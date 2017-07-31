@@ -38,3 +38,15 @@ BU_: XXX
 
 BO_ 320 Throttle: 8 XXX
  SG_ ThrottlePosition : 7|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 209 NEW_MSG_1: 8 XXX
+ SG_ BrakePosition : 23|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 2 NEW_MSG_2: 8 XXX
+ SG_ Steering_Angle : 7|16@0- (1,0) [0|65535] "" XXX
+
+
+
+
+
+

@@ -48,8 +48,8 @@ BO_ 228 STEERING_CONTROL: 5 NEO
  SG_ COUNTER : 33|2@0+ (1,0) [0|3] ""  EPS
 
 BO_ 232 BRAKE_COMMAND: 7 NEO
- SG_ CAR_SPEED : 3|10@0- (1,0)  [1,0]
- SG_ XXX : 8|1@0- (1,0)  [1,0]
+ SG_ CAR_SPEED : 3|10@0- (1,0) [1|0] "" NEO
+ SG_ XXX : 8|1@0- (1,0) [1|0] "" XXX
  SG_ COMPUTER_BRAKE_REQUEST : 29|1@0+ (1,0) [0|0] "" EBCM
  SG_ COMPUTER_BRAKE : 39|16@0+ (1,0) [0|0] "" EBCM
  SG_ COUNTER : 53|2@0+ (1,0) [0|3] ""  BDY
@@ -191,7 +191,7 @@ BO_ 777 ACC_HUD: 8 PCM
 BO_ 780 ACC_HUD_2: 8 RADAR
  SG_ ACC_SPEED : 31|8@0+ (1,0) [0|255] "kph"  BDY
  SG_ ACC_PROBLEM : 37|1@0+ (1,0) [0|1] ""  BDY
- SG_ RDMS_STATE : 28|2 @0+ (1,0) [0|1] ""  BDY
+ SG_ RDMS_STATE : 28|2@0+ (1,0) [0|1] ""  BDY
  SG_ CMBS_OFF : 35|1@0+ (1,0) [0|1] ""  BDY
  SG_ CMBS_PROBLEM : 34|1@0+ (1,0) [0|1] ""  BDY
  SG_ RADAR_OBSTRUCTED : 33|1@0+ (1,0) [0|1] ""  BDY
@@ -231,7 +231,7 @@ BO_ 829 LKAS_HUD: 5 RADAR
  SG_ LANE_LINES_ON : 14|1@0+ (1,0) [0|1] ""  BDY
  SG_ RDM_ON : 20|1@0+ (1,0) [0|1] ""  BDY
  SG_ STEERING_REQ_CHIME : 17|2@0+ (1,0) [0|1] ""  BDY
- SG_ RDMS_STATE : 28|2 @0+ (1,0) [0|1] ""  BDY
+ SG_ RDMS_STATE : 28|2@0+ (1,0) [0|1] ""  BDY
  SG_ COUNTER : 37|2@0+ (1,0) [0|3] ""  BDY
  SG_ CHECKSUM : 35|4@0+ (1,0) [0|3] ""  BDY
 
