@@ -61,4 +61,4 @@ VAL_ 324 CruiseSetButton 1 "On" 0 "Off" ;
 VAL_ 324 CruiseResumeButton 1 "On" 0 "Off" ;
 VAL_ 324 CruiseStatus 1 "On" 0 "Off" ;
 VAL_ 324 BrakeStatus 1 "On" 0 "Off" ;
-VAL_ 884 DoorStatus 3 "Both" 2 "Passenger" 1 "Driver" 0 "Closed"
+VAL_ 324 DoorStatus 3 "Both" 2 "Passenger" 1 "Driver" 0 "Closed"
