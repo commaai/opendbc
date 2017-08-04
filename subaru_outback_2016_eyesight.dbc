@@ -36,6 +36,8 @@ BS_:
 BU_: XXX
 VAL_TABLE_ OnOffList 1 "On" 0 "Off" ;
 
+BO_ 884 NEW_MSG_3: 8 XXX
+ SG_ DoorStatus : 31|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 324 NEW_MSG_3: 7 XXX
  SG_ BrakeApplied : 8|1@0+ (1,0) [0|0] ""  XXX
@@ -51,7 +53,7 @@ BO_ 209 NEW_MSG_1: 8 XXX
  SG_ BrakePosition : 23|8@0+ (1,0) [0|255] ""  XXX
 
 BO_ 2 NEW_MSG_2: 8 XXX
- SG_ Steering_Angle : 7|16@0- (1,0) [0|65535] ""  XXX
+ SG_ SteeringAngle : 7|16@0- (1,0) [0|65535] ""  XXX
 
 
 VAL_ 324 BrakeApplied 1 "On" 0 "Off" ;
@@ -59,3 +61,4 @@ VAL_ 324 CruiseSetButton 1 "On" 0 "Off" ;
 VAL_ 324 CruiseResumeButton 1 "On" 0 "Off" ;
 VAL_ 324 CruiseStatus 1 "On" 0 "Off" ;
 VAL_ 324 BrakeStatus 1 "On" 0 "Off" ;
+VAL_ 884 DoorStatus 3 "Both" 2 "Passenger" 1 "Driver" 0 "Closed"
