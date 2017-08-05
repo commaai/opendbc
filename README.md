@@ -20,7 +20,8 @@ Use [panda](https://github.com/commaai/panda) to connect your car to a computer.
 
 - Comments: the best way to store comments is to add them directly to the DBC files. For example: 
 ```
-CM_ SG_ 490 LONG_ACCEL "wheel speed derivative, noisy and zero snapping";```
+CM_ SG_ 490 LONG_ACCEL "wheel speed derivative, noisy and zero snapping";
+```
 is a comment that refers to signal `LONG_ACCEL` in message `490`. Using comments is highly recommended, especially for doubts and uncertainties. [cabana](https://community.comma.ai/cabana/) can easily display/add/edit comments to signals and messages.
 
 - Units: when applicable, it's recommended to convert signals into physical units, by using a proper signal factor. Using a SI unit is preferred, unless a non-SI unit rounds the signal factor much better. 
@@ -30,7 +31,8 @@ SG_ VEHICLE_SPEED : 7|15@0+ (0.00278,0) [0|70] "m/s" PCM
 ```
 is better than:
 ```
-SG_ VEHICLE_SPEED : 7|15@0+ (0.00620,0) [0|70] "mph" PCM```
+SG_ VEHICLE_SPEED : 7|15@0+ (0.00620,0) [0|70] "mph" PCM
+```
 However, the cleanest option is really:
 ```
 SG_ VEHICLE_SPEED : 7|15@0+ (0.01,0) [0|70] "kph" PCM
