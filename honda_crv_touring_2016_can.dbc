@@ -63,7 +63,7 @@ BO_ 380 POWERTRAIN_DATA2: 8 PCM
  SG_ GAS_PRESSED : 39|1@0+ (1,0) [0|1] ""  NEO
  SG_ ACC_STATUS : 38|1@0+ (1,0) [0|1] "rpm"  NEO
  SG_ BOH_17C : 37|5@0+ (1,0) [0|1] "rpm"  NEO
- SG_ BRAKE_LIGHTS_ON : 32|1@0+ (1,0) [0|1] "rpm"  NEO
+ SG_ BRAKE_SWITCH : 32|1@0+ (1,0) [0|1] "rpm"  NEO
  SG_ BOH2_17C : 47|10@0+ (1,0) [0|1] "rpm"  NEO
  SG_ BRAKE_PRESSED : 53|1@0+ (1,0) [0|1] ""  NEO
  SG_ BOH3_17C : 52|5@0+ (1,0) [0|1] "rpm"  NEO
