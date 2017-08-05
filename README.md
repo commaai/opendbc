@@ -31,14 +31,14 @@ For example:
     ```
     is better than:
     ```
-    SG_ VEHICLE_SPEED : 7|15@0+ (0.00620,0) [0|70] "mph" PCM
+    SG_ VEHICLE_SPEED : 7|15@0+ (0.00620,0) [0|115] "mph" PCM
     ```
     However, the cleanest option is really:
     ```
-    SG_ VEHICLE_SPEED : 7|15@0+ (0.01,0) [0|70] "kph" PCM
+    SG_ VEHICLE_SPEED : 7|15@0+ (0.01,0) [0|250] "kph" PCM
     ``` 
 
-- Signal's size: always use the smallest amount of bits possible. For example, let's say I'm reverse engineering the gas pedal position and I've determined that it's in a 3 bytes message. For 0% pedal position I read a message value of `0x000000`, while for 100% of pedal position I read `0x640000`: clearly, the gas pedal position is within the first byte of the message and I might be tempted to define the signal `GAS_POS` as:
+- Signal's size: always use the smallest amount of bits possible. For example, let's say I'm reverse engineering the gas pedal position and I've determined that it's in a 3 bytes message. For 0% pedal position I read a message value of `0x00 0x00 0x00`, while for 100% of pedal position I read `0x64 0x00 0x00`: clearly, the gas pedal position is within the first byte of the message and I might be tempted to define the signal `GAS_POS` as:
     ```
     SG_ GAS_POS : 7|8@0+ (1,0) [0|100] "%" PCM
     ```
