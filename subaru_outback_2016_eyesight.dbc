@@ -36,18 +36,18 @@ BS_:
 BU_: XXX
 
 
-BO_ 884 Doors_Status: 8 XXX
- SG_ DoorOpen_FD : 24|1@0+ (1,0) [0|1] "Front Driver Door" XXX
- SG_ DoorOpen_FP : 25|1@0+ (1,0) [0|1] "Front Passenger Door" XXX
- SG_ DoorOpen_RP : 26|1@0+ (1,0) [0|1] "Rear Passenger Door" XXX
- SG_ DoorOpen_RD : 27|1@0+ (1,0) [0|1] "Rear Driver Door" XXX
- SG_ DoorOpen_Hatch : 28|1@0+ (1,0) [0|1] "Rear Hatch" XXX
+BO_ 884 DoorStatus: 8 XXX
+ SG_ DoorOpenFD : 24|1@0+ (1,0) [0|1] "Front Driver Door" XXX
+ SG_ DoorOpenFP : 25|1@0+ (1,0) [0|1] "Front Passenger Door" XXX
+ SG_ DoorOpenRP : 26|1@0+ (1,0) [0|1] "Rear Passenger Door" XXX
+ SG_ DoorOpenRD : 27|1@0+ (1,0) [0|1] "Rear Driver Door" XXX
+ SG_ DoorOpenHatch : 28|1@0+ (1,0) [0|1] "Rear Hatch" XXX
 
-BO_ 324 Cruise_Control: 7 XXX
+BO_ 324 CruiseControl: 7 XXX
  SG_ BrakeApplied : 8|1@0+ (1,0) [0|0] "" XXX
  SG_ CruiseEnabled : 48|1@0+ (1,0) [0|0] "" XXX
  SG_ BrakeStatus : 51|1@0+ (1,0) [0|0] "" XXX
- SG_ Cruise_Buttons : 4|2@0+ (1,0) [0|3] "" XXX
+ SG_ CruiseButtons : 4|2@0+ (1,0) [0|3] "" XXX
 
 BO_ 320 Throttle: 8 XXX
  SG_ ThrottlePosition : 7|8@0+ (1,0) [0|255] "" XXX
