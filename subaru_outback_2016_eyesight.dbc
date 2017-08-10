@@ -40,8 +40,8 @@ BO_ 884 Doors_Status: 8 XXX
  SG_ DoorOpen_FD : 24|1@0+ (1,0) [0|1] "Front Driver Door" XXX
  SG_ DoorOpen_FP : 25|1@0+ (1,0) [0|1] "Front Passenger Door" XXX
  SG_ DoorOpen_RP: 26|1@0+ (1,0) [0|1] "Rear Passenger Door" XXX
- SG_ DoorOpen_RP : 27|1@0+ (1,0) [0|1] "Rear Driver Door" XXX
- SG_ DoorOpen_RP: 28|1@0+ (1,0) [0|1] "Rear Hatch" XXX
+ SG_ DoorOpen_RD : 27|1@0+ (1,0) [0|1] "Rear Driver Door" XXX
+ SG_ DoorOpen_Hatch: 28|1@0+ (1,0) [0|1] "Rear Hatch" XXX
 
 BO_ 324 NEW_MSG_3: 7 XXX
  SG_ BrakeApplied : 8|1@0+ (1,0) [0|0] "" XXX
