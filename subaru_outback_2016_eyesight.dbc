@@ -36,19 +36,34 @@ BS_:
 BU_: XXX
 
 
-BO_ 884 Door_Status: 8 XXX
+BO_ 884 Doors_Status: 8 XXX
  SG_ DoorOpen_FD : 24|1@0+ (1,0) [0|1] "Front Driver Door" XXX
  SG_ DoorOpen_FP : 25|1@0+ (1,0) [0|1] "Front Passenger Door" XXX
  SG_ DoorOpen_RP : 26|1@0+ (1,0) [0|1] "Rear Passenger Door" XXX
  SG_ DoorOpen_RD : 27|1@0+ (1,0) [0|1] "Rear Driver Door" XXX
  SG_ DoorOpen_Hatch : 28|1@0+ (1,0) [0|1] "Rear Hatch" XXX
 
-BO_ 324 ACC: 7 XXX
+BO_ 324 NEW_MSG_3: 7 XXX
  SG_ BrakeApplied : 8|1@0+ (1,0) [0|0] "" XXX
- SG_ CruiseSetButton : 3|1@0+ (1,0) [0|0] "" XXX
- SG_ CruiseResumeButton : 4|1@0+ (1,0) [0|0] "" XXX
  SG_ CruiseStatus : 48|1@0+ (1,0) [0|0] "" XXX
  SG_ BrakeStatus : 51|1@0+ (1,0) [0|0] "" XXX
+ SG_ C : 4|2@0+ (1,0) [0|3] "" XXX
+ SG_ Cr : 4|2@0+ (1,0) [0|3] "" XXX
+ SG_ Cru : 4|2@0+ (1,0) [0|3] "" XXX
+ SG_ Crui : 4|2@0+ (1,0) [0|3] "" XXX
+ SG_ Cruis : 4|2@0+ (1,0) [0|3] "" XXX
+ SG_ Cruise : 4|2@0+ (1,0) [0|3] "" XXX
+ SG_ Cruise_ : 4|2@0+ (1,0) [0|3] "" XXX
+ SG_ Cruise_S : 4|2@0+ (1,0) [0|3] "" XXX
+ SG_ Cruise_Se : 4|2@0+ (1,0) [0|3] "" XXX
+ SG_ Cruise_Set : 4|2@0+ (1,0) [0|3] "" XXX
+ SG_ Cruise_Set_ : 4|2@0+ (1,0) [0|3] "" XXX
+ SG_ Cruise_Set_R : 4|2@0+ (1,0) [0|3] "" XXX
+ SG_ Cruise_Set_Re : 4|2@0+ (1,0) [0|3] "" XXX
+ SG_ Cruise_Set_Res : 4|2@0+ (1,0) [0|3] "" XXX
+ SG_ Cruise_Set_Resu : 4|2@0+ (1,0) [0|3] "" XXX
+ SG_ Cruise_Set_Resum : 4|2@0+ (1,0) [0|3] "" XXX
+ SG_ Cruise_Set_Resume : 4|2@0+ (1,0) [0|3] "" XXX
 
 BO_ 320 Throttle: 8 XXX
  SG_ ThrottlePosition : 7|8@0+ (1,0) [0|255] "" XXX
@@ -56,7 +71,7 @@ BO_ 320 Throttle: 8 XXX
 BO_ 209 NEW_MSG_1: 8 XXX
  SG_ BrakePosition : 23|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 2 Steering: 8 XXX
+BO_ 2 NEW_MSG_2: 8 XXX
  SG_ SteeringAngle : 7|16@0- (1,0) [-500|500] "degree" XXX
 
 
@@ -64,7 +79,5 @@ BO_ 2 Steering: 8 XXX
 
 
 VAL_ 324 BrakeApplied 1 "On" 0 "Off" ;
-VAL_ 324 CruiseSetButton 1 "On" 0 "Off" ;
-VAL_ 324 CruiseResumeButton 1 "On" 0 "Off" ;
 VAL_ 324 CruiseStatus 1 "On" 0 "Off" ;
 VAL_ 324 BrakeStatus 1 "On" 0 "Off" ;
