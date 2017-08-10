@@ -36,7 +36,7 @@ BS_:
 BU_: XXX
 
 
-BO_ 884 Doors_Status: 8 XXX
+BO_ 884 Door_Status: 8 XXX
  SG_ DoorOpen_FD : 24|1@0+ (1,0) [0|1] "Front Driver Door" XXX
  SG_ DoorOpen_FP : 25|1@0+ (1,0) [0|1] "Front Passenger Door" XXX
  SG_ DoorOpen_RP : 26|1@0+ (1,0) [0|1] "Rear Passenger Door" XXX
