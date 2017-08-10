@@ -36,8 +36,8 @@ BS_:
 BU_: XXX
 
 
-BO_ 884 NEW_MSG_3: 8 XXX
- SG_ D : 24|1@0+ (1,0) [0|1] "" XXX
+BO_ 884 Doors_Status: 8 XXX
+ SG_ 6 : 26|1@0+ (1,0) [0|1] "" XXX
  SG_ Dr : 24|1@0+ (1,0) [0|1] "" XXX
  SG_ Dri : 24|1@0+ (1,0) [0|1] "" XXX
  SG_ Driv : 24|1@0+ (1,0) [0|1] "" XXX
@@ -58,7 +58,9 @@ BO_ 884 NEW_MSG_3: 8 XXX
  SG_ DriverFrontDoorStat : 24|1@0+ (1,0) [0|1] "" XXX
  SG_ DriverFrontDoorStatu : 24|1@0+ (1,0) [0|1] "" XXX
  SG_ DriverFrontDoorStatus : 24|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_1 : 25|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_1 : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_2 : 25|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_4 : 27|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 324 NEW_MSG_3: 7 XXX
  SG_ BrakeApplied : 8|1@0+ (1,0) [0|0] "" XXX
