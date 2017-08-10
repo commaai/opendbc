@@ -37,7 +37,28 @@ BU_: XXX
 
 
 BO_ 884 NEW_MSG_3: 8 XXX
- SG_ DoorStatus : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ D : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ Dr : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ Dri : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ Driv : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ Drive : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ Driver : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ DriverF : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ DriverFr : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ DriverFro : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ DriverFron : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ DriverFront : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ DriverFrontD : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ DriverFrontDo : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ DriverFrontDoo : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ DriverFrontDoor : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ DriverFrontDoorS : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ DriverFrontDoorSt : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ DriverFrontDoorSta : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ DriverFrontDoorStat : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ DriverFrontDoorStatu : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ DriverFrontDoorStatus : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_1 : 25|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 324 NEW_MSG_3: 7 XXX
  SG_ BrakeApplied : 8|1@0+ (1,0) [0|0] "" XXX
