@@ -43,7 +43,7 @@ BO_ 884 Doors_Status: 8 XXX
  SG_ DoorOpen_RD : 27|1@0+ (1,0) [0|1] "Rear Driver Door" XXX
  SG_ DoorOpen_Hatch : 28|1@0+ (1,0) [0|1] "Rear Hatch" XXX
 
-BO_ 324 NEW_MSG_3: 7 XXX
+BO_ 324 ACC: 7 XXX
  SG_ BrakeApplied : 8|1@0+ (1,0) [0|0] "" XXX
  SG_ CruiseSetButton : 3|1@0+ (1,0) [0|0] "" XXX
  SG_ CruiseResumeButton : 4|1@0+ (1,0) [0|0] "" XXX
@@ -56,7 +56,7 @@ BO_ 320 Throttle: 8 XXX
 BO_ 209 NEW_MSG_1: 8 XXX
  SG_ BrakePosition : 23|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 2 NEW_MSG_2: 8 XXX
+BO_ 2 Steering: 8 XXX
  SG_ SteeringAngle : 7|16@0- (1,0) [-500|500] "degree" XXX
 
 
