@@ -70,4 +70,4 @@ VAL_ 324 CruiseEnabled 1 "On" 0 "Off" ;
 VAL_ 324 BrakeStatus 1 "On" 0 "Off" ;
 VAL_ 324 CruiseButtons 2 "Set" 1 "Resume" ;
 
-VAL_ 624 TurnSignal 2 "Left" 1 "Right"
+VAL_ 624 TurnSignal 2 "Left" 1 "Right" ;
