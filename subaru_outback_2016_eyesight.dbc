@@ -58,6 +58,9 @@ BO_ 209 NEW_MSG_1: 8 XXX
 BO_ 2 Steering: 8 XXX
  SG_ SteeringAngle : 7|16@0- (0.1,0) [-500|500] "degree" XXX
 
+BO_ 642 NEW_MSG_2: 8 XXX
+ SG_ TurnSignal : 45|2@0+ (1,0) [0|3] "" XXX
+
 
 
 
@@ -65,4 +68,3 @@ BO_ 2 Steering: 8 XXX
 VAL_ 324 BrakeApplied 1 "On" 0 "Off" ;
 VAL_ 324 CruiseEnabled 1 "On" 0 "Off" ;
 VAL_ 324 BrakeStatus 1 "On" 0 "Off" ;
-VAL_ 324 CruiseButtons 10 "Set" 8 "Resume";
