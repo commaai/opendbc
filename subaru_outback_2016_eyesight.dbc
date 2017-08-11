@@ -65,3 +65,4 @@ BO_ 2 Steering: 8 XXX
 VAL_ 324 BrakeApplied 1 "On" 0 "Off" ;
 VAL_ 324 CruiseEnabled 1 "On" 0 "Off" ;
 VAL_ 324 BrakeStatus 1 "On" 0 "Off" ;
+VAL_ 324 CruiseButtons 10 "Set" 8 "Resume";
