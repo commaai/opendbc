@@ -39,7 +39,7 @@ BU_: XXX
 BO_ 36 STEERING: 8 XXX
  SG_ STEERING_TORQUE : 17|10@0+ (1,-512) [0|65535] "" XXX
  SG_ STEERING_ANGLE_1 : 1|10@0+ (1,-512) [0|65535] "" XXX
- SG_ STEERING_ANGLE_2 : 33|10@0+ (1,-512) [0|65535] "" XXX
+ SG_ ACCEL_Y : 33|10@0+ (1,-512) [0|65535] "" XXX
 
 BO_ 166 BRAKE: 8 XXX
  SG_ BRAKE_AMOUNT : 7|8@0+ (1,0) [0|255] "" XXX
@@ -101,12 +101,10 @@ BO_ 1556 STEERING_LEVERS: 8 XXX
  SG_ TURN_SIGNALS : 29|2@0+ (1,0) [0|3] "" XXX
 
 
-VAL_ 1556 TURN_SIGNALS 3 "none" 2 "right" 1 "left";
 
 
-CM_ SG_ 581 GAS_PEDAL "it seems slightly filtered";
 CM_ SG_ 550 BRAKE_PRESSURE "seems prop to pedal force";
 CM_ SG_ 550 BRAKE_POSITION "seems proportional to pedal displacement, unclear the max value of 0x1c8";
 CM_ SG_ 560 BRAKE_LIGHTS "double check";
-
-
+CM_ SG_ 581 GAS_PEDAL "it seems slightly filtered";
+VAL_ 1556 TURN_SIGNALS 3 "none" 2 "right" 1 "left" ;
