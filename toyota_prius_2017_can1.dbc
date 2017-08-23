@@ -38,8 +38,8 @@ BU_: XXX
 
 BO_ 36 KINEMATICS: 8 XXX
  SG_ ACCEL_Y : 33|10@0+ (1,-512) [0|65535] "" XXX
+ SG_ YAW_RATE : 1|10@0+ (1,-512) [0|65535] "" XXX
  SG_ STEERING_TORQUE : 17|10@0+ (1,-512) [0|65535] "" XXX
- SG_ STEERING_ANGLE_1 : 1|10@0+ (1,-512) [0|65535] "" XXX
 
 BO_ 166 BRAKE: 8 XXX
  SG_ BRAKE_AMOUNT : 7|8@0+ (1,0) [0|255] "" XXX
@@ -104,13 +104,19 @@ BO_ 1556 STEERING_LEVERS: 8 XXX
 
 BO_ 37 STEERING: 8 XXX
  SG_ STEER_ANGLE : 3|12@0- (0.6666,0) [0|65535] "deg" XXX
+ SG_ STEER_FRACTION : 39|4@0- (0.041666625,0) [0|15] "deg" XXX
+ SG_ STEER_RATE : 35|12@0- (1,0) [0|4095] "deg/s" XXX
 
 
 
 
 CM_ SG_ 36 ACCEL_Y "unit is tbd";
+CM_ SG_ 36 YAW_RATE "verify";
+CM_ SG_ 36 STEERING_TORQUE "does not seem the steer torque, tbd";
 CM_ SG_ 550 BRAKE_PRESSURE "seems prop to pedal force";
 CM_ SG_ 550 BRAKE_POSITION "seems proportional to pedal displacement, unclear the max value of 0x1c8";
 CM_ SG_ 560 BRAKE_LIGHTS "double check";
 CM_ SG_ 581 GAS_PEDAL "it seems slightly filtered";
+CM_ SG_ 37 STEER_FRACTION "1/16th of the signal STEER_ANGLE";
+CM_ SG_ 37 STEER_RATE "factor is tbd";
 VAL_ 1556 TURN_SIGNALS 3 "none" 2 "right" 1 "left" ;
