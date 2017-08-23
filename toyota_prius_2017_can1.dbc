@@ -90,8 +90,9 @@ BO_ 740 STEERING_LKA: 8 XXX
  SG_ ANGLE : 15|16@0- (1,0) [0|65535] "" XXX
  SG_ LKA_STATE : 31|8@0+ (1,0) [0|255] "" XXX
  SG_ CHECKSUM : 39|8@0+ (1,0) [0|255] "" XXX
- SG_ COUNTER : 6|6@0+ (1,0) [0|63] "" XXX
  SG_ STEER_REQUEST : 0|1@0+ (1,0) [0|1] "" XXX
+ SG_ COUNTER : 6|6@0+ (1,0) [0|63] "" XXX
+ SG_ SET_ME_1 : 7|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 742 NEW_MSG_1: 8 XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
