@@ -77,8 +77,8 @@ BO_ 560 BRAKE_MODULE2: 8 XXX
 BO_ 581 POWERTRAIN: 8 XXX
  SG_ GAS_PEDAL : 23|8@0+ (0.005,0) [0|1] "" XXX
 
-BO_ 608 NEW_MSG_2: 8 XXX
- SG_ NEW_SIGNAL_1 : 15|16@0- (1,0) [0|65535] "" XXX
+BO_ 608 STEER_TORQUE_SENSOR: 8 XXX
+ SG_ STEER_TORQUE_EPS : 47|16@0- (0.5,0) [0|65535] "" XXX
 
 BO_ 614 STEERING_IPAS: 8 XXX
  SG_ FLAG : 7|4@0+ (1,0) [0|15] "" XXX
@@ -117,6 +117,7 @@ CM_ SG_ 550 BRAKE_PRESSURE "seems prop to pedal force";
 CM_ SG_ 550 BRAKE_POSITION "seems proportional to pedal displacement, unclear the max value of 0x1c8";
 CM_ SG_ 560 BRAKE_LIGHTS "double check";
 CM_ SG_ 581 GAS_PEDAL "it seems slightly filtered";
+CM_ SG_ 608 STEER_TORQUE_EPS "0.5 factor to be comparable with STEER_TORQUE_CMD";
 CM_ SG_ 37 STEER_FRACTION "1/16th of the signal STEER_ANGLE";
 CM_ SG_ 37 STEER_RATE "factor is tbd";
 VAL_ 1556 TURN_SIGNALS 3 "none" 2 "right" 1 "left" ;
