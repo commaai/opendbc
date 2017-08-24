@@ -46,10 +46,10 @@ BO_ 166 BRAKE: 8 XXX
  SG_ BRAKE_PEDAL : 23|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 170 WHEEL_SPEEDS: 8 XXX
- SG_ WHEEL_SPEED_FL : 7|16@0+ (1,-6767) [0|65535] "" XXX
- SG_ WHEEL_SPEED_FR : 23|16@0+ (1,-6767) [0|65535] "" XXX
- SG_ WHEEL_SPEED_RL : 39|16@0+ (1,-6767) [0|65535] "" XXX
- SG_ WHEEL_SPEED_RR : 55|16@0+ (1,-6767) [0|65535] "" XXX
+ SG_ WHEEL_SPEED_FL : 7|16@0+ (0.01,-67.67) [0|65535] "kph" XXX
+ SG_ WHEEL_SPEED_FR : 23|16@0+ (0.01,-67.67) [0|65535] "kph" XXX
+ SG_ WHEEL_SPEED_RL : 39|16@0+ (0.01,-67.67) [0|65535] "kph" XXX
+ SG_ WHEEL_SPEED_RR : 55|16@0+ (0.01,-67.67) [0|65535] "kph" XXX
 
 BO_ 180 SPEED: 8 XXX
  SG_ ENCODER : 39|8@0+ (1,0) [0|255] "" XXX
@@ -110,6 +110,9 @@ BO_ 37 STEERING: 8 XXX
  SG_ STEER_FRACTION : 39|4@0- (0.041666625,0) [0|15] "deg" XXX
  SG_ STEER_RATE : 35|12@0- (1,0) [0|4095] "deg/s" XXX
 
+BO_ 467 CRUISE_2: 8 XXX
+ SG_ SET_SPEED : 23|8@0+ (1,0) [0|255] "kph" XXX
+
 
 
 
@@ -123,5 +126,6 @@ CM_ SG_ 581 GAS_PEDAL "it seems slightly filtered";
 CM_ SG_ 608 STEER_TORQUE_EPS "0.5 factor to be comparable with STEER_TORQUE_CMD";
 CM_ SG_ 37 STEER_FRACTION "1/16th of the signal STEER_ANGLE";
 CM_ SG_ 37 STEER_RATE "factor is tbd";
+CM_ SG_ 467 SET_SPEED "43 kph are shown as 28mph, so conversion isnt perfect";
 VAL_ 466 CRUISE_STATE 8 "active" 7 "standstill" 1 "off" ;
 VAL_ 1556 TURN_SIGNALS 3 "none" 2 "right" 1 "left" ;
