@@ -36,10 +36,10 @@ BS_:
 BU_: XXX
 
 
-BO_ 36 KINEMATICS: 8 XXX
- SG_ ACCEL_Y : 33|10@0+ (1,-512) [0|65535] "" XXX
- SG_ YAW_RATE : 1|10@0+ (1,-512) [0|65535] "" XXX
+BO_ 36 STEERING: 8 XXX
  SG_ STEERING_TORQUE : 17|10@0+ (1,-512) [0|65535] "" XXX
+ SG_ STEERING_ANGLE_1 : 1|10@0+ (1,-512) [0|65535] "" XXX
+ SG_ STEERING_ANGLE_2 : 33|10@0+ (1,-512) [0|65535] "" XXX
 
 BO_ 166 BRAKE: 8 XXX
  SG_ BRAKE_AMOUNT : 7|8@0+ (1,0) [0|255] "" XXX
@@ -74,11 +74,11 @@ BO_ 552 ACCELEROMETER: 8 XXX
 BO_ 560 BRAKE_MODULE2: 8 XXX
  SG_ BRAKE_LIGHTS : 26|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 581 POWERTRAIN: 8 XXX
+BO_ 581 GAS_PEDAL: 8 XXX
  SG_ GAS_PEDAL : 23|8@0+ (0.005,0) [0|1] "" XXX
 
-BO_ 608 STEER_TORQUE_SENSOR: 8 XXX
- SG_ STEER_TORQUE_EPS : 47|16@0- (0.5,0) [0|65535] "" XXX
+BO_ 608 NEW_MSG_2: 8 XXX
+ SG_ NEW_SIGNAL_1 : 15|16@0- (1,0) [0|65535] "" XXX
 
 BO_ 614 STEERING_IPAS: 8 XXX
  SG_ FLAG : 7|4@0+ (1,0) [0|15] "" XXX
@@ -87,12 +87,10 @@ BO_ 614 STEERING_IPAS: 8 XXX
 BO_ 643 PRE_COLLISION: 8 XXX
 
 BO_ 740 STEERING_LKA: 8 XXX
+ SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ ANGLE : 15|16@0- (1,0) [0|65535] "" XXX
  SG_ LKA_STATE : 31|8@0+ (1,0) [0|255] "" XXX
  SG_ CHECKSUM : 39|8@0+ (1,0) [0|255] "" XXX
- SG_ STEER_REQUEST : 0|1@0+ (1,0) [0|1] "" XXX
- SG_ COUNTER : 6|6@0+ (1,0) [0|63] "" XXX
- SG_ SET_ME_1 : 7|1@0+ (1,0) [0|1] "" XXX
- SG_ STEER_TORQUE_CMD : 15|16@0- (1,0) [0|65535] "" XXX
 
 BO_ 742 NEW_MSG_1: 8 XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
@@ -102,22 +100,17 @@ BO_ 742 NEW_MSG_1: 8 XXX
 BO_ 1556 STEERING_LEVERS: 8 XXX
  SG_ TURN_SIGNALS : 29|2@0+ (1,0) [0|3] "" XXX
 
-BO_ 37 STEERING: 8 XXX
- SG_ STEER_ANGLE : 3|12@0- (0.6666,0) [0|65535] "deg" XXX
- SG_ STEER_FRACTION : 39|4@0- (0.041666625,0) [0|15] "deg" XXX
- SG_ STEER_RATE : 35|12@0- (1,0) [0|4095] "deg/s" XXX
+BO_ 800 undefined: 8 XXX
+
+BO_ 466 CRUISE: 8 XXX
+ SG_ CRUISE_STATE : 55|4@0+ (1,0) [0|15] "" XXX
 
 
 
 
-CM_ SG_ 36 ACCEL_Y "unit is tbd";
-CM_ SG_ 36 YAW_RATE "verify";
-CM_ SG_ 36 STEERING_TORQUE "does not seem the steer torque, tbd";
 CM_ SG_ 550 BRAKE_PRESSURE "seems prop to pedal force";
 CM_ SG_ 550 BRAKE_POSITION "seems proportional to pedal displacement, unclear the max value of 0x1c8";
 CM_ SG_ 560 BRAKE_LIGHTS "double check";
 CM_ SG_ 581 GAS_PEDAL "it seems slightly filtered";
-CM_ SG_ 608 STEER_TORQUE_EPS "0.5 factor to be comparable with STEER_TORQUE_CMD";
-CM_ SG_ 37 STEER_FRACTION "1/16th of the signal STEER_ANGLE";
-CM_ SG_ 37 STEER_RATE "factor is tbd";
+CM_ SG_ 466 CRUISE_STATE "7 seems standstill, 8 active, 0 off";
 VAL_ 1556 TURN_SIGNALS 3 "none" 2 "right" 1 "left" ;
