@@ -115,8 +115,16 @@ BO_ 37 STEER_ANGLE_SENSOR: 8 XXX
 BO_ 467 CRUISE_2: 8 XXX
  SG_ SET_SPEED : 23|8@0+ (1,0) [0|255] "kph" XXX
 
-
-
+BO_ 1042 LKAS_HUD: 8 XXX
+ SG_ BARRIERS : 1|2@0+ (1,0) [0|3] "" XXX
+ SG_ RIGHT_LANE : 3|2@0+ (1,0) [0|3] "" XXX
+ SG_ LEFT_LANE : 5|2@0+ (1,0) [0|3] "" XXX
+ SG_ SET_ME_1 : 7|2@0+ (1,0) [0|3] "" XXX
+ SG_ LDA_ALERT : 9|2@0+ (1,0) [0|3] "" XXX
+ SG_ TWO_BEEPS : 12|1@0+ (1,0) [0|1] "" XXX
+ SG_ ADJUSTING_CAMERA : 13|1@0+ (1,0) [0|1] "" XXX
+ SG_ LDA_MALFUNCTION : 15|1@0+ (1,0) [0|1] "" XXX
+ 
 
 CM_ SG_ 36 ACCEL_Y "unit is tbd";
 CM_ SG_ 36 YAW_RATE "verify";
@@ -131,5 +139,11 @@ CM_ SG_ 608 STEER_OVERRIDE "set when driver torque exceeds a certain value";
 CM_ SG_ 37 STEER_FRACTION "1/15th of the signal STEER_ANGLE, which is 1.5 deg; note that 0x8 is never set";
 CM_ SG_ 37 STEER_RATE "factor is tbd";
 CM_ SG_ 467 SET_SPEED "43 kph are shown as 28mph, so conversion isnt perfect";
+CM_ SG_ 1042 SET_ME_1 "unclear what this is, nut it's always 1 in drive traces";
 VAL_ 466 CRUISE_STATE 8 "active" 7 "standstill" 1 "off" ;
 VAL_ 1556 TURN_SIGNALS 3 "none" 2 "right" 1 "left" ;
+VAL_ 1042 LDA_ALERT 3 "hold with continuous beep" 2 "LDA unavailable" 1 "hold" 0 "none";
+VAL_ 1042 BARRIERS 3 "both" 2 "right" 1 "left" 0 "none";
+VAL_ 1042 RIGHT_LINE 3 "orange" 2 "double" 1 "solid" 0 "none";
+VAL_ 1042 LEFT_LINE 3 "orange" 2 "double" 1 "solid" 0 "none";
+
