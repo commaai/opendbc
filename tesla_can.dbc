@@ -1,7 +1,7 @@
 VERSION ""
 
 
-NS_ : 
+NS_ :
 	NS_DESC_
 	CM_
 	BA_DEF_
@@ -67,7 +67,7 @@ BO_ 1160 DAS_steeringControl: 4 NEO
  SG_ DAS_steeringControlCounter : 19|4@0+ (1,0) [0|0] "" EPAS
  SG_ DAS_steeringAngleRequest : 6|15@0+ (0.1,-1638.35) [-1638.35|1638.35] "deg" EPAS
  SG_ DAS_steeringHapticRequest : 7|1@0+ (1,0) [0|0] "" EPAS
- 
+
 BO_ 257 GTW_epasControl: 3 NEO
  SG_ GTW_epasControlChecksum : 16|8@1+ (1,0) [0|255] "" NEO
  SG_ GTW_epasControlCounter : 12|4@1+ (1,0) [0|15] "" NEO
@@ -127,7 +127,7 @@ BO_ 280 DI_torque2: 6 DI
  SG_ DI_epbParkRequest : 38|1@1+ (1,0) [0|0] "" NEO
  SG_ DI_epbInterfaceReady : 39|1@1+ (1,0) [0|0] "" NEO
  SG_ DI_torque2Checksum : 40|8@1+ (1,0) [0|0] "" NEO
- 
+
 BO_ 309 ESP_135h: 5 ESP
  SG_ ESP_135hChecksum : 16|8@1+ (1,0) [0|255] "" NEO
  SG_ ESP_135hCounter : 12|4@1+ (1,0) [0|15] "" NEO
@@ -166,7 +166,7 @@ BO_ 792 GTW_carState: 8 GTW
  SG_ MONTH : 12|4@1+ (1,0) [0|14] "Month" NEO
  SG_ SECOND : 18|6@1+ (1,0) [0|61] "s" NEO
  SG_ YEAR : 1|7@1+ (1,2000) [2000|2125] "Year" NEO
- 
+
 BO_ 872 DI_state: 8 DI
  SG_ DI_aebState : 44|3@1+ (1,0) [5|6] "" NEO
  SG_ DI_analogSpeed : 20|12@1+ (0.10,0) [0|409.40] "speed" NEO
@@ -224,7 +224,7 @@ BO_ 69 STW_ACTN_RQ: 8 STW
  SG_ WprSw6Posn : 48|3@1+ (1,0) [0|0] "" NEO
  SG_ MC_STW_ACTN_RQ : 52|4@1+ (1,0) [0|15] "" NEO
  SG_ CRC_STW_ACTN_RQ : 56|8@1+ (1,0) [0|0] "" NEO
- 
+
 BO_ 643 BODY_R1: 8 GTW
  SG_ AirTemp_Insd : 40|8@1+ (0.25,0) [0|63.5] "C" NEO
  SG_ AirTemp_Outsd : 56|8@1+ (0.5,-40) [-40|86.5] "C" NEO
@@ -403,3 +403,6 @@ VAL_ 904 MCU_clusterReadyForDrive 0 "NO_SNA" 1 "YES" ;
 VAL_ 1160 DAS_steeringAngleRequest 16384 "ZERO_ANGLE" ;
 VAL_ 1160 DAS_steeringControlType 1 "ANGLE_CONTROL" 3 "DISABLED" 0 "NONE" 2 "RESERVED" ;
 VAL_ 1160 DAS_steeringHapticRequest 1 "ACTIVE" 0 "IDLE" ;
+
+CM_ "CHFFR_METRIC 1160 DAS_steeringAngleRequest STEER_ANGLE 0.1098666 180
+CHFFR_METRIC 264 DI_motorRPM ENGINE_RPM 1 0";
