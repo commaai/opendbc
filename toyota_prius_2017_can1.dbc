@@ -125,7 +125,7 @@ BO_ 1042 LKAS_HUD: 8 XXX
  SG_ TWO_BEEPS : 12|1@0+ (1,0) [0|1] "" XXX
  SG_ ADJUSTING_CAMERA : 13|1@0+ (1,0) [0|1] "" XXX
  SG_ LDA_MALFUNCTION : 15|1@0+ (1,0) [0|1] "" XXX
- 
+
 
 CM_ SG_ 36 ACCEL_Y "unit is tbd";
 CM_ SG_ 36 YAW_RATE "verify";
@@ -148,3 +148,4 @@ VAL_ 1042 BARRIERS 3 "both" 2 "right" 1 "left" 0 "none";
 VAL_ 1042 RIGHT_LINE 3 "orange" 2 "double" 1 "solid" 0 "none";
 VAL_ 1042 LEFT_LINE 3 "orange" 2 "double" 1 "solid" 0 "none";
 
+CM_ "CHFFR_METRIC 37 STEER_ANGLE STEER_ANGLE 0.36 180";

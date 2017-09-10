@@ -63,7 +63,7 @@ BO_ 642 NEW_MSG_2: 8 XXX
 
 
 
-
+CM_ "CHFFR_METRIC 2 STEER_ANGLE STEER_ANGLE 0.36 180";
 
 VAL_ 324 BrakeApplied 1 "On" 0 "Off" ;
 VAL_ 324 CruiseEnabled 1 "On" 0 "Off" ;
