@@ -38,56 +38,56 @@ BU_: XXX
 BO_ 528 TRACK_A_0: 8 XXX
  SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ LAT_DIST : 31|11@0- (0.05,0) [-50|50] "m" XXX
- SG_ LONG_DIST : 15|15@0+ (0.01,0) [0|300] "m" XXX
+ SG_ LONG_DIST : 15|13@0+ (0.05,0) [0|300] "m" XXX
  SG_ NEW_TRACK : 36|1@0+ (1,0) [0|1] "" XXX
  SG_ REL_SPEED : 47|12@0- (0.025,0) [-100|100] "m/s" XXX
 
 BO_ 529 TRACK_A_1: 8 XXX
  SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ LAT_DIST : 31|11@0- (0.05,0) [-50|50] "m" XXX
- SG_ LONG_DIST : 15|15@0+ (0.01,0) [0|300] "m" XXX
+ SG_ LONG_DIST : 15|13@0+ (0.05,0) [0|300] "m" XXX
  SG_ NEW_TRACK : 36|1@0+ (1,0) [0|1] "" XXX
  SG_ REL_SPEED : 47|12@0- (0.025,0) [-100|100] "m/s" XXX
 
 BO_ 530 TRACK_A_2: 8 XXX
  SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ LAT_DIST : 31|11@0- (0.05,0) [-50|50] "m" XXX
- SG_ LONG_DIST : 15|15@0+ (0.01,0) [0|300] "m" XXX
+ SG_ LONG_DIST : 13|13@0+ (0.05,0) [0|300] "m" XXX
  SG_ NEW_TRACK : 36|1@0+ (1,0) [0|1] "" XXX
  SG_ REL_SPEED : 47|12@0- (0.025,0) [-100|100] "m/s" XXX
 
 BO_ 531 TRACK_A_3: 8 XXX
  SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ LAT_DIST : 31|11@0- (0.05,0) [-50|50] "m" XXX
- SG_ LONG_DIST : 15|15@0+ (0.01,0) [0|300] "m" XXX
+ SG_ LONG_DIST : 15|13@0+ (0.05,0) [0|300] "m" XXX
  SG_ NEW_TRACK : 36|1@0+ (1,0) [0|1] "" XXX
  SG_ REL_SPEED : 47|12@0- (0.025,0) [-100|100] "m/s" XXX
 
 BO_ 532 TRACK_A_4: 8 XXX
  SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ LAT_DIST : 31|11@0- (0.05,0) [-50|50] "m" XXX
- SG_ LONG_DIST : 15|15@0+ (0.01,0) [0|300] "m" XXX
+ SG_ LONG_DIST : 15|13@0+ (0.05,0) [0|300] "m" XXX
  SG_ NEW_TRACK : 36|1@0+ (1,0) [0|1] "" XXX
  SG_ REL_SPEED : 47|12@0- (0.025,0) [-100|100] "m/s" XXX
 
 BO_ 533 TRACK_A_5: 8 XXX
  SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ LAT_DIST : 31|11@0- (0.05,0) [-50|50] "m" XXX
- SG_ LONG_DIST : 15|15@0+ (0.01,0) [0|300] "m" XXX
+ SG_ LONG_DIST : 15|13@0+ (0.05,0) [0|300] "m" XXX
  SG_ NEW_TRACK : 36|1@0+ (1,0) [0|1] "" XXX
  SG_ REL_SPEED : 47|12@0- (0.025,0) [-100|100] "m/s" XXX
 
 BO_ 534 TRACK_A_6: 8 XXX
  SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ LAT_DIST : 31|11@0- (0.05,0) [-50|50] "m" XXX
- SG_ LONG_DIST : 15|15@0+ (0.01,0) [0|300] "m" XXX
+ SG_ LONG_DIST : 15|13@0+ (0.05,0) [0|300] "m" XXX
  SG_ NEW_TRACK : 36|1@0+ (1,0) [0|1] "" XXX
  SG_ REL_SPEED : 47|12@0- (0.025,0) [-100|100] "m/s" XXX
 
 BO_ 535 TRACK_A_7: 8 XXX
  SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ LAT_DIST : 31|11@0- (0.05,0) [-50|50] "m" XXX
- SG_ LONG_DIST : 15|15@0+ (0.01,0) [0|300] "m" XXX
+ SG_ LONG_DIST : 15|13@0+ (0.05,0) [0|300] "m" XXX
  SG_ NEW_TRACK : 36|1@0+ (1,0) [0|1] "" XXX
  SG_ REL_SPEED : 47|12@0- (0.025,0) [-100|100] "m/s" XXX
 
