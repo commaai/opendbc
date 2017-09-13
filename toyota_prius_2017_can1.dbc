@@ -99,13 +99,14 @@ BO_ 740 STEERING_LKA: 8 XXX
  SG_ SET_ME_1 : 7|1@0+ (1,0) [0|1] "" XXX
  SG_ STEER_TORQUE_CMD : 15|16@0- (1,0) [0|65535] "" XXX
 
-BO_ 742 NEW_MSG_1: 8 XXX
+BO_ 742 LEAD_INFO: 8 XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
- SG_ BRAKE_COMMAND : 7|16@0- (1,0) [0|65535] "" XXX
- SG_ BRAKE_ACTUAL : 23|16@0- (1,0) [0|65535] "" XXX
+ SG_ LEAD_REL_SPEED : 23|12@0- (0.025,0) [0|65535] "" XXX
+ SG_ LEAD_LONG_DIST : 7|13@0+ (0.1,0) [0|65535] "" XXX
 
 BO_ 835 ACC_CONTROL: 8 XXX
  SG_ ACCEL_CMD : 7|16@0- (0.001,0) [-20|20] "m/s2" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 1556 STEERING_LEVERS: 8 XXX
  SG_ TURN_SIGNALS : 29|2@0+ (1,0) [0|3] "" XXX
@@ -130,6 +131,8 @@ BO_ 1042 LKAS_HUD: 8 XXX
  SG_ LDA_MALFUNCTION : 15|1@0+ (1,0) [0|1] "" XXX
 
 
+
+
 CM_ SG_ 36 ACCEL_Y "unit is tbd";
 CM_ SG_ 36 YAW_RATE "verify";
 CM_ SG_ 36 STEERING_TORQUE "does not seem the steer torque, tbd";
@@ -146,9 +149,5 @@ CM_ SG_ 467 SET_SPEED "43 kph are shown as 28mph, so conversion isnt perfect";
 CM_ SG_ 1042 SET_ME_1 "unclear what this is, nut it's always 1 in drive traces";
 VAL_ 466 CRUISE_STATE 8 "active" 7 "standstill" 1 "off" ;
 VAL_ 1556 TURN_SIGNALS 3 "none" 2 "right" 1 "left" ;
-VAL_ 1042 LDA_ALERT 3 "hold with continuous beep" 2 "LDA unavailable" 1 "hold" 0 "none";
-VAL_ 1042 BARRIERS 3 "both" 2 "right" 1 "left" 0 "none";
-VAL_ 1042 RIGHT_LINE 3 "orange" 2 "double" 1 "solid" 0 "none";
-VAL_ 1042 LEFT_LINE 3 "orange" 2 "double" 1 "solid" 0 "none";
-
-CM_ "CHFFR_METRIC 37 STEER_ANGLE STEER_ANGLE 0.36 180";
+VAL_ 1042 BARRIERS 3 "both" 2 "right" 1 "left" 0 "none" ;
+VAL_ 1042 LDA_ALERT 3 "hold with continuous beep" 2 "LDA unavailable" 1 "hold" 0 "none" ;
