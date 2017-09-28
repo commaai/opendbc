@@ -33,7 +33,7 @@ NS_ :
 
 BS_:
 
-BU_: XXX
+BU_: XXX DSU HCU EPS IPAS
 
 
 BO_ 36 KINEMATICS: 8 XXX
@@ -46,15 +46,15 @@ BO_ 166 BRAKE: 8 XXX
  SG_ BRAKE_PEDAL : 23|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 170 WHEEL_SPEEDS: 8 XXX
- SG_ WHEEL_SPEED_FL : 7|16@0+ (0.01,-67.67) [0|65535] "kph" XXX
- SG_ WHEEL_SPEED_FR : 23|16@0+ (0.01,-67.67) [0|65535] "kph" XXX
- SG_ WHEEL_SPEED_RL : 39|16@0+ (0.01,-67.67) [0|65535] "kph" XXX
- SG_ WHEEL_SPEED_RR : 55|16@0+ (0.01,-67.67) [0|65535] "kph" XXX
+ SG_ WHEEL_SPEED_FR : 7|16@0+ (0.01,-67.67) [0|250] "kph" XXX
+ SG_ WHEEL_SPEED_FL : 23|16@0+ (0.01,-67.67) [0|250] "kph" XXX
+ SG_ WHEEL_SPEED_RR : 39|16@0+ (0.01,-67.67) [0|250] "kph" XXX
+ SG_ WHEEL_SPEED_RL : 55|16@0+ (0.01,-67.67) [0|250] "kph" XXX
 
 BO_ 180 SPEED: 8 XXX
  SG_ ENCODER : 39|8@0+ (1,0) [0|255] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
- SG_ SPEED : 47|16@0+ (1,0) [0|65535] "" XXX
+ SG_ SPEED : 47|16@0+ (0.01,0) [0|250] "kph" XXX
 
 BO_ 295 GEAR_PACKET: 8 XXX
  SG_ CAR_MOVEMENT : 39|8@0- (1,0) [0|255] "" XXX
@@ -72,7 +72,7 @@ BO_ 550 BRAKE_MODULE: 8 XXX
 
 BO_ 552 ACCELEROMETER: 8 XXX
  SG_ ACCEL_Z : 22|15@0- (1,0) [0|32767] "" XXX
- SG_ ACCEL_X : 6|15@0- (0.001,0) [-20|20] "" XXX
+ SG_ ACCEL_X : 6|15@0- (0.001,0) [-20|20] "m/s2" XXX
 
 BO_ 560 BRAKE_MODULE2: 8 XXX
  SG_ BRAKE_LIGHTS : 26|1@0+ (1,0) [0|1] "" XXX
@@ -85,9 +85,16 @@ BO_ 608 STEER_TORQUE_SENSOR: 8 XXX
  SG_ STEER_TORQUE_DRIVER : 15|16@0- (1,0) [-32768|32767] "" XXX
  SG_ STEER_OVERRIDE : 0|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 614 STEERING_IPAS: 8 XXX
- SG_ FLAG : 7|4@0+ (1,0) [0|15] "" XXX
+BO_ 610 EPS_STATUS: 8 EPS
+ SG_ STATE : 3|4@0+ (1,0) [0|15] "" XXX
+
+BO_ 614 STEERING_IPAS: 8 IPAS
+ SG_ STATE : 7|4@0+ (1,0) [0|15] "" XXX
  SG_ ANGLE : 3|12@0- (1,0) [0|16777215] "" XXX
+ SG_ SET_ME_X10 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ SET_ME_X00 : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ DIRECTION_CMD : 38|2@0+ (1,0) [0|3] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 643 PRE_COLLISION: 8 XXX
 
@@ -99,14 +106,13 @@ BO_ 740 STEERING_LKA: 8 XXX
  SG_ SET_ME_1 : 7|1@0+ (1,0) [0|1] "" XXX
  SG_ STEER_TORQUE_CMD : 15|16@0- (1,0) [0|65535] "" XXX
 
-BO_ 742 LEAD_INFO: 8 XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
- SG_ LEAD_REL_SPEED : 23|12@0- (0.025,0) [0|65535] "" XXX
- SG_ LEAD_LONG_DIST : 7|13@0+ (0.1,0) [0|65535] "" XXX
+BO_ 742 LEAD_INFO: 8 DSU
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" HCU
+ SG_ LEAD_REL_SPEED : 23|12@0- (0.025,0) [-100|100] "m/s" HCU
+ SG_ LEAD_LONG_DIST : 7|13@0+ (0.05,0) [0|300] "m" HCU
 
-BO_ 835 ACC_CONTROL: 8 XXX
- SG_ ACCEL_CMD : 7|16@0- (0.001,0) [-20|20] "m/s2" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+BO_ 835 ACC_CONTROL: 8 DSU
+ SG_ ACCEL_CMD : 7|16@0- (0.001,0) [-20|20] "m/s2" HCU
 
 BO_ 1556 STEERING_LEVERS: 8 XXX
  SG_ TURN_SIGNALS : 29|2@0+ (1,0) [0|3] "" XXX
@@ -122,13 +128,16 @@ BO_ 467 CRUISE_2: 8 XXX
 
 BO_ 1042 LKAS_HUD: 8 XXX
  SG_ BARRIERS : 1|2@0+ (1,0) [0|3] "" XXX
- SG_ RIGHT_LANE : 3|2@0+ (1,0) [0|3] "" XXX
- SG_ LEFT_LANE : 5|2@0+ (1,0) [0|3] "" XXX
+ SG_ RIGHT_LINE : 3|2@0+ (1,0) [0|3] "" XXX
+ SG_ LEFT_LINE : 5|2@0+ (1,0) [0|3] "" XXX
  SG_ SET_ME_1 : 7|2@0+ (1,0) [0|3] "" XXX
  SG_ LDA_ALERT : 9|2@0+ (1,0) [0|3] "" XXX
  SG_ TWO_BEEPS : 12|1@0+ (1,0) [0|1] "" XXX
  SG_ ADJUSTING_CAMERA : 13|1@0+ (1,0) [0|1] "" XXX
  SG_ LDA_MALFUNCTION : 15|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 1568 SEATS_DOORS: 8 XXX
+ SG_ SEATBELT_UNLATCHED : 62|1@0+ (1,0) [0|1] "" XXX
 
 
 
@@ -143,11 +152,18 @@ CM_ SG_ 581 GAS_PEDAL "it seems slightly filtered";
 CM_ SG_ 608 STEER_TORQUE_EPS "0.5 factor to be comparable with STEER_TORQUE_CMD";
 CM_ SG_ 608 STEER_TORQUE_DRIVER "driver torque";
 CM_ SG_ 608 STEER_OVERRIDE "set when driver torque exceeds a certain value";
+CM_ SG_ 614 ANGLE "set to measured angle when ipas control isn't active";
 CM_ SG_ 37 STEER_FRACTION "1/15th of the signal STEER_ANGLE, which is 1.5 deg; note that 0x8 is never set";
 CM_ SG_ 37 STEER_RATE "factor is tbd";
 CM_ SG_ 467 SET_SPEED "43 kph are shown as 28mph, so conversion isnt perfect";
 CM_ SG_ 1042 SET_ME_1 "unclear what this is, nut it's always 1 in drive traces";
 VAL_ 466 CRUISE_STATE 8 "active" 7 "standstill" 1 "off" ;
+VAL_ 610 STATE 5 "override" 3 "enabled" 1 "disabled" ;
+VAL_ 614 STATE 3 "enabled" 1 "disabled" ;
+VAL_ 614 DIRECTION_CMD 3 "right" 2 "center" 1 "left" ;
 VAL_ 1556 TURN_SIGNALS 3 "none" 2 "right" 1 "left" ;
 VAL_ 1042 BARRIERS 3 "both" 2 "right" 1 "left" 0 "none" ;
+VAL_ 1042 RIGHT_LINE 3 "orange" 2 "double" 1 "solid" 0 "none" ;
+VAL_ 1042 LEFT_LINE 3 "orange" 2 "double" 1 "solid" 0 "none" ;
 VAL_ 1042 LDA_ALERT 3 "hold with continuous beep" 2 "LDA unavailable" 1 "hold" 0 "none" ;
+CM_ "CHFFR_METRIC 37 STEER_ANGLE STEER_ANGLE 0.36 180"
