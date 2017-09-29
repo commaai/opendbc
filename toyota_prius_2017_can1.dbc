@@ -61,7 +61,7 @@ BO_ 295 GEAR_PACKET: 8 XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
  SG_ GEAR : 47|4@0+ (1,0) [0|15] "" XXX
 
-BO_ 466 CRUISE: 8 XXX
+BO_ 466 PCM_CRUISE: 8 XXX
  SG_ CRUISE_STATE : 55|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 550 BRAKE_MODULE: 8 XXX
@@ -122,9 +122,13 @@ BO_ 37 STEER_ANGLE_SENSOR: 8 XXX
  SG_ STEER_FRACTION : 39|4@0- (0.1,0) [-0.7|0.7] "deg" XXX
  SG_ STEER_RATE : 35|12@0- (1,0) [-2000|2000] "deg/s" XXX
 
-BO_ 467 CRUISE_2: 8 XXX
+BO_ 467 PCM_CRUISE_2: 8 XXX
  SG_ MAIN_ON : 15|1@0+ (1,0) [0|1] "" XXX
  SG_ SET_SPEED : 23|8@0+ (1,0) [0|255] "kph" XXX
+
+BO_ 921 PCM_CRUISE_SM: 8 XXX
+ SG_ MAIN_ON : 4|1@0+ (1,0) [0|1] "" XXX
+ SG_ CRUISE_CONTROL_STATE : 11|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 951 ESP_CONTROL: 8 ESP
  SG_ TC_DISABLED : 13|1@0+ (1,0) [0|1] "" XXX
@@ -162,6 +166,7 @@ CM_ SG_ 37 STEER_FRACTION "1/15th of the signal STEER_ANGLE, which is 1.5 deg; n
 CM_ SG_ 37 STEER_RATE "factor is tbd";
 CM_ SG_ 467 SET_SPEED "43 kph are shown as 28mph, so conversion isnt perfect";
 CM_ SG_ 1042 SET_ME_1 "unclear what this is, nut it's always 1 in drive traces";
+VAL_ 295 GEAR 0 "P" 1 "R" 2 "N" 3 "D" 4 "B";
 VAL_ 466 CRUISE_STATE 8 "active" 7 "standstill" 1 "off" ;
 VAL_ 610 STATE 5 "override" 3 "enabled" 1 "disabled";
 VAL_ 614 STATE 3 "enabled" 1 "disabled";
@@ -171,5 +176,6 @@ VAL_ 1042 LDA_ALERT 3 "hold with continuous beep" 2 "LDA unavailable" 1 "hold" 0
 VAL_ 1042 BARRIERS 3 "both" 2 "right" 1 "left" 0 "none";
 VAL_ 1042 RIGHT_LINE 3 "orange" 2 "double" 1 "solid" 0 "none";
 VAL_ 1042 LEFT_LINE 3 "orange" 2 "double" 1 "solid" 0 "none";
+VAL_ 921 CRUISE_CONTROL_STATE 2 "disabled" 11 "hold" 10 "hold_waiting_user_cmd" 6 "enabled";
 
 CM_ "CHFFR_METRIC 37 STEER_ANGLE STEER_ANGLE 0.36 180";
