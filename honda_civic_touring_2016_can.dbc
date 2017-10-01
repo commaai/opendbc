@@ -295,7 +295,7 @@ BO_ 1029 DOORS_STATUS: 8 BDY
  SG_ DOOR_OPEN_FR : 38|1@0+ (1,0) [0|1] ""  NEO
  SG_ DOOR_OPEN_RL : 39|1@0+ (1,0) [0|1] ""  NEO
  SG_ DOOR_OPEN_RR : 40|1@0+ (1,0) [0|1] ""  NEO
- SG_ TRUNK_OPEN : 41|1@1+ (1,0) [0|1] "" NEO
+ SG_ TRUNK_OPEN : 41|1@0+ (1,0) [0|1] "" NEO
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] ""  NEO
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] ""  NEO
 
