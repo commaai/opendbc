@@ -62,6 +62,7 @@ BO_ 295 GEAR_PACKET: 8 XXX
  SG_ GEAR : 47|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 466 PCM_CRUISE: 8 XXX
+ SG_ GAS_RELEASED : 4|1@0+ (1,0) [0|1] "" XXX
  SG_ CRUISE_STATE : 55|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 550 BRAKE_MODULE: 8 XXX
@@ -176,6 +177,6 @@ VAL_ 1042 LDA_ALERT 3 "hold with continuous beep" 2 "LDA unavailable" 1 "hold" 0
 VAL_ 1042 BARRIERS 3 "both" 2 "right" 1 "left" 0 "none";
 VAL_ 1042 RIGHT_LINE 3 "orange" 2 "double" 1 "solid" 0 "none";
 VAL_ 1042 LEFT_LINE 3 "orange" 2 "double" 1 "solid" 0 "none";
-VAL_ 921 CRUISE_CONTROL_STATE 2 "disabled" 11 "hold" 10 "hold_waiting_user_cmd" 6 "enabled";
+VAL_ 921 CRUISE_CONTROL_STATE 2 "disabled" 11 "hold" 10 "hold_waiting_user_cmd" 6 "enabled" 5 "faulted";
 
 CM_ "CHFFR_METRIC 37 STEER_ANGLE STEER_ANGLE 0.36 180";
