@@ -177,6 +177,8 @@ BO_ 479 ACC_CONTROL: 8 NEO
 BO_ 490 XXX_12: 8 XXX
  SG_ BOH : 7|32@0+ (1,0) [0|65535] "" XXX
  SG_ BOH_2 : 23|16@0+ (1,0) [0|65535] "" XXX
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 495 ACC_CONTROL_ON: 8 XXX
  SG_ SET_TO_75 : 31|8@0+ (1,0) [0|255] "" XXX
@@ -403,8 +405,9 @@ BO_ 1633 XXX_38: 8 XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
-BO_ 1670 XXX_39: 8 XXX
-
+BO_ 1670 XXX_39: 5 XXX
+ SG_ COUNTER : 37|2@0+ (1,0) [0|3] "" XXX
+ SG_ CHECKSUM : 35|4@0+ (1,0) [0|15] "" XXX
 
 CM_ SG_ 344 DISTANCE_COUNTER "";
 CM_ SG_ 450 EPB_STATE "3: On, 2: Disengaging, 1: Engaging, 0: Off";
