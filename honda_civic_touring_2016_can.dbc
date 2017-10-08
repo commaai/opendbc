@@ -198,6 +198,8 @@ BO_ 513 GAS_SENSOR: 5 INTERCEPTOR
  SG_ CHECKSUM : 35|4@0+ (1,0) [0|3] "" NEO
 
 BO_ 545 XXX_10: 6 XXX
+ SG_ ECON_ON_2 : 37|2@0+ (1,0) [0|3] "" NEO
+ SG_ ECON_ON : 23|1@0+ (1,0) [0|1] "" NEO
  SG_ CHECKSUM : 43|4@0+ (1,0) [0|3] "" NEO
  SG_ COUNTER : 45|2@0+ (1,0) [0|3] "" NEO
 
