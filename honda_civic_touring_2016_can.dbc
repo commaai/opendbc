@@ -399,12 +399,12 @@ BO_TX_BU_ 829 : NEO,ADAS;
 BO_TX_BU_ 862 : NEO,ADAS;
 BO_TX_BU_ 927 : NEO,ADAS;
 
-
 CM_ SG_ 401 GEAR "10 = reverse, 11 = transition";
 CM_ SG_ 490 LONG_ACCEL "wheel speed derivative, noisy and zero snapping";
 CM_ SG_ 780 CRUISE_SPEED "255 = no speed";
 CM_ SG_ 804 CRUISE_SPEED_PCM "255 = no speed";
 CM_ SG_ 829 BEEP "beeps are pleasant, chimes are for warnngs etc...";
+CM_ SG_ 806 REVERSE_LIGHT "Might be reverse gear selected and not the lights";
 VAL_ 399 STEER_STATUS 5 "fault" 4 "no_torque_alert_2" 2 "no_torque_alert_1" 0 "normal" ;
 VAL_ 401 GEAR_SHIFTER 32 "L" 16 "S" 8 "D" 4 "N" 2 "R" 1 "P" ;
 VAL_ 450 EPB_STATE 3 "engaged" 2 "disengaging" 1 "engaging" 0 "disengaged" ;
