@@ -274,6 +274,7 @@ BO_ 806 SCM_FEEDBACK: 8 SCM
  SG_ MAIN_ON : 28|1@0+ (1,0) [0|1] "" NEO
  SG_ RIGHT_BLINKER : 27|1@0+ (1,0) [0|1] "" NEO
  SG_ LEFT_BLINKER : 26|1@0+ (1,0) [0|1] "" NEO
+ SG_ REVERSE_LIGHT : 18|1@0+ (1,0) [0|1] "" NEO
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" NEO
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" NEO
 
