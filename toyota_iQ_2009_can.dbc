@@ -195,15 +195,9 @@ BO_ 546 TRACK_B_2: 8 XXX
  SG_ REL_ACCEL : 15|7@0- (1,0) [-64|63] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 547 TRACK_B_3: 8 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
- SG_ REL_ACCEL : 15|7@0- (1,0) [-64|63] "" XXX
+BO_ 547 undefined: 8 XXX
 
-BO_ 548 TRACK_B_4: 8 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ REL_ACCEL : 15|7@0- (1,0) [-64|63] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+BO_ 548 undefined: 8 XXX
 
 BO_ 549 TRACK_B_5: 8 XXX
  SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
@@ -266,6 +260,7 @@ BO_ 1552 NEW_MSG_1: 8 XXX
 BO_ 452 NEW_MSG_2: 8 XXX
  SG_ NEW_SIGNAL_2 : 56|8@1+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_1 : 8|8@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_3 : 39|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 37 NEW_MSG_3: 8 XXX
  SG_ NEW_SIGNAL_1 : 15|8@0+ (1,0) [0|255] "" XXX
@@ -279,8 +274,12 @@ BO_ 36 NEW_MSG_4: 8 XXX
  SG_ NEW_SIGNAL_5 : 47|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_7 : 63|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 705 NEW_MSG_5: 8 XXX
- SG_ NEW_SIGNAL_1 : 23|8@0+ (1,0) [0|255] "" XXX
+BO_ 705 ENGINE_ACC?: 8 XXX
+ SG_ NEW_SIGNAL_3 : 15|16@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_1 : 26|11@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_2 : 47|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_4 : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_5 : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 947 NEW_MSG_6: 8 XXX
  SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
@@ -291,19 +290,50 @@ BO_ 955 NEW_MSG_7: 8 XXX
  SG_ NEW_SIGNAL_1 : 23|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 1595 CONTAINS_TIME: 8 XXX
- SG_ TIME_ON : 55|16@0+ (1,0) [0|65535] "" XXX
+ SG_ TIME_ON : 55|16@0+ (0.1,0) [0|65535] "" XXX
 
 BO_ 170 WHEELS_SPEEDS: 8 XXX
- SG_ WHEEL_SPEED_3 : 39|16@0+ (1,0) [0|65535] "" XXX
- SG_ WHEEL_SPEED_4 : 55|16@0+ (1,0) [0|65535] "" XXX
  SG_ WHEEL_SPEED_1 : 7|16@0+ (0.01,-67.67) [0|65535] "" XXX
  SG_ WHEEL_SPEED_2 : 23|16@0+ (0.01,-67.67) [0|65535] "km/h?" XXX
+ SG_ WHEEL_SPEED_3 : 39|16@0+ (0.01,-67.67) [0|65535] "km/h" XXX
+ SG_ WHEEL_SPEED_4 : 55|16@0+ (0.01,-67.67) [0|65535] "km/h" XXX
+
+BO_ 180 NEW_MSG_8: 8 XXX
+ SG_ NEW_SIGNAL_2 : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_4 : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ VEHICLE_SPEED : 47|16@0+ (0.01,0) [0|255] "km/h?" XXX
+
+BO_ 186 NEW_MSG_9: 8 XXX
+ SG_ NEW_SIGNAL_1 : 7|16@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_2 : 31|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 565 NEW_MSG_10: 8 XXX
+
+BO_ 464 NEW_MSG_11: 8 XXX
+
+BO_ 426 NEW_MSG_5: 8 XXX
+ SG_ NEW_SIGNAL_1 : 47|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 906 NEW_MSG_12: 8 XXX
+ SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 979 NEW_MSG_13: 8 XXX
+ SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_2 : 15|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 1600 NEW_MSG_14: 8 XXX
+ SG_ NEW_SIGNAL_1 : 47|8@0+ (1,0) [0|1] "" XXX
 
 
 
 
 CM_ SG_ 1552 SPEED_LOWRES "Looks like positive speed";
 CM_ SG_ 37 NEW_SIGNAL_1 "vehicle orientation? (Z axis, noisy)";
-CM_ SG_ 1595 TIME_ON "probably linear to seconds";
+CM_ SG_ 705 NEW_SIGNAL_3 "Maybe not well defined, RPM engine?";
+CM_ SG_ 705 NEW_SIGNAL_1 "Maybe not welll defined, acceleration?";
+CM_ SG_ 1595 TIME_ON "linear to seconds, must find bounds";
 CM_ SG_ 170 WHEEL_SPEED_1 "TB verified";
 CM_ SG_ 170 WHEEL_SPEED_2 "to be verified";
+CM_ SG_ 170 WHEEL_SPEED_3 "to be verified";
+CM_ SG_ 170 WHEEL_SPEED_4 "to be verified";
+CM_ SG_ 180 VEHICLE_SPEED "To be confirmed, but only psitive showing for now.";
