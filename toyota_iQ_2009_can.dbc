@@ -269,21 +269,41 @@ BO_ 452 NEW_MSG_2: 8 XXX
 
 BO_ 37 NEW_MSG_3: 8 XXX
  SG_ NEW_SIGNAL_1 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_2 : 47|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 36 NEW_MSG_4: 8 XXX
- SG_ NEW_SIGNAL_1 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_2 : 23|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_3 : 31|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_4 : 39|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_5 : 47|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_7 : 63|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 170 Wheels Speed/acceleration?: 8 XXX
+BO_ 705 NEW_MSG_5: 8 XXX
+ SG_ NEW_SIGNAL_1 : 23|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 947 NEW_MSG_6: 8 XXX
  SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_2 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_2 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_3 : 23|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 955 NEW_MSG_7: 8 XXX
+ SG_ NEW_SIGNAL_1 : 23|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 1595 CONTAINS_TIME: 8 XXX
+ SG_ TIME_ON : 55|16@0+ (1,0) [0|65535] "" XXX
+
+BO_ 170 WHEELS_SPEEDS: 8 XXX
+ SG_ WHEEL_SPEED_3 : 39|16@0+ (1,0) [0|65535] "" XXX
+ SG_ WHEEL_SPEED_4 : 55|16@0+ (1,0) [0|65535] "" XXX
+ SG_ WHEEL_SPEED_1 : 7|16@0+ (0.01,-67.67) [0|65535] "" XXX
+ SG_ WHEEL_SPEED_2 : 23|16@0+ (0.01,-67.67) [0|65535] "km/h?" XXX
 
 
 
 
 CM_ SG_ 1552 SPEED_LOWRES "Looks like positive speed";
 CM_ SG_ 37 NEW_SIGNAL_1 "vehicle orientation? (Z axis, noisy)";
+CM_ SG_ 1595 TIME_ON "probably linear to seconds";
+CM_ SG_ 170 WHEEL_SPEED_1 "TB verified";
+CM_ SG_ 170 WHEEL_SPEED_2 "to be verified";
