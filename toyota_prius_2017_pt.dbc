@@ -87,7 +87,7 @@ BO_ 608 STEER_TORQUE_SENSOR: 8 XXX
 
 BO_ 610 EPS_STATUS: 8 EPS
  SG_ STATE : 3|4@0+ (1,0) [0|15] "" XXX
- SG_ STATE2 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ LKA_STATE : 31|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 614 STEERING_IPAS: 8 IPAS
  SG_ STATE : 7|4@0+ (1,0) [0|15] "" XXX
@@ -170,7 +170,7 @@ CM_ SG_ 1042 SET_ME_1 "unclear what this is, nut it's always 1 in drive traces";
 VAL_ 295 GEAR 0 "P" 1 "R" 2 "N" 3 "D" 4 "B";
 VAL_ 466 CRUISE_STATE 8 "active" 7 "standstill" 1 "off" ;
 VAL_ 610 STATE 5 "override" 3 "enabled" 1 "disabled";
-VAL_ 610 STATE2 50 "fault";
+VAL_ 610 LKA_STATE 50 "temporary_fault";
 VAL_ 614 STATE 3 "enabled" 1 "disabled";
 VAL_ 614 DIRECTION_CMD 3 "right" 2 "center" 1 "left";
 VAL_ 1556 TURN_SIGNALS 3 "none" 2 "right" 1 "left" ;
