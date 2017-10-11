@@ -81,6 +81,7 @@ BO_ 608 STEER_TORQUE_SENSOR: 8 XXX
 
 BO_ 610 EPS_STATUS: 8 EPS
  SG_ STATE : 3|4@0+ (1,0) [0|15] "" XXX
+ SG_ STATE2 : 31|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 614 STEERING_IPAS: 8 IPAS
  SG_ STATE : 7|4@0+ (1,0) [0|15] "" XXX
@@ -156,7 +157,6 @@ CM_ SG_ 550 BRAKE_PRESSURE "seems prop to pedal force";
 CM_ SG_ 550 BRAKE_POSITION "seems proportional to pedal displacement, unclear the max value of 0x1c8";
 CM_ SG_ 560 BRAKE_LIGHTS "double check";
 CM_ SG_ 581 GAS_PEDAL "it seems slightly filtered";
-CM_ SG_ 608 STEER_TORQUE_EPS "0.5 factor to be comparable with STEER_TORQUE_CMD";
 CM_ SG_ 608 STEER_TORQUE_DRIVER "driver torque";
 CM_ SG_ 608 STEER_OVERRIDE "set when driver torque exceeds a certain value";
 CM_ SG_ 614 ANGLE "set to measured angle when ipas control isn't active";
@@ -167,6 +167,7 @@ CM_ SG_ 1042 SET_ME_1 "unclear what this is, nut it's always 1 in drive traces";
 VAL_ 956 GEAR 0 "D" 1 "S" 8 "N" 16 "R" 32 "P";
 VAL_ 466 CRUISE_STATE 8 "active" 7 "standstill" 1 "off" ;
 VAL_ 610 STATE 5 "override" 3 "enabled" 1 "disabled";
+VAL_ 610 STATE2 50 "fault";
 VAL_ 614 STATE 3 "enabled" 1 "disabled";
 VAL_ 614 DIRECTION_CMD 3 "right" 2 "center" 1 "left";
 VAL_ 1556 TURN_SIGNALS 3 "none" 2 "right" 1 "left" ;
