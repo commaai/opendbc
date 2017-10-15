@@ -267,15 +267,8 @@ BO_ 37 NEW_MSG_3: 8 XXX
 BO_ 36 Accs: 8 XXX
  SG_ Accel_Front_Back_1 : 31|8@0- (1,0) [0|255] "" XXX
  SG_ Accel_Front_Back_2 : 47|8@0- (1,0) [0|255] "" XXX
+ SG_ ACC_LAT_CLEAN : 2|11@0- (1,0) [0|255] "" XXX
  SG_ Accel_laterale : 63|8@0- (1,0) [0|255] "" XXX
-
-
-BO_ 705 ENGINE_ACC?: 8 XXX
- SG_ NEW_SIGNAL_3 : 15|16@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_1 : 26|11@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_2 : 47|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_4 : 55|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_5 : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 947 NEW_MSG_6: 8 XXX
  SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
@@ -283,25 +276,26 @@ BO_ 947 NEW_MSG_6: 8 XXX
  SG_ NEW_SIGNAL_3 : 23|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 955 NEW_MSG_7: 8 XXX
- SG_ NEW_SIGNAL_1 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ FUEL_CONSUMPTION? : 23|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 1595 CONTAINS_TIME: 8 XXX
  SG_ TIME_ON : 55|16@0+ (0.1,0) [0|65535] "" XXX
 
 BO_ 170 WHEELS_SPEEDS: 8 XXX
- SG_ WHEEL_SPEED_1 : 7|16@0+ (0.01,-67.67) [0|65535] "" XXX
  SG_ WHEEL_SPEED_2 : 23|16@0+ (0.01,-67.67) [0|65535] "km/h?" XXX
  SG_ WHEEL_SPEED_3 : 39|16@0+ (0.01,-67.67) [0|65535] "km/h" XXX
  SG_ WHEEL_SPEED_4 : 55|16@0+ (0.01,-67.67) [0|65535] "km/h" XXX
+ SG_ WHEEL_SPEED_1 : 7|16@0+ (0.01,-67.67) [0|65535] "" XXX
 
-BO_ 180 NEW_MSG_8: 8 XXX
- SG_ NEW_SIGNAL_2 : 63|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_4 : 39|8@0+ (1,0) [0|255] "" XXX
+BO_ 180 VEHICLE_DYNAMICS: 8 XXX
  SG_ VEHICLE_SPEED : 47|16@0+ (0.01,0) [0|255] "km/h?" XXX
+ SG_ WHEEL_ANGLE? : 39|8@0- (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_2 : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 186 NEW_MSG_9: 8 XXX
- SG_ NEW_SIGNAL_1 : 7|16@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_2 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ ACC_FORWARD? : 1|10@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_1 : 47|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 565 NEW_MSG_10: 8 XXX
 
@@ -320,13 +314,15 @@ BO_ 979 NEW_MSG_13: 8 XXX
 BO_ 1600 NEW_MSG_14: 8 XXX
  SG_ NEW_SIGNAL_1 : 47|8@0+ (1,0) [0|1] "" XXX
 
-BO_ 36 Accs: 8 XXX
- SG_ Accel_Front_Back_1 : 31|8@0- (1,0) [0|255] "" XXX
- SG_ Accel_Front_Back_2 : 47|8@0- (1,0) [0|255] "" XXX
- SG_ Accel_laterale : 63|8@0- (1,0) [0|255] "" XXX
- 
-BO_ 1568 Doors: 8 XXX
+BO_ 1568 DOORS: 8 XXX
  SG_ Door_Left : 45|1@0+ (1,0) [0|255] "" XXX
  SG_ Door_Right : 44|1@0+ (1,0) [0|3] "" XXX
  SG_ Coffre : 41|1@1+ (1,0) [0|3] "" XXX
 
+
+
+
+CM_ SG_ 955 FUEL_CONSUMPTION? "fuel consumption?";
+CM_ SG_ 180 VEHICLE_SPEED "Roughly 2 secons before wheel speeds";
+CM_ SG_ 180 WHEEL_ANGLE? "Would seem like wheel angle";
+CM_ SG_ 186 ACC_FORWARD? "could be forward acc";
