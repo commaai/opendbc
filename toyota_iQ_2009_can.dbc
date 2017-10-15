@@ -257,22 +257,18 @@ BO_ 559 TRACK_B_15: 6 XXX
 BO_ 1552 NEW_MSG_1: 8 XXX
  SG_ SPEED_LOWRES : 16|8@1+ (1,0) [0|255] "km/h?" XXX
 
-BO_ 452 NEW_MSG_2: 8 XXX
- SG_ NEW_SIGNAL_2 : 56|8@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_1 : 8|8@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_3 : 39|8@0+ (1,0) [0|255] "" XXX
+BO_ 452 ENGINE: 8 XXX
+ SG_ MOTOR_RPM : 7|16@0+ (1,0) [0|65535] "rpm" XXX
 
 BO_ 37 NEW_MSG_3: 8 XXX
  SG_ NEW_SIGNAL_1 : 15|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_2 : 47|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 36 NEW_MSG_4: 8 XXX
- SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_2 : 23|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_3 : 31|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_4 : 39|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_5 : 47|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_7 : 63|8@0+ (1,0) [0|255] "" XXX
+BO_ 36 Accs: 8 XXX
+ SG_ Accel_Front_Back_1 : 31|8@0- (1,0) [0|255] "" XXX
+ SG_ Accel_Front_Back_2 : 47|8@0- (1,0) [0|255] "" XXX
+ SG_ Accel_laterale : 63|8@0- (1,0) [0|255] "" XXX
+
 
 BO_ 705 ENGINE_ACC?: 8 XXX
  SG_ NEW_SIGNAL_3 : 15|16@0+ (1,0) [0|255] "" XXX
@@ -324,16 +320,13 @@ BO_ 979 NEW_MSG_13: 8 XXX
 BO_ 1600 NEW_MSG_14: 8 XXX
  SG_ NEW_SIGNAL_1 : 47|8@0+ (1,0) [0|1] "" XXX
 
+BO_ 36 Accs: 8 XXX
+ SG_ Accel_Front_Back_1 : 31|8@0- (1,0) [0|255] "" XXX
+ SG_ Accel_Front_Back_2 : 47|8@0- (1,0) [0|255] "" XXX
+ SG_ Accel_laterale : 63|8@0- (1,0) [0|255] "" XXX
+ 
+BO_ 1568 Doors: 8 XXX
+ SG_ Door_Left : 45|1@0+ (1,0) [0|255] "" XXX
+ SG_ Door_Right : 44|1@0+ (1,0) [0|3] "" XXX
+ SG_ Coffre : 41|1@1+ (1,0) [0|3] "" XXX
 
-
-
-CM_ SG_ 1552 SPEED_LOWRES "Looks like positive speed";
-CM_ SG_ 37 NEW_SIGNAL_1 "vehicle orientation? (Z axis, noisy)";
-CM_ SG_ 705 NEW_SIGNAL_3 "Maybe not well defined, RPM engine?";
-CM_ SG_ 705 NEW_SIGNAL_1 "Maybe not welll defined, acceleration?";
-CM_ SG_ 1595 TIME_ON "linear to seconds, must find bounds";
-CM_ SG_ 170 WHEEL_SPEED_1 "TB verified";
-CM_ SG_ 170 WHEEL_SPEED_2 "to be verified";
-CM_ SG_ 170 WHEEL_SPEED_3 "to be verified";
-CM_ SG_ 170 WHEEL_SPEED_4 "to be verified";
-CM_ SG_ 180 VEHICLE_SPEED "To be confirmed, but only psitive showing for now.";
