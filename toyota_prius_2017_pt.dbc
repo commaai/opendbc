@@ -146,6 +146,9 @@ BO_ 1042 LKAS_HUD: 8 XXX
  SG_ ADJUSTING_CAMERA : 13|1@0+ (1,0) [0|1] "" XXX
  SG_ LDA_MALFUNCTION : 15|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 1553 UI_SEETING: 8 XXX
+ SG_ UNITS : 26|2@0+ (1,0) [0|3] "" XXX
+
 BO_ 1568 SEATS_DOORS: 8 XXX
  SG_ SEATBELT_DRIVER_UNLATCHED : 62|1@0+ (1,0) [0|1] "" XXX
  SG_ DOOR_OPEN_FL : 45|1@0+ (1,0) [0|1] "" XXX
@@ -175,6 +178,7 @@ VAL_ 610 STATE 5 "override" 3 "enabled" 1 "disabled";
 VAL_ 610 LKA_STATE 50 "temporary_fault";
 VAL_ 614 STATE 3 "enabled" 1 "disabled";
 VAL_ 614 DIRECTION_CMD 3 "right" 2 "center" 1 "left";
+VAL_ 1553 UNITS 1 "km" 2 "miles";
 VAL_ 1556 TURN_SIGNALS 3 "none" 2 "right" 1 "left" ;
 VAL_ 1042 LDA_ALERT 3 "hold with continuous beep" 2 "LDA unavailable" 1 "hold" 0 "none";
 VAL_ 1042 BARRIERS 3 "both" 2 "right" 1 "left" 0 "none";
