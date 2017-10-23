@@ -220,6 +220,8 @@ BO_ 662 CRUISE_BUTTONS: 4 SCM
 
 BO_ 773 SEATBELT_STATUS: 7 BDY
  SG_ SEATBELT_DRIVER_LAMP : 7|1@0+ (1,0) [0|1] "" NEO
+ SG_ PASS_AIRBAG_ON : 15|1@0+ (1,0) [0|1] "" NEO
+ SG_ PASS_AIRBAG_OFF : 14|1@0+ (1,0) [0|1] "" NEO
  SG_ SEATBELT_PASS_UNLATCHED : 10|1@0+ (1,0) [0|1] "" NEO
  SG_ SEATBELT_PASS_LATCHED : 11|1@0+ (1,0) [0|1] "" NEO
  SG_ SEATBELT_DRIVER_UNLATCHED : 12|1@0+ (1,0) [0|1] "" NEO
@@ -405,6 +407,8 @@ BO_TX_BU_ 927 : NEO,ADAS;
 
 CM_ SG_ 401 GEAR "10 = reverse, 11 = transition";
 CM_ SG_ 490 LONG_ACCEL "wheel speed derivative, noisy and zero snapping";
+CM_ SG_ 773 PASS_AIRBAG_ON "Might just be indicator light";
+CM_ SG_ 773 PASS_AIRBAG_OFF "Might just be indicator light";
 CM_ SG_ 780 CRUISE_SPEED "255 = no speed";
 CM_ SG_ 804 CRUISE_SPEED_PCM "255 = no speed";
 CM_ SG_ 829 BEEP "beeps are pleasant, chimes are for warnngs etc...";
