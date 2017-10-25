@@ -57,6 +57,7 @@ BO_ 180 SPEED: 8 XXX
 
 BO_ 466 PCM_CRUISE: 8 XXX
  SG_ GAS_RELEASED : 4|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACCEL_NET : 23|16@0- (0.001,0) [-20|20] "m/s2" XXX
  SG_ CRUISE_STATE : 55|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 548 BRAKE_MODULE: 8 XXX
@@ -157,6 +158,7 @@ BO_ 1568 SEATS_DOORS: 8 XXX
 CM_ SG_ 36 ACCEL_Y "unit is tbd";
 CM_ SG_ 36 YAW_RATE "verify";
 CM_ SG_ 36 STEERING_TORQUE "does not seem the steer torque, tbd";
+CM_ SG_ 466 ACCEL_NET "net acceleration produced by the system, given ACCEL_CMD, road grade and other factors";
 CM_ SG_ 550 BRAKE_PRESSURE "seems prop to pedal force";
 CM_ SG_ 550 BRAKE_POSITION "seems proportional to pedal displacement, unclear the max value of 0x1c8";
 CM_ SG_ 560 BRAKE_LIGHTS "double check";
