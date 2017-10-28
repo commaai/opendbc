@@ -286,10 +286,10 @@ BO_ 1595 CONTAINS_TIME: 8 XXX
  SG_ TIME_ON : 55|16@0+ (0.1,0) [0|65535] "" XXX
 
 BO_ 170 WHEELS_SPEEDS: 8 XXX
- SG_ WHEEL_SPEED_2 : 23|16@0+ (0.01,-67.67) [0|65535] "km/h?" XXX
- SG_ WHEEL_SPEED_3 : 39|16@0+ (0.01,-67.67) [0|65535] "km/h" XXX
- SG_ WHEEL_SPEED_4 : 55|16@0+ (0.01,-67.67) [0|65535] "km/h" XXX
- SG_ WHEEL_SPEED_1 : 7|16@0+ (0.01,-67.67) [0|65535] "" XXX
+ SG_ REAR_LEFT_WHEEL_SPEED : 55|16@0+ (0.01,-67.67) [0|65535] "km/h" XXX
+ SG_ FRONT_LEFT_WHEEL_SPEED : 23|16@0+ (0.01,-67.67) [0|65535] "km/h?" XXX
+ SG_ FRONT_RIGHT_WHEEL_SPEED : 7|16@0+ (0.01,-67.67) [0|65535] "" XXX
+ SG_ REAR_RIGHT_WHEEL_SPEED : 39|16@0+ (0.01,-67.67) [0|65535] "km/h" XXX
 
 BO_ 180 VEHICLE_DYNAMICS: 8 XXX
  SG_ VEHICLE_SPEED : 47|16@0+ (0.01,0) [0|255] "km/h?" XXX
@@ -351,6 +351,10 @@ BO_ 1572 WHY_THESE_VALUES: 8 XXX
 
 CM_ SG_ 452 CHECKSUM "Follows path of RPMs but more precise & 1 byte only";
 CM_ SG_ 955 NEW_SIGNAL_1 "wierd toggle";
+CM_ SG_ 170 REAR_LEFT_WHEEL_SPEED "";
+CM_ SG_ 170 FRONT_LEFT_WHEEL_SPEED "";
+CM_ SG_ 170 FRONT_RIGHT_WHEEL_SPEED "";
+CM_ SG_ 170 REAR_RIGHT_WHEEL_SPEED "";
 CM_ SG_ 180 VEHICLE_SPEED "Roughly 2 seconds before wheel speeds";
 CM_ SG_ 180 NEW_SIGNAL_2 "one byte speed, a bit before vehicle speed";
 CM_ SG_ 180 WIERD_STUFF "Stuff alsohappens on the whole two bytes (sometimes all set)";
