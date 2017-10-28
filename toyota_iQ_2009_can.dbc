@@ -289,10 +289,10 @@ BO_ 170 WHEELS_SPEEDS: 8 XXX
  SG_ WHEEL_SPEED_1 : 7|16@0+ (0.01,-67.67) [0|65535] "" XXX
 
 BO_ 180 VEHICLE_DYNAMICS: 8 XXX
- SG_ NEW_SIGNAL_1 : 39|8@0+ (1,0) [0|255] "" XXX
  SG_ VEHICLE_SPEED : 47|16@0+ (0.01,0) [0|255] "km/h?" XXX
  SG_ NEW_SIGNAL_2 : 63|8@0+ (1,0) [0|255] "" XXX
  SG_ WIERD_STUFF : 8|2@1+ (1,0) [0|3] "" XXX
+ SG_ MAYBE_DISTANCE : 39|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 186 NEW_MSG_9: 8 XXX
  SG_ NEW_SIGNAL_2 : 31|8@0+ (1,0) [0|255] "" XXX
@@ -327,3 +327,4 @@ CM_ SG_ 452 CHECKSUM "Follows path of RPMs but more precise & 1 byte only";
 CM_ SG_ 180 VEHICLE_SPEED "Roughly 2 seconds before wheel speeds";
 CM_ SG_ 180 NEW_SIGNAL_2 "one byte speed, a bit before vehicle speed";
 CM_ SG_ 180 WIERD_STUFF "Stuff alsohappens on the whole two bytes (sometimes all set)";
+CM_ SG_ 180 MAYBE_DISTANCE "Looks like measure for distance or wheel angle";
