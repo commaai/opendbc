@@ -279,6 +279,8 @@ BO_ 947 NEW_MSG_6: 8 XXX
  SG_ NEW_SIGNAL_2 : 15|16@0+ (1,0) [0|255] "" XXX
 
 BO_ 955 NEW_MSG_7: 8 XXX
+ SG_ JUST_INCREASE : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_1 : 0|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1595 CONTAINS_TIME: 8 XXX
  SG_ TIME_ON : 55|16@0+ (0.1,0) [0|65535] "" XXX
@@ -336,10 +338,14 @@ BO_ 928 NEW_MSG_2: 8 XXX
 BO_ 896 NEW_MSG_4: 8 XXX
  SG_ NEW_SIGNAL_1 : 48|1@1+ (1,0) [0|3] "" XXX
 
+BO_ 944 LONG_TERM_MSG: 8 XXX
+ SG_ LONG_TERM_SIGN : 31|8@0+ (1,0) [0|255] "" XXX
+
 
 
 
 CM_ SG_ 452 CHECKSUM "Follows path of RPMs but more precise & 1 byte only";
+CM_ SG_ 955 NEW_SIGNAL_1 "wierd toggle";
 CM_ SG_ 180 VEHICLE_SPEED "Roughly 2 seconds before wheel speeds";
 CM_ SG_ 180 NEW_SIGNAL_2 "one byte speed, a bit before vehicle speed";
 CM_ SG_ 180 WIERD_STUFF "Stuff alsohappens on the whole two bytes (sometimes all set)";
@@ -350,3 +356,4 @@ CM_ SG_ 1600 INCREASES_EACH_RIDE "does not change during the ride but is differe
 CM_ SG_ 1568 HANDBRAKE "To be tested";
 CM_ SG_ 705 ACC_COMMAND "similar to other pedal indicator.";
 CM_ SG_ 705 ACCELERATING "big question mark here coula also be disengagement";
+CM_ SG_ 944 LONG_TERM_SIGN "could be total distance";
