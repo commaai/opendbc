@@ -341,6 +341,9 @@ BO_ 896 NEW_MSG_4: 8 XXX
 BO_ 944 LONG_TERM_MSG: 8 XXX
  SG_ LONG_TERM_SIGN : 31|8@0+ (1,0) [0|255] "" XXX
 
+BO_ 1553 NEW_MSG_8: 8 XXX
+ SG_ TOTAL_DISTANCE : 55|16@0+ (1,0) [0|65535] "" XXX
+
 
 
 
@@ -357,3 +360,4 @@ CM_ SG_ 1568 HANDBRAKE "To be tested";
 CM_ SG_ 705 ACC_COMMAND "similar to other pedal indicator.";
 CM_ SG_ 705 ACCELERATING "big question mark here coula also be disengagement";
 CM_ SG_ 944 LONG_TERM_SIGN "could be total distance";
+CM_ SG_ 1553 TOTAL_DISTANCE "probably also contains the previous/two previous bytes but can't confirm";
