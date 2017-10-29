@@ -375,6 +375,8 @@ BO_ 1592 NEW_MSG_14: 8 XXX
  SG_ DOORS_LOCKED2 : 20|1@0+ (1,0) [0|1] "" XXX
  SG_ DOORS_LOCKED1 : 16|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 1017 undefined: 8 XXX
+
 
 
 
