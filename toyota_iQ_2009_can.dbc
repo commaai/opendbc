@@ -265,9 +265,12 @@ BO_ 452 ENGINE: 8 XXX
  SG_ A_DECREASING_VALUE : 39|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 37 STEERING: 8 XXX
- SG_ NEW_SIGNAL_2 : 47|8@0+ (1,0) [0|255] "" XXX
- SG_ STEERING_DIRECTION : 1|3@1+ (1,0) [0|15] "" XXX
- SG_ STEERING_WHEEL : 0|9@0- (1,0) [0|511] "" XXX
+ SG_ STEERING_ANGLE : 2|11@0- (1,0) [0|511] "" XXX
+ SG_ STEER_DIRECTION : 3|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_1 : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_4 : 42|2@0- (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_2 : 44|2@0- (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_3 : 46|2@0- (1,0) [0|3] "" XXX
 
 BO_ 36 ACCELERATIONS: 8 XXX
  SG_ ACC_LAT_CLEAN : 2|11@0- (1,0) [0|255] "" XXX
@@ -303,9 +306,9 @@ BO_ 170 WHEELS_SPEEDS: 8 XXX
 
 BO_ 180 VEHICLE_DYNAMICS: 8 XXX
  SG_ WIERD_STUFF : 8|2@1+ (1,0) [0|3] "" XXX
- SG_ MAYBE_DISTANCE : 39|8@0+ (1,0) [0|255] "" XXX
- SG_ SPEED_MOD_256 : 63|8@0+ (1,0) [0|255] "" XXX
  SG_ VEHICLE_SPEED : 47|16@0+ (0.01,0) [0|255] "km/h?" XXX
+ SG_ SPEED_MOD_256 : 63|8@0- (1,0) [0|255] "" XXX
+ SG_ MAYBE_DISTANCE_MOD_256 : 39|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 186 NEW_MSG_9: 8 XXX
  SG_ NEW_SIGNAL_2 : 31|8@0+ (1,0) [0|255] "" XXX
@@ -317,8 +320,8 @@ BO_ 464 NEW_MSG_11: 8 XXX
 BO_ 426 NEW_MSG_5: 8 XXX
  SG_ CONSTANT : 47|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 906 ONE_BOOL1: 8 XXX
- SG_ SOME_BOOL : 0|1@0+ (1,0) [0|255] "" XXX
+BO_ 906 BOOLS: 8 XXX
+ SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|127] "" XXX
 
 BO_ 979 NEW_MSG_13: 8 XXX
  SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|65535] "" XXX
@@ -380,21 +383,25 @@ BO_ 1592 NEW_MSG_14: 8 XXX
 BO_ 1017 undefined: 8 XXX
 
 BO_ 608 NEW_MSG_6: 8 XXX
+ SG_ VERY_SMALL_SIGNAL2 : 56|1@0+ (1,0) [0|255] "" XXX
+ SG_ VERY_SMALL_SIGNAL1 : 0|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 1088 NEW_MSG_2: 8 XXX
 
 
 
 
 CM_ SG_ 452 CHECKSUM "Follows path of RPMs but more precise & 1 byte only";
+CM_ SG_ 37 STEER_DIRECTION "could be intended as 12 bit steering angle";
 CM_ SG_ 955 IS_BRAKING_2 "wierd toggle";
 CM_ SG_ 170 FRONT_RIGHT_WHEEL_SPEED "";
 CM_ SG_ 170 FRONT_LEFT_WHEEL_SPEED "";
 CM_ SG_ 170 REAR_RIGHT_WHEEL_SPEED "";
 CM_ SG_ 170 REAR_LEFT_WHEEL_SPEED "";
 CM_ SG_ 180 WIERD_STUFF "Stuff alsohappens on the whole two bytes (sometimes all set)";
-CM_ SG_ 180 MAYBE_DISTANCE "Looks like measure for distance or wheel angle";
-CM_ SG_ 180 SPEED_MOD_256 "one byte speed, a bit before vehicle speed";
 CM_ SG_ 180 VEHICLE_SPEED "Roughly 2 seconds before wheel speeds";
-CM_ SG_ 906 SOME_BOOL "might have a connection with steering";
+CM_ SG_ 180 SPEED_MOD_256 "one byte speed, a bit before vehicle speed";
+CM_ SG_ 180 MAYBE_DISTANCE_MOD_256 "Looks like measure for distance or wheel angle";
 CM_ SG_ 979 NEW_SIGNAL_1 "power used by engine?";
 CM_ SG_ 1600 INCREASING_VALUE_FUEL "Fuel/distance?";
 CM_ SG_ 1600 CHANGES_EACH_RIDE "Small decrementation during some rides";
