@@ -198,7 +198,6 @@ BO_ 546 TRACK_B_2: 8 XXX
 BO_ 547 undefined: 8 XXX
 
 BO_ 548 BREAKING_PEDAL: 8 XXX
- SG_ NOTHING : 59|1@0+ (1,0) [0|1] "" XXX
  SG_ IS_BREAKING : 5|1@0+ (1,0) [0|3] "" XXX
 
 BO_ 549 TRACK_B_5: 8 XXX
@@ -289,8 +288,8 @@ BO_ 947 LIGHTS_MAYBE: 8 XXX
  SG_ NEW_SIGNAL_9 : 22|6@0+ (1,0) [0|63] "" XXX
 
 BO_ 955 NEW_MSG_7: 8 XXX
- SG_ NEW_SIGNAL_1 : 0|1@0+ (1,0) [0|1] "" XXX
  SG_ JUST_INCREASE : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ IS_BREAKING_2 : 0|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1595 CONTAINS_TIME: 8 XXX
  SG_ TIME_ON : 55|16@0+ (0.1,0) [0|65535] "" XXX
@@ -316,7 +315,7 @@ BO_ 565 NEW_MSG_10: 8 XXX
 BO_ 464 NEW_MSG_11: 8 XXX
 
 BO_ 426 NEW_MSG_5: 8 XXX
- SG_ NEW_SIGNAL_1 : 47|8@0+ (1,0) [0|255] "" XXX
+ SG_ CONSTANT : 47|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 906 NEW_MSG_12: 8 XXX
  SG_ SOME_BOOL : 0|1@0+ (1,0) [0|255] "" XXX
@@ -348,15 +347,16 @@ BO_ 705 COMMAND: 8 XXX
  SG_ NEW_SIGNAL_2 : 55|8@0- (1,0) [0|65535] "" XXX
  SG_ ACCELERATING_PEDAL : 3|1@1+ (1,0) [0|1] "" XXX
  SG_ ACC_COMMAND : 27|12@0+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_3 : 63|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 928 NEW_MSG_2: 8 XXX
+BO_ 928 STEER2_MAYBE: 8 XXX
  SG_ NEW_SIGNAL_1 : 13|6@0+ (1,0) [0|63] "" XXX
  SG_ NEW_SIGNAL_2 : 60|5@0+ (1,0) [0|31] "" XXX
  SG_ NEW_SIGNAL_3 : 40|4@1+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_4 : 7|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 896 NEW_MSG_4: 8 XXX
- SG_ NEW_SIGNAL_1 : 48|1@1+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_1 : 55|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 944 LONG_TERM_MSG: 8 XXX
  SG_ LONG_TERM_SIGN : 31|8@0+ (1,0) [0|255] "" XXX
@@ -385,7 +385,7 @@ BO_ 608 NEW_MSG_6: 8 XXX
 
 
 CM_ SG_ 452 CHECKSUM "Follows path of RPMs but more precise & 1 byte only";
-CM_ SG_ 955 NEW_SIGNAL_1 "wierd toggle";
+CM_ SG_ 955 IS_BREAKING_2 "wierd toggle";
 CM_ SG_ 170 FRONT_RIGHT_WHEEL_SPEED "";
 CM_ SG_ 170 FRONT_LEFT_WHEEL_SPEED "";
 CM_ SG_ 170 REAR_RIGHT_WHEEL_SPEED "";
@@ -394,6 +394,7 @@ CM_ SG_ 180 WIERD_STUFF "Stuff alsohappens on the whole two bytes (sometimes all
 CM_ SG_ 180 MAYBE_DISTANCE "Looks like measure for distance or wheel angle";
 CM_ SG_ 180 SPEED_MOD_256 "one byte speed, a bit before vehicle speed";
 CM_ SG_ 180 VEHICLE_SPEED "Roughly 2 seconds before wheel speeds";
+CM_ SG_ 906 SOME_BOOL "might have a connection with steering";
 CM_ SG_ 979 NEW_SIGNAL_1 "power used by engine?";
 CM_ SG_ 1600 INCREASING_VALUE_FUEL "Fuel/distance?";
 CM_ SG_ 1600 CHANGES_EACH_RIDE "Small decrementation during some rides";
