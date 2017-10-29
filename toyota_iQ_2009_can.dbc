@@ -324,6 +324,7 @@ BO_ 1568 DOORS: 8 XXX
  SG_ Door_Right : 44|1@0+ (1,0) [0|3] "" XXX
  SG_ Coffre : 41|1@1+ (1,0) [0|3] "" XXX
  SG_ HANDBRAKE : 60|1@0+ (1,0) [0|3] "" XXX
+ SG_ ENGINE_OFF_MAYBE : 62|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 705 COMMAND: 8 XXX
  SG_ NEW_SIGNAL_4 : 31|4@0+ (1,0) [0|255] "" XXX
