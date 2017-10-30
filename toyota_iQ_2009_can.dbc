@@ -255,8 +255,9 @@ BO_ 559 TRACK_B_15: 6 XXX
  SG_ REL_ACCEL : 15|7@0- (1,0) [-64|63] "" XXX
  SG_ CHECKSUM : 47|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 1552 NEW_MSG_1: 8 XXX
+BO_ 1552 CONTAINS_LRES_SPEED: 8 XXX
  SG_ SPEED_LOWRES : 16|8@1+ (1,0) [0|255] "km/h?" XXX
+ SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 452 ENGINE: 8 XXX
  SG_ MOTOR_RPM : 7|16@0+ (1,0) [0|65535] "rpm" XXX
@@ -288,15 +289,15 @@ BO_ 947 LIGHTS_MAYBE: 8 XXX
  SG_ NEW_SIGNAL_8 : 12|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_5 : 15|1@0+ (1,0) [0|1] "" XXX
  SG_ POSITTION_LIGHT : 0|3@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_9 : 22|6@0+ (1,0) [0|63] "" XXX
+ SG_ LRES_ACC_PEDAL : 22|6@0+ (1,0) [0|63] "" XXX
 
 BO_ 955 BRAKING_PLUS_OTHER: 8 XXX
- SG_ JUST_INCREASE : 23|8@0+ (1,0) [0|255] "" XXX
  SG_ IS_BRAKING_2 : 0|1@0+ (1,0) [0|1] "" XXX
+ SG_ ENGINE_TEMP : 23|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 1595 CONTAINS_TIME: 8 XXX
- SG_ TIME_ON : 55|16@0+ (0.1,0) [0|65535] "" XXX
  SG_ NEW_SIGNAL_1 : 7|32@0+ (1,0) [0|4294967295] "" XXX
+ SG_ TIME_ON : 55|16@0+ (0.1,0) [0|65535] "s" XXX
 
 BO_ 170 WHEELS_SPEEDS: 8 XXX
  SG_ FRONT_RIGHT_WHEEL_SPEED : 7|16@0+ (0.01,-67.67) [0|65535] "km/h" XXX
@@ -321,42 +322,41 @@ BO_ 426 NEW_MSG_5: 8 XXX
  SG_ CONSTANT : 47|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 906 BOOLS: 8 XXX
- SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|127] "" XXX
+ SG_ MAY_CONTAIN_LIGHTS : 7|8@0+ (1,0) [0|127] "" XXX
 
 BO_ 979 NEW_MSG_13: 8 XXX
- SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|65535] "" XXX
  SG_ NEW_SIGNAL_2 : 14|7@0- (1,0) [0|255] "" XXX
+ SG_ VERY_LRES_SPEED : 7|8@0+ (1,0) [0|65535] "" XXX
 
-BO_ 1600 HAS_FUEL: 8 XXX
- SG_ INCREASING_VALUE_FUEL : 47|8@0+ (1,0) [0|255] "" XXX
+BO_ 1600 SLOW_VARIABLE_INFOS: 8 XXX
  SG_ CHANGES_EACH_RIDE : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ INCREASING_VALUE_FUEL : 47|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 1568 DOORS: 8 XXX
- SG_ Door_Left : 45|1@0+ (1,0) [0|255] "" XXX
- SG_ Door_Right : 44|1@0+ (1,0) [0|3] "" XXX
- SG_ Coffre : 41|1@1+ (1,0) [0|3] "" XXX
- SG_ HANDBRAKE : 60|1@0+ (1,0) [0|3] "" XXX
  SG_ ENGINE_OFF_MAYBE : 62|1@0+ (1,0) [0|1] "" XXX
  SG_ TRIGGER_ : 15|1@0+ (1,0) [0|1] "" XXX
  SG_ KEY_ACC : 36|1@0+ (1,0) [0|1] "" XXX
  SG_ KEY_ON : 37|1@0+ (1,0) [0|1] "" XXX
  SG_ KEY_INSERT : 46|1@0+ (1,0) [0|1] "" XXX
  SG_ NOT_ON : 63|1@0+ (1,0) [0|1] "" XXX
+ SG_ DOOR_RIGHT : 44|1@0+ (1,0) [0|3] "" XXX
+ SG_ DOOR_TRUNK : 41|1@1+ (1,0) [0|3] "" XXX
+ SG_ DOOR_LEFT : 45|1@0+ (1,0) [0|255] "" XXX
+ SG_ HANDBRAKE : 60|1@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_1 : 4|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 705 COMMAND: 8 XXX
- SG_ NEW_SIGNAL_4 : 31|4@0+ (1,0) [0|255] "" XXX
- SG_ ACC_PEDAL : 11|12@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_1 : 47|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_2 : 55|8@0- (1,0) [0|65535] "" XXX
  SG_ ACCELERATING_PEDAL : 3|1@1+ (1,0) [0|1] "" XXX
- SG_ ACC_COMMAND : 27|12@0+ (1,0) [0|7] "" XXX
- SG_ NEW_SIGNAL_3 : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ ACC_PEDAL : 15|16@0- (1,0) [0|255] "" XXX
+ SG_ ACC_COMMAND : 31|16@0- (1,0) [0|7] "" XXX
+ SG_ ACC_OTHER : 55|16@0+ (1,0) [0|65535] "" XXX
+ SG_ NEW_SIGNAL_1 : 47|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 928 STEER2_MAYBE: 8 XXX
- SG_ NEW_SIGNAL_1 : 13|6@0+ (1,0) [0|63] "" XXX
- SG_ NEW_SIGNAL_2 : 60|5@0+ (1,0) [0|31] "" XXX
  SG_ NEW_SIGNAL_4 : 4|5@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_3 : 40|4@1+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_1 : 13|6@0+ (1,0) [0|63] "" XXX
+ SG_ NEW_SIGNAL_2 : 60|5@0+ (1,0) [0|31] "" XXX
 
 BO_ 896 NEW_MSG_4: 8 XXX
  SG_ NEW_SIGNAL_1 : 55|8@0+ (1,0) [0|255] "" XXX
@@ -391,9 +391,13 @@ BO_ 1088 NEW_MSG_2: 8 XXX
 
 
 
+CM_ SG_ 1552 SPEED_LOWRES "negative values to check";
 CM_ SG_ 452 CHECKSUM "Follows path of RPMs but more precise & 1 byte only";
 CM_ SG_ 37 STEER_DIRECTION "could be intended as 12 bit steering angle";
+CM_ SG_ 947 LRES_ACC_PEDAL "Follows rather closely other acceleration commands";
 CM_ SG_ 955 IS_BRAKING_2 "wierd toggle";
+CM_ SG_ 955 ENGINE_TEMP "Tends to increase during first 10 minutes, then loosely follows speed. Motor temp?";
+CM_ SG_ 1595 TIME_ON "Time since last ignition, seconds";
 CM_ SG_ 170 FRONT_RIGHT_WHEEL_SPEED "";
 CM_ SG_ 170 FRONT_LEFT_WHEEL_SPEED "";
 CM_ SG_ 170 REAR_RIGHT_WHEEL_SPEED "";
@@ -402,11 +406,16 @@ CM_ SG_ 180 WIERD_STUFF "Stuff alsohappens on the whole two bytes (sometimes all
 CM_ SG_ 180 VEHICLE_SPEED "Roughly 2 seconds before wheel speeds";
 CM_ SG_ 180 SPEED_MOD_256 "one byte speed, a bit before vehicle speed";
 CM_ SG_ 180 MAYBE_DISTANCE_MOD_256 "Looks like measure for distance or wheel angle";
-CM_ SG_ 979 NEW_SIGNAL_1 "power used by engine?";
-CM_ SG_ 1600 INCREASING_VALUE_FUEL "Fuel/distance?";
+CM_ SG_ 979 VERY_LRES_SPEED "power used by engine? moves alongside speed, very low res, goes from 0 to 9 max?";
 CM_ SG_ 1600 CHANGES_EACH_RIDE "Small decrementation during some rides";
+CM_ SG_ 1600 INCREASING_VALUE_FUEL "Fuel/distance? Average fuel consumption?";
 CM_ SG_ 1568 HANDBRAKE "To be tested";
 CM_ SG_ 705 ACCELERATING_PEDAL "big question mark here coula also be disengagement";
-CM_ SG_ 705 ACC_COMMAND "similar to other pedal indicator.";
+CM_ SG_ 705 ACC_PEDAL "Noisier than command";
+CM_ SG_ 705 ACC_COMMAND "similar to other pedal indicator., cleaner";
+CM_ SG_ 705 ACC_OTHER "Need to figure out difference between the three signals. has 255 bit errors sometimes, may have mixed sgals";
+CM_ SG_ 705 NEW_SIGNAL_1 "mysterious for now";
+CM_ SG_ 928 NEW_SIGNAL_1 "Very slow changing noisy value, 45-49 in 10 min";
+CM_ SG_ 928 NEW_SIGNAL_2 "other very slow changing 24-26 in 10 min";
 CM_ SG_ 944 LONG_TERM_SIGN "could be total distance";
 CM_ SG_ 1553 TOTAL_DISTANCE "probably also contains the previous/two previous bytes but can't confirm";
