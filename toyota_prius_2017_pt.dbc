@@ -129,6 +129,7 @@ BO_ 37 STEER_ANGLE_SENSOR: 8 XXX
 
 BO_ 467 PCM_CRUISE_2: 8 XXX
  SG_ MAIN_ON : 15|1@0+ (1,0) [0|1] "" XXX
+ SG_ LOW_SPEED_LOCKOUT : 14|2@0+ (1,0) [0|3] "kph" XXX
  SG_ SET_SPEED : 23|8@0+ (1,0) [0|255] "kph" XXX
 
 BO_ 921 PCM_CRUISE_SM: 8 XXX
@@ -174,10 +175,12 @@ CM_ SG_ 614 ANGLE "set to measured angle when ipas control isn't active";
 CM_ SG_ 37 STEER_FRACTION "1/15th of the signal STEER_ANGLE, which is 1.5 deg; note that 0x8 is never set";
 CM_ SG_ 37 STEER_RATE "factor is tbd";
 CM_ SG_ 467 SET_SPEED "43 kph are shown as 28mph, so conversion isnt perfect";
+CM_ SG_ 467 LOW_SPEED_LOCKOUT "in low speed lockout, system would always disengage below 28mph";
 CM_ SG_ 921 UI_SET_SPEED "set speed shown in UI with user set unit";
 CM_ SG_ 1042 SET_ME_1 "unclear what this is, nut it's always 1 in drive traces";
 VAL_ 295 GEAR 0 "P" 1 "R" 2 "N" 3 "D" 4 "B";
 VAL_ 466 CRUISE_STATE 8 "active" 7 "standstill" 1 "off" ;
+VAL_ 467 LOW_SPEED_LOCKOUT 2 "low speed locked" 1 "ok" ;
 VAL_ 610 STATE 5 "override" 3 "enabled" 1 "disabled";
 VAL_ 610 LKA_STATE 50 "temporary_fault";
 VAL_ 614 STATE 3 "enabled" 1 "disabled";
