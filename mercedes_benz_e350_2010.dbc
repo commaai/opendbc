@@ -41,7 +41,7 @@ BO_ 3 NEW_MSG_1: 8 XXX
 
 BO_ 5 NEW_MSG_2: 8 XXX
  SG_ BRAKE_POSITION : 23|16@0+ (1,0) [0|65535] "" XXX
- SG_ BRAKE_PRESSED? : 0|8@1+ (1,0) [0|17] "" XXX
+ SG_ BRAKE_PRESSED : 0|8@1+ (1,0) [0|17] "" XXX
 
 BO_ 69 NEW_MSG_3: 8 XXX
  SG_ TURN_SIGNAL_LEVER : 16|8@1+ (1,0) [0|255] "" XXX
@@ -50,5 +50,5 @@ BO_ 69 NEW_MSG_3: 8 XXX
 
 
 
-CM_ SG_ 5 BRAKE_PRESSED? "appears to be boolean (brake pressed)";
+CM_ SG_ 5 BRAKE_PRESSED "appears to be boolean (brake pressed)";
 
