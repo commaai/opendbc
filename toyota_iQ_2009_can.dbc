@@ -345,10 +345,10 @@ BO_ 705 COMMAND: 8 XXX
  SG_ NOT_ACCELERATING_PEDAL : 3|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 928 STEER2_MAYBE: 8 XXX
- SG_ NEW_SIGNAL_4 : 4|5@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_3 : 40|4@1+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_1 : 13|6@0+ (1,0) [0|63] "" XXX
  SG_ NEW_SIGNAL_2 : 60|5@0+ (1,0) [0|31] "" XXX
+ SG_ NEW_SIGNAL_4 : 5|6@0+ (1,0) [0|255] "" XXX
 
 BO_ 896 NEW_MSG_4: 8 XXX
  SG_ NEW_SIGNAL_1 : 55|8@0+ (1,0) [0|255] "" XXX
@@ -410,6 +410,7 @@ CM_ SG_ 705 NEW_SIGNAL_1 "Mysterious for now";
 CM_ SG_ 705 NOT_ACCELERATING_PEDAL "Looks like opposite of accelerating bit";
 CM_ SG_ 928 NEW_SIGNAL_1 "Very slow changing noisy value, 45-49 in 10 min";
 CM_ SG_ 928 NEW_SIGNAL_2 "Other very slow changing 24-26 in 10 min";
+CM_ SG_ 928 NEW_SIGNAL_4 "Inconsistent across rides";
 CM_ SG_ 944 LONG_TERM_SIGN "";
 CM_ SG_ 1553 TOTAL_DISTANCE "Probably also contains the previous/two previous bytes but can't confirm";
 
