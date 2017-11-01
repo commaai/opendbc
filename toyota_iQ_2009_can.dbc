@@ -275,9 +275,9 @@ BO_ 37 STEERING: 8 XXX
 
 BO_ 36 ACCELERATIONS: 8 XXX
  SG_ ACC_LAT_CLEAN : 2|11@0- (1,0) [0|255] "" XXX
- SG_ Accel_laterale : 63|8@0- (1,0) [0|255] "" XXX
- SG_ Accel_Front_Back_1 : 31|8@0- (1,0) [0|255] "" XXX
- SG_ Accel_Front_Back_2 : 47|8@0- (1,0) [0|255] "" XXX
+ SG_ ACC_LATERAL : 63|8@0- (1,0) [0|255] "" XXX
+ SG_ ACC_FRONT_BACK_1 : 31|8@0- (1,0) [0|255] "" XXX
+ SG_ ACC_FRONT_BACK_2 : 47|8@0- (1,0) [0|255] "" XXX
 
 BO_ 947 LIGHTS_MAYBE: 8 XXX
  SG_ NEW_SIGNAL_1 : 11|1@0+ (1,0) [0|1] "" XXX
@@ -307,7 +307,7 @@ BO_ 170 WHEELS_SPEEDS: 8 XXX
 
 BO_ 180 VEHICLE_DYNAMICS: 8 XXX
  SG_ WIERD_STUFF : 8|2@1+ (1,0) [0|3] "" XXX
- SG_ VEHICLE_SPEED : 47|16@0+ (0.01,0) [0|255] "km/h?" XXX
+ SG_ VEHICLE_SPEED : 47|16@0+ (0.01,0) [0|255] "km/h" XXX
  SG_ SPEED_MOD_256 : 63|8@0- (1,0) [0|255] "" XXX
  SG_ MAYBE_DISTANCE_MOD_256 : 39|8@0+ (1,0) [0|255] "" XXX
 
@@ -391,31 +391,31 @@ BO_ 1088 NEW_MSG_2: 8 XXX
 
 
 
-CM_ SG_ 1552 SPEED_LOWRES "negative values to check";
+CM_ SG_ 1552 SPEED_LOWRES "Negative values to check";
 CM_ SG_ 452 CHECKSUM "Follows path of RPMs but more precise & 1 byte only";
-CM_ SG_ 37 STEER_DIRECTION "could be intended as 12 bit steering angle";
+CM_ SG_ 37 STEER_DIRECTION "Could be intended as 12 bit steering angle";
 CM_ SG_ 947 LRES_ACC_PEDAL "Follows rather closely other acceleration commands";
-CM_ SG_ 955 IS_BRAKING_2 "wierd toggle";
+CM_ SG_ 955 IS_BRAKING_2 "";
 CM_ SG_ 955 ENGINE_TEMP "Tends to increase during first 10 minutes, then loosely follows speed. Motor temp?";
-CM_ SG_ 1595 TIME_ON "Time since last ignition, seconds";
+CM_ SG_ 1595 TIME_ON "Time since last ignition, tenth of seconds";
 CM_ SG_ 170 FRONT_RIGHT_WHEEL_SPEED "";
 CM_ SG_ 170 FRONT_LEFT_WHEEL_SPEED "";
 CM_ SG_ 170 REAR_RIGHT_WHEEL_SPEED "";
 CM_ SG_ 170 REAR_LEFT_WHEEL_SPEED "";
-CM_ SG_ 180 WIERD_STUFF "Stuff alsohappens on the whole two bytes (sometimes all set)";
+CM_ SG_ 180 WIERD_STUFF "Might be a signed value on the whole two bytes (sometimes all set)";
 CM_ SG_ 180 VEHICLE_SPEED "Roughly 2 seconds before wheel speeds";
-CM_ SG_ 180 SPEED_MOD_256 "one byte speed, a bit before vehicle speed";
+CM_ SG_ 180 SPEED_MOD_256 "One byte speed, a bit before vehicle speed";
 CM_ SG_ 180 MAYBE_DISTANCE_MOD_256 "Looks like measure for distance or wheel angle";
-CM_ SG_ 979 VERY_LRES_SPEED "power used by engine? moves alongside speed, very low res, goes from 0 to 9 max?";
-CM_ SG_ 1600 CHANGES_EACH_RIDE "Small decrementation during some rides";
+CM_ SG_ 979 VERY_LRES_SPEED "Power used by engine? moves alongside speed, very low res, goes from 0 to 9 max?";
+CM_ SG_ 1600 CHANGES_EACH_RIDE "Small decrementation during some rides, possibly long term fuel";
 CM_ SG_ 1600 INCREASING_VALUE_FUEL "Fuel/distance? Average fuel consumption?";
-CM_ SG_ 1568 HANDBRAKE "To be tested";
-CM_ SG_ 705 ACCELERATING_PEDAL "big question mark here coula also be disengagement";
+CM_ SG_ 1568 HANDBRAKE "";
+CM_ SG_ 705 ACCELERATING_PEDAL "Big question mark here could also be disengagement";
 CM_ SG_ 705 ACC_PEDAL "Noisier than command";
-CM_ SG_ 705 ACC_COMMAND "similar to other pedal indicator., cleaner";
+CM_ SG_ 705 ACC_COMMAND "Similar to other pedal indicator., cleaner";
 CM_ SG_ 705 ACC_OTHER "Need to figure out difference between the three signals. has 255 bit errors sometimes, may have mixed sgals";
-CM_ SG_ 705 NEW_SIGNAL_1 "mysterious for now";
+CM_ SG_ 705 NEW_SIGNAL_1 "Mysterious for now";
 CM_ SG_ 928 NEW_SIGNAL_1 "Very slow changing noisy value, 45-49 in 10 min";
-CM_ SG_ 928 NEW_SIGNAL_2 "other very slow changing 24-26 in 10 min";
-CM_ SG_ 944 LONG_TERM_SIGN "could be total distance";
-CM_ SG_ 1553 TOTAL_DISTANCE "probably also contains the previous/two previous bytes but can't confirm";
+CM_ SG_ 928 NEW_SIGNAL_2 "Other very slow changing 24-26 in 10 min";
+CM_ SG_ 944 LONG_TERM_SIGN "";
+CM_ SG_ 1553 TOTAL_DISTANCE "Probably also contains the previous/two previous bytes but can't confirm";
