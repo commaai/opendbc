@@ -306,10 +306,10 @@ BO_ 170 WHEELS_SPEEDS: 8 XXX
  SG_ REAR_LEFT_WHEEL_SPEED : 55|16@0+ (0.01,-67.67) [0|65535] "km/h" XXX
 
 BO_ 180 VEHICLE_DYNAMICS: 8 XXX
- SG_ WIERD_STUFF : 8|2@1+ (1,0) [0|3] "" XXX
  SG_ VEHICLE_SPEED : 47|16@0+ (0.01,0) [0|255] "km/h" XXX
  SG_ SPEED_MOD_256 : 63|8@0- (1,0) [0|255] "" XXX
  SG_ MAYBE_DISTANCE_MOD_256 : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ WIERD_STUFF : 7|16@0- (1,0) [0|3] "" XXX
 
 BO_ 186 NEW_MSG_9: 8 XXX
  SG_ NEW_SIGNAL_2 : 31|8@0+ (1,0) [0|255] "" XXX
@@ -396,16 +396,15 @@ CM_ SG_ 452 CHECKSUM "Follows path of RPMs but more precise & 1 byte only";
 CM_ SG_ 37 STEER_DIRECTION "Could be intended as 12 bit steering angle";
 CM_ SG_ 947 LRES_ACC_PEDAL "Follows rather closely other acceleration commands";
 CM_ SG_ 955 IS_BRAKING_2 "";
-CM_ SG_ 955 ENGINE_TEMP "Tends to increase during first 10 minutes, then loosely follows speed. Motor temp?";
 CM_ SG_ 1595 TIME_ON "Time since last ignition, tenth of seconds";
 CM_ SG_ 170 FRONT_RIGHT_WHEEL_SPEED "";
 CM_ SG_ 170 FRONT_LEFT_WHEEL_SPEED "";
 CM_ SG_ 170 REAR_RIGHT_WHEEL_SPEED "";
 CM_ SG_ 170 REAR_LEFT_WHEEL_SPEED "";
-CM_ SG_ 180 WIERD_STUFF "Might be a signed value on the whole two bytes (sometimes all set)";
 CM_ SG_ 180 VEHICLE_SPEED "Roughly 2 seconds before wheel speeds";
 CM_ SG_ 180 SPEED_MOD_256 "One byte speed, a bit before vehicle speed";
 CM_ SG_ 180 MAYBE_DISTANCE_MOD_256 "Looks like measure for distance or wheel angle";
+CM_ SG_ 180 WIERD_STUFF "Might be a signed value on the whole two bytes (sometimes all set)";
 CM_ SG_ 979 VERY_LRES_SPEED "Power used by engine? moves alongside speed, very low res, goes from 0 to 9 max?";
 CM_ SG_ 1600 CHANGES_EACH_RIDE "Small decrementation during some rides, possibly long term fuel";
 CM_ SG_ 1600 INCREASING_VALUE_FUEL "Fuel/distance? Average fuel consumption?";
