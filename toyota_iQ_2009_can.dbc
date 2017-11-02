@@ -280,8 +280,8 @@ BO_ 36 ACCELERATIONS: 8 XXX
  SG_ ACC_FRONT_BACK_1 : 31|8@0- (1,0) [0|255] "" XXX
 
 BO_ 947 LOW_RES_INDICATORS: 8 XXX
- SG_ LOW_RES_RPM : 3|12@0+ (1,0) [0|255] "rpm" XXX
  SG_ LOW_RES_ACC_PEDAL : 23|7@0+ (1,0) [0|63] "" XXX
+ SG_ LOW_RES_RPM : 7|16@0+ (1,0) [0|255] "rpm" XXX
 
 BO_ 955 BRAKING_PLUS_OTHER: 8 XXX
  SG_ IS_BRAKING_2 : 0|1@0+ (1,0) [0|1] "" XXX
@@ -390,8 +390,8 @@ CM_ SG_ 37 STEER_DIRECTION "Could be intended as 12 bit steering angle";
 CM_ SG_ 37 STEER_ANGLE "can convert to degrees (imprecise) or percentage of max amplitude";
 CM_ SG_ 36 ACC_FRONT_BACK_2 "more likely front-back";
 CM_ SG_ 36 ACC_FRONT_BACK_1 "more likely up-down";
-CM_ SG_ 947 LOW_RES_RPM "Mabe used for onboard display?";
 CM_ SG_ 947 LOW_RES_ACC_PEDAL "Follows rather closely other acceleration commands";
+CM_ SG_ 947 LOW_RES_RPM "Mabe used for onboard display?";
 CM_ SG_ 955 IS_BRAKING_2 "";
 CM_ SG_ 1595 TIME_ON "Time since last ignition, tenth of seconds";
 CM_ SG_ 170 FRONT_RIGHT_WHEEL_SPEED "";
