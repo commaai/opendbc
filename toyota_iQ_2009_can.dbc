@@ -319,7 +319,7 @@ BO_ 906 BOOLS: 8 XXX
  SG_ NEW_SIGNAL_1 : 3|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_2 : 2|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_3 : 1|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_4 : 0|1@0+ (1,0) [0|1] "" XXX
+ SG_ MOVEMENT_START_TRIGGER : 0|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 979 LOW_RES_ACCELERATOR: 8 XXX
  SG_ VERY_LRES_ACC : 7|16@0+ (1,0) [0|65535] "" XXX
@@ -411,7 +411,7 @@ CM_ SG_ 180 WIERD_STUFF "Might be a signed value on the whole two bytes (sometim
 CM_ SG_ 180 VEHICLE_SPEED "Roughly 2 seconds before wheel speeds";
 CM_ SG_ 180 SPEED_MOD_256 "One byte speed, a bit before vehicle speed";
 CM_ SG_ 180 MAYBE_DISTANCE_MOD_256 "Looks like measure for distance or wheel angle";
-CM_ SG_ 906 NEW_SIGNAL_4 "trigger of when speed becomes != 0";
+CM_ SG_ 906 MOVEMENT_START_TRIGGER "trigger of when speed becomes != 0";
 CM_ SG_ 979 VERY_LRES_ACC "Power used by engine? moves alongside speed, very low res, goes from 0 to 9 max?";
 CM_ SG_ 1600 CHANGES_EACH_RIDE "Small decrementation during some rides, possibly long term fuel";
 CM_ SG_ 1600 INCREASING_VALUE_FUEL "Fuel/distance? Average fuel consumption?";
