@@ -280,7 +280,7 @@ BO_ 760 MCU_gpsVehicleSpeed: 8 MCU
  SG_ MCU_userSpeedOffset : 42|6@1+ (1,-30) [-30|33] "kph/mph" NEO
  SG_ MCU_userSpeedOffsetUnits : 40|1@1+ (1,0) [-1|2] ""  NEO
 
-BO_ 94 MCU_clusterBacklightRequest: 3 NEO
+BO_ 904 MCU_clusterBacklightRequest: 3 NEO
  SG_ MCU_clusterBacklightOn : 7|1@1+ (1,0) [0|1] "" NEO
  SG_ MCU_clusterBrightnessLevel : 8|8@1+ (0.5,0) [0|127.5] "%" NEO
  SG_ MCU_clusterReadyForDrive : 6|1@1+ (1,0) [-1|2] ""  NEO
