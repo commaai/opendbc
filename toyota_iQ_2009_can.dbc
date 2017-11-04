@@ -35,226 +35,6 @@ BS_:
 
 BU_: XXX
 
-
-BO_ 528 TRACK_A_0: 8 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ LAT_DIST : 31|11@0- (0.04,0) [-50|50] "m" XXX
- SG_ LONG_DIST : 15|13@0+ (0.04,0) [0|300] "m" XXX
- SG_ NEW_TRACK : 36|1@0+ (1,0) [0|1] "" XXX
- SG_ REL_SPEED : 47|12@0- (0.025,0) [-100|100] "m/s" XXX
- SG_ VALID : 48|1@0+ (1,0) [0|1] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 529 TRACK_A_1: 8 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ LAT_DIST : 31|11@0- (0.04,0) [-50|50] "m" XXX
- SG_ LONG_DIST : 15|13@0+ (0.04,0) [0|300] "m" XXX
- SG_ NEW_TRACK : 36|1@0+ (1,0) [0|1] "" XXX
- SG_ REL_SPEED : 47|12@0- (0.025,0) [-100|100] "m/s" XXX
- SG_ VALID : 48|1@0+ (1,0) [0|1] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 530 TRACK_A_2: 8 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ LAT_DIST : 31|11@0- (0.04,0) [-50|50] "m" XXX
- SG_ LONG_DIST : 15|13@0+ (0.04,0) [0|300] "m" XXX
- SG_ NEW_TRACK : 36|1@0+ (1,0) [0|1] "" XXX
- SG_ REL_SPEED : 47|12@0- (0.025,0) [-100|100] "m/s" XXX
- SG_ VALID : 48|1@0+ (1,0) [0|1] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 531 TRACK_A_3: 8 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ LAT_DIST : 31|11@0- (0.04,0) [-50|50] "m" XXX
- SG_ LONG_DIST : 15|13@0+ (0.04,0) [0|300] "m" XXX
- SG_ NEW_TRACK : 36|1@0+ (1,0) [0|1] "" XXX
- SG_ REL_SPEED : 47|12@0- (0.025,0) [-100|100] "m/s" XXX
- SG_ VALID : 48|1@0+ (1,0) [0|1] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 532 TRACK_A_4: 8 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ LAT_DIST : 31|11@0- (0.04,0) [-50|50] "m" XXX
- SG_ LONG_DIST : 15|13@0+ (0.04,0) [0|300] "m" XXX
- SG_ NEW_TRACK : 36|1@0+ (1,0) [0|1] "" XXX
- SG_ REL_SPEED : 47|12@0- (0.025,0) [-100|100] "m/s" XXX
- SG_ VALID : 48|1@0+ (1,0) [0|1] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 533 TRACK_A_5: 8 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ LAT_DIST : 31|11@0- (0.04,0) [-50|50] "m" XXX
- SG_ LONG_DIST : 15|13@0+ (0.04,0) [0|300] "m" XXX
- SG_ NEW_TRACK : 36|1@0+ (1,0) [0|1] "" XXX
- SG_ REL_SPEED : 47|12@0- (0.025,0) [-100|100] "m/s" XXX
- SG_ VALID : 48|1@0+ (1,0) [0|1] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 534 TRACK_A_6: 8 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ LAT_DIST : 31|11@0- (0.04,0) [-50|50] "m" XXX
- SG_ LONG_DIST : 15|13@0+ (0.04,0) [0|300] "m" XXX
- SG_ NEW_TRACK : 36|1@0+ (1,0) [0|1] "" XXX
- SG_ REL_SPEED : 47|12@0- (0.025,0) [-100|100] "m/s" XXX
- SG_ VALID : 48|1@0+ (1,0) [0|1] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 535 TRACK_A_7: 8 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ LAT_DIST : 31|11@0- (0.04,0) [-50|50] "m" XXX
- SG_ LONG_DIST : 15|13@0+ (0.04,0) [0|300] "m" XXX
- SG_ NEW_TRACK : 36|1@0+ (1,0) [0|1] "" XXX
- SG_ REL_SPEED : 47|12@0- (0.025,0) [-100|100] "m/s" XXX
- SG_ VALID : 48|1@0+ (1,0) [0|1] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 536 TRACK_A_8: 8 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ LAT_DIST : 31|11@0- (0.04,0) [-50|50] "m" XXX
- SG_ LONG_DIST : 15|13@0+ (0.04,0) [0|300] "m" XXX
- SG_ NEW_TRACK : 36|1@0+ (1,0) [0|1] "" XXX
- SG_ REL_SPEED : 47|12@0- (0.025,0) [-100|100] "m/s" XXX
- SG_ VALID : 48|1@0+ (1,0) [0|1] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 537 TRACK_A_9: 8 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ LAT_DIST : 31|11@0- (0.04,0) [-50|50] "m" XXX
- SG_ LONG_DIST : 15|13@0+ (0.04,0) [0|300] "m" XXX
- SG_ NEW_TRACK : 36|1@0+ (1,0) [0|1] "" XXX
- SG_ REL_SPEED : 47|12@0- (0.025,0) [-100|100] "m/s" XXX
- SG_ VALID : 48|1@0+ (1,0) [0|1] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 538 TRACK_A_10: 8 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ LAT_DIST : 31|11@0- (0.04,0) [-50|50] "m" XXX
- SG_ LONG_DIST : 15|13@0+ (0.04,0) [0|300] "m" XXX
- SG_ NEW_TRACK : 36|1@0+ (1,0) [0|1] "" XXX
- SG_ REL_SPEED : 47|12@0- (0.025,0) [-100|100] "m/s" XXX
- SG_ VALID : 48|1@0+ (1,0) [0|1] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 539 TRACK_A_11: 8 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ LAT_DIST : 31|11@0- (0.04,0) [-50|50] "m" XXX
- SG_ LONG_DIST : 15|13@0+ (0.04,0) [0|300] "m" XXX
- SG_ NEW_TRACK : 36|1@0+ (1,0) [0|1] "" XXX
- SG_ REL_SPEED : 47|12@0- (0.025,0) [-100|100] "m/s" XXX
- SG_ VALID : 48|1@0+ (1,0) [0|1] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 540 TRACK_A_12: 8 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ LAT_DIST : 31|11@0- (0.04,0) [-50|50] "m" XXX
- SG_ LONG_DIST : 15|13@0+ (0.04,0) [0|300] "m" XXX
- SG_ NEW_TRACK : 36|1@0+ (1,0) [0|1] "" XXX
- SG_ REL_SPEED : 47|12@0- (0.025,0) [-100|100] "m/s" XXX
- SG_ VALID : 48|1@0+ (1,0) [0|1] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 541 TRACK_A_13: 8 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ LAT_DIST : 31|11@0- (0.04,0) [-50|50] "m" XXX
- SG_ LONG_DIST : 15|13@0+ (0.04,0) [0|300] "m" XXX
- SG_ NEW_TRACK : 36|1@0+ (1,0) [0|1] "" XXX
- SG_ REL_SPEED : 47|12@0- (0.025,0) [-100|100] "m/s" XXX
- SG_ VALID : 48|1@0+ (1,0) [0|1] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 542 TRACK_A_14: 8 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ LAT_DIST : 31|11@0- (0.04,0) [-50|50] "m" XXX
- SG_ LONG_DIST : 15|13@0+ (0.04,0) [0|300] "m" XXX
- SG_ NEW_TRACK : 36|1@0+ (1,0) [0|1] "" XXX
- SG_ REL_SPEED : 47|12@0- (0.025,0) [-100|100] "m/s" XXX
- SG_ VALID : 48|1@0+ (1,0) [0|1] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 543 TRACK_A_15: 8 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ LAT_DIST : 31|11@0- (0.04,0) [-50|50] "m" XXX
- SG_ LONG_DIST : 15|13@0+ (0.04,0) [0|300] "m" XXX
- SG_ NEW_TRACK : 36|1@0+ (1,0) [0|1] "" XXX
- SG_ REL_SPEED : 47|12@0- (0.025,0) [-100|100] "m/s" XXX
- SG_ VALID : 48|1@0+ (1,0) [0|1] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 544 TRACK_B_0: 8 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ REL_ACCEL : 15|7@0- (1,0) [-64|63] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 545 TRACK_B_1: 8 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ REL_ACCEL : 15|7@0- (1,0) [-64|63] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 546 TRACK_B_2: 8 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ REL_ACCEL : 15|7@0- (1,0) [-64|63] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 547 undefined: 8 XXX
-
-BO_ 548 BRAKING_PEDAL: 8 XXX
- SG_ IS_BRAKING : 5|1@0+ (1,0) [0|3] "" XXX
-
-BO_ 549 TRACK_B_5: 8 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ REL_ACCEL : 15|7@0- (1,0) [-64|63] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 550 TRACK_B_6: 8 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ REL_ACCEL : 15|7@0- (1,0) [-64|63] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 551 TRACK_B_7: 8 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ REL_ACCEL : 15|7@0- (1,0) [-64|63] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 552 TRACK_B_8: 6 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ REL_ACCEL : 15|7@0- (1,0) [-64|63] "" XXX
- SG_ CHECKSUM : 47|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 553 TRACK_B_9: 6 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ REL_ACCEL : 15|7@0- (1,0) [-64|63] "" XXX
- SG_ CHECKSUM : 47|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 554 TRACK_B_10: 6 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ REL_ACCEL : 15|7@0- (1,0) [-64|63] "" XXX
- SG_ CHECKSUM : 47|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 555 TRACK_B_11: 6 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ REL_ACCEL : 15|7@0- (1,0) [-64|63] "" XXX
- SG_ CHECKSUM : 47|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 556 TRACK_B_12: 6 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ REL_ACCEL : 15|7@0- (1,0) [-64|63] "" XXX
- SG_ CHECKSUM : 47|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 557 TRACK_B_13: 6 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ REL_ACCEL : 15|7@0- (1,0) [-64|63] "" XXX
- SG_ CHECKSUM : 47|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 558 TRACK_B_14: 6 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ REL_ACCEL : 15|7@0- (1,0) [-64|63] "" XXX
- SG_ CHECKSUM : 47|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 559 TRACK_B_15: 6 XXX
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ REL_ACCEL : 15|7@0- (1,0) [-64|63] "" XXX
- SG_ CHECKSUM : 47|8@0+ (1,0) [0|255] "" XXX
-
 BO_ 1552 CONTAINS_LRES_SPEED: 8 XXX
  SG_ SPEED_LOWRES : 16|8@1+ (1,0) [0|255] "km/h?" XXX
  SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
@@ -306,10 +86,6 @@ BO_ 180 VEHICLE_DYNAMICS: 8 XXX
 
 BO_ 186 NEW_MSG_9: 8 XXX
  SG_ NEW_SIGNAL_2 : 31|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 565 NEW_MSG_10: 8 XXX
-
-BO_ 464 NEW_MSG_11: 8 XXX
 
 BO_ 426 NEW_MSG_5: 8 XXX
  SG_ CONSTANT : 47|8@0+ (1,0) [0|255] "" XXX
@@ -376,13 +152,9 @@ BO_ 1592 NEW_MSG_14: 8 XXX
  SG_ DOORS_LOCKED2 : 20|1@0+ (1,0) [0|1] "" XXX
  SG_ DOORS_LOCKED1 : 16|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 1017 undefined: 8 XXX
-
 BO_ 608 NEW_MSG_6: 8 XXX
  SG_ VERY_SMALL_SIGNAL2 : 56|1@0+ (1,0) [0|255] "" XXX
  SG_ VERY_SMALL_SIGNAL1 : 0|1@0+ (1,0) [0|1] "" XXX
-
-BO_ 1088 NEW_MSG_2: 8 XXX
 
 BO_ 945 BETWEEN_RIDES_CHANGES_2: 8 XXX
  SG_ BETWEEN_RIDES : 24|1@0+ (1,0) [0|65535] "" XXX
@@ -399,14 +171,9 @@ CM_ SG_ 36 ACC_FRONT_BACK_1 "more likely up-down";
 CM_ SG_ 36 ACC_FRONT_BACK_2 "more likely front-back";
 CM_ SG_ 947 LOW_RES_ACC_PEDAL "Follows rather closely other acceleration commands";
 CM_ SG_ 947 LOW_RES_RPM "Mabe used for onboard display?";
-CM_ SG_ 955 IS_BRAKING_2 "";
 CM_ SG_ 955 MAYBE_CLUTCH "might be related to shifting gears";
 CM_ SG_ 1595 TIME_ON "Time since last ignition, tenth of seconds";
 CM_ SG_ 1595 BETWEEN_RIDES "the fourth byte (at least) changes between rides";
-CM_ SG_ 170 FRONT_LEFT_WHEEL_SPEED "";
-CM_ SG_ 170 REAR_RIGHT_WHEEL_SPEED "";
-CM_ SG_ 170 REAR_LEFT_WHEEL_SPEED "";
-CM_ SG_ 170 FRONT_RIGHT_WHEEL_SPEED "";
 CM_ SG_ 180 WIERD_STUFF "Might be a signed value on the whole two bytes (sometimes all set)";
 CM_ SG_ 180 VEHICLE_SPEED "Roughly 2 seconds before wheel speeds";
 CM_ SG_ 180 SPEED_MOD_256 "One byte speed, a bit before vehicle speed";
@@ -415,7 +182,6 @@ CM_ SG_ 906 MOVEMENT_START_TRIGGER "trigger of when speed becomes != 0";
 CM_ SG_ 979 VERY_LRES_ACC "Power used by engine? moves alongside speed, very low res, goes from 0 to 9 max?";
 CM_ SG_ 1600 CHANGES_EACH_RIDE "Small decrementation during some rides, possibly long term fuel";
 CM_ SG_ 1600 INCREASING_VALUE_FUEL "Fuel/distance? Average fuel consumption?";
-CM_ SG_ 1568 HANDBRAKE "";
 CM_ SG_ 705 NOT_ACCELERATING_PEDAL "Looks like opposite of accelerating bit";
 CM_ SG_ 705 ACC_PEDAL_SENSOR "similar to pedal sensor maybe checksum.";
 CM_ SG_ 705 ACC_COMMAND "Similar to other pedal indicator., cleaner, must be sent back to engine";
@@ -425,7 +191,6 @@ CM_ SG_ 928 NEW_SIGNAL_1 "Very slow changing noisy value, 45-49 in 10 min";
 CM_ SG_ 928 NEW_SIGNAL_2 "Other very slow changing 24-26 in 10 min";
 CM_ SG_ 928 NEW_SIGNAL_4 "Inconsistent across rides";
 CM_ SG_ 896 NEW_SIGNAL_1 "there is a difference at the beginning of 2017-10-31--12-04-05";
-CM_ SG_ 944 LONG_TERM_SIGN "";
 CM_ SG_ 1553 TOTAL_DISTANCE "Probably also contains the previous/two previous bytes but can't confirm";
 CM_ SG_ 945 BETWEEN_RIDES "Might be others in the same message. at least this one";
 
