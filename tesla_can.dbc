@@ -69,51 +69,51 @@ BO_ 1160 DAS_steeringControl: 4 NEO
  SG_ DAS_steeringHapticRequest : 7|1@0+ (1,0) [0|0] "" EPAS
 
 BO_ 257 GTW_epasControl: 3 NEO
- SG_ GTW_epasControlChecksum : 16|8@1+ (1,0) [0|255] "" NEO
- SG_ GTW_epasControlCounter : 12|4@1+ (1,0) [0|15] "" NEO
- SG_ GTW_epasControlType : 8|2@1+ (1,0) [4|-1] "" NEO
- SG_ GTW_epasEmergencyOn : 0|1@1+ (1,0) [2|-1] "" NEO
- SG_ GTW_epasLDWEnabled : 11|1@1+ (1,0) [2|-1] "" NEO
- SG_ GTW_epasPowerMode : 1|4@1+ (1,0) [4|14] "" NEO
- SG_ GTW_epasTuneRequest : 5|3@1+ (1,0) [8|-1] "" NEO
+ SG_ GTW_epasControlChecksum : 23|8@0+ (1,0) [0|255] ""  NEO
+ SG_ GTW_epasControlCounter : 11|4@0+ (1,0) [0|15] ""  NEO
+ SG_ GTW_epasControlType : 15|2@0+ (1,0) [-1|4] ""  NEO
+ SG_ GTW_epasEmergencyOn : 7|1@0+ (1,0) [-1|2] ""  NEO
+ SG_ GTW_epasLDWEnabled : 12|1@0+ (1,0) [-1|2] ""  NEO
+ SG_ GTW_epasPowerMode : 6|4@0+ (1,0) [4|14] ""  NEO
+ SG_ GTW_epasTuneRequest : 2|3@0+ (1,0) [-1|8] ""  NEO
 
 BO_ 880 EPAS_sysStatus: 8 EPAS
- SG_ EPAS_currentTuneMode : 0|4@1+ (1,0) [8|15] "" NEO
- SG_ EPAS_eacErrorCode : 16|4@1+ (1,0) [16|-1] "" NEO
- SG_ EPAS_eacStatus : 48|3@1+ (1,0) [5|7] "" NEO
- SG_ EPAS_handsOnLevel : 32|2@1+ (1,0) [4|-1] "" NEO
- SG_ EPAS_internalSAS : 37|14@0+ (0.10,-819.200010) [0|0] "deg" NEO
- SG_ EPAS_steeringFault : 5|1@1+ (1,0) [2|-1] "" NEO
+ SG_ EPAS_currentTuneMode : 7|4@0+ (1,0) [8|15] ""  NEO
+ SG_ EPAS_eacErrorCode : 23|4@0+ (1,0) [-1|16] ""  NEO
+ SG_ EPAS_eacStatus : 55|3@0+ (1,0) [5|7] ""  NEO
+ SG_ EPAS_handsOnLevel : 39|2@0+ (1,0) [-1|4] ""  NEO
+ SG_ EPAS_internalSAS : 37|14@0+ (0.1,-819.200012) [0|0] "deg"  NEO
+ SG_ EPAS_steeringFault : 2|1@0+ (1,0) [-1|2] ""  NEO
  SG_ EPAS_steeringRackForce : 1|10@0+ (50,-25575) [0|0] "N" NEO
- SG_ EPAS_steeringReduced : 4|1@1+ (1,0) [2|-1] "" NEO
- SG_ EPAS_sysStatusChecksum : 56|8@1+ (1,0) [0|255] "" NEO
- SG_ EPAS_sysStatusCounter : 52|4@1+ (1,0) [0|15] "" NEO
- SG_ EPAS_torsionBarTorque : 19|12@0+ (0.010,-20.50) [0|0] "Nm" NEO
+ SG_ EPAS_steeringReduced : 3|1@0+ (1,0) [-1|2] ""  NEO
+ SG_ EPAS_sysStatusChecksum : 63|8@0+ (1,0) [0|255] ""  NEO
+ SG_ EPAS_sysStatusCounter : 51|4@0+ (1,0) [0|15] ""  NEO
+ SG_ EPAS_torsionBarTorque : 19|12@0+ (0.01,-20.5) [0|0] "Nm"  NEO
 
 BO_ 3 STW_ANGL_STAT: 8 STW
- SG_ CRC_STW_ANGL_STAT : 56|8@1+ (1,0) [0|255] "" NEO
- SG_ MC_STW_ANGL_STAT : 52|4@1+ (1,0) [0|15] "" NEO
- SG_ StW_Angl : 5|14@0+ (0.50,-2048) [0|0] "deg" NEO
- SG_ StW_AnglSens_Id : 36|2@1+ (1,0) [3|3] "" NEO
- SG_ StW_AnglSens_Stat : 38|2@1+ (1,0) [4|-1] "" NEO
- SG_ StW_AnglSpd : 21|14@0+ (0.50,-2048) [0|0] "/s" NEO
+ SG_ StW_Angl : 5|14@0+ (0.5,-2048) [0|0] "deg"  NEO
+ SG_ StW_AnglSpd : 21|14@0+ (0.5,-2048) [0|0] "/s"  NEO
+ SG_ StW_AnglSens_Stat : 33|2@0+ (1,0) [-1|4] ""  NEO
+ SG_ StW_AnglSens_Id : 35|2@0+ (1,0) [3|3] ""  NEO
+ SG_ MC_STW_ANGL_STAT : 55|4@0+ (1,0) [0|15] ""  NEO
+ SG_ CRC_STW_ANGL_STAT : 63|8@0+ (1,0) [0|255] ""  NEO
 
-BO_ 14 STW_ANGLHP_STAT: 8 GTW
- SG_ StW_AnglHP : 5|14@0+ (0.1,-819.2) [-819.2|819] "deg" NEO
- SG_ StW_AnglHP_Spd : 21|14@0+ (0.5,-4096) [-4096|4095.5] "deg/s" NEO
- SG_ StW_AnglHP_Sens_Stat : 33|2@0+ (1,0) [0|0] "" NEO
- SG_ StW_AnglHP_Sens_Id : 35|2@0+ (1,0) [0|0] "" NEO
- SG_ MC_STW_ANGLHP_STAT : 55|4@0+ (1,0) [0|15] "" NEO
- SG_ CRC_STW_ANGLHP_STAT : 63|8@0+ (1,0) [0|0] "" NEO
+BO_ 14 STW_ANGLHP_STAT: 8 STW 
+ SG_ StW_AnglHP : 5|14@0+ (0.1,-819.2) [-819.2|819] "deg"  NEO
+ SG_ StW_AnglHP_Spd : 21|14@0+ (0.5,-4096) [-4096|4095.5] "deg/s"  NEO
+ SG_ StW_AnglHP_Sens_Stat : 33|2@0+ (1,0) [0|0] ""  NEO
+ SG_ StW_AnglHP_Sens_Id : 35|2@0+ (1,0) [0|0] ""  NEO
+ SG_ MC_STW_ANGLHP_STAT : 55|4@0+ (1,0) [0|15] ""  NEO
+ SG_ CRC_STW_ANGLHP_STAT : 63|8@0+ (1,0) [0|0] ""  NEO
 
 BO_ 264 DI_torque1: 8 DI
- SG_ DI_torqueDriver : 0|13@1- (0.25,0) [-750|750] "Nm" NEO
- SG_ DI_torque1Counter : 13|3@1+ (1,0) [0|0] "" NEO
- SG_ DI_torqueMotor : 16|13@1- (0.25,0) [-750|750] "Nm" NEO
- SG_ DI_soptState : 29|3@1+ (1,0) [0|0] "" NEO
- SG_ DI_motorRPM : 32|16@1- (1,0) [-17000|17000] "RPM" NEO
- SG_ DI_pedalPos : 48|8@1+ (0.4,0) [0|100] "%" NEO
- SG_ DI_torque1Checksum : 56|8@1+ (1,0) [0|0] "" NEO
+ SG_ DI_torqueDriver : 0|13@1- (0.25,0) [-750|750] "Nm"  NEO
+ SG_ DI_torque1Counter : 13|3@1+ (1,0) [0|0] ""  NEO
+ SG_ DI_torqueMotor : 16|13@1- (0.25,0) [-750|750] "Nm"  NEO
+ SG_ DI_soptState : 29|3@1+ (1,0) [0|0] ""  NEO
+ SG_ DI_motorRPM : 32|16@1- (1,0) [-17000|17000] "RPM"  NEO
+ SG_ DI_pedalPos : 48|8@1+ (0.4,0) [0|100] "%"  NEO
+ SG_ DI_torque1Checksum : 56|8@1+ (1,0) [0|0] ""  NEO
 
 BO_ 280 DI_torque2: 6 DI
  SG_ DI_torqueEstimate : 0|12@1- (0.5,0) [-750|750] "Nm" NEO
@@ -129,60 +129,73 @@ BO_ 280 DI_torque2: 6 DI
  SG_ DI_torque2Checksum : 40|8@1+ (1,0) [0|0] "" NEO
 
 BO_ 309 ESP_135h: 5 ESP
- SG_ ESP_135hChecksum : 16|8@1+ (1,0) [0|255] "" NEO
- SG_ ESP_135hCounter : 12|4@1+ (1,0) [0|15] "" NEO
- SG_ ESP_absBrakeEvent : 5|1@1+ (1,0) [2|-1] "" NEO
- SG_ ESP_brakeDiscWipingActive : 3|1@1+ (1,0) [2|-1] "" NEO
- SG_ ESP_brakeLamp : 4|1@1+ (1,0) [2|-1] "" NEO
- SG_ ESP_espFaultLamp : 1|1@1+ (1,0) [2|-1] "" NEO
- SG_ ESP_espLampFlash : 0|1@1+ (1,0) [2|-1] "" NEO
- SG_ ESP_hillStartAssistActive : 6|2@1+ (1,0) [4|-1] "" NEO
- SG_ ESP_messagePumpService : 31|1@1+ (1,0) [0|1] "" NEO
- SG_ ESP_messagePumpFailure : 30|1@1+ (1,0) [0|1] "" NEO
- SG_ ESP_messageEBDFailure : 29|1@1+ (1,0) [0|1] "" NEO
- SG_ ESP_absFaultLamp : 28|1@1+ (1,0) [2|-1] "" NEO
- SG_ ESP_tcDisabledByFault : 27|1@1+ (1,0) [0|1] "" NEO
- SG_ ESP_messageDynoModeActive : 26|1@1+ (1,0) [0|1] "" NEO
- SG_ ESP_hydraulicBoostEnabled : 25|1@1+ (1,0) [0|1] "" NEO
- SG_ ESP_espOffLamp : 24|1@1+ (1,0) [2|-1] "" NEO
- SG_ ESP_stabilityControlSts : 9|3@1+ (1,0) [6|7] "" NEO
- SG_ ESP_tcLampFlash : 2|1@1+ (1,0) [2|-1] "" NEO
- SG_ ESP_tcOffLamp : 8|1@1+ (1,0) [0|1] "" NEO
+ SG_ ESP_135hChecksum : 23|8@0+ (1,0) [0|255] ""  NEO
+ SG_ ESP_135hCounter : 11|4@0+ (1,0) [0|15] ""  NEO
+ SG_ ESP_absBrakeEvent : 2|1@0+ (1,0) [-1|2] ""  NEO
+ SG_ ESP_brakeDiscWipingActive : 4|1@0+ (1,0) [-1|2] ""  NEO
+ SG_ ESP_brakeLamp : 3|1@0+ (1,0) [-1|2] ""  NEO
+ SG_ ESP_espFaultLamp : 6|1@0+ (1,0) [-1|2] ""  NEO
+ SG_ ESP_espLampFlash : 7|1@0+ (1,0) [-1|2] ""  NEO
+ SG_ ESP_hillStartAssistActive : 1|2@0+ (1,0) [-1|4] ""  NEO
+ SG_ ESP_messagePumpService : 24|1@0+ (1,0) [0|1] ""  NEO
+ SG_ ESP_messagePumpFailure : 25|1@0+ (1,0) [0|1] ""  NEO
+ SG_ ESP_messageEBDFailure : 26|1@0+ (1,0) [0|1] ""  NEO
+ SG_ ESP_absFaultLamp : 27|1@0+ (1,0) [-1|2] ""  NEO
+ SG_ ESP_tcDisabledByFault : 28|1@0+ (1,0) [0|1] ""  NEO
+ SG_ ESP_messageDynoModeActive : 29|1@0+ (1,0) [0|1] ""  NEO
+ SG_ ESP_hydraulicBoostEnabled : 30|1@0+ (1,0) [0|1] ""  NEO
+ SG_ ESP_espOffLamp : 31|1@0+ (1,0) [-1|2] ""  NEO
+ SG_ ESP_stabilityControlSts : 14|3@0+ (1,0) [6|7] ""  NEO
+ SG_ ESP_tcLampFlash : 5|1@0+ (1,0) [-1|2] ""  NEO
+ SG_ ESP_tcOffLamp : 15|1@0+ (1,0) [0|1] ""  NEOBO_ 341 ESP_B: 8 ESP 
+ SG_ ESP_BChecksum : 39|8@0+ (1,0) [0|255] ""  NEO,EPAS 
+ SG_ ESP_BCounter : 62|4@0+ (1,0) [1|15] ""  NEO,EPAS 
+ SG_ ESP_vehicleSpeed : 47|16@0+ (0.00999999978,0) [0|0] "kph"  NEO,EPAS 
+ SG_ ESP_vehicleSpeedQF : 57|2@0+ (1,0) [1|2] ""  NEO,EPAS 
+ SG_ ESP_wheelPulseCountFrL : 7|8@0+ (1,0) [0|254] ""  NEO,EPAS 
+ SG_ ESP_wheelPulseCountFrR : 15|8@0+ (1,0) [0|254] ""  NEO,EPAS 
+ SG_ ESP_wheelPulseCountReL : 23|8@0+ (1,0) [0|254] ""  NEO,EPAS 
+ SG_ ESP_wheelPulseCountReR : 31|8@0+ (1,0) [0|254] ""  NEO,EPAS
+
+BO_ 532 EPB_epasControl: 3 EPB 
+ SG_ EPB_epasControlChecksum : 23|8@0+ (1,0) [0|255] ""  NEO,EPAS 
+ SG_ EPB_epasControlCounter : 11|4@0+ (1,0) [0|15] ""  NEO,EPAS 
+ SG_ EPB_epasEACAllow : 2|3@0+ (1,0) [4|7] ""  NEO,EPAS
 
 BO_ 792 GTW_carState: 8 GTW
- SG_ BOOT_STATE : 40|2@1+ (1,0) [4|-1] "" NEO
- SG_ CERRD : 0|1@1+ (1,0) [2|-1] "" NEO
- SG_ DAY : 35|5@1+ (1,0) [2|31] "" NEO
- SG_ DOOR_STATE_FL : 10|2@1+ (1,0) [4|-1] "" NEO
- SG_ DOOR_STATE_FR : 8|2@1+ (1,0) [4|-1] "" NEO
- SG_ DOOR_STATE_FrontTrunk : 52|2@1+ (1,0) [4|-1] "" NEO
- SG_ DOOR_STATE_RL : 16|2@1+ (1,0) [4|-1] "" NEO
- SG_ DOOR_STATE_RR : 25|2@1+ (1,0) [4|-1] "" NEO
- SG_ GTW_updateInProgress : 54|2@1+ (1,0) [4|-1] "" NEO
- SG_ Hour : 27|5@1+ (1,0) [0|29] "h" NEO
- SG_ MCU_factoryMode : 51|1@1+ (1,0) [2|-1] "" NEO
- SG_ MCU_transportModeOn : 50|1@1+ (1,0) [1|1] "" NEO
- SG_ MINUTE : 42|6@1+ (1,0) [0|61] "min" NEO
- SG_ MONTH : 12|4@1+ (1,0) [0|14] "Month" NEO
- SG_ SECOND : 18|6@1+ (1,0) [0|61] "s" NEO
- SG_ YEAR : 1|7@1+ (1,2000) [2000|2125] "Year" NEO
+ SG_ BOOT_STATE : 47|2@0+ (1,0) [-1|4] ""  NEO
+ SG_ CERRD : 7|1@0+ (1,0) [-1|2] ""  NEO
+ SG_ DAY : 36|5@0+ (1,0) [2|31] ""  NEO
+ SG_ DOOR_STATE_FL : 13|2@0+ (1,0) [-1|4] ""  NEO
+ SG_ DOOR_STATE_FR : 15|2@0+ (1,0) [-1|4] ""  NEO
+ SG_ DOOR_STATE_FrontTrunk : 51|2@0+ (1,0) [-1|4] ""  NEO
+ SG_ DOOR_STATE_RL : 23|2@0+ (1,0) [-1|4] ""  NEO
+ SG_ DOOR_STATE_RR : 30|2@0+ (1,0) [-1|4] ""  NEO
+ SG_ GTW_updateInProgress : 49|2@0+ (1,0) [-1|4] ""  NEO
+ SG_ Hour : 28|5@0+ (1,0) [0|29] "h"  NEO
+ SG_ MCU_factoryMode : 52|1@0+ (1,0) [-1|2] ""  NEO
+ SG_ MCU_transportModeOn : 53|1@0+ (1,0) [1|1] ""  NEO
+ SG_ MINUTE : 45|6@0+ (1,0) [0|61] "min"  NEO
+ SG_ MONTH : 11|4@0+ (1,0) [0|14] "Month"  NEO
+ SG_ SECOND : 21|6@0+ (1,0) [0|61] "s"  NEO
+ SG_ YEAR : 6|7@0+ (1,2000) [2000|2125] "Year"  NEO
 
 BO_ 872 DI_state: 8 DI
- SG_ DI_aebState : 44|3@1+ (1,0) [5|6] "" NEO
- SG_ DI_analogSpeed : 20|12@1+ (0.10,0) [0|409.40] "speed" NEO
- SG_ DI_cruiseSet : 39|9@1+ (0.50,0) [0|255.50] "speed" NEO
- SG_ DI_cruiseState : 8|4@1+ (1,0) [8|15] "" NEO
- SG_ DI_digitalSpeed : 48|8@1+ (1,0) [0|254] "" NEO
- SG_ DI_driveReady : 0|1@1+ (1,0) [0|1] "" NEO
- SG_ DI_immobilizerState : 25|3@1+ (1,0) [7|7] "" NEO
- SG_ DI_proximity : 1|1@1+ (1,0) [0|1] "" NEO
- SG_ DI_regenLight : 15|1@1+ (1,0) [0|1] "" NEO
- SG_ DI_speedUnits : 24|1@1+ (1,0) [2|-1] "" NEO
- SG_ DI_state : 12|3@1+ (1,0) [5|7] "" NEO
- SG_ DI_stateChecksum : 56|8@1+ (1,0) [0|255] "" NEO
- SG_ DI_stateCounter : 40|4@1+ (1,0) [0|15] "" NEO
- SG_ DI_systemState : 5|3@1+ (1,0) [5|7] "" NEO
- SG_ DI_vehicleHoldState : 2|3@1+ (1,0) [8|-1] "" NEO
+ SG_ DI_systemState : 0|3@1+ (1,0) [0|0] ""  NEO
+ SG_ DI_vehicleHoldState : 3|3@1+ (1,0) [0|0] ""  NEO
+ SG_ DI_proximity : 6|1@1+ (1,0) [0|0] ""  NEO
+ SG_ DI_driveReady : 7|1@1+ (1,0) [0|0] ""  NEO
+ SG_ DI_regenLight : 8|1@1+ (1,0) [0|0] ""  NEO
+ SG_ DI_state : 9|3@1+ (1,0) [0|0] ""  NEO
+ SG_ DI_cruiseState : 12|4@1+ (1,0) [0|0] ""  NEO
+ SG_ DI_analogSpeed : 16|12@1+ (0.1,0) [0|150] "speed"  NEO
+ SG_ DI_immobilizerState : 28|3@1+ (1,0) [0|0] ""  NEO
+ SG_ DI_speedUnits : 31|1@1+ (1,0) [0|1] ""  NEO
+ SG_ DI_cruiseSet : 32|9@1+ (0.5,0) [0|255.5] "speed"  NEO
+ SG_ DI_aebState : 41|3@1+ (1,0) [0|0] ""  NEO
+ SG_ DI_stateCounter : 44|4@1+ (1,0) [0|0] ""  NEO
+ SG_ DI_digitalSpeed : 48|8@1+ (1,0) [0|250] ""  NEO
+ SG_ DI_stateChecksum : 56|8@1+ (1,0) [0|0] ""  NEO
 
 BO_ 109 SBW_RQ_SCCM: 4 STW
  SG_ StW_Sw_Stat3 : 0|3@1+ (1,0) [0|0] "" NEO
@@ -226,73 +239,73 @@ BO_ 69 STW_ACTN_RQ: 8 STW
  SG_ CRC_STW_ACTN_RQ : 56|8@1+ (1,0) [0|0] "" NEO
 
 BO_ 643 BODY_R1: 8 GTW
- SG_ AirTemp_Insd : 40|8@1+ (0.25,0) [0|63.5] "C" NEO
- SG_ AirTemp_Outsd : 56|8@1+ (0.5,-40) [-40|86.5] "C" NEO
- SG_ Bckl_Sw_RL_Stat_SAM_R : 54|2@1+ (1,0) [4|-1] "" NEO
- SG_ Bckl_Sw_RM_Stat_SAM_R : 50|2@1+ (1,0) [4|-1] "" NEO
- SG_ Bckl_Sw_RR_Stat_SAM_R : 52|2@1+ (1,0) [4|-1] "" NEO
- SG_ DL_RLtch_Stat : 14|2@1+ (1,0) [4|-1] "" NEO
- SG_ DrRLtch_FL_Stat : 6|2@1+ (1,0) [4|-1] "" NEO
- SG_ DrRLtch_FR_Stat : 4|2@1+ (1,0) [4|-1] "" NEO
- SG_ DrRLtch_RL_Stat : 2|2@1+ (1,0) [4|-1] "" NEO
- SG_ DrRLtch_RR_Stat : 0|2@1+ (1,0) [4|-1] "" NEO
- SG_ EngHd_Stat : 12|2@1+ (1,0) [4|-1] "" NEO
- SG_ LoBm_On_Rq : 39|1@1+ (1,0) [0|1] "" NEO
- SG_ HiBm_On : 38|1@1+ (1,0) [0|1] "" NEO
- SG_ Hrn_On : 29|1@1+ (1,0) [0|1] "" NEO
- SG_ IrLmp_D_Lt_Flt : 37|1@1+ (1,0) [0|1] "" NEO
- SG_ IrLmp_P_Rt_Flt : 36|1@1+ (1,0) [0|1] "" NEO
- SG_ LgtSens_Twlgt : 21|3@1+ (1,0) [0|7] "Steps" NEO
- SG_ LgtSens_SNA : 20|1@1+ (1,0) [0|1] "" NEO
- SG_ LgtSens_Tunnel : 19|1@1+ (1,0) [0|1] "" NEO
- SG_ LgtSens_Flt : 18|1@1+ (1,0) [0|1] "" NEO
- SG_ LgtSens_Night : 17|1@1+ (1,0) [2|-1] "" NEO
- SG_ ADL_LoBm_On_Rq : 16|1@1+ (1,0) [0|1] "" NEO
- SG_ LoBm_D_Lt_Flt : 35|1@1+ (1,0) [0|1] "" NEO
- SG_ LoBm_P_Rt_Flt : 34|1@1+ (1,0) [0|1] "" NEO
- SG_ MPkBrk_Stat : 27|1@1+ (1,0) [2|-1] "" NEO
- SG_ RevGr_Engg : 32|2@1+ (1,0) [4|-1] "" NEO
- SG_ StW_Cond_Stat : 48|2@1+ (1,0) [4|-1] "" NEO
- SG_ Term54_Actv : 28|1@1+ (1,0) [0|1] "" NEO
- SG_ Trlr_Stat : 30|2@1+ (1,0) [4|-1] "" NEO
- SG_ VTA_Alm_Actv : 10|1@1+ (1,0) [0|1] "" NEO
- SG_ WprOutsdPkPosn : 26|1@1+ (1,0) [0|1] "" NEO
+ SG_ AirTemp_Insd : 47|8@0+ (0.25,0) [0|63.5] "C"  NEO
+ SG_ AirTemp_Outsd : 63|8@0+ (0.5,-40) [-40|86.5] "C"  NEO
+ SG_ Bckl_Sw_RL_Stat_SAM_R : 49|2@0+ (1,0) [-1|4] ""  NEO
+ SG_ Bckl_Sw_RM_Stat_SAM_R : 53|2@0+ (1,0) [-1|4] ""  NEO
+ SG_ Bckl_Sw_RR_Stat_SAM_R : 51|2@0+ (1,0) [-1|4] ""  NEO
+ SG_ DL_RLtch_Stat : 9|2@0+ (1,0) [-1|4] ""  NEO
+ SG_ DrRLtch_FL_Stat : 1|2@0+ (1,0) [-1|4] ""  NEO
+ SG_ DrRLtch_FR_Stat : 3|2@0+ (1,0) [-1|4] ""  NEO
+ SG_ DrRLtch_RL_Stat : 5|2@0+ (1,0) [-1|4] ""  NEO
+ SG_ DrRLtch_RR_Stat : 7|2@0+ (1,0) [-1|4] ""  NEO
+ SG_ EngHd_Stat : 11|2@0+ (1,0) [-1|4] ""  NEO
+ SG_ LoBm_On_Rq : 32|1@0+ (1,0) [0|1] ""  NEO
+ SG_ HiBm_On : 33|1@0+ (1,0) [0|1] ""  NEO
+ SG_ Hrn_On : 26|1@0+ (1,0) [0|1] ""  NEO
+ SG_ IrLmp_D_Lt_Flt : 34|1@0+ (1,0) [0|1] ""  NEO
+ SG_ IrLmp_P_Rt_Flt : 35|1@0+ (1,0) [0|1] ""  NEO
+ SG_ LgtSens_Twlgt : 18|3@0+ (1,0) [0|7] "Steps"  NEO
+ SG_ LgtSens_SNA : 19|1@0+ (1,0) [0|1] ""  NEO
+ SG_ LgtSens_Tunnel : 20|1@0+ (1,0) [0|1] ""  NEO
+ SG_ LgtSens_Flt : 21|1@0+ (1,0) [0|1] ""  NEO
+ SG_ LgtSens_Night : 22|1@0+ (1,0) [-1|2] ""  NEO
+ SG_ ADL_LoBm_On_Rq : 23|1@0+ (1,0) [0|1] ""  NEO
+ SG_ LoBm_D_Lt_Flt : 36|1@0+ (1,0) [0|1] ""  NEO
+ SG_ LoBm_P_Rt_Flt : 37|1@0+ (1,0) [0|1] ""  NEO
+ SG_ MPkBrk_Stat : 28|1@0+ (1,0) [-1|2] ""  NEO
+ SG_ RevGr_Engg : 39|2@0+ (1,0) [-1|4] ""  NEO
+ SG_ StW_Cond_Stat : 55|2@0+ (1,0) [-1|4] ""  NEO
+ SG_ Term54_Actv : 27|1@0+ (1,0) [0|1] ""  NEO
+ SG_ Trlr_Stat : 25|2@0+ (1,0) [-1|4] ""  NEO
+ SG_ VTA_Alm_Actv : 13|1@0+ (1,0) [0|1] ""  NEO
+ SG_ WprOutsdPkPosn : 29|1@0+ (1,0) [0|1] ""  NEO
 
 BO_ 760 MCU_gpsVehicleSpeed: 8 MCU
- SG_ MCU_gpsHDOP : 0|8@1+ (0.10,0) [0|25.50] "1" NEO
- SG_ MCU_gpsVehicleHeading : 8|16@1+ (0.007810,0) [0|511.828350] "deg" NEO
- SG_ MCU_gpsVehicleSpeed : 24|16@1+ (0.003910,0) [0|256.241850] "km/hr" NEO
+ SG_ MCU_gpsHDOP : 0|8@1+ (0.1,0) [0|25.5] "1"  NEO
+ SG_ MCU_gpsVehicleHeading : 8|16@1+ (0.00781,0) [0|511.82835] "deg"  NEO
+ SG_ MCU_gpsVehicleSpeed : 24|16@1+ (0.00391,0) [0|256.24185] "km/hr"  NEO
  SG_ MCU_mppSpeedLimit : 51|5@1+ (5,0) [0|155] "kph/mph" NEO
- SG_ MCU_speedLimitUnits : 41|1@1+ (1,0) [2|-1] "" NEO
+ SG_ MCU_speedLimitUnits : 41|1@1+ (1,0) [-1|2] ""  NEO
  SG_ MCU_userSpeedOffset : 42|6@1+ (1,-30) [-30|33] "kph/mph" NEO
- SG_ MCU_userSpeedOffsetUnits : 40|1@1+ (1,0) [2|-1] "" NEO
+ SG_ MCU_userSpeedOffsetUnits : 40|1@1+ (1,0) [-1|2] ""  NEO
 
 BO_ 904 MCU_clusterBacklightRequest: 3 NEO
  SG_ MCU_clusterBacklightOn : 7|1@1+ (1,0) [0|1] "" NEO
  SG_ MCU_clusterBrightnessLevel : 8|8@1+ (0.5,0) [0|127.5] "%" NEO
- SG_ MCU_clusterReadyForDrive : 6|1@1+ (1,0) [2|-1] "" NEO
+ SG_ MCU_clusterReadyForDrive : 6|1@1+ (1,0) [-1|2] ""  NEO
  SG_ MCU_clusterReadyForPowerOff : 5|1@1+ (1,0) [0|1] "" NEO
 
 BO_ 984 MCU_locationStatus: 8 MCU
  SG_ MCU_gpsAccuracy : 56|7@1+ (0.200000003,0) [0|25.200000378] "m" NEO
- SG_ MCU_latitude : 0|28@1- (0.000001,0) [-134.21772759734682|134.21772659734683] "deg" NEO
- SG_ MCU_longitude : 28|28@1- (0.000001,0) [-268.43545519469365|268.43545419469365] "deg" NEO
+ SG_ MCU_latitude : 0|28@1- (1E-006,0) [-134.217727597347|134.217726597347] "deg"  NEO
+ SG_ MCU_longitude : 28|28@1- (1E-006,0) [-268.435455194694|268.435454194694] "deg"  NEO
 
 BO_ 840 GTW_status: 8 GTW
- SG_ GTW_accGoingDown : 1|1@1+ (1,0) [0|1] "" NEO
- SG_ GTW_accRailReq : 15|1@1+ (1,0) [0|1] "" NEO
- SG_ GTW_brakePressed : 6|1@1+ (1,0) [0|1] "" NEO
- SG_ GTW_driveGoingDown : 0|1@1+ (1,0) [0|1] "" NEO
- SG_ GTW_driveRailReq : 7|1@1+ (1,0) [0|1] "" NEO
- SG_ GTW_driverIsLeaving : 2|1@1+ (1,0) [0|1] "" NEO
- SG_ GTW_driverPresent : 5|1@1+ (1,0) [0|1] "" NEO
- SG_ GTW_hvacGoingDown : 12|1@1+ (1,0) [0|1] "" NEO
- SG_ GTW_hvacRailReq : 14|1@1+ (1,0) [0|1] "" NEO
- SG_ GTW_icPowerOff : 3|1@1+ (1,0) [0|1] "" NEO
- SG_ GTW_notEnough12VForDrive : 4|1@1+ (1,0) [0|1] "" NEO
- SG_ GTW_preconditionRequest : 13|1@1+ (1,0) [0|1] "" NEO
- SG_ GTW_statusChecksum : 56|8@1+ (1,0) [0|255] "" NEO
- SG_ GTW_statusCounter : 52|4@1+ (1,0) [0|15] "" NEO
+ SG_ GTW_accGoingDown : 6|1@0+ (1,0) [0|1] ""  NEO
+ SG_ GTW_accRailReq : 8|1@0+ (1,0) [0|1] ""  NEO
+ SG_ GTW_brakePressed : 1|1@0+ (1,0) [0|1] ""  NEO
+ SG_ GTW_driveGoingDown : 7|1@0+ (1,0) [0|1] ""  NEO
+ SG_ GTW_driveRailReq : 0|1@0+ (1,0) [0|1] ""  NEO
+ SG_ GTW_driverIsLeaving : 5|1@0+ (1,0) [0|1] ""  NEO
+ SG_ GTW_driverPresent : 2|1@0+ (1,0) [0|1] ""  NEO
+ SG_ GTW_hvacGoingDown : 11|1@0+ (1,0) [0|1] ""  NEO
+ SG_ GTW_hvacRailReq : 9|1@0+ (1,0) [0|1] ""  NEO
+ SG_ GTW_icPowerOff : 4|1@0+ (1,0) [0|1] ""  NEO
+ SG_ GTW_notEnough12VForDrive : 3|1@0+ (1,0) [0|1] ""  NEO
+ SG_ GTW_preconditionRequest : 10|1@0+ (1,0) [0|1] ""  NEO
+ SG_ GTW_statusChecksum : 63|8@0+ (1,0) [0|255] ""  NEO
+ SG_ GTW_statusCounter : 51|4@0+ (1,0) [0|15] ""  NEO
 
 VAL_ 3 StW_Angl 16383 "SNA" ;
 VAL_ 3 StW_AnglSens_Id 2 "MUST" 0 "PSBL" 1 "SELF" ;
