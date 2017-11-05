@@ -38,8 +38,8 @@ BU_: XXX DSU HCU EPS IPAS
 
 BO_ 36 KINEMATICS: 8 XXX
  SG_ ACCEL_Y : 33|10@0+ (1,-512) [0|65535] "" XXX
- SG_ YAW_RATE : 1|10@0+ (1,-512) [0|65535] "" XXX
  SG_ STEERING_TORQUE : 17|10@0+ (1,-512) [0|65535] "" XXX
+ SG_ YAW_RATE : 1|10@0+ (1,-512) [0|65535] "" XXX
 
 BO_ 166 BRAKE: 8 XXX
  SG_ BRAKE_AMOUNT : 7|8@0+ (1,0) [0|255] "" XXX
@@ -170,8 +170,8 @@ BO_ 452 POWERTRAIN: 8 XXX
 
 
 CM_ SG_ 36 ACCEL_Y "unit is tbd";
-CM_ SG_ 36 YAW_RATE "verify";
 CM_ SG_ 36 STEERING_TORQUE "does not seem the steer torque, tbd";
+CM_ SG_ 36 YAW_RATE "verify";
 CM_ SG_ 466 ACCEL_NET "net acceleration produced by the system, given ACCEL_CMD, road grade and other factors";
 CM_ SG_ 550 BRAKE_PRESSURE "seems prop to pedal force";
 CM_ SG_ 550 BRAKE_POSITION "seems proportional to pedal displacement, unclear the max value of 0x1c8";
