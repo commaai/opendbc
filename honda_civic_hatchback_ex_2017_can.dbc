@@ -201,8 +201,8 @@ BO_ 495 ACC_CONTROL_ON: 8 XXX
  SG_ SET_TO_FF : 15|8@0+ (1,0) [0|255] "" XXX
  SG_ SET_TO_3 : 6|7@0+ (1,0) [0|4095] "" XXX
  SG_ CONTROL_ON : 7|1@0+ (1,0) [0|1] "" XXX
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
- SG_ CHECKSUM : 56|4@1+ (1,0) [0|15] "" XXX
 
 BO_ 506 XXX_13: 8 XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
@@ -210,6 +210,7 @@ BO_ 506 XXX_13: 8 XXX
 
 BO_ 545 XXX_14: 6 SCM
  SG_ ECON_ON : 23|1@0+ (1,0) [0|1] "" XXX
+ SG_ DRIVE_MODE : 37|2@0+ (1,0) [0|3] "" XXX
  SG_ COUNTER : 45|2@0+ (1,0) [0|3] "" BDY
  SG_ CHECKSUM : 43|4@0+ (1,0) [0|15] "" BDY
 
@@ -222,7 +223,7 @@ BO_ 597 ROUGH_WHEEL_SPEED: 8 VSA
  SG_ SET_TO_X55_2 : 47|8@0+ (1,0) [0|255] "" NEO
  SG_ LONG_COUNTER : 55|8@0+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
- SG_ CHECKSUM : 56|4@1+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 662 CRUISE_BUTTONS: 4 SCM
  SG_ CRUISE_BUTTONS : 7|3@0+ (1,0) [0|7] "" NEO
@@ -336,11 +337,18 @@ BO_ 862 CAMERA_MESSAGES: 8 CAM
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
-BO_ 884 XXX_20: 8 XXX
+BO_ 884 STALK_STATUS_1: 8 XXX
+ SG_ LIGHT_SWITCH_AUTO : 46|1@0+ (1,0) [0|1] "" XXX
+ SG_ HIGH_BEAM_FLASH : 45|1@0+ (1,0) [0|1] "" XXX
+ SG_ HIGH_BEAM_HOLD : 47|1@0+ (1,0) [0|1] "" XXX
+ SG_ WIPER_SWITCH : 53|2@0+ (1,0) [0|3] "" XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
-BO_ 891 XXX_21: 8 XXX
+BO_ 891 STALK_STATUS_2: 8 XXX
+ SG_ LOW_BEAMS : 35|1@0+ (1,0) [0|1] "" XXX
+ SG_ HIGH_BEAMS : 34|1@0+ (1,0) [0|1] "" XXX
+ SG_ PARK_LIGHTS : 36|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
@@ -447,6 +455,9 @@ CM_ SG_ 479 RELATED_TO_GAS "bits 7, 3, and 1 set to 1 when gas not applied";
 CM_ SG_ 479 GAS_BRAKE "Signed value, negative when braking and positive when applying gas";
 CM_ SG_ 479 ZEROS_BOH "Signed value, negative when braking, positive when applying gas";
 CM_ SG_ 780 HUD_LEAD "0: blank, 1:  no car, 2: car, 3: ACC Off";
+CM_ SG_ 780 CRUISE_SPEED 255 "no_speed" 252 "stopped" ;
 CM_ SG_ 806 CMBS_STATES "3: Pressed, 2: On, 0: Off";
+CM_ SG_ 884 WIPER_SWITCH "0 = PARKED, 1 = INTERMITTENT, 2 = LOW, 3 = HIGH/QUICK WIPE";
+CM_ SG_ 891 HIGH_BEAMS "FLASH TO PASS OR FULL ON";
 
 CM_ "CHFFR_METRIC 330 STEER_ANGLE STEER_ANGLE 0.36 180; CHFFR_METRIC 380 ENGINE_RPM ENGINE_RPM 1 0; CHFFR_METRIC 804 ENGINE_TEMPERATURE ENGINE_TEMPERATURE 1 0";
