@@ -144,6 +144,9 @@ BO_ 951 ESP_CONTROL: 8 ESP
  SG_ TC_DISABLED : 13|1@0+ (1,0) [0|1] "" XXX
  SG_ BRAKE_LIGHTS_ACC : 18|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 1041 ACC_HUD: 8 DSU
+ SG_ FCW : 4|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 1042 LKAS_HUD: 8 XXX
  SG_ BARRIERS : 1|2@0+ (1,0) [0|3] "" XXX
  SG_ RIGHT_LINE : 3|2@0+ (1,0) [0|3] "" XXX
@@ -153,6 +156,7 @@ BO_ 1042 LKAS_HUD: 8 XXX
  SG_ TWO_BEEPS : 12|1@0+ (1,0) [0|1] "" XXX
  SG_ ADJUSTING_CAMERA : 13|1@0+ (1,0) [0|1] "" XXX
  SG_ LDA_MALFUNCTION : 15|1@0+ (1,0) [0|1] "" XXX
+ SG_ REPEATED_BEEPS : 32|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1553 UI_SEETING: 8 XXX
  SG_ UNITS : 26|2@0+ (1,0) [0|3] "" XXX
@@ -182,7 +186,8 @@ CM_ SG_ 37 STEER_RATE "factor is tbd";
 CM_ SG_ 467 SET_SPEED "43 kph are shown as 28mph, so conversion isnt perfect";
 CM_ SG_ 467 LOW_SPEED_LOCKOUT "in low speed lockout, system would always disengage below 28mph";
 CM_ SG_ 921 UI_SET_SPEED "set speed shown in UI with user set unit";
-CM_ SG_ 1042 SET_ME_1 "unclear what this is, nut it's always 1 in drive traces";
+CM_ SG_ 1042 SET_ME_1 "unclear what this is, but it's always 1 in drive traces";
+CM_ SG_ 1042 REPEATED_BEEPS "recommended for fcw and other important alerts";
 VAL_ 295 GEAR 0 "P" 1 "R" 2 "N" 3 "D" 4 "B";
 VAL_ 466 CRUISE_STATE 8 "active" 7 "standstill" 1 "off" ;
 VAL_ 467 LOW_SPEED_LOCKOUT 2 "low speed locked" 1 "ok" ;
