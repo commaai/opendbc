@@ -47,9 +47,13 @@ BO_ 5 NEW_MSG_2: 8 XXX
 BO_ 69 NEW_MSG_3: 8 XXX
  SG_ TURN_SIGNAL_LEVER : 16|8@1+ (1,0) [0|255] "" XXX
  SG_ CRUISE_CONTROL_LEVER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ STEERING_WHEEL_BUTTONS : 32|8@1+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_2 : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_1 : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ STEERING_WHEEL_BUTTONS : 32|8@1+ (1,0) [0|255] "4 directional, 2 volume control, & 2 phone buttons" XXX
+ SG_ MORE_STEERING_WHEELS_BUTTONS : 40|8@1+ (1,0) [0|255] "" XXX
 
 
 
 
 CM_ SG_ 5 BRAKE_PRESSED "appears to be boolean (brake pressed)";
+CM_ SG_ 69 MORE_STEERING_WHEELS_BUTTONS "back, ok, voice assistance, and mute buttons";
