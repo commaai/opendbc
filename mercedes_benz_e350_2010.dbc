@@ -38,6 +38,7 @@ BU_: XXX
 
 BO_ 3 NEW_MSG_1: 8 XXX
  SG_ STEERING_ANGLE : 7|32@0- (1,0) [0|4294967295] "" XXX
+ SG_ NEW_SIGNAL_1 : 55|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 5 NEW_MSG_2: 8 XXX
  SG_ BRAKE_POSITION : 23|16@0+ (1,0) [0|65535] "" XXX
@@ -46,9 +47,9 @@ BO_ 5 NEW_MSG_2: 8 XXX
 BO_ 69 NEW_MSG_3: 8 XXX
  SG_ TURN_SIGNAL_LEVER : 16|8@1+ (1,0) [0|255] "" XXX
  SG_ CRUISE_CONTROL_LEVER : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ STEERING_WHEEL_BUTTONS : 32|8@1+ (1,0) [0|3] "" XXX
 
 
 
 
 CM_ SG_ 5 BRAKE_PRESSED "appears to be boolean (brake pressed)";
-
