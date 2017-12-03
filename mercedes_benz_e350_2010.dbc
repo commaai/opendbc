@@ -52,6 +52,9 @@ BO_ 69 NEW_MSG_3: 8 XXX
  SG_ STEERING_WHEEL_BUTTONS : 32|8@1+ (1,0) [0|255] "4 directional, 2 volume control, & 2 phone buttons" XXX
  SG_ MORE_STEERING_WHEELS_BUTTONS : 40|8@1+ (1,0) [0|255] "" XXX
 
+BO_ 1 NEW_MSG_4: 8 XXX
+ SG_ DOOR_LOCK_STATUS : 31|16@0+ (1,0) [0|65535] "" XXX
+
 
 
 
