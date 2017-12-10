@@ -40,3 +40,7 @@ BO_ 273 NEW_MSG_1: 8 XXX
  SG_ NEW_SIGNAL_1 : 7|2@0+ (1,0) [0|3] "" XXX
 
 BO_ 688 USER_TORQUE: 5 XXX
+ SG_ user1 : 15|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 832 NEW_MSG_2: 8 XXX
+ SG_ HUD_TIMEOUT : 8|1@1+ (1,0) [0|127] "" XXX
