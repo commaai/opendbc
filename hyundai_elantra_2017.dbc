@@ -1,7 +1,11 @@
 VERSION ""
 
 
+<<<<<<< HEAD
 NS_ : 
+=======
+NS_ :
+>>>>>>> origin/master
     NS_DESC_
     CM_
     BA_DEF_
@@ -36,6 +40,7 @@ BS_:
 BU_: XXX
 
 
+<<<<<<< HEAD
 BO_ 128 EMS_DCT1: 8 XXX
     SG_ PV_AV_CAN : 0|8@1+ (0.3906,0) [0|99.603] "%" XXX
     SG_ TQ_STND : 8|6@1+ (10,0) [0|630] "Nm" XXX
@@ -547,3 +552,13 @@ BO_ 1680 CLU2: 8 XXX
     SG_ CF_Clu_SunRoofOpenState : 60|1@1+ (1,0) [0|1] "" XXX
 
 
+=======
+BO_ 273 NEW_MSG_1: 8 XXX
+ SG_ NEW_SIGNAL_1 : 7|2@0+ (1,0) [0|3] "" XXX
+
+BO_ 688 USER_TORQUE: 5 XXX
+ SG_ user1 : 15|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 832 HUD_1: 8 XXX
+ SG_ HUD_TIMEOUT : 8|1@1+ (1,0) [0|127] "" XXX
+>>>>>>> origin/master
