@@ -188,8 +188,8 @@ BO_ 495 ACC_CONTROL_ON: 8 XXX
  SG_ SET_TO_FF : 15|8@0+ (1,0) [0|255] "" XXX
  SG_ SET_TO_3 : 6|7@0+ (1,0) [0|4095] "" XXX
  SG_ CONTROL_ON : 7|1@0+ (1,0) [0|1] "" XXX
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
- SG_ CHECKSUM : 56|4@1+ (1,0) [0|15] "" XXX
 
 BO_ 545 XXX_14: 6 SCM
  SG_ ECON_ON : 23|1@0+ (1,0) [0|1] "" XXX
@@ -203,10 +203,9 @@ BO_ 597 ROUGH_WHEEL_SPEED: 8 VSA
  SG_ WHEEL_SPEED_RR : 31|8@0+ (1,0) [0|255] "mph" NEO
  SG_ SET_TO_X55 : 39|8@0+ (1,0) [0|255] "" XXX
  SG_ SET_TO_X55_2 : 47|8@0+ (1,0) [0|255] "" NEO
- SG_ COUNTER : 55|8@0+ (1,0) [0|255] "" XXX
- SG_ CHECKSUM_COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
- SG_ CHECKSUM : 56|4@1+ (1,0) [0|15] "" XXX
-
+ SG_ WHEEL_COUNTER : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
 
 BO_ 662 CRUISE_BUTTONS: 4 SCM
  SG_ CRUISE_BUTTONS : 7|3@0+ (1,0) [0|7] "" NEO
@@ -408,6 +407,9 @@ BO_ 1633 XXX_38: 8 XXX
 BO_ 1670 XXX_39: 5 XXX
  SG_ COUNTER : 37|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 35|4@0+ (1,0) [0|15] "" XXX
+
+
+
 
 CM_ SG_ 344 DISTANCE_COUNTER "";
 CM_ SG_ 450 EPB_STATE "3: On, 2: Disengaging, 1: Engaging, 0: Off";
