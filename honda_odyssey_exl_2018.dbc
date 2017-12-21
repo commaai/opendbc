@@ -114,7 +114,7 @@ BO_ 432 STANDSTILL: 7 VSA
  SG_ CHECKSUM : 51|4@0+ (1,0) [0|3] "" EON
 
 BO_ 450 XXX_6: 8 XXX
- SG_ EPB_Brake_and_Pull_Indicator : 6|1@0+ (1,0) [0|1] "" XXX
+ SG_ EPB_BRAKE_AND_PULL : 6|1@0+ (1,0) [0|1] "" XXX
  SG_ EPB_ACTIVE : 3|1@0+ (1,0) [0|1] "" XXX
  SG_ EPB_STATE : 29|2@0+ (1,0) [0|1] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
