@@ -118,6 +118,11 @@ BO_ 927 RADAR_HUD: 8 ADAS
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" BDY
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" BDY
 
+BO_ 1302 ODOMETER: 8 XXX
+ SG_ ODOMETER : 7|24@0+ (1,0) [0|16777215] "km" NEO
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" NEO
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" NEO
+
 CM_ SG_ 401 GEAR "10 = reverse, 11 = transition";
 CM_ SG_ 420 BRAKE_HOLD_RELATED "On when Brake Hold engaged";
 CM_ SG_ 450 EPB_STATE "3 "engaged" 2 "disengaging" 1 "engaging" 0 "disengaged"";
