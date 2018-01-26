@@ -43,10 +43,10 @@ BO_ 3 STEERING: 8 XXX
  SG_ STEERING_ANGLE : 7|24@0- (1,0) [0|4294967295] "" XXX
 
 BO_ 5 BRAKE: 8 XXX
- SG_ NEW_SIGNAL_1 : 55|4@0+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_2 : 63|8@0+ (1,0) [0|255] "" XXX
- SG_ BRAKE_PRESSED : 0|1@1+ (1,0) [0|17] "" XXX
+ SG_ BRAKE_PRESSED : 0|1@1+ (1,0) [0|1] "" XXX
  SG_ BRAKE_POSITION : 31|8@0+ (1,0) [0|65535] "" XXX
+ SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_2 : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 69 DRIVER_CONTROLS: 8 XXX
  SG_ MORE_STEERING_WHEELS_BUTTONS : 40|8@1+ (1,0) [0|255] "" XXX
@@ -77,6 +77,6 @@ BO_ 925 NEW_MSG_2: 8 XXX
 
 
 
-CM_ SG_ 5 BRAKE_PRESSED "appears to be boolean (brake pressed)";
+CM_ SG_ 5 BRAKE_PRESSED "";
 CM_ SG_ 69 MORE_STEERING_WHEELS_BUTTONS "back, ok, voice assistance, and mute buttons";
 CM_ SG_ 69 TURN_SIGNAL_LEVER "momentary left, momentary right, toggle left, toggle right, momentary high beam, toggle high beam";
