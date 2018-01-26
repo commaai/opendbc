@@ -62,9 +62,9 @@ BO_ 806 SCM_FEEDBACK: 8 SCM
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
 
 BO_ 891 WIPERS: 8 XXX
- SG_ WIPERS : 17|2@0+ (1,0) [0|3] "" NEO
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" NEO
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" NEO
+ SG_ WIPERS : 17|2@0+ (1,0) [0|3] "" EON
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
 
 BO_ 862 HIGHBEAM_CONTROL: 8 ADAS
  SG_ ZEROS_BOH : 7|50@0+ (1,0) [0|127] "" BDY
@@ -88,13 +88,12 @@ BO_ 927 RADAR_HUD: 8 ADAS
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" BDY
 
 BO_ 1302 ODOMETER: 8 XXX
- SG_ ODOMETER : 7|24@0+ (1,0) [0|16777215] "km" NEO
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" NEO
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" NEO
+ SG_ ODOMETER : 7|24@0+ (1,0) [0|16777215] "km" EON
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
 
 CM_ SG_ 419 GEAR "10 = reverse, 11 = transition";
 CM_ SG_ 420 BRAKE_HOLD_RELATED "On when Brake Hold engaged";
-CM_ SG_ 450 EPB_STATE "3 "engaged" 2 "disengaging" 1 "engaging" 0 "disengaged"";
 CM_ SG_ 780 CRUISE_SPEED "255 = no speed";
 CM_ SG_ 804 CRUISE_SPEED_PCM "255 = no speed";
 CM_ SG_ 806 REVERSE_LIGHT "Might be reverse gear selected and not the lights";
@@ -103,8 +102,6 @@ CM_ SG_ 829 BEEP "beeps are pleasant, chimes are for warnings etc...";
 VAL_ 399 STEER_STATUS 5 "fault" 4 "no_torque_alert_2" 2 "no_torque_alert_1" 0 "normal" ;
 VAL_ 419 GEAR_SHIFTER 10 "S" 4 "D" 3 "N" 2 "R" 1 "P" ;
 VAL_ 450 EPB_STATE 3 "engaged" 2 "disengaging" 1 "engaging" 0 "disengaged" ;
-VAL_ 506 CHIME 4 "double_chime" 3 "single_chime" 2 "continuous_chime" 1 "repeating_chime" 0 "no_chime" ;
-VAL_ 506 FCW 3 "fcw" 2 "fcw" 1 "fcw" 0 "no_fcw" ;
 VAL_ 662 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "cancel" 1 "main" 0 "none" ;
 VAL_ 662 CRUISE_SETTING 3 "distance_adj" 2 "tbd" 1 "lkas_button" 0 "none" ;
 VAL_ 780 HUD_LEAD 3 "no_car" 2 "solid_car" 1 "dashed_car" 0 "no_car" ;
