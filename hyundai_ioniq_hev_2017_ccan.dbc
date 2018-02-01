@@ -1415,10 +1415,10 @@ BO_ 576 NEW_MSG_ENGINE: 8 XXX
  SG_ RPM_2 : 16|16@1- (1,0) [0|65535] "" XXX
 
 BO_ 304 NEW_MSG_STEERING: 8 XXX
- SG_ AliveCounter : 48|4@1+ (1,0) [0|15] "" XXX
- SG_ Steering_2 : 16|16@1+ (1,-32767) [0|65535] "" XXX
- SG_ CheckSum : 56|8@1+ (1,0) [0|255] "" XXX
  SG_ Steering_1 : 0|16@1+ (1,-32767) [0|65535] "" XXX
+ SG_ Steering_2 : 16|16@1+ (1,-32767) [0|65535] "" XXX
+ SG_ CheckSum_Steering : 56|8@1+ (1,0) [0|255] "" XXX
+ SG_ AliveCounter_Steering : 48|4@1+ (1,0) [0|15] "" XXX
 
 
 
