@@ -1420,6 +1420,13 @@ BO_ 304 NEW_MSG_STEERING: 8 XXX
  SG_ CheckSum_Steering : 56|8@1+ (1,0) [0|255] "" XXX
  SG_ AliveCounter_Steering : 48|4@1+ (1,0) [0|15] "" XXX
 
+BO_ 320 NEW_MSG_1: 8 XXX
+ SG_ AliveCounter : 48|4@1+ (1,0) [0|15] "" XXX
+ SG_ CheckSum : 56|8@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_e_power_draw : 0|16@1+ (1,-32767) [0|65535] "" XXX
+ SG_ NEW_SIGNAL_pwr_level : 24|8@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_1 : 39|8@0+ (1,0) [0|255] "" XXX
+
 
 
 
