@@ -37,10 +37,11 @@ BU_: XXX
 
 
 BO_ 3 STEERING: 8 XXX
- SG_ STEERING_TORQUE : 31|8@0+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
- SG_ STEERING_ANGLE : 7|24@0- (1,0) [0|4294967295] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ STEERING_DIRECTION : 4|1@0+ (1,0) [0|1] "" XXX
+ SG_ STEERING_RATE_OF_CHANGE : 19|12@0- (0.5,0) [0|255] "" XXX
+ SG_ STEERING_ANGLE : 3|12@0- (0.5,0) [-500|500] "degrees" XXX
 
 BO_ 5 BRAKE: 8 XXX
  SG_ BRAKE_PRESSED : 0|1@1+ (1,0) [0|1] "" XXX
@@ -86,6 +87,7 @@ BO_ 261 NEW_MSG_1: 8 XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_3 : 31|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_4 : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ ENGINE_RPM : 4|5@0+ (1,0) [0|255] "" XXX
 
 BO_ 925 NEW_MSG_2: 8 XXX
  SG_ COUNTER : 62|4@0+ (1,0) [0|15] "" XXX
@@ -93,5 +95,6 @@ BO_ 925 NEW_MSG_2: 8 XXX
 
 
 
+CM_ SG_ 3 STEERING_DIRECTION "0 = left, 1 = right";
 CM_ SG_ 5 BRAKE_PRESSED "";
 CM_ SG_ 69 MORE_STEERING_WHEELS_BUTTONS "back, ok, voice assistance, and mute buttons";
