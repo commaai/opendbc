@@ -38,14 +38,13 @@ VAL_TABLE_ TurnSignals 2 "Right Turn" 1 "Left Turn" 0 "None" ;
 VAL_TABLE_ ACCLeadCar 1 "Present" 0 "Not Present" ;
 VAL_TABLE_ ACCCmdActive 1 "Active" 0 "Inactive" ;
 VAL_TABLE_ BrakePedalPressed 1 "Pressed" 0 "Depressed" ;
-VAL_TABLE_ ACCGapButton 1 "Active" 0 "Inactive" ;
+VAL_TABLE_ DistanceButton 1 "Active" 0 "Inactive" ;
 VAL_TABLE_ LKAButton 1 "Active" 0 "Inactive" ;
-VAL_TABLE_ ACCCancelButton 1 "Active" 0 "Inactive" ;
+VAL_TABLE_ ACCButtons 6 "Cancel" 5 "Main" 3 "Set" 2 "Resume" 1 "None" ;
 VAL_TABLE_ PRNDL 3 "Reverse" 2 "Drive" 1 "Neutral" 0 "Park" ;
 VAL_TABLE_ DriverDoorStatus 1 "Opened" 0 "Closed" ;
 VAL_TABLE_ LKASteeringCmdActive 1 "Active" 0 "Inactive" ;
 VAL_TABLE_ ACCGapLevel 3 "Far" 2 "Med" 1 "Near" 0 "Inactive" ;
-VAL_TABLE_ ACCButton 1 "Pressed" 0 "Depressed" ;
 VAL_TABLE_ GasRegenCmdActiveInv 1 "Inactive" 0 "Active" ;
 VAL_TABLE_ GasRegenCmdActive 1 "Active" 0 "Inactive" ;
 VAL_TABLE_ LKATorqueDeliveredStatus 3 "Failed" 2 "Temp. Limited" 1 "Active" 0 "Inactive" ;
@@ -66,9 +65,9 @@ BO_ 1300 VIN_Part1: 8 K20_ECM
  SG_ VINPart1 : 7|64@0+ (1,0) [0|0] ""  NEO
 
 BO_ 481 ASCMSteeringButton: 7 K124_ASCM
- SG_ ACCGapButton : 22|1@0+ (1,0) [0|0] ""  NEO
+ SG_ DistanceButton : 22|1@0+ (1,0) [0|0] ""  NEO
  SG_ LKAButton : 23|1@0+ (1,0) [0|0] ""  NEO
- SG_ ACCCancelButton : 7|1@0+ (1,0) [0|0] ""  NEO
+ SG_ ACCButtons : 46|3@0+ (1,0) [0|0] ""  NEO
 
 BO_ 1912 PSCM_778: 8 K43_PSCM
 
@@ -198,9 +197,9 @@ BA_DEF_DEF_  "BusType" "";
 BA_ "BusType" "CAN";
 BA_ "ProtocolType" "GMLAN";
 BA_ "UseGMParameterIDs" 0;
-VAL_ 481 ACCGapButton 1 "Active" 0 "Inactive" ;
+VAL_ 481 DistanceButton 1 "Active" 0 "Inactive" ;
 VAL_ 481 LKAButton 1 "Active" 0 "Inactive" ;
-VAL_ 481 ACCCancelButton 1 "Active" 0 "Inactive" ;
+VAL_ 481 ACCButtons 6 "Cancel" 5 "Main" 3 "Set" 2 "Resume" 1 "None" ;
 VAL_ 309 PRNDL 3 "Reverse" 2 "Drive" 1 "Neutral" 0 "Park" ;
 VAL_ 298 DriverDoorStatus 1 "Opened" 0 "Closed" ;
 VAL_ 384 LKASteeringCmdActive 1 "Active" 0 "Inactive" ;
