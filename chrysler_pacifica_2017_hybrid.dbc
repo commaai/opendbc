@@ -53,8 +53,12 @@ BO_ 820 DOORS: 8 XXX
  SG_ DOOR_OPEN_TRUNK : 22|1@0+ (1,0) [0|1] "" XXX
  SG_ DOOR_OPEN_FL : 17|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 746 GEAR: 8 XXX
+ SG_ PRNDL : 0|3@1+ (1,0) [0|7] "" XXX
+
 
 
 
 CM_ SG_ 258 STEER_ANGLE "positive is left (counter-clockwise)";
 CM_ SG_ 514 SPEED "TODO find upper limit";
+CM_ SG_ 746 PRNDL "4=D, 3=N, 2=R, 1=P";
