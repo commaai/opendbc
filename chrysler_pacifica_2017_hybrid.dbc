@@ -34,6 +34,7 @@ NS_ :
 BS_:
 
 BU_: XXX
+VAL_TABLE_ PRNDL 4 "Drive" 3 "Neutral" 2 "Reverse" 1 "Park" ;
 
 
 BO_ 258 STEERING: 8 XXX
@@ -63,3 +64,4 @@ CM_ SG_ 258 STEER_ANGLE "positive is left (counter-clockwise)";
 CM_ SG_ 514 SPEED "TODO find upper limit";
 CM_ SG_ 653 BRAKE_PRESSURE "max seems to be 148";
 CM_ SG_ 746 PRNDL "4=D, 3=N, 2=R, 1=P";
+VAL_ 746 PRNDL 4 "Drive" 3 "Neutral" 2 "Reverse" 1 "Park" ;
