@@ -58,6 +58,24 @@ BO_ 820 DOORS: 8 XXX
 BO_ 746 GEAR: 5 XXX
  SG_ PRNDL : 0|3@1+ (1,0) [0|7] "" XXX
 
+BO_ 284 NEW_MSG_1: 8 XXX
+ SG_ BRAKE_RELATED : 3|12@0+ (1,0) [0|255] "" XXX
+ SG_ BRAKE_RELATED_2 : 17|10@0+ (1,0) [0|255] "" XXX
+ SG_ SPEED : 37|14@0+ (1,0) [0|255] "" XXX
+
+BO_ 320 NEW_MSG_2: 8 XXX
+ SG_ SPEED_RELATED : 47|8@0+ (1,0) [0|63] "" XXX
+ SG_ BRAKE_PRESSED : 2|3@0+ (1,0) [0|7] "" XXX
+
+BO_ 736 TRIP: 8 XXX
+ SG_ DISTANCE_COUNTER : 7|16@0+ (0,0) [0|65535] "Meters" XXX
+ SG_ DISTANCE_COUNTER_2 : 23|16@0+ (1,0) [0|65535] "Meters" XXX
+
+BO_ 344 WHEEL_SPEEDS: 8 XXX
+ SG_ WHEEL_SPEED_FL : 1|10@0+ (1,0) [0|65535] "" XXX
+ SG_ WHEEL_SPEED_FR : 17|10@0+ (1,0) [0|255] "" XXX
+ SG_ WHEEL_SPEED_RL : 33|10@0+ (1,0) [0|3] "" XXX
+ SG_ WHEEL_SPEED_RR : 49|10@0+ (1,0) [0|255] "" XXX
 
 
 
@@ -66,4 +84,7 @@ CM_ SG_ 258 STEER_ANGLE "positive is left (counter-clockwise)";
 CM_ SG_ 514 SPEED_LEFT "TODO find upper limit";
 CM_ SG_ 653 BRAKE_PRESSURE "max seems to be 148";
 CM_ SG_ 746 PRNDL "4=D, 3=N, 2=R, 1=P";
+CM_ SG_ 284 BRAKE_RELATED "Correlates with braking";
+CM_ SG_ 284 SPEED "Another Speed Signal, Maybe RPMs?";
+CM_ SG_ 320 BRAKE_PRESSED "Value is 5 when brake is pressed";
 VAL_ 746 PRNDL 4 "Drive" 3 "Neutral" 2 "Reverse" 1 "Park" ;
