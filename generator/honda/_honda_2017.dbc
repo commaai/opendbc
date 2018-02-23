@@ -134,8 +134,7 @@ BO_ 777 LOCK_STATUS: 8 XXX
 
 BO_ 780 ACC_HUD: 8 ADAS
  SG_ PCM_SPEED : 7|16@0+ (0.01,0) [0|250] "kph" BDY
- SG_ PCM_GAS : 23|7@0+ (1,0) [0|127] "" BDY
- SG_ ZEROS_BOH : 16|1@0+ (1,0) [0|255] "" BDY
+ SG_ PCM_GAS : 23|8@0+ (1,0) [0|127] "" BDY
  SG_ CRUISE_SPEED : 31|8@0+ (1,0) [0|255] "" BDY
  SG_ DTC_MODE : 39|1@0+ (1,0) [0|1] "" BDY
  SG_ BOH : 38|1@0+ (1,0) [0|1] "" BDY
