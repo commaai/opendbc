@@ -85,6 +85,9 @@ BO_ 792 STEERING_LEVERS: 8 XXX
  SG_ HIGH_BEAM_PUSHED_IN : 2|1@1+ (1,0) [0|3] "" XXX
  SG_ HIGH_BEAM_FLASH : 3|1@1+ (1,0) [0|3] "" XXX
 
+BO_ 264 ACCEL_PEDAL_MSG: 8 XXX
+ SG_ ACCEL_PEDAL : 32|4@1+ (1,-7) [0|15] "" XXX
+
 
 
 
@@ -99,5 +102,6 @@ CM_ SG_ 284 SPEED "Another Speed Signal, Maybe RPMs?";
 CM_ SG_ 320 BRAKE_PRESSED "Value is 5 when brake is pressed";
 CM_ SG_ 792 TURN_SIGNALS "1=Left, 2=Right";
 CM_ SG_ 792 HIGH_BEAM_FLASH "use this for genericToggle";
+CM_ SG_ 264 ACCEL_PEDAL "not in ACC so seems to be actual pedal. Use for gasPressed";
 VAL_ 746 PRNDL 4 "Drive" 3 "Neutral" 2 "Reverse" 1 "Park" ;
 VAL_ 792 TURN_SIGNALS 2 "Right" 1 "Left" ;
