@@ -127,6 +127,9 @@ BO_ 951 ESP_CONTROL: 8 ESP
 
 BO_ 1041 ACC_HUD: 8 DSU
  SG_ FCW : 4|1@0+ (1,0) [0|1] "" XXX
+ SG_ SET_ME_X20 : 15|8@0+ (1,0) [0|1] "" XXX
+ SG_ SET_ME_X10 : 39|8@0+ (1,0) [0|1] "" XXX
+ SG_ SET_ME_X80 : 55|8@0+ (1,0) [0|1] "" XXX
 
 BO_ 1042 LKAS_HUD: 8 XXX
  SG_ BARRIERS : 1|2@0+ (1,0) [0|3] "" XXX
