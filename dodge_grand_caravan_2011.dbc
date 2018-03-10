@@ -102,7 +102,7 @@ BO_ 776 NEW_MSG_3: 8 XXX
 
 BO_ 566 hassteering: 8 XXX
  SG_ NEW_SIGNAL_1 : 31|16@0+ (1,0) [0|65535] "" XXX
- SG_ strangl : 4|13@0- (1,0) [0|65535] "" XXX
+ SG_ strangl : 4|13@0- (1,0) [-360|360] "" XXX
 
 
 
