@@ -112,9 +112,12 @@ BO_ 719 AUTO_PARK_SIGNALS_1: 8 XXX
  SG_ AUTO_PARK_UNKNOWN_1 : 7|16@0+ (1,0) [0|31] "" XXX
 
 BO_ 671 AUTO_PARK_SIGNALS_2: 8 XXX
- SG_ AUTO_PARK_PERPENDICULAR : 22|1@0+ (1,0) [0|1] "" XXX
  SG_ AUTO_PARK_PARALLEL : 21|1@0+ (1,0) [0|1] "" XXX
  SG_ AUTO_PARK_MAYBE_TURNING : 2|11@0+ (1,0) [0|1023] "" XXX
+ SG_ AUTO_PARK_PERPENDICULAR_1 : 22|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 784 AUTO_PARK_LESS_INTERESTING: 8 XXX
+ SG_ AUTO_PARK_PERPENDICULAR_2 : 61|1@0+ (1,0) [0|255] "" XXX
 
 
 
@@ -137,8 +140,8 @@ CM_ SG_ 678 WARNING_PLACE_HANDS "set when warning displays place hands on steeri
 CM_ SG_ 678 LKAS_WHITE_OR_YELLOW "set when indicator is yellow or white. could indicate lkas not on track.";
 CM_ SG_ 678 LKAS_IS_YELLOW_2 "set when indicator is yellow. could indicate lkas is steering.";
 CM_ SG_ 705 AUTO_PARK_TOGGLE_1 "set briefly when turning on or off self-parking";
-CM_ SG_ 671 AUTO_PARK_PERPENDICULAR "perpendicular parking mode";
 CM_ SG_ 671 AUTO_PARK_PARALLEL "parallel parking mode";
 CM_ SG_ 671 AUTO_PARK_MAYBE_TURNING "something with autopark turning the steering wheel maybe.";
+CM_ SG_ 671 AUTO_PARK_PERPENDICULAR_1 "perpendicular parking mode";
 VAL_ 746 PRNDL 4 "Drive" 3 "Neutral" 2 "Reverse" 1 "Park" ;
 VAL_ 792 TURN_SIGNALS 2 "Right" 1 "Left" ;
