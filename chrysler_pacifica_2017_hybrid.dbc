@@ -102,6 +102,10 @@ BO_ 678 LKAS_INDICATOR_3: 8 XXX
  SG_ LKAS_WHITE_OR_YELLOW : 0|1@1+ (1,0) [0|1] "" XXX
  SG_ LKAS_IS_YELLOW_2 : 19|1@1+ (1,0) [0|1] "" XXX
 
+BO_ 705 AUTO_PARK_BUTTON: 8 XXX
+ SG_ AUTO_PARK_TURN_OFF_2 : 8|1@1+ (1,0) [0|1] "" XXX
+ SG_ AUTO_PARK_TURN_OFF_1 : 11|1@0+ (1,0) [0|1] "" XXX
+
 
 
 
@@ -121,5 +125,6 @@ CM_ SG_ 658 LKAS_IS_YELLOW_1 "could indicate lkas is steering.";
 CM_ SG_ 678 WARNING_PLACE_HANDS "set when warning displays place hands on steering wheel";
 CM_ SG_ 678 LKAS_WHITE_OR_YELLOW "set when indicator is yellow or white. could indicate lkas not on track.";
 CM_ SG_ 678 LKAS_IS_YELLOW_2 "set when indicator is yellow. could indicate lkas is steering.";
+CM_ SG_ 705 AUTO_PARK_TURN_OFF_1 "set briefly when turning off self-parking";
 VAL_ 746 PRNDL 4 "Drive" 3 "Neutral" 2 "Reverse" 1 "Park" ;
 VAL_ 792 TURN_SIGNALS 2 "Right" 1 "Left" ;
