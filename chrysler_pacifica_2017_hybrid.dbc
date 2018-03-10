@@ -93,7 +93,8 @@ BO_ 464 SEATBELT_STATUS: 8 XXX
 
 BO_ 544 LKAS_INDICATOR_1: 8 XXX
  SG_ LKAS_IS_GREEN : 23|1@0+ (1,0) [0|1] "" XXX
- SG_ AUTO_PARK_HAS_CONTROL : 20|1@0+ (1,0) [0|1] "" XXX
+ SG_ AUTO_PARK_HAS_CONTROL_1 : 20|1@0+ (1,0) [0|1] "" XXX
+ SG_ AUTO_PARK_HAS_CONTROL_2 : 51|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 658 LKAS_INDICATOR_2: 8 XXX
  SG_ LKAS_IS_YELLOW_1 : 8|2@1+ (1,0) [0|3] "" XXX
@@ -125,7 +126,7 @@ CM_ SG_ 320 BRAKE_PRESSED "Value is 5 when brake is pressed";
 CM_ SG_ 792 TURN_SIGNALS "1=Left, 2=Right";
 CM_ SG_ 792 HIGH_BEAM_FLASH "use this for genericToggle";
 CM_ SG_ 264 ACCEL_PEDAL "not in ACC so seems to be actual pedal. Use for gasPressed";
-CM_ SG_ 544 AUTO_PARK_HAS_CONTROL "set when autopark has control";
+CM_ SG_ 544 AUTO_PARK_HAS_CONTROL_1 "set when autopark has control";
 CM_ SG_ 658 LKAS_IS_YELLOW_1 "could indicate lkas is steering.";
 CM_ SG_ 678 WARNING_PLACE_HANDS "set when warning displays place hands on steering wheel";
 CM_ SG_ 678 LKAS_WHITE_OR_YELLOW "set when indicator is yellow or white. could indicate lkas not on track.";
