@@ -123,6 +123,9 @@ BO_ 826 AUTO_PARK_SIGNALS_3: 8 XXX
  SG_ AUTO_PARK_HAS_CONTROL_3 : 1|1@0+ (1,0) [0|1] "" XXX
  SG_ HUMAN_HAS_CONTROL : 2|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 332 STEERING_2: 8 XXX
+ SG_ STEER_ANGLE_2 : 7|13@0+ (0.3187251,-1307.888) [-360|360] "deg" XXX
+
 
 
 
@@ -147,5 +150,6 @@ CM_ SG_ 705 AUTO_PARK_TOGGLE_1 "set briefly when turning on or off self-parking"
 CM_ SG_ 671 AUTO_PARK_PARALLEL "parallel parking mode";
 CM_ SG_ 671 AUTO_PARK_MAYBE_TURNING "something with autopark turning the steering wheel maybe.";
 CM_ SG_ 671 AUTO_PARK_PERPENDICULAR_1 "perpendicular parking mode";
+CM_ SG_ 332 STEER_ANGLE_2 "slightly lags the other steer_angle signal. also more noisy.";
 VAL_ 746 PRNDL 4 "Drive" 3 "Neutral" 2 "Reverse" 1 "Park" ;
 VAL_ 792 TURN_SIGNALS 2 "Right" 1 "Left" ;
