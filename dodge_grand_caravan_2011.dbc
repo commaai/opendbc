@@ -88,9 +88,21 @@ BO_ 792 STEERING_LEVERS: 8 XXX
 BO_ 264 ACCEL_PEDAL_MSG: 8 XXX
  SG_ ACCEL_PEDAL : 32|4@1+ (1,-7) [0|15] "" XXX
 
-BO_ 520 NEW_MSG_3: 8 XXX
+BO_ 520 brakeandspeed: 8 XXX
  SG_ Brake : 31|8@0+ (1,0) [0|255] "" XXX
- SG_ steer : 55|16@0+ (1,0) [0|65535] "" XXX
+ SG_ speed : 55|16@0+ (1,0) [0|65535] "" XXX
+
+BO_ 786 NEW_MSG_4: 8 XXX
+ SG_ movem : 39|16@0+ (1,0) [0|65535] "" XXX
+ SG_ NEW_SIGNAL_1 : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_2 : 8|8@1+ (1,0) [0|255] "" XXX
+
+BO_ 776 NEW_MSG_3: 8 XXX
+ SG_ NEW_SIGNAL_1 : 15|16@0+ (1,0) [0|65535] "" XXX
+
+BO_ 566 hassteering: 8 XXX
+ SG_ NEW_SIGNAL_1 : 31|16@0+ (1,0) [0|65535] "" XXX
+ SG_ strangl : 7|16@0- (1,0) [0|65535] "" XXX
 
 
 
