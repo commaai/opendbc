@@ -72,6 +72,11 @@ BO_ 789 NEW_MSG_8: 8 XXX
 BO_ 805 NEW_MSG_9: 8 XXX
  SG_ someh1 : 39|8@0+ (1,0) [0|255] "" XXX
 
+BO_ 808 NEW_MSG_10: 8 XXX
+ SG_ counter : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ som : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ speed : 8|8@1+ (1,0) [0|255] "" XXX
+
 
 
 
