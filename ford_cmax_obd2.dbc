@@ -40,6 +40,8 @@ BO_ 16 STEER_1: 8 XXX
  SG_ WheelTurnActiveDirect : 23|1@0+ (1,0) [0|255] "" XXX
  SG_ WheelDirection : 39|1@0+ (1,0) [0|1] "" XXX
  SG_ WheelOrientation : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ Torque1 : 40|8@1+ (1,0) [0|255] "" XXX
+ SG_ Torque2 : 38|7@0+ (1,0) [0|127] "" XXX
 
 
 
