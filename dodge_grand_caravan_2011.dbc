@@ -36,8 +36,6 @@ BS_:
 BU_: XXX
 
 
-
-
 BO_ 520 brakeandspeed: 8 XXX
  SG_ Brake : 31|8@0+ (1,0) [0|255] "" XXX
  SG_ speed : 55|16@0+ (1,0) [0|65535] "" XXX
@@ -52,9 +50,9 @@ BO_ 776 NEW_MSG_3: 8 XXX
 
 BO_ 566 hassteering: 8 XXX
  SG_ NEW_SIGNAL_1 : 31|16@0+ (1,0) [0|65535] "" XXX
- SG_ strangl : 4|13@0- (1,0) [-360|360] "" XXX
+ SG_ strangl : 3|12@0- (1,0) [-360|360] "" XXX
 
 
 
 
-
+CM_ SG_ 566 strangl "Positive is left";
