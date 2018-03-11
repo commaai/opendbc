@@ -52,6 +52,13 @@ BO_ 566 hassteering: 8 XXX
  SG_ strangl : 3|12@0- (1,0) [-360|360] "" XXX
  SG_ NEW_SIGNAL_1 : 31|16@0+ (1,0) [0|65535] "" XXX
 
+BO_ 512 NEW_MSG_1: 8 XXX
+
+BO_ 528 NEW_MSG_2: 8 XXX
+
+BO_ 530 NEW_MSG_5: 8 XXX
+ SG_ something : 53|14@0+ (1,0) [0|255] "" XXX
+
 
 
 
