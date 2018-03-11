@@ -129,6 +129,11 @@ BO_ 332 STEERING_2: 8 XXX
 BO_ 720 BLIND_SPOT_WARNINGS: 8 XXX
  SG_ BLIND_SPOT_RIGHT : 5|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 331 NEW_MSG_3: 8 XXX
+
+BO_ 608 PARKSENSE_SIGNAL: 8 XXX
+ SG_ PARKSENSE_DISABLED : 34|1@0+ (1,0) [0|1] "" XXX
+
 
 
 
@@ -155,5 +160,6 @@ CM_ SG_ 671 AUTO_PARK_MAYBE_TURNING "something with autopark turning the steerin
 CM_ SG_ 671 AUTO_PARK_PERPENDICULAR_1 "perpendicular parking mode";
 CM_ SG_ 332 STEER_ANGLE_2 "slightly lags the other steer_angle signal. also more noisy.";
 CM_ SG_ 720 BLIND_SPOT_RIGHT "yellow triangle alert on side view mirror when a car is in your blind spot";
+CM_ SG_ 608 PARKSENSE_DISABLED "set if parksense is disabled";
 VAL_ 746 PRNDL 4 "Drive" 3 "Neutral" 2 "Reverse" 1 "Park" ;
 VAL_ 792 TURN_SIGNALS 2 "Right" 1 "Left" ;
