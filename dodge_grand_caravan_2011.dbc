@@ -77,6 +77,12 @@ BO_ 808 NEW_MSG_10: 8 XXX
  SG_ som : 16|8@1+ (1,0) [0|255] "" XXX
  SG_ speed : 8|8@1+ (1,0) [0|255] "" XXX
 
+BO_ 848 NEW_MSG_11: 8 XXX
+
+BO_ 752 NEW_MSG_12: 8 XXX
+ SG_ NEW_SIGNAL_1 : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ gas_pedal : 24|8@1+ (1,0) [0|255] "" XXX
+
 
 
 
