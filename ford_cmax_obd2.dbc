@@ -33,7 +33,16 @@ NS_ :
 
 BS_:
 
-BU_: 
+BU_: XXX
 
 
 BO_ 16 STEER_1: 8 XXX
+ SG_ WheelTurnActiveDirect : 23|1@0+ (1,0) [0|255] "" XXX
+ SG_ WheelDirection : 39|1@0+ (1,0) [0|1] "" XXX
+ SG_ WheelOrientation : 55|8@0+ (1,0) [0|255] "" XXX
+
+
+
+
+CM_ SG_ 16 WheelTurnActiveDirect "0-wheel going ccw,1-wheel going cw";
+CM_ SG_ 16 WheelDirection "0-left,1-right. ";
