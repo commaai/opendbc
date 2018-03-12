@@ -43,6 +43,12 @@ BO_ 16 STEER_1: 8 XXX
  SG_ Torque1 : 40|8@1+ (1,0) [0|255] "" XXX
  SG_ Torque2 : 38|7@0+ (1,0) [0|127] "" XXX
 
+BO_ 516 GAS: 8 XXX
+ SG_ UserGasPosition : 1|18@0+ (1,0) [0|65535] "" XXX
+
+BO_ 125 BRAKE1: 8 XXX
+ SG_ PedalPosition : 7|16@0+ (1,0) [0|65535] "" XXX
+
 
 
 
