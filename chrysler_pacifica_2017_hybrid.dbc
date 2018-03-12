@@ -96,10 +96,10 @@ BO_ 544 LKAS_INDICATOR_1: 8 XXX
  SG_ AUTO_PARK_HAS_CONTROL_1 : 20|1@0+ (1,0) [0|1] "" XXX
  SG_ AUTO_PARK_HAS_CONTROL_2 : 51|1@1+ (1,0) [0|1] "" XXX
 
-BO_ 658 LKAS_INDICATOR_2: 8 XXX
+BO_ 658 LKAS_INDICATOR_2: 6 XXX
  SG_ LKAS_STEERING_TORQUE_MAYBE : 0|8@0- (1,0) [0|63] "" XXX
  SG_ LKAS_INCREMENTING : 39|4@0+ (1,0) [0|15] "" XXX
- SG_ LKAS_CHECKSUM_MAYBE : 40|8@1+ (1,0) [0|255] "" XXX
+ SG_ LKAS_CHECKSUM_2 : 40|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 678 LKAS_INDICATOR_3: 8 XXX
  SG_ WARNING_PLACE_HANDS : 22|2@0+ (1,0) [0|3] "" XXX
@@ -153,6 +153,7 @@ CM_ SG_ 792 HIGH_BEAM_FLASH "use this for genericToggle";
 CM_ SG_ 264 ACCEL_PEDAL "not in ACC so seems to be actual pedal. Use for gasPressed";
 CM_ SG_ 544 AUTO_PARK_HAS_CONTROL_1 "set when autopark has control";
 CM_ SG_ 658 LKAS_INCREMENTING "each message increments, 0..f";
+CM_ SG_ 658 LKAS_CHECKSUM_2 "checksum calculated with https://gist.github.com/adhintz/94bf8d19b9075539f50172ab0fb24ba1";
 CM_ SG_ 678 WARNING_PLACE_HANDS "set when warning displays place hands on steering wheel";
 CM_ SG_ 678 LKAS_WHITE_OR_YELLOW "set when indicator is yellow or white. could indicate lkas not on track.";
 CM_ SG_ 678 LKAS_IS_YELLOW_2 "set when indicator is yellow. could indicate lkas is steering.";
