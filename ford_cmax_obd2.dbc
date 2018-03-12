@@ -49,6 +49,12 @@ BO_ 516 GAS: 8 XXX
 BO_ 125 BRAKE1: 8 XXX
  SG_ PedalPosition : 7|16@0+ (1,0) [0|65535] "" XXX
 
+BO_ 604 TRANS1: 8 XXX
+ SG_ GearPosition : 17|2@1+ (1,0) [0|3] "" XXX
+
+BO_ 514 SPEED1: 8 XXX
+ SG_ SPEED1 : 48|8@1+ (1,0) [0|255] "" XXX
+
 
 
 
