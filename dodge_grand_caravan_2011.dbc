@@ -38,7 +38,7 @@ BU_: XXX
 
 BO_ 520 brakeandspeed: 8 XXX
  SG_ Brake : 19|12@0+ (1,0) [0|255] "" XXX
- SG_ speed : 55|16@0+ (1,0) [0|65535] "" XXX
+ SG_ speed : 55|16@0+ (.0001,0) [0|65535] "kph" XXX
 
 BO_ 786 NEW_MSG_4: 8 XXX
  SG_ NEW_SIGNAL_1 : 63|8@0+ (1,0) [0|255] "" XXX
@@ -80,6 +80,11 @@ BO_ 848 NEW_MSG_11: 8 XXX
 BO_ 752 has_gas_pedal: 8 XXX
  SG_ gas_pedal : 24|8@1+ (1,0) [0|255] "" XXX
  SG_ relatedtogaspedal : 0|8@1+ (1,0) [0|255] "" XXX
+
+BO_ 840 NEW_MSG_7: 8 XXX
+
+BO_ 996 NEW_MSG_12: 8 XXX
+ SG_ counter : 16|8@1+ (1,0) [0|255] "" XXX
 
 
 
