@@ -39,9 +39,9 @@ BU_: XXX
 BO_ 16 STEER_1: 8 XXX
  SG_ WheelTurnActiveDirect : 23|1@0+ (1,0) [0|255] "" XXX
  SG_ WheelDirection : 39|1@0+ (1,0) [0|1] "" XXX
- SG_ WheelOrientation : 55|8@0+ (1,0) [0|255] "" XXX
  SG_ Torque1 : 40|8@1+ (1,0) [0|255] "" XXX
- SG_ Torque2 : 38|7@0+ (1,0) [0|127] "" XXX
+ SG_ WheelOrientation : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ Torque2 : 38|7@0- (1,0) [0|127] "" XXX
 
 BO_ 516 GAS: 8 XXX
  SG_ UserGasPosition : 1|18@0+ (1,0) [0|65535] "" XXX
@@ -53,7 +53,7 @@ BO_ 604 TRANS1: 8 XXX
  SG_ GearPosition : 17|2@1+ (1,0) [0|3] "" XXX
 
 BO_ 514 SPEED1: 8 XXX
- SG_ SPEED1 : 48|8@1+ (1,0) [0|255] "" XXX
+ SG_ SPEED1 : 48|8@1+ (2,0) [0|255] "" XXX
 
 
 
