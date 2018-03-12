@@ -62,8 +62,8 @@ BO_ 530 NEW_MSG_5: 8 XXX
 BO_ 533 NEW_MSG_6: 8 XXX
  SG_ relatedtogaspedal : 3|12@0+ (1,0) [0|4095] "" XXX
 
-BO_ 768 NEW_MSG_7: 8 XXX
- SG_ relatedtosteering : 40|16@1+ (1,0) [0|255] "" XXX
+BO_ 768 steering: 8 XXX
+ SG_ steering : 40|16@1+ (1,0) [0|255] "" XXX
 
 BO_ 789 NEW_MSG_8: 8 XXX
 
