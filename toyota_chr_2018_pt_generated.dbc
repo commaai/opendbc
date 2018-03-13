@@ -139,7 +139,8 @@ BO_ 1042 LKAS_HUD: 8 XXX
  SG_ BARRIERS : 1|2@0+ (1,0) [0|3] "" XXX
  SG_ RIGHT_LINE : 3|2@0+ (1,0) [0|3] "" XXX
  SG_ LEFT_LINE : 5|2@0+ (1,0) [0|3] "" XXX
- SG_ SET_ME_1 : 7|2@0+ (1,0) [0|3] "" XXX
+ SG_ SET_ME_X01 : 7|2@0+ (1,0) [0|3] "" XXX
+ SG_ SET_ME_X01_2 : 11|2@0+ (1,0) [0|3] "" XXX
  SG_ LDA_ALERT : 9|2@0+ (1,0) [0|3] "" XXX
  SG_ TWO_BEEPS : 12|1@0+ (1,0) [0|1] "" XXX
  SG_ ADJUSTING_CAMERA : 13|1@0+ (1,0) [0|1] "" XXX
