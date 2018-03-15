@@ -60,15 +60,17 @@ BO_ 820 DOORS: 8 XXX
 
 BO_ 746 GEAR: 5 XXX
  SG_ PRNDL : 0|3@1+ (1,0) [0|7] "" XXX
+ SG_ GEAR_CHECKSUM : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ GEAR_INCREMENTING : 31|4@0+ (1,0) [0|15] "" XXX
 
-BO_ 284 NEW_MSG_1: 8 XXX
- SG_ BRAKE_RELATED : 3|12@0+ (1,0) [0|255] "" XXX
- SG_ BRAKE_RELATED_2 : 17|10@0+ (1,0) [0|255] "" XXX
- SG_ SPEED : 37|14@0+ (1,0) [0|255] "" XXX
+BO_ 284 BRAKE_1: 8 XXX
+ SG_ SPEED_RELATED_1 : 37|14@0+ (1,0) [0|255] "" XXX
+ SG_ BRAKE_RELATED_1_2 : 17|10@0+ (1,0) [0|255] "" XXX
+ SG_ BRAKE_RELATED_1_1 : 3|12@0+ (1,0) [0|255] "" XXX
 
-BO_ 320 NEW_MSG_2: 8 XXX
- SG_ SPEED_RELATED : 47|8@0+ (1,0) [0|63] "" XXX
+BO_ 320 BRAKE_2: 8 XXX
  SG_ BRAKE_PRESSED : 2|3@0+ (1,0) [0|7] "" XXX
+ SG_ SPEED_RELATED_2 : 47|8@0+ (1,0) [0|63] "" XXX
 
 BO_ 736 TRIP: 8 XXX
  SG_ DISTANCE_COUNTER : 7|16@0+ (0,0) [0|65535] "Meters" XXX
@@ -131,10 +133,22 @@ BO_ 332 STEERING_2: 8 XXX
 BO_ 720 BLIND_SPOT_WARNINGS: 8 XXX
  SG_ BLIND_SPOT_RIGHT : 5|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 331 NEW_MSG_3: 8 XXX
+BO_ 331 BRAKE_3: 8 XXX
+ SG_ BRAKE_RELATED_3 : 7|16@0+ (1,0) [0|65535] "" XXX
 
 BO_ 608 PARKSENSE_SIGNAL: 8 XXX
  SG_ PARKSENSE_DISABLED : 34|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 729 LKAS_STATUS_1: 5 XXX
+ SG_ LKAS_STATUS_OK : 31|16@0+ (1,0) [0|65535] "" XXX
+
+BO_ 274 NEW_MSG_1: 2 XXX
+
+BO_ 290 NEW_MSG_2: 6 XXX
+
+BO_ 376 NEW_MSG_3: 3 XXX
+
+BO_ 288 NEW_MSG_4: 7 XXX
 
 
 
@@ -145,8 +159,9 @@ CM_ SG_ 653 BRAKE_PRESSURE "max seems to be 148";
 CM_ SG_ 820 TURN_LIGHT_LEFT "oscillates with the light blinking";
 CM_ SG_ 820 TURN_LIGHT_RIGHT "hazard blinks both right and left lights";
 CM_ SG_ 746 PRNDL "4=D, 3=N, 2=R, 1=P";
-CM_ SG_ 284 BRAKE_RELATED "Correlates with braking";
-CM_ SG_ 284 SPEED "Another Speed Signal, Maybe RPMs?";
+CM_ SG_ 746 GEAR_CHECKSUM "different than the LKAS checksum. unknown non-simple algorithm. just build a lookup table for it.";
+CM_ SG_ 284 SPEED_RELATED_1 "Another Speed Signal, Maybe RPMs?";
+CM_ SG_ 284 BRAKE_RELATED_1_1 "Correlates with braking";
 CM_ SG_ 320 BRAKE_PRESSED "Value is 5 when brake is pressed";
 CM_ SG_ 792 TURN_SIGNALS "1=Left, 2=Right";
 CM_ SG_ 792 HIGH_BEAM_FLASH "use this for genericToggle";
@@ -164,5 +179,6 @@ CM_ SG_ 671 AUTO_PARK_PERPENDICULAR_1 "perpendicular parking mode";
 CM_ SG_ 332 STEER_ANGLE_2 "slightly lags the other steer_angle signal. also more noisy.";
 CM_ SG_ 720 BLIND_SPOT_RIGHT "yellow triangle alert on side view mirror when a car is in your blind spot";
 CM_ SG_ 608 PARKSENSE_DISABLED "set if parksense is disabled";
+CM_ SG_ 729 LKAS_STATUS_OK "Set to 0x0820 when LKAS system is plugged in.";
 VAL_ 746 PRNDL 4 "Drive" 3 "Neutral" 2 "Reverse" 1 "Park" ;
 VAL_ 792 TURN_SIGNALS 2 "Right" 1 "Left" ;
