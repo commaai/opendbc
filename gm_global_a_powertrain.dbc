@@ -173,7 +173,7 @@ BO_ 842 EBCMWheelSpdRear: 4 K17_EBCM
  SG_ RRWheelSpd : 23|16@0+ (0.0311,0) [0|255] "km/h"  NEO
 
 BO_ 241 EBCMBrakePedalPosition: 6 K17_EBCM
- SG_ BrakePedalPosition : 15|8@0+ (0.392157,0) [0|255] "%"  NEO
+ SG_ BrakePedalPosition : 15|8@0+ (1,0) [0|255] ""  NEO
 
 BO_ 711 BECMBatteryVoltageCurrent: 6 K17_EBCM
  SG_ HVBatteryVoltage : 31|12@0+ (0.125,0) [0|511.875] "V"  NEO
