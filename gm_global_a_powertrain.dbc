@@ -165,12 +165,12 @@ BO_ 715 ASCMGasRegenCmd: 8 K124_ASCM
  SG_ GasRegenCmd : 22|12@0+ (1,0) [0|0] ""  NEO
 
 BO_ 840 EBCMWheelSpdFront: 4 K17_EBCM
- SG_ FLWheelSpd : 7|16@0+ (0.0305,0) [0|255] "km/h"  NEO
- SG_ FRWheelSpd : 23|16@0+ (0.0305,0) [0|255] "km/h"  NEO
+ SG_ FLWheelSpd : 7|16@0+ (0.0311,0) [0|255] "km/h"  NEO
+ SG_ FRWheelSpd : 23|16@0+ (0.0311,0) [0|255] "km/h"  NEO
 
 BO_ 842 EBCMWheelSpdRear: 4 K17_EBCM
- SG_ RLWheelSpd : 7|16@0+ (0.0305,0) [0|255] "km/h"  NEO
- SG_ RRWheelSpd : 23|16@0+ (0.0305,0) [0|255] "km/h"  NEO
+ SG_ RLWheelSpd : 7|16@0+ (0.0311,0) [0|255] "km/h"  NEO
+ SG_ RRWheelSpd : 23|16@0+ (0.0311,0) [0|255] "km/h"  NEO
 
 BO_ 241 EBCMBrakePedalPosition: 6 K17_EBCM
  SG_ BrakePedalPosition : 15|8@0+ (0.392157,0) [0|255] "%"  NEO
