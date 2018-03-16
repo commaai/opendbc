@@ -104,6 +104,7 @@ BO_ 835 ACC_CONTROL: 8 DSU
  SG_ SET_ME_1 : 30|1@0+ (1,0) [0|1] "" HCU
  SG_ RELEASE_STANDSTILL : 31|1@0+ (1,0) [0|1] "" HCU
  SG_ CANCEL_REQ : 24|1@0+ (1,0) [0|1] "" HCU
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 1556 STEERING_LEVERS: 8 XXX
  SG_ TURN_SIGNALS : 29|2@0+ (1,0) [0|3] "" XXX
@@ -138,7 +139,8 @@ BO_ 1042 LKAS_HUD: 8 XXX
  SG_ BARRIERS : 1|2@0+ (1,0) [0|3] "" XXX
  SG_ RIGHT_LINE : 3|2@0+ (1,0) [0|3] "" XXX
  SG_ LEFT_LINE : 5|2@0+ (1,0) [0|3] "" XXX
- SG_ SET_ME_1 : 7|2@0+ (1,0) [0|3] "" XXX
+ SG_ SET_ME_X01 : 7|2@0+ (1,0) [0|3] "" XXX
+ SG_ SET_ME_X01_2 : 11|2@0+ (1,0) [0|3] "" XXX
  SG_ LDA_ALERT : 9|2@0+ (1,0) [0|3] "" XXX
  SG_ TWO_BEEPS : 12|1@0+ (1,0) [0|1] "" XXX
  SG_ ADJUSTING_CAMERA : 13|1@0+ (1,0) [0|1] "" XXX
@@ -216,7 +218,7 @@ BO_ 608 STEER_TORQUE_SENSOR: 8 XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 610 EPS_STATUS: 8 EPS
- SG_ STATE : 3|4@0+ (1,0) [0|15] "" XXX
+ SG_ IPAS_STATE : 3|4@0+ (1,0) [0|15] "" XXX
  SG_ LKA_STATE : 31|8@0+ (1,0) [0|255] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
@@ -224,5 +226,5 @@ CM_ SG_ 550 BRAKE_PRESSURE "seems prop to pedal force";
 CM_ SG_ 550 BRAKE_POSITION "seems proportional to pedal displacement, unclear the max value of 0x1c8";
 CM_ SG_ 581 GAS_PEDAL "it seems slightly filtered";
 VAL_ 295 GEAR 0 "P" 1 "R" 2 "N" 3 "D" 4 "B";
-VAL_ 610 STATE 5 "override" 3 "enabled" 1 "disabled";
+VAL_ 610 IPAS_STATE 5 "override" 3 "enabled" 1 "disabled";
 VAL_ 610 LKA_STATE 50 "temporary_fault" 10 "active" 2 "standby";
