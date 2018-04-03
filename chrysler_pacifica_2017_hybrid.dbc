@@ -68,16 +68,17 @@ BO_ 746 GEAR: 5 XXX
 
 BO_ 284 BRAKE_1: 8 XXX
  SG_ SPEED_RELATED_1 : 37|14@0+ (1,0) [0|255] "" XXX
- SG_ BRAKE_RELATED_1_2 : 17|10@0+ (1,0) [0|255] "" XXX
+ SG_ BRAKE_RELATED_1_2 : 18|11@0+ (1,0) [0|255] "" XXX
  SG_ BRAKE_RELATED_1_1 : 3|12@0+ (1,0) [0|255] "" XXX
  SG_ INCREMENTING_BRAKE : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM_BRAKE : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 320 BRAKE_2: 8 XXX
- SG_ BRAKE_PRESSED : 2|3@0+ (1,0) [0|7] "" XXX
  SG_ SPEED_RELATED_2 : 47|8@0+ (1,0) [0|63] "" XXX
  SG_ INCREMENTING_140 : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM_140 : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ BRAKE_PRESSED_2 : 2|3@0+ (1,0) [0|7] "" XXX
+ SG_ BRAKE_PRESSED_1 : 6|1@0+ (1,0) [0|3] "" XXX
 
 BO_ 736 TRIP: 8 XXX
  SG_ DISTANCE_COUNTER : 7|16@0+ (1,0) [0|65535] "Meters" XXX
@@ -284,7 +285,7 @@ CM_ SG_ 746 PRNDL "4=D, 3=N, 2=R, 1=P";
 CM_ SG_ 746 GEAR_CHECKSUM "different than the LKAS checksum. unknown non-simple algorithm. just build a lookup table for it.";
 CM_ SG_ 284 SPEED_RELATED_1 "Another Speed Signal, Maybe RPMs?";
 CM_ SG_ 284 BRAKE_RELATED_1_1 "Correlates with braking";
-CM_ SG_ 320 BRAKE_PRESSED "Value is 5 when brake is pressed";
+CM_ SG_ 320 BRAKE_PRESSED_2 "Value is 5 when brake is pressed";
 CM_ SG_ 792 TURN_SIGNALS "1=Left, 2=Right";
 CM_ SG_ 792 HIGH_BEAM_FLASH "use this for genericToggle";
 CM_ SG_ 264 ACCEL_PEDAL "not in ACC so seems to be actual pedal. Use for gasPressed";
