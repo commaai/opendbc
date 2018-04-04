@@ -73,6 +73,10 @@ BO_ 184053784 LIGHTING5: 3 XXX
 BO_ 318259736 RR_DOOR: 1 XXX
  SG_ LOCK_STATUS : 7|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 318288034 HEATED_SEATS: 2 XXX
+ SG_ PASS_SEAT : 2|2@0+ (1,0) [0|3] "" XXX
+ SG_ DRIVER_SEAT : 6|2@0+ (1,0) [0|3] "" XXX
+
 
 
 
@@ -80,3 +84,5 @@ CM_ SG_ 16 WheelTurnActiveDirect "0-wheel going ccw,1-wheel going cw";
 CM_ SG_ 16 WheelDirection "0-left,1-right. ";
 CM_ SG_ 318255664 LOCK_STATUS "LOCKED = 0, UNLOCKED = 1";
 CM_ SG_ 318259736 LOCK_STATUS "LOCKED = 0, UNLOCKED = 1";
+CM_ SG_ 318288034 PASS_SEAT "0 = OFF, 1 = HIGH, 2 = MED, 3 = LO";
+CM_ SG_ 318288034 DRIVER_SEAT "0 = OFF, 1 = HIGH, 2 = MED, 3 = LO";
