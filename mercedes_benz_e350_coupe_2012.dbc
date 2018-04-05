@@ -36,27 +36,29 @@ BS_:
 BU_: XXX
 
 
-BO_ 3 NEW_MSG_1: 8 XXX
- SG_ STEERING_ANGLE : 7|32@0- (1,0) [0|4294967295] "" XXX
- SG_ NEW_SIGNAL_1 : 55|8@0+ (1,0) [0|255] "" XXX
+BO_ 3 STEERING: 8 XXX
+ SG_ STEERING_ANGLE : 3|12@0- (0.03,0) [-30|30] "degree" XXX
 
-BO_ 5 NEW_MSG_2: 8 XXX
- SG_ BRAKE_POSITION : 23|16@0+ (1,0) [0|65535] "" XXX
- SG_ BRAKE_PRESSED : 0|8@1+ (1,0) [0|17] "" XXX
+BO_ 5 BRAKE: 8 XXX
+ SG_ BRAKE_PRESSED : 0|8@0+ (1,0) [0|0] "" XXX
+ SG_ BRAKE_POSITION : 19|12@0+ (1,0) [0|4095] "" XXX
 
-BO_ 69 NEW_MSG_3: 8 XXX
- SG_ TURN_SIGNAL_LEVER : 16|8@1+ (1,0) [0|255] "" XXX
- SG_ CRUISE_CONTROL_LEVER : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_2 : 55|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_1 : 63|8@0+ (1,0) [0|255] "" XXX
- SG_ STEERING_WHEEL_BUTTONS : 32|8@1+ (1,0) [0|255] "4 directional, 2 volume control, & 2 phone buttons" XXX
- SG_ MORE_STEERING_WHEELS_BUTTONS : 40|8@1+ (1,0) [0|255] "" XXX
+BO_ 261 GAS: 8 XXX
+ SG_ RPM : 7|16@0+ (1,0) [0|255] "" XXX
+ SG_ GAS : 31|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 1 NEW_MSG_4: 8 XXX
- SG_ DOOR_LOCK_STATUS : 31|16@0+ (1,0) [0|65535] "" XXX
+BO_ 515 SPEED: 8 XXX
+ SG_ Reverse : 7|1@0+ (1,0) [0|1] "" XXX
+ SG_ Front : 6|1@0+ (1,0) [0|1] "" XXX
+ SG_ SPEED1 : 5|14@0+ (1,0) [0|16383] "" XXX
+ SG_ SPEED2 : 21|14@0+ (1,0) [0|255] "" XXX
+ SG_ SPEED3 : 37|14@0+ (1,0) [0|16383] "" XXX
+ SG_ SPEED4 : 53|14@0+ (1,0) [0|16383] "" XXX
 
-
-
-
-CM_ SG_ 5 BRAKE_PRESSED "appears to be boolean (brake pressed)";
-CM_ SG_ 69 MORE_STEERING_WHEELS_BUTTONS "back, ok, voice assistance, and mute buttons";
+BO_ 1014 STEERING_WHEEL_AUDIO_CONTROLS: 8 XXX
+ SG_ VOLUME_UP : 8|1@1+ (1,0) [0|1] "" XXX
+ SG_ VOLUME_DOWN : 9|1@0+ (1,0) [0|1] "" XXX
+ SG_ ANSWER : 10|1@0+ (1,0) [0|1] "" XXX
+ SG_ HANG_UP : 11|1@0+ (1,0) [0|1] "" XXX
+ SG_ SPEEK : 12|1@0+ (1,0) [0|1] "" XXX
+ SG_ MUTE : 14|1@0+ (1,0) [0|1] "" XXX
