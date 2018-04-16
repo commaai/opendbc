@@ -1,0 +1,106 @@
+VERSION ""
+
+
+NS_ : 
+    NS_DESC_
+    CM_
+    BA_DEF_
+    BA_
+    VAL_
+    CAT_DEF_
+    CAT_
+    FILTER
+    BA_DEF_DEF_
+    EV_DATA_
+    ENVVAR_DATA_
+    SGTYPE_
+    SGTYPE_VAL_
+    BA_DEF_SGTYPE_
+    BA_SGTYPE_
+    SIG_TYPE_REF_
+    VAL_TABLE_
+    SIG_GROUP_
+    SIG_VALTYPE_
+    SIGTYPE_VALTYPE_
+    BO_TX_BU_
+    BA_DEF_REL_
+    BA_REL_
+    BA_DEF_DEF_REL_
+    BU_SG_REL_
+    BU_EV_REL_
+    BU_BO_REL_
+    SG_MUL_VAL_
+
+BU_: XXX
+
+BO_ 130 EPAS_INFO: 8 XXX
+ SG_ SteMdule_U_Meas : 39|8@0+ (0.05,6.0) [0|0] "Volts" XXX
+ SG_ SteMdule_I_Est : 21|12@0+ (0.05,-64.0) [0|0] "Amps" XXX
+ SG_ EPAS_FAILURE : 9|2@0+ (1,0) [0|0] "" XXX
+ SG_ SteeringColumnTorque : 7|8@0+ (0.0625,-8.0) [0|0] "Nm" XXX
+ SG_ SAPPAngleControlStat6 : 15|1@0+ (1,0) [0|0] "" XXX
+ SG_ SAPPAngleControlStat5 : 14|1@0+ (1,0) [0|0] "" XXX
+ SG_ SAPPAngleControlStat4 : 13|1@0+ (1,0) [0|0] "" XXX
+ SG_ SAPPAngleControlStat3 : 12|1@0+ (1,0) [0|0] "" XXX
+ SG_ SAPPAngleControlStat2 : 11|1@0+ (1,0) [0|0] "" XXX
+ SG_ SAPPAngleControlStat1 : 23|2@0+ (1,0) [0|0] "" XXX
+
+BO_ 132 Steering_Wheel_Data_CG1: 8 XXX
+ SG_ SteWhlRelInit_An_Sns : 7|16@0+ (0.1,-1600.0) [0|0] "deg" XXX
+ SG_ SteWhlRelCalib_An_Sns : 23|15@0+ (0.1,-1600.0) [0|0] "deg" XXX
+ SG_ SteWhlRelInit2_An_Sns : 55|16@0+ (0.1,-3200.0) [0|0] "deg" XXX
+ SG_ SteWhlAn_No_Cs : 39|8@0+ (1,0) [0|0] "" XXX
+ SG_ SteWhlAn_No_Cnt : 47|4@0+ (1,0) [0|0] "Counts" XXX
+
+BO_ 145 Yaw_Data: 8 XXX
+ SG_ VehYaw_W_Actl : 39|16@0+ (0.0002,-6.5) [0|0] "rad/s" XXX
+ SG_ VehRol_W_Actl : 23|16@0+ (0.0002,-6.5) [0|0] "rad/s" XXX
+ SG_ VehPtch_W_Actl : 7|16@0+ (0.0002,-6.5) [0|0] "rad/s" XXX
+
+BO_ 146 Accel_Data: 8 XXX
+ SG_ VehVertAActl_D_Qf : 38|2@0+ (1,0) [0|0] "" XXX
+ SG_ VehLongAActl_D_Qf : 22|2@0+ (1,0) [0|0] "" XXX
+ SG_ VehLatAActl_D_Qf : 6|2@0+ (1,0) [0|0] "" XXX
+ SG_ VehVert_A_Actl : 36|13@0+ (0.01,-40.0) [0|0] "m/s^2" XXX
+ SG_ VehLong_A_Actl : 20|13@0+ (0.01,-40.0) [0|0] "m/s^2" XXX
+ SG_ VehLat_A_Actl : 4|13@0+ (0.01,-40.0) [0|0] "m/s^2" XXX
+
+BO_ 338 TransData_2_CG1: 8 XXX
+ SG_ GearPos_D_Actl : 55|4@0+ (1,0) [0|0] "" XXX
+ SG_ TrnAout2_Tq_Actl : 39|16@0+ (4.0,-131072.0) [0|0] "Nm" XXX
+ SG_ TrnTotTq_Rt_Actl : 23|16@0+ (0.001,0) [0|0] "" XXX
+ SG_ TrnGbox_Rt_Pred : 7|16@0+ (0.001,0) [0|0] "" XXX
+
+BO_ 344 EngineData_14: 8 XXX
+ SG_ ApedPosScal_Pc_Actl : 9|10@0+ (0.1,0) [0|0] "%" XXX
+ SG_ ApedPosPcActl_No_Cs : 39|8@0+ (1,0) [0|0] "" XXX
+ SG_ ApedPosPcActl_No_Cnt : 13|4@0+ (1,0) [0|0] "" XXX
+
+BO_ 513 EngVehicleSpThrottle_CG1: 8 XXX
+ SG_ ApedPos_PcRate_ActlArb : 63|8@0+ (0.04,-5.0) [0|0] "%/ms" XXX
+ SG_ Veh_V_RqCcSet : 45|9@0+ (0.5,0) [0|0] "kph" XXX
+ SG_ VehVActlEng_D_Qf : 9|2@0+ (1,0) [0|0] "" XXX
+ SG_ reserve : 10|1@0+ (1,0) [0|0] "" XXX
+ SG_ EngAout_N_Actl : 7|13@0+ (2.0,0) [0|0] "rpm" XXX
+ SG_ Veh_V_ActlEng : 23|16@0+ (0.01,0) [0|0] "kph" XXX
+ SG_ ApedPos_Pc_ActlArb : 39|10@0+ (0.1,0) [0|0] "%" XXX
+ SG_ ApedPosPcActl_D_Qf : 52|2@0+ (1,0) [0|0] "" XXX
+ SG_ Autostart_B_Stat : 50|1@0+ (1,0) [0|0] "" XXX
+
+BO_ 535 WheelSpeed_CG1: 8 XXX
+ SG_ WhlRr_W_Meas : 55|16@0+ (0.01,0) [0|0] "rad/s" XXX
+ SG_ WhlRl_W_Meas : 39|16@0+ (0.01,0) [0|0] "rad/s" XXX
+ SG_ WhlFr_W_Meas : 23|16@0+ (0.01,0) [0|0] "rad/s" XXX
+ SG_ WhlFl_W_Meas : 7|16@0+ (0.01,0) [0|0] "rad/s" XXX
+
+BO_ 534 WheelData: 8 XXX
+ SG_ WhlRotatRr_No_Cnt : 23|8@0+ (1,0) [0|0] "" XXX
+ SG_ WhlDirRr_D_Actl : 33|2@0+ (1,0) [0|0] "" XXX
+ SG_ WhlDirRl_D_Actl : 39|2@0+ (1,0) [0|0] "" XXX
+ SG_ WhlDirFr_D_Actl : 37|2@0+ (1,0) [0|0] "" XXX
+ SG_ WhlDirFl_D_Actl : 35|2@0+ (1,0) [0|0] "" XXX
+ SG_ WhlRotatRl_No_Cnt : 31|8@0+ (1,0) [0|0] "" XXX
+ SG_ WhlRotatFr_No_Cnt : 7|8@0+ (1,0) [0|0] "" XXX
+ SG_ WhlRotatFl_No_Cnt : 15|8@0+ (1,0) [0|0] "" XXX
+ SG_ WHEEL_ROLLING_TIMESTAMP : 47|8@0+ (1,0) [0|0] "" XXX
+
