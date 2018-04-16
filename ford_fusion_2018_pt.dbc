@@ -45,7 +45,7 @@ BO_ 130 EPAS_INFO: 8 XXX
  SG_ SAPPAngleControlStat2 : 11|1@0+ (1,0) [0|0] "" XXX
  SG_ SAPPAngleControlStat1 : 23|2@0+ (1,0) [0|0] "" XXX
 
-BO_ 132 Steering_Wheel_Data_CG1: 8 XXX
+BO_ 118 Steering_Wheel_Data_CG1: 8 XXX
  SG_ SteWhlRelInit_An_Sns : 7|16@0+ (0.1,-1600.0) [0|0] "deg" XXX
  SG_ SteWhlRelCalib_An_Sns : 23|15@0+ (0.1,-1600.0) [0|0] "deg" XXX
  SG_ SteWhlRelInit2_An_Sns : 55|16@0+ (0.1,-3200.0) [0|0] "deg" XXX
@@ -88,10 +88,10 @@ BO_ 513 EngVehicleSpThrottle_CG1: 8 XXX
  SG_ Autostart_B_Stat : 50|1@0+ (1,0) [0|0] "" XXX
 
 BO_ 535 WheelSpeed_CG1: 8 XXX
- SG_ WhlRr_W_Meas : 55|16@0+ (0.01,0) [0|0] "rad/s" XXX
- SG_ WhlRl_W_Meas : 39|16@0+ (0.01,0) [0|0] "rad/s" XXX
- SG_ WhlFr_W_Meas : 23|16@0+ (0.01,0) [0|0] "rad/s" XXX
- SG_ WhlFl_W_Meas : 7|16@0+ (0.01,0) [0|0] "rad/s" XXX
+ SG_ WhlRr_W_Meas : 55|15@0+ (0.01,0) [0|0] "rad/s" XXX
+ SG_ WhlRl_W_Meas : 39|15@0+ (0.01,0) [0|0] "rad/s" XXX
+ SG_ WhlFr_W_Meas : 23|15@0+ (0.01,0) [0|0] "rad/s" XXX
+ SG_ WhlFl_W_Meas : 7|15@0+ (0.01,0) [0|0] "rad/s" XXX
 
 BO_ 534 WheelData: 8 XXX
  SG_ WhlRotatRr_No_Cnt : 23|8@0+ (1,0) [0|0] "" XXX
