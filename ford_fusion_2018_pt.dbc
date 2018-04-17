@@ -75,6 +75,10 @@ BO_ 146 Accel_Data: 8 XXX
  SG_ VehLong_A_Actl : 20|13@0+ (0.01,-40.0) [0|0] "m/s^2" XXX
  SG_ VehLat_A_Actl : 4|13@0+ (0.01,-40.0) [0|0] "m/s^2" XXX
 
+BO_ 357 Cruise_Status: 8 XXX
+ SG_ Cruise_State : 11|4@0+ (1,0) [0|0] "" XXX
+ SG_ Set_Speed : 23|8@0+ (1,0) [0|0] "" XXX
+
 BO_ 535 WheelSpeed_CG1: 8 XXX
  SG_ WhlRr_W_Meas : 55|15@0+ (0.01,0) [0|0] "rad/s" XXX
  SG_ WhlRl_W_Meas : 39|15@0+ (0.01,0) [0|0] "rad/s" XXX
@@ -91,4 +95,7 @@ BO_ 534 WheelData: 8 XXX
  SG_ WhlRotatFr_No_Cnt : 7|8@0+ (1,0) [0|0] "" XXX
  SG_ WhlRotatFl_No_Cnt : 15|8@0+ (1,0) [0|0] "" XXX
  SG_ WHEEL_ROLLING_TIMESTAMP : 47|8@0+ (1,0) [0|0] "" XXX
+
+
+VAL_ 357 Cruise_State 4 "active" 3 "standby" 0 "off" ;
 
