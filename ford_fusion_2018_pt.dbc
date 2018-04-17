@@ -80,10 +80,10 @@ BO_ 357 Cruise_Status: 8 XXX
  SG_ Set_Speed : 23|8@0+ (1,0) [0|0] "" XXX
 
 BO_ 535 WheelSpeed_CG1: 8 XXX
- SG_ WhlRr_W_Meas : 55|15@0+ (0.01,0) [0|0] "rad/s" XXX
- SG_ WhlRl_W_Meas : 39|15@0+ (0.01,0) [0|0] "rad/s" XXX
- SG_ WhlFr_W_Meas : 23|15@0+ (0.01,0) [0|0] "rad/s" XXX
- SG_ WhlFl_W_Meas : 7|15@0+ (0.01,0) [0|0] "rad/s" XXX
+ SG_ WhlRr_W_Meas : 55|14@0+ (0.01,0) [0|0] "rad/s" XXX
+ SG_ WhlRl_W_Meas : 39|14@0+ (0.01,0) [0|0] "rad/s" XXX
+ SG_ WhlFr_W_Meas : 23|14@0+ (0.01,0) [0|0] "rad/s" XXX
+ SG_ WhlFl_W_Meas : 7|14@0+ (0.01,0) [0|0] "rad/s" XXX
 
 BO_ 534 WheelData: 8 XXX
  SG_ WhlRotatRr_No_Cnt : 23|8@0+ (1,0) [0|0] "" XXX
