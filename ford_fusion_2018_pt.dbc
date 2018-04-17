@@ -96,6 +96,10 @@ BO_ 534 WheelData: 8 XXX
  SG_ WhlRotatFl_No_Cnt : 15|8@0+ (1,0) [0|0] "" XXX
  SG_ WHEEL_ROLLING_TIMESTAMP : 47|8@0+ (1,0) [0|0] "" XXX
 
+BO_ 970 Lane_Keep_Assist: 8 XXX
+ SG_ Steer_Torque : 7|8@0- (1,0) [-128|127] "" XXX
+ SG_ Curvature_Left_Line : 15|12@0+ (1,-2048) [0|0] "" XXX
+ SG_ Curvature_Right_Line : 19|12@0+ (1,-2048) [0|0] "" XXX
 
 VAL_ 357 Cruise_State 4 "active" 3 "standby" 0 "off" ;
 
