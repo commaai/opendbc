@@ -102,6 +102,15 @@ BO_ 970 Lane_Keep_Assist: 8 XXX
  SG_ Lane_Curvature : 15|12@0+ (1,-2048) [0|0] "" XXX
  SG_ Lane_Offset : 19|12@0+ (1,-2048) [0|0] "" XXX
 
+BO_ 984 Lane_Keep_Assist_Ui: 8 XXX
+ SG_ Set_Me_X80 : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ Set_Me_X45 : 47|8@0+ (1,0) [0|255] "" XXX
+ SG_ Lines_Hud : 55|4@0+ (1,0) [0|15] "" XXX
+ SG_ Hands_Warning_W_Chime : 50|1@0+ (1,0) [0|1] "" XXX
+ SG_ Hands_Warning : 49|1@0+ (1,0) [0|1] "" XXX
+ SG_ Set_Me_X30 : 63|8@0+ (1,0) [0|255] "" XXX
+
 VAL_ 357 Cruise_State 4 "active" 3 "standby" 0 "off" ;
 VAL_ 970 Lkas_Action 15 "off" 9 "active";
 VAL_ 970 Lkas_Alert 15 "no_alert" 3 "high_intensity" 2 "mid_intensity" 1 "low_intensity";
+VAL_ 984 Lines_Hud 15 "none" 11 "grey_yellow" 8 "green_red" 7 "yellow_grey" 6 "grey_grey" 4 "red_green" 3 "green_green";
