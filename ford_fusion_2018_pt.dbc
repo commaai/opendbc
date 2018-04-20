@@ -46,7 +46,7 @@ BO_ 130 EPAS_INFO: 8 XXX
  SG_ SAPPAngleControlStat1 : 23|2@0+ (1,0) [0|0] "" XXX
 
 BO_ 118 Steering_Wheel_Data_CG1: 8 XXX
- SG_ SteWhlRelInit_An_Sns : 7|16@0+ (0.1,-1600.0) [0|0] "deg" XXX
+ SG_ SteWhlRelInit_An_Sns : 6|15@0+ (0.1,-1600.0) [0|0] "deg" XXX
  SG_ SteWhlRelCalib_An_Sns : 23|15@0+ (0.1,-1600.0) [0|0] "deg" XXX
  SG_ SteWhlRelInit2_An_Sns : 55|16@0+ (0.1,-3200.0) [0|0] "deg" XXX
  SG_ SteWhlAn_No_Cs : 39|8@0+ (1,0) [0|0] "" XXX
