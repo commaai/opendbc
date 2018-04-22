@@ -1,0 +1,121 @@
+VERSION ""
+
+
+NS_ :
+    NS_DESC_
+    CM_
+    BA_DEF_
+    BA_
+    VAL_
+    CAT_DEF_
+    CAT_
+    FILTER
+    BA_DEF_DEF_
+    EV_DATA_
+    ENVVAR_DATA_
+    SGTYPE_
+    SGTYPE_VAL_
+    BA_DEF_SGTYPE_
+    BA_SGTYPE_
+    SIG_TYPE_REF_
+    VAL_TABLE_
+    SIG_GROUP_
+    SIG_VALTYPE_
+    SIGTYPE_VALTYPE_
+    BO_TX_BU_
+    BA_DEF_REL_
+    BA_REL_
+    BA_DEF_DEF_REL_
+    BU_SG_REL_
+    BU_EV_REL_
+    BU_BO_REL_
+    SG_MUL_VAL_
+
+BS_:
+
+BU_: XXX
+
+
+BO_ 544 a_1: 8 XXX
+ SG_ zeros : 55|4@0+ (1,0) [0|15] "" XXX
+ SG_ sig0 : 3|12@0+ (1,0) [0|31] "" XXX
+ SG_ status1 : 23|4@0+ (1,0) [0|15] "" XXX
+ SG_ sig1 : 19|12@0+ (1,0) [0|65535] "" XXX
+ SG_ sig2 : 35|12@0+ (1,0) [0|255] "" XXX
+ SG_ status2 : 39|4@0+ (1,0) [0|15] "" XXX
+ SG_ incrementing : 48|7@1+ (1,0) [0|15] "" XXX
+ SG_ checksum : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ track_id : 7|4@0+ (1,0) [0|15] "" XXX
+
+BO_ 576 b_1: 8 XXX
+ SG_ sig0 : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ sig1 : 15|16@0+ (1,0) [0|65535] "" XXX
+ SG_ sig2 : 31|16@0+ (1,0) [0|255] "" XXX
+ SG_ checksum : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ zeros : 47|12@0+ (1,0) [0|255] "" XXX
+ SG_ incrementing : 48|4@1+ (1,0) [0|15] "" XXX
+
+BO_ 608 a_2: 8 XXX
+ SG_ sig0 : 3|12@0+ (1,0) [0|255] "" XXX
+ SG_ track_id : 7|4@0+ (1,0) [0|15] "" XXX
+ SG_ sig1 : 19|12@0+ (1,0) [0|65535] "" XXX
+ SG_ status1 : 23|4@0+ (1,0) [0|15] "" XXX
+ SG_ sig2 : 35|12@0+ (1,0) [0|65535] "" XXX
+ SG_ status2 : 39|4@0+ (1,0) [0|15] "" XXX
+ SG_ zeros : 55|4@0+ (1,0) [0|15] "" XXX
+ SG_ incrementing : 48|7@1+ (1,0) [0|15] "" XXX
+ SG_ checksum : 63|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 644 a_3: 8 XXX
+ SG_ sig0 : 3|12@0+ (1,0) [0|7] "" XXX
+ SG_ track_id : 7|4@0+ (1,0) [0|15] "" XXX
+ SG_ sig1 : 19|12@0+ (1,0) [0|63] "" XXX
+ SG_ status1 : 23|4@0+ (1,0) [0|15] "" XXX
+ SG_ sig2 : 35|12@0+ (1,0) [0|511] "" XXX
+ SG_ status2 : 39|4@0+ (1,0) [0|15] "" XXX
+ SG_ zeros : 55|4@0+ (1,0) [0|15] "" XXX
+ SG_ incrementing : 48|7@1+ (1,0) [0|15] "" XXX
+ SG_ checksum : 63|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 640 b_2: 8 XXX
+ SG_ sig0 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ sig1 : 15|16@0+ (1,0) [0|255] "" XXX
+ SG_ sig2 : 31|16@0+ (1,0) [0|65535] "" XXX
+ SG_ incrementing : 48|4@1+ (1,0) [0|15] "" XXX
+ SG_ checksum : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ zeros : 47|12@0+ (1,0) [0|4095] "" XXX
+
+BO_ 648 b_3: 8 XXX
+ SG_ sig0 : 7|8@0+ (1,0) [0|15] "" XXX
+ SG_ sig1 : 15|16@0+ (1,0) [0|65535] "" XXX
+ SG_ zeros : 47|12@0+ (1,0) [0|4095] "" XXX
+ SG_ sig2 : 31|16@0+ (1,0) [0|65535] "" XXX
+
+BO_ 652 a_4: 8 XXX
+ SG_ track_id : 7|4@0+ (1,0) [0|15] "" XXX
+
+BO_ 656 b_4: 8 XXX
+ SG_ sig0 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ sig1 : 15|16@0+ (1,0) [0|65535] "" XXX
+ SG_ sig2 : 31|16@0+ (1,0) [0|65535] "" XXX
+ SG_ zeros : 47|12@0+ (1,0) [0|4095] "" XXX
+
+BO_ 512 unknown_200: 8 XXX
+ SG_ incrementing : 48|4@1+ (1,0) [0|15] "" XXX
+ SG_ checksum : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ increasing : 31|16@0+ (1,0) [0|255] "" XXX
+ SG_ zeros_0 : 3|12@0+ (1,0) [0|63] "" XXX
+ SG_ zeros_1 : 47|12@0+ (1,0) [0|63] "" XXX
+ SG_ status0 : 7|4@0+ (1,0) [0|15] "" XXX
+ SG_ unknown_0 : 23|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 514 unknown_202: 8 XXX
+ SG_ incrementing : 43|4@0+ (1,0) [0|15] "" XXX
+ SG_ sig3 : 31|8@0+ (1,0) [0|65535] "" XXX
+ SG_ increasing : 39|12@0+ (1,0) [0|15] "" XXX
+
+
+
+
+CM_ SG_ 544 track_id "for message a_1 track_id is always 1, similar for other messages and track_id";
+CM_ SG_ 576 zeros "not always zero, sometimes has value when another car changes lanes";
