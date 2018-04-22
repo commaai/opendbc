@@ -131,6 +131,7 @@ BO_ 184054040 WIPER_STALK: 3 XXX
  SG_ SWIPE : 1|1@0+ (1,0) [0|1] "" XXX
  SG_ OFF : 6|1@0+ (1,0) [0|1] "" XXX
  SG_ REAR_WIPER : 23|3@0+ (1,0) [0|7] "" XXX
+ SG_ INTERMITTENT_SLIDER : 15|8@0+ (1,0) [0|255] "" XXX
 
 
 
