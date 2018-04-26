@@ -37,33 +37,31 @@ BU_: XXX
 
 
 BO_ 117 NI1: 8 XXX
- SG_ NI1_Counter : 7|16@0+ (1,0) [0|65535] "" XXX
  SG_ NI1_NI1 : 39|16@0+ (1,0) [1|100000] "" XXX
+ SG_ NI1_Counter : 7|8@0+ (1,0) [0|65535] "" XXX
 
 BO_ 576 Steering: 8 XXX
  SG_ SteeringCorrSignalX : 39|16@0+ (1,-32512) [0|50002] "" XXX
  SG_ Steering : 7|16@0+ (1,-32512) [0|31998] "" XXX
 
 BO_ 533 WheelSpeed: 8 XXX
- SG_ Wheel2 : 23|16@0+ (1,-10000) [0|15000] "" XXX
- SG_ Wheel4 : 55|16@0+ (1,-10000) [0|1] "" XXX
- SG_ Wheel3 : 39|16@0+ (1,-10000) [0|65535] "" XXX
- SG_ Wheel1 : 7|16@0+ (1,-10000) [0|1] "" XXX
+ SG_ WHEEL_FL : 7|16@0+ (1,-10000) [0|1] "" XXX
+ SG_ WHEEL_FR : 23|16@0+ (1,-10000) [0|15000] "" XXX
+ SG_ WHEEL_RR : 55|16@0+ (1,-10000) [0|1] "" XXX
 
 BO_ 118 NI2: 8 XXX
  SG_ NI2_Counter : 7|8@0+ (1,0) [0|1] "" XXX
  SG_ NI2_NI : 31|8@0+ (1,0) [0|1] "" XXX
 
 BO_ 357 Gear: 8 XXX
- SG_ Clutch_Neutral : 23|8@0+ (1,0) [0|255] "" XXX
  SG_ Gear_NI : 31|8@0+ (1,0) [0|1] "" XXX
+ SG_ Clutch_Neutral : 23|8@0+ (1,0) [0|255] "" XXX
  SG_ Gear : 55|8@0+ (1,0) [0|1] "" XXX
 
 BO_ 514 ThrottleRPM: 8 XXX
- SG_ VehicleSpeed : 23|16@0+ (1,0) [0|1] "" XXX
- SG_ Throttle : 39|16@0+ (1,0) [0|1] "" XXX
- SG_ PI2_NI1 : 55|16@0+ (1,0) [0|1] "" XXX
- SG_ RPM : 7|16@0+ (1,0) [0|1000000] "" XXX
+ SG_ VehicleSpeed : 23|16@0+ (0.01,0) [0|1000] "km/h" XXX
+ SG_ Throttle : 39|16@0+ (0.002778,0) [0|1] "%" XXX
+ SG_ RPM : 7|16@0- (0.25,0) [0|8500] "" XXX
 
 BO_ 134 NI3: 8 XXX
  SG_ NI3Counter : 23|16@0+ (1,0) [0|1] "" XXX
@@ -79,7 +77,7 @@ BO_ 120 Brake: 8 XXX
  SG_ Counter_PIX : 55|16@0+ (1,0) [0|10000000] "" XXX
  SG_ PIX_X : 31|8@0+ (1,0) [0|10000000] "" XXX
  SG_ Cand : 7|16@0+ (1,0) [0|100000] "" XXX
- SG_ BrakePressure : 39|16@0+ (1,0) [2|100000] "" XXX
+ SG_ BrakePressure : 39|16@0+ (1,-39107) [2|100000] "" XXX
 
 BO_ 121 NI7: 8 XXX
 
@@ -100,7 +98,22 @@ BO_ 2024 NEW_MSG_4: 8 XXX
  SG_ NEW_SIGNAL_1 : 7|32@0+ (1,0) [0|4294967295] "" XXX
  SG_ NEW_SIGNAL_2 : 32|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 512 NEW_MSG_5: 8 XXX
+ SG_ NEW_SIGNAL_1 : 7|16@0+ (1,0) [0|65535] "" XXX
+ SG_ NEW_SIGNAL_2 : 39|16@0+ (1,0) [0|65535] "" XXX
+
+BO_ 154 LIGHTS: 8 XXX
+ SG_ RIGHT_TURN_SIGNAL_BLINK : 19|1@0+ (1,0) [0|1] "" XXX
+ SG_ LEFT_TURN_SIGNAL_BLINK : 18|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 1056 TEMPERATURE: 8 XXX
+ SG_ COOLANT_TEMP : 0|8@1+ (1,0) [0|255] "" XXX
+
+BO_ 1045 TRACTION: 8 XXX
+
 
 
 
 CM_ SG_ 357 Gear "Potentially more info embedded - these are the steady state levels which seem to correlate to gear state.";
+CM_ SG_ 154 LEFT_TURN_SIGNAL_BLINK "";
+CM_ SG_ 1056 COOLANT_TEMP "";
