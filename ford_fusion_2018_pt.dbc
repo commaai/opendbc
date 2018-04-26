@@ -100,7 +100,7 @@ BO_ 970 Lane_Keep_Assist_Control: 8 XXX
  SG_ Lkas_Action : 7|4@0+ (1,0) [0|15] "" XXX
  SG_ Lkas_Alert : 3|4@0+ (1,0) [0|15] "" XXX
  SG_ Lane_Curvature : 15|12@0+ (5e-06,-0.01) [0|0] "1/m" XXX
- SG_ Steer_Angle_Req : 19|12@0+ (0.021486,-44.00445) [0|0] "mrad" XXX
+ SG_ Steer_Angle_Req : 19|12@0+ (0.04297,-88.00445) [0|0] "deg" XXX
 
 BO_ 972 Lane_Keep_Assist_Status: 8 XXX
  SG_ LaHandsOff_B_Actl : 7|1@0+ (1,0) [0|0] "" XXX
