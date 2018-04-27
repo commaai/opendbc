@@ -40,28 +40,34 @@ BO_ 117 NI1: 8 XXX
  SG_ NI1_NI1 : 39|16@0+ (1,0) [1|100000] "" XXX
  SG_ NI1_Counter : 7|8@0+ (1,0) [0|65535] "" XXX
 
-BO_ 576 Steering: 8 XXX
- SG_ SteeringCorrSignalX : 39|16@0+ (1,-32512) [0|50002] "" XXX
- SG_ Steering : 7|16@0+ (1,-32512) [0|31998] "" XXX
+BO_ 576 STEERING_SENSOR: 8 XXX
+ SG_ STEERING_ANGLE : 7|16@0+ (0.01,-327.68) [-90|90] "deg" XXX
+ SG_ SteeringCorrSignalX : 39|16@0+ (0.01,-327.68) [0|50002] "" XXX
 
-BO_ 533 WheelSpeed: 8 XXX
- SG_ WHEEL_FL : 7|16@0+ (1,-10000) [0|1] "" XXX
- SG_ WHEEL_FR : 23|16@0+ (1,-10000) [0|15000] "" XXX
- SG_ WHEEL_RR : 55|16@0+ (1,-10000) [0|1] "" XXX
+BO_ 533 WHEEL_SPEED: 8 XXX
+ SG_ WHEEL_SPEED_FL : 7|16@0+ (1,-10000) [0|1] "kph" XXX
+ SG_ WHEEL_SPEED_FR : 23|16@0+ (1,-10000) [0|15000] "kph" XXX
+ SG_ WHEEL_SPEED_RL : 39|16@0+ (1,-10000) [0|150000] "kph" XXX
+ SG_ WHEEL_SPEED_RR : 55|16@0+ (1,-10000) [0|1] "kph" XXX
 
 BO_ 118 NI2: 8 XXX
  SG_ NI2_Counter : 7|8@0+ (1,0) [0|1] "" XXX
  SG_ NI2_NI : 31|8@0+ (1,0) [0|1] "" XXX
 
-BO_ 357 Gear: 8 XXX
- SG_ Gear_NI : 31|8@0+ (1,0) [0|1] "" XXX
- SG_ Clutch_Neutral : 23|8@0+ (1,0) [0|255] "" XXX
- SG_ Gear : 55|8@0+ (1,0) [0|1] "" XXX
+BO_ 357 GEAR: 8 XXX
+ SG_ CLUTCH_DISENGAGED : 19|1@0+ (1,0) [0|255] "" XXX
+ SG_ CLUTCH_ENGAGED_2 : 17|1@1+ (1,0) [0|3] "" XXX
+ SG_ CLUTCH_ENGAGED : 18|1@0+ (1,0) [0|1] "" XXX
+ SG_ CLUTCH_RELATED : 16|1@0+ (1,0) [0|1] "" XXX
+ SG_ GEAR_N : 36|1@0+ (1,0) [0|1] "" XXX
+ SG_ GEAR : 37|3@1+ (1,0) [0|255] "" XXX
+ SG_ GEAR_RELATED : 48|4@1+ (1,0) [0|1] "" XXX
 
-BO_ 514 ThrottleRPM: 8 XXX
- SG_ VehicleSpeed : 23|16@0+ (0.01,0) [0|1000] "km/h" XXX
+BO_ 514 POWERTRAIN_DATA: 8 XXX
  SG_ Throttle : 39|16@0+ (0.002778,0) [0|1] "%" XXX
- SG_ RPM : 7|16@0- (0.25,0) [0|8500] "" XXX
+ SG_ ENGINE_RPM : 7|16@0- (0.25,0) [0|8500] "" XXX
+ SG_ VehicleSpeed : 23|16@0+ (0.01,0) [0|1000] "km/h" XXX
+ SG_ NEW_SIGNAL_2 : 56|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 134 NI3: 8 XXX
  SG_ NI3Counter : 23|16@0+ (1,0) [0|1] "" XXX
@@ -80,8 +86,11 @@ BO_ 120 Brake: 8 XXX
  SG_ BrakePressure : 39|16@0+ (1,-39107) [2|100000] "" XXX
 
 BO_ 121 NI7: 8 XXX
+ SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|65535] "" XXX
 
-BO_ 253 NEW_MSG_1: 8 XXX
+BO_ 253 MASTER_WARNING: 8 XXX
+ SG_ NEW_SIGNAL_1 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_2 : 55|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 304 PI3: 8 XXX
  SG_ GearCand2 : 47|8@0+ (1,0) [0|1] "" XXX
@@ -99,21 +108,51 @@ BO_ 2024 NEW_MSG_4: 8 XXX
  SG_ NEW_SIGNAL_2 : 32|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 512 NEW_MSG_5: 8 XXX
- SG_ NEW_SIGNAL_1 : 7|16@0+ (1,0) [0|65535] "" XXX
- SG_ NEW_SIGNAL_2 : 39|16@0+ (1,0) [0|65535] "" XXX
 
 BO_ 154 LIGHTS: 8 XXX
- SG_ RIGHT_TURN_SIGNAL_BLINK : 19|1@0+ (1,0) [0|1] "" XXX
- SG_ LEFT_TURN_SIGNAL_BLINK : 18|1@0+ (1,0) [0|1] "" XXX
+ SG_ LOW_BEAMS : 5|2@0+ (1,0) [0|3] "" XXX
+ SG_ HIGH_BEAMS : 7|2@0+ (1,0) [0|3] "" XXX
+ SG_ RIGHT_BLINKER : 19|1@0+ (1,0) [0|1] "" XXX
+ SG_ LEFT_BLINKER : 18|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1056 TEMPERATURE: 8 XXX
  SG_ COOLANT_TEMP : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ CHARGING_SYSTEM_MALFUNCTION : 38|1@0+ (1,0) [0|1] "" XXX
+ SG_ CHECK_FUEL_CAP : 40|1@0+ (1,0) [0|1] "" XXX
+ SG_ LOW_ENGINE_OIL_PRESSURE : 43|1@0+ (1,0) [0|1] "" XXX
+ SG_ OUTDOOR_TEMPERATURE : 63|8@0+ (0.25,0) [0|1] "cel" XXX
 
 BO_ 1045 TRACTION: 8 XXX
+ SG_ DSC_OFF : 3|1@0+ (1,0) [0|1] "" XXX
+ SG_ ABS_MALFUNCTION : 1|2@0+ (1,0) [0|3] "" XXX
+ SG_ BRAKE_WARNING : 2|1@0+ (1,0) [0|1] "" XXX
+ SG_ LOUD_BEEP : 28|1@0+ (1,0) [0|1] "" XXX
+ SG_ TCS_DCS_MALFUNCTION : 6|2@0+ (1,0) [0|3] "" XXX
+ SG_ TPMS_WARNING_DOUBLE_BLINK : 31|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 1114 CONSTANT_1: 8 XXX
+
+BO_ 1116 CONSTANT_2: 8 XXX
+
+BO_ 1169 CONSTANTS_3: 8 XXX
+
+BO_ 358 NEW_MSG_6: 8 XXX
+ SG_ NEW_SIGNAL_2 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_1 : 23|16@0+ (1,0) [0|65535] "" XXX
+ SG_ NEW_SIGNAL_3 : 47|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 628 LOCK_STATUS: 8 XXX
+
+BO_ 832 SAFTY: 8 XXX
+ SG_ SEAT_BELT_UNBUCKLED : 28|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 1242 NEW_MSG_1: 8 XXX
 
 
 
 
-CM_ SG_ 357 Gear "Potentially more info embedded - these are the steady state levels which seem to correlate to gear state.";
-CM_ SG_ 154 LEFT_TURN_SIGNAL_BLINK "";
+CM_ SG_ 357 GEAR_RELATED "Potentially more info embedded - these are the steady state levels which seem to correlate to gear state.";
+CM_ SG_ 154 LEFT_BLINKER "";
 CM_ SG_ 1056 COOLANT_TEMP "";
+CM_ SG_ 1045 ABS_MALFUNCTION "off: 0, solid: 1, slow blink: 2, fast blink: 3";
+CM_ SG_ 1045 TCS_DCS_MALFUNCTION "off: 0, solid: 1, slow blink: 2, fast blink: 3";
