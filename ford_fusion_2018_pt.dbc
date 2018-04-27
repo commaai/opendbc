@@ -80,7 +80,7 @@ BO_ 357 Cruise_Status: 8 XXX
  SG_ Set_Speed : 23|8@0+ (1,0) [0|0] "" XXX
 
 BO_ 516 EngineData_14: 8 XXX
- SG_ ApedPosScal_Pc_Actl : 9|10@0+ (0.1,0) [0|0] "%" XXX
+ SG_ ApedPosScal_Pc_Actl : 1|10@0+ (0.1,0) [0|0] "%" XXX
 
 BO_ 535 WheelSpeed_CG1: 8 XXX
  SG_ WhlRr_W_Meas : 55|14@0+ (0.04,0) [0|0] "rad/s" XXX
