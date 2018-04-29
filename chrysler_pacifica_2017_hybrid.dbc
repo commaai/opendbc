@@ -275,6 +275,13 @@ BO_ 878 ACCEL_RELATED_36E: 8 XXX
 BO_ 324 SPEED_2: 8 XXX
  SG_ SPEED_2 : 31|16@0+ (0.01,0) [0|255] "m/s" XXX
 
+BO_ 501 DASHBOARD: 8 XXX
+ SG_ SPEED_DIGITAL : 56|8@1+ (1,0) [0|255] "mph" XXX
+ SG_ ACC_DISTANCE_CONFIG_2 : 40|2@1+ (1,0) [0|3] "" XXX
+ SG_ ACC_DISTANCE_CONFIG_1 : 0|2@1+ (1,0) [0|3] "" XXX
+ SG_ ACC_SPEED_CONFIG_2 : 16|2@1+ (1,0) [0|3] "" XXX
+ SG_ ACC_SPEED_CONFIG_1 : 8|2@1+ (1,0) [0|3] "" XXX
+
 
 
 
@@ -313,5 +320,7 @@ CM_ SG_ 291 ENERGY_SMOOTHER_CURVE "unusre what it is, but smoother";
 CM_ SG_ 532 NOISY_SLOWLY_DECREASING "perhaps battery but do not know";
 CM_ SG_ 816 TRACTION_OFF "set when traction off button is enabled";
 CM_ SG_ 324 SPEED_2 "signal is approx half other speeds";
+CM_ SG_ 501 ACC_SPEED_CONFIG_2 "unsure what it is exactly";
+CM_ SG_ 501 ACC_SPEED_CONFIG_1 "unsure what it is exactly";
 VAL_ 746 PRNDL 4 "Drive" 3 "Neutral" 2 "Reverse" 1 "Park" ;
 VAL_ 792 TURN_SIGNALS 2 "Right" 1 "Left" ;
