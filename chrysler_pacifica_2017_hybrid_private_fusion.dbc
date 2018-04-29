@@ -138,6 +138,26 @@ BO_ 710 c_3: 8 XXX
  SG_ sig1 : 18|11@0+ (1,0) [0|63] "" XXX
  SG_ sig2 : 34|11@0+ (1,0) [0|511] "" XXX
 
+BO_ 690 NEW_MSG_1: 8 XXX
+ SG_ NEW_SIGNAL_1 : 15|8@0- (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_2 : 17|10@0+ (1,0) [0|255] "" XXX
+
+BO_ 678 NEW_MSG_2: 8 XXX
+ SG_ NEW_SIGNAL_1 : 0|9@0+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_2 : 17|10@0+ (1,0) [0|255] "" XXX
+
+BO_ 676 NEW_MSG_3: 8 XXX
+ SG_ NEW_SIGNAL_1 : 17|10@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_2 : 15|8@0- (1,0) [0|511] "" XXX
+
+BO_ 674 NEW_MSG_4: 8 XXX
+ SG_ NEW_SIGNAL_1 : 17|10@0+ (1,0) [0|1023] "" XXX
+ SG_ NEW_SIGNAL_2 : 7|16@0+ (1,0) [0|255] "" XXX
+
+BO_ 672 NEW_MSG_5: 8 XXX
+ SG_ NEW_SIGNAL_1 : 9|10@0+ (1,0) [0|1023] "" XXX
+ SG_ NEW_SIGNAL_2 : 45|10@0+ (1,0) [0|1023] "" XXX
+
 
 
 
