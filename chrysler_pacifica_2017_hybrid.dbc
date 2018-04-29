@@ -125,6 +125,7 @@ BO_ 678 LKAS_INDICATOR_3: 8 XXX
 
 BO_ 705 AUTO_PARK_BUTTON: 8 XXX
  SG_ AUTO_PARK_TOGGLE_2 : 8|1@1+ (1,0) [0|1] "" XXX
+ SG_ INCREASING_UNKNOWN : 32|4@1+ (1,0) [0|15] "" XXX
  SG_ AUTO_PARK_TOGGLE_1 : 11|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 719 AUTO_PARK_SIGNALS_1: 8 XXX
@@ -286,6 +287,12 @@ BO_ 501 DASHBOARD: 8 XXX
  SG_ ACC_SPEED_CONFIG_2 : 16|2@1+ (1,0) [0|3] "" XXX
  SG_ ACC_SPEED_CONFIG_1 : 8|2@1+ (1,0) [0|3] "" XXX
 
+BO_ 639 NEW_MSG_27f: 8 XXX
+ SG_ INCREASING : 40|8@1+ (1,0) [0|255] "" XXX
+
+BO_ 701 NEW_MSG_2bd: 8 XXX
+ SG_ unknown_1 : 32|8@1+ (1,0) [0|255] "" XXX
+
 
 
 
@@ -309,6 +316,7 @@ CM_ SG_ 658 LKAS_CHECKSUM_2 "checksum calculated with https://gist.github.com/ad
 CM_ SG_ 678 WARNING_PLACE_HANDS "set when warning displays place hands on steering wheel";
 CM_ SG_ 678 LKAS_WHITE_OR_YELLOW "set when indicator is yellow or white. could indicate lkas not on track.";
 CM_ SG_ 678 LKAS_IS_YELLOW_2 "set when indicator is yellow. could indicate lkas is steering.";
+CM_ SG_ 705 INCREASING_UNKNOWN "perhaps counting distance traveled";
 CM_ SG_ 705 AUTO_PARK_TOGGLE_1 "set briefly when turning on or off self-parking";
 CM_ SG_ 671 AUTO_PARK_PARALLEL "parallel parking mode";
 CM_ SG_ 671 AUTO_PARK_MAYBE_TURNING "something with autopark turning the steering wheel maybe.";
@@ -326,5 +334,6 @@ CM_ SG_ 816 TRACTION_OFF "set when traction off button is enabled";
 CM_ SG_ 324 SPEED_2 "signal is approx half other speeds";
 CM_ SG_ 501 ACC_SPEED_CONFIG_2 "unsure what it is exactly";
 CM_ SG_ 501 ACC_SPEED_CONFIG_1 "unsure what it is exactly";
+CM_ SG_ 639 INCREASING "perhaps number of seconds divided by two for this drive";
 VAL_ 746 PRNDL 4 "Drive" 3 "Neutral" 2 "Reverse" 1 "Park" ;
 VAL_ 792 TURN_SIGNALS 2 "Right" 1 "Left" ;
