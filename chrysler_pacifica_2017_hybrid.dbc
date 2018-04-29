@@ -139,6 +139,7 @@ BO_ 671 AUTO_PARK_SIGNALS_2: 8 XXX
  SG_ AUTO_PARK_CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 784 AUTO_PARK_LESS_INTERESTING: 8 XXX
+ SG_ INCREASING_UNKNOWN : 48|8@1+ (1,0) [0|7] "" XXX
  SG_ AUTO_PARK_PERPENDICULAR_2 : 61|1@0+ (1,0) [0|255] "" XXX
 
 BO_ 826 AUTO_PARK_SIGNALS_3: 8 XXX
@@ -293,6 +294,29 @@ BO_ 639 NEW_MSG_27f: 8 XXX
 BO_ 701 NEW_MSG_2bd: 8 XXX
  SG_ unknown_1 : 32|8@1+ (1,0) [0|255] "" XXX
 
+BO_ 832 UNKNOWN_340: 8 XXX
+ SG_ SPEED_DIGITAL : 56|8@1+ (1,0) [0|255] "mph" XXX
+
+BO_ 848 UNKNOWN_350: 8 XXX
+ SG_ INCREASING_LSB : 0|6@1+ (1,0) [0|255] "" XXX
+ SG_ INCREASING_MSB : 12|5@0+ (1,0) [0|31] "" XXX
+
+BO_ 908 NEW_MSG_38c: 8 XXX
+ SG_ INCREASING_MSB : 44|5@0+ (1,0) [0|31] "" XXX
+ SG_ INCREASING_LSB : 56|6@1+ (1,0) [0|255] "" XXX
+
+BO_ 938 NEW_MSG_3aa: 8 XXX
+ SG_ INCREASING_UNKNOWN_1 : 32|8@1+ (1,0) [0|255] "" XXX
+ SG_ INCREASING_UNKNOWN_2 : 56|8@1+ (1,0) [0|255] "" XXX
+
+BO_ 940 NEW_MSG_3ac: 8 XXX
+ SG_ INCREASING_1 : 32|4@1+ (1,0) [0|15] "" XXX
+ SG_ INCREASING_2 : 56|8@1+ (1,0) [0|255] "" XXX
+
+BO_ 941 NEW_MSG_3ad: 8 XXX
+ SG_ INCREASING_1 : 32|5@1+ (1,0) [0|31] "" XXX
+ SG_ INCREASING_2 : 56|8@1+ (1,0) [0|255] "" XXX
+
 
 
 
@@ -321,6 +345,7 @@ CM_ SG_ 705 AUTO_PARK_TOGGLE_1 "set briefly when turning on or off self-parking"
 CM_ SG_ 671 AUTO_PARK_PARALLEL "parallel parking mode";
 CM_ SG_ 671 AUTO_PARK_MAYBE_TURNING "something with autopark turning the steering wheel maybe.";
 CM_ SG_ 671 AUTO_PARK_PERPENDICULAR_1 "perpendicular parking mode";
+CM_ SG_ 784 INCREASING_UNKNOWN "perhaps distance traveled";
 CM_ SG_ 332 STEER_ANGLE_2 "slightly lags the other steer_angle signal. also more noisy.";
 CM_ SG_ 720 BLIND_SPOT_RIGHT "yellow triangle alert on side view mirror when a car is in your blind spot";
 CM_ SG_ 608 PARKSENSE_DISABLED "set if parksense is disabled";
@@ -335,5 +360,8 @@ CM_ SG_ 324 SPEED_2 "signal is approx half other speeds";
 CM_ SG_ 501 ACC_SPEED_CONFIG_2 "unsure what it is exactly";
 CM_ SG_ 501 ACC_SPEED_CONFIG_1 "unsure what it is exactly";
 CM_ SG_ 639 INCREASING "perhaps number of seconds divided by two for this drive";
+CM_ SG_ 848 INCREASING_LSB "lower part of time counter";
+CM_ SG_ 848 INCREASING_MSB "upper part of time counter";
+CM_ SG_ 908 INCREASING_MSB "time based";
 VAL_ 746 PRNDL 4 "Drive" 3 "Neutral" 2 "Reverse" 1 "Park" ;
 VAL_ 792 TURN_SIGNALS 2 "Right" 1 "Left" ;
