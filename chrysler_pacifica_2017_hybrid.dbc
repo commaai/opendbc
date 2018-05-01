@@ -133,10 +133,11 @@ BO_ 719 AUTO_PARK_SIGNALS_1: 8 XXX
 
 BO_ 671 AUTO_PARK_SIGNALS_2: 8 XXX
  SG_ AUTO_PARK_PARALLEL : 21|1@0+ (1,0) [0|1] "" XXX
- SG_ AUTO_PARK_MAYBE_TURNING : 2|11@0+ (1,0) [0|1023] "" XXX
  SG_ AUTO_PARK_PERPENDICULAR_1 : 22|1@0+ (1,0) [0|1] "" XXX
  SG_ INCREMENTING : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ AUTO_PARK_CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ AUTO_PARK_MAYBE_TURNING : 3|12@0+ (1,0) [0|1023] "" XXX
+ SG_ AUTO_PARK_TURNING_STATUS : 7|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 784 AUTO_PARK_LESS_INTERESTING: 8 XXX
  SG_ INCREASING_UNKNOWN : 48|8@1+ (1,0) [0|7] "" XXX
@@ -343,8 +344,9 @@ CM_ SG_ 678 LKAS_IS_YELLOW_2 "set when indicator is yellow. could indicate lkas 
 CM_ SG_ 705 INCREASING_UNKNOWN "perhaps counting distance traveled";
 CM_ SG_ 705 AUTO_PARK_TOGGLE_1 "set briefly when turning on or off self-parking";
 CM_ SG_ 671 AUTO_PARK_PARALLEL "parallel parking mode";
-CM_ SG_ 671 AUTO_PARK_MAYBE_TURNING "something with autopark turning the steering wheel maybe.";
 CM_ SG_ 671 AUTO_PARK_PERPENDICULAR_1 "perpendicular parking mode";
+CM_ SG_ 671 AUTO_PARK_MAYBE_TURNING "something with autopark turning the steering wheel maybe.";
+CM_ SG_ 671 AUTO_PARK_TURNING_STATUS "0 when not steering. when steering starts, 4 for two packets, and then 5 for the rest";
 CM_ SG_ 784 INCREASING_UNKNOWN "perhaps distance traveled";
 CM_ SG_ 332 STEER_ANGLE_2 "slightly lags the other steer_angle signal. also more noisy.";
 CM_ SG_ 720 BLIND_SPOT_RIGHT "yellow triangle alert on side view mirror when a car is in your blind spot";
