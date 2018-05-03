@@ -186,21 +186,35 @@ BO_ 724 c_10: 8 XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 690 NEW_MSG_1: 8 XXX
- SG_ NEW_SIGNAL_1 : 15|8@0- (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_2 : 17|10@0+ (1,0) [0|255] "" XXX
+BO_ 674 d_1: 8 XXX
+ SG_ REL_SPEED : 17|10@0+ (1,-512) [0|1023] "" XXX
 
-BO_ 678 NEW_MSG_2: 8 XXX
- SG_ NEW_SIGNAL_1 : 0|9@0+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_2 : 17|10@0+ (1,0) [0|255] "" XXX
+BO_ 676 d_2: 8 XXX
+ SG_ REL_SPEED : 17|10@0+ (1,-512) [0|1023] "" XXX
 
-BO_ 676 NEW_MSG_3: 8 XXX
- SG_ NEW_SIGNAL_1 : 17|10@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_2 : 15|8@0- (1,0) [0|511] "" XXX
+BO_ 678 d_3: 8 XXX
+ SG_ REL_SPEED : 17|10@0+ (1,-512) [0|1023] "" XXX
 
-BO_ 674 NEW_MSG_4: 8 XXX
- SG_ NEW_SIGNAL_1 : 17|10@0+ (1,0) [0|1023] "" XXX
- SG_ NEW_SIGNAL_2 : 7|16@0+ (1,0) [0|255] "" XXX
+BO_ 680 d_4: 8 XXX
+ SG_ REL_SPEED : 17|10@0+ (1,-512) [0|1023] "" XXX
+
+BO_ 682 d_5: 8 XXX
+ SG_ REL_SPEED : 17|10@0+ (1,-512) [0|1023] "" XXX
+
+BO_ 684 d_6: 8 XXX
+ SG_ REL_SPEED : 17|10@0+ (1,-512) [0|1023] "" XXX
+
+BO_ 686 d_7: 8 XXX
+ SG_ REL_SPEED : 17|10@0+ (1,-512) [0|1023] "" XXX
+
+BO_ 688 d_8: 8 XXX
+ SG_ REL_SPEED : 17|10@0+ (1,-512) [0|1023] "" XXX
+
+BO_ 690 d_9: 8 XXX
+ SG_ REL_SPEED : 17|10@0+ (1,-512) [0|1023] "" XXX
+
+BO_ 692 d_10: 8 XXX
+ SG_ REL_SPEED : 17|10@0+ (1,-512) [0|1023] "" XXX
 
 BO_ 672 NEW_MSG_5: 8 XXX
  SG_ NEW_SIGNAL_1 : 9|10@0+ (1,0) [0|1023] "" XXX
@@ -210,7 +224,7 @@ BO_ 672 NEW_MSG_5: 8 XXX
 
 
 CM_ SG_ 544 track_id "for message a_1 track_id is always 1, similar for other messages and track_id";
-CM_ SG_ 544 sig2 "perhaps distance to object. LONG_DIST or REL_ACCEL or REL_SPEED";
 CM_ SG_ 544 REL_ACCEL "perhaps REL_ACCEL because it responds faster and before REL_SPEED";
+CM_ SG_ 544 sig2 "perhaps distance to object. LONG_DIST or REL_ACCEL or REL_SPEED";
 CM_ SG_ 576 zeros "not always zero, sometimes has value when another car changes lanes";
 CM_ SG_ 706 LAT_DIST "positive is to the right, negative is to the left";
