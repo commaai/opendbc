@@ -76,6 +76,7 @@ BO_ 146 Accel_Data: 8 XXX
  SG_ VehLat_A_Actl : 4|13@0+ (0.01,-40.0) [0|0] "m/s^2" XXX
 
 BO_ 357 Cruise_Status: 8 XXX
+ SG_ Brake_Drv_Appl : 5|1@0+ (1,0) [0|0] "" XXX
  SG_ Cruise_State : 11|4@0+ (1,0) [0|0] "" XXX
  SG_ Set_Speed : 23|8@0+ (1,0) [0|0] "" XXX
 
@@ -98,6 +99,15 @@ BO_ 534 WheelData: 8 XXX
  SG_ WhlRotatFr_No_Cnt : 7|8@0+ (1,0) [0|0] "" XXX
  SG_ WhlRotatFl_No_Cnt : 15|8@0+ (1,0) [0|0] "" XXX
  SG_ WHEEL_ROLLING_TIMESTAMP : 47|8@0+ (1,0) [0|0] "" XXX
+
+BO_ 947 Doors: 8 XXX
+ SG_ Door_FL_Open : 61|1@0+ (1,0) [0|0] "" XXX
+ SG_ Door_FR_Open : 60|1@0+ (1,0) [0|0] "" XXX
+ SG_ Door_RL_Open : 48|1@0+ (1,0) [0|0] "" XXX
+ SG_ Door_RR_Open : 49|1@0+ (1,0) [0|0] "" XXX
+
+BO_ 963 BCM_to_HS_Body: 8 XXX
+ SG_ Brake_Lights : 8|1@0+ (1,0) [0|0] "" XXX
 
 BO_ 970 Lane_Keep_Assist_Control: 8 XXX
  SG_ Lkas_Action : 7|4@0+ (1,0) [0|15] "" XXX
