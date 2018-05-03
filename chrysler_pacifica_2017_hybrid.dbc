@@ -292,8 +292,8 @@ BO_ 501 DASHBOARD: 8 XXX
  SG_ SPEED_DIGITAL : 56|8@1+ (1,0) [0|255] "mph" XXX
  SG_ ACC_DISTANCE_CONFIG_2 : 40|2@1+ (1,0) [0|3] "" XXX
  SG_ ACC_DISTANCE_CONFIG_1 : 0|2@1+ (1,0) [0|3] "" XXX
- SG_ ACC_SPEED_CONFIG_2 : 16|2@1+ (1,0) [0|3] "" XXX
- SG_ ACC_SPEED_CONFIG_1 : 8|2@1+ (1,0) [0|3] "" XXX
+ SG_ ACC_SPEED_CONFIG_KPH : 8|8@1+ (1,0) [0|3] "km/h" XXX
+ SG_ ACC_SPEED_CONFIG_MPH : 16|8@1+ (1,0) [0|3] "mph" XXX
 
 BO_ 639 NEW_MSG_27f: 8 XXX
  SG_ INCREASING : 40|8@1+ (1,0) [0|255] "" XXX
@@ -368,8 +368,8 @@ CM_ SG_ 291 ENERGY_SMOOTHER_CURVE "unusre what it is, but smoother";
 CM_ SG_ 532 NOISY_SLOWLY_DECREASING "perhaps battery but do not know";
 CM_ SG_ 816 TRACTION_OFF "set when traction off button is enabled";
 CM_ SG_ 324 SPEED_2 "signal is approx half other speeds";
-CM_ SG_ 501 ACC_SPEED_CONFIG_2 "unsure what it is exactly";
-CM_ SG_ 501 ACC_SPEED_CONFIG_1 "unsure what it is exactly";
+CM_ SG_ 501 ACC_SPEED_CONFIG_KPH "speed configured for ACC";
+CM_ SG_ 501 ACC_SPEED_CONFIG_MPH "speed configured for ACC";
 CM_ SG_ 639 INCREASING "perhaps number of seconds divided by two for this drive";
 CM_ SG_ 848 INCREASING_LSB "lower part of time counter";
 CM_ SG_ 848 INCREASING_MSB "upper part of time counter";
