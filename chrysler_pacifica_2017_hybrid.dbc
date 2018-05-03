@@ -324,6 +324,15 @@ BO_ 941 NEW_MSG_3ad: 8 XXX
  SG_ INCREASING_1 : 32|5@1+ (1,0) [0|31] "" XXX
  SG_ INCREASING_2 : 56|8@1+ (1,0) [0|255] "" XXX
 
+BO_ 500 ACC_2: 8 XXX
+ SG_ UNKNOWN_1 : 16|6@1+ (1,0) [0|255] "" XXX
+ SG_ BRAKE_MAYBE : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ BRAKE_BOOL_1 : 36|1@0+ (1,0) [0|3] "" XXX
+
+BO_ 625 ACC_1: 8 XXX
+ SG_ SPEED : 24|8@1+ (1,0) [0|255] "" XXX
+ SG_ ACCEL_PERHAPS : 39|16@0+ (1,0) [0|255] "" XXX
+
 
 
 
@@ -374,5 +383,10 @@ CM_ SG_ 639 INCREASING "perhaps number of seconds divided by two for this drive"
 CM_ SG_ 848 INCREASING_LSB "lower part of time counter";
 CM_ SG_ 848 INCREASING_MSB "upper part of time counter";
 CM_ SG_ 908 INCREASING_MSB "time based";
+CM_ SG_ 500 UNKNOWN_1 "set to 15 in non-ACC, signal on deceleration";
+CM_ SG_ 500 BRAKE_MAYBE "254 in non-ACC and non-decel. Signal on deceleration.";
+CM_ SG_ 500 BRAKE_BOOL_1 "set to 1 when ACC decel. 0 on non-ACC and accel.";
+CM_ SG_ 625 SPEED "zero on non-acc drives";
+CM_ SG_ 625 ACCEL_PERHAPS "set to 7767 on non-ACC drives. ACC drive 40k is constant speed, 42k is accelerating";
 VAL_ 746 PRNDL 4 "Drive" 3 "Neutral" 2 "Reverse" 1 "Park" ;
 VAL_ 792 TURN_SIGNALS 2 "Right" 1 "Left" ;
