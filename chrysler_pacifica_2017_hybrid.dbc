@@ -78,7 +78,7 @@ BO_ 320 BRAKE_2: 8 XXX
  SG_ INCREMENTING_140 : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM_140 : 63|8@0+ (1,0) [0|255] "" XXX
  SG_ BRAKE_PRESSED_2 : 2|3@0+ (1,0) [0|7] "" XXX
- SG_ BRAKE_PRESSED_1 : 6|1@0+ (1,0) [0|3] "" XXX
+ SG_ BRAKE_PRESSED_ACC : 6|1@0+ (1,0) [0|3] "" XXX
 
 BO_ 736 TRIP: 8 XXX
  SG_ DISTANCE_COUNTER : 7|16@0+ (1,0) [0|65535] "Meters" XXX
@@ -185,6 +185,7 @@ BO_ 288 ACCEL_RELATED_120: 7 XXX
  SG_ UNKNOWN_INCREMENTING_120 : 47|4@0+ (1,0) [0|15] "" XXX
  SG_ UNKNOWN_CHECKSUM_120 : 55|8@0+ (1,0) [0|255] "" XXX
  SG_ ACCEL : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_1 : 31|16@0+ (1,0) [0|65535] "" XXX
 
 BO_ 257 ACCEL_RELATED_101: 5 XXX
  SG_ ENERGY_OR_RPM : 24|8@1+ (1,0) [0|255] "" XXX
@@ -238,6 +239,7 @@ BO_ 270 ACCEL_RELATED_10e: 8 XXX
  SG_ ACCEL_OR_RPM : 7|16@0+ (1,0) [0|255] "" XXX
  SG_ INCREMENTING_ACCEL : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM_ACCEL : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ GAS_ENGINE_RPM_MAYBE : 23|16@0+ (1,0) [0|65535] "" XXX
 
 BO_ 291 ENERGY_RELATED_123: 8 XXX
  SG_ ENERGY_GAIN_LOSS : 18|11@0- (1,0) [0|255] "" XXX
@@ -334,6 +336,14 @@ BO_ 625 ACC_1: 8 XXX
  SG_ SPEED : 24|8@1+ (1,0) [0|255] "" XXX
  SG_ ACCEL_PERHAPS : 39|16@0+ (1,0) [0|255] "" XXX
 
+BO_ 268 ACC_10c: 8 XXX
+ SG_ BRAKE_PERHAPS : 48|1@1+ (1,0) [0|3] "" XXX
+
+BO_ 384 NEW_MSG_180: 8 XXX
+ SG_ NEW_SIGNAL_2 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_3 : 32|8@1+ (1,0) [0|3] "" XXX
+
 
 
 
@@ -347,7 +357,8 @@ CM_ SG_ 746 PRNDL "4=D, 3=N, 2=R, 1=P";
 CM_ SG_ 746 GEAR_CHECKSUM "different than the LKAS checksum. unknown non-simple algorithm. just build a lookup table for it.";
 CM_ SG_ 284 SPEED_RELATED_1 "Another Speed Signal, Maybe RPMs?";
 CM_ SG_ 284 BRAKE_RELATED_1_1 "Correlates with braking";
-CM_ SG_ 320 BRAKE_PRESSED_2 "Value is 5 when brake is pressed";
+CM_ SG_ 320 BRAKE_PRESSED_2 "Value is 5 when brake is pressed by human, 1 when ACC brake";
+CM_ SG_ 320 BRAKE_PRESSED_ACC "set when ACC brakes";
 CM_ SG_ 792 TURN_SIGNALS "1=Left, 2=Right";
 CM_ SG_ 792 HIGH_BEAM_FLASH "use this for genericToggle";
 CM_ SG_ 264 ACCEL_PEDAL "not in ACC so seems to be actual pedal. Use for gasPressed";
@@ -372,6 +383,7 @@ CM_ SG_ 720 BLIND_SPOT_RIGHT "yellow triangle alert on side view mirror when a c
 CM_ SG_ 608 PARKSENSE_DISABLED "set if parksense is disabled";
 CM_ SG_ 729 LKAS_STATUS_OK "Set to 0x0820 when LKAS system is plugged in.";
 CM_ SG_ 288 UNKNOWN_CHECKSUM_120 "not the LKAS checksum";
+CM_ SG_ 288 NEW_SIGNAL_1 "lags acceleration, perhaps gas engine";
 CM_ SG_ 257 ENERGY_OR_RPM "perhaps energy consumption or RPMs";
 CM_ SG_ 291 ENERGY_GAIN_LOSS "unsure what this actually is";
 CM_ SG_ 291 ENERGY_SMOOTHER_CURVE "unusre what it is, but smoother";
@@ -390,5 +402,7 @@ CM_ SG_ 500 ACC_STATUS_2 "set to 1 in non-ACC, 3 when ACC enabled (white icon), 
 CM_ SG_ 500 ACC_STATUS_1 "2 briefly (9 packets) when ACC goes to green, 1 help when ACC coming to a stop and at a stop";
 CM_ SG_ 625 SPEED "zero on non-acc drives";
 CM_ SG_ 625 ACCEL_PERHAPS "set to 7767 on non-ACC drives. ACC drive 40k is constant speed, 42k is accelerating";
+CM_ SG_ 268 BRAKE_PERHAPS "triggers only on ACC braking";
+CM_ SG_ 384 NEW_SIGNAL_1 "set in ACC gas driving. not set in electric human. not sure about gas human driving.";
 VAL_ 746 PRNDL 4 "Drive" 3 "Neutral" 2 "Reverse" 1 "Park" ;
 VAL_ 792 TURN_SIGNALS 2 "Right" 1 "Left" ;
