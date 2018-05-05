@@ -125,8 +125,8 @@ BO_ 678 LKAS_INDICATOR_3: 8 XXX
 
 BO_ 705 AUTO_PARK_BUTTON: 8 XXX
  SG_ AUTO_PARK_TOGGLE_2 : 8|1@1+ (1,0) [0|1] "" XXX
- SG_ INCREASING_UNKNOWN : 32|4@1+ (1,0) [0|15] "" XXX
  SG_ AUTO_PARK_TOGGLE_1 : 11|1@0+ (1,0) [0|1] "" XXX
+ SG_ INCREASING_UNKNOWN : 32|7@1+ (1,0) [0|15] "" XXX
 
 BO_ 719 AUTO_PARK_SIGNALS_1: 8 XXX
  SG_ AUTO_PARK_UNKNOWN_1 : 7|16@0+ (1,0) [0|31] "" XXX
@@ -201,12 +201,12 @@ BO_ 560 NEW_MSG_230: 4 XXX
 BO_ 564 NEW_MSG_234: 4 XXX
 
 BO_ 571 WHEEL_BUTTONS: 3 XXX
- SG_ INCREMENTING_23B : 15|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM_23B : 23|8@0+ (1,0) [0|255] "" XXX
  SG_ ACC_FOLLOW_DEC : 1|1@1+ (1,0) [0|3] "" XXX
  SG_ ACC_SPEED_INC : 2|1@0+ (1,0) [0|255] "" XXX
  SG_ ACC_SPEED_DEC : 3|1@1+ (1,0) [0|3] "" XXX
  SG_ ACC_FOLLOW_INC : 8|1@1+ (1,0) [0|15] "" XXX
+ SG_ COUNTER : 15|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 669 NEW_MSG_29d: 3 XXX
  SG_ INCREMENTING_29D : 15|4@0+ (1,0) [0|15] "" XXX
@@ -261,7 +261,7 @@ BO_ 308 ACCEL_134: 8 XXX
  SG_ ACCEL_134 : 40|4@1+ (1,0) [0|15] "" XXX
 
 BO_ 532 ENERGY_RELATED_214: 8 XXX
- SG_ NOISY_SLOWLY_DECREASING : 30|7@0+ (1,0) [0|255] "" XXX
+ SG_ NOISY_SLOWLY_DECREASING : 16|9@0+ (1,0) [0|255] "" XXX
  SG_ ENERGY_RELATED : 0|9@0+ (1,0) [0|255] "" XXX
 
 BO_ 559 ACCEL_RELATED_22F: 8 XXX
@@ -350,6 +350,16 @@ BO_ 384 NEW_MSG_180: 8 XXX
  SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_3 : 32|8@1+ (1,0) [0|3] "" XXX
 
+BO_ 853 NEW_MSG_355: 8 XXX
+
+BO_ 939 NEW_MSG_3ab: 8 XXX
+
+BO_ 512 NEW_MSG_200: 8 XXX
+ SG_ NEW_SIGNAL_1 : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ INCREASING : 27|12@0+ (1,0) [0|127] "" XXX
+ SG_ COUNTER : 48|4@1+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
 
 
 
@@ -374,8 +384,8 @@ CM_ SG_ 658 LKAS_CHECKSUM_2 "checksum calculated with https://gist.github.com/ad
 CM_ SG_ 678 WARNING_PLACE_HANDS "set when warning displays place hands on steering wheel";
 CM_ SG_ 678 LKAS_WHITE_OR_YELLOW "set when indicator is yellow or white. could indicate lkas not on track.";
 CM_ SG_ 678 LKAS_IS_YELLOW_2 "set when indicator is yellow. could indicate lkas is steering.";
-CM_ SG_ 705 INCREASING_UNKNOWN "perhaps counting distance traveled";
 CM_ SG_ 705 AUTO_PARK_TOGGLE_1 "set briefly when turning on or off self-parking";
+CM_ SG_ 705 INCREASING_UNKNOWN "sometimes decreasing";
 CM_ SG_ 671 AUTO_PARK_PARALLEL "parallel parking mode";
 CM_ SG_ 671 AUTO_PARK_PERPENDICULAR_1 "perpendicular parking mode";
 CM_ SG_ 671 AUTO_PARK_MAYBE_TURNING "something with autopark turning the steering wheel maybe.";
