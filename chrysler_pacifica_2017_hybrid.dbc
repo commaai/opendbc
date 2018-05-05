@@ -329,15 +329,21 @@ BO_ 941 NEW_MSG_3ad: 8 XXX
 BO_ 500 ACC_2: 8 XXX
  SG_ BRAKE_BOOL_1 : 36|1@0+ (1,0) [0|3] "" XXX
  SG_ BRAKE_MAYBE : 18|11@0+ (1,0) [0|255] "" XXX
- SG_ ACC_STATUS_2 : 19|3@1+ (1,0) [0|255] "" XXX
  SG_ ACC_STATUS_1 : 7|3@0+ (1,0) [0|255] "" XXX
+ SG_ ACC_STATUS_2 : 19|3@1+ (1,0) [0|255] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 625 ACC_1: 8 XXX
- SG_ SPEED : 24|8@1+ (1,0) [0|255] "" XXX
+ SG_ SPEED : 24|8@1+ (1,0) [0|255] "km/h" XXX
  SG_ ACCEL_PERHAPS : 39|16@0+ (1,0) [0|255] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 268 ACC_10c: 8 XXX
  SG_ BRAKE_PERHAPS : 48|1@1+ (1,0) [0|3] "" XXX
+ SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 384 NEW_MSG_180: 8 XXX
  SG_ NEW_SIGNAL_2 : 15|8@0+ (1,0) [0|255] "" XXX
@@ -398,8 +404,8 @@ CM_ SG_ 848 INCREASING_MSB "upper part of time counter";
 CM_ SG_ 908 INCREASING_MSB "time based";
 CM_ SG_ 500 BRAKE_BOOL_1 "set to 1 when ACC decel. 0 on non-ACC and accel.";
 CM_ SG_ 500 BRAKE_MAYBE "2046 in non-ACC and non-decel. Signal on deceleration. 818 for already stopped break.";
-CM_ SG_ 500 ACC_STATUS_2 "set to 1 in non-ACC, 3 when ACC enabled (white icon), and 7 when ACC in use (green icon)";
 CM_ SG_ 500 ACC_STATUS_1 "2 briefly (9 packets) when ACC goes to green, 1 help when ACC coming to a stop and at a stop";
+CM_ SG_ 500 ACC_STATUS_2 "set to 1 in non-ACC, 3 when ACC enabled (white icon), and 7 when ACC in use (green icon)";
 CM_ SG_ 625 SPEED "zero on non-acc drives";
 CM_ SG_ 625 ACCEL_PERHAPS "set to 7767 on non-ACC drives. ACC drive 40k is constant speed, 42k is accelerating";
 CM_ SG_ 268 BRAKE_PERHAPS "triggers only on ACC braking";
