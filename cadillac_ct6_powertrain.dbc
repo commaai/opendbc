@@ -129,7 +129,7 @@ BO_ 338 ASCMLKASteeringCmd: 6 NEO
  SG_ SetMe1 : 21|1@0+ (1,0) [0|0] ""  NEO
  SG_ LKASVehicleSpeed : 20|13@0+ (0.22,0) [0|0] "kph" NEO
  SG_ LKASteeringCmdActive2 : 35|1@0+ (1,0) [0|0] ""  NEO
- SG_ LKASteeringCmdChecksum : 34|11@0+ (1,0) [0|0] ""  NEO
+ SG_ LKASteeringCmdChecksum : 33|10@0+ (1,0) [0|0] ""  NEO
 
 BO_ 388 PSCMStatus: 8 K43_PSCM
  SG_ HandsOffSWDetectionMode : 20|2@0+ (1,0) [0|3] ""  NEO
