@@ -128,7 +128,7 @@ BO_ 338 ASCMLKASteeringCmd: 6 NEO
  SG_ RollingCounter : 23|2@0+ (1,0) [0|0] ""  NEO
  SG_ SetMe1 : 21|1@0+ (1,0) [0|0] ""  NEO
  SG_ LKASVehicleSpeed : 20|13@0+ (0.22,0) [0|0] "kph" NEO
- SG_ LKASteeringCmdActive2 : 35|1@0+ (1,0) [0|0] ""  NEO
+ SG_ LKASMode : 36|2@0+ (1,0) [0|0] ""  NEO
  SG_ LKASteeringCmdChecksum : 33|10@0+ (1,0) [0|0] ""  NEO
 
 BO_ 340 ASCMBLKASteeringCmd: 6 NEO
@@ -232,6 +232,7 @@ VAL_ 481 LKAButton 1 "Active" 0 "Inactive" ;
 VAL_ 481 ACCButtons 6 "Cancel" 5 "Main" 3 "Set" 2 "Resume" 1 "None" ;
 VAL_ 309 PRNDL 3 "Reverse" 2 "Drive" 1 "Neutral" 0 "Park" ;
 VAL_ 338 LKASteeringCmdActive 1 "Active" 0 "Inactive" ;
+VAL_ 338 LKASMode 2 "supercruise" 1 "lkas" 0 "Inactive" ;
 VAL_ 880 ACCLeadCar 1 "Present" 0 "Not Present" ;
 VAL_ 880 ACCGapLevel 3 "Far" 2 "Med" 1 "Near" 0 "Inactive" ;
 VAL_ 880 ACCResumeButton 1 "Pressed" 0 "Depressed" ;
