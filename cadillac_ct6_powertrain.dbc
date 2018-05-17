@@ -191,7 +191,7 @@ BO_ 880 ASCMActiveCruiseControlStatus: 6 K124_ASCM
 BO_ 1033 ASCMKeepAlive: 7 NEO
  SG_ ASCMKeepAliveAllZero : 7|56@0+ (1,0) [0|0] ""  NEO
 
-BO_TX_BU_ 384 : K124_ASCM,NEO;
+BO_TX_BU_ 338 : K124_ASCM,NEO;
 BO_TX_BU_ 880 : NEO,K124_ASCM;
 BO_TX_BU_ 1033 : K124_ASCM,NEO;
 BO_TX_BU_ 715 : NEO,K124_ASCM;
@@ -222,7 +222,7 @@ VAL_ 481 DistanceButton 1 "Active" 0 "Inactive" ;
 VAL_ 481 LKAButton 1 "Active" 0 "Inactive" ;
 VAL_ 481 ACCButtons 6 "Cancel" 5 "Main" 3 "Set" 2 "Resume" 1 "None" ;
 VAL_ 309 PRNDL 3 "Reverse" 2 "Drive" 1 "Neutral" 0 "Park" ;
-VAL_ 384 LKASteeringCmdActive 1 "Active" 0 "Inactive" ;
+VAL_ 338 LKASteeringCmdActive 1 "Active" 0 "Inactive" ;
 VAL_ 880 ACCLeadCar 1 "Present" 0 "Not Present" ;
 VAL_ 880 ACCGapLevel 3 "Far" 2 "Med" 1 "Near" 0 "Inactive" ;
 VAL_ 880 ACCResumeButton 1 "Pressed" 0 "Depressed" ;
