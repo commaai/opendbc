@@ -122,11 +122,13 @@ BO_ 298 BCMDoorBeltStatus: 8 K9_BCM
 BO_ 381 MSG_17D: 6 K20_ECM
  SG_ MSG17D_AccPower : 35|12@0- (1,0) [0|0] ""  NEO
 
-BO_ 384 ASCMLKASteeringCmd: 4 NEO
- SG_ RollingCounter : 5|2@0+ (1,0) [0|0] ""  NEO
- SG_ LKASteeringCmdChecksum : 19|12@0+ (1,0) [0|0] ""  NEO
- SG_ LKASteeringCmdActive : 3|1@0+ (1,0) [0|0] ""  NEO
- SG_ LKASteeringCmd : 2|11@0- (1,0) [0|0] ""  NEO
+BO_ 338 ASCMLKASteeringCmd: 6 NEO
+ SG_ LKASteeringCmdActive : 7|1@0+ (1,0) [0|0] ""  NEO
+ SG_ LKASteeringCmd : 5|14@0- (1,0) [0|0] ""  NEO
+ SG_ RollingCounter : 22|2@0+ (1,0) [0|0] ""  NEO
+ SG_ LKASteeringCmdActive2 : 35|1@0+ (1,0) [0|0] ""  NEO
+ SG_ LKASteeringCmdChecksum : 34|11@0+ (1,0) [0|0] ""  NEO
+ SG_ LKASVehicleSpeed : 20|13@0+ (1,0) [0|0] "" NEO
 
 BO_ 388 PSCMStatus: 8 K43_PSCM
  SG_ HandsOffSWDetectionMode : 20|2@0+ (1,0) [0|3] ""  NEO
