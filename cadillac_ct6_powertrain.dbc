@@ -53,49 +53,15 @@ VAL_TABLE_ HandsOffSWDetectionStatus 1 "Hands On" 0 "Hands Off" ;
 VAL_TABLE_ HandsOffSWDetectionMode 2 "Failed" 1 "Enabled" 0 "Disabled" ;
 
 
-BO_ 320 BCMTurnSignals: 3 K9_BCM
- SG_ TurnSignals : 19|2@0+ (1,0) [0|0] ""  NEO
-
-BO_ 1217 ECMEngineCoolantTemp: 8 K20_ECM
- SG_ EngineCoolantTemp : 23|8@0+ (1,-40) [0|0] "°C"  NEO
-
-BO_ 1249 VIN_Part2: 8 K20_ECM
- SG_ VINPart2 : 7|64@0+ (1,0) [0|0] ""  NEO
-
-BO_ 1300 VIN_Part1: 8 K20_ECM
- SG_ VINPart1 : 7|64@0+ (1,0) [0|0] ""  NEO
-
-BO_ 481 ASCMSteeringButton: 7 K124_ASCM
- SG_ DistanceButton : 22|1@0+ (1,0) [0|0] ""  NEO
- SG_ LKAButton : 23|1@0+ (1,0) [0|0] ""  NEO
- SG_ ACCButtons : 46|3@0+ (1,0) [0|0] ""  NEO
-
-BO_ 1912 PSCM_778: 8 K43_PSCM
-
-BO_ 328 PSCM_148: 1 K43_PSCM
-
-BO_ 309 ECMPRDNL: 8 K20_ECM
- SG_ PRNDL : 2|3@0+ (1,0) [0|0] ""  NEO
-
-BO_ 810 TCICOnStarGPSPosition: 8 K73_TCIC
- SG_ GPSLongitude : 39|32@0+ (1,0) [0|0] "milliarcsecond"  NEO
- SG_ GPSLatitude : 7|32@0+ (1,0) [0|0] "milliarcsecond"  NEO
-
-BO_ 1001 ECMVehicleSpeed: 8 K20_ECM
- SG_ VehicleSpeed : 7|16@0+ (0.01,0) [0|0] "mph"  NEO
-
-BO_ 1930 ASCM_78A: 7 K124_ASCM
-
-BO_ 1296 ASCM_510: 4 K124_ASCM
-
-BO_ 1034 ASCM_40A: 7 K124_ASCM
+BO_ 717 ASCM_2CD: 5 K124_ASCM
 
 BO_ 869 ASCM_365: 4 K124_ASCM
 
-BO_ 717 ASCM_2CD: 5 K124_ASCM
+BO_ 1034 ASCM_40A: 7 K124_ASCM
 
-BO_ 189 EBCMRegenPaddle: 7 K17_EBCM
- SG_ RegenPaddle : 7|4@0+ (1,0) [0|0] ""  NEO
+BO_ 1296 ASCM_510: 4 K124_ASCM
+
+BO_ 1930 ASCM_78A: 7 K124_ASCM
 
 BO_ 190 ECMAcceleratorPos: 6 K20_ECM
  SG_ BrakePedalPos : 15|8@0+ (1,0) [0|0] "sticky"  NEO
@@ -119,8 +85,14 @@ BO_ 298 BCMDoorBeltStatus: 8 K9_BCM
  SG_ LeftSeatBelt : 12|1@0+ (1,0) [0|0] ""  NEO
  SG_ RightSeatBelt : 53|1@0+ (1,0) [0|0] ""  NEO
 
-BO_ 381 MSG_17D: 6 K20_ECM
- SG_ MSG17D_AccPower : 35|12@0- (1,0) [0|0] ""  NEO
+BO_ 309 ECMPRDNL: 8 K20_ECM
+ SG_ PRNDL : 2|3@0+ (1,0) [0|0] ""  NEO
+
+BO_ 320 BCMTurnSignals: 3 K9_BCM
+ SG_ TurnSignals : 19|2@0+ (1,0) [0|0] ""  NEO
+
+BO_ 336 ASCMLKASStatus: 1 NEO
+ SG_ Active : 7|1@0+ (1,0) [0|0] ""  NEO
 
 BO_ 338 ASCMLKASteeringCmd: 6 NEO
  SG_ LKASteeringCmdActive : 7|1@0+ (1,0) [0|0] ""  NEO
@@ -140,6 +112,9 @@ BO_ 340 ASCMBLKASteeringCmd: 6 NEO
  SG_ LKASteeringCmdActive2 : 35|1@0+ (1,0) [0|0] ""  NEO
  SG_ LKASteeringCmdChecksum : 33|10@0+ (1,0) [0|0] ""  NEO
 
+BO_ 381 MSG_17D: 8 K20_ECM
+ SG_ MSG17D_AccPower : 35|12@0- (1,0) [0|0] ""  NEO
+
 BO_ 388 PSCMStatus: 8 K43_PSCM
  SG_ HandsOffSWDetectionMode : 20|2@0+ (1,0) [0|3] ""  NEO
  SG_ HandsOffSWlDetectionStatus : 21|1@0+ (1,0) [0|1] ""  NEO
@@ -147,7 +122,7 @@ BO_ 388 PSCMStatus: 8 K43_PSCM
  SG_ LKADriverAppldTrq : 50|11@0- (0.01,0) [-10.24|10.23] "Nm"  NEO
  SG_ LKATotalTorqueDelivered : 2|11@0- (0.01,0) [-10.24|10.23] "Nm"  NEO
 
-BO_ 417 AcceleratorPedal: 8 XXX
+BO_ 417 AcceleratorPedal: 7 XXX
  SG_ AcceleratorPedal : 55|8@0+ (1,0) [0|0] ""  NEO
 
 BO_ 451 GasAndAcc: 8 XXX
@@ -155,6 +130,11 @@ BO_ 451 GasAndAcc: 8 XXX
 
 BO_ 452 AcceleratorPedal2: 8 XXX
  SG_ AcceleratorPedal2 : 47|8@0+ (1,0) [0|0] ""  NEO
+
+BO_ 481 ASCMSteeringButton: 7 K124_ASCM
+ SG_ DistanceButton : 22|1@0+ (1,0) [0|0] ""  NEO
+ SG_ LKAButton : 23|1@0+ (1,0) [0|0] ""  NEO
+ SG_ ACCButtons : 46|3@0+ (1,0) [0|0] ""  NEO
 
 BO_ 485 PSCMSteeringAngle: 8 K43_PSCM
  SG_ SteeringWheelAngle : 15|16@0- (0.0625,0) [-540|540] "deg"  NEO
@@ -180,6 +160,10 @@ BO_ 715 ASCMGasRegenCmd: 8 K124_ASCM
  SG_ GasRegenAlwaysOne3 : 23|1@0+ (1,0) [0|1] ""  NEO
  SG_ GasRegenCmd : 22|12@0+ (1,0) [0|0] ""  NEO
 
+BO_ 810 TCICOnStarGPSPosition: 8 K73_TCIC
+ SG_ GPSLongitude : 39|32@0+ (1,0) [0|0] "milliarcsecond"  NEO
+ SG_ GPSLatitude : 7|32@0+ (1,0) [0|0] "milliarcsecond"  NEO
+
 BO_ 840 EBCMWheelSpdFront: 4 K17_EBCM
  SG_ FLWheelSpd : 7|16@0+ (0.0311,0) [0|255] "km/h"  NEO
  SG_ FRWheelSpd : 23|16@0+ (0.0311,0) [0|255] "km/h"  NEO
@@ -197,8 +181,22 @@ BO_ 880 ASCMActiveCruiseControlStatus: 6 K124_ASCM
  SG_ ACCResumeButton : 1|1@0+ (1,0) [0|0] ""  NEO
  SG_ ACCCmdActive : 23|1@0+ (1,0) [0|0] ""  NEO
 
+BO_ 1001 ECMVehicleSpeed: 8 K20_ECM
+ SG_ VehicleSpeed : 7|16@0+ (0.01,0) [0|0] "mph"  NEO
+
 BO_ 1033 ASCMKeepAlive: 7 NEO
  SG_ ASCMKeepAliveAllZero : 7|56@0+ (1,0) [0|0] ""  NEO
+
+BO_ 1217 ECMEngineCoolantTemp: 8 K20_ECM
+ SG_ EngineCoolantTemp : 23|8@0+ (1,-40) [0|0] "°C"  NEO
+
+BO_ 1249 VIN_Part2: 8 K20_ECM
+ SG_ VINPart2 : 7|64@0+ (1,0) [0|0] ""  NEO
+
+BO_ 1300 VIN_Part1: 8 K20_ECM
+ SG_ VINPart1 : 7|64@0+ (1,0) [0|0] ""  NEO
+
+BO_ 1912 PSCM_778: 8 K43_PSCM
 
 BO_TX_BU_ 338 : K124_ASCM,NEO;
 BO_TX_BU_ 880 : NEO,K124_ASCM;
