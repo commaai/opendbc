@@ -92,7 +92,7 @@ BO_ 320 BCMTurnSignals: 3 K9_BCM
  SG_ TurnSignals : 19|2@0+ (1,0) [0|0] ""  NEO
 
 BO_ 336 ASCMLKASStatus: 1 NEO
- SG_ Active : 7|1@0+ (1,0) [0|0] ""  NEO
+ SG_ Available : 7|1@0+ (1,0) [0|0] ""  NEO
 
 BO_ 338 ASCMLKASteeringCmd: 6 NEO
  SG_ LKASteeringCmdActive : 7|1@0+ (1,0) [0|0] ""  NEO
