@@ -115,11 +115,9 @@ BO_ 340 ASCMBLKASteeringCmd: 6 NEO
 BO_ 381 MSG_17D: 8 K20_ECM
  SG_ MSG17D_AccPower : 35|12@0- (1,0) [0|0] ""  NEO
 
-BO_ 388 PSCMStatus: 8 K43_PSCM
- SG_ HandsOffSWDetectionMode : 20|2@0+ (1,0) [0|3] ""  NEO
- SG_ HandsOffSWlDetectionStatus : 21|1@0+ (1,0) [0|1] ""  NEO
- SG_ LKATorqueDeliveredStatus : 5|3@0+ (1,0) [0|7] ""  NEO
- SG_ LKADriverAppldTrq : 50|11@0- (0.01,0) [-10.24|10.23] "Nm"  NEO
+BO_ 356 PSCMStatus: 8 K43_PSCM
+ SG_ LKATorqueDeliveredStatus : 7|3@0+ (1,0) [0|7] ""  NEO
+ SG_ LKADriverAppldTrq : 35|14@0- (0.01,0) [-10.24|10.23] "Nm"  NEO
  SG_ LKATotalTorqueDelivered : 2|11@0- (0.01,0) [-10.24|10.23] "Nm"  NEO
 
 BO_ 417 AcceleratorPedal: 7 XXX
@@ -237,7 +235,7 @@ VAL_ 880 ACCResumeButton 1 "Pressed" 0 "Depressed" ;
 VAL_ 880 ACCCmdActive 1 "Active" 0 "Inactive" ;
 VAL_ 388 HandsOffSWDetectionMode 2 "Failed" 1 "Enabled" 0 "Disabled" ;
 VAL_ 388 HandsOffSWlDetectionStatus 1 "Hands On" 0 "Hands Off" ;
-VAL_ 388 LKATorqueDeliveredStatus 3 "Failed" 2 "Temp. Limited" 1 "Active" 0 "Inactive" ;
+VAL_ 388 LKATorqueDeliveredStatus 7 "Override Fault" 6 "LKAS Fault but Responsive" 5 "TBD but Responsive" 3 "Fault" 1 "Active" 0 "Inactive" ;
 VAL_ 489 BrakePedalPressed 1 "Pressed" 0 "Depressed" ;
 VAL_ 715 GasRegenCmdActiveInv 1 "Inactive" 0 "Active" ;
 VAL_ 715 GasRegenCmdActive 1 "Active" 0 "Inactive" ;
