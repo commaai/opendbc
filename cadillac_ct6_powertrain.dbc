@@ -150,15 +150,16 @@ BO_ 711 BECMBatteryVoltageCurrent: 6 K17_EBCM
  SG_ HVBatteryCurrent : 12|13@0- (0.15,0) [-614.4|614.25] "A"  NEO
 
 BO_ 715 ASCMGasRegenCmd: 8 K124_ASCM
- SG_ GasRegenAlwaysOne2 : 9|1@0+ (1,1) [1|1] ""  NEO
- SG_ GasRegenAlwaysOne : 14|1@0+ (1,1) [1|1] ""  NEO
+ SG_ GasRegenAlwaysOne : 9|1@0+ (1,1) [1|1] ""  NEO
+ SG_ GasRegenAlwaysThree : 15|2@0+ (1,1) [1|1] ""  NEO
  SG_ GasRegenChecksum : 47|24@0+ (1,0) [0|0] ""  NEO
  SG_ GasRegenCmdActiveInv : 32|1@0+ (1,0) [0|0] ""  NEO
  SG_ GasRegenFullStopActive : 13|1@0+ (1,0) [0|0] ""  NEO
  SG_ GasRegenCmdActive : 0|1@0+ (1,0) [0|0] ""  NEO
  SG_ RollingCounter : 7|2@0+ (1,0) [0|0] ""  NEO
- SG_ GasRegenAlwaysOne3 : 23|1@0+ (1,0) [0|1] ""  NEO
- SG_ GasRegenCmd : 22|12@0+ (1,0) [0|0] ""  NEO
+ SG_ RollingCounter2 : 36|4@0+ (1,0) [0|0] ""  NEO
+ SG_ GasRegenAlwaysOne2 : 23|1@0+ (1,0) [0|1] ""  NEO
+ SG_ GasRegenCmd : 22|15@0+ (1,0) [0|0] ""  NEO
 
 BO_ 810 TCICOnStarGPSPosition: 8 K73_TCIC
  SG_ GPSLongitude : 39|32@0+ (1,0) [0|0] "milliarcsecond"  NEO
@@ -216,6 +217,7 @@ CM_ BU_ K124_ASCM "Active Safety Control Module";
 CM_ SG_ 381 MSG17D_AccPower "Need to investigate";
 CM_ SG_ 190 GasPedalAndAcc "ACC baseline is 62";
 CM_ SG_ 451 GasPedalAndAcc2 "ACC baseline is 62";
+CM_ SG_ 715 RollingCounter2 "Values cycle between 0, 7, 10, 13";
 BA_DEF_  "UseGMParameterIDs" INT 0 0;
 BA_DEF_  "ProtocolType" STRING ;
 BA_DEF_  "BusType" STRING ;
