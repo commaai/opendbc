@@ -208,13 +208,14 @@ VAL_ 921 CRUISE_CONTROL_STATE 2 "disabled" 11 "hold" 10 "hold_waiting_user_cmd" 
 
 CM_ "CHFFR_METRIC 37 STEER_ANGLE STEER_ANGLE 0.36 180";
 
-CM_ "toyota_rav4_2017_pt.dbc starts here"
+CM_ "toyota_highlander_2017_pt.dbc starts here"
 
 
 
-BO_ 548 BRAKE_MODULE: 8 XXX
- SG_ BRAKE_PRESSURE : 43|12@0+ (1,0) [0|4047] "" XXX
- SG_ BRAKE_PRESSED : 5|1@0+ (1,0) [0|1] "" XXX
+BO_ 550 BRAKE_MODULE: 8 XXX
+ SG_ BRAKE_PRESSURE : 0|9@0+ (1,0) [0|255] "" XXX
+ SG_ BRAKE_POSITION : 16|9@0+ (1,0) [0|65535] "" XXX
+ SG_ BRAKE_PRESSED : 37|1@0+ (1,0) [0|3] "" XXX
 
 BO_ 705 GAS_PEDAL: 8 XXX
  SG_ GAS_RELEASED : 3|1@0+ (1,0) [0|1] "" XXX
