@@ -109,7 +109,7 @@ BO_ 340 ASCMBLKASteeringCmd: 6 NEO
  SG_ RollingCounter : 23|2@0+ (1,0) [0|0] ""  NEO
  SG_ SetMe1 : 21|1@0+ (1,0) [0|0] ""  NEO
  SG_ LKASVehicleSpeed : 20|13@0+ (0.22,0) [0|0] "kph" NEO
- SG_ LKASteeringCmdActive2 : 35|1@0+ (1,0) [0|0] ""  NEO
+ SG_ LKASMode : 36|2@0+ (1,0) [0|0] ""  NEO
  SG_ LKASteeringCmdChecksum : 33|10@0+ (1,0) [0|0] ""  NEO
 
 BO_ 381 MSG_17D: 8 K20_ECM
