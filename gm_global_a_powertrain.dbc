@@ -33,7 +33,7 @@ NS_ :
 
 BS_:
 
-BU_: K16_BECM K73_TCIC K9_BCM K43_PSCM K17_EBCM K20_ECM K114B_HPCM NEO K124_ASCM
+BU_: K16_BECM K73_TCIC K9_BCM K43_PSCM K17_EBCM K20_ECM K114B_HPCM NEO K124_ASCM EPB
 VAL_TABLE_ TurnSignals 2 "Right Turn" 1 "Left Turn" 0 "None" ;
 VAL_TABLE_ ACCLeadCar 1 "Present" 0 "Not Present" ;
 VAL_TABLE_ ACCCmdActive 1 "Active" 0 "Inactive" ;
@@ -126,6 +126,9 @@ BO_ 489 EBCMVehicleDynamic: 8 K17_EBCM
  SG_ YawRate : 51|12@0- (0.0625,0) [-2047|2047] "grad/s"  NEO
  SG_ LateralAcceleration : 3|12@0- (0.0161,0) [-2047|2047] "m/s2"  NEO
  SG_ BrakePedalPressed : 6|1@0+ (1,0) [0|0] ""  NEO
+
+BO_ 489 EBPStatus: 8 EPB
+ SG_ EPBClosed : 12|1@0+ (1,0) [0|1] ""  NEO
 
 BO_ 711 BECMBatteryVoltageCurrent: 6 K17_EBCM
  SG_ HVBatteryVoltage : 31|12@0+ (0.125,0) [0|511.875] "V"  NEO
