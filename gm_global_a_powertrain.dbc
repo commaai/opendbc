@@ -127,7 +127,7 @@ BO_ 489 EBCMVehicleDynamic: 8 K17_EBCM
  SG_ LateralAcceleration : 3|12@0- (0.0161,0) [-2047|2047] "m/s2"  NEO
  SG_ BrakePedalPressed : 6|1@0+ (1,0) [0|0] ""  NEO
 
-BO_ 489 EBPStatus: 8 EPB
+BO_ 560 EBPStatus: 8 EPB
  SG_ EPBClosed : 12|1@0+ (1,0) [0|1] ""  NEO
 
 BO_ 711 BECMBatteryVoltageCurrent: 6 K17_EBCM
