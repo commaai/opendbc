@@ -14,7 +14,7 @@ def create_dbc(filename):
     output_filename = filename.replace('.dbc', '_generated.dbc')
     output_file_location = os.path.join(generator_path, output_filename)
     
-    if os.isfile(output_file_location):
+    if os.path.isfile(output_file_location):
         os.remove(output_file_location)
       
     with open(output_file_location, 'a') as dbc_file_out:
