@@ -2,6 +2,11 @@
 import os
 import re
 
+cur_path = os.path.dirname(os.path.realpath(__file__))
+generator_path = os.path.join(cur_path, '../')
+
+include_pattern = re.compile(r'CM_ "IMPORT (.*?)"')
+
 def read_dbc(filename):
     with open(os.path.join(dir_name, filename), 'r') as file_in:
         return file_in.read()
@@ -33,10 +38,6 @@ def create_dbc(filename):
         core_dbc = include_pattern.sub('', dbc_file_in)
         dbc_file_out.write(core_dbc)
    
-cur_path = os.path.dirname(os.path.realpath(__file__))
-generator_path = os.path.join(cur_path, '../')
-
-include_pattern = re.compile(r'CM_ "IMPORT (.*?)"')
 
 for dir_name, _, filenames in os.walk(cur_path):
     if dir_name == cur_path:
