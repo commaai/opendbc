@@ -55,7 +55,7 @@ BO_ 832 GEAR_RPM_SPEED_STATUS: 8 XXX
  SG_ TRANS_MODE : 8|8@1+ (1,0) [0|0] "" XXX
  SG_ TRANS_GEAR_POS : 0|3@1+ (1,0) [0|1] "" XXX
  SG_ ENGINE_RPM1 : 55|8@0+ (1,0) [0|255] "" XXX
- SG_ _ENGINE_TEMP : 63|8@0+ (1,0) [0|255] "KM" XXX
+ SG_ _ENGINE_TEMP : 63|8@0+ (1,0) [0|255] "engine value(not sure)" XXX
 
 BO_ 821 THROTTLE_STATUS: 8 XXX
  SG_ CRUSE_ONOFF : 2|1@0+ (1,0) [0|1] "on/off" XXX
@@ -146,10 +146,10 @@ CM_ SG_ 1056 _DOOR_FL_STATUS "28 - FL open , 38 - FR";
 CM_ SG_ 1056 RIGHT_SIGNAL_STATUS "R,L shows at same time means hazard";
 CM_ SG_ 832 TRANS_MODE "AT - 85 / MT - 8D";
 CM_ SG_ 832 TRANS_GEAR_POS "R-7 , 0 - N";
-CM_ SG_ 821 CRUSE_ONOFF "定速開關（但未啟動)";
-CM_ SG_ 821 CRUSE_ENABLED "定速巡航啟動";
-CM_ SG_ 821 THROTTLE_PEDAL_POS "踏板真實油門";
-CM_ SG_ 821 THROTTLE_POS "巡航定速會用的油門";
+CM_ SG_ 821 CRUSE_ONOFF "Cruse Switch";
+CM_ SG_ 821 CRUSE_ENABLED "Cruse enabled";
+CM_ SG_ 821 THROTTLE_PEDAL_POS "Real Pedal Pos";
+CM_ SG_ 821 THROTTLE_POS "Throttle Pos for Cruse Mode";
 CM_ SG_ 906 ABS_UNDEF1 "ABS force";
 CM_ SG_ 906 SPEED_FL "used for car speed in dash board";
 CM_ SG_ 864 TCS_ON_FF "ON = 1, OFF =0";
