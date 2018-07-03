@@ -37,5 +37,13 @@ BU_: XXX
 
 
 BO_ 570 NEW_MSG_1: 8 XXX
- SG_ NEW_SIGNAL_1 : 8|8@1+ (1,0) [0|255] "" XXX
- SG_ DISTANCE : 24|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 48|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER_2 : 1|2@0+ (1,0) [0|255] "" XXX
+ SG_ STATE : 6|5@0+ (1,0) [0|31] "" XXX
+ SG_ NEW_SIGNAL_1 : 8|12@1+ (1,0) [0|255] "" XXX
+ SG_ DISTANCE : 20|12@1+ (1,0) [0|255] "" XXX
+
+
+
+
+CM_ SG_ 570 DISTANCE "";
