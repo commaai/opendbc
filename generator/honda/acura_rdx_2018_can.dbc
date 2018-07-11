@@ -1,3 +1,4 @@
+CM_ "IMPORT _common.dbc"
 CM_ "IMPORT _honda_2017.dbc"
 CM_ "IMPORT _comma.dbc"
 
@@ -57,8 +58,11 @@ BO_ 660 SCM_FEEDBACK: 8 SCM
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
 
 CM_ SG_ 422 PARKING_BRAKE_LIGHT "Believe this is just the dash light for the parking break";
+
 VAL_ 392 GEAR_SHIFTER 0 "S" 1 "P" 2 "R" 4 "N" 8 "D" ;
 VAL_ 392 GEAR 26 "S" 4 "D" 3 "N" 2 "R" 1 "P" ;
 VAL_ 422 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "cancel" 1 "main" 0 "none" ;
+VAL_ 422 LIGHTS_SETTING 3 "high_beam" 2 "low_beam" 1 "position" 0 "no_lights" ;
+VAL_ 422 CRUISE_SETTING 3 "distance_adj" 2 "tbd" 1 "lkas_button" 0 "none" ;
 
 CM_ "CHFFR_METRIC 342 STEER_ANGLE STEER_ANGLE 0.36 180; CHFFR_METRIC 380 ENGINE_RPM ENGINE_RPM 1 0; CHFFR_METRIC 804 ENGINE_TEMPERATURE ENGINE_TEMPERATURE 1 0";
