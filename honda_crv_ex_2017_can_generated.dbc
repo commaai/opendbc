@@ -125,7 +125,7 @@ BO_ 495 ACC_CONTROL_ON: 8 XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
 
-BO_ 545 XXX_16: 6 SCM
+BO_ 545 DRIVE_MODE_STATUS: 6 SCM
  SG_ ECON_ON : 23|1@0+ (1,0) [0|1] "" XXX
  SG_ DRIVE_MODE : 37|2@0+ (1,0) [0|3] "" XXX
  SG_ COUNTER : 45|2@0+ (1,0) [0|3] "" BDY
@@ -219,7 +219,9 @@ BO_ 891 STALK_STATUS_2: 8 XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
 
-VAL_ 545 ECON_ON_2 0 "off" 3 "on" ;
+CM_ SG_ 545 "3: econ, tbd: sport, tbd: sport_plus, 0: normal";
+
+VAL_ 545 DRIVE_MODE 3 "econ" 0 "normal" ;
 VAL_ 662 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "cancel" 1 "main" 0 "none" ;
 VAL_ 662 CRUISE_SETTING 3 "distance_adj" 2 "tbd" 1 "lkas_button" 0 "none" ;
 VAL_ 806 CMBS_BUTTON 3 "pressed" 0 "released" ;
@@ -271,6 +273,10 @@ BO_ 829 LKAS_HUD: 5 ADAS
  SG_ SET_ME_X48 : 31|8@0+ (1,0) [0|255] "" BDY
  SG_ COUNTER : 37|2@0+ (1,0) [0|3] "" BDY
  SG_ CHECKSUM : 35|4@0+ (1,0) [0|15] "" BDY
+
+CM_ SG_ 773 PASS_AIRBAG_ON "Might just be indicator light";
+CM_ SG_ 773 PASS_AIRBAG_OFF "Might just be indicator light";
+CM_ SG_ 829 BEEP "beeps are pleasant, chimes are for warnngs etc...";
 
 VAL_ 829 BEEP 3 "single_beep" 2 "triple_beep" 1 "repeated_beep" 0 "no_beep" ;
 

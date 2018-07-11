@@ -96,10 +96,6 @@ BO_ 1302 ODOMETER: 8 XXX
 
 CM_ SG_ 419 GEAR "10 = reverse, 11 = transition";
 CM_ SG_ 420 BRAKE_HOLD_RELATED "On when Brake Hold engaged";
-CM_ SG_ 780 CRUISE_SPEED "255 = no speed";
-CM_ SG_ 804 CRUISE_SPEED_PCM "255 = no speed";
-CM_ SG_ 806 REVERSE_LIGHT "Might be reverse gear selected and not the lights";
-CM_ SG_ 829 BEEP "beeps are pleasant, chimes are for warnings etc...";
 
 VAL_ 399 STEER_STATUS 5 "fault" 4 "no_torque_alert_2" 2 "no_torque_alert_1" 0 "normal" ;
 VAL_ 419 GEAR_SHIFTER 10 "S" 4 "D" 3 "N" 2 "R" 1 "P" ;
