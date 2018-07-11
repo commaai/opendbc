@@ -26,7 +26,7 @@ BO_ 404 STEERING_CONTROL: 4 EON
  SG_ STEER_TORQUE : 7|12@0- (1,0) [-768|768] "" EPS
  SG_ SET_ME_X00 : 22|7@0+ (1,0) [0|127] "" EPS
  SG_ STEER_TORQUE_REQUEST : 23|1@0+ (1,0) [0|1] "" EPS
- SG_ COUNTER : 29|2@0+ (1,0) [0|15] "" EPS
+ SG_ COUNTER : 29|2@0+ (1,0) [0|3] "" EPS
  SG_ CHECKSUM : 27|4@0+ (1,0) [0|3] "" EPS
 
 BO_ 420 VSA_STATUS: 8 VSA
@@ -57,7 +57,7 @@ BO_ 660 SCM_FEEDBACK: 8 SCM
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
 
-CM_ SG_ 422 PARKING_BRAKE_LIGHT "Believe this is just the dash light for the parking break";
+CM_ SG_ 422 PARKING_BRAKE_LIGHT "Believe this is just the dash light for the parking brake";
 
 VAL_ 392 GEAR_SHIFTER 0 "S" 1 "P" 2 "R" 4 "N" 8 "D" ;
 VAL_ 392 GEAR 26 "S" 4 "D" 3 "N" 2 "R" 1 "P" ;
