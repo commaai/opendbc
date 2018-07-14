@@ -60,6 +60,11 @@ BO_ 660 SCM_FEEDBACK: 8 SCM
  SG_ RIGHT_BLINKER : 6|1@0+ (1,0) [0|1] "" EON
  SG_ LEFT_BLINKER : 5|1@0+ (1,0) [0|1] "" EON
  SG_ WIPERS_SPEED : 4|2@0+ (1,0) [0|3] "" EON
+ 
+BO_ 777 CAR_SPEED: 8 PCM
+ SG_ CAR_SPEED : 39|16@0+ (0.01,0) [0|65535] "kph" XXX
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
 CM_ SG_ 419 GEAR "10 = reverse, 11 = transition/neutral";
 CM_ SG_ 419 AVAILABLE_GEAR "gear available at current differential speed";

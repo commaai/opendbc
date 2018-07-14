@@ -57,6 +57,16 @@ BO_ 660 SCM_FEEDBACK: 8 SCM
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
 
+BO_ 777 CAR_SPEED: 8 PCM
+ SG_ CAR_SPEED : 7|16@0+ (1,0) [0|65535] "" XXX
+ SG_ ROUGH_CAR_SPEED : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ ROUGH_CAR_SPEED_2 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ ROUGH_CAR_SPEED_3 : 39|16@0+ (1,0) [0|65535] "" XXX
+ SG_ DOORS_UNLOCKED : 54|1@0+ (1,0) [0|1] "" EON
+ SG_ DOORS_LOCKED : 55|1@0+ (1,0) [0|1] "" EON
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
+
 CM_ SG_ 422 PARKING_BRAKE_LIGHT "Believe this is just the dash light for the parking brake";
 
 VAL_ 392 GEAR_SHIFTER 0 "S" 1 "P" 2 "R" 4 "N" 8 "D" ;
