@@ -43,11 +43,11 @@ BO_ 1104 SEATBELT_STATUS: 8 XXX
  SG_ DRIVER_SEAT_BELT_ONOFF : 21|1@0+ (1,0) [0|3] "" XXX
 
 BO_ 1056 BODY_ECU_STATUS: 8 XXX
- SG_ _DOOR_RL_STATUS : 18|1@1+ (1,0) [0|255] "" XXX
- SG_ _DOOR_FL_STATUS : 13|1@0+ (1,0) [0|1] "" XXX
- SG_ _DOOR_FR_STATUS : 12|1@0+ (1,0) [0|1] "" XXX
- SG_ _DOOR_RR_STATUS : 19|1@0+ (1,0) [0|1] "" XXX
- SG_ _DOOR_BACK_DOOR_STATUS : 22|1@0+ (1,0) [0|1] "" XXX
+ SG_ DOOR_RL_STATUS : 18|1@1+ (1,0) [0|255] "" XXX
+ SG_ DOOR_FL_STATUS : 13|1@0+ (1,0) [0|1] "" XXX
+ SG_ DOOR_FR_STATUS : 12|1@0+ (1,0) [0|1] "" XXX
+ SG_ DOOR_RR_STATUS : 19|1@0+ (1,0) [0|1] "" XXX
+ SG_ DOOR_BACK_DOOR_STATUS : 22|1@0+ (1,0) [0|1] "" XXX
  SG_ LEFT_SIGNAL_STATUS : 10|1@0+ (1,0) [0|1] "" XXX
  SG_ RIGHT_SIGNAL_STATUS : 9|1@0+ (1,0) [0|1] "" XXX
 
@@ -55,7 +55,7 @@ BO_ 832 GEAR_RPM_SPEED_STATUS: 8 XXX
  SG_ TRANS_MODE : 8|8@1+ (1,0) [0|0] "" XXX
  SG_ TRANS_GEAR_POS : 0|3@1+ (1,0) [0|1] "" XXX
  SG_ ENGINE_RPM1 : 55|8@0+ (1,0) [0|255] "" XXX
- SG_ _ENGINE_TEMP : 63|8@0+ (1,0) [0|255] "engine value(not sure)" XXX
+ SG_ ENGINE_TEMP : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 821 THROTTLE_STATUS: 8 XXX
  SG_ CRUSE_ONOFF : 2|1@0+ (1,0) [0|1] "on/off" XXX
@@ -80,10 +80,10 @@ BO_ 848 ABS_WHEELS_STATUS: 8 XXX
 
 BO_ 1402 DASH_STATUS: 8 XXX
  SG_ CAR_SPEED : 32|8@1+ (1,0) [0|255] "" XXX
- SG_ _DASH_INFO2 : 16|8@1+ (1,0) [0|255] "" XXX
- SG_ _DASH_INFO0 : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ _DASH_INFO_2 : 15|8@0+ (1,0) [0|255] "" XXX
- SG_ _DASH_INFO_3 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ DASH_INFO2 : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ DASH_INFO0 : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ DASH_INFO_2 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ DASH_INFO_3 : 31|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 1306 _SPEEDX: 8 XXX
  SG_ DASH_CAR_SPEED : 7|9@0+ (1,0) [0|255] "" XXX
@@ -109,7 +109,7 @@ BO_ 896 undefined: 8 XXX
 BO_ 809 undefined: 8 XXX
 
 BO_ 864 BREAK_TCS_STATUS: 8 XXX
- SG_ _SPEED3 : 24|8@1+ (1,0) [0|255] "" XXX
+ SG_ SPEED3 : 24|8@1+ (1,0) [0|255] "" XXX
  SG_ TCS_ON_FF : 45|1@0+ (1,0) [0|1] "" XXX
  SG_ XXXX1 : 63|8@0+ (1,0) [0|255] "" XXX
  SG_ BRAKE_PRSSED : 42|1@0+ (1,0) [0|1] "" XXX
@@ -129,7 +129,7 @@ BO_ 1040 CONSOLE_STATUS: 8 XXX
  SG_ HID_LIGHT_SWITCH : 4|1@0+ (1,0) [0|1] "" XXX
  SG_ YELLOW_WARN_TEMP_TRIGGER : 5|1@0+ (1,0) [0|1] "" XXX
  SG_ HID_LIGHT_HANDLE_SWITCH : 6|1@0+ (1,0) [0|1] "" XXX
- SG_ _MIX_MODE : 7|1@0+ (1,0) [0|1] "" XXX
+ SG_ MIX_MODE : 7|1@0+ (1,0) [0|1] "" XXX
  SG_ slider_rain_bar : 13|1@0+ (1,0) [0|1] "" XXX
  SG_ temp_slider_rain_bar : 15|1@0+ (1,0) [0|1] "" XXX
  SG_ temp_water_push : 11|1@0+ (1,0) [0|1] "" XXX
