@@ -85,9 +85,9 @@ BO_ 513 WHEEL_SPEEDS: 8 XXX
 BO_ 261 ENGINE: 8 XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_3 : 31|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_4 : 39|8@0+ (1,0) [0|255] "" XXX
  SG_ ENGINE_RPM : 4|5@0+ (1,0) [0|255] "" XXX
+ SG_ COMBINED_GAS : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ GAS_PEDAL : 39|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 925 NEW_MSG_2: 8 XXX
  SG_ COUNTER : 62|4@0+ (1,0) [0|15] "" XXX
@@ -121,3 +121,5 @@ BO_ 260 CRUISE_CONTROL2: 8 XXX
 CM_ SG_ 3 STEER_DIRECTION "0 = left, 1 = right";
 CM_ SG_ 5 BRAKE_PRESSED "";
 CM_ SG_ 69 MORE_STEERING_WHEELS_BUTTONS "back, ok, voice assistance, and mute buttons";
+CM_ SG_ 261 COMBINED_GAS "computer and driver gas";
+CM_ SG_ 261 GAS_PEDAL "user gas input";
