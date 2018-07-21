@@ -44,11 +44,13 @@ BO_ 3 STEER_SENSOR: 8 XXX
  SG_ STEER_DIRECTION : 4|1@0+ (1,2) [0|1] "" XXX
 
 BO_ 5 BRAKE_MODULE: 8 XXX
- SG_ BRAKE_PRESSED : 0|1@1+ (1,0) [0|1] "" XXX
- SG_ BRAKE_POSITION : 31|8@0+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
- SG_ BRAKE_HOLD : 2|1@0+ (1,0) [0|1] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ BRAKE_HOLD : 2|1@0+ (1,0) [0|1] "" XXX
+ SG_ BRAKE_POSITION : 31|8@0+ (1,0) [0|65535] "" XXX
+ SG_ BRAKE_PRESSED : 0|1@1+ (1,0) [0|1] "" XXX
+ SG_ DRIVER_BRAKE : 4|1@0+ (1,0) [0|1] "" XXX
+ SG_ COMPUTER_BRAKE : 10|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 69 DRIVER_CONTROLS: 8 XXX
  SG_ MORE_STEERING_WHEELS_BUTTONS : 40|8@1+ (1,0) [0|255] "" XXX
@@ -107,9 +109,10 @@ BO_ 257 CRUISE_CONTROL: 8 XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
  SG_ ACCEL_REQ : 15|8@0+ (1,0) [0|127] "" XXX
- SG_ CC_ENABLED : 22|1@0+ (1,0) [0|1] "" XXX
- SG_ CC_DISABLED : 23|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_1 : 6|1@0+ (1,0) [0|255] "" XXX
+ SG_ CRUISE_ACCELERATING : 22|1@0+ (1,0) [0|1] "" XXX
+ SG_ CRUISE_DISABLED : 23|1@0+ (1,0) [0|1] "" XXX
+ SG_ SET_ME_1 : 5|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 260 CRUISE_CONTROL2: 8 XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
@@ -137,7 +140,9 @@ BO_ 888 CRUISE_CONTROL3: 8 XXX
 
 
 CM_ SG_ 3 STEER_DIRECTION "0 = left, 1 = right";
-CM_ SG_ 5 BRAKE_PRESSED "";
+CM_ SG_ 5 BRAKE_POSITION "computer and driver";
+CM_ SG_ 5 BRAKE_PRESSED "computer and driver";
 CM_ SG_ 69 MORE_STEERING_WHEELS_BUTTONS "back, ok, voice assistance, and mute buttons";
 CM_ SG_ 261 COMBINED_GAS "computer and driver gas";
 CM_ SG_ 261 GAS_PEDAL "user gas input";
+CM_ SG_ 257 CRUISE_ACCELERATING "1 if cc enabled and accelerating. 0 if cc braking or not enabled";
