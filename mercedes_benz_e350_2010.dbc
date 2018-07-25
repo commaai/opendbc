@@ -88,8 +88,8 @@ BO_ 261 GAS_PEDAL: 8 XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
  SG_ ENGINE_RPM : 4|5@0+ (1,0) [0|255] "" XXX
- SG_ COMBINED_GAS : 31|8@0+ (1,0) [0|255] "" XXX
  SG_ GAS_PEDAL : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ COMBINED_GAS : 31|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 925 NEW_MSG_2: 8 XXX
  SG_ COUNTER : 62|4@0+ (1,0) [0|15] "" XXX
@@ -112,12 +112,19 @@ BO_ 257 CRUISE_CONTROL: 8 XXX
  SG_ NEW_SIGNAL_1 : 6|1@0+ (1,0) [0|255] "" XXX
  SG_ CRUISE_ACCELERATING : 22|1@0+ (1,0) [0|1] "" XXX
  SG_ CRUISE_DISABLED : 23|1@0+ (1,0) [0|1] "" XXX
+ SG_ SET_ME_X002 : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ SET_ME_X00 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ SET_ME_X003 : 47|8@0+ (1,0) [0|255] "" XXX
  SG_ SET_ME_1 : 5|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 260 CRUISE_CONTROL2: 8 XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_1 : 7|4@0+ (1,0) [0|255] "" XXX
+ SG_ SET_ME_X00 : 47|8@0+ (1,0) [0|255] "" XXX
+ SG_ SET_ME_XFF : 31|8@0+ (1,0) [0|65535] "" XXX
+ SG_ SET_ME_X02 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ SET_ME_XFF2 : 39|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 515 NEW_MSG_1: 8 XXX
  SG_ NEW_SIGNAL_1 : 15|8@0+ (1,0) [0|255] "" XXX
@@ -130,11 +137,15 @@ BO_ 14 STEER_TORQUE: 8 XXX
 BO_ 888 CRUISE_CONTROL3: 8 XXX
  SG_ NEW_SIGNAL_2 : 7|1@0+ (1,0) [0|1] "" XXX
  SG_ CRUISE_SPEED_CHANGE : 55|1@0+ (1,0) [0|1] "" XXX
- SG_ CRUISE_SET_SPEED : 13|6@0+ (1,0) [0|63] "" XXX
  SG_ NEW_SIGNAL_1 : 38|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_5 : 32|1@0+ (1,0) [0|1] "" XXX
  SG_ CRUISE_DISABLED : 36|1@0+ (1,0) [0|1] "" XXX
  SG_ CRUISE_ENABLED : 34|1@0+ (1,0) [0|1] "" XXX
+ SG_ SET_ME_X003 : 47|8@0+ (1,0) [0|255] "" XXX
+ SG_ SET_ME_X004 : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ SET_ME_X002 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ SET_ME_X00 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ CRUISE_SET_SPEED : 13|6@0+ (1,0) [0|63] "mph" XXX
 
 BO_ 307 POWER_SEATS: 8 XXX
  SG_ DRIVER_FORWARD : 0|1@0+ (1,0) [0|1] "" XXX
@@ -149,6 +160,6 @@ CM_ SG_ 3 STEER_DIRECTION "0 = left, 1 = right";
 CM_ SG_ 5 BRAKE_POSITION "computer and driver";
 CM_ SG_ 5 BRAKE_PRESSED "computer and driver";
 CM_ SG_ 69 MORE_STEERING_WHEELS_BUTTONS "back, ok, voice assistance, and mute buttons";
-CM_ SG_ 261 COMBINED_GAS "computer and driver gas";
 CM_ SG_ 261 GAS_PEDAL "user gas input";
+CM_ SG_ 261 COMBINED_GAS "computer and driver gas";
 CM_ SG_ 257 CRUISE_ACCELERATING "1 if cc enabled and accelerating. 0 if cc braking or not enabled";
