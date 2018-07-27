@@ -99,13 +99,13 @@ BO_ 490 VEHICLE_DYNAMICS: 8 VSA
 BO_ 506 BRAKE_COMMAND: 8 ADAS
  SG_ COMPUTER_BRAKE : 7|10@0+ (1,0) [0|1] "" EBCM
  SG_ ZEROS_BOH : 13|5@0+ (1,0) [0|1] "" EBCM
- SG_ BRAKE_PUMP_REQUEST : 8|1@0+ (1,0) [0|1] "" EBCM
+ SG_ COMPUTER_BRAKE_REQUEST : 8|1@0+ (1,0) [0|1] "" EBCM
  SG_ CRUISE_BOH2 : 23|3@0+ (1,0) [0|1] "" EBCM
  SG_ CRUISE_OVERRIDE : 20|1@0+ (1,0) [0|1] "" EBCM
  SG_ CRUISE_BOH3 : 19|1@0+ (1,0) [0|1] "" EBCM
  SG_ CRUISE_FAULT_CMD : 18|1@0+ (1,0) [0|1] "" EBCM
  SG_ CRUISE_CANCEL_CMD : 17|1@0+ (1,0) [0|1] "" EBCM
- SG_ COMPUTER_BRAKE_REQUEST : 16|1@0+ (1,0) [0|1] "" EBCM
+ SG_ COMPUTER_BRAKE_REQUEST_2 : 16|1@0+ (1,0) [0|1] "" EBCM
  SG_ SET_ME_0X80 : 31|8@0+ (1,0) [0|1] "" EBCM
  SG_ BRAKE_LIGHTS : 39|1@0+ (1,0) [0|1] "" EBCM
  SG_ CRUISE_STATES : 38|7@0+ (1,0) [0|1] "" EBCM
@@ -226,7 +226,7 @@ VAL_ 780 CRUISE_SPEED 255 "no_speed" 252 "stopped" ;
 VAL_ 780 HUD_LEAD 3 "acc_off" 2 "solid_car" 1 "dashed_car" 0 "no_car" ;
 VAL_ 829 BEEP 3 "single_beep" 2 "triple_beep" 1 "repeated_beep" 0 "no_beep" ;
 
-CM_ "honda_ridgeline_black_edition_2017_can.dbc starts here"
+CM_ "honda_fit_ex_2018_can.dbc starts here"
 
 
 
@@ -236,12 +236,17 @@ BO_ 145 KINEMATICS: 8 XXX
 BO_ 228 STEERING_CONTROL: 5 ADAS
  SG_ STEER_TORQUE : 7|16@0- (1,0) [-3840|3840] "" EPS
  SG_ STEER_TORQUE_REQUEST : 23|1@0+ (1,0) [0|1] "" EPS
- SG_ SET_ME_X00 : 31|8@0+ (1,0) [0|0] "" EPS
+ SG_ SET_ME_X00 : 22|7@0+ (1,0) [0|127] "" EPS
+ SG_ SET_ME_X00_2 : 31|8@0+ (1,0) [0|0] "" EPS
  SG_ COUNTER : 37|2@0+ (1,0) [0|3] "" EPS
- SG_ CHECKSUM : 35|4@0+ (1,0) [0|3] "" EPS
+ SG_ CHECKSUM : 35|4@0+ (1,0) [0|15] "" EPS
 
-BO_ 316 GAS_PEDAL: 8 PCM
+BO_ 304 GAS_PEDAL_2: 8 PCM
+ SG_ ENGINE_TORQUE_ESTIMATE : 7|16@0- (1,0) [-1000|1000] "Nm" EON
+ SG_ ENGINE_TORQUE_REQUEST : 23|16@0- (1,0) [-1000|1000] "Nm" EON
  SG_ CAR_GAS : 39|8@0+ (1,0) [0|255] "" EON
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
 
 BO_ 342 STEERING_SENSORS: 6 EPS
  SG_ STEER_ANGLE : 7|16@0- (-0.1,0) [-500|500] "deg" EON
@@ -257,15 +262,17 @@ BO_ 399 STEER_STATUS: 7 EPS
  SG_ COUNTER : 53|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 51|4@0+ (1,0) [0|3] "" EON
 
-BO_ 419 GEARBOX: 8 PCM
+BO_ 401 GEARBOX: 8 PCM
+ SG_ GEAR_SHIFTER : 5|6@0+ (1,0) [0|63] "" EON
+ SG_ GEAR : 43|4@0+ (1,0) [0|15] "" EON
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
- SG_ GEAR_SHIFTER : 29|6@0+ (1,0) [0|63] "" EON
- SG_ GEAR : 7|8@0+ (1,0) [0|255] "" EON
 
 BO_ 420 VSA_STATUS: 8 VSA
  SG_ USER_BRAKE : 7|16@0+ (0.015625,-1.609375) [0|1000] "" EON
  SG_ ESP_DISABLED : 28|1@0+ (1,0) [0|1] "" EON
+ SG_ BRAKE_HOLD_ACTIVE : 46|1@0+ (1,0) [0|1] "" EON
+ SG_ BRAKE_HOLD_ENABLED : 45|1@0+ (1,0) [0|1] "" EON
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
 
@@ -277,13 +284,41 @@ BO_ 422 SCM_BUTTONS: 8 SCM
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
 
+BO_ 487 BRAKE_PRESSURE: 4 VSA
+ SG_ BRAKE_PRESSURE1 : 7|10@0+ (0.015625,-103) [0|1000] "" EON
+ SG_ BRAKE_PRESSURE2 : 9|10@0+ (0.015625,-103) [0|1000] "" EON
+ SG_ CHECKSUM : 27|4@0+ (1,0) [0|3] "" EON
+ SG_ COUNTER : 29|2@0+ (1,0) [0|3] "" EON
+
 BO_ 660 SCM_FEEDBACK: 8 SCM
  SG_ RIGHT_BLINKER : 6|1@0+ (1,0) [0|1] "" EON
  SG_ LEFT_BLINKER : 5|1@0+ (1,0) [0|1] "" EON
  SG_ WIPERS_SPEED : 4|2@0+ (1,0) [0|3] "" EON
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
+
+BO_ 862 HIGHBEAM_CONTROL: 8 ADAS
+ SG_ ZEROS_BOH : 7|50@0+ (1,0) [0|127] "" BDY
+ SG_ ZEROS_BOH_2 : 48|4@1+ (1,0) [0|15] "" XXX
+ SG_ HIGHBEAMS_ON : 52|1@0+ (1,0) [0|1] "" XXX
+ SG_ AUTO_HIGHBEAMS_ACTIVE : 53|1@0+ (1,0) [0|1] "" XXX
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
+
+BO_ 884 STALK_STATUS: 8 XXX
+ SG_ AUTO_HEADLIGHTS : 46|1@0+ (1,0) [0|1] "" EON
+ SG_ HIGH_BEAM_HOLD : 47|1@0+ (1,0) [0|1] "" EON
+ SG_ HIGH_BEAM_FLASH : 45|1@0+ (1,0) [0|1] "" EON
+ SG_ HEADLIGHTS_ON : 54|1@0+ (1,0) [0|1] "" EON
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
+
+CM_ SG_ 401 GEAR "10 = reverse, 11 = transition";
+CM_ SG_ 420 BRAKE_HOLD_RELATED "On when Brake Hold engaged";
 
 VAL_ 399 STEER_STATUS 5 "fault" 4 "no_torque_alert_2" 2 "no_torque_alert_1" 0 "normal" ;
-VAL_ 419 GEAR_SHIFTER  32 "D" 8 "R" 4 "P" ;
+VAL_ 401 GEAR_SHIFTER 32 "L" 16 "S" 8 "D" 4 "N" 2 "R" 1 "P" ;
+VAL_ 401 GEAR 7 "L" 10 "S" 4 "D" 3 "N" 2 "R" 1 "P" ;
 VAL_ 422 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "cancel" 1 "main" 0 "none" ;
 VAL_ 422 LIGHTS_SETTING 3 "high_beam" 2 "low_beam" 1 "position" 0 "no_lights" ;
 VAL_ 422 CRUISE_SETTING 3 "distance_adj" 2 "tbd" 1 "lkas_button" 0 "none" ;
