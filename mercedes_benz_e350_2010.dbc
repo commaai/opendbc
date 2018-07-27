@@ -40,8 +40,8 @@ BO_ 3 STEER_SENSOR: 8 XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
  SG_ STEER_RATE : 19|12@0- (0.5,0) [0|255] "" XXX
- SG_ STEER_ANGLE : 3|12@0- (0.5,0) [-500|500] "degrees" XXX
  SG_ STEER_DIRECTION : 4|1@0+ (1,2) [0|1] "" XXX
+ SG_ STEER_ANGLE : 3|12@0- (-0.5,0) [-500|500] "degrees" XXX
 
 BO_ 5 BRAKE_MODULE: 8 XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
