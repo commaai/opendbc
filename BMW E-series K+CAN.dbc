@@ -33,7 +33,7 @@ NS_ :
 
 BS_:
 
-BU_: XXX 
+BU_: XXX
 
 
 BO_ 170 AccPedal: 8 XXX
@@ -49,10 +49,18 @@ BO_ 404 CruiseControl: 4 XXX
  SG_ Cancel_request_up_stalk : 23|1@0+ (1,0) [0|1] "" XXX
  SG_ Cancel_request_up_or_down_stalk : 20|1@0+ (1,0) [0|1] "" XXX
  SG_ Resume_request : 22|1@0+ (1,0) [0|1] "" XXX
- 
+
 BO_ 168 Brake: 8 XXX
  SG_ Brake_active1 : 61|1@0+ (1,0) [0|1] "" XXX
  SG_ Brake_active2 : 62|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 470 SteeringButtons: 8 XXX
+ SG_ Volume_DOWN : 2|1@0+ (1,0) [0|1] "" XXX
+ SG_ Volume_UP : 3|1@0+ (1,0) [0|1] "" XXX
+ SG_ VoiceControl : 8|1@0+ (1,0) [0|1] "" XXX
+ SG_ Telephone : 0|1@0+ (1,0) [0|1] "" XXX
+ SG_ Next_up : 5|1@0+ (1,0) [0|1] "" XXX
+ SG_ Previous_down : 4|1@0+ (1,0) [0|1] "" XXX
 
 
 
