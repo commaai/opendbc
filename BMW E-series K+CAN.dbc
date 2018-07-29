@@ -36,12 +36,12 @@ BS_:
 BU_: JBE XXX 
 
 
-BO_ 170 NEW_MSG_2: 8 JBE
+BO_ 170 AccPedal: 8 JBE
  SG_ AccPedalPressed : 52|1@0+ (1,0) [0|7] "" XXX
  SG_ KickDownPressed : 53|1@0+ (1,0) [0|3] "" XXX
  SG_ AccPedal : 21|14@0+ (0.00952925481,-36.5923384704) [0|100] "%" XXX
 
-BO_ 404 Cruise control: 4 XXX
+BO_ 404 CruiseControl: 4 XXX
  SG_ Counter #1 : 0|4@1+ (1,0) [0|15] "" XXX
  SG_ Counter #2 : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ +1mph/kph request : 16|1@0+ (1,0) [0|1] "" XXX
