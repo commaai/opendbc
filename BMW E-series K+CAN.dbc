@@ -40,7 +40,15 @@ BO_ 200 NEW_MSG_1: 6 SZL
 
 BO_ 165 NEW_MSG_2: 8 JBE
 
-BO_ 170 Pedal: 8 XXX
+BO_ 170 Accelerator Pedal: 8 XXX
  SG_ AccPedalPressed : 52|1@0+ (1,0) [0|7] "" XXX
  SG_ KickDownPressed : 53|1@0+ (1,0) [0|3] "" XXX
  SG_ AccPedal : 21|14@0+ (0.00952925481,-36.5923384704) [0|100] "%" XXX
+
+BO_ 168 Brake: 8 XXX
+ SG_ Brake pedal depressed : 61|1@0+ (1,0) [0|1] "" XXX
+
+
+
+
+CM_ SG_ 168 Brake pedal depressed "Copy #2";
