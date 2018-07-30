@@ -42,13 +42,13 @@ BO_ 170 AccPedal: 8 XXX
  SG_ AccPedal : 21|14@0+ (0.00952925481,-36.5923384704) [0|100] "%" XXX
 
 BO_ 404 CruiseControl: 4 XXX
- SG_ Counter1 : 0|4@1+ (1,0) [0|15] "" XXX
- SG_ Counter2 : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ plus1mph_request : 16|1@0+ (1,0) [0|1] "" XXX
  SG_ minus1mph_request : 18|1@0+ (1,0) [0|1] "" XXX
  SG_ Cancel_request_up_stalk : 23|1@0+ (1,0) [0|1] "" XXX
  SG_ Cancel_request_up_or_down_stalk : 20|1@0+ (1,0) [0|1] "" XXX
  SG_ Resume_request : 22|1@0+ (1,0) [0|1] "" XXX
+ SG_ Counter1 : 3|4@0+ (1,0) [0|15] "" XXX
+ SG_ Counter2 : 11|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 168 Brake: 8 XXX
  SG_ Brake_active1 : 61|1@0+ (1,0) [0|1] "" XXX
@@ -65,12 +65,12 @@ BO_ 470 SteeringButtons: 8 XXX
 
 
 
-CM_ SG_ 404 Counter1 "It accelerates when requests are being sent";
-CM_ SG_ 404 Counter2 "It accelerates when requests are being sent";
 CM_ SG_ 404 plus1mph_request "Appears when +1mph/kph stalk is depressed";
 CM_ SG_ 404 minus1mph_request "Appears when -1mph/kph stalk is depressed";
 CM_ SG_ 404 Cancel_request_up_stalk "Appears when cancel stalk (up) is depressed";
 CM_ SG_ 404 Cancel_request_up_or_down_stalk "Appears when cancel stalk (up or down) is depressed";
 CM_ SG_ 404 Resume_request "It appears when resume stalk button is depressed";
+CM_ SG_ 404 Counter1 "It accelerates when requests are being sent";
+CM_ SG_ 404 Counter2 "It accelerates when requests are being sent";
 CM_ SG_ 168 Brake_active1 "Brake depressed when driver presses the brake";
 CM_ SG_ 168 Brake_active2 "Brake depressed when driver presses the brake";
