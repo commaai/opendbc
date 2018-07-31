@@ -1,0 +1,148 @@
+VERSION ""
+
+
+NS_ :
+    NS_DESC_
+    CM_
+    BA_DEF_
+    BA_
+    VAL_
+    CAT_DEF_
+    CAT_
+    FILTER
+    BA_DEF_DEF_
+    EV_DATA_
+    ENVVAR_DATA_
+    SGTYPE_
+    SGTYPE_VAL_
+    BA_DEF_SGTYPE_
+    BA_SGTYPE_
+    SIG_TYPE_REF_
+    VAL_TABLE_
+    SIG_GROUP_
+    SIG_VALTYPE_
+    SIGTYPE_VALTYPE_
+    BO_TX_BU_
+    BA_DEF_REL_
+    BA_REL_
+    BA_DEF_DEF_REL_
+    BU_SG_REL_
+    BU_EV_REL_
+    BU_BO_REL_
+    SG_MUL_VAL_
+
+BS_:
+
+BU_: XXX
+
+
+BO_ 170 AccPedal: 8 XXX
+ SG_ AccPedalPressed : 52|1@0+ (1,0) [0|7] "" XXX
+ SG_ KickDownPressed : 53|1@0+ (1,0) [0|3] "" XXX
+ SG_ AccPedal : 21|14@0+ (0.00952925481,-36.5923384704) [0|100] "%" XXX
+
+BO_ 404 CruiseControl: 4 XXX
+ SG_ plus1mph_request : 16|1@0+ (1,0) [0|1] "" XXX
+ SG_ minus1mph_request : 18|1@0+ (1,0) [0|1] "" XXX
+ SG_ Cancel_request_up_stalk : 23|1@0+ (1,0) [0|1] "" XXX
+ SG_ Resume_request : 22|1@0+ (1,0) [0|1] "" XXX
+ SG_ Counter1 : 3|4@0+ (1,0) [0|15] "" XXX
+ SG_ Counter2 : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ Cancel_request_up_or_down_stalk : 20|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 168 Brake: 8 XXX
+ SG_ Brake_active2 : 62|1@0+ (1,0) [0|1] "" XXX
+ SG_ Brake_active1 : 61|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 470 SteeringButtons: 8 XXX
+ SG_ Volume_DOWN : 2|1@0+ (1,0) [0|1] "" XXX
+ SG_ Volume_UP : 3|1@0+ (1,0) [0|1] "" XXX
+ SG_ VoiceControl : 8|1@0+ (1,0) [0|1] "" XXX
+ SG_ Telephone : 0|1@0+ (1,0) [0|1] "" XXX
+ SG_ Next_up : 5|1@0+ (1,0) [0|1] "" XXX
+ SG_ Previous_down : 4|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 422 NEW_MSG_1: 8 XXX
+ SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_2 : 15|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 169 NEW_MSG_2: 8 XXX
+ SG_ NEW_SIGNAL_1 : 15|40@0+ (1,0) [0|281474976710655] "" XXX
+
+BO_ 184 NEW_MSG_3: 8 XXX
+ SG_ NEW_SIGNAL_1 : 23|40@0+ (1,0) [0|18446744073709552000] "" XXX
+ SG_ NEW_SIGNAL_2 : 7|16@0+ (1,0) [0|65535] "" XXX
+
+BO_ 196 NEW_MSG_4: 8 XXX
+ SG_ NEW_SIGNAL_1 : 7|8@0+ (1,-20) [-20|255] "" XXX
+
+BO_ 266 NEW_MSG_5: 8 XXX
+ SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|65535] "" XXX
+ SG_ NEW_SIGNAL_2 : 39|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 182 NEW_MSG_6: 8 XXX
+ SG_ NEW_SIGNAL_1 : 7|4@0+ (1,0) [0|255] "" XXX
+
+BO_ 186 NEW_MSG_7: 8 XXX
+ SG_ NEW_SIGNAL_1 : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_2 : 43|4@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_3 : 48|4@1+ (1,0) [0|15] "" XXX
+
+BO_ 373 NEW_MSG_8: 8 XXX
+ SG_ NEW_SIGNAL_1 : 7|16@0+ (1,0) [0|65535] "" XXX
+ SG_ NEW_SIGNAL_2 : 23|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 416 NEW_MSG_9: 8 XXX
+ SG_ NEW_SIGNAL_2 : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_3 : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_1 : 47|8@0- (1,0) [0|65535] "" XXX
+
+BO_ 436 NEW_MSG_10: 8 XXX
+ SG_ NEW_SIGNAL_2 : 56|8@1- (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_1 : 0|8@1+ (1,0) [0|255] "" XXX
+
+BO_ 464 NEW_MSG_11: 8 XXX
+ SG_ NEW_SIGNAL_2 : 32|16@1+ (1,0) [0|65535] "" XXX
+ SG_ counter : 23|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 945 NEW_MSG_12: 8 XXX
+ SG_ counter2 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ counter1 : 7|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 200 NEW_MSG_13: 8 XXX
+ SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 215 NEW_MSG_14: 8 XXX
+ SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 414 NEW_MSG_15: 8 XXX
+ SG_ counter2 : 63|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 466 NEW_MSG_16: 8 XXX
+ SG_ Counter : 31|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 512 NEW_MSG_17: 8 XXX
+ SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 841 NEW_MSG_18: 8 XXX
+ SG_ NEW_SIGNAL_2 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_1 : 7|16@0+ (1,0) [0|255] "" XXX
+
+BO_ 438 NEW_MSG_19: 8 XXX
+ SG_ NEW_SIGNAL_1 : 39|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 582 NEW_MSG_20: 8 XXX
+ SG_ NEW_SIGNAL_1 : 23|8@0+ (1,0) [0|255] "" XXX
+
+
+
+
+CM_ SG_ 404 plus1mph_request "Appears when +1mph/kph stalk is depressed";
+CM_ SG_ 404 minus1mph_request "Appears when -1mph/kph stalk is depressed";
+CM_ SG_ 404 Cancel_request_up_stalk "Appears when cancel stalk (up) is depressed";
+CM_ SG_ 404 Resume_request "It appears when resume stalk button is depressed";
+CM_ SG_ 404 Counter1 "It accelerates when requests are being sent";
+CM_ SG_ 404 Counter2 "It accelerates when requests are being sent";
+CM_ SG_ 404 Cancel_request_up_or_down_stalk "Appears when cancel stalk (up or down) is depressed";
+CM_ SG_ 168 Brake_active2 "Brake depressed when driver presses the brake";
+CM_ SG_ 168 Brake_active1 "Brake depressed when driver presses the brake";
