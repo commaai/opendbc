@@ -65,6 +65,8 @@ BO_ 470 SteeringButtons: 8 XXX
 BO_ 422 NEW_MSG_1: 8 XXX
  SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_2 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_4 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_3 : 23|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 169 NEW_MSG_2: 8 XXX
  SG_ NEW_SIGNAL_1 : 15|40@0+ (1,0) [0|281474976710655] "" XXX
@@ -121,8 +123,10 @@ BO_ 414 NEW_MSG_15: 8 XXX
 BO_ 466 NEW_MSG_16: 8 XXX
  SG_ Counter : 31|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 512 NEW_MSG_17: 8 XXX
- SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
+BO_ 512 CruiseControlStatus: 8 XXX
+ SG_ CruiseControlInactiveFlag : 12|1@0+ (1,0) [0|1] "" XXX
+ SG_ CruiseCoontrolActiveFlag : 13|1@0+ (1,0) [0|1] "" XXX
+ SG_ CrusieControlSetpointSpeed : 7|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 841 NEW_MSG_18: 8 XXX
  SG_ NEW_SIGNAL_2 : 23|8@0+ (1,0) [0|255] "" XXX
