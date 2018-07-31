@@ -126,7 +126,7 @@ BO_ 466 NEW_MSG_16: 8 XXX
 BO_ 512 CruiseControlStatus: 8 XXX
  SG_ CruiseControlInactiveFlag : 12|1@0+ (1,0) [0|1] "" XXX
  SG_ CruiseCoontrolActiveFlag : 13|1@0+ (1,0) [0|1] "" XXX
- SG_ CrusieControlSetpointSpeed : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ CrusieControlSetpointSpeed : 7|8@0+ (.25,0) [0|255] "" XXX
 
 BO_ 841 NEW_MSG_18: 8 XXX
  SG_ NEW_SIGNAL_2 : 23|8@0+ (1,0) [0|255] "" XXX
