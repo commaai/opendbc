@@ -36,7 +36,7 @@ BS_:
 BU_: XXX
 
 
-BO_ 170 AccPedal: 8 XXX
+BO_ 170 AccPedal_Torque: 8 XXX
  SG_ KickDownPressed : 53|1@0+ (1,0) [0|3] "" XXX
  SG_ AccPedal : 21|14@0+ (0.00952925481,-36.5923384704) [0|100] "%" XXX
  SG_ CruisePedalActive : 54|1@0+ (1,0) [0|1] "" XXX
@@ -86,6 +86,14 @@ BO_ 678 WiperSwitch: 8 XXX
 
 BO_ 304 TerminalStatus: 8 XXX
 
+BO_ 169 Torque2: 8 XXX
+
+BO_ 184 TorqueTransmisionRequest: 8 XXX
+
+BO_ 196 SteeringWheelAngle: 8 XXX
+ SG_ NEW_SIGNAL_2 : 31|8@0- (1,0) [0|65535] "" XXX
+ SG_ SteeringAngle : 7|8@0- (1,0) [0|255] "" XXX
+
 
 
 
@@ -99,3 +107,4 @@ CM_ SG_ 404 Counter2 "It accelerates when requests are being sent";
 CM_ SG_ 168 Brake_active1 "Brake depressed when driver presses the brake";
 CM_ SG_ 168 Brake_active2 "Brake depressed when driver presses the brake";
 CM_ SG_ 403 CruiseSetpoint "Speed target";
+CM_ SG_ 196 SteeringAngle "For some reason it overflows";
