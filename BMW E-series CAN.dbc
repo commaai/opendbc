@@ -75,6 +75,17 @@ BO_ 403 DynamicCruiseControlStatus: 8 XXX
  SG_ CruiseActive : 43|1@0+ (1,0) [0|1] "" XXX
  SG_ CruiseSpeedChangeRequest : 48|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 201 NEW_MSG_1: 8 XXX
+ SG_ NEW_SIGNAL_1 : 25|2@0+ (1,0) [0|1] "" XXX
+
+BO_ 206 Wheel speed: 8 XXX
+
+BO_ 884 Wheel tolerance adjustment: 8 XXX
+
+BO_ 678 Wiper switch: 8 XXX
+
+BO_ 304 Terminal status: 8 XXX
+
 
 
 
