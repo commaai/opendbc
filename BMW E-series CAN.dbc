@@ -75,10 +75,14 @@ BO_ 403 DynamicCruiseControlStatus: 8 XXX
  SG_ CruiseActive : 43|1@0+ (1,0) [0|1] "" XXX
  SG_ CruiseSpeedChangeRequest : 48|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 201 WheelTorqueDriveTrain2: 8 XXX
+BO_ 201 untitled2: 8 XXX
  SG_ NEW_SIGNAL_1 : 25|2@0+ (1,0) [0|1] "" XXX
 
 BO_ 206 WheelSpeed: 8 XXX
+ SG_ NEW_SIGNAL_1 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_2 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_3 : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_4 : 55|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 884 WheelToleranceAdjustment: 8 XXX
 
@@ -198,6 +202,15 @@ BO_ 1449 ServicesDSC: 8 XXX
 BO_ 1504 ServicesKOMBI: 8 XXX
 
 BO_ 1522 ServicesKBM: 8 XXX
+
+BO_ 209 SteeringAngle: 8 XXX
+ SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ SteeringAngle : 15|8@0- (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_2 : 39|8@0- (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_3 : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ Counter1 : 55|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 172 WheelTorqueDrivetrain2: 8 XXX
 
 
 
