@@ -75,7 +75,7 @@ BO_ 403 DynamicCruiseControlStatus: 8 XXX
  SG_ CruiseActive : 43|1@0+ (1,0) [0|1] "" XXX
  SG_ CruiseSpeedChangeRequest : 48|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 201 NEW_MSG_1: 8 XXX
+BO_ 201 WheelTorqueDriveTrain2: 8 XXX
  SG_ NEW_SIGNAL_1 : 25|2@0+ (1,0) [0|1] "" XXX
 
 BO_ 206 WheelSpeed: 8 XXX
@@ -92,7 +92,38 @@ BO_ 184 TorqueTransmisionRequest: 8 XXX
 
 BO_ 196 SteeringWheelAngle: 8 XXX
  SG_ NEW_SIGNAL_2 : 31|8@0- (1,0) [0|65535] "" XXX
- SG_ SteeringAngle : 7|8@0- (1,0) [0|255] "" XXX
+ SG_ SteeringAngle : 7|12@0- (1,0) [0|255] "" XXX
+
+BO_ 180 WheelTorqueDriveTrain1: 8 XXX
+
+BO_ 182 TorqueDemandDSC_CruiseControl: 8 XXX
+
+BO_ 186 TransmissionData: 8 XXX
+
+BO_ 191 RequestedWheelTorqueDriveTrainActiveCruiseControl: 8 XXX
+
+BO_ 414 Status_DSC: 8 XXX
+
+BO_ 416 Speed: 8 XXX
+
+BO_ 418 TransimissionData2: 8 XXX
+
+BO_ 690 WheelPressure: 8 XXX
+
+BO_ 691 AccelerationData: 8 XXX
+
+BO_ 408 GearSelectorSwitch: 8 XXX
+
+BO_ 422 Distance: 8 XXX
+
+BO_ 436 InstrumentClusterStatus_KOMBI: 8 XXX
+
+BO_ 464 EngineData: 8 XXX
+
+BO_ 945 TransmissionData3: 8 XXX
+
+BO_ 200 SteeringWheelAngle_slow: 8 XXX
+ SG_ NEW_SIGNAL_1 : 7|8@0- (1,0) [0|255] "" XXX
 
 
 
