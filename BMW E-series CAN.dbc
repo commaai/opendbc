@@ -125,6 +125,36 @@ BO_ 945 TransmissionData3: 8 XXX
 BO_ 200 SteeringWheelAngle_slow: 8 XXX
  SG_ NEW_SIGNAL_1 : 7|8@0- (1,0) [0|255] "" XXX
 
+BO_ 466 TransmissionDataDisplay: 8 XXX
+
+BO_ 437 HeatFlow_LoadMomentClimate: 8 XXX
+
+BO_ 1152 NetworkManagment1: 8 XXX
+
+BO_ 1170 NetworkManagment2: 8 XXX
+
+BO_ 1175 NetworkManagment3: 8 XXX
+
+BO_ 1176 NetworkManagment4: 8 XXX
+
+BO_ 1193 NetworkManagment5: 8 XXX
+
+BO_ 1246 NetworkManagment6: 8 XXX
+
+BO_ 438 HeatFlowEngine: 8 XXX
+
+BO_ 784 AmbientTemperature: 8 XXX
+
+BO_ 821 ElectricFuelPumpStatus: 8 XXX
+
+BO_ 1007 EngineOBD_data: 8 XXX
+
+BO_ 1432 Services: 8 XXX
+
+BO_ 309 CrashDisconnectControl: 8 XXX
+
+BO_ 502 Blinking: 8 XXX
+
 
 
 
