@@ -149,11 +149,55 @@ BO_ 821 ElectricFuelPumpStatus: 8 XXX
 
 BO_ 1007 EngineOBD_data: 8 XXX
 
-BO_ 1432 Services: 8 XXX
+BO_ 1432 ServicesDKG: 8 XXX
 
 BO_ 309 CrashDisconnectControl: 8 XXX
 
 BO_ 502 Blinking: 8 XXX
+
+BO_ 514 Dimming: 8 XXX
+
+BO_ 538 LampsCondition: 8 XXX
+
+BO_ 550 RainSensorWiperSpeed: 8 XXX
+
+BO_ 578 ClimateFrontStatus: 8 XXX
+
+BO_ 704 LCD_lighting: 8 XXX
+
+BO_ 758 LightControl: 8 XXX
+
+BO_ 760 Time_Date: 8 XXX
+
+BO_ 762 SeatBeltContact: 8 XXX
+
+BO_ 764 TrunkStatus: 8 XXX
+
+BO_ 797 TirePressureStatus: 8 XXX
+
+BO_ 816 Range_Mileage: 8 XXX
+
+BO_ 823 StatusFuelControl: 8 XXX
+
+BO_ 897 EngineOilLevelStatus: 8 XXX
+
+BO_ 940 Terminal30Eerror: 8 XXX
+
+BO_ 947 PowerManagmentConsumptionControl: 8 XXX
+
+BO_ 948 PowerBatteryVoltage: 8 XXX
+
+BO_ 958 PowerRunningTime: 8 XXX
+
+BO_ 1408 ServicesKGM: 8 XXX
+
+BO_ 1426 ServicesDME: 8 XXX
+
+BO_ 1449 ServicesDSC: 8 XXX
+
+BO_ 1504 ServicesKOMBI: 8 XXX
+
+BO_ 1522 ServicesKBM: 8 XXX
 
 
 
