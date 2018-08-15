@@ -1,3 +1,4 @@
+CM_ "IMPORT _common.dbc"
 CM_ "IMPORT _honda_2017.dbc"
 CM_ "IMPORT _comma.dbc"
 
@@ -8,10 +9,10 @@ BO_ 342 STEERING_SENSORS: 6 EPS
  SG_ CHECKSUM : 43|4@0+ (1,0) [0|15] "" EON
 
 BO_ 392 GEARBOX: 6 XXX
- SG_ CHECKSUM : 43|4@0+ (1,0) [0|15] "" XXX
- SG_ COUNTER : 45|2@0+ (1,0) [0|3] "" XXX
  SG_ GEAR_SHIFTER : 27|4@0+ (1,0) [0|15] "" EON
  SG_ GEAR : 36|5@0+ (1,0) [0|31] "" EON
+ SG_ COUNTER : 45|2@0+ (1,0) [0|3] "" XXX
+ SG_ CHECKSUM : 43|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 399 STEER_STATUS: 6 EPS
  SG_ STEER_TORQUE_SENSOR : 7|12@0- (1,0) [-2047.5|2047.5] "tbd" EON
@@ -25,7 +26,7 @@ BO_ 404 STEERING_CONTROL: 4 EON
  SG_ STEER_TORQUE : 7|12@0- (1,0) [-768|768] "" EPS
  SG_ SET_ME_X00 : 22|7@0+ (1,0) [0|127] "" EPS
  SG_ STEER_TORQUE_REQUEST : 23|1@0+ (1,0) [0|1] "" EPS
- SG_ COUNTER : 29|2@0+ (1,0) [0|15] "" EPS
+ SG_ COUNTER : 29|2@0+ (1,0) [0|3] "" EPS
  SG_ CHECKSUM : 27|4@0+ (1,0) [0|3] "" EPS
 
 BO_ 420 VSA_STATUS: 8 VSA
@@ -56,9 +57,23 @@ BO_ 660 SCM_FEEDBACK: 8 SCM
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
 
-CM_ SG_ 422 PARKING_BRAKE_LIGHT "Believe this is just the dash light for the parking break";
+BO_ 777 CAR_SPEED: 8 PCM
+ SG_ CAR_SPEED : 7|16@0+ (1,0) [0|65535] "" XXX
+ SG_ ROUGH_CAR_SPEED : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ ROUGH_CAR_SPEED_2 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ ROUGH_CAR_SPEED_3 : 39|16@0+ (1,0) [0|65535] "" XXX
+ SG_ DOORS_UNLOCKED : 54|1@0+ (1,0) [0|1] "" EON
+ SG_ DOORS_LOCKED : 55|1@0+ (1,0) [0|1] "" EON
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
+
+CM_ SG_ 422 PARKING_BRAKE_LIGHT "Believe this is just the dash light for the parking brake";
+
 VAL_ 392 GEAR_SHIFTER 0 "S" 1 "P" 2 "R" 4 "N" 8 "D" ;
 VAL_ 392 GEAR 26 "S" 4 "D" 3 "N" 2 "R" 1 "P" ;
+VAL_ 399 STEER_STATUS 5 "fault" 4 "no_torque_alert_2" 2 "no_torque_alert_1" 0 "normal" ;
 VAL_ 422 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "cancel" 1 "main" 0 "none" ;
+VAL_ 422 LIGHTS_SETTING 3 "high_beam" 2 "low_beam" 1 "position" 0 "no_lights" ;
+VAL_ 422 CRUISE_SETTING 3 "distance_adj" 2 "tbd" 1 "lkas_button" 0 "none" ;
 
 CM_ "CHFFR_METRIC 342 STEER_ANGLE STEER_ANGLE 0.36 180; CHFFR_METRIC 380 ENGINE_RPM ENGINE_RPM 1 0; CHFFR_METRIC 804 ENGINE_TEMPERATURE ENGINE_TEMPERATURE 1 0";

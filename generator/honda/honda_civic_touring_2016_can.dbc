@@ -1,3 +1,4 @@
+CM_ "IMPORT _common.dbc"
 CM_ "IMPORT _honda_2017.dbc"
 CM_ "IMPORT _comma.dbc"
 
@@ -64,10 +65,10 @@ BO_ 487 BRAKE_PRESSURE: 4 VSA
  SG_ CHECKSUM : 27|4@0+ (1,0) [0|3] "" EON
  SG_ COUNTER : 29|2@0+ (1,0) [0|3] "" EON
 
-BO_ 545 ECON_STATUS: 6 XXX
- SG_ ECON_ON_2 : 37|2@0+ (1,0) [0|3] "" EON
+BO_ 545 DRIVE_MODE_STATUS: 6 SCM
  SG_ ECON_ON : 23|1@0+ (1,0) [0|1] "" EON
- SG_ CHECKSUM : 43|4@0+ (1,0) [0|3] "" EON
+ SG_ DRIVE_MODE : 37|2@0+ (1,0) [0|3] "" EON
+ SG_ CHECKSUM : 43|4@0+ (1,0) [0|15] "" EON
  SG_ COUNTER : 45|2@0+ (1,0) [0|3] "" EON
 
 BO_ 662 SCM_BUTTONS: 4 SCM
@@ -75,6 +76,16 @@ BO_ 662 SCM_BUTTONS: 4 SCM
  SG_ CRUISE_SETTING : 3|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 27|4@0+ (1,0) [0|3] "" EON
  SG_ COUNTER : 29|2@0+ (1,0) [0|3] "" EON
+
+BO_ 777 CAR_SPEED: 8 PCM
+ SG_ CAR_SPEED : 7|16@0+ (1,0) [0|65535] "" XXX
+ SG_ ROUGH_CAR_SPEED : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ ROUGH_CAR_SPEED_2 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ ROUGH_CAR_SPEED_3 : 39|16@0+ (1,0) [0|65535] "" XXX
+ SG_ DOORS_UNLOCKED : 54|1@0+ (1,0) [0|1] "" EON
+ SG_ DOORS_LOCKED : 55|1@0+ (1,0) [0|1] "" EON
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 806 SCM_FEEDBACK: 8 SCM
  SG_ CMBS_BUTTON : 22|2@0+ (1,0) [0|3] "" EON
@@ -124,16 +135,13 @@ BO_ 1302 ODOMETER: 8 XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
 
-CM_ SG_ 401 GEAR "10 = reverse, 11 = transition";
-CM_ SG_ 420 BRAKE_HOLD_RELATED "On when Brake Hold engaged";
-CM_ SG_ 450 EPB_STATE "3 "engaged" 2 "disengaging" 1 "engaging" 0 "disengaged"";
-CM_ SG_ 806 REVERSE_LIGHT "Might be reverse gear selected and not the lights";
+CM_ SG_ 545 "3: econ, tbd: sport, tbd: sport_plus, 0: normal";
 
 VAL_ 399 STEER_STATUS 5 "fault" 4 "no_torque_alert_2" 2 "no_torque_alert_1" 0 "normal" ;
 VAL_ 401 GEAR_SHIFTER 32 "L" 16 "S" 8 "D" 4 "N" 2 "R" 1 "P" ;
 VAL_ 401 GEAR 7 "L" 10 "S" 4 "D" 3 "N" 2 "R" 1 "P" ;
 VAL_ 450 EPB_STATE 3 "engaged" 2 "disengaging" 1 "engaging" 0 "disengaged" ;
-VAL_ 545 ECON_ON_2 0 "off" 3 "on" ;
+VAL_ 545 DRIVE_MODE 3 "econ" 0 "normal" ;
 VAL_ 662 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "cancel" 1 "main" 0 "none" ;
 VAL_ 662 CRUISE_SETTING 3 "distance_adj" 2 "tbd" 1 "lkas_button" 0 "none" ;
 VAL_ 806 CMBS_BUTTON 3 "pressed" 0 "released" ;

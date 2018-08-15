@@ -1,3 +1,4 @@
+CM_ "IMPORT _common.dbc"
 CM_ "IMPORT _honda_2017.dbc"
 CM_ "IMPORT _comma.dbc"
 
@@ -34,8 +35,10 @@ BO_ 399 STEER_STATUS: 7 EPS
  SG_ CHECKSUM : 51|4@0+ (1,0) [0|3] "" EON
 
 BO_ 419 GEARBOX: 8 PCM
- SG_ GEAR : 7|8@0+ (1,0) [0|256] "" EON
- SG_ GEAR_SHIFTER : 35|4@0+ (1,0) [0|15] "" EON
+ SG_ GEAR : 3|4@0+ (1,0) [0|15] "" EON
+ SG_ AVAILABLE_GEAR : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ REVERSE_GEAR : 20|1@0+ (-1,1) [0|1] "" XXX
+ SG_ GEAR_SHIFTER : 35|4@0+ (1,0) [0|15] "" EON 
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
 
@@ -57,21 +60,20 @@ BO_ 660 SCM_FEEDBACK: 8 SCM
  SG_ RIGHT_BLINKER : 6|1@0+ (1,0) [0|1] "" EON
  SG_ LEFT_BLINKER : 5|1@0+ (1,0) [0|1] "" EON
  SG_ WIPERS_SPEED : 4|2@0+ (1,0) [0|3] "" EON
+ 
+BO_ 777 CAR_SPEED: 8 PCM
+ SG_ CAR_SPEED : 39|16@0+ (0.01,0) [0|65535] "kph" XXX
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
-CM_ SG_ 419 GEAR "10 = reverse, 11 = transition";
-CM_ SG_ 490 LONG_ACCEL "wheel speed derivative, noisy and zero snapping";
-CM_ SG_ 780 CRUISE_SPEED "255 = no speed";
-CM_ SG_ 804 CRUISE_SPEED_PCM "255 = no speed";
-CM_ SG_ 829 BEEP "beeps are pleasant, chimes are for warnngs etc...";
+CM_ SG_ 419 GEAR "10 = reverse, 11 = transition/neutral";
+CM_ SG_ 419 AVAILABLE_GEAR "gear available at current differential speed";
 
 VAL_ 399 STEER_STATUS 5 "fault" 4 "no_torque_alert_2" 2 "no_torque_alert_1" 0 "normal" ;
+VAL_ 419 GEAR 11 "neutral" 10 "reverse" 8 "eighth" 7 "seventh" 6 "sixth" 5 "fifth" 4 "fourth" 3 "third" 2 "second" 1 "first";
 VAL_ 419 GEAR_SHIFTER 10 "S" 4 "D" 3 "N" 2 "R" 1 "P" ;
 VAL_ 422 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "cancel" 1 "main" 0 "none" ;
 VAL_ 422 LIGHTS_SETTING 3 "high_beam" 2 "low_beam" 1 "position" 0 "no_lights" ;
 VAL_ 422 CRUISE_SETTING 3 "distance_adj" 2 "tbd" 1 "lkas_button" 0 "none" ;
-VAL_ 506 CHIME 4 "double_chime" 3 "single_chime" 2 "continuous_chime" 1 "repeating_chime" 0 "no_chime" ;
-VAL_ 506 FCW 3 "fcw" 2 "fcw" 1 "fcw" 0 "no_fcw" ;
-VAL_ 780 HUD_LEAD 3 "no_car" 2 "solid_car" 1 "dashed_car" 0 "no_car" ;
-VAL_ 829 BEEP 3 "single_beep" 2 "triple_beep" 1 "repeated_beep" 0 "no_beep" ;
 
 CM_ "CHFFR_METRIC 342 STEER_ANGLE STEER_ANGLE 0.36 180; CHFFR_METRIC 380 ENGINE_RPM ENGINE_RPM 1 0; CHFFR_METRIC 804 ENGINE_TEMPERATURE ENGINE_TEMPERATURE 1 0";
