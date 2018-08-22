@@ -971,7 +971,7 @@ BO_ 832 LKAS11: 8 LDWS_LKAS
  SG_ CF_Lkas_ToiFlt : 28|1@1+ (1.0,0.0) [0.0|1.0] ""  MDPS
  SG_ CF_Lkas_HbaSysState : 29|3@1+ (1.0,0.0) [0.0|7.0] ""  BCM,CLU
  SG_ CF_Lkas_FcwOpt : 32|2@1+ (1.0,0.0) [0.0|3.0] ""  CLU
- SG_ CF_Lkas_HbaOpt : 34|1@1+ (1.0,0.0) [0.0|1.0] ""  BCM,CGW
+ SG_ CF_Lkas_HbaOpt : 34|2@1+ (1.0,0.0) [0.0|1.0] ""  BCM,CGW
  SG_ CF_Lkas_MsgCount : 36|4@1+ (1.0,0.0) [0.0|15.0] ""  CLU,MDPS
  SG_ CF_Lkas_FcwSysState : 40|3@1+ (1.0,0.0) [0.0|7.0] ""  CLU
  SG_ CF_Lkas_FcwCollisionWarning : 43|2@1+ (1.0,0.0) [0.0|3.0] ""  CLU
