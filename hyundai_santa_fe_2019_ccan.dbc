@@ -439,7 +439,7 @@ BO_ 897 MDPS11: 8 MDPS
  SG_ CF_Mdps_Flex : 2|3@1+ (1.0,0.0) [0.0|3.0] ""  CLU,LDWS_LKAS
  SG_ CF_Mdps_FlexDisp : 5|1@1+ (1.0,0.0) [0.0|1.0] ""  CLU
  SG_ CF_Mdps_Stat : 7|4@1+ (1.0,0.0) [0.0|15.0] ""  SPAS
- SG_ CR_Mdps_DrvTq : 11|12@1+ (0.01,-20.48) [-20.48|20.46] ""  SPAS
+ SG_ CR_Mdps_DrvTq : 11|12@1+ (1.0,-2048.0) [-2048.0|2046.0] ""  SPAS
  SG_ CF_Mdps_ALTRequest : 23|1@1+ (1.0,0.0) [0.0|1.0] ""  EMS
  SG_ CR_Mdps_StrAng : 24|16@1- (0.1,0.0) [-3276.8|3276.7] "Deg"  SPAS
  SG_ CF_Mdps_AliveCnt : 40|8@1+ (1.0,0.0) [0.0|255.0] ""  LDWS_LKAS,SPAS
