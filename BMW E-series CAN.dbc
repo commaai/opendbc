@@ -79,10 +79,10 @@ BO_ 201 untitled2: 8 XXX
  SG_ NEW_SIGNAL_1 : 25|2@0+ (1,0) [0|1] "" XXX
 
 BO_ 206 WheelSpeed: 8 XXX
- SG_ NEW_SIGNAL_1 : 23|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_2 : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_3 : 39|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_4 : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ Wheel2 : 16|16@1- (1,0) [0|255] "" XXX
+ SG_ Wheel3 : 32|16@1- (1,0) [0|255] "" XXX
+ SG_ Wheel4 : 48|16@1- (1,0) [0|255] "" XXX
+ SG_ Wheel1 : 0|16@1- (1,0) [0|255] "" XXX
 
 BO_ 884 WheelToleranceAdjustment: 8 XXX
 
@@ -95,8 +95,9 @@ BO_ 169 Torque2: 8 XXX
 BO_ 184 TorqueTransmisionRequest: 8 XXX
 
 BO_ 196 SteeringWheelAngle: 8 XXX
- SG_ NEW_SIGNAL_2 : 31|8@0- (1,0) [0|65535] "" XXX
- SG_ SteeringAngle : 7|12@0- (1,0) [0|255] "" XXX
+ SG_ SteeringPosition : 0|16@1- (1,0) [0|255] "" XXX
+ SG_ SteeringAcceleration : 31|8@0- (1,0) [0|255] "" XXX
+ SG_ SteeringSpeed : 39|8@0- (1,0) [0|255] "" XXX
 
 BO_ 180 WheelTorqueDriveTrain1: 8 XXX
 
@@ -109,6 +110,7 @@ BO_ 191 RequestedWheelTorqueDriveTrainActiveCruiseControl: 8 XXX
 BO_ 414 Status_DSC: 8 XXX
 
 BO_ 416 Speed: 8 XXX
+ SG_ VehicleSpeed : 0|12@1+ (1,0) [0|255] "" XXX
 
 BO_ 418 TransimissionData2: 8 XXX
 
@@ -225,4 +227,3 @@ CM_ SG_ 404 Counter2 "It accelerates when requests are being sent";
 CM_ SG_ 168 Brake_active1 "Brake depressed when driver presses the brake";
 CM_ SG_ 168 Brake_active2 "Brake depressed when driver presses the brake";
 CM_ SG_ 403 CruiseSetpoint "Speed target";
-CM_ SG_ 196 SteeringAngle "For some reason it overflows";
