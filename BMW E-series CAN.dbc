@@ -97,10 +97,10 @@ BO_ 169 Torque2: 8 XXX
 
 BO_ 184 TorqueTransmisionRequest: 8 XXX
 
-BO_ 196 SteeringWheelAngle: 8 XXX
- SG_ SteeringPosition : 0|16@1- (1,0) [0|255] "" XXX
+BO_ 196 SteeringWheelAngle: 7 XXX
  SG_ SteeringAcceleration : 31|8@0- (1,0) [0|255] "" XXX
  SG_ SteeringSpeed : 39|8@0- (1,0) [0|255] "" XXX
+ SG_ SteeringPosition : 0|16@1- (1,0) [0|255] "" XXX
 
 BO_ 180 WheelTorqueDriveTrain1: 8 XXX
 
