@@ -36,12 +36,15 @@ BS_:
 BU_: XXX
 
 
-BO_ 170 AccPedal_Torque: 8 XXX
+BO_ 170 AccPedal: 8 XXX
  SG_ KickDownPressed : 53|1@0+ (1,0) [0|3] "" XXX
- SG_ AccPedal : 21|14@0+ (0.00952925481,-36.5923384704) [0|100] "%" XXX
  SG_ CruisePedalActive : 54|1@0+ (1,0) [0|1] "" XXX
- SG_ AccPedalActive : 52|1@0+ (1,0) [0|7] "" XXX
  SG_ CruisePedalInactive : 55|1@0+ (1,0) [0|1] "" XXX
+ SG_ AccPedalSomething : 52|1@0+ (1,0) [0|7] "" XXX
+ SG_ AcceleratorPedalPercentage : 16|16@1+ (0.01,0) [0|100] "" XXX
+ SG_ AcceleratorPedalPressed : 50|1@0+ (1,0) [0|1] "" XXX
+ SG_ AcceleratorSomwethingDetail : 0|8@1- (1,0) [0|65535] "" XXX
+ SG_ AcceleratorPedalRateFiltered : 32|16@1- (1,0) [0|65535] "" XXX
 
 BO_ 404 CruiseControl: 4 XXX
  SG_ plus1mph_request : 16|1@0+ (1,0) [0|1] "" XXX
@@ -57,9 +60,9 @@ BO_ 512 CruiseControlStatus: 8 XXX
  SG_ CruiseCoontrolActiveFlag : 13|1@0+ (1,0) [0|1] "" XXX
  SG_ CrusieControlSetpointSpeed : 7|8@0+ (0.25,0) [0|255] "" XXX
 
-BO_ 168 Brake: 8 XXX
- SG_ Brake_active1 : 61|1@0+ (1,0) [0|1] "" XXX
+BO_ 168 BRAKE_MODULE: 8 XXX
  SG_ Brake_active2 : 62|1@0+ (1,0) [0|1] "" XXX
+ SG_ BRAKE_PRESSED : 61|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 470 SteeringButtons: 8 XXX
  SG_ Volume_DOWN : 2|1@0+ (1,0) [0|1] "" XXX
@@ -79,10 +82,10 @@ BO_ 201 untitled2: 8 XXX
  SG_ NEW_SIGNAL_1 : 25|2@0+ (1,0) [0|1] "" XXX
 
 BO_ 206 WheelSpeed: 8 XXX
- SG_ NEW_SIGNAL_1 : 23|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_2 : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_3 : 39|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_4 : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ Wheel2 : 16|16@1- (1,0) [0|255] "" XXX
+ SG_ Wheel3 : 32|16@1- (1,0) [0|255] "" XXX
+ SG_ Wheel4 : 48|16@1- (1,0) [0|255] "" XXX
+ SG_ Wheel1 : 0|16@1- (1,0) [0|255] "" XXX
 
 BO_ 884 WheelToleranceAdjustment: 8 XXX
 
@@ -95,8 +98,9 @@ BO_ 169 Torque2: 8 XXX
 BO_ 184 TorqueTransmisionRequest: 8 XXX
 
 BO_ 196 SteeringWheelAngle: 8 XXX
- SG_ NEW_SIGNAL_2 : 31|8@0- (1,0) [0|65535] "" XXX
- SG_ SteeringAngle : 7|12@0- (1,0) [0|255] "" XXX
+ SG_ SteeringPosition : 0|16@1- (1,0) [0|255] "" XXX
+ SG_ SteeringAcceleration : 31|8@0- (1,0) [0|255] "" XXX
+ SG_ SteeringSpeed : 39|8@0- (1,0) [0|255] "" XXX
 
 BO_ 180 WheelTorqueDriveTrain1: 8 XXX
 
@@ -109,6 +113,7 @@ BO_ 191 RequestedWheelTorqueDriveTrainActiveCruiseControl: 8 XXX
 BO_ 414 Status_DSC: 8 XXX
 
 BO_ 416 Speed: 8 XXX
+ SG_ VehicleSpeed : 0|12@1+ (1,0) [0|255] "" XXX
 
 BO_ 418 TransimissionData2: 8 XXX
 
@@ -215,6 +220,8 @@ BO_ 172 WheelTorqueDrivetrain2: 8 XXX
 
 
 
+CM_ SG_ 170 AcceleratorPedalPercentage "ToDo Factor to be adjusted";
+CM_ SG_ 170 AcceleratorPedalRateFiltered "It's hard to say that is even a rate";
 CM_ SG_ 404 plus1mph_request "Appears when +1mph/kph stalk is depressed";
 CM_ SG_ 404 minus1mph_request "Appears when -1mph/kph stalk is depressed";
 CM_ SG_ 404 Cancel_request_up_stalk "Appears when cancel stalk (up) is depressed";
@@ -222,7 +229,6 @@ CM_ SG_ 404 Cancel_request_up_or_down_stalk "Appears when cancel stalk (up or do
 CM_ SG_ 404 Resume_request "It appears when resume stalk button is depressed";
 CM_ SG_ 404 Counter1 "It accelerates when requests are being sent";
 CM_ SG_ 404 Counter2 "It accelerates when requests are being sent";
-CM_ SG_ 168 Brake_active1 "Brake depressed when driver presses the brake";
-CM_ SG_ 168 Brake_active2 "Brake depressed when driver presses the brake";
+CM_ SG_ 168 Brake_active2 "";
+CM_ SG_ 168 BRAKE_PRESSED "Brake when driver presses the brake";
 CM_ SG_ 403 CruiseSetpoint "Speed target";
-CM_ SG_ 196 SteeringAngle "For some reason it overflows";
