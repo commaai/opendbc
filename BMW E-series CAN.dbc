@@ -60,9 +60,9 @@ BO_ 512 CruiseControlStatus: 8 XXX
  SG_ CruiseCoontrolActiveFlag : 13|1@0+ (1,0) [0|1] "" XXX
  SG_ CrusieControlSetpointSpeed : 7|8@0+ (0.25,0) [0|255] "" XXX
 
-BO_ 168 BRAKE_MODULE: 8 XXX
+BO_ 168 Brake: 8 XXX
  SG_ Brake_active2 : 62|1@0+ (1,0) [0|1] "" XXX
- SG_ BRAKE_PRESSED : 61|1@0+ (1,0) [0|1] "" XXX
+ SG_ BrakePressed : 61|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 470 SteeringButtons: 8 XXX
  SG_ Volume_DOWN : 2|1@0+ (1,0) [0|1] "" XXX
@@ -230,5 +230,5 @@ CM_ SG_ 404 Resume_request "It appears when resume stalk button is depressed";
 CM_ SG_ 404 Counter1 "It accelerates when requests are being sent";
 CM_ SG_ 404 Counter2 "It accelerates when requests are being sent";
 CM_ SG_ 168 Brake_active2 "";
-CM_ SG_ 168 BRAKE_PRESSED "Brake when driver presses the brake";
+CM_ SG_ 168 BrakePressed "Brake when driver presses the brake";
 CM_ SG_ 403 CruiseSetpoint "Speed target";
