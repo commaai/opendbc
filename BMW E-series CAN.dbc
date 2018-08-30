@@ -73,10 +73,10 @@ BO_ 470 SteeringButtons: 8 XXX
  SG_ Previous_down : 4|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 403 DynamicCruiseControlStatus: 8 XXX
- SG_ CruiseSetpoint : 15|8@0+ (1,0) [0|255] "mph" XXX
  SG_ Counter : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ CruiseActive : 43|1@0+ (1,0) [0|1] "" XXX
  SG_ CruiseSpeedChangeRequest : 48|1@0+ (1,0) [0|1] "" XXX
+ SG_ CruiseActive : 43|1@0+ (1,0) [0|1] "" XXX
+ SG_ CruiseControlSetpointSpeed : 15|8@0+ (1,0) [0|255] "mph" XXX
 
 BO_ 201 untitled2: 8 XXX
  SG_ NEW_SIGNAL_1 : 25|2@0+ (1,0) [0|1] "" XXX
@@ -98,9 +98,8 @@ BO_ 169 Torque2: 8 XXX
 BO_ 184 TorqueTransmisionRequest: 8 XXX
 
 BO_ 196 SteeringWheelAngle: 7 XXX
- SG_ SteeringAcceleration : 31|8@0- (1,0) [0|255] "" XXX
- SG_ SteeringSpeed : 39|8@0- (1,0) [0|255] "" XXX
  SG_ SteeringPosition : 0|16@1- (1,0) [0|255] "" XXX
+ SG_ SteeringAcceleration : 8|8@1- (1,0) [0|255] "" XXX
 
 BO_ 180 WheelTorqueDriveTrain1: 8 XXX
 
@@ -132,7 +131,7 @@ BO_ 464 EngineData: 8 XXX
 BO_ 945 TransmissionData3: 8 XXX
 
 BO_ 200 SteeringWheelAngle_slow: 8 XXX
- SG_ NEW_SIGNAL_1 : 0|16@1- (1,0) [0|255] "" XXX
+ SG_ SteeringPosition : 0|16@1- (1,0) [0|255] "" XXX
 
 BO_ 466 TransmissionDataDisplay: 8 XXX
 
@@ -231,4 +230,4 @@ CM_ SG_ 404 Counter1 "It accelerates when requests are being sent";
 CM_ SG_ 404 Counter2 "It accelerates when requests are being sent";
 CM_ SG_ 168 Brake_active2 "";
 CM_ SG_ 168 BrakePressed "Brake when driver presses the brake";
-CM_ SG_ 403 CruiseSetpoint "Speed target";
+CM_ SG_ 403 CruiseControlSetpointSpeed "Speed target";
