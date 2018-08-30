@@ -81,7 +81,7 @@ BO_ 403 DynamicCruiseControlStatus: 8 XXX
 BO_ 201 untitled2: 8 XXX
  SG_ NEW_SIGNAL_1 : 25|2@0+ (1,0) [0|1] "" XXX
 
-BO_ 206 WheelSpeed: 8 XXX
+BO_ 206 WheelSpeeds: 8 XXX
  SG_ Wheel2 : 16|16@1- (1,0) [0|255] "" XXX
  SG_ Wheel3 : 32|16@1- (1,0) [0|255] "" XXX
  SG_ Wheel4 : 48|16@1- (1,0) [0|255] "" XXX
@@ -132,7 +132,7 @@ BO_ 464 EngineData: 8 XXX
 BO_ 945 TransmissionData3: 8 XXX
 
 BO_ 200 SteeringWheelAngle_slow: 8 XXX
- SG_ NEW_SIGNAL_1 : 7|8@0- (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_1 : 0|16@1- (1,0) [0|255] "" XXX
 
 BO_ 466 TransmissionDataDisplay: 8 XXX
 
