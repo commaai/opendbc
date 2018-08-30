@@ -73,10 +73,10 @@ BO_ 470 SteeringButtons: 8 XXX
  SG_ Previous_down : 4|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 403 DynamicCruiseControlStatus: 8 XXX
- SG_ CruiseSetpoint : 15|8@0+ (1,0) [0|255] "mph" XXX
  SG_ Counter : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ CruiseActive : 43|1@0+ (1,0) [0|1] "" XXX
  SG_ CruiseSpeedChangeRequest : 48|1@0+ (1,0) [0|1] "" XXX
+ SG_ CruiseSetpoint : 15|8@0+ (1,-2) [0|255] "mph" XXX
 
 BO_ 201 untitled2: 8 XXX
  SG_ NEW_SIGNAL_1 : 25|2@0+ (1,0) [0|1] "" XXX
@@ -113,7 +113,7 @@ BO_ 191 RequestedWheelTorqueDriveTrainActiveCruiseControl: 8 XXX
 BO_ 414 Status_DSC: 8 XXX
 
 BO_ 416 Speed: 8 XXX
- SG_ VehicleSpeed : 0|12@1+ (1,0) [0|255] "" XXX
+ SG_ VehicleSpeed : 0|12@1+ (0.1,0) [0|255] "" XXX
 
 BO_ 418 TransimissionData2: 8 XXX
 
