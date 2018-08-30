@@ -76,7 +76,7 @@ BO_ 403 DynamicCruiseControlStatus: 8 XXX
  SG_ Counter : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ CruiseActive : 43|1@0+ (1,0) [0|1] "" XXX
  SG_ CruiseSpeedChangeRequest : 48|1@0+ (1,0) [0|1] "" XXX
- SG_ CruiseSetpoint : 15|8@0+ (1,-2) [0|255] "mph" XXX
+ SG_ CruiseControlSetpointSpeed : 15|8@0+ (1,-2) [0|255] "mph" XXX
 
 BO_ 201 untitled2: 8 XXX
  SG_ NEW_SIGNAL_1 : 25|2@0+ (1,0) [0|1] "" XXX
@@ -231,4 +231,4 @@ CM_ SG_ 404 Counter1 "It accelerates when requests are being sent";
 CM_ SG_ 404 Counter2 "It accelerates when requests are being sent";
 CM_ SG_ 168 Brake_active2 "";
 CM_ SG_ 168 BrakePressed "Brake when driver presses the brake";
-CM_ SG_ 403 CruiseSetpoint "Speed target";
+CM_ SG_ 403 CruiseControlSetpointSpeed "Speed target";
