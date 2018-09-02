@@ -54,6 +54,7 @@ BO_ 404 CruiseControl: 4 XXX
  SG_ Resume_request : 22|1@0+ (1,0) [0|1] "" XXX
  SG_ Counter1 : 3|4@0+ (1,0) [0|15] "" XXX
  SG_ Counter2 : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ notCancel_0xF : 7|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 512 CruiseControlStatus: 8 XXX
  SG_ CruiseControlInactiveFlag : 12|1@0+ (1,0) [0|1] "" XXX
@@ -229,6 +230,7 @@ CM_ SG_ 404 Cancel_request_up_or_down_stalk "Appears when cancel stalk (up or do
 CM_ SG_ 404 Resume_request "It appears when resume stalk button is depressed";
 CM_ SG_ 404 Counter1 "It accelerates when requests are being sent";
 CM_ SG_ 404 Counter2 "It accelerates when requests are being sent";
+CM_ SG_ 404 notCancel_0xF "0xF unless cancel is requested then 0x0";
 CM_ SG_ 168 Brake_active2 "";
 CM_ SG_ 168 BrakePressed "Brake when driver presses the brake";
 CM_ SG_ 403 CruiseControlSetpointSpeed "Speed target";
