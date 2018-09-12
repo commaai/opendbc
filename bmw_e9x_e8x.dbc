@@ -56,8 +56,8 @@ BO_ 404 CruiseControl: 4 XXX
  SG_ Counter1 : 3|4@0+ (1,0) [0|15] "" XXX
  SG_ Counter2 : 11|4@0+ (1,0) [0|15] "" XXX
  SG_ notCancel_0xF : 7|4@0+ (1,0) [0|15] "" XXX
- SG_ usally_0xF : 15|4@0+ (1,0) [0|15] "" XXX
  SG_ setMe_0xFC : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ requests_0xF : 15|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 512 CruiseControlStatus: 8 XXX
  SG_ CruiseControlInactiveFlag : 12|1@0+ (1,0) [0|1] "" XXX
