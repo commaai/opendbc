@@ -44,7 +44,8 @@ BO_ 769 VEHICLE_STATE2: 8 ADAS
  SG_ SET_ME_0F18510 : 7|28@0+ (1,0) [0|268435455] "" Vector__XXX
  SG_ SET_ME_25A0000 : 27|28@0+ (1,0) [0|268435455] "" Vector__XXX
 
-BO_ 1024 XXX_100: 8 RADAR
+BO_ 1024 RADAR_DIAGNOSTIC: 8 RADAR
+ SG_ RADAR_STATE : 7|8@0+ (1,0) [0|255] "" NEO
 
 BO_ 1040 XXX_101: 8 RADAR
 
@@ -180,4 +181,5 @@ BO_TX_BU_ 768 : NEO,ADAS;
 BO_TX_BU_ 769 : NEO,ADAS;
 
 
-
+CM_ SG_ 1024 RADAR_STATE "need to find out more diagnostic values";
+VAL_ 1024 RADAR_STATE 121 "ok" 110 "faulted" 105 "wrong_config";
