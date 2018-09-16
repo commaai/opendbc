@@ -37,12 +37,12 @@ def create_dbc(dir_name, filename):
 
 
 for dir_name, _, filenames in os.walk(cur_path):
-    if dir_name == cur_path:
+    if dir_name == cur_path or not (dir_name.endswith("toyota") or dir_name.endswith("honda")):
         continue
 
     print dir_name
     for filename in filenames:
-        if filename.startswith('_'):
+        if filename.startswith('_') or not filename.lower().endswith('.dbc'):
             continue
 
         print filename
