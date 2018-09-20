@@ -81,6 +81,7 @@ BO_ 298 BCMDoorBeltStatus: 8 K9_BCM
 
 BO_ 309 ECMPRDNL: 8 K20_ECM
  SG_ PRNDL : 2|3@0+ (1,0) [0|0] ""  NEO
+ SG_ ESPButton : 4|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 320 BCMTurnSignals: 3 K9_BCM
  SG_ TurnSignals : 19|2@0+ (1,0) [0|0] ""  NEO
