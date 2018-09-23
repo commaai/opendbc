@@ -87,6 +87,9 @@ BO_ 309 ECMPRDNL: 8 K20_ECM
 
 BO_ 320 BCMTurnSignals: 3 K9_BCM
  SG_ TurnSignals : 19|2@0+ (1,0) [0|0] ""  NEO
+ SG_ IntellibeamEnabled : 13|1@0+ (1,0) [0|1] "" XXX
+ SG_ HighBeamsEnabled : 7|1@0+ (1,0) [0|1] "" XXX
+ SG_ HighBeamsTemporary : 5|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 328 PSCM_148: 1 K43_PSCM
 
