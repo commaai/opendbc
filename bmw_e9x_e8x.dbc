@@ -117,7 +117,7 @@ BO_ 191 RequestedWheelTorqueDriveTrainActiveCruiseControl: 8 XXX
 BO_ 414 Status_DSC: 8 XXX
 
 BO_ 416 Speed: 8 XXX
- SG_ VehicleSpeed : 0|12@1+ (0.1,0) [0|255] "" XXX
+ SG_ VehicleSpeed : 0|12@1+ (0.103,0) [0|255] "" XXX
 
 BO_ 418 TransimissionData2: 8 XXX
 
