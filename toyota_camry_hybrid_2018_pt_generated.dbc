@@ -151,6 +151,7 @@ BO_ 467 PCM_CRUISE_2: 8 XXX
 BO_ 921 PCM_CRUISE_SM: 8 XXX
  SG_ MAIN_ON : 4|1@0+ (1,0) [0|1] "" XXX
  SG_ CRUISE_CONTROL_STATE : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ DISTANCE_LINES : 14|2@0+ (1,0) [0|3] "" XXX
  SG_ UI_SET_SPEED : 31|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 951 ESP_CONTROL: 8 ESP
@@ -192,6 +193,37 @@ BO_ 1568 SEATS_DOORS: 8 XXX
 BO_ 1570 LIGHT_STALK: 8 SCM
  SG_ AUTO_HIGH_BEAM : 37|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 1161 RSA1: 8 FCM
+ SG_ TSGN1 : 7|8@0+ (1,0) [0|0] "" XXX
+ SG_ TSGNGRY1 : 12|3@0+ (1,0) [0|0] "" XXX
+ SG_ TSGNHLT1 : 9|2@0+ (1,0) [0|0] "" XXX
+ SG_ SPDVAL1 : 23|8@0+ (1,0) [0|0] "kph" XXX
+ SG_ SPLSGN1 : 31|4@0+ (1,0) [0|0] "" XXX
+ SG_ SPLSGN2 : 27|4@0+ (1,0) [0|0] "" XXX
+ SG_ TSGN2 : 39|8@0+ (1,0) [0|0] "" XXX
+ SG_ TSGNGRY2 : 44|3@0+ (1,0) [0|0] "" XXX
+ SG_ TSGNHLT2 : 41|2@0+ (1,0) [0|0] "" XXX
+ SG_ SPDVAL2 : 55|8@0+ (1,0) [0|0] "" XXX
+ SG_ BZRRQ_P : 63|2@0+ (1,0) [0|0] "" XXX
+ SG_ BZRRQ_A : 61|2@0+ (1,0) [0|0] "" XXX
+ SG_ SYNCID1 : 59|4@0+ (1,0) [0|0] "" XXX
+
+BO_ 1162 RSA2: 8 FCM
+ SG_ TSGN3 : 7|8@0+ (1,0) [0|0] "" XXX
+ SG_ TSGNGRY3 : 12|3@0+ (1,0) [0|0] "" XXX
+ SG_ TSGNHLT3 : 9|2@0+ (1,0) [0|0] "" XXX
+ SG_ SPLSGN3 : 31|4@0+ (1,0) [0|0] "" XXX
+ SG_ SPLSGN4 : 27|4@0+ (1,0) [0|0] "" XXX
+ SG_ TSGN4 : 39|8@0+ (1,0) [0|0] "" XXX
+ SG_ TSGNGRY4 : 44|3@0+ (1,0) [0|0] "" XXX
+ SG_ TSGNHLT4 : 41|2@0+ (1,0) [0|0] "" XXX
+ SG_ DPSGNREQ : 54|1@0+ (1,0) [0|0] "" XXX
+ SG_ SGNNUMP : 53|3@0+ (1,0) [0|0] "" XXX
+ SG_ SGNNUMA : 50|3@0+ (1,0) [0|0] "" XXX
+ SG_ SPDUNT : 63|2@0+ (1,0) [0|0] "" XXX
+ SG_ TSRWMSG : 61|2@0+ (1,0) [0|0] "" XXX
+ SG_ SYNCID2 : 59|4@0+ (1,0) [0|0] "" XXX
+
 CM_ SG_ 36 ACCEL_Y "unit is tbd";
 CM_ SG_ 36 YAW_RATE "verify";
 CM_ SG_ 36 STEERING_TORQUE "does not seem the steer torque, tbd";
@@ -208,6 +240,7 @@ CM_ SG_ 467 LOW_SPEED_LOCKOUT "in low speed lockout, system would always disenga
 CM_ SG_ 921 UI_SET_SPEED "set speed shown in UI with user set unit";
 CM_ SG_ 1042 SET_ME_1 "unclear what this is, but it's always 1 in drive traces";
 CM_ SG_ 1042 REPEATED_BEEPS "recommended for fcw and other important alerts";
+CM_ SG_ 1161 SPDVAL1 "is the displayed speed 10,30,50,60,70,80,90,100,120 and 255 is for no limit. SPDVAL2 is the secondary speed usually written smaller";
 VAL_ 466 CRUISE_STATE 8 "active" 7 "standstill" 1 "off" ;
 VAL_ 467 LOW_SPEED_LOCKOUT 2 "low speed locked" 1 "ok" ;
 VAL_ 614 STATE 3 "enabled" 1 "disabled";
