@@ -220,6 +220,9 @@ CM_ SG_ 951 BRAKE_LIGHTS_ACC "brake lights when ACC commands decel";
 CM_ SG_ 1042 SET_ME_1 "unclear what this is, but it's always 1 in drive traces";
 CM_ SG_ 1042 REPEATED_BEEPS "recommended for fcw and other important alerts";
 CM_ SG_ 1161 SPDVAL1 "is the displayed speed 10,30,50,60,70,80,90,100,120 and 255 is for no limit. SPDVAL2 is the secondary speed usually written smaller";
+CM_ SG_ 1161 SYNCID1 "counter from 1 to f at 1 Hz";
+CM_ SG_ 1162 SGNNUMP "1 if SPDVAL1 is set, otherwise 0";
+CM_ SG_ 1162 SYNCID2 "counter from 1 to f at 1 Hz";
 
 VAL_ 466 CRUISE_STATE 8 "active" 7 "standstill" 1 "off" ;
 VAL_ 467 LOW_SPEED_LOCKOUT 2 "low speed locked" 1 "ok" ;
@@ -232,8 +235,9 @@ VAL_ 1042 RIGHT_LINE 3 "orange" 2 "double" 1 "solid" 0 "none";
 VAL_ 1042 LEFT_LINE 3 "orange" 2 "double" 1 "solid" 0 "none";
 VAL_ 1553 UNITS 1 "km" 2 "miles";
 VAL_ 1556 TURN_SIGNALS 3 "none" 2 "right" 1 "left" ;
+VAL_ 1161 TSGN1 1 "Sign" 0 "none";
 VAL_ 1162 TSGN3 67 "overtaking allowed again" 65 "no overtake" 0 "none";
-VAL_ 1162 SPLSGN3 15 "conditional" 0 "None";
+VAL_ 1162 SPLSGN3 15 "conditional" 0 "none";
 
 
 CM_ "CHFFR_METRIC 37 STEER_ANGLE STEER_ANGLE 0.36 180";
