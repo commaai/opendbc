@@ -82,10 +82,15 @@ BO_ 403 DynamicCruiseControlStatus: 8 XXX
  SG_ CruiseSpeedChangeRequest : 48|1@0+ (1,0) [0|1] "" XXX
  SG_ CruiseControlSetpointSpeed : 15|8@0+ (1,-2) [0|255] "mph" XXX
 
-BO_ 201 untitled2: 8 XXX
+BO_ 201 Unknown_c9: 8 XXX
  SG_ Counter1 : 23|4@0+ (1,0) [0|15] "" XXX
  SG_ PositionNeg : 24|11@1- (1,0) [0|1] "" XXX
  SG_ Position : 0|16@1- (1,0) [0|65535] "" XXX
+ SG_ NEW_SIGNAL_1 : 47|4@0+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_2 : 48|16@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_3 : 39|3@0+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_4 : 36|2@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_5 : 42|3@1+ (1,0) [0|3] "" XXX
 
 BO_ 206 WheelSpeeds: 8 XXX
  SG_ Wheel2 : 16|16@1- (1,0) [0|255] "" XXX
