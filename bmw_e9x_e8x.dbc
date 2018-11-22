@@ -83,7 +83,9 @@ BO_ 403 DynamicCruiseControlStatus: 8 XXX
  SG_ CruiseControlSetpointSpeed : 15|8@0+ (1,-2) [0|255] "mph" XXX
 
 BO_ 201 untitled2: 8 XXX
- SG_ NEW_SIGNAL_1 : 25|2@0+ (1,0) [0|1] "" XXX
+ SG_ Counter1 : 23|4@0+ (1,0) [0|15] "" XXX
+ SG_ PositionNeg : 24|11@1- (1,0) [0|1] "" XXX
+ SG_ Position : 0|16@1- (1,0) [0|65535] "" XXX
 
 BO_ 206 WheelSpeeds: 8 XXX
  SG_ Wheel2 : 16|16@1- (1,0) [0|255] "" XXX
@@ -220,6 +222,29 @@ BO_ 209 SteeringAngle: 8 XXX
  SG_ Counter1 : 55|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 172 WheelTorqueDrivetrain2: 8 XXX
+
+BO_ 128 Unknown80: 5 XXX
+ SG_ State2 : 24|4@1+ (1,0) [0|15] "" XXX
+ SG_ State1 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ Counter1 : 31|4@0+ (1,0) [0|15] "" XXX
+
+BO_ 320 Unknown140: 2 XXX
+ SG_ State : 7|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 212 Unknown_d4: 8 XXX
+ SG_ State1 : 47|8@0+ (1,0) [0|255] "" XXX
+ SG_ Counter1 : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ Counter2 : 63|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 205 Unknown_cd: 8 XXX
+ SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_2 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_3 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_4 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_5 : 39|8@0- (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_6 : 47|8@0+ (1,0) [0|255] "" XXX
+ SG_ Counter1 : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_7 : 63|8@0+ (1,0) [0|255] "" XXX
 
 
 
