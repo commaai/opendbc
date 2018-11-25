@@ -84,7 +84,7 @@ BO_ 403 DynamicCruiseControlStatus: 8 XXX
 
 BO_ 201 WheelPosition_c9: 8 XXX
  SG_ Counter1 : 23|4@0+ (1,0) [0|15] "" XXX
- SG_ Position : 0|13@1- (1,0) [0|65535] "" XXX
+ SG_ Position : 0|16@1- (1,0) [0|65535] "" XXX
  SG_ NEW_SIGNAL_5 : 44|4@1+ (1,0) [0|3] "" XXX
  SG_ PositionNegLow : 31|8@0- (1,0) [0|1] "" XXX
 
