@@ -84,9 +84,9 @@ BO_ 403 DynamicCruiseControlStatus: 8 XXX
 
 BO_ 201 SteeringWheelAngle_DSC: 8 XXX
  SG_ Counter1 : 23|4@0+ (1,0) [0|15] "" XXX
- SG_ SteeringPosition : 0|16@1- (1,0) [0|65535] "" XXX
- SG_ PositionNegLow : 24|11@1- (1,0) [0|1] "" XXX
  SG_ WeirdCounter : 44|4@1+ (1,0) [0|3] "" XXX
+ SG_ PositionNegLow : 24|11@1- (1,0) [0|1] "" XXX
+ SG_ SteeringPosition : 0|16@1- (0.0439453125,0) [-600|600] "deg" XXX
 
 BO_ 206 WheelSpeeds: 8 XXX
  SG_ Wheel2 : 16|16@1- (1,0) [0|255] "" XXX
@@ -105,9 +105,8 @@ BO_ 169 Torque2: 8 XXX
 BO_ 184 TorqueTransmisionRequest: 8 XXX
 
 BO_ 196 SteeringWheelAngle: 7 XXX
- SG_ SteeringSpeed : 39|8@0- (1,0) [0|255] "" XXX
- SG_ SteeringAcceleration : 31|8@0- (1,0) [0|255] "" XXX
- SG_ SteeringPosition : 0|16@1- (1,0) [0|255] "" XXX
+ SG_ SteeringSpeed : 24|16@1- (0.0439453125,0) [0|255] "degree/s" XXX
+ SG_ SteeringPosition : 0|16@1- (0.0439453125,0) [-600|600] "degree" XXX
 
 BO_ 180 WheelTorqueDriveTrain1: 8 XXX
 
@@ -139,7 +138,7 @@ BO_ 464 EngineData: 8 XXX
 BO_ 945 TransmissionData3: 8 XXX
 
 BO_ 200 SteeringWheelAngle_slow: 8 XXX
- SG_ SteeringPosition : 0|16@1- (1,0) [0|255] "" XXX
+ SG_ SteeringPosition : 0|16@1- (0.0439453125,0) [-600|600] "degree" XXX
 
 BO_ 466 TransmissionDataDisplay: 8 XXX
 
