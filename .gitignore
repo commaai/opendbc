@@ -1,2 +1,6 @@
+# macOS noise
+.DS_Store
+
+# Python thingies
 *.pyc
 .*.swp
