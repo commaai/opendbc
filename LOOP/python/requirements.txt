@@ -1,0 +1,5 @@
+loop-python-client==1.18.0.dev185
+python-can==1.5.2
+nose
+nose-exclude
+twine
