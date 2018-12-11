@@ -18,7 +18,7 @@ check_bail_with_popd $?
 pip3 install --upgrade loop_python_client
 check_bail_with_popd $?
 
-pip3 install -r python-tests/requirements.txt
+pip3 install -r python/requirements.txt
 check_bail_with_popd $?
 
 "${SCRIPT_DIR}"/clean.sh
