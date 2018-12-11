@@ -5,9 +5,9 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "${SCRIPT_DIR}/exit_routines.sh"
 
-#pushd "${SCRIPT_DIR}/../../python-tests" > /dev/null 2>&1 || exit 1
+pushd "${SCRIPT_DIR}/../../python" > /dev/null 2>&1 || exit 1
 
-#python setup.py clean --all
-#check_bail_with_popd $? 
+python setup.py clean --all
+check_bail_with_popd $?
 
 exit_with_popd 0

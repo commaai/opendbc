@@ -11,8 +11,8 @@ pipeline {
             agent { label 'Debian9IntegrationTests' }
             steps {
               script {
-                sh "scripts/linux/clean.sh"
-                sh "scripts/linux/lint_bash.sh"
+                sh "LOOP/scripts/linux/clean.sh"
+                sh "LOOP/scripts/linux/lint_bash.sh"
               }
             }
         }
@@ -20,17 +20,15 @@ pipeline {
         stage('Debian Server Integration Tests') {
             steps {
                 lock('loop-debian') {
-                    lock('can-bus-1') {
-                        timeout(1)
-                        {
-                            sh "scripts/linux/run_integration_tests.sh ${LOOPSERVERIPADDR}"
-                        }
+                    timeout(1)
+                    {
+                        sh "LOOP/scripts/linux/run_integration_tests.sh ${LOOPSERVERIPADDR}"
                     }
                 }
             }
             post {
                 always {
-                    junit "scripts/linux/output/run-integration-tests/${LOOPSERVERIPADDR}*.xml"
+                    junit "LOOP/scripts/linux/output/run-integration-tests/${LOOPSERVERIPADDR}*.xml"
                 }
             }
         }
