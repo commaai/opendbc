@@ -26,7 +26,7 @@ check_bail_with_popd $?
 
 export LOOPSERVERIPADDR="${IP_ADDRESS}"
 export TESTCANADAPTER="can0"
-python3 -m nose --with-xunit --xunit-file="${OUTPUT_DIR}/${IP_ADDRESS}-integration-nosetests.xml" -w python
+python3 -m nose --nocapture --with-xunit --xunit-file="${OUTPUT_DIR}/${IP_ADDRESS}-integration-nosetests.xml" -w python
 check_bail_with_popd $?
 
 echo "Integration test results placed in ${OUTPUT_DIR}..."
