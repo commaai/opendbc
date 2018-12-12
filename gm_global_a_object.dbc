@@ -42,6 +42,8 @@ VAL_TABLE_ FrntVsnInPthVehBrkNwSt 10 "Active" 5 "Inactive" ;
 VAL_TABLE_ FrntVsnClostPedBrkNwSt 10 "Active" 5 "Inactive" ;
 VAL_TABLE_ LaneSnsLLnPosValid 1 "Invalid" 0 "Valid" ;
 VAL_TABLE_ LnSnsRLnPosValid 1 "Invalid" 0 "Valid" ;
+VAL_TABLE_ ObjectType 7 "no object present" 6 "fixed roadside object" 5 "fixed overhead object" 4 "pedestrian" 3 "motocycle  / bicycle" 2 "Large vehicle (semi)" 1 "4 Wheel Vehicle (car, small trk)" 0 "Unknown" ;
+
 
 BO_ 3221225472 VECTOR__INDEPENDENT_SIG_MSG: 0 Vector__XXX
  SG_ Always12 : 0|8@0+ (1,0) [0|0] ""  Vector__XXX
