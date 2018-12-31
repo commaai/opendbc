@@ -103,7 +103,7 @@ BO_ 264 ACCEL_PEDAL_MSG: 8 XXX
 BO_ 464 SEATBELT_STATUS: 8 XXX
  SG_ SEATBELT_DRIVER_UNLATCHED : 13|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 544 LKAS_INDICATOR_1: 8 XXX
+BO_ 544 EPS_STATUS: 8 XXX
  SG_ LKAS_STATE : 23|4@0+ (1,0) [0|15] "" XXX
  SG_ TORQUE_DRIVER : 2|11@0+ (1,-1024) [-1024|1023] "" XXX
  SG_ TORQUE_MOTOR : 19|12@0+ (1,-2048) [-2048|2047] "" XXX
@@ -112,16 +112,16 @@ BO_ 544 LKAS_INDICATOR_1: 8 XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 658 LKAS_INDICATOR_2: 6 XXX
+BO_ 658 LKAS_COMMAND: 6 XXX
  SG_ COUNTER : 39|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 47|8@0+ (1,0) [0|255] "" XXX
  SG_ LKAS_STEERING_TORQUE : 2|11@0+ (1,-1024) [0|1] "" XXX
  SG_ LKAS_HIGH_TORQUE : 4|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 678 LKAS_INDICATOR_3: 8 XXX
- SG_ WARNING_PLACE_HANDS : 22|2@0+ (1,0) [0|3] "" XXX
+BO_ 678 LKAS_HUD: 8 XXX
  SG_ LKAS_ICON_COLOR : 1|2@0+ (1,0) [0|3] "" XXX
- SG_ LKAS_IS_YELLOW_2 : 19|1@0+ (1,0) [0|1] "" XXX
+ SG_ LKAS_LANE_LINES : 19|4@0+ (1,0) [0|1] "" XXX
+ SG_ LKAS_ALERTS : 27|4@0+ (1,0) [0|1] "" XXX
 
 BO_ 705 AUTO_PARK_BUTTON: 8 XXX
  SG_ AUTO_PARK_TOGGLE_2 : 8|1@0+ (1,0) [0|1] "" XXX
@@ -383,9 +383,9 @@ CM_ SG_ 544 LKAS_STATE "2 when autopark has control, 8 when is actuatable by lka
 CM_ SG_ 658 COUNTER "each message increments, 0..f";
 CM_ SG_ 658 CHECKSUM "checksum calculated with https://gist.github.com/adhintz/94bf8d19b9075539f50172ab0fb24ba1";
 CM_ SG_ 658 LKAS_STEERING_TORQUE "Most sent by stock system is 1024+-230. + is left. typically changes by 2 or 3 each 0.01s";
-CM_ SG_ 678 WARNING_PLACE_HANDS "set when warning displays place hands on steering wheel";
 CM_ SG_ 678 LKAS_ICON_COLOR "3 is yellow, 2 is green, 1 is white, 0 is null";
-CM_ SG_ 678 LKAS_IS_YELLOW_2 "set when indicator is yellow. could indicate lkas is steering.";
+CM_ SG_ 678 LKAS_LANE_LINES "0x01 transparent lines, 0x02 left white, 0x03 right white, 0x04 left yellow with car on top, 0x05 left yellow with car on top, 0x06 both white, 0x07 left yellow, 0x08 left yellow right white, 0x09 right yellow, 0x0a right yellow left white, 0x0b left yellow with car on top right white, 0x0c right yellow with car on top left white, (0x00, 0x0d, 0x0e, 0x0f) null";
+CM_ SG_ 678 LKAS_ALERTS "(0x01, 0x02) lane sense off, (0x03, 0x04, 0x06) place hands on steering wheel, 0x07 lane departure detected + place hands on steering wheel, (0x08, 0x09) lane sense unavailable + clean front windshield, 0x0b lane sense and auto high beam unavailable + clean front windshield, 0x0c lane sense unavailable + service required, (0x00, 0x05, 0x0a, 0x0d, 0x0e, 0x0f) null";
 CM_ SG_ 705 AUTO_PARK_TOGGLE_1 "set briefly when turning on or off self-parking";
 CM_ SG_ 705 INCREASING_UNKNOWN "sometimes decreasing";
 CM_ SG_ 671 AUTO_PARK_PARALLEL "parallel parking mode";
