@@ -106,8 +106,8 @@ BO_ 464 SEATBELT_STATUS: 8 XXX
 BO_ 544 EPS_STATUS: 8 XXX
  SG_ LKAS_STATE : 23|4@0+ (1,0) [0|15] "" XXX
  SG_ TORQUE_DRIVER : 2|11@0+ (1,-1024) [-1024|1023] "" XXX
- SG_ TORQUE_MOTOR : 19|12@0+ (1,-2048) [-2048|2047] "" XXX
- SG_ TORQUE_DRIVER2 : 34|11@0+ (1,-1024) [-1024|1023] "" XXX
+ SG_ TORQUE_MOTOR_RAW : 19|12@0+ (1,-2048) [-2048|2047] "" XXX
+ SG_ TORQUE_MOTOR : 34|11@0+ (1,-1024) [-1024|1023] "" XXX
  SG_ AUTO_PARK_HAS_CONTROL_2 : 51|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
@@ -380,6 +380,7 @@ CM_ SG_ 792 TURN_SIGNALS "1=Left, 2=Right";
 CM_ SG_ 792 HIGH_BEAM_FLASH "use this for genericToggle";
 CM_ SG_ 264 ACCEL_PEDAL "not in ACC so seems to be actual pedal. Use for gasPressed";
 CM_ SG_ 544 LKAS_STATE "2 when autopark has control, 8 when is actuatable by lkas, 4 when there is a fault";
+CM_ SG_ 544 TORQUE_MOTOR_RAW "has larger range than TORQUE_MOTOR but ut seems biased";
 CM_ SG_ 658 COUNTER "each message increments, 0..f";
 CM_ SG_ 658 CHECKSUM "checksum calculated with https://gist.github.com/adhintz/94bf8d19b9075539f50172ab0fb24ba1";
 CM_ SG_ 658 LKAS_STEERING_TORQUE "Most sent by stock system is 1024+-230. + is left. typically changes by 2 or 3 each 0.01s";
