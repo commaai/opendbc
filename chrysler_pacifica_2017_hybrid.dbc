@@ -213,7 +213,8 @@ BO_ 669 NEW_MSG_29d: 3 XXX
  SG_ COUNTER : 15|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 23|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 825 NEW_MSG_339: 2 XXX
+BO_ 825 AUDIBLE_BEEP_339: 2 XXX
+ SG_ BEEP_339 : 7|16@0+ (1,0) [0|65535] "" XXX
 
 BO_ 856 NEW_MSG_358: 4 XXX
 
@@ -283,6 +284,7 @@ BO_ 764 ACCEL_RELATED_2FC: 8 XXX
 
 BO_ 816 TRACTION_BUTTON: 8 XXX
  SG_ TRACTION_OFF : 19|1@0+ (1,0) [0|3] "" XXX
+ SG_ TOGGLE_PARKSENSE : 52|1@0+ (1,0) [0|3] "" XXX
 
 BO_ 878 ACCEL_RELATED_36E: 8 XXX
  SG_ ACCEL_OR_RPM_2 : 15|8@0+ (1,0) [0|255] "" XXX
@@ -405,11 +407,13 @@ CM_ SG_ 288 UNKNOWN_CHECKSUM "not the LKAS checksum";
 CM_ SG_ 288 GAS_ENGINE_RPM_MAYBE "lags acceleration, perhaps gas engine";
 CM_ SG_ 257 ENERGY_OR_RPM "perhaps energy consumption or RPMs";
 CM_ SG_ 571 CHECKSUM "standard checksum";
+CM_ SG_ 825 BEEP_339 "sent every 0.5s. 0050 is no beep. To beep send 4355 or 4155. Used by ParkSense warning.";
 CM_ SG_ 270 ELECTRIC_MOTOR "0x7fff indicates electric motor not in use";
 CM_ SG_ 291 ENERGY_GAIN_LOSS "unsure what this actually is";
 CM_ SG_ 291 ENERGY_SMOOTHER_CURVE "unusre what it is, but smoother";
 CM_ SG_ 532 NOISY_SLOWLY_DECREASING "perhaps battery but do not know";
 CM_ SG_ 816 TRACTION_OFF "set when traction off button is enabled";
+CM_ SG_ 816 TOGGLE_PARKSENSE "sending 3000071ec0ff9000 enables or disables parksense";
 CM_ SG_ 324 SPEED_2 "signal is approx half other speeds";
 CM_ SG_ 501 ACC_SPEED_CONFIG_KPH "speed configured for ACC";
 CM_ SG_ 501 ACC_SPEED_CONFIG_MPH "speed configured for ACC";
