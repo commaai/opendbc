@@ -68,7 +68,7 @@ BO_ 168 Brake: 8 XXX
  SG_ Brake_active2 : 62|1@0+ (1,0) [0|1] "" XXX
  SG_ BrakePressed : 61|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 470 SteeringButtons: 8 XXX
+BO_ 470 SteeringButtons: 2 XXX
  SG_ Volume_DOWN : 2|1@0+ (1,0) [0|1] "" XXX
  SG_ Volume_UP : 3|1@0+ (1,0) [0|1] "" XXX
  SG_ VoiceControl : 8|1@0+ (1,0) [0|1] "" XXX
