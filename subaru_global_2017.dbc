@@ -177,9 +177,12 @@ BO_ 557 NEW_MSG_14: 8 XXX
  SG_ NEW_SIGNAL_1 : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_2 : 7|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 576 NEW_MSG_15: 8 XXX
+BO_ 576 CruiseControl: 8 XXX
  SG_ NEW_SIGNAL_1 : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_2 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_5 : 42|1@1+ (1,0) [0|3] "" XXX
+ SG_ Cruise_On : 40|1@1+ (1,0) [0|3] "" XXX
+ SG_ Cruise_Activated : 41|1@1+ (1,0) [0|3] "" XXX
 
 BO_ 577 NEW_MSG_16: 8 XXX
  SG_ NEW_SIGNAL_2 : 8|4@1+ (1,0) [0|15] "" XXX
