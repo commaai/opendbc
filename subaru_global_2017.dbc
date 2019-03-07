@@ -126,7 +126,7 @@ BO_ 313 NEW_MSG_8: 8 XXX
 BO_ 290 ES_LKAS: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ LKAS_Output : 16|13@1- (1,0) [0|3] "" XXX
+ SG_ LKAS_Output : 16|13@1- (-1,0) [0|3] "" XXX
  SG_ LKAS_Request : 29|1@0+ (1,0) [0|3] "" XXX
  SG_ SET_1 : 12|1@0+ (1,0) [0|3] "" XXX
 
