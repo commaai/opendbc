@@ -39,7 +39,7 @@ BU_: XXX X
 BO_ 2 Steering: 8 XXX
  SG_ Counter : 25|3@1+ (1,0) [0|7] "" XXX
  SG_ Checksum : 39|8@0+ (1,0) [0|255] "" XXX
- SG_ Steering_Angle : 7|16@0- (-0.1,0) [0|65535] "" XXX
+ SG_ Steering_Angle : 7|16@0- (0.1,0) [0|65535] "" XXX
 
 BO_ 64 Accelerator: 8 XXX
  SG_ NEW_SIGNAL_1 : 32|8@1+ (1,0) [0|255] "" XXX
