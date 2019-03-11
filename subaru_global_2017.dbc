@@ -137,7 +137,7 @@ BO_ 722 NEW_MSG_10: 8 XXX
  SG_ NEW_SIGNAL_4 : 56|2@1+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_5 : 45|2@0+ (1,0) [0|3] "" XXX
 
-BO_ 544 ES_BRAKE: 8 XXX
+BO_ 544 ES_Brake: 8 XXX
  SG_ Checksum : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Brake_Pressure : 16|16@1+ (1,0) [0|255] "" XXX
@@ -227,19 +227,19 @@ BO_ 801 ES_DashStatus: 8 XXX
  SG_ Counter : 8|4@1+ (1,0) [0|7] "" XXX
  SG_ ACC_Distance : 30|3@0+ (1,0) [0|3] "" XXX
 
-BO_ 802 ES_LKAS_STATE: 8 XXX
- SG_ NEW_SIGNAL_4 : 44|1@0+ (1,0) [0|3] "" XXX
+BO_ 802 ES_LKAS_State: 8 XXX
+ SG_ NEW_SIGNAL_4 : 44|1@1+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_5 : 56|2@1+ (1,0) [0|3] "" XXX
- SG_ Checksum : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_7 : 28|1@0+ (1,0) [0|3] "" XXX
- SG_ Right_Depart : 36|1@0+ (1,0) [0|3] "" XXX
+ SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_7 : 28|1@1+ (1,0) [0|3] "" XXX
+ SG_ Right_Depart : 36|1@1+ (1,0) [0|3] "" XXX
  SG_ Warning_Depart : 35|1@1+ (1,0) [0|3] "" XXX
  SG_ Right_Warning : 32|1@1+ (1,0) [0|15] "" XXX
  SG_ Left_Depart : 34|1@1+ (1,0) [0|3] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_2 : 30|1@0+ (1,0) [0|3] "" XXX
- SG_ LKAS_ENABLE_2 : 26|1@0+ (1,0) [0|1] "" XXX
- SG_ LKAS_ENABLE_3 : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_2 : 30|1@1+ (1,0) [0|3] "" XXX
+ SG_ LKAS_ENABLE_2 : 26|1@1+ (1,0) [0|1] "" XXX
+ SG_ LKAS_ENABLE_3 : 24|1@1+ (1,0) [0|1] "" XXX
  SG_ LKAS_ACTIVE : 17|1@1+ (1,0) [0|3] "" XXX
 
 BO_ 805 ES_NEW_MSG_22: 8 XXX
