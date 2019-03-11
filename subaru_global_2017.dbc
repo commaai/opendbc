@@ -79,8 +79,8 @@ BO_ 315 G_Sensor: 8 XXX
  SG_ longitudinal : 63|8@0- (1,0) [0|255] "" XXX
  SG_ Latitudinal : 48|8@1- (1,0) [0|255] "" XXX
 
-BO_ 314 WHEEL_SPEEDS: 8 XXX
- SG_ NEW_SIGNAL_4 : 7|8@0+ (1,0) [0|255] "" XXX
+BO_ 314 Wheel_Speeds: 8 XXX
+ SG_ NEW_SIGNAL_4 : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_6 : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ FR : 12|13@1+ (0.05747,0) [0|255] "kph" XXX
  SG_ RR : 25|13@1+ (0.05747,0) [0|255] "kph" XXX
