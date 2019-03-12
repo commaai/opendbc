@@ -200,8 +200,8 @@ BO_ 940 BodyInfo: 8 XXX
  SG_ DASH_BTN_LIGHTS : 56|1@0+ (1,0) [0|1] "" XXX
  SG_ DOOR_OPEN_FL : 32|1@1+ (1,0) [0|255] "" XXX
  SG_ DOOR_OPEN_FR : 33|1@1+ (1,0) [0|3] "" XXX
- SG_ DOOR_OPEN_BL : 34|1@1+ (1,0) [0|1] "" XXX
- SG_ DOOR_OPEN_BR : 35|1@1+ (1,0) [0|1] "" XXX
+ SG_ DOOR_OPEN_RL : 34|1@1+ (1,0) [0|1] "" XXX
+ SG_ DOOR_OPEN_RR : 35|1@1+ (1,0) [0|1] "" XXX
  SG_ DOOR_OPEN_TRUNK : 36|1@0+ (1,0) [0|1] "" XXX
  SG_ FOG_LIGHTS2 : 60|1@1+ (1,0) [0|1] "" XXX
  SG_ Highbeam : 58|1@1+ (1,0) [0|1] "" XXX
