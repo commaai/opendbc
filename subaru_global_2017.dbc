@@ -84,10 +84,10 @@ BO_ 315 G_Sensor: 8 XXX
 BO_ 314 Wheel_Speeds: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ FR : 12|13@1+ (0.05747,0) [0|255] "kph" XXX
- SG_ RR : 25|13@1+ (0.05747,0) [0|255] "kph" XXX
- SG_ FL : 51|13@1+ (0.05747,0) [0|255] "kph" XXX
- SG_ RL : 38|13@1+ (0.05747,0) [0|255] "kph" XXX
+ SG_ FR : 12|13@1+ (0.057,0) [0|255] "kph" XXX
+ SG_ RR : 25|13@1+ (0.057,0) [0|255] "kph" XXX
+ SG_ FL : 51|13@1+ (0.057,0) [0|255] "kph" XXX
+ SG_ RL : 38|13@1+ (0.057,0) [0|255] "kph" XXX
 
 BO_ 73 NEW_MSG_5: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
