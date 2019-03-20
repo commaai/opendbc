@@ -208,33 +208,37 @@ BO_ 940 BodyInfo: 8 XXX
  SG_ Lowbeam : 57|1@1+ (1,0) [0|3] "" XXX
 
 BO_ 801 ES_DashStatus: 8 XXX
+ SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ Counter : 8|4@1+ (1,0) [0|7] "" XXX
  SG_ NEW_SIGNAL_9 : 60|4@1+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_10 : 49|2@1+ (1,0) [0|3] "" XXX
  SG_ Brake_Pedal : 51|1@1+ (1,0) [0|3] "" XXX
- SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Cruise_Set_Speed : 40|6@1+ (1,0) [0|3] "" XXX
  SG_ Cruise_Activated : 36|1@1+ (1,0) [0|3] "" XXX
  SG_ Cruise_Disengaged : 35|1@1+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_1 : 46|1@1+ (1,0) [0|3] "" XXX
  SG_ Far_Distance : 56|4@1+ (1,0) [0|15] "" XXX
  SG_ Car_Follow : 52|1@1+ (1,0) [0|3] "" XXX
- SG_ Counter : 8|4@1+ (1,0) [0|7] "" XXX
  SG_ ACC_Distance : 28|3@1+ (1,0) [0|3] "" XXX
 
 BO_ 802 ES_LKAS_State: 8 XXX
+ SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ Keep_Hands_On_Wheel : 12|1@1+ (1,0) [0|1] "" XXX
+ SG_ Empty_Box : 13|1@1+ (1,0) [0|1] "" XXX
+ SG_ LKAS_ACTIVE : 17|1@1+ (1,0) [0|3] "" XXX
+ SG_ Backward_Speed_Limit_Menu : 23|1@1+ (1,0) [0|1] "" XXX
+ SG_ LKAS_ENABLE_3 : 24|1@1+ (1,0) [0|1] "" XXX
+ SG_ LKAS_ENABLE_2 : 26|1@1+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_7 : 28|1@1+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_2 : 30|1@1+ (1,0) [0|3] "" XXX
+ SG_ FCW_Cont_Beep : 32|1@1+ (1,0) [0|1] "" XXX
+ SG_ FCW_Repeated_Beep : 33|1@1+ (1,0) [0|1] "" XXX
+ SG_ Throttle_Management_Activated : 34|1@1+ (1,0) [0|1] "" XXX
+ SG_ Traffic_light_Ahead : 35|1@1+ (1,0) [0|1] "" XXX
+ SG_ Right_Depart : 36|1@1+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_4 : 44|1@1+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_5 : 56|2@1+ (1,0) [0|3] "" XXX
- SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_7 : 28|1@1+ (1,0) [0|3] "" XXX
- SG_ Right_Depart : 36|1@1+ (1,0) [0|3] "" XXX
- SG_ Warning_Depart : 35|1@1+ (1,0) [0|3] "" XXX
- SG_ Right_Warning : 32|1@1+ (1,0) [0|15] "" XXX
- SG_ Left_Depart : 34|1@1+ (1,0) [0|3] "" XXX
- SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_2 : 30|1@1+ (1,0) [0|3] "" XXX
- SG_ LKAS_ENABLE_2 : 26|1@1+ (1,0) [0|1] "" XXX
- SG_ LKAS_ENABLE_3 : 24|1@1+ (1,0) [0|1] "" XXX
- SG_ LKAS_ACTIVE : 17|1@1+ (1,0) [0|3] "" XXX
 
 BO_ 805 ES_NEW_MSG_22: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
