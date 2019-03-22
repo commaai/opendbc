@@ -213,10 +213,9 @@ BO_ 801 ES_DashStatus: 8 XXX
  SG_ NEW_SIGNAL_9 : 60|4@1+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_10 : 49|2@1+ (1,0) [0|3] "" XXX
  SG_ Brake_Pedal : 51|1@1+ (1,0) [0|3] "" XXX
- SG_ Cruise_Set_Speed : 40|6@1+ (1,0) [0|3] "" XXX
+ SG_ Cruise_Set_Speed : 40|8@1+ (1,0) [0|255] "" XXX
  SG_ Cruise_Activated : 36|1@1+ (1,0) [0|3] "" XXX
  SG_ Cruise_Disengaged : 35|1@1+ (1,0) [0|3] "" XXX
- SG_ NEW_SIGNAL_1 : 46|1@1+ (1,0) [0|3] "" XXX
  SG_ Far_Distance : 56|4@1+ (1,0) [0|15] "" XXX
  SG_ Car_Follow : 52|1@1+ (1,0) [0|3] "" XXX
  SG_ ACC_Distance : 28|3@1+ (1,0) [0|3] "" XXX
