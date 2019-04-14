@@ -70,12 +70,12 @@ BO_ 72 NEW_MSG_2: 8 XXX
 
 BO_ 316 NEW_MSG_3: 8 XXX
 
-BO_ 326 NEW_MSG_4: 8 XXX
+BO_ 326 Cruise_Buttons: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_1 : 16|12@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_2 : 32|8@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_3 : 40|2@1+ (1,0) [0|255] "" XXX
+ SG_ Main : 42|1@1+ (1,0) [0|1] "" XXX
+ SG_ set : 43|1@1+ (1,0) [0|1] "" XXX
+ SG_ Resume : 44|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 315 G_Sensor: 8 XXX
  SG_ longitudinal : 63|8@0- (1,0) [0|255] "" XXX
