@@ -48,7 +48,7 @@ BO_ 64 Throttle: 8 XXX
  SG_ NEW_SIGNAL_3 : 56|4@1+ (1,0) [0|255] "" XXX
  SG_ Engine_RPM : 16|12@1+ (1,0) [0|255] "" XXX
  SG_ Throttle_Cruise : 40|8@1+ (1,0) [0|255] "" XXX
- SG_ Throttle_Combo : 55|8@1+ (0.392157,0) [0|255] "" XXX
+ SG_ Throttle_Combo : 55|8@1+ (1,0) [0|255] "" XXX
  SG_ Throttle_Pedal : 32|8@1+ (1,0) [0|255] "" XXX
 
 
