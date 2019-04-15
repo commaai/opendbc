@@ -142,19 +142,10 @@ BO_ 544 ES_Brake: 8 XXX
 BO_ 545 ES_Distance: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ Close_Distance : 40|8@1+ (1,0) [0|255] "" XXX
- SG_ Distance_Swap : 37|1@1+ (1,0) [0|3] "" XXX
- SG_ NEW_SIGNAL_5 : 39|1@1+ (1,0) [0|31] "" XXX
- SG_ NEW_SIGNAL_9 : 38|1@1+ (1,0) [0|3] "" XXX
- SG_ NEW_SIGNAL_4 : 34|1@1+ (1,0) [0|3] "" XXX
- SG_ Brake_Pedal : 33|1@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_10 : 35|1@1+ (1,0) [0|3] "" XXX
- SG_ Throttle : 16|12@1+ (1,0) [0|65535] "" XXX
- SG_ NEW_SIGNAL_1 : 31|4@0+ (1,0) [0|15] "" XXX
- SG_ SET_1 : 12|1@0+ (1,0) [0|3] "" XXX
- SG_ ACC_ENABLE_BTN : 56|1@0+ (1,0) [0|1] "" XXX
- SG_ Car_Follow : 32|1@1+ (1,0) [0|3] "" XXX
- SG_ Brake : 36|1@0+ (1,0) [0|3] "" XXX
+ SG_ Signal1 : 12|20@1+ (1,0) [0|15] "" XXX
+ SG_ Signal2 : 32|24@1+ (1,0) [0|15] "" XXX
+ SG_ Main : 56|1@1+ (1,0) [0|1] "" XXX
+ SG_ Signal3 : 57|7@1+ (1,0) [0|1] "" XXX
 
 BO_ 546 ES_Status: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
