@@ -1,0 +1,103 @@
+VERSION ""
+
+
+NS_ :
+    NS_DESC_
+    CM_
+    BA_DEF_
+    BA_
+    VAL_
+    CAT_DEF_
+    CAT_
+    FILTER
+    BA_DEF_DEF_
+    EV_DATA_
+    ENVVAR_DATA_
+    SGTYPE_
+    SGTYPE_VAL_
+    BA_DEF_SGTYPE_
+    BA_SGTYPE_
+    SIG_TYPE_REF_
+    VAL_TABLE_
+    SIG_GROUP_
+    SIG_VALTYPE_
+    SIGTYPE_VALTYPE_
+    BO_TX_BU_
+    BA_DEF_REL_
+    BA_REL_
+    BA_DEF_DEF_REL_
+    BU_SG_REL_
+    BU_EV_REL_
+    BU_BO_REL_
+    SG_MUL_VAL_
+
+BS_:
+
+BU_: + XXX 0
+
+
+BO_ 85 PedalandBrake: 8 XXX
+ SG_ AccPedal : 9|10@0+ (0.1,0) [0|1023] "" XXX
+ SG_ BrakePedalActive2 : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ BrakePedalActive : 38|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 8 SteeringAngle: 8 XXX
+ SG_ SteeringDirection : 42|1@0+ (1,0) [0|1] "" XXX
+ SG_ SteeringAngle : 53|14@0+ (0.04,0) [0|65535] "degrees" XXX
+
+BO_ 101 EngineInfo: 8 XXX
+ SG_ EngineSpeed : 52|13@0+ (1,0) [0|1023] "" XXX
+
+BO_ 336 VehicleSpeed: 8 XXX
+ SG_ VehicleSpeed : 55|16@0+ (0.01,0) [0|2047] "" XXX
+
+BO_ 192 Gear: 8 XXX
+ SG_ TransmissionGear : 36|3@0+ (1,1) [0|7] "" XXX
+
+BO_ 652 untitled: 8 XXX
+
+BO_ 681 MiscCarInfo: 8 XXX
+ SG_ TurnSignal : 0|2@1+ (1,0) [0|3] "" XXX
+ SG_ HighBeamOn : 52|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 304 VehicleSpeed: 8 XXX
+ SG_ VehicleSpeed : 31|16@0+ (0.01,0) [0|65535] "km/h" XXX
+
+BO_ 48 fromFSM: 8 XXX
+
+BO_ 208 fromFSM: 8 XXX
+ SG_ NEW_SIGNAL_1 : 48|8@1+ (1,0) [0|255] "" XXX
+ SG_ LKAAngleRequest : 37|14@0+ (0.04395,-360) [0|32774] "degrees" XXX
+
+BO_ 352 fromFSM: 8 XXX
+
+BO_ 624 fromFSM: 8 XXX
+
+BO_ 640 fromFSM: 8 XXX
+ SG_ SpeedTarget : 40|8@1+ (1,0) [0|255] "" XXX
+
+BO_ 853 fromFSM: 8 XXX
+
+BO_ 709 fromECM: 8 XXX
+ SG_ SpeedTargetACC : 0|9@0+ (0.5,0) [0|511] "" XXX
+
+BO_ 880 fromECM: 8 XXX
+
+BO_ 293 fromServo: 8 XXX
+ SG_ SteeringAngle : 47|16@0+ (1,0) [0|65535] "" XXX
+
+BO_ 224 fromServo: 8 XXX
+
+
+
+
+CM_ SG_ 85 BrakePedalActive2 "Active during braking";
+CM_ SG_ 85 BrakePedalActive "Brake pedal pushed";
+CM_ SG_ 8 SteeringDirection "1=Right turn, 0=Left turn";
+CM_ SG_ 192 TransmissionGear "0 = 1st gear, 1= 2nd gear... Onlyh activated in tip-mode";
+CM_ SG_ 681 TurnSignal "0 = Nothing, 1= Left, 3=Right";
+CM_ SG_ 681 HighBeamOn "1=HighBeam On, 0=HighBeam Off";
+CM_ SG_ 208 LKAAngleRequest "+ = CW, - = CCW ";
+CM_ SG_ 640 SpeedTarget "SpeedTarget ACC (noisy bf starting acc Jumps from 0->252->0)";
+CM_ SG_ 709 SpeedTargetACC "SpeedTargetACC";
+CM_ SG_ 293 SteeringAngle "Correlates with steering angle.";
