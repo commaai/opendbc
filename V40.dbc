@@ -67,7 +67,7 @@ BO_ 48 fromFSM: 8 XXX
 
 BO_ 208 fromFSM: 8 XXX
  SG_ NEW_SIGNAL_1 : 48|8@1+ (1,0) [0|255] "" XXX
- SG_ LKAAngleRequest : 37|14@0+ (0.04,-360) [0|32774] "degrees" XXX
+ SG_ LKAAngleRequest : 37|14@0+ (0.04,-327.68) [0|32774] "degrees" XXX
 
 BO_ 352 fromFSM: 8 XXX
 
