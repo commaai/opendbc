@@ -66,8 +66,8 @@ BO_ 304 VehicleSpeed: 8 XXX
 BO_ 48 fromFSM: 8 XXX
 
 BO_ 208 fromFSM: 8 XXX
- SG_ NEW_SIGNAL_1 : 48|8@1+ (1,0) [0|255] "" XXX
  SG_ LKAAngleRequest : 37|14@0+ (0.04,-327.68) [0|32774] "degrees" XXX
+ SG_ NEW_SIGNAL_1 : 48|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 352 fromFSM: 8 XXX
 
@@ -98,6 +98,7 @@ CM_ SG_ 192 TransmissionGear "0 = 1st gear, 1= 2nd gear... Onlyh activated in ti
 CM_ SG_ 681 TurnSignal "0 = Nothing, 1= Left, 3=Right";
 CM_ SG_ 681 HighBeamOn "1=HighBeam On, 0=HighBeam Off";
 CM_ SG_ 208 LKAAngleRequest "+ = CW, - = CCW ";
+CM_ SG_ 208 NEW_SIGNAL_1 "three lowest significatn bits seem to be not of bit 24->26";
 CM_ SG_ 640 SpeedTarget "SpeedTarget ACC (noisy bf starting acc Jumps from 0->252->0)";
 CM_ SG_ 709 SpeedTargetACC "SpeedTargetACC";
 CM_ SG_ 293 SteeringAngle "Correlates with steering angle.";
