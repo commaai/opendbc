@@ -1194,12 +1194,11 @@ BO_ 361 Msg169_ESP_wheelSpeeds: 8 FrontCamera
 
 BO_ 345 Msg159_ESP_C: 8 FrontCamera
  SG_ Msg159Always0x3A : 16|8@1+ (1,0) [0|0] ""  Radar
- SG_ Msg159Always0x5 : 24|4@1+ (1,0) [0|0] ""  Radar
  SG_ Msg159Always0xA5 : 0|8@1+ (1,0) [0|0] ""  Radar
  SG_ Msg159Always0xCF : 32|8@1+ (1,0) [0|0] ""  Radar
  SG_ Msg159Always0xF4 : 8|8@1+ (1,0) [0|0] ""  Radar
- SG_ Msg159Checksum : 40|8@1+ (1,0) [0|0] ""  Radar
- SG_ Msg159Counter : 28|4@1+ (1,0) [0|0] ""  Radar
+ SG_ Msg159Counter : 44|4@1+ (1,0) [0|0] ""  Radar
+ SG_ Msg159Checksum : 24|8@1+ (1,0) [0|0] ""  Radar
 
 BO_ 329 Msg149_ESP_145h: 8 FrontCamera
  SG_ Msg149Always0x02 : 16|8@1+ (1,0) [0|0] ""  Radar
@@ -1262,7 +1261,7 @@ CM_ BO_ 697 "Start with MuxID 0x12, then 0x11 and finally 0x10 (VIN is then tran
 CM_ BO_ 681 "Message sent every 1000 ms. All fixed bytes, no checksum, the byte for RWD or AWD needs to match VIN config";
 CM_ BO_ 409 "Message sent every 10ms. Checksum : use all first 7 bytes with the SAE J1850 CRC algo";
 CM_ BO_ 361 "Message sent every 10ms. Checksum : Sum of all first 7 bytes + 0x76";
-CM_ BO_ 345 "Message sent every 20ms. Checksum : Sum of all first 5 bytes + 0xB2";
+CM_ BO_ 345 "Message sent every 20ms. Checksum : Sum of all first bytes + 0xc; place checksum in 4th octet";
 CM_ BO_ 329 "Message sent every 20ms. Checksum : Sum of all first 7 bytes + 0x46";
 CM_ BO_ 297 "Message sent every 20ms. Checksum : Sum of all first 5 bytes + 0x16";
 CM_ BO_ 281 "Message sent every 10ms. Checksum : Sum of all first 5 bytes + 0x17";
