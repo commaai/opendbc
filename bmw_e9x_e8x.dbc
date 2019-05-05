@@ -246,7 +246,7 @@ BO_ 205 Unknown_cd: 8 XXX
 
 BO_ 250 OpenActuatorStatus: 8 XXX
  SG_ DutyCycle : 16|8@1- (100,0) [-100|100] "perc" Vector__XXX
- SG_ MotorTorque : 24|16@1- (100,0) [-10|10] "cNm" Vector__XXX
+ SG_ MotorTorque : 24|16@1- (1,0) [-0|0] "cNm" Vector__XXX
  SG_ Voltage : 4|4@1+ (1,10) [10|16] "V" Vector__XXX
  SG_ Temperature : 56|8@1+ (1,0) [0|200] "C" Vector__XXX
  SG_ Counter01 : 0|4@1+ (1,0) [0|0] "" Vector__XXX
@@ -254,6 +254,16 @@ BO_ 250 OpenActuatorStatus: 8 XXX
  SG_ PositionEncoder : 40|16@1- (1,0) [-220|220] "deg" Vector__XXX
  SG_ TorqueControlActive : 15|1@1+ (1,0) [0|0] "" Vector__XXX
  SG_ FreeWheelingActive : 14|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ ErrorBits : 12|2@1+ (1,0) [0|0] "" Vector__XXX
+
+
+BO_ 251 OpenActuatorRequest: 8 XXX
+ SG_ MotorTorqueReq : 24|16@1- (1,0) [-10|10] "cNm" Vector__XXX
+ SG_ Counter01 : 0|4@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Counter02 : 8|4@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ PositionTarget : 40|16@1- (1,0) [-220|220] "deg" Vector__XXX
+ SG_ TorqueControlEnbl : 15|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ FreeWheelingEnbl : 14|1@1+ (1,0) [0|0] "" Vector__XXX
  SG_ ErrorBits : 12|2@1+ (1,0) [0|0] "" Vector__XXX
 
 
