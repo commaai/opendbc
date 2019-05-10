@@ -88,6 +88,13 @@ BO_ 293 fromServo: 8 XXX
 
 BO_ 224 fromServo: 8 XXX
 
+BO_ 16 CCButtons: 8 XXX
+ SG_ ACCOnOffBtn : 58|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACCSetBtn : 63|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACCMinusBtn : 48|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACCStopBtn : 60|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACCResumeBtn : 61|1@0+ (1,0) [0|1] "" XXX
+
 
 
 
@@ -102,3 +109,8 @@ CM_ SG_ 208 ChecksumMaybe "three lowest significatn bits seem to be not of bit 2
 CM_ SG_ 640 SpeedTarget "SpeedTarget ACC (noisy bf starting acc Jumps from 0->252->0)";
 CM_ SG_ 709 SpeedTargetACC "SpeedTargetACC";
 CM_ SG_ 293 SteeringAngle "Correlates with steering angle.";
+CM_ SG_ 16 ACCOnOffBtn "Cruise control on/off button pressed";
+CM_ SG_ 16 ACCSetBtn "Acc Set button (+) pressed";
+CM_ SG_ 16 ACCMinusBtn "ACC Minus (-) button pressed";
+CM_ SG_ 16 ACCStopBtn "ACC Stop button pressed";
+CM_ SG_ 16 ACCResumeBtn "ACC Resume button pressed";
