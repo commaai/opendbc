@@ -51,7 +51,6 @@ BO_ 64 Throttle: 8 XXX
  SG_ Throttle_Combo : 55|8@1+ (1,0) [0|255] "" XXX
  SG_ Throttle_Pedal : 32|8@1+ (1,0) [0|255] "" XXX
 
-
 BO_ 65 NEW_MSG_1: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
@@ -329,7 +328,7 @@ BO_ 1677 Dash_State: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_3 : 16|4@1+ (1,0) [0|15] "" XXX
- SG_ Units : 29|3@1+ (1,0) [0|7] "" XXX
+ SG_ Units : 30|1@1+ (1,0) [0|7] "" XXX
 
 BO_ 1743 NEW_MSG_41: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
