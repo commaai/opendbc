@@ -60,12 +60,13 @@ BO_ 65 NEW_MSG_1: 8 XXX
  SG_ NEW_SIGNAL_6 : 48|8@1+ (1,0) [0|63] "" XXX
  SG_ NEW_SIGNAL_7 : 59|2@0+ (1,0) [0|255] "" XXX
 
-BO_ 72 NEW_MSG_2: 8 XXX
- SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
+BO_ 72 Transmission: 8 XXX
  SG_ NEW_SIGNAL_3 : 40|16@1+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_4 : 38|3@0+ (1,0) [0|255] "" XXX
+ SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_5 : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ Gear : 24|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 316 NEW_MSG_3: 8 XXX
 
@@ -328,7 +329,7 @@ BO_ 1677 Dash_State: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_3 : 16|4@1+ (1,0) [0|15] "" XXX
- SG_ Units : 30|2@1+ (1,0) [0|7] "" XXX
+ SG_ Units : 29|3@1+ (1,0) [0|7] "" XXX
 
 BO_ 1743 NEW_MSG_41: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
@@ -355,6 +356,7 @@ BO_ 1787 NEW_MSG_45: 8 XXX
 
 
 
+CM_ SG_ 72 Gear "4=P, 3=R, 2=N, 121=D, 137=1, 145=2";
 CM_ SG_ 940 FOG_LIGHTS2 "yellow fog light in the dash";
 CM_ SG_ 940 Highbeam "01 = low beam, 11 = high beam";
 CM_ SG_ 805 NEW_SIGNAL_3 "always 3";
