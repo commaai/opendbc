@@ -356,7 +356,6 @@ BO_ 1787 NEW_MSG_45: 8 XXX
 
 
 
-CM_ SG_ 72 Gear "4=P, 3=R, 2=N, 121=D, 137=1, 145=2";
 CM_ SG_ 940 FOG_LIGHTS2 "yellow fog light in the dash";
 CM_ SG_ 940 Highbeam "01 = low beam, 11 = high beam";
 CM_ SG_ 805 NEW_SIGNAL_3 "always 3";
