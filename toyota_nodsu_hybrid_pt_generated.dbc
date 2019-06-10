@@ -295,7 +295,7 @@ VAL_ 1162 SPLSGN3 15 "conditional blank" 4 "wet road" 5 "rain" 0 "none";
 
 CM_ "CHFFR_METRIC 37 STEER_ANGLE STEER_ANGLE 0.36 180";
 
-CM_ "toyota_chr_hybrid_2018_pt.dbc starts here"
+CM_ "toyota_nodsu_hybrid_pt.dbc starts here"
 
 
 
