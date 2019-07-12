@@ -295,7 +295,7 @@ VAL_ 1162 SPLSGN3 15 "conditional blank" 4 "wet road" 5 "rain" 0 "none";
 
 CM_ "CHFFR_METRIC 37 STEER_ANGLE STEER_ANGLE 0.36 180";
 
-CM_ "lexus_rx_hybrid_2017_pt.dbc starts here"
+CM_ "lexus_rx_350_2016_pt.dbc starts here"
 
 
 
