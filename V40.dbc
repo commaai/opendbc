@@ -86,7 +86,7 @@ BO_ 709 fromECM: 8 XXX
 BO_ 880 fromECM: 8 XXX
 
 BO_ 293 fromServo: 8 XXX
- SG_ SteeringAngle : 47|16@0+ (0.04,-32768) [0|65535] "deg" XXX
+ SG_ SteeringAngle : 47|16@0+ (1,-32768) [0|65535] "deg" XXX
 
 BO_ 224 fromServo: 8 XXX
 
