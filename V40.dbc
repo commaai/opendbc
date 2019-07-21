@@ -43,7 +43,7 @@ BO_ 85 PedalandBrake: 8 XXX
 
 BO_ 8 SteeringAngle: 8 XXX
  SG_ SteeringDirection : 42|1@0+ (1,0) [0|1] "" XXX
- SG_ SteeringAngle : 53|14@0+ (0.04,0) [0|65535] "degrees" XXX
+ SG_ SteeringAngle1 : 53|14@0+ (0.04,0) [0|65535] "degrees" XXX
 
 BO_ 101 EngineInfo: 8 XXX
  SG_ EngineSpeed : 52|13@0+ (1,0) [0|1023] "" XXX
@@ -86,7 +86,7 @@ BO_ 709 fromECM0: 8 XXX
 BO_ 880 fromECM1: 8 XXX
 
 BO_ 293 fromServo1: 8 XXX
- SG_ SteeringAngel : 47|16@0+ (0.04,-1310.72) [0|65535] "deg" XXX
+ SG_ SteeringAngleServo : 47|16@0+ (0.04,-1310.72) [0|65535] "deg" XXX
 
 BO_ 224 fromServo0: 8 XXX
 
