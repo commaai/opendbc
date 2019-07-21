@@ -48,7 +48,7 @@ BO_ 8 SteeringAngle: 8 XXX
 BO_ 101 EngineInfo: 8 XXX
  SG_ EngineSpeed : 52|13@0+ (1,0) [0|1023] "" XXX
 
-BO_ 336 VehicleSpeed: 8 XXX
+BO_ 336 VehicleSpeed1: 8 XXX
  SG_ VehicleSpeed : 55|16@0+ (0.01,0) [0|2047] "" XXX
 
 BO_ 192 Gear: 8 XXX
@@ -60,35 +60,35 @@ BO_ 681 MiscCarInfo: 8 XXX
  SG_ TurnSignal : 0|2@1+ (1,0) [0|3] "" XXX
  SG_ HighBeamOn : 52|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 304 VehicleSpeed: 8 XXX
+BO_ 304 VehicleSpeed0: 8 XXX
  SG_ VehicleSpeed : 31|16@0+ (0.01,0) [0|65535] "km/h" XXX
 
-BO_ 48 fromFSM: 8 XXX
+BO_ 48 fromFSM0: 8 XXX
 
-BO_ 208 fromFSM: 8 XXX
+BO_ 208 fromFSMSteeringRequest: 8 XXX
  SG_ LKADirection : 56|2@1+ (1,0) [0|3] "" XXX
  SG_ Checksum : 48|8@1+ (1,0) [0|255] "" XXX
  SG_ Unkown : 24|8@1+ (1,0) [0|255] "" XXX
  SG_ LKAAngleRequest : 37|14@0+ (0.04,-327.68) [0|32774] "degrees" XXX
 
-BO_ 352 fromFSM: 8 XXX
+BO_ 352 fromFSM1: 8 XXX
 
-BO_ 624 fromFSM: 8 XXX
+BO_ 624 fromFSM2: 8 XXX
 
-BO_ 640 fromFSM: 8 XXX
+BO_ 640 fromFSM3: 8 XXX
  SG_ SpeedTarget : 40|8@1+ (1,0) [0|255] "" XXX
 
-BO_ 853 fromFSM: 8 XXX
+BO_ 853 fromFSM4: 8 XXX
 
-BO_ 709 fromECM: 8 XXX
+BO_ 709 fromECM0: 8 XXX
  SG_ SpeedTargetACC : 0|9@0+ (0.5,0) [0|511] "" XXX
 
-BO_ 880 fromECM: 8 XXX
+BO_ 880 fromECM1: 8 XXX
 
-BO_ 293 fromServo: 8 XXX
+BO_ 293 fromServo1: 8 XXX
  SG_ SteeringAngel : 47|16@0+ (0.04,-1310.72) [0|65535] "deg" XXX
 
-BO_ 224 fromServo: 8 XXX
+BO_ 224 fromServo0: 8 XXX
 
 BO_ 16 CCButtons: 8 XXX
  SG_ ACCOnOffBtn : 58|1@0+ (1,0) [0|1] "" XXX
