@@ -132,7 +132,7 @@ BO_ 643 PRE_COLLISION: 8 XXX
  SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ SET_ME_X00 : 15|8@0+ (1,0) [0|255] "" XXX
  SG_ ACCEL : 23|16@0- (1,0) [0|255] "" XXX
- SG_ STATE : 39|8@0 (1,0) [0|255] "" XXX
+ SG_ STATE : 39|8@0+ (1,0) [0|255] "" XXX
  SG_ SET_ME_X00_2 : 47|8@0+ (1,0) [0|255] "" XXX
  SG_ CHECKSUM : 55|8@0+ (1,0) [0|255] "" XXX
 
