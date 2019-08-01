@@ -129,11 +129,12 @@ BO_ 614 STEERING_IPAS: 8 IPAS
  SG_ SET_ME_X00_1 : 55|8@0+ (1,0) [0|255] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 643 PRE_COLLISION: 8 XXX
+BO_ 643 PRE_COLLISION: 7 XXX
  SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ SET_ME_X00 : 15|8@0+ (1,0) [0|255] "" XXX
- SG_ ACCEL : 23|16@0- (1,0) [0|255] "" XXX
- SG_ STATE : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ FORCE : 23|16@0- (2,0) [0|255] "N" XXX
+ SG_ BRAKE_STATUS: 39|3@0+ (1,0) [0|255] "" XXX
+ SG_ STATE : 36|3@0+ (1,0) [0|255] "" XXX
  SG_ SET_ME_X00_2 : 47|8@0+ (1,0) [0|255] "" XXX
  SG_ CHECKSUM : 55|8@0+ (1,0) [0|255] "" XXX
 
@@ -286,7 +287,8 @@ VAL_ 466 CRUISE_STATE 8 "active" 7 "standstill" 1 "off";
 VAL_ 467 LOW_SPEED_LOCKOUT 2 "low speed locked" 1 "ok";
 VAL_ 614 STATE 3 "enabled" 1 "disabled";
 VAL_ 614 DIRECTION_CMD 3 "right" 2 "center" 1 "left";
-VAL_ 643 STATE 0 "normal" 36 "slight_brake " 132 "medium_brake" 140 "strong_brake";
+VAL_ 643 BRAKE_STATUS  0 "normal" 9 "slight_brake" 132 "medium_brake" 140 "strong_brake";
+VAL_ 643 STATE 0 "normal" 1 "enginge_braking" 4 "braking";
 VAL_ 921 CRUISE_CONTROL_STATE 2 "disabled" 11 "hold" 10 "hold_waiting_user_cmd" 6 "enabled" 5 "faulted";
 VAL_ 1042 LDA_ALERT 3 "hold with continuous beep" 2 "LDA unavailable" 1 "hold" 0 "none";
 VAL_ 1042 BARRIERS 3 "both" 2 "right" 1 "left" 0 "none";
