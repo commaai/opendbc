@@ -690,9 +690,9 @@ BO_ 134 LWI_01: 8 Gateway_MQB
  SG_ LWI_VZ_Lenkradw_Geschw : 30|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ LWI_Lenkradw_Geschw : 31|9@1+ (5,0) [0|2500] "Unit_DegreOfArcPerSecon" Vector__XXX
  SG_ LWI_Sub_Daten : 40|16@1+ (1,0) [0|65535] "" Vector__XXX
- SG_ LWI_Lenkradwinkel : 16|13@1+ (0.1,0) [0|800] "Unit_DegreOfArc" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ LWI_QBit_Lenkradwinkel : 15|1@1+ (1,0) [0|1] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ LWI_VZ_Lenkradwinkel : 29|1@1+ (1,0) [0|1] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
+ SG_ LWI_Lenkradwinkel : 16|13@1+ (0.1,0) [0|800] "Unit_DegreOfArc" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
 
 BO_ 263 Motor_04: 8 Motor_Diesel_MQB
  SG_ MO_Istgang : 8|4@1+ (1,0) [0|15] "" Gateway_MQB
@@ -1172,7 +1172,6 @@ BO_ 294 HCA_01: 8 XXX
 BO_ 159 EPS_01: 8 XXX
  SG_ EPS_01_CRC : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ EPS_01_BZ : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ Steering_Wheel_Angle : 16|13@1+ (0.075,0) [0|16383] "Unit_DegreOfArc" XXX
  SG_ Steering_Wheel_Angle_VZ : 31|1@0+ (1,0) [0|1] "" XXX
  SG_ HCA_Active : 34|1@0+ (1,0) [0|1] "" XXX
  SG_ HCA_Standby : 33|1@0+ (1,0) [0|1] "" XXX
@@ -1181,6 +1180,7 @@ BO_ 159 EPS_01: 8 XXX
  SG_ Driver_Strain : 40|13@1+ (1,0) [0|255] "Nm" XXX
  SG_ Driver_Strain_VZ : 55|1@1+ (1,0) [0|1] "" XXX
  SG_ Unknown_Status1 : 62|1@0+ (1,0) [0|1] "" XXX
+ SG_ Steering_Wheel_Angle : 16|13@1+ (0.15,0) [0|800] "Unit_DegreOfArc" XXX
 
 BO_ 286 VehicleSpeed: 8 XXX
  SG_ VehicleSpeed_CRC : 0|8@1+ (1,0) [0|255] "" XXX
@@ -1254,6 +1254,7 @@ BO_ 427 ESP_33: 8 XXX
 
 
 
+CM_ SG_ 134 LWI_Lenkradwinkel "Steering angle WITH variable ratio effect included";
 CM_ SG_ 294 3 "May be zero when sent by older cameras";
 CM_ SG_ 294 7 "May be zero when sent by older cameras";
 CM_ SG_ 294 254 "May be zero when sent by older cameras";
@@ -1263,6 +1264,7 @@ CM_ SG_ 294 HCA_Available "Must be 1 for steering rack to accept HCA commands";
 CM_ SG_ 159 HCA_Ready "1 if HCA is okay, 0 if the rack doesn't have HCA configured or a timer/constraint has been violated, rack will not respond to HCA commands";
 CM_ SG_ 159 Driver_Strain "Steering input by driver, torque";
 CM_ SG_ 159 Driver_Strain_VZ "Steering input by driver, sign (direction)";
+CM_ SG_ 159 Steering_Wheel_Angle "Steering angle WITHOUT variable ratio effect included";
 CM_ SG_ 919 LDW_DLC "Probable DLC (distance to line crossing)";
 CM_ SG_ 919 LDW_TLC "Probable TLC (time to line crossing)";
 CM_ SG_ 919 LDW_Unknown "Might be a steering pressed / driver active flag";
