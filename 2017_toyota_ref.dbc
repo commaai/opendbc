@@ -1636,11 +1636,3 @@ BO_ 1073743494 YGW1S05_0: 8 CGW
  SG_ YI_IMO_E : 23|1@0+ (1,0) [0|0] "" Vector__XXX
  SG_ YI_UREQ : 16|1@0+ (1,0) [0|0] "" Vector__XXX
  SG_ YI_RE : 47|16@0+ (1,0) [0|0] "" Vector__XXX
-
-BO_ 740 Steering_LKA: 8 XXX
-
-BO_ 166 Brake : 8 XXX
-
-BO_ 295 Gear_packet : 8 XXX
-
-BO_ 608 Steering_torque_sensor: 8 XXX
