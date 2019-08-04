@@ -67,7 +67,7 @@ NS_ :
 
 BS_:
 
-BU_: XXX DSU HCU EPS IPAS
+BU_: XXX DSU HCU EPS IPAS CGW
 
 BO_ 36 KINEMATICS: 8 XXX
  SG_ ACCEL_Y : 33|10@0+ (1,-512) [0|65535] "" XXX
@@ -198,6 +198,29 @@ BO_ 1042 LKAS_HUD: 8 XXX
  SG_ SET_ME_X2C : 47|8@0+ (1,0) [0|1] "" XXX
  SG_ SET_ME_X38 : 55|8@0+ (1,0) [0|1] "" XXX
  SG_ SET_ME_X02 : 63|8@0+ (1,0) [0|1] "" XXX
+
+BO_ 1408 VIN_1: 8 CGW
+ SG_ VIN_1 : 7|8@0+ (1,0) [0|0] "" XXX
+ SG_ VIN_2 : 15|8@0+ (1,0) [0|0] "" XXX
+ SG_ VIN_3 : 23|8@0+ (1,0) [0|0] "" XXX
+ SG_ VIN_4 : 31|8@0+ (1,0) [0|0] "" XXX
+ SG_ VIN_5 : 39|8@0+ (1,0) [0|0] "" XXX
+ SG_ VIN_6 : 47|8@0+ (1,0) [0|0] "" XXX
+ SG_ VIN_7 : 55|8@0+ (1,0) [0|0] "" XXX
+ SG_ VIN_8 : 63|8@0+ (1,0) [0|0] "" XXX
+
+BO_ 1409 VIN_2: 8 CGW
+ SG_ VIN_9 : 7|8@0+ (1,0) [0|0] "" XXX
+ SG_ VIN_10 : 15|8@0+ (1,0) [0|0] "" XXX
+ SG_ VIN_11 : 23|8@0+ (1,0) [0|0] "" XXX
+ SG_ VIN_12 : 31|8@0+ (1,0) [0|0] "" XXX
+ SG_ VIN_13 : 39|8@0+ (1,0) [0|0] "" XXX
+ SG_ VIN_14 : 47|8@0+ (1,0) [0|0] "" XXX
+ SG_ VIN_15 : 55|8@0+ (1,0) [0|0] "" XXX
+ SG_ VIN_16 : 63|8@0+ (1,0) [0|0] "" XXX
+
+BO_ 1410 VIN_3: 8 CGW
+ SG_ VIN_17 : 7|8@0+ (1,0) [0|0] "" XXX
 
 BO_ 1553 UI_SEETING: 8 XXX
  SG_ UNITS : 26|2@0+ (1,0) [0|3] "" XXX
