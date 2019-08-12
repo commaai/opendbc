@@ -683,7 +683,6 @@ BO_ 982 Licht_hinten_01: 8 Gateway_MQB
  SG_ LH_Bremsl_re_ges_def : 55|1@1+ (1,0) [0|1] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
 
 BO_ 134 LWI_01: 8 Gateway_MQB
- SG_ LWI_01_CRC : 0|8@1+ (1,0) [0|255] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ LWI_01_BZ : 8|4@1+ (1,0) [0|15] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ LWI_Sensorstatus : 12|1@1+ (1,0) [0|1] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ LWI_QBit_Sub_Daten : 13|1@1+ (1,0) [0|1] "" Vector__XXX
@@ -692,6 +691,7 @@ BO_ 134 LWI_01: 8 Gateway_MQB
  SG_ LWI_Sub_Daten : 40|16@1+ (1,0) [0|65535] "" Vector__XXX
  SG_ LWI_QBit_Lenkradwinkel : 15|1@1+ (1,0) [0|1] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ LWI_VZ_Lenkradwinkel : 29|1@1+ (1,0) [0|1] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
+ SG_ LWI_01_CRC : 0|8@1+ (1,0) [0|255] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ LWI_Lenkradwinkel : 16|13@1+ (0.1,0) [0|800] "Unit_DegreOfArc" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
 
 BO_ 263 Motor_04: 8 Motor_Diesel_MQB
@@ -1157,17 +1157,17 @@ BO_ 1602 WIV_01: 8 Motor_Diesel_MQB
  SG_ WIV_W_max : 56|7@1+ (1000,0) [0|127000] "Unit_KiloMeter" Gateway_MQB
 
 BO_ 294 HCA_01: 8 XXX
- SG_ 3 : 15|4@0+ (1,0) [0|15] "" XXX
- SG_ 7 : 55|8@0+ (1,0) [0|255] "" XXX
- SG_ 254 : 47|8@0+ (1,0) [0|255] "" XXX
- SG_ HCA_01_CRC : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ HCA_01_BZ : 11|4@0+ (1,0) [0|255] "" XXX
- SG_ Assist_Requested : 30|1@0+ (1,0) [0|1] "" XXX
+ SG_ 3 : 12|4@1+ (1,0) [0|15] "" XXX
+ SG_ 7 : 48|8@1+ (1,0) [0|255] "" XXX
+ SG_ 254 : 40|8@1+ (1,0) [0|255] "" XXX
+ SG_ HCA_01_CRC : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ HCA_01_BZ : 8|4@1+ (1,0) [0|255] "" XXX
  SG_ Assist_Torque : 16|14@1+ (1,0) [0|300] "Nm" XXX
- SG_ Assist_VZ : 31|1@0+ (1,0) [0|1] "" XXX
+ SG_ Assist_Requested : 30|1@1+ (1,0) [0|1] "" XXX
+ SG_ Assist_VZ : 31|1@1+ (1,0) [0|1] "" XXX
  SG_ HCA_Available : 32|1@1+ (1,0) [0|1] "" XXX
- SG_ HCA_Standby : 33|1@0+ (1,0) [0|1] "" XXX
- SG_ HCA_Active : 34|1@0+ (1,0) [0|1] "" XXX
+ SG_ HCA_Standby : 33|1@1+ (1,0) [0|1] "" XXX
+ SG_ HCA_Active : 34|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 159 EPS_01: 8 XXX
  SG_ EPS_01_CRC : 0|8@1+ (1,0) [0|255] "" XXX
