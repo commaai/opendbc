@@ -120,6 +120,7 @@ BO_ 479 ACC_CONTROL: 8 EON
  SG_ GAS_COMMAND : 0|9@0+ (1,0) [0|1] "" PCM
  SG_ GAS_BRAKE : 31|14@0- (1,0) [0|1] "" XXX
  SG_ AEB_STATUS : 33|1@0+ (1,0) [0|1] "" XXX
+ SG_ AEB_BRAKING : 47|1@0+ (1,0) [0|1] "" XXX
  SG_ AEB_PREPARE : 43|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
@@ -261,5 +262,9 @@ BO_ 891 STALK_STATUS_2: 8 XXX
  SG_ PARK_LIGHTS : 36|1@0+ (1,0) [0|1] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
+
+CM_ SG_ 479 AEB_STATUS "set for the duration of AEB event";
+CM_ SG_ 479 AEB_BRAKING "set when braking is commanded during AEB event";
+CM_ SG_ 479 AEB_PREPARE "set 1s before AEB";
 
 VAL_ 399 STEER_STATUS 6 "tmp_fault" 5 "fault_1" 4 "no_torque_alert_2" 3 "low_speed_lockout" 2 "no_torque_alert_1" 0 "normal" ;
