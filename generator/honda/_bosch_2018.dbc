@@ -119,7 +119,8 @@ BO_ 479 ACC_CONTROL: 8 EON
  SG_ RELATED_TO_GAS : 7|7@0+ (1,0) [0|69] "" XXX
  SG_ GAS_COMMAND : 0|9@0+ (1,0) [0|1] "" PCM
  SG_ GAS_BRAKE : 31|14@0- (1,0) [0|1] "" XXX
- SG_ ZEROS_BOH : 33|18@0+ (1,0) [100|100] "" XXX
+ SG_ AEB_STATUS : 33|1@0+ (1,0) [0|1] "" XXX
+ SG_ AEB_PREPARE : 43|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
