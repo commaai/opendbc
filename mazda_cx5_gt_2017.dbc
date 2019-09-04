@@ -165,14 +165,14 @@ BO_ 581 CAM_IDK3: 8 XXX
  SG_ S8 : 48|8@1+ (1,0) [0|255] "" XXX
  SG_ S9 : 56|8@1+ (1,0) [0|255] "" XXX
 
-BO_ 863 CAM_STATUS: 8 XXX
- SG_ NEW_SIGNAL_1 : 32|1@0+ (1,0) [0|32767] "" XXX
- SG_ NEW_SIGNAL_5 : 4|2@0+ (1,0) [0|32767] "" XXX
- SG_ NEW_SIGNAL_4 : 15|4@0+ (1,0) [0|15] "" XXX
+BO_ 863 CAM_TRAFFIC_SIGNS: 8 XXX
  SG_ STOP_SIGN : 31|4@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_3 : 55|1@0+ (1,0) [0|127] "" XXX
- SG_ NEW_SIGNAL_6 : 0|3@1+ (1,0) [0|7] "" XXX
  SG_ FORWARD_COLLISION : 40|8@1+ (1,0) [0|7] "" XXX
+ SG_ SPEED_SIGN_MAYBE : 32|1@0+ (1,0) [0|32767] "" XXX
+ SG_ SPEED_SIGN1 : 0|3@1+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_5 : 4|2@0+ (1,0) [0|32767] "" XXX
+ SG_ SPEED_SIGN2 : 15|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 1157 CAM_SETTINGS: 8 XXX
  SG_ NEW_SIGNAL_2 : 14|1@0+ (1,0) [0|1] "" XXX
@@ -193,7 +193,6 @@ BO_ 1088 CAM_LANEINFO: 8 XXX
  SG_ BIT3 : 62|1@0+ (1,0) [0|3] "" XXX
  SG_ HANDS_ON_STEER_WARN_2 : 59|1@0+ (1,0) [0|1] "" XXX
  SG_ HANDS_ON_STEER_WARN : 56|1@0+ (1,0) [0|3] "" XXX
- SG_ S1_NOT : 54|1@0+ (1,0) [0|31] "" XXX
  SG_ S1 : 52|1@0+ (1,0) [0|1] "" XXX
  SG_ HANDS_WARN_3_BITS : 51|3@0+ (1,0) [0|7] "" XXX
  SG_ ERR_BIT : 40|1@0+ (1,0) [0|1] "" XXX
@@ -205,6 +204,7 @@ BO_ 1088 CAM_LANEINFO: 8 XXX
  SG_ LINE_VISIBLE : 0|1@0+ (1,0) [0|3] "" XXX
  SG_ LDW_WARN_RL : 58|1@0+ (1,0) [0|1] "" XXX
  SG_ LDW_WARN_LL : 57|1@0+ (1,0) [0|1] "" XXX
+ SG_ S1_HBEAM : 54|1@0+ (1,0) [0|31] "" XXX
 
 BO_ 1479 NEW_MSG_470: 8 XXX
 
@@ -543,10 +543,7 @@ BO_ 535 CURVE_CTRS: 8 XXX
  SG_ CTR_B_2 : 15|3@0+ (1,0) [0|7] "" XXX
  SG_ CTR_C_1 : 20|3@0+ (1,0) [0|7] "" XXX
  SG_ CTR_C_2 : 23|3@0+ (1,0) [0|255] "" XXX
- SG_ CTR_D_2 : 31|3@0+ (1,0) [0|7] "" XXX
  SG_ CTR_D_1 : 28|3@0+ (1,0) [0|7] "" XXX
- SG_ CURVE : 39|16@0+ (1,0) [0|7] "" XXX
- SG_ CTR : 55|8@0+ (1,0) [0|255] "" XXX
  SG_ CHK_MAYBE : 63|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_1 : 0|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_2 : 1|1@0+ (1,0) [0|1] "" XXX
@@ -556,6 +553,9 @@ BO_ 535 CURVE_CTRS: 8 XXX
  SG_ SEATBELT_MAYBE : 8|1@0+ (1,0) [0|1] "" XXX
  SG_ NO_SEATBELT_MAYBE : 16|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_4 : 9|1@0+ (1,0) [0|1] "" XXX
+ SG_ CTR_D_2 : 31|3@0+ (1,0) [0|7] "" XXX
+ SG_ CTR : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ Speed : 39|16@0+ (0.01,0) [0|7] "kph" XXX
 
 BO_ 540 CRZ_CTRL: 8 XXX
  SG_ NEW_SIGNAL_3 : 1|1@0+ (1,0) [0|1] "" XXX
@@ -570,6 +570,9 @@ BO_ 540 CRZ_CTRL: 8 XXX
  SG_ CRZ_ACTIVE : 3|1@0+ (1,0) [0|1] "" XXX
  SG_ HANDS_OFF_STEERING : 48|1@0+ (1,0) [0|1] "" XXX
  SG_ HANDS_ON_STEER_WARN : 59|4@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_1 : 52|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_2 : 45|3@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_8 : 0|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 539 CRZ_INFO: 8 XXX
  SG_ NEW_SIGNAL_1 : 17|1@0+ (1,0) [0|255] "" XXX
@@ -579,8 +582,8 @@ BO_ 539 CRZ_INFO: 8 XXX
  SG_ CTR1 : 55|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_3 : 37|1@0+ (1,0) [0|255] "" XXX
  SG_ ACC_ACTIVE : 33|1@0+ (1,0) [0|1] "" XXX
- SG_ ACCEL_CMD : 31|10@0- (1,0) [0|1] "" XXX
  SG_ CHKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ ACCEL_CMD : 31|10@0- (1,0) [0|1] "" XXX
 
 BO_ 121 EPB: 8 XXX
  SG_ NEW_SIGNAL_1 : 4|4@0+ (1,0) [0|255] "" XXX
@@ -746,6 +749,8 @@ BO_ 1248 MOB4: 8 XXX
 
 CM_ SG_ 605 PED_BRAKE "3: no brake, 4: brake";
 CM_ SG_ 605 BRAKE_WARNING "Flashing brake warning and audible alert for potential forward collision";
+CM_ SG_ 863 SPEED_SIGN1 "3, 30mph, 2, 45mph";
+CM_ SG_ 863 SPEED_SIGN2 "5: 45mph, 9: 30mph, 1, 60mph";
 CM_ SG_ 1157 SBS_WARNING_DISTANCE "1 far, 2 mid, 3 near";
 CM_ SG_ 1157 SBS_SCBC "1 off, 2 on";
 CM_ SG_ 1157 LKAS_ASSIT_TIMING "1 at, 0 before";
