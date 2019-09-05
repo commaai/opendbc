@@ -1256,8 +1256,14 @@ BO_ 418 ESP_15: 8 XXX
  SG_ ESP_15_BZ : 8|4@1+ (1,0) [0|15] "" XXX
 
 BO_ 1122 PSD_04: 8 XXX
+ SG_ NEW_SIGNAL_2 : 7|2@0+ (1,0) [0|3] "" XXX
+ SG_ PSD_Object_Index : 0|6@1+ (1,0) [0|63] "" XXX
 
 BO_ 1123 PSD_05: 8 XXX
+ SG_ PSD_Current_Route_Index : 0|6@1+ (1,0) [0|63] "" XXX
+ SG_ NEW_SIGNAL_1 : 63|1@0+ (1,0) [0|1] "" XXX
+ SG_ Route_Distance_Remaining : 8|5@1+ (1,0) [0|31] "" XXX
+ SG_ NEW_SIGNAL_2 : 24|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 1124 PSD_06: 8 XXX
 
