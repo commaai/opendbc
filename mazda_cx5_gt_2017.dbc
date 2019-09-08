@@ -91,8 +91,10 @@ BO_ 576 STEER_TORQUE: 8 XXX
  SG_ NEW_SIGNAL_1 : 23|4@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_3 : 47|1@0+ (1,0) [0|1] "" XXX
  SG_ SENSOR1 : 39|8@0+ (1,-128) [0|127] "" XXX
- SG_ STEER_TORQUE_MOTOR : 46|20@0- (0.1,0) [-3000|3000] "tbd" XXX
- SG_ STEER_TORQUE_SENSOR : 7|16@0+ (0.5,-16256) [0|255] "" XXX
+ SG_ STEER_TORQUE_MOTOR : 46|15@0- (0.1,0) [-3000|3000] "tbd" XXX
+ SG_ NEW_SIGNAL_2 : 62|4@0+ (1,0) [0|31] "" XXX
+ SG_ NEW_SIGNAL_4 : 15|8@0+ (1,0) [0|127] "" XXX
+ SG_ STEER_TORQUE_SENSOR : 7|8@0+ (1,-127) [-85|85] "" XXX
 
 BO_ 577 STEER_RATE: 8 XXX
  SG_ STEER_ANGLE_RATE : 23|16@0+ (0.25,-8192) [0|1] "deg/s" XXX
@@ -119,6 +121,7 @@ BO_ 605 CAM_PEDESTRIAN: 8 XXX
  SG_ PED_BRAKE : 3|3@0+ (1,0) [0|7] "" XXX
  SG_ RST_CTR : 23|6@0+ (1,0) [0|63] "" XXX
  SG_ S1 : 29|4@0+ (1,0) [0|31] "" XXX
+ SG_ BRAKE_WARNING : 25|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 578 CAM_LANETRACK: 8 XXX
  SG_ CHKSUM : 63|8@0+ (1,0) [0|255] "" XXX
@@ -138,9 +141,9 @@ BO_ 579 CAM_LKAS: 8 XXX
  SG_ LINE_NOT_VISIBLE : 19|1@0+ (1,0) [0|1] "" XXX
  SG_ BIT_2 : 33|1@0+ (1,0) [0|1] "" XXX
  SG_ ERR_BIT_2 : 30|1@0+ (1,0) [0|1] "" XXX
- SG_ LKAS_REQUEST : 3|12@0+ (1,-2048) [0|2048] "" XXX
  SG_ BIT_1 : 29|1@0+ (1,0) [0|1] "" XXX
  SG_ LDW : 23|1@0+ (1,0) [0|1] "" XXX
+ SG_ LKAS_REQUEST : 3|12@0+ (1,-2048) [0|2048] "" XXX
 
 BO_ 580 CAM_DISTANCE: 8 XXX
  SG_ S1 : 0|8@1+ (1,0) [0|127] "" XXX
@@ -212,7 +215,6 @@ BO_ 1446 NEW_MSG_a600: 8 XXX
 BO_ 1416 MSG_18: 8 XXX
 
 BO_ 1086 DOORS: 8 XXX
- SG_ DOOR_OPEN : 30|1@0+ (1,0) [0|255] "" XXX
  SG_ LEFTGATE : 32|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_3 : 53|1@0+ (1,0) [0|255] "" XXX
  SG_ KEYFOB_HORN : 2|1@0+ (1,0) [0|1] "" XXX
@@ -224,6 +226,7 @@ BO_ 1086 DOORS: 8 XXX
  SG_ BL : 35|1@0+ (1,0) [0|1] "" XXX
  SG_ FR : 36|1@0+ (1,0) [0|1] "" XXX
  SG_ FL : 37|1@0+ (1,0) [0|255] "" XXX
+ SG_ DOORS_UNLOCKED : 30|1@0+ (1,0) [0|255] "" XXX
 
 BO_ 977 TWO_STATES: 8 XXX
  SG_ NEW_SIGNAL_1 : 50|1@1+ (1,0) [0|7] "" XXX
@@ -245,6 +248,7 @@ BO_ 1085 MSG_12: 8 XXX
 
 BO_ 159 MSG_11: 8 XXX
  SG_ NEW_SIGNAL_1 : 50|4@1+ (1,0) [0|15] "" XXX
+ SG_ INCREASEING : 39|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 1278 NEW_MSG_3: 8 XXX
  SG_ NEW_SIGNAL_2 : 23|8@0+ (1,0) [0|255] "" XXX
@@ -421,22 +425,22 @@ BO_ 154 BLINK_INFO: 8 XXX
  SG_ WIPER_HI : 34|1@0+ (1,0) [0|1] "" XXX
  SG_ LOW_BEAMS : 5|2@0+ (1,0) [0|3] "" XXX
  SG_ HIGH_BEAMS : 7|2@0+ (1,0) [0|3] "" XXX
+ SG_ LBEAM1 : 17|1@0+ (1,0) [0|1] "" XXX
+ SG_ LBEAM2 : 50|1@0+ (1,0) [0|1] "" XXX
+ SG_ LBEAM3 : 60|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 145 TURN_SWITCH: 8 XXX
- SG_ NEW_SIGNAL_1 : 37|1@0+ (1,0) [0|3] "" XXX
- SG_ NEW_SIGNAL_2 : 36|1@0+ (1,0) [0|3] "" XXX
- SG_ TURN : 38|1@0+ (1,0) [0|3] "" XXX
- SG_ TURN_LEFT_SWITCH : 13|1@0+ (1,0) [0|255] "" XXX
- SG_ TURN_RIGHT_SWITCH : 12|1@1+ (1,0) [0|3] "" XXX
  SG_ HAZARD : 10|1@0+ (1,0) [0|1] "" XXX
+ SG_ TURN_RIGHT_SWITCH : 12|1@0+ (1,0) [0|3] "" XXX
+ SG_ TURN_LEFT_SWITCH : 13|1@0+ (1,0) [0|255] "" XXX
  SG_ CTR : 27|4@0+ (1,0) [0|255] "" XXX
+ SG_ CHKSUM : 39|8@0+ (1,0) [0|15] "" XXX
 
 BO_ 80 MSG_04: 8 XXX
  SG_ NEW_SIGNAL_1 : 25|1@0+ (1,0) [0|1] "" XXX
  SG_ SIGNAL : 24|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 978 MSG_03: 8 XXX
- SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_2 : 15|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_3 : 23|8@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_4 : 31|8@0+ (1,0) [0|255] "" XXX
@@ -444,6 +448,7 @@ BO_ 978 MSG_03: 8 XXX
  SG_ NEW_SIGNAL_6 : 47|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_7 : 55|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_8 : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ CTR : 1|2@0+ (1,0) [0|255] "" XXX
 
 BO_ 607 NEW_MSG_25: 8 XXX
 
@@ -712,10 +717,35 @@ BO_ 1272 MSG_17: 8 XXX
 
 BO_ 1425 MSG_19: 8 XXX
 
+BO_ 70 MOB1: 8 XXX
+ SG_ NEW_SIGNAL_1 : 1|3@1+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_2 : 14|6@0+ (1,0) [0|127] "" XXX
+ SG_ NEW_SIGNAL_3 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_4 : 30|6@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_5 : 38|6@0+ (1,0) [0|7] "" XXX
+
+BO_ 64 MOB2: 8 XXX
+ SG_ NEW_SIGNAL_1 : 7|2@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_2 : 10|3@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_3 : 16|1@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_4 : 24|1@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_5 : 35|4@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_6 : 0|3@1+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_7 : 13|3@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_8 : 15|2@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_9 : 19|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_10 : 31|6@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_11 : 37|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 1171 MOB3: 8 XXX
+
+BO_ 1248 MOB4: 8 XXX
+
 
 
 
 CM_ SG_ 605 PED_BRAKE "3: no brake, 4: brake";
+CM_ SG_ 605 BRAKE_WARNING "Flashing brake warning and audible alert for potential forward collision";
 CM_ SG_ 1157 SBS_WARNING_DISTANCE "1 far, 2 mid, 3 near";
 CM_ SG_ 1157 SBS_SCBC "1 off, 2 on";
 CM_ SG_ 1157 LKAS_ASSIT_TIMING "1 at, 0 before";
