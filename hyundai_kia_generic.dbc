@@ -1443,4 +1443,12 @@ BO_ 905 SCC14: 8 SCC
  SG_ JerkUpperLimit : 12|7@1+ (0.1,0) [0|12.7] "m/s^3"  ESC
  SG_ JerkLowerLimit : 19|7@1+ (0.1,0) [0|12.7] "m/s^3"  ESC
  SG_ SCCMode : 32|3@1+ (1,0) [0|7] ""  ESC
+ 
+BO_ 870 366_EMS: 8 EMS
+ SG_ EMS_Related : 23|16@0+ (1,0) [0|65535] "" XXX
+ SG_ N : 7|16@0+ (1,0.25) [0|16383.75] "rpm" XXX
+ SG_ TQFR : 39|8@0+ (0.390625,0) [0|99.6094] "%" XXX
+ SG_ SWI_IGK : 48|1@0+ (1,0) [0|1] "" XXX
+ SG_ VS : 40|8@1+ (1,0) [0|255] "km/h" MDPS
+
 
