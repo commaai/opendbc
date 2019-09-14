@@ -1267,6 +1267,26 @@ BO_ 1123 PSD_05: 8 XXX
 
 BO_ 1124 PSD_06: 8 XXX
 
+BO_ 988 Gateway_73: 8 XXX
+
+BO_ 792 Kamera_Status: 8 XXX
+
+BO_ 981 Licht_Anf_01: 8 XXX
+
+BO_ 1440 RLS_01: 8 XXX
+
+BO_ 870 Blinkmodi_02: 8 XXX
+
+BO_ 1385 HVEM_04: 8 XXX
+
+BO_ 1605 FLA_01: 8 XXX
+
+BO_ 1624 Licht_vorne_01: 8 XXX
+
+BO_ 1646 Klima_03: 8 XXX
+
+BO_ 1720 Kombi_03: 8 XXX
+
 
 
 
