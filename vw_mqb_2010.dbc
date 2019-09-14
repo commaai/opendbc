@@ -1182,10 +1182,10 @@ BO_ 159 EPS_01: 8 XXX
  SG_ Unknown_Status1 : 62|1@0+ (1,0) [0|1] "" XXX
  SG_ Steering_Wheel_Angle : 16|13@1+ (0.15,0) [0|800] "Unit_DegreOfArc" XXX
 
-BO_ 286 VehicleSpeed: 8 XXX
- SG_ VehicleSpeed_CRC : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ VehicleSpeed_BZ : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ Speed : 52|12@1+ (0.125,0) [0|1] "" XXX
+BO_ 286 ESP_08: 8 XXX
+ SG_ ESP_08_CRC : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ ESP_08_BZ : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ ESP_v_ref : 52|12@1+ (0.125,0) [0|512] "km/h" XXX
 
 BO_ 919 LDW_02: 8 XXX
  SG_ LDW_DLC : 40|8@1+ (0.01,0) [0|255] "m" XXX
