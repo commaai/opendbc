@@ -44,13 +44,13 @@ BO_ 290 ACC_06: 8 Gateway_MQB
  SG_ ACC_StartStopp_Info : 22|2@1+ (1,0) [0|3] "" Motor_Diesel_MQB,Motor_Otto_MQB
  SG_ ACC_Sollbeschleunigung_02 : 24|11@1+ (0.005,-7.22) [-7.22|3.005] "Unit_MeterPerSeconSquar" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ ACC_zul_Regelabw_oben : 35|5@1+ (0.0625,0) [0|1.9375] "Unit_MeterPerSeconSquar" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
+ SG_ ACC_neg_Sollbeschl_Grad_02 : 40|8@1+ (0.05,0) [0|12.75] "Unit_MeterPerCubicSecon" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ ACC_pos_Sollbeschl_Grad_02 : 48|8@1+ (0.05,0) [0|12.75] "Unit_MeterPerCubicSecon" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ ACC_Anfahren : 56|1@1+ (1,0) [0|1] "" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ ACC_Anhalten : 57|1@1+ (1,0) [0|1] "" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ ACC_Typ : 58|2@1+ (1,0) [0|3] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ ACC_Status_ACC : 60|3@1+ (1,0) [0|7] "" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ ACC_Minimale_Bremsung : 63|1@1+ (1,0) [0|1] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ ACC_neg_Sollbeschl_Grad_02 : 40|8@1+ (0.05,0) [0|12.75] "Unit_MeterPerCubicSecon" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
 
 BO_ 279 ACC_10: 8 Gateway_MQB
  SG_ ACC_10_CRC : 0|8@1+ (1,0) [0|255] "" Airbag_MQB
@@ -535,7 +535,6 @@ BO_ 299 GRA_ACC_01: 8 Gateway_MQB
  SG_ GRA_Fehler : 24|1@1+ (1,0) [0|1] "" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ GRA_Typ468 : 25|2@1+ (1,0) [0|3] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ GRA_Tip_Stufe_2 : 27|1@1+ (1,0) [0|1] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ SET_ME_0X1 : 28|2@1+ (1,0) [0|3] "" XXX
 
 BO_ 960 Klemmen_Status_01: 4 Gateway_MQB
  SG_ Klemmen_Status_01_CRC : 0|8@1+ (1,0) [0|255] "" Airbag_MQB,BMS_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
@@ -684,16 +683,16 @@ BO_ 982 Licht_hinten_01: 8 Gateway_MQB
  SG_ LH_Bremsl_re_ges_def : 55|1@1+ (1,0) [0|1] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
 
 BO_ 134 LWI_01: 8 Gateway_MQB
+ SG_ LWI_01_CRC : 0|8@1+ (1,0) [0|255] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ LWI_01_BZ : 8|4@1+ (1,0) [0|15] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ LWI_Sensorstatus : 12|1@1+ (1,0) [0|1] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ LWI_QBit_Sub_Daten : 13|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ LWI_VZ_Lenkradw_Geschw : 30|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ LWI_Lenkradw_Geschw : 31|9@1+ (5,0) [0|2500] "Unit_DegreOfArcPerSecon" Vector__XXX
  SG_ LWI_Sub_Daten : 40|16@1+ (1,0) [0|65535] "" Vector__XXX
+ SG_ LWI_Lenkradwinkel : 16|13@1+ (0.1,0) [0|800] "Unit_DegreOfArc" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ LWI_QBit_Lenkradwinkel : 15|1@1+ (1,0) [0|1] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ LWI_VZ_Lenkradwinkel : 29|1@1+ (1,0) [0|1] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ LWI_01_CRC : 0|8@1+ (1,0) [0|255] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ LWI_Lenkradwinkel : 16|13@1+ (0.1,0) [0|800] "Unit_DegreOfArc" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
 
 BO_ 263 Motor_04: 8 Motor_Diesel_MQB
  SG_ MO_Istgang : 8|4@1+ (1,0) [0|15] "" Gateway_MQB
@@ -1158,21 +1157,22 @@ BO_ 1602 WIV_01: 8 Motor_Diesel_MQB
  SG_ WIV_W_max : 56|7@1+ (1000,0) [0|127000] "Unit_KiloMeter" Gateway_MQB
 
 BO_ 294 HCA_01: 8 XXX
- SG_ 3 : 12|4@1+ (1,0) [0|15] "" XXX
- SG_ 7 : 48|8@1+ (1,0) [0|255] "" XXX
- SG_ 254 : 40|8@1+ (1,0) [0|255] "" XXX
- SG_ HCA_01_CRC : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ HCA_01_BZ : 8|4@1+ (1,0) [0|255] "" XXX
+ SG_ 3 : 15|4@0+ (1,0) [0|15] "" XXX
+ SG_ 7 : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ 254 : 47|8@0+ (1,0) [0|255] "" XXX
+ SG_ HCA_01_CRC : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ HCA_01_BZ : 11|4@0+ (1,0) [0|255] "" XXX
+ SG_ Assist_Requested : 30|1@0+ (1,0) [0|1] "" XXX
  SG_ Assist_Torque : 16|14@1+ (1,0) [0|300] "Nm" XXX
- SG_ Assist_Requested : 30|1@1+ (1,0) [0|1] "" XXX
- SG_ Assist_VZ : 31|1@1+ (1,0) [0|1] "" XXX
+ SG_ Assist_VZ : 31|1@0+ (1,0) [0|1] "" XXX
  SG_ HCA_Available : 32|1@1+ (1,0) [0|1] "" XXX
- SG_ HCA_Standby : 33|1@1+ (1,0) [0|1] "" XXX
- SG_ HCA_Active : 34|1@1+ (1,0) [0|1] "" XXX
+ SG_ HCA_Standby : 33|1@0+ (1,0) [0|1] "" XXX
+ SG_ HCA_Active : 34|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 159 EPS_01: 8 XXX
  SG_ EPS_01_CRC : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ EPS_01_BZ : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ Steering_Wheel_Angle : 16|13@1+ (0.075,0) [0|16383] "Unit_DegreOfArc" XXX
  SG_ Steering_Wheel_Angle_VZ : 31|1@0+ (1,0) [0|1] "" XXX
  SG_ HCA_Active : 34|1@0+ (1,0) [0|1] "" XXX
  SG_ HCA_Standby : 33|1@0+ (1,0) [0|1] "" XXX
@@ -1181,12 +1181,11 @@ BO_ 159 EPS_01: 8 XXX
  SG_ Driver_Strain : 40|13@1+ (1,0) [0|255] "Nm" XXX
  SG_ Driver_Strain_VZ : 55|1@1+ (1,0) [0|1] "" XXX
  SG_ Unknown_Status1 : 62|1@0+ (1,0) [0|1] "" XXX
- SG_ Steering_Wheel_Angle : 16|13@1+ (0.15,0) [0|800] "Unit_DegreOfArc" XXX
 
-BO_ 286 ESP_08: 8 XXX
- SG_ ESP_08_CRC : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ ESP_08_BZ : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ ESP_v_ref : 52|12@1+ (0.125,0) [0|512] "km/h" XXX
+BO_ 286 VehicleSpeed: 8 XXX
+ SG_ VehicleSpeed_CRC : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ VehicleSpeed_BZ : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ Speed : 52|12@1+ (0.125,0) [0|1] "" XXX
 
 BO_ 919 LDW_02: 8 XXX
  SG_ LDW_DLC : 40|8@1+ (0.01,0) [0|255] "m" XXX
@@ -1213,10 +1212,10 @@ BO_ 780 ACC_02: 8 XXX
  SG_ MotorbitB5_7 : 47|1@1+ (1,0) [0|1] "" XXX
  SG_ SetAbstand : 48|4@1+ (1,0) [0|15] "" XXX
  SG_ Hebel : 56|4@1+ (1,0) [0|15] "" XXX
+ SG_ SetSpeed : 12|10@1+ (0.32,0) [0|320] "kmh" XXX
  SG_ Abstand : 24|10@1+ (0.1,0) [0|102.3] "m" XXX
  SG_ ACC_02_CRC : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ ACC_02_BZ : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ SetSpeed : 12|10@1+ (0.08865,0) [0|90.68] "Unit_MeterPerSecond" XXX
 
 BO_ 302 ACC_07: 8 XXX
  SG_ ACC_07_BZ : 8|4@1+ (1,0) [0|15] "" XXX
@@ -1252,46 +1251,9 @@ BO_ 427 ESP_33: 8 XXX
  SG_ ESP_33_BZ : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ ESP_33_CRC : 0|8@1+ (1,0) [0|255] "" XXX
 
-BO_ 418 ESP_15: 8 XXX
- SG_ ESP_15_CRC : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ ESP_15_BZ : 8|4@1+ (1,0) [0|15] "" XXX
-
-BO_ 1122 PSD_04: 8 XXX
- SG_ NEW_SIGNAL_2 : 7|2@0+ (1,0) [0|3] "" XXX
- SG_ PSD_Object_Index : 0|6@1+ (1,0) [0|63] "" XXX
-
-BO_ 1123 PSD_05: 8 XXX
- SG_ PSD_Current_Route_Index : 0|6@1+ (1,0) [0|63] "" XXX
- SG_ NEW_SIGNAL_1 : 63|1@0+ (1,0) [0|1] "" XXX
- SG_ Route_Distance_Remaining : 8|5@1+ (1,0) [0|31] "" XXX
- SG_ NEW_SIGNAL_2 : 24|8@1+ (1,0) [0|255] "" XXX
-
-BO_ 1124 PSD_06: 8 XXX
-
-BO_ 988 Gateway_73: 8 XXX
-
-BO_ 792 Kamera_Status: 8 XXX
-
-BO_ 981 Licht_Anf_01: 8 XXX
-
-BO_ 1440 RLS_01: 8 XXX
-
-BO_ 870 Blinkmodi_02: 8 XXX
-
-BO_ 1385 HVEM_04: 8 XXX
-
-BO_ 1605 FLA_01: 8 XXX
-
-BO_ 1624 Licht_vorne_01: 8 XXX
-
-BO_ 1646 Klima_03: 8 XXX
-
-BO_ 1720 Kombi_03: 8 XXX
 
 
 
-
-CM_ SG_ 134 LWI_Lenkradwinkel "Steering angle WITH variable ratio effect included";
 CM_ SG_ 294 3 "May be zero when sent by older cameras";
 CM_ SG_ 294 7 "May be zero when sent by older cameras";
 CM_ SG_ 294 254 "May be zero when sent by older cameras";
@@ -1301,7 +1263,6 @@ CM_ SG_ 294 HCA_Available "Must be 1 for steering rack to accept HCA commands";
 CM_ SG_ 159 HCA_Ready "1 if HCA is okay, 0 if the rack doesn't have HCA configured or a timer/constraint has been violated, rack will not respond to HCA commands";
 CM_ SG_ 159 Driver_Strain "Steering input by driver, torque";
 CM_ SG_ 159 Driver_Strain_VZ "Steering input by driver, sign (direction)";
-CM_ SG_ 159 Steering_Wheel_Angle "Steering angle WITHOUT variable ratio effect included";
 CM_ SG_ 919 LDW_DLC "Probable DLC (distance to line crossing)";
 CM_ SG_ 919 LDW_TLC "Probable TLC (time to line crossing)";
 CM_ SG_ 919 LDW_Unknown "Might be a steering pressed / driver active flag";
@@ -1313,6 +1274,6 @@ CM_ SG_ 919 Kombi_Lamp_Orange "Enables orange LDW light in instrument cluster";
 CM_ SG_ 919 Kombi_Lamp_Green "Enables green LDW light in instrument cluster";
 CM_ SG_ 780 Folgefahrt "Following another vehicle";
 CM_ SG_ 780 SetAbstand "Set following distance";
-CM_ SG_ 780 Abstand "Following distance";
 CM_ SG_ 780 SetSpeed "ACC set speed";
+CM_ SG_ 780 Abstand "Following distance";
 VAL_ 173 GE_Fahrstufe 5 "P" 6 "R" 7 "N" 8 "D" 9 "S" 10 "E" 14 "T" ;
