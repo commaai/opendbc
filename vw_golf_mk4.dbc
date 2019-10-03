@@ -1046,3 +1046,5 @@ BO_ 210 PQ_HCA: 8 XXX
  SG_ HCA_Torque_VZ : 31|1@0+ (1,0) [0|1] "" XXX
  SG_ PQ_HCA_BZ : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ PQ_HCA_Checksum : 0|4@1+ (1,0) [0|15] "" XXX
+
+BO_ 1490 VIN_1: 8 XXX
