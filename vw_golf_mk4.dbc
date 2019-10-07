@@ -1009,3 +1009,12 @@ BO_ 210 PQ_HCA: 8 XXX
  SG_ PQ_HCA_Checksum : 0|4@1+ (1,0) [0|15] "" XXX
 
 BO_ 1490 VIN_1: 8 XXX
+
+BO_ 208 EPS_1: 8 XXX
+ SG_ Counter1 : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ Counter2 : 15|4@0+ (1,0) [0|15] "" XXX
+ SG_ Driver_Torque_Sign : 26|1@1+ (1,0) [0|1] "" XXX
+ SG_ Driver_Torque : 16|10@1+ (1,0) [0|1023] "" XXX
+ SG_ Steering_Angle : 32|12@1+ (1,0) [0|4095] "" XXX
+ SG_ Steering_Angle_Sign : 44|1@0+ (1,0) [0|1] "" XXX
+ SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
