@@ -1309,7 +1309,7 @@ BO_ 1720 Kombi_03: 8 XXX
 
 
 
-
+CM_ SG_ 173 COUNTERXX "Message renamed to disable OP counter support due to J533 rate-limiting"
 CM_ SG_ 134 LWI_Lenkradwinkel "Steering angle WITH variable ratio effect included";
 CM_ SG_ 294 3 "May be zero when sent by older cameras";
 CM_ SG_ 294 7 "May be zero when sent by older cameras";
