@@ -6,7 +6,7 @@ import sys
 import jinja2
 
 from collections import Counter
-from common.dbc import dbc
+from opendbc.can.dbc import dbc
 
 def main():
   if len(sys.argv) != 3:
