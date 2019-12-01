@@ -3,22 +3,25 @@ Import('env')
 import os
 from opendbc.can.process_dbc import process
 
-for x in os.listdir('../'):
-  if x.endswith(".dbc"):
-    def build(target, source, env):
-      process(source[0].path, target[0].path)
-    in_fn = os.path.join('../', x)
-    out_fn = os.path.join('dbc_out', x.replace(".dbc", ".cc"))
-    env.Command(out_fn, in_fn, build)
-
-"""
 dbcs = []
 for x in os.listdir('../'):
   if x.endswith(".dbc"):
-    dbcs.append(env.Command(
-                [os.path.join('dbc_out', x.replace(".dbc", ".cc"))],
-                [os.path.join('../', x)],
-                "python3 opendbc/can/process_dbc.py ../ $SOURCE"))
-print(dbcs)
-"""
+    def compile_dbc(target, source, env):
+      process(source[0].path, target[0].path)
+    in_fn = os.path.join('../', x)
+    out_fn = os.path.join('dbc_out', x.replace(".dbc", ".cc"))
+    dbc = env.Command(out_fn, in_fn, compile_dbc)
+    dbcs.append(dbc)
+
+libdbc = env.SharedLibrary('libdbc', dbcs)
+
+# packer
+env.Command(['packer_impl.so'],
+  ['packer_impl.pyx', 'packer_setup.py'],
+  "cd opendbc/can && python3 packer_setup.py build_ext --inplace")
+
+# parser
+env.Command(['parser_pyx.so'],
+  [libdbc, 'parser_pyx_setup.py', 'parser_pyx.pyx', 'common.pxd'],
+  "cd opendbc/can && python3 parser_pyx_setup.py build_ext --inplace")
 
