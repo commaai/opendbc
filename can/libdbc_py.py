@@ -5,7 +5,6 @@ from cffi import FFI
 
 can_dir = os.path.dirname(os.path.abspath(__file__))
 libdbc_fn = os.path.join(can_dir, "libdbc.so")
-subprocess.check_call(["make", "-j3"], cwd=can_dir)  # don't use all the cores to avoid overheating
 
 ffi = FFI()
 ffi.cdef("""
