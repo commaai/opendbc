@@ -71,7 +71,6 @@ cdef class CANPacker():
     can_dir = os.path.dirname(os.path.abspath(__file__))
     libdbc_fn = os.path.join(can_dir, "libdbc.so")
     libdbc_fn = str(libdbc_fn).encode('utf8')
-    subprocess.check_call(["make"], cwd=can_dir)
 
     cdef void *libdbc = dlopen(libdbc_fn, RTLD_LAZY)
     self.canpack_init = <canpack_init_func>dlsym(libdbc, 'canpack_init')
