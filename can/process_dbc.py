@@ -8,22 +8,16 @@ import jinja2
 from collections import Counter
 from opendbc.can.dbc import dbc
 
-def main():
-  if len(sys.argv) != 3:
-    print("usage: %s dbc_directory output_filename" % (sys.argv[0],))
-    sys.exit(0)
-
-  dbc_dir = sys.argv[1]
-  out_fn = sys.argv[2]
-
+def process(in_fn, out_fn):
   dbc_name = os.path.split(out_fn)[-1].replace('.cc', '')
+  #print("processing %s: %s -> %s" % (dbc_name, in_fn, out_fn))
 
   template_fn = os.path.join(os.path.dirname(__file__), "dbc_template.cc")
 
   with open(template_fn, "r") as template_f:
     template = jinja2.Template(template_f.read(), trim_blocks=True, lstrip_blocks=True)
 
-  can_dbc = dbc(os.path.join(dbc_dir, dbc_name + '.dbc'))
+  can_dbc = dbc(in_fn)
 
   msgs = [(address, msg_name, msg_size, sorted(msg_sigs, key=lambda s: s.name not in ("COUNTER", "CHECKSUM"))) # process counter and checksums first
           for address, ((msg_name, msg_size), msg_sigs) in sorted(can_dbc.msgs.items()) if msg_sigs]
@@ -97,9 +91,22 @@ def main():
 
   parser_code = template.render(dbc=can_dbc, checksum_type=checksum_type, msgs=msgs, def_vals=def_vals, len=len)
 
-
   with open(out_fn, "w") as out_f:
     out_f.write(parser_code)
 
+def main():
+  if len(sys.argv) != 3:
+    print("usage: %s dbc_directory output_filename" % (sys.argv[0],))
+    sys.exit(0)
+
+  dbc_dir = sys.argv[1]
+  out_fn = sys.argv[2]
+
+  dbc_name = os.path.split(out_fn)[-1].replace('.cc', '')
+  in_fn = os.path.join(dbc_dir, dbc_name + '.dbc')
+
+  process(in_fn, out_fn)
+
 if __name__ == '__main__':
   main()
+
