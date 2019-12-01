@@ -8,12 +8,13 @@ for x in os.listdir('../'):
   if x.endswith(".dbc"):
     def compile_dbc(target, source, env):
       process(source[0].path, target[0].path)
-    in_fn = os.path.join('../', x)
+    in_fn = [os.path.join('../', x), 'dbc_template.cc']
     out_fn = os.path.join('dbc_out', x.replace(".dbc", ".cc"))
     dbc = env.Command(out_fn, in_fn, compile_dbc)
     dbcs.append(dbc)
 
-libdbc = env.SharedLibrary('libdbc', dbcs)
+
+libdbc = env.SharedLibrary('libdbc', ["dbc.cc", "parser.cc", "packer.cc", "common.cc"]+dbcs, LIBS=["capnp", "kj"])
 
 # packer
 env.Command(['packer_impl.so'],
