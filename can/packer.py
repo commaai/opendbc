@@ -1,3 +1,3 @@
 # pylint: skip-file
-from opendbc.can.packer_impl import CANPacker
+from opendbc.can.packer_pyx import CANPacker
 assert CANPacker
