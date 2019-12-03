@@ -12,6 +12,9 @@ jobs:
 
 - job: unittests
   displayName: 'Unit tests'
+  container:
+    image: opendbc:latest
+    options: --shm-size 1G
   dependsOn: build
   steps:
   - script: |
