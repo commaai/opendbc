@@ -4,7 +4,7 @@ import os
 from opendbc.can.process_dbc import process
 
 dbcs = []
-for x in os.listdir('../'):
+for x in sorted(os.listdir('../')):
   if x.endswith(".dbc"):
     def compile_dbc(target, source, env):
       process(source[0].path, target[0].path)
