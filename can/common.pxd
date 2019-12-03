@@ -9,8 +9,7 @@ from libcpp.unordered_set cimport unordered_set
 from libcpp cimport bool
 
 
-cdef extern from "common.h":
-
+cdef extern from "common_dbc.h":
   ctypedef enum SignalType:
     DEFAULT,
     HONDA_CHECKSUM,
@@ -64,6 +63,12 @@ cdef extern from "common.h":
     const char* name
     double value
 
+  cdef struct SignalPackValue:
+    const char * name
+    double value
+
+
+cdef extern from "common.h":
   cdef const DBC* dbc_lookup(const string);
 
   cdef cppclass CANParser:
@@ -71,3 +76,7 @@ cdef extern from "common.h":
     CANParser(int, string, vector[MessageParseOptions], vector[SignalParseOptions])
     void update_string(string, bool)
     vector[SignalValue] query_latest()
+
+  cdef cppclass CANPacker:
+   CANPacker(string)
+   uint64_t pack(uint32_t, vector[SignalPackValue], int counter)

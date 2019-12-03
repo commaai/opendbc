@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <map>
 #include <unordered_map>
 
 #include "common_dbc.h"
@@ -55,5 +56,15 @@ public:
   void UpdateValid(uint64_t sec);
   void update_string(std::string data, bool sendcan);
   std::vector<SignalValue> query_latest();
+};
 
+class CANPacker {
+private:
+  const DBC *dbc = NULL;
+  std::map<std::pair<uint32_t, std::string>, Signal> signal_lookup;
+  std::map<uint32_t, Msg> message_lookup;
+
+public:
+  CANPacker(const std::string& dbc_name);
+  uint64_t pack(uint32_t address, const std::vector<SignalPackValue> &signals, int counter);
 };
