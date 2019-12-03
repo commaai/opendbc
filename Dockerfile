@@ -12,7 +12,8 @@ RUN pip3 install pyyaml==5.1.2 Cython==0.29.14 scons==3.1.1 pycapnp==0.6.4 Jinja
 
 ENV PYTHONPATH=/project
 
-RUN git clone -b master https://github.com/commaai/cereal.git /project/cereal
+# TODO: Add tag to cereal
+RUN git clone https://github.com/commaai/cereal.git /project/cereal
 RUN /project/cereal/install_capnp.sh
 
 WORKDIR /project
