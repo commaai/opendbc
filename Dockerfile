@@ -7,8 +7,9 @@ ENV PATH="/root/.pyenv/bin:/root/.pyenv/shims:${PATH}"
 RUN pyenv install 3.7.3
 RUN pyenv global 3.7.3
 RUN pyenv rehash
-RUN pip3 install pyyaml==5.1.2 Cython==0.29.14 scons==3.1.1 pycapnp==0.6.4 Jinja2==2.10.3
 
+COPY requirements.txt /tmp/
+RUN pip install -r /tmp/requirements.txt
 
 ENV PYTHONPATH=/project
 
