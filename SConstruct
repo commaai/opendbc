@@ -7,7 +7,10 @@ arch = subprocess.check_output(["uname", "-m"], encoding='utf8').rstrip()
 cereal_dir = Dir('.')
 
 cpppath = [
+    '#',
     '#cereal',
+    "#cereal/messaging",
+    "#opendbc/can",
     '/usr/lib/include',
 ]
 
@@ -44,7 +47,11 @@ env = Environment(
   CPPPATH=cpppath,
 )
 
-
 Export('env', 'zmq', 'arch')
+
+cereal = [File('#cereal/libcereal.a')]
+messaging = [File('#cereal/libmessaging.a')]
+Export('cereal', 'messaging')
+
 SConscript(['cereal/SConscript'])
-SConscript(['opendbc/SConscript'])
+SConscript(['opendbc/can/SConscript'])
