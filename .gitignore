@@ -5,5 +5,5 @@
 can/*.so
 can/build/
 can/obj/
-can/packer_impl.cpp
+can/packer_pyx.cpp
 can/parser_pyx.cpp

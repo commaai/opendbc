@@ -4,7 +4,27 @@ import unittest
 
 from opendbc.can.parser import CANParser
 from opendbc.can.packer import CANPacker
-from opendbc.boardd.boardd import can_list_to_can_capnp
+import cereal.messaging as messaging
+
+
+# Python implementation so we don't have to depend on boardd
+def can_list_to_can_capnp(can_msgs, msgtype='can'):
+  dat = messaging.new_message()
+  dat.init(msgtype, len(can_msgs))
+
+  for i, can_msg in enumerate(can_msgs):
+    if msgtype == 'sendcan':
+      cc = dat.sendcan[i]
+    else:
+      cc = dat.can[i]
+
+    cc.address = can_msg[0]
+    cc.busTime = can_msg[1]
+    cc.dat = bytes(can_msg[2])
+    cc.src = can_msg[3]
+
+  return dat.to_bytes()
+
 
 class TestCanParserPacker(unittest.TestCase):
   def test_civic(self):
