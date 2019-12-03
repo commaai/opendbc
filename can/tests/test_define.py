@@ -3,6 +3,7 @@ import unittest
 
 from opendbc.can.can_define import CANDefine
 
+
 class TestCADNDefine(unittest.TestCase):
   def test_civic(self):
 
