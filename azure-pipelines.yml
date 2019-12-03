@@ -1,12 +1,26 @@
 pr: none
 
-pool:
-  vmImage: 'ubuntu-16.04'
+jobs:
+- job: build
+  displayName: 'Build'
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - script: |
+      set -e
+      docker build -t opendbc .
 
-steps:
-- script: |
-    set -e
-    docker build -t opendbc .
-    docker run opendbc bash -c "python -m unittest discover opendbc"
+- job: unittests
+  displayName: 'Unit tests'
+  dependsOn: build
+  steps:
+  - script: |
+      docker run opendbc bash -c "python -m unittest discover opendbc"
 
-  displayName: 'Run Tests'
+- job: linter
+  displayName: 'Python linters'
+  dependsOn: build
+  steps:
+  - script: |
+      docker run opendbc bash -c "cd opendbc/can/tests/linter_python; PYTHONPATH=/ ./flake8_opendbc.sh"
+      docker run opendbc bash -c "cd opendbc/can/tests/linter_python; PYTHONPATH=/ ./pylint_opendbc.sh"
