@@ -257,7 +257,6 @@ class dbc():
 
 if __name__ == "__main__":
    from opendbc import DBC_PATH
-   import numpy as np
 
    dbc_test = dbc(os.path.join(DBC_PATH, 'toyota_prius_2017_pt_generated.dbc'))
    msg = ('STEER_ANGLE_SENSOR', {'STEER_ANGLE': -6.0, 'STEER_RATE': 4, 'STEER_FRACTION': -0.2})
@@ -267,7 +266,7 @@ if __name__ == "__main__":
 
    dbc_test = dbc(os.path.join(DBC_PATH, 'hyundai_santa_fe_2019_ccan.dbc'))
    decoded = dbc_test.decode((0x2b0, 0, "\xfa\xfe\x00\x07\x12"))
-   assert np.isclose(decoded[1]['SAS_Angle'], -26.2)
+   assert abs(decoded[1]['SAS_Angle'] - (-26.2)) < 0.001
 
    msg = ('SAS11', {'SAS_Stat': 7.0, 'MsgCount': 0.0, 'SAS_Angle': -26.200000000000003, 'SAS_Speed': 0.0, 'CheckSum': 0.0})
    encoded = dbc_test.encode(*msg)
