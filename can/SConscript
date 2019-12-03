@@ -18,7 +18,7 @@ libdbc = env.SharedLibrary('libdbc', ["dbc.cc", "parser.cc", "packer.cc", "commo
 
 # packer
 env.Command(['packer_pyx.so'],
-  ['packer_pyx.pyx', 'packer_pyx_setup.py'],
+  [libdbc, 'packer_pyx.pyx', 'packer_pyx_setup.py'],
   "cd opendbc/can && python3 packer_pyx_setup.py build_ext --inplace")
 
 # parser
