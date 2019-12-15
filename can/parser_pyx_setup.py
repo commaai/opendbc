@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sysconfig
+import platform
 from distutils.core import Extension, setup  # pylint: disable=import-error,no-name-in-module
 
 from Cython.Build import cythonize
@@ -50,10 +51,13 @@ setup(name='CAN parser',
             BASEDIR,
             os.path.join(BASEDIR, 'phonelibs', 'capnp-cpp/include'),
           ],
-          extra_link_args=[
-            os.path.join(BASEDIR, 'opendbc', 'can', 'libdbc.so'),
-          ],
+          libraries=["dbc"],
+          library_dirs=["."],
         )
       ),
       nthreads=4,
 )
+
+if platform.system() == "Darwin":
+  os.system("install_name_tool -change opendbc/can/libdbc.dylib "+BASEDIR+"/opendbc/can/libdbc.dylib parser_pyx.so")
+
