@@ -39,6 +39,10 @@ ARCH = subprocess.check_output(["uname", "-m"], encoding='utf8').rstrip()  # pyl
 if ARCH == "aarch64":
   extra_compile_args += ["-Wno-deprecated-register"]
 
+if platform.system() == "Darwin":
+  libdbc = "libdbc.dylib"
+else:
+  libdbc = "libdbc.so"
 
 setup(name='CAN packer',
       cmdclass={'build_ext': BuildExtWithoutPlatformSuffix},
@@ -52,8 +56,9 @@ setup(name='CAN packer',
             BASEDIR,
             os.path.join(BASEDIR, 'phonelibs', 'capnp-cpp/include'),
           ],
-          libraries=["dbc"],
-          library_dirs=["."],
+          extra_link_args=[
+            os.path.join(BASEDIR, 'opendbc', 'can', libdbc),
+          ],
         )
       ),
       nthreads=4,
