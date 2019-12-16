@@ -13,4 +13,5 @@ steps:
 - script: |
     docker run opendbc bash -c "cd opendbc/can/tests/linter_python; PYTHONPATH=/ ./flake8_opendbc.sh"
     docker run opendbc bash -c "cd opendbc/can/tests/linter_python; PYTHONPATH=/ ./pylint_opendbc.sh"
+    docker run opendbc bash -c "cd opendbc/can/tests/; PYTHONPATH=/ ./test_generator.sh"
   displayName: 'Python linter'
