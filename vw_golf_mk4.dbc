@@ -341,7 +341,6 @@ BO_ 1152 Motor_5: 8 XXX
  SG_ Ladekontroll_Lampe : 8|1@1+ (1,0) [0|0] "" XXX
 
 BO_ 896 Motor_3: 8 XXX
- SG_ Drosselklappenpoti : 56|8@1+ (0.4,0) [0|101.6] "%" XXX
  SG_ Motor_Wunschdrehzahl : 48|8@1+ (25,0) [0|6350] "U/min" XXX
  SG_ Motordrehzahlbeeinflussung : 40|8@1+ (0.392,0) [0|100] "%" XXX
  SG_ Kein_Start_Stop : 39|1@1+ (1,0) [0|0] "" XXX
@@ -359,21 +358,22 @@ BO_ 896 Motor_3: 8 XXX
  SG_ Motor_Wunschdrehzahl_Priorit_t : 2|1@1+ (1,0) [0|0] "" XXX
  SG_ Uebertemperaturschutz__Motor_3_ : 1|1@1+ (1,0) [0|0] "" XXX
  SG_ Vorgluehmeldung : 0|1@1+ (1,0) [0|0] "" XXX
+ SG_ Drosselklappenpoti : 56|8@1+ (0.4,0) [0|101.6] "%" XXX
 
 BO_ 648 Motor_2: 8 XXX
  SG_ Minimales_Motormoment_bei_Zuend : 56|8@1+ (0.39,0) [0|99] "MDI" XXX
  SG_ Begrenzungsmoment : 48|8@1+ (0.39,0) [0|99] "MDI" XXX
  SG_ Leerlaufsolldrehzahl__Motor_2_ : 40|8@1+ (10,0) [0|2540] "U/min" XXX
  SG_ Soll_Geschwindigkeit_bei_GRA_Be : 32|8@1+ (1.28,0) [0|325] "km/h" XXX
- SG_ Fahrzeuggeschwindigkeit : 24|8@1+ (1.28,0) [0|325] "km/h" XXX
  SG_ GRA_Status : 22|2@1+ (1,0) [0|0] "" XXX
  SG_ OBD_2_freeze_frame : 21|1@1+ (1,0) [0|0] "" XXX
- SG_ Status_Normalbetrieb : 20|1@1+ (1,0) [0|0] "" XXX
  SG_ Ansteuerung_Klima__4_1_ : 19|1@1+ (1,0) [0|0] "" XXX
  SG_ Fehlerstatus_Kuhlmitteltempera : 18|1@1+ (1,0) [0|0] "" XXX
  SG_ Bremstestschalter : 17|1@1+ (1,0) [0|0] "" XXX
  SG_ Bremslichtschalter : 16|1@1+ (1,0) [0|0] "" XXX
  SG_ Kuehlmitteltemperatur__Motor_2_ : 8|8@1+ (0.75,-48) [-48|142.5] "" XXX
+ SG_ Status_Normalbetrieb : 20|1@1+ (1,0) [0|0] "" XXX
+ SG_ Fahrzeuggeschwindigkeit : 24|8@1+ (1.28,0) [0|325] "km/h" XXX
 
 BO_ 640 Motor_1: 8 XXX
  SG_ Fahrerwunschmoment : 56|8@1+ (0.39,0) [0|99] "MDI" XXX
@@ -597,8 +597,8 @@ BO_ 906 GRA_neu: 4 XXX
  SG_ Kurz_Tip_up : 11|1@1+ (1,0) [0|0] "" XXX
  SG_ Kurz_Tip_down : 10|1@1+ (1,0) [0|0] "" XXX
  SG_ Abbrechen : 9|1@1+ (1,0) [0|0] "" XXX
- SG_ Hauptschalter : 8|1@1+ (1,0) [0|0] "" XXX
  SG_ Checksumme_GRA_Neu : 0|8@1+ (1,0) [0|0] "" XXX
+ SG_ Hauptschalter : 8|1@1+ (1,0) [0|0] "" XXX
 
 BO_ 904 GRA: 3 XXX
  SG_ Checksumme_GRA_alt : 16|8@1+ (1,0) [0|0] "" XXX
@@ -671,8 +671,6 @@ BO_ 912 Gateway_Komfort_1: 6 XXX
  SG_ Anhaenger_erkannt_Gateway : 46|1@1+ (1,0) [0|0] "" XXX
  SG_ ECD_AAG_unplausibel : 45|1@1+ (1,0) [0|0] "" XXX
  SG_ BLS_AAG_unplausibel : 44|1@1+ (1,0) [0|0] "" XXX
- SG_ Zaehler_Anhaenger : 40|4@1+ (1,0) [0|15] "" XXX
- SG_ Frei_Gateway_Komfort_1_4 : 34|6@1+ (1,0) [0|0] "" XXX
  SG_ ECD_ILM_unplausibel : 33|1@1+ (1,0) [0|0] "" XXX
  SG_ BLS_ILM_unplausibel : 32|1@1+ (1,0) [0|0] "" XXX
  SG_ Bremslicht_mitte_defekt : 31|1@1+ (1,0) [0|0] "" XXX
@@ -681,7 +679,6 @@ BO_ 912 Gateway_Komfort_1: 6 XXX
  SG_ Rueckfahrlicht_Gateway : 28|1@1+ (1,0) [0|0] "" XXX
  SG_ Zaehler_Bremslicht : 24|4@1+ (1,0) [0|15] "" XXX
  SG_ Frei_Gateway_Komfort_1_3 : 17|7@1+ (1,0) [0|0] "" XXX
- SG_ Fahrertuerkontakt : 16|1@1+ (1,0) [0|0] "" XXX
  SG_ RDK_Systemfehler : 15|1@1+ (1,0) [0|0] "" XXX
  SG_ RDK_Warnstufe_1 : 14|1@1+ (1,0) [0|0] "" XXX
  SG_ RDK_Warnstufe_2 : 13|1@1+ (1,0) [0|0] "" XXX
@@ -696,6 +693,9 @@ BO_ 912 Gateway_Komfort_1: 6 XXX
  SG_ Licht_1_Botschaft_veraltet : 2|1@1+ (1,0) [0|0] "" XXX
  SG_ Anhaenger_Botschaft_veraltet : 1|1@1+ (1,0) [0|0] "" XXX
  SG_ Reifendruckwarnung_veraltet : 0|1@1+ (1,0) [0|0] "" XXX
+ SG_ Fahrertuerkontakt : 16|1@1+ (1,0) [0|0] "" XXX
+ SG_ Zaehler_Anhaenger : 40|4@1+ (1,0) [0|15] "" XXX
+ SG_ Frei_Gateway_Komfort_1_4 : 34|6@1+ (1,0) [0|0] "" XXX
 
 BO_ 1340 Fahrwerk_1: 1 XXX
  SG_ Frei_Fahrwerk_1_2 : 7|1@1+ (1,0) [0|0] "" XXX
@@ -927,7 +927,6 @@ BO_ 80 Airbag_1: 4 XXX
  SG_ Gurtwarnung_Beifahrer : 15|1@1+ (1,0) [0|0] "" XXX
  SG_ Gurtschalter_Beifahrer : 14|1@1+ (1,0) [0|0] "" XXX
  SG_ Gurtwarnung_Fahrer : 13|1@1+ (1,0) [0|0] "" XXX
- SG_ Gurtschalter_Fahrer : 12|1@1+ (1,0) [0|0] "" XXX
  SG_ Airbag_Systemfehler : 11|1@1+ (1,0) [0|0] "" XXX
  SG_ Kindersitzerkennung : 10|1@1+ (1,0) [0|0] "" XXX
  SG_ Airbag_deaktiviert : 9|1@1+ (1,0) [0|0] "" XXX
@@ -938,6 +937,7 @@ BO_ 80 Airbag_1: 4 XXX
  SG_ Seiten_Crash_Fahrer : 2|1@1+ (1,0) [0|0] "" XXX
  SG_ Heck_Crash : 1|1@1+ (1,0) [0|0] "" XXX
  SG_ Front_Crash : 0|1@1+ (1,0) [0|0] "" XXX
+ SG_ Gurtschalter_Fahrer : 12|1@1+ (1,0) [0|0] "" XXX
 
 BO_ 864 ADR_System: 8 XXX
  SG_ S_Checksumme_ADR_1 : 56|8@1+ (1,0) [0|0] "" XXX
@@ -1021,6 +1021,9 @@ BO_ 208 EPS_1: 8 XXX
  SG_ Steering_Angle_Sign : 44|1@0+ (1,0) [0|1] "" XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
 
+BO_ 1550 Einheiten_1: 2 XXX
+ SG_ MFA_v_Signal_02 : 0|1@1+ (1,0) [0|1] "" XXX
+
 
 
 
@@ -1028,3 +1031,4 @@ CM_ SG_ 210 LM_Offset "Actually centiNewton-meters for ease of calculation witho
 CM_ SG_ 210 Vib_Amp "Steering wheel haptic, amplitude";
 CM_ SG_ 210 Vib_Freq "Steering wheel haptic, frequency";
 CM_ SG_ 210 PQ_HCA_CHECKSUM "Bypassing OP CRC code until it understands PQ XOR";
+CM_ SG_ 1550 MFA_v_Signal_02 "0=km/h, 1=mph";
