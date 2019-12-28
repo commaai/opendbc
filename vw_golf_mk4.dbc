@@ -2,30 +2,38 @@ VERSION ""
 
 
 NS_ :
-	NS_DESC_
-	CM_
-	BA_DEF_
-	BA_
-	VAL_
-	CAT_DEF_
-	CAT_
-	FILTER
-	BA_DEF_DEF_
-	EV_DATA_
-	ENVVAR_DATA_
-	SGTYPE_
-	SGTYPE_VAL_
-	BA_DEF_SGTYPE_
-	BA_SGTYPE_
-	SIG_TYPE_REF_
-	VAL_TABLE_
-	SIG_GROUP_
-	SIG_VALTYPE_
-	SIGTYPE_VALTYPE_
+    NS_DESC_
+    CM_
+    BA_DEF_
+    BA_
+    VAL_
+    CAT_DEF_
+    CAT_
+    FILTER
+    BA_DEF_DEF_
+    EV_DATA_
+    ENVVAR_DATA_
+    SGTYPE_
+    SGTYPE_VAL_
+    BA_DEF_SGTYPE_
+    BA_SGTYPE_
+    SIG_TYPE_REF_
+    VAL_TABLE_
+    SIG_GROUP_
+    SIG_VALTYPE_
+    SIGTYPE_VALTYPE_
+    BO_TX_BU_
+    BA_DEF_REL_
+    BA_REL_
+    BA_DEF_DEF_REL_
+    BU_SG_REL_
+    BU_EV_REL_
+    BU_BO_REL_
+    SG_MUL_VAL_
 
 BS_:
 
-BU_: XXX
+BU_: XXX t _ e f S c a I i
 
 
 BO_ 1394 ZAS_1: 2 XXX
@@ -280,25 +288,11 @@ BO_ 900 Motor_Momente: 8 XXX
  SG_ Momentenangaben_ungenau__Moment : 35|2@1+ (1,0) [0|0] "" XXX
 
 BO_ 1408 Motor_Flexia: 8 XXX
- SG_ Ansaugsystem m0 : 63|1@1+ (1,0) [0|0] "" XXX
- SG_ Hubraum m0 : 56|7@1+ (0.1,0) [0|12.7] "l" XXX
- SG_ Steigung_der_Befuellungskennlin m1 : 56|8@1+ (0.001,0) [0|0.255] "l/mm" XXX
- SG_ Anzahl_Zylinder m0 : 52|4@1+ (1,0) [0|15] "Vent./Zyl." XXX
- SG_ Bewertungsfaktor_Russindex_Turb m1 : 50|6@1+ (0.1,0) [0|6.3] "" XXX
- SG_ Anzahl_Ventile m0 : 49|3@1+ (1,0) [0|7] "Vent./Zyl." XXX
- SG_ Bewertungsfaktor_Verschleissind m1 : 44|6@1+ (0.1,0) [0|6.3] "" XXX
- SG_ Hersteller_Code m1 : 40|4@1+ (1,0) [0|15] "" XXX
- SG_ Motorleistung m0 : 40|9@1+ (1,0) [0|512] "KW" XXX
- SG_ Max_Drehmoment m0 : 32|8@1+ (10,0) [0|2550] "Nm" XXX
- SG_ Normierter_Verbrauch m1 : 32|8@1+ (10,0) [0|2550] "l/Zyl." XXX
- SG_ Oelniveauschwelle m1 : 24|8@1+ (0.25,0) [0|63.75] "cm" XXX
- SG_ Drehzahl_MaxNorm m0 : 24|8@1+ (100,0) [0|25500] "U/min" XXX
  SG_ Verschleissindex : 16|8@1+ (1,0) [0|254] "" XXX
  SG_ Russindex : 8|8@1+ (1,0) [0|254] "" XXX
  SG_ Verbrennungsart : 7|1@1+ (1,0) [0|0] "" XXX
  SG_ Frei_Motor_Flexia_1 : 4|3@1+ (1,0) [0|0] "" XXX
  SG_ Zaehler_Motor_Flexia : 1|3@1+ (1,0) [0|15] "" XXX
- SG_ Multiplex_Schalter_Motor_Flexia M : 0|1@1+ (1,0) [0|0] "" XXX
 
 BO_ 1416 Motor_7: 8 XXX
  SG_ Frei_Motor_7_3 : 40|24@1+ (1,0) [0|0] "" XXX
@@ -345,11 +339,6 @@ BO_ 1152 Motor_5: 8 XXX
  SG_ E_Gas_Lampe : 10|1@1+ (1,0) [0|0] "" XXX
  SG_ Vorgluehlampe__Motor_5_ : 9|1@1+ (1,0) [0|0] "" XXX
  SG_ Ladekontroll_Lampe : 8|1@1+ (1,0) [0|0] "" XXX
- SG_ Multiplex_Code M : 6|2@1+ (1,0) [0|0] "" XXX
- SG_ Multiplex_Info_norm__Verbrauch m3 : 0|6@1+ (20,0) [0|1260] "l/Zyl" XXX
- SG_ Multiplex_Info_Motortyp m2 : 0|6@1+ (1,0) [0|0] "" XXX
- SG_ Multiplex_Info_Drehzahl_MD_Max m1 : 0|6@1+ (100,0) [0|6300] "U/min" XXX
- SG_ Multiplex_Info_Max_Drehmoment m0 : 0|6@1+ (10,0) [0|630] "Nm" XXX
 
 BO_ 896 Motor_3: 8 XXX
  SG_ Drosselklappenpoti : 56|8@1+ (0.4,0) [0|101.6] "%" XXX
@@ -385,11 +374,6 @@ BO_ 648 Motor_2: 8 XXX
  SG_ Bremstestschalter : 17|1@1+ (1,0) [0|0] "" XXX
  SG_ Bremslichtschalter : 16|1@1+ (1,0) [0|0] "" XXX
  SG_ Kuehlmitteltemperatur__Motor_2_ : 8|8@1+ (0.75,-48) [-48|142.5] "" XXX
- SG_ Multiplex_Code_Motor_2 M : 6|2@1+ (1,0) [0|0] "" XXX
- SG_ Multiplex_Info_Motorcode__4_x_ m1 : 0|6@1+ (1,0) [0|0] "" XXX
- SG_ Multiplex_Info_Getriebecode m2 : 0|6@1+ (1,0) [0|0] "" XXX
- SG_ Multiplex_Info_Max_Moment__Norm m3 : 0|6@1+ (10,0) [0|630] "Nm" XXX
- SG_ Multiplex_Info_CAN_Stand m0 : 0|6@1+ (1,0) [0|0] "" XXX
 
 BO_ 640 Motor_1: 8 XXX
  SG_ Fahrerwunschmoment : 56|8@1+ (0.39,0) [0|99] "MDI" XXX
@@ -404,7 +388,6 @@ BO_ 640 Motor_1: 8 XXX
  SG_ Time_Out_Bremsen_Botschaft : 4|1@1+ (1,0) [0|0] "" XXX
  SG_ Kupplungsschalter : 3|1@1+ (1,0) [0|0] "" XXX
  SG_ Kickdownschalter : 2|1@1+ (1,0) [0|0] "" XXX
- SG_ Fahrpedalwert_ungenau__Motor_1_ M : 1|1@1+ (1,0) [0|0] "" XXX
  SG_ Leergasinformation : 0|1@1+ (1,0) [0|0] "" XXX
 
 BO_ 262 Master_3: 8 XXX
@@ -532,25 +515,6 @@ BO_ 1312 Kombi_3: 8 XXX
  SG_ Standzeit : 24|15@1+ (4,0) [0|131068] "sec" XXX
  SG_ Frei_Kombi_3_1 : 20|4@1+ (1,0) [0|0] "" XXX
  SG_ Schluesselinfo : 16|4@1+ (1,0) [0|15] "" XXX
- SG_ Kombi_Multiplex_Code M : 14|2@1+ (1,0) [0|0] "" XXX
- SG_ Kombi_Verbauliste_Niveauregulie m3 : 11|1@1+ (1,0) [0|0] "" XXX
- SG_ Kombi_Multiplex_Marke m1 : 11|3@1+ (1,0) [0|0] "" XXX
- SG_ Kombi_Verbauliste_Lenkhilfe m3 : 10|1@1+ (1,0) [0|0] "" XXX
- SG_ Kombi_Verbauliste_Dieselpumpe m3 : 9|1@1+ (1,0) [0|0] "" XXX
- SG_ Kombi_Verbauliste_Lenkwinkel m3 : 8|1@1+ (1,0) [0|0] "" XXX
- SG_ Kombi_Multiplex_Baureihe m1 : 8|3@1+ (1,0) [0|0] "" XXX
- SG_ Kombi_Multiplex_Laendervariante m0 : 8|6@1+ (1,0) [0|0] "" XXX
- SG_ Kombi_Verbauliste_Allrad m3 : 7|1@1+ (1,0) [0|0] "" XXX
- SG_ Kombi_Verbauliste_Bordnetz m3 : 6|1@1+ (1,0) [0|0] "" XXX
- SG_ Kombi_Verbauliste_ACC m3 : 5|1@1+ (1,0) [0|0] "" XXX
- SG_ Kombi_Verbauliste_Airbag m3 : 4|1@1+ (1,0) [0|0] "" XXX
- SG_ Kombi_Multiplex_Generation m1 : 4|4@1+ (1,0) [0|0] "" XXX
- SG_ Kombi_Verbauliste_Klima m3 : 3|1@1+ (1,0) [0|0] "" XXX
- SG_ Kombi_Verbauliste_ABS m3 : 2|1@1+ (1,0) [0|0] "" XXX
- SG_ Kombi_Verbauliste_Motor m3 : 0|1@1+ (1,0) [0|0] "" XXX
- SG_ Kombi_Multiplex_Derivat m1 : 0|4@1+ (1,0) [0|0] "" XXX
- SG_ Kombi_Multiplex_Sprachvariante m0 : 0|8@1+ (1,0) [0|0] "" XXX
- SG_ Kombi_Multiplex_Reifenumfang m2 : 0|12@1+ (1,0) [0|4095] "mm" XXX
 
 BO_ 1056 Kombi_2: 8 XXX
  SG_ Frei_Kombi_2_2 : 56|8@1+ (1,0) [0|0] "" XXX
@@ -876,9 +840,6 @@ BO_ 1440 Bremse_2: 8 XXX
  SG_ Wegimpulse_Vorderachse : 40|11@1+ (1,0) [0|2047] "" XXX
  SG_ Zeitstempel : 24|16@1+ (1,0) [0|65535] "tics" XXX
  SG_ mittlere_Raddrehzahl__Bremse_2 : 9|15@1+ (0.002,0) [0|65.278] "U/sec" XXX
- SG_ Querbeschl__TimerTic M : 8|1@1+ (1,0) [0|0] "" XXX
- SG_ Timer m1 : 0|8@1+ (0.04,0) [0|10.2] "usec" XXX
- SG_ Querbeschleunigung m0 : 0|8@1+ (0.01,-1.27) [-1.27|1.27] "g" XXX
 
 BO_ 416 Bremse_1: 8 XXX
  SG_ Geschwindigkeitsersatzwert : 63|1@1+ (1,0) [0|0] "" XXX
@@ -1041,11 +1002,13 @@ BO_ 1324 ADR_1: 8 XXX
  SG_ Momentenanforderung_ADR : 0|8@1+ (0.39,0) [0|99] "MDI" XXX
 
 BO_ 210 PQ_HCA: 8 XXX
- SG_ HCA_Torque : 16|15@1+ (1,0) [0|32767] "" XXX
- SG_ UNK_Bit : 34|1@0+ (1,0) [0|1] "" XXX
- SG_ HCA_Torque_VZ : 31|1@0+ (1,0) [0|1] "" XXX
- SG_ PQ_HCA_BZ : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ PQ_HCA_Checksum : 0|4@1+ (1,0) [0|15] "" XXX
+ SG_ HCA_Status : 15|4@0+ (1,0) [0|15] "" XXX
+ SG_ LM_Offset : 16|15@1+ (0.03052,0) [0|300] "nm" XXX
+ SG_ LM_Offsign : 31|1@0+ (1,0) [0|1] "" XXX
+ SG_ Vib_Amp : 36|4@1+ (0.5,0) [0|7.5] "Nm" XXX
+ SG_ Vib_Freq : 32|4@1+ (4,0) [0|60] "Hz" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ PQ_HCA_CHECKSUM : 0|8@1+ (1,0) [0|15] "" XXX
 
 BO_ 1490 VIN_1: 8 XXX
 
@@ -1057,4 +1020,11 @@ BO_ 208 EPS_1: 8 XXX
  SG_ Steering_Angle : 32|12@1+ (1,0) [0|4095] "" XXX
  SG_ Steering_Angle_Sign : 44|1@0+ (1,0) [0|1] "" XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
- 
+
+
+
+
+CM_ SG_ 210 LM_Offset "Actually centiNewton-meters for ease of calculation without FP math in Panda";
+CM_ SG_ 210 Vib_Amp "Steering wheel haptic, amplitude";
+CM_ SG_ 210 Vib_Freq "Steering wheel haptic, frequency";
+CM_ SG_ 210 PQ_HCA_CHECKSUM "Bypassing OP CRC code until it understands PQ XOR";
