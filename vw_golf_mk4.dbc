@@ -1033,11 +1033,15 @@ BO_ 1386 ACC_XX02: 8 XXX
  SG_ XXACCSetPoint : 24|8@1+ (1,0) [0|255] "km/h" XXX
 
 BO_ 1470 LDW_1: 8 XXX
- SG_ NEW_SIGNAL_3 : 16|8@1+ (1,0) [0|255] "" XXX
  SG_ XXRight_Lane_Status : 0|2@1+ (1,0) [0|3] "" XXX
  SG_ XXLeft_Lane_Status : 2|2@1+ (1,0) [0|3] "" XXX
  SG_ XX_DLCorTLC1 : 24|8@1+ (1,0) [0|255] "" XXX
  SG_ XX_2DLCorTLC : 32|8@1+ (1,0) [0|15] "" XXX
+ SG_ XXDLCTLC_Side : 14|1@0+ (1,0) [0|1] "" XXX
+ SG_ XXLDW_SET_ME_1 : 18|1@0+ (1,0) [0|1] "" XXX
+ SG_ Kombi_Lamp_Green : 20|1@0+ (1,0) [0|1] "" XXX
+ SG_ Kombi_Lamp_Orange : 19|1@0+ (1,0) [0|1] "" XXX
+ SG_ XXLDW_MAYBE_WARNING : 16|1@0+ (1,0) [0|1] "" XXX
 
 
 
