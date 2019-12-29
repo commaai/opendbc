@@ -1032,10 +1032,12 @@ BO_ 872 ACC_XX01: 8 XXX
 BO_ 1386 ACC_XX02: 8 XXX
  SG_ XXACCSetPoint : 24|8@1+ (1,0) [0|255] "km/h" XXX
 
-BO_ 1470 NEW_MSG_2: 8 XXX
- SG_ NEW_SIGNAL_1 : 24|8@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_2 : 32|8@1+ (1,0) [0|255] "" XXX
+BO_ 1470 LDW_1: 8 XXX
  SG_ NEW_SIGNAL_3 : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ XXRight_Lane_Status : 0|2@1+ (1,0) [0|3] "" XXX
+ SG_ XXLeft_Lane_Status : 2|2@1+ (1,0) [0|3] "" XXX
+ SG_ XX_DLCorTLC1 : 24|8@1+ (1,0) [0|255] "" XXX
+ SG_ XX_2DLCorTLC : 32|8@1+ (1,0) [0|15] "" XXX
 
 
 
