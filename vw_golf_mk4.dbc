@@ -1024,6 +1024,19 @@ BO_ 208 EPS_1: 8 XXX
 BO_ 1550 Einheiten_1: 2 XXX
  SG_ MFA_v_Signal_02 : 0|1@1+ (1,0) [0|1] "" XXX
 
+BO_ 872 ACC_XX01: 8 XXX
+ SG_ XXAccelValue : 24|10@1+ (1,0) [0|255] "" XXX
+ SG_ XXDecelGradient : 40|8@1+ (1,0) [0|255] "" XXX
+ SG_ XXAccelGradient : 48|8@1+ (1,0) [0|255] "" XXX
+
+BO_ 1386 ACC_XX02: 8 XXX
+ SG_ XXACCSetPoint : 24|8@1+ (1,0) [0|255] "km/h" XXX
+
+BO_ 1470 NEW_MSG_2: 8 XXX
+ SG_ NEW_SIGNAL_1 : 24|8@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_2 : 32|8@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_3 : 16|8@1+ (1,0) [0|255] "" XXX
+
 
 
 
@@ -1032,3 +1045,4 @@ CM_ SG_ 210 Vib_Amp "Steering wheel haptic, amplitude";
 CM_ SG_ 210 Vib_Freq "Steering wheel haptic, frequency";
 CM_ SG_ 210 PQ_HCA_CHECKSUM "Bypassing OP CRC code until it understands PQ XOR";
 CM_ SG_ 1550 MFA_v_Signal_02 "0=km/h, 1=mph";
+CM_ SG_ 1386 XXACCSetPoint "255=unset";
