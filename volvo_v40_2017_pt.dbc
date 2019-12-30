@@ -196,7 +196,7 @@ CM_ SG_ 85 BrakePedalActive "Brake pedal pushed";
 CM_ SG_ 85 NEW_SIGNAL_1 "Not yet figured out.";
 CM_ SG_ 8 SteeringDirection "1=Right turn, 0=Left turn";
 CM_ SG_ 101 NEW_SIGNAL_1 "Rate of something?";
-CM_ SG_ 192 TransmissionGear "0 = 1st gear, 1= 2nd gear... Onlyh activated in tip-mode";
+CM_ SG_ 192 TransmissionGear "0 = 1st gear, 1= 2nd gear...";
 CM_ SG_ 681 TurnSignal "0 = Nothing, 1= Left, 3=Right";
 CM_ SG_ 681 HighBeamOn "1=HighBeam On, 0=HighBeam Off";
 CM_ SG_ 48 FCWSomething "All bit set during fcw";
