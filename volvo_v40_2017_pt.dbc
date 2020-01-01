@@ -94,8 +94,8 @@ BO_ 624 fromFSM2: 8 XXX
  SG_ NEW_SIGNAL_1 : 23|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 640 fromFSM3: 8 XXX
+ SG_ SpeedTarget : 47|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_1 : 49|10@0+ (1,0) [0|255] "" XXX
- SG_ SpeedTarget : 40|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 853 fromFSM4: 8 XXX
  SG_ text_under_sign : 37|1@0+ (1,0) [0|1] "" XXX
