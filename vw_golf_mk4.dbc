@@ -1030,7 +1030,15 @@ BO_ 872 ACC_XX01: 8 XXX
  SG_ XXAccelGradient : 48|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 1386 ACC_XX02: 8 XXX
- SG_ XXACCSetPoint : 24|8@1+ (1,0) [0|255] "km/h" XXX
+ SG_ XXINV_CTR_OR_CKSUM : 4|4@1+ (1,0) [0|15] "" XXX
+ SG_ XXUnk_Always_1 : 19|1@0+ (1,0) [0|1] "" XXX
+ SG_ XXCOUNTER : 60|4@1+ (1,0) [0|15] "" XXX
+ SG_ Lead_Car_Distance : 40|4@1+ (1,0) [0|15] "" XXX
+ SG_ XXCC_and_ACC_Status_Related : 0|4@1+ (1,0) [0|15] "" XXX
+ SG_ CC_Set_Speed : 24|8@1+ (1,0) [0|255] "km/h" XXX
+ SG_ XXUnk_CC_and_ACC_Info : 35|4@1+ (1,0) [0|15] "" XXX
+ SG_ XXACC_Status : 8|2@1+ (1,0) [0|3] "" XXX
+ SG_ XXCC_Status : 48|4@1+ (1,0) [0|15] "" XXX
 
 BO_ 1470 LDW_1: 8 XXX
  SG_ XXRight_Lane_Status : 0|2@1+ (1,0) [0|3] "" XXX
@@ -1051,4 +1059,7 @@ CM_ SG_ 210 Vib_Amp "Steering wheel haptic, amplitude";
 CM_ SG_ 210 Vib_Freq "Steering wheel haptic, frequency";
 CM_ SG_ 210 PQ_HCA_CHECKSUM "Bypassing OP CRC code until it understands PQ XOR";
 CM_ SG_ 1550 MFA_v_Signal_02 "0=km/h, 1=mph";
-CM_ SG_ 1386 XXACCSetPoint "255=unset";
+CM_ SG_ 1386 XXCC_and_ACC_Status_Related "Looks almost like crude accel/decel, perhaps accel and overrun";
+CM_ SG_ 1386 CC_Set_Speed "255=unset, both CC and ACC";
+CM_ SG_ 1386 XXACC_Status "ACC only, probably reflects radar control status";
+CM_ SG_ 1386 XXCC_Status "CC only, probably reflects ECU control status";
