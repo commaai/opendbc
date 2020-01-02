@@ -89,6 +89,7 @@ BO_ 208 fromFSMSteeringRequest: 8 XXX
  SG_ SET_X_25 : 63|6@0+ (1,0) [0|63] "" XXX
 
 BO_ 352 fromFSM1: 8 XXX
+ SG_ NEW_SIGNAL_1 : 55|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 624 fromFSM2: 8 XXX
  SG_ NEW_SIGNAL_1 : 23|8@0+ (1,0) [0|255] "" XXX
@@ -206,6 +207,7 @@ CM_ SG_ 208 Unkown "Used in checksum calculation, Seems to limit torque based on
 CM_ SG_ 208 LKAAngleRequest "+ = right, - = left";
 CM_ SG_ 208 Checksum "Checksum calculated as a one-complement addition of LKAAngleRequest+LKADirection+Unkown, Zeros used to pad missing bits.";
 CM_ SG_ 208 LKADirection "0 = No lka active, 1=LKA steer right, 2=LKA steer left";
+CM_ SG_ 352 NEW_SIGNAL_1 "Turned one pulling out. Got LKA service needed can this be the one?";
 CM_ SG_ 640 SpeedTarget "SpeedTarget ACC (noisy bf starting acc Jumps from 0->252->0)";
 CM_ SG_ 853 TargetSpeedOdo "Probably target speed odo";
 CM_ SG_ 853 speed_sign_recognition "Speed sign recognition.";
