@@ -72,10 +72,10 @@ BO_ 304 VehicleSpeed0: 8 XXX
  SG_ NEW_SIGNAL_1 : 55|16@0+ (1,0) [0|65535] "" XXX
 
 BO_ 48 fromFSM0: 8 XXX
+ SG_ ACC_STATUS_ACTIVE : 58|1@0+ (1,0) [0|1] "" XXX
  SG_ FCWSomething : 25|3@0+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_1 : 55|8@0+ (1,0) [0|255] "" XXX
  SG_ ACC_STATUS_ONOFF : 57|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_STATUS_ACTIVE : 58|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 208 fromFSMSteeringRequest: 8 XXX
  SG_ SET_X_E3 : 7|8@0+ (1,0) [0|255] "" XXX
@@ -104,11 +104,11 @@ BO_ 853 fromFSM4: 8 XXX
  SG_ text_under_sign : 37|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_6 : 39|3@0+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_5 : 47|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_4 : 55|16@0+ (1,0) [0|65535] "" XXX
  SG_ NEW_SIGNAL_3 : 31|8@0+ (1,0) [0|255] "" XXX
  SG_ LaneMarkingsOdo : 15|4@0+ (1,0) [0|7] "" XXX
  SG_ NEW_SIGNAL_2 : 11|4@0+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_4 : 55|16@0+ (1,0) [0|65535] "" XXX
 
 BO_ 709 ACC: 8 XXX
  SG_ SpeedTargetACC : 0|9@0+ (0.5,0) [0|511] "" XXX
@@ -137,18 +137,17 @@ BO_ 16 CCButtons: 8 XXX
  SG_ ACCResumeBtn : 61|1@0+ (1,0) [0|1] "" XXX
  SG_ ACCMinusBtn : 48|1@0+ (1,0) [0|1] "" XXX
  SG_ TimeGapIncreaseBtn : 49|1@0+ (1,0) [0|1] "" XXX
- SG_ TimeGapDecreaseBtn : 50|1@0+ (1,0) [0|1] "" XXX
+ SG_ TimgeGapDecreaseBtn : 50|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 245 wheelspeed0: 8 XXX
- SG_ wheel_speed_xx0 : 39|16@0+ (1,0) [0|65535] "" XXX
- SG_ wheel_speed_xx1 : 55|16@0+ (1,0) [0|65535] "" XXX
- SG_ counter1 : 23|16@0+ (1,0) [0|65535] "" XXX
+ SG_ counter1 : 21|6@0+ (1,0) [0|65535] "" XXX
  SG_ counter0 : 7|16@0+ (1,0) [0|65535] "" XXX
+ SG_ WhlSpdLF : 39|16@0+ (1,0) [0|65535] "" XXX
+ SG_ WhlSpdRF : 55|16@0+ (1,0) [0|65535] "" XXX
 
 BO_ 288 wheel_speed1: 8 XXX
- SG_ NEW_SIGNAL_1 : 7|16@0+ (1,0) [0|65535] "" XXX
- SG_ wheel_speed3 : 39|16@0+ (1,0) [0|65535] "" XXX
- SG_ wheel_speed4 : 55|16@0+ (1,0) [0|65535] "" XXX
+ SG_ WhlSpdLR : 39|16@0+ (1,0) [0|65535] "" XXX
+ SG_ WhlSpdRR : 55|16@0+ (1,0) [0|65535] "" XXX
 
 BO_ 1344 NEW_MSG_1: 8 XXX
  SG_ NEW_SIGNAL_1 : 4|13@0+ (1,0) [0|8191] "" XXX
@@ -200,9 +199,9 @@ CM_ SG_ 101 NEW_SIGNAL_1 "Rate of something?";
 CM_ SG_ 192 TransmissionGear "0 = 1st gear, 1= 2nd gear...";
 CM_ SG_ 681 TurnSignal "0 = Nothing, 1= Left, 3=Right";
 CM_ SG_ 681 HighBeamOn "1=HighBeam On, 0=HighBeam Off";
+CM_ SG_ 48 ACC_STATUS_ACTIVE "Active?";
 CM_ SG_ 48 FCWSomething "All bit set during fcw";
 CM_ SG_ 48 ACC_STATUS_ONOFF "Turns one after pressing on/off button on steering wheeel";
-CM_ SG_ 48 ACC_STATUS_ACTIVE "Active?";
 CM_ SG_ 208 Unkown "Used in checksum calculation, Seems to limit torque based on the number.";
 CM_ SG_ 208 LKAAngleRequest "+ = right, - = left";
 CM_ SG_ 208 Checksum "Checksum calculated as a one-complement addition of LKAAngleRequest+LKADirection+Unkown, Zeros used to pad missing bits.";
@@ -226,7 +225,12 @@ CM_ SG_ 16 ACCStopBtn "ACC Stop button pressed";
 CM_ SG_ 16 ACCResumeBtn "ACC Resume button pressed";
 CM_ SG_ 16 ACCMinusBtn "ACC Minus (-) button pressed";
 CM_ SG_ 16 TimeGapIncreaseBtn "Increase the time gap on ACC";
-CM_ SG_ 16 TimeGapDecreaseBtn "Decrease the time gap on ACC";
+CM_ SG_ 16 TimgeGapDecreaseBtn "Decrease the time gap on ACC";
+CM_ SG_ 245 counter0 "Speed based counter";
+CM_ SG_ 245 WhlSpdLF "Wheel speed left front";
+CM_ SG_ 245 WhlSpdRF "Wheel speed right front";
+CM_ SG_ 288 WhlSpdLR "Wheel speed left rear";
+CM_ SG_ 288 WhlSpdRR "Wheel speed right rear";
 CM_ SG_ 64 RPMSomething "TransmissionOutput?";
 CM_ SG_ 272 VehicleSpeedSignal "km/h";
 CM_ SG_ 432 BrakePress0 "Brake being pressed";
