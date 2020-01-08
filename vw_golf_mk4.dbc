@@ -1053,7 +1053,10 @@ BO_ 1470 LDW_1: 8 XXX
 
 BO_ 978 EPS_2: 8 XXX
  SG_ Rack_Healthy : 32|1@0+ (1,0) [0|1] "" XXX
- SG_ Unknown_HCA_Unsupported : 28|1@0+ (1,0) [0|1] "" XXX
+ SG_ XXHCA_Various_States : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ XXCounter1 : 0|4@1+ (1,0) [0|15] "" XXX
+ SG_ XXCounter2 : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_1 : 16|4@1+ (1,0) [0|15] "" XXX
 
 
 
