@@ -1051,6 +1051,10 @@ BO_ 1470 LDW_1: 8 XXX
  SG_ Kombi_Lamp_Orange : 19|1@0+ (1,0) [0|1] "" XXX
  SG_ XXLDW_MAYBE_WARNING : 16|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 978 EPS_2: 8 XXX
+ SG_ Rack_Healthy : 32|1@0+ (1,0) [0|1] "" XXX
+ SG_ Unknown_HCA_Unsupported : 28|1@0+ (1,0) [0|1] "" XXX
+
 
 
 
