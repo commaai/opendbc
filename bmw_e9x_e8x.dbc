@@ -33,7 +33,7 @@ NS_ :
 
 BS_:
 
-BU_: XXX EON OpenActuator
+BU_: XXX EON
 
 
 BO_ 170 AccPedal: 8 XXX
@@ -58,11 +58,13 @@ BO_ 404 CruiseControl: 4 XXX
  SG_ notCancel_0xF : 7|4@0+ (1,0) [0|15] ""  XXX
  SG_ setMe_0xFC : 31|8@0+ (1,0) [0|255] ""  XXX
  SG_ requests_0xF : 15|4@0+ (1,0) [0|15] ""  XXX
+ SG_ plus5mph_request : 17|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ minus5mph_request : 19|1@0+ (1,0) [0|0] "" Vector__XXX
 
 BO_ 512 CruiseControlStatus: 8 XXX
  SG_ CruiseControlInactiveFlag : 12|1@0+ (1,0) [0|1] ""  XXX
  SG_ CruiseCoontrolActiveFlag : 13|1@0+ (1,0) [0|1] ""  XXX
- SG_ CruiseControlSetpointSpeed : 7|8@0+ (0.25,0) [0|255] ""  XXX
+ SG_ CruiseControlSetpointSpeed : 7|8@0+ (0.25,0) [0|255] "mph"  XXX
 
 BO_ 168 Brake: 8 XXX
  SG_ Brake_active2 : 62|1@0+ (1,0) [0|1] ""  XXX
@@ -85,7 +87,7 @@ BO_ 403 DynamicCruiseControlStatus: 8 XXX
 BO_ 201 SteeringWheelAngle_DSC: 8 XXX
  SG_ Counter1 : 23|4@0+ (1,0) [0|15] ""  XXX
  SG_ WeirdCounter : 44|4@1+ (1,0) [0|3] ""  XXX
- SG_ PositionNegLow : 24|11@1- (1,0) [0|1] ""  XXX
+ SG_ SteeringPositionComplementLow : 24|11@1- (1,0) [0|1] ""  XXX
  SG_ SteeringPosition : 0|16@1- (0.0439453125,0) [-600|600] "deg"  XXX
 
 BO_ 206 WheelSpeeds: 8 XXX
@@ -110,7 +112,7 @@ BO_ 196 SteeringWheelAngle: 7 XXX
 
 BO_ 180 WheelTorqueDriveTrain1: 8 XXX
 
-BO_ 182 TorqueDemandDSC_CruiseControl: 8 XXX
+BO_ 182 DynamicCruiseControlTorqueDemand: 8 XXX
 
 BO_ 186 TransmissionData: 8 XXX
 
@@ -128,6 +130,7 @@ BO_ 690 WheelPressure: 8 XXX
 BO_ 691 AccelerationData: 8 XXX
 
 BO_ 408 GearSelectorSwitch: 8 XXX
+ SG_ Gear : 0|8@1+ (1,0) [0|0] "" Vector__XXX
 
 BO_ 422 Distance: 8 XXX
 
@@ -244,27 +247,6 @@ BO_ 205 Unknown_cd: 8 XXX
  SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] ""  XXX
  SG_ NEW_SIGNAL_7 : 63|8@0- (1,0) [0|255] ""  XXX
 
-BO_ 250 OpenActuatorStatus: 8 OpenActuator
- SG_ DutyCycle : 16|8@1- (100,0) [-100|100] "perc" Vector__XXX
- SG_ MotorTorque : 24|16@1- (1,0) [0|0] "cNm" Vector__XXX
- SG_ Voltage : 4|4@1+ (1,10) [10|16] "V" Vector__XXX
- SG_ Temperature : 56|8@1+ (1,0) [0|200] "C" Vector__XXX
- SG_ Counter01 : 0|4@1+ (1,0) [0|0] "" Vector__XXX
- SG_ Counter02 : 8|4@1+ (1,0) [0|0] "" Vector__XXX
- SG_ PositionEncoder : 40|16@1- (1,0) [-220|220] "deg" Vector__XXX
- SG_ TorqueControlActive : 15|1@1+ (1,0) [0|0] "" Vector__XXX
- SG_ FreeWheelingActive : 14|1@1+ (1,0) [0|0] "" Vector__XXX
- SG_ ErrorBits : 12|2@1+ (1,0) [0|0] "" Vector__XXX
-
-BO_ 251 OpenActuatorRequest: 7 EON
- SG_ MotorTorqueReq : 23|16@0- (0.03125,0) [-100|100] "cNm" Vector__XXX
- SG_ Counter01 : 3|4@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Counter02 : 11|4@0+ (1,0) [0|0] "" Vector__XXX
- SG_ PositionTarget : 39|16@0- (1,0) [-220|220] "deg" Vector__XXX
- SG_ TorqueControlEnbl : 15|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ FreeWheelingEnbl : 14|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ ErrorBits : 13|2@0+ (1,0) [0|0] "" Vector__XXX
-
 
 
 CM_ SG_ 170 ThrottlelPressed "Active when accelerator pedal pressed or cruise control drives";
@@ -282,4 +264,6 @@ CM_ SG_ 404 notCancel_0xF "0xF unless cancel is requested then 0x0";
 CM_ SG_ 168 Brake_active2 "";
 CM_ SG_ 168 BrakePressed "Brake when driver presses the brake";
 CM_ SG_ 403 CruiseControlSetpointSpeed "Speed target";
+CM_ SG_ 408 Gear "This is just provision, needs to be reverse engineered";
+VAL_ 408 Gear 1 "D" 2 "S" 3 "N" 4 "R" 5 "P" ;
 
