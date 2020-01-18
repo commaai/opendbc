@@ -173,7 +173,12 @@ BO_ 1432 ServicesDKG: 8 XXX
 
 BO_ 309 CrashDisconnectControl: 8 XXX
 
-BO_ 502 Blinking: 8 XXX
+BO_ 502 TurnSignals: 2 XXX
+ SG_ TurnSignalIdle : 9|1@0+ (1,0) [0|1] "" XXX
+ SG_ TurnSignalActive : 8|1@0+ (1,0) [0|1] "" XXX
+ SG_ RightTurn : 5|1@0+ (1,0) [0|1] "" XXX
+ SG_ LeftTurn : 4|1@1+ (1,0) [0|1] "" XXX
+ SG_ HoldActivated : 0|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 514 Dimming: 8 XXX
 
@@ -267,4 +272,9 @@ CM_ SG_ 168 Brake_active2 "";
 CM_ SG_ 168 BrakePressed "Brake when driver presses the brake";
 CM_ SG_ 403 CruiseControlSetpointSpeed "Speed target";
 CM_ SG_ 408 Gear "This is just provision, needs to be reverse engineered";
+CM_ SG_ 502 TurnSignalIdle "Turn signal off";
+CM_ SG_ 502 TurnSignalActive "Turn signal on or transitioning";
+CM_ SG_ 502 RightTurn "Indicates right blinker or when steering returning right clears left blinker";
+CM_ SG_ 502 LeftTurn "Indicates left blinker or when steering returning left clears right blinker";
+CM_ SG_ 502 HoldActivated "Spikes down if blinker cleared with timeout or turn. Stays off if blinker cleared with stalk";
 VAL_ 408 Gear 1 "D" 2 "S" 3 "N" 4 "R" 5 "P" ;
