@@ -51,10 +51,10 @@ BO_ 118 RPM_RELATED: 8 XXX
  SG_ NEW_SIGNAL_2 : 19|12@0+ (1,0) [0|4095] "" XXX
 
 BO_ 514 ENGINE_DATA: 8 XXX
- SG_ PEDAL_GAS : 39|12@0+ (0.002778,0) [0|255] "%" XXX
  SG_ CHKSUM : 63|8@0+ (1,0) [0|127] "" XXX
  SG_ RPM : 7|16@0+ (0.25,0) [0|8500] "rpm" XXX
  SG_ SPEED : 23|16@0+ (0.01,0) [0|32767] "kph" XXX
+ SG_ PEDAL_GAS : 39|12@0+ (1,0) [0|255] "%" XXX
 
 BO_ 357 PEDALS: 8 XXX
  SG_ NEW_SIGNAL_6 : 31|4@0+ (1,0) [0|1] "" XXX
@@ -64,11 +64,11 @@ BO_ 357 PEDALS: 8 XXX
  SG_ CHKSUM : 63|8@0+ (1,0) [0|15] "" XXX
  SG_ STANDSTILL : 26|1@0+ (1,0) [0|16777215] "" XXX
  SG_ NEW_SIGNAL_3 : 23|8@0+ (1,0) [0|3] "" XXX
- SG_ GEAR : 48|5@1+ (1,0) [0|255] "" XXX
  SG_ BRAKE_ON : 4|1@0+ (1,0) [0|1] "" XXX
  SG_ NO_BRAKE : 6|1@0+ (1,0) [0|7] "" XXX
  SG_ BRAKE_ON_2 : 7|1@1+ (1,0) [0|255] "" XXX
  SG_ NO_BRAKE_2 : 15|1@0+ (1,0) [0|7] "" XXX
+ SG_ GEAR : 48|5@1+ (1,0) [0|255] "" XXX
 
 BO_ 533 WHEEL_SPEEDS: 8 XXX
  SG_ FL : 7|16@0+ (0.01,-100) [0|16383] "kph" XXX
@@ -615,14 +615,14 @@ BO_ 1179 2017_7: 8 XXX
 
 BO_ 1435 2017_8: 8 XXX
 
-BO_ 253 NEW_MSG_7: 8 XXX
+BO_ 253 GAS: 8 XXX
  SG_ NEW_SIGNAL_1 : 16|1@0+ (1,0) [0|65535] "" XXX
  SG_ CTR : 23|4@0+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_2 : 41|1@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_3 : 55|8@0+ (1,0) [0|255] "" XXX
  SG_ CRZ_NOT_ACTIVE : 61|1@0+ (1,0) [0|255] "" XXX
+ SG_ GAS_CMD : 55|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 359 NEW_MSG_11: 8 XXX
+BO_ 359 MORE_GAS: 8 XXX
  SG_ NEW_SIGNAL_1 : 15|1@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_2 : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ CTR : 31|4@0+ (1,0) [0|255] "" XXX
@@ -745,6 +745,7 @@ BO_ 1248 MOB4: 8 XXX
 
 
 
+CM_ SG_ 357 GEAR "13P, 26R, 13N, 24D";
 CM_ SG_ 605 PED_BRAKE "3: no brake, 4: brake";
 CM_ SG_ 605 BRAKE_WARNING "Flashing brake warning and audible alert for potential forward collision";
 CM_ SG_ 1157 SBS_WARNING_DISTANCE "1 far, 2 mid, 3 near";
