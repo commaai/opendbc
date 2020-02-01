@@ -43,8 +43,12 @@ BO_ 16 NEW_MSG_1: 8 XXX
  SG_ SteeringDirection : 6|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_1 : 22|15@0+ (1,0) [0|65535] "" XXX
 
+BO_ 32 NEW_MSG_2: 8 XXX
+ SG_ AcceleratorPedal : 17|10@0+ (0.1,0) [0|1023] "" XXX
+
 
 
 
 CM_ SG_ 16 RateOfChangeOrTorque "Rate of change? Torque?";
 CM_ SG_ 16 SteeringDirection "0 = CCW, 1=CW (turning left or right of center)";
+CM_ SG_ 32 AcceleratorPedal "Unsure about scaling.";
