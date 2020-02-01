@@ -50,6 +50,9 @@ BO_ 648 NEW_MSG_3: 8 XXX
  SG_ Counter : 0|3@1+ (1,0) [0|7] "" XXX
  SG_ Brake : 24|8@1+ (1,4) [0|255] "" XXX
 
+BO_ 465 NEW_MSG_4: 8 XXX
+ SG_ ZeroWhileBraking : 3|1@0+ (1,0) [0|1] "" XXX
+
 
 
 
@@ -57,3 +60,4 @@ CM_ SG_ 16 RateOfChangeOrTorque "Rate of change? Torque?";
 CM_ SG_ 16 SteeringDirection "0 = CCW, 1=CW (turning left or right of center)";
 CM_ SG_ 32 AcceleratorPedal "Unsure about scaling.";
 CM_ SG_ 648 Brake "Something with brake pedal, presure, position.";
+CM_ SG_ 465 ZeroWhileBraking "Turns zero while braking";
