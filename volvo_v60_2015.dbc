@@ -56,6 +56,9 @@ BO_ 465 NEW_MSG_4: 8 XXX
 BO_ 298 NEW_MSG_5: 8 XXX
  SG_ ZeroWhileBraking : 38|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 609 NEW_MSG_6: 8 XXX
+ SG_ SteeringAngle : 21|14@0+ (1,0) [0|65535] "" XXX
+
 
 
 
