@@ -61,6 +61,7 @@ BO_ 609 SteeringServo: 8 XXX
 
 BO_ 582 NEW_MSG_6: 8 XXX
  SG_ SteeringWheelAngle : 23|16@0+ (1,0) [0|65535] "" XXX
+ SG_ SteeringWheelRateOfChange : 0|9@0+ (1,0) [0|255] "" XXX
 
 
 
@@ -71,3 +72,4 @@ CM_ SG_ 32 AcceleratorPedal "Unsure about scaling.";
 CM_ SG_ 648 Brake "Something with brake pedal, presure, position.";
 CM_ SG_ 465 ZeroWhileBraking "Turns zero while braking";
 CM_ SG_ 298 ZeroWhileBraking "Turns zero while braking";
+CM_ SG_ 582 SteeringWheelRateOfChange "Some rate of change for steering wheel?";
