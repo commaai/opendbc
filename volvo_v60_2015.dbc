@@ -1,0 +1,50 @@
+VERSION ""
+
+
+NS_ :
+    NS_DESC_
+    CM_
+    BA_DEF_
+    BA_
+    VAL_
+    CAT_DEF_
+    CAT_
+    FILTER
+    BA_DEF_DEF_
+    EV_DATA_
+    ENVVAR_DATA_
+    SGTYPE_
+    SGTYPE_VAL_
+    BA_DEF_SGTYPE_
+    BA_SGTYPE_
+    SIG_TYPE_REF_
+    VAL_TABLE_
+    SIG_GROUP_
+    SIG_VALTYPE_
+    SIGTYPE_VALTYPE_
+    BO_TX_BU_
+    BA_DEF_REL_
+    BA_REL_
+    BA_DEF_DEF_REL_
+    BU_SG_REL_
+    BU_EV_REL_
+    BU_BO_REL_
+    SG_MUL_VAL_
+
+BS_:
+
+BU_: XXX
+
+
+BO_ 16 NEW_MSG_1: 8 XXX
+ SG_ Counter0 : 3|8@0+ (1,0) [0|511] "" XXX
+ SG_ SteeringWheelAngle : 53|14@0+ (1,0) [0|65535] "" XXX
+ SG_ RateOfChangeOrTorque : 39|16@0+ (1,-32768) [0|65535] "" XXX
+ SG_ SteeringDirection : 6|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_1 : 22|15@0+ (1,0) [0|65535] "" XXX
+
+
+
+
+CM_ SG_ 16 RateOfChangeOrTorque "Rate of change? Torque?";
+CM_ SG_ 16 SteeringDirection "0 = CCW, 1=CW (turning left or right of center)";
