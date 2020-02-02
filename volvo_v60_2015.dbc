@@ -69,6 +69,9 @@ BO_ 608 fromFSM1: 8 XXX
 
 BO_ 610 fromFSM2: 8 XXX
  SG_ Unkown : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ Checksum : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ LKAAngleRequest : 29|14@0+ (1,0) [0|16383] "" XXX
+ SG_ LKADirection : 41|2@0+ (1,0) [0|3] "" XXX
 
 BO_ 624 fromFSM3: 8 XXX
 
@@ -88,3 +91,4 @@ CM_ SG_ 648 Brake "Something with brake pedal, presure, position.";
 CM_ SG_ 465 ZeroWhileBraking "Turns zero while braking";
 CM_ SG_ 298 ZeroWhileBraking "Turns zero while braking";
 CM_ SG_ 582 SteeringWheelRateOfChange "Some rate of change for steering wheel?";
+CM_ SG_ 610 LKADirection "0=None, 1=Right, 2=Left";
