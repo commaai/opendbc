@@ -63,6 +63,20 @@ BO_ 582 NEW_MSG_6: 8 XXX
  SG_ SteeringWheelAngle : 23|16@0+ (1,0) [0|65535] "" XXX
  SG_ SteeringWheelRateOfChange : 0|9@0+ (1,0) [0|255] "" XXX
 
+BO_ 81 fromFSM0: 8 XXX
+
+BO_ 608 fromFSM1: 8 XXX
+
+BO_ 610 fromFSM2: 8 XXX
+
+BO_ 624 fromFSM3: 8 XXX
+
+BO_ 794 fromFSM4: 8 XXX
+
+BO_ 821 fromFSM5: 8 XXX
+
+BO_ 1021 fromFSM6: 8 XXX
+
 
 
 
