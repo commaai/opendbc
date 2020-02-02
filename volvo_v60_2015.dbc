@@ -68,6 +68,7 @@ BO_ 81 fromFSM0: 8 XXX
 BO_ 608 fromFSM1: 8 XXX
 
 BO_ 610 fromFSM2: 8 XXX
+ SG_ Unkown : 23|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 624 fromFSM3: 8 XXX
 
