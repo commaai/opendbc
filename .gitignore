@@ -3,10 +3,11 @@
 *.tmp
 *.dylib
 .*.swp
+.DS_Store
+
 can/*.so
 can/build/
 can/obj/
 can/packer_pyx.cpp
 can/parser_pyx.cpp
 can/packer_impl.cpp
-generator/.DS_Store
