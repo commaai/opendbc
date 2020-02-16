@@ -112,7 +112,7 @@ BO_ 523 CruiseThrottle: 6 XXX
  SG_ unsure3 : 43|4@0+ (1,0) [0|15] "" XXX
  SG_ unsure : 7|10@0+ (1,0) [0|63] "" XXX
 
-BO_ 1108 Doors: 8 XXX
+BO_ 1108 DoorsLights: 8 XXX
  SG_ DOOR_CLOSED_RR : 40|1@0+ (1,0) [0|1] "" XXX
  SG_ DOOR_OPEN_RR : 41|1@0+ (1,0) [0|1] "" XXX
  SG_ DOOR_CLOSED_RL : 42|1@0+ (1,0) [0|1] "" XXX
@@ -122,6 +122,8 @@ BO_ 1108 Doors: 8 XXX
  SG_ DOOR_CLOSED_FR : 46|1@0+ (1,0) [0|3] "" XXX
  SG_ DOOR_OPEN_FR : 47|1@0+ (1,0) [0|3] "" XXX
  SG_ BOOT_OPEN : 55|1@0+ (1,0) [0|1] "" XXX
+ SG_ BRAKE_LIGHT : 54|1@0+ (1,0) [0|1] "" XXX
+ SG_ USER_BRAKE_PRESSED : 23|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 403 LKAS_OLD: 8 XXX
  SG_ Checksum : 63|8@0+ (1,0) [0|255] "" XXX
@@ -152,4 +154,3 @@ BO_ 438 ProPilot: 8 XXX
  SG_ CRUISE_ACTIVATED : 38|1@0+ (1,0) [0|3] "" XXX
  SG_ STEER_STATUS : 51|1@1+ (1,0) [0|3] "" XXX
  SG_ CRUISE_ON : 36|1@0+ (1,0) [0|255] "" XXX
- 
