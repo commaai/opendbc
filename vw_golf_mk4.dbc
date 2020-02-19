@@ -1001,72 +1001,100 @@ BO_ 1324 ADR_1: 8 XXX
  SG_ Zaehler_ADR_1 : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Momentenanforderung_ADR : 0|8@1+ (0.39,0) [0|99] "MDI" XXX
 
-BO_ 210 PQ_HCA: 8 XXX
- SG_ HCA_Status : 15|4@0+ (1,0) [0|15] "" XXX
- SG_ LM_Offset : 16|15@1+ (0.03052,0) [0|300] "nm" XXX
- SG_ LM_Offsign : 31|1@0+ (1,0) [0|1] "" XXX
- SG_ Vib_Amp : 36|4@1+ (0.5,0) [0|7.5] "Nm" XXX
- SG_ Vib_Freq : 32|4@1+ (4,0) [0|60] "Hz" XXX
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ PQ_HCA_CHECKSUM : 0|8@1+ (1,0) [0|15] "" XXX
-
-BO_ 1490 VIN_1: 8 XXX
-
-BO_ 208 EPS_1: 8 XXX
- SG_ Counter1 : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ Counter2 : 15|4@0+ (1,0) [0|15] "" XXX
- SG_ Driver_Torque_Sign : 26|1@1+ (1,0) [0|1] "" XXX
- SG_ Driver_Torque : 16|10@1+ (1,0) [0|1023] "" XXX
- SG_ Steering_Angle_Sign : 44|1@0+ (1,0) [0|1] "" XXX
- SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ Steering_Angle : 32|12@1+ (0.15,0) [0|615] "" XXX
-
 BO_ 1550 Einheiten_1: 2 XXX
- SG_ MFA_v_Signal_02 : 0|1@1+ (1,0) [0|1] "" XXX
+ SG_ MFA_v_Einheit_02 : 0|1@1+ (1,0) [0|1] "" XXX
 
-BO_ 872 ACC_XX01: 8 XXX
- SG_ XXAccelValue : 24|10@1+ (1,0) [0|255] "" XXX
- SG_ XXDecelGradient : 40|8@1+ (1,0) [0|255] "" XXX
- SG_ XXAccelGradient : 48|8@1+ (1,0) [0|255] "" XXX
+BO_ 872 ACC_System: 8 XXX
+ SG_ ACS_Checksum : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ ACS_Zaehler : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ ACS_Sta_ADR : 12|2@1+ (1,0) [0|3] "" XXX
+ SG_ ACS_ADR_Schub : 14|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACS_Schubabsch : 15|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACS_StSt_Info : 16|2@1+ (1,0) [0|3] "" XXX
+ SG_ ACS_MomEingriff : 18|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACS_Typ_ACC : 19|2@1+ (1,0) [0|3] "" XXX
+ SG_ ACS_FreigSollB : 23|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACS_Sollbeschl : 24|11@1+ (0.005,-7.22) [-7.22|3.005] "Unit_MeterPerSeconSquar" XXX
+ SG_ ACS_Anhaltewunsch : 38|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACS_Fehler : 39|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACS_zul_Regelabw : 40|8@1+ (1,0.005) [0|1.265] "Unit_MeterPerSeconSquar" XXX
+ SG_ ACS_max_AendGrad : 48|8@1+ (1,0.02) [0.02|5.06] "Unit_MeterPerSeconSquar" XXX
 
-BO_ 1386 ACC_XX02: 8 XXX
- SG_ XXINV_CTR_OR_CKSUM : 4|4@1+ (1,0) [0|15] "" XXX
- SG_ XXUnk_Always_1 : 19|1@0+ (1,0) [0|1] "" XXX
- SG_ XXCOUNTER : 60|4@1+ (1,0) [0|15] "" XXX
- SG_ Lead_Car_Distance : 40|4@1+ (1,0) [0|15] "" XXX
- SG_ XXCC_and_ACC_Status_Related : 0|4@1+ (1,0) [0|15] "" XXX
- SG_ CC_Set_Speed : 24|8@1+ (1,0) [0|255] "km/h" XXX
- SG_ XXUnk_CC_and_ACC_Info : 35|4@1+ (1,0) [0|15] "" XXX
- SG_ XXACC_Status : 8|2@1+ (1,0) [0|3] "" XXX
- SG_ XXCC_Status : 48|4@1+ (1,0) [0|15] "" XXX
+BO_ 1386 ACC_GRA_Anziege: 8 XXX
+ SG_ ACA_Checksum : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ ACA_StaACC : 8|3@1+ (1,0) [0|7] "" XXX
+ SG_ ACA_ID_StaACC : 11|5@1+ (1,0) [0|31] "" XXX
+ SG_ ACA_Fahrerhinw : 16|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACA_AnzDisplay : 17|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACA_Zeitluecke : 18|4@1+ (1,0) [0|15] "" XXX
+ SG_ ACA_V_Wunsch : 24|8@1+ (1,0) [0|255] "Unit_KiloMeterPerHour" XXX
+ SG_ ACA_kmh_mph : 32|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACA_Akustik1 : 33|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACA_Akustik2 : 34|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACA_PrioDisp : 35|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACA_gemZeitl : 40|4@1+ (1,0) [0|15] "" XXX
+ SG_ ACA_ACC_Verz : 44|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACA_StaGRA : 48|3@1+ (1,0) [0|7] "" XXX
+ SG_ ACA_ID_StaGRA : 51|5@1+ (1,0) [0|31] "" XXX
+ SG_ ACA_Codierung : 56|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACA_Tachokranz : 57|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACA_Aend_Zeitluecke : 58|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACA_Zaehler : 60|4@1+ (1,0) [0|15] "" XXX
+
+BO_ 208 Lenkhilfe_3: 8 XXX
+ SG_ LH3_Checksumme : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ LH3_BS_Spiegel : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ LH3_Zaehler : 12|4@4+ (1,0) [0|15] "" XXX
+ SG_ LH3_LM : 16|10@1+ (1,0) [0|1023] "" XXX
+ SG_ LH3_LMSign : 26|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH3_LMValid : 27|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH3_Sta_DSR : 28|4@1+ (1,0) [0|15] "" XXX
+ SG_ LH3_BLW : 32|12@1+ (0.15,0) [0|615] "" XXX
+ SG_ LH3_BLWSign : 44|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH3_BLWValid : 45|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH3_Lenkungstyp : 46|2@1+ (1,0) [0|3] "" XXX
+
+BO_ 978 Lenkhilfe_2: 8 XXX
+ SG_ LH2_Checksumme : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ LH2_Zaehler : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ LH2_Geradeaus : 12|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH2_Sta_Charisma : 13|3@1+ (1,0) [0|7] "" XXX
+ SG_ LH2_Sta_HCA : 16|4@1+ (1,0) [0|15] "" XXX
+ SG_ LH2_Ausg_LW1 : 20|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH2_Ausg_LW1_gue : 21|1@1+ (1,0) [0|1] "" XXX
+ SG_ LH2_StatEPS_PLA : 24|4@1+ (1,0) [0|15] "" XXX
+ SG_ LH2_aktLenkeingriff : 32|8@1+ (1,0) [0|255] "" XXX
+ SG_ LH2_PLA_Err : 48|4@1+ (1,0) [0|15] "" XXX
+ SG_ LH2_PLA_Abbr: 52|4@1+ (1,0) [0|15] "" XXX
+
+BO_ 210 HCA_1: 5 XXX
+ SG_ HCA_Checksumme : 0|8@1+ (1,0) [0|15] "" XXX
+ SG_ HCA_Zaehler : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ HCA_Status : 12|4@1+ (1,0) [0|15] "" XXX
+ SG_ LM_Offset : 16|15@1+ (0.03125,0) [0|300] "cNm" XXX
+ SG_ LM_OffSign : 31|1@1+ (1,0) [0|1] "" XXX
+ SG_ Vib_Freq : 32|4@1+ (4,0) [0|60] "Hz" XXX
+ SG_ Vib_Amp : 36|4@1+ (0.5,0) [0|7.5] "Nm" XXX
 
 BO_ 1470 LDW_1: 8 XXX
- SG_ XXRight_Lane_Status : 0|2@1+ (1,0) [0|3] "" XXX
- SG_ XXLeft_Lane_Status : 2|2@1+ (1,0) [0|3] "" XXX
- SG_ XX_DLCorTLC1 : 24|8@1+ (1,0) [0|255] "" XXX
- SG_ XX_2DLCorTLC : 32|8@1+ (1,0) [0|15] "" XXX
- SG_ XXDLCTLC_Side : 14|1@0+ (1,0) [0|1] "" XXX
- SG_ XXLDW_SET_ME_1 : 18|1@0+ (1,0) [0|1] "" XXX
- SG_ Kombi_Lamp_Green : 20|1@0+ (1,0) [0|1] "" XXX
+ SG_ Right_Lane_Status : 0|2@1+ (1,0) [0|3] "" XXX
+ SG_ Left_Lane_Status : 2|2@1+ (1,0) [0|3] "" XXX
+ SG_ LDW_Direction : 14|1@0+ (1,0) [0|1] "" XXX
+ SG_ SET_ME_X1 : 18|1@0+ (1,0) [0|1] "" XXX
  SG_ Kombi_Lamp_Orange : 19|1@0+ (1,0) [0|1] "" XXX
- SG_ XXLDW_MAYBE_WARNING : 16|1@0+ (1,0) [0|1] "" XXX
-
-BO_ 978 EPS_2: 8 XXX
- SG_ Rack_Healthy : 32|1@0+ (1,0) [0|1] "" XXX
- SG_ XXHCA_Various_States : 31|8@0+ (1,0) [0|255] "" XXX
- SG_ XXCounter1 : 0|4@1+ (1,0) [0|15] "" XXX
- SG_ XXCounter2 : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_1 : 16|4@1+ (1,0) [0|15] "" XXX
+ SG_ Kombi_Lamp_Green : 20|1@0+ (1,0) [0|1] "" XXX
+ SG_ XX_LDW_Maybe_Warning : 16|1@0+ (1,0) [0|1] "" XXX
+ SG_ XX_DLCORTLC1 : 24|8@1+ (1,0) [0|255] "" XXX
+ SG_ XX_DLCORTLC2 : 32|8@1+ (1,0) [0|255] "" XXX
 
 
-
-
-CM_ SG_ 210 LM_Offset "Actually centiNewton-meters for ease of calculation without FP math in Panda";
+CM_ SG_ 210 LM_Offset "centiNewton-meters for ease of calculation without FP math in Panda";
 CM_ SG_ 210 Vib_Amp "Steering wheel haptic, amplitude";
 CM_ SG_ 210 Vib_Freq "Steering wheel haptic, frequency";
-CM_ SG_ 210 PQ_HCA_CHECKSUM "Bypassing OP CRC code until it understands PQ XOR";
+CM_ SG_ 1386 XXACCSetPoint "255=unset";
+CM_ SG_ 1470 LDW_Direction "0=right,1=left";
+CM_ SG_ 1470 XX_DLCORTLC1 "Might be DLC or TLC";
+CM_ SG_ 1470 XX_DLCORTLC2 "Might be DLC or TLC, might have wrong size";
 CM_ SG_ 1550 MFA_v_Signal_02 "0=km/h, 1=mph";
-CM_ SG_ 1386 XXCC_and_ACC_Status_Related "Looks almost like crude accel/decel, perhaps accel and overrun";
-CM_ SG_ 1386 CC_Set_Speed "255=unset, both CC and ACC";
-CM_ SG_ 1386 XXACC_Status "ACC only, probably reflects radar control status";
-CM_ SG_ 1386 XXCC_Status "CC only, probably reflects ECU control status";
+
+VAL_ 1088 Waehlhebelposition__Getriebe_1_ 8 "P" 7 "R" 6 "N" 5 "D" 9 "U";
