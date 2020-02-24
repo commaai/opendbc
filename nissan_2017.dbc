@@ -46,27 +46,27 @@ BO_ 645 WheelspeedRear: 8 XXX
  SG_ RL : 23|16@0+ (0.00555,0) [0|65535] "KPH" XXX
 
 BO_ 768 STEER_TORQUE: 2 XXX
- SG_ STEERING_TORQUE : 0|7@1+ (1,0) [0|127] "" XXX
+ SG_ STEERING_TORQUE : 6|7@0+ (1,0) [0|127] "" XXX
  SG_ DriverTouchingWheel : 15|1@0+ (-1,1) [0|7] "" XXX
 
 BO_ 459 Maybe_RegenBraking: 8 XXX
 
 BO_ 372 Maybe_Gear_Selector: 8 XXX
- SG_ Counter : 32|4@1+ (1,0) [0|15] "" XXX
+ SG_ Counter : 35|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 374 Maybe_Motor_RPM_or_Speed: 8 XXX
- SG_ Counter : 48|4@1+ (1,0) [0|15] "" XXX
+ SG_ Counter : 51|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 460 Maybe_Brake_Related: 8 XXX
 
 BO_ 2 SteeringWheel: 8 XXX
- SG_ Steering_RateChange : 23|8@0+ (1,0) [0|255] "" XXX
- SG_ Always_07 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ Steering_RateChange : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ Always_07 : 24|8@1+ (1,0) [0|255] "" XXX
  SG_ Steering_Angle : 0|16@1- (-0.1,0) [0|65535] "" XXX
- SG_ Counter : 35|4@0+ (1,0) [0|15] "" XXX
+ SG_ Counter : 32|4@1+ (1,0) [0|15] "" XXX
 
 BO_ 384 Maybe_PowerInfo: 8 XXX
- SG_ Unknown_Timer_PowerInfo : 48|4@1+ (1,0) [0|15] "" XXX
+ SG_ Unknown_Timer_PowerInfo : 51|4@0+ (1,0) [0|15] "" XXX
  SG_ EnginePower : 27|12@0- (1,0) [0|1] "" XXX
  SG_ RequestedAccel : 23|12@0- (1,0) [0|4294967295] "" XXX
 
@@ -81,7 +81,7 @@ BO_ 666 WheelspeedFront: 8 XXX
  SG_ FL : 23|16@0+ (0.00555,0) [0|65535] "KPH" XXX
 
 BO_ 389 Steering: 8 XXX
- SG_ COUNTER : 48|4@1+ (1,0) [0|15] "" XXX
+ SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
  SG_ LKAS_ACTIVE : 37|1@0+ (1,0) [0|3] "" XXX
  SG_ LKAS_Torque : 47|8@0+ (1,0) [0|255] "" XXX
  SG_ CRC : 63|8@0+ (1,0) [0|127] "" XXX
@@ -103,7 +103,7 @@ BO_ 523 CruiseThrottle: 6 XXX
  SG_ PROPILOT_BUTTON : 8|1@0+ (1,0) [0|1] "" XXX
  SG_ CANCEL_BUTTON : 9|1@0+ (1,0) [0|1] "" XXX
  SG_ GAS_PEDAL_INVERTED : 37|10@0+ (1,0) [0|1023] "" XXX
- SG_ unsure2 : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ unsure2 : 23|8@0+ (1,0) [0|255] "" XXX
  SG_ SET_BUTTON : 11|1@0+ (1,0) [0|1] "" XXX
  SG_ RES_BUTTON : 12|1@0+ (1,0) [0|1] "" XXX
  SG_ FOLLOW_DISTANCE_BUTTON : 10|1@0+ (1,0) [0|1] "" XXX
@@ -128,7 +128,7 @@ BO_ 1108 DoorsLights: 8 XXX
 BO_ 403 LKAS_OLD: 8 XXX
  SG_ Checksum : 63|8@0+ (1,0) [0|255] "" XXX
  SG_ Angle_2 : 32|13@0+ (1,-4000) [0|63] "" XXX
- SG_ Counter : 48|4@1+ (1,0) [0|15] "" XXX
+ SG_ Counter : 51|4@0+ (1,0) [0|15] "" XXX
  SG_ Angle_1 : 10|13@0+ (0.12,-480) [0|65535] "" XXX
  SG_ Steering_Torque : 7|13@0+ (-1,4000) [0|65535] "" XXX
  SG_ Torque_Command : 29|13@0+ (1,-4000) [0|255] "" XXX
@@ -148,7 +148,7 @@ BO_ 438 ProPilot: 8 XXX
  SG_ NEW_SIGNAL_8 : 63|8@0+ (1,0) [0|7] "" XXX
  SG_ Counter : 55|4@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_6 : 47|8@0+ (1,0) [0|255] "" XXX
- SG_ SET_3 : 32|2@1+ (1,0) [0|15] "" XXX
+ SG_ SET_3 : 33|2@0+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_1 : 7|12@0- (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_3 : 23|12@0- (-1,0) [0|255] "" XXX
  SG_ CRUISE_ACTIVATED : 38|1@0+ (1,0) [0|3] "" XXX
