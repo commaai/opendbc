@@ -216,7 +216,7 @@ BO_ 801 ES_DashStatus: 8 XXX
  SG_ Far_Distance : 56|4@1+ (1,0) [0|15] "" XXX
  SG_ Car_Follow : 52|1@1+ (1,0) [0|3] "" XXX
  SG_ ACC_Distance : 28|3@1+ (1,0) [0|3] "" XXX
- SG_ ACC_Hold : 60|4@1+ (1,0) [0|15] "" XXX
+ SG_ ACC_State : 60|4@1+ (1,0) [0|15] "" XXX
 
 BO_ 802 ES_LKAS_State: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
@@ -363,7 +363,7 @@ BO_ 1787 NEW_MSG_45: 8 XXX
 
 CM_ SG_ 940 FOG_LIGHTS2 "yellow fog light in the dash";
 CM_ SG_ 940 Highbeam "01 = low beam, 11 = high beam";
-CM_ SG_ 801 ACC_Hold "0 = No Hold, 3 = Hold";
+CM_ SG_ 801 ACC_State "0 = Normal, 3 = Hold";
 CM_ SG_ 802 Vehicle_In_Front_Has_Moved "Crosstrek 2018 = car in front has moved";
 CM_ SG_ 805 NEW_SIGNAL_3 "always 3";
 CM_ SG_ 805 NEW_SIGNAL_4 "always 1";
