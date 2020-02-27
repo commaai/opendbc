@@ -81,7 +81,13 @@ BO_ 821 untitled: 8 XXX
 
 BO_ 1021 fromFSM5: 8 XXX
 
-
+BO_ 295 CCButtons: 8 XXX
+ SG_ ACCMinusBtn : 48|1@0+ (1,0) [0|1] "" XXX
+ SG_ TimeGapIncreaseBtn : 49|1@0+ (1,0) [0|1] "" XXX
+ SG_ TimeGapDecreaseBtn : 50|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACCSetBtn : 63|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACCResumeBtn : 61|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACCOnOffBtn : 59|1@0+ (1,0) [0|1] "" XXX
 
 
 CM_ SG_ 16 RateOfChangeOrTorque "Rate of change? Torque?";
@@ -92,3 +98,9 @@ CM_ SG_ 465 ZeroWhileBraking "Turns zero while braking";
 CM_ SG_ 298 ZeroWhileBraking "Turns zero while braking";
 CM_ SG_ 582 SteeringWheelRateOfChange "Some rate of change for steering wheel?";
 CM_ SG_ 610 LKADirection "0=None, 1=Right, 2=Left";
+CM_ SG_ 295 ACCMinusBtn "ACC Minus (-) button pressed";
+CM_ SG_ 295 TimeGapIncreaseBtn "Increase the time gap on ACC";
+CM_ SG_ 295 TimeGapDecreaseBtn "Decrease the time gap on ACC";
+CM_ SG_ 295 ACCSetBtn "Acc Set button (+) pressed";
+CM_ SG_ 295 ACCResumeBtn "ACC Resume button pressed";
+CM_ SG_ 295 ACCOnOffBtn "Cruise control on/off button pressed";
