@@ -66,6 +66,7 @@ BO_ 582 NEW_MSG_6: 8 XXX
 BO_ 81 fromFSM0: 8 XXX
 
 BO_ 608 fromFSM1: 8 XXX
+ SG_ TimeGapMaybe : 0|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 610 fromFSM2: 8 XXX
  SG_ Unkown : 23|8@0+ (1,0) [0|255] "" XXX
@@ -105,6 +106,7 @@ CM_ SG_ 648 Brake "Something with brake pedal, presure, position.";
 CM_ SG_ 465 ZeroWhileBraking "Turns zero while braking";
 CM_ SG_ 298 ZeroWhileBraking "Turns zero while braking";
 CM_ SG_ 582 SteeringWheelRateOfChange "Some rate of change for steering wheel?";
+CM_ SG_ 608 TimeGapMaybe "When ACC turned on goes from 255 -> 2 Then from 2->1 when pressing longer time gap.";
 CM_ SG_ 610 LKADirection "0=None, 1=Right, 2=Left";
 CM_ SG_ 295 ACCMinusBtn "ACC Minus (-) button pressed";
 CM_ SG_ 295 ACCSetBtn "Acc Set button (+) pressed";
