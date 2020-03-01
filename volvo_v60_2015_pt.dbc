@@ -33,15 +33,15 @@ NS_ :
 
 BS_:
 
-BU_: XXX
+BU_: XXX FSM CEM PSCM
 
 
-BO_ 16 NEW_MSG_1: 8 XXX
+BO_ 16 SteeringAngle: 8 XXX
  SG_ Counter0 : 3|8@0+ (1,0) [0|511] "" XXX
- SG_ SteeringWheelAngle : 53|14@0+ (1,0) [0|65535] "" XXX
  SG_ RateOfChangeOrTorque : 39|16@0+ (1,-32768) [0|65535] "" XXX
- SG_ SteeringDirection : 6|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_1 : 22|15@0+ (1,0) [0|65535] "" XXX
+ SG_ SteeringDirection : 6|1@0+ (1,0) [0|1] "" XXX
+ SG_ SteeringWheelAngle : 53|14@0+ (0.037,0) [0|65535] "degrees" XXX
 
 BO_ 32 NEW_MSG_2: 8 XXX
  SG_ AcceleratorPedal : 17|10@0+ (0.1,0) [0|1023] "" XXX
@@ -51,38 +51,41 @@ BO_ 648 NEW_MSG_3: 8 XXX
  SG_ Brake : 24|8@1+ (1,4) [0|255] "" XXX
 
 BO_ 465 NEW_MSG_4: 8 XXX
- SG_ ZeroWhileBraking : 3|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_1 : 55|16@0+ (1,0) [0|4095] "" XXX
 
 BO_ 298 NEW_MSG_5: 8 XXX
- SG_ ZeroWhileBraking : 38|1@0+ (1,0) [0|1] "" XXX
+ SG_ EngineRpm : 52|13@0+ (1,0) [0|8000] "" XXX
 
-BO_ 609 SteeringServo: 8 XXX
- SG_ SteeringAngle : 21|14@0+ (1,0) [0|65535] "" XXX
+BO_ 609 fromServo1: 8 PSCM
+ SG_ SteeringAngle : 21|14@0+ (0.04,-408.32) [0|65535] "deg" XXX
 
-BO_ 582 NEW_MSG_6: 8 XXX
- SG_ SteeringWheelAngle : 23|16@0+ (1,0) [0|65535] "" XXX
+BO_ 582 WheelAngle: 8 XXX
+ SG_ SteeringWheelAngle : 23|16@0+ (0.04,-1310.72) [-1310.72|1310.72] "deg" XXX
+ SG_ lka_torque : 35|12@0+ (1,-2000) [0|65535] "" XXX
+ SG_ LKAActive : 49|1@0+ (1,0) [0|1] "" XXX
  SG_ SteeringWheelRateOfChange : 0|9@0+ (1,0) [0|255] "" XXX
+ SG_ TurnDirection : 2|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 81 fromFSM0: 8 XXX
+BO_ 81 fromFSM0: 8 FSM
+ SG_ ACCStatus : 18|3@0+ (1,0) [0|7] "" XXX
 
-BO_ 608 fromFSM1: 8 XXX
+BO_ 608 fromFSM1: 8 FSM
  SG_ TimeGapMaybe : 0|8@1+ (1,0) [0|255] "" XXX
 
-BO_ 610 fromFSM2: 8 XXX
- SG_ Unkown : 23|8@0+ (1,0) [0|255] "" XXX
- SG_ Checksum : 55|8@0+ (1,0) [0|255] "" XXX
- SG_ LKADirection : 41|2@0+ (1,0) [0|3] "" XXX
- SG_ LKAAngleRequest : 29|14@0+ (0.04,-327.68) [0|16383] "" XXX
+BO_ 610 fromFSMSteeringRequest: 8 FSM
+ SG_ Unkown : 23|8@0+ (1,-128) [0|255] "" PSCM
+ SG_ Checksum : 55|8@0+ (1,0) [0|255] "" PSCM
+ SG_ LKAAngleRequest : 29|14@0+ (0.04,-327.68) [0|16383] "" PSCM
+ SG_ LKADirection : 41|2@0+ (1,0) [0|3] "" PSCM
 
-BO_ 624 fromFSM3: 8 XXX
+BO_ 624 fromFSM3: 8 FSM
 
-BO_ 794 fromFSM4: 8 XXX
+BO_ 794 fromFSM4: 8 FSM
+ SG_ NEW_SIGNAL_1 : 47|16@0+ (1,0) [0|16383] "" XXX
 
-BO_ 821 untitled: 8 XXX
+BO_ 1021 fromFSM5: 8 FSM
 
-BO_ 1021 fromFSM5: 8 XXX
-
-BO_ 295 CCButtons: 8 XXX
+BO_ 295 CCButtons: 8 CEM
  SG_ ACCMinusBtn : 48|1@0+ (1,0) [0|1] "" XXX
  SG_ ACCSetBtn : 63|1@0+ (1,0) [0|1] "" XXX
  SG_ ACCOnOffBtn : 59|1@0+ (1,0) [0|1] "" XXX
@@ -96,6 +99,28 @@ BO_ 295 CCButtons: 8 XXX
  SG_ ACCMinusBtnInv : 32|1@0+ (1,0) [0|1] "" XXX
  SG_ TimeGapIncreaseBtnInv : 33|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 544 wheelspeed1: 8 XXX
+ SG_ WhlSpdRR : 39|16@0+ (0.01,-327.68) [0|65535] "" XXX
+ SG_ WhlSpdLR : 55|16@0+ (0.01,-327.68) [0|65535] "" XXX
+
+BO_ 565 wheelspeed0: 8 XXX
+ SG_ WhlSpdLF : 55|16@0+ (0.01,-327.68) [0|65535] "" XXX
+ SG_ WhlSpdRF : 39|16@0+ (0.01,-327.68) [0|65535] "" XXX
+
+BO_ 923 NEW_MSG_1: 8 XXX
+ SG_ NEW_SIGNAL_1 : 15|16@0+ (1,0) [0|65535] "" XXX
+
+BO_ 277 NEW_MSG_7: 8 XXX
+ SG_ NEW_SIGNAL_1 : 39|16@0+ (1,0) [0|65535] "" XXX
+
+BO_ 336 NEW_MSG_8: 8 XXX
+
+BO_ 328 NEW_MSG_9: 8 XXX
+ SG_ VehSpeed : 55|16@0+ (0.01,0) [0|65535] "" XXX
+
+BO_ 1039 MiscCarInfo: 8 XXX
+ SG_ TurnSignal : 33|2@0+ (1,0) [0|3] "" XXX
+
 
 
 
@@ -103,9 +128,12 @@ CM_ SG_ 16 RateOfChangeOrTorque "Rate of change? Torque?";
 CM_ SG_ 16 SteeringDirection "0 = CCW, 1=CW (turning left or right of center)";
 CM_ SG_ 32 AcceleratorPedal "Unsure about scaling.";
 CM_ SG_ 648 Brake "Something with brake pedal, presure, position.";
-CM_ SG_ 465 ZeroWhileBraking "Turns zero while braking";
-CM_ SG_ 298 ZeroWhileBraking "Turns zero while braking";
-CM_ SG_ 582 SteeringWheelRateOfChange "Some rate of change for steering wheel?";
+CM_ SG_ 298 EngineRpm "Might be engine rpm. But behaves abit weird.";
+CM_ SG_ 582 SteeringWheelAngle "SteeringWheelAngle CW= <0 CCW= >0";
+CM_ SG_ 582 LKAActive "Seems one when lka active.";
+CM_ SG_ 582 SteeringWheelRateOfChange "Some rate of change for steering wheel? Torque?";
+CM_ SG_ 582 TurnDirection "0=CCW, 1=CW";
+CM_ SG_ 81 ACCStatus "0=Acc Unavailable, 1=???, 2=Acc Ready, 3,4=???, 6,7= Acc Active ";
 CM_ SG_ 608 TimeGapMaybe "When ACC turned on goes from 255 -> 2 Then from 2->1 when pressing longer time gap.";
 CM_ SG_ 610 LKADirection "0=None, 1=Right, 2=Left";
 CM_ SG_ 295 ACCMinusBtn "ACC Minus (-) button pressed";
@@ -120,3 +148,4 @@ CM_ SG_ 295 TimeGapIncreaseBtn "Increase the time gap on ACC";
 CM_ SG_ 295 TimeGapDecreaseBtn "Decrease the time gap on ACC";
 CM_ SG_ 295 ACCMinusBtnInv "Active zero when button pressed.";
 CM_ SG_ 295 TimeGapIncreaseBtnInv "Active zero when button pressed.";
+CM_ SG_ 1039 TurnSignal "0 = Nothing, 1= Left, 3=Right";
