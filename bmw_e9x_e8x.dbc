@@ -211,6 +211,7 @@ BO_ 940 Terminal30Eerror: 8 XXX
 BO_ 947 PowerManagmentConsumptionControl: 8 XXX
 
 BO_ 948 PowerBatteryVoltage: 8 XXX
+ SG_ BatteryVoltage : 7|24@0+ (0.001,0) [0|65535] "" XXX
 
 BO_ 958 PowerRunningTime: 8 XXX
 
@@ -224,9 +225,9 @@ BO_ 1504 ServicesKOMBI: 8 XXX
 
 BO_ 1522 ServicesKBM: 8 XXX
 
-BO_ 209 Unknown_d1: 8 XXX
- SG_ Counter1 : 55|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_1 : 23|8@0+ (1,0) [0|16777215] "" XXX
+BO_ 209 Accelerometer: 8 XXX
+ SG_ LateralAcceleration : 0|16@1- (1,0) [0|7] "" XXX
+ SG_ LongitudalAcceleration : 32|16@1- (1,0) [0|65535] "" XXX
 
 BO_ 172 WheelTorqueDrivetrain2: 8 XXX
 
