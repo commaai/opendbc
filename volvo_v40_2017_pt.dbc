@@ -33,7 +33,7 @@ NS_ :
 
 BS_:
 
-BU_: + XXX 0
+BU_: XXX FSM PSCM CEM 
 
 
 BO_ 85 PedalandBrake: 8 XXX
@@ -60,8 +60,6 @@ BO_ 336 VehicleSpeed1: 8 XXX
 BO_ 192 Gear: 8 XXX
  SG_ TransmissionGear : 36|3@0+ (1,1) [0|7] "" XXX
 
-BO_ 652 untitled: 8 XXX
-
 BO_ 681 MiscCarInfo: 8 XXX
  SG_ TurnSignal : 1|2@0+ (1,0) [0|3] "" XXX
  SG_ HighBeamOn : 52|1@0+ (1,0) [0|1] "" XXX
@@ -71,13 +69,13 @@ BO_ 304 VehicleSpeed0: 8 XXX
  SG_ VehicleSpeed : 31|16@0+ (0.01,0) [0|65535] "km/h" XXX
  SG_ NEW_SIGNAL_1 : 55|16@0+ (1,0) [0|65535] "" XXX
 
-BO_ 48 fromFSM0: 8 XXX
+BO_ 48 fromFSM0: 8 FSM
  SG_ ACC_STATUS_ACTIVE : 58|1@0+ (1,0) [0|1] "" XXX
  SG_ FCWSomething : 25|3@0+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_1 : 55|8@0+ (1,0) [0|255] "" XXX
  SG_ ACC_STATUS_ONOFF : 57|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 208 fromFSMSteeringRequest: 8 XXX
+BO_ 208 fromFSMSteeringRequest: 8 FSM
  SG_ SET_X_E3 : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ SET_X_B4 : 15|8@0+ (1,0) [0|255] "" XXX
  SG_ SET_X_08 : 23|8@0+ (1,0) [0|255] "" XXX
@@ -88,17 +86,17 @@ BO_ 208 fromFSMSteeringRequest: 8 XXX
  SG_ LKADirection : 57|2@0+ (1,0) [0|2] "" XXX
  SG_ SET_X_25 : 63|6@0+ (1,0) [0|63] "" XXX
 
-BO_ 352 fromFSM1: 8 XXX
+BO_ 352 fromFSM1: 8 FSM
  SG_ NEW_SIGNAL_1 : 55|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 624 fromFSM2: 8 XXX
+BO_ 624 fromFSM2: 8 FSM
  SG_ NEW_SIGNAL_1 : 23|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 640 fromFSM3: 8 XXX
+BO_ 640 fromFSM3: 8 FSM
  SG_ SpeedTarget : 47|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_1 : 49|10@0+ (1,0) [0|255] "" XXX
 
-BO_ 853 fromFSM4: 8 XXX
+BO_ 853 fromFSM4: 8 FSM
  SG_ TargetSpeedOdo : 23|8@0+ (1,0) [0|63] "kph" XXX
  SG_ speed_sign_recognition : 36|5@0+ (5,0) [0|32] "" XXX
  SG_ text_under_sign : 37|1@0+ (1,0) [0|1] "" XXX
@@ -115,14 +113,14 @@ BO_ 709 ACC: 8 XXX
 
 BO_ 880 untitled: 8 XXX
 
-BO_ 293 fromServo1: 8 XXX
+BO_ 293 fromServo1: 8 PSCM
  SG_ StatusSomewhat : 0|1@0+ (1,0) [0|1] "" XXX
  SG_ lka_torque : 11|12@0+ (1,-2000) [0|4095] "" XXX
  SG_ LKA_Active : 13|1@0+ (1,0) [0|1] "" XXX
  SG_ ServoError : 32|1@0+ (1,0) [0|1] "" XXX
  SG_ SteeringAngleServo : 47|16@0+ (0.04,-1310.72) [0|65535] "deg" XXX
 
-BO_ 224 fromServo0: 8 XXX
+BO_ 224 fromServo0: 8 PSCM
  SG_ NEW_SIGNAL_2 : 12|5@0+ (1,0) [0|31] "" XXX
  SG_ counter_07 : 15|3@0+ (1,0) [0|7] "" XXX
  SG_ counter2_07 : 37|3@0+ (1,0) [0|16383] "" XXX
@@ -130,7 +128,7 @@ BO_ 224 fromServo0: 8 XXX
  SG_ OneDuringDriving : 49|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_1 : 63|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 16 CCButtons: 8 XXX
+BO_ 16 CCButtons: 8 CEM
  SG_ ACCOnOffBtn : 58|1@0+ (1,0) [0|1] "" XXX
  SG_ ACCSetBtn : 63|1@0+ (1,0) [0|1] "" XXX
  SG_ ACCStopBtn : 60|1@0+ (1,0) [0|1] "" XXX
