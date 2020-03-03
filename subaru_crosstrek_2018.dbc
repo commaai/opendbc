@@ -121,8 +121,13 @@ BO_ 312 Brake_Pressure_L_R: 8 XXX
  SG_ Brake_1 : 48|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 313 Brake_Pedal: 8 XXX
- SG_ Brake_Pedal_On : 34|1@1+ (1,0) [0|7] "" XXX
+ SG_ Checksum : 0|8@1+ (1,0) [0|1] "" XXX
+ SG_ Counter : 8|4@1+ (1,0) [0|1] "" XXX
  SG_ Brake_Pedal : 36|12@1+ (1,0) [0|65535] "" XXX
+ SG_ Signal3 : 48|16@1+ (1,0) [0|1] "" XXX
+ SG_ Signal2 : 35|2@0+ (1,0) [0|1] "" XXX
+ SG_ Brake_Pedal_On : 34|1@1+ (1,0) [0|7] "" XXX
+ SG_ Signal1 : 12|22@1+ (1,0) [0|1] "" XXX
 
 BO_ 290 ES_LKAS: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
@@ -365,10 +370,10 @@ BO_ 1787 NEW_MSG_45: 8 XXX
 
 
 
-CM_ SG_ 940 FOG_LIGHTS2 "yellow fog light in the dash";
 CM_ SG_ 940 Highbeam "01 = low beam, 11 = high beam";
+CM_ SG_ 940 FOG_LIGHTS2 "yellow fog light in the dash";
 CM_ SG_ 801 Cruise_State "0 = Normal, 3 = Hold";
 CM_ SG_ 805 NEW_SIGNAL_3 "always 3";
 CM_ SG_ 805 NEW_SIGNAL_4 "always 1";
 CM_ SG_ 1677 Units "1 = imperial, 6 = metric";
-VAL_ 72 Gear 2 "N" 3 "R" 4 "P" 121 "D" 137 "1" 145 "2" 153 "3" 161 "4" 169 "5" 177 "6";
+VAL_ 72 Gear 2 "N" 3 "R" 4 "P" 121 "D" 137 "1" 145 "2" 153 "3" 161 "4" 169 "5" 177 "6" ;
