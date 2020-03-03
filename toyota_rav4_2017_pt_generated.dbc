@@ -363,6 +363,7 @@ CM_ "toyota_rav4_2017_pt.dbc starts here"
 BO_ 548 BRAKE_MODULE: 8 XXX
  SG_ BRAKE_PRESSURE : 43|12@0+ (1,0) [0|4047] "" XXX
  SG_ BRAKE_PRESSED : 5|1@0+ (1,0) [0|1] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 705 GAS_PEDAL: 8 XXX
  SG_ GAS_RELEASED : 3|1@0+ (1,0) [0|1] "" XXX
