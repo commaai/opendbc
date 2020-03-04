@@ -103,14 +103,19 @@ BO_ 523 CruiseThrottle: 6 XXX
  SG_ PROPILOT_BUTTON : 8|1@0+ (1,0) [0|1] "" XXX
  SG_ CANCEL_BUTTON : 9|1@0+ (1,0) [0|1] "" XXX
  SG_ GAS_PEDAL_INVERTED : 37|10@0+ (1,0) [0|1023] "" XXX
- SG_ unsure2 : 23|8@0+ (1,0) [0|255] "" XXX
  SG_ SET_BUTTON : 11|1@0+ (1,0) [0|1] "" XXX
  SG_ RES_BUTTON : 12|1@0+ (1,0) [0|1] "" XXX
  SG_ FOLLOW_DISTANCE_BUTTON : 10|1@0+ (1,0) [0|1] "" XXX
  SG_ NO_BUTTON_PRESSED : 13|1@0+ (1,0) [0|1] "" XXX
  SG_ GAS_PEDAL : 31|10@0+ (1,0) [0|255] "" XXX
- SG_ unsure3 : 43|4@0+ (1,0) [0|15] "" XXX
- SG_ unsure : 7|10@0+ (1,0) [0|63] "" XXX
+ SG_ USER_BRAKE_PRESSED : 21|1@0+ (1,0) [0|1] "" XXX
+ SG_ USER_BRAKE_PRESSED_INVERTED : 22|1@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_2 : 23|1@0+ (1,0) [0|1] "" XXX
+ SG_ unsure2 : 43|4@0+ (1,0) [0|1] "" XXX
+ SG_ unsure1 : 7|16@0+ (1,0) [0|15] "" XXX
+ SG_ GAS_PRESSED_INVERTED : 20|1@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 17|2@0+ (1,0) [0|3] "" XXX
+ SG_ unsure3 : 19|2@0+ (1,0) [0|3] "" XXX
 
 BO_ 1108 DoorsLights: 8 XXX
  SG_ DOOR_CLOSED_RR : 40|1@0+ (1,0) [0|1] "" XXX
@@ -134,13 +139,13 @@ BO_ 403 LKAS_OLD: 8 XXX
  SG_ Torque_Command : 29|13@0+ (1,-4000) [0|255] "" XXX
 
 BO_ 361 LKAS: 8 XXX
- SG_ NEW_SIGNAL_4 : 39|8@0+ (1,0) [0|255] "" XXX
- SG_ SET_X80 : 47|8@0+ (1,0) [0|255] "" XXX
- SG_ LKA_Active : 52|1@0+ (1,0) [0|15] "" XXX
+ SG_ MAX_TORQUE : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ SET_0x80 : 47|8@0+ (1,0) [0|255] "" XXX
+ SG_ LKA_ACTIVE : 52|1@0+ (1,0) [0|15] "" XXX
  SG_ CRC : 63|8@0+ (1,0) [0|255] "" XXX
  SG_ SET_0x80_2 : 31|8@0+ (1,0) [0|255] "" XXX
- SG_ Counter : 51|4@0+ (1,0) [0|15] "" XXX
- SG_ Des_Angle : 7|18@0+ (-0.01,1310) [0|255] "" XXX
+ SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
+ SG_ DESIRED_ANGLE : 7|18@0+ (-0.01,1310) [0|255] "" XXX
 
 BO_ 438 ProPilot: 8 XXX
  SG_ NEW_SIGNAL_2 : 11|4@0+ (1,0) [0|255] "" XXX
@@ -152,5 +157,24 @@ BO_ 438 ProPilot: 8 XXX
  SG_ NEW_SIGNAL_1 : 7|12@0- (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_3 : 23|12@0- (-1,0) [0|255] "" XXX
  SG_ CRUISE_ACTIVATED : 38|1@0+ (1,0) [0|3] "" XXX
- SG_ STEER_STATUS : 51|1@1+ (1,0) [0|3] "" XXX
  SG_ CRUISE_ON : 36|1@0+ (1,0) [0|255] "" XXX
+ SG_ STEER_STATUS : 51|1@0+ (1,0) [0|3] "" XXX
+
+BO_ 397 _GEAR: 8 XXX
+ SG_ GEAR : 27|4@0+ (1,0) [0|15] "" XXX
+
+BO_ 1273 _SEATBELT: 7 XXX
+ SG_ DRIVERS_SEATBELT : 25|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 665 _ESP: 8 XXX
+ SG_ ESP_DISABLED : 24|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 1055 GEARBOX: 2 XXX
+ SG_ SPORTS_MODE : 13|1@0+ (1,0) [0|1] "" XXX
+ SG_ GEAR_SHIFTER : 5|3@0+ (1,0) [0|255] "" XXX
+
+
+
+
+
+VAL_ 1055 GEAR_SHIFTER 6 "L" 4 "D" 3 "N" 2 "R" 1 "P" ;
