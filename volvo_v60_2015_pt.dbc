@@ -41,7 +41,7 @@ BO_ 16 SteeringAngle: 8 XXX
  SG_ RateOfChangeOrTorque : 39|16@0+ (1,-32768) [0|65535] "" XXX
  SG_ NEW_SIGNAL_1 : 22|15@0+ (1,0) [0|65535] "" XXX
  SG_ SteeringDirection : 6|1@0+ (1,0) [0|1] "" XXX
- SG_ SteeringWheelAngle : 53|14@0+ (0.037,0) [0|65535] "degrees" XXX
+ SG_ SteeringWheelAngle : 53|14@0+ (0.0445,0) [0|65535] "degrees" XXX
 
 BO_ 32 NEW_MSG_2: 8 XXX
  SG_ AcceleratorPedal : 17|10@0+ (0.1,0) [0|1023] "" XXX
@@ -57,14 +57,14 @@ BO_ 298 NEW_MSG_5: 8 XXX
  SG_ EngineRpm : 52|13@0+ (1,0) [0|8000] "" XXX
 
 BO_ 609 fromServo1: 8 PSCM
- SG_ SteeringAngle : 21|14@0+ (0.04,-408.32) [0|65535] "deg" XXX
+ SG_ SteeringAngle : 21|14@0+ (0.1,-1021) [0|65535] "deg" XXX
 
 BO_ 582 WheelAngle: 8 XXX
- SG_ SteeringWheelAngle : 23|16@0+ (0.04,-1310.72) [-1310.72|1310.72] "deg" XXX
  SG_ lka_torque : 35|12@0+ (1,-2000) [0|65535] "" XXX
  SG_ LKAActive : 49|1@0+ (1,0) [0|1] "" XXX
  SG_ SteeringWheelRateOfChange : 0|9@0+ (1,0) [0|255] "" XXX
  SG_ TurnDirection : 2|1@0+ (1,0) [0|1] "" XXX
+ SG_ SteeringWheelAngle : 23|16@0+ (0.04470,-1468.0) [0|65535] "deg" XXX
 
 BO_ 81 fromFSM0: 8 FSM
  SG_ ACCStatus : 18|3@0+ (1,0) [0|7] "" XXX
@@ -129,10 +129,10 @@ CM_ SG_ 16 SteeringDirection "0 = CCW, 1=CW (turning left or right of center)";
 CM_ SG_ 32 AcceleratorPedal "Unsure about scaling.";
 CM_ SG_ 648 Brake "Something with brake pedal, presure, position.";
 CM_ SG_ 298 EngineRpm "Might be engine rpm. But behaves abit weird.";
-CM_ SG_ 582 SteeringWheelAngle "SteeringWheelAngle CW= <0 CCW= >0";
 CM_ SG_ 582 LKAActive "Seems one when lka active.";
 CM_ SG_ 582 SteeringWheelRateOfChange "Some rate of change for steering wheel? Torque?";
 CM_ SG_ 582 TurnDirection "0=CCW, 1=CW";
+CM_ SG_ 582 SteeringWheelAngle "SteeringWheelAngle CW= <0 CCW= >0";
 CM_ SG_ 81 ACCStatus "0=Acc Unavailable, 1=???, 2=Acc Ready, 3,4=???, 6,7= Acc Active ";
 CM_ SG_ 608 TimeGapMaybe "When ACC turned on goes from 255 -> 2 Then from 2->1 when pressing longer time gap.";
 CM_ SG_ 610 LKADirection "0=None, 1=Right, 2=Left";
