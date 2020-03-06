@@ -825,6 +825,8 @@ BO_ 1648 Motor_18: 8 Motor_Diesel_MQB
  SG_ MO_obere_Drehzahlgrenze : 56|8@1+ (50,0) [50|12750] "Unit_MinutInver" Gateway_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
 
 BO_ 289 Motor_20: 8 Motor_Diesel_MQB
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|255] "" XXX
  SG_ MO_Fahrpedalrohwert_01 : 12|8@1+ (0.4,0) [0|101.6] "Unit_PerCent" Airbag_MQB,Gateway_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
  SG_ MO_QBit_Fahrpedalwerte_01 : 20|1@1+ (1,0) [0|1] "" Airbag_MQB,Gateway_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
  SG_ MO_Fahrpedalgradient : 21|8@1+ (25,0) [0|6350] "Unit_PerCentPerSecon" Airbag_MQB,Gateway_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
