@@ -120,6 +120,8 @@ BO_ 182 DynamicCruiseControlTorqueDemand: 8 XXX
 BO_ 186 TransmissionData: 8 XXX
 
 BO_ 191 RequestedWheelTorqueDriveTrainActiveCruiseControl: 8 XXX
+ SG_ Counter : 11|4@0- (1,0) [0|255] "" XXX
+ SG_ TorqueReq : 16|11@1+ (1,0) [0|65535] "" XXX
 
 BO_ 414 Status_DSC: 8 XXX
 
