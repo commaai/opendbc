@@ -43,12 +43,12 @@ BO_ 16 SteeringAngle: 8 XXX
  SG_ SteeringDirection : 6|1@0+ (1,0) [0|1] "" XXX
  SG_ SteeringWheelAngle : 53|14@0+ (0.0445,0) [0|65535] "degrees" XXX
 
-BO_ 32 NEW_MSG_2: 8 XXX
- SG_ AcceleratorPedal : 17|10@0+ (0.1,0) [0|1023] "" XXX
+BO_ 32 AccPedal: 8 XXX
+ SG_ AccPedal : 17|10@0+ (0.1,0) [0|1023] "%" XXX
 
-BO_ 648 NEW_MSG_3: 8 XXX
+BO_ 648 BrakePedal: 8 XXX
  SG_ Counter : 0|3@1+ (1,0) [0|7] "" XXX
- SG_ Brake : 24|8@1+ (1,4) [0|255] "" XXX
+ SG_ BrakePedal : 24|8@1+ (1,4) [0|255] "" XXX
 
 BO_ 465 NEW_MSG_4: 8 XXX
  SG_ NEW_SIGNAL_1 : 55|16@0+ (1,0) [0|4095] "" XXX
@@ -56,15 +56,15 @@ BO_ 465 NEW_MSG_4: 8 XXX
 BO_ 298 NEW_MSG_5: 8 XXX
  SG_ EngineRpm : 52|13@0+ (1,0) [0|8000] "" XXX
 
-BO_ 609 fromServo1: 8 PSCM
+BO_ 609 fromWhere: 8 XXX
  SG_ SteeringAngle : 21|14@0+ (0.1,-1021) [0|65535] "deg" XXX
 
-BO_ 582 WheelAngle: 8 XXX
- SG_ lka_torque : 35|12@0+ (1,-2000) [0|65535] "" XXX
+BO_ 582 fromServo1: 8 PSCM
+ SG_ LKATorque : 35|12@0+ (1,-2000) [0|65535] "" XXX
  SG_ LKAActive : 49|1@0+ (1,0) [0|1] "" XXX
  SG_ SteeringWheelRateOfChange : 0|9@0+ (1,0) [0|255] "" XXX
  SG_ TurnDirection : 2|1@0+ (1,0) [0|1] "" XXX
- SG_ SteeringWheelAngle : 23|16@0+ (0.04470,-1468.0) [0|65535] "deg" XXX
+ SG_ SteeringAngleServo : 23|16@0+ (0.04470,-1468.0) [0|65535] "deg" XXX
 
 BO_ 81 fromFSM0: 8 FSM
  SG_ ACCStatus : 18|3@0+ (1,0) [0|7] "" XXX
@@ -115,8 +115,8 @@ BO_ 277 NEW_MSG_7: 8 XXX
 
 BO_ 336 NEW_MSG_8: 8 XXX
 
-BO_ 328 NEW_MSG_9: 8 XXX
- SG_ VehSpeed : 55|16@0+ (0.01,0) [0|65535] "" XXX
+BO_ 328 VehicleSpeed1: 8 XXX
+ SG_ VehicleSpeed : 55|16@0+ (0.01,0) [0|65535] "" XXX
 
 BO_ 1039 MiscCarInfo: 8 XXX
  SG_ TurnSignal : 33|2@0+ (1,0) [0|3] "" XXX
