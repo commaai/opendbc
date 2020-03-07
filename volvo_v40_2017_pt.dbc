@@ -37,7 +37,7 @@ BU_: XXX FSM PSCM CEM
 
 
 BO_ 85 PedalandBrake: 8 XXX
- SG_ AccPedal : 9|10@0+ (0.1,0) [0|1023] "" XXX
+ SG_ AccPedal : 9|10@0+ (0.1,0) [0|1023] "%" XXX
  SG_ BrakePedalActive2 : 24|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_1 : 35|12@0+ (1,0) [0|4095] "" XXX
  SG_ BrakePedalActive : 38|1@0+ (1,0) [0|1] "" XXX
@@ -55,7 +55,7 @@ BO_ 101 EngineInfo: 8 XXX
 BO_ 336 VehicleSpeed1: 8 XXX
  SG_ NEW_SIGNAL_2 : 31|16@0+ (1,0) [0|65535] "" XXX
  SG_ NEW_SIGNAL_1 : 15|16@0+ (1,0) [0|65535] "" XXX
- SG_ VehicleSpeed : 55|16@0+ (0.01,0) [0|2047] "" XXX
+ SG_ VehicleSpeed : 55|16@0+ (0.01,0) [0|65535] "" XXX
 
 BO_ 192 Gear: 8 XXX
  SG_ TransmissionGear : 36|3@0+ (1,1) [0|7] "" XXX
@@ -70,10 +70,10 @@ BO_ 304 VehicleSpeed0: 8 XXX
  SG_ NEW_SIGNAL_1 : 55|16@0+ (1,0) [0|65535] "" XXX
 
 BO_ 48 fromFSM0: 8 FSM
- SG_ ACC_STATUS_ACTIVE : 58|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACCStatusActive : 58|1@0+ (1,0) [0|1] "" XXX
  SG_ FCWSomething : 25|3@0+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_1 : 55|8@0+ (1,0) [0|255] "" XXX
- SG_ ACC_STATUS_ONOFF : 57|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACCStatusOnOff : 57|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 208 fromFSMSteeringRequest: 8 FSM
  SG_ SET_X_E3 : 7|8@0+ (1,0) [0|255] "" XXX
@@ -98,8 +98,8 @@ BO_ 640 fromFSM3: 8 FSM
 
 BO_ 853 fromFSM4: 8 FSM
  SG_ TargetSpeedOdo : 23|8@0+ (1,0) [0|63] "kph" XXX
- SG_ speed_sign_recognition : 36|5@0+ (5,0) [0|32] "" XXX
- SG_ text_under_sign : 37|1@0+ (1,0) [0|1] "" XXX
+ SG_ SpeedSign : 36|5@0+ (5,0) [0|32] "" XXX
+ SG_ TextUnderSign : 37|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_6 : 39|3@0+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_5 : 47|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_3 : 31|8@0+ (1,0) [0|255] "" XXX
@@ -115,8 +115,8 @@ BO_ 880 untitled: 8 XXX
 
 BO_ 293 fromServo1: 8 PSCM
  SG_ StatusSomewhat : 0|1@0+ (1,0) [0|1] "" XXX
- SG_ lka_torque : 11|12@0+ (1,-2000) [0|4095] "" XXX
- SG_ LKA_Active : 13|1@0+ (1,0) [0|1] "" XXX
+ SG_ LKATorque : 11|12@0+ (1,-2000) [0|4095] "" XXX
+ SG_ LKAActive : 13|1@0+ (1,0) [0|1] "" XXX
  SG_ ServoError : 32|1@0+ (1,0) [0|1] "" XXX
  SG_ SteeringAngleServo : 47|16@0+ (0.04,-1310.72) [0|65535] "deg" XXX
 
@@ -197,9 +197,9 @@ CM_ SG_ 101 NEW_SIGNAL_1 "Rate of something?";
 CM_ SG_ 192 TransmissionGear "0 = 1st gear, 1= 2nd gear...";
 CM_ SG_ 681 TurnSignal "0 = Nothing, 1= Left, 3=Right";
 CM_ SG_ 681 HighBeamOn "1=HighBeam On, 0=HighBeam Off";
-CM_ SG_ 48 ACC_STATUS_ACTIVE "Active?";
+CM_ SG_ 48 ACCStatusActive "Active?";
 CM_ SG_ 48 FCWSomething "All bit set during fcw";
-CM_ SG_ 48 ACC_STATUS_ONOFF "Turns one after pressing on/off button on steering wheeel";
+CM_ SG_ 48 ACCStatusOnOff "Turns one after pressing on/off button on steering wheeel";
 CM_ SG_ 208 Unkown "Used in checksum calculation, Seems to limit torque based on the number.";
 CM_ SG_ 208 LKAAngleRequest "+ = right, - = left";
 CM_ SG_ 208 Checksum "Checksum calculated as a one-complement addition of LKAAngleRequest+LKADirection+Unkown, Zeros used to pad missing bits.";
