@@ -104,6 +104,8 @@ BO_ 678 WiperSwitch: 8 XXX
  SG_ AutoWipersOn : 0|1@1+ (1,0) [0|3] "" XXX
 
 BO_ 304 TerminalStatus: 8 XXX
+ SG_ AccOn : 23|1@0+ (1,0) [0|255] "" XXX
+ SG_ IgnitionOff : 22|1@0+ (1,0) [0|3] "" XXX
 
 BO_ 169 Torque2: 8 XXX
 
@@ -257,6 +259,8 @@ BO_ 205 Unknown_cd: 8 XXX
  SG_ Counter1 : 55|4@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_7 : 63|8@0- (1,0) [0|255] "" XXX
+
+BO_ 1577 NEW_MSG_1: 8 XXX
 
 
 
