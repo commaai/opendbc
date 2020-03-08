@@ -250,7 +250,7 @@ BO_ 802 ES_LKAS_State: 8 XXX
  SG_ FCW_Cont_Beep : 32|1@1+ (1,0) [0|1] "" XXX
  SG_ FCW_Repeated_Beep : 33|1@1+ (1,0) [0|1] "" XXX
  SG_ Throttle_Management_Activated : 34|1@1+ (1,0) [0|1] "" XXX
- SG_ Vehicle_In_Front_Has_Moved : 35|1@1+ (1,0) [0|1] "" XXX
+ SG_ Lead_Vehicle_Start_Alert : 35|1@1+ (1,0) [0|1] "" XXX
  SG_ Right_Depart : 36|1@1+ (1,0) [0|3] "" XXX
  SG_ Signal5 : 37|27@1+ (1,0) [0|1] "" XXX
 
