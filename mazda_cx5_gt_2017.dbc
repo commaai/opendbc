@@ -706,6 +706,7 @@ BO_ 1143 BSM: 8 XXX
  SG_ RIGHT_BS1 : 14|1@0+ (1,0) [0|63] "" XXX
  SG_ RIGHT_BS_DISTANCE : 35|3@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_1 : 32|1@0+ (1,0) [0|1] "" XXX
+ SG_ REAR_CT_ALERT : 23|5@0+ (1,0) [0|63] "" XXX
 
 BO_ 1361 KEY_POSITION: 8 XXX
 
@@ -767,3 +768,4 @@ CM_ SG_ 157 CAN_OFF "Disengage Cruise if enabled, if already disabled  TURN it O
 CM_ SG_ 552 GEAR "0 P/N, 12 R, 2 D M1, 4 M2, 14 Shift";
 CM_ SG_ 552 MORE_GEAR "";
 CM_ SG_ 540 HANDS_ON_STEER_WARN "0 no warning, b warning";
+CM_ SG_ 1143 REAR_CT_ALERT "Rear Cross Traffic Alert";
