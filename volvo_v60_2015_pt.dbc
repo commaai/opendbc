@@ -121,6 +121,38 @@ BO_ 328 VehicleSpeed1: 8 XXX
 BO_ 1039 MiscCarInfo: 8 XXX
  SG_ TurnSignal : 33|2@0+ (1,0) [0|3] "" XXX
 
+BO_ 2015 diagTstrPrsnt: 8 XXX
+ SG_ byte0 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte2 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte1 : 15|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 1892 diagFSMReq: 8 XXX
+ SG_ byte0 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte1 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte2 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte3 : 31|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 1900 diagFSMResp: 8 XXX
+ SG_ bytes : 31|32@0+ (1,0) [0|4294967295] "" XXX
+
+BO_ 1830 diagPSCMReq: 8 XXX
+ SG_ byte0 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte1 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte2 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte3 : 31|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 1838 diagPSCMResp: 8 XXX
+ SG_ bytes : 31|32@0+ (1,0) [0|4294967295] "" XXX
+
+BO_ 1840 diagCEMReq: 8 XXX
+ SG_ byte0 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte1 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte2 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte3 : 31|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 1848 diagCEMResp: 8 XXX
+ SG_ bytes : 31|32@0+ (1,0) [0|4294967295] "" XXX
+
 
 
 

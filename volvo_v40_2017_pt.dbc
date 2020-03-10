@@ -33,7 +33,7 @@ NS_ :
 
 BS_:
 
-BU_: XXX FSM PSCM CEM 
+BU_: XXX FSM PSCM CEM
 
 
 BO_ 85 PedalandBrake: 8 XXX
@@ -86,17 +86,17 @@ BO_ 208 fromFSMSteeringRequest: 8 FSM
  SG_ LKADirection : 57|2@0+ (1,0) [0|2] "" XXX
  SG_ SET_X_25 : 63|6@0+ (1,0) [0|63] "" XXX
 
-BO_ 352 fromFSM1: 8 FSM
+BO_ 352 fromFSM2: 8 FSM
  SG_ NEW_SIGNAL_1 : 55|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 624 fromFSM2: 8 FSM
+BO_ 624 fromFSM3: 8 FSM
  SG_ NEW_SIGNAL_1 : 23|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 640 fromFSM3: 8 FSM
+BO_ 640 fromFSM4: 8 FSM
  SG_ SpeedTarget : 47|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_1 : 49|10@0+ (1,0) [0|255] "" XXX
 
-BO_ 853 fromFSM4: 8 FSM
+BO_ 853 fromFSM5: 8 FSM
  SG_ TargetSpeedOdo : 23|8@0+ (1,0) [0|63] "kph" XXX
  SG_ SpeedSign : 36|5@0+ (5,0) [0|32] "" XXX
  SG_ TextUnderSign : 37|1@0+ (1,0) [0|1] "" XXX
@@ -186,6 +186,38 @@ BO_ 176 NEW_MSG_6: 8 XXX
  SG_ NEW_SIGNAL_1 : 50|11@0+ (1,0) [0|2047] "" XXX
  SG_ NEW_SIGNAL_2 : 47|8@0+ (1,0) [0|63] "" XXX
 
+BO_ 2015 diagTstrPrsnt: 8 XXX
+ SG_ byte0 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte2 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte1 : 15|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 1892 diagFSMReq: 8 XXX
+ SG_ byte0 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte1 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte2 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte3 : 31|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 1900 diagFSMResp: 8 XXX
+ SG_ bytes : 31|32@0+ (1,0) [0|4294967295] "" XXX
+
+BO_ 1830 diagPSCMReq: 8 XXX
+ SG_ byte0 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte1 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte2 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte3 : 31|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 1838 diagPSCMResp: 8 XXX
+ SG_ bytes : 31|32@0+ (1,0) [0|4294967295] "" XXX
+
+BO_ 1840 diagCEMReq: 8 XXX
+ SG_ byte0 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte1 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte2 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte3 : 31|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 1848 diagCEMResp: 8 XXX
+ SG_ bytes : 31|32@0+ (1,0) [0|4294967295] "" XXX
+
 
 
 
@@ -207,13 +239,9 @@ CM_ SG_ 208 LKADirection "0 = No lka active, 1=LKA steer right, 2=LKA steer left
 CM_ SG_ 352 NEW_SIGNAL_1 "Turned one. Got LKA service needed can this be the one?";
 CM_ SG_ 640 SpeedTarget "SpeedTarget ACC (noisy bf starting acc Jumps from 0->252->0)";
 CM_ SG_ 853 TargetSpeedOdo "Probably target speed odo";
-CM_ SG_ 853 speed_sign_recognition "Speed sign recognition.";
-CM_ SG_ 853 text_under_sign "True when sign has additional information";
 CM_ SG_ 853 LaneMarkingsOdo "Probably signal to odo on what lanemarkings to display";
 CM_ SG_ 709 SpeedTargetACC "SpeedTargetACC";
 CM_ SG_ 293 StatusSomewhat "1 when turning wheel at standstill, 0 when speed dropped below 8 kph, 1 when speed went above 8kph. Test driving no hands?! Driver detect?";
-CM_ SG_ 293 lka_torque "Seems active when doing LKA, might be torque";
-CM_ SG_ 293 LKA_Active "Seems to be True when steering command is processed.";
 CM_ SG_ 293 ServoError "Servo set fault?! This bit get one when LKA didnt work and set error in dash. Not entirely true seen cases where its one while lka engaged.";
 CM_ SG_ 224 rate_of_something "Seems to be some kind of torque rather than rate.";
 CM_ SG_ 224 OneDuringDriving "Set to 1 when vehicle is rolling.";
