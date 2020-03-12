@@ -86,7 +86,7 @@ BO_ 389 Steering: 8 XXX
  SG_ LKAS_Torque : 47|8@0+ (1,0) [0|255] "" XXX
  SG_ CRC : 63|8@0+ (1,0) [0|127] "" XXX
  SG_ Angle : 23|18@0+ (-0.01,1310) [0|262143] "" XXX
- SG_ DriverTorque : 7|12@0+ (-0.01,20) [0|4095] "Nm" XXX
+ SG_ DriverTorque : 7|12@0+ (-0.01,20.47) [0|4095] "Nm" XXX
 
 BO_ 851 SPEED_RELATED: 8 XXX
  SG_ SPEED_RELATED : 7|16@0+ (0.01014,0) [0|65535] "" XXX
