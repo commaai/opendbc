@@ -156,11 +156,18 @@ BO_ 545 ES_Distance: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ ES_Cruise_Throttle : 12|20@1+ (1,0) [0|15] "" XXX
- SG_ Signal2 : 32|24@1+ (1,0) [0|15] "" XXX
  SG_ Cruise_Cancel : 56|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Set : 57|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Resume : 58|1@1+ (1,0) [0|1] "" XXX
  SG_ Signal3 : 59|5@1+ (1,0) [0|1] "" XXX
+ SG_ Close_Distance : 40|8@1+ (1,0) [0|1] "" XXX
+ SG_ Car_Follow : 32|1@1+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_2 : 38|1@1+ (1,0) [0|1] "" XXX
+ SG_ Distance_Swap : 37|1@1+ (1,0) [0|15] "" XXX
+ SG_ Brake_Pedal : 33|1@1+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_1 : 48|8@1+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_3 : 34|3@1+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_4 : 39|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 546 ES_Status: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
@@ -237,7 +244,6 @@ BO_ 801 ES_DashStatus: 8 XXX
  SG_ Car_Follow : 52|1@1+ (1,0) [0|3] "" XXX
  SG_ Far_Distance : 56|4@1+ (1,0) [0|15] "" XXX
  SG_ Cruise_State : 60|4@1+ (1,0) [0|15] "" XXX
- SG_ Short_Distance : 16|4@1+ (1,0) [0|1] "" XXX
 
 BO_ 802 ES_LKAS_State: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
@@ -384,6 +390,7 @@ BO_ 1787 NEW_MSG_45: 8 XXX
 
 CM_ SG_ 64 Throttle_Combo "Throttle Cruise + Pedal";
 CM_ SG_ 545 ES_Cruise_Throttle "signal might be smaller, values do not correlate with Throttle:CruiseThrottle";
+CM_ SG_ 545 Distance_Swap "Switch from Close to Far distance";
 CM_ SG_ 940 Highbeam "01 = low beam, 11 = high beam";
 CM_ SG_ 940 FOG_LIGHTS2 "yellow fog light in the dash";
 CM_ SG_ 801 Cruise_State "0 = Normal, 3 = Hold";
