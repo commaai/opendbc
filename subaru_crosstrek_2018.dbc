@@ -214,12 +214,19 @@ BO_ 940 BodyInfo: 8 XXX
  SG_ Lowbeam : 57|1@1+ (1,0) [0|3] "" XXX
  SG_ Highbeam : 58|1@1+ (1,0) [0|1] "" XXX
  SG_ FOG_LIGHTS2 : 60|1@1+ (1,0) [0|1] "" XXX
+ SG_ Checksum : 0|8@1+ (1,0) [0|1] "" XXX
+ SG_ Counter : 8|4@1+ (1,0) [0|1] "" XXX
+ SG_ Signal1 : 12|20@1+ (1,0) [0|1] "" XXX
+ SG_ Signal2 : 38|18@1+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_2 : 37|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_1 : 63|1@1+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_3 : 61|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_4 : 59|1@0+ (1,0) [0|1] "" XXX
  SG_ WIPERS : 62|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 801 ES_DashStatus: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|7] "" XXX
- SG_ Short_Distance : 16|4@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Distance : 28|3@1+ (1,0) [0|3] "" XXX
  SG_ Cruise_Disengaged : 35|1@1+ (1,0) [0|3] "" XXX
  SG_ Cruise_Activated : 36|1@1+ (1,0) [0|3] "" XXX
@@ -230,6 +237,7 @@ BO_ 801 ES_DashStatus: 8 XXX
  SG_ Car_Follow : 52|1@1+ (1,0) [0|3] "" XXX
  SG_ Far_Distance : 56|4@1+ (1,0) [0|15] "" XXX
  SG_ Cruise_State : 60|4@1+ (1,0) [0|15] "" XXX
+ SG_ Short_Distance : 16|4@1+ (1,0) [0|1] "" XXX
 
 BO_ 802 ES_LKAS_State: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
