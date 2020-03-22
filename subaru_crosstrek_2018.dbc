@@ -157,7 +157,7 @@ BO_ 545 ES_Distance: 8 XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ ES_Cruise_Throttle : 12|20@1+ (1,0) [0|15] "" XXX
  SG_ Car_Follow : 32|1@1+ (1,0) [0|1] "" XXX
- SG_ Signal1 : 34|3@1+ (1,0) [0|1] "" XXX
+ SG_ Signal1 : 33|4@1+ (1,0) [0|1] "" XXX
  SG_ Distance_Swap : 37|1@1+ (1,0) [0|15] "" XXX
  SG_ Signal2 : 38|2@1+ (1,0) [0|1] "" XXX
  SG_ Close_Distance : 40|8@1+ (1,0) [0|1] "" XXX
