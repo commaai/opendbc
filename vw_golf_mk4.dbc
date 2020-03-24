@@ -615,26 +615,27 @@ BO_ 1504 Klima_1: 8 XXX
  SG_ Fahrerwunsch_Zuheizer : 1|1@1+ (1,0) [0|0] "" XXX
  SG_ Drehzahlanhebung : 0|1@1+ (1,0) [0|0] "" XXX
 
-BO_ 906 GRA_neu: 4 XXX
- SG_ Tiptronik_Bedienteilfehler : 31|1@1+ (1,0) [0|0] "" XXX
- SG_ Frei_GRA_neu_1_2 : 29|2@1+ (1,0) [0|0] "" XXX
- SG_ Limiter_ein : 28|1@1+ (1,0) [0|0] "" XXX
- SG_ Zeitlueckenverstellung : 26|2@1+ (1,0) [0|0] "" XXX
- SG_ Tiptronic_Tip_Up__4_1_ : 25|1@1+ (1,0) [0|0] "" XXX
- SG_ Tiptronic_Tip_Down__4_1_ : 24|1@1+ (1,0) [0|0] "" XXX
- SG_ Zaehler__GRA_neu_ : 20|4@1+ (1,0) [0|15] "" XXX
- SG_ Sender_Codierung__4_1_ : 18|2@1+ (1,0) [0|0] "" XXX
- SG_ Wiederaufnahme : 17|1@1+ (1,0) [0|0] "" XXX
- SG_ Setzen : 16|1@1+ (1,0) [0|0] "" XXX
- SG_ GRA_Neu_frei_1 : 15|1@1+ (1,0) [0|0] "" XXX
- SG_ Bedienteil_Fehler : 14|1@1+ (1,0) [0|0] "" XXX
- SG_ Lang_Tip_up : 13|1@1+ (1,0) [0|0] "" XXX
- SG_ Lang_Tip_down : 12|1@1+ (1,0) [0|0] "" XXX
- SG_ Kurz_Tip_up : 11|1@1+ (1,0) [0|0] "" XXX
- SG_ Kurz_Tip_down : 10|1@1+ (1,0) [0|0] "" XXX
- SG_ Abbrechen : 9|1@1+ (1,0) [0|0] "" XXX
- SG_ Hauptschalter : 8|1@1+ (1,0) [0|0] "" XXX
- SG_ Checksumme_GRA_Neu : 0|8@1+ (1,0) [0|0] "" XXX
+BO_ 906 GRA_Neu: 4 XXX
+ SG_ GRA_Checksum : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ GRA_Hauptschalt : 8|1@1+ (1,0) [0|1] "" XXX
+ SG_ GRA_Abbrechen : 9|1@1+ (1,0) [0|1] "" XXX
+ SG_ GRA_Down_kurz : 10|1@1+ (1,0) [0|1] "" XXX
+ SG_ GRA_Up_kurz : 11|1@1+ (1,0) [0|1] "" XXX
+ SG_ GRA_Down_lang : 12|1@1+ (1,0) [0|1] "" XXX
+ SG_ GRA_Up_lang : 13|1@1+ (1,0) [0|1] "" XXX
+ SG_ GRA_Fehler_Bed : 14|1@1+ (1,0) [0|1] "" XXX
+ SG_ GRA_Kodierinfo : 15|1@1+ (1,0) [0|1] "" XXX
+ SG_ GRA_Neu_Setzen : 16|1@1+ (1,0) [0|1] "" XXX
+ SG_ GRA_Recall : 17|1@1+ (1,0) [0|1] "" XXX
+ SG_ GRA_Sender : 18|2@1+ (1,0) [0|3] "" XXX
+ SG_ GRA_Neu_Zaehler : 20|4@1+ (1,0) [0|15] "" XXX
+ SG_ GRA_Tip_Down : 24|1@1+ (1,0) [0|1] "" XXX
+ SG_ GRA_Tip_Up : 25|1@1+ (1,0) [0|1] "" XXX
+ SG_ GRA_Zeitluecke : 26|2@1+ (1,0) [0|3] "" XXX
+ SG_ GRA_Sta_Limiter : 28|1@1+ (1,0) [0|1] "" XXX
+ SG_ GRA_Typ_Hauptschalt : 29|1@1+ (1,0) [0|1] "" XXX
+ SG_ GRA_Sportschalter : 30|1@1+ (1,0) [0|1] "" XXX
+ SG_ GRA_Fehler_Tip : 31|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 904 GRA: 3 XXX
  SG_ Checksumme_GRA_alt : 16|8@1+ (1,0) [0|0] "" XXX
