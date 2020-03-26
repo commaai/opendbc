@@ -230,8 +230,8 @@ BO_ 1892 diagFSMReq: 8 XXX
  SG_ byte7 : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 1900 diagFSMResp: 8 XXX
- SG_ byte47 : 31|32@0+ (1,0) [0|4294967295] "" XXX
- SG_ byte03 : 63|32@0+ (1,0) [0|4294967295] "" XXX
+ SG_ byte03 : 7|32@0+ (1,0) [0|4294967295] "" XXX
+ SG_ byte47 : 39|32@0+ (1,0) [0|4294967295] "" XXX
 
 BO_ 1830 diagPSCMReq: 8 XXX
  SG_ byte0 : 7|8@0+ (1,0) [0|255] "" XXX
@@ -244,8 +244,8 @@ BO_ 1830 diagPSCMReq: 8 XXX
  SG_ byte7 : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 1838 diagPSCMResp: 8 XXX
- SG_ byte47 : 31|32@0+ (1,0) [0|4294967295] "" XXX
- SG_ byte03 : 63|32@0+ (1,0) [0|4294967295] "" XXX
+ SG_ byte03 : 7|32@0+ (1,0) [0|4294967295] "" XXX
+ SG_ byte47 : 39|32@0+ (1,0) [0|4294967295] "" XXX
 
 BO_ 1840 diagCEMReq: 8 XXX
  SG_ byte0 : 7|8@0+ (1,0) [0|255] "" XXX
@@ -258,8 +258,8 @@ BO_ 1840 diagCEMReq: 8 XXX
  SG_ byte7 : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 1848 diagCEMResp: 8 XXX
- SG_ byte47 : 31|32@0+ (1,0) [0|4294967295] "" XXX
- SG_ byte03 : 63|32@0+ (1,0) [0|4294967295] "" XXX
+ SG_ byte03 : 7|32@0+ (1,0) [0|4294967295] "" XXX
+ SG_ byte47 : 39|32@0+ (1,0) [0|4294967295] "" XXX
 
 
 
