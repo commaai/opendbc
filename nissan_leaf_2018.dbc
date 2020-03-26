@@ -65,9 +65,24 @@ BO_ 389 STEER_TORQUE_SENSOR: 8 XXX
 BO_ 460 BRAKE_PEDAL: 8 XXX
  SG_ BRAKE_PEDAL : 7|8@0+ (1,0) [0|256] "" XXX
 
-BO_ 569 GAS_PEDAL: 8 XXX
- SG_ GAS_PEDAL : 7|8@0+ (1,0) [0|256] "" XXX
+BO_ 569 CRUISE_THROTTLE: 8 XXX
+ SG_ GAS_PEDAL_INVERTED : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ GAS_PEDAL : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ CRUISE_AVAILABLE : 17|1@0+ (1,0) [0|1] "" XXX
+ SG_ unsure1 : 23|6@0+ (1,0) [0|63] "" XXX
+ SG_ unsure2 : 16|1@0+ (1,0) [0|1] "" XXX
+ SG_ unsure3 : 31|2@0+ (1,0) [0|3] "" XXX
+ SG_ NO_BUTTON_PRESSED : 29|1@0+ (1,0) [0|1] "" XXX
+ SG_ RES_BUTTON : 28|1@0+ (1,0) [0|1] "" XXX
+ SG_ SET_BUTTON : 27|1@0+ (1,0) [0|1] "" XXX
+ SG_ FOLLOW_DISTANCE_BUTTON : 26|1@0+ (1,0) [0|1] "" XXX
+ SG_ CANCEL_BUTTON : 25|1@0+ (1,0) [0|1] "" XXX
+ SG_ PROPILOT_BUTTON : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ unsure4 : 39|6@0+ (1,0) [0|63] "" XXX
+ SG_ COUNTER : 32|2@1+ (1,0) [0|3] "" XXX
+ SG_ unsure5 : 47|8@0+ (1,0) [0|255] "" XXX
+ SG_ unsure6 : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ unsure7 : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 644 WHEEL_SPEEDS_FRONT: 8 XXX
  SG_ WHEEL_SPEED_FR : 7|16@0+ (0.00555,0) [0|65535] "KPH" XXX
