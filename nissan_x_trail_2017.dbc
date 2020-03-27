@@ -121,13 +121,13 @@ BO_ 689 PROPILOT_HUD: 8 XXX
  SG_ AUDIBLE_TONE : 47|3@0+ (1,0) [0|8] "" XXX
  SG_ SPEED_SET_ICON : 7|2@0+ (1,0) [0|3] "" XXX
  SG_ SMALL_STEERING_WHEEL_ICON : 42|3@0+ (1,0) [0|7] "" XXX
+ SG_ SET_SPEED : 39|8@0+ (1,0) [0|255] "" XXX
  SG_ unknown02 : 1|2@0+ (1,0) [0|3] "" XXX
  SG_ unknown05 : 5|2@0+ (1,0) [0|3] "" XXX
  SG_ unknown08 : 8|7@0+ (1,0) [0|63] "" XXX
  SG_ unknown26 : 26|1@0+ (1,0) [0|1] "" XXX
  SG_ unknown28 : 28|1@0+ (1,0) [0|1] "" XXX
  SG_ unknown31 : 31|2@0+ (1,0) [0|3] "" XXX
- SG_ unknown39 : 39|8@0+ (1,0) [0|255] "" XXX
  SG_ unknown43 : 43|1@0+ (1,0) [0|1] "" XXX
  SG_ unknown55 : 55|8@0+ (1,0) [0|63] "" XXX
  SG_ unknown59 : 59|4@0+ (1,0) [0|15] "" XXX
