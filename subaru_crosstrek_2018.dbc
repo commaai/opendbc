@@ -149,7 +149,7 @@ BO_ 544 ES_Brake: 8 XXX
  SG_ Signal1 : 12|4@1+ (1,0) [0|1] "" XXX
  SG_ Brake_Pressure : 16|16@1+ (1,0) [0|255] "" XXX
  SG_ Signal2 : 32|4@1+ (1,0) [0|1] "" XXX
- SG_ __Status : 36|4@1+ (1,0) [0|63] "" XXX
+ SG_ State : 36|4@1+ (1,0) [0|63] "" XXX
  SG_ Signal3 : 40|24@1+ (1,0) [0|1] "" XXX
 
 BO_ 545 ES_Distance: 8 XXX
@@ -381,6 +381,7 @@ BO_ 1787 NEW_MSG_45: 8 XXX
 
 
 CM_ SG_ 64 Throttle_Combo "Throttle Cruise + Pedal";
+CM_ SG_ 544 State "0 = ES disabled, 8 = ES enabled, 12, 13 = ES_Brake active";
 CM_ SG_ 545 ES_Cruise_Throttle "signal might be smaller, values do not correlate with Throttle:CruiseThrottle";
 CM_ SG_ 545 Distance_Swap "Switch from Close to Far distance";
 CM_ SG_ 940 Highbeam "01 = low beam, 11 = high beam";
