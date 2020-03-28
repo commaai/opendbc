@@ -99,11 +99,14 @@ BO_ 73 NEW_MSG_5: 8 XXX
  SG_ NEW_SIGNAL_1 : 32|8@1+ (1,0) [0|4095] "" XXX
  SG_ NEW_SIGNAL_2 : 24|8@1+ (1,0) [0|127] "" XXX
 
-BO_ 280 NEW_MSG_6: 8 XXX
+BO_ 280 STOP_START: 8 XXX
  SG_ NEW_SIGNAL_1 : 12|12@1- (1,0) [0|4095] "" XXX
  SG_ NEW_SIGNAL_2 : 48|8@1- (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_3 : 61|1@1+ (1,0) [0|7] "" XXX
  SG_ NEW_SIGNAL_4 : 40|4@1+ (1,0) [0|255] "" XXX
+ SG_ Checksum : 0|8@1+ (1,0) [0|1] "" XXX
+ SG_ Counter : 8|4@1+ (1,0) [0|1] "" XXX
+ SG_ State : 63|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 281 Steering_Torque: 8 XXX
  SG_ checksum : 0|8@1+ (1,0) [0|3] "" XXX
