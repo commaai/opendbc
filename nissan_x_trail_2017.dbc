@@ -84,7 +84,7 @@ BO_ 523 CRUISE_THROTTLE: 6 XXX
  SG_ NEW_SIGNAL_2 : 23|1@0+ (1,0) [0|1] "" XXX
  SG_ GAS_PRESSED_INVERTED : 20|1@0+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 17|2@0+ (1,0) [0|3] "" XXX
- SG_ unsure1 : 7|16@0+ (1,0) [0|15] "" XXX
+ SG_ unsure1 : 7|10@0+ (1,0) [0|1023] "" XXX
  SG_ unsure2 : 43|4@0+ (1,0) [0|1] "" XXX
  SG_ unsure3 : 19|2@0+ (1,0) [0|3] "" XXX
 
