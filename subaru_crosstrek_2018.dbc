@@ -238,6 +238,8 @@ BO_ 801 ES_DashStatus: 8 XXX
  SG_ Car_Follow : 52|1@1+ (1,0) [0|3] "" XXX
  SG_ Far_Distance : 56|4@1+ (1,0) [0|15] "" XXX
  SG_ Cruise_State : 60|4@1+ (1,0) [0|15] "" XXX
+ SG_ LDW_Off : 13|1@1+ (1,0) [0|1] "" XXX
+ SG_ PCB_Off : 12|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 802 ES_LKAS_State: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
@@ -389,6 +391,7 @@ CM_ SG_ 545 Distance_Swap "Switch from Close to Far distance";
 CM_ SG_ 940 Highbeam "01 = low beam, 11 = high beam";
 CM_ SG_ 940 FOG_LIGHTS2 "yellow fog light in the dash";
 CM_ SG_ 801 Cruise_State "0 = Normal, 3 = Hold";
+CM_ SG_ 801 PCB_Off "Pre-Collision Braking";
 CM_ SG_ 805 NEW_SIGNAL_3 "always 3";
 CM_ SG_ 805 NEW_SIGNAL_4 "always 1";
 CM_ SG_ 1677 Units "1 = imperial, 6 = metric";
