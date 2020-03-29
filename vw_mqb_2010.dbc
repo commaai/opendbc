@@ -1108,8 +1108,8 @@ BO_ 1413 Systeminfo_01: 8 Gateway_MQB
  SG_ SI_BUS_15 : 30|1@1+ (1,0) [0|1] "" Vector__XXX
 
 BO_ 288 TSK_06: 8 Motor_Diesel_MQB
- SG_ TSK_06_CRC : 0|8@1+ (1,0) [0|255] "" Gateway_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
- SG_ TSK_06_BZ : 8|4@1+ (1,0) [0|15] "" Gateway_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Gateway_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Gateway_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
  SG_ TSK_Radbremsmom : 12|12@1+ (8,0) [0|32760] "Unit_NewtoMeter" Gateway_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
  SG_ TSK_Status : 24|3@1+ (1,0) [0|7] "" Gateway_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
  SG_ TSK_v_Begrenzung_aktiv : 27|1@1+ (1,0) [0|1] "" Gateway_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
