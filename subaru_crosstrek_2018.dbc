@@ -64,11 +64,7 @@ BO_ 65 NEW_MSG_1: 8 XXX
  SG_ NEW_SIGNAL_7 : 59|2@0+ (1,0) [0|255] "" XXX
 
 BO_ 72 Transmission: 8 XXX
-<<<<<<< HEAD
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
-=======
- SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
->>>>>>> add Transmission and Gear values
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_5 : 16|8@1+ (1,0) [0|255] "" XXX
  SG_ Gear : 24|8@1+ (1,0) [0|255] "" XXX
