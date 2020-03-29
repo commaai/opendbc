@@ -143,8 +143,7 @@ BO_ 518 Battery_Module_4: 8 K16_BECM
 
 BO_ 528 Pack_Stats: 8 K16_BECM
    SG_ Pack_Voltage : 7|12@0+ (0.125,0) [0|0] "V" K16_BECM
-   SG_ Byte_3 : 31|8@0+ (1,0) [0|0] "" K16_BECM
-   SG_ Byte_4 : 39|8@0+ (1,0) [0|0] "" K16_BECM
+   SG_ Pack_Current : 23|8@0- (0.15,0) [0|0] "A" K16_BECM
 
 BO_ 530 Charger_stats: 6 T18_BatteryCharger
    SG_ Charger_HV_Current : 0|10@1+ (0.05,0) [0|0] "A" K16_BECM
