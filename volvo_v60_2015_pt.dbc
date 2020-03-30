@@ -64,7 +64,7 @@ BO_ 582 fromServo1: 8 PSCM
  SG_ LKAActive : 49|1@0+ (1,0) [0|1] "" XXX
  SG_ SteeringWheelRateOfChange : 0|9@0+ (1,0) [0|255] "" XXX
  SG_ TurnDirection : 2|1@0+ (1,0) [0|1] "" XXX
- SG_ SteeringAngleServo : 23|16@0+ (0.04470,-1468.0) [0|65535] "deg" XXX
+ SG_ SteeringAngleServo : 23|16@0+ (0.0447,-1468) [0|65535] "deg" XXX
 
 BO_ 81 fromFSM0: 8 FSM
  SG_ ACCStatus : 18|3@0+ (1,0) [0|7] "" XXX
@@ -77,6 +77,10 @@ BO_ 610 fromFSMSteeringRequest: 8 FSM
  SG_ Checksum : 55|8@0+ (1,0) [0|255] "" PSCM
  SG_ LKAAngleRequest : 29|14@0+ (0.04,-327.68) [0|16383] "" PSCM
  SG_ LKADirection : 41|2@0+ (1,0) [0|3] "" PSCM
+ SG_ SET_X_22 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ SET_X_02 : 31|2@0+ (1,0) [0|3] "" XXX
+ SG_ SET_X_10 : 47|6@0+ (1,0) [0|63] "" XXX
+ SG_ SET_X_A4 : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 624 fromFSM3: 8 FSM
 
@@ -173,13 +177,10 @@ BO_ 1848 diagPSCMResp: 8 XXX
 
 CM_ SG_ 16 RateOfChangeOrTorque "Rate of change? Torque?";
 CM_ SG_ 16 SteeringDirection "0 = CCW, 1=CW (turning left or right of center)";
-CM_ SG_ 32 AcceleratorPedal "Unsure about scaling.";
-CM_ SG_ 648 Brake "Something with brake pedal, presure, position.";
 CM_ SG_ 298 EngineRpm "Might be engine rpm. But behaves abit weird.";
 CM_ SG_ 582 LKAActive "Seems one when lka active.";
 CM_ SG_ 582 SteeringWheelRateOfChange "Some rate of change for steering wheel? Torque?";
 CM_ SG_ 582 TurnDirection "0=CCW, 1=CW";
-CM_ SG_ 582 SteeringWheelAngle "SteeringWheelAngle CW= <0 CCW= >0";
 CM_ SG_ 81 ACCStatus "0=Acc Unavailable, 1=???, 2=Acc Ready, 3,4=???, 6,7= Acc Active ";
 CM_ SG_ 608 TimeGapMaybe "When ACC turned on goes from 255 -> 2 Then from 2->1 when pressing longer time gap.";
 CM_ SG_ 610 LKADirection "0=None, 1=Right, 2=Left";
