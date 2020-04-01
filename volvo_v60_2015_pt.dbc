@@ -60,11 +60,11 @@ BO_ 609 fromWhere: 8 XXX
  SG_ SteeringAngle : 21|14@0+ (0.1,-1021) [0|65535] "deg" XXX
 
 BO_ 582 fromServo1: 8 PSCM
- SG_ LKATorque : 35|12@0+ (1,-2000) [0|65535] "" XXX
  SG_ LKAActive : 49|1@0+ (1,0) [0|1] "" XXX
  SG_ SteeringWheelRateOfChange : 0|9@0+ (1,0) [0|255] "" XXX
  SG_ TurnDirection : 2|1@0+ (1,0) [0|1] "" XXX
  SG_ SteeringAngleServo : 23|16@0+ (0.0447,-1468) [0|65535] "deg" XXX
+ SG_ LKATorque : 35|12@0+ (1,-2000) [0|65535] "" XXX
 
 BO_ 81 fromFSM0: 8 FSM
  SG_ ACCStatus : 18|3@0+ (1,0) [0|7] "" XXX
@@ -77,10 +77,10 @@ BO_ 610 fromFSMSteeringRequest: 8 FSM
  SG_ Checksum : 55|8@0+ (1,0) [0|255] "" PSCM
  SG_ LKAAngleRequest : 29|14@0+ (0.04,-327.68) [0|16383] "" PSCM
  SG_ LKADirection : 41|2@0+ (1,0) [0|3] "" PSCM
- SG_ SET_X_22 : 15|8@0+ (1,0) [0|255] "" XXX
  SG_ SET_X_02 : 31|2@0+ (1,0) [0|3] "" XXX
  SG_ SET_X_10 : 47|6@0+ (1,0) [0|63] "" XXX
  SG_ SET_X_A4 : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ SET_X_22 : 15|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 624 fromFSM3: 8 FSM
 
@@ -184,6 +184,7 @@ CM_ SG_ 582 TurnDirection "0=CCW, 1=CW";
 CM_ SG_ 81 ACCStatus "0=Acc Unavailable, 1=???, 2=Acc Ready, 3,4=???, 6,7= Acc Active ";
 CM_ SG_ 608 TimeGapMaybe "When ACC turned on goes from 255 -> 2 Then from 2->1 when pressing longer time gap.";
 CM_ SG_ 610 LKADirection "0=None, 1=Right, 2=Left";
+CM_ SG_ 610 SET_X_22 "0x20 Heartbeat, VEgo <58kph = 0x03, VEgo >65kph = 0x04, 0x05";
 CM_ SG_ 295 ACCMinusBtn "ACC Minus (-) button pressed";
 CM_ SG_ 295 ACCSetBtn "Acc Set button (+) pressed";
 CM_ SG_ 295 ACCOnOffBtn "Cruise control on/off button pressed";
