@@ -360,6 +360,7 @@ BO_ 1677 Dash_State: 8 XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_3 : 16|4@1+ (1,0) [0|15] "" XXX
  SG_ Units : 29|3@1+ (1,0) [0|7] "" XXX
+ SG_ Icy_Road_Warning : 20|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 1743 NEW_MSG_41: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
@@ -392,8 +393,8 @@ CM_ SG_ 545 ES_Cruise_Throttle "signal might be smaller, values do not correlate
 CM_ SG_ 545 Distance_Swap "Switch from Close to Far distance";
 CM_ SG_ 940 Highbeam "01 = low beam, 11 = high beam";
 CM_ SG_ 940 FOG_LIGHTS2 "yellow fog light in the dash";
-CM_ SG_ 801 Cruise_State "0 = Normal, 1 = Hold+User Brake, 2 = Ready, 3 = Hold";
 CM_ SG_ 801 PCB_Off "Pre-Collision Braking";
+CM_ SG_ 801 Cruise_State "0 = Normal, 1 = Hold+User Brake, 2 = Ready, 3 = Hold";
 CM_ SG_ 805 NEW_SIGNAL_3 "always 3";
 CM_ SG_ 805 NEW_SIGNAL_4 "always 1";
 CM_ SG_ 1677 Units "1 = imperial, 6 = metric";
