@@ -1192,53 +1192,64 @@ BO_ 294 HCA_01: 8 XXX
  SG_ SET_ME_0XFE : 40|8@1+ (1,0) [0|255] "" XXX
  SG_ SET_ME_0X07 : 48|8@1+ (1,0) [0|255] "" XXX
 
-BO_ 159 EPS_01: 8 XXX
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ Steering_Wheel_Angle : 16|13@1+ (0.15,0) [0|16383] "Unit_DegreOfArc" XXX
- SG_ Steering_Wheel_Angle_VZ : 31|1@0+ (1,0) [0|1] "" XXX
- SG_ HCA_Active : 34|1@0+ (1,0) [0|1] "" XXX
- SG_ HCA_Standby : 33|1@0+ (1,0) [0|1] "" XXX
- SG_ Unknown_Status2 : 63|1@0+ (1,0) [0|1] "" XXX
- SG_ HCA_Ready : 32|1@1+ (1,0) [0|3] "" XXX
- SG_ Driver_Strain : 40|13@1+ (1,0) [0|255] "Nm" XXX
- SG_ Driver_Strain_VZ : 55|1@1+ (1,0) [0|1] "" XXX
- SG_ Unknown_Status1 : 62|1@0+ (1,0) [0|1] "" XXX
+BO_ 159 LH_EPS_03: 8 Gateway_D4C7
+ SG_ EPS_03_CRC : 0|8@1+ (1,0) [0|255] ""  APS_D4
+ SG_ EPS_03_BZ : 8|4@1+ (1,0) [0|15] ""  APS_D4
+ SG_ EPS_DSR_Status : 12|4@1+ (1.0,0.0) [0.0|15] ""  Vector__XXX
+ SG_ EPS_Berechneter_LW : 16|12@1+ (0.15,0) [0.00|613.95] "Unit_DegreOfArc"  APS_D4
+ SG_ EPS_BLW_QBit : 30|1@1+ (1.0,0.0) [0.0|1] ""  APS_D4
+ SG_ EPS_VZ_BLW : 31|1@1+ (1.0,0.0) [0.0|1] ""  APS_D4
+ SG_ EPS_HCA_Status : 32|4@1+ (1.0,0.0) [0.0|15] ""  Vector__XXX
+ SG_ EPS_Lenkmoment : 40|10@1+ (0.01,0) [0.00|8.00] "Unit_NewtoMeter"  APS_D4
+ SG_ EPS_Lenkmoment_QBit : 54|1@1+ (1.0,0.0) [0.0|1] ""  APS_D4
+ SG_ EPS_VZ_Lenkmoment : 55|1@1+ (1.0,0.0) [0.0|1] ""  APS_D4
+ SG_ EPS_Lenkungstyp : 60|4@1+ (1.0,0.0) [0.0|15] ""  APS_D4
 
 BO_ 286 VehicleSpeed: 8 XXX
  SG_ VehicleSpeed_CRC : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ VehicleSpeed_BZ : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Speed : 52|12@1+ (0.125,0) [0|1] "" XXX
 
-BO_ 919 LDW_02: 8 XXX
- SG_ LDW_DLC : 40|8@1+ (0.01,0) [0|255] "m" XXX
- SG_ LDW_TLC : 48|5@1+ (0.05,0) [0|255] "Seconds" XXX
- SG_ LDW_Unknown : 15|2@0+ (1,0) [0|3] "" XXX
- SG_ Alert_Message : 16|4@1+ (1,0) [0|15] "" XXX
- SG_ LDW_Direction : 20|1@0+ (1,0) [0|1] "" XXX
- SG_ Right_Lane_Status : 36|2@1+ (1,0) [0|3] "" XXX
- SG_ Left_Lane_Status : 38|2@1+ (1,0) [0|3] "" XXX
- SG_ Kombi_Lamp_Orange : 61|1@0+ (1,0) [0|1] "" XXX
- SG_ Kombi_Lamp_Green : 62|1@0+ (1,0) [0|1] "" XXX
+BO_ 919 LDW_02_FR: 8 Gateway_D4C7
+ SG_ LDW_02_CHK : 0|8@1+ (1,0) [0|255] ""  HUD_C7,SMLS_D4
+ SG_ LDW_02_BZ : 8|4@1+ (1,0) [0|15] ""  HUD_C7,SMLS_D4
+ SG_ LDW_Gong : 12|2@1+ (1.0,0.0) [0.0|3] ""  Kombi_D4
+ SG_ LDW_SW_Warnung_links : 14|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ LDW_SW_Warnung_rechts : 15|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ LDW_Texte : 16|4@1+ (1.0,0.0) [0.0|15] ""  Kombi_D4
+ SG_ LDW_Seite_DLCTLC : 20|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ LDW_Lernmodus : 21|3@1+ (1.0,0.0) [0.0|7] ""  HUD_C7
+ SG_ LDW_Anlaufsp_VLR : 24|4@1+ (1,0) [0|15] ""  SMLS_D4
+ SG_ LDW_Vib_Amp_VLR : 28|4@1+ (1,0) [0|15] ""  SMLS_D4
+ SG_ LDW_Anlaufzeit_VLR : 32|4@1+ (1,0) [0|15] ""  SMLS_D4
+ SG_ LDW_Lernmodus_seitenabhaengig : 36|4@1+ (1.0,0.0) [0.0|15] ""  HUD_C7,Kombi_D4
+ SG_ LDW_DLC : 40|8@1+ (0.01,-1.25) [-1.25|1.25] "Unit_Meter"  Vector__XXX
+ SG_ LDW_TLC : 48|5@1+ (0.1,0) [0.0|3.0] "Unit_Secon"  Vector__XXX
+ SG_ LDW_Warnung_links : 56|1@1+ (1.0,0.0) [0.0|1] ""  SMLS_D4
+ SG_ LDW_Warnung_rechts : 57|1@1+ (1.0,0.0) [0.0|1] ""  SMLS_D4
+ SG_ LDW_Codierinfo_fuer_VLR : 58|2@1+ (1.0,0.0) [0.0|3] ""  SMLS_D4
+ SG_ LDW_Frontscheibenheizung_aktiv : 60|1@1+ (1.0,0.0) [0.0|1] ""  Klima_D4_C7,SMLS_D4
+ SG_ LDW_Status_LED_gelb : 61|1@1+ (1.0,0.0) [0.0|1] ""  APS_D4,Kombi_D4
+ SG_ LDW_Status_LED_gruen : 62|1@1+ (1.0,0.0) [0.0|1] ""  APS_D4,Kombi_D4
+ SG_ LDW_KD_Fehler : 63|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
 
-BO_ 780 ACC_02: 8 XXX
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ SetSpeed : 12|10@1+ (0.08865,0) [0|90.68] "Unit_MeterPerSecond" XXX
- SG_ Kollision1 : 23|1@1+ (1,0) [0|1] "" XXX
- SG_ Abstand : 24|10@1+ (0.1,0) [0|102.3] "m" XXX
- SG_ ACC_MinusInv : 36|2@1+ (1,0) [0|3] "" XXX
- SG_ ACC_Minus : 38|2@1+ (1,0) [0|3] "" XXX
- SG_ Kollision2 : 40|1@1+ (1,0) [0|1] "" XXX
- SG_ MotorbitB5_1 : 41|1@1+ (1,0) [0|1] "" XXX
- SG_ 1_aktivieren : 42|1@1+ (1,0) [0|1] "" XXX
- SG_ Tacho_LED : 43|1@1+ (1,0) [0|1] "" XXX
- SG_ Hebelquit : 44|1@1+ (1,0) [0|1] "" XXX
- SG_ 1_aktivieren_inv : 45|1@1+ (1,0) [0|1] "" XXX
- SG_ Folgefahrt : 46|1@1+ (1,0) [0|1] "" XXX
- SG_ MotorbitB5_7 : 47|1@1+ (1,0) [0|1] "" XXX
- SG_ SetAbstand : 48|4@1+ (1,0) [0|15] "" XXX
- SG_ Hebel : 56|4@1+ (1,0) [0|15] "" XXX
+BO_ 780 ACC_02_FR: 8 Gateway_D4C7
+ SG_ ACC_02_CHK : 0|8@1+ (1,0) [0|255] ""  HUD_C7,Kombi_D4
+ SG_ ACC_02_BZ : 8|4@1+ (1,0) [0|15] ""  HUD_C7,Kombi_D4
+ SG_ ACC_Wunschgeschw : 12|10@1+ (0.32,0) [0.00|326.72] "Unit_KiloMeterPerHour"  HUD_C7,Kombi_D4
+ SG_ ACC_Status_Prim_Anz : 22|2@1+ (1.0,0.0) [0.0|3] ""  HUD_C7,Kombi_D4
+ SG_ ACC_Abstandsindex : 24|10@1+ (1,0) [1|1021] ""  HUD_C7,Kombi_D4
+ SG_ ACC_Akustik : 34|3@1+ (1.0,0.0) [0.0|7] ""  Kombi_D4
+ SG_ ACC_Gesetzte_Zeitluecke : 37|3@1+ (1.0,0.0) [0.0|7] ""  Kombi_D4
+ SG_ ACC_Optischer_Fahrerhinweis : 40|1@1+ (1.0,0.0) [0.0|1] ""  Kombi_D4
+ SG_ ACC_Typ_Tachokranz : 41|1@1+ (1.0,0.0) [0.0|1] ""  Kombi_D4
+ SG_ ACC_Anzeige_Zeitluecke : 42|1@1+ (1.0,0.0) [0.0|1] ""  Kombi_D4
+ SG_ ACC_Tachokranz : 43|1@1+ (1.0,0.0) [0.0|1] ""  Kombi_D4
+ SG_ ACC_Display_Prio : 44|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ ACC_Relevantes_Objekt : 46|2@1+ (1.0,0.0) [0.0|3] ""  HUD_C7,Kombi_D4
+ SG_ ACC_Texte_Primaeranz : 48|7@1+ (1.0,0.0) [0.0|127] ""  HUD_C7,Kombi_D4
+ SG_ ACC_Wunschgeschw_erreicht : 55|1@1+ (1.0,0.0) [0.0|1] ""  Kombi_D4
+ SG_ ACC_Status_Anzeige : 61|3@1+ (1.0,0.0) [0.0|7] ""  APS_D4,Kombi_D4
 
 BO_ 302 ACC_07: 8 XXX
  SG_ ACC_07_BZ : 8|4@1+ (1,0) [0|15] "" XXX
@@ -1252,15 +1263,70 @@ BO_ 695 RCTA_01: 8 XXX
  SG_ RCTA_01_BZ : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ RCTA_01_CRC : 0|8@1+ (1,0) [0|255] "" XXX
 
-BO_ 783 SWA_01: 8 XXX
- SG_ SWA_01_BZ : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ SWA_01_CRC : 0|8@1+ (1,0) [0|255] "" XXX
+BO_ 783 SWA_01_FR: 8 Gateway_D4C7
+ SG_ SWA_Status_CHK : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ SWA_Status_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ SWA_Anzeigen : 12|4@1+ (1.0,0.0) [0.0|15] ""  Kombi_D4
+ SG_ SWA_Blindheit_erkannt : 16|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ SWA_rel_Nichtverf : 17|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ SWA_rel_Fehler : 18|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ SWA_Sta_aktiv : 19|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ SWA_Sta_passiv : 20|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ SWA_Standziele_li : 24|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ SWA_Kolonne_li : 25|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ SWA_Infostufe_SWA_li : 26|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ SWA_Warnung_SWA_li : 27|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ SWA_Kolonne_mi : 33|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ SWA_Standziele_re : 40|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ SWA_Kolonne_re : 41|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ SWA_Infostufe_SWA_re : 42|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ SWA_Warnung_SWA_re : 43|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ SWA_Gischtzaehler : 48|7@1+ (1,0) [0|100] "Unit_PerCent"  Vector__XXX
+ SG_ SWA_KD_Fehler : 59|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
 
-BO_ 804 ACC_04: 8 XXX
- SG_ ACC_04_CRC : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ ACC_04_BZ : 8|4@1+ (1,0) [0|15] "" XXX
+BO_ 804 ACC_04: 8 Gateway_D4C7
+ SG_ ACC_04_CHK : 0|8@1+ (1,0) [0|255] ""  HUD_C7,Kombi_D4
+ SG_ ACC_04_BZ : 8|4@1+ (1,0) [0|15] ""  HUD_C7,Kombi_D4
+ SG_ ACC_Texte_Zusatzanz : 16|6@1+ (1.0,0.0) [0.0|63] ""  Kombi_D4
+ SG_ ACC_Status_Zusatzanz : 22|5@1+ (1.0,0.0) [0.0|31] ""  HUD_C7,Kombi_D4
+ SG_ ACC_Texte : 27|5@1+ (1.0,0.0) [0.0|31] ""  Kombi_D4
+ SG_ ACC_Texte_braking_guard : 32|3@1+ (1.0,0.0) [0.0|7] ""  HUD_C7,Kombi_D4
+ SG_ ACC_Warnhinweis : 35|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ ACC_Geschw_Zielfahrzeug : 40|10@1+ (0.32,0) [0.00|326.72] "Unit_KiloMeterPerHour"  Vector__XXX
+ SG_ ACC_Charisma_FahrPr : 56|3@1+ (1.0,0.0) [0.0|7] ""  Vector__XXX
+ SG_ ACC_Charisma_Status : 59|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ ACC_Charisma_Umschaltung : 61|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
 
-BO_ 917 LWR_AFS_01: 8 XXX
+BO_ 917 LWR_AFS_01: 8 Gateway_D4C7
+ SG_ AFS_Abbiegelicht_li_Anf : 0|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ AFS_Abbiegelicht_re_Anf : 1|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ AFS_Abbiegelicht_Dimm_Anf : 2|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ AFS_Verfuegbarkeit_GLW : 3|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ AFS_Status_adaptive_LV : 4|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ AFS_Fernlicht_li_defekt : 5|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ AFS_Fernlicht_re_defekt : 6|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ AFS_Fernlicht_Status : 7|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ LWR_AFS_01_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ AFS_Lampe : 12|1@1+ (1.0,0.0) [0.0|1] ""  Kombi_D4
+ SG_ LWR_Lampe : 13|1@1+ (1.0,0.0) [0.0|1] ""  Kombi_D4
+ SG_ AFS_Fehlertext : 14|1@1+ (1.0,0.0) [0.0|1] ""  Kombi_D4
+ SG_ AFS_LED_Blinkmode : 15|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ LWR_Touristenmodus_aktiv : 16|1@1+ (1.0,0.0) [0.0|1] ""  Kombi_D4
+ SG_ AFS_Charisma_FahrPr : 17|3@1+ (1.0,0.0) [0.0|7] ""  Vector__XXX
+ SG_ AFS_Charisma_Status : 20|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ AFS_Charisma_Umschaltung : 22|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ AFS_Allwetterlicht : 24|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ LWR_Pos_Schrittmotor : 32|8@1+ (0.4,0) [0.0|100.0] "Unit_PerCent"  Vector__XXX
+ SG_ LWR_Hoehenwert_VL : 40|8@1+ (1,-127) [-127|126] ""  Vector__XXX
+ SG_ LWR_Hoehenwert_HL : 48|8@1+ (1,-127) [-127|126] ""  Vector__XXX
+ SG_ AFS_Ersatzlicht_Links : 56|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ AFS_Ersatzlicht_Rechts : 57|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ LWR_AFS_Grundeinstellung : 58|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ LWR_AFS_Parametrisierung : 59|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ LWR_Initialisierungslauf : 60|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ LWR_Sicherheitsposition : 61|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ LWR_Modus : 62|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ LWR_KD_Fehler : 63|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
 
 BO_ 991 Gateway_76: 8 XXX
 
@@ -1268,7 +1334,26 @@ BO_ 997 TSG_FT_02: 8 XXX
  SG_ TSG_FT_02_BZ : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ TSG_FT_02_CRC : 0|8@1+ (1,0) [0|255] "" XXX
 
-BO_ 1175 Parkhilfe_01: 8 XXX
+BO_ 1175 Parkhilfe_01: 8 APS_D4
+ SG_ PH_Abschaltursache : 13|3@1+ (1.0,0.0) [0.0|7] ""  Gateway_D4C7
+ SG_ PH_Opt_Anzeige_V_ein : 16|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
+ SG_ PH_Opt_Anzeige_H_ein : 17|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
+ SG_ PH_Opt_Anz_V_Hindernis : 18|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
+ SG_ PH_Opt_Anz_H_Hindernis : 19|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
+ SG_ PH_Tongeber_V_aktiv : 20|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
+ SG_ PH_Tongeber_H_aktiv : 21|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
+ SG_ PH_Tongeber_mute : 22|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
+ SG_ PH_Anf_Audioabsenkung : 23|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
+ SG_ PH_Frequenz_hinten : 32|4@1+ (1,0) [0|15] ""  Gateway_D4C7
+ SG_ PH_Lautstaerke_hinten : 36|4@1+ (1,0) [0|15] ""  Gateway_D4C7
+ SG_ PH_Frequenz_vorn : 40|4@1+ (1,0) [0|15] ""  Gateway_D4C7
+ SG_ PH_Lautstaerke_vorn : 44|4@1+ (1,0) [0|15] ""  Gateway_D4C7
+ SG_ PH_StartStopp_Info : 49|2@1+ (1.0,0.0) [0.0|3] ""  Gateway_D4C7
+ SG_ PH_defekt : 56|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
+ SG_ PH_gestoert : 57|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
+ SG_ PH_Systemzustand : 58|3@1+ (1.0,0.0) [0.0|7] ""  Gateway_D4C7,RearView_D4
+ SG_ PH_Display_Kundenwunsch : 61|2@1+ (1.0,0.0) [0.0|3] ""  Gateway_D4C7
+ SG_ PH_KD_Fehler : 63|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
 
 BO_ 427 ESP_33: 8 XXX
  SG_ ESP_33_BZ : 8|4@1+ (1,0) [0|15] "" XXX
@@ -1293,9 +1378,41 @@ BO_ 792 Kamera_Status: 8 XXX
 
 BO_ 981 Licht_Anf_01: 8 XXX
 
-BO_ 1440 RLS_01: 8 XXX
+BO_ 1440 RLS_01: 5 Gateway_D4C7
+ SG_ LS_Helligkeit_IR : 0|8@1+ (400,0) [0|101200] "Unit_Lux"  HUD_C7
+ SG_ LS_Helligkeit_FW : 8|10@1+ (6,0) [0|6126] "Unit_Lux"  HUD_C7
+ SG_ LS_defekt : 22|1@1+ (1.0,0.0) [0.0|1] ""  HUD_C7
+ SG_ LS_Verbau : 23|1@1+ (1.0,0.0) [0.0|1] ""  HUD_C7
+ SG_ RS_Regenmenge : 24|4@1+ (10,0) [0|100] "Unit_PerCent"  Vector__XXX
+ SG_ RS_Verbau : 29|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ RS_Verglasung_schliessen : 30|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ RS_defekt : 31|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ RS_Wischergeschwindigkeit : 32|3@1+ (1.0,0.0) [0.0|7] ""  Vector__XXX
 
-BO_ 870 Blinkmodi_02: 8 XXX
+BO_ 867 Blinkmodi_01: 4 Gateway_D4C7
+ SG_ BM_ZV_auf : 0|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BM_ZV_zu : 1|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BM_DWA_ein : 2|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BM_DWA_Alarm : 3|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BM_Crash : 4|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BM_Panik : 5|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BM_Not_Bremsung : 6|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BM_GDO : 7|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BM_links : 8|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BM_rechts : 9|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BM_Warnblinken : 10|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BM_Autobahn : 11|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BM_Taxi_Notalarm : 12|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BM_Telematik : 13|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BM_HD_Oeffnung_angelernt : 14|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BM_WBT_Beleuchtung : 15|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ Blinken_li_Fzg_Takt : 16|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ Blinken_re_Fzg_Takt : 17|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ Blinken_li_Kombi_Takt : 18|1@1+ (1.0,0.0) [0.0|1] ""  Kombi_D4
+ SG_ Blinken_re_Kombi_Takt : 19|1@1+ (1.0,0.0) [0.0|1] ""  Kombi_D4
+ SG_ BM_NBA_n_codiert_n_aktiv : 20|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BM_NBA_Status : 21|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ Blinken_FWB_aktiv : 23|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
 
 BO_ 1385 HVEM_04: 8 XXX
 
@@ -1303,15 +1420,54 @@ BO_ 1605 FLA_01: 8 XXX
 
 BO_ 1624 Licht_vorne_01: 8 XXX
 
-BO_ 1646 Klima_03: 8 XXX
+BO_ 1646 Klima_03: 7 Klima_D4_C7
+ SG_ KL_STL_aktiv : 0|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7,Kombi_D4,STH_D4
+ SG_ KL_STH_aktiv : 1|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7,Kombi_D4,STH_D4
+ SG_ KL_Solarluefter_aktiv : 2|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7,STH_D4
+ SG_ KL_Umluft_Taste : 3|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
+ SG_ KL_Geblaese_Fond_Status : 4|4@1+ (1.0,0.0) [0.0|15] ""  Gateway_D4C7,Klima_Fond_D4_C7
+ SG_ KL_STH_Ansteuerung : 8|2@1+ (1.0,0.0) [0.0|3] ""  Gateway_D4C7,STH_D4
+ SG_ KL_STH_Betriebsdauer : 10|6@1+ (1,0) [0|60] "Unit_Minut"  Gateway_D4C7,STH_D4
+ SG_ KL_Magnetventil : 16|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7,STH_D4
+ SG_ KL_WaPu : 17|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7,STH_D4
+ SG_ KL_Freigabe_KRH_li : 18|3@1+ (1.0,0.0) [0.0|7] ""  Gateway_D4C7
+ SG_ KL_Freigabe_KRH_re : 21|3@1+ (1.0,0.0) [0.0|7] ""  Gateway_D4C7
+ SG_ KL_BCmE_Livetip_Freigabe : 24|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
+ SG_ KL_HYB_ASV_hinten_schliessen_Anf : 25|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
+ SG_ KL_HYB_ASV_vorne_schliessen_Anf : 26|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
+ SG_ KL_HYB_Spuelbetrieb_Freigabe : 27|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
+ SG_ KL_Innen_Temp : 32|8@1+ (0.5,-50) [-50.0|76.0] "Unit_DegreCelsi"  Gateway_D4C7
+ SG_ KL_Sonnenintensitaet : 40|8@1+ (10,0) [0|1000] "Unit_WattPerMeterSquar"  Gateway_D4C7
+ SG_ KL_AussenTemp_WK : 48|8@1+ (0.5,-50) [-50.0|76.0] "Unit_DegreCelsi"  Gateway_D4C7
 
-BO_ 1720 Kombi_03: 8 XXX
+BO_ 1720 Kombi_03: 8 Kombi_D4
+ SG_ KBI_Reifenumfang : 0|12@1+ (1,0) [0|4095] "Unit_MilliMeter"  Gateway_D4C7
+ SG_ WFS_Schluessel_Fahrberecht : 12|4@1+ (1.0,0.0) [0.0|15] ""  Gateway_D4C7
+ SG_ KBI_BCmE_aktiv : 16|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
+ SG_ KBI_Sparhinweis_quittiert : 17|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_D4C7
 
 BO_ 391 EV_Gearshift: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ GearPosition : 16|4@1+ (1,0) [0|255] "" XXX
  SG_ RegenBrakingMode : 13|2@0+ (1,0) [0|3] "" XXX
+
+BO_ 1712 Klima_Sensor_01: 6 Gateway_D4C7
+ SG_ FS_Taupunkt : 0|10@1+ (0.1,-39.6) [-39.5|60.4] "Unit_DegreCelsi"  Klima_D4_C7
+ SG_ FS_ResponseError : 15|1@1+ (1.0,0.0) [0.0|1] ""  Klima_D4_C7
+ SG_ FS_Temp_Scheibe : 16|10@1+ (0.1,-39.6) [-39.5|60.4] "Unit_DegreCelsi"  Klima_D4_C7
+ SG_ FS_Temp_Sensor : 32|8@1+ (0.5,-40) [-39.5|87.0] "Unit_DegreCelsi"  Klima_D4_C7
+ SG_ FS_Luftfeuchte_rel : 40|8@1+ (0.5,-0.5) [0.0|100.0] "Unit_PerCent"  Klima_D4_C7
+
+BO_ 1717 Klima_Sensor_03: 8 Gateway_D4C7
+ SG_ FSA_Taupunkt : 0|10@1+ (0.1,-40) [-40.0|60.0] "Unit_DegreCelsi"  Klima_D4_C7
+ SG_ FSA_ResponseError : 15|1@1+ (1.0,0.0) [0.0|1] ""  Klima_D4_C7
+ SG_ FSA_Temp_Luft : 16|10@1+ (0.1,-40) [-40.0|61.0] "Unit_DegreCelsi"  Klima_D4_C7
+ SG_ FSA_Luftfeuchte_rel : 32|8@1+ (0.5,0) [0.0|100.0] "Unit_PerCent"  Klima_D4_C7
+ SG_ FSA_HW : 40|4@1+ (1,0) [0|15] ""  Klima_D4_C7
+ SG_ FSA_SW : 44|4@1+ (1,0) [0|15] ""  Klima_D4_C7
+ SG_ FSA_Temp_Sensor : 48|11@1+ (0.1,-40) [-40.0|90.0] "Unit_DegreCelsi"  Klima_D4_C7
+ SG_ FSA_Sensorheizung_Status : 59|1@1+ (1.0,0.0) [0.0|1] ""  Klima_D4_C7
 
 CM_ SG_ 173 COUNTERXX "Message not renamed to COUNTER because J533 rate-limiting makes it look like messages are being lost"
 CM_ SG_ 134 LWI_Lenkradwinkel "Steering angle WITH variable ratio effect included";
@@ -1325,15 +1481,6 @@ CM_ SG_ 159 HCA_Ready "1 if HCA is okay, 0 if the rack doesn't have HCA configur
 CM_ SG_ 159 Driver_Strain "Steering input by driver, torque";
 CM_ SG_ 159 Driver_Strain_VZ "Steering input by driver, sign (direction)";
 CM_ SG_ 159 Steering_Wheel_Angle "Steering angle WITHOUT variable ratio effect included";
-CM_ SG_ 919 LDW_DLC "Probable DLC (distance to line crossing)";
-CM_ SG_ 919 LDW_TLC "Probable TLC (time to line crossing)";
-CM_ SG_ 919 LDW_Unknown "Might be a steering pressed / driver active flag";
-CM_ SG_ 919 Alert_Message "Static table of alert messages to be invoked in the instrument cluster, some with or without beeps, 0 = no current message";
-CM_ SG_ 919 LDW_Direction "Left/right indicator for DLC and TLC";
-CM_ SG_ 919 Right_Lane_Status "Display brightness range, 0 = no lane, 3 = full brightness";
-CM_ SG_ 919 Left_Lane_Status "Display brightness range, 0 = no lane, 3 = full brightness";
-CM_ SG_ 919 Kombi_Lamp_Orange "Enables orange LDW light in instrument cluster";
-CM_ SG_ 919 Kombi_Lamp_Green "Enables green LDW light in instrument cluster";
 CM_ SG_ 780 Folgefahrt "Following another vehicle";
 CM_ SG_ 780 SetAbstand "Set following distance";
 CM_ SG_ 780 Abstand "Following distance";
