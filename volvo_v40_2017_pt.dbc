@@ -46,7 +46,7 @@ BO_ 85 PedalandBrake: 8 ECM
 
 BO_ 8 SteeringAngle: 8 SAS
  SG_ SteeringDirection : 42|1@0+ (1,0) [0|1] "" XXX
- SG_ SteeringAngle1 : 53|14@0+ (0.04,0) [0|65535] "degrees" XXX
+ SG_ SteeringAngle1 : 53|14@0+ (0.04395,0) [0|65535] "degrees" XXX
 
 BO_ 101 EngineInfo: 8 XXX
  SG_ NEW_SIGNAL_1 : 17|10@0+ (1,-512) [0|1023] "" XXX
@@ -80,11 +80,11 @@ BO_ 208 fromFSMSteeringRequest: 8 FSM
  SG_ SET_X_B4 : 15|8@0+ (1,0) [0|255] "" XXX
  SG_ SET_X_08 : 23|8@0+ (1,0) [0|255] "" XXX
  SG_ Unkown : 31|8@0+ (1,-128) [0|255] "" XXX
- SG_ LKAAngleRequest : 37|14@0+ (0.04,-327.68) [0|16383] "degrees" XXX
  SG_ SET_X_02 : 39|2@0+ (1,0) [0|3] "" XXX
  SG_ Checksum : 55|8@0+ (1,0) [0|255] "" XXX
  SG_ LKADirection : 57|2@0+ (1,0) [0|2] "" XXX
  SG_ SET_X_25 : 63|6@0+ (1,0) [0|63] "" XXX
+ SG_ LKAAngleRequest : 37|14@0+ (0.04395,-360.04) [0|16383] "degrees" XXX
 
 BO_ 352 fromFSM2: 8 FSM
  SG_ NEW_SIGNAL_1 : 55|1@0+ (1,0) [0|1] "" XXX
@@ -116,7 +116,7 @@ BO_ 293 fromServo1: 8 PSCM
  SG_ LKATorque : 11|12@0+ (1,-2000) [0|4095] "" XXX
  SG_ LKAActive : 13|1@0+ (1,0) [0|1] "" XXX
  SG_ ServoError : 32|1@0+ (1,0) [0|1] "" XXX
- SG_ SteeringAngleServo : 47|16@0+ (0.04,-1310.72) [0|65535] "deg" XXX
+ SG_ SteeringAngleServo : 47|16@0+ (0.04395,-1440.1536) [0|65535] "deg" XXX
 
 BO_ 224 fromServo0: 8 PSCM
  SG_ NEW_SIGNAL_2 : 12|5@0+ (1,0) [0|31] "" XXX
@@ -276,9 +276,9 @@ CM_ SG_ 48 ACCStatusActive "Active?";
 CM_ SG_ 48 FCWSomething "All bit set during fcw";
 CM_ SG_ 48 ACCStatusOnOff "Turns one after pressing on/off button on steering wheeel";
 CM_ SG_ 208 Unkown "Used in checksum calculation, Seems to limit torque based on the number.";
-CM_ SG_ 208 LKAAngleRequest "+ = right, - = left";
 CM_ SG_ 208 Checksum "Checksum calculated as a one-complement addition of LKAAngleRequest+LKADirection+Unkown, Zeros used to pad missing bits.";
 CM_ SG_ 208 LKADirection "0 = No lka active, 1=LKA steer right, 2=LKA steer left";
+CM_ SG_ 208 LKAAngleRequest "+ = right, - = left";
 CM_ SG_ 352 NEW_SIGNAL_1 "Turned one. Got LKA service needed can this be the one?";
 CM_ SG_ 640 SpeedTarget "SpeedTarget ACC (noisy bf starting acc Jumps from 0->252->0)";
 CM_ SG_ 853 TargetSpeedOdo "Probably target speed odo";
