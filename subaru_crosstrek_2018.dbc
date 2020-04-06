@@ -43,16 +43,16 @@ BO_ 2 Steering: 8 XXX
 
 BO_ 64 Throttle: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ Off_Accel : 60|4@1+ (1,0) [0|7] "" XXX
- SG_ NEW_SIGNAL_3 : 56|4@1+ (1,0) [0|255] "" XXX
- SG_ Throttle_Cruise : 40|8@1+ (1,0) [0|255] "" XXX
- SG_ Throttle_Combo : 55|8@1+ (1,0) [0|255] "" XXX
- SG_ Throttle_Pedal : 32|8@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_2 : 48|7@1+ (1,0) [0|1] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|255] "" XXX
- SG_ Engine_RPM : 16|12@1+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_1 : 12|4@1+ (1,0) [0|1] "" XXX
+ SG_ Engine_RPM : 16|12@1+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_4 : 28|5@1+ (1,0) [0|1] "" XXX
+ SG_ Throttle_Pedal : 32|8@1+ (1,0) [0|255] "" XXX
+ SG_ Throttle_Cruise : 40|8@1+ (1,0) [0|255] "" XXX
+ SG_ Throttle_Combo : 48|7@1+ (1,0) [0|1] "" XXX
+ SG_ Signal1 : 55|8@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_3 : 56|4@1+ (1,0) [0|255] "" XXX
+ SG_ Off_Accel : 60|4@1+ (1,0) [0|7] "" XXX
 
 BO_ 65 NEW_MSG_1: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
@@ -63,12 +63,13 @@ BO_ 65 NEW_MSG_1: 8 XXX
  SG_ NEW_SIGNAL_6 : 48|8@1+ (1,0) [0|63] "" XXX
  SG_ NEW_SIGNAL_7 : 59|2@0+ (1,0) [0|255] "" XXX
 
-BO_ 72 NEW_MSG_2: 8 XXX
+BO_ 72 Transmission: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_3 : 40|16@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_4 : 38|3@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_5 : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ Gear : 24|8@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_4 : 38|3@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_3 : 40|16@1+ (1,0) [0|255] "" XXX
 
 BO_ 316 NEW_MSG_3: 8 XXX
 
@@ -98,28 +99,38 @@ BO_ 73 NEW_MSG_5: 8 XXX
  SG_ NEW_SIGNAL_1 : 32|8@1+ (1,0) [0|4095] "" XXX
  SG_ NEW_SIGNAL_2 : 24|8@1+ (1,0) [0|127] "" XXX
 
-BO_ 280 NEW_MSG_6: 8 XXX
+BO_ 280 STOP_START: 8 XXX
+ SG_ Checksum : 0|8@1+ (1,0) [0|1] "" XXX
+ SG_ Counter : 8|4@1+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_1 : 12|12@1- (1,0) [0|4095] "" XXX
+ SG_ NEW_SIGNAL_4 : 40|4@1+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_2 : 48|8@1- (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_3 : 61|1@1+ (1,0) [0|7] "" XXX
- SG_ NEW_SIGNAL_4 : 40|4@1+ (1,0) [0|255] "" XXX
+ SG_ State : 63|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 281 Steering_Torque: 8 XXX
  SG_ checksum : 0|8@1+ (1,0) [0|3] "" XXX
  SG_ counter : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ Steer_Error_1 : 12|1@0+ (1,0) [0|7] "" XXX
  SG_ Steer_Torque_Sensor : 16|11@1- (-1,0) [0|3] "" XXX
+ SG_ Steer_Error_2 : 28|1@1+ (1,0) [0|3] "" XXX
  SG_ Steering_Angle : 32|16@1- (-0.0217,0) [0|255] "" X
  SG_ Steer_Torque_Output : 48|11@1- (-1,0) [0|31] "" XXX
 
 BO_ 312 Brake_Pressure_L_R: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|31] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|3] "" XXX
- SG_ Brake_2 : 56|8@1+ (1,0) [0|255] "" XXX
  SG_ Brake_1 : 48|8@1+ (1,0) [0|255] "" XXX
+ SG_ Brake_2 : 56|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 313 Brake_Pedal: 8 XXX
+ SG_ Checksum : 0|8@1+ (1,0) [0|1] "" XXX
+ SG_ Counter : 8|4@1+ (1,0) [0|1] "" XXX
+ SG_ Signal1 : 12|22@1+ (1,0) [0|1] "" XXX
  SG_ Brake_Pedal_On : 34|1@1+ (1,0) [0|7] "" XXX
+ SG_ Signal2 : 35|1@1+ (1,0) [0|1] "" XXX
  SG_ Brake_Pedal : 36|12@1+ (1,0) [0|65535] "" XXX
+ SG_ Signal3 : 48|16@1+ (1,0) [0|1] "" XXX
 
 BO_ 290 ES_LKAS: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
@@ -138,18 +149,26 @@ BO_ 722 NEW_MSG_10: 8 XXX
 BO_ 544 ES_Brake: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ Signal1 : 12|4@1+ (1,0) [0|1] "" XXX
  SG_ Brake_Pressure : 16|16@1+ (1,0) [0|255] "" XXX
- SG_ __Status : 36|4@1+ (1,0) [0|63] "" XXX
+ SG_ Signal2 : 32|4@1+ (1,0) [0|1] "" XXX
+ SG_ State : 36|4@1+ (1,0) [0|63] "" XXX
+ SG_ Signal3 : 40|24@1+ (1,0) [0|1] "" XXX
 
 BO_ 545 ES_Distance: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ Signal1 : 12|20@1+ (1,0) [0|15] "" XXX
- SG_ Signal2 : 32|24@1+ (1,0) [0|15] "" XXX
- SG_ ACC_Cancel : 56|1@1+ (1,0) [0|1] "" XXX
- SG_ ACC_Set : 57|1@1+ (1,0) [0|1] "" XXX
- SG_ ACC_Resume : 58|1@1+ (1,0) [0|1] "" XXX
- SG_ Signal3 : 59|5@1+ (1,0) [0|1] "" XXX
+ SG_ ES_Cruise_Throttle : 12|20@1+ (1,0) [0|15] "" XXX
+ SG_ Car_Follow : 32|1@1+ (1,0) [0|1] "" XXX
+ SG_ Signal1 : 33|4@1+ (1,0) [0|1] "" XXX
+ SG_ Distance_Swap : 37|1@1+ (1,0) [0|15] "" XXX
+ SG_ Signal2 : 38|2@1+ (1,0) [0|1] "" XXX
+ SG_ Close_Distance : 40|8@1+ (1,0) [0|1] "" XXX
+ SG_ Signal3 : 48|8@1+ (1,0) [0|1] "" XXX
+ SG_ Cruise_Cancel : 56|1@1+ (1,0) [0|1] "" XXX
+ SG_ Cruise_Set : 57|1@1+ (1,0) [0|1] "" XXX
+ SG_ Cruise_Resume : 58|1@1+ (1,0) [0|1] "" XXX
+ SG_ Signal4 : 59|5@1+ (1,0) [0|1] "" XXX
 
 BO_ 546 ES_Status: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
@@ -157,6 +176,7 @@ BO_ 546 ES_Status: 8 XXX
  SG_ RPM : 16|12@1+ (1,0) [0|255] "" XXX
  SG_ Cruise_Activated : 29|1@0+ (1,0) [0|3] "" XXX
  SG_ Cruise_Brake : 30|1@1+ (1,0) [0|3] "" XXX
+ SG_ Cruise_Hold : 31|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 554 ES_Blank: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
@@ -194,28 +214,34 @@ BO_ 912 Dashlights: 8 XXX
  SG_ SEATBELT_FL : 48|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 940 BodyInfo: 8 XXX
- SG_ DASH_BTN_LIGHTS : 56|1@0+ (1,0) [0|1] "" XXX
+ SG_ Checksum : 0|8@1+ (1,0) [0|1] "" XXX
+ SG_ Counter : 8|4@1+ (1,0) [0|1] "" XXX
  SG_ DOOR_OPEN_FL : 32|1@1+ (1,0) [0|255] "" XXX
  SG_ DOOR_OPEN_FR : 33|1@1+ (1,0) [0|3] "" XXX
  SG_ DOOR_OPEN_RL : 34|1@1+ (1,0) [0|1] "" XXX
  SG_ DOOR_OPEN_RR : 35|1@1+ (1,0) [0|1] "" XXX
  SG_ DOOR_OPEN_TRUNK : 36|1@0+ (1,0) [0|1] "" XXX
- SG_ FOG_LIGHTS2 : 60|1@1+ (1,0) [0|1] "" XXX
- SG_ Highbeam : 58|1@1+ (1,0) [0|1] "" XXX
+ SG_ DASH_BTN_LIGHTS : 56|1@0+ (1,0) [0|1] "" XXX
  SG_ Lowbeam : 57|1@1+ (1,0) [0|3] "" XXX
+ SG_ Highbeam : 58|1@1+ (1,0) [0|1] "" XXX
+ SG_ FOG_LIGHTS2 : 60|1@1+ (1,0) [0|1] "" XXX
+ SG_ WIPERS : 62|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 801 ES_DashStatus: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|7] "" XXX
+ SG_ PCB_Off : 12|1@1+ (1,0) [0|1] "" XXX
+ SG_ LDW_Off : 13|1@1+ (1,0) [0|1] "" XXX
+ SG_ Cruise_Distance : 28|3@1+ (1,0) [0|3] "" XXX
+ SG_ Cruise_Disengaged : 35|1@1+ (1,0) [0|3] "" XXX
+ SG_ Cruise_Activated : 36|1@1+ (1,0) [0|3] "" XXX
+ SG_ Cruise_Set_Speed : 40|8@1+ (1,0) [0|255] "" XXX
+ SG_ Cruise_Fault : 48|1@1+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_10 : 49|2@1+ (1,0) [0|3] "" XXX
  SG_ Brake_Pedal : 51|1@1+ (1,0) [0|3] "" XXX
- SG_ Cruise_Set_Speed : 40|8@1+ (1,0) [0|255] "" XXX
- SG_ Cruise_Activated : 36|1@1+ (1,0) [0|3] "" XXX
- SG_ Cruise_Disengaged : 35|1@1+ (1,0) [0|3] "" XXX
- SG_ Far_Distance : 56|4@1+ (1,0) [0|15] "" XXX
  SG_ Car_Follow : 52|1@1+ (1,0) [0|3] "" XXX
- SG_ ACC_Distance : 28|3@1+ (1,0) [0|3] "" XXX
- SG_ ACC_Hold : 60|4@1+ (1,0) [0|15] "" XXX
+ SG_ Far_Distance : 56|4@1+ (1,0) [0|15] "" XXX
+ SG_ Cruise_State : 60|4@1+ (1,0) [0|15] "" XXX
 
 BO_ 802 ES_LKAS_State: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
@@ -237,9 +263,9 @@ BO_ 802 ES_LKAS_State: 8 XXX
  SG_ FCW_Cont_Beep : 32|1@1+ (1,0) [0|1] "" XXX
  SG_ FCW_Repeated_Beep : 33|1@1+ (1,0) [0|1] "" XXX
  SG_ Throttle_Management_Activated : 34|1@1+ (1,0) [0|1] "" XXX
+ SG_ Lead_Vehicle_Start_Alert : 35|1@1+ (1,0) [0|1] "" XXX
  SG_ Right_Depart : 36|1@1+ (1,0) [0|3] "" XXX
  SG_ Signal5 : 37|27@1+ (1,0) [0|1] "" XXX
- SG_ Vehicle_In_Front_Has_Moved : 35|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 805 ES_NEW_MSG_22: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
@@ -334,6 +360,7 @@ BO_ 1677 Dash_State: 8 XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_3 : 16|4@1+ (1,0) [0|15] "" XXX
  SG_ Units : 29|3@1+ (1,0) [0|7] "" XXX
+ SG_ Icy_Road_Warning : 20|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 1743 NEW_MSG_41: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
@@ -360,10 +387,15 @@ BO_ 1787 NEW_MSG_45: 8 XXX
 
 
 
-CM_ SG_ 940 FOG_LIGHTS2 "yellow fog light in the dash";
+CM_ SG_ 64 Throttle_Combo "Throttle Cruise + Pedal";
+CM_ SG_ 544 State "0 = ES disabled, 8 = ES enabled, 12, 13 = ES_Brake active";
+CM_ SG_ 545 ES_Cruise_Throttle "signal might be smaller, values do not correlate with Throttle:CruiseThrottle";
+CM_ SG_ 545 Distance_Swap "Switch from Close to Far distance";
 CM_ SG_ 940 Highbeam "01 = low beam, 11 = high beam";
-CM_ SG_ 801 ACC_Hold "0 = No Hold, 3 = Hold";
-CM_ SG_ 802 Vehicle_In_Front_Has_Moved "Crosstrek 2018 = car in front has moved";
+CM_ SG_ 940 FOG_LIGHTS2 "yellow fog light in the dash";
+CM_ SG_ 801 PCB_Off "Pre-Collision Braking";
+CM_ SG_ 801 Cruise_State "0 = Normal, 1 = Hold+User Brake, 2 = Ready, 3 = Hold";
 CM_ SG_ 805 NEW_SIGNAL_3 "always 3";
 CM_ SG_ 805 NEW_SIGNAL_4 "always 1";
 CM_ SG_ 1677 Units "1 = imperial, 6 = metric";
+VAL_ 72 Gear 2 "N" 3 "R" 4 "P" 121 "D" 137 "1" 145 "2" 153 "3" 161 "4" 169 "5" 177 "6" ;
