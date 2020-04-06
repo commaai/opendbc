@@ -1414,7 +1414,7 @@ BO_ 867 Blinkmodi_01: 4 Gateway_D4C7
  SG_ BM_NBA_Status : 21|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
  SG_ Blinken_FWB_aktiv : 23|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
 
-BO_ 1385 HVEM_04: 8 XXX
+BO_ 1 HVEM_04: 8 XXX
 
 BO_ 1605 FLA_01: 8 XXX
 
@@ -1468,6 +1468,22 @@ BO_ 1717 Klima_Sensor_03: 8 Gateway_D4C7
  SG_ FSA_SW : 44|4@1+ (1,0) [0|15] ""  Klima_D4_C7
  SG_ FSA_Temp_Sensor : 48|11@1+ (0.1,-40) [-40.0|90.0] "Unit_DegreCelsi"  Klima_D4_C7
  SG_ FSA_Sensorheizung_Status : 59|1@1+ (1.0,0.0) [0.0|1] ""  Klima_D4_C7
+
+BO_ 385 VZE_01: 8 Gateway_D4C7
+ SG_ VZE_Anzeigemodus : 0|2@1+ (1.0,0.0) [0.0|3] ""  HUD_C7,Kombi_D4
+ SG_ VZE_Hinweistext : 2|3@1+ (1,0) [1|7] ""  Kombi_D4
+ SG_ VZE_Statuszaehler_1 : 5|2@1+ (1.0,0.0) [0.0|3] ""  Kombi_D4
+ SG_ VZE_Statuszaehler_2 : 7|2@1+ (1.0,0.0) [0.0|3] ""  Kombi_D4
+ SG_ VZE_Statuszaehler_3 : 9|2@1+ (1.0,0.0) [0.0|3] ""  Kombi_D4
+ SG_ VZE_Verkehrszeichen_1 : 11|8@1+ (1,0) [1|255] ""  HUD_C7,Kombi_D4
+ SG_ VZE_Verkehrszeichen_2 : 19|8@1+ (1,0) [1|255] ""  HUD_C7,Kombi_D4
+ SG_ VZE_Verkehrszeichen_3 : 27|8@1+ (1,0) [1|255] ""  HUD_C7,Kombi_D4
+ SG_ VZE_Warnung_Verkehrszeichen_1 : 35|1@1+ (1.0,0.0) [0.0|1] ""  HUD_C7,Kombi_D4
+ SG_ VZE_Warnung_Verkehrszeichen_2 : 36|1@1+ (1.0,0.0) [0.0|1] ""  HUD_C7,Kombi_D4
+ SG_ VZE_Warnung_Verkehrszeichen_3 : 37|1@1+ (1.0,0.0) [0.0|1] ""  HUD_C7,Kombi_D4
+ SG_ VZE_Zusatzschild_1 : 38|4@1+ (1,0) [1|15] ""  HUD_C7,Kombi_D4
+ SG_ VZE_Zusatzschild_2 : 42|4@1+ (1,0) [1|15] ""  HUD_C7,Kombi_D4
+ SG_ VZE_Zusatzschild_3 : 46|4@1+ (1,0) [1|15] ""  HUD_C7,Kombi_D4
 
 CM_ SG_ 173 COUNTERXX "Message not renamed to COUNTER because J533 rate-limiting makes it look like messages are being lost"
 CM_ SG_ 134 LWI_Lenkradwinkel "Steering angle WITH variable ratio effect included";
