@@ -63,12 +63,13 @@ BO_ 65 NEW_MSG_1: 8 XXX
  SG_ NEW_SIGNAL_6 : 48|8@1+ (1,0) [0|63] "" XXX
  SG_ NEW_SIGNAL_7 : 59|2@0+ (1,0) [0|255] "" XXX
 
-BO_ 72 NEW_MSG_2: 8 XXX
+BO_ 72 Transmission: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_3 : 40|16@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_4 : 38|3@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_5 : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ Gear : 24|8@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_4 : 38|3@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_3 : 40|16@1+ (1,0) [0|255] "" XXX
 
 BO_ 316 NEW_MSG_3: 8 XXX
 
@@ -196,28 +197,30 @@ BO_ 912 Dashlights: 8 XXX
  SG_ SEATBELT_FL : 48|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 940 BodyInfo: 8 XXX
- SG_ DASH_BTN_LIGHTS : 56|1@0+ (1,0) [0|1] "" XXX
  SG_ DOOR_OPEN_FL : 32|1@1+ (1,0) [0|255] "" XXX
  SG_ DOOR_OPEN_FR : 33|1@1+ (1,0) [0|3] "" XXX
  SG_ DOOR_OPEN_RL : 34|1@1+ (1,0) [0|1] "" XXX
  SG_ DOOR_OPEN_RR : 35|1@1+ (1,0) [0|1] "" XXX
  SG_ DOOR_OPEN_TRUNK : 36|1@0+ (1,0) [0|1] "" XXX
- SG_ FOG_LIGHTS2 : 60|1@1+ (1,0) [0|1] "" XXX
- SG_ Highbeam : 58|1@1+ (1,0) [0|1] "" XXX
+ SG_ DASH_BTN_LIGHTS : 56|1@0+ (1,0) [0|1] "" XXX
  SG_ Lowbeam : 57|1@1+ (1,0) [0|3] "" XXX
+ SG_ Highbeam : 58|1@1+ (1,0) [0|1] "" XXX
+ SG_ FOG_LIGHTS2 : 60|1@1+ (1,0) [0|1] "" XXX
+ SG_ WIPERS : 62|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 801 ES_DashStatus: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|7] "" XXX
- SG_ NEW_SIGNAL_9 : 60|4@1+ (1,0) [0|15] "" XXX
+ SG_ Cruise_Distance : 28|3@1+ (1,0) [0|3] "" XXX
+ SG_ Cruise_Disengaged : 35|1@1+ (1,0) [0|3] "" XXX
+ SG_ Cruise_Activated : 36|1@1+ (1,0) [0|3] "" XXX
+ SG_ Cruise_Set_Speed : 40|8@1+ (1,0) [0|255] "" XXX
+ SG_ Cruise_Fault : 48|1@1+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_10 : 49|2@1+ (1,0) [0|3] "" XXX
  SG_ Brake_Pedal : 51|1@1+ (1,0) [0|3] "" XXX
- SG_ Cruise_Set_Speed : 40|8@1+ (1,0) [0|255] "" XXX
- SG_ Cruise_Activated : 36|1@1+ (1,0) [0|3] "" XXX
- SG_ Cruise_Disengaged : 35|1@1+ (1,0) [0|3] "" XXX
- SG_ Far_Distance : 56|4@1+ (1,0) [0|15] "" XXX
  SG_ Car_Follow : 52|1@1+ (1,0) [0|3] "" XXX
- SG_ ACC_Distance : 28|3@1+ (1,0) [0|3] "" XXX
+ SG_ Far_Distance : 56|4@1+ (1,0) [0|15] "" XXX
+ SG_ Cruise_State : 60|4@1+ (1,0) [0|15] "" XXX
 
 BO_ 802 ES_LKAS_State: 8 XXX
  SG_ Checksum : 0|8@1+ (1,0) [0|255] "" XXX
@@ -364,7 +367,9 @@ BO_ 1787 NEW_MSG_45: 8 XXX
 
 CM_ SG_ 940 FOG_LIGHTS2 "yellow fog light in the dash";
 CM_ SG_ 940 Highbeam "01 = low beam, 11 = high beam";
+CM_ SG_ 801 Cruise_State "0 = Normal, 3 = Hold";
 CM_ SG_ 802 Traffic_light_Ahead "Crosstrek 2018 = car in front has moved";
 CM_ SG_ 805 NEW_SIGNAL_3 "always 3";
 CM_ SG_ 805 NEW_SIGNAL_4 "always 1";
 CM_ SG_ 1677 Units "1 = imperial, 6 = metric";
+VAL_ 72 Gear 2 "N" 3 "R" 4 "P" 121 "D" 137 "1" 145 "2" 153 "3" 161 "4" 169 "5" 177 "6";
