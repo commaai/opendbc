@@ -46,12 +46,11 @@ BO_ 64 Throttle: 8 XXX
  SG_ Counter : 8|4@1+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_1 : 12|4@1+ (1,0) [0|1] "" XXX
  SG_ Engine_RPM : 16|12@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_4 : 28|5@1+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_4 : 28|4@1+ (1,0) [0|1] "" XXX
  SG_ Throttle_Pedal : 32|8@1+ (1,0) [0|255] "" XXX
  SG_ Throttle_Cruise : 40|8@1+ (1,0) [0|255] "" XXX
- SG_ Throttle_Combo : 48|7@1+ (1,0) [0|1] "" XXX
- SG_ Signal1 : 55|8@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_3 : 56|4@1+ (1,0) [0|255] "" XXX
+ SG_ Throttle_Combo : 48|8@1+ (1,0) [0|1] "" XXX
+ SG_ Signal1 : 56|4@1+ (1,0) [0|255] "" XXX
  SG_ Off_Accel : 60|4@1+ (1,0) [0|7] "" XXX
 
 BO_ 65 NEW_MSG_1: 8 XXX
@@ -67,9 +66,9 @@ BO_ 72 Transmission: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_5 : 16|8@1+ (1,0) [0|255] "" XXX
- SG_ Gear : 24|8@1+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_4 : 38|3@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_3 : 40|16@1+ (1,0) [0|255] "" XXX
+ SG_ Gear : 24|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 316 NEW_MSG_3: 8 XXX
 
@@ -158,17 +157,19 @@ BO_ 544 ES_Brake: 8 XXX
 BO_ 545 ES_Distance: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ ES_Cruise_Throttle : 12|20@1+ (1,0) [0|15] "" XXX
  SG_ Car_Follow : 32|1@1+ (1,0) [0|1] "" XXX
  SG_ Signal1 : 33|4@1+ (1,0) [0|1] "" XXX
  SG_ Distance_Swap : 37|1@1+ (1,0) [0|15] "" XXX
  SG_ Signal2 : 38|2@1+ (1,0) [0|1] "" XXX
  SG_ Close_Distance : 40|8@1+ (1,0) [0|1] "" XXX
- SG_ Signal3 : 48|8@1+ (1,0) [0|1] "" XXX
+ SG_ Signal3 : 12|4@1+ (1,0) [0|1] "" XXX
+ SG_ Signal4 : 28|4@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Cancel : 56|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Set : 57|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Resume : 58|1@1+ (1,0) [0|1] "" XXX
- SG_ Signal4 : 59|5@1+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_1 : 48|8@1+ (1,0) [0|1] "" XXX
+ SG_ Signal5 : 59|5@1+ (1,0) [0|1] "" XXX
+ SG_ ES_Cruise_Throttle : 16|12@1+ (1,0) [0|15] "" XXX
 
 BO_ 546 ES_Status: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
@@ -177,6 +178,7 @@ BO_ 546 ES_Status: 8 XXX
  SG_ Cruise_Activated : 29|1@0+ (1,0) [0|3] "" XXX
  SG_ Cruise_Brake : 30|1@1+ (1,0) [0|3] "" XXX
  SG_ Cruise_Hold : 31|1@1+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_1 : 28|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 554 ES_Blank: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
@@ -393,8 +395,8 @@ BO_ 1787 NEW_MSG_45: 8 XXX
 
 CM_ SG_ 64 Throttle_Combo "Throttle Cruise + Pedal";
 CM_ SG_ 544 State "0 = ES disabled, 8 = ES enabled, 12, 13 = ES_Brake active";
-CM_ SG_ 545 ES_Cruise_Throttle "signal might be smaller, values do not correlate with Throttle:CruiseThrottle";
 CM_ SG_ 545 Distance_Swap "Switch from Close to Far distance";
+CM_ SG_ 545 ES_Cruise_Throttle "signal might be smaller, values do not correlate with Throttle:CruiseThrottle";
 CM_ SG_ 940 Highbeam "01 = low beam, 11 = high beam";
 CM_ SG_ 940 FOG_LIGHTS2 "yellow fog light in the dash";
 CM_ SG_ 801 PCB_Off "Pre-Collision Braking";
