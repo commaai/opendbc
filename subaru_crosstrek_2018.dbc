@@ -396,7 +396,7 @@ BO_ 1787 NEW_MSG_45: 8 XXX
 CM_ SG_ 64 Throttle_Combo "Throttle Cruise + Pedal";
 CM_ SG_ 544 State "0 = ES disabled, 8 = ES enabled, 12, 13 = ES_Brake active";
 CM_ SG_ 545 Distance_Swap "Switch from Close to Far distance";
-CM_ SG_ 545 ES_Cruise_Throttle "signal might be smaller, values do not correlate with Throttle:CruiseThrottle";
+CM_ SG_ 545 Throttle_Cruise "RPM output signal";
 CM_ SG_ 940 Highbeam "01 = low beam, 11 = high beam";
 CM_ SG_ 940 FOG_LIGHTS2 "yellow fog light in the dash";
 CM_ SG_ 801 PCB_Off "Pre-Collision Braking";
