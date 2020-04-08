@@ -47,6 +47,9 @@ BO_ 85 PedalandBrake: 8 ECM
 BO_ 8 SteeringAngle: 8 SAS
  SG_ SteeringDirection : 42|1@0+ (1,0) [0|1] "" XXX
  SG_ SteeringAngle1 : 53|14@0+ (0.04395,0) [0|65535] "degrees" XXX
+ SG_ NEW_SIGNAL_1 : 47|4@0+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_2 : 39|4@0+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_3 : 23|16@0+ (1,-32768) [0|65535] "" XXX
 
 BO_ 101 EngineInfo: 8 XXX
  SG_ NEW_SIGNAL_1 : 17|10@0+ (1,-512) [0|1023] "" XXX
@@ -72,8 +75,8 @@ BO_ 304 VehicleSpeed0: 8 BCM
 BO_ 48 fromFSM0: 8 FSM
  SG_ ACCStatusActive : 58|1@0+ (1,0) [0|1] "" XXX
  SG_ FCWSomething : 25|3@0+ (1,0) [0|3] "" XXX
- SG_ NEW_SIGNAL_1 : 55|8@0+ (1,0) [0|255] "" XXX
  SG_ ACCStatusOnOff : 57|1@0+ (1,0) [0|1] "" XXX
+ SG_ StatusSomething : 55|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 208 fromFSMSteeringRequest: 8 FSM
  SG_ SET_X_E3 : 7|8@0+ (1,0) [0|255] "" XXX
@@ -275,6 +278,7 @@ CM_ SG_ 681 HighBeamOn "1=HighBeam On, 0=HighBeam Off";
 CM_ SG_ 48 ACCStatusActive "Active?";
 CM_ SG_ 48 FCWSomething "All bit set during fcw";
 CM_ SG_ 48 ACCStatusOnOff "Turns one after pressing on/off button on steering wheeel";
+CM_ SG_ 48 StatusSomething "Some status changes when zeroing DTCs";
 CM_ SG_ 208 Unkown "Used in checksum calculation, Seems to limit torque based on the number.";
 CM_ SG_ 208 Checksum "Checksum calculated as a one-complement addition of LKAAngleRequest+LKADirection+Unkown, Zeros used to pad missing bits.";
 CM_ SG_ 208 LKADirection "0 = No lka active, 1=LKA steer right, 2=LKA steer left";
