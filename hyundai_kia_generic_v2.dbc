@@ -1460,7 +1460,7 @@ BO_ 1136 P_STS: 6 CGW
  SG_ HCU5_STS : 8|2@1+ (1,0) [0|3] "" EPB,FCA,MDPS,iBAU
 
 BO_ 304 YRS11: 8 ACU
- SG_ CR_Yrs_Yr : 0|16@1+ (0.005,-163.84) [-163.84|163.83] "˚/s" CGW,iBAU
+ SG_ CR_Yrs_Yr : 0|16@1+ (0.005,-163.84) [-163.84|163.83] "deg/s" CGW,iBAU
  SG_ CR_Yrs_LatAc : 16|16@1+ (0.000127465,-4.17677312) [-4.17677312|4.17651819] "g" iBAU
  SG_ CF_Yrs_YrStat : 32|4@1+ (1,0) [0|15] "" iBAU
  SG_ CF_Yrs_LatAcStat : 36|4@1+ (1,0) [0|15] "" iBAU
@@ -1475,7 +1475,7 @@ BO_ 320 YRS12: 8 ACU
  SG_ CF_Yrs_Type : 36|4@1+ (1,0) [0|15] "" iBAU
  SG_ CR_Yrs_MsgCnt2 : 48|4@1+ (1,0) [0|15] "" iBAU
  SG_ CR_Yrs_Crc2 : 56|8@1+ (1,0) [0|255] "" iBAU
- SG_ YRS_Temp : 24|8@1+ (1,-68) [-68|187] "℃" iBAU
+ SG_ YRS_Temp : 24|8@1+ (1,-68) [-68|187] "C" iBAU
  SG_ CR_Yrs_LongAc : 0|16@1+ (0.000127465,-4.17677312) [-4.17677312|4.17651819] "g" CGW,iBAU
 
 BO_ 1173 YRS13: 8 ACU
