@@ -60,13 +60,13 @@ BO_ 609 fromWhere: 8 XXX
  SG_ SteeringAngle : 21|14@0+ (0.1,-1021) [0|65535] "deg" XXX
 
 BO_ 582 fromServo1: 8 PSCM
- SG_ SteeringAngleServo : 23|16@0+ (0.0447,-1468) [0|65535] "deg" XXX
+ SG_ byte4 : 39|4@0+ (1,0) [0|15] "" XXX
  SG_ LKATorque : 35|12@0+ (1,-2000) [0|65535] "" XXX
+ SG_ SteeringAngleServo : 23|16@0+ (0.0447,-1468) [0|65535] "deg" XXX
  SG_ SteeringWheelRateOfChange : 15|8@0+ (1,0) [0|255] "" XXX
- SG_ byte5 : 39|4@0+ (1,0) [0|15] "" XXX
+ SG_ byte0 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ LKAActive : 55|8@0+ (1,0) [0|255] "" XXX
  SG_ byte7 : 63|8@0+ (1,0) [0|255] "" XXX
- SG_ TurnDirection : 7|8@0+ (1,0) [0|1] "" XXX
- SG_ LKAActive : 55|8@0+ (1,0) [0|1] "" XXX
 
 BO_ 81 fromFSM0: 8 FSM
  SG_ ACCStatus : 18|3@0+ (1,0) [0|7] "" XXX
@@ -184,9 +184,10 @@ BO_ 1848 diagPSCMResp: 8 XXX
 CM_ SG_ 16 RateOfChangeOrTorque "Rate of change? Torque?";
 CM_ SG_ 16 SteeringDirection "0 = CCW, 1=CW (turning left or right of center)";
 CM_ SG_ 298 EngineRpm "Might be engine rpm. But behaves abit weird.";
+CM_ SG_ 582 byte4 "High nibble";
 CM_ SG_ 582 SteeringWheelRateOfChange "Some rate of change for steering wheel? Torque?";
-CM_ SG_ 582 TurnDirection "0=CCW, 1=CW, bit 2";
-CM_ SG_ 582 LKAActive "Seems one when lka active. bit 1";
+CM_ SG_ 582 byte0 "0=CCW, 1=CW, bit 2";
+CM_ SG_ 582 LKAActive "Bit 1, 1 When LKA Active";
 CM_ SG_ 81 ACCStatus "0=Acc Unavailable, 1=???, 2=Acc Ready, 3,4=???, 6= Acc Active, 7=Acc active tracking object (probably) ";
 CM_ SG_ 608 ACC_Tracking "Seems to track distance, or speed of vehicle in front.";
 CM_ SG_ 610 SET_X_22 "0x20 Heartbeat, VEgo <58kph = 0x03, VEgo >65kph = 0x04, 0x05";
