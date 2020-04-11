@@ -197,9 +197,10 @@ BO_ 557 NEW_MSG_14: 8 XXX
 BO_ 576 CruiseControl: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_5 : 42|1@1+ (1,0) [0|3] "" XXX
  SG_ Cruise_On : 40|1@1+ (1,0) [0|3] "" XXX
  SG_ Cruise_Activated : 41|1@1+ (1,0) [0|3] "" XXX
+ SG_ Signal1 : 12|28@1+ (1,0) [0|1] "" XXX
+ SG_ Signal2 : 42|22@1+ (1,0) [0|3] "" XXX
 
 BO_ 577 NEW_MSG_16: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
@@ -403,13 +404,13 @@ CM_ SG_ 545 Cruise_Throttle "RPM-like output signal";
 CM_ SG_ 545 Distance_Swap "Switch from Close to Far distance";
 CM_ SG_ 545 Cruise_EPB "Electric Parking Brake set";
 CM_ SG_ 546 Cruise_RPM "ES RPM output for ECM and TCM";
-CM_ SG_ 546 Signal3 "0 when cruise_activated = 1";
 CM_ SG_ 546 Brake_Lights "1 when ES_Brake State 12 or 13 or Brake_Pedal pressed";
+CM_ SG_ 546 Signal3 "0 when cruise_activated = 1";
 CM_ SG_ 940 Highbeam "01 = low beam, 11 = high beam";
 CM_ SG_ 940 FOG_LIGHTS2 "yellow fog light in the dash";
 CM_ SG_ 801 PCB_Off "Pre-Collision Braking";
-CM_ SG_ 801 Cruise_State "0 = Normal, 1 = Hold+User Brake, 2 = Ready, 3 = Hold";
 CM_ SG_ 801 Brake_Lights "Driver or Cruise brake on";
+CM_ SG_ 801 Cruise_State "0 = Normal, 1 = Hold+User Brake, 2 = Ready, 3 = Hold";
 CM_ SG_ 805 NEW_SIGNAL_3 "always 3";
 CM_ SG_ 805 NEW_SIGNAL_4 "always 1";
 CM_ SG_ 1677 Units "1 = imperial, 6 = metric";
