@@ -206,6 +206,7 @@ BO_ 577 NEW_MSG_16: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_1 : 16|12@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_2 : 55|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 552 BSD_RCTA: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
@@ -222,6 +223,7 @@ BO_ 912 Dashlights: 8 XXX
  SG_ RIGHT_BLINKER : 51|1@1+ (1,0) [0|1] "" XXX
  SG_ LEFT_BLINKER : 50|1@1+ (1,0) [0|3] "" XXX
  SG_ SEATBELT_FL : 48|1@1+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_3 : 24|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 940 BodyInfo: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|1] "" XXX
@@ -236,6 +238,7 @@ BO_ 940 BodyInfo: 8 XXX
  SG_ Highbeam : 58|1@1+ (1,0) [0|1] "" XXX
  SG_ FOG_LIGHTS2 : 60|1@1+ (1,0) [0|1] "" XXX
  SG_ WIPERS : 62|1@0+ (1,0) [0|1] "" XXX
+ SG_ BRAKE : 54|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 801 ES_DashStatus: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
@@ -252,6 +255,7 @@ BO_ 801 ES_DashStatus: 8 XXX
  SG_ Car_Follow : 52|1@1+ (1,0) [0|3] "" XXX
  SG_ Far_Distance : 56|4@1+ (1,0) [0|15] "" XXX
  SG_ Cruise_State : 60|4@1+ (1,0) [0|15] "" XXX
+ SG_ Conventional_Cruise : 32|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 802 ES_LKAS_State: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
@@ -293,7 +297,6 @@ BO_ 837 NEW_MSG_24: 8 XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_3 : 40|8@1+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_4 : 32|4@1+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_5 : 24|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 838 NEW_MSG_25: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
@@ -394,6 +397,12 @@ BO_ 1787 NEW_MSG_45: 8 XXX
  SG_ NEW_SIGNAL_2 : 8|8@1+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_3 : 16|8@1+ (1,0) [0|255] "" XXX
 
+BO_ 372 NEW_MSG_2: 8 XXX
+ SG_ NEW_SIGNAL_1 : 40|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_2 : 42|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_3 : 32|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_4 : 33|1@0+ (1,0) [0|1] "" XXX
+
 
 
 
@@ -411,6 +420,7 @@ CM_ SG_ 940 FOG_LIGHTS2 "yellow fog light in the dash";
 CM_ SG_ 801 PCB_Off "Pre-Collision Braking";
 CM_ SG_ 801 Brake_Lights "Driver or Cruise brake on";
 CM_ SG_ 801 Cruise_State "0 = Normal, 1 = Hold+User Brake, 2 = Ready, 3 = Hold";
+CM_ SG_ 801 Conventional_Cruise "";
 CM_ SG_ 805 NEW_SIGNAL_3 "always 3";
 CM_ SG_ 805 NEW_SIGNAL_4 "always 1";
 CM_ SG_ 1677 Units "1 = imperial, 6 = metric";
