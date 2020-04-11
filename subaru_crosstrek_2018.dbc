@@ -126,10 +126,10 @@ BO_ 313 Brake_Pedal: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|1] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|1] "" XXX
  SG_ Signal1 : 12|22@1+ (1,0) [0|1] "" XXX
+ SG_ Brake_Lights : 34|1@1+ (1,0) [0|7] "" XXX
  SG_ Signal2 : 35|1@1+ (1,0) [0|1] "" XXX
  SG_ Brake_Pedal : 36|12@1+ (1,0) [0|65535] "" XXX
  SG_ Signal3 : 48|16@1+ (1,0) [0|1] "" XXX
- SG_ Brake_Lights : 34|1@1+ (1,0) [0|7] "" XXX
 
 BO_ 290 ES_LKAS: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
@@ -161,17 +161,17 @@ BO_ 545 ES_Distance: 8 XXX
  SG_ Cruise_Throttle : 16|12@1+ (1,0) [0|15] "" XXX
  SG_ Signal2 : 28|4@1+ (1,0) [0|1] "" XXX
  SG_ Car_Follow : 32|1@1+ (1,0) [0|1] "" XXX
+ SG_ Signal3 : 33|3@1+ (1,0) [0|1] "" XXX
+ SG_ Cruise_Brake_Active : 36|1@1+ (1,0) [0|1] "" XXX
  SG_ Distance_Swap : 37|1@1+ (1,0) [0|15] "" XXX
+ SG_ Cruise_EPB : 38|1@1+ (1,0) [0|1] "" XXX
+ SG_ Signal4 : 39|1@0+ (1,0) [0|1] "" XXX
  SG_ Close_Distance : 40|8@1+ (1,0) [0|1] "" XXX
  SG_ Signal5 : 48|8@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Cancel : 56|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Set : 57|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Resume : 58|1@1+ (1,0) [0|1] "" XXX
  SG_ Signal6 : 59|5@1+ (1,0) [0|1] "" XXX
- SG_ Cruise_EPB : 38|1@1+ (1,0) [0|1] "" XXX
- SG_ Cruise_Brake_Active : 36|1@1+ (1,0) [0|1] "" XXX
- SG_ Signal4 : 39|1@0+ (1,0) [0|1] "" XXX
- SG_ Signal3 : 33|3@1+ (1,0) [0|1] "" XXX
 
 BO_ 546 ES_Status: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
@@ -180,9 +180,9 @@ BO_ 546 ES_Status: 8 XXX
  SG_ Cruise_RPM : 16|12@1+ (1,0) [0|255] "" XXX
  SG_ Signal2 : 28|1@0+ (1,0) [0|1] "" XXX
  SG_ Cruise_Activated : 29|1@0+ (1,0) [0|3] "" XXX
+ SG_ Brake_Lights : 30|1@1+ (1,0) [0|3] "" XXX
  SG_ Cruise_Hold : 31|1@1+ (1,0) [0|1] "" XXX
  SG_ Signal3 : 32|32@1+ (1,0) [0|1] "" XXX
- SG_ Brake_Lights : 30|1@1+ (1,0) [0|3] "" XXX
 
 BO_ 554 ES_Blank: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
@@ -247,10 +247,10 @@ BO_ 801 ES_DashStatus: 8 XXX
  SG_ Cruise_Set_Speed : 40|8@1+ (1,0) [0|255] "" XXX
  SG_ Cruise_Fault : 48|1@1+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_10 : 49|2@1+ (1,0) [0|3] "" XXX
+ SG_ Brake_Lights : 51|1@1+ (1,0) [0|3] "" XXX
  SG_ Car_Follow : 52|1@1+ (1,0) [0|3] "" XXX
  SG_ Far_Distance : 56|4@1+ (1,0) [0|15] "" XXX
  SG_ Cruise_State : 60|4@1+ (1,0) [0|15] "" XXX
- SG_ Brake_Lights : 51|1@1+ (1,0) [0|3] "" XXX
 
 BO_ 802 ES_LKAS_State: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
