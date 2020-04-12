@@ -1464,11 +1464,12 @@ BO_ 385 VZE_01: 8 Gateway_D4C7
  SG_ VZE_Zusatzschild_3 : 46|4@1+ (1,0) [1|15] "" HUD_C7,Kombi_D4
 
 BO_ 806 XRADAR_01: 8 XXX
- SG_ UNK_SIG_1 : 21|11@1+ (1,0) [0|1] "" XXX
  SG_ UNK_STATUS_2 : 40|4@1+ (1,0) [0|15] "" XXX
  SG_ UNK_STATUS_FLAG_1 : 11|1@0+ (1,0) [0|1] "" XXX
  SG_ UNK_COUNTER_2 : 45|6@1+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_1 : 0|11@1+ (1,0) [0|1024] "" XXX
+ SG_ UNK_TRACKDATA_1 : 0|11@1- (1,0) [0|1024] "" XXX
+ SG_ UNK_TRACKDATA_2 : 21|11@1- (1,0) [0|1] "" XXX
+ SG_ UNK_TRACKDATA_3 : 32|8@1- (1,0) [0|255] "" XXX
 
 BO_ 809 XRADAR_04: 8 XXX
  SG_ NEW_SIGNAL_1 : 44|12@1+ (1,0) [0|8191] "" XXX
@@ -1484,9 +1485,9 @@ BO_ 808 XRADAR_03: 8 XXX
 
 
 CM_ SG_ 173 COUNTERXX "Message not renamed to COUNTER because J533 rate-limiting makes it look like messages are being lost"
-CM_ SG_ 134 LWI_Lenkradwinkel "Steering angle WITH variable ratio effect incl";
+CM_ SG_ 134 LWI_Lenkradwinkel "Steering angle WITH variable ratio effect inc";
 CM_ SG_ 134 LWI_Lenkradwinkel "Steering angle WITH variable ratio effect included
-CM_ SG_ 294 3 "May be zero when sent by older cam";
+CM_ SG_ 294 3 "May be zero when sent by older ca";
 CM_ SG_ 294 Assist_Torque "Heading control input, torque";
 CM_ SG_ 294 Assist_VZ "Heading control input, direction (sign)";
 CM_ SG_ 294 HCA_Available "Must be 1 for steering rack to accept HCA commands";
