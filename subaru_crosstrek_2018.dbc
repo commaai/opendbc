@@ -68,9 +68,16 @@ BO_ 72 Transmission: 8 XXX
  SG_ NEW_SIGNAL_5 : 16|8@1+ (1,0) [0|255] "" XXX
  SG_ Gear : 24|8@1+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_4 : 38|3@0+ (1,0) [0|255] "" XXX
- SG_ Cruise_RPM : 40|16@1+ (1,0) [0|255] "" XXX
+ SG_ RPM : 40|16@1+ (1,0) [0|255] "" XXX
 
-BO_ 316 NEW_MSG_3: 8 XXX
+BO_ 316 Brake_Status: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|1] "" XXX
+ SG_ Counter : 8|4@1+ (1,0) [0|1] "" XXX
+ SG_ Signal1 : 12|46@1+ (1,0) [0|1] "" XXX
+ SG_ ES_Brake : 58|1@1+ (1,0) [0|1] "" XXX
+ SG_ Signal2 : 59|3@1+ (1,0) [0|1] "" XXX
+ SG_ Brake : 62|1@1+ (1,0) [0|1] "" XXX
+ SG_ Signal3 : 63|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 326 Cruise_Buttons: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
@@ -202,11 +209,13 @@ BO_ 576 CruiseControl: 8 XXX
  SG_ Signal1 : 12|28@1+ (1,0) [0|1] "" XXX
  SG_ Signal2 : 42|22@1+ (1,0) [0|3] "" XXX
 
-BO_ 577 NEW_MSG_16: 8 XXX
+BO_ 577 Cruise_Status: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_1 : 16|12@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_2 : 55|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_1 : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ Cruise_On : 54|1@1+ (1,0) [0|1] "" XXX
+ SG_ Cruise_Activated : 55|1@1+ (1,0) [0|1] "" XXX
+ SG_ Cruise_Active : 57|4@1+ (1,0) [0|1] "" XXX
 
 BO_ 552 BSD_RCTA: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
