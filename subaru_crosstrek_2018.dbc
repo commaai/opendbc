@@ -254,22 +254,22 @@ BO_ 801 ES_DashStatus: 8 XXX
  SG_ Counter : 8|4@1+ (1,0) [0|7] "" XXX
  SG_ PCB_Off : 12|1@1+ (1,0) [0|1] "" XXX
  SG_ LDW_Off : 13|1@1+ (1,0) [0|1] "" XXX
- SG_ Cruise_Distance : 28|3@1+ (1,0) [0|3] "" XXX
- SG_ Cruise_Disengaged : 35|1@1+ (1,0) [0|3] "" XXX
- SG_ Cruise_Activated : 36|1@1+ (1,0) [0|3] "" XXX
- SG_ Cruise_Set_Speed : 40|8@1+ (1,0) [0|255] "" XXX
- SG_ Cruise_Fault : 48|1@1+ (1,0) [0|1] "" XXX
- SG_ Brake_Lights : 51|1@1+ (1,0) [0|3] "" XXX
- SG_ Car_Follow : 52|1@1+ (1,0) [0|3] "" XXX
- SG_ Far_Distance : 56|4@1+ (1,0) [0|15] "" XXX
- SG_ Cruise_State : 60|4@1+ (1,0) [0|15] "" XXX
- SG_ Signal2 : 31|1@1+ (1,0) [0|1] "" XXX
  SG_ Signal1 : 14|14@1+ (1,0) [0|1] "" XXX
+ SG_ Cruise_Distance : 28|3@1+ (1,0) [0|3] "" XXX
+ SG_ Signal2 : 31|1@1+ (1,0) [0|1] "" XXX
  SG_ Conventional_Cruise : 32|1@1+ (1,0) [0|1] "" XXX
  SG_ Signal3 : 33|2@1+ (1,0) [0|1] "" XXX
+ SG_ Cruise_Disengaged : 35|1@1+ (1,0) [0|3] "" XXX
+ SG_ Cruise_Activated : 36|1@1+ (1,0) [0|3] "" XXX
  SG_ Signal4 : 37|3@1+ (1,0) [0|1] "" XXX
+ SG_ Cruise_Set_Speed : 40|8@1+ (1,0) [0|255] "" XXX
+ SG_ Cruise_Fault : 48|1@1+ (1,0) [0|1] "" XXX
  SG_ Signal5 : 49|2@1+ (1,0) [0|3] "" XXX
+ SG_ Brake_Lights : 51|1@1+ (1,0) [0|3] "" XXX
+ SG_ Car_Follow : 52|1@1+ (1,0) [0|3] "" XXX
  SG_ Signal6 : 53|3@1+ (1,0) [0|1] "" XXX
+ SG_ Far_Distance : 56|4@1+ (1,0) [0|15] "" XXX
+ SG_ Cruise_State : 60|4@1+ (1,0) [0|15] "" XXX
 
 BO_ 802 ES_LKAS_State: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
