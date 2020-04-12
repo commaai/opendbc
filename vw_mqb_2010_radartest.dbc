@@ -1471,18 +1471,29 @@ BO_ 806 XRADAR_01: 8 XXX
  SG_ UNK_TRACKDATA_2 : 21|11@1- (1,0) [0|1] "" XXX
  SG_ UNK_TRACKDATA_3 : 32|8@1- (1,0) [0|255] "" XXX
 
-BO_ 809 XRADAR_04: 8 XXX
- SG_ NEW_SIGNAL_1 : 44|12@1+ (1,0) [0|8191] "" XXX
- SG_ NEW_SIGNAL_2 : 40|4@1+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_3 : 32|8@1+ (1,0) [0|255] "" XXX
-
 BO_ 807 XRADAR_02: 8 XXX
+ SG_ UNK_STATUS_2 : 40|4@1+ (1,0) [0|15] "" XXX
  SG_ UNK_STATUS_FLAG_1 : 11|1@0+ (1,0) [0|1] "" XXX
+ SG_ UNK_COUNTER_2 : 45|6@1+ (1,0) [0|1] "" XXX
+ SG_ UNK_TRACKDATA_1 : 0|11@1- (1,0) [0|1024] "" XXX
+ SG_ UNK_TRACKDATA_2 : 21|11@1- (1,0) [0|1] "" XXX
+ SG_ UNK_TRACKDATA_3 : 32|8@1- (1,0) [0|255] "" XXX
 
 BO_ 808 XRADAR_03: 8 XXX
+ SG_ UNK_STATUS_2 : 40|4@1+ (1,0) [0|15] "" XXX
+ SG_ UNK_STATUS_FLAG_1 : 11|1@0+ (1,0) [0|1] "" XXX
+ SG_ UNK_COUNTER_2 : 45|6@1+ (1,0) [0|1] "" XXX
+ SG_ UNK_TRACKDATA_1 : 0|11@1- (1,0) [0|1024] "" XXX
+ SG_ UNK_TRACKDATA_2 : 21|11@1- (1,0) [0|1] "" XXX
+ SG_ UNK_TRACKDATA_3 : 32|8@1- (1,0) [0|255] "" XXX
 
-
-
+BO_ 809 XRADAR_04: 8 XXX
+ SG_ UNK_STATUS_2 : 40|4@1+ (1,0) [0|15] "" XXX
+ SG_ UNK_STATUS_FLAG_1 : 11|1@0+ (1,0) [0|1] "" XXX
+ SG_ UNK_COUNTER_2 : 45|6@1+ (1,0) [0|1] "" XXX
+ SG_ UNK_TRACKDATA_1 : 0|11@1- (1,0) [0|1024] "" XXX
+ SG_ UNK_TRACKDATA_2 : 21|11@1- (1,0) [0|1] "" XXX
+ SG_ UNK_TRACKDATA_3 : 32|8@1- (1,0) [0|255] "" XXX
 
 CM_ SG_ 173 COUNTERXX "Message not renamed to COUNTER because J533 rate-limiting makes it look like messages are being lost"
 CM_ SG_ 134 LWI_Lenkradwinkel "Steering angle WITH variable ratio effect inc";
