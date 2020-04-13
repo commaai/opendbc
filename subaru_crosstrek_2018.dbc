@@ -155,46 +155,46 @@ BO_ 722 NEW_MSG_10: 8 XXX
 BO_ 544 ES_Brake: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ Signal1 : 12|4@1+ (1,0) [0|1] "" XXX
  SG_ Brake_Pressure : 16|16@1+ (1,0) [0|255] "" XXX
- SG_ Signal3 : 40|24@1+ (1,0) [0|1] "" XXX
  SG_ Signal2 : 32|4@1+ (1,0) [0|1] "" XXX
+ SG_ Cruise_Brake_Lights : 36|1@1+ (1,0) [0|63] "" XXX
+ SG_ Cruise_Brake_Fault : 37|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Brake_Active : 38|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Activated : 39|1@1+ (1,0) [0|1] "" XXX
- SG_ Cruise_Brake_Lights : 36|1@1+ (1,0) [0|63] "" XXX
- SG_ Signal1 : 12|4@1+ (1,0) [0|1] "" XXX
- SG_ Cruise_Brake_Fault : 37|1@1+ (1,0) [0|1] "" XXX
+ SG_ Signal3 : 40|24@1+ (1,0) [0|1] "" XXX
 
 BO_ 545 ES_Distance: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ Signal1 : 12|3@1+ (1,0) [0|1] "" XXX
+ SG_ Cruise_Fault : 15|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Throttle : 16|12@1+ (1,0) [0|15] "" XXX
  SG_ Signal2 : 28|4@1+ (1,0) [0|1] "" XXX
  SG_ Car_Follow : 32|1@1+ (1,0) [0|1] "" XXX
+ SG_ Signal3 : 33|3@1+ (1,0) [0|1] "" XXX
+ SG_ Cruise_Brake_Active : 36|1@1+ (1,0) [0|1] "" XXX
+ SG_ Distance_Swap : 37|1@1+ (1,0) [0|15] "" XXX
  SG_ Cruise_EPB : 38|1@1+ (1,0) [0|1] "" XXX
+ SG_ Signal4 : 39|1@0+ (1,0) [0|1] "" XXX
+ SG_ Close_Distance : 40|8@1+ (1,0) [0|1] "" XXX
+ SG_ Signal5 : 48|8@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Cancel : 56|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Set : 57|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Resume : 58|1@1+ (1,0) [0|1] "" XXX
  SG_ Signal6 : 59|5@1+ (1,0) [0|1] "" XXX
- SG_ Signal1 : 12|3@1+ (1,0) [0|1] "" XXX
- SG_ Cruise_Fault : 15|1@1+ (1,0) [0|1] "" XXX
- SG_ Signal4 : 39|1@0+ (1,0) [0|1] "" XXX
- SG_ Signal5 : 48|8@1+ (1,0) [0|1] "" XXX
- SG_ Close_Distance : 40|8@1+ (1,0) [0|1] "" XXX
- SG_ Distance_Swap : 37|1@1+ (1,0) [0|15] "" XXX
- SG_ Cruise_Brake_Active : 36|1@1+ (1,0) [0|1] "" XXX
- SG_ Signal3 : 33|3@1+ (1,0) [0|1] "" XXX
 
 BO_ 546 ES_Status: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ Signal1 : 12|3@1+ (1,0) [0|1] "" XXX
+ SG_ Cruise_Fault : 15|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_RPM : 16|12@1+ (1,0) [0|255] "" XXX
  SG_ Signal2 : 28|1@0+ (1,0) [0|1] "" XXX
+ SG_ Cruise_Activated : 29|1@0+ (1,0) [0|3] "" XXX
  SG_ Brake_Lights : 30|1@1+ (1,0) [0|3] "" XXX
  SG_ Cruise_Hold : 31|1@1+ (1,0) [0|1] "" XXX
  SG_ Signal3 : 32|32@1+ (1,0) [0|1] "" XXX
- SG_ Signal1 : 12|3@1+ (1,0) [0|1] "" XXX
- SG_ Cruise_Fault : 15|1@1+ (1,0) [0|1] "" XXX
- SG_ Cruise_Activated : 29|1@0+ (1,0) [0|3] "" XXX
 
 BO_ 554 ES_Blank: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
@@ -264,17 +264,17 @@ BO_ 801 ES_DashStatus: 8 XXX
  SG_ Signal2 : 31|1@1+ (1,0) [0|1] "" XXX
  SG_ Conventional_Cruise : 32|1@1+ (1,0) [0|1] "" XXX
  SG_ Signal3 : 33|2@1+ (1,0) [0|1] "" XXX
+ SG_ Cruise_Disengaged : 35|1@1+ (1,0) [0|3] "" XXX
  SG_ Cruise_Activated : 36|1@1+ (1,0) [0|3] "" XXX
  SG_ Signal4 : 37|3@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Set_Speed : 40|8@1+ (1,0) [0|255] "" XXX
+ SG_ Cruise_Fault : 48|1@1+ (1,0) [0|1] "" XXX
  SG_ Signal5 : 49|2@1+ (1,0) [0|3] "" XXX
  SG_ Brake_Lights : 51|1@1+ (1,0) [0|3] "" XXX
  SG_ Car_Follow : 52|1@1+ (1,0) [0|3] "" XXX
  SG_ Signal6 : 53|3@1+ (1,0) [0|1] "" XXX
  SG_ Far_Distance : 56|4@1+ (1,0) [0|15] "" XXX
  SG_ Cruise_State : 60|4@1+ (1,0) [0|15] "" XXX
- SG_ Cruise_Disengaged : 35|1@1+ (1,0) [0|3] "" XXX
- SG_ Cruise_Fault : 48|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 802 ES_LKAS_State: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
@@ -429,15 +429,13 @@ CM_ SG_ 64 Throttle_Combo "Throttle Cruise + Pedal";
 CM_ SG_ 313 Brake_Lights "Driver or Cruise Brake on";
 CM_ SG_ 544 Cruise_Brake_Lights "1 = switch on brake lights";
 CM_ SG_ 545 Cruise_Throttle "RPM-like output signal";
-CM_ SG_ 545 Cruise_EPB "Electric Parking Brake set";
+CM_ SG_ 545 Cruise_EPB "1 = set Electric Parking Brake";
 CM_ SG_ 545 Distance_Swap "Switch from Close to Far distance";
 CM_ SG_ 546 Cruise_RPM "ES RPM output for ECM and TCM";
-CM_ SG_ 546 Brake_Lights "1 when ES_Brake State 12 or 13 or Brake_Pedal pressed";
 CM_ SG_ 546 Signal3 "0 when cruise_activated = 1";
 CM_ SG_ 940 Highbeam "01 = low beam, 11 = high beam";
 CM_ SG_ 940 FOG_LIGHTS2 "yellow fog light in the dash";
-CM_ SG_ 801 PCB_Off "Pre-Collision Braking";
-CM_ SG_ 801 Conventional_Cruise "";
+CM_ SG_ 801 PCB_Off "Pre-Collision Braking off";
 CM_ SG_ 801 Brake_Lights "Driver or Cruise brake on";
 CM_ SG_ 801 Cruise_State "0 = Normal, 1 = Hold+User Brake, 2 = Ready, 3 = Hold";
 CM_ SG_ 805 NEW_SIGNAL_3 "always 3";
