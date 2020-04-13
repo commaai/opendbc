@@ -24,6 +24,16 @@ unsigned int toyota_checksum(unsigned int address, uint64_t d, int l) {
   return s & 0xFF;
 }
 
+unsigned int subaru_checksum(unsigned int address, uint64_t d, int l) {
+  d >>= ((8-l)*8); // remove padding
+
+  unsigned int s = 0;
+  while (address) { s += address & 0xff; address >>= 8; }
+  while (d) { s += d & 0xff; d >>= 8; }
+
+  return s & 0xFF;
+}
+
 // Static lookup table for fast computation of CRC8 poly 0x2F, aka 8H2F/AUTOSAR
 uint8_t crc8_lut_8h2f[256];
 
