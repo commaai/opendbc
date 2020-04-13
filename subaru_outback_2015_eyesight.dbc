@@ -42,7 +42,7 @@ BO_ 2 Steering: 8 XXX
  SG_ NEW_SIGNAL_2 : 22|3@0+ (1,0) [0|7] "" XXX
  SG_ Counter : 27|3@0+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_1 : 31|4@0- (1,0) [0|65535] "" XXX
- SG_ CHECKSUM : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ Checksum : 39|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 208 G_Sensor: 8 XXX
  SG_ NEW_SIGNAL_3 : 32|8@1+ (1,0) [0|255] "" XXX
@@ -158,7 +158,7 @@ BO_ 346 Counter_3: 8 XXX
 
 BO_ 352 ES_Brake: 8 XXX
  SG_ Counter : 48|3@1+ (1,0) [0|7] "" XXX
- SG_ CHECKSUM : 56|8@1+ (1,0) [0|7] "" XXX
+ SG_ Checksum : 56|8@1+ (1,0) [0|7] "" XXX
  SG_ Brake_Pressure : 0|16@1+ (1,0) [0|255] "" XXX
  SG_ Cruise_Activated : 23|1@1+ (1,0) [0|3] "" XXX
  SG_ Brake_On : 22|1@1+ (1,0) [0|3] "" XXX
@@ -166,7 +166,7 @@ BO_ 352 ES_Brake: 8 XXX
  SG_ Brake_Light : 20|1@1+ (1,0) [0|2047] "" XXX
 
 BO_ 353 ES_CruiseThrottle: 8 XXX
- SG_ CHECKSUM : 56|8@1+ (1,0) [0|15] "" XXX
+ SG_ Checksum : 56|8@1+ (1,0) [0|15] "" XXX
  SG_ Button : 48|3@1+ (1,0) [0|3] "" XXX
  SG_ ES_Error : 42|1@1+ (1,0) [0|3] "" XXX
  SG_ Standstill_2 : 41|1@1+ (1,0) [0|3] "" XXX
@@ -192,10 +192,10 @@ BO_ 354 ES_RPM: 8 XXX
  SG_ RPM : 16|16@1+ (1,0) [0|255] "" XXX
  SG_ Brake : 8|1@1+ (1,0) [0|7] "" XXX
  SG_ Cruise_Activated : 9|1@1+ (1,0) [0|3] "" XXX
- SG_ CHECKSUM : 32|8@1+ (1,0) [0|65535] "" XXX
+ SG_ Checksum : 32|8@1+ (1,0) [0|65535] "" XXX
 
 BO_ 356 ES_LKAS: 8 XXX
- SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" XXX
+ SG_ Checksum : 56|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 0|3@1+ (1,0) [0|7] "" XXX
  SG_ LKAS_Active : 24|1@1+ (1,0) [0|1] "" XXX
  SG_ LKAS_Command : 8|13@1- (-1,0) [-4096|4096] "" XXX
