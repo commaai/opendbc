@@ -33,10 +33,10 @@ NS_ :
 
 BS_:
 
-BU_: XXX FSM CEM PSCM
+BU_: XXX BCM CEM FSM PSCM SAS
 
 
-BO_ 16 SteeringAngle: 8 XXX
+BO_ 16 SAS0: 8 SAS
  SG_ Counter0 : 3|8@0+ (1,0) [0|511] "" XXX
  SG_ RateOfChangeOrTorque : 39|16@0+ (1,-32768) [0|65535] "" XXX
  SG_ NEW_SIGNAL_1 : 22|15@0+ (1,0) [0|65535] "" XXX
@@ -59,7 +59,7 @@ BO_ 298 NEW_MSG_5: 8 XXX
 BO_ 609 fromWhere: 8 XXX
  SG_ SteeringAngle : 21|14@0+ (0.1,-1021) [0|65535] "deg" XXX
 
-BO_ 582 fromServo1: 8 PSCM
+BO_ 582 PSCM1: 8 PSCM
  SG_ byte4 : 39|4@0+ (1,0) [0|15] "" XXX
  SG_ LKATorque : 35|12@0+ (1,-2000) [0|65535] "" XXX
  SG_ SteeringAngleServo : 23|16@0+ (0.0447,-1468) [0|65535] "deg" XXX
@@ -68,32 +68,32 @@ BO_ 582 fromServo1: 8 PSCM
  SG_ LKAActive : 55|8@0+ (1,0) [0|255] "" XXX
  SG_ byte7 : 63|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 81 fromFSM0: 8 FSM
+BO_ 81 FSM0: 8 FSM
  SG_ ACCStatus : 18|3@0+ (1,0) [0|7] "" XXX
 
-BO_ 608 fromFSM1: 8 FSM
+BO_ 608 FSM1: 8 FSM
  SG_ ACC_Tracking : 7|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 610 fromFSMSteeringRequest: 8 FSM
+BO_ 610 FSM2: 8 FSM
  SG_ Unkown : 23|8@0+ (1,-128) [0|255] "" PSCM
  SG_ Checksum : 55|8@0+ (1,0) [0|255] "" PSCM
- SG_ LKAAngleRequest : 29|14@0+ (0.04,-327.68) [0|16383] "" PSCM
+ SG_ LKAAngleReq : 29|14@0+ (0.04,-327.68) [0|16383] "" PSCM
  SG_ SET_X_02 : 31|2@0+ (1,0) [0|3] "" XXX
  SG_ SET_X_10 : 47|6@0+ (1,0) [0|63] "" XXX
  SG_ SET_X_A4 : 63|8@0+ (1,0) [0|255] "" XXX
  SG_ SET_X_22 : 15|8@0+ (1,0) [0|255] "" XXX
- SG_ LKADirection : 41|2@0+ (1,0) [0|3] "" PSCM
+ SG_ LKASteerDirection : 41|2@0+ (1,0) [0|3] "" PSCM
 
-BO_ 624 fromFSM3: 8 FSM
+BO_ 624 FSM3: 8 FSM
  SG_ ACC_SOMETHING : 15|8@0+ (1,0) [0|255] "" XXX
  SG_ ACC_Some : 17|10@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_3 : 47|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 794 fromFSM4: 8 FSM
+BO_ 794 FSM4: 8 FSM
  SG_ NEW_SIGNAL_1 : 47|16@0+ (1,-46090) [0|16383] "" XXX
  SG_ NEW_SIGNAL_2 : 32|4@1+ (1,0) [0|15] "" XXX
 
-BO_ 1021 fromFSM5: 8 FSM
+BO_ 1021 FSM5: 8 FSM
 
 BO_ 295 CCButtons: 8 CEM
  SG_ ACCMinusBtn : 48|1@0+ (1,0) [0|1] "" XXX
@@ -109,11 +109,11 @@ BO_ 295 CCButtons: 8 CEM
  SG_ ACCMinusBtnInv : 32|1@0+ (1,0) [0|1] "" XXX
  SG_ TimeGapIncreaseBtnInv : 33|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 544 wheelspeed1: 8 XXX
+BO_ 544 wheelspeed1: 8 BCM
  SG_ WhlSpdRR : 39|16@0+ (0.01,-327.68) [0|65535] "" XXX
  SG_ WhlSpdLR : 55|16@0+ (0.01,-327.68) [0|65535] "" XXX
 
-BO_ 565 wheelspeed0: 8 XXX
+BO_ 565 wheelspeed0: 8 BCM
  SG_ WhlSpdLF : 55|16@0+ (0.01,-327.68) [0|65535] "" XXX
  SG_ WhlSpdRF : 39|16@0+ (0.01,-327.68) [0|65535] "" XXX
 
