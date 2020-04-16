@@ -50,6 +50,7 @@ CANPacker::CANPacker(const std::string& dbc_name) {
 
 uint64_t CANPacker::pack(uint32_t address, const std::vector<SignalPackValue> &signals, int counter) {
   uint64_t ret = 0;
+  bool set_checksum = false;
   for (const auto& sigval : signals) {
     std::string name = std::string(sigval.name);
     double value = sigval.value;
@@ -65,6 +66,9 @@ uint64_t CANPacker::pack(uint32_t address, const std::vector<SignalPackValue> &s
     if (ival < 0) {
       ival = (1ULL << sig.b2) + ival;
     }
+
+    // if value for checksum is given, don't calculate
+    set_checksum = set_checksum || name == "CHECKSUM";
 
     ret = set_value(ret, sig, ival);
   }
@@ -85,7 +89,7 @@ uint64_t CANPacker::pack(uint32_t address, const std::vector<SignalPackValue> &s
   }
 
   auto sig_it_checksum = signal_lookup.find(std::make_pair(address, "CHECKSUM"));
-  if (sig_it_checksum != signal_lookup.end()) {
+  if (sig_it_checksum != signal_lookup.end() && !set_checksum) {
     auto sig = sig_it_checksum->second;
     if (sig.type == SignalType::HONDA_CHECKSUM) {
       unsigned int chksm = honda_checksum(address, ret, message_lookup[address].size);
