@@ -50,7 +50,7 @@ BO_ 8 SAS0: 8 SAS
  SG_ SteeringAngle1 : 53|14@0+ (0.04395,0) [0|65535] "degrees" XXX
  SG_ NEW_SIGNAL_1 : 47|4@0+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_2 : 39|4@0+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_3 : 23|16@0+ (1,-32768) [0|65535] "" XXX
+ SG_ AngleRate : 21|14@0+ (0.075,0) [0|1500] "deg/S" XXX
 
 BO_ 101 EngineInfo: 8 XXX
  SG_ NEW_SIGNAL_1 : 17|10@0+ (1,-512) [0|1023] "" XXX
@@ -74,9 +74,10 @@ BO_ 304 VehicleSpeed0: 8 BCM
  SG_ NEW_SIGNAL_1 : 55|16@0+ (1,0) [0|65535] "" XXX
 
 BO_ 48 FSM0: 8 FSM
+ SG_ ACCStatusTracking : 56|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACCStatusOnOff : 57|1@0+ (1,0) [0|1] "" XXX
  SG_ ACCStatusActive : 58|1@0+ (1,0) [0|1] "" XXX
  SG_ FCWSomething : 25|3@0+ (1,0) [0|3] "" XXX
- SG_ ACCStatusOnOff : 57|1@0+ (1,0) [0|1] "" XXX
  SG_ StatusSomething : 55|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 208 FSM1: 8 FSM
@@ -280,7 +281,8 @@ CM_ SG_ 101 NEW_SIGNAL_1 "Rate of something?";
 CM_ SG_ 192 TransmissionGear "0 = 1st gear, 1= 2nd gear...";
 CM_ SG_ 681 TurnSignal "0 = Nothing, 1= Left, 3=Right";
 CM_ SG_ 681 HighBeamOn "1=HighBeam On, 0=HighBeam Off";
-CM_ SG_ 48 ACCStatusActive "Active?";
+CM_ SG_ 48 ACCStatusTracking "ACC Tracking vehicle, distance control.";
+CM_ SG_ 48 ACCStatusActive "ACC Active";
 CM_ SG_ 48 FCWSomething "All bit set during fcw";
 CM_ SG_ 48 ACCStatusOnOff "Turns one after pressing on/off button on steering wheeel";
 CM_ SG_ 48 StatusSomething "Some status changes when zeroing DTCs";
@@ -291,7 +293,7 @@ CM_ SG_ 208 LKAAngleRequest "+ = right, - = left";
 CM_ SG_ 352 NEW_SIGNAL_1 "Turned one. Got LKA service needed can this be the one?";
 CM_ SG_ 640 SpeedTarget "SpeedTarget ACC (noisy bf starting acc Jumps from 0->252->0)";
 CM_ SG_ 853 TargetSpeedOdo "Probably target speed odo";
-CM_ SG_ 853 LaneMarkingsOdo "Probably signal to odo on what lanemarkings to display";
+CM_ SG_ 853 LaneMarkingsOdo "Bit 3=Left lane, Bit 2=Right lane, Bit 1=LKA on?, Bit 0=?";
 CM_ SG_ 709 SpeedTargetACC "SpeedTargetACC";
 CM_ SG_ 293 StatusSomewhat "1 when turning wheel at standstill, 0 when speed dropped below 8 kph, 1 when speed went above 8kph. Test driving no hands?! Driver detect?";
 CM_ SG_ 293 ServoError "Servo set fault?! This bit get one when LKA didnt work and set error in dash. Not entirely true seen cases where its one while lka engaged.";
