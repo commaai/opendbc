@@ -200,20 +200,35 @@ void CANParser::UpdateValid(uint64_t sec) {
 }
 
 void CANParser::update_string(std::string data, bool sendcan) {
-  // format for board, make copy due to alignment issues, will be freed on out of scope
-  auto amsg = kj::heapArray<capnp::word>((data.length() / sizeof(capnp::word)) + 1);
-  memcpy(amsg.begin(), data.data(), data.length());
+  char* buf = (char*)data.data();
+  size_t size = data.length();
+  size_t buf_size = size;
+  bool allocated = false;
+  if (size % sizeof(capnp::word) != 0){
+    buf_size = (size / sizeof(capnp::word) + 1) * sizeof(capnp::word);
+  }
+  if (((reinterpret_cast<uintptr_t>(buf)) % sizeof(capnp::word) != 0) || buf_size != size){
+    int error = posix_memalign(reinterpret_cast<void **>(&buf), sizeof(capnp::word), buf_size);
+    assert(error == 0);
+    memcpy(buf, data.data(), size);
+    allocated = true;
+    DEBUG("CANParser::update_string: data is not aligned\n");
+  }
+  {
+    auto array_ptr = kj::ArrayPtr<const capnp::word>(reinterpret_cast<capnp::word *>(buf), buf_size / sizeof(capnp::word));
+    auto amsg = capnp::FlatArrayMessageReader(array_ptr);
+    cereal::Event::Reader event = amsg.getRoot<cereal::Event>();
 
-  // extract the messages
-  capnp::FlatArrayMessageReader cmsg(amsg);
-  cereal::Event::Reader event = cmsg.getRoot<cereal::Event>();
+    last_sec = event.getLogMonoTime();
 
-  last_sec = event.getLogMonoTime();
+    auto cans = sendcan? event.getSendcan() : event.getCan();
+    UpdateCans(last_sec, cans);
 
-  auto cans = sendcan? event.getSendcan() : event.getCan();
-  UpdateCans(last_sec, cans);
-
-  UpdateValid(last_sec);
+    UpdateValid(last_sec);
+  }
+  if (allocated){
+    free(buf);
+  }
 }
 
 
