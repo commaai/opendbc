@@ -48,10 +48,10 @@ BO_ 228 STEERING_CONTROL: 5 EON
  SG_ CHECKSUM : 35|4@0+ (1,0) [0|15] "" EPS
 
 BO_ 229 BOSCH_SUPPLEMENTAL_1: 8 XXX
- SG_ BYTE_0 : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE_1 : 8|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE_2 : 16|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE_3 : 24|8@1+ (1,0) [0|255] "" XXX
+ SG_ SET_ME_X04 : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ SET_ME_X00 : 8|8@1+ (1,0) [0|255] "" XXX
+ SG_ SET_ME_X80 : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ SET_ME_X10 : 24|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
