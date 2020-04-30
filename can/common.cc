@@ -36,11 +36,6 @@ unsigned int subaru_checksum(unsigned int address, uint64_t d, int l) {
 }
 
 unsigned int chrysler_checksum(unsigned int address, uint64_t d, int l) {
-  //d >>= ((8-l)*8); // remove padding
-
-  //printf("checksum called\n");
-  //return 0xBC;
-
   /* This function does not want the checksum byte in the input data.
   jeep chrysler canbus checksum from http://illmatics.com/Remote%20Car%20Hacking.pdf */
   uint8_t checksum = 0xFF;
