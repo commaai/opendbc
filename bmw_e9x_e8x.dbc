@@ -137,7 +137,21 @@ BO_ 690 WheelPressure: 8 XXX
 BO_ 691 AccelerationData: 8 XXX
 
 BO_ 408 GearSelectorSwitch: 8 XXX
- SG_ Gear : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ ParkButtonSecond : 26|2@1+ (1,0) [0|3] "" XXX
+ SG_ SideButton : 29|2@0+ (1,0) [0|3] "" XXX
+ SG_ SportButtonPressed : 35|2@0+ (1,0) [0|255] "" XXX
+ SG_ M3_button : 37|2@0+ (1,0) [0|3] "" XXX
+ SG_ SideButtonXOR11 : 31|2@0+ (1,0) [0|3] "" XXX
+ SG_ param1XOR11 : 23|2@0+ (1,0) [0|3] "" XXX
+ SG_ m3ShifterPositionXOR1111 : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ always11 : 39|2@0+ (1,0) [0|3] "" XXX
+ SG_ m3ShifterPosition : 7|4@0+ (1,0) [0|15] "" XXX
+ SG_ param1 : 21|2@0+ (1,0) [0|3] "" XXX
+ SG_ param5 : 32|2@1+ (1,0) [0|3] "" XXX
+ SG_ Counter : 0|4@1+ (1,0) [0|14] "" XXX
+ SG_ ParkButtonFirst : 24|2@1+ (1,0) [0|3] "" XXX
+ SG_ ShifterPositionXOR1111 : 16|7@1+ (1,0) [0|15] "" XXX
+ SG_ ShifterPosition : 12|4@1+ (1,0) [0|0] "" Vector__XXX
 
 BO_ 422 Distance: 8 XXX
 
@@ -282,10 +296,19 @@ CM_ SG_ 168 BrakePressed "Brake when driver presses the brake";
 CM_ SG_ 168 EngineTorque "Engine torque without inertia - combustion torque";
 CM_ SG_ 168 EngineTorqueWoInterv "Engine torque without inertia and without shift intervention";
 CM_ SG_ 403 CruiseControlSetpointSpeed "Speed target - unit depends on locale";
-CM_ SG_ 408 Gear "This is just provision, needs to be reverse engineered";
+CM_ SG_ 408 ParkButtonSecond "Redundant buton. 0x1 = pressed;";
+CM_ SG_ 408 SideButton "0x1 = pressed;";
+CM_ SG_ 408 SportButtonPressed "0x1 = pressed;";
+CM_ SG_ 408 M3_button "M3 POWER (?)";
+CM_ SG_ 408 SideButtonXOR11 "Complement value";
+CM_ SG_ 408 m3ShifterPosition "";
+CM_ SG_ 408 param1 "can not be 0x03. Always 0 in 135i.";
+CM_ SG_ 408 param5 "Always 0 in 135i.";
+CM_ SG_ 408 ParkButtonFirst "0x1 = pressed;";
+CM_ SG_ 408 ShifterPosition "0001 = N|R; 0010 = R; 0011 = N|D; 0100 = D; 0101 = -1; 0110 = +1; 0111 = ManualMode; 1000 = inBetween;";
 CM_ SG_ 502 TurnSignalIdle "Turn signal off";
 CM_ SG_ 502 TurnSignalActive "Turn signal on or transitioning";
 CM_ SG_ 502 RightTurn "Indicates right blinker or when steering returning right clears left blinker";
 CM_ SG_ 502 LeftTurn "Indicates left blinker or when steering returning left clears right blinker";
 CM_ SG_ 502 HoldActivated "Spikes down if blinker cleared with timeout or turn. Stays off if blinker cleared with stalk";
-VAL_ 408 Gear 1 "D" 2 "S" 3 "N" 4 "R" 5 "P" ;
+VAL_ 408 ShifterPosition 1 "D" 2 "S" 3 "N" 4 "R" 5 "P" ;
