@@ -170,29 +170,19 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
 }
 
 void CANParser::UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Reader& cans) {
-    int msg_count = cans.size();
     uint64_t p;
 
-    DEBUG("got %d messages\n", msg_count);
-
-    // parse the messages
-    for (int i = 0; i < msg_count; i++) {
-      auto cmsg = cans[i];
+    for (const auto &cmsg : cans) {
       if (cmsg.getSrc() != bus) {
-        // DEBUG("skip %d: wrong bus\n", cmsg.getAddress());
         continue;
       }
       auto state_it = message_states.find(cmsg.getAddress());
       if (state_it == message_states.end()) {
-        // DEBUG("skip %d: not specified\n", cmsg.getAddress());
         continue;
       }
 
       if (cmsg.getDat().size() > 8) continue; //shouldnt ever happen
-      uint8_t dat[8] = {0};
-      memcpy(dat, cmsg.getDat().begin(), cmsg.getDat().size());
-
-      state_it->second.parse(sec, cmsg.getBusTime(), dat);
+      state_it->second.parse(sec, cmsg.getBusTime(), (uint8_t *)cmsg.getDat().begin());
     }
 }
 
@@ -201,16 +191,12 @@ void CANParser::UpdateValid(uint64_t sec) {
   for (const auto& kv : message_states) {
     const auto& state = kv.second;
     if (state.check_threshold > 0 && (sec - state.seen) > state.check_threshold) {
-      if (state.seen > 0) {
-        DEBUG("0x%X TIMEOUT\n", state.address);
-      }
       can_valid = false;
     }
   }
 }
 
 void CANParser::update_string(std::string data, bool sendcan) {
-  // format for board, make copy due to alignment issues, will be freed on out of scope
   auto amsg = kj::heapArray<capnp::word>((data.length() / sizeof(capnp::word)) + 1);
   memcpy(amsg.begin(), data.data(), data.length());
 
@@ -220,9 +206,8 @@ void CANParser::update_string(std::string data, bool sendcan) {
 
   last_sec = event.getLogMonoTime();
 
-  auto cans = sendcan? event.getSendcan() : event.getCan();
+  auto cans = sendcan ? event.getSendcan() : event.getCan();
   UpdateCans(last_sec, cans);
-
   UpdateValid(last_sec);
 }
 
