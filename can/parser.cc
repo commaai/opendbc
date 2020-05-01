@@ -127,9 +127,11 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
 
 
     const Msg* msg = NULL;
+    const char *name = NULL;
     for (int i=0; i<dbc->num_msgs; i++) {
       if (dbc->msgs[i].address == op.address) {
         msg = &dbc->msgs[i];
+        name = dbc->msgs[i].name;
         break;
       }
     }
@@ -165,7 +167,16 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
 
     }
 
-    message_states[state.address] = state;
+
+    // Inserting makes a copy, so get pointer to item after insertion
+    auto s = message_states_by_addr.insert(std::make_pair(state.address, state));
+    MessageState * ms = &s.first->second;
+    message_states_by_name[std::string(name)] = ms;
+
+    for (int i = 0; i < ms->parse_sigs.size(); i++){
+      auto sig = ms->parse_sigs[i];
+      ms->vals_by_name[std::string(sig.name)] = &ms->vals[i];
+    }
   }
 }
 
@@ -176,8 +187,8 @@ void CANParser::UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Rea
       if (cmsg.getSrc() != bus) {
         continue;
       }
-      auto state_it = message_states.find(cmsg.getAddress());
-      if (state_it == message_states.end()) {
+      auto state_it = message_states_by_addr.find(cmsg.getAddress());
+      if (state_it == message_states_by_addr.end()) {
         continue;
       }
 
@@ -188,7 +199,7 @@ void CANParser::UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Rea
 
 void CANParser::UpdateValid(uint64_t sec) {
   can_valid = true;
-  for (const auto& kv : message_states) {
+  for (const auto& kv : message_states_by_addr) {
     const auto& state = kv.second;
     if (state.check_threshold > 0 && (sec - state.seen) > state.check_threshold) {
       can_valid = false;
@@ -215,7 +226,7 @@ void CANParser::update_string(std::string data, bool sendcan) {
 std::vector<SignalValue> CANParser::query_latest() {
   std::vector<SignalValue> ret;
 
-  for (const auto& kv : message_states) {
+  for (const auto& kv : message_states_by_addr) {
     const auto& state = kv.second;
     if (last_sec != 0 && state.seen != last_sec) continue;
 
@@ -231,4 +242,17 @@ std::vector<SignalValue> CANParser::query_latest() {
   }
 
   return ret;
+}
+
+
+double CANParser::GetValue(std::string message_name, std::string signal_name) {
+  auto message_state_it = message_states_by_name.find(message_name);
+  assert(message_state_it != message_states_by_name.end());
+
+  MessageState * message_state = message_state_it->second;
+
+  auto signal_it = message_state->vals_by_name.find(signal_name);
+  assert(signal_it != message_state->vals_by_name.end());
+
+  return *signal_it->second;
 }

@@ -139,6 +139,9 @@ cdef class CANParser:
 
     return updated_vals
 
+  def __getitem__(self, key):
+    return self.can.GetValue(key[0], key[1])
+
 cdef class CANDefine():
   cdef:
     const DBC *dbc

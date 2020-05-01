@@ -28,6 +28,7 @@ public:
 
   std::vector<Signal> parse_sigs;
   std::vector<double> vals;
+  std::unordered_map<std::string, double*> vals_by_name;
 
   uint16_t ts;
   uint64_t seen;
@@ -45,7 +46,8 @@ private:
   const int bus;
 
   const DBC *dbc = NULL;
-  std::unordered_map<uint32_t, MessageState> message_states;
+  std::unordered_map<uint32_t, MessageState> message_states_by_addr;
+  std::unordered_map<std::string, MessageState*> message_states_by_name;
 
 public:
   bool can_valid = false;
@@ -58,6 +60,7 @@ public:
   void UpdateValid(uint64_t sec);
   void update_string(std::string data, bool sendcan);
   std::vector<SignalValue> query_latest();
+  double GetValue(std::string message_name, std::string signal_name);
 };
 
 class CANPacker {

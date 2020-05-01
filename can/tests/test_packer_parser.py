@@ -58,6 +58,10 @@ class TestCanParserPacker(unittest.TestCase):
         self.assertAlmostEqual(parser.vl["STEERING_CONTROL"]["STEER_TORQUE_REQUEST"], active)
         self.assertAlmostEqual(parser.vl["STEERING_CONTROL"]["COUNTER"], idx % 4)
 
+        self.assertAlmostEqual(parser["STEERING_CONTROL", "STEER_TORQUE"], steer)
+        self.assertAlmostEqual(parser["STEERING_CONTROL", "STEER_TORQUE_REQUEST"], active)
+        self.assertAlmostEqual(parser["STEERING_CONTROL", "COUNTER"], idx % 4)
+
         idx += 1
 
   def test_subaru(self):
