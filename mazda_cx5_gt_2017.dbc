@@ -771,3 +771,5 @@ CM_ SG_ 552 MORE_GEAR "";
 CM_ SG_ 552 GEAR "0 P/N, 6 R, 1 D M1, 2 M2, 7 Shift";
 CM_ SG_ 540 HANDS_ON_STEER_WARN "0 no warning, b warning";
 CM_ SG_ 1143 REAR_CT_ALERT "Rear Cross Traffic Alert";
+
+VAL_ 552 GEAR 0 "P" 1 "D" 2 "D" 3 "D" 4 "D" 5 "D" 6 "R" 7 "N";
