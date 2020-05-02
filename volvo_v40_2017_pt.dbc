@@ -84,7 +84,7 @@ BO_ 208 FSM1: 8 FSM
  SG_ SET_X_E3 : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ SET_X_B4 : 15|8@0+ (1,0) [0|255] "" XXX
  SG_ SET_X_08 : 23|8@0+ (1,0) [0|255] "" XXX
- SG_ Unkown : 31|8@0+ (1,-128) [0|255] "" XXX
+ SG_ TrqLim : 31|8@0+ (1,-128) [0|255] "" XXX
  SG_ SET_X_02 : 39|2@0+ (1,0) [0|3] "" XXX
  SG_ Checksum : 55|8@0+ (1,0) [0|255] "" XXX
  SG_ LKASteerDirection : 57|2@0+ (1,0) [0|2] "" XXX
@@ -134,6 +134,17 @@ BO_ 293 PSCM1: 8 PSCM
  SG_ LKAActive : 15|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 16 CCButtons: 8 CEM
+ SG_ byte0 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte1 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte2 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte3 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte4 : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte5 : 47|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte6 : 55|5@0+ (1,0) [0|31] "" XXX
+ SG_ B7b0 : 56|8@0+ (1,0) [0|1] "" XXX
+ SG_ B7b1 : 57|8@0+ (1,0) [0|1] "" XXX
+ SG_ B7b3 : 59|8@0+ (1,0) [0|1] "" XXX
+ SG_ B7b6 : 62|8@0+ (1,0) [0|1] "" XXX
  SG_ ACCOnOffBtn : 58|1@0+ (1,0) [0|1] "" XXX
  SG_ ACCSetBtn : 63|1@0+ (1,0) [0|1] "" XXX
  SG_ ACCStopBtn : 60|1@0+ (1,0) [0|1] "" XXX
@@ -225,10 +236,17 @@ BO_ 968 SRS1: 8 SRS
 
 BO_ 1029 CEMBCM0: 8 CEM
 
-BO_ 2015 diagTstrPrsnt: 8 XXX
+BO_ 2015 diagGlobalReq: 8 XXX
  SG_ byte0 : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ byte2 : 23|8@0+ (1,0) [0|255] "" XXX
  SG_ byte1 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte2 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte3 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte4 : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte5 : 47|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte6 : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte7 : 63|8@0+ (1,0) [0|255] "" XXX
+
 
 BO_ 1892 diagFSMReq: 8 XXX
  SG_ byte0 : 7|8@0+ (1,0) [0|255] "" XXX
@@ -303,7 +321,7 @@ CM_ SG_ 48 ACCStatusActive "ACC Active";
 CM_ SG_ 48 FCWSomething "All bit set during fcw";
 CM_ SG_ 48 ACCStatusOnOff "Turns one after pressing on/off button on steering wheeel";
 CM_ SG_ 48 StatusSomething "Some status changes when zeroing DTCs";
-CM_ SG_ 208 Unkown "Used in checksum calculation, Seems to limit torque based on the number.";
+CM_ SG_ 208 TrqLim "Used in checksum calculation, Limit directional torque based on the number.";
 CM_ SG_ 208 Checksum "Checksum calculated as a one-complement addition of LKAAngleRequest+LKADirection+Unkown, Zeros used to pad missing bits.";
 CM_ SG_ 208 LKADirection "0 = No lka active, 1=LKA steer right, 2=LKA steer left";
 CM_ SG_ 208 LKAAngleRequest "+ = right, - = left";

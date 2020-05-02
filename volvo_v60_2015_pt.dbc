@@ -79,7 +79,7 @@ BO_ 608 FSM1: 8 FSM
  SG_ ACC_Tracking : 7|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 610 FSM2: 8 FSM
- SG_ Unkown : 23|8@0+ (1,-128) [0|255] "" PSCM
+ SG_ TrqLim : 23|8@0+ (1,-128) [0|255] "" PSCM
  SG_ Checksum : 55|8@0+ (1,0) [0|255] "" PSCM
  SG_ LKAAngleReq : 29|14@0+ (0.04,-327.68) [0|16383] "" PSCM
  SG_ SET_X_02 : 31|2@0+ (1,0) [0|3] "" XXX
@@ -104,7 +104,7 @@ BO_ 295 CCButtons: 8 CEM
  SG_ ACCSetBtn : 63|1@0+ (1,0) [0|1] "" XXX
  SG_ ACCOnOffBtn : 59|1@0+ (1,0) [0|1] "" XXX
  SG_ ACCResumeBtn : 61|1@0+ (1,0) [0|1] "" XXX
- SG_ TimeGapDecreaseBtnInv : 34|1@0+ (1,0) [0|2047] "" XXX
+ SG_ TimeGapDecreaseBtnInv : 34|1@0+ (1,0) [0|1] "" XXX
  SG_ ACCOnOffBtnInv : 43|1@0+ (1,0) [0|1] "" XXX
  SG_ ACCResumeBtnInv : 45|1@0+ (1,0) [0|1] "" XXX
  SG_ ACCSetBtnInv : 47|1@0+ (1,0) [0|1] "" XXX
@@ -135,10 +135,15 @@ BO_ 328 VehicleSpeed1: 8 XXX
 BO_ 1039 MiscCarInfo: 8 XXX
  SG_ TurnSignal : 33|2@0+ (1,0) [0|3] "" XXX
 
-BO_ 2015 diagTstrPrsnt: 8 XXX
+BO_ 2015 diagGlobalReq: 8 XXX
  SG_ byte0 : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ byte2 : 23|8@0+ (1,0) [0|255] "" XXX
  SG_ byte1 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte3 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte4 : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte5 : 47|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte6 : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte7 : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 1892 diagFSMReq: 8 XXX
  SG_ byte0 : 7|8@0+ (1,0) [0|255] "" XXX
