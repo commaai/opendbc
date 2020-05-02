@@ -182,6 +182,7 @@ BO_ 466 TransmissionDataDisplay: 8 XXX
  SG_ ShiftLeverPosition : 0|4@1+ (1,0) [0|8] "" XXX
  SG_ xFF : 47|8@0+ (1,0) [0|255] "" XXX
  SG_ ShiftLeverPositionXOR : 4|4@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ SportButtonState : 26|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 437 HeatFlow_LoadMomentClimate: 8 XXX
 
