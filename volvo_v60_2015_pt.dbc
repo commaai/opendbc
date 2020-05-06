@@ -41,7 +41,7 @@ BO_ 16 SAS0: 8 SAS
  SG_ RateOfChangeOrTorque : 39|16@0+ (1,-32768) [0|65535] "" XXX
  SG_ NEW_SIGNAL_1 : 22|15@0+ (1,0) [0|65535] "" XXX
  SG_ SteeringDirection : 6|1@0+ (1,0) [0|1] "" XXX
- SG_ SteeringWheelAngle : 53|14@0+ (0.0445,0) [0|65535] "degrees" XXX
+ SG_ SteeringAngle : 53|14@0+ (0.0445,0) [0|65535] "degrees" XXX
 
 BO_ 32 AccPedal: 8 XXX
  SG_ AccPedal : 17|10@0+ (0.1,0) [0|1023] "%" XXX

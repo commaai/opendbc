@@ -47,7 +47,7 @@ BO_ 85 PedalandBrake: 8 ECM
 BO_ 8 SAS0: 8 SAS
  SG_ SteeringDirection : 42|1@0+ (1,0) [0|1] "" XXX
  SG_ RelativeTurnDirection : 43|1@0+ (1,0) [0|1] "" XXX
- SG_ SteeringAngle1 : 53|14@0+ (0.04395,0) [0|65535] "degrees" XXX
+ SG_ SteeringAngle : 53|14@0+ (0.04395,0) [0|65535] "degrees" XXX
  SG_ NEW_SIGNAL_1 : 47|4@0+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_2 : 39|4@0+ (1,0) [0|15] "" XXX
  SG_ AngleRate : 21|14@0+ (0.075,0) [0|1500] "deg/S" XXX
