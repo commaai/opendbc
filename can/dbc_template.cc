@@ -31,6 +31,8 @@ const Signal sigs_{{address}}[] = {
       .type = SignalType::VOLKSWAGEN_COUNTER,
       {% elif checksum_type == "subaru" and sig.name == "CHECKSUM" %}
       .type = SignalType::SUBARU_CHECKSUM,
+      {% elif checksum_type == "chrysler" and sig.name == "CHECKSUM" %}
+      .type = SignalType::CHRYSLER_CHECKSUM,
       {% elif address in [512, 513] and sig.name == "CHECKSUM_PEDAL" %}
       .type = SignalType::PEDAL_CHECKSUM,
       {% elif address in [512, 513] and sig.name == "COUNTER_PEDAL" %}
