@@ -10,7 +10,10 @@ BMW E-series have 4 CAN busses:
 
 **K-CAN** - [100kbps] - body CAN - so things like climate, radio, door status, buttons -  Some messages are copied from PT-CAN and F-CAN here too.
 
-There is many points where K-CAN is spliced in BMW. Good point of access is in a corner of driver footwell, where all the CAN-busses can be accessed. F-CAN is spilced close to footwell too - under doorstep trim.
+Several message-IDs are repeated between buses by the gateway. Note, this DBC doesn't specify which bus contain which message. This could be added perhaps to message description. 
+
+
+There is many points where K-CAN can be accessed in BMW. PT-CAN and K-CAN can be found in the corner of driver footwell. F-CAN can be found under doorstep trim. D-CAN on pin 6,14 of OBD2 port. 
 
 
 
