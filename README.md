@@ -5,10 +5,10 @@ BMW E-series have 4 CAN busses:
 
 **D-CAN** - [500kbps] - diagnostic CAN - this is in OBD2 port and can be used with "K+DCAN cable" for flashing etc
 
-**F-CAN** - [500kbps] - traction control - things like SZL and DSC connected here - messages from steering and traction control (accelerometers, gyros, steering angle, etc)  
+**F-CAN** - [500kbps] - chasis CAN - things like SZL and DSC connected here - messages from steering and traction control (accelerometers, gyros, steering angle, etc)  
 **PT-CAN** - [500kbps] - powertrain CAN - engine and transmission, etc. Some of messages from F-CAN are copied here by JBBF gateway
 
-**K-CAN** - [100kbps] - body control - so things like climate, radio, door status, buttons -  Some messages are copied from PT-CAN and F-CAN here too.
+**K-CAN** - [100kbps] - body CAN - so things like climate, radio, door status, buttons -  Some messages are copied from PT-CAN and F-CAN here too.
 
 There is many points where K-CAN is spliced in BMW. Good point of access is in a corner of driver footwell, where all the CAN-busses can be accessed. F-CAN is spilced close to footwell too - under doorstep trim.
 
