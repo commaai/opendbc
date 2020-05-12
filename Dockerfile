@@ -16,7 +16,7 @@ ENV PYTHONPATH=/project
 WORKDIR /project
 # TODO: Add tag to cereal
 RUN git clone -b lib-cleanup https://github.com/commaai/cereal.git /project/cereal
-
+RUN cd /project/cereal && ./install_capnp.sh
 
 COPY SConstruct .
 COPY . /project/opendbc
