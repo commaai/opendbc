@@ -92,9 +92,9 @@ void init_crc_lookup_tables() {
   gen_crc_lookup_table(0x2F, crc8_lut_8h2f);    // CRC-8 8H2F/AUTOSAR for Volkswagen
 }
 
-unsigned int volkswagen_crc(unsigned int address, uint64_t d, int l) {
-  // Volkswagen uses standard CRC8 8H2F/AUTOSAR, but they compute it with
-  // a magic variable padding byte tacked onto the end of the payload.
+unsigned int volkswagen_mqb_crc(unsigned int address, uint64_t d, int l) {
+  // Volkswagen MQB vehicles use standard CRC8 8H2F/AUTOSAR, but they compute
+  // it with a magic variable padding byte tacked onto the end of the payload.
   // https://www.autosar.org/fileadmin/user_upload/standards/classic/4-3/AUTOSAR_SWS_CRCLibrary.pdf
 
   uint8_t *dat = (uint8_t *)&d;
@@ -168,6 +168,28 @@ unsigned int volkswagen_crc(unsigned int address, uint64_t d, int l) {
   return crc ^ 0xFF; // Return after standard final XOR for CRC8 8H2F/AUTOSAR
 }
 
+unsigned int volkswagen_pq_checksum(unsigned int address, uint64_t d, int l) {
+  // Volkswagen PQ35/PQ46/NMS vehicles use a simple XOR of all payload bytes,
+  // if present. Relatively few CAN messages have a payload-level checksum.
+  uint8_t *dat = (uint8_t *)&d;
+  uint8_t checksum = 0;
+  for (int i = 1; i < len; i++) {
+    checksum ^= dat[i];
+  }
+
+  return checksum;
+}
+
+unsigned int toyota_checksum(unsigned int address, uint64_t d, int l) {
+  d >>= ((8-l)*8); // remove padding
+  d >>= 8; // remove checksum
+
+  unsigned int s = l;
+  while (address) { s += address & 0xFF; address >>= 8; }
+  while (d) { s += d & 0xFF; d >>= 8; }
+
+  return s & 0xFF;
+}
 
 unsigned int pedal_checksum(uint64_t d, int l) {
   uint8_t crc = 0xFF;

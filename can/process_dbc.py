@@ -39,8 +39,15 @@ def process(in_fn, out_fn):
     checksum_start_bit = 7
     counter_start_bit = None
     little_endian = False
-  elif can_dbc.name.startswith(("vw_", "volkswagen_", "audi_", "seat_", "skoda_")):
-    checksum_type = "volkswagen"
+  elif can_dbc.name.startswith(("volkswagen_mqb")):
+    checksum_type = "volkswagen_mqb"
+    checksum_size = 8
+    counter_size = 4
+    checksum_start_bit = 0
+    counter_start_bit = 0
+    little_endian = True
+  elif can_dbc.name.startswith(("volkswagen_pq")):
+    checksum_type = "volkswagen_pq"
     checksum_size = 8
     counter_size = 4
     checksum_start_bit = 0

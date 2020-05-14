@@ -93,11 +93,14 @@ uint64_t CANPacker::pack(uint32_t address, const std::vector<SignalPackValue> &s
     } else if (sig.type == SignalType::TOYOTA_CHECKSUM) {
       unsigned int chksm = toyota_checksum(address, ret, message_lookup[address].size);
       ret = set_value(ret, sig, chksm);
-    } else if (sig.type == SignalType::VOLKSWAGEN_CHECKSUM) {
+    } else if (sig.type == SignalType::VOLKSWAGEN_MQB_CHECKSUM) {
       // FIXME: Hackish fix for an endianness issue. The message is in reverse byte order
       // until later in the pack process. Checksums can be run backwards, CRCs not so much.
       // The correct fix is unclear but this works for the moment.
-      unsigned int chksm = volkswagen_crc(address, ReverseBytes(ret), message_lookup[address].size);
+      unsigned int chksm = volkswagen_mqb_crc(address, ReverseBytes(ret), message_lookup[address].size);
+      ret = set_value(ret, sig, chksm);
+    } else if (sig.type == SignalType::VOLKSWAGEN_PQ_CHECKSUM) {
+      unsigned int chksm = volkswagen_pq_checksum(address, ret, message_lookup[address].size);
       ret = set_value(ret, sig, chksm);
     } else if (sig.type == SignalType::SUBARU_CHECKSUM) {
       unsigned int chksm = subaru_checksum(address, ret, message_lookup[address].size);

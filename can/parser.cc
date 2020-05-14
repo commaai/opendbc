@@ -48,9 +48,14 @@ bool MessageState::parse(uint64_t sec, uint16_t ts_, uint8_t * dat) {
         INFO("0x%X CHECKSUM FAIL\n", address);
         return false;
       }
-    } else if (sig.type == SignalType::VOLKSWAGEN_CHECKSUM) {
-      if (volkswagen_crc(address, dat_le, size) != tmp) {
+    } else if (sig.type == SignalType::VOLKSWAGEN_MQB_CHECKSUM) {
+      if (volkswagen_mqb_crc(address, dat_le, size) != tmp) {
         INFO("0x%X CRC FAIL\n", address);
+        return false;
+      }
+    } else if (sig.type == SignalType::VOLKSWAGEN_PQ_CHECKSUM) {
+      if (volkswagen_pq_checksum(address, dat_be, size) != tmp) {
+        INFO("0x%X CHECKSUM FAIL\n", address);
         return false;
       }
     } else if (sig.type == SignalType::VOLKSWAGEN_COUNTER) {
