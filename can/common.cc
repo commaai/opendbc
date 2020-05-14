@@ -173,7 +173,7 @@ unsigned int volkswagen_pq_checksum(unsigned int address, uint64_t d, int l) {
   // if present. Relatively few CAN messages have a payload-level checksum.
   uint8_t *dat = (uint8_t *)&d;
   uint8_t checksum = 0;
-  for (int i = 1; i < len; i++) {
+  for (int i = 1; i < l; i++) {
     checksum ^= dat[i];
   }
 
