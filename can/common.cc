@@ -180,17 +180,6 @@ unsigned int volkswagen_pq_checksum(unsigned int address, uint64_t d, int l) {
   return checksum;
 }
 
-unsigned int toyota_checksum(unsigned int address, uint64_t d, int l) {
-  d >>= ((8-l)*8); // remove padding
-  d >>= 8; // remove checksum
-
-  unsigned int s = l;
-  while (address) { s += address & 0xFF; address >>= 8; }
-  while (d) { s += d & 0xFF; d >>= 8; }
-
-  return s & 0xFF;
-}
-
 unsigned int pedal_checksum(uint64_t d, int l) {
   uint8_t crc = 0xFF;
   uint8_t poly = 0xD5; // standard crc8
