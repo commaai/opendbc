@@ -89,7 +89,7 @@ BO_ 208 FSM1: 8 FSM
  SG_ Checksum : 55|8@0+ (1,0) [0|255] "" XXX
  SG_ LKASteerDirection : 57|2@0+ (1,0) [0|2] "" XXX
  SG_ SET_X_25 : 63|6@0+ (1,0) [0|63] "" XXX
- SG_ LKAAngleReq : 37|14@0+ (0.04395,-360.04) [0|16383] "degrees" XXX
+ SG_ LKAAngleReq : 37|14@0+ (0.04395,-360.0384) [-360.0384|359.99445] "degrees" XXX
 
 BO_ 352 FSM2: 8 FSM
  SG_ NEW_SIGNAL_1 : 55|1@0+ (1,0) [0|1] "" XXX
@@ -141,10 +141,10 @@ BO_ 16 CCButtons: 8 CEM
  SG_ byte4 : 39|8@0+ (1,0) [0|255] "" XXX
  SG_ byte5 : 47|8@0+ (1,0) [0|255] "" XXX
  SG_ byte6 : 55|5@0+ (1,0) [0|31] "" XXX
- SG_ B7b0 : 56|8@0+ (1,0) [0|1] "" XXX
- SG_ B7b1 : 57|8@0+ (1,0) [0|1] "" XXX
- SG_ B7b3 : 59|8@0+ (1,0) [0|1] "" XXX
- SG_ B7b6 : 62|8@0+ (1,0) [0|1] "" XXX
+ SG_ B7b0 : 56|1@0+ (1,0) [0|1] "" XXX
+ SG_ B7b1 : 57|1@0+ (1,0) [0|1] "" XXX
+ SG_ B7b3 : 59|1@0+ (1,0) [0|1] "" XXX
+ SG_ B7b6 : 62|1@0+ (1,0) [0|1] "" XXX
  SG_ ACCOnOffBtn : 58|1@0+ (1,0) [0|1] "" XXX
  SG_ ACCSetBtn : 63|1@0+ (1,0) [0|1] "" XXX
  SG_ ACCStopBtn : 60|1@0+ (1,0) [0|1] "" XXX
