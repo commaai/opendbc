@@ -239,9 +239,6 @@ BO_ 1745 Dash_State: 8 XXX
   SG_ Units : 13|1@1+ (1,0) [0|1] "" XXX
   SG_ Units2 : 15|1@1+ (1,0) [0|1] "" XXX
 
-
-
-
 CM_ SG_ 211 Brake_Pedal_On "high tolerance";
 CM_ SG_ 212 FL "KPH";
 CM_ SG_ 212 RL "KPH";
