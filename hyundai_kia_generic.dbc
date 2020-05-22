@@ -1253,7 +1253,7 @@ BO_ 881 E_EMS11: 8 XXX
  SG_ Cruise_Limit_Target : 23|8@1+ (1,0) [0|15] "" XXX
  SG_ Gear_Change : 12|1@0+ (1,0) [0|31] "" XXX
  SG_ IG_Reactive_Stat : 8|3@1+ (1,0) [0|3] "" XXX
- SG_ Brake_Pedal_Pos : 7|8@0+ (1,0) [0|127] "" XXX
+ SG_ Brake_Pedal_Pos : 0|8@1+ (1,0) [0|127] "" XXX
  SG_ Accel_Pedal_Pos : 31|8@1+ (1,0) [0|7] "" XXX
 
 BO_ 1301 CLU14: 8 CLU
