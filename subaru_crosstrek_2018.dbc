@@ -200,10 +200,13 @@ BO_ 577 NEW_MSG_16: 8 XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_1 : 16|12@1+ (1,0) [0|255] "" XXX
 
-BO_ 552 NEW_MSG_17: 8 XXX
+BO_ 552 BSD_RCTA: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_1 : 48|1@1+ (1,0) [0|3] "" XXX
+ SG_ R_ADJACENT : 48|1@1+ (1,0) [0|1] "" XXX
+ SG_ L_ADJACENT : 49|1@1+ (1,0) [0|1] "" XXX
+ SG_ R_APPROACHING : 58|1@1+ (1,0) [0|1] "" XXX
+ SG_ L_APPROACHING : 59|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 912 Dashlights: 8 XXX
  SG_ NEW_SIGNAL_1 : 32|1@1+ (1,0) [0|3] "" XXX
