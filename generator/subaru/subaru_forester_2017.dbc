@@ -30,4 +30,3 @@ CM_ SG_ 642 SEATBELT_FL "Driver seatbelt";
 CM_ SG_ 880 Steering_Voltage_Flat "receives later than 371";
 VAL_ 328 Gear 0 "N" 1 "D" 2 "D" 3 "D" 4 "D" 5 "D" 6 "D" 14 "R" 15 "P";
 VAL_ 1745 Units 0 "Metric" 1 "Imperial";
-VAL_ 1745 Units2 0 "Metric" 1 "Imperial";
