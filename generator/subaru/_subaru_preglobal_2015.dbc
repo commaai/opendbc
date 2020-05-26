@@ -33,7 +33,7 @@ NS_ :
 
 BS_:
 
-BU_: XXX 0
+BU_: XXX X
 
 
 BO_ 2 Steering: 8 XXX
@@ -167,12 +167,11 @@ BO_ 359 ES_LDW: 8 XXX
  SG_ Sig1All_Depart : 31|1@1+ (1,0) [0|15] "" XXX
  SG_ LKAS_Inactive_2017 : 36|1@1+ (1,0) [0|3] "" XXX
  SG_ LKAS_Active : 37|1@1+ (1,0) [0|3] "" XXX
+ SG_ Sig1Right_Depart : 48|1@1+ (1,0) [0|3] "" XXX
  SG_ Sig1Right_Depart_Front : 49|1@1+ (1,0) [0|3] "" XXX
+ SG_ Sig2Right_Depart : 50|1@1+ (1,0) [0|7] "" XXX
  SG_ Left_Depart_Front : 51|1@1+ (1,0) [0|3] "" XXX
  SG_ Sig3All_Depart : 52|1@1+ (1,0) [0|3] "" XXX
- SG_ Alerts : 48|5@1+ (1,0) [0|3] "" XXX
- SG_ Sig1Right_Depart : 48|1@1+ (1,0) [0|3] "" XXX
- SG_ Sig2Right_Depart : 50|1@1+ (1,0) [0|7] "" XXX
 
 BO_ 642 Dashlights: 8 XXX
  SG_ Counter : 12|4@1+ (1,0) [0|15] "" XXX
