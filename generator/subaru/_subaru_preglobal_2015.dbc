@@ -217,6 +217,5 @@ BO_ 604 BSD_RCTA: 8 XXX
  SG_ L_RCTA : 47|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 1745 Dash_State: 8 XXX
-  SG_ Units : 13|1@1+ (1,0) [0|1] "" XXX
-  SG_ Units2 : 15|1@1+ (1,0) [0|1] "" XXX
+  SG_ Units : 15|1@1+ (1,0) [0|1] "" XXX
 
