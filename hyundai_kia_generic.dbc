@@ -990,6 +990,8 @@ BO_ 1342 LKAS12: 6 LDWS_LKAS
  SG_ CF_Lkas_TsrSpeed_Display_Clu : 16|8@1+ (1.0,0.0) [0.0|255.0] ""  CLU
  SG_ CF_LkasTsrSpeed_Display_Navi : 24|8@1+ (1.0,0.0) [0.0|255.0] ""  BCM,CLU
  SG_ CF_Lkas_TsrAddinfo_Display : 32|2@1+ (1.0,0.0) [0.0|3.0] ""  CLU
+ SG_ CF_LkasDawStatus : 40|3@1+ (1,0) [0|7] "" CLU
+ SG_ CF_Lkas_Daw_USM : 39|3@1+ (1,0) [0|7] "" CLU
 
 BO_ 1338 TMU_GW_E_01: 8 CLU
  SG_ CF_Gway_TeleReqDrLock : 0|2@1+ (1.0,0.0) [0.0|3.0] ""  BCM
