@@ -279,7 +279,7 @@ CM_ SG_ 64 Throttle_Combo "Throttle Cruise + Pedal";
 CM_ SG_ 313 Brake_Lights "Driver or Cruise Brake on";
 CM_ SG_ 544 Cruise_Brake_Lights "1 = switch on brake lights";
 CM_ SG_ 545 Cruise_Throttle "RPM-like output signal";
-CM_ SG_ 545 Cruise_EPB "1 = set Electric Parking Brake";
+CM_ SG_ 545 Cruise_EPB "1 = Electric Parking Brake set";
 CM_ SG_ 545 Distance_Swap "Switch from Close to Far distance";
 CM_ SG_ 546 Cruise_RPM "ES RPM output for ECM and TCM";
 CM_ SG_ 546 Signal3 "0 when cruise_activated = 1";
