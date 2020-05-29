@@ -10,6 +10,7 @@ RUN pyenv rehash
 
 COPY requirements.txt /tmp/
 RUN pip install -r /tmp/requirements.txt
+RUN pip install pre-commit==2.4.0 pylint==2.5.2
 
 ENV PYTHONPATH=/project
 
@@ -20,4 +21,5 @@ RUN git clone https://github.com/commaai/cereal.git /project/cereal
 COPY SConstruct .
 COPY . /project/opendbc
 
+RUN rm -rf /project/opendbc/.git
 RUN scons -c && scons -j$(nproc)
