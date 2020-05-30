@@ -66,4 +66,3 @@ setup(name='CAN packer',
 
 if platform.system() == "Darwin":
   os.system("install_name_tool -change opendbc/can/libdbc.dylib "+BASEDIR+"/opendbc/can/libdbc.dylib packer_pyx.so")
-
