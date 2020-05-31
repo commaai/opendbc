@@ -98,7 +98,7 @@ class dbc():
         sgname = dat.group(2)
         defvals = dat.group(3)
 
-        defvals = defvals.replace("?",r"\?") #escape sequence in C++
+        defvals = defvals.replace("?",r"\?")  # escape sequence in C++
         defvals = defvals.split('"')[:-1]
 
         # convert strings to UPPER_CASE_WITH_UNDERSCORES
