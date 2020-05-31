@@ -55,7 +55,7 @@ class dbc():
 
         name = dat.group(2)
         size = int(dat.group(3))
-        ids = int(dat.group(1), 0) # could be hex
+        ids = int(dat.group(1), 0)  # could be hex
         if ids in self.msgs:
           sys.exit("Duplicate address detected %d %s" % (ids, self.name))
 
@@ -94,7 +94,7 @@ class dbc():
         if dat is None:
           print("bad VAL {0}".format(l))
 
-        ids = int(dat.group(1), 0) # could be hex
+        ids = int(dat.group(1), 0)  # could be hex
         sgname = dat.group(2)
         defvals = dat.group(3)
 
