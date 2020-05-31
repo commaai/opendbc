@@ -73,15 +73,15 @@ class dbc():
           print("bad SG {0}".format(l))
 
         sgname = dat.group(1)
-        start_bit = int(dat.group(go+2))
-        signal_size = int(dat.group(go+3))
-        is_little_endian = int(dat.group(go+4))==1
-        is_signed = dat.group(go+5)=='-'
-        factor = int_or_float(dat.group(go+6))
-        offset = int_or_float(dat.group(go+7))
-        tmin = int_or_float(dat.group(go+8))
-        tmax = int_or_float(dat.group(go+9))
-        units = dat.group(go+10)
+        start_bit = int(dat.group(go + 2))
+        signal_size = int(dat.group(go + 3))
+        is_little_endian = int(dat.group(go + 4)) == 1
+        is_signed = dat.group(go + 5) == '-'
+        factor = int_or_float(dat.group(go + 6))
+        offset = int_or_float(dat.group(go + 7))
+        tmin = int_or_float(dat.group(go + 8))
+        tmax = int_or_float(dat.group(go + 9))
+        units = dat.group(go + 10)
 
         self.msgs[ids][1].append(
           DBCSignal(sgname, start_bit, signal_size, is_little_endian,
