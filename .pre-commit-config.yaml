@@ -15,7 +15,8 @@ repos:
     hooks:
     -   id: flake8
         args:
-        - --select=F
+        - --ignore=E111,E114,E121,E124,E302,E501,E741
+        - --statistics
 -   repo: local
     hooks:
     -   id: pylint
