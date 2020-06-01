@@ -64,8 +64,8 @@ BO_ 582 PSCM1: 8 PSCM
  SG_ LKATorque : 35|12@0+ (1,-2000) [0|65535] "" XXX
  SG_ SteeringAngleServo : 23|16@0+ (0.0447,-1468) [0|65535] "deg" XXX
  SG_ SteeringWheelRateOfChange : 15|8@0+ (1,0) [0|255] "" XXX
- SG_ byte0 : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ byte7 : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte0 : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ LKAActive : 55|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 819 PSCM0: 8 PSCM
@@ -209,8 +209,8 @@ CM_ SG_ 16 SteeringDirection "0 = CCW, 1=CW (turning left or right of center)";
 CM_ SG_ 298 EngineRpm "Might be engine rpm. But behaves abit weird.";
 CM_ SG_ 582 byte4 "High nibble";
 CM_ SG_ 582 SteeringWheelRateOfChange "Some rate of change for steering wheel? Torque?";
-CM_ SG_ 582 byte0 "0=CCW, 1=CW, bit 2";
-CM_ SG_ 582 LKAActive "Bit 1, 1 When LKA Active, Bit 4, 1 When denying?";
+CM_ SG_ 582 byte0 "0=CCW, 1=CW, bit 2,";
+CM_ SG_ 582 LKAActive "Bit 1, 1 When LKA Active, Bit 3, 1 When denying?";
 CM_ SG_ 81 ACCStatus "0=Acc Unavailable, 1=???, 2=Acc Ready, 3,4=???, 6= Acc Active, 7=Acc active tracking object (probably) ";
 CM_ SG_ 608 ACC_Tracking "Seems to track distance, or speed of vehicle in front.";
 CM_ SG_ 610 SET_X_22 "0x20 Heartbeat, VEgo <58kph = 0x03, VEgo >65kph = 0x04, 0x05";
