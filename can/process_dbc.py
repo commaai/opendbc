@@ -70,7 +70,7 @@ def process(in_fn, out_fn):
     little_endian = None
 
   # sanity checks on expected COUNTER and CHECKSUM rules, as packer and parser auto-compute those signals
-  for address, msg_name, msg_size, sigs in msgs:
+  for address, msg_name, _, sigs in msgs:
     dbc_msg_name = dbc_name + " " + msg_name
     for sig in sigs:
       if checksum_type is not None:
