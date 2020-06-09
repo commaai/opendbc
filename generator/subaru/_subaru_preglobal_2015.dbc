@@ -184,13 +184,6 @@ BO_ 880 Steer_Torque_2: 8 XXX
  SG_ Steer_Torque_Sensor : 32|8@1- (-1,0) [0|255] "" XXX
  SG_ Counter : 40|4@1+ (1,0) [0|15] "" XXX
 
-BO_ 881 Steering_Torque: 8 XXX
- SG_ Steering_Motor_Flat : 0|10@1+ (32,0) [0|16500] "" XXX
- SG_ Steer_Torque_Output : 16|11@1- (-32,0) [-16500|16500] "" XXX
- SG_ LKA_Lockout : 27|1@1+ (1,0) [0|1] "" XXX
- SG_ Steer_Torque_Sensor : 29|11@1- (1,0) [-1500|1500] "" XXX
- SG_ Steering_Angle : 40|16@1- (-0.033,0) [-600|600] "" XXX
-
 BO_ 884 BodyInfo: 8 XXX
  SG_ DOOR_OPEN_FR : 24|1@1+ (1,0) [0|1] "" XXX
  SG_ DOOR_OPEN_FL : 25|1@1+ (1,0) [0|1] "" XXX
