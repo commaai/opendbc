@@ -3,9 +3,9 @@ repos:
     rev: master
     hooks:
     -   id: check-ast
-    -   id: check-json
-    -   id: check-xml
     -   id: check-yaml
+    -   id: check-merge-conflict
+    -   id: check-symlinks
 -   repo: https://github.com/pre-commit/mirrors-mypy
     rev: master
     hooks:
@@ -26,3 +26,16 @@ repos:
         types: [python]
         args:
         - --disable=C,R,W0613,W0511,W0212,W0201,W0311,W0106,W0603,W0621,W0703,E1136
+-   repo: local
+    hooks:
+    -   id: cppcheck
+        name: cppcheck
+        entry: cppcheck
+        language: system
+        types: [c++]
+        exclude: 'can/dbc_template.cc'
+        args:
+        - --error-exitcode=1
+        - --force
+        - --quiet
+        - -j4
