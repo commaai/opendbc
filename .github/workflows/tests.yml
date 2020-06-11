@@ -33,7 +33,7 @@ jobs:
       - name: Push to dockerhub
         if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request' && github.repository == 'commaai/opendbc'
         run: |
-          docker login -u wmelching -p ${{ secrets.DOCKERHUB_TOKEN }}
+          docker login -u wmelching -p ${{ secrets.COMMA_DOCKERHUB_TOKEN}}
           docker tag opendbc docker.io/commaai/opendbc:latest
           docker push docker.io/commaai/opendbc:latest
 
