@@ -205,6 +205,7 @@ void CANParser::UpdateValid(uint64_t sec) {
         DEBUG("0x%X TIMEOUT\n", state.address);
       }
       can_valid = false;
+      break;
     }
   }
 }
