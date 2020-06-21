@@ -85,14 +85,18 @@ BO_ 208 FSM1: 8 FSM
  SG_ SET_X_B4 : 15|8@0+ (1,0) [0|255] "" XXX
  SG_ SET_X_08 : 23|8@0+ (1,0) [0|255] "" XXX
  SG_ TrqLim : 31|8@0+ (1,-128) [0|255] "" XXX
- SG_ SET_X_02 : 39|2@0+ (1,0) [0|3] "" XXX
  SG_ Checksum : 55|8@0+ (1,0) [0|255] "" XXX
  SG_ LKASteerDirection : 57|2@0+ (1,0) [0|2] "" XXX
  SG_ SET_X_25 : 63|6@0+ (1,0) [0|63] "" XXX
  SG_ LKAAngleReq : 37|14@0+ (0.04395,-360.0384) [-360.0384|359.99445] "degrees" XXX
+ SG_ SET_X_02 : 39|2@0+ (1,0) [0|3] "" XXX
 
 BO_ 352 FSM2: 8 FSM
+ SG_ LkaDimLine : 51|2@1+ (1,0) [0|127] "" XXX
+ SG_ NEW_SIGNAL_2 : 56|7@1+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_1 : 55|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_3 : 7|24@0+ (1,0) [0|16777215] "" XXX
+ SG_ NEW_SIGNAL_4 : 36|5@0+ (1,0) [0|31] "" XXX
 
 BO_ 624 FSM3: 8 FSM
  SG_ NEW_SIGNAL_1 : 23|8@0+ (1,0) [0|255] "" XXX
@@ -328,6 +332,8 @@ CM_ SG_ 48 FCWSomething "All bit set during fcw";
 CM_ SG_ 48 StatusSomething "Some status changes when zeroing DTCs";
 CM_ SG_ 208 TrqLim "Used in checksum calculation, Limit directional torque based on the number.";
 CM_ SG_ 208 Checksum "Checksum calculated as a one-complement addition of LKAAngleRequest+LKADirection+Unkown, Zeros used to pad missing bits.";
+CM_ SG_ 208 SET_X_02 "Bit 0 = Vibrate steering wheel., Bit 1 = Heartbeat";
+CM_ SG_ 352 LkaDimLine "Not true, but follows lka steer direction.";
 CM_ SG_ 352 NEW_SIGNAL_1 "Turned one. Got LKA service needed can this be the one?";
 CM_ SG_ 640 SpeedTarget "SpeedTarget ACC (noisy bf starting acc Jumps from 0->252->0)";
 CM_ SG_ 853 TargetSpeedOdo "Probably target speed odo";
