@@ -41,7 +41,7 @@ BO_ 2 Steering: 8 XXX
  SG_ Counter : 25|3@1+ (1,0) [0|7] "" XXX
  SG_ CHECKSUM : 32|8@1+ (1,0) [0|255] "" XXX
 
-BO_ 39 Cruise_Status: 8 XXX
+BO_ 39 Cruise_Status_2: 8 XXX
  SG_ Cruise_Activated : 37|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 64 Throttle: 8 XXX
