@@ -217,7 +217,7 @@ BO_ 801 ES_DashStatus: 8 XXX
  SG_ Signal5 : 37|3@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Set_Speed : 40|8@1+ (1,0) [0|255] "" XXX
  SG_ Cruise_Fault : 48|1@1+ (1,0) [0|1] "" XXX
- SG_ Cruise_On: 49|1@1+ (1,0) [0|1] "" XXX
+ SG_ Cruise_On : 49|1@1+ (1,0) [0|1] "" XXX
  SG_ Signal6 : 50|1@1+ (1,0) [0|1] "" XXX
  SG_ Brake_Lights : 51|1@1+ (1,0) [0|3] "" XXX
  SG_ Car_Follow : 52|1@1+ (1,0) [0|3] "" XXX
