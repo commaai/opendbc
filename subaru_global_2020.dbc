@@ -274,4 +274,4 @@ CM_ SG_ 912 ICY_ROAD "1 = DASHLIGHT ON, 2 = WARNING, 3 = OFF";
 CM_ SG_ 940 Highbeam "01 = low beam, 11 = high beam";
 CM_ SG_ 940 FOG_LIGHTS2 "yellow fog light in the dash";
 CM_ SG_ 1677 Units "AU/EU: 1 = imperial, 3 = metric US: 3 = imperial, 4 = metric";
-VAL_ 295 Gear 0 "P" 3 "D";
+VAL_ 295 Gear 0 "P" 1 "R" 3 "D";
