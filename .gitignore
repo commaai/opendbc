@@ -5,6 +5,7 @@
 *.dylib
 .*.swp
 .DS_Store
+.sconsign.dblite
 
 can/*.so
 can/build/
