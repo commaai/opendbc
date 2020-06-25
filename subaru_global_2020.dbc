@@ -130,6 +130,9 @@ BO_ 290 ES_LKAS: 8 XXX
  SG_ LKAS_Output : 16|13@1- (-1,0) [0|3] "" XXX
  SG_ LKAS_Request : 29|1@0+ (1,0) [0|3] "" XXX
 
+BO_ 360 Throttle_Hybrid: 8 XXX
+ SG_ Throttle_Pedal : 32|8@1+ (1,0) [0|255] "" XXX
+
 BO_ 544 ES_Brake: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
