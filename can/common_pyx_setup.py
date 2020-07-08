@@ -34,8 +34,6 @@ class BuildExtWithoutPlatformSuffix(build_ext):
     return get_ext_filename_without_platform_suffix(filename)
 
 
-
-extra_compile_args = ["-std=c++14"]
 ARCH = subprocess.check_output(["uname", "-m"], encoding='utf8').rstrip()  # pylint: disable=unexpected-keyword-arg
 
 if ARCH == "aarch64":
@@ -46,6 +44,12 @@ if platform.system() == "Darwin":
 else:
   libdbc = "libdbc.so"
 
+extra_compile_args = ["-std=c++14"]
+extra_link_args = [os.path.join(BASEDIR, 'opendbc', 'can', libdbc)]
+include_dirs = [
+  BASEDIR,
+  os.path.join(BASEDIR, 'phonelibs'),
+]
 
 # Build CAN Parser
 
@@ -57,13 +61,8 @@ setup(name='CAN parser',
           language="c++",
           sources=['parser_pyx.pyx'],
           extra_compile_args=extra_compile_args,
-          include_dirs=[
-            BASEDIR,
-            os.path.join(BASEDIR, 'phonelibs'),
-          ],
-          extra_link_args=[
-            os.path.join(BASEDIR, 'opendbc', 'can', libdbc),
-          ],
+          include_dirs=include_dirs,
+          extra_link_args=extra_link_args,
         ),
         annotate=ANNOTATE
       ),
@@ -84,13 +83,8 @@ setup(name='CAN packer',
           language="c++",
           sources=['packer_pyx.pyx'],
           extra_compile_args=extra_compile_args,
-          include_dirs=[
-            BASEDIR,
-            os.path.join(BASEDIR, 'phonelibs'),
-          ],
-          extra_link_args=[
-            os.path.join(BASEDIR, 'opendbc', 'can', libdbc),
-          ],
+          include_dirs=include_dirs,
+          extra_link_args=extra_link_args,
         ),
         annotate=ANNOTATE
       ),
