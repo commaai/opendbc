@@ -7,6 +7,8 @@ from distutils.core import Extension, setup  # pylint: disable=import-error,no-n
 from Cython.Build import cythonize
 from Cython.Distutils import build_ext
 
+
+ANNOTATE = os.getenv('ANNOTATE') is not None
 BASEDIR = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../"))
 
 
@@ -32,7 +34,7 @@ class BuildExtWithoutPlatformSuffix(build_ext):
     return get_ext_filename_without_platform_suffix(filename)
 
 
-sourcefiles = ['parser_pyx.pyx']
+
 extra_compile_args = ["-std=c++14"]
 ARCH = subprocess.check_output(["uname", "-m"], encoding='utf8').rstrip()  # pylint: disable=unexpected-keyword-arg
 
@@ -44,13 +46,16 @@ if platform.system() == "Darwin":
 else:
   libdbc = "libdbc.so"
 
+
+# Build CAN Parser
+
 setup(name='CAN parser',
       cmdclass={'build_ext': BuildExtWithoutPlatformSuffix},
       ext_modules=cythonize(
         Extension(
           "parser_pyx",
           language="c++",
-          sources=sourcefiles,
+          sources=['parser_pyx.pyx'],
           extra_compile_args=extra_compile_args,
           include_dirs=[
             BASEDIR,
@@ -59,10 +64,38 @@ setup(name='CAN parser',
           extra_link_args=[
             os.path.join(BASEDIR, 'opendbc', 'can', libdbc),
           ],
-        )
+        ),
+        annotate=ANNOTATE
       ),
       nthreads=4,
 )
 
 if platform.system() == "Darwin":
   os.system("install_name_tool -change opendbc/can/libdbc.dylib " + BASEDIR + "/opendbc/can/libdbc.dylib parser_pyx.so")
+
+
+# Build CAN Packer
+
+setup(name='CAN packer',
+      cmdclass={'build_ext': BuildExtWithoutPlatformSuffix},
+      ext_modules=cythonize(
+        Extension(
+          "packer_pyx",
+          language="c++",
+          sources=['packer_pyx.pyx'],
+          extra_compile_args=extra_compile_args,
+          include_dirs=[
+            BASEDIR,
+            os.path.join(BASEDIR, 'phonelibs'),
+          ],
+          extra_link_args=[
+            os.path.join(BASEDIR, 'opendbc', 'can', libdbc),
+          ],
+        ),
+        annotate=ANNOTATE
+      ),
+      nthreads=4,
+)
+
+if platform.system() == "Darwin":
+  os.system("install_name_tool -change opendbc/can/libdbc.dylib " + BASEDIR + "/opendbc/can/libdbc.dylib packer_pyx.so")

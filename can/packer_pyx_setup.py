@@ -7,6 +7,8 @@ from distutils.core import Extension, setup  # pylint: disable=import-error,no-n
 from Cython.Build import cythonize
 from Cython.Distutils import build_ext
 
+
+ANNOTATE = os.getenv('ANNOTATE') is not None
 BASEDIR = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../"))
 
 
@@ -59,7 +61,8 @@ setup(name='CAN packer',
           extra_link_args=[
             os.path.join(BASEDIR, 'opendbc', 'can', libdbc),
           ],
-        )
+        ),
+        annotate=ANNOTATE
       ),
       nthreads=4,
 )
