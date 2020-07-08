@@ -33,6 +33,7 @@ env = Environment(
     "-g",
     "-fPIC",
     "-O2",
+    "-Wunused",
     "-Werror",
   ] + ccflags_asan,
   LDFLAGS=ldflags_asan,
