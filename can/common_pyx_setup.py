@@ -34,8 +34,8 @@ class BuildExtWithoutPlatformSuffix(build_ext):
     return get_ext_filename_without_platform_suffix(filename)
 
 
+extra_compile_args = ["-std=c++14"]
 ARCH = subprocess.check_output(["uname", "-m"], encoding='utf8').rstrip()  # pylint: disable=unexpected-keyword-arg
-
 if ARCH == "aarch64":
   extra_compile_args += ["-Wno-deprecated-register"]
 
@@ -44,7 +44,6 @@ if platform.system() == "Darwin":
 else:
   libdbc = "libdbc.so"
 
-extra_compile_args = ["-std=c++14"]
 extra_link_args = [os.path.join(BASEDIR, 'opendbc', 'can', libdbc)]
 include_dirs = [
   BASEDIR,
