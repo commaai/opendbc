@@ -443,14 +443,6 @@ CM_ SG_ 479 CONTROL_ON "Set to 5 when car is being controlled";
 CM_ SG_ 479 RELATED_TO_GAS "bits 7, 3, and 1 set to 1 when gas not applied";
 CM_ SG_ 479 GAS_BRAKE "Signed value, negative when braking and positive when applying gas";
 
-BO_ 318291879 BSM_STATUS_RIGHT: 8 XXX
- SG_ BSM_ALERT : 4|1@0+ (1,0) [0|1] "" XXX
- SG_ BSM_MODE : 6|2@0+ (1,0) [0|3] "" XXX
-
-BO_ 318291615 BSM_STATUS_LEFT: 8 XXX
- SG_ BSM_ALERT : 4|1@0+ (1,0) [0|1] "" XXX
- SG_ BSM_MODE : 6|2@0+ (1,0) [0|3] "" XXX
-
 VAL_ 401 GEAR_SHIFTER 32 "L" 16 "S" 8 "D" 4 "N" 2 "R" 1 "P" ;
 VAL_ 401 GEAR 7 "L" 10 "S" 4 "D" 3 "N" 2 "R" 1 "P" ;
 VAL_ 545 ECON_ON_2 0 "off" 3 "on" ;
@@ -459,7 +451,5 @@ VAL_ 662 CRUISE_SETTING 3 "distance_adj" 2 "tbd" 1 "lkas_button" 0 "none" ;
 VAL_ 806 CMBS_BUTTON 3 "pressed" 0 "released" ;
 VAL_ 891 WIPERS 4 "High" 2 "Low" 0 "Off" ;
 VAL_ 829 BEEP 3 "single_beep" 2 "triple_beep" 1 "repeated_beep" 0 "no_beep" ;
-VAL_ 318291879 BSM_MODE 2 "blind_spot" 1 "cross_traffic" 0 "off";
-VAL_ 318291615 BSM_MODE 2 "blind_spot" 1 "cross_traffic" 0 "off";
 
 CM_ "CHFFR_METRIC 330 STEER_ANGLE STEER_ANGLE 0.36 180; CHFFR_METRIC 380 ENGINE_RPM ENGINE_RPM 1 0; CHFFR_METRIC 804 ENGINE_TEMPERATURE ENGINE_TEMPERATURE 1 0";
