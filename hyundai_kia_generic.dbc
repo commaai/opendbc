@@ -1513,10 +1513,10 @@ BO_ 865 ADAS_PRK_11: 8 ADAS_PRK
  SG_ PCA_CHECK_SUM : 48|8@1+ (1,0) [0|0] "" Vector__XXX
 
 BO_ 882 EV_PC5: 8 CGW
- SG_ CR_Mcu_MotEstTq_Pc : 33|12@1- (0.048828125,0) [-100|99.951171875] "%" Vector__XXX
- SG_ CF_Vcu_GarSelDisp : 16|4@1+ (1,0) [0|15] "" Vector__XXX
- SG_ Regen_Lvl : 21|2@0+ (1,0) [0|15] "" XXX
  SG_ VS : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ CF_Vcu_GearSelDisp : 16|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ Regen_Lvl : 21|2@0+ (1,0) [0|15] "" XXX
+ SG_ CR_Mcu_MotEstTq_Pc : 33|12@1- (0.048828125,0) [-100|99.951171875] "%" Vector__XXX
 
 BO_ 881 EV_PC4: 8 CGW
  SG_ CR_Brk_StkDep_Pc : 0|8@1+ (1,0) [0|0] "%" Vector__XXX
