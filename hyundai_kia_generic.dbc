@@ -1581,9 +1581,6 @@ BO_ 352 AHB1: 8 iBAU
  SG_ CF_Ahb_PedalCalStat : 25|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ CF_Ahb_Bzzr : 26|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ CF_Ahb_ChkSum : 56|8@1+ (1,0) [0|255] "" Vector__XXX
- 
-BO_ 882 ELECT_GEAR: 8 XXX
- SG_ Elect_Gear_Shifter : 16|3@1+ (1,0) [0|7] ""  CLU
 
 BO_ 1157 LFAHDA_MFC: 4 XXX
  SG_ LFA_SysWarning : 16|2@1+ (1,0) [0|3] "" XXX
