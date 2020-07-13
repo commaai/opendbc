@@ -1611,7 +1611,7 @@ BO_ 1136 P_STS: 6 CGW
  SG_ HCU5_STS : 8|2@1+ (1,0) [0|3] "" EPB,FCA,MDPS,iBAU
 
 BO_ 304 YRS11: 8 ACU
- SG_ CR_Yrs_Yr : 0|16@1+ (0.005,-163.84) [-163.84|163.83] "˚/s" CGW,iBAU
+ SG_ CR_Yrs_Yr : 0|16@1+ (0.005,-163.84) [-163.84|163.83] "deg/s" CGW,iBAU
  SG_ CR_Yrs_LatAc : 16|16@1+ (0.000127465,-4.17677312) [-4.17677312|4.17651819] "g" iBAU
  SG_ CF_Yrs_YrStat : 32|4@1+ (1,0) [0|15] "" iBAU
  SG_ CF_Yrs_LatAcStat : 36|4@1+ (1,0) [0|15] "" iBAU
