@@ -111,10 +111,11 @@ BO_ 313 Brake_Pedal: 8 XXX
  SG_ Counter : 8|4@1+ (1,0) [0|1] "" XXX
  SG_ Signal1 : 12|4@1+ (1,0) [0|1] "" XXX
  SG_ Speed : 16|12@1+ (0.05625,0) [0|255] "kph" XXX
+ SG_ Signal2 : 28|6@1+ (1,0) [0|1] "" XXX
  SG_ Brake_Lights : 34|1@1+ (1,0) [0|7] "" XXX
- SG_ Signal2 : 35|1@1+ (1,0) [0|1] "" XXX
+ SG_ Signal3 : 35|1@1+ (1,0) [0|1] "" XXX
  SG_ Brake_Pedal : 36|12@1+ (1,0) [0|65535] "" XXX
- SG_ Signal3 : 48|16@1+ (1,0) [0|1] "" XXX
+ SG_ Signal4 : 48|16@1+ (1,0) [0|1] "" XXX
 
 BO_ 290 ES_LKAS: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
