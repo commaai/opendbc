@@ -983,10 +983,10 @@ BO_ 832 LKAS11: 8 LDWS_LKAS
  SG_ CF_Lkas_FcwSysState : 40|3@1+ (1.0,0.0) [0.0|7.0] ""  CLU
  SG_ CF_Lkas_FcwCollisionWarning : 43|2@1+ (1.0,0.0) [0.0|3.0] ""  CLU
  SG_ CF_Lkas_FusionState : 45|2@1+ (1.0,0.0) [0.0|3.0] ""  SCC
+ SG_ CF_Lkas_Unknown1 : 47|1@1+ (1.0,0.0) [0.0|1.0] "" XXX
  SG_ CF_Lkas_Chksum : 48|8@1+ (1.0,0.0) [0.0|255.0] ""  MDPS
  SG_ CF_Lkas_FcwOpt_USM : 56|3@1+ (1.0,0.0) [0.0|7.0] ""  CLU
  SG_ CF_Lkas_LdwsOpt_USM : 59|3@1+ (1.0,0.0) [0.0|7.0] ""  CLU,MDPS
- SG_ CF_Lkas_Unknown1 : 47|1@1+ (1.0,0.0) [0.0|1.0] "" XXX
  SG_ CF_Lkas_Unknown2 : 62|2@1+ (1.0,0.0) [0.0|1.0] "" XXX
 
 BO_ 1342 LKAS12: 6 LDWS_LKAS
