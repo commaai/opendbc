@@ -1527,12 +1527,8 @@ BO_ 881 EV_PC4: 8 CGW
  SG_ CR_Vcu_MotTqCmd_Pc : 39|12@1- (0.048828125,0) [-100|99.951171875] "%" Vector__XXX
  SG_ CR_Vcu_AltAccPedDep_Pc : 56|8@1+ (0.3921568627,0) [0|100] "%" XXX
 
-BO_ 1291 50bLABEL13: 8 XXX
-
 BO_ 1355 EV_PC6: 8 CGW
  SG_ CF_Vcu_SbwWarnMsg : 16|3@1+ (1,0) [0|7] "" Vector__XXX
-
-BO_ 1429 595LABEL10: 8 XXX
 
 BO_ 1430 EV_PC2: 8 CGW
  SG_ CR_Ldc_ActVol_LS_V : 32|8@1+ (0.1,0) [0|0] "V" Vector__XXX
@@ -1551,8 +1547,6 @@ BO_ 908 RSPA11: 8 RSPA
  SG_ CF_RSPA_AliveCounter : 52|4@1+ (1,0) [0|15] "" XXX
  SG_ CF_RSPA_CRC : 56|8@1+ (1,0) [0|255] "" XXX
 
-BO_ 928 LDWS11: 8 XXX
-
 BO_ 914 S_MDPS11: 8 XXX
  SG_ CR_Mdps_StrAng : 24|16@1- (1,0) [0|65535] "" XXX
  SG_ CF_Mdps_Stat : 0|4@1+ (1,0) [0|15] "" XXX
@@ -1565,8 +1559,6 @@ BO_ 357 S_MDPS12: 8 XXX
  SG_ Checksum : 63|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_2 : 12|12@1+ (1,0) [0|4095] "" XXX
  SG_ NEW_SIGNAL_1 : 0|12@1+ (1,0) [0|4095] "" XXX
-
-BO_ 1507 BSD_Reactive: 8 XXX
 
 BO_ 352 AHB1: 8 iBAU
  SG_ CF_Ahb_SLmp : 0|2@1+ (1,0) [0|3] "" CLU
@@ -1582,8 +1574,6 @@ BO_ 352 AHB1: 8 iBAU
 
 BO_ 1191 4a7MFC: 8 XXX
  SG_ PAINT1 : 0|1@0+ (1,0) [0|1] "" XXX
-
-BO_ 1996 7ccMFC: 8 XXX
 
 BO_ 1162 BCA11: 8 BCW
  SG_ CF_BCA_State : 16|3@1+ (1,0) [0|7] "" CLU,iBAU
