@@ -1453,14 +1453,15 @@ BO_ 909 FCA11: 8 FCA
 BO_ 1156 HDA11_MFC: 8 XXX
  SG_ Counter : 5|4@0+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_1 : 1|2@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_6 : 16|2@1+ (1,0) [0|3] "" XXX
- SG_ NEW_SIGNAL_3 : 49|2@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_7 : 18|14@1+ (1,0) [0|63] "" XXX
- SG_ NEW_SIGNAL_8 : 15|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_2 : 50|14@1- (1,-4095) [0|16383] "" XXX
- SG_ NEW_SIGNAL_4 : 34|14@1+ (1,0) [0|16383] "" XXX
- SG_ NEW_SIGNAL_5 : 33|2@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_9 : 7|2@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_2 : 7|2@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_3 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_4 : 16|2@1+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_5 : 18|14@1+ (1,0) [0|63] "" XXX
+ SG_ NEW_SIGNAL_6 : 33|2@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_7 : 34|14@1+ (1,0) [0|16383] "" XXX
+ SG_ NEW_SIGNAL_8 : 49|2@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_9 : 50|14@1- (1,-4095) [0|16383] "" XXX
+
 BO_ 1155 FCA12: 8 FCA
  SG_ FCA_USM : 0|3@1+ (1,0) [0|7] "" CGW,CLU,ESC
  SG_ FCA_DrvSetState : 3|3@1+ (1,0) [0|7] "" CGW
@@ -1482,9 +1483,6 @@ BO_ 1157 LFAHDA_MFC: 4 XXX
  SG_ LFA_SysWarning : 16|2@1+ (1,0) [0|3] "" XXX
  SG_ ACTIVE : 25|1@1+ (1,0) [0|3] "" XXX
  SG_ LFA_USM : 28|2@1+ (1,0) [0|3] "" XXX
-
-
-VAL_ 909 CF_VSM_Warn 2 "FCW" 3 "AEB";
 
 BO_ 913 BCM_PO_11: 8 Vector__XXX
  SG_ BCM_Door_Dri_Status : 5|1@0+ (1,0) [0|1] "" PT_ESC_ABS
@@ -1582,8 +1580,6 @@ BO_ 352 AHB1: 8 iBAU
  SG_ CF_Ahb_Bzzr : 26|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ CF_Ahb_ChkSum : 56|8@1+ (1,0) [0|255] "" Vector__XXX
 
-VAL_ 909 CF_VSM_Warn 2 "FCW" 3 "AEB";
-
 BO_ 1191 4a7MFC: 8 XXX
  SG_ PAINT1 : 0|1@0+ (1,0) [0|1] "" XXX
 
@@ -1631,9 +1627,9 @@ BO_ 870 366_EMS: 8 EMS
 
 BO_ 854 356: 8 XXX
  SG_ PAINT1 : 32|1@0+ (1,0) [0|1] "" XXX
- SG_ PAINT4 : 34|2@0+ (1,0) [0|1] "" XXX
- SG_ PAINT2 : 36|2@0+ (1,0) [0|3] "" XXX
- SG_ PAINT3 : 38|1@0+ (1,0) [0|1] "" XXX
+ SG_ PAINT2 : 34|2@0+ (1,0) [0|1] "" XXX
+ SG_ PAINT3 : 36|2@0+ (1,0) [0|3] "" XXX
+ SG_ PAINT4 : 38|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1042 ICM_412h: 8 ICM
  SG_ T_Outside_input : 0|9@0+ (0.01,0) [0|5] "V" Vector__XXX
@@ -1652,15 +1648,5 @@ BO_ 1042 ICM_412h: 8 ICM
  SG_ PopupMessageOutput_6Level : 53|1@0+ (1,0) [0|1] "" Vector__XXX
  SG_ PopupMessageOutput_7Level : 54|1@0+ (1,0) [0|1] "" Vector__XXX
  SG_ PopupMessageOutput_8Level : 55|1@0+ (1,0) [0|1] "" Vector__XXX
- 
-BO_ 1183 49fLABEL5: 8 XXX
 
-BO_ 1294 LABEL3: 8 XXX
-
-BO_ 1348 544LABEL2: 8 XXX
-
-BO_ 1470 5beLABEL1: 8 XXX
-
-BO_ 1225 4c9LABEL4: 8 XXX
-
-BO_ 549 225: 8 XXX
+VAL_ 909 CF_VSM_Warn 2 "FCW" 3 "AEB";
