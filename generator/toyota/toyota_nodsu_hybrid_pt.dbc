@@ -28,6 +28,13 @@ BO_ 610 EPS_STATUS: 8 EPS
  SG_ LKA_STATE : 31|7@0+ (1,0) [0|127] "" XXX
  SG_ TYPE : 24|1@0+ (1,0) [0|1] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+ 
+BO_ 1042 DS12F03: 8 FCM
+ SG_ LKAINDI : 7|2@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ LKAWLSL : 5|2@0+ (1,0) [0|2] "" Vector__XXX
+ SG_ LKAWLSR : 3|2@0+ (1,0) [0|2] "" Vector__XXX
+ 
+CM BO_ DS12F03 "When the first byte is 68 Lane Keep Assist is on, When the first byte is 00 Lane Keep Assist is off"
 
 CM_ SG_ 548 BRAKE_PRESSURE "seems prop to pedal force";
 CM_ SG_ 548 BRAKE_POSITION "seems proportional to pedal displacement, unclear the max value of 0x1c8";
@@ -36,3 +43,4 @@ CM_ SG_ 581 GAS_PEDAL "it seems slightly filtered";
 VAL_ 295 GEAR 0 "P" 1 "R" 2 "N" 3 "D" 4 "B";
 VAL_ 610 IPAS_STATE 5 "override" 3 "enabled" 1 "disabled";
 VAL_ 610 LKA_STATE 25 "temporary_fault" 9 "temporary_fault2" 5 "active" 1 "standby";
+VAL_ 1042 LKAINDI 0 "disabled" 2 "enabled"
