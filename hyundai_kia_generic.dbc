@@ -1190,7 +1190,7 @@ BO_ 1313 GW_DDM_PE: 8 BCM
  SG_ C_RRDoorStatus : 6|2@1+ (1.0,0.0) [0.0|3.0] ""  CLU
  SG_ C_TrunkStatus : 8|2@1+ (1.0,0.0) [0.0|3.0] ""  CLU
  SG_ C_OSMirrorStatus : 10|2@1+ (1.0,0.0) [0.0|3.0] ""  CLU
-
+ 
 BO_ 1056 SCC11: 8 SCC
  SG_ MainMode_ACC : 0|1@1+ (1,0) [0|1] "" CLU,EMS,ESC
  SG_ SCCInfoDisplay : 1|3@1+ (1,0) [0|7] "" CLU,ESC
