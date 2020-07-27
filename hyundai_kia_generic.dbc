@@ -1380,6 +1380,7 @@ BO_ 1290 SCC13: 8 SCC
  SG_ SCCDrvModeRValue : 0|3@1+ (1,0) [0|7] "" CLU
  SG_ SCC_Equip : 3|1@1+ (1,0) [0|1] "" ESC
  SG_ AebDrvSetStatus : 4|3@1+ (1,0) [0|7] "" CLU,ESC
+ SG_ Lead_Veh_Dep_Alert_USM : 13|2@0+ (1,0) [0|3] "" XXX
 
 BO_ 1287 TCS15: 4 ESC
  SG_ ABS_W_LAMP : 0|1@1+ (1.0,0.0) [0.0|1.0] ""  _4WD,CLU,CUBIS,IBOX
@@ -1459,10 +1460,10 @@ BO_ 1186 FRT_RADAR11: 2 FCA
  SG_ CF_FCA_Equip_Front_Radar : 0|3@1+ (1,0) [0|7] "" LDWS_LKAS,LDW_LKA,ESC
 
 BO_ 905 SCC14: 8 SCC
- SG_ ComfortBandLower : 6|6@1+ (1,0) [0|0] "" Vector__XXX
- SG_ ComfortBandUpper : 0|6@1+ (1,0) [0|0] "" Vector__XXX
- SG_ JerkLowerLimit : 19|7@1+ (1,0) [0|0] "" Vector__XXX
- SG_ JerkUpperLimit : 12|7@1+ (0.1,0) [0|0] "" Vector__XXX
+ SG_ ComfortBandUpper : 0|6@1+ (0.0986,-4.14) [0|1.26] "m/s^2" ESC
+ SG_ ComfortBandLower : 6|6@1+ (0.0986,-4.14) [0|1.26] "m/s^2" ESC
+ SG_ JerkUpperLimit : 12|7@1+ (1,0) [0|12.7] "m/s^3" ESC
+ SG_ JerkLowerLimit : 19|7@1+ (0.1,0) [0|12.7] "m/s^3" ESC
  SG_ ACCMode : 32|3@1+ (1,0) [0|7] "" CLU,HUD,LDWS_LKAS,ESC
  SG_ ObjGap : 56|8@1+ (1,0) [0|255] "" CLU,HUD,ESC
 
