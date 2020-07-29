@@ -1509,22 +1509,16 @@ BO_ 865 ADAS_PRK_11: 8 ADAS_PRK
  SG_ PCA_ALIVE_CNT : 40|4@1+ (1,0) [0|0] "" Vector__XXX
  SG_ PCA_CHECK_SUM : 48|8@1+ (1,0) [0|0] "" Vector__XXX
 
-BO_ 882 EV_PC5: 8 CGW
- SG_ VS : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ CF_Vcu_GearSelDisp : 16|4@1+ (1,0) [0|15] "" Vector__XXX
- SG_ Regen_Lvl : 21|2@0+ (1,0) [0|15] "" XXX
- SG_ CR_Mcu_MotEstTq_Pc : 33|12@1- (0.048828125,0) [-100|99.951171875] "%" Vector__XXX
+BO_ 882 ELECT_GEAR: 8 XXX
+ SG_ Elect_Gear_Shifter : 16|4@1+ (1,0) [0|7] ""  CLU
 
-BO_ 881 EV_PC4: 8 CGW
- SG_ CR_Brk_StkDep_Pc : 0|8@1+ (1,0) [0|0] "%" Vector__XXX
- SG_ CF_Vcu_Rdy : 9|1@1+ (1,0) [0|0] "" Vector__XXX
- SG_ CF_Vcu_EvRdyClu : 10|1@1+ (1,0) [0|0] "" Vector__XXX
- SG_ CF_Vcu_EvRdy : 11|1@1+ (1,0) [0|0] "" Vector__XXX
- SG_ CF_Vcu_EcoMdOff : 12|1@1+ (1,0) [0|0] "" Vector__XXX
- SG_ Unknown_Paint1 : 18|13@1+ (1,0) [0|63] "" XXX
- SG_ CR_Vcu_VehSpeed : 31|8@1+ (0.55,0) [0|100] "kph or mph" Vector__XXX
- SG_ CR_Vcu_MotTqCmd_Pc : 39|12@1- (0.048828125,0) [-100|99.951171875] "%" Vector__XXX
- SG_ CR_Vcu_AccPedDep_Pc : 56|8@1+ (0.3921568627,0) [0|100] "%" XXX
+BO_ 881 E_EMS11: 8 XXX
+ SG_ Brake_Pedal_Pos : 0|8@1+ (1,0) [0|127] "" XXX
+ SG_ IG_Reactive_Stat : 8|3@1+ (1,0) [0|3] "" XXX
+ SG_ Gear_Change : 12|1@0+ (1,0) [0|31] "" XXX
+ SG_ Cruise_Limit_Status : 13|1@1+ (1,0) [0|1] "" XXX
+ SG_ Cruise_Limit_Target : 23|8@1+ (1,0) [0|15] "" XXX
+ SG_ Accel_Pedal_Pos : 31|8@1+ (1,0) [0|7] "" XXX
 
 BO_ 1355 EV_PC6: 8 CGW
  SG_ CF_Vcu_SbwWarnMsg : 16|3@1+ (1,0) [0|7] "" Vector__XXX
