@@ -1218,7 +1218,8 @@ BO_ 919 LDW_02: 8 Front_Multifunction_Camera_MQB
  SG_ LDW_Anlaufsp_VLR : 24|4@1+ (1,0) [0|15] "" Vector__XXX
  SG_ LDW_Vib_Amp_VLR : 28|4@1+ (1,0) [0|15] "" Vector__XXX
  SG_ LDW_Anlaufzeit_VLR : 32|4@1+ (1,0) [0|15] "" Vector__XXX
- SG_ LDW_Lernmodus_seitenabhaengig : 36|4@1+ (1,0) [0|15] ""  HUD_MQB,Kombi_MQB
+ SG_ LDW_SW_Info_rechts : 36|2@1+ (1,0) [0|3] "" XXX
+ SG_ LDW_SW_Info_links : 38|2@1+ (1,0) [0|3] "" XXX
  SG_ LDW_DLC : 40|8@1+ (0.01,-1.25) [-1.25|1.25] "Unit_Meter"  XXX
  SG_ LDW_TLC : 48|5@1+ (0.1,0) [0|3] "Unit_Secon"  XXX
  SG_ LDW_Warnung_links : 56|1@1+ (1,0) [0|1] "" Vector__XXX
