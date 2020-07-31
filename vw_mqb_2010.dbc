@@ -1195,8 +1195,8 @@ BO_ 294 HCA_01: 8 Front_Multifunction_Camera_MQB
  SG_ SET_ME_0X07 : 48|8@1+ (1,0) [0|255] ""  XXX
 
 BO_ 159 LH_EPS_03: 8 EPS_MQB
- SG_ EPS_03_CRC : 0|8@1+ (1,0) [0|255] ""  Parkhilfe_MQB
- SG_ EPS_03_BZ : 8|4@1+ (1,0) [0|15] ""  Parkhilfe_MQB
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Parkhilfe_MQB
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Parkhilfe_MQB
  SG_ EPS_DSR_Status : 12|4@1+ (1,0) [0|15] ""  XXX
  SG_ EPS_Berechneter_LW : 16|12@1+ (0.15,0) [0|613.95] "Unit_DegreOfArc"  Parkhilfe_MQB
  SG_ EPS_BLW_QBit : 30|1@1+ (1,0) [0|1] ""  Parkhilfe_MQB
@@ -1212,9 +1212,9 @@ BO_ 286 VehicleSpeed: 8 ESP_MQB
  SG_ VehicleSpeed_BZ : 8|4@1+ (1,0) [0|15] ""  XXX
  SG_ Speed : 52|12@1+ (0.125,0) [0|1] ""  XXX
 
-BO_ 919 LDW_02_FR: 8 Front_Multifunction_Camera_MQB
- SG_ LDW_02_CHK : 0|8@1+ (1,0) [0|255] ""  HUD_MQB
- SG_ LDW_02_BZ : 8|4@1+ (1,0) [0|15] ""  HUD_MQB
+BO_ 919 LDW_02: 8 Front_Multifunction_Camera_MQB
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  HUD_MQB
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  HUD_MQB
  SG_ LDW_Gong : 12|2@1+ (1,0) [0|3] ""  Kombi_MQB
  SG_ LDW_SW_Warnung_links : 14|1@1+ (1,0) [0|1] ""  XXX
  SG_ LDW_SW_Warnung_rechts : 15|1@1+ (1,0) [0|1] ""  XXX
@@ -1236,8 +1236,8 @@ BO_ 919 LDW_02_FR: 8 Front_Multifunction_Camera_MQB
  SG_ LDW_KD_Fehler : 63|1@1+ (1,0) [0|1] ""  XXX
 
 BO_ 780 ACC_02: 8 Front_Radar_MQB
- SG_ ACC_02_CHK : 0|8@1+ (1,0) [0|255] ""  HUD_MQB,Kombi_MQB
- SG_ ACC_02_BZ : 8|4@1+ (1,0) [0|15] ""  HUD_MQB,Kombi_MQB
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  HUD_MQB,Kombi_MQB
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  HUD_MQB,Kombi_MQB
  SG_ ACC_Wunschgeschw : 12|10@1+ (0.32,0) [0|326.72] "Unit_KiloMeterPerHour"  HUD_MQB,Kombi_MQB
  SG_ ACC_Status_Prim_Anz : 22|2@1+ (1,0) [0|3] ""  HUD_MQB,Kombi_MQB
  SG_ ACC_Abstandsindex : 24|10@1+ (1,0) [1|1021] ""  HUD_MQB,Kombi_MQB
@@ -1266,8 +1266,8 @@ BO_ 695 RCTA_01: 8 Rear_Radar_MQB
  SG_ RCTA_01_CRC : 0|8@1+ (1,0) [0|255] ""  XXX
 
 BO_ 783 SWA_01: 8 Rear_Radar_MQB
- SG_ SWA_Status_CHK : 0|8@1+ (1,0) [0|255] ""  XXX
- SG_ SWA_Status_BZ : 8|4@1+ (1,0) [0|15] ""  XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  XXX
  SG_ SWA_Anzeigen : 12|4@1+ (1,0) [0|15] ""  Kombi_MQB
  SG_ SWA_Blindheit_erkannt : 16|1@1+ (1,0) [0|1] ""  XXX
  SG_ SWA_rel_Nichtverf : 17|1@1+ (1,0) [0|1] ""  XXX
