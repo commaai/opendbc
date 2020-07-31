@@ -1185,7 +1185,7 @@ BO_ 294 HCA_01: 8 Front_Multifunction_Camera_MQB
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|255] ""  XXX
  SG_ HCA_System_Status : 12|4@1+ (1,0) [0|15] "" XXX
- SG_ LM_Offset : 16|14@1+ (1,0) [0|300] "Unit_centiNewtonMeter"  XXX
+ SG_ LM_Offset : 16|14@1+ (1,0) [0|300] "Unit_centiNewtoMeter"  XXX
  SG_ LM_Offset_Valid : 30|1@1+ (1,0) [0|1] ""  XXX
  SG_ LM_Offsign : 31|1@1+ (1,0) [0|1] ""  XXX
  SG_ HCA_Control_Status : 32|3@1+ (1,0) [0|1] ""  XXX
