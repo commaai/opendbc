@@ -1150,7 +1150,7 @@ BO_ 1470 LDW_1: 8 XXX
  SG_ XX_DLCORTLC1 : 24|8@1+ (1,0) [0|255] "" XXX
  SG_ XX_DLCORTLC2 : 32|8@1+ (1,0) [0|255] "" XXX
 
-BO_ 428mBremse_8: 8 XXX
+BO_ 428 mBremse_8: 8 XXX
  SG_ BR8_Checksumme : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ BR8_Zaehler : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ BR8_Sta_ACC_Anf : 12|1@1+ (1,0) [0|1] "" XXX
