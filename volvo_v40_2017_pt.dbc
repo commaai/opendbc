@@ -243,6 +243,7 @@ BO_ 864 CEM1: 8 CEM
 BO_ 912 DIM1: 8 DIM
 
 BO_ 968 SRS1: 8 SRS
+ SG_ PassengerSeatBelt : 22|1@0+ (1,0) [0|1] "" XXX
  SG_ DriverSeatBelt : 19|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1029 CEMBCM0: 8 CEM
@@ -369,5 +370,6 @@ CM_ SG_ 114 NEW_SIGNAL_1 "Jumped from 0 -> 120 during start. Makes triangle from
 CM_ SG_ 608 NEW_SIGNAL_1 "Status?";
 CM_ SG_ 608 NEW_SIGNAL_2 "Classification of object?";
 CM_ SG_ 608 Distance "Distance to object in front.";
-CM_ SG_ 968 DriverSeatBelt "Can be more than a bit. 1=Seatbelt on, 0=Seatbelt off";
+CM_ SG_ 968 PassengerSeatBelt "1 = Seatbalt latched";
+CM_ SG_ 968 DriverSeatBelt "1=Seatbelt latched";
 VAL_ 64 GearShifter 0 "P" 1 "R" 2 "N" 3 "D" ;
