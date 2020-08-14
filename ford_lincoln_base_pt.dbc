@@ -526,7 +526,6 @@ VAL_ 936 ApaTrgtDist_D_Stat 15 "Step15" 14 "Step14" 13 "Step13" 12 "Step12" 11 "
 VAL_ 936 ApaChime_D_Rq 7 "NotUsed2" 6 "NotUsed1" 5 "Warning_Chime" 4 "Finish_Chime" 3 "Stop_Now_Chime" 2 "Spot_Ready_Chime" 1 "Spot_Found_Chime" 0 "No_Chime" ;
 VAL_ 936 EPASExtAngleStatReq 1 "Request" 0 "NoRequest" ;
 VAL_ 936 ExtSteeringAngleReq2 32767 "Invalid" 32766 "Unknown" ;
-VAL_ 877 VehElEffAvg_No_Dsply 127 "Faulty" 126 "NoDataExists" ;
 VAL_ 970 LkaDrvOvrrd_D_Rq 3 "Level_3" 2 "Level_2" 1 "Level_1" 0 "Level_0" ;
 VAL_ 970 Lkas_Action 7 "NotUsed" 6 "LkaIncrIntervRight" 5 "LkaSupprRight" 4 "LkaStandIntervRight" 3 "LkaSupprLeft" 2 "LkaStandIntervLeft" 1 "LkaIncrIntervLeft" 0 "LkaNoInterv" ;
 CM_ VAL_ 970 Lkas_Alert 15 "no_alert" 3 "high_intensity" 2 "mid_intensity" 1 "low_intensity" ;
