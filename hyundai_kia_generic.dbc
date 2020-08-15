@@ -1479,10 +1479,11 @@ BO_ 905 SCC14: 8 SCC
 
 BO_ 1157 LFAHDA_MFC: 4 XXX
  SG_ HDA_USM : 0|2@1+ (1,0) [0|3] "" XXX
- SG_ ACTIVE2 : 4|2@0+ (1,0) [0|3] "" XXX
+ SG_ HDA_C_State : 2|3@1+ (1,0) [0|1] "" XXX
+ SG_ HDA_VSetReq : 8|8@1+ (1,0) [0|255] "km/h" XXX
  SG_ LFA_SysWarning : 16|2@1+ (1,0) [0|3] "" XXX
- SG_ ACTIVE : 25|1@1+ (1,0) [0|3] "" XXX
- SG_ LFA_USM : 28|2@1+ (1,0) [0|3] "" XXX
+ SG_ LFA_Icon_State : 24|2@1+ (1,0) [0|3] "" XXX
+ SG_ LFA_USM : 27|2@1+ (1,0) [0|3] "" XXX
 
 BO_ 913 BCM_PO_11: 8 Vector__XXX
  SG_ BCM_Door_Dri_Status : 5|1@0+ (1,0) [0|1] "" PT_ESC_ABS
