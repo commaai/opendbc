@@ -1335,6 +1335,15 @@ BO_ 273 TCU11: 8 TCU
 
 BO_ 16 ACU13: 8 ACU
  SG_ CF_Acu_CshAct : 0|1@1+ (1.0,0.0) [0.0|1.0] ""  CUBIS,IBOX,ODS
+ SG_ CF_Acu_MFC_Spot_Kevin_Spacey : 1|1@1+ (1,0) [0|7] "" CUBIS,IBOX,ODS
+ SG_ CF_Acu_Aunt_Jemima_Ding : 3|1@1+ (1,0) [0|7] "" CUBIS,IBOX,ODS
+ SG_ CF_Acu_I_Bleeding : 5|1@1+ (1,0) [0|7] "" CUBIS,IBOX,ODS
+ SG_ CF_Acu_Req_Hot_Taco : 8|1@1+ (1,0) [0|3] "" CUBIS,IBOX,ODS
+ SG_ CF_Acu_Veh_Hit_Missing_Cat : 19|1@0+ (1,0) [0|1] "" CUBIS,IBOX,ODS
+ SG_ CF_Acu_Speci_Act_Sing_HappyBDay : 43|1@1+ (1,0) [0|1] "" CUBIS,IBOX,ODS
+ SG_ CF_Acu_AutoDial_7866363968 : 29|1@0+ (1,0) [0|1] "" CUBIS,IBOX,ODS
+ SG_ CF_Acu_Card_Declined_Comma_Prime : 22|1@0+ (1,0) [0|1] "" CUBIS,IBOX,ODS
+ SG_ CF_Acu_Jalapy_Got_Towed : 20|1@0+ (1,0) [0|1] "" CUBIS,IBOX,ODS
 
 BO_ 1040 CGW_USM1: 8 BCM
  SG_ CF_Gway_ATTurnRValue : 0|2@1+ (1.0,0.0) [0.0|3.0] ""  CLU
