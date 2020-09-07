@@ -172,7 +172,8 @@ BO_ 772 Charger_parameters: 4 T18_BatteryCharger
    SG_ Voltage : 23|16@0+ (0.5,0) [0|0] "V" Vector__XXX
 
 BO_ 1120 Coolant_Temp: 4 K16_BECM
-   SG_ Coolant_Temp : 7|16@0+ (1,0) [0|0] "" Vector__XXX
+   SG_ Inlet_Coolant_Temp : 1|10@0+ (0.125,-40) [0|0] "" Vector__XXX
+   SG_ Outlet_Coolant_Temp : 17|10@0+ (0.125,-40) [0|0] "" Vector__XXX
 
 BO_ 778 AC_Stats: 7 T18_BatteryCharger
    SG_ Mains_Voltage : 0|12@1+ (0.1,0) [0|0] "V" Vector__XXX
