@@ -11,6 +11,16 @@ from Cython.Distutils import build_ext
 ANNOTATE = os.getenv('ANNOTATE') is not None
 BASEDIR = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../"))
 
+CROSS_COMPILATION = os.getenv("CROSS_COMPILATION") is not None
+sysroot_args=[]
+
+if CROSS_COMPILATION:
+  os.environ['CC'] = 'aarch64-linux-gnu-gcc'
+  os.environ['CXX'] = 'aarch64-linux-gnu-g++'
+  os.environ['LDSHARED'] = 'aarch64-linux-gnu-gcc -shared'
+  os.environ['LDCXXSHARED'] = 'aarch64-linux-gnu-g++ -shared'
+  os.environ["LD_LIBRARY_PATH"] = "/usr/aarch64-linux-gnu/lib"
+  sysroot_args=['--sysroot', '/usr/aarch64-linux-gnu']
 
 def get_ext_filename_without_platform_suffix(filename):
   name, ext = os.path.splitext(filename)
@@ -44,7 +54,14 @@ if platform.system() == "Darwin":
 else:
   libdbc = "libdbc.so"
 
-extra_link_args = [os.path.join(BASEDIR, 'opendbc', 'can', libdbc)]
+if CROSS_COMPILATION:
+  extra_compile_args += ["-Wno-deprecated-register"]
+  extra_compile_args += sysroot_args
+  extra_link_args = ['-L/usr/aarch64-linux-gnu/lib']
+  extra_link_args += ['--prefix=$HOME/linker_bin/']
+else:
+  extra_link_args = [os.path.join(BASEDIR, 'opendbc', 'can', libdbc)]
+  
 include_dirs = [
   BASEDIR,
   os.path.join(BASEDIR, 'phonelibs'),
@@ -62,6 +79,8 @@ setup(name='CAN parser',
           extra_compile_args=extra_compile_args,
           include_dirs=include_dirs,
           extra_link_args=extra_link_args,
+          libraries=[':libdbc.so'],
+          library_dirs=['.'],
         ),
         nthreads=4,
         annotate=ANNOTATE
