@@ -28,7 +28,7 @@ class TestCanParserPackerExceptions(unittest.TestCase):
       self.assertTrue(1 + 1 == 3)  # Should't get to here, due to the new added exception
     except Exception:
       pass
-    
+
     # Everything is supposed to work below
     CANParser(dbc_file, signals, checks, 0)
     CANPacker(dbc_file)
