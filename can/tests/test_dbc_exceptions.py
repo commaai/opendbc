@@ -14,17 +14,17 @@ class TestCanParserPackerExceptions(unittest.TestCase):
     ]
     checks=[]
     try:
-      CANParser(dbc_file+"abcdefgh", signals, checks, 0)
+      CANParser(dbc_file + "abcdefgh", signals, checks, 0)
       self.assertTrue(False)#Should't get to here, due to the new added exception
     except:
       pass
     try:
-      CANPacker(dbc_file+"abcdefgh")
+      CANPacker(dbc_file + "abcdefgh")
       self.assertTrue(False)#Should't get to here, due to the new added exception
     except:
       pass
     try:
-      CANDefine(dbc_file+"abcdefgh")
+      CANDefine(dbc_file + "abcdefgh")
       self.assertTrue(False)#Should't get to here, due to the new added exception
     except:
       pass
@@ -35,7 +35,6 @@ class TestCanParserPackerExceptions(unittest.TestCase):
     CANDefine(dbc_file)
 
  
-    
     
 
 if __name__ == "__main__":
