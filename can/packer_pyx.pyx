@@ -20,9 +20,11 @@ cdef class CANPacker:
     map[int, int] address_to_size
 
   def __init__(self, dbc_name):
-    self.packer = new cpp_CANPacker(dbc_name)
     self.dbc = dbc_lookup(dbc_name)
-
+    if not self.dbc:
+      raise RuntimeError("Can't lookup" + dbc_name)
+      
+    self.packer = new cpp_CANPacker(dbc_name)
     num_msgs = self.dbc[0].num_msgs
     for i in range(num_msgs):
       msg = self.dbc[0].msgs[i]
