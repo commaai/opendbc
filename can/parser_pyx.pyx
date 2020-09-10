@@ -17,9 +17,6 @@ from collections import defaultdict
 
 cdef int CAN_INVALID_CNT = 5
 
-cdef class DBCNameNotFoundException(Exception):
-  pass
-
 cdef class CANParser:
   cdef:
     cpp_CANParser *can
