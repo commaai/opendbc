@@ -13,21 +13,12 @@ class TestCanParserPackerExceptions(unittest.TestCase):
       ("STEER_TORQUE_REQUEST", "STEERING_CONTROL", 0),
     ]
     checks = []
-    try:
+    with self.assertRaises(Exception):
       CANParser(dbc_file + "abcdefgh", signals, checks, 0)
-      self.assertTrue(1 + 1 == 3)  # Should't get to here, due to the new added exception
-    except Exception:
-      pass
-    try:
+    with self.assertRaises(Exception):
       CANPacker(dbc_file + "abcdefgh")
-      self.assertTrue(1 + 1 == 3)  # Should't get to here, due to the new added exception
-    except Exception:
-      pass
-    try:
+    with self.assertRaises(Exception):
       CANDefine(dbc_file + "abcdefgh")
-      self.assertTrue(1 + 1 == 3)  # Should't get to here, due to the new added exception
-    except Exception:
-      pass
 
     # Everything is supposed to work below
     CANParser(dbc_file, signals, checks, 0)
