@@ -15,24 +15,25 @@ class TestCanParserPackerExceptions(unittest.TestCase):
     checks = []
     try:
       CANParser(dbc_file + "abcdefgh", signals, checks, 0)
-      self.assertTrue(1 + 1 == 3)  #Should't get to here, due to the new added exception
+      self.assertTrue(1 + 1 == 3)  # Should't get to here, due to the new added exception
     except Exception:
       pass
     try:
       CANPacker(dbc_file + "abcdefgh")
-      self.assertTrue(1 + 1 == 3)  #Should't get to here, due to the new added exception
+      self.assertTrue(1 + 1 == 3)  # Should't get to here, due to the new added exception
     except Exception:
       pass
     try:
       CANDefine(dbc_file + "abcdefgh")
-      self.assertTrue(1 + 1 == 3)  #Should't get to here, due to the new added exception
+      self.assertTrue(1 + 1 == 3)  # Should't get to here, due to the new added exception
     except Exception:
       pass
-
-    ##This should all work
+    
+    # Everything is supposed to work below
     CANParser(dbc_file, signals, checks, 0)
     CANPacker(dbc_file)
     CANDefine(dbc_file)
+
 
 if __name__ == "__main__":
   unittest.main()
