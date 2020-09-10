@@ -15,18 +15,18 @@ class TestCanParserPackerExceptions(unittest.TestCase):
     checks=[]
     try:
       CANParser(dbc_file + "abcdefgh", signals, checks, 0)
-      self.assertTrue(False)#Should't get to here, due to the new added exception
-    except:
+      self.assertTrue(1+1==3)#Should't get to here, due to the new added exception
+    except Exception:
       pass
     try:
       CANPacker(dbc_file + "abcdefgh")
-      self.assertTrue(False)#Should't get to here, due to the new added exception
-    except:
+      self.assertTrue(1+1==3)#Should't get to here, due to the new added exception
+    except Exception:
       pass
     try:
       CANDefine(dbc_file + "abcdefgh")
-      self.assertTrue(False)#Should't get to here, due to the new added exception
-    except:
+      self.assertTrue(1+1==3)#Should't get to here, due to the new added exception
+    except Exception:
       pass
 
     #This should all work
