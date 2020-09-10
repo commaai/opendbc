@@ -17,6 +17,8 @@ from collections import defaultdict
 
 cdef int CAN_INVALID_CNT = 5
 
+class DBCNameNotFoundException(Exception):
+    pass
 
 cdef class CANParser:
   cdef:
@@ -37,10 +39,11 @@ cdef class CANParser:
   def __init__(self, dbc_name, signals, checks=None, bus=0):
     if checks is None:
       checks = []
-
     self.can_valid = True
     self.dbc_name = dbc_name
     self.dbc = dbc_lookup(dbc_name)
+    if not self.dbc:
+      raise DBCNameNotFoundException("Couldn't lookup " + dbc_name)
     self.vl = {}
     self.ts = {}
 
@@ -148,7 +151,9 @@ cdef class CANDefine():
   def __init__(self, dbc_name):
     self.dbc_name = dbc_name
     self.dbc = dbc_lookup(dbc_name)
-
+    if not self.dbc:
+      raise DBCNameNotFoundException("Couldn't lookup " + dbc_name)
+      
     num_vals = self.dbc[0].num_vals
 
     address_to_msg_name = {}
