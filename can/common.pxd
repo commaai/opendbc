@@ -8,7 +8,6 @@ from libcpp.string cimport string
 from libcpp.unordered_set cimport unordered_set
 from libcpp cimport bool
 
-
 cdef extern from "common_dbc.h":
   ctypedef enum SignalType:
     DEFAULT,

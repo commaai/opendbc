@@ -13,11 +13,11 @@ class TestCanParserPackerExceptions(unittest.TestCase):
       ("STEER_TORQUE_REQUEST", "STEERING_CONTROL", 0),
     ]
     checks = []
-    with self.assertRaises(Exception):
+    with self.assertRaises(RuntimeError):
       CANParser(dbc_file + "abcdefgh", signals, checks, 0)
-    with self.assertRaises(Exception):
+    with self.assertRaises(RuntimeError):
       CANPacker(dbc_file + "abcdefgh")
-    with self.assertRaises(Exception):
+    with self.assertRaises(RuntimeError):
       CANDefine(dbc_file + "abcdefgh")
 
     # Everything is supposed to work below
