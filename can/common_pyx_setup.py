@@ -54,11 +54,16 @@ if platform.system() == "Darwin":
 else:
   libdbc = "libdbc.so"
 
+libraries = ['']
+library_dirs = ['']
+
 if CROSS_COMPILATION:
   extra_compile_args += ["-Wno-deprecated-register"]
   extra_compile_args += sysroot_args
   extra_link_args = ['-L/usr/aarch64-linux-gnu/lib']
   extra_link_args += ['--prefix=$HOME/linker_bin/']
+  libraries=[':libdbc.so']
+  library_dirs=['.']
 else:
   extra_link_args = [os.path.join(BASEDIR, 'opendbc', 'can', libdbc)]
   
@@ -79,8 +84,8 @@ setup(name='CAN parser',
           extra_compile_args=extra_compile_args,
           include_dirs=include_dirs,
           extra_link_args=extra_link_args,
-          libraries=[':libdbc.so'],
-          library_dirs=['.'],
+          libraries=libraries,
+          library_dirs=library_dirs,
         ),
         nthreads=4,
         annotate=ANNOTATE
