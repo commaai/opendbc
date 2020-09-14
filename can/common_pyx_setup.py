@@ -12,7 +12,7 @@ ANNOTATE = os.getenv('ANNOTATE') is not None
 BASEDIR = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../"))
 
 CROSS_COMPILATION = os.getenv("CROSS_COMPILATION") is not None
-sysroot_args=[]
+sysroot_args = []
 
 if CROSS_COMPILATION:
   os.environ['CC'] = 'aarch64-linux-gnu-gcc'
@@ -20,7 +20,7 @@ if CROSS_COMPILATION:
   os.environ['LDSHARED'] = 'aarch64-linux-gnu-gcc -shared'
   os.environ['LDCXXSHARED'] = 'aarch64-linux-gnu-g++ -shared'
   os.environ["LD_LIBRARY_PATH"] = "/usr/aarch64-linux-gnu/lib"
-  sysroot_args=['--sysroot', '/usr/aarch64-linux-gnu']
+  sysroot_args = ['--sysroot', '/usr/aarch64-linux-gnu']
 
 def get_ext_filename_without_platform_suffix(filename):
   name, ext = os.path.splitext(filename)
@@ -62,11 +62,11 @@ if CROSS_COMPILATION:
   extra_compile_args += sysroot_args
   extra_link_args = ['-L/usr/aarch64-linux-gnu/lib']
   extra_link_args += ['--prefix=$HOME/linker_bin/']
-  libraries=[':libdbc.so']
-  library_dirs=['.']
+  libraries = [':libdbc.so']
+  library_dirs = ['.']
 else:
   extra_link_args = [os.path.join(BASEDIR, 'opendbc', 'can', libdbc)]
-  
+
 include_dirs = [
   BASEDIR,
   os.path.join(BASEDIR, 'phonelibs'),
