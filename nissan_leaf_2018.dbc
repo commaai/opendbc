@@ -215,17 +215,19 @@ BO_ 372 SHIFTER_STATUS_RELAY_FROM_EVCAN: 8 XXX
  SG_ COUNTER : 39|8@0+ (1,0) [0|255] "" XXX
  SG_ SHIFTER_POSITION : 31|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 403 NEW_MSG_3: 8 XXX
+BO_ 403 unknown: 8 XXX
  SG_ COUNTER : 48|4@1+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_1 : 39|8@0- (1,0) [0|255] "" XXX
- SG_ SIGNAL_UNKNOWN : 7|16@0+ (1,0) [0|65535] "" XXX
- SG_ STEERING? : 47|8@0- (1,0) [0|255] "" XXX
+ SG_ unknown0 : 7|16@0+ (1,0) [0|65535] "" XXX
+ SG_ NEW_SIGNAL_1 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_2 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_3 : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_4 : 47|8@0- (1,0) [0|255] "" XXX
 
 BO_ 459 BCM_BRAKE_STATUS: 8 XXX
  SG_ TARGET_REGEN_BRAKING : 7|12@0+ (1,0) [0|4095] "" XXX
  SG_ TARGET_BRAKING : 23|12@0+ (1,0) [0|4095] "" XXX
 
-BO_ 658 UNKNOWN: 8 XXX
+BO_ 658 unknown: 8 XXX
  SG_ 12V_BATTERY_VOLTAGE : 31|8@0+ (0.1,0) [0|255] "V" XXX
  SG_ FRICTION_BRAKING_FORCE : 55|8@0+ (1,0) [0|255] "" XXX
 
@@ -233,23 +235,33 @@ BO_ 264 MASTER_COUNTER: 8 XXX
  SG_ COUNTER0 : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ COUNTER1 : 16|4@1+ (1,0) [0|15] "" XXX
 
-BO_ 470 NEW_MSG_1: 8 XXX
+BO_ 470 unknown: 8 XXX
  SG_ NEW_SIGNAL_1 : 7|16@0+ (1,0) [0|65535] "" XXX
  SG_ NEW_SIGNAL_2 : 23|16@0+ (1,0) [0|65535] "" XXX
  SG_ NEW_SIGNAL_3 : 35|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_6 : 47|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 451 UNKNOWN_COUNTER: 8 XXX
+BO_ 451 unknown_counter: 8 XXX
+ SG_ counter1 : 56|4@1+ (1,0) [0|15] "" XXX
+ SG_ counter0 : 40|2@1+ (1,0) [0|3] "" XXX
 
 BO_ 688 NEW_MSG_2: 8 XXX
- SG_ NEW_SIGNAL_4 : 31|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_5 : 39|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_6 : 47|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_7 : 55|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_8 : 63|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_3 : 23|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_2 : 15|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 55|4@0+ (1,0) [0|255] "" XXX
+ SG_ unknown0 : 7|16@0+ (1,0) [0|65535] "" XXX
+ SG_ unknown1 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ unknown2 : 31|4@0+ (1,0) [0|15] "" XXX
+
+BO_ 581 unknown_counter: 8 XXX
+ SG_ COUNTER1 : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER0 : 39|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 634 NEW_MSG_4: 8 XXX
+ SG_ COUNTER : 40|4@1+ (1,0) [0|15] "" XXX
+ SG_ unknown0 : 7|16@0+ (1,0) [0|65535] "" XXX
+ SG_ unknown2 : 25|1@0+ (1,0) [0|1] "" XXX
+ SG_ unknown1 : 29|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 520 unknown: 8 XXX
 
 
 
