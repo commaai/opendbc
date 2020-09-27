@@ -110,7 +110,7 @@ cdef class CANParser:
 
 
     for cv in can_values:
-      # Cast char * directly to unicde
+      # Cast char * directly to unicode
       name = <unicode>self.address_to_msg_name[cv.address].c_str()
       cv_name = <unicode>cv.name
 
