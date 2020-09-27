@@ -1,0 +1,25 @@
+CM_ "IMPORT _honda_common.dbc";
+CM_ "IMPORT _bosch_2018.dbc";
+CM_ "IMPORT _bosch_adas_2018.dbc";
+CM_ "IMPORT _steering_sensors_b.dbc";
+
+BO_ 419 GEARBOX: 8 PCM
+ SG_ GEAR : 7|8@0+ (1,0) [0|256] "" EON
+ SG_ GEAR_SHIFTER : 35|4@0+ (1,0) [0|15] "" EON
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
+
+BO_ 446 BRAKE_MODULE: 3 VSA
+ SG_ BRAKE_PRESSED : 4|1@0+ (1,0) [0|1] "" XXX
+ SG_ COUNTER : 21|2@0+ (1,0) [0|3] "" XXX
+ SG_ CHECKSUM : 19|4@0+ (1,0) [0|15] "" XXX
+
+BO_ 1302 ODOMETER: 8 XXX
+ SG_ ODOMETER : 7|24@0+ (1,0) [0|16777215] "km" EON
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
+
+CM_ SG_ 419 GEAR "10 = reverse, 11 = transition";
+
+VAL_ 419 GEAR_SHIFTER 10 "S" 4 "D" 3 "N" 2 "R" 1 "P" ;
+VAL_ 927 ACC_ALERTS 29 "esp_active_acc_canceled" 10 "b_pedal_applied" 9 "speed_too_low" 8 "speed_too_high" 7 "p_brake_applied" 6 "gear_no_d" 5 "seatbelt" 4 "too_steep_downhill" 3 "too_steep_uphill" 2 "too_close" 1 "no_vehicle_ahead" ;
