@@ -39,7 +39,7 @@ cdef class CANPacker:
 
     for name, value in values.iteritems():
       n = name.encode('utf8')
-      names.append(n) # TODO: find better way to keep reference to temp string arround
+      names.append(n) # TODO: find better way to keep reference to temp string around
 
       spv.name = n
       spv.value = value
