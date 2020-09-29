@@ -55,7 +55,7 @@ VAL_TABLE_ AdvDrAstMpSegPrtCalRut 3 "Not Applicable" 2 "Unknown" 1 "Segment Is P
 VAL_TABLE_ AdvDrAstMpSegMsgTyp 7 "Unused and Reserved 2" 6 "Metadata" 5 "Profile Long" 4 "Profile Short" 3 "Stub" 2 "Segment" 1 "Position" 0 "Unused and Reserved 1" ;
 VAL_TABLE_ AdvDrAstMpSegFrmOfWay 15 "Not Applicable" 14 "Pedestrian Zone" 13 "Entrance To Or Exit To Service" 12 "Entrance To Or Exit Of A Car Park" 11 "Service Road Or Frontage Road" 10 "Slip Road per Ramp" 9 "Slip Road per Ramp On A Freeway Or Controlled Access Road" 8 "Parallel Road" 7 "Unused and Reserved 2" 6 "Unused and Reserved 1" 5 "Traffic Square per Special Traffic Figure" 4 "Roundabout Circle" 3 "Single Carriageway" 2 "Multiple Carriageway Or Multiply Digitized Road" 1 "Freeway Or Controlled Access Road That Is Not A Slip Road or Ramp" 0 "Unknown" ;
 VAL_TABLE_ AdvDrAstMpSegEffSdLmtTp 7 "Not Applicable" 6 "Explicit Snow" 5 "Explicit Rain" 4 "Explicit Time Of Day" 3 "Explicit By Day" 2 "Explicit By Night" 1 "Explicit On Traffic Sign" 0 "Implicit" ;
-VAL_TABLE_ AdvDrAstMpSegDivdRd 3 "Not Applicable" 2 "Unkown" 1 "Segment Is Part Of Divided Road" 0 "Segment Is Not Part Of Divided Road" ;
+VAL_TABLE_ AdvDrAstMpSegDivdRd 3 "Not Applicable" 2 "Unknown" 1 "Segment Is Part Of Divided Road" 0 "Segment Is Not Part Of Divided Road" ;
 VAL_TABLE_ AdvDrAstMpSegCmplxInsct 3 "Not Applicable" 2 "Unknown" 1 "Segment Is Part Of Complex Intersection" 0 "Segment Is Not Part Of Complex Intersection" ;
 VAL_TABLE_ AdvDrAstMpSegBrdg 3 "Not Applicable" 2 "Unknown" 1 "Segment Is Part Of Bridge" 0 "Segment Not Part Of Bridge" ;
 VAL_TABLE_ AdvDrAstMpSegBldUpAra 3 "Not Applicable" 2 "Unknown" 1 "Segment Is Part Of Built Up Area" 0 "Segment Is Not Part Of Built Up Area" ;
@@ -67,7 +67,7 @@ VAL_TABLE_ CPMAPINFO4 1 "Hardware Or Software Error" 0 "No Hardware Or Software 
 VAL_TABLE_ AdvDrvAstMpPrfShrt2Acur 3 "Accuracy Is Unknown" 2 "Lowest Accuracy" 1 "Medium Accuracy" 0 "Highest Accuracy" ;
 VAL_TABLE_ InterLghtStat 1 "Interior Lights On" 0 "Interior Light Off" ;
 VAL_TABLE_ VehLnStatConf 2 "High Confidence" 1 "Low Confidence" 0 "No Confidence" 3 "Very High Confidence" ;
-VAL_TABLE_ VehLnStat 3 "Lane Change To Right" 2 "Lane Change To Left" 1 "Staying in Lane" 0 "Unkown" ;
+VAL_TABLE_ VehLnStat 3 "Lane Change To Right" 2 "Lane Change To Left" 1 "Staying in Lane" 0 "Unknown" ;
 VAL_TABLE_ HrznPrvdRstRq 1 "Reset Not Required" 0 "Reset Required" ;
 VAL_TABLE_ ExptNxtTrnstnDirConf 3 "Very High Confidence" 2 "High Confidence" 1 "Low Confidence" 0 "No Confidence" ;
 VAL_TABLE_ ExptNxtTrnstnDir 7 "Reserved4" 6 "Reserved3" 5 "Reserved2" 4 "Reserved1" 3 "Traversing Middle Transition" 2 "Traversing Next Transition Right" 1 "Traversing Next Transition Left" 0 "Unknown" ;
@@ -132,7 +132,7 @@ VAL_TABLE_ CRL_Cnfdnc 7 "Reserved4" 6 "Reserved3" 5 "Reserved2" 4 "Reserved1" 3 
 VAL_TABLE_ CLL_Cnfdnc 7 "Reserved4" 6 "Reserved3" 5 "Reserved2" 4 "Reserved1" 3 "Best" 2 "Marking Present" 1 "Weak Marking" 0 "No Lane" ;
 VAL_TABLE_ VBBrkCtrlSt 4 "Release Control" 3 "Hold Vehicle" 2 "Apply Brake" 1 "Decrease Torque" 0 "No Action" ;
 VAL_TABLE_ ObstacleType 6 "NO_OBJECT" 5 "OBJ_GUARDRAIL" 4 "OBJ_TUNNEL " 3 "OBJ_TRAFFIC_SIGN" 2 "OBJ_VEHICLE" 1 "OBJ_BRIDGE " 0 "OBJ_UNKNOWN" ;
-VAL_TABLE_ VpathMode 2 "Mid Hi Spped" 1 "Low Speed" 0 "Disabled" ;
+VAL_TABLE_ VpathMode 2 "Mid Hi Speed" 1 "Low Speed" 0 "Disabled" ;
 VAL_TABLE_ LaneChngStatus 2 "Lane Change Right" 1 "Lane Change Left" 0 "Idle" ;
 VAL_TABLE_ TravelDirection 3 "Other (excessive side slip)" 2 "reverse / stopped in rvrs gear" 1 "Forward / stopped in frwd gear" 0 "Unknown" ;
 VAL_TABLE_ TrueOrFalse 1 "true" 0 "false" ;
@@ -148,14 +148,14 @@ VAL_TABLE_ MeasurementStatus 3 "Measured this cycle" 2 "Latent track not detctd 
 VAL_TABLE_ ObjectType 7 "no object present" 6 "fixed roadside object" 5 "fixed overhead object" 4 "pedestrian" 3 "motocycle  / bicycle" 2 "Large vehicle (semi)" 1 "4 Wheel Vehicle (car, small trk)" 0 "Unknown" ;
 VAL_TABLE_ Confidence 3 "confident" 2 "speculative" 1 "highly speculative" 0 "invalid" ;
 VAL_TABLE_ DynamicProp 4 "Moving in opposite direction" 3 "Moving in same direction as host" 2 "Has moved but currently stopped" 1 "Has never moved" 0 "Unknown" ;
-VAL_TABLE_ DrvWndPosSt 6 "Fully Opened" 5 "Open More Than C" 4 "Position C" 3 "Posistion B" 2 "Posistion A" 1 "Open Less Than A" 0 "Fully Closed" ;
+VAL_TABLE_ DrvWndPosSt 6 "Fully Opened" 5 "Open More Than C" 4 "Position C" 3 "Position B" 2 "Position A" 1 "Open Less Than A" 0 "Fully Closed" ;
 VAL_TABLE_ VehMovSta 4 "Invalid" 3 "Reverse" 2 "Forward" 1 "Neutral" 0 "Parked" ;
 VAL_TABLE_ OtsdAmbtLtLvlStat 2 "Day" 1 "Night" 0 "Unknown" ;
 VAL_TABLE_ RtTrnLmpAtv 2 "On with telltale" 1 "On without telltale" 0 "Off" ;
 VAL_TABLE_ LftTrnLmpAtv 2 "On with telltale" 1 "On without telltale" 0 "Off" ;
 VAL_TABLE_ HdlmpBmSelectStat 2 "High Beams" 1 "Low Beams" 0 "Unknown" ;
 VAL_TABLE_ DTCI_DTCFaultType 3 "Type C" 2 "Type B" 1 "Type A" 0 "Not Supported" ;
-VAL_TABLE_ TrnsShftLvrPos 13 "Forward Range J" 12 "Froward Range I" 15 "Lever Position Unknown" 11 "Forward Range H" 10 "Forward Range G" 9 "Forward Range F" 8 "Forward Range E" 7 "Forward Range D" 6 "Forward Range C" 5 "Forward Range B" 4 "Forward Range A" 3 "Neutral Range" 2 "Reverse Range" 1 "Park Range" 0 "Between Ranges" ;
+VAL_TABLE_ TrnsShftLvrPos 13 "Forward Range J" 12 "Forward Range I" 15 "Lever Position Unknown" 11 "Forward Range H" 10 "Forward Range G" 9 "Forward Range F" 8 "Forward Range E" 7 "Forward Range D" 6 "Forward Range C" 5 "Forward Range B" 4 "Forward Range A" 3 "Neutral Range" 2 "Reverse Range" 1 "Park Range" 0 "Between Ranges" ;
 VAL_TABLE_ SysPwrMd 3 "Crank Request" 2 "Run" 1 "Accessory" 0 "Off" ;
 VAL_TABLE_ ValidityStates 1 "Invalid" 0 "Valid" ;
 
