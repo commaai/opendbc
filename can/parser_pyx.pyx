@@ -125,7 +125,7 @@ cdef class CANParser:
     return updated_val
 
   def update_string(self, dat, sendcan=False):
-    self.can.update_string(dat, sendcan)
+    self.can.update_string(dat, len(dat), sendcan)
     return self.update_vl()
 
   def update_strings(self, strings, sendcan=False):
