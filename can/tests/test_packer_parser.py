@@ -63,7 +63,7 @@ class TestCanParserPacker(unittest.TestCase):
   def test_subaru(self):
     # Subuaru is little endian
 
-    dbc_file = "subaru_global_2017"
+    dbc_file = "subaru_global_2017_generated"
 
     signals = [
       ("Counter", "ES_LKAS", 0),

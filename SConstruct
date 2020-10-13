@@ -1,8 +1,15 @@
+import Cython
+import distutils
 import os
 import subprocess
+import sys
 
 zmq = 'zmq'
 arch = subprocess.check_output(["uname", "-m"], encoding='utf8').rstrip()
+
+# Rebuild cython extensions if python, distutils, or cython change
+cython_dependencies = [Value(v) for v in (sys.version, distutils.__version__, Cython.__version__)]
+Export('cython_dependencies')
 
 cereal_dir = Dir('.')
 
@@ -33,11 +40,8 @@ env = Environment(
     "-g",
     "-fPIC",
     "-O2",
-    "-Werror=implicit-function-declaration",
-    "-Werror=incompatible-pointer-types",
-    "-Werror=int-conversion",
-    "-Werror=return-type",
-    "-Werror=format-extra-args",
+    "-Wunused",
+    "-Werror",
   ] + ccflags_asan,
   LDFLAGS=ldflags_asan,
   LINKFLAGS=ldflags_asan,

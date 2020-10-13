@@ -10,7 +10,7 @@ from opendbc.can.dbc import dbc
 
 def process(in_fn, out_fn):
   dbc_name = os.path.split(out_fn)[-1].replace('.cc', '')
-  #print("processing %s: %s -> %s" % (dbc_name, in_fn, out_fn))
+  # print("processing %s: %s -> %s" % (dbc_name, in_fn, out_fn))
 
   template_fn = os.path.join(os.path.dirname(__file__), "dbc_template.cc")
 
@@ -19,10 +19,11 @@ def process(in_fn, out_fn):
 
   can_dbc = dbc(in_fn)
 
-  msgs = [(address, msg_name, msg_size, sorted(msg_sigs, key=lambda s: s.name not in ("COUNTER", "CHECKSUM"))) # process counter and checksums first
+  # process counter and checksums first
+  msgs = [(address, msg_name, msg_size, sorted(msg_sigs, key=lambda s: s.name not in ("COUNTER", "CHECKSUM")))
           for address, ((msg_name, msg_size), msg_sigs) in sorted(can_dbc.msgs.items()) if msg_sigs]
 
-  def_vals = {a: sorted(set(b)) for a, b in can_dbc.def_vals.items()} # remove duplicates
+  def_vals = {a: sorted(set(b)) for a, b in can_dbc.def_vals.items()}  # remove duplicates
   def_vals = sorted(def_vals.items())
 
   if can_dbc.name.startswith(("honda_", "acura_")):
@@ -46,6 +47,20 @@ def process(in_fn, out_fn):
     checksum_start_bit = 0
     counter_start_bit = 0
     little_endian = True
+  elif can_dbc.name.startswith(("subaru_global_")):
+    checksum_type = "subaru"
+    checksum_size = 8
+    counter_size = None
+    checksum_start_bit = 0
+    counter_start_bit = None
+    little_endian = True
+  elif can_dbc.name.startswith(("chrysler_")):
+    checksum_type = "chrysler"
+    checksum_size = 8
+    counter_size = None
+    checksum_start_bit = 7
+    counter_start_bit = None
+    little_endian = False
   else:
     checksum_type = None
     checksum_size = None
@@ -55,7 +70,7 @@ def process(in_fn, out_fn):
     little_endian = None
 
   # sanity checks on expected COUNTER and CHECKSUM rules, as packer and parser auto-compute those signals
-  for address, msg_name, msg_size, sigs in msgs:
+  for address, msg_name, _, sigs in msgs:
     dbc_msg_name = dbc_name + " " + msg_name
     for sig in sigs:
       if checksum_type is not None:
@@ -66,7 +81,7 @@ def process(in_fn, out_fn):
           if sig.start_bit % 8 != checksum_start_bit:
             sys.exit("%s: CHECKSUM starts at wrong bit" % dbc_msg_name)
           if little_endian != sig.is_little_endian:
-            sys.exit("%s: CHECKSUM has wrong endianess" % dbc_msg_name)
+            sys.exit("%s: CHECKSUM has wrong endianness" % dbc_msg_name)
         # counter rules
         if sig.name == "COUNTER":
           if counter_size is not None and sig.size != counter_size:
@@ -75,7 +90,7 @@ def process(in_fn, out_fn):
             print(counter_start_bit, sig.start_bit)
             sys.exit("%s: COUNTER starts at wrong bit" % dbc_msg_name)
           if little_endian != sig.is_little_endian:
-            sys.exit("%s: COUNTER has wrong endianess" % dbc_msg_name)
+            sys.exit("%s: COUNTER has wrong endianness" % dbc_msg_name)
       # pedal rules
       if address in [0x200, 0x201]:
         if sig.name == "COUNTER_PEDAL" and sig.size != 4:
@@ -107,6 +122,6 @@ def main():
 
   process(in_fn, out_fn)
 
+
 if __name__ == '__main__':
   main()
-

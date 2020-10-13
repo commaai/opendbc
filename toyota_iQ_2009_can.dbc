@@ -170,7 +170,7 @@ CM_ SG_ 37 STEER_ANGLE "can convert to degrees (imprecise) or percentage of max 
 CM_ SG_ 36 ACC_FRONT_BACK_1 "more likely up-down";
 CM_ SG_ 36 ACC_FRONT_BACK_2 "more likely front-back";
 CM_ SG_ 947 LOW_RES_ACC_PEDAL "Follows rather closely other acceleration commands";
-CM_ SG_ 947 LOW_RES_RPM "Mabe used for onboard display?";
+CM_ SG_ 947 LOW_RES_RPM "Maybe used for onboard display?";
 CM_ SG_ 955 MAYBE_CLUTCH "might be related to shifting gears";
 CM_ SG_ 1595 TIME_ON "Time since last ignition, tenth of seconds";
 CM_ SG_ 1595 BETWEEN_RIDES "the fourth byte (at least) changes between rides";
