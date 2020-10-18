@@ -178,6 +178,12 @@ BO_ 715 ASCMGasRegenCmd: 8 K124_ASCM
 
 BO_ 717 ASCM_2CD: 5 K124_ASCM
 
+BO_ 800 AEBCmd: 6 XXX
+ SG_ RollingCounter : 5|2@0+ (1,0) [0|3] "" XXX
+ SG_ Checksum : 27|20@0+ (1,0) [0|2047] "" XXX
+ SG_ BrakeCmdActive : 3|1@1+ (1,0) [0|1] "" XXX
+ SG_ BrakingForce : 2|7@0+ (1,0) [0|7] "" XXX
+
 BO_ 810 TCICOnStarGPSPosition: 8 K73_TCIC
  SG_ GPSLongitude : 39|32@0+ (1,0) [0|0] "milliarcsecond"  NEO
  SG_ GPSLatitude : 7|32@0+ (1,0) [0|0] "milliarcsecond"  NEO
