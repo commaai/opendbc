@@ -34,7 +34,7 @@ class BuildExtWithoutPlatformSuffix(build_ext):
     return get_ext_filename_without_platform_suffix(filename)
 
 
-extra_compile_args = ["-std=c++14"]
+extra_compile_args = ["-std=c++1z", "-Wno-nullability-completeness"]
 ARCH = subprocess.check_output(["uname", "-m"], encoding='utf8').rstrip()  # pylint: disable=unexpected-keyword-arg
 if ARCH == "aarch64":
   extra_compile_args += ["-Wno-deprecated-register"]
@@ -63,9 +63,9 @@ setup(name='CAN parser',
           include_dirs=include_dirs,
           extra_link_args=extra_link_args,
         ),
+        nthreads=4,
         annotate=ANNOTATE
       ),
-      nthreads=4,
 )
 
 if platform.system() == "Darwin":
@@ -85,9 +85,9 @@ setup(name='CAN packer',
           include_dirs=include_dirs,
           extra_link_args=extra_link_args,
         ),
+        nthreads=4,
         annotate=ANNOTATE
       ),
-      nthreads=4,
 )
 
 if platform.system() == "Darwin":

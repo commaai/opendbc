@@ -3,23 +3,19 @@
 
 from libcpp.string cimport string
 from libcpp.vector cimport vector
-from libcpp cimport bool
 from libcpp.unordered_set cimport unordered_set
 from libc.stdint cimport uint32_t, uint64_t, uint16_t
 from libcpp.map cimport map
-
-from collections import defaultdict
+from libcpp cimport bool
 
 from common cimport CANParser as cpp_CANParser
 from common cimport SignalParseOptions, MessageParseOptions, dbc_lookup, SignalValue, DBC
 
-
-from libcpp cimport bool
 import os
 import numbers
+from collections import defaultdict
 
 cdef int CAN_INVALID_CNT = 5
-
 
 cdef class CANParser:
   cdef:
@@ -30,7 +26,7 @@ cdef class CANParser:
     vector[SignalValue] can_values
     bool test_mode_enabled
 
-  cdef public:
+  cdef readonly:
     string dbc_name
     dict vl
     dict ts
@@ -40,10 +36,11 @@ cdef class CANParser:
   def __init__(self, dbc_name, signals, checks=None, bus=0):
     if checks is None:
       checks = []
-
     self.can_valid = True
     self.dbc_name = dbc_name
     self.dbc = dbc_lookup(dbc_name)
+    if not self.dbc:
+      raise RuntimeError("Can't lookup" + dbc_name)
     self.vl = {}
     self.ts = {}
 
@@ -113,7 +110,7 @@ cdef class CANParser:
 
 
     for cv in can_values:
-      # Cast char * directly to unicde
+      # Cast char * directly to unicode
       name = <unicode>self.address_to_msg_name[cv.address].c_str()
       cv_name = <unicode>cv.name
 
@@ -151,7 +148,9 @@ cdef class CANDefine():
   def __init__(self, dbc_name):
     self.dbc_name = dbc_name
     self.dbc = dbc_lookup(dbc_name)
-
+    if not self.dbc:
+      raise RuntimeError("Can't lookup" + dbc_name)
+      
     num_vals = self.dbc[0].num_vals
 
     address_to_msg_name = {}

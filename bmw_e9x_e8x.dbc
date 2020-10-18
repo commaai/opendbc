@@ -45,7 +45,7 @@ BO_ 170 AccPedal: 8 XXX
  SG_ AcceleratorPedalPercentage : 16|16@1+ (0.01,0) [0|100] "" XXX
  SG_ Counter1 : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ EngineSpeed : 32|16@1- (1,0) [0|65535] "" XXX
- SG_ uknown : 7|8@0- (1,0) [0|65535] "" XXX
+ SG_ unknown : 7|8@0- (1,0) [0|65535] "" XXX
 
 BO_ 404 CruiseControl: 4 XXX
  SG_ plus1mph_request : 16|1@0+ (1,0) [0|1] "" XXX
