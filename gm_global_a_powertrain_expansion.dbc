@@ -31,8 +31,8 @@ NS_ :
     BU_BO_REL_
     SG_MUL_VAL_
 
-BS_:
-BU_: K1_APM
+BS_: 
+BU_: K1_APM 
 BO_ 470 APM_Stats: 7 K1_APM
    SG_ APM_Low_Voltage_Sensed : 16|8@1+ (0.0787402,0) [0|0] "V" Vector__XXX
    SG_ APM_Temperature_1 : 24|8@1+ (1,-40) [0|0] "C" Vector__XXX
