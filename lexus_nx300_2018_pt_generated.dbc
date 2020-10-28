@@ -305,25 +305,13 @@ BO_ 1163 RSA3: 8 FCM
  SG_ OVSPVALH : 27|4@0+ (1,-5) [0|0] "" XXX
  SG_ TSRSPU : 33|2@0+ (1,0) [0|0] "" XXX
 
-BO_ 1880 DEBUG: 8 XXX
- SG_ BLINDSPOTSIDE : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ BLINDSPOT : 38|1@0+ (1,0) [0|15] "" XXX
- SG_ BLINDSPOTD1 : 47|8@0+ (1,0) [0|255] "" XXX
- SG_ BLINDSPOTD2 : 55|8@0+ (1,0) [0|255] "" XXX
- 
-
-BO_ 515 JOEL_ID: 8 XXX
- SG_ ACC_DISTANCE : 1|2@0+ (1,0) [1|3] "" XXX
- SG_ LANE_WARNING : 8|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_SLOW : 16|1@0+ (1,0) [0|1] "" XXX
-
 CM_ SG_ 36 ACCEL_Y "unit is tbd";
 CM_ SG_ 36 YAW_RATE "verify";
 CM_ SG_ 36 STEERING_TORQUE "does not seem the steer torque, tbd";
 CM_ SG_ 37 STEER_FRACTION "1/15th of the signal STEER_ANGLE, which is 1.5 deg; note that 0x8 is never set";
 CM_ SG_ 37 STEER_RATE "factor is tbd";
 CM_ SG_ 466 ACCEL_NET "net acceleration produced by the system, given ACCEL_CMD, road grade and other factors";
-CM_ SG_ 467 SET_SPEED "43 kph are shown as 28mph, so conversion isnt perfect";
+CM_ SG_ 467 SET_SPEED "43 kph are shown as 28mph, so conversion isn't perfect";
 CM_ SG_ 467 LOW_SPEED_LOCKOUT "in low speed lockout, system would always disengage below 28mph";
 CM_ SG_ 560 BRAKE_PRESSED "another brake pressed?";
 CM_ SG_ 608 STEER_TORQUE_DRIVER "driver torque";
@@ -378,13 +366,13 @@ CM_ "lexus_nx300_2018_pt.dbc starts here"
 
 
 
-	BO_ 550 BRAKE_MODULE: 8 XXX
+BO_ 550 BRAKE_MODULE: 8 XXX
  SG_ BRAKE_PRESSURE : 0|9@0+ (1,0) [0|511] "" XXX
  SG_ BRAKE_POSITION : 16|9@0+ (1,0) [0|511] "" XXX
  SG_ BRAKE_PRESSED : 37|1@0+ (1,0) [0|1] "" XXX
 
-	BO_ 705 GAS_PEDAL: 8 XXX	
- SG_ GAS_RELEASED : 3|1@0+ (1,0) [0|1] "" XXX	
+BO_ 705 GAS_PEDAL: 8 XXX
+ SG_ GAS_RELEASED : 3|1@0+ (1,0) [0|1] "" XXX
  SG_ GAS_PEDAL : 55|8@0+ (0.005,0) [0|1] "" XXX
 
 BO_ 608 STEER_TORQUE_SENSOR: 8 XXX
@@ -407,6 +395,7 @@ BO_ 956 GEAR_PACKET: 8 XXX
 
 CM_ SG_ 550 BRAKE_PRESSURE "seems prop to pedal force";
 CM_ SG_ 550 BRAKE_POSITION "seems proportional to pedal displacement, unclear the max value of 0x1c8";
+CM_ SG_ 581 GAS_PEDAL "it seems slightly filtered";
 CM_ SG_ 610 TYPE "seems 1 on Corolla, 0 on all others";
 VAL_ 610 IPAS_STATE 5 "override" 3 "enabled" 1 "disabled";
 VAL_ 610 LKA_STATE 25 "temporary_fault" 9 "temporary_fault2" 5 "active" 1 "standby";
