@@ -36,6 +36,7 @@ repos:
         exclude: 'can/dbc_template.cc'
         args:
         - --error-exitcode=1
+        - --language=c++
         - --force
         - --quiet
         - -j4
