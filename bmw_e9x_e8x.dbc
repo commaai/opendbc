@@ -67,10 +67,10 @@ BO_ 512 CruiseControlStatus: 8 XXX
  SG_ CruiseControlSetpointSpeed : 7|8@0+ (0.25,0) [0|255] "mph" XXX
 
 BO_ 168 EngineAndBrake: 8 XXX
- SG_ Brake_active2 : 62|1@0+ (1,0) [0|1] "" XXX
- SG_ BrakePressed : 61|1@0+ (1,0) [0|1] "" XXX
  SG_ EngineTorque : 8|16@1- (1,0) [0|65535] "" XXX
  SG_ EngineTorqueWoInterv : 24|16@1- (1,0) [0|65535] "" XXX
+ SG_ BrakePressed : 61|1@0+ (1,0) [0|1] "" XXX
+ SG_ Brake_active2 : 62|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 470 SteeringButtons: 2 XXX
  SG_ Volume_DOWN : 2|1@0+ (1,0) [0|1] "" XXX
@@ -90,7 +90,7 @@ BO_ 201 SteeringWheelAngle_DSC: 8 XXX
  SG_ Counter1 : 23|4@0+ (1,0) [0|15] "" XXX
  SG_ WeirdCounter : 44|4@1+ (1,0) [0|3] "" XXX
  SG_ SteeringPositionComplementLow : 24|11@1- (1,0) [0|1] "" XXX
- SG_ SteeringPosition : 0|16@1- (0.0439453125,0) [-600|600] "deg" XXX
+ SG_ SteeringPosition : 0|16@1- (0.0428316886,0) [-600|600] "deg" XXX
 
 BO_ 206 WheelSpeeds: 8 XXX
  SG_ Wheel1 : 0|16@1- (0.0643699,0) [0|255] "kph" XXX
@@ -106,6 +106,7 @@ BO_ 678 WiperSwitch: 8 XXX
 BO_ 304 TerminalStatus: 8 XXX
  SG_ AccOn : 23|1@0+ (1,0) [0|255] "" XXX
  SG_ IgnitionOff : 22|1@0+ (1,0) [0|3] "" XXX
+ SG_ IgnitioOn : 33|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 169 Torque2: 8 XXX
 
@@ -114,8 +115,8 @@ BO_ 184 TorqueTransmisionRequest: 8 XXX
  SG_ Counter2 : 8|4@1+ (1,0) [0|15] "" XXX
 
 BO_ 196 SteeringWheelAngle: 7 XXX
- SG_ SteeringPosition : 0|16@1- (0.0439453125,0) [-600|600] "degree" XXX
- SG_ SteeringSpeed : 24|16@1- (0.0439453125,0) [0|255] "degree/s" XXX
+ SG_ SteeringPosition : 0|16@1- (0.0428316886,0) [-600|600] "degree" XXX
+ SG_ SteeringSpeed : 24|16@1- (0.0428316886,0) [0|255] "degree/s" XXX
 
 BO_ 180 WheelTorqueDriveTrain1: 8 XXX
 
@@ -172,8 +173,8 @@ BO_ 945 TransmissionData3: 8 XXX
  SG_ Counter_2 : 8|4@1+ (1,0) [0|14] "" XXX
 
 BO_ 200 SteeringWheelAngle_slow: 8 XXX
- SG_ SteeringPosition : 0|16@1- (0.0439453125,0) [-600|600] "degree" XXX
- SG_ SteeringSpeed : 24|16@1- (0.0439453125,0) [-65535|65535] "degree/s" XXX
+ SG_ SteeringPosition : 0|16@1- (0.0428316886,0) [-600|600] "degree" XXX
+ SG_ SteeringSpeed : 24|16@1- (0.0428316886,0) [-65535|65535] "degree/s" XXX
 
 BO_ 466 TransmissionDataDisplay: 8 XXX
  SG_ ShiftLeverMode : 32|2@1+ (1,0) [0|3] "" XXX
@@ -309,11 +310,12 @@ CM_ SG_ 404 Resume_request "It appears when resume stalk button is depressed";
 CM_ SG_ 404 Counter1 "It accelerates when requests are being sent";
 CM_ SG_ 404 Counter2 "It accelerates when requests are being sent";
 CM_ SG_ 404 notCancel_0xF "0xF unless cancel is requested then 0x0";
-CM_ SG_ 168 Brake_active2 "";
-CM_ SG_ 168 BrakePressed "Brake when driver presses the brake";
 CM_ SG_ 168 EngineTorque "Engine torque without inertia - combustion torque";
 CM_ SG_ 168 EngineTorqueWoInterv "Engine torque without inertia and without shift intervention";
+CM_ SG_ 168 BrakePressed "Brake when driver presses the brake or hill hold";
+CM_ SG_ 168 Brake_active2 "";
 CM_ SG_ 403 CruiseControlSetpointSpeed "Speed target - unit depends on locale";
+CM_ SG_ 304 IgnitioOn "Active when engine running";
 CM_ SG_ 408 ParkButtonSecond "Redundant buton. 0x1 = pressed;";
 CM_ SG_ 408 SideButton "0x1 = pressed;";
 CM_ SG_ 408 SportButtonPressed "0x1 = pressed;";
