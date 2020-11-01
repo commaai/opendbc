@@ -133,7 +133,13 @@ BO_ 191 RequestedWheelTorqueDriveTrainActiveCruiseControl: 8 XXX
 BO_ 414 Status_DSC: 8 XXX
 
 BO_ 416 Speed: 8 XXX
+ SG_ Counter1 : 55|4@0+ (1,0) [0|14] "" XXX
+ SG_ AccY : 16|12@1- (1,0) [0|255] "" XXX
+ SG_ YawRate : 40|12@1- (1,0) [0|255] "" XXX
+ SG_ AccX : 28|12@1- (1,0) [0|15] "" XXX
+ SG_ Moving : 12|1@0+ (1,0) [0|15] "" XXX
  SG_ VehicleSpeed : 0|12@1+ (0.103,0) [0|255] "kph" XXX
+ SG_ Checksum : 63|8@0+ (1,0) [0|15] "" XXX
 
 BO_ 418 TransimissionData2: 8 XXX
  SG_ ManualMode : 50|1@0+ (1,0) [0|255] "" XXX
@@ -316,6 +322,7 @@ CM_ SG_ 168 BrakePressed "Brake when driver presses the brake or hill hold";
 CM_ SG_ 168 Brake_active2 "";
 CM_ SG_ 403 CruiseControlSetpointSpeed "Speed target - unit depends on locale";
 CM_ SG_ 304 IgnitioOn "Active when engine running";
+CM_ SG_ 416 YawRate "Lateral Acceleration";
 CM_ SG_ 408 ParkButtonSecond "Redundant buton. 0x1 = pressed;";
 CM_ SG_ 408 SideButton "0x1 = pressed;";
 CM_ SG_ 408 SportButtonPressed "0x1 = pressed;";
