@@ -8,8 +8,8 @@ from libcpp.string cimport string
 from libcpp cimport bool
 from posix.dlfcn cimport dlopen, dlsym, RTLD_LAZY
 
-from common cimport CANPacker as cpp_CANPacker
-from common cimport dbc_lookup, SignalPackValue, DBC
+from opendbc.can.common cimport CANPacker as cpp_CANPacker
+from opendbc.can.common cimport dbc_lookup, SignalPackValue, DBC
 
 
 cdef class CANPacker:
