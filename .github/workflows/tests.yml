@@ -19,10 +19,6 @@ jobs:
       - name: Static analysis
         run: |
           docker run opendbc bash -c "cd opendbc && git init && git add -A && pre-commit run --all"
-      - name: Python linter
-        run: |
-          docker run opendbc bash -c "cd opendbc/can/tests/linter_python; PYTHONPATH=/ ./flake8_opendbc.sh"
-          docker run opendbc bash -c "cd opendbc/can/tests/linter_python; PYTHONPATH=/ ./pylint_opendbc.sh"
       - name: Generator test
         run: |
           docker run opendbc bash -c "cd opendbc/can/tests/; PYTHONPATH=/ ./test_generator.sh"
