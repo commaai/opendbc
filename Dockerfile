@@ -46,7 +46,8 @@ WORKDIR /project
 RUN git clone https://github.com/commaai/cereal.git /project/cereal
 
 COPY SConstruct .
-COPY site_scons/ .
+COPY ./site_scons .
+RUN ls -la && ls -la site_scons/ && find .
 COPY . /project/opendbc
 
 RUN rm -rf /project/opendbc/.git
