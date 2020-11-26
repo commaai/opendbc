@@ -16,6 +16,6 @@ for x in sorted(os.listdir('../')):
 libdbc = env.SharedLibrary('libdbc', ["dbc.cc", "parser.cc", "packer.cc", "common.cc"]+dbcs, LIBS=["capnp", "kj"])
 
 # Build packer and parser
-envCython["LIBS"] += ["libdbc"]
-envCython.Program('parser_pyx.so', 'parser_pyx.pyx', LIBS=envCython["LIBS"])
-envCython.Program('packer_pyx.so', 'packer_pyx.pyx', LIBS=envCython["LIBS"])
+envCython["LINKFLAGS"] += [libdbc[0].get_labspath()]
+envCython.Program('parser_pyx.so', 'parser_pyx.pyx')
+envCython.Program('packer_pyx.so', 'packer_pyx.pyx')
