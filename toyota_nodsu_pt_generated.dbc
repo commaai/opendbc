@@ -26,7 +26,7 @@ BO_ 359 STEERING_IPAS_COMMA: 8 IPAS
  SG_ SET_ME_X00 : 31|8@0+ (1,0) [0|255] "" XXX
  SG_ DIRECTION_CMD : 38|2@0+ (1,0) [0|3] "" XXX
  SG_ SET_ME_X40 : 47|8@0+ (1,0) [0|255] "" XXX
- SG_ SET_ME_X00 : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ SET_ME_X00_1 : 55|8@0+ (1,0) [0|255] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 CM_ "BO_ STEERING_IPAS_COMMA Copy of msg 614 so we can do angle control while the Park Assist ECU is connected (Panda spoofs 614 with 359 on connector J70). Note that addresses 0x266 and 0x167 are checksum-invariant";
