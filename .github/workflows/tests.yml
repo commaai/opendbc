@@ -21,7 +21,7 @@ jobs:
           docker run opendbc bash -c "cd opendbc && git init && git add -A && pre-commit run --all"
       - name: Generator test
         run: |
-          docker run opendbc bash -c "cd opendbc/can/tests/; PYTHONPATH=/ ./test_generator.sh"
+          docker run opendbc bash -c "cd opendbc/generator && ./test_generator.py"
       - name: Unit tests
         run: |
           docker run opendbc bash -c "python -m unittest discover opendbc"
