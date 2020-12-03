@@ -1,7 +1,5 @@
 #!/bin/bash -e
 
-cd ../../generator/
-
 # run generator
 ./generator.py
 
