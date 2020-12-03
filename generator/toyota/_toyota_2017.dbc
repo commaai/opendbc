@@ -286,7 +286,7 @@ CM_ SG_ 614 ANGLE "set to measured angle when ipas control isn't active";
 CM_ SG_ 643 COUNTER "only used on cars that use this msg for cruise control";
 CM_ SG_ 643 BRAKE_STATUS "only used on cars that use this msg for cruise control";
 CM_ SG_ 643 PRECOLLISION_ACTIVE "set 0.5s before any braking";
-CM_ SG_ 835 PERMIT_BRAKING "Original ACC has this going high when a car in front is detected. In openpilot and before the PERMIT_BRAKING name, this was "SET_ME_1" and is hardcoded to be high. Unsure if only informational or has an effect though existing usage in openpilot is to always set it to 1. Originally 'PMTBRKG' in the leaked toyota_2017_ref_pt.dbc file and name expansion speculated to be PerMiT BRaKinG.";
+CM_ SG_ 835 PERMIT_BRAKING "Original ACC has this going high when a car in front is detected. In openpilot and before the PERMIT_BRAKING name, this was 'SET_ME_1' and is hardcoded to be high. Unsure if only informational or has an effect though existing usage in openpilot is to always set it to 1. Originally 'PMTBRKG' in the leaked toyota_2017_ref_pt.dbc file and name expansion speculated to be PerMiT BRaKinG.";
 CM_ SG_ 835 ACCEL_CMD_ALT "Copy of main ACCEL_CMD, but across 8 bits instead of 16 bits like ACCEL_CMD. Unsure if only informational or has an effect. Likely informational as existing openpilot sets this to 0 and no loss of functionality observed. Originally 'AT_RAW' in leaked toyota_2017_ref_pt.dbc file.";
 CM_ SG_ 921 UI_SET_SPEED "set speed shown in UI with user set unit";
 CM_ SG_ 951 BRAKE_LIGHTS_ACC "brake lights when ACC commands decel";
@@ -294,7 +294,7 @@ CM_ SG_ 1042 SET_ME_1 "unclear what this is, but it's always 1 in drive traces";
 CM_ SG_ 1042 REPEATED_BEEPS "recommended for fcw and other important alerts";
 CM_ SG_ 1161 SPDVAL1 "Numbers 0-199 is displayed, 200-254 displays circle without number and 255 is for no limit.";
 CM_ SG_ 1161 SYNCID1 "counter from 1 to f at 1 Hz";
-CM_ SG_ 1161 SPDVAL2 "conditional speed value 70"
+CM_ SG_ 1161 SPDVAL2 "conditional speed value 70";
 CM_ SG_ 1162 SGNNUMP "1 if SPDVAL1 is set, otherwise 0";
 CM_ SG_ 1162 SYNCID2 "counter from 1 to f at 1 Hz";
 CM_ SG_ 1163 TSREQPD "always 1";
