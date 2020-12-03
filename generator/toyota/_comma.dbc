@@ -26,5 +26,5 @@ CM BO_ STEERING_IPAS_COMMA "Copy of msg 614 so we can do angle control while the
 
  VAL_ 513 STATE 5 "FAULT_TIMEOUT" 4 "FAULT_STARTUP" 3 "FAULT_SCE" 2 "FAULT_SEND" 1 "FAULT_BAD_CHECKSUM" 0 "NO_FAULT" ;
 
-BO_ 35 SECONDARY_STEER_ANGLE: 8 XXX "ZSS is a high-precision steering angle sensor created by zorrobyte to replace the crappy sensors in most TSS1 Toyotas. Learn more: https://github.com/commaai/openpilot/wiki/Toyota-Lexus#zorro-steering-sensor-zss"
+BO_ 35 SECONDARY_STEER_ANGLE: 8 XXX "ZSS is a high-precision steering angle sensor created by zorrobyte to replace the crappy sensors in most TSS1 Toyotas. Learn more: https://github.com/commaai/openpilot/wiki/Toyota-Lexus#zorro-steering-sensor-zss";
  SG_ ZORRO_STEER : 7|24@0- (0.004901594652,0) [-500|500] "" XXX
