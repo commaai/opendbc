@@ -188,7 +188,7 @@ CM_ SG_ 467 SET_SPEED "43 kph are shown as 28mph, so conversion isn't perfect";
 CM_ SG_ 921 UI_SET_SPEED "set speed shown in UI with user set unit";
 CM_ SG_ 1042 SET_ME_1 "unclear what this is, nut it's always 1 in drive traces";
 VAL_ 295 GEAR 0 "P" 1 "R" 2 "N" 3 "D" 4 "B" ;
-VAL_ 466 CRUISE_STATE 8 "active" 7 "standstill" 1 "off" ;
+VAL_ 466 CRUISE_STATE 11 "timer_3sec" 8 "active" 7 "standstill" 1 "off";
 VAL_ 610 STATE 5 "override" 3 "enabled" 1 "disabled" ;
 VAL_ 610 LKA_STATE 50 "temporary_fault" ;
 VAL_ 614 STATE 3 "enabled" 1 "disabled" ;
