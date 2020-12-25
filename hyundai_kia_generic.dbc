@@ -1575,9 +1575,11 @@ BO_ 1162 BCA11: 8 BCW
  SG_ RCCA_Brake_Command : 29|1@1+ (1,0) [0|1] "" iBAU
  SG_ Check_Sum : 56|8@1+ (1,0) [0|16] "" iBAU
 
-BO_ 1136 P_STS: 6 CGW
+BO_ 1136 P_STS: 8 CGW
  SG_ HCU1_STS : 6|2@1+ (1,0) [0|3] "" BCW,EPB,FCA,MDPS,SCC,iBAU
  SG_ HCU5_STS : 8|2@1+ (1,0) [0|3] "" EPB,FCA,MDPS,iBAU
+ SG_ Counter : 58|4@1+ (1,0) [0|15] "" MDPS
+ SG_ Checksum : 62|2@1+ (1,0) [0|3] "" MDPS
 
 BO_ 304 YRS11: 8 ACU
  SG_ CR_Yrs_Yr : 0|16@1+ (0.005,-163.84) [-163.84|163.83] "deg/s" CGW,iBAU
