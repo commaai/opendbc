@@ -1634,3 +1634,6 @@ BO_ 1042 ICM_412h: 8 ICM
  SG_ PopupMessageOutput_8Level : 55|1@0+ (1,0) [0|1] "" Vector__XXX
 
 VAL_ 909 CF_VSM_Warn 2 "FCW" 3 "AEB";
+VAL_ 1157 LFA_Icon_State 0 "no_wheel" 1 "white_wheel" 2 "green_wheel"
+VAL_ 1157 LFA_SysWarning 0 "no_message" 1 "switching_to_hda" 2 "switching_to_scc" 3 "lfa_error"
+VAL_ 1157 HDA_C_State 0 "hda_not_available" 4 "hda_available" 5 "hda_active"
