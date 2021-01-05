@@ -3566,7 +3566,6 @@ BO_ 2150408192 Engine_Information_1_LS: 8 XXX
  SG_ CrsCntEnbld : 56|1@0+ (1,0) [0|1] ""  XXX
  SG_ CltStartSwAtv : 57|1@0+ (1,0) [0|1] ""  XXX
  SG_ CltStartSwAtvV : 58|1@0+ (1,0) [0|1] ""  XXX
- SG_ TopTrvlCltchSwActGroup : 60|2@0+ (1,0) [0|0] ""  XXX
  SG_ TopTrvlCltchSwAct : 59|1@0+ (1,0) [0|1] ""  XXX
  SG_ TopTrvlCltchSwActV : 60|1@0+ (1,0) [0|1] ""  XXX
  SG_ AdptPsngrSeatStng : 63|3@0+ (1,0) [0|7] ""  XXX
