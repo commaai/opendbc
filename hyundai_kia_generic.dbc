@@ -1570,7 +1570,7 @@ BO_ 352 AHB1: 8 iBAU
  SG_ CF_Ahb_Bzzr : 26|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ CF_Ahb_ChkSum : 56|8@1+ (1,0) [0|255] "" Vector__XXX
 
-BO_ 1191 4a7MFC: 8 XXX
+BO_ 1191 MFC_4a7: 8 XXX
  SG_ PAINT1 : 0|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1162 BCA11: 8 BCW
@@ -1608,14 +1608,14 @@ BO_ 320 YRS12: 8 ACU
 BO_ 1173 YRS13: 8 ACU
  SG_ YRS_SeralNo : 16|48@1+ (1,0) [0|281474976710655] "" iBAU
 
-BO_ 870 366_EMS: 8 EMS
+BO_ 870 EMS_366: 8 EMS
  SG_ TQI_1 : 0|8@1+ (0.390625,0) [0|99.6094] "%" MDPS
  SG_ N : 8|16@1+ (0.25,0.0) [0.0|16383.75] "rpm" MDPS
  SG_ TQI_2 : 24|8@1+ (0.390625,0) [0|99.6094] "%" MDPS
  SG_ VS : 40|8@1+ (1,0) [0|255] "km/h" MDPS
  SG_ SWI_IGK : 48|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 854 356: 8 XXX
+BO_ 854 M_356: 8 XXX
  SG_ PAINT1 : 32|1@0+ (1,0) [0|1] "" XXX
  SG_ PAINT2 : 34|2@0+ (1,0) [0|1] "" XXX
  SG_ PAINT3 : 36|2@0+ (1,0) [0|3] "" XXX
