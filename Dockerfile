@@ -23,6 +23,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libsqlite3-dev \
     libzmq3-dev \
     llvm \
+    ocl-icd-opencl-dev \
+    opencl-headers \
     tk-dev \
     python-openssl \
     xz-utils \
