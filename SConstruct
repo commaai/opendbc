@@ -51,7 +51,8 @@ env = Environment(
   tools=["default", "cython"]
 )
 
-Export('env', 'zmq', 'arch')
+QCOM_REPLAY = False
+Export('env', 'zmq', 'arch', 'QCOM_REPLAY')
 
 cereal = [File('#cereal/libcereal.a')]
 messaging = [File('#cereal/libmessaging.a')]
