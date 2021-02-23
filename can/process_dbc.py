@@ -109,7 +109,6 @@ def process(in_fn, out_fn):
   with open(out_fn, "a+") as out_f:
     out_f.seek(0)
     if out_f.read() != parser_code:
-      print('writing')
       out_f.seek(0)
       out_f.truncate()
       out_f.write(parser_code)
