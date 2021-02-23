@@ -40,6 +40,9 @@ public:
   uint8_t counter;
   uint8_t counter_fail;
 
+  bool ignore_checksum = false;
+  bool ignore_counter = false;
+
   bool parse(uint64_t sec, uint16_t ts_, uint8_t * dat);
   bool update_counter_generic(int64_t v, int cnt_size);
 };
@@ -58,7 +61,7 @@ public:
   CANParser(int abus, const std::string& dbc_name,
             const std::vector<MessageParseOptions> &options,
             const std::vector<SignalParseOptions> &sigoptions);
-  CANParser(int abus, const std::string& dbc_name);
+  CANParser(int abus, const std::string& dbc_name, bool ignore_checksum, bool ignore_counter);
   #ifndef DYNAMIC_CAPNP
   void update_string(const std::string &data, bool sendcan);
   void UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Reader& cans);

@@ -13,7 +13,6 @@
 // #define DEBUG printf
 #define INFO printf
 
-
 bool MessageState::parse(uint64_t sec, uint16_t ts_, uint8_t * dat) {
   uint64_t dat_le = read_u64_le(dat);
   uint64_t dat_be = read_u64_be(dat);
@@ -34,45 +33,45 @@ bool MessageState::parse(uint64_t sec, uint16_t ts_, uint8_t * dat) {
 
     DEBUG("parse 0x%X %s -> %lld\n", address, sig.name, tmp);
 
-    if (sig.type == SignalType::HONDA_CHECKSUM) {
+    if (!ignore_checksum && sig.type == SignalType::HONDA_CHECKSUM) {
       if (honda_checksum(address, dat_be, size) != tmp) {
         INFO("0x%X CHECKSUM FAIL\n", address);
         return false;
       }
-    } else if (sig.type == SignalType::HONDA_COUNTER) {
+    } else if (!ignore_counter && sig.type == SignalType::HONDA_COUNTER) {
       if (!update_counter_generic(tmp, sig.b2)) {
         return false;
       }
-    } else if (sig.type == SignalType::TOYOTA_CHECKSUM) {
+    } else if (!ignore_checksum && sig.type == SignalType::TOYOTA_CHECKSUM) {
       if (toyota_checksum(address, dat_be, size) != tmp) {
         INFO("0x%X CHECKSUM FAIL\n", address);
         return false;
       }
-    } else if (sig.type == SignalType::VOLKSWAGEN_CHECKSUM) {
+    } else if (!ignore_checksum && sig.type == SignalType::VOLKSWAGEN_CHECKSUM) {
       if (volkswagen_crc(address, dat_le, size) != tmp) {
         INFO("0x%X CRC FAIL\n", address);
         return false;
       }
-    } else if (sig.type == SignalType::VOLKSWAGEN_COUNTER) {
+    } else if (!ignore_counter && sig.type == SignalType::VOLKSWAGEN_COUNTER) {
         if (!update_counter_generic(tmp, sig.b2)) {
         return false;
       }
-    } else if (sig.type == SignalType::SUBARU_CHECKSUM) {
+    } else if (!ignore_checksum && sig.type == SignalType::SUBARU_CHECKSUM) {
       if (subaru_checksum(address, dat_be, size) != tmp) {
         INFO("0x%X CHECKSUM FAIL\n", address);
         return false;
       }
-    } else if (sig.type == SignalType::CHRYSLER_CHECKSUM) {
+    } else if (!ignore_checksum && sig.type == SignalType::CHRYSLER_CHECKSUM) {
       if (chrysler_checksum(address, dat_le, size) != tmp) {
         INFO("0x%X CHECKSUM FAIL\n", address);
         return false;
       }
-    } else if (sig.type == SignalType::PEDAL_CHECKSUM) {
+    } else if (!ignore_checksum && sig.type == SignalType::PEDAL_CHECKSUM) {
       if (pedal_checksum(dat_be, size) != tmp) {
         INFO("0x%X PEDAL CHECKSUM FAIL\n", address);
         return false;
       }
-    } else if (sig.type == SignalType::PEDAL_COUNTER) {
+    } else if (!ignore_counter && sig.type == SignalType::PEDAL_COUNTER) {
       if (!update_counter_generic(tmp, sig.b2)) {
         return false;
       }
@@ -169,7 +168,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
   }
 }
 
-CANParser::CANParser(int abus, const std::string& dbc_name)
+CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum, bool ignore_counter)
   : bus(abus) {
   // Add all messages and signals
 
@@ -182,6 +181,8 @@ CANParser::CANParser(int abus, const std::string& dbc_name)
     MessageState state = {
       .address = msg->address,
       .size = msg->size,
+      .ignore_checksum = ignore_checksum,
+      .ignore_counter = ignore_counter,
     };
 
     for (int j=0; j<msg->num_sigs; j++) {
@@ -241,6 +242,8 @@ void CANParser::UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Rea
 
 void CANParser::UpdateCans(uint64_t sec, const capnp::DynamicStruct::Reader& cmsg) {
   // assume message struct is `cereal::CanData` and parse
+  assert(cmsg.has("address") && cmsg.has("src") && cmsg.has("dat") && cmsg.has("busTime"));
+
   if (cmsg.get("src").as<uint8_t>() != bus) {
     DEBUG("skip %d: wrong bus\n", cmsg.get("address").as<uint32_t>());
     return;
