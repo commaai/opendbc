@@ -5,8 +5,12 @@
 #include <unordered_map>
 
 #include "common_dbc.h"
+#include <capnp/dynamic.h>
 #include <capnp/serialize.h>
+
+#ifndef DYNAMIC_CAPNP
 #include "cereal/gen/cpp/log.capnp.h"
+#endif
 
 #define MAX_BAD_COUNTER 5
 
@@ -54,9 +58,13 @@ public:
   CANParser(int abus, const std::string& dbc_name,
             const std::vector<MessageParseOptions> &options,
             const std::vector<SignalParseOptions> &sigoptions);
-  void UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Reader& cans);
-  void UpdateValid(uint64_t sec);
+  CANParser(int abus, const std::string& dbc_name);
+  #ifndef DYNAMIC_CAPNP
   void update_string(const std::string &data, bool sendcan);
+  void UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Reader& cans);
+  #endif
+  void UpdateCans(uint64_t sec, const capnp::DynamicStruct::Reader& cans);
+  void UpdateValid(uint64_t sec);
   std::vector<SignalValue> query_latest();
 };
 
@@ -68,5 +76,6 @@ private:
 
 public:
   CANPacker(const std::string& dbc_name);
-  uint64_t pack(uint32_t address, const std::vector<SignalPackValue> &signals, int counter);
+  uint64_t pack(uint32_t address, const std::vector<SignalPackValue> &values, int counter);
+  Msg* lookup_message(uint32_t address);
 };
