@@ -33,47 +33,52 @@ bool MessageState::parse(uint64_t sec, uint16_t ts_, uint8_t * dat) {
 
     DEBUG("parse 0x%X %s -> %lld\n", address, sig.name, tmp);
 
-    if (!ignore_checksum && sig.type == SignalType::HONDA_CHECKSUM) {
-      if (honda_checksum(address, dat_be, size) != tmp) {
-        INFO("0x%X CHECKSUM FAIL\n", address);
-        return false;
+    if (!ignore_checksum) {
+      if (sig.type == SignalType::HONDA_CHECKSUM) {
+        if (honda_checksum(address, dat_be, size) != tmp) {
+          INFO("0x%X CHECKSUM FAIL\n", address);
+          return false;
+        }
+      } else if (sig.type == SignalType::TOYOTA_CHECKSUM) {
+        if (toyota_checksum(address, dat_be, size) != tmp) {
+          INFO("0x%X CHECKSUM FAIL\n", address);
+          return false;
+        }
+      } else if (sig.type == SignalType::VOLKSWAGEN_CHECKSUM) {
+        if (volkswagen_crc(address, dat_le, size) != tmp) {
+          INFO("0x%X CRC FAIL\n", address);
+          return false;
+        }
+      } else if (sig.type == SignalType::SUBARU_CHECKSUM) {
+        if (subaru_checksum(address, dat_be, size) != tmp) {
+          INFO("0x%X CHECKSUM FAIL\n", address);
+          return false;
+        }
+      } else if (sig.type == SignalType::CHRYSLER_CHECKSUM) {
+        if (chrysler_checksum(address, dat_le, size) != tmp) {
+          INFO("0x%X CHECKSUM FAIL\n", address);
+          return false;
+        }
+      } else if (sig.type == SignalType::PEDAL_CHECKSUM) {
+        if (pedal_checksum(dat_be, size) != tmp) {
+          INFO("0x%X PEDAL CHECKSUM FAIL\n", address);
+          return false;
+        }
       }
-    } else if (!ignore_counter && sig.type == SignalType::HONDA_COUNTER) {
-      if (!update_counter_generic(tmp, sig.b2)) {
-        return false;
-      }
-    } else if (!ignore_checksum && sig.type == SignalType::TOYOTA_CHECKSUM) {
-      if (toyota_checksum(address, dat_be, size) != tmp) {
-        INFO("0x%X CHECKSUM FAIL\n", address);
-        return false;
-      }
-    } else if (!ignore_checksum && sig.type == SignalType::VOLKSWAGEN_CHECKSUM) {
-      if (volkswagen_crc(address, dat_le, size) != tmp) {
-        INFO("0x%X CRC FAIL\n", address);
-        return false;
-      }
-    } else if (!ignore_counter && sig.type == SignalType::VOLKSWAGEN_COUNTER) {
+    }
+    if (!ignore_counter) {
+      if (sig.type == SignalType::HONDA_COUNTER) {
         if (!update_counter_generic(tmp, sig.b2)) {
-        return false;
-      }
-    } else if (!ignore_checksum && sig.type == SignalType::SUBARU_CHECKSUM) {
-      if (subaru_checksum(address, dat_be, size) != tmp) {
-        INFO("0x%X CHECKSUM FAIL\n", address);
-        return false;
-      }
-    } else if (!ignore_checksum && sig.type == SignalType::CHRYSLER_CHECKSUM) {
-      if (chrysler_checksum(address, dat_le, size) != tmp) {
-        INFO("0x%X CHECKSUM FAIL\n", address);
-        return false;
-      }
-    } else if (!ignore_checksum && sig.type == SignalType::PEDAL_CHECKSUM) {
-      if (pedal_checksum(dat_be, size) != tmp) {
-        INFO("0x%X PEDAL CHECKSUM FAIL\n", address);
-        return false;
-      }
-    } else if (!ignore_counter && sig.type == SignalType::PEDAL_COUNTER) {
-      if (!update_counter_generic(tmp, sig.b2)) {
-        return false;
+          return false;
+        }
+      } else if (sig.type == SignalType::VOLKSWAGEN_COUNTER) {
+          if (!update_counter_generic(tmp, sig.b2)) {
+          return false;
+        }
+      } else if (sig.type == SignalType::PEDAL_COUNTER) {
+        if (!update_counter_generic(tmp, sig.b2)) {
+          return false;
+        }
       }
     }
 
@@ -123,7 +128,6 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
     if (op.check_frequency > 0) {
       state.check_threshold = (1000000000ULL / op.check_frequency) * 10;
     }
-
 
     const Msg* msg = NULL;
     for (int i=0; i<dbc->num_msgs; i++) {
