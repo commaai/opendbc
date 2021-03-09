@@ -115,16 +115,14 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
   init_crc_lookup_tables();
 
   for (const auto& op : options) {
-    MessageState state = {
-      .address = op.address,
-      // .check_frequency = op.check_frequency,
-    };
+    MessageState &state = message_states[op.address];
+    state.address = op.address;
+    // state.check_frequency = op.check_frequency,
 
     // msg is not valid if a message isn't received for 10 consecutive steps
     if (op.check_frequency > 0) {
       state.check_threshold = (1000000000ULL / op.check_frequency) * 10;
     }
-
 
     const Msg* msg = NULL;
     for (int i=0; i<dbc->num_msgs; i++) {
@@ -162,10 +160,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
           break;
         }
       }
-
     }
-
-    message_states[state.address] = state;
   }
 }
 
