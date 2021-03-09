@@ -108,7 +108,7 @@ bool MessageState::update_counter_generic(int64_t v, int cnt_size) {
 CANParser::CANParser(int abus, const std::string& dbc_name,
           const std::vector<MessageParseOptions> &options,
           const std::vector<SignalParseOptions> &sigoptions)
-  : bus(abus) {
+  : bus(abus), aligned_buf(kj::heapArray<capnp::word>(1024)) {
 
   dbc = dbc_lookup(dbc_name);
   assert(dbc);
@@ -209,12 +209,15 @@ void CANParser::UpdateValid(uint64_t sec) {
 }
 
 void CANParser::update_string(const std::string &data, bool sendcan) {
-  // format for board, make copy due to alignment issues, will be freed on out of scope
-  auto amsg = kj::heapArray<capnp::word>((data.length() / sizeof(capnp::word)) + 1);
-  memcpy(amsg.begin(), data.data(), data.length());
+  // format for board, make copy due to alignment issues.
+  const size_t buf_size = (data.length() / sizeof(capnp::word)) + 1;
+  if (aligned_buf.size() < buf_size) {
+    aligned_buf = kj::heapArray<capnp::word>(buf_size);
+  }
+  memcpy(aligned_buf.begin(), data.data(), data.length());
 
   // extract the messages
-  capnp::FlatArrayMessageReader cmsg(amsg);
+  capnp::FlatArrayMessageReader cmsg(aligned_buf.slice(0, buf_size));
   cereal::Event::Reader event = cmsg.getRoot<cereal::Event>();
 
   last_sec = event.getLogMonoTime();
