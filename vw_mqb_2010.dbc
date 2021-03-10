@@ -1202,7 +1202,7 @@ BO_ 159 LH_EPS_03: 8 XXX
  SG_ EPS_BLW_QBit : 30|1@1+ (1,0) [0|1] ""  XXX
  SG_ EPS_VZ_BLW : 31|1@1+ (1,0) [0|1] ""  XXX
  SG_ EPS_HCA_Status : 32|4@1+ (1,0) [0|15] ""  XXX
- SG_ EPS_Lenkmoment : 40|10@1+ (0.01,0) [0|8] "Unit_NewtoMeter"  XXX
+ SG_ EPS_Lenkmoment : 40|10@1+ (1,0) [0|8] "Unit_centiNewtoMeter"  XXX
  SG_ EPS_Lenkmoment_QBit : 54|1@1+ (1,0) [0|1] ""  XXX
  SG_ EPS_VZ_Lenkmoment : 55|1@1+ (1,0) [0|1] ""  XXX
  SG_ EPS_Lenkungstyp : 60|4@1+ (1,0) [0|15] ""  XXX
