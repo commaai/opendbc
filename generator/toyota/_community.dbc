@@ -1,0 +1,9 @@
+BO_ 35 SECONDARY_STEER_ANGLE: 8 XXX
+ SG_ ZORRO_STEER : 7|24@0- (0.004901594652,0) [-500|500] "" XXX
+
+CM_ "BO_ SECONDARY_STEER_ANGLE: ZSS is a high-precision steering angle sensor that can replace the lower resolution sensor in most TSS1 Toyotas. Learn more: https://github.com/commaai/openpilot/wiki/Toyota-Lexus#zorro-steering-sensor-zss";
+
+BO_ 767 SDSU: 8 XXX
+ SG_ FD_BUTTON : 7|1@0+ (1,0) [0|1] "" XXX
+
+CM_ "BO_ SDSU: Smart DSU is essentially a DSU interceptor for TSS-P Toyotas that have a physical DSU. Learn more: https://github.com/wocsor/panda/tree/smart_dsu";
