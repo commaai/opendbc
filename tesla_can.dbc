@@ -613,6 +613,9 @@ BO_ 1064 UI_telemetryControl: 8 GTW
 BO_ 522 BrakeMessage: 8 XXX
  SG_ driverBrakeStatus : 2|2@1+ (1,0) [0|3] "" XXX
 
+BO_ 921 AutopilotStatus: 8 XXX
+ SG_ autopilotStatus : 0|4@1+ (1,0) [0|0] "" XXX
+
 VAL_ 3 StW_Angl 16383 "SNA" ;
 VAL_ 3 StW_AnglSens_Id 2 "MUST" 0 "PSBL" 1 "SELF" ;
 VAL_ 3 StW_AnglSens_Stat 2 "ERR" 3 "ERR_INI" 1 "INI" 0 "OK" ;
@@ -722,6 +725,7 @@ VAL_ 880 EPAS_steeringRackForce 1022 "NOT_IN_SPEC" 1023 "SNA" ;
 VAL_ 880 EPAS_steeringReduced 0 "NORMAL_ASSIST" 1 "REDUCED_ASSIST" ;
 VAL_ 880 EPAS_torsionBarTorque 0 "SEE_SPECIFICATION" 4095 "SNA" 4094 "UNDEFINABLE_DATA" ;
 VAL_ 904 MCU_clusterReadyForDrive 0 "NO_SNA" 1 "YES" ;
+VAL_ 921 autopilotStatus 5 "ACTIVE_NAVIGATE_ON_AUTOPILOT" 4 "ACTIVE_2" 3 "ACTIVE_1" 2 "AVAILABLE" 1 "UNAVAILABLE" 0 "DISABLED" ;
 VAL_ 1160 DAS_steeringAngleRequest 16384 "ZERO_ANGLE" ;
 VAL_ 1160 DAS_steeringControlType 1 "ANGLE_CONTROL" 3 "DISABLED" 0 "NONE" 2 "RESERVED" ;
 VAL_ 1160 DAS_steeringHapticRequest 1 "ACTIVE" 0 "IDLE" ;
