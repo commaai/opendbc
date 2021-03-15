@@ -1235,23 +1235,22 @@ BO_ 919 LDW_02: 8 XXX
  SG_ LDW_KD_Fehler : 63|1@1+ (1,0) [0|1] ""  XXX
 
 BO_ 780 ACC_02: 8 XXX
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ SetSpeed : 12|10@1+ (0.08865,0) [0|90.68] "Unit_MeterPerSecond" XXX
- SG_ Kollision1 : 23|1@1+ (1,0) [0|1] "" XXX
- SG_ Abstand : 24|10@1+ (0.1,0) [0|102.3] "m" XXX
- SG_ ACC_MinusInv : 36|2@1+ (1,0) [0|3] "" XXX
- SG_ ACC_Minus : 38|2@1+ (1,0) [0|3] "" XXX
- SG_ Kollision2 : 40|1@1+ (1,0) [0|1] "" XXX
- SG_ MotorbitB5_1 : 41|1@1+ (1,0) [0|1] "" XXX
- SG_ 1_aktivieren : 42|1@1+ (1,0) [0|1] "" XXX
- SG_ Tacho_LED : 43|1@1+ (1,0) [0|1] "" XXX
- SG_ Hebelquit : 44|1@1+ (1,0) [0|1] "" XXX
- SG_ 1_aktivieren_inv : 45|1@1+ (1,0) [0|1] "" XXX
- SG_ Folgefahrt : 46|1@1+ (1,0) [0|1] "" XXX
- SG_ MotorbitB5_7 : 47|1@1+ (1,0) [0|1] "" XXX
- SG_ SetAbstand : 48|4@1+ (1,0) [0|15] "" XXX
- SG_ Hebel : 56|4@1+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  XXX
+ SG_ ACC_Wunschgeschw : 12|10@1+ (0.32,0) [0.00|326.72] "Unit_KiloMeterPerHour"  XXX
+ SG_ ACC_Status_Prim_Anz : 22|2@1+ (1.0,0.0) [0.0|3] ""  XXX
+ SG_ ACC_Abstandsindex : 24|10@1+ (1,0) [1|1021] ""  XXX
+ SG_ ACC_Akustik : 34|3@1+ (1.0,0.0) [0.0|7] ""  XXX
+ SG_ ACC_Gesetzte_Zeitluecke : 37|3@1+ (1.0,0.0) [0.0|7] ""  XXX
+ SG_ ACC_Optischer_Fahrerhinweis : 40|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ACC_Typ_Tachokranz : 41|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ACC_Anzeige_Zeitluecke : 42|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ACC_Tachokranz : 43|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ACC_Display_Prio : 44|2@1+ (1.0,0.0) [0.0|3] ""  XXX
+ SG_ ACC_Relevantes_Objekt : 46|2@1+ (1.0,0.0) [0.0|3] ""  XXX
+ SG_ ACC_Texte_Primaeranz : 48|7@1+ (1.0,0.0) [0.0|127] ""  XXX
+ SG_ ACC_Wunschgeschw_erreicht : 55|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ACC_Status_Anzeige : 61|3@1+ (1.0,0.0) [0.0|7] ""  XXX
 
 BO_ 302 ACC_07: 8 XXX
  SG_ ACC_07_BZ : 8|4@1+ (1,0) [0|15] "" XXX
@@ -1287,8 +1286,17 @@ BO_ 783 SWA_01: 8 Gateway_MQB
  SG_ SWA_KD_Fehler : 59|1@1+ (1,0) [0|1] ""  Vector__XXX
 
 BO_ 804 ACC_04: 8 XXX
- SG_ ACC_04_CRC : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ ACC_04_BZ : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  XXX
+ SG_ ACC_Texte_Zusatzanz : 16|6@1+ (1.0,0.0) [0.0|63] ""  XXX
+ SG_ ACC_Status_Zusatzanz : 22|5@1+ (1.0,0.0) [0.0|31] ""  XXX
+ SG_ ACC_Texte : 27|5@1+ (1.0,0.0) [0.0|31] ""  XXX
+ SG_ ACC_Texte_braking_guard : 32|3@1+ (1.0,0.0) [0.0|7] ""  XXX
+ SG_ ACC_Warnhinweis : 35|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ACC_Geschw_Zielfahrzeug : 40|10@1+ (0.32,0) [0.00|326.72] "Unit_KiloMeterPerHour"  XXX
+ SG_ ACC_Charisma_FahrPr : 56|3@1+ (1.0,0.0) [0.0|7] ""  XXX
+ SG_ ACC_Charisma_Status : 59|2@1+ (1.0,0.0) [0.0|3] ""  XXX
+ SG_ ACC_Charisma_Umschaltung : 61|2@1+ (1.0,0.0) [0.0|3] ""  XXX
 
 BO_ 917 LWR_AFS_01: 8 XXX
 
