@@ -157,8 +157,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
 
       for (int i = 0; i < msg->num_sigs; i++) {
         const Signal *sig = &msg->sigs[i];
-        if (strcmp(sig->name, sigop.name) == 0
-            && sig->type == SignalType::DEFAULT) {
+        if (sig->name == sigop.name && sig->type == SignalType::DEFAULT) {
           state.parse_sigs.push_back(*sig);
           state.vals.push_back(sigop.default_value);
           break;

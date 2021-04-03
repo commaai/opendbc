@@ -9,7 +9,7 @@ from libcpp.map cimport map
 from libcpp cimport bool
 
 from .common cimport CANParser as cpp_CANParser
-from .common cimport SignalParseOptions, MessageParseOptions, dbc_lookup, SignalValue, DBC
+from .common cimport SignalParseOptions, MessageParseOptions, dbc_lookup, SignalValue, DBC, Msg, SignalType, Signal, Val, dbc_register
 
 import os
 import numbers
@@ -190,3 +190,72 @@ cdef class CANDefine():
       dv[msgname][sgname] = dv[address][sgname]
 
       self.dv = dict(dv)
+
+cdef get_sigs(address, checksum_type, sigs):
+  cdef vector[Signal] ret
+  cdef Signal s
+  for sig in sigs:
+    b1 = sig.start_bit if sig.is_little_endian else (sig.start_bit//8)*8  + (-sig.start_bit-1) % 8
+    s.name = sig.name
+    s.b1 = b1
+    s.b2 = sig.size
+    s.bo = 64 - (b1 + sig.size)
+    s.is_signed = sig.is_signed
+    s.factor = sig.factor
+    s.offset = sig.offset
+
+    if checksum_type == "honda" and sig.name == "CHECKSUM":
+      s.type = SignalType.HONDA_CHECKSUM
+    elif checksum_type == "honda" and sig.name == "COUNTER":
+      s.type = SignalType.HONDA_COUNTER
+    elif checksum_type == "toyota" and sig.name == "CHECKSUM":
+      s.type = SignalType.TOYOTA_CHECKSUM
+    elif checksum_type == "volkswagen" and sig.name == "CHECKSUM":
+      s.type = SignalType.VOLKSWAGEN_CHECKSUM
+    elif checksum_type == "volkswagen" and sig.name == "COUNTER":
+      s.type = SignalType.VOLKSWAGEN_COUNTER
+    elif checksum_type == "subaru" and sig.name == "CHECKSUM":
+      s.type = SignalType.SUBARU_CHECKSUM
+    elif checksum_type == "chrysler" and sig.name == "CHECKSUM":
+      s.type = SignalType.CHRYSLER_CHECKSUM
+    elif address in [512, 513] and sig.name == "CHECKSUM_PEDAL":
+      s.type = SignalType.PEDAL_CHECKSUM
+    elif address in [512, 513] and sig.name == "COUNTER_PEDAL":
+      s.type = SignalType.PEDAL_COUNTER
+    else:
+      s.type = SignalType.DEFAULT
+
+    ret.push_back(s)
+  return ret
+
+def has_dbc(name):
+  return dbc_lookup(name) != NULL
+
+def register_dbc(name, checksum_type, msgs, def_vals):
+  cdef DBC dbc
+  dbc.name = name
+  dbc.num_msgs = len(msgs)
+  dbc.num_vals = len(def_vals)
+  cdef Msg m
+  cdef Signal sig
+  cdef Val v
+  sig_map = {}
+  
+  for address, msg_name, msg_size, sigs in msgs:
+    m.name = msg_name
+    m.address = address
+    m.size = msg_size
+    m.num_sigs = len(sigs)
+    m.sigs = get_sigs(address, checksum_type, sigs)
+    sig_map[address] = m.sigs
+    dbc.msgs.push_back(m);
+
+  for address, sigs in def_vals:
+    for sg_name, def_val in sigs:
+      v.name = sg_name
+      v.address = address
+      v.def_val = def_val
+      v.sigs = sig_map[address]
+      dbc.vals.push_back(v)
+
+  dbc_register(dbc)

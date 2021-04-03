@@ -6,16 +6,12 @@ import sys
 import jinja2
 
 from collections import Counter
+from opendbc.can.parser_pyx import register_dbc, has_dbc
 from opendbc.can.dbc import dbc
 
-def process(in_fn, out_fn):
-  dbc_name = os.path.split(out_fn)[-1].replace('.cc', '')
+def process(in_fn):
+  dbc_name = os.path.split(in_fn)[-1].replace('.dbc', '')
   # print("processing %s: %s -> %s" % (dbc_name, in_fn, out_fn))
-
-  template_fn = os.path.join(os.path.dirname(__file__), "dbc_template.cc")
-
-  with open(template_fn, "r") as template_f:
-    template = jinja2.Template(template_f.read(), trim_blocks=True, lstrip_blocks=True)
 
   can_dbc = dbc(in_fn)
 
@@ -104,27 +100,23 @@ def process(in_fn, out_fn):
     if count > 1:
       sys.exit("%s: Duplicate message name in DBC file %s" % (dbc_name, name))
 
-  parser_code = template.render(dbc=can_dbc, checksum_type=checksum_type, msgs=msgs, def_vals=def_vals, len=len)
+  register_dbc(can_dbc.name, checksum_type, msgs, def_vals)
 
-  with open(out_fn, "a+") as out_f:
-    out_f.seek(0)
-    if out_f.read() != parser_code:
-      out_f.seek(0)
-      out_f.truncate()
-      out_f.write(parser_code)
+
+def get_parser(dbc_name, signals, checks=None, bus=0) :
+  if not has_dbc(dbc_name) :
+    process("opendbc/" + dbc_name + ".dbc")
+
 
 def main():
-  if len(sys.argv) != 3:
-    print("usage: %s dbc_directory output_filename" % (sys.argv[0],))
+  if len(sys.argv) != 2:
+    print("usage: %s dbc_name" % (sys.argv[0],))
     sys.exit(0)
 
   dbc_dir = sys.argv[1]
-  out_fn = sys.argv[2]
+  in_fn = os.path.join(dbc_dir)
 
-  dbc_name = os.path.split(out_fn)[-1].replace('.cc', '')
-  in_fn = os.path.join(dbc_dir, dbc_name + '.dbc')
-
-  process(in_fn, out_fn)
+  get_parser(in_fn, None)
 
 
 if __name__ == '__main__':

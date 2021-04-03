@@ -2,22 +2,19 @@
 
 #include "common_dbc.h"
 
-std::vector<const DBC*>& get_dbcs() {
-  static std::vector<const DBC*> vec;
-  return vec;
-}
+static std::vector<DBC> dbcs;
 
 const DBC* dbc_lookup(const std::string& dbc_name) {
-  for (const auto& dbci : get_dbcs()) {
-    if (dbc_name == dbci->name) {
-      return dbci;
+  for (const auto& dbci : dbcs) {
+    if (dbc_name == dbci.name) {
+      return &dbci;
     }
   }
   return NULL;
 }
 
-void dbc_register(const DBC* dbc) {
-  get_dbcs().push_back(dbc);
+void dbc_register(const DBC& dbc) {
+  dbcs.push_back(dbc);
 }
 
 extern "C" {

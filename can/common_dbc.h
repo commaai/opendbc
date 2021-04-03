@@ -14,7 +14,7 @@ struct SignalPackValue {
 
 struct SignalParseOptions {
   uint32_t address;
-  const char* name;
+  std::string name;
   double default_value;
 };
 
@@ -26,7 +26,7 @@ struct MessageParseOptions {
 struct SignalValue {
   uint32_t address;
   uint16_t ts;
-  const char* name;
+  std::string name;
   double value;
 };
 
@@ -44,7 +44,7 @@ enum SignalType {
 };
 
 struct Signal {
-  const char* name;
+  std::string name;
   int b1, b2, bo;
   bool is_signed;
   double factor, offset;
@@ -53,32 +53,31 @@ struct Signal {
 };
 
 struct Msg {
-  const char* name;
+  std::string name;
   uint32_t address;
   unsigned int size;
   size_t num_sigs;
-  const Signal *sigs;
+  std::vector<Signal> sigs;
 };
 
 struct Val {
-  const char* name;
+  std::string name;
   uint32_t address;
-  const char* def_val;
-  const Signal *sigs;
+  std::string def_val;
+  std::vector<Signal> sigs;
 };
 
 struct DBC {
-  const char* name;
+  std::string name;
   size_t num_msgs;
-  const Msg *msgs;
-  const Val *vals;
+  std::vector<Msg> msgs;
+  std::vector<Val> vals;
   size_t num_vals;
 };
 
-std::vector<const DBC*>& get_dbcs();
 const DBC* dbc_lookup(const std::string& dbc_name);
 
-void dbc_register(const DBC* dbc);
+void dbc_register(const DBC& dbc);
 
 #define dbc_init(dbc) \
 static void __attribute__((constructor)) do_dbc_init_ ## dbc(void) { \

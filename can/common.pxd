@@ -23,35 +23,35 @@ cdef extern from "common_dbc.h":
     CHRYSLER_CHECKSUM
 
   cdef struct Signal:
-    const char* name
+    string name
     int b1, b2, bo
     bool is_signed
     double factor, offset
     SignalType type
 
   cdef struct Msg:
-    const char* name
+    string name
     uint32_t address
     unsigned int size
     size_t num_sigs
-    const Signal *sigs
+    vector[Signal] sigs
 
   cdef struct Val:
-    const char* name
+    string name
     uint32_t address
-    const char* def_val
-    const Signal *sigs
+    string def_val
+    vector[Signal] sigs
 
   cdef struct DBC:
-    const char* name
+    string name
     size_t num_msgs
-    const Msg *msgs
-    const Val *vals
+    vector[Msg] msgs
+    vector[Val] vals
     size_t num_vals
 
   cdef struct SignalParseOptions:
     uint32_t address
-    const char* name
+    string name
     double default_value
 
 
@@ -62,7 +62,7 @@ cdef extern from "common_dbc.h":
   cdef struct SignalValue:
     uint32_t address
     uint16_t ts
-    const char* name
+    string name
     double value
 
   cdef struct SignalPackValue:
@@ -72,6 +72,7 @@ cdef extern from "common_dbc.h":
 
 cdef extern from "common.h":
   cdef const DBC* dbc_lookup(const string);
+  cdef void dbc_register(const DBC&)
 
   cdef cppclass CANParser:
     bool can_valid
