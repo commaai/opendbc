@@ -103,8 +103,7 @@ def main():
     sys.exit(0)
 
   dbc_name = sys.argv[1]
-  in_fn = os.path.join("opendbc", dbc_name + ".dbc")
-  process(in_fn)
+  print(process(dbc_name))
 
 
 if __name__ == '__main__':
