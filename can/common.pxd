@@ -34,7 +34,6 @@ cdef extern from "common_dbc.h":
     string name
     uint32_t address
     unsigned int size
-    size_t num_sigs
     vector[Signal] sigs
 
   cdef struct Val:
@@ -45,10 +44,8 @@ cdef extern from "common_dbc.h":
 
   cdef struct DBC:
     string name
-    size_t num_msgs
     vector[Msg] msgs
     vector[Val] vals
-    size_t num_vals
 
   cdef struct SignalParseOptions:
     uint32_t address

@@ -54,7 +54,6 @@ struct Msg {
   std::string name;
   uint32_t address;
   unsigned int size;
-  size_t num_sigs;
   std::vector<Signal> sigs;
 };
 
@@ -67,10 +66,8 @@ struct Val {
 
 struct DBC {
   std::string name;
-  size_t num_msgs;
   std::vector<Msg> msgs;
   std::vector<Val> vals;
-  size_t num_vals;
 };
 
 const DBC* dbc_lookup(const std::string& dbc_name);

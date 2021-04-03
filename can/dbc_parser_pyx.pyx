@@ -55,7 +55,6 @@ cdef register_dbc(name, checksum_type, msgs, def_vals):
     msg.address = address
     msg.size = msg_size
     msg.sigs = get_sigs(address, checksum_type, sigs)
-    msg.num_sigs = msg.sigs.size()
     dbc.msgs.push_back(msg);
     sig_map[address] = msg.sigs
 
@@ -68,8 +67,6 @@ cdef register_dbc(name, checksum_type, msgs, def_vals):
       val.sigs = sig_map[address]
       dbc.vals.push_back(val)
 
-  dbc.num_msgs = dbc.msgs.size()
-  dbc.num_vals = dbc.vals.size()
   dbc_register(dbc)
 
 def ensure_dbc(dbc_name) :
