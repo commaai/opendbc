@@ -1,9 +1,5 @@
 Import('env', 'envCython', 'cereal')
 
-import os
-from opendbc.can.process_dbc import process
-
-
 libdbc = env.SharedLibrary('libdbc', ["dbc.cc", "parser.cc", "packer.cc", "common.cc"], LIBS=["capnp", "kj"])
 
 # Build packer and parser
