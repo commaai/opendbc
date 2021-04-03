@@ -5,8 +5,6 @@
 #include <string>
 #include <vector>
 
-#define ARRAYSIZE(x) (sizeof(x)/sizeof(x[0]))
-
 struct SignalPackValue {
   std::string name;
   double value;
@@ -76,10 +74,4 @@ struct DBC {
 };
 
 const DBC* dbc_lookup(const std::string& dbc_name);
-
 void dbc_register(const DBC& dbc);
-
-#define dbc_init(dbc) \
-static void __attribute__((constructor)) do_dbc_init_ ## dbc(void) { \
-  dbc_register(&dbc); \
-}

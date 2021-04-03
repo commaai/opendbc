@@ -3,9 +3,6 @@
 
 from libcpp.string cimport string
 from libcpp.vector cimport vector
-from libcpp.map cimport map
-from libcpp cimport bool
-from libc.stdint cimport uint32_t, uint64_t, uint16_t
 
 import threading
 from opendbc.can.process_dbc import process
@@ -15,7 +12,7 @@ cdef get_sigs(address, checksum_type, sigs):
   cdef vector[Signal] ret
   cdef Signal s
   for sig in sigs:
-    b1 = sig.start_bit if sig.is_little_endian else (sig.start_bit//8)*8  + (-sig.start_bit-1) % 8
+    b1 = sig.start_bit if sig.is_little_endian else ((sig.start_bit//8)*8  + (-sig.start_bit-1) % 8)
     s.name = sig.name
     s.b1 = b1
     s.b2 = sig.size
@@ -49,33 +46,29 @@ cdef get_sigs(address, checksum_type, sigs):
   return ret
 
 cdef register_dbc(name, checksum_type, msgs, def_vals):
-  cdef DBC dbc
-  cdef Msg m
-  cdef Signal sig
-  cdef Val v
   sig_map = {}
-
+  cdef DBC dbc
   dbc.name = name
+  cdef Msg msg
   for address, msg_name, msg_size, sigs in msgs:
-    m.name = msg_name
-    m.address = address
-    m.size = msg_size
-    m.sigs = get_sigs(address, checksum_type, sigs)
-    m.num_sigs = m.sigs.size()
-    dbc.msgs.push_back(m);
+    msg.name = msg_name
+    msg.address = address
+    msg.size = msg_size
+    msg.sigs = get_sigs(address, checksum_type, sigs)
+    msg.num_sigs = msg.sigs.size()
+    dbc.msgs.push_back(msg);
+    sig_map[address] = msg.sigs
 
-    sig_map[address] = m.sigs
-
-  dbc.num_msgs = dbc.msgs.size()
-
+  cdef Val val
   for address, sigs in def_vals:
     for sg_name, def_val in sigs:
-      v.name = sg_name
-      v.address = address
-      v.def_val = def_val
-      v.sigs = sig_map[address]
-      dbc.vals.push_back(v)
+      val.name = sg_name
+      val.address = address
+      val.def_val = def_val
+      val.sigs = sig_map[address]
+      dbc.vals.push_back(val)
 
+  dbc.num_msgs = dbc.msgs.size()
   dbc.num_vals = dbc.vals.size()
   dbc_register(dbc)
 
