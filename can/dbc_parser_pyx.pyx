@@ -73,7 +73,6 @@ cdef register_dbc(name, checksum_type, msgs, def_vals):
       v.name = sg_name
       v.address = address
       v.def_val = def_val
-      # print(v.def_val)
       v.sigs = sig_map[address]
       dbc.vals.push_back(v)
 

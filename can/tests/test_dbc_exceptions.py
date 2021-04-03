@@ -16,9 +16,9 @@ class TestCanParserPackerExceptions(unittest.TestCase):
     checks = [("STEERING_CONTROL", 50)]
     with self.assertRaises(RuntimeError):
       CANParser(dbc_invalid, signals, checks, 0)
-    with self.assertRaises(RuntimeError):
+    with self.assertRaises(FileNotFoundError):
       CANPacker(dbc_invalid)
-    with self.assertRaises(RuntimeError):
+    with self.assertRaises(FileNotFoundError):
       CANDefine(dbc_invalid)
 
     with self.assertRaises(RuntimeError):
