@@ -7,6 +7,7 @@ from libcpp.map cimport map
 from libcpp cimport bool
 from libc.stdint cimport uint32_t, uint64_t, uint16_t
 
+import threading
 from opendbc.can.process_dbc import process
 from .common cimport dbc_lookup, SignalValue, DBC, Msg, SignalType, Signal, Val, dbc_register
 
@@ -80,7 +81,9 @@ cdef register_dbc(name, checksum_type, msgs, def_vals):
   dbc_register(dbc)
 
 def ensure_dbc(dbc_name) :
-  if not dbc_lookup(dbc_name):
-    checksum,msgs,vals= process(dbc_name)
-    register_dbc(dbc_name, checksum, msgs, vals)
+  lock = threading.Lock()
+  with(lock):
+    if not dbc_lookup(dbc_name):
+      checksum,msgs,vals= process(dbc_name)
+      register_dbc(dbc_name, checksum, msgs, vals)
 
