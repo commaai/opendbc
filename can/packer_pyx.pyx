@@ -10,7 +10,7 @@ from posix.dlfcn cimport dlopen, dlsym, RTLD_LAZY
 
 from .common cimport CANPacker as cpp_CANPacker
 from .common cimport dbc_lookup, SignalPackValue, DBC
-
+from .dbc_parser_pyx import ensure_dbc
 
 cdef class CANPacker:
   cdef:
@@ -20,6 +20,7 @@ cdef class CANPacker:
     map[int, int] address_to_size
 
   def __init__(self, dbc_name):
+    ensure_dbc(dbc_name)
     self.dbc = dbc_lookup(dbc_name)
     if not self.dbc:
       raise RuntimeError(f"Can't lookup {dbc_name}")

@@ -105,7 +105,7 @@ class dbc():
 
         # convert strings to UPPER_CASE_WITH_UNDERSCORES
         defvals[1::2] = [d.strip().upper().replace(" ", "_") for d in defvals[1::2]]
-        defvals = '"' + "".join(str(i) for i in defvals) + '"'
+        defvals = "".join(str(i) for i in defvals)
 
         self.def_vals[ids].append((sgname, defvals))
 

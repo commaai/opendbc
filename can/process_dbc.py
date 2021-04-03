@@ -2,17 +2,11 @@
 from __future__ import print_function
 import os
 import sys
-
-import jinja2
-
 from collections import Counter
-from opendbc.can.parser_pyx import register_dbc, has_dbc
 from opendbc.can.dbc import dbc
 
-def process(in_fn):
-  dbc_name = os.path.split(in_fn)[-1].replace('.dbc', '')
-  # print("processing %s: %s -> %s" % (dbc_name, in_fn, out_fn))
-
+def process(dbc_name):
+  in_fn = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", dbc_name + ".dbc")
   can_dbc = dbc(in_fn)
 
   # process counter and checksums first
@@ -100,12 +94,7 @@ def process(in_fn):
     if count > 1:
       sys.exit("%s: Duplicate message name in DBC file %s" % (dbc_name, name))
 
-  register_dbc(can_dbc.name, checksum_type, msgs, def_vals)
-
-
-def get_parser(dbc_name, signals, checks=None, bus=0) :
-  if not has_dbc(dbc_name) :
-    process("opendbc/" + dbc_name + ".dbc")
+  return checksum_type, msgs, def_vals
 
 
 def main():
@@ -113,10 +102,9 @@ def main():
     print("usage: %s dbc_name" % (sys.argv[0],))
     sys.exit(0)
 
-  dbc_dir = sys.argv[1]
-  in_fn = os.path.join(dbc_dir)
-
-  get_parser(in_fn, None)
+  dbc_name = sys.argv[1]
+  in_fn = os.path.join("opendbc", dbc_name + ".dbc")
+  process(in_fn)
 
 
 if __name__ == '__main__':
