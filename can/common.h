@@ -51,7 +51,7 @@ class CANParser {
 private:
   const int bus;
   kj::Array<capnp::word> aligned_buf;
-
+  std::vector<SignalValue> signal_value_cache;
   const DBC *dbc = NULL;
   std::unordered_map<uint32_t, MessageState> message_states;
 
