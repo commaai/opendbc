@@ -37,9 +37,9 @@ CANPacker::CANPacker(const std::string& dbc_name) {
   dbc = dbc_lookup(dbc_name);
   assert(dbc);
 
-  for (const auto &msg : dbc->msgs) {
+  for (const auto& msg : dbc->msgs) {
     message_lookup[msg.address] = msg;
-    for (const auto sig : msg.sigs) {
+    for (const auto& sig : msg.sigs) {
       signal_lookup[std::make_pair(msg.address, std::string(sig.name))] = sig;
     }
   }

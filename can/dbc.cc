@@ -10,7 +10,7 @@ const DBC* dbc_lookup(const std::string& dbc_name) {
       return &dbci;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 void dbc_register(const DBC& dbc) {

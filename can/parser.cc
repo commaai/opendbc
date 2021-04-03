@@ -129,7 +129,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
     }
 
     const Msg* msg = NULL;
-    for (const auto &m : dbc->msgs) {
+    for (const auto& m : dbc->msgs) {
       if (m.address == op.address) {
         msg = &m;
         break;
@@ -143,7 +143,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
     state.size = msg->size;
 
     // track checksums and counters for this message
-    for (const auto &sig :msg->sigs) {
+    for (const auto& sig : msg->sigs) {
       if (sig.type != SignalType::DEFAULT) {
         state.parse_sigs.push_back(sig);
         state.vals.push_back(0);
@@ -154,7 +154,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
     for (const auto& sigop : sigoptions) {
       if (sigop.address != op.address) continue;
 
-      for (const auto &sig : msg->sigs) {
+      for (const auto& sig : msg->sigs) {
         if (sig.name == sigop.name && sig.type == SignalType::DEFAULT) {
           state.parse_sigs.push_back(sig);
           state.vals.push_back(sigop.default_value);
@@ -173,7 +173,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum
   assert(dbc);
   init_crc_lookup_tables();
 
-  for (const auto &msg : dbc->msgs) {
+  for (const auto& msg : dbc->msgs) {
     MessageState state = {
       .address = msg.address,
       .size = msg.size,
@@ -181,7 +181,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum
       .ignore_counter = ignore_counter,
     };
 
-    for (const auto &sig : msg.sigs) {
+    for (const auto& sig : msg.sigs) {
       state.parse_sigs.push_back(sig);
       state.vals.push_back(0);
     }
