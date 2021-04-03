@@ -65,6 +65,7 @@ public:
   CANParser(int abus, const std::string& dbc_name, bool ignore_checksum, bool ignore_counter);
   #ifndef DYNAMIC_CAPNP
   void update_string(const std::string &data, bool sendcan);
+  void update_strings(std::vector<std::string> &strings, bool sendcan);
   void UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Reader& cans);
   #endif
   void UpdateCans(uint64_t sec, const capnp::DynamicStruct::Reader& cans);

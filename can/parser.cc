@@ -216,6 +216,12 @@ void CANParser::update_string(const std::string &data, bool sendcan) {
   UpdateValid(last_sec);
 }
 
+void CANParser::update_strings(std::vector<std::string>& strings, bool sendcan) {
+  for (auto& str : strings) {
+    update_string(str, sendcan);
+  }
+}
+
 void CANParser::UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Reader& cans) {
   int msg_count = cans.size();
 

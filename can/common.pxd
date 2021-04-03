@@ -77,6 +77,7 @@ cdef extern from "common.h":
     bool can_valid
     CANParser(int, string, vector[MessageParseOptions], vector[SignalParseOptions])
     void update_string(string, bool)
+    void update_strings(vector[string], bool)
     vector[SignalValue] query_latest()
 
   cdef cppclass CANPacker:
