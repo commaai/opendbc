@@ -71,7 +71,7 @@ cdef register_dbc(name, checksum_type, msgs, def_vals):
 
 def ensure_dbc(dbc_name) :
   lock = threading.Lock()
-  with(lock):
+  with lock:
     if not dbc_lookup(dbc_name):
       checksum,msgs,vals= process(dbc_name)
       register_dbc(dbc_name, checksum, msgs, vals)
