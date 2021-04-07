@@ -61,7 +61,6 @@ typedef struct CheckSum {
 } CheckSum;
 
 enum ChecksumType {
-  NONE,
   HONDA,
   TOYOTA,
   VOLKSWAGEN,
@@ -165,7 +164,7 @@ DBC* dbc_parse(const std::string& dbc_name) {
   DBC* dbc = new DBC;
   dbc->name = dbc_name;
 
-  std::ifstream infile("../" + dbc_name + ".dbc");
+  std::ifstream infile(str("%s/%s.dbc", DBC_FILE_PATH, dbc_name.c_str()));
   DBC_ASSERT(infile, "failed open dbc file");
   std::string line;
   while (std::getline(infile, line)) {

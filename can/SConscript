@@ -1,6 +1,9 @@
+import os
 Import('env', 'envCython', 'cereal')
 
-libdbc = env.SharedLibrary('libdbc', ["dbc.cc", "parser.cc", "packer.cc", "common.cc"], LIBS=["capnp", "kj"])
+envDBC = env.Clone()
+envDBC['CXXFLAGS'] += ['-DDBC_FILE_PATH=\'"%s"\'' % (envDBC.Dir("..").abspath)]
+libdbc = envDBC.SharedLibrary('libdbc', source=["dbc.cc", "parser.cc", "packer.cc", "common.cc"], LIBS=["capnp", "kj"])
 
 # Build packer and parser
 lenv = envCython.Clone()
