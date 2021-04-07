@@ -34,7 +34,7 @@ inline bool startswith(const std::string& str, const char* s) {
 }
 
 inline bool startswith(const std::string& str, std::initializer_list<const char*> s) {
-  return s.end() != std::find_if(s.begin(), s.end(), [&](auto& it) { return strncmp(str.c_str(), it, strlen(it)) == 0; });
+  return s.end() != std::find_if(s.begin(), s.end(), [&](auto& it) { return startswith(str, it); });
 }
 
 inline std::string& trim(std::string& s, const char* t = " \t\n\r\f\v") {
@@ -171,13 +171,13 @@ DBC* dbc_parse(const std::string& dbc_name) {
       std::string name = match[2].str();
       uint32_t size = std::stoi(match[3].str());
 
+      // check for duplicates
       DBC_ASSERT(address_set.find(address) == address_set.end(), "Duplicate address detected : " <<  address);
       address_set.insert(address);
 
       DBC_ASSERT(msg_name_set.find(name) == msg_name_set.end(), "Duplicate message name : " <<  name);
       msg_name_set.insert(name);
 
-      // Msg m = {.name = name, .size = size, .address = address};
       Msg& msg = dbc->msgs.emplace_back();
       msg.address = address;
       msg.name = name;
