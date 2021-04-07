@@ -10,23 +10,24 @@
 #include <iostream>
 #include <iterator>
 #include <map>
+#include <memory>
 #include <regex>
 #include <set>
 #include <sstream>
-#include <vector>
+#include <stdexcept>
 
 #include "common.h"
 #include "common_dbc.h"
 
 namespace {
 
-#define DBC_ASSERT(condition, message)                                        \
-  do {                                                                        \
-    if (!(condition)) {                                                       \
-      std::cerr << "Assertion `" #condition "` failed in " << __FILE__        \
-                << " line " << __LINE__ << ": [" << dbc_name << "] " << message << std::endl; \
-      std::terminate();                                                       \
-    }                                                                         \
+#define DBC_ASSERT(condition, message)          \
+  do {                                          \
+    if (!(condition)) {                         \
+      std::stringstream is;                     \
+      is << "[" << dbc_name << "] " << message; \
+      throw std::runtime_error(is.str());       \
+    }                                           \
   } while (false)
 
 inline bool startswith(const std::string& str, const char* s) {
@@ -42,7 +43,7 @@ inline std::string& trim(std::string& s, const char* t = " \t\n\r\f\v") {
   return s.erase(0, s.find_first_not_of(t));
 }
 
-typedef struct CheckSum {
+typedef struct ChecksumState {
   int checksum_size;
   int counter_size;
   int checksum_start_bit;
@@ -50,62 +51,25 @@ typedef struct CheckSum {
   bool little_endian;
   SignalType checksum_type;
   SignalType counter_type;
-} CheckSum;
+} ChecksumState;
 
-enum ChecksumType {
-  HONDA,
-  TOYOTA,
-  VOLKSWAGEN,
-  SUBARU,
-  CHRYSLER
-};
+ChecksumState* get_checksum(const std::string& dbc_name) {
+  ChecksumState* s = nullptr;
+  if (startswith(dbc_name, {"honda_", "acura_"})) {
+    s = new ChecksumState({4, 2, 3, 5, false, HONDA_CHECKSUM, HONDA_COUNTER});
+  } else if (startswith(dbc_name, {"toyota_", "lexus_"})) {
+    s = new ChecksumState({8, -1, 7, -1, false, TOYOTA_CHECKSUM});
+  } else if (startswith(dbc_name, {"vw_", "volkswagen_", "audi_", "seat_", "skoda_"})) {
+    s = new ChecksumState({8, 4, 0, 0, true, VOLKSWAGEN_CHECKSUM, VOLKSWAGEN_COUNTER});
+  } else if (startswith(dbc_name, "subaru_global_")) {
+    s = new ChecksumState({8, -1, 0, -1, true, SUBARU_CHECKSUM});
+  } else if (startswith(dbc_name, "chrysler_")) {
+    s = new ChecksumState({8, -1, 7, -1, false, CHRYSLER_CHECKSUM});
+  }
+  return s;
+}
 
-CheckSum checksums[] = {
-  {
-    .checksum_size = 4,
-    .counter_size = 2,
-    .checksum_start_bit = 3,
-    .counter_start_bit = 5,
-    .little_endian = false,
-    .checksum_type = HONDA_CHECKSUM,
-    .counter_type = HONDA_COUNTER,
-  },
-  {
-    .checksum_size = 8,
-    .counter_size = -1,
-    .checksum_start_bit = 7,
-    .counter_start_bit = -1,
-    .little_endian = false,
-    .checksum_type = TOYOTA_CHECKSUM,
-  },
-  {
-    .checksum_size = 8,
-    .counter_size = 4,
-    .checksum_start_bit = 0,
-    .counter_start_bit = 0,
-    .little_endian = true,
-    .checksum_type = VOLKSWAGEN_CHECKSUM,
-    .counter_type = VOLKSWAGEN_COUNTER,
-  },
-  {
-    .checksum_size = 8,
-    .counter_size = -1,
-    .checksum_start_bit = 0,
-    .counter_start_bit = -1,
-    .little_endian = true,
-    .checksum_type = SUBARU_CHECKSUM,
-  },
-  {
-    .checksum_size = 8,
-    .counter_size = -1,
-    .checksum_start_bit = 7,
-    .counter_start_bit = -1,
-    .little_endian = false,
-    .checksum_type = CHRYSLER_CHECKSUM,
-  },
-};
-
-void set_signal_type(Signal& s, uint32_t address, CheckSum* chk, const std::string& dbc_name) {
+void set_signal_type(Signal& s, uint32_t address, ChecksumState* chk, const std::string& dbc_name) {
   if (chk) {
     if (s.name == "CHECKSUM") {
       DBC_ASSERT(s.b2 == chk->checksum_size, "CHECKSUM is not " << chk->checksum_size << " bits long");
@@ -113,7 +77,7 @@ void set_signal_type(Signal& s, uint32_t address, CheckSum* chk, const std::stri
       DBC_ASSERT(s.is_little_endian == chk->little_endian, "CHECKSUM has wrong endianness");
       s.type = chk->checksum_type;
     } else if (s.name == "COUNTER") {
-      DBC_ASSERT(chk->counter_size == -1 || s.b2 == chk->counter_size, "COUNTER is not " <<  chk->counter_size << " bits long");
+      DBC_ASSERT(chk->counter_size == -1 || s.b2 == chk->counter_size, "COUNTER is not " << chk->counter_size << " bits long");
       DBC_ASSERT(chk->counter_start_bit == -1 || s.b1 % 8 == chk->counter_start_bit, "COUNTER starts at wrong bit");
       DBC_ASSERT(chk->little_endian == s.is_little_endian, "COUNTER has wrong endianness");
       s.type = chk->counter_type;
@@ -131,23 +95,15 @@ void set_signal_type(Signal& s, uint32_t address, CheckSum* chk, const std::stri
 }
 
 DBC* dbc_parse(const std::string& dbc_name) {
+  std::ifstream infile(std::string(DBC_FILE_PATH) + "/" + dbc_name + ".dbc");
+  if (!infile) return nullptr;
+
   std::regex bo_regexp(R"(^BO\_ (\w+) (\w+) *: (\w+) (\w+))");
   std::regex sg_regexp(R"(^SG\_ (\w+) : (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*))");
   std::regex sgm_regexp(R"(^SG\_ (\w+) (\w+) *: (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*))");
   std::regex val_regexp(R"(VAL\_ (\w+) (\w+) (\s*[-+]?[0-9]+\s+\".+?\"[^;]*))");
 
-  CheckSum *checksum_ = nullptr;
-  if (startswith(dbc_name, {"honda_", "acura_"})) {
-    checksum_ = &checksums[HONDA];
-  } else if (startswith(dbc_name, {"toyota_", "lexus_"})) {
-    checksum_ = &checksums[TOYOTA];
-  } else if (startswith(dbc_name, {"vw_", "volkswagen_", "audi_", "seat_", "skoda_"})) {
-    checksum_ = &checksums[VOLKSWAGEN];
-  } else if (startswith(dbc_name, "subaru_global_")) {
-    checksum_ = &checksums[SUBARU];
-  } else if (startswith(dbc_name, "chrysler_", "stellantis_")) {
-    checksum_ = &checksums[CHRYSLER];
-  }
+  std::unique_ptr<ChecksumState> checksum(get_checksum(dbc_name));
 
   uint32_t address = 0;
   std::set<uint32_t> address_set;
@@ -156,8 +112,6 @@ DBC* dbc_parse(const std::string& dbc_name) {
   DBC* dbc = new DBC;
   dbc->name = dbc_name;
 
-  std::ifstream infile(std::string(DBC_FILE_PATH) + "/" +  dbc_name + ".dbc");
-  DBC_ASSERT(infile, "failed open dbc file");
   std::string line;
   while (std::getline(infile, line)) {
     line = trim(line);
@@ -167,21 +121,16 @@ DBC* dbc_parse(const std::string& dbc_name) {
       bool ret = std::regex_match(line, match, bo_regexp);
       DBC_ASSERT(ret, "bad BO %s" << line);
 
-      address = std::stoi(match[1].str());  // could be hex
-      std::string name = match[2].str();
-      uint32_t size = std::stoi(match[3].str());
+      Msg& msg = dbc->msgs.emplace_back();
+      address = msg.address = std::stoi(match[1].str());  // could be hex
+      msg.name = match[2].str();
+      msg.size = std::stoi(match[3].str());
 
       // check for duplicates
-      DBC_ASSERT(address_set.find(address) == address_set.end(), "Duplicate address detected : " <<  address);
+      DBC_ASSERT(address_set.find(address) == address_set.end(), "Duplicate address detected : " << address);
       address_set.insert(address);
-
-      DBC_ASSERT(msg_name_set.find(name) == msg_name_set.end(), "Duplicate message name : " <<  name);
-      msg_name_set.insert(name);
-
-      Msg& msg = dbc->msgs.emplace_back();
-      msg.address = address;
-      msg.name = name;
-      msg.size = size;
+      DBC_ASSERT(msg_name_set.find(msg.name) == msg_name_set.end(), "Duplicate message name : " << msg.name);
+      msg_name_set.insert(msg.name);
     } else if (startswith(line, "SG_ ")) {
       // new signal
       int offset = 0;
@@ -198,7 +147,7 @@ DBC* dbc_parse(const std::string& dbc_name) {
       sig.is_signed = match[offset + 5].str() == "-";
       sig.factor = std::stof(match[offset + 6].str());
       sig.offset = std::stof(match[offset + 7].str());
-      set_signal_type(sig, address, checksum_, dbc_name);
+      set_signal_type(sig, address, checksum.get(), dbc_name);
       if (!sig.is_little_endian) {
         uint64_t b1 = sig.b1;
         sig.b1 = std::floor(b1 / 8) * 8 + (-b1 - 1) % 8;
@@ -223,7 +172,6 @@ DBC* dbc_parse(const std::string& dbc_name) {
         std::transform(w.begin(), w.end(), w.begin(), ::toupper);
         std::replace(w.begin(), w.end(), ' ', '_');
       }
-
       // join string
       std::stringstream s;
       std::copy(words.begin(), words.end(), std::ostream_iterator<std::string>(s, " "));
@@ -247,14 +195,11 @@ const DBC* dbc_lookup(const std::string& dbc_name) {
   static std::map<std::string, DBC*> dbcs;
 
   std::unique_lock lk(lock);
-
   auto it = dbcs.find(dbc_name);
-  if (it != dbcs.end()) {
-    return it->second;
+  if (it == dbcs.end()) {
+    it = dbcs.insert(it, {dbc_name, dbc_parse(dbc_name)});
   }
-  DBC* dbc = dbc_parse(dbc_name);
-  dbcs[dbc_name] = dbc;
-  return dbc;
+  return it->second;
 }
 
 extern "C" {
