@@ -11,6 +11,7 @@ from posix.dlfcn cimport dlopen, dlsym, RTLD_LAZY
 from .common cimport CANPacker as cpp_CANPacker
 from .common cimport dbc_lookup, SignalPackValue, DBC
 
+
 cdef class CANPacker:
   cdef:
     cpp_CANPacker *packer

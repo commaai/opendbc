@@ -10,6 +10,7 @@ from libcpp cimport bool
 
 from .common cimport CANParser as cpp_CANParser
 from .common cimport SignalParseOptions, MessageParseOptions, dbc_lookup, SignalValue, DBC
+
 import os
 import numbers
 from collections import defaultdict
