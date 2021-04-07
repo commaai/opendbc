@@ -50,15 +50,6 @@ inline std::string& trim(std::string& s, const char* t = " \t\n\r\f\v") {
   return s.erase(0, s.find_first_not_of(t));
 }
 
-enum ChecksumType {
-  NONE,
-  HONDA,
-  TOYOTA,
-  VOLKSWAGEN,
-  SUBARU,
-  CHRYSLER
-};
-
 typedef struct CheckSum {
   int checksum_size;
   int counter_size;
@@ -69,48 +60,58 @@ typedef struct CheckSum {
   SignalType counter_type;
 } CheckSum;
 
+enum ChecksumType {
+  NONE,
+  HONDA,
+  TOYOTA,
+  VOLKSWAGEN,
+  SUBARU,
+  CHRYSLER
+};
+
 CheckSum checksums[] = {
-    [HONDA] = {
-        .checksum_size = 4,
-        .counter_size = 2,
-        .checksum_start_bit = 3,
-        .counter_start_bit = 5,
-        .little_endian = false,
-        .checksum_type = HONDA_CHECKSUM,
-        .counter_type = HONDA_COUNTER},
-    [TOYOTA] = {
-        .checksum_size = 8,
-        .counter_size = -1,
-        .checksum_start_bit = 7,
-        .counter_start_bit = -1,
-        .little_endian = false,
-        .checksum_type = TOYOTA_CHECKSUM,
-    },
-    [VOLKSWAGEN] = {
-        .checksum_size = 8,
-        .counter_size = 4,
-        .checksum_start_bit = 0,
-        .counter_start_bit = 0,
-        .little_endian = true,
-        .checksum_type = VOLKSWAGEN_CHECKSUM,
-        .counter_type = VOLKSWAGEN_COUNTER,
-    },
-    [SUBARU] = {
-        .checksum_size = 8,
-        .counter_size = -1,
-        .checksum_start_bit = 0,
-        .counter_start_bit = -1,
-        .little_endian = true,
-        .checksum_type = SUBARU_CHECKSUM,
-    },
-    [CHRYSLER] = {
-        .checksum_size = 8,
-        .counter_size = -1,
-        .checksum_start_bit = 7,
-        .counter_start_bit = -1,
-        .little_endian = false,
-        .checksum_type = CHRYSLER_CHECKSUM,
-    },
+  {
+    .checksum_size = 4,
+    .counter_size = 2,
+    .checksum_start_bit = 3,
+    .counter_start_bit = 5,
+    .little_endian = false,
+    .checksum_type = HONDA_CHECKSUM,
+    .counter_type = HONDA_COUNTER,
+  },
+  {
+    .checksum_size = 8,
+    .counter_size = -1,
+    .checksum_start_bit = 7,
+    .counter_start_bit = -1,
+    .little_endian = false,
+    .checksum_type = TOYOTA_CHECKSUM,
+  },
+  {
+    .checksum_size = 8,
+    .counter_size = 4,
+    .checksum_start_bit = 0,
+    .counter_start_bit = 0,
+    .little_endian = true,
+    .checksum_type = VOLKSWAGEN_CHECKSUM,
+    .counter_type = VOLKSWAGEN_COUNTER,
+  },
+  {
+    .checksum_size = 8,
+    .counter_size = -1,
+    .checksum_start_bit = 0,
+    .counter_start_bit = -1,
+    .little_endian = true,
+    .checksum_type = SUBARU_CHECKSUM,
+  },
+  {
+    .checksum_size = 8,
+    .counter_size = -1,
+    .checksum_start_bit = 7,
+    .counter_start_bit = -1,
+    .little_endian = false,
+    .checksum_type = CHRYSLER_CHECKSUM,
+  },
 };
 
 void set_signal_type(Signal& s, uint32_t address, CheckSum* chk, const std::string& dbc_name) {
@@ -144,7 +145,7 @@ DBC* dbc_parse(const std::string& dbc_name) {
   std::regex sgm_regexp(R"(^SG\_ (\w+) (\w+) *: (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*))");
   std::regex val_regexp(R"(VAL\_ (\w+) (\w+) (\s*[-+]?[0-9]+\s+\".+?\"[^;]*))");
 
-  CheckSum* checksum_ = nullptr;
+  CheckSum *checksum_ = nullptr;
   if (startswith(dbc_name, {"honda_", "acura_"})) {
     checksum_ = &checksums[HONDA];
   } else if (startswith(dbc_name, {"toyota_", "lexus_"})) {
