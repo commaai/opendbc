@@ -10,7 +10,6 @@ from libcpp cimport bool
 
 from .common cimport CANParser as cpp_CANParser
 from .common cimport SignalParseOptions, MessageParseOptions, dbc_lookup, SignalValue, DBC
-from .dbc_parser_pyx import ensure_dbc
 import os
 import numbers
 from collections import defaultdict
@@ -38,7 +37,6 @@ cdef class CANParser:
       checks = []
     self.can_valid = True
     self.dbc_name = dbc_name
-    ensure_dbc(dbc_name)
     self.dbc = dbc_lookup(dbc_name)
     if not self.dbc:
       raise RuntimeError(f"Can't find DBC: {dbc_name}")
@@ -154,7 +152,6 @@ cdef class CANDefine():
 
   def __init__(self, dbc_name):
     self.dbc_name = dbc_name
-    ensure_dbc(dbc_name)
     self.dbc = dbc_lookup(dbc_name)
     if not self.dbc:
       raise RuntimeError(f"Can't find DBC: '{dbc_name}'")

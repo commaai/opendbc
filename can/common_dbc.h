@@ -71,4 +71,3 @@ struct DBC {
 };
 
 const DBC* dbc_lookup(const std::string& dbc_name);
-void dbc_register(const DBC& dbc);
