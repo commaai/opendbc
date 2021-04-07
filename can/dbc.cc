@@ -1,20 +1,11 @@
-#include <assert.h>
-#include <byteswap.h>
-#include <limits.h>
-#include <unistd.h>
-
 #include <algorithm>
 #include <cmath>
-#include <cstdarg>
 #include <fstream>
-#include <iostream>
-#include <iterator>
+#include <sstream>
 #include <map>
 #include <memory>
 #include <regex>
 #include <set>
-#include <sstream>
-#include <stdexcept>
 
 #include "common.h"
 #include "common_dbc.h"

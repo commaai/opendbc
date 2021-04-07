@@ -1,4 +1,3 @@
-import os
 Import('env', 'envCython', 'cereal')
 
 envDBC = env.Clone()
