@@ -2,6 +2,7 @@
 *.pyc
 *.os
 *.o
+*.a
 *.tmp
 *.dylib
 .*.swp
