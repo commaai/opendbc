@@ -79,7 +79,8 @@ cdef class CANParser:
       signal_addrs = {s[1] for s in signals}
       unchecked = signal_addrs - checked_addrs
       if len(unchecked):
-        raise Exception(f"Unchecked addrs: {unchecked}")
+        err_msg = ', '.join(f"{self.address_to_msg_name[addr].decode()} ({hex(addr)})" for addr in unchecked)
+        raise Exception(f"Unchecked addrs: {err_msg}")
 
     cdef vector[SignalParseOptions] signal_options_v
     cdef SignalParseOptions spo
