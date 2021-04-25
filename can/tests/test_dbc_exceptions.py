@@ -13,13 +13,16 @@ class TestCanParserPackerExceptions(unittest.TestCase):
       ("STEER_TORQUE", "STEERING_CONTROL", 0),
       ("STEER_TORQUE_REQUEST", "STEERING_CONTROL", 0),
     ]
-    checks = []
+    checks = [("STEERING_CONTROL", 50)]
     with self.assertRaises(RuntimeError):
       CANParser(dbc_invalid, signals, checks, 0)
     with self.assertRaises(RuntimeError):
       CANPacker(dbc_invalid)
     with self.assertRaises(RuntimeError):
       CANDefine(dbc_invalid)
+
+    with self.assertRaises(RuntimeError):
+      CANParser(dbc_file, signals, [], 0)
 
     # Everything is supposed to work below
     CANParser(dbc_file, signals, checks, 0)
