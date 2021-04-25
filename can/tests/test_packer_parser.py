@@ -33,7 +33,7 @@ class TestCanParserPacker(unittest.TestCase):
       ("STEER_TORQUE", "STEERING_CONTROL", 0),
       ("STEER_TORQUE_REQUEST", "STEERING_CONTROL", 0),
     ]
-    checks = []
+    checks = [("STEERING_CONTROL", 50)]
 
     parser = CANParser(dbc_file, signals, checks, 0)
     packer = CANPacker(dbc_file)
@@ -69,8 +69,7 @@ class TestCanParserPacker(unittest.TestCase):
       ("LKAS_Request", "ES_LKAS", 0),
       ("SET_1", "ES_LKAS", 0),
     ]
-
-    checks = []
+    checks = [("ES_LKAS", 50)]
 
     parser = CANParser(dbc_file, signals, checks, 0)
     packer = CANPacker(dbc_file)
