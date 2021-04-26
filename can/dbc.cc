@@ -136,8 +136,8 @@ DBC* dbc_parse(const std::string& dbc_name) {
       sig.b2 = std::stoi(match[offset + 3].str());
       sig.is_little_endian = std::stoi(match[offset + 4].str()) == 1;
       sig.is_signed = match[offset + 5].str() == "-";
-      sig.factor = std::stof(match[offset + 6].str());
-      sig.offset = std::stof(match[offset + 7].str());
+      sig.factor = std::stod(match[offset + 6].str());
+      sig.offset = std::stod(match[offset + 7].str());
       set_signal_type(sig, address, checksum.get(), dbc_name);
       if (!sig.is_little_endian) {
         uint64_t b1 = sig.b1;
