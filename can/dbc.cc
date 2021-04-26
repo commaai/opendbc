@@ -171,10 +171,10 @@ DBC* dbc_parse(const std::string& dbc_name) {
   }
 
   for (auto& m : dbc->msgs) {
-    m.sigs = signals.at(m.address);
+    m.sigs = signals[m.address];
   }
   for (auto& v : dbc->vals) {
-    v.sigs = signals.at(v.address);
+    v.sigs = signals[v.address];
   }
   return dbc;
 }
