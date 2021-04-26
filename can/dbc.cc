@@ -167,6 +167,7 @@ DBC* dbc_parse(const std::string& dbc_name) {
       std::stringstream s;
       std::copy(words.begin(), words.end(), std::ostream_iterator<std::string>(s, " "));
       val.def_val = s.str();
+      val.def_val = trim(val.def_val);
     }
   }
 
