@@ -113,9 +113,9 @@ DBC* dbc_parse(const std::string& dbc_name) {
       DBC_ASSERT(ret, "bad BO %s" << line);
 
       Msg& msg = dbc->msgs.emplace_back();
-      address = msg.address = std::stoi(match[1].str());  // could be hex
+      address = msg.address = std::stoul(match[1].str());  // could be hex
       msg.name = match[2].str();
-      msg.size = std::stoi(match[3].str());
+      msg.size = std::stoul(match[3].str());
 
       // check for duplicates
       DBC_ASSERT(address_set.find(address) == address_set.end(), "Duplicate address detected : " << address);
@@ -150,7 +150,7 @@ DBC* dbc_parse(const std::string& dbc_name) {
       DBC_ASSERT(ret, "bad VAL " << line);
 
       auto& val = dbc->vals.emplace_back();
-      val.address = std::stoi(match[1].str());  // could be hex
+      val.address = std::stoul(match[1].str());  // could be hex
       val.name = match[2].str();
 
       auto defvals = match[3].str();
