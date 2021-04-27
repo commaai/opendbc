@@ -24,6 +24,7 @@ unsigned int volkswagen_crc(unsigned int address, uint64_t d, int l);
 unsigned int pedal_checksum(uint64_t d, int l);
 uint64_t read_u64_be(const uint8_t* v);
 uint64_t read_u64_le(const uint8_t* v);
+uint64_t ReverseBytes(uint64_t x);
 
 class MessageState {
 public:

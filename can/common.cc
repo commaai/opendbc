@@ -219,3 +219,15 @@ uint64_t read_u64_le(const uint8_t* v) {
           | ((uint64_t)v[6] << 48)
           | ((uint64_t)v[7] << 56));
 }
+
+// this is the same as read_u64_le, but uses uint64_t as in/out
+uint64_t ReverseBytes(uint64_t x) {
+  return ((x & 0xff00000000000000ull) >> 56) |
+          ((x & 0x00ff000000000000ull) >> 40) |
+          ((x & 0x0000ff0000000000ull) >> 24) |
+          ((x & 0x000000ff00000000ull) >> 8) |
+          ((x & 0x00000000ff000000ull) << 8) |
+          ((x & 0x0000000000ff0000ull) << 24) |
+          ((x & 0x000000000000ff00ull) << 40) |
+          ((x & 0x00000000000000ffull) << 56);
+}

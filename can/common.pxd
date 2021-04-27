@@ -70,6 +70,7 @@ cdef extern from "common_dbc.h":
 
 cdef extern from "common.h":
   cdef const DBC* dbc_lookup(const string);
+  cdef uint64_t ReverseBytes(uint64_t x);
 
   cdef cppclass CANParser:
     bool can_valid

@@ -3,7 +3,7 @@
 from libc.stdint cimport uint32_t, uint64_t
 from libcpp.string cimport string
 from libcpp.map cimport map
-from .common cimport SignalParseOptions, MessageParseOptions, Msg, dbc_lookup, SignalValue, DBC
+from .common cimport SignalParseOptions, MessageParseOptions, Msg, dbc_lookup, SignalValue, DBC, ReverseBytes
 
 import numbers, struct
 
@@ -30,16 +30,6 @@ cdef class DBCParser:
       msg_id = self.msg_name_to_address[msg_id.encode('utf8')]
     return msg_id
 
-  cdef inline uint64_t ReverseBytes(self, uint64_t x):
-    return ((x & 0xff00000000000000) >> 56) | \
-           ((x & 0x00ff000000000000) >> 40) | \
-           ((x & 0x0000ff0000000000) >> 24) | \
-           ((x & 0x000000ff00000000) >> 8) | \
-           ((x & 0x00000000ff000000) << 8) | \
-           ((x & 0x0000000000ff0000) << 24) | \
-           ((x & 0x000000000000ff00) << 40) | \
-           ((x & 0x00000000000000ff) << 56)
-
   def encode(self, msg_id, dd):
     """Encode a CAN message using the dbc.
 
@@ -64,8 +54,8 @@ cdef class DBCParser:
         dat = (ival & ((1 << s.b2) - 1)) << shift
 
         if s.is_little_endian:
-          mask = self.ReverseBytes(mask)
-          dat = self.ReverseBytes(dat)
+          mask = ReverseBytes(mask)
+          dat = ReverseBytes(dat)
 
         result &= ~mask
         result |= dat
