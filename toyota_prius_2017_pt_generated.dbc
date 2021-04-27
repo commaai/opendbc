@@ -196,28 +196,13 @@ BO_ 951 ESP_CONTROL: 8 ESP
  SG_ VSC_DISABLED : 12|2@0+ (1,0) [0|1] "" XXX
  SG_ BRAKE_LIGHTS_ACC : 18|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 956 ECT1S92: 8 CGW
- SG_ B_OILW : 7|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ B_OILMD : 5|2@0+ (1,0) [0|0] "" Vector__XXX
- SG_ B_ISNW : 1|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ B_RJTB : 0|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ B_WNDL : 15|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ B_LMULRJ : 14|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ GEAR_PARK : 13|1@0+ (1,0) [0|0] "" AFS,CSR,MAV
- SG_ GEAR_REVERSE : 12|1@0+ (1,0) [0|0] "" AFS,BSR,CSR,DS1,FCM,MAV
- SG_ GEAR_NEUTRAL : 11|1@0+ (1,0) [0|0] "" AFS,CSR,MAV
- SG_ B_ISPTM : 10|3@0+ (1,0) [0|0] "" Vector__XXX
- SG_ BV_THOCL : 23|16@0+ (0.625,-50) [0|0] "" Vector__XXX
- SG_ B_GEAR : 39|4@0+ (1,0) [0|0] "" Vector__XXX
- SG_ B_SMDE : 32|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ GEAR_DRIVE : 47|1@0+ (1,0) [0|0] "" AFS,CSR,DS1,MAV
- SG_ GEAR_BRAKE : 41|1@0+ (1,0) [0|0] "" DS1
- SG_ B_ECOMI : 40|1@0+ (1,0) [0|0] "" DS1
- SG_ B_SPTMI : 55|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ B_PWRM : 54|3@0+ (1,0) [0|0] "" Vector__XXX
- SG_ B_OILWM : 51|2@0+ (1,0) [0|0] "" Vector__XXX
- SG_ B_SPTMS : 49|2@0+ (1,0) [0|0] "" Vector__XXX
- SG_ DRIVE_MODE : 61|3@0+ (1,0) [0|0] "" SCS
+BO_ 956 GEAR_SHIFTER_PANEL: 8 CGW
+ SG_ GEAR_PARK : 13|1@0+ (1,0) [0|0] "" XXX
+ SG_ GEAR_REVERSE : 12|1@0+ (1,0) [0|0] "" XXX
+ SG_ GEAR_NEUTRAL : 11|1@0+ (1,0) [0|0] "" XXX
+ SG_ GEAR_DRIVE : 47|1@0+ (1,0) [0|0] "" XXX
+ SG_ GEAR_BRAKE : 41|1@0+ (1,0) [0|0] "" XXX
+ SG_ DRIVE_MODE : 61|3@0+ (1,0) [0|0] "" XXX
 
 BO_ 1041 ACC_HUD: 8 DSU
  SG_ FCW : 4|1@0+ (1,0) [0|1] "" XXX
