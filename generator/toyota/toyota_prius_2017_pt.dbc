@@ -28,6 +28,14 @@ BO_ 610 EPS_STATUS: 8 EPS
  SG_ TYPE : 24|1@0+ (1,0) [0|1] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
+BO_ 956 GEAR_SHIFTER_PANEL: 8 CGW
+ SG_ GEAR_PARK : 13|1@0+ (1,0) [0|0] "" XXX
+ SG_ GEAR_REVERSE : 12|1@0+ (1,0) [0|0] "" XXX
+ SG_ GEAR_NEUTRAL : 11|1@0+ (1,0) [0|0] "" XXX
+ SG_ GEAR_DRIVE : 47|1@0+ (1,0) [0|0] "" XXX
+ SG_ GEAR_BRAKE : 41|1@0+ (1,0) [0|0] "" XXX
+ SG_ DRIVE_MODE : 61|3@0+ (1,0) [0|0] "" XXX
+
 BO_ 1083 AUTOPARK_STATUS: 8 IPAS
  SG_ STATE : 7|4@0+ (1,0) [0|15] "" XXX
 
@@ -39,3 +47,4 @@ CM_ SG_ 1083 STATE "when the dashboard button is pressed, the value changes from
 VAL_ 295 GEAR 0 "P" 1 "R" 2 "N" 3 "D" 4 "B";
 VAL_ 610 IPAS_STATE 5 "override" 3 "enabled" 1 "disabled";
 VAL_ 610 LKA_STATE 25 "temporary_fault" 9 "temporary_fault2" 5 "active" 1 "standby";
+VAL_ 956 DRIVE_MODE 6 "eco mode" 1 "power mode" 0 "normal mode"

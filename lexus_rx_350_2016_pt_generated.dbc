@@ -196,14 +196,6 @@ BO_ 951 ESP_CONTROL: 8 ESP
  SG_ VSC_DISABLED : 12|2@0+ (1,0) [0|1] "" XXX
  SG_ BRAKE_LIGHTS_ACC : 18|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 956 GEAR_SHIFTER_PANEL: 8 CGW
- SG_ GEAR_PARK : 13|1@0+ (1,0) [0|0] "" XXX
- SG_ GEAR_REVERSE : 12|1@0+ (1,0) [0|0] "" XXX
- SG_ GEAR_NEUTRAL : 11|1@0+ (1,0) [0|0] "" XXX
- SG_ GEAR_DRIVE : 47|1@0+ (1,0) [0|0] "" XXX
- SG_ GEAR_BRAKE : 41|1@0+ (1,0) [0|0] "" XXX
- SG_ DRIVE_MODE : 61|3@0+ (1,0) [0|0] "" XXX
-
 BO_ 1041 ACC_HUD: 8 DSU
  SG_ FCW : 4|1@0+ (1,0) [0|1] "" XXX
  SG_ SET_ME_X20 : 15|8@0+ (1,0) [0|1] "" XXX
@@ -368,7 +360,6 @@ VAL_ 614 STATE 3 "enabled" 1 "disabled";
 VAL_ 614 DIRECTION_CMD 3 "right" 2 "center" 1 "left";
 VAL_ 643 STATE 0 "normal" 1 "adaptive_cruise_control" 3 "emergency_braking";
 VAL_ 921 CRUISE_CONTROL_STATE 2 "disabled" 11 "hold" 10 "hold_waiting_user_cmd" 6 "enabled" 5 "faulted";
-VAL_ 956 DRIVE_MODE 6 "eco mode" 1 "power mode" 0 "normal mode"
 VAL_ 1042 LDA_ALERT 3 "hold with continuous beep" 2 "LDA unavailable" 1 "hold" 0 "none";
 VAL_ 1042 BARRIERS 3 "both" 2 "right" 1 "left" 0 "none";
 VAL_ 1042 RIGHT_LINE 3 "orange" 2 "faded" 1 "solid" 0 "none";
