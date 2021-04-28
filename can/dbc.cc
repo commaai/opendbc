@@ -193,9 +193,3 @@ const DBC* dbc_lookup(const std::string& dbc_name) {
   }
   return it->second;
 }
-
-extern "C" {
-const DBC* dbc_lookup(const char* dbc_name) {
-  return dbc_lookup(std::string(dbc_name));
-}
-}
