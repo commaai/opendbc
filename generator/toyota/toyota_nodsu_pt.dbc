@@ -1,6 +1,5 @@
 CM_ "IMPORT _toyota_2017.dbc";
 CM_ "IMPORT _comma.dbc";
-CM_ "IMPORT _toyota_nodsu_bsm.dbc";
 CM_ "IMPORT _toyota_nodsu_common.dbc";
 CM_ "IMPORT _community.dbc";
 
