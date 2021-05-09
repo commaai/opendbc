@@ -178,7 +178,6 @@ BO_ 863 CAM_TRAFFIC_SIGNS: 8 XXX
  SG_ SPEED_SIGN_CAM : 32|1@0+ (1,0) [0|32767] "" XXX
 
 BO_ 1157 CAM_SETTINGS: 8 XXX
- SG_ NEW_SIGNAL_2 : 14|1@0+ (1,0) [0|1] "" XXX
  SG_ SBS_WARNING_DISTANCE : 25|2@0+ (1,0) [0|127] "" XXX
  SG_ SBS_SCBC : 28|2@0+ (1,0) [0|7] "" XXX
  SG_ LKAS_ASSIT_TIMING : 13|1@0+ (1,0) [0|1] "" XXX
@@ -186,8 +185,10 @@ BO_ 1157 CAM_SETTINGS: 8 XXX
  SG_ ILKAS_NTERVENTION_ON2 : 17|1@0+ (1,0) [0|255] "" XXX
  SG_ LANEE_DEPARTURE_ALERT : 16|2@0+ (1,0) [0|1] "" XXX
  SG_ LKAS_INERVENTION_ON1 : 15|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_1 : 12|1@0+ (1,0) [0|7] "" XXX
  SG_ WARNING : 11|1@0+ (1,0) [0|1] "" XXX
+ SG_ BIT1 : 12|1@0+ (1,0) [0|7] "" XXX
+ SG_ BIT2 : 14|1@0+ (1,0) [0|1] "" XXX
+ SG_ BIT3 : 18|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1160 CAM_Empty3: 8 XXX
  SG_ NEW_SIGNAL_1 : 47|24@0+ (1,0) [0|16777215] "" XXX
@@ -773,4 +774,4 @@ CM_ SG_ 552 GEAR "0 Shifting, 1 P, 2 R, 3 N, 4 D";
 CM_ SG_ 552 GEAR_BOX "0 P, 14 R, 1 though 6 D for speeds, 15 Shift";
 CM_ SG_ 540 HANDS_ON_STEER_WARN "0 no warning, b warning";
 CM_ SG_ 1143 REAR_CT_ALERT "Rear Cross Traffic Alert";
-VAL_ 552 GEAR 1 "P" 2 "R" 3 "N" 4 "D";
+VAL_ 552 GEAR 1 "P" 2 "R" 3 "N" 4 "D" ;
