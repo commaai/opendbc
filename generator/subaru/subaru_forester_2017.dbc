@@ -10,6 +10,6 @@ BO_ 355 ES_DashStatus: 8 XXX
 BO_ 881 Steering_Torque: 8 XXX
  SG_ Steering_Motor_Flat : 0|10@1+ (32,0) [0|1000] "" XXX
  SG_ Steer_Torque_Output : 16|11@1- (-32,0) [-1000|1000] "" XXX
- SG_ LKA_Lockout : 27|1@1+ (1,0) [0|1] "" XXX
+ SG_ Steer_Error_1 : 27|1@1+ (1,0) [0|1] "" XXX
  SG_ Steer_Torque_Sensor : 29|11@1- (-1,0) [-1000|1000] "" XXX
  SG_ Steering_Angle : 40|16@1- (-0.033,0) [-600|600] "" XXX
