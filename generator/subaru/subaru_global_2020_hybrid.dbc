@@ -11,4 +11,8 @@ BO_ 360 Throttle_Hybrid: 8 XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Throttle_Pedal : 32|8@1+ (1,0) [0|255] "" XXX
 
+BO_ 550 Brake_Hybrid: 8 XXX
+ SG_ Brake_Pedal : 24|8@1+ (1,0) [0|1] "" XXX
+ SG_ Brake : 37|1@1+ (1,0) [0|1] "" XXX
+
 VAL_ 295 Gear 0 "P" 1 "R" 3 "D";
