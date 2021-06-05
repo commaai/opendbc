@@ -1196,7 +1196,7 @@ BO_ 1313 GW_DDM_PE: 8 BCM
  SG_ C_RRDoorStatus : 6|2@1+ (1.0,0.0) [0.0|3.0] ""  CLU
  SG_ C_TrunkStatus : 8|2@1+ (1.0,0.0) [0.0|3.0] ""  CLU
  SG_ C_OSMirrorStatus : 10|2@1+ (1.0,0.0) [0.0|3.0] ""  CLU
- 
+
 BO_ 1056 SCC11: 8 SCC
  SG_ MainMode_ACC : 0|1@1+ (1,0) [0|1] "" CLU,EMS,ESC
  SG_ SCCInfoDisplay : 1|3@1+ (1,0) [0|7] "" CLU,ESC
@@ -1524,6 +1524,17 @@ BO_ 881 E_EMS11: 8 XXX
  SG_ Cruise_Limit_Status : 13|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Limit_Target : 23|8@1+ (1,0) [0|15] "" XXX
  SG_ Accel_Pedal_Pos : 31|8@1+ (1,0) [0|7] "" XXX
+
+BO_ 881 EV_PC4: 8 CGW
+ SG_ CR_Brk_StkDep_Pc : 0|8@1+ (1,0) [0|0] "%" Vector__XXX
+ SG_ CF_Vcu_Rdy : 9|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CF_Vcu_EvRdyClu : 10|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CF_Vcu_EvRdy : 11|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ CF_Vcu_EcoMdOff : 12|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ Unknown_Paint1 : 18|13@1+ (1,0) [0|63] "" XXX
+ SG_ CR_Vcu_VehSpeed : 31|8@1+ (0.55,0) [0|100] "kph or mph" Vector__XXX
+ SG_ CR_Vcu_MotTqCmd_Pc : 39|12@1- (0.048828125,0) [-100|99.951171875] "%" Vector__XXX
+ SG_ CR_Vcu_AccPedDep_Pc : 56|8@1+ (0.3921568627,0) [0|100] "%" XXX
 
 BO_ 1355 EV_PC6: 8 CGW
  SG_ CF_Vcu_SbwWarnMsg : 16|3@1+ (1,0) [0|7] "" Vector__XXX
