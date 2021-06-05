@@ -1,4 +1,4 @@
-CM_ "IMPORT hyundai_kia_generic.dbc";
+CM_ "IMPORT ../../hyundai_kia_generic.dbc";
 
 BO_ 881 EV_PC4: 8 CGW
  SG_ CR_Brk_StkDep_Pc : 0|8@1+ (1,0) [0|0] "%" Vector__XXX

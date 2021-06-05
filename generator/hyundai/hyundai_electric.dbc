@@ -1,4 +1,4 @@
-CM_ "IMPORT hyundai_kia_generic.dbc";
+CM_ "IMPORT ../../hyundai_kia_generic.dbc";
 
 BO_ 881 E_EMS11: 8 XXX
  SG_ Brake_Pedal_Pos : 0|8@1+ (1,0) [0|127] "" XXX
