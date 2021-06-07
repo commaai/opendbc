@@ -1,9 +1,0 @@
-CM_ "IMPORT ../../hyundai_kia_generic.dbc";
-
-BO_ 881 E_EMS11: 8 XXX
- SG_ Brake_Pedal_Pos : 0|8@1+ (1,0) [0|127] "" XXX
- SG_ IG_Reactive_Stat : 8|3@1+ (1,0) [0|3] "" XXX
- SG_ Gear_Change : 12|1@0+ (1,0) [0|31] "" XXX
- SG_ Cruise_Limit_Status : 13|1@1+ (1,0) [0|1] "" XXX
- SG_ Cruise_Limit_Target : 23|8@1+ (1,0) [0|15] "" XXX
- SG_ Accel_Pedal_Pos : 31|8@1+ (1,0) [0|7] "" XXX
