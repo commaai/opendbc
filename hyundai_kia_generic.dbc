@@ -1523,7 +1523,7 @@ BO_ 881 E_EMS11: 8 XXX
  SG_ Gear_Change : 12|1@0+ (1,0) [0|31] "" XXX
  SG_ Cruise_Limit_Status : 13|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Limit_Target : 23|8@1+ (1,0) [0|15] "" XXX
- SG_ Accel_Pedal_Pos : 31|8@1+ (1,0) [0|7] "" XXX
+ SG_ Accel_Pedal_Pc : 31|8@1+ (0.00390625,0) [0|100] "%" XXX
  SG_ CR_Vcu_AccPedDep_Pc : 56|8@1+ (0.3921568627,0) [0|100] "%" XXX
 
 BO_ 1355 EV_PC6: 8 CGW
