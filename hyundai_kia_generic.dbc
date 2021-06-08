@@ -1523,8 +1523,8 @@ BO_ 881 E_EMS11: 8 XXX
  SG_ Gear_Change : 12|1@0+ (1,0) [0|31] "" XXX
  SG_ Cruise_Limit_Status : 13|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Limit_Target : 23|8@1+ (1,0) [0|15] "" XXX
- SG_ Accel_Pedal_EV_Pc : 31|8@1+ (0.393701,0) [0|100] "%" XXX
- SG_ CR_Vcu_AccPedDep_Pc : 56|8@1+ (0.393701,0) [0|100] "%" XXX
+ SG_ Accel_Pedal_Pos : 31|8@1+ (1,0) [0|254] "" XXX
+ SG_ CR_Vcu_AccPedDep_Pos : 56|8@1+ (1,0) [0|254] "" XXX
 
 BO_ 1355 EV_PC6: 8 CGW
  SG_ CF_Vcu_SbwWarnMsg : 16|3@1+ (1,0) [0|7] "" Vector__XXX
@@ -1646,4 +1646,4 @@ VAL_ 1157 LFA_SysWarning 0 "no_message" 1 "switching_to_hda" 2 "switching_to_scc
 VAL_ 1157 HDA_Icon_State 0 "no_hda" 1 "white_hda" 2 "green_hda";
 VAL_ 1157 HDA_SysWarning 0 "no_message" 1 "driving_convenience_systems_cancelled" 2 "highway_drive_assist_system_cancelled";
 
-CM_ "BO_ E_EMS11: With the exception of the Optima Hybrid, all hybrid and plug-in hybrids use this gas signal: CR_Vcu_AccPedDep_Pc. All EVs (and OptimaH) use the Accel_Pedal_EV_Pc signal. Both are 0 to 100%";
+CM_ "BO_ E_EMS11: With the exception of the Optima Hybrid, all (plug-in) hybrids use this gas signal: CR_Vcu_AccPedDep_Pos. All EVs (and OptimaH) use the Accel_Pedal_Pos signal.";
