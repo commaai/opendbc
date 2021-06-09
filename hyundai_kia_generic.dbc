@@ -1646,4 +1646,4 @@ VAL_ 1157 LFA_SysWarning 0 "no_message" 1 "switching_to_hda" 2 "switching_to_scc
 VAL_ 1157 HDA_Icon_State 0 "no_hda" 1 "white_hda" 2 "green_hda";
 VAL_ 1157 HDA_SysWarning 0 "no_message" 1 "driving_convenience_systems_cancelled" 2 "highway_drive_assist_system_cancelled";
 
-CM_ "BO_ E_EMS11: With the exception of the Optima Hybrid, all (plug-in) hybrids use this gas signal: CR_Vcu_AccPedDep_Pos. All EVs (and OptimaH) use the Accel_Pedal_Pos signal.";
+CM_ "BO_ E_EMS11: All (plug-in) hybrids use this gas signal: CR_Vcu_AccPedDep_Pos, and all EVs use the Accel_Pedal_Pos signal. See hyundai/values.py for a specific car list";
