@@ -7,7 +7,7 @@ repos:
     -   id: check-merge-conflict
     -   id: check-symlinks
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: master
+    rev: v0.800
     hooks:
     -   id: mypy
 -   repo: https://github.com/PyCQA/flake8
