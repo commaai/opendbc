@@ -143,13 +143,13 @@ BO_ 518 Battery_Module_4: 8 K16_BECM
 
 BO_ 528 Pack_Stats: 8 K16_BECM
    SG_ Pack_Voltage : 7|12@0+ (0.125,0) [0|0] "V" K16_BECM
-   SG_ Pack_Current : 23|8@0- (0.15,0) [0|0] "A" K16_BECM
+   SG_ Pack_Current : 23|8@0- (0.1,-0.1) [0|0] "A" K16_BECM
 
 BO_ 530 Charger_stats: 6 T18_BatteryCharger
-   SG_ Charger_HV_Current : 0|10@1+ (0.05,0) [0|0] "A" K16_BECM
-   SG_ HV_Voltage : 10|10@1+ (0.5,0) [0|0] "V" K16_BECM
-   SG_ LV_Current : 23|8@1+ (0.2,0) [0|0] "A" K16_BECM
-   SG_ LV_Voltage : 31|10@1+ (0.025,0) [0|0] "V" K16_BECM
+   SG_ Charger_HV_Current : 7|13@0+ (0.05,0) [0|0] "A" K16_BECM
+   SG_ HV_Voltage : 10|10@0+ (0.5,0) [0|0] "V" K16_BECM
+   SG_ LV_Current : 16|8@0+ (0.2,0) [0|0] "A" K16_BECM
+   SG_ LV_Voltage : 24|8@0+ (0.1,0) [0|0] "V" K16_BECM
 
 BO_ 770 Battery_temp: 8 K16_BECM
    SG_ Temp_A m0 : 8|8@1+ (0.5,-40) [0|0] "C" K16_BECM
@@ -172,16 +172,15 @@ BO_ 772 Charger_parameters: 4 T18_BatteryCharger
    SG_ Voltage : 23|16@0+ (0.5,0) [0|0] "V" Vector__XXX
 
 BO_ 1120 Coolant_Temp: 4 K16_BECM
-   SG_ Coolant_Temp : 7|16@0+ (1,0) [0|0] "" Vector__XXX
+   SG_ Inlet_Coolant_Temp : 1|10@0+ (0.125,-40) [0|0] "" Vector__XXX
+   SG_ Outlet_Coolant_Temp : 17|10@0+ (0.125,-40) [0|0] "" Vector__XXX
 
 BO_ 778 AC_Stats: 7 T18_BatteryCharger
-   SG_ Mains_Voltage : 0|12@1+ (0.1,0) [0|0] "V" Vector__XXX
+   SG_ Mains_Voltage : 10|2@0+ (1,0) [0|0] "V" Vector__XXX
    SG_ Total_Charge : 19|8@0+ (1,0) [0|0] "" Vector__XXX
 
-BO_ 776 Charger_unknown: 5 T18_BatteryCharger
-   SG_ Bit_20 : 20|1@1+ (1,0) [0|0] "" Vector__XXX
-   SG_ Bit_21 : 21|1@1+ (1,0) [0|0] "" Vector__XXX
-   SG_ Bit_22 : 22|1@1+ (1,0) [0|0] "" Vector__XXX
+BO_ 776 Charger_status: 5 T18_BatteryCharger
+   SG_ Status : 20|3@1+ (1,0) [0|0] "" Vector__XXX
 
 BA_DEF_ BO_ "GenMsgBackgroundColor" STRING ;
 BA_DEF_ BO_ "GenMsgForegroundColor" STRING ;
@@ -193,3 +192,5 @@ CM_ BU_ K16_BECM "Battery Energy Control Module";
 CM_ BU_ K114B_HPCM "Hybrid Powertrain Control Module";
 CM_ BU_ T18_BatteryCharger "Battery Charger";
 VAL_ 782 Command 1 "12V_Only" 2 "HV_Only" 3 "12V_and_HV";
+VAL_ 778 Mains_Voltage 0 "Unplugged" 1 "110V" 3 "220V";
+VAL_ 776 Status 0 "Off" 5 "LV_Only" 7 "HV_and_LV" 3 "HV_Only";
