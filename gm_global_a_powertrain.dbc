@@ -117,9 +117,9 @@ BO_ 388 PSCMStatus: 8 K43_PSCM
  SG_ HandsOffSWDetectionMode : 20|2@0+ (1,0) [0|3] "" NEO
  SG_ HandsOffSWlDetectionStatus : 21|1@0+ (1,0) [0|1] "" NEO
  SG_ LKATorqueDeliveredStatus : 5|3@0+ (1,0) [0|7] "" NEO
- SG_ LKADriverAppldTrq : 50|11@0- (0.01,0) [-10.24|10.23] "Nm" NEO
- SG_ LKATorqueDelivered : 18|11@0- (0.01,0) [0|1] "" NEO
- SG_ LKATotalTorqueDelivered : 2|11@0- (0.01,0) [-10.24|10.23] "Nm" NEO
+ SG_ LKADriverAppldTrq : 50|11@0- (1,0) [0|0] "" NEO
+ SG_ LKATorqueDelivered : 18|11@0- (1,0) [0|0] "" NEO
+ SG_ LKATotalTorqueDelivered : 2|11@0- (1,0) [0|0] "" NEO
 
 BO_ 417 AcceleratorPedal: 7 XXX
  SG_ AcceleratorPedal : 55|8@0+ (1,0) [0|0] ""  NEO
