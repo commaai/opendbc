@@ -208,7 +208,7 @@ void CANParser::UpdateValid(uint64_t sec) {
   }
 }
 
-void CANParser::update_string(char* data, uint32_t len, bool sendcan) {
+void CANParser::update_string(char* data, size_t len, bool sendcan) {
   // format for board, make copy due to alignment issues, will be freed on out of scope
   auto amsg = kj::heapArray<capnp::word>((len / sizeof(capnp::word)) + 1);
   memcpy(amsg.begin(), data, len);
