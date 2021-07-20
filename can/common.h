@@ -56,7 +56,7 @@ public:
             const std::vector<SignalParseOptions> &sigoptions);
   void UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Reader& cans);
   void UpdateValid(uint64_t sec);
-  void update_string(char* data, uint32_t len, bool sendcan);
+  void update_string(char* data, size_t len, bool sendcan);
   std::vector<SignalValue> query_latest();
 };
 
