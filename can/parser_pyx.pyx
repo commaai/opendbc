@@ -184,9 +184,7 @@ cdef class CANDefine():
       defs = def_val[1::2]
 
       if address not in dv:
-        dv[address] = {}
         msgname = address_to_msg_name[address]
-        dv[msgname] = {}
 
       # two ways to lookup: address or msg name
       dv[address][sgname] = dict(zip(values, defs))
