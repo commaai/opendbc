@@ -270,9 +270,11 @@ BO_ 1504 ServicesKOMBI: 8 XXX
 
 BO_ 1522 ServicesKBM: 8 XXX
 
-BO_ 209 Accelerometer: 8 XXX
- SG_ LateralAcceleration : 0|16@1- (1,0) [0|7] "" XXX
- SG_ LongitudalAcceleration : 32|16@1- (1,0) [0|65535] "" XXX
+BO_ 209 Accelerometer1: 8 XXX
+ SG_ Counter1 : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_1 : 16|16@1- (1,0) [0|65535] "" XXX
+ SG_ YawRate : 0|16@1- (1,0) [0|7] "" XXX
+ SG_ PitchRate : 32|16@1- (1,0) [0|65535] "" XXX
 
 BO_ 172 WheelTorqueDrivetrain2: 8 XXX
 
@@ -289,15 +291,12 @@ BO_ 212 Unknown_d4: 8 XXX
  SG_ Counter1 : 55|8@0+ (1,0) [0|255] "" XXX
  SG_ Counter2 : 63|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 205 Unknown_cd: 8 XXX
- SG_ NEW_SIGNAL_2 : 15|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_3 : 23|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_4 : 31|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_5 : 39|8@0- (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_6 : 47|8@0+ (1,0) [0|255] "" XXX
- SG_ Counter1 : 55|4@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_7 : 63|8@0- (1,0) [0|255] "" XXX
+BO_ 205 Accelerometer2: 8 XXX
+ SG_ NEW_SIGNAL_7 : 63|10@0- (1,0) [0|255] "" XXX
+ SG_ Sig : 55|4@0+ (1,0) [0|255] "" XXX
+ SG_ LateralAcceleration : 32|16@1- (1,0) [0|255] "" XXX
+ SG_ YawRate : 0|16@1- (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_1 : 16|16@1- (1,0) [0|65535] "" XXX
 
 BO_ 1577 NEW_MSG_1: 8 XXX
 
