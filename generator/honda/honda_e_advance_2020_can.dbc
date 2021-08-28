@@ -7,7 +7,7 @@ BO_ 304 GAS_PEDAL_2: 8 PCM
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
 
-BO_ 401 GEARBOX: 8 PCM
+BO_ 419 GEARBOX: 8 PCM
  SG_ GEAR_SHIFTER : 5|6@0+ (1,0) [0|63] "" EON
  SG_ BOH : 45|6@0+ (1,0) [0|63] "" XXX
  SG_ GEAR2 : 31|8@0+ (1,0) [0|1] "" XXX
@@ -23,16 +23,6 @@ BO_ 432 STANDSTILL: 7 VSA
  SG_ COUNTER : 53|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 51|4@0+ (1,0) [0|15] "" EON
 
-BO_ 506 LEGACY_BRAKE_COMMAND: 8 ADAS
- SG_ CHIME : 40|8@1+ (1,0) [0|255] "" XXX
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
-
-BO_ 892 CRUISE_PARAMS: 8 PCM
- SG_ CRUISE_SPEED_OFFSET : 31|8@0- (0.1,0) [-128|127] "kph" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|15] "" EON
-
 BO_ 927 RADAR_HUD: 8 RADAR
  SG_ ZEROS_BOH : 7|10@0+ (1,0) [0|127] "" BDY
  SG_ CMBS_OFF : 12|1@0+ (1,0) [0|1] "" BDY
@@ -46,17 +36,8 @@ BO_ 927 RADAR_HUD: 8 RADAR
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
-BO_ 1029 DOORS_STATUS: 8 BDY
- SG_ DOOR_OPEN_FL : 37|1@0+ (1,0) [0|1] "" EON
- SG_ DOOR_OPEN_FR : 38|1@0+ (1,0) [0|1] "" EON
- SG_ DOOR_OPEN_RL : 39|1@0+ (1,0) [0|1] "" EON
- SG_ DOOR_OPEN_RR : 40|1@0+ (1,0) [0|1] "" EON
- SG_ TRUNK_OPEN : 41|1@0+ (1,0) [0|1] "" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
-
-VAL_ 401 GEAR_SHIFTER 32 "L" 16 "S" 8 "D" 4 "N" 2 "R" 1 "P" ;
-VAL_ 401 GEAR 7 "L" 10 "S" 4 "D" 3 "N" 2 "R" 1 "P" ;
+VAL_ 419 GEAR_SHIFTER 32 "L" 16 "S" 8 "D" 4 "N" 2 "R" 1 "P" ;
+VAL_ 419 GEAR 7 "L" 10 "S" 4 "D" 3 "N" 2 "R" 1 "P" ;
 VAL_ 545 ECON_ON_2 0 "off" 3 "on" ;
 VAL_ 662 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "cancel" 1 "main" 0 "none" ;
 VAL_ 662 CRUISE_SETTING 3 "distance_adj" 2 "tbd" 1 "lkas_button" 0 "none" ;
