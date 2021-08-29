@@ -1,4 +1,4 @@
-CM_ "IMPORT _bosch_2018.dbc";
+CM_ "IMPORT _bosch_2020.dbc";
 
 BO_ 304 GAS_PEDAL_2: 8 PCM
  SG_ ENGINE_TORQUE_ESTIMATE : 7|16@0- (1,0) [-1000|1000] "Nm" EON
@@ -36,7 +36,7 @@ BO_ 927 RADAR_HUD: 8 RADAR
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
-VAL_ 419 GEAR_SHIFTER 32 "L" 16 "S" 8 "D" 4 "N" 2 "R" 1 "P" ;
+VAL_ 419 GEAR_SHIFTER 32 "L" 16 "S" 1 "D" 4 "N" 10 "R" 0 "P" ;
 VAL_ 419 GEAR 7 "L" 10 "S" 4 "D" 3 "N" 2 "R" 1 "P" ;
 VAL_ 545 ECON_ON_2 0 "off" 3 "on" ;
 VAL_ 662 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "cancel" 1 "main" 0 "none" ;
