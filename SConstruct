@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sysconfig
+import numpy as np
 
 zmq = 'zmq'
 arch = subprocess.check_output(["uname", "-m"], encoding='utf8').rstrip()
@@ -61,6 +62,7 @@ Export('cereal', 'messaging')
 
 
 envCython = env.Clone()
+envCython["CPPPATH"] += [np.get_include()]
 envCython["CCFLAGS"] += ["-Wno-#warnings", "-Wno-deprecated-declarations"]
 
 python_libs = []
