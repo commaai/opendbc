@@ -52,7 +52,8 @@ env = Environment(
 )
 
 QCOM_REPLAY = False
-Export('env', 'zmq', 'arch', 'QCOM_REPLAY')
+common = ''
+Export('env', 'zmq', 'arch', 'QCOM_REPLAY', 'common')
 
 cereal = [File('#cereal/libcereal.a')]
 messaging = [File('#cereal/libmessaging.a')]
