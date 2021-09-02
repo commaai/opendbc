@@ -247,7 +247,7 @@ CM_ SG_ 801 Cruise_State_Msg "1 = Cruise_Off_Steep_Slope, 2 = Cruise_lvl1_eco, 3
 CM_ SG_ 801 Cruise_Soft_Disable "Eyesight soft disable (eg direct sunlight)";
 CM_ SG_ 801 Cruise_Status_Msg "1 = Disabled_Bad_Visibility, 2 = Disabled_Check_Manual";
 CM_ SG_ 802 LKAS_ACTIVE "Turns on the full LKAS dash display";
-CM_ SG_ 802 LKAS_Alert_Msg "1 = Keep_Hands_On_Wheel, 6 = Pre_Collision_Braking, 7 = Keep_Hands_On_Wheel_Now";
+CM_ SG_ 802 LKAS_Alert_Msg "1 = Keep_Hands_On_Wheel, 6 = Pre_Collision_Braking, 7 = Keep_Hands_On_Wheel_Off";
 CM_ SG_ 802 LKAS_Alert "1 = FCW_Cont_Beep, 2 = FCW_Repeated_Beep, 3 = Throttle_Management_Activated_Warning, 4 = Throttle_Management_Activated_Alert, 5 = Pre_Collision_Activated_Alert, 8 = Traffic_Light_Ahead, 9 = Apply_Brake_to_Hold Position, 11 = LDW_Right, 12 = LDW_Left, 13 = Stay_Alert, 14 = Lead_Vehicle_Start_Alert, 18 = Keep_Hands_On_Steering_Alert, 24 = Audio_Beep, 25 = Audio_Lead_Car_Change, 26 = Audio_ACC_Disengaged, 27 = Audio_LKAS_disabled, 28 = Audio_Ding_Ding, 30 = Audio_Repeated_Beep";
 CM_ SG_ 802 LKAS_Left_Line_Visible "0 = Off, 1 = White, 2 = Green, 3 = Orange";
 CM_ SG_ 802 LKAS_Dash_State "0 = Off, 1 = Ready, 2 = Active";
