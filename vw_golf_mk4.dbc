@@ -1150,7 +1150,7 @@ BO_ 644 Motor_Bremse: 6 XXX
  SG_ MOB_Bremsstgr : 16|11@1+ (0.76,0) [0|100] "Unit_PerCent" Vector__XXX
  SG_ MOB_Bremsmom : 27|13@1+ (1,0) [0|8190] "Unit_NewtoMeter" Bremse_MK25AESP
 
-BO_ 870 mAWV: 5 ACC
+BO_ 870 AWV: 5 XXX
  SG_ AWV_2_Gurtstraffer : 39|1@1+ (1,0) [0|1] ""  Bremsbooster
  SG_ AWV_Infoton : 38|1@1+ (1,0) [0|1] ""  Gateway_Kbi_VW_A,Bremsbooster
  SG_ AWV_2_Warnsymbol : 37|1@1+ (1,0) [0|1] ""  Gateway_Kbi_VW_A,Bremsbooster
