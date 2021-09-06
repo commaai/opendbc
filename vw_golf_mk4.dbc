@@ -1139,7 +1139,7 @@ BO_ 210 HCA_1: 5 XXX
  SG_ Vib_Freq : 32|4@1+ (4,0) [0|60] "Hz" XXX
  SG_ Vib_Amp : 36|4@1+ (0.5,0) [0|7.5] "Nm" XXX
  
-BO_ 644 mMotor_Bremse: 6 Motor_Diesel
+BO_ 644 Motor_Bremse: 6 XXX
  SG_ MOB_Standby : 12|1@1+ (1,0) [0|1] "" Bremse_MK25AESP
  SG_ MOB_Freigabe : 14|1@1+ (1,0) [0|1] "" BCM_Gateway,Bremse_MK25AESP,Gateway_separat
  SG_ MOB_Anhaltewunsch : 13|1@1+ (1,0) [0|1] "" Bremse_MK25AESP,Getriebe_DQ
