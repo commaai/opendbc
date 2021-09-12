@@ -86,11 +86,11 @@ BO_ 403 DynamicCruiseControlStatus: 8 DSC
  SG_ CruiseSpeedChangeRequest : 48|1@0+ (1,0) [0|1] "" XXX
  SG_ CruiseControlSetpointSpeed : 15|8@0+ (1,-2) [0|255] "kph/mph" XXX
 
-BO_ 201 SteeringWheelAngle_DSC: 8 SZL
- SG_ Counter1 : 23|4@0+ (1,0) [0|15] "" XXX
- SG_ WeirdCounter : 44|4@1+ (1,0) [0|3] "" XXX
- SG_ SteeringPositionComplementLow : 24|11@1- (1,0) [0|1] "" XXX
- SG_ SteeringPosition : 0|16@1- (0.0428316886,0) [-600|600] "deg" XXX
+BO_ 201 SteeringWheelAngle: 8 SZL
+ SG_ Counter1 : 23|4@0+ (1,0) [0|15] "" DSC
+ SG_ WeirdCounter : 44|4@1+ (1,0) [0|3] "" DSC
+ SG_ SteeringPositionComplementLow : 24|11@1- (1,0) [0|1] "" DSC
+ SG_ SteeringPosition : 0|16@1- (0.0428316886,0) [-600|600] "deg" DSC
 
 BO_ 206 WheelSpeeds: 8 DSC
  SG_ Wheel1 : 0|16@1- (0.0643699,0) [0|255] "kph" XXX
@@ -299,9 +299,9 @@ BO_ 205 Accelerometer2: 8 XXX
  SG_ YawRate : 0|16@1- (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_1 : 16|16@1- (1,0) [0|65535] "" XXX
 
-BO_ 790 OperationPushButtonDSC: 2 JBBF
- SG_ setMe_0x3FFF : 2|14@1+ (1,0) [0|63] "" XXX
- SG_ DTC_pressed : 0|1@1+ (1,0) [0|3] "" XXX
+BO_ 790 OperationPushButton_DTC: 2 JBBF
+ SG_ setMe_0x3FFF : 2|14@1+ (1,0) [0|63] "" DSC
+ SG_ DTC_pressed : 0|1@1+ (1,0) [0|3] "" DSC
 
 BO_ 1577 Unknown_629: 8 XXX
 
