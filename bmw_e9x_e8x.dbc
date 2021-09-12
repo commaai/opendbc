@@ -33,10 +33,10 @@ NS_ :
 
 BS_:
 
-BU_: XXX EON Vector__XXX
+BU_: EON XXX RDC ACSM_ROSE SZL VGSG JBBF RFK FLA RAD1 CAS CID AHM HKL HUD EKP DWA DSC_CT SM_BF GWS VDM DDE1 ACI CCC DSC SM_FA CTM LDM RSE MRSZ VDA EDCK ZBE EGS ACC_Sensor Kombi IHKA ARS ACSM FZD PGS NVC AFS DME FRMFA EMF FKA VSW EPS PDC DKG EHC Diagnosetool_PT_CAN Diagnosetool_K_CAN_System Vector__XXX
 
 
-BO_ 170 AccPedal: 8 XXX
+BO_ 170 AccPedal: 8 DME
  SG_ KickDownPressed : 53|1@0+ (1,0) [0|3] "" XXX
  SG_ CruisePedalActive : 54|1@0+ (1,0) [0|1] "" XXX
  SG_ CruisePedalInactive : 55|1@0+ (1,0) [0|1] "" XXX
@@ -47,7 +47,7 @@ BO_ 170 AccPedal: 8 XXX
  SG_ EngineSpeed : 32|16@1- (1,0) [0|65535] "" XXX
  SG_ uknown : 7|8@0- (1,0) [0|65535] "" XXX
 
-BO_ 404 CruiseControl: 4 XXX
+BO_ 404 CruiseControl: 4 SZL
  SG_ plus1mph_request : 16|1@0+ (1,0) [0|1] "" XXX
  SG_ minus1mph_request : 18|1@0+ (1,0) [0|1] "" XXX
  SG_ Cancel_request_up_stalk : 23|1@0+ (1,0) [0|1] "" XXX
@@ -61,18 +61,18 @@ BO_ 404 CruiseControl: 4 XXX
  SG_ plus5mph_request : 17|1@0+ (1,0) [0|0] "" Vector__XXX
  SG_ minus5mph_request : 19|1@0+ (1,0) [0|0] "" Vector__XXX
 
-BO_ 512 CruiseControlStatus: 8 XXX
+BO_ 512 CruiseControlStatus: 8 DME
  SG_ CruiseControlInactiveFlag : 12|1@0+ (1,0) [0|1] "" XXX
  SG_ CruiseCoontrolActiveFlag : 13|1@0+ (1,0) [0|1] "" XXX
  SG_ CruiseControlSetpointSpeed : 7|8@0+ (0.25,0) [0|255] "mph" XXX
 
-BO_ 168 EngineAndBrake: 8 XXX
+BO_ 168 EngineAndBrake: 8 DME
  SG_ EngineTorque : 8|16@1- (1,0) [0|65535] "" XXX
  SG_ EngineTorqueWoInterv : 24|16@1- (1,0) [0|65535] "" XXX
  SG_ BrakePressed : 61|1@0+ (1,0) [0|1] "" XXX
  SG_ Brake_active2 : 62|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 470 SteeringButtons: 2 XXX
+BO_ 470 SteeringButtons: 2 SZL
  SG_ Volume_DOWN : 2|1@0+ (1,0) [0|1] "" XXX
  SG_ Volume_UP : 3|1@0+ (1,0) [0|1] "" XXX
  SG_ VoiceControl : 8|1@0+ (1,0) [0|1] "" XXX
@@ -80,59 +80,59 @@ BO_ 470 SteeringButtons: 2 XXX
  SG_ Next_up : 5|1@0+ (1,0) [0|1] "" XXX
  SG_ Previous_down : 4|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 403 DynamicCruiseControlStatus: 8 XXX
+BO_ 403 DynamicCruiseControlStatus: 8 DSC
  SG_ Counter : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ CruiseActive : 43|1@0+ (1,0) [0|1] "" XXX
  SG_ CruiseSpeedChangeRequest : 48|1@0+ (1,0) [0|1] "" XXX
  SG_ CruiseControlSetpointSpeed : 15|8@0+ (1,-2) [0|255] "kph/mph" XXX
 
-BO_ 201 SteeringWheelAngle_DSC: 8 XXX
+BO_ 201 SteeringWheelAngle_DSC: 8 SZL
  SG_ Counter1 : 23|4@0+ (1,0) [0|15] "" XXX
  SG_ WeirdCounter : 44|4@1+ (1,0) [0|3] "" XXX
  SG_ SteeringPositionComplementLow : 24|11@1- (1,0) [0|1] "" XXX
  SG_ SteeringPosition : 0|16@1- (0.0428316886,0) [-600|600] "deg" XXX
 
-BO_ 206 WheelSpeeds: 8 XXX
+BO_ 206 WheelSpeeds: 8 DSC
  SG_ Wheel1 : 0|16@1- (0.0643699,0) [0|255] "kph" XXX
  SG_ Wheel2 : 16|16@1- (0.0643699,0) [0|255] "kph" XXX
  SG_ Wheel4 : 48|16@1- (0.0643699,0) [0|255] "kph" XXX
  SG_ Wheel3 : 32|16@1- (0.0643699,0) [0|255] "kph" XXX
 
-BO_ 884 WheelToleranceAdjustment: 8 XXX
+BO_ 884 WheelToleranceAdjustment: 8 DSC
 
-BO_ 678 WiperSwitch: 8 XXX
+BO_ 678 WiperSwitch: 8 SZL
  SG_ AutoWipersOn : 0|1@1+ (1,0) [0|3] "" XXX
 
-BO_ 304 TerminalStatus: 8 XXX
+BO_ 304 TerminalStatus: 8 CAS
  SG_ AccOn : 23|1@0+ (1,0) [0|255] "" XXX
  SG_ IgnitionOff : 22|1@0+ (1,0) [0|3] "" XXX
  SG_ IgnitioOn : 33|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 169 Torque2: 8 XXX
+BO_ 169 Torque2: 8 DME
 
-BO_ 184 TorqueTransmisionRequest: 8 XXX
+BO_ 184 TorqueTransmisionRequest: 8 LDM
  SG_ Counter1 : 0|4@1+ (1,0) [0|15] "" XXX
  SG_ Counter2 : 8|4@1+ (1,0) [0|15] "" XXX
 
-BO_ 196 SteeringWheelAngle: 7 XXX
+BO_ 196 SteeringWheelAngle: 7 DSC
  SG_ SteeringSpeed : 24|16@1- (0.0428316886,0) [0|255] "degree/s" XXX
  SG_ SteeringPosition : 0|16@1- (0.0428316886,0) [-600|600] "degree" XXX
 
-BO_ 180 WheelTorqueDriveTrain1: 8 XXX
+BO_ 180 WheelTorqueDriveTrain1: 8 DME
 
-BO_ 182 DynamicCruiseControlTorqueDemand: 8 XXX
+BO_ 182 DynamicCruiseControlTorqueDemand: 8 DSC
 
-BO_ 186 TransmissionData: 8 XXX
+BO_ 186 TransmissionData: 8 EGS
  SG_ Counter_2 : 48|4@1+ (1,0) [0|14] "" XXX
  SG_ Counter_1 : 40|4@1+ (1,0) [0|15] "" XXX
 
-BO_ 191 RequestedWheelTorqueDriveTrainActiveCruiseControl: 8 XXX
+BO_ 191 RequestedWheelTorqueDriveTrain: 8 LDM
  SG_ Counter : 11|4@0- (1,0) [0|255] "" XXX
  SG_ TorqueReq : 16|11@1+ (1,0) [0|65535] "" XXX
 
-BO_ 414 Status_DSC: 8 XXX
+BO_ 414 StatusDSC: 8 DSC
 
-BO_ 416 Speed: 8 XXX
+BO_ 416 Speed: 8 DSC
  SG_ AccX : 28|12@1- (1,0) [0|15] "" XXX
  SG_ YawRate : 40|12@1- (1,0) [0|255] "" XXX
  SG_ VehicleSpeed : 0|12@1- (0.103,0) [0|255] "kph" XXX
@@ -142,16 +142,16 @@ BO_ 416 Speed: 8 XXX
  SG_ Checksum : 56|8@1+ (1,0) [0|15] "" XXX
  SG_ MovingForward : 12|1@1+ (1,0) [0|15] "" XXX
 
-BO_ 418 TransimissionData2: 8 XXX
+BO_ 418 TransimissionData2: 8 EGS
  SG_ ManualMode : 50|1@0+ (1,0) [0|255] "" XXX
  SG_ Counter1 : 31|4@0+ (1,0) [0|14] "" XXX
  SG_ Counter2 : 63|4@0+ (1,0) [0|15] "" XXX
 
-BO_ 690 WheelPressure: 8 XXX
+BO_ 690 WheelPressure: 8 DSC
 
-BO_ 691 AccelerationData: 8 XXX
+BO_ 691 AccelerationData: 8 DSC
 
-BO_ 408 GearSelectorSwitch: 8 XXX
+BO_ 408 GearSelectorSwitch: 8 GWS
  SG_ ParkButtonSecond : 26|2@1+ (1,0) [0|3] "" XXX
  SG_ SideButton : 29|2@0+ (1,0) [0|3] "" XXX
  SG_ SportButtonPressed : 35|2@0+ (1,0) [0|255] "" XXX
@@ -168,22 +168,22 @@ BO_ 408 GearSelectorSwitch: 8 XXX
  SG_ ShifterPositionXOR1111 : 16|7@1+ (1,0) [0|15] "" XXX
  SG_ ShifterPosition : 12|4@1+ (1,0) [0|0] "" Vector__XXX
 
-BO_ 422 Distance: 8 XXX
+BO_ 422 DistanceRoute: 8 DSC
 
-BO_ 436 InstrumentClusterStatus_KOMBI: 8 XXX
+BO_ 436 InstrumentClusterStatus_KOMBI: 8 CCC
 
-BO_ 464 EngineData: 8 XXX
+BO_ 464 EngineData: 8 DME
  SG_ Counter : 23|8@0+ (1,0) [0|65535] "" XXX
 
-BO_ 945 TransmissionData3: 8 XXX
+BO_ 945 TransmissionData3: 8 DKG
  SG_ Counter_1 : 0|5@1+ (1,0) [0|19] "" XXX
  SG_ Counter_2 : 8|4@1+ (1,0) [0|14] "" XXX
 
-BO_ 200 SteeringWheelAngle_slow: 8 XXX
+BO_ 200 SteeringWheelAngle_slow: 8 SZL
  SG_ SteeringPosition : 0|16@1- (0.0428316886,0) [-600|600] "degree" XXX
  SG_ SteeringSpeed : 24|16@1- (0.0428316886,0) [-65535|65535] "degree/s" XXX
 
-BO_ 466 TransmissionDataDisplay: 8 XXX
+BO_ 466 TransmissionDataDisplay: 8 EGS
  SG_ ShiftLeverMode : 32|2@1+ (1,0) [0|3] "" XXX
  SG_ GearRelated_TBD : 15|4@0+ (1,0) [0|15] "" XXX
  SG_ Counter : 31|4@0+ (1,0) [0|14] "" XXX
@@ -192,7 +192,7 @@ BO_ 466 TransmissionDataDisplay: 8 XXX
  SG_ ShiftLeverPositionXOR : 4|4@1+ (1,0) [0|0] "" Vector__XXX
  SG_ SportButtonState : 26|1@1+ (1,0) [0|1] "" XXX
 
-BO_ 437 HeatFlow_LoadMomentClimate: 8 XXX
+BO_ 437 HeatFlow_LoadTorqueClimate: 8 IHKA
 
 BO_ 1152 NetworkManagment1: 8 XXX
 
@@ -207,59 +207,59 @@ BO_ 1193 NetworkManagment5: 8 XXX
 BO_ 1246 GWS_ShiftLeverHeartbeat: 8 XXX
  SG_ IgnOff : 12|1@0+ (1,0) [0|3] "" XXX
 
-BO_ 438 HeatFlowEngine: 8 XXX
+BO_ 438 HeatFlowEngine: 8 DME
 
-BO_ 784 AmbientTemperature: 8 XXX
+BO_ 784 AmbientTemperature: 8 Kombi
 
-BO_ 821 ElectricFuelPumpStatus: 8 XXX
+BO_ 821 ElectricFuelPumpStatus: 8 EKP
 
-BO_ 1007 EngineOBD_data: 8 XXX
+BO_ 1007 EngineOBD_data: 8 DME
 
 BO_ 1432 ServicesDKG: 8 XXX
 
-BO_ 309 CrashDisconnectControl: 8 XXX
+BO_ 309 CrashDisconnectControl: 8 ACSM
 
-BO_ 502 TurnSignals: 2 XXX
+BO_ 502 TurnSignals: 2 FRMFA
  SG_ TurnSignalIdle : 9|1@0+ (1,0) [0|1] "" XXX
  SG_ TurnSignalActive : 8|1@0+ (1,0) [0|1] "" XXX
  SG_ RightTurn : 5|1@0+ (1,0) [0|1] "" XXX
  SG_ LeftTurn : 4|1@1+ (1,0) [0|1] "" XXX
  SG_ HoldActivated : 0|1@1+ (1,0) [0|1] "" XXX
 
-BO_ 514 Dimming: 8 XXX
+BO_ 514 Dimming: 8 FRMFA
 
-BO_ 538 LampsCondition: 8 XXX
+BO_ 538 LampsCondition: 8 FRMFA
 
-BO_ 550 RainSensorWiperSpeed: 8 XXX
+BO_ 550 RainSensorWiperSpeed: 8 FZD
 
-BO_ 578 ClimateFrontStatus: 8 XXX
+BO_ 578 ClimateFrontStatus: 8 IHKA
 
-BO_ 704 LCD_lighting: 8 XXX
+BO_ 704 LCD_lighting: 8 Kombi
 
-BO_ 758 LightControl: 8 XXX
+BO_ 758 LightControl: 8 FRMFA
 
-BO_ 760 Time_Date: 8 XXX
+BO_ 760 Time_Date: 8 Kombi
 
-BO_ 762 SeatBeltContact: 8 XXX
+BO_ 762 SeatBeltContact: 8 ACSM
 
-BO_ 764 TrunkStatus: 8 XXX
+BO_ 764 TrunkStatus: 8 CAS
 
-BO_ 797 TirePressureStatus: 8 XXX
+BO_ 797 TirePressureStatus: 8 DSC
 
-BO_ 816 Range_Mileage: 8 XXX
+BO_ 816 Range_Mileage: 8 Kombi
 
-BO_ 823 StatusFuelControl: 8 XXX
+BO_ 823 StatusFuelControl: 8 DME
 
-BO_ 897 EngineOilLevelStatus: 8 XXX
+BO_ 897 EngineOilLevelStatus: 8 DME
 
-BO_ 940 Terminal30Eerror: 8 XXX
+BO_ 940 RunOnTimeTerminal30Eerror: 8 JBBF
 
-BO_ 947 PowerManagmentConsumptionControl: 8 XXX
+BO_ 947 PowerManagmentConsumptionControl: 8 DME
 
-BO_ 948 PowerBatteryVoltage: 8 XXX
+BO_ 948 PowerBatteryVoltage: 8 DME
  SG_ BatteryVoltage : 7|24@0+ (0.001,0) [0|65535] "" XXX
 
-BO_ 958 PowerRunningTime: 8 XXX
+BO_ 958 PowerRunningTime: 8 CAS
 
 BO_ 1408 ServicesKGM: 8 XXX
 
@@ -277,7 +277,7 @@ BO_ 209 Accelerometer1: 8 XXX
  SG_ YawRate : 0|16@1- (1,0) [0|7] "" XXX
  SG_ PitchRate : 32|16@1- (1,0) [0|65535] "" XXX
 
-BO_ 172 WheelTorqueDrivetrain2: 8 XXX
+BO_ 172 WheelTorqueDrivetrain2: 8 DME
 
 BO_ 128 Unknown80: 5 XXX
  SG_ State2 : 24|4@1+ (1,0) [0|15] "" XXX
@@ -301,7 +301,7 @@ BO_ 205 Accelerometer2: 8 XXX
 
 BO_ 1577 NEW_MSG_1: 8 XXX
 
-BO_ 790 Operation_push_button_DSC: 2 XXX
+BO_ 790 OperationPushButtonDSC: 2 JBBF
  SG_ setMe_0x3FFF : 2|14@1+ (1,0) [0|63] "" XXX
  SG_ DTC_pressed : 0|1@1+ (1,0) [0|3] "" XXX
 
@@ -323,7 +323,6 @@ CM_ SG_ 404 notCancel_0xF "0xF unless cancel is requested then 0x0";
 CM_ SG_ 168 EngineTorque "Engine torque without inertia - combustion torque";
 CM_ SG_ 168 EngineTorqueWoInterv "Engine torque without inertia and without shift intervention";
 CM_ SG_ 168 BrakePressed "Brake when driver presses the brake or hill hold";
-CM_ SG_ 168 Brake_active2 "";
 CM_ SG_ 403 CruiseControlSetpointSpeed "Speed target - unit depends on locale";
 CM_ SG_ 304 IgnitioOn "Active when engine running";
 CM_ SG_ 416 YawRate "Lateral Acceleration";
@@ -332,7 +331,6 @@ CM_ SG_ 408 SideButton "0x1 = pressed;";
 CM_ SG_ 408 SportButtonPressed "0x1 = pressed;";
 CM_ SG_ 408 M3_button "M3 POWER (?)";
 CM_ SG_ 408 SideButtonXOR11 "Complement value";
-CM_ SG_ 408 m3ShifterPosition "";
 CM_ SG_ 408 param1 "can not be 0x03. Always 0 in 135i.";
 CM_ SG_ 408 param5 "Always 0 in 135i.";
 CM_ SG_ 408 ParkButtonFirst "0x1 = pressed";
