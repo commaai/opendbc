@@ -301,6 +301,10 @@ BO_ 205 Accelerometer2: 8 XXX
 
 BO_ 1577 NEW_MSG_1: 8 XXX
 
+BO_ 790 Operation_push_button_DSC: 2 XXX
+ SG_ setMe_0x3FFF : 2|14@1+ (1,0) [0|63] "" XXX
+ SG_ DTC_pressed : 0|1@1+ (1,0) [0|3] "" XXX
+
 
 
 
@@ -339,6 +343,8 @@ CM_ SG_ 502 TurnSignalActive "Turn signal on or transitioning";
 CM_ SG_ 502 RightTurn "Indicates right blinker or when steering returning right clears left blinker";
 CM_ SG_ 502 LeftTurn "Indicates left blinker or when steering returning left clears right blinker";
 CM_ SG_ 502 HoldActivated "Spikes down if blinker cleared with timeout or turn. Stays off if blinker cleared with stalk";
+CM_ SG_ 790 setMe_0x3FFF "All ones";
+CM_ SG_ 790 DTC_pressed "Traction control off. Message transmitted when pressed. Few presses may be required followed by off.";
 VAL_ 408 ShifterPosition 1 "D" 2 "S" 3 "N" 4 "R" 5 "P" ;
 VAL_ 466 ShiftLeverMode 0 "Normal" 1 "Sport" 2 "Manual" ;
 VAL_ 466 ShiftLeverPosition 0 "Off" 1 "P" 2 "R" 4 "N" 8 "D" ;
