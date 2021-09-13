@@ -67,10 +67,10 @@ BO_ 512 CruiseControlStatus: 8 DME
  SG_ CruiseControlSetpointSpeed : 7|8@0+ (0.25,0) [0|255] "mph" XXX
 
 BO_ 168 EngineAndBrake: 8 DME
- SG_ EngineTorque : 8|16@1- (1,0) [0|65535] "" XXX
- SG_ EngineTorqueWoInterv : 24|16@1- (1,0) [0|65535] "" XXX
  SG_ BrakePressed : 61|1@0+ (1,0) [0|1] "" XXX
  SG_ Brake_active2 : 62|1@0+ (1,0) [0|1] "" XXX
+ SG_ EngineTorque : 8|16@1- (0.03125,0) [-1024|1023] "" XXX
+ SG_ EngineTorqueWoInterv : 24|16@1- (0.03125,0) [-1024|1023.96875] "" XXX
 
 BO_ 470 SteeringButtons: 2 SZL
  SG_ Volume_DOWN : 2|1@0+ (1,0) [0|1] "" XXX
@@ -128,7 +128,7 @@ BO_ 186 TransmissionData: 8 EGS
 
 BO_ 191 RequestedWheelTorqueDriveTrain: 8 LDM
  SG_ Counter : 11|4@0- (1,0) [0|255] "" XXX
- SG_ TorqueReq : 16|11@1+ (1,0) [0|65535] "" XXX
+ SG_ TorqueReq : 16|12@1- (0.5,350) [-1024|1023.96875] "" XXX
 
 BO_ 414 StatusDSC_KCAN: 8 DSC
 
@@ -822,9 +822,9 @@ CM_ SG_ 404 Resume_request "It appears when resume stalk button is depressed";
 CM_ SG_ 404 Counter1 "It accelerates when requests are being sent";
 CM_ SG_ 404 Counter2 "It accelerates when requests are being sent";
 CM_ SG_ 404 notCancel_0xF "0xF unless cancel is requested then 0x0";
+CM_ SG_ 168 BrakePressed "Brake when driver presses the brake or hill hold";
 CM_ SG_ 168 EngineTorque "Engine torque without inertia - combustion torque";
 CM_ SG_ 168 EngineTorqueWoInterv "Engine torque without inertia and without shift intervention";
-CM_ SG_ 168 BrakePressed "Brake when driver presses the brake or hill hold";
 CM_ SG_ 403 CruiseControlSetpointSpeed "Speed target - unit depends on locale";
 CM_ SG_ 304 IgnitioOn "Active when engine running";
 CM_ SG_ 416 YawRate "Lateral Acceleration";
