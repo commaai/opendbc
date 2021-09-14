@@ -131,11 +131,12 @@ BO_ 191 RequestedWheelTorqueDriveTrain: 8 LDM
  SG_ TorqueReq : 16|12@1- (0.5,350) [-1024|1023.96875] "" XXX
 
 BO_ 414 StatusDSC_KCAN: 8 DSC
- SG_ DSC_off : 12|1@1+ (1,0) [0|3] "" XXX
- SG_ Counter1 : 23|4@0+ (1,0) [0|15] "" XXX
- SG_ Counter2 : 63|4@0+ (1,0) [0|15] "" XXX
  SG_ BrakePressure : 48|8@1- (1,0) [0|255] "" XXX
  SG_ BrakeStates : 47|8@0+ (1,0) [0|255] "" XXX
+ SG_ Checksum : 63|8@0+ (1,0) [0|15] "" XXX
+ SG_ Counter : 23|4@0+ (1,0) [0|15] "" XXX
+ SG_ DTC_on : 12|1@1+ (1,0) [0|3] "" XXX
+ SG_ MDM_states_or_DSC_off : 8|4@1+ (1,0) [0|15] "" XXX
 
 BO_ 416 Speed: 8 DSC
  SG_ AccX : 28|12@1- (1,0) [0|15] "" XXX
@@ -832,6 +833,7 @@ CM_ SG_ 168 EngineTorque "Engine torque without inertia - combustion torque";
 CM_ SG_ 168 EngineTorqueWoInterv "Engine torque without inertia and without shift intervention";
 CM_ SG_ 403 CruiseControlSetpointSpeed "Speed target - unit depends on locale";
 CM_ SG_ 304 IgnitioOn "Active when engine running";
+CM_ SG_ 414 MDM_states_or_DSC_off "0x4 enabling, 0xA enabled. Or 0x4 enabled and 0xA is DSC full off. TBD";
 CM_ SG_ 416 YawRate "Lateral Acceleration";
 CM_ SG_ 408 ParkButtonSecond "Redundant buton. 0x1 = pressed;";
 CM_ SG_ 408 SideButton "0x1 = pressed;";
