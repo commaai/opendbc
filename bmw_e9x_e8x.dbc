@@ -131,6 +131,11 @@ BO_ 191 RequestedWheelTorqueDriveTrain: 8 LDM
  SG_ TorqueReq : 16|12@1- (0.5,350) [-1024|1023.96875] "" XXX
 
 BO_ 414 StatusDSC_KCAN: 8 DSC
+ SG_ DSC_off : 12|1@1+ (1,0) [0|3] "" XXX
+ SG_ Counter1 : 23|4@0+ (1,0) [0|15] "" XXX
+ SG_ Counter2 : 63|4@0+ (1,0) [0|15] "" XXX
+ SG_ BrakePressure : 48|8@1- (1,0) [0|255] "" XXX
+ SG_ BrakeStates : 47|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 416 Speed: 8 DSC
  SG_ AccX : 28|12@1- (1,0) [0|15] "" XXX
