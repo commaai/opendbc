@@ -38,6 +38,15 @@ BS_:
 BU_: XXX
 """)
 
+# camera messages ?
+# TODO: not all the same
+for s, l in [(0x202, 8), (0x20A, 3), (0x238, 30), (0x25A, 5), (0x266, 8)]:
+  for a in range(s, s+l):
+    print(f"""
+BO_ {a} V_{hex(a)}: 8 XXX
+""")
+
+# radar messages
 print("""
 BO_ 513 R_0x201: 8 XXX
 
@@ -45,7 +54,7 @@ BO_ 768 R_0x300: 8 XXX
 """)
 
 for s, l in [(0x400, 24), (0x418, 16)]:
-  for a in range(0x400, 0x400+40):
+  for a in range(s, s+l):
     print(f"""
 BO_ {a} R_{hex(a)}: 8 XXX
 """)
@@ -93,6 +102,10 @@ BO_ {a} R_{hex(a)}: 8 XXX
 """)
 
 print("""
+BO_ 1696 R_0x5ED: 8 XXX
+BO_ 1697 R_0x5EE: 8 XXX
+BO_ 1698 R_0x5EF: 8 XXX
+
 BO_ 1696 R_0x6A0: 8 XXX
 BO_ 1697 R_0x6A1: 8 XXX
 BO_ 1698 R_0x6A2: 8 XXX
