@@ -50,6 +50,6 @@ BO_ {a} R_{hex(a)}: 8 XXX
  SG_ NEW_SIGNAL_6 : 37|4@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_7 : 38|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_8 : 39|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_9 : 53|14@0- (0.04,0) [-327.68|327.64] "" XXX
+ SG_ NEW_SIGNAL_9 : 53|14@0- (0.01,0) [-81.92|81.92] "" XXX
  SG_ NEW_SIGNAL_10 : 55|2@0+ (1,0) [0|3] "" XXX
 """)
