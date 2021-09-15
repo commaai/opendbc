@@ -43,13 +43,13 @@ for a in range(0x500, 0x500 + 32):
     print(f"""
 BO_ {a} R_{hex(a)}: 8 XXX
  SG_ NEW_SIGNAL_1 : 7|8@0- (1,0) [-128|127] "" XXX
- SG_ NEW_SIGNAL_2 : 12|10@0- (0.2,0) [-102.4|102.2] "" XXX
- SG_ NEW_SIGNAL_3 : 15|3@0+ (1,0) [0|7] "" XXX
- SG_ NEW_SIGNAL_4 : 18|11@0+ (0.1,0) [0|204.7] "" XXX
- SG_ NEW_SIGNAL_5 : 33|10@0- (0.2,0) [-102.4|102.2] "" XXX
+ SG_ AZIMUTH : 12|10@0- (0.2,0) [-102.4|102.2] "" XXX
+ SG_ STATE : 15|3@0+ (1,0) [0|7] "" XXX
+ SG_ LONG_DIST : 18|11@0+ (0.1,0) [0|204.7] "" XXX
+ SG_ REL_ACCEL : 33|10@0- (0.02,0) [-10.24|10.22] "" XXX
  SG_ NEW_SIGNAL_6 : 37|4@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_7 : 38|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_8 : 39|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_9 : 53|14@0- (0.01,0) [-81.92|81.92] "" XXX
+ SG_ REL_SPEED : 53|14@0- (0.01,0) [-81.92|81.92] "" XXX
  SG_ NEW_SIGNAL_10 : 55|2@0+ (1,0) [0|3] "" XXX
 """)
