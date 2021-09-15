@@ -280,14 +280,14 @@ for s, l in [(0x680, 16), (0x690, 16)]:
 BO_ {a} R_{hex(a)}: 8 XXX
 """)
 
-print("""
-BO_ 1696 R_0x5ED: 8 XXX
-BO_ 1697 R_0x5EE: 8 XXX
-BO_ 1698 R_0x5EF: 8 XXX
+# print("""
+# BO_ 1696 R_0x5ED: 8 XXX
+# BO_ 1697 R_0x5EE: 8 XXX
+# BO_ 1698 R_0x5EF: 8 XXX
 
-BO_ 1696 R_0x6A0: 8 XXX
-BO_ 1697 R_0x6A1: 8 XXX
-BO_ 1698 R_0x6A2: 8 XXX
-BO_ 1699 R_0x6A3: 8 XXX
-BO_ 1700 R_0x6A4: 8 XXX
-""")
+# BO_ 1696 R_0x6A0: 8 XXX
+# BO_ 1697 R_0x6A1: 8 XXX
+# BO_ 1698 R_0x6A2: 8 XXX
+# BO_ 1699 R_0x6A3: 8 XXX
+# BO_ 1700 R_0x6A4: 8 XXX
+# """)
