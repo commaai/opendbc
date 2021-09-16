@@ -167,6 +167,11 @@ BO_ 47 ABS_3: 8 XXX
  SG_ UNKNOWN_LOAD : 47|8@0+ (1,0) [0|1] "" XXX
  SG_ UNKNOWN_BRAKE : 55|8@0+ (1,0) [0|1] "" XXX
 
+BO_ 127 ABS_5: 8 XXX
+ SG_ TONE_COUNTER_RL : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ TONE_COUNTER_FR : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ TONE_COUNTER_FL : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ TONE_COUNTER_RR : 31|8@0+ (1,0) [0|255] "" XXX
 
 
 
@@ -194,4 +199,9 @@ CM_ SG_ 43 ACCEL_LATERAL "verify this isn't crossed up with yaw rate";
 CM_ SG_ 47 UNKNOWN_SPEED_1 "scaling TBD";
 CM_ SG_ 47 UNKNOWN_LOAD "maybe brake manifold vacuum";
 CM_ SG_ 47 UNKNOWN_BRAKE "maybe brake pressure/torque?";
+CM_ SG_ 127 TONE_COUNTER_RL "ABS tone ring impulse counter";
+CM_ SG_ 127 TONE_COUNTER_FR "ABS tone ring impulse counter";
+CM_ SG_ 127 TONE_COUNTER_FL "ABS tone ring impulse counter";
+CM_ SG_ 127 TONE_COUNTER_RR "ABS tone ring impulse counter";
+
 VAL_ 173 SHIFTER_POSITION 4 "D" 3 "N" 2 "R" 1 "P" ;
