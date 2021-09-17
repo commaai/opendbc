@@ -47,7 +47,7 @@ BO_ {a} R_{hex(a)}: 8 RADAR
  SG_ STATE : 15|3@0+ (1,0) [0|7] "" XXX
  SG_ LONG_DIST : 18|11@0+ (0.1,0) [0|204.7] "" XXX
  SG_ REL_ACCEL : 33|10@0- (0.02,0) [-10.24|10.22] "" XXX
- SG_ ZEROS_1 : 37|4@0+ (1,0) [0|255] "" XXX
+ SG_ ZEROS : 37|4@0+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 38|1@0+ (1,0) [0|1] "" XXX
  SG_ STATE_3 : 39|1@0+ (1,0) [0|1] "" XXX
  SG_ REL_SPEED : 53|14@0- (0.01,0) [-81.92|81.92] "" XXX
