@@ -41,7 +41,7 @@ BU_: XXX
 # note: 0x501/0x502 seem to be special in 0x5XX range
 for a in range(0x500, 0x500 + 32):
     print(f"""
-BO_ {a} R_{hex(a)}: 8 RADAR
+BO_ {a} RADAR_TRACK_{a:x}: 8 RADAR
  SG_ ELEVATION : 7|8@0- (1,0) [-128|127] "" XXX
  SG_ AZIMUTH : 12|10@0- (0.2,0) [-102.4|102.2] "" XXX
  SG_ STATE : 15|3@0+ (1,0) [0|7] "" XXX
