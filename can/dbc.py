@@ -148,7 +148,7 @@ class dbc():
       ival = dd.get(s.name)
       if ival is not None:
 
-        ival = (ival / s.factor) - s.offset
+        ival = (ival - s.offset) / s.factor
         ival = int(round(ival))
 
         if s.is_signed and ival < 0:
