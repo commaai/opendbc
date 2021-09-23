@@ -42,7 +42,7 @@ BU_: XXX
 for a in range(0x500, 0x500 + 32):
     print(f"""
 BO_ {a} RADAR_TRACK_{a:x}: 8 RADAR
- SG_ ELEVATION : 7|8@0- (1,0) [-128|127] "" XXX
+ SG_ UNKNOWN_1 : 7|8@0- (1,0) [-128|127] "" XXX
  SG_ AZIMUTH : 12|10@0- (0.2,0) [-102.4|102.2] "" XXX
  SG_ STATE : 15|3@0+ (1,0) [0|7] "" XXX
  SG_ LONG_DIST : 18|11@0+ (0.1,0) [0|204.7] "" XXX
