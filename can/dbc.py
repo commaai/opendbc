@@ -4,6 +4,7 @@ import struct
 import sys
 import numbers
 from collections import namedtuple, defaultdict
+from numpy.testing import assert_almost_equal
 
 def int_or_float(s):
   # return number, trying to maintain int format
