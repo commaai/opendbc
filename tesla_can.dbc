@@ -34,14 +34,14 @@ NS_ :
 BS_:
 
 BU_:
-    NEO
-    MCU
-    GTW
-    EPAS
-    DI
-    ESP
-    SBW
-    STW
+	NEO
+	MCU
+	GTW
+	EPAS
+	DI
+	ESP
+	SBW
+	STW
 	APP
 	DAS
 	XXX
@@ -102,7 +102,6 @@ BO_ 3 STW_ANGL_STAT: 8 STW
  SG_ CRC_STW_ANGL_STAT : 63|8@0+ (1,0) [0|255] ""  NEO
 
 BO_ 14 STW_ANGLHP_STAT: 8 STW
-
  SG_ StW_AnglHP : 5|14@0+ (0.1,-819.2) [-819.2|819] "deg"  NEO
  SG_ StW_AnglHP_Spd : 21|14@0+ (0.5,-4096) [-4096|4095.5] "deg/s"  NEO
  SG_ StW_AnglHP_Sens_Stat : 33|2@0+ (1,0) [0|0] ""  NEO
