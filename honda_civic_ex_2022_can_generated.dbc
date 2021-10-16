@@ -387,7 +387,7 @@ CM_ SG_ 577 LINE_DASHED "1 = line is dashed";
 CM_ SG_ 577 LINE_SOLID "1 = line is solid";
 VAL_ 399 STEER_STATUS 6 "tmp_fault" 5 "fault_1" 4 "no_torque_alert_2" 3 "low_speed_lockout" 2 "no_torque_alert_1" 0 "normal" ;
 
-CM_ "honda_civic_hatchback_ex_2017_can.dbc starts here";
+CM_ "honda_civic_ex_2022_can.dbc starts here";
 
 
 BO_ 304 GAS_PEDAL_2: 8 PCM
@@ -413,7 +413,7 @@ BO_ 432 STANDSTILL: 7 VSA
  SG_ COUNTER : 53|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 51|4@0+ (1,0) [0|15] "" EON
 
-BO_ 479 ACC_CONTROL: 8 EON
+BO_ 477 ACC_CONTROL: 8 EON
  SG_ SET_TO_0 : 20|5@0+ (1,0) [0|1] "" XXX
  SG_ CONTROL_ON : 23|3@0+ (1,0) [0|5] "" XXX
  SG_ GAS_COMMAND : 7|16@0- (1,0) [0|0] "" XXX
@@ -433,7 +433,12 @@ BO_ 506 LEGACY_BRAKE_COMMAND: 8 ADAS
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
 
-BO_ 829 LKAS_HUD: 5 ADAS
+BO_ 892 CRUISE_PARAMS: 8 PCM
+ SG_ CRUISE_SPEED_OFFSET : 31|8@0- (0.1,0) [-128|127] "kph" EON
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
+ SG_ COUNTER : 61|2@0+ (1,0) [0|15] "" EON
+
+BO_ 829 LKAS_HUD: 8 ADAS
  SG_ CAM_TEMP_HIGH : 7|1@0+ (1,0) [0|255] "" BDY
  SG_ SET_ME_X41 : 6|7@0+ (1,0) [0|127] "" BDY
  SG_ BOH : 6|7@0+ (1,0) [0|127] "" BDY
@@ -451,13 +456,8 @@ BO_ 829 LKAS_HUD: 5 ADAS
  SG_ LDW_OFF : 27|1@0+ (1,0) [0|1] "" BDY
  SG_ CLEAN_WINDSHIELD : 26|1@0+ (1,0) [0|1] "" BDY
  SG_ SET_ME_X48 : 31|8@0+ (1,0) [0|255] "" BDY
- SG_ COUNTER : 37|2@0+ (1,0) [0|3] "" BDY
- SG_ CHECKSUM : 35|4@0+ (1,0) [0|15] "" BDY
-
-BO_ 892 CRUISE_PARAMS: 8 PCM
- SG_ CRUISE_SPEED_OFFSET : 31|8@0- (0.1,0) [-128|127] "kph" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|15] "" EON
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" BDY
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" BDY
 
 BO_ 927 RADAR_HUD: 8 RADAR
  SG_ ZEROS_BOH : 7|10@0+ (1,0) [0|127] "" BDY

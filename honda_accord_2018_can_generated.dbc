@@ -135,21 +135,6 @@ BO_ 464 WHEEL_SPEEDS: 8 VSA
  SG_ WHEEL_SPEED_RR : 42|15@0+ (0.01,0) [0|250] "kph" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
 
-BO_ 479 ACC_CONTROL: 8 EON
- SG_ SET_TO_0 : 20|5@0+ (1,0) [0|1] "" XXX
- SG_ CONTROL_ON : 23|3@0+ (1,0) [0|5] "" XXX
- SG_ GAS_COMMAND : 7|16@0- (1,0) [0|0] "" XXX
- SG_ ACCEL_COMMAND : 31|11@0- (0.01,0) [0|0] "m/s2" XXX
- SG_ BRAKE_LIGHTS : 62|1@0+ (1,0) [0|1] "" XXX
- SG_ BRAKE_REQUEST : 34|1@0+ (1,0) [0|1] "" XXX
- SG_ STANDSTILL : 35|1@0+ (1,0) [0|1] "" XXX
- SG_ STANDSTILL_RELEASE : 36|1@0+ (1,0) [0|1] "" XXX
- SG_ AEB_STATUS : 33|1@0+ (1,0) [0|1] "" XXX
- SG_ AEB_BRAKING : 47|1@0+ (1,0) [0|1] "" XXX
- SG_ AEB_PREPARE : 43|1@0+ (1,0) [0|1] "" XXX
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
-
 BO_ 490 VEHICLE_DYNAMICS: 8 VSA
  SG_ LAT_ACCEL : 7|16@0- (0.0015,0) [-20|20] "m/s2" EON
  SG_ LONG_ACCEL : 23|16@0- (0.0015,0) [-20|20] "m/s2" EON
@@ -325,27 +310,6 @@ BO_ 806 SCM_FEEDBACK: 8 SCM
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
-BO_ 829 LKAS_HUD: 5 ADAS
- SG_ CAM_TEMP_HIGH : 7|1@0+ (1,0) [0|255] "" BDY
- SG_ SET_ME_X41 : 6|7@0+ (1,0) [0|127] "" BDY
- SG_ BOH : 6|7@0+ (1,0) [0|127] "" BDY
- SG_ DASHED_LANES : 14|1@0+ (1,0) [0|1] "" BDY
- SG_ DTC : 13|1@0+ (1,0) [0|1] "" BDY
- SG_ LKAS_PROBLEM : 12|1@0+ (1,0) [0|1] "" BDY
- SG_ LKAS_OFF : 11|1@0+ (1,0) [0|1] "" BDY
- SG_ SOLID_LANES : 10|1@0+ (1,0) [0|1] "" BDY
- SG_ LDW_RIGHT : 9|1@0+ (1,0) [0|1] "" BDY
- SG_ STEERING_REQUIRED : 8|1@0+ (1,0) [0|1] "" BDY
- SG_ BOH : 23|2@0+ (1,0) [0|4] "" BDY
- SG_ LDW_PROBLEM : 21|1@0+ (1,0) [0|1] "" BDY
- SG_ BEEP : 17|2@0+ (1,0) [0|1] "" BDY
- SG_ LDW_ON : 28|1@0+ (1,0) [0|1] "" BDY
- SG_ LDW_OFF : 27|1@0+ (1,0) [0|1] "" BDY
- SG_ CLEAN_WINDSHIELD : 26|1@0+ (1,0) [0|1] "" BDY
- SG_ SET_ME_X48 : 31|8@0+ (1,0) [0|255] "" BDY
- SG_ COUNTER : 37|2@0+ (1,0) [0|3] "" BDY
- SG_ CHECKSUM : 35|4@0+ (1,0) [0|15] "" BDY
-
 BO_ 862 CAMERA_MESSAGES: 8 CAM
  SG_ ZEROS_BOH : 7|50@0+ (1,0) [0|127] "" BDY
  SG_ AUTO_HIGHBEAMS_ACTIVE : 53|1@0+ (1,0) [0|1] "" XXX
@@ -458,6 +422,42 @@ BO_ 446 BRAKE_MODULE: 3 VSA
  SG_ BRAKE_PRESSED : 4|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 21|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 19|4@0+ (1,0) [0|15] "" XXX
+
+BO_ 479 ACC_CONTROL: 8 EON
+ SG_ SET_TO_0 : 20|5@0+ (1,0) [0|1] "" XXX
+ SG_ CONTROL_ON : 23|3@0+ (1,0) [0|5] "" XXX
+ SG_ GAS_COMMAND : 7|16@0- (1,0) [0|0] "" XXX
+ SG_ ACCEL_COMMAND : 31|11@0- (0.01,0) [0|0] "m/s2" XXX
+ SG_ BRAKE_LIGHTS : 62|1@0+ (1,0) [0|1] "" XXX
+ SG_ BRAKE_REQUEST : 34|1@0+ (1,0) [0|1] "" XXX
+ SG_ STANDSTILL : 35|1@0+ (1,0) [0|1] "" XXX
+ SG_ STANDSTILL_RELEASE : 36|1@0+ (1,0) [0|1] "" XXX
+ SG_ AEB_STATUS : 33|1@0+ (1,0) [0|1] "" XXX
+ SG_ AEB_BRAKING : 47|1@0+ (1,0) [0|1] "" XXX
+ SG_ AEB_PREPARE : 43|1@0+ (1,0) [0|1] "" XXX
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
+
+BO_ 829 LKAS_HUD: 5 ADAS
+ SG_ CAM_TEMP_HIGH : 7|1@0+ (1,0) [0|255] "" BDY
+ SG_ SET_ME_X41 : 6|7@0+ (1,0) [0|127] "" BDY
+ SG_ BOH : 6|7@0+ (1,0) [0|127] "" BDY
+ SG_ DASHED_LANES : 14|1@0+ (1,0) [0|1] "" BDY
+ SG_ DTC : 13|1@0+ (1,0) [0|1] "" BDY
+ SG_ LKAS_PROBLEM : 12|1@0+ (1,0) [0|1] "" BDY
+ SG_ LKAS_OFF : 11|1@0+ (1,0) [0|1] "" BDY
+ SG_ SOLID_LANES : 10|1@0+ (1,0) [0|1] "" BDY
+ SG_ LDW_RIGHT : 9|1@0+ (1,0) [0|1] "" BDY
+ SG_ STEERING_REQUIRED : 8|1@0+ (1,0) [0|1] "" BDY
+ SG_ BOH : 23|2@0+ (1,0) [0|4] "" BDY
+ SG_ LDW_PROBLEM : 21|1@0+ (1,0) [0|1] "" BDY
+ SG_ BEEP : 17|2@0+ (1,0) [0|1] "" BDY
+ SG_ LDW_ON : 28|1@0+ (1,0) [0|1] "" BDY
+ SG_ LDW_OFF : 27|1@0+ (1,0) [0|1] "" BDY
+ SG_ CLEAN_WINDSHIELD : 26|1@0+ (1,0) [0|1] "" BDY
+ SG_ SET_ME_X48 : 31|8@0+ (1,0) [0|255] "" BDY
+ SG_ COUNTER : 37|2@0+ (1,0) [0|3] "" BDY
+ SG_ CHECKSUM : 35|4@0+ (1,0) [0|15] "" BDY
 
 BO_ 927 RADAR_HUD: 8 RADAR
  SG_ ZEROS_BOH : 7|10@0+ (1,0) [0|127] "" BDY
