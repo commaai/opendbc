@@ -288,9 +288,6 @@ BO_ 1571 CENTRAL_GATEWAY_UNIT: 8 CGW
  SG_ KEYFOB_LOCKING_FEEDBACK_LIGHT : 61|1@0+ (1,0) [0|0] "" XXX
  SG_ KEYFOB_UNLOCKING_FEEDBACK_LIGHT : 62|1@0+ (1,0) [0|0] "" XXX
 
-BO_ 767 SDSU: 8 XXX
- SG_ FD_BUTTON : 7|1@0+ (1,0) [0|1] "" XXX
-
 CM_ SG_ 36 ACCEL_Y "unit is tbd";
 CM_ SG_ 36 YAW_RATE "verify";
 CM_ SG_ 36 STEERING_TORQUE "does not seem the steer torque, tbd";
@@ -307,7 +304,6 @@ CM_ SG_ 614 ANGLE "set to measured angle when ipas control isn't active";
 CM_ SG_ 643 COUNTER "only used on cars that use this msg for cruise control";
 CM_ SG_ 643 BRAKE_STATUS "only used on cars that use this msg for cruise control";
 CM_ SG_ 643 PRECOLLISION_ACTIVE "set 0.5s before any braking";
-CM_ SG_ 767 FD_BUTTON "The follow distance button signal as forwarded by the sdsu"
 CM_ SG_ 835 ACC_TYPE "if 2, car is likely to have a permanent low speed lockout. 1 is ok";
 CM_ SG_ 835 PERMIT_BRAKING "Original ACC has this going high when a car in front is detected. In openpilot and before the PERMIT_BRAKING name, this was 'SET_ME_1' and is hardcoded to be high. Unsure if only informational or has an effect though existing usage in openpilot is to always set it to 1. Originally 'PMTBRKG' in the leaked toyota_2017_ref_pt.dbc file and name expansion speculated to be PerMiT BRaKinG.";
 CM_ SG_ 835 ACCEL_CMD_ALT "Copy of main ACCEL_CMD, but across 8 bits instead of 16 bits like ACCEL_CMD. Unsure if only informational or has an effect. Likely informational as existing openpilot sets this to 0 and no loss of functionality observed. Originally 'AT_RAW' in leaked toyota_2017_ref_pt.dbc file.";
