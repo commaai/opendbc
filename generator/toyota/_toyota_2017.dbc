@@ -164,7 +164,7 @@ BO_ 1041 ACC_HUD: 8 DSU
  SG_ FCW : 4|1@0+ (1,0) [0|1] "" XXX
  SG_ SET_ME_X20 : 15|8@0+ (1,0) [0|1] "" XXX
  SG_ SET_ME_X10 : 39|8@0+ (1,0) [0|1] "" XXX
- SG_ PCS_OFF : 40|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ PCS_OFF : 40|1@0+ (1,0) [0|0] "" XXX
  SG_ PCS_SENSITIVITY : 55|8@0+ (1,0) [0|1] "" XXX
 
 BO_ 1042 LKAS_HUD: 8 XXX
