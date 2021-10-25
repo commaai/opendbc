@@ -127,7 +127,7 @@ BO_ 835 ACC_CONTROL: 8 DSU
  SG_ ACC_MALFUNCTION : 18|1@0+ (1,0) [0|0] "" XXX
  SG_ ACC_CUT_IN : 25|1@0+ (1,0) [0|0] "" XXX
  SG_ ACC_WAITING : 29|1@0+ (1,0) [0|0] "" XXX
- SG_ ALLOW_LONG_PRESS : 31|1@0+ (1,0) [0|0] "" XXX
+ SG_ ALLOW_LONG_PRESS : 17|2@0+ (1,0) [0|0] "" XXX
  SG_ ACC_TYPE : 23|2@0+ (1,0) [0|3] "" HCU
  SG_ DISTANCE : 20|1@0+ (1,0) [0|1] "" XXX
  SG_ MINI_CAR : 21|1@0+ (1,0) [0|1] "" XXX
