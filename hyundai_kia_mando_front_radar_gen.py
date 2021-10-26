@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-print("""
+
+if __name__ == "__main__":
+  print("""
 VERSION ""
 
 
@@ -36,20 +38,20 @@ NS_ :
 BS_:
 
 BU_: XXX
-""")
+  """)
 
-# note: 0x501/0x502 seem to be special in 0x5XX range
-for a in range(0x500, 0x500 + 32):
-    print(f"""
+  # note: 0x501/0x502 seem to be special in 0x5XX range
+  for a in range(0x500, 0x500 + 32):
+      print(f"""
 BO_ {a} RADAR_TRACK_{a:x}: 8 RADAR
- SG_ UNKNOWN_1 : 7|8@0- (1,0) [-128|127] "" XXX
- SG_ AZIMUTH : 12|10@0- (0.2,0) [-102.4|102.2] "" XXX
- SG_ STATE : 15|3@0+ (1,0) [0|7] "" XXX
- SG_ LONG_DIST : 18|11@0+ (0.1,0) [0|204.7] "" XXX
- SG_ REL_ACCEL : 33|10@0- (0.02,0) [-10.24|10.22] "" XXX
- SG_ ZEROS : 37|4@0+ (1,0) [0|255] "" XXX
- SG_ COUNTER : 38|1@0+ (1,0) [0|1] "" XXX
- SG_ STATE_3 : 39|1@0+ (1,0) [0|1] "" XXX
- SG_ REL_SPEED : 53|14@0- (0.01,0) [-81.92|81.92] "" XXX
- SG_ STATE_2 : 55|2@0+ (1,0) [0|3] "" XXX
-""")
+SG_ UNKNOWN_1 : 7|8@0- (1,0) [-128|127] "" XXX
+SG_ AZIMUTH : 12|10@0- (0.2,0) [-102.4|102.2] "" XXX
+SG_ STATE : 15|3@0+ (1,0) [0|7] "" XXX
+SG_ LONG_DIST : 18|11@0+ (0.1,0) [0|204.7] "" XXX
+SG_ REL_ACCEL : 33|10@0- (0.02,0) [-10.24|10.22] "" XXX
+SG_ ZEROS : 37|4@0+ (1,0) [0|255] "" XXX
+SG_ COUNTER : 38|1@0+ (1,0) [0|1] "" XXX
+SG_ STATE_3 : 39|1@0+ (1,0) [0|1] "" XXX
+SG_ REL_SPEED : 53|14@0- (0.01,0) [-81.92|81.92] "" XXX
+SG_ STATE_2 : 55|2@0+ (1,0) [0|3] "" XXX
+  """)
