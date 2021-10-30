@@ -13,4 +13,6 @@ def test_generator():
     comp = filecmp.dircmp(opendbc_root, d, ignore=ignore)
     assert len(comp.diff_files) == 0, f"Different files: {comp.diff_files}"
 
-test_generator()
+
+if __name__ == "__main__":
+  test_generator()
