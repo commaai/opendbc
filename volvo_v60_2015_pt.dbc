@@ -192,8 +192,8 @@ BO_ 1947 diagCVMResp: 8 XXX
 
 BO_ 2015 diagGlobalReq: 8 XXX
  SG_ byte0 : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ byte2 : 23|8@0+ (1,0) [0|255] "" XXX
  SG_ byte1 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte2 : 23|8@0+ (1,0) [0|255] "" XXX
  SG_ byte3 : 31|8@0+ (1,0) [0|255] "" XXX
  SG_ byte4 : 39|8@0+ (1,0) [0|255] "" XXX
  SG_ byte5 : 47|8@0+ (1,0) [0|255] "" XXX
