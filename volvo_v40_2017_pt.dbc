@@ -171,6 +171,11 @@ BO_ 352 FSM2: 8 FSM
  SG_ NEW_SIGNAL_3 : 7|24@0+ (1,0) [0|16777215] "" XXX
  SG_ NEW_SIGNAL_4 : 36|5@0+ (1,0) [0|31] "" XXX
 
+BO_ 432 BrakeMessages: 8 BCM
+ SG_ BrakePress0 : 1|10@0+ (1,0) [0|1023] "" XXX
+ SG_ BrakePress1 : 33|10@0+ (1,0) [0|1023] "" XXX
+ SG_ BrakeStatus : 18|3@0+ (1,0) [0|7] "" XXX
+
 BO_ 464 DIM0: 8 DIM
 
 BO_ 480 BCM0: 8 BCM
@@ -196,6 +201,10 @@ BO_ 652 ECM4: 8 ECM
 BO_ 656 ECM5: 8 ECM
 
 BO_ 657 ECM6: 8 ECM
+
+BO_ 681 MiscCarInfo: 8 CEM
+ SG_ TurnSignal : 1|2@0+ (1,0) [0|3] "" XXX
+ SG_ HighBeamOn : 52|1@0+ (1,0) [0|1] "" XX
 
 BO_ 693 ECM7: 8 ECM
 
@@ -285,8 +294,8 @@ BO_ 1947 diagCVMResp: 8 XXX
 
 BO_ 2015 diagGlobalReq: 8 XXX
  SG_ byte0 : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ byte2 : 23|8@0+ (1,0) [0|255] "" XXX
  SG_ byte1 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ byte2 : 23|8@0+ (1,0) [0|255] "" XXX
  SG_ byte3 : 31|8@0+ (1,0) [0|255] "" XXX
  SG_ byte4 : 39|8@0+ (1,0) [0|255] "" XXX
  SG_ byte5 : 47|8@0+ (1,0) [0|255] "" XXX
