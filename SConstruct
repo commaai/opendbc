@@ -39,6 +39,7 @@ env = Environment(
     "-O2",
     "-Wunused",
     "-Werror",
+    "-Wshadow",
   ] + ccflags_asan,
   LDFLAGS=ldflags_asan,
   LINKFLAGS=ldflags_asan,
@@ -63,7 +64,7 @@ Export('cereal', 'messaging')
 
 envCython = env.Clone()
 envCython["CPPPATH"] += [np.get_include()]
-envCython["CCFLAGS"] += ["-Wno-#warnings", "-Wno-deprecated-declarations"]
+envCython["CCFLAGS"] += ["-Wno-#warnings", "-Wno-shadow", "-Wno-deprecated-declarations"]
 
 python_libs = []
 if arch == "Darwin":
