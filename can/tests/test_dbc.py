@@ -1,9 +1,7 @@
-import os
 import unittest
 
 from numpy.testing import assert_almost_equal
 
-from opendbc import DBC_PATH
 from opendbc.can.parser import DBCParser as dbc
 from opendbc.can.packer import CANPacker
 
