@@ -45,7 +45,7 @@ cdef class DBCParser:
     for s in msg_def.sigs:
       ival = dd.get(s.name.decode('utf8'))
       if ival is not None:
-        ival = int(round((ival / s.factor) - s.offset))
+        ival = int(round((ival - s.offset) / s.factor))
         if s.is_signed and ival < 0:
           ival = (1 << s.b2) + ival
 

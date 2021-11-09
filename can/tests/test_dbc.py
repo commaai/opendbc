@@ -7,7 +7,6 @@ from opendbc import DBC_PATH
 from opendbc.can.parser import DBCParser as dbc
 from opendbc.can.packer import CANPacker
 
-
 def assert_message_equal(msg1, msg2, decimal=10):
   for key in msg1[1]:
     assert_almost_equal(msg1[1][key], msg2[1][key], decimal=decimal)
@@ -16,7 +15,7 @@ def assert_message_equal(msg1, msg2, decimal=10):
 
 class TestPythonDBC(unittest.TestCase):
   def test_toyota(self):
-    dbc_test = dbc(os.path.join(DBC_PATH, 'toyota_prius_2017_pt_generated.dbc'))
+    dbc_test = dbc('toyota_prius_2017_pt_generated')
     packer_test = CANPacker('toyota_prius_2017_pt_generated')
 
     msg = ('STEER_ANGLE_SENSOR', {'STEER_ANGLE': -6.0, 'STEER_RATE': 4, 'STEER_FRACTION': -0.2})
@@ -36,7 +35,7 @@ class TestPythonDBC(unittest.TestCase):
 
   def test_hyundai(self):
     # Test Little Endian
-    dbc_test = dbc(os.path.join(DBC_PATH, 'hyundai_2015_ccan.dbc'))
+    dbc_test = dbc('hyundai_2015_ccan')
     packer_test = CANPacker('hyundai_2015_ccan')
     decoded = dbc_test.decode((0x2b0, 0, b'\xfa\xfe\x00\x07\x12'))
     assert abs(decoded[1]['SAS_Angle'] - (-26.2)) < 0.001
@@ -47,3 +46,6 @@ class TestPythonDBC(unittest.TestCase):
 
     decoded = dbc_test.decode((0x2b0, 0, encoded))
     assert decoded == msg
+
+if __name__ == "__main__":
+  unittest.main()
