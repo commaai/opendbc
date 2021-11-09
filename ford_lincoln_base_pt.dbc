@@ -316,6 +316,17 @@ BO_ 972 Lane_Keep_Assist_Status: 8 PSCM
  SG_ LaActAvail_D_Actl : 5|2@0+ (1,0) [0|3] "SED"  IPMA_ADAS,GWM
  SG_ LsmcBrk_Tq_Rq : 15|13@0+ (4,0) [0|32764] "Nm"  ABS_ESC
 
+BO_ 979 LateralMotionControl: 8 IPMA_ADAS
+ SG_ LatCtlRng_L_Max : 63|6@0+ (2,0) [0|126] "meter"  GWM
+ SG_ HandsOffCnfm_B_Rq : 51|1@0+ (1,0) [0|1] "SED"  GWM
+ SG_ LatCtl_D_Rq : 36|3@0+ (1,0) [0|7] "SED"  GWM
+ SG_ LatCtlRampType_D_Rq : 53|2@0+ (1,0) [0|3] "SED"  GWM
+ SG_ LatCtlPrecision_D_Rq : 33|2@0+ (1,0) [0|3] "SED"  GWM
+ SG_ LatCtlPathOffst_L_Actl : 47|10@0+ (0.01,-5.12) [-5.12|5.11] "meter"  GWM
+ SG_ LatCtlPath_An_Actl : 31|11@0+ (0.0005,-0.5) [-0.5|0.5235] "radians"  GWM
+ SG_ LatCtlCurv_NoRate_Actl : 12|13@0+ (2.5E-007,-0.001024) [-0.001024|0.00102375] "1/meter"  GWM
+ SG_ LatCtlCurv_No_Actl : 7|11@0+ (2E-005,-0.02) [-0.02|0.02094] "1/meter"  GWM
+
 BO_ 984 Lane_Keep_Assist_Ui: 8 IPMA_ADAS
  SG_ FeatConfigIpmaActl : 7|16@0+ (1,0) [0|65535] "Undefined"  GWM
  SG_ FeatNoIpmaActl : 23|16@0+ (1,0) [0|65535] "Number"  GWM
@@ -543,6 +554,10 @@ VAL_ 972 TjaHandsOnCnfdnc_B_Est 1 "High_Confidence" 0 "Low_Confidence" ;
 VAL_ 972 LaHandsOff_B_Actl 1 "Hands_Off" 0 "Hands_On" ;
 VAL_ 972 LaActDeny_B_Actl 1 "LA_Denied" 0 "LA_Not_Denied" ;
 VAL_ 972 LaActAvail_D_Actl 3 "LKA_LCA_LDW_Avail" 2 "LCA_LKA_Avail_LDW_Suppress" 1 "LCA_LKA_Suppress_LDW_Avail" 0
+VAL_ 979 HandsOffCnfm_B_Rq 1 "Active" 0 "Inactive" ;
+VAL_ 979 LatCtl_D_Rq 7 "NotUsed4" 6 "NotUsed3" 5 "NotUsed2" 4 "NotUsed1" 3 "InterventionRight" 2 "InterventionLeft" 1 "ContinuousPathFollowing" 0 "NoLateralControl" ;
+VAL_ 979 LatCtlRampType_D_Rq 3 "Immediately" 2 "Fast" 1 "Medium" 0 "Slow" ;
+VAL_ 979 LatCtlPrecision_D_Rq 3 "NotUsed2" 2 "NotUsed1" 1 "Precise" 0 "Comfortable" ;
 VAL_ 984 PersIndexIpma_D_Actl 7 "Unused_3" 6 "Unused_2" 5 "Unused_1" 4 "Vehicle" 3 "PERS_4" 2 "PERS_3" 1 "PERS_2" 0 "PERS_1" ;
 VAL_ 984 AhbcRampingV_D_Rq 3 "Slow" 2 "Medium" 1 "Fast" 0 "Immediately" ;
 VAL_ 984 Lines_Hud 31 "Unused7" 30 "LA_Off" 29 "Unused5" 28 "Unused4" 27 "Unused3" 26 "Unused2" 25 "Unused1" 24 "InerveneLeft_InterveneRght" 23 "WarnLeft_InterveneRight" 22 "SuppressLeft_InterveneRght" 21 "AvailLeft_InterveneRhtt" 20 "NoLeft_InterveneRight" 19 "InterveneLeft_WarnRight" 18 "WarnLeft_WarnRight" 17 "SuppressLeft_WarnRight" 16 "AvailableLeft_WarnRight" 15 "NoLeft_WarnRight" 14 "InterveneLeft_SuppressRght" 13 "WarnLeft_SuppressRight" 12 "SuppressLeft_SuppressRight" 11 "AvailLeft_SuppressRight" 10 "NoLeft_SuppressRight" 9 "InterveneLeft_AvailRight" 8 "WarnLeft_AvailRight" 7 "SuppressLeft_AvailRight" 6 "AvailableLeft_AvailRight" 5 "NoLeft_AvailableRight" 4 "InterveneLeft_NoRight" 3 "WarnLeft_NoRight" 2 "SuppressLeft_NoRight" 1 "AvailableLeft_NoRight" 0 "NoLeft_NoRight" ;
