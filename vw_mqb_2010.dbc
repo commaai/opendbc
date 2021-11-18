@@ -33,7 +33,7 @@ NS_ :
 
 BS_:
 
-BU_: Airbag_MQB BAP_Tester_MQB BMS_MQB Datenlogger_MQB Gateway_MQB Getriebe_DQ_Hybrid_MQB Getriebe_DQ_MQB LEH_MQB Motor_Diesel_MQB Motor_Hybrid_MQB Motor_Otto_MQB SAK_MQB Waehlhebel_MQB Vector__XXX 9 l c i XXX
+BU_: Airbag_MQB BAP_Tester_MQB BMS_MQB Datenlogger_MQB Gateway_MQB Getriebe_DQ_Hybrid_MQB Getriebe_DQ_MQB LEH_MQB Motor_Diesel_MQB Motor_Hybrid_MQB Motor_Otto_MQB SAK_MQB Waehlhebel_MQB Vector__XXX l c i XXX
 
 
 BO_ 290 ACC_06: 8 Gateway_MQB
@@ -1371,11 +1371,11 @@ BO_ 391 EV_Gearshift: 8 XXX
  SG_ RegenBrakingMode : 12|2@1+ (1,0) [0|3] "" XXX
 
 CM_ SG_ 134 LWI_Lenkradwinkel "Steering angle WITH variable ratio effect included";
-CM_ SG_ 159 EPS_HCA_Status "Status of Heading Control Assist feature"
+CM_ SG_ 159 EPS_HCA_Status "Status of Heading Control Assist feature";
 CM_ SG_ 159 EPS_Lenkmoment "Steering input by driver, torque";
 CM_ SG_ 159 EPS_VZ_Lenkmoment "Steering input by driver, direction";
 CM_ SG_ 159 EPS_Berechneter_LW "Raw steering angle, degrees";
-CM_ SG_ 159 EPS_VZ_BLW "Raw steering angle, direction"
+CM_ SG_ 159 EPS_VZ_BLW "Raw steering angle, direction";
 CM_ SG_ 173 COUNTERXX "Message not renamed to COUNTER because J533 rate-limiting makes it look like messages are being lost";
 CM_ SG_ 294 3 "May be zero when sent by older cameras";
 CM_ SG_ 294 7 "May be zero when sent by older cameras";
