@@ -70,6 +70,14 @@ BO_ 118 Steering_Wheel_Data_CG1: 8 XXX
  SG_ SteWhlAn_No_Cs : 39|8@0+ (1,0) [0|0] "" XXX
  SG_ SteWhlAn_No_Cnt : 47|4@0+ (1,0) [0|0] "Counts" XXX
 
+BO_ 126 SteeringPinion_Data: 8 PSCM
+ SG_ StePw_B_Rq : 23|1@0+ (1,0) [0|1] "SED"  GWM,ECM_Diesel,PCM
+ SG_ StePinRelInit_An_Sns : 7|16@0+ (0.1,-3200) [-3200|3353.3] "degrees"  VDM,IPMA_ADAS,GWM,ECM_Diesel,PCM,PCM_HEV,ABS_ESC,TCCM
+ SG_ StePinCompAnEst_D_Qf : 43|2@0+ (1,0) [0|3] "SED"  VDM,CMR_DSMC,IPMA_ADAS,TCM_DSL,ECM_Diesel,PCM,PCM_HEV,ABS_ESC,TCCM,GWM
+ SG_ StePinComp_An_Est : 22|15@0+ (0.1,-1600) [-1600|1676.7] "degrees"  VDM,CMR_DSMC,IPMA_ADAS,TCM_DSL,ECM_Diesel,PCM,PCM_HEV,ABS_ESC,TCCM,GWM
+ SG_ StePinAn_No_Cs : 39|8@0+ (1,0) [0|255] "Unitless"  VDM,ABS_ESC,TCCM,GWM
+ SG_ StePinAn_No_Cnt : 47|4@0+ (1,0) [0|15] "unitless"  VDM,TCCM,GWM,ABS_ESC
+
 BO_ 131 Steering_Buttons: 8 GWM
  SG_ Right_Turn_Light : 5|1@0+ (1,0) [0|0] "SED"  IPMA_ADAS,PSCM
  SG_ Left_Turn_Light : 4|1@0+ (1,0) [0|0] "SED"  IPMA_ADAS,PSCM
