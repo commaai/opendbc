@@ -1264,7 +1264,7 @@ BO_ 302 ACC_07: 8 XXX
  SG_ ACC_Anhaltevorgang : 29|1@1+ (1,0) [0|1] "Boolean" XXX
  SG_ ACC_Anfahrvorgang : 30|1@1+ (1,0) [0|1] "Boolean" XXX
  SG_ ACC_Anfahren : 31|1@1+ (1,0) [0|1] "Boolean" XXX
- SG_ XXX_Lead_Car_Relative_Speed : 32|8@1+ (1,-153) [0|255] "" XXX
+ SG_ ACC_Sollbeschleunigung_03 : 32|8@1+ (0.03,-4.59) [3.5|-4.5] "m/s2" XXX
  SG_ ACC_Sollbeschleunigung_01 : 53|11@1+ (0.005,-7.22) [-7.22|3.005] "Unit_MeterPerSeconSquar" XXX
 
 BO_ 264 Fahrwerk_01: 8 XXX
