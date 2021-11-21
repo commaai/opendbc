@@ -194,4 +194,3 @@ CM_ SG_ 896 NEW_SIGNAL_1 "there is a difference at the beginning of 2017-10-31--
 CM_ SG_ 1553 TOTAL_DISTANCE "Probably also contains the previous/two previous bytes but can't confirm";
 CM_ SG_ 945 BETWEEN_RIDES "Might be others in the same message. at least this one";
 
-CM_ "CHFFR_METRIC 37 STEER_ANGLE STEER_ANGLE 0.36 180; CHFFR_METRIC 452 ENGINE_RPM ENGINE_RPM 1 0; CHFFR_METRIC 955 ENGINE_TEMPERATURE ENGINE_TEMPERATURE 1 0";
