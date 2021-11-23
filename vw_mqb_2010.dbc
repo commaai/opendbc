@@ -1413,7 +1413,7 @@ CM_ SG_ 960 ZAS_Kl_15 "Indicates ignition on";
 VAL_ 159 EPS_HCA_Status 0 "disabled" 1 "initializing" 2 "fault" 3 "ready" 4 "rejected" 5 "active";
 VAL_ 173 GE_Fahrstufe 5 "P" 6 "R" 7 "N" 8 "D" 9 "S" 10 "E" 14 "T";
 VAL_ 302 ACC_Freewheel_Type 0 "freewheel_released" 1 "freewheel_not_permitted" 2 "freewheel_not_released" 3 "freewheel_requested" ;
-VAL_ 302 ACC_Hold_Type 0 "no_request" 1 "hold" 2 "park" 3 "hold_standby" 4 "approach" 5 "loosen_over_ramp" ;
+VAL_ 302 ACC_Hold_Type 0 "no_request" 1 "hold" 2 "park" 3 "hold_standby" 4 "startup" 5 "loosen_over_ramp" ;
 VAL_ 391 GearPosition 2 "P" 3 "R" 4 "N" 5 "D" 6 "D";
 VAL_ 391 RegenBrakingMode 0 "default" 1 "B1" 2 "B2" 3 "B3";
 VAL_ 870 Fast_Send_Rate_Active 0 "1 Hz" 1 "50 Hz";
