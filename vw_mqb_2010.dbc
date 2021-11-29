@@ -1263,7 +1263,7 @@ BO_ 302 ACC_07: 8 XXX
  SG_ ACC_Hold_Type : 28|3@1+ (1,0) [0|15] "enum"  XXX
  SG_ ACC_Hold_Release : 31|1@1+ (1,0) [0|1] ""  XXX
  SG_ ACC_Accel_Secondary : 32|8@1+ (0.03,-4.6) [-4.6|2.99] "m/s2"  XXX
- SG_ ACC_Accel_Primary : 53|11@1+ (0.005,-7.22) [-7.22|3.005] "m/s2"  XXX
+ SG_ ACC_Accel_TSK : 53|11@1+ (0.005,-7.22) [-7.22|3.005] "m/s2"  XXX
 
 BO_ 264 Fahrwerk_01: 8 XXX
  SG_ Fahrwerk_01_BZ : 8|4@1+ (1,0) [0|15] "" XXX
@@ -1386,7 +1386,7 @@ CM_ SG_ 302 ACC_Boost_Request "Hybrid engine start related";
 CM_ SG_ 302 ACC_Freewheel_Request "Active request for DSG sailing/coasting in ACC_Freewheel_Type";
 CM_ SG_ 302 ACC_Hold_Release "Request to ABS to release brake hold";
 CM_ SG_ 302 ACC_Accel_Secondary "Target acceleration of the secondary controller";
-CM_ SG_ 302 ACC_Accel_Primary "Mirror of request to TSK to implement a target acceleration";
+CM_ SG_ 302 ACC_Accel_TSK "Mirror of request to TSK to implement a target acceleration";
 CM_ SG_ 870 Hazard_Switch "Four-way flashers active";
 CM_ SG_ 870 Comfort_Signal_Left "Comfort turn signal active, left";
 CM_ SG_ 870 Comfort_Signal_Right "Comfort turn signal active, right";
