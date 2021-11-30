@@ -77,6 +77,7 @@ void set_signal_type(Signal& s, uint32_t address, ChecksumState* chk, const std:
       s.type = chk->counter_type;
     }
   }
+  // TODO: replace hardcoded addresses with signal names. prefix with COMMA_PEDAL_?
   if (address == 0x200 || address == 0x201) {
     if (s.name == "CHECKSUM_PEDAL") {
       DBC_ASSERT(s.b2 == 8, "PEDAL CHECKSUM is not 8 bits long");
