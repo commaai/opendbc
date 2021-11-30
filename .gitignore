@@ -8,11 +8,9 @@
 .DS_Store
 .sconsign.dblite
 
+can/*_pyx.cpp
 can/*.so
 can/build/
 can/obj/
-can/packer_pyx.cpp
-can/parser_pyx.cpp
 can/packer_pyx.html
 can/parser_pyx.html
-can/dbc_pyx.cpp

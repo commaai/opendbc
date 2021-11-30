@@ -21,12 +21,15 @@ namespace {
     }                                           \
   } while (false)
 
-inline bool startswith(const std::string& str, const char* s) {
-  return strncmp(str.c_str(), s, strlen(s)) == 0;
+inline bool startswith(const std::string& str, const char* prefix) {
+  return str.rfind(prefix, 0) == 0;
 }
 
-inline bool startswith(const std::string& str, std::initializer_list<const char*> s) {
-  return s.end() != std::find_if(s.begin(), s.end(), [&](auto& it) { return startswith(str, it); });
+inline bool startswith(const std::string& str, std::initializer_list<const char*> prefix_list) {
+  for (auto prefix : prefix_list) {
+    if (startswith(str, prefix)) return true;
+  }
+  return false;
 }
 
 inline std::string& trim(std::string& s, const char* t = " \t\n\r\f\v") {
