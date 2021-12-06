@@ -167,6 +167,18 @@ BO_ 715 ASCMGasRegenCmd: 8 K124_ASCM
 
 BO_ 717 ASCM_2CD: 5 K124_ASCM
 
+BO_ 789 EBCMFrictionBrakeCmd: 5 K124_ASCM
+ SG_ RollingCounter : 33|2@0+ (1,0) [0|0] ""  NEO
+ SG_ FrictionBrakeMode : 7|4@0+ (1,0) [0|0] ""  NEO
+ SG_ FrictionBrakeChecksum : 23|16@0+ (1,0) [0|0] ""  NEO
+ SG_ FrictionBrakeCmd : 3|12@0- (1,0) [0|0] ""  NEO
+
+BO_ 800 AEBCmd: 6 K124_ASCM
+ SG_ RollingCounter : 5|2@0+ (1,0) [0|3] "" NEO
+ SG_ Checksum : 27|20@0+ (1,0) [0|2047] "" NEO
+ SG_ BrakeCmdActive : 3|1@1+ (1,0) [0|1] "" NEO
+ SG_ BrakingForce : 2|7@0+ (1,0) [0|7] "" NEO
+
 BO_ 810 TCICOnStarGPSPosition: 8 K73_TCIC
  SG_ GPSLongitude : 39|32@0+ (1,-2147483648) [0|0] "milliarcsecond"  NEO
  SG_ GPSLatitude : 7|32@0+ (1,0) [0|0] "milliarcsecond"  NEO
@@ -218,6 +230,8 @@ BO_TX_BU_ 384 : K124_ASCM,NEO;
 BO_TX_BU_ 880 : NEO,K124_ASCM;
 BO_TX_BU_ 1033 : K124_ASCM,NEO;
 BO_TX_BU_ 715 : NEO,K124_ASCM;
+BO_TX_BU_ 789 : NEO,K124_ASCM;
+BO_TX_BU_ 800 : NEO,K124_ASCM;
 
 
 CM_ BU_ K16_BECM "Battery Energy Control Module";
