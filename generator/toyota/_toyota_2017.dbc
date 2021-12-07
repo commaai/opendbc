@@ -354,7 +354,7 @@ VAL_ 921 CRUISE_CONTROL_STATE 2 "disabled" 11 "hold" 10 "hold_waiting_user_cmd" 
 VAL_ 1041 PCS_INDICATOR 2 "PCS Faulted" 1 "PCS Turned Off By User" 0 "PCS Enabled";
 VAL_ 1041 PCS_SENSITIVITY 64 "high sensitivity"  128 "mid sensitivity" 192 "low sensitivity" 0 "off";
 VAL_ 1042 LDA_ALERT 3 "hold with continuous beep" 2 "LDA unavailable" 1 "hold" 0 "none";
-VAL_ 1042 BARRIERS 3 "both" 2 "right" 1 "left" 0 "none";
+VAL_ 1042 BARRIERS 3 "left" 2 "right" 1 "both" 0 "none";
 VAL_ 1042 RIGHT_LINE 3 "orange" 2 "faded" 1 "solid" 0 "none";
 VAL_ 1042 LEFT_LINE 3 "orange" 2 "faded" 1 "solid" 0 "none";
 VAL_ 1553 UNITS 1 "km" 2 "miles";
