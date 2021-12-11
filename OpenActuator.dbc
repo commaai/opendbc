@@ -1,0 +1,91 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: Actuator Driver
+
+
+BO_ 250 ControlCmd1: 7 Driver
+ SG_ CRC8_CMD1 : 0|8@1+ (1,0) [0|255] ""  Actuator
+ SG_ Counter_CMD1 : 12|4@1+ (1,0) [0|15] ""  Actuator
+ SG_ MotorId_CMD1 : 8|2@1+ (1,0) [0|3] ""  Actuator
+ SG_ ControlMode : 10|2@1+ (1,0) [0|3] ""  Actuator
+ SG_ PositionChange : 16|16@1- (0.0125558,0) [-360|360] "deg"  Actuator
+ SG_ TorqueFeedforward : 32|11@1- (0.0102667,0) [-10|10] "N*m"  Actuator
+ SG_ TorqueCloseloopMax : 43|10@1+ (0.0102667,0) [0|10] "N*m"  Actuator
+
+BO_ 252 LimitsCmd2: 6 Driver
+ SG_ CRC8_CMD2 : 0|8@1+ (1,0) [0|255] ""  Actuator
+ SG_ Counter_CMD2 : 12|4@1+ (1,0) [0|15] ""  Actuator
+ SG_ VelocityLimit : 16|16@1+ (1,0) [0|0] ""  Actuator
+ SG_ AccelLimit : 32|16@1+ (1,0) [0|0] ""  Actuator
+
+BO_ 251 ControlStatus1: 8 Actuator
+ SG_ CRC8_STAT1 : 0|8@1+ (1,0) [0|255] ""  Driver
+ SG_ Counter_STAT1 : 12|4@1+ (1,0) [0|15] ""  Driver
+ SG_ TorqueActual : 32|11@1- (0.0102667,0) [-8|8] "N*m"  Driver
+ SG_ TorqueCloseLoopActual : 43|11@1- (0.0102667,0) [0|8] "N*m"  Driver
+ SG_ SpeedActual : 56|8@1- (0.0357143,0) [-4.5|4.5] "rev/s"  Driver
+ SG_ PositionError : 16|16@1- (0.0125558,0) [-360|360] ""  Driver
+
+BO_ 253 SystemStatus2: 8 Actuator
+ SG_ CRC8_STAT2 : 0|8@1+ (1,0) [0|255] ""  Driver
+ SG_ Counter_STAT2 : 12|4@1+ (1,0) [0|15] ""  Driver
+ SG_ ChipTemp : 16|8@1+ (1,-60) [-60|195] "C"  Driver
+ SG_ PositionRaw : 24|32@1- (1,0) [0|0] ""  Driver
+
+
+
+CM_ SG_ 250 PositionChange "Relative position degrees at steering wheel to raw motor angle units x 64.
+Motor 360deg = 65536 units, so:
+Factor = 64_mutiplier *360deg/65536 / FinalGearRatio / GearboxRatio";
+CM_ SG_ 250 TorqueFeedforward "Feedforward torque at steering wheel to motor raw current mA x 8.
+Factor formula: 
+8_const * 1A/1000mA * MotorRatedTorque / MotorRatedCurrent * GearboxRatio * FinalGearRatio";
+CM_ SG_ 250 TorqueCloseloopMax "Closeloop torque limit at steering wheel to motor raw current mA x 32.
+If internally close loop is in the same direction as feedforward, closelooop is simply limited by the value. 
+If internally close loop is in opposite direction to feedforward, then close loop limit is set to |feedforwad| so that closeloop has always power to cancel the feedfrward to avoid uncontrolled rotation away from target position. 
+
+Factor formula: 
+32_const * 1A/1000mA * MotorRatedTorque / MotorRatedCurrent * GearboxRatio * FinalGearRatio";
+CM_ SG_ 251 SpeedActual "Filered speed in revolutions per seconds
+
+factor =  1[rev/s]/ FinalGearRatio / GearboxRatio";
+CM_ SG_ 251 PositionError "Position error (desired - actual) in degrees at steering wheel from raw motor angle units x 64.
+Motor 360deg = 65536 units, so:
+Factor = 64_mutiplier *360deg/65536 / FinalGearRatio / GearboxRatio";
+BA_DEF_  "BusType" STRING ;
+BA_DEF_DEF_  "BusType" "CAN";
+VAL_ 250 ControlMode 0 "Off" 1 "ControlEnable" 4 "Assist" ;
+
