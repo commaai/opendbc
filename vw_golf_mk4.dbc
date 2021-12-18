@@ -1104,10 +1104,10 @@ BO_ 1386 ACC_GRA_Anziege: 8 XXX
  SG_ ACA_Aend_Zeitluecke : 58|1@1+ (1,0) [0|1] "" XXX
  SG_ ACA_Zaehler : 60|4@1+ (1,0) [0|15] "" XXX
 
-BO_ 208 Lenkhilfe_3: 8 XXX
+BO_ 208 Lenkhilfe_3: 6 XXX
  SG_ LH3_Checksumme : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ LH3_BS_Spiegel : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ LH3_Zaehler : 12|4@4+ (1,0) [0|15] "" XXX
+ SG_ LH3_Zaehler : 12|4@1+ (1,0) [0|15] "" XXX
  SG_ LH3_LM : 16|10@1+ (1,0) [0|1023] "" XXX
  SG_ LH3_LMSign : 26|1@1+ (1,0) [0|1] "" XXX
  SG_ LH3_LMValid : 27|1@1+ (1,0) [0|1] "" XXX
