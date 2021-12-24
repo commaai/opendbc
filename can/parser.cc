@@ -9,8 +9,8 @@
 
 #include "common.h"
 
-#define DEBUG(...)
-// #define DEBUG printf
+// #define DEBUG(...)
+#define DEBUG printf
 #define INFO printf
 
 bool MessageState::parse(uint64_t sec, uint16_t ts_, uint8_t * dat) {
@@ -31,7 +31,7 @@ bool MessageState::parse(uint64_t sec, uint16_t ts_, uint8_t * dat) {
       tmp -= (tmp >> (sig.b2-1)) ? (1ULL << sig.b2) : 0; //signed
     }
 
-    DEBUG("parse 0x%X %s -> %lld\n", address, sig.name, tmp);
+    DEBUG("parse 0x%X %s -> %lld\n", address, sig.name, (long long)tmp);
 
     if (!ignore_checksum) {
       if (sig.type == SignalType::HONDA_CHECKSUM) {
@@ -225,12 +225,12 @@ void CANParser::UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Rea
     auto cmsg = cans[i];
     // parse the messages
     if (cmsg.getSrc() != bus) {
-      // DEBUG("skip %d: wrong bus\n", cmsg.getAddress());
+      DEBUG("skip %d: wrong bus\n", cmsg.getAddress());
       continue;
     }
     auto state_it = message_states.find(cmsg.getAddress());
     if (state_it == message_states.end()) {
-      // DEBUG("skip %d: not specified\n", cmsg.getAddress());
+      DEBUG("skip %d: not specified\n", cmsg.getAddress());
       continue;
     }
 
