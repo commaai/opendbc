@@ -225,12 +225,12 @@ void CANParser::UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Rea
     auto cmsg = cans[i];
     // parse the messages
     if (cmsg.getSrc() != bus) {
-      DEBUG("skip %d: wrong bus\n", cmsg.getAddress());
+      // DEBUG("skip %d: wrong bus\n", cmsg.getAddress());
       continue;
     }
     auto state_it = message_states.find(cmsg.getAddress());
     if (state_it == message_states.end()) {
-      DEBUG("skip %d: not specified\n", cmsg.getAddress());
+      // DEBUG("skip %d: not specified\n", cmsg.getAddress());
       continue;
     }
 
