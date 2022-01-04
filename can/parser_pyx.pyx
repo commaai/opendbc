@@ -32,6 +32,7 @@ cdef class CANParser:
     dict ts
     bool can_valid
     int can_invalid_cnt
+    int toyota_safety_param
 
   def __init__(self, dbc_name, signals, checks=None, bus=0, enforce_checks=True):
     if checks is None:
@@ -45,10 +46,11 @@ cdef class CANParser:
     self.ts = {}
 
     self.can_invalid_cnt = CAN_INVALID_CNT
+    self.toyota_safety_param = -1
 
     cdef int i
-    cdef int num_msgs = self.dbc[0].num_msgs
-    for i in range(num_msgs):
+    cdef int x
+    for i in range(self.dbc[0].num_msgs):
       msg = self.dbc[0].msgs[i]
       name = msg.name.decode('utf8')
 
@@ -58,6 +60,13 @@ cdef class CANParser:
       self.vl[name] = {}
       self.ts[msg.address] = {}
       self.ts[name] = {}
+
+      # store torque scaling if available
+      if name == "STEER_TORQUE_SENSOR":
+        for x in range(msg.num_sigs):
+          sig = msg.sigs[x]
+          if sig.name.decode('utf8') == "STEER_TORQUE_EPS":
+            self.toyota_safety_param = round(sig.factor * 100)
 
     # Convert message names into addresses
     for i in range(len(signals)):
