@@ -5,11 +5,13 @@ unsigned int honda_checksum(unsigned int address, uint64_t d, int l) {
   d >>= 4; // remove checksum
 
   int s = 0;
-  bool extended = address > 0x7FF; // extended can
+  bool extended_bosch = address > 0x7FF; // extended can for Bosch 2021+
+  bool extended_valeo = address > 0x4000; // extended can for Civic 2022
   while (address) { s += (address & 0xF); address >>= 4; }
   while (d) { s += (d & 0xF); d >>= 4; }
   s = 8-s;
-  if (extended) s += 3;
+  if (extended_valeo) s -= 6;
+  if (extended_bosch && !extended_valeo) s += 3;
   s &= 0xF;
 
   return s;
