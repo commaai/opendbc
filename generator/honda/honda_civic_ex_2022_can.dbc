@@ -93,9 +93,12 @@ BO_ 1029 DOORS_STATUS: 8 BDY
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
 
 BO_ 254913108 LKAS_HUD_2: 8 ADAS
+ SG_ COUNTER_2 : 7|2@0+ (1,0) [0|3] "" XXX
  SG_ SET_ME_X01 : 5|1@0+ (1,0) [0|1] "" XXX
+ SG_ LKAS_BOH_1 : 15|6@0+ (1,0) [0|63] "" XXX
  SG_ LEFT_LANE : 23|2@0+ (1,0) [0|3] "" XXX
  SG_ RIGHT_LANE : 21|2@0+ (1,0) [0|3] "" XXX
+ SG_ LKAS_BOH_2 : 30|5@0+ (1,0) [0|31]
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
