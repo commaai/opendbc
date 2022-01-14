@@ -296,7 +296,6 @@ BO_ 1571 CERTIFICATION_ECU: 8 CGW
  SG_ KEYFOB_LOCKING_FEEDBACK_LIGHT : 61|1@0+ (1,0) [0|0] "" XXX
  SG_ KEYFOB_UNLOCKING_FEEDBACK_LIGHT : 62|1@0+ (1,0) [0|0] "" XXX
 
-CM_ SG_ 36 ACCEL_Y "unit is tbd";
 CM_ SG_ 36 YAW_RATE "verify";
 CM_ SG_ 36 STEERING_TORQUE "does not seem the steer torque, tbd";
 CM_ SG_ 37 STEER_FRACTION "1/15th of the signal STEER_ANGLE, which is 1.5 deg; note that 0x8 is never set";
