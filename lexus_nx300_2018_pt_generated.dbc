@@ -412,7 +412,6 @@ CM_ SG_ 767 FD_BUTTON "The follow distance button signal as forwarded by the sds
 
 VAL_ 513 STATE 5 "FAULT_TIMEOUT" 4 "FAULT_STARTUP" 3 "FAULT_SCE" 2 "FAULT_SEND" 1 "FAULT_BAD_CHECKSUM" 0 "NO_FAULT" ;
 
-
 CM_ "lexus_nx300_2018_pt.dbc starts here";
 
 
