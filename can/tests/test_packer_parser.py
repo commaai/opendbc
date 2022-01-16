@@ -5,6 +5,7 @@ import cereal.messaging as messaging
 from opendbc.can.parser import CANParser
 from opendbc.can.packer import CANPacker
 
+
 # Python implementation so we don't have to depend on boardd
 def can_list_to_can_capnp(can_msgs, msgtype='can'):
   dat = messaging.new_message()
@@ -71,7 +72,7 @@ class TestCanParserPacker(unittest.TestCase):
     packer = CANPacker(dbc_file)
 
     idx = 0
-    for brake in range(0, 100):
+    for brake in range(101):
       values = {"USER_BRAKE": brake}
       msgs = packer.make_can_msg("VSA_STATUS", 0, values, idx)
       bts = can_list_to_can_capnp([msgs])
@@ -118,6 +119,23 @@ class TestCanParserPacker(unittest.TestCase):
         self.assertAlmostEqual(parser.vl["ES_LKAS"]["Counter"], idx % 16)
 
         idx += 1
+
+  def test_eps_torque_scale(self):
+    """Test Toyota EPS torque scaling detection"""
+    eps_scales = {
+      "toyota_nodsu_pt_generated": 73,
+      "toyota_prius_2017_pt_generated": 66,
+      "toyota_corolla_2017_pt_generated": 88,
+      "lexus_is_2018_pt_generated": 77,
+      "lexus_ct200h_2018_pt_generated": 100,
+      "honda_accord_2018_can_generated": -1,  # shouldn't be set
+    }
+
+    for dbc_file, eps_scale in eps_scales.items():
+      parser = CANParser(dbc_file, [])
+
+      self.assertIsInstance(parser.toyota_eps_scale, int)
+      self.assertAlmostEqual(parser.toyota_eps_scale, eps_scale)
 
 
 if __name__ == "__main__":
