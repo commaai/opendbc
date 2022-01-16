@@ -126,14 +126,11 @@ class TestCanParserPacker(unittest.TestCase):
       "toyota_nodsu_pt_generated": 73,
       "toyota_prius_2017_pt_generated": 66,
       "toyota_corolla_2017_pt_generated": 88,
-      "lexus_is_2018_pt_generated": 77,
-      "lexus_ct200h_2018_pt_generated": 100,
       "honda_accord_2018_can_generated": -1,  # shouldn't be set
     }
 
     for dbc_file, eps_scale in eps_scales.items():
       parser = CANParser(dbc_file, [])
-
       self.assertIsInstance(parser.toyota_eps_scale, int)
       self.assertAlmostEqual(parser.toyota_eps_scale, eps_scale)
 
