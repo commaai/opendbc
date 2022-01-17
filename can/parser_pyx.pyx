@@ -64,7 +64,7 @@ cdef class CANParser:
       for x in range(msg.num_sigs):
         sig = msg.sigs[x]
         sig_name = sig.name.decode('utf8')
-        self.info[name][sig_name] = {"is_signed": sig.is_signed, "scale": sig.factor, "offset": sig.offset}
+        self.info[name][sig_name] = {"is_signed": sig.is_signed, "scale": sig.factor, "offset": sig.offset, "is_little_endian": sig.is_little_endian}
 
     # Convert message names into addresses
     for i in range(len(signals)):
