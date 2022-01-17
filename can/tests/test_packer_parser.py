@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from collections import namedtuple
 import unittest
 
 import cereal.messaging as messaging
@@ -122,17 +123,16 @@ class TestCanParserPacker(unittest.TestCase):
 
   def test_eps_torque_scale(self):
     """Test Toyota EPS torque scaling detection"""
-    eps_scales = {
-      "toyota_nodsu_pt_generated": 73,
-      "toyota_prius_2017_pt_generated": 66,
-      "toyota_corolla_2017_pt_generated": 88,
-      "honda_accord_2018_can_generated": -1,  # shouldn't be set
-    }
+    SignalInfo = namedtuple("SignalInfo", ["dbc", "msg", "sig", "param", "value"])
+    signals = [
+      SignalInfo("toyota_nodsu_pt_generated", "STEER_TORQUE_SENSOR", "STEER_TORQUE_EPS", "scale", 0.73),
+      SignalInfo("toyota_prius_2017_pt_generated", "STEER_TORQUE_SENSOR", "STEER_TORQUE_EPS", "scale", 0.66),
+      SignalInfo("toyota_corolla_2017_pt_generated", "STEER_TORQUE_SENSOR", "STEER_TORQUE_EPS", "scale", 0.88),
+    ]
 
-    for dbc_file, eps_scale in eps_scales.items():
-      parser = CANParser(dbc_file, [])
-      self.assertIsInstance(parser.toyota_eps_scale, int)
-      self.assertAlmostEqual(parser.toyota_eps_scale, eps_scale)
+    for info in signals:
+      parser = CANParser(info.dbc, [])
+      self.assertAlmostEqual(parser.info[info.msg][info.sig][info.param], info.value)
 
 
 if __name__ == "__main__":
