@@ -30,9 +30,9 @@ cdef class CANParser:
     string dbc_name
     dict vl
     dict ts
+    dict info
     bool can_valid
     int can_invalid_cnt
-    int toyota_eps_scale
 
   def __init__(self, dbc_name, signals, checks=None, bus=0, enforce_checks=True):
     if checks is None:
@@ -44,9 +44,9 @@ cdef class CANParser:
 
     self.vl = {}
     self.ts = {}
+    self.info = {}
     self.can_valid = True
     self.can_invalid_cnt = CAN_INVALID_CNT
-    self.toyota_eps_scale = -1
 
     for i in range(self.dbc[0].num_msgs):
       msg = self.dbc[0].msgs[i]
@@ -58,13 +58,13 @@ cdef class CANParser:
       self.vl[name] = {}
       self.ts[msg.address] = {}
       self.ts[name] = {}
+      self.info[msg.address] = {}
+      self.info[name] = {}
 
-      # store eps torque scaling if available
-      if self.toyota_eps_scale == -1 and name == "STEER_TORQUE_SENSOR":
-        for x in range(msg.num_sigs):
-          sig = msg.sigs[x]
-          if sig.name.decode('utf8') == "STEER_TORQUE_EPS":
-            self.toyota_eps_scale = round(sig.factor * 100.)
+      for x in range(msg.num_sigs):
+        sig = msg.sigs[x]
+        sig_name = sig.name.decode('utf8')
+        self.info[name][sig_name] = {"is_signed": sig.is_signed, "scale": sig.factor, "offset": sig.offset}
 
     # Convert message names into addresses
     for i in range(len(signals)):
