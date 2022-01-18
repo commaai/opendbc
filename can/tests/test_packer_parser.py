@@ -121,8 +121,8 @@ class TestCanParserPacker(unittest.TestCase):
 
         idx += 1
 
-  def test_eps_torque_scale(self):
-    """Test Toyota EPS torque scaling detection"""
+  def test_info(self):
+    """Test signal info available from parser"""
     SignalInfo = namedtuple("SignalInfo", ["dbc", "msg", "sig", "param", "value"])
     signals = [
       SignalInfo("toyota_nodsu_pt_generated", "STEER_TORQUE_SENSOR", "STEER_TORQUE_EPS", "scale", 0.73),
