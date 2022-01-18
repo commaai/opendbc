@@ -227,6 +227,11 @@ BO_ 1409 VIN_PART_2: 8 CGW
 BO_ 1410 VIN_PART_3: 8 CGW
  SG_ VIN_17 : 7|8@0+ (1,0) [0|0] "" XXX
 
+BO_ 1552 BODY_CONTROL_STATE_2: 8 XXX
+ SG_ METER_SLIDER_BRIGHTNESS_PCT : 30|7@0+ (1,0) [12|100] "%" XXX
+ SG_ METER_SLIDER_LOW_BRIGHTNESS : 37|1@0+ (1,0) [0|1] "" XXX
+ SG_ METER_SLIDER_DIMMED : 38|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 1553 UI_SETTING: 8 XXX
  SG_ UNITS : 26|2@0+ (1,0) [0|3] "" XXX
  SG_ ODOMETER : 43|20@0+ (1,0) [0|1048575] "" XXX
@@ -343,6 +348,9 @@ CM_ SG_ 1163 OVSPVALL "-5 at start then 2 after 2 seconds";
 CM_ SG_ 1163 OVSPVALM "-5 at start then 5 after 2 seconds";
 CM_ SG_ 1163 OVSPVALH "-5 at start then 10 after 2 seconds";
 CM_ SG_ 1163 TSRSPU "always 1";
+CM_ SG_ 1552 METER_SLIDER_BRIGHTNESS_PCT "Combination display brightness setting, scales from 12 per cent to 100 per cent, reflects combination meter settings only, not linked with headlight state";
+CM_ SG_ 1552 METER_SLIDER_LOW_BRIGHTNESS "Combination display low brightness mode, also controls footwell lighting";
+CM_ SG_ 1552 METER_SLIDER_DIMMED "Combination display slider not at max, reflects combination meter settings only, not linked with headlight state";
 CM_ SG_ 1553 ODOMETER "Unit is dependent upon units signal";
 
 VAL_ 466 CRUISE_STATE 11 "timer_3sec" 10 "adaptive click down" 9 "adaptive click up" 8 "adaptive engaged" 7 "standstill" 6 "non-adaptive click up" 5 "non-adaptive click down" 4 "non-adaptive hold down" 3 "non-adaptive hold up" 2 "non-adaptive being engaged" 1 "non-adaptive engaged" 0 "off";
@@ -369,5 +377,7 @@ VAL_ 1161 TSGN2 1 "speed sign" 0 "none";
 VAL_ 1161 SPLSGN2 15 "conditional blank" 4 "wet road" 5 "rain" 0 "none";
 VAL_ 1162 TSGN3 0 "none" 1 "speed sign" 2 "0 unlimited" 7 "unlimited" 16 "highway" 17 "no highway" 18 "motorway" 19 "no motorway" 20 "in city" 21 "outside city" 22 "pedestrian area" 23 "no pedestrian area" 65 "no overtaking left" 66 "no overtaking right" 67 "overtaking allowed again" 81 "no right turn" 97 "stop" 105 "yield" 113 "stop" 114 "yield us" 129 "no entry" 138 "no entry tss2" 145 "do not enter";
 VAL_ 1162 SPLSGN3 15 "conditional blank" 4 "wet road" 5 "rain" 0 "none";
+VAL_ 1552 METER_SLIDER_LOW_BRIGHTNESS 1 "Low brightness mode, footwell lights off" 0 "Normal mode, footwell lights on";
+VAL_ 1552 METER_SLIDER_DIMMED 1 "Dimmed" 0 "Not Dimmed";
 
 
