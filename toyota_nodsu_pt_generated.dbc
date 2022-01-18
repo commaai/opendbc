@@ -381,6 +381,8 @@ VAL_ 1552 METER_SLIDER_LOW_BRIGHTNESS 1 "Low brightness mode, footwell lights of
 VAL_ 1552 METER_SLIDER_DIMMED 1 "Dimmed" 0 "Not Dimmed";
 
 
+
+
 CM_ "Imported file _comma.dbc starts here";
 BO_ 359 STEERING_IPAS_COMMA: 8 IPAS
  SG_ STATE : 7|4@0+ (1,0) [0|15] "" XXX
