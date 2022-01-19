@@ -167,6 +167,15 @@ BO_ 951 ESP_CONTROL: 8 ESP
  SG_ BRAKE_HOLD_ENABLED : 33|1@1+ (1,0) [0|1] "" XXX
  SG_ BRAKE_HOLD_ACTIVE : 36|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 956 GEAR_PACKET: 8 XXX
+ SG_ SPORT_ON : 2|1@0+ (1,0) [0|1] "" XXX
+ SG_ GEAR : 13|6@0+ (1,0) [0|63] "" XXX
+ SG_ SPORT_GEAR_ON : 33|1@0+ (1,0) [0|1] "" XXX
+ SG_ SPORT_GEAR : 38|3@0+ (1,0) [0|7] "" XXX
+ SG_ ECON_ON : 40|1@0+ (1,0) [0|1] "" XXX
+ SG_ B_GEAR_ENGAGED : 41|1@0+ (1,0) [0|1] "" XXX
+ SG_ DRIVE_ENGAGED : 47|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 1005 REVERSE_CAMERA_STATE: 2 BGM
  SG_ REVERSE_CAMERA_GUIDELINES : 9|2@0+ (1,0) [1|3] "" XXX
 
@@ -367,6 +376,13 @@ VAL_ 835 ACC_MALFUNCTION 1 "faulted" 0 "ok";
 VAL_ 835 ACC_CUT_IN 1 "CUT-IN Detected" 0 "clear";
 VAL_ 835 ALLOW_LONG_PRESS 2 "set speed increase by 5 speed units regardless" 1 "set speed increase by 1 speed unit on short press, 5 speed units on long press";
 VAL_ 921 CRUISE_CONTROL_STATE 2 "disabled" 11 "hold" 10 "hold_waiting_user_cmd" 6 "enabled" 5 "faulted";
+VAL_ 956 SPORT_ON 0 "off" 1 "on";
+VAL_ 956 GEAR 0 "D" 1 "S" 8 "N" 16 "R" 32 "P";
+VAL_ 956 SPORT_GEAR_ON 0 "off" 1 "on";
+VAL_ 956 SPORT_GEAR 1 "S1" 2 "S2" 3 "S3" 4 "S4" 5 "S5" 6 "S6";
+VAL_ 956 ECON_ON 0 "off" 1 "on";
+VAL_ 956 B_GEAR_ENGAGED 0 "off" 1 "on";
+VAL_ 956 DRIVE_ENGAGED 0 "off" 1 "on";
 VAL_ 1005 REVERSE_CAMERA_GUIDELINES 3 "No guidelines" 2 "Static guidelines" 1 "Active guidelines";
 VAL_ 1041 PCS_INDICATOR 2 "PCS Faulted" 1 "PCS Turned Off By User" 0 "PCS Enabled";
 VAL_ 1041 PCS_SENSITIVITY 64 "high sensitivity"  128 "mid sensitivity" 192 "low sensitivity" 0 "off";
