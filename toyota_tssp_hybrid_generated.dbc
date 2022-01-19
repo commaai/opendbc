@@ -426,7 +426,7 @@ CM_ "BO_ SDSU: The sDSU is a modified DSU for use in TSS1 Toyotas. Learn more: h
 
 CM_ SG_ 767 FD_BUTTON "The follow distance button signal as forwarded by the sdsu";
 
-CM_ "toyota_tnga_k_tss_p_hybrid.dbc starts here";
+CM_ "toyota_tssp_hybrid.dbc starts here";
 
 
 
