@@ -1,12 +1,6 @@
 CM_ "IMPORT _toyota_2017.dbc";
 CM_ "IMPORT _comma.dbc";
 
-BO_ 295 GEAR_PACKET: 8 XXX
- SG_ CAR_MOVEMENT : 39|8@0- (1,0) [0|255] "" XXX
- SG_ COUNTER : 55|8@0+ (1,0) [0|255] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
- SG_ GEAR : 47|4@0+ (1,0) [0|15] "" XXX
-
 BO_ 550 BRAKE_MODULE: 8 XXX
  SG_ BRAKE_PRESSURE : 0|9@0+ (1,0) [0|511] "" XXX
  SG_ BRAKE_POSITION : 16|9@0+ (1,0) [0|511] "" XXX
