@@ -352,7 +352,7 @@ CM_ SG_ 1042 LDA_FRONT_CAMERA_BLOCKED "originally LDAFCVB, LDA related settings 
 CM_ SG_ 1042 TAKE_CONTROL "Please Control Steering Wheel warning";
 CM_ SG_ 1042 LANE_SWAY_TOGGLE "Lane Sway Warning System SWS Switch";
 CM_ SG_ 1042 LANE_SWAY_WARNING "Lane Sway Warning System Triggered";
-CM_ SG_ 1042 LANE_SWAY_FLD "Unknown Feature of Lane Sway Warning System, always set to 0 on stock system";
+CM_ SG_ 1042 LANE_SWAY_FLD "Unknown signal for Lane Sway Warning System, set to 7 on stock system when SWS is enabled, 0 when SWS is disabled";
 CM_ SG_ 1042 LANE_SWAY_BUZZER "Similar to TWO_BEEPS";
 CM_ SG_ 1042 SET_ME_X01 "empty bit on leaked dbc, always set to 1 during normal operations";
 CM_ SG_ 1042 SET_ME_X02 "empty bit on leaked dbc, always set to 2 during normal operations";
@@ -392,7 +392,7 @@ VAL_ 1042 LDA_ALERT 3 "hold with continuous beep" 2 "LDA unavailable" 1 "hold" 0
 VAL_ 1042 BARRIERS 3 "left" 2 "right" 1 "both" 0 "none";
 VAL_ 1042 RIGHT_LINE 3 "orange" 2 "faded" 1 "solid" 0 "none";
 VAL_ 1042 LEFT_LINE 3 "orange" 2 "faded" 1 "solid" 0 "none";
-VAL_ 1042 LDA_SA_TOGGLE 1 "steering assist on" 0 "steering assist off";
+VAL_ 1042 LDA_SA_TOGGLE  2 "steering assist off" 1 "steering assist on"; 
 VAL_ 1042 LDA_SENSITIVITY 2 "standard" 1 "high" 0 "undefined";
 VAL_ 1042 LDA_SPEED_TOO_LOW 1 "lda unavailable, speed too low" 0 "ok";
 VAL_ 1042 LDA_FRONT_CAMERA_BLOCKED 1 "lda unavailable" 0 "ok";
