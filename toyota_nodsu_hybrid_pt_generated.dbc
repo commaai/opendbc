@@ -506,4 +506,3 @@ BO_ 581 GAS_PEDAL: 8 XXX
  SG_ GAS_PEDAL : 23|8@0+ (0.005,0) [0|1] "" XXX
 
 CM_ SG_ 581 GAS_PEDAL "it seems slightly filtered";
-VAL_ 295 GEAR 0 "P" 1 "R" 2 "N" 3 "D" 4 "B";
