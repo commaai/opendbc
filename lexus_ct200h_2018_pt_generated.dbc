@@ -196,6 +196,7 @@ BO_ 1042 LKAS_HUD: 8 DSU
  SG_ LDA_SENSITIVITY : 18|2@0+ (1,0) [0|3] "" XXX
  SG_ LDA_SA_TOGGLE : 20|2@0+ (1,0) [0|3] "" XXX
  SG_ LDA_SPEED_TOO_LOW : 21|1@0+ (1,0) [0|1] "" XXX
+ SG_ LDA_ON_MESSAGE : 31|2@0+ (1,0) [0|3] "" XXX
  SG_ REPEATED_BEEPS : 32|1@0+ (1,0) [0|1] "" XXX
  SG_ LANE_SWAY_TOGGLE : 43|1@0+ (1,0) [0|1] "" XXX
  SG_ LANE_SWAY_SENSITIVITY : 45|2@0+ (1,0) [0|3] "" XXX
@@ -349,6 +350,7 @@ CM_ SG_ 1041 PCS_SENSITIVITY "Pre-Collision System Sensitivity";
 CM_ SG_ 1042 LDA_SA_TOGGLE "LDA Steering Assist Toggle";
 CM_ SG_ 1042 LDW_EXIST "Unclear what this is, it's usually set to 0";
 CM_ SG_ 1042 LDA_SENSITIVITY "LDA Sensitivity";
+CM_ SG_ 1042 LDA_ON_MESSAGE "Display LDA Turned ON message";
 CM_ SG_ 1042 REPEATED_BEEPS "LDA audible warning";
 CM_ SG_ 1042 LDA_UNAVAILABLE_QUIET "LDA toggles and sensitivity settings are greyed out if set to 1";
 CM_ SG_ 1042 LDA_SPEED_TOO_LOW "length is 3 bits in the leaked DBC, displays LDA unavailable below approx 50 km/h if set to 1";
@@ -395,7 +397,9 @@ VAL_ 1041 PCS_SENSITIVITY 64 "high sensitivity"  128 "mid sensitivity" 192 "low 
 VAL_ 1042 LDA_ALERT 3 "hold with continuous beep" 2 "LDA unavailable" 1 "hold" 0 "none";
 VAL_ 1042 BARRIERS 3 "left" 2 "right" 1 "both" 0 "none";
 VAL_ 1042 RIGHT_LINE 3 "orange" 2 "faded" 1 "solid" 0 "none";
+VAL_ 1042 LKAS_STATUS 1 "on" 0 "off";
 VAL_ 1042 LEFT_LINE 3 "orange" 2 "faded" 1 "solid" 0 "none";
+VAL_ 1042 LDA_ON_MESSAGE 2 "Lane Departure Alert Turned ON, Steering Assist Inactive" 1 "Lane Departure Alert Turned ON, Steering Assist Active" 0 "clear";
 VAL_ 1042 LDA_SA_TOGGLE  2 "steering assist off" 1 "steering assist on"; 
 VAL_ 1042 LDA_SENSITIVITY 2 "standard" 1 "high" 0 "undefined";
 VAL_ 1042 LDA_SPEED_TOO_LOW 1 "lda unavailable, speed too low" 0 "ok";
