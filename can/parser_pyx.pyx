@@ -200,7 +200,7 @@ cdef class CANDefine():
       for x in range(msg.num_sigs):
         sig = msg.sigs[x]
         sig_name = sig.name.decode('utf8')
-        info[address][sig_name] = {"is_signed": sig.is_signed, "scale": sig.factor, "offset": sig.offset, "is_little_endian": sig.is_little_endian}
+        info[address][sig_name] = {a: v for a, v in sig.items() if a != 'name'}
         info[msg_name][sig_name] = info[address][sig_name]
 
     self.dv = dict(dv)
