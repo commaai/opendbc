@@ -44,7 +44,6 @@ cdef class CANParser:
 
     self.vl = {}
     self.ts = {}
-    self.info = {}
     self.can_valid = True
     self.can_invalid_cnt = CAN_INVALID_CNT
 
@@ -155,8 +154,9 @@ cdef class CANDefine():
   cdef:
     const DBC *dbc
 
-  cdef public:
+  cdef readonly:
     dict dv
+    dict info
     string dbc_name
 
   def __init__(self, dbc_name):
@@ -165,35 +165,31 @@ cdef class CANDefine():
     if not self.dbc:
       raise RuntimeError(f"Can't find DBC: '{dbc_name}'")
 
-    num_vals = self.dbc[0].num_vals
-
     address_to_msg_name = {}
 
-    num_msgs = self.dbc[0].num_msgs
-    for i in range(num_msgs):
+    for i in range(self.dbc[0].num_msgs):
       msg = self.dbc[0].msgs[i]
-      name = msg.name.decode('utf8')
-      address = msg.address
-      address_to_msg_name[address] = name
+      address_to_msg_name[msg.address] = msg.name.decode('utf8')
 
     dv = defaultdict(dict)
+    info = defaultdict(dict)
 
-    for i in range(num_vals):
+    for i in range(self.dbc[0].num_vals):
       val = self.dbc[0].vals[i]
 
-      sgname = val.name.decode('utf8')
+      sig_name = val.name.decode('utf8')
+      msg_name = address_to_msg_name[address]
       def_val = val.def_val.decode('utf8')
       address = val.address
-      msgname = address_to_msg_name[address]
 
       # separate definition/value pairs
       def_val = def_val.split()
       values = [int(v) for v in def_val[::2]]
       defs = def_val[1::2]
 
-
       # two ways to lookup: address or msg name
-      dv[address][sgname] = dict(zip(values, defs))
-      dv[msgname][sgname] = dv[address][sgname]
+      dv[address][sig_name] = dict(zip(values, defs))
+      dv[msg_name][sig_name] = dv[address][sig_name]
 
-      self.dv = dict(dv)
+    self.dv = dict(dv)
+    self.info = dict(info)
