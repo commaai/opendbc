@@ -5,7 +5,7 @@ from opendbc.can.process_dbc import process
 
 dbcs = []
 for x in sorted(os.listdir('../')):
-  if x.endswith(".dbc"):
+  if x.endswith(".dbc") and 'nodsu_hybrid' in x:
     def compile_dbc(target, source, env):
       process(source[0].path, target[0].path)
     in_fn = [os.path.join('../', x), 'dbc_template.cc']

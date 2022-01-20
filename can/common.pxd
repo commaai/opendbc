@@ -42,6 +42,7 @@ cdef extern from "common_dbc.h":
     uint32_t address
     const char* def_val
     const Signal *sigs
+    int sig_idx
 
   cdef struct DBC:
     const char* name
