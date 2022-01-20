@@ -6,6 +6,7 @@ import sys
 import numbers
 from collections import namedtuple, defaultdict
 
+
 def int_or_float(s):
   # return number, trying to maintain int format
   if s.isdigit():

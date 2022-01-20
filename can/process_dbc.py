@@ -8,6 +8,7 @@ import jinja2
 from collections import Counter
 from opendbc.can.dbc import dbc
 
+
 def process(in_fn, out_fn):
   dbc_name = os.path.split(out_fn)[-1].replace('.cc', '')
   # print("processing %s: %s -> %s" % (dbc_name, in_fn, out_fn))
@@ -23,8 +24,7 @@ def process(in_fn, out_fn):
   msgs = [(address, msg_name, msg_size, sorted(msg_sigs, key=lambda s: s.name not in ("COUNTER", "CHECKSUM")))
           for address, ((msg_name, msg_size), msg_sigs) in sorted(can_dbc.msgs.items()) if msg_sigs]
 
-  def_vals = {a: sorted(set(b)) for a, b in can_dbc.def_vals.items()}  # remove duplicates
-  def_vals = sorted(def_vals.items())
+  def_vals = sorted((a, sorted(b)) for a, b in can_dbc.def_vals.items())
 
   if can_dbc.name.startswith(("honda_", "acura_")):
     checksum_type = "honda"
@@ -112,6 +112,7 @@ def process(in_fn, out_fn):
       out_f.seek(0)
       out_f.truncate()
       out_f.write(parser_code)
+
 
 def main():
   if len(sys.argv) != 3:
