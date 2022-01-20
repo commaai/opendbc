@@ -41,7 +41,7 @@ class dbc():
     self.msgs = {}
 
     # A dictionary which maps message ids to a list of tuples (signal name, definition value pairs)
-    self.def_vals = defaultdict(list)
+    self.def_vals = defaultdict(set)
 
     # lookup to bit reverse each byte
     self.bits_index = [(i & ~0b111) + ((-i - 1) & 0b111) for i in range(64)]
@@ -108,7 +108,7 @@ class dbc():
         defvals[1::2] = [d.strip().upper().replace(" ", "_") for d in defvals[1::2]]
         defvals = '"' + "".join(str(i) for i in defvals) + '"'
 
-        self.def_vals[ids].append((sgname, defvals))
+        self.def_vals[ids].add((sgname, defvals))
 
     for msg in self.msgs.values():
       msg[1].sort(key=lambda x: x.start_bit)
