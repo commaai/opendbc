@@ -383,7 +383,7 @@ CM_ SG_ 1552 METER_SLIDER_DIMMED "Combination display slider not at max, reflect
 CM_ SG_ 1553 ODOMETER "Unit is dependent upon units signal";
 CM_ SG_ 1592 LOCK_STATUS_CHANGED "1 on rising edge of lock/unlocking";
 CM_ SG_ 1592 LOCK_STATUS "The next 3 bits always seem to follow this signal.";
-CM_ SG_ 1592 LOCKED_VIA_KEYFOB "1 for as long as locked with key fob";
+CM_ SG_ 1592 LOCKED_VIA_KEYFOB "1 for as long as car is locked with key fob or door handle touch";
 
 VAL_ 466 CRUISE_STATE 11 "timer_3sec" 10 "adaptive click down" 9 "adaptive click up" 8 "adaptive engaged" 7 "standstill" 6 "non-adaptive click up" 5 "non-adaptive click down" 4 "non-adaptive hold down" 3 "non-adaptive hold up" 2 "non-adaptive being engaged" 1 "non-adaptive engaged" 0 "off";
 VAL_ 467 LOW_SPEED_LOCKOUT 2 "low speed locked" 1 "ok";
