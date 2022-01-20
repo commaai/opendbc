@@ -195,6 +195,7 @@ cdef class CANDefine():
     for i in range(self.dbc[0].num_msgs):
       msg = self.dbc[0].msgs[i]
       msg_name = msg.name.decode('utf8')
+      address = msg.address
 
       for x in range(msg.num_sigs):
         sig = msg.sigs[x]
