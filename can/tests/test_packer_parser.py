@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
-from collections import namedtuple
 import unittest
 
 import cereal.messaging as messaging
 from opendbc.can.parser import CANParser
 from opendbc.can.packer import CANPacker
-
 
 # Python implementation so we don't have to depend on boardd
 def can_list_to_can_capnp(can_msgs, msgtype='can'):
@@ -73,7 +71,7 @@ class TestCanParserPacker(unittest.TestCase):
     packer = CANPacker(dbc_file)
 
     idx = 0
-    for brake in range(101):
+    for brake in range(0, 100):
       values = {"USER_BRAKE": brake}
       msgs = packer.make_can_msg("VSA_STATUS", 0, values, idx)
       bts = can_list_to_can_capnp([msgs])
@@ -120,19 +118,6 @@ class TestCanParserPacker(unittest.TestCase):
         self.assertAlmostEqual(parser.vl["ES_LKAS"]["Counter"], idx % 16)
 
         idx += 1
-
-  def test_info(self):
-    """Test signal info available from parser"""
-    SignalInfo = namedtuple("SignalInfo", ["dbc", "msg", "sig", "param", "value"])
-    signals = [
-      SignalInfo("toyota_nodsu_pt_generated", "STEER_TORQUE_SENSOR", "STEER_TORQUE_EPS", "scale", 0.73),
-      SignalInfo("toyota_prius_2017_pt_generated", "STEER_TORQUE_SENSOR", "STEER_TORQUE_EPS", "scale", 0.66),
-      SignalInfo("toyota_corolla_2017_pt_generated", "STEER_TORQUE_SENSOR", "STEER_TORQUE_EPS", "scale", 0.88),
-    ]
-
-    for info in signals:
-      parser = CANParser(info.dbc, [])
-      self.assertAlmostEqual(parser.info[info.msg][info.sig][info.param], info.value)
 
 
 if __name__ == "__main__":
