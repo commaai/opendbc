@@ -30,25 +30,25 @@ cdef class CANParser:
     string dbc_name
     dict vl
     dict ts
-    dict info
     bool can_valid
     int can_invalid_cnt
 
   def __init__(self, dbc_name, signals, checks=None, bus=0, enforce_checks=True):
     if checks is None:
       checks = []
+    self.can_valid = True
     self.dbc_name = dbc_name
     self.dbc = dbc_lookup(dbc_name)
     if not self.dbc:
       raise RuntimeError(f"Can't find DBC: {dbc_name}")
-
     self.vl = {}
     self.ts = {}
-    self.info = {}
-    self.can_valid = True
+
     self.can_invalid_cnt = CAN_INVALID_CNT
 
-    for i in range(self.dbc[0].num_msgs):
+    cdef int i
+    cdef int num_msgs = self.dbc[0].num_msgs
+    for i in range(num_msgs):
       msg = self.dbc[0].msgs[i]
       name = msg.name.decode('utf8')
 
@@ -58,13 +58,6 @@ cdef class CANParser:
       self.vl[name] = {}
       self.ts[msg.address] = {}
       self.ts[name] = {}
-      self.info[msg.address] = {}
-      self.info[name] = {}
-
-      for x in range(msg.num_sigs):
-        sig = msg.sigs[x]
-        sig_name = sig.name.decode('utf8')
-        self.info[name][sig_name] = {"is_signed": sig.is_signed, "scale": sig.factor, "offset": sig.offset, "is_little_endian": sig.is_little_endian}
 
     # Convert message names into addresses
     for i in range(len(signals)):
@@ -155,8 +148,9 @@ cdef class CANDefine():
   cdef:
     const DBC *dbc
 
-  cdef public:
+  cdef readonly:
     dict dv
+    dict info
     string dbc_name
 
   def __init__(self, dbc_name):
@@ -176,8 +170,8 @@ cdef class CANDefine():
       address = msg.address
       address_to_msg_name[address] = name
 
+    # Value definitions
     dv = defaultdict(dict)
-
     for i in range(num_vals):
       val = self.dbc[0].vals[i]
 
@@ -196,4 +190,17 @@ cdef class CANDefine():
       dv[address][sgname] = dict(zip(values, defs))
       dv[msgname][sgname] = dv[address][sgname]
 
-      self.dv = dict(dv)
+    # Signal information
+    info = defaultdict(dict)
+    for i in range(self.dbc[0].num_msgs):
+      msg = self.dbc[0].msgs[i]
+      msg_name = msg.name.decode('utf8')
+
+      for x in range(msg.num_sigs):
+        sig = msg.sigs[x]
+        sig_name = sig.name.decode('utf8')
+        info[address][sig_name] = {"is_signed": sig.is_signed, "scale": sig.factor, "offset": sig.offset, "is_little_endian": sig.is_little_endian}
+        info[msg_name][sig_name] = info[address][sig_name]
+
+    self.dv = dict(dv)
+    self.info = dict(info)
