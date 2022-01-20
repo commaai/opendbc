@@ -189,4 +189,4 @@ cdef class CANDefine():
       dv[address][sgname] = dict(zip(values, defs))
       dv[msgname][sgname] = dv[address][sgname]
 
-      self.dv = dict(dv)
+    self.dv = dict(dv)
