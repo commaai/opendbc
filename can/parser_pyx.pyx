@@ -186,7 +186,7 @@ cdef class CANDefine():
 
 
       # two ways to lookup: address or msg name
-      dv[address][sgname] = dict(zip(values, defs))
+      dv[address][sgname] = dict(zip(values + defs, defs + values))
       dv[msgname][sgname] = dv[address][sgname]
 
       self.dv = dict(dv)
