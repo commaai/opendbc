@@ -2,11 +2,10 @@
 from __future__ import print_function
 import os
 import sys
-import numpy as np
 
 import jinja2
 
-from collections import Counter, OrderedDict
+from collections import Counter
 from opendbc.can.dbc import dbc
 
 def process(in_fn, out_fn):
@@ -18,44 +17,14 @@ def process(in_fn, out_fn):
   with open(template_fn, "r") as template_f:
     template = jinja2.Template(template_f.read(), trim_blocks=True, lstrip_blocks=True)
 
-  # if "toyota_nodsu_hybrid_pt" not in in_fn:
-  #   return
   can_dbc = dbc(in_fn)
 
   # process counter and checksums first
-  msgs = {}
-  for address, ((msg_name, msg_size), msg_sigs) in sorted(can_dbc.msgs.items()):
-    if msg_sigs:
-      sigs_sorted = {s.name: s for s in sorted(msg_sigs, key=lambda s: s.name not in ("COUNTER", "CHECKSUM"))}
-      msgs[address] = (address, msg_name, msg_size, sigs_sorted)
+  msgs = [(address, msg_name, msg_size, sorted(msg_sigs, key=lambda s: s.name not in ("COUNTER", "CHECKSUM")))
+          for address, ((msg_name, msg_size), msg_sigs) in sorted(can_dbc.msgs.items()) if msg_sigs]
 
-  def_vals = {}
-  # def_vals = {a: sorted(set(b)) for a, b in can_dbc.def_vals.items()}  # remove duplicates
-  # def_vals = sorted(def_vals.items())
-
-  print(can_dbc.def_vals.items())
-
-  for address, b in can_dbc.def_vals.items():
-    print(address, b)
-    print()
-    sig_idx = msgs[address][3][b[0]]
-    def_vals[address] = sorted((b[0], b[1], sig_idx))
-
-  # sig_idxs = []
-  # for def_val in def_vals:
-  #   msg_sigs = msgs[def_val[0]][3]
-  #   sig_idx = 0
-  #   print(msg_sigs)
-  #   for idx, sig in enumerate(msg_sigs):
-  #     if sig.name == def_val[1][0][0]:
-  #       sig_idx = idx
-  #       break
-  #   else:
-  #     raise Exception
-  #   sig_idxs.append(sig_idx)
-  # for sig in def_vals:
-  #   sig.append(np.random.randint(0, 4))
-  #   print(sig)
+  def_vals = {a: sorted(set(b)) for a, b in can_dbc.def_vals.items()}  # remove duplicates
+  def_vals = sorted(def_vals.items())
 
   if can_dbc.name.startswith(("honda_", "acura_")):
     checksum_type = "honda"
@@ -135,8 +104,7 @@ def process(in_fn, out_fn):
     if count > 1:
       sys.exit("%s: Duplicate message name in DBC file %s" % (dbc_name, name))
 
-  parser_code = template.render(dbc=can_dbc, checksum_type=checksum_type, msgs=msgs, def_vals=def_vals, sig_idxs=sig_idxs, len=len)
-  # print(parser_code)
+  parser_code = template.render(dbc=can_dbc, checksum_type=checksum_type, msgs=msgs, def_vals=def_vals, len=len)
 
   with open(out_fn, "a+") as out_f:
     out_f.seek(0)

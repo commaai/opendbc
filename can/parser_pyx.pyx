@@ -9,7 +9,7 @@ from libcpp.map cimport map
 from libcpp cimport bool
 
 from .common cimport CANParser as cpp_CANParser
-from .common cimport SignalParseOptions, MessageParseOptions, dbc_lookup, SignalValue, DBC, Signal
+from .common cimport SignalParseOptions, MessageParseOptions, dbc_lookup, SignalValue, DBC
 
 import os
 import numbers
@@ -172,45 +172,24 @@ cdef class CANDefine():
       address_to_msg_name[msg.address] = msg.name.decode('utf8')
 
     dv = defaultdict(dict)
+    info = defaultdict(dict)
+
     for i in range(self.dbc[0].num_vals):
       val = self.dbc[0].vals[i]
 
       sig_name = val.name.decode('utf8')
-      address = val.address
-      def_val = val.def_val.decode('utf8')
       msg_name = address_to_msg_name[address]
+      def_val = val.def_val.decode('utf8')
+      address = val.address
 
       # separate definition/value pairs
       def_val = def_val.split()
       values = [int(v) for v in def_val[::2]]
       defs = def_val[1::2]
 
-      # also get information like scale, offset, etc
-      print(sig_name)
-      print(val.sigs[val.sig_idx].name)
-      print()
-      #for x in range(val.sig):
-      #  print(val.sigs[x])
-
       # two ways to lookup: address or msg name
       dv[address][sig_name] = dict(zip(values, defs))
       dv[msg_name][sig_name] = dv[address][sig_name]
-      #info[address][sig_name] = {}
-      #info[msg_name][sig_name] = info[address][sig_name]
 
-    it = 0
-    info = defaultdict(dict)
-    for i in range(self.dbc[0].num_msgs):
-      msg = self.dbc[0].msgs[i]
-      msg_name = msg.name.decode('utf8')
-
-      for x in range(msg.num_sigs):
-        it += 1
-        sig = msg.sigs[x]
-        sig_name = sig.name.decode('utf8')
-        info[address][sig_name] = {"is_signed": sig.is_signed, "scale": sig.factor, "offset": sig.offset, "is_little_endian": sig.is_little_endian}
-        info[msg_name][sig_name] = info[address][sig_name]
-
-    print(it)
     self.dv = dict(dv)
     self.info = dict(info)

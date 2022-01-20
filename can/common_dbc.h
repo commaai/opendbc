@@ -65,7 +65,6 @@ struct Val {
   uint32_t address;
   const char* def_val;
   const Signal *sigs;
-  int sig_idx;
 };
 
 struct DBC {

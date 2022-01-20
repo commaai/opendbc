@@ -60,14 +60,13 @@ const Msg msgs[] = {
 
 const Val vals[] = {
 {% for address, sig in def_vals %}
-  {% for sg_name, def_val, sig_idx in sig %}
+  {% for sg_name, def_val in sig %}
     {% set address_hex = "0x%X" % address %}
     {
       .name = "{{sg_name}}",
       .address = {{address_hex}},
       .def_val = {{def_val}},
       .sigs = sigs_{{address}},
-      .sig_idx = {{sig_idx}},
     },
   {% endfor %}
 {% endfor %}
