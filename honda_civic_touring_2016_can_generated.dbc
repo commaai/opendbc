@@ -253,8 +253,6 @@ VAL_ 513 STATE 5 "FAULT_TIMEOUT" 4 "FAULT_STARTUP" 3 "FAULT_SCE" 2 "FAULT_SEND" 
 
 CM_ "honda_civic_touring_2016_can.dbc starts here";
 
-
-
 BO_ 148 KINEMATICS: 8 XXX
  SG_ LAT_ACCEL : 7|10@0+ (0.02,-512) [-20|20] "m/s2" EON
  SG_ LONG_ACCEL : 24|9@0- (-0.02,0) [-20|20] "m/s2" EON

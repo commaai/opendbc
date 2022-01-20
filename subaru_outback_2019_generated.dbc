@@ -249,7 +249,6 @@ VAL_ 328 Gear 0 "N" 1 "D" 2 "D" 3 "D" 4 "D" 5 "D" 6 "D" 14 "R" 15 "P";
 
 CM_ "subaru_outback_2019.dbc starts here";
 
-
 BO_ 358 ES_DashStatus: 8 XXX
  SG_ Not_Ready_Startup : 0|3@1+ (1,0) [0|7] "" XXX
  SG_ Seatbelt_Disengage : 12|2@1+ (1,0) [0|3] "" XXX
