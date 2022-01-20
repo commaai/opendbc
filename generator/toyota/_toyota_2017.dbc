@@ -177,20 +177,31 @@ BO_ 1041 ACC_HUD: 8 DSU
  SG_ PCS_OFF : 40|1@0+ (1,0) [0|0] "" XXX
  SG_ PCS_SENSITIVITY : 55|8@0+ (1,0) [0|1] "" XXX
 
-BO_ 1042 LKAS_HUD: 8 XXX
+BO_ 1042 LKAS_HUD: 8 DSU
  SG_ BARRIERS : 1|2@0+ (1,0) [0|3] "" XXX
  SG_ RIGHT_LINE : 3|2@0+ (1,0) [0|3] "" XXX
  SG_ LEFT_LINE : 5|2@0+ (1,0) [0|3] "" XXX
  SG_ LKAS_STATUS : 7|2@0+ (1,0) [0|3] "" XXX
- SG_ SET_ME_X01 : 11|2@0+ (1,0) [0|3] "" XXX
  SG_ LDA_ALERT : 9|2@0+ (1,0) [0|3] "" XXX
+ SG_ LDW_EXIST : 10|1@0+ (1,0) [0|1] "" XXX
  SG_ TWO_BEEPS : 12|1@0+ (1,0) [0|1] "" XXX
  SG_ ADJUSTING_CAMERA : 13|1@0+ (1,0) [0|1] "" XXX
+ SG_ LDA_UNAVAILABLE_QUIET : 14|1@0+ (1,0) [0|1] "" XXX
  SG_ LDA_MALFUNCTION : 15|1@0+ (1,0) [0|1] "" XXX
+ SG_ LDA_UNAVAILABLE : 16|1@0+ (1,0) [0|1] "" XXX
+ SG_ LDA_SENSITIVITY : 18|2@0+ (1,0) [0|3] "" XXX
+ SG_ LDA_SA_TOGGLE : 20|2@0+ (1,0) [0|3] "" XXX
+ SG_ LDA_SPEED_TOO_LOW : 21|1@0+ (1,0) [0|1] "" XXX
+ SG_ LDA_ON_MESSAGE : 31|2@0+ (1,0) [0|3] "" XXX
  SG_ REPEATED_BEEPS : 32|1@0+ (1,0) [0|1] "" XXX
- SG_ SET_ME_X0C : 23|8@0+ (1,0) [0|1] "" XXX
- SG_ SET_ME_X2C : 47|8@0+ (1,0) [0|1] "" XXX
- SG_ SET_ME_X38 : 55|8@0+ (1,0) [0|1] "" XXX
+ SG_ LANE_SWAY_TOGGLE : 43|1@0+ (1,0) [0|1] "" XXX
+ SG_ LANE_SWAY_SENSITIVITY : 45|2@0+ (1,0) [0|3] "" XXX
+ SG_ TAKE_CONTROL : 46|1@0+ (1,0) [0|1] "" XXX
+ SG_ LDA_FRONT_CAMERA_BLOCKED : 47|1@0+ (1,0) [0|1] "" XXX
+ SG_ LANE_SWAY_BUZZER : 50|2@0+ (1,0) [0|0] "" XXX
+ SG_ LANE_SWAY_FLD : 53|3@0+ (1,0) [0|7] "" XXX
+ SG_ LANE_SWAY_WARNING : 55|2@0+ (1,0) [0|3] "" XXX
+ SG_ SET_ME_X01 : 42|1@0+ (1,0) [0|1] "" XXX
  SG_ SET_ME_X02 : 63|8@0+ (1,0) [0|1] "" XXX
 
 BO_ 1043 TIME : 8 CGW
@@ -332,8 +343,21 @@ CM_ SG_ 921 UI_SET_SPEED "set speed shown in UI with user set unit";
 CM_ SG_ 951 BRAKE_LIGHTS_ACC "brake lights when ACC commands decel";
 CM_ SG_ 1041 PCS_INDICATOR "Pre-Collision System Indicator";
 CM_ SG_ 1041 PCS_SENSITIVITY "Pre-Collision System Sensitivity";
-CM_ SG_ 1042 SET_ME_1 "unclear what this is, but it's always 1 in drive traces";
-CM_ SG_ 1042 REPEATED_BEEPS "recommended for fcw and other important alerts";
+CM_ SG_ 1042 LDA_SA_TOGGLE "LDA Steering Assist Toggle";
+CM_ SG_ 1042 LDW_EXIST "Unclear what this is, it's usually set to 0";
+CM_ SG_ 1042 LDA_SENSITIVITY "LDA Sensitivity";
+CM_ SG_ 1042 LDA_ON_MESSAGE "Display LDA Turned ON message";
+CM_ SG_ 1042 REPEATED_BEEPS "LDA audible warning";
+CM_ SG_ 1042 LDA_UNAVAILABLE_QUIET "LDA toggles and sensitivity settings are greyed out if set to 1";
+CM_ SG_ 1042 LDA_SPEED_TOO_LOW "length is 3 bits in the leaked DBC, displays LDA unavailable below approx 50 km/h if set to 1";
+CM_ SG_ 1042 LDA_FRONT_CAMERA_BLOCKED "originally LDAFCVB, LDA related settings are greyed out if set to 1";
+CM_ SG_ 1042 TAKE_CONTROL "Please Control Steering Wheel warning";
+CM_ SG_ 1042 LANE_SWAY_TOGGLE "Lane Sway Warning System SWS Switch";
+CM_ SG_ 1042 LANE_SWAY_WARNING "Lane Sway Warning System Triggered";
+CM_ SG_ 1042 LANE_SWAY_FLD "Unknown signal for Lane Sway Warning System, set to 7 on stock system when SWS is enabled, 0 when SWS is disabled";
+CM_ SG_ 1042 LANE_SWAY_BUZZER "Similar to TWO_BEEPS";
+CM_ SG_ 1042 SET_ME_X01 "empty bit on leaked dbc, always set to 1 during normal operations";
+CM_ SG_ 1042 SET_ME_X02 "empty bit on leaked dbc, always set to 2 during normal operations";
 CM_ SG_ 1161 SPDVAL1 "Numbers 0-199 is displayed, 200-254 displays circle without number and 255 is for no limit.";
 CM_ SG_ 1161 SYNCID1 "counter from 1 to f at 1 Hz";
 CM_ SG_ 1161 SPDVAL2 "conditional speed value 70";
@@ -369,7 +393,16 @@ VAL_ 1041 PCS_SENSITIVITY 64 "high sensitivity"  128 "mid sensitivity" 192 "low 
 VAL_ 1042 LDA_ALERT 3 "hold with continuous beep" 2 "LDA unavailable" 1 "hold" 0 "none";
 VAL_ 1042 BARRIERS 3 "left" 2 "right" 1 "both" 0 "none";
 VAL_ 1042 RIGHT_LINE 3 "orange" 2 "faded" 1 "solid" 0 "none";
+VAL_ 1042 LKAS_STATUS 1 "on" 0 "off";
 VAL_ 1042 LEFT_LINE 3 "orange" 2 "faded" 1 "solid" 0 "none";
+VAL_ 1042 LDA_ON_MESSAGE 2 "Lane Departure Alert Turned ON, Steering Assist Inactive" 1 "Lane Departure Alert Turned ON, Steering Assist Active" 0 "clear";
+VAL_ 1042 LDA_SA_TOGGLE  2 "steering assist off" 1 "steering assist on"; 
+VAL_ 1042 LDA_SENSITIVITY 2 "standard" 1 "high" 0 "undefined";
+VAL_ 1042 LDA_SPEED_TOO_LOW 1 "lda unavailable, speed too low" 0 "ok";
+VAL_ 1042 LDA_FRONT_CAMERA_BLOCKED 1 "lda unavailable" 0 "ok";
+VAL_ 1042 TAKE_CONTROL 1 "take control" 0 "ok";
+VAL_ 1042 LANE_SWAY_WARNING 3 "ok" 2 "orange please take a break" 1 "prompt would you like to take a break" 0 "ok";
+VAL_ 1042 LANE_SWAY_BUZZER 3 "ok" 2 "beep twice" 1 "beep twice" 0 "ok";
 VAL_ 1553 UNITS 1 "km" 2 "miles";
 VAL_ 1556 TURN_SIGNALS 3 "none" 2 "right" 1 "left";
 VAL_ 1161 TSGN1 1 "speed sign" 0 "none";
