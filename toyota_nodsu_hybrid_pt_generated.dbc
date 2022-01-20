@@ -522,9 +522,6 @@ VAL_ 610 LKA_STATE 25 "temporary_fault" 9 "temporary_fault2" 5 "active" 1 "stand
 
 CM_ "toyota_nodsu_hybrid_pt.dbc starts here";
 
-
-
-
 BO_ 295 GEAR_PACKET: 8 XXX
  SG_ CAR_MOVEMENT : 39|8@0- (1,0) [0|255] "" XXX
  SG_ COUNTER : 55|8@0+ (1,0) [0|255] "" XXX

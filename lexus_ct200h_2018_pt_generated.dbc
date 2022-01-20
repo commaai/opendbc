@@ -469,8 +469,6 @@ CM_ SG_ 767 FD_BUTTON "The follow distance button signal as forwarded by the sds
 
 CM_ "lexus_ct200h_2018_pt.dbc starts here";
 
-
-
 BO_ 548 BRAKE_MODULE: 8 XXX
  SG_ BRAKE_PRESSURE : 43|12@0+ (1,0) [0|4047] "" XXX
  SG_ BRAKE_PRESSED : 5|1@0+ (1,0) [0|1] "" XXX

@@ -4,7 +4,7 @@ import re
 
 cur_path = os.path.dirname(os.path.realpath(__file__))
 opendbc_root = os.path.join(cur_path, '../')
-include_pattern = re.compile(r'CM_ "IMPORT (.*?)";')
+include_pattern = re.compile(r'CM_ "IMPORT (.*?)";\n')
 
 
 def read_dbc(src_dir, filename):
