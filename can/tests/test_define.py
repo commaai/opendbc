@@ -28,13 +28,15 @@ class TestCADNDefine(unittest.TestCase):
     defs = CANDefine(dbc_file)
 
     self.assertDictEqual(defs.info[608], defs.info['STEER_TORQUE_SENSOR'])
-    self.assertDictEqual(defs.info[608],
-                         {'CHECKSUM': {'is_signed': False, 'scale': 1.0, 'offset': 0.0, 'is_little_endian': False},
-                          'STEER_OVERRIDE': {'is_signed': False, 'scale': 1.0, 'offset': 0.0, 'is_little_endian': False},
-                          'STEER_TORQUE_DRIVER': {'is_signed': True, 'scale': 1.0, 'offset': 0.0, 'is_little_endian': False},
-                          'STEER_ANGLE': {'is_signed': True, 'scale': 0.0573, 'offset': 0.0, 'is_little_endian': False},
-                          'STEER_TORQUE_EPS': {'is_signed': True, 'scale': 0.73, 'offset': 0.0, 'is_little_endian': False},
-                          }
+    self.assertDictEqual(defs.info[608]['STEER_TORQUE_EPS'],
+                         {'b1': 40,
+                          'b2': 16,
+                          'bo': 8,
+                          'is_signed': True,
+                          'factor': 0.73,
+                          'offset': 0.0,
+                          'is_little_endian': False,
+                          'type': 0}
                          )
 
 
