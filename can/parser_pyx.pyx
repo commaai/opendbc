@@ -36,42 +36,39 @@ cdef class CANParser:
   def __init__(self, dbc_name, signals, checks=None, bus=0, enforce_checks=True):
     if checks is None:
       checks = []
-    self.can_valid = True
     self.dbc_name = dbc_name
     self.dbc = dbc_lookup(dbc_name)
     if not self.dbc:
       raise RuntimeError(f"Can't find DBC: {dbc_name}")
     self.vl = {}
     self.ts = {}
-
+    self.can_valid = True
     self.can_invalid_cnt = CAN_INVALID_CNT
 
-    cdef int i
-    cdef int num_msgs = self.dbc[0].num_msgs
-    for i in range(num_msgs):
+    for i in range(self.dbc[0].num_msgs):
       msg = self.dbc[0].msgs[i]
-      name = msg.name.decode('utf8')
+      msg_name = msg.name.decode('utf8')
 
-      self.msg_name_to_address[name] = msg.address
-      self.address_to_msg_name[msg.address] = name
+      self.msg_name_to_address[msg_name] = msg.address
+      self.address_to_msg_name[msg.address] = msg_name
       self.vl[msg.address] = {}
-      self.vl[name] = {}
+      self.vl[msg_name] = {}
       self.ts[msg.address] = {}
-      self.ts[name] = {}
+      self.ts[msg_name] = {}
 
     # Convert message names into addresses
     for i in range(len(signals)):
       s = signals[i]
       if not isinstance(s[1], numbers.Number):
-        name = s[1].encode('utf8')
-        s = (s[0], self.msg_name_to_address[name], s[2])
+        msg_name = s[1].encode('utf8')
+        s = (s[0], self.msg_name_to_address[msg_name], s[2])
         signals[i] = s
 
     for i in range(len(checks)):
       c = checks[i]
       if not isinstance(c[0], numbers.Number):
-        name = c[0].encode('utf8')
-        c = (self.msg_name_to_address[name], c[1])
+        msg_name = c[0].encode('utf8')
+        c = (self.msg_name_to_address[msg_name], c[1])
         checks[i] = c
 
     if enforce_checks:
