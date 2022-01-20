@@ -253,8 +253,6 @@ VAL_ 513 STATE 5 "FAULT_TIMEOUT" 4 "FAULT_STARTUP" 3 "FAULT_SCE" 2 "FAULT_SEND" 
 
 CM_ "honda_odyssey_extreme_edition_2018_china_can.dbc starts here";
 
-
-
 BO_ 316 GAS_PEDAL: 8 PCM
  SG_ CAR_GAS : 39|8@0+ (1,0) [0|255] "" EON
 

@@ -461,8 +461,6 @@ CM_ SG_ 767 FD_BUTTON "The follow distance button signal as forwarded by the sds
 
 CM_ "toyota_tssp_hybrid.dbc starts here";
 
-
-
 BO_ 550 BRAKE_MODULE: 8 XXX
  SG_ BRAKE_PRESSURE : 0|9@0+ (1,0) [0|511] "" XXX
  SG_ BRAKE_POSITION : 16|9@0+ (1,0) [0|511] "" XXX
