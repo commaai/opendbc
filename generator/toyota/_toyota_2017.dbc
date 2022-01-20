@@ -268,6 +268,11 @@ BO_ 1570 LIGHT_STALK: 8 SCM
  SG_ HIGH_BEAM : 30|1@0+ (1,0) [0|1] "" XXX
  SG_ DAYTIME_RUNNING_LIGHT : 31|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 1592 DOOR_LOCKS: 8 XXX
+ SG_ LOCK_STATUS_CHANGED : 15|1@0+ (1,0) [0|1] "" XXX
+ SG_ LOCK_STATUS : 20|1@0+ (1,0) [0|1] "" XXX
+ SG_ LOCKED_VIA_KEYFOB : 23|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 1161 RSA1: 8 FCM
  SG_ TSGN1 : 7|8@0+ (1,0) [0|0] "" XXX
  SG_ TSGNGRY1 : 12|3@0+ (1,0) [0|0] "" XXX
@@ -376,6 +381,8 @@ CM_ SG_ 1552 METER_SLIDER_BRIGHTNESS_PCT "Combination display brightness setting
 CM_ SG_ 1552 METER_SLIDER_LOW_BRIGHTNESS "Combination display low brightness mode, also controls footwell lighting";
 CM_ SG_ 1552 METER_SLIDER_DIMMED "Combination display slider not at max, reflects combination meter settings only, not linked with headlight state";
 CM_ SG_ 1553 ODOMETER "Unit is dependent upon units signal";
+CM_ SG_ 1592 LOCK_STATUS_CHANGED "1 on rising edge of lock/unlocking";
+CM_ SG_ 1592 LOCKED_VIA_KEYFOB "1 for as long as locked with key fob";
 
 VAL_ 466 CRUISE_STATE 11 "timer_3sec" 10 "adaptive click down" 9 "adaptive click up" 8 "adaptive engaged" 7 "standstill" 6 "non-adaptive click up" 5 "non-adaptive click down" 4 "non-adaptive hold down" 3 "non-adaptive hold up" 2 "non-adaptive being engaged" 1 "non-adaptive engaged" 0 "off";
 VAL_ 467 LOW_SPEED_LOCKOUT 2 "low speed locked" 1 "ok";
@@ -396,7 +403,7 @@ VAL_ 1042 RIGHT_LINE 3 "orange" 2 "faded" 1 "solid" 0 "none";
 VAL_ 1042 LKAS_STATUS 1 "on" 0 "off";
 VAL_ 1042 LEFT_LINE 3 "orange" 2 "faded" 1 "solid" 0 "none";
 VAL_ 1042 LDA_ON_MESSAGE 2 "Lane Departure Alert Turned ON, Steering Assist Inactive" 1 "Lane Departure Alert Turned ON, Steering Assist Active" 0 "clear";
-VAL_ 1042 LDA_SA_TOGGLE  2 "steering assist off" 1 "steering assist on"; 
+VAL_ 1042 LDA_SA_TOGGLE  2 "steering assist off" 1 "steering assist on";
 VAL_ 1042 LDA_SENSITIVITY 2 "standard" 1 "high" 0 "undefined";
 VAL_ 1042 LDA_SPEED_TOO_LOW 1 "lda unavailable, speed too low" 0 "ok";
 VAL_ 1042 LDA_FRONT_CAMERA_BLOCKED 1 "lda unavailable" 0 "ok";
@@ -412,3 +419,4 @@ VAL_ 1162 TSGN3 0 "none" 1 "speed sign" 2 "0 unlimited" 7 "unlimited" 16 "highwa
 VAL_ 1162 SPLSGN3 15 "conditional blank" 4 "wet road" 5 "rain" 0 "none";
 VAL_ 1552 METER_SLIDER_LOW_BRIGHTNESS 1 "Low brightness mode, footwell lights off" 0 "Normal mode, footwell lights on";
 VAL_ 1552 METER_SLIDER_DIMMED 1 "Dimmed" 0 "Not Dimmed";
+VAL_ 1592 LOCK_STATUS 0 "locked" 1 "unlocked";
