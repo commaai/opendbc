@@ -425,7 +425,6 @@ VAL_ 399 STEER_STATUS 6 "tmp_fault" 5 "fault_1" 4 "no_torque_alert_2" 3 "low_spe
 
 CM_ "honda_civic_sedan_16_diesel_2019_can.dbc starts here";
 
-
 BO_ 316 GAS_PEDAL_2: 8 XXX
  SG_ CAR_GAS : 39|8@0+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX

@@ -263,7 +263,6 @@ CM_ SG_ 912 ICY_ROAD "1 = DASHLIGHT ON, 2 = WARNING, 3 = OFF";
 
 CM_ "subaru_global_2020_hybrid.dbc starts here";
 
-
 BO_ 39 Cruise_Status_2: 8 XXX
  SG_ Cruise_Activated : 37|1@0+ (1,0) [0|1] "" XXX
 
