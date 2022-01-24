@@ -88,6 +88,9 @@ BO_ 552 ACCELEROMETER: 8 XXX
 BO_ 560 BRAKE_2: 7 XXX
  SG_ BRAKE_PRESSED : 26|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 581 GAS_PEDAL_HYBRID: 8 XXX
+ SG_ GAS_PEDAL : 23|8@0+ (0.005,0) [0|1] "" XXX
+
 BO_ 614 STEERING_IPAS: 8 IPAS
  SG_ STATE : 7|4@0+ (1,0) [0|15] "" XXX
  SG_ ANGLE : 3|12@0- (1.5,0) [-510|510] "deg" XXX
@@ -108,6 +111,10 @@ BO_ 643 PRE_COLLISION: 7 DSU
  SG_ SET_ME_X003 : 40|1@0+ (1,0) [0|1] "" XXX
  SG_ PRECOLLISION_ACTIVE : 41|1@0+ (1,0) [0|255] "" XXX
  SG_ CHECKSUM : 55|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 705 GAS_PEDAL: 8 XXX
+ SG_ GAS_RELEASED : 3|1@0+ (1,0) [0|1] "" XXX
+ SG_ GAS_PEDAL : 55|8@0+ (0.005,0) [0|1] "" XXX
 
 BO_ 740 STEERING_LKA: 5 XXX
  SG_ LKA_STATE : 31|8@0+ (1,0) [0|255] "" XXX
@@ -329,6 +336,7 @@ CM_ SG_ 466 CRUISE_STATE "Active state is 8, if standstill is requested will swi
 CM_ SG_ 467 SET_SPEED "43 km/h are shown as 28 mph, so conversion isn't perfect";
 CM_ SG_ 467 LOW_SPEED_LOCKOUT "in low speed lockout, system would always disengage below 28mph";
 CM_ SG_ 560 BRAKE_PRESSED "another brake pressed?";
+CM_ SG_ 581 GAS_PEDAL "it seems slightly filtered";
 CM_ SG_ 608 STEER_TORQUE_DRIVER "driver torque";
 CM_ SG_ 608 STEER_OVERRIDE "set when driver torque exceeds a certain value";
 CM_ SG_ 614 ANGLE "set to measured angle when ipas control isn't active";
