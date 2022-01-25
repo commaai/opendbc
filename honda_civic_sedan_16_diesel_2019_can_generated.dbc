@@ -107,6 +107,21 @@ BO_ 399 STEER_STATUS: 7 EPS
  SG_ COUNTER : 53|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 51|4@0+ (1,0) [0|15] "" EON
 
+BO_ 401 GEARBOX: 8 PCM
+ SG_ GEAR_SHIFTER : 5|6@0+ (1,0) [0|63] "" EON
+ SG_ BOH : 45|6@0+ (1,0) [0|63] "" XXX
+ SG_ GEAR2 : 31|8@0+ (1,0) [0|1] "" XXX
+ SG_ GEAR : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ ZEROS_BOH : 47|2@0+ (1,0) [0|3] "" XXX
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
+
+BO_ 419 GEARBOX_ALT: 8 PCM
+ SG_ GEAR : 7|8@0+ (1,0) [0|256] "" EON
+ SG_ GEAR_SHIFTER : 35|4@0+ (1,0) [0|15] "" EON
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
+
 BO_ 420 VSA_STATUS: 8 VSA
  SG_ ESP_DISABLED : 28|1@0+ (1,0) [0|1] "" EON
  SG_ USER_BRAKE : 7|16@0+ (0.015625,-1.609375) [0|1000] "" EON
@@ -413,6 +428,7 @@ BO_ 13275 LKAS_HUD_B: 8 ADAS
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" BDY
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" BDY
 
+
 CM_ SG_ 479 AEB_STATUS "set for the duration of AEB event";
 CM_ SG_ 479 AEB_BRAKING "set when braking is commanded during AEB event";
 CM_ SG_ 479 AEB_PREPARE "set 1s before AEB";
@@ -422,17 +438,15 @@ CM_ SG_ 577 LINE_PARAMETER "Unclear if this is low quality line curvature rate o
 CM_ SG_ 577 LINE_DASHED "1 = line is dashed";
 CM_ SG_ 577 LINE_SOLID "1 = line is solid";
 VAL_ 399 STEER_STATUS 6 "tmp_fault" 5 "fault_1" 4 "no_torque_alert_2" 3 "low_speed_lockout" 2 "no_torque_alert_1" 0 "normal" ;
+VAL_ 401 GEAR_SHIFTER 32 "L" 16 "S" 8 "D" 4 "N" 2 "R" 1 "P" ;
+VAL_ 401 GEAR 7 "L" 10 "S" 4 "D" 3 "N" 2 "R" 1 "P" ;
+VAL_ 419 GEAR  10 "R" 1 "D" 0 "P";
+VAL_ 419 GEAR_SHIFTER  32 "D" 16 "N" 8 "R" 4 "P" ;
 
 CM_ "honda_civic_sedan_16_diesel_2019_can.dbc starts here";
 
 BO_ 316 GAS_PEDAL_2: 8 XXX
  SG_ CAR_GAS : 39|8@0+ (1,0) [0|255] "" XXX
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
-
-BO_ 419 GEARBOX: 8 XXX
- SG_ GEAR_SHIFTER : 24|8@1+ (1,0) [0|255] "" XXX
- SG_ GEAR : 32|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
@@ -475,12 +489,9 @@ BO_ 1029 DOORS_STATUS: 8 BDY
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
 
-VAL_ 419 GEAR_SHIFTER 2 "S" 32 "D" 16 "N" 8 "R" 4 "P" ;
-VAL_ 419 GEAR 26 "S" 20 "D" 19 "N" 18 "R" 17 "P" ;
 VAL_ 545 ECON_ON_2 0 "off" 3 "on" ;
 VAL_ 662 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "cancel" 1 "main" 0 "none" ;
 VAL_ 662 CRUISE_SETTING 3 "distance_adj" 2 "tbd" 1 "lkas_button" 0 "none" ;
 VAL_ 806 CMBS_BUTTON 3 "pressed" 0 "released" ;
 VAL_ 891 WIPERS 4 "High" 2 "Low" 0 "Off" ;
 VAL_ 829 BEEP 3 "single_beep" 2 "triple_beep" 1 "repeated_beep" 0 "no_beep" ;
-

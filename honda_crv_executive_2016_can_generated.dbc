@@ -76,6 +76,21 @@ BO_ 380 POWERTRAIN_DATA: 8 PCM
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
 
+BO_ 401 GEARBOX: 8 PCM
+ SG_ GEAR_SHIFTER : 5|6@0+ (1,0) [0|63] "" EON
+ SG_ BOH : 45|6@0+ (1,0) [0|63] "" XXX
+ SG_ GEAR2 : 31|8@0+ (1,0) [0|1] "" XXX
+ SG_ GEAR : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ ZEROS_BOH : 47|2@0+ (1,0) [0|3] "" XXX
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
+
+BO_ 419 GEARBOX_ALT: 8 PCM
+ SG_ GEAR : 7|8@0+ (1,0) [0|256] "" EON
+ SG_ GEAR_SHIFTER : 35|4@0+ (1,0) [0|15] "" EON
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
+
 BO_ 420 VSA_STATUS: 8 VSA
  SG_ USER_BRAKE : 7|16@0+ (0.015625,-1.609375) [0|1000] "" EON
  SG_ COMPUTER_BRAKING : 23|1@0+ (1,0) [0|1] "" EON
@@ -243,7 +258,10 @@ CM_ SG_ 780 CRUISE_SPEED "255 = no speed";
 CM_ SG_ 804 CRUISE_SPEED_PCM "255 = no speed";
 CM_ SG_ 829 BEEP "beeps are pleasant, chimes are for warnngs etc...";
 
-
+VAL_ 401 GEAR_SHIFTER 32 "L" 16 "S" 8 "D" 4 "N" 2 "R" 1 "P" ;
+VAL_ 401 GEAR 7 "L" 10 "S" 4 "D" 3 "N" 2 "R" 1 "P" ;
+VAL_ 419 GEAR  10 "R" 1 "D" 0 "P";
+VAL_ 419 GEAR_SHIFTER  32 "D" 16 "N" 8 "R" 4 "P" ;
 VAL_ 506 FCW 3 "fcw" 2 "fcw" 1 "fcw" 0 "no_fcw" ;
 VAL_ 506 CHIME 4 "double_chime" 3 "single_chime" 2 "continuous_chime" 1 "repeating_chime" 0 "no_chime" ;
 VAL_ 506 AEB_STATUS 3 "aeb_prepare" 2 "aeb_ready" 1 "aeb_braking" 0 "no_aeb" ;
@@ -266,12 +284,6 @@ BO_ 399 STEER_STATUS: 6 EPS
  SG_ STEER_STATUS : 35|4@0+ (1,0) [0|15] ""  EON
  SG_ COUNTER : 45|2@0+ (1,0) [0|3] ""  EON
  SG_ CHECKSUM : 43|4@0+ (1,0) [0|15] ""  EON
-
-BO_ 419 GEARBOX: 8 PCM
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
- SG_ GEAR_SHIFTER : 29|6@0+ (1,0) [0|63] "" EON
- SG_ GEAR : 7|8@0+ (1,0) [0|255] "" EON
 
 BO_ 404 STEERING_CONTROL: 4 EON
  SG_ STEER_TORQUE : 7|12@0- (1,0) [-768|768] "" EPS
@@ -308,9 +320,7 @@ BO_ 891 WIPERS: 8 XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
 
 VAL_ 399 STEER_STATUS 6 "tmp_fault" 5 "fault_1" 4 "no_torque_alert_2" 3 "low_speed_lockout" 2 "no_torque_alert_1" 0 "normal" ;
-VAL_ 419 GEAR_SHIFTER  32 "D" 8 "R" 4 "P" ;
 VAL_ 422 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "cancel" 1 "main" 0 "none" ;
 VAL_ 422 LIGHTS_SETTING 3 "high_beam" 2 "low_beam" 1 "position" 0 "no_lights" ;
 VAL_ 422 CRUISE_SETTING 3 "distance_adj" 2 "tbd" 1 "lkas_button" 0 "none" ;
 VAL_ 891 WIPERS 4 "High" 2 "Low" 0 "Off" ;
-
