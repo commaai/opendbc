@@ -392,12 +392,6 @@ BO_ 304 GAS_PEDAL_2: 8 PCM
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
 
- BO_ 419 GEARBOX: 8 PCM
-  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
-  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
-  SG_ GEAR_SHIFTER : 29|6@0+ (1,0) [0|63] "" EON
-  SG_ GEAR : 7|8@0+ (1,0) [0|255] "" EON
-
 BO_ 432 STANDSTILL: 7 VSA
  SG_ BRAKE_ERROR_1 : 11|1@0+ (1,0) [0|1] "" EON
  SG_ BRAKE_ERROR_2 : 9|1@0+ (1,0) [0|1] "" EON

@@ -250,6 +250,8 @@ BO_ 1029 DOORS_STATUS: 8 BDY
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
 
+CM_ SG_ 401 GEAR "10 = reverse, 11 = transition";
+CM_ SG_ 419 GEAR "10 = reverse, 11 = transition";
 CM_ SG_ 490 LONG_ACCEL "wheel speed derivative, noisy and zero snapping";
 CM_ SG_ 506 AEB_REQ_1 "set for duration of suspected AEB event";
 CM_ SG_ 773 PASS_AIRBAG_ON "Might just be indicator light";
@@ -318,9 +320,6 @@ BO_ 891 WIPERS: 8 XXX
  SG_ WIPERS : 17|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
-
-
-CM_ SG_ 401 GEAR "10 = reverse, 11 = transition";
 
 VAL_ 399 STEER_STATUS 6 "tmp_fault" 5 "fault_1" 4 "no_torque_alert_2" 3 "low_speed_lockout" 2 "no_torque_alert_1" 0 "normal" ;
 VAL_ 422 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "cancel" 1 "main" 0 "none" ;
