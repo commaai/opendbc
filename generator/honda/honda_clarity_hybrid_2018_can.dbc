@@ -1,12 +1,6 @@
 CM_ "IMPORT _comma.dbc";
 CM_ "IMPORT _dual_can_nidec_2018.dbc";
 
-BO_ 148 KINEMATICS: 8 XXX
- SG_ LAT_ACCEL : 7|10@0+ (0.02,-512) [-20|20] "m/s2" EON
- SG_ LONG_ACCEL : 24|9@0- (-0.02,0) [-20|20] "m/s2" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
-
 BO_ 228 STEERING_CONTROL: 5 ADAS
  SG_ STEER_TORQUE : 7|16@0- (1,0) [-3840|3840] "" EPS
  SG_ STEER_TORQUE_REQUEST : 23|1@0+ (1,0) [0|1] "" EPS

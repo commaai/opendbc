@@ -1,12 +1,6 @@
 CM_ "IMPORT _comma.dbc";
 CM_ "IMPORT _honda_2017.dbc";
 
-BO_ 148 KINEMATICS: 8 XXX
- SG_ LAT_ACCEL : 7|10@0+ (0.02,-512) [-20|20] "m/s2" EON
- SG_ LONG_ACCEL : 24|9@0- (-0.02,0) [-20|20] "m/s2" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
-
 BO_ 228 STEERING_CONTROL: 5 ADAS
  SG_ STEER_TORQUE : 7|16@0- (1,0) [-3840|3840] "" EPS
  SG_ STEER_TORQUE_REQUEST : 23|1@0+ (1,0) [0|1] "" EPS
@@ -139,4 +133,3 @@ VAL_ 806 CMBS_BUTTON 3 "pressed" 0 "released" ;
 VAL_ 884 DASHBOARD_ALERT 0 "none" 51 "acc_problem" 55 "cmbs_problem" 75 "key_not_detected" 79 "fasten_seatbelt" 111 "lkas_problem" 131 "brake_system_problem" 132 "brake_hold_problem" 139 "tbd" 161 "door_open"
 VAL_ 891 WIPERS 4 "High" 2 "Low" 0 "Off" ;
 VAL_ 927 ACC_ALERTS 29 "esp_active_acc_canceled" 10 "b_pedal_applied" 9 "speed_too_low" 8 "speed_too_high" 7 "p_brake_applied" 6 "gear_no_d" 5 "seatbelt" 4 "too_steep_downhill" 3 "too_steep_uphill" 2 "too_close" 1 "no_vehicle_ahead" ;
-
