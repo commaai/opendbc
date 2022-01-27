@@ -213,6 +213,7 @@ BO_ 1029 DOORS_STATUS: 8 BDY
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
 
+CM_ SG_ 420 BRAKE_HOLD_RELATED "On when Brake Hold engaged";
 CM_ SG_ 490 LONG_ACCEL "wheel speed derivative, noisy and zero snapping";
 CM_ SG_ 506 AEB_REQ_1 "set for duration of suspected AEB event";
 CM_ SG_ 773 PASS_AIRBAG_ON "Might just be indicator light";
