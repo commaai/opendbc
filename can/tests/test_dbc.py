@@ -16,8 +16,8 @@ def assert_message_equal(msg1, msg2, decimal=10):
 
 class TestPythonDBC(unittest.TestCase):
   def test_toyota(self):
-    dbc_test = dbc(os.path.join(DBC_PATH, 'toyota_prius_2017_pt_generated.dbc'))
-    packer_test = CANPacker('toyota_prius_2017_pt_generated')
+    dbc_test = dbc(os.path.join(DBC_PATH, 'toyota_nodsu_pt_generated.dbc'))
+    packer_test = CANPacker('toyota_nodsu_pt_generated')
 
     msg = ('STEER_ANGLE_SENSOR', {'STEER_ANGLE': -6.0, 'STEER_RATE': 4, 'STEER_FRACTION': -0.2})
     encoded = dbc_test.encode(*msg)
@@ -47,3 +47,7 @@ class TestPythonDBC(unittest.TestCase):
 
     decoded = dbc_test.decode((0x2b0, 0, encoded))
     assert decoded == msg
+
+
+if __name__ == "__main__":
+  unittest.main()
