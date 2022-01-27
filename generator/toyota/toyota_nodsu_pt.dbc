@@ -14,11 +14,6 @@ BO_ 401 STEERING_LTA: 8 XXX
  SG_ STEER_REQUEST_2 : 0|1@0+ (1,0) [0|1] "" XXX
  SG_ SETME_X1 : 7|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 550 BRAKE_MODULE: 8 XXX
- SG_ BRAKE_PRESSURE : 0|9@0+ (1,0) [0|511] "" XXX
- SG_ BRAKE_POSITION : 16|9@0+ (1,0) [0|511] "" XXX
- SG_ BRAKE_PRESSED : 37|1@0+ (1,0) [0|1] "" XXX
-
 BO_ 608 STEER_TORQUE_SENSOR: 8 XXX
  SG_ STEER_TORQUE_EPS : 47|16@0- (0.73,0) [-20000|20000] "" XXX
  SG_ STEER_TORQUE_DRIVER : 15|16@0- (1,0) [-32768|32767] "" XXX
@@ -40,8 +35,6 @@ BO_ 1014 BSM: 8 XXX
  SG_ ADJACENT_ENABLED : 7|1@0+ (1,0) [0|1] "" XXX
  SG_ APPROACHING_ENABLED : 15|1@0+ (1,0) [0|1] "" XXX
 
-CM_ SG_ 550 BRAKE_PRESSURE "seems prop to pedal force";
-CM_ SG_ 550 BRAKE_POSITION "seems proportional to pedal displacement, unclear the max value of 0x1c8";
 CM_ SG_ 610 TYPE "seems 1 on Corolla, 0 on all others";
 CM_ SG_ 1014 L_ADJACENT "vehicle adjacent left side of car. enabled above 10mph, regardless of ADJACENT_ENABLED or APPROACHING_ENABLED";
 CM_ SG_ 1014 L_APPROACHING "vehicle approaching from left side of car. enabled above 10mph, regardless of ADJACENT_ENABLED or APPROACHING_ENABLED";
