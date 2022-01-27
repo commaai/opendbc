@@ -37,12 +37,6 @@ BO_ 422 SCM_BUTTONS: 8 SCM
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
 
-BO_ 487 BRAKE_PRESSURE: 4 VSA
- SG_ BRAKE_PRESSURE1 : 7|10@0+ (0.015625,-103) [0|1000] "" EON
- SG_ BRAKE_PRESSURE2 : 9|10@0+ (0.015625,-103) [0|1000] "" EON
- SG_ COUNTER : 29|2@0+ (1,0) [0|15] "" EON
- SG_ CHECKSUM : 27|4@0+ (1,0) [0|3] "" EON
-
 BO_ 660 SCM_FEEDBACK: 8 SCM
  SG_ RIGHT_BLINKER : 6|1@0+ (1,0) [0|1] "" EON
  SG_ LEFT_BLINKER : 5|1@0+ (1,0) [0|1] "" EON
@@ -65,4 +59,3 @@ VAL_ 422 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "c
 VAL_ 422 LIGHTS_SETTING 3 "high_beam" 2 "low_beam" 1 "position" 0 "no_lights" ;
 VAL_ 422 CRUISE_SETTING 3 "distance_adj" 2 "tbd" 1 "lkas_button" 0 "none" ;
 VAL_ 891 WIPERS 4 "High" 2 "Low" 0 "Off" ;
-
