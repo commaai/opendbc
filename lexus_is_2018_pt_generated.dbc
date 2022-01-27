@@ -132,6 +132,15 @@ BO_ 467 PCM_CRUISE_2: 8 XXX
  SG_ SET_SPEED : 23|8@0+ (1,0) [0|255] "km/h" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
+BO_ 548 BRAKE_MODULE_ALT: 8 XXX
+ SG_ BRAKE_PRESSURE : 43|12@0+ (1,0) [0|4047] "" XXX
+ SG_ BRAKE_PRESSED : 5|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 550 BRAKE_MODULE: 8 XXX
+ SG_ BRAKE_PRESSURE : 0|9@0+ (1,0) [0|511] "" XXX
+ SG_ BRAKE_POSITION : 16|9@0+ (1,0) [0|511] "" XXX
+ SG_ BRAKE_PRESSED : 37|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 552 ACCELEROMETER: 8 XXX
  SG_ ACCEL_Z : 22|15@0- (1,0) [0|32767] "m/s^2" XXX
  SG_ ACCEL_X : 6|15@0- (0.001,0) [-20|20] "m/s^2" XXX
@@ -395,6 +404,10 @@ CM_ SG_ 466 ACCEL_NET "net acceleration produced by the system, given ACCEL_CMD,
 CM_ SG_ 466 CRUISE_STATE "Active state is 8, if standstill is requested will switch to state 11(3 sec timer), after timer is elapsed will switch into state 7(standstill). If plus button was pressed - status 9, minus button pressed - status 10";
 CM_ SG_ 467 SET_SPEED "43 km/h are shown as 28 mph, so conversion isn't perfect";
 CM_ SG_ 467 LOW_SPEED_LOCKOUT "in low speed lockout, system would always disengage below 28mph";
+CM_ SG_ 548 BRAKE_PRESSURE "seems prop to pedal force";
+CM_ SG_ 548 BRAKE_POSITION "seems proportional to pedal displacement, unclear the max value of 0x1c8";
+CM_ SG_ 550 BRAKE_PRESSURE "seems prop to pedal force";
+CM_ SG_ 550 BRAKE_POSITION "seems proportional to pedal displacement, unclear the max value of 0x1c8";
 CM_ SG_ 560 BRAKE_PRESSED "another brake pressed?";
 CM_ SG_ 581 GAS_PEDAL "it seems slightly filtered";
 CM_ SG_ 608 STEER_TORQUE_DRIVER "driver torque";
@@ -500,11 +513,6 @@ VAL_ 1592 LOCK_STATUS 0 "locked" 1 "unlocked";
 
 CM_ "lexus_is_2018_pt.dbc starts here";
 
-BO_ 550 BRAKE_MODULE: 8 XXX
- SG_ BRAKE_PRESSURE : 0|9@0+ (1,0) [0|511] "" XXX
- SG_ BRAKE_POSITION : 16|9@0+ (1,0) [0|511] "" XXX
- SG_ BRAKE_PRESSED : 37|1@0+ (1,0) [0|1] "" XXX
-
 BO_ 608 STEER_TORQUE_SENSOR: 8 XXX
  SG_ STEER_TORQUE_EPS : 47|16@0- (0.77,0) [-20000|20000] "" XXX
  SG_ STEER_TORQUE_DRIVER : 15|16@0- (1,0) [-32768|32767] "" XXX
@@ -526,8 +534,6 @@ BO_ 1009 PCM_CRUISE_ALT: 8 XXX
 BO_ 1599 LIGHT_STALK_ISH: 8 SCM
  SG_ AUTO_HIGH_BEAM : 19|1@0+ (1,0) [0|1] "" XXX
 
-CM_ SG_ 550 BRAKE_PRESSURE "seems prop to pedal force";
-CM_ SG_ 550 BRAKE_POSITION "seems proportional to pedal displacement, unclear the max value of 0x1c8";
 CM_ SG_ 610 TYPE "seems 1 on Corolla, 0 on all others";
 CM_ SG_ 1009 SET_SPEED "units seem to be whatever the car is set to";
 
