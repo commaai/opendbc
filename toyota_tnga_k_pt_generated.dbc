@@ -505,7 +505,7 @@ VAL_ 1553 UNITS 1 "km" 2 "miles";
 VAL_ 1556 TURN_SIGNALS 3 "none" 2 "right" 1 "left";
 VAL_ 1592 LOCK_STATUS 0 "locked" 1 "unlocked";
 
-CM_ "toyota_tssp_hybrid.dbc starts here";
+CM_ "toyota_tnga_k_pt.dbc starts here";
 
 BO_ 550 BRAKE_MODULE: 8 XXX
  SG_ BRAKE_PRESSURE : 0|9@0+ (1,0) [0|511] "" XXX
