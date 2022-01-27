@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 import os
 import re
+import glob
 
 cur_path = os.path.dirname(os.path.realpath(__file__))
 opendbc_root = os.path.join(cur_path, '../')
 include_pattern = re.compile(r'CM_ "IMPORT (.*?)";\n')
+generated_suffix = '_generated.dbc'
 
 
 def read_dbc(src_dir, filename):
@@ -17,7 +19,7 @@ def create_dbc(src_dir, filename, output_path):
 
   includes = include_pattern.findall(dbc_file_in)
 
-  output_filename = filename.replace('.dbc', '_generated.dbc')
+  output_filename = filename.replace('.dbc', generated_suffix)
   output_file_location = os.path.join(output_path, output_filename)
 
   with open(output_file_location, 'w') as dbc_file_out:
@@ -37,6 +39,10 @@ def create_dbc(src_dir, filename, output_path):
 
 
 def create_all(output_path):
+  # clear out old DBCs
+  for f in glob.glob(f"{opendbc_root}/*{generated_suffix}"):
+    os.remove(f)
+
   for src_dir, _, filenames in os.walk(cur_path):
     if src_dir == cur_path:
       continue
