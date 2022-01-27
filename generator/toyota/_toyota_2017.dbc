@@ -244,6 +244,9 @@ BO_ 1043 TIME : 8 CGW
  SG_ GMTDIFF_MINUTES : 50|6@0+ (1,0) [0|0] "minutes" XXX
  SG_ SUMMER : 60|1@0+ (1,0) [0|0] "" XXX
 
+BO_ 1083 AUTOPARK_STATUS: 8 IPAS
+ SG_ STATE : 7|4@0+ (1,0) [0|15] "" XXX
+
 BO_ 1161 RSA1: 8 FCM
  SG_ TSGN1 : 7|8@0+ (1,0) [0|0] "" XXX
  SG_ TSGNGRY1 : 12|3@0+ (1,0) [0|0] "" XXX
@@ -393,6 +396,7 @@ CM_ SG_ 1042 LANE_SWAY_FLD "Unknown signal for Lane Sway Warning System, set to 
 CM_ SG_ 1042 LANE_SWAY_BUZZER "Similar to TWO_BEEPS";
 CM_ SG_ 1042 SET_ME_X01 "empty bit on leaked dbc, always set to 1 during normal operations";
 CM_ SG_ 1042 SET_ME_X02 "empty bit on leaked dbc, always set to 2 during normal operations";
+CM_ SG_ 1083 STATE "when the dashboard button is pressed, the value changes from zero to non-zero";
 CM_ SG_ 1161 SPDVAL1 "Numbers 0-199 is displayed, 200-254 displays circle without number and 255 is for no limit.";
 CM_ SG_ 1161 SYNCID1 "counter from 1 to f at 1 Hz";
 CM_ SG_ 1161 SPDVAL2 "conditional speed value 70";
