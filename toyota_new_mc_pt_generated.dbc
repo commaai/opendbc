@@ -515,7 +515,7 @@ VAL_ 1553 UNITS 1 "km" 2 "miles";
 VAL_ 1556 TURN_SIGNALS 3 "none" 2 "right" 1 "left";
 VAL_ 1592 LOCK_STATUS 0 "locked" 1 "unlocked";
 
-CM_ "toyota_rav4_2017_pt.dbc starts here";
+CM_ "toyota_new_mc_pt.dbc starts here";
 
 BO_ 548 BRAKE_MODULE: 8 XXX
  SG_ BRAKE_PRESSURE : 43|12@0+ (1,0) [0|4047] "" XXX
