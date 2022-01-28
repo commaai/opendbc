@@ -100,27 +100,6 @@ BO_ 506 BRAKE_COMMAND: 8 ADAS
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EBCM
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EBCM
 
-BO_ 597 ROUGH_WHEEL_SPEED: 8 VSA
- SG_ WHEEL_SPEED_FL : 7|8@0+ (1,0) [0|255] "mph" EON
- SG_ WHEEL_SPEED_FR : 15|8@0+ (1,0) [0|255] "mph" EON
- SG_ WHEEL_SPEED_RL : 23|8@0+ (1,0) [0|255] "mph" EON
- SG_ WHEEL_SPEED_RR : 31|8@0+ (1,0) [0|255] "mph" EON
- SG_ SET_TO_X55 : 39|8@0+ (1,0) [0|255] "" EON
- SG_ SET_TO_X55_2 : 47|8@0+ (1,0) [0|255] "" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
-
-BO_ 773 SEATBELT_STATUS: 7 BDY
- SG_ SEATBELT_DRIVER_LAMP : 7|1@0+ (1,0) [0|1] "" EON
- SG_ SEATBELT_PASS_UNLATCHED : 10|1@0+ (1,0) [0|1] "" EON
- SG_ SEATBELT_PASS_LATCHED : 11|1@0+ (1,0) [0|1] "" EON
- SG_ SEATBELT_DRIVER_UNLATCHED : 12|1@0+ (1,0) [0|1] "" EON
- SG_ SEATBELT_DRIVER_LATCHED : 13|1@0+ (1,0) [0|1] "" EON
- SG_ PASS_AIRBAG_OFF : 14|1@0+ (1,0) [0|1] "" EON
- SG_ PASS_AIRBAG_ON : 15|1@0+ (1,0) [0|1] "" EON
- SG_ COUNTER : 53|2@0+ (1,0) [0|3] "" EON
- SG_ CHECKSUM : 51|4@0+ (1,0) [0|3] "" EON
-
 BO_ 777 LOCK_STATUS: 8 XXX
  SG_ DOORS_UNLOCKED : 54|1@0+ (1,0) [0|1] "" EON
  SG_ DOORS_LOCKED : 55|1@0+ (1,0) [0|1] "" EON
@@ -164,27 +143,6 @@ BO_ 804 CRUISE: 8 PCM
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
 
-BO_ 829 LKAS_HUD: 5 ADAS
- SG_ CAM_TEMP_HIGH : 7|1@0+ (1,0) [0|255] "" BDY
- SG_ SET_ME_X41 : 6|7@0+ (1,0) [0|127] "" BDY
- SG_ BOH : 6|7@0+ (1,0) [0|127] "" BDY
- SG_ DASHED_LANES : 14|1@0+ (1,0) [0|1] "" BDY
- SG_ DTC : 13|1@0+ (1,0) [0|1] "" BDY
- SG_ LKAS_PROBLEM : 12|1@0+ (1,0) [0|1] "" BDY
- SG_ LKAS_OFF : 11|1@0+ (1,0) [0|1] "" BDY
- SG_ SOLID_LANES : 10|1@0+ (1,0) [0|1] "" BDY
- SG_ LDW_RIGHT : 9|1@0+ (1,0) [0|1] "" BDY
- SG_ STEERING_REQUIRED : 8|1@0+ (1,0) [0|1] "" BDY
- SG_ BOH : 23|2@0+ (1,0) [0|4] "" BDY
- SG_ LDW_PROBLEM : 21|1@0+ (1,0) [0|1] "" BDY
- SG_ BEEP : 17|2@0+ (1,0) [0|1] "" BDY
- SG_ LDW_ON : 28|1@0+ (1,0) [0|1] "" BDY
- SG_ LDW_OFF : 27|1@0+ (1,0) [0|1] "" BDY
- SG_ CLEAN_WINDSHIELD : 26|1@0+ (1,0) [0|1] "" BDY
- SG_ SET_ME_X48 : 31|8@0+ (1,0) [0|255] "" BDY
- SG_ COUNTER : 37|2@0+ (1,0) [0|3] "" BDY
- SG_ CHECKSUM : 35|4@0+ (1,0) [0|15] "" BDY
-
 BO_ 892 CRUISE_PARAMS: 8 PCM
  SG_ CRUISE_SPEED_OFFSET : 31|8@0- (0.1,0) [-128|127] "kph" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
@@ -201,16 +159,11 @@ BO_ 1029 DOORS_STATUS: 8 BDY
 
 CM_ SG_ 490 LONG_ACCEL "wheel speed derivative, noisy and zero snapping";
 CM_ SG_ 506 AEB_REQ_1 "set for duration of suspected AEB event";
-CM_ SG_ 773 PASS_AIRBAG_ON "Might just be indicator light";
-CM_ SG_ 773 PASS_AIRBAG_OFF "Might just be indicator light";
 CM_ SG_ 780 CRUISE_SPEED "255 = no speed";
 CM_ SG_ 804 CRUISE_SPEED_PCM "255 = no speed";
-CM_ SG_ 829 BEEP "beeps are pleasant, chimes are for warnngs etc...";
-
 
 VAL_ 506 FCW 3 "fcw" 2 "fcw" 1 "fcw" 0 "no_fcw" ;
 VAL_ 506 CHIME 4 "double_chime" 3 "single_chime" 2 "continuous_chime" 1 "repeating_chime" 0 "no_chime" ;
 VAL_ 506 AEB_STATUS 3 "aeb_prepare" 2 "aeb_ready" 1 "aeb_braking" 0 "no_aeb" ;
 VAL_ 780 CRUISE_SPEED 255 "no_speed" 252 "stopped" ;
 VAL_ 780 HUD_LEAD 3 "acc_off" 2 "solid_car" 1 "dashed_car" 0 "no_car" ;
-VAL_ 829 BEEP 3 "single_beep" 2 "triple_beep" 1 "repeated_beep" 0 "no_beep" ;
