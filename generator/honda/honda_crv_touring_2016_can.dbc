@@ -1,4 +1,5 @@
 CM_ "IMPORT _comma.dbc";
+CM_ "IMPORT _honda_common.dbc";
 CM_ "IMPORT _honda_2017.dbc";
 
 BO_ 342 STEERING_SENSORS: 6 EPS
@@ -48,7 +49,6 @@ BO_ 891 WIPERS: 8 XXX
  SG_ WIPERS : 17|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
-
 
 CM_ SG_ 401 GEAR "10 = reverse, 11 = transition";
 

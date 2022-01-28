@@ -1,3 +1,4 @@
+CM_ "IMPORT _honda_common.dbc";
 CM_ "IMPORT _bosch_2020.dbc";
 
 BO_ 304 GAS_PEDAL_2: 8 PCM
@@ -50,5 +51,3 @@ VAL_ 662 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "c
 VAL_ 662 CRUISE_SETTING 3 "distance_adj" 2 "tbd" 1 "lkas_button" 0 "none" ;
 VAL_ 806 CMBS_BUTTON 3 "pressed" 0 "released" ;
 VAL_ 891 WIPERS 4 "High" 2 "Low" 0 "Off" ;
-VAL_ 829 BEEP 3 "single_beep" 2 "triple_beep" 1 "repeated_beep" 0 "no_beep" ;
-
