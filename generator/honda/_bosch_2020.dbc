@@ -225,15 +225,6 @@ BO_ 862 CAMERA_MESSAGES: 8 CAM
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
-BO_ 884 STALK_STATUS: 8 XXX
- SG_ AUTO_HEADLIGHTS : 46|1@0+ (1,0) [0|1] "" EON
- SG_ HIGH_BEAM_HOLD : 47|1@0+ (1,0) [0|1] "" EON
- SG_ HIGH_BEAM_FLASH : 45|1@0+ (1,0) [0|1] "" EON
- SG_ HEADLIGHTS_ON : 54|1@0+ (1,0) [0|1] "" EON
- SG_ WIPER_SWITCH : 53|2@0+ (1,0) [0|3] "" XXX
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
-
 CM_ SG_ 479 AEB_STATUS "set for the duration of AEB event";
 CM_ SG_ 479 AEB_BRAKING "set when braking is commanded during AEB event";
 CM_ SG_ 479 AEB_PREPARE "set 1s before AEB";
