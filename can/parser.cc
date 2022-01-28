@@ -160,7 +160,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
         if (strcmp(sig->name, sigop.name) == 0
             && sig->type == SignalType::DEFAULT) {
           state.parse_sigs.push_back(*sig);
-          state.vals.push_back(sigop.default_value);
+          state.vals.push_back(0);
           break;
         }
       }
