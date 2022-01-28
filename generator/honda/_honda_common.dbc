@@ -52,6 +52,15 @@ BO_ 829 LKAS_HUD: 5 ADAS
  SG_ COUNTER : 37|2@0+ (1,0) [0|3] "" BDY
  SG_ CHECKSUM : 35|4@0+ (1,0) [0|15] "" BDY
 
+BO_ 1029 DOORS_STATUS: 8 BDY
+ SG_ DOOR_OPEN_FL : 37|1@0+ (1,0) [0|1] "" EON
+ SG_ DOOR_OPEN_FR : 38|1@0+ (1,0) [0|1] "" EON
+ SG_ DOOR_OPEN_RL : 39|1@0+ (1,0) [0|1] "" EON
+ SG_ DOOR_OPEN_RR : 40|1@0+ (1,0) [0|1] "" EON
+ SG_ TRUNK_OPEN : 41|1@0+ (1,0) [0|1] "" EON
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
+
 CM_ SG_ 773 PASS_AIRBAG_ON "Might just be indicator light";
 CM_ SG_ 773 PASS_AIRBAG_OFF "Might just be indicator light";
 CM_ SG_ 829 BEEP "beeps are pleasant, chimes are for warnngs etc...";
