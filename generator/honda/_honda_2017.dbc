@@ -23,11 +23,6 @@ BO_ 487 BRAKE_PRESSURE: 4 VSA
  SG_ CHECKSUM : 27|4@0+ (1,0) [0|15] "" EON
  SG_ COUNTER : 29|2@0+ (1,0) [0|3] "" EON
 
-BO_ 490 VEHICLE_DYNAMICS: 8 VSA
- SG_ LONG_ACCEL : 23|16@0- (0.0015384,0) [-20|20] "m/s2" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
-
 BO_ 506 BRAKE_COMMAND: 8 ADAS
  SG_ COMPUTER_BRAKE : 7|10@0+ (1,0) [0|1] "" EBCM
  SG_ SET_ME_X00 : 13|5@0+ (1,0) [0|1] "" EBCM
@@ -109,7 +104,6 @@ BO_ 892 CRUISE_PARAMS: 8 PCM
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
 
-CM_ SG_ 490 LONG_ACCEL "wheel speed derivative, noisy and zero snapping";
 CM_ SG_ 506 AEB_REQ_1 "set for duration of suspected AEB event";
 CM_ SG_ 780 CRUISE_SPEED "255 = no speed";
 CM_ SG_ 804 CRUISE_SPEED_PCM "255 = no speed";

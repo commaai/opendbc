@@ -52,7 +52,6 @@ BO_ 660 SCM_FEEDBACK: 8 SCM
  SG_ WIPERS_SPEED : 4|2@0+ (1,0) [0|3] "" EON
 
 CM_ SG_ 419 GEAR "10 = reverse, 11 = transition";
-CM_ SG_ 490 LONG_ACCEL "wheel speed derivative, noisy and zero snapping";
 CM_ SG_ 780 CRUISE_SPEED "255 = no speed";
 CM_ SG_ 804 CRUISE_SPEED_PCM "255 = no speed";
 
