@@ -6,7 +6,7 @@ BO_ 304 GAS_PEDAL_2: 8 PCM
  SG_ CAR_GAS : 39|8@0+ (1,0) [0|255] "" EON
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
- 
+
 BO_ 401 GEARBOX: 8 PCM
  SG_ GEAR_SHIFTER : 5|6@0+ (1,0) [0|63] "" EON
  SG_ BOH : 45|6@0+ (1,0) [0|63] "" XXX
@@ -55,7 +55,6 @@ BO_ 1302 ODOMETER: 8 XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
 
-CM_ SG_ 344 DISTANCE_COUNTER "";
 CM_ SG_ 450 EPB_STATE "3: On, 2: Disengaging, 1: Engaging, 0: Off";
 CM_ SG_ 479 CONTROL_ON "Set to 5 when car is being controlled";
 CM_ SG_ 479 RELATED_TO_GAS "bits 7, 3, and 1 set to 1 when gas not applied";
@@ -68,5 +67,3 @@ VAL_ 662 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "c
 VAL_ 662 CRUISE_SETTING 3 "distance_adj" 2 "tbd" 1 "lkas_button" 0 "none" ;
 VAL_ 806 CMBS_BUTTON 3 "pressed" 0 "released" ;
 VAL_ 891 WIPERS 4 "High" 2 "Low" 0 "Off" ;
-VAL_ 829 BEEP 3 "single_beep" 2 "triple_beep" 1 "repeated_beep" 0 "no_beep" ;
-
