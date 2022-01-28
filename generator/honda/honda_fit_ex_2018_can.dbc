@@ -65,14 +65,6 @@ BO_ 862 HIGHBEAM_CONTROL: 8 ADAS
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
-BO_ 884 STALK_STATUS: 8 XXX
- SG_ AUTO_HEADLIGHTS : 46|1@0+ (1,0) [0|1] "" EON
- SG_ HIGH_BEAM_HOLD : 47|1@0+ (1,0) [0|1] "" EON
- SG_ HIGH_BEAM_FLASH : 45|1@0+ (1,0) [0|1] "" EON
- SG_ HEADLIGHTS_ON : 54|1@0+ (1,0) [0|1] "" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
-
 CM_ SG_ 401 GEAR "10 = reverse, 11 = transition";
 
 VAL_ 399 STEER_STATUS 6 "tmp_fault" 5 "fault_1" 4 "no_torque_alert_2" 3 "low_speed_lockout" 2 "no_torque_alert_1" 0 "normal" ;

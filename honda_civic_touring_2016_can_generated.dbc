@@ -113,6 +113,24 @@ BO_ 829 LKAS_HUD: 5 ADAS
  SG_ COUNTER : 37|2@0+ (1,0) [0|3] "" BDY
  SG_ CHECKSUM : 35|4@0+ (1,0) [0|15] "" BDY
 
+BO_ 884 STALK_STATUS: 8 XXX
+ SG_ DASHBOARD_ALERT : 39|8@0+ (1,0) [0|255] "" EON
+ SG_ AUTO_HEADLIGHTS : 46|1@0+ (1,0) [0|1] "" EON
+ SG_ HIGH_BEAM_HOLD : 47|1@0+ (1,0) [0|1] "" EON
+ SG_ HIGH_BEAM_FLASH : 45|1@0+ (1,0) [0|1] "" EON
+ SG_ HEADLIGHTS_ON : 54|1@0+ (1,0) [0|1] "" EON
+ SG_ WIPER_SWITCH : 53|2@0+ (1,0) [0|3] "" XXX
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
+
+BO_ 891 STALK_STATUS_2: 8 XXX
+ SG_ WIPERS : 17|2@0+ (1,0) [0|3] "" EON
+ SG_ LOW_BEAMS : 35|1@0+ (1,0) [0|1] "" XXX
+ SG_ HIGH_BEAMS : 34|1@0+ (1,0) [0|1] "" XXX
+ SG_ PARK_LIGHTS : 36|1@0+ (1,0) [0|1] "" XXX
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
+
 BO_ 1029 DOORS_STATUS: 8 BDY
  SG_ DOOR_OPEN_FL : 37|1@0+ (1,0) [0|1] "" EON
  SG_ DOOR_OPEN_FR : 38|1@0+ (1,0) [0|1] "" EON
@@ -130,6 +148,8 @@ CM_ SG_ 804 CRUISE_SPEED_PCM "255 = no speed";
 CM_ SG_ 829 BEEP "beeps are pleasant, chimes are for warnngs etc...";
 
 VAL_ 829 BEEP 3 "single_beep" 2 "triple_beep" 1 "repeated_beep" 0 "no_beep";
+VAL_ 884 DASHBOARD_ALERT 0 "none" 51 "acc_problem" 55 "cmbs_problem" 75 "key_not_detected" 79 "fasten_seatbelt" 111 "lkas_problem" 131 "brake_system_problem" 132 "brake_hold_problem" 139 "tbd" 161 "door_open";
+VAL_ 891 WIPERS 4 "High" 2 "Low" 0 "Off";
 
 
 CM_ "Imported file _honda_2017.dbc starts here";
@@ -318,20 +338,6 @@ BO_ 862 HIGHBEAM_CONTROL: 8 ADAS
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
-BO_ 884 STALK_STATUS: 8 XXX
- SG_ DASHBOARD_ALERT : 39|8@0+ (1,0) [0|255] "" EON
- SG_ AUTO_HEADLIGHTS : 46|1@0+ (1,0) [0|1] "" EON
- SG_ HIGH_BEAM_HOLD : 47|1@0+ (1,0) [0|1] "" EON
- SG_ HIGH_BEAM_FLASH : 45|1@0+ (1,0) [0|1] "" EON
- SG_ HEADLIGHTS_ON : 54|1@0+ (1,0) [0|1] "" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
-
-BO_ 891 WIPERS: 8 XXX
- SG_ WIPERS : 17|2@0+ (1,0) [0|3] "" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
-
 BO_ 927 RADAR_HUD: 8 ADAS
  SG_ ZEROS_BOH : 7|17@0+ (1,0) [0|127] "" BDY
  SG_ APPLY_BRAKES_FOR_CANC : 23|1@0+ (1,0) [0|15] "" BDY
@@ -362,6 +368,4 @@ VAL_ 545 ECON_ON_2 0 "off" 3 "on" ;
 VAL_ 662 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "cancel" 1 "main" 0 "none" ;
 VAL_ 662 CRUISE_SETTING 3 "distance_adj" 2 "tbd" 1 "lkas_button" 0 "none" ;
 VAL_ 806 CMBS_BUTTON 3 "pressed" 0 "released" ;
-VAL_ 884 DASHBOARD_ALERT 0 "none" 51 "acc_problem" 55 "cmbs_problem" 75 "key_not_detected" 79 "fasten_seatbelt" 111 "lkas_problem" 131 "brake_system_problem" 132 "brake_hold_problem" 139 "tbd" 161 "door_open"
-VAL_ 891 WIPERS 4 "High" 2 "Low" 0 "Off" ;
 VAL_ 927 ACC_ALERTS 29 "esp_active_acc_canceled" 10 "b_pedal_applied" 9 "speed_too_low" 8 "speed_too_high" 7 "p_brake_applied" 6 "gear_no_d" 5 "seatbelt" 4 "too_steep_downhill" 3 "too_steep_uphill" 2 "too_close" 1 "no_vehicle_ahead" ;

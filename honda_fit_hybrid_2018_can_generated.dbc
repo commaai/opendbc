@@ -113,6 +113,24 @@ BO_ 829 LKAS_HUD: 5 ADAS
  SG_ COUNTER : 37|2@0+ (1,0) [0|3] "" BDY
  SG_ CHECKSUM : 35|4@0+ (1,0) [0|15] "" BDY
 
+BO_ 884 STALK_STATUS: 8 XXX
+ SG_ DASHBOARD_ALERT : 39|8@0+ (1,0) [0|255] "" EON
+ SG_ AUTO_HEADLIGHTS : 46|1@0+ (1,0) [0|1] "" EON
+ SG_ HIGH_BEAM_HOLD : 47|1@0+ (1,0) [0|1] "" EON
+ SG_ HIGH_BEAM_FLASH : 45|1@0+ (1,0) [0|1] "" EON
+ SG_ HEADLIGHTS_ON : 54|1@0+ (1,0) [0|1] "" EON
+ SG_ WIPER_SWITCH : 53|2@0+ (1,0) [0|3] "" XXX
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
+
+BO_ 891 STALK_STATUS_2: 8 XXX
+ SG_ WIPERS : 17|2@0+ (1,0) [0|3] "" EON
+ SG_ LOW_BEAMS : 35|1@0+ (1,0) [0|1] "" XXX
+ SG_ HIGH_BEAMS : 34|1@0+ (1,0) [0|1] "" XXX
+ SG_ PARK_LIGHTS : 36|1@0+ (1,0) [0|1] "" XXX
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
+
 BO_ 1029 DOORS_STATUS: 8 BDY
  SG_ DOOR_OPEN_FL : 37|1@0+ (1,0) [0|1] "" EON
  SG_ DOOR_OPEN_FR : 38|1@0+ (1,0) [0|1] "" EON
@@ -130,6 +148,8 @@ CM_ SG_ 804 CRUISE_SPEED_PCM "255 = no speed";
 CM_ SG_ 829 BEEP "beeps are pleasant, chimes are for warnngs etc...";
 
 VAL_ 829 BEEP 3 "single_beep" 2 "triple_beep" 1 "repeated_beep" 0 "no_beep";
+VAL_ 884 DASHBOARD_ALERT 0 "none" 51 "acc_problem" 55 "cmbs_problem" 75 "key_not_detected" 79 "fasten_seatbelt" 111 "lkas_problem" 131 "brake_system_problem" 132 "brake_hold_problem" 139 "tbd" 161 "door_open";
+VAL_ 891 WIPERS 4 "High" 2 "Low" 0 "Off";
 
 
 CM_ "Imported file _dual_can_nidec_2018.dbc starts here";
@@ -286,19 +306,6 @@ BO_ 862 HIGHBEAM_CONTROL: 8 ADAS
  SG_ AUTO_HIGHBEAMS_ACTIVE : 53|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
-
-BO_ 884 STALK_STATUS: 8 XXX
- SG_ AUTO_HEADLIGHTS : 46|1@0+ (1,0) [0|1] "" EON
- SG_ HIGH_BEAM_HOLD : 47|1@0+ (1,0) [0|1] "" EON
- SG_ HIGH_BEAM_FLASH : 45|1@0+ (1,0) [0|1] "" EON
- SG_ HEADLIGHTS_ON : 54|1@0+ (1,0) [0|1] "" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
-
-BO_ 891 WIPERS: 8 XXX
- SG_ WIPERS : 17|2@0+ (1,0) [0|3] "" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
 
 BO_ 927 RADAR_HUD: 8 ADAS
  SG_ ZEROS_BOH : 7|17@0+ (1,0) [0|127] "" BDY
