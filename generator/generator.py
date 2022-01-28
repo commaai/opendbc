@@ -40,7 +40,7 @@ def create_dbc(src_dir, filename, output_path):
 
 def create_all(output_path):
   # clear out old DBCs
-  for f in glob.glob(f"{opendbc_root}/*{generated_suffix}"):
+  for f in glob.glob(f"{output_path}/*{generated_suffix}"):
     os.remove(f)
 
   for src_dir, _, filenames in os.walk(cur_path):
