@@ -62,11 +62,6 @@ BO_ 780 ACC_HUD: 8 ADAS
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" BDY
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" BDY
 
-BO_ 892 CRUISE_PARAMS: 8 PCM
- SG_ CRUISE_SPEED_OFFSET : 31|8@0- (0.1,0) [-128|127] "kph" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
-
 CM_ SG_ 506 AEB_REQ_1 "set for duration of suspected AEB event";
 CM_ SG_ 780 CRUISE_SPEED "255 = no speed";
 
