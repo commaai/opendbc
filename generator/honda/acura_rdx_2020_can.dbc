@@ -1,5 +1,11 @@
 CM_ "IMPORT _honda_common.dbc";
-CM_ "IMPORT _bosch_2020.dbc";
+CM_ "IMPORT _bosch_2018.dbc";
+
+BO_ 342 STEERING_SENSORS: 6 EPS
+ SG_ STEER_ANGLE : 7|16@0- (-0.1,0) [-500|500] "deg" EON
+ SG_ STEER_ANGLE_RATE : 23|16@0- (-1,0) [-3000|3000] "deg/s" EON
+ SG_ COUNTER : 45|2@0+ (1,0) [0|3] "" EON
+ SG_ CHECKSUM : 43|4@0+ (1,0) [0|15] "" EON
 
 BO_ 419 GEARBOX: 8 PCM
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON

@@ -148,7 +148,7 @@ VAL_ 884 DASHBOARD_ALERT 0 "none" 51 "acc_problem" 55 "cmbs_problem" 75 "key_not
 VAL_ 891 WIPERS 4 "High" 2 "Low" 0 "Off";
 
 
-CM_ "Imported file _bosch_2020.dbc starts here";
+CM_ "Imported file _bosch_2018.dbc starts here";
 BO_ 148 KINEMATICS: 8 XXX
  SG_ LAT_ACCEL : 7|10@0+ (-0.035,17.92) [-20|20] "m/s2" EON
  SG_ LONG_ACCEL : 25|10@0+ (-0.035,17.92) [-20|20] "m/s2" EON
@@ -178,12 +178,6 @@ BO_ 232 BRAKE_HOLD: 7 XXX
  SG_ COMPUTER_BRAKE_REQUEST : 29|1@0+ (1,0) [0|0] "" XXX
  SG_ COUNTER : 53|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 51|4@0+ (1,0) [0|15] "" XXX
-
-BO_ 342 STEERING_SENSORS: 6 EPS
- SG_ STEER_ANGLE : 7|16@0- (-0.1,0) [-500|500] "deg" EON
- SG_ STEER_ANGLE_RATE : 23|16@0- (-1,0) [-3000|3000] "deg/s" EON
- SG_ COUNTER : 45|2@0+ (1,0) [0|3] "" EON
- SG_ CHECKSUM : 43|4@0+ (1,0) [0|15] "" EON
 
 BO_ 399 STEER_STATUS: 7 EPS
  SG_ STEER_TORQUE_SENSOR : 7|16@0- (-1,0) [-31000|31000] "tbd" EON
@@ -376,6 +370,48 @@ BO_ 862 CAMERA_MESSAGES: 8 CAM
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
+BO_ 13274 LKAS_HUD_A: 5 ADAS
+ SG_ CAM_TEMP_HIGH : 7|1@0+ (1,0) [0|255] "" BDY
+ SG_ SET_ME_X41 : 6|7@0+ (1,0) [0|127] "" BDY
+ SG_ BOH : 6|7@0+ (1,0) [0|127] "" BDY
+ SG_ DASHED_LANES : 14|1@0+ (1,0) [0|1] "" BDY
+ SG_ DTC : 13|1@0+ (1,0) [0|1] "" BDY
+ SG_ LKAS_PROBLEM : 12|1@0+ (1,0) [0|1] "" BDY
+ SG_ LKAS_OFF : 11|1@0+ (1,0) [0|1] "" BDY
+ SG_ SOLID_LANES : 10|1@0+ (1,0) [0|1] "" BDY
+ SG_ LDW_RIGHT : 9|1@0+ (1,0) [0|1] "" BDY
+ SG_ STEERING_REQUIRED : 8|1@0+ (1,0) [0|1] "" BDY
+ SG_ BOH : 23|2@0+ (1,0) [0|4] "" BDY
+ SG_ LDW_PROBLEM : 21|1@0+ (1,0) [0|1] "" BDY
+ SG_ BEEP : 17|2@0+ (1,0) [0|1] "" BDY
+ SG_ SET_ME_X01 : 20|1@0+ (1,0) [0|1] "" BDY
+ SG_ LDW_ON : 28|1@0+ (1,0) [0|1] "" BDY
+ SG_ LDW_OFF : 27|1@0+ (1,0) [0|1] "" BDY
+ SG_ CLEAN_WINDSHIELD : 26|1@0+ (1,0) [0|1] "" BDY
+ SG_ COUNTER : 37|2@0+ (1,0) [0|3] "" BDY
+ SG_ CHECKSUM : 35|4@0+ (1,0) [0|15] "" BDY
+
+BO_ 13275 LKAS_HUD_B: 8 ADAS
+ SG_ CAM_TEMP_HIGH : 7|1@0+ (1,0) [0|255] "" BDY
+ SG_ SET_ME_X41 : 6|7@0+ (1,0) [0|127] "" BDY
+ SG_ BOH : 6|7@0+ (1,0) [0|127] "" BDY
+ SG_ DASHED_LANES : 14|1@0+ (1,0) [0|1] "" BDY
+ SG_ DTC : 13|1@0+ (1,0) [0|1] "" BDY
+ SG_ LKAS_PROBLEM : 12|1@0+ (1,0) [0|1] "" BDY
+ SG_ LKAS_OFF : 11|1@0+ (1,0) [0|1] "" BDY
+ SG_ SOLID_LANES : 10|1@0+ (1,0) [0|1] "" BDY
+ SG_ LDW_RIGHT : 9|1@0+ (1,0) [0|1] "" BDY
+ SG_ STEERING_REQUIRED : 8|1@0+ (1,0) [0|1] "" BDY
+ SG_ BOH : 23|2@0+ (1,0) [0|4] "" BDY
+ SG_ LDW_PROBLEM : 21|1@0+ (1,0) [0|1] "" BDY
+ SG_ BEEP : 17|2@0+ (1,0) [0|1] "" BDY
+ SG_ SET_ME_X01 : 20|1@0+ (1,0) [0|1] "" BDY
+ SG_ LDW_ON : 28|1@0+ (1,0) [0|1] "" BDY
+ SG_ LDW_OFF : 27|1@0+ (1,0) [0|1] "" BDY
+ SG_ CLEAN_WINDSHIELD : 26|1@0+ (1,0) [0|1] "" BDY
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" BDY
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" BDY
+
 CM_ SG_ 479 AEB_STATUS "set for the duration of AEB event";
 CM_ SG_ 479 AEB_BRAKING "set when braking is commanded during AEB event";
 CM_ SG_ 479 AEB_PREPARE "set 1s before AEB";
@@ -388,6 +424,12 @@ CM_ SG_ 577 LINE_SOLID "1 = line is solid";
 VAL_ 399 STEER_STATUS 6 "tmp_fault" 5 "fault_1" 4 "no_torque_alert_2" 3 "low_speed_lockout" 2 "no_torque_alert_1" 0 "normal";
 
 CM_ "acura_rdx_2020_can.dbc starts here";
+
+BO_ 342 STEERING_SENSORS: 6 EPS
+ SG_ STEER_ANGLE : 7|16@0- (-0.1,0) [-500|500] "deg" EON
+ SG_ STEER_ANGLE_RATE : 23|16@0- (-1,0) [-3000|3000] "deg/s" EON
+ SG_ COUNTER : 45|2@0+ (1,0) [0|3] "" EON
+ SG_ CHECKSUM : 43|4@0+ (1,0) [0|15] "" EON
 
 BO_ 419 GEARBOX: 8 PCM
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
