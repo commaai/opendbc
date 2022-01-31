@@ -179,16 +179,6 @@ BO_ 232 BRAKE_HOLD: 7 XXX
  SG_ COUNTER : 53|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 51|4@0+ (1,0) [0|15] "" XXX
 
-BO_ 330 STEERING_SENSORS: 8 EPS
- SG_ STEER_ANGLE : 7|16@0- (-0.1,0) [-500|500] "deg" EON
- SG_ STEER_ANGLE_RATE : 23|16@0- (-1,0) [-3000|3000] "deg/s" EON
- SG_ STEER_SENSOR_STATUS_1 : 34|1@0+ (1,0) [0|1] "" EON
- SG_ STEER_SENSOR_STATUS_2 : 33|1@0+ (1,0) [0|1] "" EON
- SG_ STEER_SENSOR_STATUS_3 : 32|1@0+ (1,0) [0|1] "" EON
- SG_ STEER_WHEEL_ANGLE : 47|16@0- (-0.1,0) [-500|500] "deg" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
-
 BO_ 399 STEER_STATUS: 7 EPS
  SG_ STEER_TORQUE_SENSOR : 7|16@0- (-1,0) [-31000|31000] "tbd" EON
  SG_ STEER_ANGLE_RATE : 23|16@0- (-0.1,0) [-31000|31000] "deg/s" EON
@@ -434,6 +424,16 @@ CM_ SG_ 577 LINE_SOLID "1 = line is solid";
 VAL_ 399 STEER_STATUS 6 "tmp_fault" 5 "fault_1" 4 "no_torque_alert_2" 3 "low_speed_lockout" 2 "no_torque_alert_1" 0 "normal";
 
 CM_ "honda_civic_hatchback_ex_2017_can.dbc starts here";
+
+BO_ 330 STEERING_SENSORS: 8 EPS
+ SG_ STEER_ANGLE : 7|16@0- (-0.1,0) [-500|500] "deg" EON
+ SG_ STEER_ANGLE_RATE : 23|16@0- (-1,0) [-3000|3000] "deg/s" EON
+ SG_ STEER_SENSOR_STATUS_1 : 34|1@0+ (1,0) [0|1] "" EON
+ SG_ STEER_SENSOR_STATUS_2 : 33|1@0+ (1,0) [0|1] "" EON
+ SG_ STEER_SENSOR_STATUS_3 : 32|1@0+ (1,0) [0|1] "" EON
+ SG_ STEER_WHEEL_ANGLE : 47|16@0- (-0.1,0) [-500|500] "deg" EON
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
 
 BO_ 401 GEARBOX: 8 PCM
  SG_ GEAR_SHIFTER : 5|6@0+ (1,0) [0|63] "" EON
