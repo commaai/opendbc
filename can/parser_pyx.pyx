@@ -30,6 +30,7 @@ cdef class CANParser:
     string dbc_name
     dict vl
     dict ts
+    dict up
     bool can_valid
     int can_invalid_cnt
 
@@ -43,6 +44,7 @@ cdef class CANParser:
       raise RuntimeError(f"Can't find DBC: {dbc_name}")
     self.vl = {}
     self.ts = {}
+    self.up = {}
 
     self.can_invalid_cnt = CAN_INVALID_CNT
 
@@ -58,6 +60,8 @@ cdef class CANParser:
       self.vl[name] = {}
       self.ts[msg.address] = {}
       self.ts[name] = {}
+      self.up[msg.address] = False
+      self.up[name] = False
 
     # Convert message names into addresses
     for i in range(len(signals)):
@@ -100,9 +104,9 @@ cdef class CANParser:
       message_options_v.push_back(mpo)
 
     self.can = new cpp_CANParser(bus, dbc_name, message_options_v, signal_options_v)
-    self.update_vl()
+    self.update_vl(init=True)
 
-  cdef unordered_set[uint32_t] update_vl(self):
+  cdef unordered_set[uint32_t] update_vl(self, init=False):
     cdef string sig_name
     cdef unordered_set[uint32_t] updated_val
 
@@ -112,7 +116,7 @@ cdef class CANParser:
     # Update invalid flag
     self.can_invalid_cnt += 1
     if valid:
-        self.can_invalid_cnt = 0
+      self.can_invalid_cnt = 0
     self.can_valid = self.can_invalid_cnt < CAN_INVALID_CNT
 
     for cv in can_values:
@@ -121,24 +125,35 @@ cdef class CANParser:
       cv_name = <unicode>cv.name
 
       self.vl[cv.address][cv_name] = cv.value
-      self.ts[cv.address][cv_name] = cv.ts
-
       self.vl[name][cv_name] = cv.value
+      self.ts[cv.address][cv_name] = cv.ts
       self.ts[name][cv_name] = cv.ts
+
+      if not init:
+        self.up[cv.address] = True
+        self.up[name] = True
 
       updated_val.insert(cv.address)
 
     return updated_val
 
-  def update_string(self, dat, sendcan=False):
+  def update_string(self, dat, sendcan=False, reset_updated=True):
+    if reset_updated:
+      for msg in self.up:
+        self.up[msg] = False
+
     self.can.update_string(dat, sendcan)
     return self.update_vl()
 
   def update_strings(self, strings, sendcan=False):
     updated_vals = set()
 
+    # Reset updated values
+    for msg in self.up:
+      self.up[msg] = False
+
     for s in strings:
-      updated_val = self.update_string(s, sendcan)
+      updated_val = self.update_string(s, sendcan, reset_updated=False)
       updated_vals.update(updated_val)
 
     return updated_vals
