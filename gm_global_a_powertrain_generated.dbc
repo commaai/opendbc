@@ -169,6 +169,9 @@ BO_ 489 EBCMVehicleDynamic: 8 K17_EBCM
  SG_ YawRate : 35|12@0- (0.625,0) [0|1] "" NEO
  SG_ YawRate2 : 51|12@0- (0.0625,0) [-2047|2047] "grad/s" NEO
 
+BO_ 501 ECMPRDNL2: 8 K20_ECM
+ SG_ PRNDL2 : 31|8@0+ (1,0) [0|255] "" NEO
+
 BO_ 560 EPBStatus: 8 EPB
  SG_ EPBClosed : 12|1@0+ (1,0) [0|1] ""  NEO
 
@@ -298,3 +301,4 @@ VAL_ 715 GasRegenCmdActive 1 "Active" 0 "Inactive" ;
 VAL_ 320 Intellibeam 1 "Active" 0 "Inactive" ;
 VAL_ 320 HighBeamsActive 1 "Active" 0 "Inactive" ;
 VAL_ 320 HighBeamsTemporary 1 "Active" 0 "Inactive" ;
+VAL_ 501 PRNDL2 6 "L" 4 "D" 3 "N" 2 "R" 1 "P" 0 "Unknown";
