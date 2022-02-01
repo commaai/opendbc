@@ -30,7 +30,7 @@ cdef class CANParser:
     string dbc_name
     dict vl
     dict ts
-    dict up
+    dict updated
     bool can_valid
     int can_invalid_cnt
 
@@ -44,7 +44,7 @@ cdef class CANParser:
       raise RuntimeError(f"Can't find DBC: {dbc_name}")
     self.vl = {}
     self.ts = {}
-    self.up = {}
+    self.updated = {}
 
     self.can_invalid_cnt = CAN_INVALID_CNT
 
@@ -60,8 +60,8 @@ cdef class CANParser:
       self.vl[name] = {}
       self.ts[msg.address] = {}
       self.ts[name] = {}
-      self.up[msg.address] = False
-      self.up[name] = False
+      self.updated[msg.address] = False
+      self.updated[name] = False
 
     # Convert message names into addresses
     for i in range(len(signals)):
@@ -130,8 +130,8 @@ cdef class CANParser:
       self.ts[name][cv_name] = cv.ts
 
       if not init:
-        self.up[cv.address] = True
-        self.up[name] = True
+        self.updated[cv.address] = True
+        self.updated[name] = True
 
       updated_val.insert(cv.address)
 
@@ -139,8 +139,8 @@ cdef class CANParser:
 
   def update_string(self, dat, sendcan=False, reset_updated=True):
     if reset_updated:
-      for msg in self.up:
-        self.up[msg] = False
+      for msg in self.updated:
+        self.updated[msg] = False
 
     self.can.update_string(dat, sendcan)
     return self.update_vl()
@@ -149,8 +149,8 @@ cdef class CANParser:
     updated_vals = set()
 
     # Reset updated values
-    for msg in self.up:
-      self.up[msg] = False
+    for msg in self.updated:
+      self.updated[msg] = False
 
     for s in strings:
       updated_val = self.update_string(s, sendcan, reset_updated=False)
