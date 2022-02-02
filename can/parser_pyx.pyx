@@ -139,9 +139,7 @@ cdef class CANParser:
 
   def update_string(self, dat, sendcan=False, reset_updated=True):
     if reset_updated:
-      for msg in self.updated:
-        for sig in self.updated[msg]:
-          self.updated[msg][sig] = []
+      self.reset_updated()
 
     self.can.update_string(dat, sendcan)
     return self.update_vl()
@@ -149,16 +147,17 @@ cdef class CANParser:
   def update_strings(self, strings, sendcan=False):
     updated_vals = set()
 
-    # Reset updated values
-    for msg in self.updated:
-      for sig in self.updated[msg]:
-        self.updated[msg][sig] = []
-
+    self.reset_updated()
     for s in strings:
       updated_val = self.update_string(s, sendcan, reset_updated=False)
       updated_vals.update(updated_val)
 
     return updated_vals
+
+  def reset_updated(self):
+    for msg in self.updated:
+      for sig in self.updated[msg]:
+        self.updated[msg][sig] = []
 
 cdef class CANDefine():
   cdef:
