@@ -124,18 +124,16 @@ cdef class CANParser:
       name = <unicode>self.address_to_msg_name[cv.address].c_str()
       cv_name = <unicode>cv.name
 
-      msg_updated = cv.value.size() != 0
-      vl = cv.value.back() if msg_updated else 0
-      self.vl[cv.address][cv_name] = vl
-      self.vl[name][cv_name] = vl
+      self.vl[cv.address][cv_name] = cv.value
+      self.vl[name][cv_name] = cv.value
 
       self.ts[cv.address][cv_name] = cv.ts
       self.ts[name][cv_name] = cv.ts
 
-      self.updated[cv.address][cv_name] = cv.value
-      self.updated[name][cv_name] = cv.value
+      self.updated[cv.address][cv_name] = cv.updated_values
+      self.updated[name][cv_name] = cv.updated_values
 
-      if msg_updated:
+      if cv.updated_values.size():
         updated_val.insert(cv.address)
 
     return updated_val
