@@ -291,7 +291,6 @@ std::vector<SignalValue> CANParser::query_all() {
 
     for (int i=0; i<state.parse_sigs.size(); i++) {
       const Signal &sig = state.parse_sigs[i];
-
       ret.push_back((SignalValue){
         .address = state.address,
         .ts = state.ts,
@@ -299,7 +298,6 @@ std::vector<SignalValue> CANParser::query_all() {
         .value = state.last_vals[i],
         .updated_values = state.updated_vals[i],
       });
-
       state.updated_vals[i].clear();  // reset updated values for next cycle
     }
   }
