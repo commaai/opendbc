@@ -130,7 +130,6 @@ cdef class CANParser:
       self.ts[cv.address][cv_name] = cv.ts
       self.ts[name][cv_name] = self.ts[cv.address][cv_name]
 
-      print(self.updated[name], name, cv_name)
       self.updated[cv.address][cv_name] = [] if init else cv.value
       self.updated[name][cv_name] = [] if init else cv.value
 

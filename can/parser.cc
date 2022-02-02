@@ -218,7 +218,7 @@ void CANParser::update_string(const std::string &data, bool sendcan) {
 void CANParser::UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Reader& cans) {
   int msg_count = cans.size();
 
-  INFO("got %d messages\n", msg_count);
+  DEBUG("got %d messages\n", msg_count);
 
   // reset updated signal values
   for (auto &kv : message_states) {
@@ -226,7 +226,6 @@ void CANParser::UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Rea
     for (int i = 0; i < state.parse_sigs.size(); i++) {
       state.vals[i].clear();
     }
-    INFO("clearing %d\n", state.address);
   }
 
   for (int i = 0; i < msg_count; i++) {
