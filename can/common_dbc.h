@@ -26,7 +26,7 @@ struct SignalValue {
   uint32_t address;
   uint16_t ts;
   const char* name;
-  std::vector<double> value;
+  std::vector<double> values;
 };
 
 enum SignalType {
