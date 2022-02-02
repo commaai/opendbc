@@ -1,3 +1,5 @@
+CM_ "IMPORT _comma.dbc";
+
 VERSION ""
 
 
@@ -67,7 +69,7 @@ BO_ 190 ECMAcceleratorPos: 6 K20_ECM
 
 BO_ 201 ECMEngineStatus: 8 K20_ECM
  SG_ EngineTPS : 39|8@0+ (0.392156863,0) [0|100.000000065] "%" NEO
- SG_ EngineRPM : 13|14@0+ (0.25,0) [0|0] "RPM" NEO
+ SG_ EngineRPM : 15|16@0+ (0.25,0) [0|0] "RPM" NEO
  SG_ CruiseMainOn : 29|1@0+ (1,0) [0|1] "" NEO
  SG_ Brake_Pressed : 40|1@0+ (1,0) [0|1] "" NEO
  SG_ Standstill : 2|1@0+ (1,0) [0|1] "" NEO

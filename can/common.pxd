@@ -52,7 +52,6 @@ cdef extern from "common_dbc.h":
   cdef struct SignalParseOptions:
     uint32_t address
     const char* name
-    double default_value
 
 
   cdef struct MessageParseOptions:

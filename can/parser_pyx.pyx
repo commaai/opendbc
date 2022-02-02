@@ -64,7 +64,7 @@ cdef class CANParser:
       s = signals[i]
       if not isinstance(s[1], numbers.Number):
         name = s[1].encode('utf8')
-        s = (s[0], self.msg_name_to_address[name], s[2])
+        s = (s[0], self.msg_name_to_address[name])
         signals[i] = s
 
     for i in range(len(checks)):
@@ -84,13 +84,12 @@ cdef class CANParser:
 
     cdef vector[SignalParseOptions] signal_options_v
     cdef SignalParseOptions spo
-    for sig_name, sig_address, sig_default in signals:
+    for sig_name, sig_address in signals:
       spo.address = sig_address
       spo.name = sig_name
-      spo.default_value = sig_default
       signal_options_v.push_back(spo)
 
-    message_options = dict((address, 0) for _, address, _ in signals)
+    message_options = dict((address, 0) for _, address in signals)
     message_options.update(dict(checks))
 
     cdef vector[MessageParseOptions] message_options_v
@@ -189,4 +188,4 @@ cdef class CANDefine():
       dv[address][sgname] = dict(zip(values, defs))
       dv[msgname][sgname] = dv[address][sgname]
 
-      self.dv = dict(dv)
+    self.dv = dict(dv)

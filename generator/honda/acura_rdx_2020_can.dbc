@@ -1,11 +1,11 @@
-CM_ "IMPORT _bosch_2020.dbc";
+CM_ "IMPORT _honda_common.dbc";
+CM_ "IMPORT _bosch_2018.dbc";
 
-BO_ 304 GAS_PEDAL_2: 8 PCM
- SG_ ENGINE_TORQUE_ESTIMATE : 7|16@0- (1,0) [-1000|1000] "Nm" EON
- SG_ ENGINE_TORQUE_REQUEST : 23|16@0- (1,0) [-1000|1000] "Nm" EON
- SG_ CAR_GAS : 39|8@0+ (1,0) [0|255] "" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
+BO_ 342 STEERING_SENSORS: 6 EPS
+ SG_ STEER_ANGLE : 7|16@0- (-0.1,0) [-500|500] "deg" EON
+ SG_ STEER_ANGLE_RATE : 23|16@0- (-1,0) [-3000|3000] "deg/s" EON
+ SG_ COUNTER : 45|2@0+ (1,0) [0|3] "" EON
+ SG_ CHECKSUM : 43|4@0+ (1,0) [0|15] "" EON
 
 BO_ 419 GEARBOX: 8 PCM
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
@@ -49,6 +49,3 @@ VAL_ 545 ECON_ON_2 0 "off" 3 "on" ;
 VAL_ 662 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "cancel" 1 "main" 0 "none" ;
 VAL_ 662 CRUISE_SETTING 3 "distance_adj" 2 "tbd" 1 "lkas_button" 0 "none" ;
 VAL_ 806 CMBS_BUTTON 3 "pressed" 0 "released" ;
-VAL_ 891 WIPERS 4 "High" 2 "Low" 0 "Off" ;
-VAL_ 829 BEEP 3 "single_beep" 2 "triple_beep" 1 "repeated_beep" 0 "no_beep" ;
-
