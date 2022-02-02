@@ -104,13 +104,13 @@ cdef class CANParser:
       message_options_v.push_back(mpo)
 
     self.can = new cpp_CANParser(bus, dbc_name, message_options_v, signal_options_v)
-    self.update_vl(init=True)
+    self.update_vl()
 
-  cdef unordered_set[uint32_t] update_vl(self, init=False):
+  cdef unordered_set[uint32_t] update_vl(self):
     cdef string sig_name
     cdef unordered_set[uint32_t] updated_val
 
-    can_values = self.can.query_latest()
+    can_values = self.can.query_all()
     valid = self.can.can_valid
 
     # Update invalid flag
@@ -124,40 +124,32 @@ cdef class CANParser:
       name = <unicode>self.address_to_msg_name[cv.address].c_str()
       cv_name = <unicode>cv.name
 
-      self.vl[cv.address][cv_name] = cv.value.back()  # set with latest
-      self.vl[name][cv_name] = self.vl[cv.address][cv_name]
+      msg_updated = cv.value.size() != 0
+      vl = cv.value.back() if msg_updated else 0
+      self.vl[cv.address][cv_name] = vl
+      self.vl[name][cv_name] = vl
 
       self.ts[cv.address][cv_name] = cv.ts
-      self.ts[name][cv_name] = self.ts[cv.address][cv_name]
+      self.ts[name][cv_name] = cv.ts
 
-      self.updated[cv.address][cv_name] = [] if init else cv.value
-      self.updated[name][cv_name] = [] if init else cv.value
+      self.updated[cv.address][cv_name] = cv.value
+      self.updated[name][cv_name] = cv.value
 
-      updated_val.insert(cv.address)
+      if msg_updated:
+        updated_val.insert(cv.address)
 
     return updated_val
 
-  def update_string(self, dat, sendcan=False, reset_updated=True):
-    if reset_updated:
-      self.reset_updated()
-
+  def update_string(self, dat, sendcan=False, update_vl=True):
     self.can.update_string(dat, sendcan)
-    return self.update_vl()
+    if update_vl:
+      return self.update_vl()
 
   def update_strings(self, strings, sendcan=False):
-    updated_vals = set()
-
-    self.reset_updated()
     for s in strings:
-      updated_val = self.update_string(s, sendcan, reset_updated=False)
-      updated_vals.update(updated_val)
+      self.update_string(s, sendcan, update_vl=False)
 
-    return updated_vals
-
-  def reset_updated(self):
-    for msg in self.updated:
-      for sig in self.updated[msg]:
-        self.updated[msg][sig] = []
+    return self.update_vl()
 
 cdef class CANDefine():
   cdef:

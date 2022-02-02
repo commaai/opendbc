@@ -146,7 +146,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
       const Signal *sig = &msg->sigs[i];
       if (sig->type != SignalType::DEFAULT) {
         state.parse_sigs.push_back(*sig);
-        state.vals.push_back({0});
+        state.vals.push_back({});
       }
     }
 
@@ -159,7 +159,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
         if (strcmp(sig->name, sigop.name) == 0
             && sig->type == SignalType::DEFAULT) {
           state.parse_sigs.push_back(*sig);
-          state.vals.push_back({0});
+          state.vals.push_back({});
           break;
         }
       }
@@ -187,7 +187,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum
     for (int j = 0; j < msg->num_sigs; j++) {
       const Signal *sig = &msg->sigs[j];
       state.parse_sigs.push_back(*sig);
-      state.vals.push_back({0});
+      state.vals.push_back({});
     }
 
     message_states[state.address] = state;
@@ -219,14 +219,6 @@ void CANParser::UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Rea
   int msg_count = cans.size();
 
   DEBUG("got %d messages\n", msg_count);
-
-  // reset updated signal values
-  for (auto &kv : message_states) {
-    auto &state = kv.second;
-    for (int i = 0; i < state.parse_sigs.size(); i++) {
-      state.vals[i].clear();
-    }
-  }
 
   for (int i = 0; i < msg_count; i++) {
     auto cmsg = cans[i];
@@ -287,12 +279,11 @@ void CANParser::UpdateValid(uint64_t sec) {
   }
 }
 
-std::vector<SignalValue> CANParser::query_latest() {
+std::vector<SignalValue> CANParser::query_all() {
   std::vector<SignalValue> ret;
 
-  for (const auto& kv : message_states) {
-    const auto& state = kv.second;
-    if (last_sec != 0 && state.seen != last_sec) continue;
+  for (auto& kv : message_states) {
+    auto& state = kv.second;
 
     for (int i=0; i<state.parse_sigs.size(); i++) {
       const Signal &sig = state.parse_sigs[i];
@@ -302,6 +293,7 @@ std::vector<SignalValue> CANParser::query_latest() {
         .name = sig.name,
         .value = state.vals[i],
       });
+      state.vals[i].clear();  // reset updated signals for next cycle
     }
   }
 
