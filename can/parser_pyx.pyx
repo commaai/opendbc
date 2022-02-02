@@ -60,8 +60,8 @@ cdef class CANParser:
       self.vl[name] = {}
       self.ts[msg.address] = {}
       self.ts[name] = {}
-      self.updated[msg.address] = False
-      self.updated[name] = False
+      self.updated[msg.address] = {}
+      self.updated[name] = {}
 
     # Convert message names into addresses
     for i in range(len(signals)):
@@ -124,14 +124,15 @@ cdef class CANParser:
       name = <unicode>self.address_to_msg_name[cv.address].c_str()
       cv_name = <unicode>cv.name
 
-      self.vl[cv.address][cv_name] = cv.value
-      self.vl[name][cv_name] = cv.value
-      self.ts[cv.address][cv_name] = cv.ts
-      self.ts[name][cv_name] = cv.ts
+      self.vl[cv.address][cv_name] = cv.value.back()  # set with latest
+      self.vl[name][cv_name] = self.vl[cv.address][cv_name]
 
-      if not init:
-        self.updated[cv.address] = True
-        self.updated[name] = True
+      self.ts[cv.address][cv_name] = cv.ts
+      self.ts[name][cv_name] = self.ts[cv.address][cv_name]
+
+      print(self.updated[name], name, cv_name)
+      self.updated[cv.address][cv_name] = [] if init else cv.value
+      self.updated[name][cv_name] = [] if init else cv.value
 
       updated_val.insert(cv.address)
 
@@ -140,7 +141,8 @@ cdef class CANParser:
   def update_string(self, dat, sendcan=False, reset_updated=True):
     if reset_updated:
       for msg in self.updated:
-        self.updated[msg] = False
+        for sig in self.updated[msg]:
+          self.updated[msg][sig] = []
 
     self.can.update_string(dat, sendcan)
     return self.update_vl()
@@ -150,7 +152,8 @@ cdef class CANParser:
 
     # Reset updated values
     for msg in self.updated:
-      self.updated[msg] = False
+      for sig in self.updated[msg]:
+        self.updated[msg][sig] = []
 
     for s in strings:
       updated_val = self.update_string(s, sendcan, reset_updated=False)

@@ -82,14 +82,13 @@ bool MessageState::parse(uint64_t sec, uint16_t ts_, uint8_t * dat) {
       }
     }
 
-    vals[i] = tmp * sig.factor + sig.offset;
+    vals[i].push_back(tmp * sig.factor + sig.offset);
   }
   ts = ts_;
   seen = sec;
 
   return true;
 }
-
 
 bool MessageState::update_counter_generic(int64_t v, int cnt_size) {
   uint8_t old_counter = counter;
@@ -147,7 +146,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
       const Signal *sig = &msg->sigs[i];
       if (sig->type != SignalType::DEFAULT) {
         state.parse_sigs.push_back(*sig);
-        state.vals.push_back(0);
+        state.vals.push_back({0});
       }
     }
 
@@ -160,7 +159,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
         if (strcmp(sig->name, sigop.name) == 0
             && sig->type == SignalType::DEFAULT) {
           state.parse_sigs.push_back(*sig);
-          state.vals.push_back(0);
+          state.vals.push_back({0});
           break;
         }
       }
@@ -188,7 +187,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum
     for (int j = 0; j < msg->num_sigs; j++) {
       const Signal *sig = &msg->sigs[j];
       state.parse_sigs.push_back(*sig);
-      state.vals.push_back(0);
+      state.vals.push_back({0});
     }
 
     message_states[state.address] = state;
@@ -219,7 +218,16 @@ void CANParser::update_string(const std::string &data, bool sendcan) {
 void CANParser::UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Reader& cans) {
   int msg_count = cans.size();
 
-  DEBUG("got %d messages\n", msg_count);
+  INFO("got %d messages\n", msg_count);
+
+  // reset updated signal values
+  for (auto &kv : message_states) {
+    auto &state = kv.second;
+    for (int i = 0; i < state.parse_sigs.size(); i++) {
+      state.vals[i].clear();
+    }
+    INFO("clearing %d\n", state.address);
+  }
 
   for (int i = 0; i < msg_count; i++) {
     auto cmsg = cans[i];
