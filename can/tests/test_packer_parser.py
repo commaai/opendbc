@@ -119,6 +119,29 @@ class TestCanParserPacker(unittest.TestCase):
 
         idx += 1
 
+  def test_updated(self):
+    """Test updated value dict"""
+    dbc_file = "honda_civic_touring_2016_can_generated"
+
+    signals = [
+      ("BRAKE_SWITCH", "POWERTRAIN_DATA", 0),
+    ]
+    checks = [("VSA_STATUS", 50)]
+
+    parser = CANParser(dbc_file, signals, checks, 0)
+    packer = CANPacker(dbc_file)
+
+    idx = 0
+    for brake in range(0, 100):
+      values = {"USER_BRAKE": brake}
+      msgs = packer.make_can_msg("VSA_STATUS", 0, values, idx)
+      bts = can_list_to_can_capnp([msgs])
+
+      parser.update_string(bts)
+
+      self.assertAlmostEqual(parser.vl["VSA_STATUS"]["USER_BRAKE"], brake)
+      idx += 1
+
 
 if __name__ == "__main__":
   unittest.main()
