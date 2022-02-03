@@ -29,7 +29,6 @@ cdef class CANParser:
   cdef readonly:
     string dbc_name
     dict vl
-    dict ts
     bool can_valid
     int can_invalid_cnt
 
@@ -42,7 +41,6 @@ cdef class CANParser:
     if not self.dbc:
       raise RuntimeError(f"Can't find DBC: {dbc_name}")
     self.vl = {}
-    self.ts = {}
 
     self.can_invalid_cnt = CAN_INVALID_CNT
 
@@ -56,8 +54,6 @@ cdef class CANParser:
       self.address_to_msg_name[msg.address] = name
       self.vl[msg.address] = {}
       self.vl[name] = {}
-      self.ts[msg.address] = {}
-      self.ts[name] = {}
 
     # Convert message names into addresses
     for i in range(len(signals)):
@@ -121,10 +117,7 @@ cdef class CANParser:
       cv_name = <unicode>cv.name
 
       self.vl[cv.address][cv_name] = cv.value
-      self.ts[cv.address][cv_name] = cv.ts
-
       self.vl[name][cv_name] = cv.value
-      self.ts[name][cv_name] = cv.ts
 
       updated_val.insert(cv.address)
 

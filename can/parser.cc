@@ -13,7 +13,7 @@
 // #define DEBUG printf
 #define INFO printf
 
-bool MessageState::parse(uint64_t sec, uint16_t ts_, uint8_t * dat) {
+bool MessageState::parse(uint64_t sec, uint8_t * dat) {
   uint64_t dat_le = read_u64_le(dat);
   uint64_t dat_be = read_u64_be(dat);
 
@@ -84,7 +84,6 @@ bool MessageState::parse(uint64_t sec, uint16_t ts_, uint8_t * dat) {
 
     vals[i] = tmp * sig.factor + sig.offset;
   }
-  ts = ts_;
   seen = sec;
 
   return true;
@@ -238,7 +237,7 @@ void CANParser::UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Rea
     uint8_t dat[8] = {0};
     memcpy(dat, cmsg.getDat().begin(), cmsg.getDat().size());
 
-    state_it->second.parse(sec, cmsg.getBusTime(), dat);
+    state_it->second.parse(sec, dat);
   }
 }
 #endif
@@ -262,7 +261,7 @@ void CANParser::UpdateCans(uint64_t sec, const capnp::DynamicStruct::Reader& cms
   if (dat.size() > 8) return; //shouldn't ever happen
   uint8_t data[8] = {0};
   memcpy(data, dat.begin(), dat.size());
-  state_it->second.parse(sec, cmsg.get("busTime").as<uint16_t>(), data);
+  state_it->second.parse(sec, data);
 }
 
 void CANParser::UpdateValid(uint64_t sec) {
@@ -291,7 +290,6 @@ std::vector<SignalValue> CANParser::query_latest() {
       const Signal &sig = state.parse_sigs[i];
       ret.push_back((SignalValue){
         .address = state.address,
-        .ts = state.ts,
         .name = sig.name,
         .value = state.vals[i],
       });
