@@ -30,8 +30,8 @@ class TestCanParserPacker(unittest.TestCase):
     dbc_file = "honda_civic_touring_2016_can_generated"
 
     signals = [
-      ("STEER_TORQUE", "STEERING_CONTROL", 0),
-      ("STEER_TORQUE_REQUEST", "STEERING_CONTROL", 0),
+      ("STEER_TORQUE", "STEERING_CONTROL"),
+      ("STEER_TORQUE_REQUEST", "STEERING_CONTROL"),
     ]
     checks = [("STEERING_CONTROL", 50)]
 
@@ -63,7 +63,7 @@ class TestCanParserPacker(unittest.TestCase):
     dbc_file = "honda_civic_touring_2016_can_generated"
 
     signals = [
-      ("USER_BRAKE", "VSA_STATUS", 0),
+      ("USER_BRAKE", "VSA_STATUS"),
     ]
     checks = [("VSA_STATUS", 50)]
 
@@ -87,10 +87,10 @@ class TestCanParserPacker(unittest.TestCase):
     dbc_file = "subaru_global_2017_generated"
 
     signals = [
-      ("Counter", "ES_LKAS", 0),
-      ("LKAS_Output", "ES_LKAS", 0),
-      ("LKAS_Request", "ES_LKAS", 0),
-      ("SET_1", "ES_LKAS", 0),
+      ("Counter", "ES_LKAS"),
+      ("LKAS_Output", "ES_LKAS"),
+      ("LKAS_Request", "ES_LKAS"),
+      ("SET_1", "ES_LKAS"),
     ]
     checks = [("ES_LKAS", 50)]
 

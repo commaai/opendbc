@@ -10,8 +10,8 @@ class TestCanParserPackerExceptions(unittest.TestCase):
     dbc_file = "honda_civic_touring_2016_can_generated"
     dbc_invalid = dbc_file + "abcdef"
     signals = [
-      ("STEER_TORQUE", "STEERING_CONTROL", 0),
-      ("STEER_TORQUE_REQUEST", "STEERING_CONTROL", 0),
+      ("STEER_TORQUE", "STEERING_CONTROL"),
+      ("STEER_TORQUE_REQUEST", "STEERING_CONTROL"),
     ]
     checks = [("STEERING_CONTROL", 50)]
     with self.assertRaises(RuntimeError):
