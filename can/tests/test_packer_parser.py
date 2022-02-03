@@ -124,23 +124,31 @@ class TestCanParserPacker(unittest.TestCase):
     dbc_file = "honda_civic_touring_2016_can_generated"
 
     signals = [
-      ("BRAKE_SWITCH", "POWERTRAIN_DATA", 0),
+      ("USER_BRAKE", "VSA_STATUS"),
     ]
     checks = [("VSA_STATUS", 50)]
 
     parser = CANParser(dbc_file, signals, checks, 0)
     packer = CANPacker(dbc_file)
 
-    idx = 0
-    for brake in range(0, 100):
-      values = {"USER_BRAKE": brake}
-      msgs = packer.make_can_msg("VSA_STATUS", 0, values, idx)
-      bts = can_list_to_can_capnp([msgs])
+    # Make sure nothing is updated
+    self.assertEqual(len(parser.updated["VSA_STATUS"]["USER_BRAKE"]), 0)
 
-      parser.update_string(bts)
+    # Ensure CANParser holds the values of any duplicate messages
+    user_brake_vals = [4, 5, 6, 7]
+    msgs = []
+    for idx, user_brake in enumerate(user_brake_vals):
+      values = {"USER_BRAKE": user_brake}
+      msgs.append(packer.make_can_msg("POWERTRAIN_DATA", 0, values, idx))
 
-      self.assertAlmostEqual(parser.vl["VSA_STATUS"]["USER_BRAKE"], brake)
-      idx += 1
+    # simulates two instances of lag in a row
+    bts_frame_1 = can_list_to_can_capnp(msgs[:2])
+    bts_frame_2 = can_list_to_can_capnp(msgs[2:])
+    parser.update_strings([bts_frame_1, bts_frame_2])
+
+    updated = parser.updated["VSA_STATUS"]["USER_BRAKE"]
+    self.assertEqual(updated, user_brake_vals)
+    self.assertEqual(updated[-1], parser.vl["VSA_STATUS"]["USER_BRAKE"])
 
 
 if __name__ == "__main__":
