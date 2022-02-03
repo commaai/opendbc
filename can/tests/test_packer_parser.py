@@ -139,7 +139,7 @@ class TestCanParserPacker(unittest.TestCase):
     msgs = []
     for idx, user_brake in enumerate(user_brake_vals):
       values = {"USER_BRAKE": user_brake}
-      msgs.append(packer.make_can_msg("POWERTRAIN_DATA", 0, values, idx))
+      msgs.append(packer.make_can_msg("VSA_STATUS", 0, values, idx))
 
     # simulates two instances of lag in a row
     bts_frame_1 = can_list_to_can_capnp(msgs[:2])
