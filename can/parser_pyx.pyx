@@ -106,7 +106,7 @@ cdef class CANParser:
     cdef string sig_name
     cdef unordered_set[uint32_t] updated_val
 
-    can_values = self.can.query_all()
+    can_values = self.can.update_vl()
     valid = self.can.can_valid
 
     # Update invalid flag

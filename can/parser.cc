@@ -282,7 +282,7 @@ void CANParser::UpdateValid(uint64_t sec) {
   }
 }
 
-std::vector<SignalValue> CANParser::query_all() {
+std::vector<SignalValue> CANParser::update_vl() {
   std::vector<SignalValue> ret;
 
   for (auto& kv : message_states) {
