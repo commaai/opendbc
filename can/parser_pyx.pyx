@@ -131,14 +131,13 @@ cdef class CANParser:
 
     return updated_val
 
-  def update_string(self, dat, sendcan=False, update_vl=True):
+  def update_string(self, dat, sendcan=False):
     self.can.update_string(dat, sendcan)
-    if update_vl:
-      return self.update_vl()
+    return self.update_vl()
 
   def update_strings(self, strings, sendcan=False):
     for s in strings:
-      self.update_string(s, sendcan, update_vl=False)
+      self.can.update_string(s, sendcan)
 
     return self.update_vl()
 
