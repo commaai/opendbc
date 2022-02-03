@@ -137,14 +137,12 @@ class TestCanParserPacker(unittest.TestCase):
     # Ensure CANParser holds the values of any duplicate messages
     user_brake_vals = [4, 5, 6, 7]
     msgs = []
-    for idx, user_brake in enumerate(user_brake_vals):
+    for user_brake in user_brake_vals:
       values = {"USER_BRAKE": user_brake}
-      msgs.append(packer.make_can_msg("VSA_STATUS", 0, values, idx))
+      msgs.append(packer.make_can_msg("VSA_STATUS", 0, values))
 
-    # simulates two instances of lag in a row
-    bts_frame_1 = can_list_to_can_capnp(msgs[:2])
-    bts_frame_2 = can_list_to_can_capnp(msgs[2:])
-    parser.update_strings([bts_frame_1, bts_frame_2])
+    bts = can_list_to_can_capnp(msgs)
+    parser.update_strings([bts])
 
     updated = parser.updated["VSA_STATUS"]["USER_BRAKE"]
     self.assertEqual(updated, user_brake_vals)
