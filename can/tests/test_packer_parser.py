@@ -123,9 +123,7 @@ class TestCanParserPacker(unittest.TestCase):
     """Test updated value dict"""
     dbc_file = "honda_civic_touring_2016_can_generated"
 
-    signals = [
-      ("USER_BRAKE", "VSA_STATUS"),
-    ]
+    signals = [("USER_BRAKE", "VSA_STATUS")]
     checks = [("VSA_STATUS", 50)]
 
     parser = CANParser(dbc_file, signals, checks, 0)
@@ -141,10 +139,9 @@ class TestCanParserPacker(unittest.TestCase):
       values = {"USER_BRAKE": user_brake}
       msgs.append(packer.make_can_msg("VSA_STATUS", 0, values))
 
-    bts = can_list_to_can_capnp(msgs)
-    parser.update_strings([bts])
-
+    parser.update_strings([can_list_to_can_capnp(msgs)])
     updated = parser.updated["VSA_STATUS"]["USER_BRAKE"]
+
     self.assertEqual(updated, user_brake_vals)
     self.assertEqual(updated[-1], parser.vl["VSA_STATUS"]["USER_BRAKE"])
 
