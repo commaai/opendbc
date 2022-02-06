@@ -150,7 +150,7 @@ class dbc():
       if ival is not None:
 
         ival = (ival - s.offset) / s.factor
-        ival = int(round(ival))
+        ival = round(ival)
 
         if s.is_signed and ival < 0:
           ival = (1 << s.size) + ival
