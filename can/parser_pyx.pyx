@@ -127,9 +127,9 @@ cdef class CANParser:
       cv_name = <unicode>cv.name
 
       self.vl[cv.address][cv_name] = cv.value
-      self.ts[cv.address][cv_name] = cv.ts
-
       self.vl[name][cv_name] = cv.value
+
+      self.ts[cv.address][cv_name] = cv.ts
       self.ts[name][cv_name] = cv.ts
 
       self.updated[cv.address][cv_name] = cv.updated_values
