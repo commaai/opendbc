@@ -62,8 +62,6 @@ cdef class CANParser:
       self.ts[name] = {}
       self.updated[msg.address] = {}
       self.updated[name] = {}
-      self.ts[msg.address] = {}
-      self.ts[name] = {}
 
     # Convert message names into addresses
     for i in range(len(signals)):
