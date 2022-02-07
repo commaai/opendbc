@@ -83,13 +83,13 @@ bool MessageState::parse(uint64_t sec, uint16_t ts_, uint8_t * dat) {
     }
 
     vals[i] = tmp * sig.factor + sig.offset;
+    updated_vals[i].push_back(vals[i]);
   }
   ts = ts_;
   seen = sec;
 
   return true;
 }
-
 
 bool MessageState::update_counter_generic(int64_t v, int cnt_size) {
   uint8_t old_counter = counter;
@@ -148,6 +148,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
       if (sig->type != SignalType::DEFAULT) {
         state.parse_sigs.push_back(*sig);
         state.vals.push_back(0);
+        state.updated_vals.push_back({});
       }
     }
 
@@ -161,6 +162,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
             && sig->type == SignalType::DEFAULT) {
           state.parse_sigs.push_back(*sig);
           state.vals.push_back(0);
+          state.updated_vals.push_back({});
           break;
         }
       }
@@ -189,6 +191,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum
       const Signal *sig = &msg->sigs[j];
       state.parse_sigs.push_back(*sig);
       state.vals.push_back(0);
+      state.updated_vals.push_back({});
     }
 
     message_states[state.address] = state;
@@ -280,12 +283,11 @@ void CANParser::UpdateValid(uint64_t sec) {
   }
 }
 
-std::vector<SignalValue> CANParser::query_latest() {
+std::vector<SignalValue> CANParser::update_vl() {
   std::vector<SignalValue> ret;
 
-  for (const auto& kv : message_states) {
-    const auto& state = kv.second;
-    if (last_sec != 0 && state.seen != last_sec) continue;
+  for (auto& kv : message_states) {
+    auto& state = kv.second;
 
     for (int i=0; i<state.parse_sigs.size(); i++) {
       const Signal &sig = state.parse_sigs[i];
@@ -294,7 +296,9 @@ std::vector<SignalValue> CANParser::query_latest() {
         .ts = state.ts,
         .name = sig.name,
         .value = state.vals[i],
+        .updated_values = state.updated_vals[i],
       });
+      state.updated_vals[i].clear();  // reset updated values for next cycle
     }
   }
 
