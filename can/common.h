@@ -32,6 +32,7 @@ public:
 
   std::vector<Signal> parse_sigs;
   std::vector<double> vals;
+  std::vector<std::vector<double>> updated_vals;
 
   uint16_t ts;
   uint64_t seen;
@@ -69,7 +70,7 @@ public:
   #endif
   void UpdateCans(uint64_t sec, const capnp::DynamicStruct::Reader& cans);
   void UpdateValid(uint64_t sec);
-  std::vector<SignalValue> query_latest();
+  std::vector<SignalValue> update_vl();
 };
 
 class CANPacker {

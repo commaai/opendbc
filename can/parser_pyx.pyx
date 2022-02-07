@@ -30,6 +30,7 @@ cdef class CANParser:
     string dbc_name
     dict vl
     dict ts
+    dict updated
     bool can_valid
     int can_invalid_cnt
 
@@ -43,6 +44,7 @@ cdef class CANParser:
       raise RuntimeError(f"Can't find DBC: {dbc_name}")
     self.vl = {}
     self.ts = {}
+    self.updated = {}
 
     self.can_invalid_cnt = CAN_INVALID_CNT
 
@@ -58,6 +60,8 @@ cdef class CANParser:
       self.vl[name] = {}
       self.ts[msg.address] = {}
       self.ts[name] = {}
+      self.updated[msg.address] = {}
+      self.updated[name] = {}
 
     # Convert message names into addresses
     for i in range(len(signals)):
@@ -106,13 +110,13 @@ cdef class CANParser:
     cdef string sig_name
     cdef unordered_set[uint32_t] updated_val
 
-    can_values = self.can.query_latest()
+    can_values = self.can.update_vl()
     valid = self.can.can_valid
 
     # Update invalid flag
     self.can_invalid_cnt += 1
     if valid:
-        self.can_invalid_cnt = 0
+      self.can_invalid_cnt = 0
     self.can_valid = self.can_invalid_cnt < CAN_INVALID_CNT
 
     for cv in can_values:
@@ -121,12 +125,16 @@ cdef class CANParser:
       cv_name = <unicode>cv.name
 
       self.vl[cv.address][cv_name] = cv.value
-      self.ts[cv.address][cv_name] = cv.ts
-
       self.vl[name][cv_name] = cv.value
+
+      self.ts[cv.address][cv_name] = cv.ts
       self.ts[name][cv_name] = cv.ts
 
-      updated_val.insert(cv.address)
+      self.updated[cv.address][cv_name] = cv.updated_values
+      self.updated[name][cv_name] = cv.updated_values
+
+      if cv.updated_values.size():
+        updated_val.insert(cv.address)
 
     return updated_val
 
@@ -135,13 +143,10 @@ cdef class CANParser:
     return self.update_vl()
 
   def update_strings(self, strings, sendcan=False):
-    updated_vals = set()
-
     for s in strings:
-      updated_val = self.update_string(s, sendcan)
-      updated_vals.update(updated_val)
+      self.can.update_string(s, sendcan)
 
-    return updated_vals
+    return self.update_vl()
 
 cdef class CANDefine():
   cdef:
