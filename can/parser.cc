@@ -82,8 +82,8 @@ bool MessageState::parse(uint64_t sec, uint16_t ts_, uint8_t * dat) {
       }
     }
 
-    last_vals[i] = tmp * sig.factor + sig.offset;
-    updated_vals[i].push_back(last_vals[i]);
+    vals[i] = tmp * sig.factor + sig.offset;
+    updated_vals[i].push_back(vals[i]);
   }
   ts = ts_;
   seen = sec;
@@ -147,7 +147,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
       const Signal *sig = &msg->sigs[i];
       if (sig->type != SignalType::DEFAULT) {
         state.parse_sigs.push_back(*sig);
-        state.last_vals.push_back(0);
+        state.vals.push_back(0);
         state.updated_vals.push_back({});
       }
     }
@@ -161,7 +161,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
         if (strcmp(sig->name, sigop.name) == 0
             && sig->type == SignalType::DEFAULT) {
           state.parse_sigs.push_back(*sig);
-          state.last_vals.push_back(0);
+          state.vals.push_back(0);
           state.updated_vals.push_back({});
           break;
         }
@@ -190,7 +190,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum
     for (int j = 0; j < msg->num_sigs; j++) {
       const Signal *sig = &msg->sigs[j];
       state.parse_sigs.push_back(*sig);
-      state.last_vals.push_back(0);
+      state.vals.push_back(0);
       state.updated_vals.push_back({});
     }
 
@@ -295,7 +295,7 @@ std::vector<SignalValue> CANParser::update_vl() {
         .address = state.address,
         .ts = state.ts,
         .name = sig.name,
-        .value = state.last_vals[i],
+        .value = state.vals[i],
         .updated_values = state.updated_vals[i],
       });
       state.updated_vals[i].clear();  // reset updated values for next cycle

@@ -31,7 +31,7 @@ public:
   unsigned int size;
 
   std::vector<Signal> parse_sigs;
-  std::vector<double> last_vals;
+  std::vector<double> vals;
   std::vector<std::vector<double>> updated_vals;
 
   uint16_t ts;
