@@ -24,6 +24,7 @@ struct MessageParseOptions {
 
 struct SignalValue {
   uint32_t address;
+  uint16_t ts;
   const char* name;
   double value;  // latest value
   std::vector<double> updated_values;  // values updated this cycle
