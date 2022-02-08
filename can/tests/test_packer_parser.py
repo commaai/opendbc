@@ -139,11 +139,15 @@ class TestCanParserPacker(unittest.TestCase):
       values = {"USER_BRAKE": user_brake}
       msgs.append(packer.make_can_msg("VSA_STATUS", 0, values))
 
-    parser.update_strings([can_list_to_can_capnp(msgs)])
+    parser.update_string(can_list_to_can_capnp(msgs))
     updated = parser.updated["VSA_STATUS"]["USER_BRAKE"]
 
     self.assertEqual(updated, user_brake_vals)
     self.assertEqual(updated[-1], parser.vl["VSA_STATUS"]["USER_BRAKE"])
+
+    parser.update_string(can_list_to_can_capnp([]))
+    updated = parser.updated["VSA_STATUS"]["USER_BRAKE"]
+    self.assertEqual(len(updated), 0)
 
 
 if __name__ == "__main__":
