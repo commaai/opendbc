@@ -283,11 +283,12 @@ void CANParser::UpdateValid(uint64_t sec) {
   }
 }
 
-std::vector<SignalValue> CANParser::update_vl() {
+std::vector<SignalValue> CANParser::query_latest() {
   std::vector<SignalValue> ret;
 
   for (auto& kv : message_states) {
     auto& state = kv.second;
+    if (last_sec != 0 && state.updated_vals[0].size() == 0) continue;
 
     for (int i=0; i<state.parse_sigs.size(); i++) {
       const Signal &sig = state.parse_sigs[i];

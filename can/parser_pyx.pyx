@@ -104,13 +104,13 @@ cdef class CANParser:
       message_options_v.push_back(mpo)
 
     self.can = new cpp_CANParser(bus, dbc_name, message_options_v, signal_options_v)
-    self.update_vl()
+    self.update_vl(init=True)
 
-  cdef unordered_set[uint32_t] update_vl(self):
+  cdef unordered_set[uint32_t] update_vl(self, init=False):
     cdef string sig_name
     cdef unordered_set[uint32_t] updated_val
 
-    can_values = self.can.update_vl()
+    can_values = self.can.query_latest()
     valid = self.can.can_valid
 
     # Update invalid flag
@@ -118,6 +118,11 @@ cdef class CANParser:
     if valid:
       self.can_invalid_cnt = 0
     self.can_valid = self.can_invalid_cnt < CAN_INVALID_CNT
+
+    # TODO: build class fields independent of cpp_CANParser
+    if not init:
+      for msg in self.updated:
+        self.updated[msg] = {sig: [] for sig in self.updated[msg]}
 
     for cv in can_values:
       # Cast char * directly to unicode
@@ -133,8 +138,7 @@ cdef class CANParser:
       self.updated[cv.address][cv_name] = cv.updated_values
       self.updated[name][cv_name] = cv.updated_values
 
-      if cv.updated_values.size():
-        updated_val.insert(cv.address)
+      updated_val.insert(cv.address)
 
     return updated_val
 
