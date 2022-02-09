@@ -288,16 +288,17 @@ std::vector<SignalValue> CANParser::update_vl() {
 
   for (auto& kv : message_states) {
     auto& state = kv.second;
-
-    for (int i=0; i<state.parse_sigs.size(); i++) {
-      const Signal &sig = state.parse_sigs[i];
-      ret.push_back((SignalValue){
-        .address = state.address,
-        .ts = state.ts,
-        .name = sig.name,
-        .value = state.vals[i],
-        .updated_values = state.updated_vals[i],
-      });
+    for (int i = 0; i < state.parse_sigs.size(); i++) {
+      if (last_sec == 0 || state.seen == last_sec) {
+        const Signal &sig = state.parse_sigs[i];
+        ret.push_back((SignalValue){
+          .address = state.address,
+          .ts = state.ts,
+          .name = sig.name,
+          .value = state.vals[i],
+          .updated_values = state.updated_vals[i],
+        });
+      }
       state.updated_vals[i].clear();  // reset updated values for next cycle
     }
   }
