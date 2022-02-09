@@ -17,16 +17,24 @@ from collections import defaultdict
 
 cdef int CAN_INVALID_CNT = 5
 
-class SigValDict():
-  def __init__(self, dat, msg_name_to_address):
-    self.dat = dat
+cdef class SigValDict:  # TODO: better name
+  cdef public:
+    # dict dat
+    map[uint32_t, map[string, double]] dat
+    dict msg_name_to_address
+
+  def __init__(self, msg_name_to_address):
     self.msg_name_to_address = msg_name_to_address
 
   def __getitem__(self, key):
     # Converts unicode message name into address
     if not isinstance(key, numbers.Number):
       key = self.msg_name_to_address[bytes(key, encoding='utf8')]
+    print(self.dat[key])
     return self.dat[key]
+
+  def __setitem__(self, key, value):
+    self.dat[key] = value
 
 cdef class CANParser:
   cdef:
@@ -35,9 +43,11 @@ cdef class CANParser:
     map[string, uint32_t] msg_name_to_address
     map[uint32_t, string] address_to_msg_name
     vector[SignalValue] can_values
-    map[uint32_t, map[string, double]] _vl
+    #map[uint32_t, map[string, double]] _vl
+    SigValDict _vl
     map[uint32_t, map[string, uint16_t]] _ts
     map[uint32_t, map[string, vector[double]]] _updated
+    bool test_mode_enabled
 
   cdef readonly:
     string dbc_name
@@ -62,6 +72,8 @@ cdef class CANParser:
 
       self.msg_name_to_address[name] = msg.address
       self.address_to_msg_name[msg.address] = name
+
+    self._vl = SigValDict(self.msg_name_to_address)
 
     # Convert message names into addresses
     for i in range(len(signals)):
@@ -108,15 +120,16 @@ cdef class CANParser:
 
   @property
   def vl(self):
-    return SigValDict(self._vl, self.msg_name_to_address)
+    return self._vl
+    # return SigValDict(self._vl, self.msg_name_to_address)
 
-  @property
-  def ts(self):
-    return SigValDict(self._ts, self.msg_name_to_address)
+  #@property
+  #def ts(self):
+  #  return SigValDict(self._ts, self.msg_name_to_address)
 
-  @property
-  def updated(self):
-    return SigValDict(self._updated, self.msg_name_to_address)
+  #@property
+  #def updated(self):
+  #  return SigValDict(self._updated, self.msg_name_to_address)
 
   cdef unordered_set[uint32_t] update_vl(self, init=False):
     cdef unordered_set[uint32_t] updated_val
@@ -138,9 +151,12 @@ cdef class CANParser:
     for cv in can_values:
       cv_name = <unicode>cv.name
 
-      self._vl[cv.address][cv_name] = cv.value
+      print(cv.address, cv_name, cv.value)
+      self._vl.dat[cv.address][cv_name] = cv.value
       self._ts[cv.address][cv_name] = cv.ts
       self._updated[cv.address][cv_name] = cv.updated_values
+      print(self._vl.dat)
+      print()
 
       updated_val.insert(cv.address)
 
