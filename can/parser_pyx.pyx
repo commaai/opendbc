@@ -17,13 +17,17 @@ from collections import defaultdict
 
 cdef int CAN_INVALID_CNT = 5
 
-class SigValDict():
-  def __init__(self, dat, msg_name_to_address):
-    self.dat = dat
-    self.msg_name_to_address = msg_name_to_address
+cdef class CANParserField:
+  cdef:
+    dict msg_name_to_address
+
+  cdef public:
+    dict dat
+
+  def __init__(self):
+    self.dat = {}
 
   def __getitem__(self, key):
-    # Converts unicode message name into address
     if not isinstance(key, numbers.Number):
       key = self.msg_name_to_address[bytes(key, encoding='utf8')]
     return self.dat[key]
@@ -36,14 +40,14 @@ cdef class CANParser:
     map[uint32_t, string] address_to_msg_name
     vector[SignalValue] can_values
     bool test_mode_enabled
-    dict _vl  # TODO: use maps
-    dict _ts
-    dict _updated
 
   cdef readonly:
     string dbc_name
     bool can_valid
     int can_invalid_cnt
+    CANParserField vl
+    CANParserField ts
+    CANParserField updated
 
   def __init__(self, dbc_name, signals, checks=None, bus=0, enforce_checks=True):
     if checks is None:
@@ -53,9 +57,9 @@ cdef class CANParser:
     self.dbc = dbc_lookup(dbc_name)
     if not self.dbc:
       raise RuntimeError(f"Can't find DBC: {dbc_name}")
-    self._vl = {}
-    self._ts = {}
-    self._updated = {}
+    self.vl = CANParserField()
+    self.ts = CANParserField()
+    self.updated = CANParserField()
 
     self.can_invalid_cnt = CAN_INVALID_CNT
 
@@ -68,9 +72,13 @@ cdef class CANParser:
       self.msg_name_to_address[name] = msg.address
       self.address_to_msg_name[msg.address] = name
 
-      self._vl[msg.address] = {}
-      self._ts[msg.address] = {}
-      self._updated[msg.address] = {}
+      self.vl.dat[msg.address] = {}
+      self.ts.dat[msg.address] = {}
+      self.updated.dat[msg.address] = {}
+
+    self.vl.msg_name_to_address = self.msg_name_to_address
+    self.ts.msg_name_to_address = self.msg_name_to_address
+    self.updated.msg_name_to_address = self.msg_name_to_address
 
     # Convert message names into addresses
     for i in range(len(signals)):
@@ -115,18 +123,6 @@ cdef class CANParser:
     self.can = new cpp_CANParser(bus, dbc_name, message_options_v, signal_options_v)
     self.update_vl(init=True)
 
-  @property
-  def vl(self):
-    return SigValDict(self._vl, self.msg_name_to_address)
-
-  @property
-  def ts(self):
-    return SigValDict(self._ts, self.msg_name_to_address)
-
-  @property
-  def updated(self):
-    return SigValDict(self._updated, self.msg_name_to_address)
-
   cdef unordered_set[uint32_t] update_vl(self, init=False):
     cdef string sig_name
     cdef unordered_set[uint32_t] updated_val
@@ -141,15 +137,15 @@ cdef class CANParser:
     self.can_valid = self.can_invalid_cnt < CAN_INVALID_CNT
 
     if not init:
-      for msg in self._updated:
-        self._updated[msg] = {sig: [] for sig in self._updated[msg]}
+      for msg in self.updated.dat:
+        self.updated.dat[msg] = {sig: [] for sig in self.updated.dat[msg]}
 
     for cv in can_values:
       cv_name = <unicode>cv.name
 
-      self._vl[cv.address][cv_name] = cv.value
-      self._ts[cv.address][cv_name] = cv.ts
-      self._updated[cv.address][cv_name] = cv.updated_values
+      self.vl.dat[cv.address][cv_name] = cv.value
+      self.ts.dat[cv.address][cv_name] = cv.ts
+      self.updated.dat[cv.address][cv_name] = cv.updated_values
 
       updated_val.insert(cv.address)
 
