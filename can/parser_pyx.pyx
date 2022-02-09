@@ -23,10 +23,10 @@ class SigValDict():
     self.msg_name_to_address = msg_name_to_address
 
   def __getitem__(self, key):
-    if isinstance(key, numbers.Number):
-      return self.dat[key]
-    addr = self.msg_name_to_address[bytes(key, encoding='utf8')]
-    return self.dat[addr]
+    # Converts unicode message name into address
+    if not isinstance(key, numbers.Number):
+      key = self.msg_name_to_address[bytes(key, encoding='utf8')]
+    return self.dat[key]
 
 cdef class CANParser:
   cdef:
@@ -36,12 +36,12 @@ cdef class CANParser:
     map[uint32_t, string] address_to_msg_name
     vector[SignalValue] can_values
     bool test_mode_enabled
+    dict _vl  # TODO: use maps
+    dict _ts
+    dict _updated
 
   cdef readonly:
     string dbc_name
-    dict _vl
-    dict _ts
-    dict _updated
     bool can_valid
     int can_invalid_cnt
 
@@ -145,20 +145,12 @@ cdef class CANParser:
         self._updated[msg] = {sig: [] for sig in self._updated[msg]}
 
     for cv in can_values:
-      # Cast char * directly to unicode
-      name = <unicode>self.address_to_msg_name[cv.address].c_str()
       cv_name = <unicode>cv.name
 
       self._vl[cv.address][cv_name] = cv.value
-      #self._vl[name][cv_name] = cv.value
-
       self._ts[cv.address][cv_name] = cv.ts
-      #self._ts[name][cv_name] = cv.ts
-
       self._updated[cv.address][cv_name] = cv.updated_values
-      #self._updated[name][cv_name] = cv.updated_values
 
-      #if cv.updated_values.size():
       updated_val.insert(cv.address)
 
     return updated_val
