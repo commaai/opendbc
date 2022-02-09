@@ -35,9 +35,10 @@ cdef class CANParser:
     map[string, uint32_t] msg_name_to_address
     map[uint32_t, string] address_to_msg_name
     vector[SignalValue] can_values
-    map[uint32_t, map[string, double]] _vl
-    map[uint32_t, map[string, uint16_t]] _ts
-    map[uint32_t, map[string, vector[double]]] _updated
+    bool test_mode_enabled
+    dict _vl  # TODO: use maps
+    dict _ts
+    dict _updated
 
   cdef readonly:
     string dbc_name
@@ -52,6 +53,10 @@ cdef class CANParser:
     self.dbc = dbc_lookup(dbc_name)
     if not self.dbc:
       raise RuntimeError(f"Can't find DBC: {dbc_name}")
+    self._vl = {}
+    self._ts = {}
+    self._updated = {}
+
     self.can_invalid_cnt = CAN_INVALID_CNT
 
     cdef int i
@@ -62,6 +67,10 @@ cdef class CANParser:
 
       self.msg_name_to_address[name] = msg.address
       self.address_to_msg_name[msg.address] = name
+
+      self._vl[msg.address] = {}
+      self._ts[msg.address] = {}
+      self._updated[msg.address] = {}
 
     # Convert message names into addresses
     for i in range(len(signals)):
@@ -119,6 +128,7 @@ cdef class CANParser:
     return SigValDict(self._updated, self.msg_name_to_address)
 
   cdef unordered_set[uint32_t] update_vl(self, init=False):
+    cdef string sig_name
     cdef unordered_set[uint32_t] updated_val
 
     can_values = self.can.update_vl()
@@ -130,10 +140,9 @@ cdef class CANParser:
       self.can_invalid_cnt = 0
     self.can_valid = self.can_invalid_cnt < CAN_INVALID_CNT
 
-    # TODO: build class fields independent of cpp_CANParser
     if not init:
       for msg in self._updated:
-        (sig.second.clear() for sig in msg.second)
+        self._updated[msg] = {sig: [] for sig in self._updated[msg]}
 
     for cv in can_values:
       cv_name = <unicode>cv.name
