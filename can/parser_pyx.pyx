@@ -76,6 +76,9 @@ cdef class CANParser:
       self.vl.dat[msg.address] = {}
       self.ts.dat[msg.address] = {}
       self.updated.dat[msg.address] = {}
+      for x in range(msg.num_sigs):
+        self.vl.dat[msg.address][<unicode>msg.sigs[x].name] = 0
+        self.ts.dat[msg.address][<unicode>msg.sigs[x].name] = 0
 
     self.vl.msg_name_to_address = self.msg_name_to_address
     self.ts.msg_name_to_address = self.msg_name_to_address
@@ -139,10 +142,9 @@ cdef class CANParser:
       cv_name = <unicode>cv.name
 
       self.updated.dat[cv.address][cv_name] = cv.updated_values
-      self.vl.dat[cv.address][cv_name] = cv.value
-      self.ts.dat[cv.address][cv_name] = cv.ts
-
       if len(cv.updated_values) > 0:
+        self.vl.dat[cv.address][cv_name] = cv.value
+        self.ts.dat[cv.address][cv_name] = cv.ts
         updated_val.insert(cv.address)
 
     return updated_val
