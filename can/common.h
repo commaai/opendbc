@@ -32,7 +32,7 @@ public:
 
   std::vector<Signal> parse_sigs;
   std::vector<double> vals;
-  std::vector<std::vector<double>> updated_vals;
+  std::vector<std::vector<double>> all_vals;
 
   uint64_t seen;
   uint64_t check_threshold;
@@ -58,7 +58,6 @@ private:
 public:
   bool can_valid = false;
   uint64_t last_sec = 0;
-  std::map<uint32_t, std::map<std::string, std::vector<double>>> updated_values;
 
   CANParser(int abus, const std::string& dbc_name,
             const std::vector<MessageParseOptions> &options,

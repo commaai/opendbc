@@ -41,7 +41,7 @@ class TestCanParserPacker(unittest.TestCase):
     idx = 0
 
     for steer in range(-256, 255):
-      for active in [1, 0]:
+      for active in (1, 0):
         values = {
           "STEER_TORQUE": steer,
           "STEER_TORQUE_REQUEST": active,
@@ -55,6 +55,9 @@ class TestCanParserPacker(unittest.TestCase):
         self.assertAlmostEqual(parser.vl["STEERING_CONTROL"]["STEER_TORQUE"], steer)
         self.assertAlmostEqual(parser.vl["STEERING_CONTROL"]["STEER_TORQUE_REQUEST"], active)
         self.assertAlmostEqual(parser.vl["STEERING_CONTROL"]["COUNTER"], idx % 4)
+
+        for sig in ("STEER_TORQUE", "STEER_TORQUE_REQUEST", "COUNTER", "CHECKSUM"):
+          self.assertEqual(parser.vl["STEERING_CONTROL"][sig], parser.vl[228][sig])
 
         idx += 1
 
@@ -130,24 +133,23 @@ class TestCanParserPacker(unittest.TestCase):
     packer = CANPacker(dbc_file)
 
     # Make sure nothing is updated
-    self.assertEqual(len(parser.updated["VSA_STATUS"]["USER_BRAKE"]), 0)
+    self.assertEqual(len(parser.vl_all["VSA_STATUS"]["USER_BRAKE"]), 0)
 
-    # Ensure CANParser holds the values of any duplicate messages
-    user_brake_vals = [4, 5, 6, 7]
-    msgs = []
-    for user_brake in user_brake_vals:
-      values = {"USER_BRAKE": user_brake}
-      msgs.append(packer.make_can_msg("VSA_STATUS", 0, values))
+    idx = 0
+    for _ in range(10):
+      # Ensure CANParser holds the values of any duplicate messages
+      user_brake_vals = [4, 5, 6, 7]
+      msgs = []
+      for user_brake in user_brake_vals:
+        values = {"USER_BRAKE": user_brake}
+        msgs.append(packer.make_can_msg("VSA_STATUS", 0, values, idx))
+        idx += 1
 
-    parser.update_string(can_list_to_can_capnp(msgs))
-    updated = parser.updated["VSA_STATUS"]["USER_BRAKE"]
+      parser.update_strings((can_list_to_can_capnp(msgs), ))
+      vl_all = parser.vl_all["VSA_STATUS"]["USER_BRAKE"]
 
-    self.assertEqual(updated, user_brake_vals)
-    self.assertEqual(updated[-1], parser.vl["VSA_STATUS"]["USER_BRAKE"])
-
-    parser.update_string(can_list_to_can_capnp([]))
-    updated = parser.updated["VSA_STATUS"]["USER_BRAKE"]
-    self.assertEqual(len(updated), 0)
+      self.assertEqual(vl_all, user_brake_vals)
+      self.assertEqual(vl_all[-1], parser.vl["VSA_STATUS"]["USER_BRAKE"])
 
 
 if __name__ == "__main__":

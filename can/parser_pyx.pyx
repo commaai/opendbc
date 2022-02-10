@@ -5,8 +5,8 @@ from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp.unordered_set cimport unordered_set
 from libc.stdint cimport uint32_t, uint64_t, uint16_t
-from libcpp.map cimport map
 from libcpp cimport bool
+from libcpp.map cimport map
 
 from .common cimport CANParser as cpp_CANParser
 from .common cimport SignalParseOptions, MessageParseOptions, dbc_lookup, SignalValue, DBC
@@ -17,54 +17,34 @@ from collections import defaultdict
 
 cdef int CAN_INVALID_CNT = 5
 
-cdef class CANParserField:
-  cdef:
-    dict msg_name_to_address
-    bool convert_keys
-
-  cdef public:
-    dict dat
-
-  def __init__(self, dat=None, convert_keys=False):
-    if dat is None:
-      dat = {}
-    self.dat = dat
-    self.convert_keys = convert_keys
-
-  def __getitem__(self, key):
-    if not isinstance(key, int):
-      key = self.msg_name_to_address[key]
-    if not self.convert_keys:
-      return self.dat[key]
-    return {k.decode('utf8'): v for k, v in self.dat[key].items()}
 
 cdef class CANParser:
   cdef:
     cpp_CANParser *can
     const DBC *dbc
-    dict msg_name_to_address
+    map[string, uint32_t] msg_name_to_address
     map[uint32_t, string] address_to_msg_name
-    vector[SignalValue] can_values
-    bool test_mode_enabled
+    vector[vector[SignalValue]] can_values
 
   cdef readonly:
-    string dbc_name
-    CANParserField vl
+    dict vl
+    dict vl_all
     bool can_valid
+    string dbc_name
     int can_invalid_cnt
 
   def __init__(self, dbc_name, signals, checks=None, bus=0, enforce_checks=True):
     if checks is None:
       checks = []
-    self.can_valid = True
+
     self.dbc_name = dbc_name
     self.dbc = dbc_lookup(dbc_name)
     if not self.dbc:
       raise RuntimeError(f"Can't find DBC: {dbc_name}")
 
-    self.vl = CANParserField()
-    self.msg_name_to_address = {}
-
+    self.vl = {}
+    self.vl_all = {}
+    self.can_valid = False
     self.can_invalid_cnt = CAN_INVALID_CNT
 
     cdef int i
@@ -75,21 +55,24 @@ cdef class CANParser:
 
       self.msg_name_to_address[name] = msg.address
       self.address_to_msg_name[msg.address] = name
-      self.vl.dat[msg.address] = {}
-
-    self.vl.msg_name_to_address = self.msg_name_to_address
+      self.vl[msg.address] = {}
+      self.vl[name] = self.vl[msg.address]
+      self.vl_all[msg.address] = defaultdict(list)
+      self.vl_all[name] = self.vl_all[msg.address]
 
     # Convert message names into addresses
     for i in range(len(signals)):
       s = signals[i]
       if not isinstance(s[1], numbers.Number):
-        s = (s[0], self.msg_name_to_address[s[1]])
+        name = s[1].encode('utf8')
+        s = (s[0], self.msg_name_to_address[name])
         signals[i] = s
 
     for i in range(len(checks)):
       c = checks[i]
       if not isinstance(c[0], numbers.Number):
-        c = (self.msg_name_to_address[c[0]], c[1])
+        name = c[0].encode('utf8')
+        c = (self.msg_name_to_address[name], c[1])
         checks[i] = c
 
     if enforce_checks:
@@ -120,43 +103,43 @@ cdef class CANParser:
     self.can = new cpp_CANParser(bus, dbc_name, message_options_v, signal_options_v)
     self.update_vl()
 
-  @property
-  def updated(self):
-    up = CANParserField(self.can.updated_values, convert_keys=True)
-    up.msg_name_to_address = self.msg_name_to_address
-    return up
-
   cdef unordered_set[uint32_t] update_vl(self):
-    cdef string sig_name
-    cdef unordered_set[uint32_t] updated_val
-
-    can_values = self.can.query_latest()
-    valid = self.can.can_valid
+    cdef unordered_set[uint32_t] updated_addrs
 
     # Update invalid flag
     self.can_invalid_cnt += 1
-    if valid:
-        self.can_invalid_cnt = 0
+    if self.can.can_valid:
+      self.can_invalid_cnt = 0
     self.can_valid = self.can_invalid_cnt < CAN_INVALID_CNT
 
-    for cv in can_values:
-      self.vl.dat[cv.address][<unicode>cv.name] = cv.value
-      updated_val.insert(cv.address)
+    new_vals = self.can.query_latest()
+    #self.can_values.push_back(new_vals)
+    for cv in new_vals:
+      # Cast char * directly to unicode
+      cv_name = <unicode>cv.name
+      self.vl[cv.address][cv_name] = cv.value
+      self.vl_all[cv.address][cv_name].extend(cv.all_values)
+      updated_addrs.insert(cv.address)
 
-    return updated_val
+    return updated_addrs
 
   def update_string(self, dat, sendcan=False):
+    for v in self.vl_all.values():
+      v.clear()
+
     self.can.update_string(dat, sendcan)
     return self.update_vl()
 
   def update_strings(self, strings, sendcan=False):
-    updated_vals = set()
+    for v in self.vl_all.values():
+      v.clear()
 
+    updated_addrs = set()
     for s in strings:
-      updated_val = self.update_string(s, sendcan)
-      updated_vals.update(updated_val)
+      updated_addrs = self.update_string(s, sendcan)
+      updated_addrs.update(updated_addrs)
+    return updated_addrs
 
-    return updated_vals
 
 cdef class CANDefine():
   cdef:
@@ -197,7 +180,6 @@ cdef class CANDefine():
       def_val = def_val.split()
       values = [int(v) for v in def_val[::2]]
       defs = def_val[1::2]
-
 
       # two ways to lookup: address or msg name
       dv[address][sgname] = dict(zip(values, defs))
