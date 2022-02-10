@@ -76,7 +76,7 @@ cdef extern from "common.h":
     map[uint32_t, map[string, vector[double]]] updated_values
     CANParser(int, string, vector[MessageParseOptions], vector[SignalParseOptions])
     void update_string(string, bool)
-    vector[SignalValue] update_vl()
+    vector[SignalValue] query_latest()
 
   cdef cppclass CANPacker:
    CANPacker(string)

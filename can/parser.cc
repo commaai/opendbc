@@ -282,7 +282,7 @@ void CANParser::UpdateValid(uint64_t sec) {
   }
 }
 
-std::vector<SignalValue> CANParser::update_vl() {
+std::vector<SignalValue> CANParser::query_latest() {
   std::vector<SignalValue> ret;
 
   for (auto& kv : message_states) {
@@ -295,7 +295,6 @@ std::vector<SignalValue> CANParser::update_vl() {
           .address = state.address,
           .name = sig.name,
           .value = state.vals[i],
-//          .updated_values = state.updated_vals[i],
         });
       }
       updated_values[state.address][sig.name] = state.updated_vals[i];

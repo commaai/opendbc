@@ -42,7 +42,6 @@ cdef class CANParser:
   cdef:
     cpp_CANParser *can
     const DBC *dbc
-    # map[string, uint32_t] msg_name_to_address
     dict msg_name_to_address
     map[uint32_t, string] address_to_msg_name
     vector[SignalValue] can_values
@@ -51,7 +50,6 @@ cdef class CANParser:
   cdef readonly:
     string dbc_name
     CANParserField vl
-    # dict updated
     bool can_valid
     int can_invalid_cnt
 
@@ -65,7 +63,6 @@ cdef class CANParser:
       raise RuntimeError(f"Can't find DBC: {dbc_name}")
     self.vl = CANParserField()
     self.msg_name_to_address = {}
-    # self.updated = {}
 
     self.can_invalid_cnt = CAN_INVALID_CNT
 
@@ -78,9 +75,6 @@ cdef class CANParser:
       self.msg_name_to_address[name] = msg.address
       self.address_to_msg_name[msg.address] = name
       self.vl.dat[msg.address] = {}
-      # self.vl.dat[name] = {}
-      # self.updated[msg.address] = {}
-      # self.updated[name] = {}
 
     self.vl.msg_name_to_address = self.msg_name_to_address
 
@@ -135,7 +129,7 @@ cdef class CANParser:
     cdef string sig_name
     cdef unordered_set[uint32_t] updated_val
 
-    can_values = self.can.update_vl()
+    can_values = self.can.query_latest()
     valid = self.can.can_valid
 
     # Update invalid flag
@@ -145,17 +139,8 @@ cdef class CANParser:
     self.can_valid = self.can_invalid_cnt < CAN_INVALID_CNT
 
     for cv in can_values:
-      # Cast char * directly to unicode
-      #name = <unicode>self.address_to_msg_name[cv.address].c_str()
       cv_name = <unicode>cv.name
-
       self.vl.dat[cv.address][cv_name] = cv.value
-      #self.vl[name][cv_name] = cv.value
-
-      #self.updated[cv.address][cv_name] = cv.updated_values
-      #self.updated[name][cv_name] = cv.updated_values
-
-      #if cv.updated_values.size():
       updated_val.insert(cv.address)
 
     return updated_val
