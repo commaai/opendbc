@@ -62,6 +62,7 @@ cdef extern from "common_dbc.h":
     uint32_t address
     const char* name
     double value
+    vector[double] all_values
 
   cdef struct SignalPackValue:
     string name
