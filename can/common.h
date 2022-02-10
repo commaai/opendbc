@@ -58,6 +58,7 @@ private:
 public:
   bool can_valid = false;
   uint64_t last_sec = 0;
+  std::map<uint32_t, std::map<std::string, std::vector<double>>> updated_values;
 
   CANParser(int abus, const std::string& dbc_name,
             const std::vector<MessageParseOptions> &options,
