@@ -25,6 +25,7 @@ cdef class CANParser:
     map[string, uint32_t] msg_name_to_address
     map[uint32_t, string] address_to_msg_name
     vector[SignalValue] can_values
+    dict msg_updated
 
   cdef readonly:
     dict vl
@@ -44,6 +45,7 @@ cdef class CANParser:
 
     self.vl = {}
     self.vl_all = {}
+    self.msg_updated = {}
     self.can_valid = False
     self.can_invalid_cnt = CAN_INVALID_CNT
 
@@ -59,6 +61,7 @@ cdef class CANParser:
       self.vl[name] = self.vl[msg.address]
       self.vl_all[msg.address] = defaultdict(list)
       self.vl_all[name] = self.vl_all[msg.address]
+      self.msg_updated[msg.address] = False
 
     # Convert message names into addresses
     for i in range(len(signals)):
@@ -101,9 +104,15 @@ cdef class CANParser:
       message_options_v.push_back(mpo)
 
     self.can = new cpp_CANParser(bus, dbc_name, message_options_v, signal_options_v)
-    self.update_vl()
+    # TODO: build initial CANParser fields from specified signals
+    self.update_vl(init=True)
 
-  cdef unordered_set[uint32_t] update_vl(self):
+  def is_updated(self, key):
+    if not isinstance(key, int):
+      key = self.msg_name_to_address[key]
+    return self.msg_updated[key]
+
+  cdef unordered_set[uint32_t] update_vl(self, init=False):
     cdef unordered_set[uint32_t] updated_addrs
 
     # Update invalid flag
@@ -117,7 +126,11 @@ cdef class CANParser:
       # Cast char * directly to unicode
       cv_name = <unicode>cv.name
       self.vl[cv.address][cv_name] = cv.value
-      self.vl_all[cv.address][cv_name].extend(cv.all_values)
+      if cv.all_values.size() > 1:
+        self.vl_all[cv.address][cv_name].extend(cv.all_values[:-1])
+      if not init:
+        self.msg_updated[cv.address] = True
+
       updated_addrs.insert(cv.address)
 
     return updated_addrs
@@ -125,6 +138,8 @@ cdef class CANParser:
   def update_string(self, dat, sendcan=False):
     for v in self.vl_all.values():
       v.clear()
+    for u in self.msg_updated:
+      self.msg_updated[u] = False
 
     self.can.update_string(dat, sendcan)
     return self.update_vl()
@@ -132,6 +147,8 @@ cdef class CANParser:
   def update_strings(self, strings, sendcan=False):
     for v in self.vl_all.values():
       v.clear()
+    for u in self.msg_updated:
+      self.msg_updated[u] = False
 
     updated_addrs = set()
     for s in strings:
