@@ -139,8 +139,7 @@ cdef class CANParser:
     self.can_valid = self.can_invalid_cnt < CAN_INVALID_CNT
 
     for cv in can_values:
-      cv_name = <unicode>cv.name
-      self.vl.dat[cv.address][cv_name] = cv.value
+      self.vl.dat[cv.address][<unicode>cv.name] = cv.value
       updated_val.insert(cv.address)
 
     return updated_val
