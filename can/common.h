@@ -37,6 +37,7 @@ public:
   uint16_t ts;
   uint64_t seen;
   uint64_t check_threshold;
+  bool cleared_last;
 
   uint8_t counter;
   uint8_t counter_fail;

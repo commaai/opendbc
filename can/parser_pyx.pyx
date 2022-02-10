@@ -28,15 +28,15 @@ cdef class CANParserField:
     self.dat = {}
 
   def __getitem__(self, key):
-    if not isinstance(key, numbers.Number):
-      key = self.msg_name_to_address[bytes(key, encoding='utf8')]
+    if not isinstance(key, int):
+      key = self.msg_name_to_address[key]
     return self.dat[key]
 
 cdef class CANParser:
   cdef:
     cpp_CANParser *can
     const DBC *dbc
-    map[string, uint32_t] msg_name_to_address
+    dict msg_name_to_address
     map[uint32_t, string] address_to_msg_name
     vector[SignalValue] can_values
     bool test_mode_enabled
@@ -60,6 +60,7 @@ cdef class CANParser:
     self.vl = CANParserField()
     self.ts = CANParserField()
     self.updated = CANParserField()
+    self.msg_name_to_address = {}
 
     self.can_invalid_cnt = CAN_INVALID_CNT
 
@@ -69,7 +70,7 @@ cdef class CANParser:
       msg = self.dbc[0].msgs[i]
       name = msg.name.decode('utf8')
 
-      self.msg_name_to_address[name] = msg.address
+      self.msg_name_to_address[<unicode>name] = msg.address
       self.address_to_msg_name[msg.address] = name
 
       self.vl.dat[msg.address] = {}
@@ -84,15 +85,13 @@ cdef class CANParser:
     for i in range(len(signals)):
       s = signals[i]
       if not isinstance(s[1], numbers.Number):
-        name = s[1].encode('utf8')
-        s = (s[0], self.msg_name_to_address[name])
+        s = (s[0], self.msg_name_to_address[s[1]])
         signals[i] = s
 
     for i in range(len(checks)):
       c = checks[i]
       if not isinstance(c[0], numbers.Number):
-        name = c[0].encode('utf8')
-        c = (self.msg_name_to_address[name], c[1])
+        c = (self.msg_name_to_address[c[0]], c[1])
         checks[i] = c
 
     if enforce_checks:
@@ -121,9 +120,9 @@ cdef class CANParser:
       message_options_v.push_back(mpo)
 
     self.can = new cpp_CANParser(bus, dbc_name, message_options_v, signal_options_v)
-    self.update_vl(init=True)
+    self.update_vl()
 
-  cdef unordered_set[uint32_t] update_vl(self, init=False):
+  cdef unordered_set[uint32_t] update_vl(self):
     cdef string sig_name
     cdef unordered_set[uint32_t] updated_val
 
@@ -136,18 +135,15 @@ cdef class CANParser:
       self.can_invalid_cnt = 0
     self.can_valid = self.can_invalid_cnt < CAN_INVALID_CNT
 
-    if not init:
-      for msg in self.updated.dat:
-        self.updated.dat[msg] = {sig: [] for sig in self.updated.dat[msg]}
-
     for cv in can_values:
       cv_name = <unicode>cv.name
 
+      self.updated.dat[cv.address][cv_name] = cv.updated_values
       self.vl.dat[cv.address][cv_name] = cv.value
       self.ts.dat[cv.address][cv_name] = cv.ts
-      self.updated.dat[cv.address][cv_name] = cv.updated_values
 
-      updated_val.insert(cv.address)
+      if len(cv.updated_values) > 0:
+        updated_val.insert(cv.address)
 
     return updated_val
 
