@@ -138,15 +138,18 @@ class TestCanParserPacker(unittest.TestCase):
 
     idx = 0
     for _ in range(10):
-      # Ensure CANParser holds the values of any duplicate messages
-      user_brake_vals = [random.randrange(100) for _ in range(random.randrange(10))]
-      msgs = []
-      for user_brake in user_brake_vals:
-        values = {"USER_BRAKE": user_brake}
-        msgs.append(packer.make_can_msg("VSA_STATUS", 0, values, idx))
-        idx += 1
+      # Ensure CANParser holds the values of any duplicate messages over multiple frames
+      user_brake_vals = [random.randrange(100) for _ in range(random.randrange(5, 10))]
+      half_idx = len(user_brake_vals) // 2
+      can_msgs = [[], []]
+      for frame, brake_vals in enumerate((user_brake_vals[:half_idx], user_brake_vals[half_idx:])):
+        for user_brake in brake_vals:
+          values = {"USER_BRAKE": user_brake}
+          can_msgs[frame].append(packer.make_can_msg("VSA_STATUS", 0, values, idx))
+          idx += 1
 
-      parser.update_strings((can_list_to_can_capnp(msgs), ))
+      can_strings = [can_list_to_can_capnp(msgs) for msgs in can_msgs]
+      parser.update_strings(can_strings)
       vl_all = parser.vl_all["VSA_STATUS"]["USER_BRAKE"]
 
       self.assertEqual(vl_all, user_brake_vals)
