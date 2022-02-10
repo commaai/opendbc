@@ -32,7 +32,6 @@ public:
 
   std::vector<Signal> parse_sigs;
   std::vector<double> vals;
-  std::vector<std::vector<double>> updated_vals;
 
   uint64_t seen;
   uint64_t check_threshold;
@@ -69,7 +68,7 @@ public:
   #endif
   void UpdateCans(uint64_t sec, const capnp::DynamicStruct::Reader& cans);
   void UpdateValid(uint64_t sec);
-  std::vector<SignalValue> update_vl();
+  std::vector<SignalValue> query_latest();
 };
 
 class CANPacker {

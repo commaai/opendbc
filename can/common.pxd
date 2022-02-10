@@ -62,7 +62,6 @@ cdef extern from "common_dbc.h":
     uint32_t address
     const char* name
     double value
-    vector[double] updated_values
 
   cdef struct SignalPackValue:
     string name
@@ -76,7 +75,7 @@ cdef extern from "common.h":
     bool can_valid
     CANParser(int, string, vector[MessageParseOptions], vector[SignalParseOptions])
     void update_string(string, bool)
-    vector[SignalValue] update_vl()
+    vector[SignalValue] query_latest()
 
   cdef cppclass CANPacker:
    CANPacker(string)
