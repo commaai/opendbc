@@ -24,7 +24,7 @@ cdef class CANParser:
     const DBC *dbc
     map[string, uint32_t] msg_name_to_address
     map[uint32_t, string] address_to_msg_name
-    vector[vector[SignalValue]] can_values
+    vector[SignalValue] can_values
 
   cdef readonly:
     dict vl
@@ -113,7 +113,6 @@ cdef class CANParser:
     self.can_valid = self.can_invalid_cnt < CAN_INVALID_CNT
 
     new_vals = self.can.query_latest()
-    #self.can_values.push_back(new_vals)
     for cv in new_vals:
       # Cast char * directly to unicode
       cv_name = <unicode>cv.name
