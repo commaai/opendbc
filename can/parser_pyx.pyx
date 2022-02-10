@@ -61,6 +61,7 @@ cdef class CANParser:
     self.dbc = dbc_lookup(dbc_name)
     if not self.dbc:
       raise RuntimeError(f"Can't find DBC: {dbc_name}")
+
     self.vl = CANParserField()
     self.msg_name_to_address = {}
 
@@ -135,7 +136,7 @@ cdef class CANParser:
     # Update invalid flag
     self.can_invalid_cnt += 1
     if valid:
-      self.can_invalid_cnt = 0
+        self.can_invalid_cnt = 0
     self.can_valid = self.can_invalid_cnt < CAN_INVALID_CNT
 
     for cv in can_values:
@@ -149,10 +150,13 @@ cdef class CANParser:
     return self.update_vl()
 
   def update_strings(self, strings, sendcan=False):
-    for s in strings:
-      self.can.update_string(s, sendcan)
+    updated_vals = set()
 
-    return self.update_vl()
+    for s in strings:
+      updated_val = self.update_string(s, sendcan)
+      updated_vals.update(updated_val)
+
+    return updated_vals
 
 cdef class CANDefine():
   cdef:
