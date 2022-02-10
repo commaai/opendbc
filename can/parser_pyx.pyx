@@ -123,8 +123,8 @@ cdef class CANParser:
       self.vl[cv.address][cv_name] = cv.value
       self.vl[name][cv_name] = cv.value
 
-      self.updated[cv.address][cv_name] = cv.updated_values
-      self.updated[name][cv_name] = cv.updated_values
+      #self.updated[cv.address][cv_name] = cv.updated_values
+      #self.updated[name][cv_name] = cv.updated_values
 
       if cv.updated_values.size():
         updated_val.insert(cv.address)
