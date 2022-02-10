@@ -41,7 +41,7 @@ class TestCanParserPacker(unittest.TestCase):
     idx = 0
 
     for steer in range(-256, 255):
-      for active in [1, 0]:
+      for active in (1, 0):
         values = {
           "STEER_TORQUE": steer,
           "STEER_TORQUE_REQUEST": active,
@@ -55,6 +55,9 @@ class TestCanParserPacker(unittest.TestCase):
         self.assertAlmostEqual(parser.vl["STEERING_CONTROL"]["STEER_TORQUE"], steer)
         self.assertAlmostEqual(parser.vl["STEERING_CONTROL"]["STEER_TORQUE_REQUEST"], active)
         self.assertAlmostEqual(parser.vl["STEERING_CONTROL"]["COUNTER"], idx % 4)
+
+        for sig in ("STEER_TORQUE", "STEER_TORQUE_REQUEST", "COUNTER", "CHECKSUM"):
+          self.assertEqual(parser.vl["STEERING_CONTROL"][sig], parser.vl[228][sig])
 
         idx += 1
 
