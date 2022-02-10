@@ -24,24 +24,24 @@ cdef class CANParser:
     map[string, uint32_t] msg_name_to_address
     map[uint32_t, string] address_to_msg_name
     vector[SignalValue] can_values
-    bool test_mode_enabled
 
   cdef readonly:
-    string dbc_name
     dict vl
     bool can_valid
+    string dbc_name
     int can_invalid_cnt
 
   def __init__(self, dbc_name, signals, checks=None, bus=0, enforce_checks=True):
     if checks is None:
       checks = []
-    self.can_valid = True
+
     self.dbc_name = dbc_name
     self.dbc = dbc_lookup(dbc_name)
     if not self.dbc:
       raise RuntimeError(f"Can't find DBC: {dbc_name}")
-    self.vl = {}
 
+    self.vl = {}
+    self.can_valid = False
     self.can_invalid_cnt = CAN_INVALID_CNT
 
     cdef int i
@@ -53,7 +53,7 @@ cdef class CANParser:
       self.msg_name_to_address[name] = msg.address
       self.address_to_msg_name[msg.address] = name
       self.vl[msg.address] = {}
-      self.vl[name] = {}
+      self.vl[name] = self.vl[msg.address]
 
     # Convert message names into addresses
     for i in range(len(signals)):
@@ -113,12 +113,8 @@ cdef class CANParser:
 
     for cv in can_values:
       # Cast char * directly to unicode
-      name = <unicode>self.address_to_msg_name[cv.address].c_str()
       cv_name = <unicode>cv.name
-
       self.vl[cv.address][cv_name] = cv.value
-      self.vl[name][cv_name] = cv.value
-
       updated_val.insert(cv.address)
 
     return updated_val
