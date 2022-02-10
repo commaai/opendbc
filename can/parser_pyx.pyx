@@ -46,7 +46,6 @@ cdef class CANParser:
     bool can_valid
     int can_invalid_cnt
     CANParserField vl
-    CANParserField ts
     CANParserField updated
 
   def __init__(self, dbc_name, signals, checks=None, bus=0, enforce_checks=True):
@@ -58,7 +57,6 @@ cdef class CANParser:
     if not self.dbc:
       raise RuntimeError(f"Can't find DBC: {dbc_name}")
     self.vl = CANParserField()
-    self.ts = CANParserField()
     self.updated = CANParserField()
     self.msg_name_to_address = {}
 
@@ -74,11 +72,9 @@ cdef class CANParser:
       self.address_to_msg_name[msg.address] = name
 
       self.vl.dat[msg.address] = {}
-      self.ts.dat[msg.address] = {}
       self.updated.dat[msg.address] = {}
 
     self.vl.msg_name_to_address = self.msg_name_to_address
-    self.ts.msg_name_to_address = self.msg_name_to_address
     self.updated.msg_name_to_address = self.msg_name_to_address
 
     # Convert message names into addresses
@@ -144,7 +140,6 @@ cdef class CANParser:
 
       self.updated.dat[cv.address][cv_name] = cv.updated_values
       self.vl.dat[cv.address][cv_name] = cv.value
-      self.ts.dat[cv.address][cv_name] = cv.ts
       updated_val.insert(cv.address)
 
     return updated_val
