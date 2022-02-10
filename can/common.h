@@ -32,6 +32,7 @@ public:
 
   std::vector<Signal> parse_sigs;
   std::vector<double> vals;
+  std::vector<std::vector<double>> all_vals;
 
   uint64_t seen;
   uint64_t check_threshold;
