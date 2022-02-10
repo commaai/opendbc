@@ -142,7 +142,7 @@ class TestCanParserPacker(unittest.TestCase):
       user_brake_vals = [random.randrange(100) for _ in range(random.randrange(10))]
       can_msgs = [[], []]
       for frame, brake_vals in enumerate((user_brake_vals[:5], user_brake_vals[-5:])):
-        for user_brake in user_brake_vals:
+        for user_brake in brake_vals:
           values = {"USER_BRAKE": user_brake}
           can_msgs[frame].append(packer.make_can_msg("VSA_STATUS", 0, values, idx))
           idx += 1
