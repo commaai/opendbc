@@ -135,8 +135,8 @@ cdef class CANParser:
 
     updated_addrs = set()
     for s in strings:
-      updated_addrs = self.update_string(s, sendcan)
-      updated_addrs.update(updated_addrs)
+      self.can.update_string(s, sendcan)
+      updated_addrs.update(self.update_vl())
     return updated_addrs
 
 
