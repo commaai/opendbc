@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import unittest
+import random
 
 import cereal.messaging as messaging
 from opendbc.can.parser import CANParser
@@ -138,7 +139,7 @@ class TestCanParserPacker(unittest.TestCase):
     idx = 0
     for _ in range(10):
       # Ensure CANParser holds the values of any duplicate messages
-      user_brake_vals = [4, 5, 6, 7]
+      user_brake_vals = [random.randrange(100) for _ in range(random.randrange(10))]
       msgs = []
       for user_brake in user_brake_vals:
         values = {"USER_BRAKE": user_brake}
@@ -149,7 +150,8 @@ class TestCanParserPacker(unittest.TestCase):
       vl_all = parser.vl_all["VSA_STATUS"]["USER_BRAKE"]
 
       self.assertEqual(vl_all, user_brake_vals)
-      self.assertEqual(vl_all[-1], parser.vl["VSA_STATUS"]["USER_BRAKE"])
+      if len(user_brake_vals):
+        self.assertEqual(vl_all[-1], parser.vl["VSA_STATUS"]["USER_BRAKE"])
 
 
 if __name__ == "__main__":
