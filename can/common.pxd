@@ -75,6 +75,7 @@ cdef extern from "common.h":
 
   cdef cppclass CANParser:
     bool can_valid
+    map[uint32_t, bool] msg_updated
     CANParser(int, string, vector[MessageParseOptions], vector[SignalParseOptions])
     void update_string(string, bool)
     vector[SignalValue] update_vl()
