@@ -412,6 +412,8 @@ BO_ 13275 LKAS_HUD_B: 8 ADAS
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" BDY
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" BDY
 
+CM_ SG_ 450 EPB_STATE "3: On, 2: Disengaging, 1: Engaging, 0: Off";
+CM_ SG_ 479 CONTROL_ON "Set to 5 when car is being controlled";
 CM_ SG_ 479 AEB_STATUS "set for the duration of AEB event";
 CM_ SG_ 479 AEB_BRAKING "set when braking is commanded during AEB event";
 CM_ SG_ 479 AEB_PREPARE "set 1s before AEB";
@@ -435,12 +437,6 @@ BO_ 330 STEERING_SENSORS: 8 EPS
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
 
-BO_ 419 GEARBOX: 8 PCM
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
- SG_ GEAR_SHIFTER : 29|6@0+ (1,0) [0|63] "" EON
- SG_ GEAR : 7|8@0+ (1,0) [0|255] "" EON
-
 BO_ 401 GEARBOX_15T: 8 PCM
  SG_ GEAR_SHIFTER : 5|6@0+ (1,0) [0|63] "" EON
  SG_ BOH : 45|6@0+ (1,0) [0|63] "" XXX
@@ -450,7 +446,14 @@ BO_ 401 GEARBOX_15T: 8 PCM
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
 
+BO_ 419 GEARBOX: 8 XXX
+ SG_ GEAR_SHIFTER : 24|8@1+ (1,0) [0|255] "" XXX
+ SG_ GEAR : 32|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
+
 BO_ 432 STANDSTILL: 7 VSA
+ SG_ WHEELS_MOVING : 12|1@0+ (1,0) [0|1] "" EON
  SG_ BRAKE_ERROR_1 : 11|1@0+ (1,0) [0|1] "" EON
  SG_ BRAKE_ERROR_2 : 9|1@0+ (1,0) [0|1] "" EON
  SG_ COUNTER : 53|2@0+ (1,0) [0|3] "" EON
@@ -461,9 +464,20 @@ BO_ 446 BRAKE_MODULE: 3 VSA
  SG_ COUNTER : 21|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 19|4@0+ (1,0) [0|15] "" XXX
 
+BO_ 506 LEGACY_BRAKE_COMMAND: 8 ADAS
+ SG_ CHIME : 40|8@1+ (1,0) [0|255] "" XXX
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
+
+BO_ 892 CRUISE_PARAMS: 8 PCM
+ SG_ CRUISE_SPEED_OFFSET : 31|8@0- (0.1,0) [-128|127] "kph" EON
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
+ SG_ COUNTER : 61|2@0+ (1,0) [0|15] "" EON
+
 BO_ 927 RADAR_HUD: 8 RADAR
  SG_ ZEROS_BOH : 7|10@0+ (1,0) [0|127] "" BDY
  SG_ CMBS_OFF : 12|1@0+ (1,0) [0|1] "" BDY
+ SG_ ZEROS_BOH3 : 31|32@0+ (1,0) [0|4294967295] "" XXX
  SG_ RESUME_INSTRUCTION : 21|1@0+ (1,0) [0|1] "" XXX
  SG_ SET_TO_1 : 13|1@0+ (1,0) [0|1] "" BDY
  SG_ ZEROS_BOH2 : 11|4@0+ (1,0) [0|1] "" XXX
@@ -481,10 +495,11 @@ BO_ 1302 ODOMETER: 8 XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
 
-VAL_ 419 GEAR_SHIFTER  32 "D" 8 "R" 4 "P" ;
-VAL_ 401 GEAR_SHIFTER 32 "L" 16 "S" 8 "D" 4 "N" 2 "R" 1 "P" ;
-VAL_ 401 GEAR 7 "L" 10 "S" 4 "D" 3 "N" 2 "R" 1 "P" ;
-VAL_ 545 ECON_ON_2 0 "off" 3 "on" ;
-VAL_ 662 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "cancel" 1 "main" 0 "none" ;
-VAL_ 662 CRUISE_SETTING 3 "distance_adj" 2 "tbd" 1 "lkas_button" 0 "none" ;
-VAL_ 806 CMBS_BUTTON 3 "pressed" 0 "released" ;
+VAL_ 401 GEAR_SHIFTER 32 "L" 16 "S" 8 "D" 4 "N" 2 "R" 1 "P";
+VAL_ 401 GEAR 7 "L" 10 "S" 4 "D" 3 "N" 2 "R" 1 "P";
+VAL_ 419 GEAR_SHIFTER 2 "S" 32 "D" 16 "N" 8 "R" 4 "P";
+VAL_ 419 GEAR 26 "S" 20 "D" 19 "N" 18 "R" 17 "P";
+VAL_ 545 ECON_ON_2 0 "off" 3 "on";
+VAL_ 662 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "cancel" 1 "main" 0 "none";
+VAL_ 662 CRUISE_SETTING 3 "distance_adj" 2 "tbd" 1 "lkas_button" 0 "none";
+VAL_ 806 CMBS_BUTTON 3 "pressed" 0 "released";

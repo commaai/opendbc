@@ -412,6 +412,8 @@ BO_ 13275 LKAS_HUD_B: 8 ADAS
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" BDY
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" BDY
 
+CM_ SG_ 450 EPB_STATE "3: On, 2: Disengaging, 1: Engaging, 0: Off";
+CM_ SG_ 479 CONTROL_ON "Set to 5 when car is being controlled";
 CM_ SG_ 479 AEB_STATUS "set for the duration of AEB event";
 CM_ SG_ 479 AEB_BRAKING "set when braking is commanded during AEB event";
 CM_ SG_ 479 AEB_PREPARE "set 1s before AEB";
@@ -474,8 +476,6 @@ BO_ 1302 ODOMETER: 8 XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
 
-CM_ SG_ 450 EPB_STATE "3: On, 2: Disengaging, 1: Engaging, 0: Off";
-CM_ SG_ 479 CONTROL_ON "Set to 5 when car is being controlled";
 CM_ SG_ 479 RELATED_TO_GAS "bits 7, 3, and 1 set to 1 when gas not applied";
 CM_ SG_ 479 GAS_BRAKE "Signed value, negative when braking and positive when applying gas";
 
