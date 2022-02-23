@@ -61,8 +61,8 @@ cdef class CANParser:
       self.vl[name] = self.vl[msg.address]
       self.vl_all[msg.address] = defaultdict(list)
       self.vl_all[name] = self.vl_all[msg.address]
-      self.seen[msg.address] = {}
-      self.seen[name] = self.seen[msg.address]
+      self.seen[msg.address] = 0
+      self.seen[name] = 0
 
     # Convert message names into addresses
     for i in range(len(signals)):
@@ -119,10 +119,12 @@ cdef class CANParser:
     new_vals = self.can.query_latest()
     for cv in new_vals:
       # Cast char * directly to unicode
+      name = <unicode>self.address_to_msg_name[cv.address].c_str()
       cv_name = <unicode>cv.name
       self.vl[cv.address][cv_name] = cv.value
       self.vl_all[cv.address][cv_name].extend(cv.all_values)
-      self.seen[cv.address][cv_name] = cv.seen
+      self.seen[cv.address] = cv.seen
+      self.seen[name] = cv.seen
       updated_addrs.insert(cv.address)
 
     return updated_addrs
