@@ -27,6 +27,7 @@ struct SignalValue {
   const char* name;
   double value;  // latest value
   std::vector<double> all_values;  // all values from this cycle
+  uint64_t seen;
 };
 
 enum SignalType {

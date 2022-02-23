@@ -29,6 +29,7 @@ cdef class CANParser:
   cdef readonly:
     dict vl
     dict vl_all
+    dict seen
     bool can_valid
     string dbc_name
     int can_invalid_cnt
@@ -44,6 +45,7 @@ cdef class CANParser:
 
     self.vl = {}
     self.vl_all = {}
+    self.seen = {}
     self.can_valid = False
     self.can_invalid_cnt = CAN_INVALID_CNT
 
@@ -59,6 +61,8 @@ cdef class CANParser:
       self.vl[name] = self.vl[msg.address]
       self.vl_all[msg.address] = defaultdict(list)
       self.vl_all[name] = self.vl_all[msg.address]
+      self.seen[msg.address] = {}
+      self.seen[name] = self.seen[msg.address]
 
     # Convert message names into addresses
     for i in range(len(signals)):
@@ -118,6 +122,7 @@ cdef class CANParser:
       cv_name = <unicode>cv.name
       self.vl[cv.address][cv_name] = cv.value
       self.vl_all[cv.address][cv_name].extend(cv.all_values)
+      self.seen[cv.address][cv_name] = cv.seen
       updated_addrs.insert(cv.address)
 
     return updated_addrs

@@ -297,6 +297,7 @@ std::vector<SignalValue> CANParser::query_latest() {
         .name = sig.name,
         .value = state.vals[i],
         .all_values = state.all_vals[i],
+        .seen = state.seen,
       });
       state.all_vals[i].clear();
     }
