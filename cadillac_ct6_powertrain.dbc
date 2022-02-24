@@ -71,8 +71,13 @@ BO_ 201 ECMEngineStatus: 8 K20_ECM
  SG_ EngineTPS : 39|8@0+ (0.392156863,0) [0|100.000000065] "%"  NEO
  SG_ EngineRPM : 15|16@0+ (0.25,0) [0|0] "RPM"  NEO
 
-BO_ 209 EBCMBrakePedalTorque: 7 K17_EBCM
- SG_ BrakePedalTorque : 3|12@0+ (1,0) [0|0] ""  NEO
+BO_ 209 EBCMBrakePedalSensors: 7 K17_EBCM
+ SG_ Counter1 : 7|2@0+ (1,0) [0|3] "" XXX
+ SG_ Counter2 : 23|2@0+ (1,0) [0|3] "" XXX
+ SG_ BrakePedalPosition1 : 5|14@0+ (1,0) [0|16383] "" XXX
+ SG_ BrakePedalPosition2 : 21|14@0- (-1,0) [0|16383] "" XXX
+ SG_ BrakeNormalized1 : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ BrakeNormalized2 : 47|8@0- (-1,0) [0|255] "" XXX
 
 BO_ 241 EBCMBrakePedalPosition: 6 K17_EBCM
  SG_ BrakePedalPosition : 15|8@0+ (1,0) [0|255] ""  NEO
@@ -137,8 +142,8 @@ BO_ 481 ASCMSteeringButton: 7 K124_ASCM
  SG_ ACCButtons : 46|3@0+ (1,0) [0|0] ""  NEO
 
 BO_ 485 PSCMSteeringAngle: 8 K43_PSCM
- SG_ SteeringWheelAngle : 15|16@0- (0.0625,0) [-540|540] "deg"  NEO
- SG_ SteeringWheelRate : 27|12@0- (0.5,0) [-100|100] "deg/s"  NEO
+ SG_ SteeringWheelAngle : 15|16@0- (0.0625,0) [-2047|2047] "deg"  NEO
+ SG_ SteeringWheelRate : 27|12@0- (1,0) [-2047|2047] "deg/s"  NEO
 
 BO_ 489 EBCMVehicleDynamic: 8 K17_EBCM
  SG_ YawRate : 51|12@0- (0.0625,0) [-2047|2047] "grad/s"  NEO
@@ -162,7 +167,7 @@ BO_ 715 ASCMGasRegenCmd: 8 K124_ASCM
  SG_ GasRegenCmd : 22|15@0+ (1,0) [0|0] ""  NEO
 
 BO_ 810 TCICOnStarGPSPosition: 8 K73_TCIC
- SG_ GPSLongitude : 39|32@0+ (1,0) [0|0] "milliarcsecond"  NEO
+ SG_ GPSLongitude : 39|32@0+ (1,-2147483648) [0|0] "milliarcsecond"  NEO
  SG_ GPSLatitude : 7|32@0+ (1,0) [0|0] "milliarcsecond"  NEO
 
 BO_ 840 EBCMWheelSpdFront: 4 K17_EBCM

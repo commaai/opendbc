@@ -1,17 +1,21 @@
 import os
 import subprocess
+import sysconfig
+import numpy as np
 
 zmq = 'zmq'
 arch = subprocess.check_output(["uname", "-m"], encoding='utf8').rstrip()
 
 cereal_dir = Dir('.')
 
+python_path = sysconfig.get_paths()['include']
 cpppath = [
-    '#',
-    '#cereal',
-    "#cereal/messaging",
-    "#opendbc/can",
-    '/usr/lib/include',
+  '#',
+  '#cereal',
+  "#cereal/messaging",
+  "#opendbc/can",
+  '/usr/lib/include',
+  python_path
 ]
 
 AddOption('--test',
@@ -33,25 +37,49 @@ env = Environment(
     "-g",
     "-fPIC",
     "-O2",
-    "-Werror=implicit-function-declaration",
-    "-Werror=incompatible-pointer-types",
-    "-Werror=int-conversion",
-    "-Werror=return-type",
-    "-Werror=format-extra-args",
+    "-Wunused",
+    "-Werror",
+    "-Wshadow",
   ] + ccflags_asan,
   LDFLAGS=ldflags_asan,
   LINKFLAGS=ldflags_asan,
-
+  LIBPATH=[
+    "#opendbc/can/",
+  ],
   CFLAGS="-std=gnu11",
-  CXXFLAGS="-std=c++14",
+  CXXFLAGS="-std=c++1z",
   CPPPATH=cpppath,
+  CYTHONCFILESUFFIX=".cpp",
+  tools=["default", "cython"]
 )
 
-Export('env', 'zmq', 'arch')
+QCOM_REPLAY = False
+common = ''
+Export('env', 'zmq', 'arch', 'QCOM_REPLAY', 'common')
 
 cereal = [File('#cereal/libcereal.a')]
 messaging = [File('#cereal/libmessaging.a')]
 Export('cereal', 'messaging')
+
+
+envCython = env.Clone()
+envCython["CPPPATH"] += [np.get_include()]
+envCython["CCFLAGS"] += ["-Wno-#warnings", "-Wno-shadow", "-Wno-deprecated-declarations"]
+
+python_libs = []
+if arch == "Darwin":
+  envCython["LINKFLAGS"] = ["-bundle", "-undefined", "dynamic_lookup"]
+elif arch == "aarch64":
+  envCython["LINKFLAGS"] = ["-shared"]
+
+  python_libs.append(os.path.basename(python_path))
+else:
+  envCython["LINKFLAGS"] = ["-pthread", "-shared"]
+
+envCython["LIBS"] = python_libs
+
+Export('envCython')
+
 
 SConscript(['cereal/SConscript'])
 SConscript(['opendbc/can/SConscript'])

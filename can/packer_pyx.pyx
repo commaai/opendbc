@@ -8,8 +8,8 @@ from libcpp.string cimport string
 from libcpp cimport bool
 from posix.dlfcn cimport dlopen, dlsym, RTLD_LAZY
 
-from common cimport CANPacker as cpp_CANPacker
-from common cimport dbc_lookup, SignalPackValue, DBC
+from .common cimport CANPacker as cpp_CANPacker
+from .common cimport dbc_lookup, SignalPackValue, DBC
 
 
 cdef class CANPacker:
@@ -20,9 +20,11 @@ cdef class CANPacker:
     map[int, int] address_to_size
 
   def __init__(self, dbc_name):
-    self.packer = new cpp_CANPacker(dbc_name)
     self.dbc = dbc_lookup(dbc_name)
+    if not self.dbc:
+      raise RuntimeError(f"Can't lookup {dbc_name}")
 
+    self.packer = new cpp_CANPacker(dbc_name)
     num_msgs = self.dbc[0].num_msgs
     for i in range(num_msgs):
       msg = self.dbc[0].msgs[i]
@@ -31,15 +33,11 @@ cdef class CANPacker:
 
   cdef uint64_t pack(self, addr, values, counter):
     cdef vector[SignalPackValue] values_thing
+    values_thing.reserve(len(values))
     cdef SignalPackValue spv
 
-    names = []
-
     for name, value in values.iteritems():
-      n = name.encode('utf8')
-      names.append(n) # TODO: find better way to keep reference to temp string arround
-
-      spv.name = n
+      spv.name = name.encode('utf8')
       spv.value = value
       values_thing.push_back(spv)
 

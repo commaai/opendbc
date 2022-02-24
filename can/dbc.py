@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import re
 import os
 import struct
@@ -11,6 +12,7 @@ def int_or_float(s):
     return int(s, 10)
   else:
     return float(s)
+
 
 DBCSignal = namedtuple(
   "DBCSignal", ["name", "start_bit", "size", "is_little_endian", "is_signed",
@@ -41,7 +43,7 @@ class dbc():
     self.def_vals = defaultdict(list)
 
     # lookup to bit reverse each byte
-    self.bits_index = [(i & ~0b111) + ((-i-1) & 0b111) for i in range(64)]
+    self.bits_index = [(i & ~0b111) + ((-i - 1) & 0b111) for i in range(64)]
 
     for l in self.txt:
       l = l.strip()
@@ -55,7 +57,7 @@ class dbc():
 
         name = dat.group(2)
         size = int(dat.group(3))
-        ids = int(dat.group(1), 0) # could be hex
+        ids = int(dat.group(1), 0)  # could be hex
         if ids in self.msgs:
           sys.exit("Duplicate address detected %d %s" % (ids, self.name))
 
@@ -73,15 +75,15 @@ class dbc():
           print("bad SG {0}".format(l))
 
         sgname = dat.group(1)
-        start_bit = int(dat.group(go+2))
-        signal_size = int(dat.group(go+3))
-        is_little_endian = int(dat.group(go+4))==1
-        is_signed = dat.group(go+5)=='-'
-        factor = int_or_float(dat.group(go+6))
-        offset = int_or_float(dat.group(go+7))
-        tmin = int_or_float(dat.group(go+8))
-        tmax = int_or_float(dat.group(go+9))
-        units = dat.group(go+10)
+        start_bit = int(dat.group(go + 2))
+        signal_size = int(dat.group(go + 3))
+        is_little_endian = int(dat.group(go + 4)) == 1
+        is_signed = dat.group(go + 5) == '-'
+        factor = int_or_float(dat.group(go + 6))
+        offset = int_or_float(dat.group(go + 7))
+        tmin = int_or_float(dat.group(go + 8))
+        tmax = int_or_float(dat.group(go + 9))
+        units = dat.group(go + 10)
 
         self.msgs[ids][1].append(
           DBCSignal(sgname, start_bit, signal_size, is_little_endian,
@@ -94,16 +96,16 @@ class dbc():
         if dat is None:
           print("bad VAL {0}".format(l))
 
-        ids = int(dat.group(1), 0) # could be hex
+        ids = int(dat.group(1), 0)  # could be hex
         sgname = dat.group(2)
         defvals = dat.group(3)
 
-        defvals = defvals.replace("?",r"\?") #escape sequence in C++
+        defvals = defvals.replace("?", r"\?")  # escape sequence in C++
         defvals = defvals.split('"')[:-1]
 
         # convert strings to UPPER_CASE_WITH_UNDERSCORES
-        defvals[1::2] = [d.strip().upper().replace(" ","_") for d in defvals[1::2]]
-        defvals = '"'+"".join(str(i) for i in defvals)+'"'
+        defvals[1::2] = [d.strip().upper().replace(" ", "_") for d in defvals[1::2]]
+        defvals = '"' + "".join(str(i) for i in defvals) + '"'
 
         self.def_vals[ids].append((sgname, defvals))
 
@@ -147,7 +149,7 @@ class dbc():
       ival = dd.get(s.name)
       if ival is not None:
 
-        ival = (ival / s.factor) - s.offset
+        ival = (ival - s.offset) / s.factor
         ival = int(round(ival))
 
         if s.is_signed and ival < 0:
@@ -193,12 +195,12 @@ class dbc():
     if arr is None:
       out = {}
     else:
-      out = [None]*len(arr)
+      out = [None] * len(arr)
 
     msg = self.msgs.get(x[0])
     if msg is None:
       if x[0] not in self._warned_addresses:
-        #print("WARNING: Unknown message address {}".format(x[0]))
+        # print("WARNING: Unknown message address {}".format(x[0]))
         self._warned_addresses.add(x[0])
       return None, None
 
@@ -253,23 +255,3 @@ class dbc():
   def get_signals(self, msg):
     msg = self.lookup_msg_id(msg)
     return [sgs.name for sgs in self.msgs[msg][1]]
-
-
-if __name__ == "__main__":
-   from opendbc import DBC_PATH
-
-   dbc_test = dbc(os.path.join(DBC_PATH, 'toyota_prius_2017_pt_generated.dbc'))
-   msg = ('STEER_ANGLE_SENSOR', {'STEER_ANGLE': -6.0, 'STEER_RATE': 4, 'STEER_FRACTION': -0.2})
-   encoded = dbc_test.encode(*msg)
-   decoded = dbc_test.decode((0x25, 0, encoded))
-   assert decoded == msg
-
-   dbc_test = dbc(os.path.join(DBC_PATH, 'hyundai_santa_fe_2019_ccan.dbc'))
-   decoded = dbc_test.decode((0x2b0, 0, "\xfa\xfe\x00\x07\x12"))
-   assert abs(decoded[1]['SAS_Angle'] - (-26.2)) < 0.001
-
-   msg = ('SAS11', {'SAS_Stat': 7.0, 'MsgCount': 0.0, 'SAS_Angle': -26.200000000000003, 'SAS_Speed': 0.0, 'CheckSum': 0.0})
-   encoded = dbc_test.encode(*msg)
-   decoded = dbc_test.decode((0x2b0, 0, encoded))
-
-   assert decoded == msg
