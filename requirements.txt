@@ -1,6 +1,6 @@
 Cython==0.29.14
 flake8==3.7.9
-Jinja2==2.11.3
+Jinja2==3.0.3
 numpy==1.21.0
 pycapnp==1.0.0
 pylint==2.4.3
