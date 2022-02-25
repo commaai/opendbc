@@ -9,9 +9,6 @@
 
 #include "common.h"
 
-#define DEBUG(...)
-// #define DEBUG printf
-#define INFO printf
 
 bool MessageState::parse(uint64_t sec, uint8_t * dat) {
   uint64_t dat_le = read_u64_le(dat);

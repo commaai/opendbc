@@ -13,9 +13,8 @@ def int_or_float(s):
     return float(s)
 
 
-DBCSignal = namedtuple(
-  "DBCSignal", ["name", "start_bit", "size", "is_little_endian", "is_signed",
-                "factor", "offset", "tmin", "tmax", "units"])
+DBCSignal = namedtuple("DBCSignal", ["name", "start_bit", "size", "is_little_endian", "is_signed",
+                                     "factor", "offset", "tmin", "tmax", "units"])
 
 
 class dbc():
