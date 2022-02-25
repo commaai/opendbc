@@ -109,9 +109,5 @@ uint64_t CANPacker::pack(uint32_t address, const std::vector<SignalPackValue> &s
     }
   }
 
-  return ret;
-}
-
-Msg* CANPacker::lookup_message(uint32_t address) {
-  return &message_lookup[address];
+  return ReverseBytes(ret);
 }

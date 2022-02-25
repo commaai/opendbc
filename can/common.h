@@ -12,6 +12,11 @@
 #include "cereal/gen/cpp/log.capnp.h"
 #endif
 
+#define INFO printf
+#define WARN printf
+#define DEBUG(...)
+// #define DEBUG printf
+
 #define MAX_BAD_COUNTER 5
 
 // Helper functions
