@@ -173,10 +173,10 @@ unsigned int pedal_checksum(const std::vector<uint8_t> &d) {
   uint8_t crc = 0xFF;
   uint8_t poly = 0xD5; // standard crc8
 
-  int i, j;
-  for (i = 1; i < d.size() - 1; i++) {
+  // skip checksum byte
+  for (int i = d.size()-2; i >= 0; i--) {
     crc ^= d[i];
-    for (j = 0; j < 8; j++) {
+    for (int j = 0; j < 8; j++) {
       if ((crc & 0x80) != 0) {
         crc = (uint8_t)((crc << 1) ^ poly);
       } else {
