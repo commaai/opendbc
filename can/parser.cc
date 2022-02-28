@@ -11,13 +11,13 @@
 
 
 int64_t get_raw_value(const std::vector<uint8_t> &msg, const Signal &sig) {
-
   int64_t ret = 0;
+
   int i = sig.msb / 8;
-  int msb = sig.msb;
   int bits = sig.size;
   while (i >= 0 && i < msg.size() && bits > 0) {
     int lsb = (int)(sig.lsb / 8) == i ? sig.lsb : i*8;
+    int msb = (int)(sig.msb / 8) == i ? sig.msb : (i+1)*8 - 1;
     int size = msb - lsb + 1;
 
     uint8_t d = (msg[i] >> (lsb - (i*8))) & ((1ULL << size) - 1);
@@ -25,7 +25,6 @@ int64_t get_raw_value(const std::vector<uint8_t> &msg, const Signal &sig) {
 
     bits -= size;
     i = sig.is_little_endian ? i-1 : i+1;
-    msb = (i+1)*8 - 1;
   }
   return ret;
 }
@@ -212,13 +211,11 @@ void CANParser::update_string(const std::string &data, bool sendcan) {
 }
 
 void CANParser::UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Reader& cans) {
-  int msg_count = cans.size();
+  DEBUG("got %d messages\n", cans.size());
 
-  DEBUG("got %d messages\n", msg_count);
-
-  for (int i = 0; i < msg_count; i++) {
+  // parse the messages
+  for (int i = 0; i < cans.size(); i++) {
     auto cmsg = cans[i];
-    // parse the messages
     if (cmsg.getSrc() != bus) {
       // DEBUG("skip %d: wrong bus\n", cmsg.getAddress());
       continue;
@@ -237,12 +234,10 @@ void CANParser::UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Rea
     }
 
     // TODO: this actually triggers for some cars. fix and enable this
-    /*
-    if (dat.size() != state_it->second.size) {
-      DEBUG("got message with unexpected length: expected %d, got %zu for %d", state_it->second.size, dat.size(), cmsg.getAddress());
-      continue;
-    }
-    */
+    //if (dat.size() != state_it->second.size) {
+    //  DEBUG("got message with unexpected length: expected %d, got %zu for %d", state_it->second.size, dat.size(), cmsg.getAddress());
+    //  continue;
+    //}
 
     std::vector<uint8_t> data(dat.size(), 0);
     memcpy(data.data(), dat.begin(), dat.size());
@@ -268,7 +263,6 @@ void CANParser::UpdateCans(uint64_t sec, const capnp::DynamicStruct::Reader& cms
 
   auto dat = cmsg.get("dat").as<capnp::Data>();
   if (dat.size() > 64) return; // shouldn't ever happen
-
   std::vector<uint8_t> data(dat.size(), 0);
   memcpy(data.data(), dat.begin(), dat.size());
   state_it->second.parse(sec, data);

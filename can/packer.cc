@@ -9,19 +9,18 @@
 
 void set_value(std::vector<uint8_t> &msg, const Signal &sig, int64_t ival) {
   int i = sig.lsb / 8;
-  int shift = sig.lsb % 8;
   int bits = sig.size;
   if (sig.size < 64) {
     ival &= ((1ULL << sig.size) - 1);
   }
 
   while (i >= 0 && i < msg.size() && bits > 0) {
+    int shift = (int)(sig.lsb / 8) == i ? sig.lsb % 8 : 0;
     int size = std::min(bits, 8 - shift);
 
     msg[i] &= ~(((1ULL << size) - 1) << shift);
     msg[i] |= (ival & ((1ULL << size) - 1)) << shift;
 
-    shift = 0;
     bits -= size;
     ival >>= size;
     i = sig.is_little_endian ? i+1 : i-1;
