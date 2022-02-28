@@ -26,6 +26,17 @@ def can_list_to_can_capnp(can_msgs, msgtype='can'):
 
 
 class TestCanParserPacker(unittest.TestCase):
+  def test_packer(self):
+    packer = CANPacker("test")
+
+    for b in range(6):
+      for i in range(256):
+        values = {"COUNTER": i}
+        addr, _, dat, bus = packer.make_can_msg("CAN_FD_MESSAGE", b, values)
+        self.assertEqual(addr, 245)
+        self.assertEqual(bus, b)
+        self.assertEqual(dat[0], i)
+
   def test_packer_parser(self):
 
     signals = [
