@@ -266,14 +266,12 @@ void CANParser::UpdateCans(uint64_t sec, const capnp::DynamicStruct::Reader& cms
     return;
   }
 
-  // TODO: fix this
-  /*
   auto dat = cmsg.get("dat").as<capnp::Data>();
-  if (dat.size() > 8) return; //shouldn't ever happen
-  uint8_t data[8] = {0};
-  memcpy(data, dat.begin(), dat.size());
+  if (dat.size() > 64) return; // shouldn't ever happen
+
+  std::vector<uint8_t> data(dat.size(), 0);
+  memcpy(data.data(), dat.begin(), dat.size());
   state_it->second.parse(sec, data);
-  */
 }
 
 void CANParser::UpdateValid(uint64_t sec) {
