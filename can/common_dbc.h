@@ -44,7 +44,8 @@ enum SignalType {
 
 struct Signal {
   const char* name;
-  int b1, b2, bo;
+  int b1, bo, size;
+  int start_bit, msb, lsb;
   bool is_signed;
   double factor, offset;
   bool is_little_endian;

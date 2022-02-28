@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cassert>
 #include <cstring>
 
@@ -5,80 +6,73 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
-#include <algorithm>
 
 #include "common.h"
 
 
-bool MessageState::parse(uint64_t sec, uint8_t * dat) {
-  uint64_t dat_le = read_u64_le(dat);
-  uint64_t dat_be = read_u64_be(dat);
+int64_t get_raw_value(const std::vector<uint8_t> &msg, const Signal &sig) {
 
-  for (int i=0; i < parse_sigs.size(); i++) {
-    auto& sig = parse_sigs[i];
-    int64_t tmp;
+  int64_t ret = 0;
+  int i = sig.msb / 8;
+  int msb = sig.msb;
+  int bits = sig.size;
+  while (i >= 0 && i < msg.size() && bits > 0) {
+    int lsb = (int)(sig.lsb / 8) == i ? sig.lsb : i*8;
+    int size = msb - lsb + 1;
 
-    if (sig.is_little_endian){
-      tmp = (dat_le >> sig.b1) & ((1ULL << sig.b2)-1);
-    } else {
-      tmp = (dat_be >> sig.bo) & ((1ULL << sig.b2)-1);
-    }
+    uint8_t d = (msg[i] >> (lsb - (i*8))) & ((1ULL << size) - 1);
+    ret |= d << (bits - size);
 
+    bits -= size;
+    i = sig.is_little_endian ? i-1 : i+1;
+    msb = (i+1)*8 - 1;
+  }
+  return ret;
+}
+
+
+bool MessageState::parse(uint64_t sec, const std::vector<uint8_t> &dat) {
+
+  for (int i = 0; i < parse_sigs.size(); i++) {
+    auto &sig = parse_sigs[i];
+
+    int64_t tmp = get_raw_value(dat, sig);
     if (sig.is_signed) {
-      tmp -= (tmp >> (sig.b2-1)) ? (1ULL << sig.b2) : 0; //signed
+      tmp -= ((tmp >> (sig.size-1)) & 0x1) ? (1ULL << sig.size) : 0;
     }
 
-    DEBUG("parse 0x%X %s -> %lld\n", address, sig.name, tmp);
+    DEBUG("parse 0x%X %s -> %ld\n", address, sig.name, tmp);
 
+    bool checksum_failed = false;
     if (!ignore_checksum) {
-      if (sig.type == SignalType::HONDA_CHECKSUM) {
-        if (honda_checksum(address, dat_be, size) != tmp) {
-          INFO("0x%X CHECKSUM FAIL\n", address);
-          return false;
-        }
-      } else if (sig.type == SignalType::TOYOTA_CHECKSUM) {
-        if (toyota_checksum(address, dat_be, size) != tmp) {
-          INFO("0x%X CHECKSUM FAIL\n", address);
-          return false;
-        }
-      } else if (sig.type == SignalType::VOLKSWAGEN_CHECKSUM) {
-        if (volkswagen_crc(address, dat_le, size) != tmp) {
-          INFO("0x%X CRC FAIL\n", address);
-          return false;
-        }
-      } else if (sig.type == SignalType::SUBARU_CHECKSUM) {
-        if (subaru_checksum(address, dat_be, size) != tmp) {
-          INFO("0x%X CHECKSUM FAIL\n", address);
-          return false;
-        }
-      } else if (sig.type == SignalType::CHRYSLER_CHECKSUM) {
-        if (chrysler_checksum(address, dat_le, size) != tmp) {
-          INFO("0x%X CHECKSUM FAIL\n", address);
-          return false;
-        }
-      } else if (sig.type == SignalType::PEDAL_CHECKSUM) {
-        if (pedal_checksum(dat_be, size) != tmp) {
-          INFO("0x%X PEDAL CHECKSUM FAIL\n", address);
-          return false;
-        }
-      }
-    }
-    if (!ignore_counter) {
-      if (sig.type == SignalType::HONDA_COUNTER) {
-        if (!update_counter_generic(tmp, sig.b2)) {
-          return false;
-        }
-      } else if (sig.type == SignalType::VOLKSWAGEN_COUNTER) {
-          if (!update_counter_generic(tmp, sig.b2)) {
-          return false;
-        }
-      } else if (sig.type == SignalType::PEDAL_COUNTER) {
-        if (!update_counter_generic(tmp, sig.b2)) {
-          return false;
-        }
+      if (sig.type == SignalType::HONDA_CHECKSUM && honda_checksum(address, dat) != tmp) {
+        checksum_failed = true;
+      } else if (sig.type == SignalType::TOYOTA_CHECKSUM && toyota_checksum(address, dat) != tmp) {
+        checksum_failed = true;
+      } else if (sig.type == SignalType::VOLKSWAGEN_CHECKSUM && volkswagen_crc(address, dat) != tmp) {
+        checksum_failed = true;
+      } else if (sig.type == SignalType::SUBARU_CHECKSUM && subaru_checksum(address, dat) != tmp) {
+        checksum_failed = true;
+      } else if (sig.type == SignalType::CHRYSLER_CHECKSUM && chrysler_checksum(address, dat) != tmp) {
+        checksum_failed = true;
+      } else if (sig.type == SignalType::PEDAL_CHECKSUM && pedal_checksum(dat) != tmp) {
+        checksum_failed = true;
       }
     }
 
+    bool counter_failed = false;
+    if (!ignore_counter) {
+      if (sig.type == SignalType::HONDA_COUNTER || sig.type == SignalType::VOLKSWAGEN_COUNTER || sig.type == SignalType::PEDAL_COUNTER) { 
+        counter_failed = !update_counter_generic(tmp, sig.size);
+      }
+    }
+
+    if (checksum_failed || counter_failed) {
+      WARN("0x%X message checks failed, checksum failed %d, counter failed %d\n", address, checksum_failed, counter_failed);
+      return false;
+    }
+
+    // TODO: these may get updated if the invalid or checksum gets checked later
     vals[i] = tmp * sig.factor + sig.offset;
     all_vals[i].push_back(vals[i]);
   }
@@ -94,7 +88,7 @@ bool MessageState::update_counter_generic(int64_t v, int cnt_size) {
   if (((old_counter+1) & ((1 << cnt_size) -1)) != v) {
     counter_fail += 1;
     if (counter_fail > 1) {
-      INFO("0x%X COUNTER FAIL %d -- %d vs %d\n", address, counter_fail, old_counter, (int)v);
+      INFO("0x%X COUNTER FAIL #%d -- %d -> %d\n", address, counter_fail, old_counter, (int)v);
     }
     if (counter_fail >= MAX_BAD_COUNTER) {
       return false;
@@ -138,6 +132,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
     }
 
     state.size = msg->size;
+    assert(state.size < 64);  // max signal size is 8 bytes
 
     // track checksums and counters for this message
     for (int i = 0; i < msg->num_sigs; i++) {
@@ -234,11 +229,24 @@ void CANParser::UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Rea
       continue;
     }
 
-    if (cmsg.getDat().size() > 8) continue; //shouldn't ever happen
-    uint8_t dat[8] = {0};
-    memcpy(dat, cmsg.getDat().begin(), cmsg.getDat().size());
+    auto dat = cmsg.getDat();
 
-    state_it->second.parse(sec, dat);
+    if (dat.size() > 64) {
+      DEBUG("got message longer than 64 bytes: 0x%X %zu\n", cmsg.getAddress(), dat.size());
+      continue;
+    }
+
+    // TODO: this actually triggers for some cars. fix and enable this
+    /*
+    if (dat.size() != state_it->second.size) {
+      DEBUG("got message with unexpected length: expected %d, got %zu for %d", state_it->second.size, dat.size(), cmsg.getAddress());
+      continue;
+    }
+    */
+
+    std::vector<uint8_t> data(dat.size(), 0);
+    memcpy(data.data(), dat.begin(), dat.size());
+    state_it->second.parse(sec, data);
   }
 }
 #endif
@@ -258,11 +266,14 @@ void CANParser::UpdateCans(uint64_t sec, const capnp::DynamicStruct::Reader& cms
     return;
   }
 
+  // TODO: fix this
+  /*
   auto dat = cmsg.get("dat").as<capnp::Data>();
   if (dat.size() > 8) return; //shouldn't ever happen
   uint8_t data[8] = {0};
   memcpy(data, dat.begin(), dat.size());
   state_it->second.parse(sec, data);
+  */
 }
 
 void CANParser::UpdateValid(uint64_t sec) {

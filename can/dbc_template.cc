@@ -13,7 +13,10 @@ const Signal sigs_{{address}}[] = {
       {% endif %}
       .name = "{{sig.name}}",
       .b1 = {{b1}},
-      .b2 = {{sig.size}},
+      .start_bit = {{sig.start_bit}},
+      .msb  = {{sig.msb}},
+      .lsb = {{sig.lsb}},
+      .size = {{sig.size}},
       .bo = {{64 - (b1 + sig.size)}},
       .is_signed = {{"true" if sig.is_signed else "false"}},
       .factor = {{sig.factor}},
