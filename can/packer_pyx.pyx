@@ -1,7 +1,7 @@
 # distutils: language = c++
 # cython: c_string_encoding=ascii, language_level=3
 
-from libc.stdint cimport uint32_t, uint64_t
+from libc.stdint cimport uint8_t, uint32_t, uint64_t
 from libcpp.vector cimport vector
 from libcpp.map cimport map
 from libcpp.string cimport string
@@ -31,7 +31,7 @@ cdef class CANPacker:
       self.name_to_address_and_size[string(msg.name)] = (msg.address, msg.size)
       self.address_to_size[msg.address] = msg.size
 
-  cdef uint64_t pack(self, addr, values, counter):
+  cdef vector[uint8_t] pack(self, addr, values, counter):
     cdef vector[SignalPackValue] values_thing
     values_thing.reserve(len(values))
     cdef SignalPackValue spv
@@ -50,5 +50,6 @@ cdef class CANPacker:
       size = self.address_to_size[name_or_addr]
     else:
       addr, size = self.name_to_address_and_size[name_or_addr.encode('utf8')]
-    cdef uint64_t val = self.pack(addr, values, counter)
-    return [addr, 0, (<char *>&val)[:size], bus]
+
+    cdef vector[uint8_t] val = self.pack(addr, values, counter)
+    return [addr, 0, (<char *>&val[0])[:size], bus]

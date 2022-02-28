@@ -13,7 +13,7 @@ def int_or_float(s):
     return float(s)
 
 
-DBCSignal = namedtuple("DBCSignal", ["name", "start_bit", "size", "is_little_endian", "is_signed",
+DBCSignal = namedtuple("DBCSignal", ["name", "start_bit", "msb", "lsb", "size", "is_little_endian", "is_signed",
                                      "factor", "offset", "tmin", "tmax", "units"])
 
 
@@ -40,8 +40,8 @@ class dbc():
     # A dictionary which maps message ids to a list of tuples (signal name, definition value pairs)
     self.def_vals = defaultdict(list)
 
-    # lookup to bit reverse each byte
-    self.bits_index = [(i & ~0b111) + ((-i - 1) & 0b111) for i in range(64)]
+    # used to find big endian LSB from MSB and size
+    be_bits = [(j + i*8) for i in range(64) for j in range(7, -1, -1)]
 
     for l in self.txt:
       l = l.strip()
@@ -83,9 +83,18 @@ class dbc():
         tmax = int_or_float(dat.group(go + 9))
         units = dat.group(go + 10)
 
+        if is_little_endian:
+          lsb = start_bit
+          msb = start_bit + signal_size - 1
+        else:
+          lsb = be_bits[be_bits.index(start_bit) + signal_size - 1]
+          msb = start_bit
+
         self.msgs[ids][1].append(
-          DBCSignal(sgname, start_bit, signal_size, is_little_endian,
+          DBCSignal(sgname, start_bit, msb, lsb, signal_size, is_little_endian,
                     is_signed, factor, offset, tmin, tmax, units))
+
+        assert lsb < (64*8) and msb < (64*8), f"Signal out of bounds: {msb=} {lsb=}"
 
       if l.startswith("VAL_ "):
         # new signal value/definition
