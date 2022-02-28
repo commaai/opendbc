@@ -6,15 +6,11 @@ namespace {
 const Signal sigs_{{address}}[] = {
   {% for sig in sigs %}
     {
-      {% if sig.is_little_endian %}
-        {% set b1 = sig.start_bit %}
-      {% else %}
-        {% set b1 = (sig.start_bit//8)*8  + (-sig.start_bit-1) % 8 %}
-      {% endif %}
       .name = "{{sig.name}}",
-      .b1 = {{b1}},
-      .b2 = {{sig.size}},
-      .bo = {{64 - (b1 + sig.size)}},
+      .start_bit = {{sig.start_bit}},
+      .msb  = {{sig.msb}},
+      .lsb = {{sig.lsb}},
+      .size = {{sig.size}},
       .is_signed = {{"true" if sig.is_signed else "false"}},
       .factor = {{sig.factor}},
       .offset = {{sig.offset}},
