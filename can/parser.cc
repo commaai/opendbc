@@ -40,7 +40,7 @@ bool MessageState::parse(uint64_t sec, const std::vector<uint8_t> &dat) {
       tmp -= ((tmp >> (sig.size-1)) & 0x1) ? (1ULL << sig.size) : 0;
     }
 
-    DEBUG("parse 0x%X %s -> %ld\n", address, sig.name, tmp);
+    //DEBUG("parse 0x%X %s -> %ld\n", address, sig.name, tmp);
 
     bool checksum_failed = false;
     if (!ignore_checksum) {
@@ -211,7 +211,7 @@ void CANParser::update_string(const std::string &data, bool sendcan) {
 }
 
 void CANParser::UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Reader& cans) {
-  DEBUG("got %d messages\n", cans.size());
+  //DEBUG("got %d messages\n", cans.size());
 
   // parse the messages
   for (int i = 0; i < cans.size(); i++) {
