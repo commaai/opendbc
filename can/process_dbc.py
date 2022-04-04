@@ -96,12 +96,6 @@ def process(in_fn, out_fn):
           sys.exit("%s: PEDAL COUNTER is not 4 bits long" % dbc_msg_name)
         if sig.name == "CHECKSUM_PEDAL" and sig.size != 8:
           sys.exit("%s: PEDAL CHECKSUM is not 8 bits long" % dbc_msg_name)
-      # body rules
-      if address == 0x250:
-        if sig.name == "COUNTER" and sig.size != 4:
-          sys.exit("%s: BODY COUNTER is not 4 bits long" % dbc_msg_name)
-        if sig.name == "CHECKSUM" and sig.size != 8:
-          sys.exit("%s: BODY CHECKSUM is not 8 bits long" % dbc_msg_name)
 
   # Fail on duplicate message names
   c = Counter([msg_name for address, msg_name, msg_size, sigs in msgs])
