@@ -150,8 +150,11 @@ BO_ 451 GasAndAcc: 8 XXX
  SG_ GasPedalAndAcc2 : 55|8@0+ (1,0) [0|0] ""  NEO
 
 BO_ 452 AcceleratorPedal2: 8 XXX
- SG_ CruiseState : 15|3@0+ (1,0) [0|7] ""  NEO
+ SG_ GasPressed : 4|1@1+ (1,0) [0|7] "" NEO
+ SG_ GasPressedInACC : 11|1@0+ (1,0) [0|31] "" NEO
+ SG_ CruiseState : 15|3@0+ (1,0) [0|7] "" NEO
  SG_ AcceleratorPedal2 : 47|8@0+ (1,0) [0|0] ""  NEO
+ SG_ Speed : 17|10@0+ (1,0) [0|255] "" NEO
 
 BO_ 481 ASCMSteeringButton: 7 K124_ASCM
  SG_ DistanceButton : 22|1@0+ (1,0) [0|0] ""  NEO
