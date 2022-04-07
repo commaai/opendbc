@@ -8,6 +8,7 @@ from opendbc.can.packer import CANPacker
 from opendbc.can.tests.test_packer_parser import can_list_to_can_capnp
 
 class TestCanChecksum(unittest.TestCase):
+  # TODO: Add other checksum/CRC tests
   def test_honda_checksum(self):
     """Test checksums for Honda standard and extended CAN ids"""
     dbc_file = "honda_accord_2018_can_generated"
@@ -41,8 +42,10 @@ class TestCanChecksum(unittest.TestCase):
 
     can_strings = [can_list_to_can_capnp(msgs) for msgs in can_msgs]
     parser.update_strings(can_strings)
+    # standard CAN id
     for i, s in enumerate(parser.vl_all["LKAS_HUD"]["CHECKSUM"]):
       self.assertEqual(s, checksum_std[i])
+    # extended CAN id
     for ie, se in enumerate(parser.vl_all["LKAS_HUD_A"]["CHECKSUM"]):
       self.assertEqual(se, checksum_ext[ie])
 
