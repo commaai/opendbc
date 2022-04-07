@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 import unittest
-import random
 
-import cereal.messaging as messaging
 from opendbc.can.parser import CANParser
 from opendbc.can.packer import CANPacker
 from opendbc.can.tests.test_packer_parser import can_list_to_can_capnp
