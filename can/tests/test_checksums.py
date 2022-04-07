@@ -6,7 +6,7 @@ from opendbc.can.packer import CANPacker
 from opendbc.can.tests.test_packer_parser import can_list_to_can_capnp
 
 
-class TestCanChecksum(unittest.TestCase):
+class TestCanChecksums(unittest.TestCase):
   # TODO: Add other checksum/CRC tests
   def test_honda_checksum(self):
     """Test checksums for Honda standard and extended CAN ids"""
