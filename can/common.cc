@@ -2,6 +2,7 @@
 
 unsigned int honda_checksum(uint32_t address, const std::vector<uint8_t> &d) {
   int s = 0;
+  bool extended = address > 0x7FF;
   while (address) { s += (address & 0xF); address >>= 4; }
   for (int i = 0; i < d.size(); i++) {
     uint8_t x = d[i];
@@ -9,7 +10,7 @@ unsigned int honda_checksum(uint32_t address, const std::vector<uint8_t> &d) {
     s += (x & 0xF) + (x >> 4);
   }
   s = 8-s;
-  if (address > 0x7FF) s += 3;  // extended can
+  if (extended) s += 3;  // extended can
 
   return s & 0xF;
 }
