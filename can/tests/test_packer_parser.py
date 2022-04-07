@@ -182,6 +182,5 @@ class TestCanParserPacker(unittest.TestCase):
       if len(user_brake_vals):
         self.assertEqual(vl_all[-1], parser.vl["VSA_STATUS"]["USER_BRAKE"])
 
-
 if __name__ == "__main__":
   unittest.main()
