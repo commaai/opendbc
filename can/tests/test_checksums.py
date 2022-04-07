@@ -14,9 +14,7 @@ class TestCanChecksums(unittest.TestCase):
 
     signals = [
       ("CHECKSUM", "LKAS_HUD"),
-      ("COUNTER", "LKAS_HUD"),
       ("CHECKSUM", "LKAS_HUD_A"),
-      ("COUNTER", "LKAS_HUD_A")
     ]
     checks = [("LKAS_HUD", 0), ("LKAS_HUD_A", 0)]
 
