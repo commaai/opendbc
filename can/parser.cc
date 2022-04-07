@@ -207,7 +207,7 @@ void CANParser::update_string(const std::string &data, bool sendcan) {
   auto cans = sendcan ? event.getSendcan() : event.getCan();
   UpdateCans(last_sec, cans);
 
-  UpdateValid(last_sec);
+  UpdateValid(last_sec, cans.size() == 0);
 }
 
 void CANParser::UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Reader& cans) {
@@ -268,7 +268,11 @@ void CANParser::UpdateCans(uint64_t sec, const capnp::DynamicStruct::Reader& cms
   state_it->second.parse(sec, data);
 }
 
-void CANParser::UpdateValid(uint64_t sec) {
+void CANParser::UpdateValid(uint64_t sec, const bool empty) {
+  // update bus timeout
+  bus_timeout_cnt = empty ? 0 : bus_timeout_cnt + 1;
+
+  // update can valid
   can_valid = true;
   for (const auto& kv : message_states) {
     const auto& state = kv.second;

@@ -61,6 +61,7 @@ private:
 public:
   bool can_valid = false;
   uint64_t last_sec = 0;
+  uint64_t bus_timeout_cnt = 0;
 
   CANParser(int abus, const std::string& dbc_name,
             const std::vector<MessageParseOptions> &options,
@@ -71,7 +72,7 @@ public:
   void UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Reader& cans);
   #endif
   void UpdateCans(uint64_t sec, const capnp::DynamicStruct::Reader& cans);
-  void UpdateValid(uint64_t sec);
+  void UpdateValid(uint64_t sec, const bool empty);
   std::vector<SignalValue> query_latest();
 };
 

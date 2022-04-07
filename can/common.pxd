@@ -74,6 +74,7 @@ cdef extern from "common.h":
 
   cdef cppclass CANParser:
     bool can_valid
+    uint64_t bus_timeout_cnt
     CANParser(int, string, vector[MessageParseOptions], vector[SignalParseOptions])
     void update_string(string, bool)
     vector[SignalValue] query_latest()
