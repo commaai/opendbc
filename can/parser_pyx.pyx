@@ -16,7 +16,7 @@ import numbers
 from collections import defaultdict
 
 cdef int CAN_INVALID_CNT = 5
-cdef int BUS_TIMEOUT_CNT = 20
+cdef int BUS_TIMEOUT_CNT = 50
 
 
 cdef class CANParser:
