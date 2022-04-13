@@ -11977,7 +11977,7 @@ VAL_ 90 TrnGearButtn_B_ActlM0 1 "Yes" 0 "No";
 VAL_ 90 TrnGearButtn_B_ActlD2 1 "Yes" 0 "No";
 VAL_ 90 TrnGearButtn_B_ActlD1 1 "Yes" 0 "No";
 VAL_ 90 TrnGearButtn_B_ActlD0 1 "Yes" 0 "No";
-VAL_ 90 TrnGear_D_RqDrv 31 "Fault" 30 "NotUsed_25" 29 "NotUsed_24" 28 "NotUsed_23" 27 "NotUsed_22" 26 "Return_to_Park" 25 "NotUsed_20" 24 "NotUsed_19" 23 "NotUsed_18" 22 "NotUsed_17" 21 "Return_To_Park" 20 "NotUsed_15" 19 "NotUsed_14" 18 "NotUsed_13" 17 "NotUsed_12" 16 "Manual" 15 "Not_Used11" 14 "Not_Used10" 13 "NotUsed_9" 12 "NotUsed_8" 11 "NotUsed_7" 10 "NotUsed_6" 9 "NotUsed_5" 8 "Drive" 7 "NotUsed_4" 6 "NotUsed_3" 5 "NotUsed_2" 4 "Neutral" 3 "NotUsed_1" 2 "Reverse" 1 "Park" 0 "No_Gear";
+VAL_ 90 TrnGear_D_RqDrv 26 "P" 21 "P" 16 "T" 8 "D" 4 "N" 2 "R" 1 "P";
 VAL_ 90 BrkSwtchPos_B_ActlGsm 1 "Yes" 0 "No";
 VAL_ 1091 ParkLampTrlrOut_B_Stat 1 "Out" 0 "Null";
 VAL_ 1091 TrlrLampCtl_D_Stat 3 "NotUsed" 2 "TrlrLampCnnctDrvFailure" 1 "TrlrLampNotCnnctDrvFailure" 0 "Null";
