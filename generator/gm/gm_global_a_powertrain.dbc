@@ -64,7 +64,7 @@ BO_ 189 EBCMRegenPaddle: 7 K17_EBCM
  SG_ RegenPaddle : 7|4@0+ (1,0) [0|0] ""  NEO
 
 BO_ 190 ECMAcceleratorPos: 6 K20_ECM
- SG_ BrakePedalPos : 15|8@0+ (1,0) [0|0] "sticky"  NEO
+ SG_ BrakePedalPos : 15|8@0+ (1,0) [0|0] ""  NEO
  SG_ GasPedalAndAcc : 23|8@0+ (1,0) [0|0] ""  NEO
 
 BO_ 201 ECMEngineStatus: 8 K20_ECM
@@ -131,8 +131,24 @@ BO_ 451 GasAndAcc: 8 XXX
  SG_ GasPedalAndAcc2 : 55|8@0+ (1,0) [0|0] ""  NEO
 
 BO_ 452 AcceleratorPedal2: 8 XXX
- SG_ CruiseState : 15|3@0+ (1,0) [0|7] ""  NEO
- SG_ AcceleratorPedal2 : 47|8@0+ (1,0) [0|0] ""  NEO
+ SG_ AcceleratorPedal2 : 32|9@0+ (1,0) [0|512] "" NEO
+ SG_ AcceleratorPedalChecksum : 48|9@0+ (1,0) [0|512] "" NEO
+ SG_ AcceleratorPedalPressed : 4|1@1+ (1,0) [0|7] "" NEO
+ SG_ AnyPedalWhileEngaged : 11|1@0+ (1,0) [0|1] "" NEO
+ SG_ Count1 : 6|2@0+ (1,0) [0|3] "" NEO
+ SG_ Count2 : 3|2@0+ (1,0) [0|3] "" NEO
+ SG_ Count3 : 33|2@1+ (1,0) [0|3] "" NEO
+ SG_ Countdown1 : 0|2@1+ (1,0) [0|3] "" NEO
+ SG_ Countdown2 : 49|2@1+ (1,0) [0|3] "" NEO
+ SG_ CruiseState : 15|3@0+ (1,0) [0|7] "" NEO
+ SG_ CruiseToActive : 12|1@0+ (1,0) [0|1] "" NEO
+ SG_ CruiseTransition : 7|1@0+ (1,0) [0|1] "" NEO
+ SG_ DistanceToStop : 18|11@0+ (1,0) [0|2048] "" NEO
+ SG_ SET_ME_X00 : 39|3@0+ (1,0) [0|0] "" NEO
+ SG_ SET_ME_X00_2 : 55|5@0+ (1,0) [0|0] "" NEO
+ SG_ SET_ME_X02 : 8|3@1+ (1,0) [2|2] "" NEO
+ SG_ SET_ME_X18 : 23|5@0+ (1,0) [24|24] "" NEO
+ SG_ SET_ME_X03 : 36|2@0+ (1,0) [3|3] "" NEO
 
 BO_ 481 ASCMSteeringButton: 7 K124_ASCM
  SG_ DistanceButton : 22|1@0+ (1,0) [0|0] ""  NEO
@@ -267,9 +283,18 @@ CM_ BU_ K114B_HPCM "Hybrid Powertrain Control Module";
 CM_ BU_ NEO "Comma NEO";
 CM_ BU_ K124_ASCM "Active Safety Control Module";
 CM_ SG_ 381 MSG17D_AccPower "Need to investigate";
+CM_ SG_ 190 BrakePedalPos ">=8 disengages ACC";
 CM_ SG_ 190 GasPedalAndAcc "ACC baseline is 62";
 CM_ SG_ 352 Ignition "Non-zero when ignition is on";
 CM_ SG_ 451 GasPedalAndAcc2 "ACC baseline is 62";
+CM_ SG_ 452 AcceleratorPedalChecksum "(0x200 - pedal - count) & 0x1FF";
+CM_ SG_ 452 AcceleratorPedalPressed "Minimum observed pedal is 3";
+CM_ SG_ 452 AnyPedalWhileEngaged "(AcceleratorPedalPressed || BrakePedalPos >=8) && CruiseState != 0";
+CM_ SG_ 452 Count1 "Count1 == Count2 == Count3";
+CM_ SG_ 452 Countdown1 "Countdown1 != Countdown2";
+CM_ SG_ 452 CruiseToActive "Asserts once after CruiseState -> 1"
+CM_ SG_ 452 CruiseTransition "Asserts for 4 seconds after resuming, briefly after canceling"
+CM_ SG_ 452 DistanceToStop "? v * reaction_time + v^2 / 2a ?";
 CM_ SG_ 497 Ignition "Describes ignition + preconditioning mode, noisy";
 CM_ SG_ 501 PRNDL2 "When ManualMode is Active, Value is 13=L1 12=L2 11=L3 ... 4=L10";
 CM_ SG_ 1001 VehicleSpeed "Spinouts show here on 2wd. Speed derived from right front wheel (drive tire)";
