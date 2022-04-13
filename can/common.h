@@ -60,7 +60,10 @@ private:
 
 public:
   bool can_valid = false;
+  bool bus_timeout = false;
   uint64_t last_sec = 0;
+  uint64_t last_nonempty_sec = 0;
+  uint64_t bus_timeout_threshold = 0;
 
   CANParser(int abus, const std::string& dbc_name,
             const std::vector<MessageParseOptions> &options,

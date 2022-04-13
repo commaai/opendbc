@@ -7,9 +7,12 @@ from opendbc.can.parser import CANParser
 from opendbc.can.packer import CANPacker
 
 # Python implementation so we don't have to depend on boardd
-def can_list_to_can_capnp(can_msgs, msgtype='can'):
+def can_list_to_can_capnp(can_msgs, msgtype='can', logMonoTime=None):
   dat = messaging.new_message()
   dat.init(msgtype, len(can_msgs))
+
+  if logMonoTime is not None:
+    dat.logMonoTime = logMonoTime
 
   for i, can_msg in enumerate(can_msgs):
     if msgtype == 'sendcan':
@@ -148,6 +151,45 @@ class TestCanParserPacker(unittest.TestCase):
         self.assertAlmostEqual(parser.vl["ES_LKAS"]["Counter"], idx % 16)
 
         idx += 1
+
+  def test_bus_timeout(self):
+    """Test CAN bus timeout detection"""
+    dbc_file = "honda_civic_touring_2016_can_generated"
+
+    freq = 100
+    checks = [("VSA_STATUS", freq), ("STEER_MOTOR_TORQUE", freq/2)]
+
+    parser = CANParser(dbc_file, [], checks, 0)
+    packer = CANPacker(dbc_file)
+
+    i = 0
+    def send_msg(blank=False):
+      nonlocal i
+      i += 1
+      t = i*((1 / freq) * 1e9)
+
+      if blank:
+        msgs = []
+      else:
+        msgs = [packer.make_can_msg("VSA_STATUS", 0, {}), ]
+
+      can = can_list_to_can_capnp(msgs, logMonoTime=t)
+      parser.update_strings([can, ])
+
+    # all good, no timeout
+    for _ in range(1000):
+      send_msg()
+      self.assertFalse(parser.bus_timeout, str(_))
+
+    # timeout after 10 blank msgs
+    for n in range(200):
+      send_msg(blank=True)
+      self.assertEqual(n >= 10, parser.bus_timeout)
+
+    # no timeout immediately after seen again
+    send_msg()
+    self.assertFalse(parser.bus_timeout)
+
 
   def test_updated(self):
     """Test updated value dict"""

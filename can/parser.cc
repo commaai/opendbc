@@ -108,6 +108,8 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
   assert(dbc);
   init_crc_lookup_tables();
 
+  bus_timeout_threshold = std::numeric_limits<uint64_t>::max();
+
   for (const auto& op : options) {
     MessageState &state = message_states[op.address];
     state.address = op.address;
@@ -116,6 +118,9 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
     // msg is not valid if a message isn't received for 10 consecutive steps
     if (op.check_frequency > 0) {
       state.check_threshold = (1000000000ULL / op.check_frequency) * 10;
+
+      // bus timeout threshold should be 10x the fastest msg
+      bus_timeout_threshold = std::min(bus_timeout_threshold, state.check_threshold);
     }
 
     const Msg* msg = NULL;
@@ -213,6 +218,8 @@ void CANParser::update_string(const std::string &data, bool sendcan) {
 void CANParser::UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Reader& cans) {
   //DEBUG("got %d messages\n", cans.size());
 
+  bool bus_empty = true;
+
   // parse the messages
   for (int i = 0; i < cans.size(); i++) {
     auto cmsg = cans[i];
@@ -220,6 +227,8 @@ void CANParser::UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Rea
       // DEBUG("skip %d: wrong bus\n", cmsg.getAddress());
       continue;
     }
+    bus_empty = false;
+
     auto state_it = message_states.find(cmsg.getAddress());
     if (state_it == message_states.end()) {
       // DEBUG("skip %d: not specified\n", cmsg.getAddress());
@@ -243,6 +252,12 @@ void CANParser::UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Rea
     memcpy(data.data(), dat.begin(), dat.size());
     state_it->second.parse(sec, data);
   }
+
+  // update bus timeout
+  if (!bus_empty) {
+    last_nonempty_sec = sec;
+  }
+  bus_timeout = (sec - last_nonempty_sec) > bus_timeout_threshold;
 }
 #endif
 

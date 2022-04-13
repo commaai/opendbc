@@ -30,6 +30,7 @@ cdef class CANParser:
     dict vl
     dict vl_all
     bool can_valid
+    bool bus_timeout
     string dbc_name
     int can_invalid_cnt
 
@@ -111,6 +112,7 @@ cdef class CANParser:
     if self.can.can_valid:
       self.can_invalid_cnt = 0
     self.can_valid = self.can_invalid_cnt < CAN_INVALID_CNT
+    self.bus_timeout = self.can.bus_timeout
 
     new_vals = self.can.query_latest()
     for cv in new_vals:
