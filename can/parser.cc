@@ -284,7 +284,6 @@ void CANParser::UpdateCans(uint64_t sec, const capnp::DynamicStruct::Reader& cms
 }
 
 void CANParser::UpdateValid(uint64_t sec) {
-  // update can valid
   can_valid = true;
   for (const auto& kv : message_states) {
     const auto& state = kv.second;
