@@ -179,7 +179,7 @@ class TestCanParserPacker(unittest.TestCase):
     # all good, no timeout
     for _ in range(1000):
       send_msg()
-      self.assertFalse(parser.bus_timeout)
+      self.assertFalse(parser.bus_timeout, str(_))
 
     # timeout after 10 blank msgs
     for n in range(200):
