@@ -16,7 +16,6 @@ import numbers
 from collections import defaultdict
 
 cdef int CAN_INVALID_CNT = 5
-cdef int BUS_TIMEOUT_CNT = 50
 
 
 cdef class CANParser:
@@ -113,7 +112,7 @@ cdef class CANParser:
     if self.can.can_valid:
       self.can_invalid_cnt = 0
     self.can_valid = self.can_invalid_cnt < CAN_INVALID_CNT
-    self.bus_timeout = self.can.bus_timeout_cnt > BUS_TIMEOUT_CNT
+    self.bus_timeout = self.can.bus_timeout
 
     new_vals = self.can.query_latest()
     for cv in new_vals:

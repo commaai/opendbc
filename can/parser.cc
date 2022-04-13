@@ -108,6 +108,8 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
   assert(dbc);
   init_crc_lookup_tables();
 
+  bus_timeout_threshold = std::numeric_limits<uint64_t>::max();
+
   for (const auto& op : options) {
     MessageState &state = message_states[op.address];
     state.address = op.address;
@@ -116,6 +118,9 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
     // msg is not valid if a message isn't received for 10 consecutive steps
     if (op.check_frequency > 0) {
       state.check_threshold = (1000000000ULL / op.check_frequency) * 10;
+
+      // bus timeout threshold should be 10x the fastest msg
+      bus_timeout_threshold = std::min(bus_timeout_threshold, state.check_threshold);
     }
 
     const Msg* msg = NULL;
@@ -270,7 +275,10 @@ void CANParser::UpdateCans(uint64_t sec, const capnp::DynamicStruct::Reader& cms
 
 void CANParser::UpdateValid(uint64_t sec, const bool empty) {
   // update bus timeout
-  bus_timeout_cnt = empty ? 0 : bus_timeout_cnt + 1;
+  if (!empty) {
+    last_nonempty_sec = sec;
+  }
+  bus_timeout = (sec - last_nonempty_sec) > bus_timeout_threshold;
 
   // update can valid
   can_valid = true;
