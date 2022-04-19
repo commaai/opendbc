@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from __future__ import print_function
 import os
 import sys
 
@@ -104,7 +103,7 @@ def process(in_fn, out_fn):
     if count > 1:
       sys.exit("%s: Duplicate message name in DBC file %s" % (dbc_name, name))
 
-  parser_code = template.render(dbc=can_dbc, checksum_type=checksum_type, msgs=msgs, def_vals=def_vals, len=len)
+  parser_code = template.render(dbc=can_dbc, checksum_type=checksum_type, msgs=msgs, def_vals=def_vals)
 
   with open(out_fn, "a+") as out_f:
     out_f.seek(0)

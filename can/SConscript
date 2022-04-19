@@ -11,6 +11,7 @@ for x in sorted(os.listdir('../')):
     in_fn = [os.path.join('../', x), 'dbc_template.cc']
     out_fn = os.path.join('dbc_out', x.replace(".dbc", ".cc"))
     dbc = env.Command(out_fn, in_fn, compile_dbc)
+    env.Depends(dbc, ["dbc.py", "process_dbc.py"])
     dbcs.append(dbc)
 
 libdbc = env.SharedLibrary('libdbc', ["dbc.cc", "parser.cc", "packer.cc", "common.cc"]+dbcs, LIBS=["capnp", "kj"])

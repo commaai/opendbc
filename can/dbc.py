@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import re
 import os
-import struct
 import sys
 import numbers
 from collections import namedtuple, defaultdict
@@ -14,15 +13,14 @@ def int_or_float(s):
     return float(s)
 
 
-DBCSignal = namedtuple(
-  "DBCSignal", ["name", "start_bit", "size", "is_little_endian", "is_signed",
-                "factor", "offset", "tmin", "tmax", "units"])
+DBCSignal = namedtuple("DBCSignal", ["name", "start_bit", "msb", "lsb", "size", "is_little_endian", "is_signed",
+                                     "factor", "offset", "tmin", "tmax", "units"])
 
 
 class dbc():
   def __init__(self, fn):
     self.name, _ = os.path.splitext(os.path.basename(fn))
-    with open(fn, encoding="ascii") as f:
+    with open(fn, encoding="utf-8") as f:
       self.txt = f.readlines()
     self._warned_addresses = set()
 
@@ -42,8 +40,8 @@ class dbc():
     # A dictionary which maps message ids to a list of tuples (signal name, definition value pairs)
     self.def_vals = defaultdict(list)
 
-    # lookup to bit reverse each byte
-    self.bits_index = [(i & ~0b111) + ((-i - 1) & 0b111) for i in range(64)]
+    # used to find big endian LSB from MSB and size
+    be_bits = [(j + i*8) for i in range(64) for j in range(7, -1, -1)]
 
     for l in self.txt:
       l = l.strip()
@@ -85,9 +83,18 @@ class dbc():
         tmax = int_or_float(dat.group(go + 9))
         units = dat.group(go + 10)
 
+        if is_little_endian:
+          lsb = start_bit
+          msb = start_bit + signal_size - 1
+        else:
+          lsb = be_bits[be_bits.index(start_bit) + signal_size - 1]
+          msb = start_bit
+
         self.msgs[ids][1].append(
-          DBCSignal(sgname, start_bit, signal_size, is_little_endian,
+          DBCSignal(sgname, start_bit, msb, lsb, signal_size, is_little_endian,
                     is_signed, factor, offset, tmin, tmax, units))
+
+        assert lsb < (64*8) and msb < (64*8), f"Signal out of bounds: {msb=} {lsb=}"
 
       if l.startswith("VAL_ "):
         # new signal value/definition
@@ -121,136 +128,6 @@ class dbc():
     if not isinstance(msg_id, numbers.Number):
       msg_id = self.msg_name_to_address[msg_id]
     return msg_id
-
-  def reverse_bytes(self, x):
-    return ((x & 0xff00000000000000) >> 56) | \
-           ((x & 0x00ff000000000000) >> 40) | \
-           ((x & 0x0000ff0000000000) >> 24) | \
-           ((x & 0x000000ff00000000) >> 8) | \
-           ((x & 0x00000000ff000000) << 8) | \
-           ((x & 0x0000000000ff0000) << 24) | \
-           ((x & 0x000000000000ff00) << 40) | \
-           ((x & 0x00000000000000ff) << 56)
-
-  def encode(self, msg_id, dd):
-    """Encode a CAN message using the dbc.
-
-       Inputs:
-        msg_id: The message ID.
-        dd: A dictionary mapping signal name to signal data.
-    """
-    msg_id = self.lookup_msg_id(msg_id)
-
-    msg_def = self.msgs[msg_id]
-    size = msg_def[0][1]
-
-    result = 0
-    for s in msg_def[1]:
-      ival = dd.get(s.name)
-      if ival is not None:
-
-        ival = (ival - s.offset) / s.factor
-        ival = int(round(ival))
-
-        if s.is_signed and ival < 0:
-          ival = (1 << s.size) + ival
-
-        if s.is_little_endian:
-          shift = s.start_bit
-        else:
-          b1 = (s.start_bit // 8) * 8 + (-s.start_bit - 1) % 8
-          shift = 64 - (b1 + s.size)
-
-        mask = ((1 << s.size) - 1) << shift
-        dat = (ival & ((1 << s.size) - 1)) << shift
-
-        if s.is_little_endian:
-          mask = self.reverse_bytes(mask)
-          dat = self.reverse_bytes(dat)
-
-        result &= ~mask
-        result |= dat
-
-    result = struct.pack('>Q', result)
-    return result[:size]
-
-  def decode(self, x, arr=None, debug=False):
-    """Decode a CAN message using the dbc.
-
-       Inputs:
-        x: A collection with elements (address, time, data), where address is
-           the CAN address, time is the bus time, and data is the CAN data as a
-           hex string.
-        arr: Optional list of signals which should be decoded and returned.
-        debug: True to print debugging statements.
-
-       Returns:
-        A tuple (name, data), where name is the name of the CAN message and data
-        is the decoded result. If arr is None, data is a dict of properties.
-        Otherwise data is a list of the same length as arr.
-
-        Returns (None, None) if the message could not be decoded.
-    """
-
-    if arr is None:
-      out = {}
-    else:
-      out = [None] * len(arr)
-
-    msg = self.msgs.get(x[0])
-    if msg is None:
-      if x[0] not in self._warned_addresses:
-        # print("WARNING: Unknown message address {}".format(x[0]))
-        self._warned_addresses.add(x[0])
-      return None, None
-
-    name = msg[0][0]
-    if debug:
-      print(name)
-
-    st = x[2].ljust(8, b'\x00')
-    le, be = None, None
-
-    for s in msg[1]:
-      if arr is not None and s[0] not in arr:
-        continue
-
-      start_bit = s[1]
-      signal_size = s[2]
-      little_endian = s[3]
-      signed = s[4]
-      factor = s[5]
-      offset = s[6]
-
-      if little_endian:
-        if le is None:
-          le = struct.unpack("<Q", st)[0]
-        tmp = le
-        shift_amount = start_bit
-      else:
-        if be is None:
-          be = struct.unpack(">Q", st)[0]
-        tmp = be
-        b1 = (start_bit // 8) * 8 + (-start_bit - 1) % 8
-        shift_amount = 64 - (b1 + signal_size)
-
-      if shift_amount < 0:
-        continue
-
-      tmp = (tmp >> shift_amount) & ((1 << signal_size) - 1)
-      if signed and (tmp >> (signal_size - 1)):
-        tmp -= (1 << signal_size)
-
-      tmp = tmp * factor + offset
-
-      # if debug:
-      #   print("%40s  %2d %2d  %7.2f %s" % (s[0], s[1], s[2], tmp, s[-1]))
-
-      if arr is None:
-        out[s[0]] = tmp
-      else:
-        out[arr.index(s[0])] = tmp
-    return name, out
 
   def get_signals(self, msg):
     msg = self.lookup_msg_id(msg)

@@ -1,12 +1,12 @@
 # distutils: language = c++
-#cython: language_level=3
+# cython: language_level=3
 
-from libc.stdint cimport uint32_t, uint64_t, uint16_t
-from libcpp.vector cimport vector
+from libc.stdint cimport uint8_t, uint16_t, uint32_t, uint64_t
+from libcpp cimport bool
 from libcpp.map cimport map
 from libcpp.string cimport string
+from libcpp.vector cimport vector
 from libcpp.unordered_set cimport unordered_set
-from libcpp cimport bool
 
 
 cdef extern from "common_dbc.h":
@@ -24,7 +24,7 @@ cdef extern from "common_dbc.h":
 
   cdef struct Signal:
     const char* name
-    int b1, b2, bo
+    int start_bit, msb, lsb, size
     bool is_signed
     double factor, offset
     SignalType type
@@ -60,9 +60,9 @@ cdef extern from "common_dbc.h":
 
   cdef struct SignalValue:
     uint32_t address
-    uint16_t ts
     const char* name
     double value
+    vector[double] all_values
 
   cdef struct SignalPackValue:
     string name
@@ -74,10 +74,11 @@ cdef extern from "common.h":
 
   cdef cppclass CANParser:
     bool can_valid
+    bool bus_timeout
     CANParser(int, string, vector[MessageParseOptions], vector[SignalParseOptions])
     void update_string(string, bool)
     vector[SignalValue] query_latest()
 
   cdef cppclass CANPacker:
    CANPacker(string)
-   uint64_t pack(uint32_t, vector[SignalPackValue], int counter)
+   vector[uint8_t] pack(uint32_t, vector[SignalPackValue], int counter)
