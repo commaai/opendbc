@@ -123,7 +123,11 @@ BO_ 182 DynamicCruiseControlTorqueDemand: 8 DSC
 
 BO_ 186 TransmissionData: 8 EGS
  SG_ Counter_186 : 48|4@1+ (1,0) [0|14] "" XXX
- SG_ Checksum_186 : 40|4@1+ (1,0) [0|15] "" XXX
+ SG_ Shifting : 4|1@1+ (1,0) [0|15] "" XXX
+ SG_ OutputShaftSpeed : 24|16@1- (0.125,0) [0|255] "rpm" XXX
+ SG_ GearRatio : 8|8@1+ (0.05,0) [0|255] "" XXX
+ SG_ GearTar : 0|4@1+ (1,-4) [0|255] "" XXX
+ SG_ Checksum_186 : 40|8@1+ (1,0) [0|15] "" XXX
 
 BO_ 191 RequestedWheelTorqueDriveTrain: 8 LDM
  SG_ Checksum_191 : 0|8@1+ (1,0) [0|19] "" XXX
@@ -192,7 +196,7 @@ BO_ 200 SteeringWheelAngle_slow: 6 SZL
 
 BO_ 466 TransmissionDataDisplay: 8 EGS
  SG_ ShiftLeverMode : 32|2@1+ (1,0) [0|3] "" XXX
- SG_ GearRelated_TBD : 12|4@1+ (1,0) [0|15] "" XXX
+ SG_ GearAct : 12|4@1+ (1,-4) [0|15] "" XXX
  SG_ Counter_466 : 28|4@1+ (1,0) [0|14] "" XXX
  SG_ ShiftLeverPosition : 0|4@1+ (1,0) [0|8] "" XXX
  SG_ xFF : 40|8@1+ (1,0) [0|255] "" XXX
@@ -833,6 +837,8 @@ CM_ SG_ 168 BrakePressed "Brake when driver presses the brake or hill hold";
 CM_ SG_ 168 EngineTorque "Engine torque without inertia - combustion torque";
 CM_ SG_ 168 EngineTorqueWoInterv "Engine torque without inertia and without shift intervention";
 CM_ SG_ 403 CruiseControlSetpointSpeed "Speed target - unit depends on locale";
+CM_ SG_ 186 GearTar "Values corresponds to forward gears. TBD Add enums for park, reverse";
+CM_ SG_ 466 GearAct "TransmissionDataDisplay";
 CM_ SG_ 414 DSC_full_off "0x4 enabling, 0xA enabled. TBD";
 CM_ SG_ 416 YawRate "Lateral Acceleration";
 CM_ SG_ 408 ParkButtonSecond "Redundant buton. 0x1 = pressed;";
