@@ -35,6 +35,7 @@ BS_:
 
 BU_: XXX
 
+
 BO_ 540 CRZ_CTRL: 8 XXX
  SG_ CRZ_ACTIVE : 3|1@0+ (1,0) [0|1] "" XXX
  SG_ CRZ_AVAILABLE : 17|1@0+ (1,0) [0|255] "" XXX
@@ -72,12 +73,12 @@ BO_ 865 RADAR_361: 8 XXX
 
 BO_ 866 RADAR_362: 8 XXX
  SG_ DIST_OBJ : 7|12@0+ (1,0) [0|255] "" XXX
- SG_ ANG_OBJ : 11|12@0+ (1,0) [0|7] "" XXX
  SG_ RVEL_OBJ : 31|11@0- (1,0) [0|63] "" XXX
  SG_ NEW_SIGNAL_1 : 36|9@0+ (1,0) [0|3] "" XXX
  SG_ STEER_ANGLE : 43|12@0+ (-1,2048) [0|7] "" XXX
  SG_ NEW_SIGNAL_2 : 63|4@0+ (1,0) [0|15] "" XXX
  SG_ CTR : 59|4@0+ (1,0) [0|15] "" XXX
+ SG_ ANG_OBJ : 11|12@0- (1,0) [0|7] "" XXX
 
 BO_ 867 RADAR_363: 8 XXX
  SG_ CTR : 59|4@0+ (1,0) [0|255] "" XXX
