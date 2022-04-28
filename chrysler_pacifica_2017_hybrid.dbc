@@ -332,12 +332,13 @@ BO_ 941 NEW_MSG_3ad: 8 XXX
  SG_ INCREASING_2 : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 500 ACC_2: 8 XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
- SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ ACC_STATUS_1 : 7|3@0+ (1,0) [0|255] "" XXX
  SG_ BRAKE_MAYBE : 18|11@0+ (1,0) [0|255] "" XXX
  SG_ ACC_STATUS_2 : 21|3@0+ (1,0) [0|255] "" XXX
  SG_ BRAKE_BOOL_1 : 36|1@0+ (1,0) [0|3] "" XXX
+ SG_ ACC_FAULTED : 47|1@0+ (1,0) [0|1] "" XXX
+ SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 625 ACC_1: 8 XXX
  SG_ SPEED : 31|8@0+ (1,0) [0|255] "km/h" XXX
