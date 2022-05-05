@@ -49,8 +49,7 @@ cdef class CANParser:
     self.can_invalid_cnt = CAN_INVALID_CNT
 
     cdef int i
-    cdef int num_msgs = self.dbc[0].num_msgs
-    for i in range(num_msgs):
+    for i in range(self.dbc[0].msgs.size()):
       msg = self.dbc[0].msgs[i]
       name = msg.name.decode('utf8')
 
@@ -102,7 +101,7 @@ cdef class CANParser:
       message_options_v.push_back(mpo)
 
     self.can = new cpp_CANParser(bus, dbc_name, message_options_v, signal_options_v)
-    self.update_vl()
+    # self.update_vl()
 
   cdef unordered_set[uint32_t] update_vl(self):
     cdef unordered_set[uint32_t] updated_addrs
@@ -156,12 +155,9 @@ cdef class CANDefine():
     if not self.dbc:
       raise RuntimeError(f"Can't find DBC: '{dbc_name}'")
 
-    num_vals = self.dbc[0].num_vals
-
     address_to_msg_name = {}
 
-    num_msgs = self.dbc[0].num_msgs
-    for i in range(num_msgs):
+    for i in range(self.dbc[0].msgs.size()):
       msg = self.dbc[0].msgs[i]
       name = msg.name.decode('utf8')
       address = msg.address
@@ -169,7 +165,7 @@ cdef class CANDefine():
 
     dv = defaultdict(dict)
 
-    for i in range(num_vals):
+    for i in range(self.dbc[0].vals.size()):
       val = self.dbc[0].vals[i]
 
       sgname = val.name.decode('utf8')
