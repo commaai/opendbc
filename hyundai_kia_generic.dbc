@@ -1164,7 +1164,7 @@ BO_ 1314 GW_IPM_PE_1: 8 BCM
  SG_ C_SMKTeleCrankingFailRes : 34|2@1+ (1.0,0.0) [0.0|3.0] ""  CLU
 
 BO_ 1057 SCC12: 8 SCC
- SG_ CF_VSM_Prefill : 0|900@1+ (1,0) [0|1] "" ESC
+ SG_ CF_VSM_Prefill : 0|1@1+ (1,0) [0|1] "" ESC
  SG_ CF_VSM_DecCmdAct : 1|1@1+ (1,0) [0|1] "" ESC
  SG_ CF_VSM_HBACmd : 2|2@1+ (1,0) [0|3] "" ESC
  SG_ CF_VSM_Warn : 4|2@1+ (1,0) [0|3] "" CLU,ESC,IAP

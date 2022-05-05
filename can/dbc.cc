@@ -7,6 +7,7 @@
 #include <memory>
 #include <regex>
 #include <set>
+#include <cassert>
 
 #include "common_dbc.h"
 
@@ -117,7 +118,7 @@ DBC* dbc_parse(const std::string& dbc_name) {
   std::string line;
   while (std::getline(infile, line)) {
     line = trim(line);
-    printf("%s\n", line.c_str());
+//    printf("%s\n", line.c_str());
     std::smatch match;
     if (startswith(line, "BO_ ")) {
       // new group
@@ -144,18 +145,21 @@ DBC* dbc_parse(const std::string& dbc_name) {
       }
       Signal& sig = signals[address].emplace_back();
       sig.name = match[1].str();
-      //sig.b1 = std::stoi(match[offset + 2].str());
+      sig.start_bit = std::stoi(match[offset + 2].str());
       sig.size = std::stoi(match[offset + 3].str());
       sig.is_little_endian = std::stoi(match[offset + 4].str()) == 1;
       sig.is_signed = match[offset + 5].str() == "-";
       sig.factor = std::stod(match[offset + 6].str());
       sig.offset = std::stod(match[offset + 7].str());
       set_signal_type(sig, address, checksum.get(), dbc_name);
-//      if (!sig.is_little_endian) {
-//        uint64_t b1 = sig.b1;
-//        sig.b1 = std::floor(b1 / 8) * 8 + (-b1 - 1) % 8;
-//      }
-//      sig.bo = 64 - (sig.b1 + sig.b2);
+      if (sig.is_little_endian) {
+        sig.lsb = sig.start_bit;
+        sig.msb = sig.start_bit + sig.size - 1;
+      } else {
+        sig.lsb = std::floor(sig.start_bit / 8) * 8 + (-sig.start_bit - 1) % 8;
+        sig.msb = sig.start_bit;
+      }
+      DBC_ASSERT(sig.lsb < (64 * 8) && sig.msb < (64 * 8), "Signal out of bounds : " << line);
     } else if (startswith(line, "VAL_ ")) {
       // new signal value/definition
       bool ret = std::regex_search(line, match, val_regexp);
