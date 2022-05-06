@@ -106,7 +106,6 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
   : bus(abus), aligned_buf(kj::heapArray<capnp::word>(1024)) {
 
   dbc = dbc_lookup(dbc_name);
-//  dbc = dbc_parse(dbc_name);
   assert(dbc);
   init_crc_lookup_tables();
 

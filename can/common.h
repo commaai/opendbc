@@ -55,7 +55,7 @@ private:
   const int bus;
   kj::Array<capnp::word> aligned_buf;
 
-  const DBC *dbc;
+  const DBC *dbc = NULL;
   std::unordered_map<uint32_t, MessageState> message_states;
 
 public:

@@ -65,14 +65,6 @@ struct Val {
   std::vector<Signal> sigs;
 };
 
-//struct DBC {
-//  const char* name;
-//  size_t num_msgs;
-//  const Msg *msgs;
-//  const Val *vals;
-//  size_t num_vals;
-//};
-
 struct DBC {
   std::string name;
   std::vector<Msg> msgs;

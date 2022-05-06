@@ -37,6 +37,7 @@ env = Environment(
     "-g",
     "-fPIC",
     "-O2",
+    "-Wunused",
     "-Werror",
     "-Wshadow",
   ] + ccflags_asan,

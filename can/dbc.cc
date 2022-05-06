@@ -4,17 +4,10 @@
 #include <fstream>
 #include <sstream>
 #include <map>
-#include <memory>
 #include <regex>
 #include <set>
-#include <cassert>
 
 #include "common_dbc.h"
-
-
-
-
-
 
 
 #define DBC_ASSERT(condition, message)          \
@@ -41,8 +34,6 @@ inline std::string& trim(std::string& s, const char* t = " \t\n\r\f\v") {
   s.erase(s.find_last_not_of(t) + 1);
   return s.erase(0, s.find_first_not_of(t));
 }
-
-std::string DBC_FILE_PATH = "/home/batman/openpilot/opendbc";
 
 typedef struct ChecksumState {
   int checksum_size;
@@ -74,12 +65,12 @@ void set_signal_type(Signal& s, uint32_t address, ChecksumState* chk, const std:
   if (chk) {
     if (s.name == "CHECKSUM") {
       DBC_ASSERT(s.size == chk->checksum_size, "CHECKSUM is not " << chk->checksum_size << " bits long");
-//      DBC_ASSERT((s.b1 % 8) == chk->checksum_start_bit, " CHECKSUM starts at wrong bit");
+      DBC_ASSERT((s.start_bit % 8) == chk->checksum_start_bit, " CHECKSUM starts at wrong bit");
       DBC_ASSERT(s.is_little_endian == chk->little_endian, "CHECKSUM has wrong endianness");
       s.type = chk->checksum_type;
     } else if (s.name == "COUNTER") {
       DBC_ASSERT(chk->counter_size == -1 || s.size == chk->counter_size, "COUNTER is not " << chk->counter_size << " bits long");
-//      DBC_ASSERT(chk->counter_start_bit == -1 || s.b1 % 8 == chk->counter_start_bit, "COUNTER starts at wrong bit");
+      DBC_ASSERT(chk->counter_start_bit == -1 || s.start_bit % 8 == chk->counter_start_bit, "COUNTER starts at wrong bit");
       DBC_ASSERT(chk->little_endian == s.is_little_endian, "COUNTER has wrong endianness");
       s.type = chk->counter_type;
     }
@@ -125,7 +116,6 @@ DBC* dbc_parse(const std::string& dbc_name) {
   std::string line;
   while (std::getline(infile, line)) {
     line = trim(line);
-    printf("%s\n", line.c_str());
     std::smatch match;
     if (startswith(line, "BO_ ")) {
       // new group
@@ -203,7 +193,6 @@ DBC* dbc_parse(const std::string& dbc_name) {
   }
   return dbc;
 }
-
 
 const DBC* dbc_lookup(const std::string& dbc_name) {
   static std::mutex lock;
