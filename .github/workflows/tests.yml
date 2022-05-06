@@ -24,7 +24,7 @@ jobs:
           docker run opendbc bash -c "cd opendbc/generator && ./test_generator.py"
       - name: Unit tests
         run: |
-          docker run opendbc bash -c "python -m unittest discover opendbc"
+          docker run opendbc bash -c "BASEDIR=/project python -m unittest discover opendbc"
       - name: Push to dockerhub
         if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request' && github.repository == 'commaai/opendbc'
         run: |
