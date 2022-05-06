@@ -3,13 +3,7 @@ Import('env', 'envCython', 'cereal')
 import os
 from opendbc.can.process_dbc import process
 
-envDBC = env.Clone()
-define_path = '-DDBC_FILE_PATH=\'"%s"\'' % (envDBC.Dir("..").abspath)
-if isinstance(envDBC['CXXFLAGS'], list):
-  envDBC['CXXFLAGS'] += [define_path]
-else:
-  envDBC['CXXFLAGS'] += ' ' + define_path
-libdbc = envDBC.SharedLibrary('libdbc', ["dbc.cc", "parser.cc", "packer.cc", "common.cc"], LIBS=["capnp", "kj"])
+libdbc = env.SharedLibrary('libdbc', ["dbc.cc", "parser.cc", "packer.cc", "common.cc"], LIBS=["capnp", "kj"])
 
 # Build packer and parser
 lenv = envCython.Clone()

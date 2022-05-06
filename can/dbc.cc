@@ -1,14 +1,18 @@
-#include <vector>
 #include <algorithm>
 #include <cmath>
 #include <fstream>
-#include <sstream>
 #include <map>
+#include <pwd.h>
 #include <regex>
 #include <set>
+#include <sstream>
+#include <unistd.h>
+#include <vector>
 
 #include "common_dbc.h"
 
+
+std::string dbc_file_path;
 
 #define DBC_ASSERT(condition, message)          \
   do {                                          \
@@ -96,7 +100,7 @@ void set_signal_type(Signal& s, uint32_t address, ChecksumState* chk, const std:
 }
 
 DBC* dbc_parse(const std::string& dbc_name) {
-  std::ifstream infile(std::string(DBC_FILE_PATH) + "/" + dbc_name + ".dbc");
+  std::ifstream infile(std::string(dbc_file_path) + "/" + dbc_name + ".dbc");
   if (!infile) return nullptr;
 
   std::regex bo_regexp(R"(^BO\_ (\w+) (\w+) *: (\w+) (\w+))");
@@ -207,6 +211,14 @@ const DBC* dbc_lookup(const std::string& dbc_name) {
   static std::map<std::string, DBC*> dbcs;
 
   std::unique_lock lk(lock);
+
+  if (dbc_file_path.empty()) {
+    // fallback to $HOME/openpilot
+    char *basedir = std::getenv("BASEDIR");
+    dbc_file_path = basedir != NULL ? basedir : std::string(getpwuid(getuid())->pw_dir) + "/openpilot";
+    dbc_file_path = dbc_file_path + "/opendbc";
+  }
+
   auto it = dbcs.find(dbc_name);
   if (it == dbcs.end()) {
     it = dbcs.insert(it, {dbc_name, dbc_parse(dbc_name)});
