@@ -96,7 +96,6 @@ void set_signal_type(Signal& s, uint32_t address, ChecksumState* chk, const std:
   }
 }
 
-
 DBC* dbc_parse(const std::string& dbc_name) {
   std::ifstream infile(std::string(DBC_FILE_PATH) + "/" + dbc_name + ".dbc");
   if (!infile) return nullptr;
@@ -115,10 +114,18 @@ DBC* dbc_parse(const std::string& dbc_name) {
   DBC* dbc = new DBC;
   dbc->name = dbc_name;
 
+  // used to find big endian LSB from MSB and size
+  std::vector<int> be_bits;
+  for (int i = 0; i < 64; i++) {
+    for (int j = 7; j >= 0; j--) {
+      be_bits.push_back(j + i * 8);
+    }
+  }
+
   std::string line;
   while (std::getline(infile, line)) {
     line = trim(line);
-//    printf("%s\n", line.c_str());
+    printf("%s\n", line.c_str());
     std::smatch match;
     if (startswith(line, "BO_ ")) {
       // new group
@@ -156,7 +163,8 @@ DBC* dbc_parse(const std::string& dbc_name) {
         sig.lsb = sig.start_bit;
         sig.msb = sig.start_bit + sig.size - 1;
       } else {
-        sig.lsb = std::floor(sig.start_bit / 8) * 8 + (-sig.start_bit - 1) % 8;
+        auto it = find(be_bits.begin(), be_bits.end(), sig.start_bit);
+        sig.lsb = be_bits[(it - be_bits.begin()) + sig.size - 1];
         sig.msb = sig.start_bit;
       }
       DBC_ASSERT(sig.lsb < (64 * 8) && sig.msb < (64 * 8), "Signal out of bounds : " << line);
