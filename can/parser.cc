@@ -102,10 +102,11 @@ bool MessageState::update_counter_generic(int64_t v, int cnt_size) {
 
 CANParser::CANParser(int abus, const std::string& dbc_name,
           const std::vector<MessageParseOptions> &options,
-          const std::vector<SignalParseOptions> &sigoptions)
+          const std::vector<SignalParseOptions> &sigoptions,
+          const std::string& dbc_file_path)
   : bus(abus), aligned_buf(kj::heapArray<capnp::word>(1024)) {
 
-  dbc = dbc_lookup(dbc_name);
+  dbc = dbc_lookup(dbc_name, dbc_file_path);
   assert(dbc);
   init_crc_lookup_tables();
 
@@ -164,11 +165,12 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
   }
 }
 
-CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum, bool ignore_counter)
+CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum, bool ignore_counter, const std::string& dbc_file_path)
   : bus(abus) {
   // Add all messages and signals
+  printf("");
 
-  dbc = dbc_lookup(dbc_name);
+  dbc = dbc_lookup(dbc_name, dbc_file_path);
   assert(dbc);
   init_crc_lookup_tables();
 

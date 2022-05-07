@@ -27,8 +27,8 @@ void set_value(std::vector<uint8_t> &msg, const Signal &sig, int64_t ival) {
   }
 }
 
-CANPacker::CANPacker(const std::string& dbc_name) {
-  dbc = dbc_lookup(dbc_name);
+CANPacker::CANPacker(const std::string& dbc_name, const std::string& dbc_file_path) {
+  dbc = dbc_lookup(dbc_name, dbc_file_path);
   assert(dbc);
 
   for (const auto& msg : dbc->msgs) {

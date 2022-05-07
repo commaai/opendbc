@@ -8,11 +8,14 @@
 #include <sstream>
 #include <unistd.h>
 #include <vector>
+#include <stdio.h>
+
+extern char **environ;
 
 #include "common_dbc.h"
 
 
-std::string dbc_file_path;
+//std::string dbc_file_path;
 
 #define DBC_ASSERT(condition, message)          \
   do {                                          \
@@ -99,7 +102,7 @@ void set_signal_type(Signal& s, uint32_t address, ChecksumState* chk, const std:
   }
 }
 
-DBC* dbc_parse(const std::string& dbc_name) {
+DBC* dbc_parse(const std::string& dbc_name, const std::string& dbc_file_path) {
   std::ifstream infile(std::string(dbc_file_path) + "/" + dbc_name + ".dbc");
   if (!infile) return nullptr;
 
@@ -206,22 +209,42 @@ DBC* dbc_parse(const std::string& dbc_name) {
   return dbc;
 }
 
-const DBC* dbc_lookup(const std::string& dbc_name) {
+
+const DBC* dbc_lookup(const std::string& dbc_name, const std::string& dbc_file_path) {
   static std::mutex lock;
   static std::map<std::string, DBC*> dbcs;
 
   std::unique_lock lk(lock);
-
-  if (dbc_file_path.empty()) {
-    // fallback to $HOME/openpilot
-    char *basedir = std::getenv("BASEDIR");
-    dbc_file_path = basedir != NULL ? basedir : std::string(getpwuid(getuid())->pw_dir) + "/openpilot";
-    dbc_file_path = dbc_file_path + "/opendbc";
-  }
+//  dbc_file_path = "";
+//
+//  char **s = environ;
+//
+//  for (; *s; s++) {
+//    printf("%s\n", *s);
+//  }
+//
+//  if (dbc_file_path.empty()) {
+//    // fallback to $HOME/openpilot
+//    char *basedir = std::getenv("BASEDIR");
+////    char *libdbc_path = std::getenv("LD_LIBRARY_PATH");
+//    if (basedir != NULL) {
+//      dbc_file_path = std::string(basedir) + "/opendbc";
+//      printf("basedir: %s\n", basedir);
+//    } else {
+//      char *libdbc_path = std::getenv("LD_LIBRARY_PATH");
+////      assert(libdbc_path != NULL);  // TODO: use dbc assert
+//      dbc_file_path = std::string(libdbc_path) + "/../../../opendbc";
+////      printf("BASEDIR empty\n");
+//    }
+////    dbc_file_path = basedir != NULL ? basedir : std::string(getpwuid(getuid())->pw_dir) + "/openpilot";
+//    printf("Using DBC path: %s\n", dbc_file_path.c_str());
+////    dbc_file_path = dbc_file_path + "/opendbc";
+//  }
+  printf("Using DBC path: %s\n", dbc_file_path.c_str());
 
   auto it = dbcs.find(dbc_name);
   if (it == dbcs.end()) {
-    it = dbcs.insert(it, {dbc_name, dbc_parse(dbc_name)});
+    it = dbcs.insert(it, {dbc_name, dbc_parse(dbc_name, dbc_file_path)});
   }
   return it->second;
 }
