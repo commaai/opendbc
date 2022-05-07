@@ -12,21 +12,22 @@ from opendbc.can.tests.test_packer_parser import can_list_to_can_capnp
 from opendbc.generator.generator import generated_suffix
 
 
-class TestCANParserSpeed(unittest.TestCase):
+class TestCANParser(unittest.TestCase):
   @classmethod
   def setUpClass(cls):
     cls.dbcs = []
     for dbc in glob.glob(f"{DBC_PATH}/*{generated_suffix}"):
       cls.dbcs.append(os.path.basename(dbc).split('.')[0])
 
-  def test_dbc_parsing(self):
+  def test_dbc_parsing_speed(self):
     start_time = time.time()
     for dbc in self.dbcs:
       CANParser(dbc, [], [], 0)
+
     elapsed = time.time() - start_time
     self.assertLess(elapsed, 0.15, "Took too long to parse {} DBCs".format(len(self.dbcs)))
 
-  def test_can_parsing(self):
+  def test_can_parsing_speed(self):
     signals = [
       ("CR_VSM_DecCmd", "SCC12"),
       ("aReqValue", "SCC12"),
@@ -42,6 +43,7 @@ class TestCANParserSpeed(unittest.TestCase):
                                              "aReqValue": random.uniform(-10.23, 10.24),
                                              "aReqRaw": random.uniform(-10.23, 10.24)})
       parser.update_strings([can_list_to_can_capnp([msg])] * 10)
+
     elapsed = time.time() - start_time
     self.assertLess(elapsed, 1, "Took too long parsing messages")
 
