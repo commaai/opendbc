@@ -217,7 +217,12 @@ void set_dbc_file_path() {
     if (basedir != NULL) {
       dbc_file_path = std::string(basedir) + "/opendbc";
     } else {
+#ifdef DBC_FILE_PATH
       dbc_file_path = DBC_FILE_PATH;
+#else
+      // fall back to $HOME/openpilot
+      dbc_file_path = std::string(getpwuid(getuid())->pw_dir) + "/openpilot";
+#endif
     }
   }
 }
