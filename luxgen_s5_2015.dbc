@@ -98,15 +98,15 @@ BO_ 790 ENGINE_DATA: 8 XXX
  SG_ NEW_SIGNAL_4 : 39|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_5 : 47|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 1313 undefined: 8 XXX
+BO_ 1313 undefined_2: 8 XXX
 
 BO_ 1312 __trigger_every_range: 8 XXX
  SG_ __SIGNAL_every_interval : 4|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 896 undefined: 8 XXX
+BO_ 896 undefined_3: 8 XXX
  SG_ NEW_SIGNAL_1 : 32|4@1+ (1,0) [0|15] "" XXX
 
-BO_ 809 undefined: 8 XXX
+BO_ 809 undefined_4: 8 XXX
 
 BO_ 864 BREAK_TCS_STATUS: 8 XXX
  SG_ SPEED3 : 24|8@1+ (1,0) [0|255] "" XXX
@@ -114,7 +114,7 @@ BO_ 864 BREAK_TCS_STATUS: 8 XXX
  SG_ XXXX1 : 63|8@0+ (1,0) [0|255] "" XXX
  SG_ BRAKE_PRSSED : 42|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 842 undefined: 8 XXX
+BO_ 842 undefined_5: 8 XXX
 
 BO_ 880 WHEEL_RPM_STATUS: 8 XXX
  SG_ WHEEL_RL_SPEED : 23|16@0+ (1,0) [0|255] "" XXX
