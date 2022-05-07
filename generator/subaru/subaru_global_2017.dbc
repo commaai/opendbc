@@ -24,7 +24,7 @@ BO_ 545 ES_Distance: 8 XXX
  SG_ Distance_Swap : 37|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_EPB : 38|1@1+ (1,0) [0|1] "" XXX
  SG_ Signal4 : 39|1@0+ (1,0) [0|1] "" XXX
- SG_ Close_Distance : 40|8@1+ (1,0) [0|1] "" XXX
+ SG_ Close_Distance : 40|8@1+ (0.019607,0) [0|5] "m" XXX
  SG_ Signal5 : 48|8@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Cancel : 56|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Set : 57|1@1+ (1,0) [0|1] "" XXX
