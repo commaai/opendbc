@@ -220,9 +220,7 @@ const DBC* dbc_lookup(const std::string& dbc_name) {
     } else {
       dbc_file_path = DBC_FILE_PATH;
     }
-    printf("Using DBC path: %s\n", dbc_file_path.c_str());
   }
-
 
   auto it = dbcs.find(dbc_name);
   if (it == dbcs.end()) {
