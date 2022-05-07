@@ -18,6 +18,9 @@ class TestCANParser(unittest.TestCase):
     for dbc in glob.glob(f"{DBC_PATH}/*{generated_suffix}"):
       cls.dbcs.append(os.path.basename(dbc).split('.')[0])
 
+  def test_detecting_dbcs(self):
+    self.assertGreaterEqual(len(self.dbcs), 20)
+
   def test_dbc_parsing_speed(self):
     start_time = time.time()
     for dbc in self.dbcs:
