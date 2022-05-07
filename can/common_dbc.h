@@ -71,6 +71,6 @@ struct DBC {
   std::vector<Val> vals;
 };
 
-std::vector<const DBC*>& get_dbcs();
+std::vector<std::string> get_dbc_names();
 const DBC* dbc_lookup(const std::string& dbc_name);
 DBC* dbc_parse(const std::string& dbc_name);

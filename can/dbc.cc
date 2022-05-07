@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cmath>
+#include <filesystem>
 #include <fstream>
 #include <map>
 #include <pwd.h>
@@ -32,6 +33,10 @@ inline bool startswith(const std::string& str, std::initializer_list<const char*
     if (startswith(str, prefix)) return true;
   }
   return false;
+}
+
+inline bool endswith(const std::string& str, const char* suffix) {
+  return str.find(suffix, 0) == (str.length() - strlen(suffix));
 }
 
 inline std::string& trim(std::string& s, const char* t = " \t\n\r\f\v") {
@@ -100,7 +105,7 @@ void set_signal_type(Signal& s, uint32_t address, ChecksumState* chk, const std:
 }
 
 DBC* dbc_parse(const std::string& dbc_name) {
-  std::ifstream infile(std::string(dbc_file_path) + "/" + dbc_name + ".dbc");
+  std::ifstream infile(dbc_file_path + "/" + dbc_name + ".dbc");
   if (!infile) return nullptr;
 
   std::regex bo_regexp(R"(^BO\_ (\w+) (\w+) *: (\w+) (\w+))");
@@ -206,13 +211,7 @@ DBC* dbc_parse(const std::string& dbc_name) {
   return dbc;
 }
 
-
-const DBC* dbc_lookup(const std::string& dbc_name) {
-  static std::mutex lock;
-  static std::map<std::string, DBC*> dbcs;
-
-  std::unique_lock lk(lock);
-
+void set_dbc_file_path() {
   if (dbc_file_path.empty()) {
     char *basedir = std::getenv("BASEDIR");
     if (basedir != NULL) {
@@ -221,10 +220,32 @@ const DBC* dbc_lookup(const std::string& dbc_name) {
       dbc_file_path = DBC_FILE_PATH;
     }
   }
+}
+
+const DBC* dbc_lookup(const std::string& dbc_name) {
+  static std::mutex lock;
+  static std::map<std::string, DBC*> dbcs;
+
+  std::unique_lock lk(lock);
+  set_dbc_file_path();
 
   auto it = dbcs.find(dbc_name);
   if (it == dbcs.end()) {
     it = dbcs.insert(it, {dbc_name, dbc_parse(dbc_name)});
   }
   return it->second;
+}
+
+std::vector<std::string> get_dbc_names() {
+  set_dbc_file_path();
+  std::vector<std::string> dbcs;
+  for (std::filesystem::directory_iterator i(dbc_file_path), end; i != end; i++) {
+    if (!is_directory(i->path())) {
+      std::string filename = i->path().filename();
+      if (!startswith(filename, "_") && endswith(filename, ".dbc")) {
+        dbcs.push_back(filename.substr(0, filename.length() - 4));
+      }
+    }
+  }
+  return dbcs;
 }
