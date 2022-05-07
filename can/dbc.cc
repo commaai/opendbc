@@ -24,7 +24,7 @@ std::string dbc_file_path;
   } while (false)
 
 inline bool startswith(const std::string& str, const char* prefix) {
-  return str.rfind(prefix, 0) == 0;
+  return str.find(prefix, 0) == 0;
 }
 
 inline bool startswith(const std::string& str, std::initializer_list<const char*> prefix_list) {
