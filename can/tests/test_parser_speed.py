@@ -8,8 +8,8 @@ import unittest
 from opendbc import DBC_PATH
 from opendbc.can.packer import CANPacker
 from opendbc.can.parser import CANParser
+from opendbc.can.tests.test_packer_parser import can_list_to_can_capnp
 from opendbc.generator.generator import generated_suffix
-from selfdrive.boardd.boardd import can_list_to_can_capnp
 
 
 class TestCANParserSpeed(unittest.TestCase):
