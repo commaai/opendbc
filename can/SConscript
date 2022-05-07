@@ -1,7 +1,6 @@
 Import('env', 'envCython', 'cereal')
 
 import os
-from opendbc.can.process_dbc import process
 
 envDBC = env.Clone()
 dbc_file_path = '-DDBC_FILE_PATH=\'"%s"\'' % (envDBC.Dir("..").abspath)
