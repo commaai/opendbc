@@ -51,7 +51,6 @@ struct Signal {
   SignalType type;
 };
 
-
 struct Msg {
   std::string name;
   uint32_t address;
@@ -73,5 +72,5 @@ struct DBC {
 };
 
 std::vector<const DBC*>& get_dbcs();
-const DBC* dbc_lookup(const std::string& dbc_name, const std::string& dbc_file_path);
+const DBC* dbc_lookup(const std::string& dbc_name);
 DBC* dbc_parse(const std::string& dbc_name);

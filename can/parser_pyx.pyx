@@ -16,7 +16,7 @@ import numbers
 from collections import defaultdict
 
 cdef int CAN_INVALID_CNT = 5
-DBC_FILE_PATH = os.path.abspath(os.path.join(os.environ["LD_LIBRARY_PATH"], "../../../opendbc"))
+
 
 cdef class CANParser:
   cdef:
@@ -39,7 +39,7 @@ cdef class CANParser:
       checks = []
 
     self.dbc_name = dbc_name
-    self.dbc = dbc_lookup(dbc_name, DBC_FILE_PATH)
+    self.dbc = dbc_lookup(dbc_name)
     if not self.dbc:
       raise RuntimeError(f"Can't find DBC: {dbc_name}")
 
@@ -100,7 +100,7 @@ cdef class CANParser:
       mpo.check_frequency = freq
       message_options_v.push_back(mpo)
 
-    self.can = new cpp_CANParser(bus, dbc_name, message_options_v, signal_options_v, DBC_FILE_PATH)
+    self.can = new cpp_CANParser(bus, dbc_name, message_options_v, signal_options_v)
     self.update_vl()
 
   cdef unordered_set[uint32_t] update_vl(self):
@@ -151,7 +151,7 @@ cdef class CANDefine():
 
   def __init__(self, dbc_name):
     self.dbc_name = dbc_name
-    self.dbc = dbc_lookup(dbc_name, DBC_FILE_PATH)
+    self.dbc = dbc_lookup(dbc_name)
     if not self.dbc:
       raise RuntimeError(f"Can't find DBC: '{dbc_name}'")
 

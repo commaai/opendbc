@@ -67,9 +67,8 @@ public:
 
   CANParser(int abus, const std::string& dbc_name,
             const std::vector<MessageParseOptions> &options,
-            const std::vector<SignalParseOptions> &sigoptions,
-            const std::string& dbc_file_path);
-  CANParser(int abus, const std::string& dbc_name, bool ignore_checksum, bool ignore_counter, const std::string& dbc_file_path);
+            const std::vector<SignalParseOptions> &sigoptions);
+  CANParser(int abus, const std::string& dbc_name, bool ignore_checksum, bool ignore_counter);
   #ifndef DYNAMIC_CAPNP
   void update_string(const std::string &data, bool sendcan);
   void UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Reader& cans);
@@ -86,7 +85,7 @@ private:
   std::map<uint32_t, Msg> message_lookup;
 
 public:
-  CANPacker(const std::string& dbc_name, const std::string& dbc_file_path);
+  CANPacker(const std::string& dbc_name);
   std::vector<uint8_t> pack(uint32_t address, const std::vector<SignalPackValue> &values, int counter);
   Msg* lookup_message(uint32_t address);
 };

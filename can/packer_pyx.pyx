@@ -11,10 +11,6 @@ from posix.dlfcn cimport dlopen, dlsym, RTLD_LAZY
 from .common cimport CANPacker as cpp_CANPacker
 from .common cimport dbc_lookup, SignalPackValue, DBC
 
-import os
-
-DBC_FILE_PATH = os.path.abspath(os.path.join(os.environ["LD_LIBRARY_PATH"], "../../../opendbc"))
-
 
 cdef class CANPacker:
   cdef:
@@ -24,11 +20,11 @@ cdef class CANPacker:
     map[int, int] address_to_size
 
   def __init__(self, dbc_name):
-    self.dbc = dbc_lookup(dbc_name, DBC_FILE_PATH)
+    self.dbc = dbc_lookup(dbc_name)
     if not self.dbc:
       raise RuntimeError(f"Can't lookup {dbc_name}")
 
-    self.packer = new cpp_CANPacker(dbc_name, DBC_FILE_PATH)
+    self.packer = new cpp_CANPacker(dbc_name)
     for i in range(self.dbc[0].msgs.size()):
       msg = self.dbc[0].msgs[i]
       self.name_to_address_and_size[string(msg.name)] = (msg.address, msg.size)
