@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import glob
 import os
-import random
 import time
 import unittest
 
@@ -39,13 +38,13 @@ class TestCANParser(unittest.TestCase):
 
     start_time = time.time()
     for _ in range(10000):
-      msg = packer.make_can_msg("SCC12", 0, {"CR_VSM_DecCmd": random.uniform(0, 2.55),
-                                             "aReqValue": random.uniform(-10.23, 10.24),
-                                             "aReqRaw": random.uniform(-10.23, 10.24)})
+      msg = packer.make_can_msg("SCC12", 0, {"CR_VSM_DecCmd": 2.55,  # max values
+                                             "aReqValue": 10.24,
+                                             "aReqRaw": 10.24})
       parser.update_strings([can_list_to_can_capnp([msg])] * 10)
 
     elapsed = time.time() - start_time
-    self.assertLess(elapsed, 1, "Took too long parsing messages")
+    self.assertLess(elapsed, 0.7, "Took too long parsing messages")
 
 
 if __name__ == "__main__":
