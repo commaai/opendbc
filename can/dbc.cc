@@ -12,8 +12,13 @@
 
 #include "common_dbc.h"
 
-
 std::string dbc_file_path;
+
+std::regex bo_regexp(R"(^BO\_ (\w+) (\w+) *: (\w+) (\w+))");
+std::regex sg_regexp(R"(^SG\_ (\w+) : (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*))");
+std::regex sgm_regexp(R"(^SG\_ (\w+) (\w+) *: (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*))");
+std::regex val_regexp(R"(VAL\_ (\w+) (\w+) (\s*[-+]?[0-9]+\s+\".+?\"[^;]*))");
+std::regex val_split_regexp{R"([\"]+)"};  // split on "
 
 #define DBC_ASSERT(condition, message)          \
   do {                                          \
@@ -108,11 +113,6 @@ DBC* dbc_parse(const std::string& dbc_name) {
   std::ifstream infile(dbc_file_path + "/" + dbc_name + ".dbc");
   if (!infile) return nullptr;
 
-  std::regex bo_regexp(R"(^BO\_ (\w+) (\w+) *: (\w+) (\w+))");
-  std::regex sg_regexp(R"(^SG\_ (\w+) : (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*))");
-  std::regex sgm_regexp(R"(^SG\_ (\w+) (\w+) *: (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*))");
-  std::regex val_regexp(R"(VAL\_ (\w+) (\w+) (\s*[-+]?[0-9]+\s+\".+?\"[^;]*))");
-
   std::unique_ptr<ChecksumState> checksum(get_checksum(dbc_name));
 
   uint32_t address = 0;
@@ -131,9 +131,9 @@ DBC* dbc_parse(const std::string& dbc_name) {
   }
 
   std::string line;
+  std::smatch match;
   while (std::getline(infile, line)) {
     line = trim(line);
-    std::smatch match;
     if (startswith(line, "BO_ ")) {
       // new group
       bool ret = std::regex_match(line, match, bo_regexp);
@@ -185,8 +185,7 @@ DBC* dbc_parse(const std::string& dbc_name) {
       val.name = match[2].str();
 
       auto defvals = match[3].str();
-      std::regex regex{R"([\"]+)"};  // split on "
-      std::sregex_token_iterator it{defvals.begin(), defvals.end(), regex, -1};
+      std::sregex_token_iterator it{defvals.begin(), defvals.end(), val_split_regexp, -1};
       // convert strings to UPPER_CASE_WITH_UNDERSCORES
       std::vector<std::string> words{it, {}};
       for (auto& w : words) {
