@@ -68,7 +68,7 @@ bool MessageState::parse(uint64_t sec, const std::vector<uint8_t> &dat) {
     }
 
     if (checksum_failed || counter_failed) {
-      LOGE("0x%X message checks failed, checksum failed %d, counter failed %d\n", address, checksum_failed, counter_failed);
+      LOGE("0x%X message checks failed, checksum failed %d, counter failed %d", address, checksum_failed, counter_failed);
       return false;
     }
 
@@ -290,9 +290,9 @@ void CANParser::UpdateValid(uint64_t sec) {
     const auto& state = kv.second;
     if (state.check_threshold > 0 && (sec - state.seen) > state.check_threshold) {
       if (state.seen > 0) {
-        LOGE("0x%X TIMEOUT\n", state.address);
+        LOGE("0x%X TIMEOUT", state.address);
       } else {
-        LOGE("0x%X MISSING\n", state.address);
+        LOGE("0x%X MISSING", state.address);
       }
       can_valid = false;
     }
