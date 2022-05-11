@@ -3,17 +3,14 @@
 #include <filesystem>
 #include <fstream>
 #include <map>
-#include <mutex>
 #include <pwd.h>
+#include <regex>
 #include <set>
 #include <sstream>
-#include <string.h>
 #include <unistd.h>
 #include <vector>
 
-#include "selfdrive/common/timing.h"
 #include "common_dbc.h"
-#include "ctre.hpp"
 
 
 std::string dbc_file_path;
@@ -108,16 +105,13 @@ void set_signal_type(Signal& s, uint32_t address, ChecksumState* chk, const std:
 }
 
 DBC* dbc_parse(const std::string& dbc_name) {
-  double start_t = millis_since_boot();
   std::ifstream infile(dbc_file_path + "/" + dbc_name + ".dbc");
   if (!infile) return nullptr;
 
-  static constexpr auto bo_regexp_ctre = ctll::fixed_string{ R"(^BO_ (\w+) (\w+) *: (\w+) (\w+))" };
-  static constexpr auto sg_regexp_ctre = ctll::fixed_string{ R"(^SG_ (\w+) : (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*))" };
-  static constexpr auto sgm_regexp_ctre = ctll::fixed_string{ R"(^SG_ (\w+) (\w+) *: (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*))" };
-  static constexpr auto val_regexp_ctre = ctll::fixed_string{ R"(VAL_ (\w+) (\w+) (\s*[\-\+]?[0-9]+\s+\".+?\"[^;]*);)" };
-  static constexpr auto val_split_regexp_ctre = ctll::fixed_string{ R"([\"]+)" };  // split on "
-  printf("\nctre regex patterns: %lf ms\n", millis_since_boot() - start_t);
+  std::regex bo_regexp(R"(^BO\_ (\w+) (\w+) *: (\w+) (\w+))");
+  std::regex sg_regexp(R"(^SG\_ (\w+) : (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*))");
+  std::regex sgm_regexp(R"(^SG\_ (\w+) (\w+) *: (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*))");
+  std::regex val_regexp(R"(VAL\_ (\w+) (\w+) (\s*[-+]?[0-9]+\s+\".+?\"[^;]*))");
 
   std::unique_ptr<ChecksumState> checksum(get_checksum(dbc_name));
 
@@ -136,59 +130,42 @@ DBC* dbc_parse(const std::string& dbc_name) {
     }
   }
 
-  start_t = millis_since_boot();
   std::string line;
-  double tot_bo = 0;
-  double tot_sg = 0;
-  double tot_val = 0;
-  double t = 0;
   while (std::getline(infile, line)) {
     line = trim(line);
+    std::smatch match;
     if (startswith(line, "BO_ ")) {
-      t = millis_since_boot();
       // new group
-      auto match = ctre::match<bo_regexp_ctre>(line);
-      DBC_ASSERT(match, "bad BO %s" << line);
+      bool ret = std::regex_match(line, match, bo_regexp);
+      DBC_ASSERT(ret, "bad BO %s" << line);
 
       Msg& msg = dbc->msgs.emplace_back();
-      address = msg.address = match.get<1>().to_number();  // could be hex
-      msg.name = match.get<2>().to_string();
-      msg.size = std::stoul(match.get<3>().to_string());
+      address = msg.address = std::stoul(match[1].str());  // could be hex
+      msg.name = match[2].str();
+      msg.size = std::stoul(match[3].str());
 
       // check for duplicates
       DBC_ASSERT(address_set.find(address) == address_set.end(), "Duplicate address detected : " << address);
       address_set.insert(address);
       DBC_ASSERT(msg_name_set.find(msg.name) == msg_name_set.end(), "Duplicate message name : " << msg.name);
       msg_name_set.insert(msg.name);
-      tot_bo += millis_since_boot() - t;
     } else if (startswith(line, "SG_ ")) {
       // new signal
-      t = millis_since_boot();
-
-      auto match = ctre::match<sg_regexp_ctre>(line);
-      tot_sg += millis_since_boot() - t;
-      Signal& sig = signals[address].emplace_back();
-      sig.name = match.get<1>().to_string();
-
-      if (match) {
-        sig.start_bit = match.get<2>().to_number();
-        sig.size = match.get<3>().to_number();
-        sig.is_little_endian = match.get<4>().to_number() == 1;
-        sig.is_signed = match.get<5>().to_string() == "-";
-        sig.factor = std::stod(match.get<6>().to_string());
-        sig.offset = std::stod(match.get<7>().to_string());
-      } else {
-        auto match_offset = ctre::match<sgm_regexp_ctre>(line);
-        DBC_ASSERT(match_offset, "bad SG " << line);
-        sig.start_bit = match_offset.get<3>().to_number();
-        sig.size = match_offset.get<4>().to_number();
-        sig.is_little_endian = match_offset.get<5>().to_number() == 1;
-        sig.is_signed = match_offset.get<6>().to_string() == "-";
-        sig.factor = std::stod(match_offset.get<7>().to_string());
-        sig.offset = std::stod(match_offset.get<8>().to_string());
+      int offset = 0;
+      if (!std::regex_search(line, match, sg_regexp)) {
+        bool ret = std::regex_search(line, match, sgm_regexp);
+        DBC_ASSERT(ret, "bad SG " << line);
+        offset = 1;
       }
+      Signal& sig = signals[address].emplace_back();
+      sig.name = match[1].str();
+      sig.start_bit = std::stoi(match[offset + 2].str());
+      sig.size = std::stoi(match[offset + 3].str());
+      sig.is_little_endian = std::stoi(match[offset + 4].str()) == 1;
+      sig.is_signed = match[offset + 5].str() == "-";
+      sig.factor = std::stod(match[offset + 6].str());
+      sig.offset = std::stod(match[offset + 7].str());
       set_signal_type(sig, address, checksum.get(), dbc_name);
-
       if (sig.is_little_endian) {
         sig.lsb = sig.start_bit;
         sig.msb = sig.start_bit + sig.size - 1;
@@ -199,38 +176,31 @@ DBC* dbc_parse(const std::string& dbc_name) {
       }
       DBC_ASSERT(sig.lsb < (64 * 8) && sig.msb < (64 * 8), "Signal out of bounds : " << line);
     } else if (startswith(line, "VAL_ ")) {
-      t = millis_since_boot();
       // new signal value/definition
-      auto match = ctre::match<val_regexp_ctre>(line);
-      DBC_ASSERT(match, "bad VAL " << line);
+      bool ret = std::regex_search(line, match, val_regexp);
+      DBC_ASSERT(ret, "bad VAL " << line);
 
       auto& val = dbc->vals.emplace_back();
-      val.address = match.get<1>().to_number();  // could be hex
-      val.name = match.get<2>().to_string();
+      val.address = std::stoul(match[1].str());  // could be hex
+      val.name = match[2].str();
 
-      auto defvals = match.get<3>().to_string();
+      auto defvals = match[3].str();
+      std::regex regex{R"([\"]+)"};  // split on "
+      std::sregex_token_iterator it{defvals.begin(), defvals.end(), regex, -1};
       // convert strings to UPPER_CASE_WITH_UNDERSCORES
-      std::vector<std::string> words;
-      for (auto word : ctre::split<val_split_regexp_ctre>(defvals)) {
-        std::string w = word.to_string();
+      std::vector<std::string> words{it, {}};
+      for (auto& w : words) {
         w = trim(w);
         std::transform(w.begin(), w.end(), w.begin(), ::toupper);
         std::replace(w.begin(), w.end(), ' ', '_');
-        words.push_back(w);
       }
-
       // join string
       std::stringstream s;
       std::copy(words.begin(), words.end(), std::ostream_iterator<std::string>(s, " "));
       val.def_val = s.str();
       val.def_val = trim(val.def_val);
-      tot_val += millis_since_boot() - t;
     }
   }
-  printf("\n\nloop time: %lf ms\n", millis_since_boot() - start_t);
-  printf("bo: %lf ms\n", tot_bo);
-  printf("sg: %lf ms\n", tot_sg);
-  printf("val:  %lf ms\n", tot_val);
 
   for (auto& m : dbc->msgs) {
     m.sigs = signals[m.address];
@@ -238,7 +208,6 @@ DBC* dbc_parse(const std::string& dbc_name) {
   for (auto& v : dbc->vals) {
     v.sigs = signals[v.address];
   }
-  printf("\ntotal dbc_parse time: %lf ms\n", millis_since_boot() - start_t);
   return dbc;
 }
 
@@ -254,7 +223,6 @@ void set_dbc_file_path() {
 }
 
 const DBC* dbc_lookup(const std::string& dbc_name) {
-  double start_t = millis_since_boot();
   static std::mutex lock;
   static std::map<std::string, DBC*> dbcs;
 
@@ -265,7 +233,6 @@ const DBC* dbc_lookup(const std::string& dbc_name) {
   if (it == dbcs.end()) {
     it = dbcs.insert(it, {dbc_name, dbc_parse(dbc_name)});
   }
-  printf("total dbc_lookup time: %lf ms\n\n", millis_since_boot() - start_t);
   return it->second;
 }
 
