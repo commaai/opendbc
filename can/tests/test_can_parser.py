@@ -28,7 +28,7 @@ class TestCANParser(unittest.TestCase):
     #   print('{:54} ({:5} lines): {} ms'.format(dbc, lines, round(t * 1000, 4)))
 
     max_ms_per_line = max([t / lines * 1000 for _, lines, t in dbc_times])
-    self.assertTrue(max_ms_per_line < 0.02, f'Max ms/line time too high: {max_ms_per_line} >= 0.01')
+    self.assertTrue(max_ms_per_line < 0.02, f'Max ms/line time too high: {max_ms_per_line} >= 0.02')
 
 
 if __name__ == "__main__":
