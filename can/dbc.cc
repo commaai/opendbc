@@ -132,6 +132,7 @@ DBC* dbc_parse(const std::string& dbc_name) {
 
   std::string line;
   std::smatch match;
+  // TODO: see if we can speed up the regex statements in this loop, SG_ is specifically the slowest
   while (std::getline(infile, line)) {
     line = trim(line);
     if (startswith(line, "BO_ ")) {
