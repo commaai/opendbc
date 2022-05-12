@@ -48,7 +48,6 @@ cdef class CANParser:
     self.can_valid = False
     self.can_invalid_cnt = CAN_INVALID_CNT
 
-    cdef int i
     for i in range(self.dbc[0].msgs.size()):
       msg = self.dbc[0].msgs[i]
       name = msg.name.decode('utf8')
