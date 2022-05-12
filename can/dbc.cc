@@ -11,8 +11,6 @@
 
 #include "common_dbc.h"
 
-std::string dbc_file_path;
-
 std::regex bo_regexp(R"(^BO\_ (\w+) (\w+) *: (\w+) (\w+))");
 std::regex sg_regexp(R"(^SG\_ (\w+) : (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*))");
 std::regex sgm_regexp(R"(^SG\_ (\w+) (\w+) *: (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*))");
@@ -108,7 +106,7 @@ void set_signal_type(Signal& s, uint32_t address, ChecksumState* chk, const std:
   }
 }
 
-DBC* dbc_parse(const std::string& dbc_name) {
+DBC* dbc_parse(const std::string& dbc_name, const std::string& dbc_file_path) {
   std::ifstream infile(dbc_file_path + "/" + dbc_name + ".dbc");
   if (!infile) return nullptr;
 
@@ -210,33 +208,30 @@ DBC* dbc_parse(const std::string& dbc_name) {
   return dbc;
 }
 
-void set_dbc_file_path() {
-  if (dbc_file_path.empty()) {
-    char *basedir = std::getenv("BASEDIR");
-    if (basedir != NULL) {
-      dbc_file_path = std::string(basedir) + "/opendbc";
-    } else {
-      dbc_file_path = DBC_FILE_PATH;
-    }
+const std::string get_dbc_file_path() {
+  char *basedir = std::getenv("BASEDIR");
+  if (basedir != NULL) {
+    return std::string(basedir) + "/opendbc";
+  } else {
+    return DBC_FILE_PATH;
   }
 }
 
 const DBC* dbc_lookup(const std::string& dbc_name) {
   static std::mutex lock;
   static std::map<std::string, DBC*> dbcs;
+  const std::string& dbc_file_path = get_dbc_file_path();
 
   std::unique_lock lk(lock);
-  set_dbc_file_path();
-
   auto it = dbcs.find(dbc_name);
   if (it == dbcs.end()) {
-    it = dbcs.insert(it, {dbc_name, dbc_parse(dbc_name)});
+    it = dbcs.insert(it, {dbc_name, dbc_parse(dbc_name, dbc_file_path)});
   }
   return it->second;
 }
 
 std::vector<std::string> get_dbc_names() {
-  set_dbc_file_path();
+  const std::string& dbc_file_path = get_dbc_file_path();
   std::vector<std::string> dbcs;
   for (std::filesystem::directory_iterator i(dbc_file_path), end; i != end; i++) {
     if (!is_directory(i->path())) {
