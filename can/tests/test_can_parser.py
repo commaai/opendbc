@@ -18,17 +18,14 @@ class TestCANParser(unittest.TestCase):
         cls.dbcs[dbc_name] = len(f.readlines())
 
   def test_dbc_parsing_speed(self):
-    dbc_times = []
     for dbc, lines in self.dbcs.items():
       start_time = time.monotonic()
       CANParser(dbc, [], [], 0)
-      dbc_times.append((dbc, lines, time.monotonic() - start_time))
+      total_time_ms = (time.monotonic() - start_time) * 1000
 
-    # for dbc, lines, t in sorted(dbc_times, key=lambda x: x[-1]):
-    #   print('{:54} ({:5} lines): {} ms'.format(dbc, lines, round(t * 1000, 4)))
-
-    max_ms_per_line = max([t / lines * 1000 for _, lines, t in dbc_times])
-    self.assertTrue(max_ms_per_line < 0.02, f'Max ms/line time too high: {max_ms_per_line} >= 0.02')
+      self.assertTrue(total_time_ms < 100, f'{dbc}: total parsing time too high: {total_time_ms} ms >= 100 ms')
+      ms_per_line = total_time_ms / lines
+      self.assertTrue(ms_per_line < 0.02, f'{dbc}: max ms/line time too high: {ms_per_line} ms >= 0.02 ms')
 
 
 if __name__ == "__main__":
