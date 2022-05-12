@@ -1,4 +1,4 @@
-Import('env', 'envCython', 'cereal')
+Import('env', 'envCython', 'cereal', 'common')
 
 import os
 
@@ -8,7 +8,7 @@ if isinstance(envDBC['CXXFLAGS'], list):
   envDBC['CXXFLAGS'] += [dbc_file_path]
 else:
   envDBC['CXXFLAGS'] += ' ' + dbc_file_path
-libdbc = envDBC.SharedLibrary('libdbc', ["dbc.cc", "parser.cc", "packer.cc", "common.cc"], LIBS=["capnp", "kj"])
+libdbc = envDBC.SharedLibrary('libdbc', ["dbc.cc", "parser.cc", "packer.cc", "common.cc"], LIBS=[common, "capnp", "kj", "zmq"])
 
 # Build packer and parser
 lenv = envCython.Clone()
