@@ -4,10 +4,7 @@ import os
 
 envDBC = env.Clone()
 dbc_file_path = '-DDBC_FILE_PATH=\'"%s"\'' % (envDBC.Dir("..").abspath)
-if isinstance(envDBC['CXXFLAGS'], list):
-  envDBC['CXXFLAGS'] += [dbc_file_path]
-else:
-  envDBC['CXXFLAGS'] += ' ' + dbc_file_path
+envDBC['CXXFLAGS'] += [dbc_file_path]
 libdbc = envDBC.SharedLibrary('libdbc', ["dbc.cc", "parser.cc", "packer.cc", "common.cc"], LIBS=[common, "capnp", "kj", "zmq"])
 
 # Build packer and parser
