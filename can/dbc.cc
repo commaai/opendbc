@@ -138,7 +138,7 @@ DBC* dbc_parse(const std::string& dbc_name) {
     if (startswith(line, "BO_ ")) {
       // new group
       bool ret = std::regex_match(line, match, bo_regexp);
-      DBC_ASSERT(ret, "bad BO %s" << line);
+      DBC_ASSERT(ret, "bad BO: " << line);
 
       Msg& msg = dbc->msgs.emplace_back();
       address = msg.address = std::stoul(match[1].str());  // could be hex
@@ -146,16 +146,16 @@ DBC* dbc_parse(const std::string& dbc_name) {
       msg.size = std::stoul(match[3].str());
 
       // check for duplicates
-      DBC_ASSERT(address_set.find(address) == address_set.end(), "Duplicate address detected : " << address);
+      DBC_ASSERT(address_set.find(address) == address_set.end(), "Duplicate message address: " << address << " (" << msg.name << ")");
       address_set.insert(address);
-      DBC_ASSERT(msg_name_set.find(msg.name) == msg_name_set.end(), "Duplicate message name : " << msg.name);
+      DBC_ASSERT(msg_name_set.find(msg.name) == msg_name_set.end(), "Duplicate message name: " << msg.name);
       msg_name_set.insert(msg.name);
     } else if (startswith(line, "SG_ ")) {
       // new signal
       int offset = 0;
       if (!std::regex_search(line, match, sg_regexp)) {
         bool ret = std::regex_search(line, match, sgm_regexp);
-        DBC_ASSERT(ret, "bad SG " << line);
+        DBC_ASSERT(ret, "bad SG: " << line);
         offset = 1;
       }
       Signal& sig = signals[address].emplace_back();
@@ -175,11 +175,11 @@ DBC* dbc_parse(const std::string& dbc_name) {
         sig.lsb = be_bits[(it - be_bits.begin()) + sig.size - 1];
         sig.msb = sig.start_bit;
       }
-      DBC_ASSERT(sig.lsb < (64 * 8) && sig.msb < (64 * 8), "Signal out of bounds : " << line);
+      DBC_ASSERT(sig.lsb < (64 * 8) && sig.msb < (64 * 8), "Signal out of bounds: " << line);
     } else if (startswith(line, "VAL_ ")) {
       // new signal value/definition
       bool ret = std::regex_search(line, match, val_regexp);
-      DBC_ASSERT(ret, "bad VAL " << line);
+      DBC_ASSERT(ret, "bad VAL: " << line);
 
       auto& val = dbc->vals.emplace_back();
       val.address = std::stoul(match[1].str());  // could be hex
