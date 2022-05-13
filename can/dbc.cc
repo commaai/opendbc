@@ -69,7 +69,7 @@ ChecksumState* get_checksum(const std::string& dbc_name) {
   } else if (startswith(dbc_name, "chrysler_")) {
     s = new ChecksumState({8, -1, 7, -1, false, CHRYSLER_CHECKSUM});
   } else if (startswith(dbc_name, "comma_body")) {
-    s = new ChecksumState({8, 4, -1, -1, false, PEDAL_CHECKSUM, PEDAL_COUNTER});
+    s = new ChecksumState({8, 4, 7, 3, false, PEDAL_CHECKSUM, PEDAL_COUNTER});
   }
   return s;
 }
@@ -78,7 +78,7 @@ void set_signal_type(Signal& s, uint32_t address, ChecksumState* chk, const std:
   if (chk) {
     if (s.name == "CHECKSUM") {
       DBC_ASSERT(s.size == chk->checksum_size, "CHECKSUM is not " << chk->checksum_size << " bits long");
-      DBC_ASSERT(chk->checksum_start_bit == -1 || (s.start_bit % 8) == chk->checksum_start_bit, " CHECKSUM starts at wrong bit");
+      DBC_ASSERT((s.start_bit % 8) == chk->checksum_start_bit, " CHECKSUM starts at wrong bit");
       DBC_ASSERT(s.is_little_endian == chk->little_endian, "CHECKSUM has wrong endianness");
       s.type = chk->checksum_type;
     } else if (s.name == "COUNTER") {
