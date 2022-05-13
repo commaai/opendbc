@@ -66,8 +66,7 @@ public:
   uint64_t bus_timeout_threshold = 0;
 
   CANParser(int abus, const std::string& dbc_name,
-            const std::vector<MessageParseOptions> &options,
-            const std::vector<SignalParseOptions> &sigoptions);
+            const std::vector<MessageParseOptions> &options);
   CANParser(int abus, const std::string& dbc_name, bool ignore_checksum, bool ignore_counter);
   #ifndef DYNAMIC_CAPNP
   void update_string(const std::string &data, bool sendcan);

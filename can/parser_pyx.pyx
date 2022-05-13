@@ -62,10 +62,9 @@ cdef class CANParser:
     # Convert message names into addresses
     for i in range(len(signals)):
       s = signals[i]
-      if not isinstance(s[1], numbers.Number):
-        name = s[1].encode('utf8')
-        s = (s[0], self.msg_name_to_address[name])
-        signals[i] = s
+      if not isinstance(s, numbers.Number):
+        name = s.encode('utf8')
+        signals[i] = self.msg_name_to_address[name]
 
     for i in range(len(checks)):
       c = checks[i]
@@ -76,20 +75,16 @@ cdef class CANParser:
 
     if enforce_checks:
       checked_addrs = {c[0] for c in checks}
-      signal_addrs = {s[1] for s in signals}
-      unchecked = signal_addrs - checked_addrs
+      unchecked = set(signals) - checked_addrs
       if len(unchecked):
         err_msg = ', '.join(f"{self.address_to_msg_name[addr].decode()} ({hex(addr)})" for addr in unchecked)
         raise RuntimeError(f"Unchecked addrs: {err_msg}")
 
-    cdef vector[SignalParseOptions] signal_options_v
-    cdef SignalParseOptions spo
-    for sig_name, sig_address in signals:
-      spo.address = sig_address
-      spo.name = sig_name
-      signal_options_v.push_back(spo)
+    cdef vector[uint32_t] signal_options_v
+    for sig_address in signals:  # TODO: just pass signals to cc parser
+      signal_options_v.push_back(sig_address)
 
-    message_options = dict((address, 0) for _, address in signals)
+    message_options = dict((address, 0) for address in signals)
     message_options.update(dict(checks))
 
     cdef vector[MessageParseOptions] message_options_v
@@ -99,7 +94,7 @@ cdef class CANParser:
       mpo.check_frequency = freq
       message_options_v.push_back(mpo)
 
-    self.can = new cpp_CANParser(bus, dbc_name, message_options_v, signal_options_v)
+    self.can = new cpp_CANParser(bus, dbc_name, message_options_v)
     self.update_vl()
 
   cdef unordered_set[uint32_t] update_vl(self):
