@@ -220,7 +220,7 @@ const std::string get_dbc_file_path() {
 const DBC* dbc_lookup(const std::string& dbc_name) {
   static std::mutex lock;
   static std::map<std::string, DBC*> dbcs;
-  const std::string& dbc_file_path = get_dbc_file_path();
+  static const std::string& dbc_file_path = get_dbc_file_path();
 
   std::unique_lock lk(lock);
   auto it = dbcs.find(dbc_name);
@@ -231,7 +231,7 @@ const DBC* dbc_lookup(const std::string& dbc_name) {
 }
 
 std::vector<std::string> get_dbc_names() {
-  const std::string& dbc_file_path = get_dbc_file_path();
+  static const std::string& dbc_file_path = get_dbc_file_path();
   std::vector<std::string> dbcs;
   for (std::filesystem::directory_iterator i(dbc_file_path), end; i != end; i++) {
     if (!is_directory(i->path())) {
