@@ -125,9 +125,9 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
     }
 
     const Msg* msg = NULL;
-    for (int i = 0; i < dbc->num_msgs; i++) {
-      if (dbc->msgs[i].address == op.address) {
-        msg = &dbc->msgs[i];
+    for (const auto& m : dbc->msgs) {
+      if (m.address == op.address) {
+        msg = &m;
         break;
       }
     }
@@ -140,10 +140,9 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
     assert(state.size < 64);  // max signal size is 64 bytes
 
     // track checksums and counters for this message
-    for (int i = 0; i < msg->num_sigs; i++) {
-      const Signal *sig = &msg->sigs[i];
-      if (sig->type != SignalType::DEFAULT) {
-        state.parse_sigs.push_back(*sig);
+    for (const auto& sig : msg->sigs) {
+      if (sig.type != SignalType::DEFAULT) {
+        state.parse_sigs.push_back(sig);
         state.vals.push_back(0);
         state.all_vals.push_back({});
       }
@@ -153,11 +152,9 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
     for (const auto& sigop : sigoptions) {
       if (sigop.address != op.address) continue;
 
-      for (int i = 0; i < msg->num_sigs; i++) {
-        const Signal *sig = &msg->sigs[i];
-        if (strcmp(sig->name, sigop.name) == 0
-            && sig->type == SignalType::DEFAULT) {
-          state.parse_sigs.push_back(*sig);
+      for (const auto& sig : msg->sigs) {
+        if (sig.name == sigop.name && sig.type == SignalType::DEFAULT) {
+          state.parse_sigs.push_back(sig);
           state.vals.push_back(0);
           state.all_vals.push_back({});
           break;
@@ -175,18 +172,16 @@ CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum
   assert(dbc);
   init_crc_lookup_tables();
 
-  for (int i = 0; i < dbc->num_msgs; i++) {
-    const Msg* msg = &dbc->msgs[i];
+  for (const auto& msg : dbc->msgs) {
     MessageState state = {
-      .address = msg->address,
-      .size = msg->size,
+      .address = msg.address,
+      .size = msg.size,
       .ignore_checksum = ignore_checksum,
       .ignore_counter = ignore_counter,
     };
 
-    for (int j = 0; j < msg->num_sigs; j++) {
-      const Signal *sig = &msg->sigs[j];
-      state.parse_sigs.push_back(*sig);
+    for (const auto& sig : msg.sigs) {
+      state.parse_sigs.push_back(sig);
       state.vals.push_back(0);
       state.all_vals.push_back({});
     }
