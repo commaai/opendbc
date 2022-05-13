@@ -95,7 +95,7 @@ void set_signal_type(Signal& s, uint32_t address, ChecksumState* chk, const std:
       DBC_ASSERT(s.size == 4, "PEDAL COUNTER is not 4 bits long");
       s.type = PEDAL_COUNTER;
     }
-  } else if (address == 592) {
+  } else if (address == 0x250) {
     if (s.name == "CHECKSUM") {
       DBC_ASSERT(s.size == 8, "BODY CHECKSUM is not 8 bits long");
       s.type = PEDAL_CHECKSUM;
