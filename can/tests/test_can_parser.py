@@ -23,7 +23,7 @@ class TestCANParser(unittest.TestCase):
       CANParser(dbc, [], [], 0)
       total_time_ms = (time.monotonic() - start_time) * 1000
 
-      self.assertTrue(total_time_ms < 100, f'{dbc}: total parsing time too high: {total_time_ms} ms >= 100 ms')
+      self.assertTrue(total_time_ms < 45, f'{dbc}: total parsing time too high: {total_time_ms} ms >= 45 ms')
       ms_per_line = total_time_ms / lines
       self.assertTrue(ms_per_line < 0.02, f'{dbc}: max ms/line time too high: {ms_per_line} ms >= 0.02 ms')
 
