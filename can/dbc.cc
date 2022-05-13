@@ -88,10 +88,10 @@ void set_signal_type(Signal& s, ChecksumState* chk, const std::string& dbc_name)
       s.type = chk->counter_type;
     }
   }
-  if (s.name == "CHECKSUM_INTERCEPTOR") {
+  if (s.name == "CHECKSUM_PEDAL") {
     DBC_ASSERT(s.size == 8, "INTERCEPTOR CHECKSUM is not 8 bits long");
     s.type = PEDAL_CHECKSUM;
-  } else if (s.name == "COUNTER_INTERCEPTOR") {
+  } else if (s.name == "COUNTER_PEDAL") {
     DBC_ASSERT(s.size == 4, "INTERCEPTOR COUNTER is not 4 bits long");
     s.type = PEDAL_COUNTER;
   }
