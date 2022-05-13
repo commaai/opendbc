@@ -17,13 +17,13 @@ std::regex sgm_regexp(R"(^SG_ (\w+) (\w+) *: (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9
 std::regex val_regexp(R"(VAL_ (\w+) (\w+) (\s*[-+]?[0-9]+\s+\".+?\"[^;]*))");
 std::regex val_split_regexp{R"([\"]+)"};  // split on "
 
-#define DBC_ASSERT(condition, message)          \
-  do {                                          \
-    if (!(condition)) {                         \
-      std::stringstream is;                     \
+#define DBC_ASSERT(condition, message)                             \
+  do {                                                             \
+    if (!(condition)) {                                            \
+      std::stringstream is;                                        \
       is << "[" << dbc_name << ":" << line_num << "] " << message; \
-      throw std::runtime_error(is.str());       \
-    }                                           \
+      throw std::runtime_error(is.str());                          \
+    }                                                              \
   } while (false)
 
 inline bool startswith(const std::string& str, const char* prefix) {
