@@ -82,27 +82,6 @@ BO_ 804 CRUISE: 8 PCM
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
 
-BO_ 829 LKAS_HUD: 5 ADAS
- SG_ CAM_TEMP_HIGH : 7|1@0+ (1,0) [0|255] "" BDY
- SG_ SET_ME_X41 : 6|7@0+ (1,0) [0|127] "" BDY
- SG_ BOH : 6|7@0+ (1,0) [0|127] "" BDY
- SG_ DASHED_LANES : 14|1@0+ (1,0) [0|1] "" BDY
- SG_ DTC : 13|1@0+ (1,0) [0|1] "" BDY
- SG_ LKAS_PROBLEM : 12|1@0+ (1,0) [0|1] "" BDY
- SG_ LKAS_OFF : 11|1@0+ (1,0) [0|1] "" BDY
- SG_ SOLID_LANES : 10|1@0+ (1,0) [0|1] "" BDY
- SG_ LDW_RIGHT : 9|1@0+ (1,0) [0|1] "" BDY
- SG_ STEERING_REQUIRED : 8|1@0+ (1,0) [0|1] "" BDY
- SG_ BOH : 23|2@0+ (1,0) [0|4] "" BDY
- SG_ LDW_PROBLEM : 21|1@0+ (1,0) [0|1] "" BDY
- SG_ BEEP : 17|2@0+ (1,0) [0|1] "" BDY
- SG_ LDW_ON : 28|1@0+ (1,0) [0|1] "" BDY
- SG_ LDW_OFF : 27|1@0+ (1,0) [0|1] "" BDY
- SG_ CLEAN_WINDSHIELD : 26|1@0+ (1,0) [0|1] "" BDY
- SG_ SET_ME_X48 : 31|8@0+ (1,0) [0|255] "" BDY
- SG_ COUNTER : 37|2@0+ (1,0) [0|3] "" BDY
- SG_ CHECKSUM : 35|4@0+ (1,0) [0|15] "" BDY
-
 BO_ 884 STALK_STATUS: 8 XXX
  SG_ DASHBOARD_ALERT : 39|8@0+ (1,0) [0|255] "" EON
  SG_ AUTO_HEADLIGHTS : 46|1@0+ (1,0) [0|1] "" EON
@@ -137,8 +116,6 @@ CM_ SG_ 490 LONG_ACCEL "wheel speed derivative, noisy and zero snapping";
 CM_ SG_ 773 PASS_AIRBAG_ON "Might just be indicator light";
 CM_ SG_ 773 PASS_AIRBAG_OFF "Might just be indicator light";
 CM_ SG_ 804 CRUISE_SPEED_PCM "255 = no speed";
-CM_ SG_ 829 BEEP "beeps are pleasant, chimes are for warnngs etc...";
 
-VAL_ 829 BEEP 3 "single_beep" 2 "triple_beep" 1 "repeated_beep" 0 "no_beep";
 VAL_ 884 DASHBOARD_ALERT 0 "none" 51 "acc_problem" 55 "cmbs_problem" 75 "key_not_detected" 79 "fasten_seatbelt" 111 "lkas_problem" 131 "brake_system_problem" 132 "brake_hold_problem" 139 "tbd" 161 "door_open";
 VAL_ 891 WIPERS 4 "High" 2 "Low" 0 "Off";
