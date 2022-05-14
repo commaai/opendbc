@@ -80,14 +80,14 @@ void set_signal_type(Signal& s, uint32_t address, ChecksumState* chk, const std:
       DBC_ASSERT(s.size == chk->checksum_size, "CHECKSUM is not " << chk->checksum_size << " bits long");
       DBC_ASSERT((s.start_bit % 8) == chk->checksum_start_bit, " CHECKSUM starts at wrong bit");
       DBC_ASSERT(s.is_little_endian == chk->little_endian, "CHECKSUM has wrong endianness");
-      if (address != 513) {
+      if (dbc_name == "comma_body" && address != 513) {
         s.type = chk->checksum_type;
       }
     } else if (s.name == "COUNTER") {
       DBC_ASSERT(chk->counter_size == -1 || s.size == chk->counter_size, "COUNTER is not " << chk->counter_size << " bits long");
       DBC_ASSERT(chk->counter_start_bit == -1 || (s.start_bit % 8) == chk->counter_start_bit, "COUNTER starts at wrong bit");
       DBC_ASSERT(chk->little_endian == s.is_little_endian, "COUNTER has wrong endianness");
-      if (address != 513) {
+      if (dbc_name == "comma_body" && address != 513) {
         s.type = chk->counter_type;
       }
     }
