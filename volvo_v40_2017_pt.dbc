@@ -98,7 +98,7 @@ BO_ 114 ECM1: 8 ECM1
  SG_ ECM_ACC_DEC_INV : 32|1@0+ (1,0) [0|1] "" XXX
  SG_ ECM_ACC_TIMEGAP_DEC_INV : 34|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 117 ECM1: 8 ECM
+BO_ 117 ECM1_2: 8 ECM
 
 BO_ 128 NEW_MSG_5: 8 XXX
  SG_ NEW_SIGNAL_2 : 26|11@0+ (1,0) [0|2047] "" XXX
@@ -142,7 +142,7 @@ BO_ 272 SpeedSignal0: 8 XXX
 BO_ 288 wheel_speed1: 8 BCM
  SG_ WhlSpdLR : 39|16@0+ (1,0) [0|65535] "" XXX
  SG_ WhlSpdRR : 55|16@0+ (1,0) [0|65535] "" XXX
- 
+
 BO_ 293 PSCM1: 8 PSCM
  SG_ byte0 : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ byte3 : 31|8@0+ (1,0) [0|255] "" XXX
@@ -273,7 +273,7 @@ BO_ 1892 diagFSMReq: 8 XXX
  SG_ byte5 : 47|8@0+ (1,0) [0|255] "" XXX
  SG_ byte6 : 55|8@0+ (1,0) [0|255] "" XXX
  SG_ byte7 : 63|8@0+ (1,0) [0|255] "" XXX
- 
+
 BO_ 1900 diagFSMResp: 8 XXX
  SG_ byte03 : 7|32@0+ (1,0) [0|4294967295] "" XXX
  SG_ byte47 : 39|32@0+ (1,0) [0|4294967295] "" XXX
