@@ -166,7 +166,7 @@ VAL_ 884 DASHBOARD_ALERT 0 "none" 51 "acc_problem" 55 "cmbs_problem" 75 "key_not
 VAL_ 891 WIPERS 4 "High" 2 "Low" 0 "Off";
 
 
-CM_ "Imported file _honda_2017.dbc starts here";
+CM_ "Imported file _nidec_2017.dbc starts here";
 BO_ 145 KINEMATICS: 8 XXX
  SG_ LAT_ACCEL : 7|10@0+ (0.02,-512) [-20|20] "m/s2" EON
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
