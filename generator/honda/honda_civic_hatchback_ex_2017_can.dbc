@@ -1,6 +1,7 @@
 CM_ "IMPORT _honda_common.dbc";
 CM_ "IMPORT _honda_common_2018.dbc";
-CM_ "IMPORT _bosch_2018.dbc";
+CM_ "import _bosch_common.dbc";
+CM_ "import _bosch_2018.dbc";
 
 BO_ 330 STEERING_SENSORS: 8 EPS
  SG_ STEER_ANGLE : 7|16@0- (-0.1,0) [-500|500] "deg" EON
