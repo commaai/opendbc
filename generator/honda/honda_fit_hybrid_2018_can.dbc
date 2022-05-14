@@ -1,5 +1,5 @@
 CM_ "IMPORT _comma.dbc";
-CM_ "IMPORT _honda_common.dbc";
+CM_ "IMPORT _honda_common_2018.dbc";
 CM_ "IMPORT _dual_can_nidec_2018.dbc";
 
 BO_ 228 STEERING_CONTROL: 5 ADAS
