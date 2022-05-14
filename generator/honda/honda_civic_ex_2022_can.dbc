@@ -1,4 +1,5 @@
 CM_ "IMPORT _comma.dbc";
+CM_ "IMPORT _bosch_2018.dbc";
 CM_ "IMPORT _honda_common.dbc";
 
 BO_ 401 GEARBOX: 8 PCM
