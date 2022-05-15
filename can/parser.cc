@@ -55,6 +55,8 @@ bool MessageState::parse(uint64_t sec, const std::vector<uint8_t> &dat) {
         checksum_failed = true;
       } else if (sig.type == SignalType::CHRYSLER_CHECKSUM && chrysler_checksum(address, dat) != tmp) {
         checksum_failed = true;
+      } else if (sig.type == SignalType::HKG_CAN_FD_CHECKSUM && hkg_can_fd_checksum(address, dat) != tmp) {
+        checksum_failed = true;
       } else if (sig.type == SignalType::PEDAL_CHECKSUM && pedal_checksum(dat) != tmp) {
         checksum_failed = true;
       }
