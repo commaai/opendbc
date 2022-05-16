@@ -17,13 +17,13 @@ std::regex sgm_regexp(R"(^SG_ (\w+) (\w+) *: (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9
 std::regex val_regexp(R"(VAL_ (\w+) (\w+) (\s*[-+]?[0-9]+\s+\".+?\"[^;]*))");
 std::regex val_split_regexp{R"([\"]+)"};  // split on "
 
-#define DBC_ASSERT(condition, message)          \
-  do {                                          \
-    if (!(condition)) {                         \
-      std::stringstream is;                     \
-      is << "[" << dbc_name << "] " << message; \
-      throw std::runtime_error(is.str());       \
-    }                                           \
+#define DBC_ASSERT(condition, message)                             \
+  do {                                                             \
+    if (!(condition)) {                                            \
+      std::stringstream is;                                        \
+      is << "[" << dbc_name << ":" << line_num << "] " << message; \
+      throw std::runtime_error(is.str());                          \
+    }                                                              \
   } while (false)
 
 inline bool startswith(const std::string& str, const char* prefix) {
@@ -76,7 +76,7 @@ ChecksumState* get_checksum(const std::string& dbc_name) {
   return s;
 }
 
-void set_signal_type(Signal& s, uint32_t address, ChecksumState* chk, const std::string& dbc_name) {
+void set_signal_type(Signal& s, uint32_t address, ChecksumState* chk, const std::string& dbc_name, int line_num) {
   if (chk) {
     if (s.name == "CHECKSUM") {
       DBC_ASSERT(s.size == chk->checksum_size, "CHECKSUM is not " << chk->checksum_size << " bits long");
@@ -124,10 +124,12 @@ DBC* dbc_parse(const std::string& dbc_name, const std::string& dbc_file_path) {
   }
 
   std::string line;
+  int line_num = 0;
   std::smatch match;
   // TODO: see if we can speed up the regex statements in this loop, SG_ is specifically the slowest
   while (std::getline(infile, line)) {
     line = trim(line);
+    line_num += 1;
     if (startswith(line, "BO_ ")) {
       // new group
       bool ret = std::regex_match(line, match, bo_regexp);
@@ -159,7 +161,7 @@ DBC* dbc_parse(const std::string& dbc_name, const std::string& dbc_file_path) {
       sig.is_signed = match[offset + 5].str() == "-";
       sig.factor = std::stod(match[offset + 6].str());
       sig.offset = std::stod(match[offset + 7].str());
-      set_signal_type(sig, address, checksum.get(), dbc_name);
+      set_signal_type(sig, address, checksum.get(), dbc_name, line_num);
       if (sig.is_little_endian) {
         sig.lsb = sig.start_bit;
         sig.msb = sig.start_bit + sig.size - 1;
