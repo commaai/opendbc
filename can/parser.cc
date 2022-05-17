@@ -205,6 +205,9 @@ void CANParser::update_string(const std::string &data, bool sendcan) {
   capnp::FlatArrayMessageReader cmsg(aligned_buf.slice(0, buf_size));
   cereal::Event::Reader event = cmsg.getRoot<cereal::Event>();
 
+  if (first_sec == 0) {
+    first_sec = event.getLogMonoTime();
+  }
   last_sec = event.getLogMonoTime();
 
   auto cans = sendcan ? event.getSendcan() : event.getCan();
@@ -282,13 +285,15 @@ void CANParser::UpdateCans(uint64_t sec, const capnp::DynamicStruct::Reader& cms
 }
 
 void CANParser::UpdateValid(uint64_t sec) {
+  const bool show_missing = (last_sec - first_sec) > 2e9;
+
   can_valid = true;
   for (const auto& kv : message_states) {
     const auto& state = kv.second;
     if (state.check_threshold > 0 && (sec - state.seen) > state.check_threshold) {
       if (state.seen > 0) {
         LOGE("0x%X TIMEOUT", state.address);
-      } else {
+      } else if (show_missing) {
         LOGE("0x%X MISSING", state.address);
       }
       can_valid = false;
