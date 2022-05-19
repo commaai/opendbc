@@ -19,13 +19,15 @@
 
 #define MAX_BAD_COUNTER 5
 
+void init_crc_lookup_tables();
+
 // Car specific functions
 unsigned int honda_checksum(uint32_t address, const std::vector<uint8_t> &d);
 unsigned int toyota_checksum(uint32_t address, const std::vector<uint8_t> &d);
 unsigned int subaru_checksum(uint32_t address, const std::vector<uint8_t> &d);
 unsigned int chrysler_checksum(uint32_t address, const std::vector<uint8_t> &d);
-void init_crc_lookup_tables();
 unsigned int volkswagen_crc(uint32_t address, const std::vector<uint8_t> &d);
+unsigned int hkg_can_fd_checksum(uint32_t address, const std::vector<uint8_t> &d);
 unsigned int pedal_checksum(const std::vector<uint8_t> &d);
 
 class MessageState {
@@ -61,6 +63,7 @@ private:
 public:
   bool can_valid = false;
   bool bus_timeout = false;
+  uint64_t first_sec = 0;
   uint64_t last_sec = 0;
   uint64_t last_nonempty_sec = 0;
   uint64_t bus_timeout_threshold = 0;
