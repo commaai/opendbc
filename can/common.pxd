@@ -77,7 +77,7 @@ cdef extern from "common.h":
     CANParser(int, string, vector[MessageParseOptions])
     void update_string(string, bool)
     vector[SignalValue] query_latest()
-    SignalValue get_msg(uint32_t msg_addr)
+    double get_value(uint32_t msg_addr, string signal)
 
   cdef cppclass CANPacker:
    CANPacker(string)

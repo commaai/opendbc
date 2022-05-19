@@ -140,22 +140,11 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
     state.size = msg->size;
     assert(state.size < 64);  // max signal size is 64 bytes
 
-    // track checksums and counters for this message
+    // track all signals for this message
     for (const auto& sig : msg->sigs) {
-      if (sig.type != SignalType::DEFAULT) {
-        state.parse_sigs.push_back(sig);
-        state.vals.push_back(0);
-        state.all_vals.push_back({});
-      }
-    }
-
-    // track requested signals for this message
-    for (const auto& sig : msg->sigs) {
-      if (sig.type == SignalType::DEFAULT) {
-        state.parse_sigs.push_back(sig);
-        state.vals.push_back(0);
-        state.all_vals.push_back({});
-      }
+      state.parse_sigs.push_back(sig);
+      state.vals.push_back(0);
+      state.all_vals.push_back({});
     }
   }
 }
@@ -295,20 +284,47 @@ void CANParser::UpdateValid(uint64_t sec) {
   }
 }
 
-SignalValue CANParser::get_msg(uint32_t msg_addr) {
+double CANParser::get_value(uint32_t msg_addr, std::string &signal) {
   auto state_it = message_states.find(msg_addr);
-  if (state_it != message_states.end()) {
-    MessageState state = state_it->second;
-    const Signal &sig = state.parse_sigs[0];
-     return (SignalValue){
-        .address = state.address,
-        .name = sig.name,
-        .value = state.vals[0],
-        .all_values = state.all_vals[0],
-      };
+  if (state_it == message_states.end()) {
+    fprintf(stderr, "CANParser: could not find message 0x%X in DBC\n", msg_addr);
+    assert(false);
+  }
+
+  MessageState state = state_it->second;
+
+  for (int i = 0; i < state.parse_sigs.size(); i++) {
+    const Signal &sig = state.parse_sigs[i];
+//    printf("%s, %s\n", sig.name.c_str(), signal.c_str());
+//    printf("%lf\n", state.vals[i]);
+    if (sig.name == signal) {
+      return state.vals[i];
+    }
   }
   assert(false);
 }
+
+//double get_value(uint32_t msg_addr, std::string &signal);
+//SignalValue CANParser::get_msg(uint32_t msg_addr) {
+//  auto state_it = message_states.find(msg_addr);
+//  if (state_it == message_states.end()) {
+//    fprintf(stderr, "CANParser: could not find message 0x%X in DBC\n", msg_addr);
+//    assert(false);
+//  }
+//
+//  MessageState state = state_it->second;
+//
+//  for (int i = 0; i < state.parse_sigs.size(); i++) {
+//    const Signal &sig = state.parse_sigs[i];
+//    if (sig.name == signal) {
+//      return state.vals[i];
+//    }
+//  }
+//  assert(false);
+//}
+//
+//double get_value(uint32_t msg_addr, std::string &signal);
+//SignalValue get_message(uint32_t msg_addr);
 
 std::vector<SignalValue> CANParser::query_latest() {
   std::vector<SignalValue> ret;

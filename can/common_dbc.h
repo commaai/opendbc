@@ -29,6 +29,13 @@ struct SignalValue {
   std::vector<double> all_values;  // all values from this cycle
 };
 
+struct SignalValueNew {
+  uint32_t address;
+  std::string name;
+  double value;  // latest value
+  std::vector<double> all_values;  // all values from this cycle
+};
+
 enum SignalType {
   DEFAULT,
   HONDA_CHECKSUM,

@@ -98,8 +98,12 @@ cdef class CANParser:
     self.can = new cpp_CANParser(bus, dbc_name, message_options_v)
     self.update_vl()
 
-  def get_msg(self):
-    return self.can.get_msg(835)
+  # TODO: combine these?
+  def get_value(self, msg_addr, sig_name):
+    return self.can.get_value(msg_addr, sig_name)
+
+  #def get_message(self, msg_addr):
+  #  return self.can.get_message(msg_addr)
 
   cdef unordered_set[uint32_t] update_vl(self):
     cdef unordered_set[uint32_t] updated_addrs
