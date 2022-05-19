@@ -67,6 +67,7 @@ public:
   uint64_t last_sec = 0;
   uint64_t last_nonempty_sec = 0;
   uint64_t bus_timeout_threshold = 0;
+  SignalValue get_msg(uint32_t msg_addr);
 
   CANParser(int abus, const std::string& dbc_name,
             const std::vector<MessageParseOptions> &options);

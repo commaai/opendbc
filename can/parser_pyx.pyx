@@ -7,6 +7,7 @@ from libcpp.unordered_set cimport unordered_set
 from libc.stdint cimport uint32_t, uint64_t, uint16_t
 from libcpp cimport bool
 from libcpp.map cimport map
+import time
 
 from .common cimport CANParser as cpp_CANParser
 from .common cimport SignalParseOptions, MessageParseOptions, dbc_lookup, SignalValue, DBC
@@ -97,6 +98,9 @@ cdef class CANParser:
     self.can = new cpp_CANParser(bus, dbc_name, message_options_v)
     self.update_vl()
 
+  def get_msg(self):
+    return self.can.get_msg(835)
+
   cdef unordered_set[uint32_t] update_vl(self):
     cdef unordered_set[uint32_t] updated_addrs
 
@@ -118,11 +122,13 @@ cdef class CANParser:
     return updated_addrs
 
   def update_string(self, dat, sendcan=False):
-    for v in self.vl_all.values():
-      v.clear()
+    #for v in self.vl_all.values():
+    #  v.clear()
 
+    # t = time.time()
     self.can.update_string(dat, sendcan)
-    return self.update_vl()
+    # print(time.time() - t)
+    # return self.update_vl()
 
   def update_strings(self, strings, sendcan=False):
     for v in self.vl_all.values():

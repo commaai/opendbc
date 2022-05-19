@@ -53,7 +53,6 @@ cdef extern from "common_dbc.h":
     uint32_t address
     string name
 
-
   cdef struct MessageParseOptions:
     uint32_t address
     int check_frequency
@@ -78,6 +77,7 @@ cdef extern from "common.h":
     CANParser(int, string, vector[MessageParseOptions])
     void update_string(string, bool)
     vector[SignalValue] query_latest()
+    SignalValue get_msg(uint32_t msg_addr)
 
   cdef cppclass CANPacker:
    CANPacker(string)

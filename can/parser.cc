@@ -295,6 +295,21 @@ void CANParser::UpdateValid(uint64_t sec) {
   }
 }
 
+SignalValue CANParser::get_msg(uint32_t msg_addr) {
+  auto state_it = message_states.find(msg_addr);
+  if (state_it != message_states.end()) {
+    MessageState state = state_it->second;
+    const Signal &sig = state.parse_sigs[0];
+     return (SignalValue){
+        .address = state.address,
+        .name = sig.name,
+        .value = state.vals[0],
+        .all_values = state.all_vals[0],
+      };
+  }
+  assert(false);
+}
+
 std::vector<SignalValue> CANParser::query_latest() {
   std::vector<SignalValue> ret;
 
