@@ -543,6 +543,7 @@ BO_ 610 EPS_STATUS: 8 EPS
  SG_ LKA_STATE : 31|7@0+ (1,0) [0|127] "" XXX
  SG_ TYPE : 24|1@0+ (1,0) [0|1] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ LTA_STATUS : 15|3@0+ (1,0) [0|1] "" XXX
 
 BO_ 1014 BSM: 8 XXX
  SG_ L_ADJACENT : 0|1@0+ (1,0) [0|1] "" XXX
