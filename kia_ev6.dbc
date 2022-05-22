@@ -43,29 +43,36 @@ BO_ 53 ACCELERATOR: 32 XXX
  SG_ ACCELERATOR_PEDAL : 40|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 80 LKAS: 16 XXX
- SG_ STEER_REQ_3 : 67|1@1+ (1,0) [0|7] "" XXX
- SG_ STEER_REQ_2 : 65|1@1+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_5 : 62|1@1+ (1,0) [0|1] "" XXX
  SG_ STEER_REQ : 52|1@1+ (1,0) [0|1] "" XXX
  SG_ TORQUE_REQUEST : 41|11@1+ (1,-1024) [0|4095] "" XXX
  SG_ LKA_ICON : 38|2@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_4 : 32|1@1+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_1 : 26|3@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_1 : 27|2@1+ (1,0) [0|255] "" XXX
  SG_ LFA_BUTTON : 56|1@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
+ SG_ STEER_MODE : 65|3@1+ (1,0) [0|1] "" XXX
+ SG_ LKA_WARNING : 32|1@1+ (1,0) [0|1] "" XXX
+ SG_ LKA_ASSIST : 62|1@1+ (1,0) [0|1] "" XXX
+ SG_ LKA_MODE : 24|3@1+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_2 : 70|2@0+ (1,0) [0|3] "" XXX
+ SG_ SET_ME_1 : 80|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_3 : 111|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 298 LFA: 16 XXX
- SG_ STEER_REQ_3 : 67|1@1+ (1,0) [0|7] "" XXX
- SG_ STEER_REQ_2 : 65|1@1+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_5 : 62|1@1+ (1,0) [0|1] "" XXX
  SG_ STEER_REQ : 52|1@1+ (1,0) [0|1] "" XXX
  SG_ TORQUE_REQUEST : 41|11@1+ (1,-1024) [0|4095] "" XXX
- SG_ LDW_STATUS : 38|2@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_4 : 32|1@1+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_1 : 26|3@1+ (1,0) [0|255] "" XXX
+ SG_ LKA_ICON : 38|2@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_1 : 27|2@1+ (1,0) [0|255] "" XXX
+ SG_ LFA_BUTTON : 56|1@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
+ SG_ STEER_MODE : 65|3@1+ (1,0) [0|1] "" XXX
+ SG_ LKA_WARNING : 32|1@1+ (1,0) [0|1] "" XXX
+ SG_ LKA_ASSIST : 62|1@1+ (1,0) [0|1] "" XXX
+ SG_ LKA_MODE : 24|3@1+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_2 : 70|2@0+ (1,0) [0|3] "" XXX
+ SG_ SET_ME_1 : 80|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_3 : 111|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 96 ESP_STATUS: 32 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
@@ -146,8 +153,29 @@ BO_ 1043 BLINKERS: 8 XXX
 BO_ 1240 CLUSTER_INFO: 8 XXX
  SG_ DISTANCE_UNIT : 0|1@1+ (1,0) [0|1] "" XXX
 
+BO_ 480 NEW_MSG_1: 16 XXX
+ SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
+ SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ LFA_ENABLED : 63|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 81 NEW_MSG_2: 32 XXX
+ SG_ NEW_SIGNAL_1 : 71|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_2 : 228|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_3 : 195|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_4 : 0|16@1+ (1,0) [0|65535] "" XXX
+ SG_ NEW_SIGNAL_5 : 16|8@1+ (1,0) [0|255] "" XXX
+
+BO_ 389 NEW_MSG_3: 8 XXX
+ SG_ NEW_SIGNAL_1 : 28|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_2 : 48|4@1+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_3 : 16|8@1+ (1,0) [0|255] "" XXX
+
+
+
+
 CM_ SG_ 961 COUNTER_ALT "only increments on change";
 CM_ SG_ 1041 COUNTER_ALT "only increments on change";
 CM_ SG_ 1043 COUNTER_ALT "only increments on change";
 VAL_ 53 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
 VAL_ 80 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green" ;
+VAL_ 80 LKA_MODE 1 "warning only" 2 "assist" 6 "off" ;
