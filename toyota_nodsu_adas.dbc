@@ -33,7 +33,7 @@ NS_ :
 
 BS_:
 
-BU_: RADAR
+BU_: XXX RADAR
 
 BO_ 768 BUTTONS: 8 RADAR
  SG_ LKAS_PRESS : 2|1@0+ (1,0) [0|1] "" XXX
