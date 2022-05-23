@@ -78,7 +78,7 @@ NS_ :
 
 BS_:
 
-BU_: XXX DSU HCU EPS IPAS CGW BGM CANFILTER
+BU_: XXX DSU HCU EPS IPAS CGW BGM
 
 BO_ 36 KINEMATICS: 8 XXX
  SG_ ACCEL_Y : 33|10@0+ (0.03589,-18.375) [0|65535] "m/s^2" XXX
@@ -205,8 +205,7 @@ BO_ 835 ACC_CONTROL: 8 DSU
  SG_ ACCEL_CMD_ALT : 47|8@0- (0.05,0) [0|0] "m/s^2" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
-CM_ "BO_ ACC_CONTROL_COPY: CANFILTER mirrors stock ACC_CONTROL with this msg id, this msg used for canfiter fingerprinting, DISTANCE button event, logging"
-BO_ 682 ACC_CONTROL_COPY: 8 CANFILTER
+BO_ 682 ACC_CONTROL_COPY: 8 XXX
  SG_ ACCEL_CMD : 7|16@0- (0.001,0) [-20|20] "m/s^2" HCU
  SG_ ALLOW_LONG_PRESS : 17|2@0+ (1,0) [0|2] "" XXX
  SG_ ACC_MALFUNCTION : 18|1@0+ (1,0) [0|0] "" XXX
@@ -223,8 +222,7 @@ BO_ 682 ACC_CONTROL_COPY: 8 CANFILTER
  SG_ ACCEL_CMD_ALT : 47|8@0- (0.05,0) [0|0] "m/s^2" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
-CM_ "BO_ ACC_CONTROL_SAFE: A ACC_CONTROL version which supports failsafe, when AEB is active, CANFILTER mutes ACC_CONTROL from OP and pass the stock msg instead"
-BO_ 674 ACC_CONTROL_SAFE: 8 CANFILTER
+BO_ 674 ACC_CONTROL_SAFE: 8 XXX 
  SG_ ACCEL_CMD : 7|16@0- (0.001,0) [-20|20] "m/s^2" HCU
  SG_ ALLOW_LONG_PRESS : 17|2@0+ (1,0) [0|2] "" XXX
  SG_ ACC_MALFUNCTION : 18|1@0+ (1,0) [0|0] "" XXX
@@ -240,6 +238,9 @@ BO_ 674 ACC_CONTROL_SAFE: 8 CANFILTER
  SG_ ITS_CONNECT_LEAD : 39|8@0+ (1,0) [0|1] "" Vector__XXX
  SG_ ACCEL_CMD_ALT : 47|8@0- (0.05,0) [0|0] "m/s^2" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
+CM_ "BO_ ACC_CONTROL_COPY: CANFILTER is a CAN interceptor designed for NODSU CAMRY and CH-R: https://github.com/Smartype/canfilter, CANFILTER mirrors stock ACC_CONTROL with this msg id, this msg is used for canfiter detection, DISTANCE button event, and logging"
+CM_ "BO_ ACC_CONTROL_SAFE: A ACC_CONTROL version which supports failsafe, when AEB is active, CANFILTER mutes ACC_CONTROL from OP and pass the stock msg instead"
 
 BO_ 836 PRE_COLLISION_2: 8 DSU
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|0] "" XXX
