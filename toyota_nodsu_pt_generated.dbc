@@ -205,43 +205,6 @@ BO_ 835 ACC_CONTROL: 8 DSU
  SG_ ACCEL_CMD_ALT : 47|8@0- (0.05,0) [0|0] "m/s^2" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 682 ACC_CONTROL_COPY: 8 XXX
- SG_ ACCEL_CMD : 7|16@0- (0.001,0) [-20|20] "m/s^2" HCU
- SG_ ALLOW_LONG_PRESS : 17|2@0+ (1,0) [0|2] "" XXX
- SG_ ACC_MALFUNCTION : 18|1@0+ (1,0) [0|0] "" XXX
- SG_ RADAR_DIRTY : 19|1@0+ (1,0) [0|1] "" XXX
- SG_ DISTANCE : 20|1@0+ (1,0) [0|1] "" XXX
- SG_ MINI_CAR : 21|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_TYPE : 23|2@0+ (1,0) [0|3] "" HCU
- SG_ CANCEL_REQ : 24|1@0+ (1,0) [0|1] "" HCU
- SG_ ACC_CUT_IN : 25|1@0+ (1,0) [0|1] "" XXX
- SG_ LEAD_STANDSTILL : 29|1@0+ (1,0) [0|1] "" HCU
- SG_ PERMIT_BRAKING : 30|1@0+ (1,0) [0|1] "" HCU
- SG_ RELEASE_STANDSTILL : 31|1@0+ (1,0) [0|1] "" HCU
- SG_ ITS_CONNECT_LEAD : 39|8@0+ (1,0) [0|1] "" Vector__XXX
- SG_ ACCEL_CMD_ALT : 47|8@0- (0.05,0) [0|0] "m/s^2" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 674 ACC_CONTROL_SAFE: 8 XXX
- SG_ ACCEL_CMD : 7|16@0- (0.001,0) [-20|20] "m/s^2" HCU
- SG_ ALLOW_LONG_PRESS : 17|2@0+ (1,0) [0|2] "" XXX
- SG_ ACC_MALFUNCTION : 18|1@0+ (1,0) [0|0] "" XXX
- SG_ RADAR_DIRTY : 19|1@0+ (1,0) [0|1] "" XXX
- SG_ DISTANCE : 20|1@0+ (1,0) [0|1] "" XXX
- SG_ MINI_CAR : 21|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_TYPE : 23|2@0+ (1,0) [0|3] "" HCU
- SG_ CANCEL_REQ : 24|1@0+ (1,0) [0|1] "" HCU
- SG_ ACC_CUT_IN : 25|1@0+ (1,0) [0|1] "" XXX
- SG_ LEAD_STANDSTILL : 29|1@0+ (1,0) [0|1] "" HCU
- SG_ PERMIT_BRAKING : 30|1@0+ (1,0) [0|1] "" HCU
- SG_ RELEASE_STANDSTILL : 31|1@0+ (1,0) [0|1] "" HCU
- SG_ ITS_CONNECT_LEAD : 39|8@0+ (1,0) [0|1] "" Vector__XXX
- SG_ ACCEL_CMD_ALT : 47|8@0- (0.05,0) [0|0] "m/s^2" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
-CM_ "BO_ ACC_CONTROL_COPY: CANFILTER is a CAN interceptor designed for NODSU CAMRY and CH-R: https://github.com/Smartype/canfilter, CANFILTER mirrors stock ACC_CONTROL with this msg id, this msg is used for canfiter detection, DISTANCE button event, and logging"
-CM_ "BO_ ACC_CONTROL_SAFE: A ACC_CONTROL version which supports failsafe, when AEB is active, CANFILTER mutes ACC_CONTROL from OP and pass the stock msg instead"
-
 BO_ 836 PRE_COLLISION_2: 8 DSU
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|0] "" XXX
 
@@ -589,6 +552,43 @@ BO_ 1014 BSM: 8 XXX
  SG_ R_APPROACHING : 10|1@0+ (1,0) [0|1] "" XXX
  SG_ ADJACENT_ENABLED : 7|1@0+ (1,0) [0|1] "" XXX
  SG_ APPROACHING_ENABLED : 15|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 682 ACC_CONTROL_COPY: 8 XXX
+ SG_ ACCEL_CMD : 7|16@0- (0.001,0) [-20|20] "m/s^2" HCU
+ SG_ ALLOW_LONG_PRESS : 17|2@0+ (1,0) [0|2] "" XXX
+ SG_ ACC_MALFUNCTION : 18|1@0+ (1,0) [0|0] "" XXX
+ SG_ RADAR_DIRTY : 19|1@0+ (1,0) [0|1] "" XXX
+ SG_ DISTANCE : 20|1@0+ (1,0) [0|1] "" XXX
+ SG_ MINI_CAR : 21|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_TYPE : 23|2@0+ (1,0) [0|3] "" HCU
+ SG_ CANCEL_REQ : 24|1@0+ (1,0) [0|1] "" HCU
+ SG_ ACC_CUT_IN : 25|1@0+ (1,0) [0|1] "" XXX
+ SG_ LEAD_STANDSTILL : 29|1@0+ (1,0) [0|1] "" HCU
+ SG_ PERMIT_BRAKING : 30|1@0+ (1,0) [0|1] "" HCU
+ SG_ RELEASE_STANDSTILL : 31|1@0+ (1,0) [0|1] "" HCU
+ SG_ ITS_CONNECT_LEAD : 39|8@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ ACCEL_CMD_ALT : 47|8@0- (0.05,0) [0|0] "m/s^2" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 674 ACC_CONTROL_SAFE: 8 XXX
+ SG_ ACCEL_CMD : 7|16@0- (0.001,0) [-20|20] "m/s^2" HCU
+ SG_ ALLOW_LONG_PRESS : 17|2@0+ (1,0) [0|2] "" XXX
+ SG_ ACC_MALFUNCTION : 18|1@0+ (1,0) [0|0] "" XXX
+ SG_ RADAR_DIRTY : 19|1@0+ (1,0) [0|1] "" XXX
+ SG_ DISTANCE : 20|1@0+ (1,0) [0|1] "" XXX
+ SG_ MINI_CAR : 21|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_TYPE : 23|2@0+ (1,0) [0|3] "" HCU
+ SG_ CANCEL_REQ : 24|1@0+ (1,0) [0|1] "" HCU
+ SG_ ACC_CUT_IN : 25|1@0+ (1,0) [0|1] "" XXX
+ SG_ LEAD_STANDSTILL : 29|1@0+ (1,0) [0|1] "" HCU
+ SG_ PERMIT_BRAKING : 30|1@0+ (1,0) [0|1] "" HCU
+ SG_ RELEASE_STANDSTILL : 31|1@0+ (1,0) [0|1] "" HCU
+ SG_ ITS_CONNECT_LEAD : 39|8@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ ACCEL_CMD_ALT : 47|8@0- (0.05,0) [0|0] "m/s^2" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
+CM_ "BO_ ACC_CONTROL_COPY: CANFILTER is a CAN interceptor designed for NODSU CAMRY and CH-R: https://github.com/Smartype/canfilter, CANFILTER mirrors stock ACC_CONTROL with this msg id, this msg is used for canfiter detection, DISTANCE button event, and logging"
+CM_ "BO_ ACC_CONTROL_SAFE: A ACC_CONTROL version which supports failsafe, when AEB is active, CANFILTER mutes ACC_CONTROL from OP and pass the stock msg instead"
 
 CM_ SG_ 401 PERCENTAGE "driver override percentage (0-100), very close to steeringPressed in OP";
 CM_ SG_ 401 SETME_X64 "ramps to 0 smoothly then back on falling edge of STEER_REQUEST if BIT isn't 1";
