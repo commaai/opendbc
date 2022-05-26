@@ -64,10 +64,11 @@ unsigned int chrysler_checksum(uint32_t address, const std::vector<uint8_t> &d) 
   return ~checksum & 0xFF;
 }
 
-// Static lookup table for fast computation of CRC8 poly 0x2F, aka 8H2F/AUTOSAR
-uint8_t crc8_lut_8h2f[256];
+// Static lookup table for fast computation of CRCs
+uint8_t crc8_lut_8h2f[256]; // CRC8 poly 0x2F, aka 8H2F/AUTOSAR
+uint16_t crc16_lut_xmodem[256]; // CRC16 poly 0x1021, aka XMODEM
 
-void gen_crc_lookup_table(uint8_t poly, uint8_t crc_lut[]) {
+void gen_crc_lookup_table_8(uint8_t poly, uint8_t crc_lut[]) {
   uint8_t crc;
   int i, j;
 
@@ -83,10 +84,27 @@ void gen_crc_lookup_table(uint8_t poly, uint8_t crc_lut[]) {
   }
 }
 
+void gen_crc_lookup_table_16(uint16_t poly, uint16_t crc_lut[]) {
+  uint16_t crc;
+  int i, j;
+
+   for (i = 0; i < 256; i++) {
+    crc = i << 8;
+    for (j = 0; j < 8; j++) {
+      if ((crc & 0x8000) != 0) {
+        crc = (uint16_t)((crc << 1) ^ poly);
+      } else {
+        crc <<= 1;
+      }
+    }
+    crc_lut[i] = crc;
+  }
+}
+
 void init_crc_lookup_tables() {
   // At init time, set up static lookup tables for fast CRC computation.
-
-  gen_crc_lookup_table(0x2F, crc8_lut_8h2f);    // CRC-8 8H2F/AUTOSAR for Volkswagen
+  gen_crc_lookup_table_8(0x2F, crc8_lut_8h2f);    // CRC-8 8H2F/AUTOSAR for Volkswagen
+  gen_crc_lookup_table_16(0x1021, crc16_lut_xmodem);    // CRC-16 XMODEM for HKG CAN FD
 }
 
 unsigned int volkswagen_crc(uint32_t address, const std::vector<uint8_t> &d) {
@@ -185,5 +203,30 @@ unsigned int pedal_checksum(const std::vector<uint8_t> &d) {
       }
     }
   }
+  return crc;
+}
+
+unsigned int hkg_can_fd_checksum(uint32_t address, const std::vector<uint8_t> &d) {
+
+  uint16_t crc = 0;
+
+  for (int i = 2; i < d.size(); i++) {
+    crc = (crc << 8) ^ crc16_lut_xmodem[(crc >> 8) ^ d[i]];
+  }
+
+  // Add address to crc
+  crc = (crc << 8) ^ crc16_lut_xmodem[(crc >> 8) ^ ((address >> 0) & 0xFF)];
+  crc = (crc << 8) ^ crc16_lut_xmodem[(crc >> 8) ^ ((address >> 8) & 0xFF)];
+
+  if (d.size() == 8) {
+    crc ^= 0x5f29;
+  } else if (d.size() == 16) {
+    crc ^= 0x041d;
+  } else if (d.size() == 24) {
+    crc ^= 0x819d;
+  } else if (d.size() == 32) {
+    crc ^= 0x9f5b;
+  }
+
   return crc;
 }
