@@ -53,3 +53,4 @@ CM_ SG_ 1014 APPROACHING_ENABLED "when BSM is enabled in settings, this is on al
 
 VAL_ 610 IPAS_STATE 5 "override" 3 "enabled" 1 "disabled";
 VAL_ 610 LKA_STATE 25 "temporary_fault" 9 "temporary_fault2" 5 "active" 1 "standby";
+VAL_ 610 LTA_STATE 6 "temporary_fault" 4 "temporary_fault2" 2 "temporary_fault3" 1 "active" 0 "disabled";
