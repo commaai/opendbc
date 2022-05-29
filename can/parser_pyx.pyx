@@ -9,6 +9,7 @@ from libcpp cimport bool
 from libcpp.map cimport map
 
 from .common cimport CANParser as cpp_CANParser
+from .common cimport CanData as cpp_CanData
 from .common cimport SignalParseOptions, MessageParseOptions, dbc_lookup, SignalValue, DBC
 
 import os
@@ -138,6 +139,17 @@ cdef class CANParser:
       self.can.update_string(s, sendcan)
       updated_addrs.update(self.update_vl())
     return updated_addrs
+
+  def update_candata(self, sec, candata):
+    cdef:
+        vector[cpp_CanData] cpp_candata
+    for v in self.vl_all.values():
+      v.clear()
+
+    for data in candata:
+        cpp_candata.push_back(cpp_CanData(data.address, data.busTime, data.dat, data.src))
+    self.can.update_candata(sec, cpp_candata)
+    return self.update_vl()
 
 
 cdef class CANDefine():

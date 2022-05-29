@@ -260,6 +260,46 @@ void CANParser::UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Rea
   }
   bus_timeout = (sec - last_nonempty_sec) > bus_timeout_threshold;
 }
+
+
+void CANParser::update_candata(uint64_t sec, const std::vector<CanData> cans) {
+  //DEBUG("got %d messages\n", cans.size());
+  if (first_sec == 0) {
+    first_sec = sec;
+  }
+
+  bool bus_empty = true;
+
+  // parse the messages
+  for (int i = 0; i < cans.size(); i++) {
+    auto cmsg = cans[i];
+    if (cmsg.src != bus) {
+      // DEBUG("skip %d: wrong bus\n", cmsg.getAddress());
+      continue;
+    }
+    bus_empty = false;
+
+    auto state_it = message_states.find(cmsg.address);
+    if (state_it == message_states.end()) {
+      // DEBUG("skip %d: not specified\n", cmsg.getAddress());
+      continue;
+    }
+    std::vector<uint8_t> &dat = cmsg.dat;
+    if (dat.size() > 8) {
+      DEBUG("got message longer than 64 bytes: 0x%X %zu\n", cmsg.address, dat.size());
+      continue;
+    }
+
+    state_it->second.parse(sec, dat);
+    UpdateValid(sec);
+  }
+
+  // update bus timeout
+  if (!bus_empty) {
+    last_nonempty_sec = sec;
+  }
+  bus_timeout = (sec - last_nonempty_sec) > bus_timeout_threshold;
+}
 #endif
 
 void CANParser::UpdateCans(uint64_t sec, const capnp::DynamicStruct::Reader& cmsg) {

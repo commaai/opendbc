@@ -30,6 +30,15 @@ unsigned int volkswagen_crc(uint32_t address, const std::vector<uint8_t> &d);
 unsigned int hkg_can_fd_checksum(uint32_t address, const std::vector<uint8_t> &d);
 unsigned int pedal_checksum(const std::vector<uint8_t> &d);
 
+
+struct CanData {
+  CanData(uint32_t address, uint16_t busTime, std::vector<uint8_t> dat, uint8_t src): address(address), busTime(busTime), dat(dat), src(src) {};
+  uint32_t address;
+  uint16_t busTime;
+  std::vector<uint8_t> dat;
+  uint8_t src;
+}; 
+
 class MessageState {
 public:
   uint32_t address;
@@ -75,6 +84,7 @@ public:
   #ifndef DYNAMIC_CAPNP
   void update_string(const std::string &data, bool sendcan);
   void UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Reader& cans);
+  void update_candata(uint64_t sec, const std::vector<CanData> cans);
   #endif
   void UpdateCans(uint64_t sec, const capnp::DynamicStruct::Reader& cans);
   void UpdateValid(uint64_t sec);
