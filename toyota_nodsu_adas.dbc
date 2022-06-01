@@ -43,7 +43,7 @@ BO_ 769 OBJECT_0: 8 RADAR
  SG_ ID : 5|6@0+ (1,0) [0|255] "" XXX
  SG_ LONG_DIST : 7|13@1+ (0.04,0) [0|65535] "m" XXX
  SG_ LAT_DIST : 20|11@1- (0.018,0) [0|15] "" XXX
- SG_ SPEED : 31|10@1- (0.07142857143,0) [0|7] "m/s" XXX
+ SG_ SPEED : 31|10@1- (0.06944444444,0) [0|71] "m/s" XXX
  SG_ LAT_SPEED : 48|7@1- (0.1,0) [0|127] "m/s" XXX
  SG_ RCS : 63|8@0+ (1,0) [0|255] "" XXX
 
@@ -51,7 +51,7 @@ BO_ 771 OBJECT_1: 8 RADAR
  SG_ ID : 5|6@0+ (1,0) [0|255] "" XXX
  SG_ LONG_DIST : 7|13@1+ (0.04,0) [0|65535] "m" XXX
  SG_ LAT_DIST : 20|11@1- (0.018,0) [0|15] "" XXX
- SG_ SPEED : 31|10@1- (0.07142857143,0) [0|7] "m/s" XXX
+ SG_ SPEED : 31|10@1- (0.06944444444,0) [0|71] "m/s" XXX
  SG_ LAT_SPEED : 48|7@1- (0.1,0) [0|127] "m/s" XXX
  SG_ RCS : 63|8@0+ (1,0) [0|255] "" XXX
 
@@ -59,7 +59,7 @@ BO_ 773 OBJECT_2: 8 RADAR
  SG_ ID : 5|6@0+ (1,0) [0|255] "" XXX
  SG_ LONG_DIST : 7|13@1+ (0.04,0) [0|65535] "m" XXX
  SG_ LAT_DIST : 20|11@1- (0.018,0) [0|15] "" XXX
- SG_ SPEED : 31|10@1- (0.07142857143,0) [0|7] "m/s" XXX
+ SG_ SPEED : 31|10@1- (0.06944444444,0) [0|71] "m/s" XXX
  SG_ LAT_SPEED : 48|7@1- (0.1,0) [0|127] "m/s" XXX
  SG_ RCS : 63|8@0+ (1,0) [0|255] "" XXX
 
@@ -67,7 +67,7 @@ BO_ 775 OBJECT_3: 8 RADAR
  SG_ ID : 5|6@0+ (1,0) [0|255] "" XXX
  SG_ LONG_DIST : 7|13@1+ (0.04,0) [0|65535] "m" XXX
  SG_ LAT_DIST : 20|11@1- (0.018,0) [0|15] "" XXX
- SG_ SPEED : 31|10@1- (0.07142857143,0) [0|7] "m/s" XXX
+ SG_ SPEED : 31|10@1- (0.06944444444,0) [0|71] "m/s" XXX
  SG_ LAT_SPEED : 48|7@1- (0.1,0) [0|127] "m/s" XXX
  SG_ RCS : 63|8@0+ (1,0) [0|255] "" XXX
 
@@ -75,7 +75,7 @@ BO_ 777 OBJECT_4: 8 RADAR
  SG_ ID : 5|6@0+ (1,0) [0|255] "" XXX
  SG_ LONG_DIST : 7|13@1+ (0.04,0) [0|65535] "m" XXX
  SG_ LAT_DIST : 20|11@1- (0.018,0) [0|15] "" XXX
- SG_ SPEED : 31|10@1- (0.07142857143,0) [0|7] "m/s" XXX
+ SG_ SPEED : 31|10@1- (0.06944444444,0) [0|71] "m/s" XXX
  SG_ LAT_SPEED : 48|7@1- (0.1,0) [0|127] "m/s" XXX
  SG_ RCS : 63|8@0+ (1,0) [0|255] "" XXX
 
@@ -83,7 +83,7 @@ BO_ 779 OBJECT_5: 8 RADAR
  SG_ ID : 5|6@0+ (1,0) [0|255] "" XXX
  SG_ LONG_DIST : 7|13@1+ (0.04,0) [0|65535] "m" XXX
  SG_ LAT_DIST : 20|11@1- (0.018,0) [0|15] "" XXX
- SG_ SPEED : 31|10@1- (0.07142857143,0) [0|7] "m/s" XXX
+ SG_ SPEED : 31|10@1- (0.06944444444,0) [0|71] "m/s" XXX
  SG_ LAT_SPEED : 48|7@1- (0.1,0) [0|127] "m/s" XXX
  SG_ RCS : 63|8@0+ (1,0) [0|255] "" XXX
 
@@ -91,7 +91,7 @@ BO_ 781 OBJECT_6: 8 RADAR
  SG_ ID : 5|6@0+ (1,0) [0|255] "" XXX
  SG_ LONG_DIST : 7|13@1+ (0.04,0) [0|65535] "m" XXX
  SG_ LAT_DIST : 20|11@1- (0.018,0) [0|15] "" XXX
- SG_ SPEED : 31|10@1- (0.07142857143,0) [0|7] "m/s" XXX
+ SG_ SPEED : 31|10@1- (0.06944444444,0) [0|71] "m/s" XXX
  SG_ LAT_SPEED : 48|7@1- (0.1,0) [0|127] "m/s" XXX
  SG_ RCS : 63|8@0+ (1,0) [0|255] "" XXX
 
@@ -99,7 +99,7 @@ BO_ 783 OBJECT_7: 8 RADAR
  SG_ ID : 5|6@0+ (1,0) [0|255] "" XXX
  SG_ LONG_DIST : 7|13@1+ (0.04,0) [0|65535] "m" XXX
  SG_ LAT_DIST : 20|11@1- (0.018,0) [0|15] "" XXX
- SG_ SPEED : 31|10@1- (0.07142857143,0) [0|7] "m/s" XXX
+ SG_ SPEED : 31|10@1- (0.06944444444,0) [0|71] "m/s" XXX
  SG_ LAT_SPEED : 48|7@1- (0.1,0) [0|127] "m/s" XXX
  SG_ RCS : 63|8@0+ (1,0) [0|255] "" XXX
 
@@ -107,7 +107,7 @@ BO_ 785 OBJECT_8: 8 RADAR
  SG_ ID : 5|6@0+ (1,0) [0|255] "" XXX
  SG_ LONG_DIST : 7|13@1+ (0.04,0) [0|65535] "m" XXX
  SG_ LAT_DIST : 20|11@1- (0.018,0) [0|15] "" XXX
- SG_ SPEED : 31|10@1- (0.07142857143,0) [0|7] "m/s" XXX
+ SG_ SPEED : 31|10@1- (0.06944444444,0) [0|71] "m/s" XXX
  SG_ LAT_SPEED : 48|7@1- (0.1,0) [0|127] "m/s" XXX
  SG_ RCS : 63|8@0+ (1,0) [0|255] "" XXX
 
@@ -115,7 +115,7 @@ BO_ 787 OBJECT_9: 8 RADAR
  SG_ ID : 5|6@0+ (1,0) [0|255] "" XXX
  SG_ LONG_DIST : 7|13@1+ (0.04,0) [0|65535] "m" XXX
  SG_ LAT_DIST : 20|11@1- (0.018,0) [0|15] "" XXX
- SG_ SPEED : 31|10@1- (0.07142857143,0) [0|7] "m/s" XXX
+ SG_ SPEED : 31|10@1- (0.06944444444,0) [0|71] "m/s" XXX
  SG_ LAT_SPEED : 48|7@1- (0.1,0) [0|127] "m/s" XXX
  SG_ RCS : 63|8@0+ (1,0) [0|255] "" XXX
 
@@ -123,7 +123,7 @@ BO_ 789 OBJECT_10: 8 RADAR
  SG_ ID : 5|6@0+ (1,0) [0|255] "" XXX
  SG_ LONG_DIST : 7|13@1+ (0.04,0) [0|65535] "m" XXX
  SG_ LAT_DIST : 20|11@1- (0.018,0) [0|15] "" XXX
- SG_ SPEED : 31|10@1- (0.07142857143,0) [0|7] "m/s" XXX
+ SG_ SPEED : 31|10@1- (0.06944444444,0) [0|71] "m/s" XXX
  SG_ LAT_SPEED : 48|7@1- (0.1,0) [0|127] "m/s" XXX
  SG_ RCS : 63|8@0+ (1,0) [0|255] "" XXX
 
@@ -131,7 +131,7 @@ BO_ 791 OBJECT_11: 8 RADAR
  SG_ ID : 5|6@0+ (1,0) [0|255] "" XXX
  SG_ LONG_DIST : 7|13@1+ (0.04,0) [0|65535] "m" XXX
  SG_ LAT_DIST : 20|11@1- (0.018,0) [0|15] "" XXX
- SG_ SPEED : 31|10@1- (0.07142857143,0) [0|7] "m/s" XXX
+ SG_ SPEED : 31|10@1- (0.06944444444,0) [0|71] "m/s" XXX
  SG_ LAT_SPEED : 48|7@1- (0.1,0) [0|127] "m/s" XXX
  SG_ RCS : 63|8@0+ (1,0) [0|255] "" XXX
 
@@ -139,7 +139,7 @@ CM_ "Front target"
 BO_ 1664 CLUSTER_F: 8 RADAR
  SG_ LONG_DIST : 7|13@1+ (0.04,0) [0|255] "m" XXX
  SG_ LAT_DIST : 20|11@1- (0.015,0) [-20|20] "m" XXX
- SG_ SPEED : 31|10@1- (0.25,0) [-256|256] "km/h" XXX
+ SG_ SPEED : 31|10@1- (0.06944444444,0) [0|71] "m/s" XXX
  SG_ ID : 0|6@1+ (1,0) [0|63] "" XXX
  SG_ LAT_SPEED : 48|7@1- (0.1,0) [0|127] "m/s" XXX
  SG_ RCS : 63|8@0+ (1,0) [0|255] "" XXX
@@ -148,7 +148,7 @@ CM_ "Front target ahead"
 BO_ 1665 CLUSTER_F_A: 8 RADAR
  SG_ LONG_DIST : 7|13@1+ (0.04,0) [0|255] "m" XXX
  SG_ LAT_DIST : 20|11@1- (0.015,0) [-20|20] "m" XXX
- SG_ SPEED : 31|10@1- (0.25,0) [-256|256] "km/h" XXX
+ SG_ SPEED : 31|10@1- (0.06944444444,0) [0|71] "m/s" XXX
  SG_ ID : 0|6@1+ (1,0) [0|63] "" XXX
  SG_ LAT_SPEED : 48|7@1- (0.1,0) [0|127] "m/s" XXX
  SG_ RCS : 63|8@0+ (1,0) [0|255] "" XXX
@@ -157,7 +157,7 @@ CM_ "Left target"
 BO_ 1666 CLUSTER_L: 8 RADAR
  SG_ LONG_DIST : 7|13@1+ (0.04,0) [0|255] "m" XXX
  SG_ LAT_DIST : 20|11@1- (0.015,0) [-20|20] "m" XXX
- SG_ SPEED : 31|10@1- (0.25,0) [-256|256] "km/h" XXX
+ SG_ SPEED : 31|10@1- (0.06944444444,0) [0|71] "m/s" XXX
  SG_ VALID : 6|1@0+ (1,0) [0|1] "" XXX
  SG_ ID : 0|6@1+ (1,0) [0|63] "" XXX
  SG_ LAT_SPEED : 48|7@1- (0.1,0) [0|127] "m/s" XXX
@@ -167,7 +167,7 @@ CM_ "Right target"
 BO_ 1667 CLUSTER_R: 8 RADAR
  SG_ LONG_DIST : 7|13@1+ (0.04,0) [0|255] "m" XXX
  SG_ LAT_DIST : 20|11@1- (0.015,0) [-20|20] "m" XXX
- SG_ SPEED : 31|10@1- (0.25,0) [-256|256] "km/h" XXX
+ SG_ SPEED : 31|10@1- (0.06944444444,0) [0|71] "m/s" XXX
  SG_ VALID : 6|1@0+ (1,0) [0|1] "" XXX
  SG_ ID : 0|6@1+ (1,0) [0|63] "" XXX
  SG_ LAT_SPEED : 48|7@1- (0.1,0) [0|127] "m/s" XXX
@@ -177,7 +177,7 @@ CM_ "Left target ahead"
 BO_ 1668 CLUSTER_L_A: 8 RADAR
  SG_ LONG_DIST : 7|13@1+ (0.04,0) [0|255] "m" XXX
  SG_ LAT_DIST : 20|11@1- (0.015,0) [-20|20] "m" XXX
- SG_ SPEED : 31|10@1- (0.25,0) [-256|256] "km/h" XXX
+ SG_ SPEED : 31|10@1- (0.06944444444,0) [0|71] "m/s" XXX
  SG_ VALID : 6|1@0+ (1,0) [0|1] "" XXX
  SG_ ID : 0|6@1+ (1,0) [0|63] "" XXX
  SG_ LAT_SPEED : 48|7@1- (0.1,0) [0|127] "m/s" XXX
@@ -187,7 +187,7 @@ CM_ "Right target ahead"
 BO_ 1669 CLUSTER_R_A: 8 RADAR
  SG_ LONG_DIST : 7|13@1+ (0.04,0) [0|255] "m" XXX
  SG_ LAT_DIST : 20|11@1- (0.015,0) [-20|20] "m" XXX
- SG_ SPEED : 31|10@1- (0.25,0) [-256|256] "km/h" XXX
+ SG_ SPEED : 31|10@1- (0.06944444444,0) [0|71] "m/s" XXX
  SG_ VALID : 6|1@0+ (1,0) [0|1] "" XXX
  SG_ ID : 0|6@1+ (1,0) [0|63] "" XXX
  SG_ LAT_SPEED : 48|7@1- (0.1,0) [0|127] "m/s" XXX
