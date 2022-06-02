@@ -17,7 +17,7 @@ class TestDBCParser(unittest.TestCase):
   def test_parse_all_dbcs(self):
     """
       Dynamic DBC parser checks:
-        - Checksum and checksum length, start bit, endianness
+        - Checksum and counter length, start bit, endianness
         - Duplicate message addresses and names
         - Signal out of bounds
         - All BO_, SG_, VAL_ lines for syntax errors
