@@ -15,6 +15,14 @@ class TestDBCParser(unittest.TestCase):
       cls.dbcs.append(os.path.basename(dbc).split('.')[0])
 
   def test_parse_all_dbcs(self):
+    """
+      Dynamic DBC parser checks:
+        - Checksum and checksum length, start bit, endianness
+        - Duplicate message addresses and names
+        - Signal out of bounds
+        - All BO_, SG_, VAL_ lines for syntax errors
+    """
+
     for dbc in self.dbcs:
       CANParser(dbc, [], [], 0)
 
