@@ -16,7 +16,6 @@ class TestDBCParser(unittest.TestCase):
 
   def test_parse_all_dbcs(self):
     for dbc in self.dbcs:
-      print(dbc)
       CANParser(dbc, [], [], 0)
 
 
