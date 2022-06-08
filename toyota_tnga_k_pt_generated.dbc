@@ -413,7 +413,7 @@ CM_ SG_ 466 ACCEL_NET "net acceleration produced by the system, given ACCEL_CMD,
 CM_ SG_ 466 CRUISE_STATE "Active state is 8, if standstill is requested will switch to state 11(3 sec timer), after timer is elapsed will switch into state 7(standstill). If plus button was pressed - status 9, minus button pressed - status 10";
 CM_ SG_ 467 SET_SPEED "43 km/h are shown as 28 mph, so conversion isn't perfect";
 CM_ SG_ 467 LOW_SPEED_LOCKOUT "in low speed lockout, system would always disengage below 28mph";
-CM_ SG_ 467 PCM_FOLLOW_DISTANCE "PCM cruise control's follow distance";
+CM_ SG_ 467 PCM_FOLLOW_DISTANCE "PCM's follow distance";
 CM_ SG_ 560 BRAKE_PRESSED "another brake pressed?";
 CM_ SG_ 581 GAS_PEDAL "it seems slightly filtered";
 CM_ SG_ 608 STEER_TORQUE_DRIVER "driver torque";
