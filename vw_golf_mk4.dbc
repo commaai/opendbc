@@ -1131,8 +1131,8 @@ BO_ 978 Lenkhilfe_2: 8 XXX
  SG_ LH2_PLA_Abbr : 52|4@1+ (1,0) [0|15] "" XXX
 
 BO_ 210 HCA_1: 5 XXX
- SG_ HCA_Checksumme : 0|8@1+ (1,0) [0|15] "" XXX
- SG_ HCA_Zaehler : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|15] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ HCA_Status : 12|4@1+ (1,0) [0|15] "" XXX
  SG_ LM_Offset : 16|15@1+ (0.03125,0) [0|300] "cNm" XXX
  SG_ LM_OffSign : 31|1@1+ (1,0) [0|1] "" XXX
