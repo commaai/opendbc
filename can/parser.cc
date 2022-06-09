@@ -49,7 +49,7 @@ bool MessageState::parse(uint64_t sec, const std::vector<uint8_t> &dat) {
         checksum_failed = true;
       } else if (sig.type == SignalType::TOYOTA_CHECKSUM && toyota_checksum(address, dat) != tmp) {
         checksum_failed = true;
-      } else if (sig.type == SignalType::VOLKSWAGEN_CHECKSUM && volkswagen_crc(address, dat) != tmp) {
+      } else if (sig.type == SignalType::VOLKSWAGEN_MQB_CHECKSUM && volkswagen_crc(address, dat) != tmp) {
         checksum_failed = true;
       } else if (sig.type == SignalType::SUBARU_CHECKSUM && subaru_checksum(address, dat) != tmp) {
         checksum_failed = true;
@@ -64,7 +64,7 @@ bool MessageState::parse(uint64_t sec, const std::vector<uint8_t> &dat) {
 
     bool counter_failed = false;
     if (!ignore_counter) {
-      if (sig.type == SignalType::HONDA_COUNTER || sig.type == SignalType::VOLKSWAGEN_COUNTER || sig.type == SignalType::PEDAL_COUNTER) {
+      if (sig.type == SignalType::HONDA_COUNTER || sig.type == SignalType::VOLKSWAGEN_MQB_COUNTER || sig.type == SignalType::PEDAL_COUNTER) {
         counter_failed = !update_counter_generic(tmp, sig.size);
       }
     }
