@@ -1175,6 +1175,7 @@ BO_ 870 AWV: 5 XXX
 BO_ 1470 LDW_1: 8 XXX
  SG_ Right_Lane_Status : 0|2@1+ (1,0) [0|3] "" XXX
  SG_ Left_Lane_Status : 2|2@1+ (1,0) [0|3] "" XXX
+ SG_ LDW_Textbits : 12|4@1+ (1,0) [0|1] "" XXX
  SG_ LDW_Direction : 14|1@0+ (1,0) [0|1] "" XXX
  SG_ SET_ME_X1 : 18|1@0+ (1,0) [0|1] "" XXX
  SG_ Kombi_Lamp_Orange : 19|1@0+ (1,0) [0|1] "" XXX
