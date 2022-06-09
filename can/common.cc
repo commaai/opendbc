@@ -107,7 +107,7 @@ void init_crc_lookup_tables() {
   gen_crc_lookup_table_16(0x1021, crc16_lut_xmodem);    // CRC-16 XMODEM for HKG CAN FD
 }
 
-unsigned int volkswagen_crc(uint32_t address, const std::vector<uint8_t> &d) {
+unsigned int volkswagen_mqb_crc(uint32_t address, const std::vector<uint8_t> &d) {
   // Volkswagen uses standard CRC8 8H2F/AUTOSAR, but they compute it with
   // a magic variable padding byte tacked onto the end of the payload.
   // https://www.autosar.org/fileadmin/user_upload/standards/classic/4-3/AUTOSAR_SWS_CRCLibrary.pdf
@@ -186,6 +186,17 @@ unsigned int volkswagen_crc(uint32_t address, const std::vector<uint8_t> &d) {
   crc = crc8_lut_8h2f[crc];
 
   return crc ^ 0xFF; // Return after standard final XOR for CRC8 8H2F/AUTOSAR
+}
+
+unsigned int volkswagen_pq_checksum(uint32_t address, const std::vector<uint8_t> &d) {
+  uint8_t checksum = 0;
+
+  // Simple checksum over the payload, skipping over the first byte where the checksum lives.
+  for (int i = 1; i < d.size(); i++) {
+    checksum ^= d[i];
+  }
+
+  return checksum;
 }
 
 unsigned int pedal_checksum(const std::vector<uint8_t> &d) {

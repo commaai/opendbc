@@ -70,7 +70,9 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
     }
     const auto& sig = sig_it->second;
 
-    if ((sig.type != SignalType::HONDA_COUNTER) && (sig.type != SignalType::VOLKSWAGEN_MQB_COUNTER)) {
+    if ((sig.type != SignalType::HONDA_COUNTER) &&
+        (sig.type != SignalType::VOLKSWAGEN_MQB_COUNTER) &&
+        (sig.type != SignalType::VOLKSWAGEN_PQ_COUNTER)) {
       //WARN("COUNTER signal type not valid\n");
     }
 
@@ -88,7 +90,10 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
       unsigned int chksm = toyota_checksum(address, ret);
       set_value(ret, sig, chksm);
     } else if (sig.type == SignalType::VOLKSWAGEN_MQB_CHECKSUM) {
-      unsigned int chksm = volkswagen_crc(address, ret);
+      unsigned int chksm = volkswagen_mqb_crc(address, ret);
+      set_value(ret, sig, chksm);
+    } else if (sig.type == SignalType::VOLKSWAGEN_PQ_CHECKSUM) {
+      unsigned int chksm = volkswagen_pq_checksum(address, ret);
       set_value(ret, sig, chksm);
     } else if (sig.type == SignalType::SUBARU_CHECKSUM) {
       unsigned int chksm = subaru_checksum(address, ret);
