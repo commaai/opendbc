@@ -82,7 +82,7 @@ BO_ 777 CAR_SPEED: 8 PCM
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
  SG_ IMPERIAL_UNIT : 63|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 804 CRUISE: 8 PCM
+BO_ 804 CRUISE: 8 PCM  # maybe put in nidec only
  SG_ HUD_SPEED_KPH : 7|8@0+ (1,0) [0|255] "kph" EON
  SG_ HUD_SPEED_MPH : 15|8@0+ (1,0) [0|255] "mph" EON
  SG_ TRIP_FUEL_CONSUMED : 23|16@0+ (1,0) [0|255] "" EON
