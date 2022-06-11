@@ -168,40 +168,6 @@ BO_ 662 SCM_BUTTONS: 4 SCM
  SG_ COUNTER : 29|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 27|4@0+ (1,0) [0|15] "" EON
 
-BO_ 777 CAR_SPEED: 8 PCM
- SG_ ROUGH_CAR_SPEED : 23|8@0+ (1,0) [0|255] "mph" XXX
- SG_ CAR_SPEED : 7|16@0+ (0.01,0) [0|65535] "kph" XXX
- SG_ ROUGH_CAR_SPEED_3 : 39|16@0+ (0.01,0) [0|65535] "kph" XXX
- SG_ ROUGH_CAR_SPEED_2 : 31|8@0+ (1,0) [0|255] "mph" XXX
- SG_ LOCK_STATUS : 55|2@0+ (1,0) [0|255] "" XXX
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
- SG_ IMPERIAL_UNIT : 63|1@0+ (1,0) [0|1] "" XXX
-
-BO_ 780 ACC_HUD: 8 ADAS
- SG_ CRUISE_SPEED : 31|8@0+ (1,0) [0|255] "kph" BDY
- SG_ DTC_MODE : 39|1@0+ (1,0) [0|1] "" BDY
- SG_ BOH : 38|1@0+ (1,0) [0|1] "" BDY
- SG_ FCM_PROBLEM : 34|1@0+ (1,0) [0|1] "" BDY
- SG_ RADAR_OBSTRUCTED : 33|1@0+ (1,0) [0|1] "" BDY
- SG_ ENABLE_MINI_CAR : 32|1@0+ (1,0) [0|1] "" BDY
- SG_ BOH_3 : 43|1@0+ (1,0) [0|3] "" BDY
- SG_ BOH_4 : 42|1@0+ (1,0) [0|3] "" BDY
- SG_ BOH_5 : 41|1@0+ (1,0) [0|3] "" BDY
- SG_ CRUISE_CONTROL_LABEL : 40|1@0+ (1,0) [0|3] "" BDY
- SG_ ZEROS_BOH : 7|24@0+ (0.002759506,0) [0|100] "m/s" BDY
- SG_ FCM_OFF : 35|1@0+ (1,0) [0|1] "" BDY
- SG_ SET_TO_1 : 36|1@0+ (1,0) [0|1] "" XXX
- SG_ HUD_DISTANCE : 47|2@0+ (1,0) [0|3] "" BDY
- SG_ HUD_LEAD : 45|2@0+ (1,0) [0|3] "" BDY
- SG_ ACC_PROBLEM : 37|1@0+ (1,0) [0|1] "" BDY
- SG_ ACC_ON : 52|1@0+ (1,0) [0|1] "" XXX
- SG_ BOH_6 : 51|4@0+ (1,0) [0|15] "" XXX
- SG_ SET_TO_X1 : 55|1@0+ (1,0) [0|1] "" XXX
- SG_ IMPERIAL_UNIT : 54|1@0+ (1,0) [0|1] "" XXX
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
-
 BO_ 806 SCM_FEEDBACK: 8 SCM
  SG_ DRIVERS_DOOR_OPEN : 17|1@0+ (1,0) [0|1] "" XXX
  SG_ MAIN_ON : 28|1@0+ (1,0) [0|1] "" EON
