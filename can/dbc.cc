@@ -80,7 +80,7 @@ void set_signal_type(Signal& s, ChecksumState* chk, const std::string& dbc_name,
   if (chk) {
     if (s.name == "CHECKSUM") {
       DBC_ASSERT(s.size == chk->checksum_size, "CHECKSUM is not " << chk->checksum_size << " bits long");
-      DBC_ASSERT((s.start_bit % 8) == chk->checksum_start_bit, " CHECKSUM starts at wrong bit");
+      DBC_ASSERT(chk->checksum_start_bit == -1 || (s.start_bit % 8) == chk->checksum_start_bit, " CHECKSUM starts at wrong bit");
       DBC_ASSERT(s.is_little_endian == chk->little_endian, "CHECKSUM has wrong endianness");
       s.type = chk->checksum_type;
     } else if (s.name == "COUNTER") {
