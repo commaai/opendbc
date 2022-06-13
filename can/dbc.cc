@@ -67,7 +67,7 @@ ChecksumState* get_checksum(const std::string& dbc_name) {
   } else if (startswith(dbc_name, "vw_mqb")) {
     s = new ChecksumState({8, 4, 0, 0, true, VOLKSWAGEN_MQB_CHECKSUM, VOLKSWAGEN_MQB_COUNTER});
   } else if (startswith(dbc_name, "vw_golf")) {
-    s = new ChecksumState({8, 4, 0, 0, true, VOLKSWAGEN_PQ_CHECKSUM, VOLKSWAGEN_PQ_COUNTER});
+    s = new ChecksumState({8, 4, 0, -1, true, VOLKSWAGEN_PQ_CHECKSUM, VOLKSWAGEN_PQ_COUNTER});
   } else if (startswith(dbc_name, "subaru_global_")) {
     s = new ChecksumState({8, -1, 0, -1, true, SUBARU_CHECKSUM});
   } else if (startswith(dbc_name, "chrysler_")) {
