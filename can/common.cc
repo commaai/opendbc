@@ -191,7 +191,7 @@ unsigned int volkswagen_mqb_crc(uint32_t address, const std::vector<uint8_t> &d)
 unsigned int volkswagen_pq_checksum(uint32_t address, const std::vector<uint8_t> &d) {
   uint8_t checksum = 0;
 
-  // Simple checksum over the payload, skipping over the first byte where the checksum lives.
+  // Simple XOR over the payload, skipping over the first byte where the checksum lives.
   for (int i = 1; i < d.size(); i++) {
     checksum ^= d[i];
   }
