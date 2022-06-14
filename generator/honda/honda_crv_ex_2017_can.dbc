@@ -1,5 +1,6 @@
 CM_ "IMPORT _honda_common.dbc";
 CM_ "IMPORT _bosch_2018.dbc";
+CM_ "IMPORT _bosch_adas_2018.dbc";
 CM_ "IMPORT _steering_sensors_a.dbc";
 
 BO_ 401 GEARBOX: 8 PCM
