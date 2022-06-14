@@ -36,15 +36,6 @@ BS_:
 BU_: XXX
 
 
-BO_ 346 ACCELERATOR: 8 XXX
- SG_ NEW_SIGNAL3 : 16|8@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL4 : 7|16@0+ (1,0) [0|65535] "" XXX
- SG_ NEW_SIGNAL2 : 40|3@1+ (1,0) [0|7] "" XXX
- SG_ NEW_SIGNAL5 : 47|8@0+ (1,0) [0|255] "" XXX
- SG_ onlyworkonP : 56|1@0+ (1,0) [0|1] "" XXX
- SG_ GEAR : 24|3@1+ (1,0) [0|7] "" XXX
- SG_ ACCELERATOR_PEDAL : 55|8@0+ (1,0) [0|255] "" XXX
-
 BO_ 80 LKAS: 16 XXX
  SG_ STEER_REQ : 52|1@1+ (1,0) [0|1] "" XXX
  SG_ TORQUE_REQUEST : 41|11@1+ (1,-1024) [0|4095] "" XXX
@@ -83,10 +74,10 @@ BO_ 96 ESP_STATUS: 32 XXX
  SG_ ESP_DISABLED : 42|3@1+ (1,0) [0|63] "" XXX
 
 BO_ 256 BRAKE: 32 XXX
- SG_ CHECKSUM : 7|16@0+ (1,0) [0|65535] "" XXX
- SG_ COUNTER : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
+ SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
  SG_ BRAKE_PRESSED : 32|1@1+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_1 : 120|8@1+ (1,0) [0|7] "" XXX
+
 
 BO_ 160 WHEEL_SPEEDS: 24 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
@@ -172,11 +163,22 @@ BO_ 426 CRUISE_BUTTONS: 16 XXX
  SG_ _CHECKSUM : 7|16@0+ (1,0) [0|65535] "" XXX
  SG_ _COUNTER : 23|8@0+ (1,0) [0|255] "" XXX
 
+BO_ 346 ACCELERATOR: 8 XXX
+ SG_ NEW_SIGNAL_3 : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_4 : 7|16@0+ (1,0) [0|65535] "" XXX
+ SG_ NEW_SIGNAL_2 : 40|3@1+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_5 : 47|8@0+ (1,0) [0|255] "" XXX
+ SG_ onlyworkonP : 56|1@0+ (1,0) [0|1] "" XXX
+ SG_ GEAR : 24|3@1+ (1,0) [0|7] "" XXX
+ SG_ ACCELERATOR_PEDAL : 55|8@0+ (1,0) [0|255] "" XXX
+
+
+
 
 CM_ SG_ 961 COUNTER_ALT "only increments on change";
 CM_ SG_ 1041 COUNTER_ALT "only increments on change";
 CM_ SG_ 1043 COUNTER_ALT "only increments on change";
-VAL_ 53 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
+VAL_ 346 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
 VAL_ 80 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green" ;
 VAL_ 80 LKA_MODE 1 "warning only" 2 "assist" 6 "off" ;
-VAL_ 426 DISTANCE_BTN 3 "Gap" 1 "Speed inc" 2 "Speed dec" ;
+VAL_ 426 DISTANCE_BTN 3 "Gap" 1 "Speed inc" 2 "speed dec" ;
