@@ -93,7 +93,7 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
       unsigned int chksm = volkswagen_mqb_crc(address, ret);
       set_value(ret, sig, chksm);
     } else if (sig.type == SignalType::VOLKSWAGEN_PQ_CHECKSUM) {
-      unsigned int chksm = volkswagen_pq_checksum(address, sig.start_bit, ret);
+      unsigned int chksm = volkswagen_pq_checksum(sig.start_bit, ret);
       set_value(ret, sig, chksm);
     } else if (sig.type == SignalType::SUBARU_CHECKSUM) {
       unsigned int chksm = subaru_checksum(address, ret);

@@ -51,7 +51,7 @@ bool MessageState::parse(uint64_t sec, const std::vector<uint8_t> &dat) {
         checksum_failed = true;
       } else if (sig.type == SignalType::VOLKSWAGEN_MQB_CHECKSUM && volkswagen_mqb_crc(address, dat) != tmp) {
         checksum_failed = true;
-      } else if (sig.type == SignalType::VOLKSWAGEN_PQ_CHECKSUM && volkswagen_pq_checksum(address, sig.start_bit, dat) != tmp) {
+      } else if (sig.type == SignalType::VOLKSWAGEN_PQ_CHECKSUM && volkswagen_pq_checksum(sig.start_bit, dat) != tmp) {
         checksum_failed = true;
       } else if (sig.type == SignalType::SUBARU_CHECKSUM && subaru_checksum(address, dat) != tmp) {
         checksum_failed = true;

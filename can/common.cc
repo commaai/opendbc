@@ -188,7 +188,7 @@ unsigned int volkswagen_mqb_crc(uint32_t address, const std::vector<uint8_t> &d)
   return crc ^ 0xFF; // Return after standard final XOR for CRC8 8H2F/AUTOSAR
 }
 
-unsigned int volkswagen_pq_checksum(uint32_t address, int checksum_start_bit, const std::vector<uint8_t> &d) {
+unsigned int volkswagen_pq_checksum(int checksum_start_bit, const std::vector<uint8_t> &d) {
   uint8_t checksum = 0;
   int checksum_byte = checksum_start_bit / 8;
 
