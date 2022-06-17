@@ -74,7 +74,6 @@ BO_ 284 BRAKE_1: 8 XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 320 ESP_1: 8 XXX
- SG_ SPEED_RELATED_2 : 47|8@0+ (1,0) [0|63] "" XXX
  SG_ Brake_Pedal_State : 2|2@1+ (1,0) [0|0] "" XXX
  SG_ Vehicle_Speed : 33|10@0+ (0.5,0) [0|511] "km/h" XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
