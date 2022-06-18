@@ -334,7 +334,7 @@ BO_ 941 NEW_MSG_3ad: 8 XXX
 BO_ 500 DAS_3: 8 XXX
  SG_ Engine_Torque_Request : 4|13@0+ (0.25,-500) [-500|1547.5] "Nm" XXX
  SG_ ACC_StandStill : 5|1@1+ (1,0) [0|1] ""  XXX
- SG_ Engine_Torque_Request_Max : 7|1@1+ (1,0) [0|0] "" XXX
+ SG_ Engine_Torque_Request_Max : 7|1@1+ (1,0) [0|1] "" XXX
  SG_ ACC_Enabled : 20|1@1+ (1,0) [0|1] "" XXX
  SG_ ACC_Engaged : 21|1@1+ (1,0) [0|1] "" XXX
  SG_ ACC_Faulted : 47|1@0+ (1,0) [0|1] "" XXX
