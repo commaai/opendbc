@@ -36,12 +36,11 @@ BS_:
 BU_: XXX
 
 
-BO_ 258 STEERING: 8 XXX
+BO_ 258 Steering_Column_Angle_Status: 8 XXX
+ SG_ Steering_Wheel_Angle : 5|14@0+ (0.5,-2048) [-2048|2047] "Degrees" XXX
+ SG_ Steering_Rate : 21|14@0+ (0.5,-2048) [-2048|2047] "deg/s" XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
- SG_ UNKNOWN_STEERING : 50|3@0+ (1,0) [0|15] "" XXX
- SG_ STEERING_RATE : 20|13@0+ (0.3187251,-1305.498) [0|8191] "deg/s" XXX
- SG_ STEER_ANGLE : 4|13@0+ (0.3187251,-1307.888) [-360|360] "deg" XXX
 
 BO_ 514 SPEED_1: 8 XXX
  SG_ SPEED_LEFT : 7|12@0+ (0.071028,0) [0|65535] "m/s" XXX
@@ -369,8 +368,7 @@ BO_ 512 NEW_MSG_200: 8 XXX
  SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
-CM_ SG_ 258 UNKNOWN_STEERING "never goes above 4. see if human-applied torque";
-CM_ SG_ 258 STEER_ANGLE "positive is left (counter-clockwise)";
+CM_ SG_ 258 Steering_Wheel_Angle "positive is left (counter-clockwise)";
 CM_ SG_ 514 SPEED_LEFT "TODO find upper limit";
 CM_ SG_ 653 BRAKE_PRESSURE "max seems to be 148";
 CM_ SG_ 820 TURN_LIGHT_LEFT "oscillates with the light blinking";
