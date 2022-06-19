@@ -194,9 +194,7 @@ unsigned int volkswagen_pq_checksum(int checksum_start_bit, const std::vector<ui
 
   // Simple XOR over the payload, except for the byte where the checksum lives.
   for (int i = 0; i < d.size(); i++) {
-    if (i == checksum_byte) {
-      continue;
-    } else {
+    if (i != checksum_byte) {
       checksum ^= d[i];
     }
   }
