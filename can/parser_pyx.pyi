@@ -1,10 +1,7 @@
-import numbers
-
-from cereal import log
 from dataclasses import dataclass
-from typing import Any, DefaultDict, Dict, List, Set, Tuple
+from typing import Any, Dict, List, Set, Tuple
 
-from opendbc.can.common import *
+from opendbc.can.common import DBC, SignalValue
 
 
 class CANParser():
@@ -44,3 +41,4 @@ class CANDefine():
     self.dbc: DBC
     self.dv: Dict[str|int, Dict[str, Dict[int, str]]]
     """Example: dv["Message"]["signal"][1] -> "LEFT" """
+    ...
