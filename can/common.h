@@ -39,7 +39,7 @@ public:
   std::vector<double> vals;
   std::vector<std::vector<double>> all_vals;
 
-  uint64_t seen;
+  uint64_t last_seen_nanos;
   uint64_t check_threshold;
 
   uint8_t counter;
