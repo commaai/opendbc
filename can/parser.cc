@@ -45,19 +45,7 @@ bool MessageState::parse(uint64_t sec, const std::vector<uint8_t> &dat) {
 
     bool checksum_failed = false;
     if (!ignore_checksum) {
-      if (sig.type == SignalType::HONDA_CHECKSUM && honda_checksum(address, sig, dat) != tmp) {
-        checksum_failed = true;
-      } else if (sig.type == SignalType::TOYOTA_CHECKSUM && toyota_checksum(address, sig, dat) != tmp) {
-        checksum_failed = true;
-      } else if (sig.type == SignalType::VOLKSWAGEN_MQB_CHECKSUM && volkswagen_mqb_checksum(address, sig, dat) != tmp) {
-        checksum_failed = true;
-      } else if (sig.type == SignalType::SUBARU_CHECKSUM && subaru_checksum(address, sig, dat) != tmp) {
-        checksum_failed = true;
-      } else if (sig.type == SignalType::CHRYSLER_CHECKSUM && chrysler_checksum(address, sig, dat) != tmp) {
-        checksum_failed = true;
-      } else if (sig.type == SignalType::HKG_CAN_FD_CHECKSUM && hkg_can_fd_checksum(address, sig, dat) != tmp) {
-        checksum_failed = true;
-      } else if (sig.type == SignalType::PEDAL_CHECKSUM && pedal_checksum(address, sig, dat) != tmp) {
+      if (sig.calc_checksum != nullptr && sig.calc_checksum(address, sig, dat) != tmp) {
         checksum_failed = true;
       }
     }

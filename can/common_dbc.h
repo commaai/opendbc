@@ -51,6 +51,7 @@ struct Signal {
   double factor, offset;
   bool is_little_endian;
   SignalType type;
+  unsigned int (*calc_checksum)(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 };
 
 struct Msg {
