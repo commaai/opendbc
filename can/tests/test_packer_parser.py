@@ -45,6 +45,32 @@ class TestCanParserPacker(unittest.TestCase):
         self.assertEqual(bus, b)
         self.assertEqual(dat[0], i)
 
+  def test_parser_can_valid(self):
+    signals = [
+      ("COUNTER", "CAN_FD_MESSAGE"),
+    ]
+    checks = [("CAN_FD_MESSAGE", 10), ]
+    packer = CANPacker(TEST_DBC)
+    parser = CANParser(TEST_DBC, signals, checks, 0)
+
+    # shouldn't be valid initially
+    self.assertFalse(parser.can_valid)
+
+    # not valid until the message is seen
+    for _ in range(100):
+      dat = can_list_to_can_capnp([])
+      parser.update_string(dat)
+      self.assertFalse(parser.can_valid)
+
+    # valid once seen
+    for i in range(1, 100):
+      t = int(0.01 * i * 1e9)
+      msg = packer.make_can_msg("CAN_FD_MESSAGE", 0, {})
+      dat = can_list_to_can_capnp([msg, ], logMonoTime=t)
+      parser.update_string(dat)
+      self.assertTrue(parser.can_valid)
+
+
   def test_packer_parser(self):
 
     signals = [
