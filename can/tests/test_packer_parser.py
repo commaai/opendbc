@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
+import os
 import unittest
 import random
 
 import cereal.messaging as messaging
 from opendbc.can.parser import CANParser
 from opendbc.can.packer import CANPacker
+
+
+TEST_DBC = os.path.abspath(os.path.join(os.path.dirname(__file__), "test.dbc"))
+
 
 # Python implementation so we don't have to depend on boardd
 def can_list_to_can_capnp(can_msgs, msgtype='can', logMonoTime=None):
@@ -30,7 +35,7 @@ def can_list_to_can_capnp(can_msgs, msgtype='can', logMonoTime=None):
 
 class TestCanParserPacker(unittest.TestCase):
   def test_packer(self):
-    packer = CANPacker("test")
+    packer = CANPacker(TEST_DBC)
 
     for b in range(6):
       for i in range(256):
@@ -55,8 +60,8 @@ class TestCanParserPacker(unittest.TestCase):
     ]
     checks = [("STEERING_CONTROL", 0), ("CAN_FD_MESSAGE", 0)]
 
-    packer = CANPacker("test")
-    parser = CANParser("test", signals, checks, 0)
+    packer = CANPacker(TEST_DBC)
+    parser = CANParser(TEST_DBC, signals, checks, 0)
 
     idx = 0
 
