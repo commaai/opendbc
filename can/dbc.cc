@@ -99,9 +99,11 @@ void set_signal_type(Signal& s, ChecksumState* chk, const std::string& dbc_name,
   }
 }
 
-DBC* dbc_parse(const std::string& dbc_name, const std::string& dbc_file_path) {
-  std::ifstream infile(dbc_file_path + "/" + dbc_name + ".dbc");
+DBC* dbc_parse(const std::string& dbc_path) {
+  std::ifstream infile(dbc_path);
   if (!infile) return nullptr;
+
+  const std::string dbc_name = std::filesystem::path(dbc_path).filename();
 
   std::unique_ptr<ChecksumState> checksum(get_checksum(dbc_name));
 
@@ -203,7 +205,7 @@ DBC* dbc_parse(const std::string& dbc_name, const std::string& dbc_file_path) {
   return dbc;
 }
 
-const std::string get_dbc_file_path() {
+const std::string get_dbc_root_path() {
   char *basedir = std::getenv("BASEDIR");
   if (basedir != NULL) {
     return std::string(basedir) + "/opendbc";
@@ -215,18 +217,22 @@ const std::string get_dbc_file_path() {
 const DBC* dbc_lookup(const std::string& dbc_name) {
   static std::mutex lock;
   static std::map<std::string, DBC*> dbcs;
-  static const std::string& dbc_file_path = get_dbc_file_path();
+
+  std::string dbc_file_path = dbc_name;
+  if (!std::filesystem::exists(dbc_file_path)) {
+    dbc_file_path = get_dbc_root_path() + "/" + dbc_name + ".dbc";
+  }
 
   std::unique_lock lk(lock);
   auto it = dbcs.find(dbc_name);
   if (it == dbcs.end()) {
-    it = dbcs.insert(it, {dbc_name, dbc_parse(dbc_name, dbc_file_path)});
+    it = dbcs.insert(it, {dbc_name, dbc_parse(dbc_file_path)});
   }
   return it->second;
 }
 
 std::vector<std::string> get_dbc_names() {
-  static const std::string& dbc_file_path = get_dbc_file_path();
+  static const std::string& dbc_file_path = get_dbc_root_path();
   std::vector<std::string> dbcs;
   for (std::filesystem::directory_iterator i(dbc_file_path), end; i != end; i++) {
     if (!is_directory(i->path())) {
