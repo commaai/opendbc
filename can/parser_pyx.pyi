@@ -15,9 +15,9 @@ class CANParser():
     self.bus_timeout_threshold: int
     self.dbc_name: str
     self.dbc: DBC
-    self.vl: Dict[int|str, Dict[str, Any]]
+    self.vl: Dict[int|str, Dict[str, float]]
     """ Get Latest value for a signal. vl["messagename"|messageid]["signalName"] -> signal value""" 
-    self.vl_all: Dict[int|str, Dict[str, List[Any]]]
+    self.vl_all: Dict[int|str, Dict[str, List[float]]]
     self.can_invalid_cnt: int
     ...
 

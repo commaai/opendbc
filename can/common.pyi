@@ -65,12 +65,12 @@ class MessageParseOptions():
 class SignalValue():
   address: int
   name: str
-  value: Any # TODO: c++ double... - maybe debug to get runtime type
-  all_values: List[Any]
+  value: float
+  all_values: List[float]
 
 @dataclass
 class SignalPackValue():
     name: str
-    value: Any # TODO: c++ double... - maybe debug to get runtime type
+    value: float
 
 def dbc_lookup(dbc_name: str) -> DBC: ...
