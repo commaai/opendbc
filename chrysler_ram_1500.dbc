@@ -36,9 +36,10 @@ BS_:
 BU_: XXX
 
 
-BO_ 35 Steering_Column_Angle_Status: 8 XXX
- SG_ Steering_Wheel_Angle : 5|14@0+ (0.5,-2048) [-2048|2047] "Degrees" XXX #2019 Ram 1500
- SG_ Steering_Rate : 21|14@0+ (0.5,-2048) [-2048|2047] "deg/s" XXX #From 2500
+BO_ 35 STEERING: 8 XXX
+ SG_ STEER_ANGLE : 4|13@0+ (0.3187251,-1307.888) [-360|360] "deg" XXX
+ SG_ STEERING_RATE : 20|13@0+ (0.3187251,-1305.498) [0|8191] "deg/s" XXX
+ SG_ UNKNOWN_STEERING : 50|3@0+ (1,0) [0|15] "" XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
@@ -62,6 +63,7 @@ BO_ 131 ESP_1: 8 XXX
  SG_ Vehicle_Speed : 33|10@0+ (0.5,0) [0|511] "km/h" XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ BRAKE_PRESSED_ACC : 6|1@0+ (1,0) [0|3] "" XXX
 
 BO_ 137 ESP_4: 8 XXX
  SG_ Yaw_Rate : 7|16@0+ (0.01,-327.68) [-327.68|327.66] "deg/s" XXX
@@ -79,16 +81,21 @@ BO_ 147 Transmission_Status: 8 XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 153 DAS_3: 8 XXX
- SG_ Engine_Torque_Request : 4|13@0+ (0.25,-500) [-500|1547.5] "Nm" XXX
- SG_ ACC_StandStill : 5|1@1+ (1,0) [0|0] ""  XXX
- SG_ Engine_Torque_Request_Max : 7|1@1+ (1,0) [0|0] "" XXX
- SG_ ACC_Enabled : 20|1@1+ (1,0) [0|0] "" XXX
- SG_ ACC_Engaged : 21|1@1+ (1,0) [0|0] "" XXX
+ SG_ ENGINE_TORQUE_REQUEST : 4|13@0+ (0.25,-500) [-500|1547.5] "Nm" XXX
+ SG_ ENGINE_TORQUE_REQUEST_MAX : 7|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_STANDSTILL : 5|1@0+ (1,0) [0|1] ""  XXX
+ SG_ ACC_AVAILABLE : 20|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_ACTIVE : 21|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_FAULTED : 47|1@0+ (1,0) [0|1] "" XXX
+ SG_ BRAKE_MAYBE : 18|11@0+ (1,0) [0|255] "" XXX
+ SG_ BRAKE_BOOL_1 : 36|1@0+ (1,0) [0|3] "" XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 157 ECM_5: 8 XXX
  SG_ Accelerator_Position : 0|8@1+ (0.4,0) [0|100] "%" XXX
+ SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 164 EPS_3: 8 XXX
  SG_ DASM_FAULT : 34|1@0+ (1,0) [0|1] "" XXX
@@ -182,7 +189,7 @@ BO_ 135 ABS_2: 8 XXX
 
 
 
-CM_ SG_ 35 Steering_Wheel_Angle "540 deg total negative values indicate right turn, positive values indicate left turn";
+CM_ SG_ 35 STEERING "540 deg total negative values indicate right turn, positive values indicate left turn";
 CM_ SG_ 133 ACTUAL_GEAR "0xd = P, 0x1-8 = D (actual gear), 0xb = R or N?? TODO find R vs N";
 CM_ SG_ 153 ACC_Engaged "SENT BY FORWARD CAMERA 1 = ACTIVE, 3 = ENGAGED, 0 = DISENGAGED/OFF";
 CM_ SG_ 166 LKAS_COMMAND "SENT BY FORWARD CAMERA";
