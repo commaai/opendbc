@@ -396,7 +396,7 @@ BO_ 640 Motor_1: 8 XXX
  SG_ mechanisches_Motor_Verlustmomen : 48|8@1+ (0.39,0) [0|99] "MDI" XXX
  SG_ Fahrpedalwert_oder_Drosselklapp : 40|8@1+ (0.4,0) [0|101.6] "%" XXX
  SG_ inneres_Motor_Moment_ohne_exter : 32|8@1+ (0.39,0) [0|99] "MDI" XXX
- SG_ Motordrehzahl : 16|16@1+ (0.25,0) [0|16256] "U/min" XXX
+ SG_ Engine_Speed : 16|16@1+ (0.25,0) [0|16256] "U/min" XXX
  SG_ inneres_Motor_Moment : 8|8@1+ (0.39,0) [0|99] "MDI" XXX
  SG_ Momentenangaben_ungenau : 7|1@1+ (1,0) [0|0] "" XXX
  SG_ Fehlerstatus_Getriebe_Momentene : 6|1@1+ (1,0) [0|0] "" XXX
