@@ -374,9 +374,9 @@ BO_ 896 Motor_3: 8 XXX
 BO_ 648 Motor_2: 8 XXX
  SG_ Minimales_Motormoment_bei_Zuend : 56|8@1+ (0.39,0) [0|99] "MDI" XXX
  SG_ Begrenzungsmoment : 48|8@1+ (0.39,0) [0|99] "MDI" XXX
- SG_ Leerlaufsolldrehzahl__Motor_2_ : 40|8@1+ (10,0) [0|2540] "U/min" XXX
+ SG_ TargetIdleSpeed__Motor_2_ : 40|8@1+ (10,0) [0|2540] "U/min" XXX
  SG_ Soll_Geschwindigkeit_bei_GRA_Be : 32|8@1+ (1.28,0) [0|325] "km/h" XXX
- SG_ Fahrzeuggeschwindigkeit : 24|8@1+ (1.28,0) [0|325] "km/h" XXX
+ SG_ Vehicle_Speed : 24|8@1+ (1.28,0) [0|325] "km/h" XXX
  SG_ GRA_Status : 22|2@1+ (1,0) [0|0] "" XXX
  SG_ OBD_2_freeze_frame : 21|1@1+ (1,0) [0|0] "" XXX
  SG_ Status_Normalbetrieb : 20|1@1+ (1,0) [0|0] "" XXX
@@ -384,7 +384,7 @@ BO_ 648 Motor_2: 8 XXX
  SG_ Fehlerstatus_Kuhlmitteltempera : 18|1@1+ (1,0) [0|0] "" XXX
  SG_ Bremstestschalter : 17|1@1+ (1,0) [0|0] "" XXX
  SG_ Bremslichtschalter : 16|1@1+ (1,0) [0|0] "" XXX
- SG_ Kuehlmitteltemperatur__Motor_2_ : 8|8@1+ (0.75,-48) [-48|142.5] "" XXX
+ SG_ Coolant_Temperature_Motor_2_ : 8|8@1+ (0.75,-48) [-48|142.5] "" XXX
  SG_ Multiplex_Code_Motor_2 M : 6|2@1+ (1,0) [0|0] "" XXX
  SG_ Multiplex_Info_Motorcode__4_x_ m1 : 0|6@1+ (1,0) [0|0] "" XXX
  SG_ Multiplex_Info_Getriebecode m2 : 0|6@1+ (1,0) [0|0] "" XXX
