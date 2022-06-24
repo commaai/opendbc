@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
+import os
 import unittest
 import random
 
 import cereal.messaging as messaging
 from opendbc.can.parser import CANParser
 from opendbc.can.packer import CANPacker
+
+
+TEST_DBC = os.path.abspath(os.path.join(os.path.dirname(__file__), "test.dbc"))
+
 
 # Python implementation so we don't have to depend on boardd
 def can_list_to_can_capnp(can_msgs, msgtype='can', logMonoTime=None):
@@ -30,7 +35,7 @@ def can_list_to_can_capnp(can_msgs, msgtype='can', logMonoTime=None):
 
 class TestCanParserPacker(unittest.TestCase):
   def test_packer(self):
-    packer = CANPacker("test")
+    packer = CANPacker(TEST_DBC)
 
     for b in range(6):
       for i in range(256):
@@ -39,6 +44,32 @@ class TestCanParserPacker(unittest.TestCase):
         self.assertEqual(addr, 245)
         self.assertEqual(bus, b)
         self.assertEqual(dat[0], i)
+
+  def test_parser_can_valid(self):
+    signals = [
+      ("COUNTER", "CAN_FD_MESSAGE"),
+    ]
+    checks = [("CAN_FD_MESSAGE", 10), ]
+    packer = CANPacker(TEST_DBC)
+    parser = CANParser(TEST_DBC, signals, checks, 0)
+
+    # shouldn't be valid initially
+    self.assertFalse(parser.can_valid)
+
+    # not valid until the message is seen
+    for _ in range(100):
+      dat = can_list_to_can_capnp([])
+      parser.update_string(dat)
+      self.assertFalse(parser.can_valid)
+
+    # valid once seen
+    for i in range(1, 100):
+      t = int(0.01 * i * 1e9)
+      msg = packer.make_can_msg("CAN_FD_MESSAGE", 0, {})
+      dat = can_list_to_can_capnp([msg, ], logMonoTime=t)
+      parser.update_string(dat)
+      self.assertTrue(parser.can_valid)
+
 
   def test_packer_parser(self):
 
@@ -55,8 +86,8 @@ class TestCanParserPacker(unittest.TestCase):
     ]
     checks = [("STEERING_CONTROL", 0), ("CAN_FD_MESSAGE", 0)]
 
-    packer = CANPacker("test")
-    parser = CANParser("test", signals, checks, 0)
+    packer = CANPacker(TEST_DBC)
+    parser = CANParser(TEST_DBC, signals, checks, 0)
 
     idx = 0
 
