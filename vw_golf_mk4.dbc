@@ -1458,6 +1458,7 @@ CM_ SG_ 648 Fahrzeuggeschwindigkeit "Vehicle Speed";
 CM_ SG_ 648 Kuehlmitteltemperatur__Motor_2_ "Coolant Temperature";
 
 CM_ SG_ 1088 Zaehler_Getriebe_1 "Counter Getriebe_1"
+CM_ SG_ 1088 Waehlhebelposition__Getriebe_1_ "Gear Selector Position"
 
 CM_ SG_ 1152 Checksumme_Motor_5 "Checksum Motor_5"
 
