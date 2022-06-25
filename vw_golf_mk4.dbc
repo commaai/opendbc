@@ -1437,6 +1437,14 @@ BO_ 2000 Diagnose_1: 8 XXX
 CM_ SG_ 210 LM_Offset "centiNewton-meters for ease of calculation without FP math in Panda";
 CM_ SG_ 210 Vib_Amp "Steering wheel haptic, amplitude";
 CM_ SG_ 210 Vib_Freq "Steering wheel haptic, frequency";
+
+CM_ SG_ 640 Fahrpedalwert_oder_Drosselklapp "Accelerator Pedal or Throttle Position";
+CM_ SG_ 640 Motordrehzahl "Engine Speed";
+
+CM_ SG_ 648 Leerlaufsolldrehzahl__Motor_2_ "Target Idle Speed";
+CM_ SG_ 648 Fahrzeuggeschwindigkeit "Vehicle Speed";
+CM_ SG_ 648 Kuehlmitteltemperatur__Motor_2_ "Coolant Temperature";
+
 CM_ SG_ 1386 ACA_V_Wunsch "255=unset";
 CM_ SG_ 1470 LDW_Direction "0=right,1=left";
 CM_ SG_ 1470 XX_DLCORTLC1 "Might be DLC or TLC";
