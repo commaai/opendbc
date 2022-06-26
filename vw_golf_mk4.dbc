@@ -1467,6 +1467,7 @@ CM_ SG_ 1088 Waehlhebelposition__Getriebe_1_ "Gear Selector Position"
 CM_ SG_ 1152 Checksumme_Motor_5 "Checksum Motor_5"
 
 CM_ SG_ 1160 Zaehler_Motor_6 "Counter Motor_6"
+CM_ SG_ 1160 Hoeheninfo__Motor_6_ "Altitude Correction"
 CM_ SG_ 1160 Istmoment_f_r_Getriebe "Actual Torque"
 CM_ SG_ 1160 Sollmoment_f_r_Getriebe "Target Torque"
 CM_ SG_ 1160 Checksumme_Motor_6 "Checksum Motor_6"
