@@ -1468,6 +1468,9 @@ CM_ SG_ 1160 Checksumme_Motor_6 "Checksum Motor_6"
 CM_ SG_ 1344 Zahler_Getriebe_2 "Counter Getriebe_2"
 
 CM_ SG_ 1386 ACA_V_Wunsch "255=unset";
+
+CM_ SG_ 1416 Ladedruck "Boost Pressure"
+
 CM_ SG_ 1470 LDW_Direction "0=right,1=left";
 CM_ SG_ 1470 XX_DLCORTLC1 "Might be DLC or TLC";
 CM_ SG_ 1470 XX_DLCORTLC2 "Might be DLC or TLC, might have wrong size";
