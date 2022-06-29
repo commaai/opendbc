@@ -1,44 +1,41 @@
-from dataclasses import dataclass
-from typing import Any, Dict, List, Set, Tuple
-
-from opendbc.can.common import DBC, SignalValue
+from typing import Dict, List, Set, Tuple, Optional
+from opendbc.can.common import CANParser as cpp_CANParser
+from opendbc.can.common import SignalValue, DBC
 
 
 class CANParser():
   def __init__(self, dbc_name: str, signals: List[Tuple[str|int, str]],
-               checks: List[Tuple[str, int]], bus: int = 0, enforce_checks: bool = True) -> None:
-    self.can_valid: bool
-    self.bus_timeout: bool
-    self.first_sec: int
-    self.last_sec: int
-    self.last_nonempty_sec: int
-    self.bus_timeout_threshold: int
-    self.dbc_name: str
+               checks: Optional[List[Tuple[str, int]]] = None, bus: Optional[int] = 0, enforce_checks: Optional[bool] = True) -> None:
+    self.can: cpp_CANParser
     self.dbc: DBC
+    self.msg_name_to_address: Dict[str,int]
+    self.address_to_msg_name: Dict[int,str]
+    self.can_values: List[SignalValue]
+    # readonly
     self.vl: Dict[int|str, Dict[str, float]]
     """ Get Latest value for a signal. vl["messagename"|messageid]["signalName"] -> signal value""" 
     self.vl_all: Dict[int|str, Dict[str, List[float]]]
+    self.can_valid: bool
+    self.bus_timeout: bool
+    self.dbc_name: str
     self.can_invalid_cnt: int
     ...
 
-  def update_string(self, data: str, sendcan: bool) -> None: ...
+  def update_vl(self) -> Set[int]: ...
+
+  def update_string(self, dat: str, sendcan: Optional[bool] = False) -> Set[int]: ...
+
+  def update_strings(self, strings: List[str], sendcan: Optional[bool] = False) -> Set[int]: ...
 
   def UpdateValid(self, sec: int) -> None: ...
   
   def query_latest(self) -> List[SignalValue]: ...
   
-  def update_vl(self) -> Set[int]: ...
-
-  # #ifndef DYNAMIC_CAPNP
-  # void UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Reader& cans);
-  # #endif
-  # void UpdateCans(uint64_t sec, const capnp::DynamicStruct::Reader& cans);
 
 class CANDefine():
-  """Helper class to convert raw int signal values to their mapped names"""
   def __init__(self, dbc_name: str) -> None:
-    self.dbc_name: str
     self.dbc: DBC
     self.dv: Dict[str|int, Dict[str, Dict[int, str]]]
     """Example: dv["Message"]["signal"][1] -> "LEFT" """
+    self.dbc_name: str
     ...
