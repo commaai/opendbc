@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from enum import Enum
-from typing import Any, List
+from typing import List
 
 class SignalType(Enum):
   DEFAULT = 0
@@ -55,7 +55,6 @@ class SignalParseOptions():
   address: int
   name: str
 
-
 @dataclass
 class MessageParseOptions():
   address: int
@@ -74,3 +73,21 @@ class SignalPackValue():
     value: float
 
 def dbc_lookup(dbc_name: str) -> DBC: ...
+
+
+class CANParser():
+  """ Cython wrapper for c++ CANParser
+  """
+  def __init__(self, abus: int, dbc_name: str, options: List[MessageParseOptions], sigoptions: List[SignalParseOptions]) -> None:
+    self.can_valid: bool
+    self.bus_timeout: bool
+    ...
+  
+  def update_string(self, data: str, sendcan: bool) -> None: ...
+  def query_latest(self) -> List[SignalValue]: ...
+
+class CANPacker():
+  """ Cython wrapper for c++ CANPacker
+  """
+  def __init__(self, dbc_name: str) -> None: ...
+  def pack(address: int, signals: List[SignalPackValue], counter: int) -> List[int]: ...
