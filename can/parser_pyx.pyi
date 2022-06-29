@@ -5,7 +5,7 @@ from opendbc.can.common import SignalValue, DBC
 
 class CANParser():
   def __init__(self, dbc_name: str, signals: List[Tuple[str|int, str]],
-               checks: Optional[List[Tuple[str, int]]] = None, bus: Optional[int] = 0, enforce_checks: Optional[bool] = True) -> None:
+               checks: Optional[List[Tuple[str, int]]] = ..., bus: int = ..., enforce_checks: bool = ...) -> None:
     self.can: cpp_CANParser
     self.dbc: DBC
     self.msg_name_to_address: Dict[str,int]
@@ -23,9 +23,9 @@ class CANParser():
 
   def update_vl(self) -> Set[int]: ...
 
-  def update_string(self, dat: str, sendcan: Optional[bool] = False) -> Set[int]: ...
+  def update_string(self, dat: str, sendcan: bool = ...) -> Set[int]: ...
 
-  def update_strings(self, strings: List[str], sendcan: Optional[bool] = False) -> Set[int]: ...
+  def update_strings(self, strings: List[str], sendcan: bool = ...) -> Set[int]: ...
 
   def UpdateValid(self, sec: int) -> None: ...
   

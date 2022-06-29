@@ -69,8 +69,8 @@ class SignalValue():
 
 @dataclass
 class SignalPackValue():
-    name: str
-    value: float
+  name: str
+  value: float
 
 def dbc_lookup(dbc_name: str) -> DBC: ...
 
