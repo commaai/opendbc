@@ -36,7 +36,6 @@ repos:
         entry: cppcheck
         language: system
         types: [c++]
-        exclude: 'can/dbc_template.cc'
         args:
         - --error-exitcode=1
         - --language=c++

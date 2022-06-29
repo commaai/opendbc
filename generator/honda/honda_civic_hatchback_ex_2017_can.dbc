@@ -1,5 +1,7 @@
 CM_ "IMPORT _honda_common.dbc";
 CM_ "IMPORT _bosch_2018.dbc";
+CM_ "IMPORT _bosch_adas_2018.dbc";
+CM_ "IMPORT _steering_sensors_a.dbc";
 
 BO_ 401 GEARBOX: 8 PCM
  SG_ GEAR_SHIFTER : 5|6@0+ (1,0) [0|63] "" EON
@@ -21,19 +23,6 @@ BO_ 506 LEGACY_BRAKE_COMMAND: 8 ADAS
  SG_ CHIME : 40|8@1+ (1,0) [0|255] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
-
-BO_ 927 RADAR_HUD: 8 RADAR
- SG_ ZEROS_BOH : 7|10@0+ (1,0) [0|127] "" BDY
- SG_ CMBS_OFF : 12|1@0+ (1,0) [0|1] "" BDY
- SG_ ZEROS_BOH3 : 31|32@0+ (1,0) [0|4294967295] "" XXX
- SG_ RESUME_INSTRUCTION : 21|1@0+ (1,0) [0|1] "" XXX
- SG_ SET_TO_1 : 13|1@0+ (1,0) [0|1] "" BDY
- SG_ ZEROS_BOH2 : 11|4@0+ (1,0) [0|1] "" XXX
- SG_ APPLY_BRAKES_FOR_CANC : 23|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_ALERTS : 20|5@0+ (1,0) [0|1] "" BDY
- SG_ SET_TO_0 : 22|1@0+ (1,0) [0|1] "" XXX
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
 VAL_ 401 GEAR_SHIFTER 32 "L" 16 "S" 8 "D" 4 "N" 2 "R" 1 "P" ;
 VAL_ 401 GEAR 7 "L" 10 "S" 4 "D" 3 "N" 2 "R" 1 "P" ;
