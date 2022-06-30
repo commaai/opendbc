@@ -36,8 +36,8 @@ enum SignalType {
   TOYOTA_CHECKSUM,
   PEDAL_CHECKSUM,
   PEDAL_COUNTER,
-  VOLKSWAGEN_CHECKSUM,
-  VOLKSWAGEN_COUNTER,
+  VOLKSWAGEN_MQB_CHECKSUM,
+  VOLKSWAGEN_MQB_COUNTER,
   SUBARU_CHECKSUM,
   CHRYSLER_CHECKSUM,
   HKG_CAN_FD_CHECKSUM,
@@ -51,6 +51,7 @@ struct Signal {
   double factor, offset;
   bool is_little_endian;
   SignalType type;
+  unsigned int (*calc_checksum)(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 };
 
 struct Msg {
