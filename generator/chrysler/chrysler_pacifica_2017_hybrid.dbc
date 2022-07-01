@@ -22,6 +22,12 @@ BO_ 264 ACCEL_PEDAL_MSG: 8 XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
  SG_ ACCEL_PEDAL : 35|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 658 LKAS_COMMAND: 6 XXX
+ SG_ COUNTER : 39|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 47|8@0+ (1,0) [0|255] "" XXX
+ SG_ STEERING_TORQUE : 2|11@0+ (1,-1024) [0|1] "" XXX
+ SG_ LKAS_CONTROL_BIT : 4|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 705 AUTO_PARK_BUTTON: 8 XXX
  SG_ AUTO_PARK_TOGGLE_2 : 8|1@0+ (1,0) [0|1] "" XXX
  SG_ AUTO_PARK_TOGGLE_1 : 11|1@0+ (1,0) [0|1] "" XXX
@@ -52,10 +58,6 @@ BO_ 332 STEERING_2: 8 XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ ENERGY_RELATED : 39|16@0+ (1,0) [0|65535] "" XXX
  SG_ STEER_ANGLE_2 : 7|13@0+ (0.3187251,-1307.888) [-360|360] "deg" XXX
-
-BO_ 720 BLIND_SPOT_WARNINGS: 6 XXX
- SG_ BLIND_SPOT_RIGHT : 5|1@0+ (1,0) [0|1] "" XXX
- SG_ BLIND_SPOT_LEFT : 2|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 331 BRAKE_3: 8 XXX
  SG_ BRAKE_RELATED_3 : 7|16@0+ (1,0) [0|65535] "" XXX
@@ -179,7 +181,6 @@ CM_ SG_ 826 AUTO_PARK_GEAR_1 "Reverse=0, Forward=f";
 CM_ SG_ 826 AUTO_PARK_GEAR_2 "Reverse=0, Forward=f";
 CM_ SG_ 826 AUTO_PARK_GEAR_3 "Reverse=0, Forward=f";
 CM_ SG_ 332 STEER_ANGLE_2 "slightly lags the other steer_angle signal. also more noisy.";
-CM_ SG_ 720 BLIND_SPOT_RIGHT "yellow triangle alert on side view mirror when a car is in your blind spot";
 CM_ SG_ 608 PARKSENSE_DISABLED "set if parksense is disabled";
 CM_ SG_ 729 LKAS_STATUS_OK "Set to 0x0820 when LKAS system is plugged in.";
 CM_ SG_ 825 BEEP_339 "sent every 0.5s. 0050 is no beep. To beep send 4355 or 4155. Used by ParkSense warning.";

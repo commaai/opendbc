@@ -3,7 +3,6 @@ import os
 
 
 CHRYSLER_TO_RAM_ADDR = {
-  166: 658,
   258: 35,
   284: 121,
   320: 131,
