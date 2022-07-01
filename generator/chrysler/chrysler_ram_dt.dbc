@@ -1,4 +1,4 @@
-CM_ "IMPORT _stellantis_common_ram_addrs.dbc"
+CM_ "IMPORT _stellantis_common_ram.dbc";
 
 BO_ 53 PCM_2: 8 XXX
  SG_ ENG_TORQUE_REQ : 3|12@0+ (1,0) [0|7] "" XXX

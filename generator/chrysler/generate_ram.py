@@ -4,16 +4,17 @@ import os
 
 CHRYSLER_TO_RAM_ADDR = {
   166: 658,
-  678: 250,
   258: 35,
-  554: 49,
   284: 121,
   320: 131,
   344: 139,
   464: 464,
   500: 153,
+  544: 49,
   571: 177,
   559: 157,
+  678: 250,
+  720: 720,
   792: 792,
   820: 657,
 }
@@ -37,5 +38,5 @@ if __name__ == "__main__":
         line = ' '.join(sl)
       out_f.write(line)
 
-    #missing_addrs = wrote_addrs ^ set(RAM_ADDRS.keys())
-    #assert len(missing_addrs) == 0, f"Missing addrs: {unused_addrs}"
+    missing_addrs = set(CHRYSLER_TO_RAM_ADDR.keys()) - wrote_addrs
+    assert len(missing_addrs) == 0, f"Missing addrs from {src}: {missing_addrs}"
