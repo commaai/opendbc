@@ -1448,7 +1448,7 @@ CM_ SG_ 644 MOB_CHECKSUM "Checksum MOB";
 CM_ SG_ 644 MOB_COUNTER "Counter MOB";
 CM_ SG_ 648 Bremstestschalter "Brake Test Switch";
 CM_ SG_ 648 Bremslichtschalter "Brake Light Switch";
-CM_ SG_ 648 Leerlaufsolldrehzahl__Motor_2_ "Target Idle Speed";;
+CM_ SG_ 648 Leerlaufsolldrehzahl__Motor_2_ "Target Idle Speed";
 CM_ SG_ 648 Fahrzeuggeschwindigkeit "Vehicle Speed";
 CM_ SG_ 648 Kuehlmitteltemperatur__Motor_2_ "Coolant Temperature";
 CM_ SG_ 896 Drosselklappenpoti "Throttle Position";
