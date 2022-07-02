@@ -66,10 +66,10 @@ ChecksumState* get_checksum(const std::string& dbc_name) {
     s = new ChecksumState({8, -1, 7, -1, false, TOYOTA_CHECKSUM, DEFAULT, &toyota_checksum});
   } else if (startswith(dbc_name, "kia_ev6")) {
     s = new ChecksumState({16, 8, 0, 0, true, HKG_CAN_FD_CHECKSUM, HKG_CAN_FD_COUNTER, &hkg_can_fd_checksum});
-  } else if (startswith(dbc_name, {"vw_mqb"})) {
+  } else if (startswith(dbc_name, {"vw_mqb_2010"})) {
     s = new ChecksumState({8, 4, 0, 0, true, VOLKSWAGEN_MQB_CHECKSUM, VOLKSWAGEN_MQB_COUNTER, &volkswagen_mqb_checksum});
-  } else if (startswith(dbc_name, {"vw_golf"})) {
-    s = new ChecksumState({8, 4, 0, 0, true, VOLKSWAGEN_PQ_CHECKSUM, VOLKSWAGEN_PQ_COUNTER, &volkswagen_pq_checksum});
+  } else if (startswith(dbc_name, {"vw_golf_mk4"})) {
+    s = new ChecksumState({8, 4, 0, -1, true, VOLKSWAGEN_PQ_CHECKSUM, VOLKSWAGEN_PQ_COUNTER, &volkswagen_pq_checksum});
   } else if (startswith(dbc_name, "subaru_global_")) {
     s = new ChecksumState({8, -1, 0, -1, true, SUBARU_CHECKSUM, DEFAULT, &subaru_checksum});
   } else if (startswith(dbc_name, "chrysler_")) {
