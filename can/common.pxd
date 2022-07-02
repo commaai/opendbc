@@ -9,6 +9,8 @@ from libcpp.vector cimport vector
 from libcpp.unordered_set cimport unordered_set
 
 
+ctypedef unsigned int (*calc_checksum_type)(uint32_t, const Signal&, const vector[uint8_t] &)
+
 cdef extern from "common_dbc.h":
   ctypedef enum SignalType:
     DEFAULT,
@@ -33,6 +35,7 @@ cdef extern from "common_dbc.h":
     double factor, offset
     bool is_little_endian
     SignalType type
+    calc_checksum_type calc_checksum
 
   cdef struct Msg:
     string name

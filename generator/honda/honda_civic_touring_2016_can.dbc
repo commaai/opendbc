@@ -1,6 +1,7 @@
 CM_ "IMPORT _comma.dbc";
 CM_ "IMPORT _honda_common.dbc";
-CM_ "IMPORT _nidec_2017.dbc";
+CM_ "IMPORT _nidec_common.dbc";
+CM_ "IMPORT _steering_sensors_a.dbc";
 
 BO_ 228 STEERING_CONTROL: 5 ADAS
  SG_ STEER_TORQUE : 7|16@0- (1,0) [-3840|3840] "" EPS
@@ -9,16 +10,6 @@ BO_ 228 STEERING_CONTROL: 5 ADAS
  SG_ SET_ME_X00_2 : 31|8@0+ (1,0) [0|0] "" EPS
  SG_ COUNTER : 37|2@0+ (1,0) [0|3] "" EPS
  SG_ CHECKSUM : 35|4@0+ (1,0) [0|15] "" EPS
-
-BO_ 330 STEERING_SENSORS: 8 EPS
- SG_ STEER_ANGLE : 7|16@0- (-0.1,0) [-500|500] "deg" EON
- SG_ STEER_ANGLE_RATE : 23|16@0- (-1,0) [-3000|3000] "deg/s" EON
- SG_ STEER_SENSOR_STATUS_1 : 34|1@0+ (1,0) [0|1] "" EON
- SG_ STEER_SENSOR_STATUS_2 : 33|1@0+ (1,0) [0|1] "" EON
- SG_ STEER_SENSOR_STATUS_3 : 32|1@0+ (1,0) [0|1] "" EON
- SG_ STEER_WHEEL_ANGLE : 47|16@0- (-0.1,0) [-500|500] "deg" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
 
 BO_ 399 STEER_STATUS: 7 EPS
  SG_ STEER_TORQUE_SENSOR : 7|16@0- (-1,0) [-31000|31000] "tbd" EON

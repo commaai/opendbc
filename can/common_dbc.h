@@ -53,6 +53,7 @@ struct Signal {
   double factor, offset;
   bool is_little_endian;
   SignalType type;
+  unsigned int (*calc_checksum)(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 };
 
 struct Msg {
@@ -75,6 +76,6 @@ struct DBC {
   std::vector<Val> vals;
 };
 
-DBC* dbc_parse(const std::string& dbc_name, const std::string& dbc_file_path);
+DBC* dbc_parse(const std::string& dbc_path);
 const DBC* dbc_lookup(const std::string& dbc_name);
 std::vector<std::string> get_dbc_names();

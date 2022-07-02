@@ -1,15 +1,7 @@
 CM_ "IMPORT _honda_common.dbc";
 CM_ "IMPORT _bosch_2018.dbc";
-
-BO_ 330 STEERING_SENSORS: 8 EPS
- SG_ STEER_ANGLE : 7|16@0- (-0.1,0) [-500|500] "deg" EON
- SG_ STEER_ANGLE_RATE : 23|16@0- (-1,0) [-3000|3000] "deg/s" EON
- SG_ STEER_SENSOR_STATUS_1 : 34|1@0+ (1,0) [0|1] "" EON
- SG_ STEER_SENSOR_STATUS_2 : 33|1@0+ (1,0) [0|1] "" EON
- SG_ STEER_SENSOR_STATUS_3 : 32|1@0+ (1,0) [0|1] "" EON
- SG_ STEER_WHEEL_ANGLE : 47|16@0- (-0.1,0) [-500|500] "deg" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
+CM_ "IMPORT _bosch_adas_2018.dbc";
+CM_ "IMPORT _steering_sensors_a.dbc";
 
 BO_ 419 GEARBOX: 8 PCM
  SG_ GEAR : 7|8@0+ (1,0) [0|255] "" EON
@@ -22,23 +14,6 @@ BO_ 432 STANDSTILL: 7 VSA
  SG_ BRAKE_ERROR_2 : 12|1@0+ (1,0) [0|1] "" EON
  SG_ COUNTER : 53|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 51|4@0+ (1,0) [0|15] "" EON
-
-BO_ 927 RADAR_HUD: 8 RADAR
- SG_ ZEROS_BOH : 7|10@0+ (1,0) [0|127] "" BDY
- SG_ CMBS_OFF : 12|1@0+ (1,0) [0|1] "" BDY
- SG_ RESUME_INSTRUCTION : 21|1@0+ (1,0) [0|1] "" XXX
- SG_ SET_TO_1 : 13|1@0+ (1,0) [0|1] "" BDY
- SG_ ZEROS_BOH2 : 11|4@0+ (1,0) [0|1] "" XXX
- SG_ APPLY_BRAKES_FOR_CANC : 23|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_ALERTS : 20|5@0+ (1,0) [0|1] "" BDY
- SG_ SET_TO_0 : 22|1@0+ (1,0) [0|1] "" XXX
- SG_ HUD_LEAD : 40|1@0+ (1,0) [0|1] "" XXX
- SG_ SET_TO_64 : 31|8@0+ (1,0) [0|255] "" XXX
- SG_ LEAD_DISTANCE : 39|8@0+ (1,0) [0|255] "" XXX
- SG_ ZEROS_BOH3 : 47|7@0+ (1,0) [0|127] "" XXX
- SG_ ZEROS_BOH4 : 55|8@0+ (1,0) [0|255] "" XXX
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
 VAL_ 419 GEAR  10 "R" 1 "D" 0 "P";
 VAL_ 419 GEAR_SHIFTER  32 "D" 16 "N" 8 "R" 4 "P";
