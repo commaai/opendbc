@@ -1182,7 +1182,7 @@ BO_ 1470 LDW_Status: 8 XXX
  SG_ LDW_Lernmodus : 9|3@1+ (1,0) [0|3] "" XXX
  SG_ LDW_Textbits : 12|4@1+ (1,0) [0|15] "" XXX
  SG_ LDW_Gong : 16|2@1+ (1,0) [0|3] "" XXX
- SG_ LDW_Kameratyp 18|1@1+ (1,0) [0|1] "" XXX
+ SG_ LDW_Kameratyp : 18|1@1+ (1,0) [0|1] "" XXX
  SG_ LDW_Lampe_gelb : 19|1@1+ (1,0) [0|1] "" XXX
  SG_ LDW_Lampe_gruen : 20|1@1+ (1,0) [0|1] "" XXX
  SG_ LDW_SW_Warnung_links : 21|1@1+ (1,0) [0|1] "" XXX
