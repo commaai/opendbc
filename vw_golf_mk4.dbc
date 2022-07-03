@@ -722,6 +722,8 @@ BO_ 912 Gate_Komf_1: 8 XXX
  SG_ GK1_ParkFrontWi : 22|1@1+ (1,0) [0|1] "" XXX
  SG_ GK1_KW_Warm : 23|1@1+ (1,0) [0|1] "" XXX
  SG_ BCM_Remotestart_Betrieb : 24|1@1+ (1,0) [0|1] "" XXX
+ SG_ BSK_HL_geoeffnet : 26|1@1+ (1,0) [0|1] "" XXX
+ SG_ BSK_HR_geoeffnet : 27|1@1+ (1,0) [0|1] "" XXX
  SG_ GK1_Rueckfahr : 28|1@1+ (1,0) [0|1] "" XXX
  SG_ GK1_BrLi_links : 29|1@1+ (1,0) [0|1] "" XXX
  SG_ GK1_BrLi_rechts : 30|1@1+ (1,0) [0|1] "" XXX
@@ -735,6 +737,7 @@ BO_ 912 Gate_Komf_1: 8 XXX
  SG_ GK1_Sta_Licht2 : 38|1@1+ (1,0) [0|1] "" XXX
  SG_ GK1_Sta_LSM : 39|1@1+ (1,0) [0|1] "" XXX
  SG_ GK1_Count_Anhaen : 40|4@1+ (1,0) [0|15] "" XXX
+ SG_ BSK_BT_geoeffnet : 41|1@1+ (1,0) [0|1] "" XXX
  SG_ GK1_BLS_AAG : 44|1@1+ (1,0) [0|1] "" XXX
  SG_ GK1_EDC_AAG : 45|1@1+ (1,0) [0|1] "" XXX
  SG_ GK1_Anhaenger : 46|1@1+ (1,0) [0|1] "" XXX
@@ -1455,6 +1458,10 @@ CM_ SG_ 648 Kuehlmitteltemperatur__Motor_2_ "Coolant Temperature";
 CM_ SG_ 896 Drosselklappenpoti "Throttle Position";
 CM_ SG_ 896 Fahrpedal_Rohsignal "Accelerator Pedal Position";
 CM_ SG_ 896 Ansauglufttemperatur "Intake Air Temperature";
+CM_ SG_ 912 GK1_Fa_Tuerkont "Status of the driver's door rotary latch";
+CM_ SG_ 912 BSK_HL_geoeffnet "Status of the rear left door rotary latch";
+CM_ SG_ 912 BSK_HR_geoeffnet "Status of the rear right door rotary latch";
+CM_ SG_ 912 BSK_BT_geoeffnet "Status of the passenger door rotary latch";
 CM_ SG_ 1088 Zaehler_Getriebe_1 "Counter Getriebe_1";
 CM_ SG_ 1088 Waehlhebelposition__Getriebe_1_ "Gear Selector Position";
 CM_ SG_ 1152 Checksumme_Motor_5 "Checksum Motor_5";
