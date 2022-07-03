@@ -738,6 +738,7 @@ BO_ 912 Gate_Komf_1: 8 XXX
  SG_ GK1_Sta_LSM : 39|1@1+ (1,0) [0|1] "" XXX
  SG_ GK1_Count_Anhaen : 40|4@1+ (1,0) [0|15] "" XXX
  SG_ BSK_BT_geoeffnet : 41|1@1+ (1,0) [0|1] "" XXX
+ SG_ BSK_HD_Hauptraste : 43|1@1+ (1,0) [0|1] "" XXX
  SG_ GK1_BLS_AAG : 44|1@1+ (1,0) [0|1] "" XXX
  SG_ GK1_EDC_AAG : 45|1@1+ (1,0) [0|1] "" XXX
  SG_ GK1_Anhaenger : 46|1@1+ (1,0) [0|1] "" XXX
@@ -1462,6 +1463,7 @@ CM_ SG_ 912 GK1_Fa_Tuerkont "Status of the driver's door rotary latch";
 CM_ SG_ 912 BSK_HL_geoeffnet "Status of the rear left door rotary latch";
 CM_ SG_ 912 BSK_HR_geoeffnet "Status of the rear right door rotary latch";
 CM_ SG_ 912 BSK_BT_geoeffnet "Status of the passenger door rotary latch";
+CM_ SG_ 912 BSK_HD_Hauptraste "Status of trunk lid main detent";
 CM_ SG_ 1088 Zaehler_Getriebe_1 "Counter Getriebe_1";
 CM_ SG_ 1088 Waehlhebelposition__Getriebe_1_ "Gear Selector Position";
 CM_ SG_ 1152 Checksumme_Motor_5 "Checksum Motor_5";
