@@ -1176,17 +1176,22 @@ BO_ 870 AWV: 5 XXX
  SG_ AWV_Zaehler : 8|4@1+ (1,0) [0|15] ""  Bremsbooster
  SG_ AWV_Checksumme : 0|8@1+ (1,0) [0|255] ""  Bremsbooster
 
-BO_ 1470 LDW_1: 8 XXX
- SG_ Right_Lane_Status : 0|2@1+ (1,0) [0|3] "" XXX
- SG_ Left_Lane_Status : 2|2@1+ (1,0) [0|3] "" XXX
- SG_ LDW_Textbits : 12|4@1+ (1,0) [0|1] "" XXX
- SG_ LDW_Direction : 14|1@0+ (1,0) [0|1] "" XXX
- SG_ SET_ME_X1 : 18|1@0+ (1,0) [0|1] "" XXX
- SG_ Kombi_Lamp_Orange : 19|1@0+ (1,0) [0|1] "" XXX
- SG_ Kombi_Lamp_Green : 20|1@0+ (1,0) [0|1] "" XXX
- SG_ XX_LDW_Maybe_Warning : 16|1@0+ (1,0) [0|1] "" XXX
- SG_ XX_DLCORTLC1 : 24|8@1+ (1,0) [0|255] "" XXX
- SG_ XX_DLCORTLC2 : 32|8@1+ (1,0) [0|255] "" XXX
+BO_ 1470 LDW_Status: 8 XXX
+ SG_ LDW_Lernmodus_rechts : 0|2@1+ (1,0) [0|3] "" XXX
+ SG_ LDW_Lernmodus_links : 2|2@1+ (1,0) [0|3] "" XXX
+ SG_ LDW_Lernmodus : 9|3@1+ (1,0) [0|3] "" XXX
+ SG_ LDW_Textbits : 12|4@1+ (1,0) [0|15] "" XXX
+ SG_ LDW_Gong : 16|2@1+ (1,0) [0|3] "" XXX
+ SG_ LDW_Kameratyp 18|1@1+ (1,0) [0|1] "" XXX
+ SG_ LDW_Lampe_gelb : 19|1@1+ (1,0) [0|1] "" XXX
+ SG_ LDW_Lampe_gruen : 20|1@1+ (1,0) [0|1] "" XXX
+ SG_ LDW_SW_Warnung_links : 21|1@1+ (1,0) [0|1] "" XXX
+ SG_ LDW_SW_Warnung_rechts : 22|1@1+ (1,0) [0|1] "" XXX
+ SG_ LDW_KD_Fehler : 23|1@1+ (1,0) [0|1] "" XXX
+ SG_ LDW_DLC : 24|8@1+ (0.01,-1.25) [-1.25|1.25] "" XXX
+ SG_ LDW_TLC : 32|5@1+ (0.1,0) [0|3] "" XXX
+ SG_ LDW_Seite_DLCTLC : 37|1@1+ (1,0) [0|1] "" XXX
+ SG_ LDW_Frueh_Spaet : 38|2@1+ (1,0) [0|3] "" XXX
 
 BO_ 428 Bremse_8: 8 XXX
  SG_ BR8_Checksumme : 0|8@1+ (1,0) [0|255] "" XXX
@@ -1475,9 +1480,6 @@ CM_ SG_ 1160 Checksumme_Motor_6 "Checksum Motor_6";
 CM_ SG_ 1344 Zahler_Getriebe_2 "Counter Getriebe_2";
 CM_ SG_ 1386 ACA_V_Wunsch "255=unset";
 CM_ SG_ 1416 Ladedruck "Boost Pressure";
-CM_ SG_ 1470 LDW_Direction "0=right,1=left";
-CM_ SG_ 1470 XX_DLCORTLC1 "Might be DLC or TLC";
-CM_ SG_ 1470 XX_DLCORTLC2 "Might be DLC or TLC, might have wrong size";
 CM_ SG_ 1550 MFA_v_Signal_02 "0=km/h, 1=mph";
 
 
