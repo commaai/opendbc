@@ -2,9 +2,10 @@
 import os
 import re
 import glob
+import subprocess
 
-cur_path = os.path.dirname(os.path.realpath(__file__))
-opendbc_root = os.path.join(cur_path, '../')
+generator_path = os.path.dirname(os.path.realpath(__file__))
+opendbc_root = os.path.join(generator_path, '../')
 include_pattern = re.compile(r'CM_ "IMPORT (.*?)";\n')
 generated_suffix = '_generated.dbc'
 
@@ -43,8 +44,12 @@ def create_all(output_path):
   for f in glob.glob(f"{output_path}/*{generated_suffix}"):
     os.remove(f)
 
-  for src_dir, _, filenames in os.walk(cur_path):
-    if src_dir == cur_path:
+  # run python generator scripts first
+  for f in glob.glob(f"{generator_path}/*/*.py"):
+    subprocess.check_call(f)
+
+  for src_dir, _, filenames in os.walk(generator_path):
+    if src_dir == generator_path:
       continue
 
     #print(src_dir)
