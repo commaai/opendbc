@@ -15,7 +15,6 @@ cdef extern from "common_dbc.h":
   ctypedef enum SignalType:
     DEFAULT,
     COUNTER,
-    PEDAL_COUNTER,
     HONDA_CHECKSUM,
     TOYOTA_CHECKSUM,
     PEDAL_CHECKSUM,

@@ -73,7 +73,7 @@ ChecksumState* get_checksum(const std::string& dbc_name) {
   } else if (startswith(dbc_name, "chrysler_")) {
     s = new ChecksumState({8, -1, 7, -1, false, CHRYSLER_CHECKSUM, DEFAULT, &chrysler_checksum});
   } else if (startswith(dbc_name, "comma_body")) {
-    s = new ChecksumState({8, 4, 7, 3, false, PEDAL_CHECKSUM, PEDAL_COUNTER, &pedal_checksum});
+    s = new ChecksumState({8, 4, 7, 3, false, PEDAL_CHECKSUM, COUNTER, &pedal_checksum});
   }
   return s;
 }
@@ -102,7 +102,7 @@ void set_signal_type(Signal& s, ChecksumState* chk, const std::string& dbc_name,
     s.type = PEDAL_CHECKSUM;
   } else if (s.name == "COUNTER_PEDAL") {
     DBC_ASSERT(s.size == 4, "INTERCEPTOR COUNTER is not 4 bits long");
-    s.type = PEDAL_COUNTER;
+    s.type = COUNTER;
   }
 }
 

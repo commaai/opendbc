@@ -32,7 +32,6 @@ struct SignalValue {
 enum SignalType {
   DEFAULT,
   COUNTER,
-  PEDAL_COUNTER,
   HONDA_CHECKSUM,
   TOYOTA_CHECKSUM,
   PEDAL_CHECKSUM,
