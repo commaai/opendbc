@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import os
-
+from pathlib import Path
 
 CHRYSLER_TO_RAM_ADDR = {
   258: 35,
@@ -20,7 +20,7 @@ CHRYSLER_TO_RAM_ADDR = {
 
 if __name__ == "__main__":
   src = '_stellantis_common.dbc'
-  out = '_stellantis_common_ram.dbc'
+  out = Path(__file__).stem + '.dbc'
   chrysler_path = os.path.dirname(os.path.realpath(__file__))
 
   with open(os.path.join(chrysler_path, src)) as in_f, open(os.path.join(chrysler_path, out), 'w') as out_f:
@@ -32,7 +32,7 @@ if __name__ == "__main__":
         sl = line.split(' ')
         addr = int(sl[1])
         wrote_addrs.add(addr)
- 
+
         sl[1] = str(CHRYSLER_TO_RAM_ADDR.get(addr, addr))
         line = ' '.join(sl)
       out_f.write(line)
