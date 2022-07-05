@@ -80,8 +80,8 @@ BO_ 250 DAS_6: 8 XXX
  SG_ CAR_MODEL : 15|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 720 BSM_1: 6 XXX
- SG_ LEFT_STATUS : 0|3@1+ (1,0) [0|0] "" XXX
- SG_ RIGHT_STATUS : 3|3@1+ (1,0) [0|0] "" XXX
+ SG_ RIGHT_STATUS : 5|1@0+ (1,0) [0|1] "" XXX
+ SG_ LEFT_STATUS : 2|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 792 STEERING_LEVERS: 8 XXX
  SG_ TURN_SIGNALS : 0|2@1+ (1,0) [0|3] "" XXX
@@ -103,18 +103,17 @@ CM_ SG_ 678 LKAS_ALERTS "(0x01, 0x02) lane sense off, (0x03, 0x04, 0x06) place h
 
 CM_ "chrysler_ram_dt.dbc starts here";
 
+BO_ 37 PCM_1: 8 XXX
+ SG_ ENGINE_RPM : 7|16@0+ (1,0) [0|1] "" XXX
+ SG_ ENGINE_TRQ_REQ : 23|12@0+ (1,0) [0|1] "" XXX
+ SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
 BO_ 53 PCM_2: 8 XXX
  SG_ ENG_TORQUE_REQ : 3|12@0+ (1,0) [0|7] "" XXX
  SG_ ENG_TORQUE_OUT : 19|12@0+ (1,0) [0|1] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
-
-BO_ 121 ESP_8: 8 XXX
- SG_ BRK_PRESSURE : 3|12@0+ (1,0) [0|1] "" XXX
- SG_ BRAKE_PEDAL : 19|12@0+ (1,0) [0|1] "" XXX
- SG_ VEHICLE_SPEED : 39|16@0+ (0.0078125,0) [0|511.984375] "km/h" XXX
- SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 133 TCM_1: 8 XXX
  SG_ DESIRED_GEAR : 15|4@0+ (1,0) [0|1] "" XXX
@@ -161,16 +160,6 @@ BO_ 232 DAS_4: 8 XXX
 
 BO_ 650 Center_Stack_2: 8 XXX
  SG_ LKAS_Button : 57|1@1+ (1,0) [0|0] "" XXX
-
-BO_ 720 BSM_1: 6 XXX
- SG_ BSM_LEFT_STATUS : 0|3@1+ (1,0) [0|0] "" XXX
- SG_ BSM_RIGHT_STATUS : 3|3@1+ (1,0) [0|0] "" XXX
-
-BO_ 37 PCM_1: 8 XXX
- SG_ ENGINE_RPM : 7|16@0+ (1,0) [0|1] "" XXX
- SG_ ENGINE_TRQ_REQ : 23|12@0+ (1,0) [0|1] "" XXX
- SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 
 CM_ SG_ 133 ACTUAL_GEAR "0xd = P, 0x1-8 = D (actual gear), 0xb = R or N?? TODO find R vs N";
