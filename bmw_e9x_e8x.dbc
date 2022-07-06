@@ -44,7 +44,7 @@ BO_ 170 AccPedal: 8 DME
  SG_ AcceleratorPedalPressed : 52|1@0+ (1,0) [0|7] "" XXX
  SG_ AcceleratorPedalPercentage : 16|16@1+ (0.01,0) [0|100] "" XXX
  SG_ Counter_170 : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ EngineSpeed : 32|16@1- (1,0) [0|65535] "" XXX
+ SG_ EngineSpeed : 32|16@1- (0.25,0) [0|65535] "U/min" XXX
  SG_ Checksum_170 : 0|8@1- (1,0) [0|65535] "" XXX
 
 BO_ 404 CruiseControl: 4 SZL
@@ -66,6 +66,7 @@ BO_ 512 CruiseControlStatus: 8 DME
  SG_ CruiseControlSetpointSpeed : 7|8@0+ (0.25,0) [0|255] "mph" XXX
 
 BO_ 168 EngineAndBrake: 8 DME
+ SG_ Checksum_EngineAndBrake : 0|8@1+ (1,0) [0|0] "" XXX
  SG_ BrakePressed : 61|1@0+ (1,0) [0|1] "" XXX
  SG_ Brake_active2 : 62|1@0+ (1,0) [0|1] "" XXX
  SG_ EngineTorque : 8|16@1- (0.03125,0) [-1024|1023] "" XXX
@@ -321,6 +322,8 @@ BO_ 173 Delay_request_ACC: 8 LDM
 BO_ 177 Torque_request_steering: 8 DSC
 
 BO_ 181 Torque_request_EGS: 8 EGS
+ SG_ Checksum_Torque_request_EGS : 0|8@1+ (1,0) [0|0] "" XXX
+ SG_ Gearbox_temperature : 56|8@1+ (1,0) [0|0] "C" XXX
 
 BO_ 183 Torque_request_ACC: 8 LDM
 
@@ -822,7 +825,6 @@ BO_ 996 Configuration_rear_view_camera_CKM: 8 CCC
 CM_ SG_ 170 ThrottlelPressed "Active when accelerator pedal pressed or cruise control: drives";
 CM_ SG_ 170 AcceleratorPedalPressed "Active only when driver actually presses the pedal";
 CM_ SG_ 170 AcceleratorPedalPercentage "ToDo Factor to be adjusted";
-CM_ SG_ 170 EngineSpeed "It's hard to say that is even a rate";
 CM_ SG_ 404 plus1mph_request "Appears when +1mph/kph stalk is depressed";
 CM_ SG_ 404 minus1mph_request "Appears when -1mph/kph stalk is depressed";
 CM_ SG_ 404 Cancel_request_up_stalk "Appears when cancel stalk (up) is depressed";
