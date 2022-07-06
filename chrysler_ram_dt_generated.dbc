@@ -46,6 +46,14 @@ BO_ 153 DAS_3: 8 XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
+BO_ 232 DAS_4: 8 XXX
+ SG_ ACC_SET_SPEED_KPH : 15|8@0+ (1,0) [0|3] "km/h" XXX
+ SG_ ACC_SET_SPEED_MPH : 23|8@0+ (1,0) [0|3] "mph" XXX
+ SG_ ACC_DISTANCE_CONFIG_1 : 1|2@0+ (1,0) [0|3] "" XXX
+ SG_ ACC_DISTANCE_CONFIG_2 : 41|2@0+ (1,0) [0|3] "" XXX
+ SG_ SPEED_DIGITAL : 63|8@0+ (1,0) [0|255] "mph" XXX
+ SG_ ACC_STATE : 38|3@0+ (1,0) [0|7] "" XXX
+
 BO_ 49 EPS_2: 8 XXX
  SG_ LKAS_STATE : 23|4@0+ (1,0) [0|15] "" XXX
  SG_ COLUMN_TORQUE : 2|11@0+ (1,-1024) [-1024|1023] "" XXX
@@ -154,10 +162,6 @@ BO_ 166 LKAS_COMMAND: 8 XXX
 BO_ 221 Center_Stack_1: 8 XXX
  SG_ LKAS_Button : 53|1@1+ (1,0) [0|0] "" XXX
  SG_ Traction_Button : 54|1@0+ (1,0) [0|1] "" XXX
-
-BO_ 232 DAS_4: 8 XXX
- SG_ ACC_Set_Speed : 8|8@1+ (1,0) [0|255] "km/h" XXX
- SG_ ACC_Activation_Status : 36|3@1+ (1,0) [0|0] "" XXX
 
 BO_ 650 Center_Stack_2: 8 XXX
  SG_ LKAS_Button : 57|1@1+ (1,0) [0|0] "" XXX
