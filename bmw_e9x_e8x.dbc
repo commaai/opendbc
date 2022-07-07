@@ -69,6 +69,11 @@ BO_ 168 EngineAndBrake: 8 DME
  SG_ Checksum_EngineAndBrake : 0|8@1+ (1,0) [0|0] "" XXX
  SG_ BrakePressed : 61|1@0+ (1,0) [0|1] "" XXX
  SG_ Brake_active2 : 62|1@0+ (1,0) [0|1] "" XXX
+ SG_ ST_RCPT_ENG_DSC : 52|2@1+ (1,0) [0|0] "" XXX
+ SG_ ST_RCPT_ENG_ARS : 50|2@1+ (1,0) [0|0] "" XXX
+ SG_ ST_RCPT_ENG_ACC : 48|2@1+ (1,0) [0|0] "" XXX
+ SG_ ST_RCPT_ENG_EGS : 54|2@1+ (1,0) [0|0] "" XXX
+ SG_ ST_DMEA_SWO : 44|2@1+ (1,0) [0|0] "" XXX
  SG_ EngineTorque : 8|16@1- (0.03125,0) [-1024|1023] "" XXX
  SG_ EngineTorqueWoInterv : 24|16@1- (0.03125,0) [-1024|1023.96875] "" XXX
 
@@ -109,6 +114,14 @@ BO_ 304 TerminalStatus: 8 CAS
  SG_ Checksum_304 : 36|4@1+ (1,0) [0|255] "" XXX
 
 BO_ 169 Torque2: 8 DME
+ SG_ TORQ_AVL_SPAR_POS : 52|12@1- (0.5,0) [-1023.5|1023.5] "Nm" XXX
+ SG_ TORQ_AVL_SPAR_NEG : 40|12@1- (0.5,0) [-1023.5|1023.5] "Nm" XXX
+ SG_ TORQ_AVL_MAX : 28|12@1- (0.5,0) [-1023.5|1023.5] "Nm" XXX
+ SG_ TORQ_AVL_MIN : 16|12@1- (0.5,0) [-1023.5|1023.5] "Nm" XXX
+ SG_ ST_INFS : 14|2@1+ (1,0) [0|0] "" XXX
+ SG_ ST_SW_LEV_RPM : 12|2@1+ (1,0) [0|0] "" XXX
+ SG_ ALIV_TORQ_2_DME : 8|4@1+ (1,0) [0|0] "" XXX
+ SG_ CHKSM_TORQ_2_DME : 0|8@1+ (1,0) [0|0] "" Vector__XXX
 
 BO_ 184 TorqueTransmisionRequest: 8 LDM
  SG_ Checksum_184 : 0|8@1+ (1,0) [0|15] "" XXX
@@ -121,10 +134,13 @@ BO_ 196 SteeringWheelAngle: 7 DSC
 BO_ 180 WheelTorqueDriveTrain1: 8 DME
 
 BO_ 182 DynamicCruiseControlTorqueDemand: 8 DSC
+ SG_ TORQ_TAR_DSC : 12|12@1- (0.5,0) [0|1000] "" XXX
+ SG_ Counter_182 : 8|4@1+ (1,0) [0|14] "" XXX
+ SG_ Checksum_182 : 0|8@1+ (1,0) [0|15] "" XXX
 
 BO_ 186 TransmissionData: 8 EGS
  SG_ Counter_186 : 48|4@1+ (1,0) [0|14] "" XXX
- SG_ Checksum_186 : 40|4@1+ (1,0) [0|15] "" XXX
+ SG_ Checksum_186 : 40|8@1+ (1,0) [0|15] "" XXX
 
 BO_ 191 RequestedWheelTorqueDriveTrain: 8 LDM
  SG_ Checksum_191 : 0|8@1+ (1,0) [0|19] "" XXX
@@ -180,7 +196,15 @@ BO_ 422 DistanceRoute: 8 DSC
 BO_ 436 InstrumentClusterStatus_KOMBI: 8 CCC
 
 BO_ 464 EngineData: 8 DME
- SG_ Counter_464 : 23|8@0+ (1,0) [0|65535] "" XXX
+ SG_ RPM_IDLG_TAR : 56|8@1+ (5,0) [0|1270] "1/min" XXX
+ SG_ CTR_SLCK : 48|2@1+ (1,0) [0|0] "" XXX
+ SG_ IJV_FU : 32|16@1+ (1,-48) [0|0] "C" XXX
+ SG_ AIP_ENG : 24|8@1+ (2,598) [600|1106] "hPa" XXX
+ SG_ ST_SW_WAUP : 22|2@1+ (1,0) [0|0] "" XXX
+ SG_ ST_ENG_RUN : 20|2@1+ (1,0) [0|0] ""  XXX
+ SG_ Counter_464 : 16|4@0+ (1,0) [0|14] "" XXX
+ SG_ TEMP_EOI : 8|8@1+ (1,-48) [0|0] "C" XXX
+ SG_ TEMP_ENG : 0|8@1+ (1,-48) [0|0] "C" XXX
 
 BO_ 945 TransmissionData3: 8 DKG
  SG_ Checksum_946 : 0|8@1+ (1,0) [0|19] "" XXX
@@ -825,18 +849,26 @@ BO_ 996 Configuration_rear_view_camera_CKM: 8 CCC
 CM_ SG_ 170 ThrottlelPressed "Active when accelerator pedal pressed or cruise control: drives";
 CM_ SG_ 170 AcceleratorPedalPressed "Active only when driver actually presses the pedal";
 CM_ SG_ 170 AcceleratorPedalPercentage "ToDo Factor to be adjusted";
+
 CM_ SG_ 404 plus1mph_request "Appears when +1mph/kph stalk is depressed";
 CM_ SG_ 404 minus1mph_request "Appears when -1mph/kph stalk is depressed";
 CM_ SG_ 404 Cancel_request_up_stalk "Appears when cancel stalk (up) is depressed";
 CM_ SG_ 404 Cancel_request_up_or_down_stalk "Appears when cancel stalk (up or down) is depressed";
 CM_ SG_ 404 Resume_request "It appears when resume stalk button is depressed";
 CM_ SG_ 404 Counter_404 "Message is sent at higher rate when cruise stalk is pressed";
+
 CM_ SG_ 168 BrakePressed "Brake when driver presses the brake or hill hold";
 CM_ SG_ 168 EngineTorque "Engine torque without inertia - combustion torque";
 CM_ SG_ 168 EngineTorqueWoInterv "Engine torque without inertia and without shift intervention";
+
+CM_ SG_ 182 TORQ_TAR_DSC "torque target DSC";
+
 CM_ SG_ 403 CruiseControlSetpointSpeed "Speed target - unit depends on locale";
+
 CM_ SG_ 414 DSC_full_off "0x4 enabling, 0xA enabled. TBD";
+
 CM_ SG_ 416 YawRate "Lateral Acceleration";
+
 CM_ SG_ 408 ParkButtonSecond "Redundant buton. 0x1 = pressed;";
 CM_ SG_ 408 SideButton "0x1 = pressed;";
 CM_ SG_ 408 SportButtonPressed "0x1 = pressed;";
@@ -846,14 +878,23 @@ CM_ SG_ 408 param1 "can not be 0x03. Always 0 in 135i.";
 CM_ SG_ 408 param5 "Always 0 in 135i.";
 CM_ SG_ 408 ParkButtonFirst "0x1 = pressed";
 CM_ SG_ 408 ShifterPosition "0001 = N|R, 0010 = R, 0011 = N|D, 0100 = D, 0101 = -1, 0110 = +1, 0111 = ManualMode, 1000 = inBetween,";
+
 CM_ SG_ 466 ShiftLeverMode "On the dashboard, there are displayed:  D1...D7 in Normal. S1...S6 in Sport.  M1..M7 in Manual";
+
 CM_ SG_ 502 TurnSignalIdle "Turn signal off";
 CM_ SG_ 502 TurnSignalActive "Turn signal on or transitioning";
 CM_ SG_ 502 RightTurn "Indicates right blinker or when steering returning right clears left blinker";
 CM_ SG_ 502 LeftTurn "Indicates left blinker or when steering returning left clears right blinker";
 CM_ SG_ 502 HoldActivated "Spikes down if blinker cleared with timeout or turn. Stays off if blinker cleared with stalk";
+
 CM_ SG_ 790 setMe_0x3FFF "All ones";
 CM_ SG_ 790 DTC_pressed "Traction control off. Message transmitted when pressed. Few presses may be required followed by off.";
+
 VAL_ 408 ShifterPosition 1 "D" 2 "S" 3 "N" 4 "R" 5 "P" ;
+
+VAL_ 464 ST_SW_WAUP 3 "signal invalid" 2 "EGS forced switching active" 1 "engine warm" 0 "warming up" ;
+VAL_ 464 ST_ENG_RUN 3 "signal invalid" 2 "engine running" 1 "engine starting" 0 "engine off" ;
+VAL_ 464 CTR_SLCK 3 "signal invalid" 2 "requirement Shiftlock" 1 "no requirement Shiftlock" 0 "not allowed" ;
+
 VAL_ 466 ShiftLeverMode 0 "Normal" 1 "Sport" 2 "Manual" ;
 VAL_ 466 ShiftLeverPosition 0 "Off" 1 "P" 2 "R" 4 "N" 8 "D" ;
