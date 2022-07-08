@@ -74,7 +74,8 @@ BO_ 168 EngineAndBrake: 8 DME
  SG_ ST_RCPT_ENG_ACC : 48|2@1+ (1,0) [0|0] "" XXX
  SG_ ST_RCPT_ENG_EGS : 54|2@1+ (1,0) [0|0] "" XXX
  SG_ ST_DMEA_SWO : 44|2@1+ (1,0) [0|0] "" XXX
- SG_ EngineTorque : 8|16@1- (0.03125,0) [-1024|1023] "" XXX
+ SG_ EngineTorque : 12|12@1- (0.03125,0) [-1024|1023] "" XXX
+ SG_ ALIV_TORQ_1_DME : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ EngineTorqueWoInterv : 24|16@1- (0.03125,0) [-1024|1023.96875] "" XXX
 
 BO_ 470 SteeringButtons: 2 SZL
@@ -173,6 +174,9 @@ BO_ 418 TransimissionData2: 8 EGS
 BO_ 690 WheelPressure_KCAN: 8 DSC
 
 BO_ 691 AccelerationData: 8 DSC
+
+BO_ 402 GearSelectorSwitch_1: 4 XXX
+ SG_ Counter_402 : 24|4@1+ (1,0) [0|14] "" XXX
 
 BO_ 408 GearSelectorSwitch: 8 GWS
  SG_ ParkButtonSecond : 26|2@1+ (1,0) [0|3] "" XXX
@@ -860,6 +864,9 @@ CM_ SG_ 404 Counter_404 "Message is sent at higher rate when cruise stalk is pre
 CM_ SG_ 168 BrakePressed "Brake when driver presses the brake or hill hold";
 CM_ SG_ 168 EngineTorque "Engine torque without inertia - combustion torque";
 CM_ SG_ 168 EngineTorqueWoInterv "Engine torque without inertia and without shift intervention";
+CM_ SG_ 168 ALIV_TORQ_1_DME "Counter TORQ_1";
+
+CM_ SG_ 169 ALIV_TORQ_2_DME "Counter TORQ_2";
 
 CM_ SG_ 182 TORQ_TAR_DSC "torque target DSC";
 
