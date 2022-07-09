@@ -1480,6 +1480,8 @@ CM_ SG_ 912 BSK_HD_Hauptraste "Status of trunk lid main detent";
 CM_ SG_ 1088 Zaehler_Getriebe_1 "Counter Getriebe_1";
 CM_ SG_ 1088 Waehlhebelposition__Getriebe_1_ "Gear Selector Position";
 
+CM_ SG_ 1096 Zaehler_Waehlhebel_1 "Counter Waehlhebel_1";
+
 CM_ SG_ 1152 Checksumme_Motor_5 "Checksum Motor_5";
 
 CM_ SG_ 1160 Zaehler_Motor_6 "Counter Motor_6";
