@@ -14,17 +14,14 @@ ctypedef unsigned int (*calc_checksum_type)(uint32_t, const Signal&, const vecto
 cdef extern from "common_dbc.h":
   ctypedef enum SignalType:
     DEFAULT,
+    COUNTER,
     HONDA_CHECKSUM,
-    HONDA_COUNTER,
     TOYOTA_CHECKSUM,
     PEDAL_CHECKSUM,
-    PEDAL_COUNTER,
     VOLKSWAGEN_MQB_CHECKSUM,
-    VOLKSWAGEN_MQB_COUNTER,
     SUBARU_CHECKSUM,
     CHRYSLER_CHECKSUM
     HKG_CAN_FD_CHECKSUM,
-    HKG_CAN_FD_COUNTER,
 
   cdef struct Signal:
     string name
