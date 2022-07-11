@@ -69,14 +69,6 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
       return ret;
     }
     const auto& sig = sig_it->second;
-
-    if ((sig.type != SignalType::HONDA_COUNTER) &&
-        (sig.type != SignalType::VOLKSWAGEN_MQB_COUNTER) &&
-        (sig.type != SignalType::VOLKSWAGEN_PQ_COUNTER) &&
-        (sig.type != SignalType::PEDAL_COUNTER)) {
-      //WARN("COUNTER signal type not valid\n");
-    }
-
     set_value(ret, sig, counter);
   }
 
