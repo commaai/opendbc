@@ -166,13 +166,12 @@ BO_ 441 CAM_0x1b9: 32 CAMERA
 
 BO_ 463 CRUISE_BUTTONS: 8 XXX
  SG_ _CHECKSUM : 0|8@1+ (1,0) [0|65535] "" XXX
- SG_ _COUNTER : 12|4@1+ (1,0) [0|255] "" XXX
  SG_ LKAS_BTN : 23|1@1+ (1,0) [0|1] "" XXX
- SG_ PAUSE_RESUME_BTN : 18|1@1+ (1,0) [0|1] "" XXX
- SG_ DISTANCE_BTN : 16|2@1+ (1,0) [0|3] "" XXX
- SG_ NORMAL_CRUISE_BTN : 21|1@1+ (1,0) [0|1] "" XXX
- SG_ ADAPTIVE_CRUISE_BTN : 19|1@1+ (1,0) [0|1] "" XXX
  SG_ SET_ME_1 : 29|1@1+ (1,0) [0|1] "" XXX
+ SG_ ADAPTIVE_CRUISE_MAIN_BTN : 19|1@1+ (1,0) [0|1] "" XXX
+ SG_ NORMAL_CRUISE_MAIN_BTN : 21|1@1+ (1,0) [0|1] "" XXX
+ SG_ COUNTER : 12|4@1+ (1,0) [0|255] "" XXX
+ SG_ CRUISE_BUTTONS : 16|3@1+ (1,0) [0|3] "" XXX
 
 BO_ 480 NEW_MSG_1: 16 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
@@ -263,3 +262,4 @@ CM_ SG_ 1043 COUNTER_ALT "only increments on change";
 VAL_ 53 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
 VAL_ 80 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green" ;
 VAL_ 80 LKA_MODE 1 "warning only" 2 "assist" 6 "off" ;
+VAL_ 463 CRUISE_BUTTONS 0 "none" 1 "res_accel" 2 "set_decel" 3 "gap_distance" 4 "pause_resume" ;
