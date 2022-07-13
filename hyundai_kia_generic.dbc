@@ -1641,6 +1641,75 @@ BO_ 1042 ICM_412h: 8 ICM
 BO_ 1348 Navi_HU: 8 XXX
  SG_ SpeedLim_Nav_Clu : 7|8@0+ (1,0) [0|255] "" XXX
 
+BO_ 682 ESCC: 8 XXX
+ SG_ FCA_CmdAct : 0|1@1+ (1,0) [0|1] "" ESC
+ SG_ CF_VSM_Warn_FCA11 : 1|2@1+ (1,0) [0|3] "" ACU,CLU,ESC
+ SG_ AEB_CmdAct : 3|1@1+ (1,0) [0|1] "" ESC
+ SG_ CF_VSM_Warn_SCC12 : 4|2@1+ (1,0) [0|3] "" CLU,ESC,IAP
+ SG_ ObjValid : 16|1@1+ (1,0) [0|1] "" CLU,ESC,TCU
+ SG_ ACC_ObjLatPos : 24|9@1+ (0.1,-20) [-20|31.1] "m" ABS,ESC
+ SG_ ACC_ObjRelSpd : 44|12@1+ (0.1,-170) [-170|239.5] "m/s" ABS,ESC
+ SG_ ACC_ObjDist : 33|11@1+ (0.1,0) [0|204.7] "m" ABS,ESC
+
+BO_ 714 ESCC_SCC11: 8 SCC
+ SG_ MainMode_ACC : 0|1@1+ (1,0) [0|1] "" CLU,EMS,ESC
+ SG_ SCCInfoDisplay : 1|3@1+ (1,0) [0|7] "" CLU,ESC
+ SG_ AliveCounterACC : 4|4@1+ (1,0) [0|15] "" CLU,EMS,ESC,TCU
+ SG_ VSetDis : 8|8@1+ (1,0) [0|255] "km/h or MPH" CLU,ESC,TCU
+ SG_ ObjValid : 16|1@1+ (1,0) [0|1] "" CLU,ESC,TCU
+ SG_ DriverAlertDisplay : 17|2@1+ (1,0) [0|3] "" CLU,ESC
+ SG_ TauGapSet : 19|3@1+ (1,0) [0|7] "" CLU,ESC,TCU
+ SG_ Navi_SCC_Curve_Status : 56|2@1+ (1,0) [0|3] "" CLU
+ SG_ Navi_SCC_Curve_Act : 58|2@1+ (1,0) [0|3] "" CLU
+ SG_ Navi_SCC_Camera_Act : 60|2@1+ (1,0) [0|3] "" CLU
+ SG_ Navi_SCC_Camera_Status : 62|2@1+ (1,0) [0|3] "" CLU
+ SG_ ACC_ObjStatus : 22|2@1+ (1,0) [0|3] "" ABS,ESC
+ SG_ ACC_ObjLatPos : 24|9@1+ (0.1,-20) [-20|31.1] "m" ABS,ESC
+ SG_ ACC_ObjRelSpd : 44|12@1+ (0.1,-170) [-170|239.5] "m/s" ABS,ESC
+ SG_ ACC_ObjDist : 33|11@1+ (0.1,0) [0|204.7] "m" ABS,ESC
+
+BO_ 715 ESCC_SCC12: 8 SCC
+ SG_ CF_VSM_Prefill : 0|1@1+ (1,0) [0|1] "" ESC
+ SG_ CF_VSM_DecCmdAct : 1|1@1+ (1,0) [0|1] "" ESC
+ SG_ CF_VSM_HBACmd : 2|2@1+ (1,0) [0|3] "" ESC
+ SG_ CF_VSM_Warn : 4|2@1+ (1,0) [0|3] "" CLU,ESC,IAP
+ SG_ CF_VSM_Stat : 6|2@1+ (1,0) [0|3] "" CLU,ESC,PSB
+ SG_ CF_VSM_BeltCmd : 8|3@1+ (1,0) [0|7] "" ESC,PSB
+ SG_ ACCFailInfo : 11|2@1+ (1,0) [0|3] "" CLU,CUBIS,ESC,IBOX
+ SG_ ACCMode : 13|2@1+ (1,0) [0|3] "" CLU,ESC,IBOX,TCU
+ SG_ StopReq : 15|1@1+ (1,0) [0|1] "" EPB,ESC
+ SG_ CR_VSM_DecCmd : 16|8@1+ (0.01,0) [0|2.55] "g" ESC
+ SG_ TakeOverReq : 35|1@1+ (1,0) [0|1] "" CLU,ESC,TCU
+ SG_ PreFill : 36|1@1+ (1,0) [0|1] "" ESC,TCU
+ SG_ CF_VSM_ConfMode : 48|2@1+ (1,0) [0|3] "" CLU,ESC
+ SG_ AEB_Failinfo : 50|2@1+ (1,0) [0|3] "" CLU,ESC
+ SG_ AEB_Status : 52|2@1+ (1,0) [0|3] "" CLU,ESC
+ SG_ AEB_CmdAct : 54|1@1+ (1,0) [0|1] "" ESC
+ SG_ AEB_StopReq : 55|1@1+ (1,0) [0|1] "" CLU,ESC
+ SG_ CR_VSM_Alive : 56|4@1+ (1,0) [0|15] "" ESC,PSB
+ SG_ CR_VSM_ChkSum : 60|4@1+ (1,0) [0|15] "" ESC,PSB
+ SG_ aReqValue : 37|11@1+ (0.01,-10.23) [-10.23|10.24] "m/s^2" Vector__XXX
+ SG_ aReqRaw : 24|11@1+ (0.01,-10.23) [-10.23|10.24] "m/s^2" Vector__XXX
+
+BO_ 718 ESCC_FCA11: 8 FCA
+ SG_ CF_VSM_Prefill : 0|1@1+ (1,0) [0|1] "" ESC
+ SG_ CF_VSM_HBACmd : 1|2@1+ (1,0) [0|3] "" ESC
+ SG_ CF_VSM_Warn : 3|2@1+ (1,0) [0|3] "" ACU,CLU,ESC
+ SG_ CF_VSM_BeltCmd : 5|3@1+ (1,0) [0|7] "" ESC
+ SG_ CR_VSM_DecCmd : 8|8@1+ (0.01,0) [0|2.55] "g" ESC
+ SG_ FCA_Status : 18|2@1+ (1,0) [0|3] "" ACU,CLU,ESC
+ SG_ FCA_CmdAct : 20|1@1+ (1,0) [0|1] "" ESC
+ SG_ FCA_StopReq : 21|1@1+ (1,0) [0|1] "" CLU,ESC
+ SG_ FCA_DrvSetStatus : 22|3@1+ (1,0) [0|7] "" CLU,ESC
+ SG_ CF_VSM_DecCmdAct : 31|1@1+ (1,0) [0|1] "" ESC
+ SG_ FCA_Failinfo : 32|3@1+ (1,0) [0|7] "" ACU,CLU,ESC
+ SG_ FCA_RelativeVelocity : 39|9@1+ (0.1,-25.5) [-25.5|25.5] "m/s" iBAU
+ SG_ FCA_TimetoCollision : 48|8@1+ (10,0) [0|2540] "ms" iBAU
+ SG_ CR_FCA_Alive : 56|4@1+ (1,0) [0|15] "" ESC
+ SG_ CR_FCA_ChkSum : 60|4@1+ (1,0) [0|15] "" ESC
+ SG_ Supplemental_Counter : 35|4@1+ (1,0) [0|15] "" XXX
+ SG_ PAINT1_Status : 16|2@1+ (1,0) [0|1] "" XXX
+
 CM_ "BO_ E_EMS11: All (plug-in) hybrids use this gas signal: CR_Vcu_AccPedDep_Pos, and all EVs use the Accel_Pedal_Pos signal. See hyundai/values.py for a specific car list";
 CM_ SG_ 1348 SpeedLim_Nav_Clu "Speed limit displayed on Nav, Cluster and HUD";
 
