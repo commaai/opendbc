@@ -1,5 +1,10 @@
 CM_ "IMPORT _stellantis_common.dbc";
 
+BO_ 368 TRANSMISSION_STATUS: 8 XXX
+ SG_ GEAR_STATE : 2|3@1+ (1,0) [0|15] "" XXX
+ SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
 BO_ 514 SPEED_1: 8 XXX
  SG_ SPEED_LEFT : 7|12@0+ (0.071028,0) [0|65535] "m/s" XXX
  SG_ SPEED_RIGHT : 23|12@0+ (0.071028,0) [0|1023] "m/s" XXX
@@ -119,6 +124,14 @@ BO_ 532 ENERGY_RELATED_214: 8 XXX
  SG_ NOISY_SLOWLY_DECREASING : 16|9@0+ (1,0) [0|255] "" XXX
  SG_ ENERGY_RELATED : 0|9@0+ (1,0) [0|255] "" XXX
 
+BO_ 545 EPS_3: 8 XXX
+ SG_ DASM_FAULT : 34|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACTIVATION_STATUS : 48|3@1+ (1,0) [0|1] "" XXX
+ SG_ DRIVER_OVERRIDE : 35|1@0+ (1,0) [0|1] "" XXX
+ SG_ HANDS_ON_WHEEL : 51|1@0+ (1,0) [0|1] "" XXX
+ SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
 BO_ 655 CHARGING_MAYBE_28F: 8 XXX
  SG_ CHARGING : 1|2@0+ (1,0) [0|3] "" XXX
 
@@ -133,6 +146,7 @@ BO_ 764 ACCEL_RELATED_2FC: 8 XXX
 BO_ 816 TRACTION_BUTTON: 8 XXX
  SG_ TRACTION_OFF : 19|1@0+ (1,0) [0|3] "" XXX
  SG_ TOGGLE_PARKSENSE : 52|1@0+ (1,0) [0|3] "" XXX
+ SG_ LKAS_BUTTON : 53|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 878 ACCEL_RELATED_36E: 8 XXX
  SG_ ACCEL_OR_RPM_2 : 15|8@0+ (1,0) [0|255] "" XXX
@@ -189,6 +203,7 @@ CM_ SG_ 501 ACC_SPEED_CONFIG_MPH "speed configured for ACC";
 CM_ SG_ 501 CRUISE_STATE "may just be an icon, but seems to indicate different cruise modes: ACC and Non-ACC and engaged state for both.";
 CM_ SG_ 625 SPEED "zero on non-acc drives";
 
+VAL_ 368 GEAR_STATE 4 "D" 2 "N" 1 "R" 0 "P" ;
 VAL_ 501 CRUISE_STATE 0 "Off" 1 "CC On" 2 "CC Engaged" 3 "ACC On" 4 "ACC Engaged";
 VAL_ 746 PRNDL 5 "L" 4 "D" 3 "N" 2 "R" 1 "P";
 VAL_ 792 TURN_SIGNALS 2 "Right" 1 "Left";
