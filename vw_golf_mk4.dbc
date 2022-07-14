@@ -1433,14 +1433,55 @@ BO_ 2000 Diagnose_1: 8 XXX
  SG_ DI1_KM_Stand_alt : 62|1@1+ (1,0) [0|1] "" XXX
  SG_ DI1_Zeit_alt : 63|1@1+ (1,0) [0|1] "" XXX
 
+CM_ SG_ 80 Checksumme_Airbag_1 "Checksum Airbag_1";
+CM_ SG_ 80 Zaehler_Airbag_1 "Counter Airbag_1";
 
 CM_ SG_ 210 LM_Offset "centiNewton-meters for ease of calculation without FP math in Panda";
 CM_ SG_ 210 Vib_Amp "Steering wheel haptic, amplitude";
 CM_ SG_ 210 Vib_Freq "Steering wheel haptic, frequency";
+
+CM_ SG_ 416 Zaehler_Bremse_1 "Counter Bremse_1";
+
+CM_ SG_ 640 inneres_Motor_Moment "Engine Indicated Torque";
+CM_ SG_ 640 Fahrerwunschmoment "Driver Requested Torque";
+CM_ SG_ 640 mechanisches_Motor_Verlustmomen "Mechanical Torque Loss";
+CM_ SG_ 640 Fahrpedalwert_oder_Drosselklapp "Accelerator Pedal or Throttle Position";
+CM_ SG_ 640 Motordrehzahl "Engine Speed";
+
+CM_ SG_ 644 MOB_CHECKSUM "Checksum MOB";
+CM_ SG_ 644 MOB_COUNTER "Counter MOB";
+
+CM_ SG_ 648 Bremstestschalter "Brake Test Switch";
+CM_ SG_ 648 Bremslichtschalter "Brake Light Switch";
+CM_ SG_ 648 Leerlaufsolldrehzahl__Motor_2_ "Target Idle Speed";
+CM_ SG_ 648 Fahrzeuggeschwindigkeit "Vehicle Speed";
+CM_ SG_ 648 Kuehlmitteltemperatur__Motor_2_ "Coolant Temperature";
+
+CM_ SG_ 896 Drosselklappenpoti "Throttle Position";
+CM_ SG_ 896 Fahrpedal_Rohsignal "Accelerator Pedal Position";
+CM_ SG_ 896 Ansauglufttemperatur "Intake Air Temperature";
+
+CM_ SG_ 1088 Zaehler_Getriebe_1 "Counter Getriebe_1";
+CM_ SG_ 1088 Waehlhebelposition__Getriebe_1_ "Gear Selector Position";
+
+CM_ SG_ 1152 Checksumme_Motor_5 "Checksum Motor_5";
+
+CM_ SG_ 1160 Zaehler_Motor_6 "Counter Motor_6";
+CM_ SG_ 1160 Hoeheninfo__Motor_6_ "Altitude Correction";
+CM_ SG_ 1160 Istmoment_f_r_Getriebe "Actual Torque";
+CM_ SG_ 1160 Sollmoment_f_r_Getriebe "Target Torque";
+CM_ SG_ 1160 Checksumme_Motor_6 "Checksum Motor_6";
+
+CM_ SG_ 1344 Zahler_Getriebe_2 "Counter Getriebe_2";
+
 CM_ SG_ 1386 ACA_V_Wunsch "255=unset";
+
+CM_ SG_ 1416 Ladedruck "Boost Pressure";
+
 CM_ SG_ 1470 LDW_Direction "0=right,1=left";
 CM_ SG_ 1470 XX_DLCORTLC1 "Might be DLC or TLC";
 CM_ SG_ 1470 XX_DLCORTLC2 "Might be DLC or TLC, might have wrong size";
+
 CM_ SG_ 1550 MFA_v_Signal_02 "0=km/h, 1=mph";
 
 
