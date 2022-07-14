@@ -65,7 +65,7 @@ BO_ 49 EPS_2: 8 XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 157 ECM_5: 8 XXX
- SG_ Accelerator_Position : 0|8@1+ (0.4,0) [0|100] "%" XXX
+ SG_ ACCELERATOR_POSITION : 0|8@1+ (0.4,0) [0|100] "%" XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
