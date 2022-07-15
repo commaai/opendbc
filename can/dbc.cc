@@ -61,19 +61,19 @@ typedef struct ChecksumState {
 ChecksumState* get_checksum(const std::string& dbc_name) {
   ChecksumState* s = nullptr;
   if (startswith(dbc_name, {"honda_", "acura_"})) {
-    s = new ChecksumState({4, 2, 3, 5, false, HONDA_CHECKSUM, HONDA_COUNTER, &honda_checksum});
+    s = new ChecksumState({4, 2, 3, 5, false, HONDA_CHECKSUM, COUNTER, &honda_checksum});
   } else if (startswith(dbc_name, {"toyota_", "lexus_"})) {
     s = new ChecksumState({8, -1, 7, -1, false, TOYOTA_CHECKSUM, DEFAULT, &toyota_checksum});
   } else if (startswith(dbc_name, "kia_ev6")) {
-    s = new ChecksumState({16, 8, 0, 0, true, HKG_CAN_FD_CHECKSUM, HKG_CAN_FD_COUNTER, &hkg_can_fd_checksum});
+    s = new ChecksumState({16, -1, 0, -1, true, HKG_CAN_FD_CHECKSUM, COUNTER, &hkg_can_fd_checksum});
   } else if (startswith(dbc_name, {"vw_mqb_2010"})) {
-    s = new ChecksumState({8, 4, 0, 0, true, VOLKSWAGEN_MQB_CHECKSUM, VOLKSWAGEN_MQB_COUNTER, &volkswagen_mqb_checksum});
+    s = new ChecksumState({8, 4, 0, 0, true, VOLKSWAGEN_MQB_CHECKSUM, COUNTER, &volkswagen_mqb_checksum});
   } else if (startswith(dbc_name, "subaru_global_")) {
     s = new ChecksumState({8, -1, 0, -1, true, SUBARU_CHECKSUM, DEFAULT, &subaru_checksum});
   } else if (startswith(dbc_name, "chrysler_")) {
     s = new ChecksumState({8, -1, 7, -1, false, CHRYSLER_CHECKSUM, DEFAULT, &chrysler_checksum});
   } else if (startswith(dbc_name, "comma_body")) {
-    s = new ChecksumState({8, 4, 7, 3, false, PEDAL_CHECKSUM, PEDAL_COUNTER, &pedal_checksum});
+    s = new ChecksumState({8, 4, 7, 3, false, PEDAL_CHECKSUM, COUNTER, &pedal_checksum});
   }
   return s;
 }
@@ -95,12 +95,14 @@ void set_signal_type(Signal& s, ChecksumState* chk, const std::string& dbc_name,
       s.type = chk->counter_type;
     }
   }
+
+  // TODO: CAN packer/parser shouldn't know anything about interceptors or pedals
   if (s.name == "CHECKSUM_PEDAL") {
     DBC_ASSERT(s.size == 8, "INTERCEPTOR CHECKSUM is not 8 bits long");
     s.type = PEDAL_CHECKSUM;
   } else if (s.name == "COUNTER_PEDAL") {
     DBC_ASSERT(s.size == 4, "INTERCEPTOR COUNTER is not 4 bits long");
-    s.type = PEDAL_COUNTER;
+    s.type = COUNTER;
   }
 }
 
