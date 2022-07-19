@@ -151,7 +151,7 @@ class TestCanParserPacker(unittest.TestCase):
     dbc_file = "subaru_global_2017_generated"
 
     signals = [
-      ("Counter", "ES_LKAS"),
+      ("COUNTER", "ES_LKAS"),
       ("LKAS_Output", "ES_LKAS"),
       ("LKAS_Request", "ES_LKAS"),
       ("SET_1", "ES_LKAS"),
@@ -166,20 +166,19 @@ class TestCanParserPacker(unittest.TestCase):
     for steer in range(-256, 255):
       for active in [1, 0]:
         values = {
-          "Counter": idx,
           "LKAS_Output": steer,
           "LKAS_Request": active,
           "SET_1": 1
         }
 
-        msgs = packer.make_can_msg("ES_LKAS", 0, values)
+        msgs = packer.make_can_msg("ES_LKAS", 0, values, idx)
         bts = can_list_to_can_capnp([msgs])
         parser.update_string(bts)
 
         self.assertAlmostEqual(parser.vl["ES_LKAS"]["LKAS_Output"], steer)
         self.assertAlmostEqual(parser.vl["ES_LKAS"]["LKAS_Request"], active)
         self.assertAlmostEqual(parser.vl["ES_LKAS"]["SET_1"], 1)
-        self.assertAlmostEqual(parser.vl["ES_LKAS"]["Counter"], idx % 16)
+        self.assertAlmostEqual(parser.vl["ES_LKAS"]["COUNTER"], idx % 16)
 
         idx += 1
 
