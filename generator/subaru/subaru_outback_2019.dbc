@@ -13,7 +13,7 @@ BO_ 358 ES_DashStatus: 8 XXX
  SG_ Cruise_Set_Speed : 24|8@1+ (1,0) [0|255] "" XXX
  SG_ Cruise_Fault : 32|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_On_2 : 34|1@1+ (1,0) [0|1] "" XXX
- SG_ Counter : 37|3@1+ (1,0) [0|7] "" XXX
+ SG_ COUNTER : 37|3@1+ (1,0) [0|7] "" XXX
  SG_ Steep_Hill_Disengage : 44|1@1+ (1,0) [0|3] "" XXX
  SG_ Car_Follow : 46|1@1+ (1,0) [0|1] "" XXX
  SG_ Far_Distance : 48|4@1+ (5,0) [0|15] "m" XXX

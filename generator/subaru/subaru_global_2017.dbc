@@ -2,18 +2,18 @@ CM_ "IMPORT _subaru_global.dbc";
 
 BO_ 72 Transmission: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Gear : 24|8@1+ (1,0) [0|255] "" XXX
  SG_ RPM : 40|16@1+ (1,0) [0|65535] "" XXX
 
 BO_ 73 CVT: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ CVT_Gear : 24|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 545 ES_Distance: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Signal1 : 12|3@1+ (1,0) [0|7] "" XXX
  SG_ Cruise_Fault : 15|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Throttle : 16|12@1+ (1,0) [0|4095] "" XXX
@@ -33,7 +33,7 @@ BO_ 545 ES_Distance: 8 XXX
 
 BO_ 546 ES_Status: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Signal1 : 12|3@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Fault : 15|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_RPM : 16|12@1+ (1,0) [0|4095] "" XXX
@@ -45,7 +45,7 @@ BO_ 546 ES_Status: 8 XXX
 
 BO_ 576 CruiseControl: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Signal1 : 12|28@1+ (1,0) [0|268435455] "" XXX
  SG_ Cruise_On : 40|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Activated : 41|1@1+ (1,0) [0|1] "" XXX
