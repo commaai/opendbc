@@ -58,7 +58,7 @@ BO_ 210 Brake_2: 8 XXX
 
 BO_ 211 Brake_Type: 8 XXX
  SG_ Brake_Light : 21|1@1+ (1,0) [0|1] "" XXX
- SG_ Speed_COUNTER : 32|8@1+ (1,0) [0|255] "" XXX
+ SG_ Speed_Counter : 32|8@1+ (1,0) [0|255] "" XXX
  SG_ Brake_Cruise_On : 42|1@1+ (1,0) [0|1] "" XXX
  SG_ Brake_Pedal_On : 46|1@1+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 48|8@1+ (1,0) [0|255] "" XXX
