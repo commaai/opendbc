@@ -327,7 +327,7 @@ BO_ 1160 Motor_6: 8 XXX
  SG_ Checksumme_Motor_6 : 0|8@1+ (1,0) [0|0] "" XXX
 
 BO_ 1152 Motor_5: 8 XXX
- SG_ Checksumme_Motor_5 : 56|8@1+ (1,0) [0|0] "" XXX
+ SG_ CHECKSUM : 56|8@1+ (1,0) [0|0] "" XXX
  SG_ Motortext_Bits__4_1_ : 52|4@1+ (1,0) [0|0] "" XXX
  SG_ Doppelte_Momente : 51|1@1+ (1,0) [0|0] "" XXX
  SG_ GRA_Hauptschalter : 50|1@1+ (1,0) [0|0] "" XXX
@@ -1072,8 +1072,8 @@ BO_ 1550 Einheiten_1: 2 XXX
  SG_ MFA_v_Einheit_02 : 0|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 872 ACC_System: 8 XXX
- SG_ ACS_Checksum : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ ACS_Zaehler : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ ACS_Sta_ADR : 12|2@1+ (1,0) [0|3] "" XXX
  SG_ ACS_ADR_Schub : 14|1@1+ (1,0) [0|1] "" XXX
  SG_ ACS_Schubabsch : 15|1@1+ (1,0) [0|1] "" XXX
