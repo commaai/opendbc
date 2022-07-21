@@ -327,7 +327,7 @@ BO_ 1160 Motor_6: 8 XXX
  SG_ Checksumme_Motor_6 : 0|8@1+ (1,0) [0|0] "" XXX
 
 BO_ 1152 Motor_5: 8 XXX
- SG_ Checksumme_Motor_5 : 56|8@1+ (1,0) [0|0] "" XXX
+ SG_ CHECKSUM : 56|8@1+ (1,0) [0|0] "" XXX
  SG_ Motortext_Bits__4_1_ : 52|4@1+ (1,0) [0|0] "" XXX
  SG_ Doppelte_Momente : 51|1@1+ (1,0) [0|0] "" XXX
  SG_ GRA_Hauptschalter : 50|1@1+ (1,0) [0|0] "" XXX
