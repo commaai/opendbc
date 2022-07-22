@@ -43,19 +43,8 @@ CANPacker::CANPacker(const std::string& dbc_name) {
 std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalPackValue> &signals) {
   std::vector<uint8_t> ret(message_lookup[address].size, 0);
 
-  // set message counter
-  auto sig_it_counter = signal_lookup.find(std::make_pair(address, "COUNTER"));
-  if (sig_it_counter != signal_lookup.end()) {
-    const auto& sig = sig_it_counter->second;
-
-    if (counters.find(address) == counters.end()) {
-      counters[address] = 0;
-    }
-    set_value(ret, sig, counters[address]);
-    counters[address] = (counters[address] + 1) % (1 << sig.size);
-  }
-
   // set all values for all given signal/value pairs
+  bool counter_set = false;
   bool checksum_set = false;
   for (const auto& sigval : signals) {
     auto sig_it = signal_lookup.find(std::make_pair(address, sigval.name));
@@ -72,7 +61,20 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
     }
     set_value(ret, sig, ival);
 
+    counter_set = counter_set || (sigval.name == "COUNTER");
     checksum_set = checksum_set || (sigval.name == "CHECKSUM");
+  }
+
+  // set message counter
+  auto sig_it_counter = signal_lookup.find(std::make_pair(address, "COUNTER"));
+  if (!counter_set && sig_it_counter != signal_lookup.end()) {
+    const auto& sig = sig_it_counter->second;
+
+    if (counters.find(address) == counters.end()) {
+      counters[address] = 0;
+    }
+    set_value(ret, sig, counters[address]);
+    counters[address] = (counters[address] + 1) % (1 << sig.size);
   }
 
   // set message checksum
