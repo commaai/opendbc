@@ -45,6 +45,39 @@ class TestCanParserPacker(unittest.TestCase):
         self.assertEqual(bus, b)
         self.assertEqual(dat[0], i)
 
+  def test_packer_counter(self):
+    signals = [
+      ("COUNTER", "CAN_FD_MESSAGE"),
+    ]
+    checks = [("CAN_FD_MESSAGE", 0), ]
+    packer = CANPacker(TEST_DBC)
+    parser = CANParser(TEST_DBC, signals, checks, 0)
+
+    # packer should increment the counter
+    for i in range(1000):
+      msg = packer.make_can_msg("CAN_FD_MESSAGE", 0, {})
+      dat = can_list_to_can_capnp([msg, ])
+      parser.update_string(dat)
+      self.assertEqual(parser.vl["CAN_FD_MESSAGE"]["COUNTER"], i % 256)
+
+    # setting COUNTER should override
+    for _ in range(100):
+      cnt = random.randint(0, 255)
+      msg = packer.make_can_msg("CAN_FD_MESSAGE", 0, {
+        "COUNTER": cnt,
+      })
+      dat = can_list_to_can_capnp([msg, ])
+      parser.update_string(dat)
+      self.assertEqual(parser.vl["CAN_FD_MESSAGE"]["COUNTER"], cnt)
+
+    # then, should resume counting from the override value
+    cnt = parser.vl["CAN_FD_MESSAGE"]["COUNTER"]
+    for i in range(100):
+      msg = packer.make_can_msg("CAN_FD_MESSAGE", 0, {})
+      dat = can_list_to_can_capnp([msg, ])
+      parser.update_string(dat)
+      self.assertEqual(parser.vl["CAN_FD_MESSAGE"]["COUNTER"], (cnt + i) % 256)
+
   def test_parser_can_valid(self):
     signals = [
       ("COUNTER", "CAN_FD_MESSAGE"),

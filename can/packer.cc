@@ -63,6 +63,9 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
 
     counter_set = counter_set || (sigval.name == "COUNTER");
     checksum_set = checksum_set || (sigval.name == "CHECKSUM");
+    if (counter_set) {
+      counters[address] = sigval.value;
+    }
   }
 
   // set message counter
