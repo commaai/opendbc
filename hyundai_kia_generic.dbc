@@ -1646,10 +1646,14 @@ BO_ 683 ESCC: 8 XXX
  SG_ CF_VSM_Warn_FCA11 : 1|2@1+ (1,0) [0|3] "" ACU,CLU,ESC
  SG_ AEB_CmdAct : 3|1@1+ (1,0) [0|1] "" ESC
  SG_ CF_VSM_Warn_SCC12 : 4|2@1+ (1,0) [0|3] "" CLU,ESC,IAP
+ SG_ CF_VSM_DecCmdAct_SCC12 : 6|1@1+ (1,0) [0|1] "" ESC
+ SG_ CF_VSM_DecCmdAct_FCA11 : 7|1@1+ (1,0) [0|1] "" ESC
+ SG_ CR_VSM_DecCmd_SCC12 : 8|8@1+ (0.01,0) [0|2.55] "g" ESC
  SG_ ObjValid : 16|1@1+ (1,0) [0|1] "" CLU,ESC,TCU
  SG_ ACC_ObjLatPos : 24|9@1+ (0.1,-20) [-20|31.1] "m" ABS,ESC
  SG_ ACC_ObjRelSpd : 44|12@1+ (0.1,-170) [-170|239.5] "m/s" ABS,ESC
  SG_ ACC_ObjDist : 33|11@1+ (0.1,0) [0|204.7] "m" ABS,ESC
+ SG_ CR_VSM_DecCmd_FCA11 : 56|8@1+ (0.01,0) [0|2.55] "g" ESC
 
 CM_ "BO_ E_EMS11: All (plug-in) hybrids use this gas signal: CR_Vcu_AccPedDep_Pos, and all EVs use the Accel_Pedal_Pos signal. See hyundai/values.py for a specific car list";
 CM_ SG_ 1348 SpeedLim_Nav_Clu "Speed limit displayed on Nav, Cluster and HUD";
