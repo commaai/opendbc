@@ -1649,6 +1649,7 @@ BO_ 683 ESCC: 8 XXX
  SG_ CF_VSM_DecCmdAct_FCA11 : 7|1@1+ (1,0) [0|1] "" ESC
  SG_ CR_VSM_DecCmd_SCC12 : 8|8@1+ (0.01,0) [0|2.55] "g" ESC
  SG_ ObjValid : 16|1@1+ (1,0) [0|1] "" CLU,ESC,TCU
+ SG_ ACC_ObjStatus : 22|2@1+ (1,0) [0|3] "" ABS,ESC
  SG_ ACC_ObjLatPos : 24|9@1+ (0.1,-20) [-20|31.1] "m" ABS,ESC
  SG_ ACC_ObjRelSpd : 44|12@1+ (0.1,-170) [-170|239.5] "m/s" ABS,ESC
  SG_ ACC_ObjDist : 33|11@1+ (0.1,0) [0|204.7] "m" ABS,ESC
