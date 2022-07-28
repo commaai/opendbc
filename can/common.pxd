@@ -9,20 +9,20 @@ from libcpp.vector cimport vector
 from libcpp.unordered_set cimport unordered_set
 
 
+ctypedef unsigned int (*calc_checksum_type)(uint32_t, const Signal&, const vector[uint8_t] &)
+
 cdef extern from "common_dbc.h":
   ctypedef enum SignalType:
     DEFAULT,
+    COUNTER,
     HONDA_CHECKSUM,
-    HONDA_COUNTER,
     TOYOTA_CHECKSUM,
     PEDAL_CHECKSUM,
-    PEDAL_COUNTER,
-    VOLKSWAGEN_CHECKSUM,
-    VOLKSWAGEN_COUNTER,
+    VOLKSWAGEN_MQB_CHECKSUM,
+    XOR_CHECKSUM,
     SUBARU_CHECKSUM,
     CHRYSLER_CHECKSUM
     HKG_CAN_FD_CHECKSUM,
-    HKG_CAN_FD_COUNTER,
 
   cdef struct Signal:
     string name
@@ -31,6 +31,7 @@ cdef extern from "common_dbc.h":
     double factor, offset
     bool is_little_endian
     SignalType type
+    calc_checksum_type calc_checksum
 
   cdef struct Msg:
     string name
@@ -81,4 +82,4 @@ cdef extern from "common.h":
 
   cdef cppclass CANPacker:
    CANPacker(string)
-   vector[uint8_t] pack(uint32_t, vector[SignalPackValue], int counter)
+   vector[uint8_t] pack(uint32_t, vector[SignalPackValue])
