@@ -1,4 +1,4 @@
-CM_ "IMPORT _stellantis_common_ram_dt_generated.dbc";
+CM_ "IMPORT _stellantis_common_ram_hd_generated.dbc";
 
 BO_ 545 EPS_3: 8 XXX
  SG_ DASM_FAULT : 34|1@0+ (1,0) [0|1] "" XXX
