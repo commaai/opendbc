@@ -209,7 +209,7 @@ BO_ 801 ES_DashStatus: 8 XXX
  SG_ Brake_Lights : 51|1@1+ (1,0) [0|1] "" XXX
  SG_ Car_Follow : 52|1@1+ (1,0) [0|1] "" XXX
  SG_ Signal7 : 53|3@1+ (1,0) [0|1] "" XXX
- SG_ Far_Distance : 56|4@1+ (1,0) [0|15] "" XXX
+ SG_ Far_Distance : 56|4@1+ (5,0) [0|75] "m" XXX
  SG_ Cruise_State : 60|4@1+ (1,0) [0|15] "" XXX
 
 BO_ 802 ES_LKAS_State: 8 XXX
