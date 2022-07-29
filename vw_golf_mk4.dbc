@@ -1459,6 +1459,7 @@ CM_ SG_ 640 Fahrerwunschmoment "Driver Requested Torque";
 CM_ SG_ 640 mechanisches_Motor_Verlustmomen "Mechanical Torque Loss";
 CM_ SG_ 640 Fahrpedalwert_oder_Drosselklapp "Accelerator Pedal or Throttle Position";
 CM_ SG_ 640 Motordrehzahl "Engine Speed";
+CM_ SG_ 640 Momentenangaben_ungenau "Approximate Torque Values";
 
 CM_ SG_ 644 MOB_CHECKSUM "Checksum MOB";
 CM_ SG_ 644 MOB_COUNTER "Counter MOB";
