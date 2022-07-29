@@ -4,6 +4,8 @@ import os
 chrysler_to_ram = {
   "_stellantis_common_ram_dt_generated.dbc": {
     258: 35,
+    264: 37,
+    280: 181,
     284: 121,
     320: 131,
     344: 139,
