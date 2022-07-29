@@ -1,4 +1,4 @@
-CM_ "IMPORT _stellantis_common_ram.dbc";
+CM_ "IMPORT _stellantis_common_ram_dt_generated.dbc";
 
 BO_ 37 PCM_1: 8 XXX
  SG_ ENGINE_RPM : 7|16@0+ (1,0) [0|1] "" XXX
