@@ -19,7 +19,9 @@ BO_ 545 ES_Distance: 8 XXX
  SG_ Cruise_Throttle : 16|12@1+ (1,0) [0|4095] "" XXX
  SG_ Signal2 : 28|4@1+ (1,0) [0|15] "" XXX
  SG_ Car_Follow : 32|1@1+ (1,0) [0|1] "" XXX
- SG_ Signal3 : 33|3@1+ (1,0) [0|1] "" XXX
+ SG_ Signal3 : 33|1@1+ (1,0) [0|1] "" XXX
+ SG_ Cruise_Soft_Disable : 34|1@1+ (1,0) [0|1] "" XXX
+ SG_ Signal7 : 35|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Brake_Active : 36|1@1+ (1,0) [0|1] "" XXX
  SG_ Distance_Swap : 37|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_EPB : 38|1@1+ (1,0) [0|1] "" XXX
@@ -54,6 +56,7 @@ BO_ 576 CruiseControl: 8 XXX
 CM_ SG_ 545 Cruise_Throttle "RPM-like output signal";
 CM_ SG_ 545 Cruise_EPB "1 = Electric Parking Brake set";
 CM_ SG_ 545 Distance_Swap "Switch from Close to Far distance";
+CM_ SG_ 545 Cruise_Soft_Disable "Eyesight Temporary disable, sets CruiseControl Activated = 0";
 CM_ SG_ 546 Cruise_RPM "ES RPM output for ECM and TCM";
 CM_ SG_ 546 Signal3 "0 when cruise_activated = 1";
 VAL_ 72 Gear 2 "N" 3 "R" 4 "P" 121 "D" 137 "1" 145 "2" 153 "3" 161 "4" 169 "5" 177 "6";
