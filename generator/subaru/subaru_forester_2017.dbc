@@ -8,7 +8,7 @@ BO_ 355 ES_DashStatus: 8 XXX
  SG_ COUNTER : 40|3@1+ (1,0) [0|7] "" XXX
  SG_ Brake : 43|1@1+ (1,0) [0|1] "" XXX
  SG_ Car_Follow : 54|1@1+ (1,0) [0|1] "" XXX
- SG_ Far_Distance : 56|4@1+ (1,0) [0|1] "" XXX
+ SG_ Far_Distance : 56|4@1+ (5,0) [0|75] "m" XXX
 
 BO_ 881 Steering_Torque: 8 XXX
  SG_ Steering_Motor_Flat : 0|10@1+ (32,0) [0|1000] "" XXX

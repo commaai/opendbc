@@ -143,7 +143,7 @@ BO_ 353 ES_Distance: 8 XXX
  SG_ Distance_Swap : 21|1@1+ (1,0) [0|1] "" XXX
  SG_ Standstill : 22|1@1+ (1,0) [0|1] "" XXX
  SG_ Signal3 : 23|1@1+ (1,0) [0|1] "" XXX
- SG_ Close_Distance : 24|8@1+ (0.0196,0) [0|255] "m" XXX
+ SG_ Close_Distance : 24|8@1+ (0.019607,0) [0|5] "m" XXX
  SG_ Signal4 : 32|9@1+ (1,0) [0|255] "" XXX
  SG_ Standstill_2 : 41|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Fault : 42|1@1+ (1,0) [0|1] "" XXX
@@ -257,7 +257,7 @@ BO_ 355 ES_DashStatus: 8 XXX
  SG_ COUNTER : 40|3@1+ (1,0) [0|7] "" XXX
  SG_ Brake : 43|1@1+ (1,0) [0|1] "" XXX
  SG_ Car_Follow : 54|1@1+ (1,0) [0|1] "" XXX
- SG_ Far_Distance : 56|4@1+ (1,0) [0|1] "" XXX
+ SG_ Far_Distance : 56|4@1+ (5,0) [0|75] "m" XXX
 
 BO_ 881 Steering_Torque: 8 XXX
  SG_ Steering_Motor_Flat : 0|10@1+ (32,0) [0|1000] "" XXX
