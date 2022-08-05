@@ -37,7 +37,7 @@ if __name__ == "__main__":
 
       wrote_addrs = set()
       for line in in_f.readlines():
-        if line.startswith('BO_'):
+        if line.startswith(('BO_', 'VAL_')):
           sl = line.split(' ')
           addr = int(sl[1])
           wrote_addrs.add(addr)
