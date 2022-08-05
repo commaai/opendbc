@@ -51,4 +51,3 @@ CM_ SG_ 250 Auto_High_Beam "1 = HIGH BEAMS OK 0 = HIGH BEAMS OFF ";
 CM_ SG_ 250 LKAS_LANE_LINES "9 = LEFT CAUTION, 11 = VERY LEFT CAUTION 10 = RIGHT CAUTION, 14 = VERY RIGHT, 4 = NO LINES DETECTED, 3 = LINES DETECTED, SYSTEM ACTIVE";
 CM_ SG_ 464 Driver_Seatbelt_Status "1 unbuckled 0 buckled";
 CM_ SG_ 792 High_Beam_Lever_Status "1 is high beam, 0 reg";
-VAL_ 147 Gear_State 4 "D" 2 "N" 1 "R" 0 "P" ;
