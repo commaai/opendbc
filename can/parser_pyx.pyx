@@ -63,19 +63,19 @@ cdef class CANParser:
     for i in range(len(signals)):
       s = signals[i]
       if not isinstance(s[1], numbers.Number):
-        name = s[1].encode('utf8')
         if name not in msg_name_to_address:
+          print(msg_name_to_address)
           raise RuntimeError(f"could not find message {repr(name)} in DBC {self.dbc_name}")
-        s = (s[0], msg_name_to_address[name])
+        s = (s[0], msg_name_to_address[s[1]])
         signals[i] = s
 
     for i in range(len(checks)):
       c = checks[i]
       if not isinstance(c[0], numbers.Number):
-        name = c[0].encode('utf8')
-        if name not in msg_name_to_address:
+        if c[0] not in msg_name_to_address:
+          print(msg_name_to_address)
           raise RuntimeError(f"could not find message {repr(name)} in DBC {self.dbc_name}")
-        c = (msg_name_to_address[name], c[1])
+        c = (msg_name_to_address[c[0]], c[1])
         checks[i] = c
 
     if enforce_checks:
