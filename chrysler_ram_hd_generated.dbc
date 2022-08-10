@@ -42,6 +42,11 @@ BO_ 344 ESP_6: 8 XXX
  SG_ WHEEL_SPEED_RL : 37|14@0+ (0.5,0) [0|8191] "rpm" XXX
  SG_ WHEEL_SPEED_RR : 53|14@0+ (0.5,0) [0|8191] "rpm" XXX
 
+BO_ 368 Transmission_Status: 8 XXX
+ SG_ Gear_State : 2|3@1+ (1,0) [0|15] "" XXX
+ SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
 BO_ 464 ORC_1: 8 XXX
  SG_ SEATBELT_DRIVER_UNLATCHED : 13|1@0+ (1,0) [0|1] "" XXX
 
@@ -123,6 +128,8 @@ BO_ 820 BCM_1: 8 XXX
  SG_ TURN_LIGHT_LEFT : 31|1@0+ (1,0) [0|1] "" XXX
  SG_ TURN_LIGHT_RIGHT : 30|1@0+ (1,0) [0|1] "" XXX
  SG_ HIGH_BEAM_DISPLAY : 58|1@0+ (1,0) [0|1] "" XXX
+
+VAL_ 368 Gear_State 4 "D" 2 "N" 1 "R" 0 "P" ;
 
 CM_ SG_ 258 STEERING_ANGLE_HP "Steering angle high precision";
 CM_ SG_ 264 ENGINE_TORQUE "Effective engine torque";

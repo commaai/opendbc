@@ -9,6 +9,7 @@ chrysler_to_ram = {
     284: 121,
     320: 131,
     344: 139,
+    368: 147,
     464: 464,
     500: 153,
     501: 232,
@@ -36,7 +37,7 @@ if __name__ == "__main__":
 
       wrote_addrs = set()
       for line in in_f.readlines():
-        if line.startswith('BO_'):
+        if line.startswith(('BO_', 'VAL_')):
           sl = line.split(' ')
           addr = int(sl[1])
           wrote_addrs.add(addr)
