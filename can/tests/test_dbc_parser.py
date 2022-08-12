@@ -24,7 +24,8 @@ class TestDBCParser(unittest.TestCase):
     """
 
     for dbc in self.dbcs:
-      CANParser(dbc, [], [], 0)
+      with self.subTest(dbc=dbc):
+        CANParser(dbc, [], [], 0)
 
 
 if __name__ == "__main__":

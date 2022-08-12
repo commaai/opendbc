@@ -1,10 +1,4 @@
-CM_ "IMPORT _stellantis_common_ram.dbc";
-
-BO_ 37 PCM_1: 8 XXX
- SG_ ENGINE_RPM : 7|16@0+ (1,0) [0|1] "" XXX
- SG_ ENGINE_TRQ_REQ : 23|12@0+ (1,0) [0|1] "" XXX
- SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+CM_ "IMPORT _stellantis_common_ram_dt_generated.dbc";
 
 BO_ 53 PCM_2: 8 XXX
  SG_ ENG_TORQUE_REQ : 3|12@0+ (1,0) [0|7] "" XXX
@@ -26,11 +20,6 @@ BO_ 135 ABS_2: 8 XXX
 BO_ 137 ESP_4: 8 XXX
  SG_ Yaw_Rate : 7|16@0+ (0.01,-327.68) [-327.68|327.66] "deg/s" XXX
  SG_ Acceleration : 32|8@1+ (0.08,-10.24) [-10.24|10.08] "m/s2" XXX
-
-BO_ 147 Transmission_Status: 8 XXX
- SG_ Gear_State : 2|3@1+ (1,0) [0|15] "" XXX
- SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 164 EPS_3: 8 XXX
  SG_ DASM_FAULT : 34|1@0+ (1,0) [0|1] "" XXX
@@ -62,4 +51,3 @@ CM_ SG_ 250 Auto_High_Beam "1 = HIGH BEAMS OK 0 = HIGH BEAMS OFF ";
 CM_ SG_ 250 LKAS_LANE_LINES "9 = LEFT CAUTION, 11 = VERY LEFT CAUTION 10 = RIGHT CAUTION, 14 = VERY RIGHT, 4 = NO LINES DETECTED, 3 = LINES DETECTED, SYSTEM ACTIVE";
 CM_ SG_ 464 Driver_Seatbelt_Status "1 unbuckled 0 buckled";
 CM_ SG_ 792 High_Beam_Lever_Status "1 is high beam, 0 reg";
-VAL_ 147 Gear_State 4 "D" 2 "N" 1 "R" 0 "P" ;
