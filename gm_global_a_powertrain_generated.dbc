@@ -158,6 +158,8 @@ BO_ 481 ASCMSteeringButton: 7 K124_ASCM
  SG_ LKAButton : 23|1@0+ (1,0) [0|0] ""  NEO
  SG_ ACCButtons : 46|3@0+ (1,0) [0|0] ""  NEO
  SG_ DriveModeButton : 39|1@0+ (1,0) [0|1] "" XXX
+ SG_ RollingCounter : 33|2@0+ (1,0) [0|3] "" NEO
+ SG_ SteeringButtonChecksum : 43|12@0+ (1,0) [0|255] "" NEO
 
 BO_ 485 PSCMSteeringAngle: 8 K43_PSCM
  SG_ SteeringWheelAngle : 15|16@0- (0.0625,0) [-2047|2047] "deg"  NEO

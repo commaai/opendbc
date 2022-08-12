@@ -45,6 +45,39 @@ class TestCanParserPacker(unittest.TestCase):
         self.assertEqual(bus, b)
         self.assertEqual(dat[0], i)
 
+  def test_packer_counter(self):
+    signals = [
+      ("COUNTER", "CAN_FD_MESSAGE"),
+    ]
+    checks = [("CAN_FD_MESSAGE", 0), ]
+    packer = CANPacker(TEST_DBC)
+    parser = CANParser(TEST_DBC, signals, checks, 0)
+
+    # packer should increment the counter
+    for i in range(1000):
+      msg = packer.make_can_msg("CAN_FD_MESSAGE", 0, {})
+      dat = can_list_to_can_capnp([msg, ])
+      parser.update_string(dat)
+      self.assertEqual(parser.vl["CAN_FD_MESSAGE"]["COUNTER"], i % 256)
+
+    # setting COUNTER should override
+    for _ in range(100):
+      cnt = random.randint(0, 255)
+      msg = packer.make_can_msg("CAN_FD_MESSAGE", 0, {
+        "COUNTER": cnt,
+      })
+      dat = can_list_to_can_capnp([msg, ])
+      parser.update_string(dat)
+      self.assertEqual(parser.vl["CAN_FD_MESSAGE"]["COUNTER"], cnt)
+
+    # then, should resume counting from the override value
+    cnt = parser.vl["CAN_FD_MESSAGE"]["COUNTER"]
+    for i in range(100):
+      msg = packer.make_can_msg("CAN_FD_MESSAGE", 0, {})
+      dat = can_list_to_can_capnp([msg, ])
+      parser.update_string(dat)
+      self.assertEqual(parser.vl["CAN_FD_MESSAGE"]["COUNTER"], (cnt + i) % 256)
+
   def test_parser_can_valid(self):
     signals = [
       ("COUNTER", "CAN_FD_MESSAGE"),
@@ -89,18 +122,15 @@ class TestCanParserPacker(unittest.TestCase):
     packer = CANPacker(TEST_DBC)
     parser = CANParser(TEST_DBC, signals, checks, 0)
 
-    idx = 0
-
     for steer in range(-256, 255):
       for active in (1, 0):
         v1 = {
           "STEER_TORQUE": steer,
           "STEER_TORQUE_REQUEST": active,
         }
-        m1 = packer.make_can_msg("STEERING_CONTROL", 0, v1, idx)
+        m1 = packer.make_can_msg("STEERING_CONTROL", 0, v1)
 
         v2 = {
-          "COUNTER": idx % 256,
           "SIGNED": steer,
           "64_BIT_LE": random.randint(0, 100),
           "64_BIT_BE": random.randint(0, 100),
@@ -120,7 +150,6 @@ class TestCanParserPacker(unittest.TestCase):
         for sig in ("STEER_TORQUE", "STEER_TORQUE_REQUEST", "COUNTER", "CHECKSUM"):
           self.assertEqual(parser.vl["STEERING_CONTROL"][sig], parser.vl[228][sig])
 
-        idx += 1
 
   def test_scale_offset(self):
     """Test that both scale and offset are correctly preserved"""
@@ -134,16 +163,14 @@ class TestCanParserPacker(unittest.TestCase):
     parser = CANParser(dbc_file, signals, checks, 0)
     packer = CANPacker(dbc_file)
 
-    idx = 0
     for brake in range(0, 100):
       values = {"USER_BRAKE": brake}
-      msgs = packer.make_can_msg("VSA_STATUS", 0, values, idx)
+      msgs = packer.make_can_msg("VSA_STATUS", 0, values)
       bts = can_list_to_can_capnp([msgs])
 
       parser.update_string(bts)
 
       self.assertAlmostEqual(parser.vl["VSA_STATUS"]["USER_BRAKE"], brake)
-      idx += 1
 
   def test_subaru(self):
     # Subuaru is little endian
@@ -151,7 +178,7 @@ class TestCanParserPacker(unittest.TestCase):
     dbc_file = "subaru_global_2017_generated"
 
     signals = [
-      ("Counter", "ES_LKAS"),
+      ("COUNTER", "ES_LKAS"),
       ("LKAS_Output", "ES_LKAS"),
       ("LKAS_Request", "ES_LKAS"),
       ("SET_1", "ES_LKAS"),
@@ -162,11 +189,9 @@ class TestCanParserPacker(unittest.TestCase):
     packer = CANPacker(dbc_file)
 
     idx = 0
-
     for steer in range(-256, 255):
       for active in [1, 0]:
         values = {
-          "Counter": idx,
           "LKAS_Output": steer,
           "LKAS_Request": active,
           "SET_1": 1
@@ -179,8 +204,7 @@ class TestCanParserPacker(unittest.TestCase):
         self.assertAlmostEqual(parser.vl["ES_LKAS"]["LKAS_Output"], steer)
         self.assertAlmostEqual(parser.vl["ES_LKAS"]["LKAS_Request"], active)
         self.assertAlmostEqual(parser.vl["ES_LKAS"]["SET_1"], 1)
-        self.assertAlmostEqual(parser.vl["ES_LKAS"]["Counter"], idx % 16)
-
+        self.assertAlmostEqual(parser.vl["ES_LKAS"]["COUNTER"], idx % 16)
         idx += 1
 
   def test_bus_timeout(self):
@@ -244,7 +268,7 @@ class TestCanParserPacker(unittest.TestCase):
       for frame, brake_vals in enumerate((user_brake_vals[:half_idx], user_brake_vals[half_idx:])):
         for user_brake in brake_vals:
           values = {"USER_BRAKE": user_brake}
-          can_msgs[frame].append(packer.make_can_msg("VSA_STATUS", 0, values, idx))
+          can_msgs[frame].append(packer.make_can_msg("VSA_STATUS", 0, values))
           idx += 1
 
       can_strings = [can_list_to_can_capnp(msgs) for msgs in can_msgs]

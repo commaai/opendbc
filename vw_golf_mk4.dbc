@@ -327,7 +327,7 @@ BO_ 1160 Motor_6: 8 XXX
  SG_ Checksumme_Motor_6 : 0|8@1+ (1,0) [0|0] "" XXX
 
 BO_ 1152 Motor_5: 8 XXX
- SG_ Checksumme_Motor_5 : 56|8@1+ (1,0) [0|0] "" XXX
+ SG_ CHECKSUM : 56|8@1+ (1,0) [0|0] "" XXX
  SG_ Motortext_Bits__4_1_ : 52|4@1+ (1,0) [0|0] "" XXX
  SG_ Doppelte_Momente : 51|1@1+ (1,0) [0|0] "" XXX
  SG_ GRA_Hauptschalter : 50|1@1+ (1,0) [0|0] "" XXX
@@ -616,7 +616,7 @@ BO_ 1504 Klima_1: 8 XXX
  SG_ Drehzahlanhebung : 0|1@1+ (1,0) [0|0] "" XXX
 
 BO_ 906 GRA_Neu: 4 XXX
- SG_ GRA_Checksum : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ GRA_Hauptschalt : 8|1@1+ (1,0) [0|1] "" XXX
  SG_ GRA_Abbrechen : 9|1@1+ (1,0) [0|1] "" XXX
  SG_ GRA_Down_kurz : 10|1@1+ (1,0) [0|1] "" XXX
@@ -628,7 +628,7 @@ BO_ 906 GRA_Neu: 4 XXX
  SG_ GRA_Neu_Setzen : 16|1@1+ (1,0) [0|1] "" XXX
  SG_ GRA_Recall : 17|1@1+ (1,0) [0|1] "" XXX
  SG_ GRA_Sender : 18|2@1+ (1,0) [0|3] "" XXX
- SG_ GRA_Neu_Zaehler : 20|4@1+ (1,0) [0|15] "" XXX
+ SG_ COUNTER : 20|4@1+ (1,0) [0|15] "" XXX
  SG_ GRA_Tip_Down : 24|1@1+ (1,0) [0|1] "" XXX
  SG_ GRA_Tip_Up : 25|1@1+ (1,0) [0|1] "" XXX
  SG_ GRA_Zeitluecke : 26|2@1+ (1,0) [0|3] "" XXX
@@ -683,7 +683,7 @@ BO_ 1344 Getriebe_2: 8 XXX
 BO_ 1088 Getriebe_1: 8 XXX
  SG_ Wandlerverlustmoment : 56|8@1+ (0.39,0) [0|99.06] "MDI" XXX
  SG_ Fehlerspeichereintrag__Getriebe : 55|1@1+ (1,0) [0|0] "" XXX
- SG_ Zaehler_Getriebe_1 : 51|4@1+ (1,0) [0|15] "" XXX
+ SG_ COUNTER : 51|4@1+ (1,0) [0|15] "" XXX
  SG_ Gang_eingelegt : 50|1@1+ (1,0) [0|0] "" XXX
  SG_ Schaltabsicht : 49|1@1+ (1,0) [0|0] "" XXX
  SG_ Motor_aus : 48|1@1+ (1,0) [0|0] "" XXX
@@ -722,6 +722,8 @@ BO_ 912 Gate_Komf_1: 8 XXX
  SG_ GK1_ParkFrontWi : 22|1@1+ (1,0) [0|1] "" XXX
  SG_ GK1_KW_Warm : 23|1@1+ (1,0) [0|1] "" XXX
  SG_ BCM_Remotestart_Betrieb : 24|1@1+ (1,0) [0|1] "" XXX
+ SG_ BSK_HL_geoeffnet : 26|1@1+ (1,0) [0|1] "" XXX
+ SG_ BSK_HR_geoeffnet : 27|1@1+ (1,0) [0|1] "" XXX
  SG_ GK1_Rueckfahr : 28|1@1+ (1,0) [0|1] "" XXX
  SG_ GK1_BrLi_links : 29|1@1+ (1,0) [0|1] "" XXX
  SG_ GK1_BrLi_rechts : 30|1@1+ (1,0) [0|1] "" XXX
@@ -735,6 +737,8 @@ BO_ 912 Gate_Komf_1: 8 XXX
  SG_ GK1_Sta_Licht2 : 38|1@1+ (1,0) [0|1] "" XXX
  SG_ GK1_Sta_LSM : 39|1@1+ (1,0) [0|1] "" XXX
  SG_ GK1_Count_Anhaen : 40|4@1+ (1,0) [0|15] "" XXX
+ SG_ BSK_BT_geoeffnet : 41|1@1+ (1,0) [0|1] "" XXX
+ SG_ BSK_HD_Hauptraste : 43|1@1+ (1,0) [0|1] "" XXX
  SG_ GK1_BLS_AAG : 44|1@1+ (1,0) [0|1] "" XXX
  SG_ GK1_EDC_AAG : 45|1@1+ (1,0) [0|1] "" XXX
  SG_ GK1_Anhaenger : 46|1@1+ (1,0) [0|1] "" XXX
@@ -857,8 +861,8 @@ BO_ 424 Bremse_6: 3 XXX
  SG_ Bremsdruck__Bremse_6_ : 0|10@1+ (0.3255,-40) [-40|293] "bar" XXX
 
 BO_ 1192 Bremse_5: 8 XXX
- SG_ Checksumme_Bremse_5 : 56|8@1+ (1,0) [0|0] "" XXX
- SG_ Zaehler_Bremse_5 : 52|4@1+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 56|8@1+ (1,0) [0|0] "" XXX
+ SG_ COUNTER : 52|4@1+ (1,0) [0|15] "" XXX
  SG_ Bremslicht_ECD : 51|1@1+ (1,0) [0|0] "" XXX
  SG_ Bremsentemperatur_vorn : 48|3@1+ (125,125) [125|1000] "C" XXX
  SG_ Frei_Bremse_5_5 : 40|8@1+ (1,0) [0|0] "" XXX
@@ -909,7 +913,7 @@ BO_ 416 Bremse_1: 8 XXX
  SG_ ESP_Systemstatus_4_1 : 62|1@1+ (1,0) [0|0] "" XXX
  SG_ ESP_Passiv_getastet : 61|1@1+ (1,0) [0|0] "" XXX
  SG_ ASR_Steuerger_t : 60|1@1+ (1,0) [0|0] "" XXX
- SG_ Zaehler_Bremse_1 : 56|4@1+ (1,0) [0|15] "" XXX
+ SG_ COUNTER : 56|4@1+ (1,0) [0|15] "" XXX
  SG_ MSR_Eingriffsmoment : 48|8@1+ (0.39,0) [0|99.06] "MDI" XXX
  SG_ ASR_Eingriffsmoment_schnell : 40|8@1+ (0.39,0) [0|99.06] "MDI" XXX
  SG_ ASR_Eingriffsmoment_langsam : 32|8@1+ (0.39,0) [0|99.06] "MDI" XXX
@@ -981,8 +985,8 @@ BO_ 1360 Airbag_2: 2 XXX
  SG_ Checksumme_Airbag_2__reserviert : 0|8@1+ (1,0) [0|0] "" XXX
 
 BO_ 80 Airbag_1: 4 XXX
- SG_ Checksumme_Airbag_1 : 24|8@1+ (1,0) [0|0] "" XXX
- SG_ Zaehler_Airbag_1 : 20|4@1+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 24|8@1+ (1,0) [0|0] "" XXX
+ SG_ COUNTER : 20|4@1+ (1,0) [0|15] "" XXX
  SG_ Fehlerspeichereintrag : 19|1@1+ (1,0) [0|0] "" XXX
  SG_ Frei_Airbag_1_2 : 18|1@1+ (1,0) [0|0] "" XXX
  SG_ Airbag_im_Stellgliedtest : 17|1@1+ (1,0) [0|0] "" XXX
@@ -1068,8 +1072,8 @@ BO_ 1550 Einheiten_1: 2 XXX
  SG_ MFA_v_Einheit_02 : 0|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 872 ACC_System: 8 XXX
- SG_ ACS_Checksum : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ ACS_Zaehler : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ ACS_Sta_ADR : 12|2@1+ (1,0) [0|3] "" XXX
  SG_ ACS_ADR_Schub : 14|1@1+ (1,0) [0|1] "" XXX
  SG_ ACS_Schubabsch : 15|1@1+ (1,0) [0|1] "" XXX
@@ -1084,7 +1088,7 @@ BO_ 872 ACC_System: 8 XXX
  SG_ ACS_max_AendGrad : 48|8@1+ (1,0.02) [0.02|5.06] "Unit_MeterPerSeconSquar" XXX
 
 BO_ 1386 ACC_GRA_Anziege: 8 XXX
- SG_ ACA_Checksum : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ ACA_StaACC : 8|3@1+ (1,0) [0|7] "" XXX
  SG_ ACA_ID_StaACC : 11|5@1+ (1,0) [0|31] "" XXX
  SG_ ACA_Fahrerhinw : 16|1@1+ (1,0) [0|1] "" XXX
@@ -1102,12 +1106,12 @@ BO_ 1386 ACC_GRA_Anziege: 8 XXX
  SG_ ACA_Codierung : 56|1@1+ (1,0) [0|1] "" XXX
  SG_ ACA_Tachokranz : 57|1@1+ (1,0) [0|1] "" XXX
  SG_ ACA_Aend_Zeitluecke : 58|1@1+ (1,0) [0|1] "" XXX
- SG_ ACA_Zaehler : 60|4@1+ (1,0) [0|15] "" XXX
+ SG_ COUNTER : 60|4@1+ (1,0) [0|15] "" XXX
 
 BO_ 208 Lenkhilfe_3: 6 XXX
- SG_ LH3_Checksumme : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ LH3_BS_Spiegel : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ LH3_Zaehler : 12|4@1+ (1,0) [0|15] "" XXX
+ SG_ COUNTER : 12|4@1+ (1,0) [0|15] "" XXX
  SG_ LH3_LM : 16|10@1+ (1,0) [0|1023] "" XXX
  SG_ LH3_LMSign : 26|1@1+ (1,0) [0|1] "" XXX
  SG_ LH3_LMValid : 27|1@1+ (1,0) [0|1] "" XXX
@@ -1118,8 +1122,8 @@ BO_ 208 Lenkhilfe_3: 6 XXX
  SG_ LH3_Lenkungstyp : 46|2@1+ (1,0) [0|3] "" XXX
 
 BO_ 978 Lenkhilfe_2: 8 XXX
- SG_ LH2_Checksumme : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ LH2_Zaehler : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ LH2_Geradeaus : 12|1@1+ (1,0) [0|1] "" XXX
  SG_ LH2_Sta_Charisma : 13|3@1+ (1,0) [0|7] "" XXX
  SG_ LH2_Sta_HCA : 16|4@1+ (1,0) [0|15] "" XXX
@@ -1131,8 +1135,8 @@ BO_ 978 Lenkhilfe_2: 8 XXX
  SG_ LH2_PLA_Abbr : 52|4@1+ (1,0) [0|15] "" XXX
 
 BO_ 210 HCA_1: 5 XXX
- SG_ HCA_Checksumme : 0|8@1+ (1,0) [0|15] "" XXX
- SG_ HCA_Zaehler : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|15] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ HCA_Status : 12|4@1+ (1,0) [0|15] "" XXX
  SG_ LM_Offset : 16|15@1+ (0.03125,0) [0|300] "cNm" XXX
  SG_ LM_OffSign : 31|1@1+ (1,0) [0|1] "" XXX
@@ -1172,16 +1176,22 @@ BO_ 870 AWV: 5 XXX
  SG_ AWV_Zaehler : 8|4@1+ (1,0) [0|15] ""  Bremsbooster
  SG_ AWV_Checksumme : 0|8@1+ (1,0) [0|255] ""  Bremsbooster
 
-BO_ 1470 LDW_1: 8 XXX
- SG_ Right_Lane_Status : 0|2@1+ (1,0) [0|3] "" XXX
- SG_ Left_Lane_Status : 2|2@1+ (1,0) [0|3] "" XXX
- SG_ LDW_Direction : 14|1@0+ (1,0) [0|1] "" XXX
- SG_ SET_ME_X1 : 18|1@0+ (1,0) [0|1] "" XXX
- SG_ Kombi_Lamp_Orange : 19|1@0+ (1,0) [0|1] "" XXX
- SG_ Kombi_Lamp_Green : 20|1@0+ (1,0) [0|1] "" XXX
- SG_ XX_LDW_Maybe_Warning : 16|1@0+ (1,0) [0|1] "" XXX
- SG_ XX_DLCORTLC1 : 24|8@1+ (1,0) [0|255] "" XXX
- SG_ XX_DLCORTLC2 : 32|8@1+ (1,0) [0|255] "" XXX
+BO_ 1470 LDW_Status: 8 XXX
+ SG_ LDW_Lernmodus_rechts : 0|2@1+ (1,0) [0|3] "" XXX
+ SG_ LDW_Lernmodus_links : 2|2@1+ (1,0) [0|3] "" XXX
+ SG_ LDW_Lernmodus : 9|3@1+ (1,0) [0|3] "" XXX
+ SG_ LDW_Textbits : 12|4@1+ (1,0) [0|15] "" XXX
+ SG_ LDW_Gong : 16|2@1+ (1,0) [0|3] "" XXX
+ SG_ LDW_Kameratyp : 18|1@1+ (1,0) [0|1] "" XXX
+ SG_ LDW_Lampe_gelb : 19|1@1+ (1,0) [0|1] "" XXX
+ SG_ LDW_Lampe_gruen : 20|1@1+ (1,0) [0|1] "" XXX
+ SG_ LDW_SW_Warnung_links : 21|1@1+ (1,0) [0|1] "" XXX
+ SG_ LDW_SW_Warnung_rechts : 22|1@1+ (1,0) [0|1] "" XXX
+ SG_ LDW_KD_Fehler : 23|1@1+ (1,0) [0|1] "" XXX
+ SG_ LDW_DLC : 24|8@1+ (0.01,-1.25) [-1.25|1.25] "" XXX
+ SG_ LDW_TLC : 32|5@1+ (0.1,0) [0|3] "" XXX
+ SG_ LDW_Seite_DLCTLC : 37|1@1+ (1,0) [0|1] "" XXX
+ SG_ LDW_Frueh_Spaet : 38|2@1+ (1,0) [0|3] "" XXX
 
 BO_ 428 Bremse_8: 8 XXX
  SG_ BR8_Checksumme : 0|8@1+ (1,0) [0|255] "" XXX
@@ -1460,6 +1470,12 @@ CM_ SG_ 648 Kuehlmitteltemperatur__Motor_2_ "Coolant Temperature";
 CM_ SG_ 896 Drosselklappenpoti "Throttle Position";
 CM_ SG_ 896 Fahrpedal_Rohsignal "Accelerator Pedal Position";
 CM_ SG_ 896 Ansauglufttemperatur "Intake Air Temperature";
+
+CM_ SG_ 912 GK1_Fa_Tuerkont "Status of the driver's door rotary latch";
+CM_ SG_ 912 BSK_HL_geoeffnet "Status of the rear left door rotary latch";
+CM_ SG_ 912 BSK_HR_geoeffnet "Status of the rear right door rotary latch";
+CM_ SG_ 912 BSK_BT_geoeffnet "Status of the passenger door rotary latch";
+CM_ SG_ 912 BSK_HD_Hauptraste "Status of trunk lid main detent";
 
 CM_ SG_ 1088 Zaehler_Getriebe_1 "Counter Getriebe_1";
 CM_ SG_ 1088 Waehlhebelposition__Getriebe_1_ "Gear Selector Position";
