@@ -182,7 +182,7 @@ BO_ 880 ASCMActiveCruiseControlStatus: 6 K124_ASCM
  SG_ ACCLeadCar : 44|1@0+ (1,0) [0|0] "" Vector__XXX
  SG_ ACCAlwaysOne2 : 32|1@0+ (1,0) [0|0] "" Vector__XXX
  SG_ ACCAlwaysOne : 0|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ ACCSpeedSetpoint : 19|12@0+ (1,0) [0|0] "km/h"  NEO
+ SG_ ACCSpeedSetpoint : 19|12@0+ (0.0625,0) [0|255.9375] "km/h"  NEO
  SG_ ACCGapLevel : 21|2@0+ (1,0) [0|0] ""  NEO
  SG_ ACCResumeButton : 1|1@0+ (1,0) [0|0] ""  NEO
  SG_ ACCCmdActive : 23|1@0+ (1,0) [0|0] ""  NEO
