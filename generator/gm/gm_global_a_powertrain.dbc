@@ -191,9 +191,10 @@ BO_ 789 EBCMFrictionBrakeCmd: 5 K124_ASCM
 
 BO_ 800 AEBCmd: 6 K124_ASCM
  SG_ RollingCounter : 5|2@0+ (1,0) [0|3] "" NEO
- SG_ Checksum : 27|20@0+ (1,0) [0|2047] "" NEO
- SG_ BrakeCmdActive : 3|1@1+ (1,0) [0|1] "" NEO
- SG_ BrakingForce : 2|7@0+ (1,0) [0|7] "" NEO
+ SG_ AEBChecksum : 27|20@0+ (1,0) [0|0] "" NEO
+ SG_ AEBCmdActive : 3|1@1+ (1,0) [0|1] "" NEO
+ SG_ AEBCmd : 2|11@0+ (1,0) [0|0] "" NEO
+ SG_ AEBCmd2 : 23|8@0+ (1,0) [0|0] "" NEO
 
 BO_ 810 TCICOnStarGPSPosition: 8 K73_TCIC
  SG_ GPSLongitude : 39|32@0+ (1,-2147483648) [0|0] "milliarcsecond"  NEO
