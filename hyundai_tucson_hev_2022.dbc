@@ -36,7 +36,7 @@ BS_:
 BU_: XXX CAMERA
 
 
-BO_ 69 GEAR: 32 XXX
+BO_ 69 GEAR: 24 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
  SG_ GEAR : 44|3@1+ (1,0) [0|7] "" XXX
