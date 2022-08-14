@@ -73,6 +73,7 @@ BO_ 201 ECMEngineStatus: 8 K20_ECM
  SG_ CruiseMainOn : 29|1@0+ (1,0) [0|1] "" NEO
  SG_ Brake_Pressed : 40|1@0+ (1,0) [0|1] "" NEO
  SG_ Standstill : 2|1@0+ (1,0) [0|1] "" NEO
+ SG_ CruiseActive : 31|2@0+ (1,0) [0|3] "" NEO
 
 BO_ 209 EBCMBrakePedalSensors: 7 K17_EBCM
  SG_ Counter1 : 7|2@0+ (1,0) [0|3] "" XXX
