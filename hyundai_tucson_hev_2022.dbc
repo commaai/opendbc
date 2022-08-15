@@ -113,16 +113,16 @@ BO_ 416 CRUISE_INFO: 32 XXX
  SG_ BYTE5 : 40|8@1+ (1,0) [0|255] "" XXX
  SG_ BYTE6 : 48|8@1+ (1,0) [0|255] "" XXX
  SG_ BYTE7 : 56|8@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_2 : 64|2@1+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_1 : 64|2@1+ (1,0) [0|3] "" XXX
  SG_ CRUISE_MAIN : 66|1@1+ (1,0) [0|1] "" XXX
  SG_ CRUISE_STATUS : 67|3@1+ (1,0) [0|7] "" XXX
  SG_ CRUISE_INACTIVE : 70|1@1+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_3 : 71|5@1+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_2 : 71|5@1+ (1,0) [0|15] "" XXX
  SG_ CRUISE_STANDSTILL : 76|1@1+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_4 : 77|11@1+ (1,0) [0|2047] "" XXX
+ SG_ NEW_SIGNAL_3 : 77|11@1+ (1,0) [0|2047] "" XXX
  SG_ BYTE11 : 88|8@1+ (1,0) [0|127] "" XXX
  SG_ SET_SPEED : 102|7@0+ (1,0) [0|127] "km/h or mph" XXX
- SG_ NEW_SIGNAL_6 : 103|1@1+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_4 : 103|1@1+ (1,0) [0|1] "" XXX
  SG_ BYTE13 : 104|8@1+ (1,0) [0|255] "" XXX
  SG_ BYTE14 : 112|8@1+ (1,0) [0|255] "" XXX
  SG_ BYTE15 : 120|8@1+ (1,0) [0|255] "" XXX
