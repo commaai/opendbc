@@ -158,6 +158,8 @@ BO_ 481 ASCMSteeringButton: 7 K124_ASCM
  SG_ LKAButton : 23|1@0+ (1,0) [0|0] ""  NEO
  SG_ ACCButtons : 46|3@0+ (1,0) [0|0] ""  NEO
  SG_ DriveModeButton : 39|1@0+ (1,0) [0|1] "" XXX
+ SG_ RollingCounter : 33|2@0+ (1,0) [0|3] "" NEO
+ SG_ SteeringButtonChecksum : 43|12@0+ (1,0) [0|255] "" NEO
 
 BO_ 485 PSCMSteeringAngle: 8 K43_PSCM
  SG_ SteeringWheelAngle : 15|16@0- (0.0625,0) [-2047|2047] "deg"  NEO
@@ -231,7 +233,7 @@ BO_ 880 ASCMActiveCruiseControlStatus: 6 K124_ASCM
  SG_ ACCLeadCar : 44|1@0+ (1,0) [0|0] "" Vector__XXX
  SG_ ACCAlwaysOne2 : 32|1@0+ (1,0) [0|0] "" Vector__XXX
  SG_ ACCAlwaysOne : 0|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ ACCSpeedSetpoint : 19|12@0+ (1,0) [0|0] "km/h"  NEO
+ SG_ ACCSpeedSetpoint : 19|12@0+ (0.0625,0) [0|255.9375] "km/h"  NEO
  SG_ ACCGapLevel : 21|2@0+ (1,0) [0|0] ""  NEO
  SG_ ACCResumeButton : 1|1@0+ (1,0) [0|0] ""  NEO
  SG_ ACCCmdActive : 23|1@0+ (1,0) [0|0] ""  NEO
