@@ -1,0 +1,29 @@
+CM_ "IMPORT _hyundai_canfd_base.dbc";
+
+BO_ 426 CRUISE_BUTTONS: 16 XXX
+ SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
+ SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_1 : 24|4@1+ (1,0) [0|15] "" XXX
+ SG_ SET_ME_1 : 28|3@1+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_2 : 31|3@1+ (1,0) [0|7] "" XXX
+ SG_ ADAPTIVE_CRUISE_MAIN_BTN : 34|1@1+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_3 : 35|1@1+ (1,0) [0|1] "" XXX
+ SG_ LFA_BTN : 39|1@1+ (1,0) [0|1] "" XXX
+ SG_ CRUISE_BUTTONS : 36|3@1+ (1,0) [0|4] "" XXX
+ SG_ NEW_SIGNAL_4 : 40|1@1+ (1,0) [0|1] "" XXX
+ SG_ NORMAL_CRUISE_MAIN_BTN : 41|1@1+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_5 : 42|2@1+ (1,0) [0|3] "" XXX
+ SG_ SET_ME_2 : 44|3@1+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_6 : 47|1@1+ (1,0) [0|1] "" XXX
+ SG_ BYTE6 : 48|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE7 : 56|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE8 : 64|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE9 : 72|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE10 : 80|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE11 : 88|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE12 : 96|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE13 : 104|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE14 : 112|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE15 : 120|8@1+ (1,0) [0|255] "" XXX
+
+

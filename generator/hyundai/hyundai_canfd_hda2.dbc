@@ -1,0 +1,12 @@
+CM_ "IMPORT _hyundai_canfd_base.dbc";
+
+BO_ 463 CRUISE_BUTTONS: 8 XXX
+ SG_ _CHECKSUM : 0|8@1+ (1,0) [0|65535] "" XXX
+ SG_ LKAS_BTN : 23|1@1+ (1,0) [0|1] "" XXX
+ SG_ SET_ME_1 : 29|1@1+ (1,0) [0|1] "" XXX
+ SG_ ADAPTIVE_CRUISE_MAIN_BTN : 19|1@1+ (1,0) [0|1] "" XXX
+ SG_ NORMAL_CRUISE_MAIN_BTN : 21|1@1+ (1,0) [0|1] "" XXX
+ SG_ COUNTER : 12|4@1+ (1,0) [0|255] "" XXX
+ SG_ CRUISE_BUTTONS : 16|3@1+ (1,0) [0|3] "" XXX
+
+VAL_ 463 CRUISE_BUTTONS 0 "none" 1 "res_accel" 2 "set_decel" 3 "gap_distance" 4 "pause_resume" ;
