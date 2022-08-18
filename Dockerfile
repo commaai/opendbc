@@ -29,6 +29,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python-openssl \
     xz-utils \
     zlib1g-dev \
+    cmake \
   && rm -rf /var/lib/apt/lists/*
 
 RUN curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
