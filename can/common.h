@@ -18,6 +18,7 @@
 //#define DEBUG printf
 
 #define MAX_BAD_COUNTER 5
+#define CAN_INVALID_CNT 5
 
 void init_crc_lookup_tables();
 
@@ -68,6 +69,7 @@ public:
   uint64_t last_sec = 0;
   uint64_t last_nonempty_sec = 0;
   uint64_t bus_timeout_threshold = 0;
+  uint64_t can_invalid_cnt = CAN_INVALID_CNT;
 
   CANParser(int abus, const std::string& dbc_name,
             const std::vector<MessageParseOptions> &options,

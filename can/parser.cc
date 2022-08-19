@@ -275,12 +275,11 @@ void CANParser::UpdateCans(uint64_t sec, const capnp::DynamicStruct::Reader& cms
 void CANParser::UpdateValid(uint64_t sec) {
   const bool show_missing = (last_sec - first_sec) > 8e9;
 
-  can_valid = true;
   for (const auto& kv : message_states) {
     const auto& state = kv.second;
 
-    const bool missing = state.last_seen_nanos == 0;  // this probably doesn't need a threshold
-    const bool timed_out = (sec - state.last_seen_nanos) > state.check_threshold;  // this threshold is probably good enough
+    const bool missing = state.last_seen_nanos == 0;
+    const bool timed_out = (sec - state.last_seen_nanos) > state.check_threshold;
     const bool counter_invalid = state.counter_fail >= MAX_BAD_COUNTER;
     if ((state.check_threshold > 0 && (missing || timed_out)) || counter_invalid) {
       if (counter_invalid) {
@@ -289,9 +288,12 @@ void CANParser::UpdateValid(uint64_t sec) {
       } else if (show_missing) {
         LOGE("0x%X TIMEOUT", state.address);
       }
-      can_valid = false;
+      can_invalid_cnt++;
+    } else {
+      can_invalid_cnt = 0;
     }
   }
+  can_valid = can_invalid_cnt < CAN_INVALID_CNT;
 }
 
 std::vector<SignalValue> CANParser::query_latest() {
