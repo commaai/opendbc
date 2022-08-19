@@ -117,6 +117,13 @@ BO_ 298 LFA: 16 XXX
  SG_ SET_ME_1 : 80|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_3 : 111|8@0+ (1,0) [0|255] "" XXX
 
+BO_ 304 GEAR_SHIFTER: 16 XXX
+ SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
+ SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ PARK_BUTTON : 32|2@1+ (1,0) [0|3] "" XXX
+ SG_ GEAR : 64|3@1+ (1,0) [0|7] "" XXX
+ SG_ KNOB_POSITION : 40|3@1+ (1,0) [0|3] "" XXX
+
 BO_ 373 SCC1: 24 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
@@ -330,6 +337,7 @@ CM_ SG_ 1043 COUNTER_ALT "only increments on change";
 
 VAL_ 53 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
 VAL_ 69 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
+VAL_ 304 GEAR 1 "P" 2 "R" 3 "N" 4 "D";
 VAL_ 80 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green" ;
 VAL_ 80 LKA_MODE 1 "warning only" 2 "assist" 6 "off" ;
 VAL_ 298 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green" ;
