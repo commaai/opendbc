@@ -279,8 +279,8 @@ void CANParser::UpdateValid(uint64_t sec) {
   for (const auto& kv : message_states) {
     const auto& state = kv.second;
 
-    const bool missing = state.last_seen_nanos == 0;
-    const bool timed_out = (sec - state.last_seen_nanos) > state.check_threshold;
+    const bool missing = state.last_seen_nanos == 0;  // this probably doesn't need a threshold
+    const bool timed_out = (sec - state.last_seen_nanos) > state.check_threshold;  // this threshold is probably good enough
     const bool counter_invalid = state.counter_fail >= MAX_BAD_COUNTER;
     if ((state.check_threshold > 0 && (missing || timed_out)) || counter_invalid) {
       if (counter_invalid) {
