@@ -280,10 +280,8 @@ void CANParser::UpdateValid(uint64_t sec) {
 
     const bool missing = state.last_seen_nanos == 0;
     const bool timed_out = (sec - state.last_seen_nanos) > state.check_threshold;
-    const bool counter_invalid = state.counter_fail >= MAX_BAD_COUNTER;
-    if ((state.check_threshold > 0 && (missing || timed_out)) || counter_invalid) {
-      if (counter_invalid) {
-      } else if (missing) {
+    if (state.check_threshold > 0 && (missing || timed_out)) {
+      if (missing) {
         LOGE("0x%X MISSING", state.address);
       } else if (show_missing) {
         LOGE("0x%X TIMEOUT", state.address);
