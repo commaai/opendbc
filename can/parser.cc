@@ -201,11 +201,7 @@ void CANParser::update_string(const std::string &data, bool sendcan) {
   auto cans = sendcan ? event.getSendcan() : event.getCan();
   UpdateCans(last_sec, cans);
 
-  can_invalid_cnt++;
-  if (CanValid(last_sec)) {
-    can_invalid_cnt = 0;
-  }
-  can_valid = can_invalid_cnt < CAN_INVALID_CNT;
+  UpdateValid(last_sec);
 }
 
 void CANParser::UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Reader& cans) {
@@ -276,10 +272,10 @@ void CANParser::UpdateCans(uint64_t sec, const capnp::DynamicStruct::Reader& cms
   state_it->second.parse(sec, data);
 }
 
-bool CANParser::CanValid(uint64_t sec) {
+void CANParser::UpdateValid(uint64_t sec) {
   const bool show_missing = (last_sec - first_sec) > 8e9;
 
-  bool valid = false;
+  bool _valid = false;
   for (const auto& kv : message_states) {
     const auto& state = kv.second;
 
@@ -291,10 +287,11 @@ bool CANParser::CanValid(uint64_t sec) {
       } else if (show_missing) {
         LOGE("0x%X TIMEOUT", state.address);
       }
-      valid = false;
+      _valid = false;
     }
   }
-  return valid;
+  can_invalid_cnt = _valid ? 0 : (can_invalid_cnt + 1);
+  can_valid = can_invalid_cnt < CAN_INVALID_CNT;
 }
 
 std::vector<SignalValue> CANParser::query_latest() {

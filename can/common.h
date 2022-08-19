@@ -80,7 +80,7 @@ public:
   void UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Reader& cans);
   #endif
   void UpdateCans(uint64_t sec, const capnp::DynamicStruct::Reader& cans);
-  bool CanValid(uint64_t sec);
+  void UpdateValid(uint64_t sec);
   std::vector<SignalValue> query_latest();
 };
 
