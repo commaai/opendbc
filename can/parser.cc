@@ -275,7 +275,7 @@ void CANParser::UpdateCans(uint64_t sec, const capnp::DynamicStruct::Reader& cms
 void CANParser::UpdateValid(uint64_t sec) {
   const bool show_missing = (last_sec - first_sec) > 8e9;
 
-  bool _valid = false;
+  bool _valid = true;
   for (const auto& kv : message_states) {
     const auto& state = kv.second;
 
