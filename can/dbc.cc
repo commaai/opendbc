@@ -93,10 +93,7 @@ void set_signal_type(Signal& s, ChecksumState* chk, const std::string& dbc_name,
       DBC_ASSERT(chk->counter_size == -1 || s.size == chk->counter_size, "COUNTER is not " << chk->counter_size << " bits long");
       DBC_ASSERT(chk->counter_start_bit == -1 || (s.start_bit % 8) == chk->counter_start_bit, "COUNTER starts at wrong bit");
       DBC_ASSERT(chk->little_endian == s.is_little_endian, "COUNTER has wrong endianness");
-
-      if (chk->checksum_type != TOYOTA_CHECKSUM) {
-        s.type = COUNTER;
-      }
+      s.type = COUNTER;
     }
   }
 
