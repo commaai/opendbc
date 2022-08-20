@@ -241,6 +241,10 @@ BO_ 880 ASCMActiveCruiseControlStatus: 6 K124_ASCM
  SG_ ACCCmdActive : 23|1@0+ (1,0) [0|0] ""  NEO
  SG_ FCWAlert : 41|2@0+ (1,0) [0|3] "" XXX
 
+BO_ 977 ECMCruiseControl: 8 K20_ECM
+ SG_ CruiseActive : 39|1@0+ (1,0) [0|3] "" NEO
+ SG_ CruiseSetSpeed : 19|12@0+ (0.0625,0) [0|0] "km/h" NEO
+
 BO_ 1001 ECMVehicleSpeed: 8 K20_ECM
  SG_ VehicleSpeed : 7|16@0+ (0.01,0) [0|0] "mph"  NEO
  SG_ VehicleSpeedLeft : 39|16@0+ (0.01,0) [0|0] "mph" NEO
