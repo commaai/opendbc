@@ -42,3 +42,10 @@ repos:
         - --force
         - --quiet
         - -j4
+-   repo: local
+    hooks:
+    -   id: generator
+        name: dbc generator
+        entry: generator/test_generator.py
+        language: script
+        pass_filenames: false
