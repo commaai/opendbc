@@ -231,11 +231,10 @@ void CANParser::UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Rea
       continue;
     }
 
-    // TODO: this actually triggers for some cars. fix and enable this
-    //if (dat.size() != state_it->second.size) {
-    //  DEBUG("got message with unexpected length: expected %d, got %zu for %d", state_it->second.size, dat.size(), cmsg.getAddress());
-    //  continue;
-    //}
+    if (dat.size() != state_it->second.size) {
+      DEBUG("got message with unexpected length: expected %d, got %zu for %d", state_it->second.size, dat.size(), cmsg.getAddress());
+      continue;
+    }
 
     std::vector<uint8_t> data(dat.size(), 0);
     memcpy(data.data(), dat.begin(), dat.size());
