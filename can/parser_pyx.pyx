@@ -15,8 +15,6 @@ import os
 import numbers
 from collections import defaultdict
 
-cdef int CAN_INVALID_CNT = 5
-
 
 cdef class CANParser:
   cdef:
@@ -28,10 +26,7 @@ cdef class CANParser:
   cdef readonly:
     dict vl
     dict vl_all
-    bool can_valid
-    bool bus_timeout
     string dbc_name
-    int can_invalid_cnt
 
   def __init__(self, dbc_name, signals, checks=None, bus=0, enforce_checks=True):
     if checks is None:
@@ -44,8 +39,6 @@ cdef class CANParser:
 
     self.vl = {}
     self.vl_all = {}
-    self.can_valid = False
-    self.can_invalid_cnt = CAN_INVALID_CNT
     msg_name_to_address = {}
 
     for i in range(self.dbc[0].msgs.size()):
@@ -109,13 +102,6 @@ cdef class CANParser:
   cdef unordered_set[uint32_t] update_vl(self):
     cdef unordered_set[uint32_t] updated_addrs
 
-    # Update invalid flag
-    self.can_invalid_cnt += 1
-    if self.can.can_valid:
-      self.can_invalid_cnt = 0
-    self.can_valid = self.can_invalid_cnt < CAN_INVALID_CNT
-    self.bus_timeout = self.can.bus_timeout
-
     new_vals = self.can.query_latest()
     for cv in new_vals:
       # Cast char * directly to unicode
@@ -142,6 +128,14 @@ cdef class CANParser:
       self.can.update_string(s, sendcan)
       updated_addrs.update(self.update_vl())
     return updated_addrs
+
+  @property
+  def can_valid(self):
+    return self.can.can_valid
+
+  @property
+  def bus_timeout(self):
+    return self.can.bus_timeout
 
 
 cdef class CANDefine():
