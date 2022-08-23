@@ -148,9 +148,40 @@ BO_ 389 CAM_0x185: 8 CAMERA
 BO_ 416 CRUISE_INFO: 32 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE3 : 24|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE4 : 32|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE5 : 40|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE6 : 48|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE7 : 56|8@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_1 : 64|2@1+ (1,0) [0|3] "" XXX
+ SG_ CRUISE_MAIN : 66|1@1+ (1,0) [0|1] "" XXX
+ SG_ CRUISE_STATUS : 67|3@1+ (1,0) [0|7] "" XXX
+ SG_ CRUISE_INACTIVE : 70|1@1+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_2 : 71|5@1+ (1,0) [0|15] "" XXX
  SG_ CRUISE_STANDSTILL : 76|1@1+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_3 : 77|11@1+ (1,0) [0|2047] "" XXX
+ SG_ BYTE11 : 88|8@1+ (1,0) [0|127] "" XXX
  SG_ SET_SPEED : 102|7@0+ (1,0) [0|127] "km/h or mph" XXX
- SG_ CRUISE_ACTIVE : 184|1@1+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_4 : 103|1@1+ (1,0) [0|1] "" XXX
+ SG_ BYTE13 : 104|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE14 : 112|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE15 : 120|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE16 : 128|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE17 : 136|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE18 : 144|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE19 : 152|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE20 : 160|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE21 : 168|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE22 : 176|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE23 : 184|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE24 : 192|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE25 : 200|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE26 : 208|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE27 : 216|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE28 : 224|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE29 : 232|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE30 : 240|8@1+ (1,0) [0|255] "" XXX
+ SG_ BYTE31 : 248|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 426 CRUISE_BUTTONS_ALT: 16 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
