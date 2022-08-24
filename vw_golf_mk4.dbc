@@ -1121,7 +1121,7 @@ BO_ 208 Lenkhilfe_3: 6 XXX
  SG_ LH3_BLWValid : 45|1@1+ (1,0) [0|1] "" XXX
  SG_ LH3_Lenkungstyp : 46|2@1+ (1,0) [0|3] "" XXX
 
-BO_ 978 Lenkhilfe_2: 8 XXX
+BO_ 978 Lenkhilfe_2: 7 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ LH2_Geradeaus : 12|1@1+ (1,0) [0|1] "" XXX
