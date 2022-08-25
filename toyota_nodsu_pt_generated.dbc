@@ -249,7 +249,7 @@ BO_ 1005 REVERSE_CAMERA_STATE: 2 BGM
 BO_ 1009 PCM_CRUISE_ALT: 8 XXX
  SG_ MAIN_ON : 13|1@0+ (1,0) [0|3] "" XXX
  SG_ CRUISE_STATE : 10|1@0+ (1,0) [0|1] "" XXX
- SG_ SET_SPEED : 23|8@0+ (1,0) [0|255] "mph" XXX
+ SG_ UI_SET_SPEED : 23|8@0+ (1,0) [0|255] "mph" XXX
 
 BO_ 1020 SOLAR_SENSOR: 8 XXX
  SG_ LUX_SENSOR : 55|13@0+ (1,0) [0|0] "" XXX
@@ -440,7 +440,7 @@ CM_ SG_ 865 CLUTCH_RELEASED "boolean of clutch for 6MT.";
 CM_ SG_ 921 UI_SET_SPEED "set speed shown in the vehicle's UI with the vehicle's unit";
 CM_ SG_ 951 BRAKE_LIGHTS_ACC "brake lights when ACC commands decel";
 CM_ SG_ 956 GEAR "on 6MT, only R shows.";
-CM_ SG_ 1009 SET_SPEED "units seem to be whatever the car is set to";
+CM_ SG_ 1009 UI_SET_SPEED "units seem to be whatever the car is set to";
 CM_ SG_ 1041 PCS_INDICATOR "Pre-Collision System Indicator";
 CM_ SG_ 1041 PCS_SENSITIVITY "Pre-Collision System Sensitivity";
 CM_ SG_ 1042 LDA_SA_TOGGLE "LDA Steering Assist Toggle";
