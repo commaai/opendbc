@@ -1126,7 +1126,8 @@ BO_ 984 IPMA_Data: 8 IPMA_ADAS
  SG_ DasStats_D_Dsply : 47|2@0+ (1,0) [0|3] "SED" GWM
  SG_ DasWarn_D_Dsply : 44|2@0+ (1,0) [0|3] "SED" GWM
  SG_ AhbHiBeam_D_Rq : 59|2@0+ (1,0) [0|3] "SED" GWM
- SG_ Set_Me_X1 : 63|4@0+ (1,0) [0|15] "" XXX
+ SG_ Passthru_63 : 63|4@0+ (1,0) [0|15] "" XXX
+ SG_ Passthru_48 : 48|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 985 IPMA_Data2: 8 IPMA_ADAS
  SG_ LdwChime_B_Rq : 34|1@0+ (1,0) [0|1] "SED" GWM
