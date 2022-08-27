@@ -1464,15 +1464,23 @@ CM_ SG_ 640 Momentenangaben_ungenau "Approximate Torque Values";
 CM_ SG_ 644 MOB_CHECKSUM "Checksum MOB";
 CM_ SG_ 644 MOB_COUNTER "Counter MOB";
 
+CM_ SG_ 648 Minimales_Motormoment_bei_Zuend "Minimum Torque Adjustment";
+CM_ SG_ 648 Begrenzungsmoment "Maximum Inner Torque";
 CM_ SG_ 648 Bremstestschalter "Brake Test Switch";
+CM_ SG_ 648 Soll_Geschwindigkeit_bei_GRA_Be "Desired Vehicle Speed";
 CM_ SG_ 648 Bremslichtschalter "Brake Light Switch";
 CM_ SG_ 648 Leerlaufsolldrehzahl__Motor_2_ "Target Idle Speed";
 CM_ SG_ 648 Fahrzeuggeschwindigkeit "Vehicle Speed";
 CM_ SG_ 648 Kuehlmitteltemperatur__Motor_2_ "Coolant Temperature";
 
 CM_ SG_ 896 Drosselklappenpoti "Throttle Position";
+CM_ SG_ 896 Motor_Wunschdrehzahl "Desired engine speed";
+CM_ SG_ 896 Motordrehzahlbeeinflussung "Shift Target Influence";
 CM_ SG_ 896 Fahrpedal_Rohsignal "Accelerator Pedal Position";
 CM_ SG_ 896 Ansauglufttemperatur "Intake Air Temperature";
+CM_ SG_ 896 Kein_E_Gas "ETB flag";
+CM_ SG_ 896 Kein_Start_Stop "Start/stop flag";
+CM_ SG_ 896 Rad_Wunschmoment "Desired wheel torque";
 
 CM_ SG_ 912 GK1_Fa_Tuerkont "Status of the driver's door rotary latch";
 CM_ SG_ 912 BSK_HL_geoeffnet "Status of the rear left door rotary latch";
