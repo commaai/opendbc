@@ -1524,7 +1524,17 @@ CM_ SG_ 1056 Kuehlmitteltemp__4_1__Kombi_2_ "kombi coolant temperature";
 
 CM_ SG_ 1096 Zaehler_Waehlhebel_1 "Counter Waehlhebel_1";
 
-CM_ SG_ 1152 Checksumme_Motor_5 "Checksum Motor_5";
+CM_ SG_ 1152 CHECKSUM "Checksum Motor_5";
+CM_ SG_ 1152 Klimadrucksignal__Motor_5_ "Air conditioning pressure signal";
+CM_ SG_ 1152 Kraftstoffverbrauchssignal "Fuel consumption signal";
+CM_ SG_ 1152 K_hlerluefteransteuerung "Cooling fan control signal";
+CM_ SG_ 1152 Klimakompressor_Leistungsreduzi "Air conditioning compressor power reduction flag";
+CM_ SG_ 1152 Klimakompressor_aus__Motor_5_ "Air conditioning compressor";
+CM_ SG_ 1152 Anlasser_Freigabe "Starter release";
+CM_ SG_ 1152 OBD_2_Lampe "OBD light";
+CM_ SG_ 1152 E_Gas_Lampe "ETB light";
+CM_ SG_ 1152 Ladekontroll_Lampe "Charge light";
+CM_ SG_ 1152 Vorgluehlampe__Motor_5_ "Glow light";
 
 CM_ SG_ 1160 Zaehler_Motor_6 "Counter Motor_6";
 CM_ SG_ 1160 Hoeheninfo__Motor_6_ "Altitude Correction";
