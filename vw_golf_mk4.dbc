@@ -321,7 +321,8 @@ BO_ 1160 Motor_6: 8 XXX
  SG_ Frei_Motor_6_4 : 58|2@1+ (1,0) [0|0] "" XXX
  SG_ ltemperaturschutz : 57|1@1+ (1,0) [0|0] "" XXX
  SG_ GRA_Bremseingriff_Freigabe : 56|1@1+ (1,0) [0|0] "" XXX
- SG_ Frei_Motor_6_3 : 40|16@1+ (1,0) [0|0] "" XXX
+ SG_ Frei_Motor_6_3 : 48|8@1+ (1,0) [0|0] "" XXX
+ SG_ Ruckmeldung_Momenten : 40|8@1+ (0.39,0) [0|100] "" XXX
  SG_ GRA_Sollbeschleunigung : 32|8@1+ (0.024,-3.984) [-3.984|2.112] "m/s2" XXX
  SG_ Hoeheninfo__Motor_6_ : 24|8@1+ (0.00787,0) [0|2] "" XXX
  SG_ Istmoment_f_r_Getriebe : 16|8@1+ (0.39,0) [0|99] "MDI" XXX
@@ -1542,6 +1543,11 @@ CM_ SG_ 1160 Hoeheninfo__Motor_6_ "Altitude Correction";
 CM_ SG_ 1160 Istmoment_f_r_Getriebe "Actual Torque";
 CM_ SG_ 1160 Sollmoment_f_r_Getriebe "Target Torque";
 CM_ SG_ 1160 Checksumme_Motor_6 "Checksum Motor_6";
+CM_ SG_ 1160 GRA_Sollbeschleunigung "GRA target acceleration";
+CM_ SG_ 1160 Ruckmeldung_Momenten "Feedback torque-integral gear intervention";
+CM_ SG_ 1160 Hoeheninfo__Motor_6_ "Altitude info";
+CM_ SG_ 1160 Istmoment_f_r_Getriebe "Actual torque for gear";
+CM_ SG_ 1160 Sollmoment_f_r_Getriebe "Target torque for gearbox";
 
 CM_ SG_ 1344 Zahler_Getriebe_2 "Counter Getriebe_2";
 
