@@ -303,7 +303,8 @@ BO_ 1408 Motor_Flexia: 8 XXX
  SG_ Multiplex_Schalter_Motor_Flexia M : 0|1@1+ (1,0) [0|0] "" XXX
 
 BO_ 1416 Motor_7: 8 XXX
- SG_ Frei_Motor_7_3 : 40|24@1+ (1,0) [0|0] "" XXX
+ SG_ Oltemperatur : 56|8@1+ (1,0) [0|0] "" XXX
+ SG_ Frei_Motor_7_3 : 40|16@1+ (1,0) [0|0] "" XXX
  SG_ Ladedruck : 32|8@1+ (0.01,0) [0|2.54] "bar" XXX
  SG_ Vorzeichen_Motordrehzahlgradien : 31|1@1+ (1,0) [0|0] "" XXX
  SG_ Motordrehzahlgradient : 24|7@1+ (1,0) [0|126] "U/min" XXX
@@ -1564,6 +1565,9 @@ CM_ SG_ 1408 Ansaugsystem "Induction System";
 CM_ SG_ 1408 Motorleistung "Maximum engine power";
 
 CM_ SG_ 1416 Ladedruck "Boost Pressure";
+CM_ SG_ 1416 Motordrehzahlgradient "Engine speed gradient";
+CM_ SG_ 1416 Hoeheninfo__Motor_7_ "Altitude correction factor";
+CM_ SG_ 1416 Oltemperatur "Oil temperature";
 
 CM_ SG_ 1470 LDW_Direction "0=right,1=left";
 CM_ SG_ 1470 XX_DLCORTLC1 "Might be DLC or TLC";
