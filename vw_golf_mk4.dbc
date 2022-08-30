@@ -1517,6 +1517,7 @@ CM_ SG_ 912 BSK_HD_Hauptraste "Status of trunk lid main detent";
 
 CM_ SG_ 1088 Zaehler_Getriebe_1 "Counter Getriebe_1";
 CM_ SG_ 1088 Waehlhebelposition__Getriebe_1_ "Gear Selector Position";
+CM_ SG_ 1088 inneres_Soll_Motormoment "Desired Inner Torque";
 
 CM_ SG_ 1056 Fehlerstatus_Aussentemp__4_1 "ambient temp error";
 CM_ SG_ 1056 Fehlerstatus_Oeltemperatur_4_1 "oil temp error";
@@ -1546,9 +1547,9 @@ CM_ SG_ 1160 Sollmoment_f_r_Getriebe "Target torque for gearbox";
 CM_ SG_ 1160 Checksumme_Motor_6 "Checksum Motor_6";
 CM_ SG_ 1160 GRA_Sollbeschleunigung "GRA target acceleration";
 CM_ SG_ 1160 Ruckmeldung_Momenten "Feedback torque-integral gear intervention";
-CM_ SG_ 1160 Hoeheninfo__Motor_6_ "Altitude info";
 
 CM_ SG_ 1344 Zahler_Getriebe_2 "Counter Getriebe_2";
+CM_ SG_ 1344 Hochschaltlampe "Upshift Flag";
 
 CM_ SG_ 1386 ACA_V_Wunsch "255=unset";
 
