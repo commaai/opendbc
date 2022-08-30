@@ -1541,14 +1541,12 @@ CM_ SG_ 1152 Vorgluehlampe__Motor_5_ "Glow light";
 
 CM_ SG_ 1160 Zaehler_Motor_6 "Counter Motor_6";
 CM_ SG_ 1160 Hoeheninfo__Motor_6_ "Altitude Correction";
-CM_ SG_ 1160 Istmoment_f_r_Getriebe "Actual Torque";
-CM_ SG_ 1160 Sollmoment_f_r_Getriebe "Target Torque";
+CM_ SG_ 1160 Istmoment_f_r_Getriebe "Actual torque for gear";
+CM_ SG_ 1160 Sollmoment_f_r_Getriebe "Target torque for gearbox";
 CM_ SG_ 1160 Checksumme_Motor_6 "Checksum Motor_6";
 CM_ SG_ 1160 GRA_Sollbeschleunigung "GRA target acceleration";
 CM_ SG_ 1160 Ruckmeldung_Momenten "Feedback torque-integral gear intervention";
 CM_ SG_ 1160 Hoeheninfo__Motor_6_ "Altitude info";
-CM_ SG_ 1160 Istmoment_f_r_Getriebe "Actual torque for gear";
-CM_ SG_ 1160 Sollmoment_f_r_Getriebe "Target torque for gearbox";
 
 CM_ SG_ 1344 Zahler_Getriebe_2 "Counter Getriebe_2";
 
