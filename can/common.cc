@@ -246,7 +246,19 @@ unsigned int hkg_can_fd_checksum(uint32_t address, const Signal &sig, const std:
 }
 
 unsigned int ford_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
-  uint8_t sum = 0;
-
-  return sum;
+  switch (address) {
+    // Gear_Shift_by_Wire_FD1 (checksum byte 4)
+    case 0x5a: {
+      uint8_t checksum = 0xFF;
+      for (int i = 0; i < d.size(); i++) {
+        if (i == 4) continue;
+        checksum -= d[i];
+      }
+      return checksum;
+    }
+    default: {
+      printf("Attempt to checksum undefined Ford message 0x%02X\n", address);
+      return -1;
+    }
+  }
 }
