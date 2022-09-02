@@ -244,3 +244,9 @@ unsigned int hkg_can_fd_checksum(uint32_t address, const Signal &sig, const std:
 
   return crc;
 }
+
+unsigned int ford_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
+  uint8_t sum = 0;
+
+  return sum;
+}
