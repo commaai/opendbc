@@ -173,7 +173,7 @@ class TestCanParserPacker(unittest.TestCase):
       self.assertAlmostEqual(parser.vl["VSA_STATUS"]["USER_BRAKE"], brake)
 
   def test_subaru(self):
-    # Subuaru is little endian
+    # Subaru is little endian
 
     dbc_file = "subaru_global_2017_generated"
 
@@ -206,6 +206,42 @@ class TestCanParserPacker(unittest.TestCase):
         self.assertAlmostEqual(parser.vl["ES_LKAS"]["SET_1"], 1)
         self.assertAlmostEqual(parser.vl["ES_LKAS"]["COUNTER"], idx % 16)
         idx += 1
+
+  def test_subaru_large_value(self):
+    # Subaru is little endian
+
+    dbc_file = "subaru_global_2017_generated"
+
+    signals = [
+      ("COUNTER", "Brake_Status"),
+      ("Signal1", "Brake_Status"),
+      ("Brake", "Brake_Status"),
+      ("Signal2", "Brake_Status"),
+      ("ES_Brake", "Brake_Status"),
+      ("Signal3", "Brake_Status"),
+    ]
+    checks = [("Brake_Status", 50)]
+
+    parser = CANParser(dbc_file, signals, checks, 0)
+    packer = CANPacker(dbc_file)
+
+    values = {
+      "Signal1": 57174604644354.0,
+      "Brake": 0,
+      "Signal2": 4.0,
+      "ES_Brake": 0,
+      "Signal3": 0.0
+    }
+
+    msgs = packer.make_can_msg("Brake_Status", 0, values)
+    bts = can_list_to_can_capnp([msgs])
+    parser.update_string(bts)
+
+    self.assertAlmostEqual(parser.vl["Brake_Status"]["Signal1"], 57174604644354)
+    self.assertAlmostEqual(parser.vl["Brake_Status"]["Brake"], 0)
+    self.assertAlmostEqual(parser.vl["Brake_Status"]["Signal2"], 4)
+    self.assertAlmostEqual(parser.vl["Brake_Status"]["ES_Brake"], 0)
+    self.assertAlmostEqual(parser.vl["Brake_Status"]["Signal3"], 0)
 
   def test_bus_timeout(self):
     """Test CAN bus timeout detection"""
