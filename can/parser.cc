@@ -21,7 +21,7 @@ int64_t get_raw_value(const std::vector<uint8_t> &msg, const Signal &sig) {
     int msb = (int)(sig.msb / 8) == i ? sig.msb : (i+1)*8 - 1;
     int size = msb - lsb + 1;
 
-    uint8_t d = (msg[i] >> (lsb - (i*8))) & ((1ULL << size) - 1);
+    uint64_t d = (msg[i] >> (lsb - (i*8))) & ((1ULL << size) - 1);
     ret |= d << (bits - size);
 
     bits -= size;
