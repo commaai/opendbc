@@ -112,39 +112,41 @@ class TestCanParserPacker(unittest.TestCase):
       ("STEER_TORQUE", "STEERING_CONTROL"),
       ("STEER_TORQUE_REQUEST", "STEERING_CONTROL"),
 
+      ("Signal1", "Brake_Status"),
+
       ("COUNTER", "CAN_FD_MESSAGE"),
       ("64_BIT_LE", "CAN_FD_MESSAGE"),
       ("64_BIT_BE", "CAN_FD_MESSAGE"),
       ("SIGNED", "CAN_FD_MESSAGE"),
     ]
-    checks = [("STEERING_CONTROL", 0), ("CAN_FD_MESSAGE", 0)]
 
     packer = CANPacker(TEST_DBC)
-    parser = CANParser(TEST_DBC, signals, checks, 0)
+    parser = CANParser(TEST_DBC, signals, [], 0, enforce_checks=False)
 
     for steer in range(-256, 255):
       for active in (1, 0):
-        v1 = {
-          "STEER_TORQUE": steer,
-          "STEER_TORQUE_REQUEST": active,
+        values = {
+          "STEERING_CONTROL": {
+            "STEER_TORQUE": steer,
+            "STEER_TORQUE_REQUEST": active,
+          },
+          "Brake_Status": {
+            "Signal1": 61042322657536.0,
+          },
+          "CAN_FD_MESSAGE": {
+            "SIGNED": steer,
+            "64_BIT_LE": random.randint(0, 100),
+            "64_BIT_BE": random.randint(0, 100),
+          },
         }
-        m1 = packer.make_can_msg("STEERING_CONTROL", 0, v1)
 
-        v2 = {
-          "SIGNED": steer,
-          "64_BIT_LE": random.randint(0, 100),
-          "64_BIT_BE": random.randint(0, 100),
-        }
-        m2 = packer.make_can_msg("CAN_FD_MESSAGE", 0, v2)
-
-        bts = can_list_to_can_capnp([m1, m2])
+        msgs = [packer.make_can_msg(k, 0, v) for k, v in values.items()]
+        bts = can_list_to_can_capnp(msgs)
         parser.update_string(bts)
 
-        for key, val in v1.items():
-          self.assertAlmostEqual(parser.vl["STEERING_CONTROL"][key], val)
-
-        for key, val in v2.items():
-          self.assertAlmostEqual(parser.vl["CAN_FD_MESSAGE"][key], val)
+        for k, v in values.items():
+          for key, val in v.items():
+            self.assertAlmostEqual(parser.vl[k][key], val)
 
         # also check address
         for sig in ("STEER_TORQUE", "STEER_TORQUE_REQUEST", "COUNTER", "CHECKSUM"):
@@ -173,7 +175,7 @@ class TestCanParserPacker(unittest.TestCase):
       self.assertAlmostEqual(parser.vl["VSA_STATUS"]["USER_BRAKE"], brake)
 
   def test_subaru(self):
-    # Subuaru is little endian
+    # Subaru is little endian
 
     dbc_file = "subaru_global_2017_generated"
 
