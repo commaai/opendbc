@@ -1645,7 +1645,7 @@ CM_ "BO_ E_EMS11: All (plug-in) hybrids use this gas signal: CR_Vcu_AccPedDep_Po
 CM_ SG_ 1348 SpeedLim_Nav_Clu "Speed limit displayed on Nav, Cluster and HUD";
 
 VAL_ 274 CUR_GR 1 "D" 2 "D" 3 "D" 4 "D" 5 "D" 6 "D" 7 "D" 8 "D" 14 "R" 0 "P";
-VAL_ 871 CF_Lvr_Gear 5 "D" 8 "S" 6 "N" 7 "R" 0 "P";
+VAL_ 871 CF_Lvr_Gear 12 "T" 5 "D" 8 "S" 6 "N" 7 "R" 0 "P";
 VAL_ 882 Elect_Gear_Shifter 5 "D" 8 "S" 6 "N" 7 "R" 0 "P";
 VAL_ 905 ACCMode 0 "off" 1 "enabled" 2 "driver_override" 3 "off_maybe_fault" 4 "cancelled";
 VAL_ 909 CF_VSM_Warn 2 "FCW" 3 "AEB";
