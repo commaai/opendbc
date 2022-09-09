@@ -18,17 +18,19 @@
 //#define DEBUG printf
 
 #define MAX_BAD_COUNTER 5
+#define CAN_INVALID_CNT 5
 
 void init_crc_lookup_tables();
 
 // Car specific functions
-unsigned int honda_checksum(uint32_t address, const std::vector<uint8_t> &d);
-unsigned int toyota_checksum(uint32_t address, const std::vector<uint8_t> &d);
-unsigned int subaru_checksum(uint32_t address, const std::vector<uint8_t> &d);
-unsigned int chrysler_checksum(uint32_t address, const std::vector<uint8_t> &d);
-unsigned int volkswagen_crc(uint32_t address, const std::vector<uint8_t> &d);
-unsigned int hkg_can_fd_checksum(uint32_t address, const std::vector<uint8_t> &d);
-unsigned int pedal_checksum(const std::vector<uint8_t> &d);
+unsigned int honda_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
+unsigned int toyota_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
+unsigned int subaru_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
+unsigned int chrysler_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
+unsigned int volkswagen_mqb_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
+unsigned int xor_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
+unsigned int hkg_can_fd_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
+unsigned int pedal_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 
 class MessageState {
 public:
@@ -39,7 +41,7 @@ public:
   std::vector<double> vals;
   std::vector<std::vector<double>> all_vals;
 
-  uint64_t seen;
+  uint64_t last_seen_nanos;
   uint64_t check_threshold;
 
   uint8_t counter;
@@ -67,6 +69,7 @@ public:
   uint64_t last_sec = 0;
   uint64_t last_nonempty_sec = 0;
   uint64_t bus_timeout_threshold = 0;
+  uint64_t can_invalid_cnt = CAN_INVALID_CNT;
 
   CANParser(int abus, const std::string& dbc_name,
             const std::vector<MessageParseOptions> &options,
@@ -86,9 +89,10 @@ private:
   const DBC *dbc = NULL;
   std::map<std::pair<uint32_t, std::string>, Signal> signal_lookup;
   std::map<uint32_t, Msg> message_lookup;
+  std::map<uint32_t, uint32_t> counters;
 
 public:
   CANPacker(const std::string& dbc_name);
-  std::vector<uint8_t> pack(uint32_t address, const std::vector<SignalPackValue> &values, int counter);
+  std::vector<uint8_t> pack(uint32_t address, const std::vector<SignalPackValue> &values);
   Msg* lookup_message(uint32_t address);
 };

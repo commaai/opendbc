@@ -40,10 +40,11 @@ CANPacker::CANPacker(const std::string& dbc_name) {
   init_crc_lookup_tables();
 }
 
-std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalPackValue> &signals, int counter) {
+std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalPackValue> &signals) {
   std::vector<uint8_t> ret(message_lookup[address].size, 0);
 
   // set all values for all given signal/value pairs
+  bool counter_set = false;
   for (const auto& sigval : signals) {
     auto sig_it = signal_lookup.find(std::make_pair(address, sigval.name));
     if (sig_it == signal_lookup.end()) {
@@ -57,53 +58,33 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
     if (ival < 0) {
       ival = (1ULL << sig.size) + ival;
     }
-
     set_value(ret, sig, ival);
+
+    counter_set = counter_set || (sigval.name == "COUNTER");
+    if (counter_set) {
+      counters[address] = sigval.value;
+    }
   }
 
   // set message counter
-  if (counter >= 0){
-    auto sig_it = signal_lookup.find(std::make_pair(address, "COUNTER"));
-    if (sig_it == signal_lookup.end()) {
-      WARN("COUNTER not defined\n");
-      return ret;
-    }
-    const auto& sig = sig_it->second;
+  auto sig_it_counter = signal_lookup.find(std::make_pair(address, "COUNTER"));
+  if (!counter_set && sig_it_counter != signal_lookup.end()) {
+    const auto& sig = sig_it_counter->second;
 
-    if ((sig.type != SignalType::HONDA_COUNTER) && (sig.type != SignalType::VOLKSWAGEN_COUNTER)) {
-      //WARN("COUNTER signal type not valid\n");
+    if (counters.find(address) == counters.end()) {
+      counters[address] = 0;
     }
-
-    set_value(ret, sig, counter);
+    set_value(ret, sig, counters[address]);
+    counters[address] = (counters[address] + 1) % (1 << sig.size);
   }
 
   // set message checksum
   auto sig_it_checksum = signal_lookup.find(std::make_pair(address, "CHECKSUM"));
   if (sig_it_checksum != signal_lookup.end()) {
     const auto &sig = sig_it_checksum->second;
-    if (sig.type == SignalType::HONDA_CHECKSUM) {
-      unsigned int chksm = honda_checksum(address, ret);
-      set_value(ret, sig, chksm);
-    } else if (sig.type == SignalType::TOYOTA_CHECKSUM) {
-      unsigned int chksm = toyota_checksum(address, ret);
-      set_value(ret, sig, chksm);
-    } else if (sig.type == SignalType::VOLKSWAGEN_CHECKSUM) {
-      unsigned int chksm = volkswagen_crc(address, ret);
-      set_value(ret, sig, chksm);
-    } else if (sig.type == SignalType::SUBARU_CHECKSUM) {
-      unsigned int chksm = subaru_checksum(address, ret);
-      set_value(ret, sig, chksm);
-    } else if (sig.type == SignalType::CHRYSLER_CHECKSUM) {
-      unsigned int chksm = chrysler_checksum(address, ret);
-      set_value(ret, sig, chksm);
-    } else if (sig.type == SignalType::PEDAL_CHECKSUM) {
-      unsigned int chksm = pedal_checksum(ret);
-      set_value(ret, sig, chksm);
-    } else if (sig.type == SignalType::HKG_CAN_FD_CHECKSUM) {
-      unsigned int chksm = hkg_can_fd_checksum(address, ret);
-      set_value(ret, sig, chksm);
-    } else {
-      //WARN("CHECKSUM signal type not valid\n");
+    if (sig.calc_checksum != nullptr) {
+      unsigned int checksum = sig.calc_checksum(address, sig, ret);
+      set_value(ret, sig, checksum);
     }
   }
 

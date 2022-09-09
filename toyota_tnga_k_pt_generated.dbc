@@ -127,6 +127,7 @@ BO_ 466 PCM_CRUISE: 8 XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 467 PCM_CRUISE_2: 8 XXX
+ SG_ PCM_FOLLOW_DISTANCE : 12|2@0+ (1,0) [0|3] "" XXX
  SG_ MAIN_ON : 15|1@0+ (1,0) [0|1] "" XXX
  SG_ LOW_SPEED_LOCKOUT : 14|2@0+ (1,0) [0|3] "" XXX
  SG_ SET_SPEED : 23|8@0+ (1,0) [0|255] "km/h" XXX
@@ -161,7 +162,7 @@ BO_ 614 STEERING_IPAS: 8 IPAS
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 643 PRE_COLLISION: 7 DSU
- SG_ COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ _COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ SET_ME_X00 : 15|8@0+ (1,0) [0|255] "" XXX
  SG_ FORCE : 23|16@0- (2,0) [0|255] "N" XXX
  SG_ SET_ME_X002 : 33|8@0+ (1,0) [0|3] "" XXX
@@ -208,6 +209,10 @@ BO_ 835 ACC_CONTROL: 8 DSU
 BO_ 836 PRE_COLLISION_2: 8 DSU
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|0] "" XXX
 
+BO_ 865 CLUTCH: 8 XXX
+ SG_ CLUTCH_RELEASED : 38|1@0+ (1,0) [0|1] "" XXX
+ SG_ GAS_PEDAL_ALT : 23|8@0+ (0.005,0) [0|1] "" XXX
+
 BO_ 869 DSU_CRUISE : 7 DSU
  SG_ RES_BTN : 3|1@0+ (1,0) [0|0] "" XXX
  SG_ SET_BTN : 2|1@0+ (1,0) [0|0] "" XXX
@@ -245,7 +250,7 @@ BO_ 1005 REVERSE_CAMERA_STATE: 2 BGM
 BO_ 1009 PCM_CRUISE_ALT: 8 XXX
  SG_ MAIN_ON : 13|1@0+ (1,0) [0|3] "" XXX
  SG_ CRUISE_STATE : 10|1@0+ (1,0) [0|1] "" XXX
- SG_ SET_SPEED : 23|8@0+ (1,0) [0|255] "mph" XXX
+ SG_ UI_SET_SPEED : 23|8@0+ (1,0) [0|255] "mph" XXX
 
 BO_ 1020 SOLAR_SENSOR: 8 XXX
  SG_ LUX_SENSOR : 55|13@0+ (1,0) [0|0] "" XXX
@@ -369,6 +374,7 @@ BO_ 1552 BODY_CONTROL_STATE_2: 8 XXX
  SG_ METER_SLIDER_BRIGHTNESS_PCT : 30|7@0+ (1,0) [12|100] "%" XXX
  SG_ METER_SLIDER_LOW_BRIGHTNESS : 37|1@0+ (1,0) [0|1] "" XXX
  SG_ METER_SLIDER_DIMMED : 38|1@0+ (1,0) [0|1] "" XXX
+ SG_ UNITS : 63|3@0+ (1,0) [1|4] "" XXX
 
 BO_ 1553 UI_SETTING: 8 XXX
  SG_ UNITS : 26|2@0+ (1,0) [0|3] "" XXX
@@ -430,9 +436,12 @@ CM_ SG_ 835 ITS_CONNECT_LEAD "Displayed when lead car is capable of ITS Connect"
 CM_ SG_ 835 ALLOW_LONG_PRESS "Enable Toyota's factory set speed increment behaviour, available on both metrics cars and imperial unit cars";
 CM_ SG_ 835 PERMIT_BRAKING "Original ACC has this going high when a car in front is detected. In openpilot and before the PERMIT_BRAKING name, this was 'SET_ME_1' and is hardcoded to be high. Unsure if only informational or has an effect though existing usage in openpilot is to always set it to 1. Originally 'PMTBRKG' in the leaked toyota_2017_ref_pt.dbc file and name expansion speculated to be PerMiT BRaKinG.";
 CM_ SG_ 835 ACCEL_CMD_ALT "Copy of main ACCEL_CMD, but across 8 bits instead of 16 bits like ACCEL_CMD. Unsure if only informational or has an effect. Likely informational as existing openpilot sets this to 0 and no loss of functionality observed. Originally 'AT_RAW' in leaked toyota_2017_ref_pt.dbc file.";
+CM_ SG_ 865 GAS_PEDAL_ALT "copy of main GAS_PEDAL. Both use 8 bits. Might indicate that this message is for pedals.";
+CM_ SG_ 865 CLUTCH_RELEASED "boolean of clutch for 6MT.";
 CM_ SG_ 921 UI_SET_SPEED "set speed shown in the vehicle's UI with the vehicle's unit";
 CM_ SG_ 951 BRAKE_LIGHTS_ACC "brake lights when ACC commands decel";
-CM_ SG_ 1009 SET_SPEED "units seem to be whatever the car is set to";
+CM_ SG_ 956 GEAR "on 6MT, only R shows.";
+CM_ SG_ 1009 UI_SET_SPEED "units seem to be whatever the car is set to";
 CM_ SG_ 1041 PCS_INDICATOR "Pre-Collision System Indicator";
 CM_ SG_ 1041 PCS_SENSITIVITY "Pre-Collision System Sensitivity";
 CM_ SG_ 1042 LDA_SA_TOGGLE "LDA Steering Assist Toggle";
@@ -465,7 +474,7 @@ CM_ SG_ 1163 OVSPVALL "-5 at start then 2 after 2 seconds";
 CM_ SG_ 1163 OVSPVALM "-5 at start then 5 after 2 seconds";
 CM_ SG_ 1163 OVSPVALH "-5 at start then 10 after 2 seconds";
 CM_ SG_ 1163 TSRSPU "always 1";
-CM_ SG_ 1552 UI_SPEED "Vehicle's speedometer's display speed after Toyota's offset was applied, uses vehicle's unit";
+CM_ SG_ 1552 UI_SPEED "Does not appear to match dash";
 CM_ SG_ 1552 METER_SLIDER_BRIGHTNESS_PCT "Combination display brightness setting, scales from 12 per cent to 100 per cent, reflects combination meter settings only, not linked with headlight state";
 CM_ SG_ 1552 METER_SLIDER_LOW_BRIGHTNESS "Combination display low brightness mode, also controls footwell lighting";
 CM_ SG_ 1552 METER_SLIDER_DIMMED "Combination display slider not at max, reflects combination meter settings only, not linked with headlight state";
@@ -477,6 +486,7 @@ CM_ SG_ 1592 LOCKED_VIA_KEYFOB "1 for as long as car is locked with key fob or d
 VAL_ 295 GEAR 0 "P" 1 "R" 2 "N" 3 "D" 4 "B";
 VAL_ 466 CRUISE_STATE 11 "timer_3sec" 10 "adaptive click down" 9 "adaptive click up" 8 "adaptive engaged" 7 "standstill" 6 "non-adaptive click up" 5 "non-adaptive click down" 4 "non-adaptive hold down" 3 "non-adaptive hold up" 2 "non-adaptive being engaged" 1 "non-adaptive engaged" 0 "off";
 VAL_ 467 LOW_SPEED_LOCKOUT 2 "low speed locked" 1 "ok";
+VAL_ 467 PCM_FOLLOW_DISTANCE 1 "far" 2 "medium" 3 "close";
 VAL_ 614 STATE 3 "enabled" 1 "disabled";
 VAL_ 614 DIRECTION_CMD 3 "right" 2 "center" 1 "left";
 VAL_ 643 STATE 0 "normal" 1 "adaptive_cruise_control" 3 "emergency_braking";
@@ -484,6 +494,7 @@ VAL_ 835 ACC_TYPE 2 "permanent low speed lockout" 1 "ok";
 VAL_ 835 ACC_MALFUNCTION 1 "faulted" 0 "ok";
 VAL_ 835 ACC_CUT_IN 1 "CUT-IN Detected" 0 "clear";
 VAL_ 835 ALLOW_LONG_PRESS 2 "set speed increase by 5 speed units regardless" 1 "set speed increase by 1 speed unit on short press, 5 speed units on long press";
+VAL_ 865 CLUTCH_RELEASED 0 "clutch pressed any amount" 1 "clutch released"
 VAL_ 921 CRUISE_CONTROL_STATE 2 "disabled" 11 "hold" 10 "hold_waiting_user_cmd" 6 "enabled" 5 "faulted";
 VAL_ 956 SPORT_ON 0 "off" 1 "on";
 VAL_ 956 GEAR 0 "D" 1 "S" 8 "N" 16 "R" 32 "P";
@@ -515,6 +526,7 @@ VAL_ 1162 TSGN3 0 "none" 1 "speed sign" 2 "0 unlimited" 7 "unlimited" 16 "highwa
 VAL_ 1162 SPLSGN3 15 "conditional blank" 4 "wet road" 5 "rain" 0 "none";
 VAL_ 1552 METER_SLIDER_LOW_BRIGHTNESS 1 "Low brightness mode, footwell lights off" 0 "Normal mode, footwell lights on";
 VAL_ 1552 METER_SLIDER_DIMMED 1 "Dimmed" 0 "Not Dimmed";
+VAL_ 1552 UNITS 1 "km (km/L)" 2 "km (L/100km)" 3 "miles (MPG US)" 4 "miles (MPG Imperial)";
 VAL_ 1553 UNITS 1 "km" 2 "miles";
 VAL_ 1556 TURN_SIGNALS 3 "none" 2 "right" 1 "left";
 VAL_ 1592 LOCK_STATUS 0 "locked" 1 "unlocked";
