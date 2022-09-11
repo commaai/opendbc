@@ -110,6 +110,7 @@ BO_ 250 DAS_6: 8 XXX
  SG_ LKAS_ALERTS : 27|4@0+ (1,0) [0|1] "" XXX
  SG_ CAR_MODEL : 15|8@0+ (1,0) [0|255] "" XXX
  SG_ AUTO_HIGH_BEAM_ON : 47|1@1+ (1,0) [0|0] "" XXX
+ SG_ LKAS_Disabled : 56|1@1+ (1,0) [0|0] "" XXX
 
 BO_ 720 BSM_1: 6 XXX
  SG_ RIGHT_STATUS : 5|1@0+ (1,0) [0|1] "" XXX
