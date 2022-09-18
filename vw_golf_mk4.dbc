@@ -1529,6 +1529,8 @@ CM_ SG_ 1056 Kuehlmitteltemp__4_1__Kombi_2_ "kombi coolant temperature";
 CM_ SG_ 1096 Zaehler_Waehlhebel_1 "Counter Waehlhebel_1";
 
 CM_ SG_ 1152 CHECKSUM "Checksum Motor_5";
+CM_ SG_ 1152 Anlasser_Ausspuren "Starter Disable";
+CM_ SG_ 1152 Anlasser_Freigabe "Starter Release";
 CM_ SG_ 1152 Klimadrucksignal__Motor_5_ "Air conditioning pressure signal";
 CM_ SG_ 1152 Kraftstoffverbrauchssignal "Fuel consumption signal";
 CM_ SG_ 1152 K_hlerluefteransteuerung "Cooling fan control signal";
