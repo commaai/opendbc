@@ -113,13 +113,13 @@ BO_ {a} RADAR_POINTS_METADATA_0x{a:x}: 64 RADAR
     # each radar point is 101 bits so the alignment is not consistent
     RadarPointSignal = namedtuple("RadarPointSignal", ["name", "start", "length", "scale", "offset"])
     radar_point_signals = (
-      RadarPointSignal("", 7, 14, 1/64, 0),
+      RadarPointSignal("DISTANCE", 7, 14, 1/64, 0),
       RadarPointSignal("", 21, 2, 1, 0),
       RadarPointSignal("", 23, 8, 1/512, -127/512),
-      RadarPointSignal("", 31, 13, 1/32, -66),
+      RadarPointSignal("REL_VELOCITY", 31, 13, 1/32, -66),
       RadarPointSignal("", 44, 2, 1, 0),
       RadarPointSignal("", 46, 2, 1, 0),
-      RadarPointSignal("", 48, 12, 1/512, -2047/512),
+      RadarPointSignal("AZIMUTH", 48, 12, 1/512, -2047/512),
       RadarPointSignal("", 60, 2, 1, 0),
       RadarPointSignal("", 62, 1, 1, 0),
       RadarPointSignal("", 63, 7, 1, 0),
@@ -140,7 +140,7 @@ BO_ {a} RADAR_POINTS_METADATA_0x{a:x}: 64 RADAR
     for a in [0x101, 0x201]:
       f.write(f"""
 BO_ {a} RADAR_POINTS_0x{a:x}: 64 RADAR
- SG_ GROUP_ID : 0|5@1+ (1,0) [0|31] "" XXX
+ SG_ MESSAGE_ID : 0|5@1+ (1,0) [0|31] "" XXX
  SG_ LAYOUT_ID : 5|2@1+ (1,0) [0|3] "" XXX
 """)
       bit_idx = radar_point_signals[0].start
