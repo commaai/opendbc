@@ -3370,7 +3370,7 @@ BO_ 979 LateralMotionControl: 8 IPMA_ADAS
  SG_ LatCtlRampType_D_Rq : 53|2@0+ (1,0) [0|3] "SED"  GWM
  SG_ LatCtlPrecision_D_Rq : 33|2@0+ (1,0) [0|3] "SED"  GWM
  SG_ LatCtlPathOffst_L_Actl : 47|10@0+ (0.01,-5.12) [-5.12|5.11] "meter"  GWM
- SG_ LatCtlPath_An_Actl : 31|11@0+ (0.0005,-0.4995) [-0.4995|0.5240] "radians"  GWM
+ SG_ LatCtlPath_An_Actl : 31|11@0+ (0.0005,-0.5) [-0.5|0.5235] "radians"  GWM
  SG_ LatCtlCurv_NoRate_Actl : 12|13@0+ (2.5E-007,-0.001024) [-0.001024|0.00102375] "1/meter"  GWM
  SG_ LatCtlCurv_No_Actl : 7|11@0+ (2E-005,-0.02) [-0.02|0.02094] "1/meter"  GWM
 
