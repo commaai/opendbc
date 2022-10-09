@@ -143,6 +143,8 @@ BO_ 388 PSCMStatus: 8 K43_PSCM
  SG_ LKADriverAppldTrq : 50|11@0- (0.01,0) [-10.24|10.23] "Nm" NEO
  SG_ LKATorqueDelivered : 18|11@0- (0.01,0) [0|1] "" NEO
  SG_ LKATotalTorqueDelivered : 2|11@0- (0.01,0) [-10.24|10.23] "Nm" NEO
+ SG_ RollingCounter : 38|4@0+ (1,0) [0|15] "" XXX
+ SG_ PSCMStatusChecksum : 33|10@0+ (1,0) [0|1023] "" XXX
 
 BO_ 417 AcceleratorPedal: 7 XXX
  SG_ AcceleratorPedal : 55|8@0+ (1,0) [0|0] ""  NEO
