@@ -101,7 +101,7 @@ BO_ 261 ACCELERATOR_ALT: 32 XXX
 BO_ 293 STEERING_SENSORS: 16 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
- SG_ STEERING_RATE : 40|8@1+ (4.0,0) [0|1016] "deg/s" XXX
+ SG_ STEERING_RATE : 40|8@1+ (4,0) [0|1016] "deg/s" XXX
  SG_ STEERING_ANGLE : 24|16@1- (-0.1,0) [0|255] "deg" XXX
 
 BO_ 298 LFA: 16 ADRV
@@ -164,11 +164,6 @@ BO_ 389 CAM_0x185: 8 CAMERA
 BO_ 416 CRUISE_INFO: 32 ADRV
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE3 : 24|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE4 : 32|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE5 : 40|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE6 : 48|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE7 : 56|8@1+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_1 : 64|2@1+ (1,0) [0|3] "" XXX
  SG_ CRUISE_MAIN : 66|1@1+ (1,0) [0|1] "" XXX
  SG_ CRUISE_STATUS : 67|3@1+ (1,0) [0|7] "" XXX
@@ -176,28 +171,15 @@ BO_ 416 CRUISE_INFO: 32 ADRV
  SG_ NEW_SIGNAL_2 : 71|5@1+ (1,0) [0|15] "" XXX
  SG_ CRUISE_STANDSTILL : 76|1@1+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_3 : 77|11@1+ (1,0) [0|2047] "" XXX
- SG_ BYTE11 : 88|8@1+ (1,0) [0|127] "" XXX
  SG_ SET_SPEED : 102|7@0+ (1,0) [0|127] "km/h or mph" XXX
  SG_ NEW_SIGNAL_4 : 103|1@1+ (1,0) [0|1] "" XXX
- SG_ BYTE13 : 104|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE14 : 112|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE15 : 120|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE16 : 128|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE17 : 136|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE18 : 144|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE19 : 152|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE20 : 160|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE21 : 168|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE22 : 176|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE23 : 184|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE24 : 192|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE25 : 200|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE26 : 208|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE27 : 216|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE28 : 224|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE29 : 232|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE30 : 240|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE31 : 248|8@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_6 : 143|4@0+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_5 : 128|11@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_7 : 192|10@1- (1,0) [0|65535] "" XXX
+ SG_ NEW_SIGNAL_8 : 170|4@1+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_9 : 165|6@0+ (1,0) [0|63] "" XXX
+ SG_ NEW_SIGNAL_10 : 158|2@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_11 : 144|7@1+ (1,0) [0|127] "" XXX
 
 BO_ 426 CRUISE_BUTTONS_ALT: 16 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
@@ -253,24 +235,55 @@ BO_ 463 CRUISE_BUTTONS: 8 XXX
 BO_ 474 ADRV_0x1da: 32 ADRV
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ SET_ME_22 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ SET_ME_41 : 47|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 480 LFAHDA_CLUSTER: 16 ADRV
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
  SG_ HDA_ICON : 31|1@1+ (1,0) [0|1] "" XXX
  SG_ LFA_ICON : 47|2@1+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_1 : 32|3@1+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_2 : 30|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_3 : 49|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 490 ADRV_0x1ea: 32 ADRV
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ SET_ME_1C : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_1 : 32|2@1+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_2 : 47|2@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_3 : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_4 : 64|6@1+ (1,0) [0|31] "" XXX
+ SG_ NEW_SIGNAL_5 : 72|2@1+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_6 : 75|5@1+ (1,0) [0|31] "" XXX
+ SG_ NEW_SIGNAL_7 : 80|5@1+ (1,0) [0|31] "" XXX
+ SG_ NEW_SIGNAL_8 : 88|7@1+ (1,0) [0|127] "" XXX
+ SG_ NEW_SIGNAL_9 : 96|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_10 : 143|5@0+ (1,0) [0|31] "" XXX
+ SG_ NEW_SIGNAL_11 : 144|3@1+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_12 : 152|6@1+ (1,0) [0|63] "" XXX
+ SG_ NEW_SIGNAL_13 : 160|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_14 : 163|5@1+ (1,0) [0|31] "" XXX
+ SG_ NEW_SIGNAL_15 : 175|4@0+ (1,0) [0|63] "" XXX
+ SG_ NEW_SIGNAL_16 : 168|3@1+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_17 : 176|2@1+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_18 : 184|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_19 : 208|3@1+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_20 : 212|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_21 : 232|5@1+ (1,0) [0|31] "" XXX
+ SG_ NEW_SIGNAL_22 : 240|5@1+ (1,0) [0|31] "" XXX
+ SG_ SET_ME_FF : 120|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 507 CAM_0x1fb: 32 CAMERA
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
 
-BO_ 512 ADRV_0x200: 32 ADRV
+BO_ 512 ADRV_0x200: 8 ADRV
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ SET_ME_3A : 32|8@1+ (1,0) [0|255] "" XXX
+ SG_ SET_ME_E1 : 24|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 513 RADAR_0x201: 32 FRONT_RADAR
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
@@ -397,9 +410,10 @@ BO_ 702 CAM_0x2be: 32 CAMERA
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
 
-BO_ 837 ADRV_0x345: 32 ADRV
+BO_ 837 ADRV_0x345: 8 ADRV
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ SET_ME_15 : 24|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 961 BLINKER_STALKS: 8 XXX
  SG_ COUNTER_ALT : 15|4@0+ (1,0) [0|15] "" XXX
@@ -426,17 +440,17 @@ BO_ 1240 CLUSTER_INFO: 8 XXX
 
 
 
+
 CM_ SG_ 961 COUNTER_ALT "only increments on change";
 CM_ SG_ 1041 COUNTER_ALT "only increments on change";
 CM_ SG_ 1043 COUNTER_ALT "only increments on change";
-
 VAL_ 53 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
 VAL_ 69 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
-VAL_ 304 GEAR 1 "P" 2 "R" 3 "N" 4 "D";
 VAL_ 80 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green" ;
 VAL_ 80 LKA_MODE 1 "warning only" 2 "assist" 6 "off" ;
 VAL_ 298 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green" ;
 VAL_ 298 LKA_MODE 1 "warning only" 2 "assist" 6 "off" ;
+VAL_ 304 GEAR 1 "P" 2 "R" 3 "N" 4 "D" ;
 VAL_ 416 CRUISE_STATUS 0 "cruise_inactive" 2 "cruise_active" 4 "driver_override" ;
 VAL_ 426 CRUISE_BUTTONS 0 "none" 1 "res_accel" 2 "set_decel" 3 "gap_distance" 4 "pause_resume" ;
 VAL_ 463 CRUISE_BUTTONS 0 "none" 1 "res_accel" 2 "set_decel" 3 "gap_distance" 4 "pause_resume" ;
