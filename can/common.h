@@ -18,7 +18,7 @@
 //#define DEBUG printf
 
 #define MAX_BAD_COUNTER 5
-#define CAN_INVALID_CNT 5
+#define CAN_INVALID_CNT 20
 
 void init_crc_lookup_tables();
 
