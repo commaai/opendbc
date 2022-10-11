@@ -178,7 +178,7 @@ BO_ 416 CRUISE_INFO: 32 ADRV
  SG_ CRUISE_INACTIVE : 70|1@1+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_4 : 103|1@1+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_8 : 170|4@1+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_10 : 158|7@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_10 : 156|5@0+ (1,0) [0|3] "" XXX
  SG_ CRUISE_STANDSTILL : 76|1@1+ (1,0) [0|1] "" XXX
  SG_ ACCEL_REQ2 : 140|11@1+ (0.01,-10.23) [-10.23|10.24] "m/s^2" XXX
  SG_ ACCEL_REQ : 128|11@1+ (0.01,-10.23) [-10.23|10.24] "m/s^2" XXX
@@ -194,18 +194,20 @@ BO_ 416 CRUISE_INFO: 32 ADRV
  SG_ ZEROS_8 : 95|5@0+ (1,0) [0|31] "" XXX
  SG_ NEW_SIGNAL_3 : 109|2@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_5 : 88|2@1+ (1,0) [0|3] "" XXX
- SG_ NEW_SIGNAL_12 : 40|4@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_12 : 35|9@1+ (1,0) [0|255] "" XXX
  SG_ SET_ME_TMP_64 : 55|8@0+ (1,0) [0|63] "" XXX
- SG_ LEAD_STATUS : 47|2@0+ (1,0) [0|3] "" XXX
- SG_ SET_ME_3 : 45|2@0+ (1,0) [0|3] "" XXX
  SG_ SET_ME_2 : 105|3@1+ (1,0) [0|7] "" XXX
  SG_ NEW_SIGNAL_6 : 104|1@0+ (1,0) [0|1] "" XXX
- SG_ OBJ_DIST : 192|11@1+ (0.1,0) [0|204.7] "m" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_11 : 29|11@1+ (0.1,0) [0|65535] "" XXX
  SG_ ZEROS_9 : 71|5@1+ (1,0) [0|15] "" XXX
  SG_ ZEROS_10 : 111|2@0+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_9 : 166|7@0+ (0.1,0) [0|63] "" XXX
+ SG_ SET_ME_15 : 192|11@1+ (0.1,0) [0|204.7] "m" XXX
+ SG_ SET_ME_3 : 45|2@0+ (1,0) [0|3] "" XXX
+ SG_ ObjValid : 46|1@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_2 : 168|2@1+ (1,0) [0|3] "" XXX
+ SG_ OBJ_STATUS : 176|3@1+ (1,0) [0|7] "" XXX
+ SG_ ACC_ObjDist : 24|11@1+ (0.1,0) [0|204.7] "m" XXX
 
 BO_ 426 CRUISE_BUTTONS_ALT: 16 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
