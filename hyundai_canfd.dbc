@@ -88,6 +88,7 @@ BO_ 234 MDPS: 24 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
  SG_ LKA_ACTIVE : 48|1@0+ (1,0) [0|16777215] "" XXX
+ SG_ LKA_FAULT : 54|1@0+ (1,0) [0|1] "" XXX
  SG_ STEERING_OUT_TORQUE : 64|12@1+ (0.1,-204.8) [0|65535] "" XXX
  SG_ STEERING_COL_TORQUE : 80|13@1+ (1,-4095) [0|4095] "" XXX
  SG_ STEERING_ANGLE : 96|16@1- (-0.1,0) [0|255] "deg" XXX
@@ -343,6 +344,7 @@ VAL_ 69 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
 VAL_ 304 GEAR 1 "P" 2 "R" 3 "N" 4 "D";
 VAL_ 80 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green" ;
 VAL_ 80 LKA_MODE 1 "warning only" 2 "assist" 6 "off" ;
+VAL_ 234 LKA_FAULT 0 "ok" 1 "lka fault" ;
 VAL_ 298 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green" ;
 VAL_ 298 LKA_MODE 1 "warning only" 2 "assist" 6 "off" ;
 VAL_ 416 CRUISE_STATUS 0 "cruise_inactive" 2 "cruise_active" 4 "driver_override" ;
