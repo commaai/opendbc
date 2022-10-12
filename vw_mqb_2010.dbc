@@ -36,42 +36,6 @@ BS_:
 BU_: Airbag_MQB BAP_Tester_MQB BMS_MQB Datenlogger_MQB Gateway_MQB Getriebe_DQ_Hybrid_MQB Getriebe_DQ_MQB LEH_MQB Motor_Diesel_MQB Motor_Hybrid_MQB Motor_Otto_MQB SAK_MQB Waehlhebel_MQB Vector__XXX l c i XXX
 
 
-BO_ 780 ACC_02: 8 XXX
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  XXX
- SG_ ACC_Wunschgeschw_02 : 12|10@1+ (0.32,0) [0|327.04] "Unit_KiloMeterPerHour"  XXX
- SG_ ACC_Status_Prim_Anz : 22|2@1+ (1,0) [0|3] ""  XXX
- SG_ ACC_Abstandsindex : 24|10@1+ (1,0) [1|1021] ""  XXX
- SG_ ACC_Akustik_02 : 34|2@1+ (1,0) [0|3] ""  XXX
- SG_ ACC_Warnung_Verkehrszeichen_1 : 36|1@1+ (1,0) [0|1] ""  XXX
- SG_ ACC_Gesetzte_Zeitluecke : 37|3@1+ (1,0) [0|7] ""  XXX
- SG_ ACC_Optischer_Fahrerhinweis : 40|1@1+ (1,0) [0|1] ""  XXX
- SG_ ACC_Typ_Tachokranz : 41|1@1+ (1,0) [0|1] ""  XXX
- SG_ ACC_Anzeige_Zeitluecke : 42|1@1+ (1,0) [0|1] ""  XXX
- SG_ ACC_Tachokranz : 43|1@1+ (1,0) [0|1] ""  XXX
- SG_ ACC_Display_Prio : 44|2@1+ (1,0) [0|3] ""  XXX
- SG_ ACC_Relevantes_Objekt : 46|2@1+ (1,0) [0|3] ""  XXX
- SG_ ACC_Texte_Primaeranz : 48|7@1+ (1,0) [0|127] ""  XXX
- SG_ ACC_Wunschgeschw_erreicht : 55|1@1+ (1,0) [0|1] ""  XXX
- SG_ ACC_Typ_Tachokranz_unten : 60|1@1+ (1,0) [0|1] ""  XXX
- SG_ ACC_Status_Anzeige : 61|3@1+ (1,0) [0|7] ""  XXX
-
-BO_ 804 ACC_04: 8 XXX
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  XXX
- SG_ ACC_Texte_Sekundaeranz : 12|4@1+ (1,0) [0|15] ""  XXX
- SG_ ACC_Texte_Zusatzanz : 16|6@1+ (1,0) [0|63] ""  XXX
- SG_ ACC_Status_Zusatzanz : 22|5@1+ (1,0) [0|31] ""  XXX
- SG_ ACC_Texte : 27|5@1+ (1,0) [0|31] ""  XXX
- SG_ ACC_Texte_braking_guard : 32|3@1+ (1,0) [0|7] ""  XXX
- SG_ ACC_Warnhinweis : 35|1@1+ (1,0) [0|1] ""  XXX
- SG_ ACC_Zeitluecke_Abstandswarner : 36|6@1+ (0.1,0) [0|6] "Unit_Secon"  XXX
- SG_ ACC_Abstand_Abstandswarner : 42|9@1+ (1,0) [0|508] ""  XXX
- SG_ ACC_Tempolimit : 51|5@1+ (1,0) [0|31] ""  XXX
- SG_ ACC_Charisma_FahrPr : 56|4@1+ (1,0) [0|15] ""  XXX
- SG_ ACC_Charisma_Status : 60|2@1+ (1,0) [0|3] ""  XXX
- SG_ ACC_Texte_Abstandswarner : 62|2@1+ (1,0) [0|3] ""  XXX
-
 BO_ 290 ACC_06: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  XXX
@@ -90,19 +54,6 @@ BO_ 290 ACC_06: 8 XXX
  SG_ ACC_Typ : 58|2@1+ (1,0) [0|3] ""  XXX
  SG_ ACC_Status_ACC : 60|3@1+ (1,0) [0|7] ""  XXX
  SG_ ACC_Minimale_Bremsung : 63|1@1+ (1,0) [0|1] ""  XXX
-
-BO_ 302 ACC_07: 8 XXX
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  XXX
- SG_ ACC_Anhalteweg : 12|11@1+ (0.01,0) [0|20.45] "Unit_Meter"  XXX
- SG_ ACC_Anhalten : 23|1@1+ (1,0) [0|1] ""  XXX
- SG_ ACC_Boost_Anf : 24|1@1+ (1,0) [0|1] ""  XXX
- SG_ ACC_Freilauf_Anf : 25|1@1+ (1,0) [0|1] ""  XXX
- SG_ ACC_Freilauf_Info : 26|2@1+ (1,0) [0|3] ""  XXX
- SG_ ACC_Anforderung_HMS : 28|3@1+ (1,0) [0|7] ""  XXX
- SG_ ACC_Anfahren : 31|1@1+ (1,0) [0|1] ""  XXX
- SG_ ACC_Folgebeschl : 32|8@1+ (0.03,-4.6) [-4.6|2.99] "Unit_MeterPerSeconSquar"  XXX
- SG_ ACC_Sollbeschleunigung_02 : 53|11@1+ (0.005,-7.22) [-7.22|3.005] "Unit_MeterPerSeconSquar"  XXX
 
 BO_ 279 ACC_10: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
@@ -1313,6 +1264,39 @@ BO_ 919 LDW_02: 8 XXX
  SG_ LDW_Status_LED_gruen : 62|1@1+ (1,0) [0|1] ""  XXX
  SG_ LDW_KD_Fehler : 63|1@1+ (1,0) [0|1] ""  XXX
 
+BO_ 780 ACC_02: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  XXX
+ SG_ ACC_Wunschgeschw_02 : 12|10@1+ (0.32,0) [0|327.04] "Unit_KiloMeterPerHour"  XXX
+ SG_ ACC_Status_Prim_Anz : 22|2@1+ (1,0) [0|3] ""  XXX
+ SG_ ACC_Abstandsindex : 24|10@1+ (1,0) [1|1021] ""  XXX
+ SG_ ACC_Akustik_02 : 34|2@1+ (1,0) [0|3] ""  XXX
+ SG_ ACC_Warnung_Verkehrszeichen_1 : 36|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ACC_Gesetzte_Zeitluecke : 37|3@1+ (1,0) [0|7] ""  XXX
+ SG_ ACC_Optischer_Fahrerhinweis : 40|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ACC_Typ_Tachokranz : 41|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ACC_Anzeige_Zeitluecke : 42|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ACC_Tachokranz : 43|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ACC_Display_Prio : 44|2@1+ (1,0) [0|3] ""  XXX
+ SG_ ACC_Relevantes_Objekt : 46|2@1+ (1,0) [0|3] ""  XXX
+ SG_ ACC_Texte_Primaeranz : 48|7@1+ (1,0) [0|127] ""  XXX
+ SG_ ACC_Wunschgeschw_erreicht : 55|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ACC_Typ_Tachokranz_unten : 60|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ACC_Status_Anzeige : 61|3@1+ (1,0) [0|7] ""  XXX
+
+BO_ 302 ACC_07: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  XXX
+ SG_ ACC_Anhalteweg : 12|11@1+ (0.01,0) [0|20.45] "Unit_Meter"  XXX
+ SG_ ACC_Anhalten : 23|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ACC_Boost_Anf : 24|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ACC_Freilauf_Anf : 25|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ACC_Freilauf_Info : 26|2@1+ (1,0) [0|3] ""  XXX
+ SG_ ACC_Anforderung_HMS : 28|3@1+ (1,0) [0|7] ""  XXX
+ SG_ ACC_Anfahren : 31|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ACC_Folgebeschl : 32|8@1+ (0.03,-4.6) [-4.6|2.99] "Unit_MeterPerSeconSquar"  XXX
+ SG_ ACC_Sollbeschleunigung_02 : 53|11@1+ (0.005,-7.22) [-7.22|3.005] "Unit_MeterPerSeconSquar"  XXX
+
 BO_ 264 Fahrwerk_01: 8 XXX
  SG_ Fahrwerk_01_BZ : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Fahrwerk_01_CRC : 0|8@1+ (1,0) [0|255] "" XXX
@@ -1341,6 +1325,22 @@ BO_ 783 SWA_01: 8 Gateway_MQB
  SG_ SWA_Warnung_SWA_re : 43|1@1+ (1,0) [0|1] ""  Vector__XXX
  SG_ SWA_Gischtzaehler : 48|7@1+ (1,0) [0|100] "Unit_PerCent"  Vector__XXX
  SG_ SWA_KD_Fehler : 59|1@1+ (1,0) [0|1] ""  Vector__XXX
+
+BO_ 804 ACC_04: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  XXX
+ SG_ ACC_Texte_Sekundaeranz : 12|4@1+ (1,0) [0|15] ""  XXX
+ SG_ ACC_Texte_Zusatzanz : 16|6@1+ (1,0) [0|63] ""  XXX
+ SG_ ACC_Status_Zusatzanz : 22|5@1+ (1,0) [0|31] ""  XXX
+ SG_ ACC_Texte : 27|5@1+ (1,0) [0|31] ""  XXX
+ SG_ ACC_Texte_braking_guard : 32|3@1+ (1,0) [0|7] ""  XXX
+ SG_ ACC_Warnhinweis : 35|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ACC_Zeitluecke_Abstandswarner : 36|6@1+ (0.1,0) [0|6] "Unit_Secon"  XXX
+ SG_ ACC_Abstand_Abstandswarner : 42|9@1+ (1,0) [0|508] ""  XXX
+ SG_ ACC_Tempolimit : 51|5@1+ (1,0) [0|31] ""  XXX
+ SG_ ACC_Charisma_FahrPr : 56|4@1+ (1,0) [0|15] ""  XXX
+ SG_ ACC_Charisma_Status : 60|2@1+ (1,0) [0|3] ""  XXX
+ SG_ ACC_Texte_Abstandswarner : 62|2@1+ (1,0) [0|3] ""  XXX
 
 BO_ 917 LWR_AFS_01: 8 XXX
 
@@ -1449,6 +1449,10 @@ CM_ SG_ 919 Right_Lane_Status "Display brightness range, 0 = no lane, 3 = full b
 CM_ SG_ 919 Left_Lane_Status "Display brightness range, 0 = no lane, 3 = full brightness";
 CM_ SG_ 919 Kombi_Lamp_Orange "Enables orange LDW light in instrument cluster";
 CM_ SG_ 919 Kombi_Lamp_Green "Enables green LDW light in instrument cluster";
+CM_ SG_ 780 Folgefahrt "Following another vehicle";
+CM_ SG_ 780 SetAbstand "Set following distance";
+CM_ SG_ 780 Abstand "Following distance";
+CM_ SG_ 780 SetSpeed "ACC set speed";
 CM_ SG_ 391 GearPosition "Traditional PRND plus B-mode aggressive regen, B-mode mapped to Drive";
 CM_ SG_ 960 ZAS_Kl_15 "Indicates ignition on";
 CM_ SG_ 1720 KBI_BCmE_aktiv "Anzeige BCmE aktiv (BCmE-Screen oder Einsparhinweis in der Anzeige)";
