@@ -143,6 +143,8 @@ BO_ 388 PSCMStatus: 8 K43_PSCM
  SG_ LKADriverAppldTrq : 50|11@0- (0.01,0) [-10.24|10.23] "Nm" NEO
  SG_ LKATorqueDelivered : 18|11@0- (0.01,0) [0|1] "" NEO
  SG_ LKATotalTorqueDelivered : 2|11@0- (0.01,0) [-10.24|10.23] "Nm" NEO
+ SG_ RollingCounter : 38|4@0+ (1,0) [0|15] "" XXX
+ SG_ PSCMStatusChecksum : 33|10@0+ (1,0) [0|1023] "" XXX
 
 BO_ 417 AcceleratorPedal: 7 XXX
  SG_ AcceleratorPedal : 55|8@0+ (1,0) [0|0] ""  NEO
@@ -287,6 +289,7 @@ CM_ BU_ K114B_HPCM "Hybrid Powertrain Control Module";
 CM_ BU_ NEO "Comma NEO";
 CM_ BU_ K124_ASCM "Active Safety Control Module";
 CM_ SG_ 381 MSG17D_AccPower "Need to investigate";
+CM_ BO_ 190 "Length varies from 6 to 8 bytes by car";
 CM_ SG_ 190 GasPedalAndAcc "ACC baseline is 62";
 CM_ SG_ 352 Ignition "Non-zero when ignition is on";
 CM_ SG_ 451 GasPedalAndAcc2 "ACC baseline is 62";
