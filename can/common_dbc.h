@@ -25,6 +25,7 @@ struct MessageParseOptions {
 struct SignalValue {
   uint32_t address;
   std::string name;
+  uint64_t ts;
   double value;  // latest value
   std::vector<double> all_values;  // all values from this cycle
 };

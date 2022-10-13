@@ -24,6 +24,7 @@ cdef class CANParser:
     vector[SignalValue] can_values
 
   cdef readonly:
+    dict ts
     dict vl
     dict vl_all
     string dbc_name
@@ -37,6 +38,7 @@ cdef class CANParser:
     if not self.dbc:
       raise RuntimeError(f"Can't find DBC: {dbc_name}")
 
+    self.ts = {}
     self.vl = {}
     self.vl_all = {}
     msg_name_to_address = {}
@@ -47,6 +49,8 @@ cdef class CANParser:
 
       msg_name_to_address[name] = msg.address
       self.address_to_msg_name[msg.address] = name
+      self.ts[msg.address] = {}
+      self.ts[name] = {}
       self.vl[msg.address] = {}
       self.vl[name] = self.vl[msg.address]
       self.vl_all[msg.address] = defaultdict(list)
@@ -106,6 +110,8 @@ cdef class CANParser:
     for cv in new_vals:
       # Cast char * directly to unicode
       cv_name = <unicode>cv.name
+      self.ts[cv.address][cv_name] = cv.ts
+      self.ts[name][cv_name] = cv.ts
       self.vl[cv.address][cv_name] = cv.value
       self.vl_all[cv.address][cv_name].extend(cv.all_values)
       updated_addrs.insert(cv.address)
