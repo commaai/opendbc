@@ -42,6 +42,11 @@ BO_ 53 ACCELERATOR: 32 XXX
  SG_ GEAR : 192|3@1+ (1,0) [0|7] "" XXX
  SG_ ACCELERATOR_PEDAL : 40|8@1+ (1,0) [0|255] "" XXX
 
+BO_ 64 GEAR_ALT: 32 XXX
+ SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
+ SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ GEAR : 32|3@1+ (1,0) [0|7] "" XXX
+
 BO_ 69 GEAR: 24 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
@@ -97,6 +102,12 @@ BO_ 234 MDPS: 24 XXX
  SG_ STEERING_COL_TORQUE : 80|13@1+ (1,-4095) [0|4095] "" XXX
  SG_ STEERING_ANGLE : 96|16@1- (-0.1,0) [0|255] "deg" XXX
  SG_ STEERING_ANGLE_2 : 128|16@1- (-0.1,0) [0|65535] "deg" XXX
+
+BO_ 256 ACCELERATOR_BRAKE_ALT: 32 XXX
+ SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
+ SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ BRAKE_PRESSED : 32|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACCELERATOR_PEDAL_PRESSED : 176|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 261 ACCELERATOR_ALT: 32 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
@@ -476,6 +487,7 @@ CM_ SG_ 961 COUNTER_ALT "only increments on change";
 CM_ SG_ 1041 COUNTER_ALT "only increments on change";
 CM_ SG_ 1043 COUNTER_ALT "only increments on change";
 VAL_ 53 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
+VAL_ 64 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
 VAL_ 69 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
 VAL_ 80 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green" ;
 VAL_ 80 LKA_MODE 1 "warning only" 2 "assist" 6 "off" ;
