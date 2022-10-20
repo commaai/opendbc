@@ -143,11 +143,24 @@ BO_ 304 GEAR_SHIFTER: 16 XXX
  SG_ GEAR : 64|3@1+ (1,0) [0|7] "" XXX
  SG_ KNOB_POSITION : 40|3@1+ (1,0) [0|3] "" XXX
 
-BO_ 373 SCC1: 24 XXX
+BO_ 373 TCS: 24 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
- SG_ ACCEL_REQ : 48|13@1- (1,0) [0|1023] "" XXX
- SG_ CRUISE_ACTIVE : 68|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_1 : 80|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_2 : 74|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_3 : 76|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_4 : 24|7@1+ (1,0) [0|127] "" XXX
+ SG_ aBasis : 32|11@1+ (0.01,-10.23) [0|7] "m/s^2" XXX
+ SG_ NEW_SIGNAL_5 : 72|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_6 : 128|4@1+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_7 : 135|2@0+ (1,0) [0|3] "" XXX
+ SG_ PROBABLY_EQUIP : 136|2@1+ (1,0) [0|3] "" XXX
+ SG_ AEB_EQUIP_MAYBE : 96|1@0+ (1,0) [0|1] "" XXX
+ SG_ EQUIP_MAYBE : 64|1@0+ (1,0) [0|1] "" XXX
+ SG_ DriverBraking : 84|1@1+ (1,0) [0|31] "" XXX
+ SG_ BRAKE_RELATED : 81|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_REQ : 68|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACCEL_REF_ACC : 48|11@1- (1,0) [0|1023] "" XXX
 
 BO_ 352 ADRV_0x160: 16 ADRV
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
@@ -510,6 +523,7 @@ BO_ 485 BLINDSPOTS_FRONT_CORNER_1: 16 XXX
 
 
 
+CM_ SG_ 373 PROBABLY_EQUIP "aeb equip?";
 CM_ SG_ 352 SET_ME_9 "has something to do with AEB settings";
 CM_ SG_ 961 COUNTER_ALT "only increments on change";
 CM_ SG_ 1041 COUNTER_ALT "only increments on change";
