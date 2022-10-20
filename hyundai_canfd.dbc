@@ -83,7 +83,7 @@ BO_ 96 ESP_STATUS: 32 XXX
 BO_ 101 BRAKE: 32 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
- SG_ BRAKE_POSITION : 40|16@1+ (1,0) [0|65535] "" XXX
+ SG_ BRAKE_POSITION : 40|16@1- (1,0) [0|65535] "" XXX
  SG_ BRAKE_PRESSED : 57|1@1+ (1,0) [0|3] "" XXX
 
 BO_ 160 WHEEL_SPEEDS: 24 XXX
@@ -522,7 +522,7 @@ BO_ 485 BLINDSPOTS_FRONT_CORNER_1: 16 XXX
  SG_ NEW_SIGNAL_9 : 55|8@0+ (1,0) [0|255] "" XXX
 
 CM_ SG_ 96 BRAKE_PRESSURE "User applied brake pedal pressure. Ramps from computer applied pressure on falling edge of cruise. Cruise cancels if !=0";
-CM_ SG_ 101 BRAKE_POSITION "User applied brake pedal position, max is ~700";
+CM_ SG_ 101 BRAKE_POSITION "User applied brake pedal position, max is ~700. Signed on some vehicles";
 CM_ SG_ 373 PROBABLY_EQUIP "aeb equip?";
 CM_ SG_ 352 SET_ME_9 "has something to do with AEB settings";
 CM_ SG_ 961 COUNTER_ALT "only increments on change";
