@@ -158,8 +158,8 @@ BO_ 373 TCS: 24 XXX
  SG_ PROBABLY_EQUIP : 136|2@1+ (1,0) [0|3] "" XXX
  SG_ AEB_EQUIP_MAYBE : 96|1@0+ (1,0) [0|1] "" XXX
  SG_ EQUIP_MAYBE : 64|1@0+ (1,0) [0|1] "" XXX
- SG_ DriverBrakingLowSens : 84|1@1+ (1,0) [0|31] "" XXX
  SG_ DriverBraking : 81|1@0+ (1,0) [0|1] "" XXX
+ SG_ DriverBrakingLowSens : 84|1@1+ (1,0) [0|31] "" XXX
  SG_ ACC_REQ : 68|1@0+ (1,0) [0|1] "" XXX
  SG_ ACCEL_REF_ACC : 48|11@1- (1,0) [0|1023] "" XXX
 
