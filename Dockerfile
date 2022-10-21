@@ -52,5 +52,6 @@ COPY SConstruct .
 COPY ./site_scons /project/site_scons
 COPY . /project/opendbc
 
-RUN rm -rf /project/opendbc/.git
+RUN rm -rf /project/opendbc/.git && \
+    rm -rf /project/cereal/.git
 RUN scons -c && scons -j$(nproc)
