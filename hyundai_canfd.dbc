@@ -535,6 +535,7 @@ CM_ SG_ 373 PROBABLY_EQUIP "aeb equip?";
 CM_ SG_ 961 COUNTER_ALT "only increments on change";
 CM_ SG_ 1041 COUNTER_ALT "only increments on change";
 CM_ SG_ 1043 COUNTER_ALT "only increments on change";
+
 VAL_ 53 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
 VAL_ 64 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
 VAL_ 69 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
