@@ -526,15 +526,12 @@ BO_ 506 CLUSTER_SL: 32 XXX
  SG_ SPEED_LIMIT_3 : 119|8@0+ (1,0) [0|255] "" XXX
  SG_ SPEED_LIMIT_2 : 47|8@0+ (0.5,0) [0|255] "" XXX
 
-
-
-
 CM_ SG_ 96 BRAKE_PRESSURE "User applied brake pedal pressure. Ramps from computer applied pressure on falling edge of cruise. Cruise cancels if !=0";
 CM_ SG_ 101 BRAKE_POSITION "User applied brake pedal position, max is ~700. Signed on some vehicles";
-CM_ SG_ 373 PROBABLY_EQUIP "aeb equip?";
+CM_ SG_ 352 SET_ME_9 "has something to do with AEB settings";
 CM_ SG_ 373 DriverBraking "Likely derived from BRAKE->BRAKE_POSITION";
 CM_ SG_ 373 DriverBrakingLowSens "Higher threshold version of DriverBraking";
-CM_ SG_ 352 SET_ME_9 "has something to do with AEB settings";
+CM_ SG_ 373 PROBABLY_EQUIP "aeb equip?";
 CM_ SG_ 961 COUNTER_ALT "only increments on change";
 CM_ SG_ 1041 COUNTER_ALT "only increments on change";
 CM_ SG_ 1043 COUNTER_ALT "only increments on change";
