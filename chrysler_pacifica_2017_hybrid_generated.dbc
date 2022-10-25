@@ -101,7 +101,10 @@ BO_ 571 CRUISE_BUTTONS: 3 XXX
  SG_ ACC_Distance_Inc : 8|1@1+ (1,0) [0|0] "" XXX
  SG_ COUNTER : 15|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 23|8@0+ (1,0) [0|255] "" XXX
-
+ 
+BO_ 632 AUTO_STOP_START: 8 XXX
+ SG_ AUTO_STOP_START_DASH : 48|1@0+ (1,0) [0|15] "" XXX
+ 
 BO_ 678 DAS_6: 8 XXX
  SG_ LKAS_ICON_COLOR : 1|2@0+ (1,0) [0|3] "" XXX
  SG_ LKAS_LANE_LINES : 19|4@0+ (1,0) [0|1] "" XXX
@@ -321,6 +324,7 @@ CM_ SG_ 501 ACC_SPEED_CONFIG_KPH "speed configured for ACC";
 CM_ SG_ 501 ACC_SPEED_CONFIG_MPH "speed configured for ACC";
 CM_ SG_ 501 CRUISE_STATE "may just be an icon, but seems to indicate different cruise modes: ACC and Non-ACC and engaged state for both.";
 CM_ SG_ 625 SPEED "zero on non-acc drives";
+CM_ SG_ 632 AUTO_STOP_START_DASHLIGHT "1 is off, 0 is on";
 
 VAL_ 501 CRUISE_STATE 0 "Off" 1 "CC On" 2 "CC Engaged" 3 "ACC On" 4 "ACC Engaged";
 VAL_ 746 PRNDL 5 "L" 4 "D" 3 "N" 2 "R" 1 "P";
