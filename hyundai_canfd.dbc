@@ -522,6 +522,11 @@ BO_ 485 BLINDSPOTS_FRONT_CORNER_1: 16 XXX
  SG_ NEW_SIGNAL_8 : 47|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_9 : 55|8@0+ (1,0) [0|255] "" XXX
 
+BO_ 506 CLUSTER_SPEED_LIMIT: 32 XXX
+ SG_ SPEED_LIMIT_3 : 119|8@0+ (1,0) [0|255] "" XXX
+ SG_ SPEED_LIMIT_2 : 46|6@0+ (1,0) [0|255] "" XXX
+ SG_ SPEED_LIMIT_1 : 38|6@0+ (1,0) [0|255] "" XXX
+
 CM_ SG_ 96 BRAKE_PRESSURE "User applied brake pedal pressure. Ramps from computer applied pressure on falling edge of cruise. Cruise cancels if !=0";
 CM_ SG_ 101 BRAKE_POSITION "User applied brake pedal position, max is ~700. Signed on some vehicles";
 CM_ SG_ 352 SET_ME_9 "has something to do with AEB settings";
