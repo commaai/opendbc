@@ -212,7 +212,7 @@ BO_ 416 CRUISE_INFO: 32 ADRV
  SG_ ZEROS_4 : 183|4@0+ (1,0) [0|63] "" XXX
  SG_ ZEROS_6 : 119|16@0+ (1,0) [0|65535] "" XXX
  SG_ ZEROS_7 : 63|8@0+ (1,0) [0|255] "" XXX
- SG_ SET_SPEED : 102|8@0+ (0.5,0) [0|127] "km/h or mph" XXX
+ SG_ SET_SPEED : 102|8@0+ (0.5,0) [0|255] "km/h or mph" XXX
  SG_ ZEROS_8 : 95|5@0+ (1,0) [0|31] "" XXX
  SG_ NEW_SIGNAL_3 : 109|2@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_12 : 35|9@1+ (1,0) [0|255] "" XXX
