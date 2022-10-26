@@ -332,4 +332,4 @@ CM_ SG_ 632 AUTO_STOP_START_DASHLIGHT "1 is off, 0 is on";
 VAL_ 501 CRUISE_STATE 0 "Off" 1 "CC On" 2 "CC Engaged" 3 "ACC On" 4 "ACC Engaged";
 VAL_ 746 PRNDL 5 "L" 4 "D" 3 "N" 2 "R" 1 "P";
 VAL_ 792 TURN_SIGNALS 2 "Right" 1 "Left";
-VAL_ 853 AUTO_START_BUTTON 1001 "pressed" ;
+VAL_ 853 AUTO_START_BUTTON 1001 "pressed";
