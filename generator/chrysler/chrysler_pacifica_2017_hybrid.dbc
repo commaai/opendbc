@@ -149,6 +149,12 @@ BO_ 268 ACC_10c: 8 XXX
  SG_ BRAKE_PERHAPS : 48|1@0+ (1,0) [0|3] "" XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+ 
+BO_ 632 AUTO_STOP_START: 8 XXX
+ SG_ AUTO_STOP_START_DASH : 48|1@0+ (1,0) [0|1] "" XXX
+ 
+BO_ 853 AUTO_START_STOP_BUTTON: 8 XXX
+ SG_ AUTO_START_BUTTON : 53|4@0+ (1,0) [0|15] "" XXX
 
 CM_ SG_ 653 BRAKE_PRESSURE "max seems to be 148";
 CM_ SG_ 746 PRNDL "5=L, 4=D, 3=N, 2=R, 1=P";
@@ -183,6 +189,8 @@ CM_ SG_ 501 ACC_SPEED_CONFIG_KPH "speed configured for ACC";
 CM_ SG_ 501 ACC_SPEED_CONFIG_MPH "speed configured for ACC";
 CM_ SG_ 501 CRUISE_STATE "may just be an icon, but seems to indicate different cruise modes: ACC and Non-ACC and engaged state for both.";
 CM_ SG_ 625 SPEED "zero on non-acc drives";
+CM_ SG_ 632 AUTO_STOP_START_DASHLIGHT "1 is off, 0 is on";
+CM_ SG_ 853 24 when pressed (1001);
 
 VAL_ 501 CRUISE_STATE 0 "Off" 1 "CC On" 2 "CC Engaged" 3 "ACC On" 4 "ACC Engaged";
 VAL_ 746 PRNDL 5 "L" 4 "D" 3 "N" 2 "R" 1 "P";
