@@ -202,7 +202,6 @@ BO_ 416 CRUISE_INFO: 32 ADRV
  SG_ CRUISE_MAIN : 66|1@1+ (1,0) [0|1] "" XXX
  SG_ CRUISE_STATUS : 67|3@1+ (1,0) [0|7] "" XXX
  SG_ CRUISE_INACTIVE : 70|1@1+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_4 : 103|1@1+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_8 : 170|4@1+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_10 : 156|5@0+ (1,0) [0|3] "" XXX
  SG_ ACCEL_REQ2 : 140|11@1+ (0.01,-10.23) [-10.23|10.24] "m/s^2" XXX
@@ -212,7 +211,7 @@ BO_ 416 CRUISE_INFO: 32 ADRV
  SG_ ZEROS_4 : 183|4@0+ (1,0) [0|63] "" XXX
  SG_ ZEROS_6 : 119|16@0+ (1,0) [0|65535] "" XXX
  SG_ ZEROS_7 : 63|8@0+ (1,0) [0|255] "" XXX
- SG_ SET_SPEED : 102|7@0+ (1,0) [0|127] "km/h or mph" XXX
+ SG_ SET_SPEED : 103|8@0+ (1,0) [0|255] "km/h or mph" XXX
  SG_ ZEROS_8 : 95|5@0+ (1,0) [0|31] "" XXX
  SG_ NEW_SIGNAL_3 : 109|2@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_12 : 35|9@1+ (1,0) [0|255] "" XXX
