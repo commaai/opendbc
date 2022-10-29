@@ -196,7 +196,7 @@ BO_ 389 CAM_0x185: 8 CAMERA
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
 
-BO_ 416 CRUISE_INFO: 32 ADRV
+BO_ 416 SCC_CONTROL: 32 ADRV
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ NEW_SIGNAL_1 : 64|2@1+ (1,0) [0|3] "" XXX
  SG_ CRUISE_MAIN : 66|1@1+ (1,0) [0|1] "" XXX
@@ -204,8 +204,6 @@ BO_ 416 CRUISE_INFO: 32 ADRV
  SG_ CRUISE_INACTIVE : 70|1@1+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_8 : 170|4@1+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_10 : 156|5@0+ (1,0) [0|3] "" XXX
- SG_ ACCEL_REQ2 : 140|11@1+ (0.01,-10.23) [-10.23|10.24] "m/s^2" XXX
- SG_ ACCEL_REQ : 128|11@1+ (0.01,-10.23) [-10.23|10.24] "m/s^2" XXX
  SG_ ZEROS : 215|48@0+ (1,0) [0|281474976710655] "" XXX
  SG_ ZEROS_3 : 191|7@0+ (1,0) [0|127] "" XXX
  SG_ ZEROS_4 : 183|4@0+ (1,0) [0|63] "" XXX
@@ -233,6 +231,8 @@ BO_ 416 CRUISE_INFO: 32 ADRV
  SG_ NEW_SIGNAL_15 : 192|11@1+ (0.1,0) [0|204.7] "m" XXX
  SG_ ZEROS_2 : 207|5@0+ (1,0) [0|63] "" XXX
  SG_ CRUISE_STANDSTILL : 76|1@1+ (1,0) [0|1] "" XXX
+ SG_ aReqRaw : 140|11@1+ (0.01,-10.23) [-10.23|10.24] "m/s^2" XXX
+ SG_ aReqValue : 128|11@1+ (0.01,-10.23) [-10.23|10.24] "m/s^2" XXX
 
 BO_ 426 CRUISE_BUTTONS_ALT: 16 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
@@ -531,16 +531,18 @@ BO_ 506 CLUSTER_SPEED_LIMIT: 32 XXX
  SG_ ARROW_DOWN : 120|1@0+ (1,0) [0|1] "" XXX
  SG_ ARROW_UP : 121|1@0+ (1,0) [0|1] "" XXX
 
+
+
+
 CM_ SG_ 96 BRAKE_PRESSURE "User applied brake pedal pressure. Ramps from computer applied pressure on falling edge of cruise. Cruise cancels if !=0";
 CM_ SG_ 101 BRAKE_POSITION "User applied brake pedal position, max is ~700. Signed on some vehicles";
-CM_ SG_ 352 SET_ME_9 "has something to do with AEB settings";
+CM_ SG_ 373 PROBABLY_EQUIP "aeb equip?";
 CM_ SG_ 373 DriverBraking "Likely derived from BRAKE->BRAKE_POSITION";
 CM_ SG_ 373 DriverBrakingLowSens "Higher threshold version of DriverBraking";
-CM_ SG_ 373 PROBABLY_EQUIP "aeb equip?";
+CM_ SG_ 352 SET_ME_9 "has something to do with AEB settings";
 CM_ SG_ 961 COUNTER_ALT "only increments on change";
 CM_ SG_ 1041 COUNTER_ALT "only increments on change";
 CM_ SG_ 1043 COUNTER_ALT "only increments on change";
-
 VAL_ 53 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
 VAL_ 64 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
 VAL_ 69 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
