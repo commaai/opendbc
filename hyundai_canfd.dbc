@@ -525,6 +525,11 @@ BO_ 506 CLUSTER_SPEED_LIMIT: 32 XXX
  SG_ SPEED_LIMIT_3 : 119|8@0+ (1,0) [0|255] "" XXX
  SG_ SPEED_LIMIT_2 : 46|6@0+ (1,0) [0|255] "" XXX
  SG_ SPEED_LIMIT_1 : 38|6@0+ (1,0) [0|255] "" XXX
+ SG_ SPEED_CHANGE_BLINKING : 129|1@1+ (1,0) [0|3] "" XXX
+ SG_ CHIME_2 : 122|2@1+ (1,0) [0|7] "" XXX
+ SG_ CHIME_1 : 133|1@0+ (1,0) [0|1] "" XXX
+ SG_ ARROW_DOWN : 120|1@0+ (1,0) [0|1] "" XXX
+ SG_ ARROW_UP : 121|1@0+ (1,0) [0|1] "" XXX
 
 CM_ SG_ 96 BRAKE_PRESSURE "User applied brake pedal pressure. Ramps from computer applied pressure on falling edge of cruise. Cruise cancels if !=0";
 CM_ SG_ 101 BRAKE_POSITION "User applied brake pedal position, max is ~700. Signed on some vehicles";
