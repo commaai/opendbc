@@ -188,7 +188,7 @@ BO_ 501 ECMPRDNL2: 8 K20_ECM
  SG_ ManualMode : 41|1@0+ (1,0) [0|1] "" NEO
 
 BO_ 532 BRAKE_RELATED: 6 XXX
- SG_ UserBrakePressure : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ UserBrakePressure : 0|9@0+ (1,0) [0|511] "" XXX
 
 BO_ 560 EPBStatus: 8 EPB
  SG_ EPBClosed : 12|1@0+ (1,0) [0|1] ""  NEO
