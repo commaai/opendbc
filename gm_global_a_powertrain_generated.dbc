@@ -104,6 +104,7 @@ BO_ 209 EBCMBrakePedalSensors: 7 K17_EBCM
  SG_ BrakeNormalized2 : 47|8@0- (-1,0) [0|255] "" XXX
 
 BO_ 241 EBCMBrakePedalPosition: 6 K17_EBCM
+ SG_ BrakePressed : 1|1@0+ (1,0) [0|1] "" XXX
  SG_ BrakePedalPosition : 15|8@0+ (1,0) [0|255] ""  NEO
 
 BO_ 298 BCMDoorBeltStatus: 8 K9_BCM
@@ -186,6 +187,9 @@ BO_ 501 ECMPRDNL2: 8 K20_ECM
  SG_ PRNDL2 : 27|4@0+ (1,0) [0|255] "" NEO
  SG_ ManualMode : 41|1@0+ (1,0) [0|1] "" NEO
 
+BO_ 532 BRAKE_RELATED: 6 XXX
+ SG_ UserBrakePressure : 15|8@0+ (1,0) [0|255] "" XXX
+
 BO_ 560 EPBStatus: 8 EPB
  SG_ EPBClosed : 12|1@0+ (1,0) [0|1] ""  NEO
 
@@ -205,6 +209,9 @@ BO_ 715 ASCMGasRegenCmd: 8 K124_ASCM
  SG_ GasRegenCmd : 22|12@0+ (1,0) [0|0] ""  NEO
 
 BO_ 717 ASCM_2CD: 5 K124_ASCM
+
+BO_ 761 BRAKE_RELATED_2: 7 XXX
+ SG_ UserBrakePressure2 : 47|9@0+ (1,0) [0|511] "" XXX
 
 BO_ 789 EBCMFrictionBrakeCmd: 5 K124_ASCM
  SG_ RollingCounter : 33|2@0+ (1,0) [0|0] ""  NEO
