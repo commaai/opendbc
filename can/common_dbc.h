@@ -85,7 +85,7 @@ typedef struct ChecksumState {
   unsigned int (*calc_checksum)(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 } ChecksumState;
 
-DBC* dbc_parse(const std::string& dbc_path, bool extras = false);
-DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, ChecksumState *checksum = nullptr, bool extras = false);
-const DBC* dbc_lookup(const std::string& dbc_name, bool extras = false);
+DBC* dbc_parse(const std::string& dbc_path);
+DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, ChecksumState *checksum = nullptr);
+const DBC* dbc_lookup(const std::string& dbc_name);
 std::vector<std::string> get_dbc_names();
