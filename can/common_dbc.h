@@ -49,6 +49,9 @@ struct Signal {
   double factor, offset;
   bool is_little_endian;
   SignalType type;
+  double min, max;
+  std::string comment;
+  std::string unit;
   unsigned int (*calc_checksum)(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 };
 
@@ -82,7 +85,7 @@ typedef struct ChecksumState {
   unsigned int (*calc_checksum)(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 } ChecksumState;
 
-DBC* dbc_parse(const std::string& dbc_path);
-DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, ChecksumState *checksum = nullptr);
-const DBC* dbc_lookup(const std::string& dbc_name);
+DBC* dbc_parse(const std::string& dbc_path, bool extras = false);
+DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, ChecksumState *checksum = nullptr, bool extras = false);
+const DBC* dbc_lookup(const std::string& dbc_name, bool extras = false);
 std::vector<std::string> get_dbc_names();

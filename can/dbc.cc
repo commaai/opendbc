@@ -15,6 +15,7 @@
 std::regex bo_regexp(R"(^BO_ (\w+) (\w+) *: (\w+) (\w+))");
 std::regex sg_regexp(R"(^SG_ (\w+) : (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*))");
 std::regex sgm_regexp(R"(^SG_ (\w+) (\w+) *: (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*))");
+std::regex sg_comment_regexp(R"(^CM_ SG_ *(\w+) *(\w+) *\"(.*)\";)");
 std::regex val_regexp(R"(VAL_ (\w+) (\w+) (\s*[-+]?[0-9]+\s+\".+?\"[^;]*))");
 std::regex val_split_regexp{R"([\"]+)"};  // split on "
 
@@ -97,11 +98,12 @@ void set_signal_type(Signal& s, ChecksumState* chk, const std::string& dbc_name,
   }
 }
 
-DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, ChecksumState *checksum) {
+DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, ChecksumState *checksum, bool extras) {
   uint32_t address = 0;
   std::set<uint32_t> address_set;
   std::set<std::string> msg_name_set;
   std::map<uint32_t, std::vector<Signal>> signals;
+  std::map<std::pair<uint32_t, std::string>, std::string> signal_comment;
   DBC* dbc = new DBC;
   dbc->name = dbc_name;
 
@@ -151,6 +153,11 @@ DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, Ch
       sig.is_signed = match[offset + 5].str() == "-";
       sig.factor = std::stod(match[offset + 6].str());
       sig.offset = std::stod(match[offset + 7].str());
+      if (extras) {
+        sig.min = std::stod(match[offset + 8].str());
+        sig.max = std::stod(match[offset + 9].str());
+        sig.unit = match[offset + 10].str();
+      }
       set_signal_type(sig, checksum, dbc_name, line_num);
       if (sig.is_little_endian) {
         sig.lsb = sig.start_bit;
@@ -184,11 +191,27 @@ DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, Ch
       std::copy(words.begin(), words.end(), std::ostream_iterator<std::string>(s, " "));
       val.def_val = s.str();
       val.def_val = trim(val.def_val);
+    } else if (extras && startswith(line, "CM_ SG_ ")) {
+      bool ret = std::regex_search(line, match, sg_comment_regexp);
+      if (ret) {
+        uint32_t msg_address = std::stoul(match[1].str());
+        std::string sig_name = match[2].str();
+        std::string comment = match[3].str();
+        signal_comment[{msg_address, sig_name}] = comment;
+      }
     }
   }
 
   for (auto& m : dbc->msgs) {
     m.sigs = signals[m.address];
+    if (extras) {
+      for (auto &s : m.sigs) {
+        auto it = signal_comment.find({m.address, s.name});
+        if (it != signal_comment.end()) {
+          s.comment = it->second;
+        }
+      }
+    }
   }
   for (auto& v : dbc->vals) {
     v.sigs = signals[v.address];
@@ -196,14 +219,14 @@ DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, Ch
   return dbc;
 }
 
-DBC* dbc_parse(const std::string& dbc_path) {
+DBC* dbc_parse(const std::string& dbc_path, bool extras) {
   std::ifstream infile(dbc_path);
   if (!infile) return nullptr;
 
   const std::string dbc_name = std::filesystem::path(dbc_path).filename();
 
   std::unique_ptr<ChecksumState> checksum(get_checksum(dbc_name));
-  return dbc_parse_from_stream(dbc_name, infile, checksum.get());
+  return dbc_parse_from_stream(dbc_name, infile, checksum.get(), extras);
 }
 
 const std::string get_dbc_root_path() {
@@ -215,7 +238,7 @@ const std::string get_dbc_root_path() {
   }
 }
 
-const DBC* dbc_lookup(const std::string& dbc_name) {
+const DBC* dbc_lookup(const std::string& dbc_name, bool extras) {
   static std::mutex lock;
   static std::map<std::string, DBC*> dbcs;
 
@@ -227,7 +250,7 @@ const DBC* dbc_lookup(const std::string& dbc_name) {
   std::unique_lock lk(lock);
   auto it = dbcs.find(dbc_name);
   if (it == dbcs.end()) {
-    it = dbcs.insert(it, {dbc_name, dbc_parse(dbc_file_path)});
+    it = dbcs.insert(it, {dbc_name, dbc_parse(dbc_file_path, extras)});
   }
   return it->second;
 }
