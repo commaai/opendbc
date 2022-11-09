@@ -140,7 +140,7 @@ BO_ 452 AcceleratorPedal2: 8 XXX
 BO_ 481 ASCMSteeringButton: 7 K124_ASCM
  SG_ DistanceButton : 22|1@0+ (1,0) [0|0] ""  NEO
  SG_ LKAButton : 23|1@0+ (1,0) [0|0] ""  NEO
- SG_ ACCRelated : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACCAlwaysOne : 24|1@0+ (1,0) [0|1] "" XXX
  SG_ ACCButtons : 46|3@0+ (1,0) [0|0] ""  NEO
  SG_ DriveModeButton : 39|1@0+ (1,0) [0|1] "" XXX
  SG_ RollingCounter : 33|2@0+ (1,0) [0|3] "" NEO
