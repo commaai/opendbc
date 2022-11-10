@@ -154,7 +154,7 @@ BO_ 452 AcceleratorPedal2: 8 XXX
  SG_ AcceleratorPedal2 : 32|9@0+ (1,0) [0|512] "" NEO
  SG_ AcceleratorPedalChecksum : 48|9@0+ (1,0) [0|512] "" NEO
  SG_ AcceleratorPedalPressed : 4|1@1+ (1,0) [0|7] "" NEO
- SG_ AnyPedalWhileEngaged : 11|1@0+ (1,0) [0|1] "" NEO
+ SG_ AnyPedalPressedInACC : 11|1@0+ (1,0) [0|1] "" NEO
  SG_ Count1 : 6|2@0+ (1,0) [0|3] "" NEO
  SG_ Count2 : 3|2@0+ (1,0) [0|3] "" NEO
  SG_ Count3 : 33|2@1+ (1,0) [0|3] "" NEO
