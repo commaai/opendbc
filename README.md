@@ -5,7 +5,7 @@ Wondering what's the DBC file format? [Here](http://www.socialledge.com/sjsu/ind
 
 ## How to start reverse engineering cars
 
-[opendbc](https://github.com/commaai/opendbc) is integrated with [cabana](https://community.comma.ai/cabana/).
+[opendbc](https://github.com/commaai/opendbc) is integrated with [cabana](https://github.com/commaai/openpilot/tree/master/tools/cabana).
 
 Use [panda](https://github.com/commaai/panda) to connect your car to a computer.
 
