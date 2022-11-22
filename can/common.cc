@@ -244,3 +244,15 @@ unsigned int hkg_can_fd_checksum(uint32_t address, const Signal &sig, const std:
 
   return crc;
 }
+
+unsigned int mazda_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
+  uint8_t checksum = 0;
+  if (address == 0x220) {
+    checksum = 0x2a;
+  }
+  // Simple XOR over the payload, except for the byte where the checksum lives.
+  for (int i = 0; i < 7; i++) { 
+      checksum += d[i];
+  }
+  return checksum;
+}
