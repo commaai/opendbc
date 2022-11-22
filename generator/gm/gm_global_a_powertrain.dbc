@@ -225,6 +225,7 @@ BO_ 842 EBCMWheelSpdRear: 5 K17_EBCM
 BO_ 869 ASCM_365: 4 K124_ASCM
 
 BO_ 880 ASCMActiveCruiseControlStatus: 6 K124_ASCM
+ SG_ ACCCruiseState : 8|3@1+ (1,0) [0|7] "" XXX
  SG_ ACCLeadCar : 44|1@0+ (1,0) [0|0] "" Vector__XXX
  SG_ ACCAlwaysOne2 : 32|1@0+ (1,0) [0|0] "" Vector__XXX
  SG_ ACCAlwaysOne : 0|1@0+ (1,0) [0|0] "" Vector__XXX
@@ -288,6 +289,7 @@ CM_ SG_ 497 Ignition "Describes ignition + preconditioning mode, noisy";
 CM_ SG_ 501 PRNDL2 "When ManualMode is Active, Value is 13=L1 12=L2 11=L3 ... 4=L10";
 CM_ SG_ 532 UserBrakePressure "can be lower than other brake position signals when the brakes are pre-filled from ACC braking and the user presses on the brakes. user-only pressure?";
 CM_ SG_ 761 UserBrakePressure2 "Similar to BRAKE_RELATED->UserBrakePressure";
+CM_ SG_ 880 ACCCruiseState "2 when adaptive, 5 when non-adaptive. quickly transitions to 3 when going from non-adaptive to adaptive";
 CM_ SG_ 1001 VehicleSpeed "Spinouts show here on 2wd. Speed derived from right front wheel (drive tire)";
 BA_DEF_  "UseGMParameterIDs" INT 0 0;
 BA_DEF_  "ProtocolType" STRING ;
