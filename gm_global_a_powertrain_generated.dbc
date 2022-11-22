@@ -245,6 +245,7 @@ BO_ 842 EBCMWheelSpdRear: 5 K17_EBCM
 BO_ 869 ASCM_365: 4 K124_ASCM
 
 BO_ 880 ASCMActiveCruiseControlStatus: 6 K124_ASCM
+ SG_ ACCCruiseState : 8|3@1+ (1,0) [0|7] "" XXX
  SG_ ACCLeadCar : 44|1@0+ (1,0) [0|0] "" Vector__XXX
  SG_ ACCAlwaysOne2 : 32|1@0+ (1,0) [0|0] "" Vector__XXX
  SG_ ACCAlwaysOne : 0|1@0+ (1,0) [0|0] "" Vector__XXX
@@ -326,6 +327,7 @@ VAL_ 452 CruiseState 4 "Standstill" 3 "Faulted" 1 "Active" 0 "Off" ;
 VAL_ 309 PRNDL 3 "R" 2 "D" 1 "N" 0 "P" ;
 VAL_ 309 ESPButton 1 "Active" 0 "Inactive" ;
 VAL_ 384 LKASteeringCmdActive 1 "Active" 0 "Inactive" ;
+VAL_ 880 ACCCruiseState 2 "Adaptive" 3 "Adaptive" 4 "Non-adaptive" 5 "Non-adaptive" ;
 VAL_ 880 ACCLeadCar 1 "Present" 0 "Not Present" ;
 VAL_ 880 ACCGapLevel 3 "Far" 2 "Med" 1 "Near" 0 "Inactive" ;
 VAL_ 880 ACCResumeButton 1 "Pressed" 0 "Depressed" ;
