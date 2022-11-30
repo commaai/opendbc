@@ -54,11 +54,13 @@ BO_ 1098 CRUZE_STATE: 8 XXX
  SG_ CRZ_SPEED : 31|8@0+ (1,0) [0|255] "" XXX
  SG_ CRZ_ENABLED : 5|1@0+ (1,0) [0|1] "" XXX
  SG_ CRZ_DISABLED : 4|1@0+ (1,0) [0|1] "" XXX
+ SG_ PRE_ENABLE : 6|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_1 : 13|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_2 : 18|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_3 : 44|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_4 : 45|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_5 : 42|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_7 : 1|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 157 CRZ_BTNS: 8 XXX
  SG_ SET_M : 3|1@0+ (1,0) [0|1] "" XXX
