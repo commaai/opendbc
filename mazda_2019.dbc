@@ -489,6 +489,7 @@ BO_ 544 ACC: 8 XXX
  SG_ NEW_SIGNAL_8 : 45|4@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 56|8@1+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_9 : 35|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_10 : 32|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 546 ACC_2: 8 XXX
  SG_ NEW_SIGNAL_2 : 31|16@0+ (1,0) [0|255] "" XXX
