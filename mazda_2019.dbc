@@ -491,10 +491,10 @@ BO_ 544 ACC: 8 XXX
  SG_ NEW_SIGNAL_9 : 35|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_10 : 32|1@0+ (1,0) [0|1] "" XXX
  SG_ HOLD : 49|1@0+ (1,0) [0|255] "" XXX
- SG_ CHIME : 54|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_11 : 2|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_12 : 17|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_13 : 40|2@1+ (1,0) [0|3] "" XXX
+ SG_ RESUME : 54|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 546 ACC_2: 8 XXX
  SG_ NEW_SIGNAL_2 : 31|16@0+ (1,0) [0|255] "" XXX
