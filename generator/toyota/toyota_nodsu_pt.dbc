@@ -52,5 +52,5 @@ CM_ SG_ 1014 ADJACENT_ENABLED "when BSM is enabled in settings, this is on along
 CM_ SG_ 1014 APPROACHING_ENABLED "when BSM is enabled in settings, this is on along with ADJACENT_ENABLED. this controls bsm alert visibility";
 
 VAL_ 610 IPAS_STATE 5 "override" 3 "enabled" 1 "disabled";
-VAL_ 610 LKA_STATE 25 "temporary_fault" 17 "permanent_fault" 9 "temporary_fault2" 5 "active" 1 "standby";
-VAL_ 610 LTA_STATE 25 "temporary_fault" 9 "temporary_fault2" 5 "active" 1 "standby";
+VAL_ 610 LKA_STATE 25 "temporary_fault" 17 "permanent_fault" 11 "lka_missing_unavailable2" 9 "temporary_fault2" 5 "active" 3 "lka_missing_unavailable" 1 "standby";
+VAL_ 610 LTA_STATE 25 "temporary_fault" 9 "temporary_fault2" 5 "active" 3 "lta_missing_unavailable" 1 "standby";
