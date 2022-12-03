@@ -24,6 +24,8 @@ BO_ 304 GAS_PEDAL_2: 8 PCM
  SG_ ENGINE_TORQUE_ESTIMATE : 7|16@0- (1,0) [-1000|1000] "Nm" EON
  SG_ ENGINE_TORQUE_REQUEST : 23|16@0- (1,0) [-1000|1000] "Nm" EON
  SG_ CAR_GAS : 39|8@0+ (1,0) [0|255] "" EON
+ SG_ 6MT_SHIFTER : 49|2@0+ (1,0) [0|3] "" XXX
+ SG_ CLUTCH_PEDAL : 51|2@0+ (1,0) [0|3] "" XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
 
@@ -169,6 +171,8 @@ BO_ 1029 DOORS_STATUS: 8 BDY
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
 
 CM_ SG_ 304 "Seems to be platform-agnostic";
+CM_ SG_ 304 6MT_SHIFTER "Gears 1-6 are D";
+CM_ SG_ 304 CLUTCH_PEDAL "The clutch pedal has three valid states: Partial (slipping), released (engaged), and fully depressed (disengaged)";
 CM_ SG_ 316 "Should exist on Nidec";
 CM_ SG_ 420 BRAKE_HOLD_RELATED "On when Brake Hold engaged";
 CM_ SG_ 490 LONG_ACCEL "wheel speed derivative, noisy and zero snapping";
@@ -179,6 +183,8 @@ CM_ SG_ 780 PCM_SPEED "Used by Nidec";
 CM_ SG_ 780 PCM_GAS "Used by Nidec";
 CM_ SG_ 804 CRUISE_SPEED_PCM "255 = no speed";
 
+VAL_ 304 6MT_SHIFTER 0 "D" 1 "N" 2 "R" ;
+VAL_ 304 CLUTCH_PEDAL 0 "Slipping" 1 "Released" 2 "Depressed" ;
 VAL_ 780 CRUISE_SPEED 255 "no_speed" 252 "stopped";
 VAL_ 780 HUD_LEAD 3 "acc_off" 2 "solid_car" 1 "dashed_car" 0 "no_car";
 VAL_ 884 DASHBOARD_ALERT 0 "none" 51 "acc_problem" 55 "cmbs_problem" 75 "key_not_detected" 79 "fasten_seatbelt" 111 "lkas_problem" 131 "brake_system_problem" 132 "brake_hold_problem" 139 "tbd" 161 "door_open";
@@ -458,6 +464,9 @@ BO_ 456 ACC_CONTROL: 8 XXX
  SG_ FCW_2 : 54|1@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
+ 
+BO_ 477 6MT_GEAR: 8 XXX
+ SG_ 6MT_GEARBOX : 39|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 829 LKAS_HUD: 8 ADAS
  SG_ CAM_TEMP_HIGH : 7|1@0+ (1,0) [0|255] "" BDY
@@ -498,6 +507,9 @@ BO_ 254913108 LKAS_HUD_2: 8 ADAS
 
 CM_ BO_ 456 "not sure which bit enables cruise";
 CM_ SG_ 456 STANDSTILL "set to 1 when camera requests -4.0 m/s^2";
+CM_ SG_ 477 6MT_GEARBOX "Values are only >0 if clutch is released. 1 is both 1st gear and Neutral. Use 6MT_SHIFTER to confirm 1st or N";
 
 VAL_ 401 GEAR_SHIFTER 32 "L" 16 "S" 8 "D" 4 "N" 2 "R" 1 "P";
 VAL_ 401 GEAR 7 "L" 10 "S" 4 "D" 3 "N" 2 "R" 1 "P";
+VAL_ 477 6MT_GEARBOX 0 "Clutch" 1 "1" 2 "2" 3 "3" 4 "4" 5 "5" 6 "6" 14 "R";
+
