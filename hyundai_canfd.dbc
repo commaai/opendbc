@@ -153,11 +153,7 @@ BO_ 357 SPAS1: 24 APRK
 BO_ 362 SPAS2: 32 APRK
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|0] "" XXX
- SG_ NEW_SIGNAL_1 : 24|3@1+ (1,0) [0|0] "" XXX
- SG_ NEW_SIGNAL_2 : 29|1@0+ (1,0) [0|0] "" XXX
- SG_ NEW_SIGNAL_3 : 87|16@0- (1,0) [0|0] "" XXX
- SG_ NEW_SIGNAL_4 : 56|1@0+ (1,0) [0|0] "" XXX
- SG_ RIGHT_BLINKER : 135|1@0+ (1,0) [0|0] "" XXX
+ SG_ BLINKER_CONTROL : 133|3@1+ (1,0) [0|0] "" XXX
 
 BO_ 373 TCS: 24 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
@@ -572,6 +568,7 @@ VAL_ 298 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green" ;
 VAL_ 298 LKA_MODE 1 "warning only" 2 "assist" 6 "off" ;
 VAL_ 304 GEAR 1 "P" 2 "R" 3 "N" 4 "D" ;
 VAL_ 352 AEB_SETTING 1 "off" 2 "warning only" 3 "active assist" ;
+VAL_ 362 BLINKER_CONTROL 1 "hazards" 2 "hazards button backlight" 3 "left blinkers" 4 "right blinkers";
 VAL_ 416 ACCMode 0 "off" 1 "enabled" 2 "driver_override" 3 "off_maybe_fault" 4 "cancelled" ;
 VAL_ 426 CRUISE_BUTTONS 0 "none" 1 "res_accel" 2 "set_decel" 3 "gap_distance" 4 "pause_resume" ;
 VAL_ 463 CRUISE_BUTTONS 0 "none" 1 "res_accel" 2 "set_decel" 3 "gap_distance" 4 "pause_resume" ;
