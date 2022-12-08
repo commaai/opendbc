@@ -38,9 +38,9 @@ CM_ SG_ 401 PERCENTAGE "driver override percentage (0-100), very close to steeri
 CM_ SG_ 401 SETME_X64 "ramps to 0 smoothly then back on falling edge of STEER_REQUEST if BIT isn't 1";
 CM_ SG_ 401 ANGLE "angle of car relative to lane center on LTA camera";
 CM_ SG_ 401 STEER_ANGLE_CMD "desired angle, OEM steers up to 95 degrees, no angle limit but torque will bottom out";
-CM_ SG_ 401 STEER_REQUEST "enable bit for steering, 1 to steer, 0 to not";
 CM_ SG_ 401 BIT "has correlation to STEER_REQUEST";
-CM_ SG_ 401 STEER_REQUEST_2 "enable bit for steering, 1 to steer, 0 to not";
+CM_ SG_ 401 LTA_REQUEST "enable bit for steering, 1 to steer, 0 to not";
+CM_ SG_ 401 LTA_REQUEST_TYPE "1 when actively using LTA. 3 when LTA is activated for LKA. 0 when LTA_REQUEST is 0";
 CM_ SG_ 550 BRAKE_PRESSURE "seems prop to pedal force";
 CM_ SG_ 550 BRAKE_POSITION "seems proportional to pedal displacement, unclear the max value of 0x1c8";
 CM_ SG_ 610 TYPE "seems 1 on Corolla, 0 on all others";
