@@ -173,7 +173,7 @@ BO_ 373 TCS: 24 XXX
  SG_ DriverBrakingLowSens : 84|1@1+ (1,0) [0|1] "" XXX
  SG_ ACC_REQ : 68|1@0+ (1,0) [0|1] "" XXX
  SG_ ACCEL_REF_ACC : 48|11@1- (1,0) [0|1023] "" XXX
- SG_ ACCEnable : 67|2@0+ (1,0) [0|1] "" XXX
+ SG_ ACCEnable : 67|2@0+ (1,0) [0|3] "" XXX
 
 BO_ 352 ADRV_0x160: 16 ADRV
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
