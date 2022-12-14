@@ -160,6 +160,7 @@ BO_ 452 AcceleratorPedal2: 8 XXX
 BO_ 481 ASCMSteeringButton: 7 K124_ASCM
  SG_ DistanceButton : 22|1@0+ (1,0) [0|0] ""  NEO
  SG_ LKAButton : 23|1@0+ (1,0) [0|0] ""  NEO
+ SG_ ACCAlwaysOne : 24|1@0+ (1,0) [0|1] "" XXX
  SG_ ACCButtons : 46|3@0+ (1,0) [0|0] ""  NEO
  SG_ DriveModeButton : 39|1@0+ (1,0) [0|1] "" XXX
  SG_ RollingCounter : 33|2@0+ (1,0) [0|3] "" NEO
@@ -305,6 +306,7 @@ CM_ BO_ 190 "Length varies from 6 to 8 bytes by car";
 CM_ SG_ 190 GasPedalAndAcc "ACC baseline is 62";
 CM_ SG_ 352 Ignition "Non-zero when ignition is on";
 CM_ SG_ 451 GasPedalAndAcc2 "ACC baseline is 62";
+CM_ SG_ 481 ACCAlwaysOne "Usually 1 if the car is equipped with ACC";
 CM_ SG_ 497 Ignition "Describes ignition + preconditioning mode, noisy";
 CM_ SG_ 501 PRNDL2 "When ManualMode is Active, Value is 13=L1 12=L2 11=L3 ... 4=L10";
 CM_ SG_ 532 UserBrakePressure "can be lower than other brake position signals when the brakes are pre-filled from ACC braking and the user presses on the brakes. user-only pressure?";
