@@ -355,9 +355,9 @@ BO_ 120 BRAKE: 8 XXX
  SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_2 : 15|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_3 : 23|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_4 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ PEDAL_BRAKE_COUNTER : 25|3@0+ (1,0) [1|4] "" XXX
+ SG_ BRAKE_PRESSURE : 38|7@0+ (1,0) [0|127] "" XXX
  SG_ CTR : 55|8@0+ (1,0) [0|255] "" XXX
- SG_ BRAKE_PRESSURE : 39|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 304 GEAR_RELATED: 8 XXX
  SG_ NEW_SIGNAL_1 : 55|8@0+ (1,0) [0|255] "" XXX
@@ -765,6 +765,8 @@ CM_ SG_ 1157 LANEE_DEPARTURE_ALERT "1 off, 2 on";
 CM_ SG_ 1157 WARNING "1 Rare, 0 often";
 CM_ SG_ 1088 LANE_LINES "0 LKAS disabled, 1 no lines, 2 two lines, 3 left line, 4 right line";
 CM_ SG_ 1045 ABS_MALFUNCTION "off: 0, solid: 1, slow blink: 2, fast blink: 3";
+CM_ SG_ 120 PEDAL_BRAKE_COUNTER "The PADEL_BRAKE_COUNTER is a value that is used to track the number of times brake pressure has been applied. It ranges from 1 to 4. The actual brake pressure can be calculated by using the following formula: (PEDAL_BRAKE_COUNTER - 1) * 128 + BRAKE_PRESSURE - 24.";
+CM_ SG_ 120 BRAKE_PRESSURE "The actual brake pressure can be calculated by using the following formula: (PEDAL_BRAKE_COUNTER - 1) * 128 + BRAKE_PRESSURE - 24.";
 CM_ SG_ 157 CAN_OFF "Disengage Cruise if enabled, if already disabled  TURN it OFF ";
 CM_ SG_ 552 MORE_GEAR "";
 CM_ SG_ 552 GEAR "0 Shifting, 1 P, 2 R, 3 N, 4 D";
