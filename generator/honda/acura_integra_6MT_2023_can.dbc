@@ -68,7 +68,7 @@ BO_ 254913108 LKAS_HUD_2: 8 ADAS
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
-CM_ SG_ 304 6MT_SHIFTER "Gears 1-6 are D";
+CM_ SG_ 304 6MT_SHIFTER "The three values define if the shifter is in Reverse (2), not in any gear (1), or in a FWD (1st-6th) gear (0)";
 CM_ SG_ 304 CLUTCH_PEDAL "The clutch pedal has three valid states: Partial (slipping), released (engaged), and fully depressed (disengaged)";
 CM_ BO_ 456 "not sure which bit enables cruise";
 CM_ SG_ 456 STANDSTILL "set to 1 when camera requests -4.0 m/s^2";
