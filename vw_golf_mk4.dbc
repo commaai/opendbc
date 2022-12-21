@@ -1074,38 +1074,38 @@ BO_ 1550 Einheiten_1: 2 XXX
  SG_ MFA_v_Einheit_02 : 0|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 872 ACC_System: 8 XXX
- SG_ ACS_Checksum : 0|8@1+ (1,0) [0|1] "" Vector__XXX
- SG_ ACS_Zaehler : 8|4@1+ (1,0) [0|1] "" Vector__XXX
- SG_ ACS_Sta_ADR : 12|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ ACS_ADR_Schub : 14|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ ACS_Schubabsch : 15|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ ACS_StSt_Info : 16|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ ACS_MomEingriff : 18|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ ACS_Typ_ACC : 19|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ ACS_FreigSollB : 23|1@0+ (1,0) [0|1] "" Vector__XXX
- SG_ ACS_Sollbeschl : 24|11@1+ (0.005,-7.22) [-7.22|3.005] "Unit_MeterPerSeconSquar" Vector__XXX
- SG_ ACS_Anhaltewunsch : 38|1@0+ (1,0) [0|1] "" Vector__XXX
- SG_ ACS_Fehler : 39|1@0+ (1,0) [0|1] "" Vector__XXX
- SG_ ACS_zul_Regelabw : 40|8@1+ (0.005,0) [0|1.275] "Unit_MeterPerSeconSquar" Vector__XXX
- SG_ ACS_max_AendGrad : 48|8@1+ (0.02,0) [0|5.1] "Unit_MeterPerSeconSquar" Vector__XXX
+ SG_ ACS_Checksum : 0|8@1+ (1,0) [0|1] "" XXX
+ SG_ ACS_Zaehler : 8|4@1+ (1,0) [0|1] "" XXX
+ SG_ ACS_Sta_ADR : 12|2@1+ (1,0) [0|3] "" XXX
+ SG_ ACS_ADR_Schub : 14|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACS_Schubabsch : 15|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACS_StSt_Info : 16|2@1+ (1,0) [0|3] "" XXX
+ SG_ ACS_MomEingriff : 18|1@1+ (1,0) [0|1] "" XXX
+ SG_ ACS_Typ_ACC : 19|2@1+ (1,0) [0|3] "" XXX
+ SG_ ACS_FreigSollB : 23|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACS_Sollbeschl : 24|11@1+ (0.005,-7.22) [-7.22|3.005] "Unit_MeterPerSeconSquar" XXX
+ SG_ ACS_Anhaltewunsch : 38|1@0+ (1,0) [0|1] "" XX
+ SG_ ACS_Fehler : 39|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACS_zul_Regelabw : 40|8@1+ (0.005,0) [0|1.275] "Unit_MeterPerSeconSquar" XXX
+ SG_ ACS_max_AendGrad : 48|8@1+ (0.02,0) [0|5.1] "Unit_MeterPerSeconSquar" XXX
 
 BO_ 1386 ACC_GRA_Anzeige: 8 XXX
- SG_ ACA_Checksum : 0|8@1+ (1,0) [0|1] "" Vector__XXX
- SG_ ACA_StaACC : 8|3@1+ (1,0) [0|7] "" Vector__XXX
- SG_ ACA_ID_StaACC : 11|5@1+ (1,0) [0|1] "" Vector__XXX
- SG_ ACA_Fahrerhinw : 16|1@0+ (1,0) [0|1] "" Vector__XXX
- SG_ ACA_AnzDisplay : 17|1@0+ (1,0) [0|1] "" Vector__XXX
- SG_ ACA_Zeitluecke : 18|4@1+ (1,0) [0|15] "" Vector__XXX
- SG_ ACA_V_Wunsch : 24|8@1+ (1,0) [0|255] "Unit_KiloMeterPerHour" Vector__XXX
- SG_ ACA_kmh_mph : 32|1@0+ (1,0) [0|1] "" Vector__XXX
- SG_ ACA_Akustik1 : 33|1@0+ (1,0) [0|1] "" Vector__XXX
- SG_ ACA_Akustik2 : 34|1@0+ (1,0) [0|1] "" Vector__XXX
- SG_ ACA_PrioDisp : 35|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ ACA_gemZeitl : 40|4@1+ (1,0) [0|15] "" Vector__XXX
- SG_ ACA_StaGRA : 48|3@1+ (1,0) [0|7] "" Vector__XXX
- SG_ ACA_ID_StaGRA : 51|5@1+ (1,0) [0|1] "" Vector__XXX
- SG_ ACA_Codierung : 56|1@0+ (1,0) [0|1] "" Vector__XXX
- SG_ ACA_Zaehler : 60|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ ACA_Checksum : 0|8@1+ (1,0) [0|1] "" XXX
+ SG_ ACA_StaACC : 8|3@1+ (1,0) [0|7] "" XXX
+ SG_ ACA_ID_StaACC : 11|5@1+ (1,0) [0|1] "" XXX
+ SG_ ACA_Fahrerhinw : 16|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACA_AnzDisplay : 17|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACA_Zeitluecke : 18|4@1+ (1,0) [0|15] "" XXX
+ SG_ ACA_V_Wunsch : 24|8@1+ (1,0) [0|255] "Unit_KiloMeterPerHour" XXX
+ SG_ ACA_kmh_mph : 32|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACA_Akustik1 : 33|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACA_Akustik2 : 34|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACA_PrioDisp : 35|2@1+ (1,0) [0|3] "" XXX
+ SG_ ACA_gemZeitl : 40|4@1+ (1,0) [0|15] "" XXX
+ SG_ ACA_StaGRA : 48|3@1+ (1,0) [0|7] "" XXX
+ SG_ ACA_ID_StaGRA : 51|5@1+ (1,0) [0|1] "" XXX
+ SG_ ACA_Codierung : 56|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACA_Zaehler : 60|4@1+ (1,0) [0|15] "" XXX
 
 BO_ 208 Lenkhilfe_3: 6 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
