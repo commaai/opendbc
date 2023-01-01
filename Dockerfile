@@ -46,7 +46,9 @@ ENV PYTHONPATH=/project
 
 WORKDIR /project
 # TODO: Add tag to cereal
-RUN git clone https://github.com/commaai/cereal.git /project/cereal && cd /project/cereal && git checkout d46f37c314bb92306207db44693b2f58c31f66b9
+RUN git clone https://github.com/commaai/cereal.git /project/cereal && \
+    cd /project/cereal && \
+    git checkout 6a20633f3c07c73a135403c9f77143a20dcd2e52
 
 COPY SConstruct .
 COPY ./site_scons /project/site_scons
