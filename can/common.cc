@@ -1,4 +1,5 @@
-#include "common.h"
+#include "opendbc/can/common.h"
+
 
 unsigned int honda_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
   int s = 0;
@@ -34,7 +35,7 @@ unsigned int subaru_checksum(uint32_t address, const Signal &sig, const std::vec
 }
 
 unsigned int chrysler_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
-  /* jeep chrysler canbus checksum from http://illmatics.com/Remote%20Car%20Hacking.pdf */
+  // jeep chrysler canbus checksum from http://illmatics.com/Remote%20Car%20Hacking.pdf
   uint8_t checksum = 0xFF;
   for (int j = 0; j < (d.size() - 1); j++) {
     uint8_t shift = 0x80;
