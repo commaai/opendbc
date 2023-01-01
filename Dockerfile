@@ -48,7 +48,7 @@ WORKDIR /project
 # TODO: Add tag to cereal
 RUN git clone https://github.com/commaai/cereal.git /project/cereal && \
     cd /project/cereal && \
-    git checkout 6a20633f3c07c73a135403c9f77143a20dcd2e52
+    git checkout 959ff79963b80829be9902d146c31fda44dbbd20
 
 COPY SConstruct .
 COPY ./site_scons /project/site_scons
