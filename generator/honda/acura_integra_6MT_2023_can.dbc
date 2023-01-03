@@ -7,15 +7,6 @@ BO_ 304 GAS_PEDAL_2: 8 PCM
  SG_ 6MT_SHIFTER : 49|2@0+ (1,0) [0|3] "" XXX
  SG_ CLUTCH_PEDAL : 51|2@0+ (1,0) [0|3] "" XXX
 
-BO_ 401 GEARBOX: 8 PCM
- SG_ GEAR_SHIFTER : 5|6@0+ (1,0) [0|63] "" EON
- SG_ BOH : 45|6@0+ (1,0) [0|63] "" XXX
- SG_ GEAR2 : 31|8@0+ (1,0) [0|1] "" XXX
- SG_ GEAR : 39|8@0+ (1,0) [0|255] "" XXX
- SG_ ZEROS_BOH : 47|2@0+ (1,0) [0|3] "" XXX
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
-
 BO_ 432 STANDSTILL: 7 VSA
  SG_ WHEELS_MOVING : 12|1@0+ (1,0) [0|1] "" EON
  SG_ BRAKE_ERROR_1 : 11|1@0+ (1,0) [0|1] "" EON
@@ -77,7 +68,7 @@ BO_ 254913108 LKAS_HUD_2: 8 ADAS
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
-CM_ SG_ 304 6MT_SHIFTER "Gears 1-6 are D";
+CM_ SG_ 304 6MT_SHIFTER "The three values define if the shifter is in Reverse (2), not in any gear (1), or in a FWD (1st-6th) gear (0)";
 CM_ SG_ 304 CLUTCH_PEDAL "The clutch pedal has three valid states: Partial (slipping), released (engaged), and fully depressed (disengaged)";
 CM_ BO_ 456 "not sure which bit enables cruise";
 CM_ SG_ 456 STANDSTILL "set to 1 when camera requests -4.0 m/s^2";
@@ -85,6 +76,4 @@ CM_ SG_ 477 6MT_GEARBOX "Values are only >0 if clutch is released. 1 is both 1st
 
 VAL_ 304 6MT_SHIFTER 0 "D" 1 "N" 2 "R" ;
 VAL_ 304 CLUTCH_PEDAL 0 "Slipping" 1 "Released" 2 "Depressed" ;
-VAL_ 401 GEAR_SHIFTER 32 "L" 16 "S" 8 "D" 4 "N" 2 "R" 1 "P";
-VAL_ 401 GEAR 7 "L" 10 "S" 4 "D" 3 "N" 2 "R" 1 "P";
 VAL_ 477 6MT_GEARBOX 0 "Clutch" 1 "1" 2 "2" 3 "3" 4 "4" 5 "5" 6 "6" 14 "R";
