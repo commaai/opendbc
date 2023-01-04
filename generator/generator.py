@@ -10,12 +10,12 @@ include_pattern = re.compile(r'CM_ "IMPORT (.*?)";\n')
 generated_suffix = '_generated.dbc'
 
 
-def read_dbc(src_dir, filename):
+def read_dbc(src_dir: str, filename: str) -> str:
   with open(os.path.join(src_dir, filename)) as file_in:
     return file_in.read()
 
 
-def create_dbc(src_dir, filename, output_path):
+def create_dbc(src_dir: str, filename: str, output_path: str):
   dbc_file_in = read_dbc(src_dir, filename)
 
   includes = include_pattern.findall(dbc_file_in)
@@ -39,7 +39,7 @@ def create_dbc(src_dir, filename, output_path):
     dbc_file_out.write(core_dbc)
 
 
-def create_all(output_path):
+def create_all(output_path: str):
   # clear out old DBCs
   for f in glob.glob(f"{output_path}/*{generated_suffix}"):
     os.remove(f)
