@@ -66,8 +66,11 @@ unsigned int chrysler_checksum(uint32_t address, const Signal &sig, const std::v
 
 unsigned int mazda_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
   uint8_t checksum = 0;
-  if (address == 0x220) {
-    checksum = 0x2a;
+  if (address == 0x220U) {
+    checksum = 0x2aU;
+  }
+  if (address == 0x249U){
+    checksum = 0x53U;
   }
   // Simple XOR over the payload, except for the byte where the checksum lives.
   for (int i = 0; i < 7; i++) { 

@@ -67,7 +67,7 @@ ChecksumState* get_checksum(const std::string& dbc_name) {
   } else if (startswith(dbc_name, "comma_body")) {
     s = new ChecksumState({8, 4, 7, 3, false, PEDAL_CHECKSUM, &pedal_checksum});
   } else if (startswith(dbc_name, "mazda_2019")) {
-    s = new ChecksumState({8, -1, 0, -1, true, MAZDA_CHECKSUM, &mazda_checksum});
+    s = new ChecksumState({8, 8, 0, 0, true, MAZDA_CHECKSUM, &mazda_checksum});
   }
   return s;
 }
