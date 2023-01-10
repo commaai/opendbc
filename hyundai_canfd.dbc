@@ -212,7 +212,6 @@ BO_ 416 SCC_CONTROL: 32 ADRV
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ NEW_SIGNAL_1 : 64|2@1+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_8 : 170|4@1+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_10 : 156|5@0+ (1,0) [0|3] "" XXX
  SG_ ZEROS : 215|48@0+ (1,0) [0|281474976710655] "" XXX
  SG_ ZEROS_3 : 191|7@0+ (1,0) [0|127] "" XXX
  SG_ ZEROS_4 : 183|4@0+ (1,0) [0|63] "" XXX
@@ -237,7 +236,6 @@ BO_ 416 SCC_CONTROL: 32 ADRV
  SG_ aReqRaw : 140|11@1+ (0.01,-10.23) [-10.23|10.24] "m/s^2" XXX
  SG_ aReqValue : 128|11@1+ (0.01,-10.23) [-10.23|10.24] "m/s^2" XXX
  SG_ ZEROS_7 : 63|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_4 : 158|2@0+ (1,0) [0|3] "" XXX
  SG_ ACCMode : 68|3@1+ (1,0) [0|7] "" XXX
  SG_ NEW_SIGNAL_12 : 35|9@1+ (0.1,0) [0|255] "" XXX
  SG_ JerkLowerLimit : 166|7@0+ (0.1,0) [0|12.7] "m/s^3" XXX
@@ -245,6 +243,7 @@ BO_ 416 SCC_CONTROL: 32 ADRV
  SG_ NEW_SIGNAL_15 : 192|11@1+ (0.1,0) [0|204.7] "m" XXX
  SG_ VSetDis : 103|8@0+ (1,0) [0|255] "km/h or mph" XXX
  SG_ MainMode_ACC : 66|1@1+ (1,0) [0|1] "" XXX
+ SG_ JerkUpperLimit : 158|7@0+ (0.1,0) [0|0] "" XXX
 
 BO_ 426 CRUISE_BUTTONS_ALT: 16 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
