@@ -3,7 +3,7 @@ import os
 import unittest
 import random
 
-import cereal.messaging as messaging
+import openpilot.cereal.messaging as messaging
 from opendbc.can.parser import CANParser
 from opendbc.can.packer import CANPacker
 
