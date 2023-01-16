@@ -86,6 +86,11 @@ BO_ 101 BRAKE: 32 XXX
  SG_ BRAKE_POSITION : 40|16@1- (1,0) [0|65535] "" XXX
  SG_ BRAKE_PRESSED : 57|1@1+ (1,0) [0|3] "" XXX
 
+BO_ 112 GEAR_ALT_2: 32 XXX
+ SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
+ SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ GEAR : 60|3@1+ (1,0) [0|7] "" XXX
+
 BO_ 160 WHEEL_SPEEDS: 24 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
@@ -528,7 +533,7 @@ BO_ 485 BLINDSPOTS_FRONT_CORNER_1: 16 XXX
  SG_ NEW_SIGNAL_3 : 88|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_4 : 80|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_5 : 31|2@0+ (1,0) [0|3] "" XXX
- SG_ NEW_SIGNAL_6 : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ REVERSING : 24|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_7 : 32|2@1+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_8 : 47|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_9 : 55|8@0+ (1,0) [0|255] "" XXX
@@ -562,6 +567,7 @@ CM_ SG_ 1043 COUNTER_ALT "only increments on change";
 VAL_ 53 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
 VAL_ 64 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
 VAL_ 69 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
+VAL_ 112 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
 VAL_ 80 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green" ;
 VAL_ 80 LKA_MODE 1 "warning only" 2 "assist" 6 "off" ;
 VAL_ 234 LKA_FAULT 0 "ok" 1 "lka fault" ;
