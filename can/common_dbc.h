@@ -48,6 +48,8 @@ struct Signal {
   bool is_signed;
   double factor, offset;
   bool is_little_endian;
+  bool is_multiplexer;
+  int mux_selector = -1;
   SignalType type;
   unsigned int (*calc_checksum)(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 };
