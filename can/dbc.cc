@@ -147,6 +147,7 @@ DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, Ch
       Signal& sig = signals[address].emplace_back();
       sig.name = match[1].str();
 
+      // Multiplexed signal
       if (offset == 1) {
         if (match[2] == "M") {
           sig.is_multiplexer = true;
@@ -154,6 +155,7 @@ DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, Ch
           sig.mux_selector = std::stoi(match[2].str().substr(1));
         }
       }
+
       sig.start_bit = std::stoi(match[offset + 2].str());
       sig.size = std::stoi(match[offset + 3].str());
       sig.is_little_endian = std::stoi(match[offset + 4].str()) == 1;
