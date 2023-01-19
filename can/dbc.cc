@@ -9,7 +9,6 @@
 #include <mutex>
 #include <cstring>
 #include <iterator>
-#include <iostream>
 
 #include "opendbc/can/common.h"
 #include "opendbc/can/common_dbc.h"

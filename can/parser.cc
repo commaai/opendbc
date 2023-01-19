@@ -32,8 +32,14 @@ int64_t get_raw_value(const std::vector<uint8_t> &msg, const Signal &sig) {
 
 
 bool MessageState::parse(uint64_t sec, const std::vector<uint8_t> &dat) {
+  int cur_mux_selector = -1;
+
   for (int i = 0; i < parse_sigs.size(); i++) {
     auto &sig = parse_sigs[i];
+
+    if (sig.mux_selector != cur_mux_selector) {
+      continue;
+    }
 
     int64_t tmp = get_raw_value(dat, sig);
     if (sig.is_signed) {
@@ -64,6 +70,10 @@ bool MessageState::parse(uint64_t sec, const std::vector<uint8_t> &dat) {
     // TODO: these may get updated if the invalid or checksum gets checked later
     vals[i] = tmp * sig.factor + sig.offset;
     all_vals[i].push_back(vals[i]);
+
+    if (sig.is_multiplexer) {
+      cur_mux_selector = vals[i];
+    }
   }
   last_seen_nanos = sec;
 

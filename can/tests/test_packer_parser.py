@@ -287,6 +287,7 @@ class TestCanParserPacker(unittest.TestCase):
     dbc_file = "vw_golf_mk4"
 
     signals = [
+      # TODO: Make it work without manually adding the muxed signal to the signal list
       ("IDT_Mux", "Ident"), # M
       # These two signals in the second byte overlap and are muxed
       ("IDT_Geheimnis_1", "Ident"), # m0
