@@ -71,6 +71,7 @@ bool MessageState::parse(uint64_t sec, const std::vector<uint8_t> &dat) {
     vals[i] = tmp * sig.factor + sig.offset;
     all_vals[i].push_back(vals[i]);
 
+    // TODO: make sure the multiplexer is always the first signal
     if (sig.is_multiplexer) {
       cur_mux_selector = vals[i];
     }
