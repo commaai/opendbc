@@ -281,5 +281,31 @@ class TestCanParserPacker(unittest.TestCase):
       if len(user_brake_vals):
         self.assertEqual(vl_all[-1], parser.vl["VSA_STATUS"]["USER_BRAKE"])
 
+
+  def test_parse_mux(self):
+    """Test multiplexed signals"""
+    dbc_file = "vw_golf_mk4"
+
+    signals = [
+      ("IDT_Mux", "Ident"), # M
+      # These two signals in the second byte overlap and are muxed
+      ("IDT_Geheimnis_1", "Ident"), # m0
+      ("IDT_VIN_4", "Ident"), # m1
+    ]
+    checks = [("Ident", 0)]
+
+    parser = CANParser(dbc_file, signals, checks, 0)
+
+    msg1 = [(1490, 0, b"\x00\xAA\x00\x00\x00\x00\x00\x00", 0)]
+    msg2 = [(1490, 0, b"\x01\xBB\x00\x00\x00\x00\x00\x00", 0)]
+
+    parser.update_strings([can_list_to_can_capnp(msg1)])
+    self.assertEqual(0xaa, parser.vl["Ident"]["IDT_Geheimnis_1"])
+    self.assertEqual(0, parser.vl["Ident"]["IDT_VIN_4"])
+
+    parser.update_strings([can_list_to_can_capnp(msg2)])
+    self.assertEqual(0xaa, parser.vl["Ident"]["IDT_Geheimnis_1"])
+    self.assertEqual(0xbb, parser.vl["Ident"]["IDT_VIN_4"])
+
 if __name__ == "__main__":
   unittest.main()
