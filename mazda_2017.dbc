@@ -554,8 +554,6 @@ BO_ 535 CURVE_CTRS: 8 XXX
 
 BO_ 540 CRZ_CTRL: 8 XXX
  SG_ NEW_SIGNAL_6 : 10|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_9 : 31|1@0+ (1,0) [0|255] "" XXX
- SG_ ACC_GAS_MAYBE2 : 29|1@0+ (1,0) [0|1] "" XXX
  SG_ HANDS_OFF_STEERING : 48|1@0+ (1,0) [0|1] "" XXX
  SG_ HANDS_ON_STEER_WARN : 59|4@0+ (1,0) [0|255] "" XXX
  SG_ CRZ_ACTIVE : 3|1@0+ (1,0) [0|1] "" XXX
@@ -563,13 +561,13 @@ BO_ 540 CRZ_CTRL: 8 XXX
  SG_ DISTANCE_SETTING : 20|3@0+ (1,0) [0|7] "" XXX
  SG_ MSG_1_INV : 1|1@0+ (1,0) [0|1] "" XXX
  SG_ MSG_1_COPY : 9|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_GAS_MAYBE : 23|1@0+ (1,0) [0|31] "" XXX
  SG_ ACC_ACTIVE_2 : 52|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_10 : 30|1@0+ (1,0) [0|1] "" XXX
  SG_ MSG_1 : 0|1@0+ (1,0) [0|3] "" XXX
  SG_ 5_SEC_DISABLE_TIMER : 45|3@0+ (1,0) [0|7] "" XXX
  SG_ NEW_SIGNAL_3 : 13|1@0+ (1,0) [0|3] "" XXX
  SG_ MSG_1_INV_COPY : 8|1@0+ (1,0) [0|7] "" XXX
+ SG_ RADAR_HAS_LEAD : 23|1@0+ (1,0) [0|1] "" XXX
+ SG_ RADAR_LEAD_RELATIVE_DISTANCE : 31|3@0+ (1,0) [0|5] "" XXX
 
 BO_ 539 CRZ_INFO: 8 XXX
  SG_ CTR1 : 55|8@0+ (1,0) [0|255] "" XXX
@@ -773,3 +771,5 @@ CM_ SG_ 540 HANDS_ON_STEER_WARN "0 no warning, b warning";
 CM_ SG_ 540 DISTANCE_SETTING "Radar distance 0: disabled, 1: 4 bars, 2: 3 bars, 3: 2 bars, 4: 1 bar";
 CM_ SG_ 1143 REAR_CT_ALERT "Rear Cross Traffic Alert";
 VAL_ 552 GEAR 1 "P" 2 "R" 3 "N" 4 "D" ;
+VAL_ 540 RADAR_HAS_LEAD 0 "NO LEAD" 1 "HAS LEAD" ;
+VAL_ 540 RADAR_LEAD_RELATIVE_DISTANCE 0 "NO LEAD" 1 "FARTHEST" 2 "4" 3 "3" 4 "2" 5 "NEAREST" ;
