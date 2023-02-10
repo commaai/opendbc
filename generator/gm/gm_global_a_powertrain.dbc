@@ -294,7 +294,7 @@ CM_ SG_ 481 ACCAlwaysOne "Usually 1 if the car is equipped with ACC";
 CM_ SG_ 497 Ignition "Describes ignition + preconditioning mode, noisy";
 CM_ SG_ 501 PRNDL2 "When ManualMode is Active, Value is 13=L1 12=L2 11=L3 ... 4=L10";
 CM_ SG_ 532 UserBrakePressure "can be lower than other brake position signals when the brakes are pre-filled from ACC braking and the user presses on the brakes. user-only pressure?";
-CM_ SG_ 608 ClusterSpeed "Cluster speed signal seems to match dash on newer cars, but is a lower rate and can be noisier than dash.";
+CM_ SG_ 608 ClusterSpeed "Cluster speed signal seems to match dash on newer cars, but is a lower rate and can be noisier.";
 CM_ SG_ 761 UserBrakePressure2 "Similar to BRAKE_RELATED->UserBrakePressure";
 CM_ SG_ 1001 VehicleSpeed "Spinouts show here on 2wd. Speed derived from right front wheel (drive tire)";
 BA_DEF_  "UseGMParameterIDs" INT 0 0;
