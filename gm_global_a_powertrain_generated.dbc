@@ -195,6 +195,7 @@ BO_ 560 EPBStatus: 8 EPB
  SG_ EPBClosed : 12|1@0+ (1,0) [0|1] ""  NEO
 
 BO_ 608 SPEED_RELATED: 8 XXX
+ SG_ RollingCounter : 5|2@0+ (1,0) [0|0] "" XXX
  SG_ ClusterSpeed : 31|8@0+ (1,0) [0|0] "" XXX
 
 BO_ 711 BECMBatteryVoltageCurrent: 6 K17_EBCM
