@@ -73,7 +73,7 @@ unsigned int mazda_checksum(uint32_t address, const Signal &sig, const std::vect
     checksum = 0x53U;
   }
   // Simple XOR over the payload, except for the byte where the checksum lives.
-  for (int i = 0; i < 7; i++) { 
+  for (int i = 0; i < 7; i++) {
       checksum += d[i];
   }
   return checksum;
