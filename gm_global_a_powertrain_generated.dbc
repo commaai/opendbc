@@ -194,6 +194,9 @@ BO_ 532 BRAKE_RELATED: 6 XXX
 BO_ 560 EPBStatus: 8 EPB
  SG_ EPBClosed : 12|1@0+ (1,0) [0|1] ""  NEO
 
+BO_ 562 EBCMFrictionBrakeStatus: 8 XXX
+ SG_ FrictionBrakeUnavailable : 46|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 608 SPEED_RELATED: 8 XXX
  SG_ RollingCounter : 5|2@0+ (1,0) [0|0] "" XXX
  SG_ ClusterSpeed : 31|8@0+ (1,0) [0|0] "" XXX
