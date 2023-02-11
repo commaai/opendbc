@@ -174,6 +174,13 @@ BO_ 532 BRAKE_RELATED: 6 XXX
 BO_ 560 EPBStatus: 8 EPB
  SG_ EPBClosed : 12|1@0+ (1,0) [0|1] ""  NEO
 
+BO_ 562 EBCMFrictionBrakeStatus: 8 XXX
+ SG_ FrictionBrakeUnavailable : 46|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 608 SPEED_RELATED: 8 XXX
+ SG_ RollingCounter : 5|2@0+ (1,0) [0|0] "" XXX
+ SG_ ClusterSpeed : 31|8@0+ (1,0) [0|0] "" XXX
+
 BO_ 711 BECMBatteryVoltageCurrent: 6 K17_EBCM
  SG_ HVBatteryVoltage : 31|12@0+ (0.125,0) [0|511.875] "V"  NEO
  SG_ HVBatteryCurrent : 12|13@0- (0.15,0) [-614.4|614.25] "A"  NEO
@@ -287,9 +294,11 @@ CM_ SG_ 190 GasPedalAndAcc "ACC baseline is 62";
 CM_ SG_ 352 Ignition "Non-zero when ignition is on";
 CM_ SG_ 451 GasPedalAndAcc2 "ACC baseline is 62";
 CM_ SG_ 481 ACCAlwaysOne "Usually 1 if the car is equipped with ACC";
+CM_ SG_ 562 FrictionBrakeUnavailable "1 when ACC brake control is unavailable. Stays high if brake command messages are blocked for a period of time";
 CM_ SG_ 497 Ignition "Describes ignition + preconditioning mode, noisy";
 CM_ SG_ 501 PRNDL2 "When ManualMode is Active, Value is 13=L1 12=L2 11=L3 ... 4=L10";
 CM_ SG_ 532 UserBrakePressure "can be lower than other brake position signals when the brakes are pre-filled from ACC braking and the user presses on the brakes. user-only pressure?";
+CM_ SG_ 608 ClusterSpeed "Cluster speed signal seems to match dash on newer cars, but is a lower rate and can be noisier.";
 CM_ SG_ 761 UserBrakePressure2 "Similar to BRAKE_RELATED->UserBrakePressure";
 CM_ SG_ 1001 VehicleSpeed "Spinouts show here on 2wd. Speed derived from right front wheel (drive tire)";
 BA_DEF_  "UseGMParameterIDs" INT 0 0;
