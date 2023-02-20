@@ -297,8 +297,7 @@ class TestCanParserPacker(unittest.TestCase):
     # Check the default timestamp is zero
     for msg in ("VSA_STATUS", "POWERTRAIN_DATA"):
       ts_nanos = parser.ts_nanos[msg].values()
-      self.assertTrue(len(ts_nanos))
-      self.assertTrue(all(ts == 0 for ts in ts_nanos))
+      self.assertEqual(set(ts_nanos), {0})
 
     # Check:
     # - timestamp is only updated for correct messages
