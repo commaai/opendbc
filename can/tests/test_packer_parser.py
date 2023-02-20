@@ -314,9 +314,9 @@ class TestCanParserPacker(unittest.TestCase):
       parser.update_strings(can_strings)
 
       ts_nanos = parser.ts_nanos["VSA_STATUS"].values()
-      self.assertEqual(list(set(ts_nanos))[0], log_mono_time)
+      self.assertEqual(set(ts_nanos), {log_mono_time})
       ts_nanos = parser.ts_nanos["POWERTRAIN_DATA"].values()
-      self.assertEqual(list(set(ts_nanos))[0], 0)
+      self.assertEqual(set(ts_nanos), {0})
 
 
 if __name__ == "__main__":
