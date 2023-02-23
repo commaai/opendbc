@@ -65,6 +65,21 @@ unsigned int chrysler_checksum(uint32_t address, const Signal &sig, const std::v
   return ~checksum & 0xFF;
 }
 
+unsigned int mazda_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
+  uint8_t checksum = 0;
+  if (address == 0x220U) {
+    checksum = 0x2aU;
+  }
+  if (address == 0x249U){
+    checksum = 0x53U;
+  }
+  // Simple XOR over the payload, except for the byte where the checksum lives.
+  for (int i = 0; i < 7; i++) {
+      checksum += d[i];
+  }
+  return checksum;
+}
+
 // Static lookup table for fast computation of CRCs
 uint8_t crc8_lut_8h2f[256]; // CRC8 poly 0x2F, aka 8H2F/AUTOSAR
 uint16_t crc16_lut_xmodem[256]; // CRC16 poly 0x1021, aka XMODEM
