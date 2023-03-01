@@ -961,24 +961,8 @@ BO_ 1407 HU_MON_PE_01: 8 XXX
  SG_ HU_Type : 0|8@1+ (1,0) [0|0] "" XXX
 
 BO_ 1419 LCA11: 8 XXX
- SG_ CF_FL_SndWan : 21|1@1+ (1,0) [0|0] "" XXX
- SG_ CF_FR_SndWan : 20|1@1+ (1,0) [0|0] "" XXX
- SG_ CF_Lca_IndBriLeft : 24|8@1+ (1,0) [0|0] "" XXX
- SG_ CF_Lca_IndBriRight : 32|8@1+ (1,0) [0|0] "" XXX
- SG_ CF_Lca_IndLeft : 8|2@1+ (1,0) [0|0] "" XXX
- SG_ CF_Lca_IndRight : 16|2@1+ (1,0) [0|0] "" XXX
- SG_ CF_Lca_SndWan_Stat : 18|2@1+ (1,0) [0|0] "" XXX
- SG_ CF_Lca_Stat : 0|4@1+ (1,0) [0|0] "" XXX
- SG_ CF_RCTA_IndBriLeft : 40|8@1+ (1,0) [0|0] "" XXX
- SG_ CF_RCTA_IndBriRight : 48|8@1+ (1,0) [0|0] "" XXX
- SG_ CF_RCTA_IndLeft : 56|2@1+ (1,0) [0|0] "" XXX
- SG_ CF_RCTA_IndRight : 58|2@1+ (1,0) [0|0] "" XXX
- SG_ CF_RCW_Warning : 14|2@1+ (1,0) [0|0] "" XXX
- SG_ CF_RL_SndWan : 23|1@1+ (1,0) [0|0] "" XXX
- SG_ CF_RR_SndWan : 22|1@1+ (1,0) [0|0] "" XXX
- SG_ CF_Rcta_Stat : 4|4@1+ (1,0) [0|0] "" XXX
- SG_ CF_Rcw_Stat : 10|4@1+ (1,0) [0|0] "" XXX
- SG_ CF_SndWarnForClu : 60|1@1+ (1,0) [0|0] "" XXX
+ SG_ CF_Lca_IndLeft : 29|1@1+ (1,0) [0|0] "" XXX
+ SG_ CF_Lca_IndRight : 37|1@1+ (1,0) [0|0] "" XXX
 
 BO_ 1427 TPMS11: 6 XXX
  SG_ POS_FL_W_LAMP : 4|1@1+ (1,0) [0|0] "" XXX
