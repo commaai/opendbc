@@ -698,10 +698,16 @@ BO_ 1151 ESP11: 6 XXX
 
 BO_ 1157 LFAHDA_MFC: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
+ SG_ NEW_SIGNAL_1 : 8|4@1+ (1,0) [0|0] "" XXX
  SG_ COUNTER : 12|4@1+ (1,0) [0|0] "" XXX
+ SG_ NEW_SIGNAL_2 : 16|1@0+ (1,0) [0|0] "" XXX
+ SG_ NEW_SIGNAL_3 : 17|1@0+ (1,0) [0|0] "" XXX
+ SG_ NEW_SIGNAL_4 : 18|1@0+ (1,0) [0|0] "" XXX
  SG_ HDA_Icon_State : 19|2@1+ (1,0) [0|0] "" XXX
+ SG_ NEW_SIGNAL_5 : 21|3@1+ (1,0) [0|0] "" XXX
+ SG_ NEW_SIGNAL_6 : 24|1@0+ (1,0) [0|0] "" XXX
  SG_ LFA_Icon_State : 25|2@1+ (1,0) [0|0] "" XXX
- SG_ NEW_SIGNAL_1 : 17|1@0+ (1,0) [0|0] "" XXX
+ SG_ NEW_SIGNAL_7 : 27|37@1+ (1,0) [0|0] "" XXX
 
 BO_ 1162 BCA11: 8 XXX
  SG_ AliveCounter : 21|4@1+ (1,0) [0|0] "" XXX
