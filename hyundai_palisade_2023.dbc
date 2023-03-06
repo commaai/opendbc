@@ -754,7 +754,14 @@ BO_ 1173 YRS13: 8 XXX
  SG_ YRS_SeralNo : 16|48@1+ (1,0) [0|0] "" XXX
 
 BO_ 1186 FRT_RADAR11: 2 XXX
- SG_ CF_FCA_Equip_Front_Radar : 0|3@1+ (1,0) [0|0] "" XXX
+ SG_ BYTE0 : 0|8@1+ (1,0) [0|0] "" XXX
+ SG_ BYTE1 : 8|8@1+ (1,0) [0|0] "" XXX
+ SG_ BYTE2 : 16|8@1+ (1,0) [0|0] "" XXX
+ SG_ BYTE3 : 24|8@1+ (1,0) [0|0] "" XXX
+ SG_ BYTE4 : 32|8@1+ (1,0) [0|0] "" XXX
+ SG_ BYTE5 : 40|8@1+ (1,0) [0|0] "" XXX
+ SG_ BYTE6 : 48|8@1+ (1,0) [0|0] "" XXX
+ SG_ BYTE7 : 56|8@1+ (1,0) [0|0] "" XXX
 
 BO_ 1265 CLU11: 4 XXX
  SG_ CF_Clu_AliveCnt1 : 28|4@1+ (1,0) [0|0] "" XXX
