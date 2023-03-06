@@ -476,6 +476,17 @@ BO_ 854 M_356: 8 XXX
  SG_ PAINT3 : 36|2@0+ (1,0) [0|0] "" XXX
  SG_ PAINT4 : 38|1@0+ (1,0) [0|0] "" XXX
 
+BO_ 867 RADAR_0x363: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
+ SG_ COUNTER : 12|4@1+ (1,0) [0|0] "" XXX
+ SG_ FCA_ESA : 8|2@1+ (1,0) [0|3] "" XXX
+ SG_ BYTE2 : 16|8@1+ (1,0) [0|0] "" XXX
+ SG_ BYTE3 : 24|8@1+ (1,0) [0|0] "" XXX
+ SG_ BYTE4 : 32|8@1+ (1,0) [0|0] "" XXX
+ SG_ BYTE5 : 40|8@1+ (1,0) [0|0] "" XXX
+ SG_ BYTE6 : 48|8@1+ (1,0) [0|0] "" XXX
+ SG_ BYTE7 : 56|8@1+ (1,0) [0|0] "" XXX
+
 BO_ 870 EMS_366: 8 XXX
  SG_ N : 8|16@1+ (0.25,0) [0|0] "" XXX
  SG_ SWI_IGK : 48|1@0+ (1,0) [0|0] "" XXX
@@ -545,22 +556,15 @@ BO_ 905 SCC14: 8 XXX
  SG_ ObjGap : 51|3@1+ (1,0) [0|255] "" CLU,HUD,ESC
 
 BO_ 909 FCA11: 8 XXX
- SG_ CF_VSM_BeltCmd : 5|3@1+ (1,0) [0|0] "" XXX
- SG_ CF_VSM_DecCmdAct : 31|1@1+ (1,0) [0|0] "" XXX
- SG_ CF_VSM_HBACmd : 1|2@1+ (1,0) [0|0] "" XXX
- SG_ CF_VSM_Prefill : 0|1@1+ (1,0) [0|0] "" XXX
- SG_ CF_VSM_Warn : 3|2@1+ (1,0) [0|0] "" XXX
- SG_ CR_FCA_Alive : 35|4@1+ (1,0) [0|0] "" XXX
- SG_ CR_FCA_ChkSum : 56|8@1+ (1,0) [0|0] "" XXX
- SG_ CR_VSM_DecCmd : 8|8@1+ (0.01,0) [0|0] "" XXX
- SG_ FCA_CmdAct : 20|1@1+ (1,0) [0|0] "" XXX
- SG_ FCA_DrvSetStatus : 22|3@1+ (1,0) [0|0] "" XXX
- SG_ FCA_Failinfo : 32|3@1+ (1,0) [0|0] "" XXX
- SG_ FCA_RelativeVelocity : 39|9@1+ (0.1,-25.5) [0|0] "" XXX
- SG_ FCA_Status : 18|2@1+ (1,0) [0|0] "" XXX
- SG_ FCA_StopReq : 21|1@1+ (1,0) [0|0] "" XXX
- SG_ FCA_TimetoCollision : 48|8@1+ (10,0) [0|0] "" XXX
- SG_ PAINT1_Status : 16|2@1+ (1,0) [0|0] "" XXX
+ SG_ CR_FCA_ChkSum : 0|8@1+ (1,0) [0|0] "" XXX
+ SG_ NEW_SIGNAL_1 : 8|4@1+ (1,0) [0|0] "" XXX
+ SG_ CR_FCA_Alive : 12|4@1+ (1,0) [0|0] "" XXX
+ SG_ BYTE2 : 16|8@1+ (1,0) [0|0] "" XXX
+ SG_ BYTE3 : 24|8@1+ (1,0) [0|0] "" XXX
+ SG_ BYTE4 : 32|8@1+ (1,0) [0|0] "" XXX
+ SG_ BYTE5 : 40|8@1+ (1,0) [0|0] "" XXX
+ SG_ BYTE6 : 48|8@1+ (1,0) [0|0] "" XXX
+ SG_ BYTE7 : 56|8@1+ (1,0) [0|0] "" XXX
 
 BO_ 913 BCM_PO_11: 8 XXX
  SG_ BCM_Door_Dri_Status : 5|1@0+ (1,0) [0|0] "" XXX
@@ -593,6 +597,26 @@ BO_ 916 TCS13: 8 XXX
  SG_ StandStill : 47|1@1+ (1,0) [0|0] "" XXX
  SG_ TQI_SCC : 24|8@1+ (0.390625,0) [0|0] "" XXX
  SG_ aBasis : 0|11@1+ (0.01,-10.23) [0|0] "" XXX
+
+BO_ 920 RADAR_0x398: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
+ SG_ COUNTER : 12|4@1+ (1,0) [0|0] "" XXX
+
+BO_ 921 RADAR_0x399: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
+ SG_ COUNTER : 12|4@1+ (1,0) [0|0] "" XXX
+
+BO_ 922 RADAR_0x39a: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
+ SG_ COUNTER : 12|4@1+ (1,0) [0|0] "" XXX
+
+BO_ 923 RADAR_0x39b: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
+ SG_ COUNTER : 12|4@1+ (1,0) [0|0] "" XXX
+
+BO_ 924 RADAR_0x39c: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
+ SG_ COUNTER : 12|4@1+ (1,0) [0|0] "" XXX
 
 BO_ 1040 CGW_USM1: 8 XXX
  SG_ CF_Gway_ADrLRValue : 8|3@1+ (1,0) [0|0] "" XXX
@@ -679,6 +703,14 @@ BO_ 1078 PAS11: 4 XXX
  SG_ CF_Gway_PASOption : 26|2@1+ (1,0) [0|0] "" XXX
  SG_ CF_Gway_PASRsound : 6|2@1+ (1,0) [0|0] "" XXX
  SG_ CF_Gway_PASSystemOn : 24|2@1+ (1,0) [0|0] "" XXX
+
+BO_ 1082 RADAR_0x43a: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
+ SG_ COUNTER : 12|4@1+ (1,0) [0|0] "" XXX
+
+BO_ 1095 RADAR_0x447: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
+ SG_ COUNTER : 12|4@1+ (1,0) [0|0] "" XXX
 
 BO_ 1136 P_STS: 8 XXX
  SG_ Checksum : 62|2@1+ (1,0) [0|0] "" XXX
