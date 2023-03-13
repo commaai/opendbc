@@ -1086,8 +1086,8 @@ BO_ 872 ACC_System: 8 XXX
  SG_ ACS_Sollbeschl : 24|11@1+ (0.005,-7.22) [-7.22|3.005] "Unit_MeterPerSeconSquar" XXX
  SG_ ACS_Anhaltewunsch : 38|1@1+ (1,0) [0|1] "" XXX
  SG_ ACS_Fehler : 39|1@1+ (1,0) [0|1] "" XXX
- SG_ ACS_zul_Regelabw : 40|8@1+ (1,0.005) [0|1.265] "Unit_MeterPerSeconSquar" XXX
- SG_ ACS_max_AendGrad : 48|8@1+ (1,0.02) [0.02|5.06] "Unit_MeterPerSeconSquar" XXX
+ SG_ ACS_zul_Regelabw : 40|8@1+ (0.005,0) [0|1.265] "Unit_MeterPerSeconSquar" XXX
+ SG_ ACS_max_AendGrad : 48|8@1+ (0.02,0) [0.02|5.06] "Unit_MeterPerSeconSquar" XXX
 
 BO_ 1386 ACC_GRA_Anziege: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
