@@ -1153,8 +1153,8 @@ BO_ 644 Motor_Bremse: 6 XXX
  SG_ MOB_COUNTER : 8|4@1+ (1,0) [0|15] "" Bremse_MK25AESP
  SG_ TSK_v_Begrenzung_aktiv : 15|1@0+ (1,0) [0|1] "" XXX
  SG_ TSK_ax_Getriebe_01 : 40|8@1+ (0.048,0) [0|255] "m/s2" XXX
- SG_ MOB_Bremsstgr : 16|11@1+ (0.76,0) [0|100] "Unit_PerCent" Vector__XXX
- SG_ MOB_Bremsmom : 27|13@1+ (1,0) [0|8190] "Unit_NewtoMeter" Bremse_MK25AESP
+ SG_ MOB_Bremsstgr : 16|11@1+ (0.048852,0) [0|100] "Unit_PerCent" Vector__XXX
+ SG_ MOB_Bremsmom : 27|13@1+ (4,0) [0|32760] "Unit_NewtoMeter"  Bremse_MK25AESP
 
 BO_ 870 AWV: 5 XXX
  SG_ AWV_2_Gurtstraffer : 39|1@1+ (1,0) [0|1] ""  Bremsbooster
