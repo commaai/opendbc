@@ -1086,8 +1086,8 @@ BO_ 872 ACC_System: 8 XXX
  SG_ ACS_Sollbeschl : 24|11@1+ (0.005,-7.22) [-7.22|3.005] "Unit_MeterPerSeconSquar" XXX
  SG_ ACS_Anhaltewunsch : 38|1@1+ (1,0) [0|1] "" XXX
  SG_ ACS_Fehler : 39|1@1+ (1,0) [0|1] "" XXX
- SG_ ACS_zul_Regelabw : 40|8@1+ (1,0.005) [0|1.265] "Unit_MeterPerSeconSquar" XXX
- SG_ ACS_max_AendGrad : 48|8@1+ (1,0.02) [0.02|5.06] "Unit_MeterPerSeconSquar" XXX
+ SG_ ACS_zul_Regelabw : 40|8@1+ (0.005,0) [0|1.265] "Unit_MeterPerSeconSquar" XXX
+ SG_ ACS_max_AendGrad : 48|8@1+ (0.02,0) [0.02|5.06] "Unit_MeterPerSeconSquar" XXX
 
 BO_ 1386 ACC_GRA_Anziege: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
@@ -1530,6 +1530,19 @@ CM_ SG_ 1470 XX_DLCORTLC2 "Might be DLC or TLC, might have wrong size";
 
 CM_ SG_ 1550 MFA_v_Signal_02 "0=km/h, 1=mph";
 
+
+VAL_ 872 ACS_Sta_ADR 2 "ADR_passiv" 0 "ADR_nicht_aktiv" 1 "ADR_aktiv" 3 "irrev_Fehler" ;
+VAL_ 872 ACS_ADR_Schub 1 "Verz_begr_auf_Schub" 0 "Verz_nicht_begr_auf_Schub" ;
+VAL_ 872 ACS_Schubabsch 1 "SA_nicht_zulaessig" 0 "SA_zulaessig" ;
+VAL_ 872 ACS_StSt_Info 3 "Systemfehler" 0 "Motorlauf_nn" 1 "Stoppverbot_Motoranlauf_nn" 2 "Motoranlauf_notwendig" ;
+VAL_ 872 ACS_MomEingriff 1 "MomEingr_verhindern" 0 "keine_Beeinfl_MomEingr_Mot" ;
+VAL_ 872 ACS_Typ_ACC 0 "Basis_ACC" 1 "ACC_mit_FollowToStop" 3 "frei" 2 "frei" ;
+VAL_ 872 ACS_FreigSollB 0 "Sollbeschl_nicht_freigeg" 1 "Sollbeschl_freigeg" ;
+VAL_ 872 ACS_Sollbeschl 2046 "ADR_nicht_aktiv" 2047 "Fehler" ;
+VAL_ 872 ACS_Anhaltewunsch 0 "kein_Haltewunsch" 1 "Fzg_haelt_an" ;
+VAL_ 872 ACS_Fehler 1 "Fehlerspeichereintrag" 0 "kein_Fehlerspeichereintrag" ;
+VAL_ 872 ACS_zul_Regelabw 254 "ADR_nicht_aktiv" 255 "Fehler" ;
+VAL_ 872 ACS_max_AendGrad 254 "Neutralwert" 0 "Neutralwert" 255 "Fehler" ;
 
 VAL_ 978 LH2_Sta_HCA 0 "disabled" 1 "initializing" 2 "fault" 3 "ready" 4 "rejected" 5 "active";
 VAL_ 1088 Waehlhebelposition__Getriebe_1_ 8 "P" 7 "R" 6 "N" 5 "D" 9 "U" 12 "S" 14 "T" 10 "T" 11 "T";
