@@ -103,7 +103,6 @@ class TestCanParserPacker(unittest.TestCase):
       parser.update_string(dat)
       self.assertTrue(parser.can_valid)
 
-
   def test_packer_parser(self):
 
     signals = [
@@ -151,7 +150,6 @@ class TestCanParserPacker(unittest.TestCase):
         # also check address
         for sig in ("STEER_TORQUE", "STEER_TORQUE_REQUEST", "COUNTER", "CHECKSUM"):
           self.assertEqual(parser.vl["STEERING_CONTROL"][sig], parser.vl[228][sig])
-
 
   def test_scale_offset(self):
     """Test that both scale and offset are correctly preserved"""
@@ -247,7 +245,6 @@ class TestCanParserPacker(unittest.TestCase):
     send_msg()
     self.assertFalse(parser.bus_timeout)
 
-
   def test_updated(self):
     """Test updated value dict"""
     dbc_file = "honda_civic_touring_2016_can_generated"
@@ -280,6 +277,46 @@ class TestCanParserPacker(unittest.TestCase):
       self.assertEqual(vl_all, user_brake_vals)
       if len(user_brake_vals):
         self.assertEqual(vl_all[-1], parser.vl["VSA_STATUS"]["USER_BRAKE"])
+
+  def test_timestamp_nanos(self):
+    """Test message timestamp dict"""
+    dbc_file = "honda_civic_touring_2016_can_generated"
+
+    signals = [
+      ("USER_BRAKE", "VSA_STATUS"),
+      ("PEDAL_GAS", "POWERTRAIN_DATA"),
+    ]
+    checks = [
+      ("VSA_STATUS", 50),
+      ("POWERTRAIN_DATA", 100),
+    ]
+
+    parser = CANParser(dbc_file, signals, checks, 0)
+    packer = CANPacker(dbc_file)
+
+    # Check the default timestamp is zero
+    for msg in ("VSA_STATUS", "POWERTRAIN_DATA"):
+      ts_nanos = parser.ts_nanos[msg].values()
+      self.assertEqual(set(ts_nanos), {0})
+
+    # Check:
+    # - timestamp is only updated for correct messages
+    # - timestamp is correct for multiple runs
+    # - timestamp is from the latest message if updating multiple strings
+    for _ in range(10):
+      can_strings = []
+      log_mono_time = 0
+      for _ in range(10):
+        log_mono_time = int(random.uniform(1, 60) * 1e+9)
+        can_msg = packer.make_can_msg("VSA_STATUS", 0, {})
+        can_strings.append(can_list_to_can_capnp([can_msg], logMonoTime=log_mono_time))
+      parser.update_strings(can_strings)
+
+      ts_nanos = parser.ts_nanos["VSA_STATUS"].values()
+      self.assertEqual(set(ts_nanos), {log_mono_time})
+      ts_nanos = parser.ts_nanos["POWERTRAIN_DATA"].values()
+      self.assertEqual(set(ts_nanos), {0})
+
 
 if __name__ == "__main__":
   unittest.main()
