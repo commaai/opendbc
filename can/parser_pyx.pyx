@@ -68,7 +68,6 @@ cdef class CANParser:
 
     for i in range(len(checks)):
       c = checks[i]
-      print(c)
       if not isinstance(c[0], numbers.Number):
         if c[0] not in msg_name_to_address:
           print(msg_name_to_address)
