@@ -118,7 +118,7 @@ cdef class CANParser:
       # Cast char * directly to unicode
       cv_name = <unicode>cv.name
       self.vl[cv.address][cv_name] = cv.value
-      self.vl_all[cv.address][cv_name].extend(cv.all_values)
+      self.vl_all[cv.address][cv_name] = cv.all_values
       self.ts_nanos[cv.address][cv_name] = cv.ts_nanos
       updated_addrs.insert(cv.address)
 
