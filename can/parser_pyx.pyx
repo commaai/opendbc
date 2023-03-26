@@ -105,8 +105,8 @@ cdef class CANParser:
 
   cdef unordered_set[uint32_t] update_vl(self):
     cdef unordered_set[uint32_t] updated_addrs
-
-    new_vals = self.can.query_latest()
+    cdef vector[SignalValue] new_vals
+    self.can.query_latest(new_vals)
     for cv in new_vals:
       # Cast char * directly to unicode
       cv_name = <unicode>cv.name
