@@ -306,8 +306,8 @@ class TestCanParserPacker(unittest.TestCase):
     for _ in range(10):
       can_strings = []
       log_mono_time = 0
-      for _ in range(10):
-        log_mono_time = int(random.uniform(1, 60) * 1e+9)
+      for i in range(10):
+        log_mono_time = int(0.01 * i * 1e+9)
         can_msg = packer.make_can_msg("VSA_STATUS", 0, {})
         can_strings.append(can_list_to_can_capnp([can_msg], logMonoTime=log_mono_time))
       parser.update_strings(can_strings)

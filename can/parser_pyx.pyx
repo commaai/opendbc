@@ -101,12 +101,19 @@ cdef class CANParser:
       message_options_v.push_back(mpo)
 
     self.can = new cpp_CANParser(bus, dbc_name, message_options_v, signal_options_v)
-    self.update_vl()
+    self.update_strings([])
 
-  cdef unordered_set[uint32_t] update_vl(self):
-    cdef unordered_set[uint32_t] updated_addrs
+  def update_string(self, dat, sendcan=False):
+    return self.update_strings([dat], sendcan)
+
+  def update_strings(self, strings, sendcan=False):
+    for v in self.vl_all.values():
+      v.clear()
+
     cdef vector[SignalValue] new_vals
-    self.can.query_latest(new_vals)
+    cdef unordered_set[uint32_t] updated_addrs
+
+    self.can.update_strings(strings, new_vals, sendcan)
     for cv in new_vals:
       # Cast char * directly to unicode
       cv_name = <unicode>cv.name
@@ -115,23 +122,6 @@ cdef class CANParser:
       self.ts_nanos[cv.address][cv_name] = cv.ts_nanos
       updated_addrs.insert(cv.address)
 
-    return updated_addrs
-
-  def update_string(self, dat, sendcan=False):
-    for v in self.vl_all.values():
-      v.clear()
-
-    self.can.update_string(dat, sendcan)
-    return self.update_vl()
-
-  def update_strings(self, strings, sendcan=False):
-    for v in self.vl_all.values():
-      v.clear()
-
-    updated_addrs = set()
-    for s in strings:
-      self.can.update_string(s, sendcan)
-      updated_addrs.update(self.update_vl())
     return updated_addrs
 
   @property

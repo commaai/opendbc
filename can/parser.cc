@@ -202,6 +202,17 @@ void CANParser::update_string(const std::string &data, bool sendcan) {
   UpdateValid(last_sec);
 }
 
+void CANParser::update_strings(const std::vector<std::string> &data, std::vector<SignalValue> &vals, bool sendcan) {
+  uint64_t current_sec = 0;
+  for (const auto &d : data) {
+    update_string(d, sendcan);
+    if (current_sec == 0) {
+      current_sec = last_sec;
+    }
+  }
+  query_latest(vals, current_sec);
+}
+
 void CANParser::UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Reader& cans) {
   //DEBUG("got %d messages\n", cans.size());
 
@@ -298,10 +309,15 @@ void CANParser::UpdateValid(uint64_t sec) {
   can_valid = (can_invalid_cnt < CAN_INVALID_CNT) && _counters_valid;
 }
 
-void CANParser::query_latest(std::vector<SignalValue> &vals) {
+void CANParser::query_latest(std::vector<SignalValue> &vals, uint64_t last_ts) {
+  if (last_ts == 0) {
+    last_ts = last_sec;
+  }
   for (auto& kv : message_states) {
     auto& state = kv.second;
-    if (last_sec != 0 && state.last_seen_nanos != last_sec) continue;
+    if (last_ts != 0 && state.last_seen_nanos < last_ts) {
+      continue;
+    }
 
     for (int i = 0; i < state.parse_sigs.size(); i++) {
       const Signal &sig = state.parse_sigs[i];
