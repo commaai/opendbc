@@ -1,6 +1,7 @@
 # distutils: language = c++
 # cython: c_string_encoding=ascii, language_level=3
 
+from cython.operator cimport dereference as deref, preincrement as preinc
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp.unordered_set cimport unordered_set
@@ -114,13 +115,17 @@ cdef class CANParser:
     cdef unordered_set[uint32_t] updated_addrs
 
     self.can.update_strings(strings, new_vals, sendcan)
-    for cv in new_vals:
+    cdef vector[SignalValue].iterator it = new_vals.begin()
+    cdef SignalValue* cv
+    while it != new_vals.end():
+      cv = &deref(it)
       # Cast char * directly to unicode
       cv_name = <unicode>cv.name
       self.vl[cv.address][cv_name] = cv.value
       self.vl_all[cv.address][cv_name] = cv.all_values
       self.ts_nanos[cv.address][cv_name] = cv.ts_nanos
       updated_addrs.insert(cv.address)
+      preinc(it)
 
     return updated_addrs
 
