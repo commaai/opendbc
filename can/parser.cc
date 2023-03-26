@@ -208,8 +208,7 @@ void CANParser::UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Rea
   bool bus_empty = true;
 
   // parse the messages
-  for (int i = 0; i < cans.size(); i++) {
-    auto cmsg = cans[i];
+  for (const auto cmsg : cans) {
     if (cmsg.getSrc() != bus) {
       // DEBUG("skip %d: wrong bus\n", cmsg.getAddress());
       continue;
