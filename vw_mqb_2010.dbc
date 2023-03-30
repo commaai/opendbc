@@ -1212,10 +1212,10 @@ BO_ 1602 WIV_01: 8 Motor_Diesel_MQB
  SG_ WIV_W_max : 56|7@1+ (1000,0) [0|127000] "Unit_KiloMeter" Gateway_MQB
 
 BO_ 294 HCA_01: 8 Frontsensorik
- SG_ HCA_01_CRC : 0|8@1+ (1,0) [0|255] "" Vector__XXX
- SG_ HCA_01_BZ : 8|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Vector__XXX
  SG_ HCA_01_Vib_Freq : 12|4@1+ (1,15) [15|30] "Unit_Hertz" Vector__XXX
- SG_ HCA_01_LM_Offset : 16|9@1+ (0.01,0) [0|5.11] "Unit_NewtoMeter" Vector__XXX
+ SG_ HCA_01_LM_Offset : 16|9@1+ (1,0) [0|511] "Unit_centiNewtoMeter" Vector__XXX
  SG_ EA_ACC_Sollstatus : 25|2@1+ (1,0) [0|3] ""  Frontradar
  SG_ EA_Ruckprofil : 27|3@1+ (1,0) [0|7] "" Vector__XXX
  SG_ HCA_01_Sendestatus : 30|1@1+ (1,0) [0|1] "" Vector__XXX
