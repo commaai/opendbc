@@ -13,7 +13,7 @@ class TestParser(unittest.TestCase):
     parser = CANParser('toyota_new_mc_pt_generated', signals, checks, 0, False)
     packer = CANPacker('toyota_new_mc_pt_generated')
     can_msgs = []
-    for i in range(10000):
+    for i in range(50000):
       values = {"ACC_CONTROL": {"ACC_TYPE": 1, "ALLOW_LONG_PRESS": 3}}
       msgs = [packer.make_can_msg(k, 0, v) for k, v in values.items()]
       bts = can_list_to_can_capnp(msgs, logMonoTime=int(0.01 * i * 1e9))
@@ -46,8 +46,8 @@ class TestParser(unittest.TestCase):
     signals = [
       ("ACCEL_CMD", "ACC_CONTROL"),
     ]
-    self._benchmark(signals, [('ACC_CONTROL', 10)], (8000, 15000), 1)
-    self._benchmark(signals, [('ACC_CONTROL', 10)], (8000, 15000), 10)
+    self._benchmark(signals, [('ACC_CONTROL', 10)], (7800, 9000), 1)
+    self._benchmark(signals, [('ACC_CONTROL', 10)], (2500, 3500), 10)
 
   def test_performance_all_signals(self):
     signals = [
@@ -65,8 +65,8 @@ class TestParser(unittest.TestCase):
       ("ACCEL_CMD_ALT", "ACC_CONTROL"),
       ("CHECKSUM", "ACC_CONTROL"),
     ]
-    self._benchmark(signals, [('ACC_CONTROL', 10)], (18000, 25000), 1)
-    self._benchmark(signals, [('ACC_CONTROL', 10)], (18000, 25000), 10)
+    self._benchmark(signals, [('ACC_CONTROL', 10)], (16000, 22000), 1)
+    self._benchmark(signals, [('ACC_CONTROL', 10)], (10000, 13000), 10)
 
 
 if __name__ == "__main__":
