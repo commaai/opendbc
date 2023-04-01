@@ -310,8 +310,8 @@ void CANParser::query_latest(std::vector<SignalValue> &vals, uint64_t last_ts) {
       v.ts_nanos = state.last_seen_nanos;
       v.name = sig.name;
       v.value = state.vals[i];
-      v.all_values = std::move(state.all_vals[i]);
-      state.all_vals[i] = {};
+      v.all_values = state.all_vals[i];
+      state.all_vals[i].clear();
     }
   }
 }

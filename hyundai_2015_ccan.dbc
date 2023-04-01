@@ -295,7 +295,7 @@ BO_ 399 EMS_H12: 8 EMS
  SG_ CF_Ems_FCopen : 59|1@1+ (1.0,0.0) [0.0|1.0] ""  CLU,IBOX
  SG_ CF_Ems_ActEcoAct : 60|1@1+ (1.0,0.0) [0.0|1.0] ""  CLU,IBOX,TCU
  SG_ CF_Ems_EngRunNorm : 61|1@1+ (1.0,0.0) [0.0|1.0] ""  ABS,ESC,IBOX,TCU
- SG_ CF_Ems_IsgStat2 : 62|2@1+ (2.0,0.0) [0.0|3.0] ""  CLU,IBOX,TCU
+ SG_ CF_Ems_IsgStat2 : 62|2@1+ (1.0,0.0) [0.0|3.0] ""  CLU,IBOX,TCU
 
 BO_ 1419 LCA11: 8 LCA
  SG_ CF_Lca_Stat : 0|4@1+ (1.0,0.0) [0.0|15.0] ""  BCM,CLU
