@@ -52,7 +52,7 @@ cdef class CANParser:
       self.address_to_msg_name[msg.address] = name
       self.vl[msg.address] = {}
       self.vl[name] = self.vl[msg.address]
-      self.vl_all[msg.address] = defaultdict(list)
+      self.vl_all[msg.address] = {}
       self.vl_all[name] = self.vl_all[msg.address]
       self.ts_nanos[msg.address] = {}
       self.ts_nanos[name] = self.ts_nanos[msg.address]
@@ -109,7 +109,8 @@ cdef class CANParser:
 
   def update_strings(self, strings, sendcan=False):
     for v in self.vl_all.values():
-      v.clear()
+      for l in v.values():
+        l.clear()
 
     cdef vector[SignalValue] new_vals
     cdef unordered_set[uint32_t] updated_addrs
