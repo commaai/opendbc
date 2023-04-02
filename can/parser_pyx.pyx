@@ -125,6 +125,13 @@ cdef class CANParser:
       self.vl[cv.address][cv_name] = cv.value
       self.vl_all[cv.address][cv_name] = cv.all_values
       self.ts_nanos[cv.address][cv_name] = cv.ts_nanos
+
+      vl_all = self.vl_all[cv.address]
+      if (cv_name in vl_all):
+        vl_all[cv_name].extend(cv.all_values)
+      else:
+        vl_all[cv_name] = cv.all_values
+
       updated_addrs.insert(cv.address)
       preinc(it)
 

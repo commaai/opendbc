@@ -3,11 +3,12 @@ name: tests
 on: [push, pull_request]
 
 env:
-  RUN: docker run --shm-size 1G --rm opendbc /bin/sh -c
+  RUN: docker run -e PYTHONWARNINGS=error --shm-size 1G --rm opendbc /bin/sh -c
   BUILD: |
       docker pull $(grep -ioP '(?<=^from)\s+\S+' Dockerfile) || true
       docker pull ghcr.io/commaai/opendbc:latest || true
       docker build --cache-from ghcr.io/commaai/opendbc:latest -t opendbc -f Dockerfile .
+  PYTHONWARNINGS: error
 
 jobs:
   test:
