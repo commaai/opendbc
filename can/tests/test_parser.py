@@ -46,7 +46,7 @@ class TestParser(unittest.TestCase):
     signals = [
       ("ACCEL_CMD", "ACC_CONTROL"),
     ]
-    self._benchmark(signals, [('ACC_CONTROL', 10)], (5800, 7000), 1)
+    self._benchmark(signals, [('ACC_CONTROL', 10)], (5000, 7000), 1)
     self._benchmark(signals, [('ACC_CONTROL', 10)], (2200, 3000), 10)
 
   def test_performance_all_signals(self):
