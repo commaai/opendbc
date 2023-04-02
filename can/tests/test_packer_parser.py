@@ -270,7 +270,7 @@ class TestCanParserPacker(unittest.TestCase):
           can_msgs[frame].append(packer.make_can_msg("VSA_STATUS", 0, values))
           idx += 1
 
-      can_strings = [can_list_to_can_capnp(msgs) for msgs in can_msgs]
+      can_strings = [can_list_to_can_capnp(msgs, 'can', int(0.01 * idx * 1e9)) for idx, msgs in enumerate(can_msgs)]
       parser.update_strings(can_strings)
       vl_all = parser.vl_all["VSA_STATUS"]["USER_BRAKE"]
 
