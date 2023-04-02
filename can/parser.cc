@@ -128,11 +128,9 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
     assert(state.size <= 64);  // max signal size is 64 bytes
 
     // track all signals for this message
-    for (const auto& sig : msg->sigs) {
-      state.parse_sigs.push_back(sig);
-      state.vals.push_back(0);
-      state.all_vals.push_back({});
-    }
+    state.parse_sigs = msg->sigs;
+    state.vals.resize(msg->sigs.size());
+    state.all_vals.resize(msg->sigs.size());
   }
 }
 
