@@ -308,13 +308,12 @@ std::vector<SignalValue> CANParser::query_latest() {
 
     for (int i = 0; i < state.parse_sigs.size(); i++) {
       const Signal &sig = state.parse_sigs[i];
-      ret.push_back((SignalValue){
-        .address = state.address,
-        .ts_nanos = state.last_seen_nanos,
-        .name = sig.name,
-        .value = state.vals[i],
-        .all_values = state.all_vals[i],
-      });
+      SignalValue &v = ret.emplace_back();
+      v.address = state.address;
+      v.ts_nanos = state.last_seen_nanos;
+      v.name = sig.name;
+      v.value = state.vals[i];
+      v.all_values = state.all_vals[i];
       state.all_vals[i].clear();
     }
   }
