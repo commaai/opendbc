@@ -65,8 +65,8 @@ class TestParser(unittest.TestCase):
       ("ACCEL_CMD_ALT", "ACC_CONTROL"),
       ("CHECKSUM", "ACC_CONTROL"),
     ]
-    self._benchmark(signals, [('ACC_CONTROL', 10)], (15000, 19000), 1)
-    self._benchmark(signals, [('ACC_CONTROL', 10)], (10000, 14000), 10)
+    self._benchmark(signals, [('ACC_CONTROL', 10)], (12000, 15000), 1)
+    self._benchmark(signals, [('ACC_CONTROL', 10)], (5000, 6800), 10)
 
 
 if __name__ == "__main__":
