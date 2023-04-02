@@ -36,7 +36,7 @@ class TestParser(unittest.TestCase):
     self.assertGreater(avg_nanos, minn, "Performance seems to have improved, update test thresholds.")
 
   def test_performance_all_signals(self):
-    self._benchmark([], [('ACC_CONTROL', 10)], (11000, 25000), 1)
+    self._benchmark([], [('ACC_CONTROL', 10)], (11000, 18000), 1)
     self._benchmark([], [('ACC_CONTROL', 10)], (1700, 2500), 10)
 
 
