@@ -465,9 +465,6 @@ BO_ 456 ACC_CONTROL: 8 XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
 
-BO_ 467 CRUISE_RELATED: 8 XXX
- SG_ CRUISE_FAULT : 3|1@0+ (1,0) [0|1] "" XXX
-
 BO_ 829 LKAS_HUD: 8 ADAS
  SG_ CAM_TEMP_HIGH : 7|1@0+ (1,0) [0|255] "" BDY
  SG_ SET_ME_X41 : 6|7@0+ (1,0) [0|127] "" BDY
@@ -505,7 +502,7 @@ BO_ 254913108 LKAS_HUD_2: 8 ADAS
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
-CM_ 446 "Does not exist on all radarless platforms. May describe cruise faults and what the PCM uses for brake pressed.";
+CM_ 446 "If exists, describes cruise faults and what the PCM uses for brake press.";
 CM_ SG_ 456 IDLESTOP_ALLOW "allows car to turn off engine at a standstill";
 CM_ SG_ 456 STANDSTILL "set to 1 when camera requests -4.0 m/s^2";
 
