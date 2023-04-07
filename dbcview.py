@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import mplcursors
 
-def visualize_bitfield_8x8(message):
+def visualize_bitfield(message):
     """Visualize the bit fields of a CAN message in a 8x8 grid"""
     _, ax = plt.subplots()
     ax.set_title(f"Message: {message.name} (ID: {message.frame_id})")
@@ -89,7 +89,7 @@ def main():
         message_to_visualize = db.get_message_by_name(args.message)
 
     if message_to_visualize:
-        visualize_bitfield_8x8(message_to_visualize)
+        visualize_bitfield(message_to_visualize)
     else:
         print("Message not found in the DBC file.")
 
