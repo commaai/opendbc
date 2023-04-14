@@ -124,6 +124,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
       assert(false);
     }
 
+    state.name = msg->name;
     state.size = msg->size;
     assert(state.size <= 64);  // max signal size is 64 bytes
 
@@ -162,6 +163,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum
 
   for (const auto& msg : dbc->msgs) {
     MessageState state = {
+      .name = msg.name,
       .address = msg.address,
       .size = msg.size,
       .ignore_checksum = ignore_checksum,
@@ -287,9 +289,9 @@ void CANParser::UpdateValid(uint64_t sec) {
     if (state.check_threshold > 0 && (missing || timed_out)) {
       if (show_missing && !bus_timeout) {
         if (missing) {
-          LOGE("0x%X NOT SEEN", state.address);
+          LOGE("0x%X '%s' NOT SEEN", state.address, state.name.c_str());
         } else if (timed_out) {
-          LOGE("0x%X TIMED OUT", state.address);
+          LOGE("0x%X '%s' TIMED OUT", state.address, state.name.c_str());
         }
       }
       _valid = false;
