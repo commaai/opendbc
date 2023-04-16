@@ -44,16 +44,14 @@ RUN pip install --no-cache-dir pre-commit==2.15.0 pylint==2.5.2
 
 ENV PYTHONPATH=/project
 
+RUN git config --global --add safe.directory '*'
+
 WORKDIR /project
-# TODO: Add tag to cereal
 RUN git clone https://github.com/commaai/cereal.git /project/cereal && \
     cd /project/cereal && \
-    git checkout 959ff79963b80829be9902d146c31fda44dbbd20
+    git checkout 959ff79963b80829be9902d146c31fda44dbbd20 && \
+    rm -rf .git && \
+    scons -j$(nproc)
 
 COPY SConstruct .
 COPY ./site_scons /project/site_scons
-COPY . /project/opendbc
-
-RUN rm -rf /project/opendbc/.git && \
-    rm -rf /project/cereal/.git
-RUN scons -c && scons -j$(nproc)
