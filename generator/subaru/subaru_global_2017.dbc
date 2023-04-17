@@ -56,6 +56,8 @@ BO_ 576 CruiseControl: 8 XXX
 BO_ 803 INFOTAINMENT_STATUS: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ CHANGES_0_2 : 15|4@0+ (1,0) [0|15] "" XXX
+ SG_ STATIC : 19|4@0+ (1,0) [0|15] "" XXX
  SG_ LKAS_State_Infotainment : 22|3@0+ (1,0) [0|8191] "" XXX
 
 CM_ SG_ 545 Cruise_Throttle "RPM-like output signal";
