@@ -1188,8 +1188,19 @@ BO_ 870 AWV: 5 XXX
  SG_ AWV_1_Prefill : 17|1@1+ (1,0) [0|1] ""  Bremsbooster
  SG_ AWV_1_Freigabe : 16|1@1+ (1,0) [0|1] ""  Bremsbooster
  SG_ AWV_Text : 12|4@1+ (1,0) [0|15] ""  Gateway_Kbi_VW_A,Bremsbooster
- SG_ AWV_Zaehler : 8|4@1+ (1,0) [0|15] ""  Bremsbooster
- SG_ AWV_Checksumme : 0|8@1+ (1,0) [0|255] ""  Bremsbooster
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Bremsbooster
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Bremsbooster
+ SG_ AWV_CityANB_Offpraegung : 21|1@1+ (1,0) [0|1] "" Bremsbooster
+ SG_ AWV_Halten : 22|1@1+ (1,0) [0|1] "" Bremsbooster
+ SG_ ANB_Teilbremsung_Freigabe : 23|1@1+ (1,0) [0|1] "" Bremsbooster
+ SG_ ANB_Ziel_Teilbrems_Verz_Anf : 54|10@1+ (0.024,-20.016) [0|1023] "" Bremsbooster
+ SG_ AWV_Konfiguration_Menueanf : 40|1@1+ (1,0) [0|1] "" Bremsbooster
+ SG_ AWV_Konfiguration_Vorw_Menueanf : 41|1@1+ (1,0) [0|1] "" Bremsbooster
+ SG_ AWV_Konfiguration_Status : 42|1@1+ (1,0) [0|1] "" Bremsbooster
+ SG_ AWV_Konfiguration_Vorw_Status : 43|1@1+ (1,0) [0|1] "" Bremsbooster
+ SG_ AWV_2_Abstandswarnung : 51|1@1+ (1,0) [0|1] "" Bremsbooster
+ SG_ ANB_Zielbremsung_Freigabe : 52|1@1+ (1,0) [0|1] "" Bremsbooster
+ SG_ ANB_CM_Anforderung : 53|1@1+ (1,0) [0|1] "" Bremsbooster
 
 BO_ 1470 LDW_Status: 8 XXX
  SG_ LDW_Lernmodus_rechts : 0|2@1+ (1,0) [0|3] "" XXX
