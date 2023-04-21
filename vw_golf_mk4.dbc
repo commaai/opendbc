@@ -779,7 +779,7 @@ BO_ 1472 EPB_1: 8 XXX
  SG_ EP1_Sta_NWS : 15|1@1+ (1,0) [0|1] "" XXX
  SG_ EP1_Neig_winkel : 16|8@1+ (1,-128) [-128|127] "Unit_PerCentOfForceOfGravi" XXX
  SG_ EP1_Verzoegerung : 24|8@1+ (0.048,-7.968) [-7.968|4.224] "Unit_MeterPerSeconSquar" XXX
- SG_ EP1_Failureeintr : 32|1@1+ (1,0) [0|1] "" XXX
+ SG_ EP1_Fehlereintr : 32|1@1+ (1,0) [0|1] "" XXX
  SG_ EP1_Freigabe_Ver : 33|1@1+ (1,0) [0|1] "" XXX
  SG_ EP1_AutoHold_zul : 34|1@1+ (1,0) [0|1] "" XXX
  SG_ EP1_AutoHold_aktiv : 35|1@1+ (1,0) [0|1] "" XXX
