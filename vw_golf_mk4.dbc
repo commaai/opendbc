@@ -1169,31 +1169,30 @@ BO_ 644 Motor_Bremse: 6 XXX
  SG_ MOB_Bremsstgr : 16|11@1+ (0.048852,0) [0|100] "Unit_PerCent" Vector__XXX
  SG_ MOB_Bremsmom : 27|13@1+ (4,0) [0|32760] "Unit_NewtoMeter"  Bremse_MK25AESP
 
-BO_ 870 mAWV: 8 XXX
- SG_ AWV_2_Gurtstraffer : 39|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ AWV_Infoton : 38|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ AWV_2_Warnsymbol : 37|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ AWV_2_Warnton : 36|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ AWV_2_Ruckprofil : 33|3@1+ (1,0) [0|7] "" Vector__XXX
- SG_ AWV_2_Freigabe : 32|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ AWV_2_Umfeldwarn : 31|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ AWV_2_SU_Lampe : 30|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ AWV_2_SU_Gong : 29|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ AWV_2_SU_Bremsruck : 28|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ AWV_2_SU_Warnzeit : 26|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ AWV_2_Fehler : 25|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ AWV_2_Status : 24|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ AWV_only : 20|4@1+ (1,0) [0|0] "" Vector__XXX
- SG_ AWV_1_Parameter : 18|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ AWV_1_Prefill : 17|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ AWV_1_Freigabe : 16|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ AWV_Text : 12|4@1+ (1,0) [0|14] "" Vector__XXX
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Vector__XXX
+BO_ 870 AWV: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ AWV_Text : 12|4@1+ (1,0) [0|14] "" Vector__XXX
+ SG_ AWV_1_Freigabe : 16|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ AWV_1_Prefill : 17|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ AWV_1_Parameter : 18|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ AWV_only : 20|4@1+ (1,0) [0|0] "" Vector__XXX
  SG_ AWV_CityANB_Auspraegung : 21|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ AWV_Halten : 22|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ ANB_Teilbremsung_Freigabe : 23|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ ANB_Ziel_Teilbrems_Verz_Anf : 54|10@1+ (0.024,-20.016) [0|1023] "Unit_MeterPerSeconSquar" Vector__XXX
+ SG_ AWV_2_Status : 24|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ AWV_2_Fehler : 25|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ AWV_2_SU_Warnzeit : 26|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ AWV_2_SU_Bremsruck : 28|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ AWV_2_SU_Gong : 29|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ AWV_2_SU_Lampe : 30|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ AWV_2_Umfeldwarn : 31|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ AWV_2_Freigabe : 32|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ AWV_2_Ruckprofil : 33|3@1+ (1,0) [0|7] "" Vector__XXX
+ SG_ AWV_2_Warnton : 36|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ AWV_2_Warnsymbol : 37|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ AWV_Infoton : 38|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ AWV_2_Gurtstraffer : 39|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ AWV_Konfiguration_Menueanf : 40|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ AWV_Konfiguration_Vorw_Menueanf : 41|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ AWV_Konfiguration_Status : 42|1@1+ (1,0) [0|1] "" Vector__XXX
@@ -1201,7 +1200,8 @@ BO_ 870 mAWV: 8 XXX
  SG_ AWV_2_Abstandswarnung : 51|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ ANB_Zielbremsung_Freigabe : 52|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ ANB_CM_Anforderung : 53|1@1+ (1,0) [0|1] "" Vector__XXX
-
+ SG_ ANB_Ziel_Teilbrems_Verz_Anf : 54|10@1+ (0.024,-20.016) [0|1023] "Unit_MeterPerSeconSquar" Vector__XXX
+ 
 BO_ 1470 LDW_Status: 8 XXX
  SG_ LDW_Lernmodus_rechts : 0|2@1+ (1,0) [0|3] "" XXX
  SG_ LDW_Lernmodus_links : 2|2@1+ (1,0) [0|3] "" XXX
