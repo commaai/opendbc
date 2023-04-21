@@ -3,7 +3,7 @@ name: tests
 on: [push, pull_request]
 
 env:
-  RUN: docker run -e PYTHONWARNINGS=error --shm-size 1G --rm opendbc /bin/sh -c
+  RUN: docker run -v $GITHUB_WORKSPACE:/project/opendbc -w /project/opendbc -e PYTHONWARNINGS=error --shm-size 1G --rm opendbc /bin/bash -c
   BUILD: |
       docker pull $(grep -ioP '(?<=^from)\s+\S+' Dockerfile) || true
       docker pull ghcr.io/commaai/opendbc:latest || true
@@ -11,25 +11,43 @@ env:
   PYTHONWARNINGS: error
 
 jobs:
-  test:
+  unit-tests:
+    name: unit tests
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
-      - name: Build Docker image
-        run: eval "$BUILD"
-      - name: Static analysis
-        run: |
-          docker run opendbc bash -c "cd opendbc && git init && git add -A && pre-commit run --all"
-      - name: Generator test
-        run: |
-          docker run opendbc bash -c "cd opendbc/generator && ./test_generator.py"
-      - name: Unit tests
-        run: |
-          docker run opendbc bash -c "python -m unittest discover opendbc"
-      - name: Push to dockerhub
-        if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request' && github.repository == 'commaai/opendbc'
-        run: |
-          docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
-          docker tag opendbc ghcr.io/commaai/opendbc:latest
-          docker push ghcr.io/commaai/opendbc:latest
+    - uses: actions/checkout@v3
+    - name: Build Docker image
+      run: eval "$BUILD"
+    - name: Build opendbc
+      run: ${{ env.RUN }} "cd ../ && scons -j$(nproc)"
+    - name: Unit tests
+      run: ${{ env.RUN }} "python -m unittest discover ."
 
+  static-analysis:
+    name: static analysis
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build Docker image
+      run: eval "$BUILD"
+    - name: Build opendbc
+      run: ${{ env.RUN }} "cd ../ && scons -j$(nproc)"
+    - name: pre-commit
+      # TODO: a package pre-commit installs has a warning, remove the unset once that's fixed
+      run: ${{ env.RUN }} "unset PYTHONWARNINGS && pre-commit run --all"
+    - name: Generator test
+      run: ${{ env.RUN }} "generator/test_generator.py"
+
+  docker-push:
+    name: docker push
+    runs-on: ubuntu-20.04
+    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request' && github.repository == 'commaai/opendbc'
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build Docker image
+      run: eval "$BUILD"
+    - name: Push to dockerhub
+      run: |
+        docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+        docker tag opendbc ghcr.io/commaai/opendbc:latest
+        docker push ghcr.io/commaai/opendbc:latest
