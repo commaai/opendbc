@@ -774,11 +774,11 @@ BO_ 1472 EPB_1: 8 XXX
  SG_ EP1_Fehler_Sta : 4|2@1+ (1,0) [0|3] "" XXX
  SG_ EP1_Sta_EPB : 6|1@1+ (1,0) [0|1] "" XXX
  SG_ EP1_Sta_Schalter : 7|1@1+ (1,0) [0|1] "" XXX
- SG_ EP1_Spannkraft : 8|5@1+ (1,0) [0|30] "kN" XXX
+ SG_ EP1_Spannkraft : 8|5@1+ (1,0) [0|30] "Unit_KiloNewto" XXX
  SG_ EP1_Schalterinfo : 13|2@1+ (1,0) [0|3] "" XXX
  SG_ EP1_Sta_NWS : 15|1@1+ (1,0) [0|1] "" XXX
- SG_ EP1_Neig_winkel : 16|8@1+ (1,-128) [-128|127] "g" XXX
- SG_ EP1_Verzoegerung : 24|8@1+ (0.048,-7.968) [-7.968|4.224] "g" XXX
+ SG_ EP1_Neig_winkel : 16|8@1+ (1,-128) [-128|127] "Unit_PerCentOfForceOfGravi" XXX
+ SG_ EP1_Verzoegerung : 24|8@1+ (0.048,-7.968) [-7.968|4.224] "Unit_MeterPerSeconSquar" XXX
  SG_ EP1_Failureeintr : 32|1@1+ (1,0) [0|1] "" XXX
  SG_ EP1_Freigabe_Ver : 33|1@1+ (1,0) [0|1] "" XXX
  SG_ EP1_AutoHold_zul : 34|1@1+ (1,0) [0|1] "" XXX
@@ -1555,7 +1555,7 @@ CM_ SG_ 1470 XX_DLCORTLC2 "Might be DLC or TLC, might have wrong size";
 CM_ SG_ 1550 MFA_v_Signal_02 "0=km/h, 1=mph";
 
 VAL_ 870 AWV_2_Gurtstraffer 0 "Gurt_not_straffen" 1 "Gurt_straffen";
-VAL_ 870 AWV_Infoton 0 "Aus" 1 "Ein" 0 "No Description";
+VAL_ 870 AWV_Infoton 0 "Aus" 1 "Ein";
 VAL_ 870 AWV_2_Warnsymbol 0 "Aus" 1 "Ein";
 VAL_ 870 AWV_2_Warnton 0 "Aus" 1 "Ein";
 VAL_ 870 AWV_2_Ruckprofil 0 "kein_Ruck" 1 "Ruckprofil_1" 2 "Ruckprofil_2" 3 "Ruckprofil_3" 4 "Ruckprofil_4" 5 "Ruckprofil_5" 6 "not_erlaubt" 7 "not_erlaubt";
