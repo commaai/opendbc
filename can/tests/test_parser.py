@@ -33,7 +33,7 @@ class TestParser(unittest.TestCase):
       else:
         t1 = time.process_time_ns()
         for m in can_msgs:
-          parser.update_string(m)
+          parser.update_strings([m])
         t2 = time.process_time_ns()
 
       ets.append(t2 - t1)

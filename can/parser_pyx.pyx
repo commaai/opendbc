@@ -104,9 +104,6 @@ cdef class CANParser:
     self.can = new cpp_CANParser(bus, dbc_name, message_options_v, signal_options_v)
     self.update_strings([])
 
-  def update_string(self, dat, sendcan=False):
-    return self.update_strings([dat], sendcan)
-
   def update_strings(self, strings, sendcan=False):
     for v in self.vl_all.values():
       for l in v.values():
