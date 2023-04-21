@@ -770,25 +770,19 @@ BO_ 1340 Fahrwerk_1: 1 XXX
  SG_ Ansteuererung_Fahrzeugniveau : 0|4@1+ (1,0) [0|15] "" XXX
 
 BO_ 1472 EPB_1: 8 XXX
- SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 0|4@1+ (1,0) [0|15] "" XXX
- SG_ EP1__Text : 52|4@1+ (1,0) [0|8] "" Vector__XXX
- SG_ EP1_Failure_gelb : 51|1@1+ (1,0) [0|1] "" XXX
- SG_ EP1_Failure_BKL : 50|1@1+ (1,0) [0|1] "" XXX
- SG_ EP1_Warnton : 49|1@1+ (1,0) [0|1] "" XXX
- SG_ EP1_Fkt_Lampe : 48|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ EP1_Freigabe_Ver : 33|1@1+ (1,0) [0|1] "" XXX
- SG_ EP1_Failureeintr : 32|1@1+ (1,0) [0|1] "" XXX
+ SG_ EP1_Fehler_Sta : 4|2@1+ (1,0) [0|3] "" XXX
+ SG_ EP1_Sta_EPB : 6|1@1+ (1,0) [0|1] "" XXX
+ SG_ EP1_Sta_Schalter : 7|1@1+ (1,0) [0|1] "" XXX
+ SG_ EP1_Spannkraft : 8|5@1+ (1,0) [0|30] "kN" XXX
+ SG_ EP1_Schalterinfo : 13|2@1+ (1,0) [0|3] "" XXX
+ SG_ EP1_Sta_NWS : 15|1@1+ (1,0) [0|1] "" XXX
  SG_ EP1_Neig_winkel : 16|8@1+ (1,-128) [-128|127] "g" XXX
  SG_ EP1_Verzoegerung : 24|8@1+ (0.048,-7.968) [-7.968|4.224] "g" XXX
- SG_ EP1_Sta_NWS : 15|1@1+ (1,0) [0|1] "" XXX
- SG_ EP1_Schalterinfo : 13|2@1+ (1,0) [0|3] "" XXX
- SG_ EP1_Spannkraft : 8|5@1+ (1,0) [0|30] "kN" XXX
- SG_ EP1_Sta_Schalter : 7|1@1+ (1,0) [0|1] "" XXX
- SG_ EP1_Sta_EPB : 6|1@1+ (1,0) [0|1] "" XXX
- SG_ EP1_Failure_Sta : 4|2@1+ (1,0) [0|3] "" XXX
+ SG_ EP1_Failureeintr : 32|1@1+ (1,0) [0|1] "" XXX
+ SG_ EP1_Freigabe_Ver : 33|1@1+ (1,0) [0|1] "" XXX
  SG_ EP1_AutoHold_zul : 34|1@1+ (1,0) [0|1] "" XXX
- SG_ EP1_AutoHold_active : 35|1@1+ (1,0) [0|1] "" XXX
+ SG_ EP1_AutoHold_aktiv : 35|1@1+ (1,0) [0|1] "" XXX
  SG_ EP1_SleepInd : 36|1@1+ (1,0) [0|1] "" XXX
  SG_ EP1_Status_Kl_15 : 37|1@1+ (1,0) [0|1] "" XXX
  SG_ EP1_Lampe_AutoP : 38|1@1+ (1,0) [0|1] "" XXX
@@ -797,9 +791,15 @@ BO_ 1472 EPB_1: 8 XXX
  SG_ EP1_Warnton2 : 41|1@1+ (1,0) [0|1] "" XXX
  SG_ EP1_AnfShLock : 42|1@1+ (1,0) [0|1] "" XXX
  SG_ EPB_Autoholdlampe : 43|1@1+ (1,0) [0|1] "" XXX
+ SG_ EP1_QualNeigWi : 44|1@1+ (1,0) [0|1] "" XXX
  SG_ EP1_KuppModBer : 45|2@1+ (1,0) [0|3] "" XXX
  SG_ EP1_HydrHalten : 47|1@1+ (1,0) [0|1] "" XXX
- SG_ EP1_QualNeigWi : 44|1@1+ (1,0) [0|1] "" XXX
+ SG_ EP1_Fkt_Lampe : 48|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ EP1_Warnton : 49|1@1+ (1,0) [0|1] "" XXX
+ SG_ EP1_EP1_Fehler_BKL : 50|1@1+ (1,0) [0|1] "" XXX
+ SG_ EP1_Fehler_gelb : 51|1@1+ (1,0) [0|1] "" XXX
+ SG_ EP1__Text : 52|4@1+ (1,0) [0|8] "" Vector__XXX
+ SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 1326 Diag_Lenkhilfe: 3 XXX
  SG_ Werkstattcode__Diag_ : 16|8@1+ (1,0) [0|0] "" XXX
