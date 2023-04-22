@@ -7,7 +7,6 @@ from opendbc.can.packer import CANPacker
 from opendbc.can.tests.test_packer_parser import can_list_to_can_capnp
 
 
-
 class TestParser(unittest.TestCase):
   def _benchmark(self, signals, checks, thresholds, n):
     parser = CANParser('toyota_new_mc_pt_generated', signals, checks, 0, False)
@@ -40,19 +39,18 @@ class TestParser(unittest.TestCase):
 
     et = sum(ets) / len(ets)
     avg_nanos = et / len(can_msgs)
-    method = 'update_strings'  if n > 1 else 'update_string'
-    print('%s: [%s] %.1fms to parse %s, avg: %dns' % (self._testMethodName, method, et/1e6, len(can_msgs), avg_nanos))
+    print('%s: [%d] %.1fms to parse %s, avg: %dns' % (self._testMethodName, n, et/1e6, len(can_msgs), avg_nanos))
 
     minn, maxx = thresholds
     self.assertLess(avg_nanos, maxx)
     self.assertGreater(avg_nanos, minn, "Performance seems to have improved, update test thresholds.")
 
-  # def test_performance_one_signal(self):
-  #   signals = [
-  #     ("ACCEL_CMD", "ACC_CONTROL"),
-  #   ]
-  #   self._benchmark(signals, [('ACC_CONTROL', 10)], (5000, 15000), 1)
-  #   self._benchmark(signals, [('ACC_CONTROL', 10)], (2200, 3000), 10)
+  def test_performance_one_signal(self):
+    signals = [
+      ("ACCEL_CMD", "ACC_CONTROL"),
+    ]
+    self._benchmark(signals, [('ACC_CONTROL', 10)], (5000, 15000), 1)
+    self._benchmark(signals, [('ACC_CONTROL', 10)], (2200, 3000), 10)
 
   def test_performance_all_signals(self):
     signals = [
