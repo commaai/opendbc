@@ -46,12 +46,9 @@ class TestCanParserPacker(unittest.TestCase):
         self.assertEqual(dat[0], i)
 
   def test_packer_counter(self):
-    signals = [
-      ("COUNTER", "CAN_FD_MESSAGE"),
-    ]
-    checks = [("CAN_FD_MESSAGE", 0), ]
+    msgs = [("CAN_FD_MESSAGE", 0), ]
     packer = CANPacker(TEST_DBC)
-    parser = CANParser(TEST_DBC, signals, checks, 0)
+    parser = CANParser(TEST_DBC, msgs, 0)
 
     # packer should increment the counter
     for i in range(1000):
@@ -79,12 +76,9 @@ class TestCanParserPacker(unittest.TestCase):
       self.assertEqual(parser.vl["CAN_FD_MESSAGE"]["COUNTER"], (cnt + i) % 256)
 
   def test_parser_can_valid(self):
-    signals = [
-      ("COUNTER", "CAN_FD_MESSAGE"),
-    ]
-    checks = [("CAN_FD_MESSAGE", 10), ]
+    msgs = [("CAN_FD_MESSAGE", 10), ]
     packer = CANPacker(TEST_DBC)
-    parser = CANParser(TEST_DBC, signals, checks, 0)
+    parser = CANParser(TEST_DBC, msgs, 0)
 
     # shouldn't be valid initially
     self.assertFalse(parser.can_valid)
@@ -120,7 +114,7 @@ class TestCanParserPacker(unittest.TestCase):
     ]
 
     packer = CANPacker(TEST_DBC)
-    parser = CANParser(TEST_DBC, signals, [], 0, enforce_checks=False)
+    parser = CANParser(TEST_DBC, [(s, 0) for s in set([x[1] for x in signals])], 0, enforce_checks=False)
 
     for steer in range(-256, 255):
       for active in (1, 0):
@@ -154,13 +148,8 @@ class TestCanParserPacker(unittest.TestCase):
   def test_scale_offset(self):
     """Test that both scale and offset are correctly preserved"""
     dbc_file = "honda_civic_touring_2016_can_generated"
-
-    signals = [
-      ("USER_BRAKE", "VSA_STATUS"),
-    ]
-    checks = [("VSA_STATUS", 50)]
-
-    parser = CANParser(dbc_file, signals, checks, 0)
+    msgs = [("VSA_STATUS", 50)]
+    parser = CANParser(dbc_file, msgs, 0)
     packer = CANPacker(dbc_file)
 
     for brake in range(0, 100):
@@ -177,15 +166,9 @@ class TestCanParserPacker(unittest.TestCase):
 
     dbc_file = "subaru_global_2017_generated"
 
-    signals = [
-      ("COUNTER", "ES_LKAS"),
-      ("LKAS_Output", "ES_LKAS"),
-      ("LKAS_Request", "ES_LKAS"),
-      ("SET_1", "ES_LKAS"),
-    ]
-    checks = [("ES_LKAS", 50)]
+    msgs = [("ES_LKAS", 50)]
 
-    parser = CANParser(dbc_file, signals, checks, 0)
+    parser = CANParser(dbc_file, msgs, 0)
     packer = CANPacker(dbc_file)
 
     idx = 0
@@ -212,9 +195,9 @@ class TestCanParserPacker(unittest.TestCase):
     dbc_file = "honda_civic_touring_2016_can_generated"
 
     freq = 100
-    checks = [("VSA_STATUS", freq), ("STEER_MOTOR_TORQUE", freq/2)]
+    msgs = [("VSA_STATUS", freq), ("STEER_MOTOR_TORQUE", freq/2)]
 
-    parser = CANParser(dbc_file, [], checks, 0)
+    parser = CANParser(dbc_file, msgs, 0)
     packer = CANPacker(dbc_file)
 
     i = 0
@@ -248,11 +231,8 @@ class TestCanParserPacker(unittest.TestCase):
   def test_updated(self):
     """Test updated value dict"""
     dbc_file = "honda_civic_touring_2016_can_generated"
-
-    signals = [("USER_BRAKE", "VSA_STATUS")]
-    checks = [("VSA_STATUS", 50)]
-
-    parser = CANParser(dbc_file, signals, checks, 0)
+    msgs = [("VSA_STATUS", 50)]
+    parser = CANParser(dbc_file, msgs, 0)
     packer = CANPacker(dbc_file)
 
     # Make sure nothing is updated
@@ -282,16 +262,12 @@ class TestCanParserPacker(unittest.TestCase):
     """Test message timestamp dict"""
     dbc_file = "honda_civic_touring_2016_can_generated"
 
-    signals = [
-      ("USER_BRAKE", "VSA_STATUS"),
-      ("PEDAL_GAS", "POWERTRAIN_DATA"),
-    ]
-    checks = [
+    msgs = [
       ("VSA_STATUS", 50),
       ("POWERTRAIN_DATA", 100),
     ]
 
-    parser = CANParser(dbc_file, signals, checks, 0)
+    parser = CANParser(dbc_file, msgs, 0)
     packer = CANPacker(dbc_file)
 
     # Check the default timestamp is zero

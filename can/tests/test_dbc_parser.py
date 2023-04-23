@@ -14,6 +14,9 @@ class TestDBCParser(unittest.TestCase):
     for dbc in glob.glob(f"{DBC_PATH}/*.dbc"):
       cls.dbcs.append(os.path.basename(dbc).split('.')[0])
 
+    # sanity check that we're running on the real DBCs
+    assert len(cls.dbcs) > 20
+
   def test_parse_all_dbcs(self):
     """
       Dynamic DBC parser checks:
@@ -22,10 +25,9 @@ class TestDBCParser(unittest.TestCase):
         - Signal out of bounds
         - All BO_, SG_, VAL_ lines for syntax errors
     """
-
     for dbc in self.dbcs:
       with self.subTest(dbc=dbc):
-        CANParser(dbc, [], [], 0)
+        CANParser(dbc, [], 0)
 
 
 if __name__ == "__main__":
