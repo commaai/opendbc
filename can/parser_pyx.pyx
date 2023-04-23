@@ -2,6 +2,7 @@
 # cython: c_string_encoding=ascii, language_level=3
 
 from cython.operator cimport dereference as deref, preincrement as preinc
+from libcpp.pair cimport pair
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp.unordered_set cimport unordered_set
@@ -10,7 +11,7 @@ from libcpp cimport bool
 from libcpp.map cimport map
 
 from .common cimport CANParser as cpp_CANParser
-from .common cimport MessageParseOptions, dbc_lookup, SignalValue, DBC
+from .common cimport dbc_lookup, SignalValue, DBC
 
 import os
 import numbers
@@ -72,15 +73,11 @@ cdef class CANParser:
     #    err_msg = ', '.join(f"{self.address_to_msg_name[addr].decode()} ({hex(addr)})" for addr in unchecked)
     #    raise RuntimeError(f"Unchecked addrs: {err_msg}")
 
-    message_options = dict(messages)
-    cdef vector[MessageParseOptions] message_options_v
-    cdef MessageParseOptions mpo
-    for msg_address, freq in message_options.items():
-      mpo.address = msg_address
-      mpo.check_frequency = freq
-      message_options_v.push_back(mpo)
+    cdef vector[pair[uint32_t, int]] message_v
+    for msg_address, freq in messages:
+      message_v.push_back((msg_address, freq))
 
-    self.can = new cpp_CANParser(bus, dbc_name, message_options_v)
+    self.can = new cpp_CANParser(bus, dbc_name, message_v)
     self.update_strings([])
 
   def update_strings(self, strings, sendcan=False):
