@@ -89,9 +89,7 @@ bool MessageState::update_counter_generic(int64_t v, int cnt_size) {
 }
 
 
-CANParser::CANParser(int abus, const std::string& dbc_name,
-          const std::vector<MessageParseOptions> &options,
-          const std::vector<SignalParseOptions> &sigoptions)
+CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<MessageParseOptions> &options)
   : bus(abus), aligned_buf(kj::heapArray<capnp::word>(1024)) {
   dbc = dbc_lookup(dbc_name);
   assert(dbc);
@@ -128,28 +126,10 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
     state.size = msg->size;
     assert(state.size <= 64);  // max signal size is 64 bytes
 
-    // track checksums and counters for this message
-    for (const auto& sig : msg->sigs) {
-      if (sig.type != SignalType::DEFAULT) {
-        state.parse_sigs.push_back(sig);
-        state.vals.push_back(0);
-        state.all_vals.push_back({});
-      }
-    }
-
-    // track requested signals for this message
-    for (const auto& sigop : sigoptions) {
-      if (sigop.address != op.address) continue;
-
-      for (const auto& sig : msg->sigs) {
-        if (sig.name == sigop.name && sig.type == SignalType::DEFAULT) {
-          state.parse_sigs.push_back(sig);
-          state.vals.push_back(0);
-          state.all_vals.push_back({});
-          break;
-        }
-      }
-    }
+    // track all signals for this message
+    state.parse_sigs = msg->sigs;
+    state.vals.resize(msg->sigs.size());
+    state.all_vals.resize(msg->sigs.size());
   }
 }
 

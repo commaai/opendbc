@@ -12,11 +12,6 @@ struct SignalPackValue {
   double value;
 };
 
-struct SignalParseOptions {
-  uint32_t address;
-  std::string name;
-};
-
 struct MessageParseOptions {
   uint32_t address;
   int check_frequency;

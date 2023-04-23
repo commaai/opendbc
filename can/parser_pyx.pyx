@@ -10,7 +10,7 @@ from libcpp cimport bool
 from libcpp.map cimport map
 
 from .common cimport CANParser as cpp_CANParser
-from .common cimport SignalParseOptions, MessageParseOptions, dbc_lookup, SignalValue, DBC
+from .common cimport MessageParseOptions, dbc_lookup, SignalValue, DBC
 
 import os
 import numbers
@@ -30,10 +30,7 @@ cdef class CANParser:
     dict ts_nanos
     string dbc_name
 
-  def __init__(self, dbc_name, signals, checks=None, bus=0, enforce_checks=True):
-    if checks is None:
-      checks = []
-
+  def __init__(self, dbc_name, messages, bus, enforce_checks=True):
     self.dbc_name = dbc_name
     self.dbc = dbc_lookup(dbc_name)
     if not self.dbc:
@@ -57,43 +54,25 @@ cdef class CANParser:
       self.ts_nanos[msg.address] = {}
       self.ts_nanos[name] = self.ts_nanos[msg.address]
 
-    # Convert message names into addresses
-    for i in range(len(signals)):
-      s = signals[i]
-      if not isinstance(s[1], numbers.Number):
-        if name not in msg_name_to_address:
-          print(msg_name_to_address)
-          raise RuntimeError(f"could not find message {repr(name)} in DBC {self.dbc_name}")
-        s = (s[0], msg_name_to_address[s[1]])
-        signals[i] = s
-
-    for i in range(len(checks)):
-      c = checks[i]
+    for i in range(len(messages)):
+      c = messages[i]
       if not isinstance(c[0], numbers.Number):
         if c[0] not in msg_name_to_address:
           print(msg_name_to_address)
           raise RuntimeError(f"could not find message {repr(name)} in DBC {self.dbc_name}")
         c = (msg_name_to_address[c[0]], c[1])
-        checks[i] = c
+        messages[i] = c
 
-    if enforce_checks:
-      checked_addrs = {c[0] for c in checks}
-      signal_addrs = {s[1] for s in signals}
-      unchecked = signal_addrs - checked_addrs
-      if len(unchecked):
-        err_msg = ', '.join(f"{self.address_to_msg_name[addr].decode()} ({hex(addr)})" for addr in unchecked)
-        raise RuntimeError(f"Unchecked addrs: {err_msg}")
+    # TODO: add this back
+    #if enforce_checks:
+    #  checked_addrs = {c[0] for c in checks}
+    #  signal_addrs = {s[1] for s in signals}
+    #  unchecked = signal_addrs - checked_addrs
+    #  if len(unchecked):
+    #    err_msg = ', '.join(f"{self.address_to_msg_name[addr].decode()} ({hex(addr)})" for addr in unchecked)
+    #    raise RuntimeError(f"Unchecked addrs: {err_msg}")
 
-    cdef vector[SignalParseOptions] signal_options_v
-    cdef SignalParseOptions spo
-    for sig_name, sig_address in signals:
-      spo.address = sig_address
-      spo.name = sig_name
-      signal_options_v.push_back(spo)
-
-    message_options = dict((address, 0) for _, address in signals)
-    message_options.update(dict(checks))
-
+    message_options = dict(messages)
     cdef vector[MessageParseOptions] message_options_v
     cdef MessageParseOptions mpo
     for msg_address, freq in message_options.items():
@@ -101,7 +80,7 @@ cdef class CANParser:
       mpo.check_frequency = freq
       message_options_v.push_back(mpo)
 
-    self.can = new cpp_CANParser(bus, dbc_name, message_options_v, signal_options_v)
+    self.can = new cpp_CANParser(bus, dbc_name, message_options_v)
     self.update_strings([])
 
   def update_strings(self, strings, sendcan=False):

@@ -50,11 +50,6 @@ cdef extern from "common_dbc.h":
     vector[Msg] msgs
     vector[Val] vals
 
-  cdef struct SignalParseOptions:
-    uint32_t address
-    string name
-
-
   cdef struct MessageParseOptions:
     uint32_t address
     int check_frequency
@@ -77,7 +72,7 @@ cdef extern from "common.h":
   cdef cppclass CANParser:
     bool can_valid
     bool bus_timeout
-    CANParser(int, string, vector[MessageParseOptions], vector[SignalParseOptions])
+    CANParser(int, string, vector[MessageParseOptions])
     void update_strings(vector[string]&, vector[SignalValue]&, bool)
 
   cdef cppclass CANPacker:
