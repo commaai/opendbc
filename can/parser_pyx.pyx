@@ -31,7 +31,7 @@ cdef class CANParser:
     dict ts_nanos
     string dbc_name
 
-  def __init__(self, dbc_name, messages, bus, enforce_checks=True):
+  def __init__(self, dbc_name, messages, bus):
     self.dbc_name = dbc_name
     self.dbc = dbc_lookup(dbc_name)
     if not self.dbc:
@@ -63,15 +63,6 @@ cdef class CANParser:
           raise RuntimeError(f"could not find message {repr(name)} in DBC {self.dbc_name}")
         c = (msg_name_to_address[c[0]], c[1])
         messages[i] = c
-
-    # TODO: add this back
-    #if enforce_checks:
-    #  checked_addrs = {c[0] for c in checks}
-    #  signal_addrs = {s[1] for s in signals}
-    #  unchecked = signal_addrs - checked_addrs
-    #  if len(unchecked):
-    #    err_msg = ', '.join(f"{self.address_to_msg_name[addr].decode()} ({hex(addr)})" for addr in unchecked)
-    #    raise RuntimeError(f"Unchecked addrs: {err_msg}")
 
     cdef vector[pair[uint32_t, int]] message_v
     for msg_address, freq in messages:

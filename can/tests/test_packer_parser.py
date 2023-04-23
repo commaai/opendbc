@@ -98,23 +98,13 @@ class TestCanParserPacker(unittest.TestCase):
       self.assertTrue(parser.can_valid)
 
   def test_packer_parser(self):
-
-    signals = [
-      ("COUNTER", "STEERING_CONTROL"),
-      ("CHECKSUM", "STEERING_CONTROL"),
-      ("STEER_TORQUE", "STEERING_CONTROL"),
-      ("STEER_TORQUE_REQUEST", "STEERING_CONTROL"),
-
-      ("Signal1", "Brake_Status"),
-
-      ("COUNTER", "CAN_FD_MESSAGE"),
-      ("64_BIT_LE", "CAN_FD_MESSAGE"),
-      ("64_BIT_BE", "CAN_FD_MESSAGE"),
-      ("SIGNED", "CAN_FD_MESSAGE"),
+    msgs = [
+      ("Brake_Status", 0),
+      ("CAN_FD_MESSAGE", 0),
+      ("STEERING_CONTROL", 0),
     ]
-
     packer = CANPacker(TEST_DBC)
-    parser = CANParser(TEST_DBC, [(s, 0) for s in set([x[1] for x in signals])], 0, enforce_checks=False)
+    parser = CANParser(TEST_DBC, msgs, 0)
 
     for steer in range(-256, 255):
       for active in (1, 0):
