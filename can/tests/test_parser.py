@@ -9,7 +9,7 @@ from opendbc.can.tests.test_packer_parser import can_list_to_can_capnp
 
 class TestParser(unittest.TestCase):
   def _benchmark(self, checks, thresholds, n):
-    parser = CANParser('toyota_new_mc_pt_generated', checks, 0, False)
+    parser = CANParser('toyota_new_mc_pt_generated', checks, 0)
     packer = CANPacker('toyota_new_mc_pt_generated')
 
     can_msgs = []
