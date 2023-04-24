@@ -796,7 +796,7 @@ BO_ 1472 EPB_1: 8 XXX
  SG_ EP1_HydrHalten : 47|1@1+ (1,0) [0|1] "" XXX
  SG_ EP1_Fkt_Lampe : 48|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ EP1_Warnton : 49|1@1+ (1,0) [0|1] "" XXX
- SG_ EP1_EP1_Fehler_BKL : 50|1@1+ (1,0) [0|1] "" XXX
+ SG_ EP1_Fehler_BKL : 50|1@1+ (1,0) [0|1] "" XXX
  SG_ EP1_Fehler_gelb : 51|1@1+ (1,0) [0|1] "" XXX
  SG_ EP1__Text : 52|4@1+ (1,0) [0|8] "" Vector__XXX
  SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" XXX
