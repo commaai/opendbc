@@ -51,5 +51,7 @@ RUN git clone https://github.com/commaai/cereal.git /project/cereal && \
     cd /project/cereal && \
     git checkout 959ff79963b80829be9902d146c31fda44dbbd20 && \
     rm -rf .git && \
-    scons -j$(nproc) && \
-    cp -r SConstruct site_scons ..
+    scons -j$(nproc)
+
+COPY SConstruct .
+COPY ./site_scons /project/site_scons
