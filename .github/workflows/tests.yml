@@ -26,7 +26,8 @@ jobs:
       run: |
         ${{ env.RUN }} "cd ../ && \
                         scons -c -j4 && \
-                        scons -j$(nproc) ${{ matrix.flags }} &&\
+                        scons -j$(nproc) ${{ matrix.flags }} && \
+                        cd opendbc && \
                         python -m unittest discover ."
 
   static-analysis:
