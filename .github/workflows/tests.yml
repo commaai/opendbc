@@ -21,10 +21,12 @@ jobs:
     - uses: actions/checkout@v3
     - name: Build Docker image
       run: eval "$BUILD"
-    - name: Build opendbc
-      run: ${{ env.RUN }} "cd ../ && scons -c -j4 && scons -j$(nproc) ${{ matrix.flags }}"
-    - name: Unit tests
-      run: ${{ env.RUN }} "python -m unittest discover ."
+    - name: Run tests
+      run: |
+        ${{ env.RUN }} "cd ../ && \
+                        scons -c -j4 && \
+                        scons -j$(nproc) ${{ matrix.flags }} &&\
+                        python -m unittest discover ."
 
   static-analysis:
     name: static analysis
