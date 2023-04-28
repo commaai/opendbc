@@ -23,6 +23,10 @@ AddOption('--asan',
           action='store_true',
           help='turn on ASAN')
 
+AddOption('--asan',
+          action='store_true',
+          help='turn on ASAN')
+
 ccflags_asan = ["-fsanitize=address", "-fno-omit-frame-pointer"] if GetOption('asan') else []
 ldflags_asan = ["-fsanitize=address"] if GetOption('asan') else []
 

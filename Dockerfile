@@ -53,5 +53,5 @@ RUN git clone https://github.com/commaai/cereal.git /project/cereal && \
     rm -rf .git && \
     scons -j$(nproc)
 
-COPY SConstruct .
+COPY cereal/SConstruct .
 COPY ./site_scons /project/site_scons
