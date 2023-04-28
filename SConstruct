@@ -79,13 +79,13 @@ envCython["CCFLAGS"] += ["-Wno-#warnings", "-Wno-shadow", "-Wno-deprecated-decla
 
 python_libs = []
 if arch == "Darwin":
-  envCython["LINKFLAGS"] = ["-bundle", "-undefined", "dynamic_lookup"]
+  envCython["LINKFLAGS"] += ["-bundle", "-undefined", "dynamic_lookup"]
 elif arch == "aarch64":
-  envCython["LINKFLAGS"] = ["-shared"]
+  envCython["LINKFLAGS"] += ["-shared"]
 
   python_libs.append(os.path.basename(python_path))
 else:
-  envCython["LINKFLAGS"] = ["-pthread", "-shared"]
+  envCython["LINKFLAGS"] += ["-pthread", "-shared"]
 
 envCython["LIBS"] = python_libs
 
