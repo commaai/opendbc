@@ -91,10 +91,10 @@ BO_ 201 SteeringWheelAngle_DSC: 8 SZL
  SG_ SteeringPosition : 0|16@1- (0.0428316886,0) [-600|600] "deg" DSC
 
 BO_ 206 WheelSpeeds: 8 DSC
- SG_ Wheel1 : 0|16@1- (0.0625,0) [0|255] "kph" XXX
- SG_ Wheel2 : 16|16@1- (0.0625,0) [0|255] "kph" XXX
- SG_ Wheel4 : 48|16@1- (0.0625,0) [0|255] "kph" XXX
- SG_ Wheel3 : 32|16@1- (0.0625,0) [0|255] "kph" XXX
+ SG_ Wheel_FL : 0|16@1- (0.0625,0) [0|255] "kph" XXX
+ SG_ Wheel_FR : 16|16@1- (0.0625,0) [0|255] "kph" XXX
+ SG_ Wheel_RL : 32|16@1- (0.0625,0) [0|255] "kph" XXX
+ SG_ Wheel_RR : 48|16@1- (0.0625,0) [0|255] "kph" XXX
 
 BO_ 884 WheelToleranceAdjustment: 8 DSC
 
