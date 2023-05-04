@@ -498,8 +498,12 @@ BO_ 961 BLINKER_STALKS: 8 XXX
 BO_ 1041 DOORS_SEATBELTS: 8 XXX
  SG_ CHECKSUM_MAYBE : 7|8@0+ (1,0) [0|65535] "" XXX
  SG_ COUNTER_ALT : 15|4@0+ (1,0) [0|15] "" XXX
- SG_ DRIVER_SEATBELT_LATCHED : 42|1@0+ (1,0) [0|1] "" XXX
- SG_ DRIVER_DOOR_OPEN : 24|1@1+ (1,0) [0|1] "" XXX
+ SG_ DRIVER_DOOR : 24|1@1+ (1,0) [0|1] "" XXX
+ SG_ PASSENGER_DOOR : 34|1@0+ (1,0) [0|1] "" XXX
+ SG_ DRIVER_REAR_DOOR : 52|1@0+ (1,0) [0|1] "" XXX
+ SG_ PASSENGER_REAR_DOOR : 56|1@0+ (1,0) [0|1] "" XXX
+ SG_ DRIVER_SEATBELT : 42|1@0+ (1,0) [0|1] "" XXX
+ SG_ PASSENGER_SEATBELT : 36|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1043 BLINKERS: 8 XXX
  SG_ COUNTER_ALT : 15|4@0+ (1,0) [0|15] "" XXX
@@ -570,6 +574,7 @@ VAL_ 69 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
 VAL_ 112 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
 VAL_ 80 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green" ;
 VAL_ 80 LKA_MODE 1 "warning only" 2 "assist" 6 "off" ;
+VAL_ 96 ESP_DISABLED 0 "On" 5 "Limited" 1 "Off";
 VAL_ 234 LKA_FAULT 0 "ok" 1 "lka fault" ;
 VAL_ 298 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green" ;
 VAL_ 298 LKA_MODE 1 "warning only" 2 "assist" 6 "off" ;
@@ -579,4 +584,11 @@ VAL_ 362 BLINKER_CONTROL 1 "hazards" 2 "hazards button backlight" 3 "left blinke
 VAL_ 373 ACCEnable 0 "SCC ready" 1 "SCC temp fault" 2 "SCC permanent fault" 3 "SCC permanent fault, communication issue";
 VAL_ 416 ACCMode 0 "off" 1 "enabled" 2 "driver_override" 3 "off_maybe_fault" 4 "cancelled" ;
 VAL_ 426 CRUISE_BUTTONS 0 "none" 1 "res_accel" 2 "set_decel" 3 "gap_distance" 4 "pause_resume" ;
+VAL_ 426 DISTANCE_UNIT 1 "Miles" 0 "Kilometers";
 VAL_ 463 CRUISE_BUTTONS 0 "none" 1 "res_accel" 2 "set_decel" 3 "gap_distance" 4 "pause_resume" ;
+VAL_ 1041 DRIVER_DOOR 0 "Closed" 1 "Opened";
+VAL_ 1041 PASSENGER_DOOR 0 "Closed" 1 "Opened";
+VAL_ 1041 DRIVER_REAR_DOOR 0 "Closed" 1 "Opened";
+VAL_ 1041 PASSENGER_REAR_DOOR 0 "Closed" 1 "Opened";
+VAL_ 1041 DRIVER_SEATBELT 0 "Unlatched" 1 "Latched";
+VAL_ 1041 PASSENGER_SEATBELT 0 "Unlatched" 1 "Latched";
