@@ -572,6 +572,8 @@ VAL_ 80 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green" ;
 VAL_ 80 LKA_MODE 1 "warning only" 2 "assist" 6 "off" ;
 VAL_ 112 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
 VAL_ 234 LKA_FAULT 0 "ok" 1 "lka fault" ;
+VAL_ 304 PARK_BUTTON 1 "Pressed" 2 "Not Pressed";
+VAL_ 304 KNOB_POSITION 1 "R" 2 "N (on R side)" 3 "Centered" 4 "N (on D side)" 5 "D";
 VAL_ 298 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green" ;
 VAL_ 298 LKA_MODE 1 "warning only" 2 "assist" 6 "off" ;
 VAL_ 298 NEW_SIGNAL_3 plots "opposite" of "LKA_ICON" and "STEER_REQ" ;
