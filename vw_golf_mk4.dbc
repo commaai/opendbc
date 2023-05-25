@@ -303,7 +303,8 @@ BO_ 1408 Motor_Flexia: 8 XXX
  SG_ Multiplex_Schalter_Motor_Flexia M : 0|1@1+ (1,0) [0|0] "" XXX
 
 BO_ 1416 Motor_7: 8 XXX
- SG_ Frei_Motor_7_3 : 40|24@1+ (1,0) [0|0] "" XXX
+ SG_ Oltemperatur : 56|8@1+ (1,0) [0|0] "" XXX
+ SG_ Frei_Motor_7_3 : 40|16@1+ (1,0) [0|0] "" XXX
  SG_ Ladedruck : 32|8@1+ (0.01,0) [0|2.54] "bar" XXX
  SG_ Vorzeichen_Motordrehzahlgradien : 31|1@1+ (1,0) [0|0] "" XXX
  SG_ Motordrehzahlgradient : 24|7@1+ (1,0) [0|126] "U/min" XXX
@@ -321,7 +322,8 @@ BO_ 1160 Motor_6: 8 XXX
  SG_ Frei_Motor_6_4 : 58|2@1+ (1,0) [0|0] "" XXX
  SG_ ltemperaturschutz : 57|1@1+ (1,0) [0|0] "" XXX
  SG_ GRA_Bremseingriff_Freigabe : 56|1@1+ (1,0) [0|0] "" XXX
- SG_ Frei_Motor_6_3 : 40|16@1+ (1,0) [0|0] "" XXX
+ SG_ Frei_Motor_6_3 : 48|8@1+ (1,0) [0|0] "" XXX
+ SG_ Ruckmeldung_Momenten : 40|8@1+ (0.39,0) [0|100] "" XXX
  SG_ GRA_Sollbeschleunigung : 32|8@1+ (0.024,-3.984) [-3.984|2.112] "m/s2" XXX
  SG_ Hoeheninfo__Motor_6_ : 24|8@1+ (0.00787,0) [0|2] "" XXX
  SG_ Istmoment_f_r_Getriebe : 16|8@1+ (0.39,0) [0|99] "MDI" XXX
@@ -1484,6 +1486,7 @@ CM_ SG_ 640 mechanisches_Motor_Verlustmomen "Mechanical Torque Loss";
 CM_ SG_ 640 Fahrpedalwert_oder_Drosselklapp "Accelerator Pedal or Throttle Position";
 CM_ SG_ 640 Motordrehzahl "Engine Speed";
 CM_ SG_ 640 Momentenangaben_ungenau "Approximate Torque Values";
+CM_ SG_ 640 inneres_Motor_Moment_ohne_exter "Inner torque without external";
 
 CM_ SG_ 644 MOB_CHECKSUM "Checksum MOB";
 CM_ SG_ 644 MOB_COUNTER "Counter MOB";
@@ -1514,6 +1517,9 @@ CM_ SG_ 912 BSK_HD_Hauptraste "Status of trunk lid main detent";
 
 CM_ SG_ 1088 Zaehler_Getriebe_1 "Counter Getriebe_1";
 CM_ SG_ 1088 Waehlhebelposition__Getriebe_1_ "Gear Selector Position";
+CM_ SG_ 1088 inneres_Soll_Motormoment "Desired Inner Torque";
+CM_ SG_ 1088 Schaltabsicht "Shift Intent";
+CM_ SG_ 1088 Wandlerverlustmoment "Converter Torque Loss";
 
 CM_ SG_ 1056 Fehlerstatus_Aussentemp__4_1 "ambient temp error";
 CM_ SG_ 1056 Fehlerstatus_Oeltemperatur_4_1 "oil temp error";
@@ -1524,15 +1530,30 @@ CM_ SG_ 1056 Kuehlmitteltemp__4_1__Kombi_2_ "kombi coolant temperature";
 
 CM_ SG_ 1096 Zaehler_Waehlhebel_1 "Counter Waehlhebel_1";
 
-CM_ SG_ 1152 Checksumme_Motor_5 "Checksum Motor_5";
+CM_ SG_ 1152 CHECKSUM "Checksum Motor_5";
+CM_ SG_ 1152 Anlasser_Ausspuren "Starter Disable";
+CM_ SG_ 1152 Anlasser_Freigabe "Starter Release";
+CM_ SG_ 1152 Klimadrucksignal__Motor_5_ "Air conditioning pressure signal";
+CM_ SG_ 1152 Kraftstoffverbrauchssignal "Fuel consumption signal";
+CM_ SG_ 1152 K_hlerluefteransteuerung "Cooling fan control signal";
+CM_ SG_ 1152 Klimakompressor_Leistungsreduzi "Air conditioning compressor power reduction flag";
+CM_ SG_ 1152 Klimakompressor_aus__Motor_5_ "Air conditioning compressor";
+CM_ SG_ 1152 Anlasser_Freigabe "Starter release";
+CM_ SG_ 1152 OBD_2_Lampe "OBD light";
+CM_ SG_ 1152 E_Gas_Lampe "ETB light";
+CM_ SG_ 1152 Ladekontroll_Lampe "Charge light";
+CM_ SG_ 1152 Vorgluehlampe__Motor_5_ "Glow light";
 
 CM_ SG_ 1160 Zaehler_Motor_6 "Counter Motor_6";
 CM_ SG_ 1160 Hoeheninfo__Motor_6_ "Altitude Correction";
-CM_ SG_ 1160 Istmoment_f_r_Getriebe "Actual Torque";
-CM_ SG_ 1160 Sollmoment_f_r_Getriebe "Target Torque";
+CM_ SG_ 1160 Istmoment_f_r_Getriebe "Actual torque for gear";
+CM_ SG_ 1160 Sollmoment_f_r_Getriebe "Target torque for gearbox";
 CM_ SG_ 1160 Checksumme_Motor_6 "Checksum Motor_6";
+CM_ SG_ 1160 GRA_Sollbeschleunigung "GRA target acceleration";
+CM_ SG_ 1160 Ruckmeldung_Momenten "Feedback torque-integral gear intervention";
 
 CM_ SG_ 1344 Zahler_Getriebe_2 "Counter Getriebe_2";
+CM_ SG_ 1344 Hochschaltlampe "Upshift Flag";
 
 CM_ SG_ 1386 ACA_V_Wunsch "255=unset";
 
@@ -1547,6 +1568,9 @@ CM_ SG_ 1408 Ansaugsystem "Induction System";
 CM_ SG_ 1408 Motorleistung "Maximum engine power";
 
 CM_ SG_ 1416 Ladedruck "Boost Pressure";
+CM_ SG_ 1416 Motordrehzahlgradient "Engine speed gradient";
+CM_ SG_ 1416 Hoeheninfo__Motor_7_ "Altitude correction factor";
+CM_ SG_ 1416 Oltemperatur "Oil temperature";
 
 CM_ SG_ 1470 LDW_Direction "0=right,1=left";
 CM_ SG_ 1470 XX_DLCORTLC1 "Might be DLC or TLC";
