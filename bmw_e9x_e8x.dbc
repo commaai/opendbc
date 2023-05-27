@@ -42,9 +42,9 @@ BO_ 170 AccPedal: 8 DME
  SG_ CruisePedalInactive : 55|1@0+ (1,0) [0|1] "" XXX
  SG_ ThrottlelPressed : 50|1@0+ (1,0) [0|1] "" XXX
  SG_ AcceleratorPedalPressed : 52|1@0+ (1,0) [0|7] "" XXX
- SG_ AcceleratorPedalPercentage : 16|16@1+ (0.01,0) [0|100] "" XXX
+ SG_ AcceleratorPedalPercentage : 16|16@1+ (0.04,0) [0|100] "" XXX
  SG_ Counter_170 : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ EngineSpeed : 32|16@1- (0.25,0) [0|65535] "U/min" XXX
+ SG_ EngineSpeed : 32|16@1+ (0.25,0) [0|8000] "rpm" XXX
  SG_ Checksum_170 : 0|8@1- (1,0) [0|65535] "" XXX
 
 BO_ 404 CruiseControl: 4 SZL
@@ -98,10 +98,10 @@ BO_ 201 SteeringWheelAngle_DSC: 8 SZL
  SG_ SteeringPosition : 0|16@1- (0.0428316886,0) [-600|600] "deg" DSC
 
 BO_ 206 WheelSpeeds: 8 DSC
- SG_ Wheel1 : 0|16@1- (0.0643699,0) [0|255] "kph" XXX
- SG_ Wheel2 : 16|16@1- (0.0643699,0) [0|255] "kph" XXX
- SG_ Wheel4 : 48|16@1- (0.0643699,0) [0|255] "kph" XXX
- SG_ Wheel3 : 32|16@1- (0.0643699,0) [0|255] "kph" XXX
+ SG_ Wheel_FL : 0|16@1- (0.0625,0) [0|255] "kph" XXX
+ SG_ Wheel_FR : 16|16@1- (0.0625,0) [0|255] "kph" XXX
+ SG_ Wheel_RL : 32|16@1- (0.0625,0) [0|255] "kph" XXX
+ SG_ Wheel_RR : 48|16@1- (0.0625,0) [0|255] "kph" XXX
 
 BO_ 884 WheelToleranceAdjustment: 8 DSC
 
@@ -141,6 +141,10 @@ BO_ 182 DynamicCruiseControlTorqueDemand: 8 DSC
 
 BO_ 186 TransmissionData: 8 EGS
  SG_ Counter_186 : 48|4@1+ (1,0) [0|14] "" XXX
+ SG_ Shifting : 4|1@1+ (1,0) [0|15] "" XXX
+ SG_ OutputShaftSpeed : 24|16@1- (0.125,0) [0|255] "rpm" XXX
+ SG_ GearRatio : 8|8@1+ (0.05,0) [0|255] "" XXX
+ SG_ GearTar : 0|4@1+ (1,-4) [0|255] "" XXX
  SG_ Checksum_186 : 40|8@1+ (1,0) [0|15] "" XXX
 
 BO_ 191 RequestedWheelTorqueDriveTrain: 8 LDM
@@ -198,6 +202,7 @@ BO_ 408 GearSelectorSwitch: 8 GWS
 BO_ 422 DistanceRoute: 8 DSC
 
 BO_ 436 InstrumentClusterStatus_KOMBI: 8 CCC
+ SG_ HandbrakeActive : 41|1@1+ (1,0) [0|3] "" XXX
 
 BO_ 464 EngineData: 8 DME
  SG_ RPM_IDLG_TAR : 56|8@1+ (5,0) [0|1270] "1/min" XXX
@@ -206,7 +211,7 @@ BO_ 464 EngineData: 8 DME
  SG_ AIP_ENG : 24|8@1+ (2,598) [600|1106] "hPa" XXX
  SG_ ST_SW_WAUP : 22|2@1+ (1,0) [0|0] "" XXX
  SG_ ST_ENG_RUN : 20|2@1+ (1,0) [0|0] ""  XXX
- SG_ Counter_464 : 16|4@0+ (1,0) [0|14] "" XXX
+ SG_ Counter_464 : 16|4@1+ (1,0) [0|14] "" XXX
  SG_ TEMP_EOI : 8|8@1+ (1,-48) [0|0] "C" XXX
  SG_ TEMP_ENG : 0|8@1+ (1,-48) [0|0] "C" XXX
 
@@ -221,7 +226,7 @@ BO_ 200 SteeringWheelAngle_slow: 6 SZL
 
 BO_ 466 TransmissionDataDisplay: 8 EGS
  SG_ ShiftLeverMode : 32|2@1+ (1,0) [0|3] "" XXX
- SG_ GearRelated_TBD : 12|4@1+ (1,0) [0|15] "" XXX
+ SG_ GearAct : 12|4@1+ (1,-4) [0|15] "" XXX
  SG_ Counter_466 : 28|4@1+ (1,0) [0|14] "" XXX
  SG_ ShiftLeverPosition : 0|4@1+ (1,0) [0|8] "" XXX
  SG_ xFF : 40|8@1+ (1,0) [0|255] "" XXX
@@ -720,6 +725,7 @@ BO_ 843 Seat_back_lock_status_FA: 8 SM_FA
 BO_ 845 Status_seat_back_lock_BF: 8 SM_BF
 
 BO_ 847 Status_contact_handbrake: 8 JBBF
+ SG_ Handbrake_push : 0|2@1+ (1,0) [0|3] "" XXX
 
 BO_ 858 Appointment_Condition_Based_Service: 8 CCC
 
@@ -853,7 +859,6 @@ BO_ 996 Configuration_rear_view_camera_CKM: 8 CCC
 CM_ SG_ 170 ThrottlelPressed "Active when accelerator pedal pressed or cruise control: drives";
 CM_ SG_ 170 AcceleratorPedalPressed "Active only when driver actually presses the pedal";
 CM_ SG_ 170 AcceleratorPedalPercentage "ToDo Factor to be adjusted";
-
 CM_ SG_ 404 plus1mph_request "Appears when +1mph/kph stalk is depressed";
 CM_ SG_ 404 minus1mph_request "Appears when -1mph/kph stalk is depressed";
 CM_ SG_ 404 Cancel_request_up_stalk "Appears when cancel stalk (up) is depressed";
@@ -871,7 +876,8 @@ CM_ SG_ 169 ALIV_TORQ_2_DME "Counter TORQ_2";
 CM_ SG_ 182 TORQ_TAR_DSC "torque target DSC";
 
 CM_ SG_ 403 CruiseControlSetpointSpeed "Speed target - unit depends on locale";
-
+CM_ SG_ 186 GearTar "Values corresponds to forward gears. TBD Add enums for park, reverse";
+CM_ SG_ 466 GearAct "TransmissionDataDisplay";
 CM_ SG_ 414 DSC_full_off "0x4 enabling, 0xA enabled. TBD";
 
 CM_ SG_ 416 YawRate "Lateral Acceleration";
