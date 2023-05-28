@@ -772,25 +772,19 @@ BO_ 1340 Fahrwerk_1: 1 XXX
  SG_ Ansteuererung_Fahrzeugniveau : 0|4@1+ (1,0) [0|15] "" XXX
 
 BO_ 1472 EPB_1: 8 XXX
- SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 0|4@1+ (1,0) [0|15] "" XXX
- SG_ EP1__Text : 52|4@1+ (1,0) [0|8] "" Vector__XXX
- SG_ EP1_Failure_gelb : 51|1@1+ (1,0) [0|1] "" XXX
- SG_ EP1_Failure_BKL : 50|1@1+ (1,0) [0|1] "" XXX
- SG_ EP1_Warnton : 49|1@1+ (1,0) [0|1] "" XXX
- SG_ EP1_Fkt_Lampe : 48|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ EP1_Freigabe_Ver : 33|1@1+ (1,0) [0|1] "" XXX
- SG_ EP1_Failureeintr : 32|1@1+ (1,0) [0|1] "" XXX
- SG_ EP1_Neig_winkel : 16|8@1+ (1,-128) [-128|127] "g" XXX
- SG_ EP1_Verzoegerung : 24|8@1+ (0.048,-7.968) [-7.968|4.224] "g" XXX
- SG_ EP1_Sta_NWS : 15|1@1+ (1,0) [0|1] "" XXX
- SG_ EP1_Schalterinfo : 13|2@1+ (1,0) [0|3] "" XXX
- SG_ EP1_Spannkraft : 8|5@1+ (1,0) [0|30] "kN" XXX
- SG_ EP1_Sta_Schalter : 7|1@1+ (1,0) [0|1] "" XXX
+ SG_ EP1_Fehler_Sta : 4|2@1+ (1,0) [0|3] "" Vector__XXX
  SG_ EP1_Sta_EPB : 6|1@1+ (1,0) [0|1] "" XXX
- SG_ EP1_Failure_Sta : 4|2@1+ (1,0) [0|3] "" XXX
+ SG_ EP1_Sta_Schalter : 7|1@1+ (1,0) [0|1] "" XXX
+ SG_ EP1_Spannkraft : 8|5@1+ (1,0) [0|30] "Unit_KiloNewto" XXX
+ SG_ EP1_Schalterinfo : 13|2@1+ (1,0) [0|3] "" XXX
+ SG_ EP1_Sta_NWS : 15|1@1+ (1,0) [0|1] "" XXX
+ SG_ EP1_Neig_winkel : 16|8@1+ (1,-128) [-128|127] "Unit_PerCentOfForceOfGravi" XXX
+ SG_ EP1_Verzoegerung : 24|8@1+ (0.048,-7.968) [-7.968|4.224] "Unit_MeterPerSeconSquar" XXX
+ SG_ EP1_Fehlereintr : 32|1@1+ (1,0) [0|1] "" XXX
+ SG_ EP1_Freigabe_Ver : 33|1@1+ (1,0) [0|1] "" XXX
  SG_ EP1_AutoHold_zul : 34|1@1+ (1,0) [0|1] "" XXX
- SG_ EP1_AutoHold_active : 35|1@1+ (1,0) [0|1] "" XXX
+ SG_ EP1_AutoHold_aktiv : 35|1@1+ (1,0) [0|1] "" XXX
  SG_ EP1_SleepInd : 36|1@1+ (1,0) [0|1] "" XXX
  SG_ EP1_Status_Kl_15 : 37|1@1+ (1,0) [0|1] "" XXX
  SG_ EP1_Lampe_AutoP : 38|1@1+ (1,0) [0|1] "" XXX
@@ -799,9 +793,15 @@ BO_ 1472 EPB_1: 8 XXX
  SG_ EP1_Warnton2 : 41|1@1+ (1,0) [0|1] "" XXX
  SG_ EP1_AnfShLock : 42|1@1+ (1,0) [0|1] "" XXX
  SG_ EPB_Autoholdlampe : 43|1@1+ (1,0) [0|1] "" XXX
+ SG_ EP1_QualNeigWi : 44|1@1+ (1,0) [0|1] "" XXX
  SG_ EP1_KuppModBer : 45|2@1+ (1,0) [0|3] "" XXX
  SG_ EP1_HydrHalten : 47|1@1+ (1,0) [0|1] "" XXX
- SG_ EP1_QualNeigWi : 44|1@1+ (1,0) [0|1] "" XXX
+ SG_ EP1_Fkt_Lampe : 48|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ EP1_Warnton : 49|1@1+ (1,0) [0|1] "" XXX
+ SG_ EP1_Fehler_BKL : 50|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ EP1_Fehler_gelb : 51|1@1+ (1,0) [0|1] "" XXX
+ SG_ EP1__Text : 52|4@1+ (1,0) [0|8] "" Vector__XXX
+ SG_ CHECKSUM : 56|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 1326 Diag_Lenkhilfe: 3 XXX
  SG_ Werkstattcode__Diag_ : 16|8@1+ (1,0) [0|0] "" XXX
@@ -1640,3 +1640,30 @@ VAL_ 1386 ACA_ID_StaGRA 0 "keine_Anzeige" ;
 VAL_ 1386 ACA_Codierung 0 "ACC" 1 "GRA" ;
 VAL_ 1386 ACA_Tachokranz 0 "nicht_beleuchtet" 1 "beleuchtet" ;
 VAL_ 1386 ACA_Aend_Zeitluecke 1 "Anzeige_angef" 0 "keine_Anzeige" ;
+
+VAL_ 1472 EP1_Fehler_Sta 0 "volle_Funktion" 1 "linke_Seite_fehlerhaft" 2 "rechte_Seite_fehlerhaft" 3 "beide_Seiten_fehlerhaft";
+VAL_ 1472 EP1_Sta_EPB 0 "Bremse_geoeffnet" 1 "Bremse_geschlossen";
+VAL_ 1472 EP1_Sta_Schalter 0 "volle_Funktion" 1 "Schalter_ausser_Funktion";
+VAL_ 1472 EP1_Spannkraft 31 "Fehler";
+VAL_ 1472 EP1_Schalterinfo 0 "keine_Fahreranforderung" 1 "Fahreranforderung_oeffnen" 2 "Fahreranforderung_schliessen" 3 "Schalterfehler";
+VAL_ 1472 EP1_Sta_NWS 0 "volle_Funktion" 1 "keine_Funktion";
+VAL_ 1472 EP1_Fehlereintr 0 "kein_Fehlerspeichereintrag" 1 "Fehlerspeichereintrag";
+VAL_ 1472 EP1_Freigabe_Ver 0 "Verzoegerungsanf_nicht_freigegeb" 1 "Verzoegerungsanf_freigegeben";
+VAL_ 1472 EP1_AutoHold_zul 0 "Pers_nicht_zulaessig" 1 "Pers_zulaessig";
+VAL_ 1472 EP1_AutoHold_aktiv 0 "nein" 1 "ja";
+VAL_ 1472 EP1_SleepInd 0 "CAN_wird_benoetigt" 1 "Sleep_bereit";
+VAL_ 1472 EP1_Status_Kl_15 0 "Kl_15_aus" 1 "Kl_15_ein";
+VAL_ 1472 EP1_Lampe_AutoP 0 "Lampe_aus" 1 "Lampe_ein";
+VAL_ 1472 EP1_Bremslicht 0 "Aus" 1 "Ein";
+VAL_ 1472 EP1_Warnton1 0 "Aus" 1 "Ein";
+VAL_ 1472 EP1_Warnton2 0 "Aus" 1 "Ein";
+VAL_ 1472 EP1_AnfShLock 0 "Aus" 1 "Ein";
+VAL_ 1472 EPB_Autoholdlampe 0 "Lampe_aus" 1 "Lampe_ein";
+VAL_ 1472 EP1_QualNeigWi 0 "gueltiger_Wert" 1 "Ersatz_Init_oder_Fehlerwert";
+VAL_ 1472 EP1_KuppModBer 0 "Kuppsensor_aus_Modbereich" 1 "Kupplsensor_im_Modbereich" 2 "Sensorsignal_ungenau" 3 "Sensor_defekt";
+VAL_ 1472 EP1_HydrHalten 0 "Fzg_nicht_hydr_geh" 1 "Fzg_hydr_geh";
+VAL_ 1472 EP1_Fkt_Lampe 0 "Lampe_aus" 1 "Lampe_ein";
+VAL_ 1472 EP1_Warnton 0 "Warnton_aus" 1 "Warnton_an";
+VAL_ 1472 EP1_Fehler_BKL 0 "BKL_aus" 1 "BKL_an";
+VAL_ 1472 EP1_Fehler_gelb 0 "Lampe_aus" 1 "Lampe_ein";
+VAL_ 1472 EP1__Text 0 "kein_Text" 1 "Text_1" 2 "Text_2" 3 "Text_3" 4 "Text_4" 5 "Text_5" 6 "reserviert" 7 "reserviert" 8 "Text_8";
