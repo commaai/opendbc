@@ -1,4 +1,4 @@
-name: repo
+name: OpenDBC
 
 on:
   schedule:
