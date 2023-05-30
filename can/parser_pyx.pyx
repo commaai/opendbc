@@ -47,7 +47,6 @@ cdef class CANParser:
     for i in range(self.dbc[0].msgs.size()):
       msg = self.dbc[0].msgs[i]
       name = msg.name.decode('utf8')
-      print(name)
 
       msg_name_to_address[name] = msg.address
       self.address_to_msg_name[msg.address] = name
