@@ -122,6 +122,7 @@ BO_ 313 Brake_Pedal: 8 XXX
 BO_ 372 Engine_Stop_Start: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ Counter : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ Cruise_Hold : 20|1@0+ (1,0) [0|1] "" XXX
  SG_ STOP_START_STATE : 39|2@0+ (1,0) [0|3] "" XXX
 
 BO_ 290 ES_LKAS: 8 XXX
@@ -260,6 +261,7 @@ CM_ SG_ 802 LKAS_Dash_State "0 = Off, 1 = Ready, 2 = Active";
 CM_ SG_ 802 LKAS_Right_Line_Visible "0 = Off, 1 = White, 2 = Green, 3 = Orange";
 CM_ SG_ 912 UNITS "0 = Metric, 1 = Imperial";
 CM_ SG_ 912 ICY_ROAD "1 = DASHLIGHT ON, 2 = WARNING, 3 = OFF";
+VAL_ 372 Cruise_Hold 0 "Normal" 1 "Hold";
 
 CM_ "subaru_global_2017.dbc starts here";
 
