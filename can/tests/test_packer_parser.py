@@ -57,7 +57,7 @@ class TestCanParserPacker(unittest.TestCase):
     for i in range(1000):
       msg = packer.make_can_msg("CAN_FD_MESSAGE", 0, {})
       dat = can_list_to_can_capnp([msg, ])
-      parser.update_string(dat)
+      parser.update_strings([dat])
       self.assertEqual(parser.vl["CAN_FD_MESSAGE"]["COUNTER"], i % 256)
 
     # setting COUNTER should override
@@ -67,7 +67,7 @@ class TestCanParserPacker(unittest.TestCase):
         "COUNTER": cnt,
       })
       dat = can_list_to_can_capnp([msg, ])
-      parser.update_string(dat)
+      parser.update_strings([dat])
       self.assertEqual(parser.vl["CAN_FD_MESSAGE"]["COUNTER"], cnt)
 
     # then, should resume counting from the override value
@@ -75,7 +75,7 @@ class TestCanParserPacker(unittest.TestCase):
     for i in range(100):
       msg = packer.make_can_msg("CAN_FD_MESSAGE", 0, {})
       dat = can_list_to_can_capnp([msg, ])
-      parser.update_string(dat)
+      parser.update_strings([dat])
       self.assertEqual(parser.vl["CAN_FD_MESSAGE"]["COUNTER"], (cnt + i) % 256)
 
   def test_parser_can_valid(self):
@@ -92,7 +92,7 @@ class TestCanParserPacker(unittest.TestCase):
     # not valid until the message is seen
     for _ in range(100):
       dat = can_list_to_can_capnp([])
-      parser.update_string(dat)
+      parser.update_strings([dat])
       self.assertFalse(parser.can_valid)
 
     # valid once seen
@@ -100,7 +100,7 @@ class TestCanParserPacker(unittest.TestCase):
       t = int(0.01 * i * 1e9)
       msg = packer.make_can_msg("CAN_FD_MESSAGE", 0, {})
       dat = can_list_to_can_capnp([msg, ], logMonoTime=t)
-      parser.update_string(dat)
+      parser.update_strings([dat])
       self.assertTrue(parser.can_valid)
 
   def test_packer_parser(self):
@@ -141,7 +141,7 @@ class TestCanParserPacker(unittest.TestCase):
 
         msgs = [packer.make_can_msg(k, 0, v) for k, v in values.items()]
         bts = can_list_to_can_capnp(msgs)
-        parser.update_string(bts)
+        parser.update_strings([bts])
 
         for k, v in values.items():
           for key, val in v.items():
@@ -168,7 +168,7 @@ class TestCanParserPacker(unittest.TestCase):
       msgs = packer.make_can_msg("VSA_STATUS", 0, values)
       bts = can_list_to_can_capnp([msgs])
 
-      parser.update_string(bts)
+      parser.update_strings([bts])
 
       self.assertAlmostEqual(parser.vl["VSA_STATUS"]["USER_BRAKE"], brake)
 
@@ -199,7 +199,7 @@ class TestCanParserPacker(unittest.TestCase):
 
         msgs = packer.make_can_msg("ES_LKAS", 0, values)
         bts = can_list_to_can_capnp([msgs])
-        parser.update_string(bts)
+        parser.update_strings([bts])
 
         self.assertAlmostEqual(parser.vl["ES_LKAS"]["LKAS_Output"], steer)
         self.assertAlmostEqual(parser.vl["ES_LKAS"]["LKAS_Request"], active)
@@ -306,8 +306,8 @@ class TestCanParserPacker(unittest.TestCase):
     for _ in range(10):
       can_strings = []
       log_mono_time = 0
-      for _ in range(10):
-        log_mono_time = int(random.uniform(1, 60) * 1e+9)
+      for i in range(10):
+        log_mono_time = int(0.01 * i * 1e+9)
         can_msg = packer.make_can_msg("VSA_STATUS", 0, {})
         can_strings.append(can_list_to_can_capnp([can_msg], logMonoTime=log_mono_time))
       parser.update_strings(can_strings)
