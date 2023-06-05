@@ -61,12 +61,6 @@ BO_ 803 INFOTAINMENT_STATUS: 8 XXX
  SG_ LKAS_State_Infotainment : 22|3@0+ (1,0) [0|7] "" XXX
  SG_ Signal2 : 24|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 256 OPENPILOT_STATUS: 8 XXX
- SG_ Cruise_Activated : 41|1@1+ (1,0) [0|1] "" XXX
- SG_ vehicle_moving : 42|1@1+ (1,0) [0|1] "" XXX
- SG_ brake_pressed : 43|1@1+ (1,0) [0|1] "" XXX
- SG_ gas_pressed : 44|1@1+ (1,0) [0|1] "" XXX
-
 CM_ SG_ 545 Cruise_Throttle "RPM-like output signal";
 CM_ SG_ 545 Cruise_EPB "1 = Electric Parking Brake set";
 CM_ SG_ 545 Distance_Swap "Switch from Close to Far distance";
