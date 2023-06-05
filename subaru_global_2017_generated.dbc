@@ -146,9 +146,9 @@ BO_ 544 ES_Brake: 8 XXX
 BO_ 577 Cruise_Status: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ Cruise_Set_Speed : 51|12@0+ (1,0) [0|120] "" XXX
  SG_ Cruise_On : 54|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Activated : 55|1@1+ (1,0) [0|1] "" XXX
- SG_ Cruise_Active : 57|4@1+ (1,0) [0|15] "" XXX
 
 BO_ 552 BSD_RCTA: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
@@ -241,6 +241,27 @@ BO_ 1677 Dash_State: 8 XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Units : 29|3@1+ (1,0) [0|7] "" XXX
 
+BO_ 1935 EYESIGHT_UDS_RESPONSE: 8 XXX
+ SG_ PCI : 0|8@1+ (1,0) [0|255] "Protocol Control Info" XXX
+ SG_ SID : 8|8@1+ (1,0) [0|255] "Service Identifier" XXX
+ SG_ DID : 16|16@1+ (1,0) [0|65535] "Data Identifier" XXX
+ SG_ DATA : 32|16@1+ (1,0) [0|65535] "DID data (only for RDBI, this could be made generic in the future if we have dbc multiplexing)" XXX
+
+BO_ 554 ES_UNKNOWN_1: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ Signal1 : 23|48@0+ (1,0) [0|281474976710655] "" XXX
+
+BO_ 805 ES_UNKNOWN_2: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ Signal1 : 23|48@0+ (1,0) [0|281474976710655] "" XXX
+
+BO_ 289 ES_UNKNOWN_3: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ Signal1 : 23|48@0+ (1,0) [0|281474976710655] "" XXX
+
 CM_ SG_ 64 Throttle_Combo "Throttle Cruise + Pedal";
 CM_ SG_ 313 Brake_Lights "Driver or Cruise Brake on";
 CM_ SG_ 544 Cruise_Brake_Lights "1 = switch on brake lights";
@@ -282,7 +303,7 @@ BO_ 545 ES_Distance: 8 XXX
  SG_ Cruise_Throttle : 16|12@1+ (1,0) [0|4095] "" XXX
  SG_ Signal2 : 28|4@1+ (1,0) [0|15] "" XXX
  SG_ Car_Follow : 32|1@1+ (1,0) [0|1] "" XXX
- SG_ Signal3 : 33|1@1+ (1,0) [0|1] "" XXX
+ SG_ Low_Speed : 33|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Soft_Disable : 34|1@1+ (1,0) [0|1] "" XXX
  SG_ Signal7 : 35|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Brake_Active : 36|1@1+ (1,0) [0|1] "" XXX
@@ -323,6 +344,12 @@ BO_ 803 INFOTAINMENT_STATUS: 8 XXX
  SG_ Signal1 : 19|4@0+ (1,0) [0|15] "" XXX
  SG_ LKAS_State_Infotainment : 22|3@0+ (1,0) [0|7] "" XXX
  SG_ Signal2 : 24|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 256 OPENPILOT_STATUS: 8 XXX
+ SG_ Cruise_Activated : 41|1@1+ (1,0) [0|1] "" XXX
+ SG_ vehicle_moving : 42|1@1+ (1,0) [0|1] "" XXX
+ SG_ brake_pressed : 43|1@1+ (1,0) [0|1] "" XXX
+ SG_ gas_pressed : 44|1@1+ (1,0) [0|1] "" XXX
 
 CM_ SG_ 545 Cruise_Throttle "RPM-like output signal";
 CM_ SG_ 545 Cruise_EPB "1 = Electric Parking Brake set";

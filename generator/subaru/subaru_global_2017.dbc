@@ -19,7 +19,7 @@ BO_ 545 ES_Distance: 8 XXX
  SG_ Cruise_Throttle : 16|12@1+ (1,0) [0|4095] "" XXX
  SG_ Signal2 : 28|4@1+ (1,0) [0|15] "" XXX
  SG_ Car_Follow : 32|1@1+ (1,0) [0|1] "" XXX
- SG_ Signal3 : 33|1@1+ (1,0) [0|1] "" XXX
+ SG_ Low_Speed : 33|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Soft_Disable : 34|1@1+ (1,0) [0|1] "" XXX
  SG_ Signal7 : 35|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Brake_Active : 36|1@1+ (1,0) [0|1] "" XXX
@@ -60,6 +60,12 @@ BO_ 803 INFOTAINMENT_STATUS: 8 XXX
  SG_ Signal1 : 19|4@0+ (1,0) [0|15] "" XXX
  SG_ LKAS_State_Infotainment : 22|3@0+ (1,0) [0|7] "" XXX
  SG_ Signal2 : 24|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 256 OPENPILOT_STATUS: 8 XXX
+ SG_ Cruise_Activated : 41|1@1+ (1,0) [0|1] "" XXX
+ SG_ vehicle_moving : 42|1@1+ (1,0) [0|1] "" XXX
+ SG_ brake_pressed : 43|1@1+ (1,0) [0|1] "" XXX
+ SG_ gas_pressed : 44|1@1+ (1,0) [0|1] "" XXX
 
 CM_ SG_ 545 Cruise_Throttle "RPM-like output signal";
 CM_ SG_ 545 Cruise_EPB "1 = Electric Parking Brake set";
