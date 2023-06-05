@@ -7,9 +7,8 @@
 #include <sstream>
 #include <vector>
 #include <mutex>
-#include <iterator>
 #include <cstring>
-#include <clocale>
+#include <iterator>
 
 #include "opendbc/can/common.h"
 #include "opendbc/can/common_dbc.h"
