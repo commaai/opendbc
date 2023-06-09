@@ -45,11 +45,16 @@ public:
   std::vector<double> vals;
   std::vector<std::vector<double>> all_vals;
 
-  uint64_t last_seen_nanos;
-  uint64_t check_threshold;
+  uint64_t first_seen_nanos = 0;
+  uint64_t last_seen_nanos = 0;
+  uint64_t check_threshold = 0;
 
-  uint8_t counter;
-  uint8_t counter_fail;
+  uint8_t counter = 0;
+  uint8_t counter_fail = 0;
+
+  double check_freq = 0;
+  double avg_freq = 0;
+  uint64_t total_count = 0;
 
   bool ignore_checksum = false;
   bool ignore_counter = false;
