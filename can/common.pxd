@@ -3,10 +3,8 @@
 
 from libc.stdint cimport uint8_t, uint16_t, uint32_t, uint64_t
 from libcpp cimport bool
-from libcpp.map cimport map
 from libcpp.string cimport string
 from libcpp.vector cimport vector
-from libcpp.unordered_set cimport unordered_set
 
 
 ctypedef unsigned int (*calc_checksum_type)(uint32_t, const Signal&, const vector[uint8_t] &)

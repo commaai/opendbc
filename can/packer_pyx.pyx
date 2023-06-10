@@ -5,8 +5,6 @@ from libc.stdint cimport uint8_t, uint32_t, uint64_t
 from libcpp.vector cimport vector
 from libcpp.map cimport map
 from libcpp.string cimport string
-from libcpp cimport bool
-from posix.dlfcn cimport dlopen, dlsym, RTLD_LAZY
 
 from .common cimport CANPacker as cpp_CANPacker
 from .common cimport dbc_lookup, SignalPackValue, DBC
