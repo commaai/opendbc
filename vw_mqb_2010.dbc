@@ -1431,12 +1431,6 @@ CM_ SG_ 294 HCA_01_Status_HCA "Statusinformation vom HCA und Manoevrierassistent
 CM_ SG_ 294 HCA_01_Vib_Amp "Momentenamplitude der Lenkradvibration";
 CM_ SG_ 294 EA_Ruckfreigabe "Emergency Alert Freigabit für die Warnruck-Anforderung an das ESP";
 CM_ SG_ 294 EA_ACC_Wunschgeschwindigkeit "Emergency Alert Anforderung neue Wunschgeschwindigkeit";
-CM_ SG_ 302 ACC_Hold_Request "Active request for ABS brake hold in ACC_Hold_Type";
-CM_ SG_ 302 ACC_Boost_Request "Hybrid engine start related";
-CM_ SG_ 302 ACC_Freewheel_Request "Active request for DSG sailing/coasting in ACC_Freewheel_Type";
-CM_ SG_ 302 ACC_Hold_Release "Request to ABS to release brake hold";
-CM_ SG_ 302 ACC_Accel_Secondary "Target acceleration of the secondary controller";
-CM_ SG_ 302 ACC_Accel_TSK "Mirror of request to TSK to implement a target acceleration";
 CM_ SG_ 870 Hazard_Switch "Four-way flashers active";
 CM_ SG_ 870 Comfort_Signal_Left "Comfort turn signal active, left";
 CM_ SG_ 870 Comfort_Signal_Right "Comfort turn signal active, right";
@@ -1447,29 +1441,13 @@ CM_ SG_ 870 Right_Turn_Exterior_Bulb_2 "Probably rear";
 CM_ SG_ 870 Fast_Send_Rate_Active "CAN message send rate";
 CM_ SG_ 919 LDW_DLC "Probable DLC (distance to line crossing)";
 CM_ SG_ 919 LDW_TLC "Probable TLC (time to line crossing)";
-CM_ SG_ 919 LDW_Unknown "Might be a steering pressed / driver active flag";
-CM_ SG_ 919 Alert_Message "Static table of alert messages to be invoked in the instrument cluster, some with or without beeps, 0 = no current message";
-CM_ SG_ 919 LDW_Direction "Left/right indicator for DLC and TLC";
-CM_ SG_ 919 Right_Lane_Status "Display brightness range, 0 = no lane, 3 = full brightness";
-CM_ SG_ 919 Left_Lane_Status "Display brightness range, 0 = no lane, 3 = full brightness";
-CM_ SG_ 919 Kombi_Lamp_Orange "Enables orange LDW light in instrument cluster";
-CM_ SG_ 919 Kombi_Lamp_Green "Enables green LDW light in instrument cluster";
-CM_ SG_ 780 Folgefahrt "Following another vehicle";
-CM_ SG_ 780 SetAbstand "Set following distance";
-CM_ SG_ 780 Abstand "Following distance";
-CM_ SG_ 780 SetSpeed "ACC set speed";
 CM_ SG_ 391 GearPosition "Traditional PRND plus B-mode aggressive regen, B-mode mapped to Drive";
 CM_ SG_ 960 ZAS_Kl_15 "Indicates ignition on";
 CM_ SG_ 1720 KBI_BCmE_aktiv "Anzeige BCmE aktiv (BCmE-Screen oder Einsparhinweis in der Anzeige)";
 CM_ SG_ 1720 KBI_Max_Tankinhalt "Mitteilung des maximalen Tankinhalts an das Reichweitenmodul";
 CM_ SG_ 1720 KBI_Nachtanken_erkannt "Statusinformation Nachtankmodus";
-CM_ SG_ 1720 KBI_Reifenumfang "Mittlerer Radumfang aus der K-Zahl gerechnet in Millimeter.  Byte 2 Bit 5,4 reserviert, Byte 2 Bit 3..0 und Byte 1 Bit 7..0; Wertebereich 0..4096 mm
-";
-CM_ SG_ 1720 KBI_Reifenumfang_Sekundaer "Fahrzeuge mit unterschiedlichen Reifenumfängen Vorderachse / Hinterachse:
-
-Primärachse: KBI_Reifenumfang
-Sekundärachse: KBI_Reifenumfang_Sekundaer
-";
+CM_ SG_ 1720 KBI_Reifenumfang "Mittlerer Radumfang aus der K-Zahl gerechnet in Millimeter.  Byte 2 Bit 5,4 reserviert, Byte 2 Bit 3..0 und Byte 1 Bit 7..0; Wertebereich 0..4096 mm";
+CM_ SG_ 1720 KBI_Reifenumfang_Sekundaer "Fahrzeuge mit unterschiedlichen Reifenumfängen Vorderachse / Hinterachse";
 CM_ SG_ 1720 KBI_Sparhinweis_quittiert "angezeigter Sparhinweis ist quittiert. Signal wird nach zwei Sendebotschaften wieder auf '0' gesetzt.";
 CM_ SG_ 1720 KBI_Tankfuellstand_Prozent "Tankfüllstand in %";
 CM_ SG_ 1720 KBI_Tankinhalt_hochaufl "angezeigter Tankinhalt hochauflösend zur Restreichweitenberechnung";
