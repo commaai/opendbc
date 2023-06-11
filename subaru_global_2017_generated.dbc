@@ -244,17 +244,17 @@ BO_ 1935 EYESIGHT_UDS_RESPONSE: 8 XXX
  SG_ PCI : 0|8@1+ (1,0) [0|255] "Protocol Control Info" XXX
  SG_ SID : 8|8@1+ (1,0) [0|255] "Service Identifier" XXX
  SG_ DID : 16|16@1+ (1,0) [0|65535] "Data Identifier" XXX
- SG_ Cruise_Main : 32|1@1+ (1,0) [0|65535] "" XXX
- SG_ Cruise_Set : 33|1@1+ (1,0) [0|65535] "" XXX
- SG_ Cruise_Resume : 34|1@1+ (1,0) [0|65535] "" XXX
+ SG_ Main : 32|1@1+ (1,0) [0|65535] "" XXX
+ SG_ Set : 33|1@1+ (1,0) [0|65535] "" XXX
+ SG_ Resume : 34|1@1+ (1,0) [0|65535] "" XXX
  SG_ FCW : 32|1@1+ (1,0) [0|65535] "" XXX
- SG_ AEB : 33|1@1+ (1,0) [0|65535] "" XXX
+ SG_ AEB : 32|1@1+ (1,0) [0|65535] "" XXX
 
 SG_MUL_VAL_ 1935 DID SID 98-98;
 
-SG_MUL_VAL_ 1935 Cruise_Main DID 243-243;
-SG_MUL_VAL_ 1935 Cruise_Resume DID 243-243;
-SG_MUL_VAL_ 1935 Cruise_Set DID 243-243;
+SG_MUL_VAL_ 1935 Main DID 243-243;
+SG_MUL_VAL_ 1935 Resume DID 243-243;
+SG_MUL_VAL_ 1935 Set DID 243-243;
 
 SG_MUL_VAL_ 1935 FCW DID 244-244;
 SG_MUL_VAL_ 1935 AEB DID 245-245;
