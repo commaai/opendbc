@@ -29,7 +29,6 @@ NS_ :
     BU_SG_REL_
     BU_EV_REL_
     BU_BO_REL_
-    SG_MUL_VAL_
 
 BS_:
 
@@ -241,7 +240,20 @@ BO_ 1935 EYESIGHT_UDS_RESPONSE: 8 XXX
  SG_ PCI : 0|8@1+ (1,0) [0|255] "Protocol Control Info" XXX
  SG_ SID : 8|8@1+ (1,0) [0|255] "Service Identifier" XXX
  SG_ DID : 16|16@1+ (1,0) [0|65535] "Data Identifier" XXX
- SG_ DATA : 32|16@1+ (1,0) [0|65535] "DID data (only for RDBI, this could be made generic in the future if we have dbc multiplexing)" XXX
+ SG_ Cruise_Main : 32|1@1+ (1,0) [0|65535] "" XXX
+ SG_ Cruise_Set : 33|1@1+ (1,0) [0|65535] "" XXX
+ SG_ Cruise_Resume : 34|1@1+ (1,0) [0|65535] "" XXX
+ SG_ FCW : 32|1@1+ (1,0) [0|65535] "" XXX
+ SG_ AEB : 33|1@1+ (1,0) [0|65535] "" XXX
+
+SG_MUL_VAL_ 1935 DID SID 98-98;
+
+SG_MUL_VAL_ 1935 Cruise_Main DID 243-243;
+SG_MUL_VAL_ 1935 Cruise_Resume DID 243-243;
+SG_MUL_VAL_ 1935 Cruise_Set DID 243-243;
+
+SG_MUL_VAL_ 1935 FCW DID 244-244;
+SG_MUL_VAL_ 1935 AEB DID 245-245;
 
 BO_ 554 ES_UNKNOWN_1: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX

@@ -44,7 +44,7 @@ bool MessageState::parse(uint64_t sec, const std::vector<uint8_t> &dat) {
       };
 
       int64_t selector = get_raw_value(dat, selector_sig);
-      if (selector != sig.mux_selector) {
+      if (selector < sig.mux_selector_min || selector > sig.mux_selector_max) {
         continue;
       }
     }

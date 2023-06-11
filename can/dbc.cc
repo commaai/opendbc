@@ -19,6 +19,9 @@ std::regex sgm_regexp(R"(^SG_ (\w+) (\w+) *: (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9
 std::regex val_regexp(R"(VAL_ (\w+) (\w+) (\s*[-+]?[0-9]+\s+\".+?\"[^;]*))");
 std::regex val_split_regexp{R"([\"]+)"};  // split on "
 
+std::regex sg_mulval_regexp(R"(^SG_MUL_VAL_ (\d+) (\w+) (\w+) (\d+)-(\d+))");
+
+
 #define DBC_ASSERT(condition, message)                             \
   do {                                                             \
     if (!(condition)) {                                            \
@@ -160,7 +163,8 @@ DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, Ch
         sig.mux_lsb = multiplexer.lsb;
         sig.mux_size = multiplexer.size;
         sig.mux_little_endian = multiplexer.is_little_endian;
-        sig.mux_selector = std::stoi(match[2].str().substr(1));
+        sig.mux_selector_min = std::stoi(match[2].str().substr(1));
+        sig.mux_selector_max = std::stoi(match[2].str().substr(1));
       } else {
         sig.is_multiplexed = false;
       }
@@ -213,6 +217,31 @@ DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, Ch
       std::copy(words.begin(), words.end(), std::ostream_iterator<std::string>(s, " "));
       val.def_val = s.str();
       val.def_val = trim(val.def_val);
+    } else if(startswith(line, "SG_MUL_VAL_")) {
+      bool ret = std::regex_search(line, match, sg_mulval_regexp);
+      DBC_ASSERT(ret, "bad SG_MUL_VAL_: " << line);
+
+      address = std::stoul(match[1].str());
+      
+      std::string multiplexed_signal_name = match[2].str();
+      std::string multiplexor_signal_name = match[3].str();
+
+      DBC_ASSERT(signal_name_sets[address].find(multiplexed_signal_name) != signal_name_sets[address].end(), "bad SG_MUL_VAL_: " << line << " " << multiplexed_signal_name << " not found");
+      DBC_ASSERT(signal_name_sets[address].find(multiplexor_signal_name) != signal_name_sets[address].end(), "bad SG_MUL_VAL_: " << line << " " << multiplexor_signal_name << " not found");
+
+      int min_value = std::stoul(match[4].str());
+      int max_value = std::stoul(match[5].str());
+
+      auto multiplexed_signal = std::find_if(signals[address].begin(), signals[address].end(), [multiplexed_signal_name] (const Signal& s) { return s.name == multiplexed_signal_name; });
+      auto multiplexor_signal = std::find_if(signals[address].begin(), signals[address].end(), [multiplexor_signal_name] (const Signal& s) { return s.name == multiplexor_signal_name; });
+
+      multiplexed_signal->is_multiplexed = true;
+      multiplexed_signal->mux_msb = multiplexor_signal->msb;
+      multiplexed_signal->mux_lsb = multiplexor_signal->lsb;
+      multiplexed_signal->mux_size = multiplexor_signal->size;
+      multiplexed_signal->mux_little_endian = multiplexor_signal->is_little_endian;
+      multiplexed_signal->mux_selector_min = min_value;
+      multiplexed_signal->mux_selector_max = max_value;
     }
   }
 
