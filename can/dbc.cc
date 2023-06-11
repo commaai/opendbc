@@ -217,12 +217,12 @@ DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, Ch
       std::copy(words.begin(), words.end(), std::ostream_iterator<std::string>(s, " "));
       val.def_val = s.str();
       val.def_val = trim(val.def_val);
-    } else if(startswith(line, "SG_MUL_VAL_ ")) {
+    } else if (startswith(line, "SG_MUL_VAL_ ")) {
       bool ret = std::regex_search(line, match, sg_mulval_regexp);
       DBC_ASSERT(ret, "bad SG_MUL_VAL_: " << line);
 
       address = std::stoul(match[1].str());
-      
+
       std::string multiplexed_signal_name = match[2].str();
       std::string multiplexor_signal_name = match[3].str();
 
