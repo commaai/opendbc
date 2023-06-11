@@ -343,11 +343,10 @@ class TestCanParserPacker(unittest.TestCase):
     self.assertEqual(0xbb, parser.vl["Ident"]["IDT_VIN_4"])
   
   def test_parse_mux_extended(self):
-    """Test multiplexed signals"""
+    """Test extended multiplexed signals"""
     dbc_file = "subaru_global_2017_generated"
 
     signals = [
-      # These two signals in the second byte overlap and are muxed
       ("Main", "EYESIGHT_UDS_RESPONSE"),
       ("Resume", "EYESIGHT_UDS_RESPONSE"),
       ("Set", "EYESIGHT_UDS_RESPONSE"),
