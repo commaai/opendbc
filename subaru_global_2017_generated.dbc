@@ -300,7 +300,7 @@ BO_ 545 ES_Distance: 8 XXX
  SG_ Cruise_Throttle : 16|12@1+ (1,0) [0|4095] "" XXX
  SG_ Signal2 : 28|4@1+ (1,0) [0|15] "" XXX
  SG_ Car_Follow : 32|1@1+ (1,0) [0|1] "" XXX
- SG_ Low_Speed : 33|1@1+ (1,0) [0|1] "" XXX
+ SG_ Signal3 : 33|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Soft_Disable : 34|1@1+ (1,0) [0|1] "" XXX
  SG_ Signal7 : 35|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Brake_Active : 36|1@1+ (1,0) [0|1] "" XXX
