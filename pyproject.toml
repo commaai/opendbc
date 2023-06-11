@@ -1,4 +1,7 @@
 name = "opendbc"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/commaai/opendbc"
 
 [tool.cython-lint]
 max-line-length = 120
