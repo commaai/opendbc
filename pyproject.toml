@@ -1,0 +1,5 @@
+name = "opendbc"
+
+[tool.cython-lint]
+max-line-length = 120
+ignore = ["E111", "E114"]

@@ -52,7 +52,6 @@ cdef extern from "common_dbc.h":
     uint32_t address
     string name
 
-
   cdef struct MessageParseOptions:
     uint32_t address
     int check_frequency
@@ -70,7 +69,7 @@ cdef extern from "common_dbc.h":
 
 
 cdef extern from "common.h":
-  cdef const DBC* dbc_lookup(const string);
+  cdef const DBC* dbc_lookup(const string)
 
   cdef cppclass CANParser:
     bool can_valid
