@@ -18,4 +18,4 @@ can/packer_pyx.html
 can/parser_pyx.html
 
 # CANalyzer Related
-.stcfg
+*.stcfg
