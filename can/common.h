@@ -47,7 +47,7 @@ public:
 
   uint64_t first_seen_nanos = 0;
   uint64_t last_seen_nanos = 0;
-  uint64_t check_threshold = 0;
+  uint64_t alive_threshold = 0;
 
   uint8_t counter = 0;
   uint8_t counter_fail = 0;
