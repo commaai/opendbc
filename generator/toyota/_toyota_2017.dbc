@@ -218,8 +218,13 @@ BO_ 1041 ACC_HUD: 8 DSU
  SG_ PCS_INDICATOR : 7|2@0+ (1,0) [0|3] "" XXX
  SG_ FCW : 4|1@0+ (1,0) [0|1] "" XXX
  SG_ SET_ME_X20 : 15|8@0+ (1,0) [0|1] "" XXX
+ SG_ PCS_DUST : 34|1@0+ (1,0) [0|0] "" XXX
+ SG_ PCS_TEMP : 35|1@0+ (1,0) [0|0] "" XXX
+ SG_ PCS_DUST2 : 41|1@0+ (1,0) [0|0] "" XXX
+ SG_ PCS_TEMP2 : 42|1@0+ (1,0) [0|0] "" XXX
  SG_ SET_ME_X10 : 39|8@0+ (1,0) [0|1] "" XXX
  SG_ PCS_OFF : 40|1@0+ (1,0) [0|0] "" XXX
+ SG_ FRD_ADJ : 53|3@0+ (1,0) [0|0] "" XXX
  SG_ PCS_SENSITIVITY : 55|8@0+ (1,0) [0|1] "" XXX
 
 BO_ 1042 LKAS_HUD: 8 DSU
@@ -407,6 +412,11 @@ CM_ SG_ 956 GEAR "on 6MT, only R shows.";
 CM_ SG_ 1009 UI_SET_SPEED "units seem to be whatever the car is set to";
 CM_ SG_ 1041 PCS_INDICATOR "Pre-Collision System Indicator";
 CM_ SG_ 1041 PCS_SENSITIVITY "Pre-Collision System Sensitivity";
+CM_ SG_ 1041 PCS_DUST "alert: Front Camera Low Visibility Unavailable See Owner's Manual";
+CM_ SG_ 1041 PCS_DUST2 "alert: Pre-Collision System Radar Sensor Blocked Unavailable Clean Radar Sensor";
+CM_ SG_ 1041 PCS_TEMP "alert: Front Camera Out of Temperature Range Unavailable Wait until Normal Temperature";
+CM_ SG_ 1041 PCS_TEMP2 "alert: Pre-Collision System Out of Temperature Range Unavailable See Owner's Manual";
+CM_ SG_ 1041 FRD_ADJ "alert: ERROR ADJUSTING FRONT RADAR BEAM";
 CM_ SG_ 1042 LDA_SA_TOGGLE "LDA Steering Assist Toggle";
 CM_ SG_ 1042 LDW_EXIST "Unclear what this is, it's usually set to 0";
 CM_ SG_ 1042 LDA_SENSITIVITY "LDA Sensitivity";
