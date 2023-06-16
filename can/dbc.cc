@@ -7,8 +7,9 @@
 #include <sstream>
 #include <vector>
 #include <mutex>
-#include <cstring>
 #include <iterator>
+#include <cstring>
+#include <clocale>
 
 #include "opendbc/can/common.h"
 #include "opendbc/can/common_dbc.h"
@@ -102,9 +103,11 @@ DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, Ch
   uint32_t address = 0;
   std::set<uint32_t> address_set;
   std::set<std::string> msg_name_set;
+  std::map<uint32_t, std::set<std::string>> signal_name_sets;
   std::map<uint32_t, std::vector<Signal>> signals;
   DBC* dbc = new DBC;
   dbc->name = dbc_name;
+  std::setlocale(LC_NUMERIC, "C");
 
   // used to find big endian LSB from MSB and size
   std::vector<int> be_bits;
@@ -165,6 +168,10 @@ DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, Ch
         sig.msb = sig.start_bit;
       }
       DBC_ASSERT(sig.lsb < (64 * 8) && sig.msb < (64 * 8), "Signal out of bounds: " << line);
+
+      // Check for duplicate signal names
+      DBC_ASSERT(signal_name_sets[address].find(sig.name) == signal_name_sets[address].end(), "Duplicate signal name: " << sig.name);
+      signal_name_sets[address].insert(sig.name);
     } else if (startswith(line, "VAL_ ")) {
       // new signal value/definition
       bool ret = std::regex_search(line, match, val_regexp);
