@@ -772,5 +772,5 @@ CM_ SG_ 540 DISTANCE_SETTING "Radar distance 0: disabled, 1: 4 bars, 2: 3 bars, 
 VAL_ 552 GEAR 1 "P" 2 "R" 3 "N" 4 "D" ;
 VAL_ 540 RADAR_HAS_LEAD 0 "NO LEAD" 1 "HAS LEAD" ;
 VAL_ 540 RADAR_LEAD_RELATIVE_DISTANCE 0 "NO LEAD" 1 "FARTHEST" 2 "4" 3 "3" 4 "2" 5 "NEAREST" ;
-VAL_ 1143 LEFT_BS_STATUS 0 "No object detected" 1 "Left blindspot object detected" 2 "Left blindspot object detected with blinker - warning"
-VAL_ 1143 RIGHT_BS_STATUS 0 "No object detected" 1 "Right blindspot object detected" 2 "Right blindspot object detected with blinker - warning"
+VAL_ 1143 LEFT_BS_STATUS 0 "No object detected" 1 "Object detected in left blindspot" 2 "Object detected in left blindspot with blinker - warning"
+VAL_ 1143 RIGHT_BS_STATUS 0 "No object detected" 1 "Object detected in right blindspot" 2 "Object detected in right blindspot with blinker - warning"
