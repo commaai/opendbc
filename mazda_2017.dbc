@@ -690,18 +690,16 @@ BO_ 1143 BSM: 8 XXX
  SG_ BSM_OFF : 0|1@0+ (1,0) [0|1] "" XXX
  SG_ RIGHT_BS_3 : 37|1@0+ (1,0) [0|1] "" XXX
  SG_ STANDSTILL : 8|1@0+ (1,0) [0|1] "" XXX
- SG_ LEFT_BS1 : 12|1@0+ (1,0) [0|1] "" XXX
+ SG_ LEFT_BS_STATUS : 13|2@0+ (1,0) [0|3] "" XXX
+ SG_ RIGHT_BS_STATUS : 15|2@0+ (1,0) [0|3] "" XXX
  SG_ LEFT_BS3 : 38|1@0+ (1,0) [0|1] "" XXX
  SG_ RIGHT_BS4 : 39|1@0+ (1,0) [0|1] "" XXX
  SG_ LEFT_BS_SIDE : 36|1@0+ (1,0) [0|1] "" XXX
  SG_ IS_MOVING : 9|1@0+ (1,0) [0|1] "" XXX
  SG_ LEFT_BS_BEHIND : 46|2@1+ (1,0) [0|16777215] "" XXX
- SG_ RIGHT_BS1 : 14|1@0+ (1,0) [0|63] "" XXX
  SG_ RIGHT_BS_DISTANCE : 35|3@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_1 : 32|1@0+ (1,0) [0|1] "" XXX
  SG_ REAR_CT_ALERT : 23|5@0+ (1,0) [0|63] "" XXX
- SG_ LEFT_BS2 : 13|1@0+ (1,0) [0|1] "" XXX
- SG_ RIGHT_BS2 : 15|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1361 KEY_POSITION: 8 XXX
 
@@ -771,11 +769,8 @@ CM_ SG_ 552 GEAR "0 Shifting, 1 P, 2 R, 3 N, 4 D";
 CM_ SG_ 552 GEAR_BOX "0 P, 14 R, 1 though 6 D for speeds, 15 Shift";
 CM_ SG_ 540 HANDS_ON_STEER_WARN "0 no warning, b warning";
 CM_ SG_ 540 DISTANCE_SETTING "Radar distance 0: disabled, 1: 4 bars, 2: 3 bars, 3: 2 bars, 4: 1 bar";
-CM_ SG_ 1143 REAR_CT_ALERT "Rear Cross Traffic Alert";
-CM_ SG_ 1143 LEFT_BS1 "Left BlindSpot without blinker";
-CM_ SG_ 1143 RIGHT_BS1 "Right BlindSpot without blinker";
-CM_ SG_ 1143 LEFT_BS2 "Left Blindspot with left blinker activated - warning activated";
-CM_ SG_ 1143 RIGHT_BS2 "Right Blindspot with right blinker activated - warning activated";
 VAL_ 552 GEAR 1 "P" 2 "R" 3 "N" 4 "D" ;
 VAL_ 540 RADAR_HAS_LEAD 0 "NO LEAD" 1 "HAS LEAD" ;
 VAL_ 540 RADAR_LEAD_RELATIVE_DISTANCE 0 "NO LEAD" 1 "FARTHEST" 2 "4" 3 "3" 4 "2" 5 "NEAREST" ;
+VAL_ 1143 LEFT_BS_STATUS 0 "No object detected" 1 "Left blindspot object detected" 2 "Left blindspot object detected with blinker - warning"
+VAL_ 1143 RIGHT_BS_STATUS 0 "No object detected" 1 "Right blindspot object detected" 2 "Right blindspot object detected with blinker - warning"
