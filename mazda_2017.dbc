@@ -688,18 +688,18 @@ BO_ 1087 NEW_MSG_1: 8 XXX
 
 BO_ 1143 BSM: 8 XXX
  SG_ BSM_OFF : 0|1@0+ (1,0) [0|1] "" XXX
+ SG_ RIGHT_BS_3 : 37|1@0+ (1,0) [0|1] "" XXX
  SG_ STANDSTILL : 8|1@0+ (1,0) [0|1] "" XXX
- SG_ LEFT_BS_SIDE : 36|1@0+ (1,0) [0|1] "" XXX
- SG_ RIGHT_BS_DISTANCE : 35|3@0+ (1,0) [0|1] "" XXX
- SG_ IS_MOVING : 9|1@0+ (1,0) [0|1] "" XXX
- SG_ RIGHT_BS4 : 39|1@0+ (1,0) [0|1] "" XXX
- SG_ RIGHT_BS3 : 37|1@0+ (1,0) [0|1] "" XXX
- SG_ LEFT_BS3 : 38|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_1 : 32|1@0+ (1,0) [0|1] "" XXX
- SG_ LEFT_BS_BEHIND : 46|2@1+ (1,0) [0|16777215] "" XXX
- SG_ REAR_CT_ALERT : 23|5@0+ (1,0) [0|63] "" XXX
  SG_ LEFT_BS1 : 12|1@0+ (1,0) [0|1] "" XXX
- SG_ RIGHT_BS1 : 14|1@0+ (1,0) [0|1] "" XXX
+ SG_ LEFT_BS3 : 38|1@0+ (1,0) [0|1] "" XXX
+ SG_ RIGHT_BS4 : 39|1@0+ (1,0) [0|1] "" XXX
+ SG_ LEFT_BS_SIDE : 36|1@0+ (1,0) [0|1] "" XXX
+ SG_ IS_MOVING : 9|1@0+ (1,0) [0|1] "" XXX
+ SG_ LEFT_BS_BEHIND : 46|2@1+ (1,0) [0|16777215] "" XXX
+ SG_ RIGHT_BS1 : 14|1@0+ (1,0) [0|63] "" XXX
+ SG_ RIGHT_BS_DISTANCE : 35|3@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_1 : 32|1@0+ (1,0) [0|1] "" XXX
+ SG_ REAR_CT_ALERT : 23|5@0+ (1,0) [0|63] "" XXX
  SG_ LEFT_BS2 : 13|1@0+ (1,0) [0|1] "" XXX
  SG_ RIGHT_BS2 : 15|1@0+ (1,0) [0|1] "" XXX
 
