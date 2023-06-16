@@ -240,7 +240,9 @@ BO_ 1677 Dash_State: 8 XXX
 CM_ SG_ 64 Throttle_Combo "Throttle Cruise + Pedal";
 CM_ SG_ 313 Brake_Lights "Driver or Cruise Brake on";
 CM_ SG_ 544 Cruise_Brake_Lights "1 = switch on brake lights";
-CM_ SG_ 544 AEB_Status "Occasionally is 4 instead of 8 while Brake_Pressure is non-zero, unsure why. Signal3 also often goes to 2 if this signal is 4.";
+CM_ SG_ 544 Brake_Pressure "Winds down after cruise disabled. Also can be non-zero when likely preparing for AEB";
+CM_ SG_ 544 Signal3 "Usually goes to 2 if AEB_Status is 4";
+CM_ SG_ 544 AEB_Status "Occasionally is 4 instead of 8 while Brake_Pressure is non-zero, unsure why";
 CM_ SG_ 801 PCB_Off "Pre-Collision Braking off";
 CM_ SG_ 801 Brake_Lights "Driver or Cruise brake on";
 CM_ SG_ 801 Cruise_State "0 = Normal, 1 = Hold+User Brake, 2 = Ready, 3 = Hold";
