@@ -263,7 +263,7 @@ CM_ SG_ 802 LKAS_Dash_State "0 = Off, 1 = Ready, 2 = Active";
 CM_ SG_ 802 LKAS_Right_Line_Visible "0 = Off, 1 = White, 2 = Green, 3 = Orange";
 CM_ SG_ 912 UNITS "0 = Metric, 1 = Imperial";
 CM_ SG_ 912 ICY_ROAD "1 = DASHLIGHT ON, 2 = WARNING, 3 = OFF";
-VAL_ 544 AEB_Status 8 "AEB actuation" 4 "AEB related" 0 "No AEB actuation";
+VAL_ 544 AEB_Status 12 "AEB related" 8 "AEB actuation" 4 "AEB related" 0 "No AEB actuation";
 
 CM_ "subaru_global_2017.dbc starts here";
 
