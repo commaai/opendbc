@@ -698,6 +698,7 @@ BO_ 1365 FPCM11: 8 FPCM
 
 BO_ 871 LVR12: 8 LVR
  SG_ CF_Lvr_CruiseSet : 0|8@1+ (1.0,0.0) [0.0|255.0] "" CLU,TCU
+ SG_ CF_Lvr_IsgState : 8|2@1+ (1.0,0.0) [0.0|3.0] "Idle Stop and Go. 0 = Engine running, 1 = Engine stopped, 3 = Disabled" CLU,TCU
  SG_ CF_Lvr_Gear : 32|4@1+ (1.0,0.0) [0.0|15.0] ""  CLU,TCU
 
 BO_ 872 LVR11: 8 LVR
