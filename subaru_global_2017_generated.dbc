@@ -293,9 +293,7 @@ BO_ 545 ES_Distance: 8 XXX
  SG_ Signal4 : 39|1@0+ (1,0) [0|1] "" XXX
  SG_ Close_Distance : 40|8@1+ (0.019607,0) [0|5] "m" XXX
  SG_ Signal5 : 48|8@1+ (1,0) [0|1] "" XXX
- SG_ Cruise_Cancel : 56|1@1+ (1,0) [0|1] "" XXX
- SG_ Cruise_Set : 57|1@1+ (1,0) [0|1] "" XXX
- SG_ Cruise_Resume : 58|1@1+ (1,0) [0|1] "" XXX
+ SG_ Cruise_Button : 56|3@1+ (1,0) [0|1] "" XXX
  SG_ Signal6 : 59|5@1+ (1,0) [0|1] "" XXX
 
 BO_ 546 ES_Status: 8 XXX
