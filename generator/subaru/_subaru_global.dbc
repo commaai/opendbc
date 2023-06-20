@@ -66,9 +66,7 @@ BO_ 326 Cruise_Buttons: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Signal1 : 12|30@1+ (1,0) [0|1073741823] "" XXX
- SG_ Main : 42|1@1+ (1,0) [0|1] "" XXX
- SG_ Set : 43|1@1+ (1,0) [0|1] "" XXX
- SG_ Resume : 44|1@1+ (1,0) [0|1] "" XXX
+ SG_ Cruise_Button : 42|3@1+ (1,0) [0|1] "" XXX
  SG_ Signal2 : 45|19@1+ (1,0) [0|524287] "" XXX
 
 BO_ 315 G_Sensor: 8 XXX
