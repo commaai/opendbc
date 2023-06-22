@@ -34,8 +34,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
 ENV PATH="/root/.pyenv/bin:/root/.pyenv/shims:${PATH}"
-RUN pyenv install 3.8.10
-RUN pyenv global 3.8.10
+RUN pyenv install 3.11.4
+RUN pyenv global 3.11.4
 RUN pyenv rehash
 
 COPY requirements.txt /tmp/
