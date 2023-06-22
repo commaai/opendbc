@@ -15,7 +15,7 @@ repos:
         - --check-hidden
         - --builtins clear,rare,informal,usage,code,names,en-GB_to_en-US
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.2.0
+    rev: v1.3.0
     hooks:
     -   id: mypy
 -   repo: https://github.com/PyCQA/flake8
@@ -37,6 +37,11 @@ repos:
         exclude: 'site_scons/'
         args:
         - --disable=C,R,W0613,W0511,W0212,W0201,W0311,W0106,W0603,W0621,W0703,E1136
+-   repo: https://github.com/MarcoGorelli/cython-lint
+    rev: v0.15.0
+    hooks:
+    -   id: cython-lint
+    -   id: double-quote-cython-strings
 -   repo: https://github.com/cpplint/cpplint
     rev: 1.6.1
     hooks:
