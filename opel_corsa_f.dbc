@@ -1,7 +1,7 @@
 BO_ 520 ENGINE: 8 XXX
  SG_ RPM : 6|12@0+ (1,0) [0|8191] "" XXX
  SG_ NEW_SIGNAL_4 : 22|7@0+ (1,0) [0|127] "" XXX
- SG_ THROTTLE : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ THROTTLE : 31|8@0+ (0.5,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_3 : 33|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_1 : 34|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_2 : 35|1@0+ (1,0) [0|1] "" XXX
