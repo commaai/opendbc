@@ -1,5 +1,7 @@
 BO_ 520 ENGINE: 8 XXX
  SG_ RPM : 6|12@0+ (1,0) [0|8191] "" XXX
+ SG_ THROTTLE : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ IGNITION : 38|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 749 NEW_MSG_2ED: 7 XXX
  SG_ COUNTER : 3|4@0+ (1,0) [0|15] "" XXX
