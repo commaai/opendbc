@@ -96,7 +96,7 @@ BO_ 1010 LANE_KEEP_ASSIST: 8 XXX
  SG_ RIGHT_DEPART : 32|1@0+ (1,0) [0|3] "" XXX
  SG_ LEFT_DEPART : 33|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_11 : 34|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_3 : 35|1@0+ (1,0) [0|3] "" XXX
+ SG_ STATUS : 35|1@0+ (1,0) [0|3] "" XXX
  SG_ ACTIVE : 36|1@0+ (1,0) [0|3] "" XXX
  SG_ RAMP : 47|7@0+ (1,0) [0|255] "" XXX
  SG_ ANGLE : 55|14@0- (0.1,0) [0|16383] "" XXX
