@@ -2,7 +2,7 @@ BO_ 520 ENGINE: 8 XXX
  SG_ RPM : 6|12@0+ (1,0) [0|8191] "" XXX
  SG_ NEW_SIGNAL_4 : 22|7@0+ (1,0) [0|127] "" XXX
  SG_ THROTTLE : 31|8@0+ (0.5,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_3 : 33|1@0+ (1,0) [0|1] "" XXX
+ SG_ BRAKE_PRESSED : 33|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_1 : 34|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_2 : 35|1@0+ (1,0) [0|1] "" XXX
  SG_ IGNITION : 38|1@0+ (1,0) [0|1] "" XXX
@@ -113,6 +113,12 @@ BO_ 1038 NEW_MSG_40E: 5 XXX
  SG_ NEW_SIGNAL_1 : 1|3@1+ (1,0) [0|7] "" XXX
  SG_ NEW_SIGNAL_3 : 4|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_2 : 5|3@1+ (1,0) [0|7] "" XXX
+
+BO_ 1042 NEW_MSG_412: 8 XXX
+ SG_ REVERSE : 2|1@0+ (1,0) [0|1] "" XXX
+ SG_ HANDBRAKE : 3|1@0+ (1,0) [0|1] "" XXX
+ SG_ BRAKE_PRESSED : 5|1@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_1 : 9|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1067 NEW_MSG_42B: 8 XXX
 
