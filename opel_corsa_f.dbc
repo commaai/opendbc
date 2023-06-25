@@ -91,7 +91,7 @@ BO_ 1010 LANE_KEEP_ASSIST: 8 XXX
  SG_ CHECKSUM : 15|4@0+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_6 : 17|2@0+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_5 : 19|2@0+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_4 : 21|2@0+ (1,0) [0|15] "" XXX
+ SG_ LOW_SPEED : 21|2@0+ (1,0) [0|15] "" XXX
  SG_ TORQUE : 31|11@0- (1,0) [0|127] "" XXX
  SG_ RIGHT_DEPART : 32|1@0+ (1,0) [0|3] "" XXX
  SG_ LEFT_DEPART : 33|1@0+ (1,0) [0|1] "" XXX
