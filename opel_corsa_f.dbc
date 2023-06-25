@@ -80,6 +80,8 @@ BO_ 973 ACCEL: 8 XXX
  SG_ COUNTER : 59|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|4@0+ (1,0) [0|15] "" XXX
 
+BO_ 974 NEW_MSG_3CE: 8 XXX
+
 BO_ 1010 LANE_KEEP_ASSIST: 8 XXX
  SG_ NEW_SIGNAL_8 : 0|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_7 : 4|1@0+ (1,0) [0|1] "" XXX
@@ -159,6 +161,8 @@ BO_ 1554 NEW_MSG_612: 8 XXX
  SG_ NEW_SIGNAL_4 : 15|3@0+ (1,0) [0|7] "" XXX
  SG_ NEW_SIGNAL_1 : 30|7@0+ (1,0) [0|127] "" XXX
  SG_ NEW_SIGNAL_2 : 44|5@0+ (1,0) [0|31] "" XXX
+
+BO_ 1960 NEW_MSG_7A8: 4 XXX
 
 CM_ SG_ 973 Y "positive is left";
 CM_ SG_ 973 X "positive is forward";
