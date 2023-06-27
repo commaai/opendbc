@@ -40,7 +40,7 @@ RUN pyenv rehash
 
 COPY requirements.txt /tmp/
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
-RUN pip install --no-cache-dir pre-commit==2.15.0 pylint==2.5.2
+RUN pip install --no-cache-dir pre-commit==2.15.0 pylint==2.17.4
 
 ENV PYTHONPATH=/project
 
