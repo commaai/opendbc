@@ -4,7 +4,7 @@ import os
 if __name__ == "__main__":
   dbc_name = os.path.basename(__file__).replace(".py", ".dbc")
   hyundai_path = os.path.dirname(os.path.realpath(__file__))
-  with open(os.path.join(hyundai_path, dbc_name), "w") as f:
+  with open(os.path.join(hyundai_path, dbc_name), "w", encoding='utf-8') as f:
     f.write("""
 VERSION ""
 
