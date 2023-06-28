@@ -11,6 +11,8 @@ BO_ 401 STEERING_LTA: 8 XXX
  SG_ STEER_REQUEST_2 : 25|1@0+ (1,0) [0|1] "" XXX
  SG_ LKA_ACTIVE : 26|1@0+ (1,0) [0|1] "" XXX
  SG_ BIT : 30|1@0+ (1,0) [0|1] "" XXX
+ SG_ BYTE3_BIT0_2 : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ BYTE3_BIT0 : 31|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 6|6@0+ (1,0) [0|255] "" XXX
  SG_ STEER_REQUEST : 0|1@0+ (1,0) [0|1] "" XXX
  SG_ SETME_X1 : 7|1@0+ (1,0) [0|1] "" XXX
