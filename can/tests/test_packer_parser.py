@@ -324,9 +324,11 @@ class TestCanParserPacker(unittest.TestCase):
 
     for msg, sigs in existing_signals.items():
       for sig in sigs:
-        CANParser(TEST_DBC, [(sig, msg)], [], 0, enforce_checks=False)
-        self.assertRaises(RuntimeError, partial(CANParser, TEST_DBC, [(sig + "123", msg)], enforce_checks=False))
-        self.assertRaises(RuntimeError, partial(CANParser, TEST_DBC, [(sig, msg + "123")], enforce_checks=False))
+        CANParser(TEST_DBC, [(sig, msg)], [(msg, 0)])
+        self.assertRaises(RuntimeError, partial(CANParser, TEST_DBC, [(sig + "123", msg)], [(msg, 0)]))
+        self.assertRaises(RuntimeError, partial(CANParser, TEST_DBC, [(sig, msg + "123")], [(msg, 0)]))
+        self.assertRaises(RuntimeError, partial(CANParser, TEST_DBC, [(sig, msg)], [(msg + "123", 0)]))
+        self.assertRaises(RuntimeError, partial(CANParser, TEST_DBC, [(sig, msg + "123")], [(msg + "123", 0)]))
 
 
 if __name__ == "__main__":
