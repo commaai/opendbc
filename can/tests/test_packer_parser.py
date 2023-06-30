@@ -320,8 +320,12 @@ class TestCanParserPacker(unittest.TestCase):
 
   def test_undefined_signals(self):
     # Ensure we don't allow messages or signals not in the DBC
-    existing_signals = {"STEERING_CONTROL": ["STEER_TORQUE_REQUEST", "SET_ME_X00_2", "COUNTER"],
-                        "CAN_FD_MESSAGE": ["SIGNED", "64_BIT_LE", "64_BIT_BE", "COUNTER"]}
+    existing_signals = {
+      "STEERING_CONTROL": ["STEER_TORQUE_REQUEST", "SET_ME_X00_2", "COUNTER"],
+      228: ["STEER_TORQUE_REQUEST", "SET_ME_X00_2", "COUNTER"],
+      "CAN_FD_MESSAGE": ["SIGNED", "64_BIT_LE", "64_BIT_BE", "COUNTER"],
+      245: ["SIGNED", "64_BIT_LE", "64_BIT_BE", "COUNTER"],
+    }
 
     for msg, sigs in existing_signals.items():
       for sig in sigs:
