@@ -318,7 +318,8 @@ class TestCanParserPacker(unittest.TestCase):
       ts_nanos = parser.ts_nanos["POWERTRAIN_DATA"].values()
       self.assertEqual(set(ts_nanos), {0})
 
-  def test_catches_missing_signals(self):
+  def test_undefined_signals(self):
+    # Ensure we don't allow messages or signals not in the DBC
     existing_signals = {"STEERING_CONTROL": ["STEER_TORQUE_REQUEST", "SET_ME_X00_2", "COUNTER"],
                         "CAN_FD_MESSAGE": ["SIGNED", "64_BIT_LE", "64_BIT_BE", "COUNTER"]}
 
