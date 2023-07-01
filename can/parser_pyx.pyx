@@ -41,16 +41,16 @@ cdef class CANParser:
     self.vl_all = {}
     self.ts_nanos = {}
     msg_name_to_address = {}
-    msg_signals = {}
+    msg_address_to_signals = {}
 
     for i in range(self.dbc[0].msgs.size()):
       msg = self.dbc[0].msgs[i]
       name = msg.name.decode("utf8")
 
       msg_name_to_address[name] = msg.address
-      msg_signals[name] = set()
+      msg_address_to_signals[msg.address] = set()
       for sig in msg.sigs:
-        msg_signals[name].add(sig.name.decode("utf8"))
+        msg_address_to_signals[msg.address].add(sig.name.decode("utf8"))
 
       self.address_to_msg_name[msg.address] = name
       self.vl[msg.address] = {}
@@ -67,11 +67,16 @@ cdef class CANParser:
         if s[1] not in msg_name_to_address:
           print(msg_name_to_address)
           raise RuntimeError(f"could not find message {repr(s[1])} in DBC {self.dbc_name}")
-        if s[0] not in msg_signals[s[1]]:
+        if s[0] not in msg_address_to_signals[msg_name_to_address[s[1]]]:
           raise RuntimeError(f"could not find signal {repr(s[0])} in {repr(s[1])}, DBC {self.dbc_name}")
 
         s = (s[0], msg_name_to_address[s[1]])
         signals[i] = s
+      else:
+        if s[1] not in msg_address_to_signals:
+          raise RuntimeError(f"could not find message {repr(s[1])} in DBC {self.dbc_name}")
+        if s[0] not in msg_address_to_signals[s[1]]:
+          raise RuntimeError(f"could not find signal {repr(s[0])} in {repr(s[1])}, DBC {self.dbc_name}")
 
     for i in range(len(checks)):
       c = checks[i]
