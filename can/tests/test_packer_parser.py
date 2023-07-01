@@ -331,5 +331,71 @@ class TestCanParserPacker(unittest.TestCase):
         self.assertRaises(RuntimeError, partial(CANParser, TEST_DBC, [(sig, msg + "123")], [(msg + "123", 0)]))
 
 
+  def test_parse_mux(self):
+    """Test multiplexed signals"""
+    dbc_file = "vw_golf_mk4"
+
+    signals = [
+      # These two signals in the second byte overlap and are muxed
+      ("IDT_Geheimnis_1", "Ident"), # m0
+      ("IDT_VIN_4", "Ident"), # m1
+    ]
+    checks = [("Ident", 0)]
+
+    parser = CANParser(dbc_file, signals, checks, 0)
+
+    msg1 = [(1490, 0, b"\x00\xAA\x00\x00\x00\x00\x00\x00", 0)]
+    msg2 = [(1490, 0, b"\x01\xBB\x00\x00\x00\x00\x00\x00", 0)]
+
+    parser.update_strings([can_list_to_can_capnp(msg1)])
+    self.assertEqual(0xaa, parser.vl["Ident"]["IDT_Geheimnis_1"])
+    self.assertEqual(0, parser.vl["Ident"]["IDT_VIN_4"])
+
+    parser.update_strings([can_list_to_can_capnp(msg2)])
+    self.assertEqual(0xaa, parser.vl["Ident"]["IDT_Geheimnis_1"])
+    self.assertEqual(0xbb, parser.vl["Ident"]["IDT_VIN_4"])
+  
+  def test_parse_mux_extended(self):
+    """Test multiplexed signals"""
+    dbc_file = "subaru_global_2017_generated"
+
+    signals = [
+      # These two signals in the second byte overlap and are muxed
+      ("Cruise_Main", "EYESIGHT_UDS_RESPONSE"),
+      ("Cruise_Resume", "EYESIGHT_UDS_RESPONSE"),
+      ("Cruise_Set", "EYESIGHT_UDS_RESPONSE"),
+      ("DID", "EYESIGHT_UDS_RESPONSE"),
+      ("SID", "EYESIGHT_UDS_RESPONSE"),
+      ("PCI", "EYESIGHT_UDS_RESPONSE"),
+    ]
+    checks = [("EYESIGHT_UDS_RESPONSE", 0)]
+
+    parser = CANParser(dbc_file, signals, checks, 0)
+
+    msg1 = [(0x78f, 0, b"\x04\x62\xF3\x00\x01\x00\x00\x00", 0)] # main button
+    msg2 = [(0x78f, 0, b"\x04\x62\xF3\x00\x04\x00\x00\x00", 0)] # resume button
+    msg3 = [(0x78f, 0, b"\x04\x62\xF3\x00\x02\x00\x00\x00", 0)] # set button
+    msg4 = [(0x78f, 0, b"\x04\x62\xF3\x00\x00\x00\x00\x00", 0)] # no button
+
+    parser.update_strings([can_list_to_can_capnp(msg1)])
+    self.assertEqual(1, parser.vl["EYESIGHT_UDS_RESPONSE"]["Cruise_Main"])
+    self.assertEqual(0, parser.vl["EYESIGHT_UDS_RESPONSE"]["Cruise_Resume"])
+    self.assertEqual(0, parser.vl["EYESIGHT_UDS_RESPONSE"]["Cruise_Set"])
+
+    parser.update_strings([can_list_to_can_capnp(msg2)])
+    self.assertEqual(0, parser.vl["EYESIGHT_UDS_RESPONSE"]["Cruise_Main"])
+    self.assertEqual(1, parser.vl["EYESIGHT_UDS_RESPONSE"]["Cruise_Resume"])
+    self.assertEqual(0, parser.vl["EYESIGHT_UDS_RESPONSE"]["Cruise_Set"])
+
+    parser.update_strings([can_list_to_can_capnp(msg3)])
+    self.assertEqual(0, parser.vl["EYESIGHT_UDS_RESPONSE"]["Cruise_Main"])
+    self.assertEqual(0, parser.vl["EYESIGHT_UDS_RESPONSE"]["Cruise_Resume"])
+    self.assertEqual(1, parser.vl["EYESIGHT_UDS_RESPONSE"]["Cruise_Set"])
+
+    parser.update_strings([can_list_to_can_capnp(msg4)])
+    self.assertEqual(0, parser.vl["EYESIGHT_UDS_RESPONSE"]["Cruise_Main"])
+    self.assertEqual(0, parser.vl["EYESIGHT_UDS_RESPONSE"]["Cruise_Resume"])
+    self.assertEqual(0, parser.vl["EYESIGHT_UDS_RESPONSE"]["Cruise_Set"])
+
 if __name__ == "__main__":
   unittest.main()
