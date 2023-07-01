@@ -63,20 +63,13 @@ cdef class CANParser:
     # Convert message names into addresses
     for i in range(len(signals)):
       s = signals[i]
-      if not isinstance(s[1], numbers.Number):
-        address = msg_name_to_address.get(s[1])
-        if address is None:
-          print(msg_name_to_address)
-          raise RuntimeError(f"could not find message {repr(s[1])} in DBC {self.dbc_name}")
-        if s[0] not in msg_address_to_signals[address]:
-          raise RuntimeError(f"could not find signal {repr(s[0])} in {repr(s[1])}, DBC {self.dbc_name}")
+      address = s[1] if isinstance(s[1], numbers.Number) else msg_name_to_address.get(s[1])
+      if address not in msg_address_to_signals:
+        raise RuntimeError(f"could not find message {repr(s[1])} in DBC {self.dbc_name}")
+      if s[0] not in msg_address_to_signals[address]:
+        raise RuntimeError(f"could not find signal {repr(s[0])} in {repr(s[1])}, DBC {self.dbc_name}")
 
-        signals[i] = (s[0], address)
-      else:
-        if s[1] not in msg_address_to_signals:
-          raise RuntimeError(f"could not find message {repr(s[1])} in DBC {self.dbc_name}")
-        if s[0] not in msg_address_to_signals[s[1]]:
-          raise RuntimeError(f"could not find signal {repr(s[0])} in {repr(s[1])}, DBC {self.dbc_name}")
+      signals[i] = (s[0], address)
 
     for i in range(len(checks)):
       c = checks[i]
