@@ -70,7 +70,7 @@ BO_ 829 LKAS_HUD: 5 ADAS
  SG_ STEERING_REQUIRED : 8|1@0+ (1,0) [0|1] "" BDY
  SG_ LDW_ICON : 22|1@0+ (1,0) [0|1] "" BDY
  SG_ LDW_PROBLEM : 21|1@0+ (1,0) [0|1] "" BDY
- SG_ BEEP : 17|2@0+ (1,0) [0|1] "" BDY
+ SG_ BEEP : 18|3@0+ (1,0) [0|7] "" BDY
  SG_ LDW_ON : 28|1@0+ (1,0) [0|1] "" BDY
  SG_ LDW_OFF : 27|1@0+ (1,0) [0|1] "" BDY
  SG_ CLEAN_WINDSHIELD : 26|1@0+ (1,0) [0|1] "" BDY
