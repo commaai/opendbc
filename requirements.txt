@@ -1,8 +1,8 @@
-Cython==0.29.34
-flake8==6.0.0
-Jinja2==3.1.2
-numpy==1.24.2
-pycapnp==1.3.0
-pylint==2.17.2
-pyyaml==6.0
+Cython
+flake8
+Jinja2
+numpy
+pycapnp
+pylint==2.17.4
+pyyaml
 scons
