@@ -59,8 +59,9 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
   std::vector<uint8_t> ret(msg.size, 0);
 
   for (const auto &sig : msg.sigs) {
-    auto value_it = std::find_if(values.begin(), values.end(), [name = sig.name](auto &v) { return v.name == name; });
+    auto value_it = std::find_if(values.begin(), values.end(), [&name = sig.name](auto &v) { return v.name == name; });
     double v = (value_it != values.end()) ? value_it->value : 0.0;
+
     int64_t ival = (int64_t)(round((v - sig.offset) / sig.factor));
     if (ival < 0) {
       ival = (1ULL << sig.size) + ival;
