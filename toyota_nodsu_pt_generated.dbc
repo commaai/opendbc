@@ -54,7 +54,7 @@ BO_ 401 STEERING_LTA: 8 XXX
  SG_ STEER_REQUEST_2 : 25|1@0+ (1,0) [0|1] "" XXX
  SG_ LKA_ACTIVE : 26|1@0+ (1,0) [0|1] "" XXX
  SG_ SETME_X3 : 29|2@0+ (1,0) [0|3] "" XXX
- SG_ BIT : 30|1@0+ (1,0) [0|1] "" XXX
+ SG_ CLEAR_HANDS_ON_ALERT : 30|1@0+ (1,0) [0|1] "" XXX
  SG_ BYTE3_BIT0 : 31|1@0+ (1,0) [0|1] "" XXX
  SG_ PERCENTAGE : 39|8@0+ (1,0) [0|255] "" XXX
  SG_ SETME_X64 : 47|8@0+ (1,0) [0|255] "" XXX
@@ -114,7 +114,9 @@ BO_ 581 GAS_PEDAL_HYBRID: 8 XXX
 
 BO_ 608 STEER_TORQUE_SENSOR: 8 XXX
  SG_ STEER_OVERRIDE : 0|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_2 : 2|2@0+ (1,0) [0|3] "" XXX
  SG_ STEER_ANGLE_INITIALIZING : 3|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_1 : 7|4@0+ (1,0) [0|15] "" XXX
  SG_ STEER_TORQUE_DRIVER : 15|16@0- (1,0) [-32768|32767] "" XXX
  SG_ STEER_ANGLE : 31|16@0- (0.0573,0) [-500|500] "" XXX
  SG_ STEER_TORQUE_EPS : 47|16@0- (1,0) [-32768|32767] "" XXX
@@ -190,6 +192,9 @@ BO_ 835 ACC_CONTROL: 8 XXX
 BO_ 836 PRE_COLLISION_2: 8 XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|0] "" XXX
 
+BO_ 863 NEW_MSG_35F: 8 XXX
+ SG_ NEW_SIGNAL_1 : 47|3@0+ (1,0) [0|7] "" XXX
+
 BO_ 865 CLUTCH: 8 XXX
  SG_ GAS_PEDAL_ALT : 23|8@0+ (0.005,0) [0|1] "" XXX
  SG_ ACC_FAULTED : 32|1@0+ (1,0) [0|1] "" XXX
@@ -205,15 +210,16 @@ BO_ 869 DSU_CRUISE: 7 XXX
  SG_ LEAD_DISTANCE : 39|8@0+ (1,0) [0|0] "m" XXX
 
 BO_ 871 LTA_RELATED: 2 XXX
- SG_ NEW_SIGNAL_2 : 0|1@0+ (1,0) [0|3] "" XXX
+ SG_ LDA_SA_TOGGLE : 0|1@0+ (1,0) [0|1] "" XXX
  SG_ LKA_ACTIVE : 2|1@0+ (1,0) [0|65535] "" XXX
  SG_ UNKNOWN : 3|1@1+ (1,0) [0|31] "" XXX
  SG_ NEW_SIGNAL_3 : 15|2@0+ (1,0) [0|255] "" XXX
 
 BO_ 881 LTA_RELATED_2: 8 XXX
  SG_ STEER_ANGLE : 23|16@0- (0.0573,0) [0|65535] "" XXX
- SG_ NEW_SIGNAL_2 : 35|2@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_1 : 63|8@0+ (1,0) [0|1] "" XXX
+ SG_ TURN_SIGNALS : 35|2@0+ (1,0) [0|255] "" XXX
+ SG_ LDA_SA_TOGGLE : 59|1@0+ (1,0) [0|1] "" XXX
+ SG_ STEERING_PRESSED : 63|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 921 PCM_CRUISE_SM: 8 XXX
  SG_ MAIN_ON : 4|1@0+ (1,0) [0|1] "" XXX
@@ -308,6 +314,9 @@ BO_ 1043 TIME: 8 XXX
  SG_ GMT_DIFF : 55|1@0+ (1,0) [0|0] "" XXX
  SG_ SUMMER : 60|1@0+ (1,0) [0|0] "" XXX
 
+BO_ 1063 NEW_MSG_427: 8 XXX
+ SG_ NEW_SIGNAL_1 : 30|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 1083 AUTOPARK_STATUS: 8 XXX
  SG_ STATE : 7|4@0+ (1,0) [0|15] "" XXX
 
@@ -352,6 +361,9 @@ BO_ 1163 RSA3: 8 XXX
  SG_ OVSPVALM : 19|4@0+ (1,-5) [0|0] "" XXX
  SG_ OVSPVALH : 27|4@0+ (1,-5) [0|0] "" XXX
  SG_ TSRSPU : 33|2@0+ (1,0) [0|0] "" XXX
+
+BO_ 1165 NEW_MSG_48D: 8 XXX
+ SG_ NEW_SIGNAL_1 : 30|7@0+ (1,0) [0|127] "" XXX
 
 BO_ 1167 NEW_MSG_48F: 8 XXX
  SG_ NEW_SIGNAL_1 : 23|8@0+ (1,0) [0|255] "" XXX
@@ -428,7 +440,7 @@ CM_ SG_ 401 STEER_REQUEST "enable bit for steering, 1 to steer, 0 to not";
 CM_ SG_ 401 STEER_ANGLE_CMD "desired angle, OEM steers up to 95 degrees, no angle limit but torque will bottom out";
 CM_ SG_ 401 STEER_REQUEST_2 "enable bit for steering, 1 to steer, 0 to not";
 CM_ SG_ 401 LKA_ACTIVE "1 when using LTA for LKA";
-CM_ SG_ 401 BIT "has correlation to STEER_REQUEST";
+CM_ SG_ 401 CLEAR_HANDS_ON_ALERT "Set to 1 if LKAS_HUD->LDA_ALERT ('Keep Hands On Wheel') is activated and user touches wheel enough to clear it";
 CM_ SG_ 401 PERCENTAGE "driver override percentage (0-100), very close to steeringPressed in OP";
 CM_ SG_ 401 SETME_X64 "ramps to 0 smoothly then back on falling edge of STEER_REQUEST if BIT isn't 1";
 CM_ SG_ 401 ANGLE "angle of car relative to lane center on LTA camera";
@@ -464,6 +476,7 @@ CM_ SG_ 865 ACC_FAULTED "1 when ACC is faulted and the PCM disallows engagement.
 CM_ SG_ 865 CLUTCH_RELEASED "boolean of clutch for 6MT.";
 CM_ SG_ 871 UNKNOWN "very rarely 1";
 CM_ SG_ 881 STEER_ANGLE "matches LTA and STEER_TORQUE_SENSOR->STEER_ANGLE";
+CM_ SG_ 881 STEERING_PRESSED "low sensitivity steering wheel pressed by driver signal";
 CM_ SG_ 921 TEMP_ACC_FAULTED "1 when the UI is displaying or playing fault-related alerts or sounds. Also 1 when pressing main on.";
 CM_ SG_ 921 UI_SET_SPEED "set speed shown in the vehicle's UI with the vehicle's unit";
 CM_ SG_ 951 BRAKE_LIGHTS_ACC "brake lights when ACC commands decel";
@@ -536,7 +549,9 @@ VAL_ 835 ACC_MALFUNCTION 1 "faulted" 0 "ok";
 VAL_ 835 ACC_TYPE 2 "permanent low speed lockout" 1 "ok";
 VAL_ 835 ACC_CUT_IN 1 "CUT-IN Detected" 0 "clear";
 VAL_ 865 CLUTCH_RELEASED 0 "clutch pressed any amount" 1 "clutch released";
-VAL_ 881 NEW_SIGNAL_2 0 "none" 1 "left" 2 "right";
+VAL_ 871 LDA_SA_TOGGLE 0 "steering assist off" 1 "steering assist on";
+VAL_ 881 TURN_SIGNALS 0 "none" 1 "left" 2 "right";
+VAL_ 881 LDA_SA_TOGGLE 0 "steering assist off" 1 "steering assist on";
 VAL_ 921 CRUISE_CONTROL_STATE 2 "disabled" 11 "hold" 10 "hold_waiting_user_cmd" 6 "enabled" 5 "faulted";
 VAL_ 956 SPORT_ON 0 "off" 1 "on";
 VAL_ 956 GEAR 0 "D" 1 "S" 8 "N" 16 "R" 32 "P";
