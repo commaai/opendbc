@@ -613,7 +613,7 @@ CM_ SG_ 550 BRAKE_POSITION "seems proportional to pedal displacement, unclear th
 CM_ SG_ 610 TYPE "seems 1 on Corolla, 0 on all others";
 CM_ SG_ 881 GAS_PEDAL "not set on all cars, only seen on TSS 2.5 Camry Hybrid so far";
 CM_ SG_ 881 STEER_ANGLE "matches STEER_TORQUE_SENSOR->STEER_ANGLE";
-CM_ SG_ 881 TURN_SIGNALS "may be flipped on some cars";
+CM_ SG_ 881 TURN_SIGNALS "flipped on some cars";
 CM_ SG_ 881 LTA_STEER_REQUEST "matches STEERING_LTA->STEER_REQUEST";
 CM_ SG_ 881 UNKNOWN "related to steering wheel angle";
 CM_ SG_ 881 STEERING_PRESSED "low sensitivity steering wheel pressed by driver signal";
