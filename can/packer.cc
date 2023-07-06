@@ -40,8 +40,8 @@ CANPacker::CANPacker(const std::string& dbc_name) {
   init_crc_lookup_tables();
 }
 
-// set all values for all given signal/value pairs
 std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalPackValue> &values) {
+  // check parameters
   auto msg_it = message_lookup.find(address);
   if (msg_it == message_lookup.end()) {
     throw std::runtime_error("CanPacker::pack(): invalid address " + std::to_string(address));
@@ -53,13 +53,14 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
     }
   }
 
+  // set all values for all given signal/value pairs
   bool counter_set = false;
   const auto &msg = msg_it->second;
   std::vector<uint8_t> ret(msg.size, 0);
 
   for (const auto &sig : msg.sigs) {
-    auto it = std::find_if(values.begin(), values.end(), [name = sig.name](auto &v) { return v.name == name; });
-    double v = (it != values.end()) ? it->value : 0.0;
+    auto value_it = std::find_if(values.begin(), values.end(), [name = sig.name](auto &v) { return v.name == name; });
+    double v = (value_it != values.end()) ? value_it->value : 0.0;
     int64_t ival = (int64_t)(round((v - sig.offset) / sig.factor));
     if (ival < 0) {
       ival = (1ULL << sig.size) + ival;
@@ -68,25 +69,19 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
       set_value(ret, sig, ival);
     }
 
-    if (sig.name == "COUNTER") {
-      if (it != values.end()) {
-        // set_value(ret, sig, ival);
-        counter_set = true;
-        counters[address] = v;
-      }
+    if (sig.name == "COUNTER" && value_it != values.end()) {
+      counter_set = true;
+      counters[address] = v;
     }
   }
 
   // set message counter
   auto sig_it_counter = signal_lookup.find(std::make_pair(address, "COUNTER"));
   if (!counter_set && sig_it_counter != signal_lookup.end()) {
-    const auto& sig = sig_it_counter->second;
-
-    if (counters.find(address) == counters.end()) {
-      counters[address] = 0;
-    }
-    set_value(ret, sig, counters[address]);
-    counters[address] = (counters[address] + 1) % (1 << sig.size);
+    const auto &sig = sig_it_counter->second;
+    auto &cnt = counters[address];
+    set_value(ret, sig, cnt);
+    cnt = (cnt + 1) % (1 << sig.size);
   }
 
   // set message checksum
