@@ -32,7 +32,8 @@ CANPacker::CANPacker(const std::string& dbc_name) {
   assert(dbc);
 
   for (const auto& msg : dbc->msgs) {
-    message_lookup[msg.address] = msg;
+    message_address_lookup[msg.address] = &msg;
+    message_name_lookup[msg.name] = &msg;
     for (const auto& sig : msg.sigs) {
       signal_lookup[std::make_pair(msg.address, std::string(sig.name))] = sig;
     }
@@ -40,10 +41,18 @@ CANPacker::CANPacker(const std::string& dbc_name) {
   init_crc_lookup_tables();
 }
 
+uint32_t CANPacker::addressFromName(const std::string &msg_name) {
+  auto msg_it = message_name_lookup.find(msg_name);
+  if (msg_it == message_name_lookup.end()) {
+    throw std::runtime_error("CanPacker::pack(): invalid message name " + msg_name);
+  }
+  return msg_it->second->address;
+}
+
 std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::map<std::string, double> &values) {
   // check parameters
-  auto msg_it = message_lookup.find(address);
-  if (msg_it == message_lookup.end()) {
+  auto msg_it = message_address_lookup.find(address);
+  if (msg_it == message_address_lookup.end()) {
     throw std::runtime_error("CanPacker::pack(): invalid address " + std::to_string(address));
   }
 
@@ -55,10 +64,10 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::map<std::strin
 
   // set all values for all given signal/value pairs
   bool counter_set = false;
-  const auto &msg = msg_it->second;
-  std::vector<uint8_t> ret(msg.size, 0);
+  const Msg *msg = msg_it->second;
+  std::vector<uint8_t> ret(msg->size, 0);
 
-  for (const auto &sig : msg.sigs) {
+  for (const auto &sig : msg->sigs) {
     auto value_it = values.find(sig.name);
     double v = (value_it != values.end()) ? value_it->second : 0.0;
 
@@ -100,5 +109,5 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::map<std::strin
 
 // This function has a definition in common.h and is used in PlotJuggler
 Msg* CANPacker::lookup_message(uint32_t address) {
-  return &message_lookup[address];
+  return (Msg*)message_address_lookup[address];
 }
