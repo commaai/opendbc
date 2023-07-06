@@ -10,7 +10,7 @@ BO_ 401 STEERING_LTA: 8 XXX
  SG_ STEER_ANGLE_CMD : 15|16@0- (0.0573,0) [-540|540] "" XXX
  SG_ STEER_REQUEST_2 : 25|1@0+ (1,0) [0|1] "" XXX
  SG_ LKA_ACTIVE : 26|1@0+ (1,0) [0|1] "" XXX
- SG_ BIT : 30|1@0+ (1,0) [0|1] "" XXX
+ SG_ CLEAR_HOLD_STEERING_ALERT : 30|1@0+ (1,0) [0|1] "" XXX
  SG_ BYTE3_BIT0_2 : 24|1@0+ (1,0) [0|1] "" XXX
  SG_ BYTE3_BIT0 : 31|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 6|6@0+ (1,0) [0|255] "" XXX
@@ -29,6 +29,16 @@ BO_ 610 EPS_STATUS: 8 EPS
  SG_ TYPE : 24|1@0+ (1,0) [0|1] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
+BO_ 881 LTA_RELATED: 8 FCM
+ SG_ GAS_PEDAL : 15|8@0+ (0.005,0) [0|1] "" XXX
+ SG_ STEER_ANGLE : 23|16@0- (0.0573,0) [-500|500] "" XXX
+ SG_ TURN_SIGNALS : 35|2@0+ (1,0) [0|3] "" XXX
+ SG_ UNKNOWN_2 : 58|1@0+ (1,0) [0|1] "" XXX
+ SG_ LDA_SA_TOGGLE : 59|1@0+ (1,0) [0|1] "" XXX
+ SG_ LTA_STEER_REQUEST : 60|1@0+ (1,0) [0|1] "" XXX
+ SG_ UNKNOWN : 61|1@0+ (1,0) [0|1] "" XXX
+ SG_ STEERING_PRESSED : 63|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 1014 BSM: 8 XXX
  SG_ L_ADJACENT : 0|1@0+ (1,0) [0|1] "" XXX
  SG_ L_APPROACHING : 8|1@0+ (1,0) [0|1] "" XXX
@@ -41,13 +51,20 @@ CM_ SG_ 401 PERCENTAGE "driver override percentage (0-100), very close to steeri
 CM_ SG_ 401 SETME_X64 "ramps to 0 smoothly then back on falling edge of STEER_REQUEST if BIT isn't 1";
 CM_ SG_ 401 ANGLE "angle of car relative to lane center on LTA camera";
 CM_ SG_ 401 STEER_ANGLE_CMD "desired angle, OEM steers up to 95 degrees, no angle limit but torque will bottom out";
-CM_ SG_ 401 BIT "has correlation to STEER_REQUEST";
+CM_ SG_ 401 CLEAR_HOLD_STEERING_ALERT "set to 1 when user clears LKAS_HUD->LDA_ALERT ('Hold Steering') by applying torque to steering wheel";
 CM_ SG_ 401 STEER_REQUEST "enable bit for steering, 1 to steer, 0 to not";
 CM_ SG_ 401 STEER_REQUEST_2 "enable bit for steering, 1 to steer, 0 to not";
 CM_ SG_ 401 LKA_ACTIVE "1 when using LTA for LKA";
 CM_ SG_ 550 BRAKE_PRESSURE "seems prop to pedal force";
 CM_ SG_ 550 BRAKE_POSITION "seems proportional to pedal displacement, unclear the max value of 0x1c8";
 CM_ SG_ 610 TYPE "seems 1 on Corolla, 0 on all others";
+CM_ SG_ 881 GAS_PEDAL "not set on all cars, only seen on TSS 2.5 Camry Hybrid so far";
+CM_ SG_ 881 STEER_ANGLE "matches STEER_TORQUE_SENSOR->STEER_ANGLE";
+CM_ SG_ 881 TURN_SIGNALS "flipped on some cars";
+CM_ SG_ 881 LDA_SA_TOGGLE "not applicable for all cars";
+CM_ SG_ 881 LTA_STEER_REQUEST "only applicable for TSS 2.5: matches STEERING_LTA->STEER_REQUEST";
+CM_ SG_ 881 UNKNOWN "related to steering wheel angle";
+CM_ SG_ 881 STEERING_PRESSED "only applicable for TSS 2.5: low sensitivity steering wheel pressed by driver signal";
 CM_ SG_ 1014 L_ADJACENT "vehicle adjacent left side of car. enabled above 10mph, regardless of ADJACENT_ENABLED or APPROACHING_ENABLED";
 CM_ SG_ 1014 L_APPROACHING "vehicle approaching from left side of car. enabled above 10mph, regardless of ADJACENT_ENABLED or APPROACHING_ENABLED";
 CM_ SG_ 1014 R_ADJACENT "vehicle adjacent right side of car. enabled above 10mph, regardless of ADJACENT_ENABLED or APPROACHING_ENABLED";
