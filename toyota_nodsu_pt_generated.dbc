@@ -216,9 +216,13 @@ BO_ 871 LTA_RELATED: 2 XXX
  SG_ NEW_SIGNAL_3 : 15|2@0+ (1,0) [0|255] "" XXX
 
 BO_ 881 LTA_RELATED_2: 8 XXX
+ SG_ GAS_PEDAL : 15|8@0+ (0.005,0) [0|1] "" XXX
  SG_ STEER_ANGLE : 23|16@0- (0.0573,0) [0|65535] "" XXX
  SG_ TURN_SIGNALS : 35|2@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_1 : 58|1@0+ (1,0) [0|1] "" XXX
  SG_ LDA_SA_TOGGLE : 59|1@0+ (1,0) [0|1] "" XXX
+ SG_ LTA_STEER_REQUEST : 60|1@0+ (1,0) [0|1] "" XXX
+ SG_ UNKNOWN : 61|1@0+ (1,0) [0|1] "" XXX
  SG_ STEERING_PRESSED : 63|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 921 PCM_CRUISE_SM: 8 XXX
@@ -227,6 +231,9 @@ BO_ 921 PCM_CRUISE_SM: 8 XXX
  SG_ DISTANCE_LINES : 14|2@0+ (1,0) [0|3] "" XXX
  SG_ TEMP_ACC_FAULTED : 15|1@0+ (1,0) [0|1] "" XXX
  SG_ UI_SET_SPEED : 31|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 950 NEW_MSG_3B6: 8 XXX
+ SG_ NEW_SIGNAL_1 : 33|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 951 ESP_CONTROL: 8 XXX
  SG_ VSC_DISABLED : 12|2@0+ (1,0) [0|1] "" XXX
@@ -475,7 +482,11 @@ CM_ SG_ 865 GAS_PEDAL_ALT "copy of main GAS_PEDAL. Both use 8 bits. Might indica
 CM_ SG_ 865 ACC_FAULTED "1 when ACC is faulted and the PCM disallows engagement. Also describes a lockout when the ACC_CONTROL->ACC_MALFUNCTION bit is set.";
 CM_ SG_ 865 CLUTCH_RELEASED "boolean of clutch for 6MT.";
 CM_ SG_ 871 UNKNOWN "very rarely 1";
+CM_ SG_ 881 GAS_PEDAL "not set on all cars, only seen TSS 2.5 Camry Hybrid so far";
 CM_ SG_ 881 STEER_ANGLE "matches LTA and STEER_TORQUE_SENSOR->STEER_ANGLE";
+CM_ SG_ 881 TURN_SIGNALS "may be flipped on some cars";
+CM_ SG_ 881 LTA_STEER_REQUEST "matches STEERING_LTA->STEER_REQUEST";
+CM_ SG_ 881 UNKNOWN "related to steering wheel angle";
 CM_ SG_ 881 STEERING_PRESSED "low sensitivity steering wheel pressed by driver signal";
 CM_ SG_ 921 TEMP_ACC_FAULTED "1 when the UI is displaying or playing fault-related alerts or sounds. Also 1 when pressing main on.";
 CM_ SG_ 921 UI_SET_SPEED "set speed shown in the vehicle's UI with the vehicle's unit";
