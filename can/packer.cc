@@ -41,35 +41,39 @@ CANPacker::CANPacker(const std::string& dbc_name) {
 }
 
 // set all values for all given signal/value pairs
-std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalPackValue> &signals) {
+std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalPackValue> &values) {
   auto msg_it = message_lookup.find(address);
   if (msg_it == message_lookup.end()) {
     throw std::runtime_error("CanPacker::pack(): invalid address " + std::to_string(address));
   }
 
-  for (const auto &sig: signals) {
-    if (signal_lookup.find({address, sig.name}) == signal_lookup.end()) {
-      throw std::runtime_error("CanPacker::pack(): undefined signal:" + sig.name + " in " + std::to_string(address));
+  for (const auto &v : values) {
+    if (signal_lookup.find(std::make_pair(address, v.name)) == signal_lookup.end()) {
+      throw std::runtime_error("CanPacker::pack(): undefined signal:" + v.name + " in " + std::to_string(address));
     }
   }
 
-  std::vector<uint8_t> ret(message_lookup[address].size, 0);
   bool counter_set = false;
-  for (const auto &sig : msg_it->second.sigs) {
-    double value = 0.0;
-    auto it = std::find_if(signals.begin(), signals.end(), [name = sig.name](auto &v) { return v.name == name; });
-    if (it != signals.end()) {
-      value = it->value;
-    }
-    int64_t ival = (int64_t)(round((value - sig.offset) / sig.factor));
+  const auto &msg = msg_it->second;
+  std::vector<uint8_t> ret(msg.size, 0);
+
+  for (const auto &sig : msg.sigs) {
+    auto it = std::find_if(values.begin(), values.end(), [name = sig.name](auto &v) { return v.name == name; });
+    double v = (it != values.end()) ? it->value : 0.0;
+    int64_t ival = (int64_t)(round((v - sig.offset) / sig.factor));
     if (ival < 0) {
       ival = (1ULL << sig.size) + ival;
     }
-    set_value(ret, sig, ival);
+    if (ival != 0) {
+      set_value(ret, sig, ival);
+    }
 
-    if (sig.name == "COUNTER" && it != signals.end()) {
-      counter_set = true;
-      counters[address] = value;
+    if (sig.name == "COUNTER") {
+      if (it != values.end()) {
+        // set_value(ret, sig, ival);
+        counter_set = true;
+        counters[address] = v;
+      }
     }
   }
 
