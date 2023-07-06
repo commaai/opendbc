@@ -161,8 +161,9 @@ class TestCanParserPacker(unittest.TestCase):
     parser = CANParser(dbc_file, signals, checks, 0)
     packer = CANPacker(dbc_file)
 
-    for brake in range(0, 100):
-      values = {"USER_BRAKE": brake}
+    # Ensure packer correctly scales and offsets when signal is not explicitly set
+    cases = [({'USER_BRAKE': b}, b) for b in range(100)]
+    for values, brake in (({}, 0), *cases):
       msgs = packer.make_can_msg("VSA_STATUS", 0, values)
       bts = can_list_to_can_capnp([msgs])
 
