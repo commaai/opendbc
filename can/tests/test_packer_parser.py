@@ -168,10 +168,16 @@ class TestCanParserPacker(unittest.TestCase):
       values = {"USER_BRAKE": brake}
       msgs = packer.make_can_msg("VSA_STATUS", 0, values)
       bts = can_list_to_can_capnp([msgs])
-
       parser.update_strings([bts])
 
       self.assertAlmostEqual(parser.vl["VSA_STATUS"]["USER_BRAKE"], brake)
+
+    # Ensure packer correctly scales and offsets when signal is not explicitly set
+    msgs = packer.make_can_msg("VSA_STATUS", 0, {})
+    bts = can_list_to_can_capnp([msgs])
+    parser.update_strings([bts])
+
+    self.assertAlmostEqual(parser.vl["VSA_STATUS"]["USER_BRAKE"], 0)
 
   def test_subaru(self):
     # Subaru is little endian
