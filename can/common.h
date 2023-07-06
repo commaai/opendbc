@@ -92,7 +92,6 @@ public:
 class CANPacker {
 private:
   const DBC *dbc = NULL;
-  std::map<std::pair<uint32_t, std::string>, Signal> signal_lookup;
   std::unordered_map<uint32_t, const Msg *> message_address_lookup;
   std::unordered_map<std::string, const Msg *> message_name_lookup;
   std::unordered_map<uint32_t, uint32_t> counters;
