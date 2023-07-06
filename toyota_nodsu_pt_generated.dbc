@@ -310,6 +310,11 @@ BO_ 1043 TIME : 8 CGW
  SG_ GMTDIFF_MINUTES : 50|6@0+ (1,0) [0|0] "minutes" XXX
  SG_ SUMMER : 60|1@0+ (1,0) [0|0] "" XXX
 
+BO_ 1044 AUTO_HIGH_BEAM: 8 FCM
+ SG_ AHB_DUTY : 47|8@0+ (0.5,0) [0|0] "%" Vector__XXX
+ SG_ F_AHB : 55|4@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ C_AHB : 51|4@0+ (1,0) [0|0] "" Vector__XXX
+
 BO_ 1083 AUTOPARK_STATUS: 8 IPAS
  SG_ STATE : 7|4@0+ (1,0) [0|15] "" XXX
 
