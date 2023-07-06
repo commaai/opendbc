@@ -608,7 +608,7 @@ CM_ SG_ 401 CLEAR_HOLD_STEERING_ALERT "set to 1 when user clears LKAS_HUD->LDA_A
 CM_ SG_ 401 STEER_REQUEST "enable bit for steering, 1 to steer, 0 to not";
 CM_ SG_ 401 STEER_REQUEST_2 "enable bit for steering, 1 to steer, 0 to not";
 CM_ SG_ 401 LKA_ACTIVE "1 when using LTA for LKA";
-CM_ SG_ 401 SETME_X1 "usually 1, seen at 0 on some South American Corollas";
+CM_ SG_ 401 SETME_X1 "usually 1, seen at 0 on some South American Corollas indicating lack of stock Lane Tracing Assist";
 CM_ SG_ 401 SETME_X3 "almost completely correlates with Toyota Safety Sense version, but may instead describe max torque when using LTA. if TSS 2.5 or 2022 RAV4, this is always 1. if TSS 2.0 this is always 3 (or 0 on Alphard, Highlander, NX)";
 CM_ SG_ 550 BRAKE_PRESSURE "seems prop to pedal force";
 CM_ SG_ 550 BRAKE_POSITION "seems proportional to pedal displacement, unclear the max value of 0x1c8";
