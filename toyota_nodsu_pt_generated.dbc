@@ -608,6 +608,7 @@ CM_ SG_ 401 CLEAR_HOLD_STEERING_ALERT "set to 1 when user clears LKAS_HUD->LDA_A
 CM_ SG_ 401 STEER_REQUEST "enable bit for steering, 1 to steer, 0 to not";
 CM_ SG_ 401 STEER_REQUEST_2 "enable bit for steering, 1 to steer, 0 to not";
 CM_ SG_ 401 LKA_ACTIVE "1 when using LTA for LKA";
+CM_ SG_ 401 SETME_X3 "almost completely correlates with Toyota Safety Sense version, but may instead describe max torque when using LTA. if TSS 2.5 or 2022 RAV4, this is always 1. if TSS 2.0 this is always 3 (or 0 on Alphard, Highlander, NX)";
 CM_ SG_ 550 BRAKE_PRESSURE "seems prop to pedal force";
 CM_ SG_ 550 BRAKE_POSITION "seems proportional to pedal displacement, unclear the max value of 0x1c8";
 CM_ SG_ 610 TYPE "seems 1 on Corolla, 0 on all others";
@@ -625,6 +626,7 @@ CM_ SG_ 1014 R_APPROACHING "vehicle approaching from right side of car. enabled 
 CM_ SG_ 1014 ADJACENT_ENABLED "when BSM is enabled in settings, this is on along with APPROACHING_ENABLED. this controls bsm alert visibility";
 CM_ SG_ 1014 APPROACHING_ENABLED "when BSM is enabled in settings, this is on along with ADJACENT_ENABLED. this controls bsm alert visibility";
 
+VAL_ 401 SETME_X3 3 "TSS 2.0" 1 "TSS 2.5 or 2022 RAV4" 0 "TSS 2.0 on Alphard, Highlander, NX";
 VAL_ 610 IPAS_STATE 5 "override" 3 "enabled" 1 "disabled";
 VAL_ 610 LKA_STATE 25 "temporary_fault" 17 "permanent_fault" 11 "lka_missing_unavailable2" 9 "temporary_fault2" 5 "active" 3 "lka_missing_unavailable" 1 "standby";
 VAL_ 610 LTA_STATE 25 "temporary_fault" 9 "temporary_fault2" 5 "active" 3 "lta_missing_unavailable" 1 "standby";
