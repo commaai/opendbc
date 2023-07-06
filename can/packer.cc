@@ -45,24 +45,23 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
 
   // set all values for all given signal/value pairs
   bool counter_set = false;
-  for (const auto& sigval : signals) {
-    auto sig_it = signal_lookup.find(std::make_pair(address, sigval.name));
-    if (sig_it == signal_lookup.end()) {
-      // TODO: do something more here. invalid flag like CANParser?
-      WARN("undefined signal %s - %d\n", sigval.name.c_str(), address);
-      continue;
-    }
-    const auto &sig = sig_it->second;
+  for (auto &[key, sig] : signal_lookup) {
+    if (key.first != address) continue;
 
-    int64_t ival = (int64_t)(round((sigval.value - sig.offset) / sig.factor));
+    double value = 0.0;
+    auto it = std::find_if(signals.begin(), signals.end(), [name = key.second](auto &v) { return v.name == name; });
+    if (it != signals.end()) {
+      value = it->value;
+    }
+    int64_t ival = (int64_t)(round((value - sig.offset) / sig.factor));
     if (ival < 0) {
       ival = (1ULL << sig.size) + ival;
     }
     set_value(ret, sig, ival);
 
-    counter_set = counter_set || (sigval.name == "COUNTER");
-    if (counter_set) {
-      counters[address] = sigval.value;
+    if (key.second == "COUNTER" && it != signals.end()) {
+      counter_set = true;
+      counters[address] = value;
     }
   }
 
