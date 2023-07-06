@@ -565,7 +565,7 @@ BO_ 401 STEERING_LTA: 8 XXX
  SG_ STEER_ANGLE_CMD : 15|16@0- (0.0573,0) [-540|540] "" XXX
  SG_ STEER_REQUEST_2 : 25|1@0+ (1,0) [0|1] "" XXX
  SG_ LKA_ACTIVE : 26|1@0+ (1,0) [0|1] "" XXX
- SG_ CLEAR_HANDS_ON_ALERT : 30|1@0+ (1,0) [0|1] "" XXX
+ SG_ CLEAR_HOLD_STEERING_ALERT : 30|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 6|6@0+ (1,0) [0|255] "" XXX
  SG_ STEER_REQUEST : 0|1@0+ (1,0) [0|1] "" XXX
  SG_ SETME_X1 : 7|1@0+ (1,0) [0|1] "" XXX
@@ -604,7 +604,7 @@ CM_ SG_ 401 PERCENTAGE "driver override percentage (0-100), very close to steeri
 CM_ SG_ 401 SETME_X64 "ramps to 0 smoothly then back on falling edge of STEER_REQUEST if BIT isn't 1";
 CM_ SG_ 401 ANGLE "angle of car relative to lane center on LTA camera";
 CM_ SG_ 401 STEER_ANGLE_CMD "desired angle, OEM steers up to 95 degrees, no angle limit but torque will bottom out";
-CM_ SG_ 401 CLEAR_HANDS_ON_ALERT "set to 1 when user clears LKAS_HUD->LDA_ALERT ('Keep Hands On Wheel') by applying torque to steering wheel";
+CM_ SG_ 401 CLEAR_HOLD_STEERING_ALERT "set to 1 when user clears LKAS_HUD->LDA_ALERT ('Hold Steering') by applying torque to steering wheel";
 CM_ SG_ 401 STEER_REQUEST "enable bit for steering, 1 to steer, 0 to not";
 CM_ SG_ 401 STEER_REQUEST_2 "enable bit for steering, 1 to steer, 0 to not";
 CM_ SG_ 401 LKA_ACTIVE "1 when using LTA for LKA";
