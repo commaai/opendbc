@@ -40,16 +40,16 @@ CANPacker::CANPacker(const std::string& dbc_name) {
   init_crc_lookup_tables();
 }
 
-std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalPackValue> &values) {
+std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::map<std::string, double> &values) {
   // check parameters
   auto msg_it = message_lookup.find(address);
   if (msg_it == message_lookup.end()) {
     throw std::runtime_error("CanPacker::pack(): invalid address " + std::to_string(address));
   }
 
-  for (const auto &v : values) {
-    if (signal_lookup.find(std::make_pair(address, v.name)) == signal_lookup.end()) {
-      throw std::runtime_error("CanPacker::pack(): undefined signal:" + v.name + " in " + std::to_string(address));
+  for (const auto &[name, _] : values) {
+    if (signal_lookup.find(std::make_pair(address, name)) == signal_lookup.end()) {
+      throw std::runtime_error("CanPacker::pack(): undefined signal:" + name + " in " + std::to_string(address));
     }
   }
 
@@ -59,8 +59,8 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
   std::vector<uint8_t> ret(msg.size, 0);
 
   for (const auto &sig : msg.sigs) {
-    auto value_it = std::find_if(values.begin(), values.end(), [&name = sig.name](auto &v) { return v.name == name; });
-    double v = (value_it != values.end()) ? value_it->value : 0.0;
+    auto value_it = values.find(sig.name);
+    double v = (value_it != values.end()) ? value_it->second : 0.0;
 
     int64_t ival = (int64_t)(round((v - sig.offset) / sig.factor));
     if (ival < 0) {

@@ -98,6 +98,6 @@ private:
 
 public:
   CANPacker(const std::string& dbc_name);
-  std::vector<uint8_t> pack(uint32_t address, const std::vector<SignalPackValue> &values);
+  std::vector<uint8_t> pack(uint32_t address, const std::map<std::string, double> &values);
   Msg* lookup_message(uint32_t address);
 };

@@ -7,7 +7,7 @@ from libcpp.map cimport map
 from libcpp.string cimport string
 
 from .common cimport CANPacker as cpp_CANPacker
-from .common cimport dbc_lookup, SignalPackValue, DBC
+from .common cimport dbc_lookup, DBC
 
 
 cdef class CANPacker:
@@ -28,18 +28,6 @@ cdef class CANPacker:
       self.name_to_address_and_size[string(msg.name)] = (msg.address, msg.size)
       self.address_to_size[msg.address] = msg.size
 
-  cdef vector[uint8_t] pack(self, addr, values):
-    cdef vector[SignalPackValue] values_thing
-    values_thing.reserve(len(values))
-    cdef SignalPackValue spv
-
-    for name, value in values.iteritems():
-      spv.name = name.encode("utf8")
-      spv.value = value
-      values_thing.push_back(spv)
-
-    return self.packer.pack(addr, values_thing)
-
   cpdef make_can_msg(self, name_or_addr, bus, values) except +RuntimeError:
     cdef int addr, size
     if type(name_or_addr) == int:
@@ -48,5 +36,5 @@ cdef class CANPacker:
     else:
       addr, size = self.name_to_address_and_size[name_or_addr.encode("utf8")]
 
-    cdef vector[uint8_t] val = self.pack(addr, values)
+    cdef vector[uint8_t] val = self.packer.pack(addr, values)
     return [addr, 0, (<char *>&val[0])[:size], bus]
