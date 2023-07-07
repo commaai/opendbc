@@ -1640,6 +1640,8 @@ BO_ 1042 ICM_412h: 8 ICM
 
 BO_ 1348 Navi_HU: 8 XXX
  SG_ SpeedLim_Nav_Clu : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ SpeedLim_Nav_General : 29|1@0+ (1,0) [0|1] "" XXX
+ SG_ SpeedLim_Nav_Cam : 30|1@0+ (1,0) [0|1] "" XXX
 
 CM_ "BO_ E_EMS11: All (plug-in) hybrids use this gas signal: CR_Vcu_AccPedDep_Pos, and all EVs use the Accel_Pedal_Pos signal. See hyundai/values.py for a specific car list";
 CM_ SG_ 871 CF_Lvr_IsgState "Idle Stop and Go";
