@@ -24,7 +24,7 @@ class TestCADNDefine(unittest.TestCase):
                          )
 
   def test_all_dbcs(self):
-
+    # Asserts no exceptions on all DBCs
     for dbc in ALL_DBCS:
       with self.subTest(dbc=dbc):
         CANDefine(dbc)

@@ -7,7 +7,6 @@ from opendbc.can.packer import CANPacker
 from opendbc.can.tests import TEST_DBC
 
 
-
 class TestCanParserPackerExceptions(unittest.TestCase):
   def test_civic_exceptions(self):
     dbc_file = "honda_civic_touring_2016_can_generated"
