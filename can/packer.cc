@@ -29,24 +29,24 @@ CANPacker::CANPacker(const std::string& dbc_name) {
   dbc = dbc_lookup(dbc_name);
   assert(dbc);
   for (const auto& msg : dbc->msgs) {
-    message_address_lookup[msg.address] = &msg;
-    message_name_lookup[msg.name] = &msg;
+    message_lookup[msg.address] = &msg;
+    message_name_to_address[msg.name] = msg.address;
   }
   init_crc_lookup_tables();
 }
 
 uint32_t CANPacker::addressFromName(const std::string &msg_name) {
-  auto msg_it = message_name_lookup.find(msg_name);
-  if (msg_it == message_name_lookup.end()) {
+  auto msg_it = message_name_to_address.find(msg_name);
+  if (msg_it == message_name_to_address.end()) {
     throw std::runtime_error("CanPacker::pack(): invalid message name " + msg_name);
   }
-  return msg_it->second->address;
+  return msg_it->second;
 }
 
 std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::map<std::string, double> &values) {
   // check parameters
-  auto msg_it = message_address_lookup.find(address);
-  if (msg_it == message_address_lookup.end()) {
+  auto msg_it = message_lookup.find(address);
+  if (msg_it == message_lookup.end()) {
     throw std::runtime_error("CanPacker::pack(): invalid address " + std::to_string(address));
   }
 
@@ -104,5 +104,5 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::map<std::strin
 
 // This function has a definition in common.h and is used in PlotJuggler
 Msg* CANPacker::lookup_message(uint32_t address) {
-  return (Msg*)message_address_lookup[address];
+  return (Msg*)message_lookup[address];
 }
