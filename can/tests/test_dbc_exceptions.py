@@ -4,6 +4,7 @@ import unittest
 
 from opendbc.can.parser import CANParser, CANDefine
 from opendbc.can.packer import CANPacker
+from opendbc.can.tests import TEST_DBC
 
 
 class TestCanParserPackerExceptions(unittest.TestCase):
@@ -21,6 +22,8 @@ class TestCanParserPackerExceptions(unittest.TestCase):
       CANPacker(dbc_invalid)
     with self.assertRaises(RuntimeError):
       CANDefine(dbc_invalid)
+    with self.assertRaises(KeyError):
+      CANDefine(TEST_DBC)
 
     with self.assertRaises(RuntimeError):
       CANParser(dbc_file, signals, [], 0)
