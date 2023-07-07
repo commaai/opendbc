@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import os
 import unittest
 import random
 from functools import partial
@@ -7,9 +6,7 @@ from functools import partial
 import cereal.messaging as messaging
 from opendbc.can.parser import CANParser
 from opendbc.can.packer import CANPacker
-
-
-TEST_DBC = os.path.abspath(os.path.join(os.path.dirname(__file__), "test.dbc"))
+from opendbc.can.tests import TEST_DBC
 
 
 # Python implementation so we don't have to depend on boardd
