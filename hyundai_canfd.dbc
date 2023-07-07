@@ -52,24 +52,7 @@ BO_ 69 GEAR: 24 XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
  SG_ GEAR : 44|3@1+ (1,0) [0|7] "" XXX
 
-BO_ 80 LKAS: 16 XXX
- SG_ STEER_REQ : 52|1@1+ (1,0) [0|1] "" XXX
- SG_ TORQUE_REQUEST : 41|11@1+ (1,-1024) [0|4095] "" XXX
- SG_ LKA_ICON : 38|2@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_1 : 27|2@1+ (1,0) [0|255] "" XXX
- SG_ LFA_BUTTON : 56|1@1+ (1,0) [0|255] "" XXX
- SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
- SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
- SG_ STEER_MODE : 65|3@1+ (1,0) [0|1] "" XXX
- SG_ LKA_WARNING : 32|1@1+ (1,0) [0|1] "" XXX
- SG_ LKA_ASSIST : 62|1@1+ (1,0) [0|1] "" XXX
- SG_ LKA_MODE : 24|3@1+ (1,0) [0|7] "" XXX
- SG_ NEW_SIGNAL_2 : 70|2@0+ (1,0) [0|3] "" XXX
- SG_ SET_ME_1 : 80|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_3 : 111|8@0+ (1,0) [0|255] "" XXX
- SG_ FCA_SYSWARN : 40|1@0+ (1,0) [0|1] "" XXX
-
-BO_ 272 LKAS_ALT: 32 XXX
+BO_ 272 LKAS: 32 XXX
  SG_ STEER_REQ : 52|1@1+ (1,0) [0|1] "" XXX
  SG_ TORQUE_REQUEST : 41|11@1+ (1,-1024) [0|4095] "" XXX
  SG_ LKA_ICON : 38|2@1+ (1,0) [0|255] "" XXX
