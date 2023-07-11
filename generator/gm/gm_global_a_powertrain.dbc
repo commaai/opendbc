@@ -140,6 +140,7 @@ BO_ 452 AcceleratorPedal2: 8 XXX
 BO_ 481 ASCMSteeringButton: 7 K124_ASCM
  SG_ DistanceButton : 22|1@0+ (1,0) [0|0] ""  NEO
  SG_ LKAButton : 23|1@0+ (1,0) [0|0] ""  NEO
+ SG_ ACCAlwaysOne : 24|1@0+ (1,0) [0|1] "" XXX
  SG_ ACCButtons : 46|3@0+ (1,0) [0|0] ""  NEO
  SG_ DriveModeButton : 39|1@0+ (1,0) [0|1] "" XXX
  SG_ RollingCounter : 33|2@0+ (1,0) [0|3] "" NEO
@@ -172,6 +173,13 @@ BO_ 532 BRAKE_RELATED: 6 XXX
 
 BO_ 560 EPBStatus: 8 EPB
  SG_ EPBClosed : 12|1@0+ (1,0) [0|1] ""  NEO
+
+BO_ 562 EBCMFrictionBrakeStatus: 8 XXX
+ SG_ FrictionBrakeUnavailable : 46|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 608 SPEED_RELATED: 8 XXX
+ SG_ RollingCounter : 5|2@0+ (1,0) [0|0] "" XXX
+ SG_ ClusterSpeed : 31|8@0+ (1,0) [0|0] "" XXX
 
 BO_ 711 BECMBatteryVoltageCurrent: 6 K17_EBCM
  SG_ HVBatteryVoltage : 31|12@0+ (0.125,0) [0|511.875] "V"  NEO
@@ -235,6 +243,11 @@ BO_ 880 ASCMActiveCruiseControlStatus: 6 K124_ASCM
  SG_ ACCCmdActive : 23|1@0+ (1,0) [0|0] ""  NEO
  SG_ FCWAlert : 41|2@0+ (1,0) [0|3] "" XXX
 
+BO_ 967 EVDriveMode: 4 XXX
+ SG_ SinglePedalModeActive : 7|1@0+ (1,0) [0|1] "" XXX
+ SG_ SinglePedalModeRisingEdge : 21|1@0+ (1,0) [0|1] "" XXX
+ SG_ SinglePedalModeFallingEdge : 22|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 977 ECMCruiseControl: 8 K20_ECM
  SG_ CruiseActive : 39|1@0+ (1,0) [0|3] "" NEO
  SG_ CruiseSetSpeed : 19|12@0+ (0.0625,0) [0|0] "km/h" NEO
@@ -285,9 +298,12 @@ CM_ BO_ 190 "Length varies from 6 to 8 bytes by car";
 CM_ SG_ 190 GasPedalAndAcc "ACC baseline is 62";
 CM_ SG_ 352 Ignition "Non-zero when ignition is on";
 CM_ SG_ 451 GasPedalAndAcc2 "ACC baseline is 62";
+CM_ SG_ 481 ACCAlwaysOne "Usually 1 if the car is equipped with ACC";
+CM_ SG_ 562 FrictionBrakeUnavailable "1 when ACC brake control is unavailable. Stays high if brake command messages are blocked for a period of time";
 CM_ SG_ 497 Ignition "Describes ignition + preconditioning mode, noisy";
 CM_ SG_ 501 PRNDL2 "When ManualMode is Active, Value is 13=L1 12=L2 11=L3 ... 4=L10";
 CM_ SG_ 532 UserBrakePressure "can be lower than other brake position signals when the brakes are pre-filled from ACC braking and the user presses on the brakes. user-only pressure?";
+CM_ SG_ 608 ClusterSpeed "Cluster speed signal seems to match dash on newer cars, but is a lower rate and can be noisier.";
 CM_ SG_ 761 UserBrakePressure2 "Similar to BRAKE_RELATED->UserBrakePressure";
 CM_ SG_ 1001 VehicleSpeed "Spinouts show here on 2wd. Speed derived from right front wheel (drive tire)";
 BA_DEF_  "UseGMParameterIDs" INT 0 0;

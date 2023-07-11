@@ -11,6 +11,9 @@ BO_ 610 EPS_STATUS: 5 EPS
  SG_ TYPE : 24|1@0+ (1,0) [0|1] "" XXX
  SG_ CHECKSUM : 39|8@0+ (1,0) [0|255] "" XXX
 
+BO_ 1178 BRAKE_RELATED: 8 XXX
+ SG_ BRAKE_PRESSED : 48|1@0+ (1,0) [0|1] "" XXX
+
 CM_ SG_ 548 BRAKE_PRESSURE "seems prop to pedal force";
 CM_ SG_ 548 BRAKE_POSITION "seems proportional to pedal displacement, unclear the max value of 0x1c8";
 CM_ SG_ 610 TYPE "seems 1 on Corolla, 0 on all others";

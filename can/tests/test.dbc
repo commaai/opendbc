@@ -23,3 +23,5 @@ BO_ 245 CAN_FD_MESSAGE: 32 XXX
  SG_ SIGNED : 22|16@0- (1,0) [0|1] "" XXX
  SG_ 64_BIT_LE : 159|64@1+ (1,0) [0|1] "" XXX
  SG_ 64_BIT_BE : 80|64@0+ (1,0) [0|1] "" XXX
+
+VAL_ 80 NON_EXISTENT_ADDR 0 "test";

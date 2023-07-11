@@ -11,9 +11,6 @@ cereal_dir = Dir('.')
 python_path = sysconfig.get_paths()['include']
 cpppath = [
   '#',
-  '#cereal',
-  "#cereal/messaging",
-  "#opendbc/can",
   '/usr/lib/include',
   python_path
 ]

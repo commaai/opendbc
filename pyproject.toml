@@ -1,0 +1,12 @@
+[tool.poetry]
+name = "opendbc"
+version = "1.0.0"
+description = "CAN bus databases and tools"
+license = "MIT"
+authors = ["Vehicle Researcher <user@comma.ai>"]
+readme = "README.md"
+repository = "https://github.com/commaai/opendbc"
+
+[tool.cython-lint]
+max-line-length = 120
+ignore = ["E111", "E114"]
