@@ -1,6 +1,3 @@
-CM_ "IMPORT _subaru_global.dbc";
-CM_ "IMPORT _subaru_global_ice.dbc";
-
 BO_ 292 ES_LKAS: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|1] "" XXX

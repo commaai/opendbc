@@ -1,0 +1,12 @@
+BO_ 72 Transmission: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ Gear : 24|8@1+ (1,0) [0|255] "" XXX
+ SG_ RPM : 40|16@1+ (1,0) [0|65535] "" XXX
+
+BO_ 73 CVT: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ CVT_Gear : 24|8@1+ (1,0) [0|255] "" XXX
+
+VAL_ 72 Gear 2 "N" 3 "R" 4 "P" 121 "D" 137 "1" 145 "2" 153 "3" 161 "4" 169 "5" 177 "6";
