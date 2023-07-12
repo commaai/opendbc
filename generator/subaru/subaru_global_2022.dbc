@@ -1,9 +1,0 @@
-CM_ "IMPORT _subaru_global.dbc";
-CM_ "IMPORT subaru_global_2017.dbc";
-
-BO_ 292 ES_LKAS_ALT: 8 XXX
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|1] "" XXX
- SG_ COUNTER : 8|4@1+ (1,0) [0|1] "" XXX
- SG_ LKAS_Request : 12|1@1+ (1,0) [0|1] "" XXX
- SG_ LKAS_Output : 40|17@1- (-1,0) [0|1] "" XXX
- SG_ SET_3 : 60|2@1+ (1,0) [0|1] "" XXX
