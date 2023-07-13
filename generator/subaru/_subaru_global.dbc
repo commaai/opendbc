@@ -106,7 +106,6 @@ BO_ 282 Steering_2: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|1] "" XXX
  SG_ Steering_Angle : 24|17@1- (-0.01,0) [0|1] "" XXX
- SG_ Steering_Angle_2 : 47|17@1- (-0.01,0) [0|1] "" XXX
 
 BO_ 312 Brake_Pressure_L_R: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
