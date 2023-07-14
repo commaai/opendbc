@@ -83,10 +83,14 @@ BO_ 314 Wheel_Speeds: 8 XXX
  SG_ FL : 51|13@1+ (0.057,0) [0|255] "kph" XXX
  SG_ RL : 38|13@1+ (0.057,0) [0|255] "kph" XXX
 
-BO_ 280 STOP_START: 8 XXX
+BO_ 280 Steering_Torque_2: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ State : 63|1@1+ (1,0) [0|1] "" XXX
+ SG_ Steer_Torque_Output : 13|11@1- (-10,0) [0|255] "" XXX
+ SG_ Signal1 : 24|8@1+ (1,0) [0|511] "" XXX
+ SG_ Steer_Torque_Sensor : 45|11@1- (-1,0) [0|255] "" XXX
+ SG_ Steering_Active : 61|1@0+ (1,0) [0|1] "" XXX
+ SG_ Steering_Disabled : 63|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 281 Steering_Torque: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
@@ -97,6 +101,11 @@ BO_ 281 Steering_Torque: 8 XXX
  SG_ Steer_Warning : 29|1@1+ (1,0) [0|1] "" XXX
  SG_ Steering_Angle : 32|16@1- (-0.0217,0) [-600|600] "" X
  SG_ Steer_Torque_Output : 48|11@1- (-10,0) [-1000|1000] "" XXX
+
+BO_ 282 Steering_2: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|1] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|1] "" XXX
+ SG_ Steering_Angle : 24|17@1- (-0.01,0) [0|1] "" XXX
 
 BO_ 312 Brake_Pressure_L_R: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
