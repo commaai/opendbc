@@ -44,7 +44,7 @@ CANPacker::CANPacker(const std::string& dbc_name) {
 uint32_t CANPacker::addressFromName(const std::string &msg_name) {
   auto msg_it = message_name_to_address.find(msg_name);
   if (msg_it == message_name_to_address.end()) {
-    throw std::runtime_error("CanPacker::addressFromName(): invalid message name " + msg_name);
+    throw std::runtime_error("CANPacker::addressFromName(): invalid message name " + msg_name);
   }
   return msg_it->second;
 }
@@ -52,7 +52,7 @@ uint32_t CANPacker::addressFromName(const std::string &msg_name) {
 std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalPackValue> &values) {
   auto msg_it = message_lookup.find(address);
   if (msg_it == message_lookup.end()) {
-    throw std::runtime_error("CanPacker::pack(): invalid address " + std::to_string(address));
+    throw std::runtime_error("CANPacker::pack(): invalid address " + std::to_string(address));
   }
 
   std::vector<uint8_t> ret(message_lookup[address].size, 0);
@@ -62,11 +62,10 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
   for (const auto& sigval : values) {
     auto sig_it = signal_lookup.find(std::make_pair(address, sigval.name));
     if (sig_it == signal_lookup.end()) {
-      throw std::runtime_error("CanPacker::pack(): undefined signal:" + sigval.name + " in " + std::to_string(address));
+      throw std::runtime_error("CANPacker::pack(): undefined signal:" + sigval.name + " in " + std::to_string(address));
     }
 
     const auto &sig = sig_it->second;
-
     int64_t ival = (int64_t)(round((sigval.value - sig.offset) / sig.factor));
     if (ival < 0) {
       ival = (1ULL << sig.size) + ival;
