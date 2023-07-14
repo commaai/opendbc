@@ -65,6 +65,7 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
       continue;
     }
     const auto &sig = sig_it->second;
+
     int64_t ival = (int64_t)(round((sigval.value - sig.offset) / sig.factor));
     if (ival < 0) {
       ival = (1ULL << sig.size) + ival;
