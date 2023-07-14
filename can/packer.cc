@@ -62,7 +62,7 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
   for (const auto& sigval : values) {
     auto sig_it = signal_lookup.find(std::make_pair(address, sigval.name));
     if (sig_it == signal_lookup.end()) {
-      throw std::runtime_error("CANPacker::pack(): undefined signal:" + sigval.name + " in " + std::to_string(address));
+      throw std::runtime_error("CANPacker::pack(): undefined signal " + sigval.name + " in " + msg_it->second.name);
     }
 
     const auto &sig = sig_it->second;
