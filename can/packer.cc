@@ -60,8 +60,8 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
   // Check all signals with non-zero offsets have explicit values
   for (const auto& dbc_signal : msg_it->second.sigs) {
     if (dbc_signal.offset != 0) {
-      auto sig_it = std::find_if(signals.begin(), signals.end(), [&dbc_signal](const SignalPackValue& spv) { return spv.name == dbc_signal.name; });
-      if (sig_it == signals.end()) {
+      auto sig_it = std::find_if(values.begin(), values.end(), [&dbc_signal](const SignalPackValue& spv) { return spv.name == dbc_signal.name; });
+      if (sig_it == values.end()) {
         throw std::runtime_error("CANPacker::pack(): missing signal with non-zero offset: " + dbc_signal.name + " in address " + std::to_string(address));
       }
     }
