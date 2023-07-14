@@ -2,7 +2,6 @@
 # cython: c_string_encoding=ascii, language_level=3
 
 from libc.stdint cimport uint8_t, uint32_t
-from libcpp cimport bool
 from libcpp.vector cimport vector
 
 from .common cimport CANPacker as cpp_CANPacker
