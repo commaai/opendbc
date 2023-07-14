@@ -333,9 +333,10 @@ class TestCanParserPacker(unittest.TestCase):
         self.assertRaises(RuntimeError, CANParser, TEST_DBC, [(sig, msg)], [(new_msg, 0)])
         self.assertRaises(RuntimeError, CANParser, TEST_DBC, [(sig, new_msg)], [(new_msg, 0)])
 
-        self.assertRaises(RuntimeError, packer.make_can_msg, msg, 0, {sig + "1" : 0})
-        self.assertRaises(RuntimeError, packer.make_can_msg, new_msg, 0, {sig : 0})
-        self.assertRaises(RuntimeError, packer.make_can_msg, new_msg, 0, {sig + "1" : 0})
+        packer.make_can_msg(msg, 0, {sig: 0})
+        self.assertRaises(RuntimeError, packer.make_can_msg, msg, 0, {sig + "1": 0})
+        self.assertRaises(RuntimeError, packer.make_can_msg, new_msg, 0, {sig: 0})
+        self.assertRaises(RuntimeError, packer.make_can_msg, new_msg, 0, {sig + "1": 0})
 
 
 if __name__ == "__main__":
