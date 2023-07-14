@@ -41,10 +41,10 @@ CANPacker::CANPacker(const std::string& dbc_name) {
   init_crc_lookup_tables();
 }
 
-uint32_t CANPacker::addressFromName(const std::string &msg_name) {
+uint32_t CANPacker::address_from_name(const std::string &msg_name) {
   auto msg_it = message_name_to_address.find(msg_name);
   if (msg_it == message_name_to_address.end()) {
-    throw std::runtime_error("CANPacker::addressFromName(): invalid message name " + msg_name);
+    throw std::runtime_error("CANPacker::address_from_name(): invalid message name " + msg_name);
   }
   return msg_it->second;
 }

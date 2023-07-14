@@ -34,7 +34,7 @@ cdef class CANPacker:
     if type(name_or_addr) == int:
       addr = name_or_addr
     else:
-      addr = self.packer.addressFromName(name_or_addr.encode("utf8"))
+      addr = self.packer.address_from_name(name_or_addr.encode("utf8"))
 
     cdef vector[uint8_t] val = self.pack(addr, values)
     return [addr, 0, (<char *>&val[0])[:val.size()], bus]

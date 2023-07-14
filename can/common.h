@@ -99,7 +99,7 @@ private:
 
 public:
   CANPacker(const std::string& dbc_name);
-  uint32_t addressFromName(const std::string &msg_name);
+  uint32_t address_from_name(const std::string &msg_name);
   std::vector<uint8_t> pack(uint32_t address, const std::vector<SignalPackValue> &values);
   Msg* lookup_message(uint32_t address);
 };
