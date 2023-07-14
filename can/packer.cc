@@ -55,16 +55,6 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
     throw std::runtime_error("CanPacker::pack(): invalid address " + std::to_string(address));
   }
 
-  // Check all signals with non-zero offsets have explicit values
-  for (const auto& dbc_signal : msg_it->second.sigs) {
-    if (dbc_signal.offset != 0) {
-      auto sig_it = std::find_if(values.begin(), values.end(), [&dbc_signal](const SignalPackValue& spv) { return spv.name == dbc_signal.name; });
-      if (sig_it == values.end()) {
-        throw std::runtime_error("CanPacker::pack(): missing non-zero offset signal " + dbc_signal.name + " in address " + std::to_string(address));
-      }
-    }
-  }
-
   std::vector<uint8_t> ret(message_lookup[address].size, 0);
 
   // set all values for all given signal/value pairs
@@ -76,6 +66,7 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
     }
 
     const auto &sig = sig_it->second;
+
     int64_t ival = (int64_t)(round((sigval.value - sig.offset) / sig.factor));
     if (ival < 0) {
       ival = (1ULL << sig.size) + ival;
