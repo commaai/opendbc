@@ -10,16 +10,13 @@ from .common cimport dbc_lookup, SignalPackValue
 
 
 cdef class CANPacker:
-  cdef:
-    cpp_CANPacker *packer
-    bool enforce_checks
+  cdef cpp_CANPacker *packer
 
   def __init__(self, dbc_name, enforce_checks=True):
     if not dbc_lookup(dbc_name):
       raise RuntimeError(f"Can't lookup {dbc_name}")
 
-    self.packer = new cpp_CANPacker(dbc_name)
-    self.enforce_checks = enforce_checks
+    self.packer = new cpp_CANPacker(dbc_name, enforce_checks)
 
   cdef vector[uint8_t] pack(self, addr, values):
     cdef vector[SignalPackValue] values_thing
@@ -31,7 +28,7 @@ cdef class CANPacker:
       spv.value = value
       values_thing.push_back(spv)
 
-    return self.packer.pack(addr, values_thing, self.enforce_checks)
+    return self.packer.pack(addr, values_thing)
 
   cpdef make_can_msg(self, name_or_addr, bus, values) except +RuntimeError:
     cdef uint32_t addr

@@ -96,10 +96,11 @@ private:
   std::map<uint32_t, Msg> message_lookup;
   std::map<std::string, uint32_t> message_name_to_address;
   std::map<uint32_t, uint32_t> counters;
+  bool enforce_checks = false;
 
 public:
-  CANPacker(const std::string& dbc_name);
+  CANPacker(const std::string& dbc_name, bool enforce_checks);
   uint32_t address_from_name(const std::string &msg_name);
-  std::vector<uint8_t> pack(uint32_t address, const std::vector<SignalPackValue> &values, bool enforce_checks);
+  std::vector<uint8_t> pack(uint32_t address, const std::vector<SignalPackValue> &values);
   Msg* lookup_message(uint32_t address);
 };

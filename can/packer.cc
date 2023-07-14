@@ -27,7 +27,7 @@ void set_value(std::vector<uint8_t> &msg, const Signal &sig, int64_t ival) {
   }
 }
 
-CANPacker::CANPacker(const std::string& dbc_name) {
+CANPacker::CANPacker(const std::string& dbc_name, bool enforce_checks) : enforce_checks(enforce_checks) {
   dbc = dbc_lookup(dbc_name);
   assert(dbc);
 
@@ -49,7 +49,7 @@ uint32_t CANPacker::address_from_name(const std::string &msg_name) {
   return msg_it->second;
 }
 
-std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalPackValue> &values, bool enforce_checks) {
+std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalPackValue> &values) {
   auto msg_it = message_lookup.find(address);
   if (msg_it == message_lookup.end()) {
     throw std::runtime_error("CANPacker::pack(): invalid address " + std::to_string(address));
