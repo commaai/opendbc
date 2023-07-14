@@ -57,7 +57,8 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
 
   std::vector<uint8_t> ret(message_lookup[address].size, 0);
 
-  // Check all signals with non-zero offsets have explicit values
+  // For signals with offsets, leaving bytes at zero results in non-zero parsed values.
+  // Require those signals to be explicitly set
   for (const auto& dbc_signal : msg_it->second.sigs) {
     if (dbc_signal.offset != 0 && enforce_checks) {
       auto sig_it = std::find_if(values.begin(), values.end(), [&dbc_signal](const SignalPackValue& spv) { return spv.name == dbc_signal.name; });
