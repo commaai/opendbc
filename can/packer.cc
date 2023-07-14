@@ -59,13 +59,11 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
 
   // For signals with offsets, leaving bytes at zero results in non-zero parsed values.
   // Require those signals to be explicitly set
-  if (enforce_checks) {
-    for (const auto& dbc_signal : msg_it->second.sigs) {
-      if (dbc_signal.offset != 0) {
-        auto sig_it = std::find_if(values.begin(), values.end(), [&dbc_signal](const SignalPackValue& spv) { return spv.name == dbc_signal.name; });
-        if (sig_it == values.end()) {
-          throw std::runtime_error("CANPacker::pack(): missing signal with non-zero offset: " + dbc_signal.name + " in address " + std::to_string(address));
-        }
+  for (const auto& dbc_signal : msg_it->second.sigs) {
+    if (dbc_signal.offset != 0 && enforce_checks) {
+      auto sig_it = std::find_if(values.begin(), values.end(), [&dbc_signal](const SignalPackValue& spv) { return spv.name == dbc_signal.name; });
+      if (sig_it == values.end()) {
+        throw std::runtime_error("CANPacker::pack(): missing signal with non-zero offset: " + dbc_signal.name + " in address " + std::to_string(address));
       }
     }
   }
