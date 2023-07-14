@@ -57,8 +57,6 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
 
   std::vector<uint8_t> ret(message_lookup[address].size, 0);
 
-  auto msg_it = message_lookup.find(address);
-
   // Check all signals with non-zero offsets have explicit values
   for (const auto& dbc_signal : msg_it->second.sigs) {
     if (dbc_signal.offset != 0) {
