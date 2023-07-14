@@ -49,7 +49,7 @@ uint32_t CANPacker::address_from_name(const std::string &msg_name) {
   return msg_it->second;
 }
 
-std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalPackValue> &values) {
+std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalPackValue> &values, bool enforce_checks) {
   auto msg_it = message_lookup.find(address);
   if (msg_it == message_lookup.end()) {
     throw std::runtime_error("CANPacker::pack(): invalid address " + std::to_string(address));
@@ -59,7 +59,7 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
 
   // Check all signals with non-zero offsets have explicit values
   for (const auto& dbc_signal : msg_it->second.sigs) {
-    if (dbc_signal.offset != 0) {
+    if (dbc_signal.offset != 0 && enforce_checks) {
       auto sig_it = std::find_if(values.begin(), values.end(), [&dbc_signal](const SignalPackValue& spv) { return spv.name == dbc_signal.name; });
       if (sig_it == values.end()) {
         throw std::runtime_error("CANPacker::pack(): missing signal with non-zero offset: " + dbc_signal.name + " in address " + std::to_string(address));

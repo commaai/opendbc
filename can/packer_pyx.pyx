@@ -2,6 +2,7 @@
 # cython: c_string_encoding=ascii, language_level=3
 
 from libc.stdint cimport uint8_t, uint32_t
+from libcpp cimport bool
 from libcpp.vector cimport vector
 
 from .common cimport CANPacker as cpp_CANPacker
@@ -9,13 +10,16 @@ from .common cimport dbc_lookup, SignalPackValue
 
 
 cdef class CANPacker:
-  cdef cpp_CANPacker *packer
+  cdef:
+    cpp_CANPacker *packer
+    bool enforce_checks
 
-  def __init__(self, dbc_name):
+  def __init__(self, dbc_name, enforce_checks=True):
     if not dbc_lookup(dbc_name):
       raise RuntimeError(f"Can't lookup {dbc_name}")
 
     self.packer = new cpp_CANPacker(dbc_name)
+    self.enforce_checks = enforce_checks
 
   cdef vector[uint8_t] pack(self, addr, values):
     cdef vector[SignalPackValue] values_thing
@@ -27,7 +31,7 @@ cdef class CANPacker:
       spv.value = value
       values_thing.push_back(spv)
 
-    return self.packer.pack(addr, values_thing)
+    return self.packer.pack(addr, values_thing, self.enforce_checks)
 
   cpdef make_can_msg(self, name_or_addr, bus, values) except +RuntimeError:
     cdef uint32_t addr
