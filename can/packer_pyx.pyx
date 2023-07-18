@@ -29,7 +29,7 @@ cdef class CANPacker:
 
     return self.packer.pack(addr, values_thing)
 
-  cpdef make_can_msg(self, name_or_addr, bus, values) except +RuntimeError:
+  cpdef make_can_msg(self, name_or_addr, bus, values):
     cdef uint32_t addr
     if type(name_or_addr) == int:
       addr = name_or_addr
