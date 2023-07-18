@@ -1,4 +1,4 @@
-Cython
+Cython<3.0.0
 flake8
 Jinja2
 numpy
