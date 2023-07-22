@@ -1,0 +1,32 @@
+CM_ "IMPORT subaru_global_2017.dbc";
+
+BO_ 325 Throttle2: 8 XXX
+ SG_ Throttle : 7|9@0+ (1,0) [0|255] "" XXX
+ SG_ RPM : 11|12@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 27|4@0+ (1,0) [0|15] "" XXX
+ SG_ Throttle2 : 32|8@1+ (1,0) [0|255] "" XXX
+
+BO_ 337 NEW_MSG_151: 8 XXX
+ SG_ NEW_SIGNAL_2 : 8|8@1- (1,0) [0|255] "" XXX
+ SG_ COUNTER : 27|4@0+ (1,0) [0|4095] "" XXX
+ SG_ CHECKSUM : 32|8@1+ (1,0) [0|255] "" XXX
+
+BO_ 339 NEW_MSG_153: 8 XXX
+ SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_2 : 8|14@1- (0.06,0) [0|15] "" XXX
+
+BO_ 341 NEW_MSG_155: 8 XXX
+ SG_ NEW_SIGNAL_3 : 0|8@1- (1,0) [0|255] "" XXX
+ SG_ Speed : 10|11@0+ (0.057,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_1 : 27|4@0+ (1,0) [0|4095] "" XXX
+ SG_ NEW_SIGNAL_2 : 39|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 343 NEW_MSG_157: 8 XXX
+ SG_ COUNTER : 27|4@0+ (1,0) [0|4095] "" XXX
+ SG_ CHECKSUM : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_3 : 47|24@0+ (1,0) [0|255] "" XXX
+
+BO_ 362 NEW_MSG_16A: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 11|4@0- (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_1 : 16|8@1- (1,0) [0|255] "" XXX
