@@ -152,8 +152,8 @@ BO_ 178 ESP_19: 8 Gateway_MQB
  SG_ ESP_VR_Radgeschw_02 : 48|16@1+ (0.0075,0) [0|491.49] "Unit_KiloMeterPerHour" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
 
 BO_ 252 ESP_NEW_1: 48 XXX
- SG_ XCHECKSUM : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ COUNTER : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ XCHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ WHEEL_SPEED_FL : 64|16@1+ (0.0075,0) [0|65535] "" XXX
  SG_ WHEEL_SPEED_FR : 80|16@1+ (0.0075,0) [0|65535] "" XXX
  SG_ WHEEL_SPEED_RL : 96|16@1+ (0.0075,0) [0|65535] "" XXX
@@ -201,7 +201,7 @@ BO_ 258 ESP_NEW_2: 48 XXX
  SG_ LATERAL_ACCEL : 16|8@1+ (1,0) [0|255] "" XXX
  SG_ LONGITUDINAL_ACCEL : 24|8@1- (1,0) [0|255] "" XXX
  SG_ YAW_RATE : 40|14@1+ (1,0) [0|16383] "" XXX
- SG_ YAW_RATE_SIGN : 54|1@0+ (1,0) [0|1] "" XXX
+ SG_ YAW_RATE_SIGN : 54|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 260 EPB_01: 8 Gateway_MQB
  SG_ EPB_01_CRC : 0|8@1+ (1,0) [0|255] "" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
@@ -408,7 +408,7 @@ BO_ 299 GRA_ACC_01: 8 Gateway_MQB
  SG_ GRA_Typ468 : 25|2@1+ (1,0) [0|3] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ GRA_Tip_Stufe_2 : 27|1@1+ (1,0) [0|1] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ GRA_ButtonTypeInfo : 28|2@1+ (1,0) [0|1] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ MAYBE_TRAVEL_ASSIST : 30|1@0+ (1,0) [0|1] "" XXX
+ SG_ MAYBE_TRAVEL_ASSIST : 30|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 301 Getriebe_13: 8 Getriebe_DQ_Hybrid_MQB
  SG_ Getriebe_13_CRC : 0|8@1+ (1,0) [0|255] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
@@ -434,16 +434,16 @@ BO_ 302 ACC_07: 8 XXX
 
 BO_ 313 ESP_NEW_3: 32 XXX
  SG_ XCHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ COUNTER : 11|4@0+ (1,0) [0|15] "" XXX
- SG_ BRAKE_PRESSED_1 : 16|1@0+ (1,0) [0|1] "" XXX
- SG_ BRAKE_PRESSED_2 : 27|1@0+ (1,0) [0|1] "" XXX
- SG_ BRAKE_PRESSED_3 : 48|1@0+ (1,0) [0|1] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ BRAKE_PRESSED_1 : 16|1@1+ (1,0) [0|1] "" XXX
+ SG_ BRAKE_PRESSED_2 : 27|1@1+ (1,0) [0|1] "" XXX
+ SG_ BRAKE_PRESSED_3 : 48|1@1+ (1,0) [0|1] "" XXX
  SG_ BRAKE_PRESSURE : 76|10@1+ (1,0) [0|1023] "" XXX
 
 BO_ 317 MOTOR_NEW_2: 32 XXX
- SG_ XCHECKSUM : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ COUNTER : 11|4@0+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_1 : 36|1@0+ (1,0) [0|1] "" XXX
+ SG_ XCHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_1 : 36|1@1+ (1,0) [0|1] "" XXX
  SG_ UNKNOWN : 76|10@1+ (1,0) [0|1023] "" XXX
 
 BO_ 387 CAMERA_NEW_3_HF: 64 XXX
@@ -507,8 +507,8 @@ BO_ 771 HCA_NEW: 24 XXX
  SG_ ENABLED_1 : 13|2@1+ (1,0) [0|3] "" XXX
  SG_ SET_ME_0X54 : 16|7@1+ (1,0) [0|127] "" XXX
  SG_ ASSIST_TORQUE : 24|10@1+ (1,0) [0|255] "" XXX
- SG_ ASSIST_DIRECTION : 39|1@0+ (1,0) [0|1] "" XXX
- SG_ ENABLED_2 : 66|1@0+ (1,0) [0|1] "" XXX
+ SG_ ASSIST_DIRECTION : 39|1@1+ (1,0) [0|1] "" XXX
+ SG_ ENABLED_2 : 66|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 779 Kombi_01: 8 Gateway_MQB
  SG_ KBI_ABS_Lampe : 0|1@1+ (1,0) [0|1] "" Vector__XXX
