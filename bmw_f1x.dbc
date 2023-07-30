@@ -1,0 +1,579 @@
+VERSION ""
+
+
+NS_ :
+    NS_DESC_
+    CM_
+    BA_DEF_
+    BA_
+    VAL_
+    CAT_DEF_
+    CAT_
+    FILTER
+    BA_DEF_DEF_
+    EV_DATA_
+    ENVVAR_DATA_
+    SGTYPE_
+    SGTYPE_VAL_
+    BA_DEF_SGTYPE_
+    BA_SGTYPE_
+    SIG_TYPE_REF_
+    VAL_TABLE_
+    SIG_GROUP_
+    SIG_VALTYPE_
+    SIGTYPE_VALTYPE_
+    BO_TX_BU_
+    BA_DEF_REL_
+    BA_REL_
+    BA_DEF_DEF_REL_
+    BU_SG_REL_
+    BU_EV_REL_
+    BU_BO_REL_
+    SG_MUL_VAL_
+
+BS_: 
+BU_: ACC ACSM AHM ASZ CAS CBX CON DDE DSC ICM EGS EMF FRM GWS HUD HU_NBT IHKA JBE KAFAS2 KOMBI RDC REMALI SCR TRSVC XXX ZGM DIAG TMSL TMSR 
+BO_ 192 ZGM_ABSAlive: 2 ZGM
+
+BO_ 217 DDE_AccelerationPedalAngle: 8 DDE
+   SG_ DDE_KickDownPressed : 53|1@0+ (1,0) [0|3] "" XXX
+   SG_ DDE_CruisePedalActive : 54|1@0+ (1,0) [0|1] "" XXX
+   SG_ DDE_CruisePedalInactive : 55|1@0+ (1,0) [0|1] "" XXX
+   SG_ DDE_ThrottlelPressed : 50|1@0+ (1,0) [0|1] "" XXX
+   SG_ DDE_AcceleratorPedalPressed : 52|1@0+ (1,0) [0|7] "" XXX
+   SG_ DDE_AcceleratorPedalPercentage : 16|16@1+ (0.01,0) [0|100] "" XXX
+   SG_ DDE_Counter1 : 8|4@1+ (1,0) [0|15] "" XXX
+   SG_ DDE_EngineSpeed : 32|16@1- (1,0) [0|65535] "" XXX
+   SG_ DDE_uknown : 7|8@0- (1,0) [0|65535] "" XXX
+
+BO_ 417 ICM_VehicleSpeed: 5 ICM
+   SG_ ICM_Wheel1 : 0|16@1- (0.0643699,0) [0|255] "kph" EMF
+   SG_ ICM_Wheel2 : 16|16@1- (0.0643699,0) [0|255] "kph" EMF
+   SG_ ICM_Wheel3 : 32|16@1- (0.0643699,0) [0|255] "kph" EMF
+   SG_ ICM_Wheel4 : 48|16@1- (0.0643699,0) [0|255] "kph" EMF
+
+BO_ 596 DSC_ActualWheelSpeed: 8 DSC
+   SG_ DSC_ActualWheelSpeedRearLeft : 7|16@0+ (1,0) [0|1] "" Vector__XXX
+   SG_ DSC_ActualWheelSpeedRearRight : 23|16@0+ (1,0) [0|1] "" Vector__XXX
+   SG_ DSC_ActualWheelSpeedFrontRight : 55|16@0+ (1,0) [0|1] "" Vector__XXX
+   SG_ DSC_ActualWheelSpeedFrontLeft : 39|16@0+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 627 HU_iDriveController_wakeup273: 6 HU_NBT
+
+BO_ 631 CON_ReplyWakeUp273: 6 CON
+
+BO_ 1400 DDE_DriveTrainData: 8 DDE
+
+BO_ 1021 EGS_TransmissionPowerTrain: 8 EGS
+   SG_ EGS_TransmissionPowerTrain_SelectedGear : 23|8@0+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 161 IHKA_Buttons1: 2 IHKA
+   SG_ IHKA_ButtonMode : 4|1@0+ (1,0) [0|1] "" Vector__XXX
+   SG_ IHKA_ButtonTraffic : 6|1@0+ (1,0) [0|1] "" Vector__XXX
+   SG_ IHKA_ButtonEject : 0|1@0+ (1,0) [0|1] "" Vector__XXX
+   SG_ IHKA_ButtonPower : 2|1@0+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 162 IHKA_ButtonsMem: 2 IHKA
+   SG_ IHKA_ButtonNum1 : 1|2@0+ (1,0) [0|2] "" Vector__XXX
+   SG_ IHKA_ButtonNum2 : 3|2@0+ (1,0) [0|2] "" Vector__XXX
+   SG_ IHKA_ButtonNum3 : 5|2@0+ (1,0) [0|2] "" Vector__XXX
+   SG_ IHKA_ButtonNum4 : 7|2@0+ (1,0) [0|2] "" Vector__XXX
+   SG_ IHKA_ButtonNum5 : 9|2@0+ (1,0) [0|2] "" Vector__XXX
+   SG_ IHKA_ButtonNum6 : 11|2@0+ (1,0) [0|2] "" Vector__XXX
+   SG_ IHKA_ButtonNum7 : 13|2@0+ (1,0) [0|2] "" Vector__XXX
+   SG_ IHKA_ButtonNum8 : 15|2@0+ (1,0) [0|2] "" Vector__XXX
+
+BO_ 163 IHKA_ButtonsSelectSong: 2 IHKA
+   SG_ IHKA_ButtonsSelectSong : 1|2@0+ (1,0) [0|2] "" Vector__XXX
+
+BO_ 241 IHKA_ButtonVolume: 2 IHKA
+   SG_ IHKA_ButtonVolumeDir : 9|2@0+ (1,0) [0|2] "" Vector__XXX
+   SG_ IHKA_ButtonVolumeStep : 0|4@1+ (1,0) [0|15] "" Vector__XXX
+
+BO_ 578 IHKA_HVACFrontStatus: 5 IHKA
+   SG_ IHKA_HVACstatusAC : 0|1@0+ (1,0) [0|1] "" Vector__XXX
+   SG_ IHKA_HVACstatusBlowWindshield : 10|1@0+ (1,0) [0|1] "" Vector__XXX
+   SG_ IHKA_HVACstatusFan : 8|1@0+ (1,0) [0|1] "" Vector__XXX
+   SG_ IHKA_HVACstatusPassengerTemp : 24|6@1+ (0.5,0) [0|56] "C" Vector__XXX
+   SG_ IHKA_HVACstatusDriverTemp : 32|6@1+ (0.5,0) [0|56] "C" Vector__XXX
+
+BO_ 746 IHKA_Unknown_2EA: 8 IHKA
+
+BO_ 742 IHKA_HVACstatus2: 8 IHKA
+   SG_ IHKA_HVACstatusBlowPower : 40|4@1+ (1,0) [0|9] "" Vector__XXX
+   SG_ IHKA_HVACstatusBlowOpenUp : 0|8@1+ (1,0) [0|64] "" Vector__XXX
+   SG_ IHKA_HVACstatusBlowOpenStraight : 8|8@1+ (1,0) [0|64] "" Vector__XXX
+   SG_ IHKA_HVACstatusBlowOpenDown : 16|8@1+ (1,0) [0|64] "" Vector__XXX
+
+BO_ 583 IHKA_Unknown247: 2 IHKA
+
+BO_ 768 IHKA_Unknown300: 8 IHKA
+
+BO_ 996 IHKA_Unknown3E4: 6 IHKA
+
+BO_ 1016 IHKA_Unknown3F8: 7 IHKA
+
+BO_ 1528 IHKA_Unknown5F8: 8 IHKA
+
+BO_ 1656 IHKA_Unknown678: 8 IHKA
+
+BO_ 138 SCR_ST_RESO_SCRA: 8 SCR
+
+BO_ 143 DDE_WheelTorquePowertrain1: 8 DDE
+
+BO_ 151 REMALI_StatusPrecrashMaster: 8 REMALI
+
+BO_ 160 EGS_RQ_TORQ_CRSH_GRB_2: 8 EGS
+
+BO_ 165 DDE_CrankshaftTorque1: 8 DDE
+   SG_ DDE_CrankshaftTorque1EngineRPM : 47|16@0+ (0.25,0) [0|1] "" Vector__XXX
+   SG_ DDE_CrankshaftTorque1EngineTorque : 23|12@0+ (0.5,-1023.5) [0|1] "" Vector__XXX
+   SG_ DDE_CrankshaftTorque1GearboxTorque : 27|12@0+ (0.5,-1023.5) [0|1] "" Vector__XXX
+
+BO_ 176 EGS_RQ_TORQ_CRSH_GRB: 8 EGS
+
+BO_ 191 CON_Touch: 8 CON
+
+BO_ 215 ACSM_AliveCounterSafety: 8 ACSM
+
+BO_ 220 DDE_WheelTorquePowertrain4: 8 DDE
+
+BO_ 228 ICM_VehicleRideHeight: 8 ICM
+
+BO_ 239 DSC_ActaulBrakingTorque: 8 DSC
+
+BO_ 243 DDE_EngineSpeedDriveTrain: 8 DDE
+
+BO_ 248 EGS_DISP_RPM_ENG_DYNS: 8 EGS
+
+BO_ 291 HUD_HUDStatus: 8 HUD
+
+BO_ 303 CAS_TerminalStatus: 8 CAS
+
+BO_ 309 ACSM_ControlCrashDeactivationFuelPump: 8 ACSM
+
+BO_ 311 DDE_DeliveryQuantity: 8 DDE
+
+BO_ 325 DDE_WheelTorquePowertrain3: 8 DDE
+
+BO_ 371 DSC_StabilisationOfDynamicStabilityControl: 8 DSC
+
+BO_ 407 GWS_GearSelectionSwitch: 8 GWS
+   SG_ GWS_GearSelectionSwitch_LeverPosition : 23|4@0+ (1,0) [0|1] "" EGS
+   SG_ GWS_GearSelectionSwitch_ParkButton : 31|8@0+ (1,0) [0|1] "" EGS
+   SG_ GWS_GearSelectionSwitch_Counter : 11|4@0+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 409 ICM_LongitudinalAccelerationCentrrOfGravity: 8 ICM
+
+BO_ 410 ICM_LateralAccelerationCentreOfGravity: 8 ICM
+
+BO_ 415 ICM_VechicleYawRate: 8 ICM
+
+BO_ 431 EGS_DT_GRDT: 8 EGS
+
+BO_ 442 DDE_EnergyGenerationStatus: 8 DDE
+
+BO_ 514 FRM_BrightnessAdjustment: 8 FRM
+
+BO_ 519 ASZ_ShiftPaddleOperation: 8 ASZ
+
+BO_ 538 FRM_LampCondition: 8 FRM
+
+BO_ 543 ICM_WarningObjectCoordinationStatus: 8 ICM
+
+BO_ 612 CON_Rotary: 8 CON
+   SG_ CON_Rotary_Counter : 23|8@0+ (1,0) [0|1] "" HU_NBT
+   SG_ CON_Rotary_TurnDir : 39|8@0+ (1,0) [0|1] "" HU_NBT
+   SG_ CON_Rotary_Steps : 31|8@0- (1,1) [0|1] "" Vector__XXX
+
+BO_ 615 CON_Button: 6 CON
+   SG_ CON_Button_Counter : 23|8@0+ (1,0) [0|1] "" HU_NBT
+   SG_ CON_Button_PressStatus : 25|2@0+ (1,0) [0|1] "" HU_NBT
+   SG_ CON_Button_PushType M : 39|8@0+ (1,0) [0|1] "" HU_NBT
+   SG_ CON_Button_KnobSide m221 : 31|4@0+ (1,0) [0|1] "" HU_NBT
+   SG_ CON_Button_ButtonVal m192 : 47|8@0+ (1,0) [0|1] "" HU_NBT
+
+BO_ 647 KAFAS2_RoadSignIdentification: 8 KAFAS2
+
+BO_ 658 KAFAS2_HighBeamAssistant: 8 KAFAS2
+
+BO_ 663 ACSM_SeatBelt: 8 ACSM
+
+BO_ 677 JBE_BrightnessOfSurroundingAreaStatus: 8 JBE
+
+BO_ 681 KAFAS2_LaneRecognitionData1: 8 KAFAS2
+
+BO_ 699 DSC_VehicleDistanceCovered: 8 DSC
+
+BO_ 703 IHKA_WaterValves: 8 IHKA
+
+BO_ 707 CBX_EmergencyCall: 8 CBX
+
+BO_ 708 DDE_EngineFuelConsumptionStatus: 8 DDE
+
+BO_ 709 KOMBI_DrivingDynamicsStatusDisplay: 8 KOMBI
+
+BO_ 714 KOMBI_Temperature: 8 KOMBI
+
+BO_ 719 JBE_AdditionalWaterPumpStatus: 8 JBE
+
+BO_ 720 JBE_AucSensorData: 8 JBE
+
+BO_ 721 JBE_WindscreenFittingStatus: 8 JBE
+
+BO_ 722 JBE_PressureInRefigerantCircuitStatus: 8 JBE
+
+BO_ 726 JBE_AirConditioningCompressorValveStatus: 8 JBE
+
+BO_ 732 EMF_ParkingBrake: 8 EMF
+
+BO_ 740 AHM_TrailerStatus: 8 AHM
+
+BO_ 749 DSC_VehicleStandstillStatus: 8 DSC
+
+BO_ 752 IHKA_StationaryFunction: 8 IHKA
+
+BO_ 761 IHKA_ACNeeded: 7 IHKA
+
+BO_ 764 CAS_DoorAndLidStatus: 8 CAS
+
+BO_ 770 DSC_EffectiveFrontAxleSteeringAngle: 8 DSC
+
+BO_ 779 DDE_AutomaticStartStopStatus: 8 DDE
+
+BO_ 788 JBE_DrivingLightStatus: 8 JBE
+
+BO_ 798 FRM_OperatingElementBrakeAssistStatus: 8 FRM
+
+BO_ 807 KAFAS2_LaneDepartureWarinig: 8 KAFAS2
+
+BO_ 808 KOMBI_Status: 8 KOMBI
+
+BO_ 809 AHM_CheckControlBypass02: 8 AHM
+
+BO_ 814 IHKA_InternalRegulation: 8 IHKA
+
+BO_ 816 KOMBI_KilometrageReading: 8 KOMBI
+
+BO_ 821 XXX_FuelPumpStatus: 8 XXX
+
+BO_ 835 FRM_LineDepartureWarningSystemStatus: 8 FRM
+
+BO_ 839 ICM_SteeringWheelVibrationCoordinationStatus: 8 ICM
+
+BO_ 841 JBE_FuelTankLevelRawData: 8 JBE
+
+BO_ 872 RDC_RdcTyreStatus: 8 RDC
+
+BO_ 878 DSC_DisplayCheckcontrolBypass: 8 DSC
+
+BO_ 879 EMF_CheckContol: 8 EMF
+
+BO_ 890 TRSVC_RearView: 8 TRSVC
+
+BO_ 893 DDE_AuxiliaryCoolantPump: 8 DDE
+
+BO_ 896 CAS_VIN: 8 CAS
+   SG_ CAS_VIN_Str : 7|56@4- (1,0) [0|1] "" Vector__XXX
+
+BO_ 897 XXX_ElectronicOilLevel: 8 XXX
+
+BO_ 918 EGS_ObdDiagnostics: 8 EGS
+
+BO_ 919 DDE_ObdDiagnostics: 8 DDE
+
+BO_ 922 EGS_TransmissionControlUnitStatus: 8 EGS
+
+BO_ 928 JBE_VechicleCondition: 8 JBE
+
+BO_ 933 ZGM_SleepReadiness: 8 ZGM
+
+BO_ 944 FRM_ReverseGear: 8 FRM
+
+BO_ 947 DDE_PowerManagementConsumerLoadControl: 8 DDE
+
+BO_ 1006 SCR_ObdDiagnostics: 8 SCR
+
+BO_ 1016 XXX_RearAirCondition: 8 XXX
+
+BO_ 1017 DDE_DriveTrainData2: 8 DDE
+   SG_ DDE_DriveTrainData2WaterTemp : 39|8@0+ (1,-48) [0|1] "" Vector__XXX
+   SG_ DDE_DriveTrainData2OilTemp : 47|8@0+ (1,-48) [0|1] "" Vector__XXX
+
+BO_ 1019 DDE_DriveTrainData: 8 DDE
+
+BO_ 1035 SCR_ST_FFLV_SCRA: 8 SCR
+
+BO_ 1296 ZGM_Unknown510: 8 ZGM
+
+BO_ 1298 XXX_Unknown0x512: 8 XXX
+
+BO_ 1303 XXX_Unknown0x517: 8 XXX
+
+BO_ 1807 ACC_SensorDataFrontAreaMonitoring: 8 ACC
+
+BO_ 1839 ACC_DynamicBrakeControl: 8 ACC
+
+BO_ 1856 ACC_ObjectDataFrontFootwellMonitoring: 8 ACC
+
+BO_ 1896 ACC_FrontFootwellMonitoringStatus: 8 ACC
+
+BO_ 2147485024 HU_iDriveController_wakeup560: 8 HU_NBT
+
+BO_ 1511 CON_Unknown5E7: 8 CON
+   SG_ CON_Unknown5E7_Counter : 31|8@0+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 2147485031 CON_Unknown567: 6 CON
+
+BO_ 2147485424 ZGM_Unknown6F0: 8 ZGM
+
+BO_ 2147483894 FRM_Unknown0F6: 2 FRM
+
+BO_ 2147484129 FRM_Unknown1E1: 6 FRM
+
+BO_ 2147484150 FRM_Unknown1F6: 2 FRM
+
+BO_ 2147484235 FRM_Unknown24B: 2 FRM
+
+BO_ 2147484299 FRM_Unknown28B: 2 FRM
+
+BO_ 2147484372 FRM_Unknown2D4: 2 FRM
+
+BO_ 2147484422 FRM_Unknown306: 2 FRM
+
+BO_ 2147484522 FRM_Unknown36A: 2 FRM
+
+BO_ 2147484529 FRM_Unknown371: 2 FRM
+
+BO_ 902 FRM_Unknown386: 2 FRM
+
+BO_ 2147484598 FRM_Unknown3B6: 3 FRM
+
+BO_ 952 FRM_Unknown3B8: 3 FRM
+
+BO_ 2147484605 FRM_Unknown3BD: 2 FRM
+
+BO_ 2147484637 FRM_Unknown3DD: 3 FRM
+
+BO_ 1009 FRM_Unknown3F1: 2 FRM
+
+BO_ 2147484714 FRM_Unknown42A: 2 FRM
+
+BO_ 2147485042 FRM_Unknown572: 8 FRM
+
+BO_ 2147485170 FRM_Unknown5F2: 8 FRM
+
+BO_ 2147485298 FRM_Unknown672: 8 FRM
+
+BO_ 2147484230 IHKA_HVACStatus: 5 IHKA
+
+BO_ 1374 GWS_Unknown55E: 4 GWS
+
+BO_ 915 KOMBI_LCDBrightnessControl: 8 KOMBI
+
+BO_ 149 KAFAS2_SteplessHighBeamAssistantObjectData: 8 KAFAS2
+
+BO_ 234 FRM_DoorDriverStatus: 8 FRM
+   SG_ FRM_DoorDriverStatusOpen : 25|2@0+ (1,0) [0|1] "" Vector__XXX
+   SG_ FRM_DoorDriverStatusLock : 1|2@0+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 226 FRM_DoorPassengerStatus: 8 FRM
+   SG_ FRM_DoorPassengerStatusOpen : 25|2@0+ (1,0) [0|1] "" Vector__XXX
+   SG_ FRM_DoorPassengerStatusLock : 1|2@0+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 238 FRM_DoorPassengerRearStatus: 8 FRM
+   SG_ FRM_DoorPassengerRearStatusOpen : 25|2@0+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 230 FRM_DoorDriverRearStatus: 8 FRM
+   SG_ FRM_DoorDriverRearStatusOpen : 25|2@0+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 408 KAFAS2_Unknown198: 8 KAFAS2
+
+BO_ 652 KAFAS2_Unknown28C: 4 KAFAS2
+
+BO_ 837 KAFAS2_Unknown345: 6 KAFAS2
+
+BO_ 977 KAFAS2_Unknown3D1: 2 KAFAS2
+
+BO_ 1079 KAFAS2_Unknown437: 4 KAFAS2
+
+BO_ 1501 KAFAS2_Unknown5DD: 8 KAFAS2
+
+BO_ 1629 KAFAS2_Unknown65D: 8 KAFAS2
+
+BO_ 1811 ICM_driver_action_steering_wheel: 8 ICM
+
+BO_ 2147484242 JBE_wiper_status: 8 JBE
+
+BO_ 480 TMSL_status_of_exterior_light_left: 8 TMSL
+
+BO_ 486 TMSR_status_of_exterior_light_right: 8 TMSR
+
+BO_ 1816 ACC_PreCrashDetection: 8 ACC
+
+BO_ 2147485450 KOMBI_SystemTime: 8 KOMBI
+
+CM_ BU_ CON "iDrive Controller";
+CM_ BU_ EGS "Electronic Gear Shifter";
+CM_ BU_ HU_NBT "Head Unit NBT";
+CM_ BO_ 217 "rcv: KAFAS2";
+CM_ BO_ 417 "rcv: EMF";
+CM_ SG_ 417 ICM_Wheel1 "X*0.015625";
+CM_ BO_ 596 "Probably two bytes per wheel, rcv: EGS";
+CM_ SG_ 596 DSC_ActualWheelSpeedRearLeft "X_*_0.015625_-_511.984_in_rad/s";
+CM_ SG_ 596 DSC_ActualWheelSpeedRearRight "X_*_0.015625_-_511.984_in_rad/s";
+CM_ SG_ 596 DSC_ActualWheelSpeedFrontRight "X_*_0.015625_-_511.984_in_rad/s";
+CM_ SG_ 596 DSC_ActualWheelSpeedFrontLeft "X_*_0.015625_-_511.984_in_rad/s";
+CM_ BO_ 1021 "rcv: KOMBI, https://openinverter.org/wiki/BMW_F-Series_Gear_Lever";
+CM_ SG_ 162 IHKA_ButtonNum1 "Button_1";
+CM_ SG_ 162 IHKA_ButtonNum2 "Button_2";
+CM_ SG_ 162 IHKA_ButtonNum3 "Button_3";
+CM_ SG_ 162 IHKA_ButtonNum4 "Button_4";
+CM_ SG_ 162 IHKA_ButtonNum5 "Button_5";
+CM_ SG_ 162 IHKA_ButtonNum6 "Button_6";
+CM_ SG_ 162 IHKA_ButtonNum7 "Button_7";
+CM_ SG_ 162 IHKA_ButtonNum8 "Button_8";
+CM_ BO_ 163 "Buttons to controll station/song";
+CM_ SG_ 163 IHKA_ButtonsSelectSong "Relase_value_not_confirmed";
+CM_ BO_ 241 "Rotary to control volume";
+CM_ SG_ 578 IHKA_HVACstatusAC "AC_Status";
+CM_ SG_ 578 IHKA_HVACstatusBlowWindshield "Windshield_Blow";
+CM_ SG_ 578 IHKA_HVACstatusFan "Fan";
+CM_ SG_ 578 IHKA_HVACstatusPassengerTemp "TBC";
+CM_ SG_ 578 IHKA_HVACstatusDriverTemp "TBC";
+CM_ BO_ 742 "When auto button is pressed these values are affected";
+CM_ SG_ 742 IHKA_HVACstatusBlowOpenUp "Blow_Open_Up";
+CM_ SG_ 742 IHKA_HVACstatusBlowOpenStraight "Blow_Open_Straight";
+CM_ SG_ 742 IHKA_HVACstatusBlowOpenDown "Blow_Open_Down";
+CM_ BO_ 583 "Unknown 247";
+CM_ BO_ 768 "Unknown 300";
+CM_ BO_ 996 "Unknown 3E4";
+CM_ BO_ 1016 "Unknown 3F8";
+CM_ BO_ 1528 "Unknown 5F8";
+CM_ BO_ 1656 "Unknown 678";
+CM_ BO_ 151 "rcv: JBE";
+CM_ SG_ 165 DDE_CrankshaftTorque1EngineRPM "not_confirmed";
+CM_ SG_ 165 DDE_CrankshaftTorque1EngineTorque "not_confirmed_0.5X_-1023.5";
+CM_ SG_ 165 DDE_CrankshaftTorque1GearboxTorque "not_confirmed_0.5X_-1023.5";
+CM_ BO_ 215 "rcv: KOMBI";
+CM_ BO_ 239 "rcv: KAFAS2";
+CM_ BO_ 243 "rcv: KOMBI";
+CM_ BO_ 291 "rcv: NVE";
+CM_ BO_ 303 "rcv: KOMBI, GWS";
+CM_ BO_ 407 "rcv: EGS, https://openinverter.org/wiki/BMW_F-Series_Gear_Lever";
+CM_ BO_ 410 "rcv: KAFAS2";
+CM_ BO_ 415 "rcv: FRM";
+CM_ BO_ 514 "rcv: IHKA";
+CM_ SG_ 612 CON_Rotary_Counter "Increase_at_every_event";
+CM_ SG_ 615 CON_Button_Counter "Increase_at_every_button_press";
+CM_ BO_ 647 "rcv: KOMBI";
+CM_ BO_ 658 "rcv: FRM";
+CM_ BO_ 681 "rcv: ICM";
+CM_ BO_ 709 "rcv: KAFAS2";
+CM_ BO_ 714 "include: OutsideTemperature, AmbientTemperature, rcv: IHKA";
+CM_ BO_ 719 "rcv: IHKA";
+CM_ BO_ 721 "rcv: IHKA";
+CM_ BO_ 722 "rcv: IHKA";
+CM_ BO_ 726 "rcv: IHKA";
+CM_ BO_ 740 "rcv: EGS";
+CM_ BO_ 770 "rcv: KAFAS2";
+CM_ BO_ 779 "rcv: IHKA";
+CM_ BO_ 807 "rcv: KOMBI";
+CM_ BO_ 808 "Include: RelativeTime, SystemTime, LiquidCrystalDisplayBrightnessControl, rcv: TRSVC, IHKA";
+CM_ BO_ 809 "rcv: KOMBI";
+CM_ BO_ 839 "rcv: KAFAS2";
+CM_ BO_ 841 "rcv: KOMBI";
+CM_ BO_ 872 "rcv: KOMBI";
+CM_ BO_ 919 "rcv: EGS";
+CM_ BO_ 933 "rcv: DDE";
+CM_ BO_ 947 "rcv: IHKA";
+CM_ BO_ 1017 "rcv: IHKA";
+CM_ SG_ 1017 DDE_DriveTrainData2WaterTemp "not_confirmed";
+CM_ SG_ 1017 DDE_DriveTrainData2OilTemp "not_confirmed";
+CM_ BO_ 1296 "?";
+CM_ BO_ 1807 "rcv: ICM";
+CM_ BO_ 1839 "rcv: ICM";
+CM_ BO_ 1856 "rcv: ICM";
+CM_ BO_ 1896 "rcv: ICM";
+CM_ SG_ 1511 CON_Unknown5E7_Counter "Increase_every_second";
+CM_ BO_ 902 "Possibly status of a button";
+CM_ BO_ 1374 "sent every 640ms, rcv: EGS";
+CM_ BO_ 149 "rcv: FRM, NVE";
+CM_ BO_ 234 "Not sure about sending node, FRM or CAS?";
+CM_ BO_ 226 "Not sure about sending node, FRM or CAS?";
+CM_ BO_ 238 "Not sure about sending node, FRM or CAS?";
+CM_ BO_ 230 "Not sure about sending node, FRM or CAS?";
+CM_ BO_ 1811 "or SZL";
+CM_ BO_ 1816 "rcv: ICM";
+CM_ BO_ 2147485450 "rcv: KAFAS2";
+BA_DEF_ BO_ "GenMsgBackgroundColor" STRING ;
+BA_DEF_ BO_ "GenMsgForegroundColor" STRING ;
+BA_DEF_ BO_ "matchingcriteria" INT 0 0;
+BA_DEF_ BO_ "filterlabeling" INT 0 0;
+BA_DEF_ BO_ "matchingcriteria" INT 0 0;
+BA_DEF_ BO_ "filterlabeling" INT 0 0;
+BA_DEF_ BO_ "matchingcriteria" INT 0 0;
+BA_DEF_ BO_ "filterlabeling" INT 0 0;
+BA_DEF_ BO_ "matchingcriteria" INT 0 0;
+BA_DEF_ BO_ "filterlabeling" INT 0 0;
+BA_DEF_ BO_ "matchingcriteria" INT 0 0;
+BA_DEF_ BO_ "filterlabeling" INT 0 0;
+BA_DEF_ BO_ "matchingcriteria" INT 0 0;
+BA_DEF_ BO_ "filterlabeling" INT 0 0;
+BA_DEF_ BO_ "matchingcriteria" INT 0 0;
+BA_DEF_ BO_ "filterlabeling" INT 0 0;
+BA_DEF_ BO_ "matchingcriteria" INT 0 0;
+BA_DEF_ BO_ "filterlabeling" INT 0 0;
+BA_DEF_ BO_ "matchingcriteria" INT 0 0;
+BA_DEF_ BO_ "filterlabeling" INT 0 0;
+BA_DEF_ BO_ "matchingcriteria" INT 0 0;
+BA_DEF_ BO_ "filterlabeling" INT 0 0;
+BA_DEF_ BO_ "matchingcriteria" INT 0 0;
+BA_DEF_ BO_ "filterlabeling" INT 0 0;
+BA_DEF_DEF_ "GenMsgBackgroundColor" "#ffffff";
+BA_DEF_DEF_ "GenMsgForegroundColor" "#000000";
+BA_DEF_DEF_ "matchingcriteria" 0;
+BA_DEF_DEF_ "filterlabeling" 1;
+BA_DEF_DEF_ "matchingcriteria" 0;
+BA_DEF_DEF_ "filterlabeling" 1;
+BA_ "GenMsgBackgroundColor" BO_ 192 "#000000";
+BA_ "GenMsgBackgroundColor" BO_ 161 "#ffffff";
+BA_ "GenMsgBackgroundColor" BO_ 162 "#ffffff";
+BA_ "GenMsgBackgroundColor" BO_ 163 "#ffffff";
+BA_ "GenMsgBackgroundColor" BO_ 241 "#ffffff";
+BA_ "GenMsgBackgroundColor" BO_ 578 "#ffffff";
+BA_ "GenMsgBackgroundColor" BO_ 746 "#ffffff";
+BA_ "GenMsgBackgroundColor" BO_ 742 "#ffffff";
+BA_ "GenMsgBackgroundColor" BO_ 583 "#ffffff";
+VAL_ 1021 EGS_TransmissionPowerTrain_SelectedGear 0 "Off" 32 "P" 128 "D" 129 "D_(can_move_to_side)" 64 "R" 96 "N";
+VAL_ 161 IHKA_ButtonMode 1 "Pressed" 0 "Released";
+VAL_ 161 IHKA_ButtonTraffic 1 "Pressed" 0 "Released";
+VAL_ 161 IHKA_ButtonEject 1 "Pressed" 0 "Released";
+VAL_ 161 IHKA_ButtonPower 1 "Pressed" 0 "Released";
+VAL_ 162 IHKA_ButtonNum1 0 "Released" 1 "Touched" 2 "Pressed";
+VAL_ 162 IHKA_ButtonNum2 0 "Released" 1 "Touched" 2 "Pressed";
+VAL_ 162 IHKA_ButtonNum3 0 "Released" 1 "Touched" 2 "Pressed";
+VAL_ 162 IHKA_ButtonNum4 0 "Released" 1 "Touched" 2 "Pressed";
+VAL_ 162 IHKA_ButtonNum5 0 "Released" 1 "Touched" 2 "Pressed";
+VAL_ 162 IHKA_ButtonNum6 0 "Released" 1 "Touched" 2 "Pressed";
+VAL_ 162 IHKA_ButtonNum7 0 "Released" 1 "Touched" 2 "Pressed";
+VAL_ 162 IHKA_ButtonNum8 0 "Released" 1 "Touched" 2 "Pressed";
+VAL_ 163 IHKA_ButtonsSelectSong 0 "Released" 1 "Previous" 2 "Next";
+VAL_ 241 IHKA_ButtonVolumeDir 0 "Stop_rotation" 1 "Down" 2 "Up";
+VAL_ 578 IHKA_HVACstatusAC 0 "Off" 1 "On";
+VAL_ 578 IHKA_HVACstatusBlowWindshield 0 "Off" 1 "On";
+VAL_ 578 IHKA_HVACstatusFan 0 "Off" 1 "On";
+VAL_ 742 IHKA_HVACstatusBlowPower 0 "Off" 1 "Blow1" 2 "Blow2" 3 "Blow3" 4 "Blow4" 5 "Blow5" 6 "Blow6" 7 "Blow7" 8 "Blow8" 9 "Blow9";
+VAL_ 407 GWS_GearSelectionSwitch_LeverPosition 0 "Centre_middle" 1 "Up" 2 "UpTwo" 3 "Down" 4 "DownTwo" 7 "CentreSide" 5 "sideUp" 6 "sideDown";
+VAL_ 407 GWS_GearSelectionSwitch_ParkButton 192 "Released" 213 "Pressed" 0 "" 0 "" 0 "" 0 "" 0 "" 0 "";
+VAL_ 612 CON_Rotary_TurnDir 128 "clockwise_turn" 127 "counterclockwise_turn";
+VAL_ 615 CON_Button_PressStatus 0 "Released" 1 "Press" 2 "LongPress";
+VAL_ 615 CON_Button_PushType 192 "buttons" 221 "knobSide" 222 "knobPush";
+VAL_ 615 CON_Button_KnobSide 1 "up" 2 "right" 4 "down" 8 "left";
+VAL_ 615 CON_Button_ButtonVal 1 "menu" 2 "back" 4 "option" 8 "radio" 16 "media" 32 "nav" 64 "tel";
+VAL_ 234 FRM_DoorDriverStatusOpen 0 "DoorClosed" 1 "DoorOpen";
+VAL_ 234 FRM_DoorDriverStatusLock 2 "DoorLocked" 1 "DoorUnlocked" 3 "DoorDeadLock";
+VAL_ 226 FRM_DoorPassengerStatusOpen 0 "DoorClosed" 1 "DoorOpen";
+VAL_ 226 FRM_DoorPassengerStatusLock 2 "DoorLocked" 1 "DoorUnocked" 3 "DoorDeadLock";
+VAL_ 238 FRM_DoorPassengerRearStatusOpen 0 "DoorClosed" 1 "DoorOpen";
+VAL_ 230 FRM_DoorDriverRearStatusOpen 0 "DoorClosed" 1 "DoorOpen";
