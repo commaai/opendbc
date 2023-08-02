@@ -4,7 +4,6 @@ import sysconfig
 import platform
 import numpy as np
 
-zmq = 'zmq'
 arch = subprocess.check_output(["uname", "-m"], encoding='utf8').rstrip()
 if platform.system() == "Darwin":
   target = "Darwin"
@@ -58,7 +57,7 @@ env = Environment(
 )
 
 common = ''
-Export('env', 'zmq', 'target', 'arch', 'common')
+Export('env', 'target', 'arch', 'common')
 
 cereal = [File('#cereal/libcereal.a')]
 messaging = [File('#cereal/libmessaging.a')]
