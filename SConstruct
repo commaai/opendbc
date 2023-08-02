@@ -1,10 +1,17 @@
 import os
 import subprocess
 import sysconfig
+import platform
 import numpy as np
 
 zmq = 'zmq'
 arch = subprocess.check_output(["uname", "-m"], encoding='utf8').rstrip()
+if platform.system() == "Darwin":
+  target = "Darwin"
+elif platform.system() == "Linux":
+  target = f"linux-{arch}"
+else:
+  raise Exception("Unsupported platform: ", platform.system())
 
 cereal_dir = Dir('.')
 
@@ -51,7 +58,7 @@ env = Environment(
 )
 
 common = ''
-Export('env', 'zmq', 'arch', 'common')
+Export('env', 'zmq', 'target', 'arch', 'common')
 
 cereal = [File('#cereal/libcereal.a')]
 messaging = [File('#cereal/libmessaging.a')]
@@ -64,12 +71,8 @@ envCython["CCFLAGS"] += ["-Wno-#warnings", "-Wno-shadow", "-Wno-deprecated-decla
 envCython["CCFLAGS"].remove("-Werror")
 
 python_libs = []
-if arch == "Darwin":
+if target == "Darwin":
   envCython["LINKFLAGS"] = ["-bundle", "-undefined", "dynamic_lookup"]
-elif arch == "aarch64":
-  envCython["LINKFLAGS"] = ["-shared"]
-
-  python_libs.append(os.path.basename(python_path))
 else:
   envCython["LINKFLAGS"] = ["-pthread", "-shared"]
 
