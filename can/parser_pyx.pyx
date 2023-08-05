@@ -28,7 +28,7 @@ cdef class CANParser:
     dict ts_nanos
     string dbc_name
 
-  def __init__(self, dbc_name, messages, bus):
+  def __init__(self, dbc_name, messages, bus=0):
     self.dbc_name = dbc_name
     self.dbc = dbc_lookup(dbc_name)
     if not self.dbc:

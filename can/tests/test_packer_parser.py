@@ -285,10 +285,10 @@ class TestCanParserPacker(unittest.TestCase):
     existing_messages = ("STEERING_CONTROL", 228, "CAN_FD_MESSAGE", 245)
 
     for msg in existing_messages:
-      CANParser(TEST_DBC, [(msg, 0)], 0)
+      CANParser(TEST_DBC, [(msg, 0)])
       with self.assertRaises(RuntimeError):
         new_msg = msg + "1" if isinstance(msg, str) else msg + 1
-        CANParser(TEST_DBC, [(new_msg, 0)], 0)
+        CANParser(TEST_DBC, [(new_msg, 0)])
 
 
 if __name__ == "__main__":
