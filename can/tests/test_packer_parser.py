@@ -290,6 +290,25 @@ class TestCanParserPacker(unittest.TestCase):
         new_msg = msg + "1" if isinstance(msg, str) else msg + 1
         CANParser(TEST_DBC, [(new_msg, 0)])
 
+  def test_track_all_signals(self):
+    parser = CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 0)])
+    self.assertEqual(parser.vl["ACC_CONTROL"], {
+      "ACCEL_CMD": 0,
+      "ALLOW_LONG_PRESS": 0,
+      "ACC_MALFUNCTION": 0,
+      "RADAR_DIRTY": 0,
+      "DISTANCE": 0,
+      "MINI_CAR": 0,
+      "ACC_TYPE": 0,
+      "CANCEL_REQ": 0,
+      "ACC_CUT_IN": 0,
+      "PERMIT_BRAKING": 0,
+      "RELEASE_STANDSTILL": 0,
+      "ITS_CONNECT_LEAD": 0,
+      "ACCEL_CMD_ALT": 0,
+      "CHECKSUM": 0,
+    })
+
 
 if __name__ == "__main__":
   unittest.main()
