@@ -7,7 +7,6 @@ from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp.unordered_set cimport unordered_set
 from libc.stdint cimport uint32_t
-from libcpp.map cimport map
 
 from .common cimport CANParser as cpp_CANParser
 from .common cimport dbc_lookup, SignalValue, DBC
