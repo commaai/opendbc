@@ -2,6 +2,7 @@
 import unittest
 
 from opendbc.can.can_define import CANDefine
+from opendbc.can.tests import ALL_DBCS
 
 
 class TestCADNDefine(unittest.TestCase):
@@ -21,6 +22,12 @@ class TestCADNDefine(unittest.TestCase):
                            0: 'NORMAL'}
                           }
                          )
+
+  def test_all_dbcs(self):
+    # Asserts no exceptions on all DBCs
+    for dbc in ALL_DBCS:
+      with self.subTest(dbc=dbc):
+        CANDefine(dbc)
 
 
 if __name__ == "__main__":
