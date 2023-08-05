@@ -60,12 +60,10 @@ cdef class CANParser:
 
     for i in range(len(messages)):
       c = messages[i]
-      if not isinstance(c[0], numbers.Number):
-        if c[0] not in msg_name_to_address:
-          print(msg_name_to_address)
-          raise RuntimeError(f"could not find message {repr(c[0])} in DBC {self.dbc_name}")
-        c = (msg_name_to_address[c[0]], c[1])
-        messages[i] = c
+      address = c[0] if isinstance(c[0], numbers.Number) else msg_name_to_address.get(c[0])
+      if address not in msg_address_to_signals:
+        raise RuntimeError(f"could not find message {repr(c[0])} in DBC {self.dbc_name}")
+      messages[i] = (address, c[1])
 
     cdef vector[pair[uint32_t, int]] message_v
     for msg_address, freq in messages:
