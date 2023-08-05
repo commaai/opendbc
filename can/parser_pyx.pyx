@@ -38,7 +38,6 @@ cdef class CANParser:
     self.vl_all = {}
     self.ts_nanos = {}
     msg_name_to_address = {}
-    msg_address_to_name = {}
     address_to_msg_name = {}
 
     for i in range(self.dbc[0].msgs.size()):
