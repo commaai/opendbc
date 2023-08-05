@@ -17,6 +17,7 @@ class TestDBCParser(unittest.TestCase):
 
     # sanity check that we're running on the real DBCs
     self.assertGreater(len(ALL_DBCS), 20)
+
     for dbc in ALL_DBCS:
       with self.subTest(dbc=dbc):
         CANParser(dbc, [], 0)
