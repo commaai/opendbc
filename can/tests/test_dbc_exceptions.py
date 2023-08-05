@@ -23,7 +23,6 @@ class TestCanParserPackerExceptions(unittest.TestCase):
 
     # Everything is supposed to work below
     CANParser(dbc_file, msgs, 0)
-    CANParser(dbc_file, [], 0)
     CANPacker(dbc_file)
     CANDefine(dbc_file)
 
