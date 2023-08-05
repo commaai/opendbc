@@ -280,23 +280,15 @@ class TestCanParserPacker(unittest.TestCase):
       ts_nanos = parser.ts_nanos["POWERTRAIN_DATA"].values()
       self.assertEqual(set(ts_nanos), {0})
 
-  def test_undefined_signals(self):
-    # Ensure we don't allow messages or signals not in the DBC
-    existing_signals = {
-      "STEERING_CONTROL": ["STEER_TORQUE_REQUEST", "SET_ME_X00_2", "COUNTER"],
-      228: ["STEER_TORQUE_REQUEST", "SET_ME_X00_2", "COUNTER"],
-      "CAN_FD_MESSAGE": ["SIGNED", "64_BIT_LE", "64_BIT_BE", "COUNTER"],
-      245: ["SIGNED", "64_BIT_LE", "64_BIT_BE", "COUNTER"],
-    }
+  def test_nonexistent_messages(self):
+    # Ensure we don't allow messages not in the DBC
+    existing_messages = ("STEERING_CONTROL", 228, "CAN_FD_MESSAGE", 245)
 
-    for msg, sigs in existing_signals.items():
-      for sig in sigs:
-        CANParser(TEST_DBC, [(sig, msg)], [(msg, 0)])
+    for msg in existing_messages:
+      CANParser(TEST_DBC, [(msg, 0)], 0)
+      with self.assertRaises(RuntimeError):
         new_msg = msg + "1" if isinstance(msg, str) else msg + 1
-        self.assertRaises(RuntimeError, CANParser, TEST_DBC, [(sig + "1", msg)], [(msg, 0)])
-        self.assertRaises(RuntimeError, CANParser, TEST_DBC, [(sig, new_msg)], [(msg, 0)])
-        self.assertRaises(RuntimeError, CANParser, TEST_DBC, [(sig, msg)], [(new_msg, 0)])
-        self.assertRaises(RuntimeError, CANParser, TEST_DBC, [(sig, new_msg)], [(new_msg, 0)])
+        CANParser(TEST_DBC, [(new_msg, 0)], 0)
 
 
 if __name__ == "__main__":
