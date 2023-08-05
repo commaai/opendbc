@@ -54,6 +54,7 @@ cdef class CANParser:
       self.ts_nanos[msg.address] = {}
       self.ts_nanos[name] = self.ts_nanos[msg.address]
 
+    # Convert message names into addresses and check existence in DBC
     for i in range(len(messages)):
       c = messages[i]
       address = c[0] if isinstance(c[0], numbers.Number) else msg_name_to_address.get(c[0])
