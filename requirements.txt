@@ -1,8 +1,7 @@
+ruff
 Cython
-flake8
 Jinja2
 numpy
 pycapnp
-pylint==2.17.4
 pyyaml
 scons
