@@ -28,6 +28,10 @@ class TestCanParserPackerExceptions(unittest.TestCase):
     with self.assertRaises(RuntimeError):
       CANParser(dbc_file, signals, [], 0)
 
+    parser = CANParser(dbc_file, signals, checks, 0)
+    with self.assertRaises(RuntimeError):
+      parser.update_strings([b''])
+
     # Everything is supposed to work below
     CANParser(dbc_file, signals, checks, 0)
     CANPacker(dbc_file)
