@@ -21,6 +21,10 @@ class TestCanParserPackerExceptions(unittest.TestCase):
     with self.assertRaises(KeyError):
       CANDefine(TEST_DBC)
 
+    parser = CANParser(dbc_file, msgs, 0)
+    with self.assertRaises(RuntimeError):
+      parser.update_strings([b''])
+
     # Everything is supposed to work below
     CANParser(dbc_file, msgs, 0)
     CANParser(dbc_file, [], 0)
