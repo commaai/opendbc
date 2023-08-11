@@ -89,9 +89,7 @@ bool MessageState::update_counter_generic(int64_t v, int cnt_size) {
 }
 
 
-CANParser::CANParser(int abus, const std::string& dbc_name,
-          const std::vector<MessageParseOptions> &options,
-          const std::vector<SignalParseOptions> &sigoptions)
+CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<std::pair<uint32_t, int>> &messages)
   : bus(abus), aligned_buf(kj::heapArray<capnp::word>(1024)) {
   dbc = dbc_lookup(dbc_name);
   assert(dbc);
@@ -99,14 +97,14 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
 
   bus_timeout_threshold = std::numeric_limits<uint64_t>::max();
 
-  for (const auto& op : options) {
-    MessageState &state = message_states[op.address];
-    state.address = op.address;
+  for (const auto& [address, frequency] : messages) {
+    MessageState &state = message_states[address];
+    state.address = address;
     // state.check_frequency = op.check_frequency,
 
     // msg is not valid if a message isn't received for 10 consecutive steps
-    if (op.check_frequency > 0) {
-      state.check_threshold = (1000000000ULL / op.check_frequency) * 10;
+    if (frequency > 0) {
+      state.check_threshold = (1000000000ULL / frequency) * 10;
 
       // bus timeout threshold should be 10x the fastest msg
       bus_timeout_threshold = std::min(bus_timeout_threshold, state.check_threshold);
@@ -114,13 +112,13 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
 
     const Msg* msg = NULL;
     for (const auto& m : dbc->msgs) {
-      if (m.address == op.address) {
+      if (m.address == address) {
         msg = &m;
         break;
       }
     }
     if (!msg) {
-      fprintf(stderr, "CANParser: could not find message 0x%X in DBC %s\n", op.address, dbc_name.c_str());
+      fprintf(stderr, "CANParser: could not find message 0x%X in DBC %s\n", address, dbc_name.c_str());
       assert(false);
     }
 
@@ -128,28 +126,10 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
     state.size = msg->size;
     assert(state.size <= 64);  // max signal size is 64 bytes
 
-    // track checksums and counters for this message
-    for (const auto& sig : msg->sigs) {
-      if (sig.type != SignalType::DEFAULT) {
-        state.parse_sigs.push_back(sig);
-        state.vals.push_back(0);
-        state.all_vals.push_back({});
-      }
-    }
-
-    // track requested signals for this message
-    for (const auto& sigop : sigoptions) {
-      if (sigop.address != op.address) continue;
-
-      for (const auto& sig : msg->sigs) {
-        if (sig.name == sigop.name && sig.type == SignalType::DEFAULT) {
-          state.parse_sigs.push_back(sig);
-          state.vals.push_back(0);
-          state.all_vals.push_back({});
-          break;
-        }
-      }
-    }
+    // track all signals for this message
+    state.parse_sigs = msg->sigs;
+    state.vals.resize(msg->sigs.size());
+    state.all_vals.resize(msg->sigs.size());
   }
 }
 
