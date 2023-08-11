@@ -43,12 +43,9 @@ class TestCanParserPacker(unittest.TestCase):
         self.assertEqual(dat[0], i)
 
   def test_packer_counter(self):
-    signals = [
-      ("COUNTER", "CAN_FD_MESSAGE"),
-    ]
-    checks = [("CAN_FD_MESSAGE", 0), ]
+    msgs = [("CAN_FD_MESSAGE", 0), ]
     packer = CANPacker(TEST_DBC)
-    parser = CANParser(TEST_DBC, signals, checks, 0)
+    parser = CANParser(TEST_DBC, msgs, 0)
 
     # packer should increment the counter
     for i in range(1000):
@@ -76,12 +73,9 @@ class TestCanParserPacker(unittest.TestCase):
       self.assertEqual(parser.vl["CAN_FD_MESSAGE"]["COUNTER"], (cnt + i) % 256)
 
   def test_parser_can_valid(self):
-    signals = [
-      ("COUNTER", "CAN_FD_MESSAGE"),
-    ]
-    checks = [("CAN_FD_MESSAGE", 10), ]
+    msgs = [("CAN_FD_MESSAGE", 10), ]
     packer = CANPacker(TEST_DBC)
-    parser = CANParser(TEST_DBC, signals, checks, 0)
+    parser = CANParser(TEST_DBC, msgs, 0)
 
     # shouldn't be valid initially
     self.assertFalse(parser.can_valid)
@@ -101,23 +95,13 @@ class TestCanParserPacker(unittest.TestCase):
       self.assertTrue(parser.can_valid)
 
   def test_packer_parser(self):
-
-    signals = [
-      ("COUNTER", "STEERING_CONTROL"),
-      ("CHECKSUM", "STEERING_CONTROL"),
-      ("STEER_TORQUE", "STEERING_CONTROL"),
-      ("STEER_TORQUE_REQUEST", "STEERING_CONTROL"),
-
-      ("Signal1", "Brake_Status"),
-
-      ("COUNTER", "CAN_FD_MESSAGE"),
-      ("64_BIT_LE", "CAN_FD_MESSAGE"),
-      ("64_BIT_BE", "CAN_FD_MESSAGE"),
-      ("SIGNED", "CAN_FD_MESSAGE"),
+    msgs = [
+      ("Brake_Status", 0),
+      ("CAN_FD_MESSAGE", 0),
+      ("STEERING_CONTROL", 0),
     ]
-
     packer = CANPacker(TEST_DBC)
-    parser = CANParser(TEST_DBC, signals, [], 0, enforce_checks=False)
+    parser = CANParser(TEST_DBC, msgs, 0)
 
     for steer in range(-256, 255):
       for active in (1, 0):
@@ -151,13 +135,8 @@ class TestCanParserPacker(unittest.TestCase):
   def test_scale_offset(self):
     """Test that both scale and offset are correctly preserved"""
     dbc_file = "honda_civic_touring_2016_can_generated"
-
-    signals = [
-      ("USER_BRAKE", "VSA_STATUS"),
-    ]
-    checks = [("VSA_STATUS", 50)]
-
-    parser = CANParser(dbc_file, signals, checks, 0)
+    msgs = [("VSA_STATUS", 50)]
+    parser = CANParser(dbc_file, msgs, 0)
     packer = CANPacker(dbc_file)
 
     for brake in range(0, 100):
@@ -174,15 +153,9 @@ class TestCanParserPacker(unittest.TestCase):
 
     dbc_file = "subaru_global_2017_generated"
 
-    signals = [
-      ("COUNTER", "ES_LKAS"),
-      ("LKAS_Output", "ES_LKAS"),
-      ("LKAS_Request", "ES_LKAS"),
-      ("SET_1", "ES_LKAS"),
-    ]
-    checks = [("ES_LKAS", 50)]
+    msgs = [("ES_LKAS", 50)]
 
-    parser = CANParser(dbc_file, signals, checks, 0)
+    parser = CANParser(dbc_file, msgs, 0)
     packer = CANPacker(dbc_file)
 
     idx = 0
@@ -209,9 +182,9 @@ class TestCanParserPacker(unittest.TestCase):
     dbc_file = "honda_civic_touring_2016_can_generated"
 
     freq = 100
-    checks = [("VSA_STATUS", freq), ("STEER_MOTOR_TORQUE", freq/2)]
+    msgs = [("VSA_STATUS", freq), ("STEER_MOTOR_TORQUE", freq/2)]
 
-    parser = CANParser(dbc_file, [], checks, 0)
+    parser = CANParser(dbc_file, msgs, 0)
     packer = CANPacker(dbc_file)
 
     i = 0
@@ -245,11 +218,8 @@ class TestCanParserPacker(unittest.TestCase):
   def test_updated(self):
     """Test updated value dict"""
     dbc_file = "honda_civic_touring_2016_can_generated"
-
-    signals = [("USER_BRAKE", "VSA_STATUS")]
-    checks = [("VSA_STATUS", 50)]
-
-    parser = CANParser(dbc_file, signals, checks, 0)
+    msgs = [("VSA_STATUS", 50)]
+    parser = CANParser(dbc_file, msgs, 0)
     packer = CANPacker(dbc_file)
 
     # Make sure nothing is updated
@@ -279,16 +249,12 @@ class TestCanParserPacker(unittest.TestCase):
     """Test message timestamp dict"""
     dbc_file = "honda_civic_touring_2016_can_generated"
 
-    signals = [
-      ("USER_BRAKE", "VSA_STATUS"),
-      ("PEDAL_GAS", "POWERTRAIN_DATA"),
-    ]
-    checks = [
+    msgs = [
       ("VSA_STATUS", 50),
       ("POWERTRAIN_DATA", 100),
     ]
 
-    parser = CANParser(dbc_file, signals, checks, 0)
+    parser = CANParser(dbc_file, msgs, 0)
     packer = CANPacker(dbc_file)
 
     # Check the default timestamp is zero
@@ -314,23 +280,34 @@ class TestCanParserPacker(unittest.TestCase):
       ts_nanos = parser.ts_nanos["POWERTRAIN_DATA"].values()
       self.assertEqual(set(ts_nanos), {0})
 
-  def test_undefined_signals(self):
-    # Ensure we don't allow messages or signals not in the DBC
-    existing_signals = {
-      "STEERING_CONTROL": ["STEER_TORQUE_REQUEST", "SET_ME_X00_2", "COUNTER"],
-      228: ["STEER_TORQUE_REQUEST", "SET_ME_X00_2", "COUNTER"],
-      "CAN_FD_MESSAGE": ["SIGNED", "64_BIT_LE", "64_BIT_BE", "COUNTER"],
-      245: ["SIGNED", "64_BIT_LE", "64_BIT_BE", "COUNTER"],
-    }
+  def test_nonexistent_messages(self):
+    # Ensure we don't allow messages not in the DBC
+    existing_messages = ("STEERING_CONTROL", 228, "CAN_FD_MESSAGE", 245)
 
-    for msg, sigs in existing_signals.items():
-      for sig in sigs:
-        CANParser(TEST_DBC, [(sig, msg)], [(msg, 0)])
+    for msg in existing_messages:
+      CANParser(TEST_DBC, [(msg, 0)])
+      with self.assertRaises(RuntimeError):
         new_msg = msg + "1" if isinstance(msg, str) else msg + 1
-        self.assertRaises(RuntimeError, CANParser, TEST_DBC, [(sig + "1", msg)], [(msg, 0)])
-        self.assertRaises(RuntimeError, CANParser, TEST_DBC, [(sig, new_msg)], [(msg, 0)])
-        self.assertRaises(RuntimeError, CANParser, TEST_DBC, [(sig, msg)], [(new_msg, 0)])
-        self.assertRaises(RuntimeError, CANParser, TEST_DBC, [(sig, new_msg)], [(new_msg, 0)])
+        CANParser(TEST_DBC, [(new_msg, 0)])
+
+  def test_track_all_signals(self):
+    parser = CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 0)])
+    self.assertEqual(parser.vl["ACC_CONTROL"], {
+      "ACCEL_CMD": 0,
+      "ALLOW_LONG_PRESS": 0,
+      "ACC_MALFUNCTION": 0,
+      "RADAR_DIRTY": 0,
+      "DISTANCE": 0,
+      "MINI_CAR": 0,
+      "ACC_TYPE": 0,
+      "CANCEL_REQ": 0,
+      "ACC_CUT_IN": 0,
+      "PERMIT_BRAKING": 0,
+      "RELEASE_STANDSTILL": 0,
+      "ITS_CONNECT_LEAD": 0,
+      "ACCEL_CMD_ALT": 0,
+      "CHECKSUM": 0,
+    })
 
 
 if __name__ == "__main__":
