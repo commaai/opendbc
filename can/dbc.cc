@@ -7,9 +7,8 @@
 #include <sstream>
 #include <vector>
 #include <mutex>
-#include <iterator>
 #include <cstring>
-#include <clocale>
+#include <iterator>
 
 #include "opendbc/can/common.h"
 #include "opendbc/can/common_dbc.h"
@@ -19,6 +18,9 @@ std::regex sg_regexp(R"(^SG_ (\w+) : (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+
 std::regex sgm_regexp(R"(^SG_ (\w+) (\w+) *: (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*))");
 std::regex val_regexp(R"(VAL_ (\w+) (\w+) (\s*[-+]?[0-9]+\s+\".+?\"[^;]*))");
 std::regex val_split_regexp{R"([\"]+)"};  // split on "
+
+std::regex sg_mulval_regexp(R"(^SG_MUL_VAL_ (\d+) (\w+) (\w+) (\d+)-(\d+))");
+
 
 #define DBC_ASSERT(condition, message)                             \
   do {                                                             \
@@ -120,6 +122,7 @@ DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, Ch
   std::string line;
   int line_num = 0;
   std::smatch match;
+  Signal multiplexer = {};
   // TODO: see if we can speed up the regex statements in this loop, SG_ is specifically the slowest
   while (std::getline(stream, line)) {
     line = trim(line);
@@ -152,6 +155,20 @@ DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, Ch
       }
       Signal& sig = signals[address].emplace_back();
       sig.name = match[1].str();
+
+      // Multiplexed signal
+      if (offset == 1 && match[2] != "M") {
+        sig.is_multiplexed = true;
+        sig.mux_msb = multiplexer.msb;
+        sig.mux_lsb = multiplexer.lsb;
+        sig.mux_size = multiplexer.size;
+        sig.mux_little_endian = multiplexer.is_little_endian;
+        sig.mux_selector_min = std::stoi(match[2].str().substr(1));
+        sig.mux_selector_max = std::stoi(match[2].str().substr(1));
+      } else {
+        sig.is_multiplexed = false;
+      }
+
       sig.start_bit = std::stoi(match[offset + 2].str());
       sig.size = std::stoi(match[offset + 3].str());
       sig.is_little_endian = std::stoi(match[offset + 4].str()) == 1;
@@ -166,6 +183,11 @@ DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, Ch
         auto it = find(be_bits.begin(), be_bits.end(), sig.start_bit);
         sig.lsb = be_bits[(it - be_bits.begin()) + sig.size - 1];
         sig.msb = sig.start_bit;
+      }
+
+      // TODO: ensure multiplexer comes first
+      if (offset == 1 && match[2] == "M") {
+        multiplexer = sig;
       }
       DBC_ASSERT(sig.lsb < (64 * 8) && sig.msb < (64 * 8), "Signal out of bounds: " << line);
 
@@ -195,6 +217,31 @@ DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, Ch
       std::copy(words.begin(), words.end(), std::ostream_iterator<std::string>(s, " "));
       val.def_val = s.str();
       val.def_val = trim(val.def_val);
+    } else if (startswith(line, "SG_MUL_VAL_ ")) {
+      bool ret = std::regex_search(line, match, sg_mulval_regexp);
+      DBC_ASSERT(ret, "bad SG_MUL_VAL_: " << line);
+
+      address = std::stoul(match[1].str());
+
+      std::string multiplexed_signal_name = match[2].str();
+      std::string multiplexor_signal_name = match[3].str();
+
+      DBC_ASSERT(signal_name_sets[address].find(multiplexed_signal_name) != signal_name_sets[address].end(), "bad SG_MUL_VAL_: " << line << " " << multiplexed_signal_name << " not found");
+      DBC_ASSERT(signal_name_sets[address].find(multiplexor_signal_name) != signal_name_sets[address].end(), "bad SG_MUL_VAL_: " << line << " " << multiplexor_signal_name << " not found");
+
+      int min_value = std::stoul(match[4].str());
+      int max_value = std::stoul(match[5].str());
+
+      auto multiplexed_signal = std::find_if(signals[address].begin(), signals[address].end(), [multiplexed_signal_name] (const Signal& s) { return s.name == multiplexed_signal_name; });
+      auto multiplexor_signal = std::find_if(signals[address].begin(), signals[address].end(), [multiplexor_signal_name] (const Signal& s) { return s.name == multiplexor_signal_name; });
+
+      multiplexed_signal->is_multiplexed = true;
+      multiplexed_signal->mux_msb = multiplexor_signal->msb;
+      multiplexed_signal->mux_lsb = multiplexor_signal->lsb;
+      multiplexed_signal->mux_size = multiplexor_signal->size;
+      multiplexed_signal->mux_little_endian = multiplexor_signal->is_little_endian;
+      multiplexed_signal->mux_selector_min = min_value;
+      multiplexed_signal->mux_selector_max = max_value;
     }
   }
 

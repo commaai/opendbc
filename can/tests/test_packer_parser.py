@@ -310,5 +310,80 @@ class TestCanParserPacker(unittest.TestCase):
     })
 
 
+  def test_parse_mux(self):
+    """Test multiplexed signals"""
+    dbc_file = "vw_golf_mk4"
+
+    signals = [
+      # These two signals in the second byte overlap and are muxed
+      ("IDT_Geheimnis_1", "Ident"), # m0
+      ("IDT_VIN_4", "Ident"), # m1
+    ]
+    checks = [("Ident", 0)]
+
+    parser = CANParser(dbc_file, signals, checks, 0)
+
+    msg1 = [(1490, 0, b"\x00\xAA\x00\x00\x00\x00\x00\x00", 0)]
+    msg2 = [(1490, 0, b"\x01\xBB\x00\x00\x00\x00\x00\x00", 0)]
+
+    parser.update_strings([can_list_to_can_capnp(msg1)])
+    self.assertEqual(0xaa, parser.vl["Ident"]["IDT_Geheimnis_1"])
+    self.assertEqual(0, parser.vl["Ident"]["IDT_VIN_4"])
+
+    parser.update_strings([can_list_to_can_capnp(msg2)])
+    self.assertEqual(0xaa, parser.vl["Ident"]["IDT_Geheimnis_1"])
+    self.assertEqual(0xbb, parser.vl["Ident"]["IDT_VIN_4"])
+  
+  def test_parse_mux_extended(self):
+    """Test extended multiplexed signals"""
+    dbc_file = "subaru_global_2017_generated"
+
+    signals = [
+      ("Main", "EYESIGHT_UDS_RESPONSE"),
+      ("Resume", "EYESIGHT_UDS_RESPONSE"),
+      ("Set", "EYESIGHT_UDS_RESPONSE"),
+      ("AEB", "EYESIGHT_UDS_RESPONSE"),
+      ("FCW", "EYESIGHT_UDS_RESPONSE")
+    ]
+    checks = [("EYESIGHT_UDS_RESPONSE", 0)]
+
+    parser = CANParser(dbc_file, signals, checks, 0)
+
+    msg1 = [(0x78f, 0, b"\x04\x62\xF3\x00\x01\x00\x00\x00", 0)] # main button
+    msg2 = [(0x78f, 0, b"\x04\x62\xF3\x00\x04\x00\x00\x00", 0)] # resume button
+    msg3 = [(0x78f, 0, b"\x04\x62\xF3\x00\x02\x00\x00\x00", 0)] # set button
+    msg5 = [(0x78f, 0, b"\x04\x62\xF4\x00\x01\x00\x00\x00", 0)] # fcw
+    msg6 = [(0x78f, 0, b"\x04\x62\xF5\x00\x01\x00\x00\x00", 0)] # aeb
+
+    parser.update_strings([can_list_to_can_capnp(msg1)])
+    self.assertEqual(1, parser.vl["EYESIGHT_UDS_RESPONSE"]["Main"])
+    self.assertEqual(0, parser.vl["EYESIGHT_UDS_RESPONSE"]["Resume"])
+    self.assertEqual(0, parser.vl["EYESIGHT_UDS_RESPONSE"]["Set"])
+
+    parser.update_strings([can_list_to_can_capnp(msg2)])
+    self.assertEqual(0, parser.vl["EYESIGHT_UDS_RESPONSE"]["Main"])
+    self.assertEqual(1, parser.vl["EYESIGHT_UDS_RESPONSE"]["Resume"])
+    self.assertEqual(0, parser.vl["EYESIGHT_UDS_RESPONSE"]["Set"])
+
+    parser.update_strings([can_list_to_can_capnp(msg3)])
+    self.assertEqual(0, parser.vl["EYESIGHT_UDS_RESPONSE"]["Main"])
+    self.assertEqual(0, parser.vl["EYESIGHT_UDS_RESPONSE"]["Resume"])
+    self.assertEqual(1, parser.vl["EYESIGHT_UDS_RESPONSE"]["Set"])
+
+    parser.update_strings([can_list_to_can_capnp(msg5)])
+    self.assertEqual(0, parser.vl["EYESIGHT_UDS_RESPONSE"]["Main"])
+    self.assertEqual(0, parser.vl["EYESIGHT_UDS_RESPONSE"]["Resume"])
+    self.assertEqual(1, parser.vl["EYESIGHT_UDS_RESPONSE"]["Set"])
+    self.assertEqual(1, parser.vl["EYESIGHT_UDS_RESPONSE"]["FCW"])
+    self.assertEqual(0, parser.vl["EYESIGHT_UDS_RESPONSE"]["AEB"])
+
+    parser.update_strings([can_list_to_can_capnp(msg6)])
+    self.assertEqual(0, parser.vl["EYESIGHT_UDS_RESPONSE"]["Main"])
+    self.assertEqual(0, parser.vl["EYESIGHT_UDS_RESPONSE"]["Resume"])
+    self.assertEqual(1, parser.vl["EYESIGHT_UDS_RESPONSE"]["Set"])
+    self.assertEqual(1, parser.vl["EYESIGHT_UDS_RESPONSE"]["FCW"])
+    self.assertEqual(1, parser.vl["EYESIGHT_UDS_RESPONSE"]["AEB"])
+
+
 if __name__ == "__main__":
   unittest.main()
