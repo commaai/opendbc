@@ -6,6 +6,10 @@ from opendbc.can.tests import ALL_DBCS
 
 
 class TestDBCParser(unittest.TestCase):
+  def test_enough_dbcs(self):
+    # sanity check that we're running on the real DBCs
+    self.assertGreater(len(ALL_DBCS), 20)
+
   def test_parse_all_dbcs(self):
     """
       Dynamic DBC parser checks:
@@ -17,7 +21,7 @@ class TestDBCParser(unittest.TestCase):
 
     for dbc in ALL_DBCS:
       with self.subTest(dbc=dbc):
-        CANParser(dbc, [], [], 0)
+        CANParser(dbc, [], 0)
 
 
 if __name__ == "__main__":
