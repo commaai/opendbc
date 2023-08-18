@@ -608,7 +608,7 @@ BO_ 1264 LOCAL_TIME: 8 XXX
  SG_ MINUTES : 21|6@0+ (1,0) [0|63] "" XXX
  SG_ SECONDS : 31|8@0+ (1,0) [0|59] "" XXX
 
-CM_ 272 "Alternative LKAS message, used on cars such as 2023 Ioniq 6, 2nd gen Kona";
+CM_ 272 "Alternative LKAS message, used on cars such as 2023 Ioniq 6, 2nd gen Kona. Matches LKAS except size is 32 bytes";
 
 CM_ SG_ 96 BRAKE_PRESSURE "User applied brake pedal pressure. Ramps from computer applied pressure on falling edge of cruise. Cruise cancels if !=0";
 CM_ SG_ 101 BRAKE_POSITION "User applied brake pedal position, max is ~700. Signed on some vehicles";
