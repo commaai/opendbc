@@ -158,9 +158,9 @@ BO_ 544 ES_Brake: 8 XXX
 BO_ 577 Cruise_Status: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ Cruise_Set_Speed : 51|12@0+ (1,0) [0|120] "" XXX
  SG_ Cruise_On : 54|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Activated : 55|1@1+ (1,0) [0|1] "" XXX
- SG_ Cruise_Active : 57|4@1+ (1,0) [0|15] "" XXX
 
 BO_ 552 BSD_RCTA: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
@@ -252,6 +252,21 @@ BO_ 1677 Dash_State: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Units : 29|3@1+ (1,0) [0|7] "" XXX
+
+BO_ 554 ES_HighBeamAssist: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ HBA_Available : 13|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 805 ES_STATIC_1: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ SET_3 : 23|2@0+ (1,0) [0|3] "" XXX
+
+BO_ 289 ES_STATIC_2: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ SET_3 : 15|2@1+ (1,0) [0|3] "" XXX
 
 CM_ SG_ 64 Throttle_Combo "Throttle Cruise + Pedal";
 CM_ SG_ 313 Brake_Lights "Driver or Cruise Brake on";
