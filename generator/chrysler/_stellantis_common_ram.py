@@ -32,7 +32,7 @@ if __name__ == "__main__":
   chrysler_path = os.path.dirname(os.path.realpath(__file__))
 
   for out, addr_lookup in chrysler_to_ram.items():
-    with open(os.path.join(chrysler_path, src)) as in_f, open(os.path.join(chrysler_path, out), 'w') as out_f:
+    with open(os.path.join(chrysler_path, src), encoding='utf-8') as in_f, open(os.path.join(chrysler_path, out), 'w', encoding='utf-8') as out_f:
       out_f.write(f'CM_ "Generated from {src}"\n\n')
 
       wrote_addrs = set()

@@ -98,10 +98,10 @@ BO_ 160 WHEEL_SPEEDS: 24 XXX
  SG_ MOVING_BACKWARD : 57|1@0+ (1,0) [0|1] "" XXX
  SG_ MOVING_FORWARD2 : 58|1@0+ (1,0) [0|1] "" XXX
  SG_ MOVING_BACKWARD2 : 59|1@0+ (1,0) [0|1] "" XXX
- SG_ WHEEL_SPEED_1 : 64|16@1+ (0.03125,0) [0|65535] "m/s" XXX
- SG_ WHEEL_SPEED_2 : 80|16@1+ (0.03125,0) [0|65535] "m/s" XXX
- SG_ WHEEL_SPEED_3 : 96|16@1+ (0.03125,0) [0|65535] "m/s" XXX
- SG_ WHEEL_SPEED_4 : 112|16@1+ (0.03125,0) [0|65535] "m/s" XXX
+ SG_ WHEEL_SPEED_1 : 64|16@1+ (0.03125,0) [0|65535] "kph" XXX
+ SG_ WHEEL_SPEED_2 : 80|16@1+ (0.03125,0) [0|65535] "kph" XXX
+ SG_ WHEEL_SPEED_3 : 96|16@1+ (0.03125,0) [0|65535] "kph" XXX
+ SG_ WHEEL_SPEED_4 : 112|16@1+ (0.03125,0) [0|65535] "kph" XXX
 
 BO_ 234 MDPS: 24 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
@@ -123,6 +123,23 @@ BO_ 261 ACCELERATOR_ALT: 32 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
  SG_ ACCELERATOR_PEDAL : 103|10@1+ (0.25,0) [0|1022] "" XXX
+
+BO_ 272 LKAS_ALT: 32 XXX
+ SG_ STEER_REQ : 52|1@1+ (1,0) [0|1] "" XXX
+ SG_ TORQUE_REQUEST : 41|11@1+ (1,-1024) [0|4095] "" XXX
+ SG_ LKA_ICON : 38|2@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_1 : 27|2@1+ (1,0) [0|255] "" XXX
+ SG_ LFA_BUTTON : 56|1@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
+ SG_ STEER_MODE : 65|3@1+ (1,0) [0|1] "" XXX
+ SG_ LKA_WARNING : 32|1@1+ (1,0) [0|1] "" XXX
+ SG_ LKA_ASSIST : 62|1@1+ (1,0) [0|1] "" XXX
+ SG_ LKA_MODE : 24|3@1+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_2 : 70|2@0+ (1,0) [0|3] "" XXX
+ SG_ SET_ME_1 : 80|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_3 : 111|8@0+ (1,0) [0|255] "" XXX
+ SG_ FCA_SYSWARN : 40|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 293 STEERING_SENSORS: 16 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
@@ -512,6 +529,8 @@ BO_ 1041 DOORS_SEATBELTS: 8 XXX
  SG_ PASSENGER_SEATBELT : 36|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1043 BLINKERS: 8 XXX
+ SG_ LEFT_STALK : 8|1@0+ (1,0) [0|1] "" XXX
+ SG_ RIGHT_STALK : 10|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER_ALT : 15|4@0+ (1,0) [0|15] "" XXX
  SG_ LEFT_LAMP : 20|1@0+ (1,0) [0|1] "" XXX
  SG_ RIGHT_LAMP : 22|1@0+ (1,0) [0|1] "" XXX
@@ -589,6 +608,8 @@ BO_ 1264 LOCAL_TIME: 8 XXX
  SG_ MINUTES : 21|6@0+ (1,0) [0|63] "" XXX
  SG_ SECONDS : 31|8@0+ (1,0) [0|59] "" XXX
 
+CM_ 272 "Alternative LKAS message, used on cars such as 2023 Ioniq 6, 2nd gen Kona. Matches LKAS except size is 32 bytes";
+CM_ 1043 "Lamp signals do not seem universal on cars that use LKAS_ALT, but stalk signals do.";
 
 CM_ SG_ 96 BRAKE_PRESSURE "User applied brake pedal pressure. Ramps from computer applied pressure on falling edge of cruise. Cruise cancels if !=0";
 CM_ SG_ 101 BRAKE_POSITION "User applied brake pedal position, max is ~700. Signed on some vehicles";
@@ -609,6 +630,8 @@ VAL_ 80 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green" ;
 VAL_ 80 LKA_MODE 1 "warning only" 2 "assist" 6 "off" ;
 VAL_ 96 TRACTION_AND_STABILITY_CONTROL 0 "On" 5 "Limited" 1 "Off";
 VAL_ 234 LKA_FAULT 0 "ok" 1 "lka fault" ;
+VAL_ 272 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green" ;
+VAL_ 272 LKA_MODE 1 "warning only" 2 "assist" 6 "off" ;
 VAL_ 298 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green" ;
 VAL_ 298 LKA_MODE 1 "warning only" 2 "assist" 6 "off" ;
 VAL_ 304 PARK_BUTTON 1 "Pressed" 2 "Not Pressed";

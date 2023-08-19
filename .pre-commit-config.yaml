@@ -7,7 +7,7 @@ repos:
     -   id: check-merge-conflict
     -   id: check-symlinks
 -   repo: https://github.com/codespell-project/codespell
-    rev: v2.2.4
+    rev: v2.2.5
     hooks:
     -   id: codespell
         exclude: '\.dbc$'
@@ -15,28 +15,13 @@ repos:
         - --check-hidden
         - --builtins clear,rare,informal,usage,code,names,en-GB_to_en-US
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.3.0
+    rev: v1.5.0
     hooks:
     -   id: mypy
--   repo: https://github.com/PyCQA/flake8
-    rev: 6.0.0
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.0.284
     hooks:
-    -   id: flake8
-        exclude: 'site_scons/'
-        args:
-        - --select=F,E112,E113,E304,E501,E502,E701,E702,E703,E71,E72,E731,W191,W6
-        - --max-line-length=240
-        - --statistics
--   repo: local
-    hooks:
-    -   id: pylint
-        name: pylint
-        entry: pylint
-        language: system
-        types: [python]
-        exclude: 'site_scons/'
-        args:
-        - --disable=C,R,W0613,W0511,W0212,W0201,W0311,W0106,W0603,W0621,W0703,E1136
+    - id: ruff
 -   repo: https://github.com/MarcoGorelli/cython-lint
     rev: v0.15.0
     hooks:
