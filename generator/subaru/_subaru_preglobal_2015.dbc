@@ -150,10 +150,10 @@ BO_ 353 ES_Distance: 8 XXX
  SG_ Signal7 : 51|5@1+ (1,0) [0|31] "" XXX
  SG_ Checksum : 56|8@1+ (1,0) [0|255] "" XXX
 
-BO_ 354 ES_RPM: 8 XXX
+BO_ 354 ES_Status: 8 XXX
  SG_ Brake : 8|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Activated : 9|1@1+ (1,0) [0|1] "" XXX
- SG_ RPM : 16|16@1+ (1,0) [0|65535] "" XXX
+ SG_ Cruise_RPM : 16|16@1+ (1,0) [0|65535] "" XXX
  SG_ Checksum : 32|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 48|3@1+ (1,0) [0|7] "" XXX
 
