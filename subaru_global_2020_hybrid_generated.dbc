@@ -246,6 +246,14 @@ BO_ 802 ES_LKAS_State: 8 XXX
  SG_ LKAS_Alert : 32|5@1+ (1,0) [0|31] "" XXX
  SG_ Signal3 : 37|27@1+ (1,0) [0|1] "" XXX
 
+BO_ 803 ES_Infotainment: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ LKAS_Blue_Lines : 15|4@0+ (1,0) [0|15] "" XXX
+ SG_ Signal1 : 19|4@0+ (1,0) [0|15] "" XXX
+ SG_ LKAS_State_Infotainment : 22|3@0+ (1,0) [0|7] "" XXX
+ SG_ Signal2 : 24|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 722 AC_State: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
