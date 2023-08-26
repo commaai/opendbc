@@ -49,7 +49,7 @@ RUN git config --global --add safe.directory '*'
 WORKDIR /project
 RUN git clone https://github.com/commaai/cereal.git /project/cereal && \
     cd /project/cereal && \
-    git checkout aed9fd278a704816aba11f4473aafefc281ed2bc && \
+    git checkout 82bca3a9714b73c05414fdf848b6016a0ffac17d && \
     rm -rf .git && \
     scons -j$(nproc)
 
