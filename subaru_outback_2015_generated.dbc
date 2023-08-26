@@ -150,7 +150,9 @@ BO_ 353 ES_Distance: 8 XXX
  SG_ Signal5 : 43|1@1+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 44|3@1+ (1,0) [0|7] "" XXX
  SG_ Signal6 : 47|1@1+ (1,0) [0|1] "" XXX
- SG_ Cruise_Button : 48|3@1+ (1,0) [0|7] "" XXX
+ SG_ Cruise_Cancel : 48|1@1+ (1,0) [0|1] "" XXX
+ SG_ Cruise_Set : 49|1@1+ (1,0) [0|1] "" XXX
+ SG_ Cruise_Resume : 50|1@1+ (1,0) [0|1] "" XXX
  SG_ Signal7 : 51|5@1+ (1,0) [0|31] "" XXX
  SG_ Checksum : 56|8@1+ (1,0) [0|255] "" XXX
 
