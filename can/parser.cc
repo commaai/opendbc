@@ -33,7 +33,7 @@ int64_t get_raw_value(const std::vector<uint8_t> &msg, const Signal &sig) {
 
 bool MessageState::parse(uint64_t sec, const std::vector<uint8_t> &dat) {
   for (int i = 0; i < parse_sigs.size(); i++) {
-    auto &sig = parse_sigs[i];
+    const auto &sig = parse_sigs[i];
 
     if (sig.is_multiplexed) {
       Signal selector_sig = {
@@ -103,9 +103,7 @@ bool MessageState::update_counter_generic(int64_t v, int cnt_size) {
 }
 
 
-CANParser::CANParser(int abus, const std::string& dbc_name,
-          const std::vector<MessageParseOptions> &options,
-          const std::vector<SignalParseOptions> &sigoptions)
+CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<std::pair<uint32_t, int>> &messages)
   : bus(abus), aligned_buf(kj::heapArray<capnp::word>(1024)) {
   dbc = dbc_lookup(dbc_name);
   assert(dbc);
@@ -113,14 +111,14 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
 
   bus_timeout_threshold = std::numeric_limits<uint64_t>::max();
 
-  for (const auto& op : options) {
-    MessageState &state = message_states[op.address];
-    state.address = op.address;
+  for (const auto& [address, frequency] : messages) {
+    MessageState &state = message_states[address];
+    state.address = address;
     // state.check_frequency = op.check_frequency,
 
     // msg is not valid if a message isn't received for 10 consecutive steps
-    if (op.check_frequency > 0) {
-      state.check_threshold = (1000000000ULL / op.check_frequency) * 10;
+    if (frequency > 0) {
+      state.check_threshold = (1000000000ULL / frequency) * 10;
 
       // bus timeout threshold should be 10x the fastest msg
       bus_timeout_threshold = std::min(bus_timeout_threshold, state.check_threshold);
@@ -128,41 +126,24 @@ CANParser::CANParser(int abus, const std::string& dbc_name,
 
     const Msg* msg = NULL;
     for (const auto& m : dbc->msgs) {
-      if (m.address == op.address) {
+      if (m.address == address) {
         msg = &m;
         break;
       }
     }
     if (!msg) {
-      fprintf(stderr, "CANParser: could not find message 0x%X in DBC %s\n", op.address, dbc_name.c_str());
+      fprintf(stderr, "CANParser: could not find message 0x%X in DBC %s\n", address, dbc_name.c_str());
       assert(false);
     }
 
+    state.name = msg->name;
     state.size = msg->size;
     assert(state.size <= 64);  // max signal size is 64 bytes
 
-    // track checksums and counters for this message
-    for (const auto& sig : msg->sigs) {
-      if (sig.type != SignalType::DEFAULT) {
-        state.parse_sigs.push_back(sig);
-        state.vals.push_back(0);
-        state.all_vals.push_back({});
-      }
-    }
-
-    // track requested signals for this message
-    for (const auto& sigop : sigoptions) {
-      if (sigop.address != op.address) continue;
-
-      for (const auto& sig : msg->sigs) {
-        if (sig.name == sigop.name && sig.type == SignalType::DEFAULT) {
-          state.parse_sigs.push_back(sig);
-          state.vals.push_back(0);
-          state.all_vals.push_back({});
-          break;
-        }
-      }
-    }
+    // track all signals for this message
+    state.parse_sigs = msg->sigs;
+    state.vals.resize(msg->sigs.size());
+    state.all_vals.resize(msg->sigs.size());
   }
 }
 
@@ -176,6 +157,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum
 
   for (const auto& msg : dbc->msgs) {
     MessageState state = {
+      .name = msg.name,
       .address = msg.address,
       .size = msg.size,
       .ignore_checksum = ignore_checksum,
@@ -216,14 +198,24 @@ void CANParser::update_string(const std::string &data, bool sendcan) {
   UpdateValid(last_sec);
 }
 
+void CANParser::update_strings(const std::vector<std::string> &data, std::vector<SignalValue> &vals, bool sendcan) {
+  uint64_t current_sec = 0;
+  for (const auto &d : data) {
+    update_string(d, sendcan);
+    if (current_sec == 0) {
+      current_sec = last_sec;
+    }
+  }
+  query_latest(vals, current_sec);
+}
+
 void CANParser::UpdateCans(uint64_t sec, const capnp::List<cereal::CanData>::Reader& cans) {
   //DEBUG("got %d messages\n", cans.size());
 
   bool bus_empty = true;
 
   // parse the messages
-  for (int i = 0; i < cans.size(); i++) {
-    auto cmsg = cans[i];
+  for (const auto cmsg : cans) {
     if (cmsg.getSrc() != bus) {
       // DEBUG("skip %d: wrong bus\n", cmsg.getAddress());
       continue;
@@ -301,9 +293,9 @@ void CANParser::UpdateValid(uint64_t sec) {
     if (state.check_threshold > 0 && (missing || timed_out)) {
       if (show_missing && !bus_timeout) {
         if (missing) {
-          LOGE("0x%X NOT SEEN", state.address);
+          LOGE("0x%X '%s' NOT SEEN", state.address, state.name.c_str());
         } else if (timed_out) {
-          LOGE("0x%X TIMED OUT", state.address);
+          LOGE("0x%X '%s' TIMED OUT", state.address, state.name.c_str());
         }
       }
       _valid = false;
@@ -313,24 +305,25 @@ void CANParser::UpdateValid(uint64_t sec) {
   can_valid = (can_invalid_cnt < CAN_INVALID_CNT) && _counters_valid;
 }
 
-std::vector<SignalValue> CANParser::query_latest() {
-  std::vector<SignalValue> ret;
-
+void CANParser::query_latest(std::vector<SignalValue> &vals, uint64_t last_ts) {
+  if (last_ts == 0) {
+    last_ts = last_sec;
+  }
   for (auto& kv : message_states) {
     auto& state = kv.second;
-    if (last_sec != 0 && state.last_seen_nanos != last_sec) continue;
+    if (last_ts != 0 && state.last_seen_nanos < last_ts) {
+      continue;
+    }
 
     for (int i = 0; i < state.parse_sigs.size(); i++) {
       const Signal &sig = state.parse_sigs[i];
-      ret.push_back((SignalValue){
-        .address = state.address,
-        .name = sig.name,
-        .value = state.vals[i],
-        .all_values = state.all_vals[i],
-      });
+      SignalValue &v = vals.emplace_back();
+      v.address = state.address;
+      v.ts_nanos = state.last_seen_nanos;
+      v.name = sig.name;
+      v.value = state.vals[i];
+      v.all_values = state.all_vals[i];
       state.all_vals[i].clear();
     }
   }
-
-  return ret;
 }

@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
-import os
 import unittest
 import random
 
 import cereal.messaging as messaging
 from opendbc.can.parser import CANParser
 from opendbc.can.packer import CANPacker
-
-
-TEST_DBC = os.path.abspath(os.path.join(os.path.dirname(__file__), "test.dbc"))
+from opendbc.can.tests import TEST_DBC
 
 
 # Python implementation so we don't have to depend on boardd
@@ -46,18 +43,15 @@ class TestCanParserPacker(unittest.TestCase):
         self.assertEqual(dat[0], i)
 
   def test_packer_counter(self):
-    signals = [
-      ("COUNTER", "CAN_FD_MESSAGE"),
-    ]
-    checks = [("CAN_FD_MESSAGE", 0), ]
+    msgs = [("CAN_FD_MESSAGE", 0), ]
     packer = CANPacker(TEST_DBC)
-    parser = CANParser(TEST_DBC, signals, checks, 0)
+    parser = CANParser(TEST_DBC, msgs, 0)
 
     # packer should increment the counter
     for i in range(1000):
       msg = packer.make_can_msg("CAN_FD_MESSAGE", 0, {})
       dat = can_list_to_can_capnp([msg, ])
-      parser.update_string(dat)
+      parser.update_strings([dat])
       self.assertEqual(parser.vl["CAN_FD_MESSAGE"]["COUNTER"], i % 256)
 
     # setting COUNTER should override
@@ -67,7 +61,7 @@ class TestCanParserPacker(unittest.TestCase):
         "COUNTER": cnt,
       })
       dat = can_list_to_can_capnp([msg, ])
-      parser.update_string(dat)
+      parser.update_strings([dat])
       self.assertEqual(parser.vl["CAN_FD_MESSAGE"]["COUNTER"], cnt)
 
     # then, should resume counting from the override value
@@ -75,16 +69,13 @@ class TestCanParserPacker(unittest.TestCase):
     for i in range(100):
       msg = packer.make_can_msg("CAN_FD_MESSAGE", 0, {})
       dat = can_list_to_can_capnp([msg, ])
-      parser.update_string(dat)
+      parser.update_strings([dat])
       self.assertEqual(parser.vl["CAN_FD_MESSAGE"]["COUNTER"], (cnt + i) % 256)
 
   def test_parser_can_valid(self):
-    signals = [
-      ("COUNTER", "CAN_FD_MESSAGE"),
-    ]
-    checks = [("CAN_FD_MESSAGE", 10), ]
+    msgs = [("CAN_FD_MESSAGE", 10), ]
     packer = CANPacker(TEST_DBC)
-    parser = CANParser(TEST_DBC, signals, checks, 0)
+    parser = CANParser(TEST_DBC, msgs, 0)
 
     # shouldn't be valid initially
     self.assertFalse(parser.can_valid)
@@ -92,7 +83,7 @@ class TestCanParserPacker(unittest.TestCase):
     # not valid until the message is seen
     for _ in range(100):
       dat = can_list_to_can_capnp([])
-      parser.update_string(dat)
+      parser.update_strings([dat])
       self.assertFalse(parser.can_valid)
 
     # valid once seen
@@ -100,28 +91,17 @@ class TestCanParserPacker(unittest.TestCase):
       t = int(0.01 * i * 1e9)
       msg = packer.make_can_msg("CAN_FD_MESSAGE", 0, {})
       dat = can_list_to_can_capnp([msg, ], logMonoTime=t)
-      parser.update_string(dat)
+      parser.update_strings([dat])
       self.assertTrue(parser.can_valid)
 
-
   def test_packer_parser(self):
-
-    signals = [
-      ("COUNTER", "STEERING_CONTROL"),
-      ("CHECKSUM", "STEERING_CONTROL"),
-      ("STEER_TORQUE", "STEERING_CONTROL"),
-      ("STEER_TORQUE_REQUEST", "STEERING_CONTROL"),
-
-      ("Signal1", "Brake_Status"),
-
-      ("COUNTER", "CAN_FD_MESSAGE"),
-      ("64_BIT_LE", "CAN_FD_MESSAGE"),
-      ("64_BIT_BE", "CAN_FD_MESSAGE"),
-      ("SIGNED", "CAN_FD_MESSAGE"),
+    msgs = [
+      ("Brake_Status", 0),
+      ("CAN_FD_MESSAGE", 0),
+      ("STEERING_CONTROL", 0),
     ]
-
     packer = CANPacker(TEST_DBC)
-    parser = CANParser(TEST_DBC, signals, [], 0, enforce_checks=False)
+    parser = CANParser(TEST_DBC, msgs, 0)
 
     for steer in range(-256, 255):
       for active in (1, 0):
@@ -142,7 +122,7 @@ class TestCanParserPacker(unittest.TestCase):
 
         msgs = [packer.make_can_msg(k, 0, v) for k, v in values.items()]
         bts = can_list_to_can_capnp(msgs)
-        parser.update_string(bts)
+        parser.update_strings([bts])
 
         for k, v in values.items():
           for key, val in v.items():
@@ -152,17 +132,11 @@ class TestCanParserPacker(unittest.TestCase):
         for sig in ("STEER_TORQUE", "STEER_TORQUE_REQUEST", "COUNTER", "CHECKSUM"):
           self.assertEqual(parser.vl["STEERING_CONTROL"][sig], parser.vl[228][sig])
 
-
   def test_scale_offset(self):
     """Test that both scale and offset are correctly preserved"""
     dbc_file = "honda_civic_touring_2016_can_generated"
-
-    signals = [
-      ("USER_BRAKE", "VSA_STATUS"),
-    ]
-    checks = [("VSA_STATUS", 50)]
-
-    parser = CANParser(dbc_file, signals, checks, 0)
+    msgs = [("VSA_STATUS", 50)]
+    parser = CANParser(dbc_file, msgs, 0)
     packer = CANPacker(dbc_file)
 
     for brake in range(0, 100):
@@ -170,7 +144,7 @@ class TestCanParserPacker(unittest.TestCase):
       msgs = packer.make_can_msg("VSA_STATUS", 0, values)
       bts = can_list_to_can_capnp([msgs])
 
-      parser.update_string(bts)
+      parser.update_strings([bts])
 
       self.assertAlmostEqual(parser.vl["VSA_STATUS"]["USER_BRAKE"], brake)
 
@@ -179,15 +153,9 @@ class TestCanParserPacker(unittest.TestCase):
 
     dbc_file = "subaru_global_2017_generated"
 
-    signals = [
-      ("COUNTER", "ES_LKAS"),
-      ("LKAS_Output", "ES_LKAS"),
-      ("LKAS_Request", "ES_LKAS"),
-      ("SET_1", "ES_LKAS"),
-    ]
-    checks = [("ES_LKAS", 50)]
+    msgs = [("ES_LKAS", 50)]
 
-    parser = CANParser(dbc_file, signals, checks, 0)
+    parser = CANParser(dbc_file, msgs, 0)
     packer = CANPacker(dbc_file)
 
     idx = 0
@@ -201,7 +169,7 @@ class TestCanParserPacker(unittest.TestCase):
 
         msgs = packer.make_can_msg("ES_LKAS", 0, values)
         bts = can_list_to_can_capnp([msgs])
-        parser.update_string(bts)
+        parser.update_strings([bts])
 
         self.assertAlmostEqual(parser.vl["ES_LKAS"]["LKAS_Output"], steer)
         self.assertAlmostEqual(parser.vl["ES_LKAS"]["LKAS_Request"], active)
@@ -214,9 +182,9 @@ class TestCanParserPacker(unittest.TestCase):
     dbc_file = "honda_civic_touring_2016_can_generated"
 
     freq = 100
-    checks = [("VSA_STATUS", freq), ("STEER_MOTOR_TORQUE", freq/2)]
+    msgs = [("VSA_STATUS", freq), ("STEER_MOTOR_TORQUE", freq/2)]
 
-    parser = CANParser(dbc_file, [], checks, 0)
+    parser = CANParser(dbc_file, msgs, 0)
     packer = CANPacker(dbc_file)
 
     i = 0
@@ -247,15 +215,11 @@ class TestCanParserPacker(unittest.TestCase):
     send_msg()
     self.assertFalse(parser.bus_timeout)
 
-
   def test_updated(self):
     """Test updated value dict"""
     dbc_file = "honda_civic_touring_2016_can_generated"
-
-    signals = [("USER_BRAKE", "VSA_STATUS")]
-    checks = [("VSA_STATUS", 50)]
-
-    parser = CANParser(dbc_file, signals, checks, 0)
+    msgs = [("VSA_STATUS", 50)]
+    parser = CANParser(dbc_file, msgs, 0)
     packer = CANPacker(dbc_file)
 
     # Make sure nothing is updated
@@ -281,7 +245,70 @@ class TestCanParserPacker(unittest.TestCase):
       if len(user_brake_vals):
         self.assertEqual(vl_all[-1], parser.vl["VSA_STATUS"]["USER_BRAKE"])
 
+  def test_timestamp_nanos(self):
+    """Test message timestamp dict"""
+    dbc_file = "honda_civic_touring_2016_can_generated"
 
+    msgs = [
+      ("VSA_STATUS", 50),
+      ("POWERTRAIN_DATA", 100),
+    ]
+
+    parser = CANParser(dbc_file, msgs, 0)
+    packer = CANPacker(dbc_file)
+
+    # Check the default timestamp is zero
+    for msg in ("VSA_STATUS", "POWERTRAIN_DATA"):
+      ts_nanos = parser.ts_nanos[msg].values()
+      self.assertEqual(set(ts_nanos), {0})
+
+    # Check:
+    # - timestamp is only updated for correct messages
+    # - timestamp is correct for multiple runs
+    # - timestamp is from the latest message if updating multiple strings
+    for _ in range(10):
+      can_strings = []
+      log_mono_time = 0
+      for i in range(10):
+        log_mono_time = int(0.01 * i * 1e+9)
+        can_msg = packer.make_can_msg("VSA_STATUS", 0, {})
+        can_strings.append(can_list_to_can_capnp([can_msg], logMonoTime=log_mono_time))
+      parser.update_strings(can_strings)
+
+      ts_nanos = parser.ts_nanos["VSA_STATUS"].values()
+      self.assertEqual(set(ts_nanos), {log_mono_time})
+      ts_nanos = parser.ts_nanos["POWERTRAIN_DATA"].values()
+      self.assertEqual(set(ts_nanos), {0})
+
+  def test_nonexistent_messages(self):
+    # Ensure we don't allow messages not in the DBC
+    existing_messages = ("STEERING_CONTROL", 228, "CAN_FD_MESSAGE", 245)
+
+    for msg in existing_messages:
+      CANParser(TEST_DBC, [(msg, 0)])
+      with self.assertRaises(RuntimeError):
+        new_msg = msg + "1" if isinstance(msg, str) else msg + 1
+        CANParser(TEST_DBC, [(new_msg, 0)])
+
+  def test_track_all_signals(self):
+    parser = CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 0)])
+    self.assertEqual(parser.vl["ACC_CONTROL"], {
+      "ACCEL_CMD": 0,
+      "ALLOW_LONG_PRESS": 0,
+      "ACC_MALFUNCTION": 0,
+      "RADAR_DIRTY": 0,
+      "DISTANCE": 0,
+      "MINI_CAR": 0,
+      "ACC_TYPE": 0,
+      "CANCEL_REQ": 0,
+      "ACC_CUT_IN": 0,
+      "PERMIT_BRAKING": 0,
+      "RELEASE_STANDSTILL": 0,
+      "ITS_CONNECT_LEAD": 0,
+      "ACCEL_CMD_ALT": 0,
+      "CHECKSUM": 0,
+    })
+  
   def test_parse_mux(self):
     """Test multiplexed signals"""
     dbc_file = "vw_golf_mk4"
@@ -305,6 +332,7 @@ class TestCanParserPacker(unittest.TestCase):
     parser.update_strings([can_list_to_can_capnp(msg2)])
     self.assertEqual(0xaa, parser.vl["Ident"]["IDT_Geheimnis_1"])
     self.assertEqual(0xbb, parser.vl["Ident"]["IDT_VIN_4"])
+
 
 if __name__ == "__main__":
   unittest.main()
