@@ -470,7 +470,10 @@ BO_ 676 CAM_0x2a4: 24 XXX
  SG_ BYTE4 : 32|8@1+ (1,0) [0|255] "" XXX
  SG_ BYTE5 : 40|8@1+ (1,0) [0|255] "" XXX
  SG_ BYTE6 : 48|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE7 : 56|8@1+ (1,0) [0|255] "" XXX
+ SG_ LEFT_LANELINES : 56|2@1+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_1 : 58|2@1+ (1,0) [0|3] "" XXX
+ SG_ RIGHT_LANELINES : 60|2@1+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_2 : 62|2@1+ (1,0) [0|3] "" XXX
  SG_ BYTE8 : 64|8@1+ (1,0) [0|255] "" XXX
  SG_ BYTE9 : 72|8@1+ (1,0) [0|255] "" XXX
  SG_ BYTE10 : 80|8@1+ (1,0) [0|255] "" XXX
