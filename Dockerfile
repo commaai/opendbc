@@ -34,13 +34,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
 ENV PATH="/root/.pyenv/bin:/root/.pyenv/shims:${PATH}"
-RUN pyenv install 3.8.10
-RUN pyenv global 3.8.10
+RUN pyenv install 3.11.4
+RUN pyenv global 3.11.4
 RUN pyenv rehash
 
 COPY requirements.txt /tmp/
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
-RUN pip install --no-cache-dir pre-commit==2.15.0 pylint==2.5.2
+RUN pip install --no-cache-dir pre-commit==2.15.0 pylint==2.17.4
 
 ENV PYTHONPATH=/project
 
@@ -49,9 +49,9 @@ RUN git config --global --add safe.directory '*'
 WORKDIR /project
 RUN git clone https://github.com/commaai/cereal.git /project/cereal && \
     cd /project/cereal && \
-    git checkout 959ff79963b80829be9902d146c31fda44dbbd20 && \
+    git checkout 82bca3a9714b73c05414fdf848b6016a0ffac17d && \
     rm -rf .git && \
-    scons -j$(nproc)
+    scons -j$(nproc) --minimal
 
 COPY SConstruct .
 COPY ./site_scons /project/site_scons

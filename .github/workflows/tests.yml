@@ -3,7 +3,7 @@ name: tests
 on: [push, pull_request]
 
 env:
-  RUN: docker run -v $GITHUB_WORKSPACE:/project/opendbc -w /project/opendbc -e PYTHONWARNINGS=error --shm-size 1G --rm opendbc /bin/bash -c
+  RUN: docker run -v $GITHUB_WORKSPACE:/project/opendbc -w /project/opendbc -e PYTHONWARNINGS="error,default::DeprecationWarning" --shm-size 1G --rm opendbc /bin/bash -c
   BUILD: |
       docker pull $(grep -ioP '(?<=^from)\s+\S+' Dockerfile) || true
       docker pull ghcr.io/commaai/opendbc:latest || true
@@ -23,7 +23,7 @@ jobs:
     - name: Build Docker image
       run: eval "$BUILD"
     - name: Build opendbc
-      run: ${{ env.RUN }} "cd ../ && scons -j$(nproc)"
+      run: ${{ env.RUN }} "cd ../ && scons -j$(nproc) --minimal"
     - name: Unit tests
       run: ${{ env.RUN }} "python -m unittest discover ."
 
@@ -35,7 +35,7 @@ jobs:
     - name: Build Docker image
       run: eval "$BUILD"
     - name: Build opendbc
-      run: ${{ env.RUN }} "cd ../ && scons -j$(nproc)"
+      run: ${{ env.RUN }} "cd ../ && scons -j$(nproc) --minimal"
     - name: pre-commit
       # TODO: a package pre-commit installs has a warning, remove the unset once that's fixed
       run: ${{ env.RUN }} "unset PYTHONWARNINGS && pre-commit run --all"
