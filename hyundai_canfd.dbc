@@ -612,6 +612,7 @@ BO_ 1264 LOCAL_TIME: 8 XXX
  SG_ SECONDS : 31|8@0+ (1,0) [0|59] "" XXX
 
 CM_ 272 "Alternative LKAS message, used on cars such as 2023 Ioniq 6, 2nd gen Kona. Matches LKAS except size is 32 bytes";
+CM_ 676 "Contains signals with left and right lanelines detections, utilized by factory LFA and LKAS to engage steering assists."
 CM_ 1043 "Lamp signals do not seem universal on cars that use LKAS_ALT, but stalk signals do.";
 
 CM_ SG_ 96 BRAKE_PRESSURE "User applied brake pedal pressure. Ramps from computer applied pressure on falling edge of cruise. Cruise cancels if !=0";
@@ -622,6 +623,8 @@ CM_ SG_ 373 DriverBraking "Likely derived from BRAKE->BRAKE_POSITION";
 CM_ SG_ 373 DriverBrakingLowSens "Higher threshold version of DriverBraking";
 CM_ SG_ 352 SET_ME_9 "has something to do with AEB settings";
 CM_ SG_ 416 VSetDis "set speed in display units";
+CM_ SG_ 676 LEFT_LANELINES "Left lanelines detection";
+CM_ SG_ 676 RIGHT_LANELINES "Right lanelines detection";
 CM_ SG_ 961 COUNTER_ALT "only increments on change";
 CM_ SG_ 1041 COUNTER_ALT "only increments on change";
 CM_ SG_ 1043 COUNTER_ALT "only increments on change";
@@ -648,6 +651,8 @@ VAL_ 426 CRUISE_BUTTONS 0 "none" 1 "res_accel" 2 "set_decel" 3 "gap_distance" 4 
 VAL_ 463 CRUISE_BUTTONS 0 "none" 1 "res_accel" 2 "set_decel" 3 "gap_distance" 4 "pause_resume" ;
 VAL_ 463 RIGHT_PADDLE 0 "Not Pulled" 1 "Pulled";
 VAL_ 463 LEFT_PADDLE 0 "Not Pulled" 1 "Pulled";
+VAL_ 676 LEFT_LANELINES 0 "Not Detected" 1 "Low Confidence" 2 "Medium Confidence" 3 "High Confidence";
+VAL_ 676 RIGHT_LANELINES 0 "Not Detected" 1 "Low Confidence" 2 "Medium Confidence" 3 "High Confidence";
 VAL_ 1041 DRIVER_DOOR 0 "Closed" 1 "Opened";
 VAL_ 1041 PASSENGER_DOOR 0 "Closed" 1 "Opened";
 VAL_ 1041 DRIVER_REAR_DOOR 0 "Closed" 1 "Opened";
