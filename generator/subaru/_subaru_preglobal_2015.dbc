@@ -127,6 +127,7 @@ BO_ 352 ES_Brake: 8 XXX
  SG_ Cruise_Fault : 21|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Brake_Active : 22|1@1+ (1,0) [0|1] "" XXX
  SG_ Cruise_Activated : 23|1@1+ (1,0) [0|1] "" XXX
+ SG_ SET_1 : 45|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 48|3@1+ (1,0) [0|7] "" XXX
  SG_ Checksum : 56|8@1+ (1,0) [0|255] "" XXX
 
