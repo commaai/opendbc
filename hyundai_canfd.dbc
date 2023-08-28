@@ -65,7 +65,7 @@ BO_ 80 LKAS: 16 XXX
  SG_ LKA_ASSIST : 62|1@1+ (1,0) [0|1] "" XXX
  SG_ LKA_MODE : 24|3@1+ (1,0) [0|7] "" XXX
  SG_ NEW_SIGNAL_2 : 70|2@0+ (1,0) [0|3] "" XXX
- SG_ SET_ME_1 : 80|1@0+ (1,0) [0|1] "" XXX
+ SG_ HAS_LANE_SAFETY : 80|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_3 : 111|8@0+ (1,0) [0|255] "" XXX
  SG_ FCA_SYSWARN : 40|1@0+ (1,0) [0|1] "" XXX
 
@@ -137,7 +137,7 @@ BO_ 272 LKAS_ALT: 32 XXX
  SG_ LKA_ASSIST : 62|1@1+ (1,0) [0|1] "" XXX
  SG_ LKA_MODE : 24|3@1+ (1,0) [0|7] "" XXX
  SG_ NEW_SIGNAL_2 : 70|2@0+ (1,0) [0|3] "" XXX
- SG_ SET_ME_1 : 80|1@0+ (1,0) [0|1] "" XXX
+ SG_ HAS_LANE_SAFETY : 80|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_3 : 111|8@0+ (1,0) [0|255] "" XXX
  SG_ FCA_SYSWARN : 40|1@0+ (1,0) [0|1] "" XXX
 
@@ -160,7 +160,7 @@ BO_ 298 LFA: 16 ADRV
  SG_ LKA_ASSIST : 62|1@1+ (1,0) [0|1] "" XXX
  SG_ LKA_MODE : 24|3@1+ (1,0) [0|7] "" XXX
  SG_ NEW_SIGNAL_2 : 70|2@0+ (1,0) [0|3] "" XXX
- SG_ SET_ME_1 : 80|1@0+ (1,0) [0|1] "" XXX
+ SG_ HAS_LANE_SAFETY : 80|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_3 : 111|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 304 GEAR_SHIFTER: 16 XXX
@@ -611,6 +611,7 @@ BO_ 1264 LOCAL_TIME: 8 XXX
 CM_ 272 "Alternative LKAS message, used on cars such as 2023 Ioniq 6, 2nd gen Kona. Matches LKAS except size is 32 bytes";
 CM_ 1043 "Lamp signals do not seem universal on cars that use LKAS_ALT, but stalk signals do.";
 
+CM_ SG_ 80 HAS_LANE_SAFETY "If 0, hides 'Lane Safety' menu from vehicle settings";
 CM_ SG_ 96 BRAKE_PRESSURE "User applied brake pedal pressure. Ramps from computer applied pressure on falling edge of cruise. Cruise cancels if !=0";
 CM_ SG_ 101 BRAKE_POSITION "User applied brake pedal position, max is ~700. Signed on some vehicles";
 CM_ SG_ 373 PROBABLY_EQUIP "aeb equip?";
