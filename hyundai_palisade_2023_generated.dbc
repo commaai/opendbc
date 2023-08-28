@@ -16,7 +16,7 @@ BO_ 80 LKAS: 16 XXX
  SG_ LKA_ASSIST : 62|1@1+ (1,0) [0|0] "" XXX
  SG_ STEER_MODE : 65|3@1+ (1,0) [0|0] "" XXX
  SG_ NEW_SIGNAL_2 : 69|2@1+ (1,0) [0|3] "" XXX
- SG_ SET_ME_1 : 80|1@1+ (1,0) [0|3] "" XXX
+ SG_ HAS_LANE_SAFETY : 80|1@1+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_3 : 104|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 81 ADRV_0x51: 32 ADRV
@@ -184,6 +184,7 @@ BO_ 702 CAM_0x2be: 32 CAMERA
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
 
+CM_ SG_ 80 HAS_LANE_SAFETY "If 0, hides LKAS 'Lane Safety' menu from vehicle settings";
 VAL_ 80 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green" ;
 VAL_ 80 LKA_MODE 1 "warning only" 2 "assist" 6 "off" ;
 
