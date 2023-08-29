@@ -308,7 +308,7 @@ class TestCanParserPacker(unittest.TestCase):
       "ACCEL_CMD_ALT": 0,
       "CHECKSUM": 0,
     })
-  
+
   def test_disallow_duplicate_messages(self):
     CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 5)])
 
