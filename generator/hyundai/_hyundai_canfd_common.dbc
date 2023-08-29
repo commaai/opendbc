@@ -1,3 +1,41 @@
+VERSION ""
+
+
+NS_ :
+    NS_DESC_
+    CM_
+    BA_DEF_
+    BA_
+    VAL_
+    CAT_DEF_
+    CAT_
+    FILTER
+    BA_DEF_DEF_
+    EV_DATA_
+    ENVVAR_DATA_
+    SGTYPE_
+    SGTYPE_VAL_
+    BA_DEF_SGTYPE_
+    BA_SGTYPE_
+    SIG_TYPE_REF_
+    VAL_TABLE_
+    SIG_GROUP_
+    SIG_VALTYPE_
+    SIGTYPE_VALTYPE_
+    BO_TX_BU_
+    BA_DEF_REL_
+    BA_REL_
+    BA_DEF_DEF_REL_
+    BU_SG_REL_
+    BU_EV_REL_
+    BU_BO_REL_
+    SG_MUL_VAL_
+
+BS_:
+
+BU_: XXX CAMERA FRONT_RADAR ADRV APRK
+
+
 BO_ 80 LKAS: 16 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|0] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|0] "" XXX
@@ -146,7 +184,10 @@ BO_ 676 CAM_0x2a4: 24 XXX
  SG_ BYTE4 : 32|8@1+ (1,0) [0|255] "" XXX
  SG_ BYTE5 : 40|8@1+ (1,0) [0|255] "" XXX
  SG_ BYTE6 : 48|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE7 : 56|8@1+ (1,0) [0|255] "" XXX
+ SG_ LEFT_LANE_LINE : 56|2@1+ (1,0) [0|3] "" XXX
+ SG_ SET_ME_0 : 58|2@1+ (1,0) [0|3] "" XXX
+ SG_ RIGHT_LANE_LINE : 60|2@1+ (1,0) [0|3] "" XXX
+ SG_ SET_ME_0_2 : 62|2@1+ (1,0) [0|3] "" XXX
  SG_ BYTE8 : 64|8@1+ (1,0) [0|255] "" XXX
  SG_ BYTE9 : 72|8@1+ (1,0) [0|255] "" XXX
  SG_ BYTE10 : 80|8@1+ (1,0) [0|255] "" XXX
@@ -180,6 +221,12 @@ BO_ 702 CAM_0x2be: 32 CAMERA
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
 
+CM_ 676 "Contains signals with detailed lane line information. Used by ADAS ECU on HDA 2 vehicles to operate LFA.";
+
 CM_ SG_ 80 HAS_LANE_SAFETY "If 0, hides LKAS 'Lane Safety' menu from vehicle settings";
+CM_ SG_ 676 LEFT_LANE_LINE "Left lane line confidence";
+CM_ SG_ 676 RIGHT_LANE_LINE "Right lane line confidence";
 VAL_ 80 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green" ;
 VAL_ 80 LKA_MODE 1 "warning only" 2 "assist" 6 "off" ;
+VAL_ 676 LEFT_LANE_LINE 0 "Not Detected" 1 "Low Confidence" 2 "Medium Confidence" 3 "High Confidence";
+VAL_ 676 RIGHT_LANE_LINE 0 "Not Detected" 1 "Low Confidence" 2 "Medium Confidence" 3 "High Confidence";
