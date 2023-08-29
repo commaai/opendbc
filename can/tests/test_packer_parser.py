@@ -319,6 +319,5 @@ class TestCanParserPacker(unittest.TestCase):
       CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 10), ("ACC_CONTROL", 10)])
 
 
-
 if __name__ == "__main__":
   unittest.main()
