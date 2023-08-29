@@ -313,6 +313,7 @@ class TestCanParserPacker(unittest.TestCase):
     CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 5)])
 
     with self.assertRaises(RuntimeError):
+      CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 10), ("ACC_CONTROL", 10)])
       CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 5), ("ACC_CONTROL", 10)])
 
 
