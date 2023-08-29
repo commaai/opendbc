@@ -67,7 +67,7 @@ cdef extern from "common.h":
   cdef cppclass CANParser:
     bool can_valid
     bool bus_timeout
-    CANParser(int, string, vector[pair[uint32_t, int]])
+    CANParser(int, string, vector[pair[uint32_t, int]]) except +
     void update_strings(vector[string]&, vector[SignalValue]&, bool) except +
 
   cdef cppclass CANPacker:
