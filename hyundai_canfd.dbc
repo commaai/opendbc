@@ -470,7 +470,10 @@ BO_ 676 CAM_0x2a4: 24 XXX
  SG_ BYTE4 : 32|8@1+ (1,0) [0|255] "" XXX
  SG_ BYTE5 : 40|8@1+ (1,0) [0|255] "" XXX
  SG_ BYTE6 : 48|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE7 : 56|8@1+ (1,0) [0|255] "" XXX
+ SG_ LEFT_LANE_LINE : 56|2@1+ (1,0) [0|3] "" XXX
+ SG_ SET_ME_0 : 58|2@1+ (1,0) [0|3] "" XXX
+ SG_ RIGHT_LANE_LINE : 60|2@1+ (1,0) [0|3] "" XXX
+ SG_ SET_ME_0_2 : 62|2@1+ (1,0) [0|3] "" XXX
  SG_ BYTE8 : 64|8@1+ (1,0) [0|255] "" XXX
  SG_ BYTE9 : 72|8@1+ (1,0) [0|255] "" XXX
  SG_ BYTE10 : 80|8@1+ (1,0) [0|255] "" XXX
@@ -609,6 +612,7 @@ BO_ 1264 LOCAL_TIME: 8 XXX
  SG_ SECONDS : 31|8@0+ (1,0) [0|59] "" XXX
 
 CM_ 272 "Alternative LKAS message, used on cars such as 2023 Ioniq 6, 2nd gen Kona. Matches LKAS except size is 32 bytes";
+CM_ 676 "Contains signals with detailed lane line information. Used by ADAS ECU on HDA 2 vehicles to operate LFA.";
 CM_ 1043 "Lamp signals do not seem universal on cars that use LKAS_ALT, but stalk signals do.";
 
 CM_ SG_ 80 HAS_LANE_SAFETY "If 0, hides LKAS 'Lane Safety' menu from vehicle settings";
@@ -620,6 +624,8 @@ CM_ SG_ 373 DriverBraking "Likely derived from BRAKE->BRAKE_POSITION";
 CM_ SG_ 373 DriverBrakingLowSens "Higher threshold version of DriverBraking";
 CM_ SG_ 352 SET_ME_9 "has something to do with AEB settings";
 CM_ SG_ 416 VSetDis "set speed in display units";
+CM_ SG_ 676 LEFT_LANE_LINE "Left lane line confidence";
+CM_ SG_ 676 RIGHT_LANE_LINE "Right lane line confidence";
 CM_ SG_ 961 COUNTER_ALT "only increments on change";
 CM_ SG_ 1041 COUNTER_ALT "only increments on change";
 CM_ SG_ 1043 COUNTER_ALT "only increments on change";
@@ -646,6 +652,8 @@ VAL_ 426 CRUISE_BUTTONS 0 "none" 1 "res_accel" 2 "set_decel" 3 "gap_distance" 4 
 VAL_ 463 CRUISE_BUTTONS 0 "none" 1 "res_accel" 2 "set_decel" 3 "gap_distance" 4 "pause_resume" ;
 VAL_ 463 RIGHT_PADDLE 0 "Not Pulled" 1 "Pulled";
 VAL_ 463 LEFT_PADDLE 0 "Not Pulled" 1 "Pulled";
+VAL_ 676 LEFT_LANE_LINE 0 "Not Detected" 1 "Low Confidence" 2 "Medium Confidence" 3 "High Confidence";
+VAL_ 676 RIGHT_LANE_LINE 0 "Not Detected" 1 "Low Confidence" 2 "Medium Confidence" 3 "High Confidence";
 VAL_ 1041 DRIVER_DOOR 0 "Closed" 1 "Opened";
 VAL_ 1041 PASSENGER_DOOR 0 "Closed" 1 "Opened";
 VAL_ 1041 DRIVER_REAR_DOOR 0 "Closed" 1 "Opened";
