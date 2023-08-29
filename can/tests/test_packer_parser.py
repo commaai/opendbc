@@ -309,7 +309,7 @@ class TestCanParserPacker(unittest.TestCase):
       "CHECKSUM": 0,
     })
   
-  def test_disallow_dupliucate_messages(self):
+  def test_disallow_duplicate_messages(self):
     CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 5)])
 
     with self.assertRaises(RuntimeError):
