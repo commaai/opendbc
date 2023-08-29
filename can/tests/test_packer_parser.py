@@ -139,7 +139,7 @@ class TestCanParserPacker(unittest.TestCase):
     parser = CANParser(dbc_file, msgs, 0)
     packer = CANPacker(dbc_file)
 
-    for brake in range(0, 100):
+    for brake in range(100):
       values = {"USER_BRAKE": brake}
       msgs = packer.make_can_msg("VSA_STATUS", 0, values)
       bts = can_list_to_can_capnp([msgs])
