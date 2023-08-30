@@ -139,7 +139,7 @@ class TestCanParserPacker(unittest.TestCase):
     parser = CANParser(dbc_file, msgs, 0)
     packer = CANPacker(dbc_file)
 
-    for brake in range(0, 100):
+    for brake in range(100):
       values = {"USER_BRAKE": brake}
       msgs = packer.make_can_msg("VSA_STATUS", 0, values)
       bts = can_list_to_can_capnp([msgs])
@@ -308,6 +308,15 @@ class TestCanParserPacker(unittest.TestCase):
       "ACCEL_CMD_ALT": 0,
       "CHECKSUM": 0,
     })
+
+  def test_disallow_duplicate_messages(self):
+    CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 5)])
+
+    with self.assertRaises(RuntimeError):
+      CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 5), ("ACC_CONTROL", 10)])
+
+    with self.assertRaises(RuntimeError):
+      CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 10), ("ACC_CONTROL", 10)])
 
 
 if __name__ == "__main__":
