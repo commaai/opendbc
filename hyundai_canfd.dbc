@@ -671,6 +671,7 @@ CM_ SG_ 866 RIGHT_LANE_LINE "Right lane line confidence";
 CM_ SG_ 961 COUNTER_ALT "only increments on change";
 CM_ SG_ 1041 COUNTER_ALT "only increments on change";
 CM_ SG_ 1043 COUNTER_ALT "only increments on change";
+CM_ SG_ 1043 USE_ALT_LAMP "likely 1 on cars that use alt lamp signals";
 VAL_ 53 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
 VAL_ 64 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
 VAL_ 69 GEAR 0 "P" 5 "D" 6 "N" 7 "R" ;
