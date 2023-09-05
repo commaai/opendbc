@@ -23,7 +23,7 @@ jobs:
     - name: Build Docker image
       run: eval "$BUILD"
     - name: Build opendbc
-      run: ${{ env.RUN }} "cd ../ && scons -j$(nproc)"
+      run: ${{ env.RUN }} "cd ../ && scons -j$(nproc) --minimal"
     - name: Unit tests
       run: ${{ env.RUN }} "python -m unittest discover ."
 
@@ -35,7 +35,7 @@ jobs:
     - name: Build Docker image
       run: eval "$BUILD"
     - name: Build opendbc
-      run: ${{ env.RUN }} "cd ../ && scons -j$(nproc)"
+      run: ${{ env.RUN }} "cd ../ && scons -j$(nproc) --minimal"
     - name: pre-commit
       # TODO: a package pre-commit installs has a warning, remove the unset once that's fixed
       run: ${{ env.RUN }} "unset PYTHONWARNINGS && pre-commit run --all"
