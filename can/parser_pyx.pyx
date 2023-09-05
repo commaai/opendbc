@@ -9,7 +9,7 @@ from libcpp.unordered_set cimport unordered_set
 from libc.stdint cimport uint32_t
 
 from .common cimport CANParser as cpp_CANParser
-from .common cimport dbc_lookup, SignalValue, DBC
+from .common cimport dbc_lookup, SignalValue, DBC, Msg
 
 import numbers
 from collections import defaultdict
@@ -38,9 +38,10 @@ cdef class CANParser:
     self.ts_nanos = {}
     msg_name_to_address = {}
     address_to_msg_name = {}
+    cdef const Msg* msg
 
-    for i in range(self.dbc[0].msgs.size()):
-      msg = self.dbc[0].msgs[i]
+    for i from 0 <= i < self.dbc.msgs.size():
+      msg = &(self.dbc.msgs[i])
       name = msg.name.decode("utf8")
 
       msg_name_to_address[name] = msg.address

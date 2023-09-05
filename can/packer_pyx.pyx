@@ -7,7 +7,7 @@ from libcpp.map cimport map
 from libcpp.string cimport string
 
 from .common cimport CANPacker as cpp_CANPacker
-from .common cimport dbc_lookup, SignalPackValue, DBC
+from .common cimport dbc_lookup, SignalPackValue, DBC, Msg
 
 
 cdef class CANPacker:
@@ -22,8 +22,9 @@ cdef class CANPacker:
       raise RuntimeError(f"Can't lookup {dbc_name}")
 
     self.packer = new cpp_CANPacker(dbc_name)
-    for i in range(self.dbc[0].msgs.size()):
-      msg = self.dbc[0].msgs[i]
+    cdef const Msg* msg
+    for i from 0 <= i < self.dbc.msgs.size():
+      msg = &(self.dbc.msgs[i])
       self.name_to_address[string(msg.name)] = msg.address
 
   cdef vector[uint8_t] pack(self, addr, values):
