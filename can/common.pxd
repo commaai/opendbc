@@ -71,5 +71,5 @@ cdef extern from "common.h":
     void update_strings(vector[string]&, vector[SignalValue]&, bool) except +
 
   cdef cppclass CANPacker:
-   CANPacker(string)
-   vector[uint8_t] pack(uint32_t, vector[SignalPackValue]&)
+   CANPacker(string) except +
+   pair[uint32_t, vector[uint8_t]] pack(const string&, vector[SignalPackValue]&)

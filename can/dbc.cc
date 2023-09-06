@@ -200,6 +200,8 @@ DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, Ch
 
   for (auto& m : dbc->msgs) {
     m.sigs = signals[m.address];
+    dbc->address_to_msg[m.address] = &m;
+    dbc->name_to_msg[m.name] = &m;
   }
   for (auto& v : dbc->vals) {
     v.sigs = signals[v.address];
@@ -255,4 +257,16 @@ std::vector<std::string> get_dbc_names() {
     }
   }
   return dbcs;
+}
+
+const Msg* DBC::findMessage(const std::string& name_or_address) const {
+  auto it = name_to_msg.find(name_or_address);
+  if (it != name_to_msg.end()) return it->second;
+
+  try {
+    uint32_t address = std::stoul(name_or_address);
+    return address_to_msg.at(address);
+  } catch (std::exception& ex) {
+    return nullptr;
+  }
 }
