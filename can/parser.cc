@@ -3,12 +3,6 @@
 #include <cstring>
 #include <limits>
 #include <stdexcept>
-#include <sstream>
-
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
 
 #include "cereal/logger/logger.h"
 #include "opendbc/can/common.h"
@@ -90,25 +84,28 @@ bool MessageState::update_counter_generic(int64_t v, int cnt_size) {
   return true;
 }
 
-
-CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<std::pair<uint32_t, int>> &messages)
-  : bus(abus), aligned_buf(kj::heapArray<capnp::word>(1024)) {
+CANParser::CANParser(int abus, const std::string &dbc_name, const std::vector<std::pair<std::string, int>> &messages)
+    : bus(abus), aligned_buf(kj::heapArray<capnp::word>(1024)) {
   dbc = dbc_lookup(dbc_name);
-  assert(dbc);
+  if (!dbc) {
+    throw std::runtime_error("Can't find DBC: " + dbc_name);
+  }
   init_crc_lookup_tables();
 
   bus_timeout_threshold = std::numeric_limits<uint64_t>::max();
 
-  for (const auto& [address, frequency] : messages) {
+  for (const auto &[name_or_address, frequency] : messages) {
+    const Msg *msg = dbc->findMessage(name_or_address);
+    if (!msg) {
+      throw std::runtime_error("Could not find message " + name_or_address + " in DBC " + dbc_name);
+    }
     // disallow duplicate message checks
-    if (message_states.find(address) != message_states.end()) { 
-      std::stringstream is;
-      is << "Duplicate Message Check: " << address;
-      throw std::runtime_error(is.str());
+    if (message_states.find(msg->address) != message_states.end()) {
+      throw std::runtime_error("Duplicate Message Check: " + std::to_string(msg->address));
     }
 
-    MessageState &state = message_states[address];
-    state.address = address;
+    MessageState &state = message_states[msg->address];
+    state.address = msg->address;
     // state.check_frequency = op.check_frequency,
 
     // msg is not valid if a message isn't received for 10 consecutive steps
@@ -117,18 +114,6 @@ CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<st
 
       // bus timeout threshold should be 10x the fastest msg
       bus_timeout_threshold = std::min(bus_timeout_threshold, state.check_threshold);
-    }
-
-    const Msg* msg = NULL;
-    for (const auto& m : dbc->msgs) {
-      if (m.address == address) {
-        msg = &m;
-        break;
-      }
-    }
-    if (!msg) {
-      fprintf(stderr, "CANParser: could not find message 0x%X in DBC %s\n", address, dbc_name.c_str());
-      assert(false);
     }
 
     state.name = msg->name;
@@ -321,4 +306,11 @@ void CANParser::query_latest(std::vector<SignalValue> &vals, uint64_t last_ts) {
       state.all_vals[i].clear();
     }
   }
+}
+
+std::vector<Msg *> CANParser::messages() const {
+  std::vector<Msg *> result(message_states.size());
+  std::transform(message_states.begin(), message_states.end(), result.begin(),
+                 [this](auto &m) { return (Msg *)dbc->address_to_msg.at(m.first); });
+  return result;
 }

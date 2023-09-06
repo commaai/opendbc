@@ -76,7 +76,7 @@ public:
   uint64_t can_invalid_cnt = CAN_INVALID_CNT;
 
   CANParser(int abus, const std::string& dbc_name,
-            const std::vector<std::pair<uint32_t, int>> &messages);
+            const std::vector<std::pair<std::string, int>> &messages);
   CANParser(int abus, const std::string& dbc_name, bool ignore_checksum, bool ignore_counter);
   #ifndef DYNAMIC_CAPNP
   void update_string(const std::string &data, bool sendcan);
@@ -86,6 +86,7 @@ public:
   void UpdateCans(uint64_t sec, const capnp::DynamicStruct::Reader& cans);
   void UpdateValid(uint64_t sec);
   void query_latest(std::vector<SignalValue> &vals, uint64_t last_ts = 0);
+  std::vector<Msg*> messages() const;
 };
 
 class CANPacker {

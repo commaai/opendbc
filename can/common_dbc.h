@@ -1,8 +1,8 @@
 #pragma once
 
-#include <cstddef>
 #include <cstdint>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #define ARRAYSIZE(x) (sizeof(x)/sizeof(x[0]))
@@ -61,6 +61,10 @@ struct DBC {
   std::string name;
   std::vector<Msg> msgs;
   std::vector<Val> vals;
+  std::unordered_map<uint32_t, const Msg*> address_to_msg;
+  std::unordered_map<std::string, const Msg*> name_to_msg;
+
+  const Msg *findMessage(const std::string &name_or_address) const;
 };
 
 typedef struct ChecksumState {
