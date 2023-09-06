@@ -23,9 +23,11 @@ jobs:
     - name: Build Docker image
       run: eval "$BUILD"
     - name: Build opendbc
-      run: ${{ env.RUN }} "cd ../ && scons -j$(nproc) --minimal"
+      run: ${{ env.RUN }} "cd ../ && scons -j$(nproc)"
     - name: Unit tests
       run: ${{ env.RUN }} "python -m unittest discover ."
+    - name: C++ tests"
+      run: ${{ env.RUN }} "./can/tests/test_dbc"
 
   static-analysis:
     name: static analysis
