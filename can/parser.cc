@@ -120,18 +120,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<st
       bus_timeout_threshold = std::min(bus_timeout_threshold, state.check_threshold);
     }
 
-    const Msg* msg = NULL;
-    for (const auto& m : dbc->msgs) {
-      if (m.address == address) {
-        msg = &m;
-        break;
-      }
-    }
-    if (!msg) {
-      fprintf(stderr, "CANParser: could not find message 0x%X in DBC %s\n", address, dbc_name.c_str());
-      assert(false);
-    }
-
+    const Msg *msg = dbc->addr_to_msg.at(address);
     state.name = msg->name;
     state.size = msg->size;
     assert(state.size <= 64);  // max signal size is 64 bytes
