@@ -272,6 +272,14 @@ BO_ 289 ES_STATIC_2: 8 XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ SET_3 : 15|2@1+ (1,0) [0|3] "" XXX
 
+BO_ 1935 ES_UDS_Response: 8 XXX
+ SG_ PCI : 0|8@1+ (1,0) [0|255] "Protocol Control Info" XXX
+ SG_ SID : 8|8@1+ (1,0) [0|255] "Service Identifier" XXX
+ SG_ DID : 16|16@1+ (1,0) [0|65535] "Data Identifier" XXX
+ SG_ Cruise_Main : 32|1@1+ (1,0) [0|65535] "" XXX
+ SG_ Cruise_Set : 33|1@1+ (1,0) [0|65535] "" XXX
+ SG_ Cruise_Resume : 34|1@1+ (1,0) [0|65535] "" XXX
+
 CM_ SG_ 64 Throttle_Combo "Throttle Cruise + Pedal";
 CM_ SG_ 313 Brake_Lights "Driver or Cruise Brake on";
 CM_ SG_ 544 Cruise_Brake_Lights "1 = switch on brake lights";
