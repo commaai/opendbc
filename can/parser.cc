@@ -2,6 +2,8 @@
 #include <cassert>
 #include <cstring>
 #include <limits>
+#include <stdexcept>
+#include <sstream>
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -98,6 +100,13 @@ CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<st
   bus_timeout_threshold = std::numeric_limits<uint64_t>::max();
 
   for (const auto& [address, frequency] : messages) {
+    // disallow duplicate message checks
+    if (message_states.find(address) != message_states.end()) { 
+      std::stringstream is;
+      is << "Duplicate Message Check: " << address;
+      throw std::runtime_error(is.str());
+    }
+
     MessageState &state = message_states[address];
     state.address = address;
     // state.check_frequency = op.check_frequency,
