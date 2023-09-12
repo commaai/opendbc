@@ -206,9 +206,9 @@ BO_ 711 BECMBatteryVoltageCurrent: 6 K17_EBCM
  SG_ HVBatteryCurrent : 12|13@0- (0.15,0) [-614.4|614.25] "A"  NEO
 
 BO_ 715 ASCMGasRegenCmd: 8 K124_ASCM
+ SG_ GasRegenAlwaysOne : 14|1@0+ (1,0) [0|1] ""  NEO
  SG_ GasRegenChecksum : 32|25@0+ (1,0) [0|0] ""  NEO
  SG_ GasRegenCmdActiveInv : 32|1@0+ (1,0) [0|0] ""  NEO
- SG_ AccType : 15|2@0+ (1,0) [0|3] ""  NEO
  SG_ GasRegenFullStopActive : 13|1@0+ (1,0) [0|0] ""  NEO
  SG_ GasRegenCmdActive : 0|1@0+ (1,0) [0|0] ""  NEO
  SG_ RollingCounter : 7|2@0+ (1,0) [0|0] ""  NEO
@@ -351,7 +351,6 @@ VAL_ 388 HandsOffSWlDetectionStatus 1 "Hands On" 0 "Hands Off" ;
 VAL_ 388 LKATorqueDeliveredStatus 3 "Failed" 2 "Temp. Limited" 1 "Active" 0 "Inactive" ;
 VAL_ 489 BrakePedalPressed 1 "Pressed" 0 "Depressed" ;
 VAL_ 715 GasRegenCmdActive 1 "Active" 0 "Inactive" ;
-VAL_ 715 AccType 3 "Full Speed Range ACC with LCC" 2 "Full Speed Range ACC with Booster" 1 "Full Speed Range ACC" 0 "Adaptive Cruise Control" ;
 VAL_ 320 Intellibeam 1 "Active" 0 "Inactive" ;
 VAL_ 320 HighBeamsActive 1 "Active" 0 "Inactive" ;
 VAL_ 320 HighBeamsTemporary 1 "Active" 0 "Inactive" ;
