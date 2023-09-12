@@ -350,6 +350,7 @@ VAL_ 388 HandsOffSWDetectionMode 2 "Failed" 1 "Enabled" 0 "Disabled" ;
 VAL_ 388 HandsOffSWlDetectionStatus 1 "Hands On" 0 "Hands Off" ;
 VAL_ 388 LKATorqueDeliveredStatus 3 "Failed" 2 "Temp. Limited" 1 "Active" 0 "Inactive" ;
 VAL_ 489 BrakePedalPressed 1 "Pressed" 0 "Depressed" ;
+VAL_ 715 GasRegenCmdActiveInv 1 "Inactive" 0 "Active" ;
 VAL_ 715 GasRegenCmdActive 1 "Active" 0 "Inactive" ;
 VAL_ 320 Intellibeam 1 "Active" 0 "Inactive" ;
 VAL_ 320 HighBeamsActive 1 "Active" 0 "Inactive" ;
