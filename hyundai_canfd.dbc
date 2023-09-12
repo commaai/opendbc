@@ -674,7 +674,7 @@ CM_ SG_ 352 SET_ME_9 "has something to do with AEB settings";
 CM_ SG_ 416 VSetDis "set speed in display units";
 CM_ SG_ 676 LEFT_LANE_LINE "Left lane line confidence";
 CM_ SG_ 676 RIGHT_LANE_LINE "Right lane line confidence";
-CM_ SG_ 736 MAX_SPEED "Set speed in display units. Restricts car from driving above this speed unless accelerator pedal is depressed beyond pressure point";
+CM_ SG_ 736 MAX_SPEED "Display units. Restricts car from driving above this speed unless accelerator pedal is depressed beyond pressure point";
 CM_ SG_ 866 LEFT_LANE_LINE "Left lane line confidence";
 CM_ SG_ 866 RIGHT_LANE_LINE "Right lane line confidence";
 CM_ SG_ 961 COUNTER_ALT "only increments on change";
