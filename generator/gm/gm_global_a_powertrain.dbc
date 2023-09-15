@@ -297,7 +297,7 @@ CM_ BU_ K124_ASCM "Active Safety Control Module";
 CM_ SG_ 381 MSG17D_AccPower "Need to investigate";
 CM_ BO_ 190 "Length varies from 6 to 8 bytes by car";
 CM_ SG_ 190 GasPedalAndAcc "ACC baseline is 62";
-CM_ SG_ 352 ImmobilizerInfo "Non-zero when ignition is on";
+CM_ SG_ 352 ImmobilizerInfo "Non-zero when ignition or accessory mode";
 CM_ SG_ 451 GasPedalAndAcc2 "ACC baseline is 62";
 CM_ SG_ 481 ACCAlwaysOne "Usually 1 if the car is equipped with ACC";
 CM_ SG_ 562 FrictionBrakeUnavailable "1 when ACC brake control is unavailable. Stays high if brake command messages are blocked for a period of time";
