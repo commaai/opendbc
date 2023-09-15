@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+from opendbc.generator.tesla.radar_common import get_radar_point_definition, get_val_definition
 
 if __name__ == "__main__":
   dbc_name = os.path.basename(__file__).replace(".py", ".dbc")
@@ -41,169 +42,113 @@ NS_ :
 
 BS_:
 
-BU_:  FrontCamera Radar
+BU_:  Autopilot Radar Diag
 
 
 BO_ 769 TeslaRadarSguInfo: 8 Radar
- SG_ RADC_VerticalMisalignment : 0|8@1+ (1,0) [0|255] ""  FrontCamera
- SG_ RADC_SCUTemperature : 8|8@1+ (1,-128) [-128|127] ""  FrontCamera
- SG_ RADC_VMA_Plaus : 16|8@1+ (1,0) [0|255] ""  FrontCamera
- SG_ RADC_SGU_ITC : 24|8@1+ (1,0) [0|255] ""  FrontCamera
- SG_ RADC_HorizontMisalignment : 32|12@1+ (1,0) [0|4096] ""  FrontCamera
- SG_ RADC_SensorDirty : 44|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_HWFail : 45|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_SGUFail : 46|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_SGUInfoConsistBit : 47|1@1+ (1,0) [0|1] ""  FrontCamera
+ SG_ RADC_VerticalMisalignment : 0|8@1+ (1,0) [0|255] ""  Autopilot
+ SG_ RADC_SCUTemperature : 8|8@1+ (1,-128) [-128|127] ""  Autopilot
+ SG_ RADC_VMA_Plaus : 16|8@1+ (1,0) [0|255] ""  Autopilot
+ SG_ RADC_SGU_ITC : 24|8@1+ (1,0) [0|255] ""  Autopilot
+ SG_ RADC_HorizontMisalignment : 32|12@1+ (1,0) [0|4096] ""  Autopilot
+ SG_ RADC_SensorDirty : 44|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_HWFail : 45|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_SGUFail : 46|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_SGUInfoConsistBit : 47|1@1+ (1,0) [0|1] ""  Autopilot
 
 BO_ 770 TeslaRadarTguInfo: 8 Radar
- SG_ RADC_ACCTargObj1_sguIndex : 0|6@1+ (1,0) [0|63] ""  FrontCamera
- SG_ RADC_ACCTargObj2_sguIndex : 6|6@1+ (1,0) [0|63] ""  FrontCamera
- SG_ RADC_ACCTargObj3_sguIndex : 12|6@1+ (1,0) [0|63] ""  FrontCamera
- SG_ RADC_ACCTargObj4_sguIndex : 18|6@1+ (1,0) [0|63] ""  FrontCamera
- SG_ RADC_ACCTargObj5_sguIndex : 24|6@1+ (1,0) [0|63] ""  FrontCamera
- SG_ unused30 : 30|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_TGUInfoConsistBit : 31|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_ACCTargObj1_dBPower : 32|16@1+ (1,0) [0|65535] ""  FrontCamera
- SG_ RADC_ACCTargObj5_dBPower : 48|16@1+ (1,0) [0|65535] ""  FrontCamera
+ SG_ RADC_ACCTargObj1_sguIndex : 0|6@1+ (1,0) [0|63] ""  Autopilot
+ SG_ RADC_ACCTargObj2_sguIndex : 6|6@1+ (1,0) [0|63] ""  Autopilot
+ SG_ RADC_ACCTargObj3_sguIndex : 12|6@1+ (1,0) [0|63] ""  Autopilot
+ SG_ RADC_ACCTargObj4_sguIndex : 18|6@1+ (1,0) [0|63] ""  Autopilot
+ SG_ RADC_ACCTargObj5_sguIndex : 24|6@1+ (1,0) [0|63] ""  Autopilot
+ SG_ unused30 : 30|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_TGUInfoConsistBit : 31|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_ACCTargObj1_dBPower : 32|16@1+ (1,0) [0|65535] ""  Autopilot
+ SG_ RADC_ACCTargObj5_dBPower : 48|16@1+ (1,0) [0|65535] ""  Autopilot
 
 BO_ 1281 TeslaRadarAlertMatrix: 8 Radar
- SG_ RADC_a001_ecuInternalPerf : 0|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a002_flashPerformance : 1|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a003_vBatHigh : 2|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a004_adjustmentNotDone : 3|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a005_adjustmentReq : 4|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a006_adjustmentNotOk : 5|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a007_sensorBlinded : 6|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a008_plantModeActive : 7|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a009_configMismatch : 8|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a010_canBusOff : 9|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a011_bdyMIA : 10|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a012_espMIA : 11|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a013_gtwMIA : 12|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a014_sccmMIA : 13|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a015_adasMIA : 14|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a016_bdyInvalidCount : 15|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a017_adasInvalidCount : 16|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a018_espInvalidCount : 17|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a019_sccmInvalidCount : 18|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a020_bdyInvalidChkSm : 19|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a021_espInvalidChkSm : 20|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a022_sccmInvalidChkSm : 21|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a023_sccmInvalidChkSm : 22|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a024_absValidity : 23|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a025_ambTValidity : 24|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a026_brakeValidity : 25|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a027_CntryCdValidity : 26|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a028_espValidity : 27|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a029_longAccOffValidity : 28|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a030_longAccValidity : 29|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a031_odoValidity : 30|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a032_gearValidity : 31|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a033_steerAngValidity : 32|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a034_steerAngSpdValidity : 33|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a035_indctrValidity : 34|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a036_vehStandStillValidity : 35|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a037_vinValidity : 36|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a038_whlRotValidity : 37|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a039_whlSpdValidity : 38|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a040_whlStandStillValidity : 39|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a041_wiperValidity : 40|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a042_xwdValidity : 41|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a043_yawOffValidity : 42|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a044_yawValidity : 43|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a045_bsdSanity : 44|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a046_rctaSanity : 45|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a047_lcwSanity : 46|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a048_steerAngOffSanity : 47|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a049_tireSizeSanity : 48|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a050_velocitySanity : 49|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a051_yawSanity : 50|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a052_radomeHtrInop : 51|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a053_espmodValidity : 52|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a054_gtwmodValidity : 53|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a055_stwmodValidity : 54|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a056_bcmodValidity : 55|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a057_dimodValidity : 56|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a058_opmodValidity : 57|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a059_drmiInvalidChkSm : 58|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a060_drmiInvalidCount : 59|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a061_radPositionMismatch : 60|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ RADC_a062_strRackMismatch : 61|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ unused62 : 62|2@1+ (1,0) [0|3] ""  FrontCamera
+ SG_ RADC_a001_ecuInternalPerf : 0|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a002_flashPerformance : 1|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a003_vBatHigh : 2|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a004_adjustmentNotDone : 3|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a005_adjustmentReq : 4|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a006_adjustmentNotOk : 5|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a007_sensorBlinded : 6|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a008_plantModeActive : 7|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a009_configMismatch : 8|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a010_canBusOff : 9|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a011_bdyMIA : 10|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a012_espMIA : 11|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a013_gtwMIA : 12|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a014_sccmMIA : 13|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a015_adasMIA : 14|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a016_bdyInvalidCount : 15|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a017_adasInvalidCount : 16|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a018_espInvalidCount : 17|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a019_sccmInvalidCount : 18|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a020_bdyInvalidChkSm : 19|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a021_espInvalidChkSm : 20|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a022_sccmInvalidChkSm : 21|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a023_sccmInvalidChkSm : 22|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a024_absValidity : 23|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a025_ambTValidity : 24|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a026_brakeValidity : 25|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a027_CntryCdValidity : 26|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a028_espValidity : 27|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a029_longAccOffValidity : 28|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a030_longAccValidity : 29|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a031_odoValidity : 30|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a032_gearValidity : 31|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a033_steerAngValidity : 32|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a034_steerAngSpdValidity : 33|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a035_indctrValidity : 34|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a036_vehStandStillValidity : 35|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a037_vinValidity : 36|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a038_whlRotValidity : 37|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a039_whlSpdValidity : 38|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a040_whlStandStillValidity : 39|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a041_wiperValidity : 40|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a042_xwdValidity : 41|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a043_yawOffValidity : 42|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a044_yawValidity : 43|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a045_bsdSanity : 44|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a046_rctaSanity : 45|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a047_lcwSanity : 46|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a048_steerAngOffSanity : 47|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a049_tireSizeSanity : 48|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a050_velocitySanity : 49|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a051_yawSanity : 50|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a052_radomeHtrInop : 51|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a053_espmodValidity : 52|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a054_gtwmodValidity : 53|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a055_stwmodValidity : 54|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a056_bcmodValidity : 55|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a057_dimodValidity : 56|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a058_opmodValidity : 57|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a059_drmiInvalidChkSm : 58|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a060_drmiInvalidCount : 59|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a061_radPositionMismatch : 60|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ RADC_a062_strRackMismatch : 61|1@1+ (1,0) [0|1] ""  Autopilot
+ SG_ unused62 : 62|2@1+ (1,0) [0|3] ""  Autopilot
 """)
 
     M_RANGE = range(0x310, 0x36D + 1, 3)
-    for base_id in M_RANGE:
-      f.write(f"""
-BO_ {base_id} M_{hex(base_id).upper()[2:]}hex: 8 Radar
- SG_ LongDist : 0|12@1+ (0.0625,0) [0|255.9] "meters"  FrontCamera
- SG_ LongSpeed : 12|12@1+ (0.0625,-128) [-128|128] "meters/sec"  FrontCamera
- SG_ LatDist : 24|11@1+ (0.125,-128) [-128|128] "meters"  FrontCamera
- SG_ ProbExist : 35|5@1+ (3.125,0) [0|96.875] "%"  FrontCamera
- SG_ LongAccel : 40|10@1+ (0.03125,-16) [-16|16] "meters/sec/sec"  FrontCamera
- SG_ ProbObstacle : 50|5@1+ (3.125,0) [0|96.875] "%"  FrontCamera
- SG_ Valid : 55|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ ProbNonObstacle : 56|5@1+ (3.125,0) [0|96.875] "%"  FrontCamera
- SG_ Meas : 61|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ Tracked : 62|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ Index : 63|1@1+ (1,0) [0|1] ""  FrontCamera
-
-BO_ {base_id+1} M_{hex(base_id).upper()[2:]}hex2: 8 Radar
- SG_ LatSpeed : 0|10@1+ (0.125,-64) [-64|64] "meters/sec"  FrontCamera
- SG_ Length : 10|6@1+ (0.125,0) [0|7.875] "m"  FrontCamera
- SG_ dZ : 16|6@1+ (0.25,-5) [-5|10.75] "m"  FrontCamera
- SG_ MovingState : 22|2@1+ (1,0) [0|3] ""  FrontCamera
- SG_ dxSigma : 24|6@1+ (1,0) [0|63] ""  FrontCamera
- SG_ vxSigma : 30|6@1+ (1,0) [0|63] ""  FrontCamera
- SG_ axSigma : 36|6@1+ (1,0) [0|63] ""  FrontCamera
- SG_ dySigma : 42|6@1+ (1,0) [0|63] ""  FrontCamera
- SG_ ProbClass : 48|5@1+ (3.125,0) [0|96.875] "%"  FrontCamera
- SG_ Class : 53|3@1+ (1,0) [0|7] ""  FrontCamera
- SG_ dxRearEndLoss : 56|6@1+ (1,0) [0|63] ""  FrontCamera
- SG_ NotUsed : 62|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ Index2 : 63|1@1+ (1,0) [0|1] ""  FrontCamera
-""")
+    for i, base_id in enumerate(M_RANGE):
+      f.write(get_radar_point_definition(base_id, f"RadarPoint{i}"))
 
     L_RANGE = range(0x371, 0x37D + 1, 3)
     for i, base_id in enumerate(L_RANGE):
-      f.write(f"""
-BO_ {base_id} L_{i+1}_{hex(base_id)[2:]}hex: 8 Radar
- SG_ LongDist : 0|12@1+ (0.0625,0) [0|255.9] "meters"  FrontCamera
- SG_ LongSpeed : 12|12@1+ (0.0625,-128) [-128|128] "meters/sec"  FrontCamera
- SG_ LatDist : 24|11@1+ (0.125,-128) [-128|128] "meters"  FrontCamera
- SG_ ProbExist : 35|5@1+ (3.125,0) [0|96.875] "%"  FrontCamera
- SG_ LongAccel : 40|10@1+ (0.03125,-16) [-16|16] "meters/sec/sec"  FrontCamera
- SG_ ProbObstacle : 50|5@1+ (3.125,0) [0|96.875] "%"  FrontCamera
- SG_ Valid : 55|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ ProbNonObstacle : 56|5@1+ (3.125,0) [0|96.875] "%"  FrontCamera
- SG_ Meas : 61|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ Tracked : 62|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ Index : 63|1@1+ (1,0) [0|1] ""  FrontCamera
-
-BO_ {base_id+1} L_{i+1}_{hex(base_id)[2:]}hex2: 8 Radar
- SG_ LatSpeed : 0|10@1+ (0.125,-64) [-64|64] "meters/sec"  FrontCamera
- SG_ Length : 10|6@1+ (0.125,0) [0|7.875] "m"  FrontCamera
- SG_ dZ : 16|6@1+ (0.25,-5) [-5|10.75] "m"  FrontCamera
- SG_ MovingState : 22|2@1+ (1,0) [0|3] ""  FrontCamera
- SG_ dxSigma : 24|6@1+ (1,0) [0|63] ""  FrontCamera
- SG_ vxSigma : 30|6@1+ (1,0) [0|63] ""  FrontCamera
- SG_ axSigma : 36|6@1+ (1,0) [0|63] ""  FrontCamera
- SG_ dySigma : 42|6@1+ (1,0) [0|63] ""  FrontCamera
- SG_ ProbClass : 48|5@1+ (3.125,0) [0|96.875] "%"  FrontCamera
- SG_ Class : 53|3@1+ (1,0) [0|7] ""  FrontCamera
- SG_ dxRearEndLoss : 56|6@1+ (1,0) [0|63] ""  FrontCamera
- SG_ NotUsed : 62|1@1+ (1,0) [0|1] ""  FrontCamera
- SG_ Index2 : 63|1@1+ (1,0) [0|1] ""  FrontCamera
-""")
+      f.write(get_radar_point_definition(base_id, f"ProcessedRadarPoint{i+1}"))
 
     f.write("""
-BO_ 697 VIN_VIP_405HS: 8 FrontCamera
+BO_ 697 VIN_VIP_405HS: 8 Autopilot
  SG_ VIN_MuxID M : 0|8@1+ (1,0) [0|0] ""  Radar
  SG_ VIN_Part1 m16 : 47|24@0+ (1,0) [0|16777215] "" Radar
  SG_ VIN_Part2 m17 : 15|56@0+ (1,0) [0|7.2057594038E+16] "" Radar
  SG_ VIN_Part3 m18 : 15|56@0+ (1,0) [0|7.2057594038E+16] "" Radar
 
-BO_ 681 Msg2A9_GTW_carConfig: 8 FrontCamera
+BO_ 681 Msg2A9_GTW_carConfig: 8 Autopilot
  SG_ Msg2A9_Always0x02 : 48|8@1+ (1,0) [0|0] ""  Radar
  SG_ Msg2A9_Always0x10 : 56|8@1+ (1,0) [0|0] ""  Radar
  SG_ Msg2A9_Always0x16 : 8|8@1+ (1,0) [0|0] ""  Radar
@@ -213,7 +158,7 @@ BO_ 681 Msg2A9_GTW_carConfig: 8 FrontCamera
  SG_ Msg2A9_Value2_0x02 : 5|3@1+ (1,0) [0|0] ""  Radar
  SG_ Msg2A9_Always0x43 : 16|8@1+ (1,0) [0|0] ""  Radar
 
-BO_ 409 Msg199_STW_ANGLHP_STAT: 8 FrontCamera
+BO_ 409 Msg199_STW_ANGLHP_STAT: 8 Autopilot
  SG_ Msg199Always0x04 : 32|8@1+ (1,0) [0|0] ""  Radar
  SG_ Msg199Always0x20 : 16|8@1+ (1,0) [0|0] ""  Radar
  SG_ Msg199Always0x2F : 0|8@1+ (1,0) [0|0] ""  Radar
@@ -222,7 +167,7 @@ BO_ 409 Msg199_STW_ANGLHP_STAT: 8 FrontCamera
  SG_ Msg199Checksum : 56|8@1+ (1,0) [0|0] ""  Radar
  SG_ Msg199Counter : 52|4@1+ (1,0) [0|0] ""  Radar
 
-BO_ 361 Msg169_ESP_wheelSpeeds: 8 FrontCamera
+BO_ 361 Msg169_ESP_wheelSpeeds: 8 Autopilot
  SG_ ESP_wheelSpeedFrL_HS : 0|13@1+ (0.04,0) [0|327.64] "km/h" Radar
  SG_ ESP_wheelSpeedFrR_HS : 13|13@1+ (0.04,0) [0|327.64] "km/h" Radar
  SG_ ESP_wheelSpeedReL_HS : 26|13@1+ (0.04,0) [0|327.64] "km/h" Radar
@@ -230,7 +175,7 @@ BO_ 361 Msg169_ESP_wheelSpeeds: 8 FrontCamera
  SG_ Msg169Checksum : 56|8@1+ (1,0) [0|0] ""  Radar
  SG_ Msg169Counter : 52|4@1+ (1,0) [0|0] ""  Radar
 
-BO_ 345 Msg159_ESP_C: 8 FrontCamera
+BO_ 345 Msg159_ESP_C: 8 Autopilot
  SG_ Msg159Always0x3A : 16|8@1+ (1,0) [0|0] ""  Radar
  SG_ Msg159Always0xA5 : 0|8@1+ (1,0) [0|0] ""  Radar
  SG_ Msg159Always0xCF : 32|8@1+ (1,0) [0|0] ""  Radar
@@ -238,7 +183,7 @@ BO_ 345 Msg159_ESP_C: 8 FrontCamera
  SG_ Msg159Counter : 44|4@1+ (1,0) [0|0] ""  Radar
  SG_ Msg159Checksum : 24|8@1+ (1,0) [0|0] ""  Radar
 
-BO_ 329 Msg149_ESP_145h: 8 FrontCamera
+BO_ 329 Msg149_ESP_145h: 8 Autopilot
  SG_ Msg149Always0x02 : 16|8@1+ (1,0) [0|0] ""  Radar
  SG_ Msg149Always0x04 : 40|8@1+ (1,0) [0|0] ""  Radar
  SG_ Msg149Always0x26 : 8|8@1+ (1,0) [0|0] ""  Radar
@@ -248,12 +193,12 @@ BO_ 329 Msg149_ESP_145h: 8 FrontCamera
  SG_ Msg149Checksum : 56|8@1+ (1,0) [0|0] ""  Radar
  SG_ Msg149Counter : 52|4@1+ (1,0) [0|0] ""  Radar
 
-BO_ 297 Msg129_ESP_115h: 6 FrontCamera
+BO_ 297 Msg129_ESP_115h: 6 Autopilot
  SG_ Msg129Always0x20 : 24|8@1+ (1,0) [0|0] "" Radar
  SG_ Msg129Checksum : 40|8@1+ (1,0) [0|0] ""  Radar
  SG_ Msg129Counter : 36|4@1+ (1,0) [0|0] ""  Radar
 
-BO_ 281 Msg119_DI_torque2: 6 FrontCamera
+BO_ 281 Msg119_DI_torque2: 6 Autopilot
  SG_ Msg119Always0x11 : 24|8@1+ (1,0) [0|0] ""  Radar
  SG_ Msg119Always0x1F : 8|8@1+ (1,0) [0|0] ""  Radar
  SG_ Msg119Always0x8 : 36|4@1+ (1,0) [0|0] ""  Radar
@@ -262,12 +207,12 @@ BO_ 281 Msg119_DI_torque2: 6 FrontCamera
  SG_ Msg119Checksum : 40|8@1+ (1,0) [0|0] ""  Radar
  SG_ Msg119Counter : 32|4@1+ (1,0) [0|0] ""  Radar
 
-BO_ 265 Msg109_DI_torque1: 8 FrontCamera
+BO_ 265 Msg109_DI_torque1: 8 Autopilot
  SG_ Msg109Always0x80 : 24|8@1+ (1,0) [0|0] ""  Radar
  SG_ Msg109Checksum : 56|8@1+ (1,0) [0|0] ""  Radar
  SG_ Msg109Counter : 13|3@1+ (1,0) [0|0] ""  Radar
 
-BO_ 521 Msg209_GTW_odo: 8 FrontCamera
+BO_ 521 Msg209_GTW_odo: 8 Autopilot
  SG_ Msg209Always0x61 : 8|8@1+ (1,0) [0|0] ""  Radar
  SG_ Msg209Always0x94 : 16|8@1+ (1,0) [0|0] ""  Radar
  SG_ Msg209Always0x52 : 24|8@1+ (1,0) [0|0] ""  Radar
@@ -275,25 +220,25 @@ BO_ 521 Msg209_GTW_odo: 8 FrontCamera
  SG_ Msg209Always0x03 : 40|8@1+ (1,0) [0|0] ""  Radar
  SG_ Msg209Always0x80 : 48|8@1+ (1,0) [0|0] ""  Radar
 
-BO_ 537 Msg219_STW_ACTN_RQ: 8 FrontCamera
+BO_ 537 Msg219_STW_ACTN_RQ: 8 Autopilot
  SG_ Msg219Counter : 52|4@1+ (1,0) [0|15] "" Radar
  SG_ Msg219CRC : 56|8@1+ (1,0) [0|0] "" Radar
 
-BO_ 425 Msg1A9_DI_espControl: 5 FrontCamera
+BO_ 425 Msg1A9_DI_espControl: 5 Autopilot
  SG_ Msg1A9Always0x0C : 16|8@1+ (1,0) [0|0] ""  Radar
  SG_ Msg1A9Counter : 28|4@1+ (1,0) [0|0] ""  Radar
  SG_ Msg1A9Checksum : 32|8@1+ (1,0) [0|0] ""  Radar
 
-BO_ 729 Msg2D9_BC_status : 8 FrontCamera
+BO_ 729 Msg2D9_BC_status : 8 Autopilot
  SG_ Msg2D9Always0x80 : 0|8@1+ (1,0) [0|0] ""  Radar
  SG_ Msg2D9Always0x40 : 8|8@1+ (1,0) [0|0] ""  Radar
  SG_ Msg2D9Always0x83 : 16|8@1+ (1,0) [0|0] ""  Radar
 
-BO_ 1601 UDS_radarRequest: 8 FrontCamera
+BO_ 1601 UDS_radarRequest: 8 Diag
  SG_ UDS_radarRequestData : 7|64@0+ (1,0) [0|0] "" Radar
 
 BO_ 1617 Radar_udsResponse: 8 Radar
- SG_ Radar_udsResponseData : 7|64@0+ (1,0) [0|0] "" FrontCamera
+ SG_ Radar_udsResponseData : 7|64@0+ (1,0) [0|0] "" Diag
 
 CM_ BO_ 697 "Start with MuxID 0x12, then 0x11 and finally 0x10 (VIN is then transmitted in the reverse order)";
 CM_ BO_ 681 "Message sent every 1000 ms. All fixed bytes, no checksum, the byte for RWD or AWD needs to match VIN config";
@@ -334,7 +279,4 @@ BA_ "GenMsgCycleTime" BO_ 729 1000;
 VAL_ 681 Msg2A9_FourWheelDrive 3 "SNA" 2 "UNUSED" 1 "4WD" 0 "2WD" ;""")
 
     for base_id in list(M_RANGE) + list(L_RANGE):
-      f.write(f"""
-VAL_ {base_id+1} MovingState 3 "RADAR_MOVESTATE_STANDING" 2 "RADAR_MOVESTATE_STOPPED" 1 "RADAR_MOVESTATE_MOVING" 0 "RADAR_MOVESTATE_INDETERMINATE" ;
-VAL_ {base_id+1} Class 4 "RADAR_CLASS_CONSTRUCTION_ELEMENT" 3 "RADAR_CLASS_MOVING_PEDESTRIAN" 2 "RADAR_CLASS_MOVING_TWO_WHEEL_VEHICLE" 1 \
-"RADAR_CLASS_MOVING_FOUR_WHEEL_VEHICLE" 0 "RADAR_CLASS_UNKNOWN" ;""")
+      f.write(get_val_definition(base_id))
