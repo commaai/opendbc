@@ -1151,8 +1151,8 @@ BO_ 288 TSK_06: 8 Motor_Diesel_MQB
  SG_ TSK_zul_Regelabw : 58|6@1+ (0.024,0) [0|1.512] "Unit_MeterPerSeconSquar" Gateway_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
 
 BO_ 798 TSK_07: 8 Motor_Diesel_MQB
- SG_ TSK_07_CRC : 0|8@1+ (1,0) [0|255] "" Gateway_MQB
- SG_ TSK_07_BZ : 8|4@1+ (1,0) [0|15] "" Gateway_MQB
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Gateway_MQB
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Gateway_MQB
  SG_ TSK_Wunschgeschw : 12|10@1+ (0.32,0) [0|326.72] "Unit_KiloMeterPerHour" Gateway_MQB
  SG_ TSK_Texte_Primaeranz : 48|5@1+ (1,0) [0|31] "" Gateway_MQB
  SG_ TSK_Limiter_Anzeige : 55|1@1+ (1,0) [0|1] "" Gateway_MQB
@@ -1214,17 +1214,15 @@ BO_ 1602 WIV_01: 8 Motor_Diesel_MQB
 BO_ 294 HCA_01: 8 Frontsensorik
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Vector__XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Vector__XXX
- SG_ HCA_01_Vib_Freq : 12|4@1+ (1,15) [15|30] "Unit_Hertz" Vector__XXX
- SG_ HCA_01_LM_Offset : 16|9@1+ (1,0) [0|511] "Unit_centiNewtoMeter" Vector__XXX
- SG_ EA_ACC_Sollstatus : 25|2@1+ (1,0) [0|3] ""  Frontradar
- SG_ EA_Ruckprofil : 27|3@1+ (1,0) [0|7] "" Vector__XXX
- SG_ HCA_01_Sendestatus : 30|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ SET_ME_0XF : 12|4@1+ (1,0) [0|15] "Unit_Hertz" Vector__XXX
+ SG_ HCA_01_LM_Offset : 16|8@1+ (1,0) [0|255] "Unit_centiNewtoMeter" Vector__XXX
+ SG_ HCA_01_Enabled : 30|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ HCA_01_LM_OffSign : 31|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ HCA_01_Status_HCA : 32|4@1+ (1,0) [0|15] "" Vector__XXX
- SG_ HCA_01_Vib_Amp : 36|4@1+ (0.2,0) [0|3] "Unit_NewtoMeter" Vector__XXX
- SG_ EA_Ruckfreigabe : 40|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ EA_ACC_Wunschgeschwindigkeit : 41|10@1+ (0.32,0) [0|327.04] "Unit_KiloMeterPerHour"  Frontradar
-
+ SG_ SET_ME_0X1 : 32|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ HCA_01_Standby : 33|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ HCA_01_Request : 34|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ SET_ME_0XFE : 40|8@1+ (1,0) [0|255] "" Vector__XXX
+ 
 BO_ 159 LH_EPS_03: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  XXX
