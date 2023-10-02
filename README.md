@@ -1,3 +1,7 @@
+Adaption to MQBA0 EPS 2Q1909144J 6030 used in a PQ26 no radar non ACC car (Volkswagen Polo 6C [Polo 6R Facelift]) PQ26 can be seen as nearly identical to MQB regarding can bus communication.
+
+Panda can 1 is directly connected to engine can bus Panda can 0 is directly connected to comfort can bus
+
 ## DBC file basics
 
 A DBC file encodes, in a humanly readable way, the information needed to understand a vehicle's CAN bus traffic. A vehicle might have multiple CAN buses and every CAN bus is represented by its own dbc file.
