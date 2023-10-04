@@ -1214,7 +1214,7 @@ BO_ 1602 WIV_01: 8 Motor_Diesel_MQB
 BO_ 294 HCA_01: 8 Frontsensorik
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Vector__XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Vector__XXX
- SG_ SET_ME_0XF : 12|4@1+ (1,0) [0|15] "Unit_Hertz" Vector__XXX
+ SG_ SET_ME_0XF : 12|4@1+ (1,0) [0|15] "" Vector__XXX
  SG_ HCA_01_LM_Offset : 16|8@1+ (1,0) [0|255] "Unit_centiNewtoMeter" Vector__XXX
  SG_ HCA_01_Enabled : 30|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ HCA_01_LM_OffSign : 31|1@1+ (1,0) [0|1] "" Vector__XXX
