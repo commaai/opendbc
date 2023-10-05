@@ -1214,14 +1214,18 @@ BO_ 1602 WIV_01: 8 Motor_Diesel_MQB
 BO_ 294 HCA_01: 8 Frontsensorik
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Vector__XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Vector__XXX
- SG_ SET_ME_0XF : 12|4@1+ (1,0) [0|15] "" Vector__XXX
- SG_ HCA_01_LM_Offset : 16|8@1+ (1,0) [0|255] "Unit_centiNewtoMeter" Vector__XXX
- SG_ HCA_01_Enabled : 30|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ HCA_01_Vib_Freq : 12|4@1+ (1,15) [15|30] "Unit_Hertz" Vector__XXX
+ SG_ HCA_01_LM_Offset : 16|9@1+ (1,0) [0|511] "Unit_centiNewtoMeter" Vector__XXX
+ SG_ EA_ACC_Sollstatus : 25|2@1+ (1,0) [0|3] ""  Frontradar
+ SG_ EA_Ruckprofil : 27|3@1+ (1,0) [0|7] "" Vector__XXX
+ SG_ HCA_01_Enable : 30|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ HCA_01_LM_OffSign : 31|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ SET_ME_0X1 : 32|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ HCA_01_Available : 32|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ HCA_01_Standby : 33|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ HCA_01_Request : 34|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ SET_ME_0XFE : 40|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ HCA_01_Vib_Amp : 36|4@1+ (0.2,0) [0|3] "Unit_NewtoMeter" Vector__XXX
+ SG_ EA_Ruckfreigabe : 40|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ EA_ACC_Wunschgeschwindigkeit : 41|10@1+ (0.32,0) [0|327.04] "Unit_KiloMeterPerHour"  Frontradar
  
 BO_ 159 LH_EPS_03: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
