@@ -44,6 +44,6 @@ For example:
     ```
     However, I can't be sure that the very first bit of the message is referred to the pedal position: I haven't seen it changing! Therefore, a safer way of defining the signal is:
     ```
-    SG_ GAS_POS : 6|7@0+ (1,0) [0|100] "%" PCM
+    SG_ GAS_POS : 8|7@0+ (1,0) [0|100] "%" PCM
     ```
     which leaves the first bit unallocated. This prevents from very erroneous reading of the gas pedal position, in case the first bit is indeed used for something else.
