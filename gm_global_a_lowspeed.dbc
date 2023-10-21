@@ -90,10 +90,10 @@ BO_ 276127744 CruiseButtons2: 1 GMLAN
  SG_ LKAGapButton : 1|2@0+ (1,0) [0|2] ""  NEO
 
 BO_ 275955897 LeftRadar: 2 GMLAN
- SG_ BSM_Indicator_Light : 4|1@0+ (1,0) [0|0] "" XXX
+ SG_ BSM_Indicator_Light : 4|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 275980379 RightRadar: 2 GMLAN
- SG_ BSM_Indicator_Light : 0|1@0+ (1,0) [0|0] "" XXX
+ SG_ BSM_Indicator_Light : 0|1@0+ (1,0) [0|1] "" XXX
 
 
 
