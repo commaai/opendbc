@@ -109,6 +109,16 @@ BO_ 1265 CLU11: 4 CLU
  SG_ CF_Clu_AmpInfo : 25|1@1+ (1.0,0.0) [0.0|1.0] ""  BCM
  SG_ CF_Clu_AliveCnt1 : 28|4@1+ (1.0,0.0) [0.0|15.0] ""  AHLS,EMS,EPB,LDWS_LKAS,MDPS,SCC
 
+BO_ 1260 EU_Sign_Detection: 8 XXX
+ SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_2 : 8|8@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_3 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_4 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_5 : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ SpeedLim_Nav_Cam : 40|8@1+ (1,0) [0|255] "km/h / mph" XXX
+ SG_ SpeedLim_Nav_Cam2 : 48|8@1+ (1,0) [0|255] "km/h / mph" XXX
+ SG_ NEW_SIGNAL_6 : 56|8@1+ (1,0) [0|255] "" XXX
+ 
 BO_ 1492 TMU_GW_PE_01: 8 CLU
  SG_ TMU_IVRActivity : 0|2@1+ (1.0,0.0) [0.0|3.0] ""  DATC
  SG_ TMU_PhoneActivity : 2|2@1+ (1.0,0.0) [0.0|3.0] ""  DATC
@@ -1643,6 +1653,7 @@ BO_ 1348 Navi_HU: 8 XXX
  SG_ SpeedLim_Nav_General : 29|1@0+ (1,0) [0|1] "" XXX
  SG_ SpeedLim_Nav_Cam : 30|1@0+ (1,0) [0|1] "" XXX
 
+CM_ BO_ 1260 "This is the sign detection by the cameras on an ioniq phev 2020 EUR";
 CM_ "BO_ E_EMS11: All (plug-in) hybrids use this gas signal: CR_Vcu_AccPedDep_Pos, and all EVs use the Accel_Pedal_Pos signal. See hyundai/values.py for a specific car list";
 CM_ SG_ 871 CF_Lvr_IsgState "Idle Stop and Go";
 CM_ SG_ 1056 SCCInfoDisplay "Goes to 1 for a second while transitioning from Cruise Control to No Message";
