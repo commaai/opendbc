@@ -1431,7 +1431,12 @@ BO_ 389224720 BAP_LDW_10_S: 8 XXX
  SG_ Op : 0|4@1+ (1,0) [0|15] ""  XXX
  SG_ LogID : 4|6@1+ (1,0) [0|63] ""  XXX
  SG_ Func : 10|6@1+ (1,0) [0|63] ""  XXX
- SG_ Data : 16|48@1+ (1,0) [0|281474976710655] ""  XXX
+ SG_ Data1 : 16|8@1+ (1,0) [0|255] ""  XXX
+ SG_ Data2 : 24|8@1+ (1,0) [0|255] ""  XXX
+ SG_ Data3 : 32|8@1+ (1,0) [0|255] ""  XXX
+ SG_ Data4 : 40|8@1+ (1,0) [0|255] ""  XXX
+ SG_ Data5 : 48|8@1+ (1,0) [0|255] ""  XXX
+ SG_ Data6 : 56|8@1+ (1,0) [0|255] ""  XXX
 
 BO_ 389224720 BAP_LDW_10_L1: 8 XXX
  SG_ 0x80 : 0|8@1+ (1,0) [0|255] ""  XXX
@@ -1439,12 +1444,21 @@ BO_ 389224720 BAP_LDW_10_L1: 8 XXX
  SG_ Op : 16|4@1+ (1,0) [0|15] ""  XXX
  SG_ LogID : 20|6@1+ (1,0) [0|63] ""  XXX
  SG_ Func : 26|6@1+ (1,0) [0|63] ""  XXX
- SG_ Data : 32|32@1+ (1,0) [0|2147483647] ""  XXX
+ SG_ Data1 : 32|8@1+ (1,0) [0|255] ""  XXX
+ SG_ Data2 : 40|8@1+ (1,0) [0|255] ""  XXX
+ SG_ Data3 : 48|8@1+ (1,0) [0|255] ""  XXX
+ SG_ Data4 : 56|8@1+ (1,0) [0|255] ""  XXX
 
-BO_ 389224720 BAP_LDW_10_Ln: 8 XXX
+BO_ 389224720 BAP_LDW_10_LN: 8 XXX
  SG_ 0xC : 0|4@1+ (1,0) [0|15] ""  XXX
  SG_ Index : 4|4@1+ (1,0) [0|15] ""  XXX
- SG_ Data : 8|56@1+ (1,0) [0|4503599627370495] ""  XXX
+ SG_ Data1 : 8|8@1+ (1,0) [0|255] ""  XXX
+ SG_ Data2 : 16|8@1+ (1,0) [0|255] ""  XXX
+ SG_ Data3 : 24|8@1+ (1,0) [0|255] ""  XXX
+ SG_ Data4 : 32|8@1+ (1,0) [0|255] ""  XXX
+ SG_ Data5 : 40|8@1+ (1,0) [0|255] ""  XXX
+ SG_ Data6 : 48|8@1+ (1,0) [0|255] ""  XXX
+ SG_ Data7 : 56|8@1+ (1,0) [0|255] ""  XXX
 
 CM_ SG_ 134 LWI_Lenkradwinkel "Steering angle WITH variable ratio effect included";
 CM_ SG_ 159 EPS_HCA_Status "Status of Heading Control Assist feature";
