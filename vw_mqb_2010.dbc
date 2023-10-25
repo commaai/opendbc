@@ -1416,45 +1416,11 @@ BO_ 391 EV_Gearshift: 8 XXX
  SG_ GearPosition : 16|4@1+ (1,0) [0|255] "" XXX
  SG_ RegenBrakingMode : 12|2@1+ (1,0) [0|3] "" XXX
 
-BO_ 389224705 BAP_LDW_01_S: 8 XXX
- SG_ Op : 0|4@1+ (1,0) [0|15] ""  XXX
- SG_ LogID : 4|6@1+ (1,0) [0|63] ""  XXX
- SG_ Func : 10|6@1+ (1,0) [0|63] ""  XXX
- SG_ Data1 : 16|8@1+ (1,0) [0|255] ""  XXX
- SG_ Data2 : 24|8@1+ (1,0) [0|255] ""  XXX
- SG_ Data3 : 32|8@1+ (1,0) [0|255] ""  XXX
- SG_ Data4 : 40|8@1+ (1,0) [0|255] ""  XXX
- SG_ Data5 : 48|8@1+ (1,0) [0|255] ""  XXX
- SG_ Data6 : 56|8@1+ (1,0) [0|255] ""  XXX
+BO_ 2536708353 BAP_LDW_01: 8 XXX
+ SG_ Stream : 0|64@1+ (1,0) [0|0] ""  XXX
 
-BO_ 389224720 BAP_LDW_10: 8 XXX
- SG_ Op m0 : 0|4@1+ (1,0) [0|15] ""  XXX
- SG_ LogID m0 : 4|6@1+ (1,0) [0|63] ""  XXX
- SG_ Func m0 : 10|6@1+ (1,0) [0|63] ""  XXX
- SG_ Data1 m0 : 16|8@1+ (1,0) [0|255] ""  XXX
- SG_ Data2 m0 : 24|8@1+ (1,0) [0|255] ""  XXX
- SG_ Data3 m0 : 32|8@1+ (1,0) [0|255] ""  XXX
- SG_ Data4 m0 : 40|8@1+ (1,0) [0|255] ""  XXX
- SG_ Data5 m0 : 48|8@1+ (1,0) [0|255] ""  XXX
- SG_ Data6 m0 : 56|8@1+ (1,0) [0|255] ""  XXX
- SG_ 0x80 m1 : 0|8@1+ (1,0) [0|255] ""  XXX
- SG_ Length m1 : 8|8@1+ (1,0) [0|255] ""  XXX
- SG_ Op m1 : 16|4@1+ (1,0) [0|15] ""  XXX
- SG_ LogID m1 : 20|6@1+ (1,0) [0|63] ""  XXX
- SG_ Func m1 : 26|6@1+ (1,0) [0|63] ""  XXX
- SG_ Data1 m1 : 32|8@1+ (1,0) [0|255] ""  XXX
- SG_ Data2 m1 : 40|8@1+ (1,0) [0|255] ""  XXX
- SG_ Data3 m1 : 48|8@1+ (1,0) [0|255] ""  XXX
- SG_ Data4 m1 : 56|8@1+ (1,0) [0|255] ""  XXX
- SG_ 0xC m2 : 0|4@1+ (1,0) [0|15] ""  XXX
- SG_ Index m2 : 4|4@1+ (1,0) [0|15] ""  XXX
- SG_ Data1 m2 : 8|8@1+ (1,0) [0|255] ""  XXX
- SG_ Data2 m2 : 16|8@1+ (1,0) [0|255] ""  XXX
- SG_ Data3 m2 : 24|8@1+ (1,0) [0|255] ""  XXX
- SG_ Data4 m2 : 32|8@1+ (1,0) [0|255] ""  XXX
- SG_ Data5 m2 : 40|8@1+ (1,0) [0|255] ""  XXX
- SG_ Data6 m2 : 48|8@1+ (1,0) [0|255] ""  XXX
- SG_ Data7 m2 : 56|8@1+ (1,0) [0|255] ""  XXX
+BO_ 2536708368 BAP_LDW_10: 8 XXX
+ SG_ Stream : 0|64@1+ (1,0) [0|0] ""  XXX
 
 CM_ SG_ 134 LWI_Lenkradwinkel "Steering angle WITH variable ratio effect included";
 CM_ SG_ 159 EPS_HCA_Status "Status of Heading Control Assist feature";
