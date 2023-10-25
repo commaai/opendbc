@@ -62,24 +62,12 @@ if __name__ == "__main__":
               sl[2] = sl[2][:-1] + '_ALT:'
             sl[1] = str(new_addr)
             cur_msg[0] = ' '.join(sl)
-            out_f.write(''.join(cur_msg) + '\n')
-            wrote_addrs.add(new_addr)
+            out_f.write(''.join(cur_msg))
 
+          wrote_addrs.add(addr)
           cur_msg = []
 
-
-        #   new_addrs = addr_lookup.get
-        #   sl = line.split(' ')
-        #   addr = int(sl[1])
-        #   wrote_addrs.add(addr)
-        #
-        #   sl[1] = str(addr_lookup.get(addr, addr))
-        #   print(sl[1])
-        #   # if isinstance(sl[1], tuple):
-        #     # print(sl[1])
-        #   line = ' '.join(sl)
-        #   print(line)
-        # out_f.write(line)
+      out_f.write(''.join(cur_msg))
 
       missing_addrs = set(addr_lookup.keys()) - wrote_addrs
-      # assert len(missing_addrs) == 0, f"Missing addrs from {src}: {missing_addrs}"
+      assert len(missing_addrs) == 0, f"Missing addrs from {src}: {missing_addrs}"
