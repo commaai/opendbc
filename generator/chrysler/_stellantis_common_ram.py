@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 
-chrysler_to_ram: dict[str, dict[int, int | tuple[int] | tuple[int, int]]] = {
+chrysler_to_ram: dict[str, dict[int, int | tuple[int, int]]] = {
   "_stellantis_common_ram_dt_generated.dbc": {
     258: 35,
     264: 37,
@@ -39,9 +39,6 @@ if __name__ == "__main__":
       cur_msg = []
       for line in in_f.readlines():
         cur_msg.append(line)
-
-        # if line.startswith(('BO_', 'VAL_')):
-        #   cur_msg.append(line)
         if line.strip() == '':
           if not len(cur_msg):
             continue
@@ -53,7 +50,7 @@ if __name__ == "__main__":
           sl = cur_msg[0].split(' ')
           addr = int(sl[1])
 
-          new_addrs = addr_lookup.get(addr, addr)
+          new_addrs = addr_lookup.get(addr, (addr,))
           if not isinstance(new_addrs, tuple):
             new_addrs = (new_addrs,)
 
