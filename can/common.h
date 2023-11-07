@@ -49,7 +49,7 @@ public:
   uint64_t check_threshold;
 
   uint8_t counter;
-  uint8_t counter_fail;
+  uint8_t counter_fail = 0;
 
   bool ignore_checksum = false;
   bool ignore_counter = false;
