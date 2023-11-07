@@ -67,7 +67,15 @@ bool MessageState::parse(uint64_t sec, const std::vector<uint8_t> &dat) {
     vals[i] = tmp * sig.factor + sig.offset;
     all_vals[i].push_back(vals[i]);
   }
+
   last_seen_nanos = sec;
+  ++total_count;
+  if (first_seen_nanos == 0) {
+    first_seen_nanos = sec;
+    avg_freq = check_freq;
+  } else {
+    avg_freq = total_count / ((sec - first_seen_nanos) / 1e9);
+  }
 
   return true;
 }
@@ -113,10 +121,11 @@ CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<st
 
     // msg is not valid if a message isn't received for 10 consecutive steps
     if (frequency > 0) {
-      state.check_threshold = (1000000000ULL / frequency) * 10;
+      state.check_freq = frequency;
+      state.alive_threshold = (1000000000ULL / frequency) * 10;
 
       // bus timeout threshold should be 10x the fastest msg
-      bus_timeout_threshold = std::min(bus_timeout_threshold, state.check_threshold);
+      bus_timeout_threshold = std::min(bus_timeout_threshold, state.alive_threshold);
     }
 
     const Msg* msg = NULL;
@@ -284,8 +293,8 @@ void CANParser::UpdateValid(uint64_t sec) {
     }
 
     const bool missing = state.last_seen_nanos == 0;
-    const bool timed_out = (sec - state.last_seen_nanos) > state.check_threshold;
-    if (state.check_threshold > 0 && (missing || timed_out)) {
+    const bool timed_out = (sec - state.last_seen_nanos) > state.alive_threshold;
+    if (state.alive_threshold > 0 && (missing || timed_out)) {
       if (show_missing && !bus_timeout) {
         if (missing) {
           LOGE("0x%X '%s' NOT SEEN", state.address, state.name.c_str());
