@@ -300,11 +300,16 @@ void CANParser::UpdateValid(uint64_t nanos) {
 }
 
 void CANParser::query_latest(std::vector<SignalValue> &vals, uint64_t last_ts) {
+  LOGE("in query_latest");
+  // TODO: can we not just use last_nanos? this makes no sense
   if (last_ts == 0) {
     last_ts = last_nanos;
   }
   for (auto& kv : message_states) {
     auto& state = kv.second;
+    // Don't skip if we are initializing Cython wrapper and haven't seen any messages yet
+    // Skip if we have received new can Event packet and state is not in it/not parsed can Event packet
+    // TODO: can this be more explicit?!!!1
     if (last_ts != 0 && state.last_seen_nanos < last_ts) {
       continue;
     }
