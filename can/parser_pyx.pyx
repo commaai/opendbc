@@ -81,6 +81,7 @@ cdef class CANParser:
       cv = &deref(it)
       # Cast char * directly to unicode
       cv_name = <unicode>cv.name
+      # print('cyx', cv.address, cv_name, cv.value)
       self.vl[cv.address][cv_name] = cv.value
       self.vl_all[cv.address][cv_name] = cv.all_values
       self.ts_nanos[cv.address][cv_name] = cv.ts_nanos

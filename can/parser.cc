@@ -83,17 +83,20 @@ bool MessageState::update_counter_generic(int64_t v, int cnt_size) {
   uint8_t old_counter = counter;
   counter = v;
   if (((old_counter+1) & ((1 << cnt_size) -1)) != v) {
-    counter_fail += 1;
+    counter_fail = std::min(counter_fail + 1, MAX_BAD_COUNTER);
+//    counter_fail++;
     if (counter_fail > 1) {
       INFO("0x%X COUNTER FAIL #%d -- %d -> %d\n", address, counter_fail, old_counter, (int)v);
     }
-    if (counter_fail >= MAX_BAD_COUNTER) {
-      return false;
-    }
+//    if (counter_fail >= MAX_BAD_COUNTER) {
+//      return false;
+//    }
   } else if (counter_fail > 0) {
     counter_fail--;
+    INFO("0x%X COUNTER SUCCESS #%d -- %d -> %d\n", address, counter_fail, old_counter, (int)v);
   }
-  return true;
+//  return true;
+  return counter_fail < MAX_BAD_COUNTER;
 }
 
 
@@ -192,6 +195,7 @@ void CANParser::update_string(const std::string &data, bool sendcan) {
     first_nanos = event.getLogMonoTime();
   }
   last_nanos = event.getLogMonoTime();
+  LOGE("last_nanos: %ld", last_nanos);
 
   auto cans = sendcan ? event.getSendcan() : event.getCan();
   UpdateCans(last_nanos, cans);
@@ -204,7 +208,9 @@ void CANParser::update_strings(const std::vector<std::string> &data, std::vector
   uint64_t current_nanos = 0;
   for (const auto &d : data) {
     update_string(d, sendcan);
-    current_nanos = last_nanos;
+    if (current_nanos == 0) {
+      current_nanos = last_nanos;
+    }
   }
   query_latest(vals, current_nanos);
 }
@@ -293,9 +299,9 @@ void CANParser::UpdateValid(uint64_t nanos) {
     if (state.check_threshold > 0 && (missing || timed_out)) {
       if (show_missing && !bus_timeout) {
         if (missing) {
-          LOGE("0x%X '%s' NOT SEEN", state.address, state.name.c_str());
+//          LOGE("0x%X '%s' NOT SEEN", state.address, state.name.c_str());
         } else if (timed_out) {
-          LOGE("0x%X '%s' TIMED OUT", state.address, state.name.c_str());
+//          LOGE("0x%X '%s' TIMED OUT", state.address, state.name.c_str());
         }
       }
       _valid = false;
@@ -317,8 +323,10 @@ void CANParser::query_latest(std::vector<SignalValue> &vals, uint64_t last_ts) {
     // Skip if we have received new can Event packet and state is not in it/not parsed can Event packet
     // TODO: can this be more explicit?!!!1
     if (last_ts != 0 && state.last_seen_nanos < last_ts) {
+      LOGE("state name continue: %s, last_ts: %ld, state.last_seen_nanos: %ld", state.name.c_str(), last_ts, state.last_seen_nanos);
       continue;
     }
+    LOGE("state name: %s, last_ts: %ld, state.last_seen_nanos: %ld", state.name.c_str(), last_ts, state.last_seen_nanos);
 
     for (int i = 0; i < state.parse_sigs.size(); i++) {
       const Signal &sig = state.parse_sigs[i];
