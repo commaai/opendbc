@@ -34,6 +34,8 @@ int64_t get_raw_value(const std::vector<uint8_t> &msg, const Signal &sig) {
 
 
 bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
+  std::vector<std::vector<double>> tmp_all_vals;
+  tmp_all_vals.resize(parse_sigs.size());
   for (int i = 0; i < parse_sigs.size(); i++) {
     const auto &sig = parse_sigs[i];
 
@@ -64,10 +66,23 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
     }
 
     // TODO: these may get updated if the invalid or checksum gets checked later
+    // I believe vals being replaced is fine here since this won't return true until counter is fine, and then it's replaced again
+    // But all_vals builds up list regardless which is not ideal
+    LOGE("adding value for name: %s: %f", sig.name.c_str(), tmp * sig.factor + sig.offset);
     vals[i] = tmp * sig.factor + sig.offset;
-    all_vals[i].push_back(vals[i]);
+//    all_vals[i].push_back(vals[i]);
+    tmp_all_vals[i].push_back(vals[i]);
   }
+  LOGE("set last_seen_nanos to %ld", nanos);
   last_seen_nanos = nanos;
+  // success, now we can add tmp_all_vals to all_vals:
+  for (int i = 0; i < parse_sigs.size(); i++) {
+    // print tmp all vals name and vals
+//    for (auto &val : tmp_all_vals[i]) {
+////      LOGE("tmp_all_vals name: %s, val: %f", parse_sigs[i].name.c_str(), val);
+//    }
+    all_vals[i].insert(all_vals[i].end(), tmp_all_vals[i].begin(), tmp_all_vals[i].end());
+  }
 
   return true;
 }
