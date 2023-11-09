@@ -194,12 +194,11 @@ void CANParser::update_string(const std::string &data, bool sendcan) {
 }
 
 void CANParser::update_strings(const std::vector<std::string> &data, std::vector<SignalValue> &vals, bool sendcan) {
+  // iterate through all can Event packets and set current_nanos to latest
   uint64_t current_nanos = 0;
   for (const auto &d : data) {
     update_string(d, sendcan);
-    if (current_nanos == 0) {
-      current_nanos = last_nanos;
-    }
+    current_nanos = last_nanos;
   }
   query_latest(vals, current_nanos);
 }
