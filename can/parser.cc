@@ -69,7 +69,7 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
     vals[i] = tmp * sig.factor + sig.offset;
   }
 
-  // Add valid vals to all_vals
+  // Add vals once we check all signals in the message
   for (int i = 0; i < parse_sigs.size(); i++) {
     all_vals[i].push_back(vals[i]);
   }
