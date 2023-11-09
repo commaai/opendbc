@@ -34,6 +34,7 @@ int64_t get_raw_value(const std::vector<uint8_t> &msg, const Signal &sig) {
 
 
 bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
+  std::vector<double> tmp_vals;
   for (int i = 0; i < parse_sigs.size(); i++) {
     const auto &sig = parse_sigs[i];
 
@@ -63,15 +64,14 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
       return false;
     }
 
-    // Note that if counter or checksum is checked after, vals will be partially/all wrong.
-    // But we only update last_seen_nanos on success, so returned vals from query_latest are never wrong
     LOGE("adding value for name: %s: %f", sig.name.c_str(), tmp * sig.factor + sig.offset);
-    vals[i] = tmp * sig.factor + sig.offset;
+    tmp_vals.push_back(tmp * sig.factor + sig.offset);
   }
 
-  // Add vals once we check all signals in the message
+  // Update vals once we check all signals in the message
   for (int i = 0; i < parse_sigs.size(); i++) {
-    all_vals[i].push_back(vals[i]);
+    vals[i] = tmp_vals[i];
+    all_vals[i].push_back(tmp_vals[i]);
   }
   last_seen_nanos = nanos;
 
