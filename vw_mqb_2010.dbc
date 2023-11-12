@@ -1417,10 +1417,10 @@ BO_ 391 EV_Gearshift: 8 XXX
  SG_ RegenBrakingMode : 12|2@1+ (1,0) [0|3] "" XXX
 
 BO_ 2536708353 BAP_LDW_01: 2 XXX
- SG_ Stream : 0|16@0+ (1,0) [0|65535] ""  XXX
+ SG_ Stream : 0|16@1+ (1,0) [0|65535] ""  XXX
 
 BO_ 2536708368 BAP_LDW_10: 8 XXX
- SG_ Stream : 0|64@1+ (1,0) [0|0] ""  XXX
+ SG_ Stream : 0|64@1+ (1,0) [0|18446744073709551615] ""  XXX
 
 CM_ SG_ 134 LWI_Lenkradwinkel "Steering angle WITH variable ratio effect included";
 CM_ SG_ 159 EPS_HCA_Status "Status of Heading Control Assist feature";
