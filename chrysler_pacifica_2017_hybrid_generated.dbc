@@ -59,8 +59,7 @@ BO_ 500 DAS_3: 8 XXX
  SG_ DISABLE_FUEL_SHUTOFF : 23|1@1+ (1,0) [0|0] "" XXX
  SG_ GR_MAX_REQ : 32|4@1+ (1,0) [0|0] "" XXX
  SG_ ACC_DECEL_REQ : 36|3@1+ (1,0) [0|0] "" XXX
- SG_ STS : 46|2@1+ (1,0) [0|0] "" XXX
- SG_ ACC_FAULTED : 47|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_FAULTED : 46|2@1+ (1,0) [0|0] "" XXX
  SG_ COLLISION_BRK_PREP : 48|1@1+ (1,0) [0|0] "" XXX
  SG_ ACC_BRK_PREP : 49|1@1+ (1,0) [0|0] "" XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
