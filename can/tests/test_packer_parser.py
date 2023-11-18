@@ -7,6 +7,8 @@ from opendbc.can.parser import CANParser
 from opendbc.can.packer import CANPacker
 from opendbc.can.tests import TEST_DBC
 
+MAX_BAD_COUNTER = 5
+
 
 # Python implementation so we don't have to depend on boardd
 def can_list_to_can_capnp(can_msgs, msgtype='can', logMonoTime=None):
@@ -93,6 +95,24 @@ class TestCanParserPacker(unittest.TestCase):
       dat = can_list_to_can_capnp([msg, ], logMonoTime=t)
       parser.update_strings([dat])
       self.assertTrue(parser.can_valid)
+
+  def test_parser_invalid_signals(self):
+    msgs = [
+      ("STEERING_CONTROL", 0),
+    ]
+    packer = CANPacker("honda_civic_touring_2016_can_generated")
+    parser = CANParser("honda_civic_touring_2016_can_generated", msgs, 0)
+
+    self.assertEqual(parser.vl["STEERING_CONTROL"]["STEER_TORQUE"], 0)
+
+    msg = packer.make_can_msg("STEERING_CONTROL", 0, {"COUNTER": 0})
+    bts = can_list_to_can_capnp([msg])
+    parser.update_strings([bts] * MAX_BAD_COUNTER)  # warmup with bad static counters
+    print(parser.can_valid)
+    for _ in range(0x1000):
+      parser.update_strings([bts])
+      self.assertFalse(parser.can_valid)
+      print('valid', parser.can_valid)
 
   def test_packer_parser(self):
     msgs = [
