@@ -42,7 +42,7 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
       tmp -= ((tmp >> (sig.size-1)) & 0x1) ? (1ULL << sig.size) : 0;
     }
 
-    DEBUG("parse 0x%X %s -> %ld\n", address, sig.name, tmp);
+    //DEBUG("parse 0x%X %s -> %ld\n", address, sig.name, tmp);
 
     bool checksum_failed = false;
     if (!ignore_checksum) {
@@ -51,7 +51,6 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
       }
     }
 
-    LOGE("ignore_counter: %d, sig.type: %d", ignore_counter, sig.type);
     bool counter_failed = false;
     if (!ignore_counter) {
       if (sig.type == SignalType::COUNTER) {
@@ -65,7 +64,6 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
     }
 
     // TODO: these may get updated if the invalid or checksum gets checked later
-    LOGE("adding value for name: %s: %f", sig.name.c_str(), tmp * sig.factor + sig.offset);
     vals[i] = tmp * sig.factor + sig.offset;
     all_vals[i].push_back(vals[i]);
   }
@@ -84,7 +82,6 @@ bool MessageState::update_counter_generic(int64_t v, int cnt_size) {
   } else if (counter_fail > 0) {
     counter_fail--;
   }
-  LOGE("counter fail: %d\n", counter_fail);
   return counter_fail < MAX_BAD_COUNTER;
 }
 
