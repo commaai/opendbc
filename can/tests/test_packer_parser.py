@@ -107,9 +107,8 @@ class TestCanParserPacker(unittest.TestCase):
 
     msg = packer.make_can_msg("STEERING_CONTROL", 0, {"COUNTER": 0})
     bts = can_list_to_can_capnp([msg])
-    # parser.update_strings([bts] * MAX_BAD_COUNTER)  # warmup with bad static counters
-    print(parser.can_valid)
-    for idx in range(0x10):
+    # bad static counters, invalid once it's seen MAX_BAD_COUNTER messages
+    for idx in range(0x1000):
       parser.update_strings([bts])
       # print('here', idx, MAX_BAD_COUNTER, parser.can_valid)
       self.assertEqual(idx + 1 < MAX_BAD_COUNTER, parser.can_valid)
