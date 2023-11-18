@@ -98,7 +98,8 @@ class TestCanParserPacker(unittest.TestCase):
 
   def test_parser_counter_can_valid(self):
     """
-    Ensures CAN stays invalid while receiving invalid messages + that we can recover
+    Tests number of allowed bad counters + ensures CAN stays invalid
+    while receiving invalid messages + that we can recover
     """
     msgs = [
       ("STEERING_CONTROL", 0),
