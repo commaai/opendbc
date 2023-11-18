@@ -96,40 +96,29 @@ class TestCanParserPacker(unittest.TestCase):
       parser.update_strings([dat])
       self.assertTrue(parser.can_valid)
 
-  def test_parser_invalid_signals(self):
+  def test_parser_counter_can_valid(self):
+    """
+    Ensures CAN stays invalid while receiving invalid messages
+    """
     msgs = [
       ("STEERING_CONTROL", 0),
     ]
     packer = CANPacker("honda_civic_touring_2016_can_generated")
     parser = CANParser("honda_civic_touring_2016_can_generated", msgs, 0)
 
-    self.assertEqual(parser.vl["STEERING_CONTROL"]["STEER_TORQUE"], 0)
-
     msg = packer.make_can_msg("STEERING_CONTROL", 0, {"COUNTER": 0})
     bts = can_list_to_can_capnp([msg])
+
     # bad static counters, invalid once it's seen MAX_BAD_COUNTER messages
     for idx in range(0x1000):
       parser.update_strings([bts])
-      # print('here', idx, MAX_BAD_COUNTER, parser.can_valid)
       self.assertEqual(idx + 1 < MAX_BAD_COUNTER, parser.can_valid)
-      # print('valid', parser.can_valid)
 
     # one to recover
     msg = packer.make_can_msg("STEERING_CONTROL", 0, {"COUNTER": 1})
     bts = can_list_to_can_capnp([msg])
     parser.update_strings([bts])
     self.assertTrue(parser.can_valid)
-
-    print(parser.vl_all["STEERING_CONTROL"])
-
-    # print('recovering!\n')
-    # for i in range(10):
-    #   print('sending', i & 0x3)
-    #   msg = packer.make_can_msg("STEERING_CONTROL", 0, {"COUNTER": i & 0x3})
-    #   bts = can_list_to_can_capnp([msg])
-    #   parser.update_strings([bts])
-    #   self.assertEqual(i > 5, parser.can_valid)
-
 
   def test_packer_parser(self):
     msgs = [
