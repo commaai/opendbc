@@ -107,12 +107,30 @@ class TestCanParserPacker(unittest.TestCase):
 
     msg = packer.make_can_msg("STEERING_CONTROL", 0, {"COUNTER": 0})
     bts = can_list_to_can_capnp([msg])
-    parser.update_strings([bts] * MAX_BAD_COUNTER)  # warmup with bad static counters
+    # parser.update_strings([bts] * MAX_BAD_COUNTER)  # warmup with bad static counters
     print(parser.can_valid)
-    for _ in range(0x1000):
+    for idx in range(0x10):
       parser.update_strings([bts])
-      self.assertFalse(parser.can_valid)
-      print('valid', parser.can_valid)
+      # print('here', idx, MAX_BAD_COUNTER, parser.can_valid)
+      self.assertEqual(idx + 1 < MAX_BAD_COUNTER, parser.can_valid)
+      # print('valid', parser.can_valid)
+
+    # one to recover
+    msg = packer.make_can_msg("STEERING_CONTROL", 0, {"COUNTER": 1})
+    bts = can_list_to_can_capnp([msg])
+    parser.update_strings([bts])
+    self.assertTrue(parser.can_valid)
+
+    print(parser.vl_all["STEERING_CONTROL"])
+
+    # print('recovering!\n')
+    # for i in range(10):
+    #   print('sending', i & 0x3)
+    #   msg = packer.make_can_msg("STEERING_CONTROL", 0, {"COUNTER": i & 0x3})
+    #   bts = can_list_to_can_capnp([msg])
+    #   parser.update_strings([bts])
+    #   self.assertEqual(i > 5, parser.can_valid)
+
 
   def test_packer_parser(self):
     msgs = [
