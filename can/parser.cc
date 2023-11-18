@@ -34,6 +34,10 @@ int64_t get_raw_value(const std::vector<uint8_t> &msg, const Signal &sig) {
 
 
 bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
+  // only updates values if both checksum and counter are valid
+  bool checksum_failed = false;
+  bool counter_failed = false;
+  std::vector<double> tmp_vals;
   for (int i = 0; i < parse_sigs.size(); i++) {
     const auto &sig = parse_sigs[i];
 
@@ -44,30 +48,31 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
 
     //DEBUG("parse 0x%X %s -> %ld\n", address, sig.name, tmp);
 
-    bool checksum_failed = false;
     if (!ignore_checksum) {
       if (sig.calc_checksum != nullptr && sig.calc_checksum(address, sig, dat) != tmp) {
         checksum_failed = true;
       }
     }
 
-    bool counter_failed = false;
     if (!ignore_counter) {
       if (sig.type == SignalType::COUNTER) {
         counter_failed = !update_counter_generic(tmp, sig.size);
       }
     }
 
-    if (checksum_failed || counter_failed) {
-      LOGE("0x%X message checks failed, checksum failed %d, counter failed %d", address, checksum_failed, counter_failed);
-      return false;
-    }
-
-    // TODO: these may get updated if the invalid or checksum gets checked later
-    vals[i] = tmp * sig.factor + sig.offset;
-    all_vals[i].push_back(vals[i]);
+    tmp_vals.push_back(tmp * sig.factor + sig.offset);
   }
   last_seen_nanos = nanos;
+
+  if (checksum_failed || counter_failed) {
+    LOGE("0x%X message checks failed, checksum failed %d, counter failed %d", address, checksum_failed, counter_failed);
+    return false;
+  }
+
+  for (int i = 0; i < parse_sigs.size(); i++) {
+    vals[i] = tmp_vals[i];
+    all_vals[i].push_back(vals[i]);
+  }
 
   return true;
 }
