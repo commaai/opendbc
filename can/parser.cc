@@ -77,7 +77,7 @@ bool MessageState::update_counter_generic(int64_t v, int cnt_size) {
   if (((counter + 1) & ((1 << cnt_size) -1)) != v) {
     counter_fail = std::min(counter_fail + 1, MAX_BAD_COUNTER);
     if (counter_fail > 1) {
-      INFO("0x%X COUNTER FAIL #%d -- %d -> %d", address, counter_fail, old_counter, (int)v);
+      LOGE("0x%X COUNTER FAIL #%d -- %d -> %d", address, counter_fail, counter, (int)v);
     }
   } else if (counter_fail > 0) {
     counter_fail--;
