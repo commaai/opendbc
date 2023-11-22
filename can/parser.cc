@@ -34,9 +34,9 @@ int64_t get_raw_value(const std::vector<uint8_t> &msg, const Signal &sig) {
 
 
 bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
-  std::vector<double> tmp_vals;
   bool checksum_failed = false;
   bool counter_failed = false;
+  std::vector<double> tmp_vals;
   for (int i = 0; i < parse_sigs.size(); i++) {
     const auto &sig = parse_sigs[i];
 
