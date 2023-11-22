@@ -124,7 +124,8 @@ class TestCanParserPacker(unittest.TestCase):
   def test_parser_no_partial_update(self):
     """
     Ensure that the CANParser doesn't partially update messages with invalid signals (COUNTER/CHECKSUM).
-    Previously, the signal update loop would only break once it got to one of these invalid signals.
+    Previously, the signal update loop would only break once it got to one of these invalid signals,
+    after already updating most/all of the signals.
     """
     msgs = [
       ("STEERING_CONTROL", 0),
