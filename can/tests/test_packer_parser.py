@@ -121,6 +121,42 @@ class TestCanParserPacker(unittest.TestCase):
     parser.update_strings([bts])
     self.assertTrue(parser.can_valid)
 
+  def test_parser_no_partial_update(self):
+    """
+    Ensure that the CANParser doesn't partially update messages with invalid signals (COUNTER/CHECKSUM).
+    Previously, the signal update loop would only break once it got to one of these invalid signals,
+    after already updating most/all of the signals.
+    """
+    msgs = [
+      ("STEERING_CONTROL", 0),
+    ]
+    packer = CANPacker("honda_civic_touring_2016_can_generated")
+    parser = CANParser("honda_civic_touring_2016_can_generated", msgs, 0)
+
+    def rx_steering_msg(values, bad_checksum=False):
+      msg = packer.make_can_msg("STEERING_CONTROL", 0, values)
+      if bad_checksum:
+        # add 1 to checksum
+        msg[2] = bytearray(msg[2])
+        msg[2][4] = (msg[2][4] & 0xF0) | ((msg[2][4] & 0x0F) + 1)
+
+      bts = can_list_to_can_capnp([msg])
+      parser.update_strings([bts])
+
+    rx_steering_msg({"STEER_TORQUE": 100}, bad_checksum=False)
+    self.assertEqual(parser.vl["STEERING_CONTROL"]["STEER_TORQUE"], 100)
+    self.assertEqual(parser.vl_all["STEERING_CONTROL"]["STEER_TORQUE"], [100])
+
+    for _ in range(5):
+      rx_steering_msg({"STEER_TORQUE": 200}, bad_checksum=True)
+      self.assertEqual(parser.vl["STEERING_CONTROL"]["STEER_TORQUE"], 100)
+      self.assertEqual(parser.vl_all["STEERING_CONTROL"]["STEER_TORQUE"], [])
+
+    # Even if CANParser doesn't update instantaneous vl, make sure it didn't add invalid values to vl_all
+    rx_steering_msg({"STEER_TORQUE": 300}, bad_checksum=False)
+    self.assertEqual(parser.vl["STEERING_CONTROL"]["STEER_TORQUE"], 300)
+    self.assertEqual(parser.vl_all["STEERING_CONTROL"]["STEER_TORQUE"], [300])
+
   def test_packer_parser(self):
     msgs = [
       ("Brake_Status", 0),
