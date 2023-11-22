@@ -151,6 +151,7 @@ class TestCanParserPacker(unittest.TestCase):
       self.assertEqual(parser.vl["STEERING_CONTROL"]["STEER_TORQUE"], 100)
       self.assertEqual(parser.vl_all["STEERING_CONTROL"]["STEER_TORQUE"], [])
 
+    # Even if CANParser doesn't update instantaneous vl, make sure it didn't add invalid values to vl_all
     rx_steering_msg({"STEER_TORQUE": 300}, break_checksum=False)
     self.assertEqual(parser.vl["STEERING_CONTROL"]["STEER_TORQUE"], 300)
     self.assertEqual(parser.vl_all["STEERING_CONTROL"]["STEER_TORQUE"], [300])
