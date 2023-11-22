@@ -61,7 +61,6 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
 
     tmp_vals.push_back(tmp * sig.factor + sig.offset);
   }
-  last_seen_nanos = nanos;
 
   // only update values if both checksum and counter are valid
   if (checksum_failed || counter_failed) {
@@ -73,6 +72,7 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
     vals[i] = tmp_vals[i];
     all_vals[i].push_back(vals[i]);
   }
+  last_seen_nanos = nanos;
 
   return true;
 }
