@@ -34,7 +34,6 @@ int64_t get_raw_value(const std::vector<uint8_t> &msg, const Signal &sig) {
 
 
 bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
-  std::vector<double> tmp_vals;
   bool checksum_failed = false;
   bool counter_failed = false;
   for (int i = 0; i < parse_sigs.size(); i++) {
@@ -59,7 +58,7 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
       }
     }
 
-    tmp_vals.push_back(tmp * sig.factor + sig.offset);
+    vals[i] = tmp * sig.factor + sig.offset;
   }
 
   // only update values if both checksum and counter are valid
@@ -69,7 +68,6 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
   }
 
   for (int i = 0; i < parse_sigs.size(); i++) {
-    vals[i] = tmp_vals[i];
     all_vals[i].push_back(vals[i]);
   }
   last_seen_nanos = nanos;
