@@ -1,0 +1,119 @@
+VERSION ""
+
+
+NS_ :
+    NS_DESC_
+    CM_
+    BA_DEF_
+    BA_
+    VAL_
+    CAT_DEF_
+    CAT_
+    FILTER
+    BA_DEF_DEF_
+    EV_DATA_
+    ENVVAR_DATA_
+    SGTYPE_
+    SGTYPE_VAL_
+    BA_DEF_SGTYPE_
+    BA_SGTYPE_
+    SIG_TYPE_REF_
+    VAL_TABLE_
+    SIG_GROUP_
+    SIG_VALTYPE_
+    SIGTYPE_VALTYPE_
+    BO_TX_BU_
+    BA_DEF_REL_
+    BA_REL_
+    BA_DEF_DEF_REL_
+    BU_SG_REL_
+    BU_EV_REL_
+    BU_BO_REL_
+    SG_MUL_VAL_
+
+BS_:
+
+BU_: XXX
+
+
+BO_ 544 a_1: 8 XXX
+ SG_ status1 : 23|4@0+ (1,0) [0|15] "" XXX
+ SG_ status2 : 39|6@0+ (1,0) [0|15] "" XXX
+ SG_ sig2 : 33|10@0+ (1,0) [0|255] "" XXX
+ SG_ zeros : 55|4@0+ (1,0) [0|15] "" XXX
+ SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ DIST_LEFT_LANE_2 : 19|12@0+ (1,0) [0|1] "" XXX
+ SG_ DIST_LEFT_LANE : 3|12@0+ (1,0) [0|1] "" XXX
+
+BO_ 576 b_1: 8 XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ VEH_CENTER : 1|10@0+ (1,0) [0|1] "" XXX
+ SG_ LINE_VISIBILITY : 17|10@0+ (1,0) [0|1] "" XXX
+
+BO_ 608 a_2: 8 XXX
+ SG_ status1 : 23|4@0+ (1,0) [0|15] "" XXX
+ SG_ status2 : 39|6@0+ (1,0) [0|15] "" XXX
+ SG_ sig2 : 33|10@0+ (1,0) [0|255] "" XXX
+ SG_ zeros : 55|4@0+ (1,0) [0|15] "" XXX
+ SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ DIST_RIGHT_LANE : 3|12@0+ (1,0) [0|1] "" XXX
+ SG_ DIST_RIGHT_2_LESS_NOISE : 19|12@0+ (1,0) [0|1] "" XXX
+
+BO_ 640 b_2: 8 XXX
+ SG_ sig0 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ sig1 : 15|16@0+ (1,0) [0|65535] "" XXX
+ SG_ sig2 : 31|16@0+ (1,0) [0|255] "" XXX
+ SG_ zeros : 47|12@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 704 c_1: 8 XXX
+ SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ LONG_DIST : 34|11@0+ (0.046875,0) [0|255] "m" XXX
+ SG_ LAT1 : 2|11@0+ (0.0046875,-4.80) [0|2047] "m" XXX
+ SG_ LAT2 : 18|11@0+ (0.0046875,-4.80) [0|2047] "m" XXX
+
+BO_ 800 c_2: 8 XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ LAT_DIST : 18|11@0+ (0.005,-5.12) [0|2047] "m" XXX
+ SG_ LONG_DIST : 34|11@0+ (0.05,0) [0|255] "m" XXX
+ SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
+
+BO_ 864 c_3: 8 XXX
+ SG_ LAT_DIST : 18|11@0+ (0.005,-5.12) [0|2047] "m" XXX
+ SG_ LONG_DIST : 34|11@0+ (0.05,0) [0|255] "m" XXX
+ SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 928 c_4: 8 XXX
+ SG_ LAT_DIST : 18|11@0+ (0.005,-5.12) [0|2047] "m" XXX
+ SG_ LONG_DIST : 34|11@0+ (0.05,0) [0|255] "m" XXX
+ SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 672 d_1: 8 XXX
+ SG_ REL_SPEED : 9|10@0+ (-0.1875,96) [0|1023] "m/s" XXX
+
+BO_ 768 d_2: 8 XXX
+ SG_ REL_SPEED : 9|10@0+ (-0.1875,96) [0|1023] "m/s" XXX
+
+BO_ 832 d_3: 8 XXX
+ SG_ REL_SPEED : 9|10@0+ (-0.1875,96) [0|1023] "m/s" XXX
+
+BO_ 896 d_4: 8 XXX
+ SG_ REL_SPEED : 9|10@0+ (-0.1875,96) [0|1023] "m/s" XXX
+
+
+
+
+CM_ SG_ 544 sig2 "LKAS";
+CM_ SG_ 576 VEH_CENTER "0x280 when vehicle centered between lines";
+CM_ SG_ 608 DIST_RIGHT_LANE "0x800 centered/baseline";
+CM_ SG_ 704 LAT_DIST "positive to the right, negative to the left";
+CM_ SG_ 800 LAT_DIST "positive to the right, negative to the left";
+CM_ SG_ 864 LAT_DIST "positive to the right, negative to the left";
+CM_ SG_ 928 LAT_DIST "positive to the right, negative to the left";
+CM_ SG_ 672 REL_SPEED "baseline 0x200";
