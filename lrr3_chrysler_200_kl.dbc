@@ -114,17 +114,17 @@ BO_ 1500 LKAS_HUD: 4 XXX
 BO_ 1508 LKAS_HEARTBIT: 8 XXX
  SG_ LKAS_STATUS_OK : 28|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 762 WHEEL_BUTTONS: 8 XXX
+BO_ 762 CRUISE_BUTTONS: 8 XXX
+ SG_ ACC_Cancel : 0|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_Distance_Dec : 1|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_Accel : 2|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_Decel : 3|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_Resume : 4|1@0+ (1,0) [0|1] "" XXX
+ SG_ Cruise_OnOff : 6|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_OnOff : 7|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_Distance_Inc : 8|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 15|4@0+ (1,0) [0|1] "" XXX
  SG_ CHECKSUM : 23|8@0+ (1,0) [0|1] "" XXX
- SG_ CANCEL : 0|1@0+ (1,0) [0|1] "" XXX
- SG_ RESUME : 4|1@0+ (1,0) [0|1] "" XXX
- SG_ SET_INCREASE : 2|1@0+ (1,0) [0|1] "" XXX
- SG_ SET_DECREASE : 3|1@0+ (1,0) [0|1] "" XXX
- SG_ REG_CRUISE : 6|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_CRUISE : 7|1@0+ (1,0) [0|1] "" XXX
- SG_ DECREASE_DIST : 1|1@0+ (1,0) [0|1] "" XXX
- SG_ INCREASE_DIST : 8|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 484 BRAKE_1: 8 XXX
  SG_ COUNTER : 51|4@0+ (1,0) [0|1] "" XXX
