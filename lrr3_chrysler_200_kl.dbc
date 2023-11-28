@@ -187,7 +187,7 @@ CM_ SG_ 1500 LKAS_LANE_LINES "0x01 transparent lines, 0x02 left white, 0x03 righ
 CM_ SG_ 1492 LEAD_CAR "lead car present = 4, no car = 2 ";
 CM_ SG_ 498 ACC_STATUS_2 "1 no ACC, 3 icpno ";
 CM_ SG_ 498 ACC_STATUS_1 "0x00 = acc off, 0x03 = acc on, green, 0x02 acc on, white";
-CM_ SG_ 1006 ACC_STATE "0 = ACC off, 6 = ACC active (white), 8 = ACC engaged (green)"
+CM_ SG_ 1006 ACC_STATE "0 = ACC off, 6 = ACC active (white), 8 = ACC engaged (green)";
 CM_ SG_ 502 LKAS_STATE "2 = active (green), 1 = error";
 CM_ SG_ 1006 ACC_SET_SPEED_KMH "min set appears to be 68 km/h, errors below 59 km/h ";
 VAL_ 1262 PRNDL 1 "P" 2 "R" 3 "N" 4 "D" 5 "S";
