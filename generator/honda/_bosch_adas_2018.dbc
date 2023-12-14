@@ -25,9 +25,9 @@ BO_ 495 ACC_CONTROL_ON: 8 XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
 
 BO_ 829 LKAS_HUD: 5 ADAS
+ SG_ ENABLED : 0|1@0+ (1,0) [0|1] "" XXX
+ SG_ SET_ME_X20 : 6|6@0+ (1,0) [0|127] "" BDY
  SG_ CAM_TEMP_HIGH : 7|1@0+ (1,0) [0|255] "" BDY
- SG_ SET_ME_X41 : 6|7@0+ (1,0) [0|127] "" BDY
- SG_ BOH : 6|7@0+ (1,0) [0|127] "" BDY
  SG_ DASHED_LANES : 14|1@0+ (1,0) [0|1] "" BDY
  SG_ DTC : 13|1@0+ (1,0) [0|1] "" BDY
  SG_ LKAS_PROBLEM : 12|1@0+ (1,0) [0|1] "" BDY
