@@ -3,7 +3,7 @@ Import('env', 'envCython', 'cereal', 'common')
 import os
 
 envDBC = env.Clone()
-dbc_file_path = '-DDBC_FILE_PATH=\'"%s"\'' % (envDBC.Dir("..").abspath)
+dbc_file_path = '-DDBC_FILE_PATH=\'"%s"\'' % (envDBC.Dir("..").relpath)
 envDBC['CXXFLAGS'] += [dbc_file_path]
 src = ["dbc.cc", "parser.cc", "packer.cc", "common.cc"]
 libs = [common, "capnp", "kj", "zmq"]
@@ -16,7 +16,7 @@ envDBC.Library('libdbc_static', src, LIBS=libs)
 
 # Build packer and parser
 lenv = envCython.Clone()
-lenv["LINKFLAGS"] += [libdbc[0].get_labspath()]
+lenv["LINKFLAGS"] += [File(libdbc[0]).relpath]
 parser = lenv.Program('parser_pyx.so', 'parser_pyx.pyx')
 packer = lenv.Program('packer_pyx.so', 'packer_pyx.pyx')
 
