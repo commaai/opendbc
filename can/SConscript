@@ -3,7 +3,7 @@ Import('env', 'envCython', 'cereal', 'common')
 import os
 
 envDBC = env.Clone()
-dbc_file_path = '-DDBC_FILE_PATH=\'"%s"\'' % (envDBC.Dir("..").abspath)
+dbc_file_path = '-DDBC_FILE_PATH=\'"%s"\'' % (envDBC.Dir("..").relpath)
 envDBC['CXXFLAGS'] += [dbc_file_path]
 src = ["dbc.cc", "parser.cc", "packer.cc", "common.cc"]
 libs = [common, "capnp", "kj", "zmq"]
