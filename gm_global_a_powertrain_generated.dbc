@@ -125,9 +125,9 @@ BO_ 320 BCMTurnSignals: 3 K9_BCM
  SG_ HighBeamsActive : 7|1@0+ (1,0) [0|1] "" XXX
  SG_ HighBeamsTemporary : 5|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 322 BCMBSM: 7 K9_BCM
- SG_ Left_BSM : 6|1@0+ (1,0) [0|1] "" XXX
- SG_ Right_BSM : 7|1@0+ (1,0) [0|1] "" XXX
+BO_ 322 BCMBlindSpotMonitors: 7 K9_BCM
+ SG_ LeftBSM : 6|1@0+ (1,0) [0|1] "" XXX
+ SG_ RightBSM : 7|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 328 PSCM_148: 1 K43_PSCM
 
