@@ -30,10 +30,11 @@ void set_value(std::vector<uint8_t> &msg, const Signal &sig, int64_t ival) {
 
 CANPacker::CANPacker(const std::string& dbc_name) {
   dbc = dbc_lookup(dbc_name);
-  assert(dbc);
+  if (!dbc) {
+    throw std::runtime_error("Can't find DBC: " + dbc_name);
+  }
 
   for (const auto& msg : dbc->msgs) {
-    message_lookup[msg.address] = msg;
     for (const auto& sig : msg.sigs) {
       signal_lookup[std::make_pair(msg.address, sig.name)] = sig;
     }
@@ -41,8 +42,13 @@ CANPacker::CANPacker(const std::string& dbc_name) {
   init_crc_lookup_tables();
 }
 
-std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalPackValue> &signals) {
-  std::vector<uint8_t> ret(message_lookup[address].size, 0);
+std::pair<uint32_t, std::vector<uint8_t>> CANPacker::pack(const std::string &name_or_address, const std::vector<SignalPackValue> &signals) {
+  auto msg = dbc->findMessage(name_or_address);
+  if (!msg) {
+    throw std::runtime_error("Can't find message: " + name_or_address);
+  }
+  uint32_t address = msg->address;
+  std::vector<uint8_t> ret(msg->size, 0);
 
   // set all values for all given signal/value pairs
   bool counter_set = false;
@@ -89,10 +95,10 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
     }
   }
 
-  return ret;
+  return std::make_pair(address, ret);
 }
 
 // This function has a definition in common.h and is used in PlotJuggler
 Msg* CANPacker::lookup_message(uint32_t address) {
-  return &message_lookup[address];
+  return (Msg*)dbc->address_to_msg.at(address);
 }
