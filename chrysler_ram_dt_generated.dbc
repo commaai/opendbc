@@ -24,6 +24,7 @@ BO_ 181 ECM_TRQ: 8 XXX
 
 BO_ 121 ESP_8: 8 XXX
  SG_ BRK_PRESSURE : 3|12@0+ (1,0) [0|1] "" XXX
+ SG_ Vehicle_Stopped : 7|1@0+ (1,0) [0|1] "" XXX
  SG_ BRAKE_PEDAL : 19|12@0+ (1,0) [0|1] "" XXX
  SG_ Vehicle_Speed : 39|16@0+ (0.0078125,0) [0|511.984375] "km/h" XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
@@ -31,6 +32,8 @@ BO_ 121 ESP_8: 8 XXX
 
 BO_ 131 ESP_1: 8 XXX
  SG_ Brake_Pedal_State : 2|2@1+ (1,0) [0|0] "" XXX
+ SG_ ACC_Engaged : 15|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_Enabled : 23|1@0+ (1,0) [0|1] "" XXX
  SG_ Vehicle_Speed : 33|10@0+ (0.5,0) [0|511] "km/h" XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
@@ -158,10 +161,13 @@ BO_ 53 PCM_2: 8 XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 133 TCM_1: 8 XXX
- SG_ DESIRED_GEAR : 15|4@0+ (1,0) [0|1] "" XXX
  SG_ SHIFT_PENDING : 2|1@0+ (1,0) [0|1] "" XXX
- SG_ SPEED_TURBINE : 27|12@0+ (0.04,0) [0|1] "km/h" XXX
  SG_ ACTUAL_GEAR : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ DESIRED_GEAR : 15|4@0+ (1,0) [0|1] "" XXX
+ SG_ TC_LOCKED : 17|1@1+ (1,0) [0|0] ""  XXX
+ SG_ OUTPUT_SPEED : 31|16@0+ (1,0) [0|65534] "rpm" XXX
+ SG_ INPUT_SPEED : 47|16@0+ (1,0) [0|65534] "rpm"  XXX
+ SG_ RATIO : 11|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 135 ABS_2: 8 XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|1] "" XXX
