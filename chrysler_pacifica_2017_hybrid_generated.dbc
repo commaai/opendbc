@@ -22,6 +22,7 @@ BO_ 280 ECM_TRQ: 8 XXX
 
 BO_ 284 ESP_8: 8 XXX
  SG_ BRK_PRESSURE : 3|12@0+ (1,0) [0|1] "" XXX
+ SG_ Vehicle_Stopped : 7|1@0+ (1,0) [0|1] "" XXX
  SG_ BRAKE_PEDAL : 19|12@0+ (1,0) [0|1] "" XXX
  SG_ Vehicle_Speed : 39|16@0+ (0.0078125,0) [0|511.984375] "km/h" XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
@@ -29,6 +30,8 @@ BO_ 284 ESP_8: 8 XXX
 
 BO_ 320 ESP_1: 8 XXX
  SG_ Brake_Pedal_State : 2|2@1+ (1,0) [0|0] "" XXX
+ SG_ ACC_Engaged : 15|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_Enabled : 23|1@0+ (1,0) [0|1] "" XXX
  SG_ Vehicle_Speed : 33|10@0+ (0.5,0) [0|511] "km/h" XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
