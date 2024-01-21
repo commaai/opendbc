@@ -30,8 +30,8 @@ BO_ 288 ECM_2: 7 XXX
  SG_ TCM_TORQUE_REQ_ENABLE : 7|1@1+ (1,0) [0|0] "" XXX
  SG_ Accelerator_Position : 16|8@1+ (0.4,0) [0|100] "%" XXX
  SG_ CRUISE_OVERRIDE : 31|1@1+ (1,0) [0|0] "" XXX
- SG_ COUNTER : 44|4@1+ (1,0) [0|15] "" XXX
- SG_ CHECKSUM : 48|8@1+ (1,0) [0|0] "" XXX
+ SG_ COUNTER : 47|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 55|8@0+ (1,0) [0|0] "" XXX
 
 BO_ 320 ESP_1: 8 XXX
  SG_ Brake_State : 0|2@1+ (1,0) [0|0] "" XXX
@@ -56,8 +56,8 @@ BO_ 268 ESP_2: 8 ESC
  SG_ DISABLE_FUEL_SHUTOFF : 47|1@1+ (1,0) [0|0] "" XXX
  SG_ DAS_REQ_ACTIVE : 48|3@1+ (1,0) [0|0] "" XXX
  SG_ COLLISION_BRK_PREP : 51|1@1+ (1,0) [0|0] "" XXX
- SG_ COUNTER : 52|4@1+ (1,0) [0|15] "" XXX
- SG_ CHECKSUM : 56|8@1+ (1,0) [0|0] "" XXX
+ SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|0] "" XXX
 
 BO_ 344 ESP_6: 8 XXX
  SG_ WHEEL_SPEED_FL : 5|14@0+ (0.5,0) [0|8191] "rpm" XXX
@@ -142,9 +142,9 @@ BO_ 625 DAS_5: 8 XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 669 EPB_1: 3 XXX
- SG_ PARKING_BRAKE_STATUS : 9|3@1+ (1,0) [0|7] "" XXX
- SG_ COUNTER : 12|4@1+ (1,0) [0|15] "" XXX
- SG_ CHECKSUM : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ PARKING_BRAKE_STATUS : 11|3@0+ (1,0) [0|7] "" XXX
+ SG_ COUNTER : 15|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 23|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 678 DAS_6: 8 XXX
  SG_ LKAS_ICON_COLOR : 1|2@0+ (1,0) [0|3] "" XXX
