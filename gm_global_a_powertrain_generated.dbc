@@ -125,6 +125,10 @@ BO_ 320 BCMTurnSignals: 3 K9_BCM
  SG_ HighBeamsActive : 7|1@0+ (1,0) [0|1] "" XXX
  SG_ HighBeamsTemporary : 5|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 322 BCMBlindSpotMonitor: 7 K9_BCM
+ SG_ LeftBSM : 6|1@0+ (1,0) [0|1] "" XXX
+ SG_ RightBSM : 7|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 328 PSCM_148: 1 K43_PSCM
 
 BO_ 381 ESPStatus: 6 K20_ECM
@@ -317,6 +321,8 @@ CM_ BU_ K124_ASCM "Active Safety Control Module";
 CM_ SG_ 381 MSG17D_AccPower "Need to investigate";
 CM_ BO_ 190 "Length varies from 6 to 8 bytes by car";
 CM_ SG_ 190 GasPedalAndAcc "ACC baseline is 62";
+CM_ SG_ 322 LeftBSM "For some cars, this can only be when the blinker is also active";
+CM_ SG_ 322 RightBSM "For some cars, this can only be when the blinker is also active";
 CM_ SG_ 352 ImmobilizerInfo "Non-zero when ignition or accessory mode";
 CM_ SG_ 451 GasPedalAndAcc2 "ACC baseline is 62";
 CM_ SG_ 481 ACCAlwaysOne "Usually 1 if the car is equipped with ACC";
