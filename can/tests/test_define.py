@@ -14,7 +14,8 @@ class TestCADNDefine(unittest.TestCase):
     self.assertDictEqual(defs.dv[399], defs.dv['STEER_STATUS'])
     self.assertDictEqual(defs.dv[399],
                          {'STEER_STATUS':
-                          {6: 'TMP_FAULT',
+                          {7: 'PERMANENT_FAULT',
+                           6: 'TMP_FAULT',
                            5: 'FAULT_1',
                            4: 'NO_TORQUE_ALERT_2',
                            3: 'LOW_SPEED_LOCKOUT',
