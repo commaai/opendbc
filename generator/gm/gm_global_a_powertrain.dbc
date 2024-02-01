@@ -332,7 +332,7 @@ VAL_ 309 PRNDL 3 "R" 2 "D" 1 "N" 0 "P" ;
 VAL_ 309 ESPButton 1 "Active" 0 "Inactive" ;
 VAL_ 384 LKASteeringCmdActive 1 "Active" 0 "Inactive" ;
 VAL_ 842 RRWheelDir 0 "Unknown" 1 "Forward" 2 "Reverse" 3 "Unsupported" 4 "Fault";
-VAL_ 842 RRWheelDir 0 "Unknown" 1 "Forward" 2 "Reverse" 3 "Unsupported" 4 "Fault";
+VAL_ 842 RLWheelDir 0 "Unknown" 1 "Forward" 2 "Reverse" 3 "Unsupported" 4 "Fault";
 VAL_ 880 ACCCruiseState 2 "Adaptive" 3 "Adaptive" 4 "Non-adaptive" 5 "Non-adaptive" ;
 VAL_ 880 ACCLeadCar 1 "Present" 0 "Not Present" ;
 VAL_ 880 ACCGapLevel 3 "Far" 2 "Med" 1 "Near" 0 "Inactive" ;
