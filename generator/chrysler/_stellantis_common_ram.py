@@ -5,8 +5,10 @@ chrysler_to_ram = {
   "_stellantis_common_ram_dt_generated.dbc": {
     258: 35,
     264: 37,
+    268: 113,
     280: 181,
     284: 121,
+    288: 123,
     320: 131,
     344: 139,
     368: 147,
@@ -16,6 +18,8 @@ chrysler_to_ram = {
     544: 49,
     571: 177,
     559: 157,
+    625: 163,
+    669: 213,
     678: 250,
     720: 720,
     792: 792,
@@ -32,7 +36,7 @@ if __name__ == "__main__":
   chrysler_path = os.path.dirname(os.path.realpath(__file__))
 
   for out, addr_lookup in chrysler_to_ram.items():
-    with open(os.path.join(chrysler_path, src)) as in_f, open(os.path.join(chrysler_path, out), 'w') as out_f:
+    with open(os.path.join(chrysler_path, src), encoding='utf-8') as in_f, open(os.path.join(chrysler_path, out), 'w', encoding='utf-8') as out_f:
       out_f.write(f'CM_ "Generated from {src}"\n\n')
 
       wrote_addrs = set()
