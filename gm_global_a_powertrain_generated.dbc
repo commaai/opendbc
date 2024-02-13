@@ -125,6 +125,10 @@ BO_ 320 BCMTurnSignals: 3 K9_BCM
  SG_ HighBeamsActive : 7|1@0+ (1,0) [0|1] "" XXX
  SG_ HighBeamsTemporary : 5|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 322 BCMBlindSpotMonitor: 7 K9_BCM
+ SG_ LeftBSM : 6|1@0+ (1,0) [0|1] "" XXX
+ SG_ RightBSM : 7|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 328 PSCM_148: 1 K43_PSCM
 
 BO_ 381 ESPStatus: 6 K20_ECM
@@ -176,12 +180,13 @@ BO_ 489 EBCMVehicleDynamic: 8 K17_EBCM
  SG_ YawRate : 35|12@0- (0.625,0) [0|1] "" NEO
  SG_ YawRate2 : 51|12@0- (0.0625,0) [-2047|2047] "grad/s" NEO
 
-BO_ 352 VehicleIgnition: 5 XXX
- SG_ Ignition : 7|32@0+ (1,0) [0|4294967295] "" XXX
+BO_ 352 BCMImmobilizer: 5 K9_BCM
+ SG_ ImmobilizerInfo : 7|32@0+ (1,0) [0|4294967295] "" XXX
 
-BO_ 497 VehicleIgnitionAlt: 8 XXX
- SG_ Ignition : 5|1@0+ (1,0) [0|1] "" XXX
- SG_ ParkBrake : 36|1@0+ (1,0) [0|3] "" XXX
+BO_ 497 BCMGeneralPlatformStatus: 8 K9_BCM
+ SG_ SystemPowerMode : 1|2@0+ (1,0) [0|3] "" XXX
+ SG_ SystemBackUpPowerMode : 5|2@0+ (1,0) [0|3] "" XXX
+ SG_ ParkBrakeSwActive : 36|1@0+ (1,0) [0|3] "" XXX
 
 BO_ 501 ECMPRDNL2: 8 K20_ECM
  SG_ TransmissionState : 48|4@1+ (1,0) [0|7] "" NEO
@@ -194,7 +199,7 @@ BO_ 532 BRAKE_RELATED: 6 XXX
 BO_ 560 EPBStatus: 8 EPB
  SG_ EPBClosed : 12|1@0+ (1,0) [0|1] ""  NEO
 
-BO_ 562 EBCMFrictionBrakeStatus: 8 XXX
+BO_ 562 EBCMFrictionBrakeStatus: 8 K17_EBCM
  SG_ FrictionBrakeUnavailable : 46|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 608 SPEED_RELATED: 8 XXX
@@ -243,12 +248,10 @@ BO_ 840 EBCMWheelSpdFront: 5 K17_EBCM
  SG_ FRWheelSpd : 23|16@0+ (0.0311,0) [0|255] "km/h"  NEO
 
 BO_ 842 EBCMWheelSpdRear: 5 K17_EBCM
- SG_ RLWheelSpd : 7|16@0+ (0.0311,0) [0|255] "km/h"  NEO
- SG_ RRWheelSpd : 23|16@0+ (0.0311,0) [0|255] "km/h"  NEO
- SG_ MovingForward : 32|1@0+ (1,0) [0|1] "" XXX
- SG_ MovingBackward : 33|1@0+ (1,0) [0|1] "" XXX
- SG_ MovingForward2 : 35|1@1+ (1,0) [0|1] "" XXX
- SG_ MovingBackward2 : 36|1@0+ (1,0) [0|1] "" XXX
+ SG_ RLWheelSpd : 7|16@0+ (0.0311,0) [0|255] "km/h" NEO
+ SG_ RRWheelSpd : 23|16@0+ (0.0311,0) [0|255] "km/h" NEO
+ SG_ RRWheelDir : 34|3@0+ (1,0) [0|7] "" NEO
+ SG_ RLWheelDir : 37|3@0+ (1,0) [0|7] "" NEO
 
 BO_ 869 ASCM_365: 4 K124_ASCM
 
@@ -316,11 +319,14 @@ CM_ BU_ K124_ASCM "Active Safety Control Module";
 CM_ SG_ 381 MSG17D_AccPower "Need to investigate";
 CM_ BO_ 190 "Length varies from 6 to 8 bytes by car";
 CM_ SG_ 190 GasPedalAndAcc "ACC baseline is 62";
-CM_ SG_ 352 Ignition "Non-zero when ignition is on";
+CM_ SG_ 322 LeftBSM "For some cars, this can only be when the blinker is also active";
+CM_ SG_ 322 RightBSM "For some cars, this can only be when the blinker is also active";
+CM_ SG_ 352 ImmobilizerInfo "Non-zero when ignition or accessory mode";
 CM_ SG_ 451 GasPedalAndAcc2 "ACC baseline is 62";
 CM_ SG_ 481 ACCAlwaysOne "Usually 1 if the car is equipped with ACC";
 CM_ SG_ 562 FrictionBrakeUnavailable "1 when ACC brake control is unavailable. Stays high if brake command messages are blocked for a period of time";
-CM_ SG_ 497 Ignition "Describes ignition + preconditioning mode, noisy";
+CM_ SG_ 497 SystemPowerMode "Describes ignition";
+CM_ SG_ 497 SystemBackUpPowerMode "Describes ignition + preconditioning mode, noisy";
 CM_ SG_ 501 PRNDL2 "When ManualMode is Active, Value is 13=L1 12=L2 11=L3 ... 4=L10";
 CM_ SG_ 532 UserBrakePressure "can be lower than other brake position signals when the brakes are pre-filled from ACC braking and the user presses on the brakes. user-only pressure?";
 CM_ SG_ 608 ClusterSpeed "Cluster speed signal seems to match dash on newer cars, but is a lower rate and can be noisier.";
@@ -335,6 +341,8 @@ BA_DEF_DEF_  "BusType" "";
 BA_ "BusType" "CAN";
 BA_ "ProtocolType" "GMLAN";
 BA_ "UseGMParameterIDs" 0;
+VAL_ 497 SystemPowerMode 3 "Crank Request" 2 "Run" 1 "Accessory" 0 "Off";
+VAL_ 497 SystemBackUpPowerMode 3 "Crank Request" 2 "Run" 1 "Accessory" 0 "Off";
 VAL_ 481 DistanceButton 1 "Active" 0 "Inactive" ;
 VAL_ 481 LKAButton 1 "Active" 0 "Inactive" ;
 VAL_ 481 ACCButtons 6 "Cancel" 5 "Main" 3 "Set" 2 "Resume" 1 "None" ;
@@ -343,6 +351,8 @@ VAL_ 452 CruiseState 4 "Standstill" 3 "Faulted" 1 "Active" 0 "Off" ;
 VAL_ 309 PRNDL 3 "R" 2 "D" 1 "N" 0 "P" ;
 VAL_ 309 ESPButton 1 "Active" 0 "Inactive" ;
 VAL_ 384 LKASteeringCmdActive 1 "Active" 0 "Inactive" ;
+VAL_ 842 RRWheelDir 0 "Stationary" 1 "Forward" 2 "Reverse" 3 "Unsupported" 4 "Fault";
+VAL_ 842 RLWheelDir 0 "Stationary" 1 "Forward" 2 "Reverse" 3 "Unsupported" 4 "Fault";
 VAL_ 880 ACCCruiseState 2 "Adaptive" 3 "Adaptive" 4 "Non-adaptive" 5 "Non-adaptive" ;
 VAL_ 880 ACCLeadCar 1 "Present" 0 "Not Present" ;
 VAL_ 880 ACCGapLevel 3 "Far" 2 "Med" 1 "Near" 0 "Inactive" ;

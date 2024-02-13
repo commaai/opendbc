@@ -89,6 +89,12 @@ BO_ 276135936 CruiseButtons: 3 GMLAN
 BO_ 276127744 CruiseButtons2: 1 GMLAN
  SG_ LKAGapButton : 1|2@0+ (1,0) [0|2] ""  NEO
 
+BO_ 275955897 LeftRadar: 2 GMLAN
+ SG_ BSM_Indicator_Light : 4|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 275980379 RightRadar: 2 GMLAN
+ SG_ BSM_Indicator_Light : 0|1@0+ (1,0) [0|1] "" XXX
+
 
 
 BA_DEF_  "UseGMParameterIDs" INT 0 0;
@@ -107,4 +113,6 @@ VAL_ 271368192 GearShifter 3 "Park" 0 "Drive/Low" ;
 VAL_ 271360000 CruiseControlActive 1 "Active" 0 "Inactive" ;
 VAL_ 276135936 CruiseButtons 6 "Cancel" 5 "Main" 3 "Set" 2 "Resume" 1 "None" ;
 VAL_ 276127744 LKAGapButton 2 "???" 1 "??" 0 "None" ;
+VAL_ 275955897 BSM_Indicator_Light 0 "Disabled" 1 "Enabled";
+VAL_ 275980379 BSM_Indicator_Right 0 "Disabled" 1 "Enabled";
 
