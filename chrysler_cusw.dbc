@@ -145,9 +145,6 @@ BO_ 510 ACCEL_GAS: 5 XXX
  SG_ GAS_ACC : 28|1@0+ (1,0) [0|1] "" XXX
  SG_ CHECKSUM : 39|8@0+ (1,0) [0|1] "" XXX
 
-BO_ 1492 NEW_MSG_1: 4 XXX
- SG_ LEAD_CAR : 23|4@0+ (1,0) [0|1] "" XXX
-
 BO_ 490 DASHBOARD: 4 XXX
  SG_ ACC_SPEED_CONFIG_KPH : 7|8@0+ (0.1625,0) [0|1] "m/s" XXX
 
@@ -160,11 +157,6 @@ BO_ 496 CLUSTER_1: 8 XXX
  SG_ SPEEDOMETER : 19|12@0+ (0.01065,0) [0|1] "m/s" XXX
  SG_ COUNTER : 51|4@0+ (1,0) [0|1] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|1] "" XXX
-
-BO_ 488 NEW_MSG_2: 5 XXX
- SG_ NEW_SIGNAL_1 : 19|4@0+ (1,0) [0|1] "" XXX
-
-
 
 
 CM_ SG_ 1250 TRUNK "1 = open, 0 = closed";
