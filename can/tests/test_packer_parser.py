@@ -364,6 +364,7 @@ class TestCanParserPacker(unittest.TestCase):
       "ACC_TYPE": 0,
       "CANCEL_REQ": 0,
       "ACC_CUT_IN": 0,
+      "LEAD_VEHICLE_STOPPED": 0,
       "PERMIT_BRAKING": 0,
       "RELEASE_STANDSTILL": 0,
       "ITS_CONNECT_LEAD": 0,
