@@ -12,8 +12,7 @@ MAX_BAD_COUNTER = 5
 
 # Python implementation so we don't have to depend on boardd
 def can_list_to_can_capnp(can_msgs, msgtype='can', logMonoTime=None):
-  dat = messaging.new_message()
-  dat.init(msgtype, len(can_msgs))
+  dat = messaging.new_message(msgtype, len(can_msgs))
 
   if logMonoTime is not None:
     dat.logMonoTime = logMonoTime
@@ -365,6 +364,7 @@ class TestCanParserPacker(unittest.TestCase):
       "ACC_TYPE": 0,
       "CANCEL_REQ": 0,
       "ACC_CUT_IN": 0,
+      "LEAD_VEHICLE_STOPPED": 0,
       "PERMIT_BRAKING": 0,
       "RELEASE_STANDSTILL": 0,
       "ITS_CONNECT_LEAD": 0,
