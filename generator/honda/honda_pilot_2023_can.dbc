@@ -78,7 +78,7 @@ CM_ SG_ 479 AEB_STATUS "set for the duration of AEB event";
 CM_ SG_ 479 AEB_BRAKING "set when braking is commanded during AEB event";
 CM_ SG_ 479 AEB_PREPARE "set 1s before AEB";
 CM_ SG_ 829 BEEP "beeps are pleasant, chimes are for warnings etc...";
-CM_ SG_ 829 LANE_LINES "related to lane lines on cluster, left/right white/green"
+CM_ SG_ 829 LANE_LINES "related to lane lines on cluster, left/right white/green";
 
 VAL_ 419 GEAR_SHIFTER 2 "S" 32 "D" 16 "N" 8 "R" 4 "P";
 VAL_ 419 GEAR 26 "S" 20 "D" 19 "N" 18 "R" 17 "P";
