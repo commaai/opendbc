@@ -4,10 +4,7 @@ on: [push, pull_request]
 
 env:
   RUN: docker run -v $GITHUB_WORKSPACE:/project/opendbc -w /project/opendbc -e PYTHONWARNINGS="error,default::DeprecationWarning" --shm-size 1G --rm opendbc /bin/bash -c
-  BUILD: |
-      docker pull $(grep -ioP '(?<=^from)\s+\S+' Dockerfile) || true
-      docker pull ghcr.io/commaai/opendbc:latest || true
-      docker build --cache-from ghcr.io/commaai/opendbc:latest -t opendbc -f Dockerfile .
+  BUILD: docker buildx build --pull --load --cache-to type=inline --cache-from type=registry,ref=ghcr.io/commaai/opendbc:latest -t opendbc -f Dockerfile .
   PYTHONWARNINGS: error
 
 jobs:
