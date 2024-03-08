@@ -1,3 +1,6 @@
+BO_ 114 NEW_MSG_72: 5 XXX
+ SG_ NEW_SIGNAL_1 : 0|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 488 NEW_MSG_1E8: 8 XXX
 
 BO_ 520 POWERTRAIN: 8 XXX
@@ -34,10 +37,10 @@ BO_ 773 STEERING_ALT: 7 XXX
  SG_ RATE_ALT : 47|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 781 WHEEL_SPEEDS: 8 XXX
- SG_ WHEEL_SPEED_1 : 7|16@0+ (0.01,0) [0|65535] "kph" XXX
- SG_ WHEEL_SPEED_2 : 23|16@0+ (0.01,0) [0|65535] "kph" XXX
- SG_ WHEEL_SPEED_3 : 39|16@0+ (0.01,0) [0|65535] "kph" XXX
- SG_ WHEEL_SPEED_4 : 55|16@0+ (0.01,0) [0|65535] "kph" XXX
+ SG_ WHEEL_SPEED_FL : 7|16@0+ (0.01,0) [0|65535] "kph" XXX
+ SG_ WHEEL_SPEED_FR : 23|16@0+ (0.01,0) [0|65535] "kph" XXX
+ SG_ WHEEL_SPEED_RL : 39|16@0+ (0.01,0) [0|65535] "kph" XXX
+ SG_ WHEEL_SPEED_RR : 55|16@0+ (0.01,0) [0|65535] "kph" XXX
 
 BO_ 840 BODY_2: 8 XXX
  SG_ GEAR : 7|4@0+ (1,0) [0|15] "" XXX
@@ -206,6 +209,13 @@ BO_ 1416 NEW_MSG_588: 8 XXX
  SG_ NEW_SIGNAL_2 : 43|4@0+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_3 : 47|4@0+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_5 : 54|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_12 : 57|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_11 : 58|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_6 : 59|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_10 : 60|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_9 : 61|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_8 : 62|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_7 : 63|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1485 NEW_MSG_5CD: 4 XXX
  SG_ COUNTER : 3|4@0+ (1,0) [0|15] "" XXX
@@ -228,8 +238,12 @@ CM_ SG_ 520 IGNITION "high on engine";
 CM_ SG_ 757 ANGLE "asymmetric, could be init";
 CM_ SG_ 773 ANGLE "-565 to 560, seems like estimate and not init";
 CM_ SG_ 773 RATE_SIGN "1=moving clockwise, 0=moving anticlockwise";
+CM_ SG_ 781 WHEEL_SPEED_FL "left?";
+CM_ SG_ 781 WHEEL_SPEED_FR "right";
+CM_ SG_ 781 WHEEL_SPEED_RL "front? left?";
+CM_ SG_ 781 WHEEL_SPEED_RR "front right?";
 CM_ SG_ 840 NEW_SIGNAL_7 "high on accessory mode, low on engine";
-CM_ SG_ 840 NEW_SIGNAL_6 "high on accessory mode, low on engine ";
+CM_ SG_ 840 NEW_SIGNAL_6 "high on accessory mode, low on engine";
 CM_ SG_ 840 IGNITION "low on accessory, high on engine";
 CM_ SG_ 840 IGNITION_5 "low on accessory, high on engine";
 CM_ SG_ 840 IGNITION_6 "high on accessory, high on engine";
@@ -241,7 +255,11 @@ CM_ SG_ 973 Y "positive is left";
 CM_ SG_ 973 X "positive is forward";
 CM_ SG_ 1010 LKA_DENY "1=LKA OFF (button in console)";
 CM_ SG_ 1010 STATUS "0=LKA OFF (button in console), 1=LKA AVAILABLE";
+CM_ SG_ 1101 NEW_SIGNAL_1 "FR + FL?";
+CM_ SG_ 1101 NEW_SIGNAL_2 "RL?";
+CM_ SG_ 1101 NEW_SIGNAL_3 "RR?";
 CM_ SG_ 1390 GAS_PEDAL "Max 99.5%";
+CM_ SG_ 1416 NEW_SIGNAL_1 "rpm related?";
 CM_ SG_ 1554 IGNITION "low on accessory";
 CM_ SG_ 1554 NEW_SIGNAL_4 "high on accessory";
 VAL_ 909 GEAR 2 "REVERSE";
