@@ -26,9 +26,9 @@ BO_ 757 STEERING: 7 XXX
  SG_ NEW_SIGNAL_1 : 48|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 773 STEERING_ALT: 7 XXX
- SG_ ANGLE : 7|16@0- (0.1,0) [0|16777215] "" XXX
+ SG_ ANGLE : 7|16@0- (0.1,0) [0|16777215] "degrees" XXX
  SG_ RATE : 23|8@0+ (1,0) [0|65535] "" XXX
- SG_ NEW_SIGNAL_1 : 31|1@0+ (1,0) [0|1] "" XXX
+ SG_ RATE_SIGN : 31|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 35|4@0+ (1,0) [0|255] "" XXX
  SG_ CHECKSUM : 39|4@0+ (1,0) [0|15] "" XXX
  SG_ RATE_ALT : 47|8@0+ (1,0) [0|255] "" XXX
@@ -52,9 +52,9 @@ BO_ 840 BODY_2: 8 XXX
  SG_ IGNITION_5 : 53|1@0+ (1,0) [0|1] "" XXX
  SG_ IGNITION_6 : 54|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_5 : 55|1@0+ (1,0) [0|1] "" XXX
- SG_ IGNITION_2 : 56|1@0+ (1,0) [0|1] "" XXX
- SG_ IGNITION_3 : 59|1@0+ (1,0) [0|1] "" XXX
- SG_ IGNITION_4 : 60|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_13 : 56|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_14 : 59|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_15 : 60|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 845 NEW_MSG_34D: 8 XXX
  SG_ NEW_SIGNAL_2 : 11|1@0+ (1,0) [0|1] "" XXX
@@ -81,6 +81,8 @@ BO_ 909 POWERTRAIN_2: 8 XXX
 BO_ 973 ACCEL: 8 XXX
  SG_ Y : 7|16@0- (1,0) [0|65535] "" XXX
  SG_ X : 23|16@0- (1,0) [0|65535] "" XXX
+ SG_ BRAKE_PRESSURE : 47|12@0+ (1,0) [0|2047] "" XXX
+ SG_ BRAKE_PRESSED : 48|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 59|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|4@0+ (1,0) [0|15] "" XXX
 
@@ -105,7 +107,7 @@ BO_ 1010 LANE_KEEP_ASSIST: 8 XXX
  SG_ TORQUE : 31|11@0- (1,0) [0|127] "" XXX
  SG_ RIGHT_DEPART : 32|1@0+ (1,0) [0|3] "" XXX
  SG_ LEFT_DEPART : 33|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_11 : 34|1@0+ (1,0) [0|1] "" XXX
+ SG_ LKA_DENY : 34|1@0+ (1,0) [0|1] "" XXX
  SG_ STATUS : 35|1@0+ (1,0) [0|3] "" XXX
  SG_ ACTIVE : 36|1@0+ (1,0) [0|3] "" XXX
  SG_ RAMP : 47|7@0+ (1,0) [0|255] "" XXX
@@ -173,7 +175,6 @@ BO_ 1128 NEW_MSG_468: 8 XXX
 BO_ 1134 NEW_MSG_46E: 2 XXX
 
 BO_ 1173 NEW_MSG_495: 4 XXX
- SG_ CHECKSUM : 3|4@0+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_2 : 7|4@0+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_3 : 17|1@0+ (1,0) [0|7] "" XXX
  SG_ LANE_KEEP_STATUS : 19|1@0+ (1,0) [0|1] "" XXX
@@ -221,8 +222,27 @@ BO_ 1554 STEERING_COLUMN: 8 XXX
 
 BO_ 1960 NEW_MSG_7A8: 4 XXX
 
+CM_ SG_ 520 NEW_SIGNAL_1 "high when limiter NOT set/ready";
+CM_ SG_ 520 NEW_SIGNAL_2 "high when limiter NOT set/ready";
+CM_ SG_ 520 IGNITION "high on engine";
+CM_ SG_ 757 ANGLE "asymmetric, could be init";
+CM_ SG_ 773 ANGLE "-565 to 560, seems like estimate and not init";
+CM_ SG_ 773 RATE_SIGN "1=moving clockwise, 0=moving anticlockwise";
+CM_ SG_ 840 NEW_SIGNAL_7 "high on accessory mode, low on engine";
+CM_ SG_ 840 NEW_SIGNAL_6 "high on accessory mode, low on engine ";
+CM_ SG_ 840 IGNITION "low on accessory, high on engine";
+CM_ SG_ 840 IGNITION_5 "low on accessory, high on engine";
+CM_ SG_ 840 IGNITION_6 "high on accessory, high on engine";
+CM_ SG_ 840 NEW_SIGNAL_5 "low on accessory";
+CM_ SG_ 840 NEW_SIGNAL_13 "not ignition";
+CM_ SG_ 840 NEW_SIGNAL_14 "not ignition";
+CM_ SG_ 840 NEW_SIGNAL_15 "not ignition";
 CM_ SG_ 973 Y "positive is left";
 CM_ SG_ 973 X "positive is forward";
+CM_ SG_ 1010 LKA_DENY "1=LKA OFF (button in console)";
+CM_ SG_ 1010 STATUS "0=LKA OFF (button in console), 1=LKA AVAILABLE";
 CM_ SG_ 1390 GAS_PEDAL "Max 99.5%";
+CM_ SG_ 1554 IGNITION "low on accessory";
+CM_ SG_ 1554 NEW_SIGNAL_4 "high on accessory";
 VAL_ 909 GEAR 2 "REVERSE";
 VAL_ 1042 DRIVER_DOOR 0 "CLOSED" 1 "OPEN";
