@@ -91,11 +91,11 @@ BO_ 909 POWERTRAIN_2: 8 XXX
  SG_ NEW_SIGNAL_3 : 49|1@0+ (1,0) [0|1] "" XXX
  SG_ GEAR : 54|3@0+ (1,0) [0|7] "" XXX
 
-BO_ 973 ACCEL: 8 XXX
- SG_ Y : 7|16@0- (1,0) [0|65535] "" XXX
- SG_ X : 23|16@0- (1,0) [0|65535] "" XXX
- SG_ BRAKE_PRESSURE : 47|12@0+ (1,0) [0|4095] "" XXX
- SG_ BRAKE_PRESSED : 48|1@0+ (1,0) [0|1] "" XXX
+BO_ 973 DYNAMICS: 8 XXX
+ SG_ LATERAL_ACCEL : 7|16@0- (1,0) [0|65535] "" XXX
+ SG_ YAW_RATE : 23|16@0- (1,0) [0|65535] "" XXX
+ SG_ BRAKE_PRESSURE : 47|12@0+ (1,0) [0|2050] "" XXX
+ SG_ BRAKE_PUMP : 48|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 59|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|4@0+ (1,0) [0|15] "" XXX
 
@@ -261,8 +261,9 @@ CM_ SG_ 840 NEW_SIGNAL_5 "low on accessory";
 CM_ SG_ 840 NEW_SIGNAL_13 "not ignition";
 CM_ SG_ 840 NEW_SIGNAL_14 "not ignition";
 CM_ SG_ 840 NEW_SIGNAL_15 "not ignition";
-CM_ SG_ 973 Y "positive is left";
-CM_ SG_ 973 X "positive is forward";
+CM_ SG_ 973 LATERAL_ACCEL "positive is left";
+CM_ SG_ 973 YAW_RATE "positive is left";
+CM_ SG_ 973 BRAKE_PUMP "seems related to brake pressure. can sometimes be HIGH even after brake not pressed.";
 CM_ SG_ 1010 LKA_DENY "1=LKA OFF (button in console)";
 CM_ SG_ 1010 STATUS "0=LKA OFF (button in console), 1=LKA AVAILABLE";
 CM_ SG_ 1101 NEW_SIGNAL_1 "FR + FL?";
