@@ -144,6 +144,8 @@ BO_ 1038 NEW_MSG_40E: 5 XXX
  SG_ NEW_SIGNAL_1 : 1|3@1+ (1,0) [0|7] "" XXX
  SG_ NEW_SIGNAL_3 : 4|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_2 : 5|3@1+ (1,0) [0|7] "" XXX
+ SG_ IGNITION_ALT : 33|1@0+ (1,0) [0|1] "" XXX
+ SG_ IGNITION : 35|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1042 BODY: 8 XXX
  SG_ REVERSE : 2|1@0+ (1,0) [0|1] "" XXX
@@ -158,6 +160,7 @@ BO_ 1067 NEW_MSG_42B: 8 XXX
 BO_ 1074 NEW_MSG_432: 8 XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_1 : 57|1@0+ (1,0) [0|1] "" XXX
+ SG_ ENGINE_ON : 62|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1099 NEW_MSG_44B: 8 XXX
 
@@ -168,10 +171,10 @@ BO_ 1101 WHEEL_SPEEDS_ALT: 8 XXX
  SG_ NEW_SIGNAL_4 : 55|16@0+ (0.005,0) [0|327.675] "kph" XXX
 
 BO_ 1128 NEW_MSG_468: 8 XXX
- SG_ NEW_SIGNAL_4 : 5|1@0+ (1,0) [0|1] "" XXX
+ SG_ ENGINE_ON2 : 5|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_6 : 8|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_7 : 10|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_5 : 11|1@0+ (1,0) [0|1] "" XXX
+ SG_ ENGINE_ON : 11|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_2 : 13|2@0+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_9 : 16|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_8 : 22|1@0+ (1,0) [0|1] "" XXX
@@ -180,8 +183,8 @@ BO_ 1128 NEW_MSG_468: 8 XXX
  SG_ NEW_SIGNAL_12 : 28|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_10 : 31|2@0+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_17 : 40|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_16 : 41|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_15 : 42|1@0+ (1,0) [0|1] "" XXX
+ SG_ IGNITION_ALT2 : 41|1@0+ (1,0) [0|1] "" XXX
+ SG_ IGNITION_ALT : 42|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_18 : 47|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_1 : 52|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_19 : 61|1@0+ (1,0) [0|1] "" XXX
@@ -219,6 +222,7 @@ BO_ 1394 RESTRAINTS: 8 XXX
  SG_ PASSENGER_SEATBELT : 5|2@0+ (1,0) [0|3] "" XXX
  SG_ DRIVER_SEATBELT : 7|2@0+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_1 : 23|11@0+ (1,0) [0|1] "" XXX
+ SG_ IGNITION : 32|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1416 NEW_MSG_588: 8 XXX
  SG_ NEW_SIGNAL_4 : 23|1@0+ (1,0) [0|1] "" XXX
@@ -239,6 +243,7 @@ BO_ 1485 NEW_MSG_5CD: 4 XXX
  SG_ CHECKSUM : 7|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 1554 STEERING_COLUMN: 8 XXX
+ SG_ IGNITION : 9|1@0+ (1,0) [0|1] "" XXX
  SG_ HIGH_BEAM : 10|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_4 : 13|1@0+ (1,0) [0|1] "" XXX
  SG_ LEFT_INDICATOR : 14|1@0+ (1,0) [0|1] "" XXX
@@ -250,7 +255,7 @@ BO_ 1960 NEW_MSG_7A8: 4 XXX
 
 CM_ SG_ 520 NEW_SIGNAL_1 "high when limiter NOT set/ready";
 CM_ SG_ 520 NEW_SIGNAL_2 "high when limiter NOT set/ready";
-CM_ SG_ 520 ENGINE_ON "after ignition, rpm stable?";
+CM_ SG_ 520 ENGINE_ON "after ignition, rpm stable? (slow)";
 CM_ SG_ 757 ANGLE "asymmetric, could be init";
 CM_ SG_ 773 ANGLE "-565 to 560, seems like estimate and not init";
 CM_ SG_ 773 RATE_SIGN "1=moving clockwise, 0=moving anticlockwise";
@@ -277,11 +282,19 @@ CM_ SG_ 973 YAW_RATE "positive is left";
 CM_ SG_ 973 BRAKE_PUMP "seems related to brake pressure. can sometimes be HIGH even after brake not pressed.";
 CM_ SG_ 1010 LKA_DENY "1=LKA OFF (button in console)";
 CM_ SG_ 1010 STATUS "0=LKA OFF (button in console), 1=LKA AVAILABLE";
+CM_ SG_ 1038 IGNITION_ALT "one frame behind IGNITION";
+CM_ SG_ 1038 IGNITION "doesn't turn off straight away";
+CM_ SG_ 1074 ENGINE_ON "slow";
 CM_ SG_ 1101 NEW_SIGNAL_1 "FR + FL?";
 CM_ SG_ 1101 NEW_SIGNAL_2 "RL?";
 CM_ SG_ 1101 NEW_SIGNAL_3 "RR?";
+CM_ SG_ 1128 ENGINE_ON2 "slightly slower";
+CM_ SG_ 1128 IGNITION_ALT2 "doesn't turn off straight away. low while cranking";
+CM_ SG_ 1128 IGNITION_ALT "doesn't turn off straight away, odd behaviour around cranking";
 CM_ SG_ 1390 GAS_PEDAL "Max 99.5%";
+CM_ SG_ 1394 IGNITION "doesn't turn off straight away";
 CM_ SG_ 1416 NEW_SIGNAL_1 "rpm related?";
+CM_ SG_ 1554 IGNITION "doesn't turn off straight away";
 CM_ SG_ 1554 NEW_SIGNAL_4 "high on accessory";
 VAL_ 909 GEAR 2 "REVERSE";
 VAL_ 1042 DRIVER_DOOR 0 "CLOSED" 1 "OPEN";
