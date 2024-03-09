@@ -74,12 +74,12 @@ BO_ 845 NEW_MSG_34D: 8 XXX
  SG_ NEW_SIGNAL_10 : 15|4@0+ (1,0) [0|15] "" XXX
  SG_ COUNTER : 43|4@0+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_3 : 45|1@0+ (1,0) [0|1] "" XXX
- SG_ STANDSTILL : 56|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_1 : 56|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_8 : 57|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_7 : 58|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_6 : 59|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_5 : 60|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_4 : 61|1@0+ (1,0) [0|1] "" XXX
+ SG_ MOVING : 61|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 909 POWERTRAIN_2: 8 XXX
  SG_ SPEED : 7|16@0+ (0.01,0) [0|655.35] "kph" XXX
@@ -87,8 +87,8 @@ BO_ 909 POWERTRAIN_2: 8 XXX
  SG_ SPEED_RATE : 39|8@0+ (1,-175) [0|255] "" XXX
  SG_ CHECKSUM : 43|4@0+ (1,0) [0|15] "" XXX
  SG_ COUNTER : 47|4@0+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_4 : 48|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_3 : 49|1@0+ (1,0) [0|1] "" XXX
+ SG_ MOVING : 48|1@0+ (1,0) [0|1] "" XXX
+ SG_ NOT_MOVING : 49|1@0+ (1,0) [0|1] "" XXX
  SG_ GEAR : 54|3@0+ (1,0) [0|7] "" XXX
 
 BO_ 973 DYNAMICS: 8 XXX
@@ -96,6 +96,7 @@ BO_ 973 DYNAMICS: 8 XXX
  SG_ YAW_RATE : 23|16@0- (0.1,0) [-3276.8|3276.7] "degrees/s" XXX
  SG_ BRAKE_PRESSURE : 47|12@0+ (1,-550) [0|1500] "" XXX
  SG_ BRAKE_PUMP : 48|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_1 : 49|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 59|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|4@0+ (1,0) [0|15] "" XXX
 
@@ -201,6 +202,9 @@ BO_ 1293 NEW_MSG_50D: 8 XXX
  SG_ NEW_SIGNAL_1 : 59|4@0+ (1,0) [0|15] "" XXX
  SG_ COUNTER : 63|4@0+ (1,0) [0|15] "" XXX
 
+BO_ 1358 NEW_MSG_54E: 8 XXX
+ SG_ NEW_SIGNAL_2 : 48|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 1362 CLOCKS: 8 XXX
 
 BO_ 1390 DRIVER: 7 XXX
@@ -212,6 +216,7 @@ BO_ 1390 DRIVER: 7 XXX
 BO_ 1394 RESTRAINTS: 8 XXX
  SG_ PASSENGER_SEATBELT : 5|2@0+ (1,0) [0|3] "" XXX
  SG_ DRIVER_SEATBELT : 7|2@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_1 : 23|11@0+ (1,0) [0|1] "" XXX
 
 BO_ 1416 NEW_MSG_588: 8 XXX
  SG_ NEW_SIGNAL_4 : 23|1@0+ (1,0) [0|1] "" XXX
@@ -238,7 +243,7 @@ BO_ 1554 STEERING_COLUMN: 8 XXX
  SG_ LEFT_INDICATOR : 14|1@0+ (1,0) [0|1] "" XXX
  SG_ RIGHT_INDICATOR : 15|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_1 : 30|7@0+ (1,0) [0|127] "" XXX
- SG_ NEW_SIGNAL_2 : 44|5@0+ (1,0) [0|31] "" XXX
+ SG_ NEW_SIGNAL_2 : 35|12@0+ (1,0) [0|31] "" XXX
 
 BO_ 1960 NEW_MSG_7A8: 4 XXX
 
@@ -261,6 +266,8 @@ CM_ SG_ 840 NEW_SIGNAL_5 "low on accessory";
 CM_ SG_ 840 NEW_SIGNAL_13 "not ignition";
 CM_ SG_ 840 NEW_SIGNAL_14 "not ignition";
 CM_ SG_ 840 NEW_SIGNAL_15 "not ignition";
+CM_ SG_ 909 MOVING ">5kph approx";
+CM_ SG_ 909 NOT_MOVING "<5kph approx";
 CM_ SG_ 973 LATERAL_ACCEL "positive is left";
 CM_ SG_ 973 YAW_RATE "positive is left";
 CM_ SG_ 973 BRAKE_PUMP "seems related to brake pressure. can sometimes be HIGH even after brake not pressed.";
