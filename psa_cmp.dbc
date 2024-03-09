@@ -34,7 +34,7 @@ BO_ 757 STEERING: 7 XXX
  SG_ COUNTER : 3|4@0+ (1,0) [0|255] "" XXX
  SG_ CHECKSUM : 7|4@0+ (1,0) [0|15] "" XXX
  SG_ DRIVER_TORQUE : 15|8@0- (1,0) [0|255] "" XXX
- SG_ ANGLE : 31|16@0- (0.1,0) [-3276.8|3276.7] "" XXX
+ SG_ ANGLE : 31|16@0- (0.1,0) [-3276.8|3276.7] "degrees" XXX
  SG_ RATE : 47|12@0- (1,0) [0|4095] "" XXX
  SG_ NEW_SIGNAL_1 : 48|1@0+ (1,0) [0|1] "" XXX
 
@@ -144,7 +144,7 @@ BO_ 1038 NEW_MSG_40E: 5 XXX
 
 BO_ 1042 BODY: 8 XXX
  SG_ REVERSE : 2|1@0+ (1,0) [0|1] "" XXX
- SG_ HANDBRAKE : 3|1@0+ (1,0) [0|1] "" XXX
+ SG_ PARKING_BRAKE : 3|1@0+ (1,0) [0|1] "" XXX
  SG_ BRAKE_PRESSED : 5|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_1 : 9|1@0+ (1,0) [0|1] "" XXX
  SG_ DRIVER_DOOR : 51|1@0+ (1,0) [0|1] "" XXX
