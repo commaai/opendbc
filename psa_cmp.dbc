@@ -1,3 +1,13 @@
+VERSION ""
+
+NS_ :
+ CM_
+ VAL_
+
+BS_:
+
+BU_: XXX
+
 BO_ 114 NEW_MSG_72: 5 XXX
  SG_ NEW_SIGNAL_1 : 0|1@0+ (1,0) [0|1] "" XXX
 
@@ -159,10 +169,10 @@ BO_ 1128 NEW_MSG_468: 8 XXX
  SG_ NEW_SIGNAL_6 : 8|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_7 : 10|1@0+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_5 : 11|1@0+ (1,0) [0|7] "" XXX
- SG_ NEW_SIGNAL_2 : 13|2@0+ (1,0) [0|65535] "" XXX
+ SG_ NEW_SIGNAL_2 : 13|2@0+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_9 : 16|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_8 : 22|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_3 : 25|6@0+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_3 : 25|6@0+ (1,0) [0|63] "" XXX
  SG_ NEW_SIGNAL_14 : 27|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_12 : 28|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_10 : 31|2@0+ (1,0) [0|3] "" XXX
@@ -197,7 +207,7 @@ BO_ 1390 DRIVER: 7 XXX
  SG_ NEW_SIGNAL_3 : 0|1@0+ (1,0) [0|1] "" XXX
  SG_ BRIGHTNESS_SETTING : 7|4@0+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_2 : 13|1@0+ (1,0) [0|1] "" XXX
- SG_ GAS_PEDAL : 31|8@0+ (0.5,0) [0|199] "%" XXX
+ SG_ GAS_PEDAL : 31|8@0+ (0.5,0) [0|99.5] "%" XXX
 
 BO_ 1394 RESTRAINTS: 8 XXX
  SG_ PASSENGER_SEATBELT : 5|2@0+ (1,0) [0|3] "" XXX
