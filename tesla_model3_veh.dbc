@@ -106,37 +106,6 @@ BO_ 1001 DAS_bodyControls: 8 VEH
  SG_ DAS_bodyControlsCounter : 52|4@1+ (1,0) [0|15] "" aps
  SG_ DAS_bodyControlsChecksum : 56|8@1+ (1,0) [0|255] "" aps
  
-BO_ 1013 ID3F5VCFRONT_lighting: 8 VehicleBus
- SG_ VCFRONT_DRLLeftStatus : 36|2@1+ (1,0) [0|3] ""  Receiver
- SG_ VCFRONT_DRLRightStatus : 38|2@1+ (1,0) [0|3] ""  Receiver
- SG_ VCFRONT_ambientLightingBrightnes : 8|8@1+ (0.5,0) [0|127] "%"  Receiver
- SG_ VCFRONT_approachLightingRequest : 25|1@1+ (1,0) [0|1] ""  Receiver
- SG_ VCFRONT_courtesyLightingRequest : 24|1@1+ (1,0) [0|1] ""  Receiver
- SG_ VCFRONT_fogLeftStatus : 40|2@1+ (1,0) [0|3] ""  Receiver
- SG_ VCFRONT_fogRightStatus : 42|2@1+ (1,0) [0|3] ""  Receiver
- SG_ VCFRONT_hazardLightRequest : 4|4@1+ (1,0) [0|8] ""  Receiver
- SG_ VCFRONT_hazardSwitchBacklight : 27|1@1+ (1,0) [0|1] ""  Receiver
- SG_ VCFRONT_highBeamLeftStatus : 32|2@1+ (1,0) [0|3] ""  Receiver
- SG_ VCFRONT_highBeamRightStatus : 34|2@1+ (1,0) [0|3] ""  Receiver
- SG_ VCFRONT_highBeamSwitchActive : 58|1@1+ (1,0) [0|1] ""  Receiver
- SG_ VCFRONT_indicatorLeftRequest : 0|2@1+ (1,0) [0|2] ""  Receiver
- SG_ VCFRONT_indicatorRightRequest : 2|2@1+ (1,0) [0|2] ""  Receiver
- SG_ VCFRONT_lowBeamLeftStatus : 28|2@1+ (1,0) [0|3] ""  Receiver
- SG_ VCFRONT_lowBeamRightStatus : 30|2@1+ (1,0) [0|3] ""  Receiver
- SG_ VCFRONT_lowBeamsCalibrated : 62|1@1+ (1,0) [0|1] ""  Receiver
- SG_ VCFRONT_lowBeamsOnForDRL : 61|1@1+ (1,0) [0|1] ""  Receiver
- SG_ VCFRONT_parkLeftStatus : 54|2@1+ (1,0) [0|3] ""  Receiver
- SG_ VCFRONT_parkRightStatus : 56|2@1+ (1,0) [0|3] ""  Receiver
- SG_ VCFRONT_seeYouHomeLightingReq : 26|1@1+ (1,0) [0|1] ""  Receiver
- SG_ VCFRONT_sideMarkersStatus : 44|2@1+ (1,0) [0|3] ""  Receiver
- SG_ VCFRONT_sideRepeaterLeftStatus : 46|2@1+ (1,0) [0|3] ""  Receiver
- SG_ VCFRONT_sideRepeaterRightStatus : 48|2@1+ (1,0) [0|3] ""  Receiver
- SG_ VCFRONT_simLatchingStalk : 59|2@1+ (1,0) [0|3] ""  Receiver
- SG_ VCFRONT_switchLightingBrightness : 16|8@1+ (0.5,0) [0|127] "%"  Receiver
- SG_ VCFRONT_turnSignalLeftStatus : 50|2@1+ (1,0) [0|3] ""  Receiver
- SG_ VCFRONT_turnSignalRightStatus : 52|2@1+ (1,0) [0|3] ""  Receiver
- 
-
 VAL_ 1001 DAS_headlightRequest 3 "DAS_HEADLIGHT_REQUEST_INVALID" 1 "DAS_HEADLIGHT_REQUEST_ON" 0 "DAS_HEADLIGHT_REQUEST_OFF";
 VAL_ 1001 DAS_hazardLightRequest 3 "DAS_REQUEST_HAZARDS_SNA" 2 "DAS_REQUEST_HAZARDS_UNUSED" 0 "DAS_REQUEST_HAZARDS_OFF" 1 "DAS_REQUEST_HAZARDS_ON";
 VAL_ 1001 DAS_wiperSpeed 3 "DAS_WIPER_SPEED_3" 12 "DAS_WIPER_SPEED_12" 8 "DAS_WIPER_SPEED_8" 14 "DAS_WIPER_SPEED_14" 5 "DAS_WIPER_SPEED_5" 13 "DAS_WIPER_SPEED_13" 2 "DAS_WIPER_SPEED_2" 0 "DAS_WIPER_SPEED_OFF" 4 "DAS_WIPER_SPEED_4" 1 "DAS_WIPER_SPEED_1" 15 "DAS_WIPER_SPEED_INVALID" 10 "DAS_WIPER_SPEED_10" 11 "DAS_WIPER_SPEED_11" 7 "DAS_WIPER_SPEED_7" 9 "DAS_WIPER_SPEED_9" 6 "DAS_WIPER_SPEED_6";
@@ -144,28 +113,6 @@ VAL_ 1001 DAS_turnIndicatorRequest 0 "DAS_TURN_INDICATOR_NONE" 2 "DAS_TURN_INDIC
 VAL_ 1001 DAS_highLowBeamDecision 2 "DAS_HIGH_BEAM_ON" 1 "DAS_HIGH_BEAM_OFF" 3 "DAS_HIGH_BEAM_SNA" 0 "DAS_HIGH_BEAM_UNDECIDED";
 VAL_ 1001 DAS_heaterRequest 0 "DAS_HEATER_SNA" 2 "DAS_HEATER_ON" 1 "DAS_HEATER_OFF";
 VAL_ 1001 DAS_turnIndicatorRequestReason 8 "DAS_ACTIVE_COMMANDED_LANE_CHANGE" 4 "DAS_CANCEL_LANE_CHANGE" 6 "DAS_ACTIVE_MERGE" 2 "DAS_ACTIVE_SPEED_LANE_CHANGE" 5 "DAS_CANCEL_FORK" 0 "DAS_NONE" 3 "DAS_ACTIVE_FORK" 7 "DAS_CANCEL_MERGE" 1 "DAS_ACTIVE_NAV_LANE_CHANGE";
-
-VAL_ 1013 VCFRONT_DRLLeftStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
-VAL_ 1013 VCFRONT_DRLRightStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
-VAL_ 1013 VCFRONT_ambientLightingBrightnes 255 "SNA" ;
-VAL_ 1013 VCFRONT_fogLeftStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
-VAL_ 1013 VCFRONT_fogRightStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
-VAL_ 1013 VCFRONT_hazardLightRequest 1 "HAZARD_REQUEST_BUTTON" 6 "HAZARD_REQUEST_CAR_ALARM" 5 "HAZARD_REQUEST_CRASH" 7 "HAZARD_REQUEST_DAS" 2 "HAZARD_REQUEST_LOCK" 4 "HAZARD_REQUEST_MISLOCK" 0 "HAZARD_REQUEST_NONE" 8 "HAZARD_REQUEST_UDS" 3 "HAZARD_REQUEST_UNLOCK" ;
-VAL_ 1013 VCFRONT_highBeamLeftStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
-VAL_ 1013 VCFRONT_highBeamRightStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
-VAL_ 1013 VCFRONT_indicatorLeftRequest 2 "TURN_SIGNAL_ACTIVE_HIGH" 1 "TURN_SIGNAL_ACTIVE_LOW" 0 "TURN_SIGNAL_OFF" ;
-VAL_ 1013 VCFRONT_indicatorRightRequest 2 "TURN_SIGNAL_ACTIVE_HIGH" 1 "TURN_SIGNAL_ACTIVE_LOW" 0 "TURN_SIGNAL_OFF" ;
-VAL_ 1013 VCFRONT_lowBeamLeftStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
-VAL_ 1013 VCFRONT_lowBeamRightStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
-VAL_ 1013 VCFRONT_parkLeftStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
-VAL_ 1013 VCFRONT_parkRightStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
-VAL_ 1013 VCFRONT_sideMarkersStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
-VAL_ 1013 VCFRONT_sideRepeaterLeftStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
-VAL_ 1013 VCFRONT_sideRepeaterRightStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
-VAL_ 1013 VCFRONT_simLatchingStalk 0 "SIMULATED_LATCHING_STALK_IDLE" 1 "SIMULATED_LATCHING_STALK_LEFT" 2 "SIMULATED_LATCHING_STALK_RIGHT" 3 "SIMULATED_LATCHING_STALK_SNA" ;
-VAL_ 1013 VCFRONT_switchLightingBrightness 255 "SNA" ;
-VAL_ 1013 VCFRONT_turnSignalLeftStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
-VAL_ 1013 VCFRONT_turnSignalRightStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
 VAL_ 962 VCLEFT_frontBuckleSwitch 2 "SWITCH_ON" 0 "SWITCH_SNA" 3 "SWITCH_FAULT" 1 "SWITCH_OFF";
 VAL_ 962 VCLEFT_frontSeatTrackBack 2 "SWITCH_ON" 0 "SWITCH_SNA" 3 "SWITCH_FAULT" 1 "SWITCH_OFF";
 VAL_ 962 VCLEFT_rightMirrorTilt 4 "MIRROR_TILT_LEFT" 2 "MIRROR_TILT_UP" 3 "MIRROR_TILT_RIGHT" 0 "MIRROR_TILT_STOP" 1 "MIRROR_TILT_DOWN";

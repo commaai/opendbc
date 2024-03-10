@@ -288,6 +288,36 @@ BO_ 82 EPAS3P_sysStatus: 8 CH
  SG_ EPAS3P_internalSASQF : 4|1@0+ (1,0) [0|1] ""  park
  SG_ EPAS3P_currentTuneMode : 7|3@0+ (1,0) [0|5] ""  park
 
+BO_ 1013 ID3F5VCFRONT_lighting: 8 VehicleBus
+ SG_ VCFRONT_lowBeamsCalibrated : 62|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_lowBeamsOnForDRL : 61|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_simLatchingStalk : 59|2@1+ (1,0) [0|3] ""  Receiver
+ SG_ VCFRONT_highBeamSwitchActive : 58|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_parkRightStatus : 56|2@1+ (1,0) [0|3] ""  Receiver
+ SG_ VCFRONT_parkLeftStatus : 54|2@1+ (1,0) [0|3] ""  Receiver
+ SG_ VCFRONT_turnSignalRightStatus : 52|2@1+ (1,0) [0|3] ""  Receiver
+ SG_ VCFRONT_turnSignalLeftStatus : 50|2@1+ (1,0) [0|3] ""  Receiver
+ SG_ VCFRONT_sideRepeaterRightStatus : 48|2@1+ (1,0) [0|3] ""  Receiver
+ SG_ VCFRONT_sideRepeaterLeftStatus : 46|2@1+ (1,0) [0|3] ""  Receiver
+ SG_ VCFRONT_sideMarkersStatus : 44|2@1+ (1,0) [0|3] ""  Receiver
+ SG_ VCFRONT_fogRightStatus : 42|2@1+ (1,0) [0|3] ""  Receiver
+ SG_ VCFRONT_fogLeftStatus : 40|2@1+ (1,0) [0|3] ""  Receiver
+ SG_ VCFRONT_DRLRightStatus : 38|2@1+ (1,0) [0|3] ""  Receiver
+ SG_ VCFRONT_DRLLeftStatus : 36|2@1+ (1,0) [0|3] ""  Receiver
+ SG_ VCFRONT_highBeamRightStatus : 34|2@1+ (1,0) [0|3] ""  Receiver
+ SG_ VCFRONT_highBeamLeftStatus : 32|2@1+ (1,0) [0|3] ""  Receiver
+ SG_ VCFRONT_lowBeamRightStatus : 30|2@1+ (1,0) [0|3] ""  Receiver
+ SG_ VCFRONT_lowBeamLeftStatus : 28|2@1+ (1,0) [0|3] ""  Receiver
+ SG_ VCFRONT_hazardSwitchBacklight : 27|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_seeYouHomeLightingReq : 26|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_approachLightingRequest : 25|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_courtesyLightingRequest : 24|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_switchLightingBrightness : 16|8@1+ (0.5,0) [0|127] "%"  Receiver
+ SG_ VCFRONT_ambientLightingBrightnes : 8|8@1+ (0.5,0) [0|127] "%"  Receiver
+ SG_ VCFRONT_hazardLightRequest : 4|4@1+ (1,0) [0|8] ""  Receiver
+ SG_ VCFRONT_indicatorRightRequest : 2|2@1+ (1,0) [0|2] ""  Receiver
+ SG_ VCFRONT_indicatorLeftRequest : 0|2@1+ (1,0) [0|2] ""  Receiver
+
 
 
 
@@ -406,6 +436,27 @@ VAL_ 82 EPAS3P_steeringFault 0 "NO_FAULT" 1 "FAULT" ;
 VAL_ 82 EPAS3P_steeringReduced 0 "NORMAL_ASSIST" 1 "REDUCED_ASSIST" ;
 VAL_ 82 EPAS3P_internalSASQF 1 "IN_SPEC" 0 "UNDEFINABLE_ACCURACY" ;
 VAL_ 82 EPAS3P_currentTuneMode 3 "STEERING_TUNE_RWD_COMFORT" 1 "STEERING_TUNE_DM_STANDARD" 5 "STEERING_TUNE_RWD_SPORT" 0 "STEERING_TUNE_DM_COMFORT" 4 "STEERING_TUNE_RWD_STANDARD" 2 "STEERING_TUNE_DM_SPORT" ;
+VAL_ 1013 VCFRONT_simLatchingStalk 0 "SIMULATED_LATCHING_STALK_IDLE" 1 "SIMULATED_LATCHING_STALK_LEFT" 2 "SIMULATED_LATCHING_STALK_RIGHT" 3 "SIMULATED_LATCHING_STALK_SNA" ;
+VAL_ 1013 VCFRONT_parkRightStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
+VAL_ 1013 VCFRONT_parkLeftStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
+VAL_ 1013 VCFRONT_turnSignalRightStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
+VAL_ 1013 VCFRONT_turnSignalLeftStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
+VAL_ 1013 VCFRONT_sideRepeaterRightStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
+VAL_ 1013 VCFRONT_sideRepeaterLeftStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
+VAL_ 1013 VCFRONT_sideMarkersStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
+VAL_ 1013 VCFRONT_fogRightStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
+VAL_ 1013 VCFRONT_fogLeftStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
+VAL_ 1013 VCFRONT_DRLRightStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
+VAL_ 1013 VCFRONT_DRLLeftStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
+VAL_ 1013 VCFRONT_highBeamRightStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
+VAL_ 1013 VCFRONT_highBeamLeftStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
+VAL_ 1013 VCFRONT_lowBeamRightStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
+VAL_ 1013 VCFRONT_lowBeamLeftStatus 2 "LIGHT_FAULT" 0 "LIGHT_OFF" 1 "LIGHT_ON" 3 "LIGHT_SNA" ;
+VAL_ 1013 VCFRONT_switchLightingBrightness 255 "SNA" ;
+VAL_ 1013 VCFRONT_ambientLightingBrightnes 255 "SNA" ;
+VAL_ 1013 VCFRONT_hazardLightRequest 1 "HAZARD_REQUEST_BUTTON" 6 "HAZARD_REQUEST_CAR_ALARM" 5 "HAZARD_REQUEST_CRASH" 7 "HAZARD_REQUEST_DAS" 2 "HAZARD_REQUEST_LOCK" 4 "HAZARD_REQUEST_MISLOCK" 0 "HAZARD_REQUEST_NONE" 8 "HAZARD_REQUEST_UDS" 3 "HAZARD_REQUEST_UNLOCK" ;
+VAL_ 1013 VCFRONT_indicatorRightRequest 2 "TURN_SIGNAL_ACTIVE_HIGH" 1 "TURN_SIGNAL_ACTIVE_LOW" 0 "TURN_SIGNAL_OFF" ;
+VAL_ 1013 VCFRONT_indicatorLeftRequest 2 "TURN_SIGNAL_ACTIVE_HIGH" 1 "TURN_SIGNAL_ACTIVE_LOW" 0 "TURN_SIGNAL_OFF" ;
 
 
 
