@@ -255,6 +255,10 @@ BO_ 599 DI_speed: 8 CH
  SG_ DI_speedCounter : 8|4@1+ (1,0) [0|15] ""  park
  SG_ DI_speedChecksum : 0|8@1+ (1,0) [0|255] ""  park
 
+BO_ 553 OCS1P_debugCushionSelfCNT: 8 CH
+ SG_ OCS1P_cushionSelfCNTDuty : 32|32@1+ (1,0) [0|4294967295] ""  dbg
+ SG_ OCS1P_cushionSelfCNTFreq : 0|32@1+ (1,0) [0|4294967295] ""  dbg
+
 BO_ 1160 DAS_steeringControl: 4 CH
  SG_ DAS_steeringControlChecksum : 31|8@0+ (1,0) [0|255] ""  aps
  SG_ DAS_steeringControlCounter : 19|4@0+ (1,0) [0|15] ""  aps

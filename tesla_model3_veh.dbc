@@ -80,6 +80,14 @@ BO_ 280 DI_systemStatus: 8 VEH
  SG_ DI_systemStatusChecksum : 0|8@1+ (1,0) [0|255] "" X
  SG_ DI_brakePedalState : 19|2@1+ (1,0) [0|2] "" vcleft
 
+BO_ 553 SCCM_rightStalk: 3 VEH
+ SG_ SCCM_rightStalkCounter : 8|4@1+ (1,0) [0|15] "" X
+ SG_ SCCM_rightStalkCrc : 0|8@1+ (1,0) [0|255] "" X
+ SG_ SCCM_rightStalkReserved1 : 15|1@1+ (1,0) [0|1] "" X
+ SG_ SCCM_parkButtonStatus : 16|2@1+ (1,0) [0|3] "" das
+ SG_ SCCM_rightStalkReserved2 : 18|6@1+ (1,0) [0|63] "" X
+ SG_ SCCM_rightStalkStatus : 12|3@1+ (1,0) [0|6] "" das
+
 BO_ 297 SCCM_steeringAngleSensor: 8 VEH
  SG_ SCCM_steeringAngleValidity : 30|2@1+ (1,0) [0|3] "" gtw
  SG_ SCCM_supplierID : 12|2@1+ (1,0) [0|3] "" gtw
@@ -151,5 +159,7 @@ VAL_ 280 DI_trackModeState 0 "TRACK_MODE_UNAVAILABLE" 1 "TRACK_MODE_AVAILABLE" 2
 VAL_ 280 DI_systemState 5 "DI_SYS_ENABLE" 1 "DI_SYS_IDLE" 2 "DI_SYS_STANDBY" 0 "DI_SYS_UNAVAILABLE" 3 "DI_SYS_FAULT" 4 "DI_SYS_ABORT";
 VAL_ 280 DI_immobilizerState 2 "DI_IMM_STATE_AUTHENTICATING" 0 "DI_IMM_STATE_INIT_SNA" 3 "DI_IMM_STATE_DISARMED" 4 "DI_IMM_STATE_IDLE" 6 "DI_IMM_STATE_FAULT" 1 "DI_IMM_STATE_REQUEST" 5 "DI_IMM_STATE_RESET";
 VAL_ 280 DI_brakePedalState 2 "INVALID" 0 "OFF" 1 "ON";
+VAL_ 553 SCCM_parkButtonStatus 3 "SNA" 0 "NOT_PRESSED" 2 "INIT" 1 "PRESSED";
+VAL_ 553 SCCM_rightStalkStatus 3 "DOWN_1" 6 "SNA" 0 "IDLE" 5 "INIT" 1 "UP_1" 4 "DOWN_2" 2 "UP_2";
 VAL_ 297 SCCM_steeringAngleValidity 3 "SNA" 2 "INIT" 0 "INVALID" 1 "VALID";
 VAL_ 297 SCCM_steeringAngleSensorStatus 0 "OK" 1 "INIT" 2 "ERROR" 3 "ERROR_INIT";
