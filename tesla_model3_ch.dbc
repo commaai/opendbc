@@ -329,6 +329,21 @@ BO_ 1013 ID3F5VCFRONT_lighting: 8 VehicleBus
  SG_ VCFRONT_indicatorRightRequest : 2|2@1+ (1,0) [0|2] ""  Receiver
  SG_ VCFRONT_indicatorLeftRequest : 0|2@1+ (1,0) [0|2] ""  Receiver
 
+BO_ 646 DI_locStatus: 7 ETH
+ SG_ DI_summonInPanic : 48|1@1+ (1,0) [0|0] ""  X
+ SG_ DI_rollPreventionState : 45|3@1+ (1,0) [0|0] ""  X
+ SG_ DI_vehicleHoldState : 42|3@1+ (1,0) [0|0] ""  X
+ SG_ DI_pmmStatus : 40|2@1+ (1,0) [0|0] ""  X
+ SG_ DI_aebState : 37|3@1+ (1,0) [0|0] ""  X
+ SG_ DI_autopilotRequest : 36|1@1+ (1,0) [0|0] ""  X
+ SG_ DI_parkBrakeState : 32|4@1+ (1,0) [0|0] ""  X
+ SG_ DI_autoparkState : 25|4@1+ (1,0) [0|0] ""  X
+ SG_ DI_cruiseSetSpeedUnits : 24|1@1+ (1,0) [0|0] ""  X
+ SG_ DI_cruiseSetSpeed : 15|9@1+ (0.5,0) [0|0] "speed"  X
+ SG_ DI_cruiseState : 12|3@1+ (1,0) [0|0] ""  X
+ SG_ DI_locStatusCounter : 8|4@1+ (1,0) [0|0] ""  X
+ SG_ DI_locStatusChecksum : 0|8@1+ (1,0) [0|0] ""  X
+
 
 
 
@@ -475,6 +490,15 @@ VAL_ 1013 VCFRONT_ambientLightingBrightnes 255 "SNA" ;
 VAL_ 1013 VCFRONT_hazardLightRequest 1 "HAZARD_REQUEST_BUTTON" 6 "HAZARD_REQUEST_CAR_ALARM" 5 "HAZARD_REQUEST_CRASH" 7 "HAZARD_REQUEST_DAS" 2 "HAZARD_REQUEST_LOCK" 4 "HAZARD_REQUEST_MISLOCK" 0 "HAZARD_REQUEST_NONE" 8 "HAZARD_REQUEST_UDS" 3 "HAZARD_REQUEST_UNLOCK" ;
 VAL_ 1013 VCFRONT_indicatorRightRequest 2 "TURN_SIGNAL_ACTIVE_HIGH" 1 "TURN_SIGNAL_ACTIVE_LOW" 0 "TURN_SIGNAL_OFF" ;
 VAL_ 1013 VCFRONT_indicatorLeftRequest 2 "TURN_SIGNAL_ACTIVE_HIGH" 1 "TURN_SIGNAL_ACTIVE_LOW" 0 "TURN_SIGNAL_OFF" ;
+VAL_ 646 DI_rollPreventionState 0 "UNAVAILABLE" 1 "STANDBY" 2 "READY" 3 "BUILD" 4 "HOLD" 5 "PARK" 6 "FAULT" 7 "INIT" ;
+VAL_ 646 DI_vehicleHoldState 0 "UNAVAILABLE" 1 "STANDBY" 2 "BLEND_IN" 3 "STANDSTILL" 4 "BLEND_OUT" 5 "PARK" 6 "FAULT" 7 "INIT" ;
+VAL_ 646 DI_pmmStatus 0 "INACTIVE" 1 "ACTIVE" 2 "LOGGING_ACTIVE" 3 "SNA" ;
+VAL_ 646 DI_aebState 0 "UNAVAILABLE" 1 "STANDBY" 2 "ENABLED" 3 "STANDSTILL" 4 "FAULT" 7 "SNA" ;
+VAL_ 646 DI_autopilotRequest 0 "IDLE" 1 "ACTIVATE" ;
+VAL_ 646 DI_parkBrakeState 0 "UNAVAILABLE" 1 "RELEASED" 2 "REQUESTED" 3 "APPLIED" 4 "FAULTED" 5 "PANIC_EPB" 6 "PANIC_SKID" 7 "RELEASING" 15 "SNA" ;
+VAL_ 646 DI_autoparkState 0 "UNAVAILABLE" 1 "STANDBY" 2 "STARTED" 3 "ACTIVE" 4 "COMPLETE" 5 "PAUSED" 6 "ABORTED" 7 "RESUMED" 8 "UNPARK_COMPLETE" 9 "SELFPARK_STARTED" 15 "SNA" ;
+VAL_ 646 DI_cruiseSetSpeedUnits 0 "MPH" 1 "KPH" ;
+VAL_ 646 DI_cruiseState 0 "UNAVAILABLE" 1 "STANDBY" 2 "ENABLED" 3 "STANDSTILL" 4 "OVERRIDE" 5 "FAULT" 6 "PRE_FAULT" 7 "PRE_CANCEL" ;
 
 
 
