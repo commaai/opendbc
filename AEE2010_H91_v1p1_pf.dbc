@@ -33,116 +33,8 @@ NS_ :
 
 BS_:
 
-BU_: UTIL__Traminator CMM___Motor_SG CDS___Fahrdynamikregelung BVA___Automatikgetriebe BSI___Kombiinstrument AR2S_StartStop ABS___Antiblockiersystem
+BU_: CMM___Motor_SG CDS___Fahrdynamikregelung BVA___Automatikgetriebe BSI___Kombiinstrument AR2S_StartStop ABS___Antiblockiersystem
 
-
-BO_ 3221225472 VECTOR__INDEPENDENT_SIG_MSG: 0 Vector__XXX
- SG_ P257_Com_tiYr : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ P256_Com_tiDay : 0|12@0+ (1,0) [0|0] "" Vector__XXX
- SG_ P255_Com_tiSec : 0|20@0+ (1,0) [0|0] "" Vector__XXX
- SG_ P229_Com_xTCChkSum : 0|4@1+ (1,0) [0|0] "" Vector__XXX
- SG_ P325_Com_tiEngOffLSB : 0|16@1+ (1,0) [0|65535] "" Vector__XXX
- SG_ P325_Com_tiEngOffMSB : 0|16@1+ (1,0) [0|65535] "" Vector__XXX
- SG_ P261_PCH_WakeUP : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P252_ImpluseStart : 0|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ P250_MajorStartRequest : 0|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ P248_StarterStopReq : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P298_Com_stEHRCtl : 0|1@1- (1,0) [0|1] "" Vector__XXX
- SG_ P317_FrmMng_dtBVMPChkSum : 0|4@1+ (1,0) [0|15] "" Vector__XXX
- SG_ P318_FrmMng_ctBVMPCntr : 0|4@1+ (1,0) [0|15] "" Vector__XXX
- SG_ P292_FrmMng_stGearTrqReq : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P145_Saturation_Active : 0|1@1+ (1,0) [0|1] "-" Vector__XXX
- SG_ P128_Forcage_Encl_GMV : 0|1@1+ (1,0) [0|1] "-" Vector__XXX
- SG_ P101_Com_mAddPmpTot : 0|16@0+ (0.05,0) [0|3276.5] "g" Vector__XXX
- SG_ Local_ID : 0|8@1+ (1,0) [0|255] "" Vector__XXX
- SG_ Diagnostic_On_Can : 0|8@1+ (1,0) [0|255] "" Vector__XXX
- SG_ P308_EOBD_Rediness : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P314_VehDa_stTrqMax : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P315_VehDa_stEngSpdMax : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P297_RTE_Fun_StErr : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P268_AddPmpCD_volAddInjStp : 0|8@1+ (10,0) [0|255] "" Vector__XXX
- SG_ P364_Gbx_nGbxIPSpeedFlt : 0|12@0+ (2,0) [0|0] "rpm" Vector__XXX
- SG_ P363_Com_trqRelCrSConv : 0|8@1- (3,-150) [0|0] "Nm" Vector__XXX
- SG_ P361_Com_stTscEngDemTyp : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P087_Com_stClth : 0|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ P290_StSys_stGlwAuth : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P135_StSys_stAR2s : 0|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ P133_StSys_stEngSTT2Rls : 0|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ P227_Pwr_Gen_Support_state : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P084_CoDT_trqGearbxDes : 0|8@1+ (2,-100) [-100|408] "Nm" Vector__XXX
- SG_ P004_ActualTorqueNoGearbox : 0|8@1+ (2,-100) [-100|408] "Nm" Vector__XXX
- SG_ P399_Com_stProd : 0|3@1+ (1,0) [0|7] "" Vector__XXX
- SG_ P348_Alt_bFault : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P251_Com_stScndStrtReq : 0|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ P107_Com_stAddPmpLvl : 0|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ P093_Temp_aval_FAP : 0|8@1+ (4,-40) [0|255] "�C" Vector__XXX
- SG_ P041_Cde_RVV : 0|2@1+ (1,0) [0|3] "-" Vector__XXX
- SG_ P069_Act_RVV : 0|1@1+ (1,0) [0|1] "-" Vector__XXX
- SG_ P033_sABS : 0|16@0+ (0.1,0) [0|6553.5] "m" Vector__XXX
- SG_ P407_Com_stRly2DiagRaw : 0|3@1- (1,0) [-4|3] "" Vector__XXX
- SG_ P405_Com_stRly1DiagRaw : 0|3@1- (1,0) [0|7] "" Vector__XXX
- SG_ P284_T15CD_stPart_byte8 : 0|4@1+ (1,0) [0|15] "" Vector__XXX
- SG_ Reserved_1 : 0|16@1+ (1,0) [0|255] "-" Vector__XXX
- SG_ P416_Com_bStSpCabReqRaw : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ Input4 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Input3 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Input2 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Input1 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ code : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ OutputNumber : 0|3@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Output3 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Output2 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Output1 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Output0 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ commande : 0|5@0+ (1,0) [0|0] "" Vector__XXX
- SG_ P296_Fans_bEHRPmpReq : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P243_FrmMng_stFlCnsmp_mp : 0|1@1+ (1,0) [0|0] "" Vector__XXX
- SG_ P095_EngPrt_stOvrSpd : 0|2@1+ (1,0) [0|1] "-" Vector__XXX
- SG_ P051_ACCD_stPres : 0|2@1+ (1,0) [0|3] "-" Vector__XXX
- SG_ P053_ACCtl_stHys : 0|1@1+ (1,0) [0|1] "-" Vector__XXX
- SG_ P049_Com_bMIL : 0|1@1+ (1,0) [0|1] "-" Vector__XXX
- SG_ VersionInput : 0|4@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Data1 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Mask0 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Mask1 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ VersionMode : 0|4@0+ (1,0) [0|0] "" Vector__XXX
- SG_ VersionActel : 0|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ VersionBaudRate : 0|3@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Data0 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Data2 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Mask2 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Data3 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Mask3 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Rate : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ VersionYear : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Data4 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Mask4 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ VersionMonth : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ ConfIdStatus : 0|11@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Data5 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ GetConfIdStatus : 0|11@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Mask5 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ MaskIdPert : 0|11@0+ (1,0) [0|0] "" Vector__XXX
- SG_ VersionDate : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Data6 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Mask6 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ VersionMinor : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Edge : 0|2@0+ (1,0) [0|0] "" Vector__XXX
- SG_ ConfIdCde : 0|11@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Data7 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ GetConfIdCde : 0|11@0+ (1,0) [0|0] "" Vector__XXX
- SG_ IdPert : 0|11@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Mask7 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ VersionMajor : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Code : 0|5@0+ (1,0) [0|0] "" Vector__XXX
- SG_ NumScenario : 0|3@0+ (1,0) [0|0] "" Vector__XXX
- SG_ P055_Com_trqTCSAbs : 0|8@1+ (2,-100) [-100|408] "Nm" Vector__XXX
- SG_ P028_Gbx_stEOBDFault : 0|4@1+ (1,0) [0|15] "-" Vector__XXX
- SG_ P427_Com_stBattTypEstRaw : 0|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ P436_Com_uPrdcVltgStrtRaw : 0|11@0+ (0.01,0) [0|13] "" Vector__XXX
- SG_ P284_T15CD_stPart_byte6 : 0|4@0+ (1,0) [0|15] "" Vector__XXX
- SG_ P040_Com_stBrkRaw1 : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P013_Com_stBrk1 : 0|1@1+ (1,0) [0|1] "" Vector__XXX
 
 BO_ 968 Dyn_STT_CMM: 2 Vector__XXX
  SG_ P412_Com_stDeadPnt : 2|2@1+ (1,0) [0|3] "" Vector__XXX
@@ -491,33 +383,7 @@ BO_ 114 RQD_CMM: 5 CMM___Motor_SG
 
 CM_ "EDC17 CAN data base for DT20C C10
 -Sharath Tengse (RBIN/EDR2)";
-CM_ BU_ UTIL__Traminator "Control of Traminator by CAN2 of CANalyzer";
 CM_ BU_ AR2S_StartStop "This node is for start stop function. For DV4E4";
-CM_ BO_ 3221225472 "This is a message for not used signals, created by Vector CANdb++ DBC OLE DB Provider.";
-CM_ SG_ 3221225472 P252_ImpluseStart "Momentary starting request";
-CM_ SG_ 3221225472 P250_MajorStartRequest "Main latch starting request";
-CM_ SG_ 3221225472 P248_StarterStopReq "starter stop request";
-CM_ SG_ 3221225472 P107_Com_stAddPmpLvl "P107 Minimum of FAP additive exeeded";
-CM_ SG_ 3221225472 P101_Com_mAddPmpTot "P101: absolute Menge des eingespritztem Additivs (Cerium)";
-CM_ SG_ 3221225472 P087_Com_stClth "Clutch signal for AM6";
-CM_ SG_ 3221225472 P227_Pwr_Gen_Support_state "P165: Water in fuel indication (1 = water in fueel detected / 0 = no water in fuel)";
-CM_ SG_ 3221225472 P084_CoDT_trqGearbxDes "P084  Vorweggenommenes Drehmoment";
-CM_ SG_ 3221225472 P004_ActualTorqueNoGearbox "P004  Actual torque before torque intervention by automatic gearbox";
-CM_ SG_ 3221225472 P251_Com_stScndStrtReq "Secondary latched starting request";
-CM_ SG_ 3221225472 P093_Temp_aval_FAP "P093  FAP-Temperatur";
-CM_ SG_ 3221225472 P041_Cde_RVV "P041  FGR-Bedienteilinfo";
-CM_ SG_ 3221225472 P069_Act_RVV "P069  FGR-Hauptschalter";
-CM_ SG_ 3221225472 P033_sABS "P033 odometer";
-CM_ SG_ 3221225472 P284_T15CD_stPart_byte8 "ECU electronic state";
-CM_ SG_ 3221225472 Reserved_1 "P074  Number of BusOff in driving cycle";
-CM_ SG_ 3221225472 P243_FrmMng_stFlCnsmp_mp "P155: Preparation of glow activation.";
-CM_ SG_ 3221225472 P051_ACCD_stPres "P051  Abschaltung Klimakompressor wegen Ueber- oder
-Unterdruck im Kaeltemittelkreislauf";
-CM_ SG_ 3221225472 P053_ACCtl_stHys "P053  Abschaltung Klimakompressor aus Sicherheitsgruenden
-oder wegen Komfortfunktionen";
-CM_ SG_ 3221225472 P049_Com_bMIL "P049  Ansteuerung DIA-Lampe";
-CM_ SG_ 3221225472 P028_Gbx_stEOBDFault "P028  MIL request gearbox";
-CM_ SG_ 3221225472 P284_T15CD_stPart_byte6 "ECU electronic state";
 CM_ BO_ 2024 "Le m�canisme d'�mission utilis� est �v�nementiel du CMM vers l'outil branch� sur le r�seau Can
 
 Trame r�ponse EOBD On Can du CMM";
@@ -657,13 +523,5 @@ CM_ SG_ 114 ADC2_Seed_Byte1 "SEED3 of RQD_CMM (low byte)";
 CM_ SG_ 114 ADC2_Seed_Byte2 "SEED2 of RQD_CMM (high byte)";
 CM_ SG_ 114 ADC2_Seed_Byte3 "SEED1 of RQD_CMM (highest byte)";
 CM_ SG_ 114 ADC2_Req_Status "Unlock request";
-BA_DEF_ BO_  "???" HEX 0 0;
-BA_DEF_DEF_  "???" 0;
-BA_ "???" BO_ 520 0;
-VAL_ 3221225472 P252_ImpluseStart 1 "" ;
-VAL_ 3221225472 P250_MajorStartRequest 1 "" ;
-VAL_ 3221225472 P251_Com_stScndStrtReq 1 "" ;
-VAL_ 1074 P214_Com_stMnWkUp 1 "" ;
-VAL_ 1074 P249_Com_stEngStopReq 1 "" ;
 VAL_ 840 P134_Com_stEng 7 "RESERVED" 6 "DegradedGO" 5 "GO" 4 "Stopped" 3 "Running" 2 "Starting" 1 "Cut" 0 "Locked" ;
 
