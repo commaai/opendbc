@@ -424,7 +424,7 @@ CM_ SG_ 1224 P223_CrashInfo "Crash Information";
 CM_ BO_ 1160 "ID 488:  Engine Data Frame (Period time 100 ms)";
 CM_ SG_ 1160 P056_ACCD_p "P056  K�ltemitteldruck";
 CM_ SG_ 1160 P158_Air_tAFS "P158: Intake air temperature.";
-CM_ SG_ 1160 P154_PFlt_bPFltClnReq "P154: Tell-tale lamp for \"risk of clogged filter\"";
+CM_ SG_ 1160 P154_PFlt_bPFltClnReq "P154: Tell-tale lamp for 'risk of clogged filter'";
 CM_ SG_ 1160 P063_vehV_bXVVErr "P063  FGR-Fehler";
 CM_ SG_ 1160 P108_Fid_ComAddPmpLvl "P106  Temperaturwarnlampe : blinken";
 CM_ SG_ 1160 P105_Com_bTtLmp "P105  Temperaturwarnlampe: ein/aus";
