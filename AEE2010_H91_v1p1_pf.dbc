@@ -128,15 +128,11 @@ BO_ 3221225472 VECTOR__INDEPENDENT_SIG_MSG: 0 Vector__XXX
  SG_ Mask6 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
  SG_ VersionMinor : 0|8@0+ (1,0) [0|0] "" Vector__XXX
  SG_ Edge : 0|2@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Output3 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Output2 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Output1 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
  SG_ ConfIdCde : 0|11@0+ (1,0) [0|0] "" Vector__XXX
  SG_ Data7 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
  SG_ GetConfIdCde : 0|11@0+ (1,0) [0|0] "" Vector__XXX
  SG_ IdPert : 0|11@0+ (1,0) [0|0] "" Vector__XXX
  SG_ Mask7 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Output0 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
  SG_ VersionMajor : 0|8@0+ (1,0) [0|0] "" Vector__XXX
  SG_ Code : 0|5@0+ (1,0) [0|0] "" Vector__XXX
  SG_ NumScenario : 0|3@0+ (1,0) [0|0] "" Vector__XXX
