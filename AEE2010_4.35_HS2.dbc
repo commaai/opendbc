@@ -1,7 +1,7 @@
 VERSION ""
 
 
-NS_ : 
+NS_ :
 	NS_DESC_
 	CM_
 	BA_DEF_
@@ -1116,7 +1116,7 @@ CM_ BO_ 1234 "Trame WMI d'identification de la marque de la voiture (World Manuf
 CM_ SG_ 1234 WMI_1 "Premier caractere de WMI";
 CM_ SG_ 1234 WMI_2 "Second caractere de WMI";
 CM_ SG_ 1234 WMI_3 "Troisieme caractere de WMI";
-CM_ BO_ 1294 "trame mixte : périodique à 100 ms et sur événements :    
+CM_ BO_ 1294 "trame mixte : périodique à 100 ms et sur événements :
      Changement de consigne de vitesse vehicule
      Demande d'activation RVV / ACC
      Demande d'activation LVV";
