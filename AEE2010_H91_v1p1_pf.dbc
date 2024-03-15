@@ -48,7 +48,6 @@ BO_ 3221225472 VECTOR__INDEPENDENT_SIG_MSG: 0 Vector__XXX
  SG_ P250_MajorStartRequest : 0|2@1+ (1,0) [0|3] "" Vector__XXX
  SG_ P248_StarterStopReq : 0|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ P298_Com_stEHRCtl : 0|1@1- (1,0) [0|1] "" Vector__XXX
- SG_ P107_Com_stAddPmpLvl : 0|2@1+ (1,0) [0|0] "-" Vector__XXX
  SG_ P317_FrmMng_dtBVMPChkSum : 0|4@1+ (1,0) [0|15] "" Vector__XXX
  SG_ P318_FrmMng_ctBVMPCntr : 0|4@1+ (1,0) [0|15] "" Vector__XXX
  SG_ P292_FrmMng_stGearTrqReq : 0|1@1+ (1,0) [0|1] "" Vector__XXX
