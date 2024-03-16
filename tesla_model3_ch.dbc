@@ -299,7 +299,7 @@ BO_ 82 EPAS3P_sysStatus: 8 CH
  SG_ EPAS3P_internalSASQF : 4|1@0+ (1,0) [0|1] ""  park
  SG_ EPAS3P_currentTuneMode : 7|3@0+ (1,0) [0|5] ""  park
 
-BO_ 1013 ID3F5VCFRONT_lighting: 8 VehicleBus
+BO_ 1013 ID3F5VCFRONT_lighting: 8 VEH
  SG_ VCFRONT_lowBeamsCalibrated : 62|1@1+ (1,0) [0|1] ""  Receiver
  SG_ VCFRONT_lowBeamsOnForDRL : 61|1@1+ (1,0) [0|1] ""  Receiver
  SG_ VCFRONT_simLatchingStalk : 59|2@1+ (1,0) [0|3] ""  Receiver
