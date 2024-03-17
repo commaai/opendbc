@@ -213,8 +213,10 @@ BO_ 1293 Dat_ABR: 7 ABS___Antiblockiersystem
  SG_ P351_Com_bABSIntvActv : 5|1@1+ (1,0) [0|1] "" Vector__XXX
 
 BO_ 781 Dyn4_FRE: 8 CDS___Fahrdynamikregelung
- SG_ P264_VehV_VPsvValWhlFrtR : 23|16@0+ (0.01,0) [0|655.35] "" Vector__XXX
- SG_ P263_VehV_VPsvValWhlFrtL : 7|16@0+ (0.01,0) [0|655.35] "" Vector__XXX
+ SG_ P263_VehV_VPsvValWhlFrtL : 7|16@0+ (0.01,0) [0|655.35] "km/h" Vector__XXX
+ SG_ P264_VehV_VPsvValWhlFrtR : 23|16@0+ (0.01,0) [0|655.35] "km/h" Vector__XXX
+ SG_ P264_VehV_VPsvValWhlBckL : 39|16@0+ (0.01,0) [0|655.35] "km/h" Vector__XXX
+ SG_ P263_VehV_VPsvValWhlBckR : 55|16@0+ (0.01,0) [0|655.35] "km/h" Vector__XXX
 
 BO_ 1426 Dat6_BSI: 8 CMM___Motor_SG
  SG_ P421_Com_xBattCrnt : 55|16@0+ (1,0) [0|0] "" Vector__XXX
