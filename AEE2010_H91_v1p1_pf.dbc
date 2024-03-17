@@ -617,7 +617,7 @@ CM_ SG_ 840 P017_Com_trqFrc "P017 Torque lost by AC, friction, high pressure pum
 CM_ SG_ 840 P211_AirC_pClnt "P084  Vorweggenommenes Drehmoment";
 CM_ SG_ 840 P019_Com_trqPrp "P019 Requested torque before processing.";
 CM_ SG_ 840 P152_Gearbx_stGear "P152: Gear detected by ratio vehicule speed to engine speed";
-CM_ SG_ 840 P165_FlFCD_stWtLvlSensDebVal "P165: Water in fuel indication (1 = water in fueel detected / 0 = no water in fuel)";
+CM_ SG_ 840 P165_FlFCD_stWtLvlSensDebVal "P165: Water in fuel indication (1 = water in fuel detected / 0 = no water in fuel)";
 CM_ BO_ 520 "ID 208:  Engine Dynamic Frame (Period time 10 ms)";
 CM_ SG_ 520 P027_ACCtl_stLogicOut "P027  Klimakompressor Status ein/aus";
 CM_ SG_ 520 P198_ActMod_trqClthTraIntv "P084  Vorweggenommenes Drehmoment";
