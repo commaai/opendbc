@@ -692,6 +692,26 @@ BO_ 773 STEERING_ALT: 7 XXX
  SG_ CHECKSUM : 39|4@0+ (1,0) [0|15] "" XXX
  SG_ RATE_ALT : 47|8@0+ (1,0) [0|255] "" XXX
 
+BO_ 1010 LANE_KEEP_ASSIST: 8 XXX
+ SG_ NEW_SIGNAL_8 : 0|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_1 : 3|3@0+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_7 : 4|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_12 : 5|1@0+ (1,0) [0|1] "" XXX
+ SG_ COUNTER : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 15|4@0+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_6 : 17|2@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_5 : 19|2@0+ (1,0) [0|3] "" XXX
+ SG_ LOW_SPEED : 21|2@0+ (1,0) [0|3] "" XXX
+ SG_ TORQUE : 31|11@0- (1,0) [0|2047] "" XXX
+ SG_ RIGHT_DEPART : 32|1@0+ (1,0) [0|1] "" XXX
+ SG_ LEFT_DEPART : 33|1@0+ (1,0) [0|1] "" XXX
+ SG_ LKA_DENY : 34|1@0+ (1,0) [0|1] "" XXX
+ SG_ STATUS : 35|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACTIVE : 36|1@0+ (1,0) [0|1] "" XXX
+ SG_ RAMP : 47|7@0+ (1,0) [0|127] "" XXX
+ SG_ ANGLE : 55|14@0- (0.1,0) [-90|90] "" XXX
+ SG_ NEW_SIGNAL_10 : 57|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 1390 DRIVER: 7 XXX
  SG_ NEW_SIGNAL_3 : 0|1@0+ (1,0) [0|1] "" XXX
  SG_ BRIGHTNESS_SETTING : 7|4@0+ (1,0) [0|15] "" XXX
@@ -707,5 +727,7 @@ BO_ 1394 RESTRAINTS: 8 XXX
 CM_ SG_ 757 ANGLE "asymmetric, could be init";
 CM_ SG_ 773 ANGLE "-565 to 560, seems like estimate and not init";
 CM_ SG_ 773 RATE_SIGN "1=moving clockwise, 0=moving anticlockwise";
+CM_ SG_ 1010 LKA_DENY "1=LKA OFF (button in console)";
+CM_ SG_ 1010 STATUS "0=LKA OFF (button in console), 1=LKA AVAILABLE";
 CM_ SG_ 1390 GAS_PEDAL "Max 99.5%";
 CM_ SG_ 1394 IGNITION "doesn't turn off straight away";
