@@ -355,6 +355,8 @@ BO_ 1074 Dat_BSI1: 8 BSI___Kombiinstrument
  SG_ P249_Com_stEngStopReq : 0|2@1+ (1,0) [0|3] "" Vector__XXX
 
 BO_ 1042 Dat_BSI: 8 BSI___Kombiinstrument
+ SG_ DRIVER_DOOR : 51|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ PASSENGER_DOOR : 52|1@0+ (1,0) [0|1] "" Vector__XXX
  SG_ P328_Com_stEHRPmp : 27|2@1+ (1,0) [0|3] "" Vector__XXX
  SG_ P104_Dspl_stAOHt : 30|2@1+ (1,0) [0|3] "-"  CMM___Motor_SG
  SG_ P086_Com_stFlLvlDia : 25|2@1+ (1,0) [0|3] "-" Vector__XXX
@@ -362,6 +364,7 @@ BO_ 1042 Dat_BSI: 8 BSI___Kombiinstrument
  SG_ P298_Req_RTE_Ena : 11|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ P277_Com_bOilLvlDem : 10|1@1+ (1,0) [0|0] "" Vector__XXX
  SG_ P013_MainBrake : 5|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ PARKING_BRAKE : 3|1@0+ (1,0) [0|1] "" Vector__XXX
  SG_ P103_Com_bRevGear : 2|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ P040_MainBrakeFault : 0|1@1+ (1,0) [0|1] "-" Vector__XXX
 
