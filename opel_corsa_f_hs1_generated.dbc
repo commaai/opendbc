@@ -669,11 +669,6 @@ CM_ SG_ 114 ADC2_Req_Status "Unlock request";
 BA_DEF_ BO_  "???" HEX 0 0;
 BA_DEF_DEF_  "???" 0;
 BA_ "???" BO_ 520 0;
-VAL_ 3221225472 P252_ImpluseStart 1 "" ;
-VAL_ 3221225472 P250_MajorStartRequest 1 "" ;
-VAL_ 3221225472 P251_Com_stScndStrtReq 1 "" ;
-VAL_ 1074 P214_Com_stMnWkUp 1 "" ;
-VAL_ 1074 P249_Com_stEngStopReq 1 "" ;
 VAL_ 840 P134_Com_stEng 7 "RESERVED" 6 "DegradedGO" 5 "GO" 4 "Stopped" 3 "Running" 2 "Starting" 1 "Cut" 0 "Locked" ;
 
 
