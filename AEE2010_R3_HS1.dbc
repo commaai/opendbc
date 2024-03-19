@@ -386,7 +386,7 @@ BO_ 941 Dyn_EasyMove: 8 CDS___Fahrdynamikregelung
  SG_ P337_Com_stPrkBrk : 24|3@1+ (1,0) [0|0] "" Vector__XXX
  SG_ P299_Com_bCrCtlInhib : 17|1@1+ (1,0) [0|1] "" Vector__XXX
 
-BO_ 909 Dyn_ABR: 7 ABS___Antiblockiersystem
+BO_ 909 Dyn_ABR: 8 ABS___Antiblockiersystem
  SG_ P688_Com_bAuthHllAsstStop : 54|1@0+ (1,0) [0|0] "" Vector__XXX
  SG_ P052_Com_aLng : 32|8@1+ (0.08,-14) [-14|6.32] "m/s**2" Vector__XXX
  SG_ P010_Com_v : 7|16@0+ (0.01,0) [0|655.34] "km/h" Vector__XXX
