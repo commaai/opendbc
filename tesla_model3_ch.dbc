@@ -160,7 +160,7 @@ BO_ 697 DAS_control: 8 CH
  SG_ DAS_accState : 12|4@1+ (1,0) [0|15] ""  aps
  SG_ DAS_setSpeed : 0|12@1+ (0.1,0) [0|409.4] "kph"  aps
 
-BO_ 341 ESP_wheelRotation: 8 CH
+BO_ 341 ESP_B: 8 CH
  SG_ ESP_wheelRotationChecksum : 56|8@1+ (1,0) [0|255] ""  app
  SG_ ESP_wheelRotationCounter : 52|4@1+ (1,0) [0|15] ""  app
  SG_ ESP_vehicleSpeed : 42|10@1+ (0.5,0) [0|511] "kph"  app
@@ -299,7 +299,7 @@ BO_ 82 EPAS3P_sysStatus: 8 CH
  SG_ EPAS3P_internalSASQF : 4|1@0+ (1,0) [0|1] ""  park
  SG_ EPAS3P_currentTuneMode : 7|3@0+ (1,0) [0|5] ""  park
 
-BO_ 646 DI_locStatus: 7 ETH
+BO_ 646 DI_state: 7 ETH
  SG_ DI_summonInPanic : 48|1@1+ (1,0) [0|0] ""  X
  SG_ DI_rollPreventionState : 45|3@1+ (1,0) [0|0] ""  X
  SG_ DI_vehicleHoldState : 42|3@1+ (1,0) [0|0] ""  X
@@ -308,8 +308,8 @@ BO_ 646 DI_locStatus: 7 ETH
  SG_ DI_autopilotRequest : 36|1@1+ (1,0) [0|0] ""  X
  SG_ DI_parkBrakeState : 32|4@1+ (1,0) [0|0] ""  X
  SG_ DI_autoparkState : 25|4@1+ (1,0) [0|0] ""  X
- SG_ DI_cruiseSetSpeedUnits : 24|1@1+ (1,0) [0|0] ""  X
- SG_ DI_cruiseSetSpeed : 15|9@1+ (0.5,0) [0|0] "speed"  X
+ SG_ DI_speedUnits : 24|1@1+ (1,0) [0|0] ""  X
+ SG_ DI_digitalSpeed : 15|9@1+ (0.5,0) [0|0] "speed"  X
  SG_ DI_cruiseState : 12|3@1+ (1,0) [0|0] ""  X
  SG_ DI_locStatusCounter : 8|4@1+ (1,0) [0|0] ""  X
  SG_ DI_locStatusChecksum : 0|8@1+ (1,0) [0|0] ""  X
@@ -446,7 +446,7 @@ VAL_ 646 DI_aebState 0 "UNAVAILABLE" 1 "STANDBY" 2 "ENABLED" 3 "STANDSTILL" 4 "F
 VAL_ 646 DI_autopilotRequest 0 "IDLE" 1 "ACTIVATE" ;
 VAL_ 646 DI_parkBrakeState 0 "UNAVAILABLE" 1 "RELEASED" 2 "REQUESTED" 3 "APPLIED" 4 "FAULTED" 5 "PANIC_EPB" 6 "PANIC_SKID" 7 "RELEASING" 15 "SNA" ;
 VAL_ 646 DI_autoparkState 0 "UNAVAILABLE" 1 "STANDBY" 2 "STARTED" 3 "ACTIVE" 4 "COMPLETE" 5 "PAUSED" 6 "ABORTED" 7 "RESUMED" 8 "UNPARK_COMPLETE" 9 "SELFPARK_STARTED" 15 "SNA" ;
-VAL_ 646 DI_cruiseSetSpeedUnits 0 "MPH" 1 "KPH" ;
+VAL_ 646 DI_speedUnits 0 "MPH" 1 "KPH" ;
 VAL_ 646 DI_cruiseState 0 "UNAVAILABLE" 1 "STANDBY" 2 "ENABLED" 3 "STANDSTILL" 4 "OVERRIDE" 5 "FAULT" 6 "PRE_FAULT" 7 "PRE_CANCEL" ;
 
 
