@@ -3705,7 +3705,7 @@ CM_ SG_ 130 SteMdule_U_Meas "DCR 1745  to update Tx from GWM to EP100ms. SteMdul
 CM_ SG_ 130 SteMdule_I_Est "DCR 1745  to update Tx from GWM to EP100ms. SteMdule_I_Est & SteMdule_U_Meas are used by BMS system & filtered. The filter uses standard periodic rate & changing to EP would adversely affect the filter.(jweinfur)";
 CM_ SG_ 126 StePinRelInit_An_Sns "SASM will transmit these signals on vehicles with SASM and without PSCM.  SCCM will not Tx this signal when SASM is present.";
 CM_ SG_ 126 StePinAn_No_Cs "Signal not transmitted on gas variants.";
-CM_ BO_ 133 "Seen on Ford Edge MK2"
+CM_ BO_ 133 "Seen on Ford Edge MK2";
 CM_ SG_ 133 StePinRelInit_An_Sns "SASM will transmit these signals on vehicles with SASM and without PSCM.  SCCM will not Tx this signal when SASM is present.";
 CM_ SG_ 133 StePinAn_No_Cs "Signal not transmitted on gas variants.";
 CM_ SG_ 1200 BrkTot_Tq_RqDrv "DCR 1836 to update Tx from GWM to EP100ms rejected due MPS6 TCM requires BrkTot_Tq_RqDrv at 20ms (bshu1).";
