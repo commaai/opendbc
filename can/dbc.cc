@@ -120,6 +120,7 @@ DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, Ch
   std::string line;
   int line_num = 0;
   std::smatch match;
+  Signal multiplexer = {};
   // TODO: see if we can speed up the regex statements in this loop, SG_ is specifically the slowest
   while (std::getline(stream, line)) {
     line = trim(line);
@@ -152,6 +153,19 @@ DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, Ch
       }
       Signal& sig = signals[address].emplace_back();
       sig.name = match[1].str();
+
+      // Multiplexed signal
+      if (offset == 1 && match[2] != "M") {
+        sig.is_multiplexed = true;
+        sig.mux_msb = multiplexer.msb;
+        sig.mux_lsb = multiplexer.lsb;
+        sig.mux_size = multiplexer.size;
+        sig.mux_little_endian = multiplexer.is_little_endian;
+        sig.mux_selector = std::stoi(match[2].str().substr(1));
+      } else {
+        sig.is_multiplexed = false;
+      }
+
       sig.start_bit = std::stoi(match[offset + 2].str());
       sig.size = std::stoi(match[offset + 3].str());
       sig.is_little_endian = std::stoi(match[offset + 4].str()) == 1;
@@ -166,6 +180,11 @@ DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, Ch
         auto it = find(be_bits.begin(), be_bits.end(), sig.start_bit);
         sig.lsb = be_bits[(it - be_bits.begin()) + sig.size - 1];
         sig.msb = sig.start_bit;
+      }
+
+      // TODO: ensure multiplexer comes first
+      if (offset == 1 && match[2] == "M") {
+        multiplexer = sig;
       }
       DBC_ASSERT(sig.lsb < (64 * 8) && sig.msb < (64 * 8), "Signal out of bounds: " << line);
 

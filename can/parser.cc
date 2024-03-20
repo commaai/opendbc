@@ -41,6 +41,20 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
   for (int i = 0; i < parse_sigs.size(); i++) {
     const auto &sig = parse_sigs[i];
 
+    if (sig.is_multiplexed) {
+      Signal selector_sig = {
+        .msb = sig.mux_msb,
+        .lsb = sig.mux_lsb,
+        .size = sig.mux_size,
+        .is_little_endian = sig.mux_little_endian,
+      };
+
+      int64_t selector = get_raw_value(dat, selector_sig);
+      if (selector != sig.mux_selector) {
+        continue;
+      }
+    }
+
     int64_t tmp = get_raw_value(dat, sig);
     if (sig.is_signed) {
       tmp -= ((tmp >> (sig.size-1)) & 0x1) ? (1ULL << sig.size) : 0;
