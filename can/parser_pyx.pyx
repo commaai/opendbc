@@ -5,11 +5,12 @@ from cython.operator cimport dereference as deref, preincrement as preinc
 from libcpp.pair cimport pair
 from libcpp.string cimport string
 from libcpp.vector cimport vector
+from libcpp.map cimport map
 from libcpp.unordered_set cimport unordered_set
 from libc.stdint cimport uint32_t
 
 from .common cimport CANParser as cpp_CANParser
-from .common cimport dbc_lookup, SignalValue, DBC
+from .common cimport dbc_lookup, SignalValue, DBC, Msg
 
 import numbers
 from collections import defaultdict
@@ -36,26 +37,28 @@ cdef class CANParser:
     self.vl = {}
     self.vl_all = {}
     self.ts_nanos = {}
-    msg_name_to_address = {}
-    address_to_msg_name = {}
 
-    for i in range(self.dbc[0].msgs.size()):
-      msg = self.dbc[0].msgs[i]
+    msg_name_to_address = {}
+    cdef map[uint32_t, const Msg*] address_to_msg
+    cdef const Msg* msg
+
+    for i from 0 <= i < self.dbc.msgs.size():
+      msg = &(self.dbc.msgs[i])
       name = msg.name.decode("utf8")
 
       msg_name_to_address[name] = msg.address
-      address_to_msg_name[msg.address] = name
+      address_to_msg[msg.address] = msg
 
     # Convert message names into addresses and check existence in DBC
     cdef vector[pair[uint32_t, int]] message_v
-    for i in range(len(messages)):
+    for i from 0 <= i < len(messages):
       c = messages[i]
       address = c[0] if isinstance(c[0], numbers.Number) else msg_name_to_address.get(c[0])
-      if address not in address_to_msg_name:
+      if not address or address_to_msg.count(address) == 0:
         raise RuntimeError(f"could not find message {repr(c[0])} in DBC {self.dbc_name}")
       message_v.push_back((address, c[1]))
 
-      name = address_to_msg_name[address]
+      name = address_to_msg[address].name.decode("utf8")
       self.vl[address] = {}
       self.vl[name] = self.vl[address]
       self.vl_all[address] = {}
@@ -63,8 +66,13 @@ cdef class CANParser:
       self.ts_nanos[address] = {}
       self.ts_nanos[name] = self.ts_nanos[address]
 
+      for j from 0 <= j < address_to_msg[address].sigs.size():
+        name = address_to_msg[address].sigs[j].name.decode("utf8")
+        self.vl[address][name] = 0
+        self.vl_all[address][name] = []
+        self.ts_nanos[address][name] = 0
+
     self.can = new cpp_CANParser(bus, dbc_name, message_v)
-    self.update_strings([])
 
   def __dealloc__(self):
     if self.can:
@@ -77,6 +85,9 @@ cdef class CANParser:
 
     cdef vector[SignalValue] new_vals
     cdef unordered_set[uint32_t] updated_addrs
+
+    if not strings:
+      return updated_addrs
 
     self.can.update_strings(strings, new_vals, sendcan)
     cdef vector[SignalValue].iterator it = new_vals.begin()
