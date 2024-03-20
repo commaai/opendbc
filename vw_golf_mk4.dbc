@@ -1627,7 +1627,7 @@ VAL_ 872 ACS_Fehler 1 "Fehlerspeichereintrag" 0 "kein_Fehlerspeichereintrag" ;
 VAL_ 872 ACS_zul_Regelabw 254 "ADR_nicht_aktiv" 255 "Fehler" ;
 VAL_ 872 ACS_max_AendGrad 254 "Neutralwert" 0 "Neutralwert" 255 "Fehler" ;
 
-VAL_ 978 LH2_Sta_HCA 0 "disabled" 1 "initializing" 2 "fault" 3 "ready" 4 "rejected" 5 "active";
+VAL_ 978 LH2_Sta_HCA 0 "disabled" 1 "initializing" 2 "fault" 3 "ready" 4 "rejected" 5 "active" 7 "active";
 VAL_ 1088 Waehlhebelposition__Getriebe_1_ 8 "P" 7 "R" 6 "N" 5 "D" 9 "U" 12 "S" 14 "T" 10 "T" 11 "T";
 
 VAL_ 1386 ACA_StaACC 6 "ACC_rev_aus" 0 "Hauptschalter_aus" 4 "ACC_im_Hintergrund" 3 "ACC_aktiv" 1 "Reserve" 2 "ACC_passiv" 7 "ACC_irrev_aus" 5 "frei" ;
