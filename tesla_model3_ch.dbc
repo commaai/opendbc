@@ -98,34 +98,6 @@ BO_ 264 DI_torque: 8 CH
  SG_ DI_torqueCounter : 8|4@1+ (1,0) [0|15] ""  epas3s
  SG_ DI_torqueChecksum : 0|8@1+ (1,0) [0|255] ""  epas3s
 
-BO_ 921 DAS_status: 8 CH
- SG_ DAS_statusChecksum : 56|8@1+ (1,0) [0|255] ""  aps
- SG_ DAS_statusCounter : 52|4@1+ (1,0) [0|15] ""  aps
- SG_ DAS_summonAvailable : 51|1@1+ (1,0) [0|1] ""  aps
- SG_ DAS_autoLaneChangeState : 46|5@1+ (1,0) [0|31] ""  aps
- SG_ DAS_autopilotHandsOnState : 42|4@1+ (1,0) [0|15] ""  aps
- SG_ DAS_fleetSpeedState : 40|2@1+ (1,0) [0|3] ""  aps
- SG_ DAS_laneDepartureWarning : 37|3@1+ (1,0) [0|5] ""  aps
- SG_ DAS_csaState : 35|2@1+ (1,0) [0|3] ""  aps
- SG_ DAS_sideCollisionInhibit : 34|1@1+ (1,0) [0|1] ""  aps
- SG_ DAS_sideCollisionWarning : 32|2@1+ (1,0) [0|3] ""  aps
- SG_ DAS_sideCollisionAvoid : 30|2@1+ (1,0) [0|3] ""  aps
- SG_ DAS_summonRvsLeashReached : 29|1@1+ (1,0) [0|1] ""  aps
- SG_ DAS_summonFwdLeashReached : 28|1@1+ (1,0) [0|1] ""  aps
- SG_ DAS_autoparkWaitingForBrake : 26|1@1+ (1,0) [0|1] ""  gtw
- SG_ DAS_autoParked : 25|1@1+ (1,0) [0|1] ""  aps
- SG_ DAS_autoparkReady : 24|1@1+ (1,0) [0|1] ""  aps
- SG_ DAS_forwardCollisionWarning : 22|2@1+ (1,0) [0|3] ""  aps
- SG_ DAS_heaterState : 21|1@1+ (1,0) [0|1] ""  gtw
- SG_ DAS_visionOnlySpeedLimit : 16|5@1+ (5,0) [0|150] "kph/mph"  aps
- SG_ DAS_summonClearedGate : 15|1@1+ (1,0) [0|1] ""  aps
- SG_ DAS_summonObstacle : 14|1@1+ (1,0) [0|1] ""  aps
- SG_ DAS_suppressSpeedWarning : 13|1@1+ (1,0) [0|1] ""  aps
- SG_ DAS_fusedSpeedLimit : 8|5@1+ (5,0) [0|150] "kph/mph"  aps
- SG_ DAS_blindSpotRearRight : 6|2@1+ (1,0) [0|3] ""  aps
- SG_ DAS_blindSpotRearLeft : 4|2@1+ (1,0) [0|3] ""  aps
- SG_ DAS_autopilotState : 0|4@1+ (1,0) [0|15] ""  aps
-
 BO_ 585 SCCM_leftStalk: 3 CH
  SG_ SCCM_leftStalkReserved1 : 19|5@1+ (1,0) [0|31] ""  X
  SG_ SCCM_turnIndicatorStalkStatus : 16|3@1+ (1,0) [0|5] ""  park
@@ -350,23 +322,6 @@ VAL_ 962 VCLEFT_switchStatusIndex 1 "VCLEFT_SWITCH_STATUS_INDEX_1" 2 "VCLEFT_SWI
 VAL_ 264 DI_axleSpeed -32768 "SNA" ;
 VAL_ 264 DI_torqueActual -4096 "SNA" ;
 VAL_ 264 DI_torqueCommand -4096 "SNA" ;
-VAL_ 921 DAS_autoLaneChangeState 5 "ALC_UNAVAILABLE_VEHICLE_SPEED" 17 "ALC_ABORT_POOR_VIEW_RANGE" 23 "ALC_BLOCKED_VEH_TTC_AND_USS_L" 0 "ALC_UNAVAILABLE_DISABLED" 26 "ALC_BLOCKED_LANE_TYPE_L" 29 "ALC_ABORT_TIMEOUT" 9 "ALC_IN_PROGRESS_L" 4 "ALC_UNAVAILABLE_EXITING_HIGHWAY" 22 "ALC_BLOCKED_VEH_TTC_L" 12 "ALC_WAITING_FOR_SIDE_OBST_TO_PASS_R" 18 "ALC_ABORT_LC_HEALTH_BAD" 28 "ALC_WAITING_HANDS_ON" 8 "ALC_AVAILABLE_BOTH" 11 "ALC_WAITING_FOR_SIDE_OBST_TO_PASS_L" 3 "ALC_UNAVAILABLE_TP_FOLLOW" 2 "ALC_UNAVAILABLE_SONICS_INVALID" 21 "ALC_UNAVAILABLE_SOLID_LANE_LINE" 24 "ALC_BLOCKED_VEH_TTC_R" 1 "ALC_UNAVAILABLE_NO_LANES" 25 "ALC_BLOCKED_VEH_TTC_AND_USS_R" 30 "ALC_ABORT_MISSION_PLAN_INVALID" 27 "ALC_BLOCKED_LANE_TYPE_R" 19 "ALC_ABORT_BLINKER_TURNED_OFF" 31 "ALC_SNA" 13 "ALC_WAITING_FOR_FWD_OBST_TO_PASS_L" 16 "ALC_ABORT_SIDE_OBSTACLE_PRESENT_R" 6 "ALC_AVAILABLE_ONLY_L" 20 "ALC_ABORT_OTHER_REASON" 15 "ALC_ABORT_SIDE_OBSTACLE_PRESENT_L" 7 "ALC_AVAILABLE_ONLY_R" 14 "ALC_WAITING_FOR_FWD_OBST_TO_PASS_R" 10 "ALC_IN_PROGRESS_R" ;
-VAL_ 921 DAS_autopilotHandsOnState 8 "LC_HANDS_ON_SUSPENDED" 15 "LC_HANDS_ON_SNA" 7 "LC_HANDS_ON_REQD_STRUCK_OUT" 3 "LC_HANDS_ON_REQD_VISUAL" 4 "LC_HANDS_ON_REQD_CHIME_1" 6 "LC_HANDS_ON_REQD_SLOWING" 1 "LC_HANDS_ON_REQD_DETECTED" 2 "LC_HANDS_ON_REQD_NOT_DETECTED" 5 "LC_HANDS_ON_REQD_CHIME_2" 0 "LC_HANDS_ON_NOT_REQD" ;
-VAL_ 921 DAS_fleetSpeedState 0 "FLEETSPEED_UNAVAILABLE" 1 "FLEETSPEED_AVAILABLE" 2 "FLEETSPEED_ACTIVE" 3 "FLEETSPEED_HOLD" ;
-VAL_ 921 DAS_laneDepartureWarning 5 "SNA" 0 "NONE" 2 "RIGHT_WARNING" 4 "RIGHT_WARNING_SEVERE" 3 "LEFT_WARNING_SEVERE" 1 "LEFT_WARNING" ;
-VAL_ 921 DAS_csaState 1 "CSA_EXTERNAL_STATE_AVAILABLE" 3 "CSA_EXTERNAL_STATE_HOLD" 2 "CSA_EXTERNAL_STATE_ENABLE" 0 "CSA_EXTERNAL_STATE_UNAVAILABLE" ;
-VAL_ 921 DAS_sideCollisionInhibit 0 "NO_INHIBIT" 1 "INHIBIT" ;
-VAL_ 921 DAS_sideCollisionWarning 0 "NONE" 2 "WARN_RIGHT" 1 "WARN_LEFT" 3 "WARN_LEFT_RIGHT" ;
-VAL_ 921 DAS_sideCollisionAvoid 3 "SNA" 0 "NONE" 1 "AVOID_LEFT" 2 "AVOID_RIGHT" ;
-VAL_ 921 DAS_autoparkReady 0 "AUTOPARK_UNAVAILABLE" 1 "AUTOPARK_READY" ;
-VAL_ 921 DAS_forwardCollisionWarning 3 "SNA" 0 "NONE" 1 "FORWARD_COLLISION_WARNING" ;
-VAL_ 921 DAS_heaterState 0 "HEATER_OFF_SNA" 1 "HEATER_ON" ;
-VAL_ 921 DAS_visionOnlySpeedLimit 31 "NONE" 0 "UNKNOWN_SNA" ;
-VAL_ 921 DAS_suppressSpeedWarning 1 "Suppress_Speed_Warning" 0 "Do_Not_Suppress" ;
-VAL_ 921 DAS_fusedSpeedLimit 31 "NONE" 0 "UNKNOWN_SNA" ;
-VAL_ 921 DAS_blindSpotRearRight 3 "SNA" 0 "NO_WARNING" 1 "WARNING_LEVEL_1" 2 "WARNING_LEVEL_2" ;
-VAL_ 921 DAS_blindSpotRearLeft 3 "SNA" 0 "NO_WARNING" 1 "WARNING_LEVEL_1" 2 "WARNING_LEVEL_2" ;
-VAL_ 921 DAS_autopilotState 15 "SNA" 8 "ABORTING" 3 "ACTIVE_NOMINAL" 0 "DISABLED" 4 "ACTIVE_RESTRICTED" 5 "ACTIVE_NAV" 14 "FAULT" 1 "UNAVAILABLE" 9 "ABORTED" 2 "AVAILABLE" ;
 VAL_ 585 SCCM_turnIndicatorStalkStatus 3 "DOWN_1" 5 "SNA" 0 "IDLE" 1 "UP_1" 4 "DOWN_2" 2 "UP_2" ;
 VAL_ 585 SCCM_washWipeButtonStatus 3 "SNA" 0 "NOT_PRESSED" 2 "2ND_DETENT" 1 "1ST_DETENT" ;
 VAL_ 585 SCCM_highBeamStalkStatus 3 "SNA" 0 "IDLE" 1 "PULL" 2 "PUSH" ;
