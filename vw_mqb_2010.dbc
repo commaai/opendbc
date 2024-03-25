@@ -93,6 +93,8 @@ BO_ 679 ACC_13: 8 XXX
  SG_ ACC_ENG_Texte : 60|2@1+ (1,0) [0|3] ""  XXX
 
 BO_ 681 ACC_15: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  XXX
  SG_ AWV_Warnung : 16|3@1+ (1,0) [0|7] ""  XXX
  SG_ AWV_Texte : 24|3@1+ (1,0) [0|7] ""  XXX
  SG_ AWV_Status_Anzeige : 32|2@1+ (1,0) [0|3] ""  XXX
