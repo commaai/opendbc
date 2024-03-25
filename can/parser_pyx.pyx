@@ -8,9 +8,11 @@ from libcpp.vector cimport vector
 from libc.stdint cimport uint32_t
 
 from .common cimport CANParser as cpp_CANParser
-from .common cimport dbc_lookup, SignalValue, DBC
+from .common cimport dbc_lookup, SignalValue, DBC, CanData, CanFrame
 
 import numbers
+import capnp
+from cereal import log
 from collections import defaultdict
 
 
@@ -69,6 +71,26 @@ cdef class CANParser:
     for address in self.addresses:
       self.vl_all[address].clear()
 
+    cdef CanFrame* frame
+    cdef CanData* can_data
+    cdef vector[CanData] can_data_array
+
+    can_data_array.reserve(len(strings))
+    try:
+      for s in strings:
+        with log.Event.from_bytes(s) as msg:
+          can_event = msg.sendCan if sendcan else msg.can
+          can_data = &(can_data_array.emplace_back())
+          can_data.nanos = msg.logMonoTime
+          can_data.frames.reserve(len(can_event))
+          for c in can_event:
+            frame = &(can_data.frames.emplace_back())
+            frame.src = c.src
+            frame.address = c.address
+            frame.dat = c.dat
+    except capnp.lib.capnp.KjException as ex:
+      raise RuntimeError(str(ex))
+
     cdef vector[SignalValue] new_vals
     cur_address = -1
     vl = {}
@@ -76,7 +98,7 @@ cdef class CANParser:
     ts_nanos = {}
     updated_addrs = set()
 
-    self.can.update_strings(strings, new_vals, sendcan)
+    self.can.update(can_data_array, new_vals)
     cdef vector[SignalValue].iterator it = new_vals.begin()
     cdef SignalValue* cv
     while it != new_vals.end():
