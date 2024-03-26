@@ -5,18 +5,14 @@ from cython.operator cimport dereference as deref, preincrement as preinc
 from libcpp.pair cimport pair
 from libcpp.string cimport string
 from libcpp.vector cimport vector
-from libcpp cimport bool
 from libcpp.unordered_set cimport unordered_set
 from libc.stdint cimport uint32_t
 
 from .common cimport CANParser as cpp_CANParser
-from .common cimport dbc_lookup, SignalValue, DBC, CanData
+from .common cimport dbc_lookup, SignalValue, DBC, CanData, CanFrame
 
 import numbers
 from collections import defaultdict
-
-cdef extern from "strings_to_candata.cc":
-  void strings_to_candata(const vector[string] &strings, vector[CanData] &candata, bool sendcan) except +
 
 cdef class CANParser:
   cdef:
@@ -72,13 +68,38 @@ cdef class CANParser:
   def update_strings(self, strings, sendcan=False):
     for address in self.addresses:
       self.vl_all[address].clear()
+    # input format:
+    # [nanos, [[address, 0, data, src], ...]]
+    # [[nanos, [[address, 0, data, src], ...], ...]]
+
+    for v in self.vl_all.values():
+      for l in v.values():  # no-cython-lint
+        l.clear()
 
     cdef vector[SignalValue] new_vals
     cdef unordered_set[uint32_t] updated_addrs
-    cdef vector[CanData] can_data
+    cdef CanFrame* frame
+    cdef CanData* can_data
+    cdef vector[CanData] can_data_array
 
-    strings_to_candata(strings, can_data, sendcan)
-    self.can.update(can_data, new_vals)
+    try:
+      if len(strings) and not isinstance(strings[0], (list, tuple)):
+        strings = [strings]
+
+      can_data_array.reserve(len(strings))
+      for s in strings:
+        can_data = &(can_data_array.emplace_back())
+        can_data.nanos = s[0]
+        can_data.frames.reserve(len(s[1]))
+        for f in s[1]:
+          frame = &(can_data.frames.emplace_back())
+          frame.address = f[0]
+          frame.dat = f[2]
+          frame.src = f[3]
+    except TypeError:
+      raise RuntimeError("invalid parameter")
+
+    self.can.update(can_data_array, new_vals)
 
     cdef vector[SignalValue].iterator it = new_vals.begin()
     cdef SignalValue* cv

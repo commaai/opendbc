@@ -69,7 +69,7 @@ cdef extern from "common.h":
 
   cdef struct CanFrame:
     long src
-    long address
+    uint32_t address
     vector[uint8_t] dat
 
   cdef struct CanData:

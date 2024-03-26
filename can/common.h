@@ -29,7 +29,7 @@ unsigned int pedal_checksum(uint32_t address, const Signal &sig, const std::vect
 
 struct CanFrame {
   long src;
-  long address;
+  uint32_t address;
   std::vector<uint8_t> dat;
 };
 
