@@ -10,8 +10,8 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 
-#include "cereal/logger/logger.h"
 #include "opendbc/can/common.h"
+#include "opendbc/can/logger.h"
 
 int64_t get_raw_value(const std::vector<uint8_t> &msg, const Signal &sig) {
   int64_t ret = 0;
@@ -65,7 +65,7 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
 
   // only update values if both checksum and counter are valid
   if (checksum_failed || counter_failed) {
-    LOGE("0x%X message checks failed, checksum failed %d, counter failed %d", address, checksum_failed, counter_failed);
+    NO_SPAM_LOGE("0x%X message checks failed, checksum failed %d, counter failed %d", address, checksum_failed, counter_failed);
     return false;
   }
 
@@ -83,7 +83,7 @@ bool MessageState::update_counter_generic(int64_t v, int cnt_size) {
   if (((counter + 1) & ((1 << cnt_size) -1)) != v) {
     counter_fail = std::min(counter_fail + 1, MAX_BAD_COUNTER);
     if (counter_fail > 1) {
-      INFO("0x%X COUNTER FAIL #%d -- %d -> %d\n", address, counter_fail, counter, (int)v);
+      NO_SPAM_LOG("0x%X COUNTER FAIL #%d -- %d -> %d\n", address, counter_fail, counter, (int)v);
     }
   } else if (counter_fail > 0) {
     counter_fail--;
@@ -290,9 +290,9 @@ void CANParser::UpdateValid(uint64_t nanos) {
     if (state.check_threshold > 0 && (missing || timed_out)) {
       if (show_missing && !bus_timeout) {
         if (missing) {
-          LOGE("0x%X '%s' NOT SEEN", state.address, state.name.c_str());
+          NO_SPAM_LOGE("0x%X '%s' NOT SEEN", state.address, state.name.c_str());
         } else if (timed_out) {
-          LOGE("0x%X '%s' TIMED OUT", state.address, state.name.c_str());
+          NO_SPAM_LOGE("0x%X '%s' TIMED OUT", state.address, state.name.c_str());
         }
       }
       _valid = false;

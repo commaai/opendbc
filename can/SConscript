@@ -5,7 +5,7 @@ import os
 envDBC = env.Clone()
 dbc_file_path = '-DDBC_FILE_PATH=\'"%s"\'' % (envDBC.Dir("..").abspath)
 envDBC['CXXFLAGS'] += [dbc_file_path]
-src = ["dbc.cc", "parser.cc", "packer.cc", "common.cc"]
+src = ["dbc.cc", "parser.cc", "packer.cc", "common.cc", "logger.cc"]
 libs = [common, "capnp", "kj", "zmq"]
 
 # shared library for openpilot
