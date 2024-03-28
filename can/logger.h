@@ -3,21 +3,24 @@
 #include <string>
 #include <unordered_map>
 
+#include <cassert>
 class NoSpamLogger {
 
 public:
   enum Type {Debug, Info, Warning, Error};
-  struct Stat {
-    double ts = 0;
-    uint32_t count = 0;
-  };
-  inline static uint32_t threshold = 500;  // 500 ms
-
+  ~NoSpamLogger();
   static void log(Type type, const std::string &msg);
   static std::string format_string(const char *fmt, ...);
 
 private:
-  static std::unordered_map<std::string, Stat> logs;
+  struct Stat {
+    Type type;
+    double ts = 0;
+    uint32_t count = 0;
+  };
+  const uint32_t threshold = 500;  // 500 ms
+  std::unordered_map<std::string, Stat> messages;
+  void log(std::unordered_map<std::string, Stat>::iterator it);
 };
 
 #define NO_SPAM_LOGD(fmt, ...) NoSpamLogger::log(NoSpamLogger::Type::Debug, NoSpamLogger::format_string(fmt, ##__VA_ARGS__))
