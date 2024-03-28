@@ -17,11 +17,11 @@
 
 NoSpamLogger::~NoSpamLogger() {
   // flush messages
-  for (auto it = messages.begin(); it != messages.end(); ++it) {
-    if (it->second.count > 0) {
-      log(it);
-    }
-  }
+  // for (auto it = messages.begin(); it != messages.end(); ++it) {
+  //   if (it->second.count > 0) {
+  //     log(it);
+  //   }
+  // }
 }
 
 std::string NoSpamLogger::format_string(const char *fmt, ...) {
