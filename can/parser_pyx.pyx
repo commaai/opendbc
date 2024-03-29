@@ -72,8 +72,8 @@ cdef class CANParser:
     # [nanos, [[address, 0, data, src], ...]]
     # [[nanos, [[address, 0, data, src], ...], ...]]
 
-    for v in self.vl_all.values():
-      for l in v.values():  # no-cython-lint
+    for v in self.vl_all.itervalues():
+      for l in v.itervalues():  # no-cython-lint
         l.clear()
 
     cdef vector[SignalValue] new_vals
