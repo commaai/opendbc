@@ -66,6 +66,7 @@ private:
   const int bus;
   const DBC *dbc = NULL;
   std::unordered_map<uint32_t, MessageState> message_states;
+  int32_t signal_count = -1;
 
 public:
   bool can_valid = false;
