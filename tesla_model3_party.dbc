@@ -36,7 +36,7 @@ BS_:
 BU_: CH DIPF DIPR ETH FC HVI HVS PARTY SDCV VEH VIRT
 
 
-BO_ 962 VCLEFT_switchStatus: 8 CH
+BO_ 962 VCLEFT_switchStatus: 8 PARTY
  SG_ VCLEFT_rearHVACButtonPressed m0 : 61|1@1+ (1,0) [0|1] ""  X
  SG_ VCLEFT_brakePressed m0 : 60|1@1+ (1,0) [0|1] ""  X
  SG_ VCLEFT_rearRightOccupancySwitch m0 : 58|2@1+ (1,0) [0|3] ""  X
@@ -91,7 +91,7 @@ BO_ 962 VCLEFT_switchStatus: 8 CH
  SG_ VCLEFT_hornSwitchPressed m0 : 2|1@1+ (1,0) [0|1] ""  X
  SG_ VCLEFT_switchStatusIndex M : 0|2@1+ (1,0) [0|2] ""  X
 
-BO_ 905 DAS_status2: 8 CH
+BO_ 905 DAS_status2: 8 PARTY
  SG_ DAS_status2Checksum : 56|8@1+ (1,0) [0|255] ""  aps
  SG_ DAS_status2Counter : 52|4@1+ (1,0) [0|15] ""  aps
  SG_ DAS_longCollisionWarning : 48|4@1+ (1,0) [0|15] ""  aps
@@ -110,14 +110,14 @@ BO_ 905 DAS_status2: 8 CH
  SG_ DAS_pmmObstacleSeverity : 10|3@1+ (1,0) [0|7] ""  aps
  SG_ DAS_accSpeedLimit : 0|10@1+ (0.2,0) [0|204.6] "mph"  aps
 
-BO_ 264 DI_torque: 8 CH
+BO_ 264 DI_torque: 8 PARTY
  SG_ DI_axleSpeed : 40|16@1- (0.1,0.0) [-2750|2750] "RPM"  epas3s
  SG_ DI_torqueActual : 27|13@1- (2,0) [-7500|7500] "Nm"  X
  SG_ DI_torqueCommand : 12|13@1- (2,0) [-7500|7500] "Nm"  X
  SG_ DI_torqueCounter : 8|4@1+ (1,0) [0|15] ""  epas3s
  SG_ DI_torqueChecksum : 0|8@1+ (1,0) [0|255] ""  epas3s
 
-BO_ 585 SCCM_leftStalk: 3 CH
+BO_ 585 SCCM_leftStalk: 3 PARTY
  SG_ SCCM_leftStalkReserved1 : 19|5@1+ (1,0) [0|31] ""  X
  SG_ SCCM_turnIndicatorStalkStatus : 16|3@1+ (1,0) [0|5] ""  park
  SG_ SCCM_washWipeButtonStatus : 14|2@1+ (1,0) [0|3] ""  X
@@ -125,7 +125,7 @@ BO_ 585 SCCM_leftStalk: 3 CH
  SG_ SCCM_leftStalkCounter : 8|4@1+ (1,0) [0|15] ""  X
  SG_ SCCM_leftStalkCrc : 0|8@1+ (1,0) [0|255] ""  X
 
-BO_ 280 DI_systemStatus: 8 CH
+BO_ 280 DI_systemStatus: 8 PARTY
  SG_ DI_trackModeState : 48|2@1+ (1,0) [0|2] ""  X
  SG_ DI_keepAliveRequest : 47|1@1+ (1,0) [0|1] ""  X
  SG_ DI_proximity : 46|1@1+ (1,0) [0|1] ""  X
@@ -140,7 +140,7 @@ BO_ 280 DI_systemStatus: 8 CH
  SG_ DI_systemStatusCounter : 8|4@1+ (1,0) [0|15] ""  X
  SG_ DI_systemStatusChecksum : 0|8@1+ (1,0) [0|255] ""  X
 
-BO_ 697 DAS_control: 8 CH
+BO_ 697 DAS_control: 8 PARTY
  SG_ DAS_controlChecksum : 56|8@1+ (1,0) [0|255] ""  aps
  SG_ DAS_controlCounter : 53|3@1+ (1,0) [0|7] ""  aps
  SG_ DAS_accelMax : 44|9@1+ (0.04,-15) [-15|5.44] "m/s^2"  aps
@@ -151,7 +151,7 @@ BO_ 697 DAS_control: 8 CH
  SG_ DAS_accState : 12|4@1+ (1,0) [0|15] ""  aps
  SG_ DAS_setSpeed : 0|12@1+ (0.1,0) [0|409.4] "kph"  aps
 
-BO_ 341 ESP_B: 8 CH
+BO_ 341 ESP_B: 8 PARTY
  SG_ ESP_wheelRotationChecksum : 56|8@1+ (1,0) [0|255] ""  app
  SG_ ESP_wheelRotationCounter : 52|4@1+ (1,0) [0|15] ""  app
  SG_ ESP_vehicleSpeed : 42|10@1+ (0.5,0) [0|511] "kph"  app
@@ -166,7 +166,7 @@ BO_ 341 ESP_B: 8 CH
  SG_ ESP_wheelPulseCountFrR : 8|8@1+ (1,0) [0|254] "1"  app
  SG_ ESP_wheelPulseCountFrL : 0|8@1+ (1,0) [0|254] "1"  app
 
-BO_ 969 APS_status: 4 CH
+BO_ 969 APS_status: 4 PARTY
  SG_ APS_statusCounter : 22|4@1+ (1,0) [0|15] ""  X
  SG_ APS_apbGpioState : 20|2@1+ (1,0) [0|3] ""  gtw
  SG_ APS_apbStatusMonitorState : 16|3@1+ (1,0) [0|7] ""  gtw
@@ -177,7 +177,7 @@ BO_ 969 APS_status: 4 CH
  SG_ APS_vehBehaviorState : 4|3@1+ (1,0) [0|7] ""  gtw
  SG_ APS_appStatusMonitorState : 0|3@1+ (1,0) [0|7] ""  gtw
 
-BO_ 737 VCFRONT_status: 8 CH
+BO_ 737 VCFRONT_status: 8 PARTY
  SG_ VCFRONT_frunkAccessPost m0 : 62|1@1+ (1,0) [0|1] ""  X
  SG_ VCFRONT_headlampRightFanStatus m0 : 61|1@1+ (1,0) [0|1] ""  X
  SG_ VCFRONT_headlampLeftFanStatus m0 : 60|1@1+ (1,0) [0|1] ""  X
@@ -242,7 +242,7 @@ BO_ 737 VCFRONT_status: 8 CH
  SG_ VCFRONT_5VARailStable m1 : 3|1@1+ (1,0) [0|1] ""  X
  SG_ VCFRONT_statusIndex M : 0|3@1+ (1,0) [0|5] ""  X
 
-BO_ 925 IBST_status: 5 CH
+BO_ 925 IBST_status: 5 PARTY
  SG_ IBST_sInputRodDriver : 21|12@1+ (0.015625,-5) [-5|47] "mm"  gtw
  SG_ IBST_internalState : 18|3@1+ (1,0) [0|6] ""  gtw
  SG_ IBST_driverBrakeApply : 16|2@1+ (1,0) [0|3] ""  gtw
@@ -250,7 +250,7 @@ BO_ 925 IBST_status: 5 CH
  SG_ IBST_statusCounter : 8|4@1+ (1,0) [0|15] ""  X
  SG_ IBST_statusChecksum : 0|8@1+ (1,0) [0|255] ""  X
 
-BO_ 880 EPAS3S_sysStatus: 8 CH
+BO_ 880 EPAS3S_sysStatus: 8 PARTY
  SG_ EPAS3S_sysStatusChecksum : 63|8@0+ (1,0) [0|255] ""  park
  SG_ EPAS3S_sysStatusCounter : 51|4@0+ (1,0) [0|15] ""  gtw
  SG_ EPAS3S_eacStatus : 55|3@0+ (1,0) [0|7] ""  das
@@ -264,21 +264,21 @@ BO_ 880 EPAS3S_sysStatus: 8 CH
  SG_ EPAS3S_internalSASQF : 4|1@0+ (1,0) [0|1] ""  gtw
  SG_ EPAS3S_currentTuneMode : 7|3@0+ (1,0) [0|5] ""  gtw
 
-BO_ 599 DI_speed: 8 CH
+BO_ 599 DI_speed: 8 PARTY
  SG_ DI_uiSpeedUnits : 32|1@1+ (1,0) [0|1] ""  das
  SG_ DI_uiSpeed : 24|8@1+ (1,0) [0|254] ""  das
  SG_ DI_vehicleSpeed : 12|12@1+ (0.08,-40) [-40|285] "kph"  park
  SG_ DI_speedCounter : 8|4@1+ (1,0) [0|15] ""  park
  SG_ DI_speedChecksum : 0|8@1+ (1,0) [0|255] ""  park
 
-BO_ 1160 DAS_steeringControl: 4 CH
+BO_ 1160 DAS_steeringControl: 4 PARTY
  SG_ DAS_steeringControlChecksum : 31|8@0+ (1,0) [0|255] ""  aps
  SG_ DAS_steeringControlCounter : 19|4@0+ (1,0) [0|15] ""  aps
  SG_ DAS_steeringControlType : 23|2@0+ (1,0) [0|3] ""  aps
  SG_ DAS_steeringAngleRequest : 6|15@0+ (0.1,-1638.35) [-1638.35|1638.35] "deg"  aps
  SG_ DAS_steeringHapticRequest : 7|1@0+ (1,0) [0|1] ""  aps
 
-BO_ 297 SCCM_steeringAngleSensor: 8 CH
+BO_ 297 SCCM_steeringAngleSensor: 8 PARTY
  SG_ SCCM_steeringAngleSensorReservd3 : 56|8@1+ (1,0) [0|255] ""  X
  SG_ SCCM_steeringAngleSensorReservd2 : 48|8@1+ (1,0) [0|255] ""  X
  SG_ SCCM_steeringAngleSensorReservd1 : 46|2@1+ (1,0) [0|3] ""  X
