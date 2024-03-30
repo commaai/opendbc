@@ -37,16 +37,14 @@ cdef class CANParser:
     self.vl = {}
     self.vl_all = {}
     self.ts_nanos = {}
-
     msg_name_to_address = {}
     cdef map[uint32_t, const Msg*] address_to_msg
     cdef const Msg* msg
 
     for i from 0 <= i < self.dbc.msgs.size():
       msg = &(self.dbc.msgs[i])
-      name = msg.name.decode("utf8")
 
-      msg_name_to_address[name] = msg.address
+      msg_name_to_address[msg.name.decode("utf8")] = msg.address
       address_to_msg[msg.address] = msg
 
     # Convert message names into addresses and check existence in DBC
