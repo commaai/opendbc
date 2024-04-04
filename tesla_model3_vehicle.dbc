@@ -1,8 +1,8 @@
 
-        VERSION ""
-        
-        BU_: CH DIPF DIPR ETH FC HVI HVS PARTY SDCV VEH VIRT
-        BO_ 962 VCLEFT_switchStatus: 8 VEH
+VERSION ""
+
+BU_: CH DIPF DIPR ETH FC HVI HVS PARTY SDCV VEH VIRT
+BO_ 962 VCLEFT_switchStatus: 8 VEH
  SG_ VCLEFT_frontBuckleSwitch m0: 48|2@1+ (1,0) [0|3] "" gtw
  SG_ VCLEFT_btnWindowSwPackUpLF m0: 32|1@1+ (1,0) [0|1] "" gtw
  SG_ VCLEFT_frontSeatTrackBack m0: 8|2@1+ (1,0) [0|3] "" gtw
@@ -80,71 +80,6 @@ BO_ 280 DI_systemStatus: 8 VEH
  SG_ DI_systemStatusChecksum : 0|8@1+ (1,0) [0|255] "" X
  SG_ DI_brakePedalState : 19|2@1+ (1,0) [0|2] "" vcleft
 
-BO_ 737 VCFRONT_status: 8 VEH
- SG_ VCFRONT_minEvapHeatRejection m3: 16|8@1+ (10,0) [0|2500] "W" vcright
- SG_ VCFRONT_vbatMonitorVoltage m4: 13|12@1+ (0.005443676098,0) [0|22.28641] "V" gtw
- SG_ VCFRONT_reverseBatteryFault m1: 21|1@1+ (1,0) [0|1] "" X
- SG_ VCFRONT_12VARailStable m1: 5|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_homelinkV2Response4 m2: 40|8@1+ (1,0) [0|255] "" gtw
- SG_ VCFRONT_AS8510Voltage m4: 25|12@1+ (0.005443676098,0) [0|22.28641] "V" gtw
- SG_ VCFRONT_anyDoorOpen m0: 50|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_chargeNeeded m4: 37|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_5VARailStable m1: 3|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_headlightRightVPosition m0: 38|10@1+ (1,0) [0|1023] "ticks" X
- SG_ VCFRONT_timeSpentSleeping m1: 45|8@1+ (1,0) [0|255] "s" gtw
- SG_ VCFRONT_wiperPositionDeg m0: 52|8@1+ (1,0) [0|255] "deg" X
- SG_ VCFRONT_chillerDemandActive m3: 26|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_sleepCurrent m1: 53|10@1- (1,0) [-512|511] "mA" gtw
- SG_ VCFRONT_IBSUnfilteredTemperature m4: 43|16@1- (0.01,0) [-327.68|327.67] "degC" gtw
- SG_ VCFRONT_HSDInitCompleteU16 m4: 42|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_headlampLeftFanStatus m0: 60|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_wiperSpeed m0: 8|4@1+ (1,0) [0|8] "" das
- SG_ VCFRONT_homelinkV2Response3 m2: 32|8@1+ (1,0) [0|255] "" gtw
- SG_ VCFRONT_wiperPosition m0: 12|3@1+ (1,0) [0|4] "" gtw
- SG_ VCFRONT_airCompressorStatus m0: 25|3@1+ (1,0) [0|7] "" gtw
- SG_ VCFRONT_headlampRightFanStatus m0: 61|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_iBoosterWakeLine m1: 10|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_isEvapOperationAllowed m3: 25|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_frunkInteriorRelSwitch m0: 48|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_statusIndex M: 0|3@1+ (1,0) [0|5] "" X
- SG_ VCFRONT_homelinkV2Response2 m2: 24|8@1+ (1,0) [0|255] "" gtw
- SG_ VCFRONT_hornOn m0: 51|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_homelinkCommStatus m2: 48|2@1+ (1,0) [0|3] "" gtw
- SG_ VCFRONT_compPerfRecoveryLimited m3: 27|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_hasLowRefrigerant m3: 29|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_pressureRefrigDischarge m3: 40|8@1+ (0.125,0) [0|31.75] "bar" gtw
- SG_ VCFRONT_batterySMState m1: 22|3@1+ (1,0) [0|7] "" gtw
- SG_ VCFRONT_crashState m0: 22|2@1+ (1,0) [0|2] "" gtw
- SG_ VCFRONT_12VBRailStable m1: 6|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_pressureRefrigSuction m3: 32|7@1+ (0.125,0) [0|11.5] "bar" gtw
- SG_ VCFRONT_PEResetLineState m4: 40|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_homelinkV2Response1 m2: 16|8@1+ (1,0) [0|255] "" gtw
- SG_ VCFRONT_maxEvapHeatRejection m3: 8|8@1+ (32,0) [0|8000] "W" vcright
- SG_ VCFRONT_epasWakeLine m1: 11|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_tempCompTargetVoltage m4: 3|10@1+ (0.01,9) [9|16] "V" gtw
- SG_ VCFRONT_timeSpentCharging m1: 25|10@1+ (1,0) [0|1023] "min" gtw
- SG_ VCFRONT_wiperState m0: 16|4@1+ (1,0) [0|12] "" das
- SG_ VCFRONT_freezeEvapITerm m3: 24|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_railBState m1: 8|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_HSDInitCompleteU13 m4: 41|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_anyClosureOpen m0: 49|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_timeSpentDischarging m1: 35|10@1+ (1,0) [0|1023] "min" gtw
- SG_ VCFRONT_homelinkV2Response0 m2: 8|8@1+ (1,0) [0|255] "" gtw
- SG_ VCFRONT_frunkAccessPost m0: 62|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_railAState m1: 7|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_iBoosterStateDBG m1: 12|3@1+ (1,0) [0|4] "" gtw
- SG_ VCFRONT_ChargePumpVoltageStable m1: 9|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_vehicleStatusDBG m1: 16|5@1+ (1,0) [0|17] "" aps
- SG_ VCFRONT_PCSMia m4: 38|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_crashUnlockOverrideSet m0: 24|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_12VOverchargeCounter m4: 59|4@1+ (1,0) [0|15] "" gtw
- SG_ VCFRONT_crashDetectedType m0: 20|2@1+ (1,0) [0|2] "" gtw
- SG_ VCFRONT_wiperCycles m3: 48|16@1+ (100,0) [0|6553500] "Cycles" gtw
- SG_ VCFRONT_5VBRailStable m1: 4|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_headlightLeftVPosition m0: 28|10@1+ (1,0) [0|1023] "ticks" X
- SG_ VCFRONT_IBSFault m4: 39|1@1+ (1,0) [0|1] "" gtw
- SG_ VCFRONT_frunkLatchStatus m0: 3|4@1+ (1,0) [0|8] "" di
-
 BO_ 553 SCCM_rightStalk: 3 VEH
  SG_ SCCM_rightStalkCounter : 8|4@1+ (1,0) [0|15] "" X
  SG_ SCCM_rightStalkCrc : 0|8@1+ (1,0) [0|255] "" X
@@ -165,7 +100,7 @@ BO_ 297 SCCM_steeringAngleSensor: 8 VEH
  SG_ SCCM_steeringAngleCounter : 8|4@1+ (1,0) [0|15] "" gtw
  SG_ SCCM_steeringAngleSensorReservd3 : 56|8@1+ (1,0) [0|255] "" X
 
- 
+
 BO_ 568 STW_ACTN_RQ: 8 STW
  SG_ SpdCtrlLvr_Stat : 0|6@1+ (1,0) [0|0] "" NEO
  SG_ VSL_Enbl_Rq : 6|1@1+ (1,0) [0|0] "" NEO
@@ -198,7 +133,83 @@ BO_ 568 STW_ACTN_RQ: 8 STW
  SG_ WprSw6Posn : 48|3@1+ (1,0) [0|0] "" NEO
  SG_ MC_STW_ACTN_RQ : 52|4@1+ (1,0) [0|15] "" NEO
  SG_ CRC_STW_ACTN_RQ : 56|8@1+ (1,0) [0|0] "" NEO
- 
+
+BO_ 737 VCFRONT_status: 8 VEH
+ SG_ VCFRONT_statusIndex M : 0|3@1+ (1,0) [0|6] ""  Receiver
+ SG_ VCFRONT_12VARailStable m5 : 5|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_12VBRailStable m5 : 6|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_12VOverchargeCounter m4 : 16|4@1+ (1,0) [0|15] ""  Receiver
+ SG_ VCFRONT_5VARailStable m5 : 3|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_5VBRailStable m5 : 4|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_AS8510Voltage m5 : 28|12@1+ (0.00544368,0) [0|22.2864] "V"  Receiver
+ SG_ VCFRONT_ChargePumpVoltageStable m5 : 9|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_HSDInitCompleteU13 m5 : 11|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_HSDInitCompleteU16 m5 : 12|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_IBSFault m4 : 15|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_PCSMia m4 : 14|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_PEResetLineState m5 : 10|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_airCompressorStatus m0 : 25|3@1+ (1,0) [0|7] ""  Receiver
+ SG_ VCFRONT_anyClosureOpen m0 : 49|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_anyDoorOpen m0 : 50|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_batterySMState m1 : 16|4@1+ (1,0) [0|8] ""  Receiver
+ SG_ VCFRONT_chargeNeeded m4 : 13|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_chillerDemandActive m3 : 26|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_compPerfRecoveryLimited m3 : 27|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_coolantFillRoutineStatus m3 : 50|2@1+ (1,0) [0|3] ""  Receiver
+ SG_ VCFRONT_crashDetectedType m0 : 20|2@1+ (1,0) [0|3] ""  Receiver
+ SG_ VCFRONT_crashState m0 : 22|2@1+ (1,0) [0|3] ""  Receiver
+ SG_ VCFRONT_crashUnlockOverrideSet m0 : 24|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_epasWakeLine m1 : 4|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_freezeEvapITerm m3 : 24|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_frunkAccessPost m0 : 62|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_frunkInteriorRelSwitch m0 : 48|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_frunkLatchStatus m0 : 3|4@1+ (1,0) [0|8] ""  Receiver
+ SG_ VCFRONT_frunkLatchType m0 : 58|2@1+ (1,0) [0|2] ""  Receiver
+ SG_ VCFRONT_hasLowRefrigerant m3 : 29|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_headlampLeftFanStatus m0 : 60|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_headlampRightFanStatus m0 : 61|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_headlightLeftVPosition m0 : 28|10@1+ (1,0) [0|1023] "ticks"  Receiver
+ SG_ VCFRONT_headlightRightVPosition m0 : 38|10@1+ (1,0) [0|1023] "ticks"  Receiver
+ SG_ VCFRONT_homelinkCommStatus m2 : 48|2@1+ (1,0) [0|3] ""  Receiver
+ SG_ VCFRONT_homelinkV2Response0 m2 : 8|8@1+ (1,0) [0|255] ""  Receiver
+ SG_ VCFRONT_homelinkV2Response1 m2 : 16|8@1+ (1,0) [0|255] ""  Receiver
+ SG_ VCFRONT_homelinkV2Response2 m2 : 24|8@1+ (1,0) [0|255] ""  Receiver
+ SG_ VCFRONT_homelinkV2Response3 m2 : 32|8@1+ (1,0) [0|255] ""  Receiver
+ SG_ VCFRONT_homelinkV2Response4 m2 : 40|8@1+ (1,0) [0|255] ""  Receiver
+ SG_ VCFRONT_hornOn m0 : 51|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_hvacModeNotAttainable m3 : 28|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_hvacPerfTestCommand m3 : 48|2@1+ (1,0) [0|3] ""  Receiver
+ SG_ VCFRONT_iBoosterStateDBG m1 : 5|3@1+ (1,0) [0|4] ""  Receiver
+ SG_ VCFRONT_iBoosterWakeLine m1 : 3|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_isActiveHeatingBattery m0 : 63|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_isColdStartRunning m3 : 30|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_isEvapOperationAllowed m3 : 25|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_isHeatPumpOilPurgeActive m3 : 31|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_maxEvapHeatRejection m3 : 8|8@1+ (65,0) [0|16575] "W"  Receiver
+ SG_ VCFRONT_minEvapHeatRejection m3 : 16|8@1+ (10,0) [0|2500] "W"  Receiver
+ SG_ VCFRONT_passengerBuckleStatus m0 : 57|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_pressureRefrigDischarge m3 : 40|8@1+ (0.125,0) [0|31.75] "bar"  Receiver
+ SG_ VCFRONT_pressureRefrigSuction m3 : 32|7@1+ (0.125,0) [0|11.5] "bar"  Receiver
+ SG_ VCFRONT_radarHeaterState m0 : 52|3@1+ (1,0) [0|4] ""  Receiver
+ SG_ VCFRONT_railAState m5 : 7|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_railBState m5 : 8|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_refrigFillRoutineStatus m3 : 52|2@1+ (1,0) [0|3] ""  Receiver
+ SG_ VCFRONT_reverseBatteryFault m4 : 30|1@1+ (1,0) [0|1] ""  Receiver
+ SG_ VCFRONT_shortedCellFaultCounter m4 : 44|3@1+ (1,0) [0|7] ""  Receiver
+ SG_ VCFRONT_silentWakeIBSCurrent m4 : 32|12@1- (0.1,-204.7) [-409.5|0] "mA"  Receiver
+ SG_ VCFRONT_sleepCurrent m1 : 32|12@1- (0.1,-204.7) [-409.5|0] "mA"  Receiver
+ SG_ VCFRONT_tempCompTargetVoltage m4 : 3|10@1+ (0.01,9) [9|16] "V"  Receiver
+ SG_ VCFRONT_timeSpentSleeping m1 : 24|8@1+ (1,0) [0|255] "s"  Receiver
+ SG_ VCFRONT_vbatMonitorVoltage m5 : 16|12@1+ (0.00544368,0) [0|22.2864] "V"  Receiver
+ SG_ VCFRONT_vbatProt m5 : 40|12@1+ (0.00544368,0) [0|22.2919] "V"  Receiver
+ SG_ VCFRONT_vehicleStatusDBG m1 : 8|5@1+ (1,0) [0|17] ""  Receiver
+ SG_ VCFRONT_voltageDropCounter m4 : 20|4@1+ (1,0) [0|15] ""  Receiver
+ SG_ VCFRONT_voltageFloorReachedCount m4 : 24|4@1+ (1,0) [0|15] ""  Receiver
+ SG_ VCFRONT_voltageProfile m4 : 28|2@1+ (1,0) [0|3] ""  Receiver
+ SG_ VCFRONT_wiperPosition m0 : 12|3@1+ (1,0) [0|4] ""  Receiver
+ SG_ VCFRONT_wiperSpeed m0 : 8|4@1+ (1,0) [0|8] ""  Receiver
+ SG_ VCFRONT_wiperState m0 : 16|4@1+ (1,0) [0|12] ""  Receiver
+
 BO_ 1001 DAS_bodyControls: 8 VEH
  SG_ DAS_headlightRequest : 0|2@1+ (1,0) [0|3] "" aps
  SG_ DAS_hazardLightRequest : 2|2@1+ (1,0) [0|3] "" aps
@@ -256,6 +267,30 @@ VAL_ 568 StW_Sw01_Psd 1 "PRESSED" 0 "NOT_PRESSED_SNA" ;
 VAL_ 568 StW_Sw03_Psd 1 "PRESSED" 0 "NOT_PRESSED_SNA" ;
 VAL_ 568 StW_Sw04_Psd 1 "PRESSED" 0 "NOT_PRESSED_SNA" ;
 VAL_ 568 WprSw6Posn 7 "SNA" 6 "STAGE2" 5 "STAGE1" 4 "INTERVAL4" 3 "INTERVAL3" 2 "INTERVAL2" 1 "INTERVAL1" 0 "OFF" ;
+
+VAL_ 737 VCFRONT_statusIndex 0 "VCF_STS_IDX_BODY_CONTROLS" 2 "VCF_STS_IDX_HOMELINK" 6 "VCF_STS_IDX_INVALID" 4 "VCF_STS_IDX_LV_BATTERY" 3 "VCF_STS_IDX_REFRIGERANT_SYSTEM" 5 "VCF_STS_IDX_SYSTEM_HEALTH" 1 "VCF_STS_IDX_VEHICLE_STATE" ;
+VAL_ 737 VCFRONT_AS8510Voltage 4095 "SNA" ;
+VAL_ 737 VCFRONT_airCompressorStatus 4 "VCFRONT_AIR_COMPRESSOR_STATUS_FAULT" 0 "VCFRONT_AIR_COMPRESSOR_STATUS_OFF" 1 "VCFRONT_AIR_COMPRESSOR_STATUS_ON" 5 "VCFRONT_AIR_COMPRESSOR_STATUS_RETRY_AVAILABLE" 7 "VCFRONT_AIR_COMPRESSOR_STATUS_SNA" 2 "VCFRONT_AIR_COMPRESSOR_STATUS_TURNING_OFF" 3 "VCFRONT_AIR_COMPRESSOR_STATUS_TURNING_ON" ;
+VAL_ 737 VCFRONT_batterySMState 1 "BATTERY_SM_STATE_CHARGE" 2 "BATTERY_SM_STATE_DISCHARGE" 6 "BATTERY_SM_STATE_DISCONNECTED_BATTERY_TEST" 8 "BATTERY_SM_STATE_FAULT" 0 "BATTERY_SM_STATE_INIT" 5 "BATTERY_SM_STATE_OTA_STANDBY" 4 "BATTERY_SM_STATE_RESISTANCE_ESTIMATION" 7 "BATTERY_SM_STATE_SHORTED_CELL_TEST" 3 "BATTERY_SM_STATE_STANDBY" ;
+VAL_ 737 VCFRONT_coolantFillRoutineStatus 3 "FAULTED" 1 "MOVING_TO_FILL_POSITION" 0 "NOT_READY" 2 "READY_TO_FILL" ;
+VAL_ 737 VCFRONT_crashDetectedType 1 "CRASH_DETECTED_TYPE_MINOR_1" 2 "CRASH_DETECTED_TYPE_MINOR_2" 0 "CRASH_DETECTED_TYPE_NONE" 3 "CRASH_DETECTED_TYPE_SEVERE" ;
+VAL_ 737 VCFRONT_crashState 0 "CRASH_STATE_IDLE" 1 "CRASH_STATE_MINOR_1" 2 "CRASH_STATE_MINOR_2" 3 "CRASH_STATE_SEVERE" ;
+VAL_ 737 VCFRONT_frunkLatchStatus 5 "LATCH_AJAR" 2 "LATCH_CLOSED" 3 "LATCH_CLOSING" 7 "LATCH_DEFAULT" 8 "LATCH_FAULT" 1 "LATCH_OPENED" 4 "LATCH_OPENING" 0 "LATCH_SNA" 6 "LATCH_TIMEOUT" ;
+VAL_ 737 VCFRONT_frunkLatchType 1 "FRUNK_LATCH_TYPE_DOUBLE_ACTUATOR" 2 "FRUNK_LATCH_TYPE_DOUBLE_PULL" 0 "FRUNK_LATCH_TYPE_UNKNOWN" ;
+VAL_ 737 VCFRONT_homelinkCommStatus 3 "HOMELINK_COMM_STATUS_FAULT" 1 "HOMELINK_COMM_STATUS_OFF" 2 "HOMELINK_COMM_STATUS_ON" 0 "HOMELINK_COMM_STATUS_SNA" ;
+VAL_ 737 VCFRONT_hvacPerfTestCommand 2 "BLOW" 1 "INIT" 0 "NOT_STARTED" 3 "STOP" ;
+VAL_ 737 VCFRONT_iBoosterStateDBG 4 "IBOOSTER_FORCE_OFF" 2 "IBOOSTER_GOING_DOWN" 0 "IBOOSTER_OFF" 1 "IBOOSTER_ON" 3 "IBOOSTER_WRITING_DATA_SHUTDOWN" ;
+VAL_ 737 VCFRONT_passengerBuckleStatus 1 "BUCKLED" 0 "UNBUCKLED" ;
+VAL_ 737 VCFRONT_pressureRefrigDischarge 255 "SNA" ;
+VAL_ 737 VCFRONT_pressureRefrigSuction 127 "SNA" ;
+VAL_ 737 VCFRONT_radarHeaterState 4 "HEATER_STATE_FAULT" 2 "HEATER_STATE_OFF" 3 "HEATER_STATE_OFF_UNAVAILABLE" 1 "HEATER_STATE_ON" 0 "HEATER_STATE_SNA" ;
+VAL_ 737 VCFRONT_refrigFillRoutineStatus 3 "FAULTED" 1 "MOVING_TO_FILL_POSITION" 0 "NOT_READY" 2 "READY_TO_FILL" ;
+VAL_ 737 VCFRONT_vbatMonitorVoltage 4095 "SNA" ;
+VAL_ 737 VCFRONT_vehicleStatusDBG 10 "VEHICLE_STATUS_ACCESSORY" 11 "VEHICLE_STATUS_ACCESSORY_PLUS" 3 "VEHICLE_STATUS_BATTERY_POST_WAKE" 12 "VEHICLE_STATUS_CONDITIONING" 14 "VEHICLE_STATUS_CRASH" 13 "VEHICLE_STATUS_DRIVE" 9 "VEHICLE_STATUS_HV_UP_STANDBY" 0 "VEHICLE_STATUS_INIT" 1 "VEHICLE_STATUS_LOW_POWER_STANDBY" 8 "VEHICLE_STATUS_LV_AWAKE" 7 "VEHICLE_STATUS_LV_SHUTDOWN" 15 "VEHICLE_STATUS_OTA" 17 "VEHICLE_STATUS_RESET" 2 "VEHICLE_STATUS_SILENT_WAKE" 5 "VEHICLE_STATUS_SLEEP_SHUTDOWN" 6 "VEHICLE_STATUS_SLEEP_STANDBY" 4 "VEHICLE_STATUS_SYSTEM_CHECKS" 16 "VEHICLE_STATUS_TURN_ON_RAILS" ;
+VAL_ 737 VCFRONT_voltageProfile 3 "VOLTAGE_PROFILE_ALWAYS_CLOSED_CONTACTORS" 0 "VOLTAGE_PROFILE_CHARGE" 1 "VOLTAGE_PROFILE_FLOAT" 2 "VOLTAGE_PROFILE_REDUCED_FLOAT" ;
+VAL_ 737 VCFRONT_wiperPosition 3 "WIPER_POSITION_DELAYED_REST" 2 "WIPER_POSITION_DEPRESSED_PARK" 1 "WIPER_POSITION_SERVICE" 0 "WIPER_POSITION_SNA" 4 "WIPER_POSITION_WIPING" ;
+VAL_ 737 VCFRONT_wiperSpeed 2 "WIPER_SPEED_1" 3 "WIPER_SPEED_2" 4 "WIPER_SPEED_3" 5 "WIPER_SPEED_4" 6 "WIPER_SPEED_5" 8 "WIPER_SPEED_HIGH" 7 "WIPER_SPEED_LOW" 1 "WIPER_SPEED_OFF" 0 "WIPER_SPEED_SNA" ;
+VAL_ 737 VCFRONT_wiperState 9 "WIPER_STATE_CONT_FAST" 10 "WIPER_STATE_CONT_SLOW" 3 "WIPER_STATE_DELAYED_REST" 2 "WIPER_STATE_FAULT" 7 "WIPER_STATE_INTERMITTENT_HIGH" 8 "WIPER_STATE_INTERMITTENT_LOW" 12 "WIPER_STATE_INT_AUTO_HIGH" 11 "WIPER_STATE_INT_AUTO_LOW" 6 "WIPER_STATE_MOMENTARY_WIPE" 4 "WIPER_STATE_PARK" 1 "WIPER_STATE_SERVICE" 0 "WIPER_STATE_SNA" 5 "WIPER_STATE_WASH" ;
 
 VAL_ 1001 DAS_headlightRequest 3 "DAS_HEADLIGHT_REQUEST_INVALID" 1 "DAS_HEADLIGHT_REQUEST_ON" 0 "DAS_HEADLIGHT_REQUEST_OFF";
 VAL_ 1001 DAS_hazardLightRequest 3 "DAS_REQUEST_HAZARDS_SNA" 2 "DAS_REQUEST_HAZARDS_UNUSED" 0 "DAS_REQUEST_HAZARDS_OFF" 1 "DAS_REQUEST_HAZARDS_ON";
@@ -324,22 +359,6 @@ VAL_ 280 DI_trackModeState 0 "TRACK_MODE_UNAVAILABLE" 1 "TRACK_MODE_AVAILABLE" 2
 VAL_ 280 DI_systemState 5 "DI_SYS_ENABLE" 1 "DI_SYS_IDLE" 2 "DI_SYS_STANDBY" 0 "DI_SYS_UNAVAILABLE" 3 "DI_SYS_FAULT" 4 "DI_SYS_ABORT";
 VAL_ 280 DI_immobilizerState 2 "DI_IMM_STATE_AUTHENTICATING" 0 "DI_IMM_STATE_INIT_SNA" 3 "DI_IMM_STATE_DISARMED" 4 "DI_IMM_STATE_IDLE" 6 "DI_IMM_STATE_FAULT" 1 "DI_IMM_STATE_REQUEST" 5 "DI_IMM_STATE_RESET";
 VAL_ 280 DI_brakePedalState 2 "INVALID" 0 "OFF" 1 "ON";
-VAL_ 737 VCFRONT_vbatMonitorVoltage 4095 "SNA";
-VAL_ 737 VCFRONT_AS8510Voltage 4095 "SNA";
-VAL_ 737 VCFRONT_wiperSpeed 2 "WIPER_SPEED_1" 0 "WIPER_SPEED_SNA" 7 "WIPER_SPEED_LOW" 8 "WIPER_SPEED_HIGH" 3 "WIPER_SPEED_2" 5 "WIPER_SPEED_4" 4 "WIPER_SPEED_3" 6 "WIPER_SPEED_5" 1 "WIPER_SPEED_OFF";
-VAL_ 737 VCFRONT_wiperPosition 0 "WIPER_POSITION_SNA" 1 "WIPER_POSITION_SERVICE" 2 "WIPER_POSITION_DEPRESSED_PARK" 3 "WIPER_POSITION_DELAYED_REST" 4 "WIPER_POSITION_WIPING";
-VAL_ 737 VCFRONT_airCompressorStatus 5 "VCFRONT_AIR_COMPRESSOR_STATUS_RETRY_AVAILABLE" 3 "VCFRONT_AIR_COMPRESSOR_STATUS_TURNING_ON" 4 "VCFRONT_AIR_COMPRESSOR_STATUS_FAULT" 2 "VCFRONT_AIR_COMPRESSOR_STATUS_TURNING_OFF" 7 "VCFRONT_AIR_COMPRESSOR_STATUS_SNA" 1 "VCFRONT_AIR_COMPRESSOR_STATUS_ON" 0 "VCFRONT_AIR_COMPRESSOR_STATUS_OFF";
-VAL_ 737 VCFRONT_statusIndex 5 "VCF_STS_IDX_INVALID" 4 "VCF_STS_IDX_LV_BATTERY_DEBUG" 0 "VCF_STS_IDX_BODY_CONTROLS" 3 "VCF_STS_IDX_REFRIGERANT_SYSTEM" 2 "VCF_STS_IDX_HOMELINK" 1 "VCF_STS_IDX_VEHICLE_AND_RAILS";
-VAL_ 737 VCFRONT_homelinkCommStatus 1 "HOMELINK_COMM_STATUS_OFF" 3 "HOMELINK_COMM_STATUS_FAULT" 2 "HOMELINK_COMM_STATUS_ON" 0 "HOMELINK_COMM_STATUS_SNA";
-VAL_ 737 VCFRONT_pressureRefrigDischarge 255 "SNA";
-VAL_ 737 VCFRONT_batterySMState 2 "BATTERY_SM_STATE_DISCHARGE" 7 "BATTERY_SM_STATE_FAULT" 0 "BATTERY_SM_STATE_INIT" 3 "BATTERY_SM_STATE_STANDBY" 4 "BATTERY_SM_STATE_RESISTANCE_ESTIMATION" 5 "BATTERY_SM_STATE_OTA_STANDBY" 6 "BATTERY_SM_STATE_DISCONNECTED_BATTERY_TEST" 1 "BATTERY_SM_STATE_CHARGE";
-VAL_ 737 VCFRONT_crashState 2 "CRASH_STATE_SEVERE" 0 "CRASH_STATE_IDLE" 1 "CRASH_STATE_MINOR";
-VAL_ 737 VCFRONT_pressureRefrigSuction 127 "SNA";
-VAL_ 737 VCFRONT_wiperState 2 "WIPER_STATE_FAULT" 12 "WIPER_STATE_INT_AUTO_HIGH" 9 "WIPER_STATE_CONT_FAST" 8 "WIPER_STATE_INTERMITTENT_LOW" 7 "WIPER_STATE_INTERMITTENT_HIGH" 0 "WIPER_STATE_SNA" 3 "WIPER_STATE_DELAYED_REST" 10 "WIPER_STATE_CONT_SLOW" 6 "WIPER_STATE_MOMENTARY_WIPE" 1 "WIPER_STATE_SERVICE" 5 "WIPER_STATE_WASH" 4 "WIPER_STATE_PARK" 11 "WIPER_STATE_INT_AUTO_LOW";
-VAL_ 737 VCFRONT_iBoosterStateDBG 3 "IBOOSTER_WRITING_DATA_SHUTDOWN" 1 "IBOOSTER_ON" 0 "IBOOSTER_OFF" 4 "IBOOSTER_FORCE_OFF" 2 "IBOOSTER_GOING_DOWN";
-VAL_ 737 VCFRONT_vehicleStatusDBG 5 "VEHICLE_STATUS_SLEEP_SHUTDOWN" 12 "VEHICLE_STATUS_CONDITIONING" 9 "VEHICLE_STATUS_HV_UP_STANDBY" 13 "VEHICLE_STATUS_DRIVE" 6 "VEHICLE_STATUS_SLEEP_STANDBY" 4 "VEHICLE_STATUS_SYSTEM_CHECKS" 10 "VEHICLE_STATUS_ACCESSORY" 14 "VEHICLE_STATUS_CRASH" 2 "VEHICLE_STATUS_SILENT_WAKE" 16 "VEHICLE_STATUS_TURN_ON_RAILS" 1 "VEHICLE_STATUS_LOW_POWER_STANDBY" 8 "VEHICLE_STATUS_LV_AWAKE" 0 "VEHICLE_STATUS_INIT" 15 "VEHICLE_STATUS_OTA" 3 "VEHICLE_STATUS_BATTERY_POST_WAKE" 7 "VEHICLE_STATUS_LV_SHUTDOWN" 17 "VEHICLE_STATUS_RESET" 11 "VEHICLE_STATUS_ACCESSORY_PLUS";
-VAL_ 737 VCFRONT_crashDetectedType 1 "CRASH_DETECTED_TYPE_MINOR" 0 "CRASH_DETECTED_TYPE_NONE" 2 "CRASH_DETECTED_TYPE_SEVERE";
-VAL_ 737 VCFRONT_frunkLatchStatus 8 "LATCH_FAULT" 2 "LATCH_CLOSED" 1 "LATCH_OPENED" 3 "LATCH_CLOSING" 7 "LATCH_DEFAULT" 4 "LATCH_OPENING" 5 "LATCH_AJAR" 6 "LATCH_TIMEOUT" 0 "LATCH_SNA";
 VAL_ 553 SCCM_parkButtonStatus 3 "SNA" 0 "NOT_PRESSED" 2 "INIT" 1 "PRESSED";
 VAL_ 553 SCCM_rightStalkStatus 3 "DOWN_1" 6 "SNA" 0 "IDLE" 5 "INIT" 1 "UP_1" 4 "DOWN_2" 2 "UP_2";
 VAL_ 297 SCCM_steeringAngleValidity 3 "SNA" 2 "INIT" 0 "INVALID" 1 "VALID";
