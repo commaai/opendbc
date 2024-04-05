@@ -12,7 +12,7 @@ jobs:
     container:
       image: ghcr.io/commaai/opendbc:latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: pre-commit autoupdate
       run: |
         git config --global --add safe.directory '*'
