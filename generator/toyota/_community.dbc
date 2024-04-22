@@ -33,6 +33,9 @@ CM_ "BO_ SECONDARY_STEER_ANGLE: ZSS is a high-precision steering angle sensor th
 
 BO_ 767 SDSU: 8 XXX
  SG_ FD_BUTTON : 7|1@0+ (1,0) [0|1] "" XXX
+ SG_ STATE : 23|4@0+ (1,0) [0|15] "" XXX
 
-CM_ "BO_ SDSU: The sDSU is a modified DSU for use in TSS1 Toyotas. Learn more: https://github.com/wocsor/panda/tree/smart_dsu";
+CM_ "BO_ SDSU: The sDSU is a modified DSU for use in TSS-P Toyotas. Learn more: https://github.com/RetroPilot/ocelot/tree/main/firmware/smart_dsu";
 CM_ SG_ 767 FD_BUTTON "The follow distance button signal as forwarded by the sdsu";
+
+VAL_ 767 STATE 7 "STATE_AEB_CTRL" 6 "FAULT_INVALID" 5 "FAULT_TIMEOUT" 4 "FAULT_STARTUP" 3 "FAULT_SCE" 2 "FAULT_SEND" 1 "FAULT_BAD_CHECKSUM" 0 "NO_FAULT" ;
