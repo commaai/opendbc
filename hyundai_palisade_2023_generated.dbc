@@ -726,6 +726,7 @@ BO_ 1057 SCC12: 8 XXX
  SG_ TauGapSet : 37|3@1+ (1,0) [0|7] "" CLU,ESC,TCU
  SG_ VSetDis : 41|8@1+ (1,0) [0|255] "km/h or MPH" CLU,ESC,TCU
  SG_ StopReq : 49|1@1+ (1,0) [0|1] "" EPB,ESC
+ SG_ ELEVATION : 50|11@1+ (0.1,0) [0|204.7] "m" XXX
 
 BO_ 1064 _4WD11: 8 XXX
  SG_ AUTO_ACT : 43|1@1+ (1,0) [0|0] "" XXX
