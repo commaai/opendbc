@@ -568,7 +568,7 @@ BO_ 903 WHL_PUL11: 6 XXX
 BO_ 905 SCC14: 8 XXX
  SG_ ACC_ObjLatPos : 16|9@1+ (0.1,-20) [-20|31.1] "m" ABS,ESC
  SG_ _CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
- SG_ COUNTER : 12|4@1+ (1,0) [0|0] "" XXX
+ SG_ _COUNTER : 12|4@1+ (1,0) [0|0] "" XXX
  SG_ ObjValid : 27|1@1+ (1,0) [0|1] "" CLU,ESC,TCU
  SG_ ObjGap : 51|3@1+ (1,0) [0|255] "" CLU,HUD,ESC
 
