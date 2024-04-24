@@ -567,15 +567,15 @@ BO_ 903 WHL_PUL11: 6 XXX
 
 BO_ 905 SCC14: 8 XXX
  SG_ ACC_ObjLatPos : 16|9@1+ (0.1,-20) [-20|31.1] "m" ABS,ESC
- SG_ _CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
- SG_ _COUNTER : 12|4@1+ (1,0) [0|0] "" XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
+ SG_ COUNTER : 12|4@1+ (1,0) [0|0] "" XXX
  SG_ ObjValid : 27|1@1+ (1,0) [0|1] "" CLU,ESC,TCU
  SG_ ObjGap : 51|3@1+ (1,0) [0|255] "" CLU,HUD,ESC
 
 BO_ 909 FCA11: 8 XXX
- SG_ CR_FCA_ChkSum : 0|8@1+ (1,0) [0|0] "" XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
+ SG_ COUNTER : 12|4@1+ (1,0) [0|0] "" XXX
  SG_ NEW_SIGNAL_1 : 8|4@1+ (1,0) [0|0] "" XXX
- SG_ CR_FCA_Alive : 12|4@1+ (1,0) [0|0] "" XXX
  SG_ BYTE2 : 16|8@1+ (1,0) [0|0] "" XXX
  SG_ BYTE3 : 24|8@1+ (1,0) [0|0] "" XXX
  SG_ BYTE4 : 32|8@1+ (1,0) [0|0] "" XXX
@@ -708,19 +708,19 @@ BO_ 1042 ICM_412h: 8 XXX
  SG_ WarningSoundOutput_3Group : 7|1@0+ (1,0) [0|0] "" XXX
 
 BO_ 1056 SCC11: 8 XXX
- SG_ _CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
- SG_ AliveCounterACC : 12|4@1+ (1,0) [0|15] "" CLU,EMS,ESC,TCU
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
+ SG_ COUNTER : 12|4@1+ (1,0) [0|15] "" CLU,EMS,ESC,TCU
  SG_ JerkUpperLimit : 50|7@1+ (0.1,0) [0|12.7] "m/s^3" ESC
  SG_ JerkLowerLimit : 43|7@1+ (0.1,0) [0|12.7] "m/s^3" ESC
  SG_ aReqRaw : 27|11@1+ (0.01,-10.23) [-10.23|10.24] "m/s^2" Vector__XXX
  SG_ aReqValue : 16|11@1+ (0.01,-10.23) [-10.23|10.24] "m/s^2" Vector__XXX
 
 BO_ 1057 SCC12: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
+ SG_ COUNTER : 12|4@1+ (1,0) [0|15] "" ESC,PSB
  SG_ ACCMode : 28|2@1+ (1,0) [0|3] "" CLU,HUD,LDWS_LKAS,ESC
  SG_ ACCMode_Inactive : 30|1@1+ (1,0) [0|1] "" CLU,HUD,LDWS_LKAS,ESC
  SG_ ACC_ObjDist : 16|11@1+ (0.1,0) [0|204.7] "m" ABS,ESC
- SG_ CR_VSM_ChkSum : 0|8@1+ (1,0) [0|0] "" XXX
- SG_ CR_VSM_Alive : 12|4@1+ (1,0) [0|15] "" ESC,PSB
  SG_ MainMode_ACC : 27|1@1+ (1,0) [0|1] "" CLU,EMS,ESC
  SG_ SCCInfoDisplay : 32|3@1+ (1,0) [0|7] "" CLU,ESC
  SG_ TauGapSet : 37|3@1+ (1,0) [0|7] "" CLU,ESC,TCU
