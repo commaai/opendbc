@@ -495,6 +495,7 @@ BO_ 867 RADAR_0x363: 8 XXX
  SG_ _CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
  SG_ COUNTER : 12|4@1+ (1,0) [0|0] "" XXX
  SG_ FCA_ESA : 8|2@1+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_1 : 10|4@1+ (1,0) [0|0] "" XXX
  SG_ BYTE2 : 16|8@1+ (1,0) [0|0] "" XXX
  SG_ BYTE3 : 24|8@1+ (1,0) [0|0] "" XXX
  SG_ BYTE4 : 32|8@1+ (1,0) [0|0] "" XXX
