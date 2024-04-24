@@ -492,7 +492,7 @@ BO_ 854 M_356: 8 XXX
  SG_ PAINT4 : 38|1@0+ (1,0) [0|0] "" XXX
 
 BO_ 867 RADAR_0x363: 8 XXX
- SG_ _CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
  SG_ COUNTER : 12|4@1+ (1,0) [0|0] "" XXX
  SG_ FCA_ESA : 8|2@1+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_1 : 10|2@1+ (1,0) [0|0] "" XXX
@@ -616,7 +616,7 @@ BO_ 916 TCS13: 8 XXX
  SG_ aBasis : 0|11@1+ (0.01,-10.23) [0|0] "" XXX
 
 BO_ 920 RADAR_0x398: 8 XXX
- SG_ _CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
  SG_ NEW_SIGNAL_1 : 8|4@1+ (1,0) [0|0] "" XXX
  SG_ COUNTER : 12|4@1+ (1,0) [0|0] "" XXX
  SG_ BYTE2 : 16|8@1+ (1,0) [0|0] "" XXX
@@ -627,7 +627,7 @@ BO_ 920 RADAR_0x398: 8 XXX
  SG_ BYTE7 : 56|8@1+ (1,0) [0|0] "" XXX
 
 BO_ 921 RADAR_0x399: 8 XXX
- SG_ _CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
  SG_ NEW_SIGNAL_1 : 8|4@1+ (1,0) [0|0] "" XXX
  SG_ COUNTER : 12|4@1+ (1,0) [0|0] "" XXX
  SG_ BYTE2 : 16|8@1+ (1,0) [0|0] "" XXX
@@ -638,7 +638,7 @@ BO_ 921 RADAR_0x399: 8 XXX
  SG_ BYTE7 : 56|8@1+ (1,0) [0|0] "" XXX
 
 BO_ 922 RADAR_0x39a: 8 XXX
- SG_ _CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
  SG_ NEW_SIGNAL_1 : 8|4@1+ (1,0) [0|0] "" XXX
  SG_ COUNTER : 12|4@1+ (1,0) [0|0] "" XXX
  SG_ BYTE2 : 16|8@1+ (1,0) [0|0] "" XXX
@@ -649,7 +649,7 @@ BO_ 922 RADAR_0x39a: 8 XXX
  SG_ BYTE7 : 56|8@1+ (1,0) [0|0] "" XXX
 
 BO_ 923 RADAR_0x39b: 8 XXX
- SG_ _CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
  SG_ NEW_SIGNAL_1 : 8|4@1+ (1,0) [0|0] "" XXX
  SG_ COUNTER : 12|4@1+ (1,0) [0|0] "" XXX
  SG_ BYTE2 : 16|8@1+ (1,0) [0|0] "" XXX
@@ -660,7 +660,7 @@ BO_ 923 RADAR_0x39b: 8 XXX
  SG_ BYTE7 : 56|8@1+ (1,0) [0|0] "" XXX
 
 BO_ 924 RADAR_0x39c: 8 XXX
- SG_ _CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
  SG_ NEW_SIGNAL_1 : 8|4@1+ (1,0) [0|0] "" XXX
  SG_ COUNTER : 12|4@1+ (1,0) [0|0] "" XXX
  SG_ BYTE2 : 16|8@1+ (1,0) [0|0] "" XXX
@@ -756,7 +756,7 @@ BO_ 1078 PAS11: 4 XXX
  SG_ CF_Gway_PASSystemOn : 24|2@1+ (1,0) [0|0] "" XXX
 
 BO_ 1082 RADAR_0x43a: 8 XXX
- SG_ _CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
  SG_ NEW_SIGNAL_1 : 8|4@1+ (1,0) [0|0] "" XXX
  SG_ COUNTER : 12|4@1+ (1,0) [0|0] "" XXX
  SG_ BYTE2 : 16|8@1+ (1,0) [0|0] "" XXX
