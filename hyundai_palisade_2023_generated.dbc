@@ -767,6 +767,10 @@ BO_ 1082 RADAR_0x43a: 8 XXX
  SG_ BYTE6 : 48|8@1+ (1,0) [0|0] "" XXX
  SG_ BYTE7 : 56|8@1+ (1,0) [0|0] "" XXX
 
+BO_ 1095 RADAR_0x447: 8 XXX
+ SG_ FCW_RELATED_1 : 26|1@0+ (1,0) [0|1] "" XXX
+ SG_ FCW_RELATED_2 : 34|3@1+ (1,0) [0|7] "" XXX
+
 BO_ 1136 P_STS: 8 XXX
  SG_ Checksum : 62|2@1+ (1,0) [0|0] "" XXX
  SG_ Counter : 58|4@1+ (1,0) [0|0] "" XXX
