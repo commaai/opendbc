@@ -570,7 +570,7 @@ BO_ 905 SCC14: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
  SG_ COUNTER : 12|4@1+ (1,0) [0|0] "" XXX
  SG_ ObjValid : 27|1@1+ (1,0) [0|1] "" CLU,ESC,TCU
- SG_ ObjGap : 51|3@1+ (1,0) [0|255] "" CLU,HUD,ESC
+ SG_ ObjStatus : 51|3@1+ (1,0) [0|7] "" CLU,HUD,ESC
 
 BO_ 909 FCA11: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
