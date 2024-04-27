@@ -725,6 +725,7 @@ BO_ 1057 SCC12: 8 XXX
  SG_ MainMode_ACC : 27|1@1+ (1,0) [0|1] "" CLU,EMS,ESC
  SG_ SCCInfoDisplay : 32|3@1+ (1,0) [0|7] "" CLU,ESC
  SG_ TauGapSet : 37|3@1+ (1,0) [0|7] "" CLU,ESC,TCU
+ SG_ ACCEnabled : 40|1@0+ (1,0) [0|1] "" XXX
  SG_ VSetDis : 41|8@1+ (1,0) [0|255] "km/h or MPH" CLU,ESC,TCU
  SG_ StopReq : 49|1@1+ (1,0) [0|1] "" EPB,ESC
  SG_ MIN_DISTANCE_BAR : 50|11@1+ (0.1,0) [0|204.7] "m" XXX
