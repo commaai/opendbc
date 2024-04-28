@@ -710,10 +710,13 @@ BO_ 1042 ICM_412h: 8 XXX
 BO_ 1056 SCC11: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|0] "" XXX
  SG_ COUNTER : 12|4@1+ (1,0) [0|15] "" CLU,EMS,ESC,TCU
- SG_ JerkLowerLimit : 50|7@1+ (0.1,0) [0|12.7] "m/s^3" ESC
- SG_ JerkUpperLimit : 43|7@1+ (0.1,-4) [0|12.7] "m/s^3" ESC
- SG_ aReqRaw : 27|11@1+ (0.01,-10.23) [-10.23|10.24] "m/s^2" Vector__XXX
  SG_ aReqValue : 16|11@1+ (0.01,-10.23) [-10.23|10.24] "m/s^2" Vector__XXX
+ SG_ aReqRaw : 27|11@1+ (0.01,-10.23) [-10.23|10.24] "m/s^2" Vector__XXX
+ SG_ JerkUpperLimit : 38|7@1+ (0.1,-1) [0|12.7] "" XXX
+ SG_ LEAD_SIGNAL_1 : 45|1@0+ (1,0) [0|1] "" XXX
+ SG_ LEAD_SIGNAL_2 : 46|2@1+ (1,0) [0|15] "" XXX
+ SG_ LEAD_SIGNAL_3 : 48|2@1+ (1,0) [0|3] "" XXX
+ SG_ JerkLowerLimit : 50|7@1+ (0.1,0) [0|12.7] "m/s^3" ESC
  SG_ NEW_SIGNAL_1 : 58|4@1+ (1,0) [0|15] "" XXX
 
 BO_ 1057 SCC12: 8 XXX
