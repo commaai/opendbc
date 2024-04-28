@@ -27,6 +27,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     opencl-headers \
     tk-dev \
     python3-pip \
+    python3-dev \
     python3-openssl \
     xz-utils \
     zlib1g-dev \
