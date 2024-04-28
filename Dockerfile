@@ -26,21 +26,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ocl-icd-opencl-dev \
     opencl-headers \
     tk-dev \
+    python3-pip \
     python3-openssl \
     xz-utils \
     zlib1g-dev \
     cmake \
   && rm -rf /var/lib/apt/lists/*
 
-RUN curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
-ENV PATH="/root/.pyenv/bin:/root/.pyenv/shims:${PATH}"
-RUN pyenv install 3.11.4
-RUN pyenv global 3.11.4
-RUN pyenv rehash
-
 COPY requirements.txt /tmp/
-RUN pip install --no-cache-dir -r /tmp/requirements.txt
-RUN pip install --no-cache-dir pre-commit==2.15.0 pylint==2.17.4
+RUN pip3 install --break-system-packages --no-cache-dir -r /tmp/requirements.txt
+RUN pip3 install --break-system-packages --no-cache-dir pre-commit==2.15.0 pylint==2.17.4
 
 ENV PYTHONPATH=/project
 
