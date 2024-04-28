@@ -26,7 +26,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ocl-icd-opencl-dev \
     opencl-headers \
     tk-dev \
-    python-openssl \
+    python3-openssl \
     xz-utils \
     zlib1g-dev \
     cmake \
