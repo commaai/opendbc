@@ -29,6 +29,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-pip \
     python3-dev \
     python3-openssl \
+    python-is-python3 \
     xz-utils \
     zlib1g-dev \
     cmake \
