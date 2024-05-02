@@ -10,7 +10,7 @@ env:
 jobs:
   unit-tests:
     name: unit tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     #strategy:
     #  fail-fast: false
     #  matrix:
@@ -26,7 +26,7 @@ jobs:
 
   static-analysis:
     name: static analysis
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
     - name: Build Docker image
@@ -41,7 +41,7 @@ jobs:
 
   docker-push:
     name: docker push
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request' && github.repository == 'commaai/opendbc'
     steps:
     - uses: actions/checkout@v4
