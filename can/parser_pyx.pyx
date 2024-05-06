@@ -1,6 +1,7 @@
 # distutils: language = c++
 # cython: c_string_encoding=ascii, language_level=3
 
+cimport cython
 from cython.operator cimport dereference as deref, preincrement as preinc
 from libcpp.pair cimport pair
 from libcpp.string cimport string
@@ -71,12 +72,15 @@ cdef class CANParser:
     if self.can:
       del self.can
 
+  @cython.wraparound(False)
+  @cython.boundscheck(False)
   def update_strings(self, strings, sendcan=False):
     for address in self.addresses:
      self.vl_all[address].clear()
 
     cdef vector[SignalValue] new_vals
     self.can.update_strings(strings, new_vals, sendcan)
+
     cdef vector[SignalValue].iterator it = new_vals.begin()
     cdef SignalValue* cv
     cdef uint32_t cur_address = -1
