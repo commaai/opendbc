@@ -78,19 +78,20 @@ cdef class CANParser:
     for address in self.addresses:
      self.vl_all[address].clear()
 
+    # Predeclare variables
     cdef vector[SignalValue] new_vals
-    self.can.update_strings(strings, new_vals, sendcan)
-
-    cdef vector[SignalValue].iterator it = new_vals.begin()
+    cdef vector[SignalValue].iterator it
     cdef SignalValue* cv
     cdef uint32_t cur_address = -1
-    updated_addrs = set()
-
-    # Store references to dictionaries
+    cdef unicode cv_name
+    cdef dict ts_nanos
     cdef dict vl
     vl_all = {}
-    cdef dict ts_nanos
+    updated_addrs = set()
 
+    # Iterate through new_vals
+    self.can.update_strings(strings, new_vals, sendcan)
+    it = new_vals.begin()
     while it != new_vals.end():
       cv = &deref(it)
 
