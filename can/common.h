@@ -26,14 +26,14 @@
 void init_crc_lookup_tables();
 
 // Car specific functions
-unsigned int honda_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
-unsigned int toyota_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
-unsigned int subaru_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
-unsigned int chrysler_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
-unsigned int volkswagen_mqb_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
-unsigned int xor_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
-unsigned int hkg_can_fd_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
-unsigned int pedal_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
+unsigned int honda_checksum(uint32_t address, const Signal &sig, const uint8_t *data, size_t size);
+unsigned int toyota_checksum(uint32_t address, const Signal &sig, const uint8_t *data, size_t size);
+unsigned int subaru_checksum(uint32_t address, const Signal &sig, const uint8_t *data, size_t size);
+unsigned int chrysler_checksum(uint32_t address, const Signal &sig, const uint8_t *data, size_t size);
+unsigned int volkswagen_mqb_checksum(uint32_t address, const Signal &sig, const uint8_t *data, size_t size);
+unsigned int xor_checksum(uint32_t address, const Signal &sig, const uint8_t *data, size_t size);
+unsigned int hkg_can_fd_checksum(uint32_t address, const Signal &sig, const uint8_t *data, size_t size);
+unsigned int pedal_checksum(uint32_t address, const Signal &sig, const uint8_t *data, size_t size);
 
 class MessageState {
 public:
@@ -54,7 +54,7 @@ public:
   bool ignore_checksum = false;
   bool ignore_counter = false;
 
-  bool parse(uint64_t nanos, const std::vector<uint8_t> &dat);
+  bool parse(uint64_t nanos, const uint8_t *msg, const size_t msg_size);
   bool update_counter_generic(int64_t v, int cnt_size);
 };
 

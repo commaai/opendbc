@@ -1,13 +1,13 @@
 #include "opendbc/can/common.h"
 
 
-unsigned int honda_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
+unsigned int honda_checksum(uint32_t address, const Signal &sig, const uint8_t *data, size_t size) {
   int s = 0;
   bool extended = address > 0x7FF;
   while (address) { s += (address & 0xF); address >>= 4; }
-  for (int i = 0; i < d.size(); i++) {
-    uint8_t x = d[i];
-    if (i == d.size()-1) x >>= 4; // remove checksum
+  for (int i = 0; i < size; i++) {
+    uint8_t x = data[i];
+    if (i == size-1) x >>= 4; // remove checksum
     s += (x & 0xF) + (x >> 4);
   }
   s = 8-s;
@@ -16,30 +16,30 @@ unsigned int honda_checksum(uint32_t address, const Signal &sig, const std::vect
   return s & 0xF;
 }
 
-unsigned int toyota_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
-  unsigned int s = d.size();
+unsigned int toyota_checksum(uint32_t address, const Signal &sig, const uint8_t *data, size_t size) {
+  unsigned int s = size;
   while (address) { s += address & 0xFF; address >>= 8; }
-  for (int i = 0; i < d.size() - 1; i++) { s += d[i]; }
+  for (int i = 0; i < size - 1; i++) { s += data[i]; }
 
   return s & 0xFF;
 }
 
-unsigned int subaru_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
+unsigned int subaru_checksum(uint32_t address, const Signal &sig, const uint8_t *data, size_t size) {
   unsigned int s = 0;
   while (address) { s += address & 0xFF; address >>= 8; }
 
   // skip checksum in first byte
-  for (int i = 1; i < d.size(); i++) { s += d[i]; }
+  for (int i = 1; i < size; i++) { s += data[i]; }
 
   return s & 0xFF;
 }
 
-unsigned int chrysler_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
+unsigned int chrysler_checksum(uint32_t address, const Signal &sig, const uint8_t *data, size_t size) {
   // jeep chrysler canbus checksum from http://illmatics.com/Remote%20Car%20Hacking.pdf
   uint8_t checksum = 0xFF;
-  for (int j = 0; j < (d.size() - 1); j++) {
+  for (int j = 0; j < (size - 1); j++) {
     uint8_t shift = 0x80;
-    uint8_t curr = d[j];
+    uint8_t curr = data[j];
     for (int i = 0; i < 8; i++) {
       uint8_t bit_sum = curr & shift;
       uint8_t temp_chk = checksum & 0x80U;
@@ -108,7 +108,7 @@ void init_crc_lookup_tables() {
   gen_crc_lookup_table_16(0x1021, crc16_lut_xmodem);    // CRC-16 XMODEM for HKG CAN FD
 }
 
-unsigned int volkswagen_mqb_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
+unsigned int volkswagen_mqb_checksum(uint32_t address, const Signal &sig, const uint8_t *data, size_t size) {
   // Volkswagen uses standard CRC8 8H2F/AUTOSAR, but they compute it with
   // a magic variable padding byte tacked onto the end of the payload.
   // https://www.autosar.org/fileadmin/user_upload/standards/classic/4-3/AUTOSAR_SWS_CRCLibrary.pdf
@@ -116,14 +116,14 @@ unsigned int volkswagen_mqb_checksum(uint32_t address, const Signal &sig, const 
   uint8_t crc = 0xFF; // Standard init value for CRC8 8H2F/AUTOSAR
 
   // CRC the payload first, skipping over the first byte where the CRC lives.
-  for (int i = 1; i < d.size(); i++) {
-    crc ^= d[i];
+  for (int i = 1; i < size; i++) {
+    crc ^= data[i];
     crc = crc8_lut_8h2f[crc];
   }
 
   // Look up and apply the magic final CRC padding byte, which permutes by CAN
   // address, and additionally (for SOME addresses) by the message counter.
-  uint8_t counter = d[1] & 0x0F;
+  uint8_t counter = data[1] & 0x0F;
   switch (address) {
     case 0x86:  // LWI_01 Steering Angle
       crc ^= (uint8_t[]){0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86}[counter];
@@ -189,27 +189,27 @@ unsigned int volkswagen_mqb_checksum(uint32_t address, const Signal &sig, const 
   return crc ^ 0xFF; // Return after standard final XOR for CRC8 8H2F/AUTOSAR
 }
 
-unsigned int xor_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
+unsigned int xor_checksum(uint32_t address, const Signal &sig, const uint8_t *data, size_t size) {
   uint8_t checksum = 0;
   int checksum_byte = sig.start_bit / 8;
 
   // Simple XOR over the payload, except for the byte where the checksum lives.
-  for (int i = 0; i < d.size(); i++) {
+  for (int i = 0; i < size; i++) {
     if (i != checksum_byte) {
-      checksum ^= d[i];
+      checksum ^= data[i];
     }
   }
 
   return checksum;
 }
 
-unsigned int pedal_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
+unsigned int pedal_checksum(uint32_t address, const Signal &sig, const uint8_t *data, size_t size) {
   uint8_t crc = 0xFF;
   uint8_t poly = 0xD5; // standard crc8
 
   // skip checksum byte
-  for (int i = d.size()-2; i >= 0; i--) {
-    crc ^= d[i];
+  for (int i = size-2; i >= 0; i--) {
+    crc ^= data[i];
     for (int j = 0; j < 8; j++) {
       if ((crc & 0x80) != 0) {
         crc = (uint8_t)((crc << 1) ^ poly);
@@ -221,24 +221,24 @@ unsigned int pedal_checksum(uint32_t address, const Signal &sig, const std::vect
   return crc;
 }
 
-unsigned int hkg_can_fd_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
+unsigned int hkg_can_fd_checksum(uint32_t address, const Signal &sig, const uint8_t *data, size_t size) {
   uint16_t crc = 0;
 
-  for (int i = 2; i < d.size(); i++) {
-    crc = (crc << 8) ^ crc16_lut_xmodem[(crc >> 8) ^ d[i]];
+  for (int i = 2; i < size; i++) {
+    crc = (crc << 8) ^ crc16_lut_xmodem[(crc >> 8) ^ data[i]];
   }
 
   // Add address to crc
   crc = (crc << 8) ^ crc16_lut_xmodem[(crc >> 8) ^ ((address >> 0) & 0xFF)];
   crc = (crc << 8) ^ crc16_lut_xmodem[(crc >> 8) ^ ((address >> 8) & 0xFF)];
 
-  if (d.size() == 8) {
+  if (size == 8) {
     crc ^= 0x5f29;
-  } else if (d.size() == 16) {
+  } else if (size == 16) {
     crc ^= 0x041d;
-  } else if (d.size() == 24) {
+  } else if (size == 24) {
     crc ^= 0x819d;
-  } else if (d.size() == 32) {
+  } else if (size == 32) {
     crc ^= 0x9f5b;
   }
 

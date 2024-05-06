@@ -13,12 +13,12 @@
 #include "cereal/logger/logger.h"
 #include "opendbc/can/common.h"
 
-int64_t get_raw_value(const std::vector<uint8_t> &msg, const Signal &sig) {
+int64_t get_raw_value(const uint8_t *msg, size_t msg_size, const Signal &sig) {
   int64_t ret = 0;
 
   int i = sig.msb / 8;
   int bits = sig.size;
-  while (i >= 0 && i < msg.size() && bits > 0) {
+  while (i >= 0 && i < msg_size && bits > 0) {
     int lsb = (int)(sig.lsb / 8) == i ? sig.lsb : i*8;
     int msb = (int)(sig.msb / 8) == i ? sig.msb : (i+1)*8 - 1;
     int size = msb - lsb + 1;
@@ -33,7 +33,7 @@ int64_t get_raw_value(const std::vector<uint8_t> &msg, const Signal &sig) {
 }
 
 
-bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
+bool MessageState::parse(uint64_t nanos, const uint8_t *msg, size_t msg_size) {
   std::vector<double> tmp_vals(parse_sigs.size());
   bool checksum_failed = false;
   bool counter_failed = false;
@@ -41,7 +41,7 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
   for (int i = 0; i < parse_sigs.size(); i++) {
     const auto &sig = parse_sigs[i];
 
-    int64_t tmp = get_raw_value(dat, sig);
+    int64_t tmp = get_raw_value(msg, msg_size, sig);
     if (sig.is_signed) {
       tmp -= ((tmp >> (sig.size-1)) & 0x1) ? (1ULL << sig.size) : 0;
     }
@@ -49,7 +49,7 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
     //DEBUG("parse 0x%X %s -> %ld\n", address, sig.name, tmp);
 
     if (!ignore_checksum) {
-      if (sig.calc_checksum != nullptr && sig.calc_checksum(address, sig, dat) != tmp) {
+      if (sig.calc_checksum != nullptr && sig.calc_checksum(address, sig, msg, msg_size) != tmp) {
         checksum_failed = true;
       }
     }
@@ -238,9 +238,7 @@ void CANParser::UpdateCans(uint64_t nanos, const capnp::List<cereal::CanData>::R
     //  continue;
     //}
 
-    std::vector<uint8_t> data(dat.size(), 0);
-    memcpy(data.data(), dat.begin(), dat.size());
-    state_it->second.parse(nanos, data);
+    state_it->second.parse(nanos, dat.begin(), dat.size());
   }
 
   // update bus timeout
@@ -268,9 +266,7 @@ void CANParser::UpdateCans(uint64_t nanos, const capnp::DynamicStruct::Reader& c
 
   auto dat = cmsg.get("dat").as<capnp::Data>();
   if (dat.size() > 64) return; // shouldn't ever happen
-  std::vector<uint8_t> data(dat.size(), 0);
-  memcpy(data.data(), dat.begin(), dat.size());
-  state_it->second.parse(nanos, data);
+  state_it->second.parse(nanos, dat.begin(), dat.size());
 }
 
 void CANParser::UpdateValid(uint64_t nanos) {

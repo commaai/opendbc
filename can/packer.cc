@@ -84,7 +84,7 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
   if (sig_it_checksum != signal_lookup.end()) {
     const auto &sig = sig_it_checksum->second;
     if (sig.calc_checksum != nullptr) {
-      unsigned int checksum = sig.calc_checksum(address, sig, ret);
+      unsigned int checksum = sig.calc_checksum(address, sig, ret.data(), ret.size());
       set_value(ret, sig, checksum);
     }
   }

@@ -38,7 +38,7 @@ struct Signal {
   double factor, offset;
   bool is_little_endian;
   SignalType type;
-  unsigned int (*calc_checksum)(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
+  unsigned int (*calc_checksum)(uint32_t address, const Signal &sig, const uint8_t *data, const size_t size);
 };
 
 struct Msg {
@@ -68,7 +68,7 @@ typedef struct ChecksumState {
   int counter_start_bit;
   bool little_endian;
   SignalType checksum_type;
-  unsigned int (*calc_checksum)(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
+  unsigned int (*calc_checksum)(uint32_t address, const Signal &sig, const uint8_t *data, const size_t size);
 } ChecksumState;
 
 DBC* dbc_parse(const std::string& dbc_path);
