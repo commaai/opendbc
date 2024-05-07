@@ -1,0 +1,390 @@
+VERSION ""
+
+
+NS_ :
+    NS_DESC_
+    CM_
+    BA_DEF_
+    BA_
+    VAL_
+    CAT_DEF_
+    CAT_
+    FILTER
+    BA_DEF_DEF_
+    EV_DATA_
+    ENVVAR_DATA_
+    SGTYPE_
+    SGTYPE_VAL_
+    BA_DEF_SGTYPE_
+    BA_SGTYPE_
+    SIG_TYPE_REF_
+    VAL_TABLE_
+    SIG_GROUP_
+    SIG_VALTYPE_
+    SIGTYPE_VALTYPE_
+    BO_TX_BU_
+    BA_DEF_REL_
+    BA_REL_
+    BA_DEF_DEF_REL_
+    BU_SG_REL_
+    BU_EV_REL_
+    BU_BO_REL_
+    SG_MUL_VAL_
+
+BS_:
+
+BU_: BAP_Tester BedienDisp_vo BedienSG_hi CGS DDA Gateway Gateway_PAG GurtMikrofon OTA_FC ZR_High ZR_LIMU ZR_MIB_TOP_ab_Gen3 ZR_Standard
+
+
+BO_ 870 Blinkmodi_02: 8 Gateway
+ SG_ BM_ZV_auf : 12|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BM_ZV_zu : 13|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BM_DWA_ein : 14|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BM_DWA_Alarm : 15|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BM_Crash : 16|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BM_Panik : 17|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BM_Not_Bremsung : 18|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BM_GDO : 19|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BM_Warnblinken : 20|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BM_Taxi_Notalarm : 21|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BM_Telematik : 22|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BM_links : 23|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BM_rechts : 24|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ Blinken_li_Fzg_Takt : 25|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ Blinken_re_Fzg_Takt : 26|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ Blinken_li_Kombi_Takt : 27|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ Blinken_re_Kombi_Takt : 28|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ BM_NBA_n_codiert_n_aktiv : 29|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BM_NBA_Status : 30|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ BM_WBT_Beleuchtung : 32|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BM_HD_Oeffnung_angelernt : 33|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BM_Autobahn : 34|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ BM_Rollenmodus_Blinken : 35|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BM_Recas : 36|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BM_Wischblinken : 37|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BM_Telematik_Abbruchgrund : 38|6@1+ (1.0,0.0) [0.0|63] ""  Vector__XXX
+ SG_ BM_PiloPa : 44|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ DWA_Alarmquelle : 59|5@1+ (1.0,0.0) [0.0|31] ""  ZR_High
+ 
+BO_ 259 ESP_03: 8 Gateway
+ SG_ ESP_03_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ ESP_03_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ ESP_VL_FR : 12|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC
+ SG_ ESP_VR_FR : 13|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC
+ SG_ ESP_HL_FR : 14|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC
+ SG_ ESP_HR_FR : 15|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC
+ SG_ ESP_VL_Radgeschw : 16|12@1+ (0.1,0) [0.0|409.2] "Unit_KiloMeterPerHour"  OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ ESP_VR_Radgeschw : 28|12@1+ (0.1,0) [0.0|409.2] "Unit_KiloMeterPerHour"  OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ ESP_HL_Radgeschw : 40|12@1+ (0.1,0) [0.0|409.2] "Unit_KiloMeterPerHour"  OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ ESP_HR_Radgeschw : 52|12@1+ (0.1,0) [0.0|409.2] "Unit_KiloMeterPerHour"  OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+
+BO_ 299 GRA_ACC_01: 8 Gateway
+ SG_ GRA_ACC_01_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ GRA_ACC_01_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ GRA_Hauptschalter : 12|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ GRA_Abbrechen : 13|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ GRA_Typ_Hauptschalter : 14|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ GRA_Limiter : 15|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ GRA_Tip_Setzen : 16|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ GRA_Tip_Hoch : 17|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ GRA_Tip_Runter : 18|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ GRA_Tip_Wiederaufnahme : 19|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ GRA_Verstellung_Zeitluecke : 20|2@1+ (1.0,0.0) [0.0|3] ""  ZR_High
+ SG_ GRA_Codierung : 22|2@1+ (1.0,0.0) [0.0|3] ""  ZR_High
+ SG_ GRA_Fehler : 24|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ GRA_LIM_Taste_verfuegbar : 25|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ GRA_Tip_Stufe_2 : 26|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ GRA_Typ_Bedienteil : 27|3@1+ (1.0,0.0) [0.0|7] ""  ZR_High
+ SG_ GRA_TravelAssist : 30|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ GRA_reserveByte4 : 31|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ GRA_reserveByte5 : 32|8@1+ (1.0,0.0) [0.0|255] ""  Vector__XXX
+ SG_ GRA_reserveByte6 : 40|8@1+ (1.0,0.0) [0.0|255] ""  Vector__XXX
+ SG_ GRA_reserveByte7 : 48|8@1+ (1.0,0.0) [0.0|255] ""  Vector__XXX
+ SG_ GRA_reserveByte8 : 56|8@1+ (1.0,0.0) [0.0|255] ""  Vector__XXX
+ 
+BO_ 134 LWI_01: 8 Gateway
+ SG_ LWI_01_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ LWI_01_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ LWI_Sensorstatus : 12|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ LWI_QBit_Sub_Daten : 13|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LWI_MFL_Abschaltung : 14|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LWI_QBit_Lenkradwinkel : 15|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ LWI_Lenkradwinkel : 16|13@1+ (0.1,0) [0.0|800.0] "Unit_DegreOfArc"  OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ LWI_VZ_Lenkradwinkel : 29|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ LWI_VZ_Lenkradw_Geschw : 30|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LWI_Lenkradw_Geschw : 31|9@1+ (5,0) [0|2500] "Unit_DegreOfArcPerSecon"  OTA_FC,ZR_High
+ SG_ LWI_Sub_Daten : 40|16@1+ (1,0) [0|65535] ""  Vector__XXX
+ 
+BO_ 420 EA_01: 8 Gateway
+ SG_ EA_01_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ EA_01_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ EA_Parken_beibehalten_HMS : 12|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ EA_Warnruckprofil : 28|3@1+ (1.0,0.0) [0.0|7] ""  Vector__XXX
+ SG_ EA_eCall_Anf : 31|2@1+ (1.0,0.0) [0.0|3] ""  ZR_High
+ SG_ EA_Funktionsstatus : 40|4@1+ (1.0,0.0) [0.0|15] ""  ZR_High
+ SG_ EA_Gurtstraffer_Anf : 44|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ EA_Anforderung_HMS : 48|3@1+ (1.0,0.0) [0.0|7] ""  Vector__XXX
+ SG_ EA_Sollbeschleunigung : 53|11@1+ (0.005,-7.22) [-7.220|3.005] "Unit_MeterPerSeconSquar"  Vector__XXX
+ 
+BO_ 289 Motor_20: 8 Gateway
+ SG_ Motor_20_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ Motor_20_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ MO_Fahrpedalrohwert_01 : 12|8@1+ (0.4,0) [0.0|101.6] "Unit_PerCent"  OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ MO_QBit_Fahrpedalwerte_01 : 20|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ MO_Fahrpedalgradient : 21|8@1+ (25,0) [0|6350] "Unit_PerCentPerSecon"  OTA_FC,ZR_High
+ SG_ MO_Sig_Fahrpedalgradient : 29|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ MO_rel_Saugrohrdruck : 30|6@1+ (18,0) [0|1116] "Unit_MilliBar"  Vector__XXX
+ SG_ MO_rel_Saugrohrdruck_gem_err : 36|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ MO_Moment_im_Leerlauf : 37|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ MO_Schubabschaltung : 38|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ MO_StartStopp_StoppVorbereitung : 39|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC
+ SG_ MO_Solldrehz_Leerlauf : 40|8@1+ (10,0) [0|2540] "Unit_MinutInver"  Vector__XXX
+ SG_ MO_Entkopplung_Sollschlupf : 48|7@1+ (20,0) [0|2480] "Unit_MinutInver"  Vector__XXX
+ SG_ MO_temporaere_Fahrerabwesenheit : 55|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ TSK_a_Soll_gradientenbegrenzt : 57|7@1+ (0.1,-7.2) [-7.2|5.4] "Unit_MeterPerSeconSquar"  Vector__XXX
+ 
+BO_ 262 ESP_05: 8 Gateway
+ SG_ ESP_05_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ ESP_05_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ ESP_QBit_Bremsdruck : 12|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ ESP_QBit_Fahrer_bremst : 13|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ ESP_Schwelle_Unterdruck : 14|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ ESP_Bremsdruck : 16|10@1+ (0.3,-30) [-30.0|276.6] "Unit_Bar"  OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ ESP_Fahrer_bremst : 26|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ ESP_Lenkeingriff_ADS : 28|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ ECD_Fehler : 32|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ ECD_nicht_verfuegbar : 33|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ ESP_Status_Bremsentemp : 34|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ ESP_Autohold_Standby : 35|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ ESP_HDC_Standby : 36|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ ESP_HBA_aktiv : 37|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ ESP_Prefill_ausgeloest : 38|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ ESP_Rueckwaertsfahrt_erkannt : 39|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ ESP_Status_Anfahrhilfe : 40|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ ESP_HDC_aktiv : 41|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ ESP_StartStopp_Info : 42|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ ESP_Eingr_HL : 44|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ ESP_Eingr_HR : 45|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ ESP_Eingr_VL : 46|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ ESP_Eingr_VR : 47|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ ESP_BKV_Unterdruck : 48|8@1+ (4,0) [4|1012] "Unit_MilliBar"  Vector__XXX
+ SG_ ESP_Autohold_aktiv : 56|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ ESP_FStatus_Anfahrhilfe : 57|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ ESP_Verz_EPB_aktiv : 58|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ ESC_Bremslicht : 59|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC
+ SG_ ESP_Verzoeg_EPB_verf : 60|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ ESP_Status_Bremsdruck : 61|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ ESP_Anforderung_EPB : 62|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ 
+BO_ 958 Motor_14: 8 Gateway
+ SG_ Motor_14_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ Motor_14_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ MO_StartStopp_Status : 12|2@1+ (1.0,0.0) [0.0|3] ""  BedienSG_hi
+ SG_ MO_StartStopp_Wiederstart : 14|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ MO_StartStopp_Motorstopp : 15|1@1+ (1.0,0.0) [0.0|1] ""  BedienSG_hi,ZR_High
+ SG_ MO_Freig_Reku : 16|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ MO_Kl_75 : 18|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ MO_Kl_50 : 19|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ MO_Gangposition : 20|4@1+ (1.0,0.0) [0.0|15] ""  OTA_FC,ZR_High
+ SG_ MO_StartStopp_Fahrerwunsch : 24|2@1+ (1.0,0.0) [0.0|3] ""  ZR_High
+ SG_ MO_HYB_Fahrbereitschaft : 26|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ MO_Ext_E_Fahrt_aktiv : 27|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ MO_Fahrer_bremst : 28|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ MO_QBit_Fahrer_bremst : 29|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ MO_BLS : 30|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ MO_Konsistenz_Bremsped : 31|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ MO_KomFehler_ESP : 32|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ MO_Klima_Eingr : 33|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ MO_Aussp_Anlass : 35|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ MO_Freig_Anlass : 36|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ MO_Kuppl_schalter : 37|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ MO_Interlock : 38|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ MO_Motor_laeuft : 39|1@1+ (1.0,0.0) [0.0|1] ""  DDA
+ SG_ MO_Kickdown : 40|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ MO_QBit_KL_75 : 41|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ MO_EKlKomLeiRed : 42|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ MO_Handshake_STH : 44|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ MO_BKV_Unterdruckwarnung : 45|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ MO_Freigabe_Segeln : 46|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ MO_PTC_Status : 47|3@1+ (1.0,0.0) [0.0|7] ""  Vector__XXX
+ SG_ MO_QBit_Gangposition : 50|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ MO_Signalquelle_Gangposition : 51|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ MO_Remotestart_Betrieb : 52|1@1+ (1.0,0.0) [0.0|1] ""  DDA
+ SG_ MO_Remotestart_moeglich : 53|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ MO_Text_Geschw_red : 54|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ MO_FMAus_aktiv : 55|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ MO_FMAus_Startvariante : 56|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ MO_BMS_NV_Anf_stuetzen : 58|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ MO_Zylinderabschaltung : 59|2@1+ (1.0,0.0) [0.0|3] ""  ZR_High
+ SG_ MO_HYB_VM_aktiv : 61|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ MO_StartVorauss_erfuellt : 62|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ 
+BO_ 779 Kombi_01: 8 Gateway
+ SG_ KBI_ABS_Lampe : 0|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ KBI_ESP_Lampe : 1|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ KBI_BKL_Lampe : 2|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ KBI_Airbag_Lampe : 3|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ KBI_SILA_gueltig : 4|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ KBI_Lenkung_Lampe : 5|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ KBI_Vorglueh_System_Lampe : 6|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ KBI_NV_in_Anzeige : 7|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ Kombi_01_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ KBI_Anzeigestatus_ACC : 12|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ KBI_Anzeigestatus_GRA : 13|2@1+ (1.0,0.0) [0.0|3] ""  ZR_High
+ SG_ KBI_Tankwarnung : 16|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ KBI_MFA_v_Einheit_01 : 17|1@1+ (1.0,0.0) [0.0|1] ""  BedienSG_hi,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ KBI_im_Stellgliedtest : 18|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ KBI_Anzeigefehler_LDW : 19|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ KBI_Tankwarnung_ungueltig : 21|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ KBI_Handbremse : 23|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ KBI_V_Digital : 24|9@1+ (1,0) [0|511] ""  BedienSG_hi,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ KBI_PLA_in_Anzeige : 33|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ KBI_Anzeigefehler_NV : 34|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ KBI_Anzeigestatus_LIM : 35|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ KBI_ARA_in_Anzeige : 37|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ KBI_Taster_Lift : 38|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ KBI_Taster_Fahrwerk : 39|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ KBI_GRA_Hauptschalter : 40|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ KBI_angez_Geschw : 48|10@1+ (0.32,0) [0.00|325.12] "Unit_KiloMeterPerHour"  BedienSG_hi,OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ KBI_Einheit_Tacho : 58|1@1+ (1.0,0.0) [0.0|1] ""  BedienSG_hi,ZR_High
+ SG_ KBI_Konsistenz_ACC : 59|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ KBI_Fehler_Anzeige_ACC : 60|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ KBI_Anzeigefehler_SWA : 61|2@1+ (1.0,0.0) [0.0|3] ""  ZR_High
+ SG_ KBI_Systemstatus : 63|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ 
+BO_ 173 Getriebe_11: 8 Gateway
+ SG_ Getriebe_11_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ Getriebe_11_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ GE_MMom_Soll_02 : 12|10@1+ (1,-509) [-509|509] ""  Vector__XXX
+ SG_ GE_MMom_Vorhalt_02 : 22|10@1+ (1,-509) [-509|509] ""  Vector__XXX
+ SG_ GE_Uefkt : 32|10@1+ (0.1,0) [0.0|102.2] ""  Vector__XXX
+ SG_ GE_Fahrstufe : 42|4@1+ (1.0,0.0) [0.0|15] ""  DDA,OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ GE_reserv_Fahrstufe : 46|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ GE_Schaltablauf : 47|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ GE_Uefkt_unplausibel : 49|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ GE_MMom_Status_02 : 50|3@1+ (1.0,0.0) [0.0|7] ""  Vector__XXX
+ SG_ GE_Status_Kraftschluss : 53|3@1+ (1.0,0.0) [0.0|7] ""  Vector__XXX
+ SG_ GE_MMom_Status : 56|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ GE_Freig_MMom_Vorhalt : 58|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ GE_Verbot_Ausblendung : 59|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ GE_Zielgang : 60|4@1+ (1.0,0.0) [0.0|15] ""  OTA_FC,ZR_High
+ 
+BO_ 1411 ZV_02: 8 Gateway
+ SG_ BCM_FH_Freigabe : 12|1@1+ (1.0,0.0) [0.0|1] ""  BedienDisp_vo
+ SG_ BCM_Komfortfkt_Freigabe : 13|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BCM_HSK_Freigabe : 14|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BCM_Verdeck_Freigabe : 15|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ ZV_verriegelt_intern_ist : 16|1@1+ (1.0,0.0) [0.0|1] ""  DDA,OTA_FC,ZR_High
+ SG_ ZV_verriegelt_extern_ist : 17|1@1+ (1.0,0.0) [0.0|1] ""  DDA,OTA_FC,ZR_High
+ SG_ ZV_verriegelt_intern_soll : 18|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ ZV_verriegelt_extern_soll : 19|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ ZV_gesafet_extern_ist : 20|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ ZV_gesafet_extern_soll : 21|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ ZV_Einzeltuerentriegelung : 22|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ ZV_Heckeinzelentriegelung : 23|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ ZV_FT_offen : 24|1@1+ (1.0,0.0) [0.0|1] ""  DDA,OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ ZV_BT_offen : 25|1@1+ (1.0,0.0) [0.0|1] ""  DDA,OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ ZV_HFS_offen : 26|1@1+ (1.0,0.0) [0.0|1] ""  DDA,OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ ZV_HBFS_offen : 27|1@1+ (1.0,0.0) [0.0|1] ""  DDA,OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ ZV_HD_offen : 28|1@1+ (1.0,0.0) [0.0|1] ""  DDA,OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ ZV_HS_offen : 29|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ IRUE_aktiv : 30|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ DWA_aktiv : 31|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ HD_Hauptraste : 32|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ HD_Vorraste : 33|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ FFB_CarFinder : 38|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ FFB_Komfortoeffnen : 39|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ FFB_Komfortschliessen : 40|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ ZV_Schluessel_Zugang : 42|4@1+ (1.0,0.0) [0.0|15] ""  ZR_High
+ SG_ ZV_SafeFunktion_aktiv : 46|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ FBS_Warn_Schluessel_Batt : 47|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ ZV_Oeffnungsmodus : 48|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ HFS_verriegelt : 50|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC
+ SG_ HFS_gesafet : 51|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ HBFS_verriegelt : 52|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC
+ SG_ HBFS_gesafet : 53|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ ZV_ist_Zustand_verfuegbar : 54|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ IRUE_Taster_Fkts_LED : 55|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ ZV_Tankklappe_offen : 56|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ ZV_Rollo_auf : 57|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ ZV_Rollo_zu : 58|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ ZV_SAD_auf : 59|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ ZV_SAD_zu : 60|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BCM_Tankklappensteller_Fehler : 61|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ ZV_verriegelt_soll : 62|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ 
+BO_ 1312 Airbag_02: 8 Gateway
+ SG_ Airbag_02_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ Airbag_02_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ LoGeWa_Event_Kombiwarnung : 12|4@1+ (1.0,0.0) [0.0|15] ""  ZR_High
+ SG_ AB_Anforderung_eCall : 16|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ AB_Anprall_Seite_Beifahrer : 17|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ AB_Anprall_Rollover : 18|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ AB_Anprall_FGS : 19|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ AB_Anprall_Front_Beifahrer : 20|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ AB_Anprall_Front_Fahrer : 21|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ AB_Anprall_Heck_Beifahrer : 22|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ AB_Anprall_Heck_Fahrer : 23|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ AB_Wickelklappung_Reihe2_MI : 24|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ AB_Belegung_VB : 26|2@1+ (1.0,0.0) [0.0|3] ""  BedienSG_hi,GurtMikrofon,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ AB_Abschaltanf_SIH_BF : 28|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ AB_Anprall_Seite_Fahrer : 29|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ SC_PAO_Schriftzug_Anf : 30|2@1+ (1.0,0.0) [0.0|3] ""  ZR_High
+ SG_ SC_PAO_ON_Anf : 32|2@1+ (1.0,0.0) [0.0|3] ""  ZR_High
+ SG_ SC_PAO_OFF_Anf : 34|2@1+ (1.0,0.0) [0.0|3] ""  ZR_High
+ SG_ AB_Crashschwere : 36|3@1+ (1.0,0.0) [0.0|7] ""  Vector__XXX
+ SG_ AB_Anforderung_USM : 39|1@1+ (1.0,0.0) [0.0|1] ""  ZR_Standard
+ SG_ AB_Gurtschloss_FA : 40|2@1+ (1.0,0.0) [0.0|3] ""  BedienSG_hi,GurtMikrofon,ZR_High
+ SG_ AB_Gurtschloss_BF : 42|2@1+ (1.0,0.0) [0.0|3] ""  BedienSG_hi,GurtMikrofon,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ AB_Gurtschloss_Reihe2_FA : 44|2@1+ (1.0,0.0) [0.0|3] ""  BedienSG_hi,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ AB_Gurtschloss_Reihe2_MI : 46|2@1+ (1.0,0.0) [0.0|3] ""  BedienSG_hi,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ AB_Gurtschloss_Reihe2_BF : 48|2@1+ (1.0,0.0) [0.0|3] ""  BedienSG_hi,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ AB_Gurtschloss_Reihe3_FA : 50|2@1+ (1.0,0.0) [0.0|3] ""  BedienSG_hi,ZR_High
+ SG_ AB_Gurtschloss_Reihe3_MI : 52|2@1+ (1.0,0.0) [0.0|3] ""  BedienSG_hi,ZR_High
+ SG_ AB_Gurtschloss_Reihe3_BF : 54|2@1+ (1.0,0.0) [0.0|3] ""  BedienSG_hi,ZR_High
+ SG_ AB_Sitzpos_Sens_FA : 56|2@1+ (1.0,0.0) [0.0|3] ""  ZR_High
+ SG_ AB_Sitzpos_Sens_BF : 58|2@1+ (1.0,0.0) [0.0|3] ""  ZR_High
+ SG_ AB_Wickelklappung_Reihe2_BF : 60|2@1+ (1.0,0.0) [0.0|3] ""  ZR_High
+ SG_ AB_Wickelklappung_Reihe2_FA : 62|2@1+ (1.0,0.0) [0.0|3] ""  ZR_High
+ 
+BO_ 783 SWA_01: 8 Gateway
+ SG_ SWA_01_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ SWA_01_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ SWA_Anzeigen : 12|4@1+ (1.0,0.0) [0.0|15] ""  ZR_High
+ SG_ SWA_Blindheit_erkannt : 16|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ SWA_rel_Nichtverf : 17|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ SWA_rel_Fehler : 18|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ SWA_Sta_aktiv : 19|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ SWA_Sta_passiv : 20|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ SWA_FT_RueckLED : 21|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ ASW_Status : 22|2@1+ (1.0,0.0) [0.0|3] ""  ZR_High
+ SG_ SWA_Standziele_li : 24|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ SWA_Kolonne_li : 25|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ SWA_Infostufe_SWA_li : 26|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ SWA_Warnung_SWA_li : 27|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ ASW_Warnung_FS : 28|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ ASW_Warnung_BFS : 29|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ ASW_Kombitexte : 30|3@1+ (1.0,0.0) [0.0|7] ""  ZR_High
+ SG_ SWA_Kolonne_mi : 33|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ ASW_Modus : 34|3@1+ (1.0,0.0) [0.0|7] ""  ZR_High
+ SG_ SWA_Modus : 37|3@1+ (1.0,0.0) [0.0|7] ""  ZR_High
+ SG_ SWA_Standziele_re : 40|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ SWA_Kolonne_re : 41|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ SWA_Infostufe_SWA_re : 42|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ SWA_Warnung_SWA_re : 43|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ HRE_Anzeigetexte : 44|4@1+ (1.0,0.0) [0.0|15] ""  Vector__XXX
+ SG_ SWA_Status_02 : 48|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ Heckradar_Kombitexte : 56|5@1+ (1.0,0.0) [0.0|31] ""  ZR_High
+ SG_ RCTA_Kombitexte : 61|3@1+ (1.0,0.0) [0.0|7] ""  ZR_High
+ 
+BO_ 605 KLR_01: 8 Gateway
+ SG_ KLR_01_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ KLR_01_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ KLR_Fehler : 12|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ KLR_ResponseError : 13|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ KLR_Lokalaktiv : 14|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ KLR_Fehler_Codierung : 15|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ KLR_Touchintensitaet_1 : 16|8@1+ (1,0) [0|250] "Unit_None"  Vector__XXX
+ SG_ KLR_Touchintensitaet_2 : 24|8@1+ (1,0) [0|250] "Unit_None"  Vector__XXX
+ SG_ KLR_Touchintensitaet_3 : 32|8@1+ (1,0) [0|250] "Unit_None"  Vector__XXX
+ SG_ KLR_Touchauswertung : 40|4@1+ (1.0,0.0) [0.0|15] ""  ZR_High
