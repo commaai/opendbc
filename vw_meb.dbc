@@ -67,8 +67,8 @@ BO_ 870 Blinkmodi_02: 8 Gateway
  SG_ DWA_Alarmquelle : 59|5@1+ (1.0,0.0) [0.0|31] ""  ZR_High
  
 BO_ 259 ESP_03: 8 Gateway
- SG_ ESP_03_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
- SG_ ESP_03_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
  SG_ ESP_VL_FR : 12|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC
  SG_ ESP_VR_FR : 13|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC
  SG_ ESP_HL_FR : 14|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC
@@ -79,8 +79,8 @@ BO_ 259 ESP_03: 8 Gateway
  SG_ ESP_HR_Radgeschw : 52|12@1+ (0.1,0) [0.0|409.2] "Unit_KiloMeterPerHour"  OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
 
 BO_ 299 GRA_ACC_01: 8 Gateway
- SG_ GRA_ACC_01_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
- SG_ GRA_ACC_01_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
  SG_ GRA_Hauptschalter : 12|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
  SG_ GRA_Abbrechen : 13|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
  SG_ GRA_Typ_Hauptschalter : 14|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
@@ -103,8 +103,8 @@ BO_ 299 GRA_ACC_01: 8 Gateway
  SG_ GRA_reserveByte8 : 56|8@1+ (1.0,0.0) [0.0|255] ""  Vector__XXX
  
 BO_ 134 LWI_01: 8 Gateway
- SG_ LWI_01_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
- SG_ LWI_01_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
  SG_ LWI_Sensorstatus : 12|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
  SG_ LWI_QBit_Sub_Daten : 13|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
  SG_ LWI_MFL_Abschaltung : 14|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
@@ -116,8 +116,8 @@ BO_ 134 LWI_01: 8 Gateway
  SG_ LWI_Sub_Daten : 40|16@1+ (1,0) [0|65535] ""  Vector__XXX
  
 BO_ 420 EA_01: 8 Gateway
- SG_ EA_01_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
- SG_ EA_01_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
  SG_ EA_Parken_beibehalten_HMS : 12|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
  SG_ EA_Warnruckprofil : 28|3@1+ (1.0,0.0) [0.0|7] ""  Vector__XXX
  SG_ EA_eCall_Anf : 31|2@1+ (1.0,0.0) [0.0|3] ""  ZR_High
@@ -127,8 +127,8 @@ BO_ 420 EA_01: 8 Gateway
  SG_ EA_Sollbeschleunigung : 53|11@1+ (0.005,-7.22) [-7.220|3.005] "Unit_MeterPerSeconSquar"  Vector__XXX
  
 BO_ 289 Motor_20: 8 Gateway
- SG_ Motor_20_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
- SG_ Motor_20_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
  SG_ MO_Fahrpedalrohwert_01 : 12|8@1+ (0.4,0) [0.0|101.6] "Unit_PerCent"  OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
  SG_ MO_QBit_Fahrpedalwerte_01 : 20|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
  SG_ MO_Fahrpedalgradient : 21|8@1+ (25,0) [0|6350] "Unit_PerCentPerSecon"  OTA_FC,ZR_High
@@ -144,8 +144,8 @@ BO_ 289 Motor_20: 8 Gateway
  SG_ TSK_a_Soll_gradientenbegrenzt : 57|7@1+ (0.1,-7.2) [-7.2|5.4] "Unit_MeterPerSeconSquar"  Vector__XXX
  
 BO_ 262 ESP_05: 8 Gateway
- SG_ ESP_05_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
- SG_ ESP_05_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
  SG_ ESP_QBit_Bremsdruck : 12|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
  SG_ ESP_QBit_Fahrer_bremst : 13|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
  SG_ ESP_Schwelle_Unterdruck : 14|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
@@ -177,8 +177,8 @@ BO_ 262 ESP_05: 8 Gateway
  SG_ ESP_Anforderung_EPB : 62|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
  
 BO_ 958 Motor_14: 8 Gateway
- SG_ Motor_14_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
- SG_ Motor_14_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
  SG_ MO_StartStopp_Status : 12|2@1+ (1.0,0.0) [0.0|3] ""  BedienSG_hi
  SG_ MO_StartStopp_Wiederstart : 14|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
  SG_ MO_StartStopp_Motorstopp : 15|1@1+ (1.0,0.0) [0.0|1] ""  BedienSG_hi,ZR_High
@@ -348,8 +348,8 @@ BO_ 1312 Airbag_02: 8 Gateway
  SG_ AB_Wickelklappung_Reihe2_FA : 62|2@1+ (1.0,0.0) [0.0|3] ""  ZR_High
  
 BO_ 783 SWA_01: 8 Gateway
- SG_ SWA_01_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
- SG_ SWA_01_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
  SG_ SWA_Anzeigen : 12|4@1+ (1.0,0.0) [0.0|15] ""  ZR_High
  SG_ SWA_Blindheit_erkannt : 16|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
  SG_ SWA_rel_Nichtverf : 17|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
@@ -378,8 +378,8 @@ BO_ 783 SWA_01: 8 Gateway
  SG_ RCTA_Kombitexte : 61|3@1+ (1.0,0.0) [0.0|7] ""  ZR_High
  
 BO_ 605 KLR_01: 8 Gateway
- SG_ KLR_01_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
- SG_ KLR_01_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
  SG_ KLR_Fehler : 12|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
  SG_ KLR_ResponseError : 13|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
  SG_ KLR_Lokalaktiv : 14|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
@@ -388,3 +388,54 @@ BO_ 605 KLR_01: 8 Gateway
  SG_ KLR_Touchintensitaet_2 : 24|8@1+ (1,0) [0|250] "Unit_None"  Vector__XXX
  SG_ KLR_Touchintensitaet_3 : 32|8@1+ (1,0) [0|250] "Unit_None"  Vector__XXX
  SG_ KLR_Touchauswertung : 40|4@1+ (1.0,0.0) [0.0|15] ""  ZR_High
+
+BO_ 294 HCA_01: 8 Frontsensorik
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ HCA_01_Vib_Freq : 12|4@1+ (1,15) [15|30] "Unit_Hertz" Vector__XXX
+ SG_ HCA_01_LM_Offset : 16|9@1+ (1,0) [0|511] "Unit_centiNewtoMeter" Vector__XXX
+ SG_ EA_ACC_Sollstatus : 25|2@1+ (1,0) [0|3] ""  Frontradar
+ SG_ EA_Ruckprofil : 27|3@1+ (1,0) [0|7] "" Vector__XXX
+ SG_ HCA_01_Enable : 30|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ HCA_01_LM_OffSign : 31|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ HCA_01_Available : 32|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ HCA_01_Standby : 33|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ HCA_01_Request : 34|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ HCA_01_Vib_Amp : 36|4@1+ (0.2,0) [0|3] "Unit_NewtoMeter" Vector__XXX
+ SG_ EA_Ruckfreigabe : 40|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ EA_ACC_Wunschgeschwindigkeit : 41|10@1+ (0.32,0) [0|327.04] "Unit_KiloMeterPerHour"  Frontradar
+
+BO_ 159 LH_EPS_03: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  XXX
+ SG_ EPS_DSR_Status : 12|4@1+ (1,0) [0|15] ""  XXX
+ SG_ EPS_Berechneter_LW : 16|12@1+ (0.15,0) [0|613.95] "Unit_DegreOfArc"  XXX
+ SG_ EPS_BLW_QBit : 30|1@1+ (1,0) [0|1] ""  XXX
+ SG_ EPS_VZ_BLW : 31|1@1+ (1,0) [0|1] ""  XXX
+ SG_ EPS_HCA_Status : 32|4@1+ (1,0) [0|15] ""  XXX
+ SG_ EPS_Lenkmoment : 40|10@1+ (1,0) [0|8] "Unit_centiNewtoMeter"  XXX
+ SG_ EPS_Lenkmoment_QBit : 54|1@1+ (1,0) [0|1] ""  XXX
+ SG_ EPS_VZ_Lenkmoment : 55|1@1+ (1,0) [0|1] ""  XXX
+ SG_ EPS_Lenkungstyp : 60|4@1+ (1,0) [0|15] ""  XXX
+
+BO_ 919 LDW_02: 8 XXX
+ SG_ LDW_Gong : 12|2@1+ (1,0) [0|3] ""  XXX
+ SG_ LDW_SW_Warnung_links : 14|1@1+ (1,0) [0|1] ""  XXX
+ SG_ LDW_SW_Warnung_rechts : 15|1@1+ (1,0) [0|1] ""  XXX
+ SG_ LDW_Texte : 16|4@1+ (1,0) [0|15] ""  XXX
+ SG_ LDW_Seite_DLCTLC : 20|1@1+ (1,0) [0|1] ""  XXX
+ SG_ LDW_Lernmodus : 21|3@1+ (1,0) [0|7] ""  XXX
+ SG_ LDW_Anlaufsp_VLR : 24|4@1+ (1,0) [0|15] ""  XXX
+ SG_ LDW_Vib_Amp_VLR : 28|4@1+ (1,0) [0|15] ""  XXX
+ SG_ LDW_Anlaufzeit_VLR : 32|4@1+ (1,0) [0|15] ""  XXX
+ SG_ LDW_Lernmodus_rechts : 36|2@1+ (1,0) [0|3] ""  XXX
+ SG_ LDW_Lernmodus_links : 38|2@1+ (1,0) [0|3] ""  XXX
+ SG_ LDW_DLC : 40|8@1+ (0.01,-1.25) [-1.25|1.25] "Unit_Meter"  XXX
+ SG_ LDW_TLC : 48|5@1+ (0.1,0) [0|3] "Unit_Secon"  XXX
+ SG_ LDW_Warnung_links : 56|1@1+ (1,0) [0|1] ""  XXX
+ SG_ LDW_Warnung_rechts : 57|1@1+ (1,0) [0|1] ""  XXX
+ SG_ LDW_Codierinfo_fuer_VLR : 58|2@1+ (1,0) [0|3] ""  XXX
+ SG_ LDW_Frontscheibenheizung_aktiv : 60|1@1+ (1,0) [0|1] ""  XXX
+ SG_ LDW_Status_LED_gelb : 61|1@1+ (1,0) [0|1] ""  XXX
+ SG_ LDW_Status_LED_gruen : 62|1@1+ (1,0) [0|1] ""  XXX
+ SG_ LDW_KD_Fehler : 63|1@1+ (1,0) [0|1] ""  XXX
