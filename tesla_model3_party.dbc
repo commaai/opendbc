@@ -185,11 +185,8 @@ BO_ 646 DI_state: 7 ETH
  SG_ DI_locStatusCounter : 8|4@1+ (1,0) [0|0] ""  X
  SG_ DI_locStatusChecksum : 0|8@1+ (1,0) [0|0] ""  X
 
-BO_ 778 LeftSeat: 8 XXX
- SG_ frontBuckleStatus : 59|1@1+ (1,0) [0|3] ""  XXX
-
-BO_ 794 RightSeat: 8 XXX
- SG_ frontBuckleStatus : 59|1@1+ (1,0) [0|3] ""  XXX
+BO_ 785 DriverSeat: 7 XXX
+ SG_ buckleStatus : 13|1@0+ (1,0) [0|1] ""  XXX
 
 
 
@@ -281,6 +278,7 @@ VAL_ 646 DI_parkBrakeState 0 "UNAVAILABLE" 1 "RELEASED" 2 "REQUESTED" 3 "APPLIED
 VAL_ 646 DI_autoparkState 0 "UNAVAILABLE" 1 "STANDBY" 2 "STARTED" 3 "ACTIVE" 4 "COMPLETE" 5 "PAUSED" 6 "ABORTED" 7 "RESUMED" 8 "UNPARK_COMPLETE" 9 "SELFPARK_STARTED" 15 "SNA" ;
 VAL_ 646 DI_speedUnits 0 "MPH" 1 "KPH" ;
 VAL_ 646 DI_cruiseState 0 "UNAVAILABLE" 1 "STANDBY" 2 "ENABLED" 3 "STANDSTILL" 4 "OVERRIDE" 5 "FAULT" 6 "PRE_FAULT" 7 "PRE_CANCEL" ;
+VAL_ 785 buckleStatus 1 "LATCHED" 0 "UNLATCHED" ;
 
 
 
