@@ -1,7 +1,6 @@
 # distutils: language = c++
 # cython: c_string_encoding=ascii, language_level=3
 
-cimport cython
 from cython.operator cimport dereference as deref, preincrement as preinc
 from libcpp.pair cimport pair
 from libcpp.string cimport string
@@ -72,8 +71,6 @@ cdef class CANParser:
     if self.can:
       del self.can
 
-  @cython.wraparound(False)
-  @cython.boundscheck(False)
   def update_strings(self, strings, sendcan=False):
     for address in self.addresses:
       self.vl_all[address].clear()
