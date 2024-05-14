@@ -20,6 +20,7 @@ cdef class CANParser:
     cpp_CANParser *can
     const DBC *dbc
     vector[SignalValue] can_values
+    dict address_to_msg_name
 
   cdef readonly:
     dict vl
@@ -37,25 +38,25 @@ cdef class CANParser:
     self.vl_all = {}
     self.ts_nanos = {}
     msg_name_to_address = {}
-    address_to_msg_name = {}
+    self.address_to_msg_name = {}
 
     for i in range(self.dbc[0].msgs.size()):
       msg = self.dbc[0].msgs[i]
       name = msg.name.decode("utf8")
 
       msg_name_to_address[name] = msg.address
-      address_to_msg_name[msg.address] = name
+      self.address_to_msg_name[msg.address] = name
 
     # Convert message names into addresses and check existence in DBC
     cdef vector[pair[uint32_t, int]] message_v
     for i in range(len(messages)):
       c = messages[i]
       address = c[0] if isinstance(c[0], numbers.Number) else msg_name_to_address.get(c[0])
-      if address not in address_to_msg_name:
+      if address not in self.address_to_msg_name:
         raise RuntimeError(f"could not find message {repr(c[0])} in DBC {self.dbc_name}")
       message_v.push_back((address, c[1]))
 
-      name = address_to_msg_name[address]
+      name = self.address_to_msg_name[address]
       self.vl[address] = {}
       self.vl[name] = self.vl[address]
       self.vl_all[address] = {}
@@ -83,8 +84,7 @@ cdef class CANParser:
     cdef SignalValue* cv
     while it != new_vals.end():
       cv = &deref(it)
-      # Cast char * directly to unicode
-      cv_name = <unicode>cv.name
+      cv_name = self.address_to_msg_name[cv.address]
       self.vl[cv.address][cv_name] = cv.value
       self.vl_all[cv.address][cv_name] = cv.all_values
       self.ts_nanos[cv.address][cv_name] = cv.ts_nanos
