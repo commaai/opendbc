@@ -76,7 +76,7 @@ cdef class CANParser:
   @cython.boundscheck(False)
   def update_strings(self, strings, sendcan=False):
     for address in self.addresses:
-     self.vl_all[address].clear()
+      self.vl_all[address].clear()
 
     # Predeclare variables
     cdef vector[SignalValue] new_vals
