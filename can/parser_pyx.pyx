@@ -5,7 +5,6 @@ from cython.operator cimport dereference as deref, preincrement as preinc
 from libcpp.pair cimport pair
 from libcpp.string cimport string
 from libcpp.vector cimport vector
-from libcpp.unordered_set cimport unordered_set
 from libc.stdint cimport uint32_t
 
 from .common cimport CANParser as cpp_CANParser
@@ -20,6 +19,7 @@ cdef class CANParser:
     cpp_CANParser *can
     const DBC *dbc
     vector[SignalValue] can_values
+    vector[uint32_t] addresses
 
   cdef readonly:
     dict vl
@@ -54,11 +54,12 @@ cdef class CANParser:
       if address not in address_to_msg_name:
         raise RuntimeError(f"could not find message {repr(c[0])} in DBC {self.dbc_name}")
       message_v.push_back((address, c[1]))
+      self.addresses.push_back(address)
 
       name = address_to_msg_name[address]
       self.vl[address] = {}
       self.vl[name] = self.vl[address]
-      self.vl_all[address] = {}
+      self.vl_all[address] = defaultdict(list)
       self.vl_all[name] = self.vl_all[address]
       self.ts_nanos[address] = {}
       self.ts_nanos[name] = self.ts_nanos[address]
@@ -71,24 +72,35 @@ cdef class CANParser:
       del self.can
 
   def update_strings(self, strings, sendcan=False):
-    for v in self.vl_all.values():
-      for l in v.values():  # no-cython-lint
-        l.clear()
+    for address in self.addresses:
+      self.vl_all[address].clear()
 
     cdef vector[SignalValue] new_vals
-    cdef unordered_set[uint32_t] updated_addrs
+    cur_address = -1
+    vl = {}
+    vl_all = {}
+    ts_nanos = {}
+    updated_addrs = set()
 
     self.can.update_strings(strings, new_vals, sendcan)
     cdef vector[SignalValue].iterator it = new_vals.begin()
     cdef SignalValue* cv
     while it != new_vals.end():
       cv = &deref(it)
+
+      # Check if the address has changed
+      if cv.address != cur_address:
+        cur_address = cv.address
+        vl = self.vl[cur_address]
+        vl_all = self.vl_all[cur_address]
+        ts_nanos = self.ts_nanos[cur_address]
+        updated_addrs.add(cur_address)
+
       # Cast char * directly to unicode
       cv_name = <unicode>cv.name
-      self.vl[cv.address][cv_name] = cv.value
-      self.vl_all[cv.address][cv_name] = cv.all_values
-      self.ts_nanos[cv.address][cv_name] = cv.ts_nanos
-      updated_addrs.insert(cv.address)
+      vl[cv_name] = cv.value
+      vl_all[cv_name] = cv.all_values
+      ts_nanos[cv_name] = cv.ts_nanos
       preinc(it)
 
     return updated_addrs
