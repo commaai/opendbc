@@ -185,11 +185,12 @@ BO_ 1198 LKA_HUD: 8 CAMERA
 BO_ 1351 CAM_UNKNOWN_4: 8 CAMERA
 
 BO_ 1442 ACC_1: 8 RADAR
- SG_ MAYBE_HUD_SPEED : 7|8@0+ (1,0) [0|255] "km/h" XXX
- SG_ NEW_SIGNAL_1 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ HUD_SPEED : 7|8@0+ (1,0) [0|255] "km/h" XXX
+ SG_ TARGET_SPEED : 15|8@0+ (0.433,0) [0|255] "m/s" XXX
  SG_ NEW_SIGNAL_3 : 17|5@0+ (1,0) [0|31] "" XXX
  SG_ NEW_SIGNAL_4 : 18|1@0+ (1,0) [0|1] "" XXX
- SG_ CRUISE_STATUS : 23|3@0+ (1,0) [0|7] "" XXX
+ SG_ CRUISE_STATUS : 22|2@0+ (1,0) [0|3] "" XXX
+ SG_ MAYBE_TJA : 23|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1458 CAM_UNKNOWN_5: 4 CAMERA
  SG_ NEW_SIGNAL_1 : 5|1@0+ (1,0) [0|1] "" XXX
@@ -208,4 +209,3 @@ CM_ SG_ 254 LATERAL_ACCEL "scale TBD";
 CM_ SG_ 254 YAW_RATE "scale estimated";
 CM_ SG_ 284 VEHICLE_SPEED "scale estimated";
 CM_ BO_ 1198 "Definite LKA activity, probably contains lane-line recognition and lane departure signals, indicator of LKA vs TJA, perhaps indicator of active assist in map-permitted areas";
-VAL_ 1442 CRUISE_STATUS 0 "off" 1 "mainswitch on";
