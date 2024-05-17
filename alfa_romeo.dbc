@@ -1,3 +1,7 @@
+BO_ 171 NEW_MSG_AB: 8 XXX
+ SG_ NEW_SIGNAL_1 : 23|2@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_2 : 34|3@0+ (1,0) [0|7] "" XXX
+
 BO_ 222 EPS_1: 6 EPS
  SG_ STEERING_ANGLE : 5|14@0+ (0.1,-700) [0|16383] "deg" XXX
  SG_ STEERING_RATE : 19|12@0+ (0.5,-1000) [0|4095] "deg/s" XXX
@@ -137,10 +141,35 @@ BO_ 900 NEW_MSG_384: 8 XXX
  SG_ NEW_SIGNAL_1 : 19|3@0+ (1,0) [0|7] "" XXX
 
 BO_ 1040 NEW_MSG_410: 8 XXX
+ SG_ NEW_SIGNAL_3 : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_1 : 23|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_2 : 49|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 1046 NEW_MSG_416: 8 XXX
+ SG_ MUX M : 1|2@0+ (1,0) [0|3] "" XXX
+ SG_ UNKNOWN_M0_1 m0 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ UNKNOWN_M0_2 m0 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ UNKNOWN_M0_3 m0 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ UNKNOWN_M0_4 m0 : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ UNKNOWN_M0_5 m0 : 47|8@0+ (1,0) [0|255] "" XXX
+ SG_ UNKNOWN_M0_6 m0 : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ UNKNOWN_M0_7 m0 : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ UNKNOWN_M1_1 m1 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ UNKNOWN_M1_2 m1 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ UNKNOWN_M1_3 m1 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ UNKNOWN_M1_4 m1 : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ UNKNOWN_M1_5 m1 : 47|8@0+ (1,0) [0|255] "" XXX
+ SG_ UNKNOWN_M1_6 m1 : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ UNKNOWN_M1_7 m1 : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ UNKNOWN_M2_1 m2 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ UNKNOWN_M2_2 m2 : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ UNKNOWN_M2_3 m2 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ UNKNOWN_M2_4 m2 : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ UNKNOWN_M2_5 m2 : 47|8@0+ (1,0) [0|255] "" XXX
+ SG_ UNKNOWN_M2_6 m2 : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ UNKNOWN_M2_7 m2 : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 1194 CAM_UNKNOWN_2: 8 CAMERA
 
@@ -160,7 +189,7 @@ BO_ 1442 ACC_1: 8 RADAR
  SG_ NEW_SIGNAL_1 : 15|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_3 : 17|5@0+ (1,0) [0|31] "" XXX
  SG_ NEW_SIGNAL_4 : 18|1@0+ (1,0) [0|1] "" XXX
- SG_ MAYBE_STATUS : 23|3@0+ (1,0) [0|7] "" XXX
+ SG_ CRUISE_STATUS : 23|3@0+ (1,0) [0|7] "" XXX
 
 BO_ 1458 CAM_UNKNOWN_5: 4 CAMERA
  SG_ NEW_SIGNAL_1 : 5|1@0+ (1,0) [0|1] "" XXX
@@ -169,6 +198,9 @@ BO_ 1854 BCM_1: 4 BCM
  SG_ RIGHT_TURN_STALK : 16|1@0+ (1,0) [0|1] "" XXX
  SG_ LEFT_TURN_STALK : 17|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 1865 NEW_MSG_749: 8 XXX
+ SG_ NEW_SIGNAL_1 : 23|2@0+ (1,0) [0|3] "" XXX
+
 BO_ 506855454 CAM_UNKNOWN_6: 1 CAMERA
 
 CM_ SG_ 254 LONG_ACCEL "scale TBD";
@@ -176,3 +208,4 @@ CM_ SG_ 254 LATERAL_ACCEL "scale TBD";
 CM_ SG_ 254 YAW_RATE "scale estimated";
 CM_ SG_ 284 VEHICLE_SPEED "scale estimated";
 CM_ BO_ 1198 "Definite LKA activity, probably contains lane-line recognition and lane departure signals, indicator of LKA vs TJA, perhaps indicator of active assist in map-permitted areas";
+VAL_ 1442 CRUISE_STATUS 0 "off" 1 "mainswitch on";
