@@ -73,6 +73,9 @@ BO_ 336 NEW_MSG_8: 8 XXX
 BO_ 328 VehicleSpeed1: 8 XXX
  SG_ VehicleSpeed : 55|16@0+ (0.01,0) [0|65535] "" XXX
 
+BO_ 359 ACC_Speed: 8 XXX
+ SG_ ACC_Speed : 0|8@0+ (1,0) [0|255] "km/h" XXX
+
 BO_ 465 NEW_MSG_4: 8 XXX
  SG_ NEW_SIGNAL_1 : 55|16@0+ (1,0) [0|4095] "" XXX
 
@@ -87,14 +90,14 @@ BO_ 565 wheelspeed0: 8 BCM
 BO_ 582 PSCM1: 8 PSCM
  SG_ byte4 : 39|4@0+ (1,0) [0|15] "" XXX
  SG_ LKATorque : 35|12@0+ (1,-2000) [0|65535] "" XXX
- SG_ SteeringAngleServo : 23|16@0+ (0.0447,-1468) [0|65535] "deg" XXX
+ SG_ SteeringAngleServo : 23|16@0+ (0.0447,-1464.8) [0|65535] "deg" XXX
  SG_ SteeringWheelRateOfChange : 15|8@0+ (1,0) [0|255] "" XXX
  SG_ byte7 : 63|8@0+ (1,0) [0|255] "" XXX
  SG_ byte0 : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ LKAActive : 55|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 608 FSM1: 8 FSM
- SG_ ACC_Tracking : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ ACC_Distance : 7|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 609 fromWhere: 8 XXX
  SG_ SteeringAngle : 21|14@0+ (0.1,-1021) [0|65535] "deg" XXX
@@ -110,6 +113,8 @@ BO_ 610 FSM2: 8 FSM
  SG_ LKASteerDirection : 41|2@0+ (1,0) [0|3] "" PSCM
 
 BO_ 624 FSM3: 8 FSM
+ SG_ ACC_Standstill : 0|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_Check : 2|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_SOMETHING : 15|8@0+ (1,0) [0|255] "" XXX
  SG_ ACC_Some : 17|10@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_3 : 47|8@0+ (1,0) [0|255] "" XXX
@@ -119,6 +124,7 @@ BO_ 648 BrakePedal: 8 XXX
  SG_ BrakePedal : 24|8@1+ (1,4) [0|255] "" XXX
 
 BO_ 794 FSM4: 8 FSM
+ SG_ ACC_LeadSpeed : 31|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_1 : 47|16@0+ (1,-46090) [0|16383] "" XXX
  SG_ NEW_SIGNAL_2 : 32|4@1+ (1,0) [0|15] "" XXX
 
@@ -128,6 +134,7 @@ BO_ 923 NEW_MSG_1: 8 XXX
  SG_ NEW_SIGNAL_1 : 15|16@0+ (1,0) [0|65535] "" XXX
 
 BO_ 1021 FSM5: 8 FSM
+ SG_ TSR_Speed : 25|4@1+ (10,0) [0|15] "km/h" XXX
 
 BO_ 1039 MiscCarInfo: 8 XXX
  SG_ TurnSignal : 33|2@0+ (1,0) [0|3] "" XXX
@@ -211,8 +218,9 @@ CM_ SG_ 582 SteeringWheelRateOfChange "Some rate of change for steering wheel? T
 CM_ SG_ 582 byte0 "0=CCW, 1=CW, bit 2,";
 CM_ SG_ 582 LKAActive "Bit 1, 1 When LKA Active, Bit 3, 1 When denying?";
 CM_ SG_ 81 ACCStatus "0=Acc Unavailable, 1=???, 2=Acc Ready, 3,4=???, 6= Acc Active, 7=Acc active tracking object (probably) ";
-CM_ SG_ 608 ACC_Tracking "Seems to track distance, or speed of vehicle in front.";
+CM_ SG_ 608 ACC_Distance "Seems to track distance, or speed of vehicle in front.";
 CM_ SG_ 610 SET_X_22 "0x20 Heartbeat, VEgo <58kph = 0x03, VEgo >65kph = 0x04, 0x05";
+CM_ SG_ 624 ACC_Pause "Boolean variable when ACC is ON but in pause";
 CM_ SG_ 624 ACC_SOMETHING "Might be some acc speed, moved abit after activating acc";
 CM_ SG_ 624 ACC_Some "Jumps to life after activating ACC, 0 when not active";
 CM_ SG_ 295 ACCMinusBtn "ACC Minus (-) button pressed";
@@ -227,4 +235,5 @@ CM_ SG_ 295 TimeGapIncreaseBtn "Increase the time gap on ACC";
 CM_ SG_ 295 TimeGapDecreaseBtn "Decrease the time gap on ACC";
 CM_ SG_ 295 ACCMinusBtnInv "Active zero when button pressed.";
 CM_ SG_ 295 TimeGapIncreaseBtnInv "Active zero when button pressed.";
+CM_ SG_ 1021 TSR_Speed "Traffic Sign Recognition speed";
 CM_ SG_ 1039 TurnSignal "0 = Nothing, 1= Left, 3=Right";
