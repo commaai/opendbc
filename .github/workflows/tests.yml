@@ -10,13 +10,13 @@ env:
 jobs:
   unit-tests:
     name: unit tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     #strategy:
     #  fail-fast: false
     #  matrix:
     #    run: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Build Docker image
       run: eval "$BUILD"
     - name: Build opendbc
@@ -26,9 +26,9 @@ jobs:
 
   static-analysis:
     name: static analysis
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Build Docker image
       run: eval "$BUILD"
     - name: Build opendbc
@@ -41,10 +41,10 @@ jobs:
 
   docker-push:
     name: docker push
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request' && github.repository == 'commaai/opendbc'
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Build Docker image
       run: eval "$BUILD"
     - name: Push to dockerhub
