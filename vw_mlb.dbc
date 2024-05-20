@@ -580,18 +580,19 @@ BO_ 1089 Getriebe_04: 8 Getriebe_AL551_951_D4_C7
  SG_ GE_amax_moeglich : 42|9@1+ (0.024,-2.016) [-2.016|10.224] "Unit_MeterPerSeconSquar"  Gateway_D4C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
  SG_ GE_Sumpftemperatur : 56|8@1+ (1,-58) [-58|196] "Unit_DegreCelsi"  Gateway_D4C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
 
-BO_ 294 HCA_01: 8 XXX
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ COUNTER : 8|4@1+ (1,0) [0|255] "" XXX
- SG_ SET_ME_0X3 : 12|4@1+ (1,0) [0|15] "" XXX
- SG_ Assist_Torque : 16|14@1+ (1,0) [0|300] "Nm" XXX
- SG_ Assist_Requested : 30|1@1+ (1,0) [0|1] "" XXX
- SG_ Assist_VZ : 31|1@1+ (1,0) [0|1] "" XXX
- SG_ HCA_Available : 32|1@1+ (1,0) [0|1] "" XXX
- SG_ HCA_Standby : 33|1@1+ (1,0) [0|1] "" XXX
- SG_ HCA_Active : 34|1@1+ (1,0) [0|1] "" XXX
- SG_ SET_ME_0XFE : 40|8@1+ (1,0) [0|255] "" XXX
- SG_ SET_ME_0X07 : 48|8@1+ (1,0) [0|255] "" XXX
+BO_ 294 HCA_01: 8 Frontsensorik
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ HCA_01_Vib_Freq : 12|4@1+ (1,15) [15|30] "Unit_Hertz" Vector__XXX
+ SG_ HCA_01_LM_Offset : 16|9@1+ (1,0) [0|511] "Unit_centiNewtoMeter" Vector__XXX
+ SG_ EA_ACC_Sollstatus : 25|2@1+ (1,0) [0|3] ""  Frontradar
+ SG_ EA_Ruckprofil : 27|3@1+ (1,0) [0|7] "" Vector__XXX
+ SG_ HCA_01_Sendestatus : 30|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ HCA_01_LM_OffSign : 31|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ HCA_01_Status_HCA : 32|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ HCA_01_Vib_Amp : 36|4@1+ (0.2,0) [0|3] "Unit_NewtoMeter" Vector__XXX
+ SG_ EA_Ruckfreigabe : 40|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ EA_ACC_Wunschgeschwindigkeit : 41|10@1+ (0.32,0) [0|327.04] "Unit_KiloMeterPerHour"  Frontradar
 
 BO_ 1811 ISO_ABS_Req: 8 Gateway_D4C7
  SG_ ISO_ABS_Req_Data : 0|64@1+ (1.0,0.0) [0.0|18446744073709551615] ""  ESP_D4
