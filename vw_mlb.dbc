@@ -86,6 +86,30 @@ BO_ 269 ACC_05: 8 Gateway_D4C7
  SG_ ACC_Anhalten : 62|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
  SG_ ACC_KD_Fehler : 63|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
 
+BO_ 279 ACC_10: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  XXX
+ SG_ AWV1_Anf_Prefill : 16|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ANB_CM_Info : 17|1@1+ (1,0) [0|1] ""  XXX
+ SG_ AWV2_Freigabe : 18|1@1+ (1,0) [0|1] ""  XXX
+ SG_ AWV1_HBA_Param : 19|2@1+ (1,0) [0|3] ""  XXX
+ SG_ AWV2_Ruckprofil : 21|3@1+ (1,0) [0|7] ""  XXX
+ SG_ AWV2_Priowarnung : 24|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ANB_CM_Anforderung : 25|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ANB_Info_Teilbremsung : 26|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ANB_Notfallblinken : 27|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ANB_Teilbremsung_Freigabe : 28|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ANB_Zielbrems_Teilbrems_Verz_Anf : 29|10@1+ (0.024,-20.016) [-20.016|4.536] "Unit_MeterPerSeconSquar"  XXX
+ SG_ ANB_Zielbremsung_Freigabe : 39|1@1+ (1,0) [0|1] ""  XXX
+ SG_ AWV_Vorstufe : 40|1@1+ (1,0) [0|1] ""  XXX
+ SG_ AWV_Halten : 41|1@1+ (1,0) [0|1] ""  XXX
+ SG_ AWV_CityANB_Auspraegung : 42|1@1+ (1,0) [0|1] ""  XXX
+ SG_ PCF_Freigabe : 43|1@1+ (1,0) [0|1] ""  XXX
+ SG_ AWV1_ECD_Anlauf : 44|1@1+ (1,0) [0|1] ""  XXX
+ SG_ AWV_AWA_VZ_Anf_Lenkmomoffset : 46|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ AWV_AWA_Anf_Lenkmomoffset : 47|9@1+ (0.01,0) [0.00|5.11] "Unit_NewtoMeter"  XXX
+ SG_ PCF_Time_to_collision : 56|8@1+ (0.01,0) [0|2.5] "Unit_Secon"  XXX
+
 BO_ 64 Airbag_01: 8 Airbag_D4
  SG_ Airbag_01_CHK : 0|8@1+ (1,0) [0|255] ""  Gateway_D4C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
  SG_ Airbag_01_BZ : 8|4@1+ (1,0) [0|15] ""  Gateway_D4C7,Motor_EDC17_D4,Motor_ME17_BY,Motor_MED17_SIMOS8_D4
@@ -432,6 +456,21 @@ BO_ 914 ESP_07_FR: 8 Gateway_D4C7
  SG_ ESP_MKB_Status : 59|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
  SG_ ESP_CM_Variante : 60|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
  SG_ ESP_OBD_Status : 61|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+
+BO_ 286 ESP_08: 8 Vector__XXX
+ SG_ ESP_08_CRC : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ ESP_08_BZ : 8|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ ESP_ANB_CM_Rueckk_Umsetz : 12|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ESP_Konsistenz_ACC_Botschaft : 13|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ESP_Stillstandsphase_erschoepft : 14|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ESP_ZT_Rueckk_Umsetz : 15|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ESP_Tuerkontakt_Fahrertuer : 16|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ESP_Abrutschen_Stillstand : 18|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ESP_Fahrer_tritt_ZBR_Schw : 19|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ESP_QBit_v_ref : 41|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ESP_v_ref_Fahrtrichtung : 42|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ ESC_Bremsdruckgradient : 44|8@1+ (10,0) [0|2500] "Unit_BarPerSecon" Vector__XXX
+ SG_ ESP_v_ref : 52|12@1+ (0.125,0) [0|511.5] "Unit_KiloMeterPerHour" Vector__XXX
 
 BO_ 1623 ESP_17: 8 ESP_D4
  SG_ ESP_17_CRC : 0|8@1+ (1,0) [0|255] ""  EPB_D4
