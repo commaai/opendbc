@@ -50,12 +50,11 @@ BO_ 254 ABS_2: 8 ABS
  SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 257 NEW_MSG_101: 8 XXX
- SG_ COUNTER_1 : 3|4@0+ (1,0) [0|15] "" XXX
- SG_ COUNTER_2 : 7|4@0+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_3 : 15|11@0+ (1,0) [0|2047] "" XXX
- SG_ NEW_SIGNAL_2 : 20|11@0+ (1,0) [0|2047] "" XXX
- SG_ NEW_SIGNAL_1 : 43|12@0+ (1,0) [0|4095] "" XXX
+BO_ 257 ABS_6: 8 ABS
+ SG_ MAYBE_ACC_BRAKE : 5|1@0+ (1,0) [0|1] "" XXX
+ SG_ VEHICLE_SPEED : 15|11@0+ (0.017,0) [0|2047] "" XXX
+ SG_ BRAKE_PRESSURE_1 : 20|11@0+ (1,0) [0|2047] "" XXX
+ SG_ BRAKE_PRESSURE_2 : 43|12@0+ (1,0) [0|4095] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 262 EPS_2: 7 EPS
@@ -219,6 +218,7 @@ BO_ 506855454 CAM_UNKNOWN_6: 1 CAMERA
 CM_ SG_ 254 LONG_ACCEL "scale TBD";
 CM_ SG_ 254 LATERAL_ACCEL "scale TBD";
 CM_ SG_ 254 YAW_RATE "scale estimated";
+CM_ SG_ 257 MAYBE_ACC_BRAKE "may correlate with ACC-actuated braking";
 CM_ SG_ 278 FORWARD_1 "probably per-axle";
 CM_ SG_ 278 REVERSE_1 "probably per-axle";
 CM_ SG_ 278 FORWARD_2 "probably per-axle";
