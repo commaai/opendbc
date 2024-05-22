@@ -258,6 +258,10 @@ unsigned int fca_giorgio_checksum(uint32_t address, const Signal &sig, const std
 
   if (address == 0xDE) {
     return crc ^ 0x10;
+  } else if (address == 0x106) {
+    return crc ^ 0xF6;
+  } else if (address == 0x122) {
+    return crc ^ 0xF1;
   } else {
     return crc ^ 0xA;
   }
