@@ -129,10 +129,10 @@ BO_ 501 NEW_MSG_1F5: 5 XXX
 
 BO_ 502 LKA_COMMAND: 8 CAMERA
  SG_ LKA_TORQUE : 7|11@0+ (1,-1024) [0|2047] "" XXX
- SG_ NEW_SIGNAL_3 : 8|1@0+ (1,0) [0|1] "" XXX
+ SG_ HAPTIC_WARN_1 : 8|1@0+ (1,0) [0|1] "" XXX
  SG_ LKA_ACTIVE : 11|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_1 : 12|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_4 : 19|1@0+ (1,0) [0|1] "" XXX
+ SG_ HAPTIC_WARN_2 : 19|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
@@ -224,5 +224,7 @@ CM_ SG_ 278 REVERSE_1 "probably per-axle";
 CM_ SG_ 278 FORWARD_2 "probably per-axle";
 CM_ SG_ 278 REVERSE_2 "probably per-axle";
 CM_ SG_ 284 VEHICLE_SPEED "scale estimated";
+CM_ SG_ 502 HAPTIC_WARN_1 "correlates with steering wheel haptic";
+CM_ SG_ 502 HAPTIC_WARN_2 "correlates with steering wheel haptic";
 CM_ BO_ 1198 "Definite LKA activity, probably contains lane-line recognition and lane departure signals, indicator of LKA vs TJA, perhaps indicator of active assist in map-permitted areas";
 VAL_ 262 LKA_STATUS 0 "standby" 1 "lka_active";
