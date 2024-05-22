@@ -9,6 +9,9 @@ BO_ 222 EPS_1: 6 EPS
  SG_ COUNTER : 35|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 47|8@0+ (1,0) [0|255] "" XXX
 
+BO_ 228 NEW_MSG_E4: 6 XXX
+ SG_ NEW_SIGNAL_1 : 13|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 238 ABS_1: 8 ABS
  SG_ WHEEL_SPEED_FL : 7|13@0+ (0.017,0) [0|8191] "m/s" XXX
  SG_ WHEEL_SPEED_FR : 10|13@0+ (0.017,0) [0|8191] "m/s" XXX
@@ -100,7 +103,7 @@ BO_ 280 NEW_MSG_118: 6 XXX
  SG_ CHECKSUM : 47|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 282 NEW_MSG_11A: 8 XXX
- SG_ NEW_SIGNAL_1 : 7|11@0+ (1,0) [0|2047] "" XXX
+ SG_ NEW_SIGNAL_1 : 7|11@0+ (1,-1000) [0|2047] "" XXX
  SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
@@ -124,6 +127,7 @@ BO_ 290 EPS_3: 4 EPS
 
 BO_ 501 NEW_MSG_1F5: 5 XXX
  SG_ NEW_SIGNAL_2 : 22|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_3 : 27|4@0+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_1 : 39|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 502 LKA_COMMAND: 8 CAMERA
@@ -223,6 +227,7 @@ CM_ SG_ 278 FORWARD_1 "probably per-axle";
 CM_ SG_ 278 REVERSE_1 "probably per-axle";
 CM_ SG_ 278 FORWARD_2 "probably per-axle";
 CM_ SG_ 278 REVERSE_2 "probably per-axle";
+CM_ SG_ 282 NEW_SIGNAL_1 "smoothed yaw rate with low speed cutoff, maybe active forward lighting target angle";
 CM_ SG_ 284 VEHICLE_SPEED "scale estimated";
 CM_ SG_ 502 HAPTIC_WARN_1 "correlates with steering wheel haptic";
 CM_ SG_ 502 HAPTIC_WARN_2 "correlates with steering wheel haptic";
