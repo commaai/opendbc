@@ -58,11 +58,11 @@ BO_ 257 NEW_MSG_101: 8 XXX
  SG_ NEW_SIGNAL_1 : 43|12@0+ (1,0) [0|4095] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 262 NEW_MSG_106: 7 XXX
- SG_ NEW_SIGNAL_2 : 7|12@0+ (1,0) [0|4095] "" XXX
- SG_ NEW_SIGNAL_3 : 9|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_1 : 23|11@0+ (1,0) [0|2047] "" XXX
- SG_ NEW_SIGNAL_4 : 38|2@0+ (1,0) [0|3] "" XXX
+BO_ 262 EPS_2: 7 XXX
+ SG_ NEW_SIGNAL_2 : 7|12@0+ (1,-2000) [0|4095] "" XXX
+ SG_ LKA_STATUS_1 : 9|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_1 : 23|11@0+ (1,-1024) [0|2047] "" XXX
+ SG_ LKA_STATUS_2 : 38|2@0+ (1,0) [0|3] "" XXX
  SG_ COUNTER : 43|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 55|8@0+ (1,0) [0|255] "" XXX
 
@@ -100,6 +100,7 @@ BO_ 284 NEW_MSG_11C: 8 XXX
  SG_ NEW_SIGNAL_1 : 7|12@0+ (1,0) [0|4095] "" XXX
  SG_ NEW_SIGNAL_2 : 11|12@0+ (1,0) [0|4095] "" XXX
  SG_ NEW_SIGNAL_3 : 28|13@0+ (1,0) [0|8191] "" XXX
+ SG_ NEW_SIGNAL_4 : 31|2@0+ (1,0) [0|3] "" XXX
  SG_ VEHICLE_SPEED : 47|12@0+ (0.017,0) [0|4095] "m/s" XXX
  SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
@@ -173,7 +174,7 @@ BO_ 1046 NEW_MSG_416: 8 XXX
 
 BO_ 1194 CAM_UNKNOWN_2: 8 CAMERA
 
-BO_ 1198 LKA_HUD: 8 CAMERA
+BO_ 1198 LKA_HUD_1: 8 CAMERA
  SG_ NEW_SIGNAL_1 : 4|5@0+ (1,0) [0|31] "" XXX
  SG_ NEW_SIGNAL_3 : 12|5@0+ (1,0) [0|31] "" XXX
  SG_ NEW_SIGNAL_2 : 23|8@0+ (1,0) [0|255] "" XXX
@@ -182,7 +183,9 @@ BO_ 1198 LKA_HUD: 8 CAMERA
  SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 1351 CAM_UNKNOWN_4: 8 CAMERA
+BO_ 1351 LKA_HUD_2: 8 CAMERA
+ SG_ NEW_SIGNAL_1 : 51|3@0+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_2 : 55|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 1442 ACC_1: 8 RADAR
  SG_ HUD_SPEED : 7|8@0+ (1,0) [0|255] "km/h" XXX
@@ -209,3 +212,4 @@ CM_ SG_ 254 LATERAL_ACCEL "scale TBD";
 CM_ SG_ 254 YAW_RATE "scale estimated";
 CM_ SG_ 284 VEHICLE_SPEED "scale estimated";
 CM_ BO_ 1198 "Definite LKA activity, probably contains lane-line recognition and lane departure signals, indicator of LKA vs TJA, perhaps indicator of active assist in map-permitted areas";
+VAL_ 262 LKA_STATUS_2 0 "standby" 1 "lka_active";
