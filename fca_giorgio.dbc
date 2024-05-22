@@ -80,10 +80,19 @@ BO_ 270 NEW_MSG_10E: 7 XXX
  SG_ COUNTER : 43|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 55|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 278 NEW_MSG_116: 8 XXX
- SG_ NEW_SIGNAL_1 : 7|16@0+ (1,0) [0|65535] "" XXX
- SG_ NEW_SIGNAL_2 : 16|16@1+ (1,0) [0|65535] "" XXX
- SG_ NEW_SIGNAL_3 : 39|8@0+ (1,0) [0|255] "" XXX
+BO_ 278 ABS_5: 8 XXX
+ SG_ WHEEL_IMPULSE_FL : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ WHEEL_IMPULSE_FR : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ WHEEL_IMPULSE_RL : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ WHEEL_IMPULSE_RR : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ ACTIVE_FL : 32|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACTIVE_FR : 33|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACTIVE_RL : 34|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACTIVE_RR : 35|1@0+ (1,0) [0|1] "" XXX
+ SG_ FORWARD_1 : 36|1@0+ (1,0) [0|1] "" XXX
+ SG_ REVERSE_1 : 37|1@0+ (1,0) [0|1] "" XXX
+ SG_ FORWARD_2 : 38|1@0+ (1,0) [0|1] "" XXX
+ SG_ REVERSE_2 : 39|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
@@ -210,6 +219,10 @@ BO_ 506855454 CAM_UNKNOWN_6: 1 CAMERA
 CM_ SG_ 254 LONG_ACCEL "scale TBD";
 CM_ SG_ 254 LATERAL_ACCEL "scale TBD";
 CM_ SG_ 254 YAW_RATE "scale estimated";
+CM_ SG_ 278 FORWARD_1 "probably per-axle";
+CM_ SG_ 278 REVERSE_1 "probably per-axle";
+CM_ SG_ 278 FORWARD_2 "probably per-axle";
+CM_ SG_ 278 REVERSE_2 "probably per-axle";
 CM_ SG_ 284 VEHICLE_SPEED "scale estimated";
 CM_ BO_ 1198 "Definite LKA activity, probably contains lane-line recognition and lane departure signals, indicator of LKA vs TJA, perhaps indicator of active assist in map-permitted areas";
 VAL_ 262 LKA_STATUS_2 0 "standby" 1 "lka_active";
