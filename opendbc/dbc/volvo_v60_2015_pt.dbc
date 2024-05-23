@@ -71,6 +71,7 @@ BO_ 298 NEW_MSG_5: 8 XXX
 BO_ 336 NEW_MSG_8: 8 XXX
 
 BO_ 328 VehicleSpeed1: 8 XXX
+ SG_ COUNTER : 37|4@0+ (1,0) [0|15] "" XXX
  SG_ VehicleSpeed : 55|16@0+ (0.01,0) [0|65535] "" XXX
 
 BO_ 359 ACC_Speed: 8 XXX
