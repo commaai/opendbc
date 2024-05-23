@@ -65,7 +65,9 @@ BO_ 295 CCButtons: 8 CEM
  SG_ ACCResumeBtn : 61|1@0+ (1,0) [0|1] "" XXX
  SG_ ACCSetBtn : 63|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 298 NEW_MSG_5: 8 XXX
+BO_ 298 EngineData: 8 XXX
+ SG_ BrakePressed2 : 2|1@0+ (1,0) [0|1] "" XXX
+ SG_ BrakePressed : 38|1@0+ (1,0) [0|1] "" XXX
  SG_ EngineRpm : 52|13@0+ (1,0) [0|8000] "" XXX
 
 BO_ 328 VehicleSpeed1: 8 XXX
