@@ -121,7 +121,7 @@ BO_ 624 FSM3: 8 FSM
 
 BO_ 648 BrakePedal: 8 XXX
  SG_ Counter : 0|3@1+ (1,0) [0|7] "" XXX
- SG_ BrakePedal : 24|8@1+ (1,4) [0|255] "" XXX
+ SG_ BrakePedal : 16|9@0+ (1,0) [0|511] "" XXX
 
 BO_ 794 FSM4: 8 FSM
  SG_ ACC_LeadSpeed : 31|8@0+ (1,0) [0|255] "" XXX
