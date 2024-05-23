@@ -69,6 +69,7 @@ BO_ 298 NEW_MSG_5: 8 XXX
  SG_ EngineRpm : 52|13@0+ (1,0) [0|8000] "" XXX
 
 BO_ 328 VehicleSpeed1: 8 XXX
+ SG_ BrakePressure2 : 33|10@0+ (1,0) [0|63] "" XXX
  SG_ COUNTER : 37|4@0+ (1,0) [0|15] "" XXX
  SG_ VehicleSpeed : 55|16@0+ (0.01,0) [0|65535] "" XXX
 
@@ -121,8 +122,8 @@ BO_ 624 FSM3: 8 FSM
  SG_ NEW_SIGNAL_3 : 47|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 648 BrakePedal: 8 XXX
- SG_ Counter : 0|3@1+ (1,0) [0|7] "" XXX
- SG_ BrakePedal : 16|9@0+ (1,0) [0|511] "" XXX
+ SG_ Counter : 0|3@1+ (1,0) [0|6] "" XXX
+ SG_ BrakePressure : 16|9@0+ (1,0) [0|511] "" XXX
 
 BO_ 794 FSM4: 8 FSM
  SG_ ACC_LeadSpeed : 31|8@0+ (1,0) [0|255] "" XXX
@@ -232,5 +233,7 @@ CM_ SG_ 608 ACC_Distance "Seems to track distance, or speed of vehicle in front.
 CM_ SG_ 610 SET_X_22 "0x20 Heartbeat, VEgo <58kph = 0x03, VEgo >65kph = 0x04, 0x05";
 CM_ SG_ 624 ACC_SOMETHING "Might be some acc speed, moved abit after activating acc";
 CM_ SG_ 624 ACC_Some "Jumps to life after activating ACC, 0 when not active";
+CM_ SG_ 648 Counter "counts 0 to 6";
+CM_ SG_ 648 BrakePressure "max seen 486";
 CM_ SG_ 1021 TSR_Speed "Traffic Sign Recognition speed";
 CM_ SG_ 1039 TurnSignal "0 = Nothing, 1= Left, 3=Right";
