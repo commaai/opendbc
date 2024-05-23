@@ -66,7 +66,7 @@ BO_ 295 CCButtons: 8 CEM
  SG_ ACCSetBtn : 63|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 298 EngineData: 8 XXX
- SG_ BrakePressed2 : 2|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_1 : 1|10@0+ (1,0) [0|1023] "" XXX
  SG_ BrakePressed : 38|1@0+ (1,0) [0|1] "" XXX
  SG_ EngineRpm : 52|13@0+ (1,0) [0|8000] "" XXX
 
@@ -76,6 +76,10 @@ BO_ 328 VehicleSpeed1: 8 XXX
  SG_ VehicleSpeed : 55|16@0+ (0.01,0) [0|65535] "" XXX
 
 BO_ 336 NEW_MSG_8: 8 XXX
+ SG_ NEW_SIGNAL_1 : 3|12@0+ (1,0) [0|4095] "" XXX
+ SG_ NEW_SIGNAL_2 : 19|12@0+ (1,0) [0|4095] "" XXX
+ SG_ NEW_SIGNAL_3 : 35|12@0+ (1,0) [0|4095] "" XXX
+ SG_ NEW_SIGNAL_4 : 51|12@0+ (1,0) [0|4095] "" XXX
 
 BO_ 359 ACC_Speed: 8 XXX
  SG_ ACC_Speed : 0|8@0+ (1,0) [0|255] "km/h" XXX
@@ -139,6 +143,11 @@ BO_ 923 NEW_MSG_1: 8 XXX
 
 BO_ 1021 FSM5: 8 FSM
  SG_ TSR_Speed : 25|4@1+ (10,0) [0|15] "km/h" XXX
+
+BO_ 1024 NEW_MSG_400: 8 XXX
+ SG_ NEW_SIGNAL_1 : 25|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 1029 NEW_MSG_405: 8 XXX
 
 BO_ 1039 MiscCarInfo: 8 XXX
  SG_ TurnSignal : 33|2@0+ (1,0) [0|3] "" XXX
@@ -226,6 +235,7 @@ CM_ SG_ 295 TimeGapDecreaseBtn "Decrease the time gap on ACC";
 CM_ SG_ 295 ACCOnOffBtn "Cruise control on/off button pressed";
 CM_ SG_ 295 ACCResumeBtn "ACC Resume button pressed";
 CM_ SG_ 295 ACCSetBtn "Acc Set button (+) pressed";
+CM_ SG_ 298 BrakePressed "driver";
 CM_ SG_ 298 EngineRpm "Might be engine rpm. But behaves abit weird.";
 CM_ SG_ 582 byte0 "0=CCW, 1=CW, bit 2,";
 CM_ SG_ 582 SteeringWheelRateOfChange "Some rate of change for steering wheel? Torque?";
