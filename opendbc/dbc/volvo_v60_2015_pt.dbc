@@ -43,7 +43,7 @@ BO_ 16 SAS0: 8 SAS
  SG_ SteeringAngle : 53|14@0+ (0.0445,0) [0|65535] "degrees" XXX
 
 BO_ 32 AccPedal: 8 XXX
- SG_ AccPedal : 17|10@0+ (0.1,0) [0|1023] "%" XXX
+ SG_ AccPedal : 17|10@0+ (0.1,-8.3) [0|1023] "%" XXX
 
 BO_ 81 FSM0: 8 FSM
  SG_ ACCStatus : 18|3@0+ (1,0) [0|7] "" XXX
