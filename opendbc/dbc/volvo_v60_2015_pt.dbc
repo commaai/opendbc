@@ -68,6 +68,7 @@ BO_ 295 CCButtons: 8 CEM
 BO_ 298 EngineData: 8 XXX
  SG_ NEW_SIGNAL_1 : 1|10@0+ (1,0) [0|1023] "" XXX
  SG_ BrakePressed2 : 2|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_7 : 25|2@0+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_2 : 33|10@0- (1,0) [0|7] "" XXX
  SG_ NEW_SIGNAL_3 : 34|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_4 : 35|1@0+ (1,0) [0|1] "" XXX
@@ -89,6 +90,8 @@ BO_ 336 NEW_MSG_8: 8 XXX
 
 BO_ 359 ACC_Speed: 8 XXX
  SG_ ACC_Speed : 0|8@0+ (1,0) [0|255] "km/h" XXX
+ SG_ GasPedal : 51|12@0- (1,0) [0|255] "" XXX
+ SG_ GasPressed : 52|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 465 NEW_MSG_4: 8 XXX
  SG_ NEW_SIGNAL_1 : 55|16@0+ (1,0) [0|4095] "" XXX
@@ -241,6 +244,7 @@ CM_ SG_ 295 TimeGapDecreaseBtn "Decrease the time gap on ACC";
 CM_ SG_ 295 ACCOnOffBtn "Cruise control on/off button pressed";
 CM_ SG_ 295 ACCResumeBtn "ACC Resume button pressed";
 CM_ SG_ 295 ACCSetBtn "Acc Set button (+) pressed";
+CM_ SG_ 298 NEW_SIGNAL_4 "related to gas pedal";
 CM_ SG_ 298 NEW_SIGNAL_5 "related to ACCStatus";
 CM_ SG_ 298 NEW_SIGNAL_6 "went high at same time as ACCStatus >= 2";
 CM_ SG_ 298 BrakePressed "driver";
