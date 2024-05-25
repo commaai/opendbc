@@ -77,6 +77,9 @@ BO_ 298 EngineData: 8 XXX
  SG_ BrakePressed : 38|1@0+ (1,0) [0|1] "" XXX
  SG_ EngineRpm : 52|13@0+ (1,0) [0|8000] "" XXX
 
+BO_ 307 NEW_MSG_133: 8 XXX
+ SG_ Brake : 14|7@0+ (1,0) [0|127] "" XXX
+
 BO_ 328 VehicleSpeed1: 8 XXX
  SG_ BrakePressure2 : 33|10@0+ (1,0) [0|63] "" XXX
  SG_ COUNTER : 37|4@0+ (1,0) [0|15] "" XXX
@@ -94,7 +97,18 @@ BO_ 359 ACC_Speed: 8 XXX
  SG_ GasPressed : 52|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 465 NEW_MSG_4: 8 XXX
+ SG_ BrakePressedInv : 3|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_1 : 55|16@0+ (1,0) [0|4095] "" XXX
+
+BO_ 522 Brake_Info: 8 XXX
+ SG_ NEW_SIGNAL_2 : 1|1@0+ (1,0) [0|1] "" XXX
+ SG_ COUNTER : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ BrakeCmd : 13|1@0+ (1,0) [0|1] "" XXX
+ SG_ BrakePressure : 17|10@0+ (1,0) [0|255] "" XXX
+ SG_ BrakePedal : 19|2@0+ (1,0) [0|3] "" XXX
+ SG_ BrakePedal2 : 33|2@0+ (1,0) [0|3] "" XXX
+ SG_ CHECKSUM : 39|4@0+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_1 : 47|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 544 wheelspeed1: 8 BCM
  SG_ WhlSpdRR : 39|16@0+ (0.01,-327.68) [0|65535] "" XXX
@@ -117,6 +131,8 @@ BO_ 608 FSM1: 8 FSM
  SG_ ACC_Distance : 7|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 609 fromWhere: 8 XXX
+ SG_ COUNTER : 3|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 15|4@0+ (1,0) [0|15] "" XXX
  SG_ SteeringAngle : 21|14@0+ (0.1,-1021) [0|65535] "deg" XXX
 
 BO_ 610 FSM2: 8 FSM
@@ -260,3 +276,4 @@ CM_ SG_ 624 ACC_Some "Jumps to life after activating ACC, 0 when not active";
 CM_ SG_ 648 Counter "counts 0 to 6";
 CM_ SG_ 1021 TSR_Speed "Traffic Sign Recognition speed";
 CM_ SG_ 1039 TurnSignal "0 = Nothing, 1= Left, 3=Right";
+VAL_ 522 BrakePedal 1 "Not Pressed" 2 "Pressed";
