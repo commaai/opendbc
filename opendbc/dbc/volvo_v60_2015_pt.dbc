@@ -38,8 +38,9 @@ BU_: XXX BCM CEM FSM PSCM SAS
 BO_ 16 SAS0: 8 SAS
  SG_ Counter0 : 3|8@0+ (1,0) [0|511] "" XXX
  SG_ SteeringDirection : 6|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_1 : 22|15@0+ (1,0) [0|65535] "" XXX
- SG_ RateOfChangeOrTorque : 39|16@0+ (1,-32768) [0|65535] "" XXX
+ SG_ SteeringRateOfChange2 : 22|15@0+ (1,0) [0|32767] "" XXX
+ SG_ SteeringPressureOnIt : 23|1@0+ (1,0) [0|1] "" XXX
+ SG_ SteeringRateOfChange : 39|16@0+ (1,-32768) [0|65535] "" XXX
  SG_ SteeringAngle : 53|14@0+ (0.0445,0) [0|65535] "degrees" XXX
 
 BO_ 32 AccPedal: 8 XXX
@@ -96,6 +97,10 @@ BO_ 359 ACC_Speed: 8 XXX
  SG_ GasPedal : 51|12@0- (1,0) [0|255] "" XXX
  SG_ GasPressed : 52|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 384 Accessories_02: 8 XXX
+ SG_ Park_Assist_State : 42|1@0+ (1,0) [0|1] "" XXX
+ SG_ StartStop_Inv : 44|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 465 NEW_MSG_4: 8 XXX
  SG_ BrakePressedInv : 3|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_1 : 55|16@0+ (1,0) [0|4095] "" XXX
@@ -145,6 +150,9 @@ BO_ 610 FSM2: 8 FSM
  SG_ Checksum : 55|8@0+ (1,0) [0|255] "" PSCM
  SG_ SET_X_A4 : 63|8@0+ (1,0) [0|255] "" XXX
 
+BO_ 612 Accessories_03: 8 XXX
+ SG_ Park_Assist_Button : 60|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 624 FSM3: 8 FSM
  SG_ ACC_Standstill : 0|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_Check : 2|1@0+ (1,0) [0|1] "" XXX
@@ -156,15 +164,28 @@ BO_ 648 BrakePedal: 8 XXX
  SG_ Counter : 0|3@1+ (1,0) [0|6] "" XXX
  SG_ BrakePressure : 17|10@0+ (1,0) [0|1023] "" XXX
 
+BO_ 750 HandBrake: 8 XXX
+ SG_ Hand_Brake_Button : 33|2@0+ (1,0) [0|3] "" XXX
+ SG_ Hand_Brake_State : 44|4@0+ (1,0) [0|15] "" XXX
+
 BO_ 794 FSM4: 8 FSM
  SG_ ACC_LeadSpeed : 31|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_2 : 32|4@1+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_1 : 47|16@0+ (1,-46090) [0|16383] "" XXX
 
-BO_ 819 PSCM0: 8 PSCM
+BO_ 802 StartStop: 8 XXX
+ SG_ StartStop : 8|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 923 NEW_MSG_1: 8 XXX
+BO_ 819 PSCM0: 8 PSCM
+ SG_ SteeringPressureOnIt : 25|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 923 Accessories_01: 8 XXX
  SG_ NEW_SIGNAL_1 : 15|16@0+ (1,0) [0|65535] "" XXX
+ SG_ Wipers : 38|2@0+ (1,0) [0|3] "" XXX
+
+BO_ 1006 Doors: 8 XXX
+ SG_ DriverDoorClosed : 8|1@0+ (1,0) [0|1] "" XXX
+ SG_ PassengerDoorClosed : 9|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1021 FSM5: 8 FSM
  SG_ TSR_Speed : 25|4@1+ (10,0) [0|15] "km/h" XXX
@@ -172,10 +193,11 @@ BO_ 1021 FSM5: 8 FSM
 BO_ 1024 NEW_MSG_400: 8 XXX
  SG_ NEW_SIGNAL_1 : 25|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 1029 NEW_MSG_405: 8 XXX
-
 BO_ 1039 MiscCarInfo: 8 XXX
  SG_ TurnSignal : 33|2@0+ (1,0) [0|3] "" XXX
+
+BO_ 1174 Lights: 8 XXX
+ SG_ High_Beam : 23|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1279 PSCM3: 8 PSCM
 
