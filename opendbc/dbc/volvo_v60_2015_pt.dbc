@@ -156,7 +156,7 @@ BO_ 612 Accessories_03: 8 XXX
 BO_ 624 FSM3: 8 FSM
  SG_ ACC_Standstill : 0|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_Check : 2|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_SOMETHING : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ ACC_AccelDecel : 15|8@0+ (1,0) [0|255] "" XXX
  SG_ ACC_Some : 17|10@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_3 : 47|8@0+ (1,0) [0|255] "" XXX
 
