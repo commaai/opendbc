@@ -176,9 +176,6 @@ BO_ 794 FSM4: 8 FSM
 BO_ 802 StartStop: 8 XXX
  SG_ StartStop : 8|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 819 PSCM0: 8 PSCM
- SG_ SteeringPressureOnIt : 25|1@0+ (1,0) [0|1] "" XXX
-
 BO_ 923 Accessories_01: 8 XXX
  SG_ NEW_SIGNAL_1 : 15|16@0+ (1,0) [0|65535] "" XXX
  SG_ Wipers : 38|2@0+ (1,0) [0|3] "" XXX
