@@ -60,6 +60,7 @@ class TestCanParserPacker(unittest.TestCase):
       cnt = random.randint(0, 255)
       msg = packer.make_can_msg("CAN_FD_MESSAGE", 0, {
         "COUNTER": cnt,
+        "SIGNED": 0
       })
       dat = can_list_to_can_capnp([msg, ])
       parser.update_strings([dat])
