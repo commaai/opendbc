@@ -1,7 +1,7 @@
 # distutils: language = c++
 # cython: c_string_encoding=ascii, language_level=3
 
-from libc.stdint cimport uint8_t
+from libc.stdint cimport uint8_t, uint32_t
 from libcpp.vector cimport vector
 
 from .common cimport CANPacker as cpp_CANPacker
@@ -37,11 +37,17 @@ cdef class CANPacker:
     return self.packer.pack(addr, values_thing)
 
   cpdef make_can_msg(self, name_or_addr, bus, values):
+    cdef uint32_t address = 0
     cdef const Msg* m
-    if isinstance(name_or_addr, int):
-      m = self.dbc.addr_to_msg.at(name_or_addr)
-    else:
-      m = self.dbc.name_to_msg.at(name_or_addr.encode("utf8"))
+    try:
+      if isinstance(name_or_addr, int):
+        m = self.dbc.addr_to_msg.at(name_or_addr)
+      else:
+        m = self.dbc.name_to_msg.at(name_or_addr.encode("utf8"))
+      address = m.address
+    except IndexError:
+      # The C++ pack function will log an error message for invalid addresses
+      pass
 
-    cdef vector[uint8_t] val = self.pack(m.address, values)
-    return [m.address, 0, (<char *>&val[0])[:val.size()], bus]
+    cdef vector[uint8_t] val = self.pack(address, values)
+    return [address, 0, (<char *>&val[0])[:val.size()], bus]
