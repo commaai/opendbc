@@ -92,6 +92,6 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
 }
 
 // This function has a definition in common.h and is used in PlotJuggler
-Msg* CANPacker::lookup_message(uint32_t address) {
-  return (Msg*)dbc->addr_to_msg.at(address);
+const Msg* CANPacker::lookup_message(uint32_t address) {
+  return dbc->addr_to_msg.at(address);
 }
