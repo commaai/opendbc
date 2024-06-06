@@ -37,7 +37,11 @@ cdef class CANPacker:
     return self.packer.pack(addr, values_thing)
 
   cpdef make_can_msg(self, name_or_addr, bus, values):
-    cdef const Msg* m = (self.dbc.addr_to_msg.at(name_or_addr) if isinstance(name_or_addr, int)
-                         else self.dbc.name_to_msg.at(name_or_addr.encode("utf8")))
+    cdef const Msg* m
+    if isinstance(name_or_addr, int):
+      m = self.dbc.addr_to_msg.at(name_or_addr)
+    else:
+      m = self.dbc.name_to_msg.at(name_or_addr.encode("utf8"))
+
     cdef vector[uint8_t] val = self.pack(m.address, values)
     return [m.address, 0, (<char *>&val[0])[:val.size()], bus]
