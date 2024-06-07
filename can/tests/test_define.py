@@ -2,6 +2,7 @@
 import unittest
 
 from opendbc.can.can_define import CANDefine
+from opendbc.can.tests import ALL_DBCS
 
 
 class TestCADNDefine(unittest.TestCase):
@@ -13,7 +14,8 @@ class TestCADNDefine(unittest.TestCase):
     self.assertDictEqual(defs.dv[399], defs.dv['STEER_STATUS'])
     self.assertDictEqual(defs.dv[399],
                          {'STEER_STATUS':
-                          {6: 'TMP_FAULT',
+                          {7: 'PERMANENT_FAULT',
+                           6: 'TMP_FAULT',
                            5: 'FAULT_1',
                            4: 'NO_TORQUE_ALERT_2',
                            3: 'LOW_SPEED_LOCKOUT',
@@ -21,6 +23,12 @@ class TestCADNDefine(unittest.TestCase):
                            0: 'NORMAL'}
                           }
                          )
+
+  def test_all_dbcs(self):
+    # Asserts no exceptions on all DBCs
+    for dbc in ALL_DBCS:
+      with self.subTest(dbc=dbc):
+        CANDefine(dbc)
 
 
 if __name__ == "__main__":

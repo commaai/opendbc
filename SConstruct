@@ -15,9 +15,11 @@ cpppath = [
   python_path
 ]
 
-AddOption('--test',
-          action='store_true',
-          help='build test files')
+AddOption('--minimal',
+          action='store_false',
+          dest='extras',
+          default=True,
+          help='the minimum build. no tests, tools, etc.')
 
 AddOption('--asan',
           action='store_true',
@@ -37,6 +39,7 @@ env = Environment(
     "-Wunused",
     "-Werror",
     "-Wshadow",
+    "-Wno-vla-cxx-extension",
   ] + ccflags_asan,
   LDFLAGS=ldflags_asan,
   LINKFLAGS=ldflags_asan,
@@ -61,6 +64,7 @@ Export('cereal', 'messaging')
 envCython = env.Clone()
 envCython["CPPPATH"] += [np.get_include()]
 envCython["CCFLAGS"] += ["-Wno-#warnings", "-Wno-shadow", "-Wno-deprecated-declarations"]
+envCython["CCFLAGS"].remove("-Werror")
 
 python_libs = []
 if arch == "Darwin":

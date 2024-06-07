@@ -7,10 +7,14 @@ BO_ 53 PCM_2: 8 XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 133 TCM_1: 8 XXX
- SG_ DESIRED_GEAR : 15|4@0+ (1,0) [0|1] "" XXX
  SG_ SHIFT_PENDING : 2|1@0+ (1,0) [0|1] "" XXX
- SG_ SPEED_TURBINE : 27|12@0+ (0.04,0) [0|1] "km/h" XXX
  SG_ ACTUAL_GEAR : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ DESIRED_GEAR : 15|4@0+ (1,0) [0|1] "" XXX
+ SG_ TC_LOCKED : 17|1@1+ (1,0) [0|0] ""  XXX
+ SG_ OUTPUT_SPEED : 31|16@0+ (1,0) [0|65534] "rpm" XXX
+ SG_ INPUT_SPEED : 47|16@0+ (1,0) [0|65534] "rpm"  XXX
+ SG_ OUTPUT_SPEED_SIGN : 57|2@0+ (1,0) [0|3] "" XXX
+ SG_ COUNTER : 61|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 135 ABS_2: 8 XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|1] "" XXX

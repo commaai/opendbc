@@ -5,21 +5,9 @@
 #include <string>
 #include <vector>
 
-#define ARRAYSIZE(x) (sizeof(x)/sizeof(x[0]))
-
 struct SignalPackValue {
   std::string name;
   double value;
-};
-
-struct SignalParseOptions {
-  uint32_t address;
-  std::string name;
-};
-
-struct MessageParseOptions {
-  uint32_t address;
-  int check_frequency;
 };
 
 struct SignalValue {
@@ -84,6 +72,6 @@ typedef struct ChecksumState {
 } ChecksumState;
 
 DBC* dbc_parse(const std::string& dbc_path);
-DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, ChecksumState *checksum = nullptr);
+DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, ChecksumState *checksum = nullptr, bool allow_duplicate_msg_name=false);
 const DBC* dbc_lookup(const std::string& dbc_name);
 std::vector<std::string> get_dbc_names();
