@@ -65,6 +65,8 @@ ChecksumState* get_checksum(const std::string& dbc_name) {
     s = new ChecksumState({8, -1, 0, -1, true, SUBARU_CHECKSUM, &subaru_checksum});
   } else if (startswith(dbc_name, "chrysler_")) {
     s = new ChecksumState({8, -1, 7, -1, false, CHRYSLER_CHECKSUM, &chrysler_checksum});
+  } else if (startswith(dbc_name, "fca_giorgio")) {
+    s = new ChecksumState({8, -1, 7, -1, false, FCA_GIORGIO_CHECKSUM, &fca_giorgio_checksum});
   } else if (startswith(dbc_name, "comma_body")) {
     s = new ChecksumState({8, 4, 7, 3, false, PEDAL_CHECKSUM, &pedal_checksum});
   }
