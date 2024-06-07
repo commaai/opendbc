@@ -41,10 +41,10 @@ cdef class CANPacker:
     cdef const Msg* m
     try:
       if isinstance(name_or_addr, int):
-        m = self.dbc.addr_to_msg.at(name_or_addr)
+        address = name_or_addr
       else:
         m = self.dbc.name_to_msg.at(name_or_addr.encode("utf8"))
-      address = m.address
+        address = m.address
     except IndexError:
       # The C++ pack function will log an error message for invalid addresses
       pass
