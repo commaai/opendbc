@@ -24,8 +24,6 @@
 #define MAX_BAD_COUNTER 5
 #define CAN_INVALID_CNT 5
 
-void init_crc_lookup_tables();
-
 // Car specific functions
 unsigned int honda_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int toyota_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);

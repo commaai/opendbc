@@ -38,7 +38,6 @@ CANPacker::CANPacker(const std::string& dbc_name) {
       signal_lookup[std::make_pair(msg.address, sig.name)] = sig;
     }
   }
-  init_crc_lookup_tables();
 }
 
 std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalPackValue> &signals) {
