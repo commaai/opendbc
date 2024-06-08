@@ -93,11 +93,10 @@ class CANPacker {
 private:
   const DBC *dbc = NULL;
   std::map<std::pair<uint32_t, std::string>, Signal> signal_lookup;
-  std::map<uint32_t, Msg> message_lookup;
   std::map<uint32_t, uint32_t> counters;
 
 public:
   CANPacker(const std::string& dbc_name);
   std::vector<uint8_t> pack(uint32_t address, const std::vector<SignalPackValue> &values);
-  Msg* lookup_message(uint32_t address);
+  const Msg* lookup_message(uint32_t address);
 };
