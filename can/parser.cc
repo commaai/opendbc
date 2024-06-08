@@ -226,7 +226,10 @@ void CANParser::UpdateCans(uint64_t nanos, const capnp::List<cereal::CanData>::R
     //  continue;
     //}
 
-    std::vector<uint8_t> data(dat.size(), 0);
+    // TODO: can remove when we ignore unexpected can msg lengths
+    // make sure the data_size is not less than state_it->second.size
+    size_t data_size = std::max<size_t>(dat.size(), state_it->second.size);
+    std::vector<uint8_t> data(data_size, 0);
     memcpy(data.data(), dat.begin(), dat.size());
     state_it->second.parse(nanos, data);
   }
