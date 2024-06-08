@@ -133,7 +133,7 @@ cdef class CANDefine():
       try:
         m = self.dbc.addr_to_msg.at(address)
       except IndexError:
-        raise KeyError("no address")
+        raise KeyError(address)
       msgname = m.name.decode("utf-8")
 
       # separate definition/value pairs
