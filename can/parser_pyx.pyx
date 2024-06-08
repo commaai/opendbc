@@ -90,7 +90,8 @@ cdef class CANParser:
     self.can = new cpp_CANParser(bus, dbc_name, message_v)
 
     for address, _ in message_v:
-      name = address_to_msg_name[address]
+      m = self.dbc.addr_to_msg.at(address)
+      name = m.name.decode("utf8")
       state = MessageState.create(self.can.messageState(address))
       self.vl[name] = self.vl[address] = ValueDict(state, MessageState.value)
       self.vl_all[name] = self.vl_all[address] = ValueDict(state, MessageState.all_values)
