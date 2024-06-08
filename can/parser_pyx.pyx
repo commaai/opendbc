@@ -5,7 +5,6 @@ from cython.operator cimport dereference as deref, preincrement as preinc
 from libcpp.pair cimport pair
 from libcpp.string cimport string
 from libcpp.vector cimport vector
-from libcpp.unordered_set cimport unordered_set
 from libc.stdint cimport uint32_t
 
 from .common cimport CANParser as cpp_CANParser
@@ -18,7 +17,6 @@ cdef class CANParser:
   cdef:
     cpp_CANParser *can
     const DBC *dbc
-    vector[SignalValue] can_values
     vector[uint32_t] addresses
 
   cdef readonly:
@@ -66,18 +64,19 @@ cdef class CANParser:
       del self.can
 
   def update_strings(self, strings, sendcan=False):
-    for address in self.addresses:
-      self.vl_all[address].clear()
     # input format:
     # [nanos, [[address, 0, data, src], ...]]
     # [[nanos, [[address, 0, data, src], ...], ...]]
+    for address in self.addresses:
+      self.vl_all[address].clear()
 
-    for v in self.vl_all.itervalues():
-      for l in v.itervalues():  # no-cython-lint
-        l.clear()
+    cur_address = -1
+    vl = {}
+    vl_all = {}
+    ts_nanos = {}
+    updated_addrs = set()
 
     cdef vector[SignalValue] new_vals
-    cdef unordered_set[uint32_t] updated_addrs
     cdef CanFrame* frame
     cdef CanData* can_data
     cdef vector[CanData] can_data_array
