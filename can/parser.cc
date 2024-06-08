@@ -96,7 +96,6 @@ CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<st
   : bus(abus), aligned_buf(kj::heapArray<capnp::word>(1024)) {
   dbc = dbc_lookup(dbc_name);
   assert(dbc);
-  init_crc_lookup_tables();
 
   bus_timeout_threshold = std::numeric_limits<uint64_t>::max();
 
@@ -138,7 +137,6 @@ CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum
 
   dbc = dbc_lookup(dbc_name);
   assert(dbc);
-  init_crc_lookup_tables();
 
   for (const auto& msg : dbc->msgs) {
     MessageState state = {
