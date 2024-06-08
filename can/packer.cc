@@ -44,7 +44,7 @@ CANPacker::CANPacker(const std::string& dbc_name) {
 std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalPackValue> &signals) {
   auto msg_it = message_lookup.find(address);
   if (msg_it == message_lookup.end()) {
-    LOGE("undefined address - %d", address);
+    LOGE("undefined address %d", address);
     return {};
   }
 
