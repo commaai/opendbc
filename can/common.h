@@ -38,11 +38,7 @@ unsigned int pedal_checksum(uint32_t address, const Signal &sig, const std::vect
 
 class MessageState {
 public:
-  std::string name;
-  uint32_t address;
-  unsigned int size;
-
-  std::vector<Signal> parse_sigs;
+  Msg msg;
   std::vector<double> vals;
   std::vector<std::vector<double>> all_vals;
 
