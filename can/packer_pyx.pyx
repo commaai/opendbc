@@ -39,15 +39,15 @@ cdef class CANPacker:
   cpdef make_can_msg(self, name_or_addr, bus, values):
     cdef uint32_t address = 0
     cdef const Msg* m
-    try:
-      if isinstance(name_or_addr, int):
-        address = name_or_addr
-      else:
+    if isinstance(name_or_addr, int):
+      address = name_or_addr
+    else:
+      try:
         m = self.dbc.name_to_msg.at(name_or_addr.encode("utf8"))
         address = m.address
-    except IndexError:
-      # The C++ pack function will log an error message for invalid addresses
-      pass
+      except IndexError:
+        # The C++ pack function will log an error message for invalid addresses
+        pass
 
     cdef vector[uint8_t] val = self.pack(address, values)
     return [address, 0, (<char *>&val[0])[:val.size()], bus]

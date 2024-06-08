@@ -43,7 +43,7 @@ CANPacker::CANPacker(const std::string& dbc_name) {
 std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalPackValue> &signals) {
   auto msg_it = dbc->addr_to_msg.find(address);
   if (msg_it == dbc->addr_to_msg.end()) {
-    LOGE("invalid address %d\n", address);
+    LOGE("undefined address - %d", address);
     return {};
   }
 
