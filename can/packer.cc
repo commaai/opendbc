@@ -33,7 +33,6 @@ CANPacker::CANPacker(const std::string& dbc_name) {
   assert(dbc);
 
   for (const auto& msg : dbc->msgs) {
-    message_lookup[msg.address] = msg;
     for (const auto& sig : msg.sigs) {
       signal_lookup[std::make_pair(msg.address, sig.name)] = sig;
     }
@@ -42,13 +41,13 @@ CANPacker::CANPacker(const std::string& dbc_name) {
 }
 
 std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalPackValue> &signals) {
-  auto msg_it = message_lookup.find(address);
-  if (msg_it == message_lookup.end()) {
+  auto msg_it = dbc->addr_to_msg.find(address);
+  if (msg_it == dbc->addr_to_msg.end()) {
     LOGE("undefined address %d", address);
     return {};
   }
 
-  std::vector<uint8_t> ret(msg_it->second.size, 0);
+  std::vector<uint8_t> ret(msg_it->second->size, 0);
 
   // set all values for all given signal/value pairs
   bool counter_set = false;
@@ -99,6 +98,6 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
 }
 
 // This function has a definition in common.h and is used in PlotJuggler
-Msg* CANPacker::lookup_message(uint32_t address) {
-  return &message_lookup[address];
+const Msg* CANPacker::lookup_message(uint32_t address) {
+  return dbc->addr_to_msg.at(address);
 }
