@@ -43,6 +43,7 @@ public:
   std::vector<Signal> parse_sigs;
   std::vector<double> vals;
   std::vector<std::vector<double>> all_vals;
+  std::vector<double> tmp_vals;
 
   uint64_t last_seen_nanos;
   uint64_t check_threshold;
