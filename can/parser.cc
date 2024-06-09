@@ -33,7 +33,6 @@ int64_t get_raw_value(const std::vector<uint8_t> &msg, const Signal &sig) {
 
 
 bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
-  std::vector<double> tmp_vals(parse_sigs.size());
   bool checksum_failed = false;
   bool counter_failed = false;
 
@@ -128,6 +127,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<st
     state.parse_sigs = msg->sigs;
     state.vals.resize(msg->sigs.size());
     state.all_vals.resize(msg->sigs.size());
+    state.tmp_vals.resize(msg->sigs.size());
   }
 }
 
@@ -147,6 +147,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum
       .ignore_counter = ignore_counter,
     };
 
+    state.tmp_vals.resize(msg.sigs.size());
     for (const auto& sig : msg.sigs) {
       state.parse_sigs.push_back(sig);
       state.vals.push_back(0);
