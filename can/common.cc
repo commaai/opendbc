@@ -112,7 +112,7 @@ struct CrcInitializer {
 
 static CrcInitializer crcInitializer;
 
-unsigned int volkswagen_mqb_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
+unsigned int volkswagen_mxb_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
   // Volkswagen uses standard CRC8 8H2F/AUTOSAR, but they compute it with
   // a magic variable padding byte tacked onto the end of the payload.
   // https://www.autosar.org/fileadmin/user_upload/standards/classic/4-3/AUTOSAR_SWS_CRCLibrary.pdf
