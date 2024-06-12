@@ -36,27 +36,21 @@ cdef class CANParser:
     self.vl = {}
     self.vl_all = {}
     self.ts_nanos = {}
-    msg_name_to_address = {}
-    address_to_msg_name = {}
-
-    for i in range(self.dbc[0].msgs.size()):
-      msg = self.dbc[0].msgs[i]
-      name = msg.name.decode("utf8")
-
-      msg_name_to_address[name] = msg.address
-      address_to_msg_name[msg.address] = name
 
     # Convert message names into addresses and check existence in DBC
     cdef vector[pair[uint32_t, int]] message_v
     for i in range(len(messages)):
       c = messages[i]
-      address = c[0] if isinstance(c[0], numbers.Number) else msg_name_to_address.get(c[0])
-      if address not in address_to_msg_name:
+      try:
+        m = self.dbc.addr_to_msg.at(c[0]) if isinstance(c[0], numbers.Number) else self.dbc.name_to_msg.at(c[0])
+      except IndexError:
         raise RuntimeError(f"could not find message {repr(c[0])} in DBC {self.dbc_name}")
+
+      address = m.address
       message_v.push_back((address, c[1]))
       self.addresses.push_back(address)
 
-      name = address_to_msg_name[address]
+      name = m.name.decode("utf8")
       self.vl[address] = {}
       self.vl[name] = self.vl[address]
       self.vl_all[address] = defaultdict(list)
@@ -128,14 +122,6 @@ cdef class CANDefine():
     if not self.dbc:
       raise RuntimeError(f"Can't find DBC: '{dbc_name}'")
 
-    address_to_msg_name = {}
-
-    for i in range(self.dbc[0].msgs.size()):
-      msg = self.dbc[0].msgs[i]
-      name = msg.name.decode("utf8")
-      address = msg.address
-      address_to_msg_name[address] = name
-
     dv = defaultdict(dict)
 
     for i in range(self.dbc[0].vals.size()):
@@ -144,7 +130,11 @@ cdef class CANDefine():
       sgname = val.name.decode("utf8")
       def_val = val.def_val.decode("utf8")
       address = val.address
-      msgname = address_to_msg_name[address]
+      try:
+        m = self.dbc.addr_to_msg.at(address)
+      except IndexError:
+        raise KeyError(address)
+      msgname = m.name.decode("utf-8")
 
       # separate definition/value pairs
       def_val = def_val.split()
