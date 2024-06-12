@@ -2,7 +2,6 @@
 #include <cassert>
 #include <cstring>
 #include <limits>
-#include <numeric>
 #include <stdexcept>
 #include <sstream>
 
@@ -169,14 +168,14 @@ void CANParser::update(const std::vector<CanData> &can_data, std::vector<SignalV
     }
     last_nanos = c.nanos;
 
-    update_can(c);
+    updateCans(c);
     UpdateValid(last_nanos);
   }
 
   query_latest(vals, current_nanos);
 }
 
-void CANParser::update_can(const CanData &can) {
+void CANParser::updateCans(const CanData &can) {
   bool bus_empty = true;
   for (const auto &frame : can.frames) {
     if (frame.src != bus) {
