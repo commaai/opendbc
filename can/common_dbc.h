@@ -29,6 +29,7 @@ enum SignalType {
   SUBARU_CHECKSUM,
   CHRYSLER_CHECKSUM,
   HKG_CAN_FD_CHECKSUM,
+  MAZDA_CHECKSUM,
 };
 
 struct Signal {
