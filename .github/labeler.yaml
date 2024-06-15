@@ -1,0 +1,7 @@
+libcan:
+  - changed-files:
+    - any-glob-to-all-files: 'can/'
+
+dbc:
+  - changed-files:
+    - any-glob-to-all-files: '*.dbc'
