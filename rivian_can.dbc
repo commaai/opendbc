@@ -312,6 +312,12 @@ BO_ 530 VDM_Torque_Rear: 8 VDM
  SG_ VDM_OutputTorqueRearQ : 51|1@0+ (1,0) [0|1] "" ESP
  SG_ VDM_Torque_Rear_MinQ : 52|1@0+ (1,0) [0|1] "" ESP
 
+BO_ 565 IndicatorLights: 8 XXX
+ SG_ checksum : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ counter : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ TurnLightLeft : 40|1@0+ (1,0) [0|1] "" XXX
+ SG_ TurnLightRight : 54|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 592 VDM_EcasStatus: 8 VDM
  SG_ VDM_EcasHeightFL : 7|8@0- (1,0) [-128|127] "mm" ACM
  SG_ VDM_EcasHeightFR : 15|8@0- (1,0) [-128|127] "mm" ACM
@@ -485,6 +491,8 @@ BO_ 1329 Dummy_CGM_PrimaryActuatorCAN: 1 CGM
 
 BO_ 1330 Dummy_VDM_PrimaryActuatorCAN: 1 VDM
  SG_ Dummy_VDM_PrimaryActuatorCAN : 7|8@0+ (1,0) [0|255] "" TestTool
+
+BO_ 1520 NEW_MSG_5F0: 8 XXX
 
 BO_ 1545 XCP_Cmd_VDM: 8 TestTool
 
