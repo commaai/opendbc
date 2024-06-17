@@ -48,6 +48,7 @@ repos:
         args:
         - --error-exitcode=1
         - --language=c++
+        - --inline-suppr
         - --force
         - --quiet
         - -j4
