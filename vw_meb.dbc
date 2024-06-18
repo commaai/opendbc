@@ -460,3 +460,39 @@ BO_ 960 Klemmen_Status_01: 4 Gateway
  SG_ KST_Fahrerhinweis_4 : 29|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
  SG_ KST_Fahrerhinweis_5 : 30|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
  SG_ KST_Fahrerhinweis_6 : 31|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+
+BO_ 1626 BCM_01: 8 Gateway
+ SG_ BCM_Bremsbelag_Sensor : 12|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ BCM_Bremsfluessigkeit_Sensor : 13|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BCM1_Licht_Warn : 14|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BCM_Waschwasser_Sensor : 15|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ BCM_Kuehlmittel_Sensor : 16|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BCM1_Kl_15_HW_erkannt : 17|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BCM1_Kl_15_Sig_HW_erkannt : 18|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BCM_Kuehlmittel_Sensor_02 : 19|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BCM1_Hinweis_Lichtnachlauf : 20|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BCM_Offroad_Taste : 21|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BCM_Hybrid_StSt_Taste_Fehler : 23|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BCM_Hybrid_StartStopp_Taste : 24|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BCM1_Warnblink_Taster : 25|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BCM1_Valet_Parking_Taster : 26|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BCM1_LDS_Stellung : 27|3@1+ (1.0,0.0) [0.0|7] ""  Vector__XXX
+ SG_ BCM1_Rueckfahrlicht_Schalter : 30|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BCM1_MH_Schalter : 31|1@1+ (1.0,0.0) [0.0|1] ""  DDA,OTA_FC,ZR_High
+ SG_ BCM1_MH_WIV_Schalter : 32|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BCM_Eco_Charisma_Taste : 33|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BCM1_NV_Taster : 34|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BCM1_AFS_Lampe : 35|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BCM1_Reisemodus_Texte : 36|2@1+ (1.0,0.0) [0.0|3] ""  ZR_High
+ SG_ BCM1_Lichtwarn_Texte : 38|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ Gong_TFL_Umschaltung : 40|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ UGDO_Function_01 : 41|3@1+ (1.0,0.0) [0.0|7] ""  Vector__XXX
+ SG_ APS_Tongeber_defekt : 44|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BCM1_EasyEntry_Status : 45|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BCM1_Lenksaeule_aktiv : 46|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BCM1_St_SW_Diebstahl_links : 47|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BCM1_St_SW_Diebstahl_rechts : 48|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ ISP_Dimmung_ASP_02 : 49|6@1+ (0.0226,0) [0.0000|1.4012] "Unit_Volt"  Vector__XXX
+ SG_ BCM1_Schluesselsuche_Anf : 55|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BCM1_Fahrlicht_Hinweis : 62|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BCM_HDF_betaetigt : 63|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
