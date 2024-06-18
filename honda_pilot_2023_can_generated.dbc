@@ -307,10 +307,12 @@ BO_ 597 ROUGH_WHEEL_SPEED: 8 VSA
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
 
 BO_ 662 SCM_BUTTONS: 4 SCM
- SG_ CRUISE_BUTTONS : 7|3@0+ (1,0) [0|7] "" EON
  SG_ CRUISE_SETTING : 3|2@0+ (1,0) [0|3] "" EON
- SG_ COUNTER : 29|2@0+ (1,0) [0|3] "" EON
+ SG_ CRUISE_BUTTONS : 7|3@0+ (1,0) [0|7] "" EON
+ SG_ BOH_1 : 1|20@0+ (1,0) [0|255] "" XXX
+ SG_ BOH_2 : 4|1@0+ (1,0) [0|1] "" XXX
  SG_ CHECKSUM : 27|4@0+ (1,0) [0|15] "" EON
+ SG_ COUNTER : 29|2@0+ (1,0) [0|3] "" EON
 
 BO_ 806 SCM_FEEDBACK: 8 SCM
  SG_ DRIVERS_DOOR_OPEN : 17|1@0+ (1,0) [0|1] "" XXX
@@ -347,9 +349,9 @@ BO_ 927 RADAR_HUD: 8 RADAR
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 13274 LKAS_HUD_A: 5 ADAS
+ SG_ ENABLED : 0|1@0+ (1,0) [0|1] "" XXX
+ SG_ SET_ME_X20 : 6|6@0+ (1,0) [0|127] "" BDY
  SG_ CAM_TEMP_HIGH : 7|1@0+ (1,0) [0|255] "" BDY
- SG_ SET_ME_X41 : 6|7@0+ (1,0) [0|127] "" BDY
- SG_ BOH : 6|7@0+ (1,0) [0|127] "" BDY
  SG_ DASHED_LANES : 14|1@0+ (1,0) [0|1] "" BDY
  SG_ DTC : 13|1@0+ (1,0) [0|1] "" BDY
  SG_ LKAS_PROBLEM : 12|1@0+ (1,0) [0|1] "" BDY
@@ -368,9 +370,9 @@ BO_ 13274 LKAS_HUD_A: 5 ADAS
  SG_ CHECKSUM : 35|4@0+ (1,0) [0|15] "" BDY
 
 BO_ 13275 LKAS_HUD_B: 8 ADAS
+ SG_ ENABLED : 0|1@0+ (1,0) [0|1] "" XXX
+ SG_ SET_ME_X20 : 6|6@0+ (1,0) [0|127] "" BDY
  SG_ CAM_TEMP_HIGH : 7|1@0+ (1,0) [0|255] "" BDY
- SG_ SET_ME_X41 : 6|7@0+ (1,0) [0|127] "" BDY
- SG_ BOH : 6|7@0+ (1,0) [0|127] "" BDY
  SG_ DASHED_LANES : 14|1@0+ (1,0) [0|1] "" BDY
  SG_ DTC : 13|1@0+ (1,0) [0|1] "" BDY
  SG_ LKAS_PROBLEM : 12|1@0+ (1,0) [0|1] "" BDY
