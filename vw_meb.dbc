@@ -276,3 +276,6 @@ BO_ 960 Klemmen_Status_01: 4 Gateway
  SG_ ZAS_Kl_15a : 16|1@1+ (1.0,0.0) [0.0|1] ""  XXX
  SG_ ZAS_Kl_15b : 17|1@1+ (1.0,0.0) [0.0|1] ""  XXX
  SG_ ZAS_Kl_15c : 18|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+
+VAL_ 173 GE_Fahrstufe 5 "P" 6 "R" 7 "N" 8 "D" 9 "S" 10 "E" 13 "T" 14 "T" ;
+VAL_ 159 EPS_HCA_Status 0 "disabled" 1 "initializing" 2 "fault" 3 "ready" 4 "rejected" 5 "active" 8 "preempted" ;
