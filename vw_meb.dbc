@@ -273,22 +273,6 @@ BO_ 919 LDW_02: 8 XXX
  SG_ LDW_KD_Fehler : 63|1@1+ (1,0) [0|1] ""  XXX
 
 BO_ 960 Klemmen_Status_01: 4 Gateway
- SG_ Klemmen_Status_01_CRC : 0|8@1+ (1,0) [0|255] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
- SG_ Klemmen_Status_01_BZ : 8|4@1+ (1,0) [0|15] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
- SG_ RSt_Fahrerhinweise : 12|4@1+ (1.0,0.0) [0.0|15] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
- SG_ ZAS_Kl_S : 16|1@1+ (1.0,0.0) [0.0|1] ""  BedienDisp_vo,BedienSG_hi,GurtMikrofon,OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
- SG_ ZAS_Kl_15 : 17|1@1+ (1.0,0.0) [0.0|1] ""  BedienDisp_vo,BedienSG_hi,DDA,GurtMikrofon,OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
- SG_ ZAS_Kl_X : 18|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
- SG_ ZAS_Kl_50_Startanforderung : 19|1@1+ (1.0,0.0) [0.0|1] ""  BedienDisp_vo,BedienSG_hi,OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
- SG_ BCM_Remotestart_Betrieb : 20|1@1+ (1.0,0.0) [0.0|1] ""  BedienSG_hi,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
- SG_ ZAS_Kl_Infotainment : 21|1@1+ (1.0,0.0) [0.0|1] ""  BedienDisp_vo,BedienSG_hi,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
- SG_ BCM_Remotestart_KL15_Anf : 22|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
- SG_ BCM_Remotestart_MO_Start : 23|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
- SG_ KST_Warn_P1_ZST_def : 24|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
- SG_ KST_Warn_P2_ZST_def : 25|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
- SG_ KST_Fahrerhinweis_1 : 26|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
- SG_ KST_Fahrerhinweis_2 : 27|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
- SG_ BCM_Ausparken_Betrieb : 28|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
- SG_ KST_Fahrerhinweis_4 : 29|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
- SG_ KST_Fahrerhinweis_5 : 30|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
- SG_ KST_Fahrerhinweis_6 : 31|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ ZAS_Kl_15a : 17|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ZAS_Kl_15b : 18|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ZAS_Kl_15c : 19|1@1+ (1.0,0.0) [0.0|1] ""  XXX
