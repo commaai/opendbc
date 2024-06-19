@@ -273,6 +273,6 @@ BO_ 919 LDW_02: 8 XXX
  SG_ LDW_KD_Fehler : 63|1@1+ (1,0) [0|1] ""  XXX
 
 BO_ 960 Klemmen_Status_01: 4 Gateway
- SG_ ZAS_Kl_15a : 17|1@1+ (1.0,0.0) [0.0|1] ""  XXX
- SG_ ZAS_Kl_15b : 18|1@1+ (1.0,0.0) [0.0|1] ""  XXX
- SG_ ZAS_Kl_15c : 19|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ZAS_Kl_15a : 16|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ZAS_Kl_15b : 17|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ZAS_Kl_15c : 18|1@1+ (1.0,0.0) [0.0|1] ""  XXX
