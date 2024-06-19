@@ -115,8 +115,8 @@ BO_ 420 EA_01: 8 Gateway
  SG_ EA_Sollbeschleunigung : 53|11@1+ (0.005,-7.22) [-7.220|3.005] "Unit_MeterPerSeconSquar"  Vector__XXX
  
 BO_ 173 Getriebe_11: 8 Gateway
- SG_ Getriebe_11_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
- SG_ Getriebe_11_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
  SG_ GE_MMom_Soll_02 : 12|10@1+ (1,-509) [-509|509] ""  Vector__XXX
  SG_ GE_MMom_Vorhalt_02 : 22|10@1+ (1,-509) [-509|509] ""  Vector__XXX
  SG_ GE_Uefkt : 32|10@1+ (0.1,0) [0.0|102.2] ""  Vector__XXX
@@ -176,8 +176,8 @@ BO_ 1411 ZV_02: 8 Gateway
  SG_ ZV_verriegelt_soll : 62|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
  
 BO_ 1312 Airbag_02: 8 Gateway
- SG_ Airbag_02_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
- SG_ Airbag_02_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
  SG_ LoGeWa_Event_Kombiwarnung : 12|4@1+ (1.0,0.0) [0.0|15] ""  ZR_High
  SG_ AB_Anforderung_eCall : 16|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
  SG_ AB_Anprall_Seite_Beifahrer : 17|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
