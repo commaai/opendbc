@@ -277,7 +277,7 @@ BO_ 960 Klemmen_Status_01: 4 Gateway
  SG_ ZAS_Kl_15b : 17|1@1+ (1.0,0.0) [0.0|1] ""  XXX
  SG_ ZAS_Kl_15c : 18|1@1+ (1.0,0.0) [0.0|1] ""  XXX
 
-BO_ 259 Speed_01: 48 XXX
+BO_ 252 Speed_01: 48 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
  SG_ VL_Radgeschw : 72|8@1+ (1,0) [0|255] "Unit_MeterPerSecond"  XXX
