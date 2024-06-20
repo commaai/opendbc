@@ -281,9 +281,9 @@ BO_ 252 Speed_01: 48 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
  SG_ VL_Radgeschw : 72|8@1+ (1,0) [0|255] "Unit_MeterPerSecond"  XXX
- SG_ VR_Radgeschw : 88|8@1+ (0.1,0) [0|255] "Unit_MeterPerSecond"  XXX
- SG_ HL_Radgeschw : 104|8@1+ (0.1,0) [0|255] "Unit_MeterPerSecond"  XXX
- SG_ HR_Radgeschw : 120|8@1+ (0.1,0) [0|255] "Unit_MeterPerSecond"  XXX
+ SG_ VR_Radgeschw : 88|8@1+ (1,0) [0|255] "Unit_MeterPerSecond"  XXX
+ SG_ HL_Radgeschw : 104|8@1+ (1,0) [0|255] "Unit_MeterPerSecond"  XXX
+ SG_ HR_Radgeschw : 120|8@1+ (1,0) [0|255] "Unit_MeterPerSecond"  XXX
 
 VAL_ 173 GE_Fahrstufe 5 "P" 6 "R" 7 "N" 8 "D" 9 "S" 10 "E" 13 "T" 14 "T" ;
 VAL_ 159 EPS_HCA_Status 0 "disabled" 1 "initializing" 2 "fault" 3 "ready" 4 "rejected" 5 "active" 8 "preempted" ;
