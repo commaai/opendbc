@@ -346,19 +346,6 @@ BO_ 967 Motor_26: 8 Gateway
  SG_ WIV_Oeldr_Warn_Motor : 60|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ MO_E_Mode : 61|3@1+ (1,0) [0|7] "" Vector__XXX
 
-BO_ 869 BEM_05: 8 Gateway_MQB
- SG_ BEM_P_Generator : 16|8@1+ (50,0) [0|12700] "Unit_Watt" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ BEM_n_LLA : 24|2@1+ (1,0) [0|3] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ BEM_01_Abschaltstufen : 26|3@1+ (1,0) [0|7] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ BEM_Anf_KL : 29|1@1+ (1,0) [0|1] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ BEM_StartStopp_Info : 30|2@1+ (1,0) [0|3] "" Motor_Diesel_MQB,Motor_Otto_MQB
- SG_ BEM_DFM : 32|5@1+ (3.225,0.025) [0.025|100] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ BEM_EMLIN_ungueltig : 37|1@1+ (1,0) [0|1] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ BEM_Batt_Ab : 38|1@1+ (1,0) [0|1] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ BEM_Segel_Info : 48|2@1+ (1,0) [0|3] "" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ BEM_HYB_DC_uSollLV : 50|6@1+ (0.1,10.6) [10.6|16] "Unit_Volt" LEH_MQB
- SG_ BEM_HYB_DC_uMinLV : 56|8@1+ (0.1,0) [0|25.3] "Unit_Volt" LEH_MQB
-
 BO_ 916 WBA_03: 8 Gateway
  SG_ WBA_03_CRC : 0|8@1+ (1,0) [0|255] ""  Sub_Gateway
  SG_ WBA_03_BZ : 8|4@1+ (1,0) [0|15] ""  Sub_Gateway
