@@ -1113,5 +1113,84 @@ BO_ 1355 Parkhilfe_04: 8 Gateway
  SG_ PDC_Charisma_Status : 58|2@1+ (1,0) [0|3] "" Vector__XXX
  SG_ PDC_Charisma_FahrPr : 60|4@1+ (1,0) [0|15] "" Vector__XXX
 
+BO_ 588 DRIVE_STATES: 16 XXX
+ SG_ NEW_SIGNAL_5 : 32|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_2 : 33|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_1 : 83|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_3 : 84|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_4 : 86|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_7 : 98|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_6 : 119|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 589 SIDE_ASSIST: 64 XXX
+ SG_ NEW_SIGNAL_1 : 15|4@0+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_2 : 21|13@0+ (1,0) [0|8191] "" XXX
+ SG_ NEW_SIGNAL_3 : 34|3@0+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_4 : 55|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_5 : 56|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_9 : 60|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_7 : 87|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_10 : 89|2@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_8 : 95|4@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_11 : 97|2@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_41 : 105|2@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_13 : 116|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_12 : 119|2@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_14 : 121|2@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_15 : 135|8@0+ (1,0) [0|65535] "" XXX
+ SG_ NEW_SIGNAL_6 : 143|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_16 : 151|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_17 : 159|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_18 : 167|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_19 : 175|16@0+ (1,0) [0|65535] "" XXX
+ SG_ NEW_SIGNAL_20 : 191|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_21 : 262|7@0+ (1,0) [0|127] "" XXX
+ SG_ NEW_SIGNAL_22 : 270|7@0+ (1,0) [0|127] "" XXX
+ SG_ NEW_SIGNAL_23 : 279|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_24 : 286|9@0+ (1,0) [0|511] "" XXX
+ SG_ NEW_SIGNAL_25 : 292|2@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_26 : 303|10@0+ (1,0) [0|1023] "" XXX
+ SG_ NEW_SIGNAL_27 : 308|4@0+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_28 : 318|7@0+ (1,0) [0|127] "" XXX
+ SG_ NEW_SIGNAL_30 : 391|8@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_32 : 399|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_33 : 400|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_35 : 410|3@0+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_34 : 413|2@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_37 : 428|4@0+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_36 : 430|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_38 : 439|7@0+ (1,0) [0|127] "" XXX
+ SG_ NEW_SIGNAL_40 : 447|8@0+ (1,0) [0|63] "" XXX
+
+BO_ 591 DISTANCE: 64 XXX
+ SG_ NEW_SIGNAL_23 : 16|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_10 : 21|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_9 : 22|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_7 : 23|1@1+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_13 : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_8 : 25|1@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_22 : 27|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_11 : 28|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_17 : 29|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_18 : 30|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_19 : 31|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_15 : 32|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_12 : 33|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_14 : 43|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_20 : 47|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_21 : 49|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_16 : 50|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_5 : 53|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_4 : 55|2@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_6 : 61|6@0+ (1,0) [0|63] "" XXX
+ SG_ NEW_SIGNAL_3 : 71|32@0+ (1,0) [0|4294967295] "" XXX
+ SG_ NEW_SIGNAL_2 : 103|32@0+ (1,0) [0|4294967295] "" XXX
+ SG_ NEW_SIGNAL_1 : 135|32@0+ (1,0) [0|4294967295] "" XXX
+ SG_ NEW_SIGNAL_26 : 199|32@0+ (1,0) [0|4294967295] "" XXX
+ SG_ NEW_SIGNAL_25 : 231|32@0+ (1,0) [0|4294967295] "" XXX
+ SG_ NEW_SIGNAL_24 : 263|32@0+ (1,0) [0|4294967295] "" XXX
+
+
+
 VAL_ 173 GE_Fahrstufe 5 "P" 6 "R" 7 "N" 8 "D" 9 "S" 10 "E" 13 "T" 14 "T" ;
 VAL_ 159 EPS_HCA_Status 0 "disabled" 1 "initializing" 2 "fault" 3 "ready" 4 "rejected" 5 "active" 8 "preempted" ;
