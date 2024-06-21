@@ -1022,6 +1022,14 @@ BO_ 294 HCA_01: 8 Frontsensorik
  SG_ EA_Ruckfreigabe : 40|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ EA_ACC_Wunschgeschwindigkeit : 41|10@1+ (0.32,0) [0|327.04] "Unit_KiloMeterPerHour"  Frontradar
 
+BO_ 771 LANE_ASSIST_01: 24 XXX
+ SG_ Inactive : 13|1@0+ (1,0) [0|1] "" XXX
+ SG_ Active : 14|1@0+ (1,0) [0|3] "" XXX
+ SG_ Data_01 : 16|7@1+ (1,0) [0|127] "" XXX
+ SG_ Data_02 : 24|8@1+ (1,0) [0|255] "" XXX
+ SG_ VZ : 39|1@0+ (1,0) [0|1] "" XXX
+ SG_ Active_02 : 66|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 159 LH_EPS_03: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  XXX
