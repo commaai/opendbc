@@ -22,7 +22,7 @@ jobs:
     - name: Build opendbc
       run: ${{ env.RUN }} "cd ../ && scons -j$(nproc) --minimal"
     - name: Unit tests
-      run: ${{ env.RUN }} "python -m unittest discover ."
+      run: ${{ env.RUN }} "pytest"
 
   static-analysis:
     name: static analysis
