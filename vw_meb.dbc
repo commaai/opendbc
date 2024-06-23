@@ -1204,7 +1204,7 @@ BO_ 768 ACC_01: 48 XXX
  SG_ NEW_SIGNAL_41 : 66|3@0+ (1,0) [0|7] "" XXX
  SG_ NEW_SIGNAL_4 : 69|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_42 : 73|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_Set_Speed_1 : 79|4@0+ (1,1) [0|15] "" XXX
+ SG_ ACC_Set_Speed_1 : 79|4@0+ (1,2) [0|15] "" XXX
  SG_ ACC_Set_Speed_2 : 85|6@0+ (5,0) [0|63] "" XXX
  SG_ NEW_SIGNAL_32 : 87|2@0+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_33 : 95|8@0+ (1,0) [0|255] "" XXX
