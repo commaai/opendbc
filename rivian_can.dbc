@@ -492,8 +492,6 @@ BO_ 1329 Dummy_CGM_PrimaryActuatorCAN: 1 CGM
 BO_ 1330 Dummy_VDM_PrimaryActuatorCAN: 1 VDM
  SG_ Dummy_VDM_PrimaryActuatorCAN : 7|8@0+ (1,0) [0|255] "" TestTool
 
-BO_ 1520 NEW_MSG_5F0: 8 XXX
-
 BO_ 1545 XCP_Cmd_VDM: 8 TestTool
 
 BO_ 1609 XCP_Resp_VDM: 8 VDM
