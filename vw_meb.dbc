@@ -1122,7 +1122,7 @@ BO_ 1355 Parkhilfe_04: 8 Gateway
  SG_ PDC_Charisma_Status : 58|2@1+ (1,0) [0|3] "" Vector__XXX
  SG_ PDC_Charisma_FahrPr : 60|4@1+ (1,0) [0|15] "" Vector__XXX
 
-BO_ 588 DRIVE_STATES: 16 XXX
+BO_ 588 Drive_States_01: 16 XXX
  SG_ NEW_SIGNAL_5 : 32|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_2 : 33|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_1 : 83|1@0+ (1,0) [0|1] "" XXX
@@ -1131,7 +1131,7 @@ BO_ 588 DRIVE_STATES: 16 XXX
  SG_ NEW_SIGNAL_7 : 98|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_6 : 119|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 589 SIDE_ASSIST: 64 XXX
+BO_ 589 Side_Assist_01: 64 XXX
  SG_ NEW_SIGNAL_1 : 15|4@0+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_2 : 21|13@0+ (1,0) [0|8191] "" XXX
  SG_ NEW_SIGNAL_3 : 34|3@0+ (1,0) [0|7] "" XXX
@@ -1171,7 +1171,7 @@ BO_ 589 SIDE_ASSIST: 64 XXX
  SG_ NEW_SIGNAL_38 : 439|7@0+ (1,0) [0|127] "" XXX
  SG_ NEW_SIGNAL_40 : 447|8@0+ (1,0) [0|63] "" XXX
 
-BO_ 591 ACC_01: 64 XXX
+BO_ 591 Distance_01: 64 XXX
  SG_ NEW_SIGNAL_23 : 16|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_10 : 21|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_9 : 22|1@0+ (1,0) [0|1] "" XXX
@@ -1200,6 +1200,43 @@ BO_ 591 ACC_01: 64 XXX
  SG_ NEW_SIGNAL_25 : 231|32@0+ (1,0) [0|4294967295] "" XXX
  SG_ NEW_SIGNAL_24 : 263|32@0+ (1,0) [0|4294967295] "" XXX
 
+BO_ 768 ACC_01: 48 XXX
+ SG_ NEW_SIGNAL_3 : 79|4@0+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_4 : 85|6@0+ (1,0) [0|63] "" XXX
+ SG_ NEW_SIGNAL_2 : 96|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_Ready : 97|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_22 : 102|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_5 : 143|4@0+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_6 : 149|6@0+ (1,0) [0|63] "" XXX
+ SG_ NEW_SIGNAL_7 : 150|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_8 : 158|7@0+ (1,0) [0|127] "" XXX
+ SG_ NEW_SIGNAL_10 : 167|16@0+ (1,0) [0|65535] "" XXX
+ SG_ NEW_SIGNAL_9 : 186|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_11 : 209|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_13 : 226|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_12 : 228|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_20 : 247|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_21 : 254|7@0+ (1,0) [0|127] "" XXX
+ SG_ NEW_SIGNAL_14 : 266|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_17 : 274|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_16 : 276|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_15 : 279|2@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_19 : 347|4@0+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_18 : 349|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 333 ACC_02: 32 XXX
+ SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_2 : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_3 : 31|7@0+ (1,0) [0|127] "" XXX
+ SG_ NEW_SIGNAL_4 : 34|3@0+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_6 : 59|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_Ready : 61|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_7 : 71|7@0+ (1,0) [0|127] "" XXX
+ SG_ NEW_SIGNAL_8 : 74|3@0+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_9 : 87|7@0+ (1,0) [0|127] "" XXX
+ SG_ NEW_SIGNAL_10 : 92|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_12 : 232|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_11 : 235|1@0+ (1,0) [0|1] "" XXX
 
 
 VAL_ 173 GE_Fahrstufe 5 "P" 6 "R" 7 "N" 8 "D" 9 "S" 10 "E" 13 "T" 14 "T" ;
