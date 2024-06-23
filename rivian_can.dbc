@@ -218,7 +218,7 @@ BO_ 448 ESP_TorqueLimit_Rear: 8 ESP
  SG_ ESP_Torque_Rear_Max : 23|16@0+ (0.5,-16384) [-16384|16383] "Nm" VDM
  SG_ ESP_Torque_Rear_Min : 39|16@0+ (0.5,-16384) [-16384|16383] "Nm" VDM
 
-BO_ 516 RCM_ALR_Status: 1 RCM
+BO_ 516 RCM_ALR_Status: 8 RCM
  SG_ RCM_ALR_Status_Signal : 0|2@1+ (1,0) [0|3] "" OCS
 
 BO_ 520 ESP_Status: 8 ESP
@@ -324,7 +324,7 @@ BO_ 592 VDM_EcasStatus: 8 VDM
  SG_ VDM_EcasHeightRL : 23|8@0- (1,0) [-128|127] "mm" ACM
  SG_ VDM_EcasHeightRR : 31|8@0- (1,0) [-128|127] "mm" ACM
 
-BO_ 789 BCM_Status: 2 VDM
+BO_ 789 BCM_Status: 8 VDM
  SG_ BCM_AmbientAirTemperature : 15|8@0- (1,0) [-60|100] "degC" ESP
 
 BO_ 811 ESP_EpbStatus: 8 ESP
@@ -416,7 +416,7 @@ BO_ 909 ESPiB3: 7 ESP
  SG_ ESPiB3_pForceBlendingMC_Q : 45|2@0+ (1,0) [0|3] "" IBM
  SG_ ESPiB3_pMC1_Q : 49|2@0+ (1,0) [0|3] "" IBM
 
-BO_ 910 iBESP1: 6 IBM
+BO_ 910 iBESP1: 7 IBM
  SG_ iBESP1_Checksum : 7|8@0+ (1,0) [0|255] "" ESP,VDM
  SG_ iBESP1_AliveCounter : 11|4@0+ (1,0) [0|15] "" ESP,VDM
  SG_ iBESP1_ExtReqPrio : 12|1@0+ (1,0) [0|1] "" ESP,VDM
@@ -483,7 +483,7 @@ BO_ 1280 RCM_Dtc: 8 RCM
 BO_ 1281 RCM_SerialIdentifier: 8 RCM
  SG_ RCM_SerialNumber : 7|64@0+ (1,0) [0|1.84467440737096e+19] "" ESP,VDM
 
-BO_ 1328 Dummy_ACM_PrimaryActuatorCAN: 1 ACM
+BO_ 1328 Dummy_ACM_PrimaryActuatorCAN: 8 ACM
  SG_ Dummy_ACM_PrimaryActuatorCAN : 7|8@0+ (1,0) [0|255] "" TestTool
 
 BO_ 1329 Dummy_CGM_PrimaryActuatorCAN: 1 CGM
