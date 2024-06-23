@@ -1233,18 +1233,18 @@ BO_ 768 ACC_01: 48 XXX
  SG_ NEW_SIGNAL_12 : 228|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_20 : 247|8@0+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_21 : 254|7@0+ (1,0) [0|127] "" XXX
+ SG_ NEW_SIGNAL_43 : 262|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_29 : 265|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_14 : 266|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_35 : 267|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_28 : 268|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_Limiter_Mode : 268|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_34 : 270|2@0+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_17 : 274|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_16 : 276|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_15 : 279|2@0+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_36 : 287|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_40 : 288|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_39 : 290|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_38 : 292|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_28 : 293|4@0+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_37 : 295|2@0+ (1,0) [0|3] "" XXX
  SG_ ACC_Speed : 329|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_45 : 331|1@0+ (1,0) [0|1] "" XXX
