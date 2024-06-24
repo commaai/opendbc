@@ -1222,7 +1222,7 @@ BO_ 768 MEB_ACC_01: 48 XXX
  SG_ NEW_SIGNAL_31 : 109|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_3 : 112|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_Active : 113|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_24 : 120|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_Faultless : 120|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_18 : 121|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_5 : 143|4@0+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_6 : 149|6@0+ (1,0) [0|63] "" XXX
