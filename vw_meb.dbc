@@ -1022,15 +1022,6 @@ BO_ 294 HCA_01: 8 Frontsensorik
  SG_ EA_Ruckfreigabe : 40|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ EA_ACC_Wunschgeschwindigkeit : 41|10@1+ (0.32,0) [0|327.04] "Unit_KiloMeterPerHour"  Frontradar
 
-BO_ 771 LANE_ASSIST_01: 24 XXX
- SG_ Inactive : 13|1@0+ (1,0) [0|1] "" XXX
- SG_ Active : 14|1@0+ (1,0) [0|3] "" XXX
- SG_ Data_01 : 16|7@1+ (1,0) [0|127] "" XXX
- SG_ Data_02 : 24|8@1+ (1,0) [0|255] "" XXX
- SG_ Contact : 34|3@0+ (1,0) [0|7] "" XXX
- SG_ VZ : 39|1@0+ (1,0) [0|1] "" XXX
- SG_ Active_02 : 66|1@0+ (1,0) [0|1] "" XXX
-
 BO_ 159 LH_EPS_03: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  XXX
@@ -1128,7 +1119,16 @@ BO_ 1355 Parkhilfe_04: 8 Gateway
  SG_ PDC_Charisma_Status : 58|2@1+ (1,0) [0|3] "" Vector__XXX
  SG_ PDC_Charisma_FahrPr : 60|4@1+ (1,0) [0|15] "" Vector__XXX
 
-BO_ 588 Drive_States_01: 16 XXX
+BO_ 771 MEB_Lane_Assist_01: 24 XXX
+ SG_ Inactive : 13|1@0+ (1,0) [0|1] "" XXX
+ SG_ Active : 14|1@0+ (1,0) [0|3] "" XXX
+ SG_ Data_01 : 16|7@1+ (1,0) [0|127] "" XXX
+ SG_ Data_02 : 24|8@1+ (1,0) [0|255] "" XXX
+ SG_ Contact : 34|3@0+ (1,0) [0|7] "" XXX
+ SG_ VZ : 39|1@0+ (1,0) [0|1] "" XXX
+ SG_ Active_02 : 66|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 588 MEB_Drive_State_01: 16 XXX
  SG_ Lower_Speed_01 : 32|1@0+ (1,0) [0|1] "" XXX
  SG_ Higher_Speed_01 : 33|1@0+ (1,0) [0|1] "" XXX
  SG_ Higher_Speed_02 : 83|1@0+ (1,0) [0|1] "" XXX
@@ -1137,7 +1137,7 @@ BO_ 588 Drive_States_01: 16 XXX
  SG_ NEW_SIGNAL_1 : 98|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_6 : 119|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 589 Side_Assist_01: 64 XXX
+BO_ 589 MEB_Side_Assist_01: 64 XXX
  SG_ NEW_SIGNAL_1 : 15|4@0+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_2 : 21|13@0+ (1,0) [0|8191] "" XXX
  SG_ NEW_SIGNAL_3 : 34|3@0+ (1,0) [0|7] "" XXX
@@ -1177,7 +1177,7 @@ BO_ 589 Side_Assist_01: 64 XXX
  SG_ NEW_SIGNAL_38 : 439|7@0+ (1,0) [0|127] "" XXX
  SG_ NEW_SIGNAL_40 : 447|8@0+ (1,0) [0|63] "" XXX
 
-BO_ 591 Distance_01: 64 XXX
+BO_ 591 MEB_Distance_01: 64 XXX
  SG_ NEW_SIGNAL_23 : 16|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_10 : 21|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_9 : 22|1@0+ (1,0) [0|1] "" XXX
@@ -1206,7 +1206,7 @@ BO_ 591 Distance_01: 64 XXX
  SG_ NEW_SIGNAL_25 : 231|32@0+ (1,0) [0|4294967295] "" XXX
  SG_ NEW_SIGNAL_24 : 263|32@0+ (1,0) [0|4294967295] "" XXX
 
-BO_ 768 ACC_01: 48 XXX
+BO_ 768 MEB_ACC_01: 48 XXX
  SG_ NEW_SIGNAL_41 : 66|3@0+ (1,0) [0|7] "" XXX
  SG_ NEW_SIGNAL_4 : 69|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_42 : 73|1@0+ (1,0) [0|1] "" XXX
@@ -1257,7 +1257,7 @@ BO_ 768 ACC_01: 48 XXX
  SG_ NEW_SIGNAL_19 : 350|7@0+ (1,0) [0|15] "" XXX
 
 
-BO_ 333 ACC_02: 32 XXX
+BO_ 333 MEB_ACC_02: 32 XXX
  SG_ CHECKSUM : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 11|4@0+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_3 : 31|7@0+ (1,0) [0|127] "" XXX
