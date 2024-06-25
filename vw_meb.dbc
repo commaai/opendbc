@@ -844,6 +844,24 @@ BO_ 976 TSG_FT_01: 8 Gateway
  SG_ SWA_HMI_Diagnose : 60|2@1+ (1,0) [0|3] "" Vector__XXX
  SG_ FS_Status_eTAG : 62|2@1+ (1,0) [0|3] "" Vector__XXX
 
+BO_ 997 TSG_FT_02: 8 Gateway
+ SG_ TSG_FT_02_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ TSG_FT_02_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ FT_Tuer_Status : 12|2@1+ (1.0,0.0) [0.0|3] ""  OTA_FC,ZR_High
+ SG_ FT_Tuer_Status_QBit : 14|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ FT_Lock_Taster_02 : 15|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ FT_Schluesselschalter_zu_02 : 16|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ FT_BFS_Tuer_Status : 17|2@1+ (1.0,0.0) [0.0|3] ""  ZR_High
+ SG_ FT_HBFS_Tuer_Status : 19|2@1+ (1.0,0.0) [0.0|3] ""  ZR_High
+ SG_ FT_HFS_Tuer_Status : 21|2@1+ (1.0,0.0) [0.0|3] ""  ZR_High
+ SG_ FT_Tueroeffnen_Warnung : 23|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ FT_SP_Heizung_ein : 24|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ FT_Kisi_Taster_li_02 : 25|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ FT_Kisi_Taster_re_02 : 26|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ FT_TD_Taste_Status : 27|2@1+ (1.0,0.0) [0.0|3] ""  ZR_High
+ SG_ FT_TCR_Mode_aktiv : 29|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ FS_Push_Tuergriff : 36|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+
 BO_ 64 Airbag_01: 8 Gateway
  SG_ Airbag_01_CRC : 0|8@1+ (1,0) [0|255] ""  AWC,BMC_MLBevo,BMS_NV,DCDC_800V_PAG,DCDC_HV,DCDC_HV_02,DCDC_IHEV,FCU_MLBevo_FCEV,Ladegeraet_2,Ladegeraet_Konzern,Sub_Gateway
  SG_ Airbag_01_BZ : 8|4@1+ (1,0) [0|15] ""  AWC,BMC_MLBevo,BMS_NV,DCDC_800V_PAG,DCDC_HV,DCDC_HV_02,DCDC_IHEV,FCU_MLBevo_FCEV,Ladegeraet_2,Ladegeraet_Konzern,Sub_Gateway
@@ -993,6 +1011,345 @@ BO_ 1413 Systeminfo_01: 8 Gateway_MQB
  SG_ SI_BUS_13 : 28|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ SI_BUS_14 : 29|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ SI_BUS_15 : 30|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 891 GNSS_05: 8 Gateway
+ SG_ GNSS_UTC_Zeit : 0|32@1+ (1,0) [1|4294967295] "Unit_Secon"  OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ GNSS_Empfaenger_Status : 32|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ GNSS_GPS_in_Nutzung : 33|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ GNSS_GLONASS_in_Nutzung : 34|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ GNSS_Empfangbare_Satelliten : 35|5@1+ (1,0) [1|30] "Unit_None"  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ GNSS_Sichtbare_Satelliten : 40|5@1+ (1,0) [1|30] "Unit_None"  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ GNSS_Genutzte_Satelliten : 45|5@1+ (1,0) [1|30] "Unit_None"  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ GNSS_Nachrichtenpaket_ID5 : 50|2@1+ (1,0) [0|3] "Unit_Bit"  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+
+BO_ 888 GNSS_04: 8 Gateway
+ SG_ GNSS_Nachrichtenpaket_ID4 : 0|2@1+ (1,0) [0|3] "Unit_Bit"  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ GNSS_Ortung_Zeit_in_GPSWoche : 2|30@1+ (1,0) [0|604800001] "Unit_MilliSecon"  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ GNSS_Ortung_Hoehe : 32|12@1+ (2,-500) [-500|7686] "Unit_Meter"  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+
+BO_ 1524 Innenlicht_11: 8 Gateway
+ SG_ IL_Dimmung_V_Tuerkontur : 0|8@1+ (1,0) [0|100] "Unit_PerCent"  ZR_High
+ SG_ IL_Dimmung_H_Tuerkontur : 8|8@1+ (1,0) [0|100] "Unit_PerCent"  ZR_High
+ SG_ IL_Dimmung_Tuerinnengriff : 16|8@1+ (1,0) [0|100] "Unit_PerCent"  ZR_High
+ SG_ IL_Dimmung_Umfeldbel : 24|8@1+ (1,0) [0|100] "Unit_PerCent"  ZR_High
+ SG_ IL_Bel_FS_Ausstieg : 32|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ IL_Bel_BFS_Ausstieg : 33|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ IL_Bel_HFS_Ausstieg : 34|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ IL_Bel_HBFS_Ausstieg : 35|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BCM1_Innenlicht_gedimmt_V : 36|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BCM1_Innenlicht_gedimmt_H : 37|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ IL_Innenlicht_aktiv : 38|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ IL_Klemme_30G_aktiv : 39|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BCM1_DI_Rampe_Innenlicht : 40|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BCM1_DI_Rampe_Leselicht : 41|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BCM1_Innenlicht_H : 42|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BCM1_Innenlicht_V : 43|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BCM1_Leselicht_Anf_hl : 44|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BCM1_Leselicht_Anf_hr : 45|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BCM1_Leselicht_Anf_vl : 46|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BCM1_Leselicht_Anf_vr : 47|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BCM1_Leuchten_Aus : 48|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ AMB_Charisma_FahrPr : 49|4@1+ (1.0,0.0) [0.0|15] ""  Vector__XXX
+ SG_ AMB_Charisma_Status : 53|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ IL_Dimmung_Lautspr : 56|8@1+ (1,0) [0|100] "Unit_PerCent"  ZR_High
+
+BO_ 1624 Licht_vorne_01: 8 Gateway
+ SG_ Licht_Vorne_01_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ Licht_Vorne_01_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ LV_Standlicht_Anzeige : 12|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ LV_Abblendlicht_Anzeige : 13|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ LV_Fernlicht_Anzeige : 14|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ LV_Nebellicht_Anzeige : 15|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ LV_Nebelschlusslicht_Anzeige : 16|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ LV_Tagfahrlicht_Anzeige : 17|1@1+ (1.0,0.0) [0.0|1] ""  BedienSG_hi,OTA_FC,ZR_High
+ SG_ LV_AFL_aktiv_Anzeige : 18|1@1+ (1.0,0.0) [0.0|1] ""  BedienSG_hi,OTA_FC,ZR_High
+ SG_ LV_AFL_defekt : 19|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LV_Blinker_li_def : 20|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LV_Standlicht_li_def : 21|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LV_Abblendlicht_li_def : 22|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LV_Fernlicht_li_def : 23|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LV_Nebellicht_li_def : 24|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LV_Blk_li_Seite_def : 25|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LV_Tagfahrlicht_li_def : 26|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LV_FLA_aktiv_Anzeige : 27|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ LV_FLA_defekt : 28|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LV_FLA_Sensor_blockiert : 29|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ LV_Blinker_re_def : 30|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LV_Standlicht_re_def : 31|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LV_Abblendlicht_re_def : 32|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LV_Fernlicht_re_def : 33|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LV_Nebellicht_re_def : 34|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LV_Blk_re_Seite_def : 35|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LV_Tagfahrlicht_re_def : 36|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LV_Aussenlicht_def : 37|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LV_Abblendlicht_TFL_li_def : 38|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LV_Nebellicht_TFL_li_def : 39|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LV_Standlicht_TFL_li_def : 40|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LV_Abblend_Fernlicht_li_def : 41|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LV_Abblendlicht_TFL_re_def : 42|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LV_Nebellicht_TFL_re_def : 43|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LV_Standlicht_TFL_re_def : 44|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LV_Abblend_Fernlicht_re_def : 45|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LV_Abbiegelicht_li_def : 46|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ LV_Abbiegelicht_re_def : 47|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ BCM1_Linksverkehr : 48|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ BCM1_Licht_Dunkelheit_aktiv : 49|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ LV_LED_Scheinwerfer_li_def : 50|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ LV_LED_Scheinwerfer_re_def : 51|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ LV_Blinker_VL_aktiv : 52|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ LV_Blinker_VR_aktiv : 53|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ LV_MXB_Status_Anzeige : 54|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+
+BO_ 982 Licht_hinten_01: 8 Gateway
+ SG_ BCM2_Bremsl_durch_ECD : 5|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ LH_Aussenlicht_def : 7|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_Standlicht_H_aktiv : 8|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ LH_Parklicht_HL_aktiv : 9|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ LH_Parklicht_HR_aktiv : 10|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ LH_Bremslicht_H_aktiv : 11|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ LH_Nebelschluss_aktiv : 12|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ LH_Rueckfahrlicht_aktiv : 13|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ LH_Blinker_HL_akt : 14|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ LH_Blinker_HR_akt : 15|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ LH_Blinker_li_def : 16|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_Bremsl_li_def : 17|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_Schlusslicht_li_def : 18|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_Rueckf_li_def : 19|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_Nebel_li_def : 20|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_Schluss_Brems_Nebel_li_def : 21|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_Schluss_Brems_Nebel_re_def : 22|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_Zusatzschlussl_def : 23|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ LH_Schluss_Brems_li_def : 24|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_Schluss_Nebel_li_def : 25|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_SL_BRL_BLK_li_def : 26|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_Brems_Blk_li_def : 27|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ LH_Diag_Status_re_def : 28|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_Diag_Status_li_def : 29|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_Diag_LED_li_def : 30|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_Diag_LED_re_def : 31|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_Blinker_re_def : 32|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_Bremsl_re_def : 33|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_Schlusslicht_re_def : 34|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_Rueckf_re_def : 35|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_Nebel_re_def : 36|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_Schluss_Brems_mi_def : 37|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ LH_Schluss_Brems_re_def : 40|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_Schluss_Nebel_re_def : 41|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_SL_BRL_BLK_re_def : 42|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_Brems_Blk_re_def : 43|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_Kennzl_def : 48|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_3_Bremsl_def : 49|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_Nebel_mi_def : 50|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_Rueckf_mi_def : 51|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_Schlusslicht_mi_def : 52|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ LH_Bremsl_mi_def : 53|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ LH_Bremsl_li_ges_def : 54|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LH_Bremsl_re_ges_def : 55|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+
+BO_ 817 MFL_01: 8 Gateway
+ SG_ MFL_Zaehler : 0|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ MFL_Toggle : 4|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ MFL_Lokalaktiv : 5|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ MFL_M_Taste : 6|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ MFL_Paddle_Verbau : 7|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ MFL_Tastencode_1 : 8|8@1+ (1.0,0.0) [0.0|255] ""  Vector__XXX
+ SG_ MFL_Tastencode_2 : 16|8@1+ (1.0,0.0) [0.0|255] ""  Vector__XXX
+ SG_ MFL_Eventcode_1 : 24|4@1+ (1.0,0.0) [0.0|15] ""  Vector__XXX
+ SG_ MFL_Eventcode_2 : 28|4@1+ (1.0,0.0) [0.0|15] ""  Vector__XXX
+ SG_ MFL_Marke : 32|4@1+ (1.0,0.0) [0.0|15] ""  Vector__XXX
+ SG_ MFL_Variante : 36|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ MFL_Dummy_0_Signal_1 : 40|8@1+ (1.0,0.0) [0.0|255] ""  Vector__XXX
+ SG_ MFL_Tip_Down : 48|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ MFL_Tip_Up : 49|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ MFL_SatModul_links_Err : 50|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ MFL_SatModul_rechts_Err : 51|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ MFL_Dummy_0_Signal_2 : 52|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ MFL_Dummy_0_Signal_3 : 53|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ MFL_LR_HZG_Status : 54|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ MFL_LR_HZG_Err : 55|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ MFL_Signalhorn : 56|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ MFL_Signalhorn_Err : 57|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ MFL_Tip_links_Err : 58|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ MFL_Tip_rechts_Err : 59|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ MFL_Taste_links_Err : 60|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ MFL_Taste_rechts_Err : 61|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ MFL_ECU_Err : 62|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ MFL_Response_Err : 63|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+
+BO_ 706 Motor_41: 8 Gateway
+ SG_ MO_Anzeige_StSt_Text : 12|4@1+ (1.0,0.0) [0.0|15] ""  Vector__XXX
+ SG_ MO_Anzeige_StSt_Symbol : 16|3@1+ (1.0,0.0) [0.0|7] ""  Vector__XXX
+ SG_ MO_ADR_Status : 19|2@1+ (1.0,0.0) [0.0|3] ""  ZR_High
+ SG_ MO_AGA_Sound_Texte : 21|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ MO_Anzeige_FMAus_Text : 23|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ MO_Fehler_MSpG : 24|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ PEA_Texte : 25|3@1+ (1.0,0.0) [0.0|7] ""  Vector__XXX
+ SG_ TSK_Ueberstimmt_vMax_FahrerInfo : 28|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ MO_Avus_Motorschutz : 30|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ MO_Rekuperationsstufe : 32|3@1+ (1.0,0.0) [0.0|7] ""  OTA_FC
+ SG_ TSK_Einheit_vMax_FahrerInfo : 35|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ TSK_Status_vMax_FahrerInfo : 36|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ MO_Red_Fahrleistung : 38|3@1+ (1.0,0.0) [0.0|7] ""  Vector__XXX
+ SG_ MO_Anz_Kuehlerluefter : 47|3@1+ (1.0,0.0) [0.0|7] ""  Vector__XXX
+ SG_ MO_im_Leerlauf : 50|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ WIV_Enable_Oeldr_Motor : 51|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ MO_OelMessung_Dauer : 52|4@1+ (15,15) [15|225] "Unit_Secon"  Vector__XXX
+ SG_ TSK_vMax_FahrerInfo : 56|8@1+ (1,15) [16|270] ""  Vector__XXX
+
+BO_ 1122 PSD_04: 8 ZR_High
+ SG_ PSD_Segment_ID : 0|6@1+ (1,0) [2|63] ""  Gateway,Gateway_PAG
+ SG_ PSD_Vorgaenger_Segment_ID : 6|6@1+ (1,0) [2|63] ""  Gateway,Gateway_PAG
+ SG_ PSD_Segmentlaenge : 12|7@1+ (2,0) [0|254] "Unit_Meter"  Gateway,Gateway_PAG,OTA_FC
+ SG_ PSD_Strassenkategorie : 19|3@1+ (1.0,0.0) [0.0|7] ""  Gateway,Gateway_PAG,OTA_FC
+ SG_ PSD_Endkruemmung : 22|8@1+ (1,0) [0|254] "Unit_None"  Gateway,Gateway_PAG
+ SG_ PSD_Endkruemmung_Vorz : 30|1@1+ (1.0,0.0) [0.0|1] ""  Gateway,Gateway_PAG
+ SG_ PSD_Idenditaets_ID : 31|6@1+ (1,0) [2|63] ""  Gateway,Gateway_PAG
+ SG_ PSD_ADAS_Qualitaet : 37|1@1+ (1.0,0.0) [0.0|1] ""  Gateway,Gateway_PAG
+ SG_ PSD_wahrscheinlichster_Pfad : 38|1@1+ (1.0,0.0) [0.0|1] ""  Gateway,Gateway_PAG
+ SG_ PSD_Geradester_Pfad : 39|1@1+ (1.0,0.0) [0.0|1] ""  Gateway,Gateway_PAG
+ SG_ PSD_Fahrspuren_Anzahl : 40|3@1+ (1.0,0.0) [0.0|7] ""  Gateway,Gateway_PAG,OTA_FC
+ SG_ PSD_Bebauung : 43|1@1+ (1.0,0.0) [0.0|1] ""  Gateway,Gateway_PAG
+ SG_ PSD_Segment_Komplett : 44|1@1+ (1.0,0.0) [0.0|1] ""  Gateway,Gateway_PAG
+ SG_ PSD_Rampe : 45|2@1+ (1.0,0.0) [0.0|3] ""  Gateway,Gateway_PAG
+ SG_ PSD_Anfangskruemmung : 47|8@1+ (1,0) [0|254] ""  Gateway,Gateway_PAG
+ SG_ PSD_Anfangskruemmung_Vorz : 55|1@1+ (1.0,0.0) [0.0|1] ""  Gateway,Gateway_PAG
+ SG_ PSD_Abzweigerichtung : 56|1@1+ (1.0,0.0) [0.0|1] ""  Gateway,Gateway_PAG
+ SG_ PSD_Abzweigewinkel : 57|7@1+ (1.417323,0) [0.000000|180.000021] ""  Gateway,Gateway_PAG
+
+BO_ 1123 PSD_05: 8 ZR_High
+ SG_ PSD_Pos_Segment_ID : 0|6@1+ (1,0) [2|63] ""  Gateway,Gateway_PAG
+ SG_ PSD_Pos_Segmentlaenge : 6|7@1+ (2,0) [0|254] "Unit_Meter"  Gateway,Gateway_PAG
+ SG_ PSD_Pos_Inhibitzeit : 13|5@1+ (10,0) [0|310] "Unit_MilliSecon"  Gateway,Gateway_PAG
+ SG_ PSD_Pos_Standort_Eindeutig : 18|1@1+ (1.0,0.0) [0.0|1] ""  Gateway,Gateway_PAG
+ SG_ PSD_Pos_Fehler_Laengsrichtung : 19|3@1+ (1.0,0.0) [0.0|7] ""  Gateway,Gateway_PAG
+ SG_ PSD_Pos_Fahrspur : 22|3@1+ (1.0,0.0) [0.0|7] ""  Gateway,Gateway_PAG,OTA_FC
+ SG_ PSD_Attribut_Segment_ID_05 : 25|6@1+ (1,0) [2|63] ""  Gateway,Gateway_PAG
+ SG_ PSD_Attribut_1_ID : 31|5@1+ (1,0) [1|31] ""  Gateway,Gateway_PAG
+ SG_ PSD_Attribut_1_Wert : 36|4@1+ (1.0,0.0) [0.0|15] ""  Gateway,Gateway_PAG
+ SG_ PSD_Attribut_1_Offset : 40|7@1+ (2,0) [0|254] "Unit_Meter"  Gateway,Gateway_PAG
+ SG_ PSD_Attribut_2_ID : 47|5@1+ (1,0) [1|31] ""  Gateway,Gateway_PAG
+ SG_ PSD_Attribut_2_Wert : 52|4@1+ (1.0,0.0) [0.0|15] ""  Gateway,Gateway_PAG
+ SG_ PSD_Attribut_2_Offset : 56|7@1+ (2,0) [0|254] "Unit_Meter"  Gateway,Gateway_PAG
+ SG_ PSD_Attribute_Komplett_05 : 63|1@1+ (1.0,0.0) [0.0|1] ""  Gateway,Gateway_PAG
+
+BO_ 1124 PSD_06: 8 ZR_High
+ SG_ PSD_06_Mux M  : 0|3@1+ (1.0,0.0) [0.0|7] ""  Gateway,Gateway_PAG
+ SG_ PSD_Sys_Segment_ID m0  : 3|6@1+ (1,0) [2|63] ""  Gateway,Gateway_PAG
+ SG_ PSD_Attribut_Segment_ID m1  : 3|6@1+ (1,0) [2|63] ""  Gateway,Gateway_PAG
+ SG_ PSD_Ges_Segment_ID m2  : 3|6@1+ (1,0) [2|63] ""  Gateway,Gateway_PAG
+ SG_ PSD_Baum_Laenge_VZ m3  : 3|1@1+ (1.0,0.0) [0.0|1] ""  Gateway,Gateway_PAG
+ SG_ PSD_Steigung_1_Segment_ID m4  : 3|6@1+ (1,0) [2|63] ""  Gateway,Gateway_PAG
+ SG_ PSD_Baum_Laenge m3  : 4|25@1+ (0.00001,0) [0.00000|180.00000] "Unit_DegreOfArc"  Gateway,Gateway_PAG
+ SG_ PSD_Sys_Laendercode m0  : 9|8@1+ (1.0,0.0) [0.0|255] ""  Gateway,Gateway_PAG
+ SG_ PSD_Attribut_3_ID m1  : 9|5@1+ (1,0) [1|31] ""  Gateway,Gateway_PAG
+ SG_ PSD_Ges_Offset m2  : 9|7@1+ (2,0) [0|254] "Unit_Meter"  Gateway,Gateway_PAG
+ SG_ PSD_Steigung_1_A_Steigung m4  : 9|7@1+ (0.12,0) [0.00|15.00] "Unit_PerCent"  Gateway,Gateway_PAG
+ SG_ PSD_Attribut_3_Offset m1  : 14|7@1+ (2,0) [0|254] "Unit_Meter"  Gateway,Gateway_PAG
+ SG_ PSD_Ges_Geschwindigkeit m2  : 16|5@1+ (1.0,0.0) [0.0|31] ""  Gateway,Gateway_PAG,OTA_FC
+ SG_ PSD_Steigung_1_A_Vorz m4  : 16|1@1+ (1.0,0.0) [0.0|1] ""  Gateway,Gateway_PAG
+ SG_ PSD_Sys_Geschwindigkeit_Einheit m0  : 17|1@1+ (1.0,0.0) [0.0|1] ""  Gateway,Gateway_PAG
+ SG_ PSD_Steigung_1_A_Offset m4  : 17|7@1+ (2,0) [0|254] "Unit_Meter"  Gateway,Gateway_PAG
+ SG_ PSD_Sys_Verkehrsrichtung m0  : 18|1@1+ (1.0,0.0) [0.0|1] ""  Gateway,Gateway_PAG
+ SG_ PSD_Sys_Geometrieguete m0  : 19|2@1+ (1.0,0.0) [0.0|3] ""  Gateway,Gateway_PAG
+ SG_ PSD_Sys_Mapmatchingguete m0  : 21|2@1+ (1.0,0.0) [0.0|3] ""  Gateway,Gateway_PAG
+ SG_ PSD_Attribut_3_Wert m1  : 21|4@1+ (1.0,0.0) [0.0|15] ""  Gateway,Gateway_PAG
+ SG_ PSD_Ges_Typ m2  : 21|2@1+ (1.0,0.0) [0.0|3] ""  Gateway,Gateway_PAG
+ SG_ PSD_Sys_Alter_Karte m0  : 23|3@1+ (1.0,0.0) [0.0|7] ""  Gateway,Gateway_PAG
+ SG_ PSD_Ges_Spur_Geschw_Begrenzung m2  : 23|6@1+ (1.0,0.0) [0.0|63] ""  Gateway,Gateway_PAG
+ SG_ PSD_Steigung_1_B_Steigung m4  : 24|7@1+ (0.12,0) [0.00|15.00] "Unit_PerCent"  Gateway,Gateway_PAG
+ SG_ PSD_Attribut_4_ID m1  : 25|5@1+ (1,0) [1|31] ""  Gateway,Gateway_PAG
+ SG_ PSD_Sys_Zielfuehrung m0  : 26|1@1+ (1.0,0.0) [0.0|1] ""  Gateway,Gateway_PAG,OTA_FC
+ SG_ PSD_Sys_US_State m0  : 27|6@1+ (1.0,0.0) [0.0|63] ""  Gateway,Gateway_PAG
+ SG_ PSD_Ges_Geschwindigkeit_Gespann m2  : 29|2@1+ (1.0,0.0) [0.0|3] ""  Gateway,Gateway_PAG
+ SG_ PSD_Baum_Breite_VZ m3  : 29|1@1+ (1.0,0.0) [0.0|1] ""  Gateway,Gateway_PAG
+ SG_ PSD_Attribut_4_Wert m1  : 30|4@1+ (1,0) [0|15] ""  Gateway,Gateway_PAG
+ SG_ PSD_Baum_Breite m3  : 30|24@1+ (0.00001,0) [0.00000|90.00000] "Unit_DegreOfArc"  Gateway,Gateway_PAG
+ SG_ PSD_Ges_Geschwindigkeit_Witter m2  : 31|2@1+ (1.0,0.0) [0.0|3] ""  Gateway,Gateway_PAG
+ SG_ PSD_Steigung_1_B_Vorz m4  : 31|1@1+ (1.0,0.0) [0.0|1] ""  Gateway,Gateway_PAG
+ SG_ PSD_Steigung_1_B_Offset m4  : 32|7@1+ (2,0) [0|254] "Unit_Meter"  Gateway,Gateway_PAG
+ SG_ PSD_Sys_Quali_Geometrien m0  : 33|3@1+ (1,0) [0|7] "Unit_None"  Gateway,Gateway_PAG
+ SG_ PSD_Ges_Geschwindigkeit_Tag_Anf m2  : 33|3@1+ (1.0,0.0) [0.0|7] ""  Gateway,Gateway_PAG
+ SG_ PSD_Attribut_4_Offset m1  : 34|7@1+ (2,0) [0|254] "Unit_Meter"  Gateway,Gateway_PAG
+ SG_ PSD_Sys_Quali_Ortsinfo m0  : 36|2@1+ (1,0) [0|3] "Unit_None"  Gateway,Gateway_PAG
+ SG_ PSD_Ges_Geschwindigkeit_Tag_Ende m2  : 36|3@1+ (1.0,0.0) [0.0|7] ""  Gateway,Gateway_PAG
+ SG_ PSD_Sys_Quali_verfuegbar m0  : 38|1@1+ (1.0,0.0) [0.0|1] ""  Gateway,Gateway_PAG
+ SG_ PSD_Sys_Zielfuehrung_geaendert m0  : 39|1@1+ (1.0,0.0) [0.0|1] ""  Gateway,Gateway_PAG
+ SG_ PSD_Ges_Geschwindigkeit_Std_Anf m2  : 39|5@1+ (1,0) [0|24] "Unit_Hours"  Gateway,Gateway_PAG
+ SG_ PSD_Steigung_1_Attribute_kompl m4  : 39|1@1+ (1.0,0.0) [0.0|1] ""  Gateway,Gateway_PAG
+ SG_ PSD_Sys_Geometrieguete_erweitert m0  : 40|8@1+ (1.0,0.0) [0.0|255] ""  Gateway,Gateway_PAG
+ SG_ PSD_Steigung_2_Segment_ID m4  : 40|6@1+ (1,0) [2|63] ""  Gateway,Gateway_PAG
+ SG_ PSD_Attribut_5_ID m1  : 41|5@1+ (1,0) [1|31] ""  Gateway,Gateway_PAG
+ SG_ PSD_Ges_Geschwindigkeit_Std_Ende m2  : 44|5@1+ (1,0) [0|24] "Unit_Hours"  Gateway,Gateway_PAG
+ SG_ PSD_Attribut_5_Offset m1  : 46|7@1+ (2,0) [0|254] "Unit_Meter"  Gateway,Gateway_PAG
+ SG_ PSD_Steigung_2_Steigung m4  : 46|7@1+ (0.12,0) [0.00|15.00] "Unit_PerCent"  Gateway,Gateway_PAG
+ SG_ PSD_Sys_Quali_sonstige_Attribute m0  : 48|3@1+ (1,0) [0|7] "Unit_None"  Gateway,Gateway_PAG
+ SG_ PSD_Ges_Ueberholverbot m2  : 49|2@1+ (1.0,0.0) [0.0|3] ""  Gateway,Gateway_PAG
+ SG_ PSD_Sys_Quali_Steigungen m0  : 51|3@1+ (1,0) [0|7] ""  Gateway,Gateway_PAG
+ SG_ PSD_Ges_Wechselverkehrszeichen m2  : 51|3@1+ (1.0,0.0) [0.0|7] ""  Gateway,Gateway_PAG
+ SG_ PSD_Attribut_5_Wert m1  : 53|4@1+ (1,0) [0|15] ""  Gateway,Gateway_PAG
+ SG_ PSD_Steigung_2_Vorz m4  : 53|1@1+ (1.0,0.0) [0.0|1] ""  Gateway,Gateway_PAG
+ SG_ PSD_Sys_Quali_Strassenkennz m0  : 54|3@1+ (1,0) [0|7] "Unit_None"  Gateway,Gateway_PAG
+ SG_ PSD_Wechselverkehrszeichen_Typ m2  : 54|2@1+ (1.0,0.0) [0.0|3] ""  Gateway,Gateway_PAG
+ SG_ PSD_Baum_Ausrichtung m3  : 54|10@1+ (0.3515625,0) [0E-7|359.6484375] "Unit_DegreOfArc"  Gateway,Gateway_PAG
+ SG_ PSD_Steigung_2_Offset m4  : 54|7@1+ (2,0) [0|254] "Unit_Meter"  Gateway,Gateway_PAG
+ SG_ PSD_Ges_Gesetzlich_Kategorie m2  : 56|3@1+ (1.0,0.0) [0.0|7] ""  Gateway,Gateway_PAG
+ SG_ PSD_Sys_Quali_Tempolimits m0  : 57|3@1+ (1,0) [0|7] "Unit_None"  Gateway,Gateway_PAG
+ SG_ PSD_Attribute_Komplett_06 m1  : 57|1@1+ (1.0,0.0) [0.0|1] ""  Gateway,Gateway_PAG
+ SG_ PSD_Ges_Gesetzlich_Zusatz m2  : 59|2@1+ (1.0,0.0) [0.0|3] ""  Gateway,Gateway_PAG
+ SG_ PSD_Sys_Quali_Vorfahrtsregelung m0  : 60|3@1+ (1,0) [0|7] "Unit_None"  Gateway,Gateway_PAG
+ SG_ PSD_Ges_Verkehrszeichen_Quelle m2  : 61|2@1+ (1.0,0.0) [0.0|3] ""  Gateway,Gateway_PAG
+ SG_ PSD_Steigung_2_Attribute_kompl m4  : 61|1@1+ (1.0,0.0) [0.0|1] ""  Gateway,Gateway_PAG
+ SG_ PSD_Ges_Attribute_Komplett m2  : 63|1@1+ (1.0,0.0) [0.0|1] ""  Gateway,Gateway_PAG
+
+BO_ 980 SMLS_01: 8 Gateway
+ SG_ SMLS_01_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ SMLS_01_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ BH_Blinker_li : 12|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_Standard
+ SG_ BH_Blinker_re : 13|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_Standard
+ SG_ BH_Lichthupe : 14|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BH_Fernlicht : 15|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ WH_Tipwischen : 16|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ WH_Intervall : 17|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ WH_WischerStufe1 : 18|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ WH_WischerStufe2 : 19|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ WH_Frontwaschen : 20|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ WH_Heckintervall : 21|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ WH_Heckwaschen : 22|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ WH_Intervallstufen : 23|4@1+ (1.0,0.0) [0.0|15] ""  ZR_High
+ SG_ FAS_Taster : 27|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_Standard
+ SG_ FAS_Taster_Fehler : 28|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ SMLS_Hupe : 29|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ LRH_On_Off : 30|2@1+ (1.0,0.0) [0.0|3] ""  ZR_High
+ SG_ LRH_aktiv : 40|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ SMLS_P_verriegelt_plausibel : 43|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ WH_SRA : 44|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ WH_Wischer_Fehler : 45|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ BH_Blinker_Fehler : 46|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ SMLS_PTT : 47|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ WH_Tipwischen_lang : 48|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+
+BO_ 1710 Spiegel_01: 8 Gateway
+ SG_ SP_FT_oben : 0|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ SP_FT_unten : 1|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ SP_FT_links : 2|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ SP_FT_rechts : 3|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ SP_BT_oben : 4|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ SP_BT_unten : 5|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ SP_BT_links : 6|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ SP_BT_rechts : 7|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ SP_abklappen : 8|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ SP_anklappen : 9|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ SP_normieren : 10|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ SP_Hzg_Taster : 12|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ SP_S_oben : 16|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ SP_S_unten : 17|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ SP_S_links : 18|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ SP_S_rechts : 19|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ SP_Auswahl_li : 20|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ SP_Auswahl_re : 21|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ SP_ARA_Status : 22|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ SP_S_Klappen : 23|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ SP_Verstellschalter_Fehler : 24|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
  
 BO_ 605 KLR_01: 8 Gateway
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
@@ -1005,6 +1362,18 @@ BO_ 605 KLR_01: 8 Gateway
  SG_ KLR_Touchintensitaet_2 : 24|8@1+ (1,0) [0|250] "Unit_None"  Vector__XXX
  SG_ KLR_Touchintensitaet_3 : 32|8@1+ (1,0) [0|250] "Unit_None"  Vector__XXX
  SG_ KLR_Touchauswertung : 40|4@1+ (1.0,0.0) [0.0|15] ""  ZR_High
+
+BO_ 1440 RLS_01: 8 Gateway
+ SG_ LS_Helligkeit_IR : 0|8@1+ (400,0) [0|101200] "Unit_Lux"  ZR_High
+ SG_ LS_Helligkeit_FW : 8|10@1+ (6,0) [0|6126] "Unit_Lux"  ZR_High
+ SG_ LS_defekt : 22|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ LS_Verbau : 23|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ RS_Regenmenge : 24|4@1+ (10,0) [0|100] "Unit_PerCent"  OTA_FC,ZR_High
+ SG_ RS_Verbau : 29|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ RS_Verglasung_schliessen : 30|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ RS_defekt : 31|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ RS_Wischergeschwindigkeit : 32|3@1+ (1.0,0.0) [0.0|7] ""  OTA_FC,ZR_High
+ SG_ RLS_Vorfeldhelligkeit_Boost : 35|4@1+ (1.0,0.0) [0.0|15] ""  ZR_High
 
 BO_ 294 HCA_01: 8 Frontsensorik
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Vector__XXX
