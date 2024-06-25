@@ -1110,10 +1110,10 @@ BO_ 252 MEB_ESP_01: 48 XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Vector__XXX
  SG_ Accelerator_Higher_Speed : 40|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_1 : 59|4@0+ (1,0) [0|15] "" XXX
- SG_ VL_Radgeschw : 72|8@1+ (0.53,0) [0|127] "Unit_MeterPerSecond" XXX
- SG_ VR_Radgeschw : 88|8@1+ (0.53,0) [0|127] "Unit_MeterPerSecond" XXX
- SG_ HL_Radgeschw : 104|8@1+ (0.53,0) [0|127] "Unit_MeterPerSecond" XXX
- SG_ HR_Radgeschw : 120|8@1+ (0.53,0) [0|127] "Unit_MeterPerSecond" XXX
+ SG_ VL_Radgeschw : 72|8@1+ (0.54,0) [0|127] "Unit_MeterPerSecond" XXX
+ SG_ VR_Radgeschw : 88|8@1+ (0.54,0) [0|127] "Unit_MeterPerSecond" XXX
+ SG_ HL_Radgeschw : 104|8@1+ (0.54,0) [0|127] "Unit_MeterPerSecond" XXX
+ SG_ HR_Radgeschw : 120|8@1+ (0.54,0) [0|127] "Unit_MeterPerSecond" XXX
  SG_ VL_Brake_Pressure : 156|5@0+ (1,0) [0|15] "" XXX
  SG_ VR_Brake_Pressure : 164|5@0+ (1,0) [0|15] "" XXX
  SG_ HL_Brake_Pressure : 172|5@0+ (1,0) [0|15] "" XXX
