@@ -1212,12 +1212,9 @@ BO_ 768 MEB_ACC_01: 48 XXX
  SG_ ACC_Limiter_Mode : 268|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 333 MEB_ACC_02: 32 XXX
- SG_ ACC_Ready : 59|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_Active : 60|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_Main_On : 61|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_State_Transition : 62|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_Active_Request : 90|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_State : 62|3@0+ (1,0) [0|31] "" XXX
 
 
 VAL_ 173 GE_Fahrstufe 5 "P" 6 "R" 7 "N" 8 "D" 9 "S" 10 "E" 13 "T" 14 "T" ;
 VAL_ 159 EPS_HCA_Status 0 "disabled" 1 "initializing" 2 "fault" 3 "ready" 4 "rejected" 5 "active" 8 "preempted" ;
+VAL_ 333 ACC_State 0 "disabled" 2 "ready" 3 "active" 4 "pre_active" 5 "pre_inactive" 7 "fault" ;
