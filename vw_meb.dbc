@@ -470,45 +470,6 @@ BO_ 870 Blinkmodi_02: 8 Gateway
  SG_ BM_PiloPa : 44|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
  SG_ DWA_Alarmquelle : 59|5@1+ (1.0,0.0) [0.0|31] ""  ZR_High
 
-BO_ 982 Licht_hinten_01: 8 Gateway_MQB
- SG_ Licht_hinten_01_BZ : 0|4@1+ (1,0) [0|15] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ BCM2_Bremsl_durch_ECD : 5|1@1+ (1,0) [0|1] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ LH_Aussenlicht_def : 7|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Standlicht_H_aktiv : 8|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Parklicht_HL_aktiv : 9|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Parklicht_HR_aktiv : 10|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Bremslicht_H_aktiv : 11|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Nebelschluss_aktiv : 12|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Rueckfahrlicht_aktiv : 13|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Blinker_HL_akt : 14|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Blinker_HR_akt : 15|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Blinker_li_def : 16|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Bremsl_li_def : 17|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Schlusslicht_li_def : 18|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Rueckf_li_def : 19|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Nebel_li_def : 20|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Schluss_Brems_Nebel_li_def : 21|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Schluss_Brems_Nebel_re_def : 22|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Schluss_Brems_li_def : 24|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Schluss_Nebel_li_def : 25|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_SL_BRL_BLK_li_def : 26|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Brems_Blk_li_def : 27|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Blinker_re_def : 32|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Bremsl_re_def : 33|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Schlusslicht_re_def : 34|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Rueckf_re_def : 35|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Nebel_re_def : 36|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Schluss_Brems_re_def : 40|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Schluss_Nebel_re_def : 41|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_SL_BRL_BLK_re_def : 42|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Brems_Blk_re_def : 43|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Kennzl_def : 48|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_3_Bremsl_def : 49|1@1+ (1,0) [0|1] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ LH_Nebel_mi_def : 50|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Rueckf_mi_def : 51|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ LH_Bremsl_li_ges_def : 54|1@1+ (1,0) [0|1] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ LH_Bremsl_re_ges_def : 55|1@1+ (1,0) [0|1] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
-
 BO_ 987 Gateway_72: 8 Gateway_MQB
  SG_ BCM_01_alt : 0|1@1+ (1,0) [0|1] "" Airbag_MQB
  SG_ SMLS_01_alt : 1|1@1+ (1,0) [0|1] "" Motor_Diesel_MQB,Motor_Otto_MQB
