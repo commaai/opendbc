@@ -1444,10 +1444,10 @@ BO_ 252 MEB_ESP_01: 48 XXX
  SG_ VR_Radgeschw : 88|8@1+ (0.57,0) [0|127] "Unit_MeterPerSecond" XXX
  SG_ HL_Radgeschw : 104|8@1+ (0.57,0) [0|127] "Unit_MeterPerSecond" XXX
  SG_ HR_Radgeschw : 120|8@1+ (0.57,0) [0|127] "Unit_MeterPerSecond" XXX
- SG_ VL_Brake_Pressure : 156|5@0+ (1,0) [0|15] "" XXX
- SG_ VR_Brake_Pressure : 164|5@0+ (1,0) [0|15] "" XXX
- SG_ HL_Brake_Pressure : 172|5@0+ (1,0) [0|15] "" XXX
- SG_ HR_Brake_Pressure : 180|5@0+ (1,0) [0|15] "" XXX
+ SG_ VL_Brake_Pressure : 157|6@0+ (1,0) [0|15] "" XXX
+ SG_ VR_Brake_Pressure : 165|6@0+ (1,0) [0|15] "" XXX
+ SG_ HL_Brake_Pressure : 173|6@0+ (1,0) [0|15] "" XXX
+ SG_ HR_Brake_Pressure : 181|6@0+ (1,0) [0|15] "" XXX
 
 BO_ 192 MEB_ESP_02: 32 XXX
  SG_ CHECKSUM : 7|8@0+ (1,0) [0|255] "" XXX
@@ -1544,6 +1544,7 @@ BO_ 591 MEB_Distance_01: 64 XXX
 BO_ 768 MEB_ACC_01: 48 XXX
  SG_ ACC_Set_Speed_1 : 79|4@0+ (1,2) [0|15] "" XXX
  SG_ ACC_Set_Speed_2 : 85|6@0+ (5,0) [0|63] "" XXX
+ SG_ FCW_Active : 122|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_Limiter_Mode : 268|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 333 MEB_ACC_02: 32 XXX
