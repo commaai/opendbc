@@ -1436,8 +1436,8 @@ BO_ 1355 Parkhilfe_04: 8 Gateway
  SG_ PDC_Charisma_FahrPr : 60|4@1+ (1,0) [0|15] "" Vector__XXX
 
 BO_ 252 MEB_ESP_01: 48 XXX
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Vector__XXX
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ MEB_ESP_01_CRC : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ MEB_ESP_01_COUNT : 8|4@1+ (1,0) [0|15] "" Vector__XXX
  SG_ Accelerator_Higher_Speed : 40|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_1 : 59|4@0+ (1,0) [0|15] "" XXX
  SG_ VL_Radgeschw : 72|8@1+ (0.57,0) [0|127] "Unit_MeterPerSecond" XXX
@@ -1450,8 +1450,8 @@ BO_ 252 MEB_ESP_01: 48 XXX
  SG_ HR_Brake_Pressure : 181|6@0+ (1,0) [0|15] "" XXX
 
 BO_ 192 MEB_ESP_02: 32 XXX
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Vector__XXX
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ MEB_ESP_02_CRC : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ MEB_ESP_02_COUNT : 8|4@1+ (1,0) [0|15] "" Vector__XXX
  SG_ Accelerator : 79|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 771 MEB_Lane_Assist_01: 24 XXX
