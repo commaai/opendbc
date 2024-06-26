@@ -1450,8 +1450,8 @@ BO_ 252 MEB_ESP_01: 48 XXX
  SG_ HR_Brake_Pressure : 181|6@0+ (1,0) [0|15] "" XXX
 
 BO_ 192 MEB_ESP_02: 32 XXX
- SG_ CHECKSUM : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ COUNTER : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Vector__XXX
  SG_ Accelerator : 79|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 771 MEB_Lane_Assist_01: 24 XXX
