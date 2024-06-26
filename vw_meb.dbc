@@ -1388,8 +1388,8 @@ BO_ 919 LDW_02: 8 XXX
  SG_ LDW_KD_Fehler : 63|1@1+ (1,0) [0|1] ""  XXX
 
 BO_ 960 Klemmen_Status_01: 4 Gateway_MQB
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Airbag_MQB,BMS_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Airbag_MQB,BMS_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
+ SG_ Klemmen_Status_01_CRC : 0|8@1+ (1,0) [0|255] "" Airbag_MQB,BMS_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
+ SG_ Klemmen_Status_01_COUNT : 8|4@1+ (1,0) [0|15] "" Airbag_MQB,BMS_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ ZAS_Kl_S : 16|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ ZAS_Kl_15 : 17|1@1+ (1,0) [0|1] "" Airbag_MQB,BMS_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ ZAS_Kl_X : 18|1@1+ (1,0) [0|1] "" Vector__XXX
