@@ -855,8 +855,8 @@ BO_ 64 Airbag_01: 8 Gateway
  SG_ SC_Masterzeit : 57|7@1+ (0.04,0) [0|5.04] "Unit_Secon"  FCU_MLBevo_FCEV,Sub_Gateway
  
 BO_ 1312 Airbag_02: 8 Gateway
- SG_ Airbag_02_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
- SG_ Airbag_02_COUNT : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
  SG_ LoGeWa_Event_Kombiwarnung : 12|4@1+ (1.0,0.0) [0.0|15] ""  ZR_High
  SG_ AB_Anforderung_eCall : 16|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
  SG_ AB_Anprall_Seite_Beifahrer : 17|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
