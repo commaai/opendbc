@@ -230,7 +230,7 @@ unsigned int volkswagen_meb_checksum(uint32_t address, const Signal &sig, const 
   // address, and additionally (for SOME addresses) by the message counter.
   uint8_t counter = d[1] & 0x0F;
   switch (address) {
-    case 0x86:  // LWI_01 Steering Angle
+    case 0x86:  // LWI_01 Steering Angle - confirmed
       crc ^= (uint8_t[]){0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86}[counter];
       break;
     case 0x9F:  // LH_EPS_03 Electric Power Steering
