@@ -73,8 +73,6 @@ BO_ 253 ESP_21: 8 Gateway_MQB
  SG_ ESP_Anhaltevorgang_ACC_aktiv : 63|1@1+ (1,0) [0|1] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
 
 BO_ 795 ESP_24: 8 Gateway
- SG_ ESP_24_CRC : 0|8@1+ (1,0) [0|255] ""  Sub_Gateway
- SG_ ESP_24_BZ : 8|4@1+ (1,0) [0|15] ""  Sub_Gateway
  SG_ ESP_Lampe : 12|1@1+ (1,0) [0|1] ""  Sub_Gateway
  SG_ ABS_Lampe : 13|1@1+ (1,0) [0|1] ""  Sub_Gateway
  SG_ BK_Lampe_02 : 14|2@1+ (1,0) [0|3] ""  Sub_Gateway
@@ -232,8 +230,8 @@ BO_ 168 Motor_12: 8 Motor_Diesel_MQB
  SG_ MO_Drehzahl_01 : 48|16@1+ (0.25,0) [0|16383] "Unit_MinutInver" BMS_MQB,Gateway_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,LEH_MQB,SAK_MQB
 
 BO_ 958 Motor_14: 8 Gateway
- SG_ Motor_14_CRC : 0|8@1+ (1,0) [0|255] ""  Sub_Gateway
- SG_ Motor_14_BZ : 8|4@1+ (1,0) [0|15] ""  Sub_Gateway
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Sub_Gateway
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Sub_Gateway
  SG_ MO_StartStopp_Status : 12|2@1+ (1,0) [0|3] ""  Sub_Gateway,TME
  SG_ MO_StartStopp_Wiederstart : 14|1@1+ (1,0) [0|1] ""  BMS_NV,Sub_Gateway,TME
  SG_ MO_StartStopp_Motorstopp : 15|1@1+ (1,0) [0|1] ""  BMS_NV,Sub_Gateway,TME
@@ -1434,8 +1432,6 @@ BO_ 1355 Parkhilfe_04: 8 Gateway
  SG_ PDC_Charisma_FahrPr : 60|4@1+ (1,0) [0|15] "" Vector__XXX
 
 BO_ 252 MEB_ESP_01: 48 XXX
- SG_ MEB_ESP_01_CRC : 0|8@1+ (1,0) [0|255] "" Vector__XXX
- SG_ MEB_ESP_01_COUNT : 8|4@1+ (1,0) [0|15] "" Vector__XXX
  SG_ Accelerator_Higher_Speed : 40|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_1 : 59|4@0+ (1,0) [0|15] "" XXX
  SG_ VL_Radgeschw : 72|8@1+ (0.57,0) [0|127] "Unit_MeterPerSecond" XXX
@@ -1448,8 +1444,6 @@ BO_ 252 MEB_ESP_01: 48 XXX
  SG_ HR_Brake_Pressure : 181|6@0+ (1,0) [0|15] "" XXX
 
 BO_ 192 MEB_ESP_02: 32 XXX
- SG_ MEB_ESP_02_CRC : 0|8@1+ (1,0) [0|255] "" Vector__XXX
- SG_ MEB_ESP_02_COUNT : 8|4@1+ (1,0) [0|15] "" Vector__XXX
  SG_ Accelerator : 79|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 771 MEB_Lane_Assist_01: 24 XXX
