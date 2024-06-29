@@ -1448,7 +1448,7 @@ BO_ 771 MEB_Lane_Assist_01: 24 XXX
  SG_ Inactive : 13|1@0+ (1,0) [0|1] "" XXX
  SG_ Active : 14|1@0+ (1,0) [0|3] "" XXX
  SG_ State : 22|7@0+ (1,0) [0|127] "" XXX
- SG_ Torque : 24|11@1+ (1,0) [0|2047] "" XXX
+ SG_ Torque : 24|11@1+ (0.1,0) [0|200] "deciNewtonMeter" XXX
  SG_ VZ : 39|1@0+ (1,0) [0|1] "" XXX
  SG_ Active_02 : 66|1@0+ (1,0) [0|1] "" XXX
 
