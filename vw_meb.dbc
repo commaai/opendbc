@@ -1448,7 +1448,7 @@ BO_ 771 MEB_Lane_Assist_01: 24 XXX
  SG_ Inactive : 13|1@0+ (1,0) [0|1] "" XXX
  SG_ Active : 14|1@0+ (1,0) [0|3] "" XXX
  SG_ Torque_Wind_Down : 22|7@0+ (1,0) [0|127] "" XXX
- SG_ Steering_Angle : 24|11@1+ (0.55,0) [0|200] "" XXX
+ SG_ Steering_Angle : 24|11@1+ (0.1,0) [0|180] "" XXX
  SG_ VZ : 39|1@0+ (1,0) [0|1] "" XXX
  SG_ Active_02 : 66|1@0+ (1,0) [0|1] "" XXX
 
