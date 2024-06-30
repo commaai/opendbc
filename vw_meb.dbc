@@ -1438,7 +1438,7 @@ BO_ 1355 Parkhilfe_04: 8 Gateway
 
 BO_ 252 MEB_ESP_01: 48 XXX
  SG_ Accelerator_Higher_Speed : 40|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_1 : 59|4@0+ (1,0) [0|15] "" XXX
+ SG_ Brake_Pressed : 49|2@0+ (1,0) [0|3] "" XXX
  SG_ VL_Radgeschw : 72|8@1+ (0.57,0) [0|127] "Unit_MeterPerSecond" XXX
  SG_ VR_Radgeschw : 88|8@1+ (0.57,0) [0|127] "Unit_MeterPerSecond" XXX
  SG_ HL_Radgeschw : 104|8@1+ (0.57,0) [0|127] "Unit_MeterPerSecond" XXX
