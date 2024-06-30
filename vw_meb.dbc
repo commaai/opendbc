@@ -1471,8 +1471,8 @@ BO_ 588 MEB_Drive_State_01: 16 XXX
  SG_ NEW_SIGNAL_6 : 119|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 589 MEB_Side_Assist_01: 64 XXX
- SG_ Blind_Spot_Left : 100|3@0+ (1,0) [0|7] "" XXX
- SG_ Blind_Spot_Right : 108|3@0+ (1,0) [0|7] "" XXX
+ SG_ Unknown_01 : 100|3@0+ (1,0) [0|7] "" XXX
+ SG_ Unknown_02 : 108|3@0+ (1,0) [0|7] "" XXX
 
 BO_ 591 MEB_Distance_01: 64 XXX
  SG_ Same_Lane_01 : 71|32@0+ (1,0) [0|4294967295] "" XXX
