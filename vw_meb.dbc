@@ -1460,6 +1460,8 @@ BO_ 771 MEB_Lane_Assist_01: 24 XXX
  SG_ Active_02 : 66|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 588 MEB_Drive_State_01: 16 XXX
+ SG_ Blind_Spot_Right : 14|4@1+ (1,0) [0|15] "" XXX
+ SG_ Blind_Spot_Left : 21|4@1+ (1,0) [0|15] "" XXX
  SG_ Lower_Speed_01 : 32|1@0+ (1,0) [0|1] "" XXX
  SG_ Higher_Speed_01 : 33|1@0+ (1,0) [0|1] "" XXX
  SG_ Higher_Speed_02 : 83|1@0+ (1,0) [0|1] "" XXX
