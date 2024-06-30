@@ -1481,9 +1481,9 @@ BO_ 768 MEB_ACC_01: 48 XXX
  SG_ ACC_Limiter_Mode : 268|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 333 MEB_ACC_02: 32 XXX
- SG_ ACC_State : 62|3@0+ (1,0) [0|31] "" XXX
+ SG_ ACC_State : 63|4@0+ (1,0) [0|31] "" XXX
 
 
 VAL_ 173 GE_Fahrstufe 5 "P" 6 "R" 7 "N" 8 "D" 9 "D" 10 "E" 13 "T" 14 "T" ;
 VAL_ 159 EPS_HCA_Status 0 "disabled" 1 "initializing" 2 "fault" 3 "ready" 4 "rejected" 5 "active" 8 "preempted" ;
-VAL_ 333 ACC_State 0 "disabled" 1 "initializing" 2 "ready" 3 "active" 4 "pre_active" 5 "pre_inactive" 6 "temp_fault" 7 "fault" ;
+VAL_ 333 ACC_State 0 "disabled" 1 "initializing" 2 "ready" 3 "active" 4 "pre_active" 5 "pre_inactive" 6 "temp_fault" 7 "fault" 12 "user_overwrite" 11 "pre_user_overwrite";
