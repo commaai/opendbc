@@ -1449,7 +1449,10 @@ BO_ 252 MEB_ESP_01: 48 XXX
  SG_ HR_Brake_Pressure : 181|6@0+ (1,0) [0|15] "" XXX
 
 BO_ 192 MEB_ESP_02: 32 XXX
- SG_ Accelerator : 79|1@0+ (1,0) [0|1] "" XXX
+ SG_ Schubbetrieb : 79|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 332 MEB_ESP_03: 32 XXX
+ SG_ Accelerator_Pressure : 175|8@0+ (1,-37) [0|255] "" XXX
 
 BO_ 771 MEB_Lane_Assist_01: 24 XXX
  SG_ Inactive : 13|1@0+ (1,0) [0|1] "" XXX
