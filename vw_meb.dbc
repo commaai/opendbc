@@ -1101,6 +1101,13 @@ BO_ 982 Licht_hinten_01: 8 Gateway
  SG_ LH_Bremsl_li_ges_def : 54|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
  SG_ LH_Bremsl_re_ges_def : 55|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
 
+BO_ 517 MEB_Light_01: 8 XXX
+ SG_ CHECKSUM : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ Brake_Light : 36|1@0+ (1,0) [0|1] "" XXX
+ SG_ Left_Blinker : 37|1@0+ (1,0) [0|1] "" XXX
+ SG_ Right_Blinker : 38|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 817 MFL_01: 8 Gateway
  SG_ MFL_Zaehler : 0|4@1+ (1,0) [0|15] ""  Vector__XXX
  SG_ MFL_Toggle : 4|1@1+ (1,0) [0|1] ""  Vector__XXX
