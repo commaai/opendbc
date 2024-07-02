@@ -1459,7 +1459,7 @@ BO_ 317 MEB_EPS_01: 32 XXX
  SG_ LatCon_HCA_Status : 20|3@1+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_1 : 48|6@1+ (1,0) [0|63] "" XXX
  SG_ Steering_Angle_VZ : 63|1@0+ (1,0) [0|1] "" XXX
- SG_ Steering_Angle : 76|15@1+ (0.02,0) [0|32767] "" XXX
+ SG_ Steering_Angle : 76|15@1+ (0.01,0) [0|32767] "" XXX
 
 BO_ 771 HCA_03: 24 XXX
  SG_ Inactive : 13|1@0+ (1,0) [0|1] "" XXX
