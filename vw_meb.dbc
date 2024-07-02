@@ -1455,8 +1455,8 @@ BO_ 332 MEB_ESP_03: 32 XXX
  SG_ Accelerator_Pressure : 175|8@0+ (1,-37) [0|255] "" XXX
 
 BO_ 317 MEB_EPS_01: 32 XXX
- SG_ EPS_HCA_Accept : 17|2@1+ (1,0) [0|3] "" XXX
- SG_ ESP_HCA_Status : 20|3@1+ (1,0) [0|15] "" XXX
+ SG_ LatCon_HCA_Accept : 17|2@1+ (1,0) [0|3] "" XXX
+ SG_ LatCon_HCA_Status : 20|3@1+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_1 : 48|6@1+ (1,0) [0|63] "" XXX
  SG_ Steering_Angle_VZ : 63|1@0+ (1,0) [0|1] "" XXX
  SG_ Steering_Angle : 76|15@1+ (0.02,0) [0|32767] "" XXX
