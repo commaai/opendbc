@@ -60,6 +60,7 @@ class TestCanParserPacker(unittest.TestCase):
       cnt = random.randint(0, 255)
       msg = packer.make_can_msg("CAN_FD_MESSAGE", 0, {
         "COUNTER": cnt,
+        "SIGNED": 0
       })
       dat = can_list_to_can_capnp([msg, ])
       parser.update_strings([dat])
@@ -380,6 +381,18 @@ class TestCanParserPacker(unittest.TestCase):
 
     with self.assertRaises(RuntimeError):
       CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 10), ("ACC_CONTROL", 10)])
+
+  def test_allow_undefined_msgs(self):
+    # TODO: we should throw an exception for these, but we need good
+    #  discovery tests in openpilot first
+    packer = CANPacker("toyota_nodsu_pt_generated")
+
+    self.assertEqual(packer.make_can_msg("ACC_CONTROL", 0, {"UNKNOWN_SIGNAL": 0}),
+                     [835, 0, b'\x00\x00\x00\x00\x00\x00\x00N', 0])
+    self.assertEqual(packer.make_can_msg("UNKNOWN_MESSAGE", 0, {"UNKNOWN_SIGNAL": 0}),
+                     [0, 0, b'', 0])
+    self.assertEqual(packer.make_can_msg(0, 0, {"UNKNOWN_SIGNAL": 0}),
+                     [0, 0, b'', 0])
 
 
 if __name__ == "__main__":
