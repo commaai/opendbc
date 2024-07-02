@@ -1445,6 +1445,8 @@ BO_ 252 MEB_ESP_01: 48 XXX
  SG_ VR_Brake_Pressure : 165|6@0+ (1,0) [0|15] "" XXX
  SG_ HL_Brake_Pressure : 173|6@0+ (1,0) [0|15] "" XXX
  SG_ HR_Brake_Pressure : 181|6@0+ (1,0) [0|15] "" XXX
+ SG_ Steering_Wheel_CW : 184|8@1+ (1.95,0) [0|255] "" XXX
+ SG_ Steering_Wheel_CCW : 192|8@1+ (1.95,0) [0|255] "" XXX
 
 BO_ 192 MEB_ESP_02: 32 XXX
  SG_ Schubbetrieb : 79|1@0+ (1,0) [0|1] "" XXX
