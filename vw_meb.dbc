@@ -1437,14 +1437,14 @@ BO_ 1355 Parkhilfe_04: 8 Gateway
 BO_ 252 MEB_ESP_01: 48 XXX
  SG_ Accelerator_Higher_Speed : 40|1@0+ (1,0) [0|1] "" XXX
  SG_ Brake_Pressed : 49|2@0+ (1,0) [0|3] "" XXX
- SG_ VL_Radgeschw : 64|16@1+ (0.0075,0) [0|127] "Unit_KilometerPerSecond" XXX
- SG_ VR_Radgeschw : 80|16@1+ (0.0075,0) [0|127] "Unit_KilometerPerSecond" XXX
- SG_ HL_Radgeschw : 96|16@1+ (0.0075,0) [0|127] "Unit_KilometerPerSecond" XXX
- SG_ HR_Radgeschw : 112|16@1+ (0.0075,0) [0|127] "Unit_KilometerPerSecond" XXX
- SG_ VL_Brake_Pressure : 157|6@0+ (1,0) [0|15] "" XXX
- SG_ VR_Brake_Pressure : 165|6@0+ (1,0) [0|15] "" XXX
- SG_ HL_Brake_Pressure : 173|6@0+ (1,0) [0|15] "" XXX
- SG_ HR_Brake_Pressure : 181|6@0+ (1,0) [0|15] "" XXX
+ SG_ VL_Radgeschw : 64|16@1+ (0.0075,0) [0|491.5125] "Unit_KilometerPerSecond" XXX
+ SG_ VR_Radgeschw : 80|16@1+ (0.0075,0) [0|491.5125] "Unit_KilometerPerSecond" XXX
+ SG_ HL_Radgeschw : 96|16@1+ (0.0075,0) [0|491.5125] "Unit_KilometerPerSecond" XXX
+ SG_ HR_Radgeschw : 112|16@1+ (0.0075,0) [0|491.5125] "Unit_KilometerPerSecond" XXX
+ SG_ VL_Brake_Pressure : 157|6@0+ (1.5873,0) [0|100] "Unit_Percent" XXX
+ SG_ VR_Brake_Pressure : 165|6@0+ (1.5873,0) [0|100] "Unit_Percent" XXX
+ SG_ HL_Brake_Pressure : 173|6@0+ (1.5873,0) [0|100] "Unit_Percent" XXX
+ SG_ HR_Brake_Pressure : 181|6@0+ (1.5873,0) [0|100] "Unit_Percent" XXX
  SG_ Steering_Wheel_CW : 184|8@1+ (1.95,0) [0|255] "" XXX
  SG_ Steering_Wheel_CCW : 192|8@1+ (1.95,0) [0|255] "" XXX
 
