@@ -1445,8 +1445,8 @@ BO_ 252 MEB_ESP_01: 48 XXX
  SG_ VR_Brake_Pressure : 165|6@0+ (1.5873,0) [0|100] "Unit_Percent" XXX
  SG_ HL_Brake_Pressure : 173|6@0+ (1.5873,0) [0|100] "Unit_Percent" XXX
  SG_ HR_Brake_Pressure : 181|6@0+ (1.5873,0) [0|100] "Unit_Percent" XXX
- SG_ Steering_Wheel_CW : 184|8@1+ (1.95,0) [0|255] "" XXX
- SG_ Steering_Wheel_CCW : 192|8@1+ (1.95,0) [0|255] "" XXX
+ SG_ Steering_Wheel_CW : 184|8@1+ (1.67,0) [0|255] "" XXX
+ SG_ Steering_Wheel_CCW : 192|8@1+ (1.67,0) [0|255] "" XXX
 
 BO_ 192 MEB_ESP_02: 32 XXX
  SG_ Schubbetrieb : 79|1@0+ (1,0) [0|1] "" XXX
@@ -1457,9 +1457,10 @@ BO_ 332 MEB_ESP_03: 32 XXX
 BO_ 317 MEB_EPS_01: 32 XXX
  SG_ LatCon_HCA_Accept : 17|2@1+ (1,0) [0|3] "" XXX
  SG_ LatCon_HCA_Status : 20|3@1+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_1 : 48|6@1+ (1,0) [0|63] "" XXX
- SG_ Steering_Angle_VZ : 63|1@0+ (1,0) [0|1] "" XXX
- SG_ Steering_Angle : 76|15@1+ (0.01,0) [0|32767] "" XXX
+ SG_ Steering_Angle_VZ_02 : 36|1@0+ (1,0) [0|1] "" XXX
+ SG_ Steering_Angle : 40|15@1+ (0.0171,0) [0|65535] "" XXX
+ SG_ Steering_Angle_VZ : 55|1@0+ (1,0) [0|1] "" XXX
+ SG_ Steering_Angle_02 : 76|16@1+ (0.00906,0) [0|32767] "" XXX
 
 BO_ 771 HCA_03: 24 XXX
  SG_ Inactive : 13|1@0+ (1,0) [0|1] "" XXX
