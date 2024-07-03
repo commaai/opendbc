@@ -524,17 +524,17 @@ BO_ 299 GRA_ACC_01: 8 Gateway
  SG_ GRA_reserveByte8 : 56|8@1+ (1.0,0.0) [0.0|255] ""  Vector__XXX
  
 BO_ 134 LWI_01: 8 Gateway
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
- SG_ LWI_Sensorstatus : 12|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
- SG_ LWI_QBit_Sub_Daten : 13|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
- SG_ LWI_MFL_Abschaltung : 14|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
- SG_ LWI_QBit_Lenkradwinkel : 15|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
- SG_ LWI_Lenkradwinkel : 16|13@1+ (0.1,0) [0.0|800.0] "Unit_DegreOfArc"  OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
- SG_ LWI_VZ_Lenkradwinkel : 29|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
- SG_ LWI_VZ_Lenkradw_Geschw : 30|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
- SG_ LWI_Lenkradw_Geschw : 31|9@1+ (5,0) [0|2500] "Unit_DegreOfArcPerSecon"  OTA_FC,ZR_High
- SG_ LWI_Sub_Daten : 40|16@1+ (1,0) [0|65535] ""  Vector__XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ LWI_Sensorstatus : 12|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ LWI_QBit_Sub_Daten : 13|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ LWI_MFL_Abschaltung : 14|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ LWI_QBit_Lenkradwinkel : 15|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ LWI_Lenkradwinkel : 16|13@1+ (0.0843,0) [0|800] "Unit_DegreOfArc" OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ LWI_VZ_Lenkradwinkel : 29|1@1+ (1,0) [0|1] "" OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ LWI_VZ_Lenkradw_Geschw : 30|1@1+ (1,0) [0|1] "" ZR_High
+ SG_ LWI_Lenkradw_Geschw : 31|9@1+ (5,0) [0|2500] "Unit_DegreOfArcPerSecon" OTA_FC,ZR_High
+ SG_ LWI_Sub_Daten : 40|16@1+ (1,0) [0|65535] "" Vector__XXX
  
 BO_ 420 EA_01: 8 Gateway
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
