@@ -1486,13 +1486,31 @@ BO_ 589 MEB_Side_Assist_01: 64 XXX
  SG_ Unknown_02 : 108|3@0+ (1,0) [0|7] "" XXX
 
 BO_ 591 MEB_Distance_01: 64 XXX
- SG_ Same_Lane_01 : 71|32@0+ (1,0) [0|4294967295] "" XXX
- SG_ Left_Lane_01 : 103|32@0+ (1,0) [0|4294967295] "" XXX
- SG_ Right_Lane_01 : 135|32@0+ (1,0) [0|4294967295] "" XXX
- SG_ Same_Lane_03 : 167|32@0+ (1,0) [0|4294967295] "" XXX
- SG_ Left_Lane_02 : 199|32@0+ (1,0) [0|4294967295] "" XXX
- SG_ Right_Lane_02 : 231|32@0+ (1,0) [0|4294967295] "" XXX
- SG_ Same_Lane_02 : 263|32@0+ (1,0) [0|4294967295] "" XXX
+ SG_ State_Area : 16|38@1+ (1,0) [0|274877906943] "" XXX
+ SG_ Same_Lane_01_Distance : 54|22@1+ (1,0) [0|4294967295] "" XXX
+ SG_ Same_Lane_01_a : 76|10@1+ (1,0) [0|31] "" XXX
+ SG_ Same_Lane_01_b : 86|10@1+ (1,0) [0|127] "" XXX
+ SG_ Left_Lane_01_Distance : 96|12@1+ (1,0) [0|4294967295] "" XXX
+ SG_ Left_Lane_01_a : 108|10@1+ (1,0) [0|15] "" XXX
+ SG_ Left_Lane_01_b : 118|10@1+ (1,0) [0|7] "" XXX
+ SG_ Right_Lane_01_Distance : 128|12@1+ (1,0) [0|1023] "" XXX
+ SG_ Right_Lane_01_a : 140|10@1+ (1,0) [0|15] "" XXX
+ SG_ Right_Lane_01_b : 150|10@1+ (1,0) [0|1023] "" XXX
+ SG_ Same_Lane_02_Distance : 160|12@1+ (1,0) [0|4095] "" XXX
+ SG_ Same_Lane_02_a : 172|10@1+ (1,0) [0|31] "" XXX
+ SG_ Same_Lane_02_b : 182|10@1+ (1,0) [0|1023] "" XXX
+ SG_ Left_Lane_02_Distance : 192|12@1+ (1,0) [0|4095] "" XXX
+ SG_ Left_Lane_02_a : 204|10@1+ (1,0) [0|1023] "" XXX
+ SG_ Left_Lane_02_b : 214|10@1+ (1,0) [0|1023] "" XXX
+ SG_ Right_Lane_02_Distance : 224|12@1+ (1,0) [0|4095] "" XXX
+ SG_ Right_Lane_02_a : 236|10@1+ (1,0) [0|1023] "" XXX
+ SG_ Right_Lane_02_b : 246|10@1+ (1,0) [0|1023] "" XXX
+ SG_ Same_Lane_03_a : 263|8@0+ (1,0) [0|255] "" XXX
+ SG_ Same_Lane_03_b : 264|6@1+ (1,0) [0|31] "" XXX
+ SG_ Same_Lane_03_c : 270|5@1+ (1,0) [0|31] "" XXX
+ SG_ Same_Lane_03_d : 279|3@0+ (1,0) [0|7] "" XXX
+ SG_ Same_Lane_03_e : 280|1@0+ (1,0) [0|1] "" XXX
+ SG_ Same_Lane_03_f : 284|4@1+ (1,0) [0|3] "" XXX
 
 BO_ 768 MEB_ACC_01: 48 XXX
  SG_ ACC_Set_Speed_1 : 79|4@0+ (1,2) [0|15] "" XXX
