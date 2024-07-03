@@ -69,6 +69,7 @@ BO_ 262 EPS_2: 7 EPS
  SG_ UNKNOWN_STATUS : 9|1@0+ (1,0) [0|1] "" XXX
  SG_ DRIVER_TORQUE : 23|11@0+ (1,-1024) [0|2047] "" XXX
  SG_ LKA_STATUS : 38|2@0+ (1,0) [0|3] "" XXX
+ SG_ LKA_FAULT : 39|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 43|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 55|8@0+ (1,0) [0|255] "" XXX
 
