@@ -1522,18 +1522,33 @@ BO_ 768 MEB_ACC_01: 48 XXX
  SG_ ACC_Limiter_Mode : 268|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 333 MEB_ACC_02: 32 XXX
- SG_ NEW_SIGNAL_7 : 14|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_4 : 19|4@0+ (1,0) [0|15] "" XXX
- SG_ Accel : 24|11@1+ (1,0) [0|1023] "" XXX
- SG_ NEW_SIGNAL_9 : 35|2@1+ (1,0) [0|3] "" XXX
- SG_ NEW_SIGNAL_2 : 45|6@0+ (1,0) [0|63] "" XXX
- SG_ NEW_SIGNAL_3 : 54|7@0+ (1,0) [0|63] "" XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ Stopping_Stronger : 14|1@0+ (1,0) [0|1] "" XXX
+ SG_ Regulating_State : 19|3@0+ (1,0) [0|15] "" XXX
+ SG_ Accel : 24|11@1+ (1,-1446) [0|1023] "" XXX
+ SG_ Signal_01 : 47|8@0+ (1,0) [0|63] "" XXX
+ SG_ Signal_02 : 55|8@0+ (1,0) [0|63] "" XXX
+ SG_ Starting : 56|1@0+ (1,0) [0|1] "" XXX
+ SG_ Stopping : 57|1@0+ (1,0) [0|1] "" XXX
+ SG_ Constant_1_1 : 59|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_State : 63|4@0+ (1,0) [0|31] "" XXX
- SG_ NEW_SIGNAL_5 : 77|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_6 : 79|1@0+ (1,0) [0|1] "" XXX
+ SG_ Rough_Stopping : 64|1@0+ (1,0) [0|3] "" XXX
+ SG_ Rough_Anti_Stopping : 65|1@0+ (1,0) [0|1] "" XXX
+ SG_ Constant_1_4 : 66|1@0+ (1,0) [0|1] "" XXX
+ SG_ State_Change_01 : 69|3@0+ (1,0) [0|7] "" XXX
+ SG_ Constant_1_2 : 70|1@0+ (1,0) [0|1] "" XXX
+ SG_ State_Change_02 : 71|1@0+ (1,0) [0|1] "" XXX
+ SG_ State_Change_03 : 74|3@0+ (1,0) [0|7] "" XXX
+ SG_ Stopped : 77|1@0+ (1,0) [0|1] "" XXX
+ SG_ End_of_Stopped : 79|1@0+ (1,0) [0|1] "" XXX
+ SG_ Constant_FE : 87|8@0+ (1,0) [0|255] "" XXX
  SG_ ACC_Active : 90|1@0+ (1,0) [0|1] "" XXX
+ SG_ Constant_1_3 : 92|1@0+ (1,0) [0|1] "" XXX
+ SG_ Constant_1_5 : 232|1@0+ (1,0) [0|1] "" XXX
+ SG_ Constant_1_6 : 235|1@0+ (1,0) [0|1] "" XXX
  SG_ Speed : 236|10@1+ (0.1,0) [0|1023] "" XXX
- SG_ NEW_SIGNAL_8 : 253|6@0+ (1,0) [0|63] "" XXX
+ SG_ Signal_High_Starting : 253|6@0+ (1,0) [0|63] "" XXX
 
 BO_ 1004 MEB_ACC_04: 8 XXX
  SG_ ACC_State : 53|3@1+ (1,0) [0|7] "" XXX
