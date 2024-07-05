@@ -1527,7 +1527,8 @@ BO_ 333 MEB_ACC_02: 32 XXX
  SG_ Stopping_Stronger : 14|1@0+ (1,0) [0|1] "" XXX
  SG_ Regulating_State : 21|6@0+ (1,0) [0|15] "" XXX
  SG_ Accel : 24|11@1+ (1,-1446) [0|1023] "" XXX
- SG_ Unknown_01 : 36|2@1+ (1,0) [0|3] "" XXX
+ SG_ Diabling_01 : 36|1@0+ (1,0) [0|1] "" XXX
+ SG_ Disabling_02 : 37|1@1+ (1,0) [0|3] "" XXX
  SG_ Signal_01 : 47|8@0+ (1,0) [0|63] "" XXX
  SG_ Signal_02 : 55|8@0+ (1,0) [0|63] "" XXX
  SG_ Starting : 56|1@0+ (1,0) [0|1] "" XXX
