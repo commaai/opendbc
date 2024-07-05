@@ -1,4 +1,4 @@
-Import('env', 'envCython', 'cereal', 'common')
+Import('env', 'envCython', 'cereal', 'common', 'arch')
 
 import os
 
@@ -12,11 +12,15 @@ libs = [common, "capnp", "kj", "zmq"]
 libdbc = envDBC.SharedLibrary('libdbc', src, LIBS=libs)
 
 # static library for tools like cabana
+if arch == "Darwin":
+  envDBC["LINKFLAGS"] += ["-Wl,-install_name,@rpath/libdbc.dylib"]
 envDBC.Library('libdbc_static', src, LIBS=libs)
 
 # Build packer and parser
 lenv = envCython.Clone()
 lenv["LINKFLAGS"] += [libdbc[0].get_labspath()]
+if arch == "Darwin":
+  lenv["LINKFLAGS"] += [libdbc[0].get_labspath(), f'-Wl,-rpath,{File(libdbc[0]).dir.abspath}']
 parser = lenv.Program('parser_pyx.so', 'parser_pyx.pyx')
 packer = lenv.Program('packer_pyx.so', 'packer_pyx.pyx')
 
