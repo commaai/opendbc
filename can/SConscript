@@ -1,4 +1,4 @@
-Import('env', 'envCython', 'cereal', 'common')
+Import('env', 'envCython', 'cereal', 'common', 'arch')
 
 import os
 
@@ -9,7 +9,10 @@ src = ["dbc.cc", "parser.cc", "packer.cc", "common.cc"]
 libs = [common, "capnp", "kj", "zmq"]
 
 # shared library for openpilot
-libdbc = envDBC.SharedLibrary('libdbc', src, LIBS=libs)
+LINKFLAGS = envDBC["LINKFLAGS"]
+if arch == "Darwin":
+  LINKFLAGS += ["-Wl,-install_name,@loader_path/libdbc.dylib"]
+libdbc = envDBC.SharedLibrary('libdbc', src, LIBS=libs, LINKFLAGS=LINKFLAGS)
 
 # static library for tools like cabana
 envDBC.Library('libdbc_static', src, LIBS=libs)
