@@ -9,7 +9,7 @@ src = ["dbc.cc", "parser.cc", "packer.cc", "common.cc"]
 libs = [common, "capnp", "kj", "zmq"]
 
 # shared library for openpilot
-LINKFLAGS = envDBC["LINKFLAGS"] + ["-Wl,-install_name,@rpath/libdbc.dylib"] if arch == "Darwin" else envDBC["LINKFLAGS"]
+LINKFLAGS = envDBC["LINKFLAGS"] + ["-Wl,-install_name,@loader_path/libdbc.dylib"] if arch == "Darwin" else envDBC["LINKFLAGS"]
 libdbc = envDBC.SharedLibrary('libdbc', src, LIBS=libs, LINKFLAGS=LINKFLAGS)
 
 # static library for tools like cabana
@@ -18,8 +18,6 @@ envDBC.Library('libdbc_static', src, LIBS=libs)
 # Build packer and parser
 lenv = envCython.Clone()
 lenv["LINKFLAGS"] += [libdbc[0].get_labspath()]
-if arch == "Darwin":
-  lenv["LINKFLAGS"] += [f'-Wl,-rpath,{File(libdbc[0]).dir.abspath}']
 parser = lenv.Program('parser_pyx.so', 'parser_pyx.pyx')
 packer = lenv.Program('packer_pyx.so', 'packer_pyx.pyx')
 
