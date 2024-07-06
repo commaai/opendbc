@@ -1553,8 +1553,8 @@ BO_ 333 MEB_ACC_02: 32 XXX
  SG_ Signal_High_Starting : 253|6@0+ (1,0) [0|63] "" XXX
  SG_ Reversing : 254|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 1004 MEB_ACC_04: 8 XXX
- SG_ ACC_State : 53|3@1+ (1,0) [0|7] "" XXX
+BO_ 1004 MEB_TSK_01: 8 XXX
+ SG_ TSK_State : 53|3@1+ (1,0) [0|7] "" XXX
 
 BO_ 1019 MEB_ACC_03: 8 XXX
 
@@ -1564,4 +1564,4 @@ VAL_ 159 EPS_HCA_Status 0 "disabled" 1 "initializing" 2 "fault" 3 "ready" 4 "rej
 VAL_ 317 LatCon_HCA_Status 0 "disabled" 1 "initializing" 2 "ready" 3 "fault" 4 "active" 5 "preempted" 6 "fault" 7 "rejected";
 VAL_ 333 ACC_State 0 "disabled" 1 "initializing" 2 "ready" 3 "active" 4 "pre_active" 5 "pre_inactive" 6 "temp_fault" 7 "fault" 12 "user_overwrite" 11 "pre_user_overwrite";
 VAL_ 333 Regulating_State 4 "Regulating" 0 "Not_Regulating" 3 "Regulating_02" 11 "Initializing" 8 "Not_Regulating" 63 "Pre_Regulating";
-VAL_ 1004 ACC_State 0 "disabled" 1 "initializing" 2 "ready" 3 "active" 4 "user_overwrite";
+VAL_ 1004 TSK_State 0 "init" 1 "disabled" 2 "enabled" 3 "regulating" 4 "accel_pedal_override" 5 "brake_only" 6 "temp_fault" 7 "perm_fault" ;
