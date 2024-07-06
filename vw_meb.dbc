@@ -1464,7 +1464,7 @@ BO_ 258 MEB_ESP_04: 48 XXX
 
 BO_ 522 MEB_ABS_01: 64 XXX
  SG_ Yaw_Rate_VZ : 33|1@0+ (1,0) [0|1] "" XXX
- SG_ Yaw_Rate : 200|16@1+ (0.001,-32.768) [0|255] "" XXX
+ SG_ Yaw_Rate : 200|16@1+ (0.01,-327.68) [0|255] "" XXX
 
 BO_ 317 MEB_EPS_01: 32 XXX
  SG_ LatCon_HCA_Accept : 17|2@1+ (1,0) [0|3] "" XXX
