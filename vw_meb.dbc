@@ -1468,7 +1468,7 @@ BO_ 317 MEB_EPS_01: 32 XXX
  SG_ Steering_Angle_VZ_02 : 36|1@0+ (1,0) [0|1] "" XXX
  SG_ Steering_Angle_02 : 40|15@1+ (0.0171,0) [0|65535] "" XXX
  SG_ Steering_Angle_VZ : 55|1@0+ (1,0) [0|1] "" XXX
- SG_ Steering_Angle : 76|16@1+ (0.00906,0) [0|32767] "" XXX
+ SG_ Steering_Angle : 76|17@1+ (0.00906,0) [0|32767] "" XXX
 
 BO_ 771 HCA_03: 24 XXX
  SG_ Inactive : 13|1@0+ (1,0) [0|1] "" XXX
