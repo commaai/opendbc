@@ -1462,6 +1462,10 @@ BO_ 258 MEB_ESP_04: 48 XXX
  SG_ NEW_SIGNAL_6 : 171|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_5 : 180|10@1+ (1,0) [0|63] "" XXX
 
+BO_ 522 MEB_ABS_01: 64 XXX
+ SG_ Yaw_Rate_VZ : 33|1@0+ (1,0) [0|1] "" XXX
+ SG_ Yaw_Rate : 200|16@1+ (0.001,-32.768) [0|255] "" XXX
+
 BO_ 317 MEB_EPS_01: 32 XXX
  SG_ LatCon_HCA_Accept : 17|2@1+ (1,0) [0|3] "" XXX
  SG_ LatCon_HCA_Status : 20|3@1+ (1,0) [0|15] "" XXX
@@ -1526,7 +1530,7 @@ BO_ 333 MEB_ACC_02: 32 XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Stopping_Stronger : 14|1@0+ (1,0) [0|1] "" XXX
  SG_ Regulating_State : 21|6@0+ (1,0) [0|15] "" XXX
- SG_ Accel : 24|11@1+ (1,-1446) [0|1023] "" XXX
+ SG_ Accel : 24|11@1+ (0.01,-14.46) [0|1023] "" XXX
  SG_ Diabling_01 : 36|1@0+ (1,0) [0|1] "" XXX
  SG_ Disabling_02 : 37|1@1+ (1,0) [0|3] "" XXX
  SG_ Signal_01 : 47|8@0+ (1,0) [0|63] "" XXX
