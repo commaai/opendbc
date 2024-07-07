@@ -1529,7 +1529,7 @@ BO_ 333 MEB_ACC_02: 32 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Stopping_Stronger : 14|1@0+ (1,0) [0|1] "" XXX
- SG_ Regulating_State : 21|6@0+ (1,0) [0|15] "" XXX
+ SG_ Regulating_Strength : 21|6@0+ (1,0) [0|15] "" XXX
  SG_ Accel : 24|11@1+ (0.01,-14.46) [0|1023] "" XXX
  SG_ Diabling_01 : 36|1@0+ (1,0) [0|1] "" XXX
  SG_ Disabling_02 : 37|1@1+ (1,0) [0|3] "" XXX
@@ -1567,5 +1567,4 @@ VAL_ 173 GE_Fahrstufe 5 "P" 6 "R" 7 "N" 8 "D" 9 "D" 10 "E" 13 "T" 14 "T" ;
 VAL_ 159 EPS_HCA_Status 0 "disabled" 1 "initializing" 2 "fault" 3 "ready" 4 "rejected" 5 "active" 8 "preempted";
 VAL_ 317 LatCon_HCA_Status 0 "disabled" 1 "initializing" 2 "ready" 3 "fault" 4 "active" 5 "preempted" 6 "fault" 7 "rejected";
 VAL_ 333 ACC_State 0 "disabled" 1 "initializing" 2 "ready" 3 "active" 4 "pre_active" 5 "pre_inactive" 6 "temp_fault" 7 "fault" 12 "user_overwrite" 11 "pre_user_overwrite";
-VAL_ 333 Regulating_State 4 "Regulating" 0 "Not_Regulating" 3 "Regulating_02" 11 "Initializing" 8 "Not_Regulating" 63 "Pre_Regulating";
 VAL_ 1004 TSK_State 0 "init" 1 "disabled" 2 "enabled" 3 "regulating" 4 "accel_pedal_override" 5 "brake_only" 6 "temp_fault" 7 "perm_fault" ;
