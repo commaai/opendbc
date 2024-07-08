@@ -1546,8 +1546,8 @@ BO_ 333 MEB_ACC_02: 32 XXX
  SG_ Constant_1_7 : 68|1@0+ (1,0) [0|1] "" XXX
  SG_ Constant_1_8 : 69|1@0+ (1,0) [0|1] "" XXX
  SG_ Constant_1_2 : 70|1@0+ (1,0) [0|1] "" XXX
- SG_ State_Change_02 : 71|1@0+ (1,0) [0|1] "" XXX
- SG_ State_Change_03 : 74|3@0+ (1,0) [0|7] "" XXX
+ SG_ Anti_Stopping_03 : 71|1@0+ (1,0) [0|1] "" XXX
+ SG_ Anti_Stopping_04 : 74|3@0+ (1,0) [0|7] "" XXX
  SG_ Disabling_or_Active_Hold : 77|1@0+ (1,0) [0|1] "" XXX
  SG_ Disabling : 79|1@0+ (1,0) [0|1] "" XXX
  SG_ Constant_FE : 87|8@0+ (1,0) [0|255] "" XXX
