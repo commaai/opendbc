@@ -1532,8 +1532,7 @@ BO_ 333 MEB_ACC_02: 32 XXX
  SG_ Regulating_Strength : 21|6@0+ (1,0) [0|15] "" XXX
  SG_ Accel : 24|11@1+ (0.01,-14.46) [0|1023] "" XXX
  SG_ User_Override_State : 35|3@1+ (1,0) [0|3] "" XXX
- SG_ Secondary_Accel_03 : 45|6@0+ (1,0) [0|63] "" XXX
- SG_ Disabling : 46|1@1+ (1,0) [0|3] "" XXX
+ SG_ Secondary_Accel_03 : 46|7@0+ (1,0) [0|63] "" XXX
  SG_ Secondary_Accel_02 : 55|8@0+ (1,0) [0|63] "" XXX
  SG_ Starting : 56|1@0+ (1,0) [0|1] "" XXX
  SG_ Stopping : 57|1@0+ (1,0) [0|1] "" XXX
@@ -1556,7 +1555,7 @@ BO_ 333 MEB_ACC_02: 32 XXX
  SG_ Constant_1_5 : 232|1@0+ (1,0) [0|1] "" XXX
  SG_ Constant_1_6 : 235|1@0+ (1,0) [0|1] "" XXX
  SG_ Speed : 236|10@1+ (0.1,0) [0|1023] "" XXX
- SG_ Secondary_Accel : 253|6@0+ (1,0) [0|63] "" XXX
+ SG_ Secondary_Accel : 252|5@0+ (1,0) [0|63] "" XXX
  SG_ Reversing : 254|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1004 MEB_TSK_01: 8 XXX
