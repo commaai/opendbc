@@ -1551,8 +1551,7 @@ BO_ 333 MEB_ACC_02: 32 XXX
  SG_ Constant_1_2 : 70|1@0+ (1,0) [0|1] "" XXX
  SG_ Anti_Stopping_03 : 71|1@0+ (1,0) [0|1] "" XXX
  SG_ Anti_Stopping_04 : 74|3@0+ (1,0) [0|7] "" XXX
- SG_ Disabling_or_Active_Hold : 77|1@0+ (1,0) [0|1] "" XXX
- SG_ Disabling_Starting : 79|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_Anforderung_HMS : 77|3@1+ (1,0) [0|7] "" XXX
  SG_ Constant_FE : 87|8@0+ (1,0) [0|255] "" XXX
  SG_ ACC_Active : 90|1@0+ (1,0) [0|1] "" XXX
  SG_ Constant_1_3 : 92|1@0+ (1,0) [0|1] "" XXX
@@ -1581,3 +1580,4 @@ VAL_ 333 ACC_Anhalten 0 "kein_Anhalten_gewuenscht" 1 "Anhalten_gewuenscht" ;
 VAL_ 333 ACC_Typ 0 "Basis_ACC" 1 "ACC_mit_FollowToStop" 2 "ACC_mit_StopAndGo" 3 "ACC_nicht_codiert" ;
 VAL_ 333 ACC_Status_ACC 0 "ACC_OFF_Hauptschalter_aus" 1 "ACC_INIT" 2 "ACC_STANDBY" 3 "ACC_AKTIV_regelt" 4 "ACC_OVERRIDE" 5 "ACC_Abschaltreaktion" 6 "reversibler_Fehler_im_ACC_System" 7 "irreversibler_Fehler_im_ACC_System" ;
 VAL_ 333 ACC_Minimale_Bremsung 0 "Anforderung_Minimale_Bremsung_nicht_aktiv" 1 "Anforderung_Minimale_Bremsung_aktiv" ;
+VAL_ 333 ACC_Anforderung_HMS 0 "keine_Anforderung" 1 "halten" 2 "parken" 3 "halten_Standby" 4 "anfahren" 5 "Loesen_ueber_Rampe" ;
