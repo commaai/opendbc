@@ -386,9 +386,6 @@ class TestCanParserPacker:
     #  discovery tests in openpilot first
     packer = CANPacker("toyota_nodsu_pt_generated")
 
-    assert packer.make_can_msg("ACC_CONTROL", 0, {"UNKNOWN_SIGNAL": 0}) == \
-                     [835, 0, b'\x00\x00\x00\x00\x00\x00\x00N', 0]
-    assert packer.make_can_msg("UNKNOWN_MESSAGE", 0, {"UNKNOWN_SIGNAL": 0}) == \
-                     [0, 0, b'', 0]
-    assert packer.make_can_msg(0, 0, {"UNKNOWN_SIGNAL": 0}) == \
-                     [0, 0, b'', 0]
+    assert packer.make_can_msg("ACC_CONTROL", 0, {"UNKNOWN_SIGNAL": 0}) == [835, 0, b'\x00\x00\x00\x00\x00\x00\x00N', 0]
+    assert packer.make_can_msg("UNKNOWN_MESSAGE", 0, {"UNKNOWN_SIGNAL": 0}) == [0, 0, b'', 0]
+    assert packer.make_can_msg(0, 0, {"UNKNOWN_SIGNAL": 0}) == [0, 0, b'', 0]

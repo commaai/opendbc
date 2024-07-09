@@ -9,16 +9,15 @@ class TestCADNDefine:
     defs = CANDefine(dbc_file)
 
     assert defs.dv[399] == defs.dv['STEER_STATUS']
-    assert defs.dv[399] == \
-                         {'STEER_STATUS': \
-                          {7: 'PERMANENT_FAULT',
-                           6: 'TMP_FAULT',
-                           5: 'FAULT_1',
-                           4: 'NO_TORQUE_ALERT_2',
-                           3: 'LOW_SPEED_LOCKOUT',
-                           2: 'NO_TORQUE_ALERT_1',
-                           0: 'NORMAL'} \
-                          }
+    assert defs.dv[399] == {'STEER_STATUS': 
+                            {7: 'PERMANENT_FAULT',
+                             6: 'TMP_FAULT',
+                             5: 'FAULT_1',
+                             4: 'NO_TORQUE_ALERT_2',
+                             3: 'LOW_SPEED_LOCKOUT',
+                             2: 'NO_TORQUE_ALERT_1',
+                             0: 'NORMAL'}
+                            }
 
   def test_all_dbcs(self, subtests):
     # Asserts no exceptions on all DBCs
