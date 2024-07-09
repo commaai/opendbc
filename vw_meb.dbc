@@ -1530,7 +1530,7 @@ BO_ 333 MEB_ACC_02: 32 XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Stopping_Stronger : 14|1@0+ (1,0) [0|1] "" XXX
  SG_ Regulating_Strength : 21|6@0+ (1,0) [0|15] "" XXX
- SG_ Accel : 24|11@1+ (0.01,-14.46) [0|1023] "" XXX
+ SG_ Accel : 24|11@1+ (0.005,-7.22) [-7.22|3.005] "Unit_MeterPerSeconSquar"  XXX
  SG_ User_Override_State : 35|3@1+ (1,0) [0|3] "" XXX
  SG_ Secondary_Accel_03 : 46|7@0+ (1,0) [0|63] "" XXX
  SG_ Secondary_Accel_02 : 55|8@0+ (1,0) [0|63] "" XXX
