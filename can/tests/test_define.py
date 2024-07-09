@@ -9,7 +9,7 @@ class TestCADNDefine:
     defs = CANDefine(dbc_file)
 
     assert defs.dv[399] == defs.dv['STEER_STATUS']
-    assert defs.dv[399] == {'STEER_STATUS': 
+    assert defs.dv[399] == {'STEER_STATUS':
                             {7: 'PERMANENT_FAULT',
                              6: 'TMP_FAULT',
                              5: 'FAULT_1',
