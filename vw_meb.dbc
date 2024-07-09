@@ -1528,17 +1528,21 @@ BO_ 768 MEB_ACC_01: 48 XXX
 BO_ 333 MEB_ACC_02: 32 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ Stopping_Stronger : 14|1@0+ (1,0) [0|1] "" XXX
- SG_ Regulating_Strength : 21|6@0+ (1,0) [0|15] "" XXX
- SG_ Accel : 24|11@1+ (0.005,-7.22) [-7.22|3.005] "Unit_MeterPerSeconSquar"  XXX
- SG_ User_Override_State : 35|3@1+ (1,0) [0|3] "" XXX
- SG_ Secondary_Accel_03 : 46|7@0+ (1,0) [0|63] "" XXX
- SG_ Secondary_Accel_02 : 55|8@0+ (1,0) [0|63] "" XXX
- SG_ Starting : 56|1@0+ (1,0) [0|1] "" XXX
- SG_ Stopping : 57|1@0+ (1,0) [0|1] "" XXX
- SG_ Constant_1_1 : 59|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_State : 63|4@0+ (1,0) [0|31] "" XXX
- SG_ Stopping_02 : 64|1@0+ (1,0) [0|3] "" XXX
+ SG_ ACC_limitierte_Anfahrdyn : 12|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ACC_nachtr_Stopp_Anf : 13|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ACC_DynErhoehung : 14|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ACC_Freilaufstrategie_TSK : 15|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ACC_zul_Regelabw_unten : 16|6@1+ (0.024,0) [0|1.512] "Unit_MeterPerSeconSquar"  XXX
+ SG_ ACC_StartStopp_Info : 22|2@1+ (1,0) [0|3] ""  XXX
+ SG_ ACC_Sollbeschleunigung_02 : 24|11@1+ (0.005,-7.22) [-7.22|3.005] "Unit_MeterPerSeconSquar"  XXX
+ SG_ ACC_zul_Regelabw_oben : 35|5@1+ (0.0625,0) [0|1.9375] "Unit_MeterPerSeconSquar"  XXX
+ SG_ ACC_neg_Sollbeschl_Grad_02 : 40|8@1+ (0.05,0) [0|12.75] "Unit_MeterPerCubicSecon"  XXX
+ SG_ ACC_pos_Sollbeschl_Grad_02 : 48|8@1+ (0.05,0) [0|12.75] "Unit_MeterPerCubicSecon"  XXX
+ SG_ ACC_Anfahren : 56|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ACC_Anhalten : 57|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ACC_Typ : 58|2@1+ (1,0) [0|3] ""  XXX
+ SG_ ACC_Status_ACC : 60|3@1+ (1,0) [0|7] ""  XXX
+ SG_ ACC_Minimale_Bremsung : 63|1@1+ (1,0) [0|1] ""  XXX
  SG_ Anti_Stopping : 65|1@0+ (1,0) [0|1] "" XXX
  SG_ Anti_Stopping_07 : 66|1@0+ (1,0) [0|1] "" XXX
  SG_ Anti_Stopping_02 : 67|1@0+ (1,0) [0|7] "" XXX
@@ -1567,5 +1571,13 @@ BO_ 1019 MEB_ACC_03: 8 XXX
 VAL_ 173 GE_Fahrstufe 5 "P" 6 "R" 7 "N" 8 "D" 9 "D" 10 "E" 13 "T" 14 "T" ;
 VAL_ 159 EPS_HCA_Status 0 "disabled" 1 "initializing" 2 "fault" 3 "ready" 4 "rejected" 5 "active" 8 "preempted";
 VAL_ 317 LatCon_HCA_Status 0 "disabled" 1 "initializing" 2 "ready" 3 "fault" 4 "active" 5 "preempted" 6 "fault" 7 "rejected";
-VAL_ 333 ACC_State 0 "disabled" 1 "initializing" 2 "ready" 3 "active" 4 "pre_active" 5 "pre_inactive" 6 "temp_fault" 7 "fault" 12 "user_overwrite" 11 "pre_user_overwrite";
 VAL_ 1004 TSK_State 0 "init" 1 "disabled" 2 "enabled" 3 "regulating" 4 "accel_pedal_override" 5 "brake_only" 6 "temp_fault" 7 "perm_fault" ;
+VAL_ 333 ACC_limitierte_Anfahrdyn 0 "keine_Limitierung" 1 "Limitierung_Anfahrdynamik_angefordert" ;
+VAL_ 333 ACC_nachtr_Stopp_Anf 0 "nicht_angefordert" 1 "angefordert" ;
+VAL_ 333 ACC_StartStopp_Info 0 "Motorlauf_langfristig_nicht_notwendig_Stoppfreigabe" 1 "Motoranlauf_nicht_zwingend_notwendig_Stoppverbot_keine_Startanforderung" 2 "Motoranlauf_zwingend_notwendig_Startanforderung" 3 "Systemfehler" ;
+VAL_ 333 ACC_Sollbeschleunigung_02 2046 "Neutralwert" 2047 "Fehler" ;
+VAL_ 333 ACC_Anfahren 0 "keine_Anforderung_Anfahren" 1 "Anforderung_Anfahren" ;
+VAL_ 333 ACC_Anhalten 0 "kein_Anhalten_gewuenscht" 1 "Anhalten_gewuenscht" ;
+VAL_ 333 ACC_Typ 0 "Basis_ACC" 1 "ACC_mit_FollowToStop" 2 "ACC_mit_StopAndGo" 3 "ACC_nicht_codiert" ;
+VAL_ 333 ACC_Status_ACC 0 "ACC_OFF_Hauptschalter_aus" 1 "ACC_INIT" 2 "ACC_STANDBY" 3 "ACC_AKTIV_regelt" 4 "ACC_OVERRIDE" 5 "ACC_Abschaltreaktion" 6 "reversibler_Fehler_im_ACC_System" 7 "irreversibler_Fehler_im_ACC_System" ;
+VAL_ 333 ACC_Minimale_Bremsung 0 "Anforderung_Minimale_Bremsung_nicht_aktiv" 1 "Anforderung_Minimale_Bremsung_aktiv" ;
