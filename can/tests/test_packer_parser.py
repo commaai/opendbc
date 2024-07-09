@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
 import pytest
-import unittest
 import random
 
 import cereal.messaging as messaging
@@ -54,7 +52,7 @@ class TestCanParserPacker:
       msg = packer.make_can_msg("CAN_FD_MESSAGE", 0, {})
       dat = can_list_to_can_capnp([msg, ])
       parser.update_strings([dat])
-      assert parser.vl["CAN_FD_MESSAGE"]["COUNTER"] == i % 256
+      assert parser.vl["CAN_FD_MESSAGE"]["COUNTER"] == (i % 256)
 
     # setting COUNTER should override
     for _ in range(100):
@@ -73,7 +71,7 @@ class TestCanParserPacker:
       msg = packer.make_can_msg("CAN_FD_MESSAGE", 0, {})
       dat = can_list_to_can_capnp([msg, ])
       parser.update_strings([dat])
-      assert parser.vl["CAN_FD_MESSAGE"]["COUNTER"] == (cnt + i) % 256
+      assert parser.vl["CAN_FD_MESSAGE"]["COUNTER"] == ((cnt + i) % 256)
 
   def test_parser_can_valid(self):
     msgs = [("CAN_FD_MESSAGE", 10), ]
@@ -114,7 +112,7 @@ class TestCanParserPacker:
     # bad static counter, invalid once it's seen MAX_BAD_COUNTER messages
     for idx in range(0x1000):
       parser.update_strings([bts])
-      assert (idx + 1) < MAX_BAD_COUNTER == parser.can_valid
+      assert ((idx + 1) < MAX_BAD_COUNTER) == parser.can_valid
 
     # one to recover
     msg = packer.make_can_msg("STEERING_CONTROL", 0, {"COUNTER": 1})
@@ -273,7 +271,7 @@ class TestCanParserPacker:
     # timeout after 10 blank msgs
     for n in range(200):
       send_msg(blank=True)
-      assert n >= 10 == parser.bus_timeout
+      assert (n >= 10) == parser.bus_timeout
 
     # no timeout immediately after seen again
     send_msg()
@@ -394,7 +392,3 @@ class TestCanParserPacker:
                      [0, 0, b'', 0]
     assert packer.make_can_msg(0, 0, {"UNKNOWN_SIGNAL": 0}) == \
                      [0, 0, b'', 0]
-
-
-if __name__ == "__main__":
-  unittest.main()

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 from opendbc.can.parser import CANParser
 from opendbc.can.packer import CANPacker
 from opendbc.can.tests.test_packer_parser import can_list_to_can_capnp

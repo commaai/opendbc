@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-import unittest
-
 from opendbc.can.can_define import CANDefine
 from opendbc.can.tests import ALL_DBCS
 
@@ -23,12 +20,8 @@ class TestCADNDefine:
                            0: 'NORMAL'} \
                           }
 
-  def test_all_dbcs(self):
+  def test_all_dbcs(self, subtests):
     # Asserts no exceptions on all DBCs
     for dbc in ALL_DBCS:
-      with self.subTest(dbc=dbc):
+      with subtests.test(dbc=dbc):
         CANDefine(dbc)
-
-
-if __name__ == "__main__":
-  unittest.main()

@@ -1,7 +1,5 @@
-#!/usr/bin/env python3
 import pytest
 import time
-import unittest
 
 from opendbc.can.parser import CANParser
 from opendbc.can.packer import CANPacker
@@ -50,7 +48,3 @@ class TestParser:
   def test_performance_all_signals(self):
     self._benchmark([('ACC_CONTROL', 10)], (10000, 19000), 1)
     self._benchmark([('ACC_CONTROL', 10)], (1300, 5000), 10)
-
-
-if __name__ == "__main__":
-  unittest.main()

@@ -1,7 +1,4 @@
-#!/usr/bin/env python3
-
 import pytest
-import unittest
 
 from opendbc.can.parser import CANParser, CANDefine
 from opendbc.can.packer import CANPacker
@@ -31,7 +28,3 @@ class TestCanParserPackerExceptions:
     CANParser(dbc_file, [], 0)
     CANPacker(dbc_file)
     CANDefine(dbc_file)
-
-
-if __name__ == "__main__":
-  unittest.main()
