@@ -1543,8 +1543,8 @@ BO_ 333 MEB_ACC_02: 32 XXX
  SG_ Anti_Stopping : 65|1@0+ (1,0) [0|1] "" XXX
  SG_ Constant_1_4 : 66|1@0+ (1,0) [0|1] "" XXX
  SG_ Anti_Stopping_02 : 67|1@0+ (1,0) [0|7] "" XXX
- SG_ Constant_1_7 : 68|1@0+ (1,0) [0|1] "" XXX
- SG_ Constant_1_8 : 69|1@0+ (1,0) [0|1] "" XXX
+ SG_ Anti_Stopping_06 : 68|1@0+ (1,0) [0|1] "" XXX
+ SG_ Anti_Stopping_05 : 69|1@0+ (1,0) [0|1] "" XXX
  SG_ Constant_1_2 : 70|1@0+ (1,0) [0|1] "" XXX
  SG_ Anti_Stopping_03 : 71|1@0+ (1,0) [0|1] "" XXX
  SG_ Anti_Stopping_04 : 74|3@0+ (1,0) [0|7] "" XXX
