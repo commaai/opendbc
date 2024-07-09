@@ -5,10 +5,10 @@ from opendbc.can.parser import CANParser
 from opendbc.can.tests import ALL_DBCS
 
 
-class TestDBCParser(unittest.TestCase):
+class TestDBCParser:
   def test_enough_dbcs(self):
     # sanity check that we're running on the real DBCs
-    self.assertGreater(len(ALL_DBCS), 20)
+    assert len(ALL_DBCS) > 20
 
   def test_parse_all_dbcs(self):
     """
