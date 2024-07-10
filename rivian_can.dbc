@@ -85,6 +85,7 @@ BO_ 272 ACM_SteeringControl: 8 ACM
 BO_ 288 ACM_lkaHbaCmd: 8 ACM
  SG_ ACM_lkaHbaCmd_Checksum : 7|8@0+ (1,0) [0|0] "" EPAS_P
  SG_ ACM_lkaHbaCmd_Counter : 11|4@0+ (1,0) [0|0] "" EPAS_P
+ SG_ ACM_unkown1 : 14|3@0+ (1,0) [0|7] "" XXX
  SG_ ACM_HapticRequest : 15|1@0+ (1,0) [0|1] "" EPAS_P
  SG_ ACM_lkaStrToqReq : 23|11@0+ (0.0078125,-8) [-8|7.9921875] "Nm" EPAS_P
  SG_ ACM_lkaSymbolState : 26|3@0+ (1,0) [0|7] "" EPAS_P
@@ -92,13 +93,16 @@ BO_ 288 ACM_lkaHbaCmd: 8 ACM
  SG_ ACM_lkaActToi : 28|1@0+ (1,0) [0|1] "" EPAS_P
  SG_ ACM_hbaSysState : 34|3@0+ (1,0) [0|7] "" EPAS_P
  SG_ ACM_FailinfoAeb : 37|3@0+ (1,0) [0|7] "" EPAS_P
+ SG_ ACM_unkown2 : 38|2@1+ (1,0) [0|3] "" XXX
  SG_ ACM_lkaRHWarning : 41|2@0+ (1,0) [0|3] "" EPAS_P
  SG_ ACM_lkaLHWarning : 43|2@0+ (1,0) [0|3] "" EPAS_P
  SG_ ACM_lkaLaneRecogState : 45|2@0+ (1,0) [0|3] "" EPAS_P
  SG_ ACM_hbaOpt : 46|1@0+ (1,0) [0|1] "" EPAS_P
  SG_ ACM_hbaLamp : 47|1@0+ (1,0) [0|1] "" EPAS_P
+ SG_ ACM_unkown3 : 51|4@0+ (1,0) [0|15] "" XXX
  SG_ ACM_lkaHandsoffSoundWarning : 53|2@0+ (1,0) [0|3] "" EPAS_P
  SG_ ACM_lkaHandsoffDisplayWarning : 55|2@0+ (1,0) [0|3] "" EPAS_P
+ SG_ ACM_unkown4 : 56|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 304 RCM_IMU_LatAccYaw: 8 RCM
  SG_ RCM_LateralAccelYaw_Checksum : 7|8@0+ (1,0) [0|25] "" ACM,ESP,VDM
