@@ -1605,7 +1605,8 @@ BO_ 333 MEB_ACC_02: 32 XXX
  SG_ Constant_1_3 : 232|1@0+ (1,0) [0|1] "" XXX
  SG_ Constant_1_4 : 235|1@0+ (1,0) [0|1] "" XXX
  SG_ Speed : 236|10@1+ (0.1,0) [0|1023] "" XXX
- SG_ ACC_Anhalteweg : 252|5@0+ (1,0) [0|63] "" XXX
+ SG_ Init : 246|2@1+ (1,0) [0|3] "" XXX
+ SG_ ACC_Anhalteweg : 253|6@0+ (1,0) [0|63] "" XXX
  SG_ Reversing : 254|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1004 MEB_TSK_01: 8 XXX
