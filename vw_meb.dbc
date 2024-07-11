@@ -1520,10 +1520,35 @@ BO_ 591 MEB_Distance_01: 64 XXX
  SG_ NEW_SIGNAL_6 : 286|3@0+ (1,0) [0|1] "" XXX
 
 BO_ 768 MEB_ACC_01: 48 XXX
- SG_ ACC_Set_Speed_1 : 79|4@0+ (1,2) [0|15] "" XXX
- SG_ ACC_Set_Speed_2 : 85|6@0+ (5,0) [0|63] "" XXX
+ SG_ NEW_SIGNAL_5 : 64|4@1+ (1,0) [0|15] "" XXX
+ SG_ ACC_Set_Speed : 76|10@1+ (0.32,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_1 : 86|10@1+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_6 : 96|3@1+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_8 : 106|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_14 : 107|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_7 : 109|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_9 : 112|2@1+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_10 : 120|2@1+ (1,0) [0|3] "" XXX
  SG_ FCW_Active : 122|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_11 : 140|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_13 : 145|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_12 : 147|3@1+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_18 : 186|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_15 : 189|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_Status_ACC : 208|3@1+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_20 : 265|3@1+ (1,0) [0|7] "" XXX
  SG_ ACC_Limiter_Mode : 268|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_21 : 269|3@1+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_24 : 272|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_22 : 274|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_23 : 276|4@1+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_25 : 280|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_27 : 287|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_26 : 288|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_4 : 290|10@1+ (1,0) [0|31] "" XXX
+ SG_ NEW_SIGNAL_28 : 329|4@1+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_2 : 344|8@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_3 : 354|8@1+ (1,0) [0|63] "" XXX
 
 BO_ 333 MEB_ACC_02: 32 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
@@ -1576,3 +1601,4 @@ VAL_ 333 ACC_Typ 0 "Basis_ACC" 1 "ACC_mit_FollowToStop" 2 "ACC_mit_StopAndGo" 3 
 VAL_ 333 ACC_Status_ACC 0 "ACC_OFF_Hauptschalter_aus" 1 "ACC_INIT" 2 "ACC_STANDBY" 3 "ACC_AKTIV_regelt" 4 "ACC_OVERRIDE" 5 "ACC_Abschaltreaktion" 6 "reversibler_Fehler_im_ACC_System" 7 "irreversibler_Fehler_im_ACC_System" ;
 VAL_ 333 ACC_Minimale_Bremsung 0 "Anforderung_Minimale_Bremsung_nicht_aktiv" 1 "Anforderung_Minimale_Bremsung_aktiv" ;
 VAL_ 333 ACC_Anforderung_HMS 0 "keine_Anforderung" 1 "halten" 2 "parken" 3 "halten_Standby" 4 "anfahren" 5 "Loesen_ueber_Rampe" ;
+VAL_ 768 ACC_Status_ACC 0 "ACC_OFF_Hauptschalter_aus" 1 "ACC_INIT" 2 "ACC_STANDBY" 3 "ACC_AKTIV_regelt" 4 "ACC_OVERRIDE" 5 "ACC_Abschaltreaktion" 6 "reversibler_Fehler_im_ACC_System" 7 "irreversibler_Fehler_im_ACC_System";
