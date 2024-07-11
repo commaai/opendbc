@@ -1521,9 +1521,10 @@ BO_ 591 MEB_Distance_01: 64 XXX
 
 BO_ 768 MEB_ACC_01: 48 XXX
  SG_ NEW_SIGNAL_5 : 64|4@1+ (1,0) [0|15] "" XXX
- SG_ ACC_Set_Speed : 76|10@1+ (0.32,0) [0|15] "" XXX
+ SG_ ACC_Set_Speed : 76|10@1+ (0.0886,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_1 : 86|10@1+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_6 : 96|3@1+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_19 : 104|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_8 : 106|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_14 : 107|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_7 : 109|1@0+ (1,0) [0|1] "" XXX
@@ -1533,9 +1534,12 @@ BO_ 768 MEB_ACC_01: 48 XXX
  SG_ NEW_SIGNAL_11 : 140|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_13 : 145|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_12 : 147|3@1+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_16 : 150|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_17 : 158|7@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_18 : 186|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_15 : 189|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_Status_ACC : 208|3@1+ (1,0) [0|7] "" XXX
+ SG_ ACC_Status_ACC : 208|5@1+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_29 : 225|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_20 : 265|3@1+ (1,0) [0|7] "" XXX
  SG_ ACC_Limiter_Mode : 268|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_21 : 269|3@1+ (1,0) [0|7] "" XXX
