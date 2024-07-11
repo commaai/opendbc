@@ -1459,6 +1459,8 @@ BO_ 258 MEB_ESP_04: 48 XXX
  SG_ NEW_SIGNAL_3 : 24|10@1+ (1,0) [0|1023] "" XXX
  SG_ NEW_SIGNAL_1 : 40|13@1+ (1,0) [0|63] "" XXX
  SG_ NEW_SIGNAL_2 : 54|1@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_7 : 99|1@0+ (1,0) [0|1] "" XXX
+ SG_ ESP_Hold : 120|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_6 : 171|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_5 : 180|10@1+ (1,0) [0|63] "" XXX
 
