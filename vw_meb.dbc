@@ -1543,8 +1543,9 @@ BO_ 768 MEB_ACC_01: 48 XXX
  SG_ NEW_SIGNAL_18 : 226|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_19 : 228|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_11 : 240|15@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_12 : 267|1@0+ (1,0) [0|7] "" XXX
  SG_ ACC_Limiter_Mode : 268|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_12 : 269|3@0+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_2 : 269|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_13 : 274|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_14 : 276|4@1+ (1,0) [0|7] "" XXX
  SG_ NEW_SIGNAL_16 : 280|1@0+ (1,0) [0|1] "" XXX
