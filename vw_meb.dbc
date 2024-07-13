@@ -1541,32 +1541,14 @@ BO_ 768 MEB_ACC_01: 48 XXX
  SG_ ACC_Texte_Primaeranz_02 : 114|6@1+ (1,0) [0|63] "" Vector__XXX
  SG_ ACC_Texte_Zusatzanz_02 : 120|6@1+ (1,0) [0|63] "" Vector__XXX
  SG_ STA_Primaeranz : 126|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ Constant_F : 140|4@1+ (1,0) [0|15] "" XXX
- SG_ Constant_63 : 144|6@1+ (1,0) [0|63] "" XXX
- SG_ Heartbeat : 150|10@1+ (1,0) [0|3] "" XXX
- SG_ Constant_FFFF : 160|16@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_20 : 186|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_21 : 189|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_17 : 199|1@0+ (1,0) [0|1] "" XXX
+ SG_ Signal_2 : 128|64@1+ (1,0) [0|1.84467440737096e+19] "" XXX
+ SG_ Signal_3_1 : 192|16@1+ (1,0) [0|65535] "" XXX
  SG_ ACC_Status_ACC : 208|3@1+ (1,0) [0|7] "" XXX
- SG_ NEW_SIGNAL_18 : 226|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_19 : 228|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_11 : 240|15@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_33 : 265|2@1+ (1,0) [0|3] "" XXX
- SG_ NEW_SIGNAL_12 : 267|1@0+ (1,0) [0|7] "" XXX
+ SG_ Signal_3_2 : 211|45@1+ (1,0) [0|35184372088831] "" XXX
+ SG_ Signal_4_1 : 256|12@1+ (1,0) [0|4095] "" XXX
  SG_ ACC_Limiter_Mode : 268|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_32 : 271|3@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_13 : 274|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_14 : 276|4@1+ (1,0) [0|7] "" XXX
- SG_ NEW_SIGNAL_16 : 280|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_3 : 287|3@1+ (1,0) [0|3] "" XXX
- SG_ Abstand : 290|10@1+ (0.32,0) [0|3] "" XXX
- SG_ Reaktion_Tempo : 331|3@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_10 : 334|8@1+ (1,0) [0|3] "" XXX
- SG_ NEW_SIGNAL_1 : 344|8@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_2 : 354|8@1+ (1,0) [0|63] "" XXX
- SG_ NEW_SIGNAL_4 : 364|8@1+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_25 : 374|9@1+ (1,0) [0|3] "" XXX
+ SG_ Signal_4_2 : 269|51@1+ (1,0) [0|2.25179981368525e+15] "" XXX
+ SG_ Signal_5 : 320|64@1+ (1,0) [0|1.84467440737096e+19] "" XXX
 
 BO_ 333 MEB_ACC_02: 32 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
@@ -1586,19 +1568,11 @@ BO_ 333 MEB_ACC_02: 32 XXX
  SG_ ACC_Typ : 58|2@1+ (1,0) [0|3] "" XXX
  SG_ ACC_Status_ACC : 60|3@1+ (1,0) [0|7] "" XXX
  SG_ ACC_Minimale_Bremsung : 63|1@1+ (1,0) [0|1] "" XXX
- SG_ Unknown_01 : 69|5@0+ (1,0) [0|1] "" XXX
- SG_ Constant_1_1 : 70|1@0+ (1,0) [0|1] "" XXX
- SG_ Unknown_02 : 71|4@1+ (1,0) [0|1] "" XXX
+ SG_ Signal_2_1 : 64|13@1+ (1,0) [0|8191] "" XXX
  SG_ ACC_Anforderung_HMS : 77|3@1+ (1,0) [0|7] "" XXX
- SG_ Constant_FE : 87|8@0+ (1,0) [0|255] "" XXX
- SG_ ACC_Active : 90|1@0+ (1,0) [0|1] "" XXX
- SG_ Constant_1_2 : 92|1@0+ (1,0) [0|1] "" XXX
- SG_ Constant_1_3 : 232|1@0+ (1,0) [0|1] "" XXX
- SG_ Constant_1_4 : 235|1@0+ (1,0) [0|1] "" XXX
- SG_ Speed : 236|10@1+ (0.1,0) [0|1023] "" XXX
- SG_ Init : 246|2@1+ (1,0) [0|3] "" XXX
- SG_ ACC_Anhalteweg : 253|6@0+ (1,0) [0|63] "" XXX
- SG_ Reversing : 254|1@0+ (1,0) [0|1] "" XXX
+ SG_ Signal_2_2 : 80|48@1+ (1,0) [0|281474976710655] "" XXX
+ SG_ Signal_3 : 128|64@1+ (1,0) [0|1.84467440737096e+19] "" XXX
+ SG_ Signal_4 : 192|64@1+ (1,0) [0|1.84467440737096e+19] "" XXX
 
 BO_ 1004 MEB_TSK_01: 8 XXX
  SG_ TSK_State : 53|3@1+ (1,0) [0|7] "" XXX
