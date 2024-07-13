@@ -1555,25 +1555,18 @@ BO_ 768 MEB_ACC_01: 48 XXX
  SG_ NEW_SIGNAL_33 : 265|2@1+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_12 : 267|1@0+ (1,0) [0|7] "" XXX
  SG_ ACC_Limiter_Mode : 268|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_2 : 269|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_31 : 270|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_32 : 271|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_32 : 271|3@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_13 : 274|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_14 : 276|4@1+ (1,0) [0|7] "" XXX
  SG_ NEW_SIGNAL_16 : 280|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_15 : 287|12@1+ (1,0) [0|3] "" XXX
- SG_ NEW_SIGNAL_39 : 299|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_34 : 329|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_37 : 330|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_27 : 331|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_10 : 334|3@1+ (1,0) [0|3] "" XXX
- SG_ NEW_SIGNAL_23 : 338|3@1+ (1,0) [0|7] "" XXX
- SG_ NEW_SIGNAL_1 : 344|8@1+ (1,0) [0|127] "" XXX
- SG_ NEW_SIGNAL_8 : 354|8@1+ (1,0) [0|63] "" XXX
- SG_ NEW_SIGNAL_24 : 364|8@1+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_25 : 374|7@1+ (1,0) [0|3] "" XXX
- SG_ NEW_SIGNAL_26 : 382|1@0+ (1,0) [0|1] "" XXX
-
+ SG_ NEW_SIGNAL_3 : 287|3@1+ (1,0) [0|3] "" XXX
+ SG_ Abstand : 290|10@1+ (0.32,0) [0|3] "" XXX
+ SG_ Reaktion_Tempo : 331|3@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_10 : 334|8@1+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_1 : 344|8@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_2 : 354|8@1+ (1,0) [0|63] "" XXX
+ SG_ NEW_SIGNAL_4 : 364|8@1+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_25 : 374|9@1+ (1,0) [0|3] "" XXX
 
 BO_ 333 MEB_ACC_02: 32 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
