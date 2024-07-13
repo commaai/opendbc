@@ -5,3 +5,6 @@ numpy
 pycapnp
 pyyaml
 scons
+pytest
+pytest-xdist
+pytest-subtests
