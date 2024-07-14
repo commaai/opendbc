@@ -1528,6 +1528,7 @@ BO_ 768 MEB_ACC_01: 48 XXX
  SG_ ACC_Wunschgeschw_Farbe : 69|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ ACC_Warnung_Verkehrszeichen_1 : 70|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ ACA_Querfuehrung : 71|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ Unknown_01 : 73|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_Regelung_AIO : 75|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
  SG_ ACC_Wunschgeschw_02 : 76|10@1+ (0.32,0) [0|327.04] "Unit_KiloMeterPerHour" Vector__XXX
  SG_ ACC_Abstandsindex_02 : 86|10@1+ (1,0) [1|1021] "" Vector__XXX
@@ -1543,18 +1544,32 @@ BO_ 768 MEB_ACC_01: 48 XXX
  SG_ ACC_Texte_Primaeranz_02 : 114|6@1+ (1,0) [0|63] "" Vector__XXX
  SG_ ACC_Texte_Zusatzanz_02 : 120|6@1+ (1,0) [0|63] "" Vector__XXX
  SG_ STA_Primaeranz : 126|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ Signal_2 : 128|64@1+ (1,0) [0|1.84467440737096e+19] "" XXX
- SG_ Signal_3_1 : 192|16@1+ (1,0) [0|65535] "" XXX
+ SG_ SET_ME_0X3FF : 140|10@1+ (1,0) [0|15] "" XXX
+ SG_ Heartbeat : 150|9@1+ (1,0) [0|3] "" XXX
+ SG_ SET_ME_0XFFFF : 160|16@1+ (1,0) [0|65535] "" XXX
+ SG_ ACC_Enabled : 186|1@0+ (1,0) [0|1] "" XXX
+ SG_ SET_ME_0X1 : 199|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_Status_ACC : 208|3@1+ (1,0) [0|7] "" XXX
- SG_ Signal_3_2 : 211|45@1+ (1,0) [0|35184372088831] "" XXX
- SG_ Signal_4_1 : 256|9@1+ (1,0) [0|511] "" XXX
- SG_ ACC_Relevantes_Objekt_03 : 265|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_Temp_Inactive : 266|1@0+ (1,0) [0|1] "" XXX
- SG_ Signal_4_2 : 267|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_Status_Change : 211|1@0+ (1,0) [0|1] "" XXX
+ SG_ SET_ME_0X7FFF : 240|16@1+ (1,0) [0|65535] "" XXX
+ SG_ Lead_Type_Detected : 265|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_Override_or_Standby : 266|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_AKTIV_regelt : 267|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_Limiter_Mode : 268|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_Cruise_Type : 269|3@1+ (1,0) [0|7] "" XXX
- SG_ Signal_4_3 : 272|48@1+ (1,0) [0|281474976710655] "" XXX
- SG_ Signal_5 : 320|64@1+ (1,0) [0|1.84467440737096e+19] "" XXX
+ SG_ NEW_SIGNAL_3 : 269|2@1+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_2 : 271|2@1+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_1 : 273|2@1+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_12 : 276|3@1+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_16 : 279|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_15 : 280|1@0+ (1,0) [0|1] "" XXX
+ SG_ Lead_Type : 287|3@1+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_20 : 290|9@1+ (1,0) [0|7] "" XXX
+ SG_ PACC_Events : 332|4@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_19 : 334|9@1+ (0.5,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_17 : 344|9@1+ (0.5,0) [0|63] "" XXX
+ SG_ NEW_SIGNAL_21 : 354|9@1+ (0.5,0) [0|63] "" XXX
+ SG_ NEW_SIGNAL_23 : 364|9@1+ (0.5,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_24 : 374|9@1+ (0.5,0) [0|3] "" XXX
 
 BO_ 333 MEB_ACC_02: 32 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
@@ -1626,4 +1641,7 @@ VAL_ 768 ACC_Texte_Primaeranz_02 0 "keine Anzeige" 1 "VDA_ACC_Symbol_YYY_kmh_mph
 VAL_ 768 ACC_Texte_Zusatzanz_02 0 "keine_Anzeige" 1 "ACC_AUS" 2 "Standby" 3 "UEBERTRETEN" 4 "ABSTAND" 5 "DISTANZ_1" 6 "DISTANZ_2" 7 "DISTANZ_3" 8 "DISTANZ_4" 9 "DISTANZ_5" 10 "DISTANZ_1__dyn" 11 "DISTANZ_2__dyn" 12 "DISTANZ_3__dyn" 13 "DISTANZ_4__dyn" 14 "DISTANZ_5__dyn" 15 "DISTANZ_1__comf" 16 "DISTANZ_2__comf" 17 "DISTANZ_3__comf" 18 "DISTANZ_4__comf" 19 "DISTANZ_5__comf" 20 "DISTANZ_1__efficiency" 21 "DISTANZ_2__efficiency" 22 "DISTANZ_3__efficiency" 23 "DISTANZ_4__efficiency" 24 "DISTANZ_5__efficiency" 25 "DISTANZ_1__Stau" 26 "DISTANZ_2__Stau" 27 "DISTANZ_3__Stau" 28 "DISTANZ_4__Stau" 29 "DISTANZ_5__Stau" 30 "ACHTUNG" 31 "Abstandsanzeige" 32 "Abstandsanzeige_Warnung_aktiviert" 33 "STA_verfuegbar" 34 "Engstelle" 35 "RUV_aktiv_Rechtsverkehr" 36 "RUV_aktiv_Linksverkehr" 37 "STP_Verfuegbar" 38 "AW_Warnschwelle_1" 39 "AW_Warnschwelle_2" 40 "AW_Warnschwelle_3" 41 "AW_Warnung_1" 42 "AW_Warnung_2" 43 "AW_Warnung_3";
 VAL_ 768 STA_Primaeranz 0 "keine_Anzeige" 1 "STA_standby" 2 "STA_aktiv" 3 "STA_Warnung";
 VAL_ 768 ACC_Status_ACC 0 "ACC_OFF_Hauptschalter_aus" 1 "ACC_INIT" 2 "ACC_STANDBY" 3 "ACC_AKTIV_regelt" 4 "ACC_OVERRIDE" 5 "ACC_Abschaltreaktion" 6 "reversibler_Fehler_im_ACC_System" 7 "irreversibler_Fehler_im_ACC_System";
+VAL_ 768 Lead_Type 5 "Motorcycle" 3 "Car" 0 "None" 2 "Truck";
+VAL_ 768 Heartbeat 1 "ACC_Init_Low" 420 "ACC_Init_High" 221 "ACC_Available_Low" 360 "ACC_Available_High";
+
 VAL_ 1004 TSK_State 0 "init" 1 "disabled" 2 "enabled" 3 "regulating" 4 "accel_pedal_override" 5 "brake_only" 6 "temp_fault" 7 "perm_fault";
