@@ -1574,11 +1574,17 @@ BO_ 333 MEB_ACC_02: 32 XXX
  SG_ ACC_Typ : 58|2@1+ (1,0) [0|3] "" XXX
  SG_ ACC_Status_ACC : 60|3@1+ (1,0) [0|7] "" XXX
  SG_ ACC_Minimale_Bremsung : 63|1@1+ (1,0) [0|1] "" XXX
- SG_ Signal_2_1 : 64|13@1+ (1,0) [0|8191] "" XXX
+ SG_ ACC_Anhalten_Bremse : 64|11@1+ (0.005,0) [0|2046] "" XXX
  SG_ ACC_Anforderung_HMS : 77|3@1+ (1,0) [0|7] "" XXX
- SG_ Signal_2_2 : 80|48@1+ (1,0) [0|281474976710655] "" XXX
- SG_ Signal_3 : 128|64@1+ (1,0) [0|1.84467440737096e+19] "" XXX
- SG_ Signal_4 : 192|64@1+ (1,0) [0|1.84467440737096e+19] "" XXX
+ SG_ SET_ME_0XFE : 80|8@1+ (1,0) [0|255] "" XXX
+ SG_ ACC_AKTIV_regelt : 90|1@0+ (1,0) [0|1] "" XXX
+ SG_ SET_ME_0X1 : 92|1@0+ (1,0) [0|1] "" XXX
+ SG_ SET_ME_0X9 : 232|4@1+ (1,0) [0|15] "" XXX
+ SG_ Speed : 236|10@1+ (0.1,0) [0|15] "" XXX
+ SG_ Unknown_State_1_1 : 248|2@1+ (1,0) [0|3] "" XXX
+ SG_ Unknown_State_1_2 : 250|2@1+ (1,0) [0|3] "" XXX
+ SG_ Unknown_State_1_3 : 252|2@1+ (1,0) [0|3] "" XXX
+ SG_ Reversing : 254|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1004 MEB_TSK_01: 8 XXX
  SG_ TSK_State : 53|3@1+ (1,0) [0|7] "" XXX
@@ -1599,6 +1605,7 @@ VAL_ 333 ACC_Typ 0 "Basis_ACC" 1 "ACC_mit_FollowToStop" 2 "ACC_mit_StopAndGo" 3 
 VAL_ 333 ACC_Status_ACC 0 "ACC_OFF_Hauptschalter_aus" 1 "ACC_INIT" 2 "ACC_STANDBY" 3 "ACC_AKTIV_regelt" 4 "ACC_OVERRIDE" 5 "ACC_Abschaltreaktion" 6 "reversibler_Fehler_im_ACC_System" 7 "irreversibler_Fehler_im_ACC_System";
 VAL_ 333 ACC_Minimale_Bremsung 0 "Anforderung_Minimale_Bremsung_nicht_aktiv" 1 "Anforderung_Minimale_Bremsung_aktiv";
 VAL_ 333 ACC_Anforderung_HMS 0 "keine_Anforderung" 1 "halten" 2 "parken" 3 "halten_Standby" 4 "anfahren" 5 "Loesen_ueber_Rampe";
+VAL_ 333 ACC_Anhalten_Bremse 2046 "neutral";
 VAL_ 768 ACC_Tempolimit 0 "keine_Anzeige" 1 "5_zulHoechstgeschw" 2 "7_zulHoechstgeschw" 3 "10_zulHoechstgeschw" 4 "15_zulHoechstgeschw" 5 "20_zulHoechstgeschw" 6 "25_zulHoechstgeschw" 7 "30_zulHoechstgeschw" 8 "35_zulHoechstgeschw" 9 "40_zulHoechstgeschw" 10 "45_zulHoechstgeschw" 11 "50_zulHoechstgeschw" 12 "55_zulHoechstgeschw" 13 "60_zulHoechstgeschw" 14 "65_zulHoechstgeschw" 15 "70_zulHoechstgeschw" 16 "75_zulHoechstgeschw" 17 "80_zulHoechstgeschw" 18 "85_zulHoechstgeschw" 19 "90_zulHoechstgeschw" 20 "95_zulHoechstgeschw" 21 "100_zulHoechstgeschw" 22 "110_zulHoechstgeschw" 23 "120_zulHoechstgeschw" 24 "130_zulHoechstgeschw" 25 "140_zulHoechstgeschw" 26 "150_zulHoechstgeschw" 27 "160_zulHoechstgeschw" 28 "200_zulHoechstgeschw" 30 "250_zulHoechstgeschw" 31 "Ende_zulHoechstgeschw";
 VAL_ 768 ACC_Wunschgeschw_Farbe 0 "Grundfarbe" 1 "Farbe_1";
 VAL_ 768 ACC_Warnung_Verkehrszeichen_1 0 "keine_Warnung_Initialwert" 1 "Warnung";
