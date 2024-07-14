@@ -1351,6 +1351,16 @@ BO_ 294 HCA_01: 8 Frontsensorik
  SG_ EA_Ruckfreigabe : 40|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ EA_ACC_Wunschgeschwindigkeit : 41|10@1+ (0.32,0) [0|327.04] "Unit_KiloMeterPerHour"  Frontradar
 
+BO_ 285 LH_EPS_02: 8 Gateway_D4C7
+ SG_ EPS_02_CRC : 0|8@1+ (1,0) [0|255] ""  SCU_D4
+ SG_ EPS_02_BZ : 8|4@1+ (1,0) [0|15] ""  SCU_D4
+ SG_ EPS_Notlauf : 12|4@1+ (1.0,0.0) [0.0|15] ""  Vector__XXX
+ SG_ EPS_Lastinfo : 16|8@1+ (1,0) [0|253] "Unit_Amper"  Vector__XXX
+ SG_ EPS_Unterstuetzungsleistung : 24|8@1+ (0.5,0) [0.0|100.0] "Unit_PerCent"  SCU_D4
+ SG_ EPS_Drehzahlreserve : 32|7@1+ (10,0) [0|1000] "Unit_DegreOfArcPerSecon"  SCU_D4
+ SG_ EPS_VZ_Drehzahlreserve : 39|1@1+ (1.0,0.0) [0.0|1] ""  SCU_D4
+ SG_ EPS_Leistungsanforderung : 40|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+
 BO_ 159 LH_EPS_03: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  XXX
