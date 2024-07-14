@@ -1465,14 +1465,22 @@ BO_ 332 MEB_ESP_03: 32 XXX
  SG_ Accelerator_Pressure : 175|8@0+ (1,-37) [0|255] "" XXX
 
 BO_ 258 MEB_ESP_04: 48 XXX
- SG_ NEW_SIGNAL_4 : 23|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_3 : 24|10@1+ (1,0) [0|1023] "" XXX
- SG_ NEW_SIGNAL_1 : 40|13@1+ (1,0) [0|63] "" XXX
- SG_ NEW_SIGNAL_2 : 54|1@0+ (1,0) [0|3] "" XXX
+ SG_ Lateral_Accel : 16|8@1+ (1,-128) [0|255] "" XXX
+ SG_ Longitudinal_Accel : 24|8@1- (1,0) [0|255] "" XXX
+ SG_ Yaw_Rate : 40|14@1+ (1,0) [0|16383] "" XXX
+ SG_ Yaw_Rate_Sign : 54|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_7 : 99|1@0+ (1,0) [0|1] "" XXX
  SG_ ESP_Hold : 120|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_6 : 171|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_5 : 180|10@1+ (1,0) [0|63] "" XXX
+
+BO_ 313 ESP_NEW_3: 32 XXX
+ SG_ XCHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ BRAKE_PRESSED_1 : 16|1@0+ (1,0) [0|1] "" XXX
+ SG_ BRAKE_PRESSED_2 : 27|1@0+ (1,0) [0|1] "" XXX
+ SG_ BRAKE_PRESSED_3 : 48|1@0+ (1,0) [0|1] "" XXX
+ SG_ BRAKE_PRESSURE : 76|10@1+ (1,0) [0|1023] "" XXX
 
 BO_ 522 MEB_ABS_01: 64 XXX
  SG_ Yaw_Rate_VZ : 33|1@0+ (1,0) [0|1] "" XXX
@@ -1493,6 +1501,12 @@ BO_ 771 HCA_03: 24 XXX
  SG_ Steering_Angle : 24|15@1+ (0.0174,0) [0|360] "Unit_DegreOfArc" XXX
  SG_ VZ : 39|1@0+ (1,0) [0|1] "" XXX
  SG_ Active_02 : 66|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 267 MOTOR_NEW_1: 32 XXX
+ SG_ XCHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ ACCEL_PEDAL : 12|8@1+ (0.4,0) [0|255] "" XXX
+ SG_ TSK_STATUS : 88|3@1+ (1,0) [0|7] "" XXX
 
 BO_ 588 MEB_Drive_State_01: 16 XXX
  SG_ Blind_Spot_Right : 12|7@1+ (1,0) [0|15] "" XXX
@@ -1653,5 +1667,5 @@ VAL_ 768 STA_Primaeranz 0 "keine_Anzeige" 1 "STA_standby" 2 "STA_aktiv" 3 "STA_W
 VAL_ 768 ACC_Status_ACC 0 "ACC_OFF_Hauptschalter_aus" 1 "ACC_INIT" 2 "ACC_STANDBY" 3 "ACC_AKTIV_regelt" 4 "ACC_OVERRIDE" 5 "ACC_Abschaltreaktion" 6 "reversibler_Fehler_im_ACC_System" 7 "irreversibler_Fehler_im_ACC_System";
 VAL_ 768 Lead_Type 5 "Motorcycle" 3 "Car" 0 "None" 2 "Truck";
 VAL_ 768 Heartbeat 1 "ACC_Init_Low" 420 "ACC_Init_High" 221 "ACC_Available_Low" 360 "ACC_Available_High";
-
+VAL_ 267 TSK_State 0 "init" 1 "disabled" 2 "enabled" 3 "regulating" 4 "accel_pedal_override" 5 "brake_only" 6 "temp_fault" 7 "perm_fault";
 VAL_ 1004 TSK_State 0 "init" 1 "disabled" 2 "enabled" 3 "regulating" 4 "accel_pedal_override" 5 "brake_only" 6 "temp_fault" 7 "perm_fault";
