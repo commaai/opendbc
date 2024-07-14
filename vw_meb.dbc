@@ -1545,9 +1545,13 @@ BO_ 768 MEB_ACC_01: 48 XXX
  SG_ Signal_3_1 : 192|16@1+ (1,0) [0|65535] "" XXX
  SG_ ACC_Status_ACC : 208|3@1+ (1,0) [0|7] "" XXX
  SG_ Signal_3_2 : 211|45@1+ (1,0) [0|35184372088831] "" XXX
- SG_ Signal_4_1 : 256|12@1+ (1,0) [0|4095] "" XXX
+ SG_ Signal_4_1 : 256|9@1+ (1,0) [0|511] "" XXX
+ SG_ ACC_Relevantes_Objekt_03 : 265|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_Temp_Inactive : 266|1@0+ (1,0) [0|1] "" XXX
+ SG_ Signal_4_2 : 267|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_Limiter_Mode : 268|1@0+ (1,0) [0|1] "" XXX
- SG_ Signal_4_2 : 269|51@1+ (1,0) [0|2.25179981368525e+15] "" XXX
+ SG_ ACC_Cruise_Type : 269|3@1+ (1,0) [0|7] "" XXX
+ SG_ Signal_4_3 : 272|48@1+ (1,0) [0|281474976710655] "" XXX
  SG_ Signal_5 : 320|64@1+ (1,0) [0|1.84467440737096e+19] "" XXX
 
 BO_ 333 MEB_ACC_02: 32 XXX
