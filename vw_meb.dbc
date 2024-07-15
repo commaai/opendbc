@@ -1474,11 +1474,12 @@ BO_ 258 MEB_ESP_04: 48 XXX
  SG_ NEW_SIGNAL_6 : 171|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_5 : 180|10@1+ (1,0) [0|63] "" XXX
 
-BO_ 313 ESP_NEW_3: 32 XXX
- SG_ BRAKE_PRESSED_1 : 16|1@0+ (1,0) [0|1] "" XXX
- SG_ BRAKE_PRESSED_2 : 27|1@0+ (1,0) [0|1] "" XXX
- SG_ BRAKE_PRESSED_3 : 48|1@0+ (1,0) [0|1] "" XXX
- SG_ BRAKE_PRESSURE : 76|10@1+ (1,0) [0|1023] "" XXX
+BO_ 313 MEB_ESP_05: 32 XXX
+ SG_ Brake_Pressed_1 : 16|1@0+ (1,0) [0|1] "" XXX
+ SG_ Brake_Pressed_2 : 27|1@0+ (1,0) [0|1] "" XXX
+ SG_ ESP_Hold : 35|1@0+ (1,0) [0|1] "" XXX
+ SG_ Brake_Pressed_3 : 48|1@0+ (1,0) [0|1] "" XXX
+ SG_ Brake_Pressure : 76|10@1+ (1,0) [0|1023] "" XXX
 
 BO_ 522 MEB_ABS_01: 64 XXX
  SG_ Yaw_Rate_VZ : 33|1@0+ (1,0) [0|1] "" XXX
