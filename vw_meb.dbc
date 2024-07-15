@@ -1502,11 +1502,9 @@ BO_ 771 HCA_03: 24 XXX
  SG_ VZ : 39|1@0+ (1,0) [0|1] "" XXX
  SG_ Active_02 : 66|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 267 MOTOR_NEW_1: 32 XXX
- SG_ XCHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ ACCEL_PEDAL : 12|8@1+ (0.4,0) [0|255] "" XXX
- SG_ TSK_STATUS : 88|3@1+ (1,0) [0|7] "" XXX
+BO_ 267 MEB_Motor_01: 32 XXX
+ SG_ Accel_Pedal : 12|8@1+ (0.4,0) [0|255] "" XXX
+ SG_ TSK_Status : 88|3@1+ (1,0) [0|7] "" XXX
 
 BO_ 588 MEB_Drive_State_01: 16 XXX
  SG_ Blind_Spot_Right : 12|7@1+ (1,0) [0|15] "" XXX
