@@ -1548,11 +1548,12 @@ BO_ 591 MEB_Distance_01: 64 XXX
  SG_ NEW_SIGNAL_6 : 286|3@0+ (1,0) [0|1] "" XXX
 
 BO_ 768 MEB_ACC_01: 48 XXX
+ SG_ Unknown_Area_01 : 0|64@1+ (1,0) [0|1.84467440737096e+19] "" XXX
  SG_ ACC_Tempolimit : 64|5@1+ (1,0) [0|31] "" OTA_FC
  SG_ ACC_Wunschgeschw_Farbe : 69|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ ACC_Warnung_Verkehrszeichen_1 : 70|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ ACA_Querfuehrung : 71|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ Unknown_01 : 73|1@0+ (1,0) [0|1] "" XXX
+ SG_ SET_ME_0X1_2 : 73|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_Regelung_AIO : 75|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
  SG_ ACC_Wunschgeschw_02 : 76|10@1+ (0.32,0) [0|327.04] "Unit_KiloMeterPerHour" Vector__XXX
  SG_ ACC_Abstandsindex_02 : 86|10@1+ (1,0) [1|1021] "" Vector__XXX
@@ -1572,7 +1573,7 @@ BO_ 768 MEB_ACC_01: 48 XXX
  SG_ Heartbeat : 150|9@1+ (1,0) [0|3] "" XXX
  SG_ SET_ME_0XFFFF : 160|16@1+ (1,0) [0|65535] "" XXX
  SG_ ACC_Enabled : 186|1@0+ (1,0) [0|1] "" XXX
- SG_ Unknown_02 : 189|1@0+ (1,0) [0|1] "" XXX
+ SG_ Hold_First_Active : 189|1@0+ (1,0) [0|1] "" XXX
  SG_ SET_ME_0X1 : 199|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_Status_ACC : 208|3@1+ (1,0) [0|7] "" XXX
  SG_ ACC_Status_Change : 211|1@0+ (1,0) [0|1] "" XXX
@@ -1584,13 +1585,13 @@ BO_ 768 MEB_ACC_01: 48 XXX
  SG_ ACC_Driving_Type : 269|4@1+ (1,0) [0|7] "" XXX
  SG_ Unknown_03 : 273|8@1+ (1,0) [0|7] "" XXX
  SG_ Lead_Type : 287|3@1+ (1,0) [0|3] "" XXX
- SG_ NEW_SIGNAL_20 : 290|9@1+ (1,0) [0|7] "" XXX
- SG_ PACC_Events : 332|4@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_19 : 334|9@1+ (0.5,0) [0|3] "" XXX
- SG_ NEW_SIGNAL_17 : 344|9@1+ (0.5,0) [0|63] "" XXX
- SG_ NEW_SIGNAL_21 : 354|9@1+ (0.5,0) [0|63] "" XXX
- SG_ NEW_SIGNAL_23 : 364|9@1+ (0.5,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_24 : 374|9@1+ (0.5,0) [0|3] "" XXX
+ SG_ Lead_Distance : 290|9@1+ (0.32,0) [0|7] "Unit_Meter" XXX
+ SG_ ACC_Special_Events : 332|4@0+ (1,0) [0|3] "" XXX
+ SG_ Zeitluecke_1_Signal : 334|9@1+ (1,0) [0|3] "" XXX
+ SG_ Zeitluecke_2_Signal : 344|9@1+ (1,0) [0|63] "" XXX
+ SG_ Zeitluecke_3_Signal : 354|9@1+ (1,0) [0|63] "" XXX
+ SG_ Zeitluecke_4_Signal : 364|9@1+ (1,0) [0|15] "" XXX
+ SG_ Zeitluecke_5_Signal : 374|9@1+ (1,0) [0|3] "" XXX
 
 BO_ 333 MEB_ACC_02: 32 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
@@ -1664,6 +1665,13 @@ VAL_ 768 Heartbeat 1 "ACC_Init_Low" 420 "ACC_Init_High" 221 "ACC_Available_Low" 
 VAL_ 768 ACC_Status_ACC 0 "ACC_OFF_Hauptschalter_aus" 1 "ACC_INIT" 2 "ACC_STANDBY" 3 "ACC_AKTIV_regelt" 4 "ACC_OVERRIDE" 5 "ACC_Abschaltreaktion" 6 "reversibler_Fehler_im_ACC_System" 7 "irreversibler_Fehler_im_ACC_System";
 VAL_ 768 Lead_Type_Detected 1 "Lead_Detected" 0 "No_Lead_Detected";
 VAL_ 768 ACC_Driving_Type 3 "Following_Lead" 0 "None" 4 "PACC_Regulating_Speed" 8 "PACC_Regulating_Speed";
+VAL_ 768 Unknown_03 0 "None" 106 "State_01" 208 "State_02";
 VAL_ 768 Lead_Type 5 "Motorcycle" 3 "Car" 0 "None" 2 "Truck";
+VAL_ 768 ACC_Special_Events 3 "ACC_Starting_Without_User_Available";
+VAL_ 768 Zeitluecke_1_Signal 0 "keine Anzeige";
+VAL_ 768 Zeitluecke_2_Signal 0 "keine Anzeige" 32 "Minimum";
+VAL_ 768 Zeitluecke_3_Signal 0 "keine Anzeige";
+VAL_ 768 Zeitluecke_4_Signal 0 "keine Anzeige" 40 "Minimum";
+VAL_ 768 Zeitluecke_5_Signal 0 "keine Anzeige";
 VAL_ 267 TSK_STATUS 0 "init" 1 "disabled" 2 "enabled" 3 "regulating" 4 "accel_pedal_override" 5 "brake_only" 6 "temp_fault" 7 "perm_fault";
 VAL_ 1004 TSK_State 0 "init" 1 "disabled" 2 "enabled" 3 "regulating" 4 "accel_pedal_override" 5 "brake_only" 6 "temp_fault" 7 "perm_fault";
