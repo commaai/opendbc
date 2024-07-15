@@ -1572,20 +1572,17 @@ BO_ 768 MEB_ACC_01: 48 XXX
  SG_ Heartbeat : 150|9@1+ (1,0) [0|3] "" XXX
  SG_ SET_ME_0XFFFF : 160|16@1+ (1,0) [0|65535] "" XXX
  SG_ ACC_Enabled : 186|1@0+ (1,0) [0|1] "" XXX
+ SG_ Unknown_02 : 189|1@0+ (1,0) [0|1] "" XXX
  SG_ SET_ME_0X1 : 199|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_Status_ACC : 208|3@1+ (1,0) [0|7] "" XXX
  SG_ ACC_Status_Change : 211|1@0+ (1,0) [0|1] "" XXX
  SG_ SET_ME_0X7FFF : 240|16@1+ (1,0) [0|65535] "" XXX
  SG_ Lead_Type_Detected : 265|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_Override_or_Standby : 266|1@0+ (1,0) [0|1] "" XXX
+ SG_ Not_ACC_AKTIV_regelt : 266|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_AKTIV_regelt : 267|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_Limiter_Mode : 268|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_3 : 269|2@1+ (1,0) [0|7] "" XXX
- SG_ NEW_SIGNAL_2 : 271|2@1+ (1,0) [0|3] "" XXX
- SG_ NEW_SIGNAL_1 : 273|2@1+ (1,0) [0|7] "" XXX
- SG_ NEW_SIGNAL_12 : 276|3@1+ (1,0) [0|15] "" XXX
- SG_ NEW_SIGNAL_16 : 279|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_15 : 280|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_Driving_Type : 269|4@1+ (1,0) [0|7] "" XXX
+ SG_ Unknown_03 : 273|8@1+ (1,0) [0|7] "" XXX
  SG_ Lead_Type : 287|3@1+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_20 : 290|9@1+ (1,0) [0|7] "" XXX
  SG_ PACC_Events : 332|4@0+ (1,0) [0|1] "" XXX
@@ -1620,9 +1617,7 @@ BO_ 333 MEB_ACC_02: 32 XXX
  SG_ SET_ME_0X1 : 92|1@0+ (1,0) [0|1] "" XXX
  SG_ SET_ME_0X9 : 232|4@1+ (1,0) [0|15] "" XXX
  SG_ Speed : 236|10@1+ (0.1,0) [0|15] "" XXX
- SG_ Unknown_State_1_1 : 248|2@1+ (1,0) [0|3] "" XXX
- SG_ Unknown_State_1_2 : 250|2@1+ (1,0) [0|3] "" XXX
- SG_ Unknown_State_1_3 : 252|2@1+ (1,0) [0|3] "" XXX
+ SG_ Accel_Boost : 248|6@1+ (1,0) [0|3] "" XXX
  SG_ Reversing : 254|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1004 MEB_TSK_01: 8 XXX
@@ -1643,8 +1638,9 @@ VAL_ 333 ACC_Anhalten 0 "kein_Anhalten_gewuenscht" 1 "Anhalten_gewuenscht";
 VAL_ 333 ACC_Typ 0 "Basis_ACC" 1 "ACC_mit_FollowToStop" 2 "ACC_mit_StopAndGo" 3 "ACC_nicht_codiert";
 VAL_ 333 ACC_Status_ACC 0 "ACC_OFF_Hauptschalter_aus" 1 "ACC_INIT" 2 "ACC_STANDBY" 3 "ACC_AKTIV_regelt" 4 "ACC_OVERRIDE" 5 "ACC_Abschaltreaktion" 6 "reversibler_Fehler_im_ACC_System" 7 "irreversibler_Fehler_im_ACC_System";
 VAL_ 333 ACC_Minimale_Bremsung 0 "Anforderung_Minimale_Bremsung_nicht_aktiv" 1 "Anforderung_Minimale_Bremsung_aktiv";
-VAL_ 333 ACC_Anforderung_HMS 0 "keine_Anforderung" 1 "halten" 2 "parken" 3 "halten_Standby" 4 "anfahren" 5 "Loesen_ueber_Rampe";
 VAL_ 333 ACC_Anhalten_Bremse 2046 "neutral";
+VAL_ 333 ACC_Anforderung_HMS 0 "keine_Anforderung" 1 "halten" 2 "parken" 3 "halten_Standby" 4 "anfahren" 5 "Loesen_ueber_Rampe";
+VAL_ 333 Accel_Boost 3 "Driving" 0 "Stop" 2 "Driving" 1 "Driving";
 VAL_ 768 ACC_Tempolimit 0 "keine_Anzeige" 1 "5_zulHoechstgeschw" 2 "7_zulHoechstgeschw" 3 "10_zulHoechstgeschw" 4 "15_zulHoechstgeschw" 5 "20_zulHoechstgeschw" 6 "25_zulHoechstgeschw" 7 "30_zulHoechstgeschw" 8 "35_zulHoechstgeschw" 9 "40_zulHoechstgeschw" 10 "45_zulHoechstgeschw" 11 "50_zulHoechstgeschw" 12 "55_zulHoechstgeschw" 13 "60_zulHoechstgeschw" 14 "65_zulHoechstgeschw" 15 "70_zulHoechstgeschw" 16 "75_zulHoechstgeschw" 17 "80_zulHoechstgeschw" 18 "85_zulHoechstgeschw" 19 "90_zulHoechstgeschw" 20 "95_zulHoechstgeschw" 21 "100_zulHoechstgeschw" 22 "110_zulHoechstgeschw" 23 "120_zulHoechstgeschw" 24 "130_zulHoechstgeschw" 25 "140_zulHoechstgeschw" 26 "150_zulHoechstgeschw" 27 "160_zulHoechstgeschw" 28 "200_zulHoechstgeschw" 30 "250_zulHoechstgeschw" 31 "Ende_zulHoechstgeschw";
 VAL_ 768 ACC_Wunschgeschw_Farbe 0 "Grundfarbe" 1 "Farbe_1";
 VAL_ 768 ACC_Warnung_Verkehrszeichen_1 0 "keine_Warnung_Initialwert" 1 "Warnung";
@@ -1664,8 +1660,10 @@ VAL_ 768 ACC_Anzeige_Zeitluecke 0 "Anzeige_Zeitluecke_nicht_angefordert" 1 "Anze
 VAL_ 768 ACC_Texte_Primaeranz_02 0 "keine Anzeige" 1 "VDA_ACC_Symbol_YYY_kmh_mph" 2 "Kurven_Symbol_YYY_kmh_mph" 3 "Tempolimit_Symbol_YYY_kmh_mph" 4 "ACC_anfahrbereit" 5 "eingestellte_Zeitluecke" 6 "Tuer offen !" 7 "Stehendes Objekt voraus" 8 "o  o  o" 9 "ACC aus" 10 "ACC startet" 11 "ACC Sensor Sicht !" 12 "ACC nicht verfuegbar" 13 "ACC Fehler" 14 "ESP Eingriff" 15 "ESP PASSIV !" 16 "Parkbremse !" 17 "Geschwindigkeitsgrenze" 18 "Waehlhebelposition !" 19 "Fahrer Gurtschloss offen !" 20 "Schalthebelposition !" 21 "Drehzahl !" 22 "HDC aktiv" 23 "Kupplung betaetigt" 24 "Gang einlegen !" 25 "Bremse ueberhitzt !" 26 "Steigung_Gefaelle_zu_gross" 27 "ABSTAND" 28 "Rechtsueberholen_verhindert" 29 "Linksueberholen_verhindert" 30 "Kreuzungs_Symbol" 31 "Kreisverkehr_Symbol" 32 "Gefaelle_Symbol" 33 "Tempolimit_Kurvenassistent_ein" 34 "Kurvenassistent_ein" 35 "Tempolimitassistent_ein" 36 "Achtung_Geschwindigkeitsueberschreitung" 37 "Tempolimit_und_Kurvenassistent_nicht_verfuegbar" 38 "Tempolimit_nicht_verfuegbar" 39 "Kurvenassistent_nicht_verfuegbar" 40 "Autobahnausfahrt_Symbol" 41 "Stauende_Symbol" 42 "Engstelle_Symbol" 43 "STP_verfuegbar" 44 "Ampel_vertikal" 45 "Ampel_horizontal" 46 "STA_verfuegbar";
 VAL_ 768 ACC_Texte_Zusatzanz_02 0 "keine_Anzeige" 1 "ACC_AUS" 2 "Standby" 3 "UEBERTRETEN" 4 "ABSTAND" 5 "DISTANZ_1" 6 "DISTANZ_2" 7 "DISTANZ_3" 8 "DISTANZ_4" 9 "DISTANZ_5" 10 "DISTANZ_1__dyn" 11 "DISTANZ_2__dyn" 12 "DISTANZ_3__dyn" 13 "DISTANZ_4__dyn" 14 "DISTANZ_5__dyn" 15 "DISTANZ_1__comf" 16 "DISTANZ_2__comf" 17 "DISTANZ_3__comf" 18 "DISTANZ_4__comf" 19 "DISTANZ_5__comf" 20 "DISTANZ_1__efficiency" 21 "DISTANZ_2__efficiency" 22 "DISTANZ_3__efficiency" 23 "DISTANZ_4__efficiency" 24 "DISTANZ_5__efficiency" 25 "DISTANZ_1__Stau" 26 "DISTANZ_2__Stau" 27 "DISTANZ_3__Stau" 28 "DISTANZ_4__Stau" 29 "DISTANZ_5__Stau" 30 "ACHTUNG" 31 "Abstandsanzeige" 32 "Abstandsanzeige_Warnung_aktiviert" 33 "STA_verfuegbar" 34 "Engstelle" 35 "RUV_aktiv_Rechtsverkehr" 36 "RUV_aktiv_Linksverkehr" 37 "STP_Verfuegbar" 38 "AW_Warnschwelle_1" 39 "AW_Warnschwelle_2" 40 "AW_Warnschwelle_3" 41 "AW_Warnung_1" 42 "AW_Warnung_2" 43 "AW_Warnung_3";
 VAL_ 768 STA_Primaeranz 0 "keine_Anzeige" 1 "STA_standby" 2 "STA_aktiv" 3 "STA_Warnung";
-VAL_ 768 ACC_Status_ACC 0 "ACC_OFF_Hauptschalter_aus" 1 "ACC_INIT" 2 "ACC_STANDBY" 3 "ACC_AKTIV_regelt" 4 "ACC_OVERRIDE" 5 "ACC_Abschaltreaktion" 6 "reversibler_Fehler_im_ACC_System" 7 "irreversibler_Fehler_im_ACC_System";
-VAL_ 768 Lead_Type 5 "Motorcycle" 3 "Car" 0 "None" 2 "Truck";
 VAL_ 768 Heartbeat 1 "ACC_Init_Low" 420 "ACC_Init_High" 221 "ACC_Available_Low" 360 "ACC_Available_High";
+VAL_ 768 ACC_Status_ACC 0 "ACC_OFF_Hauptschalter_aus" 1 "ACC_INIT" 2 "ACC_STANDBY" 3 "ACC_AKTIV_regelt" 4 "ACC_OVERRIDE" 5 "ACC_Abschaltreaktion" 6 "reversibler_Fehler_im_ACC_System" 7 "irreversibler_Fehler_im_ACC_System";
+VAL_ 768 Lead_Type_Detected 1 "Lead_Detected" 0 "No_Lead_Detected";
+VAL_ 768 ACC_Driving_Type 3 "Following_Lead" 0 "None" 4 "PACC_Regulating_Speed" 8 "PACC_Regulating_Speed";
+VAL_ 768 Lead_Type 5 "Motorcycle" 3 "Car" 0 "None" 2 "Truck";
 VAL_ 267 TSK_STATUS 0 "init" 1 "disabled" 2 "enabled" 3 "regulating" 4 "accel_pedal_override" 5 "brake_only" 6 "temp_fault" 7 "perm_fault";
 VAL_ 1004 TSK_State 0 "init" 1 "disabled" 2 "enabled" 3 "regulating" 4 "accel_pedal_override" 5 "brake_only" 6 "temp_fault" 7 "perm_fault";
