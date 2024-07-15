@@ -1570,13 +1570,13 @@ BO_ 768 MEB_ACC_01: 48 XXX
  SG_ Heartbeat : 150|9@1+ (1,0) [0|3] "" XXX
  SG_ SET_ME_0XFFFF : 160|16@1+ (1,0) [0|65535] "" XXX
  SG_ ACC_Enabled : 186|1@0+ (1,0) [0|1] "" XXX
- SG_ Hold_First_Active : 189|1@0+ (1,0) [0|1] "" XXX
+ SG_ Unknown_05 : 189|1@0+ (1,0) [0|1] "" XXX
  SG_ SET_ME_0X1 : 199|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_Status_ACC : 208|3@1+ (1,0) [0|7] "" XXX
- SG_ ACC_Status_Change : 211|1@0+ (1,0) [0|1] "" XXX
+ SG_ Unknown_04 : 211|1@0+ (1,0) [0|1] "" XXX
  SG_ SET_ME_0X7FFF : 240|16@1+ (1,0) [0|65535] "" XXX
  SG_ Lead_Type_Detected : 265|1@0+ (1,0) [0|1] "" XXX
- SG_ Not_ACC_AKTIV_regelt : 266|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_Standby_Override : 266|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_AKTIV_regelt : 267|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_Limiter_Mode : 268|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_Driving_Type : 269|4@1+ (1,0) [0|7] "" XXX
@@ -1664,7 +1664,7 @@ VAL_ 768 Lead_Type_Detected 1 "Lead_Detected" 0 "No_Lead_Detected";
 VAL_ 768 ACC_Driving_Type 3 "Following_Lead" 0 "None" 4 "PACC_Regulating_Speed" 8 "PACC_Regulating_Speed";
 VAL_ 768 Unknown_03 0 "None" 106 "State_01" 208 "State_02";
 VAL_ 768 Lead_Type 5 "Motorcycle" 3 "Car" 0 "None" 2 "Truck";
-VAL_ 768 ACC_Special_Events 3 "ACC_Starting_Without_User_Available";
+VAL_ 768 ACC_Special_Events 3 "Starting_Available" 0 "None" 5 "Speed_Limit_Camera" 9 "Street_Type" 4 "Speed_Limit_in_Nav";
 VAL_ 768 Zeitluecke_1_Signal 0 "keine Anzeige";
 VAL_ 768 Zeitluecke_2_Signal 0 "keine Anzeige" 32 "Minimum";
 VAL_ 768 Zeitluecke_3_Signal 0 "keine Anzeige";
