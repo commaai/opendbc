@@ -1550,7 +1550,7 @@ BO_ 768 MEB_ACC_01: 48 XXX
  SG_ ACC_Wunschgeschw_Farbe : 69|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ ACC_Warnung_Verkehrszeichen_1 : 70|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ ACA_Querfuehrung : 71|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ SET_ME_0X1_2 : 73|1@0+ (1,0) [0|1] "" XXX
+ SG_ Unknown_02 : 73|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_Regelung_AIO : 75|1@1+ (1,0) [0|1] "" ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
  SG_ ACC_Wunschgeschw_02 : 76|10@1+ (0.32,0) [0|327.04] "Unit_KiloMeterPerHour" Vector__XXX
  SG_ ACC_Abstandsindex_02 : 86|10@1+ (1,0) [1|1021] "" Vector__XXX
@@ -1582,7 +1582,7 @@ BO_ 768 MEB_ACC_01: 48 XXX
  SG_ ACC_Driving_Type : 269|4@1+ (1,0) [0|7] "" XXX
  SG_ Unknown_03 : 273|8@1+ (1,0) [0|7] "" XXX
  SG_ Lead_Type : 287|3@1+ (1,0) [0|3] "" XXX
- SG_ Lead_Distance : 290|9@1+ (0.32,0) [0|7] "Unit_Meter" XXX
+ SG_ Lead_Distance : 290|10@1+ (0.32,0) [0|7] "Unit_Meter" XXX
  SG_ ACC_Special_Events : 332|4@0+ (1,0) [0|3] "" XXX
  SG_ Zeitluecke_1_Signal : 334|9@1+ (1,0) [0|3] "" XXX
  SG_ Zeitluecke_2_Signal : 344|9@1+ (1,0) [0|63] "" XXX
