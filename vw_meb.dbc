@@ -1496,12 +1496,12 @@ BO_ 317 MEB_EPS_01: 32 XXX
  SG_ Steering_Angle : 76|17@1+ (0.00906,0) [0|32767] "" XXX
 
 BO_ 771 HCA_03: 24 XXX
- SG_ Inactive : 13|1@0+ (1,0) [0|1] "" XXX
- SG_ Active : 14|1@0+ (1,0) [0|3] "" XXX
- SG_ Torque_Wind_Down : 22|7@0+ (1,0) [0|125] "" XXX
+ SG_ Inactive : 13|1@1+ (1,0) [0|1] "" XXX
+ SG_ Active : 14|1@1+ (1,0) [0|3] "" XXX
+ SG_ Torque_Wind_Down : 16|7@1+ (1,0) [0|125] "" XXX
  SG_ Steering_Angle : 24|15@1+ (0.0174,0) [0|360] "Unit_DegreOfArc" XXX
- SG_ VZ : 39|1@0+ (1,0) [0|1] "" XXX
- SG_ Active_02 : 66|1@0+ (1,0) [0|1] "" XXX
+ SG_ VZ : 39|1@1+ (1,0) [0|1] "" XXX
+ SG_ Active_02 : 66|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 267 MEB_Motor_01: 32 XXX
  SG_ Accel_Pedal : 12|8@1+ (0.4,0) [0|255] "" XXX
