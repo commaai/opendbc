@@ -1676,7 +1676,7 @@ VAL_ 768 ACC_Status_ACC 0 "ACC_OFF_Hauptschalter_aus" 1 "ACC_INIT" 2 "ACC_STANDB
 VAL_ 768 Lead_Type_Detected 1 "Lead_Detected" 0 "No_Lead_Detected";
 VAL_ 768 ACC_Driving_Type 3 "Following_Lead" 0 "None" 4 "PACC_Regulating_Speed" 8 "PACC_Regulating_Speed";
 VAL_ 768 Unknown_03 0 "None" 106 "State_01" 208 "State_02";
-VAL_ 768 Lead_Type 5 "Motorcycle" 3 "Car" 0 "None" 2 "Truck";
+VAL_ 768 Lead_Type 5 "Bicycle" 3 "Car" 0 "None" 2 "Truck" 4 "Motorcycle";
 VAL_ 768 ACC_Special_Events 3 "Starting_Available" 0 "None" 5 "Speed_Limit_Camera" 9 "Street_Type" 4 "Speed_Limit_in_Nav";
 VAL_ 768 Zeitluecke_1_Signal 0 "keine Anzeige";
 VAL_ 768 Zeitluecke_2_Signal 0 "keine Anzeige" 32 "Minimum";
