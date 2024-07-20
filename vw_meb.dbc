@@ -1539,7 +1539,7 @@ BO_ 591 MEB_Distance_01: 64 XXX
  SG_ Left_Lane_01_Lat_Distance : 108|10@1+ (0.065,-33.28) [0|15] "Unit_Meter" XXX
  SG_ Right_Lane_01_Long_Distance : 118|22@1+ (3.2e-05,0) [0|1023] "Unit_Meter" XXX
  SG_ Right_Lane_01_Lat_Distance : 140|10@1+ (0.065,-33.28) [0|15] "Unit_Meter" XXX
- SG_ Same_Lane_02_Long_Distance : 150|22@1+ (3.2e-05,1) [0|4095] "Unit_Meter" XXX
+ SG_ Same_Lane_02_Long_Distance : 150|22@1+ (3.2e-05,0) [0|4095] "Unit_Meter" XXX
  SG_ Same_Lane_02_Lat_Distance : 172|10@1+ (0.065,-33.28) [0|31] "Unit_Meter" XXX
  SG_ Left_Lane_02_Long_Distance : 182|22@1+ (3.2e-05,0) [0|4095] "Unit_Meter" XXX
  SG_ Left_Lane_02_Lat_Distance : 204|10@1+ (0.065,-33.28) [0|1023] "Unit_Meter" XXX
