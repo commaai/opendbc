@@ -1451,10 +1451,10 @@ BO_ 252 MEB_ESP_01: 48 XXX
  SG_ VR_Radgeschw : 80|16@1+ (0.0075,0) [0|491.5125] "Unit_KilometerPerSecond" XXX
  SG_ HL_Radgeschw : 96|16@1+ (0.0075,0) [0|491.5125] "Unit_KilometerPerSecond" XXX
  SG_ HR_Radgeschw : 112|16@1+ (0.0075,0) [0|491.5125] "Unit_KilometerPerSecond" XXX
- SG_ VL_Brake_Pressure : 154|6@1+ (1,0) [0|100] "" XXX
- SG_ VR_Brake_Pressure : 162|6@1+ (1,0) [0|100] "" XXX
- SG_ HL_Brake_Pressure : 170|6@1+ (1,0) [0|100] "" XXX
- SG_ HR_Brake_Pressure : 178|6@1+ (1,0) [0|100] "" XXX
+ SG_ VL_Brake_Pressure : 152|8@1+ (1,0) [0|100] "" XXX
+ SG_ VR_Brake_Pressure : 160|8@1+ (1,0) [0|100] "" XXX
+ SG_ HL_Brake_Pressure : 168|8@1+ (1,0) [0|100] "" XXX
+ SG_ HR_Brake_Pressure : 176|8@1+ (1,0) [0|100] "" XXX
  SG_ Steering_Wheel_CW : 184|8@1+ (1.67,0) [0|255] "" XXX
  SG_ Steering_Wheel_CCW : 192|8@1+ (1.67,0) [0|255] "" XXX
 
