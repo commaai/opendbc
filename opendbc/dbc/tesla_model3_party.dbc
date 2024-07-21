@@ -144,13 +144,6 @@ BO_ 880 EPAS3S_sysStatus: 8 PARTY
  SG_ EPAS3S_internalSASQF : 4|1@0+ (1,0) [0|1] ""  gtw
  SG_ EPAS3S_currentTuneMode : 7|3@0+ (1,0) [0|5] ""  gtw
 
-BO_ 599 DI_speed: 8 PARTY
- SG_ DI_uiSpeedUnits : 32|1@1+ (1,0) [0|1] ""  das
- SG_ DI_uiSpeed : 24|8@1+ (1,0) [0|254] ""  das
- SG_ DI_vehicleSpeed : 12|12@1+ (0.08,-40) [-40|285] "kph"  park
- SG_ DI_speedCounter : 8|4@1+ (1,0) [0|15] ""  park
- SG_ DI_speedChecksum : 0|8@1+ (1,0) [0|255] ""  park
-
 BO_ 1160 DAS_steeringControl: 4 PARTY
  SG_ DAS_steeringControlChecksum : 31|8@0+ (1,0) [0|255] ""  aps
  SG_ DAS_steeringControlCounter : 19|4@0+ (1,0) [0|15] ""  aps
@@ -291,9 +284,6 @@ VAL_ 880 EPAS3S_steeringFault 0 "NO_FAULT" 1 "FAULT" ;
 VAL_ 880 EPAS3S_steeringReduced 0 "NORMAL_ASSIST" 1 "REDUCED_ASSIST" ;
 VAL_ 880 EPAS3S_internalSASQF 1 "IN_SPEC" 0 "UNDEFINABLE_ACCURACY" ;
 VAL_ 880 EPAS3S_currentTuneMode 3 "STEERING_TUNE_RWD_COMFORT" 1 "STEERING_TUNE_DM_STANDARD" 5 "STEERING_TUNE_RWD_SPORT" 0 "STEERING_TUNE_DM_COMFORT" 4 "STEERING_TUNE_RWD_STANDARD" 2 "STEERING_TUNE_DM_SPORT" ;
-VAL_ 599 DI_uiSpeedUnits 0 "DI_SPEED_MPH" 1 "DI_SPEED_KPH" ;
-VAL_ 599 DI_uiSpeed 255 "DI_UI_SPEED_SNA" ;
-VAL_ 599 DI_vehicleSpeed 4095 "SNA" ;
 VAL_ 1160 DAS_steeringControlType 2 "LANE_KEEP_ASSIST" 0 "NONE" 1 "ANGLE_CONTROL" 3 "EMERGENCY_LANE_KEEP" ;
 VAL_ 1160 DAS_steeringAngleRequest 16384 "ZERO_ANGLE" ;
 VAL_ 297 SCCM_steeringAngleValidity 3 "SNA" 2 "INIT" 0 "INVALID" 1 "VALID" ;

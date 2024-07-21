@@ -236,6 +236,15 @@ BO_ 1013 ID3F5VCFRONT_lighting: 8 VEH
  SG_ VCFRONT_indicatorRightRequest : 2|2@1+ (1,0) [0|2] ""  Receiver
  SG_ VCFRONT_indicatorLeftRequest : 0|2@1+ (1,0) [0|2] ""  Receiver
 
+BO_ 599 DI_speed: 8 VEH
+ SG_ DI_speedChecksum : 0|8@1+ (1,0) [0|255] ""  VehicleBus
+ SG_ DI_speedCounter : 8|4@1+ (1,0) [0|15] ""  VehicleBus
+ SG_ DI_opdVehicleModelSpeedRef : 12|12@1+ (0.08,-40) [-40|287.6] "kph"  VehicleBus
+ SG_ DI_uiSpeed : 24|9@1+ (1,0) [0|511] ""  VehicleBus
+ SG_ DI_uiSpeedUnits : 33|1@1+ (1,0) [0|1] ""  VehicleBus
+ SG_ DI_vehicleSpeed : 43|13@1+ (0.08,-40) [-40|615.28] "kph"  VehicleBus
+ SG_ DI_velocityEstimatorState : 56|3@1+ (1,0) [0|7] ""  VehicleBus
+
 VAL_ 568 SpdCtrlLvr_Stat 32 "DN_1ST" 16 "UP_1ST" 8 "DN_2ND" 4 "UP_2ND" 2 "RWD" 1 "FWD" 0 "IDLE" ;
 VAL_ 568 DTR_Dist_Rq 255 "SNA" 200 "ACC_DIST_7" 166 "ACC_DIST_6" 133 "ACC_DIST_5" 100 "ACC_DIST_4" 66 "ACC_DIST_3" 33 "ACC_DIST_2" 0 "ACC_DIST_1" ;
 VAL_ 568 TurnIndLvr_Stat 3 "SNA" 2 "RIGHT" 1 "LEFT" 0 "IDLE" ;
@@ -337,3 +346,7 @@ VAL_ 258 VCLEFT_mirrorState 3 "MIRROR_STATE_FOLD_UNFOLD" 1 "MIRROR_STATE_TILT_X"
 VAL_ 258 VCLEFT_mirrorHeatState 2 "HEATER_STATE_OFF" 4 "HEATER_STATE_FAULT" 1 "HEATER_STATE_ON" 0 "HEATER_STATE_SNA" 3 "HEATER_STATE_OFF_UNAVAILABLE";
 VAL_ 258 VCLEFT_frontLatchStatus 8 "LATCH_FAULT" 2 "LATCH_CLOSED" 1 "LATCH_OPENED" 3 "LATCH_CLOSING" 7 "LATCH_DEFAULT" 4 "LATCH_OPENING" 5 "LATCH_AJAR" 6 "LATCH_TIMEOUT" 0 "LATCH_SNA";
 VAL_ 258 VCLEFT_mirrorFoldState 4 "MIRROR_FOLD_STATE_UNFOLDING" 1 "MIRROR_FOLD_STATE_FOLDED" 3 "MIRROR_FOLD_STATE_FOLDING" 0 "MIRROR_FOLD_STATE_UNKNOWN" 2 "MIRROR_FOLD_STATE_UNFOLDED";
+VAL_ 599 DI_velocityEstimatorState 0 "NOT_INITIALIZED" 1 "WHEELS_NORMAL" 2 "WHEELS_REDUCED" 3 "BACKUP_WHEELS_A" 4 "BACKUP_WHEELS_B" 5 "BACKUP_MOTOR" ;
+VAL_ 599 DI_vehicleSpeed 8191 "SNA" ;
+VAL_ 599 DI_uiSpeedUnits 0 "MPH" 1 "KPH" ;
+VAL_ 599 DI_uiSpeed 511 "DI_UI_SPEED_SNA" ;
