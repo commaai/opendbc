@@ -1508,6 +1508,8 @@ BO_ 771 HCA_03: 24 XXX
  SG_ Active_02 : 66|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 267 MEB_Motor_01: 32 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Accel_Pedal_Pressure : 12|9@1+ (0.4,0) [0|255] "" XXX
  SG_ Accel_Low_Pressed_Support : 21|1@1+ (1,0) [0|7] "" XXX
  SG_ TSK_Status : 88|3@1+ (1,0) [0|7] "" XXX
