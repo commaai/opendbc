@@ -230,6 +230,8 @@ BO_ 168 Motor_12: 8 Motor_Diesel_MQB
  SG_ MO_Drehzahl_01 : 48|16@1+ (0.25,0) [0|16383] "Unit_MinutInver" BMS_MQB,Gateway_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,LEH_MQB,SAK_MQB
 
 BO_ 958 Motor_14: 8 Gateway
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  XXX
  SG_ MO_StartStopp_Status : 12|2@1+ (1,0) [0|3] ""  Sub_Gateway,TME
  SG_ MO_StartStopp_Wiederstart : 14|1@1+ (1,0) [0|1] ""  BMS_NV,Sub_Gateway,TME
  SG_ MO_StartStopp_Motorstopp : 15|1@1+ (1,0) [0|1] ""  BMS_NV,Sub_Gateway,TME
