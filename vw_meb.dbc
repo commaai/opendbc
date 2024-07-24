@@ -1488,7 +1488,6 @@ BO_ 313 MEB_ESP_05: 32 XXX
  SG_ Brake_Pressed_2 : 27|1@0+ (1,0) [0|1] "" XXX
  SG_ ESP_Hold : 35|1@0+ (1,0) [0|1] "" XXX
  SG_ Brake_Pressed_3 : 48|1@0+ (1,0) [0|1] "" XXX
- SG_ AEB_Active : 56|2@1+ (1,0) [0|3] "" XXX
  SG_ Brake_Pressure : 76|11@1+ (1,0) [0|1023] "" XXX
 
 BO_ 522 MEB_ABS_01: 64 XXX
