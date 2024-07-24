@@ -1651,8 +1651,8 @@ BO_ 1004 MEB_TSK_01: 8 XXX
  SG_ TSK_State : 53|3@1+ (1,0) [0|7] "" XXX
 
 BO_ 619 MEB_Travel_Assist_01: 8 XXX
- SG_ CHK : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ CNT : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Travel_Assist_Status : 13|3@1+ (1,0) [0|3] "" XXX
  SG_ Travel_Assist_Request : 19|3@1+ (1,0) [0|7] "" XXX
  SG_ Travel_Assist_Available : 23|1@1+ (1,0) [0|1] "" XXX
