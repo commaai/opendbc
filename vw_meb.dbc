@@ -1646,7 +1646,12 @@ BO_ 333 MEB_ACC_02: 32 XXX
 BO_ 1004 MEB_TSK_01: 8 XXX
  SG_ TSK_State : 53|3@1+ (1,0) [0|7] "" XXX
 
-BO_ 1019 MEB_ACC_03: 8 XXX
+BO_ 619 MEB_Travel_Assist_01: 8 XXX
+ SG_ CHK : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ CNT : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ Travel_Assist_Status : 13|3@1+ (1,0) [0|3] "" XXX
+ SG_ Travel_Assist_Request : 19|3@1+ (1,0) [0|7] "" XXX
+ SG_ Travel_Assist_Available : 23|1@0+ (1,0) [0|1] "" XXX
 
 
 VAL_ 159 EPS_HCA_Status 0 "disabled" 1 "initializing" 2 "fault" 3 "ready" 4 "rejected" 5 "active" 8 "preempted";
@@ -1664,6 +1669,9 @@ VAL_ 333 ACC_Minimale_Bremsung 0 "Anforderung_Minimale_Bremsung_nicht_aktiv" 1 "
 VAL_ 333 ACC_Anhalteweg 2046 "Neutralwert" 2047 "Fehler";
 VAL_ 333 ACC_Anforderung_HMS 0 "keine_Anforderung" 1 "halten" 2 "parken" 3 "halten_Standby" 4 "anfahren" 5 "Loesen_ueber_Rampe";
 VAL_ 333 Accel_Boost 3 "Driving" 0 "Stop" 2 "Driving" 1 "Driving";
+VAL_ 619 Travel_Assist_Status 4 "enabled" 0 "disabled" 2 "ready" 3 "pre_ready";
+VAL_ 619 Travel_Assist_Request 4 "enable" 3 "disable" 0 "no_request" 1 "error";
+VAL_ 619 Travel_Assist_Available 0 "not_available" 1 "available";
 VAL_ 768 ACC_Tempolimit 0 "keine_Anzeige" 1 "5_zulHoechstgeschw" 2 "7_zulHoechstgeschw" 3 "10_zulHoechstgeschw" 4 "15_zulHoechstgeschw" 5 "20_zulHoechstgeschw" 6 "25_zulHoechstgeschw" 7 "30_zulHoechstgeschw" 8 "35_zulHoechstgeschw" 9 "40_zulHoechstgeschw" 10 "45_zulHoechstgeschw" 11 "50_zulHoechstgeschw" 12 "55_zulHoechstgeschw" 13 "60_zulHoechstgeschw" 14 "65_zulHoechstgeschw" 15 "70_zulHoechstgeschw" 16 "75_zulHoechstgeschw" 17 "80_zulHoechstgeschw" 18 "85_zulHoechstgeschw" 19 "90_zulHoechstgeschw" 20 "95_zulHoechstgeschw" 21 "100_zulHoechstgeschw" 22 "110_zulHoechstgeschw" 23 "120_zulHoechstgeschw" 24 "130_zulHoechstgeschw" 25 "140_zulHoechstgeschw" 26 "150_zulHoechstgeschw" 27 "160_zulHoechstgeschw" 28 "200_zulHoechstgeschw" 30 "250_zulHoechstgeschw" 31 "Ende_zulHoechstgeschw";
 VAL_ 768 ACC_Wunschgeschw_Farbe 0 "Grundfarbe" 1 "Farbe_1";
 VAL_ 768 ACC_Warnung_Verkehrszeichen_1 0 "keine_Warnung_Initialwert" 1 "Warnung";
