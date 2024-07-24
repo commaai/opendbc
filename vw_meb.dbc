@@ -1651,7 +1651,7 @@ BO_ 619 MEB_Travel_Assist_01: 8 XXX
  SG_ CNT : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Travel_Assist_Status : 13|3@1+ (1,0) [0|3] "" XXX
  SG_ Travel_Assist_Request : 19|3@1+ (1,0) [0|7] "" XXX
- SG_ Travel_Assist_Available : 23|1@0+ (1,0) [0|1] "" XXX
+ SG_ Travel_Assist_Available : 23|1@1+ (1,0) [0|1] "" XXX
 
 
 VAL_ 159 EPS_HCA_Status 0 "disabled" 1 "initializing" 2 "fault" 3 "ready" 4 "rejected" 5 "active" 8 "preempted";
