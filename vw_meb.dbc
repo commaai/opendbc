@@ -1449,8 +1449,10 @@ BO_ 1355 Parkhilfe_04: 8 Gateway
 BO_ 252 MEB_ESP_01: 48 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ AEB_Breaking_01 : 24|8@1+ (1,0) [0|255] "" XXX
+ SG_ AEB_Breaking_02 : 32|8@1+ (1,0) [0|255] "" XXX
  SG_ Accelerator_Higher_Speed : 40|1@0+ (1,0) [0|1] "" XXX
- SG_ Brake_Pressure : 42|8@1+ (1,0) [0|3] "" XXX
+ SG_ Brake_Pressure : 42|9@1+ (1,0) [0|3] "" XXX
  SG_ VL_Radgeschw : 64|16@1+ (0.0075,0) [0|491.5125] "Unit_KilometerPerSecond" XXX
  SG_ VR_Radgeschw : 80|16@1+ (0.0075,0) [0|491.5125] "Unit_KilometerPerSecond" XXX
  SG_ HL_Radgeschw : 96|16@1+ (0.0075,0) [0|491.5125] "Unit_KilometerPerSecond" XXX
@@ -1477,6 +1479,7 @@ BO_ 258 MEB_ESP_04: 48 XXX
  SG_ Yaw_Rate_Sign : 54|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_7 : 99|1@0+ (1,0) [0|1] "" XXX
  SG_ ESP_Hold : 120|1@0+ (1,0) [0|1] "" XXX
+ SG_ AEB_Active : 123|1@1+ (1,0) [0|7] "" XXX
  SG_ NEW_SIGNAL_6 : 171|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_5 : 180|10@1+ (1,0) [0|63] "" XXX
 
@@ -1485,7 +1488,8 @@ BO_ 313 MEB_ESP_05: 32 XXX
  SG_ Brake_Pressed_2 : 27|1@0+ (1,0) [0|1] "" XXX
  SG_ ESP_Hold : 35|1@0+ (1,0) [0|1] "" XXX
  SG_ Brake_Pressed_3 : 48|1@0+ (1,0) [0|1] "" XXX
- SG_ Brake_Pressure : 76|10@1+ (1,0) [0|1023] "" XXX
+ SG_ AEB_Active : 56|2@1+ (1,0) [0|3] "" XXX
+ SG_ Brake_Pressure : 76|11@1+ (1,0) [0|1023] "" XXX
 
 BO_ 522 MEB_ABS_01: 64 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
