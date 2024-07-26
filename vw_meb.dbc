@@ -1508,9 +1508,9 @@ BO_ 317 MEB_EPS_01: 32 XXX
 
 BO_ 771 HCA_03: 24 XXX
  SG_ Inactive : 13|1@1+ (1,0) [0|1] "" XXX
- SG_ Active : 14|1@1+ (1,0) [0|3] "" XXX
- SG_ Torque_Wind_Down : 16|7@1+ (1,0) [0|125] "" XXX
- SG_ Steering_Angle : 24|15@1+ (0.0174,0) [0|360] "Unit_DegreOfArc" XXX
+ SG_ Active : 14|1@1+ (1,0) [0|1] "" XXX
+ SG_ Power : 16|7@1+ (1,0) [0|125] "" XXX
+ SG_ Curvature : 24|15@1+ (0.00001526,0) [0|0.5] "Unit_Meter-1" XXX
  SG_ VZ : 39|1@1+ (1,0) [0|1] "" XXX
  SG_ Active_02 : 66|1@1+ (1,0) [0|1] "" XXX
 
