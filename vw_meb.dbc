@@ -1510,7 +1510,7 @@ BO_ 771 HCA_03: 24 XXX
  SG_ Inactive : 13|1@1+ (1,0) [0|1] "" XXX
  SG_ Active : 14|1@1+ (1,0) [0|1] "" XXX
  SG_ Power : 16|7@1+ (1,0) [0|125] "" XXX
- SG_ Curvature : 24|15@1+ (3e-06,0) [0|0.1] "Unit_1/m" XXX
+ SG_ Curvature : 24|15@1+ (5.8e-06,0) [0|0.2] "Unit_1/m" XXX
  SG_ VZ : 39|1@1+ (1,0) [0|1] "" XXX
  SG_ Active_02 : 66|1@1+ (1,0) [0|1] "" XXX
 
