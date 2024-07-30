@@ -264,7 +264,7 @@ class TestCanParserPacker:
           can_msgs[frame].append(packer.make_can_msg("VSA_STATUS", 0, values))
           idx += 1
 
-      parser.update_strings([[0, can_msgs[0]], [0, can_msgs[1]]])
+      parser.update_strings([[0, m] for m in can_msgs])
       vl_all = parser.vl_all["VSA_STATUS"]["USER_BRAKE"]
 
       assert vl_all == user_brake_vals
