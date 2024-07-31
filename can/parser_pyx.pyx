@@ -13,6 +13,7 @@ from .common cimport dbc_lookup, SignalValue, DBC, CanData, CanFrame
 import numbers
 from collections import defaultdict
 
+
 cdef class CANParser:
   cdef:
     cpp_CANParser *can

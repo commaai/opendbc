@@ -195,7 +195,7 @@ void CANParser::updateCans(const CanData &can) {
     }
 
     // TODO: this actually triggers for some cars. fix and enable this
-    // if (dat.size() != state_it->second.size) {
+    //if (dat.size() != state_it->second.size) {
     //  DEBUG("got message with unexpected length: expected %d, got %zu for %d", state_it->second.size, dat.size(), cmsg.getAddress());
     //  continue;
     //}
