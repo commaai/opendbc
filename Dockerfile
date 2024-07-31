@@ -44,11 +44,6 @@ ENV PYTHONPATH=/project
 RUN git config --global --add safe.directory '*'
 
 WORKDIR /project
-RUN git clone https://github.com/commaai/cereal.git /project/cereal && \
-    cd /project/cereal && \
-    git checkout 861144c136c91f70dcbc652c2ffe99f57440ad47 && \
-    rm -rf .git && \
-    scons -j$(nproc) --minimal
 
 COPY SConstruct .
 COPY ./site_scons /project/site_scons
