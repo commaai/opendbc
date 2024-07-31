@@ -1,32 +1,11 @@
 import pytest
 import random
 
-import cereal.messaging as messaging
 from opendbc.can.parser import CANParser
 from opendbc.can.packer import CANPacker
 from opendbc.can.tests import TEST_DBC
 
 MAX_BAD_COUNTER = 5
-
-
-# Python implementation so we don't have to depend on boardd
-def can_list_to_can_capnp(can_msgs, msgtype='can', logMonoTime=None):
-  dat = messaging.new_message(msgtype, len(can_msgs))
-
-  if logMonoTime is not None:
-    dat.logMonoTime = logMonoTime
-
-  for i, can_msg in enumerate(can_msgs):
-    if msgtype == 'sendcan':
-      cc = dat.sendcan[i]
-    else:
-      cc = dat.can[i]
-
-    cc.address = can_msg[0]
-    cc.dat = bytes(can_msg[1])
-    cc.src = can_msg[2]
-
-  return dat.to_bytes()
 
 
 class TestCanParserPacker:
@@ -49,8 +28,7 @@ class TestCanParserPacker:
     # packer should increment the counter
     for i in range(1000):
       msg = packer.make_can_msg("CAN_FD_MESSAGE", 0, {})
-      dat = can_list_to_can_capnp([msg, ])
-      parser.update_strings([dat])
+      parser.update_strings([0, [msg]])
       assert parser.vl["CAN_FD_MESSAGE"]["COUNTER"] == (i % 256)
 
     # setting COUNTER should override
@@ -60,16 +38,14 @@ class TestCanParserPacker:
         "COUNTER": cnt,
         "SIGNED": 0
       })
-      dat = can_list_to_can_capnp([msg, ])
-      parser.update_strings([dat])
+      parser.update_strings([0, [msg]])
       assert parser.vl["CAN_FD_MESSAGE"]["COUNTER"] == cnt
 
     # then, should resume counting from the override value
     cnt = parser.vl["CAN_FD_MESSAGE"]["COUNTER"]
     for i in range(100):
       msg = packer.make_can_msg("CAN_FD_MESSAGE", 0, {})
-      dat = can_list_to_can_capnp([msg, ])
-      parser.update_strings([dat])
+      parser.update_strings([0, [msg]])
       assert parser.vl["CAN_FD_MESSAGE"]["COUNTER"] == ((cnt + i) % 256)
 
   def test_parser_can_valid(self):
@@ -82,16 +58,14 @@ class TestCanParserPacker:
 
     # not valid until the message is seen
     for _ in range(100):
-      dat = can_list_to_can_capnp([])
-      parser.update_strings([dat])
+      parser.update_strings([0, []])
       assert not parser.can_valid
 
     # valid once seen
     for i in range(1, 100):
       t = int(0.01 * i * 1e9)
       msg = packer.make_can_msg("CAN_FD_MESSAGE", 0, {})
-      dat = can_list_to_can_capnp([msg, ], logMonoTime=t)
-      parser.update_strings([dat])
+      parser.update_strings([t, [msg]])
       assert parser.can_valid
 
   def test_parser_counter_can_valid(self):
@@ -106,17 +80,15 @@ class TestCanParserPacker:
     parser = CANParser("honda_civic_touring_2016_can_generated", msgs, 0)
 
     msg = packer.make_can_msg("STEERING_CONTROL", 0, {"COUNTER": 0})
-    bts = can_list_to_can_capnp([msg])
 
     # bad static counter, invalid once it's seen MAX_BAD_COUNTER messages
     for idx in range(0x1000):
-      parser.update_strings([bts])
+      parser.update_strings([0, [msg]])
       assert ((idx + 1) < MAX_BAD_COUNTER) == parser.can_valid
 
     # one to recover
     msg = packer.make_can_msg("STEERING_CONTROL", 0, {"COUNTER": 1})
-    bts = can_list_to_can_capnp([msg])
-    parser.update_strings([bts])
+    parser.update_strings([0, [msg]])
     assert parser.can_valid
 
   def test_parser_no_partial_update(self):
@@ -138,8 +110,7 @@ class TestCanParserPacker:
         msg[1] = bytearray(msg[1])
         msg[1][4] = (msg[1][4] & 0xF0) | ((msg[1][4] & 0x0F) + 1)
 
-      bts = can_list_to_can_capnp([msg])
-      parser.update_strings([bts])
+      parser.update_strings([0, [msg]])
 
     rx_steering_msg({"STEER_TORQUE": 100}, bad_checksum=False)
     assert parser.vl["STEERING_CONTROL"]["STEER_TORQUE"] == 100
@@ -182,8 +153,7 @@ class TestCanParserPacker:
         }
 
         msgs = [packer.make_can_msg(k, 0, v) for k, v in values.items()]
-        bts = can_list_to_can_capnp(msgs)
-        parser.update_strings([bts])
+        parser.update_strings([0, msgs])
 
         for k, v in values.items():
           for key, val in v.items():
@@ -203,9 +173,7 @@ class TestCanParserPacker:
     for brake in range(100):
       values = {"USER_BRAKE": brake}
       msgs = packer.make_can_msg("VSA_STATUS", 0, values)
-      bts = can_list_to_can_capnp([msgs])
-
-      parser.update_strings([bts])
+      parser.update_strings([0, [msgs]])
 
       assert parser.vl["VSA_STATUS"]["USER_BRAKE"] == pytest.approx(brake)
 
@@ -229,8 +197,7 @@ class TestCanParserPacker:
         }
 
         msgs = packer.make_can_msg("ES_LKAS", 0, values)
-        bts = can_list_to_can_capnp([msgs])
-        parser.update_strings([bts])
+        parser.update_strings([0, [msgs]])
 
         assert parser.vl["ES_LKAS"]["LKAS_Output"] == pytest.approx(steer)
         assert parser.vl["ES_LKAS"]["LKAS_Request"] == pytest.approx(active)
@@ -259,8 +226,7 @@ class TestCanParserPacker:
       else:
         msgs = [packer.make_can_msg("VSA_STATUS", 0, {}), ]
 
-      can = can_list_to_can_capnp(msgs, logMonoTime=t)
-      parser.update_strings([can, ])
+      parser.update_strings([t, msgs])
 
     # all good, no timeout
     for _ in range(1000):
@@ -298,8 +264,7 @@ class TestCanParserPacker:
           can_msgs[frame].append(packer.make_can_msg("VSA_STATUS", 0, values))
           idx += 1
 
-      can_strings = [can_list_to_can_capnp(msgs) for msgs in can_msgs]
-      parser.update_strings(can_strings)
+      parser.update_strings([[0, m] for m in can_msgs])
       vl_all = parser.vl_all["VSA_STATUS"]["USER_BRAKE"]
 
       assert vl_all == user_brake_vals
@@ -333,7 +298,7 @@ class TestCanParserPacker:
       for i in range(10):
         log_mono_time = int(0.01 * i * 1e+9)
         can_msg = packer.make_can_msg("VSA_STATUS", 0, {})
-        can_strings.append(can_list_to_can_capnp([can_msg], logMonoTime=log_mono_time))
+        can_strings.append((log_mono_time, [can_msg]))
       parser.update_strings(can_strings)
 
       ts_nanos = parser.ts_nanos["VSA_STATUS"].values()

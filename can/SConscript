@@ -1,4 +1,4 @@
-Import('env', 'envCython', 'cereal', 'common', 'arch')
+Import('env', 'envCython', 'common', 'arch')
 
 import os
 
@@ -6,7 +6,7 @@ envDBC = env.Clone()
 dbc_file_path = '-DDBC_FILE_PATH=\'"%s"\'' % (envDBC.Dir("..").abspath)
 envDBC['CXXFLAGS'] += [dbc_file_path]
 src = ["dbc.cc", "parser.cc", "packer.cc", "common.cc"]
-libs = [common, "capnp", "kj", "zmq"]
+libs = [common, "zmq"]
 
 # shared library for openpilot
 LINKFLAGS = envDBC["LINKFLAGS"]
