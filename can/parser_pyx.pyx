@@ -84,11 +84,11 @@ cdef class CANParser:
       except IndexError:
         raise RuntimeError(f"could not find message {repr(c[0])} in DBC {self.dbc_name}")
 
-      address = m.address
-      message_v.push_back((address, c[1]))
+      message_v.push_back((m.address, c[1]))
 
     self.can = new cpp_CANParser(bus, dbc_name, message_v)
 
+    # Populate dictionaries with ValueDict
     for address, _ in message_v:
       m = self.dbc.addr_to_msg.at(address)
       name = m.name.decode("utf8")
