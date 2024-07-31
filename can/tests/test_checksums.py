@@ -1,6 +1,5 @@
 from opendbc.can.parser import CANParser
 from opendbc.can.packer import CANPacker
-from opendbc.can.tests.test_packer_parser import can_list_to_can_capnp
 
 
 class TestCanChecksums:
@@ -28,8 +27,7 @@ class TestCanChecksums:
         packer.make_can_msg("LKAS_HUD", 0, values),
         packer.make_can_msg("LKAS_HUD_A", 0, values),
       ]
-      can_strings = [can_list_to_can_capnp(msgs), ]
-      parser.update_strings(can_strings)
+      parser.update_strings([0, msgs])
 
       assert parser.vl['LKAS_HUD']['CHECKSUM'] == std
       assert parser.vl['LKAS_HUD_A']['CHECKSUM'] == ext
