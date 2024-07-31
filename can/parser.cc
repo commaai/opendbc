@@ -263,7 +263,7 @@ void CANParser::UpdateCans(uint64_t nanos, const capnp::DynamicStruct::Reader& c
 }
 
 void CANParser::UpdateValid(uint64_t nanos) {
-  const bool show_missing = (last_nanos - first_nanos) > 8e9;
+  const bool show_missing = (nanos - first_nanos) > 8e9;
 
   bool _valid = true;
   bool _counters_valid = true;
