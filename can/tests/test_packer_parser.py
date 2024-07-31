@@ -23,9 +23,8 @@ def can_list_to_can_capnp(can_msgs, msgtype='can', logMonoTime=None):
       cc = dat.can[i]
 
     cc.address = can_msg[0]
-    cc.busTime = can_msg[1]
-    cc.dat = bytes(can_msg[2])
-    cc.src = can_msg[3]
+    cc.dat = bytes(can_msg[1])
+    cc.src = can_msg[2]
 
   return dat.to_bytes()
 
@@ -37,7 +36,7 @@ class TestCanParserPacker:
     for b in range(6):
       for i in range(256):
         values = {"COUNTER": i}
-        addr, _, dat, bus = packer.make_can_msg("CAN_FD_MESSAGE", b, values)
+        addr, dat, bus = packer.make_can_msg("CAN_FD_MESSAGE", b, values)
         assert addr == 245
         assert bus == b
         assert dat[0] == i
@@ -136,8 +135,8 @@ class TestCanParserPacker:
       msg = packer.make_can_msg("STEERING_CONTROL", 0, values)
       if bad_checksum:
         # add 1 to checksum
-        msg[2] = bytearray(msg[2])
-        msg[2][4] = (msg[2][4] & 0xF0) | ((msg[2][4] & 0x0F) + 1)
+        msg[1] = bytearray(msg[1])
+        msg[1][4] = (msg[1][4] & 0xF0) | ((msg[1][4] & 0x0F) + 1)
 
       bts = can_list_to_can_capnp([msg])
       parser.update_strings([bts])
@@ -386,6 +385,6 @@ class TestCanParserPacker:
     #  discovery tests in openpilot first
     packer = CANPacker("toyota_nodsu_pt_generated")
 
-    assert packer.make_can_msg("ACC_CONTROL", 0, {"UNKNOWN_SIGNAL": 0}) == [835, 0, b'\x00\x00\x00\x00\x00\x00\x00N', 0]
-    assert packer.make_can_msg("UNKNOWN_MESSAGE", 0, {"UNKNOWN_SIGNAL": 0}) == [0, 0, b'', 0]
-    assert packer.make_can_msg(0, 0, {"UNKNOWN_SIGNAL": 0}) == [0, 0, b'', 0]
+    assert packer.make_can_msg("ACC_CONTROL", 0, {"UNKNOWN_SIGNAL": 0}) == [835, b'\x00\x00\x00\x00\x00\x00\x00N', 0]
+    assert packer.make_can_msg("UNKNOWN_MESSAGE", 0, {"UNKNOWN_SIGNAL": 0}) == [0, b'', 0]
+    assert packer.make_can_msg(0, 0, {"UNKNOWN_SIGNAL": 0}) == [0, b'', 0]

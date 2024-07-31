@@ -242,7 +242,7 @@ void CANParser::UpdateCans(uint64_t nanos, const capnp::List<cereal::CanData>::R
 
 void CANParser::UpdateCans(uint64_t nanos, const capnp::DynamicStruct::Reader& cmsg) {
   // assume message struct is `cereal::CanData` and parse
-  assert(cmsg.has("address") && cmsg.has("src") && cmsg.has("dat") && cmsg.has("busTime"));
+  assert(cmsg.has("address") && cmsg.has("src") && cmsg.has("dat"));
 
   if (cmsg.get("src").as<uint8_t>() != bus) {
     DEBUG("skip %d: wrong bus\n", cmsg.get("address").as<uint32_t>());
