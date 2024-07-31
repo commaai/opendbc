@@ -65,8 +65,8 @@ cdef class CANParser:
 
   def update_strings(self, strings, sendcan=False):
     # input format:
-    # [nanos, [[address, 0, data, src], ...]]
-    # [[nanos, [[address, 0, data, src], ...], ...]]
+    # [nanos, [[address, data, src], ...]]
+    # [[nanos, [[address, data, src], ...], ...]]
     for address in self.addresses:
       self.vl_all[address].clear()
 
@@ -93,8 +93,8 @@ cdef class CANParser:
         for f in s[1]:
           frame = &(can_data.frames.emplace_back())
           frame.address = f[0]
-          frame.dat = f[2]
-          frame.src = f[3]
+          frame.dat = f[1]
+          frame.src = f[2]
     except TypeError:
       raise RuntimeError("invalid parameter")
 
