@@ -83,7 +83,7 @@ public:
   void query_latest(std::vector<SignalValue> &vals, uint64_t last_ts = 0);
 
 protected:
-  void updateCans(const CanData &can);
+  void UpdateCans(const CanData &can);
   void UpdateValid(uint64_t nanos);
 };
 

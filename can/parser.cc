@@ -168,14 +168,14 @@ void CANParser::update(const std::vector<CanData> &can_data, std::vector<SignalV
     }
     last_nanos = c.nanos;
 
-    updateCans(c);
+    UpdateCans(c);
     UpdateValid(last_nanos);
   }
 
   query_latest(vals, current_nanos);
 }
 
-void CANParser::updateCans(const CanData &can) {
+void CANParser::UpdateCans(const CanData &can) {
   bool bus_empty = true;
   for (const auto &frame : can.frames) {
     if (frame.src != bus) {
