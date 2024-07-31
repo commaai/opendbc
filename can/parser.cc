@@ -171,12 +171,14 @@ void CANParser::update(const std::vector<CanData> &can_data, std::vector<SignalV
     UpdateCans(c);
     UpdateValid(last_nanos);
   }
-
   query_latest(vals, current_nanos);
 }
 
 void CANParser::UpdateCans(const CanData &can) {
+  //DEBUG("got %zu messages\n", can.frames.size());
+
   bool bus_empty = true;
+
   for (const auto &frame : can.frames) {
     if (frame.src != bus) {
       // DEBUG("skip %d: wrong bus\n", cmsg.getAddress());
