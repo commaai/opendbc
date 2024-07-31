@@ -18,7 +18,6 @@ cdef class CANParser:
   cdef:
     cpp_CANParser *can
     const DBC *dbc
-    vector[SignalValue] can_values
     vector[uint32_t] addresses
 
   cdef readonly:
