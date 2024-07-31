@@ -1,7 +1,7 @@
 # distutils: language = c++
 # cython: language_level=3
 
-from libc.stdint cimport uint8_t, uint16_t, uint32_t, uint64_t
+from libc.stdint cimport uint8_t, uint32_t, uint64_t
 from libcpp cimport bool
 from libcpp.map cimport map
 from libcpp.pair cimport pair
@@ -70,12 +70,21 @@ cdef extern from "common.h":
   cdef cppclass MessageState:
     map[string, SignalValue] values
 
+  cdef struct CanFrame:
+    long src
+    uint32_t address
+    vector[uint8_t] dat
+
+  cdef struct CanData:
+    uint64_t nanos
+    vector[CanFrame] frames
+
   cdef cppclass CANParser:
     bool can_valid
     bool bus_timeout
     CANParser(int, string, vector[pair[uint32_t, int]]) except +
     MessageState *messageState(uint32_t address)
-    set[uint32_t] update_strings(vector[string]&, bool) except +
+    set[uint32_t] update(vector[CanData]&, bool) except +
 
   cdef cppclass CANPacker:
    CANPacker(string)

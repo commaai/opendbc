@@ -8,7 +8,7 @@ from libc.stdint cimport uint32_t
 
 from .common cimport CANParser as cpp_CANParser
 from .common cimport MessageState as cpp_MessageState
-from .common cimport dbc_lookup, DBC
+from .common cimport dbc_lookup, DBC, CanData, CanFrame
 
 import numbers
 from collections import defaultdict
@@ -102,7 +102,32 @@ cdef class CANParser:
       del self.can
 
   def update_strings(self, strings, sendcan=False):
-    return self.can.update_strings(strings, sendcan)
+    # input format:
+    # [nanos, [[address, data, src], ...]]
+    # [[nanos, [[address, data, src], ...], ...]]
+
+    cdef CanFrame* frame
+    cdef CanData* can_data
+    cdef vector[CanData] can_data_array
+
+    try:
+      if len(strings) and not isinstance(strings[0], (list, tuple)):
+        strings = [strings]
+
+      can_data_array.reserve(len(strings))
+      for s in strings:
+        can_data = &(can_data_array.emplace_back())
+        can_data.nanos = s[0]
+        can_data.frames.reserve(len(s[1]))
+        for f in s[1]:
+          frame = &(can_data.frames.emplace_back())
+          frame.address = f[0]
+          frame.dat = f[1]
+          frame.src = f[2]
+    except TypeError:
+      raise RuntimeError("invalid parameter")
+
+    return self.can.update(can_data_array, sendcan)
 
   @property
   def can_valid(self):

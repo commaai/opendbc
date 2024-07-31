@@ -7,13 +7,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include <capnp/dynamic.h>
-#include <capnp/serialize.h>
-
-#ifndef DYNAMIC_CAPNP
-#include "cereal/gen/cpp/log.capnp.h"
-#endif
-
 #include "opendbc/can/logger.h"
 #include "opendbc/can/common_dbc.h"
 
@@ -34,6 +27,17 @@ unsigned int volkswagen_mqb_checksum(uint32_t address, const Signal &sig, const 
 unsigned int xor_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int hkg_can_fd_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int pedal_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
+
+struct CanFrame {
+  long src;
+  uint32_t address;
+  std::vector<uint8_t> dat;
+};
+
+struct CanData {
+  uint64_t nanos;
+  std::vector<CanFrame> frames;
+};
 
 class MessageState {
 public:
@@ -60,11 +64,8 @@ public:
 class CANParser {
 private:
   const int bus;
-  kj::Array<capnp::word> aligned_buf;
-
   const DBC *dbc = NULL;
   std::unordered_map<uint32_t, MessageState> message_states;
-  kj::ArrayPtr<capnp::word> getAlignedData(const std::string &data);
 
 public:
   bool can_valid = false;
@@ -78,12 +79,11 @@ public:
   CANParser(int abus, const std::string& dbc_name,
             const std::vector<std::pair<uint32_t, int>> &messages);
   CANParser(int abus, const std::string& dbc_name, bool ignore_checksum, bool ignore_counter);
-  #ifndef DYNAMIC_CAPNP
   MessageState *messageState(uint32_t address) { return &message_states.at(address); }
-  std::set<uint32_t> update_strings(const std::vector<std::string> &data, bool sendcan);
-  void UpdateCans(uint64_t nanos, const capnp::List<cereal::CanData>::Reader& cans, std::set<uint32_t> updated_addresses);
-  #endif
-  void UpdateCans(uint64_t nanos, const capnp::DynamicStruct::Reader& cans);
+  std::set<uint32_t> update(const std::vector<CanData> &can_data, bool sendcan);
+
+protected:
+  void UpdateCans(const CanData &can, std::set<uint32_t> &updated_addresses);
   void UpdateValid(uint64_t nanos);
 };
 
