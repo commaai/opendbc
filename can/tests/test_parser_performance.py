@@ -3,7 +3,6 @@ import time
 
 from opendbc.can.parser import CANParser
 from opendbc.can.packer import CANPacker
-from opendbc.can.tests.test_packer_parser import can_list_to_can_capnp
 
 
 @pytest.mark.skip("TODO: varies too much between machines")
@@ -16,8 +15,7 @@ class TestParser:
     for i in range(50000):
       values = {"ACC_CONTROL": {"ACC_TYPE": 1, "ALLOW_LONG_PRESS": 3}}
       msgs = [packer.make_can_msg(k, 0, v) for k, v in values.items()]
-      bts = can_list_to_can_capnp(msgs, logMonoTime=int(0.01 * i * 1e9))
-      can_msgs.append(bts)
+      can_msgs.append([int(0.01 * i * 1e9), msgs])
 
     ets = []
     for _ in range(25):
