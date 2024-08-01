@@ -222,7 +222,7 @@ DBC* dbc_parse(const std::string& dbc_path) {
 const std::string get_dbc_root_path() {
   char *basedir = std::getenv("BASEDIR");
   if (basedir != NULL) {
-    return std::string(basedir) + "/opendbc";
+    return std::string(basedir) + "/opendbc/dbc";
   } else {
     return DBC_FILE_PATH;
   }
