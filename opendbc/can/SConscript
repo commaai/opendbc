@@ -3,7 +3,7 @@ Import('env', 'envCython', 'common', 'arch')
 import os
 
 envDBC = env.Clone()
-dbc_file_path = '-DDBC_FILE_PATH=\'"%s"\'' % (envDBC.Dir("..").abspath)
+dbc_file_path = '-DDBC_FILE_PATH=\'"%s"\'' % (envDBC.Dir("../dbc").abspath)
 envDBC['CXXFLAGS'] += [dbc_file_path]
 src = ["dbc.cc", "parser.cc", "packer.cc", "common.cc"]
 libs = [common, "zmq"]
