@@ -39,11 +39,13 @@ COPY requirements.txt /tmp/
 RUN pip3 install --break-system-packages --no-cache-dir -r /tmp/requirements.txt
 RUN pip3 install --break-system-packages --no-cache-dir pre-commit==2.15.0 pylint==2.17.4
 
+WORKDIR /project/opendbc
 ENV PYTHONPATH=/project
 
-RUN git config --global --add safe.directory '*'
-
-WORKDIR /project
-
-COPY SConstruct .
+COPY . .
+COPY SConstruct /project
 COPY ./site_scons /project/site_scons
+COPY .gitignore /project/.gitignore
+
+RUN ls && rm -rf .git && cd ../ && \
+    scons -c && scons -j$(nproc) \
