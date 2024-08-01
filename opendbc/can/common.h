@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <set>
 #include <string>
 #include <utility>
 #include <unordered_map>
@@ -65,7 +66,6 @@ class CANParser {
 private:
   const int bus;
   const DBC *dbc = NULL;
-  std::unordered_map<uint32_t, MessageState> message_states;
 
 public:
   bool can_valid = false;
@@ -75,15 +75,16 @@ public:
   uint64_t last_nonempty_nanos = 0;
   uint64_t bus_timeout_threshold = 0;
   uint64_t can_invalid_cnt = CAN_INVALID_CNT;
+  std::unordered_map<uint32_t, MessageState> message_states;
 
   CANParser(int abus, const std::string& dbc_name,
             const std::vector<std::pair<uint32_t, int>> &messages);
   CANParser(int abus, const std::string& dbc_name, bool ignore_checksum, bool ignore_counter);
-  void update(const std::vector<CanData> &can_data, std::vector<SignalValue> &vals);
-  void query_latest(std::vector<SignalValue> &vals, uint64_t last_ts = 0);
+  std::set<uint32_t> update(const std::vector<CanData> &can_data);
 
 protected:
-  void UpdateCans(const CanData &can);
+  void clearAllValues();
+  void updateCans(const CanData &can, std::set<uint32_t> &updated_addresses);
   void UpdateValid(uint64_t nanos);
 };
 

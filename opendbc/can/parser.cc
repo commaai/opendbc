@@ -157,34 +157,44 @@ CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum
   }
 }
 
-void CANParser::update(const std::vector<CanData> &can_data, std::vector<SignalValue> &vals) {
-  uint64_t current_nanos = 0;
-  for (const auto &c : can_data) {
-    if (first_nanos == 0) {
-      first_nanos = c.nanos;
-    }
-    if (current_nanos == 0) {
-      current_nanos = c.nanos;
-    }
-    last_nanos = c.nanos;
+std::set<uint32_t> CANParser::update(const std::vector<CanData> &can_data) {
+  clearAllValues();
+  std::set<uint32_t> updated_addresses;
 
-    UpdateCans(c);
-    UpdateValid(last_nanos);
+  if (can_data.empty()) {
+    return updated_addresses;
   }
-  query_latest(vals, current_nanos);
+
+  if (first_nanos == 0) {
+    first_nanos = can_data.front().nanos;
+  }
+
+  for (const auto &c : can_data) {
+    last_nanos = c.nanos;
+    updateCans(c, updated_addresses);
+  }
+  UpdateValid(last_nanos);
+
+  return updated_addresses;
 }
 
-void CANParser::UpdateCans(const CanData &can) {
-  //DEBUG("got %zu messages\n", can.frames.size());
+void CANParser::clearAllValues() {
+  for (auto &[_, state] : message_states) {
+    for (auto &vals : state.all_vals) {
+      vals.clear();
+    }
+  }
+}
 
-  bool bus_empty = true;
+void CANParser::updateCans(const CanData &can, std::set<uint32_t> &updated_addresses) {
+  //DEBUG("got %zu messages\n", can.frames.size());
 
   for (const auto &frame : can.frames) {
     if (frame.src != bus) {
       // DEBUG("skip %d: wrong bus\n", cmsg.getAddress());
       continue;
     }
-    bus_empty = false;
+    last_nonempty_nanos = can.nanos;
 
     auto state_it = message_states.find(frame.address);
     if (state_it == message_states.end()) {
@@ -202,14 +212,10 @@ void CANParser::UpdateCans(const CanData &can) {
     //  continue;
     //}
 
-    state_it->second.parse(can.nanos, frame.dat);
+    if (state_it->second.parse(can.nanos, frame.dat)) {
+      updated_addresses.insert(frame.address);
+    }
   }
-
-  // update bus timeout
-  if (!bus_empty) {
-    last_nonempty_nanos = can.nanos;
-  }
-  bus_timeout = (can.nanos - last_nonempty_nanos) > bus_timeout_threshold;
 }
 
 void CANParser::UpdateValid(uint64_t nanos) {
@@ -239,27 +245,5 @@ void CANParser::UpdateValid(uint64_t nanos) {
   }
   can_invalid_cnt = _valid ? 0 : (can_invalid_cnt + 1);
   can_valid = (can_invalid_cnt < CAN_INVALID_CNT) && _counters_valid;
-}
-
-void CANParser::query_latest(std::vector<SignalValue> &vals, uint64_t last_ts) {
-  if (last_ts == 0) {
-    last_ts = last_nanos;
-  }
-  for (auto& kv : message_states) {
-    auto& state = kv.second;
-    if (last_ts != 0 && state.last_seen_nanos < last_ts) {
-      continue;
-    }
-
-    for (int i = 0; i < state.parse_sigs.size(); i++) {
-      const Signal &sig = state.parse_sigs[i];
-      SignalValue &v = vals.emplace_back();
-      v.address = state.address;
-      v.ts_nanos = state.last_seen_nanos;
-      v.name = sig.name;
-      v.value = state.vals[i];
-      v.all_values = state.all_vals[i];
-      state.all_vals[i].clear();
-    }
-  }
+  bus_timeout = (nanos - last_nonempty_nanos) > bus_timeout_threshold;
 }

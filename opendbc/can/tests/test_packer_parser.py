@@ -126,6 +126,11 @@ class TestCanParserPacker:
     assert parser.vl["STEERING_CONTROL"]["STEER_TORQUE"] == 300
     assert parser.vl_all["STEERING_CONTROL"]["STEER_TORQUE"] == [300]
 
+  def test_parser_empty_message(self):
+    parser = CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 0)])
+    addr = parser.update_strings([])
+    assert len(addr) == 0
+
   def test_packer_parser(self):
     msgs = [
       ("Brake_Status", 0),
@@ -264,7 +269,7 @@ class TestCanParserPacker:
           can_msgs[frame].append(packer.make_can_msg("VSA_STATUS", 0, values))
           idx += 1
 
-      parser.update_strings([[0, m] for m in can_msgs])
+      parser.update_strings([[random.randint(0, 255), m] for m in can_msgs])
       vl_all = parser.vl_all["VSA_STATUS"]["USER_BRAKE"]
 
       assert vl_all == user_brake_vals
