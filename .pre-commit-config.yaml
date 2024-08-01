@@ -56,6 +56,6 @@ repos:
     hooks:
     -   id: generator
         name: dbc generator
-        entry: generator/test_generator.py
+        entry: opendbc/dbc/generator/test_generator.py
         language: script
         pass_filenames: false
