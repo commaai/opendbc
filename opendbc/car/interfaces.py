@@ -9,6 +9,7 @@ from typing import Any, NamedTuple
 from collections.abc import Callable
 from functools import cache
 
+from opendbc.can.parser import ParsedCanData
 from opendbc.car import DT_CTRL, apply_hysteresis, gen_empty_fingerprint, scale_rot_inertia, scale_tire_stiffness, get_friction, STD_CARGO_KG
 from opendbc.car import structs
 from opendbc.car.can_definitions import CanData, CanRecvCallable, CanSendCallable
@@ -225,9 +226,10 @@ class CarInterfaceBase(ABC):
 
   def update(self, can_packets: list[tuple[int, list[CanData]]]) -> structs.CarState:
     # parse can
+    parsed_can_data = ParsedCanData(can_packets)
     for cp in self.can_parsers:
       if cp is not None:
-        cp.update_strings(can_packets)
+        cp.update_from_parsed(parsed_can_data)
 
     # get CarState
     ret = self._update()

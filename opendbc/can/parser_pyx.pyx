@@ -13,6 +13,39 @@ from .common cimport dbc_lookup, SignalValue, DBC, CanData, CanFrame
 import numbers
 from collections import defaultdict
 
+cdef class ParsedCanData:
+  cdef vector[CanData] *can_data_list
+
+  def __cinit__(self, strings):
+    # input format:
+    # [nanos, [[address, data, src], ...]]
+    # [[nanos, [[address, data, src], ...], ...]]
+
+    self.can_data_list = new vector[CanData]()
+
+    cdef CanFrame* frame
+    cdef CanData* can_data
+    try:
+      if len(strings) and not isinstance(strings[0], (list, tuple)):
+        strings = [strings]
+      self.can_data_list.reserve(len(strings))
+
+      for s in strings:
+        can_data = &(self.can_data_list.emplace_back())
+        can_data.nanos = s[0]
+        can_data.frames.reserve(len(s[1]))
+        for f in s[1]:
+          frame = &(can_data.frames.emplace_back())
+          frame.address = f[0]
+          frame.dat = f[1]
+          frame.src = f[2]
+    except TypeError:
+      raise RuntimeError("invalid parameter")
+
+  def __dealloc__(self):
+    if self.can_data_list:
+      del self.can_data_list
+
 
 cdef class CANParser:
   cdef:
@@ -65,9 +98,9 @@ cdef class CANParser:
       del self.can
 
   def update_strings(self, strings, sendcan=False):
-    # input format:
-    # [nanos, [[address, data, src], ...]]
-    # [[nanos, [[address, data, src], ...], ...]]
+    return self.update_from_parsed(ParsedCanData(strings), sendcan)
+
+  def update_from_parsed(self, ParsedCanData parsed, sendcan=False):
     for address in self.addresses:
       self.vl_all[address].clear()
 
@@ -76,30 +109,9 @@ cdef class CANParser:
     vl_all = {}
     ts_nanos = {}
     updated_addrs = set()
-
     cdef vector[SignalValue] new_vals
-    cdef CanFrame* frame
-    cdef CanData* can_data
-    cdef vector[CanData] can_data_array
 
-    try:
-      if len(strings) and not isinstance(strings[0], (list, tuple)):
-        strings = [strings]
-
-      can_data_array.reserve(len(strings))
-      for s in strings:
-        can_data = &(can_data_array.emplace_back())
-        can_data.nanos = s[0]
-        can_data.frames.reserve(len(s[1]))
-        for f in s[1]:
-          frame = &(can_data.frames.emplace_back())
-          frame.address = f[0]
-          frame.dat = f[1]
-          frame.src = f[2]
-    except TypeError:
-      raise RuntimeError("invalid parameter")
-
-    self.can.update(can_data_array, new_vals)
+    self.can.update(deref(parsed.can_data_list), new_vals)
 
     cdef vector[SignalValue].iterator it = new_vals.begin()
     cdef SignalValue* cv
