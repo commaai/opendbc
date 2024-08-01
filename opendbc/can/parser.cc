@@ -3,12 +3,7 @@
 #include <cstring>
 #include <limits>
 #include <stdexcept>
-#include <sstream>
 
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
 
 #include "opendbc/can/common.h"
 
@@ -31,14 +26,20 @@ int64_t get_raw_value(const std::vector<uint8_t> &msg, const Signal &sig) {
   return ret;
 }
 
+MessageState::MessageState(const Msg *msg_ptr, uint64_t threshold, bool no_checksum, bool no_counter)
+    : msg(*msg_ptr), check_threshold(threshold), ignore_checksum(no_checksum), ignore_counter(no_counter) {
+  assert(msg.size <= 64 && "The maximum message size is 64 bytes");
+  vals.resize(msg.sigs.size());
+  all_vals.resize(msg.sigs.size());
+}
 
 bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
-  std::vector<double> tmp_vals(parse_sigs.size());
+  std::vector<double> tmp_vals(msg.sigs.size());
   bool checksum_failed = false;
   bool counter_failed = false;
 
-  for (int i = 0; i < parse_sigs.size(); i++) {
-    const auto &sig = parse_sigs[i];
+  for (int i = 0; i < msg.sigs.size(); ++i) {
+    const auto &sig = msg.sigs[i];
 
     int64_t tmp = get_raw_value(dat, sig);
     if (sig.is_signed) {
@@ -48,7 +49,7 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
     //DEBUG("parse 0x%X %s -> %ld\n", address, sig.name, tmp);
 
     if (!ignore_checksum) {
-      if (sig.calc_checksum != nullptr && sig.calc_checksum(address, sig, dat) != tmp) {
+      if (sig.calc_checksum != nullptr && sig.calc_checksum(msg.address, sig, dat) != tmp) {
         checksum_failed = true;
       }
     }
@@ -64,11 +65,11 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
 
   // only update values if both checksum and counter are valid
   if (checksum_failed || counter_failed) {
-    LOGE_100("0x%X message checks failed, checksum failed %d, counter failed %d", address, checksum_failed, counter_failed);
+    LOGE_100("0x%X message checks failed, checksum failed %d, counter failed %d", msg.address, checksum_failed, counter_failed);
     return false;
   }
 
-  for (int i = 0; i < parse_sigs.size(); i++) {
+  for (int i = 0; i < msg.sigs.size(); ++i) {
     vals[i] = tmp_vals[i];
     all_vals[i].push_back(vals[i]);
   }
@@ -82,7 +83,7 @@ bool MessageState::update_counter_generic(int64_t v, int cnt_size) {
   if (((counter + 1) & ((1 << cnt_size) -1)) != v) {
     counter_fail = std::min(counter_fail + 1, MAX_BAD_COUNTER);
     if (counter_fail > 1) {
-      INFO("0x%X COUNTER FAIL #%d -- %d -> %d\n", address, counter_fail, counter, (int)v);
+      INFO("0x%X COUNTER FAIL #%d -- %d -> %d\n", msg.address, counter_fail, counter, (int)v);
     }
   } else if (counter_fail > 0) {
     counter_fail--;
@@ -93,67 +94,33 @@ bool MessageState::update_counter_generic(int64_t v, int cnt_size) {
 
 
 CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<std::pair<uint32_t, int>> &messages)
-  : bus(abus) {
-  dbc = dbc_lookup(dbc_name);
-  assert(dbc);
-
-  bus_timeout_threshold = std::numeric_limits<uint64_t>::max();
+  : bus(abus), dbc(dbc_lookup(dbc_name)), bus_timeout_threshold(std::numeric_limits<uint64_t>::max()) {
+  assert(dbc && "DBC lookup failed");
 
   for (const auto& [address, frequency] : messages) {
     // disallow duplicate message checks
     if (message_states.find(address) != message_states.end()) {
-      std::stringstream is;
-      is << "Duplicate Message Check: " << address;
-      throw std::runtime_error(is.str());
+      throw std::runtime_error("Duplicate Message Check: " + std::to_string(address));
     }
 
-    MessageState &state = message_states[address];
-    state.address = address;
-    // state.check_frequency = op.check_frequency,
-
     // msg is not valid if a message isn't received for 10 consecutive steps
-    if (frequency > 0) {
-      state.check_threshold = (1000000000ULL / frequency) * 10;
-
+    uint64_t check_threshold = frequency > 0 ? (1000000000ULL / frequency) * 10 : 0;
+    if (check_threshold > 0) {
       // bus timeout threshold should be 10x the fastest msg
-      bus_timeout_threshold = std::min(bus_timeout_threshold, state.check_threshold);
+      bus_timeout_threshold = std::min(bus_timeout_threshold, check_threshold);
     }
 
     const Msg *msg = dbc->addr_to_msg.at(address);
-    state.name = msg->name;
-    state.size = msg->size;
-    assert(state.size <= 64);  // max signal size is 64 bytes
-
-    // track all signals for this message
-    state.parse_sigs = msg->sigs;
-    state.vals.resize(msg->sigs.size());
-    state.all_vals.resize(msg->sigs.size());
+    message_states.emplace(std::piecewise_construct, std::forward_as_tuple(address), std::forward_as_tuple(msg, check_threshold));
   }
 }
 
 CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum, bool ignore_counter)
-  : bus(abus) {
-  // Add all messages and signals
-
-  dbc = dbc_lookup(dbc_name);
-  assert(dbc);
-
+  : bus(abus), dbc(dbc_lookup(dbc_name)) {
+  assert(dbc && "DBC lookup failed");
   for (const auto& msg : dbc->msgs) {
-    MessageState state = {
-      .name = msg.name,
-      .address = msg.address,
-      .size = msg.size,
-      .ignore_checksum = ignore_checksum,
-      .ignore_counter = ignore_counter,
-    };
-
-    for (const auto& sig : msg.sigs) {
-      state.parse_sigs.push_back(sig);
-      state.vals.push_back(0);
-      state.all_vals.push_back({});
-    }
-
-    message_states[state.address] = state;
+    message_states.emplace(std::piecewise_construct, std::forward_as_tuple(msg.address),
+                           std::forward_as_tuple(&msg, 0, ignore_checksum, ignore_counter));
   }
 }
 
@@ -229,9 +196,9 @@ void CANParser::UpdateValid(uint64_t nanos) {
     if (state.check_threshold > 0 && (missing || timed_out)) {
       if (show_missing && !bus_timeout) {
         if (missing) {
-          LOGE_100("0x%X '%s' NOT SEEN", state.address, state.name.c_str());
+          LOGE_100("0x%X '%s' NOT SEEN", state.msg.address, state.msg.name.c_str());
         } else if (timed_out) {
-          LOGE_100("0x%X '%s' TIMED OUT", state.address, state.name.c_str());
+          LOGE_100("0x%X '%s' TIMED OUT", state.msg.address, state.msg.name.c_str());
         }
       }
       _valid = false;
@@ -251,10 +218,10 @@ void CANParser::query_latest(std::vector<SignalValue> &vals, uint64_t last_ts) {
       continue;
     }
 
-    for (int i = 0; i < state.parse_sigs.size(); i++) {
-      const Signal &sig = state.parse_sigs[i];
+    for (int i = 0; i < state.msg.sigs.size(); ++i) {
+      const Signal &sig = state.msg.sigs[i];
       SignalValue &v = vals.emplace_back();
-      v.address = state.address;
+      v.address = state.msg.address;
       v.ts_nanos = state.last_seen_nanos;
       v.name = sig.name;
       v.value = state.vals[i];
