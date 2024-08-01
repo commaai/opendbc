@@ -2,7 +2,7 @@
 import os
 import filecmp
 import tempfile
-from opendbc.generator.generator import create_all, opendbc_root
+from opendbc.dbc.generator.generator import create_all, opendbc_root
 
 
 def test_generator():
