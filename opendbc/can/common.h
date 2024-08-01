@@ -41,23 +41,20 @@ struct CanData {
 
 class MessageState {
 public:
-  std::string name;
-  uint32_t address;
-  unsigned int size;
-
-  std::vector<Signal> parse_sigs;
+  Msg msg;
   std::vector<double> vals;
   std::vector<std::vector<double>> all_vals;
 
-  uint64_t last_seen_nanos;
-  uint64_t check_threshold;
+  uint64_t last_seen_nanos = 0;
+  uint64_t check_threshold = 0;
 
-  uint8_t counter;
-  uint8_t counter_fail;
+  uint8_t counter = 0;
+  uint8_t counter_fail = 0;
 
   bool ignore_checksum = false;
   bool ignore_counter = false;
 
+  MessageState(const Msg *msg, uint64_t threshold, bool no_checksum = false, bool no_counter = false);
   bool parse(uint64_t nanos, const std::vector<uint8_t> &dat);
   bool update_counter_generic(int64_t v, int cnt_size);
 };
