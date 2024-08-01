@@ -14,7 +14,7 @@ def test_generator():
 
     err = "Generated DBC mismatch\n\n"
     err += f"Different files: {comp.diff_files}\n\n"
-    err += "Run opendbc/generator/generator.py to regenerate DBC files."
+    err += "Run opendbc/dbc/generator/generator.py to regenerate DBC files."
     assert len(comp.diff_files) == 0, err
 
 
