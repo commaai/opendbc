@@ -6,8 +6,8 @@ build-backend = "setuptools.build_meta"
 name = "opendbc"
 version = "1.0.0"
 description = "CAN bus databases, tools, and car APIs"
-license = {file = "LICENSE"}
-authors = [{ name="Vehicle Researcher", email="user@comma.ai" }]
+license = { file = "LICENSE" }
+authors = [{ name = "Vehicle Researcher", email = "user@comma.ai" }]
 readme = "README.md"
 requires-python = ">=3.9"
 
@@ -24,8 +24,7 @@ dependencies = [
   "pytest-subtests",
 ]
 
-[project.urls]
-homepage = "https://github.com/commaai/opendbc"
+urls = { "homepage" = "https://github.com/commaai/opendbc" }
 
 [tool.cython-lint]
 max-line-length = 120
