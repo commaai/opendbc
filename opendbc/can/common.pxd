@@ -1,7 +1,7 @@
 # distutils: language = c++
 # cython: language_level=3
 
-from libc.stdint cimport uint8_t, uint16_t, uint32_t, uint64_t
+from libc.stdint cimport uint8_t, uint32_t, uint64_t
 from libcpp cimport bool
 from libcpp.pair cimport pair
 from libcpp.string cimport string
@@ -68,11 +68,20 @@ cdef extern from "common_dbc.h":
 cdef extern from "common.h":
   cdef const DBC* dbc_lookup(const string) except +
 
+  cdef struct CanFrame:
+    long src
+    uint32_t address
+    vector[uint8_t] dat
+
+  cdef struct CanData:
+    uint64_t nanos
+    vector[CanFrame] frames
+
   cdef cppclass CANParser:
     bool can_valid
     bool bus_timeout
     CANParser(int, string, vector[pair[uint32_t, int]]) except +
-    void update_strings(vector[string]&, vector[SignalValue]&, bool) except +
+    void update(vector[CanData]&, vector[SignalValue]&) except +
 
   cdef cppclass CANPacker:
    CANPacker(string)

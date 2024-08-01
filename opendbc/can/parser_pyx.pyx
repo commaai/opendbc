@@ -8,7 +8,7 @@ from libcpp.vector cimport vector
 from libc.stdint cimport uint32_t
 
 from .common cimport CANParser as cpp_CANParser
-from .common cimport dbc_lookup, SignalValue, DBC
+from .common cimport dbc_lookup, SignalValue, DBC, CanData, CanFrame
 
 import numbers
 from collections import defaultdict
@@ -18,7 +18,6 @@ cdef class CANParser:
   cdef:
     cpp_CANParser *can
     const DBC *dbc
-    vector[SignalValue] can_values
     vector[uint32_t] addresses
 
   cdef readonly:
@@ -66,17 +65,42 @@ cdef class CANParser:
       del self.can
 
   def update_strings(self, strings, sendcan=False):
+    # input format:
+    # [nanos, [[address, data, src], ...]]
+    # [[nanos, [[address, data, src], ...], ...]]
     for address in self.addresses:
       self.vl_all[address].clear()
 
-    cdef vector[SignalValue] new_vals
     cur_address = -1
     vl = {}
     vl_all = {}
     ts_nanos = {}
     updated_addrs = set()
 
-    self.can.update_strings(strings, new_vals, sendcan)
+    cdef vector[SignalValue] new_vals
+    cdef CanFrame* frame
+    cdef CanData* can_data
+    cdef vector[CanData] can_data_array
+
+    try:
+      if len(strings) and not isinstance(strings[0], (list, tuple)):
+        strings = [strings]
+
+      can_data_array.reserve(len(strings))
+      for s in strings:
+        can_data = &(can_data_array.emplace_back())
+        can_data.nanos = s[0]
+        can_data.frames.reserve(len(s[1]))
+        for f in s[1]:
+          frame = &(can_data.frames.emplace_back())
+          frame.address = f[0]
+          frame.dat = f[1]
+          frame.src = f[2]
+    except TypeError:
+      raise RuntimeError("invalid parameter")
+
+    self.can.update(can_data_array, new_vals)
+
     cdef vector[SignalValue].iterator it = new_vals.begin()
     cdef SignalValue* cv
     while it != new_vals.end():

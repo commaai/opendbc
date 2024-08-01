@@ -11,6 +11,9 @@ repository = "https://github.com/commaai/opendbc"
 max-line-length = 120
 ignore = ["E111", "E114"]
 
+[tool.mypy]
+explicit_package_bases=true
+
 # https://beta.ruff.rs/docs/configuration/#using-pyprojecttoml
 [tool.ruff]
 select = ["E", "F", "W", "PIE", "C4", "ISC", "RUF100", "A"]
