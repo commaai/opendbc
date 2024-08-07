@@ -50,4 +50,4 @@ cdef class CANPacker:
         pass
 
     cdef vector[uint8_t] val = self.pack(addr, values)
-    return [addr, (<char *>&val[0])[:val.size()], bus]
+    return addr, (<char *>&val[0])[:val.size()], bus
