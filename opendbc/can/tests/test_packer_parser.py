@@ -107,8 +107,9 @@ class TestCanParserPacker:
       msg = packer.make_can_msg("STEERING_CONTROL", 0, values)
       if bad_checksum:
         # add 1 to checksum
-        msg[1] = bytearray(msg[1])
-        msg[1][4] = (msg[1][4] & 0xF0) | ((msg[1][4] & 0x0F) + 1)
+        dat = bytearray(msg[1])
+        dat[4] = (dat[4] & 0xF0) | ((dat[4] & 0x0F) + 1)
+        msg = (msg[0], bytes(dat), msg[2])
 
       parser.update_strings([0, [msg]])
 
@@ -350,6 +351,6 @@ class TestCanParserPacker:
     #  discovery tests in openpilot first
     packer = CANPacker("toyota_nodsu_pt_generated")
 
-    assert packer.make_can_msg("ACC_CONTROL", 0, {"UNKNOWN_SIGNAL": 0}) == [835, b'\x00\x00\x00\x00\x00\x00\x00N', 0]
-    assert packer.make_can_msg("UNKNOWN_MESSAGE", 0, {"UNKNOWN_SIGNAL": 0}) == [0, b'', 0]
-    assert packer.make_can_msg(0, 0, {"UNKNOWN_SIGNAL": 0}) == [0, b'', 0]
+    assert packer.make_can_msg("ACC_CONTROL", 0, {"UNKNOWN_SIGNAL": 0}) == (835, b'\x00\x00\x00\x00\x00\x00\x00N', 0)
+    assert packer.make_can_msg("UNKNOWN_MESSAGE", 0, {"UNKNOWN_SIGNAL": 0}) == (0, b'', 0)
+    assert packer.make_can_msg(0, 0, {"UNKNOWN_SIGNAL": 0}) == (0, b'', 0)
