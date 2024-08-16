@@ -1,10 +1,10 @@
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
-from openpilot.selfdrive.car import create_button_events, structs
-from openpilot.selfdrive.car.common.conversions import Conversions as CV
-from openpilot.selfdrive.car.ford.fordcan import CanBus
-from openpilot.selfdrive.car.ford.values import DBC, CarControllerParams, FordFlags
-from openpilot.selfdrive.car.interfaces import CarStateBase
+from opendbc.car import create_button_events, structs
+from opendbc.car.common.conversions import Conversions as CV
+from opendbc.car.ford.fordcan import CanBus
+from opendbc.car.ford.values import DBC, CarControllerParams, FordFlags
+from opendbc.car.interfaces import CarStateBase
 
 ButtonType = structs.CarState.ButtonEvent.Type
 GearShifter = structs.CarState.GearShifter

@@ -1,11 +1,11 @@
 import copy
 from opendbc.can.packer import CANPacker
-from openpilot.selfdrive.car import DT_CTRL, apply_driver_steer_torque_limits, structs
-from openpilot.selfdrive.car.common.conversions import Conversions as CV
-from openpilot.selfdrive.car.common.numpy_fast import clip
-from openpilot.selfdrive.car.interfaces import CarControllerBase
-from openpilot.selfdrive.car.volkswagen import mqbcan, pqcan
-from openpilot.selfdrive.car.volkswagen.values import CANBUS, CarControllerParams, VolkswagenFlags
+from opendbc.car import DT_CTRL, apply_driver_steer_torque_limits, structs
+from opendbc.car.common.conversions import Conversions as CV
+from opendbc.car.common.numpy_fast import clip
+from opendbc.car.interfaces import CarControllerBase
+from opendbc.car.volkswagen import mqbcan, pqcan
+from opendbc.car.volkswagen.values import CANBUS, CarControllerParams, VolkswagenFlags
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState

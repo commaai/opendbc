@@ -1,9 +1,9 @@
 import re
 
 from panda.python.uds import get_rx_addr_for_tx_addr, FUNCTIONAL_ADDRS
-from openpilot.selfdrive.car import carlog
-from openpilot.selfdrive.car.isotp_parallel_query import IsoTpParallelQuery
-from openpilot.selfdrive.car.fw_query_definitions import STANDARD_VIN_ADDRS, StdQueries
+from opendbc.car import carlog
+from opendbc.car.isotp_parallel_query import IsoTpParallelQuery
+from opendbc.car.fw_query_definitions import STANDARD_VIN_ADDRS, StdQueries
 
 VIN_UNKNOWN = "0" * 17
 VIN_RE = "[A-HJ-NPR-Z0-9]{17}"

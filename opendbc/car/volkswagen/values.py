@@ -4,12 +4,12 @@ from enum import Enum, IntFlag, StrEnum
 
 from panda.python import uds
 from opendbc.can.can_define import CANDefine
-from openpilot.selfdrive.car import dbc_dict, CarSpecs, DbcDict, PlatformConfig, Platforms
-from openpilot.selfdrive.car.common.conversions import Conversions as CV
-from openpilot.selfdrive.car import structs
-from openpilot.selfdrive.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, \
+from opendbc.car import dbc_dict, CarSpecs, DbcDict, PlatformConfig, Platforms
+from opendbc.car.common.conversions import Conversions as CV
+from opendbc.car import structs
+from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, \
                                                      Device
-from openpilot.selfdrive.car.fw_query_definitions import EcuAddrSubAddr, FwQueryConfig, Request, p16
+from opendbc.car.fw_query_definitions import EcuAddrSubAddr, FwQueryConfig, Request, p16
 
 Ecu = structs.CarParams.Ecu
 NetworkLocation = structs.CarParams.NetworkLocation

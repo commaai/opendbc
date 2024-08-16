@@ -1,9 +1,9 @@
 import numpy as np
 from opendbc.can.parser import CANParser
-from openpilot.selfdrive.car import structs
-from openpilot.selfdrive.car.interfaces import CarStateBase
-from openpilot.selfdrive.car.common.conversions import Conversions as CV
-from openpilot.selfdrive.car.volkswagen.values import DBC, CANBUS, NetworkLocation, TransmissionType, GearShifter, \
+from opendbc.car import structs
+from opendbc.car.interfaces import CarStateBase
+from opendbc.car.common.conversions import Conversions as CV
+from opendbc.car.volkswagen.values import DBC, CANBUS, NetworkLocation, TransmissionType, GearShifter, \
                                                       CarControllerParams, VolkswagenFlags
 
 

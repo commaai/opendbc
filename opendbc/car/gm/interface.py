@@ -3,12 +3,12 @@ import os
 from math import fabs, exp
 from panda import Panda
 
-from openpilot.selfdrive.car import get_safety_config, get_friction, structs
-from openpilot.selfdrive.car.common.basedir import BASEDIR
-from openpilot.selfdrive.car.common.conversions import Conversions as CV
-from openpilot.selfdrive.car.gm.radar_interface import RADAR_HEADER_MSG
-from openpilot.selfdrive.car.gm.values import CAR, CarControllerParams, EV_CAR, CAMERA_ACC_CAR, CanBus
-from openpilot.selfdrive.car.interfaces import CarInterfaceBase, TorqueFromLateralAccelCallbackType, FRICTION_THRESHOLD, LatControlInputs, NanoFFModel
+from opendbc.car import get_safety_config, get_friction, structs
+from opendbc.car.common.basedir import BASEDIR
+from opendbc.car.common.conversions import Conversions as CV
+from opendbc.car.gm.radar_interface import RADAR_HEADER_MSG
+from opendbc.car.gm.values import CAR, CarControllerParams, EV_CAR, CAMERA_ACC_CAR, CanBus
+from opendbc.car.interfaces import CarInterfaceBase, TorqueFromLateralAccelCallbackType, FRICTION_THRESHOLD, LatControlInputs, NanoFFModel
 
 TransmissionType = structs.CarParams.TransmissionType
 NetworkLocation = structs.CarParams.NetworkLocation

@@ -1,5 +1,5 @@
-from openpilot.selfdrive.car.can_definitions import CanData
-from openpilot.selfdrive.car.gm.values import CAR
+from opendbc.car.can_definitions import CanData
+from opendbc.car.gm.values import CAR
 
 
 def create_buttons(packer, bus, idx, button):

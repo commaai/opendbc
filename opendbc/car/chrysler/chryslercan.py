@@ -1,5 +1,5 @@
-from openpilot.selfdrive.car import structs
-from openpilot.selfdrive.car.chrysler.values import RAM_CARS
+from opendbc.car import structs
+from opendbc.car.chrysler.values import RAM_CARS
 
 GearShifter = structs.CarState.GearShifter
 VisualAlert = structs.CarControl.HUDControl.VisualAlert

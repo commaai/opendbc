@@ -1,5 +1,5 @@
-from openpilot.selfdrive.car import structs
-from openpilot.selfdrive.car.interfaces import CarStateBase
+from opendbc.car import structs
+from opendbc.car.interfaces import CarStateBase
 
 
 class CarState(CarStateBase):

@@ -2,10 +2,10 @@ from enum import IntFlag
 from dataclasses import dataclass, field
 
 from panda.python import uds
-from openpilot.selfdrive.car import CarSpecs, DbcDict, PlatformConfig, Platforms, dbc_dict
-from openpilot.selfdrive.car.structs import CarParams
-from openpilot.selfdrive.car.docs_definitions import CarHarness, CarDocs, CarParts
-from openpilot.selfdrive.car.fw_query_definitions import FwQueryConfig, Request, p16
+from opendbc.car import CarSpecs, DbcDict, PlatformConfig, Platforms, dbc_dict
+from opendbc.car.structs import CarParams
+from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
+from opendbc.car.fw_query_definitions import FwQueryConfig, Request, p16
 
 Ecu = CarParams.Ecu
 

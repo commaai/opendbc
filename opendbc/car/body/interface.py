@@ -1,7 +1,7 @@
 import math
-from openpilot.selfdrive.car import get_safety_config, structs
-from openpilot.selfdrive.car.interfaces import CarInterfaceBase
-from openpilot.selfdrive.car.body.values import SPEED_FROM_RPM
+from opendbc.car import get_safety_config, structs
+from opendbc.car.interfaces import CarInterfaceBase
+from opendbc.car.body.values import SPEED_FROM_RPM
 
 
 class CarInterface(CarInterfaceBase):

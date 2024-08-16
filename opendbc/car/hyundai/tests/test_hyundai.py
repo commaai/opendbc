@@ -2,16 +2,16 @@ from hypothesis import settings, given, strategies as st
 
 import pytest
 
-from openpilot.selfdrive.car import gen_empty_fingerprint
-from openpilot.selfdrive.car.structs import CarParams
-from openpilot.selfdrive.car.fw_versions import build_fw_dict
-from openpilot.selfdrive.car.hyundai.interface import CarInterface
-from openpilot.selfdrive.car.hyundai.radar_interface import RADAR_START_ADDR
-from openpilot.selfdrive.car.hyundai.values import CAMERA_SCC_CAR, CANFD_CAR, CAN_GEARS, CAR, CHECKSUM, DATE_FW_ECUS, \
+from opendbc.car import gen_empty_fingerprint
+from opendbc.car.structs import CarParams
+from opendbc.car.fw_versions import build_fw_dict
+from opendbc.car.hyundai.interface import CarInterface
+from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
+from opendbc.car.hyundai.values import CAMERA_SCC_CAR, CANFD_CAR, CAN_GEARS, CAR, CHECKSUM, DATE_FW_ECUS, \
                                          HYBRID_CAR, EV_CAR, FW_QUERY_CONFIG, LEGACY_SAFETY_MODE_CAR, CANFD_FUZZY_WHITELIST, \
                                          UNSUPPORTED_LONGITUDINAL_CAR, PLATFORM_CODE_ECUS, HYUNDAI_VERSION_REQUEST_LONG, \
                                          HyundaiFlags, get_platform_codes
-from openpilot.selfdrive.car.hyundai.fingerprints import FW_VERSIONS
+from opendbc.car.hyundai.fingerprints import FW_VERSIONS
 
 Ecu = CarParams.Ecu
 

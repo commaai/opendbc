@@ -1,9 +1,9 @@
 import copy
 from opendbc.can.packer import CANPacker
-from openpilot.selfdrive.car import DT_CTRL, apply_meas_steer_torque_limits
-from openpilot.selfdrive.car.chrysler import chryslercan
-from openpilot.selfdrive.car.chrysler.values import RAM_CARS, CarControllerParams, ChryslerFlags
-from openpilot.selfdrive.car.interfaces import CarControllerBase
+from opendbc.car import DT_CTRL, apply_meas_steer_torque_limits
+from opendbc.car.chrysler import chryslercan
+from opendbc.car.chrysler.values import RAM_CARS, CarControllerParams, ChryslerFlags
+from opendbc.car.interfaces import CarControllerBase
 
 
 class CarController(CarControllerBase):

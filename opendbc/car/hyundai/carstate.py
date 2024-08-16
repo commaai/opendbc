@@ -4,12 +4,12 @@ import math
 
 from opendbc.can.parser import CANParser
 from opendbc.can.can_define import CANDefine
-from openpilot.selfdrive.car import create_button_events, structs
-from openpilot.selfdrive.car.common.conversions import Conversions as CV
-from openpilot.selfdrive.car.hyundai.hyundaicanfd import CanBus
-from openpilot.selfdrive.car.hyundai.values import HyundaiFlags, CAR, DBC, CAN_GEARS, CAMERA_SCC_CAR, \
+from opendbc.car import create_button_events, structs
+from opendbc.car.common.conversions import Conversions as CV
+from opendbc.car.hyundai.hyundaicanfd import CanBus
+from opendbc.car.hyundai.values import HyundaiFlags, CAR, DBC, CAN_GEARS, CAMERA_SCC_CAR, \
                                                    CANFD_CAR, Buttons, CarControllerParams
-from openpilot.selfdrive.car.interfaces import CarStateBase
+from opendbc.car.interfaces import CarStateBase
 
 ButtonType = structs.CarState.ButtonEvent.Type
 

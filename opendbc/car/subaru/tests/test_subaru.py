@@ -1,4 +1,4 @@
-from openpilot.selfdrive.car.subaru.fingerprints import FW_VERSIONS
+from opendbc.car.subaru.fingerprints import FW_VERSIONS
 
 
 class TestSubaruFingerprint:

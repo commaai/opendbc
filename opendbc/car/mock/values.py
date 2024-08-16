@@ -1,4 +1,4 @@
-from openpilot.selfdrive.car import CarSpecs, PlatformConfig, Platforms
+from opendbc.car import CarSpecs, PlatformConfig, Platforms
 
 
 class CAR(Platforms):

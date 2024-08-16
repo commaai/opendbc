@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from collections import defaultdict
-from openpilot.selfdrive.car.toyota.values import PLATFORM_CODE_ECUS, get_platform_codes
-from openpilot.selfdrive.car.toyota.fingerprints import FW_VERSIONS
+from opendbc.car.toyota.values import PLATFORM_CODE_ECUS, get_platform_codes
+from opendbc.car.toyota.fingerprints import FW_VERSIONS
 
 if __name__ == "__main__":
   parts_for_ecu: dict = defaultdict(set)

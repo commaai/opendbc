@@ -4,8 +4,8 @@ import copy
 from dataclasses import dataclass, field
 from enum import Enum
 
-from openpilot.selfdrive.car.common.conversions import Conversions as CV
-from openpilot.selfdrive.car.structs import CarParams
+from opendbc.car.common.conversions import Conversions as CV
+from opendbc.car.structs import CarParams
 
 GOOD_TORQUE_THRESHOLD = 1.0  # m/s^2
 MODEL_YEARS_RE = r"(?<= )((\d{4}-\d{2})|(\d{4}))(,|$)"

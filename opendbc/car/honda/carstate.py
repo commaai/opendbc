@@ -2,14 +2,14 @@ from collections import defaultdict
 
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
-from openpilot.selfdrive.car import create_button_events, structs
-from openpilot.selfdrive.car.common.conversions import Conversions as CV
-from openpilot.selfdrive.car.common.numpy_fast import interp
-from openpilot.selfdrive.car.honda.hondacan import CanBus, get_cruise_speed_conversion
-from openpilot.selfdrive.car.honda.values import CAR, DBC, STEER_THRESHOLD, HONDA_BOSCH, \
+from opendbc.car import create_button_events, structs
+from opendbc.car.common.conversions import Conversions as CV
+from opendbc.car.common.numpy_fast import interp
+from opendbc.car.honda.hondacan import CanBus, get_cruise_speed_conversion
+from opendbc.car.honda.values import CAR, DBC, STEER_THRESHOLD, HONDA_BOSCH, \
                                                  HONDA_NIDEC_ALT_SCM_MESSAGES, HONDA_BOSCH_RADARLESS, \
                                                  HondaFlags, CruiseButtons, CruiseSettings
-from openpilot.selfdrive.car.interfaces import CarStateBase
+from opendbc.car.interfaces import CarStateBase
 
 TransmissionType = structs.CarParams.TransmissionType
 ButtonType = structs.CarState.ButtonEvent.Type

@@ -1,5 +1,5 @@
 import crcmod
-from openpilot.selfdrive.car.hyundai.values import CAR, HyundaiFlags
+from opendbc.car.hyundai.values import CAR, HyundaiFlags
 
 hyundai_checksum = crcmod.mkCrcFun(0x11D, initCrc=0xFD, rev=False, xorOut=0xdf)
 

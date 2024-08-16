@@ -2,9 +2,9 @@ import time
 from collections import defaultdict
 from functools import partial
 
-from openpilot.selfdrive.car import carlog
-from openpilot.selfdrive.car.can_definitions import CanData, CanRecvCallable, CanSendCallable
-from openpilot.selfdrive.car.fw_query_definitions import AddrType
+from opendbc.car import carlog
+from opendbc.car.can_definitions import CanData, CanRecvCallable, CanSendCallable
+from opendbc.car.fw_query_definitions import AddrType
 from panda.python.uds import CanClient, IsoTpMessage, FUNCTIONAL_ADDRS, get_rx_addr_for_tx_addr
 
 

@@ -1,5 +1,5 @@
-from openpilot.selfdrive.car import carlog
-from openpilot.selfdrive.car.isotp_parallel_query import IsoTpParallelQuery
+from opendbc.car import carlog
+from opendbc.car.isotp_parallel_query import IsoTpParallelQuery
 
 EXT_DIAG_REQUEST = b'\x10\x03'
 EXT_DIAG_RESPONSE = b'\x50\x03'

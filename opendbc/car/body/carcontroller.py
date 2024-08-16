@@ -3,11 +3,11 @@ import numpy as np
 from numbers import Number
 
 from opendbc.can.packer import CANPacker
-from openpilot.selfdrive.car import DT_CTRL
-from openpilot.selfdrive.car.common.numpy_fast import clip, interp
-from openpilot.selfdrive.car.body import bodycan
-from openpilot.selfdrive.car.body.values import SPEED_FROM_RPM
-from openpilot.selfdrive.car.interfaces import CarControllerBase
+from opendbc.car import DT_CTRL
+from opendbc.car.common.numpy_fast import clip, interp
+from opendbc.car.body import bodycan
+from opendbc.car.body.values import SPEED_FROM_RPM
+from opendbc.car.interfaces import CarControllerBase
 
 
 class PIController:

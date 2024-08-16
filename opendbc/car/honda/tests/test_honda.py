@@ -1,6 +1,6 @@
 import re
 
-from openpilot.selfdrive.car.honda.fingerprints import FW_VERSIONS
+from opendbc.car.honda.fingerprints import FW_VERSIONS
 
 HONDA_FW_VERSION_RE = br"[A-Z0-9]{5}-[A-Z0-9]{3}(-|,)[A-Z0-9]{4}(\x00){2}$"
 

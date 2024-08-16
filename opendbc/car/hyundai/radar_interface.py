@@ -1,9 +1,9 @@
 import math
 
 from opendbc.can.parser import CANParser
-from openpilot.selfdrive.car import structs
-from openpilot.selfdrive.car.interfaces import RadarInterfaceBase
-from openpilot.selfdrive.car.hyundai.values import DBC
+from opendbc.car import structs
+from opendbc.car.interfaces import RadarInterfaceBase
+from opendbc.car.hyundai.values import DBC
 
 RADAR_START_ADDR = 0x500
 RADAR_MSG_COUNT = 32

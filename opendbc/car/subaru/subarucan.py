@@ -1,5 +1,5 @@
-from openpilot.selfdrive.car import structs
-from openpilot.selfdrive.car.subaru.values import CanBus
+from opendbc.car import structs
+from opendbc.car.subaru.values import CanBus
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 

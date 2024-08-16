@@ -1,4 +1,4 @@
-from openpilot.selfdrive.car.interfaces import CarControllerBase
+from opendbc.car.interfaces import CarControllerBase
 
 
 class CarController(CarControllerBase):

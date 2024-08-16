@@ -1,7 +1,7 @@
 from parameterized import parameterized
 
-from openpilot.selfdrive.car.gm.fingerprints import FINGERPRINTS
-from openpilot.selfdrive.car.gm.values import CAMERA_ACC_CAR, GM_RX_OFFSET
+from opendbc.car.gm.fingerprints import FINGERPRINTS
+from opendbc.car.gm.values import CAMERA_ACC_CAR, GM_RX_OFFSET
 
 CAMERA_DIAGNOSTIC_ADDRESS = 0x24b
 

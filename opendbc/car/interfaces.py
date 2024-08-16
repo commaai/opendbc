@@ -8,14 +8,14 @@ from typing import Any, NamedTuple
 from collections.abc import Callable
 from functools import cache
 
-from openpilot.selfdrive.car import DT_CTRL, apply_hysteresis, gen_empty_fingerprint, scale_rot_inertia, scale_tire_stiffness, get_friction, STD_CARGO_KG
-from openpilot.selfdrive.car import structs
-from openpilot.selfdrive.car.can_definitions import CanData, CanRecvCallable, CanSendCallable
-from openpilot.selfdrive.car.common.basedir import BASEDIR
-from openpilot.selfdrive.car.common.conversions import Conversions as CV
-from openpilot.selfdrive.car.common.simple_kalman import KF1D, get_kalman_gain
-from openpilot.selfdrive.car.common.numpy_fast import clip
-from openpilot.selfdrive.car.values import PLATFORMS
+from opendbc.car import DT_CTRL, apply_hysteresis, gen_empty_fingerprint, scale_rot_inertia, scale_tire_stiffness, get_friction, STD_CARGO_KG
+from opendbc.car import structs
+from opendbc.car.can_definitions import CanData, CanRecvCallable, CanSendCallable
+from opendbc.car.common.basedir import BASEDIR
+from opendbc.car.common.conversions import Conversions as CV
+from opendbc.car.common.simple_kalman import KF1D, get_kalman_gain
+from opendbc.car.common.numpy_fast import clip
+from opendbc.car.values import PLATFORMS
 
 GearShifter = structs.CarState.GearShifter
 
@@ -401,7 +401,7 @@ def get_interface_attr(attr: str, combine_brands: bool = False, ignore_none: boo
   for car_folder in sorted([x[0] for x in os.walk(BASEDIR)]):
     try:
       brand_name = car_folder.split('/')[-1]
-      brand_values = __import__(f'openpilot.selfdrive.car.{brand_name}.{INTERFACE_ATTR_FILE.get(attr, "values")}', fromlist=[attr])
+      brand_values = __import__(f'opendbc.car.{brand_name}.{INTERFACE_ATTR_FILE.get(attr, "values")}', fromlist=[attr])
       if hasattr(brand_values, attr) or not ignore_none:
         attr_data = getattr(brand_values, attr, None)
       else:

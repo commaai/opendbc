@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-from openpilot.selfdrive.car import structs
-from openpilot.selfdrive.car.interfaces import CarInterfaceBase
+from opendbc.car import structs
+from opendbc.car.interfaces import CarInterfaceBase
 
 
 # mocked car interface for dashcam mode

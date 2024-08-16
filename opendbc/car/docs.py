@@ -3,11 +3,11 @@ import jinja2
 from enum import Enum
 from natsort import natsorted
 
-from openpilot.selfdrive.car import gen_empty_fingerprint
-from openpilot.selfdrive.car.structs import CarParams
-from openpilot.selfdrive.car.docs_definitions import CarDocs, Column, CommonFootnote, PartType
-from openpilot.selfdrive.car.car_helpers import interfaces, get_interface_attr
-from openpilot.selfdrive.car.values import PLATFORMS
+from opendbc.car import gen_empty_fingerprint
+from opendbc.car.structs import CarParams
+from opendbc.car.docs_definitions import CarDocs, Column, CommonFootnote, PartType
+from opendbc.car.car_helpers import interfaces, get_interface_attr
+from opendbc.car.values import PLATFORMS
 
 
 def get_all_footnotes() -> dict[Enum, int]:

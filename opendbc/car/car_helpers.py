@@ -1,14 +1,14 @@
 import os
 import time
 
-from openpilot.selfdrive.car import carlog, gen_empty_fingerprint
-from openpilot.selfdrive.car.can_definitions import CanRecvCallable, CanSendCallable
-from openpilot.selfdrive.car.structs import CarParams
-from openpilot.selfdrive.car.fingerprints import eliminate_incompatible_cars, all_legacy_fingerprint_cars
-from openpilot.selfdrive.car.fw_versions import ObdCallback, get_fw_versions_ordered, get_present_ecus, match_fw_to_car
-from openpilot.selfdrive.car.interfaces import get_interface_attr
-from openpilot.selfdrive.car.mock.values import CAR as MOCK
-from openpilot.selfdrive.car.vin import get_vin, is_valid_vin, VIN_UNKNOWN
+from opendbc.car import carlog, gen_empty_fingerprint
+from opendbc.car.can_definitions import CanRecvCallable, CanSendCallable
+from opendbc.car.structs import CarParams
+from opendbc.car.fingerprints import eliminate_incompatible_cars, all_legacy_fingerprint_cars
+from opendbc.car.fw_versions import ObdCallback, get_fw_versions_ordered, get_present_ecus, match_fw_to_car
+from opendbc.car.interfaces import get_interface_attr
+from opendbc.car.mock.values import CAR as MOCK
+from opendbc.car.vin import get_vin, is_valid_vin, VIN_UNKNOWN
 
 FRAME_FINGERPRINT = 100  # 1s
 
@@ -16,7 +16,7 @@ FRAME_FINGERPRINT = 100  # 1s
 def load_interfaces(brand_names):
   ret = {}
   for brand_name in brand_names:
-    path = f'openpilot.selfdrive.car.{brand_name}'
+    path = f'opendbc.car.{brand_name}'
     CarInterface = __import__(path + '.interface', fromlist=['CarInterface']).CarInterface
     CarState = __import__(path + '.carstate', fromlist=['CarState']).CarState
     CarController = __import__(path + '.carcontroller', fromlist=['CarController']).CarController

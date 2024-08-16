@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 from opendbc.can.parser import CANParser
-from openpilot.selfdrive.car import structs
-from openpilot.selfdrive.car.interfaces import RadarInterfaceBase
-from openpilot.selfdrive.car.honda.values import DBC
+from opendbc.car import structs
+from opendbc.car.interfaces import RadarInterfaceBase
+from opendbc.car.honda.values import DBC
 
 
 def _create_nidec_can_parser(car_fingerprint):

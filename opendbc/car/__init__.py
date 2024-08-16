@@ -6,10 +6,10 @@ from enum import IntFlag, ReprEnum, EnumType
 from dataclasses import replace
 
 from panda.python.uds import SERVICE_TYPE
-from openpilot.selfdrive.car import structs
-from openpilot.selfdrive.car.can_definitions import CanData
-from openpilot.selfdrive.car.docs_definitions import CarDocs
-from openpilot.selfdrive.car.common.numpy_fast import clip, interp
+from opendbc.car import structs
+from opendbc.car.can_definitions import CanData
+from opendbc.car.docs_definitions import CarDocs
+from opendbc.car.common.numpy_fast import clip, interp
 
 # set up logging
 carlog = logging.getLogger('carlog')

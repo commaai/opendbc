@@ -1,10 +1,10 @@
 import copy
 from opendbc.can.packer import CANPacker
-from openpilot.selfdrive.car import apply_driver_steer_torque_limits, common_fault_avoidance, make_tester_present_msg
-from openpilot.selfdrive.car.common.numpy_fast import clip, interp
-from openpilot.selfdrive.car.interfaces import CarControllerBase
-from openpilot.selfdrive.car.subaru import subarucan
-from openpilot.selfdrive.car.subaru.values import DBC, GLOBAL_ES_ADDR, CanBus, CarControllerParams, SubaruFlags
+from opendbc.car import apply_driver_steer_torque_limits, common_fault_avoidance, make_tester_present_msg
+from opendbc.car.common.numpy_fast import clip, interp
+from opendbc.car.interfaces import CarControllerBase
+from opendbc.car.subaru import subarucan
+from opendbc.car.subaru.values import DBC, GLOBAL_ES_ADDR, CanBus, CarControllerParams, SubaruFlags
 
 # FIXME: These limits aren't exact. The real limit is more than likely over a larger time period and
 # involves the total steering angle change rather than rate, but these limits work well for now

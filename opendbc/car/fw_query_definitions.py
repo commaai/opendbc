@@ -5,7 +5,7 @@ from collections.abc import Callable
 
 import panda.python.uds as uds
 
-from openpilot.selfdrive.car.structs import CarParams
+from opendbc.car.structs import CarParams
 
 AddrType = tuple[int, int | None]
 EcuAddrBusType = tuple[int, int | None, int]

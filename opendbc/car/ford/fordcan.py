@@ -1,4 +1,4 @@
-from openpilot.selfdrive.car import CanBusBase, structs
+from opendbc.car import CanBusBase, structs
 
 HUDControl = structs.CarControl.HUDControl
 

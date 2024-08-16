@@ -2,12 +2,12 @@ import copy
 
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
-from openpilot.selfdrive.car import DT_CTRL, create_button_events, structs
-from openpilot.selfdrive.car.common.conversions import Conversions as CV
-from openpilot.selfdrive.car.common.filter_simple import FirstOrderFilter
-from openpilot.selfdrive.car.common.numpy_fast import mean
-from openpilot.selfdrive.car.interfaces import CarStateBase
-from openpilot.selfdrive.car.toyota.values import ToyotaFlags, CAR, DBC, STEER_THRESHOLD, NO_STOP_TIMER_CAR, \
+from opendbc.car import DT_CTRL, create_button_events, structs
+from opendbc.car.common.conversions import Conversions as CV
+from opendbc.car.common.filter_simple import FirstOrderFilter
+from opendbc.car.common.numpy_fast import mean
+from opendbc.car.interfaces import CarStateBase
+from opendbc.car.toyota.values import ToyotaFlags, CAR, DBC, STEER_THRESHOLD, NO_STOP_TIMER_CAR, \
                                                   TSS2_CAR, RADAR_ACC_CAR, EPS_SCALE, UNSUPPORTED_DSU_CAR
 
 ButtonType = structs.CarState.ButtonEvent.Type

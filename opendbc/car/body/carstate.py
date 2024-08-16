@@ -1,7 +1,7 @@
 from opendbc.can.parser import CANParser
-from openpilot.selfdrive.car import structs
-from openpilot.selfdrive.car.interfaces import CarStateBase
-from openpilot.selfdrive.car.body.values import DBC
+from opendbc.car import structs
+from opendbc.car.interfaces import CarStateBase
+from opendbc.car.body.values import DBC
 
 
 class CarState(CarStateBase):

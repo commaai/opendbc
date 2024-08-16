@@ -1,9 +1,9 @@
 from panda import Panda
-from openpilot.selfdrive.car import get_safety_config, structs
-from openpilot.selfdrive.car.common.conversions import Conversions as CV
-from openpilot.selfdrive.car.ford.fordcan import CanBus
-from openpilot.selfdrive.car.ford.values import Ecu, FordFlags
-from openpilot.selfdrive.car.interfaces import CarInterfaceBase
+from opendbc.car import get_safety_config, structs
+from opendbc.car.common.conversions import Conversions as CV
+from opendbc.car.ford.fordcan import CanBus
+from opendbc.car.ford.values import Ecu, FordFlags
+from opendbc.car.interfaces import CarInterfaceBase
 
 TransmissionType = structs.CarParams.TransmissionType
 

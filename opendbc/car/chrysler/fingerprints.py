@@ -1,5 +1,5 @@
-from openpilot.selfdrive.car.structs import CarParams
-from openpilot.selfdrive.car.chrysler.values import CAR
+from opendbc.car.structs import CarParams
+from opendbc.car.chrysler.values import CAR
 
 Ecu = CarParams.Ecu
 

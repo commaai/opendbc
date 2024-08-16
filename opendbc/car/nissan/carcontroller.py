@@ -1,9 +1,9 @@
 import copy
 from opendbc.can.packer import CANPacker
-from openpilot.selfdrive.car import apply_std_steer_angle_limits, structs
-from openpilot.selfdrive.car.interfaces import CarControllerBase
-from openpilot.selfdrive.car.nissan import nissancan
-from openpilot.selfdrive.car.nissan.values import CAR, CarControllerParams
+from opendbc.car import apply_std_steer_angle_limits, structs
+from opendbc.car.interfaces import CarControllerBase
+from opendbc.car.nissan import nissancan
+from opendbc.car.nissan.values import CAR, CarControllerParams
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 

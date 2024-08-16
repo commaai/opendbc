@@ -1,6 +1,6 @@
 # ruff: noqa: E501
-from openpilot.selfdrive.car.structs import CarParams
-from openpilot.selfdrive.car.nissan.values import CAR
+from opendbc.car.structs import CarParams
+from opendbc.car.nissan.values import CAR
 
 Ecu = CarParams.Ecu
 

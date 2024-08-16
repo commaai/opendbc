@@ -4,10 +4,10 @@ from collections.abc import Iterable
 from hypothesis import settings, given, strategies as st
 from parameterized import parameterized
 
-from openpilot.selfdrive.car.structs import CarParams
-from openpilot.selfdrive.car.fw_versions import build_fw_dict
-from openpilot.selfdrive.car.ford.values import CAR, FW_QUERY_CONFIG, FW_PATTERN, get_platform_codes
-from openpilot.selfdrive.car.ford.fingerprints import FW_VERSIONS
+from opendbc.car.structs import CarParams
+from opendbc.car.fw_versions import build_fw_dict
+from opendbc.car.ford.values import CAR, FW_QUERY_CONFIG, FW_PATTERN, get_platform_codes
+from opendbc.car.ford.fingerprints import FW_VERSIONS
 
 Ecu = CarParams.Ecu
 

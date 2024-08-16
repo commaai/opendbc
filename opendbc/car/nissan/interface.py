@@ -1,7 +1,7 @@
 from panda import Panda
-from openpilot.selfdrive.car import get_safety_config, structs
-from openpilot.selfdrive.car.interfaces import CarInterfaceBase
-from openpilot.selfdrive.car.nissan.values import CAR
+from opendbc.car import get_safety_config, structs
+from opendbc.car.interfaces import CarInterfaceBase
+from opendbc.car.nissan.values import CAR
 
 
 class CarInterface(CarInterfaceBase):

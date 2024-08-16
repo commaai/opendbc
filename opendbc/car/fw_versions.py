@@ -5,14 +5,14 @@ from typing import Protocol, TypeVar
 from tqdm import tqdm
 
 import panda.python.uds as uds
-from openpilot.selfdrive.car import carlog
-from openpilot.selfdrive.car.can_definitions import CanRecvCallable, CanSendCallable
-from openpilot.selfdrive.car.structs import CarParams
-from openpilot.selfdrive.car.ecu_addrs import get_ecu_addrs
-from openpilot.selfdrive.car.fingerprints import FW_VERSIONS
-from openpilot.selfdrive.car.fw_query_definitions import AddrType, EcuAddrBusType, FwQueryConfig, LiveFwVersions, OfflineFwVersions
-from openpilot.selfdrive.car.interfaces import get_interface_attr
-from openpilot.selfdrive.car.isotp_parallel_query import IsoTpParallelQuery
+from opendbc.car import carlog
+from opendbc.car.can_definitions import CanRecvCallable, CanSendCallable
+from opendbc.car.structs import CarParams
+from opendbc.car.ecu_addrs import get_ecu_addrs
+from opendbc.car.fingerprints import FW_VERSIONS
+from opendbc.car.fw_query_definitions import AddrType, EcuAddrBusType, FwQueryConfig, LiveFwVersions, OfflineFwVersions
+from opendbc.car.interfaces import get_interface_attr
+from opendbc.car.isotp_parallel_query import IsoTpParallelQuery
 
 Ecu = CarParams.Ecu
 ESSENTIAL_ECUS = [Ecu.engine, Ecu.eps, Ecu.abs, Ecu.fwdRadar, Ecu.fwdCamera, Ecu.vsa]

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-from openpilot.selfdrive.car import get_safety_config, structs
-from openpilot.selfdrive.car.common.conversions import Conversions as CV
-from openpilot.selfdrive.car.mazda.values import CAR, LKAS_LIMITS
-from openpilot.selfdrive.car.interfaces import CarInterfaceBase
+from opendbc.car import get_safety_config, structs
+from opendbc.car.common.conversions import Conversions as CV
+from opendbc.car.mazda.values import CAR, LKAS_LIMITS
+from opendbc.car.interfaces import CarInterfaceBase
 
 
 

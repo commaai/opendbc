@@ -1,10 +1,10 @@
 import copy
 from opendbc.can.packer import CANPacker
-from openpilot.selfdrive.car import apply_std_steer_angle_limits, structs
-from openpilot.selfdrive.car.ford import fordcan
-from openpilot.selfdrive.car.ford.values import CarControllerParams, FordFlags
-from openpilot.selfdrive.car.common.numpy_fast import clip
-from openpilot.selfdrive.car.interfaces import CarControllerBase, V_CRUISE_MAX
+from opendbc.car import apply_std_steer_angle_limits, structs
+from opendbc.car.ford import fordcan
+from opendbc.car.ford.values import CarControllerParams, FordFlags
+from opendbc.car.common.numpy_fast import clip
+from opendbc.car.interfaces import CarControllerBase, V_CRUISE_MAX
 
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 VisualAlert = structs.CarControl.HUDControl.VisualAlert

@@ -1,11 +1,11 @@
 import copy
 from opendbc.can.packer import CANPacker
-from openpilot.selfdrive.car import DT_CTRL, apply_driver_steer_torque_limits, structs
-from openpilot.selfdrive.car.gm import gmcan
-from openpilot.selfdrive.car.common.conversions import Conversions as CV
-from openpilot.selfdrive.car.gm.values import DBC, CanBus, CarControllerParams, CruiseButtons
-from openpilot.selfdrive.car.common.numpy_fast import interp
-from openpilot.selfdrive.car.interfaces import CarControllerBase
+from opendbc.car import DT_CTRL, apply_driver_steer_torque_limits, structs
+from opendbc.car.gm import gmcan
+from opendbc.car.common.conversions import Conversions as CV
+from opendbc.car.gm.values import DBC, CanBus, CarControllerParams, CruiseButtons
+from opendbc.car.common.numpy_fast import interp
+from opendbc.car.interfaces import CarControllerBase
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 NetworkLocation = structs.CarParams.NetworkLocation

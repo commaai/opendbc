@@ -1,7 +1,7 @@
-from openpilot.selfdrive.car import CarSpecs, PlatformConfig, Platforms, dbc_dict
-from openpilot.selfdrive.car.structs import CarParams
-from openpilot.selfdrive.car.docs_definitions import CarDocs
-from openpilot.selfdrive.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
+from opendbc.car import CarSpecs, PlatformConfig, Platforms, dbc_dict
+from opendbc.car.structs import CarParams
+from opendbc.car.docs_definitions import CarDocs
+from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
 

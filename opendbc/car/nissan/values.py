@@ -1,10 +1,10 @@
 from dataclasses import dataclass, field
 
 from panda.python import uds
-from openpilot.selfdrive.car import AngleRateLimit, CarSpecs, DbcDict, PlatformConfig, Platforms, dbc_dict
-from openpilot.selfdrive.car.structs import CarParams
-from openpilot.selfdrive.car.docs_definitions import CarDocs, CarHarness, CarParts
-from openpilot.selfdrive.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
+from opendbc.car import AngleRateLimit, CarSpecs, DbcDict, PlatformConfig, Platforms, dbc_dict
+from opendbc.car.structs import CarParams
+from opendbc.car.docs_definitions import CarDocs, CarHarness, CarParts
+from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
 

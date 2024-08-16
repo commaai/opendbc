@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-from openpilot.selfdrive.car.structs import CarParams
-from openpilot.selfdrive.car.hyundai.values import PLATFORM_CODE_ECUS, get_platform_codes
-from openpilot.selfdrive.car.hyundai.fingerprints import FW_VERSIONS
+from opendbc.car.structs import CarParams
+from opendbc.car.hyundai.values import PLATFORM_CODE_ECUS, get_platform_codes
+from opendbc.car.hyundai.fingerprints import FW_VERSIONS
 
 Ecu = CarParams.Ecu
 

@@ -1,9 +1,9 @@
 from dataclasses import dataclass, field
 
-from openpilot.selfdrive.car import dbc_dict, PlatformConfig, DbcDict, Platforms, CarSpecs
-from openpilot.selfdrive.car.structs import CarParams
-from openpilot.selfdrive.car.docs_definitions import CarHarness, CarDocs, CarParts
-from openpilot.selfdrive.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
+from opendbc.car import dbc_dict, PlatformConfig, DbcDict, Platforms, CarSpecs
+from opendbc.car.structs import CarParams
+from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
+from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
 
