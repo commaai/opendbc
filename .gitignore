@@ -1,3 +1,4 @@
+/build/
 .mypy_cache/
 *.pyc
 *.os
