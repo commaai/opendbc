@@ -8,3 +8,9 @@ scons
 pytest
 pytest-xdist
 pytest-subtests
+pytest-mock
+hypothesis==6.47.*
+crcmod
+natsort
+parameterized>=0.8,<0.9
+git+https://github.com/commaai/panda.git
