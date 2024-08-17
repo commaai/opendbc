@@ -32,7 +32,7 @@ NS_ :
     SG_MUL_VAL_
 
 BS_: 
-BU_: ACC ACSM AHM ASZ CAS CBX CON DDE DSC ICM EGS EMF FRM GWS HUD HU_NBT IHKA JBE KAFAS2 KOMBI RDC REMALI SCR TRSVC XXX ZGM DIAG TMSL TMSR 
+BU_: ACC ACSM AHM ASZ CAS CBX CON DDE DSC ICM EGS EMF FRM GWS HUD HU_NBT IHKA JBE KAFAS2 KOMBI RDC REMALI SCR TRSVC XXX ZGM DIAG TMSL TMSR HU_CHAMP2 
 BO_ 192 ZGM_ABSAlive: 2 ZGM
 
 BO_ 217 DDE_AccelerationPedalAngle: 8 DDE
@@ -399,7 +399,7 @@ BO_ 1079 KAFAS2_Unknown437: 4 KAFAS2
 
 BO_ 1501 KAFAS2_Unknown5DD: 8 KAFAS2
 
-BO_ 1629 KAFAS2_Unknown65D: 8 KAFAS2
+BO_ 1629 KAFAS2_OBDResponse: 8 KAFAS2
 
 BO_ 1811 ICM_driver_action_steering_wheel: 8 ICM
 
@@ -412,6 +412,86 @@ BO_ 486 TMSR_status_of_exterior_light_right: 8 TMSR
 BO_ 1816 ACC_PreCrashDetection: 8 ACC
 
 BO_ 2147485450 KOMBI_SystemTime: 8 KOMBI
+
+BO_ 1780 ZGM_OBDRequest: 8 ZGM
+
+BO_ 2147484218 CAS_RadioOperatedKeyStatus: 8 CAS
+
+BO_ 634 ZGM_NavigationGraphSynchronization: 8 ZGM
+
+BO_ 846 ZGM_NavigationSystemInformation: 8 ZGM
+
+BO_ 844 ZGM_NavigationGPS2: 8 ZGM
+
+BO_ 840 HU_Unknown348: 8 HU_CHAMP2
+
+BO_ 842 HU_Unknown34A: 8 HU_CHAMP2
+
+BO_ 1507 HU_Unknown5E3: 8 HU_CHAMP2
+
+BO_ 2147484239 HU_NBT_Unknown0x24F: 8 HU_NBT
+
+BO_ 972 HU_NBT_Unknown0x3CC: 7 HU_NBT
+
+BO_ 2147484280 HU_NBT_Unknown0x278: 8 HU_NBT
+
+BO_ 1015 HU_NBT_Unknown0x3F7: 8 HU_NBT
+
+BO_ 2147484678 HU_NBT_Unknown0x406: 2 HU_NBT
+
+BO_ 2147484716 HU_NBT_Unknown0x42C: 8 HU_NBT
+
+BO_ 1084 HU_NBT_Unknown0x43C: 8 HU_NBT
+
+BO_ 1085 HU_NBT_Unknown0x43D: 8 HU_NBT
+
+BO_ 1495 HU_NBT_Unknown0x5D7: 8 HU_NBT
+
+BO_ 1623 HU_NBT_Unknown0x657: 8 HU_NBT
+
+BO_ 552 HU_NBT_Unknown0x228: 2 HU_NBT
+
+BO_ 572 HU_NBT_Unknown0x23C: 7 HU_NBT
+
+BO_ 833 HU_NBT_Unknown0x341: 7 HU_NBT
+
+BO_ 906 HU_NBT_Unknown0x38A: 2 HU_NBT
+
+BO_ 909 HU_NBT_Unknown0x38D: 8 HU_NBT
+
+BO_ 1043 HU_NBT_Unknown0x413: 8 HU_NBT
+
+BO_ 1045 HU_NBT_Unknown0x415: 7 HU_NBT
+
+BO_ 2147484726 HU_NBT_Unknown0x436: 2 HU_NBT
+
+BO_ 1379 HU_NBT_Unknown0x563: 8 HU_NBT
+
+BO_ 2147485283 HU_NBT_Unknown0x663: 8 HU_NBT
+
+BO_ 1082 HU_NBT_FuelConsumptionGraph: 2 HU_NBT
+
+BO_ 657 HU_NBT_LangUnitsSetting: 6 HU_NBT
+
+BO_ 988 HU_NBT_DLR_Settings: 3 HU_NBT
+
+BO_ 1008 HU_NBT_WelcomeLightSetting: 2 HU_NBT
+
+BO_ 1115 HU_NBT_AmbientLightSetting: 8 HU_NBT
+   SG_ HU_NBT_AmbientLightSettingBrightness : 31|8@0+ (1,0) [0|1] "" Vector__XXX
+   SG_ HU_NBT_AmbientLightSettingColor : 39|4@0+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 1057 HU_NBT_ECO_proModeSetting: 4 HU_NBT
+
+BO_ 980 HU_NBT_DoorLockingSetting: 4 HU_NBT
+
+BO_ 2147484630 HU_NBT_DWA_Setting: 3 HU_NBT
+
+BO_ 994 HU_NBT_TailgateSetting: 2 HU_NBT
+
+BO_ 1056 HU_NBT_ColisionWarningSetting: 6 HU_NBT
+   SG_ HU_NBT_ColisionWarningSettingSig : 3|4@0+ (1,0) [0|1] "" Vector__XXX
+   SG_ HU_NBT_ColisionWarningSettingDynamicSpotLight : 8|1@0+ (1,0) [0|1] "" Vector__XXX
 
 CM_ BU_ CON "iDrive Controller";
 CM_ BU_ EGS "Electronic Gear Shifter";
@@ -505,9 +585,21 @@ CM_ BO_ 238 "Not sure about sending node, FRM or CAS?";
 CM_ BO_ 230 "Not sure about sending node, FRM or CAS?";
 CM_ BO_ 1811 "or SZL";
 CM_ BO_ 1816 "rcv: ICM";
-CM_ BO_ 2147485450 "rcv: KAFAS2";
+CM_ BO_ 1780 "KAFAS2 only?";
+CM_ BO_ 634 "from HU, passed to ZGM via MOST, rcv: KAFAS";
+CM_ BO_ 846 "from HU, passed to ZGM via MOST, rcv: KAFAS2";
+CM_ BO_ 844 "from HU, passed to ZGM via MOST, rcv: KAFAS";
+CM_ BO_ 1082 "request about fuel consupmption graph";
+CM_ BO_ 657 "language, Units etc setting";
+CM_ BO_ 988 "Settings of DLR, 1 touch triple turn signal, home lights duration";
+CM_ BO_ 1008 "Welcome Light Setting";
+CM_ BO_ 1115 "Ambient Light brightness and color Setting";
 BA_DEF_ BO_ "GenMsgBackgroundColor" STRING ;
 BA_DEF_ BO_ "GenMsgForegroundColor" STRING ;
+BA_DEF_ BO_ "matchingcriteria" INT 0 0;
+BA_DEF_ BO_ "filterlabeling" INT 0 0;
+BA_DEF_ BO_ "matchingcriteria" INT 0 0;
+BA_DEF_ BO_ "filterlabeling" INT 0 0;
 BA_DEF_ BO_ "matchingcriteria" INT 0 0;
 BA_DEF_ BO_ "filterlabeling" INT 0 0;
 BA_DEF_ BO_ "matchingcriteria" INT 0 0;
@@ -577,3 +669,6 @@ VAL_ 226 FRM_DoorPassengerStatusOpen 0 "DoorClosed" 1 "DoorOpen";
 VAL_ 226 FRM_DoorPassengerStatusLock 2 "DoorLocked" 1 "DoorUnocked" 3 "DoorDeadLock";
 VAL_ 238 FRM_DoorPassengerRearStatusOpen 0 "DoorClosed" 1 "DoorOpen";
 VAL_ 230 FRM_DoorDriverRearStatusOpen 0 "DoorClosed" 1 "DoorOpen";
+VAL_ 1115 HU_NBT_AmbientLightSettingColor 1 "Classic" 2 "Modern";
+VAL_ 1056 HU_NBT_ColisionWarningSettingSig 0 "late" 4 "medium" 8 "early";
+VAL_ 1056 HU_NBT_ColisionWarningSettingDynamicSpotLight 0 "off" 1 "on" 0 "";
