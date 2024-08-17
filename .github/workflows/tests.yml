@@ -27,22 +27,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Build Docker image
-      run: eval "$BUILD"
-    - name: pre-commit
-      # TODO: a package pre-commit installs has a warning, remove the unset once that's fixed
-      run: ${{ env.RUN }} "git init && git add -A && unset PYTHONWARNINGS && pre-commit run --all"
-
-  docker-push:
-    name: docker push
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request' && github.repository == 'commaai/opendbc'
-    steps:
-    - uses: actions/checkout@v4
-    - name: Build Docker image
-      run: eval "$BUILD"
-    - name: Push to dockerhub
-      run: |
-        docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
-        docker tag opendbc ghcr.io/commaai/opendbc:latest
-        docker push ghcr.io/commaai/opendbc:latest
+    - uses: actions/setup-python@v5
+    - uses: pre-commit/action@v3.0.1
