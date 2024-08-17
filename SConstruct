@@ -27,8 +27,8 @@ ldflags_asan = ["-fsanitize=address"] if GetOption('asan') else []
 
 env = Environment(
   ENV=os.environ,
-  CC='clang',
-  CXX='clang++',
+  CC='gcc',
+  CXX='g++',
   CCFLAGS=[
     "-g",
     "-fPIC",
@@ -37,7 +37,7 @@ env = Environment(
     "-Werror",
     "-Wshadow",
     "-Wno-vla-cxx-extension",
-    "-Wno-unknown-warning-option",  # for compatibility across clang versions
+    "-Wno-unknown-warning-option",  # for compatibility across compiler versions
   ] + ccflags_asan,
   LDFLAGS=ldflags_asan,
   LINKFLAGS=ldflags_asan,
