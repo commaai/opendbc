@@ -37,6 +37,7 @@ env = Environment(
     "-Werror",
     "-Wshadow",
     "-Wno-vla-cxx-extension",
+    "-Wno-unknown-warning-option",  # for compatibility across clang versions
   ] + ccflags_asan,
   LDFLAGS=ldflags_asan,
   LINKFLAGS=ldflags_asan,
