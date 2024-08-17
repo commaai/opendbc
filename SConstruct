@@ -3,7 +3,6 @@ import subprocess
 import sysconfig
 import numpy as np
 
-zmq = 'zmq'
 arch = subprocess.check_output(["uname", "-m"], encoding='utf8').rstrip()
 
 python_path = sysconfig.get_paths()['include']
@@ -52,7 +51,7 @@ env = Environment(
 )
 
 common = ''
-Export('env', 'zmq', 'arch', 'common')
+Export('env', 'arch', 'common')
 
 envCython = env.Clone()
 envCython["CPPPATH"] += [np.get_include()]

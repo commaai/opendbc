@@ -6,7 +6,7 @@ envDBC = env.Clone()
 dbc_file_path = '-DDBC_FILE_PATH=\'"%s"\'' % (envDBC.Dir("../dbc").abspath)
 envDBC['CXXFLAGS'] += [dbc_file_path]
 src = ["dbc.cc", "parser.cc", "packer.cc", "common.cc"]
-libs = [common, "zmq"]
+libs = [common, ]
 
 # shared library for openpilot
 LINKFLAGS = envDBC["LINKFLAGS"]
