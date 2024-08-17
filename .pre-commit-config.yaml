@@ -9,19 +9,16 @@ repos:
     -   id: check-executables-have-shebangs
     -   id: check-shebang-scripts-are-executable
 -   repo: https://github.com/codespell-project/codespell
-    rev: v2.2.6
+    rev: v2.3.0
     hooks:
     -   id: codespell
         exclude: '\.dbc$'
-        args:
-        - --check-hidden
-        - --builtins clear,rare,informal,usage,code,names,en-GB_to_en-US
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.9.0
+    rev: v1.11.1
     hooks:
     -   id: mypy
 -   repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.3.2
+    rev: v0.5.7
     hooks:
     - id: ruff
 -   repo: https://github.com/MarcoGorelli/cython-lint
