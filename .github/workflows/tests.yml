@@ -1,6 +1,10 @@
 name: tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
 
 env:
   RUN: docker run -e PYTHONWARNINGS="error,default::DeprecationWarning" --shm-size 1G --rm opendbc /bin/bash -c
@@ -11,6 +15,7 @@ jobs:
   unit-tests:
     name: unit tests
     runs-on: ubuntu-latest
+    timeout-minutes: 1
     #strategy:
     #  fail-fast: false
     #  matrix:
@@ -25,24 +30,15 @@ jobs:
   static-analysis:
     name: static analysis
     runs-on: ubuntu-latest
+    timeout-minutes: 1
+    env:
+      # package install has DeprecationWarnings
+      PYTHONWARNINGS: default
     steps:
     - uses: actions/checkout@v4
-    - name: Build Docker image
-      run: eval "$BUILD"
-    - name: pre-commit
-      # TODO: a package pre-commit installs has a warning, remove the unset once that's fixed
-      run: ${{ env.RUN }} "git init && git add -A && unset PYTHONWARNINGS && pre-commit run --all"
-
-  docker-push:
-    name: docker push
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request' && github.repository == 'commaai/opendbc'
-    steps:
-    - uses: actions/checkout@v4
-    - name: Build Docker image
-      run: eval "$BUILD"
-    - name: Push to dockerhub
-      run: |
-        docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
-        docker tag opendbc ghcr.io/commaai/opendbc:latest
-        docker push ghcr.io/commaai/opendbc:latest
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    - run: sudo apt install --no-install-recommends -y cppcheck
+    - run: pip install -e .
+    - uses: pre-commit/action@v3.0.1
