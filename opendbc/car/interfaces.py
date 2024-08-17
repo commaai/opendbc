@@ -394,7 +394,7 @@ INTERFACE_ATTR_FILE = {
 # interface-specific helpers
 
 def get_interface_attr(attr: str, combine_brands: bool = False, ignore_none: bool = False) -> dict[str | StrEnum, Any]:
-  # read all the folders in selfdrive/car and return a dict where:
+  # read all the folders in opendbc/car and return a dict where:
   # - keys are all the car models or brand names
   # - values are attr values from all car folders
   result = {}

@@ -34,7 +34,7 @@ def _get_interface_names() -> dict[str, list[str]]:
   return brand_names
 
 
-# imports from directory selfdrive/car/<name>/
+# imports from directory opendbc/car/<name>/
 interface_names = _get_interface_names()
 interfaces = load_interfaces(interface_names)
 

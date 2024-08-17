@@ -2,11 +2,11 @@ from collections import defaultdict
 import pytest
 import re
 
-from openpilot.selfdrive.car.car_helpers import interfaces
-from openpilot.selfdrive.car.docs import get_all_car_docs
-from openpilot.selfdrive.car.docs_definitions import Cable, Column, PartType, Star
-from openpilot.selfdrive.car.honda.values import CAR as HONDA
-from openpilot.selfdrive.car.values import PLATFORMS
+from opendbc.car.car_helpers import interfaces
+from opendbc.car.docs import get_all_car_docs
+from opendbc.car.docs_definitions import Cable, Column, PartType, Star
+from opendbc.car.honda.values import CAR as HONDA
+from opendbc.car.values import PLATFORMS
 
 
 class TestCarDocs:

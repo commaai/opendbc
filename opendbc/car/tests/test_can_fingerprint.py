@@ -1,8 +1,8 @@
 from parameterized import parameterized
 
-from openpilot.selfdrive.car.can_definitions import CanData
-from openpilot.selfdrive.car.car_helpers import FRAME_FINGERPRINT, can_fingerprint
-from openpilot.selfdrive.car.fingerprints import _FINGERPRINTS as FINGERPRINTS
+from opendbc.car.can_definitions import CanData
+from opendbc.car.car_helpers import FRAME_FINGERPRINT, can_fingerprint
+from opendbc.car.fingerprints import _FINGERPRINTS as FINGERPRINTS
 
 
 class TestCanFingerprint:

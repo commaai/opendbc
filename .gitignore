@@ -7,6 +7,7 @@
 .*.swp
 .DS_Store
 .sconsign.dblite
+.hypothesis
 
 opendbc/can/*.so
 opendbc/can/*.a

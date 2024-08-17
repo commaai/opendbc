@@ -1,4 +1,4 @@
-from openpilot.selfdrive.car.values import PLATFORMS
+from opendbc.car.values import PLATFORMS
 
 
 class TestPlatformConfigs:
