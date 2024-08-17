@@ -67,7 +67,7 @@ elif arch == "aarch64":
 
   python_libs.append(os.path.basename(python_path))
 else:
-  envCython["LINKFLAGS"] = ["-pthread", "-shared", "-lz"]
+  envCython["LINKFLAGS"] = ["-pthread", "-shared"]
 
 envCython["LIBS"] = python_libs
 

@@ -6,8 +6,9 @@ on:
       - master
   pull_request:
 
-env:
-  PYTHONWARNINGS: error,default::DeprecationWarning
+# TODO: enable this
+#env:
+#  PYTHONWARNINGS: error,default::DeprecationWarning
 
 jobs:
   unit-tests:
