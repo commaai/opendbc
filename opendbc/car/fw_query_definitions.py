@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 import struct
 from collections.abc import Callable
 
-import panda.python.uds as uds
+from panda import uds
 
 from opendbc.car.structs import CarParams
 

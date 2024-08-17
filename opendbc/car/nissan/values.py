@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from panda.python import uds
+from panda import uds
 from opendbc.car import AngleRateLimit, CarSpecs, DbcDict, PlatformConfig, Platforms, dbc_dict
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarDocs, CarHarness, CarParts

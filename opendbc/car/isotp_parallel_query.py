@@ -5,7 +5,7 @@ from functools import partial
 from opendbc.car import carlog
 from opendbc.car.can_definitions import CanData, CanRecvCallable, CanSendCallable
 from opendbc.car.fw_query_definitions import AddrType
-from panda.python.uds import CanClient, IsoTpMessage, FUNCTIONAL_ADDRS, get_rx_addr_for_tx_addr
+from panda import uds
 
 
 class IsoTpParallelQuery:
@@ -23,9 +23,9 @@ class IsoTpParallelQuery:
 
     real_addrs = [a if isinstance(a, tuple) else (a, None) for a in addrs]
     for tx_addr, _ in real_addrs:
-      assert tx_addr not in FUNCTIONAL_ADDRS, f"Functional address should be defined in functional_addrs: {hex(tx_addr)}"
+      assert tx_addr not in uds.FUNCTIONAL_ADDRS, f"Functional address should be defined in functional_addrs: {hex(tx_addr)}"
 
-    self.msg_addrs = {tx_addr: get_rx_addr_for_tx_addr(tx_addr[0], rx_offset=response_offset) for tx_addr in real_addrs}
+    self.msg_addrs = {tx_addr: uds.get_rx_addr_for_tx_addr(tx_addr[0], rx_offset=response_offset) for tx_addr in real_addrs}
     self.msg_buffer: dict[int, list[CanData]] = defaultdict(list)
 
   def rx(self) -> None:
@@ -66,14 +66,14 @@ class IsoTpParallelQuery:
     self.msg_buffer = defaultdict(list)
 
   def _create_isotp_msg(self, tx_addr: int, sub_addr: int | None, rx_addr: int):
-    can_client = CanClient(self._can_tx, partial(self._can_rx, rx_addr, sub_addr=sub_addr), tx_addr, rx_addr,
+    can_client = uds.CanClient(self._can_tx, partial(self._can_rx, rx_addr, sub_addr=sub_addr), tx_addr, rx_addr,
                            self.bus, sub_addr=sub_addr, debug=self.debug)
 
     max_len = 8 if sub_addr is None else 7
     # uses iso-tp frame separation time of 10 ms
     # TODO: use single_frame_mode so ECUs can send as fast as they want,
     # as well as reduces chances we process messages from previous queries
-    return IsoTpMessage(can_client, timeout=0, separation_time=0.01, debug=self.debug, max_len=max_len)
+    return uds.IsoTpMessage(can_client, timeout=0, separation_time=0.01, debug=self.debug, max_len=max_len)
 
   def get_data(self, timeout: float, total_timeout: float = 60.) -> dict[AddrType, bytes]:
     self._drain_rx()

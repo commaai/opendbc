@@ -1,6 +1,6 @@
 import time
 
-from panda.python.uds import SERVICE_TYPE
+from panda import uds
 from opendbc.car import make_tester_present_msg, carlog
 from opendbc.car.can_definitions import CanData, CanRecvCallable, CanSendCallable
 from opendbc.car.fw_query_definitions import EcuAddrBusType
@@ -12,10 +12,10 @@ def _is_tester_present_response(msg: CanData, subaddr: int = None) -> bool:
   dat_offset = 1 if subaddr is not None else 0
   if len(msg.dat) == 8 and 1 <= msg.dat[dat_offset] <= 7:
     # success response
-    if msg.dat[dat_offset + 1] == (SERVICE_TYPE.TESTER_PRESENT + 0x40):
+    if msg.dat[dat_offset + 1] == (uds.SERVICE_TYPE.TESTER_PRESENT + 0x40):
       return True
     # error response
-    if msg.dat[dat_offset + 1] == 0x7F and msg.dat[dat_offset + 2] == SERVICE_TYPE.TESTER_PRESENT:
+    if msg.dat[dat_offset + 1] == 0x7F and msg.dat[dat_offset + 2] == uds.SERVICE_TYPE.TESTER_PRESENT:
       return True
   return False
 

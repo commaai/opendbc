@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum, IntFlag
 
-from panda.python import uds
+from panda import uds
 from opendbc.car import CarSpecs, PlatformConfig, Platforms, dbc_dict, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
