@@ -35,4 +35,5 @@ jobs:
       with:
         python-version: '3.11'
     - run: sudo apt update && sudo apt install --no-install-recommends -y cppcheck
+    - run: pip install -e .
     - uses: pre-commit/action@v3.0.1
