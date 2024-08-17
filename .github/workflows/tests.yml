@@ -7,7 +7,7 @@ on:
   pull_request:
 
 env:
-  PYTHONWARNINGS: error
+  PYTHONWARNINGS: error,default::DeprecationWarning
 
 jobs:
   unit-tests:
@@ -31,9 +31,6 @@ jobs:
     name: static analysis
     runs-on: ubuntu-latest
     timeout-minutes: 1
-    env:
-      # package install has DeprecationWarnings
-      PYTHONWARNINGS: default
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
