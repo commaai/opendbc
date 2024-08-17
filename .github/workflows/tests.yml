@@ -23,7 +23,7 @@ jobs:
     - uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-    - run: pip install .[testing]
+    - run: pip install -e .[testing]
     - run: scons -j$(nproc)
     - run: pytest -n logical --durations=0
 
@@ -37,5 +37,5 @@ jobs:
       with:
         python-version: '3.11'
     - run: sudo apt install --no-install-recommends -y cppcheck
-    - run: pip install .
+    - run: pip install -e .
     - uses: pre-commit/action@v3.0.1
