@@ -18,9 +18,8 @@ testpaths = [
 
 [tool.codespell]
 quiet-level = 3
-# if you've got a short variable name that's getting flagged, add it here
-ignore-words-list = "alo,ba,bu,hda,deque,grey"
 builtin = "clear,rare,informal,code,names,en-GB_to_en-US"
+check-hidden = true
 
 [tool.cython-lint]
 max-line-length = 120

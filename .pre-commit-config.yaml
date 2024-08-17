@@ -13,9 +13,6 @@ repos:
     hooks:
     -   id: codespell
         exclude: '\.dbc$'
-        args:
-        - --check-hidden
-        - --builtins clear,rare,informal,usage,code,names,en-GB_to_en-US
 -   repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.9.0
     hooks:
