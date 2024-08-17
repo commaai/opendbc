@@ -9,12 +9,13 @@ on:
 env:
   RUN: docker run -e PYTHONWARNINGS="error,default::DeprecationWarning" --shm-size 1G --rm opendbc /bin/bash -c
   BUILD: docker buildx build --pull --load --cache-to type=inline --cache-from type=registry,ref=ghcr.io/commaai/opendbc:latest -t opendbc -f Dockerfile .
-  #PYTHONWARNINGS: error
+  PYTHONWARNINGS: error
 
 jobs:
   unit-tests:
     name: unit tests
     runs-on: ubuntu-latest
+    timeout-minutes: 1
     #strategy:
     #  fail-fast: false
     #  matrix:
@@ -29,6 +30,10 @@ jobs:
   static-analysis:
     name: static analysis
     runs-on: ubuntu-latest
+    timeout-minutes: 1
+    env:
+      # package install has DeprecationWarnings
+      PYTHONWARNINGS: default
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
