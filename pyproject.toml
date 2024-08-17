@@ -10,7 +10,7 @@ requires-python = ">=3.9"
 urls = { "homepage" = "https://github.com/commaai/opendbc" }
 
 [tool.pytest.ini_options]
-addopts = "-Werror --strict-config --strict-markers --durations=10 -n auto"
+addopts = "--ignore=panda/ -Werror --strict-config --strict-markers --durations=10 -n auto"
 python_files = "test_*.py"
 testpaths = [
   "opendbc"
