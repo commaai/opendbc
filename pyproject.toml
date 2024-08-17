@@ -9,6 +9,19 @@ requires-python = ">=3.9"
 
 urls = { "homepage" = "https://github.com/commaai/opendbc" }
 
+[tool.pytest.ini_options]
+addopts = "-Werror --strict-config --strict-markers --durations=10 -n auto"
+python_files = "test_*.py"
+testpaths = [
+  "opendbc"
+]
+
+[tool.codespell]
+quiet-level = 3
+# if you've got a short variable name that's getting flagged, add it here
+ignore-words-list = "alo,ba,bu,hda,deque,grey"
+builtin = "clear,rare,informal,code,names,en-GB_to_en-US"
+
 [tool.cython-lint]
 max-line-length = 120
 ignore = ["E111", "E114"]
