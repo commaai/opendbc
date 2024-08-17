@@ -9,6 +9,31 @@ requires-python = ">=3.9"
 
 urls = { "homepage" = "https://github.com/commaai/opendbc" }
 
+dependencies = [
+  "scons",
+  "pyyaml",
+  "numpy",
+  "Cython",
+  "crcmod",
+  "pandacan@git+https://github.com/commaai/panda.git@master",
+]
+
+[project.optional-dependencies]
+testing = [
+  "ruff",
+  "pytest",
+  "pytest-mock",
+  "pytest-xdist",
+  "pytest-subtests",
+  "hypothesis==6.47.*",
+  "parameterized>=0.8,<0.9",
+  "pre-commit",
+]
+docs = [
+  "Jinja2",
+  "natsort",
+]
+
 [tool.pytest.ini_options]
 addopts = "--ignore=panda/ -Werror --strict-config --strict-markers --durations=10 -n auto"
 python_files = "test_*.py"
