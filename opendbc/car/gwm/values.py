@@ -17,7 +17,7 @@ class CANBUS:
 
 @dataclass
 class GwmPlatformConfig(PlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: dbc_dict('gwm_haval_h6_mk3', None))
+  dbc_dict: DbcDict = field(default_factory=lambda: dbc_dict('gwm_haval_h6_mk3_generated', None))
 
 
 @dataclass(frozen=True, kw_only=True)
