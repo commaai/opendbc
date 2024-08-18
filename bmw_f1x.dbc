@@ -32,7 +32,7 @@ NS_ :
     SG_MUL_VAL_
 
 BS_: 
-BU_: ACC ACSM AHM ASZ CAS CBX CON DDE DSC ICM EGS EMF FRM GWS HUD HU_NBT IHKA JBE KAFAS2 KOMBI RDC REMALI SCR TRSVC XXX ZGM DIAG TMSL TMSR HU_CHAMP2 
+BU_: ACC ACSM AHM ASZ CAS CBX CON DDE DSC ICM EGS EMF FRM GWS HUD HU_NBT IHKA JBE KAFAS2 KOMBI RDC REMALI SCR TRSVC XXX ZGM DIAG TMSL TMSR HU_CHAMP2 SZL 
 BO_ 192 ZGM_ABSAlive: 2 ZGM
 
 BO_ 217 DDE_AccelerationPedalAngle: 8 DDE
@@ -333,7 +333,7 @@ BO_ 2147484129 FRM_Unknown1E1: 6 FRM
 
 BO_ 2147484150 FRM_Unknown1F6: 2 FRM
 
-BO_ 2147484235 FRM_Unknown24B: 2 FRM
+BO_ 2147484235 FRM_PullSensorStatus: 2 FRM
 
 BO_ 2147484299 FRM_Unknown28B: 2 FRM
 
@@ -493,11 +493,35 @@ BO_ 1056 HU_NBT_ColisionWarningSetting: 6 HU_NBT
    SG_ HU_NBT_ColisionWarningSettingSig : 3|4@0+ (1,0) [0|1] "" Vector__XXX
    SG_ HU_NBT_ColisionWarningSettingDynamicSpotLight : 8|1@0+ (1,0) [0|1] "" Vector__XXX
 
+BO_ 678 SZL_WiperWasherSwitch: 8 SZL
+
+BO_ 622 CAS_FH_SHD_ConvienceFunction: 8 CAS
+
+BO_ 672 CAS_CentralLockingSystem: 8 CAS
+
+BO_ 550 JBE_RainSensorWiperSpeed: 8 JBE
+
+BO_ 827 KAFAS2_DisplayLongitudinalDynamicsManagement2: 8 KAFAS2
+
+BO_ 935 ICM_ConfigurationSportButton: 8 ICM
+
+BO_ 679 ICM_DisplayCheckControlDrivinDynamics: 8 ICM
+
+BO_ 796 ICM_DisplayDriverAssistSystem: 8 ICM
+
+BO_ 60 ZGM_VehicleCondition: 2 ZGM
+
+BO_ 781 ICM_DisplayDriverAssistSystemCheckControl: 8 ICM
+
+BO_ 355 ICM_RoadwayInclination: 8 ICM
+
+BO_ 895 VSG_VehicleSoundStatus: 8 XXX
+
 CM_ BU_ CON "iDrive Controller";
 CM_ BU_ EGS "Electronic Gear Shifter";
 CM_ BU_ HU_NBT "Head Unit NBT";
-CM_ BO_ 217 "rcv: KAFAS2";
-CM_ BO_ 417 "rcv: EMF";
+CM_ BO_ 217 "rcv: KAFAS2, EMF, KOMBI";
+CM_ BO_ 417 "rcv: EMF, TRSVC, RDC, NVE, PDC, FRM";
 CM_ SG_ 417 ICM_Wheel1 "X*0.015625";
 CM_ BO_ 596 "Probably two bytes per wheel, rcv: EGS";
 CM_ SG_ 596 DSC_ActualWheelSpeedRearLeft "X_*_0.015625_-_511.984_in_rad/s";
@@ -532,42 +556,51 @@ CM_ BO_ 1016 "Unknown 3F8";
 CM_ BO_ 1528 "Unknown 5F8";
 CM_ BO_ 1656 "Unknown 678";
 CM_ BO_ 151 "rcv: JBE";
+CM_ BO_ 165 "rcv: KOMBI";
 CM_ SG_ 165 DDE_CrankshaftTorque1EngineRPM "not_confirmed";
 CM_ SG_ 165 DDE_CrankshaftTorque1EngineTorque "not_confirmed_0.5X_-1023.5";
 CM_ SG_ 165 DDE_CrankshaftTorque1GearboxTorque "not_confirmed_0.5X_-1023.5";
 CM_ BO_ 215 "rcv: KOMBI";
+CM_ BO_ 228 "rcv: FRM";
 CM_ BO_ 239 "rcv: KAFAS2";
 CM_ BO_ 243 "rcv: KOMBI";
 CM_ BO_ 291 "rcv: NVE";
 CM_ BO_ 303 "rcv: KOMBI, GWS";
 CM_ BO_ 407 "rcv: EGS, https://openinverter.org/wiki/BMW_F-Series_Gear_Lever";
+CM_ BO_ 409 "rcv: EMF, NVE";
 CM_ BO_ 410 "rcv: KAFAS2";
-CM_ BO_ 415 "rcv: FRM";
-CM_ BO_ 514 "rcv: IHKA";
+CM_ BO_ 415 "rcv: FRM, NVE";
+CM_ BO_ 514 "rcv: IHKA, CON";
+CM_ BO_ 543 "tx: NVE/ICM/DSC";
 CM_ SG_ 612 CON_Rotary_Counter "Increase_at_every_event";
 CM_ SG_ 615 CON_Button_Counter "Increase_at_every_button_press";
 CM_ BO_ 647 "rcv: KOMBI";
 CM_ BO_ 658 "rcv: FRM";
+CM_ BO_ 677 "rcv: NVE, KOMBI";
 CM_ BO_ 681 "rcv: ICM";
+CM_ BO_ 699 "rcv: KOMBI, PDC";
+CM_ BO_ 708 "rcv: KOMBI";
 CM_ BO_ 709 "rcv: KAFAS2";
 CM_ BO_ 714 "include: OutsideTemperature, AmbientTemperature, rcv: IHKA";
 CM_ BO_ 719 "rcv: IHKA";
 CM_ BO_ 721 "rcv: IHKA";
 CM_ BO_ 722 "rcv: IHKA";
 CM_ BO_ 726 "rcv: IHKA";
-CM_ BO_ 740 "rcv: EGS";
-CM_ BO_ 770 "rcv: KAFAS2";
+CM_ BO_ 740 "rcv: EGS, FRM";
+CM_ BO_ 770 "rcv: KAFAS2, TRSVC, FRM";
 CM_ BO_ 779 "rcv: IHKA";
-CM_ BO_ 807 "rcv: KOMBI";
+CM_ BO_ 788 "rcv: FRM";
+CM_ BO_ 807 "rcv: KOMBI, FRM";
 CM_ BO_ 808 "Include: RelativeTime, SystemTime, LiquidCrystalDisplayBrightnessControl, rcv: TRSVC, IHKA";
 CM_ BO_ 809 "rcv: KOMBI";
 CM_ BO_ 839 "rcv: KAFAS2";
 CM_ BO_ 841 "rcv: KOMBI";
 CM_ BO_ 872 "rcv: KOMBI";
 CM_ BO_ 919 "rcv: EGS";
+CM_ BO_ 928 "rcv: TRSVC";
 CM_ BO_ 933 "rcv: DDE";
-CM_ BO_ 947 "rcv: IHKA";
-CM_ BO_ 1017 "rcv: IHKA";
+CM_ BO_ 947 "rcv: IHKA, FRM";
+CM_ BO_ 1017 "rcv: IHKA, FZD, FRM";
 CM_ SG_ 1017 DDE_DriveTrainData2WaterTemp "not_confirmed";
 CM_ SG_ 1017 DDE_DriveTrainData2OilTemp "not_confirmed";
 CM_ BO_ 1296 "?";
@@ -576,6 +609,7 @@ CM_ BO_ 1839 "rcv: ICM";
 CM_ BO_ 1856 "rcv: ICM";
 CM_ BO_ 1896 "rcv: ICM";
 CM_ SG_ 1511 CON_Unknown5E7_Counter "Increase_every_second";
+CM_ BO_ 2147484235 "rcv: JBE";
 CM_ BO_ 902 "Possibly status of a button";
 CM_ BO_ 1374 "sent every 640ms, rcv: EGS";
 CM_ BO_ 149 "rcv: FRM, NVE";
@@ -594,8 +628,22 @@ CM_ BO_ 657 "language, Units etc setting";
 CM_ BO_ 988 "Settings of DLR, 1 touch triple turn signal, home lights duration";
 CM_ BO_ 1008 "Welcome Light Setting";
 CM_ BO_ 1115 "Ambient Light brightness and color Setting";
+CM_ BO_ 678 "rcv: JBE";
+CM_ BO_ 622 "rcv: JBE, FZD";
+CM_ BO_ 672 "rcv: JBE";
+CM_ BO_ 550 "rcv: FZD";
+CM_ BO_ 827 "rcv: KOMBI, FRM";
+CM_ BO_ 935 "tx: ICM/DSC; rcv: KOMBI";
+CM_ BO_ 679 "tx: ICM/DSC; rcv: KOMBI";
+CM_ BO_ 796 "tx: ICM/SAS; rcv: KOMBI, FRM";
+CM_ BO_ 60 "rcv: KOMBI";
+CM_ BO_ 781 "tx: ICM/SAS; rcv: KOMBI";
+CM_ BO_ 355 "tx: ICM/DSC; rcv: KOMBI";
+CM_ BO_ 895 "tx: VSG?";
 BA_DEF_ BO_ "GenMsgBackgroundColor" STRING ;
 BA_DEF_ BO_ "GenMsgForegroundColor" STRING ;
+BA_DEF_ BO_ "matchingcriteria" INT 0 0;
+BA_DEF_ BO_ "filterlabeling" INT 0 0;
 BA_DEF_ BO_ "matchingcriteria" INT 0 0;
 BA_DEF_ BO_ "filterlabeling" INT 0 0;
 BA_DEF_ BO_ "matchingcriteria" INT 0 0;
@@ -628,7 +676,9 @@ BA_DEF_DEF_ "matchingcriteria" 0;
 BA_DEF_DEF_ "filterlabeling" 1;
 BA_DEF_DEF_ "matchingcriteria" 0;
 BA_DEF_DEF_ "filterlabeling" 1;
-BA_ "GenMsgBackgroundColor" BO_ 192 "#000000";
+BA_ "GenMsgBackgroundColor" BO_ 192 "#ffffff";
+BA_ "GenMsgForegroundColor" BO_ 192 "#000000";
+BA_ "GenMsgForegroundColor" BO_ 417 "#000000";
 BA_ "GenMsgBackgroundColor" BO_ 161 "#ffffff";
 BA_ "GenMsgBackgroundColor" BO_ 162 "#ffffff";
 BA_ "GenMsgBackgroundColor" BO_ 163 "#ffffff";
@@ -637,6 +687,10 @@ BA_ "GenMsgBackgroundColor" BO_ 578 "#ffffff";
 BA_ "GenMsgBackgroundColor" BO_ 746 "#ffffff";
 BA_ "GenMsgBackgroundColor" BO_ 742 "#ffffff";
 BA_ "GenMsgBackgroundColor" BO_ 583 "#ffffff";
+BA_ "GenMsgForegroundColor" BO_ 409 "#000000";
+BA_ "GenMsgForegroundColor" BO_ 708 "#000000";
+BA_ "GenMsgForegroundColor" BO_ 60 "#000000";
+BA_ "GenMsgBackgroundColor" BO_ 60 "#ffffff";
 VAL_ 1021 EGS_TransmissionPowerTrain_SelectedGear 0 "Off" 32 "P" 128 "D" 129 "D_(can_move_to_side)" 64 "R" 96 "N";
 VAL_ 161 IHKA_ButtonMode 1 "Pressed" 0 "Released";
 VAL_ 161 IHKA_ButtonTraffic 1 "Pressed" 0 "Released";
