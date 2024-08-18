@@ -14,8 +14,8 @@ class CarState(CarStateBase):
     self.frame = 0
     self.CPP = CarControllerParams(CP)
 
-  def update(self, cp, cam_cp):
-    ret = car.CarState.new_message()
+  def update(self, cp, cam_cp, _, __, loopback_cp) -> structs.CarState:
+    ret = structs.CarState()
 
     ret.wheelSpeeds = self.get_wheel_speeds(10,10,10,10,unit=1.0)
     # ret.wheelSpeeds = self.get_wheel_speeds(
