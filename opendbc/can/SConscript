@@ -11,9 +11,6 @@ if arch == "Darwin":
   LINKFLAGS += ["-Wl,-install_name,@loader_path/libdbc.dylib"]
 libdbc = envDBC.SharedLibrary('libdbc', src, LIBS=[common, ], LINKFLAGS=LINKFLAGS)
 
-# static library for tools like cabana
-envDBC.Library('libdbc_static', src, LIBS=[common, ])
-
 # Build packer and parser
 lenv = envCython.Clone()
 lenv["RPATH"] = [libdbc[0].dir.abspath, ]
