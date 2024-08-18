@@ -2,7 +2,7 @@ from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.gwm.values import CarControllerParams
 
 class CarController(CarControllerBase):
-  def __init__(self, dbc_name, CP, VM):
+  def __init__(self, dbc_name, CP):
     self.CP = CP
     self.CCP = CarControllerParams(self.CP)
 
