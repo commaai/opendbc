@@ -17,13 +17,13 @@ class CarState(CarStateBase):
   def update(self, cp, cam_cp, _, __, loopback_cp) -> structs.CarState:
     ret = structs.CarState()
 
-    ret.wheelSpeeds = self.get_wheel_speeds(10,10,10,10,unit=1.0)
-    # ret.wheelSpeeds = self.get_wheel_speeds(
-    #   cp.vl["WHEEL_SPEEDS"]["FRONT_LEFT_WHEEL_SPEED"],
-    #   cp.vl["WHEEL_SPEEDS"]["FRONT_RIGHT_WHEEL_SPEED"],
-    #   cp.vl["WHEEL_SPEEDS"]["REAR_LEFT_WHEEL_SPEED"],
-    #   cp.vl["WHEEL_SPEEDS"]["REAR_RIGHT_WHEEL_SPEED"],
-    # )
+    # ret.wheelSpeeds = self.get_wheel_speeds(10,10,10,10,unit=1.0)
+    ret.wheelSpeeds = self.get_wheel_speeds(
+      cp.vl["WHEEL_SPEEDS"]["FRONT_LEFT_WHEEL_SPEED"],
+      cp.vl["WHEEL_SPEEDS"]["FRONT_RIGHT_WHEEL_SPEED"],
+      cp.vl["WHEEL_SPEEDS"]["REAR_LEFT_WHEEL_SPEED"],
+      cp.vl["WHEEL_SPEEDS"]["REAR_RIGHT_WHEEL_SPEED"],
+    )
     ret.vEgoRaw = float(np.mean([ret.wheelSpeeds.fl, ret.wheelSpeeds.fr, ret.wheelSpeeds.rl, ret.wheelSpeeds.rr]))
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.standstill = abs(ret.vEgoRaw) < 1e-3
@@ -38,11 +38,11 @@ class CarState(CarStateBase):
     ret.gas = 0 # TODO
     ret.gasPressed = ret.gas > 0
     ret.brake = 0
-    ret.brakePressed = False
+    ret.brakePressed = cp.vl["BRAKE"]["BRAKE_PRESSURE"] > 255
     # ret.parkingBrake = TODO
 
     # begin toyota brakePressed TODO clean-after-port
-    ret.brakePressed = cp.vl["COROLLA_BRAKE_MODULE"]["BRAKE_PRESSED"] != 0
+    # ret.brakePressed = cp.vl["COROLLA_BRAKE_MODULE"]["BRAKE_PRESSED"] != 0
     # end TODO clean-after-port
 
     ret.gearShifter = GearShifter.drive # TODO
@@ -66,9 +66,12 @@ class CarState(CarStateBase):
   @staticmethod
   def get_can_parser(CP):
     messages = [
-      ("COROLLA_BRAKE_MODULE", 40),
-      # ("BRAKE", 50),
-      # ("WHEEL_SPEEDS", 50),
+      # COROLLA:
+      # ("COROLLA_BRAKE_MODULE", 40),
+
+      # HAVAL:
+      ("BRAKE", 50),
+      ("WHEEL_SPEEDS", 50),
     ]
 
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, CANBUS.pt)
