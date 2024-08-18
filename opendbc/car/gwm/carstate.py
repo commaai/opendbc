@@ -1,5 +1,5 @@
 import numpy as np
-from cereal import car
+from opendbc.car import create_button_events, structs
 from opendbc.car.interfaces import CarStateBase
 from opendbc.can.parser import CANParser
 from opendbc.car.gwm.values import DBC, CANBUS, CarControllerParams
