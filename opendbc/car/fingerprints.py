@@ -3,7 +3,7 @@ from opendbc.car.body.values import CAR as BODY
 from opendbc.car.chrysler.values import CAR as CHRYSLER
 from opendbc.car.ford.values import CAR as FORD
 from opendbc.car.gm.values import CAR as GM
-from opendbc.selfdrive.car.gwm.values import CAR as GWM
+from opendbc.car.gwm.values import CAR as GWM
 from opendbc.car.honda.values import CAR as HONDA
 from opendbc.car.hyundai.values import CAR as HYUNDAI
 from opendbc.car.mazda.values import CAR as MAZDA
