@@ -1,5 +1,5 @@
 from collections import namedtuple
-from enum import Enum, IntFlag
+from enum import IntFlag
 from opendbc.car.structs import CarParams
 from opendbc.car import structs
 from opendbc.car import AngleRateLimit, CarSpecs, PlatformConfig, Platforms, dbc_dict
@@ -69,16 +69,14 @@ BUTTONS = [
 
 
 class CarControllerParams:
-  ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[10., 1.6, .3])
-  ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[10., 7.0, 0.8])
-  ACCEL_MIN = -5.12  # m/s^2
-  ACCEL_MAX = 2.2    # m/s^2
-  JERK_LIMIT_MAX = 8
-  JERK_LIMIT_MIN = -8
-  ACCEL_TO_SPEED_MULTIPLIER = 3
-
   def __init__(self, CP):
-    pass
+    self.ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[10., 1.6, .3])
+    self.ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[10., 7.0, 0.8])
+    self.ACCEL_MIN = -5.12  # m/s^2
+    self.ACCEL_MAX = 2.2    # m/s^2
+    self.JERK_LIMIT_MAX = 8
+    self.JERK_LIMIT_MIN = -8
+    self.ACCEL_TO_SPEED_MULTIPLIER = 3
 
 
 class TeslaFlags(IntFlag):
