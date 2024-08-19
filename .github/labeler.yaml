@@ -1,4 +1,4 @@
-car interfacing:
+car:
   - changed-files:
     - any-glob-to-all-files: "{opendbc/car/**}"
 
