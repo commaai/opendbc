@@ -22,7 +22,7 @@ class TestCanChecksums:
     checksum_std = [11, 10, 9, 8]
     checksum_ext = [4, 3, 2, 1]
 
-    for std, ext in zip(checksum_std, checksum_ext):
+    for std, ext in zip(checksum_std, checksum_ext, strict=True):
       msgs = [
         packer.make_can_msg("LKAS_HUD", 0, values),
         packer.make_can_msg("LKAS_HUD_A", 0, values),

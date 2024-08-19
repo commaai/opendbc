@@ -1,0 +1,64 @@
+car interfacing:
+  - changed-files:
+    - any-glob-to-all-files: "{opendbc/car/**}"
+
+can:
+  - changed-files:
+    - any-glob-to-all-files: "{opendbc/can/**}"
+
+DBC signals:
+  - changed-files:
+    - any-glob-to-all-files: "{opendbc/dbc/**}"
+
+
+body:
+  - changed-files:
+    - any-glob-to-all-files: 'opendbc/car/body/*'
+
+chrysler:
+  - changed-files:
+    - any-glob-to-all-files: 'opendbc/car/chrysler/*'
+
+ford:
+  - changed-files:
+    - any-glob-to-all-files: 'opendbc/car/ford/*'
+
+gm:
+  - changed-files:
+    - any-glob-to-all-files: 'opendbc/car/gm/*'
+
+honda:
+  - changed-files:
+    - any-glob-to-all-files: 'opendbc/car/honda/*'
+
+hyundai:
+  - changed-files:
+    - any-glob-to-all-files: 'opendbc/car/hyundai/*'
+
+mazda:
+  - changed-files:
+    - any-glob-to-all-files: 'opendbc/car/mazda/*'
+
+nissan:
+  - changed-files:
+    - any-glob-to-all-files: 'opendbc/car/nissan/*'
+
+subaru:
+  - changed-files:
+    - any-glob-to-all-files: 'opendbc/car/subaru/*'
+
+tesla:
+  - changed-files:
+    - any-glob-to-all-files: 'opendbc/car/tesla/*'
+
+toyota:
+  - changed-files:
+    - any-glob-to-all-files: 'opendbc/car/toyota/*'
+
+volkswagen:
+  - changed-files:
+    - any-glob-to-all-files: 'opendbc/car/volkswagen/*'
+
+fingerprint:
+  - changed-files:
+    - any-glob-to-all-files: 'opendbc/car/*/fingerprints.py'
