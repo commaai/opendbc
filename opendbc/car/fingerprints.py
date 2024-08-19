@@ -9,6 +9,7 @@ from opendbc.car.mazda.values import CAR as MAZDA
 from opendbc.car.mock.values import CAR as MOCK
 from opendbc.car.nissan.values import CAR as NISSAN
 from opendbc.car.subaru.values import CAR as SUBARU
+from opendbc.car.tesla.values import CAR as TESLA
 from opendbc.car.toyota.values import CAR as TOYOTA
 from opendbc.car.volkswagen.values import CAR as VW
 
@@ -275,6 +276,8 @@ MIGRATION = {
   "SUBARU FORESTER 2022": SUBARU.SUBARU_FORESTER_2022,
   "SUBARU OUTBACK 7TH GEN": SUBARU.SUBARU_OUTBACK_2023,
   "SUBARU ASCENT 2023": SUBARU.SUBARU_ASCENT_2023,
+  'TESLA AP3 MODEL 3': TESLA.TESLA_AP3_MODEL3,
+  'TESLA AP3 MODEL Y': TESLA.TESLA_AP3_MODELY,
   "TOYOTA ALPHARD 2020": TOYOTA.TOYOTA_ALPHARD_TSS2,
   "TOYOTA AVALON 2016": TOYOTA.TOYOTA_AVALON,
   "TOYOTA AVALON 2019": TOYOTA.TOYOTA_AVALON_2019,
