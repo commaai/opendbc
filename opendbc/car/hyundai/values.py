@@ -146,6 +146,10 @@ class CAR(Platforms):
     CarSpecs(mass=1675, wheelbase=2.885, steerRatio=14.5),
     flags=HyundaiFlags.HYBRID,
   )
+  HYUNDAI_CRETA_2ND_GEN = HyundaiPlatformConfig(
+    [HyundaiCarDocs("Hyundai Creta 2024", car_parts=CarParts.common([CarHarness.hyundai_a])),],
+    CarSpecs(mass=1222, wheelbase=2.61, steerRatio=16.4),
+  )
   HYUNDAI_ELANTRA = HyundaiPlatformConfig(
     [
       # TODO: 2017-18 could be Hyundai G
