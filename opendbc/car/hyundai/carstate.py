@@ -31,6 +31,7 @@ class CarState(CarStateBase):
 
     self.gear_msg_canfd = "GEAR_ALT" if CP.flags & HyundaiFlags.CANFD_ALT_GEARS else \
                           "GEAR_ALT_2" if CP.flags & HyundaiFlags.CANFD_ALT_GEARS_2 else \
+                          "ACCELERATOR" if CP.flags & HyundaiFlags.CANFD_ALT_GEARS_3 else \
                           "GEAR_SHIFTER"
     if CP.carFingerprint in CANFD_CAR:
       self.shifter_values = can_define.dv[self.gear_msg_canfd]["GEAR"]
@@ -333,7 +334,6 @@ class CarState(CarStateBase):
 
   def get_can_parser_canfd(self, CP):
     messages = [
-      (self.gear_msg_canfd, 100),
       (self.accelerator_msg_canfd, 100),
       ("WHEEL_SPEEDS", 100),
       ("STEERING_SENSORS", 100),
@@ -343,6 +343,9 @@ class CarState(CarStateBase):
       ("BLINKERS", 4),
       ("DOORS_SEATBELTS", 4),
     ]
+
+    if not CP.flags & HyundaiFlags.CANFD_ALT_GEARS_3:
+      messages.append((self.gear_msg_canfd, 100))
 
     if CP.flags & HyundaiFlags.EV:
       messages += [

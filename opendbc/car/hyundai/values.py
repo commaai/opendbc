@@ -95,6 +95,8 @@ class HyundaiFlags(IntFlag):
 
   MIN_STEER_32_MPH = 2 ** 23
 
+  CANFD_ALT_GEARS_3 = 2 ** 24
+
 
 class Footnote(Enum):
   CANFD = CarFootnote(
@@ -526,6 +528,16 @@ class CAR(Platforms):
     ],
     CarSpecs(mass=1950, wheelbase=2.87, steerRatio=14.6),
     flags=HyundaiFlags.RADAR_SCC,
+  )
+  # 2023 GV70 Electrified has Variable Gear Ratio (VGR) rack & pinion with rack mounted EPS.
+  # The overall gear/steering ratio is 13.27.
+  # https://www.genesis.com/content/dam/genesis-p2/au/assets/models/electrified-gv70/specs/Genesis_GV70_EV_August_2022_v0.1.pdf
+  GENESIS_GV70_ELECTRIFIED_1ST_GEN = HyundaiCanFDPlatformConfig(
+    [
+      HyundaiCarDocs("Genesis GV70 Electrified (with HDA II) 2023", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_q])),
+    ],
+    CarSpecs(mass=2295, wheelbase=2.87, steerRatio=13.27),
+    flags=HyundaiFlags.EV,
   )
   GENESIS_G80 = HyundaiPlatformConfig(
     [HyundaiCarDocs("Genesis G80 2018-19", "All", car_parts=CarParts.common([CarHarness.hyundai_h]))],
