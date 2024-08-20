@@ -108,7 +108,7 @@ class CAR(Platforms):
     ],
     CarSpecs(mass=1750, wheelbase=2.71, steerRatio=16.7),
   )
-  FORD_ESCAPE_MK4_23REFRESH = FordPlatformConfig(
+  FORD_ESCAPE_MK4_23REFRESH = FordCANFDPlatformConfig(
     [
       FordCarDocs("Ford Escape 2023-24", hybrid=True, plug_in_hybrid=True),
       FordCarDocs("Ford Kuga 2023-24", "Adaptive Cruise Control with Lane Centering", hybrid=True, plug_in_hybrid=True),
