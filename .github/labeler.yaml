@@ -1,6 +1,6 @@
 CI / testing:
   - changed-files:
-    - any-glob-to-all-files: '.github/**'
+    - any-glob-to-any-file: '.github/**'
 
 car:
   - changed-files:
