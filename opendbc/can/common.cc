@@ -1,6 +1,6 @@
 #include "opendbc/can/common.h"
 
-hi
+
 unsigned int honda_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
   int s = 0;
   bool extended = address > 0x7FF;
