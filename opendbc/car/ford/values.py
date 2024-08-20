@@ -108,6 +108,13 @@ class CAR(Platforms):
     ],
     CarSpecs(mass=1750, wheelbase=2.71, steerRatio=16.7),
   )
+  FORD_ESCAPE_MK4_23REFRESH = FordPlatformConfig(
+    [
+      FordCarDocs("Ford Escape 2023-24", hybrid=True, plug_in_hybrid=True),
+      FordCarDocs("Ford Kuga 2023-24", "Adaptive Cruise Control with Lane Centering", hybrid=True, plug_in_hybrid=True),
+    ],
+    CarSpecs(mass=1750, wheelbase=2.71, steerRatio=16.7),
+  )
   FORD_EXPLORER_MK6 = FordPlatformConfig(
     [
       FordCarDocs("Ford Explorer 2020-23", hybrid=True),  # Hybrid: Limited and Platinum only
