@@ -25,6 +25,8 @@ TEMP_STEER_FAULTS = (0, 9, 11, 21, 25)
 PERM_STEER_FAULTS = (3, 17)
 
 
+# hi
+
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
