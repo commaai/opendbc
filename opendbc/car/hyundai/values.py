@@ -95,6 +95,8 @@ class HyundaiFlags(IntFlag):
 
   MIN_STEER_32_MPH = 2 ** 23
 
+  FCEV = 2 ** 24
+
 
 class Footnote(Enum):
   CANFD = CarFootnote(
@@ -239,6 +241,11 @@ class CAR(Platforms):
     [HyundaiCarDocs("Hyundai Kona Hybrid 2020", car_parts=CarParts.common([CarHarness.hyundai_i]))],  # TODO: check packages,
     CarSpecs(mass=1425, wheelbase=2.6, steerRatio=13.42, tireStiffnessFactor=0.385),
     flags=HyundaiFlags.HYBRID,
+  )
+  HYUNDAI_NEXO_1ST_GEN = HyundaiPlatformConfig(
+    [HyundaiCarDocs("Hyundai Nexo 2021", "All", car_parts=CarParts.common([CarHarness.hyundai_h]))],
+    CarSpecs(mass=3990 * CV.LB_TO_KG, wheelbase=2.79, steerRatio=14.19),  # https://www.hyundainews.com/assets/documents/original/42768-2021NEXOProductGuideSpecs.pdf
+    flags=HyundaiFlags.FCEV,
   )
   HYUNDAI_SANTA_FE = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Santa Fe 2019-20", "All", video_link="https://youtu.be/bjDR0YjM__s",
@@ -744,6 +751,8 @@ CAMERA_SCC_CAR = CAR.with_flags(HyundaiFlags.CAMERA_SCC)
 HYBRID_CAR = CAR.with_flags(HyundaiFlags.HYBRID)
 
 EV_CAR = CAR.with_flags(HyundaiFlags.EV)
+
+FCEV_CAR = CAR.with_flags(HyundaiFlags.FCEV)
 
 LEGACY_SAFETY_MODE_CAR = CAR.with_flags(HyundaiFlags.LEGACY)
 

@@ -3,7 +3,7 @@ from opendbc.car import get_safety_config, structs
 from opendbc.car.hyundai.hyundaicanfd import CanBus
 from opendbc.car.hyundai.values import HyundaiFlags, CAR, DBC, CANFD_CAR, CAMERA_SCC_CAR, CANFD_RADAR_SCC_CAR, \
                                                    CANFD_UNSUPPORTED_LONGITUDINAL_CAR, EV_CAR, HYBRID_CAR, LEGACY_SAFETY_MODE_CAR, \
-                                                   UNSUPPORTED_LONGITUDINAL_CAR, Buttons
+                                                   UNSUPPORTED_LONGITUDINAL_CAR, Buttons, FCEV_CAR
 from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.disable_ecu import disable_ecu
@@ -58,6 +58,8 @@ class CarInterface(CarInterfaceBase):
         ret.flags |= HyundaiFlags.HYBRID.value
       elif candidate in EV_CAR:
         ret.flags |= HyundaiFlags.EV.value
+      elif candidate in FCEV_CAR:
+        ret.flags |= HyundaiFlags.FCEV.value
 
       # Send LFA message on cars with HDA
       if 0x485 in fingerprint[2]:
@@ -125,6 +127,8 @@ class CarInterface(CarInterfaceBase):
       ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_HYBRID_GAS
     elif ret.flags & HyundaiFlags.EV:
       ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_EV_GAS
+    elif ret.flags & HyundaiFlags.FCEV:
+      ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_FCEV_GAS
 
     if candidate in (CAR.HYUNDAI_KONA, CAR.HYUNDAI_KONA_EV, CAR.HYUNDAI_KONA_HEV, CAR.HYUNDAI_KONA_EV_2022):
       ret.flags |= HyundaiFlags.ALT_LIMITS.value
