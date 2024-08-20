@@ -4,15 +4,15 @@ CI / testing:
 
 car:
   - changed-files:
-    - any-glob-to-any-file: '{opendbc/car/**}'
+    - any-glob-to-any-file: 'opendbc/car/**'
 
 can:
   - changed-files:
-    - any-glob-to-any-file: '{opendbc/can/**}'
+    - any-glob-to-any-file: 'opendbc/can/**'
 
 DBC signals:
   - changed-files:
-    - any-glob-to-any-file: '{opendbc/dbc/**}'
+    - any-glob-to-any-file: 'opendbc/dbc/**'
 
 
 body:
