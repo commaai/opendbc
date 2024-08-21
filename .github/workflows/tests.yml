@@ -25,11 +25,10 @@ jobs:
         curl -LsSf https://astral.sh/uv/install.sh | sh
         uv venv --python 3.11
         uv pip install -e .[testing,docs]
+    - name: build and run tests
     - run: |
         source .venv/bin/activate
         scons -j$(nproc)
-    - run: |
-        source .venv/bin/activate
         pytest --durations=0
 
   static-analysis:
