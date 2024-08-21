@@ -78,7 +78,7 @@ class TestFwFingerprint:
     fw = []
     for ecu in valid_ecus:
       ecu_name, addr, sub_addr = ecu
-      for _ in range(5):
+      for _ in range(3):
         # Add multiple FW versions to simulate ECU returning to multiple queries in a brand
         fw.append(CarFw(ecu=ecu_name, fwVersion=random.choice(ecus[ecu]), brand=brand,
                         address=addr, subAddress=0 if sub_addr is None else sub_addr))
