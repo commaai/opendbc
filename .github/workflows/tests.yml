@@ -23,7 +23,7 @@ jobs:
     - uses: actions/checkout@v4
     - run: |
         curl -LsSf https://astral.sh/uv/install.sh | sh
-        uv venv
+        uv venv --python 3.11
         uv pip install -e .[testing,docs]
     - run: |
         source .venv/bin/activate
