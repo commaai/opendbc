@@ -42,4 +42,7 @@ jobs:
         curl -LsSf https://astral.sh/uv/install.sh | sh
         uv venv
         uv pip install -e . pre-commit
-    - run: uv run pre-commit run --all
+        source .venv/bin/activate
+    - uses: pre-commit/action@v3.0.1
+      env:
+        VIRTUAL_ENV: .venv
