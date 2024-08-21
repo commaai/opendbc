@@ -21,7 +21,8 @@ jobs:
     #    run: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
     steps:
     - uses: actions/checkout@v4
-    - run: pip install -e .[testing,docs]
+    - run: curl -LsSf https://astral.sh/uv/install.sh | sh
+    - run: uv pip install -e .[testing,docs]
     - run: scons -j$(nproc)
     - run: pytest -n logical --durations=0
 
