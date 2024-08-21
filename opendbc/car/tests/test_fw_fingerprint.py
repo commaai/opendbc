@@ -9,7 +9,7 @@ from opendbc.car.car_helpers import interfaces
 from opendbc.car.structs import CarParams
 from opendbc.car.fingerprints import FW_VERSIONS
 from opendbc.car.fw_versions import ESSENTIAL_ECUS, FW_QUERY_CONFIGS, FUZZY_EXCLUDE_ECUS, VERSIONS, build_fw_dict, \
-                                                match_fw_to_car, get_brand_ecu_matches, get_fw_versions, get_fw_versions_ordered, get_present_ecus
+                                                match_fw_to_car, get_brand_ecu_matches, get_fw_versions, get_present_ecus
 from opendbc.car.vin import get_vin
 
 CarFw = CarParams.CarFw
@@ -325,7 +325,6 @@ class TestFwFingerprintTiming:
 
     mocker.patch("opendbc.car.carlog.exception", fake_carlog_exception)
     mocker.patch("time.monotonic", fake_monotonic)
-    get_fw_versions_ordered(self.fake_can_recv, self.fake_can_send, lambda obd: None, '0' * 17, set())
     for brand in FW_QUERY_CONFIGS.keys():
       with subtests.test(brand=brand):
         get_fw_versions(self.fake_can_recv, self.fake_can_send, lambda obd: None, brand)
