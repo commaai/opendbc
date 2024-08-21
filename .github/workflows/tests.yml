@@ -27,11 +27,8 @@ jobs:
         uv venv
         # TODO: remove setuptools once https://github.com/cython/cython/issues/5751 is fixed
         uv pip install -e .[testing,docs] setuptools
-    - name: build and run tests
-      run: |
-        source .venv/bin/activate
-        scons -j$(nproc)
-        pytest --durations=0
+    - run: uv run scons -j$(nproc)
+    - run: uv run pytest --durations=0
 
   static-analysis:
     name: static analysis
