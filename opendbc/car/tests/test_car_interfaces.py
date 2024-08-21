@@ -7,7 +7,7 @@ from parameterized import parameterized
 from collections.abc import Callable
 from typing import Any
 
-from opendbc.car import DT_CTRL, CanData, structs
+from opendbc.car import DT_CTRL, CanData, gen_empty_fingerprint, structs
 from opendbc.car.car_helpers import interfaces
 from opendbc.car.fingerprints import all_known_cars
 from opendbc.car.fw_versions import FW_VERSIONS, FW_QUERY_CONFIGS
@@ -28,7 +28,7 @@ def get_fuzzy_car_interface_args(draw: DrawType) -> dict:
   # Fuzzy CAN fingerprints and FW versions to test more states of the CarInterface
   fingerprint_strategy = st.fixed_dictionaries({key: st.dictionaries(st.integers(min_value=0, max_value=0x800),
                                                                      st.integers(min_value=0, max_value=64)) for key in
-                                                (0, 1, 2, 3)})
+                                                gen_empty_fingerprint()})
 
   # only pick from possible ecus to reduce search space
   car_fw_strategy = st.lists(st.sampled_from(sorted(ALL_ECUS)))
@@ -40,11 +40,6 @@ def get_fuzzy_car_interface_args(draw: DrawType) -> dict:
   })
 
   params: dict = draw(params_strategy)
-
-  # in a multipanda setup, these should be the same/one set is missing
-  for bus in (0, 1, 2, 3):
-    params['fingerprints'][bus + 4] = params['fingerprints'][bus]
-
   params['car_fw'] = [structs.CarParams.CarFw(ecu=fw[0], address=fw[1], subAddress=fw[2] or 0,
                                               request=draw(st.sampled_from(sorted(ALL_REQUESTS))))
                       for fw in params['car_fw']]
