@@ -22,8 +22,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - run: curl -LsSf https://astral.sh/uv/install.sh | sh
-#    - run: uv pip install -e .[testing,docs]
-    - run: uv sync --frozen --all-extras
+    - run: uv venv
+    - run: uv pip install -e .[testing,docs]
     - run: scons -j$(nproc)
     - run: pytest -n logical --durations=0
 
