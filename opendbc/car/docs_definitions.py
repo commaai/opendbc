@@ -22,6 +22,7 @@ class Column(Enum):
   AUTO_RESUME = "Resume from stop"
   HARDWARE = "Hardware Needed"
   VIDEO = "Video"
+  DETAIL_SENTENCE = "Detail"
 
 
 class Star(Enum):
@@ -219,6 +220,21 @@ def split_name(name: str) -> tuple[str, str, str]:
   return make, model, years
 
 
+# prevent squashing into too thin column
+def format_with_nbsp(text):
+    words = text.split()
+    result = words[0]
+    cur_chunk_len = len(result)
+    for word in words[1:]:
+      cur_chunk_len += len(word)
+      if cur_chunk_len >= 35:
+        result += ' ' + word
+        cur_chunk_len = len(word)
+      else:
+        result += '&nbsp;' + word
+    return result
+
+
 @dataclass
 class CarDocs:
   # make + model + model years
@@ -313,6 +329,8 @@ class CarDocs:
 
     self.all_footnotes = all_footnotes
     self.detail_sentence = self.get_detail_sentence(CP)
+
+    self.row[Column.DETAIL_SENTENCE] = f'<details><summary>Detail</summary><sub>{format_with_nbsp(self.detail_sentence)}</sub></details>'
 
     return self
 
