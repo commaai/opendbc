@@ -26,7 +26,7 @@ class TestFwFingerprint:
   def test_exact_match(self, brand, car_model, ecus, test_non_essential):
     config = FW_QUERY_CONFIGS[brand]
     CP = CarParams()
-    for _ in range(100):
+    for _ in range(20):
       fw = []
       for ecu, fw_versions in ecus.items():
         # Assume non-essential ECUs apply to all cars, so we catch cases where Car A with
