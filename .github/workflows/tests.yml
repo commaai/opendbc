@@ -24,8 +24,9 @@ jobs:
     - run: curl -LsSf https://astral.sh/uv/install.sh | sh
     - run: uv venv
     - run: uv pip install -e .[testing,docs]
+    - run: source .venv/bin/activate
     - run: scons -j$(nproc)
-    - run: pytest -n logical --durations=0
+    - run: pytest --durations=0
 
   static-analysis:
     name: static analysis
