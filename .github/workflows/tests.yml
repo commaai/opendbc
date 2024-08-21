@@ -21,12 +21,16 @@ jobs:
     #    run: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
     steps:
     - uses: actions/checkout@v4
-    - run: curl -LsSf https://astral.sh/uv/install.sh | sh
-    - run: uv venv
-    - run: uv pip install -e .[testing,docs]
-    - run: source .venv/bin/activate
-    - run: scons -j$(nproc)
-    - run: pytest --durations=0
+    - run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        uv venv
+        uv pip install -e .[testing,docs]
+    - run: |
+        source .venv/bin/activate
+        scons -j$(nproc)
+    - run: |
+        source .venv/bin/activate
+        pytest --durations=0
 
   static-analysis:
     name: static analysis
