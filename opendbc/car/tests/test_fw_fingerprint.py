@@ -316,8 +316,15 @@ class TestFwFingerprintTiming:
     def fake_carlog_exception(*args, **kwargs):
       raise
 
+    t = 0
+
+    def fake_monotonic():
+      nonlocal t
+      t += 0.0001
+      return t
+
     mocker.patch("opendbc.car.carlog.exception", fake_carlog_exception)
-    get_fw_versions_ordered(self.fake_can_recv, self.fake_can_send, lambda obd: None, '0' * 17, set())
+    mocker.patch("time.monotonic", fake_monotonic)
     for brand in FW_QUERY_CONFIGS.keys():
       with subtests.test(brand=brand):
         get_fw_versions(self.fake_can_recv, self.fake_can_send, lambda obd: None, brand)
