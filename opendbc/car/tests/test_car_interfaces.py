@@ -4,7 +4,8 @@ import hypothesis.strategies as st
 from hypothesis import Phase, given, settings
 import importlib
 from parameterized import parameterized
-from typing import Callable, Any
+from collections.abc import Callable
+from typing import Any
 
 from opendbc.car import DT_CTRL, CanData, gen_empty_fingerprint, structs
 from opendbc.car.car_helpers import interfaces
