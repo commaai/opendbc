@@ -32,6 +32,21 @@ class CarInterface(CarInterfaceBase):
       #   https://blog.willemmelching.nl/carhacking/2022/01/02/vw-part1/
       # Panda ALLOW_DEBUG firmware required.
       ret.dashcamOnly = True
+      
+    elif ret.flags & VolkswagenFlags.MEB: # TODO
+      # Set global MEB parameters
+      ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.volkswagenMeb)]
+      ret.enableBsm        = True
+      ret.transmissionType = TransmissionType.direct
+      ret.networkLocation  = NetworkLocation.fwdCamera # TODO signal sources: I am connected at gateway/ICAS 1 right now
+      #ret.steerControlType = car.CarParams.SteerControlType.angle
+      ret.radarUnavailable = False
+      #ret.flags |= VolkswagenFlags.STOCK_HCA_PRESENT.value
+
+      if any(msg in fingerprint[1] for msg in (0x520, 0x86, 0xFD, 0x13D)):  # Airbag_02, LWI_01, ESP_21, MEB_EPS_01
+        ret.networkLocation = NetworkLocation.gateway
+      else:
+        ret.networkLocation = NetworkLocation.fwdCamera
 
     else:
       # Set global MQB parameters
@@ -55,11 +70,15 @@ class CarInterface(CarInterfaceBase):
 
     # Global lateral tuning defaults, can be overridden per-vehicle
 
-    ret.steerLimitTimer = 0.4
     if ret.flags & VolkswagenFlags.PQ:
+      ret.steerLimitTimer = 0.4
       ret.steerActuatorDelay = 0.2
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
+    elif ret.flags & VolkswagenFlags.MEB:
+      ret.steerLimitTimer = 0.8
+      ret.steerActuatorDelay = 0.3
     else:
+      ret.steerLimitTimer = 0.4
       ret.steerActuatorDelay = 0.1
       ret.lateralTuning.pid.kpBP = [0.]
       ret.lateralTuning.pid.kiBP = [0.]
@@ -69,19 +88,30 @@ class CarInterface(CarInterfaceBase):
 
     # Global longitudinal tuning defaults, can be overridden per-vehicle
 
+    if ret.flags & VolkswagenFlags.MEB:
+      ret.longitudinalActuatorDelay = 0.5
+      #ret.longitudinalTuning.deadzoneBP = [0., 8.05]
+      #ret.longitudinalTuning.deadzoneV = [.0, .14]
+      ret.longitudinalTuning.kpBP = [0., 5., 20.]
+      ret.longitudinalTuning.kpV  = [0.1, 0.05, 0.]
+      ret.longitudinalTuning.kiBP = [0., 5., 20.]
+      ret.longitudinalTuning.kiV  = [0., 0., -0.13]
+      #if params.get_bool('ExperimentalMode'):
+      #  ret.longitudinalTuning.kpV = [0.5, 0.2, -0.2] # experimental OP long is less smooth
+      
     ret.experimentalLongitudinalAvailable = ret.networkLocation == NetworkLocation.gateway or docs
     if experimental_long:
-      # Proof-of-concept, prep for E2E only. No radar points available. Panda ALLOW_DEBUG firmware required.
+      # Proof-of-concept, prep for E2E only. No radar points available for non MEB. Panda ALLOW_DEBUG firmware required.
       ret.openpilotLongitudinalControl = True
       ret.safetyConfigs[0].safetyParam |= Panda.FLAG_VOLKSWAGEN_LONG_CONTROL
       if ret.transmissionType == TransmissionType.manual:
         ret.minEnableSpeed = 4.5
 
+    ret.vEgoStarting = 0.1
+    ret.vEgoStopping = 0.5
     ret.pcmCruise = not ret.openpilotLongitudinalControl
     ret.stoppingControl = True
     ret.stopAccel = -0.55
-    ret.vEgoStarting = 0.1
-    ret.vEgoStopping = 0.5
     ret.autoResumeSng = ret.minEnableSpeed == -1
 
     return ret
