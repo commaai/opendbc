@@ -45,7 +45,7 @@ class RadarInterface(RadarInterfaceBase):
     return rr
 
   def _update(self, updated_messages):
-    ret = car.RadarData.new_message()
+    ret = structs.RadarData()
     if self.rcp is None:
       return ret
 
