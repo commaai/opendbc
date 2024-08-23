@@ -1,4 +1,4 @@
-from openpilot.selfdrive.car.common.numpy_fast import clip
+from opendbc.car.common.numpy_fast import clip
 
 def create_steering_control_curvature(packer, bus, apply_curvature, lkas_enabled, power):
   values = {
