@@ -39,7 +39,7 @@ class CarInterface(CarInterfaceBase):
       ret.enableBsm        = True
       ret.transmissionType = TransmissionType.direct
       ret.networkLocation  = NetworkLocation.fwdCamera # TODO signal sources: I am connected at gateway/ICAS 1 right now
-      #ret.steerControlType = car.CarParams.SteerControlType.angle
+      ret.steerControlType = structs.CarParams.SteerControlType.angle
       ret.radarUnavailable = False
       #ret.flags |= VolkswagenFlags.STOCK_HCA_PRESENT.value
 
