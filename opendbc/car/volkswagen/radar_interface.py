@@ -61,7 +61,7 @@ class RadarInterface(RadarInterfaceBase):
 
     signal_part = RADAR_SAME_LANE_01
     if signal_part not in self.pts:
-      self.pts[signal_part]         = structs.RadarData.RadarPoint.new_message()
+      self.pts[signal_part]         = structs.RadarData.RadarPoint()
       self.pts[signal_part].trackId = self.track_id
       self.track_id                += 1
 
@@ -80,7 +80,7 @@ class RadarInterface(RadarInterfaceBase):
 
     signal_part = RADAR_SAME_LANE_02
     if signal_part not in self.pts:
-      self.pts[signal_part]         = structs.RadarData.RadarPoint.new_message()
+      self.pts[signal_part]         = structs.RadarData.RadarPoint()
       self.pts[signal_part].trackId = self.track_id
       self.track_id                += 1
 
