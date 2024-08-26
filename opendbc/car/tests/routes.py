@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from typing import NamedTuple
 
 from opendbc.car.chrysler.values import CAR as CHRYSLER
