@@ -9,6 +9,31 @@ requires-python = ">=3.9"
 
 urls = { "homepage" = "https://github.com/commaai/opendbc" }
 
+dependencies = [
+  "scons",
+  "numpy",
+  "Cython",
+  "crcmod",
+  "tqdm",
+  "pandacan@git+https://github.com/commaai/panda.git@master",
+]
+
+[project.optional-dependencies]
+testing = [
+  "ruff",
+  "pytest",
+  "pytest-mock",
+  "pytest-xdist",
+  "pytest-subtests",
+  "hypothesis==6.47.*",
+  "parameterized>=0.8,<0.9",
+  "pre-commit",
+]
+docs = [
+  "Jinja2",
+  "natsort",
+]
+
 [tool.pytest.ini_options]
 addopts = "--ignore=panda/ -Werror --strict-config --strict-markers --durations=10 -n auto"
 python_files = "test_*.py"
@@ -67,3 +92,7 @@ ignore = [
   "NPY002",  # new numpy random syntax is worse
 ]
 flake8-implicit-str-concat.allow-multiline=false
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"pytest.main".msg = "pytest.main requires special handling that is easy to mess up!"
+"unittest".msg = "Use pytest"

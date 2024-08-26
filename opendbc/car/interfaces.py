@@ -261,7 +261,7 @@ class RadarInterfaceBase(ABC):
     self.radar_ts = CP.radarTimeStep
     self.frame = 0
 
-  def update(self, can_strings) -> structs.RadarData | None:
+  def update(self, can_packets: list[tuple[int, list[CanData]]]) -> structs.RadarData | None:
     self.frame += 1
     if (self.frame % int(100 * self.radar_ts)) == 0:
       return structs.RadarData()

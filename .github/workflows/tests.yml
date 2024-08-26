@@ -1,48 +1,52 @@
 name: tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
 
-env:
-  RUN: docker run -e PYTHONWARNINGS="error,default::DeprecationWarning" --shm-size 1G --rm opendbc /bin/bash -c
-  BUILD: docker buildx build --pull --load --cache-to type=inline --cache-from type=registry,ref=ghcr.io/commaai/opendbc:latest -t opendbc -f Dockerfile .
-  PYTHONWARNINGS: error
+# TODO: enable this
+#env:
+#  PYTHONWARNINGS: error,default::DeprecationWarning
 
 jobs:
   unit-tests:
     name: unit tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
     #strategy:
     #  fail-fast: false
     #  matrix:
     #    run: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
     steps:
     - uses: actions/checkout@v4
-    - name: Build Docker image
-      run: eval "$BUILD"
-    - name: Unit tests
-      run: ${{ env.RUN }} "pytest -n logical --durations=0"
+    - name: setup python
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        uv venv
+        # TODO: remove setuptools once https://github.com/cython/cython/issues/5751 is fixed
+        uv pip install -e .[testing,docs] setuptools
+    - run: uv run scons -j$(nproc)
+    - run: uv run pytest --durations=0
 
   static-analysis:
     name: static analysis
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
     steps:
     - uses: actions/checkout@v4
-    - name: Build Docker image
-      run: eval "$BUILD"
-    - name: pre-commit
-      # TODO: a package pre-commit installs has a warning, remove the unset once that's fixed
-      run: ${{ env.RUN }} "git init && git add -A && unset PYTHONWARNINGS && pre-commit run --all"
-
-  docker-push:
-    name: docker push
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request' && github.repository == 'commaai/opendbc'
-    steps:
-    - uses: actions/checkout@v4
-    - name: Build Docker image
-      run: eval "$BUILD"
-    - name: Push to dockerhub
+    - run: sudo apt install --no-install-recommends -y cppcheck
+    - name: setup python
       run: |
-        docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
-        docker tag opendbc ghcr.io/commaai/opendbc:latest
-        docker push ghcr.io/commaai/opendbc:latest
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        uv venv
+        uv pip install -e . pre-commit
+    - name: cache pre-commit environments
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pre-commit
+        key: ${{ runner.os }}-pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pre-commit-
+    - run: uv run pre-commit run --all

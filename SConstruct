@@ -3,7 +3,6 @@ import subprocess
 import sysconfig
 import numpy as np
 
-zmq = 'zmq'
 arch = subprocess.check_output(["uname", "-m"], encoding='utf8').rstrip()
 
 python_path = sysconfig.get_paths()['include']
@@ -28,8 +27,8 @@ ldflags_asan = ["-fsanitize=address"] if GetOption('asan') else []
 
 env = Environment(
   ENV=os.environ,
-  CC='clang',
-  CXX='clang++',
+  CC='gcc',
+  CXX='g++',
   CCFLAGS=[
     "-g",
     "-fPIC",
@@ -38,6 +37,7 @@ env = Environment(
     "-Werror",
     "-Wshadow",
     "-Wno-vla-cxx-extension",
+    "-Wno-unknown-warning-option",  # for compatibility across compiler versions
   ] + ccflags_asan,
   LDFLAGS=ldflags_asan,
   LINKFLAGS=ldflags_asan,
@@ -52,7 +52,7 @@ env = Environment(
 )
 
 common = ''
-Export('env', 'zmq', 'arch', 'common')
+Export('env', 'arch', 'common')
 
 envCython = env.Clone()
 envCython["CPPPATH"] += [np.get_include()]
