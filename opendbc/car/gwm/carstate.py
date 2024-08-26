@@ -28,7 +28,7 @@ class CarState(CarStateBase):
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.standstill = abs(ret.vEgoRaw) < 1e-3
 
-    ret.steeringAngleDeg = 0 # TODO
+    ret.steeringAngleDeg = cp.vl["STEER_AND_AP_STALK"]["STEERING_ANGLE"] * (-1 if cp.vl["STEER_AND_AP_STALK"]["STEERING_DIRECTION"] else 1)
     ret.steeringRateDeg = 0 # TODO
     # ret.steeringTorque = TODO
     # ret.steeringPressed = TODO
@@ -71,6 +71,7 @@ class CarState(CarStateBase):
 
       # HAVAL:
       ("BRAKE", 50),
+      ("STEER_AND_AP_STALK", 100),
       ("WHEEL_SPEEDS", 50),
     ]
 
