@@ -28,7 +28,7 @@ jobs:
         # TODO: remove setuptools once https://github.com/cython/cython/issues/5751 is fixed
         uv pip install -e .[testing,docs] setuptools
     - run: uv run scons -j$(nproc)
-    - run: uv run pytest --durations=0
+    - run: uv run pytest .
 
   static-analysis:
     name: static analysis
