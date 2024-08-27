@@ -220,9 +220,6 @@ class CarControl:
     steerOutputCan: float = auto_field()
     steeringAngleDeg: float = auto_field()
 
-    allowBrake: bool = auto_field()
-    allowThrottle: bool = auto_field()
-
     curvature: float = auto_field()
 
     speed: float = auto_field()  # m/s
