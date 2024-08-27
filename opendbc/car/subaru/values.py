@@ -269,7 +269,13 @@ FW_QUERY_CONFIG = FwQueryConfig(
   # We don't get the EPS from non-OBD queries on GEN2 cars. Note that we still attempt to match when it exists
   non_essential_ecus={
     Ecu.eps: list(CAR.with_flags(SubaruFlags.GLOBAL_GEN2)),
-  }
+  },
+  extra_ecus=[
+    (Ecu.engine, 0x7e0, None),
+    (Ecu.engine, 0x7e2, None),
+    (Ecu.transmission, 0x7e1, None),
+    (Ecu.transmission, 0x7a3, None),
+  ],
 )
 
 DBC = CAR.create_dbc_map()
