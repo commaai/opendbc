@@ -47,6 +47,8 @@ class CarState(CarStateBase):
     self.low_speed_lockout = False
     self.acc_type = 1
     self.lkas_hud = {}
+    self.pcm_accel_net = 0.0
+    self.pcm_neutral_force = 0.0
 
   def update(self, cp, cp_cam, *_) -> structs.CarState:
     ret = structs.CarState()
@@ -70,6 +72,10 @@ class CarState(CarStateBase):
     ret.vEgoRaw = mean([ret.wheelSpeeds.fl, ret.wheelSpeeds.fr, ret.wheelSpeeds.rl, ret.wheelSpeeds.rr])
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.vEgoCluster = ret.vEgo * 1.015  # minimum of all the cars
+
+    # thought to be the gas/brake as issued by the pcm (0=coasting)
+    self.pcm_accel_net = cp.vl["PCM_CRUISE"]["ACCEL_NET"]
+    self.pcm_neutral_force = cp.vl["PCM_CRUISE"]["NEUTRAL_FORCE"]
 
     ret.standstill = abs(ret.vEgoRaw) < 1e-3
 
