@@ -94,8 +94,11 @@ class CarController(CarControllerBase):
           self.apply_brake = int(round(interp(actuators.accel, self.params.BRAKE_LOOKUP_BP, self.params.BRAKE_LOOKUP_V)))
           # Don't allow any gas above inactive regen while stopping
           # FIXME: brakes aren't applied immediately when enabling at a stop
-          if stopping:
+          if stopping or not actuators.allowThrottle:
             self.apply_gas = self.params.INACTIVE_REGEN
+
+          if not actuators.allowBrake:
+            self.apply_brake = 0
 
         idx = (self.frame // 4) % 4
 
