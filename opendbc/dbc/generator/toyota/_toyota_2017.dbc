@@ -148,6 +148,12 @@ BO_ 742 LEAD_INFO: 8 DSU
  SG_ LEAD_REL_SPEED : 23|12@0- (0.025,0) [-100|100] "m/s" HCU
  SG_ LEAD_LONG_DIST : 7|13@0+ (0.05,0) [0|300] "m" HCU
 
+BO_ 800 VSC1: 8 CGW
+ SG_ ACC_BRAKING : 8|1@0+ (1,0) [0|0] "" DS1,FCM
+ SG_ SLOPE_ANGLE : 23|8@0- (1,0) [0|0] "deg" DS1
+ SG_ ACC_BRAKING2 : 26|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ACCEL : 39|8@0- (0.04,0) [0|0] "m/s^2" DS1
+
 BO_ 835 ACC_CONTROL: 8 DSU
  SG_ ACCEL_CMD : 7|16@0- (0.001,0) [-20|20] "m/s^2" HCU
  SG_ ALLOW_LONG_PRESS : 17|2@0+ (1,0) [0|2] "" XXX
@@ -417,6 +423,8 @@ CM_ SG_ 614 ANGLE "set to measured angle when ipas control isn't active";
 CM_ SG_ 643 _COUNTER "only used on cars that use this msg for cruise control";
 CM_ SG_ 643 BRAKE_STATUS "only used on cars that use this msg for cruise control";
 CM_ SG_ 643 PRECOLLISION_ACTIVE "set 0.5s before any braking";
+CM_ SG_ 800 SLOPE_ANGLE "potentially used by the PCM to compensate for road pitch";
+CM_ SG_ 800 ACCEL "filtered ego acceleration";
 CM_ SG_ 835 ACC_TYPE "if 2, car is likely to have a permanent low speed lockout. 1 is ok";
 CM_ SG_ 835 RADAR_DIRTY "Display Clean Radar Sensor message on HUD";
 CM_ SG_ 835 ACC_MALFUNCTION "display ACC fault on dash if set to 1";
