@@ -106,13 +106,13 @@ class CarController(CarControllerBase):
     # but also remove undesirable "snap to standstill" behavior when not requesting enough accel at low speeds,
     # lag to start moving, lag to start braking, etc.
     # PI should compensate for lack of the desirable behaviors, but might be worse than the PCM doing them
-    self.pcm_accel_comp = clip(actuators.accel - CS.pcm_accel_net, self.pcm_accel_comp - 0.03, self.pcm_accel_comp + 0.03)
-    pcm_accel_cmd = actuators.accel + self.pcm_accel_comp
 
-    # add back gas to maintain speed
-    # accel_offset = CS.pcm_neutral_force / self.CP.mass
-    # fact = interp(CS.out.vEgo, [3, 6], [0.0, 1.0])  # not at low speed
-    # pcm_accel_cmd -= min(accel_offset / 2, 0) * fact  # only add, reduce effect
+    # FIXME? neutral force will only be positive under ~5 mph, which messes up stopping control considerably
+    # not sure why this isn't captured in the PCM accel net, maybe that just ignores creep force + high speed deceleration
+    # it also doesn't seem to capture slightly more braking on downhills (VSC1S07->ASLP (pitch, deg.) might have some clues)
+    offset = min(CS.pcm_neutral_force / self.CP.mass, 0.0)
+    self.pcm_accel_comp = clip(actuators.accel - CS.pcm_accel_net, self.pcm_accel_comp - 0.01, self.pcm_accel_comp + 0.01)
+    pcm_accel_cmd = actuators.accel + self.pcm_accel_comp + offset
 
     if not CC.longActive:
       pcm_accel_cmd = 0.0
