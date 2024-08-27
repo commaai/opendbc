@@ -148,9 +148,9 @@ BO_ 742 LEAD_INFO: 8 DSU
  SG_ LEAD_LONG_DIST : 7|13@0+ (0.05,0) [0|300] "m" HCU
 
 BO_ 800 VSC1: 8 CGW
- SG_ BRAKE_ON : 8|1@0+ (1,0) [0|0] "" DS1,FCM
+ SG_ ACC_BRAKING : 8|1@0+ (1,0) [0|0] "" DS1,FCM
  SG_ SLOPE_ANGLE : 23|8@0- (1,0) [0|0] "deg" DS1
- SG_ BRAKE_ON2 : 26|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ACC_BRAKING2 : 26|1@0+ (1,0) [0|0] "" Vector__XXX
  SG_ ACCEL : 39|8@0- (0.04,0) [0|0] "m/s^2" DS1
 
 BO_ 835 ACC_CONTROL: 8 DSU
