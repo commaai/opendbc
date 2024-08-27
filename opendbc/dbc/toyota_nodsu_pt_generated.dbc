@@ -153,7 +153,7 @@ BO_ 742 LEAD_INFO: 8 DSU
 
 BO_ 800 VSC1: 8 CGW
  SG_ BRAKE_ON : 8|1@0+ (1,0) [0|0] "" DS1,FCM
- SG_ ANGLE_SLOPE : 23|8@0- (1,0) [0|0] "deg" DS1
+ SG_ SLOPE_ANGLE : 23|8@0- (1,0) [0|0] "deg" DS1
  SG_ BRAKE_ON2 : 26|1@0+ (1,0) [0|0] "" Vector__XXX
  SG_ ACCEL : 39|8@0- (0.04,0) [0|0] "m/s^2" DS1
 
