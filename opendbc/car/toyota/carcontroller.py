@@ -112,9 +112,12 @@ class CarController(CarControllerBase):
     # it also doesn't seem to capture slightly more braking on downhills (VSC1S07->ASLP (pitch, deg.) might have some clues)
     offset = min(CS.pcm_neutral_force / self.CP.mass, 0.0)
     self.pcm_accel_comp = clip(actuators.accel - CS.pcm_accel_net, self.pcm_accel_comp - 0.01, self.pcm_accel_comp + 0.01)
+    if CS.out.standstill:
+      self.pcm_accel_comp = 0.0
     pcm_accel_cmd = actuators.accel + self.pcm_accel_comp + offset
 
     if not CC.longActive:
+      self.pcm_accel_comp = 0.0
       pcm_accel_cmd = 0.0
 
     pcm_accel_cmd = clip(pcm_accel_cmd, self.params.ACCEL_MIN, self.params.ACCEL_MAX)
