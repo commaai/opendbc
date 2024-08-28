@@ -52,25 +52,29 @@ BO_ 278 ESP_10: 8 Gateway_MQB
  SG_ ESP_HL_Fahrtrichtung : 60|2@1+ (1,0) [0|3] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ ESP_HR_Fahrtrichtung : 62|2@1+ (1,0) [0|3] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
 
-BO_ 253 ESP_21: 8 Gateway_MQB
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,LEH_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Airbag_MQB,BMS_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,LEH_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ BR_Eingriffsmoment : 12|10@1+ (1,-509) [-509|509] "Unit_NewtoMeter" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ ESP_v_Signal : 32|16@1+ (0.01,0) [0|655.32] "Unit_KiloMeterPerHour" Airbag_MQB,BMS_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,LEH_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB,SAK_MQB
- SG_ ASR_Tastung_passiv : 48|1@1+ (1,0) [0|1] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ ESP_Tastung_passiv : 49|1@1+ (1,0) [0|1] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ ESP_Systemstatus : 50|1@1+ (1,0) [0|1] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ ASR_Schalteingriff : 51|2@1+ (1,0) [0|3] "" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
- SG_ ESP_Haltebestaetigung : 53|1@1+ (1,0) [0|1] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ ESP_QBit_v_Signal : 55|1@1+ (1,0) [0|1] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,LEH_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ ABS_Bremsung : 56|1@1+ (1,0) [0|1] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ ASR_Anf : 57|1@1+ (1,0) [0|1] "" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ MSR_Anf : 58|1@1+ (1,0) [0|1] "" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ EBV_Eingriff : 59|1@1+ (1,0) [0|1] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ EDS_Eingriff : 60|1@1+ (1,0) [0|1] "" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ ESP_Eingriff : 61|1@1+ (1,0) [0|1] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ ESP_ASP : 62|1@1+ (1,0) [0|1] "" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ ESP_Anhaltevorgang_ACC_aktiv : 63|1@1+ (1,0) [0|1] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
+BO_ 253 ESP_21: 8 Gateway
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ BR_Eingriffsmoment : 12|10@1+ (1,-509) [-509|509] ""  Vector__XXX
+ SG_ ESP_Diagnose : 23|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ ESC_v_Signal_Qualifier_High_Low : 24|3@1+ (1.0,0.0) [0.0|7] ""  Vector__XXX
+ SG_ ESP_Vorsteuerung : 28|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ OBD_Schlechtweg : 30|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ OBD_QBit_Schlechtweg : 31|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ ESP_v_Signal : 32|16@1+ (0.01,0) [0.00|655.32] "Unit_KiloMeterPerHour"  BedienSG_hi,DDA,OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ ASR_Tastung_passiv : 48|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC
+ SG_ ESP_Tastung_passiv : 49|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ ESP_Systemstatus : 50|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC
+ SG_ ASR_Schalteingriff : 51|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ ESP_QBit_v_Signal : 55|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ ABS_Bremsung : 56|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3
+ SG_ ASR_Anf : 57|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ MSR_Anf : 58|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ EBV_Eingriff : 59|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ EDS_Eingriff : 60|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ ESP_Eingriff : 61|1@1+ (1.0,0.0) [0.0|1] ""  OTA_FC,ZR_High
+ SG_ ESP_ASP : 62|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ ESC_Neutralschaltung : 63|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
 
 BO_ 795 ESP_24: 8 Gateway
  SG_ ESP_Lampe : 12|1@1+ (1,0) [0|1] ""  Sub_Gateway
@@ -1663,6 +1667,26 @@ BO_ 619 MEB_Travel_Assist_01: 8 XXX
 
 VAL_ 159 EPS_HCA_Status 0 "disabled" 1 "initializing" 2 "fault" 3 "ready" 4 "rejected" 5 "active" 8 "preempted";
 VAL_ 173 GE_Fahrstufe 5 "P" 6 "R" 7 "N" 8 "D" 9 "D" 10 "E" 13 "T" 14 "T";
+VAL_ 253 BR_Eingriffsmoment 1022 "Init" 1023 "Fehler" ;
+VAL_ 253 ESP_Diagnose 0 "ESP_nicht_in_Diagnose" 1 "ESP_in_Diagnose" ;
+VAL_ 253 ESC_v_Signal_Qualifier_High_Low 0 "Gueteschwelle_kleiner_1kmh" 1 "Gueteschwelle_kleiner_3kmh" 2 "Gueteschwelle_kleiner_5kmh" 3 "Gueteschwelle_kleiner_10kmh" 4 "Gueteschwelle_kleiner_20kmh" 5 "Gueteschwelle_groessergleich_20kmh" 6 "Init" 7 "Fehler" ;
+VAL_ 253 ESP_Vorsteuerung 0 "keine_Vorsteuerung_aktiv" 1 "Vorsteuerung_aktiv" ;
+VAL_ 253 OBD_Schlechtweg 0 "kein_Schlechtweg_erkannt" 1 "Schlechtweg_erkannt" ;
+VAL_ 253 OBD_QBit_Schlechtweg 0 "gueltiger_Wert" 1 "Ersatz_Init_oder_Fehlerwert" ;
+VAL_ 253 ESP_v_Signal 65533 "Unterspannung" 65534 "Init" 65535 "Fehler" ;
+VAL_ 253 ASR_Tastung_passiv 0 "ASR_aktiviert" 1 "ASR_passiv_getastet_oder_Schwellen_geaendert" ;
+VAL_ 253 ESP_Tastung_passiv 0 "ESP_aktiviert" 1 "ESP_passiv_getastet_oder_Schwellen_geaendert" ;
+VAL_ 253 ESP_Systemstatus 0 "iO" 1 "Fehler" ;
+VAL_ 253 ASR_Schalteingriff 0 "keine_Anforderung" 1 "ASR_Schaltkennfeld" 2 "Rueckschaltung" 3 "Schaltverbot" ;
+VAL_ 253 ESP_QBit_v_Signal 0 "gueltiger_Wert" 1 "Ersatz_Init_oder_Fehlerwert" ;
+VAL_ 253 ABS_Bremsung 0 "keine_ABS_Regelung" 1 "ABS_Regelung_aktiv" ;
+VAL_ 253 ASR_Anf 0 "keine_Anforderung" 1 "ASR_Anforderung" ;
+VAL_ 253 MSR_Anf 0 "keine Anfoderung" 1 "MSR-Anforderung" ;
+VAL_ 253 EBV_Eingriff 0 "kein_EBV_Eingriff" 1 "EBV_Eingriff" ;
+VAL_ 253 EDS_Eingriff 0 "kein_EDS_Eingriff" 1 "EDS_Eingriff" ;
+VAL_ 253 ESP_Eingriff 0 "kein_ESP_Eingriff" 1 "ESP_Eingriff_aktiv" ;
+VAL_ 253 ESP_ASP 0 "inaktiv" 1 "aktiv" ;
+VAL_ 253 ESC_Neutralschaltung 0 "keine_Anforderung" 1 "Neutralschaltung_angefordert" ;
 VAL_ 317 LatCon_HCA_Status 0 "disabled" 1 "initializing" 2 "ready" 3 "fault" 4 "active" 5 "preempted" 6 "fault" 7 "rejected";
 VAL_ 333 ACC_limitierte_Anfahrdyn 0 "keine_Limitierung" 1 "Limitierung_Anfahrdynamik_angefordert";
 VAL_ 333 ACC_nachtr_Stopp_Anf 0 "nicht_angefordert" 1 "angefordert";
