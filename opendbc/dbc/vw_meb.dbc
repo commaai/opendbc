@@ -553,6 +553,19 @@ BO_ 420 EA_01: 8 Gateway
  SG_ EA_Anforderung_HMS : 48|3@1+ (1.0,0.0) [0.0|7] ""  Vector__XXX
  SG_ EA_Sollbeschleunigung : 53|11@1+ (0.005,-7.22) [-7.220|3.005] "Unit_MeterPerSeconSquar"  Vector__XXX
 
+BO_ 496 EA_02: 8 Gateway
+ SG_ EA_02_CRC : 0|8@1+ (1,0) [0|255] ""  Vector__XXX
+ SG_ EA_02_BZ : 8|4@1+ (1,0) [0|15] ""  Vector__XXX
+ SG_ EA_Texte : 12|4@1+ (1.0,0.0) [0.0|15] ""  ZR_High
+ SG_ ACF_Lampe_Hands_Off : 16|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ EA_Infotainment_Anf : 22|2@1+ (1.0,0.0) [0.0|3] ""  ZR_High,ZR_LIMU,ZR_MIB_TOP_ab_Gen3,ZR_Standard
+ SG_ EA_Tueren_Anf : 24|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ EA_Innenraumlicht_Anf : 25|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ zFAS_Warnblinken : 26|2@1+ (1.0,0.0) [0.0|3] ""  ZR_High
+ SG_ STP_Primaeranz : 28|3@1+ (1.0,0.0) [0.0|7] ""  Vector__XXX
+ SG_ EA_Bremslichtblinken : 31|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ EA_Blinken : 32|3@1+ (1.0,0.0) [0.0|7] ""  Vector__XXX
+
 BO_ 695 RCTA_01: 8 XXX
  SG_ RCTA_01_BZ : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ RCTA_01_CRC : 0|8@1+ (1,0) [0|255] "" XXX
@@ -1700,6 +1713,22 @@ VAL_ 333 ACC_Minimale_Bremsung 0 "Anforderung_Minimale_Bremsung_nicht_aktiv" 1 "
 VAL_ 333 ACC_Anhalteweg 2046 "Neutralwert" 2047 "Fehler";
 VAL_ 333 ACC_Anforderung_HMS 0 "keine_Anforderung" 1 "halten" 2 "parken" 3 "halten_Standby" 4 "anfahren" 5 "Loesen_ueber_Rampe";
 VAL_ 333 Accel_Boost 3 "Driving" 0 "Stop" 2 "Driving" 1 "Driving";
+VAL_ 420 EA_Parken_beibehalten_HMS 0 "Parken_nicht_beibehalten" 1 "Parken_beibehalten" 2 "Init" 3 "Fehler" ;
+VAL_ 420 EA_Warnruckprofil 0 "keine_Ruckanforderung" 1 "Profil_1" 2 "Profil_2" 3 "Profil_3" 4 "Profil_4" 5 "Profil_5" 6 "Profil_6" 7 "Profil_7" ;
+VAL_ 420 EA_eCall_Anf 0 "Keine_Anforderung" 1 "Ausloesen_eCall" ;
+VAL_ 420 EA_Funktionsstatus 0 "EA_INIT" 1 "EA_OFF" 2 "EA_STANDBY" 3 "EA_PHASE0_AKTIV" 4 "EA_PHASE1_AKTIV" 5 "EA_PHASE2_AKTIV" 6 "EA_PHASE3_AKTIV" 7 "EA_REVERSIBLER_FEHLER" 8 "EA_IRREVERSIBLER_FEHLER" ;
+VAL_ 420 EA_Gurtstraffer_Anf 0 "Keine_Anforderung" 1 "Haptik_1" 2 "Haptik_2" 3 "Haptik_3" ;
+VAL_ 420 EA_Anforderung_HMS 0 "keine_Anforderung" 1 "halten" 2 "parken" 3 "halten_Standby" 4 "anfahren" 5 "Loesen_ueber_Rampe" 6 "Parken_mit_P" ;
+VAL_ 420 EA_Sollbeschleunigung 2046 "Neutralwert" 2047 "Fehler" ;
+VAL_ 496 EA_Texte 0 "keine_Anzeige" 1 "Nothalteassistent_fehlende_Fahreraktivitaet" 2 "Nothalteassistent_aktiv_Fahrzeugfuehrung_uebernehmen" 3 "Nothalteassistent_automatischer_Nothalt_wird_durchgefuehrt" 4 "Nothalteassistent_automatischer_Nothalt_durchgefuehrt" 5 "Nothalteassistent_Verbindung_zum_Notruf_wird_aufgebaut" 6 "Nothalteassistent_deaktiviert" 7 "Nothalteassistent_Eingriff_abgebrochen" 8 "Nothalteassistent_fehlende_Fahreraktivitaet_2" 9 "Sekundenschlaf_erkannt" 10 "LaneAssist_Lenkung_uebernehmen" 11 "ACA_Fahrzeugfuehrung_uebernehmen" 12 "EA_Fahr_Standstreifenwechsel" 14 "Nothalteassistent_nicht_verfuegbar_reversibel" 15 "Nothalteassistent_Stoerung_irreversibel" ;
+VAL_ 496 ACF_Lampe_Hands_Off 0 "keine_Anzeige" 1 "Hands_Off_erkannt" ;
+VAL_ 496 EA_Infotainment_Anf 0 "Init" 1 "Keine_Absenkung" 2 "Absenkung" 3 "Mute" ;
+VAL_ 496 EA_Tueren_Anf 0 "Keine_Anforderung" 1 "Tueren_entriegeln" ;
+VAL_ 496 EA_Innenraumlicht_Anf 0 "Innenraumbeleuchtung_ausschalten" 1 "Innenraumbeleuchtung_einschalten" ;
+VAL_ 496 zFAS_Warnblinken 0 "Aus" 1 "Statisch" 2 "Taster" 3 "Statisch_ohne_WBT" ;
+VAL_ 496 STP_Primaeranz 0 "keine_Anzeige" 1 "Verfuegbar" 2 "Aktiv" 3 "Uebernahme" 4 "Aktiv_Warnung" 5 "Nicht_Verfuegbar" ;
+VAL_ 496 EA_Bremslichtblinken 0 "kein_Blinken" 1 "Anforderung_Bremslichtblinken" ;
+VAL_ 496 EA_Blinken 0 "Kein_Blinken" 1 "Wechselblinken_links" 2 "Wechselblinken_rechts" 3 "Warnblinken" 4 "Warnblinken_Taster" ;
 VAL_ 619 Travel_Assist_Status 4 "enabled" 0 "disabled" 2 "ready" 3 "pre_ready";
 VAL_ 619 Travel_Assist_Request 4 "enable" 3 "disable" 0 "no_request" 1 "error";
 VAL_ 619 Travel_Assist_Available 0 "not_available" 1 "available";
