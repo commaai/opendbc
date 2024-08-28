@@ -374,7 +374,7 @@ class CarState(CarStateBase):
     self.gra_stock_values = pt_cp.vl["GRA_ACC_01"]
 
     # Additional safety checks performed in CarInterface.
-    ret.espDisabled = bool(pt_cp.vl["ESP_24"]["ESP_Off_Lampe"]) # use esp_21 systemstatus? verify
+    ret.espDisabled = bool(pt_cp.vl["ESP_21"]["ESP_Tastung_passiv"]) # this is also true for ESC Sport mode
     ret.espActive = bool(pt_cp.vl["ESP_21"]["ESP_Eingriff"])
 
     # EV battery charge WattHours
@@ -522,7 +522,6 @@ class CarState(CarStateBase):
       ("ZV_02", 5),               # From ZV
       ("MEB_EPS_01", 100),        #
       ("ESP_21", 50),             #
-      ("ESP_24", 20),             #
       ("MEB_ABS_01", 50),         #
       ("MEB_ESP_01", 100),        #
       ("MEB_ESP_03", 10),         #
