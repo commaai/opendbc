@@ -12,6 +12,7 @@ from opendbc.can.packer import CANPacker
 
 SteerControlType = structs.CarParams.SteerControlType
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
+LongCtrlState = structs.CarControl.Actuators.LongControlState
 
 # LKA limits
 # EPS faults if you apply torque while the steering rate is above 100 deg/s for too long
@@ -114,7 +115,7 @@ class CarController(CarControllerBase):
     offset = min(CS.pcm_neutral_force / self.CP.mass, 0.0)
     pitch_offset = math.sin(math.radians(CS.vsc_slope_angle)) * 9.81  # downhill is negative
     self.pcm_accel_comp = clip(actuators.accel - CS.pcm_accel_net, self.pcm_accel_comp - 0.01, self.pcm_accel_comp + 0.01)
-    if CS.out.standstill:
+    if CS.out.cruiseState.standstill or actuators.longControlState == LongCtrlState.stopping:
       self.pcm_accel_comp = 0.0
     pcm_accel_cmd = actuators.accel + self.pcm_accel_comp + offset
     # pcm_accel_cmd = actuators.accel - pitch_offset
