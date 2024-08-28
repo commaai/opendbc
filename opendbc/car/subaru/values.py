@@ -266,9 +266,11 @@ FW_QUERY_CONFIG = FwQueryConfig(
       obd_multiplexing=False,
     ),
   ],
-  # We don't get the EPS from non-OBD queries on GEN2 cars. Note that we still attempt to match when it exists
+  # We don't get the EPS from non-OBD queries on GEN2 and sometimes fwdCamera on LKAS_ANGLE cars.
+  # Note that we still attempt to match when it exists
   non_essential_ecus={
     Ecu.eps: list(CAR.with_flags(SubaruFlags.GLOBAL_GEN2)),
+    Ecu.fwdCamera: list(CAR.with_flags(SubaruFlags.LKAS_ANGLE)),
   }
 )
 
