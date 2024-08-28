@@ -71,6 +71,7 @@ BO_ 353 DSU_SPEED: 7 XXX
 
 BO_ 452 ENGINE_RPM: 8 CGW
  SG_ RPM : 7|16@0- (0.78125,0) [0|0] "rpm" SCS
+ SG_ ENGINE_RUNNING : 27|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 466 PCM_CRUISE: 8 XXX
  SG_ GAS_RELEASED : 4|1@0+ (1,0) [0|1] "" XXX
@@ -146,6 +147,12 @@ BO_ 742 LEAD_INFO: 8 DSU
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" HCU
  SG_ LEAD_REL_SPEED : 23|12@0- (0.025,0) [-100|100] "m/s" HCU
  SG_ LEAD_LONG_DIST : 7|13@0+ (0.05,0) [0|300] "m" HCU
+
+BO_ 800 VSC1: 8 CGW
+ SG_ ACC_BRAKING : 8|1@0+ (1,0) [0|0] "" DS1,FCM
+ SG_ SLOPE_ANGLE : 23|8@0- (1,0) [0|0] "deg" DS1
+ SG_ ACC_BRAKING2 : 26|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ACCEL : 39|8@0- (0.04,0) [0|0] "m/s^2" DS1
 
 BO_ 835 ACC_CONTROL: 8 DSU
  SG_ ACCEL_CMD : 7|16@0- (0.001,0) [-20|20] "m/s^2" HCU
@@ -350,9 +357,11 @@ BO_ 1552 BODY_CONTROL_STATE_2: 8 XXX
 BO_ 1553 UI_SETTING: 8 XXX
  SG_ UNITS : 26|2@0+ (1,0) [0|3] "" XXX
  SG_ ODOMETER : 39|32@0+ (1,0) [0|1048575] "" XXX
+
 BO_ 1556 BLINKERS_STATE: 8 XXX
- SG_ TURN_SIGNALS : 29|2@0+ (1,0) [0|3] "" XXX
+ SG_ BLINKER_BUTTON_PRESSED : 15|1@0+ (1,0) [0|1] "" XXX
  SG_ HAZARD_LIGHT : 27|1@0+ (1,0) [0|1] "" XXX
+ SG_ TURN_SIGNALS : 29|2@0+ (1,0) [0|3] "" XXX
 
 BO_ 1568 BODY_CONTROL_STATE: 8 XXX
  SG_ METER_DIMMED : 38|1@0+ (1,0) [0|1] "" XXX
@@ -381,6 +390,20 @@ BO_ 1592 DOOR_LOCKS: 8 XXX
  SG_ LOCK_STATUS : 20|1@0+ (1,0) [0|1] "" XXX
  SG_ LOCKED_VIA_KEYFOB : 23|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 1779 ADAS_TOGGLE_STATE: 8 XXX
+ SG_ OK_BUTTON_PRESSED : 15|1@0+ (1,0) [0|1] "" BCM
+ SG_ SWS_TOGGLE_CMD : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ SWS_SENSITIVITY_CMD : 26|2@0+ (1,0) [0|3] "" XXX
+ SG_ LKAS_ON_CMD : 28|1@0+ (1,0) [0|1] "" XXX
+ SG_ LKAS_OFF_CMD : 29|1@0+ (1,0) [0|1] "" XXX
+ SG_ LDA_SENSITIVITY_HI_CMD : 30|1@0+ (1,0) [0|1] "" XXX
+ SG_ LDA_SENSITIVITY_STD_CMD : 31|1@0+ (1,0) [0|1] "" XXX
+ SG_ IPAS_TOGGLE : 34|1@0+ (1,0) [0|1] "" XXX
+ SG_ BSM_TOGGLE_CMD : 37|1@0+ (1,0) [0|1] "" XXX
+ SG_ IPAS_SONAR_TOGGLE : 38|1@0+ (1,0) [0|1] "" XXX
+ SG_ PCS_TOGGLE_CMD : 40|1@0+ (1,0) [0|1] "" XXX
+ SG_ PCS_SENSITIVITY_CMD : 41|1@0+ (1,0) [0|1] "" XXX
+
 CM_ SG_ 36 YAW_RATE "verify";
 CM_ SG_ 36 ACCEL_X "x-axis accel";
 CM_ SG_ 37 STEER_FRACTION "1/15th of the signal STEER_ANGLE, which is 1.5 deg; note that 0x8 is never set";
@@ -400,6 +423,8 @@ CM_ SG_ 614 ANGLE "set to measured angle when ipas control isn't active";
 CM_ SG_ 643 _COUNTER "only used on cars that use this msg for cruise control";
 CM_ SG_ 643 BRAKE_STATUS "only used on cars that use this msg for cruise control";
 CM_ SG_ 643 PRECOLLISION_ACTIVE "set 0.5s before any braking";
+CM_ SG_ 800 SLOPE_ANGLE "potentially used by the PCM to compensate for road pitch";
+CM_ SG_ 800 ACCEL "filtered ego acceleration";
 CM_ SG_ 835 ACC_TYPE "if 2, car is likely to have a permanent low speed lockout. 1 is ok";
 CM_ SG_ 835 RADAR_DIRTY "Display Clean Radar Sensor message on HUD";
 CM_ SG_ 835 ACC_MALFUNCTION "display ACC fault on dash if set to 1";
@@ -512,4 +537,5 @@ VAL_ 1552 METER_SLIDER_DIMMED 1 "Dimmed" 0 "Not Dimmed";
 VAL_ 1552 UNITS 1 "km (km/L)" 2 "km (L/100km)" 3 "miles (MPG US)" 4 "miles (MPG Imperial)";
 VAL_ 1553 UNITS 1 "km" 2 "miles";
 VAL_ 1556 TURN_SIGNALS 3 "none" 2 "right" 1 "left";
+VAL_ 1556 BLINKER_BUTTON_PRESSED 1 "button pressed" 0 "not pressed";
 VAL_ 1592 LOCK_STATUS 0 "locked" 1 "unlocked";
