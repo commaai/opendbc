@@ -118,7 +118,7 @@ class CarController(CarControllerBase):
     self.pcm_accel_comp = clip(actuators.accel - CS.pcm_accel_net, self.pcm_accel_comp - 0.01, self.pcm_accel_comp + 0.01)
     if CS.out.cruiseState.standstill or actuators.longControlState == LongCtrlState.stopping:
       self.pcm_accel_comp = 0.0
-    pcm_accel_cmd = actuators.accel + self.pcm_accel_comp + offset
+    pcm_accel_cmd = actuators.accel + self.pcm_accel_comp  # + offset
     # pcm_accel_cmd = actuators.accel - pitch_offset
 
     if not CC.longActive:
