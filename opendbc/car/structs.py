@@ -290,6 +290,7 @@ class CarParams:
   pcmCruise: bool = auto_field()  # is openpilot's state tied to the PCM's cruise state?
   enableDsu: bool = auto_field()  # driving support unit
   enableBsm: bool = auto_field()  # blind spot monitoring
+  enableGasInterceptor: bool = auto_field()
   flags: int = auto_field()  # flags for car specific quirks
   experimentalLongitudinalAvailable: bool = auto_field()
 

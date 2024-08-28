@@ -52,6 +52,27 @@ def gen_empty_fingerprint():
   return {i: {} for i in range(8)}
 
 
+
+def create_gas_interceptor_command(packer, gas_amount, idx):
+  # Common gas pedal msg generator
+  enable = gas_amount > 0.001
+
+  values = {
+    "ENABLE": enable,
+    "COUNTER_PEDAL": idx & 0xF,
+  }
+
+  if enable:
+    values["GAS_COMMAND"] = gas_amount * 255.
+    values["GAS_COMMAND2"] = gas_amount * 255.
+
+  dat = packer.make_can_msg("GAS_COMMAND", 0, values)[2]
+
+  checksum = crc8_pedal(dat[:-1])
+  values["CHECKSUM_PEDAL"] = checksum
+
+  return packer.make_can_msg("GAS_COMMAND", 0, values)
+
 # these params were derived for the Civic and used to calculate params for other cars
 class VehicleDynamicsParams:
   MASS = 1326. + STD_CARGO_KG
