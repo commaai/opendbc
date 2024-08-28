@@ -1,4 +1,5 @@
 import copy
+import math
 from opendbc.car import apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, make_tester_present_msg, structs
 from opendbc.car.can_definitions import CanData
 from opendbc.car.common.numpy_fast import clip
@@ -111,10 +112,12 @@ class CarController(CarControllerBase):
     # not sure why this isn't captured in the PCM accel net, maybe that just ignores creep force + high speed deceleration
     # it also doesn't seem to capture slightly more braking on downhills (VSC1S07->ASLP (pitch, deg.) might have some clues)
     offset = min(CS.pcm_neutral_force / self.CP.mass, 0.0)
+    pitch_offset = math.sin(math.radians(CS.vsc_slope_angle)) * 9.81  # downhill is negative
     self.pcm_accel_comp = clip(actuators.accel - CS.pcm_accel_net, self.pcm_accel_comp - 0.01, self.pcm_accel_comp + 0.01)
     if CS.out.standstill:
       self.pcm_accel_comp = 0.0
     pcm_accel_cmd = actuators.accel + self.pcm_accel_comp + offset
+    # pcm_accel_cmd = actuators.accel - pitch_offset
 
     if not CC.longActive:
       self.pcm_accel_comp = 0.0
