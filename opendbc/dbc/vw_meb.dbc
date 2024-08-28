@@ -1457,14 +1457,14 @@ BO_ 252 MEB_ESP_01: 48 XXX
  SG_ AEB_Breaking_02 : 32|8@1+ (1,0) [0|255] "" XXX
  SG_ Accelerator_Higher_Speed : 40|1@0+ (1,0) [0|1] "" XXX
  SG_ Brake_Pressure : 42|9@1+ (1,0) [0|3] "" XXX
- SG_ VL_Radgeschw : 64|16@1+ (0.0075,0) [0|491.5125] "Unit_KilometerPerSecond" XXX
- SG_ VR_Radgeschw : 80|16@1+ (0.0075,0) [0|491.5125] "Unit_KilometerPerSecond" XXX
- SG_ HL_Radgeschw : 96|16@1+ (0.0075,0) [0|491.5125] "Unit_KilometerPerSecond" XXX
- SG_ HR_Radgeschw : 112|16@1+ (0.0075,0) [0|491.5125] "Unit_KilometerPerSecond" XXX
- SG_ VL_Brake_Pressure : 152|8@1+ (1,0) [0|100] "" XXX
- SG_ VR_Brake_Pressure : 160|8@1+ (1,0) [0|100] "" XXX
- SG_ HL_Brake_Pressure : 168|8@1+ (1,0) [0|100] "" XXX
- SG_ HR_Brake_Pressure : 176|8@1+ (1,0) [0|100] "" XXX
+ SG_ HL_Radgeschw : 64|16@1+ (0.0075,0) [0|491.5125] "Unit_KilometerPerHour" XXX
+ SG_ HR_Radgeschw : 80|16@1+ (0.0075,0) [0|491.5125] "Unit_KilometerPerHour" XXX
+ SG_ VL_Radgeschw : 96|16@1+ (0.0075,0) [0|491.5125] "Unit_KilometerPerHour" XXX
+ SG_ VR_Radgeschw : 112|16@1+ (0.0075,0) [0|491.5125] "Unit_KilometerPerHour" XXX
+ SG_ HL_Brake_Pressure : 152|8@1+ (1,0) [0|100] "" XXX
+ SG_ HR_Brake_Pressure : 160|8@1+ (1,0) [0|100] "" XXX
+ SG_ VL_Brake_Pressure : 168|8@1+ (1,0) [0|100] "" XXX
+ SG_ VR_Brake_Pressure : 176|8@1+ (1,0) [0|100] "" XXX
  SG_ Steering_Wheel_CW : 184|8@1+ (1.67,0) [0|255] "" XXX
  SG_ Steering_Wheel_CCW : 192|8@1+ (1.67,0) [0|255] "" XXX
 
