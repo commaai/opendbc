@@ -92,7 +92,7 @@ BO_ 280 Steering_Torque_2: 8 XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Steer_Torque_Output : 13|11@1- (-10,0) [0|255] "" XXX
  SG_ Signal1 : 24|8@1+ (1,0) [0|511] "" XXX
- SG_ Steer_Torque_Sensor : 45|11@1- (-1,0) [0|255] "" XXX
+ SG_ Steer_Torque_Sensor : 45|11@1- (-0.012,0) [0|255] "Nm" XXX
  SG_ Steering_Active : 61|1@0+ (1,0) [0|1] "" XXX
  SG_ Steering_Disabled : 63|1@1+ (1,0) [0|1] "" XXX
 
