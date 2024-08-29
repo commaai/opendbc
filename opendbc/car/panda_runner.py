@@ -19,16 +19,17 @@ def PandaRunner():
     p.set_safety_mode(Panda.SAFETY_ELM327, 1)
     CI = get_car(_can_recv, p.can_send_many, p.set_obd, True)
     print("fingerprinted", CI.CP.carName)
+    assert CI.CP.carFingerprint != "mock", "Unable to identify car. Check connections and ensure car is supported."
 
     p.set_safety_mode(Panda.SAFETY_ELM327, 1)
     CI.init(CI.CP, _can_recv, p.can_send_many)
     p.set_safety_mode(Panda.SAFETY_TOYOTA, CI.CP.safetyConfigs[0].safetyParam)
 
-    yield p
+    yield p, CI
   finally:
     p.set_safety_mode(Panda.SAFETY_NOOUTPUT)
 
 
 if __name__ == "__main__":
-  with PandaRunner() as p:
+  with PandaRunner() as (p, CI):
     print(p.can_recv())
