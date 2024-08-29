@@ -5,7 +5,7 @@ import time
 import tomllib
 from abc import abstractmethod, ABC
 from enum import StrEnum
-from typing import Any, NamedTuple, Optional
+from typing import Any, NamedTuple
 from collections.abc import Callable
 from functools import cache
 
@@ -102,7 +102,7 @@ class CarInterfaceBase(ABC):
     dbc_name = "" if self.cp is None else self.cp.dbc_name
     self.CC: CarControllerBase = CarController(dbc_name, CP)
 
-  def apply(self, c: structs.CarControl, now_nanos: Optional[int] = None) -> tuple[structs.CarControl.Actuators, list[CanData]]:
+  def apply(self, c: structs.CarControl, now_nanos: int | None = None) -> tuple[structs.CarControl.Actuators, list[CanData]]:
     if now_nanos is None:
       now_nanos = int(time.monotonic() * 1e9)
     return self.CC.update(c, self.CS, now_nanos)
