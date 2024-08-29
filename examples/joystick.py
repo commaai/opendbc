@@ -82,10 +82,13 @@ def main(joystick):
     CC = CarControl(enabled=False)
     while True:
       cd = [CanData(addr, dat, bus) for addr, dat, bus in p.can_recv()]
-      CI.update(cd)
+      CI.update([0, cd])
 
-      print(joystick.axes_values)
-      CC.actuators.gas = joystick.axes_values['gb']
+      CC.actuators.accel = float(4.0*np.clip(joystick.axes_values['gb'], -1, 1))
+      CC.actuators.steer = float(np.clip(joystick.axes_values['steer'], -1, 1))
+
+      from pprint import pprint
+      pprint(CC)
 
       _, can_sends = CI.apply(CC)
       p.can_send_many(can_sends, timeout=1000)
