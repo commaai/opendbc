@@ -169,6 +169,7 @@ class CarState(CarStateBase):
       # sig_address, frequency
       ("Dashlights", 10),
       ("Steering_Torque", 50),
+      ("Steering_Torque_2", 50),
       ("BodyInfo", 1),
       ("Brake_Pedal", 50),
     ]
