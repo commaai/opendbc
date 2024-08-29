@@ -193,7 +193,7 @@ class CarController(CarControllerBase):
     else:
       max_accel = interp(CS.out.vEgo, [0, 10], [3, 2])
       pcm_accel = int(clip(accel / max_accel, 0.0, 1.0) * self.params.NIDEC_GAS_MAX)
-      pcm_speed = CS.out.vEgo + interp(max(actuators.accel, 0), [0, 1], [-0.5, 4])
+      pcm_speed = CS.out.vEgo + interp(max(actuators.accel, 0), [0, 1], [-0.5, 3])
 
     if not self.CP.openpilotLongitudinalControl:
       if self.frame % 2 == 0 and self.CP.carFingerprint not in HONDA_BOSCH_RADARLESS:  # radarless cars don't have supplemental message
