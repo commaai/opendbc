@@ -102,6 +102,7 @@ if __name__ == '__main__':
   args = parser.parse_args()
 
   print()
+  joystick: Keyboard | Joystick
   if args.mode == 'keyboard':
     print('Gas/brake control: `W` and `S` keys')
     print('Steering control: `A` and `D` keys')
@@ -110,5 +111,5 @@ if __name__ == '__main__':
     print('- `C`: Cancel cruise control')
     joystick = Keyboard()
   else:
-    joystick = Joystick(args.mode == 'gamepad')
+    joystick = Joystick(gamepad=(args.mode == 'gamepad'))
   main(joystick)
