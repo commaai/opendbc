@@ -1,3 +1,4 @@
+CM_ "IMPORT _community.dbc";
 CM_ "IMPORT _honda_common.dbc";
 CM_ "IMPORT _nidec_common.dbc";
 CM_ "IMPORT _steering_sensors_a.dbc";
