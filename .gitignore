@@ -12,6 +12,8 @@
 *.egg-info/
 uv.lock
 
+/examples/longitudinal_reports/
+
 opendbc/can/*.so
 opendbc/can/*.a
 opendbc/can/build/
