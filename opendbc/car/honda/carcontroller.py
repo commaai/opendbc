@@ -2,6 +2,7 @@ import copy
 from collections import namedtuple
 
 from opendbc.can.packer import CANPacker
+from opendbc.car import create_gas_interceptor_command
 from opendbc.car import DT_CTRL, rate_limit, make_tester_present_msg, structs
 from opendbc.car.common.numpy_fast import clip, interp
 from opendbc.car.honda import hondacan
@@ -180,7 +181,7 @@ class CarController(CarControllerBase):
                     0.5]
     # The Honda ODYSSEY seems to have different PCM_ACCEL
     # msgs, is it other cars too?
-    if not CC.longActive:
+    if self.CP.enableGasInterceptor or not CC.longActive:
       pcm_speed = 0.0
       pcm_accel = int(0.0)
     elif self.CP.carFingerprint in HONDA_NIDEC_ALT_PCM_ACCEL:
@@ -232,6 +233,19 @@ class CarController(CarControllerBase):
           self.apply_brake_last = apply_brake
           self.brake = apply_brake / self.params.NIDEC_BRAKE_MAX
 
+          if self.CP.enableGasInterceptor:
+            # way too aggressive at low speed without this
+            gas_mult = interp(CS.out.vEgo, [0., 10.], [0.4, 1.0])
+            # send exactly zero if apply_gas is zero. Interceptor will send the max between read value and apply_gas.
+            # This prevents unexpected pedal range rescaling
+            # Sending non-zero gas when OP is not enabled will cause the PCM not to respond to throttle as expected
+            # when you do enable.
+            if CC.longActive:
+              self.gas = clip(gas_mult * (gas - brake + wind_brake * 3 / 4), 0., 1.)
+            else:
+              self.gas = 0.0
+            can_sends.append(create_gas_interceptor_command(self.packer, self.gas, self.frame // 2))
+
     # Send dashboard UI commands.
     if self.frame % 10 == 0:
       hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
@@ -240,7 +254,9 @@ class CarController(CarControllerBase):
 
       if self.CP.openpilotLongitudinalControl and self.CP.carFingerprint not in HONDA_BOSCH:
         self.speed = pcm_speed
-        self.gas = pcm_accel / self.params.NIDEC_GAS_MAX
+
+        if not self.CP.enableGasInterceptor:
+          self.gas = pcm_accel / self.params.NIDEC_GAS_MAX
 
     new_actuators = copy.copy(actuators)
     new_actuators.speed = self.speed
