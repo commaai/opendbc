@@ -56,27 +56,11 @@ MANEUVERS = [
     "creeping: alternate between +1m/ss and -1m/ss",
     Setup.STOPPED,
     [
-      Action(1, 1), Action(-1, 1),
-      Action(1, 1), Action(-1, 1),
-      Action(1, 1), Action(-1, 1),
+      Action(1, 2), Action(-1, 2),
+      Action(1, 2), Action(-1, 2),
+      Action(1, 2), Action(-1, 2),
     ],
   ),
-  # Maneuver(
-  #   "brake step response: 20mph steady state -> -1m/ss",
-  #   Setup.STEADY_STATE_SPEED,
-  # ),
-  # Maneuver(
-  #   "brake step response: 20mph steady state -> max brake",
-  #   Setup.STEADY_STATE_SPEED,
-  # ),
-  # Maneuver(
-  #   "gas step response: 20mph steady state -> +1m/ss",
-  #   Setup.STEADY_STATE_SPEED,
-  # ),
-  # Maneuver(
-  #   "gas step response: 20mph steady state -> max gas",
-  #   Setup.STEADY_STATE_SPEED,
-  # ),
 ]
 
 def main(args):
