@@ -92,13 +92,13 @@ MANEUVERS = [
   ),
 ]
 
-def report(args, logs):
+def report(args, logs, fp):
   output_path = Path(__file__).resolve().parent / "longitudinal_reports"
-  output_fn = args.output or output_path / f"{p.CI.CP.carFingerprint}_{time.strftime('%Y%m%d-%H_%M_%S')}.html"
+  output_fn = args.output or output_path / f"{fp}_{time.strftime('%Y%m%d-%H_%M_%S')}.html"
   output_path.mkdir(exist_ok=True)
   with open(output_fn, "w") as f:
     f.write("<h1>Longitudinal maneuver report</h1>\n")
-    f.write(f"<h3>{p.CI.CP.carFingerprint}</h3>\n")
+    f.write(f"<h3>{fp}</h3>\n")
     if args.desc:
       f.write(f"<h3>{args.desc}</h3>")
     for description, runs in logs.items():
@@ -184,10 +184,10 @@ def main(args):
           time.sleep(DT)
         beep(440)
 
-  with open('/tmp/logs.json', 'w') as f:
-    import json
-    json.dump(logs, f, indent=2)
-  report(args, logs)
+    with open('/tmp/logs.json', 'w') as f:
+      import json
+      json.dump(logs, f, indent=2)
+    report(args, logs, p.CI.CP.carFingerprint)
 
 
 if __name__ == "__main__":
