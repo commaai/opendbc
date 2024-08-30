@@ -10,9 +10,8 @@
 .sconsign.dblite
 .hypothesis
 *.egg-info/
+*.html
 uv.lock
-
-/examples/longitudinal_reports/
 
 opendbc/can/*.so
 opendbc/can/*.a

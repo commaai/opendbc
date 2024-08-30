@@ -45,11 +45,11 @@ class Maneuver:
   actions: list[Action]
 
   def get_msgs(self):
-    t = 0
+    t0 = 0
     for action in self.actions:
       for lt, msg in action.get_msgs():
-        t += lt
-        yield t, msg
+        yield lt + t0, msg
+      t0 += lt
 
 MANEUVERS = [
   Maneuver(
@@ -102,7 +102,7 @@ def main(args):
       print("- executing maneuver")
       for t, cc in m.get_msgs():
         cs = p.read()
-        p.send(cc)
+        p.write(cc)
 
         log["t"].append(t)
         to_log = {"carControl": cc, "carState": cs, "carControl.actuators": cc.actuators,
@@ -115,17 +115,8 @@ def main(args):
 
   # ***** write out report *****
 
-  def plt2html():
-    plt.legend()
-    plt.tight_layout(pad=0)
-    buffer = io.BytesIO()
-    plt.savefig(buffer, format='png')
-    buffer.seek(0)
-    return f"<img src='data:image/png;base64,{base64.b64encode(buffer.getvalue()).decode()}' style='width:100%; max-width:800px;'>\n"
-
   output_path = Path(__file__).resolve().parent / "longitudinal_reports"
-  #output_fn = output_path / f"{p.CI.CP.carFingerprint}_{time.strftime('%Y%m%d-%H_%M_%S')}.html"
-  output_fn = output_path / f"{p.CI.CP.carFingerprint}.html"
+  output_fn = args.output or output_path / f"{p.CI.CP.carFingerprint}_{time.strftime('%Y%m%d-%H_%M_%S')}.html"
   output_path.mkdir(exist_ok=True)
   with open(output_fn, "w") as f:
     f.write("<h1>Longitudinal maneuver report</h1>\n")
@@ -138,37 +129,42 @@ def main(args):
 
       log = logs[m.description]
 
-      # accel plot
-      plt.figure(figsize=(12, 4))
-      plt.plot(log["t"], log["carState.aEgo"], label='aEgo')
-      plt.plot(log["t"], log["carControl.actuators.accel"], label='actuators.accel')
-      plt.xlabel('Time (s)')
-      plt.ylabel('Acceleration (m/s^2)')
-      plt.ylim(-2.2, 2.2)
-      plt.title('Acceleration Profile')
-      plt.grid(True)
-      f.write(plt2html())
-      plt.close()
+      plt.rcParams['font.size'] = 40
+      fig = plt.figure(figsize=(30, 20))
+      ax = fig.subplots(3, 1, sharex=True, gridspec_kw={'hspace': 0, 'height_ratios': [5, 1, 1]})
 
-      # secondary plot
-      for k in ("carControl.enabled", "carState.cruiseState.enabled"):
-        plt.rcParams['lines.linewidth'] = 2
-        plt.figure(figsize=(12, 1))
-        plt.plot(log["t"], log[k], label=k)
-        plt.ylim(0.1, 1.1)
-        # plt.grid(False)
-        # plt.axis('off')
-        plt.ylabel('  ')   # for alignment
-        f.write(plt2html())
-        plt.close()
+      ax[0].grid(linewidth=4)
+      ax[0].plot(log["t"], log["carState.aEgo"], label='aEgo', linewidth=6)
+      ax[0].plot(log["t"], log["carControl.actuators.accel"], label='accel command', linewidth=6)
+      ax[0].set_ylabel('Acceleration (m/s^2)')
+      ax[0].set_ylim(-4.5, 4.5)
+      ax[0].legend()
 
-  print(f"\nReport written to {output_fn.relative_to(Path(__file__).parent)}\n")
+      ax[1].plot(log["t"], log["carControl.enabled"], label='enabled', linewidth=6)
+      ax[2].plot(log["t"], log["carState.gasPressed"], label='gasPressed', linewidth=6)
+      for i in (1, 2):
+        ax[i].set_yticks([0, 1], minor=False)
+        ax[i].set_ylim(-1, 2)
+        ax[i].legend()
+
+      ax[-1].set_xlabel("Time (s)")
+      fig.tight_layout()
+
+      buffer = io.BytesIO()
+      fig.savefig(buffer, format='png')
+      buffer.seek(0)
+      f.write(f"<img src='data:image/png;base64,{base64.b64encode(buffer.getvalue()).decode()}' style='width:100%; max-width:800px;'>\n")
+
+  print(f"\nReport written to {output_fn}\n")
 
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description="A tool for longitudinal control testing.",
                                    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   parser.add_argument('--desc', help="Extra description to include in report.")
+  parser.add_argument('--output', help="Write out report to this file.", default=None)
   args = parser.parse_args()
+
+  assert args.output is None or args.output.endswith(".html"), f"Output filename must end with '.html'"
 
   main(args)
