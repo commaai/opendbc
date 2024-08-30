@@ -55,39 +55,39 @@ class Maneuver:
       t0 += lt
 
 MANEUVERS = [
-  #Maneuver(
-  #  "creep: alternate between +1m/ss and -1m/ss",
-  #  [
-  #    Action(1, 2), Action(-1, 2),
-  #    Action(1, 2), Action(-1, 2),
-  #    Action(1, 2), Action(-1, 2),
-  #  ],
-  #  initial_speed=0.,
-  #),
-  #Maneuver(
-  #  "brake step response: -1m/ss from 20mph",
-  #  [Action(-1, 3),],
-  #  repeat=3,
-  #  initial_speed=20. * Conversions.MPH_TO_MS,
-  #),
+  Maneuver(
+   "creep: alternate between +1m/ss and -1m/ss",
+   [
+     Action(1, 2), Action(-1, 2),
+     Action(1, 2), Action(-1, 2),
+     Action(1, 2), Action(-1, 2),
+   ],
+   initial_speed=0.,
+  ),
+  Maneuver(
+   "brake step response: -1m/ss from 20mph",
+   [Action(-1, 3),],
+   repeat=3,
+   initial_speed=20. * Conversions.MPH_TO_MS,
+  ),
   Maneuver(
     "brake step response: -4m/ss from 20mph",
     [Action(-4, 3),],
     repeat=3,
     initial_speed=15. * Conversions.MPH_TO_MS,
   ),
-  #Maneuver(
-  #  "gas step response: +1m/ss from 20mph",
-  #  [Action(1, 3),],
-  #  repeat=3,
-  #  initial_speed=20. * Conversions.MPH_TO_MS,
-  #),
-  #Maneuver(
-  #  "gas step response: +4m/ss from 20mph",
-  #  [Action(4, 3),],
-  #  repeat=3,
-  #  initial_speed=20. * Conversions.MPH_TO_MS,
-  #),
+  Maneuver(
+   "gas step response: +1m/ss from 20mph",
+   [Action(1, 3),],
+   repeat=3,
+   initial_speed=20. * Conversions.MPH_TO_MS,
+  ),
+  Maneuver(
+   "gas step response: +4m/ss from 20mph",
+   [Action(4, 3),],
+   repeat=3,
+   initial_speed=20. * Conversions.MPH_TO_MS,
+  ),
 ]
 
 def report(args, logs, fp):
@@ -163,12 +163,11 @@ def main(args):
               longControlState=CarControl.Actuators.LongControlState.stopping if m.initial_speed < 0.1 else CarControl.Actuators.LongControlState.pid,
             ),
           )
-          #print(target, ready_cnt, cs.vEgo, cc.actuators)
           p.write(cc)
 
-          ready = cs.cruiseState.enabled and not cs.cruiseState.standstill and ((m.initial_speed - 0.5) < cs.vEgo < (m.initial_speed + 0.5))
+          ready = cs.cruiseState.enabled and not cs.cruiseState.standstill and ((m.initial_speed - 0.3) < cs.vEgo < (m.initial_speed + 0.3))
           ready_cnt = (ready_cnt+1) if ready else 0
-          if ready_cnt > (2./DT):
+          if ready_cnt > (3./DT):
             break
           time.sleep(DT)
         else:
