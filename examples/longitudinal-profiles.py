@@ -20,8 +20,6 @@ DT = 0.01  # step time (s)
 # - support lateral maneuvers
 # - setup: show countdown?
 
-def beep(freq):
-  os.system(f"play -nq -t alsa synth 0.2 sine {freq}")
 
 @dataclass
 class Action:
@@ -57,39 +55,39 @@ class Maneuver:
       t0 += lt
 
 MANEUVERS = [
-  Maneuver(
-    "creep: alternate between +1m/ss and -1m/ss",
-    [
-      Action(1, 2), Action(-1, 2),
-      Action(1, 2), Action(-1, 2),
-      Action(1, 2), Action(-1, 2),
-    ],
-    initial_speed=0.,
-  ),
-  Maneuver(
-    "brake step response: -1m/ss from 20mph",
-    [Action(-1, 3),],
-    repeat=3,
-    initial_speed=20. * Conversions.MPH_TO_MS,
-  ),
+  #Maneuver(
+  #  "creep: alternate between +1m/ss and -1m/ss",
+  #  [
+  #    Action(1, 2), Action(-1, 2),
+  #    Action(1, 2), Action(-1, 2),
+  #    Action(1, 2), Action(-1, 2),
+  #  ],
+  #  initial_speed=0.,
+  #),
+  #Maneuver(
+  #  "brake step response: -1m/ss from 20mph",
+  #  [Action(-1, 3),],
+  #  repeat=3,
+  #  initial_speed=20. * Conversions.MPH_TO_MS,
+  #),
   Maneuver(
     "brake step response: -4m/ss from 20mph",
     [Action(-4, 3),],
     repeat=3,
-    initial_speed=20. * Conversions.MPH_TO_MS,
+    initial_speed=15. * Conversions.MPH_TO_MS,
   ),
-  Maneuver(
-    "gas step response: +1m/ss from 20mph",
-    [Action(1, 3),],
-    repeat=3,
-    initial_speed=20. * Conversions.MPH_TO_MS,
-  ),
-  Maneuver(
-    "gas step response: +4m/ss from 20mph",
-    [Action(4, 3),],
-    repeat=3,
-    initial_speed=20. * Conversions.MPH_TO_MS,
-  ),
+  #Maneuver(
+  #  "gas step response: +1m/ss from 20mph",
+  #  [Action(1, 3),],
+  #  repeat=3,
+  #  initial_speed=20. * Conversions.MPH_TO_MS,
+  #),
+  #Maneuver(
+  #  "gas step response: +4m/ss from 20mph",
+  #  [Action(4, 3),],
+  #  repeat=3,
+  #  initial_speed=20. * Conversions.MPH_TO_MS,
+  #),
 ]
 
 def report(args, logs, fp):
@@ -114,11 +112,12 @@ def report(args, logs, fp):
         ax[0].plot(log["t"], log["carState.aEgo"], label='aEgo', linewidth=6)
         ax[0].plot(log["t"], log["carControl.actuators.accel"], label='accel command', linewidth=6)
         ax[0].set_ylabel('Acceleration (m/s^2)')
-        ax[0].set_ylim(-4.5, 4.5)
+        #ax[0].set_ylim(-6.5, 6.5)
         ax[0].legend()
 
         ax[1].plot(log["t"], log["carControl.enabled"], label='enabled', linewidth=6)
         ax[2].plot(log["t"], log["carState.gasPressed"], label='gasPressed', linewidth=6)
+        ax[2].plot(log["t"], log["carState.brakePressed"], label='brakePressed', linewidth=6)
         for i in (1, 2):
           ax[i].set_yticks([0, 1], minor=False)
           ax[i].set_ylim(-1, 2)
@@ -131,6 +130,9 @@ def report(args, logs, fp):
         fig.savefig(buffer, format='png')
         buffer.seek(0)
         f.write(f"<img src='data:image/png;base64,{base64.b64encode(buffer.getvalue()).decode()}' style='width:100%; max-width:800px;'>\n")
+
+    import json
+    f.write(f"<p style='display: none'>{json.dumps(logs)}</p>")
   print(f"\nReport written to {output_fn}\n")
 
 def main(args):
@@ -182,7 +184,6 @@ def main(args):
               logs[m.description][run][f"{k}.{k2}"].append(v2)
 
           time.sleep(DT)
-        beep(440)
 
     with open('/tmp/logs.json', 'w') as f:
       import json
