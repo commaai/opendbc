@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import io
+import os
 import time
 import base64
 import argparse
@@ -17,6 +18,10 @@ DT = 0.01  # step time (s)
 
 # TODOs
 # - support lateral maneuvers
+# - setup: show countdown?
+
+def beep(freq):
+  os.system(f"play -nq -t alsa synth 0.2 sine {freq}")
 
 @dataclass
 class Action:
@@ -87,14 +92,56 @@ MANEUVERS = [
   ),
 ]
 
+def report(args, logs):
+  output_path = Path(__file__).resolve().parent / "longitudinal_reports"
+  output_fn = args.output or output_path / f"{p.CI.CP.carFingerprint}_{time.strftime('%Y%m%d-%H_%M_%S')}.html"
+  output_path.mkdir(exist_ok=True)
+  with open(output_fn, "w") as f:
+    f.write("<h1>Longitudinal maneuver report</h1>\n")
+    f.write(f"<h3>{p.CI.CP.carFingerprint}</h3>\n")
+    if args.desc:
+      f.write(f"<h3>{args.desc}</h3>")
+    for description, runs in logs.items():
+      f.write("<div style='border-top: 1px solid #000; margin: 20px 0;'></div>\n")
+      f.write(f"<h2>{description}</h2>\n")
+      for run, log in runs.items():
+        f.write(f"<h3>Run #{run+1}</h3>\n")
+        plt.rcParams['font.size'] = 40
+        fig = plt.figure(figsize=(30, 20))
+        ax = fig.subplots(3, 1, sharex=True, gridspec_kw={'hspace': 0, 'height_ratios': [5, 1, 1]})
+
+        ax[0].grid(linewidth=4)
+        ax[0].plot(log["t"], log["carState.aEgo"], label='aEgo', linewidth=6)
+        ax[0].plot(log["t"], log["carControl.actuators.accel"], label='accel command', linewidth=6)
+        ax[0].set_ylabel('Acceleration (m/s^2)')
+        ax[0].set_ylim(-4.5, 4.5)
+        ax[0].legend()
+
+        ax[1].plot(log["t"], log["carControl.enabled"], label='enabled', linewidth=6)
+        ax[2].plot(log["t"], log["carState.gasPressed"], label='gasPressed', linewidth=6)
+        for i in (1, 2):
+          ax[i].set_yticks([0, 1], minor=False)
+          ax[i].set_ylim(-1, 2)
+          ax[i].legend()
+
+        ax[-1].set_xlabel("Time (s)")
+        fig.tight_layout()
+
+        buffer = io.BytesIO()
+        fig.savefig(buffer, format='png')
+        buffer.seek(0)
+        f.write(f"<img src='data:image/png;base64,{base64.b64encode(buffer.getvalue()).decode()}' style='width:100%; max-width:800px;'>\n")
+  print(f"\nReport written to {output_fn}\n")
+
 def main(args):
   with PandaRunner() as p:
     print("\n\n")
 
     logs = {}
     for i, m in enumerate(MANEUVERS):
+      logs[m.description] = {}
       print(f"Running {i+1}/{len(MANEUVERS)} '{m.description}'")
-      for run in range(0, m.repeat):
+      for run in range(m.repeat):
         print(f"- run #{run}")
         print("- setting up, engage cruise")
         ready_cnt = 0
@@ -122,60 +169,25 @@ def main(args):
           continue
 
         print("- executing maneuver")
-        logs[m.description + f" #{run}"] = defaultdict(list)
+        logs[m.description][run] = defaultdict(list)
         for t, cc in m.get_msgs():
           cs = p.read()
           p.write(cc)
 
-          logs[m.description + f" #{run}"]["t"].append(t)
+          logs[m.description][run]["t"].append(t)
           to_log = {"carControl": cc, "carState": cs, "carControl.actuators": cc.actuators,
                     "carControl.cruiseControl": cc.cruiseControl, "carState.cruiseState": cs.cruiseState}
           for k, v in to_log.items():
             for k2, v2 in asdict(v).items():
-              logs[m.description + f" #{run}"][f"{k}.{k2}"].append(v2)
+              logs[m.description][run][f"{k}.{k2}"].append(v2)
 
           time.sleep(DT)
+        beep(440)
 
-  # ***** write out report *****
-  output_path = Path(__file__).resolve().parent / "longitudinal_reports"
-  output_fn = args.output or output_path / f"{p.CI.CP.carFingerprint}_{time.strftime('%Y%m%d-%H_%M_%S')}.html"
-  output_path.mkdir(exist_ok=True)
-  with open(output_fn, "w") as f:
-    f.write("<h1>Longitudinal maneuver report</h1>\n")
-    f.write(f"<h3>{p.CI.CP.carFingerprint}</h3>\n")
-    if args.desc:
-      f.write(f"<h3>{args.desc}</h3>")
-    for description, log in logs.items():
-      f.write("<div style='border-top: 1px solid #000; margin: 20px 0;'></div>\n")
-      f.write(f"<h2>{description}</h2>\n")
-
-      plt.rcParams['font.size'] = 40
-      fig = plt.figure(figsize=(30, 20))
-      ax = fig.subplots(3, 1, sharex=True, gridspec_kw={'hspace': 0, 'height_ratios': [5, 1, 1]})
-
-      ax[0].grid(linewidth=4)
-      ax[0].plot(log["t"], log["carState.aEgo"], label='aEgo', linewidth=6)
-      ax[0].plot(log["t"], log["carControl.actuators.accel"], label='accel command', linewidth=6)
-      ax[0].set_ylabel('Acceleration (m/s^2)')
-      ax[0].set_ylim(-4.5, 4.5)
-      ax[0].legend()
-
-      ax[1].plot(log["t"], log["carControl.enabled"], label='enabled', linewidth=6)
-      ax[2].plot(log["t"], log["carState.gasPressed"], label='gasPressed', linewidth=6)
-      for i in (1, 2):
-        ax[i].set_yticks([0, 1], minor=False)
-        ax[i].set_ylim(-1, 2)
-        ax[i].legend()
-
-      ax[-1].set_xlabel("Time (s)")
-      fig.tight_layout()
-
-      buffer = io.BytesIO()
-      fig.savefig(buffer, format='png')
-      buffer.seek(0)
-      f.write(f"<img src='data:image/png;base64,{base64.b64encode(buffer.getvalue()).decode()}' style='width:100%; max-width:800px;'>\n")
-
-  print(f"\nReport written to {output_fn}\n")
+  with open('/tmp/logs.json', 'w') as f:
+    import json
+    json.dump(logs, f, indent=2)
+  report(args, logs)
 
 
 if __name__ == "__main__":
