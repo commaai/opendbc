@@ -50,30 +50,31 @@ class Maneuver:
       t0 += lt
 
 MANEUVERS = [
-  Maneuver(
-    "creep: alternate between +1m/ss and -1m/ss",
-    [
-      Action(1, 2), Action(-1, 2),
-      Action(1, 2), Action(-1, 2),
-      Action(1, 2), Action(-1, 2),
-    ],
-  ),
+  #Maneuver(
+  #  "creep: alternate between +1m/ss and -1m/ss",
+  #  [
+  #    Action(1, 2), Action(-1, 2),
+  #    Action(1, 2), Action(-1, 2),
+  #    Action(1, 2), Action(-1, 2),
+  #  ],
+  #),
   Maneuver(
     "brake step response: -1m/ss from 20mph",
     [Action(-1, 5),],
+    repeat=3,
   ),
-  Maneuver(
-    "brake step response: -4m/ss from 20mph",
-    [Action(-4, 5),],
-  ),
-  Maneuver(
-    "gas step response: +1m/ss from 20mph",
-    [Action(1, 5),],
-  ),
-  Maneuver(
-    "gas step response: +4m/ss from 20mph",
-    [Action(4, 5),],
-  ),
+  #Maneuver(
+  #  "brake step response: -4m/ss from 20mph",
+  #  [Action(-4, 5),],
+  #),
+  #Maneuver(
+  #  "gas step response: +1m/ss from 20mph",
+  #  [Action(1, 5),],
+  #),
+  #Maneuver(
+  #  "gas step response: +4m/ss from 20mph",
+  #  [Action(4, 5),],
+  #),
 ]
 
 def main(args):
@@ -83,41 +84,51 @@ def main(args):
     logs = {}
     for i, m in enumerate(MANEUVERS):
       print(f"Running {i+1}/{len(MANEUVERS)} '{m.description}'")
+      for run in range(0, m.repeat):
+        print(f"- run #{run}")
+        print("- setting up, engage cruise")
+        good_cnt = 0
+        for _ in range(int(30./DT)):
+          cs = p.read(strict=False)
 
-      print("- setting up, engage cruise")
-      good_cnt = 0
-      for _ in range(int(30./DT)):
-        cs = p.read(strict=False)
+          cc = CarControl(enabled=True, longActive=True)
+          if False:
+            cc.actuators = CarControl.Actuators(
+              accel=-1.5,
+              longControlState=CarControl.Actuators.LongControlState.stopping
+            )
+            good_cnt = (good_cnt+1) if cs.vEgo < 0.1 and cs.cruiseState.enabled and not cs.cruiseState.standstill else 0
+          else:
+            target = 4.5 # m/s, aka 10mph
+            cc.actuators = CarControl.Actuators(
+              accel=(target-cs.vEgo)*0.5,
+              longControlState=CarControl.Actuators.LongControlState.pid
+            )
+            good_cnt = (good_cnt+1) if (target-0.5)<cs.vEgo<(target+0.5) and cs.cruiseState.enabled and not cs.cruiseState.standstill else 0
+            print(target, good_cnt, cs.vEgo, cc.actuators)
+          p.write(cc)
 
-        cc = CarControl(
-          enabled=True,
-          longActive=True,
-          actuators=CarControl.Actuators(accel=-1.5, longControlState=CarControl.Actuators.LongControlState.stopping),
-        )
-        p.write(cc)
+          if good_cnt > (2./DT):
+            break
+          time.sleep(DT)
+        else:
+          print("ERROR: failed to setup")
+          continue
 
-        good_cnt = (good_cnt+1) if cs.vEgo < 0.1 and cs.cruiseState.enabled and not cs.cruiseState.standstill else 0
-        if good_cnt > (2./DT):
-          break
-        time.sleep(DT)
-      else:
-        print("ERROR: failed to setup")
-        continue
+        print("- executing maneuver")
+        logs[m.description + f" #{run}"] = defaultdict(list)
+        for t, cc in m.get_msgs():
+          cs = p.read()
+          p.write(cc)
 
-      print("- executing maneuver")
-      logs[m.description] = defaultdict(list)
-      for t, cc in m.get_msgs():
-        cs = p.read()
-        p.write(cc)
+          logs[m.description + f" #{run}"]["t"].append(t)
+          to_log = {"carControl": cc, "carState": cs, "carControl.actuators": cc.actuators,
+                    "carControl.cruiseControl": cc.cruiseControl, "carState.cruiseState": cs.cruiseState}
+          for k, v in to_log.items():
+            for k2, v2 in asdict(v).items():
+              logs[m.description + f" #{run}"][f"{k}.{k2}"].append(v2)
 
-        logs[m.description]["t"].append(t)
-        to_log = {"carControl": cc, "carState": cs, "carControl.actuators": cc.actuators,
-                  "carControl.cruiseControl": cc.cruiseControl, "carState.cruiseState": cs.cruiseState}
-        for k, v in to_log.items():
-          for k2, v2 in asdict(v).items():
-            logs[m.description][f"{k}.{k2}"].append(v2)
-
-        time.sleep(DT)
+          time.sleep(DT)
 
   # ***** write out report *****
 
@@ -129,11 +140,9 @@ def main(args):
     f.write(f"<h3>{p.CI.CP.carFingerprint}</h3>\n")
     if args.desc:
       f.write(f"<h3>{args.desc}</h3>")
-    for m in MANEUVERS:
+    for description, log in logs.items():
       f.write("<div style='border-top: 1px solid #000; margin: 20px 0;'></div>\n")
-      f.write(f"<h2>{m.description}</h2>\n")
-
-      log = logs[m.description]
+      f.write(f"<h2>{description}</h2>\n")
 
       plt.rcParams['font.size'] = 40
       fig = plt.figure(figsize=(30, 20))
