@@ -11,7 +11,6 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 
 from opendbc.car.structs import CarControl
-from opendbc.car.can_definitions import CanData
 from opendbc.car.panda_runner import PandaRunner
 
 DT = 0.01  # step time (s)
@@ -81,7 +80,7 @@ MANEUVERS = [
 ]
 
 def main(args):
-  with PandaRunner() as (p, CI):
+  with PandaRunner() as p:
     print("\n\n")
 
     logs = {}
@@ -95,8 +94,7 @@ def main(args):
       print("- setting up")
       good_cnt = 0
       for _ in range(int(30./DT)):
-        cd = [CanData(addr, dat, bus) for addr, dat, bus in p.can_recv()]
-        cs = CI.update([int(time.monotonic()*1e9), cd])
+        cs = p.read()
 
         cc = CarControl(enabled=True)
         if m.setup == Setup.STOPPED:
@@ -105,32 +103,22 @@ def main(args):
           cc.actuators.longControlState = CarControl.Actuators.LongControlState.stopping
           good_cnt = (good_cnt+1) if cs.vEgo < 0.1 and cs.cruiseState.enabled and not cs.cruiseState.standstill else 0
 
-        if not p.health()['controls_allowed']:
+        if not p.panda.health()['controls_allowed']:
           cc = CarControl(enabled=False)
+        p.write(cc)
 
         if good_cnt > (2./DT):
           break
-
-        _, can_sends = CI.apply(cc)
-        p.can_send_many(can_sends, timeout=20)
-        p.send_heartbeat()
         time.sleep(DT)
       else:
-        print("ERROR: failed to setup ***********")
+        print("ERROR: failed to setup")
         continue
 
       # run the maneuver
       print("- executing maneuver")
       for t, cc in m.get_msgs():
-        cd = [CanData(addr, dat, bus) for addr, dat, bus in p.can_recv()]
-        cs = CI.update([int(time.monotonic()*1e9), cd])
-        assert cs.canValid, f"CAN went invalid, check connections"
-
-        _, can_sends = CI.apply(cc)
-        p.can_send_many(can_sends, timeout=20)
-        p.send_heartbeat()
-
-        time.sleep(DT)
+        cs = p.read()
+        p.send(cc)
 
         log["t"].append(t)
         to_log = {"carControl": cc, "carState": cs, "carControl.actuators": cc.actuators,
@@ -138,6 +126,8 @@ def main(args):
         for k, v in to_log.items():
           for k2, v2 in asdict(v).items():
             log[f"{k}.{k2}"].append(v2)
+
+        time.sleep(DT)
 
   # ***** write out report *****
 
@@ -150,12 +140,12 @@ def main(args):
     return f"<img src='data:image/png;base64,{base64.b64encode(buffer.getvalue()).decode()}' style='width:100%; max-width:800px;'>\n"
 
   output_path = Path(__file__).resolve().parent / "longitudinal_reports"
-  #output_fn = output_path / f"{CI.CP.carFingerprint}_{time.strftime('%Y%m%d-%H_%M_%S')}.html"
-  output_fn = output_path / f"{CI.CP.carFingerprint}.html"
+  #output_fn = output_path / f"{p.CI.CP.carFingerprint}_{time.strftime('%Y%m%d-%H_%M_%S')}.html"
+  output_fn = output_path / f"{p.CI.CP.carFingerprint}.html"
   output_path.mkdir(exist_ok=True)
   with open(output_fn, "w") as f:
     f.write("<h1>Longitudinal maneuver report</h1>\n")
-    f.write(f"<h3>{CI.CP.carFingerprint}</h3>\n")
+    f.write(f"<h3>{p.CI.CP.carFingerprint}</h3>\n")
     if args.desc:
       f.write(f"<h3>{args.desc}</h3>")
     for m in MANEUVERS:
