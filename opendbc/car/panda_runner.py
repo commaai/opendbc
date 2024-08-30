@@ -38,13 +38,16 @@ class PandaRunner(AbstractContextManager):
       recv = self.p.can_recv()
     return [[CanData(addr, dat, bus) for addr, dat, bus in recv], ]
 
-  def read(self, strict: bool = True) -> CarState:
+  def read(self, strict: bool = True):
     cs = self.CI.update([int(time.monotonic()*1e9), self._can_recv()[0]])
     if strict:
       assert cs.canValid, "CAN went invalid, check connections"
     return cs
 
   def write(self, cc: CarControl) -> None:
+    if cc.enabled and not p.panda.health()['controls_allowed']:
+      # prevent the car from faulting. print a warning?
+      cc = CarControl(enabled=False)
     _, can_sends = self.CI.apply(cc)
     self.p.can_send_many(can_sends, timeout=25)
     self.p.send_heartbeat()
