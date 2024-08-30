@@ -11,6 +11,7 @@ from pathlib import Path
 
 from opendbc.car.structs import CarControl
 from opendbc.car.panda_runner import PandaRunner
+from opendbc.car.common.conversions import Conversions
 
 DT = 0.01  # step time (s)
 
@@ -41,6 +42,7 @@ class Maneuver:
   description: str
   actions: list[Action]
   repeat: int = 1
+  initial_speed: float = 0.  # m/s
 
   def get_msgs(self):
     t0 = 0
@@ -50,31 +52,39 @@ class Maneuver:
       t0 += lt
 
 MANEUVERS = [
-  #Maneuver(
-  #  "creep: alternate between +1m/ss and -1m/ss",
-  #  [
-  #    Action(1, 2), Action(-1, 2),
-  #    Action(1, 2), Action(-1, 2),
-  #    Action(1, 2), Action(-1, 2),
-  #  ],
-  #),
+  Maneuver(
+    "creep: alternate between +1m/ss and -1m/ss",
+    [
+      Action(1, 2), Action(-1, 2),
+      Action(1, 2), Action(-1, 2),
+      Action(1, 2), Action(-1, 2),
+    ],
+    initial_speed=0.,
+  ),
   Maneuver(
     "brake step response: -1m/ss from 20mph",
-    [Action(-1, 5),],
+    [Action(-1, 3),],
     repeat=3,
+    initial_speed=20. * Conversions.MPH_TO_MS,
   ),
-  #Maneuver(
-  #  "brake step response: -4m/ss from 20mph",
-  #  [Action(-4, 5),],
-  #),
-  #Maneuver(
-  #  "gas step response: +1m/ss from 20mph",
-  #  [Action(1, 5),],
-  #),
-  #Maneuver(
-  #  "gas step response: +4m/ss from 20mph",
-  #  [Action(4, 5),],
-  #),
+  Maneuver(
+    "brake step response: -4m/ss from 20mph",
+    [Action(-4, 3),],
+    repeat=3,
+    initial_speed=20. * Conversions.MPH_TO_MS,
+  ),
+  Maneuver(
+    "gas step response: +1m/ss from 20mph",
+    [Action(1, 3),],
+    repeat=3,
+    initial_speed=20. * Conversions.MPH_TO_MS,
+  ),
+  Maneuver(
+    "gas step response: +4m/ss from 20mph",
+    [Action(4, 3),],
+    repeat=3,
+    initial_speed=20. * Conversions.MPH_TO_MS,
+  ),
 ]
 
 def main(args):
@@ -87,28 +97,24 @@ def main(args):
       for run in range(0, m.repeat):
         print(f"- run #{run}")
         print("- setting up, engage cruise")
-        good_cnt = 0
-        for _ in range(int(30./DT)):
+        ready_cnt = 0
+        for _ in range(int(60./DT)):
           cs = p.read(strict=False)
 
-          cc = CarControl(enabled=True, longActive=True)
-          if False:
-            cc.actuators = CarControl.Actuators(
-              accel=-1.5,
-              longControlState=CarControl.Actuators.LongControlState.stopping
-            )
-            good_cnt = (good_cnt+1) if cs.vEgo < 0.1 and cs.cruiseState.enabled and not cs.cruiseState.standstill else 0
-          else:
-            target = 4.5 # m/s, aka 10mph
-            cc.actuators = CarControl.Actuators(
-              accel=(target-cs.vEgo)*0.5,
-              longControlState=CarControl.Actuators.LongControlState.pid
-            )
-            good_cnt = (good_cnt+1) if (target-0.5)<cs.vEgo<(target+0.5) and cs.cruiseState.enabled and not cs.cruiseState.standstill else 0
-            print(target, good_cnt, cs.vEgo, cc.actuators)
+          cc = CarControl(
+            enabled=True,
+            longActive=True,
+            actuators=CarControl.Actuators(
+              accel=(m.initial_speed - cs.vEgo)*0.5,
+              longControlState=CarControl.Actuators.LongControlState.stopping if m.initial_speed < 0.1 else CarControl.Actuators.LongControlState.pid,
+            ),
+          )
+          #print(target, ready_cnt, cs.vEgo, cc.actuators)
           p.write(cc)
 
-          if good_cnt > (2./DT):
+          ready = cs.cruiseState.enabled and not cs.cruiseState.standstill and ((m.initial_speed - 0.5) < cs.vEgo < (m.initial_speed + 0.5))
+          ready_cnt = (ready_cnt+1) if ready else 0
+          if ready_cnt > (2./DT):
             break
           time.sleep(DT)
         else:
@@ -131,7 +137,6 @@ def main(args):
           time.sleep(DT)
 
   # ***** write out report *****
-
   output_path = Path(__file__).resolve().parent / "longitudinal_reports"
   output_fn = args.output or output_path / f"{p.CI.CP.carFingerprint}_{time.strftime('%Y%m%d-%H_%M_%S')}.html"
   output_path.mkdir(exist_ok=True)
