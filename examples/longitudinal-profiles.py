@@ -24,7 +24,7 @@ class Setup(Enum):
 class Action:
   accel: float      # m/s^2
   duration: float   # seconds
-  longControlState: CarControl.Actuators.LongControlState
+  longControlState: CarControl.Actuators.LongControlState = CarControl.Actuators.LongControlState.pid
 
   def get_msgs(self):
     return [
@@ -57,12 +57,9 @@ MANEUVERS = [
     "creeping: alternate between +1m/ss and -1m/ss",
     Setup.STOPPED,
     [
-      Action(1, 1, CarControl.Actuators.LongControlState.pid),
-      Action(-1, 1, CarControl.Actuators.LongControlState.pid),
-      Action(1, 1, CarControl.Actuators.LongControlState.pid),
-      Action(-1, 1, CarControl.Actuators.LongControlState.pid),
-      Action(1, 1, CarControl.Actuators.LongControlState.pid),
-      Action(-1, 1, CarControl.Actuators.LongControlState.pid),
+      Action(1, 1), Action(-1, 1),
+      Action(1, 1), Action(-1, 1),
+      Action(1, 1), Action(-1, 1),
     ],
   ),
   # Maneuver(
@@ -109,7 +106,7 @@ def main(args):
           good_cnt = (good_cnt+1) if cs.vEgo < 0.1 else 0
         elif m.setup == Setup.STEADY_STATE_SPEED:
           cc.longActive = True
-          cc.actuators.accel = -1.5
+          cc.actuators.accel = 0.5  # TODO: small pid?
           cc.actuators.longControlState = CarControl.Actuators.LongControlState.pid
           good_cnt = (good_cnt+1) if 9 < cs.vEgo < 11 else 0
 
