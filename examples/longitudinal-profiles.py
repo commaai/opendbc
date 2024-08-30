@@ -96,26 +96,24 @@ def main(args):
       good_cnt = 0
       for _ in range(int(30./DT)):
         cd = [CanData(addr, dat, bus) for addr, dat, bus in p.can_recv()]
-        cs = CI.update([0, cd])
+        cs = CI.update([int(time.monotonic()*1e9), cd])
 
         cc = CarControl(enabled=True)
         if m.setup == Setup.STOPPED:
           cc.longActive = True
           cc.actuators.accel = -1.5
           cc.actuators.longControlState = CarControl.Actuators.LongControlState.stopping
-          good_cnt = (good_cnt+1) if cs.vEgo < 0.1 else 0
-        elif m.setup == Setup.STEADY_STATE_SPEED:
-          cc.longActive = True
-          cc.actuators.accel = 0.5  # TODO: small pid?
-          cc.actuators.longControlState = CarControl.Actuators.LongControlState.pid
-          good_cnt = (good_cnt+1) if 9 < cs.vEgo < 11 else 0
+          good_cnt = (good_cnt+1) if cs.vEgo < 0.1 and cs.cruiseState.enabled and not cs.cruiseState.standstill else 0
 
-        break
+        if not p.health()['controls_allowed']:
+          cc = CarControl(enabled=False)
+
         if good_cnt > (2./DT):
           break
 
-        _, can_sends = CI.apply(CarControl(enabled=False))
-        p.can_send_many(can_sends, timeout=1000)
+        _, can_sends = CI.apply(cc)
+        p.can_send_many(can_sends, timeout=20)
+        p.send_heartbeat()
         time.sleep(DT)
       else:
         print("ERROR: failed to setup ***********")
@@ -125,11 +123,12 @@ def main(args):
       print("- executing maneuver")
       for t, cc in m.get_msgs():
         cd = [CanData(addr, dat, bus) for addr, dat, bus in p.can_recv()]
-        cs = CI.update([0, cd])
-        #assert cs.canValid, f"CAN went invalid, check connections"
+        cs = CI.update([int(time.monotonic()*1e9), cd])
+        assert cs.canValid, f"CAN went invalid, check connections"
 
         _, can_sends = CI.apply(cc)
-        #p.can_send_many(can_sends, timeout=20)
+        p.can_send_many(can_sends, timeout=20)
+        p.send_heartbeat()
 
         time.sleep(DT)
 

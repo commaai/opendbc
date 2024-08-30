@@ -7,6 +7,7 @@ from opendbc.car.can_definitions import CanData
 @contextmanager
 def PandaRunner():
   p = Panda()
+  p.reset()
 
   def _can_recv(wait_for_one: bool = False) -> list[list[CanData]]:
     recv = p.can_recv()
