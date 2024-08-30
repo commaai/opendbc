@@ -78,7 +78,7 @@ def main(args):
       print("- setting up")
       good_cnt = 0
       for _ in range(int(30./DT)):
-        cs = p.read()
+        cs = p.read(strict=False)
 
         cc = CarControl(enabled=True)
         if m.setup == Setup.STOPPED:

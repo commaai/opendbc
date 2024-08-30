@@ -38,9 +38,10 @@ class PandaRunner(AbstractContextManager):
       recv = self.p.can_recv()
     return [[CanData(addr, dat, bus) for addr, dat, bus in recv], ]
 
-  def read(self) -> CarState:
+  def read(self, strict: bool = True) -> CarState:
     cs = self.CI.update([int(time.monotonic()*1e9), self._can_recv()[0]])
-    #assert cs.canValid, "CAN went invalid, check connections"
+    if strict:
+      assert cs.canValid, "CAN went invalid, check connections"
     return cs
 
   def write(self, cc: CarControl) -> None:
