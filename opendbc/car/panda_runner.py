@@ -4,7 +4,7 @@ from contextlib import AbstractContextManager
 from panda import Panda
 from opendbc.car.car_helpers import get_car
 from opendbc.car.can_definitions import CanData
-from opendbc.car.structs import CarState, CarControl
+from opendbc.car.structs import CarControl
 
 class PandaRunner(AbstractContextManager):
   def __enter__(self):
