@@ -14,6 +14,9 @@ from opendbc.car.panda_runner import PandaRunner
 
 DT = 0.01  # step time (s)
 
+# TODOs
+# - support lateral maneuvers
+
 @dataclass
 class Action:
   accel: float      # m/s^2
@@ -37,6 +40,7 @@ class Action:
 class Maneuver:
   description: str
   actions: list[Action]
+  repeat: int = 1
 
   def get_msgs(self):
     t0 = 0
@@ -47,12 +51,28 @@ class Maneuver:
 
 MANEUVERS = [
   Maneuver(
-    "creeping: alternate between +1m/ss and -1m/ss",
+    "creep: alternate between +1m/ss and -1m/ss",
     [
       Action(1, 2), Action(-1, 2),
       Action(1, 2), Action(-1, 2),
       Action(1, 2), Action(-1, 2),
     ],
+  ),
+  Maneuver(
+    "brake step response: -1m/ss from 20mph",
+    [Action(-1, 5),],
+  ),
+  Maneuver(
+    "brake step response: -4m/ss from 20mph",
+    [Action(-4, 5),],
+  ),
+  Maneuver(
+    "gas step response: +1m/ss from 20mph",
+    [Action(1, 5),],
+  ),
+  Maneuver(
+    "gas step response: +4m/ss from 20mph",
+    [Action(4, 5),],
   ),
 ]
 
@@ -64,7 +84,7 @@ def main(args):
     for i, m in enumerate(MANEUVERS):
       print(f"Running {i+1}/{len(MANEUVERS)} '{m.description}'")
 
-      print("- setting up")
+      print("- setting up, engage cruise")
       good_cnt = 0
       for _ in range(int(30./DT)):
         cs = p.read(strict=False)
