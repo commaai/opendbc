@@ -45,6 +45,13 @@ BO_ 37 STEER_ANGLE_SENSOR: 8 XXX
  SG_ STEER_FRACTION : 39|4@0- (0.1,0) [-0.7|0.7] "deg" XXX
  SG_ STEER_RATE : 35|12@0- (1,0) [-2000|2000] "deg/s" XXX
 
+BO_ 120 ENG2F42: 4 CGW
+ SG_ FAVLMCHH : 7|16@0- (2,0) [0|0] "N" Vector__XX228X
+ SG_ CCRNG : 23|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ FDRVTYPD : 22|3@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ GEARHD : 18|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ENG2F42S : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+
 BO_ 166 BRAKE: 8 XXX
  SG_ BRAKE_AMOUNT : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ BRAKE_PEDAL : 23|8@0+ (1,0) [0|255] "" XXX
@@ -92,9 +99,10 @@ BO_ 467 PCM_CRUISE_2: 8 XXX
  SG_ ACC_FAULTED : 47|1@0+ (1,0) [0|1] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 552 ACCELEROMETER: 8 XXX
- SG_ ACCEL_Z : 22|15@0- (1,0) [0|32767] "m/s^2" XXX
- SG_ ACCEL_X : 6|15@0- (0.001,0) [-20|20] "m/s^2" XXX
+BO_ 552 VSC1S29: 4 CGW
+ SG_ ICBACT : 7|1@0+ (1,0) [0|0] "" DS1
+ SG_ DVS0PCS : 6|15@0- (0.001,0) [0|0] "m/s^2" DS1
+ SG_ SM228 : 31|8@0+ (1,0) [0|0] "" DS1
 
 BO_ 560 BRAKE_2: 7 XXX
  SG_ BRAKE_PRESSED : 26|1@0+ (1,0) [0|1] "" XXX
@@ -148,11 +156,30 @@ BO_ 742 LEAD_INFO: 8 DSU
  SG_ LEAD_REL_SPEED : 23|12@0- (0.025,0) [-100|100] "m/s" HCU
  SG_ LEAD_LONG_DIST : 7|13@0+ (0.05,0) [0|300] "m" HCU
 
-BO_ 800 VSC1: 8 CGW
- SG_ ACC_BRAKING : 8|1@0+ (1,0) [0|0] "" DS1,FCM
- SG_ SLOPE_ANGLE : 23|8@0- (1,0) [0|0] "deg" DS1
- SG_ ACC_BRAKING2 : 26|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ ACCEL : 39|8@0- (0.04,0) [0|0] "m/s^2" DS1
+BO_ 800 VSC1S07: 8 CGW
+ SG_ FBKRLY : 6|1@0+ (1,0) [0|0] "" DS1
+ SG_ FVSCM : 4|1@0+ (1,0) [0|0] "" DS1
+ SG_ FVSCSFT : 3|1@0+ (1,0) [0|0] "" DS1
+ SG_ FABS : 2|1@0+ (1,0) [0|0] "" DS1,FCM
+ SG_ TSVSC : 1|1@0+ (1,0) [0|0] "" DS1
+ SG_ FVSCL : 0|1@0+ (1,0) [0|0] "" DS1
+ SG_ RQCSTBKB : 15|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ PSBSTBY : 14|1@0+ (1,0) [0|0] "" DS1
+ SG_ P2BRXMK : 13|1@0+ (1,0) [0|0] "" DS1
+ SG_ MCC : 11|1@0+ (1,0) [0|0] "" DS1
+ SG_ RQBKB : 10|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ BRSTOP : 9|1@0+ (1,0) [0|0] "" DS1,FCM
+ SG_ BRKON : 8|1@0+ (1,0) [0|0] "" DS1,FCM
+ SG_ ASLP : 23|8@0- (1,0) [0|0] "deg" DS1
+ SG_ BRTYPACC : 31|2@0+ (1,0) [0|0] "" DS1
+ SG_ BRKABT3 : 26|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ BRKABT2 : 25|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ BRKABT1 : 24|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ GVC : 39|8@0- (0.04,0) [0|0] "m/s^2" DS1
+ SG_ XGVCINV : 43|1@0+ (1,0) [0|0] "" DS1
+ SG_ S07CNT : 52|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ PCSBRSTA : 50|2@0+ (1,0) [0|0] "" DS1
+ SG_ VSC07SUM : 63|8@0+ (1,0) [0|0] "" DS1,FCM
 
 BO_ 835 ACC_CONTROL: 8 DSU
  SG_ ACCEL_CMD : 7|16@0- (0.001,0) [-20|20] "m/s^2" HCU
@@ -278,6 +305,18 @@ BO_ 1044 AUTO_HIGH_BEAM: 8 FCM
  SG_ AHB_DUTY : 47|8@0+ (0.5,0) [0|0] "%" Vector__XXX
  SG_ F_AHB : 55|4@0+ (1,0) [0|0] "" Vector__XXX
  SG_ C_AHB : 51|4@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 1056 VSC1S08: 8 CGW
+ SG_ YR1Z : 7|16@0- (1,0) [0|0] "rad/s" DS1,FCM,MAV
+ SG_ YR2Z : 23|16@0- (1,0) [0|0] "rad/s" DS1,FCM,MAV
+ SG_ GL1Z : 39|8@0- (0.0359,0) [0|0] "m/s^2" DS1,FCM,KSS,MAV,SCS
+ SG_ GL2Z : 47|8@0- (0.0359,0) [0|0] "m/s^2" DS1,FCM,KSS,MAV,SCS
+ SG_ YRGSDIR : 55|1@0+ (1,0) [0|0] "" DS1,FCM,KSS,SCS
+ SG_ GLZS : 51|1@0+ (1,0) [0|0] "" DS1,FCM,KSS,MAV,SCS
+ SG_ YRZF : 50|1@0+ (1,0) [0|0] "" DS1,FCM,MAV
+ SG_ YRZS : 49|1@0+ (1,0) [0|0] "" DS1,FCM,MAV
+ SG_ YRZKS : 48|1@0+ (1,0) [0|0] "" DS1,FCM,MAV
+ SG_ VSC08SUM : 63|8@0+ (1,0) [0|0] "" DS1,FCM,MAV
 
 BO_ 1083 AUTOPARK_STATUS: 8 IPAS
  SG_ STATE : 7|4@0+ (1,0) [0|15] "" XXX
