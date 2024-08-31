@@ -92,7 +92,7 @@ class GMASCMPlatformConfig(GMPlatformConfig):
 @dataclass
 class GMSDGMPlatformConfig(GMPlatformConfig):
   def init(self):
-    # SDGM is supported, but due to harness not being sold by comma, we are not showing in the car docs
+    # Don't show in docs until the harness is sold. See https://github.com/commaai/openpilot/issues/32471
     self.car_docs = []
 
 
