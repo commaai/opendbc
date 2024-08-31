@@ -79,13 +79,14 @@ MANEUVERS = [
      Action(1, 2), Action(-1, 2),
      Action(1, 2), Action(-1, 2),
    ],
+   repeat=2,
    initial_speed=0.,
   ),
   Maneuver(
-   "brake step response: -1m/ss from 20mph",
-   [Action(-1, 3),],
-   repeat=3,
-   initial_speed=20. * Conversions.MPH_TO_MS,
+    "brake step response: -1m/ss from 20mph",
+    [Action(0, 2), Action(-1, 3),],
+    repeat=3,
+    initial_speed=20. * Conversions.MPH_TO_MS,
   ),
   Maneuver(
     "brake step response: -4m/ss from 20mph",
@@ -94,19 +95,18 @@ MANEUVERS = [
     initial_speed=15. * Conversions.MPH_TO_MS,
   ),
   Maneuver(
-   "gas step response: +1m/ss from 20mph",
-   [Action(1, 3),],
-   repeat=3,
-   initial_speed=20. * Conversions.MPH_TO_MS,
+    "gas step response: +1m/ss from 20mph",
+    [Action(0, 2), Action(1, 3),],
+    repeat=3,
+    initial_speed=20. * Conversions.MPH_TO_MS,
   ),
   Maneuver(
-   "gas step response: +4m/ss from 20mph",
-   [Action(4, 3),],
-   repeat=3,
-   initial_speed=20. * Conversions.MPH_TO_MS,
+    "gas step response: +4m/ss from 20mph",
+    [Action(0, 2), Action(4, 3),],
+    repeat=3,
+    initial_speed=20. * Conversions.MPH_TO_MS,
   ),
 ]
-MANEUVERS = MANEUVERS[2:3]
 
 def report(args, logs, fp):
   output_path = Path(__file__).resolve().parent / "longitudinal_reports"
@@ -171,17 +171,19 @@ def main(args):
         print(f"- run #{run}")
         print("- setting up, engage cruise")
         ready_cnt = 0
-        for _ in range(int(60./DT)):
+        for _ in range(int(2*60./DT)):
           cs = p.read(strict=False)
-
           cc = CarControl(
             enabled=True,
             longActive=True,
             actuators=CarControl.Actuators(
-              accel=(m.initial_speed - cs.vEgo)*0.5,
-              longControlState=CarControl.Actuators.LongControlState.stopping if m.initial_speed < 0.1 else CarControl.Actuators.LongControlState.pid,
+              accel=(m.initial_speed - cs.vEgo)*0.8,
+              longControlState=CarControl.Actuators.LongControlState.pid,
             ),
           )
+          if m.initial_speed < 0.1:
+            cc.actuators.accel = -2
+            cc.actuators.longControlState = CarControl.Actuators.LongControlState.stopping
           p.write(cc)
 
           ready = cs.cruiseState.enabled and not cs.cruiseState.standstill and ((m.initial_speed - 0.6) < cs.vEgo < (m.initial_speed + 0.6))
@@ -208,6 +210,7 @@ def main(args):
 
           rk.keep_time()
 
+  print("writing out report")
   with open('/tmp/logs.json', 'w') as f:
     import json
     json.dump(logs, f, indent=2)
