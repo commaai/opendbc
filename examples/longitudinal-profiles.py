@@ -92,7 +92,7 @@ MANEUVERS = [
     "brake step response: -4m/ss from 20mph",
     [Action(0, 2), Action(-4, 3)],
     repeat=3,
-    initial_speed=15. * Conversions.MPH_TO_MS,
+    initial_speed=20. * Conversions.MPH_TO_MS,
   ),
   Maneuver(
     "gas step response: +1m/ss from 20mph",
@@ -163,8 +163,8 @@ def main(args):
     print("\n\n")
 
     maneuvers = MANEUVERS
-    if args.maneuvers is not None:
-      maneuvers = [MANEUVERS[i] for i in set(args.maneuvers)]
+    if len(args.maneuvers):
+      maneuvers = [MANEUVERS[i-1] for i in set(args.maneuvers)]
 
     logs = {}
     rk = Ratekeeper(int(1./DT))
@@ -229,6 +229,7 @@ if __name__ == "__main__":
   parser.add_argument('--output', help="Write out report to this file.", default=None)
   parser.add_argument('maneuvers', nargs='*', type=int, default=None, help=f'Deafult is all.\n{maneuver_help}')
   args = parser.parse_args()
+  print(args)
 
   if "REPORT_TEST" in os.environ:
     with open(os.environ["REPORT_TEST"]) as f:
