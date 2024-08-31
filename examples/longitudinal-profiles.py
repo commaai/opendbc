@@ -84,25 +84,25 @@ MANEUVERS = [
   ),
   Maneuver(
     "brake step response: -1m/ss from 20mph",
-    [Action(0, 2), Action(-1, 3),],
+    [Action(0, 2), Action(-1, 3)],
     repeat=3,
     initial_speed=20. * Conversions.MPH_TO_MS,
   ),
   Maneuver(
     "brake step response: -4m/ss from 20mph",
-    [Action(0, 2), Action(-4, 3),],
+    [Action(0, 2), Action(-4, 3)],
     repeat=3,
     initial_speed=15. * Conversions.MPH_TO_MS,
   ),
   Maneuver(
     "gas step response: +1m/ss from 20mph",
-    [Action(0, 2), Action(1, 3),],
+    [Action(0, 2), Action(1, 3)],
     repeat=3,
     initial_speed=20. * Conversions.MPH_TO_MS,
   ),
   Maneuver(
     "gas step response: +4m/ss from 20mph",
-    [Action(0, 2), Action(4, 3),],
+    [Action(0, 2), Action(4, 3)],
     repeat=3,
     initial_speed=20. * Conversions.MPH_TO_MS,
   ),
@@ -162,9 +162,13 @@ def main(args):
   with PandaRunner() as p:
     print("\n\n")
 
+    maneuvers = MANEUVERS
+    if args.maneuvers is not None:
+      maneuvers = [MANEUVERS[i] for i in set(args.maneuvers)]
+
     logs = {}
     rk = Ratekeeper(int(1./DT))
-    for i, m in enumerate(MANEUVERS):
+    for i, m in enumerate(maneuvers):
       logs[m.description] = {}
       print(f"Running {i+1}/{len(MANEUVERS)} '{m.description}'")
       for run in range(m.repeat):
@@ -218,10 +222,12 @@ def main(args):
 
 
 if __name__ == "__main__":
+  maneuver_help = "\n".join([f"{i+1}. {m.description}" for i, m in enumerate(MANEUVERS)])
   parser = argparse.ArgumentParser(description="A tool for longitudinal control testing.",
-                                   formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+                                   formatter_class=argparse.RawTextHelpFormatter)
   parser.add_argument('--desc', help="Extra description to include in report.")
   parser.add_argument('--output', help="Write out report to this file.", default=None)
+  parser.add_argument('maneuvers', nargs='*', type=int, default=None, help=f'Deafult is all.\n{maneuver_help}')
   args = parser.parse_args()
 
   if "REPORT_TEST" in os.environ:
