@@ -353,7 +353,6 @@ class CarParams:
 
   @auto_dataclass
   class LateralTorqueTuning:
-    useSteeringAngle: bool = auto_field()
     kp: float = auto_field()
     ki: float = auto_field()
     friction: float = auto_field()
