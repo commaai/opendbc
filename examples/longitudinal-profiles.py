@@ -79,31 +79,32 @@ MANEUVERS = [
      Action(1, 2), Action(-1, 2),
      Action(1, 2), Action(-1, 2),
    ],
+   repeat=2,
    initial_speed=0.,
   ),
   Maneuver(
-   "brake step response: -1m/ss from 20mph",
-   [Action(-1, 3),],
-   repeat=3,
-   initial_speed=20. * Conversions.MPH_TO_MS,
+    "brake step response: -1m/ss from 20mph",
+    [Action(0, 2), Action(-1, 3)],
+    repeat=3,
+    initial_speed=20. * Conversions.MPH_TO_MS,
   ),
   Maneuver(
     "brake step response: -4m/ss from 20mph",
-    [Action(-4, 3),],
+    [Action(0, 2), Action(-4, 3)],
     repeat=3,
-    initial_speed=15. * Conversions.MPH_TO_MS,
+    initial_speed=20. * Conversions.MPH_TO_MS,
   ),
   Maneuver(
-   "gas step response: +1m/ss from 20mph",
-   [Action(1, 3),],
-   repeat=3,
-   initial_speed=20. * Conversions.MPH_TO_MS,
+    "gas step response: +1m/ss from 20mph",
+    [Action(0, 2), Action(1, 3)],
+    repeat=3,
+    initial_speed=20. * Conversions.MPH_TO_MS,
   ),
   Maneuver(
-   "gas step response: +4m/ss from 20mph",
-   [Action(4, 3),],
-   repeat=3,
-   initial_speed=20. * Conversions.MPH_TO_MS,
+    "gas step response: +4m/ss from 20mph",
+    [Action(0, 2), Action(4, 3)],
+    repeat=3,
+    initial_speed=20. * Conversions.MPH_TO_MS,
   ),
 ]
 
@@ -161,31 +162,37 @@ def main(args):
   with PandaRunner() as p:
     print("\n\n")
 
+    maneuvers = MANEUVERS
+    if len(args.maneuvers):
+      maneuvers = [MANEUVERS[i-1] for i in set(args.maneuvers)]
+
     logs = {}
     rk = Ratekeeper(int(1./DT))
-    for i, m in enumerate(MANEUVERS):
+    for i, m in enumerate(maneuvers):
       logs[m.description] = {}
       print(f"Running {i+1}/{len(MANEUVERS)} '{m.description}'")
       for run in range(m.repeat):
         print(f"- run #{run}")
         print("- setting up, engage cruise")
         ready_cnt = 0
-        for _ in range(int(60./DT)):
+        for _ in range(int(2*60./DT)):
           cs = p.read(strict=False)
-
           cc = CarControl(
             enabled=True,
             longActive=True,
             actuators=CarControl.Actuators(
-              accel=(m.initial_speed - cs.vEgo)*0.5,
-              longControlState=CarControl.Actuators.LongControlState.stopping if m.initial_speed < 0.1 else CarControl.Actuators.LongControlState.pid,
+              accel=(m.initial_speed - cs.vEgo)*0.8,
+              longControlState=CarControl.Actuators.LongControlState.pid,
             ),
           )
+          if m.initial_speed < 0.1:
+            cc.actuators.accel = -2
+            cc.actuators.longControlState = CarControl.Actuators.LongControlState.stopping
           p.write(cc)
 
-          ready = cs.cruiseState.enabled and not cs.cruiseState.standstill and ((m.initial_speed - 0.3) < cs.vEgo < (m.initial_speed + 0.3))
+          ready = cs.cruiseState.enabled and not cs.cruiseState.standstill and ((m.initial_speed - 0.6) < cs.vEgo < (m.initial_speed + 0.6))
           ready_cnt = (ready_cnt+1) if ready else 0
-          if ready_cnt > (3./DT):
+          if ready_cnt > (2./DT):
             break
           rk.keep_time()
         else:
@@ -207,18 +214,22 @@ def main(args):
 
           rk.keep_time()
 
-    with open('/tmp/logs.json', 'w') as f:
-      import json
-      json.dump(logs, f, indent=2)
-    report(args, logs, p.CI.CP.carFingerprint)
+  print("writing out report")
+  with open('/tmp/logs.json', 'w') as f:
+    import json
+    json.dump(logs, f, indent=2)
+  report(args, logs, p.CI.CP.carFingerprint)
 
 
 if __name__ == "__main__":
+  maneuver_help = "\n".join([f"{i+1}. {m.description}" for i, m in enumerate(MANEUVERS)])
   parser = argparse.ArgumentParser(description="A tool for longitudinal control testing.",
-                                   formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+                                   formatter_class=argparse.RawTextHelpFormatter)
   parser.add_argument('--desc', help="Extra description to include in report.")
   parser.add_argument('--output', help="Write out report to this file.", default=None)
+  parser.add_argument('maneuvers', nargs='*', type=int, default=None, help=f'Deafult is all.\n{maneuver_help}')
   args = parser.parse_args()
+  print(args)
 
   if "REPORT_TEST" in os.environ:
     with open(os.environ["REPORT_TEST"]) as f:
