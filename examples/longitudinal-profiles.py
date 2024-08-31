@@ -21,6 +21,23 @@ DT = 0.01  # step time (s)
 # - setup: show countdown?
 
 
+class Ratekeeper:
+  def __init__(self, rate: float) -> None:
+    self.interval = 1. / rate
+    self.next_frame_time = time.monotonic() + self.interval
+
+  def keep_time(self) -> bool:
+    lagged = False
+    remaining = self.next_frame_time - time.monotonic()
+    self.next_frame_time += self.interval
+    if remaining < -0.1:
+      print(f"lagging by {-remaining * 1000:.2f} ms")
+      lagged = True
+
+    if remaining > 0:
+      time.sleep(remaining)
+    return lagged
+
 @dataclass
 class Action:
   accel: float      # m/s^2
@@ -145,6 +162,7 @@ def main(args):
     print("\n\n")
 
     logs = {}
+    rk = Ratekeeper(int(1./DT))
     for i, m in enumerate(MANEUVERS):
       logs[m.description] = {}
       print(f"Running {i+1}/{len(MANEUVERS)} '{m.description}'")
@@ -169,7 +187,7 @@ def main(args):
           ready_cnt = (ready_cnt+1) if ready else 0
           if ready_cnt > (3./DT):
             break
-          time.sleep(DT)
+          rk.keep_time()
         else:
           print("ERROR: failed to setup")
           continue
@@ -187,7 +205,7 @@ def main(args):
             for k2, v2 in asdict(v).items():
               logs[m.description][run][f"{k}.{k2}"].append(v2)
 
-          time.sleep(DT)
+          rk.keep_time()
 
     with open('/tmp/logs.json', 'w') as f:
       import json
@@ -196,7 +214,6 @@ def main(args):
 
 
 if __name__ == "__main__":
-
   parser = argparse.ArgumentParser(description="A tool for longitudinal control testing.",
                                    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
   parser.add_argument('--desc', help="Extra description to include in report.")
