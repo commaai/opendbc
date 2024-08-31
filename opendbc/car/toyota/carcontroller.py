@@ -115,7 +115,7 @@ class CarController(CarControllerBase):
     offset = min(CS.pcm_neutral_force / self.CP.mass, 0.0)
     pitch_offset = math.sin(math.radians(CS.vsc_slope_angle)) * 9.81  # downhill is negative
     # TODO: these limits are too slow to prevent a jerk when engaging, ramp down on engage?
-    self.pcm_accel_comp = clip(actuators.accel - CS.pcm_accel_net, self.pcm_accel_comp - 0.01, self.pcm_accel_comp + 0.01)
+    self.pcm_accel_comp = clip(actuators.accel - CS.pcm_accel_net, self.pcm_accel_comp - 0.05, self.pcm_accel_comp + 0.05)
     if CS.out.cruiseState.standstill or actuators.longControlState == LongCtrlState.stopping:
       self.pcm_accel_comp = 0.0
     pcm_accel_cmd = actuators.accel + self.pcm_accel_comp  # + offset
