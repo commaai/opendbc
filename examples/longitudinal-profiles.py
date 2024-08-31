@@ -89,7 +89,7 @@ MANEUVERS = [
   ),
   Maneuver(
     "brake step response: -4m/ss from 20mph",
-    [Action(-4, 3),],
+    [Action(0, 2), Action(-4, 3),],
     repeat=3,
     initial_speed=15. * Conversions.MPH_TO_MS,
   ),
@@ -106,6 +106,7 @@ MANEUVERS = [
    initial_speed=20. * Conversions.MPH_TO_MS,
   ),
 ]
+MANEUVERS = MANEUVERS[2:3]
 
 def report(args, logs, fp):
   output_path = Path(__file__).resolve().parent / "longitudinal_reports"
@@ -183,9 +184,9 @@ def main(args):
           )
           p.write(cc)
 
-          ready = cs.cruiseState.enabled and not cs.cruiseState.standstill and ((m.initial_speed - 0.3) < cs.vEgo < (m.initial_speed + 0.3))
+          ready = cs.cruiseState.enabled and not cs.cruiseState.standstill and ((m.initial_speed - 0.6) < cs.vEgo < (m.initial_speed + 0.6))
           ready_cnt = (ready_cnt+1) if ready else 0
-          if ready_cnt > (3./DT):
+          if ready_cnt > (2./DT):
             break
           rk.keep_time()
         else:
@@ -207,10 +208,10 @@ def main(args):
 
           rk.keep_time()
 
-    with open('/tmp/logs.json', 'w') as f:
-      import json
-      json.dump(logs, f, indent=2)
-    report(args, logs, p.CI.CP.carFingerprint)
+  with open('/tmp/logs.json', 'w') as f:
+    import json
+    json.dump(logs, f, indent=2)
+  report(args, logs, p.CI.CP.carFingerprint)
 
 
 if __name__ == "__main__":
