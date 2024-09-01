@@ -10,7 +10,6 @@ from kbhit import KBHit
 
 from opendbc.car.structs import CarControl
 from opendbc.car.panda_runner import PandaRunner
-from opendbc.car.can_definitions import CanData
 
 class Keyboard:
   def __init__(self):
