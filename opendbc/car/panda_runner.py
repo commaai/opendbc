@@ -4,7 +4,7 @@ from contextlib import AbstractContextManager
 from panda import Panda
 from opendbc.car.car_helpers import get_car
 from opendbc.car.can_definitions import CanData
-from opendbc.car.structs import CarControl
+from opendbc.car.structs import CarParams, CarControl
 
 class PandaRunner(AbstractContextManager):
   def __enter__(self):
@@ -14,12 +14,12 @@ class PandaRunner(AbstractContextManager):
     # setup + fingerprinting
     self.p.set_safety_mode(Panda.SAFETY_ELM327, 1)
     self.CI = get_car(self._can_recv, self.p.can_send_many, self.p.set_obd, True)
-    print("fingerprinted", self.CI.CP.carName)
-    assert self.CI.CP.carFingerprint != "mock", "Unable to identify car. Check connections and ensure car is supported."
+    assert self.CI.CP.carFingerprint.lower() != "mock", "Unable to identify car. Check connections and ensure car is supported."
 
+    safety_model = list(CarParams.SafetyModel).index(self.CI.CP.safetyConfigs[0].safetyModel)
     self.p.set_safety_mode(Panda.SAFETY_ELM327, 1)
     self.CI.init(self.CI.CP, self._can_recv, self.p.can_send_many)
-    self.p.set_safety_mode(Panda.SAFETY_TOYOTA, self.CI.CP.safetyConfigs[0].safetyParam)
+    self.p.set_safety_mode(safety_model, self.CI.CP.safetyConfigs[0].safetyParam)
 
     return self
 
