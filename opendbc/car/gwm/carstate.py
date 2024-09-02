@@ -31,7 +31,7 @@ class CarState(CarStateBase):
     ret.steeringAngleDeg = cp.vl["STEER_AND_AP_STALK"]["STEERING_ANGLE"] * (-1 if cp.vl["STEER_AND_AP_STALK"]["STEERING_DIRECTION"] else 1)
     ret.steeringRateDeg = 0 # TODO
     ret.steeringTorque = cp.vl["STEER_AND_AP_STALK"]["STEERING_TORQUE"] * (-1 if cp.vl["STEER_AND_AP_STALK"]["STEERING_DIRECTION"] else 1)
-    ret.steeringPressed = abs(ret.steeringTorque) > 75
+    ret.steeringPressed = abs(ret.steeringTorque) > 10
     # ret.yawRate = NOT ABSOLUTE NECESSARY
     # ret.steerFaultTemporary, ret.steerFaultPermanent = CRITICAL SAFETY TODO, CRITICAL SAFETY TODO
 
