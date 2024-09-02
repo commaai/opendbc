@@ -20,6 +20,7 @@ class CarInterface(CarInterfaceBase):
 
     # Global longitudinal tuning defaults, can be overridden per-vehicle
 
-    ret.pcmCruise = not ret.openpilotLongitudinalControl
+    # ret.pcmCruise = not ret.openpilotLongitudinalControl
+    ret.pcmCruise = False # TODO clean-after-port MOCK engagement
 
     return ret

@@ -1,13 +1,22 @@
+from collections import namedtuple
 from dataclasses import dataclass, field
 
-from opendbc.car import dbc_dict, CarSpecs, DbcDict, PlatformConfig, Platforms
+from opendbc.car import dbc_dict, CarSpecs, DbcDict, PlatformConfig, Platforms, structs
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
+Button = namedtuple('Button', ['event_type', 'can_addr', 'can_msg', 'values'])
 
 class CarControllerParams:
   def __init__(self, CP):
-    pass
+    self.BUTTONS = [
+      Button(structs.CarState.ButtonEvent.Type.setCruise, "STEER_AND_AP_STALK", "AP_ENABLE_COMMAND", [1]),
+      # Button(structs.CarState.ButtonEvent.Type.resumeCruise, "STEER_AND_AP_STALK", "AP_ENABLE_COMMAND", [1]),
+      Button(structs.CarState.ButtonEvent.Type.accelCruise, "STEER_AND_AP_STALK", "AP_INCREASE_SPEED_COMMAND", [1]),
+      Button(structs.CarState.ButtonEvent.Type.decelCruise, "STEER_AND_AP_STALK", "AP_DECREASE_SPEED_COMMAND", [1]),
+      Button(structs.CarState.ButtonEvent.Type.cancel, "STEER_AND_AP_STALK", "AP_CANCEL_COMMAND", [1]),
+      Button(structs.CarState.ButtonEvent.Type.gapAdjustCruise, "STEER_AND_AP_STALK", "AP_INCREASE_DISTANCE_COMMAND", [1]),
+    ]
 
 
 class CANBUS:

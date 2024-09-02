@@ -1,5 +1,5 @@
 import numpy as np
-from opendbc.car import create_button_events, structs
+from opendbc.car import structs
 from opendbc.car.interfaces import CarStateBase
 from opendbc.can.parser import CANParser
 from opendbc.car.gwm.values import DBC, CANBUS, CarControllerParams
@@ -12,12 +12,24 @@ class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
     self.frame = 0
-    self.CPP = CarControllerParams(CP)
+    self.CCP = CarControllerParams(CP)
+    self.button_states = {button.event_type: False for button in self.CCP.BUTTONS}
+
+  def create_button_events(self, cp, buttons):
+    button_events = []
+    for button in buttons:
+      state = cp.vl[button.can_addr][button.can_msg] in button.values
+      if self.button_states[button.event_type] != state:
+        event = structs.CarState.ButtonEvent()
+        event.type = button.event_type
+        event.pressed = state
+        button_events.append(event)
+      self.button_states[button.event_type] = state
+    return button_events
 
   def update(self, cp, cam_cp, _, __, loopback_cp) -> structs.CarState:
     ret = structs.CarState()
 
-    # ret.wheelSpeeds = self.get_wheel_speeds(10,10,10,10,unit=1.0)
     ret.wheelSpeeds = self.get_wheel_speeds(
       cp.vl["WHEEL_SPEEDS"]["FRONT_LEFT_WHEEL_SPEED"],
       cp.vl["WHEEL_SPEEDS"]["FRONT_RIGHT_WHEEL_SPEED"],
@@ -30,7 +42,7 @@ class CarState(CarStateBase):
 
     ret.steeringAngleDeg = cp.vl["STEER_AND_AP_STALK"]["STEERING_ANGLE"] * (-1 if cp.vl["STEER_AND_AP_STALK"]["STEERING_DIRECTION"] else 1)
     ret.steeringRateDeg = 0 # TODO
-    ret.steeringTorque = cp.vl["STEER_AND_AP_STALK"]["STEERING_TORQUE"] * (-1 if cp.vl["STEER_AND_AP_STALK"]["STEERING_DIRECTION"] else 1)
+    ret.steeringTorque = cp.vl["STEER_AND_AP_STALK"]["STEERING_TORQUE"] * (-1 if cp.vl["STEER_AND_AP_STALK"]["STEERING_DIRECTION"] else 1) * 73
     ret.steeringPressed = abs(ret.steeringTorque) > 10
     # ret.yawRate = NOT ABSOLUTE NECESSARY
     # ret.steerFaultTemporary, ret.steerFaultPermanent = CRITICAL SAFETY TODO, CRITICAL SAFETY TODO
@@ -62,7 +74,7 @@ class CarState(CarStateBase):
 
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_lamp(50, cp.vl["LIGHTS"]["LEFT_TURN_SIGNAL"],
                                                                       cp.vl["LIGHTS"]["RIGHT_TURN_SIGNAL"])
-    # ret.buttonEvents = TODO
+    ret.buttonEvents = self.create_button_events(cp, self.CCP.BUTTONS)
     # ret.espDisabled = TODO
 
     self.frame += 1
