@@ -51,7 +51,7 @@ class CarState(CarStateBase):
                         cp.vl["DOOR_DRIVER"]["DOOR_FRONT_RIGHT_OPEN"],
                         cp.vl["DOOR_DRIVER"]["DOOR_REAR_LEFT_OPEN"],
                         cp.vl["DOOR_DRIVER"]["DOOR_DRIVER_OPEN"]])
-    # ret.seatbeltUnlatched = TODO
+    ret.seatbeltUnlatched = cp.vl["SEATBELT"]["SEAT_BELT_DRIVER_STATE"] != 1
 
     # ret.cruiseState.available = CRITICAL SAFETY TODO
     # ret.cruiseState.enabled = TODO
@@ -76,6 +76,7 @@ class CarState(CarStateBase):
       ("BRAKE", 50),
       ("DOOR_DRIVER", 20),
       ("LIGHTS", 20),
+      ("SEATBELT", 2),
       ("STEER_AND_AP_STALK", 100),
       ("WHEEL_SPEEDS", 50),
     ]
