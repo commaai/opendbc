@@ -45,9 +45,9 @@ class CarState(CarStateBase):
     # ret.brakePressed = cp.vl["COROLLA_BRAKE_MODULE"]["BRAKE_PRESSED"] != 0
     # end TODO clean-after-port
 
-    ret.gearShifter = GearShifter.drive if cp.vl["CAR_OVERALL_SIGNALS"]["DRIVE_MODE"] == 1 else \
-                      GearShifter.neutral if cp.vl["CAR_OVERALL_SIGNALS"]["DRIVE_MODE"] == 2 else \
-                      GearShifter.reverse if cp.vl["CAR_OVERALL_SIGNALS"]["DRIVE_MODE"] == 3 else \
+    ret.gearShifter = GearShifter.drive if int(cp.vl["CAR_OVERALL_SIGNALS"]["DRIVE_MODE"]) == 1 else \
+                      GearShifter.neutral if int(cp.vl["CAR_OVERALL_SIGNALS"]["DRIVE_MODE"]) == 2 else \
+                      GearShifter.reverse if int(cp.vl["CAR_OVERALL_SIGNALS"]["DRIVE_MODE"]) == 3 else \
                       GearShifter.park
 
     ret.doorOpen = any([cp.vl["DOOR_DRIVER"]["DOOR_REAR_RIGHT_OPEN"],
