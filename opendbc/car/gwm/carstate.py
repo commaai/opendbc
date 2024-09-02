@@ -39,13 +39,16 @@ class CarState(CarStateBase):
     ret.gasPressed = ret.gas > 0
     ret.brake = cp.vl["BRAKE"]["BRAKE_PRESSURE"]
     ret.brakePressed = cp.vl["BRAKE"]["BRAKE_PRESSURE"] > 0
-    # ret.parkingBrake = TODO
+    ret.parkingBrake = cp.vl["CAR_OVERALL_SIGNALS"]["DRIVE_MODE"] == 0
 
     # begin toyota brakePressed TODO clean-after-port
     # ret.brakePressed = cp.vl["COROLLA_BRAKE_MODULE"]["BRAKE_PRESSED"] != 0
     # end TODO clean-after-port
 
-    ret.gearShifter = GearShifter.drive # TODO
+    ret.gearShifter = GearShifter.drive if cp.vl["CAR_OVERALL_SIGNALS"]["DRIVE_MODE"] == 1 else \
+                      GearShifter.neutral if cp.vl["CAR_OVERALL_SIGNALS"]["DRIVE_MODE"] == 2 else \
+                      GearShifter.reverse if cp.vl["CAR_OVERALL_SIGNALS"]["DRIVE_MODE"] == 3 else \
+                      GearShifter.park
 
     ret.doorOpen = any([cp.vl["DOOR_DRIVER"]["DOOR_REAR_RIGHT_OPEN"],
                         cp.vl["DOOR_DRIVER"]["DOOR_FRONT_RIGHT_OPEN"],
@@ -74,6 +77,7 @@ class CarState(CarStateBase):
 
       # HAVAL:
       ("BRAKE", 50),
+      ("CAR_OVERALL_SIGNALS", 50),
       ("CAR_OVERALL_SIGNALS2", 100),
       ("DOOR_DRIVER", 20),
       ("LIGHTS", 20),
