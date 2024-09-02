@@ -54,8 +54,8 @@ class CarState(CarStateBase):
     # ret.cruiseState.enabled = TODO
     # ret.cruiseState.speed = TODO
 
-    # ret.leftBlinker = TODO
-    # ret.rightBlinker = TODO
+    ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_lamp(50, cp.vl["LIGHTS"]["LEFT_TURN_SIGNAL"],
+                                                                      cp.vl["LIGHTS"]["RIGHT_TURN_SIGNAL"])
     # ret.buttonEvents = TODO
     # ret.espDisabled = TODO
 
@@ -71,6 +71,7 @@ class CarState(CarStateBase):
 
       # HAVAL:
       ("BRAKE", 50),
+      ("LIGHTS", 20),
       ("STEER_AND_AP_STALK", 100),
       ("WHEEL_SPEEDS", 50),
     ]
