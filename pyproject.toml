@@ -33,6 +33,10 @@ docs = [
   "Jinja2",
   "natsort",
 ]
+examples = [
+  "inputs",
+  "matplotlib",
+]
 
 [tool.pytest.ini_options]
 addopts = "--ignore=panda/ -Werror --strict-config --strict-markers --durations=10 -n auto"
