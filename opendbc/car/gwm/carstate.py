@@ -35,10 +35,10 @@ class CarState(CarStateBase):
     # ret.yawRate = NOT ABSOLUTE NECESSARY
     # ret.steerFaultTemporary, ret.steerFaultPermanent = CRITICAL SAFETY TODO, CRITICAL SAFETY TODO
 
-    ret.gas = 0 # TODO
+    ret.gas = cp.vl["CAR_OVERALL_SIGNALS2"]["GAS_POSITION"]
     ret.gasPressed = ret.gas > 0
-    ret.brake = 0
-    ret.brakePressed = cp.vl["BRAKE"]["BRAKE_PRESSURE"] > 255
+    ret.brake = cp.vl["BRAKE"]["BRAKE_PRESSURE"]
+    ret.brakePressed = cp.vl["BRAKE"]["BRAKE_PRESSURE"] > 0
     # ret.parkingBrake = TODO
 
     # begin toyota brakePressed TODO clean-after-port
@@ -74,6 +74,7 @@ class CarState(CarStateBase):
 
       # HAVAL:
       ("BRAKE", 50),
+      ("CAR_OVERALL_SIGNALS2", 100),
       ("DOOR_DRIVER", 20),
       ("LIGHTS", 20),
       ("SEATBELT", 2),
