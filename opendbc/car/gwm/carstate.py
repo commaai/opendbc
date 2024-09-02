@@ -47,7 +47,10 @@ class CarState(CarStateBase):
 
     ret.gearShifter = GearShifter.drive # TODO
 
-    # ret.doorOpen = TODO
+    ret.doorOpen = any([cp.vl["DOOR_DRIVER"]["DOOR_REAR_RIGHT_OPEN"],
+                        cp.vl["DOOR_DRIVER"]["DOOR_FRONT_RIGHT_OPEN"],
+                        cp.vl["DOOR_DRIVER"]["DOOR_REAR_LEFT_OPEN"],
+                        cp.vl["DOOR_DRIVER"]["DOOR_DRIVER_OPEN"]])
     # ret.seatbeltUnlatched = TODO
 
     # ret.cruiseState.available = CRITICAL SAFETY TODO
@@ -71,6 +74,7 @@ class CarState(CarStateBase):
 
       # HAVAL:
       ("BRAKE", 50),
+      ("DOOR_DRIVER", 20),
       ("LIGHTS", 20),
       ("STEER_AND_AP_STALK", 100),
       ("WHEEL_SPEEDS", 50),
