@@ -46,4 +46,4 @@ may end up going in openpilot.
 * Make car ports easier: refactors, tools, tests, and docs
 * Expose the state of all supported cars better: https://github.com/commaai/opendbc/issues/1144
 
-Contributions towards anyting here is welcome. Join the [Discord](https://discord.comma.ai)!
+Contributions towards anything here is welcome. Join the [Discord](https://discord.comma.ai)!
