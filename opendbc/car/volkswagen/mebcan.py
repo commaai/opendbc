@@ -98,7 +98,7 @@ def acc_hold_type(main_switch_on, acc_faulted, long_active, just_disabled, start
   return acc_hold_type
   
 
-def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, acc_hold_type, stopping, starting, esp_hold, speed, reversing, meb_acc_02_values):
+def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, acc_hold_type, stopping, starting, lower_jerk, upper_jerk, esp_hold, speed, reversing, meb_acc_02_values):
   commands = []
 
   values = {
@@ -106,8 +106,8 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
     "ACC_Status_ACC":             acc_control,
     "ACC_StartStopp_Info":        acc_enabled,
     "ACC_Sollbeschleunigung_02":  accel if acc_enabled else 3.01,
-    "ACC_zul_Regelabw_unten":     0.2,  # TODO: dynamic adjustment of comfort-band
-    "ACC_zul_Regelabw_oben":      0.2,  # TODO: dynamic adjustment of comfort-band
+    "ACC_zul_Regelabw_unten":     max(0.05, lower_jerk) if acc_enabled else 0,
+    "ACC_zul_Regelabw_oben":      min(3.0, upper_jerk) if acc_enabled else 0,
     "ACC_neg_Sollbeschl_Grad_02": 4.0 if acc_enabled else 0,  # TODO: dynamic adjustment of jerk limits
     "ACC_pos_Sollbeschl_Grad_02": 4.0 if acc_enabled else 0,  # TODO: dynamic adjustment of jerk limits
     "ACC_Anfahren":               starting,
