@@ -1503,6 +1503,7 @@ BO_ 258 MEB_ESP_04: 48 XXX
 BO_ 313 MEB_ESP_05: 32 XXX
  SG_ Brake_Pressed_1 : 16|1@0+ (1,0) [0|1] "" XXX
  SG_ Brake_Pressed_2 : 27|1@0+ (1,0) [0|1] "" XXX
+ SG_ AEB_Active : 31|1@0+ (1,0) [0|1] "" XXX
  SG_ ESP_Hold : 35|1@0+ (1,0) [0|1] "" XXX
  SG_ Brake_Pressed_3 : 48|1@0+ (1,0) [0|1] "" XXX
  SG_ FCW_Active : 56|1@1+ (1,0) [0|1] "" XXX
