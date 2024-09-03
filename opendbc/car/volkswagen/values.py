@@ -209,7 +209,7 @@ class VolkswagenMEBPlatformConfig(PlatformConfig):
 
 
 @dataclass
-class VolkswagenPQPlatformConfig(PlatformConfig):
+class VolkswagenPQPlatformConfig(VolkswagenMQBPlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: dbc_dict('vw_golf_mk4', None))
 
   def init(self):
