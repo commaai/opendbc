@@ -45,6 +45,7 @@ class CarController(CarControllerBase):
     self.steering_power = 0
     self.long_heartbeat = 0
     self.long_active_prev = False
+    self.accel_last = 0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -154,6 +155,7 @@ class CarController(CarControllerBase):
 
     if self.frame % self.CCP.ACC_CONTROL_STEP == 0 and self.CP.openpilotLongitudinalControl:
       accel = clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0
+      self.accel_last = accel
       stopping = actuators.longControlState == LongCtrlState.stopping
       starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
 
@@ -165,8 +167,17 @@ class CarController(CarControllerBase):
         acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive, just_disabled)
         acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive, just_disabled, starting,
                                                stopping, CS.esp_hold_confirmation)
+        required_jerk = min(3, abs(accel - CS.out.aEgo) * 50) ## pfeiferj:openpilot:pfeifer-hkg-long-control-tune
+        lower_jerk = required_jerk
+        upper_jerk = required_jerk
+
+        if CS.out.aEgo < accel:
+          lower_jerk = 0
+        else:
+          upper_jerk = 0
+          
         can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.longActive, accel, acc_control,
-                                                           acc_hold_type, stopping, starting, CS.esp_hold_confirmation,
+                                                           acc_hold_type, stopping, starting, lower_jerk, upper_jerk, CS.esp_hold_confirmation,
                                                            current_speed, reversing, CS.meb_acc_02_values))
 
       else:
@@ -219,6 +230,7 @@ class CarController(CarControllerBase):
     new_actuators.steerOutputCan = self.apply_steer_last
     #new_actuators.curvature = self.apply_curvature_last
     new_actuators.steeringAngleDeg = self.apply_angle_last
+    new_actuators.accel = self.accel_last
 
     self.gra_acc_counter_last = CS.gra_stock_values["COUNTER"]
     self.frame += 1
