@@ -10,6 +10,8 @@ RADAR_ADDR = 0x24F
 RADAR_SAME_LANE_01 = 1
 RADAR_SAME_LANE_02 = 2
 
+# info: distance signals can move without physical distance change ...
+
 def get_radar_can_parser(CP):
   if CP.flags & VolkswagenFlags.MEB:
     messages = [("MEB_Distance_01", 25)]
@@ -68,7 +70,7 @@ class RadarInterface(RadarInterfaceBase):
     valid = msg['Same_Lane_01_Detection'] > 0
     if valid:
       self.pts[signal_part].measured = True
-      self.pts[signal_part].dRel     = max(msg['Same_Lane_01_Long_Distance'], 0) #because of a little bit of shifting negative values possible
+      self.pts[signal_part].dRel     = msg['Same_Lane_01_Long_Distance'] # negative values possible
       self.pts[signal_part].yRel     = -msg['Same_Lane_01_Lat_Distance'] # left is positive
       self.pts[signal_part].vRel     = msg['Same_Lane_01_Rel_Velo'] * CV.KPH_TO_MS
       self.pts[signal_part].aRel     = float('nan')
@@ -87,7 +89,7 @@ class RadarInterface(RadarInterfaceBase):
     valid = msg['Same_Lane_02_Detection'] > 0
     if valid:
       self.pts[signal_part].measured = True
-      self.pts[signal_part].dRel     = max(msg['Same_Lane_02_Long_Distance'], 0)
+      self.pts[signal_part].dRel     = msg['Same_Lane_02_Long_Distance']
       self.pts[signal_part].yRel     = -msg['Same_Lane_02_Lat_Distance']
       self.pts[signal_part].vRel     = msg['Same_Lane_02_Rel_Velo'] * CV.KPH_TO_MS
       self.pts[signal_part].aRel     = float('nan')
