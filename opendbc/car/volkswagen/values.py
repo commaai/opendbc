@@ -183,6 +183,7 @@ class VolkswagenFlags(IntFlag):
   # Static flags
   PQ = 2
   MEB = 4
+  CANFD = 8
 
 
 @dataclass
@@ -207,7 +208,7 @@ class VolkswagenMEBPlatformConfig(PlatformConfig):
 
 
 @dataclass
-class VolkswagenPQPlatformConfig(VolkswagenMQBPlatformConfig):
+class VolkswagenPQPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: dbc_dict('vw_golf_mk4', None))
 
   def init(self):
