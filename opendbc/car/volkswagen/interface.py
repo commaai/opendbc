@@ -75,7 +75,7 @@ class CarInterface(CarInterfaceBase):
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
     elif ret.flags & VolkswagenFlags.MEB:
       ret.steerLimitTimer = 0.8
-      ret.steerActuatorDelay = 0.4
+      ret.steerActuatorDelay = 0.35
     else:
       ret.steerLimitTimer = 0.4
       ret.steerActuatorDelay = 0.1
@@ -89,12 +89,10 @@ class CarInterface(CarInterfaceBase):
 
     if ret.flags & VolkswagenFlags.MEB:
       ret.longitudinalActuatorDelay = 1.0
-      #ret.longitudinalTuning.deadzoneBP = [0., 8.05]
-      #ret.longitudinalTuning.deadzoneV = [.0, .14]
       #ret.longitudinalTuning.kpBP = [0., 5., 20.]
       #ret.longitudinalTuning.kpV  = [0.1, 0.05, 0.]
-      ret.longitudinalTuning.kiBP = [0., 5., 35.] # try toyota tuning for comparism
-      ret.longitudinalTuning.kiV  = [3., 2., 1.8]
+      ret.longitudinalTuning.kiBP = [0., 5., 35.]
+      ret.longitudinalTuning.kiV  = [3., 1.8., 1.4]
       #if params.get_bool('ExperimentalMode'):
       #  ret.longitudinalTuning.kpV = [0.5, 0.2, -0.2] # experimental OP long is less smooth
       
