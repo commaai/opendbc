@@ -20,8 +20,9 @@ def load_interfaces(brand_names):
     CarInterface = __import__(path + '.interface', fromlist=['CarInterface']).CarInterface
     CarState = __import__(path + '.carstate', fromlist=['CarState']).CarState
     CarController = __import__(path + '.carcontroller', fromlist=['CarController']).CarController
+    RadarInterface = __import__(path + '.radar_interface', fromlist=['RadarInterface']).RadarInterface
     for model_name in brand_names[brand_name]:
-      ret[model_name] = (CarInterface, CarController, CarState)
+      ret[model_name] = (CarInterface, CarController, CarState, RadarInterface)
   return ret
 
 
