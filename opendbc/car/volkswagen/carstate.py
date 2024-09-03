@@ -316,21 +316,6 @@ class CarState(CarStateBase):
       ret.leftBlindspot = ext_cp.vl["MEB_Drive_State_01"]["Blind_Spot_Left"] > 0
       ret.rightBlindspot = ext_cp.vl["MEB_Drive_State_01"]["Blind_Spot_Right"] > 0
 
-    # detect an object beside the car with radar and keep minimum of 4 meter
-    front_dist_min = 4
-
-    # left side
-    if self.distance_stock_values['Left_Lane_01_Detection'] > 0 and self.distance_stock_values['Left_Lane_01_Long_Distance'] < front_dist_min:
-      ret.leftBlindspot = True
-    if self.distance_stock_values['Left_Lane_02_Detection'] > 0 and self.distance_stock_values['Left_Lane_02_Long_Distance'] < front_dist_min:
-      ret.leftBlindspot = True
-
-    # right side
-    if self.distance_stock_values['Right_Lane_01_Detection'] > 0 and self.distance_stock_values['Right_Lane_01_Long_Distance'] < front_dist_min:
-      ret.rightBlindspot = True
-    if self.distance_stock_values['Right_Lane_02_Detection'] > 0 and self.distance_stock_values['Right_Lane_02_Long_Distance'] < front_dist_min:
-      ret.rightBlindspot = True
-
     # Consume factory LDW data relevant for factory SWA (Lane Change Assist)
     # and capture it for forwarding to the blind spot radar controller
     self.ldw_stock_values = cam_cp.vl["LDW_02"]
@@ -338,7 +323,7 @@ class CarState(CarStateBase):
     self.meb_acc_02_values = ext_cp.vl["MEB_ACC_02"]
 
     ret.stockFcw = False # find signal
-    ret.stockAeb = False # find signal
+    ret.stockAeb = pt_cp.vl["MEB_ESP_01"]["AEB_Breaking_01"] > 0
 
     self.acc_type = ext_cp.vl["MEB_ACC_02"]["ACC_Typ"]
 
