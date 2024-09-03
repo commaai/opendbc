@@ -92,7 +92,7 @@ class CarInterface(CarInterfaceBase):
       #ret.longitudinalTuning.kpBP = [0., 5., 20.]
       #ret.longitudinalTuning.kpV  = [0.1, 0.05, 0.]
       ret.longitudinalTuning.kiBP = [0., 5., 35.]
-      ret.longitudinalTuning.kiV  = [3., 1.8., 1.4]
+      ret.longitudinalTuning.kiV  = [3., 1.8, 1.4]
       #if params.get_bool('ExperimentalMode'):
       #  ret.longitudinalTuning.kpV = [0.5, 0.2, -0.2] # experimental OP long is less smooth
       
