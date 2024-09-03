@@ -144,7 +144,7 @@ def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_
       'CRUISE_SPEED': hud.v_cruise,
       'ENABLE_MINI_CAR': 1 if enabled else 0,
       # only moves the lead car without ACC_ON
-      'HUD_DISTANCE': (hud.lead_distance_bars + 1) % 4,  # wraps to 0 at 4 bars
+      'HUD_DISTANCE': hud.lead_distance_bars,  # wraps to 0 at 4 bars
       'IMPERIAL_UNIT': int(not is_metric),
       'HUD_LEAD': 2 if enabled and hud.lead_visible else 1 if enabled else 0,
       'SET_ME_X01_2': 1,

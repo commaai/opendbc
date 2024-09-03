@@ -1,7 +1,3 @@
-Adaption to MQBA0 EPS 2Q1909144J 6030 used in a PQ26 no radar non ACC car (Volkswagen Polo 6C [Polo 6R Facelift]) PQ26 can be seen as nearly identical to MQB regarding can bus communication.
-
-Panda can 0 is directly connected to engine can bus Panda can 1 is directly connected to comfort can bus
-
 ## DBC file basics
 
 A DBC file encodes, in a humanly readable way, the information needed to understand a vehicle's CAN bus traffic. A vehicle might have multiple CAN buses and every CAN bus is represented by its own dbc file.
@@ -18,36 +14,27 @@ To create custom CAN simulations or send reverse engineered signals back to the 
 
 ## DBC file preprocessor
 
-DBC files for different models of the same brand have a lot of overlap. Therefore, we wrote a preprocessor to create DBC files from a brand DBC file and a model specific DBC file. The source DBC files can be found in the generator folder. After changing one of the files run the generator.py script to regenerate the output files. These output files will be placed in the root of the opendbc repository and are suffixed by _generated.
+# Run the linter
+pre-commit run --all-files
+```
 
-## Good practices for contributing to opendbc
+[`examples/`](examples/) contains small example programs that can read state from the car and control the steering, gas, and brakes.
+[`examples/joystick.py`](examples/joystick.py) allows you to control a car with a joystick.
 
-- Comments: the best way to store comments is to add them directly to the DBC files. For example:
-    ```
-    CM_ SG_ 490 LONG_ACCEL "wheel speed derivative, noisy and zero snapping";
-    ```
-    is a comment that refers to signal `LONG_ACCEL` in message `490`. Using comments is highly recommended, especially for doubts and uncertainties. [cabana](https://community.comma.ai/cabana/) can easily display/add/edit comments to signals and messages.
+## Roadmap
 
-- Units: when applicable, it's recommended to convert signals into physical units, by using a proper signal factor. Using a SI unit is preferred, unless a non-SI unit rounds the signal factor much better.
-For example:
-    ```
-    SG_ VEHICLE_SPEED : 7|15@0+ (0.00278,0) [0|70] "m/s" PCM
-    ```
-    is better than:
-    ```
-    SG_ VEHICLE_SPEED : 7|15@0+ (0.00620,0) [0|115] "mph" PCM
-    ```
-    However, the cleanest option is really:
-    ```
-    SG_ VEHICLE_SPEED : 7|15@0+ (0.01,0) [0|250] "kph" PCM
-    ```
+This project was pulled out from [openpilot](https://github.com/commaai/openpilot).
+We're still figuring out the exact API between openpilot and opendbc, so some of these
+may end up going in openpilot.
 
-- Signal size: always use the smallest amount of bits possible. For example, let's say I'm reverse engineering the gas pedal position and I've determined that it's in a 3 bytes message. For 0% pedal position I read a message value of `0x00 0x00 0x00`, while for 100% of pedal position I read `0x64 0x00 0x00`: clearly, the gas pedal position is within the first byte of the message and I might be tempted to define the signal `GAS_POS` as:
-    ```
-    SG_ GAS_POS : 7|8@0+ (1,0) [0|100] "%" PCM
-    ```
-    However, I can't be sure that the very first bit of the message is referred to the pedal position: I haven't seen it changing! Therefore, a safer way of defining the signal is:
-    ```
-    SG_ GAS_POS : 6|7@0+ (1,0) [0|100] "%" PCM
-    ```
-    which leaves the first bit unallocated. This prevents from very erroneous reading of the gas pedal position, in case the first bit is indeed used for something else.
+* Extend support to every car with LKAS + ACC interfaces
+* Automatic lateral and longitudinal control/tuning evaluation
+* Auto-tuning for [lateral](https://blog.comma.ai/090release/#torqued-an-auto-tuner-for-lateral-control) and longitudinal control
+* [Automatic Emergency Braking](https://en.wikipedia.org/wiki/Automated_emergency_braking_system)
+* `pip install opendbc`
+* 100% type coverage
+* 100% line coverage
+* Make car ports easier: refactors, tools, tests, and docs
+* Expose the state of all supported cars better: https://github.com/commaai/opendbc/issues/1144
+
+Contributions towards anything here is welcome. Join the [Discord](https://discord.comma.ai)!
