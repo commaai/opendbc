@@ -322,7 +322,7 @@ class CarState(CarStateBase):
     self.meb_acc_01_values = ext_cp.vl["MEB_ACC_01"]
     self.meb_acc_02_values = ext_cp.vl["MEB_ACC_02"]
 
-    ret.stockFcw = False # find signal
+    ret.stockFcw = bool(pt_cp.vl["MEB_ESP_05"]["FCW_Active"])
     ret.stockAeb = pt_cp.vl["MEB_ESP_01"]["AEB_Breaking_01"] > 0
 
     self.acc_type = ext_cp.vl["MEB_ACC_02"]["ACC_Typ"]
