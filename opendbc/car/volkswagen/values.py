@@ -205,7 +205,7 @@ class VolkswagenMEBPlatformConfig(PlatformConfig):
 
   def init(self):
     self.flags |= VolkswagenFlags.MEB
-    self.flags |= HyundaiFlags.CANFD
+    self.flags |= VolkswagenFlags.CANFD
 
 
 @dataclass
