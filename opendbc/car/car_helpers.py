@@ -150,8 +150,8 @@ def fingerprint(can_recv: CanRecvCallable, can_send: CanSendCallable, set_obd_mu
 
 
 def get_car_interface(CP: CarParams):
-  CarInterface, CarController, CarState, _ = interfaces[CP.carFingerprint]
-  return CarInterface(CP, CarController, CarState)
+  CarInterface, CarController, CarState, RadarInterface = interfaces[CP.carFingerprint]
+  return CarInterface(CP, CarController, CarState), RadarInterface(CP)
 
 
 def get_car(can_recv: CanRecvCallable, can_send: CanSendCallable, set_obd_multiplexing: ObdCallback, experimental_long_allowed: bool,
