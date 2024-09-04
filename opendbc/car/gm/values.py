@@ -241,6 +241,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
   extra_ecus=[(Ecu.fwdCamera, 0x24b, None)],
 )
 
+# TODO: detect most of these sets live
 EV_CAR = {CAR.CHEVROLET_VOLT, CAR.CHEVROLET_VOLT_2019, CAR.CHEVROLET_BOLT_EUV}
 
 # We're integrated at the camera with VOACC on these cars (instead of ASCM w/ OBD-II harness)
