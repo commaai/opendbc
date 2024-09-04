@@ -41,6 +41,7 @@ examples = [
 [tool.pytest.ini_options]
 addopts = "--ignore=panda/ -Werror --strict-config --strict-markers --durations=10 -n auto"
 python_files = "test_*.py"
+asyncio_default_fixture_loop_scope = "function"
 testpaths = [
   "opendbc"
 ]
