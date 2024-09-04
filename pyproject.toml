@@ -16,6 +16,7 @@ dependencies = [
   "crcmod",
   "tqdm",
   "pandacan@git+https://github.com/commaai/panda.git@master",
+  "setuptools",
 ]
 
 [project.optional-dependencies]
