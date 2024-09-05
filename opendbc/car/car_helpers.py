@@ -154,6 +154,11 @@ def get_car_interface(CP: CarParams):
   return CarInterface(CP, CarController, CarState)
 
 
+def get_radar_interface(CP: CarParams):
+  _, _, _, RadarInterface = interfaces[CP.carFingerprint]
+  return RadarInterface(CP)
+
+
 def get_car(can_recv: CanRecvCallable, can_send: CanSendCallable, set_obd_multiplexing: ObdCallback, experimental_long_allowed: bool,
             num_pandas: int = 1, cached_params: CarParams | None = None):
   candidate, fingerprints, vin, car_fw, source, exact_match = fingerprint(can_recv, can_send, set_obd_multiplexing, num_pandas, cached_params)
