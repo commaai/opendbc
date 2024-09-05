@@ -20,8 +20,9 @@ def load_interfaces(brand_names):
     CarInterface = __import__(path + '.interface', fromlist=['CarInterface']).CarInterface
     CarState = __import__(path + '.carstate', fromlist=['CarState']).CarState
     CarController = __import__(path + '.carcontroller', fromlist=['CarController']).CarController
+    RadarInterface = __import__(path + '.radar_interface', fromlist=['RadarInterface']).RadarInterface
     for model_name in brand_names[brand_name]:
-      ret[model_name] = (CarInterface, CarController, CarState)
+      ret[model_name] = (CarInterface, CarController, CarState, RadarInterface)
   return ret
 
 
@@ -149,7 +150,7 @@ def fingerprint(can_recv: CanRecvCallable, can_send: CanSendCallable, set_obd_mu
 
 
 def get_car_interface(CP: CarParams):
-  CarInterface, CarController, CarState = interfaces[CP.carFingerprint]
+  CarInterface, CarController, CarState, _ = interfaces[CP.carFingerprint]
   return CarInterface(CP, CarController, CarState)
 
 
@@ -161,7 +162,7 @@ def get_car(can_recv: CanRecvCallable, can_send: CanSendCallable, set_obd_multip
     carlog.error({"event": "car doesn't match any fingerprints", "fingerprints": repr(fingerprints)})
     candidate = "MOCK"
 
-  CarInterface, _, _ = interfaces[candidate]
+  CarInterface, _, _, _ = interfaces[candidate]
   CP: CarParams = CarInterface.get_params(candidate, fingerprints, car_fw, experimental_long_allowed, docs=False)
   CP.carVin = vin
   CP.carFw = car_fw
@@ -173,6 +174,6 @@ def get_car(can_recv: CanRecvCallable, can_send: CanSendCallable, set_obd_multip
 
 def get_demo_car_params():
   platform = MOCK.MOCK
-  CarInterface, _, _ = interfaces[platform]
+  CarInterface, _, _, _ = interfaces[platform]
   CP = CarInterface.get_non_essential_params(platform)
   return CP
