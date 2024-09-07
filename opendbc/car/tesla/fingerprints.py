@@ -4,7 +4,7 @@ from opendbc.car.tesla.values import CAR
 Ecu = CarParams.Ecu
 
 FW_VERSIONS = {
-  CAR.TESLA_AP3_MODEL3: {
+  CAR.TESLA_MODEL_3: {
     (Ecu.eps, 0x730, None): [
       b'TeM3_E014p10_0.0.0 (16),E014.17.00',
       b'TeMYG4_DCS_Update_0.0.0 (13),E4014.28.1',
@@ -28,7 +28,7 @@ FW_VERSIONS = {
       b'\x01\x00\x05 [\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x003\xd8',
     ],
   },
-  CAR.TESLA_AP3_MODELY: {
+  CAR.TESLA_MODEL_Y: {
     (Ecu.eps, 0x730, None): [
       b'TeM3_E014p10_0.0.0 (16),Y002.18.00',
       b'TeM3_ES014p11_0.0.0 (16),YS002.17',
