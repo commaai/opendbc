@@ -8,7 +8,7 @@ from opendbc.car.tesla.values import DBC, CarControllerParams
 
 
 class CarController(CarControllerBase):
-  def __init__(self, dbc_name, CP, VM):
+  def __init__(self, dbc_name, CP):
     self.CP = CP
     self.frame = 0
     self.apply_angle_last = 0

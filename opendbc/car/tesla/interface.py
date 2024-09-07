@@ -4,7 +4,6 @@ from opendbc.car.tesla.values import CAR
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.tesla.values import TeslaFlags
 
-SteerControlType = structs.CarParams.SteerControlType
 
 class CarInterface(CarInterfaceBase):
   @staticmethod
@@ -16,7 +15,7 @@ class CarInterface(CarInterfaceBase):
     # how openpilot should be, hence dashcamOnly
     ret.dashcamOnly = False
 
-    ret.steerControlType = SteerControlType.angle
+    ret.steerControlType = structs.CarParams.SteerControlType
 
     ret.longitudinalActuatorDelay = 0.5 # s
     ret.radarUnavailable = True
