@@ -77,7 +77,7 @@ class CarInterface(CarInterfaceBase):
       ret.steerActuatorDelay = 0.2
 
     if candidate == CAR.KIA_EV9:
-      ret.steerControlType = structs.CarControl.SteerControlType.angle
+      ret.steerControlType = structs.CarParams.SteerControlType.angle
     # *** longitudinal control ***
     if candidate in CANFD_CAR:
       ret.experimentalLongitudinalAvailable = candidate not in (CANFD_UNSUPPORTED_LONGITUDINAL_CAR | CANFD_RADAR_SCC_CAR)

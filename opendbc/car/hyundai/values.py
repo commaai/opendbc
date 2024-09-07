@@ -498,7 +498,6 @@ class CAR(Platforms):
     flags=HyundaiFlags.RADAR_SCC,
   )
   KIA_EV9 = HyundaiCanFDPlatformConfig(
-    "KIA EV9 2024",
     [
       HyundaiCarDocs("Kia EV9 2024", car_parts=CarParts.common([CarHarness.hyundai_r]))
     ],
