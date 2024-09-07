@@ -19,7 +19,7 @@ class CarState(CarStateBase):
     self.sccm_right_stalk_counter = None
     self.das_control = None
 
-  def update(self, cp, cp_cam, cp_adas):
+  def update(self, cp, cp_cam, cp_adas, *_) -> structs.CarState:
     ret = structs.CarState()
 
     # Vehicle speed
