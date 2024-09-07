@@ -36,7 +36,7 @@ def create_lta_steer_command(packer, steer_control_type, steer_angle, steer_req,
 def create_accel_command(packer, accel, pcm_cancel, standstill_req, lead, acc_type, fcw_alert, distance):
   # TODO: find the exact canceling bit that does not create a chime
   values = {
-    "ACCEL_CMD": max(accel, 0),
+    "ACCEL_CMD": accel,
     "ACC_TYPE": acc_type,
     "DISTANCE": distance,
     "MINI_CAR": lead,
@@ -57,7 +57,6 @@ def create_pcs_commands(packer, accel, long_active, mass):
     "BRAKE_STATUS": 0,
     "PRECOLLISION_ACTIVE": 1 if long_active else 0,
   }
-
   msg1 = packer.make_can_msg("PRE_COLLISION", 0, values1)
 
   values2 = {
@@ -68,7 +67,6 @@ def create_pcs_commands(packer, accel, long_active, mass):
     "PREFILL": 1 if long_active else 0,  # goes on and off before DSS1GDRV
     "AVSTRGR": 1 if long_active else 0,
   }
-
   msg2 = packer.make_can_msg("PRE_COLLISION_2", 0, values2)
 
   return [msg1, msg2]
