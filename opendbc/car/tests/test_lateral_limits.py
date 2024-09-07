@@ -28,7 +28,7 @@ class TestLateralLimits:
 
   @classmethod
   def setup_class(cls):
-    CarInterface, _, _ = interfaces[cls.car_model]
+    CarInterface, _, _, _ = interfaces[cls.car_model]
     CP = CarInterface.get_non_essential_params(cls.car_model)
 
     if CP.dashcamOnly:
