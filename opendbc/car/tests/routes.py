@@ -294,7 +294,7 @@ routes = [
   CarTestRoute("a4af1602d8e668ac|2022-02-03--12-17-07", MAZDA.MAZDA_CX5_2022),
 
   CarTestRoute("b5f2b5b4ef23f4b6/00000008--d88c2210a5", TESLA.TESLA_MODEL_3),
-  CarTestRoute("35f334fe58c5cdc5/00000089--c5ed862a40", TESLA.TESLA_MODEL_Y),
+  CarTestRoute("46cdc864ec865f4b/00000007--42f94db730", TESLA.TESLA_MODEL_Y),
 
   # Segments that test specific issues
   # Controls mismatch due to standstill threshold
