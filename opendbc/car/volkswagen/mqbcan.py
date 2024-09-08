@@ -153,8 +153,6 @@ def create_awv_control(packer, fcw_active, aeb_active, accel):
     "ANB_Teilbremsung_Freigabe": 0,  # Target braking release
     "ANB_Zielbremsung_Freigabe": 0,  # Partial braking release
     "ANB_Zielbrems_Teilbrems_Verz_Anf": 0.0,   # Acceleration requirement for target/partial braking, m/s/s
-    "ANB_CM_Anforderung": 0,  # CM (city emergency brake?) request
-    "AWV_CityANB_Auspraegung": 0,  # Unknown, related to City Emergency Brake velocity range
     "AWV_Halten": 0,  # Vehicle standstill request
     "PCF_Time_to_collision": 0xFF,  # Pre Crash Front, populated only with a target, might be used on Audi only
   }
