@@ -106,8 +106,8 @@ def create_acc_hud_control(packer, bus, acc_hud_status, set_speed, lead_distance
 
 
 def create_aeb_control(packer, fcw_active, aeb_active, accel):
-  return None
+  return []
 
 
 def create_aeb_hud(packer, aeb_supported, fcw_active):
-  return None
+  return []
