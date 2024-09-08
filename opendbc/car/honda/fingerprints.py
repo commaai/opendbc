@@ -559,6 +559,53 @@ FW_VERSIONS = {
       b'77959-T6A-P110\x00\x00',
     ],
   },
+  CAR.HONDA_ODYSSEY_BOSCH: {
+    (Ecu.programmedFuelInjection, 0x18da10f1, None): [
+      b'37805-5MR-C120\x00\x00',  # 2023 (unknown trim)
+      b'37805-5MR-C320\x00\x00',  # 2024 Touring
+      b'37805-5MR-C730\x00\x00',  # 2021 Touring
+      b'37805-5MR-C910\x00\x00',  # 2022 Touring
+      b'37805-5MR-C920\x00\x00',  # 2022 Elite
+      b'37805-5MR-C930\x00\x00',  # 2022 Elite - FW Update
+    ],
+    (Ecu.transmission, 0x18da1ef1, None): [
+      b'28102-5MX-A100\x00\x00',  # 2021 Touring, 2022 Elite
+      b'28102-5MX-A200\x00\x00',  # 2023 (unknown trim), 2024 Touring
+      b'28102-5MX-C100\x00\x00',  # 2022 Touring
+    ],
+    (Ecu.electricBrakeBooster, 0x18da2bf1, None): [
+      b'46114-THR-A530\x00\x00', # 2021+
+      b'46114-THR-A540\x00\x00', # 2023 (unknown trim), 2024 Touring
+    ],
+    (Ecu.gateway, 0x18daeff1, None): [
+      b'38897-THR-A130\x00\x00', # 2021+
+      b'38897-THR-A410\x00\x00', # 2024 Touring
+    ],
+    (Ecu.eps, 0x18da30f1, None): [b'39990-THR-A050\x00\x00'],
+    (Ecu.fwdRadar, 0x18dab0f1, None): [b'36802-THR-A220\x00\x00'],
+    (Ecu.fwdCamera, 0x18dab5f1, None): [
+      b'36161-THR-A220\x00\x00', # 2021+
+      b'36161-THR-A230\x00\x00', # 2023 (unknown trim), 2024 Touring
+    ],
+    (Ecu.shiftByWire, 0x18da0bf1, None): [b'54008-THR-A310\x00\x00'],
+    (Ecu.srs, 0x18da53f1, None): [
+      b'77959-THR-A220\x00\x00', # 2021+
+      b'77959-THR-A230\x00\x00', # 2023 (unknown trim), 2024 Touring
+    ],
+    (Ecu.vsa, 0x18da28f1, None): [
+      b'57114-THR-A230\x00\x00', # 2021+
+      b'57114-THR-A240\x00\x00', # 2022 Elite, 2024 Touring
+    ],
+    (Ecu.combinationMeter, 0x18da60f1, None): [
+      b'78109-THR-AQ10\x00\x00',  # 2022 EX
+      b'78109-THR-AR10\x00\x00',  # 2021 EX-L
+      b'78109-THR-AS10\x00\x00',  # 2021 Touring
+      b'78109-THR-AT10\x00\x00',  # 2021 (unknown trim), 2022 Elite
+      b'78109-THR-AW10\x00\x00',  # 2023 (unknown trim)
+      b'78109-THR-AX10\x00\x00',  # 2024 Touring
+      b'78109-THR-CT10\x00\x00',  # 2022 Touring
+    ],
+  },
   CAR.HONDA_PILOT: {
     (Ecu.shiftByWire, 0x18da0bf1, None): [
       b'54008-TG7-A520\x00\x00',

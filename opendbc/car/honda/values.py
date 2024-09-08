@@ -170,6 +170,13 @@ class CAR(Platforms):
     dbc_dict('honda_civic_ex_2022_can_generated', None),
     flags=HondaFlags.BOSCH_RADARLESS,
   )
+  # TODO: specs copied from Nidec Odyssey. Unchecked.
+  HONDA_ODYSSEY_BOSCH = HondaBoschPlatformConfig(
+    [HondaCarDocs("Honda Odyssey 2021-24", "All")],
+    CarSpecs(mass=1900, wheelbase=3.0, steerRatio=14.35, centerToFrontRatio=0.41, tireStiffnessFactor=0.82, minSteerSpeed=46.5 * CV.MPH_TO_MS),
+    dbc_dict('acura_rdx_2020_can_generated', None),
+    flags=HondaFlags.BOSCH_ALT_BRAKE,
+  )
   ACURA_RDX_3G = HondaBoschPlatformConfig(
     [HondaCarDocs("Acura RDX 2019-22", "All", min_steer_speed=3. * CV.MPH_TO_MS)],
     CarSpecs(mass=4068 * CV.LB_TO_KG, wheelbase=2.75, steerRatio=11.95, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),  # as spec
