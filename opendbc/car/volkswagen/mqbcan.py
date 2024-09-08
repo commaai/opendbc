@@ -141,7 +141,7 @@ def create_acc_hud_control(packer, bus, acc_hud_status, set_speed, lead_distance
 # Refer to Self Study Program 890253: Volkswagen Driver Assistance Systems, Design and Function
 
 
-def create_awv_control(packer, fcw_active, aeb_active, accel):
+def create_aeb_control(packer, fcw_active, aeb_active, accel):
   values = {
     "AWV_Vorstufe": 0,  # Preliminary stage
     "AWV1_Anf_Prefill": 0,  # Brake pre-fill request
@@ -160,7 +160,7 @@ def create_awv_control(packer, fcw_active, aeb_active, accel):
   return packer.make_can_msg("ACC_10", 0, values)
 
 
-def create_awv_hud(packer, aeb_supported, fcw_active):
+def create_aeb_hud(packer, aeb_supported, fcw_active):
   values = {
     "AWV_Texte": 5 if aeb_supported else 7,  # FCW/AEB system status, display text (from menu in VAL)
     "AWV_Status_Anziege": 1 if aeb_supported else 2,  #  FCW/AEB system status, available or disabled

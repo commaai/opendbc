@@ -86,9 +86,9 @@ class CarController(CarControllerBase):
                                                            acc_control, stopping, starting, CS.esp_hold_confirmation))
 
       if self.frame % self.CCP.AEB_CONTROL_STEP == 0:
-        can_sends.extend(self.CCS.create_awv_control(self.packer_pt, False, False, 0.0))
+        can_sends.extend(self.CCS.create_aeb_control(self.packer_pt, False, False, 0.0))
       if self.frame % self.CCP.AEB_HUD_STEP == 0:
-        can_sends.extend(self.CCS.create_awv_hud(self.packer_pt, False, False))
+        can_sends.extend(self.CCS.create_aeb_hud(self.packer_pt, False, False))
 
     # **** HUD Controls ***************************************************** #
 

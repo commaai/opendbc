@@ -105,9 +105,9 @@ def create_acc_hud_control(packer, bus, acc_hud_status, set_speed, lead_distance
   return packer.make_can_msg("ACC_GRA_Anzeige", bus, values)
 
 
-def create_awv_control(packer, fcw_active, aeb_active, accel):
+def create_aeb_control(packer, fcw_active, aeb_active, accel):
   return None
 
 
-def create_awv_hud(packer, aeb_supported, fcw_active):
+def create_aeb_hud(packer, aeb_supported, fcw_active):
   return None
