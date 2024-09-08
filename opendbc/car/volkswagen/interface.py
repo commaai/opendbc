@@ -74,8 +74,8 @@ class CarInterface(CarInterfaceBase):
       ret.steerActuatorDelay = 0.2
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
     elif ret.flags & VolkswagenFlags.MEB:
-      ret.steerLimitTimer = 0.8
-      ret.steerActuatorDelay = 0.35
+      ret.steerLimitTimer = 0.6
+      ret.steerActuatorDelay = 0.5
     else:
       ret.steerLimitTimer = 0.4
       ret.steerActuatorDelay = 0.1
