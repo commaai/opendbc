@@ -2,7 +2,7 @@ import copy
 from opendbc.can.packer import CANPacker
 from opendbc.car import DT_CTRL, apply_driver_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, make_tester_present_msg, structs
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.common.numpy_fast import clip
+from opendbc.car.common.numpy_fast import clip, interp
 from opendbc.car.hyundai import hyundaicanfd, hyundaican
 from opendbc.car.hyundai.carstate import CarState
 from opendbc.car.hyundai.hyundaicanfd import CanBus
@@ -57,6 +57,7 @@ class CarController(CarControllerBase):
     self.last_button_frame = 0
     self.apply_angle_last = 0
     self.lkas_max_torque = 0
+    self.driver_applied_torque_reducer = 0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -81,17 +82,38 @@ class CarController(CarControllerBase):
     # CS.out.steeringPressed and steeringTorque are based on the
     # STEERING_COL_TORQUE value
     MAX_TORQUE = 200
-    if not bool(CS.out.steeringPressed):
-      # If steering is not pressed, use max torque (TODO: need to find this value)
-      self.lkas_max_torque = MAX_TORQUE
+    # Interpolate a percent to apply to max torque based on vEgo value, which is
+    # the "best estimate of speed".  This means that under 20 (units?) we will
+    # apply less torque, and over 20 we will apply the full calculated torque.
+    ego_weight = interp(CS.out.vEgo, [0, 5, 10, 20], [0.2, 0.3, 0.5, 1.0])
+
+    # Track if and how long the driver has been applying torque and create a
+    # value to reduce the max torque applied. This block will cause the
+    # `driver_applied_torque_reducer` to settle to value between 30 and 150.
+    # While the driver applies torque the value will decrease to 30, and while
+    # the driver is not applying torque the value will increase to 150.
+    if abs(CS.out.steeringTorque) > 200:
+      # If the driver is applying some torque manually, reduce the value down to 30 (the min)
+      self.driver_applied_torque_reducer -= 1
+      if self.driver_applied_torque_reducer < 30:
+        self.driver_applied_torque_reducer = 30
     else:
-      # Steering torque seems to be a different scale than applied torque, so we
-      # calculate a percentage based on observed "max" values (~|1200| based on
-      # MDPS STEERING_COL_TORQUE) and then apply that percentage to our normal
-      # max torque, use min to clamp to 100%
-      driver_applied_torque_pct = min(abs(CS.out.steeringTorque) / 1200.0, 1.0)
-      # Use max(0, ...) to avoid negative torque in case the
-      self.lkas_max_torque = MAX_TORQUE - (driver_applied_torque_pct * MAX_TORQUE)
+      # While the driver is not applying torque, increase the value up to 150 (the max)
+      self.driver_applied_torque_reducer += 1
+      if self.driver_applied_torque_reducer > 150:
+        self.driver_applied_torque_reducer = 150
+
+    if self.driver_applied_torque_reducer < 150:
+      # If the driver has just started applying torque, the reducer value will
+      # be around 150 so we won't reduce the max torque much. As the driver
+      # continues to apply torque, the reducer value will decrease to 30, so we
+      # will reduce the max torque more to fight them less.
+      self.lkas_max_torque = int(round(MAX_TORQUE * ego_weight * (self.driver_applied_torque_reducer / 150)))
+    else:
+      # A torque reducer value of 150 means the driver has not been applying
+      # torque for a while, so we will apply the full max torque value, adjusted
+      # by the ego weight (based on driving speed)
+      self.lkas_max_torque = MAX_TORQUE * ego_weight
 
     if not CC.latActive:
       apply_angle = CS.out.steeringAngleDeg
