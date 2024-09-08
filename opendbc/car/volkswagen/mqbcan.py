@@ -163,7 +163,7 @@ def create_aeb_control(packer, fcw_active, aeb_active, accel):
 def create_aeb_hud(packer, aeb_supported, fcw_active):
   values = {
     "AWV_Texte": 5 if aeb_supported else 7,  # FCW/AEB system status, display text (from menu in VAL)
-    "AWV_Status_Anziege": 1 if aeb_supported else 2,  #  FCW/AEB system status, available or disabled
+    "AWV_Status_Anzeige": 1 if aeb_supported else 2,  #  FCW/AEB system status, available or disabled
   }
 
   return packer.make_can_msg("ACC_15", 0, values)
