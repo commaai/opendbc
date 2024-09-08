@@ -9,6 +9,7 @@ from opendbc.car.nissan.values import CAR as NISSAN
 from opendbc.car.mazda.values import CAR as MAZDA
 from opendbc.car.mock.values import CAR as MOCK
 from opendbc.car.subaru.values import CAR as SUBARU
+from opendbc.car.tesla.values import CAR as TESLA
 from opendbc.car.toyota.values import CAR as TOYOTA
 from opendbc.car.values import Platform
 from opendbc.car.volkswagen.values import CAR as VOLKSWAGEN
@@ -291,6 +292,9 @@ routes = [
   CarTestRoute("fb53c640f499b73d|2021-06-01--04-17-56", MAZDA.MAZDA_6),
   CarTestRoute("f6d5b1a9d7a1c92e|2021-07-08--06-56-59", MAZDA.MAZDA_CX9_2021),
   CarTestRoute("a4af1602d8e668ac|2022-02-03--12-17-07", MAZDA.MAZDA_CX5_2022),
+
+  CarTestRoute("b5f2b5b4ef23f4b6/00000008--d88c2210a5", TESLA.TESLA_MODEL_3),
+  CarTestRoute("35f334fe58c5cdc5/00000089--c5ed862a40", TESLA.TESLA_MODEL_Y),
 
   # Segments that test specific issues
   # Controls mismatch due to standstill threshold
