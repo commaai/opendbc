@@ -99,6 +99,7 @@ def acc_hold_type(main_switch_on, acc_faulted, long_active, just_disabled, start
   
 
 def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, acc_hold_type, stopping, starting, lower_jerk, upper_jerk, esp_hold, speed, reversing, meb_acc_02_values):
+  LONG_ACTIVE = 3
   commands = []
 
   values = {
@@ -114,7 +115,7 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
     "ACC_Anhalten":               stopping,
     "ACC_Anhalteweg":             20.46,
     "ACC_Anforderung_HMS":        acc_hold_type,
-    "ACC_AKTIV_regelt":           1 if acc_control == 3 else 0,
+    "ACC_AKTIV_regelt":           1 if acc_control == LONG_ACTIVE else 0,
     "Speed":                      speed, # dont know if neccessary
     "Reversing":                  reversing, # dont know if neccessary
   }
@@ -134,7 +135,7 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
   # the button does nothing with this
   values_ta = {
      "Travel_Assist_Status" : 2, # ready
-   	 "Travel_Assist_Request" : 0, # no request
+     "Travel_Assist_Request" : 0, # no request
      "Travel_Assist_Available" : 1,
   }
 
@@ -156,58 +157,32 @@ def acc_hud_status_value(main_switch_on, acc_faulted, long_active, override):
   return acc_hud_control
   
 
-def create_acc_hud_control(packer, bus, acc_control, set_speed, gap, lead_visible, distance, heartbeat, esp_hold, meb_acc_01_values, distance_stock_values):  
-  zeitluecke_1 = 0
-  zeitluecke_2 = 0
-  zeitluecke_3 = 0
-  zeitluecke_4 = 0
-  zeitluecke_5 = 0
-
-  if distance == 1:
-    zeitluecke_1 = gap 
-  elif distance == 2:
-    zeitluecke_2 = gap
-  elif distance == 3:
-    zeitluecke_3 = gap
-  elif distance == 4:
-    zeitluecke_4 = gap
-  elif distance == 5:
-    zeitluecke_5 = gap
-
-  # scale lead dist in meter 200 -> 100
-  # clip to prevent negative values because of radar signal shift
-  lead_dist = clip(distance_stock_values["Same_Lane_01_Long_Distance"] * 0.4, 0, 100)
-
-  if lead_visible and distance_stock_values["Same_Lane_01_Detection"] == 0:
-    lead_dist = 50
+def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, gap, heartbeat, esp_hold, meb_acc_01_values):  
+  lead_detected_by_car = True if meb_acc_01_values["Lead_Type_Detected"] > 0 else False
+  lead_detected_by_op_only = lead_visible and not lead_detected_by_car
+  LONG_ACTIVE = 3
   
   values = {
     #"STA_Primaeranz": acc_hud_status,
     "ACC_Status_ACC":          acc_control,
     "ACC_Wunschgeschw_02":     set_speed if set_speed < 250 else 327.36,
     "ACC_Gesetzte_Zeitluecke": distance,
-    #"ACC_Anzeige_Zeitluecke":  1 if acc_control == 3 else 0,
     "ACC_Display_Prio":        1,
     "ACC_Abstandsindex_02":    512,
-    "ACC_EGO_Fahrzeug":        1 if acc_control == 3 else 0,
+    "ACC_EGO_Fahrzeug":        1 if acc_control == LONG_ACTIVE else 0,
     "Heartbeat":               heartbeat, # do the same as radar would do, still check if this is necessary
-    "Lead_Type_Detected":      1 if lead_visible > 0 else 0, # object should be displayed
-    "Lead_Type":               3 if lead_visible > 0 else 0, # displaying a car
-    "Lead_Distance":           lead_dist if lead_visible > 0 else 0, # hud distance of object
-    "ACC_Enabled":             1 if acc_control == 3 else 0,
-    "ACC_Standby_Override":    1 if acc_control != 3 else 0,
-    "ACC_AKTIV_regelt":        1 if acc_control == 3 else 0,
+    "Lead_Type_Detected":      1 if lead_detected_by_op_only else meb_acc_01_values["Lead_Type_Detected"], # object should be displayed
+    "Lead_Type":               3 if lead_detected_by_op_only else meb_acc_01_values["Lead_Type"], # displaying a car
+    "Lead_Distance":           80 if lead_detected_by_op_only else meb_acc_01_values["Lead_Distance"], # hud distance of object
+    "ACC_Enabled":             1 if acc_control == LONG_ACTIVE else 0,
+    "ACC_Standby_Override":    1 if acc_control != LONG_ACTIVE else 0,
+    "ACC_AKTIV_regelt":        1 if acc_control == LONG_ACTIVE else 0,
     "ACC_Limiter_Mode":        0,
-    "Lead_Brightness":         3 if acc_control == 3 else 0, # object shows in colour
+    "Lead_Brightness":         3 if acc_control == LONG_ACTIVE else 0, # object shows in colour
     "Unknown_03":              106, # prevents errors
     "Unknown_01":              0, # prevents errors
     "Unknown_08":              0, # prevents errors
-    "ACC_Special_Events":      3 if esp_hold and acc_control == 3 else 0, # acc ready message at standstill
-    "Zeitluecke_1_Signal":     zeitluecke_1,
-    "Zeitluecke_2_Signal":     zeitluecke_2,
-    "Zeitluecke_3_Signal":     zeitluecke_3,
-    "Zeitluecke_4_Signal":     zeitluecke_4,
-    "Zeitluecke_5_Signal":     zeitluecke_5,
+    "ACC_Special_Events":      3 if esp_hold and acc_control == LONG_ACTIVE else 0, # acc ready message at standstill
   }
 
   values.update({
@@ -221,6 +196,12 @@ def create_acc_hud_control(packer, bus, acc_control, set_speed, gap, lead_visibl
     "Unknown_05": meb_acc_01_values["Unknown_05"],
     "Unknown_06": meb_acc_01_values["Unknown_06"],
     "Unknown_07": meb_acc_01_values["Unknown_07"],
+    "Zeitluecke_1_Signal": meb_acc_01_values["Zeitluecke_1_Signal"],
+    "Zeitluecke_2_Signal": meb_acc_01_values["Zeitluecke_2_Signal"],
+    "Zeitluecke_3_Signal": meb_acc_01_values["Zeitluecke_3_Signal"],
+    "Zeitluecke_4_Signal": meb_acc_01_values["Zeitluecke_4_Signal"],
+    "Zeitluecke_5_Signal": meb_acc_01_values["Zeitluecke_5_Signal"],
+    "ACC_Anzeige_Zeitluecke": meb_acc_01_values["ACC_Anzeige_Zeitluecke"],
   })
 
   return packer.make_can_msg("MEB_ACC_01", bus, values)
