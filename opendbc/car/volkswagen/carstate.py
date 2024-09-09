@@ -293,7 +293,7 @@ class CarState(CarStateBase):
     ret.brakePressed = bool(pt_cp.vl["Motor_14"]["MO_Fahrer_bremst"])
     ret.brake = pt_cp.vl["MEB_ESP_01"]["Brake_Pressure"] * 0.195 # this is break general from car for signal width in percent
     #ret.regenBraking = find signal
-    #ret.parkingBrake = find signal
+    ret.parkingBrake = pt_cp.vl["MEB_EPB_01"]["EPB_Request"] == 0
 
     # Update gear and/or clutch position data.
     ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Getriebe_11"]["GE_Fahrstufe"], None))
@@ -512,6 +512,7 @@ class CarState(CarStateBase):
       ("MEB_ESP_01", 100),        #
       ("MEB_ESP_03", 10),         #
       ("MEB_ESP_05", 50),         #
+      ("MEB_EPB_01", 20),         #
       ("MEB_Light_01", 5),        #
       ("MEB_Motor_01", 50),       #
     ]
