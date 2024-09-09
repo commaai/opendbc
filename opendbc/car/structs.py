@@ -385,6 +385,7 @@ class CarParams:
   carFw: list['CarParams.CarFw'] = auto_field()
 
   radarTimeStep: float = 0.05  # time delta between radar updates, 20Hz is very standard
+  radarDelay: float = auto_field()
   fingerprintSource: 'CarParams.FingerprintSource' = field(default_factory=lambda: CarParams.FingerprintSource.can)
   # Where Panda/C2 is integrated into the car's CAN network
   networkLocation: 'CarParams.NetworkLocation' = field(default_factory=lambda: CarParams.NetworkLocation.fwdCamera)

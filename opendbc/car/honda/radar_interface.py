@@ -20,8 +20,6 @@ class RadarInterface(RadarInterfaceBase):
     self.radar_off_can = CP.radarUnavailable
     self.radar_ts = CP.radarTimeStep
 
-    self.delay = int(round(0.1 / CP.radarTimeStep))   # 0.1s delay of radar
-
     # Nidec
     if self.radar_off_can:
       self.rcp = None
