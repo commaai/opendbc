@@ -1523,7 +1523,6 @@ BO_ 522 MEB_ABS_01: 64 XXX
  SG_ Yaw_Rate : 200|16@1+ (0.007,-229.36) [0|255] "" XXX
 
 BO_ 988 MEB_EPB_01: 8 XXX
- SG_ EPB_Request : 41|1@1+ (1,0) [0|1] "" XXX
  SG_ EPB_Status : 53|3@1+ (1,0) [0|7] "" XXX
 
 BO_ 317 MEB_EPS_01: 32 XXX
@@ -1777,7 +1776,6 @@ VAL_ 768 Zeitluecke_3_Signal 0 "keine Anzeige";
 VAL_ 768 Zeitluecke_4_Signal 0 "keine Anzeige" 40 "Minimum";
 VAL_ 768 Zeitluecke_5_Signal 0 "keine Anzeige";
 VAL_ 267 TSK_STATUS 0 "init" 1 "disabled" 2 "enabled" 3 "regulating" 4 "accel_pedal_override" 5 "brake_only" 6 "temp_fault" 7 "perm_fault";
-VAL_ 988 EPB_Request 0 "geschlossen" 1 "offen" ;
 VAL_ 988 EPB_Status 0 "offen" 1 "geschlossen_Parken" 2 "teilgespannt_Halten" 3 "im_Lauf_oeffnen" 4 "im_Lauf_schliessen" 5 "tbd" 6 "Init" 7 "unbekannt" ;
 VAL_ 1004 TSK_State 0 "init" 1 "disabled" 2 "enabled" 3 "regulating" 4 "accel_pedal_override" 5 "brake_only" 6 "temp_fault" 7 "perm_fault";
 VAL_ 1631 TSK_QBit_Steigung 0 "gueltiger_Wert" 1 "Ersatz_Init_oder_Fehlerwert" ;
