@@ -363,7 +363,7 @@ class CarState(CarStateBase):
     ret.espActive = bool(pt_cp.vl["ESP_21"]["ESP_Eingriff"])
 
     # EV battery charge WattHours
-    #ret.fuelGauge = pt_cp.vl["HVEM_02"]["HVEM_Nutzbare_Energie"]
+    ret.fuelGauge = pt_cp.vl["Motor_16"]["MO_Energieinhalt_BMS"]
 
     self.frame += 1
     return ret
@@ -501,6 +501,7 @@ class CarState(CarStateBase):
       ("GRA_ACC_01", 33),         # From J533 CAN gateway (via LIN from steering wheel controls)
       ("Airbag_02", 5),           # From J234 Airbag control module
       ("Motor_14", 10),           # From J623 Engine control module
+      ("Motor_16", 2),            # From J623 Engine control module
       ("Blinkmodi_02", 2),        # From J519 BCM (sent at 1Hz when no lights active, 50Hz when active)
       ("LH_EPS_03", 100),         # From J500 Steering Assist with integrated sensors
       ("Getriebe_11", 100),       # From J743 Auto transmission control module
@@ -513,7 +514,6 @@ class CarState(CarStateBase):
       ("MEB_ESP_05", 50),         #
       ("MEB_Light_01", 5),        #
       ("MEB_Motor_01", 50),       #
-      #("HVEM_02", 10),            #
     ]
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, CANBUS.pt)
 
