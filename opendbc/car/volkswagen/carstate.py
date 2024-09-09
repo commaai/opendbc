@@ -308,8 +308,6 @@ class CarState(CarStateBase):
     # Update seatbelt fastened status.
     ret.seatbeltUnlatched = pt_cp.vl["Airbag_02"]["AB_Gurtschloss_FA"] != 3
 
-    self.distance_stock_values = ext_cp.vl["MEB_Distance_01"]
-
     # Consume blind-spot monitoring info/warning LED states, if available.
     # Infostufe: BSM LED on, Warnung: BSM LED flashing
     if self.CP.enableBsm:
@@ -526,7 +524,7 @@ class CarState(CarStateBase):
       ("MEB_ACC_01", 17),          #
       ("MEB_ACC_02", 50),          #
       ("MEB_Drive_State_01", 20),  #
-      ("MEB_Distance_01", 25),     #
+      #("MEB_Distance_01", 25),     #
     ]
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, CANBUS.cam)
 
