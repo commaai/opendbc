@@ -203,10 +203,9 @@ class CarController(CarControllerBase):
         elif self.long_heartbeat == 221:
           self.long_heartbeat = 360
 
-        gap = CS.out.vEgo * 1 #* get_T_FOLLOW(hud_control.leadDistanceBars - 1) * 2
         acc_hud_status = self.CCS.acc_hud_status_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled and CS.out.cruiseState.enabled, CC.cruiseControl.override)
-        can_sends.append(self.CCS.create_acc_hud_control(self.packer_pt, CANBUS.pt, acc_hud_status, hud_control.setSpeed * CV.MS_TO_KPH, gap, hud_control.leadVisible,
-                                                         hud_control.leadDistanceBars, self.long_heartbeat, CS.esp_hold_confirmation, CS.meb_acc_01_values, CS.distance_stock_values))
+        can_sends.append(self.CCS.create_acc_hud_control(self.packer_pt, CANBUS.pt, acc_hud_status, hud_control.setSpeed * CV.MS_TO_KPH, hud_control.leadVisible,
+                                                         hud_control.leadDistanceBars, self.long_heartbeat, CS.esp_hold_confirmation, CS.meb_acc_01_values))
 
       else:
         lead_distance = 0
