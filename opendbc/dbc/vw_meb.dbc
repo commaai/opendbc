@@ -1495,13 +1495,15 @@ BO_ 332 MEB_ESP_03: 32 XXX
  SG_ Accelerator_Pressure : 175|8@0+ (1,-37) [0|255] "" XXX
 
 BO_ 258 MEB_ESP_04: 48 XXX
+ SG_ NEW_SIGNAL_1 : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_2 : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Lateral_Accel : 16|8@1+ (1,-128) [0|255] "" XXX
  SG_ Longitudinal_Accel : 24|8@1- (1,0) [0|255] "" XXX
  SG_ Yaw_Rate : 40|14@1+ (1,0) [0|16383] "" XXX
  SG_ Yaw_Rate_Sign : 54|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_7 : 99|1@0+ (1,0) [0|1] "" XXX
  SG_ ESP_Hold : 120|1@0+ (1,0) [0|1] "" XXX
- SG_ AEB_Active : 123|1@1+ (1,0) [0|7] "" XXX
+ SG_ Regen_Braking : 123|1@1+ (1,0) [0|7] "" XXX
  SG_ NEW_SIGNAL_6 : 171|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_5 : 180|10@1+ (1,0) [0|63] "" XXX
 
