@@ -1552,7 +1552,7 @@ BO_ 267 MEB_Motor_01: 32 XXX
  SG_ Accel_Low_Pressed_Support : 21|1@1+ (1,0) [0|7] "" XXX
  SG_ TSK_Status : 88|3@1+ (1,0) [0|7] "" XXX
 
-BO_ 588 MEB_Drive_State_01: 16 XXX
+BO_ 588 MEB_Side_Assist_01: 16 XXX
  SG_ Blind_Spot_Right : 12|7@1+ (1,0) [0|15] "" XXX
  SG_ Blind_Spot_Left : 19|7@1+ (1,0) [0|15] "" XXX
  SG_ Blind_Spot_Warn_Right : 26|1@0+ (1,0) [0|1] "" XXX
@@ -1565,7 +1565,7 @@ BO_ 588 MEB_Drive_State_01: 16 XXX
  SG_ NEW_SIGNAL_1 : 98|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_6 : 119|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 589 MEB_Side_Assist_01: 64 XXX
+BO_ 589 MEB_Side_Assist_02: 64 XXX
  SG_ Unknown_01 : 100|3@0+ (1,0) [0|7] "" XXX
  SG_ Unknown_02 : 108|3@0+ (1,0) [0|7] "" XXX
 
