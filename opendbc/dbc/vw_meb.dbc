@@ -275,15 +275,20 @@ BO_ 958 Motor_14: 8 Gateway
  SG_ MO_HYB_VM_aktiv : 61|1@1+ (1,0) [0|1] ""  Sub_Gateway
  SG_ MO_StartVorauss_erfuellt : 62|2@1+ (1,0) [0|3] ""  AWC,Ladegeraet_Konzern,Sub_Gateway
 
-BO_ 1631 Motor_16: 8 Motor_Diesel_MQB
- SG_ TSK_QBit_Steigung : 12|1@1+ (1,0) [0|1] "" Gateway_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
- SG_ TSK_QBit_Fahrzeugmasse : 13|1@1+ (1,0) [0|1] "" Gateway_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
- SG_ MO_SpannungsAnf_02 : 14|2@1+ (1,0) [0|3] "" Gateway_MQB
- SG_ MO_DPF_reg : 16|1@1+ (1,0) [0|1] "" Gateway_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
- SG_ MO_Heizstrom_EKAT : 17|7@1+ (1,0) [0|126] "Unit_Amper" Gateway_MQB
- SG_ MO_Heizstrom_SCR : 24|6@1+ (1,0) [0|62] "Unit_Amper" Gateway_MQB
- SG_ TSK_Fahrzeugmasse_02 : 48|8@1+ (32,0) [0|8128] "Unit_KiloGram" Gateway_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
- SG_ TSK_Steigung : 56|8@1+ (0.8,-101.6) [-101.6|101.6] "Unit_PerCent" Gateway_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
+BO_ 1631 Motor_16: 8 Gateway
+ SG_ TSK_Grundmasse : 0|8@1+ (32,0) [0|8128] "Unit_KiloGram"  ZR_High
+ SG_ TSK_QBit_Steigung : 12|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ TSK_QBit_Fahrzeugmasse : 13|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ MO_SpannungsAnf_02 : 14|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ MO_DPF_reg : 16|1@1+ (1.0,0.0) [0.0|1] ""  ZR_High
+ SG_ MO_Heizstrom_EKAT : 17|7@1+ (1,0) [0|126] "Unit_Amper"  Vector__XXX
+ SG_ MO_Heizstrom_SCR : 24|6@1+ (1,0) [0|62] "Unit_Amper"  Vector__XXX
+ SG_ MO_Anzeige_Kaltleuchte : 30|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ MO_P_Generator_ungefiltert_Anf : 31|1@1+ (1.0,0.0) [0.0|1] ""  Vector__XXX
+ SG_ TSK_Getriebeinfo : 34|2@1+ (1.0,0.0) [0.0|3] ""  Vector__XXX
+ SG_ MO_Energieinhalt_BMS : 36|12@1+ (25,0) [0|102325] "Unit_WattHour"  Vector__XXX
+ SG_ TSK_Fahrzeugmasse_02 : 48|8@1+ (32,0) [0|8128] "Unit_KiloGram"  OTA_FC,ZR_High
+ SG_ TSK_Steigung_02 : 56|8@1+ (0.8,-101.6) [-100.8|101.6] "Unit_PerCent"  OTA_FC
 
 BO_ 1648 Motor_18: 8 Gateway
  SG_ MO_max_Ladedruck : 0|6@1+ (0.1,0) [0|6.3] "Unit_Bar"  Sub_Gateway
@@ -1769,3 +1774,15 @@ VAL_ 768 Zeitluecke_4_Signal 0 "keine Anzeige" 40 "Minimum";
 VAL_ 768 Zeitluecke_5_Signal 0 "keine Anzeige";
 VAL_ 267 TSK_STATUS 0 "init" 1 "disabled" 2 "enabled" 3 "regulating" 4 "accel_pedal_override" 5 "brake_only" 6 "temp_fault" 7 "perm_fault";
 VAL_ 1004 TSK_State 0 "init" 1 "disabled" 2 "enabled" 3 "regulating" 4 "accel_pedal_override" 5 "brake_only" 6 "temp_fault" 7 "perm_fault";
+VAL_ 1631 TSK_QBit_Steigung 0 "gueltiger_Wert" 1 "Ersatz_Init_oder_Fehlerwert" ;
+VAL_ 1631 TSK_QBit_Fahrzeugmasse 0 "gueltiger_Wert" 1 "Ersatz_Init_oder_Fehlerwert" ;
+VAL_ 1631 MO_SpannungsAnf_02 0 "keine_Anforderung" 1 "Anforderung_Stufe_1" 2 "Anforderung_Stufe_2" 3 "Anforderung_Stufe_3" ;
+VAL_ 1631 MO_DPF_reg 0 "DPF_regeneriert_nicht" 1 "DPF_regeneriert" ;
+VAL_ 1631 MO_Heizstrom_EKAT 127 "Fehler" ;
+VAL_ 1631 MO_Heizstrom_SCR 63 "Fehler" ;
+VAL_ 1631 MO_Anzeige_Kaltleuchte 0 "Lampe_aus" 1 "Lampe_an" ;
+VAL_ 1631 MO_P_Generator_ungefiltert_Anf 0 "nicht_angefordert" 1 "angefordert" ;
+VAL_ 1631 TSK_Getriebeinfo 0 "Handschalter" 1 "AL_AQ_Getriebe" 2 "DL_DQ_Getriebe" 3 "CVT_Getriebe" ;
+VAL_ 1631 MO_Energieinhalt_BMS 4094 "Init" 4095 "Fehler" ;
+VAL_ 1631 TSK_Fahrzeugmasse_02 255 "Fehler" ;
+VAL_ 1631 TSK_Steigung_02 0 "Init_oder_nicht_verbaut" 255 "Fehler" ;
