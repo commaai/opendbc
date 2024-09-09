@@ -311,8 +311,8 @@ class CarState(CarStateBase):
     # Consume blind-spot monitoring info/warning LED states, if available.
     # Infostufe: BSM LED on, Warnung: BSM LED flashing
     if self.CP.enableBsm:
-      ret.leftBlindspot = ext_cp.vl["MEB_Drive_State_01"]["Blind_Spot_Left"] > 0
-      ret.rightBlindspot = ext_cp.vl["MEB_Drive_State_01"]["Blind_Spot_Right"] > 0
+      ret.leftBlindspot = ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Left"] > 0
+      ret.rightBlindspot = ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Right"] > 0
 
     # Consume factory LDW data relevant for factory SWA (Lane Change Assist)
     # and capture it for forwarding to the blind spot radar controller
@@ -524,7 +524,7 @@ class CarState(CarStateBase):
       ("LDW_02", 10),              # From R242 Driver assistance camera
       ("MEB_ACC_01", 17),          #
       ("MEB_ACC_02", 50),          #
-      ("MEB_Drive_State_01", 20),  #
+      ("MEB_Side_Assist_01", 20),  #
       #("MEB_Distance_01", 25),     #
     ]
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, CANBUS.cam)
