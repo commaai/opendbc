@@ -292,7 +292,7 @@ class CarState(CarStateBase):
     ret.gas = pt_cp.vl["MEB_ESP_03"]["Accelerator_Pressure"] * 0.392 # signal width in percent
     ret.brakePressed = bool(pt_cp.vl["Motor_14"]["MO_Fahrer_bremst"])
     ret.brake = pt_cp.vl["MEB_ESP_01"]["Brake_Pressure"] * 0.195 # this is break general from car for signal width in percent
-    #ret.regenBraking = find signal
+    ret.regenBraking = bool(pt_cp.vl["MEB_ESP_04"]["Regen_Braking"])
     ret.parkingBrake = pt_cp.vl["MEB_EPB_01"]["EPB_Status"] == 1
 
     # Update gear and/or clutch position data.
@@ -509,6 +509,7 @@ class CarState(CarStateBase):
       ("MEB_ABS_01", 50),         #
       ("MEB_ESP_01", 100),        #
       ("MEB_ESP_03", 10),         #
+      ("MEB_ESP_04", 50),         #
       ("MEB_ESP_05", 50),         #
       ("MEB_EPB_01", 20),         #
       ("MEB_Light_01", 5),        #
