@@ -132,7 +132,8 @@ class CarController(CarControllerBase):
       gas, brake = 0.0, 0.0
 
     # *** rate limit steer ***
-    limited_steer = rate_limit(actuators.steer, self.last_steer, -self.params.STEER_DELTA_DOWN, self.params.STEER_DELTA_UP)
+    limited_steer = rate_limit(actuators.steer, self.last_steer, -self.params.STEER_DELTA_DOWN * DT_CTRL,
+                               self.params.STEER_DELTA_UP * DT_CTRL)
     self.last_steer = limited_steer
 
     # *** apply brake hysteresis ***
