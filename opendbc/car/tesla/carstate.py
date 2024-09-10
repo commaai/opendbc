@@ -41,7 +41,7 @@ class CarState(CarStateBase):
     self.hands_on_level = epas_status["EPAS3S_handsOnLevel"]
     self.steer_warning = self.can_define.dv["EPAS3S_sysStatus"]["EPAS3S_eacErrorCode"].get(int(epas_status["EPAS3S_eacErrorCode"]), None)
     ret.steeringAngleDeg = -epas_status["EPAS3S_internalSAS"]
-    ret.steeringRateDeg = -cp_adas.vl["SCCM_steeringAngleSensor"]["SCCM_steeringAngleSpeed"]
+    ret.steeringRateDeg = -cp_cam.vl["SCCM_steeringAngleSensor"]["SCCM_steeringAngleSpeed"]
     ret.steeringTorque = -epas_status["EPAS3S_torsionBarTorque"]
 
     ret.steeringPressed = self.hands_on_level > 0
@@ -118,7 +118,8 @@ class CarState(CarStateBase):
   def get_cam_can_parser(CP):
     messages = [
       ("DAS_control", 25),
-      ("DAS_status", 2)
+      ("DAS_status", 2),
+      ("SCCM_steeringAngleSensor", 100),
     ]
 
     return CANParser(DBC[CP.carFingerprint]['chassis'], messages, CANBUS.autopilot_party)
@@ -129,8 +130,6 @@ class CarState(CarStateBase):
       ("VCLEFT_switchStatus", 20),
       ("SCCM_leftStalk", 10),
       ("SCCM_rightStalk", 10),
-      ("SCCM_steeringAngleSensor", 100),
-      ("DAS_bodyControls", 2),
       ("ID3F5VCFRONT_lighting", 10),
     ]
 
