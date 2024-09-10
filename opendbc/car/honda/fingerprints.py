@@ -564,6 +564,7 @@ FW_VERSIONS = {
       b'37805-5MR-C120\x00\x00',  # 2023 (unknown trim)
       b'37805-5MR-C320\x00\x00',  # 2024 Touring
       b'37805-5MR-C730\x00\x00',  # 2021 Touring
+      b'37805-5MR-C810\x00\x00',  # 2025 Elite - e0c2250590b16ce0
       b'37805-5MR-C910\x00\x00',  # 2022 Touring
       b'37805-5MR-C920\x00\x00',  # 2022 Elite
       b'37805-5MR-C930\x00\x00',  # 2022 Elite - FW Update
@@ -571,17 +572,23 @@ FW_VERSIONS = {
     (Ecu.transmission, 0x18da1ef1, None): [
       b'28102-5MX-A100\x00\x00',  # 2021 Touring, 2022 Elite
       b'28102-5MX-A200\x00\x00',  # 2023 (unknown trim), 2024 Touring
+      b'28102-5MX-A410\x00\x00',  # 2025 Elite - e0c2250590b16ce0
       b'28102-5MX-C100\x00\x00',  # 2022 Touring
     ],
     (Ecu.electricBrakeBooster, 0x18da2bf1, None): [
       b'46114-THR-A530\x00\x00', # 2021+
       b'46114-THR-A540\x00\x00', # 2023 (unknown trim), 2024 Touring
+      b'46114-THR-A720\x00\x00', # 2025 Elite - e0c2250590b16ce0
     ],
     (Ecu.gateway, 0x18daeff1, None): [
       b'38897-THR-A130\x00\x00', # 2021+
+      b'38897-THR-A320\x00\x00', # 2025 Elite - e0c2250590b16ce0
       b'38897-THR-A410\x00\x00', # 2024 Touring
     ],
-    (Ecu.eps, 0x18da30f1, None): [b'39990-THR-A050\x00\x00'],
+    (Ecu.eps, 0x18da30f1, None): [
+        b'39990-THR-A050\x00\x00',
+        b'39990-THR-A110\x00\x00', # 2025 Elite - e0c2250590b16ce0
+        ],
     (Ecu.fwdRadar, 0x18dab0f1, None): [b'36802-THR-A220\x00\x00'],
     (Ecu.fwdCamera, 0x18dab5f1, None): [
       b'36161-THR-A220\x00\x00', # 2021+
@@ -591,12 +598,15 @@ FW_VERSIONS = {
     (Ecu.srs, 0x18da53f1, None): [
       b'77959-THR-A220\x00\x00', # 2021+
       b'77959-THR-A230\x00\x00', # 2023 (unknown trim), 2024 Touring
+      b'77959-THR-A320\x00\x00', # 2025 Elite - e0c2250590b16ce0
     ],
     (Ecu.vsa, 0x18da28f1, None): [
       b'57114-THR-A230\x00\x00', # 2021+
       b'57114-THR-A240\x00\x00', # 2022 Elite, 2024 Touring
+      b'57114-THR-A520\x00\x00', # 2025 Elite - e0c2250590b16ce0
     ],
     (Ecu.combinationMeter, 0x18da60f1, None): [
+      b'78108-THR-B310\x00\x00',  # 2025 Elite - e0c2250590b16ce0
       b'78109-THR-AQ10\x00\x00',  # 2022 EX
       b'78109-THR-AR10\x00\x00',  # 2021 EX-L
       b'78109-THR-AS10\x00\x00',  # 2021 Touring
