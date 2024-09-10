@@ -293,7 +293,7 @@ class CarState(CarStateBase):
     ret.brakePressed = bool(pt_cp.vl["Motor_14"]["MO_Fahrer_bremst"])
     ret.brake = pt_cp.vl["MEB_ESP_01"]["Brake_Pressure"] * 0.195 # this is break general from car for signal width in percent
     ret.regenBraking = bool(pt_cp.vl["MEB_ESP_04"]["Regen_Braking"])
-    ret.parkingBrake = pt_cp.vl["MEB_EPB_01"]["EPB_Status"] == 1
+    ret.parkingBrake = pt_cp.vl["MEB_EPB_01"]["EPB_Status"] in (1, 4) # EPB closing or closed
 
     # Update gear and/or clutch position data.
     ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Getriebe_11"]["GE_Fahrstufe"], None))
