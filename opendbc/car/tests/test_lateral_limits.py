@@ -35,7 +35,7 @@ class TestLateralLimits:
       pytest.skip("Platform is behind dashcamOnly")
 
     # TODO: test all platforms
-    if CP.lateralTuning.which() != 'torque':
+    if CP.steerControlType != 'torque':
       pytest.skip()
 
     if CP.notCar:
