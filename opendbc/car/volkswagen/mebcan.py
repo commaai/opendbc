@@ -166,7 +166,7 @@ def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, ga
     #"STA_Primaeranz": acc_hud_status,
     "ACC_Status_ACC":          acc_control,
     "ACC_Wunschgeschw_02":     set_speed if set_speed < 250 else 327.36,
-    "ACC_Gesetzte_Zeitluecke": distance,
+    "ACC_Gesetzte_Zeitluecke": gap,
     "ACC_Display_Prio":        1,
     "ACC_Abstandsindex_02":    512,
     "ACC_EGO_Fahrzeug":        1 if acc_control == LONG_ACTIVE else 0,
