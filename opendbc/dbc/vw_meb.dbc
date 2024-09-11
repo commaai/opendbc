@@ -1777,7 +1777,7 @@ VAL_ 768 Zeitluecke_2_Signal 0 "keine Anzeige" 32 "Minimum";
 VAL_ 768 Zeitluecke_3_Signal 0 "keine Anzeige";
 VAL_ 768 Zeitluecke_4_Signal 0 "keine Anzeige" 40 "Minimum";
 VAL_ 768 Zeitluecke_5_Signal 0 "keine Anzeige";
-VAL_ 267 TSK_STATUS 0 "init" 1 "disabled" 2 "enabled" 3 "regulating" 4 "accel_pedal_override" 5 "brake_only" 6 "temp_fault" 7 "perm_fault";
+VAL_ 267 TSK_Status 0 "init" 1 "disabled" 2 "enabled" 3 "regulating" 4 "accel_pedal_override" 5 "brake_only" 6 "temp_fault" 7 "perm_fault";
 VAL_ 988 EPB_Status 0 "offen" 1 "geschlossen_Parken" 2 "teilgespannt_Halten" 3 "im_Lauf_oeffnen" 4 "im_Lauf_schliessen" 5 "tbd" 6 "Init" 7 "unbekannt" ;
 VAL_ 1004 TSK_State 0 "init" 1 "disabled" 2 "enabled" 3 "regulating" 4 "accel_pedal_override" 5 "brake_only" 6 "temp_fault" 7 "perm_fault";
 VAL_ 1631 TSK_QBit_Steigung 0 "gueltiger_Wert" 1 "Ersatz_Init_oder_Fehlerwert" ;
