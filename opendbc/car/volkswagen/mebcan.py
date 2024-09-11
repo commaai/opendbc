@@ -187,7 +187,7 @@ def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, ga
     "Unknown_01":              0, # prevents errors
     "Unknown_08":              0, # prevents errors
     "ACC_Special_Events":      3 if esp_hold and acc_control == LONG_ACTIVE else 0, # acc ready message at standstill
-    "Zeitluecke_3_Signal":     50
+    "Zeitluecke_3_Signal":     50,
     #"ACC_Anzeige_Zeitluecke":
     "SET_ME_0X1": 0x1,
     "SET_ME_0X3FF": 0x3FF,
