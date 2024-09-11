@@ -76,8 +76,8 @@ class CarControllerParams:
       self.ACC_HUD_STEP                    = 6     # MEB_ACC_01 message frequency 16Hz
       self.STEER_DRIVER_ALLOWANCE          = 60    # Driver intervention threshold 0.6 Nm
       self.STEERING_POWER_MAX              = 127   # HCA_03 maximum steering power
-      self.STEERING_POWER_MIN              = 20    # HCA_03 minimum steering power
-      self.STEERING_POWER_USER             = 40    # HCA_03 desired steering power for user intervention
+      self.STEERING_POWER_MIN              = 40    # HCA_03 minimum steering power
+      self.STEERING_POWER_USER             = 60    # HCA_03 desired steering power for user intervention
       self.STEERING_POWER_STEPS            = 5     # HCA_03 steering power counter steps
       self.STEERING_POWER_MAX_BY_SPEED     = 20    # HCA_03 speed in m/s^2 where maximum steering power is reached
       #self.CURVATURE_MAX                   = 0.195 # HCA_03 maximum curvature in 1/m, we estimate that about 0.2 1/m is max of signal
