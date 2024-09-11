@@ -97,7 +97,8 @@ class CarInterface(CarInterfaceBase):
     if ret.flags & VolkswagenFlags.MEB:
       ret.openpilotLongitudinalControl = ret.networkLocation == NetworkLocation.gateway or docs
       if ret.openpilotLongitudinalControl:
-         ret.safetyConfigs[0].safetyParam |= Panda.FLAG_VOLKSWAGEN_LONG_CONTROL
+        ret.experimentalLongitudinalAvailable = True
+        ret.safetyConfigs[0].safetyParam |= Panda.FLAG_VOLKSWAGEN_LONG_CONTROL
       
     else:
       ret.experimentalLongitudinalAvailable = ret.networkLocation == NetworkLocation.gateway or docs
