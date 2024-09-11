@@ -228,6 +228,7 @@ class CarController(CarControllerBase):
           self.brake = apply_brake / self.params.NIDEC_BRAKE_MAX
 
     # Send dashboard UI commands.
+    # On Nidec, this controls longitudinal positive acceleration
     if self.frame % 10 == 0:
       hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
                     hud_control.lanesVisible, fcw_display, acc_alert, steer_required, hud_control.leadDistanceBars)
