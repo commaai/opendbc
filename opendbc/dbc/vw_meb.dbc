@@ -1474,7 +1474,7 @@ BO_ 252 MEB_ESP_01: 48 XXX
  SG_ AEB_Breaking_01 : 24|8@1+ (1,0) [0|255] "" XXX
  SG_ AEB_Breaking_02 : 32|8@1+ (1,0) [0|255] "" XXX
  SG_ Accelerator_Higher_Speed : 40|1@0+ (1,0) [0|1] "" XXX
- SG_ Brake_Pressure : 42|9@1+ (1,0) [0|3] "" XXX
+ SG_ Brake_Pressure : 42|9@1+ (0.195,0) [0|100] "Unit_Percent" XXX
  SG_ HL_Radgeschw : 64|16@1+ (0.0075,0) [0|491.5125] "Unit_KilometerPerHour" XXX
  SG_ HR_Radgeschw : 80|16@1+ (0.0075,0) [0|491.5125] "Unit_KilometerPerHour" XXX
  SG_ VL_Radgeschw : 96|16@1+ (0.0075,0) [0|491.5125] "Unit_KilometerPerHour" XXX
@@ -1516,7 +1516,7 @@ BO_ 313 MEB_ESP_05: 32 XXX
  SG_ ESP_Hold : 35|1@0+ (1,0) [0|1] "" XXX
  SG_ Brake_Pressed_3 : 48|1@0+ (1,0) [0|1] "" XXX
  SG_ FCW_Active : 56|1@1+ (1,0) [0|1] "" XXX
- SG_ Brake_Pressure : 76|11@1+ (0.195,0) [0|100] "Unit_Percent" XXX
+ SG_ Brake_Pressure : 76|11@1+ (1,0) [0|100] "" XXX
 
 BO_ 522 MEB_ABS_01: 64 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
