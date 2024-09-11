@@ -1492,7 +1492,7 @@ BO_ 192 MEB_ESP_02: 32 XXX
 BO_ 332 MEB_ESP_03: 32 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ Accelerator_Pressure : 175|8@0+ (1,-37) [0|255] "" XXX
+ SG_ Accelerator_Pressure : 175|8@0+ (0.392,-37) [0|100] "Unit_Percent" XXX
 
 BO_ 258 MEB_ESP_04: 48 XXX
  SG_ NEW_SIGNAL_1 : 0|8@1+ (1,0) [0|255] "" XXX
@@ -1516,7 +1516,7 @@ BO_ 313 MEB_ESP_05: 32 XXX
  SG_ ESP_Hold : 35|1@0+ (1,0) [0|1] "" XXX
  SG_ Brake_Pressed_3 : 48|1@0+ (1,0) [0|1] "" XXX
  SG_ FCW_Active : 56|1@1+ (1,0) [0|1] "" XXX
- SG_ Brake_Pressure : 76|11@1+ (1,0) [0|1023] "" XXX
+ SG_ Brake_Pressure : 76|11@1+ (0.195,0) [0|100] "Unit_Percent" XXX
 
 BO_ 522 MEB_ABS_01: 64 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
