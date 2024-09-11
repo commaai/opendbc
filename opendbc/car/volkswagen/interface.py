@@ -93,16 +93,20 @@ class CarInterface(CarInterfaceBase):
       #ret.longitudinalTuning.kpV  = [0.1, 0.05, 0.]
       ret.longitudinalTuning.kiBP = [0., 5., 35.]
       ret.longitudinalTuning.kiV  = [3., 1.8, 1.4]
-      #if params.get_bool('ExperimentalMode'):
-      #  ret.longitudinalTuning.kpV = [0.5, 0.2, -0.2] # experimental OP long is less smooth
+    
+    if ret.flags & VolkswagenFlags.MEB:
+      ret.openpilotLongitudinalControl = ret.networkLocation == NetworkLocation.gateway or docs
+      if ret.openpilotLongitudinalControl:
+         ret.safetyConfigs[0].safetyParam |= Panda.FLAG_VOLKSWAGEN_LONG_CONTROL
       
-    ret.experimentalLongitudinalAvailable = ret.networkLocation == NetworkLocation.gateway or docs
-    if experimental_long:
-      # Proof-of-concept, prep for E2E only. No radar points available for non MEB. Panda ALLOW_DEBUG firmware required.
-      ret.openpilotLongitudinalControl = True
-      ret.safetyConfigs[0].safetyParam |= Panda.FLAG_VOLKSWAGEN_LONG_CONTROL
-      if ret.transmissionType == TransmissionType.manual:
-        ret.minEnableSpeed = 4.5
+    else:
+      ret.experimentalLongitudinalAvailable = ret.networkLocation == NetworkLocation.gateway or docs
+      if experimental_long:
+        # Proof-of-concept, prep for E2E only. No radar points available. Panda ALLOW_DEBUG firmware required.
+        ret.openpilotLongitudinalControl = True
+        ret.safetyConfigs[0].safetyParam |= Panda.FLAG_VOLKSWAGEN_LONG_CONTROL
+        if ret.transmissionType == TransmissionType.manual:
+          ret.minEnableSpeed = 4.5
 
     ret.vEgoStarting = 0.1
     ret.vEgoStopping = 0.5
