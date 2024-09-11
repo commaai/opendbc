@@ -42,6 +42,7 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdCamera, 0x787, None): [
       b'\x05!\x08\x1dK\x05!\x08\x01/',
+      b'\x05!\x08\x1dK\x00\x00\x00\x00\x00',
     ],
   },
   CAR.SUBARU_LEGACY: {
