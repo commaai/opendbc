@@ -118,15 +118,21 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
     "ACC_AKTIV_regelt":           1 if acc_control == LONG_ACTIVE else 0,
     "Speed":                      speed, # dont know if neccessary
     "Reversing":                  reversing, # dont know if neccessary
+    "SET_ME_0XFE": 0xFE,
+    "SET_ME_0X1": 0x1,
+    "SET_ME_0X9": 0x9,
+    "SET_ME_0XFE": 0xFE,
+    "SET_ME_0X1": 0x1,
+    "SET_ME_0X9": 0x9,
   }
 
   values.update({
-    "SET_ME_0XFE": meb_acc_02_values["SET_ME_0XFE"],
-    "SET_ME_0X1": meb_acc_02_values["SET_ME_0X1"],
-    "SET_ME_0X9": meb_acc_02_values["SET_ME_0X9"],
-    "SET_ME_0XFE": meb_acc_02_values["SET_ME_0XFE"],
-    "SET_ME_0X1": meb_acc_02_values["SET_ME_0X1"],
-    "SET_ME_0X9": meb_acc_02_values["SET_ME_0X9"],
+    #"SET_ME_0XFE": meb_acc_02_values["SET_ME_0XFE"],
+    #"SET_ME_0X1": meb_acc_02_values["SET_ME_0X1"],
+    #"SET_ME_0X9": meb_acc_02_values["SET_ME_0X9"],
+    #"SET_ME_0XFE": meb_acc_02_values["SET_ME_0XFE"],
+    #"SET_ME_0X1": meb_acc_02_values["SET_ME_0X1"],
+    #"SET_ME_0X9": meb_acc_02_values["SET_ME_0X9"],
   })
   
   commands.append(packer.make_can_msg("MEB_ACC_02", bus, values))
@@ -158,8 +164,6 @@ def acc_hud_status_value(main_switch_on, acc_faulted, long_active, override):
   
 
 def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, gap, heartbeat, esp_hold, meb_acc_01_values):  
-  lead_detected_by_car = True if meb_acc_01_values["Lead_Type_Detected"] > 0 else False
-  lead_detected_by_op_only = lead_visible and not lead_detected_by_car
   LONG_ACTIVE = 3
   
   values = {
@@ -171,9 +175,9 @@ def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, ga
     "ACC_Abstandsindex_02":    512,
     "ACC_EGO_Fahrzeug":        1 if acc_control == LONG_ACTIVE else 0,
     "Heartbeat":               heartbeat, # do the same as radar would do, still check if this is necessary
-    "Lead_Type_Detected":      1 if lead_detected_by_op_only else meb_acc_01_values["Lead_Type_Detected"], # object should be displayed
-    "Lead_Type":               3 if lead_detected_by_op_only else meb_acc_01_values["Lead_Type"], # displaying a car
-    "Lead_Distance":           80 if lead_detected_by_op_only else meb_acc_01_values["Lead_Distance"], # hud distance of object
+    "Lead_Type_Detected":      1 if lead_visible else 0, # object should be displayed
+    "Lead_Type":               3 if lead_visible else 0, # displaying a car
+    "Lead_Distance":           40 if lead_visible else 0, # hud distance of object
     "ACC_Enabled":             1 if acc_control == LONG_ACTIVE else 0,
     "ACC_Standby_Override":    1 if acc_control != LONG_ACTIVE else 0,
     "ACC_AKTIV_regelt":        1 if acc_control == LONG_ACTIVE else 0,
@@ -183,25 +187,21 @@ def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, ga
     "Unknown_01":              0, # prevents errors
     "Unknown_08":              0, # prevents errors
     "ACC_Special_Events":      3 if esp_hold and acc_control == LONG_ACTIVE else 0, # acc ready message at standstill
+    "Zeitluecke_3_Signal":     50
+    #"ACC_Anzeige_Zeitluecke":
+    "SET_ME_0X1": 0x1,
+    "SET_ME_0X3FF": 0x3FF,
+    "SET_ME_0XFFFF": 0xFFFF,
+    "SET_ME_0X7FFF": 0x7FFF,
   }
 
   values.update({
     #"STA_Primaeranz": meb_acc_01_values["STA_Primaeranz"],
-    "Unknown_Area_01": meb_acc_01_values["Unknown_Area_01"],
-    "SET_ME_0X1": meb_acc_01_values["SET_ME_0X1"],
-    "SET_ME_0X3FF": meb_acc_01_values["SET_ME_0X3FF"],
-    "SET_ME_0XFFFF": meb_acc_01_values["SET_ME_0XFFFF"],
-    "SET_ME_0X7FFF": meb_acc_01_values["SET_ME_0X7FFF"],
-    "Unknown_04": meb_acc_01_values["Unknown_04"],
-    "Unknown_05": meb_acc_01_values["Unknown_05"],
-    "Unknown_06": meb_acc_01_values["Unknown_06"],
-    "Unknown_07": meb_acc_01_values["Unknown_07"],
-    "Zeitluecke_1_Signal": meb_acc_01_values["Zeitluecke_1_Signal"],
-    "Zeitluecke_2_Signal": meb_acc_01_values["Zeitluecke_2_Signal"],
-    "Zeitluecke_3_Signal": meb_acc_01_values["Zeitluecke_3_Signal"],
-    "Zeitluecke_4_Signal": meb_acc_01_values["Zeitluecke_4_Signal"],
-    "Zeitluecke_5_Signal": meb_acc_01_values["Zeitluecke_5_Signal"],
-    "ACC_Anzeige_Zeitluecke": meb_acc_01_values["ACC_Anzeige_Zeitluecke"],
+    #"Unknown_Area_01": meb_acc_01_values["Unknown_Area_01"],
+    #"Unknown_04": meb_acc_01_values["Unknown_04"],
+    #"Unknown_05": meb_acc_01_values["Unknown_05"],
+    #"Unknown_06": meb_acc_01_values["Unknown_06"],
+    #"Unknown_07": meb_acc_01_values["Unknown_07"],
   })
 
   return packer.make_can_msg("MEB_ACC_01", bus, values)
