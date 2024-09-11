@@ -287,12 +287,10 @@ class CarState(CarStateBase):
     #ret.carFaultedNonCritical =
 
     # Update gas, brakes, and gearshift.
-    # accel pressure on meb eps 03 has a really low frequency
     ret.gasPressed = pt_cp.vl["MEB_ESP_03"]["Accelerator_Pressure"] > 0
-    ret.gas = pt_cp.vl["MEB_ESP_03"]["Accelerator_Pressure"] * 0.392 # signal width in percent
-    ret.brakePressed = bool(pt_cp.vl["Motor_14"]["MO_Fahrer_bremst"])
-    ret.brake = pt_cp.vl["MEB_ESP_01"]["Brake_Pressure"] * 0.195 # this is break general from car for signal width in percent
-    ret.regenBraking = bool(pt_cp.vl["MEB_ESP_04"]["Regen_Braking"])
+    ret.gas = pt_cp.vl["MEB_ESP_03"]["Accelerator_Pressure"]
+    ret.brakePressed = bool(pt_cp.vl["Motor_14"]["MO_Fahrer_bremst"]) # includes regen braking by user
+    ret.brake = pt_cp.vl["MEB_ESP_01"]["Brake_Pressure"]
     ret.parkingBrake = pt_cp.vl["MEB_EPB_01"]["EPB_Status"] in (1, 4) # EPB closing or closed
 
     # Update gear and/or clutch position data.
