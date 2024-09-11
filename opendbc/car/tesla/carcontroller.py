@@ -41,7 +41,7 @@ class CarController(CarControllerBase):
       can_sends.append(self.tesla_can.create_steering_control(apply_angle, lkas_enabled, (self.frame // 2) % 16))
 
     # Longitudinal control
-    if self.CP.openpilotLongitudinalControl:
+    if self.CP.openpilotLongitudinalControl and self.frame % 2 == 0:
       acc_state = CS.das_control["DAS_accState"]
       target_accel = actuators.accel
       target_accel = clip(target_accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
