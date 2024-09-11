@@ -30,6 +30,9 @@ class CarInterface(CarInterfaceBase):
       ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.subaru)]
       if ret.flags & SubaruFlags.GLOBAL_GEN2:
         ret.safetyConfigs[0].safetyParam |= Panda.FLAG_SUBARU_GEN2
+      if ret.flags & SubaruFlags.LKAS_ANGLE:
+        ret.safetyConfigs[0].safetyParam |= Panda.FLAG_SUBARU_LKAS_ANGLE
+        ret.safetyConfigs[0].safetyParam |= Panda.FLAG_SUBARU_ES_STATUS
 
     ret.steerLimitTimer = 0.4
     ret.steerActuatorDelay = 0.1
@@ -45,6 +48,8 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kf = 0.00003
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0., 20.], [0., 20.]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.0025, 0.1], [0.00025, 0.01]]
+      if candidate == CAR.SUBARU_ASCENT_2023:
+        ret.dashcamOnly = False
 
     elif candidate == CAR.SUBARU_IMPREZA:
       ret.steerActuatorDelay = 0.4  # end-to-end angle controller
