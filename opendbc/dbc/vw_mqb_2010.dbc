@@ -1263,10 +1263,20 @@ BO_ 159 LH_EPS_03: 8 XXX
  SG_ EPS_VZ_Lenkmoment : 55|1@1+ (1,0) [0|1] ""  XXX
  SG_ EPS_Lenkungstyp : 60|4@1+ (1,0) [0|15] ""  XXX
 
-BO_ 286 VehicleSpeed: 8 XXX
- SG_ VehicleSpeed_CRC : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ VehicleSpeed_BZ : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ Speed : 52|12@1+ (0.125,0) [0|1] "" XXX
+BO_ 286 ESP_08: 8 Gateway_MQB
+ SG_ ESP_08_CRC : 0|8@1+ (1,0) [0|255] ""  XXX
+ SG_ ESP_08_BZ : 8|4@1+ (1,0) [0|15] ""  XXX
+ SG_ ESP_ANB_CM_Rueckk_Umsetz : 12|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ESP_Konsistenz_ACC_Botschaft : 13|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ESP_Stillstandsphase_erschoepft : 14|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ESP_ZT_Rueckk_Umsetz : 15|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ESP_Tuerkontakt_Fahrertuer : 16|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ESP_Abrutschen_Stillstand : 18|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ESP_Fahrer_tritt_ZBR_Schw : 19|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ESP_QBit_v_ref : 41|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ESP_v_ref_Fahrtrichtung : 42|2@1+ (1.0,0.0) [0.0|3] ""  XXX
+ SG_ ESC_Bremsdruckgradient : 44|8@1+ (10,0) [0|2500] "Unit_BarPerSecon"  XXX
+ SG_ ESP_v_ref : 52|12@1+ (0.125,0) [0.000|511.500] "Unit_KiloMeterPerHour"  XXX
 
 BO_ 919 LDW_02: 8 XXX
  SG_ LDW_Gong : 12|2@1+ (1,0) [0|3] ""  XXX
