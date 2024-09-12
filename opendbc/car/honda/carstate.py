@@ -154,6 +154,8 @@ class CarState(CarStateBase):
     ret.steerFaultTemporary = steer_status not in ("NORMAL", "LOW_SPEED_LOCKOUT", "NO_TORQUE_ALERT_2")
 
     if self.CP.carFingerprint == CAR.HONDA_ODYSSEY_BOSCH and not self.CP.openpilotLongitudinalControl:
+      if ret.steerFaultTemporary:
+        self.steer_off_cnt = 0
       ret.steerFaultTemporary |= self.steer_off_cnt >= int(1. / DT_CTRL)
 
     if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
