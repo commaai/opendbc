@@ -508,18 +508,21 @@ BO_ 296 Getriebe_06: 3 Getriebe_DQ_Hybrid_MQB
  SG_ GE_Testparameter_2 : 16|8@1+ (1,0) [0|255] "" Waehlhebel_MQB
 
 BO_ 173 Getriebe_11: 8 Getriebe_DQ_Hybrid_MQB
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Gateway_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ COUNTERXX : 8|4@1+ (1,0) [0|15] "" Gateway_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ GE_MMom_Soll_02 : 12|10@1+ (1,-509) [-509|509] "Unit_NewtoMeter" Gateway_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ GE_MMom_Vorhalt_02 : 22|10@1+ (1,-509) [-509|509] "Unit_NewtoMeter" Gateway_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ GE_Uefkt : 32|10@1+ (0.1,0) [0|102.2] "" Gateway_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ GE_Fahrstufe : 42|5@1+ (1,0) [0|31] "" Gateway_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ GE_Schaltvorgang : 47|1@1+ (1,0) [0|1] "" Gateway_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ GE_Status_Kupplung : 54|2@1+ (1,0) [0|3] "" Gateway_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ GE_MMom_Status : 56|2@1+ (1,0) [0|3] "" Gateway_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ GE_Freig_MMom_Vorhalt : 58|1@1+ (1,0) [0|1] "" Gateway_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ GE_Verbot_Ausblendung : 59|1@1+ (1,0) [0|1] "" Gateway_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ GE_Zielgang : 60|4@1+ (1,0) [0|15] "" Gateway_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
+ SG_ COUNTER_DISABLED : 8|4@1+ (1,0) [0|15] ""  XXX
+ SG_ GE_MMom_Soll_02 : 12|10@1+ (1,-509) [-509|509] ""  XXX
+ SG_ GE_MMom_Vorhalt_02 : 22|10@1+ (1,-509) [-509|509] ""  XXX
+ SG_ GE_Uefkt : 32|10@1+ (0.1,0) [0|102.2] ""  XXX
+ SG_ GE_Fahrstufe : 42|4@1+ (1,0) [0|15] ""  XXX
+ SG_ GE_reserv_Fahrstufe : 46|1@1+ (1,0) [0|1] ""  XXX
+ SG_ GE_Schaltablauf : 47|2@1+ (1,0) [0|3] ""  XXX
+ SG_ GE_Uefkt_unplausibel : 49|1@1+ (1,0) [0|1] ""  XXX
+ SG_ GE_MMom_Status_02 : 50|3@1+ (1,0) [0|7] ""  XXX
+ SG_ GE_Status_Kraftschluss : 53|3@1+ (1,0) [0|7] ""  XXX
+ SG_ GE_MMom_Status : 56|2@1+ (1,0) [0|3] ""  XXX
+ SG_ GE_Freig_MMom_Vorhalt : 58|1@1+ (1,0) [0|1] ""  XXX
+ SG_ GE_Verbot_Ausblendung : 59|1@1+ (1,0) [0|1] ""  XXX
+ SG_ GE_Zielgang : 60|4@1+ (1,0) [0|15] ""  XXX
 
 BO_ 174 Getriebe_12: 8 Getriebe_DQ_Hybrid_MQB
  SG_ Getriebe_12_CRC : 0|8@1+ (1,0) [0|255] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
@@ -1503,7 +1506,7 @@ CM_ SG_ 159 EPS_Lenkmoment "Steering input by driver, torque";
 CM_ SG_ 159 EPS_VZ_Lenkmoment "Steering input by driver, direction";
 CM_ SG_ 159 EPS_Berechneter_LW "Raw steering angle, degrees";
 CM_ SG_ 159 EPS_VZ_BLW "Raw steering angle, direction";
-CM_ SG_ 173 COUNTERXX "Message not renamed to COUNTER because J533 rate-limiting makes it look like messages are being lost";
+CM_ SG_ 173 COUNTER_DISABLED "Message not renamed to COUNTER because J533 rate-limiting makes it look like messages are being lost";
 CM_ SG_ 294 HCA_01_Vib_Freq "Frequenz der Lenkradvibration";
 CM_ SG_ 294 HCA_01_LM_Offset "Von HCA angefordertes Lenkmoment (Betrag)";
 CM_ SG_ 294 EA_ACC_Sollstatus "Status-Anforderung ACC von Emergency Alert. Statuswechsel bei Flanke. Solange Wert=1, wird EA_ACC_Wunschgeschwindigkeit übernommen. Wert=2 führt zu Zustand ¿ACC_GRA_passiv¿";
