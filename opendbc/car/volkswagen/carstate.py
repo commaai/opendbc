@@ -79,7 +79,7 @@ class CarState(CarStateBase):
     if self.CP.transmissionType == TransmissionType.automatic:
       ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Getriebe_11"]["GE_Fahrstufe"], None))
     elif self.CP.transmissionType == TransmissionType.direct:
-      ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["EV_Gearshift"]["GearPosition"], None))
+      ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Motor_EV_01"]["MO_Waehlpos"], None))
     elif self.CP.transmissionType == TransmissionType.manual:
       ret.clutchPressed = not pt_cp.vl["Motor_14"]["MO_Kuppl_schalter"]
       if bool(pt_cp.vl["Gateway_72"]["BCM1_Rueckfahrlicht_Schalter"]):
@@ -292,7 +292,7 @@ class CarState(CarStateBase):
     if CP.transmissionType == TransmissionType.automatic:
       messages.append(("Getriebe_11", 20))  # From J743 Auto transmission control module
     elif CP.transmissionType == TransmissionType.direct:
-      messages.append(("EV_Gearshift", 10))  # From J??? unknown EV control module
+      messages.append(("Motor_EV_01", 10))  # From J??? unknown EV control module
 
     if CP.networkLocation == NetworkLocation.fwdCamera:
       # Radars are here on CANBUS.pt
