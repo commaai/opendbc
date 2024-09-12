@@ -40,9 +40,6 @@ class TestCanChecksums:
       parser = CANParser(dbc_file, [(msg_name, 0)], 0)
       packer = CANPacker(dbc_file)
 
-      if len(test_messages) == 0:
-          pytest.skip('No input data given')  # TODO: Remove eventually
-
       assert len(test_messages) == 16 # All counter values must be tested
 
       for data in test_messages:
