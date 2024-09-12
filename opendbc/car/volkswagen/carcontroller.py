@@ -176,11 +176,11 @@ class CarController(CarControllerBase):
         else:
           upper_jerk = 0
           
-        can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.enabled and CS.out.cruiseState.enabled, accel, acc_control, acc_hold_type,
+        can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.enabled, accel, acc_control, acc_hold_type,
                                                            stopping, starting, lower_jerk, upper_jerk, CS.esp_hold_confirmation, CC.cruiseControl.override, current_speed, reversing))
 
       else:
-        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled)
+        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
         can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.longActive, accel,
                                                            acc_control, stopping, starting, CS.esp_hold_confirmation))
 
