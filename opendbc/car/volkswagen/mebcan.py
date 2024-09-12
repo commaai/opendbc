@@ -88,7 +88,7 @@ def acc_hold_type(main_switch_on, acc_faulted, long_active, just_disabled, start
   if just_disabled:
     acc_hold_type = 5 # disable confirmation
   elif not long_active or not main_switch_on or acc_faulted or override:
-    acc_hold_type = 0: # no hold request
+    acc_hold_type = 0 # no hold request
   elif starting or (override and esp_hold):
     acc_hold_type = 4 # release request and startup
   elif stopping or esp_hold:
@@ -134,7 +134,7 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
   values_ta = {
      "Travel_Assist_Status" :    2, # ready
      "Travel_Assist_Request" :   0, # no request
-     "Travel_Assist_Available" : 1,
+     "Travel_Assist_Available" : 1, # button is illuminated
   }
 
   commands.append(packer.make_can_msg("MEB_Travel_Assist_01", bus, values_ta))
@@ -144,18 +144,19 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
 
 def acc_hud_status_value(main_switch_on, acc_faulted, long_active, override):
   if acc_faulted:
-    acc_hud_control = 6
+    acc_hud_control = 6 # error state
   elif long_active:
-    acc_hud_control = 4 if override else 3
+    acc_hud_control = 4 if override else 3 # active or overriding state
   elif main_switch_on:
-    acc_hud_control = 2
+    acc_hud_control = 2 # inactive
   else:
-    acc_hud_control = 0
+    acc_hud_control = 0 # deactivated
 
   return acc_hud_control
 
 
 def get_desired_gap(distance_bars, desired_gap):
+  # mapping desired gap to correct signal of corresponding distance bar
   gap = 0
   
   if desired_gap == 1:
@@ -173,12 +174,13 @@ def get_desired_gap(distance_bars, desired_gap):
 
 def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, distance_bars, desired_gap, distance, heartbeat, esp_hold):  
   LONG_ACTIVE = 3
+  OVERRIDE = 4
   
   values = {
     #"STA_Primaeranz": acc_hud_status,
     "ACC_Status_ACC":          acc_control,
     "ACC_Wunschgeschw_02":     set_speed if set_speed < 250 else 327.36,
-    "ACC_Gesetzte_Zeitluecke": distance_bars,
+    "ACC_Gesetzte_Zeitluecke": distance_bars, # 5 distance bars available (3 are used by OP)
     "ACC_Display_Prio":        1,
     "ACC_Abstandsindex_02":    512,
     "ACC_EGO_Fahrzeug":        1 if acc_control == LONG_ACTIVE else 0,
@@ -187,7 +189,7 @@ def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, di
     "Lead_Type":               3 if lead_visible else 0, # displaying a car
     "Lead_Distance":           distance if lead_visible else 0, # hud distance of object
     "ACC_Enabled":             1 if acc_control == LONG_ACTIVE else 0,
-    "ACC_Standby_Override":    1 if acc_control != LONG_ACTIVE else 0,
+    "ACC_Standby_Override":    1 if acc_control != LONG_ACTIVE or OVERRIDE else 0,
     "ACC_AKTIV_regelt":        1 if acc_control == LONG_ACTIVE else 0,
     "ACC_Limiter_Mode":        0,
     "Lead_Brightness":         3 if acc_control == LONG_ACTIVE else 0, # object shows in colour
@@ -195,16 +197,16 @@ def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, di
     "Unknown_01":              0, # prevents errors
     "Unknown_08":              0, # prevents errors
     "ACC_Special_Events":      3 if esp_hold and acc_control == LONG_ACTIVE else 0, # acc ready message at standstill
-    "Zeitluecke_1_Signal":     get_desired_gap(distance_bars, desired_gap),
-    "Zeitluecke_2_Signal":     get_desired_gap(distance_bars, desired_gap),
-    "Zeitluecke_3_Signal":     get_desired_gap(distance_bars, desired_gap),
-    "Zeitluecke_4_Signal":     get_desired_gap(distance_bars, desired_gap),
-    "Zeitluecke_5_Signal":     get_desired_gap(distance_bars, desired_gap),
-    #"ACC_Anzeige_Zeitluecke":
-    "SET_ME_0X1":              0x1,
-    "SET_ME_0X3FF":            0x3FF,
-    "SET_ME_0XFFFF":           0xFFFF,
-    "SET_ME_0X7FFF":           0x7FFF,
+    "Zeitluecke_1_Signal":     get_desired_gap(distance_bars, desired_gap), # desired distance to lead object for distance bar 1
+    "Zeitluecke_2_Signal":     get_desired_gap(distance_bars, desired_gap), # desired distance to lead object for distance bar 2
+    "Zeitluecke_3_Signal":     get_desired_gap(distance_bars, desired_gap), # desired distance to lead object for distance bar 3
+    "Zeitluecke_4_Signal":     get_desired_gap(distance_bars, desired_gap), # desired distance to lead object for distance bar 4
+    "Zeitluecke_5_Signal":     get_desired_gap(distance_bars, desired_gap), # desired distance to lead object for distance bar 5
+    #"ACC_Anzeige_Zeitluecke": 
+    "SET_ME_0X1":              0x1, # unknown
+    "SET_ME_0X3FF":            0x3FF, # unknown
+    "SET_ME_0XFFFF":           0xFFFF, # unknown
+    "SET_ME_0X7FFF":           0x7FFF, # unknown
   }
 
   return packer.make_can_msg("MEB_ACC_01", bus, values)
