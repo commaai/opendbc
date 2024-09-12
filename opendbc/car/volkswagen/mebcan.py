@@ -66,15 +66,15 @@ def create_acc_buttons_control(packer, bus, gra_stock_values, cancel=False, resu
   return packer.make_can_msg("GRA_ACC_01", bus, values)
   
 
-def acc_control_value(main_switch_on, acc_faulted, long_active, just_disabled, override):
+def acc_control_value(main_switch_on, acc_faulted, long_active, just_disabled, esp_hold, override):
   if acc_faulted:
     acc_control = 6 # error state
   elif just_disabled:
     acc_control = 5 # disabling controls
   elif override:
-    acc_control = 4 # overriding controls
+    acc_control = 3 if esp_hold else 4 # overriding controls (standstill and override is a starting event)
   elif long_active:
-    acc_control = 3 # default long control state
+    acc_control = 3 # active long control state
   elif main_switch_on:
     acc_control = 2 # long control ready
   else:
@@ -87,8 +87,10 @@ def acc_hold_type(main_switch_on, acc_faulted, long_active, just_disabled, start
 
   if just_disabled:
     acc_hold_type = 5 # disable confirmation
-  elif not long_active or not main_switch_on or acc_faulted or override:
+  elif not long_active or not main_switch_on or acc_faulted:
     acc_hold_type = 0 # no hold request
+  elif override:
+    acc_hold_type = 4 if esp_hold else 0 # overriding at standstill is a starting event, apart from that overriding means no hold request
   elif starting or (override and esp_hold):
     acc_hold_type = 4 # release request and startup
   elif stopping or esp_hold:
