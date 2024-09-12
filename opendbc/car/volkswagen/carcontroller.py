@@ -164,7 +164,7 @@ class CarController(CarControllerBase):
         self.long_active_prev = CC.enabled
         current_speed = CS.out.vEgo * CV.MS_TO_KPH
         reversing = CS.out.gearShifter in [structs.CarState.GearShifter.reverse]
-        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, just_disabled, CC.cruiseControl.override)
+        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, just_disabled, CS.esp_hold_confirmation, CC.cruiseControl.override)
         acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, just_disabled, starting,
                                                stopping, CS.esp_hold_confirmation, CC.cruiseControl.override)
         required_jerk = min(3, abs(accel - CS.out.aEgo) * 50) ## pfeiferj:openpilot:pfeifer-hkg-long-control-tune
