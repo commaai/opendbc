@@ -160,13 +160,13 @@ class CarController(CarControllerBase):
       starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
 
       if self.CP.flags & VolkswagenFlags.MEB:
-        just_disabled = True if self.long_active_prev and not CC.longActive else False
-        self.long_active_prev = CC.longActive
+        just_disabled = True if self.long_active_prev and not (CC.enabled and CS.out.cruiseState.enabled) else False
+        self.long_active_prev = CC.enabled and CS.out.cruiseState.enabled
         current_speed = CS.out.vEgo * CV.MS_TO_KPH
         reversing = CS.out.gearShifter in [structs.CarState.GearShifter.reverse]
-        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive, just_disabled)
-        acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive, just_disabled, starting,
-                                               stopping, CS.esp_hold_confirmation)
+        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled and CS.out.cruiseState.enabled, just_disabled, CC.cruiseControl.override)
+        acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled and CS.out.cruiseState.enabled, just_disabled, starting,
+                                               stopping, CS.esp_hold_confirmation, CC.cruiseControl.override)
         required_jerk = min(3, abs(accel - CS.out.aEgo) * 50) ## pfeiferj:openpilot:pfeifer-hkg-long-control-tune
         lower_jerk = required_jerk
         upper_jerk = required_jerk
@@ -176,8 +176,8 @@ class CarController(CarControllerBase):
         else:
           upper_jerk = 0
           
-        can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.longActive, accel, acc_control, acc_hold_type,
-                                                           stopping, starting, lower_jerk, upper_jerk, CS.esp_hold_confirmation, current_speed, reversing))
+        can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.enabled and CS.out.cruiseState.enabled, accel, acc_control, acc_hold_type,
+                                                           stopping, starting, lower_jerk, upper_jerk, CS.esp_hold_confirmation, current_speed, reversing, CC.cruiseControl.override))
 
       else:
         acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled)
