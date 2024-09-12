@@ -164,9 +164,11 @@ class CarController(CarControllerBase):
         self.long_active_prev = CC.enabled
         current_speed = CS.out.vEgo * CV.MS_TO_KPH
         reversing = CS.out.gearShifter in [structs.CarState.GearShifter.reverse]
-        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, just_disabled, CS.esp_hold_confirmation, CC.cruiseControl.override)
+        override_starting = CC.cruiseControl.override and CS.out.vEgo < self.CP.vEgoStarting 
+        
+        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, just_disabled, CS.esp_hold_confirmation, CC.cruiseControl.override, override_starting)
         acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, just_disabled, starting,
-                                               stopping, CS.esp_hold_confirmation, CC.cruiseControl.override)
+                                               stopping, CS.esp_hold_confirmation, CC.cruiseControl.override, override_starting)
         required_jerk = min(3, abs(accel - CS.out.aEgo) * 50) ## pfeiferj:openpilot:pfeifer-hkg-long-control-tune
         lower_jerk = required_jerk
         upper_jerk = required_jerk
@@ -204,8 +206,9 @@ class CarController(CarControllerBase):
 
         distance = 50 # TODO get distance from model
         desired_gap = min(CS.out.vEgo, 100) # TODO get desired gap from OP
+        override_starting = CC.cruiseControl.override and CS.out.vEgo < self.CP.vEgoStarting 
 
-        acc_hud_status = self.CCS.acc_hud_status_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, CS.esp_hold_confirmation, CC.cruiseControl.override)
+        acc_hud_status = self.CCS.acc_hud_status_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, CS.esp_hold_confirmation, CC.cruiseControl.override, override_starting)
         can_sends.append(self.CCS.create_acc_hud_control(self.packer_pt, CANBUS.pt, acc_hud_status, hud_control.setSpeed * CV.MS_TO_KPH, hud_control.leadVisible,
                                                          hud_control.leadDistanceBars, desired_gap, distance, self.long_heartbeat, CS.esp_hold_confirmation))
 
