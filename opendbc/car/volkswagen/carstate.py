@@ -315,8 +315,6 @@ class CarState(CarStateBase):
     # Consume factory LDW data relevant for factory SWA (Lane Change Assist)
     # and capture it for forwarding to the blind spot radar controller
     self.ldw_stock_values = cam_cp.vl["LDW_02"]
-    self.meb_acc_01_values = ext_cp.vl["MEB_ACC_01"]
-    self.meb_acc_02_values = ext_cp.vl["MEB_ACC_02"]
 
     ret.stockFcw = bool(pt_cp.vl["MEB_ESP_05"]["FCW_Active"])
     ret.stockAeb = bool(pt_cp.vl["MEB_ESP_05"]["AEB_Active"])
