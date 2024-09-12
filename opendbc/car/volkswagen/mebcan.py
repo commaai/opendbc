@@ -146,11 +146,14 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
   return commands
 
 
-def acc_hud_status_value(main_switch_on, acc_faulted, long_active, override):
+def acc_hud_status_value(main_switch_on, acc_faulted, long_active, esp_hold, override):
   if acc_faulted:
     acc_hud_control = 6 # error state
   elif long_active:
-    acc_hud_control = 4 if override else 3 # active or overriding state
+    if override:
+      acc_hud_control = 3 if esp_hold else 4 # override at standstill is starting condition
+    else:
+      acc_hud_control = 3 # active
   elif main_switch_on:
     acc_hud_control = 2 # inactive
   else:
