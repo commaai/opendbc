@@ -74,7 +74,7 @@ def acc_control_value(main_switch_on, acc_faulted, long_active, just_disabled, e
   elif just_disabled:
     acc_control = 5 # disabling controls
   elif override:
-    acc_control = 3 if esp_hold else 4 # overriding controls (standstill and override is a starting event)
+    acc_control = 4 #3 if esp_hold else 4 # overriding controls (standstill and override is a starting event)
   elif long_active:
     acc_control = 3 # active long control state
   elif main_switch_on:
@@ -92,7 +92,7 @@ def acc_hold_type(main_switch_on, acc_faulted, long_active, just_disabled, start
   elif not long_active or not main_switch_on or acc_faulted:
     acc_hold_type = 0 # no hold request
   elif override:
-    acc_hold_type = 4 if esp_hold else 0 # overriding at standstill is a starting event, apart from that overriding means no hold request
+    acc_hold_type = 0 #4 if esp_hold else 0 # overriding at standstill is a starting event, apart from that overriding means no hold request
   elif starting:
     acc_hold_type = 4 # release request and startup
   elif stopping or esp_hold:
@@ -103,7 +103,7 @@ def acc_hold_type(main_switch_on, acc_faulted, long_active, just_disabled, start
   return acc_hold_type
   
 
-def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, acc_hold_type, stopping, starting, lower_jerk, upper_jerk, esp_hold, speed, reversing):
+def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, acc_hold_type, stopping, starting, lower_jerk, upper_jerk, esp_hold, override, speed, reversing):
   LONG_ACTIVE = 3
   commands = []
 
@@ -111,7 +111,7 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
     "ACC_Typ":                    acc_type,
     "ACC_Status_ACC":             acc_control,
     "ACC_StartStopp_Info":        acc_enabled,
-    "ACC_Sollbeschleunigung_02":  accel if acc_enabled else 3.01,
+    "ACC_Sollbeschleunigung_02":  accel if acc_enabled and not override else 3.01,
     "ACC_zul_Regelabw_unten":     max(0.05, lower_jerk) if acc_enabled else 0,
     "ACC_zul_Regelabw_oben":      min(3.0, upper_jerk) if acc_enabled else 0,
     "ACC_neg_Sollbeschl_Grad_02": 4.0 if acc_enabled else 0,  # TODO: dynamic adjustment of jerk limits
@@ -151,7 +151,7 @@ def acc_hud_status_value(main_switch_on, acc_faulted, long_active, esp_hold, ove
     acc_hud_control = 6 # error state
   elif long_active:
     if override:
-      acc_hud_control = 3 if esp_hold else 4 # override at standstill is starting condition
+      acc_hud_control = 4 #3 if esp_hold else 4 # override at standstill is starting condition
     else:
       acc_hud_control = 3 # active
   elif main_switch_on:
