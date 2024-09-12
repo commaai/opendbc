@@ -32,7 +32,6 @@ class CarInterface(CarInterfaceBase):
         ret.safetyConfigs[0].safetyParam |= Panda.FLAG_SUBARU_GEN2
       if ret.flags & SubaruFlags.LKAS_ANGLE:
         ret.safetyConfigs[0].safetyParam |= Panda.FLAG_SUBARU_LKAS_ANGLE
-        ret.safetyConfigs[0].safetyParam |= Panda.FLAG_SUBARU_ES_STATUS
 
     ret.steerLimitTimer = 0.4
     ret.steerActuatorDelay = 0.1
