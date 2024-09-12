@@ -2,7 +2,6 @@ import copy
 from opendbc.can.parser import CANParser
 from opendbc.can.packer import CANPacker
 
-REPEAT_COUNT = 1000000
 
 class TestCanChecksums:
 
@@ -49,9 +48,7 @@ class TestCanChecksums:
 
         modified = copy.deepcopy(expected)
         modified.pop(crc_field, None)
-        modified_msg = None
-        for _ in range(REPEAT_COUNT):
-          modified_msg = packer.make_can_msg(msg_name, 0, modified)
+        modified_msg = packer.make_can_msg(msg_name, 0, modified)
 
         parser.update_strings([0, [modified_msg]])
         tested = parser.vl[msg_name]
