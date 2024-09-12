@@ -66,7 +66,7 @@ def create_acc_buttons_control(packer, bus, gra_stock_values, cancel=False, resu
   return packer.make_can_msg("GRA_ACC_01", bus, values)
   
 
-def acc_control_value(main_switch_on, acc_faulted, long_active, just_disabled, esp_hold, override):
+def acc_control_value(main_switch_on, acc_faulted, long_active, just_disabled, esp_hold, override, override_starting)):
   # WRONG USAGE (ESPECIALLY OVERRIDING STATES) RESULTS IN CAR SHUTTING OFF AT LOW SPEEDS <~ 3km/h
   # ja, man kann ein E-Auto abwürgen ;)
   if acc_faulted:
@@ -74,7 +74,7 @@ def acc_control_value(main_switch_on, acc_faulted, long_active, just_disabled, e
   elif just_disabled:
     acc_control = 5 # disabling controls
   elif override:
-    acc_control = 3 if esp_hold else 4 # overriding controls (standstill and override is a starting event)
+    acc_control = 3 if override_starting else 4 # overriding controls (standstill and override is a starting event)
   elif long_active:
     acc_control = 3 # active long control state
   elif main_switch_on:
@@ -85,14 +85,14 @@ def acc_control_value(main_switch_on, acc_faulted, long_active, just_disabled, e
   return acc_control
   
 
-def acc_hold_type(main_switch_on, acc_faulted, long_active, just_disabled, starting, stopping, esp_hold, override):
+def acc_hold_type(main_switch_on, acc_faulted, long_active, just_disabled, starting, stopping, esp_hold, override, override_starting)):
   # WRONG USAGE (ESPECIALLY OVERRIDING STATES) RESULTS IN CAR SHUTTING OFF AT LOW SPEEDS <~ 3km/h
   if just_disabled:
     acc_hold_type = 5 # disable confirmation
   elif not long_active or not main_switch_on or acc_faulted:
     acc_hold_type = 0 # no hold request
   elif override:
-    acc_hold_type = 4 if esp_hold else 0 # overriding at standstill is a starting event, apart from that overriding means no hold request
+    acc_hold_type = 4 if override_starting else 0 # overriding at standstill is a starting event, apart from that overriding means no hold request
   elif starting:
     acc_hold_type = 4 # release request and startup
   elif stopping or esp_hold:
@@ -146,12 +146,12 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
   return commands
 
 
-def acc_hud_status_value(main_switch_on, acc_faulted, long_active, esp_hold, override):
+def acc_hud_status_value(main_switch_on, acc_faulted, long_active, esp_hold, override, override_starting):
   if acc_faulted:
     acc_hud_control = 6 # error state
   elif long_active:
     if override:
-      acc_hud_control = 3 if esp_hold else 4 # override at standstill is starting condition
+      acc_hud_control = 3 if override_starting else 4 # override at standstill is starting condition
     else:
       acc_hud_control = 3 # active
   elif main_switch_on:
