@@ -142,13 +142,13 @@ unsigned int volkswagen_mqb_checksum(uint32_t address, const Signal &sig, const 
 
   uint8_t crc = 0xFF; // CRC-8H2F initial value
 
-  // CRC over payload first
+  // CRC over payload first, skipping the first byte where the CRC lives
   for (int i = 1; i < d.size(); i++) {
     crc ^= d[i];
     crc = crc8_lut_8h2f[crc];
   }
 
-  // Continue CRC over "data ID"
+  // Continue CRC over the "data ID"
   uint8_t counter = d[1] & 0x0F;
   auto crc_const = crc_mqb_constants.find(address);
   if (crc_const != crc_mqb_constants.end()) {
