@@ -66,7 +66,7 @@ def create_acc_buttons_control(packer, bus, gra_stock_values, cancel=False, resu
   return packer.make_can_msg("GRA_ACC_01", bus, values)
   
 
-def acc_control_value(main_switch_on, acc_faulted, long_active, just_disabled, esp_hold, override, override_starting)):
+def acc_control_value(main_switch_on, acc_faulted, long_active, just_disabled, esp_hold, override, override_starting):
   # WRONG USAGE (ESPECIALLY OVERRIDING STATES) RESULTS IN CAR SHUTTING OFF AT LOW SPEEDS <~ 3km/h
   # ja, man kann ein E-Auto abwürgen ;)
   if acc_faulted:
@@ -85,7 +85,7 @@ def acc_control_value(main_switch_on, acc_faulted, long_active, just_disabled, e
   return acc_control
   
 
-def acc_hold_type(main_switch_on, acc_faulted, long_active, just_disabled, starting, stopping, esp_hold, override, override_starting)):
+def acc_hold_type(main_switch_on, acc_faulted, long_active, just_disabled, starting, stopping, esp_hold, override, override_starting):
   # WRONG USAGE (ESPECIALLY OVERRIDING STATES) RESULTS IN CAR SHUTTING OFF AT LOW SPEEDS <~ 3km/h
   if just_disabled:
     acc_hold_type = 5 # disable confirmation
