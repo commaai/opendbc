@@ -114,7 +114,7 @@ struct CrcInitializer {
 
 static CrcInitializer crcInitializer;
 
-static const std::unordered_map<uint32_t, std::array<uint8_t, 16>> crc_mqb_constants {
+static const std::unordered_map<uint32_t, std::array<uint8_t, 16>> volkswagen_mqb_crc_constants {
   {0x86,  {0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86}},  // LWI_01
   {0x9F,  {0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5}},  // LH_EPS_01
   {0xAD,  {0x3F, 0x69, 0x39, 0xDC, 0x94, 0xF9, 0x14, 0x64, 0xD8, 0x6A, 0x34, 0xCE, 0xA2, 0x55, 0xB5, 0x2C}},  // Getriebe_11
@@ -148,8 +148,8 @@ unsigned int volkswagen_mqb_checksum(uint32_t address, const Signal &sig, const 
 
   // Continue CRC over the "data ID"
   uint8_t counter = d[1] & 0x0F;
-  auto crc_const = crc_mqb_constants.find(address);
-  if (crc_const != crc_mqb_constants.end()) {
+  auto crc_const = volkswagen_mqb_crc_constants.find(address);
+  if (crc_const != volkswagen_mqb_crc_constants.end()) {
     crc ^= crc_const->second[counter];
     crc = crc8_lut_8h2f[crc];
   } else {
