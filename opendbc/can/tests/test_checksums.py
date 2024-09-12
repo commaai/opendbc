@@ -131,7 +131,6 @@ class TestCanChecksums:
           b'\xe2\x3f\x05\x00\x05\x0a\x00\x30',
       ])
 
-  @pytest.mark.skip(reason="This message has broken COUNTER behavior, see opendbc#1235")
   def test_mqb_crc_Getriebe_11(self, subtests):
       self.verify_mqb_crc(subtests, "Getriebe_11", 0xAD, [
           b'\xf8\xe0\xbf\xff\x5f\x20\x20\x20',
@@ -150,7 +149,7 @@ class TestCanChecksums:
           b'\xbd\xed\xbf\xff\xaa\x20\x20\x10',
           b'\x67\xee\xbf\xff\xaa\x20\x20\x10',
           b'\x36\xef\xbf\xff\xaa\x20\x20\x10',
-      ])
+      ], counter_field="COUNTER_DISABLED")  # see opendbc#1235
 
   def test_mqb_crc_ESP_21(self, subtests):
       self.verify_mqb_crc(subtests, "ESP_21", 0xFD, [
