@@ -401,24 +401,33 @@ BO_ 1629 ESP_20: 8 Gateway_MQB
  SG_ BR_Reifenumfang : 52|12@1+ (1,0) [0|4095] "Unit_MilliMeter" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
 
 BO_ 253 ESP_21: 8 Gateway_MQB
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,LEH_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Airbag_MQB,BMS_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,LEH_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ BR_Eingriffsmoment : 12|10@1+ (1,-509) [-509|509] "Unit_NewtoMeter" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ ESP_v_Signal : 32|16@1+ (0.01,0) [0|655.32] "Unit_KiloMeterPerHour" Airbag_MQB,BMS_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,LEH_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB,SAK_MQB
- SG_ ASR_Tastung_passiv : 48|1@1+ (1,0) [0|1] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ ESP_Tastung_passiv : 49|1@1+ (1,0) [0|1] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ ESP_Systemstatus : 50|1@1+ (1,0) [0|1] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ ASR_Schalteingriff : 51|2@1+ (1,0) [0|3] "" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
- SG_ ESP_Haltebestaetigung : 53|1@1+ (1,0) [0|1] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ ESP_QBit_v_Signal : 55|1@1+ (1,0) [0|1] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,LEH_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ ABS_Bremsung : 56|1@1+ (1,0) [0|1] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ ASR_Anf : 57|1@1+ (1,0) [0|1] "" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ MSR_Anf : 58|1@1+ (1,0) [0|1] "" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ EBV_Eingriff : 59|1@1+ (1,0) [0|1] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ EDS_Eingriff : 60|1@1+ (1,0) [0|1] "" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ ESP_Eingriff : 61|1@1+ (1,0) [0|1] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ ESP_ASP : 62|1@1+ (1,0) [0|1] "" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ ESP_Anhaltevorgang_ACC_aktiv : 63|1@1+ (1,0) [0|1] "" Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  XXX
+ SG_ BR_Eingriffsmoment : 12|10@1+ (1,-509) [-509|509] ""  XXX
+ SG_ ESP_PLA_Bremseingriff : 22|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ESP_Diagnose : 23|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ESC_Reku_Freigabe : 24|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ESC_v_Signal_Qualifier_High_Low : 25|3@1+ (1.0,0.0) [0.0|7] ""  XXX
+ SG_ ESP_Vorsteuerung : 28|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ESP_AWV3_Brems_aktiv : 29|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ OBD_Schlechtweg : 30|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ OBD_QBit_Schlechtweg : 31|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ESP_v_Signal : 32|16@1+ (0.01,0) [0.00|655.32] "Unit_KiloMeterPerHour"  XXX
+ SG_ ASR_Tastung_passiv : 48|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ESP_Tastung_passiv : 49|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ESP_Systemstatus : 50|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ASR_Schalteingriff : 51|2@1+ (1.0,0.0) [0.0|3] ""  XXX
+ SG_ ESP_Haltebestaetigung : 53|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ESP_MKB_Abbruch_Geschw : 54|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ESP_QBit_v_Signal : 55|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ABS_Bremsung : 56|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ASR_Anf : 57|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ MSR_Anf : 58|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ EBV_Eingriff : 59|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ EDS_Eingriff : 60|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ESP_Eingriff : 61|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ESP_ASP : 62|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ ESP_Anhaltevorgang_ACC_aktiv : 63|1@1+ (1.0,0.0) [0.0|1] ""  XXX
 
 BO_ 987 Gateway_72: 8 Gateway_MQB
  SG_ BCM_01_alt : 0|1@1+ (1,0) [0|1] "" Airbag_MQB
