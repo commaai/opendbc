@@ -152,7 +152,6 @@ class TestCanChecksums:
           b'\x36\xef\xbf\xff\xaa\x20\x20\x10',
       ])
 
-  @pytest.mark.skip(reason="Missing field definitions in .dbc for ESP_21")
   def test_mqb_crc_ESP_21(self, subtests):
       self.verify_mqb_crc(subtests, "ESP_21", 0xFD, [
           b'\x66\xd0\x1f\x80\x45\x05\x00\x00',
@@ -233,7 +232,6 @@ class TestCanChecksums:
           b'\x0b\x0f\x00\x02\x00\x08\xff\x21',
       ])
 
-  @pytest.mark.skip(reason="Missing field definitions in .dbc for Motor_20")
   def test_mqb_crc_Motor_20(self, subtests):
       self.verify_mqb_crc(subtests, "Motor_20", 0x121, [
           b'\xb9\x00\x00\xc0\x39\x46\x7e\xfe',
@@ -354,7 +352,7 @@ class TestCanChecksums:
           b'\x00\x8F\x15\x00\x00\x00\x00\xF0',
       ])
 
-  @pytest.mark.skip(reason="Missing field definitions in .dbc for SWA_01")
+  @pytest.mark.skip(reason="Investigate why this is still broken")
   def test_mqb_crc_SWA_01(self, subtests):
       self.verify_mqb_crc(subtests, "SWA_01", 0x30F, [
           b'\x0b\x00\xf2\x00\x10\x01\x00\x00',
@@ -415,7 +413,6 @@ class TestCanChecksums:
           b'\x35\x0f\x03\x00',
       ])
 
-  @pytest.mark.skip(reason="Missing field definitions in .dbc for ESP_20")
   def test_mqb_crc_ESP_20(self, subtests):
       self.verify_mqb_crc(subtests, "ESP_20", 0x65D, [
           b'\x98\x30\x2b\x10\x00\x00\x22\x81',
