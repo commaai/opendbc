@@ -391,14 +391,31 @@ BO_ 178 ESP_19: 8 Gateway_MQB
  SG_ ESP_VR_Radgeschw_02 : 48|16@1+ (0.0075,0) [0|491.49] "Unit_KiloMeterPerHour" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
 
 BO_ 1629 ESP_20: 8 Gateway_MQB
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Vector__XXX
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Vector__XXX
- SG_ BR_Systemart : 12|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ ESP_Zaehnezahl : 16|8@1+ (1,0) [0|255] "" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
- SG_ ESP_Charisma_FahrPr : 24|4@1+ (1,0) [0|15] "" Vector__XXX
- SG_ ESP_Charisma_Status : 28|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ BR_QBit_Reifenumfang : 51|1@1+ (1,0) [0|1] "" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
- SG_ BR_Reifenumfang : 52|12@1+ (1,0) [0|4095] "Unit_MilliMeter" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  XXX
+ SG_ BR_Systemart : 12|2@1+ (1,0) [0|3] ""  XXX
+ SG_ ESP_SpannungsAnf_02 : 14|2@1+ (1,0) [0|3] ""  XXX
+ SG_ ESP_Zaehnezahl : 16|8@1+ (1,0) [0|255] ""  XXX
+ SG_ ESP_Charisma_FahrPr : 24|4@1+ (1,0) [0|15] ""  XXX
+ SG_ ESP_Charisma_Status : 28|2@1+ (1,0) [0|3] ""  XXX
+ SG_ ESP_Wiederstart_Anz_01 : 30|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ESP_Wiederstart_Anz_02 : 31|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ESP_Wiederstart_Anz_03 : 32|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ESP_Wiederstart_Anz_04 : 33|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ESP_Stoppverbot_Anz_01 : 34|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ESP_Stoppverbot_Anz_02 : 35|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ESP_Stoppverbot_Anz_03 : 36|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ESP_Stoppverbot_Anz_04 : 37|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ESP_Stoppverbot_Anz_05 : 38|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ESP_Stoppverbot_Anz_06 : 39|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ESP_Stoppverbot_Anz_07 : 40|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ESP_Stoppverbot_Anz_Std : 41|1@1+ (1,0) [0|1] ""  XXX
+ SG_ ESP_Dachrelingsensor : 42|2@1+ (1,0) [0|3] ""  XXX
+ SG_ ESP_Stoppverbot_Anz_08 : 44|1@1+ (1,0) [0|1] ""  XXX
+ SG_ HDC_Charisma_FahrPr : 45|4@1+ (1,0) [0|15] ""  XXX
+ SG_ HDC_Charisma_Status : 49|2@1+ (1,0) [0|3] ""  XXX
+ SG_ BR_QBit_Reifenumfang : 51|1@1+ (1,0) [0|1] ""  XXX
+ SG_ BR_Reifenumfang : 52|12@1+ (1,0) [0|4095] "Unit_MilliMeter"  XXX
 
 BO_ 253 ESP_21: 8 Gateway_MQB
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
