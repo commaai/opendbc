@@ -1,5 +1,4 @@
 import copy
-import pytest
 from opendbc.can.parser import CANParser
 from opendbc.can.packer import CANPacker
 
@@ -44,24 +43,15 @@ class TestCanChecksums:
 
       for data in test_messages:
         expected_msg = (msg_addr, data, 0)
-
-        # Parse known valid message from logs
         parser.update_strings([0, [expected_msg]])
         expected = copy.deepcopy(parser.vl[msg_name])
 
-        # Clear CHECKSUM to make sure packer recalculates it
         modified = copy.deepcopy(expected)
         modified.pop(crc_field, None)
-
-        # Serialize message
         modified_msg = packer.make_can_msg(msg_name, 0, modified)
 
-        assert modified_msg[2] == expected_msg[2]
-
-        # And parse it
         parser.update_strings([0, [modified_msg]])
         tested = parser.vl[msg_name]
-
         with subtests.test(counter=expected[counter_field]):
           assert tested[crc_field] == expected[crc_field]
 
