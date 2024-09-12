@@ -93,7 +93,7 @@ def acc_hold_type(main_switch_on, acc_faulted, long_active, just_disabled, start
     acc_hold_type = 0 # no hold request
   elif override:
     acc_hold_type = 4 if esp_hold else 0 # overriding at standstill is a starting event, apart from that overriding means no hold request
-  elif starting or (override and esp_hold):
+  elif starting:
     acc_hold_type = 4 # release request and startup
   elif stopping or esp_hold:
     acc_hold_type = 1 # hold or hold request
