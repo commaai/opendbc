@@ -68,36 +68,33 @@ def create_acc_buttons_control(packer, bus, gra_stock_values, cancel=False, resu
 
 def acc_control_value(main_switch_on, acc_faulted, long_active, just_disabled, override):
   if acc_faulted:
-    acc_control = 6
+    acc_control = 6 # error state
   elif just_disabled:
-    acc_control = 5
+    acc_control = 5 # disabling controls
   elif override:
-    acc_control = 4
+    acc_control = 4 # overriding controls
   elif long_active:
-    acc_control = 3
+    acc_control = 3 # default long control state
   elif main_switch_on:
-    acc_control = 2
+    acc_control = 2 # long control ready
   else:
-    acc_control = 0
+    acc_control = 0 # long control offline state
 
   return acc_control
   
 
 def acc_hold_type(main_switch_on, acc_faulted, long_active, just_disabled, starting, stopping, esp_hold, override):
-  if acc_faulted or not main_switch_on:
-    acc_hold_type = 0
-  elif just_disabled: # prevent errors
-    acc_hold_type = 5 # disable acc confirmation
-  elif override:
-    acc_hold_type = 5
-  elif starting:
-    acc_hold_type = 4 # hold release and startup
-  elif stopping:
+
+  if just_disabled:
+    acc_hold_type = 5 # disable confirmation
+  elif not long_active or not main_switch_on or acc_faulted or override:
+    acc_hold_type = 0: # no hold request
+  elif starting or (override and esp_hold):
+    acc_hold_type = 4 # release request and startup
+  elif stopping or esp_hold:
     acc_hold_type = 1 # hold or hold request
-  elif esp_hold and long_active:
-    acc_hold_type = 1 # hold
   else:
-    acc_hold_type = 0
+    acc_hold_type = 0 # no hold request
 
   return acc_hold_type
   
