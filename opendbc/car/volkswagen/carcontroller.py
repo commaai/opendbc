@@ -176,9 +176,8 @@ class CarController(CarControllerBase):
         else:
           upper_jerk = 0
           
-        can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.longActive, accel, acc_control,
-                                                           acc_hold_type, stopping, starting, lower_jerk, upper_jerk, CS.esp_hold_confirmation,
-                                                           current_speed, reversing, CS.meb_acc_02_values))
+        can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.longActive, accel, acc_control, acc_hold_type,
+                                                           stopping, starting, lower_jerk, upper_jerk, CS.esp_hold_confirmation, current_speed, reversing))
 
       else:
         acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled)
@@ -208,7 +207,7 @@ class CarController(CarControllerBase):
 
         acc_hud_status = self.CCS.acc_hud_status_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled and CS.out.cruiseState.enabled, CC.cruiseControl.override)
         can_sends.append(self.CCS.create_acc_hud_control(self.packer_pt, CANBUS.pt, acc_hud_status, hud_control.setSpeed * CV.MS_TO_KPH, hud_control.leadVisible,
-                                                         hud_control.leadDistanceBars, desired_gap, distance, self.long_heartbeat, CS.esp_hold_confirmation, CS.meb_acc_01_values))
+                                                         hud_control.leadDistanceBars, desired_gap, distance, self.long_heartbeat, CS.esp_hold_confirmation))
 
       else:
         lead_distance = 0
