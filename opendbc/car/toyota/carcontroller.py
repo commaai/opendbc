@@ -11,6 +11,7 @@ from opendbc.can.packer import CANPacker
 
 SteerControlType = structs.CarParams.SteerControlType
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
+LongCtrlState = structs.CarControl.Actuators.LongControlState
 
 # LKA limits
 # EPS faults if you apply torque while the steering rate is above 100 deg/s for too long
@@ -39,7 +40,6 @@ class CarController(CarControllerBase):
     self.distance_button = 0
 
     self.packer = CANPacker(dbc_name)
-    self.gas = 0
     self.accel = 0
 
   def update(self, CC, CS, now_nanos):
@@ -131,8 +131,11 @@ class CarController(CarControllerBase):
       if pcm_cancel_cmd and self.CP.carFingerprint in UNSUPPORTED_DSU_CAR:
         can_sends.append(toyotacan.create_acc_cancel_command(self.packer))
       elif self.CP.openpilotLongitudinalControl:
-        can_sends.extend(toyotacan.create_pcs_commands(self.packer, 0, 0, self.CP.mass))
-        can_sends.append(toyotacan.create_accel_command(self.packer, pcm_accel_cmd, pcm_cancel_cmd, self.standstill_req, lead, CS.acc_type, fcw_alert,
+        aeb = actuators.longControlState == LongCtrlState.emergencyBraking
+        aeb_accel = pcm_accel_cmd if aeb else 0
+        acc_accel = 0 if aeb else pcm_cancel_cmd
+        can_sends.extend(toyotacan.create_pcs_commands(self.packer, aeb_accel, aeb, self.CP.mass))
+        can_sends.append(toyotacan.create_accel_command(self.packer, acc_accel, pcm_cancel_cmd, self.standstill_req, lead, CS.acc_type, fcw_alert,
                                                         self.distance_button))
         self.accel = pcm_accel_cmd
       else:
@@ -174,7 +177,6 @@ class CarController(CarControllerBase):
     new_actuators.steerOutputCan = apply_steer
     new_actuators.steeringAngleDeg = self.last_angle
     new_actuators.accel = self.accel
-    new_actuators.gas = self.gas
 
     self.frame += 1
     return new_actuators, can_sends
