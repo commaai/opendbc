@@ -31,6 +31,7 @@ class CarController(CarControllerBase):
 
     # *** steering ***
     if (self.frame % self.p.STEER_STEP) == 0:
+      apply_steer = 0
       if self.CP.flags & SubaruFlags.LKAS_ANGLE:
         apply_steer = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_steer_last, CS.out.vEgoRaw, self.p)
 
@@ -61,7 +62,7 @@ class CarController(CarControllerBase):
               common_fault_avoidance(abs(CS.out.steeringRateDeg) > MAX_STEER_RATE, apply_steer_req,
                                       self.steer_rate_counter, MAX_STEER_RATE_FRAMES)
 
-        can_sends.append(subarucan.create_steering_control(self.packer, apply_steer, apply_steer_req))
+          can_sends.append(subarucan.create_steering_control(self.packer, apply_steer, apply_steer_req))
 
       self.apply_steer_last = apply_steer
 

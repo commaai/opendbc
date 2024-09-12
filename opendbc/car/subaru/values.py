@@ -27,9 +27,6 @@ class CarControllerParams:
     elif CP.carFingerprint == CAR.SUBARU_IMPREZA_2020:
       self.STEER_DELTA_UP = 35
       self.STEER_MAX = 1439
-    elif CP.flags & SubaruFlags.LKAS_ANGLE:
-      self.ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0.], angle_v=[1.])
-      self.ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0.], angle_v=[1.])
     else:
       self.STEER_MAX = 2047
 
@@ -55,6 +52,9 @@ class CarControllerParams:
 
   BRAKE_LOOKUP_BP = [-3.5, 0]
   BRAKE_LOOKUP_V = [BRAKE_MAX, BRAKE_MIN]
+
+  ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0.], angle_v=[1.])
+  ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0.], angle_v=[1.])
 
 
 class SubaruFlags(IntFlag):
