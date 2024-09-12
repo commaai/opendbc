@@ -333,9 +333,8 @@ class TestCanChecksums:
           b'\x85\xef\x7f\x00\xfe\x00\xc0\xff',
       ])
 
-  @pytest.mark.skip(reason="Missing field definitions in .dbc for EV_Gearshift")
-  def test_mqb_crc_EV_Gearshift(self, subtests):
-      self.verify_mqb_crc(subtests, "EV_Gearshift", 0x187, [
+  def test_mqb_crc_Motor_EV_01(self, subtests):
+      self.verify_mqb_crc(subtests, "Motor_EV_01", 0x187, [
           b'\x70\x80\x15\x00\x00\x00\x00\xF0',
           b'\x07\x81\x15\x00\x00\x00\x00\xF0',
           b'\x7A\x82\x15\x00\x00\x00\x00\xF0',
