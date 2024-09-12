@@ -66,11 +66,13 @@ def create_acc_buttons_control(packer, bus, gra_stock_values, cancel=False, resu
   return packer.make_can_msg("GRA_ACC_01", bus, values)
   
 
-def acc_control_value(main_switch_on, acc_faulted, long_active, just_disabled):
+def acc_control_value(main_switch_on, acc_faulted, long_active, just_disabled, override):
   if acc_faulted:
     acc_control = 6
   elif just_disabled:
     acc_control = 5
+  elif override:
+    acc_control = 4
   elif long_active:
     acc_control = 3
   elif main_switch_on:
@@ -81,11 +83,13 @@ def acc_control_value(main_switch_on, acc_faulted, long_active, just_disabled):
   return acc_control
   
 
-def acc_hold_type(main_switch_on, acc_faulted, long_active, just_disabled, starting, stopping, esp_hold):
+def acc_hold_type(main_switch_on, acc_faulted, long_active, just_disabled, starting, stopping, esp_hold, override):
   if acc_faulted or not main_switch_on:
     acc_hold_type = 0
   elif just_disabled: # prevent errors
     acc_hold_type = 5 # disable acc confirmation
+  elif override:
+    acc_hold_type = 5
   elif starting:
     acc_hold_type = 4 # hold release and startup
   elif stopping:
