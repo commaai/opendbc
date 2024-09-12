@@ -65,9 +65,6 @@ class TestCanChecksums:
         with subtests.test(counter=expected[counter_field]):
           assert tested[crc_field] == expected[crc_field]
 
-  def verify_mqb_crc_custom(self, subtests, msg_name: str, msg_addr: int, test_messages: list[int]):
-      self.verify_mqb_crc(subtests, msg_name, msg_addr, test_messages, crc_field=f'{msg_name}_CRC', counter_field=f'{msg_name}_BZ')
-
   def test_mqb_crc_LWI_01(self, subtests):
       self.verify_mqb_crc(subtests, "LWI_01", 0x86, [
           b'\x6b\x00\xbd\x00\x00\x00\x00\x00',
