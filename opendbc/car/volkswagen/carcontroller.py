@@ -205,7 +205,7 @@ class CarController(CarControllerBase):
         distance = 50 # TODO get distance from model
         desired_gap = min(CS.out.vEgo, 100) # TODO get desired gap from OP
 
-        acc_hud_status = self.CCS.acc_hud_status_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, CC.cruiseControl.override)
+        acc_hud_status = self.CCS.acc_hud_status_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, CS.esp_hold_confirmation, CC.cruiseControl.override)
         can_sends.append(self.CCS.create_acc_hud_control(self.packer_pt, CANBUS.pt, acc_hud_status, hud_control.setSpeed * CV.MS_TO_KPH, hud_control.leadVisible,
                                                          hud_control.leadDistanceBars, desired_gap, distance, self.long_heartbeat, CS.esp_hold_confirmation))
 
