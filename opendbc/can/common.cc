@@ -136,9 +136,7 @@ static const std::unordered_map<uint32_t, std::array<uint8_t, 16>> crc_mqb_const
 };
 
 unsigned int volkswagen_mqb_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
-  // AUTOSAR E2E Profile 2, CRC-8H2F with a "data ID" appended to the payload, which varies by message and by counter
-  // https://www.autosar.org/fileadmin/standards/R20-11/FO/AUTOSAR_PRS_E2EProtocol.pdf
-  // https://www.autosar.org/fileadmin/user_upload/standards/classic/4-3/AUTOSAR_SWS_CRCLibrary.pdf
+  // This is AUTOSAR E2E Profile 2, CRC-8H2F with a "data ID" (varying by message/counter) appended to the payload
 
   uint8_t crc = 0xFF; // CRC-8H2F initial value
 
