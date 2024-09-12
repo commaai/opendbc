@@ -152,10 +152,10 @@ unsigned int volkswagen_mqb_checksum(uint32_t address, const Signal &sig, const 
   uint8_t counter = d[1] & 0x0F;
   auto crc_const = crc_mqb_constants.find(address);
   if (crc_const != crc_mqb_constants.end()) {
-      crc ^= crc_const->second[counter];
-      crc = crc8_lut_8h2f[crc];
+    crc ^= crc_const->second[counter];
+    crc = crc8_lut_8h2f[crc];
   } else {
-      printf("Attempt to CRC check undefined Volkswagen message 0x%02X\n", address);
+    printf("Attempt to CRC check undefined Volkswagen message 0x%02X\n", address);
   }
 
   return crc ^ 0xFF; // CRC-8H2F final XOR
