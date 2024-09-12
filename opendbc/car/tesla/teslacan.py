@@ -36,8 +36,8 @@ class TeslaCAN:
       "DAS_aebEvent": 0,
       "DAS_jerkMin": CarControllerParams.JERK_LIMIT_MIN,
       "DAS_jerkMax": CarControllerParams.JERK_LIMIT_MAX,
-      "DAS_accelMin": max(accel, 0),
-      "DAS_accelMax": accel,
+      "DAS_accelMin": accel,
+      "DAS_accelMax": max(accel, 0),
       "DAS_controlCounter": cnt,
       "DAS_controlChecksum": 0,
     }
