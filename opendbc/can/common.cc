@@ -136,30 +136,29 @@ static const std::unordered_map<uint32_t, std::array<uint8_t, 16>> crc_mqb_const
 };
 
 unsigned int volkswagen_mqb_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
-  // Volkswagen uses standard CRC8 8H2F/AUTOSAR, but they compute it with
-  // a magic variable padding byte tacked onto the end of the payload.
+  // AUTOSAR E2E Profile 2, CRC-8H2F with a "data ID" appended to the payload, which varies by message and by counter
+  // https://www.autosar.org/fileadmin/standards/R20-11/FO/AUTOSAR_PRS_E2EProtocol.pdf
   // https://www.autosar.org/fileadmin/user_upload/standards/classic/4-3/AUTOSAR_SWS_CRCLibrary.pdf
 
-  uint8_t crc = 0xFF; // Standard init value for CRC8 8H2F/AUTOSAR
+  uint8_t crc = 0xFF; // CRC-8H2F initial value
 
-  // CRC the payload first, skipping over the first byte where the CRC lives.
+  // CRC over payload first
   for (int i = 1; i < d.size(); i++) {
     crc ^= d[i];
     crc = crc8_lut_8h2f[crc];
   }
 
-  // Look up and apply the magic final CRC padding byte, which permutes by CAN
-  // address, and additionally (for SOME addresses) by the message counter.
+  // Continue CRC over "data ID"
   uint8_t counter = d[1] & 0x0F;
   auto crc_const = crc_mqb_constants.find(address);
   if (crc_const != crc_mqb_constants.end()) {
       crc ^= crc_const->second[counter];
-  } else { // As-yet undefined CAN message, CRC check expected to fail
+      crc = crc8_lut_8h2f[crc];
+  } else {
       printf("Attempt to CRC check undefined Volkswagen message 0x%02X\n", address);
   }
 
-  crc = crc8_lut_8h2f[crc];
-  return crc ^ 0xFF; // Return after standard final XOR for CRC8 8H2F/AUTOSAR
+  return crc ^ 0xFF; // CRC-8H2F final XOR
 }
 
 unsigned int xor_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
