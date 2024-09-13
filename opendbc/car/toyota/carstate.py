@@ -77,7 +77,7 @@ class CarState(CarStateBase):
     # thought to be the gas/brake as issued by the pcm (0=coasting)
     self.pcm_accel_net = cp.vl["PCM_CRUISE"]["ACCEL_NET"]
     self.pcm_neutral_force = cp.vl["PCM_CRUISE"]["NEUTRAL_FORCE"]
-    self.vsc_slope_angle = cp.vl["VSC1"]["SLOPE_ANGLE"]
+    self.vsc_slope_angle = cp.vl["VSC1S07"]["ASLP"]
 
     ret.standstill = abs(ret.vEgoRaw) < 1e-3
 
@@ -201,7 +201,7 @@ class CarState(CarStateBase):
       ("STEER_ANGLE_SENSOR", 80),
       ("PCM_CRUISE", 33),
       ("PCM_CRUISE_SM", 1),
-      ("VSC1", 20),
+      ("VSC1S07", 20),
       ("STEER_TORQUE_SENSOR", 50),
     ]
 
