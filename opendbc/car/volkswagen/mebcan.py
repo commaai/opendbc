@@ -112,7 +112,7 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
     "ACC_Typ":                    acc_type,
     "ACC_Status_ACC":             acc_control,
     "ACC_StartStopp_Info":        acc_enabled,
-    "ACC_Sollbeschleunigung_02":  accel if acc_enabled and not override else 3.01,
+    "ACC_Sollbeschleunigung_02":  accel if (acc_enabled and not override) or (override and esp_hold) else 3.01,
     "ACC_zul_Regelabw_unten":     max(0.05, lower_jerk) if acc_enabled else 0,
     "ACC_zul_Regelabw_oben":      min(3.0, upper_jerk) if acc_enabled else 0,
     "ACC_neg_Sollbeschl_Grad_02": 4.0 if acc_enabled else 0,  # TODO: dynamic adjustment of jerk limits
