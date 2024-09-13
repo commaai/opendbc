@@ -75,7 +75,7 @@ def acc_control_value(main_switch_on, acc_faulted, long_active, just_disabled, e
   elif just_disabled:
     acc_control = 5 # disabling controls
   elif override:
-    acc_control = 3 if not override_starting_limit else 4
+    acc_control = 3 if esp_hold else 4
   elif long_active:
     acc_control = 3 # active long control state
   elif main_switch_on:
@@ -93,7 +93,12 @@ def acc_hold_type(main_switch_on, acc_faulted, long_active, just_disabled, start
   elif just_disabled or just_overwritten:
     acc_hold_type = 5 # cancel hold management after specifc events
   elif override:
-    acc_hold_type = 4 if not override_starting_limit else 0
+    if esp_hold:
+      acc_hold_type = 4
+    elif acc_hold_type_prev == 4:
+      acc_hold_type = 5
+    else:
+      acc_hold_type = 0
   elif starting:
     acc_hold_type = 4 # release request and startup
   elif stopping or esp_hold:
@@ -154,7 +159,7 @@ def acc_hud_status_value(main_switch_on, acc_faulted, long_active, esp_hold, ove
   if acc_faulted:
     acc_hud_control = 6 # error state
   elif override and long_active:
-    acc_hud_control = 3 if not override_starting_limit else 4
+    acc_hud_control = 3 if esp_hold else 4
   elif long_active:
     acc_hud_control = 3 # active
   elif main_switch_on:
