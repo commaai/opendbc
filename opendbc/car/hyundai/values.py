@@ -366,7 +366,7 @@ class CAR(Platforms):
     # steerRatio = variable
     CarSpecs(mass=2005, wheelbase=3.105, steerRatio=14.5, tireStiffnessFactor=0.5),
     flags=HyundaiFlags.MANDO_RADAR,
-  )  
+  )
   KIA_NIRO_EV = HyundaiPlatformConfig(
     [
       HyundaiCarDocs("Kia Niro EV 2019", "All", video_link="https://www.youtube.com/watch?v=lT7zcG6ZpGo", car_parts=CarParts.common([CarHarness.hyundai_h])),
