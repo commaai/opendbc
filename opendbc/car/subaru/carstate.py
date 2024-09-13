@@ -79,8 +79,7 @@ class CarState(CarStateBase):
 
     cp_cruise = cp_alt if self.CP.flags & SubaruFlags.GLOBAL_GEN2 else cp
     if self.CP.flags & SubaruFlags.LKAS_ANGLE:
-      cp_es_status = cp_alt if self.CP.flags & SubaruFlags.GLOBAL_GEN2 else cp_cam
-      ret.cruiseState.enabled = cp_es_status.vl["ES_Status"]['Cruise_Activated'] != 0
+      ret.cruiseState.enabled = cp_cam.vl["ES_DashStatus"]['Cruise_Activated'] != 0
       ret.cruiseState.available = cp_cam.vl["ES_DashStatus"]['Cruise_On'] != 0
 
     else:
