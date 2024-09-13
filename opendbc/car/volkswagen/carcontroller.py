@@ -46,6 +46,7 @@ class CarController(CarControllerBase):
     self.long_heartbeat = 0
     self.long_active_prev = False
     self.accel_last = 0
+    self.long_overwrite_prev = False
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -162,11 +163,14 @@ class CarController(CarControllerBase):
       if self.CP.flags & VolkswagenFlags.MEB:
         just_disabled = True if self.long_active_prev and not CC.enabled else False
         self.long_active_prev = CC.enabled
+        just_overwritten = True if self.long_overwrite_prev and not CC.cruiseControl.override else False
+        self.long_overwrite_prev = CC.cruiseControl.override
         current_speed = CS.out.vEgo * CV.MS_TO_KPH
         reversing = CS.out.gearShifter in [structs.CarState.GearShifter.reverse]
         override_starting = CC.cruiseControl.override and CS.out.vEgo < self.CP.vEgoStarting 
         
-        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, just_disabled, CS.esp_hold_confirmation, CC.cruiseControl.override, override_starting)
+        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, just_disabled, CS.esp_hold_confirmation,
+                                                 CC.cruiseControl.override, just_overwritten, override_starting)
         acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, just_disabled, starting,
                                                stopping, CS.esp_hold_confirmation, CC.cruiseControl.override, override_starting)
         required_jerk = min(3, abs(accel - CS.out.aEgo) * 50) ## pfeiferj:openpilot:pfeifer-hkg-long-control-tune
