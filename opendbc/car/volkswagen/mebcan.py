@@ -1,6 +1,7 @@
 from opendbc.car.common.numpy_fast import clip
 
 def create_steering_control_curvature(packer, bus, apply_curvature, lkas_enabled, power):
+  # active lateral control deactivates active steering wheel centering 
   values = {
     #"Curvature": abs(apply_curvature) * 1000, # in 1/mm
     "Steering_Angle": abs(apply_curvature),
@@ -74,25 +75,25 @@ def acc_control_value(main_switch_on, acc_faulted, long_active, just_disabled, e
   elif just_disabled:
     acc_control = 5 # disabling controls
   elif override:
-    acc_control = 3 if override_starting else 4 # overriding controls (standstill and override is a starting event)
+    acc_control = 4 # overriding controls
   elif long_active:
     acc_control = 3 # active long control state
   elif main_switch_on:
     acc_control = 2 # long control ready
   else:
-    acc_control = 0 # long control offline state
+    acc_control = 0 # long control deactivated state
 
   return acc_control
   
 
 def acc_hold_type(main_switch_on, acc_faulted, long_active, just_disabled, starting, stopping, esp_hold, override, override_starting):
   # WRONG USAGE (ESPECIALLY OVERRIDING STATES) RESULTS IN CAR SHUTTING OFF AT LOW SPEEDS <~ 3km/h
-  if just_disabled:
-    acc_hold_type = 5 # disable confirmation
-  elif not long_active or not main_switch_on or acc_faulted:
-    acc_hold_type = 0 # no hold request
+  if acc_faulted:
+    acc_control = 0 # no hold request
+  elif just_disabled:
+    acc_hold_type = 5 # cancel hold management
   elif override:
-    acc_hold_type = 4 if override_starting else 0 # overriding at standstill is a starting event, apart from that overriding means no hold request
+    acc_hold_type = 5 if esp_hold else 0 # cancel hold management when override otherwise do nothing
   elif starting:
     acc_hold_type = 4 # release request and startup
   elif stopping or esp_hold:
@@ -149,11 +150,10 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
 def acc_hud_status_value(main_switch_on, acc_faulted, long_active, esp_hold, override, override_starting):
   if acc_faulted:
     acc_hud_control = 6 # error state
+  elif override:
+    acc_hud_control = 4 # overriding
   elif long_active:
-    if override:
-      acc_hud_control = 3 if override_starting else 4 # override at standstill is starting condition
-    else:
-      acc_hud_control = 3 # active
+    acc_hud_control = 3 # active
   elif main_switch_on:
     acc_hud_control = 2 # inactive
   else:
@@ -180,8 +180,8 @@ def get_desired_gap(distance_bars, desired_gap):
   return gap
 
 def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, distance_bars, desired_gap, distance, heartbeat, esp_hold):  
+  # active longitudinal control disables regen mode of accelerator while using overriding mechnism
   LONG_ACTIVE = 3
-  OVERRIDE = 4
   
   values = {
     #"STA_Primaeranz": acc_hud_status,
@@ -196,7 +196,7 @@ def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, di
     "Lead_Type":               3 if lead_visible else 0, # displaying a car
     "Lead_Distance":           distance if lead_visible else 0, # hud distance of object
     "ACC_Enabled":             1 if acc_control == LONG_ACTIVE else 0,
-    "ACC_Standby_Override":    1 if acc_control != LONG_ACTIVE or OVERRIDE else 0,
+    "ACC_Standby_Override":    1 if acc_control != LONG_ACTIVE else 0,
     "ACC_AKTIV_regelt":        1 if acc_control == LONG_ACTIVE else 0,
     "ACC_Limiter_Mode":        0,
     "Lead_Brightness":         3 if acc_control == LONG_ACTIVE else 0, # object shows in colour
