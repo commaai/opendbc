@@ -67,7 +67,7 @@ def create_acc_buttons_control(packer, bus, gra_stock_values, cancel=False, resu
   return packer.make_can_msg("GRA_ACC_01", bus, values)
   
 
-def acc_control_value(main_switch_on, acc_faulted, long_active, just_disabled, esp_hold, override, override_starting):
+def acc_control_value(main_switch_on, acc_faulted, long_active, just_disabled, esp_hold, override, override_starting, override_starting_limit):
   # WRONG USAGE (ESPECIALLY OVERRIDING STATES) RESULTS IN CAR SHUTTING OFF AT LOW SPEEDS <~ 3km/h
   # ja, man kann ein E-Auto abwürgen ;)
   if acc_faulted:
@@ -75,7 +75,7 @@ def acc_control_value(main_switch_on, acc_faulted, long_active, just_disabled, e
   elif just_disabled:
     acc_control = 5 # disabling controls
   elif override:
-    acc_control = 3 if esp_hold else 4
+    acc_control = 3 if not override_starting_limit else 4
   elif long_active:
     acc_control = 3 # active long control state
   elif main_switch_on:
@@ -86,14 +86,14 @@ def acc_control_value(main_switch_on, acc_faulted, long_active, just_disabled, e
   return acc_control
   
 
-def acc_hold_type(main_switch_on, acc_faulted, long_active, just_disabled, starting, stopping, esp_hold, override, just_overwritten, override_starting):
+def acc_hold_type(main_switch_on, acc_faulted, long_active, just_disabled, starting, stopping, esp_hold, override, just_overwritten, override_starting, override_starting_limit):
   # WRONG USAGE (ESPECIALLY OVERRIDING STATES) RESULTS IN CAR SHUTTING OFF AT LOW SPEEDS <~ 3km/h
   if acc_faulted:
     acc_hold_type = 0 # no hold request
   elif just_disabled or just_overwritten:
     acc_hold_type = 5 # cancel hold management after specifc events
   elif override:
-    acc_hold_type = 4 if esp_hold else 0
+    acc_hold_type = 4 if not override_starting_limit else 0
   elif starting:
     acc_hold_type = 4 # release request and startup
   elif stopping or esp_hold:
@@ -147,11 +147,11 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
   return commands
 
 
-def acc_hud_status_value(main_switch_on, acc_faulted, long_active, esp_hold, override, override_starting):
+def acc_hud_status_value(main_switch_on, acc_faulted, long_active, esp_hold, override, override_starting, override_starting_limit):
   if acc_faulted:
     acc_hud_control = 6 # error state
   elif override:
-    acc_hud_control = 3 if esp_hold else 4
+    acc_hud_control = 3 if not override_starting_limit else 4
   elif long_active:
     acc_hud_control = 3 # active
   elif main_switch_on:
