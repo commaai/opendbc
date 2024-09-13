@@ -102,8 +102,8 @@ BO_ 681 ACC_15: 8 XXX
  SG_ AWV_Warnlevel : 58|6@1+ (1,0) [0|63] ""  XXX
 
 BO_ 64 Airbag_01: 8 Airbag_MQB
- SG_ Airbag_01_CRC : 0|8@1+ (1,0) [0|255] "" BMS_MQB,Gateway_MQB,LEH_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ Airbag_01_BZ : 8|4@1+ (1,0) [0|15] "" BMS_MQB,Gateway_MQB,LEH_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" BMS_MQB,Gateway_MQB,LEH_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" BMS_MQB,Gateway_MQB,LEH_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ AB_RGS_Anst : 12|4@1+ (1,0) [0|15] "" Gateway_MQB
  SG_ AB_Front_Crash : 16|1@1+ (1,0) [0|1] "" Gateway_MQB
  SG_ AB_Heck_Crash : 17|1@1+ (1,0) [0|1] "" Gateway_MQB
@@ -126,6 +126,12 @@ BO_ 64 Airbag_01: 8 Airbag_MQB
  SG_ AB_MKB_gueltig : 39|1@1+ (1,0) [0|1] "" Gateway_MQB
  SG_ AB_MKB_Anforderung : 40|1@1+ (1,0) [0|1] "" Gateway_MQB
  SG_ AB_Versorgungsspannung : 41|1@1+ (1,0) [0|1] "" Gateway_MQB
+ SG_ AB_Deaktivierung_HV : 42|3@1+ (1.0,0.0) [0.0|7] ""  BMS,Gateway_MQB,LEH_MQB,Motor_Hybrid_MQB
+ SG_ AB_EDR_Trigger : 45|2@1+ (1.0,0.0) [0.0|3] ""  Gateway_MQB
+ SG_ AB_Gurtwarn_HFS : 47|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_MQB
+ SG_ AB_Gurtwarn_HBFS : 48|1@1+ (1.0,0.0) [0.0|1] ""  Gateway_MQB
+ SG_ SC_Masterzeit_Offset : 53|2@1+ (5.08,0) [0.00|15.24] "Unit_Secon"  Gateway_MQB
+ SG_ SC_Masterzeit : 57|7@1+ (0.04,0) [0.00|5.04] "Unit_Secon"  Gateway_MQB
 
 BO_ 1312 Airbag_02: 8 Airbag_MQB
  SG_ AB_Belegung_VB : 26|2@1+ (1,0) [0|3] "" Gateway_MQB
@@ -294,8 +300,8 @@ BO_ 260 EPB_01: 8 Gateway_MQB
  SG_ EPB_Status : 61|2@1+ (1,0) [0|3] "" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
 
 BO_ 257 ESP_02: 8 Gateway_MQB
- SG_ ESP_02_CRC : 0|8@1+ (1,0) [0|255] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ ESP_02_BZ : 8|4@1+ (1,0) [0|15] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ ESP_QBit_Gierrate : 12|1@1+ (1,0) [0|1] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
  SG_ ESP_QBit_Laengsbeschl : 13|1@1+ (1,0) [0|1] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ ESP_QBit_Querb : 14|1@1+ (1,0) [0|1] "" Airbag_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
@@ -369,8 +375,8 @@ BO_ 914 ESP_07: 8 Gateway_MQB
  SG_ ESP_OBD_Status : 61|1@1+ (1,0) [0|1] "" Vector__XXX
 
 BO_ 278 ESP_10: 8 Gateway_MQB
- SG_ ESP_10_CRC : 0|8@1+ (1,0) [0|255] "" Airbag_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
- SG_ ESP_10_BZ : 8|4@1+ (1,0) [0|15] "" Airbag_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Airbag_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Airbag_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ ESP_QBit_Wegimpuls_VL : 12|1@1+ (1,0) [0|1] "" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ ESP_QBit_Wegimpuls_VR : 13|1@1+ (1,0) [0|1] "" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
  SG_ ESP_QBit_Wegimpuls_HL : 14|1@1+ (1,0) [0|1] "" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
@@ -1449,7 +1455,34 @@ BO_ 988 Gateway_73: 8 XXX
 
 BO_ 792 Kamera_Status: 8 XXX
 
-BO_ 981 Licht_Anf_01: 8 XXX
+BO_ 981 Licht_Anf_01: 8 Vector__XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ BCM1_Kurvenlicht_links_Anf : 12|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BCM1_Kurvenlicht_rechts_Anf : 13|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BCM1_Standlicht_Anf : 14|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BCM1_Abblendlicht_Anf : 15|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BCM1_Fernlicht_Anf : 16|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BCM1_Nebellicht_Anf : 17|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BCM1_Parklicht_li_Anf : 18|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BCM1_Parklicht_re_Anf : 19|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BCM1_Nebelschluss_Ahg_Anf : 20|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BCM1_Nebelschluss_Fzg_Anf : 21|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BCM1_Schlusslicht_Anf : 22|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BCM_Rueckfahrlicht_Anf : 23|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BCM1_Signaturlicht_Anf : 24|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BCM1_Umfeldleuchten_Anf : 25|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BCM1_Tagfahrlicht_Anf : 26|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BCM1_Regenlicht_Anf : 27|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BCM1_Autobahnlicht_Anf : 28|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BCM1_Touristen_Licht_Anf : 29|1@1+ (1,0) [0|1] ""  Frontradar
+ SG_ BCM1_CH_aktiv : 30|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BCM1_LH_aktiv : 31|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BCM1_Gleitende_Leuchtw_Anf : 32|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BCM1_GLW_Fernlicht_Anf : 33|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BCM1_Adaptive_Lichtvert_Anf : 34|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BCM1_CH_LH_aktiv : 40|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ BCM1_Allwetterlicht_Anf : 41|1@1+ (1,0) [0|1] ""  Frontradar
 
 BO_ 1440 RLS_01: 8 XXX
 
