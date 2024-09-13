@@ -88,7 +88,7 @@ def acc_control_value(main_switch_on, acc_faulted, long_active, just_disabled, e
 
 def acc_hold_type(main_switch_on, acc_faulted, long_active, just_disabled, starting, stopping, esp_hold, override, just_overwritten, override_starting, override_starting_limit, acc_hold_type_prev):
   # WRONG USAGE (ESPECIALLY OVERRIDING STATES) RESULTS IN CAR SHUTTING OFF AT LOW SPEEDS <~ 3km/h
-  if acc_faulted:
+  if acc_faulted or not long_active:
     acc_hold_type = 0 # no hold request
   elif just_disabled or just_overwritten:
     acc_hold_type = 5 # cancel hold management after specifc events
@@ -153,7 +153,7 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
 def acc_hud_status_value(main_switch_on, acc_faulted, long_active, esp_hold, override, override_starting, override_starting_limit):
   if acc_faulted:
     acc_hud_control = 6 # error state
-  elif override:
+  elif override and long_active:
     acc_hud_control = 3 if not override_starting_limit else 4
   elif long_active:
     acc_hud_control = 3 # active
