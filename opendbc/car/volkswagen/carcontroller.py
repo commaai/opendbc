@@ -47,6 +47,7 @@ class CarController(CarControllerBase):
     self.long_active_prev = False
     self.accel_last = 0
     self.long_overwrite_prev = False
+    self.acc_hold_type_prev = 0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -174,7 +175,8 @@ class CarController(CarControllerBase):
                                                  CC.cruiseControl.override, override_starting, override_starting_limit)
         acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, just_disabled, starting,
                                                stopping, CS.esp_hold_confirmation, CC.cruiseControl.override, just_overwritten, override_starting,
-                                               override_starting_limit)
+                                               override_starting_limit, self.acc_hold_type_prev)
+        self.acc_hold_type_prev = acc_hold_type
         required_jerk = min(3, abs(accel - CS.out.aEgo) * 50) ## pfeiferj:openpilot:pfeifer-hkg-long-control-tune
         lower_jerk = required_jerk
         upper_jerk = required_jerk
