@@ -75,7 +75,7 @@ def acc_control_value(main_switch_on, acc_faulted, long_active, just_disabled, e
   elif just_disabled:
     acc_control = 5 # disabling controls
   elif override:
-    acc_control = 3 if esp_hold else 4
+    acc_control = 3 if esp_hold else 4 # startup while overriding is a starting condition
   elif long_active:
     acc_control = 3 # active long control state
   elif main_switch_on:
@@ -88,6 +88,8 @@ def acc_control_value(main_switch_on, acc_faulted, long_active, just_disabled, e
 
 def acc_hold_type(main_switch_on, acc_faulted, long_active, just_disabled, starting, stopping, esp_hold, override, just_overwritten, override_starting, override_starting_limit, acc_hold_type_prev):
   # WRONG USAGE (ESPECIALLY OVERRIDING STATES) RESULTS IN CAR SHUTTING OFF AT LOW SPEEDS <~ 3km/h
+  # TODO: CLEANUP -> find working state with minimum complexity
+  
   if acc_faulted or not long_active:
     acc_hold_type = 0 # no hold request
   elif just_disabled or just_overwritten:
@@ -113,16 +115,17 @@ def acc_hold_type(main_switch_on, acc_faulted, long_active, just_disabled, start
   
 
 def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, acc_hold_type, stopping, starting, lower_jerk, upper_jerk, esp_hold, override, speed, reversing):
+  # active longitudinal control disables one pedal driving (regen mode of accelerator) while using overriding mechnism
   LONG_ACTIVE = 3
   commands = []
 
   if acc_enabled:
-    if override:
+    if override: # the car expects a non inactive accel while overriding
       acceleration = 0.00
     else:
       acceleration = accel
   else:
-    acceleration = 3.01
+    acceleration = 3.01 # inactive accel
 
   values = {
     "ACC_Typ":                    acc_type,
@@ -153,9 +156,9 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
   # satisfy car to prevent errors when pressing Travel Assist Button
   # the button does nothing with this
   values_ta = {
-     "Travel_Assist_Status" :    2, # ready
-     "Travel_Assist_Request" :   0, # no request
-     "Travel_Assist_Available" : 1, # button is illuminated
+     "Travel_Assist_Status":    2, # ready
+     "Travel_Assist_Request":   0, # no request
+     "Travel_Assist_Available": 1, # button is illuminated
   }
 
   commands.append(packer.make_can_msg("MEB_Travel_Assist_01", bus, values_ta))
@@ -167,7 +170,7 @@ def acc_hud_status_value(main_switch_on, acc_faulted, long_active, esp_hold, ove
   if acc_faulted:
     acc_hud_control = 6 # error state
   elif override and long_active:
-    acc_hud_control = 3 if esp_hold else 4
+    acc_hud_control = 3 if esp_hold else 4 # startup while overriding is a starting condition and shown as default active
   elif long_active:
     acc_hud_control = 3 # active
   elif main_switch_on:
@@ -196,7 +199,6 @@ def get_desired_gap(distance_bars, desired_gap):
   return gap
 
 def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, distance_bars, desired_gap, distance, heartbeat, esp_hold):  
-  # active longitudinal control disables regen mode of accelerator while using overriding mechnism
   LONG_ACTIVE = 3
   
   values = {
