@@ -86,7 +86,7 @@ def acc_control_value(main_switch_on, acc_faulted, long_active, just_disabled, e
   return acc_control
   
 
-def acc_hold_type(main_switch_on, acc_faulted, long_active, just_disabled, starting, stopping, esp_hold, override, just_overwritten, override_starting, override_starting_limit):
+def acc_hold_type(main_switch_on, acc_faulted, long_active, just_disabled, starting, stopping, esp_hold, override, just_overwritten, override_starting, override_starting_limit, acc_hold_type_prev):
   # WRONG USAGE (ESPECIALLY OVERRIDING STATES) RESULTS IN CAR SHUTTING OFF AT LOW SPEEDS <~ 3km/h
   if acc_faulted:
     acc_hold_type = 0 # no hold request
@@ -99,7 +99,10 @@ def acc_hold_type(main_switch_on, acc_faulted, long_active, just_disabled, start
   elif stopping or esp_hold:
     acc_hold_type = 1 # hold or hold request
   else:
-    acc_hold_type = 0 # no hold request
+    if acc_hold_type_prev == 4:
+      acc_hold_type = 5
+    else:
+      acc_hold_type = 0 # no hold request
 
   return acc_hold_type
   
