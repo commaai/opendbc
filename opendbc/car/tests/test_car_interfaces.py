@@ -2,7 +2,6 @@ import os
 import math
 import hypothesis.strategies as st
 from hypothesis import Phase, given, settings
-import importlib
 from parameterized import parameterized
 from collections.abc import Callable
 from typing import Any
@@ -54,7 +53,7 @@ class TestCarInterfaces:
             phases=(Phase.reuse, Phase.generate, Phase.shrink))
   @given(data=st.data())
   def test_car_interfaces(self, car_name, data):
-    CarInterface, CarController, CarState = interfaces[car_name]
+    CarInterface, CarController, CarState, RadarInterface = interfaces[car_name]
 
     args = get_fuzzy_car_interface_args(data.draw)
 
@@ -104,7 +103,6 @@ class TestCarInterfaces:
       now_nanos += DT_CTRL * 1e9  # 10ms
 
     # Test radar interface
-    RadarInterface = importlib.import_module(f'opendbc.car.{car_params.carName}.radar_interface').RadarInterface
     radar_interface = RadarInterface(car_params)
     assert radar_interface
 
