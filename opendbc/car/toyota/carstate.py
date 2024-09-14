@@ -48,6 +48,7 @@ class CarState(CarStateBase):
     self.acc_type = 1
     self.lkas_hud = {}
     self.pcm_accel_net = 0.0
+    self.pcm_true_accel_net = 0.0
     self.pcm_neutral_force = 0.0
     self.vsc_slope_angle = 0.0
 
@@ -77,6 +78,7 @@ class CarState(CarStateBase):
     # thought to be the gas/brake as issued by the pcm (0=coasting)
     self.pcm_accel_net = cp.vl["PCM_CRUISE"]["ACCEL_NET"]
     self.pcm_neutral_force = cp.vl["PCM_CRUISE"]["NEUTRAL_FORCE"]
+    self.pcm_true_accel_net = cp.vl["CLUTCH"]["TRUE_ACCEL_NET"]
     self.vsc_slope_angle = cp.vl["VSC1S07"]["ASLP"]
 
     ret.standstill = abs(ret.vEgoRaw) < 1e-3
@@ -203,6 +205,7 @@ class CarState(CarStateBase):
       ("PCM_CRUISE_SM", 1),
       ("VSC1S07", 20),
       ("STEER_TORQUE_SENSOR", 50),
+      ("CLUTCH", 16),
     ]
 
     if CP.carFingerprint != CAR.TOYOTA_MIRAI:
