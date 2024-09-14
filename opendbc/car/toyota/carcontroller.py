@@ -123,6 +123,7 @@ class CarController(CarControllerBase):
     if CS.out.cruiseState.standstill or actuators.longControlState == LongCtrlState.stopping:
       self.pcm_accel_comp = 0.0
       self.pid.reset()
+    # TODO: just set kp to 1 and remove *2 here
     pcm_accel_cmd = actuators.accel + self.pcm_accel_comp * 2  # + offset
     # pcm_accel_cmd = actuators.accel - pitch_offset
 
