@@ -39,7 +39,6 @@ class CarController(CarControllerBase):
     self.distance_button = 0
 
     self.packer = CANPacker(dbc_name)
-    self.gas = 0
     self.accel = 0
 
   def update(self, CC, CS, now_nanos):
@@ -173,7 +172,6 @@ class CarController(CarControllerBase):
     new_actuators.steerOutputCan = apply_steer
     new_actuators.steeringAngleDeg = self.last_angle
     new_actuators.accel = self.accel
-    new_actuators.gas = self.gas
 
     self.frame += 1
     return new_actuators, can_sends
