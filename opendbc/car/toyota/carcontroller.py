@@ -5,6 +5,7 @@ from opendbc.car.can_definitions import CanData
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.toyota import toyotacan
+from openpilot.common.pid import PIDController
 from opendbc.car.toyota.values import CAR, STATIC_DSU_MSGS, NO_STOP_TIMER_CAR, TSS2_CAR, \
                                         CarControllerParams, ToyotaFlags, \
                                         UNSUPPORTED_DSU_CAR
@@ -40,6 +41,8 @@ class CarController(CarControllerBase):
     self.steer_rate_counter = 0
     self.pcm_accel_comp = 0
     self.distance_button = 0
+
+    self.pid = PIDController(k_p=0.5, k_i=0.25, k_f=0)
 
     self.packer = CANPacker(dbc_name)
     self.accel = 0
@@ -114,13 +117,17 @@ class CarController(CarControllerBase):
     offset = min(CS.pcm_neutral_force / self.CP.mass, 0.0)
     pitch_offset = math.sin(math.radians(CS.vsc_slope_angle)) * 9.81  # downhill is negative
     # TODO: these limits are too slow to prevent a jerk when engaging, ramp down on engage?
-    self.pcm_accel_comp = clip(actuators.accel - CS.pcm_accel_net, self.pcm_accel_comp - 0.05, self.pcm_accel_comp + 0.05)
+    # self.pcm_accel_comp = clip(actuators.accel - CS.pcm_accel_net, self.pcm_accel_comp - 0.05, self.pcm_accel_comp + 0.05)
+    pcm_accel_comp = self.pid.update(actuators.accel - CS.pcm_true_accel_net)
+    self.pcm_accel_comp = clip(pcm_accel_comp, self.pcm_accel_comp - 0.005, self.pcm_accel_comp + 0.005)
     if CS.out.cruiseState.standstill or actuators.longControlState == LongCtrlState.stopping:
       self.pcm_accel_comp = 0.0
-    pcm_accel_cmd = actuators.accel + self.pcm_accel_comp  # + offset
+      self.pid.reset()
+    pcm_accel_cmd = actuators.accel + self.pcm_accel_comp * 2  # + offset
     # pcm_accel_cmd = actuators.accel - pitch_offset
 
     if not CC.longActive:
+      self.pid.reset()
       self.pcm_accel_comp = 0.0
       pcm_accel_cmd = 0.0
 
