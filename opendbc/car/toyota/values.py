@@ -17,7 +17,7 @@ PEDAL_TRANSITION = 10. * CV.MPH_TO_MS
 class CarControllerParams:
   # limit compensated accel to 1.5 m/s2
   ACCEL_MAX = 2.0  # m/s2
-  ACCEL_MAX_COMP = 1.5  # m/s2
+  ACCEL_MAX_COMP = 2.0  # m/s2
   ACCEL_MIN = -3.5  # m/s2
 
   STEER_STEP = 1
