@@ -8,6 +8,7 @@ from opendbc.car.hyundai.values import CAR as HYUNDAI
 from opendbc.car.mazda.values import CAR as MAZDA
 from opendbc.car.mock.values import CAR as MOCK
 from opendbc.car.nissan.values import CAR as NISSAN
+from opendbc.car.rivian.values import CAR as RIVIAN
 from opendbc.car.subaru.values import CAR as SUBARU
 from opendbc.car.toyota.values import CAR as TOYOTA
 from opendbc.car.volkswagen.values import CAR as VW
@@ -260,6 +261,7 @@ MIGRATION = {
   "NISSAN LEAF 2018 Instrument Cluster": NISSAN.NISSAN_LEAF_IC,
   "NISSAN ROGUE 2019": NISSAN.NISSAN_ROGUE,
   "NISSAN ALTIMA 2020": NISSAN.NISSAN_ALTIMA,
+  "RIVIAN R1S": RIVIAN.RIVIAN_R1S,
   "SUBARU ASCENT LIMITED 2019": SUBARU.SUBARU_ASCENT,
   "SUBARU OUTBACK 6TH GEN": SUBARU.SUBARU_OUTBACK,
   "SUBARU LEGACY 7TH GEN": SUBARU.SUBARU_LEGACY,
