@@ -76,8 +76,8 @@ BO_ 180 SPEED: 8 XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 295 GEAR_PACKET_HYBRID: 8 XXX
- SG_ CAR_MOVEMENT : 25|10@0- (1,0) [0|255] "" XXX
- SG_ COUNTER : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ FDRVREAL : 26|11@0- (1,0) [-25600|25575] "N" XXX
+ SG_ UNKNOWN : 55|8@0+ (1,0) [0|255] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
  SG_ GEAR : 47|4@0+ (1,0) [0|15] "" XXX
 
@@ -462,7 +462,8 @@ CM_ SG_ 36 YAW_RATE "verify";
 CM_ SG_ 36 ACCEL_X "x-axis accel";
 CM_ SG_ 37 STEER_FRACTION "1/15th of the signal STEER_ANGLE, which is 1.5 deg; note that 0x8 is never set";
 CM_ SG_ 37 STEER_RATE "factor is tbd";
-CM_ SG_ 119 FDRV "force applied by wheels from the engine and/or electric motors. includes creeping force, regen, and engine braking";
+CM_ SG_ 119 FDRVREAL "ICE only: force applied by wheels from the engine. includes creeping force, regen, and engine braking";
+CM_ SG_ 295 FDRVREAL "hybrid only: force applied by wheels from the engine and/or electric motors. includes creeping force, regen, and engine braking";
 CM_ SG_ 466 NEUTRAL_FORCE "force in newtons the engine/electric motors are applying without any acceleration commands or user input";
 CM_ SG_ 466 ACC_BRAKING "whether brakes are being actuated from ACC command";
 CM_ SG_ 466 ACCEL_NET "net negative acceleration (braking) applied by the system if on flat ground";
