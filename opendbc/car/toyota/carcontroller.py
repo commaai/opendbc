@@ -42,7 +42,7 @@ class CarController(CarControllerBase):
     self.pcm_accel_comp = 0
     self.distance_button = 0
 
-    self.pid = PIDController(k_p=0.5, k_i=0.25, k_f=0)
+    self.pid = PIDController(k_p=1.0, k_i=0.25, k_f=0)
 
     self.packer = CANPacker(dbc_name)
     self.accel = 0
@@ -123,8 +123,7 @@ class CarController(CarControllerBase):
     if CS.out.cruiseState.standstill or actuators.longControlState == LongCtrlState.stopping:
       self.pcm_accel_comp = 0.0
       self.pid.reset()
-    # TODO: just set kp to 1 and remove *2 here
-    pcm_accel_cmd = actuators.accel + self.pcm_accel_comp * 2  # + offset
+    pcm_accel_cmd = actuators.accel + self.pcm_accel_comp  # + offset
     # pcm_accel_cmd = actuators.accel - pitch_offset
 
     if not CC.longActive:
