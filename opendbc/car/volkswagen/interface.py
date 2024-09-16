@@ -74,8 +74,8 @@ class CarInterface(CarInterfaceBase):
       ret.steerActuatorDelay = 0.2
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
     elif ret.flags & VolkswagenFlags.MEB:
-      ret.steerLimitTimer = 0.6
-      ret.steerActuatorDelay = 0.5
+      ret.steerLimitTimer = 1.2
+      ret.steerActuatorDelay = 0.6
     else:
       ret.steerLimitTimer = 0.4
       ret.steerActuatorDelay = 0.1
@@ -89,10 +89,10 @@ class CarInterface(CarInterfaceBase):
 
     if ret.flags & VolkswagenFlags.MEB:
       ret.longitudinalActuatorDelay = 1.0
-      #ret.longitudinalTuning.kpBP = [0., 5., 20.]
-      #ret.longitudinalTuning.kpV  = [0.1, 0.05, 0.]
+      ret.longitudinalTuning.kpBP = [0., 5., 35.]
+      ret.longitudinalTuning.kpV  = [0., 0.1, 0.4]
       ret.longitudinalTuning.kiBP = [0., 5., 35.]
-      ret.longitudinalTuning.kiV  = [3., 1.8, 1.4]
+      ret.longitudinalTuning.kiV  = [2.8, 1.2, 1.]
 
     ret.experimentalLongitudinalAvailable = ret.networkLocation == NetworkLocation.gateway or docs
     if experimental_long:
