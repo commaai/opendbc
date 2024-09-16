@@ -49,6 +49,14 @@ BO_ 37 STEER_ANGLE_SENSOR: 8 XXX
  SG_ STEER_FRACTION : 39|4@0- (0.1,0) [-0.7|0.7] "deg" XXX
  SG_ STEER_RATE : 35|12@0- (1,0) [-2000|2000] "deg/s" XXX
 
+BO_ 119 ENG2F41: 6 CGW
+ SG_ FDRV : 7|16@0- (2,0) [0|0] "N" Vector__XXX
+ SG_ FDRVREAL : 23|13@0- (10,0) [0|0] "N" Vector__XXX
+ SG_ XAECT : 39|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ XFDRVCOL : 38|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ FDRVSELP : 34|3@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ENG2F41S : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+
 BO_ 120 ENG2F42: 4 CGW
  SG_ FAVLMCHH : 7|16@0- (2,0) [0|0] "N" Vector__XX228X
  SG_ CCRNG : 23|1@0+ (1,0) [0|0] "" Vector__XXX
@@ -457,6 +465,7 @@ CM_ SG_ 36 YAW_RATE "verify";
 CM_ SG_ 36 ACCEL_X "x-axis accel";
 CM_ SG_ 37 STEER_FRACTION "1/15th of the signal STEER_ANGLE, which is 1.5 deg; note that 0x8 is never set";
 CM_ SG_ 37 STEER_RATE "factor is tbd";
+CM_ SG_ 119 FDRV "force applied by wheels from the engine and/or electric motors. includes creeping force, regen, and engine braking";
 CM_ SG_ 466 NEUTRAL_FORCE "force in newtons the engine/electric motors are applying without any acceleration commands or user input";
 CM_ SG_ 466 ACC_BRAKING "whether brakes are being actuated from ACC command";
 CM_ SG_ 466 ACCEL_NET "net acceleration produced by the system, given ACCEL_CMD, road grade and other factors";
