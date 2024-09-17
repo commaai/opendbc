@@ -103,7 +103,6 @@ class CarController(CarControllerBase):
                                                           lta_active, self.frame // 2, torque_wind_down))
 
     # *** gas and brake ***
-
     # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot
     if self.CP.carFingerprint == CAR.LEXUS_ES_TSS2 and not (self.CP.flags & ToyotaFlags.HYBRID):
       pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - actuators.accel)
