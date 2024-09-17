@@ -1,9 +1,12 @@
 import copy
-from opendbc.car import apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, make_tester_present_msg, structs
+import math
+from opendbc.car import apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, make_tester_present_msg, rate_limit, structs
 from opendbc.car.can_definitions import CanData
+from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.toyota import toyotacan
+from opendbc.car.toyota.carstate import CarState
 from opendbc.car.toyota.values import CAR, STATIC_DSU_MSGS, NO_STOP_TIMER_CAR, TSS2_CAR, \
                                         CarControllerParams, ToyotaFlags, \
                                         UNSUPPORTED_DSU_CAR
@@ -38,10 +41,12 @@ class CarController(CarControllerBase):
     self.steer_rate_counter = 0
     self.distance_button = 0
 
+    self.pcm_accel_compensation = 0.0
+
     self.packer = CANPacker(dbc_name)
     self.accel = 0
 
-  def update(self, CC, CS, now_nanos):
+  def update(self, CC, CS: CarState, now_nanos):
     actuators = CC.actuators
     hud_control = CC.hudControl
     pcm_cancel_cmd = CC.cruiseControl.cancel
@@ -99,7 +104,17 @@ class CarController(CarControllerBase):
                                                           lta_active, self.frame // 2, torque_wind_down))
 
     # *** gas and brake ***
-    pcm_accel_cmd = clip(actuators.accel, self.params.ACCEL_MIN, self.params.ACCEL_MAX)
+
+    # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot
+    if self.CP.carFingerprint == CAR.LEXUS_ES_TSS2 and not (self.CP.flags & ToyotaFlags.HYBRID):
+      pcm_accel_net_pitch = CS.pcm_accel_net - math.sin(CC.orientationNED[1]) * 9.81
+      pcm_accel_compensation = 2.0 * (pcm_accel_net_pitch - actuators.accel)
+      self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.02, 0.02)
+      pcm_accel_cmd = actuators.accel - self.pcm_accel_compensation
+    else:
+      pcm_accel_cmd = actuators.accel
+
+    pcm_accel_cmd = clip(pcm_accel_cmd, self.params.ACCEL_MIN, self.params.ACCEL_MAX)
 
     # on entering standstill, send standstill request
     if CS.out.standstill and not self.last_standstill and (self.CP.carFingerprint not in NO_STOP_TIMER_CAR):
