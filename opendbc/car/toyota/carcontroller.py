@@ -2,7 +2,6 @@ import copy
 import math
 from opendbc.car import apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, make_tester_present_msg, rate_limit, structs
 from opendbc.car.can_definitions import CanData
-from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.toyota import toyotacan
@@ -107,8 +106,7 @@ class CarController(CarControllerBase):
 
     # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot
     if self.CP.carFingerprint == CAR.LEXUS_ES_TSS2 and not (self.CP.flags & ToyotaFlags.HYBRID):
-      pcm_accel_net_pitch = CS.pcm_accel_net - math.sin(CC.orientationNED[1]) * 9.81
-      pcm_accel_compensation = 2.0 * (pcm_accel_net_pitch - actuators.accel)
+      pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - actuators.accel)
       self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.02, 0.02)
       pcm_accel_cmd = actuators.accel - self.pcm_accel_compensation
     else:
