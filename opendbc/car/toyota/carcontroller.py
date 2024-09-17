@@ -103,9 +103,14 @@ class CarController(CarControllerBase):
     # *** gas and brake ***
     # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot
     # TODO: validate PCM_CRUISE->ACCEL_NET for braking requests and compensate for imprecise braking as well
-    if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
+    if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive:
       pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - actuators.accel) if actuators.accel > 0 else 0.0
-      self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.02, 0.02)
+
+      # prevent compensation windup, TODO: can we simplify?
+      if actuators.accel - pcm_accel_compensation > self.params.ACCEL_MAX:
+        pcm_accel_compensation = actuators.accel - self.params.ACCEL_MAX
+
+      self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.01, 0.01)
       pcm_accel_cmd = actuators.accel - self.pcm_accel_compensation
     else:
       pcm_accel_cmd = actuators.accel
