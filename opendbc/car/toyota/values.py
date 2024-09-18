@@ -32,7 +32,7 @@ class CarControllerParams:
     if CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
       self.ACCEL_MAX = 2.0
     else:
-      self.ACCEL_MAX = 1.5  # m/s2, lower than allowed 2.0 m/s2 for tuning reasons
+      self.ACCEL_MAX = 1.5  # m/s2, lower than allowed 2.0 m/s^2 for tuning reasons
     self.ACCEL_MIN = -3.5  # m/s2
 
     if CP.lateralTuning.which() == 'torque':
