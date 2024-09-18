@@ -28,6 +28,39 @@ class TestCanChecksums:
       with subtests.test(counter=expected[counter_field]):
         assert tested[checksum_field] == expected[checksum_field]
 
+  def verify_fca_giorgio_crc(self, subtests, msg_name: str, msg_addr: int, test_messages: list[bytes]):
+    """Test modified SAE J1850 CRCs, with special final XOR cases for EPS messages"""
+    assert len(test_messages) == 3
+    self.verify_checksum(subtests, "fca_giorgio", msg_name, msg_addr, test_messages)
+
+  def test_fca_giorgio_eps_1(self, subtests):
+    self.verify_fca_giorgio_crc(subtests, "EPS_1", 0xDE, [
+      b'\x17\x51\x97\xcc\x00\xdf',
+      b'\x17\x51\x97\xc9\x01\xa3',
+      b'\x17\x51\x97\xcc\x02\xe5',
+    ])
+
+  def test_fca_giorgio_eps_2(self, subtests):
+    self.verify_fca_giorgio_crc(subtests, "EPS_2", 0x106, [
+      b'\x7c\x43\x57\x60\x00\x00\xa1',
+      b'\x7c\x63\x58\xe0\x00\x01\xd5',
+      b'\x7c\x63\x58\xe0\x00\x02\xf2',
+    ])
+
+  def test_fca_giorgio_eps_3(self, subtests):
+    self.verify_fca_giorgio_crc(subtests, "EPS_3", 0x122, [
+      b'\x7b\x30\x00\xf8',
+      b'\x7b\x10\x01\x90',
+      b'\x7b\xf0\x02\x6e',
+    ])
+
+  def test_fca_giorgio_abs_2(self, subtests):
+    self.verify_fca_giorgio_crc(subtests, "ABS_2", 0xFE, [
+      b'\x7e\x38\x00\x7d\x10\x31\x80\x32',
+      b'\x7e\x38\x00\x7d\x10\x31\x81\x2f',
+      b'\x7e\x38\x00\x7d\x20\x31\x82\x20',
+    ])
+
   def test_honda_checksum(self):
     """Test checksums for Honda standard and extended CAN ids"""
     # TODO: refactor to use self.verify_checksum()
