@@ -69,6 +69,7 @@ unsigned int chrysler_checksum(uint32_t address, const Signal &sig, const std::v
 
 // Static lookup table for fast computation of CRCs
 uint8_t crc8_lut_8h2f[256]; // CRC8 poly 0x2F, aka 8H2F/AUTOSAR
+uint8_t crc8_lut_j1850[256]; // CRC8 poly 0x1D, aka SAE J1850
 uint16_t crc16_lut_xmodem[256]; // CRC16 poly 0x1021, aka XMODEM
 
 void gen_crc_lookup_table_8(uint8_t poly, uint8_t crc_lut[]) {
@@ -107,8 +108,9 @@ void gen_crc_lookup_table_16(uint16_t poly, uint16_t crc_lut[]) {
 // Initializes CRC lookup tables at module initialization
 struct CrcInitializer {
   CrcInitializer() {
-    gen_crc_lookup_table_8(0x2F, crc8_lut_8h2f);    // CRC-8 8H2F/AUTOSAR for Volkswagen
-    gen_crc_lookup_table_16(0x1021, crc16_lut_xmodem);    // CRC-16 XMODEM for HKG CAN FD
+    gen_crc_lookup_table_8(0x2F, crc8_lut_8h2f);  // CRC-8 8H2F/AUTOSAR for Volkswagen
+    gen_crc_lookup_table_8(0x1D, crc8_lut_j1850);  // CRC-8 SAE-J1850
+    gen_crc_lookup_table_16(0x1021, crc16_lut_xmodem);  // CRC-16 XMODEM for HKG CAN FD
   }
 };
 
@@ -218,4 +220,26 @@ unsigned int hkg_can_fd_checksum(uint32_t address, const Signal &sig, const std:
   }
 
   return crc;
+}
+
+unsigned int fca_giorgio_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
+  // CRC is in the last byte, poly is same as SAE J1850 but uses a different init value and final XOR
+  uint8_t crc = 0x00;
+
+  for (int i = 0; i < d.size() - 1; i++) {
+    crc ^= d[i];
+    crc = crc8_lut_j1850[crc];
+  }
+
+  // Final XOR varies for EPS messages, all others use a common value
+  if (address == 0xDE) {  // EPS_1
+    return crc ^ 0x10;
+  } else if (address == 0x106) {  // EPS_2
+    return crc ^ 0xF6;
+  } else if (address == 0x122) {  // EPS_3
+    return crc ^ 0xF1;
+  } else {
+    return crc ^ 0xA;
+  }
+
 }
