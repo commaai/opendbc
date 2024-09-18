@@ -223,7 +223,7 @@ unsigned int hkg_can_fd_checksum(uint32_t address, const Signal &sig, const std:
 }
 
 unsigned int fca_giorgio_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
-  // CRC is in the last byte, poly is same as SAE J1850 but uses a different init value and output XOR
+  // CRC is in the last byte, poly is same as SAE J1850 but uses a different init value and final XOR
   uint8_t crc = 0x00;
 
   for (int i = 0; i < d.size() - 1; i++) {
@@ -231,11 +231,12 @@ unsigned int fca_giorgio_checksum(uint32_t address, const Signal &sig, const std
     crc = crc8_lut_j1850[crc];
   }
 
-  if (address == 0xDE) {
+  // Final XOR varies for EPS messages, all other messages use a common value
+  if (address == 0xDE) {  // EPS_1
     return crc ^ 0x10;
-  } else if (address == 0x106) {
+  } else if (address == 0x106) {  // EPS_2
     return crc ^ 0xF6;
-  } else if (address == 0x122) {
+  } else if (address == 0x122) {  // EPS_3
     return crc ^ 0xF1;
   } else {
     return crc ^ 0xA;
