@@ -1,5 +1,5 @@
 import copy
-from opendbc.car import apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, make_tester_present_msg, structs
+from opendbc.car import apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, make_tester_present_msg, rate_limit, structs
 from opendbc.car.can_definitions import CanData
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car.interfaces import CarControllerBase
@@ -37,6 +37,8 @@ class CarController(CarControllerBase):
     self.standstill_req = False
     self.steer_rate_counter = 0
     self.distance_button = 0
+
+    self.pcm_accel_compensation = 0.0
 
     self.packer = CANPacker(dbc_name)
     self.accel = 0
@@ -99,7 +101,22 @@ class CarController(CarControllerBase):
                                                           lta_active, self.frame // 2, torque_wind_down))
 
     # *** gas and brake ***
-    pcm_accel_cmd = clip(actuators.accel, self.params.ACCEL_MIN, self.params.ACCEL_MAX)
+    # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot
+    # TODO: validate PCM_CRUISE->ACCEL_NET for braking requests and compensate for imprecise braking as well
+    if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive:
+      pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - actuators.accel) if actuators.accel > 0 else 0.0
+
+      # prevent compensation windup
+      if actuators.accel - pcm_accel_compensation > self.params.ACCEL_MAX:
+        pcm_accel_compensation = actuators.accel - self.params.ACCEL_MAX
+
+      self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.01, 0.01)
+      pcm_accel_cmd = actuators.accel - self.pcm_accel_compensation
+    else:
+      self.pcm_accel_compensation = 0.0
+      pcm_accel_cmd = actuators.accel
+
+    pcm_accel_cmd = clip(pcm_accel_cmd, self.params.ACCEL_MIN, self.params.ACCEL_MAX)
 
     # on entering standstill, send standstill request
     if CS.out.standstill and not self.last_standstill and (self.CP.carFingerprint not in NO_STOP_TIMER_CAR):
