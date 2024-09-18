@@ -12,7 +12,7 @@ SteerControlType = structs.CarParams.SteerControlType
 class CarInterface(CarInterfaceBase):
   @staticmethod
   def get_pid_accel_limits(CP, current_speed, cruise_speed):
-    return CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX
+    return CarControllerParams(CP).ACCEL_MIN, CarControllerParams(CP).ACCEL_MAX
 
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
@@ -44,6 +44,9 @@ class CarInterface(CarInterfaceBase):
     # In TSS2 cars, the camera does long control
     found_ecus = [fw.ecu for fw in car_fw]
     ret.enableDsu = len(found_ecus) > 0 and Ecu.dsu not in found_ecus and candidate not in (NO_DSU_CAR | UNSUPPORTED_DSU_CAR)
+
+    if candidate == CAR.LEXUS_ES_TSS2 and Ecu.hybrid not in found_ecus:
+      ret.flags |= ToyotaFlags.RAISED_ACCEL_LIMIT.value
 
     if candidate == CAR.TOYOTA_PRIUS:
       stop_and_go = True
