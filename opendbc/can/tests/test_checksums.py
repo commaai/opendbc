@@ -55,7 +55,7 @@ class TestCanChecksums:
     ])
 
   def test_fca_giorgio_abs_2(self, subtests):
-    self.verify_fca_giorgio_crc(subtests, "ABS_2", 0xfe, [
+    self.verify_fca_giorgio_crc(subtests, "ABS_2", 0xFE, [
       b'\x7e\x38\x00\x7d\x10\x31\x80\x32',
       b'\x7e\x38\x00\x7d\x10\x31\x81\x2f',
       b'\x7e\x38\x00\x7d\x20\x31\x82\x20',
