@@ -231,7 +231,7 @@ unsigned int fca_giorgio_checksum(uint32_t address, const Signal &sig, const std
     crc = crc8_lut_j1850[crc];
   }
 
-  // Final XOR varies for EPS messages, all other messages use a common value
+  // Final XOR varies for EPS messages, all others use a common value
   if (address == 0xDE) {  // EPS_1
     return crc ^ 0x10;
   } else if (address == 0x106) {  // EPS_2
