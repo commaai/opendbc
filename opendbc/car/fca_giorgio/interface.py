@@ -1,5 +1,4 @@
-from cereal import car
-from opendbc.car import get_safety_config
+from opendbc.car import get_safety_config, structs
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.fca_giorgio.values import CAR
 
@@ -12,7 +11,7 @@ class CarInterface(CarInterfaceBase):
 
     # Set global parameters
 
-    ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.fcaGiorgio)]
+    ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.fcaGiorgio)]
 
     # Global lateral tuning defaults, can be overridden per-vehicle
 
