@@ -45,9 +45,6 @@ class CarInterface(CarInterfaceBase):
     found_ecus = [fw.ecu for fw in car_fw]
     ret.enableDsu = len(found_ecus) > 0 and Ecu.dsu not in found_ecus and candidate not in (NO_DSU_CAR | UNSUPPORTED_DSU_CAR)
 
-    if candidate == CAR.LEXUS_ES_TSS2 and Ecu.hybrid not in found_ecus:
-      ret.flags |= ToyotaFlags.RAISED_ACCEL_LIMIT.value
-
     if candidate == CAR.TOYOTA_PRIUS:
       stop_and_go = True
       # Only give steer angle deadzone to for bad angle sensor prius
@@ -117,7 +114,12 @@ class CarInterface(CarInterfaceBase):
     ret.openpilotLongitudinalControl = ret.enableDsu or candidate in (TSS2_CAR - RADAR_ACC_CAR) or bool(ret.flags & ToyotaFlags.DISABLE_RADAR.value)
     ret.autoResumeSng = ret.openpilotLongitudinalControl and candidate in NO_STOP_TIMER_CAR
 
-    if not ret.openpilotLongitudinalControl:
+    if ret.openpilotLongitudinalControl:
+      # Allow a higher max longitudinal acceleration (2 m/s^2, 15622:2018) and utilize PCM compensation
+      # to prevent overshoot
+      if Ecu.hybrid not in found_ecus:
+        ret.flags |= ToyotaFlags.RAISED_ACCEL_LIMIT.value
+    else:
       ret.safetyConfigs[0].safetyParam |= Panda.FLAG_TOYOTA_STOCK_LONGITUDINAL
 
     # min speed to enable ACC. if car can do stop and go, then set enabling speed
