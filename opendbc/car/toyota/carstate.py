@@ -159,6 +159,10 @@ class CarState(CarStateBase):
     ret.cruiseState.enabled = bool(cp.vl["PCM_CRUISE"]["CRUISE_ACTIVE"])
     ret.cruiseState.nonAdaptive = self.pcm_acc_status in (1, 2, 3, 4, 5, 6)
 
+    if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
+      if ret.cruiseState.enabled and not ret.gasPressed:
+        assert abs(cp.vl["CLUTCH"]["ACCEL_NET"] - cp.vl["PCM_CRUISE"]["ACCEL_NET"]) < 1
+
     ret.genericToggle = bool(cp.vl["LIGHT_STALK"]["AUTO_HIGH_BEAM"])
     ret.espDisabled = cp.vl["ESP_CONTROL"]["TC_DISABLED"] != 0
 
