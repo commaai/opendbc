@@ -115,9 +115,9 @@ class CarInterface(CarInterfaceBase):
     ret.autoResumeSng = ret.openpilotLongitudinalControl and candidate in NO_STOP_TIMER_CAR
 
     if ret.openpilotLongitudinalControl:
-      # Allow a higher max longitudinal acceleration (2 m/s^2, 15622:2018) and utilize PCM compensation
-      # to prevent overshoot
-      if Ecu.hybrid not in found_ecus:
+      # Allow a higher max longitudinal acceleration (2 m/s^2, 15622:2018) and utilize PCM compensation to prevent overshoot
+      # TODO: understand why these cars lack the CLUTCH signal and what can be used as a replacement
+      if Ecu.hybrid not in found_ecus and candidate not in (CAR.LEXUS_NX_TSS2, CAR.TOYOTA_ALPHARD_TSS2, CAR.TOYOTA_COROLLA, CAR.LEXUS_NX):
         ret.flags |= ToyotaFlags.RAISED_ACCEL_LIMIT.value
     else:
       ret.safetyConfigs[0].safetyParam |= Panda.FLAG_TOYOTA_STOCK_LONGITUDINAL
