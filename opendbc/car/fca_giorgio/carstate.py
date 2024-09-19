@@ -1,5 +1,4 @@
 import numpy as np
-from cereal import car
 from openpilot.common.conversions import Conversions as CV
 from opendbc.can.parser import CANParser
 from opendbc.car import structs
