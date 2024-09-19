@@ -7,7 +7,7 @@ from opendbc.car.interfaces import CarStateBase
 from opendbc.car.fca_giorgio.values import DBC, CANBUS, CarControllerParams
 
 
-GearShifter = car.CarState.GearShifter
+GearShifter = structs.CarState.GearShifter
 
 class CarState(CarStateBase):
   def __init__(self, CP):
