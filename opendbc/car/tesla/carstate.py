@@ -81,8 +81,8 @@ class CarState(CarStateBase):
     ret.doorOpen = cp.vl["UI_warning"]["anyDoorOpen"] == 1
 
     # Blinkers
-    ret.leftBlinker = cp_adas.vl["ID3F5VCFRONT_lighting"]["VCFRONT_indicatorLeftRequest"] != 0
-    ret.rightBlinker = cp_adas.vl["ID3F5VCFRONT_lighting"]["VCFRONT_indicatorRightRequest"] != 0
+    ret.leftBlinker = cp.vl["UI_warning"]["leftBlinkerOn"] != 0
+    ret.rightBlinker = cp.vl["UI_warning"]["rightBlinkerOn"] != 0
 
     # Seatbelt
     ret.seatbeltUnlatched = cp.vl["UI_warning"]["buckleStatus"] != 1
@@ -130,7 +130,6 @@ class CarState(CarStateBase):
       ("VCLEFT_switchStatus", 20),
       ("SCCM_leftStalk", 10),
       ("SCCM_rightStalk", 10),
-      ("ID3F5VCFRONT_lighting", 10),
     ]
 
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, CANBUS.vehicle)
