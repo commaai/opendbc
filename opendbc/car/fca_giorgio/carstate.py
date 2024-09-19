@@ -1,5 +1,5 @@
 import numpy as np
-from openpilot.common.conversions import Conversions as CV
+from opendbc.car.common.conversions import Conversions as CV
 from opendbc.can.parser import CANParser
 from opendbc.car import structs
 from opendbc.car.interfaces import CarStateBase
