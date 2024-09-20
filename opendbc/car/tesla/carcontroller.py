@@ -19,8 +19,6 @@ class CarController(CarControllerBase):
   def update(self, CC, CS, now_nanos):
 
     actuators = CC.actuators
-    pcm_cancel_cmd = CC.cruiseControl.cancel
-
     can_sends = []
 
     # Temp disable steering on a hands_on_fault, and allow for user override
@@ -42,20 +40,20 @@ class CarController(CarControllerBase):
 
     # Longitudinal control
     if self.CP.openpilotLongitudinalControl and self.frame % 4 == 0:
-      acc_state = CS.das_control["DAS_accState"]
-      target_accel = clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
-      target_speed = max(CS.out.vEgo + (target_accel * CarControllerParams.ACCEL_TO_SPEED_MULTIPLIER), 0)
-      can_sends.append(self.tesla_can.create_longitudinal_commands(acc_state, target_speed, target_accel, (self.frame // 4) % 8))
+      state = CS.das_control["DAS_accState"]
+      if hands_on_fault:
+        state = 13 # "ACC_CANCEL_GENERIC_SILENT"
+      accel = clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
+      speed = max(CS.out.vEgo + (accel * CarControllerParams.ACCEL_TO_SPEED_MULTIPLIER), 0)
+      min_accel = max(accel, 0)
+      max_accel = accel
+      cntr =  (self.frame // 4) % 8
+      can_sends.append(self.tesla_can.create_longitudinal_command(state, speed, max_accel, min_accel, cntr))
 
-    # Cancel on user steering override, since there is no steering torque blending
-    if hands_on_fault:
-      pcm_cancel_cmd = True
-
-    # Sent cancel request only if ACC is enabled
-    if self.frame % 10 == 0 and pcm_cancel_cmd and CS.acc_enabled:
-      counter = int(CS.sccm_right_stalk_counter)
-      can_sends.append(self.tesla_can.right_stalk_press((counter + 1) % 16 , 1))  # half up (cancel acc)
-      can_sends.append(self.tesla_can.right_stalk_press((counter + 2) % 16, 0))  # to prevent neutral gear warning
+    # Increment counter so cancel is prioritized even without openpilot longitudinal
+    if hands_on_fault and not self.CP.openpilotLongitudinalControl:
+      cntr = (CS.das_control["DAS_controlCounter"] + 1) % 8
+      can_sends.append(self.tesla_can.create_cancel_command(cntr))
 
     # TODO: HUD control
     new_actuators = copy.copy(actuators)
