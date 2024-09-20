@@ -131,6 +131,11 @@ class CarInterface(CarInterfaceBase):
       ret.vEgoStopping = 0.25
       ret.vEgoStarting = 0.25
       ret.stoppingDecelRate = 0.3  # reach stopping target smoothly
+
+      # Since we compensate for imprecise acceleration in carcontroller, we can be less aggressive with tuning
+      # This also prevents unnecessary request windup due to internal car jerk limits
+      if ret.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
+        tune.kiV = [0.25]
     else:
       tune.kiBP = [0., 5., 35.]
       tune.kiV = [3.6, 2.4, 1.5]
