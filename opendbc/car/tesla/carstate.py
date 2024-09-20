@@ -4,12 +4,11 @@ from opendbc.can.parser import CANParser
 from opendbc.car import structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP, BUTTONS
+from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP
 
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    self.button_states = {button.event_type: False for button in BUTTONS}
     self.can_define = CANDefine(DBC[CP.carFingerprint]['chassis'])
 
     # Needed by carcontroller
@@ -18,7 +17,7 @@ class CarState(CarStateBase):
     self.acc_enabled = None
     self.das_control = None
 
-  def update(self, cp, cp_cam, cp_adas, *_) -> structs.CarState:
+  def update(self, cp, cp_cam, *_) -> structs.CarState:
     ret = structs.CarState()
 
     # Vehicle speed
