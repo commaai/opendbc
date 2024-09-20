@@ -107,9 +107,8 @@ class CarController(CarControllerBase):
     # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot
     # TODO: validate PCM_CRUISE->ACCEL_NET for braking requests and compensate for imprecise braking as well
     if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive:
-      # if pitch compensated acceleration is positive, perform PCM acceleration compensation
+      # calculate amount of acceleration PCM should apply to reach target given pitch
       accel_due_to_pitch = math.sin(CS.slope_angle) * ACCELERATION_DUE_TO_GRAVITY
-      # this is the amount of acceleration the PCM should apply if on flat ground
       net_acceleration_request = actuators.accel + accel_due_to_pitch
 
       pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - net_acceleration_request) if net_acceleration_request > 0 else 0.0
