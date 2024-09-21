@@ -13,15 +13,14 @@ class CarController(CarControllerBase):
     self.frame = 0
     self.apply_angle_last = 0
     self.packer = CANPacker(dbc_name)
-    self.pt_packer = CANPacker(DBC[CP.carFingerprint]['pt'])
-    self.tesla_can = TeslaCAN(self.packer, self.pt_packer)
+    self.tesla_can = TeslaCAN(self.packer)
 
   def update(self, CC, CS, now_nanos):
 
     actuators = CC.actuators
     can_sends = []
 
-    # Temp disable steering on a hands_on_fault, and allow for user override
+    # Disengage and allow for user override
     hands_on_fault = CS.steer_warning == "EAC_ERROR_HANDS_ON" and CS.hands_on_level >= 3
     lkas_enabled = CC.latActive and not hands_on_fault
 

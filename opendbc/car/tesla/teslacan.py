@@ -5,14 +5,11 @@ from opendbc.car.tesla.values import CANBUS, CarControllerParams
 
 
 class TeslaCAN:
-  def __init__(self, packer, pt_packer):
+  def __init__(self, packer):
     self.packer = packer
-    self.pt_packer = pt_packer
-    self.crc = crcmod.mkCrcFun(0x11d, initCrc=0x00, rev=False, xorOut=0xff)
 
   @staticmethod
   def checksum(msg_id, dat):
-    # TODO: get message ID from name instead
     ret = (msg_id & 0xFF) + ((msg_id >> 8) & 0xFF)
     ret += sum(dat)
     return ret & 0xFF

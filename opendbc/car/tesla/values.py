@@ -11,12 +11,12 @@ class CAR(Platforms):
   TESLA_MODEL_3 = PlatformConfig(
     [CarDocs("Tesla Model 3", "All")],
     CarSpecs(mass=1899., wheelbase=2.875, steerRatio=12.0),
-    dbc_dict('tesla_model3_vehicle', None, chassis_dbc='tesla_model3_party')
+    dbc_dict('tesla_model3_party', None)
   )
   TESLA_MODEL_Y = PlatformConfig(
     [CarDocs("Tesla Model Y", "All")],
     CarSpecs(mass=2072., wheelbase=2.890, steerRatio=12.0),
-    dbc_dict('tesla_model3_vehicle', None, chassis_dbc='tesla_model3_party')
+    dbc_dict('tesla_model3_party', None)
   )
 
 
@@ -28,15 +28,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
       whitelist_ecus=[Ecu.eps],
       rx_offset=0x08,
       bus=0,
-    ),
-    Request(
-      [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.UDS_VERSION_REQUEST],
-      [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.UDS_VERSION_RESPONSE],
-      whitelist_ecus=[Ecu.engine],
-      rx_offset=0x10,
-      bus=1,
-      obd_multiplexing=False,
-    ),
+    )
   ]
 )
 

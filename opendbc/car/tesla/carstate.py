@@ -1,7 +1,7 @@
 import copy
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
-from opendbc.car import create_button_events, structs
+from opendbc.car import structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP
@@ -11,18 +11,14 @@ ButtonType = structs.CarState.ButtonEvent.Type
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    self.can_define = CANDefine(DBC[CP.carFingerprint]['chassis'])
+    self.can_define = CANDefine(DBC[CP.carFingerprint]['pt'])
 
     self.hands_on_level = 0
     self.steer_warning = None
     self.das_control = None
-    self.distance_button = 0
 
   def update(self, cp, cp_cam, *_) -> structs.CarState:
     ret = structs.CarState()
-
-    # prev_distance_button = self.distance_button
-    # self.distance_button = cp.vl["VCLEFT_switchStatus"]["VCLEFT_swcRightTiltRight"]
 
     # Vehicle speed
     ret.vEgoRaw = cp.vl["ESP_B"]["ESP_vehicleSpeed"] * CV.KPH_TO_MS
@@ -84,8 +80,7 @@ class CarState(CarStateBase):
     # AEB
     ret.stockAeb = cp_cam.vl["DAS_control"]["DAS_aebEvent"] == 1
 
-    # Buttons
-    # ret.buttonEvents = create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise})
+    # Buttons # ToDo: add Gap adjust button
 
     # Messages needed by carcontroller
     self.das_control = copy.copy(cp_cam.vl["DAS_control"])
@@ -104,7 +99,7 @@ class CarState(CarStateBase):
       ("UI_warning", 10)
     ]
 
-    return CANParser(DBC[CP.carFingerprint]['chassis'], messages, CANBUS.party)
+    return CANParser(DBC[CP.carFingerprint]['pt'], messages, CANBUS.party)
 
   @staticmethod
   def get_cam_can_parser(CP):
@@ -114,4 +109,4 @@ class CarState(CarStateBase):
       ("SCCM_steeringAngleSensor", 100),
     ]
 
-    return CANParser(DBC[CP.carFingerprint]['chassis'], messages, CANBUS.autopilot_party)
+    return CANParser(DBC[CP.carFingerprint]['pt'], messages, CANBUS.autopilot_party)
