@@ -1,4 +1,5 @@
 import copy
+import math
 from opendbc.car import apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, make_tester_present_msg, rate_limit, structs
 from opendbc.car.can_definitions import CanData
 from opendbc.car.common.numpy_fast import clip
@@ -11,6 +12,8 @@ from opendbc.can.packer import CANPacker
 
 SteerControlType = structs.CarParams.SteerControlType
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
+
+ACCELERATION_DUE_TO_GRAVITY = 9.81
 
 # LKA limits
 # EPS faults if you apply torque while the steering rate is above 100 deg/s for too long
@@ -104,7 +107,11 @@ class CarController(CarControllerBase):
     # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot
     # and imprecise braking
     if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive:
-      pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - actuators.accel)
+      # calculate amount of acceleration PCM should apply to reach target, given pitch
+      accel_due_to_pitch = math.sin(CS.slope_angle) * ACCELERATION_DUE_TO_GRAVITY
+      net_acceleration_request = actuators.accel + accel_due_to_pitch
+
+      pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - net_acceleration_request)
 
       # prevent compensation windup
       pcm_accel_compensation = clip(pcm_accel_compensation, actuators.accel - self.params.ACCEL_MAX,
