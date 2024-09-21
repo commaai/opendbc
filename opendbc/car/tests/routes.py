@@ -2,7 +2,7 @@ from typing import NamedTuple
 
 from opendbc.car.chrysler.values import CAR as CHRYSLER
 from opendbc.car.gm.values import CAR as GM
-from opendbc.car.fca_giorgio import CAR as FCA_GIORGIO
+from opendbc.car.fca_giorgio.values import CAR as FCA_GIORGIO
 from opendbc.car.ford.values import CAR as FORD
 from opendbc.car.honda.values import CAR as HONDA
 from opendbc.car.hyundai.values import CAR as HYUNDAI
