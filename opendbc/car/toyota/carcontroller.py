@@ -10,6 +10,7 @@ from opendbc.car.toyota.values import CAR, STATIC_DSU_MSGS, NO_STOP_TIMER_CAR, T
                                         UNSUPPORTED_DSU_CAR
 from opendbc.can.packer import CANPacker
 
+LongCtrlState = structs.CarControl.Actuators.LongControlState
 SteerControlType = structs.CarParams.SteerControlType
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 
@@ -111,7 +112,10 @@ class CarController(CarControllerBase):
       accel_due_to_pitch = math.sin(CS.slope_angle) * ACCELERATION_DUE_TO_GRAVITY
       net_acceleration_request = actuators.accel + accel_due_to_pitch
 
-      pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - net_acceleration_request) if net_acceleration_request > 0 else 0.0
+      # let PCM handle stopping and braking for now
+      pcm_accel_compensation = 0.0
+      if net_acceleration_request > 0.0 and actuators.longControlState != LongCtrlState.stopping:
+        pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - net_acceleration_request)
 
       # prevent compensation windup
       if actuators.accel - pcm_accel_compensation > self.params.ACCEL_MAX:
