@@ -1,26 +1,28 @@
 import copy
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
-from opendbc.car import structs
+from opendbc.car import create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP, BUTTONS
+from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP
+
+ButtonType = structs.CarState.ButtonEvent.Type
 
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    self.button_states = {button.event_type: False for button in BUTTONS}
     self.can_define = CANDefine(DBC[CP.carFingerprint]['chassis'])
 
-    # Needed by carcontroller
     self.hands_on_level = 0
     self.steer_warning = None
-    self.acc_enabled = None
-    self.sccm_right_stalk_counter = None
     self.das_control = None
+    self.distance_button = 0
 
-  def update(self, cp, cp_cam, cp_adas, *_) -> structs.CarState:
+  def update(self, cp, cp_cam, *_) -> structs.CarState:
     ret = structs.CarState()
+
+    # prev_distance_button = self.distance_button
+    # self.distance_button = cp.vl["VCLEFT_switchStatus"]["VCLEFT_swcRightTiltRight"]
 
     # Vehicle speed
     ret.vEgoRaw = cp.vl["ESP_B"]["ESP_vehicleSpeed"] * CV.KPH_TO_MS
@@ -65,18 +67,6 @@ class CarState(CarStateBase):
     # Gear
     ret.gearShifter = GEAR_MAP[self.can_define.dv["DI_systemStatus"]["DI_gear"].get(int(cp.vl["DI_systemStatus"]["DI_gear"]), "DI_GEAR_INVALID")]
 
-    # Buttons
-    button_events = []
-    for button in BUTTONS:
-      state = cp_adas.vl[button.can_addr][button.can_msg] in button.values
-      if self.button_states[button.event_type] != state:
-        event = structs.CarState.ButtonEvent()
-        event.type = button.event_type
-        event.pressed = state
-        button_events.append(event)
-      self.button_states[button.event_type] = state
-    ret.buttonEvents = button_events
-
     # Doors
     ret.doorOpen = cp.vl["UI_warning"]["anyDoorOpen"] == 1
 
@@ -94,8 +84,10 @@ class CarState(CarStateBase):
     # AEB
     ret.stockAeb = cp_cam.vl["DAS_control"]["DAS_aebEvent"] == 1
 
+    # Buttons
+    # ret.buttonEvents = create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise})
+
     # Messages needed by carcontroller
-    self.sccm_right_stalk_counter = copy.copy(cp_adas.vl["SCCM_rightStalk"]["SCCM_rightStalkCounter"])
     self.das_control = copy.copy(cp_cam.vl["DAS_control"])
 
     return ret
@@ -123,13 +115,3 @@ class CarState(CarStateBase):
     ]
 
     return CANParser(DBC[CP.carFingerprint]['chassis'], messages, CANBUS.autopilot_party)
-
-  @staticmethod
-  def get_adas_can_parser(CP):  # Vehicle Can on Model 3
-    messages = [
-      ("VCLEFT_switchStatus", 20),
-      ("SCCM_leftStalk", 10),
-      ("SCCM_rightStalk", 10),
-    ]
-
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, CANBUS.vehicle)
