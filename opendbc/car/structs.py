@@ -231,6 +231,7 @@ class CarControl:
       pid = auto()
       stopping = auto()
       starting = auto()
+      emergencyBraking = auto()
 
   @auto_dataclass
   class CruiseControl:

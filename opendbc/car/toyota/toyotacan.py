@@ -51,7 +51,7 @@ def create_accel_command(packer, accel, pcm_cancel, standstill_req, lead, acc_ty
 
 def create_pcs_commands(packer, accel, active, mass):
   values1 = {
-    "COUNTER": 0,
+    #"COUNTER": 0,  # no counter??
     "FORCE": round(min(accel, 0) * mass * 2),
     "STATE": 3 if active else 0,
     "BRAKE_STATUS": 0,
