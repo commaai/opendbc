@@ -121,7 +121,7 @@ class CarController(CarControllerBase):
       pcm_accel_compensation = clip(pcm_accel_compensation, actuators.accel - self.params.ACCEL_MAX,
                                     actuators.accel - self.params.ACCEL_MIN)
 
-      self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.01, 0.01)
+      self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.01 * 0.25, 0.01 * 0.25)
       pcm_accel_cmd = actuators.accel - self.pcm_accel_compensation
     else:
       self.pcm_accel_compensation = 0.0
