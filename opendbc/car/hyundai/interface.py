@@ -130,6 +130,12 @@ class CarInterface(CarInterfaceBase):
       ret.flags |= HyundaiFlags.ALT_LIMITS.value
       ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_ALT_LIMITS
 
+    # TODO: Enforce in panda safety
+    if candidate in CAR.KIA_SPORTAGE_5TH_GEN:
+      for fw in car_fw:
+        if fw.ecu == "fwdCamera" and fw.fwVersion == b'\xf1\x00NQ5 FR_CMR AT USA LHD 1.00 1.01 99211-P1060 680':
+          ret.flags |= HyundaiFlags.ALT_LIMITS_2.value
+
     ret.centerToFront = ret.wheelbase * 0.4
 
     return ret
