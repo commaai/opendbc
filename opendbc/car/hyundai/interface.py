@@ -130,6 +130,10 @@ class CarInterface(CarInterfaceBase):
       ret.flags |= HyundaiFlags.ALT_LIMITS.value
       ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_ALT_LIMITS
 
+    if candidate in (CAR.HYUNDAI_KONA_2022, ):
+      ret.flags |= HyundaiFlags.ALT_LIMITS_2.value
+      ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_ALT_LIMITS_2
+
     ret.centerToFront = ret.wheelbase * 0.4
 
     return ret
