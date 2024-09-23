@@ -20,10 +20,12 @@ class CarControllerParams:
     self.STEER_DRIVER_FACTOR = 1       # from dbc
 
     if CP.flags & SubaruFlags.GLOBAL_GEN2:
+      # TODO: lower rate limits, this reaches min/max in 0.5s which negatively affects tuning
       self.STEER_MAX = 1000
       self.STEER_DELTA_UP = 40
       self.STEER_DELTA_DOWN = 40
     elif CP.carFingerprint == CAR.SUBARU_IMPREZA_2020:
+      self.STEER_DELTA_UP = 35
       self.STEER_MAX = 1439
     else:
       self.STEER_MAX = 2047
