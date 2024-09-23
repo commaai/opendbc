@@ -59,8 +59,12 @@ class CarState(CarStateBase):
     if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
       # Sometimes ACC_BRAKING can be 1 while showing we're applying gas already
       self.pcm_accel_net = max(cp.vl["CLUTCH"]["ACCEL_NET"], 0.0)
+      # Thought to be a friction braking request value
       if cp.vl["PCM_CRUISE"]["ACC_BRAKING"]:
         self.pcm_accel_net += min(cp.vl["PCM_CRUISE"]["ACCEL_NET"], 0.0)
+      # Regen force is high enough to matter on hybrids (>0.5 m/s^2)
+      if self.CP.flags & ToyotaFlags.HYBRID:
+        self.pcm_accel_net += min(cp.vl["GEAR_PACKET_HYBRID"]["FDRVREAL"] / self.CP.mass, 0.0)
 
     # filtered pitch estimate from the car, negative is a downward slope
     self.slope_angle = cp.vl["VSC1S07"]["ASLP"] * CV.DEG_TO_RAD
@@ -213,6 +217,9 @@ class CarState(CarStateBase):
 
     if CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
       messages.append(("CLUTCH", 15))
+
+    if CP.flags & ToyotaFlags.HYBRID:
+      messages.append(("GEAR_PACKET_HYBRID", 60))
 
     if CP.carFingerprint != CAR.TOYOTA_MIRAI:
       messages.append(("ENGINE_RPM", 42))
