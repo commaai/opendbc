@@ -54,7 +54,6 @@ class CarControllerParams:
   ACCEL_MAX = 2.0    # m/s^2
   JERK_LIMIT_MAX = 5
   JERK_LIMIT_MIN = -5
-  ACCEL_TO_SPEED_MULTIPLIER = 3
 
   def __init__(self, CP):
     pass

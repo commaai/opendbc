@@ -4,7 +4,7 @@ from opendbc.can.packer import CANPacker
 from opendbc.car import apply_std_steer_angle_limits
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.tesla.teslacan import TeslaCAN
-from opendbc.car.tesla.values import DBC, CarControllerParams
+from opendbc.car.tesla.values import CarControllerParams
 
 
 class CarController(CarControllerBase):
@@ -41,18 +41,15 @@ class CarController(CarControllerBase):
     if self.CP.openpilotLongitudinalControl and self.frame % 4 == 0:
       state = CS.das_control["DAS_accState"]
       if hands_on_fault:
-        state = 13 # "ACC_CANCEL_GENERIC_SILENT"
+        state = 13  # "ACC_CANCEL_GENERIC_SILENT"
       accel = clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
-      speed = max(CS.out.vEgo + (accel * CarControllerParams.ACCEL_TO_SPEED_MULTIPLIER), 0)
-      min_accel = max(accel, 0)
-      max_accel = accel
-      cntr =  (self.frame // 4) % 8
-      can_sends.append(self.tesla_can.create_longitudinal_command(state, speed, max_accel, min_accel, cntr))
+      cntr = CS.das_control["DAS_controlCounter"]
+      can_sends.append(self.tesla_can.create_longitudinal_command(state, accel, cntr))
 
     # Increment counter so cancel is prioritized even without openpilot longitudinal
     if hands_on_fault and not self.CP.openpilotLongitudinalControl:
       cntr = (CS.das_control["DAS_controlCounter"] + 1) % 8
-      can_sends.append(self.tesla_can.create_cancel_command(cntr))
+      can_sends.append(self.tesla_can.create_longitudinal_command(13, 0,  cntr))
 
     # TODO: HUD control
     new_actuators = copy.copy(actuators)

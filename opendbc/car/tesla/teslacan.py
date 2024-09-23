@@ -1,4 +1,4 @@
-from opendbc.car.common.conversions import Conversions as CV
+from opendbc.car.interfaces import V_CRUISE_MAX
 from opendbc.car.tesla.values import CANBUS, CarControllerParams
 
 
@@ -24,21 +24,18 @@ class TeslaCAN:
     values["DAS_steeringControlChecksum"] = self.checksum(0x488, data[:3])
     return self.packer.make_can_msg("DAS_steeringControl", CANBUS.party, values)
 
-  def create_longitudinal_command(self, acc_state, speed, min_accel, max_accel, cntr):
+  def create_longitudinal_command(self, acc_state, accel, cntr):
     values = {
-      "DAS_setSpeed": speed * CV.MS_TO_KPH,
+      "DAS_setSpeed": 0 if accel < 0 else V_CRUISE_MAX,
       "DAS_accState": acc_state,
       "DAS_aebEvent": 0,
       "DAS_jerkMin": CarControllerParams.JERK_LIMIT_MIN,
       "DAS_jerkMax": CarControllerParams.JERK_LIMIT_MAX,
-      "DAS_accelMin": min_accel,
-      "DAS_accelMax": max_accel,
+      "DAS_accelMin": accel,
+      "DAS_accelMax": max(accel, 0),
       "DAS_controlCounter": cntr,
       "DAS_controlChecksum": 0,
     }
     data = self.packer.make_can_msg("DAS_control", CANBUS.party, values)[1]
     values["DAS_controlChecksum"] = self.checksum(0x2b9, data[:7])
     return self.packer.make_can_msg("DAS_control", CANBUS.party, values)
-
-  def create_cancel_command(self, cntr):
-    return self.create_longitudinal_command(13, 0, 0, 0,  cntr)
