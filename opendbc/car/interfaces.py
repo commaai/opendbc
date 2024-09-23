@@ -1,6 +1,7 @@
 import json
 import os
 import numpy as np
+import time
 import tomllib
 from abc import abstractmethod, ABC
 from enum import StrEnum
@@ -101,7 +102,9 @@ class CarInterfaceBase(ABC):
     dbc_name = "" if self.cp is None else self.cp.dbc_name
     self.CC: CarControllerBase = CarController(dbc_name, CP)
 
-  def apply(self, c: structs.CarControl, now_nanos: int) -> tuple[structs.CarControl.Actuators, list[CanData]]:
+  def apply(self, c: structs.CarControl, now_nanos: int | None = None) -> tuple[structs.CarControl.Actuators, list[CanData]]:
+    if now_nanos is None:
+      now_nanos = int(time.monotonic() * 1e9)
     return self.CC.update(c, self.CS, now_nanos)
 
   @staticmethod
@@ -257,11 +260,10 @@ class RadarInterfaceBase(ABC):
     self.CP = CP
     self.rcp = None
     self.pts: dict[int, structs.RadarData.RadarPoint] = {}
-    self.delay = 0
     self.radar_ts = CP.radarTimeStep
     self.frame = 0
 
-  def update(self, can_strings) -> structs.RadarData | None:
+  def update(self, can_packets: list[tuple[int, list[CanData]]]) -> structs.RadarData | None:
     self.frame += 1
     if (self.frame % int(100 * self.radar_ts)) == 0:
       return structs.RadarData()

@@ -49,6 +49,29 @@ def create_accel_command(packer, accel, pcm_cancel, standstill_req, lead, acc_ty
   return packer.make_can_msg("ACC_CONTROL", 0, values)
 
 
+def create_pcs_commands(packer, accel, active, mass):
+  values1 = {
+    "COUNTER": 0,
+    "FORCE": round(min(accel, 0) * mass * 2),
+    "STATE": 3 if active else 0,
+    "BRAKE_STATUS": 0,
+    "PRECOLLISION_ACTIVE": 1 if active else 0,
+  }
+  msg1 = packer.make_can_msg("PRE_COLLISION", 0, values1)
+
+  values2 = {
+    "DSS1GDRV": min(accel, 0),     # accel
+    "PCSALM": 1 if active else 0,  # goes high same time as PRECOLLISION_ACTIVE
+    "IBTRGR": 1 if active else 0,  # unknown
+    "PBATRGR": 1 if active else 0, # noisy actuation bit?
+    "PREFILL": 1 if active else 0, # goes on and off before DSS1GDRV
+    "AVSTRGR": 1 if active else 0,
+  }
+  msg2 = packer.make_can_msg("PRE_COLLISION_2", 0, values2)
+
+  return [msg1, msg2]
+
+
 def create_acc_cancel_command(packer):
   values = {
     "GAS_RELEASED": 0,
