@@ -35,7 +35,7 @@ def apply_hysteresis(val: float, val_steady: float, hyst_gap: float) -> float:
 
 class ButtonTracker:
   def __init__(self):
-    self.prev_btn = None
+    self.prev_btn: int = 0
 
   def create_button_events(self, cur_btn: int, buttons_dict: dict[int, structs.CarState.ButtonEvent.Type],
                            unpressed_btn: int = 0) -> list[structs.CarState.ButtonEvent]:
