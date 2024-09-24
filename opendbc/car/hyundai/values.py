@@ -95,6 +95,8 @@ class HyundaiFlags(IntFlag):
 
   MIN_STEER_32_MPH = 2 ** 23
 
+  HAS_LFA_BUTTON = 2 ** 24
+
 
 class Footnote(Enum):
   CANFD = CarFootnote(
