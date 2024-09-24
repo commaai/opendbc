@@ -104,6 +104,10 @@ class Footnote(Enum):
   CIVIC_DIESEL = CarFootnote(
     "2019 Honda Civic 1.6L Diesel Sedan does not have ALC below 12mph.",
     Column.FSR_STEERING)
+  BOSCH_RADAR_STEER = CarFootnote(
+    "ALC down to 0 mph only with openpilot ACC. No ALC below 47mph when using stock ACC.",
+    Column.FSR_STEERING)
+
 
 
 class HondaBoschPlatformConfig(PlatformConfig):
@@ -172,8 +176,8 @@ class CAR(Platforms):
   )
   # TODO: specs copied from Nidec Odyssey. Unchecked.
   HONDA_ODYSSEY_BOSCH = HondaBoschPlatformConfig(
-    [HondaCarDocs("Honda Odyssey 2021-24", "All")],
-    CarSpecs(mass=1900, wheelbase=3.0, steerRatio=14.35, centerToFrontRatio=0.41, tireStiffnessFactor=0.82, minSteerSpeed=47 * CV.MPH_TO_MS),
+    [HondaCarDocs("Honda Odyssey 2021-24", "All", footnotes=[Footnote.BOSCH_RADAR_STEER])],
+    CarSpecs(mass=1900, wheelbase=3.0, steerRatio=14.35, centerToFrontRatio=0.41, tireStiffnessFactor=0.82),
     dbc_dict('acura_rdx_2020_can_generated', None),
     flags=HondaFlags.BOSCH_ALT_BRAKE,
   )
