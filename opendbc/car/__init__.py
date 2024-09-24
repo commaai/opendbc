@@ -33,19 +33,25 @@ def apply_hysteresis(val: float, val_steady: float, hyst_gap: float) -> float:
   return val_steady
 
 
-def create_button_events(cur_btn: int, prev_btn: int, buttons_dict: dict[int, structs.CarState.ButtonEvent.Type],
-                         unpressed_btn: int = 0) -> list[structs.CarState.ButtonEvent]:
-  events: list[structs.CarState.ButtonEvent] = []
+class ButtonTracker:
+  def __init__(self):
+    self.prev_btn = None
 
-  if cur_btn == prev_btn:
+  def create_button_events(self, cur_btn: int, buttons_dict: dict[int, structs.CarState.ButtonEvent.Type],
+                           unpressed_btn: int = 0) -> list[structs.CarState.ButtonEvent]:
+    events: list[structs.CarState.ButtonEvent] = []
+
+    if cur_btn == self.prev_btn:
+      return events
+
+    # Add events for button presses, multiple when a button switches without going to unpressed
+    for pressed, btn in ((False, self.prev_btn), (True, cur_btn)):
+      if btn != unpressed_btn:
+        events.append(structs.CarState.ButtonEvent(pressed=pressed,
+                                                   type=buttons_dict.get(btn, ButtonType.unknown)))
+
+    self.prev_btn = cur_btn
     return events
-
-  # Add events for button presses, multiple when a button switches without going to unpressed
-  for pressed, btn in ((False, prev_btn), (True, cur_btn)):
-    if btn != unpressed_btn:
-      events.append(structs.CarState.ButtonEvent(pressed=pressed,
-                                                 type=buttons_dict.get(btn, ButtonType.unknown)))
-  return events
 
 
 def gen_empty_fingerprint():
