@@ -24,6 +24,7 @@ class CarState(CarStateBase):
       self.shifter_values = can_define.dv["GEAR"]["PRNDL"]
 
     self.distance_button = 0
+    self.lkas_button = 0
 
   def update(self, cp, cp_cam, *_) -> structs.CarState:
 
@@ -89,8 +90,10 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint in RAM_CARS:
       # Auto High Beam isn't Located in this message on chrysler or jeep currently located in 729 message
       self.auto_high_beam = cp_cam.vl["DAS_6"]['AUTO_HIGH_BEAM_ON']
+      self.lkas_button = cp.vl["Center_Stack_2"]["LKAS_Button"] == 1 or cp.vl["Center_Stack_1"]["LKAS_Button"] == 1
       ret.steerFaultTemporary = cp.vl["EPS_3"]["DASM_FAULT"] == 1
     else:
+      self.lkas_button = cp.vl["TRACTION_BUTTON"]["TOGGLE_LKAS"] == 1
       ret.steerFaultTemporary = cp.vl["EPS_2"]["LKAS_TEMPORARY_FAULT"] == 1
       ret.steerFaultPermanent = cp.vl["EPS_2"]["LKAS_STATE"] == 4
 
@@ -137,11 +140,14 @@ class CarState(CarStateBase):
         ("ESP_8", 50),
         ("EPS_3", 50),
         ("Transmission_Status", 50),
+        ("Center_Stack_1", 1),
+        ("Center_Stack_2", 1),
       ]
     else:
       messages += [
         ("GEAR", 50),
         ("SPEED_1", 100),
+        ("TRACTION_BUTTON", 1),
       ]
       messages += CarState.get_cruise_messages()
 
