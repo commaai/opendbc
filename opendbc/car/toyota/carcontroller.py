@@ -158,7 +158,7 @@ class CarController(CarControllerBase):
       if pcm_cancel_cmd and self.CP.carFingerprint in UNSUPPORTED_DSU_CAR:
         can_sends.append(toyotacan.create_acc_cancel_command(self.packer))
       elif self.CP.openpilotLongitudinalControl:
-        # internal PCM gas command can get stuck at high negative values. send one frame of zero when transitioning from braking to gas
+        # internal PCM gas command can get stuck unwinding from negative accel. send one frame of zero when transitioning from braking to gas
         if pcm_accel_cmd > 0 > self.accel and abs(pcm_accel_cmd - self.accel) > 0.5:
           pcm_accel_cmd = 0
 
