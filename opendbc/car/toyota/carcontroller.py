@@ -43,6 +43,7 @@ class CarController(CarControllerBase):
     self.distance_button = 0
 
     self.pcm_accel_compensation = 0.0
+    self.last_accel = 0.0
 
     self.packer = CANPacker(dbc_name)
     self.accel = 0
@@ -126,6 +127,10 @@ class CarController(CarControllerBase):
     else:
       self.pcm_accel_compensation = 0.0
       pcm_accel_cmd = actuators.accel
+
+    if CC.longActive:
+      pcm_accel_cmd = rate_limit(pcm_accel_cmd, self.last_accel, -0.45 / 3, 0.45 / 3)
+    self.last_accel = pcm_accel_cmd
 
     pcm_accel_cmd = clip(pcm_accel_cmd, self.params.ACCEL_MIN, self.params.ACCEL_MAX)
 
