@@ -57,8 +57,12 @@ class CarState(CarStateBase):
     # CLUTCH->ACCEL_NET is only accurate for gas, PCM_CRUISE->ACCEL_NET is only accurate for brake
     # These signals only have meaning when ACC is active
     if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
-      # Sometimes ACC_BRAKING can be 1 while showing we're applying gas already
       self.pcm_accel_net = max(cp.vl["CLUTCH"]["ACCEL_NET"], 0.0)
+
+      # add creeping force at low speeds, CLUTCH->ACCEL_NET already shows negative force from engine braking
+      self.pcm_accel_net += max(cp.vl["PCM_CRUISE"]["NEUTRAL_FORCE"] / self.CP.mass, 0.0)
+
+      # Sometimes ACC_BRAKING can be 1 while showing we're applying gas already
       if cp.vl["PCM_CRUISE"]["ACC_BRAKING"]:
         self.pcm_accel_net += min(cp.vl["PCM_CRUISE"]["ACCEL_NET"], 0.0)
 
