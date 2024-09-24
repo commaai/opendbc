@@ -43,7 +43,6 @@ class CarController(CarControllerBase):
     self.distance_button = 0
 
     self.pcm_accel_compensation = 0.0
-    self.last_accel = 0.0
 
     self.packer = CANPacker(dbc_name)
     self.accel = 0
@@ -128,10 +127,6 @@ class CarController(CarControllerBase):
       self.pcm_accel_compensation = 0.0
       pcm_accel_cmd = actuators.accel
 
-    if CC.longActive:
-      pcm_accel_cmd = rate_limit(pcm_accel_cmd, self.last_accel, -0.45 / 3, 0.45 / 3)
-    self.last_accel = pcm_accel_cmd
-
     pcm_accel_cmd = clip(pcm_accel_cmd, self.params.ACCEL_MIN, self.params.ACCEL_MAX)
 
     # on entering standstill, send standstill request
@@ -163,6 +158,10 @@ class CarController(CarControllerBase):
       if pcm_cancel_cmd and self.CP.carFingerprint in UNSUPPORTED_DSU_CAR:
         can_sends.append(toyotacan.create_acc_cancel_command(self.packer))
       elif self.CP.openpilotLongitudinalControl:
+        # on transition from negative to positive accel, send one frame of zero to ensure gas starts at zero
+        if pcm_accel_cmd > 0 > self.accel and abs(pcm_accel_cmd - self.accel) > 0.5:
+          pcm_accel_cmd = 0
+
         can_sends.append(toyotacan.create_accel_command(self.packer, pcm_accel_cmd, pcm_cancel_cmd, self.standstill_req, lead, CS.acc_type, fcw_alert,
                                                         self.distance_button))
         self.accel = pcm_accel_cmd
