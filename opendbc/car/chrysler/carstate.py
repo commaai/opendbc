@@ -31,6 +31,7 @@ class CarState(CarStateBase):
     ret = structs.CarState()
 
     prev_distance_button = self.distance_button
+    prev_lkas_button = self.lkas_button
     self.distance_button = cp.vl["CRUISE_BUTTONS"]["ACC_Distance_Dec"]
 
     # lock info
@@ -105,7 +106,10 @@ class CarState(CarStateBase):
     self.lkas_car_model = cp_cam.vl["DAS_6"]["CAR_MODEL"]
     self.button_counter = cp.vl["CRUISE_BUTTONS"]["COUNTER"]
 
-    ret.buttonEvents = create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise})
+    ret.buttonEvents = [
+      *create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise}),
+      *create_button_events(self.lkas_button, prev_lkas_button, {1: ButtonType.altButton1}),
+    ]
 
     return ret
 
