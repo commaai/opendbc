@@ -98,8 +98,7 @@ class CarController(CarControllerBase):
     torque_l = 0
     torque_r = 0
 
-    llk_valid = len(CC.orientationNED) > 1 and len(CC.angularVelocity) > 1
-    if CC.enabled and llk_valid:
+    if CC.enabled:
       # Read these from the joystick
       # TODO: this isn't acceleration, okay?
       speed_desired = CC.actuators.accel / 5.
