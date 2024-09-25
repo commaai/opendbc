@@ -5,7 +5,7 @@ from opendbc.car import create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.numpy_fast import mean
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.gm.values import DBC, AccState, CanBus, CruiseButtons, STEER_THRESHOLD
+from opendbc.car.gm.values import DBC, AccState, CanBus, CruiseButtons, STEER_THRESHOLD, SDGM_CAR
 
 ButtonType = structs.CarState.ButtonEvent.Type
 TransmissionType = structs.CarParams.TransmissionType
@@ -119,7 +119,8 @@ class CarState(CarStateBase):
     ret.cruiseState.standstill = pt_cp.vl["AcceleratorPedal2"]["CruiseState"] == AccState.STANDSTILL
     if self.CP.networkLocation == NetworkLocation.fwdCamera:
       ret.cruiseState.speed = cam_cp.vl["ASCMActiveCruiseControlStatus"]["ACCSpeedSetpoint"] * CV.KPH_TO_MS
-      ret.stockAeb = cam_cp.vl["AEBCmd"]["AEBCmdActive"] != 0
+      if self.CP.carFingerprint not in SDGM_CAR:
+        ret.stockAeb = cam_cp.vl["AEBCmd"]["AEBCmdActive"] != 0
       # openpilot controls nonAdaptive when not pcmCruise
       if self.CP.pcmCruise:
         ret.cruiseState.nonAdaptive = cam_cp.vl["ASCMActiveCruiseControlStatus"]["ACCCruiseState"] not in (2, 3)
@@ -144,10 +145,13 @@ class CarState(CarStateBase):
     messages = []
     if CP.networkLocation == NetworkLocation.fwdCamera:
       messages += [
-        ("AEBCmd", 10),
         ("ASCMLKASteeringCmd", 10),
         ("ASCMActiveCruiseControlStatus", 25),
       ]
+      if CP.carFingerprint not in SDGM_CAR:
+        messages += [
+          ("AEBCmd", 10),
+        ]
 
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, CanBus.CAMERA)
 

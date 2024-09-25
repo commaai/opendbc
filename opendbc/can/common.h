@@ -25,6 +25,7 @@ unsigned int chrysler_checksum(uint32_t address, const Signal &sig, const std::v
 unsigned int volkswagen_mqb_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int xor_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int hkg_can_fd_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
+unsigned int fca_giorgio_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int pedal_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 
 struct CanFrame {

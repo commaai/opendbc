@@ -21,7 +21,7 @@ class CarInterface(CarInterfaceBase):
 
     # These cars have been put into dashcam only due to both a lack of users and test coverage.
     # These cars likely still work fine. Once a user confirms each car works and a test route is
-    # added to openpilot/selfdrive/car/tests/routes.py, we can remove it from this list.
+    # added to opendbc/car/tests/routes.py, we can remove it from this list.
     # FIXME: the Optima Hybrid 2017 uses a different SCC12 checksum
     ret.dashcamOnly = candidate in {CAR.KIA_OPTIMA_H, }
 
