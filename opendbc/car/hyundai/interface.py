@@ -31,8 +31,9 @@ class CarInterface(CarInterfaceBase):
     if Ecu.adas in [fw.ecu for fw in car_fw]:
       hda2 = True
     else:
-      # Some HDA2 cars do not respond ADAS Driving ECU if the known HDA2 steering messages are present
-      cam_can = CanBus(ret).CAM
+      # Some HDA2 cars do not respond ADAS Driving ECU if the known HDA2 steering messages are present.
+      # The hda2 flag to initialize CanBus is not critical here since we only care about CAM bus steering messages.
+      cam_can = CanBus(None, False, fingerprint).CAM
       hda2 = 0x50 in fingerprint[cam_can] or 0x110 in fingerprint[cam_can]
 
     CAN = CanBus(None, hda2, fingerprint)
