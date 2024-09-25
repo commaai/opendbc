@@ -13,7 +13,11 @@ from opendbc.car.toyota.values import CAR as TOYOTA
 from opendbc.car.volkswagen.values import CAR as VOLKSWAGEN
 from opendbc.car.other_cars import CAR as OTHER
 
-Platform = BODY | CHRYSLER | FORD | GM | HONDA | HYUNDAI | MAZDA | MOCK | NISSAN | SUBARU | TOYOTA | VOLKSWAGEN | OTHER
+Platform = BODY | CHRYSLER | FORD | GM | HONDA | HYUNDAI | MAZDA | MOCK | NISSAN | SUBARU | TOYOTA | VOLKSWAGEN
+Doc_Platform = Platform | OTHER
+
 BRANDS = get_args(Platform)
+DOC_BRANDS = get_args(Doc_Platform)
 
 PLATFORMS: dict[str, Platform] = {str(platform): platform for brand in BRANDS for platform in brand}
+DOC_PLATFORMS: dict[str, Doc_Platform] = {str(platform): platform for brand in DOC_BRANDS for platform in brand}

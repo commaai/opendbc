@@ -24,6 +24,16 @@ class Column(Enum):
   VIDEO = "Video"
 
 
+# TODO: Bikeshed this enum, lines between custom fork and dashcam are blurry, and not sure about legacy support
+# TODO: How to render this in the markdown table? Text, checkbox/red x?
+class SupportType(Enum):
+  INCOMPATIBLE = "Not compatible"
+  CUSTOM = "Custom fork"  # Do we lump dashcam cars in this category?
+  PENDING = "Support coming soon"
+  FULL_SUPPORT = "Fully supported"
+  LEGACY_SUPPORT = "Supported with caveats"  # Cars that were onboarded under legacy guidelines, will not appear on comma.ai/vehicles
+
+
 class Star(Enum):
   FULL = "full"
   HALF = "half"
@@ -78,8 +88,12 @@ class BaseCarHarness(BasePart):
   parts: list[Enum] = field(default_factory=lambda: [Accessory.harness_box, Accessory.comma_power_v2, Cable.rj45_cable_7ft])
   has_connector: bool = True  # without are hidden on the harness connector page
 
+@dataclass
+class UnknownCarHarness(BaseCarHarness):
+  has_connector: bool = False  # for harnesses not yet developed
 
 class CarHarness(EnumBase):
+  unknown = UnknownCarHarness("Not Available")
   nidec = BaseCarHarness("Honda Nidec connector")
   bosch_a = BaseCarHarness("Honda Bosch A connector")
   bosch_b = BaseCarHarness("Honda Bosch B connector")
@@ -232,6 +246,8 @@ class CarDocs:
 
   # the simplest description of the requirements for the US market
   package: str
+
+  docs_only: bool | None = False
 
   # the minimum compatibility requirements for this model, regardless
   # of market. can be a package, trim, or list of features

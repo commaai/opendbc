@@ -1,10 +1,10 @@
-from opendbc.car.values import PLATFORMS
+from opendbc.car.values import DOC_PLATFORMS
 
 
 class TestPlatformConfigs:
   def test_configs(self, subtests):
 
-    for name, platform in PLATFORMS.items():
+    for name, platform in DOC_PLATFORMS.items():
       with subtests.test(platform=str(platform)):
         assert platform.config._frozen
 

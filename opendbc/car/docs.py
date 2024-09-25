@@ -7,7 +7,8 @@ from opendbc.car import gen_empty_fingerprint
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarDocs, Column, CommonFootnote, PartType
 from opendbc.car.car_helpers import interfaces, get_interface_attr
-from opendbc.car.values import PLATFORMS
+from opendbc.car.values import DOC_PLATFORMS
+from opendbc.car.mock.values import CAR as MOCK
 
 
 def get_all_footnotes() -> dict[Enum, int]:
@@ -20,13 +21,21 @@ def get_all_footnotes() -> dict[Enum, int]:
 def get_all_car_docs() -> list[CarDocs]:
   all_car_docs: list[CarDocs] = []
   footnotes = get_all_footnotes()
-  for model, platform in PLATFORMS.items():
+  for model, platform in DOC_PLATFORMS.items():
     car_docs = platform.config.car_docs
+    # TODO: better way to do this?
+    if model in interfaces:
+      doc_model = model
+      doc_platform = platform
+    else:
+      doc_model = "MOCK"
+      doc_platform = MOCK.MOCK
     # If available, uses experimental longitudinal limits for the docs
-    CP = interfaces[model][0].get_params(platform, fingerprint=gen_empty_fingerprint(),
-                                         car_fw=[CarParams.CarFw(ecu=CarParams.Ecu.unknown)], experimental_long=True, docs=True)
+    CP = interfaces[doc_model][0].get_params(doc_platform, fingerprint=gen_empty_fingerprint(),
+                                             car_fw=[CarParams.CarFw(ecu=CarParams.Ecu.unknown)], experimental_long=True, docs=True)
 
-    if CP.dashcamOnly or not len(car_docs):
+    # TODO: dashcam filter removed from this stage, all dashcam cars will need to be updated with a supported-state
+    if not len(car_docs):
       continue
 
     # A platform can include multiple car models
