@@ -1,7 +1,10 @@
+#!/usr/bin/env python3
+import argparse
 from collections import defaultdict
 import jinja2
 from enum import Enum
 from natsort import natsorted
+import os
 
 from opendbc.car import gen_empty_fingerprint
 from opendbc.car.structs import CarParams
@@ -9,6 +12,11 @@ from opendbc.car.docs_definitions import CarDocs, Column, CommonFootnote, PartTy
 from opendbc.car.car_helpers import interfaces, get_interface_attr
 from opendbc.car.values import DOC_PLATFORMS
 from opendbc.car.mock.values import CAR as MOCK
+
+
+BASEDIR = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../"))
+CARS_MD_OUT = os.path.join(BASEDIR, "car", "docs", "CARS.md")
+CARS_MD_TEMPLATE = os.path.join(BASEDIR, "car", "CARS_template.md")
 
 
 def get_all_footnotes() -> dict[Enum, int]:
@@ -66,3 +74,16 @@ def generate_cars_md(all_car_docs: list[CarDocs], template_fn: str) -> str:
                                  group_by_make=group_by_make, footnotes=footnotes,
                                  Column=Column)
   return cars_md
+
+
+if __name__ == "__main__":
+  parser = argparse.ArgumentParser(description="Auto generates supported cars documentation",
+                                   formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+  parser.add_argument("--template", default=CARS_MD_TEMPLATE, help="Override default template filename")
+  parser.add_argument("--out", default=CARS_MD_OUT, help="Override default generated filename")
+  args = parser.parse_args()
+
+  with open(args.out, 'w') as f:
+    f.write(generate_cars_md(get_all_car_docs(), args.template))
+  print(f"Generated and written to {args.out}")
