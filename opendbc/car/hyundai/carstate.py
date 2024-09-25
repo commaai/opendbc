@@ -320,11 +320,12 @@ class CarState(CarStateBase):
       ("LKAS11", 100)
     ]
 
-    if not CP.openpilotLongitudinalControl and CP.carFingerprint in CAMERA_SCC_CAR:
-      messages += [
-        ("SCC11", 50),
-        ("SCC12", 50),
-      ]
+    if CP.flags & HyundaiFlags.CAMERA_SCC:
+      if not CP.openpilotLongitudinalControl:
+        messages += [
+          ("SCC11", 50),
+          ("SCC12", 50),
+        ]
 
       if CP.flags & HyundaiFlags.USE_FCA.value:
         messages.append(("FCA11", 50))
