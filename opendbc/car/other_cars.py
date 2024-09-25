@@ -7,7 +7,6 @@ from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarPa
 @dataclass
 class OtherCarDocs(CarDocs):
   package: str = "Unknown"
-  docs_only: bool = True
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.unknown]))
 
   def init_make(self, CP: structs.CarParams):

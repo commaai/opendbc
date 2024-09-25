@@ -247,8 +247,6 @@ class CarDocs:
   # the simplest description of the requirements for the US market
   package: str
 
-  docs_only: bool | None = False
-
   # the minimum compatibility requirements for this model, regardless
   # of market. can be a package, trim, or list of features
   requirements: str | None = None
