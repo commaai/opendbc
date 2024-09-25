@@ -131,7 +131,7 @@ class CarState(CarStateBase):
 
     if self.CP.flags & (HyundaiFlags.HYBRID | HyundaiFlags.EV | HyundaiFlags.FCEV):
       if self.CP.flags & HyundaiFlags.FCEV:
-        ret.gas = cp.vl["ACCELERATOR"]["ACCELERATOR_PEDAL"] / 254.
+        ret.gas = cp.vl["FCEV_ACCELERATOR"]["ACCELERATOR_PEDAL"] / 254.
       elif self.CP.flags & HyundaiFlags.HYBRID:
         ret.gas = cp.vl["E_EMS11"]["CR_Vcu_AccPedDep_Pos"] / 254.
       else:
@@ -301,7 +301,7 @@ class CarState(CarStateBase):
     if CP.flags & (HyundaiFlags.HYBRID | HyundaiFlags.EV):
       messages.append(("E_EMS11", 50))
     elif CP.flags & HyundaiFlags.FCEV:
-      messages.append(("ACCELERATOR", 100))
+      messages.append(("FCEV_ACCELERATOR", 100))
     else:
       messages += [
         ("EMS12", 100),
