@@ -21,9 +21,7 @@ class OtherPlatformConfig(PlatformConfig):
 @dataclass(frozen=True, kw_only=True)
 class OtherCarSpecs(CarSpecs):
   # FIXME: Need to be able to print these as N/A or Unknown or whatever, try to eliminate entirely
-  centerToFrontRatio: float = 0.45
-  steerRatio: float = 15.6
-  minSteerSpeed: float = 0.0
+  steerRatio: float = 0.
 
 
 class CAR(Platforms):
