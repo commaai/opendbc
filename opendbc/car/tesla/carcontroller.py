@@ -43,7 +43,7 @@ class CarController(CarControllerBase):
       if hands_on_fault:
         state = 13  # "ACC_CANCEL_GENERIC_SILENT"
       accel = clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
-      cntr = CS.das_control["DAS_controlCounter"]
+      cntr =  (self.frame // 4) % 8
       can_sends.append(self.tesla_can.create_longitudinal_command(state, accel, cntr))
 
     # Increment counter so cancel is prioritized even without openpilot longitudinal
