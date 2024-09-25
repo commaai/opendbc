@@ -15,8 +15,8 @@ from opendbc.car.mock.values import CAR as MOCK
 
 
 BASEDIR = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../"))
-CARS_MD_OUT = os.path.join(BASEDIR, "car", "docs", "CARS.md")
-CARS_MD_TEMPLATE = os.path.join(BASEDIR, "car", "CARS_template.md")
+CARS_MD_OUT = os.path.join(BASEDIR, "opendbc", "car", "docs", "CARS.md")
+CARS_MD_TEMPLATE = os.path.join(BASEDIR, "opendbc", "car", "CARS_template.md")
 
 
 def get_all_footnotes() -> dict[Enum, int]:
