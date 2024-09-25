@@ -14,6 +14,7 @@ MODEL_YEARS_RE = r"(?<= )((\d{4}-\d{2})|(\d{4}))(,|$)"
 class Column(Enum):
   MAKE = "Make"
   MODEL = "Model"
+  SUPPORT_TYPE = "Support Level"
   PACKAGE = "Supported Package"
   LONGITUDINAL = "ACC"
   FSR_LONGITUDINAL = "No ACC accel below"
@@ -25,13 +26,15 @@ class Column(Enum):
 
 
 # TODO: Bikeshed this enum, lines between custom fork and dashcam are blurry, and not sure about legacy support
-# TODO: How to render this in the markdown table? Text, checkbox/red x?
+# TODO: How to render this in the markdown table? Text or icon of some sort?
+# TODO: Tests should enforce a footnote reference for some of these states
 class SupportType(Enum):
   INCOMPATIBLE = "Not compatible"
-  CUSTOM = "Custom fork"  # Do we lump dashcam cars in this category?
-  PENDING = "Support coming soon"
-  FULL_SUPPORT = "Fully supported"
-  LEGACY_SUPPORT = "Supported with caveats"  # Cars that were onboarded under legacy guidelines, will not appear on comma.ai/vehicles
+  CUSTOM = "Custom fork"
+  DASHCAM = "Dashcam mode"  # TODO: do we lump this in with Custom Fork? source changes required to drive these cars.
+  PENDING = "Coming soon"  # TODO: need a way to say Custom Fork is available while under support review
+  OFFICIAL = "Official"
+  LEGACY_SUPPORT = "Supported with caveats"  # TODO: Cars that were onboarded under legacy guidelines, will not appear on comma.ai/vehicles
 
 
 class Star(Enum):
@@ -268,6 +271,8 @@ class CarDocs:
     self.car_name = CP.carName
     self.car_fingerprint = CP.carFingerprint
 
+    self.support_type = SupportType.DASHCAM if CP.dashcamOnly else SupportType.OFFICIAL
+
     # longitudinal column
     op_long = "Stock"
     if CP.experimentalLongitudinalAvailable or CP.enableDsu:
@@ -312,6 +317,7 @@ class CarDocs:
     self.row: dict[Enum, str | Star] = {
       Column.MAKE: self.make,
       Column.MODEL: self.model,
+      Column.SUPPORT_TYPE: self.support_type.value,
       Column.PACKAGE: self.package,
       Column.LONGITUDINAL: op_long,
       Column.FSR_LONGITUDINAL: f"{max(self.min_enable_speed * CV.MS_TO_MPH, 0):.0f} mph",

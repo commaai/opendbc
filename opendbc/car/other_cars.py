@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from enum import Enum
 
 from opendbc.car import dbc_dict, structs, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, Device
@@ -22,6 +23,12 @@ class OtherPlatformConfig(PlatformConfig):
 class OtherCarSpecs(CarSpecs):
   # FIXME: Need to be able to print these as N/A or Unknown or whatever, try to eliminate entirely
   steerRatio: float = 0.
+
+
+class Footnote(Enum):
+  HYUNDAI_WIP = CarFootnote(
+    "Official support is under review.",
+    Column.MODEL)
 
 
 class CAR(Platforms):
