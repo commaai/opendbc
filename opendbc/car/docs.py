@@ -23,7 +23,7 @@ def get_all_car_docs() -> list[CarDocs]:
   footnotes = get_all_footnotes()
   for model, platform in DOC_PLATFORMS.items():
     car_docs = platform.config.car_docs
-    # TODO: better way to do this?
+    # TODO: find a better way to make CarParams optional
     if model in interfaces:
       doc_model = model
       doc_platform = platform
