@@ -58,8 +58,6 @@ class CarInterface(CarInterfaceBase):
         ret.flags |= HyundaiFlags.HYBRID.value
       elif candidate in EV_CAR:
         ret.flags |= HyundaiFlags.EV.value
-      elif candidate in FCEV_CAR:
-        ret.flags |= HyundaiFlags.FCEV.value
 
       # Send LFA message on cars with HDA
       if 0x485 in fingerprint[2]:
