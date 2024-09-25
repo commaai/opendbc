@@ -25,7 +25,16 @@ class CarInterface(CarInterfaceBase):
     # FIXME: the Optima Hybrid 2017 uses a different SCC12 checksum
     ret.dashcamOnly = candidate in {CAR.KIA_OPTIMA_H, }
 
-    hda2 = Ecu.adas in [fw.ecu for fw in car_fw]
+    # Check if the ADAS Driving ECU is present in the firmware response.
+    # If not found, check the CAM CAN bus fingerprint for known HDA2 steering messages (0x50 or 0x110),
+    # that indicate an HDA2 car even without a direct ADAS Driving ECU response.
+    if Ecu.adas in [fw.ecu for fw in car_fw]:
+      hda2 = True
+    else:
+      # Some HDA2 cars do not respond ADAS Driving ECU if the known HDA2 steering messages are present
+      cam_can = CanBus(ret).CAM
+      hda2 = 0x50 in fingerprint[cam_can] or 0x110 in fingerprint[cam_can]
+
     CAN = CanBus(None, hda2, fingerprint)
 
     if candidate in CANFD_CAR:
