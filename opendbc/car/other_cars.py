@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 from opendbc.car import dbc_dict, structs, CarSpecs, DbcDict, PlatformConfig, Platforms
-from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, Device
+from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
 
 
 @dataclass
