@@ -158,7 +158,7 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.28], [0.08]]
       if candidate == CAR.HONDA_ODYSSEY_CHN:
         ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 32767], [0, 32767]]  # TODO: determine if there is a dead zone at the top end
-      elif candidate == CAR.HONDA_ODYSSEY_BOSCH and ret.openpilotLongitudinalControl:
+      elif candidate == CAR.HONDA_ODYSSEY_BOSCH and not ret.openpilotLongitudinalControl:
         ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 3840], [0, 3840]]  # clipped/limited by the radar
         ret.minSteerSpeed = 0.
       else:
