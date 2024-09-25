@@ -442,6 +442,9 @@ BO_ 129 EMS_DCT12: 8 EMS
  SG_ CF_Ems_Alive2 : 56|4@1+ (1.0,0.0) [0.0|15.0] ""  TCU
  SG_ CF_Ems_ChkSum2 : 60|4@1+ (1.0,0.0) [0.0|15.0] ""  TCU
 
+BO_ 145 FCEV_ACCELERATOR: 8 XXX
+ SG_ ACCELERATOR_PEDAL : 48|8@1+ (1,0) [0|255] "" XXX
+
 BO_ 897 MDPS11: 8 MDPS
  SG_ CF_Mdps_WLmp : 0|2@1+ (1.0,0.0) [0.0|3.0] ""  CLU,CUBIS,EMS,IBOX,SPAS
  SG_ CF_Mdps_Flex : 2|3@1+ (1.0,0.0) [0.0|3.0] ""  CLU,LDWS_LKAS
@@ -1429,7 +1432,7 @@ BO_ 1280 ACU14: 1 ACU
  SG_ CF_SBR_Ind : 4|2@1+ (1.0,0.0) [0.0|3.0] ""  BCM,CLU
 
 BO_ 512 EMS20: 6 EMS
- SG_ FCO : 0|16@1+ (0.128,0.0) [0.0|8388.48] "ul"  CLU,CUBIS,FPCM,IBOX
+ SG_ HYDROGEN_GEAR_SHIFTER : 11|3@1+ (1,0) [0|7] "" XXX
  SG_ CF_Ems_PumpTPres : 16|8@1+ (3.137254902,0.0) [0.0|800.0] "kPa"  FPCM,IBOX
  SG_ Split_Stat : 32|1@1+ (1.0,0.0) [0.0|1.0] ""  FPCM
 
@@ -1648,11 +1651,14 @@ BO_ 1348 Navi_HU: 8 XXX
  SG_ SpeedLim_Nav_Cam : 30|1@0+ (1,0) [0|1] "" XXX
 
 CM_ "BO_ E_EMS11: All (plug-in) hybrids use this gas signal: CR_Vcu_AccPedDep_Pos, and all EVs use the Accel_Pedal_Pos signal. See hyundai/values.py for a specific car list";
+CM_ 145 "Contains signal with accelerator pedal press. Used by fuel cell hydrogen-powered (FCEV) cars such as the 2021 Hyundai Nexo.";
+CM_ 512 "Contains signal with gear shifter. Used by fuel cell hydrogen-powered (FCEV) cars such as the 2021 Hyundai Nexo.";
 CM_ SG_ 871 CF_Lvr_IsgState "Idle Stop and Go";
 CM_ SG_ 1056 SCCInfoDisplay "Goes to 1 for a second while transitioning from Cruise Control to No Message";
 CM_ SG_ 1348 SpeedLim_Nav_Clu "Speed limit displayed on Nav, Cluster and HUD";
 
 VAL_ 274 CUR_GR 1 "D" 2 "D" 3 "D" 4 "D" 5 "D" 6 "D" 7 "D" 8 "D" 14 "R" 0 "P";
+VAL_ 512 HYDROGEN_GEAR_SHIFTER 5 "D" 8 "S" 6 "N" 7 "R" 0 "P";
 VAL_ 871 CF_Lvr_IsgState 0 "enabled" 1 "activated" 2 "unknown" 3 "disabled";
 VAL_ 871 CF_Lvr_Gear 12 "T" 5 "D" 8 "S" 6 "N" 7 "R" 0 "P";
 VAL_ 882 Elect_Gear_Shifter 5 "D" 8 "S" 6 "N" 7 "R" 0 "P";
