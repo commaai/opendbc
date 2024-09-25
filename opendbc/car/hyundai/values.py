@@ -752,8 +752,6 @@ HYBRID_CAR = CAR.with_flags(HyundaiFlags.HYBRID)
 
 EV_CAR = CAR.with_flags(HyundaiFlags.EV)
 
-FCEV_CAR = CAR.with_flags(HyundaiFlags.FCEV)
-
 LEGACY_SAFETY_MODE_CAR = CAR.with_flags(HyundaiFlags.LEGACY)
 
 UNSUPPORTED_LONGITUDINAL_CAR = CAR.with_flags(HyundaiFlags.LEGACY) | CAR.with_flags(HyundaiFlags.UNSUPPORTED_LONGITUDINAL)
