@@ -18,7 +18,7 @@ class CarInterface(CarInterfaceBase):
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
     ret.carName = "hyundai"
 
-    # Check the CAM bus fingerprint for known HDA2 steering messages (0x50 or 0x110), that indicate an HDA2 car
+    # Check the CAM bus fingerprint for known HDA2 steering messages (0x50 or 0x110) to determine if it is an HDA2 car.
     # The hda2 flag to initialize CanBus is not critical here since we only care about CAM bus steering messages.
     cam_can = CanBus(None, False, fingerprint).CAM
     hda2 = 0x50 in fingerprint[cam_can] or 0x110 in fingerprint[cam_can]
