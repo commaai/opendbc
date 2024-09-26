@@ -271,6 +271,7 @@ class CarDocs:
     self.car_name = CP.carName
     self.car_fingerprint = CP.carFingerprint
 
+    # TODO: write tests to make sure reasons are set for cars in dashcam mode, and garbage-collect this
     if not hasattr(self, "support_type"):
       self.support_type = SupportType.DASHCAM if CP.dashcamOnly else SupportType.OFFICIAL
 
