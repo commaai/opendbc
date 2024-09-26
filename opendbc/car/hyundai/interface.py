@@ -32,8 +32,6 @@ class CarInterface(CarInterfaceBase):
       # detect if car is hybrid
       if 0x105 in fingerprint[CAN.ECAN]:
         ret.flags |= HyundaiFlags.HYBRID.value
-      elif candidate in EV_CAR:
-        ret.flags |= HyundaiFlags.EV.value
 
       # detect HDA2 with ADAS Driving ECU
       if hda2:
@@ -53,12 +51,6 @@ class CarInterface(CarInterfaceBase):
         if candidate not in CANFD_RADAR_SCC_CAR:
           ret.flags |= HyundaiFlags.CANFD_CAMERA_SCC.value
     else:
-      # TODO: detect EV and hybrid
-      if candidate in HYBRID_CAR:
-        ret.flags |= HyundaiFlags.HYBRID.value
-      elif candidate in EV_CAR:
-        ret.flags |= HyundaiFlags.EV.value
-
       # Send LFA message on cars with HDA
       if 0x485 in fingerprint[2]:
         ret.flags |= HyundaiFlags.SEND_LFA.value
