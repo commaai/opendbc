@@ -25,6 +25,7 @@ class OtherCarDocs(CarDocs):
 @dataclass
 class CustomForkCarDocs(OtherCarDocs):
   # TODO: attach a footnote here for the more common forks, plus allow footnotes at the car level for special cases
+  # TODO: maybe these custom fork pointers want to be intra-document #links rather than footnotes
   support_type = SupportType.CUSTOM
 
 
@@ -48,7 +49,7 @@ class FlexRayCarDocs(IncompatibleCarDocs):
 class Footnote(Enum):
   TOYOTA_SECOC = CarFootnote("Uses cryptographic message authentication, for which openpilot support is under review.", Column.SUPPORT_TYPE)
   FLEXRAY = CarFootnote("Uses a proprietary network topology incompatible with openpilot.", Column.SUPPORT_TYPE)
-  HYUNDAI_WIP = CarFootnote("Official support is under review.", Column.SUPPORT_TYPE)
+  UNDER_REVIEW = CarFootnote("Official support is under review.", Column.SUPPORT_TYPE)
 
 
 class CAR(Platforms):
@@ -56,8 +57,8 @@ class CAR(Platforms):
 
   HYUNDAI_PALISADE_FACELIFT = OtherPlatformConfig(
     [
-      CustomForkCarDocs("Hyundai Palisade 2023-24", package="All"),
-      CustomForkCarDocs("Kia Telluride 2023-24", package="All"),
+      CustomForkCarDocs("Hyundai Palisade 2023-24", package="All", footnotes=[Footnote.UNDER_REVIEW]),
+      CustomForkCarDocs("Kia Telluride 2023-24", package="All", footnotes=[Footnote.UNDER_REVIEW]),
     ],
     OtherCarSpecs(mass=0., wheelbase=0.),  # TODO: Don't require CarSpecs for unsupported cars
   )
