@@ -54,6 +54,20 @@ class CarInterface(CarInterfaceBase):
         if candidate not in CANFD_RADAR_SCC_CAR:
           ret.flags |= HyundaiFlags.CANFD_CAMERA_SCC.value
 
+      cfgs = [get_safety_config(structs.CarParams.SafetyModel.hyundaiCanfd), ]
+      if CAN.ECAN >= 4:
+        cfgs.insert(0, get_safety_config(structs.CarParams.SafetyModel.noOutput))
+      ret.safetyConfigs = cfgs
+
+      if ret.flags & HyundaiFlags.CANFD_HDA2:
+        ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_CANFD_HDA2
+        if ret.flags & HyundaiFlags.CANFD_HDA2_ALT_STEERING:
+          ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_CANFD_HDA2_ALT_STEERING
+      if ret.flags & HyundaiFlags.CANFD_ALT_BUTTONS:
+        ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_CANFD_ALT_BUTTONS
+      if ret.flags & HyundaiFlags.CANFD_CAMERA_SCC:
+        ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_CAMERA_SCC
+
     else:  # not in CANFD_CAR
       ret.experimentalLongitudinalAvailable = candidate not in (UNSUPPORTED_LONGITUDINAL_CAR | CAMERA_SCC_CAR)
       ret.enableBsm = 0x58b in fingerprint[0]
@@ -65,6 +79,15 @@ class CarInterface(CarInterfaceBase):
       # These cars use the FCA11 message for the AEB and FCW signals, all others use SCC12
       if 0x38d in fingerprint[0] or 0x38d in fingerprint[2]:
         ret.flags |= HyundaiFlags.USE_FCA.value
+
+      if candidate in LEGACY_SAFETY_MODE_CAR:
+        # these cars require a special panda safety mode due to missing counters and checksums in the messages
+        ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.hyundaiLegacy)]
+      else:
+        ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.hyundai, 0)]
+
+      if candidate in CAMERA_SCC_CAR:
+        ret.safetyConfigs[0].safetyParam |= Panda.FLAG_HYUNDAI_CAMERA_SCC
 
     ret.steerActuatorDelay = 0.1  # Default delay
     ret.steerLimitTimer = 0.4
@@ -84,30 +107,6 @@ class CarInterface(CarInterfaceBase):
     ret.longitudinalActuatorDelay = 0.5
 
     # *** panda safety config ***
-    if candidate in CANFD_CAR:
-      cfgs = [get_safety_config(structs.CarParams.SafetyModel.hyundaiCanfd), ]
-      if CAN.ECAN >= 4:
-        cfgs.insert(0, get_safety_config(structs.CarParams.SafetyModel.noOutput))
-      ret.safetyConfigs = cfgs
-
-      if ret.flags & HyundaiFlags.CANFD_HDA2:
-        ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_CANFD_HDA2
-        if ret.flags & HyundaiFlags.CANFD_HDA2_ALT_STEERING:
-          ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_CANFD_HDA2_ALT_STEERING
-      if ret.flags & HyundaiFlags.CANFD_ALT_BUTTONS:
-        ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_CANFD_ALT_BUTTONS
-      if ret.flags & HyundaiFlags.CANFD_CAMERA_SCC:
-        ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_CAMERA_SCC
-    else:
-      if candidate in LEGACY_SAFETY_MODE_CAR:
-        # these cars require a special panda safety mode due to missing counters and checksums in the messages
-        ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.hyundaiLegacy)]
-      else:
-        ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.hyundai, 0)]
-
-      if candidate in CAMERA_SCC_CAR:
-        ret.safetyConfigs[0].safetyParam |= Panda.FLAG_HYUNDAI_CAMERA_SCC
-
     if ret.openpilotLongitudinalControl:
       ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_LONG
     if ret.flags & HyundaiFlags.HYBRID:
