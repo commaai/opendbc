@@ -74,7 +74,7 @@ class CarControllerParams:
     elif CP.flags & VolkswagenFlags.MEB:
       self.LDW_STEP                        = 10    # LDW_02 message frequency 10Hz
       self.ACC_HUD_STEP                    = 6     # MEB_ACC_01 message frequency 16Hz
-      self.STEER_DRIVER_ALLOWANCE          = 60    # Driver intervention threshold 0.6 Nm
+      self.STEER_DRIVER_ALLOWANCE          = 80    # Driver intervention threshold 0.8 Nm
       self.STEERING_POWER_MAX              = 127   # HCA_03 maximum steering power
       self.STEERING_POWER_MIN              = 40    # HCA_03 minimum steering power
       self.STEERING_POWER_USER             = 60    # HCA_03 desired steering power for user intervention
@@ -184,7 +184,6 @@ class VolkswagenFlags(IntFlag):
   # Static flags
   PQ = 2
   MEB = 4
-  CANFD = 8
 
 
 @dataclass
