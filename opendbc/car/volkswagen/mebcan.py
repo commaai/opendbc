@@ -1,5 +1,22 @@
 from opendbc.car.common.numpy_fast import clip
 
+ACC_CTRL_ERROR    = 6
+ACC_CTRL_OVERRIDE = 4
+ACC_CTRL_ACTIVE   = 3
+ACC_CTRL_ENABLED  = 2
+ACC_CTRL_DISABLED = 0
+
+ACC_HMS_NO_REQUEST = 0
+ACC_HMS_RELEASE    = 4
+ACC_HMS_HOLD       = 1
+
+ACC_HUD_ERROR    = 6
+ACC_HUD_OVERRIDE = 4
+ACC_HUD_ACTIVE   = 3
+ACC_HUD_ENABLED  = 2
+ACC_HUD_DISABLED = 0
+
+
 def create_steering_control_curvature(packer, bus, apply_curvature, lkas_enabled, power):
   # active lateral control deactivates active steering wheel centering 
   values = {
@@ -67,61 +84,47 @@ def create_acc_buttons_control(packer, bus, gra_stock_values, cancel=False, resu
   return packer.make_can_msg("GRA_ACC_01", bus, values)
   
 
-def acc_control_value(main_switch_on, acc_faulted, long_active, just_disabled, esp_hold, override, override_starting, override_starting_limit):
-  # WRONG USAGE (ESPECIALLY OVERRIDING STATES) RESULTS IN CAR SHUTTING OFF AT LOW SPEEDS <~ 3km/h
-  # ja, man kann ein E-Auto abwürgen ;)
+def acc_control_value(main_switch_on, acc_faulted, long_active, esp_hold, override):
+
   if acc_faulted:
-    acc_control = 6 # error state
-  elif just_disabled:
-    acc_control = 5 # disabling controls
-  elif override:
-    acc_control = 3 if esp_hold else 4 # startup while overriding is a starting condition
+    acc_control = ACC_CTRL_ERROR # error state
   elif long_active:
-    acc_control = 3 # active long control state
+    if override:
+      acc_control = ACC_CTRL_ACTIVE if esp_hold else ACC_CTRL_OVERRIDE # startup while overriding is a starting condition
+    else:
+      acc_control = ACC_CTRL_ACTIVE # active long control state
   elif main_switch_on:
-    acc_control = 2 # long control ready
+    acc_control = ACC_CTRL_ENABLED # long control ready
   else:
-    acc_control = 0 # long control deactivated state
+    acc_control = ACC_CTRL_DISABLED # long control deactivated state
 
   return acc_control
-  
 
-def acc_hold_type(main_switch_on, acc_faulted, long_active, just_disabled, starting, stopping, esp_hold, override, just_overwritten, override_starting, override_starting_limit, acc_hold_type_prev):
-  # WRONG USAGE (ESPECIALLY OVERRIDING STATES) RESULTS IN CAR SHUTTING OFF AT LOW SPEEDS <~ 3km/h
-  # TODO: CLEANUP -> find working state with minimum complexity
-  
+
+def acc_hold_type(main_switch_on, acc_faulted, long_active, starting, stopping, esp_hold, override):
+  # warning: car is reacting to hold mechanic even with long control off
+
   if acc_faulted or not long_active:
-    acc_hold_type = 0 # no hold request
-  elif just_disabled or just_overwritten:
-    acc_hold_type = 5 # cancel hold management after specifc events
+    acc_hold_type = ACC_HMS_NO_REQUEST # no hold request
   elif override:
-    if esp_hold:
-      acc_hold_type = 4
-    elif acc_hold_type_prev == 4:
-      acc_hold_type = 5
-    else:
-      acc_hold_type = 0
+    acc_hold_type = ACC_HMS_RELEASE if esp_hold else ACC_HMS_NO_REQUEST
   elif starting:
-    acc_hold_type = 4 # release request and startup
+    acc_hold_type = ACC_HMS_RELEASE # release request and startup
   elif stopping or esp_hold:
-    acc_hold_type = 1 # hold or hold request
+    acc_hold_type = ACC_HMS_HOLD # hold or hold request
   else:
-    if acc_hold_type_prev == 4:
-      acc_hold_type = 5
-    else:
-      acc_hold_type = 0 # no hold request
+    acc_hold_type = ACC_HMS_NO_REQUEST # no hold request
 
   return acc_hold_type
-  
+
 
 def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, acc_hold_type, stopping, starting, lower_jerk, upper_jerk, esp_hold, override, speed, reversing):
   # active longitudinal control disables one pedal driving (regen mode of accelerator) while using overriding mechnism
-  LONG_ACTIVE = 3
   commands = []
 
   if acc_enabled:
     if override: # the car expects a non inactive accel while overriding
-      acceleration = 0.00
+      acceleration = 0.00 # override accel
     else:
       acceleration = accel
   else:
@@ -140,7 +143,7 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
     "ACC_Anhalten":               stopping,
     "ACC_Anhalteweg":             20.46,
     "ACC_Anforderung_HMS":        acc_hold_type,
-    "ACC_AKTIV_regelt":           1 if acc_control == LONG_ACTIVE else 0,
+    "ACC_AKTIV_regelt":           1 if acc_control == ACC_CTRL_ACTIVE else 0,
     "Speed":                      speed, # dont know if neccessary
     "Reversing":                  reversing, # dont know if neccessary
     "SET_ME_0XFE":                0xFE,
@@ -150,7 +153,7 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
     "SET_ME_0X1":                 0x1,
     "SET_ME_0X9":                 0x9,
   }
-  
+
   commands.append(packer.make_can_msg("MEB_ACC_02", bus, values))
 
   # satisfy car to prevent errors when pressing Travel Assist Button
@@ -162,21 +165,23 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
   }
 
   commands.append(packer.make_can_msg("MEB_Travel_Assist_01", bus, values_ta))
-  
+
   return commands
 
 
-def acc_hud_status_value(main_switch_on, acc_faulted, long_active, esp_hold, override, override_starting, override_starting_limit):
+def acc_hud_status_value(main_switch_on, acc_faulted, long_active, esp_hold, override):
+
   if acc_faulted:
-    acc_hud_control = 6 # error state
-  elif override and long_active:
-    acc_hud_control = 3 if esp_hold else 4 # startup while overriding is a starting condition and shown as default active
+    acc_hud_control = ACC_HUD_ERROR # error state
   elif long_active:
-    acc_hud_control = 3 # active
+    if override:
+      acc_hud_control = ACC_HUD_ACTIVE if esp_hold else ACC_HUD_OVERRIDE # startup while overriding is a starting condition and shown as default active
+    else:
+      acc_hud_control = ACC_HUD_ACTIVE # active
   elif main_switch_on:
-    acc_hud_control = 2 # inactive
+    acc_hud_control = ACC_HUD_ENABLED # inactive
   else:
-    acc_hud_control = 0 # deactivated
+    acc_hud_control = ACC_HUD_DISABLED # deactivated
 
   return acc_hud_control
 
@@ -184,23 +189,22 @@ def acc_hud_status_value(main_switch_on, acc_faulted, long_active, esp_hold, ove
 def get_desired_gap(distance_bars, desired_gap):
   # mapping desired gap to correct signal of corresponding distance bar
   gap = 0
-  
-  if desired_gap == 1:
+
+  if distance_bars == 1:
     gap = desired_gap 
-  elif desired_gap == 2:
+  elif distance_bars == 2:
     gap = desired_gap
-  elif desired_gap == 3:
+  elif distance_bars == 3:
     gap = desired_gap
-  elif desired_gap == 4:
+  elif distance_bars == 4:
     gap = desired_gap
-  elif desired_gap == 5:
+  elif distance_bars == 5:
     gap = desired_gap
-    
+
   return gap
 
-def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, distance_bars, desired_gap, distance, heartbeat, esp_hold):  
-  LONG_ACTIVE = 3
-  
+def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, distance_bars, change_distance_bar, desired_gap, distance, heartbeat, esp_hold):
+
   values = {
     #"STA_Primaeranz": acc_hud_status,
     "ACC_Status_ACC":          acc_control,
@@ -208,26 +212,27 @@ def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, di
     "ACC_Gesetzte_Zeitluecke": distance_bars, # 5 distance bars available (3 are used by OP)
     "ACC_Display_Prio":        1,
     "ACC_Abstandsindex_02":    512,
-    "ACC_EGO_Fahrzeug":        1 if acc_control == LONG_ACTIVE else 0,
+    "ACC_EGO_Fahrzeug":        1 if acc_control == ACC_HUD_ACTIVE else 0,
     "Heartbeat":               heartbeat, # do the same as radar would do, still check if this is necessary
     "Lead_Type_Detected":      1 if lead_visible else 0, # object should be displayed
     "Lead_Type":               3 if lead_visible else 0, # displaying a car
     "Lead_Distance":           distance if lead_visible else 0, # hud distance of object
-    "ACC_Enabled":             1 if acc_control == LONG_ACTIVE else 0,
-    "ACC_Standby_Override":    1 if acc_control != LONG_ACTIVE else 0,
-    "ACC_AKTIV_regelt":        1 if acc_control == LONG_ACTIVE else 0,
+    "ACC_Enabled":             1 if acc_control == ACC_HUD_ACTIVE else 0,
+    "ACC_Standby_Override":    1 if acc_control != ACC_HUD_ACTIVE else 0,
+    "ACC_AKTIV_regelt":        1 if acc_control == ACC_HUD_ACTIVE else 0,
     "ACC_Limiter_Mode":        0,
-    "Lead_Brightness":         3 if acc_control == LONG_ACTIVE else 0, # object shows in colour
+    "Lead_Brightness":         3 if acc_control == ACC_HUD_ACTIVE else 0, # object shows in colour
     "Unknown_03":              106, # prevents errors
     "Unknown_01":              0, # prevents errors
     "Unknown_08":              0, # prevents errors
-    "ACC_Special_Events":      3 if esp_hold and acc_control == LONG_ACTIVE else 0, # acc ready message at standstill
-    "Zeitluecke_1_Signal":     get_desired_gap(distance_bars, desired_gap), # desired distance to lead object for distance bar 1
-    "Zeitluecke_2_Signal":     get_desired_gap(distance_bars, desired_gap), # desired distance to lead object for distance bar 2
-    "Zeitluecke_3_Signal":     get_desired_gap(distance_bars, desired_gap), # desired distance to lead object for distance bar 3
-    "Zeitluecke_4_Signal":     get_desired_gap(distance_bars, desired_gap), # desired distance to lead object for distance bar 4
-    "Zeitluecke_5_Signal":     get_desired_gap(distance_bars, desired_gap), # desired distance to lead object for distance bar 5
-    #"ACC_Anzeige_Zeitluecke": 
+    "ACC_Events":              3 if esp_hold and acc_control == ACC_HUD_ACTIVE else 0, # acc ready message at standstill
+    "Zeitluecke_1":            get_desired_gap(distance_bars, desired_gap), # desired distance to lead object for distance bar 1
+    "Zeitluecke_2":            get_desired_gap(distance_bars, desired_gap), # desired distance to lead object for distance bar 2
+    "Zeitluecke_3":            get_desired_gap(distance_bars, desired_gap), # desired distance to lead object for distance bar 3
+    "Zeitluecke_4":            get_desired_gap(distance_bars, desired_gap), # desired distance to lead object for distance bar 4
+    "Zeitluecke_5":            get_desired_gap(distance_bars, desired_gap), # desired distance to lead object for distance bar 5
+    "ACC_Anzeige_Zeitluecke":  change_distance_bar if acc_control != ACC_HUD_DISABLED else 0, # show distance bar selection
+    "Zeitluecke_Farbe":        1 if acc_control in (ACC_HUD_ENABLED, ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0, # yellow (1) or white (0) time gap
     "SET_ME_0X1":              0x1, # unknown
     "SET_ME_0X3FF":            0x3FF, # unknown
     "SET_ME_0XFFFF":           0xFFFF, # unknown
