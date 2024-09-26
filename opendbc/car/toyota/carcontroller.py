@@ -107,24 +107,29 @@ class CarController(CarControllerBase):
                                                           lta_active, self.frame // 2, torque_wind_down))
 
     # *** gas and brake ***
+
+    pcm_accel_cmd = actuators.accel
+    # ensure we don't get stuck requesting too much decel, this affects gas response time
+    if actuators.longControlState == LongCtrlState.stopping:
+      pcm_accel_cmd = max(pcm_accel_cmd, self.CP.stopAccel)
+
     # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot and imprecise braking
     # TODO: sometimes when switching from brake to gas quickly, CLUTCH->ACCEL_NET shows a slow unwind. make it go to 0 immediately
     if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
       # calculate amount of acceleration PCM should apply to reach target, given pitch
       accel_due_to_pitch = math.sin(CS.slope_angle) * ACCELERATION_DUE_TO_GRAVITY
-      net_acceleration_request = actuators.accel + accel_due_to_pitch
+      net_acceleration_request = pcm_accel_cmd + accel_due_to_pitch
 
       pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - net_acceleration_request)
 
       # prevent compensation windup
-      pcm_accel_compensation = clip(pcm_accel_compensation, actuators.accel - self.params.ACCEL_MAX,
-                                    actuators.accel - self.params.ACCEL_MIN)
+      pcm_accel_compensation = clip(pcm_accel_compensation, pcm_accel_cmd - self.params.ACCEL_MAX,
+                                    pcm_accel_cmd - self.params.ACCEL_MIN)
 
       self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.01, 0.01)
-      pcm_accel_cmd = actuators.accel - self.pcm_accel_compensation
+      pcm_accel_cmd = pcm_accel_cmd - self.pcm_accel_compensation
     else:
       self.pcm_accel_compensation = 0.0
-      pcm_accel_cmd = actuators.accel
 
     pcm_accel_cmd = clip(pcm_accel_cmd, self.params.ACCEL_MIN, self.params.ACCEL_MAX)
 
