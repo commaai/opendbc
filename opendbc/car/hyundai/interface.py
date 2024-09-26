@@ -18,16 +18,10 @@ class CarInterface(CarInterfaceBase):
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
     ret.carName = "hyundai"
 
-    # Check if the ADAS Driving ECU is present in the firmware response.
-    # If not found, check the CAM CAN bus fingerprint for known HDA2 steering messages (0x50 or 0x110),
-    # that indicate an HDA2 car even without a direct ADAS Driving ECU response.
-    if Ecu.adas in [fw.ecu for fw in car_fw]:
-      hda2 = True
-    else:
-      # Some HDA2 cars do not respond ADAS Driving ECU if the known HDA2 steering messages are present.
-      # The hda2 flag to initialize CanBus is not critical here since we only care about CAM bus steering messages.
-      cam_can = CanBus(None, False, fingerprint).CAM
-      hda2 = 0x50 in fingerprint[cam_can] or 0x110 in fingerprint[cam_can]
+    # Check the CAM bus fingerprint for known HDA2 steering messages (0x50 or 0x110), that indicate an HDA2 car
+    # The hda2 flag to initialize CanBus is not critical here since we only care about CAM bus steering messages.
+    cam_can = CanBus(None, False, fingerprint).CAM
+    hda2 = 0x50 in fingerprint[cam_can] or 0x110 in fingerprint[cam_can]
 
     CAN = CanBus(None, hda2, fingerprint)
 
