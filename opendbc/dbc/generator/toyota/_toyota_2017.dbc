@@ -45,9 +45,24 @@ BO_ 37 STEER_ANGLE_SENSOR: 8 XXX
  SG_ STEER_FRACTION : 39|4@0- (0.1,0) [-0.7|0.7] "deg" XXX
  SG_ STEER_RATE : 35|12@0- (1,0) [-2000|2000] "deg/s" XXX
 
+BO_ 119 ENG2F41: 6 CGW
+ SG_ FDRV : 7|16@0- (2,0) [0|0] "N" Vector__XXX
+ SG_ FDRVREAL : 23|13@0- (10,0) [0|0] "N" Vector__XXX
+ SG_ XAECT : 39|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ XFDRVCOL : 38|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ FDRVSELP : 34|3@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ENG2F41S : 47|8@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 120 ENG2F42: 4 CGW
+ SG_ FAVLMCHH : 7|16@0- (2,0) [0|0] "N" Vector__XX228X
+ SG_ CCRNG : 23|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ FDRVTYPD : 22|3@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ GEARHD : 18|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ENG2F42S : 31|8@0+ (1,0) [0|0] "" Vector__XXX
+
 BO_ 166 BRAKE: 8 XXX
  SG_ BRAKE_AMOUNT : 7|8@0+ (1,0) [0|255] "" XXX
- SG_ BRAKE_PEDAL : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ BRAKE_FORCE : 23|8@0+ (40,0) [0|10200] "N" XXX
 
 BO_ 170 WHEEL_SPEEDS: 8 XXX
  SG_ WHEEL_SPEED_FR : 7|16@0+ (0.01,-67.67) [0|250] "km/h" XXX
@@ -61,8 +76,8 @@ BO_ 180 SPEED: 8 XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 295 GEAR_PACKET_HYBRID: 8 XXX
- SG_ CAR_MOVEMENT : 25|10@0- (1,0) [0|255] "" XXX
- SG_ COUNTER : 55|8@0+ (1,0) [0|255] "" XXX
+ SG_ FDRVREAL : 26|11@0- (25,0) [-25600|25575] "N" XXX
+ SG_ UNKNOWN : 55|8@0+ (1,0) [0|255] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
  SG_ GEAR : 47|4@0+ (1,0) [0|15] "" XXX
 
@@ -92,9 +107,10 @@ BO_ 467 PCM_CRUISE_2: 8 XXX
  SG_ ACC_FAULTED : 47|1@0+ (1,0) [0|1] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
-BO_ 552 ACCELEROMETER: 8 XXX
- SG_ ACCEL_Z : 22|15@0- (1,0) [0|32767] "m/s^2" XXX
- SG_ ACCEL_X : 6|15@0- (0.001,0) [-20|20] "m/s^2" XXX
+BO_ 552 VSC1S29: 4 CGW
+ SG_ ICBACT : 7|1@0+ (1,0) [0|0] "" DS1
+ SG_ DVS0PCS : 6|15@0- (0.001,0) [0|0] "m/s^2" DS1
+ SG_ SM228 : 31|8@0+ (1,0) [0|0] "" DS1
 
 BO_ 560 BRAKE_2: 7 XXX
  SG_ BRAKE_PRESSED : 26|1@0+ (1,0) [0|1] "" XXX
@@ -148,11 +164,30 @@ BO_ 742 LEAD_INFO: 8 DSU
  SG_ LEAD_REL_SPEED : 23|12@0- (0.025,0) [-100|100] "m/s" HCU
  SG_ LEAD_LONG_DIST : 7|13@0+ (0.05,0) [0|300] "m" HCU
 
-BO_ 800 VSC1: 8 CGW
- SG_ ACC_BRAKING : 8|1@0+ (1,0) [0|0] "" DS1,FCM
- SG_ SLOPE_ANGLE : 23|8@0- (1,0) [0|0] "deg" DS1
- SG_ ACC_BRAKING2 : 26|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ ACCEL : 39|8@0- (0.04,0) [0|0] "m/s^2" DS1
+BO_ 800 VSC1S07: 8 CGW
+ SG_ FBKRLY : 6|1@0+ (1,0) [0|0] "" DS1
+ SG_ FVSCM : 4|1@0+ (1,0) [0|0] "" DS1
+ SG_ FVSCSFT : 3|1@0+ (1,0) [0|0] "" DS1
+ SG_ FABS : 2|1@0+ (1,0) [0|0] "" DS1,FCM
+ SG_ TSVSC : 1|1@0+ (1,0) [0|0] "" DS1
+ SG_ FVSCL : 0|1@0+ (1,0) [0|0] "" DS1
+ SG_ RQCSTBKB : 15|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ PSBSTBY : 14|1@0+ (1,0) [0|0] "" DS1
+ SG_ P2BRXMK : 13|1@0+ (1,0) [0|0] "" DS1
+ SG_ MCC : 11|1@0+ (1,0) [0|0] "" DS1
+ SG_ RQBKB : 10|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ BRSTOP : 9|1@0+ (1,0) [0|0] "" DS1,FCM
+ SG_ BRKON : 8|1@0+ (1,0) [0|0] "" DS1,FCM
+ SG_ ASLP : 23|8@0- (1,0) [0|0] "deg" DS1
+ SG_ BRTYPACC : 31|2@0+ (1,0) [0|0] "" DS1
+ SG_ BRKABT3 : 26|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ BRKABT2 : 25|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ BRKABT1 : 24|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ GVC : 39|8@0- (0.04,0) [0|0] "m/s^2" DS1
+ SG_ XGVCINV : 43|1@0+ (1,0) [0|0] "" DS1
+ SG_ S07CNT : 52|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ PCSBRSTA : 50|2@0+ (1,0) [0|0] "" DS1
+ SG_ VSC07SUM : 63|8@0+ (1,0) [0|0] "" DS1,FCM
 
 BO_ 835 ACC_CONTROL: 8 DSU
  SG_ ACCEL_CMD : 7|16@0- (0.001,0) [-20|20] "m/s^2" HCU
@@ -172,12 +207,19 @@ BO_ 835 ACC_CONTROL: 8 DSU
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 836 PRE_COLLISION_2: 8 DSU
+ SG_ DSS1GDRV : 7|10@0- (0.1,0) [0|0] "m/s^2" Vector__XXX
+ SG_ PCSALM : 17|1@0+ (1,0) [0|0] "" FCM
+ SG_ IBTRGR : 27|1@0+ (1,0) [0|0] "" FCM
+ SG_ PBATRGR : 30|2@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ PREFILL : 33|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ AVSTRGR : 36|1@0+ (1,0) [0|0] "" SCS
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|0] "" XXX
 
 BO_ 865 CLUTCH: 8 XXX
  SG_ ACC_FAULTED : 32|1@0+ (1,0) [0|1] "" XXX
  SG_ GAS_PEDAL_ALT : 23|8@0+ (0.005,0) [0|1] "" XXX
  SG_ CLUTCH_RELEASED : 38|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACCEL_NET : 48|16@1+ (0.0002,-6.5536) [-6.5536|6.5534] "" XXX
 
 BO_ 869 DSU_CRUISE : 7 DSU
  SG_ RES_BTN : 3|1@0+ (1,0) [0|0] "" XXX
@@ -278,6 +320,18 @@ BO_ 1044 AUTO_HIGH_BEAM: 8 FCM
  SG_ AHB_DUTY : 47|8@0+ (0.5,0) [0|0] "%" Vector__XXX
  SG_ F_AHB : 55|4@0+ (1,0) [0|0] "" Vector__XXX
  SG_ C_AHB : 51|4@0+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 1056 VSC1S08: 8 CGW
+ SG_ YR1Z : 7|16@0- (1,0) [0|0] "rad/s" DS1,FCM,MAV
+ SG_ YR2Z : 23|16@0- (1,0) [0|0] "rad/s" DS1,FCM,MAV
+ SG_ GL1Z : 39|8@0- (0.0359,0) [0|0] "m/s^2" DS1,FCM,KSS,MAV,SCS
+ SG_ GL2Z : 47|8@0- (0.0359,0) [0|0] "m/s^2" DS1,FCM,KSS,MAV,SCS
+ SG_ YRGSDIR : 55|1@0+ (1,0) [0|0] "" DS1,FCM,KSS,SCS
+ SG_ GLZS : 51|1@0+ (1,0) [0|0] "" DS1,FCM,KSS,MAV,SCS
+ SG_ YRZF : 50|1@0+ (1,0) [0|0] "" DS1,FCM,MAV
+ SG_ YRZS : 49|1@0+ (1,0) [0|0] "" DS1,FCM,MAV
+ SG_ YRZKS : 48|1@0+ (1,0) [0|0] "" DS1,FCM,MAV
+ SG_ VSC08SUM : 63|8@0+ (1,0) [0|0] "" DS1,FCM,MAV
 
 BO_ 1083 AUTOPARK_STATUS: 8 IPAS
  SG_ STATE : 7|4@0+ (1,0) [0|15] "" XXX
@@ -408,9 +462,12 @@ CM_ SG_ 36 YAW_RATE "verify";
 CM_ SG_ 36 ACCEL_X "x-axis accel";
 CM_ SG_ 37 STEER_FRACTION "1/15th of the signal STEER_ANGLE, which is 1.5 deg; note that 0x8 is never set";
 CM_ SG_ 37 STEER_RATE "factor is tbd";
+CM_ SG_ 119 FDRVREAL "ICE only: force applied by wheels from the engine. includes creeping force, regen, and engine braking";
+CM_ SG_ 166 BRAKE_FORCE "hybrid only: force applied by friction brakes from user or ACC command";
+CM_ SG_ 295 FDRVREAL "hybrid only: force applied by wheels from the engine and/or electric motors. includes creeping force, regen, and engine braking";
 CM_ SG_ 466 NEUTRAL_FORCE "force in newtons the engine/electric motors are applying without any acceleration commands or user input";
 CM_ SG_ 466 ACC_BRAKING "whether brakes are being actuated from ACC command";
-CM_ SG_ 466 ACCEL_NET "net acceleration produced by the system, given ACCEL_CMD, road grade and other factors";
+CM_ SG_ 466 ACCEL_NET "net negative acceleration (braking) applied by the system if on flat ground";
 CM_ SG_ 466 CRUISE_STATE "Active state is 8, if standstill is requested will switch to state 11(3 sec timer), after timer is elapsed will switch into state 7(standstill). If plus button was pressed - status 9, minus button pressed - status 10";
 CM_ SG_ 467 ACC_FAULTED "1 when ACC is faulted and the PCM disallows engagement";
 CM_ SG_ 467 SET_SPEED "43 km/h are shown as 28 mph, so conversion isn't perfect";
@@ -437,6 +494,7 @@ CM_ SG_ 835 PERMIT_BRAKING "Original ACC has this going high when a car in front
 CM_ SG_ 835 ACCEL_CMD_ALT "Copy of main ACCEL_CMD, but across 8 bits instead of 16 bits like ACCEL_CMD. Unsure if only informational or has an effect. Likely informational as existing openpilot sets this to 0 and no loss of functionality observed. Originally 'AT_RAW' in leaked toyota_2017_ref_pt.dbc file.";
 CM_ SG_ 865 GAS_PEDAL_ALT "copy of main GAS_PEDAL. Both use 8 bits. Might indicate that this message is for pedals.";
 CM_ SG_ 865 CLUTCH_RELEASED "boolean of clutch for 6MT.";
+CM_ SG_ 865 ACCEL_NET "net positive acceleration (gas) applied by the system if on flat ground, may not include creeping force";
 CM_ SG_ 865 ACC_FAULTED "1 when ACC is faulted and the PCM disallows engagement. Also describes a lockout when the ACC_CONTROL->ACC_MALFUNCTION bit is set.";
 CM_ SG_ 921 UI_SET_SPEED "set speed shown in the vehicle's UI with the vehicle's unit";
 CM_ SG_ 921 TEMP_ACC_FAULTED "1 when the UI is displaying or playing fault-related alerts or sounds. Also 1 when pressing main on.";

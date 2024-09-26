@@ -3,13 +3,13 @@ import time
 import threading
 import argparse
 import numpy as np
+from pprint import pprint
 from inputs import get_gamepad
 
 from kbhit import KBHit
 
 from opendbc.car.structs import CarControl
 from opendbc.car.panda_runner import PandaRunner
-from opendbc.car.can_definitions import CanData
 
 class Keyboard:
   def __init__(self):
@@ -78,20 +78,15 @@ def joystick_thread(joystick):
 
 def main(joystick):
   threading.Thread(target=joystick_thread, args=(joystick,), daemon=True).start()
-  with PandaRunner() as (p, CI):
+  with PandaRunner() as p:
     CC = CarControl(enabled=False)
     while True:
-      cd = [CanData(addr, dat, bus) for addr, dat, bus in p.can_recv()]
-      CI.update([0, cd])
-
       CC.actuators.accel = float(4.0*np.clip(joystick.axes_values['gb'], -1, 1))
       CC.actuators.steer = float(np.clip(joystick.axes_values['steer'], -1, 1))
-
-      from pprint import pprint
       pprint(CC)
 
-      _, can_sends = CI.apply(CC)
-      p.can_send_many(can_sends, timeout=1000)
+      p.read()
+      p.write(CC)
 
       # 100Hz
       time.sleep(0.01)

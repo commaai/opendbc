@@ -40,7 +40,7 @@ class CarInterface(CarInterfaceBase):
 
       if 0xAD in fingerprint[0] or docs:  # Getriebe_11
         ret.transmissionType = TransmissionType.automatic
-      elif 0x187 in fingerprint[0]:  # EV_Gearshift
+      elif 0x187 in fingerprint[0]:  # Motor_EV_01
         ret.transmissionType = TransmissionType.direct
       else:
         ret.transmissionType = TransmissionType.manual
