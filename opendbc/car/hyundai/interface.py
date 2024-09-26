@@ -29,10 +29,10 @@ class CarInterface(CarInterfaceBase):
     CAN = CanBus(None, hda2, fingerprint)
 
     if candidate in CANFD_CAR:
+      # Shared configuration for CAN-FD cars
       ret.experimentalLongitudinalAvailable = candidate not in (CANFD_UNSUPPORTED_LONGITUDINAL_CAR | CANFD_RADAR_SCC_CAR)
       ret.enableBsm = 0x1e5 in fingerprint[CAN.ECAN]
 
-      # detect if car is hybrid
       if 0x105 in fingerprint[CAN.ECAN]:
         ret.flags |= HyundaiFlags.HYBRID.value
 
@@ -68,7 +68,8 @@ class CarInterface(CarInterfaceBase):
       if ret.flags & HyundaiFlags.CANFD_CAMERA_SCC:
         ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_CAMERA_SCC
 
-    else:  # not in CANFD_CAR
+    else:
+      # Shared configuration for non CAN-FD cars
       ret.experimentalLongitudinalAvailable = candidate not in (UNSUPPORTED_LONGITUDINAL_CAR | CAMERA_SCC_CAR)
       ret.enableBsm = 0x58b in fingerprint[0]
 
@@ -89,24 +90,23 @@ class CarInterface(CarInterfaceBase):
       if candidate in CAMERA_SCC_CAR:
         ret.safetyConfigs[0].safetyParam |= Panda.FLAG_HYUNDAI_CAMERA_SCC
 
-    ret.steerActuatorDelay = 0.1  # Default delay
+    # Common lateral control setup
+
+    ret.centerToFront = ret.wheelbase * 0.4
+    ret.steerActuatorDelay = 0.1
     ret.steerLimitTimer = 0.4
     CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
-    if candidate == CAR.KIA_OPTIMA_G4_FL:
-      ret.steerActuatorDelay = 0.2
+    # Common longitudinal control setup
 
-    # *** longitudinal control ***
     ret.openpilotLongitudinalControl = experimental_long and ret.experimentalLongitudinalAvailable
     ret.pcmCruise = not ret.openpilotLongitudinalControl
-
     ret.stoppingControl = True
     ret.startingState = True
     ret.vEgoStarting = 0.1
     ret.startAccel = 1.0
     ret.longitudinalActuatorDelay = 0.5
 
-    # *** panda safety config ***
     if ret.openpilotLongitudinalControl:
       ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_LONG
     if ret.flags & HyundaiFlags.HYBRID:
@@ -114,11 +114,14 @@ class CarInterface(CarInterfaceBase):
     elif ret.flags & HyundaiFlags.EV:
       ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_EV_GAS
 
+    # Car specific tuning overrides
+
+    if candidate == CAR.KIA_OPTIMA_G4_FL:
+      ret.steerActuatorDelay = 0.2
+
     if candidate in (CAR.HYUNDAI_KONA, CAR.HYUNDAI_KONA_EV, CAR.HYUNDAI_KONA_HEV, CAR.HYUNDAI_KONA_EV_2022):
       ret.flags |= HyundaiFlags.ALT_LIMITS.value
       ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_ALT_LIMITS
-
-    ret.centerToFront = ret.wheelbase * 0.4
 
     return ret
 
