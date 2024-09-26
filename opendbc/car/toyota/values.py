@@ -60,9 +60,9 @@ class ToyotaFlags(IntFlag):
   SNG_WITHOUT_DSU = 512
   # these cars can utilize 2.0 m/s^2
   RAISED_ACCEL_LIMIT = 1024
-  SECOC = 2048
-  ALT_GAS_MSG = 4196
-  GEAR_PACKET_HYBRID = 8192
+  SECOC = 4096
+  ALT_GAS_MSG = 8192
+  GEAR_PACKET_HYBRID = 16384
 
 class Footnote(Enum):
   CAMRY = CarFootnote(
