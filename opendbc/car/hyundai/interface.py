@@ -29,6 +29,8 @@ class CarInterface(CarInterfaceBase):
     CAN = CanBus(None, hda2, fingerprint)
 
     if candidate in CANFD_CAR:
+      ret.experimentalLongitudinalAvailable = candidate not in (CANFD_UNSUPPORTED_LONGITUDINAL_CAR | CANFD_RADAR_SCC_CAR)
+
       # detect if car is hybrid
       if 0x105 in fingerprint[CAN.ECAN]:
         ret.flags |= HyundaiFlags.HYBRID.value
@@ -50,7 +52,10 @@ class CarInterface(CarInterfaceBase):
             ret.flags |= HyundaiFlags.CANFD_ALT_GEARS.value
         if candidate not in CANFD_RADAR_SCC_CAR:
           ret.flags |= HyundaiFlags.CANFD_CAMERA_SCC.value
-    else:
+
+    else:  # not in CANFD_CAR
+      ret.experimentalLongitudinalAvailable = candidate not in (UNSUPPORTED_LONGITUDINAL_CAR | CAMERA_SCC_CAR)
+
       # Send LFA message on cars with HDA
       if 0x485 in fingerprint[2]:
         ret.flags |= HyundaiFlags.SEND_LFA.value
@@ -67,10 +72,6 @@ class CarInterface(CarInterfaceBase):
       ret.steerActuatorDelay = 0.2
 
     # *** longitudinal control ***
-    if candidate in CANFD_CAR:
-      ret.experimentalLongitudinalAvailable = candidate not in (CANFD_UNSUPPORTED_LONGITUDINAL_CAR | CANFD_RADAR_SCC_CAR)
-    else:
-      ret.experimentalLongitudinalAvailable = candidate not in (UNSUPPORTED_LONGITUDINAL_CAR | CAMERA_SCC_CAR)
     ret.openpilotLongitudinalControl = experimental_long and ret.experimentalLongitudinalAvailable
     ret.pcmCruise = not ret.openpilotLongitudinalControl
 
