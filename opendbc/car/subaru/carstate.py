@@ -17,7 +17,7 @@ class CarState(CarStateBase):
     self.angle_rate_calulator = CanSignalRateCalculator(50)
 
   def update(self, cp, cp_cam, _, cp_body, __) -> car.CarState:
-    ret = car.CarState()
+    ret = car.CarState.new_message()
 
     throttle_msg = cp.vl["Throttle"] if not (self.CP.flags & SubaruFlags.HYBRID) else cp_body.vl["Throttle_Hybrid"]
     ret.gas = throttle_msg["Throttle_Pedal"] / 255.

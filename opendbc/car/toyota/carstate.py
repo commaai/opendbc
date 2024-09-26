@@ -51,7 +51,7 @@ class CarState(CarStateBase):
     self.slope_angle = 0.0
 
   def update(self, cp, cp_cam, *_) -> car.CarState:
-    ret = car.CarState()
+    ret = car.CarState.new_message()
 
     # Describes the acceleration request from the PCM if on flat ground, may be higher or lower if pitched
     # CLUTCH->ACCEL_NET is only accurate for gas, PCM_CRUISE->ACCEL_NET is only accurate for brake

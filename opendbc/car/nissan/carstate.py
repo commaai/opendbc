@@ -26,7 +26,7 @@ class CarState(CarStateBase):
     self.distance_button = 0
 
   def update(self, cp, cp_cam, cp_adas, *_) -> car.CarState:
-    ret = car.CarState()
+    ret = car.CarState.new_message()
 
     prev_distance_button = self.distance_button
     self.distance_button = cp.vl["CRUISE_THROTTLE"]["FOLLOW_DISTANCE_BUTTON"]

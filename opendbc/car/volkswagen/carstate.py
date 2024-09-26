@@ -24,7 +24,7 @@ class CarState(CarStateBase):
     for button in buttons:
       state = pt_cp.vl[button.can_addr][button.can_msg] in button.values
       if self.button_states[button.event_type] != state:
-        event = car.CarState.ButtonEvent()
+        event = car.CarState.ButtonEvent.new_message()
         event.type = button.event_type
         event.pressed = state
         button_events.append(event)
@@ -39,7 +39,7 @@ class CarState(CarStateBase):
     if self.CP.flags & VolkswagenFlags.PQ:
       return self.update_pq(pt_cp, cam_cp, ext_cp)
 
-    ret = car.CarState()
+    ret = car.CarState.new_message()
     # Update vehicle speed and acceleration from ABS wheel speeds.
     ret.wheelSpeeds = self.get_wheel_speeds(
       pt_cp.vl["ESP_19"]["ESP_VL_Radgeschw_02"],
@@ -159,7 +159,7 @@ class CarState(CarStateBase):
     return ret
 
   def update_pq(self, pt_cp, cam_cp, ext_cp) -> car.CarState:
-    ret = car.CarState()
+    ret = car.CarState.new_message()
     # Update vehicle speed and acceleration from ABS wheel speeds.
     ret.wheelSpeeds = self.get_wheel_speeds(
       pt_cp.vl["Bremse_3"]["Radgeschw__VL_4_1"],

@@ -52,7 +52,7 @@ class RadarInterface(RadarInterfaceBase):
     if self.trigger_msg not in self.updated_messages:
       return None
 
-    ret = car.RadarData()
+    ret = car.RadarData.new_message()
     header = self.rcp.vl[RADAR_HEADER_MSG]
     fault = header['FLRRSnsrBlckd'] or header['FLRRSnstvFltPrsntInt'] or \
       header['FLRRYawRtPlsblityFlt'] or header['FLRRHWFltPrsntInt'] or \
@@ -82,7 +82,7 @@ class RadarInterface(RadarInterfaceBase):
         targetId = cpt['TrkObjectID']
         currentTargets.add(targetId)
         if targetId not in self.pts:
-          self.pts[targetId] = car.RadarData.RadarPoint()
+          self.pts[targetId] = car.RadarData.RadarPoint.new_message()
           self.pts[targetId].trackId = targetId
         distance = cpt['TrkRange']
         self.pts[targetId].dRel = distance  # from front of car

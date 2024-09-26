@@ -266,7 +266,7 @@ class RadarInterfaceBase(ABC):
   def update(self, can_packets: list[tuple[int, list[CanData]]]) -> car.RadarData:
     self.frame += 1
     if (self.frame % int(100 * self.radar_ts)) == 0:
-      return car.RadarData()
+      return car.RadarData.new_message()
     return None
 
 
@@ -274,7 +274,7 @@ class CarStateBase(ABC):
   def __init__(self, CP: car.CarParams):
     self.CP = CP
     self.car_fingerprint = CP.carFingerprint
-    self.out = car.CarState()
+    self.out = car.CarState.new_message()
 
     self.cruise_buttons = 0
     self.left_blinker_cnt = 0
@@ -307,7 +307,7 @@ class CarStateBase(ABC):
   def get_wheel_speeds(self, fl, fr, rl, rr, unit=CV.KPH_TO_MS):
     factor = unit * self.CP.wheelSpeedFactor
 
-    wheelSpeeds = car.CarState.WheelSpeeds()
+    wheelSpeeds = car.CarState.WheelSpeeds.new_message()
     wheelSpeeds.fl = fl * factor
     wheelSpeeds.fr = fr * factor
     wheelSpeeds.rl = rl * factor

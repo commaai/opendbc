@@ -61,7 +61,7 @@ class CarState(CarStateBase):
     if self.CP.flags & HyundaiFlags.CANFD:
       return self.update_canfd(cp, cp_cam)
 
-    ret = car.CarState()
+    ret = car.CarState.new_message()
     cp_cruise = cp_cam if self.CP.flags & HyundaiFlags.CAMERA_SCC else cp
     self.is_metric = cp.vl["CLU11"]["CF_Clu_SPEED_UNIT"] == 0
     speed_conv = CV.KPH_TO_MS if self.is_metric else CV.MPH_TO_MS
@@ -177,7 +177,7 @@ class CarState(CarStateBase):
     return ret
 
   def update_canfd(self, cp, cp_cam) -> car.CarState:
-    ret = car.CarState()
+    ret = car.CarState.new_message()
 
     self.is_metric = cp.vl["CRUISE_BUTTONS_ALT"]["DISTANCE_UNIT"] != 1
     speed_factor = CV.KPH_TO_MS if self.is_metric else CV.MPH_TO_MS

@@ -6,7 +6,7 @@ from opendbc.car.body.values import DBC
 
 class CarState(CarStateBase):
   def update(self, cp, *_) -> car.CarState:
-    ret = car.CarState()
+    ret = car.CarState.new_message()
 
     ret.wheelSpeeds.fl = cp.vl['MOTORS_DATA']['SPEED_L']
     ret.wheelSpeeds.fr = cp.vl['MOTORS_DATA']['SPEED_R']

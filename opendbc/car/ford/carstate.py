@@ -21,7 +21,7 @@ class CarState(CarStateBase):
     self.distance_button = 0
 
   def update(self, cp, cp_cam, *_) -> car.CarState:
-    ret = car.CarState()
+    ret = car.CarState.new_message()
 
     # Occasionally on startup, the ABS module recalibrates the steering pinion offset, so we need to block engagement
     # The vehicle usually recovers out of this state within a minute of normal driving

@@ -53,7 +53,7 @@ class RadarInterface(RadarInterfaceBase):
     if self.trigger_msg not in self.updated_messages:
       return None
 
-    ret = car.RadarData()
+    ret = car.RadarData.new_message()
     errors = []
     if not self.rcp.can_valid:
       errors.append("canError")
@@ -64,7 +64,7 @@ class RadarInterface(RadarInterfaceBase):
       trackId = _address_to_track(ii)
 
       if trackId not in self.pts:
-        self.pts[trackId] = car.RadarData.RadarPoint()
+        self.pts[trackId] = car.RadarData.RadarPoint.new_message()
         self.pts[trackId].trackId = trackId
         self.pts[trackId].aRel = float('nan')
         self.pts[trackId].yvRel = float('nan')

@@ -44,7 +44,7 @@ class RadarInterface(RadarInterfaceBase):
     return rr
 
   def _update(self, updated_messages):
-    ret = car.RadarData()
+    ret = car.RadarData.new_message()
     if self.rcp is None:
       return ret
 
@@ -58,7 +58,7 @@ class RadarInterface(RadarInterfaceBase):
       msg = self.rcp.vl[f"RADAR_TRACK_{addr:x}"]
 
       if addr not in self.pts:
-        self.pts[addr] = car.RadarData.RadarPoint()
+        self.pts[addr] = car.RadarData.RadarPoint.new_message()
         self.pts[addr].trackId = self.track_id
         self.track_id += 1
 

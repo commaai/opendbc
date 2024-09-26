@@ -89,13 +89,13 @@ class TestCarInterfaces:
     # Run car interface
     # TODO: use hypothesis to generate random messages
     now_nanos = 0
-    CC = car.CarControl()
+    CC = car.CarControl.new_message()
     for _ in range(10):
       car_interface.update([])
       car_interface.apply(CC, now_nanos)
       now_nanos += DT_CTRL * 1e9  # 10 ms
 
-    CC = car.CarControl()
+    CC = car.CarControl.new_message()
     CC.enabled = True
     for _ in range(10):
       car_interface.update([])

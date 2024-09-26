@@ -34,7 +34,7 @@ class CarState(CarStateBase):
     self.distance_button = 0
 
   def update(self, pt_cp, cam_cp, _, __, loopback_cp) -> car.CarState:
-    ret = car.CarState()
+    ret = car.CarState.new_message()
 
     prev_cruise_buttons = self.cruise_buttons
     prev_distance_button = self.distance_button
