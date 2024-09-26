@@ -19,7 +19,7 @@ dependencies = [
   "tqdm",
   "pandacan@git+https://github.com/commaai/panda.git@master",
   "setuptools",
-  "pycrypto",
+  "pycryptodome",
 ]
 
 [project.optional-dependencies]
