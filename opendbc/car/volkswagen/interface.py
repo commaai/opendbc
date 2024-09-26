@@ -69,15 +69,14 @@ class CarInterface(CarInterfaceBase):
 
     # Global lateral tuning defaults, can be overridden per-vehicle
 
+    ret.steerLimitTimer = 0.4
     if ret.flags & VolkswagenFlags.PQ:
-      ret.steerLimitTimer = 0.4
       ret.steerActuatorDelay = 0.2
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
     elif ret.flags & VolkswagenFlags.MEB:
-      ret.steerLimitTimer = 1.2
-      ret.steerActuatorDelay = 0.6
+    #  ret.steerLimitTimer = 1.2
+      ret.steerActuatorDelay = 0.12
     else:
-      ret.steerLimitTimer = 0.4
       ret.steerActuatorDelay = 0.1
       ret.lateralTuning.pid.kpBP = [0.]
       ret.lateralTuning.pid.kiBP = [0.]
@@ -88,11 +87,12 @@ class CarInterface(CarInterfaceBase):
     # Global longitudinal tuning defaults, can be overridden per-vehicle
 
     if ret.flags & VolkswagenFlags.MEB:
-      ret.longitudinalActuatorDelay = 1.0
+      ret.longitudinalActuatorDelay = 0.1
+      ret.radarTimeStep = (1.0 / 25) # 25Hz
       #ret.longitudinalTuning.kpBP = [0., 5., 35.]
       #ret.longitudinalTuning.kpV  = [0., 0.1, 0.4]
       ret.longitudinalTuning.kiBP = [0., 5., 35.]
-      ret.longitudinalTuning.kiV  = [2.6, 2, 1.8]
+      ret.longitudinalTuning.kiV  = [1.2, 0.8, 0.5]
 
     ret.experimentalLongitudinalAvailable = ret.networkLocation == NetworkLocation.gateway or docs
     if experimental_long:
