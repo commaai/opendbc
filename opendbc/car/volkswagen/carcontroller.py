@@ -44,10 +44,7 @@ class CarController(CarControllerBase):
     self.lat_active_prev = False
     self.steering_power = 0
     self.long_heartbeat = 0
-    self.long_active_prev = False
     self.accel_last = 0
-    self.long_overwrite_prev = False
-    self.acc_hold_type_prev = 0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -156,27 +153,18 @@ class CarController(CarControllerBase):
     # **** Acceleration Controls ******************************************** #
 
     if self.frame % self.CCP.ACC_CONTROL_STEP == 0 and self.CP.openpilotLongitudinalControl:
-      accel = clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0
-      self.accel_last = accel
       stopping = actuators.longControlState == LongCtrlState.stopping
       starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
 
       if self.CP.flags & VolkswagenFlags.MEB:
-        just_disabled = True if self.long_active_prev and not CC.enabled else False
-        self.long_active_prev = CC.enabled
-        just_overwritten = True if self.long_overwrite_prev and not CC.cruiseControl.override else False
-        self.long_overwrite_prev = CC.cruiseControl.override
+        accel = clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.enabled and CS.out.cruiseState.enabled else 0
+        self.accel_last = accel
         current_speed = CS.out.vEgo * CV.MS_TO_KPH
         reversing = CS.out.gearShifter in [structs.CarState.GearShifter.reverse]
-        override_starting = CC.cruiseControl.override and CS.out.vEgo < self.CP.vEgoStarting
-        override_starting_limit = True if CS.out.vEgo > self.CP.vEgoStarting else False
-        
-        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, just_disabled, CS.esp_hold_confirmation,
-                                                 CC.cruiseControl.override, override_starting, override_starting_limit)
-        acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, just_disabled, starting,
-                                               stopping, CS.esp_hold_confirmation, CC.cruiseControl.override, just_overwritten, override_starting,
-                                               override_starting_limit, self.acc_hold_type_prev)
-        self.acc_hold_type_prev = acc_hold_type
+        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled and CS.out.cruiseState.enabled,
+                                                 CS.esp_hold_confirmation, CC.cruiseControl.override)
+        acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled and CS.out.cruiseState.enabled,
+                                               starting, stopping, CS.esp_hold_confirmation, CC.cruiseControl.override)
         required_jerk = min(3, abs(accel - CS.out.aEgo) * 50) ## pfeiferj:openpilot:pfeifer-hkg-long-control-tune
         lower_jerk = required_jerk
         upper_jerk = required_jerk
@@ -186,10 +174,14 @@ class CarController(CarControllerBase):
         else:
           upper_jerk = 0
           
-        can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.enabled, accel, acc_control, acc_hold_type,
-                                                           stopping, starting, lower_jerk, upper_jerk, CS.esp_hold_confirmation, CC.cruiseControl.override, current_speed, reversing))
+        can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.enabled and CS.out.cruiseState.enabled,
+                                                           accel, acc_control, acc_hold_type, stopping, starting, lower_jerk, upper_jerk,
+                                                           CS.esp_hold_confirmation, CC.cruiseControl.override, current_speed, reversing))
 
       else:
+        accel = clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0
+        self.accel_last = accel
+        
         acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
         can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.longActive, accel,
                                                            acc_control, stopping, starting, CS.esp_hold_confirmation))
@@ -202,25 +194,36 @@ class CarController(CarControllerBase):
       if hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw):
         hud_alert = self.CCP.LDW_MESSAGES["laneAssistTakeOverUrgent"]
         sound_alert = 1
-      can_sends.append(self.CCS.create_lka_hud_control(self.packer_pt, CANBUS.pt, CS.ldw_stock_values, CC.latActive,
-                                                       CS.out.steeringPressed, hud_alert, hud_control, sound_alert))
+      if self.CP.flags & VolkswagenFlags.MEB:
+        can_sends.append(self.CCS.create_lka_hud_control(self.packer_pt, CANBUS.pt, CS.ldw_stock_values, CC.latActive,
+                                                         CS.out.steeringPressed, hud_alert, hud_control, sound_alert))
+      else:
+        can_sends.append(self.CCS.create_lka_hud_control(self.packer_pt, CANBUS.pt, CS.ldw_stock_values, CC.latActive,
+                                                         CS.out.steeringPressed, hud_alert, hud_control))
+
+    if self.frame % 100 == 0 and self.lead_distance_bar_timer <= 3:
+      self.lead_distance_bar_timer += 1
 
     if self.frame % self.CCP.ACC_HUD_STEP == 0 and self.CP.openpilotLongitudinalControl:
       if self.CP.flags & VolkswagenFlags.MEB:
-        if self.long_heartbeat != 221:
-          self.long_heartbeat = 221
-        elif self.long_heartbeat == 221:
-          self.long_heartbeat = 360
+        self.long_heartbeat = generate_vw_meb_hud_heartbeat()
+        desired_gap = max(1, CS.out.vEgo * 1) #get_T_FOLLOW(hud_control.leadDistanceBars))
 
         distance = 50 # TODO get distance from model
         desired_gap = min(CS.out.vEgo, 100) # TODO get desired gap from OP
-        override_starting = CC.cruiseControl.override and CS.out.vEgo < self.CP.vEgoStarting
-        override_starting_limit = True if CS.out.vEgo > self.CP.vEgoStarting else False
+        distance = 50 #min(self.lead_distance, 100)
 
-        acc_hud_status = self.CCS.acc_hud_status_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, CS.esp_hold_confirmation, CC.cruiseControl.override,
-                                                       override_starting, override_starting_limit)
-        can_sends.append(self.CCS.create_acc_hud_control(self.packer_pt, CANBUS.pt, acc_hud_status, hud_control.setSpeed * CV.MS_TO_KPH, hud_control.leadVisible,
-                                                         hud_control.leadDistanceBars, desired_gap, distance, self.long_heartbeat, CS.esp_hold_confirmation))
+        change_distance_bar = False
+        if hud_control.leadDistanceBars != self.lead_distance_bars_last:
+          self.lead_distance_bar_timer = 0
+        self.lead_distance_bars_last = hud_control.leadDistanceBars
+        change_distance_bar = True if self.lead_distance_bar_timer <= 3 else False
+
+        acc_hud_status = self.CCS.acc_hud_status_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled and CS.out.cruiseState.enabled,
+                                                       CS.esp_hold_confirmation, CC.cruiseControl.override)
+        can_sends.append(self.CCS.create_acc_hud_control(self.packer_pt, CANBUS.pt, acc_hud_status, hud_control.setSpeed * CV.MS_TO_KPH,
+                                                         hud_control.leadVisible, hud_control.leadDistanceBars, change_distance_bar,
+                                                         desired_gap, distance, self.long_heartbeat, CS.esp_hold_confirmation))
 
       else:
         lead_distance = 0
@@ -249,3 +252,9 @@ class CarController(CarControllerBase):
     self.gra_acc_counter_last = CS.gra_stock_values["COUNTER"]
     self.frame += 1
     return new_actuators, can_sends
+
+  def generate_vw_meb_hud_heartbeat(self):
+    if self.long_heartbeat != 221:
+      return 221
+    elif self.long_heartbeat == 221:
+      return 360
