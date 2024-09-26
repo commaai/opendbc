@@ -107,7 +107,6 @@ class CarController(CarControllerBase):
                                                           lta_active, self.frame // 2, torque_wind_down))
 
     # *** gas and brake ***
-
     pcm_accel_cmd = actuators.accel
     # ensure we don't get stuck requesting too much decel, this affects gas response time
     if actuators.longControlState == LongCtrlState.stopping:
