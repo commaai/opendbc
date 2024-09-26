@@ -22,7 +22,7 @@ class CarInterface(CarInterfaceBase):
 
     # BRAKE_MODULE is on a different address for these cars
     if DBC[candidate]["pt"] == "toyota_new_mc_pt_generated":
-      ret.safetyConfigs[0].safetyParam |= Panda.FLAG_TOYOTA_ALT_BRAKE
+      ret.safetyConfigs[0].safetyParam |= Panda.FLAG_TOYOTA_ALT_BRAKE_224
 
     if candidate in SECOC_CAR:
       ret.safetyConfigs[0].safetyParam |= Panda.FLAG_TOYOTA_SECOC_CAR
