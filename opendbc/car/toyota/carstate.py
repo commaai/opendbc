@@ -53,9 +53,6 @@ class CarState(CarStateBase):
   def update(self, cp, cp_cam, *_) -> structs.CarState:
     ret = structs.CarState()
 
-    # filtered pitch estimate from the car, negative is a downward slope
-    self.slope_angle = cp.vl["VSC1S07"]["ASLP"] * CV.DEG_TO_RAD
-
     ret.doorOpen = any([cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_FL"], cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_FR"],
                         cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_RL"], cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_RR"]])
     ret.seatbeltUnlatched = cp.vl["BODY_CONTROL_STATE"]["SEATBELT_DRIVER_UNLATCHED"] != 0
@@ -195,6 +192,9 @@ class CarState(CarStateBase):
       neutral_accel = max(cp.vl["PCM_CRUISE"]["NEUTRAL_FORCE"] / self.CP.mass, 0.0)
       if self.pcm_accel_net + neutral_accel < 0.0 and not ret.standstill:
         self.pcm_accel_net += neutral_accel
+
+    # filtered pitch estimate from the car, negative is a downward slope
+    self.slope_angle = cp.vl["VSC1S07"]["ASLP"] * CV.DEG_TO_RAD
 
     return ret
 
