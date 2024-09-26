@@ -6,7 +6,7 @@ from Crypto.Cipher import AES
 def add_mac(key, trip_cnt, reset_cnt, msg_cnt, msg):
   # TODO: clean up conversion to and from hex
 
-  addr, t, payload, bus = msg
+  addr, payload, bus = msg
   reset_flag = reset_cnt & 0b11
   msg_cnt_flag = msg_cnt & 0b11
   payload = payload[:4]
@@ -30,7 +30,7 @@ def add_mac(key, trip_cnt, reset_cnt, msg_cnt, msg):
   msg = payload.hex() + msg_cnt_rst_flag + mac
   payload = bytes.fromhex(msg)
 
-  return (addr, t, payload, bus)
+  return (addr, payload, bus)
 
 def build_sync_mac(key, trip_cnt, reset_cnt, id_=0xf):
   id_ = struct.pack('>H', id_) # 16
