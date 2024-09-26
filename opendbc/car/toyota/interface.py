@@ -138,13 +138,11 @@ class CarInterface(CarInterfaceBase):
     if ret.flags & ToyotaFlags.SECOC.value:
       # FIXME: rut roh, gonna have to find a different way after the opendbc refactor
       # key = Params().get("SecOCKey", encoding='utf8')
-      # TODO: show warning, and handle setting key in CI
-      # if key is None:
-      #   cloudlog.warning("SecOCKey is not set")
-      #   key = "0" * 32
-      #
-      # ret.secOCKey = bytes.fromhex(key.strip())
-      pass
+      key = None
+      # TODO: show warning
+      if key is None:
+        key = "0" * 32
+      ret.secOCKey = bytes.fromhex(key.strip())
 
     tune = ret.longitudinalTuning
     if candidate in TSS2_CAR:
