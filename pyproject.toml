@@ -17,7 +17,7 @@ dependencies = [
   "Cython",
   "crcmod",
   "tqdm",
-  "pandacan@git+https://github.com/commaai/panda.git@master",
+  "pandacan@git+https://github.com/commaai/panda.git@toyota-secoc",
   "setuptools",
   "pycryptodome",
 ]
