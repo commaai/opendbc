@@ -68,7 +68,11 @@ class CarState(CarStateBase):
         self.pcm_accel_net += min(cp.vl["PCM_CRUISE"]["ACCEL_NET"], 0.0)
 
     # filtered pitch estimate from the car, negative is a downward slope
-    self.slope_angle = cp.vl["VSC1S07"]["ASLP"] * CV.DEG_TO_RAD
+    # FIXME: check for equivalent message on RAV4 Prime
+    if self.CP.flags & ToyotaFlags.SECOC.value:
+      self.slope_angle = 0.0
+    else:
+      self.slope_angle = cp.vl["VSC1S07"]["ASLP"] * CV.DEG_TO_RAD
 
     ret.doorOpen = any([cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_FL"], cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_FR"],
                         cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_RL"], cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_RR"]])
@@ -217,7 +221,7 @@ class CarState(CarStateBase):
       ("BODY_CONTROL_STATE", 3),
       ("BODY_CONTROL_STATE_2", 2),
       ("ESP_CONTROL", 3),
-      ("VSC1S07", 20),
+      #("VSC1S07", 20),
       ("EPS_STATUS", 25),
       ("BRAKE_MODULE", 40),
       ("WHEEL_SPEEDS", 80),
@@ -264,6 +268,11 @@ class CarState(CarStateBase):
     if CP.flags & ToyotaFlags.SECOC.value:
       messages += [
         ("SECOC_SYNCHRONIZATION", 10),
+      ]
+    else:
+      # TODO: Remove when pitch signal figured out for RAV4 Prime
+      messages += [
+        ("VSC1S07", 20),
       ]
 
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, 0)
