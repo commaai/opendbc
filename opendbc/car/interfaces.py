@@ -175,7 +175,7 @@ class CarInterfaceBase(ABC):
   # returns a set of default params to avoid repetition in car specific params
   @staticmethod
   def get_std_params(candidate: str) -> car.CarParams:
-    ret = car.CarParams()
+    ret = car.CarParams.new_message()
     ret.carFingerprint = candidate
 
     # Car docs fields

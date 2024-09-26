@@ -25,7 +25,7 @@ class TestFwFingerprint:
   @parameterized.expand([(b, c, e[c], n) for b, e in VERSIONS.items() for c in e for n in (True, False)])
   def test_exact_match(self, brand, car_model, ecus, test_non_essential):
     config = FW_QUERY_CONFIGS[brand]
-    CP = CarParams()
+    CP = CarParams.new_message()
     for _ in range(20):
       fw = []
       for ecu, fw_versions in ecus.items():
@@ -53,7 +53,7 @@ class TestFwFingerprint:
     if config.match_fw_to_car_fuzzy is None:
       pytest.skip("Brand does not implement custom fuzzy fingerprinting function")
 
-    CP = CarParams()
+    CP = CarParams.new_message()
     for _ in range(5):
       fw = []
       for ecu, fw_versions in ecus.items():
