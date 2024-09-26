@@ -1438,9 +1438,48 @@ BO_ 997 TSG_FT_02: 8 XXX
 
 BO_ 1175 Parkhilfe_01: 8 XXX
 
-BO_ 427 ESP_33: 8 XXX
- SG_ ESP_33_BZ : 8|4@1+ (1,0) [0|15] "" XXX
- SG_ ESP_33_CRC : 0|8@1+ (1,0) [0|255] "" XXX
+BO_ 427 ESP_33: 8 Gateway_MQB
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Motor_Hybrid_MQB,Motor_Otto_MQB
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Motor_Hybrid_MQB,Motor_Otto_MQB
+ SG_ ESC_AHW_aktiv : 12|3@1+ (1,0) [0|7] ""  Motor_Hybrid_MQB,Motor_Otto_MQB
+ SG_ ESC_AHW_nicht_verfuegbar : 15|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ ESC_ANB_CM_aktiv : 16|2@1+ (1,0) [0|3] ""  Motor_Hybrid_MQB,Motor_Otto_MQB
+ SG_ ESC_ANB_CM_nicht_verfuegbar : 18|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ ESC_Warnruck_aktiv : 19|4@1+ (1,0) [0|15] ""  Motor_Hybrid_MQB,Motor_Otto_MQB
+ SG_ ESC_Warnruck_nicht_verfuegbar : 23|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ ESC_Prefill_aktiv : 24|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ ESC_Prefill_nicht_verfuegbar : 25|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ ESC_HBA_aktiv : 26|1@1+ (1,0) [0|1] ""  Airbag_MQB
+ SG_ ESC_HBA_nicht_verfuegbar : 27|1@1+ (1,0) [0|1] ""  Airbag_MQB
+ SG_ ESC_TSK_SRBM_Anf : 28|1@1+ (1,0) [0|1] ""  Motor_Hybrid_MQB,Motor_Otto_MQB
+ SG_ ESC_TSK_SRBM_nicht_verfuegbar : 29|1@1+ (1,0) [0|1] ""  Motor_Hybrid_MQB,Motor_Otto_MQB
+ SG_ ESC_Verz_Reg_aktiv : 30|4@1+ (1,0) [0|15] ""  Airbag_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
+ SG_ ESC_Verz_Reg_nicht_verfuegbar : 34|1@1+ (1,0) [0|1] ""  Airbag_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
+ SG_ ESC_Verz_Reg_TB_nicht_verfuegbar : 35|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ ESC_Verz_Reg_ZB_nicht_verfuegbar : 36|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ ESC_Bremslicht_unplausibel : 37|1@1+ (1,0) [0|1] ""  Motor_Hybrid_MQB,Motor_Otto_MQB
+ SG_ ESC_Konsistenz_ACC : 38|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ ESC_Konsistenz_AWV : 39|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ ESC_Konsistenz_ARA : 40|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ ESC_Konsistenz_IPA : 41|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ ESC_Konsistenz_FCW : 42|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ ESC_Konsistenz_NV : 43|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ ESC_Konsistenz_RCTA : 44|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ ESC_Konsistenz_TSK : 45|1@1+ (1,0) [0|1] ""  Motor_Hybrid_MQB,Motor_Otto_MQB
+ SG_ ESC_Konsistenz_vFGS : 46|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ ESC_Konsistenz_STA : 47|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ ESC_Fahrer_Bremsdruck_bestimmend : 48|1@1+ (1,0) [0|1] ""  Motor_Hybrid_MQB,Motor_Otto_MQB
+ SG_ ESC_Konsistenz_EA : 49|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ ESC_Konsistenz_BFF : 50|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ ESC_Konsistenz_MKB : 51|1@1+ (1,0) [0|1] ""  Airbag_MQB
+ SG_ ESC_Verz_ASIL_Verfuegbarkeit : 52|3@1+ (1,0) [0|7] ""  Airbag_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
+ SG_ ESC_Pumpenanlauf_aktiv : 55|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ ESC_Konsistenz_AGW : 56|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ ESC_Konsistenz_KAS : 57|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ ESC_Konsistenz_PCF : 58|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ ESC_Konsistenz_FAS_VK : 59|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ ESC_Verz_Begrenzung : 60|1@1+ (1,0) [0|1] ""  Vector__XXX
+ SG_ ESC_Konsistenz_AWA : 61|1@1+ (1,0) [0|1] ""  Vector__XXX
 
 BO_ 418 ESP_15: 8 XXX
  SG_ ESP_15_CRC : 0|8@1+ (1,0) [0|255] "" XXX
