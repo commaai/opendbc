@@ -29,9 +29,9 @@ class CarState(CarStateBase):
     self.cruise_buttons: deque = deque([Buttons.NONE] * PREV_BUTTON_SAMPLES, maxlen=PREV_BUTTON_SAMPLES)
     self.main_buttons: deque = deque([Buttons.NONE] * PREV_BUTTON_SAMPLES, maxlen=PREV_BUTTON_SAMPLES)
 
-    self.gear_msg_canfd = "GEAR_ALT" if CP.flags & HyundaiFlags.CANFD_ALT_GEARS else \
+    self.gear_msg_canfd = "ACCELERATOR" if CP.flags & HyundaiFlags.EV else \
+                          "GEAR_ALT" if CP.flags & HyundaiFlags.CANFD_ALT_GEARS else \
                           "GEAR_ALT_2" if CP.flags & HyundaiFlags.CANFD_ALT_GEARS_2 else \
-                          "ACCELERATOR" if CP.flags & HyundaiFlags.CANFD_ALT_GEARS_3 else \
                           "GEAR_SHIFTER"
     if CP.carFingerprint in CANFD_CAR:
       self.shifter_values = can_define.dv[self.gear_msg_canfd]["GEAR"]
@@ -334,7 +334,6 @@ class CarState(CarStateBase):
 
   def get_can_parser_canfd(self, CP):
     messages = [
-      (self.accelerator_msg_canfd, 100),
       ("WHEEL_SPEEDS", 100),
       ("STEERING_SENSORS", 100),
       ("MDPS", 100),
@@ -344,12 +343,15 @@ class CarState(CarStateBase):
       ("DOORS_SEATBELTS", 4),
     ]
 
-    if not CP.flags & HyundaiFlags.CANFD_ALT_GEARS_3:
-      messages.append((self.gear_msg_canfd, 100))
-
     if CP.flags & HyundaiFlags.EV:
       messages += [
+        ("ACCELERATOR", 100),
         ("MANUAL_SPEED_LIMIT_ASSIST", 10),
+      ]
+    else:
+      messages += [
+        (self.gear_msg_canfd, 100),
+        (self.accelerator_msg_canfd, 100),
       ]
 
     if not (CP.flags & HyundaiFlags.CANFD_ALT_BUTTONS):
