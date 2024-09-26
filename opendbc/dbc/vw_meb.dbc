@@ -1570,38 +1570,38 @@ BO_ 589 MEB_Side_Assist_02: 64 XXX
  SG_ Unknown_02 : 108|3@0+ (1,0) [0|7] "" XXX
 
 BO_ 591 MEB_Distance_01: 64 XXX
- SG_ NEW_SIGNAL_14 : 12|1@0+ (1,0) [0|1] "" XXX
- SG_ Same_Lane_01_Detection : 16|6@1+ (1,0) [0|63] "" XXX
- SG_ Left_Lane_01_Detection : 22|6@1+ (1,0) [0|3] "" XXX
- SG_ Right_Lane_01_Detection : 28|6@1+ (1,0) [0|15] "" XXX
- SG_ Same_Lane_02_Detection : 34|6@1+ (1,0) [0|63] "" XXX
- SG_ Left_Lane_02_Detection : 40|6@1+ (1,0) [0|63] "" XXX
- SG_ Right_Lane_02_Detection : 46|6@1+ (1,0) [0|3] "" XXX
- SG_ NEW_SIGNAL_8 : 52|2@1+ (1,0) [0|3] "" XXX
- SG_ Same_Lane_01_Unknown : 54|10@1+ (1,0) [0|3] "" XXX
- SG_ Same_Lane_01_Long_Distance : 64|12@1+ (0.1,-10) [0|200] "Unit_Meter" XXX
+ SG_ Unknown_01 : 12|1@0+ (1,0) [0|1] "" XXX
+ SG_ Same_Lane_01_LD_neg_Offset : 16|6@1+ (0.225,0) [0|63] "Unit_Meter" XXX
+ SG_ Left_Lane_01_LD_neg_Offset : 22|6@1+ (0.225,0) [0|63] "Unit_Meter" XXX
+ SG_ Right_Lane_01_LD_neg_Offset : 28|6@1+ (0.225,0) [0|63] "Unit_Meter" XXX
+ SG_ Same_Lane_02_LD_neg_Offset : 34|6@1+ (0.225,0) [0|63] "Unit_Meter" XXX
+ SG_ Left_Lane_02_LD_neg_Offset : 40|6@1+ (0.225,0) [0|63] "Unit_Meter" XXX
+ SG_ Right_Lane_02_LD_neg_Offset : 46|6@1+ (0.225,0) [0|63] "Unit_Meter" XXX
+ SG_ Unknown_02 : 52|2@1+ (1,0) [0|3] "" XXX
+ SG_ Unknown_03 : 54|10@1+ (1,0) [0|3] "" XXX
+ SG_ Same_Lane_01_Long_Distance : 64|12@1+ (0.0625,0) [0|200] "Unit_Meter" XXX
  SG_ Same_Lane_01_Lat_Distance : 76|10@1+ (0.065,-33.28) [0|31] "Unit_Meter" XXX
  SG_ Same_Lane_01_Rel_Velo : 86|10@1+ (1,-512) [0|3] "Unit_KilometerPerHour" XXX
- SG_ Left_Lane_01_Long_Distance : 96|12@1+ (0.1,-10) [0|200] "Unit_Meter" XXX
+ SG_ Left_Lane_01_Long_Distance : 96|12@1+ (0.0625,0) [0|200] "Unit_Meter" XXX
  SG_ Left_Lane_01_Lat_Distance : 108|10@1+ (0.065,-33.28) [0|15] "Unit_Meter" XXX
  SG_ Left_Lane_01_Rel_Velo : 118|10@1+ (1,-512) [0|3] "Unit_KilometerPerHour" XXX
- SG_ Right_Lane_01_Long_Distance : 128|12@1+ (0.1,-10) [0|200] "Unit_Meter" XXX
+ SG_ Right_Lane_01_Long_Distance : 128|12@1+ (0.0625,0) [0|200] "Unit_Meter" XXX
  SG_ Right_Lane_01_Lat_Distance : 140|10@1+ (0.065,-33.28) [0|15] "Unit_Meter" XXX
  SG_ Right_Lane_01_Rel_Velo : 150|10@1+ (1,-512) [0|3] "Unit_KilometerPerHour" XXX
- SG_ Same_Lane_02_Long_Distance : 160|12@1+ (0.1,-10) [0|200] "Unit_Meter" XXX
+ SG_ Same_Lane_02_Long_Distance : 160|12@1+ (0.0625,0) [0|200] "Unit_Meter" XXX
  SG_ Same_Lane_02_Lat_Distance : 172|10@1+ (0.065,-33.28) [0|31] "Unit_Meter" XXX
  SG_ Same_Lane_02_Rel_Velo : 182|10@1+ (1,-512) [0|3] "Unit_KilometerPerHour" XXX
- SG_ Left_Lane_02_Long_Distance : 192|12@1+ (0.1,-10) [0|200] "Unit_Meter" XXX
+ SG_ Left_Lane_02_Long_Distance : 192|12@1+ (0.0625,0) [0|200] "Unit_Meter" XXX
  SG_ Left_Lane_02_Lat_Distance : 204|10@1+ (0.065,-33.28) [0|1023] "Unit_Meter" XXX
  SG_ Left_Lane_02_Rel_Velo : 214|10@1+ (1,0) [0|3] "Unit_KilometerPerHour" XXX
- SG_ Right_Lane_02_Long_Distance : 224|12@1+ (0.1,-10) [0|200] "Unit_Meter" XXX
+ SG_ Right_Lane_02_Long_Distance : 224|12@1+ (0.0625,0) [0|200] "Unit_Meter" XXX
  SG_ Right_Lane_02_Lat_Distance : 236|10@1+ (0.065,-33.28) [0|1023] "Unit_Meter" XXX
  SG_ Right_Lane_02_Rel_Velo : 246|10@1+ (1,-512) [0|1023] "Unit_KilometerPerHour" XXX
- SG_ NEW_SIGNAL_3 : 256|8@1+ (1,-128) [0|31] "" XXX
- SG_ NEW_SIGNAL_4 : 264|6@1+ (1,-15) [0|31] "" XXX
- SG_ NEW_SIGNAL_1 : 270|6@1+ (1,0) [0|127] "" XXX
- SG_ NEW_SIGNAL_5 : 277|6@1+ (1,0) [0|7] "" XXX
- SG_ NEW_SIGNAL_6 : 286|3@0+ (1,0) [0|1] "" XXX
+ SG_ Unknown_04 : 256|8@1+ (1,-128) [0|31] "" XXX
+ SG_ Unknown_05 : 264|6@1+ (1,-15) [0|31] "" XXX
+ SG_ Unknown_06 : 270|6@1+ (1,0) [0|127] "" XXX
+ SG_ Unknown_07 : 277|6@1+ (1,0) [0|7] "" XXX
+ SG_ Unknown_08 : 286|3@0+ (1,0) [0|1] "" XXX
 
 BO_ 768 MEB_ACC_01: 48 XXX
  SG_ Unknown_Area_01 : 0|64@1+ (1,0) [0|1.84467440737096e+19] "" XXX
@@ -1629,7 +1629,7 @@ BO_ 768 MEB_ACC_01: 48 XXX
  SG_ Heartbeat : 150|9@1+ (1,0) [0|3] "" XXX
  SG_ SET_ME_0XFFFF : 160|16@1+ (1,0) [0|65535] "" XXX
  SG_ ACC_Enabled : 186|1@0+ (1,0) [0|1] "" XXX
- SG_ Unknown_05 : 189|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_Zeitluecke_Farbe : 189|1@0+ (1,0) [0|1] "" XXX
  SG_ SET_ME_0X1 : 199|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_Status_ACC : 208|3@1+ (1,0) [0|7] "" XXX
  SG_ Unknown_04 : 211|1@0+ (1,0) [0|1] "" XXX
@@ -1645,13 +1645,13 @@ BO_ 768 MEB_ACC_01: 48 XXX
  SG_ Lead_Brightness : 269|4@1+ (1,0) [0|7] "" XXX
  SG_ Unknown_03 : 273|8@1+ (1,0) [0|7] "" XXX
  SG_ Lead_Type : 287|3@1+ (1,0) [0|3] "" XXX
- SG_ Lead_Distance : 290|10@1+ (0.1,0) [0|7] "Unit_Meter" XXX
- SG_ ACC_Special_Events : 332|4@0+ (1,0) [0|3] "Unit_Meter" XXX
- SG_ Zeitluecke_1_Signal : 334|9@1+ (0.2,0) [0|100] "Unit_Meter" XXX
- SG_ Zeitluecke_2_Signal : 344|9@1+ (0.2,0) [0|100] "Unit_Meter" XXX
- SG_ Zeitluecke_3_Signal : 354|9@1+ (0.2,0) [0|100] "Unit_Meter" XXX
- SG_ Zeitluecke_4_Signal : 364|9@1+ (0.2,0) [0|100] "Unit_Meter" XXX
- SG_ Zeitluecke_5_Signal : 374|9@1+ (0.2,0) [0|100] "Unit_Meter" XXX
+ SG_ Lead_Distance : 290|10@1+ (0.2,0) [0|7] "Unit_Meter" XXX
+ SG_ ACC_Events : 332|4@0+ (1,0) [0|3] "Unit_Meter" XXX
+ SG_ Zeitluecke_1 : 334|9@1+ (0.2,0) [0|100] "Unit_Meter" XXX
+ SG_ Zeitluecke_2 : 344|9@1+ (0.2,0) [0|100] "Unit_Meter" XXX
+ SG_ Zeitluecke_3 : 354|9@1+ (0.2,0) [0|100] "Unit_Meter" XXX
+ SG_ Zeitluecke_4 : 364|9@1+ (0.2,0) [0|100] "Unit_Meter" XXX
+ SG_ Zeitluecke_5 : 374|9@1+ (0.2,0) [0|100] "Unit_Meter" XXX
 
 BO_ 333 MEB_ACC_02: 32 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
@@ -1771,12 +1771,13 @@ VAL_ 768 Lead_Type_Detected 1 "Lead_Detected" 0 "No_Lead_Detected";
 VAL_ 768 ACC_Driving_Type 3 "Following_Lead" 0 "None" 4 "PACC_Regulating_Speed" 8 "PACC_Regulating_Speed";
 VAL_ 768 Unknown_03 0 "None" 106 "State_01" 208 "State_02";
 VAL_ 768 Lead_Type 5 "Bicycle" 3 "Car" 0 "None" 2 "Truck" 4 "Motorcycle";
-VAL_ 768 ACC_Special_Events 3 "Starting_Available" 0 "None" 5 "Speed_Limit_Camera" 9 "Street_Type" 4 "Speed_Limit_in_Nav";
-VAL_ 768 Zeitluecke_1_Signal 0 "keine Anzeige";
-VAL_ 768 Zeitluecke_2_Signal 0 "keine Anzeige" 32 "Minimum";
-VAL_ 768 Zeitluecke_3_Signal 0 "keine Anzeige";
-VAL_ 768 Zeitluecke_4_Signal 0 "keine Anzeige" 40 "Minimum";
-VAL_ 768 Zeitluecke_5_Signal 0 "keine Anzeige";
+VAL_ 768 ACC_Events 3 "Starting_Available" 0 "None" 5 "Speed_Limit_Camera" 9 "Street_Type" 4 "Speed_Limit_in_Nav";
+VAL_ 768 Zeitluecke_1 0 "keine Anzeige";
+VAL_ 768 Zeitluecke_2 0 "keine Anzeige" 32 "Minimum";
+VAL_ 768 Zeitluecke_3 0 "keine Anzeige";
+VAL_ 768 Zeitluecke_4 0 "keine Anzeige" 40 "Minimum";
+VAL_ 768 Zeitluecke_5 0 "keine Anzeige";
+VAL_ 768 ACC_Zeitluecke_Farbe 0 "white" 1 "yellow";
 VAL_ 267 TSK_Status 0 "init" 1 "disabled" 2 "enabled" 3 "regulating" 4 "accel_pedal_override" 5 "brake_only" 6 "temp_fault" 7 "perm_fault";
 VAL_ 988 EPB_Status 0 "offen" 1 "geschlossen_Parken" 2 "teilgespannt_Halten" 3 "im_Lauf_oeffnen" 4 "im_Lauf_schliessen" 5 "tbd" 6 "Init" 7 "unbekannt" ;
 VAL_ 1004 TSK_State 0 "init" 1 "disabled" 2 "enabled" 3 "regulating" 4 "accel_pedal_override" 5 "brake_only" 6 "temp_fault" 7 "perm_fault";
