@@ -30,6 +30,7 @@ class CarInterface(CarInterfaceBase):
 
     if candidate in CANFD_CAR:
       ret.experimentalLongitudinalAvailable = candidate not in (CANFD_UNSUPPORTED_LONGITUDINAL_CAR | CANFD_RADAR_SCC_CAR)
+      ret.enableBsm = 0x1e5 in fingerprint[CAN.ECAN]
 
       # detect if car is hybrid
       if 0x105 in fingerprint[CAN.ECAN]:
@@ -55,6 +56,7 @@ class CarInterface(CarInterfaceBase):
 
     else:  # not in CANFD_CAR
       ret.experimentalLongitudinalAvailable = candidate not in (UNSUPPORTED_LONGITUDINAL_CAR | CAMERA_SCC_CAR)
+      ret.enableBsm = 0x58b in fingerprint[0]
 
       # Send LFA message on cars with HDA
       if 0x485 in fingerprint[2]:
@@ -80,12 +82,6 @@ class CarInterface(CarInterfaceBase):
     ret.vEgoStarting = 0.1
     ret.startAccel = 1.0
     ret.longitudinalActuatorDelay = 0.5
-
-    # *** feature detection ***
-    if candidate in CANFD_CAR:
-      ret.enableBsm = 0x1e5 in fingerprint[CAN.ECAN]
-    else:
-      ret.enableBsm = 0x58b in fingerprint[0]
 
     # *** panda safety config ***
     if candidate in CANFD_CAR:
