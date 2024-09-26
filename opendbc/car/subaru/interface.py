@@ -1,5 +1,5 @@
 from panda import Panda
-from opendbc.car import get_safety_config, structs
+from opendbc.car import get_safety_config, car
 from opendbc.car.disable_ecu import disable_ecu
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.subaru.values import CAR, GLOBAL_ES_ADDR, SubaruFlags
@@ -8,7 +8,7 @@ from opendbc.car.subaru.values import CAR, GLOBAL_ES_ADDR, SubaruFlags
 class CarInterface(CarInterfaceBase):
 
   @staticmethod
-  def _get_params(ret: structs.CarParams, candidate: CAR, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
+  def _get_params(ret: car.CarParams, candidate: CAR, fingerprint, car_fw, experimental_long, docs) -> car.CarParams:
     ret.carName = "subaru"
     ret.radarUnavailable = True
     # for HYBRID CARS to be upstreamed, we need:
@@ -24,10 +24,10 @@ class CarInterface(CarInterfaceBase):
 
     if ret.flags & SubaruFlags.PREGLOBAL:
       ret.enableBsm = 0x25c in fingerprint[0]
-      ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.subaruPreglobal)]
+      ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.subaruPreglobal)]
     else:
       ret.enableBsm = 0x228 in fingerprint[0]
-      ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.subaru)]
+      ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.subaru)]
       if ret.flags & SubaruFlags.GLOBAL_GEN2:
         ret.safetyConfigs[0].safetyParam |= Panda.FLAG_SUBARU_GEN2
 
@@ -35,7 +35,7 @@ class CarInterface(CarInterfaceBase):
     ret.steerActuatorDelay = 0.1
 
     if ret.flags & SubaruFlags.LKAS_ANGLE:
-      ret.steerControlType = structs.CarParams.SteerControlType.angle
+      ret.steerControlType = car.CarParams.SteerControlType.angle
     else:
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 

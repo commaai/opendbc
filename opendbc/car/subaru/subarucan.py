@@ -1,7 +1,7 @@
-from opendbc.car import structs
+from opendbc.car import car
 from opendbc.car.subaru.values import CanBus
 
-VisualAlert = structs.CarControl.HUDControl.VisualAlert
+VisualAlert = car.CarControl.HUDControl.VisualAlert
 
 
 def create_steering_control(packer, apply_steer, steer_req):

@@ -1,11 +1,10 @@
-import copy
 from opendbc.can.packer import CANPacker
-from opendbc.car import apply_std_steer_angle_limits, structs
+from opendbc.car import apply_std_steer_angle_limits, car
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.nissan import nissancan
 from opendbc.car.nissan.values import CAR, CarControllerParams
 
-VisualAlert = structs.CarControl.HUDControl.VisualAlert
+VisualAlert = car.CarControl.HUDControl.VisualAlert
 
 
 class CarController(CarControllerBase):
@@ -74,7 +73,7 @@ class CarController(CarControllerBase):
           self.packer, CS.lkas_hud_info_msg, steer_hud_alert
         ))
 
-    new_actuators = copy.copy(actuators)
+    new_actuators = actuators.copy()
     new_actuators.steeringAngleDeg = apply_angle
 
     self.frame += 1

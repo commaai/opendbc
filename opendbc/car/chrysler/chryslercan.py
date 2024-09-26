@@ -1,8 +1,8 @@
-from opendbc.car import structs
+from opendbc.car import car
 from opendbc.car.chrysler.values import RAM_CARS
 
-GearShifter = structs.CarState.GearShifter
-VisualAlert = structs.CarControl.HUDControl.VisualAlert
+GearShifter = car.CarState.GearShifter
+VisualAlert = car.CarControl.HUDControl.VisualAlert
 
 def create_lkas_hud(packer, CP, lkas_active, hud_alert, hud_count, car_model, auto_high_beam):
   # LKAS_HUD - Controls what lane-keeping icon is displayed

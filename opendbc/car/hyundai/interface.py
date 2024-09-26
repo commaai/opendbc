@@ -1,5 +1,5 @@
 from panda import Panda
-from opendbc.car import get_safety_config, structs
+from opendbc.car import get_safety_config, car
 from opendbc.car.hyundai.hyundaicanfd import CanBus
 from opendbc.car.hyundai.values import HyundaiFlags, CAR, DBC, CAMERA_SCC_CAR, CANFD_RADAR_SCC_CAR, \
                                                    CANFD_UNSUPPORTED_LONGITUDINAL_CAR, \
@@ -8,14 +8,14 @@ from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.disable_ecu import disable_ecu
 
-Ecu = structs.CarParams.Ecu
+Ecu = car.CarParams.Ecu
 
 ENABLE_BUTTONS = (Buttons.RES_ACCEL, Buttons.SET_DECEL, Buttons.CANCEL)
 
 
 class CarInterface(CarInterfaceBase):
   @staticmethod
-  def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
+  def _get_params(ret: car.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> car.CarParams:
     ret.carName = "hyundai"
 
     cam_can = CanBus(None, fingerprint).CAM
@@ -50,9 +50,9 @@ class CarInterface(CarInterfaceBase):
         else:
           ret.flags |= HyundaiFlags.CANFD_ALT_GEARS.value
 
-      cfgs = [get_safety_config(structs.CarParams.SafetyModel.hyundaiCanfd), ]
+      cfgs = [get_safety_config(car.CarParams.SafetyModel.hyundaiCanfd), ]
       if CAN.ECAN >= 4:
-        cfgs.insert(0, get_safety_config(structs.CarParams.SafetyModel.noOutput))
+        cfgs.insert(0, get_safety_config(car.CarParams.SafetyModel.noOutput))
       ret.safetyConfigs = cfgs
 
       if ret.flags & HyundaiFlags.CANFD_HDA2:
@@ -79,9 +79,9 @@ class CarInterface(CarInterfaceBase):
 
       if ret.flags & HyundaiFlags.LEGACY:
         # these cars require a special panda safety mode due to missing counters and checksums in the messages
-        ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.hyundaiLegacy)]
+        ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.hyundaiLegacy)]
       else:
-        ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.hyundai, 0)]
+        ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.hyundai, 0)]
 
       if ret.flags & HyundaiFlags.CAMERA_SCC:
         ret.safetyConfigs[0].safetyParam |= Panda.FLAG_HYUNDAI_CAMERA_SCC

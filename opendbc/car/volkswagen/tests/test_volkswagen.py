@@ -1,7 +1,7 @@
 import random
 import re
 
-from opendbc.car.structs import CarParams
+from opendbc.car import CarParams
 from opendbc.car.volkswagen.values import CAR, FW_QUERY_CONFIG, WMI
 from opendbc.car.volkswagen.fingerprints import FW_VERSIONS
 

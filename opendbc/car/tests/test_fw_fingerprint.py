@@ -6,7 +6,7 @@ from parameterized import parameterized
 
 from opendbc.car.can_definitions import CanData
 from opendbc.car.car_helpers import interfaces
-from opendbc.car.structs import CarParams
+from opendbc.car import CarParams
 from opendbc.car.fingerprints import FW_VERSIONS
 from opendbc.car.fw_versions import ESSENTIAL_ECUS, FW_QUERY_CONFIGS, FUZZY_EXCLUDE_ECUS, VERSIONS, build_fw_dict, \
                                                 match_fw_to_car, get_brand_ecu_matches, get_fw_versions, get_present_ecus
@@ -97,7 +97,7 @@ class TestFwFingerprint:
     for car_model, ecus in FW_VERSIONS.items():
       with subtests.test(car_model=car_model.value):
         for ecu, ecu_fw in ecus.items():
-          with subtests.test((ecu[0].value, ecu[1], ecu[2])):
+          with subtests.test((ecu[0], ecu[1], ecu[2])):
             duplicates = {fw for fw in ecu_fw if ecu_fw.count(fw) > 1}
             assert not len(duplicates), f'{car_model}: Duplicate FW versions: Ecu.{ecu[0]}, {duplicates}'
             assert len(ecu_fw) > 0, f'{car_model}: No FW versions: Ecu.{ecu[0]}'

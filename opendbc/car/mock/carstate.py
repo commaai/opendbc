@@ -1,7 +1,7 @@
-from opendbc.car import structs
+from opendbc.car import car
 from opendbc.car.interfaces import CarStateBase
 
 
 class CarState(CarStateBase):
-  def update(self, *_) -> structs.CarState:
-    return structs.CarState()
+  def update(self, *_) -> car.CarState:
+    return car.CarState()

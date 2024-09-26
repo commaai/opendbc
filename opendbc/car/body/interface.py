@@ -1,15 +1,15 @@
 import math
-from opendbc.car import get_safety_config, structs
+from opendbc.car import get_safety_config, car
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.body.values import SPEED_FROM_RPM
 
 
 class CarInterface(CarInterfaceBase):
   @staticmethod
-  def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
+  def _get_params(ret: car.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> car.CarParams:
     ret.notCar = True
     ret.carName = "body"
-    ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.body)]
+    ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.body)]
 
     ret.minSteerSpeed = -math.inf
     ret.maxLateralAccel = math.inf  # TODO: set to a reasonable value
@@ -20,6 +20,6 @@ class CarInterface(CarInterfaceBase):
 
     ret.radarUnavailable = True
     ret.openpilotLongitudinalControl = True
-    ret.steerControlType = structs.CarParams.SteerControlType.angle
+    ret.steerControlType = car.CarParams.SteerControlType.angle
 
     return ret

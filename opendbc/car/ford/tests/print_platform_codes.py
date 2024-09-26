@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from collections import defaultdict
 
-from opendbc.car.structs import CarParams
+from opendbc.car import CarParams
 from opendbc.car.ford.values import get_platform_codes
 from opendbc.car.ford.fingerprints import FW_VERSIONS
 

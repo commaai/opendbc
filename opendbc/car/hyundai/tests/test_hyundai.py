@@ -3,8 +3,7 @@ from hypothesis import settings, given, strategies as st
 import pytest
 
 from panda import Panda
-from opendbc.car import gen_empty_fingerprint
-from opendbc.car.structs import CarParams
+from opendbc.car import gen_empty_fingerprint, CarParams
 from opendbc.car.fw_versions import build_fw_dict
 from opendbc.car.hyundai.interface import CarInterface
 from opendbc.car.hyundai.hyundaicanfd import CanBus

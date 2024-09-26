@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.structs import CarParams
+from opendbc.car.capnp import car
 
 GOOD_TORQUE_THRESHOLD = 1.0  # m/s^2
 MODEL_YEARS_RE = r"(?<= )((\d{4}-\d{2})|(\d{4}))(,|$)"
@@ -250,7 +250,7 @@ class CarDocs:
     self.make, self.model, self.years = split_name(self.name)
     self.year_list = get_year_list(self.years)
 
-  def init(self, CP: CarParams, all_footnotes: dict[Enum, int]):
+  def init(self, CP: car.CarParams, all_footnotes: dict[Enum, int]):
     self.car_name = CP.carName
     self.car_fingerprint = CP.carFingerprint
 
@@ -318,7 +318,7 @@ class CarDocs:
 
     return self
 
-  def init_make(self, CP: CarParams):
+  def init_make(self, CP: car.CarParams):
     """CarDocs subclasses can add make-specific logic for harness selection, footnotes, etc."""
 
   def get_detail_sentence(self, CP):

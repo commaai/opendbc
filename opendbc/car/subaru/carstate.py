@@ -1,7 +1,7 @@
 import copy
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
-from opendbc.car import structs
+from opendbc.car import car
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.subaru.values import DBC, CanBus, SubaruFlags
@@ -16,8 +16,8 @@ class CarState(CarStateBase):
 
     self.angle_rate_calulator = CanSignalRateCalculator(50)
 
-  def update(self, cp, cp_cam, _, cp_body, __) -> structs.CarState:
-    ret = structs.CarState()
+  def update(self, cp, cp_cam, _, cp_body, __) -> car.CarState:
+    ret = car.CarState()
 
     throttle_msg = cp.vl["Throttle"] if not (self.CP.flags & SubaruFlags.HYBRID) else cp_body.vl["Throttle_Hybrid"]
     ret.gas = throttle_msg["Throttle_Pedal"] / 255.

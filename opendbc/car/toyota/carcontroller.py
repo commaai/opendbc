@@ -1,6 +1,5 @@
-import copy
 import math
-from opendbc.car import apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, make_tester_present_msg, rate_limit, structs
+from opendbc.car import apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, make_tester_present_msg, rate_limit, car
 from opendbc.car.can_definitions import CanData
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car.interfaces import CarControllerBase
@@ -10,9 +9,9 @@ from opendbc.car.toyota.values import CAR, STATIC_DSU_MSGS, NO_STOP_TIMER_CAR, T
                                         UNSUPPORTED_DSU_CAR
 from opendbc.can.packer import CANPacker
 
-LongCtrlState = structs.CarControl.Actuators.LongControlState
-SteerControlType = structs.CarParams.SteerControlType
-VisualAlert = structs.CarControl.HUDControl.VisualAlert
+LongCtrlState = car.CarControl.Actuators.LongControlState
+SteerControlType = car.CarParams.SteerControlType
+VisualAlert = car.CarControl.HUDControl.VisualAlert
 
 ACCELERATION_DUE_TO_GRAVITY = 9.81  # m/s^2
 
@@ -209,7 +208,7 @@ class CarController(CarControllerBase):
     if self.frame % 20 == 0 and self.CP.flags & ToyotaFlags.DISABLE_RADAR.value:
       can_sends.append(make_tester_present_msg(0x750, 0, 0xF))
 
-    new_actuators = copy.copy(actuators)
+    new_actuators = actuators.copy()
     new_actuators.steer = apply_steer / self.params.STEER_MAX
     new_actuators.steerOutputCan = apply_steer
     new_actuators.steeringAngleDeg = self.last_angle

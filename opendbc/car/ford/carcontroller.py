@@ -1,13 +1,12 @@
-import copy
 from opendbc.can.packer import CANPacker
-from opendbc.car import apply_std_steer_angle_limits, structs
+from opendbc.car import apply_std_steer_angle_limits, car
 from opendbc.car.ford import fordcan
 from opendbc.car.ford.values import CarControllerParams, FordFlags
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car.interfaces import CarControllerBase, V_CRUISE_MAX
 
-LongCtrlState = structs.CarControl.Actuators.LongControlState
-VisualAlert = structs.CarControl.HUDControl.VisualAlert
+LongCtrlState = car.CarControl.Actuators.LongControlState
+VisualAlert = car.CarControl.HUDControl.VisualAlert
 
 
 def apply_ford_curvature_limits(apply_curvature, apply_curvature_last, current_curvature, v_ego_raw):
@@ -111,7 +110,7 @@ class CarController(CarControllerBase):
     self.steer_alert_last = steer_alert
     self.lead_distance_bars_last = hud_control.leadDistanceBars
 
-    new_actuators = copy.copy(actuators)
+    new_actuators = actuators.copy()
     new_actuators.curvature = self.apply_curvature_last
 
     self.frame += 1

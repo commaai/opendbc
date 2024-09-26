@@ -2,12 +2,12 @@ import copy
 from collections import deque
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
-from opendbc.car import create_button_events, structs
+from opendbc.car import create_button_events, car
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.nissan.values import CAR, DBC, CarControllerParams
 
-ButtonType = structs.CarState.ButtonEvent.Type
+ButtonType = car.CarState.ButtonEvent.Type
 
 TORQUE_SAMPLES = 12
 
@@ -25,8 +25,8 @@ class CarState(CarStateBase):
 
     self.distance_button = 0
 
-  def update(self, cp, cp_cam, cp_adas, *_) -> structs.CarState:
-    ret = structs.CarState()
+  def update(self, cp, cp_cam, cp_adas, *_) -> car.CarState:
+    ret = car.CarState()
 
     prev_distance_button = self.distance_button
     self.distance_button = cp.vl["CRUISE_THROTTLE"]["FOLLOW_DISTANCE_BUTTON"]

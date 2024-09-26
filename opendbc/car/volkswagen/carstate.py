@@ -1,6 +1,6 @@
 import numpy as np
 from opendbc.can.parser import CANParser
-from opendbc.car import structs
+from opendbc.car import car
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.volkswagen.values import DBC, CANBUS, NetworkLocation, TransmissionType, GearShifter, \
@@ -24,7 +24,7 @@ class CarState(CarStateBase):
     for button in buttons:
       state = pt_cp.vl[button.can_addr][button.can_msg] in button.values
       if self.button_states[button.event_type] != state:
-        event = structs.CarState.ButtonEvent()
+        event = car.CarState.ButtonEvent()
         event.type = button.event_type
         event.pressed = state
         button_events.append(event)
@@ -32,14 +32,14 @@ class CarState(CarStateBase):
 
     return button_events
 
-  def update(self, pt_cp, cam_cp, *_) -> structs.CarState:
+  def update(self, pt_cp, cam_cp, *_) -> car.CarState:
 
     ext_cp = pt_cp if self.CP.networkLocation == NetworkLocation.fwdCamera else cam_cp
 
     if self.CP.flags & VolkswagenFlags.PQ:
       return self.update_pq(pt_cp, cam_cp, ext_cp)
 
-    ret = structs.CarState()
+    ret = car.CarState()
     # Update vehicle speed and acceleration from ABS wheel speeds.
     ret.wheelSpeeds = self.get_wheel_speeds(
       pt_cp.vl["ESP_19"]["ESP_VL_Radgeschw_02"],
@@ -158,8 +158,8 @@ class CarState(CarStateBase):
     self.frame += 1
     return ret
 
-  def update_pq(self, pt_cp, cam_cp, ext_cp) -> structs.CarState:
-    ret = structs.CarState()
+  def update_pq(self, pt_cp, cam_cp, ext_cp) -> car.CarState:
+    ret = car.CarState()
     # Update vehicle speed and acceleration from ABS wheel speeds.
     ret.wheelSpeeds = self.get_wheel_speeds(
       pt_cp.vl["Bremse_3"]["Radgeschw__VL_4_1"],

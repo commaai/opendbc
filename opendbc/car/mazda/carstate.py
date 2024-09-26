@@ -1,11 +1,11 @@
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
-from opendbc.car import create_button_events, structs
+from opendbc.car import create_button_events, car
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.mazda.values import DBC, LKAS_LIMITS, MazdaFlags
 
-ButtonType = structs.CarState.ButtonEvent.Type
+ButtonType = car.CarState.ButtonEvent.Type
 
 
 class CarState(CarStateBase):
@@ -23,9 +23,9 @@ class CarState(CarStateBase):
 
     self.distance_button = 0
 
-  def update(self, cp, cp_cam, *_) -> structs.CarState:
+  def update(self, cp, cp_cam, *_) -> car.CarState:
 
-    ret = structs.CarState()
+    ret = car.CarState()
 
     prev_distance_button = self.distance_button
     self.distance_button = cp.vl["CRZ_BTNS"]["DISTANCE_LESS"]

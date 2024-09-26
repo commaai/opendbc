@@ -6,7 +6,7 @@ from parameterized import parameterized
 from collections.abc import Callable
 from typing import Any
 
-from opendbc.car import DT_CTRL, CanData, gen_empty_fingerprint, structs
+from opendbc.car import DT_CTRL, CanData, gen_empty_fingerprint, car
 from opendbc.car.car_helpers import interfaces
 from opendbc.car.fingerprints import all_known_cars
 from opendbc.car.fw_versions import FW_VERSIONS, FW_QUERY_CONFIGS
@@ -39,7 +39,7 @@ def get_fuzzy_car_interface_args(draw: DrawType) -> dict:
   })
 
   params: dict = draw(params_strategy)
-  params['car_fw'] = [structs.CarParams.CarFw(ecu=fw[0], address=fw[1], subAddress=fw[2] or 0,
+  params['car_fw'] = [car.CarParams.CarFw(ecu=fw[0], address=fw[1], subAddress=fw[2] or 0,
                                               request=draw(st.sampled_from(sorted(ALL_REQUESTS))))
                       for fw in params['car_fw']]
   return params
@@ -74,7 +74,7 @@ class TestCarInterfaces:
     assert len(car_params.longitudinalTuning.kiV) == len(car_params.longitudinalTuning.kiBP)
 
     # Lateral sanity checks
-    if car_params.steerControlType != structs.CarParams.SteerControlType.angle:
+    if car_params.steerControlType != car.CarParams.SteerControlType.angle:
       tune = car_params.lateralTuning
       if tune.which() == 'pid':
         if car_name != MOCK.MOCK:
@@ -89,13 +89,13 @@ class TestCarInterfaces:
     # Run car interface
     # TODO: use hypothesis to generate random messages
     now_nanos = 0
-    CC = structs.CarControl()
+    CC = car.CarControl()
     for _ in range(10):
       car_interface.update([])
       car_interface.apply(CC, now_nanos)
       now_nanos += DT_CTRL * 1e9  # 10 ms
 
-    CC = structs.CarControl()
+    CC = car.CarControl()
     CC.enabled = True
     for _ in range(10):
       car_interface.update([])

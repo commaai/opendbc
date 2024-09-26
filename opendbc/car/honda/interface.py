@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from panda import Panda
-from opendbc.car import get_safety_config, structs
+from opendbc.car import get_safety_config, car
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.numpy_fast import interp
 from opendbc.car.honda.hondacan import CanBus
@@ -9,7 +9,7 @@ from opendbc.car.honda.values import CarControllerParams, HondaFlags, CAR, HONDA
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.disable_ecu import disable_ecu
 
-TransmissionType = structs.CarParams.TransmissionType
+TransmissionType = car.CarParams.TransmissionType
 
 
 class CarInterface(CarInterfaceBase):
@@ -25,13 +25,13 @@ class CarInterface(CarInterfaceBase):
       return CarControllerParams.NIDEC_ACCEL_MIN, interp(current_speed, ACCEL_MAX_BP, ACCEL_MAX_VALS)
 
   @staticmethod
-  def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
+  def _get_params(ret: car.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> car.CarParams:
     ret.carName = "honda"
 
     CAN = CanBus(ret, fingerprint)
 
     if candidate in HONDA_BOSCH:
-      ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.hondaBosch)]
+      ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.hondaBosch)]
       ret.radarUnavailable = True
       # Disable the radar and let openpilot control longitudinal
       # WARNING: THIS DISABLES AEB!
@@ -40,7 +40,7 @@ class CarInterface(CarInterfaceBase):
       ret.openpilotLongitudinalControl = experimental_long
       ret.pcmCruise = not ret.openpilotLongitudinalControl
     else:
-      ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.hondaNidec)]
+      ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.hondaNidec)]
       ret.openpilotLongitudinalControl = True
 
       ret.pcmCruise = True

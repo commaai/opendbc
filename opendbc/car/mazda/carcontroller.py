@@ -1,11 +1,10 @@
-import copy
 from opendbc.can.packer import CANPacker
-from opendbc.car import apply_driver_steer_torque_limits, structs
+from opendbc.car import apply_driver_steer_torque_limits, car
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.mazda import mazdacan
 from opendbc.car.mazda.values import CarControllerParams, Buttons
 
-VisualAlert = structs.CarControl.HUDControl.VisualAlert
+VisualAlert = car.CarControl.HUDControl.VisualAlert
 
 
 class CarController(CarControllerBase):
@@ -57,7 +56,7 @@ class CarController(CarControllerBase):
     can_sends.append(mazdacan.create_steering_control(self.packer, self.CP,
                                                       self.frame, apply_steer, CS.cam_lkas))
 
-    new_actuators = copy.copy(CC.actuators)
+    new_actuators = CC.actuators.copy()
     new_actuators.steer = apply_steer / CarControllerParams.STEER_MAX
     new_actuators.steerOutputCan = apply_steer
 

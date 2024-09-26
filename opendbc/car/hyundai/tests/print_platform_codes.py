@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from opendbc.car.structs import CarParams
+from opendbc.car import CarParams
 from opendbc.car.hyundai.values import PLATFORM_CODE_ECUS, get_platform_codes
 from opendbc.car.hyundai.fingerprints import FW_VERSIONS
 

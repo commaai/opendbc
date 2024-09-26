@@ -1,6 +1,6 @@
 from math import cos, sin
 from opendbc.can.parser import CANParser
-from opendbc.car import structs
+from opendbc.car import car
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.ford.fordcan import CanBus
 from opendbc.car.ford.values import DBC, RADAR
@@ -58,7 +58,7 @@ class RadarInterface(RadarInterfaceBase):
     if self.trigger_msg not in self.updated_messages:
       return None
 
-    ret = structs.RadarData()
+    ret = car.RadarData()
     errors = []
     if not self.rcp.can_valid:
       errors.append("canError")
@@ -89,7 +89,7 @@ class RadarInterface(RadarInterfaceBase):
       # radar point only valid if there have been enough valid measurements
       if self.valid_cnt[ii] > 0:
         if ii not in self.pts:
-          self.pts[ii] = structs.RadarData.RadarPoint()
+          self.pts[ii] = car.RadarData.RadarPoint()
           self.pts[ii].trackId = self.track_id
           self.track_id += 1
         self.pts[ii].dRel = cpt['X_Rel']  # from front of car
@@ -112,7 +112,7 @@ class RadarInterface(RadarInterfaceBase):
       i = (ii - 1) * 4 + scanIndex
 
       if i not in self.pts:
-        self.pts[i] = structs.RadarData.RadarPoint()
+        self.pts[i] = car.RadarData.RadarPoint()
         self.pts[i].trackId = self.track_id
         self.pts[i].aRel = float('nan')
         self.pts[i].yvRel = float('nan')

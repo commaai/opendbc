@@ -1,18 +1,18 @@
 from panda import Panda
-from opendbc.car import get_safety_config, structs
+from opendbc.car import get_safety_config, car
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.volkswagen.values import CAR, NetworkLocation, TransmissionType, VolkswagenFlags
 
 
 class CarInterface(CarInterfaceBase):
   @staticmethod
-  def _get_params(ret: structs.CarParams, candidate: CAR, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
+  def _get_params(ret: car.CarParams, candidate: CAR, fingerprint, car_fw, experimental_long, docs) -> car.CarParams:
     ret.carName = "volkswagen"
     ret.radarUnavailable = True
 
     if ret.flags & VolkswagenFlags.PQ:
       # Set global PQ35/PQ46/NMS parameters
-      ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.volkswagenPq)]
+      ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.volkswagenPq)]
       ret.enableBsm = 0x3BA in fingerprint[0]  # SWA_1
 
       if 0x440 in fingerprint[0] or docs:  # Getriebe_1
@@ -35,7 +35,7 @@ class CarInterface(CarInterfaceBase):
 
     else:
       # Set global MQB parameters
-      ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.volkswagen)]
+      ret.safetyConfigs = [get_safety_config(car.CarParams.SafetyModel.volkswagen)]
       ret.enableBsm = 0x30F in fingerprint[0]  # SWA_01
 
       if 0xAD in fingerprint[0] or docs:  # Getriebe_11
