@@ -142,7 +142,7 @@ class CarInterface(CarInterfaceBase):
       # TODO: show warning
       if key is None:
         key = "0" * 32
-      ret.secOCKey: bytes = bytes.fromhex(key.strip())
+      ret.secOCKey = bytes.fromhex(key.strip())
 
     tune = ret.longitudinalTuning
     if candidate in TSS2_CAR:
