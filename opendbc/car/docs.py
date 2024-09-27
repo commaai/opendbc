@@ -36,15 +36,9 @@ def get_all_car_docs() -> list[CarDocs]:
     car_docs = platform.config.car_docs
     if not len(car_docs):
       continue
-    # TODO: find a better way to make CarParams optional
-    if model in interfaces:
-      doc_model = model
-      doc_platform = platform
-    else:
-      doc_model = "MOCK"
-      doc_platform = MOCK.MOCK
+    cp_model, cp_platform = (model, platform) if model in interfaces else ("MOCK", MOCK.MOCK)
     # If available, uses experimental longitudinal limits for the docs
-    CP = interfaces[doc_model][0].get_params(doc_platform, fingerprint=gen_empty_fingerprint(),
+    CP = interfaces[cp_model][0].get_params(cp_platform, fingerprint=gen_empty_fingerprint(),
                                              car_fw=[CarParams.CarFw(ecu=CarParams.Ecu.unknown)], experimental_long=True, docs=True)
 
     # A platform can include multiple car models
