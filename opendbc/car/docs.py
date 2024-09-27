@@ -34,6 +34,8 @@ def get_all_car_docs() -> list[CarDocs]:
   footnotes = get_all_footnotes()
   for model, platform in DOC_PLATFORMS.items():
     car_docs = platform.config.car_docs
+    if not len(car_docs):
+      continue
     # TODO: find a better way to make CarParams optional
     if model in interfaces:
       doc_model = model
@@ -44,10 +46,6 @@ def get_all_car_docs() -> list[CarDocs]:
     # If available, uses experimental longitudinal limits for the docs
     CP = interfaces[doc_model][0].get_params(doc_platform, fingerprint=gen_empty_fingerprint(),
                                              car_fw=[CarParams.CarFw(ecu=CarParams.Ecu.unknown)], experimental_long=True, docs=True)
-
-    # TODO: dashcam filter removed from this stage, all dashcam cars will need to be updated with a supported-state
-    if not len(car_docs):
-      continue
 
     # A platform can include multiple car models
     for _car_docs in car_docs:
