@@ -392,15 +392,3 @@ All the cars that openpilot supports use a [CAN bus](https://en.wikipedia.org/wi
 
 openpilot does not yet support these Toyota models due to a new message authentication method.
 [Vote](https://comma.ai/shop#toyota-security) if you'd like to see openpilot support on these models.
-
-* Toyota RAV4 Prime 2021+
-* Toyota Sienna 2021+
-* Toyota Venza 2021+
-* Toyota Sequoia 2023+
-* Toyota Tundra 2022+
-* Toyota Highlander 2024+
-* Toyota Corolla Cross 2022+ (only US model)
-* Toyota Camry 2025+
-* Lexus NX 2022+
-* Toyota bZ4x 2023+
-* Subaru Solterra 2023+
