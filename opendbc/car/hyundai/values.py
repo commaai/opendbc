@@ -33,6 +33,13 @@ class CarControllerParams:
       self.STEER_DELTA_UP = 2
       self.STEER_DELTA_DOWN = 3
 
+    elif CP.flags & HyundaiFlags.CAN_CANFD_HYBRID:
+      self.STEER_MAX = 270
+      self.STEER_DRIVER_ALLOWANCE = 250
+      self.STEER_THRESHOLD = 250
+      self.STEER_DELTA_UP = 2
+      self.STEER_DELTA_DOWN = 3
+
     # To determine the limit for your car, find the maximum value that the stock LKAS will request.
     # If the max stock LKAS request is <384, add your car to this list.
     elif CP.carFingerprint in (CAR.GENESIS_G80, CAR.GENESIS_G90, CAR.HYUNDAI_ELANTRA, CAR.HYUNDAI_ELANTRA_GT_I30, CAR.HYUNDAI_IONIQ,
