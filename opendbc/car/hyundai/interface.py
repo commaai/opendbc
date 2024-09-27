@@ -120,6 +120,10 @@ class CarInterface(CarInterfaceBase):
       ret.flags |= HyundaiFlags.ALT_LIMITS.value
       ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_ALT_LIMITS
 
+    if candidate in (CAR.HYUNDAI_KONA_2022, ):
+      ret.flags |= HyundaiFlags.ALT_LIMITS_2.value
+      ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_ALT_LIMITS_2
+
     # Dashcam cars are missing a test route, or otherwise need validation
     # TODO: Optima Hybrid 2017 uses a different SCC12 checksum
     ret.dashcamOnly = candidate in {CAR.KIA_OPTIMA_H, }
