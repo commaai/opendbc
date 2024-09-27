@@ -1073,6 +1073,7 @@ FW_VERSIONS = {
       b'\xf1\x00JW1 MFC  AT USA LHD 1.00 1.02 99211-CU000 211215',
       b'\xf1\x00JW1 MFC  AT USA LHD 1.00 1.02 99211-CU100 211215',
       b'\xf1\x00JW1 MFC  AT USA LHD 1.00 1.03 99211-CU000 221118',
+      b'\xf1\x00JW1 MFC  AT AUS RHD 1.00 1.03 99211-CU100 221118',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00JW1_ RDR -----      1.00 1.00 99110-CU000         ',
