@@ -4,6 +4,8 @@ import copy
 from dataclasses import dataclass, field
 from enum import Enum
 
+from mypy.typeops import supported_self_type
+
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.structs import CarParams
 
@@ -237,7 +239,7 @@ def split_name(name: str) -> tuple[str, str, str]:
 
 
 @dataclass
-class CarDocs:
+class CarDocsBase:
   # make + model + model years
   name: str
 
@@ -247,8 +249,6 @@ class CarDocs:
 
   # the simplest description of the requirements for the US market
   package: str
-
-  support_type: SupportType = SupportType.OFFICIAL
 
   # the minimum compatibility requirements for this model, regardless
   # of market. can be a package, trim, or list of features
@@ -263,6 +263,9 @@ class CarDocs:
   # all the parts needed for the supported car
   car_parts: CarParts = field(default_factory=CarParts)
 
+  merged: bool = False
+  support_type: SupportType = SupportType.OFFICIAL
+
   def __post_init__(self):
     self.make, self.model, self.years = split_name(self.name)
     self.year_list = get_year_list(self.years)
@@ -271,9 +274,8 @@ class CarDocs:
     self.car_name = CP.carName
     self.car_fingerprint = CP.carFingerprint
 
-    # TODO: write tests to make sure reasons are set for cars in dashcam mode, and garbage-collect this
-    #if not hasattr(self, "support_type"):
-    #  self.support_type = SupportType.DASHCAM if CP.dashcamOnly else SupportType.OFFICIAL
+    if self.merged and CP.dashcamOnly and self.support_type != SupportType.REVIEW:
+      self.support_type = SupportType.DASHCAM
 
     # longitudinal column
     op_long = "Stock"
@@ -390,3 +392,16 @@ class CarDocs:
       item += footnote_tag.format(f'{",".join(map(str, sups))}')
 
     return item
+
+
+@dataclass
+class CarDocs(CarDocsBase):
+  package: str = "Unknown"
+  merged = True
+
+
+@dataclass
+class OtherCarDocs(CarDocsBase):
+  package: str = "N/A"
+  merged = False
+  car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.unknown]))

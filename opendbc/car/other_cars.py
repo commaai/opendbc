@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 from opendbc.car import dbc_dict, structs, CarSpecs, DbcDict, PlatformConfig, Platforms
-from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, SupportType
+from opendbc.car.docs_definitions import CarFootnote, OtherCarDocs, Column, SupportType
 
 
 @dataclass
@@ -14,12 +14,6 @@ class OtherPlatformConfig(PlatformConfig):
 class OtherCarSpecs(CarSpecs):
   # FIXME: Need to be able to print these as N/A or Unknown or whatever, try to eliminate entirely
   steerRatio: float = 0.
-
-
-@dataclass
-class OtherCarDocs(CarDocs):
-  package: str = "N/A"
-  car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.unknown]))
 
 
 @dataclass
