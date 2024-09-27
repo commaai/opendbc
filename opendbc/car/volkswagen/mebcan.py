@@ -135,10 +135,10 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
     "ACC_Status_ACC":             acc_control,
     "ACC_StartStopp_Info":        acc_enabled,
     "ACC_Sollbeschleunigung_02":  acceleration,
-    "ACC_zul_Regelabw_unten":     max(0.05, lower_jerk) if acc_enabled else 0,
-    "ACC_zul_Regelabw_oben":      min(3.0, upper_jerk) if acc_enabled else 0,
-    "ACC_neg_Sollbeschl_Grad_02": 4.0 if acc_enabled else 0,  # TODO: dynamic adjustment of jerk limits
-    "ACC_pos_Sollbeschl_Grad_02": 4.0 if acc_enabled else 0,  # TODO: dynamic adjustment of jerk limits
+    "ACC_zul_Regelabw_unten":     max(0.05, lower_jerk) if acc_control == ACC_CTRL_ACTIVE else 0,
+    "ACC_zul_Regelabw_oben":      min(3.0, upper_jerk) if acc_control == ACC_CTRL_ACTIVE else 0,
+    "ACC_neg_Sollbeschl_Grad_02": 4.0 if acc_control == ACC_CTRL_ACTIVE else 0,  # TODO: dynamic adjustment of jerk limits
+    "ACC_pos_Sollbeschl_Grad_02": 4.0 if acc_control == ACC_CTRL_ACTIVE else 0,  # TODO: dynamic adjustment of jerk limits
     "ACC_Anfahren":               starting,
     "ACC_Anhalten":               stopping,
     "ACC_Anhalteweg":             20.46,
