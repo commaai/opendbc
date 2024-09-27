@@ -56,46 +56,47 @@ class HyundaiFlags(IntFlag):
   CANFD_HDA2 = 1
   CANFD_ALT_BUTTONS = 2
   CANFD_ALT_GEARS = 2 ** 2
+  UNUSED_1 = 2 ** 3  # Unused flag, can be used for future implementations
 
-  ALT_LIMITS = 2 ** 3
-  ENABLE_BLINKERS = 2 ** 4
-  CANFD_ALT_GEARS_2 = 2 ** 5
-  SEND_LFA = 2 ** 6
-  USE_FCA = 2 ** 7
-  CANFD_HDA2_ALT_STEERING = 2 ** 8
+  ALT_LIMITS = 2 ** 4
+  ENABLE_BLINKERS = 2 ** 5
+  CANFD_ALT_GEARS_2 = 2 ** 6
+  SEND_LFA = 2 ** 7
+  USE_FCA = 2 ** 8
+  CANFD_HDA2_ALT_STEERING = 2 ** 9
 
   # these cars use a different gas signal
-  HYBRID = 2 ** 9
-  EV = 2 ** 10
+  HYBRID = 2 ** 10
+  EV = 2 ** 11
 
   # Static flags
 
   # If 0x500 is present on bus 1 it probably has a Mando radar outputting radar points.
   # If no points are outputted by default it might be possible to turn it on using  selfdrive/debug/hyundai_enable_radar_points.py
-  MANDO_RADAR = 2 ** 11
-  CANFD = 2 ** 12
+  MANDO_RADAR = 2 ** 12
+  CANFD = 2 ** 13
 
   # The radar does SCC on these cars when HDA I, rather than the camera
-  CANFD_RADAR_SCC = 2 ** 13
+  RADAR_SCC = 2 ** 14
   # The camera does SCC on these cars, rather than the radar
-  CAMERA_SCC = 2 ** 14
-  CHECKSUM_CRC8 = 2 ** 15
-  CHECKSUM_6B = 2 ** 16
+  CAMERA_SCC = 2 ** 15
+  CHECKSUM_CRC8 = 2 ** 16
+  CHECKSUM_6B = 2 ** 17
 
   # these cars require a special panda safety mode due to missing counters and checksums in the messages
-  LEGACY = 2 ** 17
+  LEGACY = 2 ** 18
 
   # these cars have not been verified to work with longitudinal yet - radar disable, sending correct messages, etc.
-  UNSUPPORTED_LONGITUDINAL = 2 ** 18
+  UNSUPPORTED_LONGITUDINAL = 2 ** 19
 
   # These CAN FD cars do not accept communication control to disable the ADAS ECU,
   # responds with 0x7F2822 - 'conditions not correct'
-  CANFD_NO_RADAR_DISABLE = 2 ** 19
+  CANFD_NO_RADAR_DISABLE = 2 ** 20
 
-  CLUSTER_GEARS = 2 ** 20
-  TCU_GEARS = 2 ** 21
+  CLUSTER_GEARS = 2 ** 21
+  TCU_GEARS = 2 ** 22
 
-  MIN_STEER_32_MPH = 2 ** 22
+  MIN_STEER_32_MPH = 2 ** 23
 
 
 class Footnote(Enum):
