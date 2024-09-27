@@ -24,7 +24,9 @@ class CarInterface(CarInterfaceBase):
 
     if candidate in CANFD_CAR:
       # Shared configuration for CAN-FD cars
-      ret.experimentalLongitudinalAvailable = candidate not in (CANFD_UNSUPPORTED_LONGITUDINAL_CAR | CANFD_RADAR_SCC_CAR)
+      experimental_longitudinal_available = (hda2 and Ecu.adas in [fw.ecu for fw in car_fw]) or \
+                                            candidate not in (CANFD_UNSUPPORTED_LONGITUDINAL_CAR | CANFD_RADAR_SCC_CAR)
+      ret.experimentalLongitudinalAvailable = experimental_longitudinal_available
       ret.enableBsm = 0x1e5 in fingerprint[CAN.ECAN]
 
       if 0x105 in fingerprint[CAN.ECAN]:
