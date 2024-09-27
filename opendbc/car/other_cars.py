@@ -29,16 +29,16 @@ class IncompatibleCarDocs(OtherCarDocs):
 
 
 @dataclass
-class ToyotaSecurityCarDocs(IncompatibleCarDocs):
+class ToyotaSecurityCarDocs(OtherCarDocs):
   def init_make(self, CP: structs.CarParams):
-    super().init_make(CP)
+    self.support_type = SupportType.INCOMPATIBLE
     self.footnotes.append(Footnote.TOYOTA_SECOC)
 
 
 @dataclass
-class FlexRayCarDocs(IncompatibleCarDocs):
+class FlexRayCarDocs(OtherCarDocs):
   def init_make(self, CP: structs.CarParams):
-    super().init_make(CP)
+    self.support_type = SupportType.INCOMPATIBLE
     self.footnotes.append(Footnote.FLEXRAY)
 
 
