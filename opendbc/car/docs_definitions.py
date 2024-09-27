@@ -26,15 +26,13 @@ class Column(Enum):
 
 
 # TODO: Bikeshed this enum, lines between custom fork and dashcam are blurry, and not sure about legacy support
-# TODO: How to render this in the markdown table? Text or icon of some sort?
-# TODO: Tests should enforce a footnote reference for some of these states
 class SupportType(Enum):
-  INCOMPATIBLE = "Not compatible"
-  CUSTOM = "Custom fork"
-  DASHCAM = "Dashcam mode"  # TODO: do we lump this in with Custom Fork? source changes required to drive these cars.
-  PENDING = "Coming soon"  # TODO: need a way to say Custom Fork is available while under support review
   OFFICIAL = "Official"
-  LEGACY_SUPPORT = "Supported with caveats"  # TODO: Cars that were onboarded under legacy guidelines, will not appear on comma.ai/vehicles
+  REVIEW = "Under review"  # Dashcam, but planned for official support after safety validation
+  DASHCAM = "Dashcam mode"  # Dashcam, and stuck there for the foreseeable future, but may be drivable in a community fork
+  COMMUNITY = "Community"  # Known to be usable at some level with a community fork, but not upstream and not validated
+  LEGACY = "Legacy"  # Known to be usable on stock openpilot, with caveats, not listed at comma.ai/vehicles
+  INCOMPATIBLE = "Not compatible"  # Known showstopper like FlexRay
 
 
 class Star(Enum):

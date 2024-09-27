@@ -23,22 +23,22 @@ class OtherCarDocs(CarDocs):
 
 
 @dataclass
-class CustomForkCarDocs(OtherCarDocs):
+class CommunityCarDocs(OtherCarDocs):
   # TODO: attach a footnote here for the more common forks, plus allow footnotes at the car level for special cases
-  # TODO: maybe these custom fork pointers want to be intra-document #links rather than footnotes
-  support_type = SupportType.CUSTOM
-
-
-@dataclass
-class ToyotaSecurityCarDocs(CustomForkCarDocs):
-  def init_make(self, CP: structs.CarParams):
-    # TODO: Make this an intra-document #link to more detailed info, rather than a footnote
-    self.footnotes.append(Footnote.TOYOTA_SECOC)
+  # TODO: maybe these community fork pointers want to be intra-document #links rather than footnotes
+  support_type = SupportType.COMMUNITY
 
 
 @dataclass
 class IncompatibleCarDocs(OtherCarDocs):
   support_type = SupportType.INCOMPATIBLE
+
+
+@dataclass
+class ToyotaSecurityCarDocs(IncompatibleCarDocs):
+  def init_make(self, CP: structs.CarParams):
+    # TODO: Make this an intra-document #link to more detailed info, rather than a footnote
+    self.footnotes.append(Footnote.TOYOTA_SECOC)
 
 
 @dataclass
@@ -58,14 +58,15 @@ class CAR(Platforms):
 
   HYUNDAI_PALISADE_FACELIFT = OtherPlatformConfig(
     [
-      CustomForkCarDocs("Hyundai Palisade 2023-24", package="All", footnotes=[Footnote.UNDER_REVIEW]),
-      CustomForkCarDocs("Kia Telluride 2023-24", package="All", footnotes=[Footnote.UNDER_REVIEW]),
+      CommunityCarDocs("Hyundai Palisade 2023-24", package="All", footnotes=[Footnote.UNDER_REVIEW]),
+      CommunityCarDocs("Kia Telluride 2023-24", package="All", footnotes=[Footnote.UNDER_REVIEW]),
     ],
     OtherCarSpecs(mass=0., wheelbase=0.),  # TODO: Don't require CarSpecs for unsupported cars
   )
 
   TOYOTA_SECURITY_CARS = OtherPlatformConfig(
     [
+      # TODO: Add some support type overrides for the ones known to be working on Willem's fork
       ToyotaSecurityCarDocs("Subaru Solterra 2023-25"),
       ToyotaSecurityCarDocs("Lexus NS 2022-25"),
       ToyotaSecurityCarDocs("Toyota bZ4x 2023-25"),
