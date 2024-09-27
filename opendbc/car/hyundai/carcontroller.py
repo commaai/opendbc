@@ -102,9 +102,13 @@ class CarController(CarControllerBase):
       if self.CP.flags & HyundaiFlags.ENABLE_BLINKERS:
         can_sends.append(make_tester_present_msg(0x7b1, self.CAN.ECAN, suppress_response=True))
 
+    # Common shared configuration
+
+    hda2 = self.CP.flags & HyundaiFlags.CANFD_HDA2
+    can_canfd_hybrid = bool(self.CP.flags & HyundaiFlags.CAN_CANFD_HYBRID)
+
     # CAN-FD platforms
-    if self.CP.carFingerprint in CANFD_CAR:
-      hda2 = self.CP.flags & HyundaiFlags.CANFD_HDA2
+    if self.CP.carFingerprint in CANFD_CAR or can_canfd_hybrid:
       hda2_long = hda2 and self.CP.openpilotLongitudinalControl
 
       # steering control
@@ -132,7 +136,7 @@ class CarController(CarControllerBase):
           self.accel_last = accel
       else:
         # button presses
-        can_sends.extend(self.create_button_messages(CC, CS, use_clu11=False))
+        can_sends.extend(self.create_button_messages(CC, CS, use_clu11=(hda2 and can_canfd_hybrid)))
     else:
       can_sends.append(hyundaican.create_lkas11(self.packer, self.frame, self.CP, apply_steer, apply_steer_req,
                                                 torque_fault, CS.lkas11, sys_warning, sys_state, CC.enabled,
@@ -174,12 +178,12 @@ class CarController(CarControllerBase):
     can_sends = []
     if use_clu11:
       if CC.cruiseControl.cancel:
-        can_sends.append(hyundaican.create_clu11(self.packer, self.frame, CS.clu11, Buttons.CANCEL, self.CP))
+        can_sends.append(hyundaican.create_clu11(self.packer, self.frame, CS.clu11, Buttons.CANCEL, self.CP, self.CAN))
       elif CC.cruiseControl.resume:
         # send resume at a max freq of 10Hz
         if (self.frame - self.last_button_frame) * DT_CTRL > 0.1:
           # send 25 messages at a time to increases the likelihood of resume being accepted
-          can_sends.extend([hyundaican.create_clu11(self.packer, self.frame, CS.clu11, Buttons.RES_ACCEL, self.CP)] * 25)
+          can_sends.extend([hyundaican.create_clu11(self.packer, self.frame, CS.clu11, Buttons.RES_ACCEL, self.CP, self.CAN)] * 25)
           if (self.frame - self.last_button_frame) * DT_CTRL >= 0.15:
             self.last_button_frame = self.frame
     else:

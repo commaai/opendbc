@@ -127,7 +127,7 @@ class TestHyundaiFingerprint:
 
           # Third and fourth character are usually EV/hybrid identifiers
           codes = {code.split(b"-")[0][:2] for code, _ in get_platform_codes(fws)}
-          if car_model == CAR.HYUNDAI_PALISADE:
+          if car_model in (CAR.HYUNDAI_PALISADE, CAR.HYUNDAI_PALISADE_2023):
             assert codes == {b"LX", b"ON"}, f"Car has unexpected platform codes: {car_model} {codes}"
           elif car_model == CAR.HYUNDAI_KONA_EV and ecu[0] == Ecu.fwdCamera:
             assert codes == {b"OE", b"OS"}, f"Car has unexpected platform codes: {car_model} {codes}"
@@ -139,7 +139,8 @@ class TestHyundaiFingerprint:
   def test_platform_code_ecus_available(self, subtests):
     # TODO: add queries for these non-CAN FD cars to get EPS
     no_eps_platforms = CANFD_CAR | {CAR.KIA_SORENTO, CAR.KIA_OPTIMA_G4, CAR.KIA_OPTIMA_G4_FL, CAR.KIA_OPTIMA_H,
-                                    CAR.KIA_OPTIMA_H_G4_FL, CAR.HYUNDAI_SONATA_LF, CAR.HYUNDAI_TUCSON, CAR.GENESIS_G90, CAR.GENESIS_G80, CAR.HYUNDAI_ELANTRA}
+                                    CAR.KIA_OPTIMA_H_G4_FL, CAR.HYUNDAI_SONATA_LF, CAR.HYUNDAI_TUCSON, CAR.GENESIS_G90,
+                                    CAR.GENESIS_G80, CAR.HYUNDAI_ELANTRA, CAR.HYUNDAI_PALISADE_2023}
 
     # Asserts ECU keys essential for fuzzy fingerprinting are available on all platforms
     for car_model, ecus in FW_VERSIONS.items():
