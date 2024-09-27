@@ -166,7 +166,8 @@ class CarState(CarStateBase):
       ret.rightBlindspot = cp.vl["LCA11"]["CF_Lca_IndRight"] != 0
 
     # save the entire LKAS11 and CLU11
-    self.lkas11 = copy.copy(cp_cam.vl["LKAS11"])
+    if not (self.CP.flags & (HyundaiFlags.CAN_CANFD_HYBRID | HyundaiFlags.CANFD_HDA2)):
+      self.lkas11 = copy.copy(cp_cam.vl["LKAS11"])
     self.clu11 = copy.copy(cp.vl["CLU11"])
     self.steer_state = cp.vl["MDPS12"]["CF_Mdps_ToiActive"]  # 0 NOT ACTIVE, 1 ACTIVE
     prev_cruise_buttons = self.cruise_buttons[-1]
@@ -328,12 +329,12 @@ class CarState(CarStateBase):
     if CP.carFingerprint in CANFD_CAR:
       return CarState.get_cam_can_parser_canfd(CP)
 
-    messages = [
-      ("LKAS11", 100)
-    ]
+    messages = []
 
     if CP.flags & (HyundaiFlags.CAN_CANFD_HYBRID | HyundaiFlags.CANFD_HDA2):
       messages.append(("CAM_0x2a4", 20))
+    else:
+      messages.append(("LKAS11", 100))
 
     if not CP.openpilotLongitudinalControl and CP.carFingerprint in CAMERA_SCC_CAR:
       messages += [
