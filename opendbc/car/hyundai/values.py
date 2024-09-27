@@ -56,7 +56,7 @@ class HyundaiFlags(IntFlag):
   CANFD_HDA2 = 1
   CANFD_ALT_BUTTONS = 2
   CANFD_ALT_GEARS = 2 ** 2
-  CANFD_CAMERA_SCC = 2 ** 3
+  CANFD_CAMERA_SCC = 2 ** 3  # TODO: Remove
 
   ALT_LIMITS = 2 ** 4
   ENABLE_BLINKERS = 2 ** 5
