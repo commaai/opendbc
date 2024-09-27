@@ -248,6 +248,8 @@ class CarDocs:
   # the simplest description of the requirements for the US market
   package: str
 
+  support_type: SupportType = SupportType.OFFICIAL
+
   # the minimum compatibility requirements for this model, regardless
   # of market. can be a package, trim, or list of features
   requirements: str | None = None
@@ -270,8 +272,8 @@ class CarDocs:
     self.car_fingerprint = CP.carFingerprint
 
     # TODO: write tests to make sure reasons are set for cars in dashcam mode, and garbage-collect this
-    if not hasattr(self, "support_type"):
-      self.support_type = SupportType.DASHCAM if CP.dashcamOnly else SupportType.OFFICIAL
+    #if not hasattr(self, "support_type"):
+    #  self.support_type = SupportType.DASHCAM if CP.dashcamOnly else SupportType.OFFICIAL
 
     # longitudinal column
     op_long = "Stock"

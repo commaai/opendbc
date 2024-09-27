@@ -24,29 +24,30 @@ class OtherCarDocs(CarDocs):
 
 @dataclass
 class CommunityCarDocs(OtherCarDocs):
-  # TODO: attach a footnote here for the more common forks, plus allow footnotes at the car level for special cases
-  # TODO: maybe these community fork pointers want to be intra-document #links rather than footnotes
-  support_type = SupportType.COMMUNITY
+  def init_make(self, CP: structs.CarParams):
+    self.support_type = SupportType.COMMUNITY
 
 
 @dataclass
 class IncompatibleCarDocs(OtherCarDocs):
-  support_type = SupportType.INCOMPATIBLE
+  def init_make(self, CP: structs.CarParams):
+    self.support_type = SupportType.INCOMPATIBLE
 
 
 @dataclass
 class ToyotaSecurityCarDocs(IncompatibleCarDocs):
   def init_make(self, CP: structs.CarParams):
-    # TODO: Make this an intra-document #link to more detailed info, rather than a footnote
+    super().init_make(CP)
     self.footnotes.append(Footnote.TOYOTA_SECOC)
 
 
 @dataclass
 class FlexRayCarDocs(IncompatibleCarDocs):
   def init_make(self, CP: structs.CarParams):
+    super().init_make(CP)
     self.footnotes.append(Footnote.FLEXRAY)
 
-
+# TODO: Convert most or all of these footnotes to intra-document #links to a longer explanation
 class Footnote(Enum):
   TOYOTA_SECOC = CarFootnote("Uses cryptographic message authentication, for which openpilot support is under review.", Column.SUPPORT_TYPE)
   FLEXRAY = CarFootnote("Uses a proprietary network topology incompatible with openpilot.", Column.SUPPORT_TYPE)
@@ -66,16 +67,17 @@ class CAR(Platforms):
 
   TOYOTA_SECURITY_CARS = OtherPlatformConfig(
     [
-      # TODO: Add some support type overrides for the ones known to be working on Willem's fork
       ToyotaSecurityCarDocs("Subaru Solterra 2023-25"),
       ToyotaSecurityCarDocs("Lexus NS 2022-25"),
       ToyotaSecurityCarDocs("Toyota bZ4x 2023-25"),
       ToyotaSecurityCarDocs("Toyota Camry 2025"),
       ToyotaSecurityCarDocs("Toyota Corolla Cross 2022-25"),
       ToyotaSecurityCarDocs("Toyota Highlander 2025"),
-      ToyotaSecurityCarDocs("Toyota RAV4 Prime 2021-25"),
+      CommunityCarDocs("Toyota RAV4 Prime 2021-23"),
+      ToyotaSecurityCarDocs("Toyota RAV4 Prime 2024-25"),
       ToyotaSecurityCarDocs("Toyota Sequoia 2023-25"),
-      ToyotaSecurityCarDocs("Toyota Sienna 2021-25"),
+      CommunityCarDocs("Toyota Sienna 2021-23"),
+      ToyotaSecurityCarDocs("Toyota Sienna 2024-25"),
       ToyotaSecurityCarDocs("Toyota Tundra 2022-25"),
       ToyotaSecurityCarDocs("Toyota Venza 2021-25"),
     ],
