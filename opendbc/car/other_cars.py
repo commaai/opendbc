@@ -1,31 +1,14 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 
-from opendbc.car import dbc_dict, structs, CarSpecs, DbcDict, PlatformConfig, Platforms
+from opendbc.car import structs, Platforms, OtherPlatformConfig
 from opendbc.car.docs_definitions import CarFootnote, OtherCarDocs, Column, SupportType
-
-
-@dataclass
-class OtherPlatformConfig(PlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: dbc_dict('unknown', None))
-
-
-@dataclass(frozen=True, kw_only=True)
-class OtherCarSpecs(CarSpecs):
-  # FIXME: Need to be able to print these as N/A or Unknown or whatever, try to eliminate entirely
-  steerRatio: float = 0.
 
 
 @dataclass
 class CommunityCarDocs(OtherCarDocs):
   def init_make(self, CP: structs.CarParams):
     self.support_type = SupportType.COMMUNITY
-
-
-@dataclass
-class IncompatibleCarDocs(OtherCarDocs):
-  def init_make(self, CP: structs.CarParams):
-    self.support_type = SupportType.INCOMPATIBLE
 
 
 @dataclass
@@ -57,7 +40,7 @@ class CAR(Platforms):
       CommunityCarDocs("Hyundai Palisade 2023-24", package="All", footnotes=[Footnote.UNDER_REVIEW]),
       CommunityCarDocs("Kia Telluride 2023-24", package="All", footnotes=[Footnote.UNDER_REVIEW]),
     ],
-    OtherCarSpecs(mass=0., wheelbase=0.),  # TODO: Don't require CarSpecs for unsupported cars
+    None,
   )
 
   TOYOTA_SECURITY_CARS = OtherPlatformConfig(
@@ -76,7 +59,7 @@ class CAR(Platforms):
       ToyotaSecurityCarDocs("Toyota Tundra 2022-25"),
       ToyotaSecurityCarDocs("Toyota Venza 2021-25"),
     ],
-    OtherCarSpecs(mass=0., wheelbase=0.),  # TODO: Don't require CarSpecs for unsupported cars
+    None,
   )
 
   AUDI_FLEXRAY = OtherPlatformConfig(
@@ -85,5 +68,5 @@ class CAR(Platforms):
       FlexRayCarDocs("Audi A5 2016-24", package="All"),
       FlexRayCarDocs("Audi Q5 2017-24", package="All"),
     ],
-    OtherCarSpecs(mass=0., wheelbase=0.),  # TODO: Don't require CarSpecs for unsupported cars
+    None,
   )

@@ -4,8 +4,6 @@ import copy
 from dataclasses import dataclass, field
 from enum import Enum
 
-from mypy.typeops import supported_self_type
-
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.structs import CarParams
 

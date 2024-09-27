@@ -3,12 +3,12 @@ import logging
 from collections import namedtuple
 from dataclasses import dataclass
 from enum import IntFlag, ReprEnum, EnumType
-from dataclasses import replace
+from dataclasses import replace, field
 
 from panda import uds
 from opendbc.car import structs
 from opendbc.car.can_definitions import CanData
-from opendbc.car.docs_definitions import CarDocs
+from opendbc.car.docs_definitions import CarDocs, OtherCarDocs
 from opendbc.car.common.numpy_fast import clip, interp
 
 # set up logging
@@ -321,3 +321,13 @@ class Platforms(str, ReprEnum, metaclass=PlatformsType):
   @classmethod
   def with_flags(cls, flags: IntFlag) -> set['Platforms']:
     return {p for p in cls if p.config.flags & flags}
+
+
+
+@dataclass(order=True)
+class OtherPlatformConfig(PlatformConfig):
+  car_docs: list[OtherCarDocs]
+  specs: CarSpecs | None = None
+  dbc_dict: DbcDict = field(default_factory=lambda: dbc_dict('unknown', None))
+  flags = 0
+  platform_str = "Unknown"
