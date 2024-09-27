@@ -84,7 +84,7 @@ def create_buttons(packer, CP, CAN, cnt, btn):
 
 def create_acc_cancel(packer, CP, CAN, cruise_info_copy):
   # TODO: why do we copy different values here?
-  if CP.flags & HyundaiFlags.CAMERA_SCC.value:
+  if CP.flags & HyundaiFlags.CANFD_CAMERA_SCC.value:
     values = {s: cruise_info_copy[s] for s in [
       "COUNTER",
       "CHECKSUM",
