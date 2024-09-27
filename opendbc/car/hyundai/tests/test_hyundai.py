@@ -48,7 +48,7 @@ class TestHyundaiFingerprint:
     for hda2 in (True, False):
       fingerprint = gen_empty_fingerprint()
       if hda2:
-        cam_can = CanBus(None, False, fingerprint).CAM
+        cam_can = CanBus(None, fingerprint).CAM
         fingerprint[cam_can] = [0x50, 0x110]  # HDA2 steering messages
       CP = CarInterface.get_params(CAR.KIA_EV6, fingerprint, [], False, False)
       assert bool(CP.flags & HyundaiFlags.CANFD_HDA2) == hda2

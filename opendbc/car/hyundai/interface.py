@@ -19,11 +19,10 @@ class CarInterface(CarInterfaceBase):
     ret.carName = "hyundai"
 
     # Check the CAM bus fingerprint for known HDA2 steering messages (0x50 or 0x110) to determine if it is an HDA2 car.
-    # The hda2 flag to initialize CanBus is not critical here since we only care about CAM bus steering messages.
-    cam_can = CanBus(None, False, fingerprint).CAM
+    cam_can = CanBus(None, fingerprint).CAM
     hda2 = 0x50 in fingerprint[cam_can] or 0x110 in fingerprint[cam_can]
 
-    CAN = CanBus(None, hda2, fingerprint)
+    CAN = CanBus(None, fingerprint, hda2)
 
     if candidate in CANFD_CAR:
       # Shared configuration for CAN-FD cars
