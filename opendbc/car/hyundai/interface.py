@@ -1,8 +1,8 @@
 from panda import Panda
 from opendbc.car import get_safety_config, structs
 from opendbc.car.hyundai.hyundaicanfd import CanBus
-from opendbc.car.hyundai.values import HyundaiFlags, CAR, DBC, CANFD_CAR, CAMERA_SCC_CAR, CANFD_RADAR_SCC_CAR, \
-                                                   CANFD_UNSUPPORTED_LONGITUDINAL_CAR, LEGACY_SAFETY_MODE_CAR, \
+from opendbc.car.hyundai.values import HyundaiFlags, CAR, DBC, CANFD_CAR, \
+                                                   CANFD_UNSUPPORTED_LONGITUDINAL_CAR, \
                                                    UNSUPPORTED_LONGITUDINAL_CAR, Buttons
 from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
 from opendbc.car.interfaces import CarInterfaceBase
@@ -24,7 +24,6 @@ class CarInterface(CarInterfaceBase):
 
     if candidate in CANFD_CAR:
       # Shared configuration for CAN-FD cars
-      ret.experimentalLongitudinalAvailable = candidate not in (CANFD_UNSUPPORTED_LONGITUDINAL_CAR | CANFD_RADAR_SCC_CAR)
       ret.enableBsm = 0x1e5 in fingerprint[CAN.ECAN]
 
       if 0x105 in fingerprint[CAN.ECAN]:
@@ -39,7 +38,7 @@ class CarInterface(CarInterfaceBase):
         # non-HDA2
         if 0x1cf not in fingerprint[CAN.ECAN]:
           ret.flags |= HyundaiFlags.CANFD_ALT_BUTTONS.value
-        if candidate not in CANFD_RADAR_SCC_CAR:
+        if not ret.flags & HyundaiFlags.RADAR_SCC:
           ret.flags |= HyundaiFlags.CANFD_CAMERA_SCC.value
 
       # Some HDA2 cars have alternative messages for gear checks
@@ -66,7 +65,6 @@ class CarInterface(CarInterfaceBase):
 
     else:
       # Shared configuration for non CAN-FD cars
-      ret.experimentalLongitudinalAvailable = candidate not in (UNSUPPORTED_LONGITUDINAL_CAR | CAMERA_SCC_CAR)
       ret.enableBsm = 0x58b in fingerprint[0]
 
       # Send LFA message on cars with HDA
@@ -83,7 +81,7 @@ class CarInterface(CarInterfaceBase):
       else:
         ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.hyundai, 0)]
 
-      if candidate in CAMERA_SCC_CAR:
+      if ret.flags & HyundaiFlags.CAMERA_SCC:
         ret.safetyConfigs[0].safetyParam |= Panda.FLAG_HYUNDAI_CAMERA_SCC
 
     # Common lateral control setup
@@ -95,6 +93,7 @@ class CarInterface(CarInterfaceBase):
 
     # Common longitudinal control setup
 
+    ret.experimentalLongitudinalAvailable = candidate not in (UNSUPPORTED_LONGITUDINAL_CAR | CANFD_UNSUPPORTED_LONGITUDINAL_CAR)
     ret.radarUnavailable = RADAR_START_ADDR not in fingerprint[1] or DBC[ret.carFingerprint]["radar"] is None
     ret.openpilotLongitudinalControl = experimental_long and ret.experimentalLongitudinalAvailable
     ret.pcmCruise = not ret.openpilotLongitudinalControl

@@ -78,6 +78,7 @@ class HyundaiFlags(IntFlag):
 
   # The radar does SCC on these cars when HDA I, rather than the camera
   RADAR_SCC = 2 ** 14
+  # The camera does SCC on these cars, rather than the radar
   CAMERA_SCC = 2 ** 15
   CHECKSUM_CRC8 = 2 ** 16
   CHECKSUM_6B = 2 ** 17
@@ -88,6 +89,8 @@ class HyundaiFlags(IntFlag):
   # these cars have not been verified to work with longitudinal yet - radar disable, sending correct messages, etc.
   UNSUPPORTED_LONGITUDINAL = 2 ** 19
 
+  # These CAN FD cars do not accept communication control to disable the ADAS ECU,
+  # responds with 0x7F2822 - 'conditions not correct'
   CANFD_NO_RADAR_DISABLE = 2 ** 20
 
   CLUSTER_GEARS = 2 ** 21
@@ -743,13 +746,9 @@ CAN_GEARS = {
 }
 
 CANFD_CAR = CAR.with_flags(HyundaiFlags.CANFD)
-CANFD_RADAR_SCC_CAR = CAR.with_flags(HyundaiFlags.RADAR_SCC)
 
-# These CAN FD cars do not accept communication control to disable the ADAS ECU,
-# responds with 0x7F2822 - 'conditions not correct'
-CANFD_UNSUPPORTED_LONGITUDINAL_CAR = CAR.with_flags(HyundaiFlags.CANFD_NO_RADAR_DISABLE)
+CANFD_UNSUPPORTED_LONGITUDINAL_CAR = CAR.with_flags(HyundaiFlags.CANFD_NO_RADAR_DISABLE | HyundaiFlags.RADAR_SCC)
 
-# The camera does SCC on these cars, rather than the radar
 CAMERA_SCC_CAR = CAR.with_flags(HyundaiFlags.CAMERA_SCC)
 
 HYBRID_CAR = CAR.with_flags(HyundaiFlags.HYBRID)
@@ -758,6 +757,8 @@ EV_CAR = CAR.with_flags(HyundaiFlags.EV)
 
 LEGACY_SAFETY_MODE_CAR = CAR.with_flags(HyundaiFlags.LEGACY)
 
-UNSUPPORTED_LONGITUDINAL_CAR = CAR.with_flags(HyundaiFlags.LEGACY) | CAR.with_flags(HyundaiFlags.UNSUPPORTED_LONGITUDINAL)
+UNSUPPORTED_LONGITUDINAL_CAR = CAR.with_flags(HyundaiFlags.LEGACY |
+                                              HyundaiFlags.UNSUPPORTED_LONGITUDINAL |
+                                              HyundaiFlags.CAMERA_SCC)
 
 DBC = CAR.create_dbc_map()

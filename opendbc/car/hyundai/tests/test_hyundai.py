@@ -8,8 +8,8 @@ from opendbc.car.fw_versions import build_fw_dict
 from opendbc.car.hyundai.interface import CarInterface
 from opendbc.car.hyundai.hyundaicanfd import CanBus
 from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
-from opendbc.car.hyundai.values import CAMERA_SCC_CAR, CANFD_CAR, CAN_GEARS, CAR, CHECKSUM, DATE_FW_ECUS, \
-                                         HYBRID_CAR, EV_CAR, FW_QUERY_CONFIG, LEGACY_SAFETY_MODE_CAR, CANFD_FUZZY_WHITELIST, \
+from opendbc.car.hyundai.values import CANFD_CAR, CAN_GEARS, CAR, CHECKSUM, DATE_FW_ECUS, \
+                                         HYBRID_CAR, EV_CAR, FW_QUERY_CONFIG, CANFD_FUZZY_WHITELIST, \
                                          UNSUPPORTED_LONGITUDINAL_CAR, PLATFORM_CODE_ECUS, HYUNDAI_VERSION_REQUEST_LONG, \
                                          HyundaiFlags, get_platform_codes
 from opendbc.car.hyundai.fingerprints import FW_VERSIONS
@@ -66,7 +66,7 @@ class TestHyundaiFingerprint:
     assert set.union(*CAN_GEARS.values()) & (HYBRID_CAR | EV_CAR) == set()
 
     # Test CAN FD car not in CAN feature lists
-    can_specific_feature_list = set.union(*CAN_GEARS.values(), *CHECKSUM.values(), LEGACY_SAFETY_MODE_CAR, UNSUPPORTED_LONGITUDINAL_CAR, CAMERA_SCC_CAR)
+    can_specific_feature_list = set.union(*CAN_GEARS.values(), *CHECKSUM.values(), UNSUPPORTED_LONGITUDINAL_CAR)
     for car_model in CANFD_CAR:
       assert car_model not in can_specific_feature_list, "CAN FD car unexpectedly found in a CAN feature list"
 

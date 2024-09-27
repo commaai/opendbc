@@ -7,7 +7,7 @@ from opendbc.can.can_define import CANDefine
 from opendbc.car import create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.hyundai.hyundaicanfd import CanBus
-from opendbc.car.hyundai.values import HyundaiFlags, CAR, DBC, CAN_GEARS, CAMERA_SCC_CAR, \
+from opendbc.car.hyundai.values import HyundaiFlags, CAR, DBC, CAN_GEARS, \
                                                    CANFD_CAR, Buttons, CarControllerParams
 from opendbc.car.interfaces import CarStateBase
 
@@ -63,7 +63,7 @@ class CarState(CarStateBase):
       return self.update_canfd(cp, cp_cam)
 
     ret = structs.CarState()
-    cp_cruise = cp_cam if self.CP.carFingerprint in CAMERA_SCC_CAR else cp
+    cp_cruise = cp_cam if self.CP.flags & HyundaiFlags.CAMERA_SCC else cp
     self.is_metric = cp.vl["CLU11"]["CF_Clu_SPEED_UNIT"] == 0
     speed_conv = CV.KPH_TO_MS if self.is_metric else CV.MPH_TO_MS
 
@@ -282,7 +282,7 @@ class CarState(CarStateBase):
       ("SAS11", 100),
     ]
 
-    if not CP.openpilotLongitudinalControl and CP.carFingerprint not in CAMERA_SCC_CAR:
+    if not CP.openpilotLongitudinalControl and not (CP.flags & HyundaiFlags.CAMERA_SCC):
       messages += [
         ("SCC11", 50),
         ("SCC12", 50),
@@ -321,7 +321,7 @@ class CarState(CarStateBase):
       ("LKAS11", 100)
     ]
 
-    if not CP.openpilotLongitudinalControl and CP.carFingerprint in CAMERA_SCC_CAR:
+    if not CP.openpilotLongitudinalControl and CP.flags & HyundaiFlags.CAMERA_SCC:
       messages += [
         ("SCC11", 50),
         ("SCC12", 50),
