@@ -65,7 +65,7 @@ class CarState(CarStateBase):
 
       # add creeping force at low speeds only for braking, CLUTCH->ACCEL_NET already shows this
       neutral_accel = max(cp.vl["PCM_CRUISE"]["NEUTRAL_FORCE"] / self.CP.mass, 0.0)
-      if self.pcm_accel_net + neutral_accel < 0.0 and not ret.standstill:
+      if self.pcm_accel_net + neutral_accel < 0.0:
         self.pcm_accel_net += neutral_accel
 
     # filtered pitch estimate from the car, negative is a downward slope
