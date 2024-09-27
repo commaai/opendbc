@@ -102,6 +102,10 @@ class CarController(CarControllerBase):
       if self.CP.flags & HyundaiFlags.ENABLE_BLINKERS:
         can_sends.append(make_tester_present_msg(0x7b1, self.CAN.ECAN, suppress_response=True))
 
+    # Common shared configuration
+
+    can_canfd_hybrid = bool(self.CP.flags & HyundaiFlags.CAN_CANFD_HYBRID)
+
     # CAN-FD platforms
     if self.CP.carFingerprint in CANFD_CAR:
       hda2 = self.CP.flags & HyundaiFlags.CANFD_HDA2
@@ -134,10 +138,17 @@ class CarController(CarControllerBase):
         # button presses
         can_sends.extend(self.create_button_messages(CC, CS, use_clu11=False))
     else:
-      can_sends.append(hyundaican.create_lkas11(self.packer, self.frame, self.CP, apply_steer, apply_steer_req,
-                                                torque_fault, CS.lkas11, sys_warning, sys_state, CC.enabled,
-                                                hud_control.leftLaneVisible, hud_control.rightLaneVisible,
-                                                left_lane_warning, right_lane_warning))
+      # TODO: this can be merged with hyundaican.create_lkas11
+      if can_canfd_hybrid:
+        can_sends.append(hyundaican.create_lkas11_can_canfd_hybrid(self.packer, self.frame, self.CP, apply_steer, apply_steer_req,
+                                                                   torque_fault, CS.lkas11, sys_warning, sys_state, CC.enabled,
+                                                                   hud_control.leftLaneVisible, hud_control.rightLaneVisible,
+                                                                   left_lane_warning, right_lane_warning))
+      else:
+        can_sends.append(hyundaican.create_lkas11(self.packer, self.frame, self.CP, apply_steer, apply_steer_req,
+                                                  torque_fault, CS.lkas11, sys_warning, sys_state, CC.enabled,
+                                                  hud_control.leftLaneVisible, hud_control.rightLaneVisible,
+                                                  left_lane_warning, right_lane_warning))
 
       if not self.CP.openpilotLongitudinalControl:
         can_sends.extend(self.create_button_messages(CC, CS, use_clu11=True))
@@ -152,7 +163,7 @@ class CarController(CarControllerBase):
 
       # 20 Hz LFA MFA message
       if self.frame % 5 == 0 and self.CP.flags & HyundaiFlags.SEND_LFA.value:
-        can_sends.append(hyundaican.create_lfahda_mfc(self.packer, CC.enabled))
+        can_sends.append(hyundaican.create_lfahda_mfc(self.packer, self.frame, self.CP, CC.enabled))
 
       # 5 Hz ACC options
       if self.frame % 20 == 0 and self.CP.openpilotLongitudinalControl:
@@ -174,12 +185,12 @@ class CarController(CarControllerBase):
     can_sends = []
     if use_clu11:
       if CC.cruiseControl.cancel:
-        can_sends.append(hyundaican.create_clu11(self.packer, self.frame, CS.clu11, Buttons.CANCEL, self.CP))
+        can_sends.append(hyundaican.create_clu11(self.packer, self.frame, CS.clu11, Buttons.CANCEL, self.CP, self.CAN))
       elif CC.cruiseControl.resume:
         # send resume at a max freq of 10Hz
         if (self.frame - self.last_button_frame) * DT_CTRL > 0.1:
           # send 25 messages at a time to increases the likelihood of resume being accepted
-          can_sends.extend([hyundaican.create_clu11(self.packer, self.frame, CS.clu11, Buttons.RES_ACCEL, self.CP)] * 25)
+          can_sends.extend([hyundaican.create_clu11(self.packer, self.frame, CS.clu11, Buttons.RES_ACCEL, self.CP, self.CAN)] * 25)
           if (self.frame - self.last_button_frame) * DT_CTRL >= 0.15:
             self.last_button_frame = self.frame
     else:
