@@ -18,7 +18,7 @@ class OtherCarSpecs(CarSpecs):
 
 @dataclass
 class OtherCarDocs(CarDocs):
-  package: str = "Unknown"
+  package: str = "N/A"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.unknown]))
 
 
@@ -32,6 +32,7 @@ class CustomForkCarDocs(OtherCarDocs):
 @dataclass
 class ToyotaSecurityCarDocs(CustomForkCarDocs):
   def init_make(self, CP: structs.CarParams):
+    # TODO: Make this an intra-document #link to more detailed info, rather than a footnote
     self.footnotes.append(Footnote.TOYOTA_SECOC)
 
 
@@ -65,7 +66,17 @@ class CAR(Platforms):
 
   TOYOTA_SECURITY_CARS = OtherPlatformConfig(
     [
-      CustomForkCarDocs("Toyota RAV4 Prime 2021-24", package="All"),
+      ToyotaSecurityCarDocs("Subaru Solterra 2023-25"),
+      ToyotaSecurityCarDocs("Lexus NS 2022-25"),
+      ToyotaSecurityCarDocs("Toyota bZ4x 2023-25"),
+      ToyotaSecurityCarDocs("Toyota Camry 2025"),
+      ToyotaSecurityCarDocs("Toyota Corolla Cross 2022-25"),
+      ToyotaSecurityCarDocs("Toyota Highlander 2025"),
+      ToyotaSecurityCarDocs("Toyota RAV4 Prime 2021-25"),
+      ToyotaSecurityCarDocs("Toyota Sequoia 2023-25"),
+      ToyotaSecurityCarDocs("Toyota Sienna 2021-25"),
+      ToyotaSecurityCarDocs("Toyota Tundra 2022-25"),
+      ToyotaSecurityCarDocs("Toyota Venza 2021-25"),
     ],
     OtherCarSpecs(mass=0., wheelbase=0.),  # TODO: Don't require CarSpecs for unsupported cars
   )
