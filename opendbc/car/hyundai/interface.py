@@ -27,7 +27,8 @@ class CarInterface(CarInterfaceBase):
       hda2_longitudinal = hda2 and Ecu.adas in [fw.ecu for fw in car_fw] and \
                           candidate not in CANFD_UNSUPPORTED_LONGITUDINAL_CAR
 
-      ret.experimentalLongitudinalAvailable = hda2_longitudinal or candidate not in CANFD_RADAR_SCC_CAR
+      ret.experimentalLongitudinalAvailable = hda2_longitudinal or \
+                                              candidate not in (CANFD_UNSUPPORTED_LONGITUDINAL_CAR | CANFD_RADAR_SCC_CAR)
       ret.enableBsm = 0x1e5 in fingerprint[CAN.ECAN]
 
       if 0x105 in fingerprint[CAN.ECAN]:
