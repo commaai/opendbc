@@ -18,7 +18,7 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 ACCELERATION_DUE_TO_GRAVITY = 9.81  # m/s^2
 
 ACCEL_WINDUP_LIMIT = 0.5  # m/s^2 / frame
-PCM_COMPENSATION_RATE = 0.5 * DT_CTRL  # m/s^2 / frame
+PCM_COMPENSATION_RATE = 1.0 / 3.0 * DT_CTRL  # m/s^2 / frame
 
 # LKA limits
 # EPS faults if you apply torque while the steering rate is above 100 deg/s for too long
