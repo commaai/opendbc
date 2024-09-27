@@ -47,6 +47,7 @@ class FlexRayCarDocs(IncompatibleCarDocs):
     super().init_make(CP)
     self.footnotes.append(Footnote.FLEXRAY)
 
+
 # TODO: Convert most or all of these footnotes to intra-document #links to a longer explanation
 class Footnote(Enum):
   TOYOTA_SECOC = CarFootnote("Uses cryptographic message authentication, for which openpilot support is under review.", Column.SUPPORT_TYPE)
