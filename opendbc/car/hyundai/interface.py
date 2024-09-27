@@ -38,14 +38,16 @@ class CarInterface(CarInterfaceBase):
         # non-HDA2
         if 0x1cf not in fingerprint[CAN.ECAN]:
           ret.flags |= HyundaiFlags.CANFD_ALT_BUTTONS.value
-        # ICE cars do not have 0x130; GEARS message on 0x40 or 0x70 instead
-        if 0x130 not in fingerprint[CAN.ECAN]:
-          if 0x40 not in fingerprint[CAN.ECAN]:
-            ret.flags |= HyundaiFlags.CANFD_ALT_GEARS_2.value
-          else:
-            ret.flags |= HyundaiFlags.CANFD_ALT_GEARS.value
         if candidate not in CANFD_RADAR_SCC_CAR:
           ret.flags |= HyundaiFlags.CANFD_CAMERA_SCC.value
+
+      # Some HDA2 cars have alternative messages for gear checks
+      # ICE cars do not have 0x130; GEARS message on 0x40 or 0x70 instead
+      if 0x130 not in fingerprint[CAN.ECAN]:
+        if 0x40 not in fingerprint[CAN.ECAN]:
+          ret.flags |= HyundaiFlags.CANFD_ALT_GEARS_2.value
+        else:
+          ret.flags |= HyundaiFlags.CANFD_ALT_GEARS.value
 
       cfgs = [get_safety_config(structs.CarParams.SafetyModel.hyundaiCanfd), ]
       if CAN.ECAN >= 4:
