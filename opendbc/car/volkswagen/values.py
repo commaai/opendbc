@@ -8,7 +8,7 @@ from opendbc.car import dbc_dict, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car import structs
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, \
-                                                     Device
+                                                     Device, SupportType
 from opendbc.car.fw_query_definitions import EcuAddrSubAddr, FwQueryConfig, Request, p16
 
 Ecu = structs.CarParams.Ecu
@@ -202,6 +202,14 @@ class VWCarDocs(CarDocs):
       self.min_steer_speed = 0
 
 
+@dataclass
+class VWPQCarDocs(VWCarDocs):
+  def init_make(self, CP: structs.CarParams):
+    super().init_make(CP)
+    self.support_type = SupportType.DASHCAM
+    self.support_link = "#volkswagen-pq-steering-lockout"
+
+
 # Check the 7th and 8th characters of the VIN before adding a new CAR. If the
 # chassis code is already listed below, don't add a new CAR, just add to the
 # FW_VERSIONS for that existing CAR.
@@ -235,8 +243,8 @@ class CAR(Platforms):
   )
   VOLKSWAGEN_CADDY_MK3 = VolkswagenPQPlatformConfig(
     [
-      VWCarDocs("Volkswagen Caddy 2019"),
-      VWCarDocs("Volkswagen Caddy Maxi 2019"),
+      VWPQCarDocs("Volkswagen Caddy 2019"),
+      VWPQCarDocs("Volkswagen Caddy Maxi 2019"),
     ],
     VolkswagenCarSpecs(mass=1613, wheelbase=2.6, minSteerSpeed=21 * CV.KPH_TO_MS),
     chassis_codes={"2K"},
@@ -270,7 +278,7 @@ class CAR(Platforms):
     wmis={WMI.VOLKSWAGEN_MEXICO_CAR, WMI.VOLKSWAGEN_EUROPE_CAR},
   )
   VOLKSWAGEN_JETTA_MK6 = VolkswagenPQPlatformConfig(
-    [VWCarDocs("Volkswagen Jetta 2015-18")],
+    [VWPQCarDocs("Volkswagen Jetta 2015-18")],
     VolkswagenCarSpecs(mass=1518, wheelbase=2.65, minSteerSpeed=50 * CV.KPH_TO_MS, minEnableSpeed=20 * CV.KPH_TO_MS),
     chassis_codes={"5K", "AJ"},
     wmis={WMI.VOLKSWAGEN_MEXICO_CAR},
@@ -295,7 +303,7 @@ class CAR(Platforms):
     wmis={WMI.VOLKSWAGEN_EUROPE_CAR},
   )
   VOLKSWAGEN_PASSAT_NMS = VolkswagenPQPlatformConfig(
-    [VWCarDocs("Volkswagen Passat NMS 2017-22")],
+    [VWPQCarDocs("Volkswagen Passat NMS 2017-22")],
     VolkswagenCarSpecs(mass=1503, wheelbase=2.80, minSteerSpeed=50 * CV.KPH_TO_MS, minEnableSpeed=20 * CV.KPH_TO_MS),
     chassis_codes={"A3"},
     wmis={WMI.VOLKSWAGEN_USA_CAR},
@@ -311,8 +319,8 @@ class CAR(Platforms):
   )
   VOLKSWAGEN_SHARAN_MK2 = VolkswagenPQPlatformConfig(
     [
-      VWCarDocs("Volkswagen Sharan 2018-22"),
-      VWCarDocs("SEAT Alhambra 2018-20"),
+      VWPQCarDocs("Volkswagen Sharan 2018-22"),
+      VWPQCarDocs("SEAT Alhambra 2018-20"),
     ],
     VolkswagenCarSpecs(mass=1639, wheelbase=2.92, minSteerSpeed=50 * CV.KPH_TO_MS),
     chassis_codes={"7N"},
