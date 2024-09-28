@@ -45,6 +45,7 @@ class CarController(CarControllerBase):
     self.distance_button = 0
 
     self.pcm_accel_compensation = 0.0
+    self.permit_braking = 0.0
 
     self.packer = CANPacker(dbc_name)
     self.accel = 0
@@ -125,9 +126,17 @@ class CarController(CarControllerBase):
 
       self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.01, 0.01)
       pcm_accel_cmd = actuators.accel - self.pcm_accel_compensation
+
+      # Along with rate limiting positive jerk below, this greatly improves gas response time
+      # Consider the net acceleration request that the PCM should be applying (pitch included)
+      if net_acceleration_request < 0.1:
+        self.permit_braking = True
+      elif net_acceleration_request > 0.2:
+        self.permit_braking = False
     else:
       self.pcm_accel_compensation = 0.0
       pcm_accel_cmd = actuators.accel
+      self.permit_braking = True
 
     pcm_accel_cmd = clip(pcm_accel_cmd, self.params.ACCEL_MIN, self.params.ACCEL_MAX)
 
@@ -163,11 +172,11 @@ class CarController(CarControllerBase):
         # internal PCM gas command can get stuck unwinding from negative accel so we apply a generous rate limit
         pcm_accel_cmd = min(pcm_accel_cmd, self.accel + ACCEL_WINDUP_LIMIT) if CC.longActive else 0.0
 
-        can_sends.append(toyotacan.create_accel_command(self.packer, pcm_accel_cmd, pcm_cancel_cmd, self.standstill_req, lead, CS.acc_type, fcw_alert,
-                                                        self.distance_button))
+        can_sends.append(toyotacan.create_accel_command(self.packer, pcm_accel_cmd, pcm_cancel_cmd, self.permit_braking, self.standstill_req, lead,
+                                                        CS.acc_type, fcw_alert, self.distance_button))
         self.accel = pcm_accel_cmd
       else:
-        can_sends.append(toyotacan.create_accel_command(self.packer, 0, pcm_cancel_cmd, False, lead, CS.acc_type, False, self.distance_button))
+        can_sends.append(toyotacan.create_accel_command(self.packer, 0, pcm_cancel_cmd, True, False, lead, CS.acc_type, False, self.distance_button))
 
     # *** hud ui ***
     if self.CP.carFingerprint != CAR.TOYOTA_PRIUS_V:
