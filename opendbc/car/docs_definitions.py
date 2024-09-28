@@ -261,7 +261,6 @@ class CarDocsBase:
   # all the parts needed for the supported car
   car_parts: CarParts = field(default_factory=CarParts)
 
-  merged: bool = False
   support_type: SupportType = SupportType.OFFICIAL
 
   def __post_init__(self):
@@ -395,11 +394,11 @@ class CarDocsBase:
 @dataclass
 class CarDocs(CarDocsBase):
   package: str = "Unknown"
-  merged = True
+  merged: bool = True
 
 
 @dataclass
 class OtherCarDocs(CarDocsBase):
   package: str = "N/A"
-  merged = False
+  merged: bool = False
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.unknown]))
