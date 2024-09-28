@@ -323,7 +323,6 @@ class Platforms(str, ReprEnum, metaclass=PlatformsType):
     return {p for p in cls if p.config.flags & flags}
 
 
-
 @dataclass(order=True)
 class OtherPlatformConfig(PlatformConfig):
   car_docs: list[OtherCarDocs]
