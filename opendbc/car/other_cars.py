@@ -16,7 +16,6 @@ class ToyotaSecurityCarDocs(OtherCarDocs):
   def init_make(self, CP: structs.CarParams):
     self.support_type = SupportType.INCOMPATIBLE
     self.support_link = "#toyota-security"
-    self.footnotes.append(Footnote.TOYOTA_SECOC)
 
 
 @dataclass
@@ -24,13 +23,10 @@ class FlexRayCarDocs(OtherCarDocs):
   def init_make(self, CP: structs.CarParams):
     self.support_type = SupportType.INCOMPATIBLE
     self.support_link = "#flexray"
-    self.footnotes.append(Footnote.FLEXRAY)
 
 
 # TODO: Convert most or all of these footnotes to intra-document #links to a longer explanation
 class Footnote(Enum):
-  TOYOTA_SECOC = CarFootnote("Uses cryptographic message authentication, for which openpilot support is under review.", Column.SUPPORT_TYPE)
-  FLEXRAY = CarFootnote("Uses a proprietary network topology incompatible with openpilot.", Column.SUPPORT_TYPE)
   UNDER_REVIEW = CarFootnote("Official support is under review.", Column.SUPPORT_TYPE)
 
 
