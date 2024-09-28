@@ -12,7 +12,6 @@ from opendbc.car.docs_definitions import CarDocs, Column, CommonFootnote, PartTy
 from opendbc.car.car_helpers import interfaces, get_interface_attr
 from opendbc.car.values import DOC_PLATFORMS
 from opendbc.car.mock.values import CAR as MOCK
-from opendbc.car.other_cars import Footnote as OtherFootnotes
 
 
 # TODO: does opendbc need its own version of openpilot.common.basedir?
@@ -23,7 +22,6 @@ CARS_MD_TEMPLATE = os.path.join(BASEDIR, "opendbc", "car", "CARS_template.md")
 
 def get_all_footnotes() -> dict[Enum, int]:
   all_footnotes = list(CommonFootnote)
-  all_footnotes.extend(list(OtherFootnotes))
   for footnotes in get_interface_attr("Footnote", ignore_none=True).values():
     all_footnotes.extend(footnotes)
   return {fn: idx + 1 for idx, fn in enumerate(all_footnotes)}

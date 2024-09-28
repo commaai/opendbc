@@ -1,14 +1,14 @@
 from dataclasses import dataclass
-from enum import Enum
 
 from opendbc.car import structs, Platforms, OtherPlatformConfig
-from opendbc.car.docs_definitions import CarFootnote, OtherCarDocs, Column, SupportType
+from opendbc.car.docs_definitions import OtherCarDocs, SupportType
 
 
 @dataclass
 class CommunityCarDocs(OtherCarDocs):
   def init_make(self, CP: structs.CarParams):
     self.support_type = SupportType.COMMUNITY
+    self.support_link = "#community-maintained-cars"
 
 
 @dataclass
@@ -25,18 +25,13 @@ class FlexRayCarDocs(OtherCarDocs):
     self.support_link = "#flexray"
 
 
-# TODO: Convert most or all of these footnotes to intra-document #links to a longer explanation
-class Footnote(Enum):
-  UNDER_REVIEW = CarFootnote("Official support is under review.", Column.SUPPORT_TYPE)
-
-
 class CAR(Platforms):
   config: OtherPlatformConfig
 
   HYUNDAI_PALISADE_FACELIFT = OtherPlatformConfig(
     [
-      CommunityCarDocs("Hyundai Palisade 2023-24", package="All", footnotes=[Footnote.UNDER_REVIEW]),
-      CommunityCarDocs("Kia Telluride 2023-24", package="All", footnotes=[Footnote.UNDER_REVIEW]),
+      CommunityCarDocs("Hyundai Palisade 2023-24", package="HDA2"),
+      CommunityCarDocs("Kia Telluride 2023-24", package="HDA2"),
     ],
   )
 
