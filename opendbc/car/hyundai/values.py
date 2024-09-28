@@ -306,7 +306,7 @@ class CAR(Platforms):
     CarSpecs(mass=1999, wheelbase=2.9, steerRatio=15.6 * 1.15, tireStiffnessFactor=0.63),
     flags=HyundaiFlags.MANDO_RADAR | HyundaiFlags.CHECKSUM_CRC8,
   )
-  HYUNDAI_PALISADE_2023 = HyundaiCanFDPlatformConfig(
+  HYUNDAI_PALISADE_2023 = HyundaiPlatformConfig(
     [
       HyundaiCarDocs("Hyundai Palisade (without HDA II) 2023-24", "Highway Driving Assist", car_parts=CarParts.common([CarHarness.hyundai_a])),
       HyundaiCarDocs("Kia Telluride (without HDA II) 2023-24", "Highway Driving Assist", car_parts=CarParts.common([CarHarness.hyundai_l])),
