@@ -329,5 +329,3 @@ class OtherPlatformConfig(PlatformConfig):
   car_docs: list[OtherCarDocs]
   specs: CarSpecs | None = None
   dbc_dict: DbcDict = field(default_factory=lambda: dbc_dict('unknown', None))
-  flags = 0
-  platform_str = "Unknown"
