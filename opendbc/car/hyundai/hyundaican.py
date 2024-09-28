@@ -139,7 +139,7 @@ def create_lkas11_can_canfd_hybrid(packer, frame, CP, apply_steer, steer_req,
   values["NEW_SIGNAL_1"] = 0
   values["NEW_SIGNAL_5"] = 100
 
-  dat = packer.make_can_msg("LKAS11", bus, values)[2]
+  dat = packer.make_can_msg("LKAS11", bus, values)[1]
 
   # CRC Checksum as seen on 2019 Hyundai Santa Fe
   dat = dat[1:8] if can_canfd_hybrid else dat[:6] + dat[7:8]
