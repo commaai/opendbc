@@ -126,6 +126,7 @@ class CarInterface(CarInterfaceBase):
 
     tune = ret.longitudinalTuning
     if candidate in TSS2_CAR:
+      ret.stopAccel = -0.4
       tune.kpV = [0.0]
       tune.kiV = [0.5]
       ret.vEgoStopping = 0.25
