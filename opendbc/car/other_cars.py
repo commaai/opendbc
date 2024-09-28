@@ -40,7 +40,6 @@ class CAR(Platforms):
       CommunityCarDocs("Hyundai Palisade 2023-24", package="All", footnotes=[Footnote.UNDER_REVIEW]),
       CommunityCarDocs("Kia Telluride 2023-24", package="All", footnotes=[Footnote.UNDER_REVIEW]),
     ],
-    None,
   )
 
   TOYOTA_SECURITY_CARS = OtherPlatformConfig(
@@ -59,7 +58,6 @@ class CAR(Platforms):
       ToyotaSecurityCarDocs("Toyota Tundra 2022-25"),
       ToyotaSecurityCarDocs("Toyota Venza 2021-25"),
     ],
-    None,
   )
 
   AUDI_FLEXRAY = OtherPlatformConfig(
@@ -68,5 +66,4 @@ class CAR(Platforms):
       FlexRayCarDocs("Audi A5 2016-24", package="All"),
       FlexRayCarDocs("Audi Q5 2017-24", package="All"),
     ],
-    None,
   )
