@@ -15,6 +15,7 @@ class CommunityCarDocs(OtherCarDocs):
 class ToyotaSecurityCarDocs(OtherCarDocs):
   def init_make(self, CP: structs.CarParams):
     self.support_type = SupportType.INCOMPATIBLE
+    self.support_link = "#toyota-security"
     self.footnotes.append(Footnote.TOYOTA_SECOC)
 
 
@@ -22,6 +23,7 @@ class ToyotaSecurityCarDocs(OtherCarDocs):
 class FlexRayCarDocs(OtherCarDocs):
   def init_make(self, CP: structs.CarParams):
     self.support_type = SupportType.INCOMPATIBLE
+    self.support_link = "#flexray"
     self.footnotes.append(Footnote.FLEXRAY)
 
 

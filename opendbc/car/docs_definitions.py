@@ -315,10 +315,15 @@ class CarDocsBase:
       if len(tools_docs):
         hardware_col += f'<details><summary>Tools</summary><sub>{display_func(tools_docs)}</sub></details>'
 
+    if self.support_link is not None:
+      support_info = f"[{self.support_type.value}]({self.support_link})"
+    else:
+      support_info = self.support_type.value
+
     self.row: dict[Enum, str | Star] = {
       Column.MAKE: self.make,
       Column.MODEL: self.model,
-      Column.SUPPORT_TYPE: self.support_type.value,
+      Column.SUPPORT_TYPE: support_info,
       Column.PACKAGE: self.package,
       Column.LONGITUDINAL: op_long,
       Column.FSR_LONGITUDINAL: f"{max(self.min_enable_speed * CV.MS_TO_MPH, 0):.0f} mph",
@@ -395,10 +400,12 @@ class CarDocsBase:
 class CarDocs(CarDocsBase):
   package: str = "Unknown"
   merged: bool = True
+  support_link: str | None = None
 
 
 @dataclass
 class OtherCarDocs(CarDocsBase):
   package: str = "N/A"
   merged: bool = False
+  support_link: str | None = None
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.unknown]))
