@@ -560,16 +560,6 @@ FW_VERSIONS = {
     ],
   },
   CAR.HONDA_ODYSSEY_BOSCH: {
-    (Ecu.programmedFuelInjection, 0x18da10f1, None): [
-      b'37805-5MR-C110\x00\x00',  # 2023 Elite - user "Shams"
-      b'37805-5MR-C120\x00\x00',  # 2023 (unknown trim)
-      b'37805-5MR-C320\x00\x00',  # 2024 Touring - 680f1d45486d2971
-      b'37805-5MR-C730\x00\x00',  # 2021 Touring
-      b'37805-5MR-C810\x00\x00',  # 2025 Elite - e0c2250590b16ce0
-      b'37805-5MR-C910\x00\x00',  # 2022 Touring
-      b'37805-5MR-C920\x00\x00',  # 2022 Elite
-      b'37805-5MR-C930\x00\x00',  # 2022 Elite - FW Update - c443ca9eee127f66
-    ],
     (Ecu.transmission, 0x18da1ef1, None): [
       b'28102-5MX-A100\x00\x00',  # 2021 Touring, 2022 Elite - c443ca9eee127f66
       b'28102-5MX-A200\x00\x00',  # 2023 (unknown trim), 2024 Touring - 680f1d45486d2971
@@ -605,17 +595,6 @@ FW_VERSIONS = {
       b'57114-THR-A230\x00\x00', # 2021+
       b'57114-THR-A240\x00\x00', # 2022 Elite, 2024 Touring - 680f1d45486d2971
       b'57114-THR-A520\x00\x00', # 2025 Elite - e0c2250590b16ce0
-    ],
-    (Ecu.combinationMeter, 0x18da60f1, None): [
-      b'78108-THR-B310\x00\x00',  # 2025 Elite - e0c2250590b16ce0
-      b'78109-THR-AQ10\x00\x00',  # 2022 EX
-      b'78109-THR-AR10\x00\x00',  # 2021 EX-L
-      b'78109-THR-AS10\x00\x00',  # 2021 Touring
-      b'78109-THR-AT10\x00\x00',  # 2021 (unknown trim), 2022 Elite - c443ca9eee127f66
-      b'78109-THR-AW10\x00\x00',  # 2023 (unknown trim)
-      b'78109-THR-AX10\x00\x00',  # 2024 Touring - 680f1d45486d2971
-      b'78109-THR-AY10\x00\x00',  # 2023 Elite - user "Shams"
-      b'78109-THR-CT10\x00\x00',  # 2022 Touring
     ],
   },
   CAR.HONDA_PILOT: {
