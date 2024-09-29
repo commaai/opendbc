@@ -577,9 +577,9 @@ FW_VERSIONS = {
       b'38897-THR-A410\x00\x00', # 2024 Touring - 680f1d45486d2971
     ],
     (Ecu.eps, 0x18da30f1, None): [
-        b'39990-THR-A050\x00\x00', #2021+ - 680f1d45486d2971
-        b'39990-THR-A110\x00\x00', # 2025 Elite - e0c2250590b16ce0
-        ],
+      b'39990-THR-A050\x00\x00', # 2021+ - 680f1d45486d2971
+      b'39990-THR-A110\x00\x00', # 2025 Elite - e0c2250590b16ce0
+      ],
     (Ecu.fwdRadar, 0x18dab0f1, None): [b'36802-THR-A220\x00\x00'], # 2021+ - 680f1d45486d2971
     (Ecu.fwdCamera, 0x18dab5f1, None): [
       b'36161-THR-A220\x00\x00', # 2021+ - c443ca9eee127f66
