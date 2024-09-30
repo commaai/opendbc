@@ -97,12 +97,6 @@ HUDData = namedtuple("HUDData",
                       "lanes_visible", "fcw", "acc_alert", "steer_required", "lead_distance_bars"])
 
 
-def rate_limit_steer(new_steer, last_steer):
-  # TODO just hardcoded ramp to min/max in 0.33s for all Honda
-  MAX_DELTA = 3 * DT_CTRL
-  return clip(new_steer, last_steer - MAX_DELTA, last_steer + MAX_DELTA)
-
-
 class CarController(CarControllerBase):
   def __init__(self, dbc_name, CP):
     super().__init__(dbc_name, CP)
@@ -138,7 +132,8 @@ class CarController(CarControllerBase):
       gas, brake = 0.0, 0.0
 
     # *** rate limit steer ***
-    limited_steer = rate_limit_steer(actuators.steer, self.last_steer)
+    limited_steer = rate_limit(actuators.steer, self.last_steer, -self.params.STEER_DELTA_DOWN * DT_CTRL,
+                               self.params.STEER_DELTA_UP * DT_CTRL)
     self.last_steer = limited_steer
 
     # *** apply brake hysteresis ***
@@ -233,6 +228,7 @@ class CarController(CarControllerBase):
           self.brake = apply_brake / self.params.NIDEC_BRAKE_MAX
 
     # Send dashboard UI commands.
+    # On Nidec, this controls longitudinal positive acceleration
     if self.frame % 10 == 0:
       hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
                     hud_control.lanesVisible, fcw_display, acc_alert, steer_required, hud_control.leadDistanceBars)
