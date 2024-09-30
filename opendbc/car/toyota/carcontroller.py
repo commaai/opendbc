@@ -2,7 +2,7 @@ import copy
 import math
 from opendbc.car import apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, make_tester_present_msg, rate_limit, structs
 from opendbc.car.can_definitions import CanData
-from opendbc.car.common.numpy_fast import clip
+from opendbc.car.common.numpy_fast import clip, interp
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.toyota import toyotacan
 from opendbc.car.toyota.values import CAR, STATIC_DSU_MSGS, NO_STOP_TIMER_CAR, TSS2_CAR, \
@@ -112,13 +112,21 @@ class CarController(CarControllerBase):
     # TODO: sometimes when switching from brake to gas quickly, CLUTCH->ACCEL_NET shows a slow unwind. make it go to 0 immediately
     if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
       # calculate amount of acceleration PCM should apply to reach target, given pitch
+      # pitch has less of an effect
       accel_due_to_pitch = math.sin(CS.slope_angle) * ACCELERATION_DUE_TO_GRAVITY
+      accel_due_to_pitch = interp(actuators.accel, [self.params.ACCEL_MIN, self.params.ACCEL_MIN / 2], [0, accel_due_to_pitch])
+
       net_acceleration_request = actuators.accel + accel_due_to_pitch
 
       # let PCM handle stopping for now
       pcm_accel_compensation = 0.0
       if actuators.longControlState != LongCtrlState.stopping:
         pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - net_acceleration_request)
+
+        # at lower decelerations, the PCM_CRUISE->ACCEL_NET over-reports braking request, so this leads to undershooting
+        # TODO: this is a hack
+        pcm_accel_compensation = interp(actuators.accel, [self.params.ACCEL_MIN, self.params.ACCEL_MIN + 1],
+                                        [pcm_accel_compensation / 2, pcm_accel_compensation])
 
       # prevent compensation windup
       pcm_accel_compensation = clip(pcm_accel_compensation, actuators.accel - self.params.ACCEL_MAX,
@@ -129,6 +137,8 @@ class CarController(CarControllerBase):
 
       # Along with rate limiting positive jerk below, this greatly improves gas response time
       # Consider the net acceleration request that the PCM should be applying (pitch included)
+      # what about low speed where 0.3 might still be braking due to engine neutral force?
+      # TODO: what if neutral accel matters?
       if net_acceleration_request < 0.1:
         self.permit_braking = True
       elif net_acceleration_request > 0.2:
