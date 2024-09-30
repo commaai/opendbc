@@ -25,6 +25,7 @@ class CarInterface(CarInterfaceBase):
       ret.safetyConfigs[0].safetyParam |= Panda.FLAG_TOYOTA_ALT_BRAKE_224
 
     if candidate in SECOC_CAR:
+      ret.securityConfig.secOcRequired = True
       ret.safetyConfigs[0].safetyParam |= Panda.FLAG_TOYOTA_SECOC_CAR
 
     if candidate in ANGLE_CONTROL_CAR:
