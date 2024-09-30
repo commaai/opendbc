@@ -71,7 +71,7 @@ class CarController(CarControllerBase):
         self.secoc_prev_reset_counter = CS.secoc_synchronization['RESET_CNT']
 
         # Verify mac of SecOC synchronization message to ensure we have the right key
-        expected_mac = secoc.build_sync_mac(self.CP.secOCKey, int(CS.secoc_synchronization['TRIP_CNT']), int(CS.secoc_synchronization['RESET_CNT']))
+        expected_mac = secoc.build_sync_mac(self.secoc_key, int(CS.secoc_synchronization['TRIP_CNT']), int(CS.secoc_synchronization['RESET_CNT']))
         if int(CS.secoc_synchronization['AUTHENTICATOR']) != expected_mac:
           # TODO: wrong thing to do from a car port, but we can't use cloudlog, add an error counter?
           print("SecOC MAC mismatch")
@@ -112,7 +112,7 @@ class CarController(CarControllerBase):
     steer_command = toyotacan.create_steer_command(self.packer, apply_steer, apply_steer_req)
     if self.CP.flags & ToyotaFlags.SECOC.value:
       # TODO: check if this slow and needs to be done by the CANPacker
-      steer_command = secoc.add_mac(self.CP.secOCKey,
+      steer_command = secoc.add_mac(self.secoc_key,
                                     int(CS.secoc_synchronization['TRIP_CNT']),
                                     int(CS.secoc_synchronization['RESET_CNT']),
                                     self.secoc_lka_message_counter,
@@ -135,7 +135,7 @@ class CarController(CarControllerBase):
 
       if self.CP.flags & ToyotaFlags.SECOC.value:
         lta_steer_2 = toyotacan.create_lta_steer_command_2(self.packer, self.frame // 2)
-        lta_steer_2 = secoc.add_mac(self.CP.secOCKey,
+        lta_steer_2 = secoc.add_mac(self.secoc_key,
                                     int(CS.secoc_synchronization['TRIP_CNT']),
                                     int(CS.secoc_synchronization['RESET_CNT']),
                                     self.secoc_lta_message_counter,
