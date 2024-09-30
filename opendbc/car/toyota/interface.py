@@ -135,14 +135,15 @@ class CarInterface(CarInterfaceBase):
     ret.minEnableSpeed = -1. if stop_and_go else MIN_ACC_SPEED
 
     # Read SecOC key from param
-    if ret.flags & ToyotaFlags.SECOC.value:
-      # FIXME: have to find a different way after the opendbc refactor
-      # key = Params().get("SecOCKey", encoding='utf8')
-      key = None
-      # TODO: show warning
-      if key is None:
-        key = "0" * 32
-      ret.secOCKey = bytes.fromhex(key.strip())
+    # TODO: read this in card/selfdrived
+    # if ret.flags & ToyotaFlags.SECOC.value:
+    #   # FIXME: have to find a different way after the opendbc refactor
+    #   # key = Params().get("SecOCKey", encoding='utf8')
+    #   key = None
+    #   # TODO: show warning
+    #   if key is None:
+    #    key = "0" * 32
+    #   ret.secOCKey = bytes.fromhex(key.strip())
 
     tune = ret.longitudinalTuning
     if candidate in TSS2_CAR:
