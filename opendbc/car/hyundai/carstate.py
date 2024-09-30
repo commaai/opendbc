@@ -318,6 +318,9 @@ class CarState(CarStateBase):
     else:
       messages.append(("LVR12", 100))
 
+    if CP.flags & HyundaiFlags.HAS_LFA_BUTTON:
+      messages.append(("BCM_PO_11", 50))
+
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, 0)
 
   @staticmethod
