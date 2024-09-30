@@ -112,10 +112,7 @@ class CarController(CarControllerBase):
     # TODO: sometimes when switching from brake to gas quickly, CLUTCH->ACCEL_NET shows a slow unwind. make it go to 0 immediately
     if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
       # calculate amount of acceleration PCM should apply to reach target, given pitch
-      # pitch has less of an effect
       accel_due_to_pitch = math.sin(CS.slope_angle) * ACCELERATION_DUE_TO_GRAVITY
-      accel_due_to_pitch = interp(actuators.accel, [self.params.ACCEL_MIN, self.params.ACCEL_MIN / 2], [0, accel_due_to_pitch])
-
       net_acceleration_request = actuators.accel + accel_due_to_pitch
 
       # let PCM handle stopping for now
@@ -137,8 +134,6 @@ class CarController(CarControllerBase):
 
       # Along with rate limiting positive jerk below, this greatly improves gas response time
       # Consider the net acceleration request that the PCM should be applying (pitch included)
-      # what about low speed where 0.3 might still be braking due to engine neutral force?
-      # TODO: what if neutral accel matters?
       if net_acceleration_request < 0.1:
         self.permit_braking = True
       elif net_acceleration_request > 0.2:
