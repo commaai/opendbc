@@ -1,6 +1,6 @@
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
-from opendbc.car import create_button_events, structs
+from opendbc.car import structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.mazda.values import DBC, LKAS_LIMITS, MazdaFlags
@@ -27,7 +27,6 @@ class CarState(CarStateBase):
 
     ret = structs.CarState()
 
-    prev_distance_button = self.distance_button
     self.distance_button = cp.vl["CRZ_BTNS"]["DISTANCE_LESS"]
 
     ret.wheelSpeeds = self.get_wheel_speeds(
@@ -113,7 +112,7 @@ class CarState(CarStateBase):
     ret.steerFaultPermanent = cp_cam.vl["CAM_LKAS"]["ERR_BIT_1"] == 1
 
     # TODO: add button types for inc and dec
-    ret.buttonEvents = create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise})
+    ret.buttonEvents = self.button_tracker.create_button_events(self.distance_button, {1: ButtonType.gapAdjustCruise})
 
     return ret
 

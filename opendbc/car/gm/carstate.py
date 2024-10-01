@@ -1,7 +1,7 @@
 import copy
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
-from opendbc.car import create_button_events, structs
+from opendbc.car import structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.numpy_fast import mean
 from opendbc.car.interfaces import CarStateBase
@@ -37,7 +37,6 @@ class CarState(CarStateBase):
     ret = structs.CarState()
 
     prev_cruise_buttons = self.cruise_buttons
-    prev_distance_button = self.distance_button
     self.cruise_buttons = pt_cp.vl["ASCMSteeringButton"]["ACCButtons"]
     self.distance_button = pt_cp.vl["ASCMSteeringButton"]["DistanceButton"]
     self.buttons_counter = pt_cp.vl["ASCMSteeringButton"]["RollingCounter"]
@@ -132,10 +131,8 @@ class CarState(CarStateBase):
     # Don't add event if transitioning from INIT, unless it's to an actual button
     if self.cruise_buttons != CruiseButtons.UNPRESS or prev_cruise_buttons != CruiseButtons.INIT:
       ret.buttonEvents = [
-        *create_button_events(self.cruise_buttons, prev_cruise_buttons, BUTTONS_DICT,
-                              unpressed_btn=CruiseButtons.UNPRESS),
-        *create_button_events(self.distance_button, prev_distance_button,
-                              {1: ButtonType.gapAdjustCruise})
+        *self.button_tracker.create_button_events(self.cruise_buttons, BUTTONS_DICT, unpressed_btn=CruiseButtons.UNPRESS),
+        *self.button_tracker.create_button_events(self.distance_button, {1: ButtonType.gapAdjustCruise})
       ]
 
     return ret

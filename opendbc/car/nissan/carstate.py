@@ -2,7 +2,7 @@ import copy
 from collections import deque
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
-from opendbc.car import create_button_events, structs
+from opendbc.car import structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.nissan.values import CAR, DBC, CarControllerParams
@@ -28,7 +28,6 @@ class CarState(CarStateBase):
   def update(self, cp, cp_cam, cp_adas, *_) -> structs.CarState:
     ret = structs.CarState()
 
-    prev_distance_button = self.distance_button
     self.distance_button = cp.vl["CRUISE_THROTTLE"]["FOLLOW_DISTANCE_BUTTON"]
 
     if self.CP.carFingerprint in (CAR.NISSAN_ROGUE, CAR.NISSAN_XTRAIL, CAR.NISSAN_ALTIMA):
@@ -123,7 +122,7 @@ class CarState(CarStateBase):
       self.lkas_hud_msg = copy.copy(cp_adas.vl["PROPILOT_HUD"])
       self.lkas_hud_info_msg = copy.copy(cp_adas.vl["PROPILOT_HUD_INFO_MSG"])
 
-    ret.buttonEvents = create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise})
+    ret.buttonEvents = self.button_tracker.create_button_events(self.distance_button, {1: ButtonType.gapAdjustCruise})
 
     return ret
 
