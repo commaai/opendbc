@@ -2,7 +2,7 @@ from collections import defaultdict
 
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
-from opendbc.car import structs
+from opendbc.car import create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.numpy_fast import interp
 from opendbc.car.honda.hondacan import CanBus, get_cruise_speed_conversion
@@ -116,6 +116,9 @@ class CarState(CarStateBase):
     v_weight_v = [0., 1.]  # don't trust smooth speed at low values to avoid premature zero snapping
     v_weight_bp = [1., 6.]   # smooth blending, below ~0.6m/s the smooth speed snaps to zero
 
+    # update prevs, update must run once per loop
+    prev_cruise_buttons = self.cruise_buttons
+    prev_cruise_setting = self.cruise_setting
     self.cruise_setting = cp.vl["SCM_BUTTONS"]["CRUISE_SETTING"]
     self.cruise_buttons = cp.vl["SCM_BUTTONS"]["CRUISE_BUTTONS"]
 
@@ -261,8 +264,8 @@ class CarState(CarStateBase):
       ret.rightBlindspot = cp_body.vl["BSM_STATUS_RIGHT"]["BSM_ALERT"] == 1
 
     ret.buttonEvents = [
-      *self.button_tracker.create_button_events(self.cruise_buttons, BUTTONS_DICT),
-      *self.button_tracker.create_button_events(self.cruise_setting, SETTINGS_BUTTONS_DICT),
+      *create_button_events(self.cruise_buttons, prev_cruise_buttons, BUTTONS_DICT),
+      *create_button_events(self.cruise_setting, prev_cruise_setting, SETTINGS_BUTTONS_DICT),
     ]
 
     return ret
