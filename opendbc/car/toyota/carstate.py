@@ -73,13 +73,6 @@ class CarState(CarStateBase):
       if self.pcm_accel_net + neutral_accel < 0.0:
         self.pcm_accel_net += neutral_accel
 
-    # filtered pitch estimate from the car, negative is a downward slope
-    # FIXME: check for equivalent message on RAV4 Prime
-    if self.CP.flags & ToyotaFlags.SECOC.value:
-      self.slope_angle = 0.0
-    else:
-      self.slope_angle = cp.vl["VSC1S07"]["ASLP"] * CV.DEG_TO_RAD
-
     ret.doorOpen = any([cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_FL"], cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_FR"],
                         cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_RL"], cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_RR"]])
     ret.seatbeltUnlatched = cp.vl["BODY_CONTROL_STATE"]["SEATBELT_DRIVER_UNLATCHED"] != 0
@@ -94,6 +87,7 @@ class CarState(CarStateBase):
     else:
       # TODO: non-SecOC cars also seem to have GAS_PEDAL.GAS_PEDAL_USER, come back and validate/unify this case
       ret.gasPressed = cp.vl["PCM_CRUISE"]["GAS_RELEASED"] == 0
+      self.slope_angle = cp.vl["VSC1S07"]["ASLP"] * CV.DEG_TO_RAD  # filtered pitch from the car, negative is downward
 
     ret.wheelSpeeds = self.get_wheel_speeds(
       cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FL"],
@@ -228,7 +222,6 @@ class CarState(CarStateBase):
       ("BODY_CONTROL_STATE", 3),
       ("BODY_CONTROL_STATE_2", 2),
       ("ESP_CONTROL", 3),
-      #("VSC1S07", 20),
       ("EPS_STATUS", 25),
       ("BRAKE_MODULE", 40),
       ("WHEEL_SPEEDS", 80),
@@ -248,6 +241,8 @@ class CarState(CarStateBase):
 
     if CP.flags & ToyotaFlags.SECOC:
       messages.append(("GAS_PEDAL", 42))
+    else:
+      messages.append(("VSC1S07", 20))
 
     if CP.carFingerprint not in [CAR.TOYOTA_MIRAI, CAR.TOYOTA_RAV4_PRIME]:
       messages.append(("ENGINE_RPM", 42))
@@ -275,11 +270,6 @@ class CarState(CarStateBase):
     if CP.flags & ToyotaFlags.SECOC.value:
       messages += [
         ("SECOC_SYNCHRONIZATION", 10),
-      ]
-    else:
-      # TODO: Remove when pitch signal figured out for RAV4 Prime
-      messages += [
-        ("VSC1S07", 20),
       ]
 
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, 0)
