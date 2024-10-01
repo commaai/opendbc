@@ -1,4 +1,4 @@
-from opendbc.car.common.numpy_fast import clip
+from openpilot.common.numpy_fast import clip
 
 ACC_CTRL_ERROR    = 6
 ACC_CTRL_OVERRIDE = 4
@@ -17,7 +17,7 @@ ACC_HUD_ENABLED  = 2
 ACC_HUD_DISABLED = 0
 
 
-def create_steering_control_curvature(packer, bus, apply_curvature, lkas_enabled, power):
+def create_steering_control(packer, bus, apply_curvature, lkas_enabled, power):
   # active lateral control deactivates active steering wheel centering 
   values = {
     #"Curvature": abs(apply_curvature) * 1000, # in 1/mm
@@ -25,13 +25,13 @@ def create_steering_control_curvature(packer, bus, apply_curvature, lkas_enabled
     "VZ": 1 if apply_curvature < 0 and lkas_enabled == 1 else 0, # > for curvature
     "Power": power if lkas_enabled else 0,
     "Active": lkas_enabled,
-    "Active_02": lkas_enabled,
-    "Inactive": not lkas_enabled,
+    "Request": lkas_enabled,
+    "Standby": not lkas_enabled,
   }
   return packer.make_can_msg("HCA_03", bus, values)
 
 
-def create_steering_control(packer, bus, apply_steer, lkas_enabled):
+def create_steering_boost_control(packer, bus, apply_steer, lkas_enabled):
   values = {
     "HCA_01_LM_Offset": abs(apply_steer),
     "HCA_01_Request": lkas_enabled,
@@ -39,13 +39,14 @@ def create_steering_control(packer, bus, apply_steer, lkas_enabled):
     "HCA_01_Enable": lkas_enabled,
     "HCA_01_Standby": not lkas_enabled,
     "HCA_01_Available": 1,
+    "HCA_01_Vib_Freq": 3,
   }
   return packer.make_can_msg("HCA_01", bus, values)
 
 
 def create_lka_hud_control(packer, bus, ldw_stock_values, lat_active, steering_pressed, hud_alert, hud_control, sound_alert):
   display_mode = 1 if lat_active else 0 # travel assist style showing yellow lanes when op is active
-  
+
   values = {}
   if len(ldw_stock_values):
     values = {s: ldw_stock_values[s] for s in [
@@ -65,9 +66,9 @@ def create_lka_hud_control(packer, bus, ldw_stock_values, lat_active, steering_p
     "LDW_Texte": hud_alert,
   })
   return packer.make_can_msg("LDW_02", bus, values)
-  
 
-def create_acc_buttons_control(packer, bus, gra_stock_values, cancel=False, resume=False):
+
+def create_acc_buttons_control(packer, bus, gra_stock_values, frame=0, buttons=0, cancel=False, resume=False, custom_stock_long=False):
   values = {s: gra_stock_values[s] for s in [
     "GRA_Hauptschalter",           # ACC button, on/off
     "GRA_Typ_Hauptschalter",       # ACC main button type
@@ -76,13 +77,22 @@ def create_acc_buttons_control(packer, bus, gra_stock_values, cancel=False, resu
     "GRA_ButtonTypeInfo",          # unknown related to stalk type
   ]}
 
+  accel_cruise = 1 if buttons == 1 else 0
+  decel_cruise = 1 if buttons == 2 else 0
+  resume_cruise = 1 if buttons == 3 else 0
+  set_cruise = 1 if buttons == 4 else 0
+
   values.update({
-    "COUNTER": (gra_stock_values["COUNTER"] + 1) % 16,
+    "COUNTER": (frame + 1) % 0x10 if custom_stock_long else (gra_stock_values["COUNTER"] + 1) % 16,
     "GRA_Abbrechen": cancel,
-    "GRA_Tip_Wiederaufnahme": resume,
+    "GRA_Tip_Wiederaufnahme": resume or resume_cruise,
+    "GRA_Tip_Setzen": set_cruise,
+    "GRA_Tip_Runter": decel_cruise,
+    "GRA_Tip_Hoch": accel_cruise,
   })
+
   return packer.make_can_msg("GRA_ACC_01", bus, values)
-  
+
 
 def acc_control_value(main_switch_on, acc_faulted, long_active, esp_hold, override):
 
@@ -90,7 +100,7 @@ def acc_control_value(main_switch_on, acc_faulted, long_active, esp_hold, overri
     acc_control = ACC_CTRL_ERROR # error state
   elif long_active:
     if override:
-      acc_control = ACC_CTRL_ACTIVE if esp_hold else ACC_CTRL_OVERRIDE # startup while overriding is a starting condition
+      acc_control = ACC_CTRL_OVERRIDE # overriding
     else:
       acc_control = ACC_CTRL_ACTIVE # active long control state
   elif main_switch_on:
@@ -107,7 +117,7 @@ def acc_hold_type(main_switch_on, acc_faulted, long_active, starting, stopping, 
   if acc_faulted or not long_active:
     acc_hold_type = ACC_HMS_NO_REQUEST # no hold request
   elif override:
-    acc_hold_type = ACC_HMS_RELEASE if esp_hold else ACC_HMS_NO_REQUEST
+    acc_hold_type = ACC_HMS_NO_REQUEST # overriding / no request
   elif starting:
     acc_hold_type = ACC_HMS_RELEASE # release request and startup
   elif stopping or esp_hold:
@@ -118,13 +128,13 @@ def acc_hold_type(main_switch_on, acc_faulted, long_active, starting, stopping, 
   return acc_hold_type
 
 
-def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, acc_hold_type, stopping, starting, lower_jerk, upper_jerk, esp_hold, override, speed, reversing):
+def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, acc_hold_type, stopping, starting, lower_jerk, upper_jerk, esp_hold, override, speed, reversing, travel_assist_available):
   # active longitudinal control disables one pedal driving (regen mode of accelerator) while using overriding mechnism
   commands = []
 
   if acc_enabled:
     if override: # the car expects a non inactive accel while overriding
-      acceleration = 0.00 # override accel
+      acceleration = 0.00
     else:
       acceleration = accel
   else:
@@ -156,15 +166,16 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
 
   commands.append(packer.make_can_msg("MEB_ACC_02", bus, values))
 
-  # satisfy car to prevent errors when pressing Travel Assist Button
-  # the button does nothing with this
-  values_ta = {
-     "Travel_Assist_Status":    2, # ready
-     "Travel_Assist_Request":   0, # no request
-     "Travel_Assist_Available": 1, # button is illuminated
-  }
+  if travel_assist_available:
+    # satisfy car to prevent errors when pressing Travel Assist Button
+    # testing effects of enabling this while acc enabled
+    values_ta = {
+       "Travel_Assist_Status":    4 if acc_enabled else 2,
+       "Travel_Assist_Request":   0,
+       "Travel_Assist_Available": 1, # button is illuminated
+    }
 
-  commands.append(packer.make_can_msg("MEB_Travel_Assist_01", bus, values_ta))
+    commands.append(packer.make_can_msg("MEB_Travel_Assist_01", bus, values_ta))
 
   return commands
 
@@ -175,7 +186,7 @@ def acc_hud_status_value(main_switch_on, acc_faulted, long_active, esp_hold, ove
     acc_hud_control = ACC_HUD_ERROR # error state
   elif long_active:
     if override:
-      acc_hud_control = ACC_HUD_ACTIVE if esp_hold else ACC_HUD_OVERRIDE # startup while overriding is a starting condition and shown as default active
+      acc_hud_control = ACC_HUD_OVERRIDE # overriding
     else:
       acc_hud_control = ACC_HUD_ACTIVE # active
   elif main_switch_on:
@@ -220,11 +231,7 @@ def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, di
     "ACC_Enabled":             1 if acc_control == ACC_HUD_ACTIVE else 0,
     "ACC_Standby_Override":    1 if acc_control != ACC_HUD_ACTIVE else 0,
     "ACC_AKTIV_regelt":        1 if acc_control == ACC_HUD_ACTIVE else 0,
-    "ACC_Limiter_Mode":        0,
     "Lead_Brightness":         3 if acc_control == ACC_HUD_ACTIVE else 0, # object shows in colour
-    "Unknown_03":              106, # prevents errors
-    "Unknown_01":              0, # prevents errors
-    "Unknown_08":              0, # prevents errors
     "ACC_Events":              3 if esp_hold and acc_control == ACC_HUD_ACTIVE else 0, # acc ready message at standstill
     "Zeitluecke_1":            get_desired_gap(distance_bars, desired_gap), # desired distance to lead object for distance bar 1
     "Zeitluecke_2":            get_desired_gap(distance_bars, desired_gap), # desired distance to lead object for distance bar 2
@@ -233,8 +240,9 @@ def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, di
     "Zeitluecke_5":            get_desired_gap(distance_bars, desired_gap), # desired distance to lead object for distance bar 5
     "ACC_Anzeige_Zeitluecke":  change_distance_bar if acc_control != ACC_HUD_DISABLED else 0, # show distance bar selection
     "Zeitluecke_Farbe":        1 if acc_control in (ACC_HUD_ENABLED, ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0, # yellow (1) or white (0) time gap
-    "SET_ME_0X1":              0x1, # unknown
-    "SET_ME_0X3FF":            0x3FF, # unknown
+    "SET_ME_0X1":              0x1,    # unknown
+    "SET_ME_0X6A":             0x6A,   # unknown
+    "SET_ME_0X3FF":            0x3FF,  # unknown
     "SET_ME_0XFFFF":           0xFFFF, # unknown
     "SET_ME_0X7FFF":           0x7FFF, # unknown
   }
