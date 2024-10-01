@@ -76,18 +76,17 @@ class CarControllerParams:
       self.ACC_HUD_STEP                    = 6     # MEB_ACC_01 message frequency 16Hz
       self.STEER_DRIVER_ALLOWANCE          = 80    # Driver intervention threshold 0.8 Nm
       self.STEERING_POWER_MAX              = 127   # HCA_03 maximum steering power
-      self.STEERING_POWER_MIN              = 40    # HCA_03 minimum steering power
-      self.STEERING_POWER_USER             = 60    # HCA_03 desired steering power for user intervention
-      self.STEERING_POWER_STEPS            = 5     # HCA_03 steering power counter steps
+      self.STEERING_POWER_MIN              = 60    # HCA_03 minimum steering power
+      self.STEERING_POWER_STEPS            = 10    # HCA_03 steering power counter steps
       self.STEERING_POWER_MAX_BY_SPEED     = 20    # HCA_03 speed in m/s^2 where maximum steering power is reached
       #self.CURVATURE_MAX                   = 0.195 # HCA_03 maximum curvature in 1/m, we estimate that about 0.2 1/m is max of signal
       #self.CURVATURE_ERROR                 = 0.01  # HCA_03 curvature error, yaw rate error at standstill in range of about 0.2 deg/sec
       #self.ANGLE_RATE_LIMIT_UP             = AngleRateLimit(speed_bp=[5, 12, 25], angle_v=[0.004, 0.002, 0.001]) # curvature safety limit up
       #self.ANGLE_RATE_LIMIT_DOWN           = AngleRateLimit(speed_bp=[5, 12, 25], angle_v=[0.005, 0.0025, 0.0015]) # curvature safety limit down
       self.ANGLE_ERROR                     = 20    # HCA_03 maximum difference from steering angle
-      self.ANGLE_MAX                       = 360   # HCA_03 maximum angle
-      self.ANGLE_RATE_LIMIT_UP             = AngleRateLimit(speed_bp=[0., 6., 15.], angle_v=[12., 10.0, 0.6])
-      self.ANGLE_RATE_LIMIT_DOWN           = AngleRateLimit(speed_bp=[0., 6., 15.], angle_v=[12., 11.0, 0.8])
+      self.ANGLE_MAX                       = 360   # HCA_03 maximum angle, max for HCA_03 ~ 420 deg
+      self.ANGLE_RATE_LIMIT_UP             = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[12., 4., 0.4]) # max for HCA_03 ~ 120-130 deg/s
+      self.ANGLE_RATE_LIMIT_DOWN           = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[12., 8., 0.8])
       self.ANGLE_POWER_FACTOR              = 4
       
 
@@ -219,7 +218,7 @@ class VolkswagenPQPlatformConfig(VolkswagenMQBPlatformConfig):
 @dataclass(frozen=True, kw_only=True)
 class VolkswagenCarSpecs(CarSpecs):
   centerToFrontRatio: float = 0.45
-  steerRatio: float = 15.6
+  steerRatio: float = 15 #15.6
   minSteerSpeed: float = CarControllerParams.DEFAULT_MIN_STEER_SPEED
 
 
