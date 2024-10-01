@@ -55,9 +55,6 @@ class CarControllerParams:
   JERK_LIMIT_MAX = 5
   JERK_LIMIT_MIN = -5
 
-  def __init__(self, CP):
-    pass
-
 
 class TeslaFlags(IntFlag):
   FLAG_TESLA_LONG_CONTROL = 1
