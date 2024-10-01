@@ -2,7 +2,7 @@ from panda import Panda
 from panda import uds
 from opendbc.car import structs, get_safety_config
 from opendbc.car.toyota.values import Ecu, CAR, DBC, ToyotaFlags, CarControllerParams, TSS2_CAR, RADAR_ACC_CAR, NO_DSU_CAR, \
-                                                  MIN_ACC_SPEED, EPS_SCALE, UNSUPPORTED_DSU_CAR, NO_STOP_TIMER_CAR, ANGLE_CONTROL_CAR, SECOC_CAR
+                                                  MIN_ACC_SPEED, EPS_SCALE, UNSUPPORTED_DSU_CAR, NO_STOP_TIMER_CAR, ANGLE_CONTROL_CAR
 from opendbc.car.disable_ecu import disable_ecu
 from opendbc.car.interfaces import CarInterfaceBase
 
@@ -24,7 +24,7 @@ class CarInterface(CarInterfaceBase):
     if DBC[candidate]["pt"] == "toyota_new_mc_pt_generated":
       ret.safetyConfigs[0].safetyParam |= Panda.FLAG_TOYOTA_ALT_BRAKE_224
 
-    if candidate in SECOC_CAR:
+    if ret.flags & ToyotaFlags.SECOC:
       ret.securityConfig.secOcRequired = True
       ret.safetyConfigs[0].safetyParam |= Panda.FLAG_TOYOTA_SECOC_CAR
 
