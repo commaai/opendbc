@@ -88,10 +88,11 @@ class CarState(CarStateBase):
       ret.gasPressed = cp.vl["GAS_PEDAL"]["GAS_PEDAL_USER"] > 0
       can_gear = int(cp.vl["GEAR_PACKET_HYBRID"]["GEAR"])
     else:
-      # TODO: non-SecOC cars also seem to have GAS_PEDAL.GAS_PEDAL_USER, come back and validate/unify this case
-      ret.gasPressed = cp.vl["PCM_CRUISE"]["GAS_RELEASED"] == 0
+      ret.gasPressed = cp.vl["PCM_CRUISE"]["GAS_RELEASED"] == 0  # TODO: these also have GAS_PEDAL, come back and unify
       self.slope_angle = cp.vl["VSC1S07"]["ASLP"] * CV.DEG_TO_RAD  # filtered pitch from the car, negative is downward
       can_gear = int(cp.vl["GEAR_PACKET"]["GEAR"])
+      if self.CP.carFingerprint != CAR.TOYOTA_MIRAI:
+        ret.engineRpm = cp.vl["ENGINE_RPM"]["RPM"]
 
     ret.wheelSpeeds = self.get_wheel_speeds(
       cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FL"],
@@ -125,9 +126,6 @@ class CarState(CarStateBase):
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(can_gear, None))
     ret.leftBlinker = cp.vl["BLINKERS_STATE"]["TURN_SIGNALS"] == 1
     ret.rightBlinker = cp.vl["BLINKERS_STATE"]["TURN_SIGNALS"] == 2
-
-    if self.CP.carFingerprint not in [CAR.TOYOTA_MIRAI, CAR.TOYOTA_RAV4_PRIME]:
-      ret.engineRpm = cp.vl["ENGINE_RPM"]["RPM"]
 
     ret.steeringTorque = cp.vl["STEER_TORQUE_SENSOR"]["STEER_TORQUE_DRIVER"]
     ret.steeringTorqueEps = cp.vl["STEER_TORQUE_SENSOR"]["STEER_TORQUE_EPS"] * self.eps_torque_scale
@@ -234,6 +232,9 @@ class CarState(CarStateBase):
         ("GAS_PEDAL", 42),
       ])
     else:
+      if CP.carFingerprint not in [CAR.TOYOTA_MIRAI]:
+        messages.append(("ENGINE_RPM", 42))
+
       messages.extend([
         ("GEAR_PACKET", 1),
         ("VSC1S07", 20),
@@ -241,9 +242,6 @@ class CarState(CarStateBase):
 
     if CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
       messages.append(("CLUTCH", 15))
-
-    if CP.carFingerprint not in [CAR.TOYOTA_MIRAI, CAR.TOYOTA_RAV4_PRIME]:
-      messages.append(("ENGINE_RPM", 42))
 
     if CP.carFingerprint in UNSUPPORTED_DSU_CAR:
       messages.append(("DSU_CRUISE", 5))
