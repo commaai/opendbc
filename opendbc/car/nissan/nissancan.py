@@ -1,6 +1,5 @@
 import crcmod
-import warnings
-from opendbc.car.nissan.values import CAR, CarControllerParams
+from opendbc.car.nissan.values import CAR
 
 # TODO: add this checksum to the CANPacker
 nissan_checksum = crcmod.mkCrcFun(0x11d, initCrc=0x00, rev=False, xorOut=0xff)
