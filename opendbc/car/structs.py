@@ -367,7 +367,6 @@ class CarParams:
 
   vEgoStopping: float = auto_field()  # Speed at which the car goes into stopping state
   vEgoStarting: float = auto_field()  # Speed at which the car goes into starting state
-  stoppingControl: bool = auto_field()  # Does the car allow full control even at lows speeds when stopping
   steerControlType: 'CarParams.SteerControlType' = field(default_factory=lambda: CarParams.SteerControlType.torque)
   radarUnavailable: bool = auto_field()  # True when radar objects aren't visible on CAN or aren't parsed out
   stopAccel: float = auto_field()  # Required acceleration to keep vehicle stationary
