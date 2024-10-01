@@ -3,7 +3,8 @@ import jinja2
 from enum import Enum
 from natsort import natsorted
 
-from opendbc.car import gen_empty_fingerprint, CarParams
+from opendbc.car import gen_empty_fingerprint
+from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarDocs, Column, CommonFootnote, PartType
 from opendbc.car.car_helpers import interfaces, get_interface_attr
 from opendbc.car.values import PLATFORMS

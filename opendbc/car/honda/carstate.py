@@ -2,7 +2,7 @@ from collections import defaultdict
 
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
-from opendbc.car import create_button_events, car
+from opendbc.car import create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.numpy_fast import interp
 from opendbc.car.honda.hondacan import CanBus, get_cruise_speed_conversion
@@ -11,8 +11,8 @@ from opendbc.car.honda.values import CAR, DBC, STEER_THRESHOLD, HONDA_BOSCH, \
                                                  HondaFlags, CruiseButtons, CruiseSettings
 from opendbc.car.interfaces import CarStateBase
 
-TransmissionType = car.CarParams.TransmissionType
-ButtonType = car.CarState.ButtonEvent.Type
+TransmissionType = structs.CarParams.TransmissionType
+ButtonType = structs.CarState.ButtonEvent.Type
 
 BUTTONS_DICT = {CruiseButtons.RES_ACCEL: ButtonType.accelCruise, CruiseButtons.DECEL_SET: ButtonType.decelCruise,
                 CruiseButtons.MAIN: ButtonType.altButton3, CruiseButtons.CANCEL: ButtonType.cancel}
@@ -109,8 +109,8 @@ class CarState(CarStateBase):
     # However, on cars without a digital speedometer this is not always present (HRV, FIT, CRV 2016, ILX and RDX)
     self.dash_speed_seen = False
 
-  def update(self, cp, cp_cam, _, cp_body, __) -> car.CarState:
-    ret = car.CarState.new_message()
+  def update(self, cp, cp_cam, _, cp_body, __) -> structs.CarState:
+    ret = structs.CarState()
 
     # car params
     v_weight_v = [0., 1.]  # don't trust smooth speed at low values to avoid premature zero snapping

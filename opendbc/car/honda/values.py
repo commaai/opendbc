@@ -2,13 +2,13 @@ from dataclasses import dataclass
 from enum import Enum, IntFlag
 
 from panda import uds
-from opendbc.car import CarSpecs, PlatformConfig, Platforms, dbc_dict, car
+from opendbc.car import CarSpecs, PlatformConfig, Platforms, dbc_dict, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
 
-Ecu = car.CarParams.Ecu
-VisualAlert = car.CarControl.HUDControl.VisualAlert
+Ecu = structs.CarParams.Ecu
+VisualAlert = structs.CarControl.HUDControl.VisualAlert
 
 
 class CarControllerParams:
@@ -93,7 +93,7 @@ VISUAL_HUD = {
 class HondaCarDocs(CarDocs):
   package: str = "Honda Sensing"
 
-  def init_make(self, CP: car.CarParams):
+  def init_make(self, CP: structs.CarParams):
     if CP.flags & HondaFlags.BOSCH:
       self.car_parts = CarParts.common([CarHarness.bosch_b]) if CP.flags & HondaFlags.BOSCH_RADARLESS else CarParts.common([CarHarness.bosch_a])
     else:
