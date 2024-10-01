@@ -320,6 +320,7 @@ class CarState(CarStateBase):
     ret.stockAeb = bool(pt_cp.vl["MEB_ESP_05"]["AEB_Active"])
 
     self.acc_type = ext_cp.vl["MEB_ACC_02"]["ACC_Typ"]
+    self.travel_assist_available = bool(ext_cp.vl["MEB_Travel_Assist_01"]["Travel_Assist_Available"])
 
     ret.cruiseState.available = pt_cp.vl["MEB_Motor_01"]["TSK_Status"] in (2, 3, 4, 5)
     ret.cruiseState.enabled   = pt_cp.vl["MEB_Motor_01"]["TSK_Status"] in (3, 4, 5)
@@ -515,10 +516,11 @@ class CarState(CarStateBase):
   def get_cam_can_parser_meb(CP):
     messages = [
       # sig_address, frequency
-      ("LDW_02", 10),              # From R242 Driver assistance camera
-      ("MEB_ACC_01", 17),          #
-      ("MEB_ACC_02", 50),          #
-      ("MEB_Side_Assist_01", 20),  #
+      ("LDW_02", 10),               # From R242 Driver assistance camera
+      ("MEB_ACC_01", 17),           #
+      ("MEB_ACC_02", 50),           #
+      ("MEB_Side_Assist_01", 20),   #
+      ("MEB_Travel_Assist_01", 10), #
       #("MEB_Distance_01", 25),     #
     ]
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, CANBUS.cam)
