@@ -27,6 +27,7 @@ class CarState(CarStateBase):
 
     self.cruise_buttons: deque = deque([Buttons.NONE] * PREV_BUTTON_SAMPLES, maxlen=PREV_BUTTON_SAMPLES)
     self.main_buttons: deque = deque([Buttons.NONE] * PREV_BUTTON_SAMPLES, maxlen=PREV_BUTTON_SAMPLES)
+    self.lfa_button = 0
 
     self.gear_msg_canfd = "ACCELERATOR" if CP.flags & HyundaiFlags.EV else \
                           "GEAR_ALT" if CP.flags & HyundaiFlags.CANFD_ALT_GEARS else \
@@ -168,11 +169,18 @@ class CarState(CarStateBase):
     self.clu11 = copy.copy(cp.vl["CLU11"])
     self.steer_state = cp.vl["MDPS12"]["CF_Mdps_ToiActive"]  # 0 NOT ACTIVE, 1 ACTIVE
     prev_cruise_buttons = self.cruise_buttons[-1]
+    prev_lfa_button = self.lfa_button
     self.cruise_buttons.extend(cp.vl_all["CLU11"]["CF_Clu_CruiseSwState"])
     self.main_buttons.extend(cp.vl_all["CLU11"]["CF_Clu_CruiseSwMain"])
+    self.lfa_button = cp.vl["BCM_PO_11"]["LFA_Pressed"] if self.CP.flags & HyundaiFlags.HAS_LFA_BUTTON else 0
 
     if self.CP.openpilotLongitudinalControl:
       ret.buttonEvents = create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT)
+
+    ret.buttonEvents = [
+      *ret.buttonEvents,
+      *create_button_events(self.lfa_button, prev_lfa_button, {1: ButtonType.altButton1})
+    ]
 
     return ret
 
@@ -247,8 +255,10 @@ class CarState(CarStateBase):
       ret.cruiseState.nonAdaptive = cp.vl["MANUAL_SPEED_LIMIT_ASSIST"]["MSLA_ENABLED"] == 1
 
     prev_cruise_buttons = self.cruise_buttons[-1]
+    prev_lfa_button = self.lfa_button
     self.cruise_buttons.extend(cp.vl_all[self.cruise_btns_msg_canfd]["CRUISE_BUTTONS"])
     self.main_buttons.extend(cp.vl_all[self.cruise_btns_msg_canfd]["ADAPTIVE_CRUISE_MAIN_BTN"])
+    self.lfa_button = cp.vl[self.cruise_btns_msg_canfd]["LFA_BTN"]
     self.buttons_counter = cp.vl[self.cruise_btns_msg_canfd]["COUNTER"]
     ret.accFaulted = cp.vl["TCS"]["ACCEnable"] != 0  # 0 ACC CONTROL ENABLED, 1-3 ACC CONTROL DISABLED
 
@@ -258,6 +268,11 @@ class CarState(CarStateBase):
 
     if self.CP.openpilotLongitudinalControl:
       ret.buttonEvents = create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT)
+
+    ret.buttonEvents = [
+      *ret.buttonEvents,
+      *create_button_events(self.lfa_button, prev_lfa_button, {1: ButtonType.altButton1})
+    ]
 
     return ret
 
@@ -308,6 +323,9 @@ class CarState(CarStateBase):
       messages.append(("TCU12", 100))
     else:
       messages.append(("LVR12", 100))
+
+    if CP.flags & HyundaiFlags.HAS_LFA_BUTTON:
+      messages.append(("BCM_PO_11", 50))
 
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, 0)
 

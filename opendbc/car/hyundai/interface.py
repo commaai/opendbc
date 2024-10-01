@@ -86,6 +86,10 @@ class CarInterface(CarInterfaceBase):
       if ret.flags & HyundaiFlags.CAMERA_SCC:
         ret.safetyConfigs[0].safetyParam |= Panda.FLAG_HYUNDAI_CAMERA_SCC
 
+      # These cars have the LFA button on the steering wheel
+      if 0x391 in fingerprint[0]:
+        ret.flags |= HyundaiFlags.HAS_LFA_BUTTON.value
+
     # Common lateral control setup
 
     ret.centerToFront = ret.wheelbase * 0.4
