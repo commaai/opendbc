@@ -67,10 +67,10 @@ class RadarInterface(RadarInterfaceBase):
       self.pts[signal_part].trackId = self.track_id
       self.track_id                += 1
 
-    valid = msg['Same_Lane_01_LD_neg_Offset'] > 0
+    valid = msg['Same_Lane_01_LD_Offset'] != -5
     if valid:
       self.pts[signal_part].measured = True
-      self.pts[signal_part].dRel     = msg['Same_Lane_01_Long_Distance'] - msg['Same_Lane_01_LD_neg_Offset']
+      self.pts[signal_part].dRel     = msg['Same_Lane_01_Long_Distance'] + msg['Same_Lane_01_LD_Offset']
       self.pts[signal_part].yRel     = -msg['Same_Lane_01_Lat_Distance'] # left is positive
       self.pts[signal_part].vRel     = msg['Same_Lane_01_Rel_Velo'] * CV.KPH_TO_MS
       self.pts[signal_part].aRel     = float('nan')
@@ -86,10 +86,10 @@ class RadarInterface(RadarInterfaceBase):
       self.pts[signal_part].trackId = self.track_id
       self.track_id                += 1
 
-    valid = msg['Same_Lane_02_LD_neg_Offset'] > 0
+    valid = msg['Same_Lane_02_LD_Offset'] != -5
     if valid:
       self.pts[signal_part].measured = True
-      self.pts[signal_part].dRel     = msg['Same_Lane_02_Long_Distance'] - msg['Same_Lane_02_LD_neg_Offset']
+      self.pts[signal_part].dRel     = msg['Same_Lane_02_Long_Distance'] + msg['Same_Lane_02_LD_Offset']
       self.pts[signal_part].yRel     = -msg['Same_Lane_02_Lat_Distance']
       self.pts[signal_part].vRel     = msg['Same_Lane_02_Rel_Velo'] * CV.KPH_TO_MS
       self.pts[signal_part].aRel     = float('nan')
