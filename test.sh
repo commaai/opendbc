@@ -17,4 +17,4 @@ uv run pytest -n8
 
 GREEN='\033[0;32m'
 NC='\033[0m'
-printf "\n${GREEN}All good!${NC} Finished in build, lint, and test in ${SECONDS}s\n"
+printf "\n${GREEN}All good!${NC} Finished build, lint, and test in ${SECONDS}s\n"
