@@ -1362,7 +1362,7 @@ BO_ 1440 RLS_01: 8 Gateway
 BO_ 294 HCA_01: 8 Frontsensorik
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" Vector__XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" Vector__XXX
- SG_ HCA_01_Vib_Freq : 12|4@1+ (1,15) [15|30] "Unit_Hertz" Vector__XXX
+ SG_ HCA_01_Vib_Freq : 12|4@1+ (1,15) [18|30] "Unit_Hertz" Vector__XXX
  SG_ HCA_01_LM_Offset : 16|9@1+ (1,0) [0|511] "Unit_centiNewtoMeter" Vector__XXX
  SG_ EA_ACC_Sollstatus : 25|2@1+ (1,0) [0|3] ""  Frontradar
  SG_ EA_Ruckprofil : 27|3@1+ (1,0) [0|7] "" Vector__XXX
@@ -1524,6 +1524,15 @@ BO_ 522 MEB_ABS_01: 64 XXX
  SG_ Yaw_Rate_VZ : 33|1@1+ (1,0) [0|1] "" XXX
  SG_ Yaw_Rate : 200|16@1+ (0.007,-229.36) [0|255] "" XXX
 
+BO_ 261 MEB_ABS_02: 8 XXX
+ SG_ CRC : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ CNT : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_5 : 13|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_4 : 20|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_3 : 32|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_1 : 40|2@1+ (1,0) [0|3] "" XXX
+ SG_ Brake : 53|7@1+ (1,0) [0|3] "" XXX
+
 BO_ 988 MEB_EPB_01: 8 XXX
  SG_ EPB_Status : 53|3@1+ (1,0) [0|7] "" XXX
 
@@ -1538,12 +1547,14 @@ BO_ 317 MEB_EPS_01: 32 XXX
  SG_ Steering_Angle : 76|17@1+ (0.00906,0) [0|32767] "" XXX
 
 BO_ 771 HCA_03: 24 XXX
- SG_ Inactive : 13|1@1+ (1,0) [0|1] "" XXX
- SG_ Active : 14|1@1+ (1,0) [0|1] "" XXX
+ SG_ Standby : 13|1@1+ (1,0) [0|1] "" XXX
+ SG_ Request : 14|1@1+ (1,0) [0|1] "" XXX
  SG_ Power : 16|7@1+ (1,0) [0|125] "" XXX
  SG_ Steering_Angle : 24|15@1+ (0.0174,0) [0|360] "Unit_DegreOfArc" XXX
  SG_ VZ : 39|1@1+ (1,0) [0|1] "" XXX
- SG_ Active_02 : 66|1@1+ (1,0) [0|1] "" XXX
+ SG_ Unknown_01 : 53|1@0+ (1,0) [0|1] "" XXX
+ SG_ Vibration : 56|1@0+ (1,0) [0|1] "" XXX
+ SG_ Active : 66|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 267 MEB_Motor_01: 32 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
@@ -1571,30 +1582,30 @@ BO_ 589 MEB_Side_Assist_02: 64 XXX
 
 BO_ 591 MEB_Distance_01: 64 XXX
  SG_ Unknown_01 : 12|1@0+ (1,0) [0|1] "" XXX
- SG_ Same_Lane_01_LD_neg_Offset : 16|6@1+ (0.225,0) [0|63] "Unit_Meter" XXX
- SG_ Left_Lane_01_LD_neg_Offset : 22|6@1+ (0.225,0) [0|63] "Unit_Meter" XXX
- SG_ Right_Lane_01_LD_neg_Offset : 28|6@1+ (0.225,0) [0|63] "Unit_Meter" XXX
- SG_ Same_Lane_02_LD_neg_Offset : 34|6@1+ (0.225,0) [0|63] "Unit_Meter" XXX
- SG_ Left_Lane_02_LD_neg_Offset : 40|6@1+ (0.225,0) [0|63] "Unit_Meter" XXX
- SG_ Right_Lane_02_LD_neg_Offset : 46|6@1+ (0.225,0) [0|63] "Unit_Meter" XXX
+ SG_ Same_Lane_01_LD_Offset : 16|6@1+ (0.1,-5) [0|63] "Unit_Meter" XXX
+ SG_ Left_Lane_01_LD_Offset : 22|6@1+ (0.1,-5) [0|63] "Unit_Meter" XXX
+ SG_ Right_Lane_01_LD_Offset : 28|6@1+ (0.1,-5) [0|63] "Unit_Meter" XXX
+ SG_ Same_Lane_02_LD_Offset : 34|6@1+ (0.1,-5) [0|63] "Unit_Meter" XXX
+ SG_ Left_Lane_02_LD_Offset : 40|6@1+ (0.1,-5) [0|63] "Unit_Meter" XXX
+ SG_ Right_Lane_02_LD_Offset : 46|6@1+ (0.1,-5) [0|63] "Unit_Meter" XXX
  SG_ Unknown_02 : 52|2@1+ (1,0) [0|3] "" XXX
  SG_ Unknown_03 : 54|10@1+ (1,0) [0|3] "" XXX
- SG_ Same_Lane_01_Long_Distance : 64|12@1+ (0.0625,0) [0|200] "Unit_Meter" XXX
+ SG_ Same_Lane_01_Long_Distance : 64|12@1+ (0.06,0) [0|200] "Unit_Meter" XXX
  SG_ Same_Lane_01_Lat_Distance : 76|10@1+ (0.065,-33.28) [0|31] "Unit_Meter" XXX
  SG_ Same_Lane_01_Rel_Velo : 86|10@1+ (1,-512) [0|3] "Unit_KilometerPerHour" XXX
- SG_ Left_Lane_01_Long_Distance : 96|12@1+ (0.0625,0) [0|200] "Unit_Meter" XXX
+ SG_ Left_Lane_01_Long_Distance : 96|12@1+ (0.06,0) [0|200] "Unit_Meter" XXX
  SG_ Left_Lane_01_Lat_Distance : 108|10@1+ (0.065,-33.28) [0|15] "Unit_Meter" XXX
  SG_ Left_Lane_01_Rel_Velo : 118|10@1+ (1,-512) [0|3] "Unit_KilometerPerHour" XXX
- SG_ Right_Lane_01_Long_Distance : 128|12@1+ (0.0625,0) [0|200] "Unit_Meter" XXX
+ SG_ Right_Lane_01_Long_Distance : 128|12@1+ (0.06,0) [0|200] "Unit_Meter" XXX
  SG_ Right_Lane_01_Lat_Distance : 140|10@1+ (0.065,-33.28) [0|15] "Unit_Meter" XXX
  SG_ Right_Lane_01_Rel_Velo : 150|10@1+ (1,-512) [0|3] "Unit_KilometerPerHour" XXX
- SG_ Same_Lane_02_Long_Distance : 160|12@1+ (0.0625,0) [0|200] "Unit_Meter" XXX
+ SG_ Same_Lane_02_Long_Distance : 160|12@1+ (0.06,0) [0|200] "Unit_Meter" XXX
  SG_ Same_Lane_02_Lat_Distance : 172|10@1+ (0.065,-33.28) [0|31] "Unit_Meter" XXX
  SG_ Same_Lane_02_Rel_Velo : 182|10@1+ (1,-512) [0|3] "Unit_KilometerPerHour" XXX
- SG_ Left_Lane_02_Long_Distance : 192|12@1+ (0.0625,0) [0|200] "Unit_Meter" XXX
+ SG_ Left_Lane_02_Long_Distance : 192|12@1+ (0.06,0) [0|200] "Unit_Meter" XXX
  SG_ Left_Lane_02_Lat_Distance : 204|10@1+ (0.065,-33.28) [0|1023] "Unit_Meter" XXX
  SG_ Left_Lane_02_Rel_Velo : 214|10@1+ (1,0) [0|3] "Unit_KilometerPerHour" XXX
- SG_ Right_Lane_02_Long_Distance : 224|12@1+ (0.0625,0) [0|200] "Unit_Meter" XXX
+ SG_ Right_Lane_02_Long_Distance : 224|12@1+ (0.06,0) [0|200] "Unit_Meter" XXX
  SG_ Right_Lane_02_Lat_Distance : 236|10@1+ (0.065,-33.28) [0|1023] "Unit_Meter" XXX
  SG_ Right_Lane_02_Rel_Velo : 246|10@1+ (1,-512) [0|1023] "Unit_KilometerPerHour" XXX
  SG_ Unknown_04 : 256|8@1+ (1,-128) [0|31] "" XXX
@@ -1643,7 +1654,7 @@ BO_ 768 MEB_ACC_01: 48 XXX
  SG_ ACC_AKTIV_regelt : 267|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_Limiter_Mode : 268|1@0+ (1,0) [0|1] "" XXX
  SG_ Lead_Brightness : 269|4@1+ (1,0) [0|7] "" XXX
- SG_ Unknown_03 : 273|8@1+ (1,0) [0|7] "" XXX
+ SG_ SET_ME_0X6A : 273|8@1+ (1,0) [0|7] "" XXX
  SG_ Lead_Type : 287|3@1+ (1,0) [0|3] "" XXX
  SG_ Lead_Distance : 290|10@1+ (0.2,0) [0|7] "Unit_Meter" XXX
  SG_ ACC_Events : 332|4@0+ (1,0) [0|3] "Unit_Meter" XXX
@@ -1677,7 +1688,7 @@ BO_ 333 MEB_ACC_02: 32 XXX
  SG_ ACC_AKTIV_regelt : 90|1@0+ (1,0) [0|1] "" XXX
  SG_ SET_ME_0X1 : 92|1@0+ (1,0) [0|1] "" XXX
  SG_ SET_ME_0X9 : 232|4@1+ (1,0) [0|15] "" XXX
- SG_ Speed : 236|10@1+ (0.1,0) [0|15] "" XXX
+ SG_ Speed : 236|11@1+ (0.1,0) [0|15] "" XXX
  SG_ Accel_Boost : 248|6@1+ (1,0) [0|3] "" XXX
  SG_ Reversing : 254|1@0+ (1,0) [0|1] "" XXX
 
@@ -1690,6 +1701,18 @@ BO_ 619 MEB_Travel_Assist_01: 8 XXX
  SG_ Travel_Assist_Status : 13|3@1+ (1,0) [0|3] "" XXX
  SG_ Travel_Assist_Request : 19|3@1+ (1,0) [0|7] "" XXX
  SG_ Travel_Assist_Available : 23|1@1+ (1,0) [0|1] "" XXX
+
+BO_ 387 MEB_Camera_01: 64 XXX
+ SG_ NEW_SIGNAL_1 : 191|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_2 : 200|9@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_3 : 209|9@1+ (1,0) [0|127] "" XXX
+ SG_ NEW_SIGNAL_9 : 218|6@1+ (1,0) [0|63] "" XXX
+ SG_ NEW_SIGNAL_10 : 224|8@1+ (1,0) [0|127] "" XXX
+ SG_ NEW_SIGNAL_4 : 232|9@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_5 : 241|9@1+ (1,0) [0|127] "" XXX
+ SG_ NEW_SIGNAL_8 : 250|6@1+ (1,0) [0|63] "" XXX
+ SG_ Lane_Center_Offset : 256|12@1+ (0.001,-2.5) [0|255] "Unit_Meter" XXX
+ SG_ NEW_SIGNAL_6 : 268|12@1+ (1,0) [0|255] "" XXX
 
 
 VAL_ 159 EPS_HCA_Status 0 "disabled" 1 "initializing" 2 "fault" 3 "ready" 4 "rejected" 5 "active" 8 "preempted";
