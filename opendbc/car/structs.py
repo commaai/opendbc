@@ -392,9 +392,6 @@ class CarParams:
 
   wheelSpeedFactor: float = auto_field()  # Multiplier on wheels speeds to computer actual speeds
 
-  secOcRequired: bool = auto_field()
-  secOcKeyAvailable: bool = auto_field()
-
   @auto_dataclass
   class LongitudinalPIDTuning:
     kpBP: list[float] = auto_field()
