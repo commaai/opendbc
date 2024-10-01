@@ -54,6 +54,7 @@ class CarState(CarStateBase):
     self.lkas_hud = {}
     self.pcm_accel_net = 0.0
     self.slope_angle = 0.0
+    self.secoc_synchronization = None
 
   def update(self, cp, cp_cam, *_) -> structs.CarState:
     ret = structs.CarState()
@@ -82,6 +83,7 @@ class CarState(CarStateBase):
     ret.brakeHoldActive = cp.vl["ESP_CONTROL"]["BRAKE_HOLD_ACTIVE"] == 1
 
     if self.CP.flags & ToyotaFlags.SECOC:
+      self.secoc_synchronization = copy.copy(cp.vl["SECOC_SYNCHRONIZATION"])
       ret.gas = cp.vl["GAS_PEDAL"]["GAS_PEDAL_USER"]
       ret.gasPressed = cp.vl["GAS_PEDAL"]["GAS_PEDAL_USER"] > 0
       can_gear = int(cp.vl["GEAR_PACKET_HYBRID"]["GEAR"])
@@ -206,9 +208,6 @@ class CarState(CarStateBase):
 
       ret.buttonEvents = create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise})
 
-    if self.CP.flags & ToyotaFlags.SECOC.value:
-      self.secoc_synchronization = copy.copy(cp.vl["SECOC_SYNCHRONIZATION"])
-
     return ret
 
   @staticmethod
@@ -232,7 +231,10 @@ class CarState(CarStateBase):
       messages.append(("CLUTCH", 15))
 
     if CP.flags & ToyotaFlags.SECOC:
-      messages.append(("GEAR_PACKET_HYBRID", 60))
+      messages.extend([
+        ("GEAR_PACKET_HYBRID", 60),
+        ("SECOC_SYNCHRONIZATION", 10),
+      ])
     else:
       messages.append(("GEAR_PACKET", 1))
 
@@ -262,11 +264,6 @@ class CarState(CarStateBase):
     if CP.carFingerprint not in (TSS2_CAR - RADAR_ACC_CAR) and not CP.enableDsu and not CP.flags & ToyotaFlags.DISABLE_RADAR.value:
       messages += [
         ("PRE_COLLISION", 33),
-      ]
-
-    if CP.flags & ToyotaFlags.SECOC.value:
-      messages += [
-        ("SECOC_SYNCHRONIZATION", 10),
       ]
 
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, 0)
