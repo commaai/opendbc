@@ -8,3 +8,8 @@ try:
 except ImportError:
   capnp.remove_import_hook()
   car = capnp.load(os.path.join(OPENDBC_CAR_PATH, "car.capnp"))
+
+CarState = car.CarState
+RadarData = car.RadarData
+CarControl = car.CarControl
+CarParams = car.CarParams
