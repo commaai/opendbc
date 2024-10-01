@@ -6,9 +6,6 @@ nissan_checksum = crcmod.mkCrcFun(0x11d, initCrc=0x00, rev=False, xorOut=0xff)
 
 
 def create_steering_control(packer, apply_steer, frame, steer_on, lkas_max_torque):
-  if not (-CarControllerParams.MAX_STEER_ANGLE <= apply_steer <= CarControllerParams.MAX_STEER_ANGLE):
-    warnings.warn(f"Nissan apply steering angle is out of bound: {apply_steer}", RuntimeWarning, stacklevel=1)
-
   values = {
     "COUNTER": frame % 0x10,
     "DESIRED_ANGLE": apply_steer,
