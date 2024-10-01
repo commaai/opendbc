@@ -84,10 +84,12 @@ class CarState(CarStateBase):
     if self.CP.flags & ToyotaFlags.SECOC:
       ret.gas = cp.vl["GAS_PEDAL"]["GAS_PEDAL_USER"]
       ret.gasPressed = cp.vl["GAS_PEDAL"]["GAS_PEDAL_USER"] > 0
+      can_gear = int(cp.vl["GEAR_PACKET_HYBRID"]["GEAR"])
     else:
       # TODO: non-SecOC cars also seem to have GAS_PEDAL.GAS_PEDAL_USER, come back and validate/unify this case
       ret.gasPressed = cp.vl["PCM_CRUISE"]["GAS_RELEASED"] == 0
       self.slope_angle = cp.vl["VSC1S07"]["ASLP"] * CV.DEG_TO_RAD  # filtered pitch from the car, negative is downward
+      can_gear = int(cp.vl["GEAR_PACKET"]["GEAR"])
 
     ret.wheelSpeeds = self.get_wheel_speeds(
       cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FL"],
@@ -117,11 +119,6 @@ class CarState(CarStateBase):
       if self.angle_offset.initialized:
         ret.steeringAngleOffsetDeg = self.angle_offset.x
         ret.steeringAngleDeg = torque_sensor_angle_deg - self.angle_offset.x
-
-    if self.CP.flags & ToyotaFlags.SECOC:
-      can_gear = int(cp.vl["GEAR_PACKET_HYBRID"]["GEAR"])
-    else:
-      can_gear = int(cp.vl["GEAR_PACKET"]["GEAR"])
 
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(can_gear, None))
     ret.leftBlinker = cp.vl["BLINKERS_STATE"]["TURN_SIGNALS"] == 1
