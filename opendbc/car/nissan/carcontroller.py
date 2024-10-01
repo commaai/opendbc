@@ -1,5 +1,6 @@
 import copy
 from opendbc.can.packer import CANPacker
+from opendbc.car.common.numpy_fast import clip
 from opendbc.car import apply_std_steer_angle_limits, structs
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.nissan import nissancan
@@ -48,6 +49,7 @@ class CarController(CarControllerBase):
       apply_angle = CS.out.steeringAngleDeg
       self.lkas_max_torque = 0
 
+    apply_angle = clip(apply_angle, -CarControllerParams.MAX_STEER_ANGLE, CarControllerParams.MAX_STEER_ANGLE)
     self.apply_angle_last = apply_angle
 
     if self.CP.carFingerprint in (CAR.NISSAN_ROGUE, CAR.NISSAN_XTRAIL, CAR.NISSAN_ALTIMA) and pcm_cancel_cmd:
