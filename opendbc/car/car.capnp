@@ -1,13 +1,13 @@
 using Cxx = import "./include/c++.capnp";
-$Cxx.namespace("car");
+$Cxx.namespace("cereal");
 
-@0x8e2af1e708af8b8d;
+@0xac1bd2101082f59c;
 
 # ******* events causing controls state machine transition *******
 
-# FIXME: OnroadEvent shouldn't be in car.capnp, but can't immediately
-#        move due to being referenced by structs in this file
-struct OnroadEvent @0x9b1657f34caf3ad3 {
+# This struct is needed to properly parse old logs with non-emtpy carState->events fields
+# TODO: can we make this an empty struct and capnp will ignore the data successfully?
+struct OnroadEventDEPRECATED @0x9b1657f34caf3ad3 {
   name @0 :EventName;
 
   # event types
@@ -156,8 +156,6 @@ struct OnroadEvent @0x9b1657f34caf3ad3 {
 # all speeds in m/s
 
 struct CarState {
-  events @13 :List(OnroadEvent);
-
   # CAN health
   canValid @26 :Bool;       # invalid counter/checksums
   canTimeout @40 :Bool;     # CAN bus dropped out
@@ -288,11 +286,12 @@ struct CarState {
   }
 
   # deprecated
-  errorsDEPRECATED @0 :List(OnroadEvent.EventName);
+  errorsDEPRECATED @0 :List(OnroadEventDEPRECATED.EventName);
   brakeLightsDEPRECATED @19 :Bool;
   steeringRateLimitedDEPRECATED @29 :Bool;
   canMonoTimesDEPRECATED @12: List(UInt64);
   canRcvTimeoutDEPRECATED @49 :Bool;
+  eventsDEPRECATED @13 :List(OnroadEventDEPRECATED);
 }
 
 # ******* radar state @ 20hz *******
@@ -714,5 +713,5 @@ struct CarParams {
   brakeMaxVDEPRECATED @16 :List(Float32);
   directAccelControlDEPRECATED @30 :Bool;
   maxSteeringAngleDegDEPRECATED @54 :Float32;
-  longitudinalActuatorDelayLowerBoundDEPRECATED @61 :Float32;
+  longitudinalActuatorDelayLowerBoundDEPRECATEDDEPRECATED @61 :Float32;
 }
