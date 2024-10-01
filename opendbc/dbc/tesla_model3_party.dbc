@@ -186,7 +186,9 @@ BO_ 646 DI_state: 7 ETH
  SG_ DI_locStatusChecksum : 0|8@1+ (1,0) [0|0] ""  X
 
 BO_ 785 UI_warning: 7 XXX
- SG_ buckleStatus : 13|1@0+ (1,0) [0|1] ""  XXX
+ SG_ buckleStatus : 13|1@0+ (1,0) [0|1] "" XXX
+ SG_ leftBlinkerOn : 22|1@0+ (1,0) [0|1] "" XXX
+ SG_ rightBlinkerOn : 23|1@0+ (1,0) [0|1] "" XXX
  SG_ anyDoorOpen : 28|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 923 DAS_status: 8 PARTY
