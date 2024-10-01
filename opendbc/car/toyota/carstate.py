@@ -227,21 +227,20 @@ class CarState(CarStateBase):
       ("STEER_TORQUE_SENSOR", 50),
     ]
 
-    if CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
-      messages.append(("CLUTCH", 15))
-
     if CP.flags & ToyotaFlags.SECOC:
       messages.extend([
         ("GEAR_PACKET_HYBRID", 60),
         ("SECOC_SYNCHRONIZATION", 10),
+        ("GAS_PEDAL", 42),
       ])
     else:
-      messages.append(("GEAR_PACKET", 1))
+      messages.extend([
+        ("GEAR_PACKET", 1),
+        ("VSC1S07", 20),
+      ])
 
-    if CP.flags & ToyotaFlags.SECOC:
-      messages.append(("GAS_PEDAL", 42))
-    else:
-      messages.append(("VSC1S07", 20))
+    if CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
+      messages.append(("CLUTCH", 15))
 
     if CP.carFingerprint not in [CAR.TOYOTA_MIRAI, CAR.TOYOTA_RAV4_PRIME]:
       messages.append(("ENGINE_RPM", 42))
