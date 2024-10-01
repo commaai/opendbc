@@ -4,7 +4,7 @@ from collections.abc import Iterable
 from hypothesis import settings, given, strategies as st
 from parameterized import parameterized
 
-from opendbc.car import car, CarParams
+from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
 from opendbc.car.ford.values import CAR, FW_QUERY_CONFIG, FW_PATTERN, get_platform_codes
 from opendbc.car.ford.fingerprints import FW_VERSIONS
@@ -48,7 +48,7 @@ class TestFordFW:
       assert subaddr is None, "Unexpected ECU subaddress"
 
   @parameterized.expand(FW_VERSIONS.items())
-  def test_fw_versions(self, car_model: str, fw_versions: dict[tuple[car.CarParams.Ecu, int, int | None], Iterable[bytes]]):
+  def test_fw_versions(self, car_model: str, fw_versions: dict[tuple[Ecu, int, int | None], Iterable[bytes]]):
     for (ecu, addr, subaddr), fws in fw_versions.items():
       assert ecu in ECU_PART_NUMBER, "Unexpected ECU"
       assert addr == ECU_ADDRESSES[ecu], "ECU address mismatch"

@@ -1,4 +1,4 @@
-from opendbc.car import CarParams
+from opendbc.car.structs import CarParams
 from opendbc.car.ford.values import CAR
 
 Ecu = CarParams.Ecu

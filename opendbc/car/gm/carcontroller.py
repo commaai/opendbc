@@ -1,14 +1,14 @@
 from opendbc.can.packer import CANPacker
-from opendbc.car import DT_CTRL, apply_driver_steer_torque_limits, car
+from opendbc.car import DT_CTRL, apply_driver_steer_torque_limits, structs
 from opendbc.car.gm import gmcan
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.gm.values import DBC, CanBus, CarControllerParams, CruiseButtons
 from opendbc.car.common.numpy_fast import interp
 from opendbc.car.interfaces import CarControllerBase
 
-VisualAlert = car.CarControl.HUDControl.VisualAlert
-NetworkLocation = car.CarParams.NetworkLocation
-LongCtrlState = car.CarControl.Actuators.LongControlState
+VisualAlert = structs.CarControl.HUDControl.VisualAlert
+NetworkLocation = structs.CarParams.NetworkLocation
+LongCtrlState = structs.CarControl.Actuators.LongControlState
 
 # Camera cancels up to 0.1s after brake is pressed, ECM allows 0.5s
 CAMERA_CANCEL_DELAY_FRAMES = 10

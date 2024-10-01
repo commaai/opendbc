@@ -1,28 +1,28 @@
 from panda import Panda
-from opendbc.car import get_safety_config, car
+from opendbc.car import get_safety_config, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.ford.fordcan import CanBus
 from opendbc.car.ford.values import Ecu, FordFlags
 from opendbc.car.interfaces import CarInterfaceBase
 
-TransmissionType = car.CarParams.TransmissionType
+TransmissionType = structs.CarParams.TransmissionType
 
 
 class CarInterface(CarInterfaceBase):
   @staticmethod
-  def _get_params(ret: car.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> car.CarParams:
+  def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
     ret.carName = "ford"
     ret.dashcamOnly = bool(ret.flags & FordFlags.CANFD)
 
     ret.radarUnavailable = True
-    ret.steerControlType = car.CarParams.SteerControlType.angle
+    ret.steerControlType = structs.CarParams.SteerControlType.angle
     ret.steerActuatorDelay = 0.2
     ret.steerLimitTimer = 1.0
 
     CAN = CanBus(fingerprint=fingerprint)
-    cfgs = [get_safety_config(car.CarParams.SafetyModel.ford)]
+    cfgs = [get_safety_config(structs.CarParams.SafetyModel.ford)]
     if CAN.main >= 4:
-      cfgs.insert(0, get_safety_config(car.CarParams.SafetyModel.noOutput))
+      cfgs.insert(0, get_safety_config(structs.CarParams.SafetyModel.noOutput))
     ret.safetyConfigs = cfgs
 
     ret.experimentalLongitudinalAvailable = True
