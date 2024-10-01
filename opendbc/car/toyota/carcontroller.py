@@ -71,10 +71,9 @@ class CarController(CarControllerBase):
         self.secoc_prev_reset_counter = CS.secoc_synchronization['RESET_CNT']
 
         # Verify mac of SecOC synchronization message to ensure we have the right key
-        expected_mac = secoc.build_sync_mac(self.secoc_key, int(CS.secoc_synchronization['TRIP_CNT']), int(CS.secoc_synchronization['RESET_CNT']))
-        if int(CS.secoc_synchronization['AUTHENTICATOR']) != expected_mac:
-          # TODO: wrong thing to do from a car port, but we can't use cloudlog, add an error counter?
-          print("SecOC MAC mismatch")
+        # TODO: move this to tests rather than runtime
+        # expected_mac = secoc.build_sync_mac(self.secoc_key, int(CS.secoc_synchronization['TRIP_CNT']), int(CS.secoc_synchronization['RESET_CNT']))
+        # assert(int(CS.secoc_synchronization['AUTHENTICATOR']) == expected_mac)
 
     # *** steer torque ***
     new_steer = int(round(actuators.steer * self.params.STEER_MAX))
