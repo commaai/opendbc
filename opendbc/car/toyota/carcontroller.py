@@ -1,6 +1,7 @@
 import copy
 import math
-from opendbc.car import apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, make_tester_present_msg, rate_limit, structs
+from opendbc.car import DT_CTRL, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, make_tester_present_msg, rate_limit, \
+                        structs
 from opendbc.car.can_definitions import CanData
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car.interfaces import CarControllerBase
@@ -17,6 +18,7 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 ACCELERATION_DUE_TO_GRAVITY = 9.81  # m/s^2
 
 ACCEL_WINDUP_LIMIT = 0.5  # m/s^2 / frame
+PCM_COMPENSATION_RATE = 1.0 / 3.0 * DT_CTRL  # m/s^2 / frame
 
 # LKA limits
 # EPS faults if you apply torque while the steering rate is above 100 deg/s for too long
@@ -124,7 +126,7 @@ class CarController(CarControllerBase):
       pcm_accel_compensation = clip(pcm_accel_compensation, actuators.accel - self.params.ACCEL_MAX,
                                     actuators.accel - self.params.ACCEL_MIN)
 
-      self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.01, 0.01)
+      self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -PCM_COMPENSATION_RATE, PCM_COMPENSATION_RATE)
       pcm_accel_cmd = actuators.accel - self.pcm_accel_compensation
 
       # Along with rate limiting positive jerk below, this greatly improves gas response time
