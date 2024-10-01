@@ -224,19 +224,19 @@ class CarState(CarStateBase):
     ]
 
     if CP.flags & ToyotaFlags.SECOC.value:
-      messages.extend([
+      messages += [
         ("GEAR_PACKET_HYBRID", 60),
         ("SECOC_SYNCHRONIZATION", 10),
         ("GAS_PEDAL", 42),
-      ])
+      ]
     else:
       if CP.carFingerprint not in [CAR.TOYOTA_MIRAI]:
         messages.append(("ENGINE_RPM", 42))
 
-      messages.extend([
+      messages += [
         ("GEAR_PACKET", 1),
         ("VSC1S07", 20),
-      ])
+      ]
 
     if CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
       messages.append(("CLUTCH", 15))
