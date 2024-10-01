@@ -48,6 +48,7 @@ class CarState(CarStateBase):
     self.acc_type = 1
     self.lkas_hud = {}
     self.pcm_accel_net = 0.0
+    self.neutral_accel = 0.0
     self.slope_angle = 0.0
 
   def update(self, cp, cp_cam, *_) -> structs.CarState:
@@ -64,9 +65,9 @@ class CarState(CarStateBase):
         self.pcm_accel_net += min(cp.vl["PCM_CRUISE"]["ACCEL_NET"], 0.0)
 
       # add creeping force at low speeds only for braking, CLUTCH->ACCEL_NET already shows this
-      neutral_accel = max(cp.vl["PCM_CRUISE"]["NEUTRAL_FORCE"] / self.CP.mass, 0.0)
-      if self.pcm_accel_net + neutral_accel < 0.0:
-        self.pcm_accel_net += neutral_accel
+      self.neutral_accel = max(cp.vl["PCM_CRUISE"]["NEUTRAL_FORCE"] / self.CP.mass, 0.0)
+      if self.pcm_accel_net + self.neutral_accel < 0.0:
+        self.pcm_accel_net += self.neutral_accel
 
     # filtered pitch estimate from the car, negative is a downward slope
     self.slope_angle = cp.vl["VSC1S07"]["ASLP"] * CV.DEG_TO_RAD
