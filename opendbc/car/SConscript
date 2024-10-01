@@ -1,0 +1,10 @@
+Import('env', 'common')
+
+cereal_dir = Dir('.')
+gen_dir = Dir('gen')
+
+# Build schema
+schema_files = ['car.capnp']
+env.Command([f'gen/cpp/{s}.c++' for s in schema_files] + [f'gen/cpp/{s}.h' for s in schema_files],
+            schema_files,
+            f"capnpc --src-prefix={cereal_dir.path} $SOURCES -o c++:{gen_dir.path}/cpp/")
