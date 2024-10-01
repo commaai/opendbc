@@ -41,7 +41,6 @@ class CarController(CarControllerBase):
     self.eps_timer_soft_disable_alert = False
     self.hca_frame_timer_running = 0
     self.hca_frame_same_torque = 0
-    self.lat_active_prev = False
     self.steering_power = 0
     self.long_heartbeat = 0
     self.accel_last = 0
@@ -65,47 +64,29 @@ class CarController(CarControllerBase):
         #   * keep it near maximum regarding speed to get full steering power in shortest time
 
         if CC.latActive:
-          hca_enabled          = True
-          self.lat_active_prev = True
+          hca_enabled = True
           #current_curvature    = -CS.out.yawRate / max(CS.out.vEgoRaw, 0.1) # TODO verify sign (clockwise is negative)
           #apply_curvature      = apply_meb_curvature_limits(actuators.curvature, self.apply_curvature_last, current_curvature, CS.out.vEgoRaw, self.CCP)
-          apply_angle          = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, self.CCP)
-          apply_angle          = clip(apply_angle, CS.out.steeringAngleDeg - self.CCP.ANGLE_ERROR, CS.out.steeringAngleDeg + self.CCP.ANGLE_ERROR)
+          apply_angle = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, self.CCP)
+          apply_angle = clip(apply_angle, -self.CCP.ANGLE_MAX, self.CCP.ANGLE_MAX)
+          if CS.out.steeringPressed:
+            apply_angle = clip(apply_angle, CS.out.steeringAngleDeg - self.CCP.ANGLE_ERROR, CS.out.steeringAngleDeg + self.CCP.ANGLE_ERROR)
 
-          # steering power as lazy counter
-          steering_power_min_by_speed       = interp(CS.out.vEgoRaw, [0, self.CCP.STEERING_POWER_MAX_BY_SPEED], [self.CCP.STEERING_POWER_MIN, self.CCP.STEERING_POWER_MAX])
-          steering_angle_diff               = abs(apply_angle - CS.out.steeringAngleDeg)
-          steering_power_target_angle       = steering_power_min_by_speed + self.CCP.ANGLE_POWER_FACTOR * steering_angle_diff + abs(apply_angle)
-          steering_power_target             = clip(steering_power_target_angle, self.CCP.STEERING_POWER_MIN, self.CCP.STEERING_POWER_MAX)
-
-          if self.steering_power < self.CCP.STEERING_POWER_MIN:  # OP lane assist just activated
-            self.steering_power = min(self.steering_power + self.CCP.STEERING_POWER_STEPS, self.CCP.STEERING_POWER_MIN)
-
-          elif CS.out.steeringPressed and self.steering_power > self.CCP.STEERING_POWER_USER: # user action results in decreasing the steering power
-            self.steering_power = max(self.steering_power - self.CCP.STEERING_POWER_STEPS, self.CCP.STEERING_POWER_USER)
-
-          elif self.steering_power < self.CCP.STEERING_POWER_MAX: # following desired target
-            if self.steering_power < steering_power_target:
-              self.steering_power = min(self.steering_power + self.CCP.STEERING_POWER_STEPS, steering_power_target)
-            elif self.steering_power > steering_power_target:
-              self.steering_power = max(self.steering_power - self.CCP.STEERING_POWER_STEPS, steering_power_target)
-
+          
         else:
-          if self.lat_active_prev and self.steering_power > 0: # monotonously decrement power to zero before disabling lane assist to prevent EPS fault
+          if self.steering_power > 0: # keep HCA alive until steering power has reduced to zero
             hca_enabled            = True
             #current_curvature      = -CS.out.yawRate / max(CS.out.vEgoRaw, 0.1)
             #apply_curvature        = current_curvature
-            apply_angle            = CS.out.steeringAngleDeg
-            self.steering_power    = max(self.steering_power - self.CCP.STEERING_POWER_STEPS, 0)
+            apply_angle            = CS.out.steeringAngleDeg # synchronize with current steering angle
           else:
             hca_enabled           = False
-            self.lat_active_prev  = False
-            self.steering_power   = 0
             #apply_curvature       = 0.
             apply_angle           = 0
 
+        self.steering_power = self.generate_vw_meb_steering_power(CS, CC.latActive, apply_angle, self.steering_power)
         #self.apply_curvature_last = apply_curvature
-        self.apply_angle_last = clip(apply_angle, -self.CCP.ANGLE_MAX, self.CCP.ANGLE_MAX)
+        self.apply_angle_last = apply_angle
         can_sends.append(self.CCS.create_steering_control_curvature(self.packer_pt, CANBUS.pt, apply_angle, hca_enabled, self.steering_power))
 
       else:
@@ -250,8 +231,40 @@ class CarController(CarControllerBase):
     self.frame += 1
     return new_actuators, can_sends
 
-  def generate_vw_meb_hud_heartbeat(self):
-    if self.long_heartbeat != 221:
+  def generate_vw_meb_hud_heartbeat(self, long_heartbeat_prev):
+    if long_heartbeat_prev != 221:
       return 221
-    elif self.long_heartbeat == 221:
+    elif long_heartbeat_prev == 221:
       return 360
+
+  def generate_vw_meb_steering_power(self, CS, lat_active, apply_angle, steering_power_prev):
+    # Steering power counter is used to:
+    #   * prevent sudden fluctuations at low speeds
+    #   * avoid HCA refused
+    #   * easy user intervention
+    #   * keep it near maximum regarding speed to get full steering power in shortest time
+    if lat_active:
+      steering_power_min_by_speed = interp(CS.out.vEgoRaw, [0, self.CCP.STEERING_POWER_MAX_BY_SPEED], [self.CCP.STEERING_POWER_MIN, self.CCP.STEERING_POWER_MAX])
+      steering_angle_diff = abs(apply_angle - CS.out.steeringAngleDeg)
+      steering_power_target_angle = steering_power_min_by_speed + self.CCP.ANGLE_POWER_FACTOR * steering_angle_diff + abs(apply_angle)
+      steering_power_target = clip(steering_power_target_angle, self.CCP.STEERING_POWER_MIN, self.CCP.STEERING_POWER_MAX)
+
+      if steering_power_prev < self.CCP.STEERING_POWER_MIN:  # OP lane assist just activated
+        steering_power = min(steering_power_prev + self.CCP.STEERING_POWER_STEPS, self.CCP.STEERING_POWER_MIN)
+      elif CS.out.steeringPressed and steering_power_prev > self.CCP.STEERING_POWER_MIN:  # user action results in decreasing the steering power
+        steering_power = max(steering_power_prev - self.CCP.STEERING_POWER_STEPS, self.CCP.STEERING_POWER_MIN)
+      else: # following desired target
+        if steering_power_prev < steering_power_target:
+          steering_power = min(steering_power_prev + self.CCP.STEERING_POWER_STEPS, steering_power_target)
+        elif steering_power_prev > steering_power_target:
+          steering_power = max(steering_power_prev - self.CCP.STEERING_POWER_STEPS, steering_power_target)
+        else:
+          steering_power = steering_power_prev
+        
+    else:
+      if steering_power_prev > 0: # monotonously decrement power to zero before disabling lane assist to prevent EPS fault
+        steering_power = max(steering_power_prev - self.CCP.STEERING_POWER_STEPS, 0)
+      else:
+        steering_power = 0
+        
+    return steering_power
