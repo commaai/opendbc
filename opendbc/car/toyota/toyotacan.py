@@ -1,4 +1,4 @@
-from opendbc.car import CarParams
+from opendbc.car.structs import CarParams
 
 SteerControlType = CarParams.SteerControlType
 

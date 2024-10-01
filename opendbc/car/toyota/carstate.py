@@ -2,7 +2,7 @@ import copy
 
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
-from opendbc.car import DT_CTRL, create_button_events, car
+from opendbc.car import DT_CTRL, create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.common.numpy_fast import mean
@@ -10,8 +10,8 @@ from opendbc.car.interfaces import CarStateBase
 from opendbc.car.toyota.values import ToyotaFlags, CAR, DBC, STEER_THRESHOLD, NO_STOP_TIMER_CAR, \
                                                   TSS2_CAR, RADAR_ACC_CAR, EPS_SCALE, UNSUPPORTED_DSU_CAR
 
-ButtonType = car.CarState.ButtonEvent.Type
-SteerControlType = car.CarParams.SteerControlType
+ButtonType = structs.CarState.ButtonEvent.Type
+SteerControlType = structs.CarParams.SteerControlType
 
 # These steering fault definitions seem to be common across LKA (torque) and LTA (angle):
 # - high steer rate fault: goes to 21 or 25 for 1 frame, then 9 for 2 seconds
@@ -50,8 +50,8 @@ class CarState(CarStateBase):
     self.pcm_accel_net = 0.0
     self.slope_angle = 0.0
 
-  def update(self, cp, cp_cam, *_) -> car.CarState:
-    ret = car.CarState.new_message()
+  def update(self, cp, cp_cam, *_) -> structs.CarState:
+    ret = structs.CarState()
 
     # Describes the acceleration request from the PCM if on flat ground, may be higher or lower if pitched
     # CLUTCH->ACCEL_NET is only accurate for gas, PCM_CRUISE->ACCEL_NET is only accurate for brake

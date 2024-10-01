@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from opendbc.car import car
+from opendbc.car import structs
 from opendbc.car.interfaces import CarInterfaceBase
 
 
@@ -7,7 +7,7 @@ from opendbc.car.interfaces import CarInterfaceBase
 class CarInterface(CarInterfaceBase):
 
   @staticmethod
-  def _get_params(ret: car.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> car.CarParams:
+  def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
     ret.carName = "mock"
     ret.mass = 1700.
     ret.wheelbase = 2.70

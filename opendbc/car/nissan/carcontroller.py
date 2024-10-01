@@ -1,10 +1,10 @@
 from opendbc.can.packer import CANPacker
-from opendbc.car import apply_std_steer_angle_limits, car
+from opendbc.car import apply_std_steer_angle_limits, structs
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.nissan import nissancan
 from opendbc.car.nissan.values import CAR, CarControllerParams
 
-VisualAlert = car.CarControl.HUDControl.VisualAlert
+VisualAlert = structs.CarControl.HUDControl.VisualAlert
 
 
 class CarController(CarControllerBase):

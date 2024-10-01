@@ -6,7 +6,7 @@ from parameterized import parameterized
 
 from opendbc.car.can_definitions import CanData
 from opendbc.car.car_helpers import interfaces
-from opendbc.car import CarParams
+from opendbc.car.structs import CarParams
 from opendbc.car.fingerprints import FW_VERSIONS
 from opendbc.car.fw_versions import ESSENTIAL_ECUS, FW_QUERY_CONFIGS, FUZZY_EXCLUDE_ECUS, VERSIONS, build_fw_dict, \
                                                 match_fw_to_car, get_brand_ecu_matches, get_fw_versions, get_present_ecus
@@ -25,7 +25,7 @@ class TestFwFingerprint:
   @parameterized.expand([(b, c, e[c], n) for b, e in VERSIONS.items() for c in e for n in (True, False)])
   def test_exact_match(self, brand, car_model, ecus, test_non_essential):
     config = FW_QUERY_CONFIGS[brand]
-    CP = CarParams.new_message()
+    CP = CarParams()
     for _ in range(20):
       fw = []
       for ecu, fw_versions in ecus.items():
@@ -53,7 +53,7 @@ class TestFwFingerprint:
     if config.match_fw_to_car_fuzzy is None:
       pytest.skip("Brand does not implement custom fuzzy fingerprinting function")
 
-    CP = CarParams.new_message()
+    CP = CarParams()
     for _ in range(5):
       fw = []
       for ecu, fw_versions in ecus.items():

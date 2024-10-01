@@ -1,5 +1,5 @@
 # ruff: noqa: E501
-from opendbc.car import CarParams
+from opendbc.car.structs import CarParams
 from opendbc.car.nissan.values import CAR
 
 Ecu = CarParams.Ecu
