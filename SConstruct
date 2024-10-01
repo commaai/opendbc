@@ -3,10 +3,7 @@ import subprocess
 import sysconfig
 import numpy as np
 
-zmq = 'zmq'
 arch = subprocess.check_output(["uname", "-m"], encoding='utf8').rstrip()
-
-cereal_dir = Dir('.')
 
 python_path = sysconfig.get_paths()['include']
 cpppath = [
@@ -15,9 +12,11 @@ cpppath = [
   python_path
 ]
 
-AddOption('--test',
-          action='store_true',
-          help='build test files')
+AddOption('--minimal',
+          action='store_false',
+          dest='extras',
+          default=True,
+          help='the minimum build. no tests, tools, etc.')
 
 AddOption('--asan',
           action='store_true',
@@ -28,8 +27,8 @@ ldflags_asan = ["-fsanitize=address"] if GetOption('asan') else []
 
 env = Environment(
   ENV=os.environ,
-  CC='clang',
-  CXX='clang++',
+  CC='gcc',
+  CXX='g++',
   CCFLAGS=[
     "-g",
     "-fPIC",
@@ -37,6 +36,8 @@ env = Environment(
     "-Wunused",
     "-Werror",
     "-Wshadow",
+    "-Wno-vla-cxx-extension",
+    "-Wno-unknown-warning-option",  # for compatibility across compiler versions
   ] + ccflags_asan,
   LDFLAGS=ldflags_asan,
   LINKFLAGS=ldflags_asan,
@@ -51,12 +52,7 @@ env = Environment(
 )
 
 common = ''
-Export('env', 'zmq', 'arch', 'common')
-
-cereal = [File('#cereal/libcereal.a')]
-messaging = [File('#cereal/libmessaging.a')]
-Export('cereal', 'messaging')
-
+Export('env', 'arch', 'common')
 
 envCython = env.Clone()
 envCython["CPPPATH"] += [np.get_include()]
@@ -77,6 +73,4 @@ envCython["LIBS"] = python_libs
 
 Export('envCython')
 
-
-SConscript(['cereal/SConscript'])
 SConscript(['opendbc/can/SConscript'])

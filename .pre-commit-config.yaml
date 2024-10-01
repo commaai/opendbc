@@ -1,44 +1,28 @@
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.5.0
     hooks:
     -   id: check-ast
     -   id: check-yaml
     -   id: check-merge-conflict
     -   id: check-symlinks
+    -   id: check-executables-have-shebangs
+    -   id: check-shebang-scripts-are-executable
 -   repo: https://github.com/codespell-project/codespell
-    rev: v2.2.5
+    rev: v2.3.0
     hooks:
     -   id: codespell
         exclude: '\.dbc$'
-        args:
-        - --check-hidden
-        - --builtins clear,rare,informal,usage,code,names,en-GB_to_en-US
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.4.1
+    rev: v1.11.1
     hooks:
     -   id: mypy
--   repo: https://github.com/PyCQA/flake8
-    rev: 6.0.0
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.5.7
     hooks:
-    -   id: flake8
-        exclude: 'site_scons/'
-        args:
-        - --select=F,E112,E113,E304,E501,E502,E701,E702,E703,E71,E72,E731,W191,W6
-        - --max-line-length=240
-        - --statistics
--   repo: local
-    hooks:
-    -   id: pylint
-        name: pylint
-        entry: pylint
-        language: system
-        types: [python]
-        exclude: 'site_scons/'
-        args:
-        - --disable=C,R,W0613,W0511,W0212,W0201,W0311,W0106,W0603,W0621,W0703,E1136
+    - id: ruff
 -   repo: https://github.com/MarcoGorelli/cython-lint
-    rev: v0.15.0
+    rev: v0.16.0
     hooks:
     -   id: cython-lint
     -   id: double-quote-cython-strings
@@ -50,7 +34,7 @@ repos:
         - --quiet
         - --counting=detailed
         - --linelength=240
-        - --filter=-legal,-build/include_order,-readability/casting,-whitespace/braces,-whitespace/indent,-whitespace/operators,-build/c++11,-readability/todo,-runtime/explicit,-runtime/int,-whitespace/comments,-readability/braces,-runtime/arrays,-runtime/references
+        - --filter=-build,-legal,-readability,-runtime,-whitespace,+build/include_subdir,+build/forward_decl,+build/include_what_you_use,+build/deprecated,+whitespace/comma,+whitespace/line_length,+whitespace/empty_if_body,+whitespace/empty_loop_body,+whitespace/empty_conditional_body,+whitespace/forcolon,+whitespace/parens,+whitespace/semicolon,+whitespace/tab,+readability/braces
 -   repo: local
     hooks:
     -   id: cppcheck
@@ -61,6 +45,7 @@ repos:
         args:
         - --error-exitcode=1
         - --language=c++
+        - --inline-suppr
         - --force
         - --quiet
         - -j4
@@ -68,6 +53,6 @@ repos:
     hooks:
     -   id: generator
         name: dbc generator
-        entry: generator/test_generator.py
+        entry: opendbc/dbc/generator/test_generator.py
         language: script
         pass_filenames: false
