@@ -88,10 +88,11 @@ class CarState(CarStateBase):
     ret.brakePressed = cp.vl["BRAKE_MODULE"]["BRAKE_PRESSED"] != 0
     ret.brakeHoldActive = cp.vl["ESP_CONTROL"]["BRAKE_HOLD_ACTIVE"] == 1
 
-    if self.CP.flags & ToyotaFlags.ALT_GAS_MSG.value:
+    if self.CP.flags & ToyotaFlags.SECOC:
       ret.gas = cp.vl["GAS_PEDAL"]["GAS_PEDAL_USER"]
       ret.gasPressed = cp.vl["GAS_PEDAL"]["GAS_PEDAL_USER"] > 0
     else:
+      # TODO: non-SecOC cars also seem to have GAS_PEDAL.GAS_PEDAL_USER, come back and validate/unify this case
       ret.gasPressed = cp.vl["PCM_CRUISE"]["GAS_RELEASED"] == 0
 
     ret.wheelSpeeds = self.get_wheel_speeds(
@@ -245,7 +246,7 @@ class CarState(CarStateBase):
     else:
       messages.append(("GEAR_PACKET", 1))
 
-    if CP.flags & ToyotaFlags.ALT_GAS_MSG.value:
+    if CP.flags & ToyotaFlags.SECOC.value:
       messages.append(("GAS_PEDAL", 42))
 
     if CP.carFingerprint not in [CAR.TOYOTA_MIRAI, CAR.TOYOTA_RAV4_PRIME]:
