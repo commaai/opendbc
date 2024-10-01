@@ -24,7 +24,7 @@ class CarInterface(CarInterfaceBase):
     if DBC[candidate]["pt"] == "toyota_new_mc_pt_generated":
       ret.safetyConfigs[0].safetyParam |= Panda.FLAG_TOYOTA_ALT_BRAKE
 
-    if ret.flags & ToyotaFlags.SECOC:
+    if ret.flags & ToyotaFlags.SECOC.value:
       ret.securityConfig.secOcRequired = True
       ret.safetyConfigs[0].safetyParam |= Panda.FLAG_TOYOTA_SECOC_CAR
 
