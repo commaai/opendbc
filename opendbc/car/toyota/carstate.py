@@ -33,7 +33,7 @@ class CarState(CarStateBase):
     self.cluster_speed_hyst_gap = CV.KPH_TO_MS / 2.
     self.cluster_min_speed = CV.KPH_TO_MS / 2.
 
-    if CP.flags & ToyotaFlags.GEAR_PACKET_HYBRID.value:
+    if CP.flags & ToyotaFlags.SECOC:
       self.shifter_values = can_define.dv["GEAR_PACKET_HYBRID"]["GEAR"]
     else:
       self.shifter_values = can_define.dv["GEAR_PACKET"]["GEAR"]
@@ -124,7 +124,7 @@ class CarState(CarStateBase):
         ret.steeringAngleOffsetDeg = self.angle_offset.x
         ret.steeringAngleDeg = torque_sensor_angle_deg - self.angle_offset.x
 
-    if self.CP.flags & ToyotaFlags.GEAR_PACKET_HYBRID.value:
+    if self.CP.flags & ToyotaFlags.SECOC:
       can_gear = int(cp.vl["GEAR_PACKET_HYBRID"]["GEAR"])
     else:
       can_gear = int(cp.vl["GEAR_PACKET"]["GEAR"])
@@ -241,12 +241,12 @@ class CarState(CarStateBase):
     if CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
       messages.append(("CLUTCH", 15))
 
-    if CP.flags & ToyotaFlags.GEAR_PACKET_HYBRID.value:
+    if CP.flags & ToyotaFlags.SECOC:
       messages.append(("GEAR_PACKET_HYBRID", 60))
     else:
       messages.append(("GEAR_PACKET", 1))
 
-    if CP.flags & ToyotaFlags.SECOC.value:
+    if CP.flags & ToyotaFlags.SECOC:
       messages.append(("GAS_PEDAL", 42))
 
     if CP.carFingerprint not in [CAR.TOYOTA_MIRAI, CAR.TOYOTA_RAV4_PRIME]:
