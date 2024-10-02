@@ -53,8 +53,8 @@ class CarState(CarStateBase):
 
     # This is to avoid a fault where you engage while still moving backwards after shifting to D.
     # An Equinox has been seen with an unsupported status (3), so only check if either wheel is in reverse (2)
-    left_whl_sign = -1 if (pt_cp.vl["EBCMWheelSpdRear"]["RLWheelDir"] == 2) else 1
-    right_whl_sign = -1 if (pt_cp.vl["EBCMWheelSpdRear"]["RRWheelDir"] == 2) else 1
+    left_whl_sign = -1 if pt_cp.vl["EBCMWheelSpdRear"]["RLWheelDir"] == 2 else 1
+    right_whl_sign = -1 if pt_cp.vl["EBCMWheelSpdRear"]["RRWheelDir"] == 2 else 1
     ret.wheelSpeeds = self.get_wheel_speeds(
       left_whl_sign * pt_cp.vl["EBCMWheelSpdFront"]["FLWheelSpd"],
       right_whl_sign * pt_cp.vl["EBCMWheelSpdFront"]["FRWheelSpd"],
@@ -64,7 +64,7 @@ class CarState(CarStateBase):
     ret.vEgoRaw = mean([ret.wheelSpeeds.fl, ret.wheelSpeeds.fr, ret.wheelSpeeds.rl, ret.wheelSpeeds.rr])
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     # sample rear wheel speeds, standstill=True if ECM allows engagement with brake
-    ret.standstill = ret.wheelSpeeds.rl <= STANDSTILL_THRESHOLD and ret.wheelSpeeds.rr <= STANDSTILL_THRESHOLD
+    ret.standstill = abs(ret.wheelSpeeds.rl) <= STANDSTILL_THRESHOLD and abs(ret.wheelSpeeds.rr) <= STANDSTILL_THRESHOLD
 
     if pt_cp.vl["ECMPRDNL2"]["ManualMode"] == 1:
       ret.gearShifter = self.parse_gear_shifter("T")
