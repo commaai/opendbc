@@ -53,8 +53,8 @@ class CarState(CarStateBase):
 
     # This is to avoid a fault where you engage while still moving backwards after shifting to D.
     # An Equinox has been seen with an unsupported status (3), so only check if either wheel is in reverse (2)
-    left_whl_sign = -1 if (pt_cp.vl["EBCMWheelSpdRear"]["RLWheelDir"] == 2) else 1
-    right_whl_sign = -1 if (pt_cp.vl["EBCMWheelSpdRear"]["RRWheelDir"] == 2) else 1
+    left_whl_sign = -1 if pt_cp.vl["EBCMWheelSpdRear"]["RLWheelDir"] == 2 else 1
+    right_whl_sign = -1 if pt_cp.vl["EBCMWheelSpdRear"]["RRWheelDir"] == 2 else 1
     ret.wheelSpeeds = self.get_wheel_speeds(
       left_whl_sign * pt_cp.vl["EBCMWheelSpdFront"]["FLWheelSpd"],
       right_whl_sign * pt_cp.vl["EBCMWheelSpdFront"]["FRWheelSpd"],
