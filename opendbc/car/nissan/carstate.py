@@ -110,9 +110,9 @@ class CarState(CarStateBase):
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(can_gear, None))
 
     if self.CP.carFingerprint == CAR.NISSAN_ALTIMA:
-      self.lkas_enabled = bool(cp.vl["LKAS_SETTINGS"]["LKAS_ENABLED"])
+      ret.lkasEnabled = bool(cp.vl["LKAS_SETTINGS"]["LKAS_ENABLED"])
     else:
-      self.lkas_enabled = bool(cp_adas.vl["LKAS_SETTINGS"]["LKAS_ENABLED"])
+      ret.lkasEnabled = bool(cp_adas.vl["LKAS_SETTINGS"]["LKAS_ENABLED"])
 
     self.cruise_throttle_msg = copy.copy(cp.vl["CRUISE_THROTTLE"])
 
