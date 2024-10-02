@@ -43,7 +43,7 @@ def get_lkas_cmd_bus(CAN, car_fingerprint, radar_disabled=False):
 
 def get_cruise_speed_conversion(car_fingerprint: str, is_metric: bool) -> float:
   # on certain cars, CRUISE_SPEED changes to imperial with car's unit setting
-  # Todo: finish the unit setting research for honda, and figure out the odyssey bosch too
+  # Todo: verify this works for all odyssey bosch
   return CV.MPH_TO_MS if car_fingerprint in (HONDA_BOSCH_RADARLESS | {CAR.HONDA_ODYSSEY_BOSCH}) and not is_metric else CV.KPH_TO_MS
 
 
