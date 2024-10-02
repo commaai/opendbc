@@ -111,9 +111,9 @@ class CarState(CarStateBase):
 
     # TODO: is this needed anymore?
     if self.CP.carFingerprint == CAR.NISSAN_ALTIMA:
-      ret.lkasEnabled = bool(cp.vl["LKAS_SETTINGS"]["LKAS_ENABLED"])
+      ret.invalidLkasSetting = bool(cp.vl["LKAS_SETTINGS"]["LKAS_ENABLED"])
     else:
-      ret.lkasEnabled = bool(cp_adas.vl["LKAS_SETTINGS"]["LKAS_ENABLED"])
+      ret.invalidLkasSetting = bool(cp_adas.vl["LKAS_SETTINGS"]["LKAS_ENABLED"])
 
     self.cruise_throttle_msg = copy.copy(cp.vl["CRUISE_THROTTLE"])
 
