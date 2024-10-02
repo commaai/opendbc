@@ -284,6 +284,7 @@ class CarStateBase(ABC):
     self.right_blinker_prev = False
     self.cluster_speed_hyst_gap = 0.0
     self.cluster_min_speed = 0.0  # min speed before dropping to 0
+    self.secoc_key: bytes = b"00" * 16
 
     Q = [[0.0, 0.0], [0.0, 100.0]]
     R = 0.3
@@ -382,6 +383,7 @@ class CarControllerBase(ABC):
   def __init__(self, dbc_name: str, CP: structs.CarParams):
     self.CP = CP
     self.frame = 0
+    self.secoc_key: bytes = b"00" * 16
 
   @abstractmethod
   def update(self, CC: structs.CarControl, CS: CarStateBase, now_nanos: int) -> tuple[structs.CarControl.Actuators, list[CanData]]:

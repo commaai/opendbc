@@ -44,7 +44,6 @@ class CarState(CarStateBase):
 
     self.pcm_follow_distance = 0
 
-    self.low_speed_lockout = False
     self.acc_type = 1
     self.lkas_hud = {}
     self.pcm_accel_net = 0.0
@@ -57,10 +56,16 @@ class CarState(CarStateBase):
     # CLUTCH->ACCEL_NET is only accurate for gas, PCM_CRUISE->ACCEL_NET is only accurate for brake
     # These signals only have meaning when ACC is active
     if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
-      # Sometimes ACC_BRAKING can be 1 while showing we're applying gas already
       self.pcm_accel_net = max(cp.vl["CLUTCH"]["ACCEL_NET"], 0.0)
+
+      # Sometimes ACC_BRAKING can be 1 while showing we're applying gas already
       if cp.vl["PCM_CRUISE"]["ACC_BRAKING"]:
         self.pcm_accel_net += min(cp.vl["PCM_CRUISE"]["ACCEL_NET"], 0.0)
+
+      # add creeping force at low speeds only for braking, CLUTCH->ACCEL_NET already shows this
+      neutral_accel = max(cp.vl["PCM_CRUISE"]["NEUTRAL_FORCE"] / self.CP.mass, 0.0)
+      if self.pcm_accel_net + neutral_accel < 0.0:
+        self.pcm_accel_net += neutral_accel
 
     # filtered pitch estimate from the car, negative is a downward slope
     self.slope_angle = cp.vl["VSC1S07"]["ASLP"] * CV.DEG_TO_RAD
@@ -158,7 +163,7 @@ class CarState(CarStateBase):
     # send your own ACC_CONTROL msg on startup with ACC_TYPE set to 1
     if (self.CP.carFingerprint not in TSS2_CAR and self.CP.carFingerprint not in UNSUPPORTED_DSU_CAR) or \
        (self.CP.carFingerprint in TSS2_CAR and self.acc_type == 1):
-      self.low_speed_lockout = cp.vl["PCM_CRUISE_2"]["LOW_SPEED_LOCKOUT"] == 2
+      ret.accFaulted = ret.accFaulted or cp.vl["PCM_CRUISE_2"]["LOW_SPEED_LOCKOUT"] == 2
 
     self.pcm_acc_status = cp.vl["PCM_CRUISE"]["CRUISE_STATE"]
     if self.CP.carFingerprint not in (NO_STOP_TIMER_CAR - TSS2_CAR):

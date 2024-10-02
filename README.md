@@ -25,6 +25,9 @@ pytest .
 
 # Run the linter
 pre-commit run --all-files
+
+# ./test.sh is the all-in-one that will install deps, build, lint, and test
+./test.sh
 ```
 
 [`examples/`](examples/) contains small example programs that can read state from the car and control the steering, gas, and brakes.
