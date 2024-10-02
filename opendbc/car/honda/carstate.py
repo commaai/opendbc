@@ -133,6 +133,7 @@ class CarState(CarStateBase):
     # STANDSTILL->WHEELS_MOVING bit can be noisy around zero, so use XMISSION_SPEED
     # panda checks if the signal is non-zero
     ret.standstill = cp.vl["ENGINE_DATA"]["XMISSION_SPEED"] < 1e-5
+    # TODO: verify odyssey_bosch
     # TODO: find a common signal across all cars
     if self.CP.carFingerprint in (CAR.HONDA_ACCORD, CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.HONDA_CRV_HYBRID, CAR.HONDA_INSIGHT,
                                   CAR.ACURA_RDX_3G, CAR.HONDA_E, CAR.HONDA_CIVIC_2022, CAR.HONDA_HRV_3G):
