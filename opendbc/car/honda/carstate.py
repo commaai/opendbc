@@ -152,7 +152,7 @@ class CarState(CarStateBase):
     # NO_TORQUE_ALERT_2 can be caused by bump or steering nudge from driver
     ret.steerFaultTemporary = steer_status not in ("NORMAL", "LOW_SPEED_LOCKOUT", "NO_TORQUE_ALERT_2")
 
-    # Return a fault if the radar has disabled steering. Latches on until disengaged, unless the EPS shows a fault.
+    # Return a fault if the car has disabled steering. Latches on until disengaged or if the EPS reports a fault.
     if self.CP.carFingerprint == CAR.HONDA_ODYSSEY_BOSCH and not self.CP.openpilotLongitudinalControl:
       if ret.steerFaultTemporary:
         self.steer_off_cnt = 0
