@@ -12,13 +12,11 @@ from opendbc.car.docs.definitions import CarDocs, Column, CommonFootnote, PartTy
 from opendbc.car.car_helpers import interfaces, get_interface_attr
 from opendbc.car.values import PLATFORMS
 
-from openpilot.common.basedir import BASEDIR
-#try:
-#  from openpilot.common.basedir import BASEDIR
-#except:
-#  # TODO: make sure we run in a sensible way if not checked out as a submodule
-#  # FIXME: no bare except
-#  BASEDIR = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../../"))
+try:
+  from openpilot.common.basedir import BASEDIR
+except ModuleNotFoundError:
+  # TODO: make sure we run in a sensible way if not checked out as a submodule
+  BASEDIR = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../../"))
 
 
 CARS_MD_OUT = os.path.join(BASEDIR, "docs", "CARS.md")
