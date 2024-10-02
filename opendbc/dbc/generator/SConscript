@@ -1,0 +1,4 @@
+Import('env')
+
+envDBC = env.Clone()
+envDBC.Command(None, "generator.py", "python3 $SOURCE")
