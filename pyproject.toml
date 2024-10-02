@@ -11,6 +11,7 @@ urls = { "homepage" = "https://github.com/commaai/opendbc" }
 
 # setuptools includes distutils which is needed by Cython and pre-commit.
 # distutils was removed in python3.12 from the standard library.
+# FIXME: revert pandacan back to stock when safety merged
 dependencies = [
   "scons",
   "numpy",
