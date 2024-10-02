@@ -90,6 +90,10 @@ class CarState(CarStateBase):
     ret.cruiseState.standstill = cp.vl["PEDALS"]["STANDSTILL"] == 1
     ret.cruiseState.speed = cp.vl["CRZ_EVENTS"]["CRZ_SPEED"] * CV.KPH_TO_MS
 
+    # stock lkas should be on
+    # TODO: is this needed?
+    ret.invalidLkasSetting = cp_cam.vl["CAM_LANEINFO"]["LANE_LINES"] == 0
+
     if ret.cruiseState.enabled:
       if not self.lkas_allowed_speed and self.acc_active_last:
         self.low_speed_alert = True
@@ -99,11 +103,8 @@ class CarState(CarStateBase):
     # Check if LKAS is disabled due to lack of driver torque when all other states indicate
     # it should be enabled (steer lockout). Don't warn until we actually get lkas active
     # and lose it again, i.e, after initial lkas activation
-    ret.steerFaultTemporary = self.lkas_allowed_speed and lkas_blocked
-
-    # stock lkas should be on
-    # TODO: is this needed?
-    ret.invalidLkasSetting = cp_cam.vl["CAM_LANEINFO"]["LANE_LINES"] == 0
+    if not ret.invalidLkasSetting:
+      ret.steerFaultTemporary = self.lkas_allowed_speed and lkas_blocked
 
     self.acc_active_last = ret.cruiseState.enabled
 
