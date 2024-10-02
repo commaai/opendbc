@@ -75,6 +75,7 @@ class CarState:
   steeringPressed: bool = auto_field()  # if the user is using the steering wheel
   steerFaultTemporary: bool = auto_field()  # temporary EPS fault
   steerFaultPermanent: bool = auto_field()  # permanent EPS fault
+  invalidLkasSetting: bool = auto_field()  # stock LKAS is incorrectly configured (i.e. on or off)
   stockAeb: bool = auto_field()
   stockFcw: bool = auto_field()
   espDisabled: bool = auto_field()
