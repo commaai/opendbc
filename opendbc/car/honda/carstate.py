@@ -2,10 +2,9 @@ from collections import defaultdict
 
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
-from opendbc.car import create_button_events, structs
+from opendbc.car import create_button_events, structs, DT_CTRL
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.numpy_fast import interp
-from opendbc.car import DT_CTRL
 from opendbc.car.honda.hondacan import CanBus, get_cruise_speed_conversion
 from opendbc.car.honda.values import CAR, DBC, STEER_THRESHOLD, HONDA_BOSCH, \
                                                  HONDA_NIDEC_ALT_SCM_MESSAGES, HONDA_BOSCH_RADARLESS, \
