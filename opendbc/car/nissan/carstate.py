@@ -109,6 +109,7 @@ class CarState(CarStateBase):
     can_gear = int(cp.vl["GEARBOX"]["GEAR_SHIFTER"])
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(can_gear, None))
 
+    # TODO: is this needed anymore?
     if self.CP.carFingerprint == CAR.NISSAN_ALTIMA:
       ret.lkasEnabled = bool(cp.vl["LKAS_SETTINGS"]["LKAS_ENABLED"])
     else:
