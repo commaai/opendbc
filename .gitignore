@@ -12,6 +12,7 @@
 *.egg-info/
 *.html
 uv.lock
+*_generate.dbc
 
 opendbc/can/*.so
 opendbc/can/*.a
