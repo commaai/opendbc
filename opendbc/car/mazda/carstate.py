@@ -106,10 +106,6 @@ class CarState(CarStateBase):
     # and lose it again, i.e, after initial lkas activation
     ret.steerFaultTemporary = self.lkas_allowed_speed and lkas_blocked
 
-    # stock lkas should be on
-    # TODO: is this needed?
-    ret.invalidLkasSetting = cp_cam.vl["CAM_LANEINFO"]["LANE_LINES"] == 0
-
     self.acc_active_last = ret.cruiseState.enabled
 
     self.crz_btns_counter = cp.vl["CRZ_BTNS"]["CTR"]
