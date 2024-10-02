@@ -159,7 +159,7 @@ class CarState:
       cancel = auto()
       altButton1 = auto()
       altButton2 = auto()
-      altButton3 = auto()
+      mainCruise = auto()
       setCruise = auto()
       resumeCruise = auto()
       gapAdjustCruise = auto()
