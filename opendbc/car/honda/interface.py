@@ -166,7 +166,7 @@ class CarInterface(CarInterfaceBase):
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]  # TODO: determine if there is a dead zone at the top end
       if not ret.openpilotLongitudinalControl:
         ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 3840], [0, 3840]]  # clipped/limited by the radar
-      if ret.openpilotLongitudinalControl and not docs:
+      elif not docs:
         ret.minSteerSpeed = 0.
 
     elif candidate == CAR.HONDA_PILOT:
