@@ -109,7 +109,6 @@ class Footnote(Enum):
     Column.FSR_STEERING)
 
 
-
 class HondaBoschPlatformConfig(PlatformConfig):
   def init(self):
     self.flags |= HondaFlags.BOSCH
