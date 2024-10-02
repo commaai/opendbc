@@ -42,9 +42,6 @@ class CarState(CarStateBase):
     self.distance_button = pt_cp.vl["ASCMSteeringButton"]["DistanceButton"]
     self.buttons_counter = pt_cp.vl["ASCMSteeringButton"]["RollingCounter"]
     self.pscm_status = copy.copy(pt_cp.vl["PSCMStatus"])
-    # This is to avoid a fault where you engage while still moving backwards after shifting to D.
-    # An Equinox has been seen with an unsupported status (3), so only check if either wheel is in reverse (2)
-    self.moving_backward = (pt_cp.vl["EBCMWheelSpdRear"]["RLWheelDir"] == 2) or (pt_cp.vl["EBCMWheelSpdRear"]["RRWheelDir"] == 2)
 
     # Variables used for avoiding LKAS faults
     self.loopback_lka_steering_cmd_updated = len(loopback_cp.vl_all["ASCMLKASteeringCmd"]["RollingCounter"]) > 0
@@ -54,11 +51,15 @@ class CarState(CarStateBase):
       self.pt_lka_steering_cmd_counter = pt_cp.vl["ASCMLKASteeringCmd"]["RollingCounter"]
       self.cam_lka_steering_cmd_counter = cam_cp.vl["ASCMLKASteeringCmd"]["RollingCounter"]
 
+    # This is to avoid a fault where you engage while still moving backwards after shifting to D.
+    # An Equinox has been seen with an unsupported status (3), so only check if either wheel is in reverse (2)
+    left_whl_sign = -1 if pt_cp.vl["EBCMWheelSpdRear"]["RLWheelDir"] == 2 else 1
+    right_whl_sign = -1 if pt_cp.vl["EBCMWheelSpdRear"]["RRWheelDir"] == 2 else 1
     ret.wheelSpeeds = self.get_wheel_speeds(
-      pt_cp.vl["EBCMWheelSpdFront"]["FLWheelSpd"],
-      pt_cp.vl["EBCMWheelSpdFront"]["FRWheelSpd"],
-      pt_cp.vl["EBCMWheelSpdRear"]["RLWheelSpd"],
-      pt_cp.vl["EBCMWheelSpdRear"]["RRWheelSpd"],
+      left_whl_sign * pt_cp.vl["EBCMWheelSpdFront"]["FLWheelSpd"],
+      right_whl_sign * pt_cp.vl["EBCMWheelSpdFront"]["FRWheelSpd"],
+      left_whl_sign * pt_cp.vl["EBCMWheelSpdRear"]["RLWheelSpd"],
+      right_whl_sign * pt_cp.vl["EBCMWheelSpdRear"]["RRWheelSpd"],
     )
     ret.vEgoRaw = mean([ret.wheelSpeeds.fl, ret.wheelSpeeds.fr, ret.wheelSpeeds.rl, ret.wheelSpeeds.rr])
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
