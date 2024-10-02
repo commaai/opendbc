@@ -175,7 +175,7 @@ class CAR(Platforms):
     flags=HondaFlags.BOSCH_RADARLESS,
   )
   HONDA_ODYSSEY_BOSCH = HondaBoschPlatformConfig(
-    [HondaCarDocs("Honda Odyssey 2021-24", "All", footnotes=[Footnote.OP_STEER_TO_ZERO])],
+    [HondaCarDocs("Honda Odyssey 2021-25", "All", footnotes=[Footnote.OP_STEER_TO_ZERO])],
     CarSpecs(mass=2087, wheelbase=3.0, steerRatio=14.35, centerToFrontRatio=0.41, tireStiffnessFactor=0.82, minSteerSpeed=47. * CV.MPH_TO_MS),
     dbc_dict('acura_rdx_2020_can_generated', None),
     flags=HondaFlags.BOSCH_ALT_BRAKE,
