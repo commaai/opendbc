@@ -261,6 +261,8 @@ class CarDocsBase:
   # all the parts needed for the supported car
   car_parts: CarParts = field(default_factory=CarParts)
 
+  merged: bool | None = None
+  support_link: str | None = None
   support_type: SupportType = SupportType.OFFICIAL
 
   def __post_init__(self):
