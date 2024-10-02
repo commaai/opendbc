@@ -392,12 +392,8 @@ class CarParams:
 
   wheelSpeedFactor: float = auto_field()  # Multiplier on wheels speeds to computer actual speeds
 
-  securityConfig: 'CarParams.SecurityConfig' = field(default_factory=lambda: CarParams.SecurityConfig())
-
-  @auto_dataclass
-  class SecurityConfig:
-    secOcRequired: bool = auto_field()
-    secOcKeyAvailable: bool = auto_field()
+  secOcRequired: bool = auto_field()
+  secOcKeyAvailable: bool = auto_field()
 
   @auto_dataclass
   class LongitudinalPIDTuning:
