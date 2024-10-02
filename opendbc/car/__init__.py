@@ -8,7 +8,7 @@ from dataclasses import replace
 from panda import uds
 from opendbc.car import structs
 from opendbc.car.can_definitions import CanData
-from opendbc.car.docs_definitions import CarDocs
+from opendbc.car.docs.definitions import CarDocs
 from opendbc.car.common.numpy_fast import clip, interp
 
 # set up logging

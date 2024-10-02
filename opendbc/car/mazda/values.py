@@ -4,7 +4,7 @@ from enum import IntFlag
 from opendbc.car import CarSpecs, DbcDict, PlatformConfig, Platforms, dbc_dict
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
+from opendbc.car.docs.definitions import CarHarness, CarDocs, CarParts
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu

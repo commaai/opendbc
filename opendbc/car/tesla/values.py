@@ -2,7 +2,7 @@ from enum import IntFlag
 from opendbc.car.structs import CarParams
 from opendbc.car import structs
 from opendbc.car import AngleRateLimit, CarSpecs, PlatformConfig, Platforms, dbc_dict
-from opendbc.car.docs_definitions import CarDocs
+from opendbc.car.docs.definitions import CarDocs
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu

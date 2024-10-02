@@ -4,7 +4,7 @@ from enum import Enum, IntFlag
 from panda import uds
 from opendbc.car import CarSpecs, PlatformConfig, Platforms, dbc_dict, structs
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
+from opendbc.car.docs.definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
 
 Ecu = structs.CarParams.Ecu
