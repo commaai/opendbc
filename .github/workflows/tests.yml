@@ -15,10 +15,11 @@ jobs:
     name: unit tests
     runs-on: ubuntu-24.04
     timeout-minutes: 1
-    #strategy:
-    #  fail-fast: false
-    #  matrix:
-    #    run: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-latest]
+        #run: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
     steps:
     - uses: actions/checkout@v4
     - name: setup python
