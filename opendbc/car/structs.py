@@ -76,7 +76,7 @@ class CarState:
   steerFaultTemporary: bool = auto_field()  # temporary EPS fault
   steerFaultPermanent: bool = auto_field()  # permanent EPS fault
   lkasDisabled: bool = auto_field()  # LKAS being enabled is required to control car
-  lkasEnabled: bool = auto_field()  # LKAS being disabled is required to control car
+  invalidLkasSetting: bool = auto_field()  # LKAS being disabled is required to control car
   stockAeb: bool = auto_field()
   stockFcw: bool = auto_field()
   espDisabled: bool = auto_field()
