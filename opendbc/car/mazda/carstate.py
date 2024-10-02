@@ -99,6 +99,7 @@ class CarState(CarStateBase):
         self.low_speed_alert = True
       else:
         self.low_speed_alert = False
+    ret.lowSpeedAlert = self.low_speed_alert
 
     # Check if LKAS is disabled due to lack of driver torque when all other states indicate
     # it should be enabled (steer lockout). Don't warn until we actually get lkas active
