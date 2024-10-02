@@ -7,20 +7,16 @@ from enum import Enum
 from natsort import natsorted
 
 from opendbc.car import gen_empty_fingerprint
+from opendbc.car.common.basedir import BASEDIR
 from opendbc.car.structs import CarParams
 from opendbc.car.docs.definitions import CarDocs, Column, CommonFootnote, PartType
 from opendbc.car.car_helpers import interfaces, get_interface_attr
 from opendbc.car.values import PLATFORMS
 
-try:
-  from openpilot.common.basedir import BASEDIR
-except ModuleNotFoundError:
-  # TODO: make sure we run in a sensible way if not checked out as a submodule
-  BASEDIR = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../../"))
 
-
-CARS_MD_OUT = os.path.join(BASEDIR, "docs", "CARS.md")
-CARS_MD_TEMPLATE = os.path.join(BASEDIR, "opendbc", "car", "docs", "CARS_template.md")
+# FIXME: make sure we run in a sensible way if not checked out as a submodule, try-except for writing to CARS.md
+CARS_MD_OUT = os.path.join(BASEDIR, "../", "../", "../", "docs", "CARS.md")
+CARS_MD_TEMPLATE = os.path.join(BASEDIR, "docs", "CARS_template.md")
 
 
 def get_all_footnotes() -> dict[Enum, int]:
