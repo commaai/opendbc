@@ -3,7 +3,7 @@ import pytest
 import re
 
 from opendbc.car.car_helpers import interfaces
-from opendbc.car.docs import get_all_car_docs
+from opendbc.car.docs.generate_docs import get_all_car_docs
 from opendbc.car.docs.definitions import Cable, Column, PartType, Star
 from opendbc.car.honda.values import CAR as HONDA
 from opendbc.car.values import PLATFORMS
