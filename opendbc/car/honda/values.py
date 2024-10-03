@@ -105,7 +105,8 @@ class Footnote(Enum):
     "2019 Honda Civic 1.6L Diesel Sedan does not have ALC below 12mph.",
     Column.FSR_STEERING)
   OP_STEER_TO_ZERO = CarFootnote(
-    "No ALC below 0 mph when openpilot Longitudinal Control is enabled. Safety features such as AEB and FCW will be disabled.",
+    "This car is capable of ALC at all speeds when openpilot ACC is enabled. " +
+    "<b><i>NOTE: The car's radar and all related features such as AEB and FCW will be disabled.</i></b>",
     Column.FSR_STEERING)
 
 
