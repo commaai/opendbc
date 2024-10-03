@@ -53,6 +53,6 @@ Contributions towards anything here is welcome. Join the [Discord](https://disco
 
 ## FAQ
 
-* **How do I use this?** Depends on what you want to do. [openpilot + comma 3X](https://comma.ai/shop/comma-3x) is our development target, but you can also use a [panda](https://comma.ai/shop/panda) for basic control or just reading state from your car.
+* **How do I use this?** Depends on what you want to do. [openpilot](https://github.com/commaai/openpilot) is our development target, but you can also use a [panda](https://comma.ai/shop/panda) for basic control or just reading state from your car.
 * **Can I add support for my car?** Yes, most car support comes from the community. Join the [Discord](https://discord.comma.ai) and watch this [talk](https://www.youtube.com/watch?v=XxPS5TpTUnI&t=142s&pp=ygUPY29tbWFfY29uIGphc29u) to get started. (We also offer [paid bounties](https://comma.ai/bounties) on car ports.)
 * **Which cars are supported?** See the openpilot [supported cars list](https://github.com/commaai/openpilot/blob/master/docs/CARS.md) and `grep` around the codebase.
