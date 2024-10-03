@@ -1,7 +1,7 @@
 # functions common among cars
 import logging
 from collections import namedtuple
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import IntFlag, ReprEnum, EnumType
 from dataclasses import replace
 
@@ -271,6 +271,15 @@ class Freezable:
 
 @dataclass(order=True)
 class PlatformConfigBase(Freezable):
+  car_docs: list[CarDocs] | list[ExtraCarDocs]
+  specs: CarSpecs
+
+  dbc_dict: DbcDict
+
+  flags: int = 0
+
+  platform_str: str | None = None
+
   def __hash__(self) -> int:
     return hash(self.platform_str)
 
@@ -278,7 +287,7 @@ class PlatformConfigBase(Freezable):
     return replace(self, **kwargs)
 
   def init(self):
-    self.platform_str = None
+    pass
 
   def __post_init__(self):
     self.init()
@@ -289,15 +298,13 @@ class PlatformConfig(PlatformConfigBase):
   car_docs: list[CarDocs]
   specs: CarSpecs
   dbc_dict: DbcDict
-  flags: int = 0
-  platform_str: str | None = None
 
 
 @dataclass(order=True)
 class ExtraPlatformConfig(PlatformConfigBase):
   car_docs: list[ExtraCarDocs]
-  platform_str: str | None = None
-  flags: int = 0
+  specs: CarSpecs = CarSpecs(mass=0., wheelbase=0., steerRatio=0.)
+  dbc_dict: DbcDict = field(default_factory=lambda: dbc_dict('unknown', None))
 
 
 class PlatformsType(EnumType):

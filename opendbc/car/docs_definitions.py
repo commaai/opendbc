@@ -231,9 +231,33 @@ def split_name(name: str) -> tuple[str, str, str]:
 
 
 @dataclass
-class CarDocsBase:
+class CarDocs:
   # make + model + model years
   name: str
+
+  # Example for Toyota Corolla MY20
+  # requirements: Lane Tracing Assist (LTA) and Dynamic Radar Cruise Control (DRCC)
+  # US Market reference: "All", since all Corolla in the US come standard with LTA and DRCC
+
+  # the simplest description of the requirements for the US market
+  package: str
+
+  # the minimum compatibility requirements for this model, regardless
+  # of market. can be a package, trim, or list of features
+  requirements: str | None = None
+
+  video_link: str | None = None
+  footnotes: list[Enum] = field(default_factory=list)
+  min_steer_speed: float | None = None
+  min_enable_speed: float | None = None
+  auto_resume: bool | None = None
+
+  # all the parts needed for the supported car
+  car_parts: CarParts = field(default_factory=CarParts)
+
+  merged: bool = True
+  support_type: SupportType = SupportType.UPSTREAM
+  support_link: str | None = "#upstream"  # TODO: have a default link to the definition of an upstream car
 
   def __post_init__(self):
     self.make, self.model, self.years = split_name(self.name)
@@ -360,33 +384,8 @@ class CarDocsBase:
 
 
 @dataclass
-class CarDocs(CarDocsBase):
-  # Example for Toyota Corolla MY20
-  # requirements: Lane Tracing Assist (LTA) and Dynamic Radar Cruise Control (DRCC)
-  # US Market reference: "All", since all Corolla in the US come standard with LTA and DRCC
-
-  # the simplest description of the requirements for the US market
-  package: str
-
-  merged: bool = True
-  support_type: SupportType = SupportType.UPSTREAM
-  support_link: str | None = None  # TODO: have a default link to the definition of an upstream car
-
-  requirements: str | None = None  # Minimum compatibility requirements, regardless of market
-  video_link: str | None = None
-  footnotes: list[Enum] = field(default_factory=list)
-  min_steer_speed: float | None = None
-  min_enable_speed: float | None = None
-  auto_resume: bool | None = None
-  car_parts: CarParts = field(default_factory=CarParts)  # All the parts needed for a supported car
-
-
-@dataclass
-class ExtraCarDocs(CarDocsBase):
+class ExtraCarDocs(CarDocs):
   package: str = "Any"
   merged: bool = False
   support_type: SupportType = SupportType.INCOMPATIBLE
-  support_link: str | None = None  # TODO: have a default link to the definition of an incompatible car
-
-  video_link: str | None = None
-  footnotes: list[Enum] = field(default_factory=list)
+  support_link: str | None = "#incompatible"  # TODO: have a default link to the definition of an incompatible car
