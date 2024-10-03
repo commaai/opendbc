@@ -1,4 +1,3 @@
-import copy
 from opendbc.car.common.numpy_fast import clip
 from opendbc.can.packer import CANPacker
 from opendbc.car import apply_std_steer_angle_limits
@@ -52,7 +51,7 @@ class CarController(CarControllerBase):
       can_sends.append(self.tesla_can.create_longitudinal_command(13, 0,  cntr))
 
     # TODO: HUD control
-    new_actuators = copy.copy(actuators)
+    new_actuators = actuators.as_builder()
     new_actuators.steeringAngleDeg = self.apply_angle_last
 
     self.frame += 1
