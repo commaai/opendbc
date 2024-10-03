@@ -249,6 +249,7 @@ class CAR(Platforms):
     flags=ToyotaFlags.RADAR_ACC | ToyotaFlags.ANGLE_CONTROL,
   )
   TOYOTA_RAV4_PRIME = PlatformConfig(
+    # Not including in CarDocs due to unique support issues with Toyota SecOC
     [],
     CarSpecs(mass=3650. * CV.LB_TO_KG, wheelbase=2.65, steerRatio=16.88, tireStiffnessFactor=0.5533),
     dbc_dict('toyota_rav4_prime_generated', 'toyota_tss2_adas'),
