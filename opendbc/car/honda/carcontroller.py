@@ -1,4 +1,3 @@
-import copy
 from collections import namedtuple
 
 from opendbc.can.packer import CANPacker
@@ -238,7 +237,7 @@ class CarController(CarControllerBase):
         self.speed = pcm_speed
         self.gas = pcm_accel / self.params.NIDEC_GAS_MAX
 
-    new_actuators = copy.copy(actuators)
+    new_actuators = actuators.as_builder()
     new_actuators.speed = self.speed
     new_actuators.accel = self.accel
     new_actuators.gas = self.gas
