@@ -564,7 +564,7 @@ FW_VERSIONS = {
       b'28102-5MX-A100\x00\x00',
       b'28102-5MX-A200\x00\x00',
       b'28102-5MX-A410\x00\x00',
-      b'28102-5MX-C100\x00\x00',  # 2022 Touring. find a dongle for this.
+      b'28102-5MX-C100\x00\x00',
     ],
     (Ecu.electricBrakeBooster, 0x18da2bf1, None): [
       b'46114-THR-A530\x00\x00',
