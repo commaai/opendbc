@@ -314,7 +314,7 @@ class CarState(CarStateBase):
 
     # Consume factory LDW data relevant for factory SWA (Lane Change Assist)
     # and capture it for forwarding to the blind spot radar controller
-    self.ldw_stock_values = cam_cp.vl["LDW_02"]
+    self.ldw_stock_values = cam_cp.vl["LDW_02"] if self.CP.networkLocation == NetworkLocation.fwdCamera else {}
 
     ret.stockFcw = bool(pt_cp.vl["MEB_ESP_05"]["FCW_Active"])
     ret.stockAeb = bool(pt_cp.vl["MEB_ESP_05"]["AEB_Active"])
@@ -331,7 +331,7 @@ class CarState(CarStateBase):
       ret.cruiseState.nonAdaptive = bool(ext_cp.vl["MEB_ACC_01"]["ACC_Limiter_Mode"])
     else:
       # Speed limiter mode; ECM faults if we command ACC while not pcmCruise
-      ret.cruiseState.nonAdaptive = False # TODO
+      ret.cruiseState.nonAdaptive = ext_cp.vl["MEB_ACC_01"]["ACC_Gesetzte_Zeitluecke"] == 0
 
     ret.accFaulted = pt_cp.vl["MEB_Motor_01"]["TSK_Status"] in (6, 7)
 
@@ -342,7 +342,7 @@ class CarState(CarStateBase):
     # radar sends a set-speed of ~90.69 m/s / 203mph.
     if self.CP.pcmCruise:
       ret.cruiseState.speed = int(round(ext_cp.vl["MEB_ACC_01"]["ACC_Wunschgeschw_02"])) * CV.KPH_TO_MS
-      if ret.cruiseState.speed > 50: # settable maximum 180km/h
+      if ret.cruiseState.speed > 90:
         ret.cruiseState.speed = 0
 
     # Update button states for turn signals and ACC controls, capture all ACC button state/config for passthrough
@@ -510,19 +510,31 @@ class CarState(CarStateBase):
       ("MEB_Light_01", 5),        #
       ("MEB_Motor_01", 50),       #
     ]
+
+    if CP.networkLocation == NetworkLocation.fwdCamera:
+      # Radars are here on CANBUS.pt
+      messages += MebExtraSignals.fwd_radar_messages
+      if CP.enableBsm:
+        messages += MebExtraSignals.bsm_radar_messages
+    
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, CANBUS.pt)
 
   @staticmethod
   def get_cam_can_parser_meb(CP):
-    messages = [
-      # sig_address, frequency
-      ("LDW_02", 10),               # From R242 Driver assistance camera
-      ("MEB_ACC_01", 17),           #
-      ("MEB_ACC_02", 50),           #
-      ("MEB_Side_Assist_01", 20),   #
-      ("MEB_Travel_Assist_01", 10), #
-      #("MEB_Distance_01", 25),     #
-    ]
+    
+    messages = []
+
+    if CP.networkLocation == NetworkLocation.fwdCamera:
+      messages += [
+        # sig_address, frequency
+        ("LDW_02", 10)      # From R242 Driver assistance camera
+      ]
+    else:
+      # Radars are here on CANBUS.cam
+      messages += MebExtraSignals.fwd_radar_messages
+      if CP.enableBsm:
+        messages += MebExtraSignals.bsm_radar_messages
+    
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, CANBUS.cam)
 
 
@@ -546,4 +558,17 @@ class PqExtraSignals:
   ]
   bsm_radar_messages = [
     ("SWA_1", 20),                               # From J1086 Lane Change Assist
+  ]
+
+
+class MebExtraSignals:
+  # Additional signal and message lists for optional or bus-portable controllers
+  fwd_radar_messages = [
+    ("MEB_ACC_01", 17),           #
+    ("MEB_ACC_02", 50),           #
+    ("MEB_Travel_Assist_01", 10), #
+    #("MEB_Distance_01", 25),     #
+  ]
+  bsm_radar_messages = [
+    ("MEB_Side_Assist_01", 20),
   ]
