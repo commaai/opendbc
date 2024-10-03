@@ -169,6 +169,7 @@ class CarInterface(CarInterfaceBase):
       # TODO: change minSteerSpeed in values.py and remove this once Honda Bosch w/OP long is in release
       elif not docs:
         ret.minSteerSpeed = 0.
+      ret.dashcamOnly = True
 
     elif candidate == CAR.HONDA_PILOT:
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]  # TODO: determine if there is a dead zone at the top end
