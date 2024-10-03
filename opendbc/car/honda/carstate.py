@@ -100,8 +100,11 @@ class CarState(CarStateBase):
 
     self.shifter_values = can_define.dv[self.gearbox_msg]["GEAR_SHIFTER"]
     self.steer_status_values = defaultdict(lambda: "UNKNOWN", can_define.dv["STEER_STATUS"]["STEER_STATUS"])
-    self.steer_off_cnt = 0
     self.min_steer_alert_speed = self.CP.minSteerSpeed
+
+  # Depending on vehicle state, ODYSSEY_BOSCH & ACURA_RDX_3G can forcibly disengage lateral controls.
+  # Show an alert when the EPS has been unresponsive to control requests for 1000ms.
+    self.eps_ctrl_invalid_cnt = 0
 
     self.brake_switch_prev = False
     self.brake_switch_active = False
@@ -155,8 +158,8 @@ class CarState(CarStateBase):
     # Return a fault if the car hasn't enabled steering. Latches on until disengaged or if the EPS reports a fault.
     if self.CP.carFingerprint == CAR.HONDA_ODYSSEY_BOSCH and not self.CP.openpilotLongitudinalControl:
       if ret.steerFaultTemporary:
-        self.steer_off_cnt = 0
-      ret.steerFaultTemporary |= self.steer_off_cnt >= int(1. / DT_CTRL)
+        self.eps_ctrl_invalid_cnt = 0
+      ret.steerFaultTemporary |= self.eps_ctrl_invalid_cnt >= int(1. / DT_CTRL)
 
     if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
       ret.accFaulted = bool(cp.vl["CRUISE_FAULT_STATUS"]["CRUISE_FAULT"])
@@ -277,12 +280,11 @@ class CarState(CarStateBase):
     #   self.min_steer_alert_speed = self.CP.minSteerSpeed
     # ret.lowSpeedAlert = (0 < ret.vEgo <= self.min_steer_alert_speed) and self.CP.minSteerSpeed > 6.0
 
-    # # Some cars forcibly disengage steering depending on vehicle conditions (i.e. some Odyssey Bosch & late model Acura RDX 3G).
-    # # carState sets the steerFaultTemporary flag if controls are on and steering has not engaged within 1 second.
+
     # if CC.latActive and not self.steer_on: # type: ignore[attr-defined]
-    #   self.steer_off_cnt += 1 # type: ignore[attr-defined]
+    #   self.eps_ctrl_invalid_cnt += 1 # type: ignore[attr-defined]
     # else:
-    #   self.steer_off_cnt = 0 # type: ignore[attr-defined]
+    #   self.eps_ctrl_invalid_cnt = 0 # type: ignore[attr-defined]
 
     if self.CP.enableBsm:
       # BSM messages are on B-CAN, requires a panda forwarding B-CAN messages to CAN 0
