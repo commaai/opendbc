@@ -102,8 +102,8 @@ class CarState(CarStateBase):
     self.steer_status_values = defaultdict(lambda: "UNKNOWN", can_define.dv["STEER_STATUS"]["STEER_STATUS"])
     self.min_steer_alert_speed = self.CP.minSteerSpeed
 
-  # Depending on vehicle state, ODYSSEY_BOSCH & ACURA_RDX_3G can forcibly disengage lateral controls.
-  # Show an alert when the EPS has been unresponsive to control requests for 1000ms.
+    # Depending on vehicle state, ODYSSEY_BOSCH & ACURA_RDX_3G can forcibly disengage lateral controls.
+    # Show an alert when the EPS has been unresponsive to control requests for 1000ms.
     self.eps_ctrl_invalid_cnt = 0
 
     self.brake_switch_prev = False
