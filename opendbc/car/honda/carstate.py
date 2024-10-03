@@ -269,6 +269,21 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
       self.lkas_hud = cp_cam.vl["LKAS_HUD"]
 
+    # # Low speed steer alert logic; for cars with steer cut off above 6 m/s
+    # # Show the alert earlier when slowing. Must first exceed a greater speed while engaged.
+    # if ret.vEgo > (self.CP.minSteerSpeed + 3.5):
+    #   self.min_steer_alert_speed = (self.CP.minSteerSpeed + 1.5)
+    # elif not CC.latActive:
+    #   self.min_steer_alert_speed = self.CP.minSteerSpeed
+    # ret.lowSpeedAlert = (0 < ret.vEgo <= self.min_steer_alert_speed) and self.CP.minSteerSpeed > 6.0
+
+    # # Some cars forcibly disengage steering depending on vehicle conditions (i.e. some Odyssey Bosch & late model Acura RDX 3G).
+    # # carState sets the steerFaultTemporary flag if controls are on and steering has not engaged within 1 second.
+    # if CC.latActive and not self.steer_on: # type: ignore[attr-defined]
+    #   self.steer_off_cnt += 1 # type: ignore[attr-defined]
+    # else:
+    #   self.steer_off_cnt = 0 # type: ignore[attr-defined]
+
     if self.CP.enableBsm:
       # BSM messages are on B-CAN, requires a panda forwarding B-CAN messages to CAN 0
       # more info here: https://github.com/commaai/openpilot/pull/1867
