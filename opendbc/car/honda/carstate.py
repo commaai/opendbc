@@ -101,9 +101,6 @@ class CarState(CarStateBase):
     self.shifter_values = can_define.dv[self.gearbox_msg]["GEAR_SHIFTER"]
     self.steer_status_values = defaultdict(lambda: "UNKNOWN", can_define.dv["STEER_STATUS"]["STEER_STATUS"])
     self.min_steer_alert_speed = self.CP.minSteerSpeed
-
-    # Depending on vehicle state, ODYSSEY_BOSCH & ACURA_RDX_3G can forcibly disengage lateral controls.
-    # Show an alert when the EPS has been unresponsive to control requests for 1000ms.
     self.eps_ctrl_invalid_cnt = 0
 
     self.brake_switch_prev = False
@@ -272,15 +269,16 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
       self.lkas_hud = cp_cam.vl["LKAS_HUD"]
 
-    # # Low speed steer alert logic; for cars with steer cut off above 6 m/s
-    # # Show the alert earlier when slowing. Must first exceed a greater speed while engaged.
+    # Low speed steer alert logic; for cars with steer cut off above 6 m/s
+    # Show the alert earlier when slowing. Must first exceed a greater speed while engaged.
     # if ret.vEgo > (self.CP.minSteerSpeed + 3.5):
     #   self.min_steer_alert_speed = (self.CP.minSteerSpeed + 1.5)
     # elif not CC.latActive:
     #   self.min_steer_alert_speed = self.CP.minSteerSpeed
     # ret.lowSpeedAlert = (0 < ret.vEgo <= self.min_steer_alert_speed) and self.CP.minSteerSpeed > 6.0
 
-
+    # Depending on vehicle state, ODYSSEY_BOSCH & ACURA_RDX_3G can forcibly disengage lateral controls.
+    # Show an alert when the EPS has been unresponsive to control requests for 1000ms.
     # if CC.latActive and not self.steer_on: # type: ignore[attr-defined]
     #   self.eps_ctrl_invalid_cnt += 1 # type: ignore[attr-defined]
     # else:
