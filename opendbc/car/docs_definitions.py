@@ -24,6 +24,15 @@ class Column(Enum):
   VIDEO = "Video"
 
 
+class SupportType(Enum):
+  UPSTREAM = "Upstream"             # Actively maintained by comma, plug-and-play in release versions of openpilot
+  REVIEW = "Under review"           # Dashcam, but planned for official support after safety validation
+  DASHCAM = "Dashcam mode"          # Dashcam, but may be drivable in a community fork
+  COMMUNITY = "Community"           # Not upstream, but available in a custom community fork, not validated by comma
+  LEGACY = "Legacy"                 # Cars that would be in dashcam mode, but work in release for historical reasons
+  INCOMPATIBLE = "Not compatible"   # Known fundamental incompatibility such as Flexray or hydraulic power steering
+
+
 class Star(Enum):
   FULL = "full"
   HALF = "half"
@@ -222,29 +231,9 @@ def split_name(name: str) -> tuple[str, str, str]:
 
 
 @dataclass
-class CarDocs:
+class CarDocsBase:
   # make + model + model years
   name: str
-
-  # Example for Toyota Corolla MY20
-  # requirements: Lane Tracing Assist (LTA) and Dynamic Radar Cruise Control (DRCC)
-  # US Market reference: "All", since all Corolla in the US come standard with LTA and DRCC
-
-  # the simplest description of the requirements for the US market
-  package: str
-
-  # the minimum compatibility requirements for this model, regardless
-  # of market. can be a package, trim, or list of features
-  requirements: str | None = None
-
-  video_link: str | None = None
-  footnotes: list[Enum] = field(default_factory=list)
-  min_steer_speed: float | None = None
-  min_enable_speed: float | None = None
-  auto_resume: bool | None = None
-
-  # all the parts needed for the supported car
-  car_parts: CarParts = field(default_factory=CarParts)
 
   def __post_init__(self):
     self.make, self.model, self.years = split_name(self.name)
@@ -368,3 +357,36 @@ class CarDocs:
       item += footnote_tag.format(f'{",".join(map(str, sups))}')
 
     return item
+
+
+@dataclass
+class CarDocs(CarDocsBase):
+  # Example for Toyota Corolla MY20
+  # requirements: Lane Tracing Assist (LTA) and Dynamic Radar Cruise Control (DRCC)
+  # US Market reference: "All", since all Corolla in the US come standard with LTA and DRCC
+
+  # the simplest description of the requirements for the US market
+  package: str
+
+  merged: bool = True
+  support_type: SupportType = SupportType.UPSTREAM
+  support_link: str | None = None  # TODO: have a default link to the definition of an upstream car
+
+  requirements: str | None = None  # Minimum compatibility requirements, regardless of market
+  video_link: str | None = None
+  footnotes: list[Enum] = field(default_factory=list)
+  min_steer_speed: float | None = None
+  min_enable_speed: float | None = None
+  auto_resume: bool | None = None
+  car_parts: CarParts = field(default_factory=CarParts)  # All the parts needed for a supported car
+
+
+@dataclass
+class ExtraCarDocs(CarDocsBase):
+  package: str = "Any"
+  merged: bool = False
+  support_type: SupportType = SupportType.INCOMPATIBLE
+  support_link: str | None = None  # TODO: have a default link to the definition of an incompatible car
+
+  video_link: str | None = None
+  footnotes: list[Enum] = field(default_factory=list)

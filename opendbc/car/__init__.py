@@ -8,7 +8,7 @@ from dataclasses import replace
 from panda import uds
 from opendbc.car import structs
 from opendbc.car.can_definitions import CanData
-from opendbc.car.docs_definitions import CarDocs
+from opendbc.car.docs_definitions import CarDocs, ExtraCarDocs
 from opendbc.car.common.numpy_fast import clip, interp
 
 # set up logging
@@ -270,16 +270,7 @@ class Freezable:
 
 
 @dataclass(order=True)
-class PlatformConfig(Freezable):
-  car_docs: list[CarDocs]
-  specs: CarSpecs
-
-  dbc_dict: DbcDict
-
-  flags: int = 0
-
-  platform_str: str | None = None
-
+class PlatformConfigBase(Freezable):
   def __hash__(self) -> int:
     return hash(self.platform_str)
 
@@ -287,10 +278,26 @@ class PlatformConfig(Freezable):
     return replace(self, **kwargs)
 
   def init(self):
-    pass
+    self.platform_str = None
 
   def __post_init__(self):
     self.init()
+
+
+@dataclass(order=True)
+class PlatformConfig(PlatformConfigBase):
+  car_docs: list[CarDocs]
+  specs: CarSpecs
+  dbc_dict: DbcDict
+  flags: int = 0
+  platform_str: str | None = None
+
+
+@dataclass(order=True)
+class ExtraPlatformConfig(PlatformConfigBase):
+  car_docs: list[ExtraCarDocs]
+  platform_str: str | None = None
+  flags: int = 0
 
 
 class PlatformsType(EnumType):
@@ -303,7 +310,7 @@ class PlatformsType(EnumType):
 
 
 class Platforms(str, ReprEnum, metaclass=PlatformsType):
-  config: PlatformConfig
+  config: PlatformConfigBase
 
   def __new__(cls, platform_config: PlatformConfig):
     member = str.__new__(cls, platform_config.platform_str)
