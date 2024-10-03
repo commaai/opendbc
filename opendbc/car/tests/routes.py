@@ -9,6 +9,7 @@ from opendbc.car.nissan.values import CAR as NISSAN
 from opendbc.car.mazda.values import CAR as MAZDA
 from opendbc.car.mock.values import CAR as MOCK
 from opendbc.car.subaru.values import CAR as SUBARU
+from opendbc.car.tesla.values import CAR as TESLA
 from opendbc.car.toyota.values import CAR as TOYOTA
 from opendbc.car.values import Platform
 from opendbc.car.volkswagen.values import CAR as VOLKSWAGEN
@@ -25,6 +26,8 @@ non_tested_cars = [
   HONDA.HONDA_ODYSSEY_CHN,
   VOLKSWAGEN.VOLKSWAGEN_CRAFTER_MK2,  # need a route from an ACC-equipped Crafter
   SUBARU.SUBARU_FORESTER_HYBRID,
+  TESLA.TESLA_MODEL_3,
+  TESLA.TESLA_MODEL_Y,
 ]
 
 
@@ -72,6 +75,7 @@ routes = [
   CarTestRoute("5085c761395d1fe6|2023-04-07--18-20-06", GM.CHEVROLET_TRAILBLAZER),
   CarTestRoute("162796f1469f2f1b/00000005--6f334eda14", GM.CADILLAC_XT4),
   CarTestRoute("477dd485611d1e6e/00000009--85fc06e10a", GM.CHEVROLET_VOLT_2019),
+  CarTestRoute("a40976dc9f28ba62/0000001f--160e210119", GM.CHEVROLET_TRAVERSE),
 
   CarTestRoute("0e7a2ba168465df5|2020-10-18--14-14-22", HONDA.ACURA_RDX_3G),
   CarTestRoute("a74b011b32b51b56|2020-07-26--17-09-36", HONDA.HONDA_CIVIC),
@@ -294,6 +298,8 @@ routes = [
   CarTestRoute("fb53c640f499b73d|2021-06-01--04-17-56", MAZDA.MAZDA_6),
   CarTestRoute("f6d5b1a9d7a1c92e|2021-07-08--06-56-59", MAZDA.MAZDA_CX9_2021),
   CarTestRoute("a4af1602d8e668ac|2022-02-03--12-17-07", MAZDA.MAZDA_CX5_2022),
+
+  #CarTestRoute("46cdc864ec865f4b/00000007--42f94db730", TESLA.TESLA_MODEL_Y),
 
   # Segments that test specific issues
   # Controls mismatch due to standstill threshold

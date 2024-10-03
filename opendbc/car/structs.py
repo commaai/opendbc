@@ -75,6 +75,7 @@ class CarState:
   steeringPressed: bool = auto_field()  # if the user is using the steering wheel
   steerFaultTemporary: bool = auto_field()  # temporary EPS fault
   steerFaultPermanent: bool = auto_field()  # permanent EPS fault
+  invalidLkasSetting: bool = auto_field()  # stock LKAS is incorrectly configured (i.e. on or off)
   stockAeb: bool = auto_field()
   stockFcw: bool = auto_field()
   espDisabled: bool = auto_field()
@@ -82,6 +83,7 @@ class CarState:
   carFaultedNonCritical: bool = auto_field()  # some ECU is faulted, but car remains controllable
   espActive: bool = auto_field()
   vehicleSensorsInvalid: bool = auto_field()  # invalid steering angle readings, etc.
+  lowSpeedAlert: bool = auto_field()  # lost steering control due to a dynamic min steering speed
 
   # cruise state
   cruiseState: 'CarState.CruiseState' = field(default_factory=lambda: CarState.CruiseState())
@@ -157,7 +159,7 @@ class CarState:
       cancel = auto()
       altButton1 = auto()
       altButton2 = auto()
-      altButton3 = auto()
+      mainCruise = auto()
       setCruise = auto()
       resumeCruise = auto()
       gapAdjustCruise = auto()
@@ -391,6 +393,9 @@ class CarParams:
   networkLocation: 'CarParams.NetworkLocation' = field(default_factory=lambda: CarParams.NetworkLocation.fwdCamera)
 
   wheelSpeedFactor: float = auto_field()  # Multiplier on wheels speeds to computer actual speeds
+
+  secOcRequired: bool = auto_field()
+  secOcKeyAvailable: bool = auto_field()
 
   @auto_dataclass
   class LongitudinalPIDTuning:
