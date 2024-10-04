@@ -101,7 +101,7 @@ class CarState(CarStateBase):
     self.shifter_values = can_define.dv[self.gearbox_msg]["GEAR_SHIFTER"]
     self.steer_status_values = defaultdict(lambda: "UNKNOWN", can_define.dv["STEER_STATUS"]["STEER_STATUS"])
     self.min_steer_alert_speed = self.CP.minSteerSpeed
-    self.eps_ctrl_invalid_cnt = 0
+    self.eps_steer_invalid_cnt = 0
 
     self.brake_switch_prev = False
     self.brake_switch_active = False
