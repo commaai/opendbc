@@ -1,4 +1,3 @@
-import copy
 from opendbc.can.packer import CANPacker
 from opendbc.car import apply_std_steer_angle_limits, structs
 from opendbc.car.ford import fordcan
@@ -111,7 +110,7 @@ class CarController(CarControllerBase):
     self.steer_alert_last = steer_alert
     self.lead_distance_bars_last = hud_control.leadDistanceBars
 
-    new_actuators = copy.copy(actuators)
+    new_actuators = actuators.as_builder()
     new_actuators.curvature = self.apply_curvature_last
 
     self.frame += 1

@@ -103,7 +103,6 @@ class CarInterface(CarInterfaceBase):
     ret.radarUnavailable = RADAR_START_ADDR not in fingerprint[1] or DBC[ret.carFingerprint]["radar"] is None
     ret.openpilotLongitudinalControl = experimental_long and ret.experimentalLongitudinalAvailable
     ret.pcmCruise = not ret.openpilotLongitudinalControl
-    ret.stoppingControl = True
     ret.startingState = True
     ret.vEgoStarting = 0.1
     ret.startAccel = 1.0

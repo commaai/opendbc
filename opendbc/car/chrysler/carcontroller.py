@@ -1,4 +1,3 @@
-import copy
 from opendbc.can.packer import CANPacker
 from opendbc.car import DT_CTRL, apply_meas_steer_torque_limits
 from opendbc.car.chrysler import chryslercan
@@ -77,7 +76,7 @@ class CarController(CarControllerBase):
 
     self.frame += 1
 
-    new_actuators = copy.copy(CC.actuators)
+    new_actuators = CC.actuators.as_builder()
     new_actuators.steer = self.apply_steer_last / self.params.STEER_MAX
     new_actuators.steerOutputCan = self.apply_steer_last
 
