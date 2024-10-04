@@ -111,7 +111,7 @@
 |Hyundai|Kona Electric (with HDA II, Korea only)|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|Kona Hybrid|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|Palisade|All|[Upstream](#upstream)|
-|Hyundai|Palisade|HDA2|[Community](#community-maintained-cars)|
+|Hyundai|Palisade|HDA2|[Community](#community)|
 |Hyundai|Santa Cruz|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|Santa Fe|All|[Upstream](#upstream)|
 |Hyundai|Santa Fe|All|[Upstream](#upstream)|
@@ -169,7 +169,7 @@
 |Kia|Stinger|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Kia|Stinger|All|[Upstream](#upstream)|
 |Kia|Telluride|All|[Upstream](#upstream)|
-|Kia|Telluride|HDA2|[Community](#community-maintained-cars)|
+|Kia|Telluride|HDA2|[Community](#community)|
 |Lexus|CT Hybrid|Lexus Safety System+|[Upstream](#upstream)|
 |Lexus|ES|All|[Upstream](#upstream)|
 |Lexus|ES|All|[Upstream](#upstream)|
@@ -179,7 +179,7 @@
 |Lexus|IS|All|[Upstream](#upstream)|
 |Lexus|IS|All|[Upstream](#upstream)|
 |Lexus|LC|All|[Upstream](#upstream)|
-|Lexus|NS|Any|[Not compatible](#toyota-security)|
+|Lexus|NS|Any|[Not compatible](#can-bus-security)|
 |Lexus|NX|All|[Upstream](#upstream)|
 |Lexus|NX|All|[Upstream](#upstream)|
 |Lexus|NX Hybrid|All|[Upstream](#upstream)|
@@ -229,7 +229,7 @@
 |Subaru|Outback|EyeSight Driver Assistance|[Upstream](#upstream)|
 |Subaru|Outback|All|[Upstream](#upstream)|
 |Subaru|Outback|All|[Upstream](#upstream)|
-|Subaru|Solterra|Any|[Not compatible](#toyota-security)|
+|Subaru|Solterra|Any|[Not compatible](#can-bus-security)|
 |Subaru|XV|EyeSight Driver Assistance|[Upstream](#upstream)|
 |Subaru|XV|EyeSight Driver Assistance|[Upstream](#upstream)|
 |Škoda|Fabia|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
@@ -251,19 +251,19 @@
 |Toyota|Avalon|All|[Upstream](#upstream)|
 |Toyota|Avalon Hybrid|All|[Upstream](#upstream)|
 |Toyota|Avalon Hybrid|All|[Upstream](#upstream)|
-|Toyota|bZ4x|Any|[Not compatible](#toyota-security)|
+|Toyota|bZ4x|Any|[Not compatible](#can-bus-security)|
 |Toyota|C-HR|All|[Upstream](#upstream)|
 |Toyota|C-HR|All|[Upstream](#upstream)|
 |Toyota|C-HR Hybrid|All|[Upstream](#upstream)|
 |Toyota|C-HR Hybrid|All|[Upstream](#upstream)|
 |Toyota|Camry|All|[Upstream](#upstream)|
 |Toyota|Camry|All|[Upstream](#upstream)|
-|Toyota|Camry|Any|[Not compatible](#toyota-security)|
+|Toyota|Camry|Any|[Not compatible](#can-bus-security)|
 |Toyota|Camry Hybrid|All|[Upstream](#upstream)|
 |Toyota|Camry Hybrid|All|[Upstream](#upstream)|
 |Toyota|Corolla|All|[Upstream](#upstream)|
 |Toyota|Corolla|All|[Upstream](#upstream)|
-|Toyota|Corolla Cross|Any|[Not compatible](#toyota-security)|
+|Toyota|Corolla Cross|Any|[Not compatible](#can-bus-security)|
 |Toyota|Corolla Cross (Non-US only)|All|[Upstream](#upstream)|
 |Toyota|Corolla Cross Hybrid (Non-US only)|All|[Upstream](#upstream)|
 |Toyota|Corolla Hatchback|All|[Upstream](#upstream)|
@@ -271,7 +271,7 @@
 |Toyota|Corolla Hybrid (South America only)|All|[Upstream](#upstream)|
 |Toyota|Highlander|All|[Upstream](#upstream)|
 |Toyota|Highlander|All|[Upstream](#upstream)|
-|Toyota|Highlander|Any|[Not compatible](#toyota-security)|
+|Toyota|Highlander|Any|[Not compatible](#can-bus-security)|
 |Toyota|Highlander Hybrid|All|[Upstream](#upstream)|
 |Toyota|Highlander Hybrid|All|[Upstream](#upstream)|
 |Toyota|Mirai|All|[Upstream](#upstream)|
@@ -291,14 +291,14 @@
 |Toyota|RAV4 Hybrid|All|[Upstream](#upstream)|
 |Toyota|RAV4 Hybrid|All|[Upstream](#upstream)|
 |Toyota|RAV4 Hybrid|All|[Upstream](#upstream)|
-|Toyota|RAV4 Prime|Any|[Community](#community-maintained-cars)|
-|Toyota|RAV4 Prime|Any|[Not compatible](#toyota-security)|
-|Toyota|Sequoia|Any|[Not compatible](#toyota-security)|
+|Toyota|RAV4 Prime|Any|[Community](#community)|
+|Toyota|RAV4 Prime|Any|[Not compatible](#can-bus-security)|
+|Toyota|Sequoia|Any|[Not compatible](#can-bus-security)|
 |Toyota|Sienna|All|[Upstream](#upstream)|
-|Toyota|Sienna|Any|[Community](#community-maintained-cars)|
-|Toyota|Sienna|Any|[Not compatible](#toyota-security)|
-|Toyota|Tundra|Any|[Not compatible](#toyota-security)|
-|Toyota|Venza|Any|[Not compatible](#toyota-security)|
+|Toyota|Sienna|Any|[Community](#community)|
+|Toyota|Sienna|Any|[Not compatible](#can-bus-security)|
+|Toyota|Tundra|Any|[Not compatible](#can-bus-security)|
+|Toyota|Venza|Any|[Not compatible](#can-bus-security)|
 |Volkswagen|Arteon|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Arteon eHybrid|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Arteon R|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
