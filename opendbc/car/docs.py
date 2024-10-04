@@ -16,7 +16,6 @@ from opendbc.car.car_helpers import interfaces, get_interface_attr
 from opendbc.car.values import Platform, PLATFORMS
 from opendbc.car.mock.values import CAR as MOCK
 from opendbc.car.extra_cars import CAR as EXTRA
-from opendbc_repo.opendbc.car.docs_definitions import SupportType
 
 
 EXTRA_CARS_MD_OUT = os.path.join(BASEDIR, "../", "../", "docs", "CARS.md")
