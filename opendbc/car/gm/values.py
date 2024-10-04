@@ -89,7 +89,6 @@ class GMASCMPlatformConfig(GMPlatformConfig):
     # ASCM is supported, but due to a janky install and hardware configuration, we are not showing in the car docs
     self.car_docs = []
 
-
 @dataclass
 class GMSDGMPlatformConfig(GMPlatformConfig):
   def init(self):
