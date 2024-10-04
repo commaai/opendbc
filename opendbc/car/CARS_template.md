@@ -12,17 +12,21 @@
 # Types of Support
 
 **opendbc can support many more cars than it currently does.** There are a few reasons your car may not be supported.
-If your car doesn't fit into any of the incompatibility criteria here, then there's a good chance it can be supported! We're adding support for new cars all the time. **We don't have a roadmap for car support**, and in fact, most car support comes from users like you!
+If your car doesn't fit into any of the incompatibility criteria here, then there's a good chance it can be supported!
+We're adding support for new cars all the time. **We don't have a roadmap for car support**, and in fact, most car
+support comes from users like you!
 
 ## Upstream
 
-A supported vehicle is one that just works when you install a comma device. All supported cars provide a better experience than any stock system. Supported vehicles reference the US market unless otherwise specified.
-
-TODO: Refer to openpilot CARS.md
+A supported vehicle is one that just works when you install a comma device. All supported cars provide a better
+experience than any stock system. Supported vehicles reference the US market unless otherwise specified.
 
 ## Under Review
 
-TODO: Talk about the merge process, dashcam while under safety review, etc
+A vehicle under review is one for which software support has been merged into upstream openpilot, but hasn't yet been
+tested for drive quality and conformance with [comma safety guidelines](https://github.com/commaai/openpilot/blob/master/docs/SAFETY.md).
+This is a normal part of the development and quality assurance process. This vehicle will not work when upstream
+openpilot is installed, but custom forks may allow their use.
 
 ## Legacy
 
