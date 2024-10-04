@@ -362,28 +362,31 @@ openpilot is installed, but custom forks may allow their use.
 
 ## Custom
 
-TODO: Talk about situations like Chevy Bolt or Volt or whatever it was
+Vehicles in this category are not considered plug-and-play. Software support is included in upstream openpilot, but
+these vehicles might not have a harness in the comma store, or the physical install might be at an unusual or cumbersome
+location, or they might need unusual configuration after install.
 
 ## Dashcam
 
-TODO: May collapse this into community, and just set the community support tag in the car port
+Dashcam vehicles have software support in upstream openpilot, but will go into "dashcam mode" at startup and will not
+engage. This is usually due to known issues with driving safety or quality.
 
 ## Community
 
-Although they're not upstream, the community has openpilot running on other makes and models. See the 'Community Supported Models' section of each make [on our wiki](https://wiki.comma.ai/).
+Although they're not upstream, the community has openpilot running on other makes and models. See the 'Community
+Supported Models' section of each make [on our wiki](https://wiki.comma.ai/).
 
 ## Incompatible
 
 ### CAN Bus Security
 
-TODO: Talk about state of Toyota SecOC
-
-TODO: GM Global B?
+Vehicles with CAN security measures, such as AUTOSAR Secure Onboard Communication (SecOC) are not usable with openpilot
+unless the owner can recover the message signing key and implement CAN message signing. Examples include certain newer
+Toyota, and the GM Global B platform.
 
 ### FlexRay
 
-All the cars that openpilot supports use a [CAN bus](https://en.wikipedia.org/wiki/CAN_bus) for communication between all the car's computers, however a CAN bus isn't the only way that the computers in your car can communicate. Most, if not all, vehicles from the following manufacturers use [FlexRay](https://en.wikipedia.org/wiki/FlexRay) instead of a CAN bus: **BMW, Mercedes, Audi, Land Rover, and some Volvo**. These cars may one day be supported, but we have no immediate plans to support FlexRay.
-
-### No Lateral Control API
-
-TODO: Talk about hydraulic power steering
+All the cars that openpilot supports use a [CAN bus](https://en.wikipedia.org/wiki/CAN_bus) for communication between all the car's computers, however a
+CAN bus isn't the only way that the computers in your car can communicate. Most, if not all, vehicles from the following
+manufacturers use [FlexRay](https://en.wikipedia.org/wiki/FlexRay) instead of a CAN bus: **BMW, Mercedes, Audi, Land Rover, and some Volvo**. These cars
+may one day be supported, but we have no immediate plans to support FlexRay.
