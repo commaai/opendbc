@@ -9,6 +9,8 @@ requires-python = ">=3.9"
 
 urls = { "homepage" = "https://github.com/commaai/opendbc" }
 
+# setuptools includes distutils which is needed by Cython and pre-commit.
+# distutils was removed in python3.12 from the standard library.
 dependencies = [
   "scons",
   "numpy",
@@ -17,8 +19,8 @@ dependencies = [
   "tqdm",
   "pycapnp",
   "pandacan@git+https://github.com/commaai/panda.git@master",
-  "setuptools", # setuptools includes distutils which is needed by Cython and pre-commit.
-                # distutils was removed in python3.12 from the standard library.
+  "setuptools",
+  "pycryptodome",
 ]
 
 [project.optional-dependencies]
