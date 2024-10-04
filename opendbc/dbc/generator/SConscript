@@ -1,7 +1,6 @@
 import os
 from opendbc.dbc.generator.generator import (generated_suffix, generator_path, opendbc_root, \
                                   get_python_generator_scripts, get_source_dbc_files)
-
 Import('env')
 
 dbc_sources = []
