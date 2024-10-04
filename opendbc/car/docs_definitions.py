@@ -24,6 +24,13 @@ class Column(Enum):
   VIDEO = "Video"
 
 
+class ExtraCarsColumn(Enum):
+  MAKE = "Make"
+  MODEL = "Model"
+  PACKAGE = "Package"
+  SUPPORT = "Support Level"
+
+
 class SupportType(Enum):
   UPSTREAM = "Upstream"             # Actively maintained by comma, plug-and-play in release versions of openpilot
   REVIEW = "Under review"           # Dashcam, but planned for official support after safety validation
@@ -263,7 +270,7 @@ class CarDocs:
     self.make, self.model, self.years = split_name(self.name)
     self.year_list = get_year_list(self.years)
 
-  def init(self, CP: CarParams, all_footnotes: dict[Enum, int]):
+  def init(self, CP: CarParams, all_footnotes=None):
     self.car_name = CP.carName
     self.car_fingerprint = CP.carFingerprint
 
@@ -319,6 +326,18 @@ class CarDocs:
       Column.AUTO_RESUME: Star.FULL if self.auto_resume else Star.EMPTY,
       Column.HARDWARE: hardware_col,
       Column.VIDEO: self.video_link if self.video_link is not None else "",  # replaced with an image and link from template in get_column
+    }
+
+    if self.support_link is not None:
+      support_info = f"[{self.support_type.value}]({self.support_link})"
+    else:
+      support_info = self.support_type.value
+
+    self.extra_cars_row: dict[Enum, str] = {
+      ExtraCarsColumn.MAKE: self.make,
+      ExtraCarsColumn.MODEL: self.model,
+      ExtraCarsColumn.PACKAGE: self.package,
+      ExtraCarsColumn.SUPPORT: support_info,
     }
 
     # Set steering torque star from max lateral acceleration
@@ -379,6 +398,13 @@ class CarDocs:
     if len(footnotes):
       sups = sorted([self.all_footnotes[fn] for fn in footnotes])
       item += footnote_tag.format(f'{",".join(map(str, sups))}')
+
+    return item
+
+  def get_extra_cars_column(self, column: Column) -> str:
+    item: str = self.extra_cars_row[column]
+    if column == Column.MODEL and len(self.years):
+      item += f" {self.years}"
 
     return item
 
