@@ -1,9 +1,10 @@
 import copy
 import math
-from opendbc.car import apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, make_tester_present_msg, rate_limit, structs
+from opendbc.car import carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
+                        make_tester_present_msg, rate_limit, structs
 from opendbc.car.can_definitions import CanData
 from opendbc.car.common.numpy_fast import clip
-from opendbc.car.secoc import add_mac
+from opendbc.car.secoc import add_mac, build_sync_mac
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.toyota import toyotacan
 from opendbc.car.toyota.values import CAR, STATIC_DSU_MSGS, NO_STOP_TIMER_CAR, TSS2_CAR, \
@@ -71,10 +72,9 @@ class CarController(CarControllerBase):
         self.secoc_lta_message_counter = 0
         self.secoc_prev_reset_counter = CS.secoc_synchronization['RESET_CNT']
 
-        # Verify mac of SecOC synchronization message to ensure we have the right key
-        # TODO: move this to tests rather than runtime
-        # expected_mac = build_sync_mac(self.secoc_key, int(CS.secoc_synchronization['TRIP_CNT']), int(CS.secoc_synchronization['RESET_CNT']))
-        # assert(int(CS.secoc_synchronization['AUTHENTICATOR']) == expected_mac)
+        expected_mac = build_sync_mac(self.secoc_key, int(CS.secoc_synchronization['TRIP_CNT']), int(CS.secoc_synchronization['RESET_CNT']))
+        if int(CS.secoc_synchronization['AUTHENTICATOR']) != expected_mac:
+          carlog.error("SecOC synchronization MAC mismatch, wrong key?")
 
     # *** steer torque ***
     new_steer = int(round(actuators.steer * self.params.STEER_MAX))
