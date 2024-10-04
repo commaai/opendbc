@@ -15,4 +15,4 @@ for src_dir, filenames in get_source_dbc_files(generator_path).items():
 envDBC = env.Clone()
 main_generator_script = File("generator.py").abspath
 generator_scripts.append(main_generator_script)
-envDBC.Command(generated_files, generator_scripts, f"{main_generator_script}")
+envDBC.Command(generated_files, generator_scripts + dbc_sources, f"{main_generator_script}")
