@@ -31,6 +31,11 @@ class CanBus(CanBusBase):
   def camera(self) -> int:
     return self.offset + 2
 
+  @property
+  def loopback(self) -> int:
+    return self._pt + 128
+
+
 
 def get_lkas_cmd_bus(CAN, car_fingerprint, radar_disabled=False):
   no_radar = car_fingerprint in HONDA_BOSCH_RADARLESS
