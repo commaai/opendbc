@@ -410,7 +410,7 @@ class CarDocs:
 
   def get_extra_cars_column(self, column: Column) -> str:
     item: str = self.extra_cars_row[column]
-    if column == Column.MODEL and len(self.years):
+    if column == ExtraCarsColumn.MODEL and len(self.years):
       item += f" {self.years}"
 
     return item
