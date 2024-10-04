@@ -28,9 +28,10 @@ EXTRA_PLATFORMS: dict[str, ExtraPlatform] = {str(platform): platform for brand i
 
 def get_params_for_docs(model, platform) -> CarParams:
   cp_model, cp_platform = (model, platform) if model in interfaces else ("MOCK", MOCK.MOCK)
-  return interfaces[cp_model][0].get_params(cp_platform, fingerprint=gen_empty_fingerprint(),
-                                            car_fw=[CarParams.CarFw(ecu=CarParams.Ecu.unknown)],
-                                            experimental_long=True, docs=True)
+  CP: CarParams = interfaces[cp_model][0].get_params(cp_platform, fingerprint=gen_empty_fingerprint(),
+                                                     car_fw=[CarParams.CarFw(ecu=CarParams.Ecu.unknown)],
+                                                     experimental_long=True, docs=True)
+  return CP
 
 
 def get_all_footnotes() -> dict[Enum, int]:
@@ -57,17 +58,19 @@ def build_sorted_car_docs_list(platforms, footnotes=None, include_dashcam=False)
       collected_car_docs.append(_car_docs)
 
   # Sort cars by make and model + year
-  sorted_cars: list[CarDocs] = natsorted(collected_car_docs, key=lambda car: car.name.lower())
+  sorted_cars = natsorted(collected_car_docs, key=lambda car: car.name.lower())
   return sorted_cars
 
 
 def get_all_car_docs() -> list[CarDocs]:
   collected_footnotes = get_all_footnotes()
-  return build_sorted_car_docs_list(PLATFORMS, footnotes=collected_footnotes)
+  sorted_list: list[CarDocs] = build_sorted_car_docs_list(PLATFORMS, footnotes=collected_footnotes)
+  return sorted_list
 
 
 def get_car_docs_with_extras() -> list[CarDocs | ExtraCarDocs]:
-  return build_sorted_car_docs_list(EXTRA_PLATFORMS, include_dashcam=True)
+  sorted_list: list[CarDocs] = build_sorted_car_docs_list(EXTRA_PLATFORMS, include_dashcam=True)
+  return sorted_list
 
 
 def group_by_make(all_car_docs: list[CarDocs]) -> dict[str, list[CarDocs]]:
