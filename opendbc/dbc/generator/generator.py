@@ -3,6 +3,7 @@ import os
 import re
 import glob
 import subprocess
+from collections import defaultdict
 
 generator_path = os.path.dirname(os.path.realpath(__file__))
 opendbc_root = os.path.join(generator_path, '../')
@@ -39,25 +40,36 @@ def create_dbc(src_dir: str, filename: str, output_path: str):
     dbc_file_out.write(core_dbc)
 
 
+def get_python_generator_scripts(generator_path: str) -> list[str]:
+  return glob.glob(f"{generator_path}/*/*.py")
+
+
+def get_source_dbc_files(generator_path: str) -> defaultdict[str, list[str]]:
+  ret = defaultdict(list)
+
+  for src_dir, _, filenames in os.walk(generator_path):
+    if src_dir == generator_path:
+      continue
+
+    for filename in filenames:
+      if filename.startswith('_') or not filename.endswith('.dbc'):
+        continue
+      ret[src_dir].append(filename)
+
+  return ret
+
+
 def create_all(output_path: str):
   # clear out old DBCs
   for f in glob.glob(f"{output_path}/*{generated_suffix}"):
     os.remove(f)
 
   # run python generator scripts first
-  for f in glob.glob(f"{generator_path}/*/*.py"):
+  for f in get_python_generator_scripts(generator_path):
     subprocess.check_call(f)
 
-  for src_dir, _, filenames in os.walk(generator_path):
-    if src_dir == generator_path:
-      continue
-
-    #print(src_dir)
+  for src_dir, filenames in get_source_dbc_files(generator_path).items():
     for filename in filenames:
-      if filename.startswith('_') or not filename.endswith('.dbc'):
-        continue
-
-      #print(filename)
       create_dbc(src_dir, filename, output_path)
 
 if __name__ == "__main__":
