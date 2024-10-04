@@ -421,4 +421,4 @@ class ExtraCarDocs(CarDocs):
   package: str = "Any"
   merged: bool = False
   support_type: SupportType = SupportType.INCOMPATIBLE
-  support_link: str | None = "#incompatible"  # TODO: have a default link to the definition of an incompatible car
+  support_link: str | None = "#incompatible"
