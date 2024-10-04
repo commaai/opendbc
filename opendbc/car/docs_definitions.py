@@ -408,7 +408,7 @@ class CarDocs:
 
     return item
 
-  def get_extra_cars_column(self, column: Column) -> str:
+  def get_extra_cars_column(self, column: ExtraCarsColumn) -> str:
     item: str = self.extra_cars_row[column]
     if column == ExtraCarsColumn.MODEL and len(self.years):
       item += f" {self.years}"
