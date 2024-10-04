@@ -1,14 +1,14 @@
 # functions common among cars
 import logging
 from collections import namedtuple
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import IntFlag, ReprEnum, EnumType
 from dataclasses import replace
 
 from panda import uds
 from opendbc.car import structs
 from opendbc.car.can_definitions import CanData
-from opendbc.car.docs_definitions import CarDocs
+from opendbc.car.docs_definitions import CarDocs, ExtraCarDocs
 from opendbc.car.common.numpy_fast import clip, interp
 
 # set up logging
@@ -270,8 +270,8 @@ class Freezable:
 
 
 @dataclass(order=True)
-class PlatformConfig(Freezable):
-  car_docs: list[CarDocs]
+class PlatformConfigBase(Freezable):
+  car_docs: list[CarDocs] | list[ExtraCarDocs]
   specs: CarSpecs
 
   dbc_dict: DbcDict
@@ -293,6 +293,20 @@ class PlatformConfig(Freezable):
     self.init()
 
 
+@dataclass(order=True)
+class PlatformConfig(PlatformConfigBase):
+  car_docs: list[CarDocs]
+  specs: CarSpecs
+  dbc_dict: DbcDict
+
+
+@dataclass(order=True)
+class ExtraPlatformConfig(PlatformConfigBase):
+  car_docs: list[ExtraCarDocs]
+  specs: CarSpecs = CarSpecs(mass=0., wheelbase=0., steerRatio=0.)
+  dbc_dict: DbcDict = field(default_factory=lambda: dbc_dict('unknown', None))
+
+
 class PlatformsType(EnumType):
   def __new__(metacls, cls, bases, classdict, *, boundary=None, _simple=False, **kwds):
     for key in classdict._member_names.keys():
@@ -303,7 +317,7 @@ class PlatformsType(EnumType):
 
 
 class Platforms(str, ReprEnum, metaclass=PlatformsType):
-  config: PlatformConfig
+  config: PlatformConfigBase
 
   def __new__(cls, platform_config: PlatformConfig):
     member = str.__new__(cls, platform_config.platform_str)
