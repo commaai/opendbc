@@ -11,7 +11,7 @@ class CarInterface(CarInterfaceBase):
     ret.carName = "tesla"
 
     # Needs safety validation and final testing before pulling out of dashcam
-    ret.dashcamOnly = True
+    ret.dashcamOnly = False
 
     # Not merged yet
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.tesla)]
