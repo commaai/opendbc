@@ -1,4 +1,3 @@
-import copy
 import numpy as np
 from numbers import Number
 
@@ -98,8 +97,7 @@ class CarController(CarControllerBase):
     torque_l = 0
     torque_r = 0
 
-    llk_valid = len(CC.orientationNED) > 1 and len(CC.angularVelocity) > 1
-    if CC.enabled and llk_valid:
+    if CC.enabled:
       # Read these from the joystick
       # TODO: this isn't acceleration, okay?
       speed_desired = CC.actuators.accel / 5.
@@ -133,7 +131,7 @@ class CarController(CarControllerBase):
     can_sends = []
     can_sends.append(bodycan.create_control(self.packer, torque_l, torque_r))
 
-    new_actuators = copy.copy(CC.actuators)
+    new_actuators = CC.actuators.as_builder()
     new_actuators.accel = torque_l
     new_actuators.steer = torque_r
     new_actuators.steerOutputCan = torque_r
