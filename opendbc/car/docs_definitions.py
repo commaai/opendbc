@@ -274,9 +274,12 @@ class CarDocs:
     self.car_name = CP.carName
     self.car_fingerprint = CP.carFingerprint
 
-    if self.merged and CP.dashcamOnly and self.support_type != SupportType.REVIEW:
-      self.support_type = SupportType.DASHCAM
-      self.support_link = "#dashcam"
+    if self.merged and CP.dashcamOnly:
+      if self.support_type != SupportType.REVIEW:
+        self.support_type = SupportType.DASHCAM
+        self.support_link = "#dashcam"
+      else:
+        self.support_link = "#under-review"
 
     # longitudinal column
     op_long = "Stock"

@@ -35,9 +35,9 @@
 |Ford|Escape Plug-in Hybrid|Co-Pilot360 Assist+|[Upstream](#upstream)|
 |Ford|Explorer|Co-Pilot360 Assist+|[Upstream](#upstream)|
 |Ford|Explorer Hybrid|Co-Pilot360 Assist+|[Upstream](#upstream)|
-|Ford|F-150|Co-Pilot360 Active 2.0|[Dashcam mode](#dashcam)|
-|Ford|F-150 Hybrid|Co-Pilot360 Active 2.0|[Dashcam mode](#dashcam)|
-|Ford|F-150 Lightning|Co-Pilot360 Active 2.0|[Dashcam mode](#dashcam)|
+|Ford|F-150|Co-Pilot360 Active 2.0|[Under review](#under-review)|
+|Ford|F-150 Hybrid|Co-Pilot360 Active 2.0|[Under review](#under-review)|
+|Ford|F-150 Lightning|Co-Pilot360 Active 2.0|[Under review](#under-review)|
 |Ford|Focus|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
 |Ford|Focus Hybrid|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
 |Ford|Kuga|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
@@ -47,8 +47,8 @@
 |Ford|Maverick|Co-Pilot360 Assist|[Upstream](#upstream)|
 |Ford|Maverick Hybrid|LARIAT Luxury|[Upstream](#upstream)|
 |Ford|Maverick Hybrid|Co-Pilot360 Assist|[Upstream](#upstream)|
-|Ford|Mustang Mach-E|Co-Pilot360 Active 2.0|[Dashcam mode](#dashcam)|
-|Ford|Ranger|Adaptive Cruise Control with Lane Centering|[Dashcam mode](#dashcam)|
+|Ford|Mustang Mach-E|Co-Pilot360 Active 2.0|[Under review](#under-review)|
+|Ford|Ranger|Adaptive Cruise Control with Lane Centering|[Under review](#under-review)|
 |Genesis|G70|All|[Upstream](#upstream)|
 |Genesis|G70|All|[Upstream](#upstream)|
 |Genesis|G70|All|[Upstream](#upstream)|
