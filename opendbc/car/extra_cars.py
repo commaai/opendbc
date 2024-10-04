@@ -8,14 +8,14 @@ from opendbc.car.docs_definitions import ExtraCarDocs, SupportType
 class CommunityCarDocs(ExtraCarDocs):
   def init_make(self, CP: structs.CarParams):
     self.support_type = SupportType.COMMUNITY
-    self.support_link = "#community-maintained-cars"
+    self.support_link = "#community"
 
 
 @dataclass
 class ToyotaSecurityCarDocs(ExtraCarDocs):
   def init_make(self, CP: structs.CarParams):
     self.support_type = SupportType.INCOMPATIBLE
-    self.support_link = "#toyota-security"
+    self.support_link = "#can-bus-security"
 
 
 @dataclass
