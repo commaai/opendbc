@@ -112,7 +112,7 @@ class CarState(CarStateBase):
     # However, on cars without a digital speedometer this is not always present (HRV, FIT, CRV 2016, ILX and RDX)
     self.dash_speed_seen = False
 
-  def update(self, cp, cp_cam, _, cp_body, __) -> structs.CarState:
+  def update(self, cp, cp_cam, _, cp_body, cp_loopback) -> structs.CarState:
     ret = structs.CarState()
 
     # car params
@@ -144,19 +144,15 @@ class CarState(CarStateBase):
                           cp.vl["DOORS_STATUS"]["DOOR_OPEN_RL"], cp.vl["DOORS_STATUS"]["DOOR_OPEN_RR"]])
     ret.seatbeltUnlatched = bool(cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LAMP"] or not cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LATCHED"])
 
-    # Triggered by STEER_TORQUE_REQUEST in CAN frame STEERING_CONTROL
-    self.eps_steer_active = bool(cp.vl["STEER_STATUS"]["STEER_CONTROL_ACTIVE"])
+    # Triggered by STEER_TORQUE_REQUEST in CAN frame STEERING_CONTROL.
+    eps_steer_active = bool(cp.vl["STEER_STATUS"]["STEER_CONTROL_ACTIVE"])
+    steer_requested_prev = bool(cp_loopback.vl["STEERING_CONTROL"]["STEER_TORQUE_REQUEST"])
+
     steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]["STEER_STATUS"]]
     ret.steerFaultPermanent = steer_status not in ("NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT")
     # LOW_SPEED_LOCKOUT is not worth a warning
     # NO_TORQUE_ALERT_2 can be caused by bump or steering nudge from driver
     ret.steerFaultTemporary = steer_status not in ("NORMAL", "LOW_SPEED_LOCKOUT", "NO_TORQUE_ALERT_2")
-
-    # Return a fault if the car hasn't enabled steering. Latches on until disengaged or if the EPS reports a fault.
-    if self.CP.carFingerprint == CAR.HONDA_ODYSSEY_BOSCH and not self.CP.openpilotLongitudinalControl:
-      if ret.steerFaultTemporary:
-        self.eps_ctrl_invalid_cnt = 0
-      ret.steerFaultTemporary |= self.eps_ctrl_invalid_cnt >= int(1. / DT_CTRL)
 
     if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
       ret.accFaulted = bool(cp.vl["CRUISE_FAULT_STATUS"]["CRUISE_FAULT"])
@@ -269,20 +265,21 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
       self.lkas_hud = cp_cam.vl["LKAS_HUD"]
 
-    # Low speed steer alert logic; for cars with steer cut off above 6 m/s
-    # Show the alert earlier when slowing. Must first exceed a greater speed while engaged.
-    # if ret.vEgo > (self.CP.minSteerSpeed + 3.5):
-    #   self.min_steer_alert_speed = (self.CP.minSteerSpeed + 1.5)
-    # elif not CC.latActive:
-    #   self.min_steer_alert_speed = self.CP.minSteerSpeed
-    # ret.lowSpeedAlert = (0 < ret.vEgo <= self.min_steer_alert_speed) and self.CP.minSteerSpeed > 6.0
+    # Low speed steer alert logic; for cars with steer cut off above 6 m/s. After exceeding a threshold, show the alert earlier when slowing.
+    if ret.vEgo >= (self.CP.minSteerSpeed + 3.5):
+      self.min_steer_alert_speed = (self.CP.minSteerSpeed + 1.5)
+    elif ret.vEgo < self.CP.minSteerSpeed:
+      self.min_steer_alert_speed = self.CP.minSteerSpeed
+    ret.lowSpeedAlert = (0 < ret.vEgo <= self.min_steer_alert_speed) and self.CP.minSteerSpeed > 6.0
 
     # Depending on vehicle state, ODYSSEY_BOSCH & ACURA_RDX_3G can forcibly disengage lateral controls.
-    # Show an alert when the EPS has been unresponsive to control requests for 1000ms.
-    # if CC.latActive and not self.steer_on: # type: ignore[attr-defined]
-    #   self.eps_ctrl_invalid_cnt += 1 # type: ignore[attr-defined]
-    # else:
-    #   self.eps_ctrl_invalid_cnt = 0 # type: ignore[attr-defined]
+    # Return a fault if the car hasn't enabled steering within 1000ms. Latches on until disengaged or if the EPS reports a fault.
+    if self.CP.carFingerprint == CAR.HONDA_ODYSSEY_BOSCH and not self.CP.openpilotLongitudinalControl:
+      if steer_requested_prev and not eps_steer_active:
+        self.eps_steer_invalid_cnt += 1
+      if ret.steerFaultTemporary or not ret.cruiseState.enabled:
+        self.eps_steer_invalid_cnt = 0
+      ret.steerFaultTemporary |= self.eps_steer_invalid_cnt >= int(1. / DT_CTRL)
 
     if self.CP.enableBsm:
       # BSM messages are on B-CAN, requires a panda forwarding B-CAN messages to CAN 0
@@ -332,3 +329,11 @@ class CarState(CarStateBase):
       bus_body = CanBus(CP).radar # B-CAN is forwarded to ACC-CAN radar side (CAN 0 on fake ethernet port)
       return CANParser(DBC[CP.carFingerprint]["body"], messages, bus_body)
     return None
+
+  @staticmethod
+  def get_loopback_can_parser(CP):
+    messages = [
+      ("STEERING_CONTROL", 0),
+    ]
+
+    return CANParser(DBC[CP.carFingerprint]["pt"], messages, CanBus(CP).loopback)
