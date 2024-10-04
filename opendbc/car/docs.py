@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import os
+from typing import get_args
 
 from collections import defaultdict
 import jinja2
@@ -12,12 +13,17 @@ from opendbc.car import gen_empty_fingerprint
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarDocs, ExtraCarDocs, Column, ExtraCarsColumn, CommonFootnote, PartType
 from opendbc.car.car_helpers import interfaces, get_interface_attr
-from opendbc.car.values import PLATFORMS, EXTRA_PLATFORMS
+from opendbc.car.values import Platform, PLATFORMS
 from opendbc.car.mock.values import CAR as MOCK
+from opendbc.car.extra_cars import CAR as EXTRA
 
 
 EXTRA_CARS_MD_OUT = os.path.join(BASEDIR, "../", "../", "docs", "CARS.md")
 EXTRA_CARS_MD_TEMPLATE = os.path.join(BASEDIR, "CARS_template.md")
+
+ExtraPlatform = Platform | EXTRA
+EXTRA_BRANDS = get_args(ExtraPlatform)
+EXTRA_PLATFORMS: dict[str, ExtraPlatform] = {str(platform): platform for brand in EXTRA_BRANDS for platform in brand}
 
 
 def get_all_footnotes() -> dict[Enum, int]:
