@@ -1,7 +1,9 @@
 import math
-from opendbc.car import apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, make_tester_present_msg, rate_limit, structs
+from opendbc.car import carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
+                        make_tester_present_msg, rate_limit, structs
 from opendbc.car.can_definitions import CanData
 from opendbc.car.common.numpy_fast import clip
+from opendbc.car.secoc import add_mac, build_sync_mac
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.toyota import toyotacan
 from opendbc.car.toyota.values import CAR, STATIC_DSU_MSGS, NO_STOP_TIMER_CAR, TSS2_CAR, \
@@ -49,6 +51,11 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(dbc_name)
     self.accel = 0
 
+    self.secoc_lka_message_counter = 0
+    self.secoc_lta_message_counter = 0
+    self.secoc_prev_reset_counter = 0
+    self.secoc_mismatch_counter = 0
+
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     hud_control = CC.hudControl
@@ -57,6 +64,18 @@ class CarController(CarControllerBase):
 
     # *** control msgs ***
     can_sends = []
+
+    # *** handle secoc reset counter increase ***
+    if self.CP.flags & ToyotaFlags.SECOC.value:
+      if CS.secoc_synchronization['RESET_CNT'] != self.secoc_prev_reset_counter:
+        self.secoc_lka_message_counter = 0
+        self.secoc_lta_message_counter = 0
+        self.secoc_prev_reset_counter = CS.secoc_synchronization['RESET_CNT']
+
+        expected_mac = build_sync_mac(self.secoc_key, int(CS.secoc_synchronization['TRIP_CNT']), int(CS.secoc_synchronization['RESET_CNT']))
+        if int(CS.secoc_synchronization['AUTHENTICATOR']) != expected_mac and self.secoc_mismatch_counter < 100:
+          carlog.error("SecOC synchronization MAC mismatch, wrong key?")
+          self.secoc_mismatch_counter += 1
 
     # *** steer torque ***
     new_steer = int(round(actuators.steer * self.params.STEER_MAX))
@@ -91,7 +110,16 @@ class CarController(CarControllerBase):
     # toyota can trace shows STEERING_LKA at 42Hz, with counter adding alternatively 1 and 2;
     # sending it at 100Hz seem to allow a higher rate limit, as the rate limit seems imposed
     # on consecutive messages
-    can_sends.append(toyotacan.create_steer_command(self.packer, apply_steer, apply_steer_req))
+    steer_command = toyotacan.create_steer_command(self.packer, apply_steer, apply_steer_req)
+    if self.CP.flags & ToyotaFlags.SECOC.value:
+      # TODO: check if this slow and needs to be done by the CANPacker
+      steer_command = add_mac(self.secoc_key,
+                              int(CS.secoc_synchronization['TRIP_CNT']),
+                              int(CS.secoc_synchronization['RESET_CNT']),
+                              self.secoc_lka_message_counter,
+                              steer_command)
+      self.secoc_lka_message_counter += 1
+    can_sends.append(steer_command)
 
     # STEERING_LTA does not seem to allow more rate by sending faster, and may wind up easier
     if self.frame % 2 == 0 and self.CP.carFingerprint in TSS2_CAR:
@@ -105,6 +133,16 @@ class CarController(CarControllerBase):
       torque_wind_down = 100 if lta_active and full_torque_condition else 0
       can_sends.append(toyotacan.create_lta_steer_command(self.packer, self.CP.steerControlType, self.last_angle,
                                                           lta_active, self.frame // 2, torque_wind_down))
+
+      if self.CP.flags & ToyotaFlags.SECOC.value:
+        lta_steer_2 = toyotacan.create_lta_steer_command_2(self.packer, self.frame // 2)
+        lta_steer_2 = add_mac(self.secoc_key,
+                              int(CS.secoc_synchronization['TRIP_CNT']),
+                              int(CS.secoc_synchronization['RESET_CNT']),
+                              self.secoc_lta_message_counter,
+                              lta_steer_2)
+        self.secoc_lta_message_counter += 1
+        can_sends.append(lta_steer_2)
 
     # *** gas and brake ***
     # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot and imprecise braking
