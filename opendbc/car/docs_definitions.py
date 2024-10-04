@@ -276,6 +276,7 @@ class CarDocs:
 
     if self.merged and CP.dashcamOnly and self.support_type != SupportType.REVIEW:
       self.support_type = SupportType.DASHCAM
+      self.support_link = "#dashcam"
 
     # longitudinal column
     op_long = "Stock"
