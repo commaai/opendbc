@@ -18,6 +18,7 @@ dependencies = [
   "Cython",
   "crcmod",
   "tqdm",
+  "pycapnp",
   "pandacan@git+https://github.com/jyoung8607/panda.git@toyota-secoc",
   "setuptools",
   "pycryptodome",

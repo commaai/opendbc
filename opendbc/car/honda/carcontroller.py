@@ -1,4 +1,3 @@
-import copy
 from collections import namedtuple
 
 from opendbc.can.packer import CANPacker
@@ -83,11 +82,11 @@ def process_hud_alert(hud_alert):
 
   # priority is: FCW, steer required, all others
   if hud_alert == VisualAlert.fcw:
-    fcw_display = VISUAL_HUD[hud_alert]
+    fcw_display = VISUAL_HUD[hud_alert.raw]
   elif hud_alert in (VisualAlert.steerRequired, VisualAlert.ldw):
-    steer_required = VISUAL_HUD[hud_alert]
+    steer_required = VISUAL_HUD[hud_alert.raw]
   else:
-    acc_alert = VISUAL_HUD[hud_alert]
+    acc_alert = VISUAL_HUD[hud_alert.raw]
 
   return fcw_display, steer_required, acc_alert
 
@@ -238,7 +237,7 @@ class CarController(CarControllerBase):
         self.speed = pcm_speed
         self.gas = pcm_accel / self.params.NIDEC_GAS_MAX
 
-    new_actuators = copy.copy(actuators)
+    new_actuators = actuators.as_builder()
     new_actuators.speed = self.speed
     new_actuators.accel = self.accel
     new_actuators.gas = self.gas
