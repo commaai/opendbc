@@ -26,6 +26,13 @@ EXTRA_BRANDS = get_args(ExtraPlatform)
 EXTRA_PLATFORMS: dict[str, ExtraPlatform] = {str(platform): platform for brand in EXTRA_BRANDS for platform in brand}
 
 
+def get_params_for_docs(model, platform) -> CarParams:
+  cp_model, cp_platform = (model, platform) if model in interfaces else ("MOCK", MOCK.MOCK)
+  return interfaces[cp_model][0].get_params(cp_platform, fingerprint=gen_empty_fingerprint(),
+                                            car_fw=[CarParams.CarFw(ecu=CarParams.Ecu.unknown)],
+                                            experimental_long=True, docs=True)
+
+
 def get_all_footnotes() -> dict[Enum, int]:
   all_footnotes = list(CommonFootnote)
   for footnotes in get_interface_attr("Footnote", ignore_none=True).values():
@@ -38,9 +45,7 @@ def get_all_car_docs() -> list[CarDocs]:
   footnotes = get_all_footnotes()
   for model, platform in PLATFORMS.items():
     car_docs = platform.config.car_docs
-    # If available, uses experimental longitudinal limits for the docs
-    CP = interfaces[model][0].get_params(platform, fingerprint=gen_empty_fingerprint(),
-                                         car_fw=[CarParams.CarFw(ecu=CarParams.Ecu.unknown)], experimental_long=True, docs=True)
+    CP = get_params_for_docs(model, platform)
 
     if CP.dashcamOnly or not len(car_docs):
       continue
@@ -61,9 +66,7 @@ def get_car_docs_with_extras() -> list[CarDocs | ExtraCarDocs]:
   car_docs_with_extras: list[CarDocs | ExtraCarDocs] = []
   for model, platform in EXTRA_PLATFORMS.items():
     car_docs = platform.config.car_docs
-    cp_model, cp_platform = (model, platform) if model in interfaces else ("MOCK", MOCK.MOCK)
-    CP = interfaces[cp_model][0].get_params(cp_platform, fingerprint=gen_empty_fingerprint(),
-                                            car_fw=[CarParams.CarFw(ecu=CarParams.Ecu.unknown)], experimental_long=True, docs=True)
+    CP = get_params_for_docs(model, platform)
 
     # A platform can include multiple car models
     for _car_docs in car_docs:
