@@ -62,6 +62,7 @@ def build_sorted_car_docs_list(platforms, footnotes=None, include_dashcam=False,
   return sorted_cars
 
 
+# CAUTION: This function is imported by shop.comma.ai and comma.ai/vehicles, test changes carefully
 def get_all_car_docs() -> list[CarDocs]:
   collected_footnotes = get_all_footnotes()
   sorted_list: list[CarDocs] = build_sorted_car_docs_list(PLATFORMS, footnotes=collected_footnotes)
@@ -80,6 +81,7 @@ def group_by_make(all_car_docs: list[CarDocs]) -> dict[str, list[CarDocs]]:
   return dict(sorted_car_docs)
 
 
+# CAUTION: This function is imported by shop.comma.ai and comma.ai/vehicles, test changes carefully
 def generate_cars_md(all_car_docs: list[CarDocs], template_fn: str) -> str:
   with open(template_fn) as f:
     template = jinja2.Template(f.read(), trim_blocks=True, lstrip_blocks=True)
