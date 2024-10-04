@@ -35,9 +35,9 @@
 |Ford|Escape Plug-in Hybrid|Co-Pilot360 Assist+|[Upstream](#upstream)|
 |Ford|Explorer|Co-Pilot360 Assist+|[Upstream](#upstream)|
 |Ford|Explorer Hybrid|Co-Pilot360 Assist+|[Upstream](#upstream)|
-|Ford|F-150|Co-Pilot360 Active 2.0|[Upstream](#upstream)|
-|Ford|F-150 Hybrid|Co-Pilot360 Active 2.0|[Upstream](#upstream)|
-|Ford|F-150 Lightning|Co-Pilot360 Active 2.0|[Upstream](#upstream)|
+|Ford|F-150|Co-Pilot360 Active 2.0|[Dashcam mode](#upstream)|
+|Ford|F-150 Hybrid|Co-Pilot360 Active 2.0|[Dashcam mode](#upstream)|
+|Ford|F-150 Lightning|Co-Pilot360 Active 2.0|[Dashcam mode](#upstream)|
 |Ford|Focus|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
 |Ford|Focus Hybrid|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
 |Ford|Kuga|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
@@ -47,8 +47,8 @@
 |Ford|Maverick|Co-Pilot360 Assist|[Upstream](#upstream)|
 |Ford|Maverick Hybrid|LARIAT Luxury|[Upstream](#upstream)|
 |Ford|Maverick Hybrid|Co-Pilot360 Assist|[Upstream](#upstream)|
-|Ford|Mustang Mach-E|Co-Pilot360 Active 2.0|[Upstream](#upstream)|
-|Ford|Ranger|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
+|Ford|Mustang Mach-E|Co-Pilot360 Active 2.0|[Dashcam mode](#upstream)|
+|Ford|Ranger|Adaptive Cruise Control with Lane Centering|[Dashcam mode](#upstream)|
 |Genesis|G70|All|[Upstream](#upstream)|
 |Genesis|G70|All|[Upstream](#upstream)|
 |Genesis|G70|All|[Upstream](#upstream)|
@@ -156,7 +156,7 @@
 |Kia|Niro Plug-in Hybrid|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Kia|Optima|Advanced Smart Cruise Control|[Upstream](#upstream)|
 |Kia|Optima|Smart Cruise Control (SCC)|[Upstream](#upstream)|
-|Kia|Optima Hybrid|Advanced Smart Cruise Control|[Upstream](#upstream)|
+|Kia|Optima Hybrid|Advanced Smart Cruise Control|[Dashcam mode](#upstream)|
 |Kia|Optima Hybrid|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Kia|Seltos|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Kia|Sorento|Advanced Smart Cruise Control & LKAS|[Upstream](#upstream)|
@@ -196,39 +196,39 @@
 |Lincoln|Aviator Plug-in Hybrid|Co-Pilot360 Plus|[Upstream](#upstream)|
 |MAN|eTGE|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |MAN|TGE|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
-|Mazda|3|All|[Upstream](#upstream)|
-|Mazda|6|All|[Upstream](#upstream)|
+|Mazda|3|All|[Dashcam mode](#upstream)|
+|Mazda|6|All|[Dashcam mode](#upstream)|
+|Mazda|CX-5|All|[Dashcam mode](#upstream)|
 |Mazda|CX-5|All|[Upstream](#upstream)|
-|Mazda|CX-5|All|[Upstream](#upstream)|
-|Mazda|CX-9|All|[Upstream](#upstream)|
+|Mazda|CX-9|All|[Dashcam mode](#upstream)|
 |Mazda|CX-9|All|[Upstream](#upstream)|
 |Nissan|Altima|ProPILOT Assist|[Upstream](#upstream)|
 |Nissan|Leaf|ProPILOT Assist|[Upstream](#upstream)|
 |Nissan|Rogue|ProPILOT Assist|[Upstream](#upstream)|
 |Nissan|X-Trail|ProPILOT Assist|[Upstream](#upstream)|
 |Ram|1500|Adaptive Cruise Control (ACC)|[Upstream](#upstream)|
-|Ram|2500|Adaptive Cruise Control (ACC)|[Upstream](#upstream)|
-|Ram|3500|Adaptive Cruise Control (ACC)|[Upstream](#upstream)|
-|SEAT|Alhambra|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
+|Ram|2500|Adaptive Cruise Control (ACC)|[Dashcam mode](#upstream)|
+|Ram|3500|Adaptive Cruise Control (ACC)|[Dashcam mode](#upstream)|
+|SEAT|Alhambra|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#upstream)|
 |SEAT|Ateca|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |SEAT|Leon|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Subaru|Ascent|All|[Upstream](#upstream)|
-|Subaru|Ascent|All|[Upstream](#upstream)|
+|Subaru|Ascent|All|[Dashcam mode](#upstream)|
 |Subaru|Crosstrek|EyeSight Driver Assistance|[Upstream](#upstream)|
 |Subaru|Crosstrek|EyeSight Driver Assistance|[Upstream](#upstream)|
-|Subaru|Crosstrek Hybrid|EyeSight Driver Assistance|[Upstream](#upstream)|
-|Subaru|Forester|EyeSight Driver Assistance|[Upstream](#upstream)|
+|Subaru|Crosstrek Hybrid|EyeSight Driver Assistance|[Dashcam mode](#upstream)|
+|Subaru|Forester|EyeSight Driver Assistance|[Dashcam mode](#upstream)|
 |Subaru|Forester|All|[Upstream](#upstream)|
-|Subaru|Forester|All|[Upstream](#upstream)|
-|Subaru|Forester Hybrid|EyeSight Driver Assistance|[Upstream](#upstream)|
+|Subaru|Forester|All|[Dashcam mode](#upstream)|
+|Subaru|Forester Hybrid|EyeSight Driver Assistance|[Dashcam mode](#upstream)|
 |Subaru|Impreza|EyeSight Driver Assistance|[Upstream](#upstream)|
 |Subaru|Impreza|EyeSight Driver Assistance|[Upstream](#upstream)|
-|Subaru|Legacy|EyeSight Driver Assistance|[Upstream](#upstream)|
+|Subaru|Legacy|EyeSight Driver Assistance|[Dashcam mode](#upstream)|
 |Subaru|Legacy|All|[Upstream](#upstream)|
-|Subaru|Outback|EyeSight Driver Assistance|[Upstream](#upstream)|
-|Subaru|Outback|EyeSight Driver Assistance|[Upstream](#upstream)|
+|Subaru|Outback|EyeSight Driver Assistance|[Dashcam mode](#upstream)|
+|Subaru|Outback|EyeSight Driver Assistance|[Dashcam mode](#upstream)|
 |Subaru|Outback|All|[Upstream](#upstream)|
-|Subaru|Outback|All|[Upstream](#upstream)|
+|Subaru|Outback|All|[Dashcam mode](#upstream)|
 |Subaru|Solterra|Any|[Not compatible](#can-bus-security)|
 |Subaru|XV|EyeSight Driver Assistance|[Upstream](#upstream)|
 |Subaru|XV|EyeSight Driver Assistance|[Upstream](#upstream)|
@@ -241,8 +241,8 @@
 |Škoda|Octavia Scout|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Škoda|Scala|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Škoda|Superb|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
-|Tesla|Model 3|All|[Upstream](#upstream)|
-|Tesla|Model Y|All|[Upstream](#upstream)|
+|Tesla|Model 3|All|[Dashcam mode](#upstream)|
+|Tesla|Model Y|All|[Dashcam mode](#upstream)|
 |Toyota|Alphard|All|[Upstream](#upstream)|
 |Toyota|Alphard Hybrid|All|[Upstream](#upstream)|
 |Toyota|Avalon|Toyota Safety Sense P|[Upstream](#upstream)|
@@ -305,8 +305,8 @@
 |Volkswagen|Arteon Shooting Brake|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Atlas|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Atlas Cross Sport|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
-|Volkswagen|Caddy|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
-|Volkswagen|Caddy Maxi|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
+|Volkswagen|Caddy|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#upstream)|
+|Volkswagen|Caddy Maxi|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#upstream)|
 |Volkswagen|California|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Caravelle|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|CC|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
@@ -321,16 +321,16 @@
 |Volkswagen|Golf R|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Golf SportsVan|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Grand California|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
-|Volkswagen|Jetta|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
+|Volkswagen|Jetta|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#upstream)|
 |Volkswagen|Jetta|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Jetta GLI|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Passat|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Passat Alltrack|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Passat GTE|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
-|Volkswagen|Passat NMS|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
+|Volkswagen|Passat NMS|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#upstream)|
 |Volkswagen|Polo|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Polo GTI|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
-|Volkswagen|Sharan|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
+|Volkswagen|Sharan|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#upstream)|
 |Volkswagen|T-Cross|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|T-Roc|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Taos|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
