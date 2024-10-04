@@ -72,6 +72,4 @@ else:
 envCython["LIBS"] = python_libs
 
 Export('envCython')
-
-SConscript(['opendbc/can/SConscript'])
-SConscript(['opendbc/dbc/generator/SConscript'])
+SConscript(['SConscript'])
