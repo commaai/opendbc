@@ -40,14 +40,13 @@ def get_all_footnotes() -> dict[Enum, int]:
   return {fn: idx + 1 for idx, fn in enumerate(all_footnotes)}
 
 
-def get_all_car_docs() -> list[CarDocs]:
-  all_car_docs: list[CarDocs] = []
-  footnotes = get_all_footnotes()
-  for model, platform in PLATFORMS.items():
+def build_sorted_car_docs_list(platforms, footnotes=None, include_dashcam=False):
+  collected_car_docs: list[CarDocs | ExtraCarDocs] = []
+  for model, platform in platforms.items():
     car_docs = platform.config.car_docs
     CP = get_params_for_docs(model, platform)
 
-    if CP.dashcamOnly or not len(car_docs):
+    if (CP.dashcamOnly and not include_dashcam) or not len(car_docs):
       continue
 
     # A platform can include multiple car models
@@ -55,29 +54,20 @@ def get_all_car_docs() -> list[CarDocs]:
       if not hasattr(_car_docs, "row"):
         _car_docs.init_make(CP)
         _car_docs.init(CP, footnotes)
-      all_car_docs.append(_car_docs)
+      collected_car_docs.append(_car_docs)
 
   # Sort cars by make and model + year
-  sorted_cars: list[CarDocs] = natsorted(all_car_docs, key=lambda car: car.name.lower())
+  sorted_cars: list[CarDocs] = natsorted(collected_car_docs, key=lambda car: car.name.lower())
   return sorted_cars
+
+
+def get_all_car_docs() -> list[CarDocs]:
+  collected_footnotes = get_all_footnotes()
+  return build_sorted_car_docs_list(PLATFORMS, footnotes=collected_footnotes)
 
 
 def get_car_docs_with_extras() -> list[CarDocs | ExtraCarDocs]:
-  car_docs_with_extras: list[CarDocs | ExtraCarDocs] = []
-  for model, platform in EXTRA_PLATFORMS.items():
-    car_docs = platform.config.car_docs
-    CP = get_params_for_docs(model, platform)
-
-    # A platform can include multiple car models
-    for _car_docs in car_docs:
-      if not hasattr(_car_docs, "row"):
-        _car_docs.init_make(CP)
-        _car_docs.init(CP)
-      car_docs_with_extras.append(_car_docs)
-
-  # Sort cars by make and model + year
-  sorted_cars: list[CarDocs | ExtraCarDocs] = natsorted(car_docs_with_extras, key=lambda car: car.name.lower())
-  return sorted_cars
+  return build_sorted_car_docs_list(EXTRA_PLATFORMS, include_dashcam=True)
 
 
 def group_by_make(all_car_docs: list[CarDocs]) -> dict[str, list[CarDocs]]:
