@@ -37,7 +37,8 @@ location, or they might need unusual configuration after install.
 ## Dashcam
 
 Dashcam vehicles have software support in upstream openpilot, but will go into "dashcam mode" at startup and will not
-engage. This is usually due to known issues with driving safety or quality.
+engage. This may be due to known issues with driving safety or quality, or it may be a work in progress that isn't yet
+ready for safety and quality review.
 
 ## Community
 
