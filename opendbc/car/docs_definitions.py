@@ -264,7 +264,7 @@ class CarDocs:
 
   merged: bool = True
   support_type: SupportType = SupportType.UPSTREAM
-  support_link: str | None = "#upstream"  # TODO: have a default link to the definition of an upstream car
+  support_link: str | None = "#upstream"
 
   def __post_init__(self):
     self.make, self.model, self.years = split_name(self.name)
