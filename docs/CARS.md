@@ -360,7 +360,7 @@ tested for drive quality and conformance with [comma safety guidelines](https://
 This is a normal part of the development and quality assurance process. This vehicle will not work when upstream
 openpilot is installed, but custom forks may allow their use.
 
-## Legacy
+## Custom
 
 TODO: Talk about situations like Chevy Bolt or Volt or whatever it was
 

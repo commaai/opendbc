@@ -16,6 +16,7 @@ from opendbc.car.car_helpers import interfaces, get_interface_attr
 from opendbc.car.values import Platform, PLATFORMS
 from opendbc.car.mock.values import CAR as MOCK
 from opendbc.car.extra_cars import CAR as EXTRA
+from opendbc_repo.opendbc.car.docs_definitions import SupportType
 
 
 EXTRA_CARS_MD_OUT = os.path.join(BASEDIR, "../", "../", "docs", "CARS.md")
@@ -41,7 +42,7 @@ def get_all_footnotes() -> dict[Enum, int]:
   return {fn: idx + 1 for idx, fn in enumerate(all_footnotes)}
 
 
-def build_sorted_car_docs_list(platforms, footnotes=None, include_dashcam=False):
+def build_sorted_car_docs_list(platforms, footnotes=None, include_dashcam=False, include_custom=False):
   collected_car_docs: list[CarDocs | ExtraCarDocs] = []
   for model, platform in platforms.items():
     car_docs = platform.config.car_docs
@@ -69,7 +70,7 @@ def get_all_car_docs() -> list[CarDocs]:
 
 
 def get_car_docs_with_extras() -> list[CarDocs | ExtraCarDocs]:
-  sorted_list: list[CarDocs] = build_sorted_car_docs_list(EXTRA_PLATFORMS, include_dashcam=True)
+  sorted_list: list[CarDocs] = build_sorted_car_docs_list(EXTRA_PLATFORMS, include_custom=True, include_dashcam=True)
   return sorted_list
 
 

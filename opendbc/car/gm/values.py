@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 
 from opendbc.car import dbc_dict, PlatformConfig, DbcDict, Platforms, CarSpecs
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
+from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts, SupportType
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
@@ -88,6 +88,7 @@ class GMASCMPlatformConfig(GMPlatformConfig):
   def init(self):
     # ASCM is supported, but due to a janky install and hardware configuration, we are not showing in the car docs
     self.car_docs = []
+
 
 @dataclass
 class GMSDGMPlatformConfig(GMPlatformConfig):

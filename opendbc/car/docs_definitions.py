@@ -36,7 +36,7 @@ class SupportType(Enum):
   REVIEW = "Under review"           # Dashcam, but planned for official support after safety validation
   DASHCAM = "Dashcam mode"          # Dashcam, but may be drivable in a community fork
   COMMUNITY = "Community"           # Not upstream, but available in a custom community fork, not validated by comma
-  LEGACY = "Legacy"                 # Cars that would be in dashcam mode, but work in release for historical reasons
+  CUSTOM = "Custom"                 # Upstream, but don't have a harness available or need an unusual custom install
   INCOMPATIBLE = "Not compatible"   # Known fundamental incompatibility such as Flexray or hydraulic power steering
 
 
