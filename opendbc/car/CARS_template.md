@@ -45,6 +45,19 @@ ready for safety and quality review.
 Although they're not upstream, the community has openpilot running on other makes and models. See the 'Community
 Supported Models' section of each make [on our wiki](https://wiki.comma.ai/).
 
+Some notable works-in-progress:
+* Honda CAN-FD vehicles
+  * 2024 Acura Integra, commaai/openpilot#32056
+  * 2023-24 Honda Accord, commaai/openpilot#32229
+  * 2024 Honda CR-V, commaai/openpilot#32806
+  * 2024 Honda CR-V Hybrid, commaai/openpilot#31527, which depends on:
+    * commaai/opendbc#1100
+  * 2023-24 Honda Pilot, commaai/openpilot#30324
+* Honda camera ACC stability improvements
+  * commaai/openpilot#31022, which depends on:
+    * commaai/panda#1814
+    * commaai/opendbc#998
+
 ## Incompatible
 
 ### CAN Bus Security
