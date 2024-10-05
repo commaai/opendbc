@@ -70,6 +70,7 @@
 |Honda|Civic 2022-24|All|[Upstream](#upstream)|
 |Honda|Civic Hatchback 2017-21|Honda Sensing|[Upstream](#upstream)|
 |Honda|Civic Hatchback 2022-24|All|[Upstream](#upstream)|
+|Honda|Clarity 2018-2021|All|[Community](#community)|
 |Honda|CR-V 2015-16|Touring Trim|[Upstream](#upstream)|
 |Honda|CR-V 2017-22|Honda Sensing|[Upstream](#upstream)|
 |Honda|CR-V Hybrid 2017-21|Honda Sensing|[Upstream](#upstream)|
