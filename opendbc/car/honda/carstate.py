@@ -265,11 +265,12 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
       self.lkas_hud = cp_cam.vl["LKAS_HUD"]
 
-    # Low speed steer alert logic; for cars with steer cut off above 6 m/s. After exceeding a threshold, show the alert earlier when slowing.
-    if ret.vEgo >= (self.CP.minSteerSpeed + 3.5):
-      self.min_steer_alert_speed = (self.CP.minSteerSpeed + 1.5)
-    elif ret.vEgo < self.CP.minSteerSpeed:
-      self.min_steer_alert_speed = self.CP.minSteerSpeed
+    # Low speed steer alert logic; only for steer cutoffs above 6 m/s.
+    # When driving close to the car's minimum speed, alert when steering disengages. If the car exceeds the minSteerSpeed by a little, alert earlier.
+    if ret.vEgo > (self.CP.minSteerSpeed + 3.5):
+      self.min_steer_alert_speed = self.CP.minSteerSpeed + 2.
+    if ret.vEgo < self.CP.minSteerSpeed:
+      self.min_steer_alert_speed = self.CP.minSteerSpeed + 0.5
     ret.lowSpeedAlert = (0 < ret.vEgo <= self.min_steer_alert_speed) and self.CP.minSteerSpeed > 6.0
 
     # Depending on vehicle state, ODYSSEY_BOSCH & ACURA_RDX_3G can forcibly disengage lateral controls.
