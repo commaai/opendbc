@@ -12,7 +12,6 @@ for src_dir, filenames in get_source_dbc_files(generator_path).items():
     output_file = filename.replace('.dbc', generated_suffix)
     generated_files.append(os.path.join(opendbc_root, output_file))
 
-envDBC = env.Clone()
 main_generator_script = File("generator.py").abspath
 generator_scripts.append(main_generator_script)
-envDBC.Command(generated_files, generator_scripts + dbc_sources, f"{main_generator_script}")
+env.Command(generated_files, generator_scripts + dbc_sources, f"{main_generator_script}")
