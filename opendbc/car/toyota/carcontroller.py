@@ -166,9 +166,9 @@ class CarController(CarControllerBase):
 
       # Along with rate limiting positive jerk below, this greatly improves gas response time
       # Consider the net acceleration request that the PCM should be applying (pitch included)
-      if net_acceleration_request < 0.1:
+      if pcm_accel_cmd + accel_due_to_pitch < 0.1:
         self.permit_braking = True
-      elif net_acceleration_request > 0.2:
+      elif pcm_accel_cmd + accel_due_to_pitch > 0.2:
         self.permit_braking = False
     else:
       self.pcm_accel_compensation = 0.0
