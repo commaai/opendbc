@@ -28,6 +28,16 @@ class FlexRayCarDocs(ExtraCarDocs):
 class CAR(Platforms):
   config: ExtraPlatformConfig
 
+  HONDA_CANFD = ExtraPlatformConfig(
+    [
+      CommunityCarDocs("Acura Integra 2024", "All"),
+      CommunityCarDocs("Honda Accord 2023-24", "All"),
+      CommunityCarDocs("Honda CR-V 2024", "All"),
+      CommunityCarDocs("Honda CR-V Hybrid 2024", "All"),
+      CommunityCarDocs("Honda Pilot 2023-24", "All"),
+    ],
+  )
+
   HYUNDAI_PALISADE_FACELIFT = ExtraPlatformConfig(
     [
       CommunityCarDocs("Hyundai Palisade 2023-24", package="HDA2"),
