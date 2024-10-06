@@ -2,7 +2,7 @@ from collections import defaultdict
 
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
-from opendbc.car import create_button_events, structs #, DT_CTRL
+from opendbc.car import create_button_events, structs, DT_CTRL
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.numpy_fast import interp
 from opendbc.car.honda.hondacan import CanBus, get_cruise_speed_conversion
@@ -100,8 +100,8 @@ class CarState(CarStateBase):
 
     self.shifter_values = can_define.dv[self.gearbox_msg]["GEAR_SHIFTER"]
     self.steer_status_values = defaultdict(lambda: "UNKNOWN", can_define.dv["STEER_STATUS"]["STEER_STATUS"])
+    self.eps_steer_invalid_cnt = 0
     # self.min_steer_alert_speed = self.CP.minSteerSpeed
-    # self.eps_steer_invalid_cnt = 0
 
     self.brake_switch_prev = False
     self.brake_switch_active = False
@@ -145,8 +145,8 @@ class CarState(CarStateBase):
     ret.seatbeltUnlatched = bool(cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LAMP"] or not cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LATCHED"])
 
     # Triggered by STEER_TORQUE_REQUEST in CAN frame STEERING_CONTROL.
-    # eps_steer_active = bool(cp.vl["STEER_STATUS"]["STEER_CONTROL_ACTIVE"])
-    # steer_requested_prev = bool(cp_loopback.vl["STEERING_CONTROL"]["STEER_TORQUE_REQUEST"])
+    eps_steer_active = bool(cp.vl["STEER_STATUS"]["STEER_CONTROL_ACTIVE"])
+    steer_requested_prev = bool(cp_loopback.vl["STEERING_CONTROL"]["STEER_TORQUE_REQUEST"])
 
     steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]["STEER_STATUS"]]
     ret.steerFaultPermanent = steer_status not in ("NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT")
@@ -273,14 +273,14 @@ class CarState(CarStateBase):
     #   self.min_steer_alert_speed = self.CP.minSteerSpeed
     # ret.lowSpeedAlert = (0 < ret.vEgo <= self.min_steer_alert_speed) and self.CP.minSteerSpeed > 6.0
 
-    # # Depending on vehicle state, ODYSSEY_BOSCH & ACURA_RDX_3G can forcibly disengage lateral controls.
-    # # Return a fault if the car hasn't enabled steering within 1000ms. Latches on until disengaged or if the EPS reports a fault.
-    # if self.CP.carFingerprint == CAR.HONDA_ODYSSEY_BOSCH and not self.CP.openpilotLongitudinalControl:
-    #   if steer_requested_prev and not eps_steer_active:
-    #     self.eps_steer_invalid_cnt += 1
-    #   if ret.steerFaultTemporary or not ret.cruiseState.enabled:
-    #     self.eps_steer_invalid_cnt = 0
-    #   ret.steerFaultTemporary |= self.eps_steer_invalid_cnt >= int(1. / DT_CTRL)
+    # Depending on vehicle state, ODYSSEY_BOSCH & ACURA_RDX_3G can forcibly disengage lateral controls.
+    # Return a fault if the car hasn't enabled steering within 1000ms. Latches on until disengaged or if the EPS reports a fault.
+    if self.CP.carFingerprint == CAR.HONDA_ODYSSEY_BOSCH and not self.CP.openpilotLongitudinalControl:
+      if steer_requested_prev and not eps_steer_active:
+        self.eps_steer_invalid_cnt += 1
+      if ret.steerFaultTemporary or not ret.cruiseState.enabled:
+        self.eps_steer_invalid_cnt = 0
+      ret.steerFaultTemporary |= self.eps_steer_invalid_cnt >= int(1. / DT_CTRL)
 
     if self.CP.enableBsm:
       # BSM messages are on B-CAN, requires a panda forwarding B-CAN messages to CAN 0
