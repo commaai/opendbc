@@ -266,10 +266,10 @@ class CarState(CarStateBase):
       self.lkas_hud = cp_cam.vl["LKAS_HUD"]
 
     # Low speed steer alert logic; only for steer cutoffs above 6 m/s.
-    # Alert only just above the minimum as to not spam the user. A modest increase in speed will increase the alert threshold.
+    # Default to just above the minimum as to not spam the user. A modest increase in speed raises the alert threshold.
     if ret.vEgo > (self.CP.minSteerSpeed + 3.5):
       self.min_steer_alert_speed = self.CP.minSteerSpeed + 2.
-    if ret.vEgo < self.CP.minSteerSpeed:
+    if ret.vEgo <= self.CP.minSteerSpeed:
       self.min_steer_alert_speed = self.CP.minSteerSpeed + 0.5
     ret.lowSpeedAlert = (0 < ret.vEgo <= self.min_steer_alert_speed) and self.CP.minSteerSpeed > 6.0
 
