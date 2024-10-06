@@ -252,7 +252,7 @@ class CAR(Platforms):
     # TODO: Enable this docs entry when it can be suppressed from openpilot CARS.md
     # [ToyotaCarDocs("Toyota RAV4 Prime 2021-23", min_enable_speed=MIN_ACC_SPEED)],
     [],
-    CarSpecs(mass=3650. * CV.LB_TO_KG, wheelbase=2.65, steerRatio=16.88, tireStiffnessFactor=0.5533),
+    CarSpecs(mass=4300. * CV.LB_TO_KG, wheelbase=2.6899, steerRatio=14.4, tireStiffnessFactor=0.5533),
     dbc_dict('toyota_rav4_prime_generated', 'toyota_tss2_adas'),
     flags=ToyotaFlags.TSS2 | ToyotaFlags.NO_STOP_TIMER | ToyotaFlags.NO_DSU | ToyotaFlags.SECOC,
   )
