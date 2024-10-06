@@ -83,6 +83,7 @@ BO_ 353 DSU_SPEED: 7 XXX
  SG_ FORWARD_SPEED : 15|16@0- (0.00390625,-30) [0|255] "km/h" XXX
 
 BO_ 374 PCM_CRUISE: 8 XXX
+ SG_ IDLE_COAST : 3|1@0+ (1,0) [0|1] "" XXX
  SG_ CRUISE_ACTIVE : 5|1@0+ (1,0) [0|1] "" XXX
  SG_ CRUISE_STATE : 31|4@0+ (1,0) [0|1] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
@@ -355,6 +356,7 @@ BO_ 1592 DOOR_LOCKS: 8 XXX
 CM_ SG_ 37 STEER_RATE "factor is tbd";
 CM_ SG_ 37 STEER_FRACTION "1/15th of the signal STEER_ANGLE, which is 1.5 deg; note that 0x8 is never set";
 CM_ SG_ 305 STEER_ANGLE_CMD "Used in place of STEERING_LTA.STEER_ANGLE_CMD on SecOC cars";
+CM_ SG_ 374 IDLE_COAST "No engine torque requirement from driver or ACC on SecOC cars";
 CM_ SG_ 387 ACCEL_CMD "Used in place of ACC_CONTROL.ACCEL_CMD on SecOC cars";
 CM_ SG_ 401 STEER_REQUEST "enable bit for steering, 1 to steer, 0 to not";
 CM_ SG_ 401 SETME_X1 "usually 1, seen at 0 on some South American Corollas indicating lack of stock Lane Tracing Assist";
