@@ -1,4 +1,3 @@
-import copy
 from opendbc.can.packer import CANPacker
 from opendbc.car import apply_driver_steer_torque_limits
 from opendbc.car.interfaces import CarControllerBase
@@ -38,7 +37,7 @@ class CarController(CarControllerBase):
     if self.frame % self.CCP.HUD_2_STEP == 0:
       can_sends.append(fca_giorgiocan.create_lka_hud_2_control(self.packer_pt, CANBUS.pt, CC.latActive))
 
-    new_actuators = copy.copy(actuators)
+    new_actuators = actuators.as_builder()
     new_actuators.steer = self.apply_steer_last / self.CCP.STEER_MAX
     new_actuators.steerOutputCan = self.apply_steer_last
 
