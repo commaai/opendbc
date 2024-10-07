@@ -1251,7 +1251,7 @@ FW_VERSIONS = {
   CAR.TOYOTA_SIENNA_4TH_GEN: {
     (Ecu.engine, 0x700, None): [
       b'\x01896630841000\x00\x00\x00\x00',
-      b'\x01896630857101\x00\x00\x00\x00,'
+      b'\x01896630857101\x00\x00\x00\x00',
       b'\x01896630864000\x00\x00\x00\x00',
     ],
     (Ecu.abs, 0x7b0, None): [
