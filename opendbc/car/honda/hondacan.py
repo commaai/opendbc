@@ -36,7 +36,6 @@ class CanBus(CanBusBase):
     return self._pt + 128
 
 
-
 def get_lkas_cmd_bus(CAN, car_fingerprint, radar_disabled=False):
   no_radar = car_fingerprint in HONDA_BOSCH_RADARLESS
   if radar_disabled or no_radar:
