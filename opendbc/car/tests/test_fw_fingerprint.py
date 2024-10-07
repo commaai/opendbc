@@ -97,7 +97,7 @@ class TestFwFingerprint:
     for car_model, ecus in FW_VERSIONS.items():
       with subtests.test(car_model=car_model.value):
         for ecu, ecu_fw in ecus.items():
-          with subtests.test((ecu[0].value, ecu[1], ecu[2])):
+          with subtests.test(ecu):
             duplicates = {fw for fw in ecu_fw if ecu_fw.count(fw) > 1}
             assert not len(duplicates), f'{car_model}: Duplicate FW versions: Ecu.{ecu[0]}, {duplicates}'
             assert len(ecu_fw) > 0, f'{car_model}: No FW versions: Ecu.{ecu[0]}'
@@ -265,7 +265,7 @@ class TestFwFingerprintTiming:
         print(f'get_vin {name} case, query time={self.total_time / self.N} seconds')
 
   def test_fw_query_timing(self, subtests, mocker):
-    total_ref_time = {1: 7.0, 2: 7.6}  # FIXME: Placeholder, adjust timing when FCA Giorgio UDS is implemented
+    total_ref_time = {1: 7.1, 2: 7.7}  # FIXME: Placeholder, adjust timing when FCA Giorgio UDS is implemented
     brand_ref_times = {
       1: {
         'gm': 1.0,
@@ -278,6 +278,7 @@ class TestFwFingerprintTiming:
         'mazda': 0.1,
         'nissan': 0.8,
         'subaru': 0.65,
+        'tesla': 0.1,
         'toyota': 0.7,
         'volkswagen': 0.65,
       },
