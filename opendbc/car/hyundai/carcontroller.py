@@ -141,6 +141,9 @@ class CarController(CarControllerBase):
       if not self.CP.openpilotLongitudinalControl:
         can_sends.extend(self.create_button_messages(CC, CS, use_clu11=True))
 
+        if self.frame % 7 and self.CP.flags & HyundaiFlags.CAMERA_SCC:
+          can_sends.append(hyundaican.create_hda11_mfc(self.packer, self.frame, CS.hda11_mfc))
+
       if self.frame % 2 == 0 and self.CP.openpilotLongitudinalControl:
         # TODO: unclear if this is needed
         jerk = 3.0 if actuators.longControlState == LongCtrlState.pid else 1.0
