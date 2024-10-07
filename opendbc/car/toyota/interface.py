@@ -67,7 +67,7 @@ class CarInterface(CarInterfaceBase):
       # https://engage.toyota.com/static/images/toyota_safety_sense/TSS_Applicability_Chart.pdf
       stop_and_go = candidate != CAR.TOYOTA_AVALON
 
-    elif candidate in (CAR.TOYOTA_RAV4_TSS2, CAR.TOYOTA_RAV4_TSS2_2022, CAR.TOYOTA_RAV4_TSS2_2023, CAR.TOYOTA_RAV4_PRIME):
+    elif candidate in (CAR.TOYOTA_RAV4_TSS2, CAR.TOYOTA_RAV4_TSS2_2022, CAR.TOYOTA_RAV4_TSS2_2023, CAR.TOYOTA_RAV4_PRIME, CAR.TOYOTA_SIENNA_4TH_GEN):
       ret.lateralTuning.init('pid')
       ret.lateralTuning.pid.kiBP = [0.0]
       ret.lateralTuning.pid.kpBP = [0.0]
