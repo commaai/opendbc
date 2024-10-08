@@ -1,0 +1,50 @@
+CM_ "IMPORT ../../AEE2010_R3_HS1.dbc";
+
+BO_ 757 STEERING: 7 XXX
+ SG_ COUNTER : 3|4@0+ (1,0) [0|255] "" XXX
+ SG_ CHECKSUM : 7|4@0+ (1,0) [0|15] "" XXX
+ SG_ DRIVER_TORQUE : 15|8@0- (1,0) [0|255] "" XXX
+ SG_ ANGLE : 31|16@0- (0.1,0) [-3276.8|3276.7] "degrees" XXX
+ SG_ RATE : 47|12@0- (1,0) [0|4095] "" XXX
+ SG_ NEW_SIGNAL_1 : 48|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 773 STEERING_ALT: 7 XXX
+ SG_ ANGLE : 7|16@0- (0.1,0) [-3276.8|3276.7] "degrees" XXX
+ SG_ RATE : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ RATE_SIGN : 31|1@0+ (1,0) [0|1] "" XXX
+ SG_ COUNTER : 35|4@0+ (1,0) [0|255] "" XXX
+ SG_ CHECKSUM : 39|4@0+ (1,0) [0|15] "" XXX
+ SG_ RATE_ALT : 47|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 1010 LANE_KEEP_ASSIST: 8 XXX
+ SG_ COUNTER : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 15|4@0+ (1,0) [0|15] "" XXX
+ SG_ TORQUE : 31|11@0- (1,0) [0|2047] "" XXX
+ SG_ LANE_DEPARTURE : 33|2@0+ (1,0) [0|3] "" XXX
+ SG_ LKA_DENY : 34|1@0+ (1,0) [0|1] "" XXX
+ SG_ STATUS : 36|2@0+ (1,0) [0|3] "" XXX
+ SG_ RAMP : 47|7@0+ (1,0) [0|127] "" XXX
+ SG_ ANGLE : 55|14@0- (0.1,0) [-90|90] "" XXX
+ SG_ NEW_SIGNAL_1 : 57|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 1390 DRIVER: 7 XXX
+ SG_ NEW_SIGNAL_3 : 0|1@0+ (1,0) [0|1] "" XXX
+ SG_ BRIGHTNESS_SETTING : 7|4@0+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_2 : 13|1@0+ (1,0) [0|1] "" XXX
+ SG_ GAS_PEDAL : 31|8@0+ (0.5,0) [0|99.5] "%" XXX
+
+BO_ 1394 RESTRAINTS: 8 XXX
+ SG_ PASSENGER_SEATBELT : 5|2@0+ (1,0) [0|3] "" XXX
+ SG_ DRIVER_SEATBELT : 7|2@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_1 : 23|11@0+ (1,0) [0|1] "" XXX
+ SG_ IGNITION : 32|1@0+ (1,0) [0|1] "" XXX
+
+CM_ SG_ 757 ANGLE "asymmetric, could be init";
+CM_ SG_ 773 ANGLE "-565 to 560, seems like estimate and not init";
+CM_ SG_ 773 RATE_SIGN "1=moving clockwise, 0=moving anticlockwise";
+CM_ SG_ 1010 LKA_DENY "1=LKA OFF (button in console)";
+CM_ SG_ 1010 STATUS "0=LKA OFF (button in console)";
+CM_ SG_ 1390 GAS_PEDAL "Max 99.5%";
+CM_ SG_ 1394 IGNITION "doesn't turn off straight away";
+VAL_ 1010 LANE_DEPARTURE 0 "NOT_DEPARTED" 1 "DEPARTED_RIGHT" 2 "DEPARTED_LEFT";
+VAL_ 1010 STATUS 0 "UNAVAILABLE" 1 "READY" 2 "ACTIVE";
