@@ -33,7 +33,7 @@ class CanBus(CanBusBase):
 
   @property
   def loopback(self) -> int:
-    return self._pt + 128
+    return self.offset + 128
 
 
 def get_lkas_cmd_bus(CAN, car_fingerprint, radar_disabled=False):
