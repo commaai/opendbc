@@ -333,8 +333,5 @@ class CarState(CarStateBase):
 
   @staticmethod
   def get_loopback_can_parser(CP):
-    messages = [
-      ("STEERING_CONTROL", 0),
-    ]
-
+    messages = [("STEERING_CONTROL", 0)]
     return CANParser(DBC[CP.carFingerprint]["pt"], messages, CanBus(CP).loopback)
