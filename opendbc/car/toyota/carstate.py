@@ -66,9 +66,12 @@ class CarState(CarStateBase):
 
       # Sometimes ACC_BRAKING can be 1 while showing we're applying gas already
       # TODO: is ACC_BRAKING actually just the brake lights? ICBACT goes high much later/with lower decel requests
-      # if cp.vl["PCM_CRUISE"]["ACC_BRAKING"]:
-      if cp.vl["VSC1S29"]["ICBACT"]:
+      if cp.vl["PCM_CRUISE"]["ACC_BRAKING"]:
         self.pcm_accel_net += min(cp.vl["PCM_CRUISE"]["ACCEL_NET"], 0.0)
+
+        # this 0.8x seems consistent with the pitch compensated accel net, TODO: figure out what this is
+        if cp.vl["VSC1S29"]["ICBACT"]:
+          self.pcm_accel_net *= 0.8
 
       # add creeping force at low speeds only for braking, CLUTCH->ACCEL_NET already shows this
       # TODO: with ICBACT maybe we can always add neutral force for engine braking at high speed now!
