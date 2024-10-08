@@ -579,17 +579,17 @@ FW_VERSIONS = {
     (Ecu.eps, 0x18da30f1, None): [
       b'39990-THR-A050\x00\x00',
       b'39990-THR-A110\x00\x00',
-      ],
+    ],
     (Ecu.fwdRadar, 0x18dab0f1, None): [
       b'36802-THR-A220\x00\x00',
-      ],
+    ],
     (Ecu.fwdCamera, 0x18dab5f1, None): [
       b'36161-THR-A220\x00\x00',
       b'36161-THR-A230\x00\x00',
     ],
     (Ecu.shiftByWire, 0x18da0bf1, None): [
       b'54008-THR-A310\x00\x00',
-      ],
+    ],
     (Ecu.srs, 0x18da53f1, None): [
       b'77959-THR-A220\x00\x00',
       b'77959-THR-A230\x00\x00',
