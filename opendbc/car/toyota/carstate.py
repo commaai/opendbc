@@ -76,8 +76,8 @@ class CarState(CarStateBase):
 
       # add creeping force at low speeds only for braking, CLUTCH->ACCEL_NET already shows this
       # TODO: with ICBACT maybe we can always add neutral force for engine braking at high speed now!
-      neutral_accel = max(cp.vl["PCM_CRUISE"]["NEUTRAL_FORCE"] / self.CP.mass, 0.0)
-      if self.pcm_accel_net + neutral_accel < 0.0:
+        neutral_accel = max(cp.vl["PCM_CRUISE"]["NEUTRAL_FORCE"] / self.CP.mass, 0.0)
+        # if self.pcm_accel_net + neutral_accel < 0.0:
         self.pcm_accel_net += neutral_accel
 
     ret.doorOpen = any([cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_FL"], cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_FR"],
