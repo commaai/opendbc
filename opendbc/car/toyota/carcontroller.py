@@ -164,6 +164,9 @@ class CarController(CarControllerBase):
       self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.01, 0.01)
       pcm_accel_cmd = actuators.accel - self.pcm_accel_compensation
 
+      # prevent request from deviating too far from current pcm accel net
+      pcm_accel_cmd = max(pcm_accel_cmd, CS.pcm_accel_net - 0.5)
+
       # Along with rate limiting positive jerk below, this greatly improves gas response time
       # Consider the net acceleration request that the PCM should be applying (pitch included)
       if net_acceleration_request < 0.1:

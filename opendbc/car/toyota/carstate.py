@@ -69,9 +69,10 @@ class CarState(CarStateBase):
       if cp.vl["PCM_CRUISE"]["ACC_BRAKING"]:
         self.pcm_accel_net += min(cp.vl["PCM_CRUISE"]["ACCEL_NET"], 0.0)
 
-        # this 0.8x seems consistent with the pitch compensated accel net, TODO: figure out what this is
-        if cp.vl["VSC1S29"]["ICBACT"]:
-          self.pcm_accel_net *= 0.8
+        # # this 0.8x seems consistent with the pitch compensated accel net, TODO: figure out what this is
+        # TODO: no it doesn't, is it request rate based?
+        # if cp.vl["VSC1S29"]["ICBACT"]:
+        #   self.pcm_accel_net *= 0.8
 
       # add creeping force at low speeds only for braking, CLUTCH->ACCEL_NET already shows this
       # TODO: with ICBACT maybe we can always add neutral force for engine braking at high speed now!
