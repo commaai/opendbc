@@ -7,8 +7,8 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.common.numpy_fast import mean
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.toyota.values import ToyotaFlags, CAR, DBC, STEER_THRESHOLD, NO_STOP_TIMER_CAR, \
-                                                  TSS2_CAR, RADAR_ACC_CAR, EPS_SCALE, UNSUPPORTED_DSU_CAR
+from opendbc.car.toyota.values import ToyotaFlags, CarControllerParams, CAR, DBC, STEER_THRESHOLD, NO_STOP_TIMER_CAR, \
+                                      TSS2_CAR, RADAR_ACC_CAR, EPS_SCALE, UNSUPPORTED_DSU_CAR
 
 ButtonType = structs.CarState.ButtonEvent.Type
 SteerControlType = structs.CarParams.SteerControlType
@@ -32,6 +32,8 @@ class CarState(CarStateBase):
     self.eps_torque_scale = EPS_SCALE[CP.carFingerprint] / 100.
     self.cluster_speed_hyst_gap = CV.KPH_TO_MS / 2.
     self.cluster_min_speed = CV.KPH_TO_MS / 2.
+
+    self.params = CarControllerParams(CP)
 
     if CP.flags & ToyotaFlags.SECOC.value:
       self.shifter_values = can_define.dv["GEAR_PACKET_HYBRID"]["GEAR"]
@@ -72,6 +74,8 @@ class CarState(CarStateBase):
       neutral_accel = max(cp.vl["PCM_CRUISE"]["NEUTRAL_FORCE"] / self.CP.mass, 0.0)
       if self.pcm_accel_net + neutral_accel < 0.0:
         self.pcm_accel_net += neutral_accel
+
+      self.pcm_accel_net = max(self.pcm_accel_net, self.params.ACCEL_MIN)
 
     ret.doorOpen = any([cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_FL"], cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_FR"],
                         cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_RL"], cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_RR"]])
