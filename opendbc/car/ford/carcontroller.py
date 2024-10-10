@@ -69,6 +69,11 @@ class CarController(CarControllerBase):
 
       if self.CP.flags & FordFlags.CANFD:
         # TODO: extended mode
+        # Ford uses four individual signals to dictate how to drive to the car. Curvature alone (limited to 0.02m/s^2)
+        # can actuate the steering for a large portion of any lateral movements. However, in order to get further control on
+        # steer actuation, the other three signals are necessary. Ford controls vehicles differently than most other makes.
+        # A detailed explanation on ford control can be found here:
+        # https://www.f150gen14.com/forum/threads/introducing-bluepilot-a-ford-specific-fork-for-comma3x-openpilot.24241/#post-457706
         mode = 1 if CC.latActive else 0
         counter = (self.frame // CarControllerParams.STEER_STEP) % 0x10
         can_sends.append(fordcan.create_lat_ctl2_msg(self.packer, self.CAN, mode, 0., 0., -apply_curvature, 0., counter))
