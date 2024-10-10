@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <set>
 #include <string>
 #include <utility>
 #include <unordered_map>
@@ -46,8 +47,7 @@ public:
   unsigned int size;
 
   std::vector<Signal> parse_sigs;
-  std::vector<double> vals;
-  std::vector<std::vector<double>> all_vals;
+  std::map<std::string, SignalValue> values;
 
   uint64_t last_seen_nanos;
   uint64_t check_threshold;
@@ -80,11 +80,11 @@ public:
   CANParser(int abus, const std::string& dbc_name,
             const std::vector<std::pair<uint32_t, int>> &messages);
   CANParser(int abus, const std::string& dbc_name, bool ignore_checksum, bool ignore_counter);
-  void update(const std::vector<CanData> &can_data, std::vector<SignalValue> &vals);
-  void query_latest(std::vector<SignalValue> &vals, uint64_t last_ts = 0);
+  MessageState *messageState(uint32_t address) { return &message_states.at(address); }
+  std::set<uint32_t> update(const std::vector<CanData> &can_data, bool sendcan);
 
 protected:
-  void UpdateCans(const CanData &can);
+  void UpdateCans(const CanData &can, std::set<uint32_t> &updated_addresses);
   void UpdateValid(uint64_t nanos);
 };
 
