@@ -1,5 +1,6 @@
 import math
 import onnxruntime as ort
+import numpy as np
 from opendbc.car import carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
                         make_tester_present_msg, rate_limit, structs, DT_CTRL
 from opendbc.car.can_definitions import CanData
@@ -48,7 +49,7 @@ class CarController(CarControllerBase):
     self.steer_rate_counter = 0
     self.distance_button = 0
 
-    self.model = ort.InferenceSession(BASEDIR + '/car/toyota/pcm.onnx')
+    self.model = ort.InferenceSession(BASEDIR + '/toyota/pcm.onnx')
     self.accel_filter = FirstOrderFilter(0.0, 1.0, DT_CTRL)
 
     self.pcm_accel_compensation = 0.0
