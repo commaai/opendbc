@@ -1,6 +1,7 @@
 import math
+import onnxruntime as ort
 from opendbc.car import carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
-                        make_tester_present_msg, rate_limit, structs
+                        make_tester_present_msg, rate_limit, structs, DT_CTRL
 from opendbc.car.can_definitions import CanData
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car.secoc import add_mac, build_sync_mac
@@ -10,6 +11,8 @@ from opendbc.car.toyota.values import CAR, STATIC_DSU_MSGS, NO_STOP_TIMER_CAR, T
                                         CarControllerParams, ToyotaFlags, \
                                         UNSUPPORTED_DSU_CAR
 from opendbc.can.packer import CANPacker
+from openpilot.common.filter_simple import FirstOrderFilter
+from opendbc.car.common.basedir import BASEDIR
 
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 SteerControlType = structs.CarParams.SteerControlType
@@ -44,6 +47,9 @@ class CarController(CarControllerBase):
     self.standstill_req = False
     self.steer_rate_counter = 0
     self.distance_button = 0
+
+    self.model = ort.InferenceSession(BASEDIR + '/car/toyota/pcm.onnx')
+    self.accel_filter = FirstOrderFilter(0.0, 1.0, DT_CTRL)
 
     self.pcm_accel_compensation = 0.0
     self.permit_braking = 0.0
@@ -148,20 +154,24 @@ class CarController(CarControllerBase):
     # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot and imprecise braking
     # TODO: sometimes when switching from brake to gas quickly, CLUTCH->ACCEL_NET shows a slow unwind. make it go to 0 immediately
     if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
+      self.accel_filter.update(actuators.accel)
+      inp = np.array([[actuators.accel, self.accel_filter.x, CC.orientationNED[1], CS.out.vEgo]]).astype(np.float32)
+      predicted_accel = self.model.run(None, {'input': inp})[0][0][0]
+
       # calculate amount of acceleration PCM should apply to reach target, given pitch
-      accel_due_to_pitch = math.sin(CS.slope_angle) * ACCELERATION_DUE_TO_GRAVITY
-      net_acceleration_request = actuators.accel + accel_due_to_pitch
+      # accel_due_to_pitch = math.sin(CS.slope_angle) * ACCELERATION_DUE_TO_GRAVITY
+      # net_acceleration_request = actuators.accel + accel_due_to_pitch
 
       # let PCM handle stopping for now
       pcm_accel_compensation = 0.0
       if actuators.longControlState != LongCtrlState.stopping:
-        pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - net_acceleration_request)
+        pcm_accel_compensation = 2.0 * (predicted_accel - actuators.accel)
 
       # prevent compensation windup
       pcm_accel_compensation = clip(pcm_accel_compensation, actuators.accel - self.params.ACCEL_MAX,
                                     actuators.accel - self.params.ACCEL_MIN)
 
-      self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.01, 0.01)
+      self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.02, 0.02)
       pcm_accel_cmd = actuators.accel - self.pcm_accel_compensation
 
       # Along with rate limiting positive jerk below, this greatly improves gas response time
