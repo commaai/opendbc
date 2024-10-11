@@ -80,7 +80,7 @@ class CarController(CarControllerBase):
     # here is based on observations of the stock LKAS system when it's engaged
     # CS.out.steeringPressed and steeringTorque are based on the
     # STEERING_COL_TORQUE value
-    MAX_TORQUE = 200
+    MAX_TORQUE = 240
     # Interpolate a percent to apply to max torque based on vEgo value, which is
     # the "best estimate of speed".  This means that under 20 (units?) we will
     # apply less torque, and over 20 we will apply the full calculated torque.
@@ -106,7 +106,8 @@ class CarController(CarControllerBase):
       # If the driver has just started applying torque, the reducer value will
       # be around 150 so we won't reduce the max torque much. As the driver
       # continues to apply torque, the reducer value will decrease to 30, so we
-      # will reduce the max torque more to fight them less.
+      # will reduce the max torque more to fight them less (at this level we'll
+      # be doing 1/5 of the torque)
       self.lkas_max_torque = int(round(MAX_TORQUE * ego_weight * (self.driver_applied_torque_reducer / 150)))
     else:
       # A torque reducer value of 150 means the driver has not been applying
