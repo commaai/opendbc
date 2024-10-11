@@ -157,16 +157,16 @@ class CarController(CarControllerBase):
     if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
       self.accel_filter.update(actuators.accel)
       inp = np.array([[actuators.accel, self.accel_filter.x, CC.orientationNED[1], CS.out.vEgo]]).astype(np.float32)
-      predicted_accel = self.model.run(None, {'input': inp})[0][0][0]
+      predicted_accel = float(self.model.run(None, {'input': inp})[0][0][0])
 
       # calculate amount of acceleration PCM should apply to reach target, given pitch
       # accel_due_to_pitch = math.sin(CS.slope_angle) * ACCELERATION_DUE_TO_GRAVITY
-      # net_acceleration_request = actuators.accel + accel_due_to_pitch
+      net_acceleration_request = actuators.accel #+ accel_due_to_pitch
 
       # let PCM handle stopping for now
       pcm_accel_compensation = 0.0
       if actuators.longControlState != LongCtrlState.stopping:
-        pcm_accel_compensation = 2.0 * (predicted_accel - actuators.accel)
+        pcm_accel_compensation = (predicted_accel - actuators.accel)
 
       # prevent compensation windup
       pcm_accel_compensation = clip(pcm_accel_compensation, actuators.accel - self.params.ACCEL_MAX,
@@ -182,6 +182,7 @@ class CarController(CarControllerBase):
       elif net_acceleration_request > 0.2:
         self.permit_braking = False
     else:
+      self.accel_filter.x = 0.0
       self.pcm_accel_compensation = 0.0
       pcm_accel_cmd = actuators.accel
       self.permit_braking = True
