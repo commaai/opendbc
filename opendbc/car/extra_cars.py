@@ -28,7 +28,7 @@ class FlexRayCarDocs(ExtraCarDocs):
 class CAR(Platforms):
   config: ExtraPlatformConfig
 
-  HONDA_CANFD = ExtraPlatformConfig(
+  EXTRA_HONDA = ExtraPlatformConfig(
     [
       CommunityCarDocs("Acura Integra 2024", "All"),
       CommunityCarDocs("Honda Accord 2023-24", "All"),
@@ -38,14 +38,14 @@ class CAR(Platforms):
     ],
   )
 
-  HYUNDAI_PALISADE_FACELIFT = ExtraPlatformConfig(
+  EXTRA_HYUNDAI = ExtraPlatformConfig(
     [
       CommunityCarDocs("Hyundai Palisade 2023-24", package="HDA2"),
       CommunityCarDocs("Kia Telluride 2023-24", package="HDA2"),
     ],
   )
 
-  TOYOTA_SECURITY_CARS = ExtraPlatformConfig(
+  EXTRA_TOYOTA = ExtraPlatformConfig(
     [
       ToyotaSecurityCarDocs("Subaru Solterra 2023-25"),
       ToyotaSecurityCarDocs("Lexus NS 2022-25"),
@@ -63,7 +63,7 @@ class CAR(Platforms):
     ],
   )
 
-  AUDI_FLEXRAY = ExtraPlatformConfig(
+  EXTRA_VOLKSWAGEN = ExtraPlatformConfig(
     [
       FlexRayCarDocs("Audi A4 2016-24", package="All"),
       FlexRayCarDocs("Audi A5 2016-24", package="All"),
