@@ -2,17 +2,17 @@ name: repo
 
 on:
   schedule:
-    - cron: "0 15 * * 2"
+    - cron: "0 15 1 * *"
   workflow_dispatch:
 
 jobs:
   pre-commit-autoupdate:
     name: pre-commit autoupdate
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     container:
       image: ghcr.io/commaai/opendbc:latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: pre-commit autoupdate
       run: |
         git config --global --add safe.directory '*'
