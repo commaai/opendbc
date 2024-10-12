@@ -1,6 +1,7 @@
 import math
 import onnxruntime as ort
 import numpy as np
+from collections import deque
 from opendbc.car import carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
                         make_tester_present_msg, rate_limit, structs, DT_CTRL
 from opendbc.car.can_definitions import CanData
@@ -51,6 +52,8 @@ class CarController(CarControllerBase):
 
     self.model = ort.InferenceSession(BASEDIR + '/toyota/pcm.onnx')
     self.accel_filter = FirstOrderFilter(0.0, 1.0, DT_CTRL)
+    # TODO: better way to give model history
+    self.accel_deque = deque([0] * 1000, maxlen=1000)
 
     self.pcm_accel_compensation = 0.0
     self.permit_braking = 0.0
@@ -156,7 +159,11 @@ class CarController(CarControllerBase):
     # TODO: sometimes when switching from brake to gas quickly, CLUTCH->ACCEL_NET shows a slow unwind. make it go to 0 immediately
     if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
       self.accel_filter.update(actuators.accel)
-      inp = np.array([[actuators.accel, self.accel_filter.x, CC.orientationNED[1], CS.out.vEgo]]).astype(np.float32)
+      self.accel_deque.append(actuators.accel)
+      inp = np.array([[actuators.accel,
+                       # self.accel_filter.x
+                       *[self.accel_deque[i] for i in (0, 20, 40, 80, 160, 320, 640)],
+                       CC.orientationNED[1], CS.out.vEgo]]).astype(np.float32)
       predicted_accel = float(self.model.run(None, {'input': inp})[0][0][0])
 
       # calculate amount of acceleration PCM should apply to reach target, given pitch
