@@ -35,6 +35,7 @@ class CAR(Platforms):
       CommunityCarDocs("Honda Clarity 2018-21", "All"),
       CommunityCarDocs("Honda CR-V 2024", "All"),
       CommunityCarDocs("Honda CR-V Hybrid 2024", "All"),
+      CommunityCarDocs("Honda Odyssey 2021-25", "All"),
       CommunityCarDocs("Honda Pilot 2023-24", "All"),
     ],
   )
