@@ -158,11 +158,12 @@ class CarController(CarControllerBase):
     # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot and imprecise braking
     # TODO: sometimes when switching from brake to gas quickly, CLUTCH->ACCEL_NET shows a slow unwind. make it go to 0 immediately
     if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
+      # TODO: reset the deque
       self.accel_filter.update(actuators.accel)
       self.accel_deque.append(actuators.accel)
       inp = np.array([[actuators.accel,
                        # self.accel_filter.x
-                       *[self.accel_deque[i] for i in (0, 20, 40, 80, 160, 320, 640)],
+                       *[self.accel_deque[-i] for i in (20, 40, 80, 160, 320, 640)],
                        CC.orientationNED[1], CS.out.vEgo]]).astype(np.float32)
       predicted_accel = float(self.model.run(None, {'input': inp})[0][0][0])
 
@@ -179,7 +180,7 @@ class CarController(CarControllerBase):
       pcm_accel_compensation = clip(pcm_accel_compensation, actuators.accel - self.params.ACCEL_MAX,
                                     actuators.accel - self.params.ACCEL_MIN)
 
-      self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.02, 0.02)
+      self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.01, 0.01)
       pcm_accel_cmd = actuators.accel - self.pcm_accel_compensation
 
       # Along with rate limiting positive jerk below, this greatly improves gas response time
