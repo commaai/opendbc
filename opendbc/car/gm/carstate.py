@@ -32,14 +32,18 @@ class CarState(CarStateBase):
     self.buttons_counter = 0
 
     self.distance_button = 0
+    self.lkas_button = 0
 
   def update(self, pt_cp, cam_cp, _, __, loopback_cp) -> structs.CarState:
     ret = structs.CarState()
 
     prev_cruise_buttons = self.cruise_buttons
     prev_distance_button = self.distance_button
+    prev_lkas_button = self.lkas_button
     self.cruise_buttons = pt_cp.vl["ASCMSteeringButton"]["ACCButtons"]
     self.distance_button = pt_cp.vl["ASCMSteeringButton"]["DistanceButton"]
+    # TODO: Camera SCC and SDGM cars do not update this signal when pressed, need to find another signal
+    self.lkas_button = pt_cp.vl["ASCMSteeringButton"]["LKAButton"]
     self.buttons_counter = pt_cp.vl["ASCMSteeringButton"]["RollingCounter"]
     self.pscm_status = copy.copy(pt_cp.vl["PSCMStatus"])
 
@@ -136,7 +140,9 @@ class CarState(CarStateBase):
         *create_button_events(self.cruise_buttons, prev_cruise_buttons, BUTTONS_DICT,
                               unpressed_btn=CruiseButtons.UNPRESS),
         *create_button_events(self.distance_button, prev_distance_button,
-                              {1: ButtonType.gapAdjustCruise})
+                              {1: ButtonType.gapAdjustCruise}),
+        *create_button_events(self.lkas_button, prev_lkas_button,
+                              {1: ButtonType.altButton1})
       ]
 
     return ret
