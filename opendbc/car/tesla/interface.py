@@ -23,8 +23,6 @@ class CarInterface(CarInterfaceBase):
     ret.steerControlType = structs.CarParams.SteerControlType.angle
     ret.radarUnavailable = True
 
-    if candidate in [CAR.TESLA_MODEL_3, CAR.TESLA_MODEL_Y]:
-      ret.safetyConfigs[0].safetyParam |= Panda.FLAG_TESLA_LONG_CONTROL
-      ret.openpilotLongitudinalControl = True
+    ret.openpilotLongitudinalControl = True
 
     return ret
