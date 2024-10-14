@@ -213,9 +213,11 @@ FW_VERSIONS = {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00TL__ FCA F-CUP      1.00 1.01 99110-D3500         ',
       b'\xf1\x00TL__ FCA F-CUP      1.00 1.02 99110-D3510         ',
+      b'\xf1\x00TL__ FCA FHCUP      1.00 1.02 99110-D3500         ',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00TL  MFC  AT KOR LHD 1.00 1.02 95895-D3800 180719',
+      b'\xf1\x00TL  MFC  AT KOR LHD 1.00 1.06 95895-D3800 190107',
       b'\xf1\x00TL  MFC  AT USA LHD 1.00 1.06 95895-D3800 190107',
     ],
   },
@@ -263,6 +265,7 @@ FW_VERSIONS = {
       b'\xf1\x00TM ESC \x02 103"\x07\x08 58910-S2GA0',
       b'\xf1\x00TM ESC \x03 101 \x08\x02 58910-S2DA0',
       b'\xf1\x00TM ESC \x03 102!\x04\x03 58910-S2DA0',
+      b'\xf1\x00TM ESC \x03 103"\x07\x06 58910-S2DA0',
       b'\xf1\x00TM ESC \x04 101 \x08\x04 58910-S2GA0',
       b'\xf1\x00TM ESC \x04 102!\x04\x05 58910-S2GA0',
       b'\xf1\x00TM ESC \x04 103"\x07\x08 58910-S2GA0',
@@ -404,6 +407,7 @@ FW_VERSIONS = {
       b'\xf1\x00LX ESC \x0b 103\x19\t\x07 58910-S8330',
       b'\xf1\x00LX ESC \x0b 103\x19\t\t 58910-S8350',
       b'\xf1\x00LX ESC \x0b 103\x19\t\x10 58910-S8360',
+      b'\xf1\x00LX ESC \x0b 104 \x10\x13 58910-S8330',
       b'\xf1\x00LX ESC \x0b 104 \x10\x16 58910-S8360',
       b'\xf1\x00ON ESC \x01 101\x19\t\x08 58910-S9360',
       b'\xf1\x00ON ESC \x0b 100\x18\x12\x18 58910-S9360',
@@ -514,6 +518,7 @@ FW_VERSIONS = {
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00HI  LKAS AT USA LHD 1.00 1.00 95895-D2020 160302',
       b'\xf1\x00HI  LKAS AT USA LHD 1.00 1.00 95895-D2030 170208',
+      b'\xf1\x00HI  LKAS AT USA LHD 1.00 1.01 95895-D2030 170811',
       b'\xf1\x00HI  MFC  AT USA LHD 1.00 1.03 99211-D2000 190831',
     ],
   },
@@ -1070,10 +1075,10 @@ FW_VERSIONS = {
   },
   CAR.GENESIS_GV60_EV_1ST_GEN: {
     (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00JW1 MFC  AT AUS RHD 1.00 1.03 99211-CU100 221118',
       b'\xf1\x00JW1 MFC  AT USA LHD 1.00 1.02 99211-CU000 211215',
       b'\xf1\x00JW1 MFC  AT USA LHD 1.00 1.02 99211-CU100 211215',
       b'\xf1\x00JW1 MFC  AT USA LHD 1.00 1.03 99211-CU000 221118',
-      b'\xf1\x00JW1 MFC  AT AUS RHD 1.00 1.03 99211-CU100 221118',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00JW1_ RDR -----      1.00 1.00 99110-CU000         ',
@@ -1084,6 +1089,7 @@ FW_VERSIONS = {
       b'\xf1\x00MQ4 MFC  AT USA LHD 1.00 1.00 99210-R5100 221019',
       b'\xf1\x00MQ4 MFC  AT USA LHD 1.00 1.03 99210-R5000 200903',
       b'\xf1\x00MQ4 MFC  AT USA LHD 1.00 1.05 99210-R5000 210623',
+      b'\xf1\x00MQ4 MFC  AT USA LHD 1.00 1.06 99210-R5000 211216',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00MQ4_ SCC F-CUP      1.00 1.06 99110-P2000         ',

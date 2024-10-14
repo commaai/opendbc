@@ -89,7 +89,7 @@ class TestCarInterfaces:
     # Run car interface
     # TODO: use hypothesis to generate random messages
     now_nanos = 0
-    CC = structs.CarControl()
+    CC = structs.CarControl().as_reader()
     for _ in range(10):
       car_interface.update([])
       car_interface.apply(CC, now_nanos)
@@ -97,6 +97,7 @@ class TestCarInterfaces:
 
     CC = structs.CarControl()
     CC.enabled = True
+    CC = CC.as_reader()
     for _ in range(10):
       car_interface.update([])
       car_interface.apply(CC, now_nanos)
