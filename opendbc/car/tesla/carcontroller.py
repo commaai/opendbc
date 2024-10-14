@@ -36,6 +36,9 @@ class CarController(CarControllerBase):
       self.apply_angle_last = apply_angle
       can_sends.append(self.tesla_can.create_steering_control(apply_angle, lkas_enabled, (self.frame // 2) % 16))
 
+    if self.frame % 10 == 0:
+      can_sends.append(self.tesla_can.create_steering_allowed((self.frame // 10) % 16))
+
     # Longitudinal control
     if self.CP.openpilotLongitudinalControl and self.frame % 4 == 0:
       state = 4 if not hands_on_fault else 13  # 4=ACC_ON, 13=ACC_CANCEL_GENERIC_SILENT
