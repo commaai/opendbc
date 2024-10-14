@@ -26,7 +26,7 @@ class TeslaCAN:
 
   def create_longitudinal_command(self, acc_state, accel, cntr, active):
     values = {
-      "DAS_setSpeed": 0 if (accel < 0 or not active) else V_CRUISE_MAX,
+      "DAS_setSpeed": 0 if accel <= 0 else V_CRUISE_MAX,
       "DAS_accState": acc_state,
       "DAS_aebEvent": 0,
       "DAS_jerkMin": CarControllerParams.JERK_LIMIT_MIN,
