@@ -14,7 +14,6 @@ class CarState(CarStateBase):
     self.can_define = CANDefine(DBC[CP.carFingerprint]['pt'])
 
     self.hands_on_level = 0
-    self.steer_warning = None
     self.das_control = None
 
   def update(self, cp, cp_cam, *_) -> structs.CarState:
@@ -23,7 +22,7 @@ class CarState(CarStateBase):
     # Vehicle speed
     ret.vEgoRaw = cp.vl["DI_speed"]["DI_vehicleSpeed"] * CV.KPH_TO_MS
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
-    ret.standstill = cp.vl["ESP_B"]["ESP_vehicleStandstillSts"] == 1
+    ret.standstill = cp.vl["DI_state"]["DI_vehicleHoldState"] == 3
 
     # Gas pedal
     pedal_status = cp.vl["DI_systemStatus"]["DI_accelPedalPos"]
@@ -37,22 +36,20 @@ class CarState(CarStateBase):
     # Steering wheel
     epas_status = cp.vl["EPAS3S_sysStatus"]
     self.hands_on_level = epas_status["EPAS3S_handsOnLevel"]
-    self.steer_warning = self.can_define.dv["EPAS3S_sysStatus"]["EPAS3S_eacErrorCode"].get(int(epas_status["EPAS3S_eacErrorCode"]), None)
     ret.steeringAngleDeg = -epas_status["EPAS3S_internalSAS"]
     ret.steeringRateDeg = -cp_cam.vl["SCCM_steeringAngleSensor"]["SCCM_steeringAngleSpeed"]
     ret.steeringTorque = -epas_status["EPAS3S_torsionBarTorque"]
 
     ret.steeringPressed = self.hands_on_level > 0
     eac_status = self.can_define.dv["EPAS3S_sysStatus"]["EPAS3S_eacStatus"].get(int(epas_status["EPAS3S_eacStatus"]), None)
-    ret.steerFaultPermanent = eac_status in ["EAC_FAULT"]
-    ret.steerFaultTemporary = self.steer_warning not in ["EAC_ERROR_IDLE", "EAC_ERROR_HANDS_ON"] and eac_status not in ["EAC_ACTIVE", "EAC_AVAILABLE"]
+    ret.steerFaultPermanent = eac_status == "EAC_FAULT"
+    ret.steerFaultTemporary = eac_status == "EAC_INHIBITED"
 
     # Cruise state
     cruise_state = self.can_define.dv["DI_state"]["DI_cruiseState"].get(int(cp.vl["DI_state"]["DI_cruiseState"]), None)
     speed_units = self.can_define.dv["DI_state"]["DI_speedUnits"].get(int(cp.vl["DI_state"]["DI_speedUnits"]), None)
 
-    self.acc_enabled = cruise_state in ("ENABLED", "STANDSTILL", "OVERRIDE", "PRE_FAULT", "PRE_CANCEL")
-    ret.cruiseState.enabled = self.acc_enabled
+    ret.cruiseState.enabled = cruise_state in ("ENABLED", "STANDSTILL", "OVERRIDE", "PRE_FAULT", "PRE_CANCEL")
     if speed_units == "KPH":
       ret.cruiseState.speed = cp.vl["DI_state"]["DI_digitalSpeed"] * CV.KPH_TO_MS
     elif speed_units == "MPH":
@@ -92,7 +89,6 @@ class CarState(CarStateBase):
     messages = [
       # sig_address, frequency
       ("DI_speed", 50),
-      ("ESP_B", 50),
       ("DI_systemStatus", 100),
       ("IBST_status", 25),
       ("DI_state", 10),
