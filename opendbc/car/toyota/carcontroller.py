@@ -1,4 +1,5 @@
 import math
+from collections import deque
 from opendbc.car import carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
                         make_tester_present_msg, rate_limit, structs
 from opendbc.car.can_definitions import CanData
@@ -44,6 +45,9 @@ class CarController(CarControllerBase):
     self.standstill_req = False
     self.steer_rate_counter = 0
     self.distance_button = 0
+
+    self.accel_deque = deque([], maxlen=100)
+    self.rl_accel = False
 
     self.pcm_accel_compensation = 0.0
     self.permit_braking = 0.0
@@ -148,9 +152,23 @@ class CarController(CarControllerBase):
     # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot and imprecise braking
     # TODO: sometimes when switching from brake to gas quickly, CLUTCH->ACCEL_NET shows a slow unwind. make it go to 0 immediately
     if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
+      self.accel_deque.append(actuators.accel)
+
+      if len(self.accel_deque) > 50:
+        if abs(actuators.accel - self.accel_deque[-50]) > 1.0:
+          self.rl_accel = True
+        elif abs(actuators.accel - self.accel_deque[-50]) < 0.1:
+          self.rl_accel = False
+
+      if self.rl_accel:
+        actuators_accel = rate_limit(actuators.accel, self.accel_deque[-2], -0.5 / 100, 0.5 / 100)
+      else:
+        actuators_accel = actuators.accel
+
       # calculate amount of acceleration PCM should apply to reach target, given pitch
-      accel_due_to_pitch = math.sin(CS.slope_angle) * ACCELERATION_DUE_TO_GRAVITY
-      net_acceleration_request = actuators.accel + accel_due_to_pitch
+      # accel_due_to_pitch = math.sin(CS.slope_angle) * ACCELERATION_DUE_TO_GRAVITY
+      accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY
+      net_acceleration_request = actuators_accel + accel_due_to_pitch
 
       if self.CP.flags & ToyotaFlags.HYBRID:
         # gas includes regen and engine braking
@@ -165,11 +183,11 @@ class CarController(CarControllerBase):
         pcm_accel_compensation = 2.0 * (pcm_accel_net - net_acceleration_request)
 
       # prevent compensation windup
-      pcm_accel_compensation = clip(pcm_accel_compensation, actuators.accel - self.params.ACCEL_MAX,
-                                    actuators.accel - self.params.ACCEL_MIN)
+      pcm_accel_compensation = clip(pcm_accel_compensation, actuators_accel - self.params.ACCEL_MAX,
+                                    actuators_accel - self.params.ACCEL_MIN)
 
-      self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.01, 0.01)
-      pcm_accel_cmd = actuators.accel - self.pcm_accel_compensation
+      self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.01 / 3, 0.01 / 3)
+      pcm_accel_cmd = actuators_accel - self.pcm_accel_compensation
 
       # Along with rate limiting positive jerk below, this greatly improves gas response time
       # Consider the net acceleration request that the PCM should be applying (pitch included)
@@ -178,6 +196,7 @@ class CarController(CarControllerBase):
       elif net_acceleration_request > 0.2:
         self.permit_braking = False
     else:
+      self.accel_deque.clear()
       self.pcm_accel_compensation = 0.0
       pcm_accel_cmd = actuators.accel
       self.permit_braking = True
@@ -215,6 +234,7 @@ class CarController(CarControllerBase):
       elif self.CP.openpilotLongitudinalControl:
         # internal PCM gas command can get stuck unwinding from negative accel so we apply a generous rate limit
         pcm_accel_cmd = min(pcm_accel_cmd, self.accel + ACCEL_WINDUP_LIMIT) if CC.longActive else 0.0
+        # pcm_accel_cmd = rate_limit(pcm_accel_cmd, self.accel, -0.5 / 33, 0.5 / 33) if CC.longActive else 0.0
 
         can_sends.append(toyotacan.create_accel_command(self.packer, pcm_accel_cmd, pcm_cancel_cmd, self.permit_braking, self.standstill_req, lead,
                                                         CS.acc_type, fcw_alert, self.distance_button))
