@@ -152,10 +152,17 @@ class CarController(CarControllerBase):
       accel_due_to_pitch = math.sin(CS.slope_angle) * ACCELERATION_DUE_TO_GRAVITY
       net_acceleration_request = actuators.accel + accel_due_to_pitch
 
+      if self.CP.flags & ToyotaFlags.HYBRID:
+        # gas includes regen and engine braking
+        pcm_accel_net = (CS.computer_gas - CS.computer_brake) / self.CP.mass
+
+      else:
+        pcm_accel_net = CS.pcm_accel_net
+
       # let PCM handle stopping for now
       pcm_accel_compensation = 0.0
       if actuators.longControlState != LongCtrlState.stopping:
-        pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - net_acceleration_request)
+        pcm_accel_compensation = 2.0 * (pcm_accel_net - net_acceleration_request)
 
       # prevent compensation windup
       pcm_accel_compensation = clip(pcm_accel_compensation, actuators.accel - self.params.ACCEL_MAX,
