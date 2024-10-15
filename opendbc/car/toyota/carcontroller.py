@@ -46,7 +46,7 @@ class CarController(CarControllerBase):
     self.distance_button = 0
 
     self.pcm_accel_compensation = 0.0
-    self.permit_braking = 0.0
+    self.permit_braking = True
 
     self.packer = CANPacker(dbc_name)
     self.accel = 0
