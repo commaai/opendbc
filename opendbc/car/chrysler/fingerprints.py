@@ -202,6 +202,7 @@ FW_VERSIONS = {
       b'68434960AF',
       b'68529064AB',
       b'68594990AB',
+      b'68594990AD',
     ],
     (Ecu.srs, 0x744, None): [
       b'68405567AB',
@@ -243,6 +244,7 @@ FW_VERSIONS = {
       b'68526772AH ',
       b'68599493AC ',
       b'68657433AA ',
+      b'68700317AC ',
     ],
     (Ecu.hybrid, 0x7e2, None): [
       b'05185116AF',
@@ -258,6 +260,7 @@ FW_VERSIONS = {
       b'68540977AK',
       b'68597647AE',
       b'68632416AB',
+      b'68632416AC',
     ],
   },
   CAR.JEEP_GRAND_CHEROKEE: {
