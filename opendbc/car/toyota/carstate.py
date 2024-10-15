@@ -218,15 +218,20 @@ class CarState(CarStateBase):
       ("PCM_CRUISE", 33),
       ("PCM_CRUISE_SM", 1),
       ("STEER_TORQUE_SENSOR", 50),
+      # These TSS-P cars are missing GEAR_PACKET_HYBRID:
+      # TOYOTA_RAV4H, LEXUS_CTH, LEXUS_ES (hybrid), TOYOTA_HIGHLANDER (hybrid)
+      ("GEAR_PACKET_HYBRID", 60),
     ]
 
     if CP.flags & ToyotaFlags.SECOC.value:
       messages += [
-        ("GEAR_PACKET_HYBRID", 60),
         ("SECOC_SYNCHRONIZATION", 10),
         ("GAS_PEDAL", 42),
       ]
     else:
+      # These TSS-P/TSS2 cars are missing BRAKE:
+      # TOYOTA_RAV4H, LEXUS_NX_TSS2 (hybrid), LEXUS_CTH, TOYOTA_HIGHLANDER (hybrid), LEXUS_NX (hybrid), LEXUS_ES (hybrid), TOYOTA_ALPHARD_TSS2 (hybrid)
+      messages.append(("BRAKE", 83))
       if CP.carFingerprint not in [CAR.TOYOTA_MIRAI]:
         messages.append(("ENGINE_RPM", 42))
 
