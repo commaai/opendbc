@@ -76,7 +76,7 @@ class CarState(CarStateBase):
         self.pcm_accel_net += neutral_accel
 
       if self.CP.flags & ToyotaFlags.HYBRID and self.CP.carFingerprint in TSS2_CAR:
-        self.computer_gas = cp.vl["GEAR_PACKET_HYBRID"]["FDRV"]
+        self.computer_gas = cp.vl["GEAR_PACKET_HYBRID"]["FDRVREAL"]
         self.computer_brake = cp.vl["BRAKE"]["BRAKE_FORCE"]
 
     ret.doorOpen = any([cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_FL"], cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_FR"],
