@@ -68,6 +68,12 @@ class TestCanParserPacker:
       parser.update_strings([t, [msg]])
       assert parser.can_valid
 
+  def test_parser_empty_list(self):
+    msgs = [("CAN_FD_MESSAGE", 10), ]
+    parser = CANParser(TEST_DBC, msgs, 0)
+    ret = parser.update_strings([])
+    assert len(ret) == 0
+
   def test_parser_counter_can_valid(self):
     """
     Tests number of allowed bad counters + ensures CAN stays invalid

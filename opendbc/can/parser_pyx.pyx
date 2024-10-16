@@ -8,7 +8,7 @@ from libcpp.vector cimport vector
 from libc.stdint cimport uint32_t
 
 from .common cimport CANParser as cpp_CANParser
-from .common cimport dbc_lookup, SignalValue, DBC, CanData, CanFrame
+from .common cimport dbc_lookup, Msg, SignalValue, DBC, CanData, CanFrame
 
 import numbers
 from collections import defaultdict
@@ -50,15 +50,16 @@ cdef class CANParser:
       self.addresses.push_back(address)
 
       name = m.name.decode("utf8")
-      self.vl[address] = {}
+      signal_names = [sig.name.decode("utf-8") for sig in (<Msg*>m).sigs]
+
+      self.vl[address] = {name : 0 for name in signal_names}
       self.vl[name] = self.vl[address]
       self.vl_all[address] = defaultdict(list)
       self.vl_all[name] = self.vl_all[address]
-      self.ts_nanos[address] = {}
+      self.ts_nanos[address] = {name : 0 for name in signal_names}
       self.ts_nanos[name] = self.ts_nanos[address]
 
     self.can = new cpp_CANParser(bus, dbc_name, message_v)
-    self.update_strings([])
 
   def __dealloc__(self):
     if self.can:
