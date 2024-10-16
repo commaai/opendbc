@@ -72,7 +72,6 @@ public:
   bool can_valid = false;
   bool bus_timeout = false;
   uint64_t first_nanos = 0;
-  uint64_t last_nanos = 0;
   uint64_t last_nonempty_nanos = 0;
   uint64_t bus_timeout_threshold = 0;
   uint64_t can_invalid_cnt = CAN_INVALID_CNT;
