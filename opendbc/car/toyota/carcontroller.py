@@ -2,6 +2,7 @@ import math
 from opendbc.car import carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
                         make_tester_present_msg, rate_limit, structs
 from opendbc.car.can_definitions import CanData
+from opendbc.car.common.pid import PIDController
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car.secoc import add_mac, build_sync_mac
 from opendbc.car.interfaces import CarControllerBase
@@ -47,6 +48,7 @@ class CarController(CarControllerBase):
 
     self.pcm_accel_compensation = 0.0
     self.permit_braking = True
+    self.comp_pid = PIDController(2.0, 0.5)
 
     self.packer = CANPacker(dbc_name)
     self.accel = 0
@@ -153,14 +155,25 @@ class CarController(CarControllerBase):
       net_acceleration_request = actuators.accel + accel_due_to_pitch
 
       # let PCM handle stopping for now
-      pcm_accel_compensation = 0.0
-      if actuators.longControlState != LongCtrlState.stopping:
-        pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - net_acceleration_request)
+      # pcm_accel_compensation = 0.0
+      # if actuators.longControlState != LongCtrlState.stopping:
+      #   pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - net_acceleration_request)
+
+      # the PCM's ACCEL_NET offset is useful to learn while stopped with permit_braking=False.
+      # for example, -0.5 might be coasting and vice versa 0.0 would be +0.5
 
       # prevent compensation windup
-      pcm_accel_compensation = clip(pcm_accel_compensation, actuators.accel - self.params.ACCEL_MAX,
-                                    actuators.accel - self.params.ACCEL_MIN)
+      # TODO: disable positive compensation, hybrids are over-reactive
+      self.comp_pid.neg_limit = actuators.accel - self.params.ACCEL_MAX
+      self.comp_pid.pos_limit = actuators.accel - self.params.ACCEL_MIN  # 0.0
 
+      pcm_accel_compensation = self.comp_pid.update(CS.pcm_accel_net - net_acceleration_request)
+
+      # # prevent compensation windup
+      # pcm_accel_compensation = clip(pcm_accel_compensation, actuators.accel - self.params.ACCEL_MAX,
+      #                               actuators.accel - self.params.ACCEL_MIN)
+
+      # TODO: lower rate limit, this might be jerky on hybrids
       self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.01, 0.01)
       pcm_accel_cmd = actuators.accel - self.pcm_accel_compensation
 
@@ -174,6 +187,7 @@ class CarController(CarControllerBase):
       self.pcm_accel_compensation = 0.0
       pcm_accel_cmd = actuators.accel
       self.permit_braking = True
+      self.comp_pid.reset()
 
     pcm_accel_cmd = clip(pcm_accel_cmd, self.params.ACCEL_MIN, self.params.ACCEL_MAX)
 
