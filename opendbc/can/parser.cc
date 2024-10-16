@@ -94,8 +94,11 @@ bool MessageState::update_counter_generic(int64_t v, int cnt_size) {
 
 
 CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<std::pair<uint32_t, int>> &messages)
-  : bus(abus), dbc(dbc_lookup(dbc_name)), bus_timeout_threshold(std::numeric_limits<uint64_t>::max()) {
-  assert(dbc && "DBC lookup failed");
+  : bus(abus) {
+  dbc = dbc_lookup(dbc_name);
+  assert(dbc);
+
+  bus_timeout_threshold = std::numeric_limits<uint64_t>::max();
 
   for (const auto& [address, frequency] : messages) {
     // disallow duplicate message checks
@@ -111,16 +114,16 @@ CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<st
     }
 
     const Msg *msg = dbc->addr_to_msg.at(address);
-    message_states.emplace(std::piecewise_construct, std::forward_as_tuple(address), std::forward_as_tuple(msg, check_threshold));
+    message_states.emplace(address, MessageState{msg, check_threshold});
   }
 }
 
 CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum, bool ignore_counter)
-  : bus(abus), dbc(dbc_lookup(dbc_name)) {
-  assert(dbc && "DBC lookup failed");
+  : bus(abus) {
+  dbc = dbc_lookup(dbc_name);
+  assert(dbc);
   for (const auto& msg : dbc->msgs) {
-    message_states.emplace(std::piecewise_construct, std::forward_as_tuple(msg.address),
-                           std::forward_as_tuple(&msg, 0, ignore_checksum, ignore_counter));
+    message_states.emplace(msg.address, MessageState{&msg, 0, ignore_checksum, ignore_counter});
   }
 }
 
