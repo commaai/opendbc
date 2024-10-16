@@ -167,7 +167,8 @@ class CarController(CarControllerBase):
       self.comp_pid.neg_limit = actuators.accel - self.params.ACCEL_MAX
       self.comp_pid.pos_limit = actuators.accel - self.params.ACCEL_MIN  # 0.0
 
-      pcm_accel_compensation = self.comp_pid.update(CS.pcm_accel_net - net_acceleration_request)
+      pcm_accel_compensation = self.comp_pid.update(CS.pcm_accel_net - net_acceleration_request,
+                                                    freeze_integrator=actuators.longControlState == LongCtrlState.stopping)
 
       # # prevent compensation windup
       # pcm_accel_compensation = clip(pcm_accel_compensation, actuators.accel - self.params.ACCEL_MAX,
