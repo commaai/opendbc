@@ -12,7 +12,7 @@ FW_VERSIONS = {
       b'TeMYG4_DCS_Update_0.0.0 (9),E4014.26.0',
       b'TeMYG4_Main_0.0.0 (59),E4H014.29.0',
       b'TeMYG4_SingleECU_0.0.0 (33),E4S014.27',
-    ]
+    ],
   },
   CAR.TESLA_MODEL_Y: {
     (Ecu.eps, 0x730, None): [
@@ -23,6 +23,6 @@ FW_VERSIONS = {
       b'TeMYG4_DCS_Update_0.0.0 (13),Y4P002.27.1',
       b'TeMYG4_DCS_Update_0.0.0 (9),Y4P002.25.0',
       b'TeMYG4_SingleECU_0.0.0 (33),Y4S002.26',
-    ]
+    ],
   },
 }

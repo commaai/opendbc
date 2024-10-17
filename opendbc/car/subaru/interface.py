@@ -90,7 +90,6 @@ class CarInterface(CarInterfaceBase):
       ret.flags |= SubaruFlags.DISABLE_EYESIGHT.value
 
     if ret.openpilotLongitudinalControl:
-      ret.stoppingControl = True
       ret.safetyConfigs[0].safetyParam |= Panda.FLAG_SUBARU_LONG
 
     return ret
