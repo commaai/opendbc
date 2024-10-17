@@ -17,7 +17,7 @@ class CarControllerParams:
     self.STEER_DELTA_DOWN = 70         # torque decrease per refresh
     self.STEER_DRIVER_ALLOWANCE = 60   # allowed driver torque before start limiting
     self.STEER_DRIVER_MULTIPLIER = 50  # weight driver torque heavily
-    self.STEER_DRIVER_FACTOR = 1       # from dbc
+    self.STEER_DRIVER_FACTOR = 0.012   # from dbc
 
     if CP.flags & SubaruFlags.GLOBAL_GEN2:
       # TODO: lower rate limits, this reaches min/max in 0.5s which negatively affects tuning
