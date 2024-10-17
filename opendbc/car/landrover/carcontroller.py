@@ -69,7 +69,6 @@ class CarController(CarControllerBase):
              self.frame % 255,
              left_lane, right_lane))
 
-
     new_actuators = actuators.as_builder()
     new_actuators.steeringAngleDeg = self.apply_angle_last
 

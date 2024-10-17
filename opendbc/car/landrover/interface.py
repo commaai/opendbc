@@ -12,7 +12,8 @@ class CarInterface(CarInterfaceBase):
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
     ret.brand = "landrover"
 
-    ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.landrover, 0)]
+    #ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.allOutput)]
+    ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.landrover)]
 
     ret.steerLimitTimer = 0.4
     ret.steerActuatorDelay = 0.15  # Default delay
@@ -28,7 +29,6 @@ class CarInterface(CarInterfaceBase):
 
 
     ret.pcmCruise = True # managed by cruise state manager
-    ret.centerToFront = 1.35
 
     if ret.centerToFront == 0:
       ret.centerToFront = ret.wheelbase * 0.4

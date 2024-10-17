@@ -81,8 +81,10 @@ class CarState(CarStateBase):
 
     ret.stockAeb = False
 
-    ret.cruiseState.available = cp.vl["CruiseInfo"]["CruiseOn"] == 1
-    ret.cruiseState.enabled =  cp.vl["CruiseInfo"]["CruiseOn"] == 1
+    #ret.cruiseState.available = cp.vl["CruiseInfo"]["CruiseOn"] == 1
+    #ret.cruiseState.enabled =  cp.vl["CruiseInfo"]["CruiseOn"] == 1
+    ret.cruiseState.available = cp.vl["LKAS_BTN"]["LKAS_Btn_on"] == 1
+    ret.cruiseState.enabled =  ret.cruiseState.available
     ret.cruiseState.speed = ret.vEgoRaw * speed_factor
     ret.cruiseState.standstill = False
 

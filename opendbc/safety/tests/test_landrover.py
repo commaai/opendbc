@@ -36,8 +36,8 @@ class TestLandroverSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSaf
 
   def setUp(self):
     self.packer = CANPackerPanda("landrover_defender_2023")
-    self.define = CANDefine("lendrover_defender_2023")
-    self.acc_states = {d: v for v, d in self.define.dv["DAS_control"]["DAS_accState"].items()}
+    self.define = CANDefine("landrover_defender_2023")
+    #self.acc_states = {d: v for v, d in self.define.dv["DAS_control"]["DAS_accState"].items()}
 
   def _angle_cmd_msg(self, angle: float, enabled: bool):
     values = {"ReqAngleTorque": angle, "EnAngle": 1 if enabled else 0}
@@ -77,11 +77,11 @@ class TestLandroverSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSaf
       "DAS_accelMax": accel_limits[1],
     }
     return self.packer.make_can_msg_panda("DAS_control", bus, values)
+  """
 
   def _accel_msg(self, accel: float):
     # For common.LongitudinalAccelSafetyTest
     return self._long_control_msg(10, accel_limits=(accel, max(accel, 0)))
-  """
 
   def test_vehicle_speed_measurements(self):
     # OVERRIDDEN: 79.1667 is the max speed in m/s
