@@ -120,7 +120,7 @@ class CAR(Platforms):
     CarSpecs(mass=2000, wheelbase=3.69, steerRatio=17.0),
   )
   FORD_F_150_LIGHTNING_MK1 = FordCANFDPlatformConfig(
-    [FordCarDocs("Ford F-150 Lightning 2021-23", "Co-Pilot360 Active 2.0", support_type=SupportType.REVIEW)],
+    [FordCarDocs("Ford F-150 Lightning 2021-23", "Co-Pilot360 Active 2.0")],
     CarSpecs(mass=2948, wheelbase=3.70, steerRatio=16.9),
   )
   FORD_FOCUS_MK4 = FordPlatformConfig(
