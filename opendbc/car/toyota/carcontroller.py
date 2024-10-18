@@ -47,8 +47,8 @@ class CarController(CarControllerBase):
     self.steer_rate_counter = 0
     self.distance_button = 0
 
-    self.pitch = FirstOrderFilter(0.5, 0.0, DT_CTRL)
-    self.coast_offset = FirstOrderFilter(2.0, 0.0, DT_CTRL)
+    self.pitch = FirstOrderFilter(0.0, 0.5, DT_CTRL)
+    self.coast_offset = FirstOrderFilter(0.0, 1.5, DT_CTRL)
 
     self.pcm_accel_compensation = 0.0
     self.permit_braking = True
@@ -153,17 +153,23 @@ class CarController(CarControllerBase):
     # *** gas and brake ***
     # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot and imprecise braking
     # TODO: sometimes when switching from brake to gas quickly, CLUTCH->ACCEL_NET shows a slow unwind. make it go to 0 immediately
+
+    # 0 is actually 0 force applied!
+    pcm_accel_net = (CS.computer_gas - CS.computer_brake) / self.CP.mass
+    if not CS.out.standstill:
+      # this is a very good estimate of coasting accel, it includes rolling resistence, wind, etc.
+      self.coast_offset.update(CS.out.aEgo - pcm_accel_net)
+      print(CS.out.aEgo, pcm_accel_net)
+      print(self.coast_offset.x)
+      print()
+
     if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
       # calculate amount of acceleration PCM should apply to reach target, given pitch
-      pcm_accel_net = (CS.computer_gas - CS.computer_brake) / self.CP.mass
 
       # learn coasting offset
       # offset = interp(CS.out.vEgo, [5, 15], [0, 0.3])
-      if not CS.out.standstill:
-        self.coast_offset.update(CS.out.aEgo - pcm_accel_net)
-        print(self.coast_offset.x)
 
-      if len(CC.orientationNED) == 3:
+      if len(CC.orientationNED) == 3 and False:
         accel_due_to_pitch = math.sin(self.pitch.update(CC.orientationNED[1])) * ACCELERATION_DUE_TO_GRAVITY
       else:
         accel_due_to_pitch = 0.0
@@ -190,7 +196,7 @@ class CarController(CarControllerBase):
       #                               actuators.accel - self.params.ACCEL_MIN)
 
       # TODO: lower rate limit, this might be jerky on hybrids
-      self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.01, 0.01)
+      self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.01 / 2, 0.01 / 2)
       pcm_accel_cmd = actuators.accel - self.pcm_accel_compensation
 
       # Along with rate limiting positive jerk below, this greatly improves gas response time
@@ -201,7 +207,6 @@ class CarController(CarControllerBase):
         self.permit_braking = False
     else:
       self.pitch.x = 0.0  # TODO fix
-      self.coast_offset.x = 0.0
       self.pcm_accel_compensation = 0.0
       pcm_accel_cmd = actuators.accel
       self.permit_braking = True
