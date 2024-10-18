@@ -52,7 +52,7 @@ class CarController(CarControllerBase):
 
     self.pcm_accel_compensation = 0.0
     self.permit_braking = True
-    self.comp_pid = PIDController(2.0, 0.5)
+    self.comp_pid = PIDController(1.0, 0.5)
 
     self.packer = CANPacker(dbc_name)
     self.accel = 0
