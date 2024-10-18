@@ -1,7 +1,8 @@
 import math
 from opendbc.car import carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
-                        make_tester_present_msg, rate_limit, structs
+                        make_tester_present_msg, rate_limit, structs, DT_CTRL
 from opendbc.car.can_definitions import CanData
+from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.common.pid import PIDController
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car.secoc import add_mac, build_sync_mac
@@ -45,6 +46,8 @@ class CarController(CarControllerBase):
     self.standstill_req = False
     self.steer_rate_counter = 0
     self.distance_button = 0
+
+    self.pitch = FirstOrderFilter(0.5, 0.0, DT_CTRL)
 
     self.pcm_accel_compensation = 0.0
     self.permit_braking = True
@@ -152,7 +155,7 @@ class CarController(CarControllerBase):
     if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
       # calculate amount of acceleration PCM should apply to reach target, given pitch
       if len(CC.orientationNED) == 3:
-        accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY
+        accel_due_to_pitch = math.sin(self.pitch.update(CC.orientationNED[1])) * ACCELERATION_DUE_TO_GRAVITY
       else:
         accel_due_to_pitch = 0.0
       net_acceleration_request = actuators.accel + accel_due_to_pitch
