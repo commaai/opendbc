@@ -617,6 +617,7 @@ FW_VERSIONS = {
       b'\xf1\x00OS IEB \x03 211 \x04\x02 58520-K4000',
       b'\xf1\x00OS IEB \x03 212 \x11\x13 58520-K4000',
       b'\xf1\x00OS IEB \r 105\x18\t\x18 58520-K4000',
+      b'\xf1\x00OS IEB \x04 212 \x11\x13 58520-K4000',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00OE2 LKAS AT EUR LHD 1.00 1.00 95740-K4200 200',
@@ -625,12 +626,14 @@ FW_VERSIONS = {
       b'\xf1\x00OSE LKAS AT KOR LHD 1.00 1.00 95740-K4100 W40',
       b'\xf1\x00OSE LKAS AT USA LHD 1.00 1.00 95740-K4100 W40',
       b'\xf1\x00OSE LKAS AT USA LHD 1.00 1.00 95740-K4300 W50',
+      b'\xf1\x00OSE LKAS AT AUS RHD 1.00 1.00 95740-K4300 W50',
     ],
     (Ecu.eps, 0x7d4, None): [
       b'\xf1\x00OS  MDPS C 1.00 1.03 56310/K4550 4OEDC103',
       b'\xf1\x00OS  MDPS C 1.00 1.04 56310-XX000 4OEDC104',
       b'\xf1\x00OS  MDPS C 1.00 1.04 56310K4000\x00 4OEDC104',
       b'\xf1\x00OS  MDPS C 1.00 1.04 56310K4050\x00 4OEDC104',
+      b'\xf1\x00OS  MDPS C 1.00 1.04 56310/K4550 4OEDC104',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00OSev SCC F-CUP      1.00 1.00 99110-K4000         ',
