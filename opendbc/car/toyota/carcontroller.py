@@ -4,7 +4,7 @@ from opendbc.car import carlog, apply_meas_steer_torque_limits, apply_std_steer_
 from opendbc.car.can_definitions import CanData
 from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.common.pid import PIDController
-from opendbc.car.common.numpy_fast import clip
+from opendbc.car.common.numpy_fast import clip, interp
 from opendbc.car.secoc import add_mac, build_sync_mac
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.toyota import toyotacan
@@ -154,10 +154,11 @@ class CarController(CarControllerBase):
     # TODO: sometimes when switching from brake to gas quickly, CLUTCH->ACCEL_NET shows a slow unwind. make it go to 0 immediately
     if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
       # calculate amount of acceleration PCM should apply to reach target, given pitch
+      offset = interp(CS.out.vEgo, [5, 15], [0, 0.3])
       if len(CC.orientationNED) == 3:
-        accel_due_to_pitch = math.sin(self.pitch.update(CC.orientationNED[1])) * ACCELERATION_DUE_TO_GRAVITY
+        accel_due_to_pitch = math.sin(self.pitch.update(CC.orientationNED[1])) * ACCELERATION_DUE_TO_GRAVITY - offset
       else:
-        accel_due_to_pitch = 0.0
+        accel_due_to_pitch = 0.0 - offset
       net_acceleration_request = actuators.accel + accel_due_to_pitch
 
       # let PCM handle stopping for now
@@ -173,7 +174,8 @@ class CarController(CarControllerBase):
       self.comp_pid.neg_limit = actuators.accel - self.params.ACCEL_MAX
       self.comp_pid.pos_limit = actuators.accel - self.params.ACCEL_MIN  # 0.0
 
-      pcm_accel_compensation = self.comp_pid.update(CS.pcm_accel_net - net_acceleration_request,
+      pcm_accel_net = (CS.computer_gas - CS.computer_brake) / self.CP.mass
+      pcm_accel_compensation = self.comp_pid.update(pcm_accel_net - net_acceleration_request,
                                                     freeze_integrator=actuators.longControlState == LongCtrlState.stopping)
 
       # # prevent compensation windup

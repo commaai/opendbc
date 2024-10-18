@@ -62,6 +62,9 @@ class CarState(CarStateBase):
     # CLUTCH->ACCEL_NET is only accurate for gas, PCM_CRUISE->ACCEL_NET is only accurate for brake
     # These signals only have meaning when ACC is active
     if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
+      self.computer_gas = cp.vl["GEAR_PACKET_HYBRID"]["FDRVREAL"]
+      self.computer_brake = cp.vl["BRAKE"]["BRAKE_FORCE"]
+
       self.pcm_accel_net = cp.vl["CLUTCH"]["ACCEL_NET"]
 
       # # Sometimes ACC_BRAKING can be 1 while showing we're applying gas already
@@ -218,11 +221,12 @@ class CarState(CarStateBase):
       ("PCM_CRUISE", 33),
       ("PCM_CRUISE_SM", 1),
       ("STEER_TORQUE_SENSOR", 50),
+      ("GEAR_PACKET_HYBRID", 60),
+      ("BRAKE", 83),
     ]
 
     if CP.flags & ToyotaFlags.SECOC.value:
       messages += [
-        ("GEAR_PACKET_HYBRID", 60),
         ("SECOC_SYNCHRONIZATION", 10),
         ("GAS_PEDAL", 42),
       ]
