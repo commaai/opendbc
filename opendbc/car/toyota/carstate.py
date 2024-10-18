@@ -230,7 +230,6 @@ class CarState(CarStateBase):
 
       messages += [
         ("GEAR_PACKET", 1),
-        ("VSC1S07", 20),
       ]
 
     if CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
