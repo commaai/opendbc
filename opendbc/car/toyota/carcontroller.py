@@ -188,8 +188,8 @@ class CarController(CarControllerBase):
       self.comp_pid.neg_limit = actuators.accel - self.params.ACCEL_MAX
       self.comp_pid.pos_limit = actuators.accel - self.params.ACCEL_MIN  # 0.0
 
-      pcm_accel_compensation = self.comp_pid.update(pcm_accel_net - net_acceleration_request,
-                                                    freeze_integrator=actuators.longControlState == LongCtrlState.stopping)
+      pcm_accel_compensation = self.comp_pid.update(pcm_accel_net - net_acceleration_request)  # ,
+                                                    # freeze_integrator=actuators.longControlState == LongCtrlState.stopping)
 
       # # prevent compensation windup
       # pcm_accel_compensation = clip(pcm_accel_compensation, actuators.accel - self.params.ACCEL_MAX,
@@ -204,6 +204,8 @@ class CarController(CarControllerBase):
       if net_acceleration_request < 0.1:
         self.permit_braking = True
       elif net_acceleration_request > 0.2:
+        # the current negative acceleration is the new offset when toggling off permit braking
+        self.comp_pid.i = self.accel
         self.permit_braking = False
     else:
       self.pitch.x = 0.0  # TODO fix
