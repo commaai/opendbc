@@ -278,7 +278,7 @@ struct CarState {
       accelCruise @3;
       decelCruise @4;
       cancel @5;
-      altButton1 @6;
+      lkas @6;
       altButton2 @7;
       mainCruise @8;
       setCruise @9;
