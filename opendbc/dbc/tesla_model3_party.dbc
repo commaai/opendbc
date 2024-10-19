@@ -53,7 +53,7 @@ BO_ 905 DAS_status2: 8 PARTY
  SG_ DAS_activationFailureStatus : 14|2@1+ (1,0) [0|2] ""  aps
  SG_ DAS_pmmLoggingRequest : 13|1@1+ (1,0) [0|1] ""  aps
  SG_ DAS_pmmObstacleSeverity : 10|3@1+ (1,0) [0|7] ""  aps
- SG_ DAS_accSpeedLimit : 0|10@1+ (0.2,0) [0|204.6] "mph"  aps
+ SG_ DAS_accSpeedLimit : 0|10@1+ (0.4,0) [0|204.6] "mph"  aps
 
 BO_ 264 DI_torque: 8 PARTY
  SG_ DI_axleSpeed : 40|16@1- (0.1,0.0) [-2750|2750] "RPM"  epas3s
