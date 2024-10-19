@@ -20,7 +20,7 @@ class CarController(CarControllerBase):
     can_sends = []
 
     # Disengage and allow for user override
-    hands_on_fault = CS.steer_warning == "EAC_ERROR_HANDS_ON" and CS.hands_on_level >= 3
+    hands_on_fault = CS.hands_on_level >= 3
     lkas_enabled = CC.latActive and not hands_on_fault
 
     if self.frame % 2 == 0:
@@ -36,14 +36,15 @@ class CarController(CarControllerBase):
       self.apply_angle_last = apply_angle
       can_sends.append(self.tesla_can.create_steering_control(apply_angle, lkas_enabled, (self.frame // 2) % 16))
 
+    if self.frame % 10 == 0:
+      can_sends.append(self.tesla_can.create_steering_allowed((self.frame // 10) % 16))
+
     # Longitudinal control
     if self.CP.openpilotLongitudinalControl and self.frame % 4 == 0:
-      state = CS.das_control["DAS_accState"]
-      if hands_on_fault:
-        state = 13  # "ACC_CANCEL_GENERIC_SILENT"
+      state = 4 if not hands_on_fault else 13  # 4=ACC_ON, 13=ACC_CANCEL_GENERIC_SILENT
       accel = clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
       cntr =  (self.frame // 4) % 8
-      can_sends.append(self.tesla_can.create_longitudinal_command(state, accel, cntr))
+      can_sends.append(self.tesla_can.create_longitudinal_command(state, accel, cntr, CC.longActive))
 
     # Increment counter so cancel is prioritized even without openpilot longitudinal
     if hands_on_fault and not self.CP.openpilotLongitudinalControl:
