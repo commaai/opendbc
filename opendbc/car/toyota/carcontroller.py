@@ -178,7 +178,7 @@ class CarController(CarControllerBase):
       pcm_accel_cmd = actuators.accel
       self.permit_braking = True
 
-    pcm_accel_cmd = clip(pcm_accel_cmd, self.params.ACCEL_MIN, self.params.ACCEL_MAX)
+    pcm_accel_cmd = clip(pcm_accel_cmd, self.params.ACCEL_MIN_LIMIT, self.params.ACCEL_MAX)
 
     # on entering standstill, send standstill request
     if CS.out.standstill and not self.last_standstill and (self.CP.carFingerprint not in NO_STOP_TIMER_CAR):
