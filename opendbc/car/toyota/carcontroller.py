@@ -2,7 +2,7 @@ import math
 from opendbc.car import carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
                         make_tester_present_msg, rate_limit, structs, apply_hysteresis
 from opendbc.car.can_definitions import CanData
-from opendbc.car.common.numpy_fast import clip
+from opendbc.car.common.numpy_fast import clip, interp
 from opendbc.car.secoc import add_mac, build_sync_mac
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.toyota import toyotacan
@@ -174,6 +174,9 @@ class CarController(CarControllerBase):
       pcm_accel_cmd = actuators.accel
       self.permit_braking = True
 
+    if actuators.longControlState == LongCtrlState.stopping:
+      pcm_accel_cmd *= interp(CS.slope_angle, [-4, 0], [2.0, 1.0])
+
     pcm_accel_cmd = clip(pcm_accel_cmd, self.params.ACCEL_MIN, self.params.ACCEL_MAX)
 
     # on entering standstill, send standstill request
@@ -205,7 +208,7 @@ class CarController(CarControllerBase):
       if pcm_cancel_cmd and self.CP.carFingerprint in UNSUPPORTED_DSU_CAR:
         can_sends.append(toyotacan.create_acc_cancel_command(self.packer))
       elif self.CP.openpilotLongitudinalControl:
-        pcm_accel_cmd = apply_hysteresis(pcm_accel_cmd, self.accel, 0.07)
+        pcm_accel_cmd = apply_hysteresis(pcm_accel_cmd, self.accel, 0.07) if CC.longActive else 0.0
         # internal PCM gas command can get stuck unwinding from negative accel so we apply a generous rate limit
         pcm_accel_cmd = min(pcm_accel_cmd, self.accel + ACCEL_WINDUP_LIMIT) if CC.longActive else 0.0
 
