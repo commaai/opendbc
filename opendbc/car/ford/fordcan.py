@@ -131,10 +131,13 @@ def create_acc_msg(packer, CAN: CanBus, long_active: bool, gas: float, accel: fl
     "AccBrkTot_A_Rq": accel,                          # Brake total accel request: [-20|11.9449] m/s^2
     "Cmbb_B_Enbl": 1 if long_active else 0,           # Enabled: 0=No, 1=Yes
     "AccPrpl_A_Rq": gas,                              # Acceleration request: [-5|5.23] m/s^2
+    # No observed acceleration seen from this signal alone
     "AccPrpl_A_Pred": -5.0,                           # Acceleration request: [-5|5.23] m/s^2
     "AccResumEnbl_B_Rq": 1 if long_active else 0,
+    # No observed acceleration seen from this signal alone
     "AccVeh_V_Trg": v_ego_kph,                        # Target speed: [0|255] km/h
     # TODO: we may be able to improve braking response by utilizing pre-charging better
+    # When setting these two bits without AccBrkTot_A_Rq, an initial jerk is observed and car may be able to brake temporarily with AccPrpl_A_Rq
     "AccBrkPrchg_B_Rq": 1 if decel else 0,            # Pre-charge brake request: 0=No, 1=Yes
     "AccBrkDecel_B_Rq": 1 if decel else 0,            # Deceleration request: 0=Inactive, 1=Active
     "AccStopStat_B_Rq": 1 if stopping else 0,
