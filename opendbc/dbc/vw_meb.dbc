@@ -1582,12 +1582,12 @@ BO_ 589 MEB_Side_Assist_02: 64 XXX
 
 BO_ 591 MEB_Distance_01: 64 XXX
  SG_ Unknown_01 : 12|1@0+ (1,0) [0|1] "" XXX
- SG_ Same_Lane_01_LD_Offset : 16|6@1+ (0.1,-5) [0|63] "Unit_Meter" XXX
- SG_ Left_Lane_01_LD_Offset : 22|6@1+ (0.1,-5) [0|63] "Unit_Meter" XXX
- SG_ Right_Lane_01_LD_Offset : 28|6@1+ (0.1,-5) [0|63] "Unit_Meter" XXX
- SG_ Same_Lane_02_LD_Offset : 34|6@1+ (0.1,-5) [0|63] "Unit_Meter" XXX
- SG_ Left_Lane_02_LD_Offset : 40|6@1+ (0.1,-5) [0|63] "Unit_Meter" XXX
- SG_ Right_Lane_02_LD_Offset : 46|6@1+ (0.1,-5) [0|63] "Unit_Meter" XXX
+ SG_ Same_Lane_01_LD_Offset : 16|6@1+ (0.1,-6) [-6|0] "Unit_Meter" XXX
+ SG_ Left_Lane_01_LD_Offset : 22|6@1+ (0.1,-6) [-6|0] "Unit_Meter" XXX
+ SG_ Right_Lane_01_LD_Offset : 28|6@1+ (0.1,-6) [-6|0] "Unit_Meter" XXX
+ SG_ Same_Lane_02_LD_Offset : 34|6@1+ (0.1,-6) [-6|0] "Unit_Meter" XXX
+ SG_ Left_Lane_02_LD_Offset : 40|6@1+ (0.1,-6) [-6|0] "Unit_Meter" XXX
+ SG_ Right_Lane_02_LD_Offset : 46|6@1+ (0.1,-6) [-6|0] "Unit_Meter" XXX
  SG_ Unknown_02 : 52|2@1+ (1,0) [0|3] "" XXX
  SG_ Unknown_03 : 54|10@1+ (1,0) [0|3] "" XXX
  SG_ Same_Lane_01_Long_Distance : 64|12@1+ (0.06,0) [0|200] "Unit_Meter" XXX
