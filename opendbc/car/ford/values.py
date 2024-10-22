@@ -29,8 +29,8 @@ class CarControllerParams:
   #  however max curvature rate linearly decreases as speed increases:
   #  ~0.009 m^-1/sec at 7 m/s, ~0.002 m^-1/sec at 35 m/s
   # Limit to ~2.7 m/s^3 up, ~3.26 m/s^3 down at 75 mph
-  ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[5, 25], angle_v=[0.000375, 0.000125])
-  ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[5, 25], angle_v=[0.000375, 0.00015])
+  ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[5, 25], angle_v=[0.00045, 0.000125])
+  ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[5, 25], angle_v=[0.00045, 0.00015])
   CURVATURE_ERROR = 0.002  # ~6 degrees at 10 m/s, ~10 degrees at 35 m/s
 
   ACCEL_MAX = 2.0               # m/s^2 max acceleration
