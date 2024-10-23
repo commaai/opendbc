@@ -24,7 +24,7 @@ def _create_delphi_mrr_radar_can_parser(CP) -> CANParser:
 
   for i in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
     msg = f"MRR_Detection_{i:03d}"
-    messages += [(msg, 20)]
+    messages += [(msg, 33)]
 
   return CANParser(RADAR.DELPHI_MRR, messages, CanBus(CP).radar)
 
@@ -36,7 +36,7 @@ class RadarInterface(RadarInterfaceBase):
     self.updated_messages = set()
     self.track_id = 0
     self.radar = DBC[CP.carFingerprint]['radar']
-    if self.radar is None or CP.radarUnavailable:
+    if CP.radarUnavailable:
       self.rcp = None
     elif self.radar == RADAR.DELPHI_ESR:
       self.rcp = _create_delphi_esr_radar_can_parser(CP)
