@@ -75,9 +75,9 @@ class RadarInterface(RadarInterfaceBase):
     elif self.radar == RADAR.DELPHI_MRR:
       self._update_delphi_mrr()
       print('pts', len(self.pts), self.rcp.vl['MRR_Header_InformationDetections']['CAN_NUMBER_OF_DET'])
-      if len(self.pts) != self.rcp.vl['MRR_Header_InformationDetections']['CAN_NUMBER_OF_DET']:
+      if len(self.pts) != self.rcp.vl['MRR_Header_InformationDetections']['CAN_NUMBER_OF_DET'] and self.frame > 10:
         print('mismatch!')
-        # raise Exception
+        raise Exception
 
     ret.points = list(self.pts.values())
     self.updated_messages.clear()
