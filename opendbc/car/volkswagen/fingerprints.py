@@ -52,6 +52,7 @@ FW_VERSIONS = {
   CAR.VOLKSWAGEN_ATLAS_MK1: {
     (Ecu.engine, 0x7e0, None): [
       b'\xf1\x8703H906026AA\xf1\x899970',
+      b'\xf1\x8703H906026AG\xf1\x899971',
       b'\xf1\x8703H906026AG\xf1\x899973',
       b'\xf1\x8703H906026AJ\xf1\x890638',
       b'\xf1\x8703H906026AJ\xf1\x891017',
