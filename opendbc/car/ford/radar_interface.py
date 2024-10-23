@@ -130,9 +130,9 @@ class RadarInterface(RadarInterfaceBase):
       scanIndex = msg[f"CAN_SCAN_INDEX_2LSB_{ii:02d}"]
       i = ii  # (ii - 1) * 4 + scanIndex
       # print('pt scanIndex', scanIndex)
-      if scanIndex != int(scan_index) & 0b11:
+      if scanIndex != int(scan_index) & 0b11 and self.frame > 10:
         print('doesn\'t match!', scanIndex, int(scan_index) & 0b11, scan_index)
-        # raise Exception
+        raise Exception
 
       if i not in self.pts:
         self.pts[i] = structs.RadarData.RadarPoint()
