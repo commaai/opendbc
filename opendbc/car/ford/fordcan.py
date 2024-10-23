@@ -131,7 +131,8 @@ def create_acc_msg(packer, CAN: CanBus, long_active: bool, gas: float, accel: fl
     "AccBrkTot_A_Rq": accel,                          # Brake total accel request: [-20|11.9449] m/s^2
     "Cmbb_B_Enbl": 1 if long_active else 0,           # Enabled: 0=No, 1=Yes
     "AccPrpl_A_Rq": gas,                              # Acceleration request: [-5|5.23] m/s^2
-    # No observed acceleration seen from this signal alone
+    # No observed acceleration seen from this signal alone. During stock system operation, it appears to
+    # be the raw acceleration request (AccPrpl_A_Rq when positive, AccBrkTot_A_Rq when negative)
     "AccPrpl_A_Pred": -5.0,                           # Acceleration request: [-5|5.23] m/s^2
     "AccResumEnbl_B_Rq": 1 if long_active else 0,
     # No observed acceleration seen from this signal alone
