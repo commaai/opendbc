@@ -9,6 +9,7 @@ from opendbc.car.interfaces import RadarInterfaceBase
 DELPHI_ESR_RADAR_MSGS = list(range(0x500, 0x540))
 
 DELPHI_MRR_RADAR_START_ADDR = 0x120
+DELPHI_MRR_RADAR_HEADER_ADDR = 0x170  # MRR_Header_InformationDetections
 DELPHI_MRR_RADAR_MSG_COUNT = 64
 
 
@@ -20,18 +21,20 @@ def _create_delphi_esr_radar_can_parser(CP) -> CANParser:
 
 
 def _create_delphi_mrr_radar_can_parser(CP) -> CANParser:
-  messages = []
+  messages = [('MRR_Header_InformationDetections', 33)]
 
   for i in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
     msg = f"MRR_Detection_{i:03d}"
     messages += [(msg, 33)]
 
-  return CANParser(RADAR.DELPHI_MRR, messages + [('MRR_Header_InformationDetections', 33)], CanBus(CP).radar)
+  return CANParser(RADAR.DELPHI_MRR, messages, CanBus(CP).radar)
 
 
 class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
     super().__init__(CP)
+
+    self.frame = 0
 
     self.updated_messages = set()
     self.track_id = 0
@@ -44,12 +47,13 @@ class RadarInterface(RadarInterfaceBase):
       self.valid_cnt = {key: 0 for key in DELPHI_ESR_RADAR_MSGS}
     elif self.radar == RADAR.DELPHI_MRR:
       self.rcp = _create_delphi_mrr_radar_can_parser(CP)
-      self.trigger_msg = DELPHI_MRR_RADAR_START_ADDR + DELPHI_MRR_RADAR_MSG_COUNT - 1
+      self.trigger_msg = DELPHI_MRR_RADAR_HEADER_ADDR
       print('trigger_msg:', self.trigger_msg)
     else:
       raise ValueError(f"Unsupported radar: {self.radar}")
 
   def update(self, can_strings):
+    self.frame += 1
     if self.rcp is None:
       return super().update(None)
 
@@ -57,8 +61,7 @@ class RadarInterface(RadarInterfaceBase):
     self.updated_messages.update(vls)
 
     # print('updated_messages:', self.updated_messages)
-    # if self.trigger_msg not in self.updated_messages:
-    if 368 not in self.updated_messages:
+    if self.trigger_msg not in self.updated_messages:
       return None
 
     ret = structs.RadarData()
@@ -114,6 +117,10 @@ class RadarInterface(RadarInterfaceBase):
     header = self.rcp.vl['MRR_Header_InformationDetections']
     scan_index = header['CAN_SCAN_INDEX']
     # print('scan_index', int(scan_index) & 0b11, scan_index)
+
+    print('updated msgs', len(self.updated_messages))
+    if self.frame > 10:
+      assert len(self.updated_messages) == DELPHI_MRR_RADAR_MSG_COUNT + 1, len(self.updated_messages)
 
     for ii in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
       msg = self.rcp.vl[f"MRR_Detection_{ii:03d}"]
