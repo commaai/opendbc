@@ -26,7 +26,7 @@ def _create_delphi_mrr_radar_can_parser(CP) -> CANParser:
     msg = f"MRR_Detection_{i:03d}"
     messages += [(msg, 33)]
 
-  return CANParser(RADAR.DELPHI_MRR, messages, CanBus(CP).radar)
+  return CANParser(RADAR.DELPHI_MRR, messages + [('MRR_Header_InformationDetections', 33)], CanBus(CP).radar)
 
 
 class RadarInterface(RadarInterfaceBase):
@@ -45,6 +45,7 @@ class RadarInterface(RadarInterfaceBase):
     elif self.radar == RADAR.DELPHI_MRR:
       self.rcp = _create_delphi_mrr_radar_can_parser(CP)
       self.trigger_msg = DELPHI_MRR_RADAR_START_ADDR + DELPHI_MRR_RADAR_MSG_COUNT - 1
+      print('trigger_msg:', self.trigger_msg)
     else:
       raise ValueError(f"Unsupported radar: {self.radar}")
 
@@ -55,7 +56,9 @@ class RadarInterface(RadarInterfaceBase):
     vls = self.rcp.update_strings(can_strings)
     self.updated_messages.update(vls)
 
-    if self.trigger_msg not in self.updated_messages:
+    # print('updated_messages:', self.updated_messages)
+    # if self.trigger_msg not in self.updated_messages:
+    if 368 not in self.updated_messages:
       return None
 
     ret = structs.RadarData()
@@ -68,6 +71,10 @@ class RadarInterface(RadarInterfaceBase):
       self._update_delphi_esr()
     elif self.radar == RADAR.DELPHI_MRR:
       self._update_delphi_mrr()
+      print('pts', len(self.pts), self.rcp.vl['MRR_Header_InformationDetections']['CAN_NUMBER_OF_DET'])
+      if len(self.pts) != self.rcp.vl['MRR_Header_InformationDetections']['CAN_NUMBER_OF_DET']:
+        print('mismatch!')
+        # raise Exception
 
     ret.points = list(self.pts.values())
     self.updated_messages.clear()
@@ -103,13 +110,22 @@ class RadarInterface(RadarInterfaceBase):
           del self.pts[ii]
 
   def _update_delphi_mrr(self):
+    print()
+    header = self.rcp.vl['MRR_Header_InformationDetections']
+    scan_index = header['CAN_SCAN_INDEX']
+    # print('scan_index', int(scan_index) & 0b11, scan_index)
+
     for ii in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
       msg = self.rcp.vl[f"MRR_Detection_{ii:03d}"]
 
       # SCAN_INDEX rotates through 0..3 on each message
       # treat these as separate points
       scanIndex = msg[f"CAN_SCAN_INDEX_2LSB_{ii:02d}"]
-      i = (ii - 1) * 4 + scanIndex
+      i = ii  # (ii - 1) * 4 + scanIndex
+      # print('pt scanIndex', scanIndex)
+      if scanIndex != int(scan_index) & 0b11:
+        print('doesn\'t match!', scanIndex, int(scan_index) & 0b11, scan_index)
+        # raise Exception
 
       if i not in self.pts:
         self.pts[i] = structs.RadarData.RadarPoint()
