@@ -23,7 +23,6 @@ class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
     super().__init__(CP)
     self.track_id = 0
-    self.radar_ts = CP.radarTimeStep
 
     if CP.carFingerprint in TSS2_CAR:
       self.RADAR_A_MSGS = list(range(0x180, 0x190))
