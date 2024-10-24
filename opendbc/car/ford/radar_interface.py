@@ -21,7 +21,7 @@ def _create_delphi_esr_radar_can_parser(CP) -> CANParser:
 
 
 def _create_delphi_mrr_radar_can_parser(CP) -> CANParser:
-  messages = [('MRR_Header_InformationDetections', 33)]
+  messages = [("MRR_Header_InformationDetections", 33)]
 
   for i in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
     msg = f"MRR_Detection_{i:03d}"
