@@ -12,6 +12,8 @@ DELPHI_MRR_RADAR_START_ADDR = 0x120
 DELPHI_MRR_RADAR_HEADER_ADDR = 0x174  # MRR_Header_SensorCoverage
 DELPHI_MRR_RADAR_MSG_COUNT = 64
 
+DELPHI_MRR_RADAR_RANGE_COVERAGE = {0: 42, 1: 164, 2: 45, 3: 175}  # scan index to detection range (m)
+
 
 def _create_delphi_esr_radar_can_parser(CP) -> CANParser:
   msg_n = len(DELPHI_ESR_RADAR_MSGS)
@@ -85,6 +87,7 @@ class RadarInterface(RadarInterfaceBase):
 
     ret.errors = errors
     ret.points = list(self.pts.values())
+    ret.errors = errors
     self.updated_messages.clear()
     return ret
 
@@ -129,8 +132,8 @@ class RadarInterface(RadarInterfaceBase):
     look_id = int(header['CAN_LOOK_ID'])
     # print('scan_index', int(scan_index) & 0b11, scan_index)
 
-    # self.can_range_coverage[scan_index & 0b11] = int(self.rcp.vl['MRR_Header_SensorCoverage']['CAN_RANGE_COVERAGE'])
-    if self.can_range_coverage[headerScanIndex] != int(self.rcp.vl['MRR_Header_SensorCoverage']['CAN_RANGE_COVERAGE']):
+    errors = []
+    if DELPHI_MRR_RADAR_RANGE_COVERAGE[headerScanIndex] != int(self.rcp.vl["MRR_Header_SensorCoverage"]["CAN_RANGE_COVERAGE"]):
       errors.append("wrongConfig")
 
     print(self.can_range_coverage)
@@ -155,8 +158,7 @@ class RadarInterface(RadarInterfaceBase):
       #   continue
       msg = self.rcp.vl[f"MRR_Detection_{ii:03d}"]
 
-      # SCAN_INDEX rotates through 0..3 on each message
-      # treat these as separate points
+      # SCAN_INDEX rotates through 0..3 on each message for different measurement modes
       # Indexes 0 and 2 have a max range of ~40m, 1 and 3 are ~170m (MRR_Header_SensorCoverage->CAN_RANGE_COVERAGE)
       # TODO: filter out close range index 1 and 3 points, contain false positives
       # TODO: can we group into 2 groups?
