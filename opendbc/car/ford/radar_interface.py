@@ -13,7 +13,6 @@ DELPHI_MRR_RADAR_HEADER_ADDR = 0x174  # MRR_Header_SensorCoverage
 DELPHI_MRR_RADAR_MSG_COUNT = 64
 
 DELPHI_MRR_RADAR_RANGE_COVERAGE = {0: 42, 1: 164, 2: 45, 3: 175}  # scan index to meters
-MIN_LONG_RANGE_DIST = 30  # meters
 
 
 def _create_delphi_esr_radar_can_parser(CP) -> CANParser:
@@ -139,13 +138,9 @@ class RadarInterface(RadarInterfaceBase):
 
       valid = bool(msg[f"CAN_DET_VALID_LEVEL_{ii:02d}"])
 
-      # Long range measurement mode is more sensitive and can detect the road surface
-      dist = msg[f"CAN_DET_RANGE_{ii:02d}"]  # m [0|255.984]
-      if scanIndex in (1, 3) and dist < MIN_LONG_RANGE_DIST:
-        valid = False
-
       if valid:
         azimuth = msg[f"CAN_DET_AZIMUTH_{ii:02d}"]              # rad [-3.1416|3.13964]
+        dist = msg[f"CAN_DET_RANGE_{ii:02d}"]                   # m [0|255.984]
         distRate = msg[f"CAN_DET_RANGE_RATE_{ii:02d}"]          # m/s [-128|127.984]
         dRel = cos(azimuth) * dist                              # m from front of car
         yRel = -sin(azimuth) * dist                             # in car frame's y axis, left is positive
@@ -159,10 +154,6 @@ class RadarInterface(RadarInterfaceBase):
         self.pts[i].dRel = dRel
         self.pts[i].yRel = yRel
         self.pts[i].vRel = distRate
-
-        # self.pts[i].flags = look_index
-        self.pts[i].flags2 = scanIndex
-        # self.pts[i].flags3 = super_res
 
         self.pts[i].measured = True
 
