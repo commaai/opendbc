@@ -20,9 +20,9 @@ class CarInterface(CarInterfaceBase):
     ret.steerLimitTimer = 1.0
 
     if DBC[candidate]['radar'] == RADAR.DELPHI_MRR:
-      # average of 33.3 Hz radar timestep / 4 scan modes = 60 ms
+      # average of 33.3 Hz radar timestep / 2 scan modes = 30 ms
       # MRR_Header_Timestamps->CAN_DET_TIME_SINCE_MEAS reports 61.3 ms
-      ret.radarDelay = 0.06
+      ret.radarDelay = 0.03
 
     CAN = CanBus(fingerprint=fingerprint)
     cfgs = [get_safety_config(structs.CarParams.SafetyModel.ford)]
