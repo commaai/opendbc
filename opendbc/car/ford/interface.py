@@ -22,7 +22,7 @@ class CarInterface(CarInterfaceBase):
     if DBC[candidate]['radar'] == RADAR.DELPHI_MRR:
       # 1 / (33.3 Hz update / 4 scan modes) / 2 average = 60 ms
       # MRR_Header_Timestamps->CAN_DET_TIME_SINCE_MEAS reports 61.3 ms
-      ret.radarDelay = .06
+      ret.radarDelay = 0.1
 
     CAN = CanBus(fingerprint=fingerprint)
     cfgs = [get_safety_config(structs.CarParams.SafetyModel.ford)]
