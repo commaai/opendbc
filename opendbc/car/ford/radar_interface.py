@@ -121,6 +121,7 @@ class RadarInterface(RadarInterfaceBase):
 
       # SCAN_INDEX rotates through 0..3 on each message for different measurement modes
       # Indexes 0 and 2 have a max range of ~40m, 1 and 3 are ~170m (MRR_Header_SensorCoverage->CAN_RANGE_COVERAGE)
+      # Indexes 0 and 1 have a Doppler coverage of +-71 m/s, 2 and 3 have +-60 m/s
       # TODO: can we group into 2 groups?
       scanIndex = msg[f"CAN_SCAN_INDEX_2LSB_{ii:02d}"]
       i = (ii - 1) * 4 + scanIndex
