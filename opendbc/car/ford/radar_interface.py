@@ -9,7 +9,7 @@ from opendbc.car.interfaces import RadarInterfaceBase
 DELPHI_ESR_RADAR_MSGS = list(range(0x500, 0x540))
 
 DELPHI_MRR_RADAR_START_ADDR = 0x120
-DELPHI_MRR_RADAR_HEADER_ADDR = 0x170  # MRR_Header_InformationDetections
+DELPHI_MRR_RADAR_HEADER_ADDR = 0x174  # MRR_Header_SensorCoverage
 DELPHI_MRR_RADAR_MSG_COUNT = 64
 
 
@@ -21,7 +21,10 @@ def _create_delphi_esr_radar_can_parser(CP) -> CANParser:
 
 
 def _create_delphi_mrr_radar_can_parser(CP) -> CANParser:
-  messages = [("MRR_Header_InformationDetections", 33)]
+  messages = [
+    ("MRR_Header_InformationDetections", 33),
+    ("MRR_Header_SensorCoverage", 33),
+  ]
 
   for i in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
     msg = f"MRR_Detection_{i:03d}"
@@ -35,6 +38,8 @@ class RadarInterface(RadarInterfaceBase):
     super().__init__(CP)
 
     self.frame = 0
+
+    self.can_range_coverage = {i: 0 for i in range(4)}
 
     self.updated_messages = set()
     self.track_id = 0
@@ -122,6 +127,9 @@ class RadarInterface(RadarInterfaceBase):
     look_id = int(header['CAN_LOOK_ID'])
     # print('scan_index', int(scan_index) & 0b11, scan_index)
 
+    self.can_range_coverage[scan_index & 0b11] = int(self.rcp.vl['MRR_Header_SensorCoverage']['CAN_RANGE_COVERAGE'])
+    print(self.can_range_coverage)
+
     if self.frame > 10:
       assert self.rcp.vl['MRR_Header_InformationDetections']['CAN_SCAN_INDEX'] == self.rcp.vl['MRR_Header_InformationDetections']['CAN_LOOK_INDEX']
       if look_id == 0:
@@ -135,7 +143,7 @@ class RadarInterface(RadarInterfaceBase):
 
     print('updated msgs', len(self.updated_messages))
     if self.frame > 10:
-      assert len(self.updated_messages) == DELPHI_MRR_RADAR_MSG_COUNT + 1, len(self.updated_messages)
+      assert len(self.updated_messages) == DELPHI_MRR_RADAR_MSG_COUNT + 2, len(self.updated_messages)
 
     for ii in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
       # if look_index != 0:
