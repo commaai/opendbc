@@ -1,7 +1,7 @@
 from opendbc.can.packer import CANPacker
 from opendbc.car import apply_std_steer_angle_limits, structs
 from opendbc.car.ford import fordcan
-from opendbc.car.ford.values import CAR, CarControllerParams, FordFlags
+from opendbc.car.ford.values import CarControllerParams, FordFlags
 from opendbc.car.common.numpy_fast import clip, interp
 from opendbc.car.interfaces import CarControllerBase, V_CRUISE_MAX
 
@@ -98,9 +98,9 @@ class CarController(CarControllerBase):
     if self.CP.openpilotLongitudinalControl and (self.frame % CarControllerParams.ACC_CONTROL_STEP) == 0:
       # Compensate for engine creep at low speed.
       # Either the ABS does not account for engine creep, or the correction is very slow
-      # TODO: whitelist more cars
+      # TODO: verify this applies to EV/hybrid
       self.accel = actuators.accel
-      if CC.longActive and self.CP.carFingerprint == CAR.FORD_BRONCO_SPORT_MK1:
+      if CC.longActive:
         self.accel = apply_creep_compensation(self.accel, CS.out.vEgo)
       self.accel = clip(self.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
 
