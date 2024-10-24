@@ -160,10 +160,6 @@ class RadarInterface(RadarInterfaceBase):
         self.pts[i].yRel = yRel
         self.pts[i].vRel = distRate
 
-        # self.pts[i].flags = look_index
-        self.pts[i].flags2 = scanIndex
-        # self.pts[i].flags3 = super_res
-
         self.pts[i].measured = True
 
       else:
