@@ -12,6 +12,10 @@
 
 #include "opendbc/can/common.h"
 
+// The allowed deviation from the expected frequency, expressed as a fraction.
+// For example, a threshold of 0.1 allows the average frequency to be up to 10% lower than the expected value.
+const double FREQ_THRESHOLD = 0.5;
+
 int64_t get_raw_value(const std::vector<uint8_t> &msg, const Signal &sig) {
   int64_t ret = 0;
 
@@ -33,6 +37,13 @@ int64_t get_raw_value(const std::vector<uint8_t> &msg, const Signal &sig) {
 
 
 bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
+  if (last_seen_nanos != 0 && nanos > last_seen_nanos) {
+    // Update the sum of intervals with the time since the last message
+    sum_intervals += (nanos - last_seen_nanos);
+  }
+  last_seen_nanos = nanos;
+  message_count++;
+
   std::vector<double> tmp_vals(parse_sigs.size());
   bool checksum_failed = false;
   bool counter_failed = false;
@@ -72,8 +83,6 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
     vals[i] = tmp_vals[i];
     all_vals[i].push_back(vals[i]);
   }
-  last_seen_nanos = nanos;
-
   return true;
 }
 
@@ -89,6 +98,23 @@ bool MessageState::update_counter_generic(int64_t v, int cnt_size) {
   }
   counter = v;
   return counter_fail < MAX_BAD_COUNTER;
+}
+
+double MessageState::getAverageFreq(uint64_t current_nanos) const {
+  if (message_count < 2) {
+    return 0.0; // Not enough messages
+  }
+
+  // Calculate the total interval from the first message to the current time
+  double total_interval = ((current_nanos - last_seen_nanos) + sum_intervals) / 1e9;
+  // Calculate the average interval
+  double average_interval = total_interval / (message_count - 1);
+  return 1.0 / average_interval;
+}
+
+bool MessageState::isFreqBelowThreshold(uint64_t current_nanos, double threshold) const {
+  double avg_freq = getAverageFreq(current_nanos);
+  return avg_freq < (frequency * (1.0 - threshold));
 }
 
 
@@ -113,10 +139,11 @@ CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<st
 
     // msg is not valid if a message isn't received for 10 consecutive steps
     if (frequency > 0) {
-      state.check_threshold = (1000000000ULL / frequency) * 10;
+      state.frequency = frequency;
 
+      uint64_t check_threshold = (1000000000ULL / frequency) * 10;
       // bus timeout threshold should be 10x the fastest msg
-      bus_timeout_threshold = std::min(bus_timeout_threshold, state.check_threshold);
+      bus_timeout_threshold = std::min(bus_timeout_threshold, check_threshold);
     }
 
     const Msg *msg = dbc->addr_to_msg.at(address);
@@ -169,8 +196,8 @@ void CANParser::update(const std::vector<CanData> &can_data, std::vector<SignalV
     last_nanos = c.nanos;
 
     UpdateCans(c);
-    UpdateValid(last_nanos);
   }
+  UpdateValid(last_nanos);
   query_latest(vals, current_nanos);
 }
 
@@ -224,17 +251,19 @@ void CANParser::UpdateValid(uint64_t nanos) {
       _counters_valid = false;
     }
 
-    const bool missing = state.last_seen_nanos == 0;
-    const bool timed_out = (nanos - state.last_seen_nanos) > state.check_threshold;
-    if (state.check_threshold > 0 && (missing || timed_out)) {
-      if (show_missing && !bus_timeout) {
-        if (missing) {
-          LOGE_100("0x%X '%s' NOT SEEN", state.address, state.name.c_str());
-        } else if (timed_out) {
-          LOGE_100("0x%X '%s' TIMED OUT", state.address, state.name.c_str());
+    if (state.frequency > 0) {
+      const bool missing = state.last_seen_nanos == 0;
+      const bool timed_out = state.last_seen_nanos < nanos && state.isFreqBelowThreshold(nanos, FREQ_THRESHOLD);
+      if (missing || timed_out) {
+        if (show_missing && !bus_timeout) {
+          if (missing) {
+            LOGE_100("0x%X '%s' NOT SEEN", state.address, state.name.c_str());
+          } else if (timed_out) {
+            LOGE_100("0x%X '%s' TIMED OUT", state.address, state.name.c_str());
+          }
         }
-      }
       _valid = false;
+      }
     }
   }
   can_invalid_cnt = _valid ? 0 : (can_invalid_cnt + 1);
