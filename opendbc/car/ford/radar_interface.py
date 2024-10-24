@@ -12,6 +12,8 @@ DELPHI_MRR_RADAR_START_ADDR = 0x120
 DELPHI_MRR_RADAR_HEADER_ADDR = 0x174  # MRR_Header_SensorCoverage
 DELPHI_MRR_RADAR_MSG_COUNT = 64
 
+DELPHI_MRR_RADAR_RANGE_COVERAGE = {0: 42, 1: 164, 2: 45, 3: 175}  # scan index to meters
+
 
 def _create_delphi_esr_radar_can_parser(CP) -> CANParser:
   msg_n = len(DELPHI_ESR_RADAR_MSGS)
@@ -66,14 +68,14 @@ class RadarInterface(RadarInterfaceBase):
     errors = []
     if not self.rcp.can_valid:
       errors.append("canError")
-    ret.errors = errors
 
     if self.radar == RADAR.DELPHI_ESR:
       self._update_delphi_esr()
     elif self.radar == RADAR.DELPHI_MRR:
-      self._update_delphi_mrr()
+      errors.extend(self._update_delphi_mrr())
 
     ret.points = list(self.pts.values())
+    ret.errors = errors
     self.updated_messages.clear()
     return ret
 
@@ -108,6 +110,10 @@ class RadarInterface(RadarInterfaceBase):
 
   def _update_delphi_mrr(self):
     headerScanIndex = int(self.rcp.vl["MRR_Header_InformationDetections"]['CAN_SCAN_INDEX']) & 0b11
+
+    errors = []
+    if self.rcp.vl["MRR_Header_SensorCoverage"]["CAN_RANGE_COVERAGE"] != DELPHI_MRR_RADAR_RANGE_COVERAGE[headerScanIndex]:
+      errors.append("wrongConfig")
 
     for ii in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
       msg = self.rcp.vl[f"MRR_Detection_{ii:03d}"]
@@ -151,3 +157,5 @@ class RadarInterface(RadarInterfaceBase):
 
       else:
         del self.pts[i]
+
+    return errors
