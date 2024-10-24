@@ -9,7 +9,7 @@ from opendbc.car.interfaces import RadarInterfaceBase
 DELPHI_ESR_RADAR_MSGS = list(range(0x500, 0x540))
 
 DELPHI_MRR_RADAR_START_ADDR = 0x120
-DELPHI_MRR_RADAR_HEADER_ADDR = 0x170  # MRR_Header_InformationDetections
+DELPHI_MRR_RADAR_HEADER_ADDR = 0x174  # MRR_Header_SensorCoverage
 DELPHI_MRR_RADAR_MSG_COUNT = 64
 
 
@@ -21,7 +21,10 @@ def _create_delphi_esr_radar_can_parser(CP) -> CANParser:
 
 
 def _create_delphi_mrr_radar_can_parser(CP) -> CANParser:
-  messages = [("MRR_Header_InformationDetections", 33)]
+  messages = [
+    ("MRR_Header_InformationDetections", 33),
+    ("MRR_Header_SensorCoverage", 33),
+  ]
 
   for i in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
     msg = f"MRR_Detection_{i:03d}"
