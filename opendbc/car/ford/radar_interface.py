@@ -39,7 +39,7 @@ class RadarInterface(RadarInterfaceBase):
 
     self.frame = 0
 
-    self.can_range_coverage = {i: 0 for i in range(4)}
+    self.can_range_coverage = {0: 42, 1: 164, 2: 45, 3: 175}
 
     self.updated_messages = set()
     self.track_id = 0
@@ -73,17 +73,17 @@ class RadarInterface(RadarInterfaceBase):
     errors = []
     if not self.rcp.can_valid:
       errors.append("canError")
-    ret.errors = errors
 
     if self.radar == RADAR.DELPHI_ESR:
       self._update_delphi_esr()
     elif self.radar == RADAR.DELPHI_MRR:
-      self._update_delphi_mrr()
+      errors.extend(self._update_delphi_mrr())
       # print('pts', len(self.pts), self.rcp.vl['MRR_Header_InformationDetections']['CAN_NUMBER_OF_DET'])
       # if len(self.pts) != self.rcp.vl['MRR_Header_InformationDetections']['CAN_NUMBER_OF_DET'] and self.frame > 10:
       #   print('mismatch!')
       #   raise Exception
 
+    ret.errors = errors
     ret.points = list(self.pts.values())
     self.updated_messages.clear()
     return ret
@@ -118,6 +118,8 @@ class RadarInterface(RadarInterfaceBase):
           del self.pts[ii]
 
   def _update_delphi_mrr(self):
+    errors = []
+
     headerScanIndex = int(self.rcp.vl["MRR_Header_InformationDetections"]['CAN_SCAN_INDEX']) & 0b11
 
     print()
@@ -127,7 +129,10 @@ class RadarInterface(RadarInterfaceBase):
     look_id = int(header['CAN_LOOK_ID'])
     # print('scan_index', int(scan_index) & 0b11, scan_index)
 
-    self.can_range_coverage[scan_index & 0b11] = int(self.rcp.vl['MRR_Header_SensorCoverage']['CAN_RANGE_COVERAGE'])
+    # self.can_range_coverage[scan_index & 0b11] = int(self.rcp.vl['MRR_Header_SensorCoverage']['CAN_RANGE_COVERAGE'])
+    if self.can_range_coverage[headerScanIndex] != int(self.rcp.vl['MRR_Header_SensorCoverage']['CAN_RANGE_COVERAGE']):
+      errors.append("wrongConfig")
+
     print(self.can_range_coverage)
 
     if self.frame > 10:
@@ -201,3 +206,5 @@ class RadarInterface(RadarInterfaceBase):
 
       else:
         del self.pts[i]
+
+    return errors
