@@ -112,7 +112,7 @@ class RadarInterface(RadarInterfaceBase):
     headerScanIndex = int(self.rcp.vl["MRR_Header_InformationDetections"]['CAN_SCAN_INDEX']) & 0b11
 
     errors = []
-    if int(self.rcp.vl["MRR_Header_SensorCoverage"]["CAN_RANGE_COVERAGE"]) != DELPHI_MRR_RADAR_RANGE_COVERAGE[headerScanIndex]:
+    if DELPHI_MRR_RADAR_RANGE_COVERAGE[headerScanIndex] != int(self.rcp.vl["MRR_Header_SensorCoverage"]["CAN_RANGE_COVERAGE"]):
       errors.append("wrongConfig")
 
     for ii in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
