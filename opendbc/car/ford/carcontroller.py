@@ -35,6 +35,7 @@ class CarController(CarControllerBase):
     self.CAN = fordcan.CanBus(CP)
 
     self.apply_curvature_last = 0
+    self.accel = 0.0
     self.main_on_last = False
     self.lkas_enabled_last = False
     self.steer_alert_last = False
@@ -98,18 +99,18 @@ class CarController(CarControllerBase):
       # Compensate for engine creep at low speed.
       # Either the ABS does not account for engine creep, or the correction is very slow
       # TODO: whitelist more cars
-      accel = actuators.accel
+      self.accel = actuators.accel
       if CC.longActive and self.CP.carFingerprint == CAR.FORD_BRONCO_SPORT_MK1:
-        accel = apply_creep_compensation(accel, CS.out.vEgo)
-      accel = clip(accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
+        self.accel = apply_creep_compensation(self.accel, CS.out.vEgo)
+      self.accel = clip(self.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
 
       # Both gas and accel are in m/s^2, accel is used solely for braking
-      gas = accel
+      gas = self.accel
       if not CC.longActive or gas < CarControllerParams.MIN_GAS:
         gas = CarControllerParams.INACTIVE_GAS
       stopping = CC.actuators.longControlState == LongCtrlState.stopping
       # TODO: look into using the actuators packet to send the desired speed
-      can_sends.append(fordcan.create_acc_msg(self.packer, self.CAN, CC.longActive, gas, accel, stopping, v_ego_kph=V_CRUISE_MAX))
+      can_sends.append(fordcan.create_acc_msg(self.packer, self.CAN, CC.longActive, gas, self.accel, stopping, v_ego_kph=V_CRUISE_MAX))
 
     ### ui ###
     send_ui = (self.main_on_last != main_on) or (self.lkas_enabled_last != CC.latActive) or (self.steer_alert_last != steer_alert)
@@ -135,6 +136,7 @@ class CarController(CarControllerBase):
 
     new_actuators = actuators.as_builder()
     new_actuators.curvature = self.apply_curvature_last
+    new_actuators.accel = self.accel
 
     self.frame += 1
     return new_actuators, can_sends
