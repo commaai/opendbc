@@ -112,14 +112,16 @@ class RadarInterface(RadarInterfaceBase):
     headerScanIndex = int(self.rcp.vl["MRR_Header_InformationDetections"]['CAN_SCAN_INDEX']) & 0b11
 
     errors = []
-    if self.rcp.vl["MRR_Header_SensorCoverage"]["CAN_RANGE_COVERAGE"] != DELPHI_MRR_RADAR_RANGE_COVERAGE[headerScanIndex]:
+    if int(self.rcp.vl["MRR_Header_SensorCoverage"]["CAN_RANGE_COVERAGE"]) != DELPHI_MRR_RADAR_RANGE_COVERAGE[headerScanIndex]:
       errors.append("wrongConfig")
 
     for ii in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
       msg = self.rcp.vl[f"MRR_Detection_{ii:03d}"]
 
-      # SCAN_INDEX rotates through 0..3 on each message
-      # treat these as separate points
+      # SCAN_INDEX rotates through 0..3 on each message for different measurement modes
+      # Indexes 0 and 2 have a max range of ~40m, 1 and 3 are ~170m (MRR_Header_SensorCoverage->CAN_RANGE_COVERAGE)
+      # TODO: filter out close range index 1 and 3 points, contain false positives
+      # TODO: can we group into 2 groups?
       scanIndex = msg[f"CAN_SCAN_INDEX_2LSB_{ii:02d}"]
       i = (ii - 1) * 4 + scanIndex
 
