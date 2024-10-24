@@ -20,7 +20,7 @@ class CarInterface(CarInterfaceBase):
     ret.steerLimitTimer = 1.0
 
     if DBC[candidate]['radar'] == RADAR.DELPHI_MRR:
-      # 1 / (33.3 Hz update / 4 scan modes) / 2 average = 60 ms
+      # average of 33.3 Hz radar timestep / 4 scan modes = 60 ms
       # MRR_Header_Timestamps->CAN_DET_TIME_SINCE_MEAS reports 61.3 ms
       ret.radarDelay = 0.1
 
