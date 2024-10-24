@@ -9,8 +9,10 @@ from opendbc.car.interfaces import RadarInterfaceBase
 DELPHI_ESR_RADAR_MSGS = list(range(0x500, 0x540))
 
 DELPHI_MRR_RADAR_START_ADDR = 0x120
-DELPHI_MRR_RADAR_HEADER_ADDR = 0x170  # MRR_Header_InformationDetections
+DELPHI_MRR_RADAR_HEADER_ADDR = 0x174  # MRR_Header_SensorCoverage
 DELPHI_MRR_RADAR_MSG_COUNT = 64
+
+DELPHI_MRR_RADAR_RANGE_COVERAGE = {0: 42, 1: 164, 2: 45, 3: 175}  # scan index to detection range (m)
 
 
 def _create_delphi_esr_radar_can_parser(CP) -> CANParser:
@@ -21,7 +23,10 @@ def _create_delphi_esr_radar_can_parser(CP) -> CANParser:
 
 
 def _create_delphi_mrr_radar_can_parser(CP) -> CANParser:
-  messages = [("MRR_Header_InformationDetections", 33)]
+  messages = [
+    ("MRR_Header_InformationDetections", 33),
+    ("MRR_Header_SensorCoverage", 33),
+  ]
 
   for i in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
     msg = f"MRR_Detection_{i:03d}"
@@ -63,14 +68,14 @@ class RadarInterface(RadarInterfaceBase):
     errors = []
     if not self.rcp.can_valid:
       errors.append("canError")
-    ret.errors = errors
 
     if self.radar == RADAR.DELPHI_ESR:
       self._update_delphi_esr()
     elif self.radar == RADAR.DELPHI_MRR:
-      self._update_delphi_mrr()
+      errors.extend(self._update_delphi_mrr())
 
     ret.points = list(self.pts.values())
+    ret.errors = errors
     self.updated_messages.clear()
     return ret
 
@@ -106,11 +111,17 @@ class RadarInterface(RadarInterfaceBase):
   def _update_delphi_mrr(self):
     headerScanIndex = int(self.rcp.vl["MRR_Header_InformationDetections"]['CAN_SCAN_INDEX']) & 0b11
 
+    errors = []
+    if DELPHI_MRR_RADAR_RANGE_COVERAGE[headerScanIndex] != int(self.rcp.vl["MRR_Header_SensorCoverage"]["CAN_RANGE_COVERAGE"]):
+      errors.append("wrongConfig")
+
     for ii in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
       msg = self.rcp.vl[f"MRR_Detection_{ii:03d}"]
 
-      # SCAN_INDEX rotates through 0..3 on each message
-      # treat these as separate points
+      # SCAN_INDEX rotates through 0..3 on each message for different measurement modes
+      # Indexes 0 and 2 have a max range of ~40m, 1 and 3 are ~170m (MRR_Header_SensorCoverage->CAN_RANGE_COVERAGE)
+      # TODO: filter out close range index 1 and 3 points, contain false positives
+      # TODO: can we group into 2 groups?
       scanIndex = msg[f"CAN_SCAN_INDEX_2LSB_{ii:02d}"]
       i = (ii - 1) * 4 + scanIndex
 
@@ -148,3 +159,5 @@ class RadarInterface(RadarInterfaceBase):
 
       else:
         del self.pts[i]
+
+    return errors
