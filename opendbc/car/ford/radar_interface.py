@@ -74,10 +74,10 @@ class RadarInterface(RadarInterfaceBase):
       self._update_delphi_esr()
     elif self.radar == RADAR.DELPHI_MRR:
       self._update_delphi_mrr()
-      print('pts', len(self.pts), self.rcp.vl['MRR_Header_InformationDetections']['CAN_NUMBER_OF_DET'])
-      if len(self.pts) != self.rcp.vl['MRR_Header_InformationDetections']['CAN_NUMBER_OF_DET'] and self.frame > 10:
-        print('mismatch!')
-        raise Exception
+      # print('pts', len(self.pts), self.rcp.vl['MRR_Header_InformationDetections']['CAN_NUMBER_OF_DET'])
+      # if len(self.pts) != self.rcp.vl['MRR_Header_InformationDetections']['CAN_NUMBER_OF_DET'] and self.frame > 10:
+      #   print('mismatch!')
+      #   raise Exception
 
     ret.points = list(self.pts.values())
     self.updated_messages.clear()
@@ -115,20 +115,39 @@ class RadarInterface(RadarInterfaceBase):
   def _update_delphi_mrr(self):
     print()
     header = self.rcp.vl['MRR_Header_InformationDetections']
-    scan_index = header['CAN_SCAN_INDEX']
+    scan_index = int(header['CAN_SCAN_INDEX'])
+    look_index = int(header['CAN_LOOK_INDEX']) & 0b11  # or CAN_LOOK_ID?
+    look_id = int(header['CAN_LOOK_ID'])
     # print('scan_index', int(scan_index) & 0b11, scan_index)
+
+    if self.frame > 10:
+      assert self.rcp.vl['MRR_Header_InformationDetections']['CAN_SCAN_INDEX'] == self.rcp.vl['MRR_Header_InformationDetections']['CAN_LOOK_INDEX']
+      if look_id == 0:
+        assert look_index == 1
+      elif look_id == 1:
+        assert look_index == 3
+      elif look_id == 2:
+        assert look_index == 0
+      elif look_id == 3:
+        assert look_index == 2
 
     print('updated msgs', len(self.updated_messages))
     if self.frame > 10:
       assert len(self.updated_messages) == DELPHI_MRR_RADAR_MSG_COUNT + 1, len(self.updated_messages)
 
     for ii in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
+      # if look_index != 0:
+      #   continue
       msg = self.rcp.vl[f"MRR_Detection_{ii:03d}"]
 
       # SCAN_INDEX rotates through 0..3 on each message
       # treat these as separate points
+      # Indexes 0 and 2 have a max range of ~40m, 1 and 3 are ~170m (MRR_Header_SensorCoverage->CAN_RANGE_COVERAGE)
+      # TODO: filter out close range index 1 and 3 points, contain false positives
+      # TODO: can we group into 2 groups?
       scanIndex = msg[f"CAN_SCAN_INDEX_2LSB_{ii:02d}"]
-      i = ii  # (ii - 1) * 4 + scanIndex
+      # i = (ii - 1) * 4 + scanIndex
+      i = (ii - 1) * 4 + look_index
       # print('pt scanIndex', scanIndex)
       if scanIndex != int(scan_index) & 0b11 and self.frame > 10:
         print('doesn\'t match!', scanIndex, int(scan_index) & 0b11, scan_index)
@@ -149,6 +168,7 @@ class RadarInterface(RadarInterfaceBase):
         distRate = msg[f"CAN_DET_RANGE_RATE_{ii:02d}"]          # m/s [-128|127.984]
         dRel = cos(azimuth) * dist                              # m from front of car
         yRel = -sin(azimuth) * dist                             # in car frame's y axis, left is positive
+        super_res = msg[f"CAN_DET_SUPER_RES_TARGET_{ii:02d}"]   # bool
 
         # delphi doesn't notify of track switches, so do it manually
         # TODO: refactor this to radard if more radars behave this way
@@ -159,6 +179,9 @@ class RadarInterface(RadarInterfaceBase):
         self.pts[i].dRel = dRel
         self.pts[i].yRel = yRel
         self.pts[i].vRel = distRate
+        self.pts[i].flags = look_index
+        self.pts[i].flags2 = scanIndex
+        self.pts[i].flags3 = super_res
 
         self.pts[i].measured = True
 
