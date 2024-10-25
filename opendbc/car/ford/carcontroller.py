@@ -1,6 +1,6 @@
 import math
 from opendbc.can.packer import CANPacker
-from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, apply_std_steer_angle_limits, structs
+from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, DT_CTRL, apply_std_steer_angle_limits, structs
 from opendbc.car.ford import fordcan
 from opendbc.car.ford.values import CarControllerParams, FordFlags
 from opendbc.car.common.numpy_fast import clip, interp
@@ -99,16 +99,22 @@ class CarController(CarControllerBase):
     ### longitudinal control ###
     # send acc msg at 50Hz
     if self.CP.openpilotLongitudinalControl and (self.frame % CarControllerParams.ACC_CONTROL_STEP) == 0:
-      # Compensate for engine creep at low speed.
-      # Either the ABS does not account for engine creep, or the correction is very slow
-      # TODO: verify this applies to EV/hybrid
       accel = actuators.accel
+      gas = accel
+
       if CC.longActive:
+        # Compensate for engine creep at low speed.
+        # Either the ABS does not account for engine creep, or the correction is very slow
+        # TODO: verify this applies to EV/hybrid
         accel = apply_creep_compensation(accel, CS.out.vEgo)
+
+        # The stock system has been seen rate limiting the brake accel to 5 m/s^3,
+        # however even 3.5 m/s^3 causes some overshoot with a step response.
+        accel = max(accel, self.accel - (3.5 * CarControllerParams.ACC_CONTROL_STEP * DT_CTRL))
+
       accel = clip(accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
 
       # Both gas and accel are in m/s^2, accel is used solely for braking
-      gas = accel
       if not CC.longActive or gas < CarControllerParams.MIN_GAS:
         gas = CarControllerParams.INACTIVE_GAS
 
