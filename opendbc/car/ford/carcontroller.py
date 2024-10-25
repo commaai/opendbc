@@ -37,6 +37,7 @@ class CarController(CarControllerBase):
 
     self.apply_curvature_last = 0
     self.accel = 0.0
+    self.gas = 0.0
     self.brake_request = False
     self.main_on_last = False
     self.lkas_enabled_last = False
@@ -107,9 +108,9 @@ class CarController(CarControllerBase):
       self.accel = clip(self.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
 
       # Both gas and accel are in m/s^2, accel is used solely for braking
-      gas = self.accel
-      if not CC.longActive or gas < CarControllerParams.MIN_GAS:
-        gas = CarControllerParams.INACTIVE_GAS
+      self.gas = self.accel
+      if not CC.longActive or self.gas < CarControllerParams.MIN_GAS:
+        self.gas = CarControllerParams.INACTIVE_GAS
 
       # PCM applies pitch compensation to gas/accel, but we need to compensate for the brake/pre-charge bits
       if len(CC.orientationNED) == 3:
@@ -125,7 +126,7 @@ class CarController(CarControllerBase):
 
       stopping = CC.actuators.longControlState == LongCtrlState.stopping
       # TODO: look into using the actuators packet to send the desired speed
-      can_sends.append(fordcan.create_acc_msg(self.packer, self.CAN, CC.longActive, gas, self.accel, stopping, self.brake_request, v_ego_kph=V_CRUISE_MAX))
+      can_sends.append(fordcan.create_acc_msg(self.packer, self.CAN, CC.longActive, self.gas, self.accel, stopping, self.brake_request, v_ego_kph=V_CRUISE_MAX))
 
     ### ui ###
     send_ui = (self.main_on_last != main_on) or (self.lkas_enabled_last != CC.latActive) or (self.steer_alert_last != steer_alert)
@@ -152,6 +153,7 @@ class CarController(CarControllerBase):
     new_actuators = actuators.as_builder()
     new_actuators.curvature = self.apply_curvature_last
     new_actuators.accel = self.accel
+    new_actuators.gas = self.gas
 
     self.frame += 1
     return new_actuators, can_sends
