@@ -76,6 +76,8 @@ class CarState(CarStateBase):
       else:
         ret.gearShifter = GearShifter.drive
 
+    ret.engineRpm = cp.vl["EngVehicleSpThrottle"]["EngAout_N_Actl"]
+
     # safety
     ret.stockFcw = bool(cp_cam.vl["ACCDATA_3"]["FcwVisblWarn_B_Rq"])
     ret.stockAeb = bool(cp_cam.vl["ACCDATA_2"]["CmbbBrkDecel_B_Rq"])
