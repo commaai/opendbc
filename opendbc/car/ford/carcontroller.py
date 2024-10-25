@@ -1,4 +1,5 @@
 import math
+from collections import deque
 from opendbc.can.packer import CANPacker
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, DT_CTRL, apply_std_steer_angle_limits, structs
 from opendbc.car.ford import fordcan
@@ -35,7 +36,9 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(dbc_name)
     self.CAN = fordcan.CanBus(CP)
 
-    self.apply_curvature_last = 0
+    self.precise_control = True
+    self.apply_curvatures = deque([0] * 100, maxlen=100)
+
     self.accel = 0.0
     self.gas = 0.0
     self.brake_request = False
@@ -71,13 +74,17 @@ class CarController(CarControllerBase):
     # send steer msg at 20Hz
     if (self.frame % CarControllerParams.STEER_STEP) == 0:
       if CC.latActive:
+        if abs(actuators.curvature - self.apply_curvatures[-50]) / 0.5 > 0.0006:
+          self.precise_control = True
+        elif abs(actuators.curvature - self.apply_curvatures[-50]) / 0.5 < 0.0004:
+          self.precise_control = False
+
         # apply rate limits, curvature error limit, and clip to signal range
         current_curvature = -CS.out.yawRate / max(CS.out.vEgoRaw, 0.1)
-        apply_curvature = apply_ford_curvature_limits(actuators.curvature, self.apply_curvature_last, current_curvature, CS.out.vEgoRaw)
+        apply_curvature = apply_ford_curvature_limits(actuators.curvature, self.apply_curvatures[-1], current_curvature, CS.out.vEgoRaw)
       else:
+        self.precise_control = True
         apply_curvature = 0.
-
-      self.apply_curvature_last = apply_curvature
 
       if self.CP.flags & FordFlags.CANFD:
         # TODO: extended mode
@@ -90,7 +97,9 @@ class CarController(CarControllerBase):
         counter = (self.frame // CarControllerParams.STEER_STEP) % 0x10
         can_sends.append(fordcan.create_lat_ctl2_msg(self.packer, self.CAN, mode, 0., 0., -apply_curvature, 0., counter))
       else:
-        can_sends.append(fordcan.create_lat_ctl_msg(self.packer, self.CAN, CC.latActive, 0., 0., -apply_curvature, 0.))
+        can_sends.append(fordcan.create_lat_ctl_msg(self.packer, self.CAN, CC.latActive, 0., 0., -apply_curvature, 0., self.precise_control))
+
+      self.apply_curvatures.append(actuators.curvature)
 
     # send lka msg at 33Hz
     if (self.frame % CarControllerParams.LKA_STEP) == 0:
@@ -159,7 +168,7 @@ class CarController(CarControllerBase):
     self.lead_distance_bars_last = hud_control.leadDistanceBars
 
     new_actuators = actuators.as_builder()
-    new_actuators.curvature = self.apply_curvature_last
+    new_actuators.curvature = self.apply_curvatures[-1]
     new_actuators.accel = self.accel
     new_actuators.gas = self.gas
 
