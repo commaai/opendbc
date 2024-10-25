@@ -117,9 +117,10 @@ class CarController(CarControllerBase):
       else:
         accel_due_to_pitch = 0.0
 
-      if (self.accel + accel_due_to_pitch) > 0.3 or not CC.longActive:
+      accel_pitch_compensated = self.accel + accel_due_to_pitch
+      if accel_pitch_compensated > 0.3 or not CC.longActive:
         self.brake_request = False
-      elif (self.accel + accel_due_to_pitch) < 0.0:
+      elif accel_pitch_compensated < 0.0:
         self.brake_request = True
 
       stopping = CC.actuators.longControlState == LongCtrlState.stopping
