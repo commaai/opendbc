@@ -276,6 +276,26 @@ FW_VERSIONS = {
       b'39494-TGL-G030\x00\x00',
     ],
   },
+  CAR.HONDA_ODYSSEY_RC5: {
+    (Ecu.vsa, 0x18da28f1, None): [
+      b'57114-T6A-JA10\x00\x00'
+    ],
+    (Ecu.eps, 0x18da30f1, None): [
+      b'39990-T6A-H230\x00\x00'
+    ],
+    (Ecu.srs, 0x18da53f1, None): [
+      b'77959-T6A-J220\x00\x00',
+    ],
+    (Ecu.combinationMeter, 0x18da60f1, None): [
+      [b'78109-T6A-JC30\x00\x00'],
+    ],
+    (Ecu.gateway, 0x18daeff1, None): [
+      b'38897-T6A-J210\x00\x00',
+    ],
+    (Ecu.shiftByWire, 0x18da2bf1, None): [
+      b'54008-TKN-H810\x00\x00',
+    ],
+  },
   CAR.HONDA_CIVIC_BOSCH_DIESEL: {
     (Ecu.transmission, 0x18da1ef1, None): [
       b'28101-59Y-G220\x00\x00',
