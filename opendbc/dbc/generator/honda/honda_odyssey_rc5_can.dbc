@@ -1,5 +1,5 @@
 CM_ "IMPORT _honda_common.dbc";
-CM_ "IMPORT _bosch_2018.dbc";
+CM_ "IMPORT _bosch_2023_odyssey.dbc";
 CM_ "IMPORT _steering_sensors_b.dbc";
 
 BO_ 419 GEARBOX: 8 PCM
