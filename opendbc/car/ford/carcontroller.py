@@ -1,5 +1,6 @@
+import math
 from opendbc.can.packer import CANPacker
-from opendbc.car import apply_std_steer_angle_limits, structs
+from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, apply_std_steer_angle_limits, structs
 from opendbc.car.ford import fordcan
 from opendbc.car.ford.values import CarControllerParams, FordFlags
 from opendbc.car.common.numpy_fast import clip, interp
@@ -36,6 +37,7 @@ class CarController(CarControllerBase):
 
     self.apply_curvature_last = 0
     self.accel = 0.0
+    self.brake_request = False
     self.main_on_last = False
     self.lkas_enabled_last = False
     self.steer_alert_last = False
@@ -108,9 +110,22 @@ class CarController(CarControllerBase):
       gas = self.accel
       if not CC.longActive or gas < CarControllerParams.MIN_GAS:
         gas = CarControllerParams.INACTIVE_GAS
+
+      # PCM applies pitch compensation to gas/accel, but we need to compensate for the brake/pre-charge bits
+      if len(CC.orientationNED) == 3:
+        accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY
+      else:
+        accel_due_to_pitch = 0.0
+
+      accel_pitch_compensated = self.accel + accel_due_to_pitch
+      if accel_pitch_compensated > 0.3 or not CC.longActive:
+        self.brake_request = False
+      elif accel_pitch_compensated < 0.0:
+        self.brake_request = True
+
       stopping = CC.actuators.longControlState == LongCtrlState.stopping
       # TODO: look into using the actuators packet to send the desired speed
-      can_sends.append(fordcan.create_acc_msg(self.packer, self.CAN, CC.longActive, gas, self.accel, stopping, v_ego_kph=V_CRUISE_MAX))
+      can_sends.append(fordcan.create_acc_msg(self.packer, self.CAN, CC.longActive, gas, self.accel, stopping, self.brake_request, v_ego_kph=V_CRUISE_MAX))
 
     ### ui ###
     send_ui = (self.main_on_last != main_on) or (self.lkas_enabled_last != CC.latActive) or (self.steer_alert_last != steer_alert)
