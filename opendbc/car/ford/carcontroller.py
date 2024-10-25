@@ -1,6 +1,6 @@
 import math
 from opendbc.can.packer import CANPacker
-from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, apply_std_steer_angle_limits, structs
+from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, DT_CTRL, apply_std_steer_angle_limits, structs
 from opendbc.car.ford import fordcan
 from opendbc.car.ford.values import CarControllerParams, FordFlags
 from opendbc.car.common.numpy_fast import clip, interp
@@ -99,26 +99,31 @@ class CarController(CarControllerBase):
     ### longitudinal control ###
     # send acc msg at 50Hz
     if self.CP.openpilotLongitudinalControl and (self.frame % CarControllerParams.ACC_CONTROL_STEP) == 0:
-      # Compensate for engine creep at low speed.
-      # Either the ABS does not account for engine creep, or the correction is very slow
-      # TODO: verify this applies to EV/hybrid
-      self.accel = actuators.accel
+      accel = actuators.accel
+      gas = accel
+
       if CC.longActive:
-        self.accel = apply_creep_compensation(self.accel, CS.out.vEgo)
-      self.accel = clip(self.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
+        # Compensate for engine creep at low speed.
+        # Either the ABS does not account for engine creep, or the correction is very slow
+        # TODO: verify this applies to EV/hybrid
+        accel = apply_creep_compensation(accel, CS.out.vEgo)
+
+        # The stock system has been seen rate limiting the brake accel to 5 m/s^3,
+        # however even 3.5 m/s^3 causes some overshoot with a step response.
+        accel = max(accel, self.accel - (3.5 * CarControllerParams.ACC_CONTROL_STEP * DT_CTRL))
+
+      accel = clip(accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
 
       # Both gas and accel are in m/s^2, accel is used solely for braking
-      self.gas = self.accel
-      if not CC.longActive or self.gas < CarControllerParams.MIN_GAS:
-        self.gas = CarControllerParams.INACTIVE_GAS
+      if not CC.longActive or gas < CarControllerParams.MIN_GAS:
+        gas = CarControllerParams.INACTIVE_GAS
 
       # PCM applies pitch compensation to gas/accel, but we need to compensate for the brake/pre-charge bits
+      accel_due_to_pitch = 0.0
       if len(CC.orientationNED) == 3:
         accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY
-      else:
-        accel_due_to_pitch = 0.0
 
-      accel_pitch_compensated = self.accel + accel_due_to_pitch
+      accel_pitch_compensated = accel + accel_due_to_pitch
       if accel_pitch_compensated > 0.3 or not CC.longActive:
         self.brake_request = False
       elif accel_pitch_compensated < 0.0:
@@ -126,7 +131,10 @@ class CarController(CarControllerBase):
 
       stopping = CC.actuators.longControlState == LongCtrlState.stopping
       # TODO: look into using the actuators packet to send the desired speed
-      can_sends.append(fordcan.create_acc_msg(self.packer, self.CAN, CC.longActive, self.gas, self.accel, stopping, self.brake_request, v_ego_kph=V_CRUISE_MAX))
+      can_sends.append(fordcan.create_acc_msg(self.packer, self.CAN, CC.longActive, gas, accel, stopping, self.brake_request, v_ego_kph=V_CRUISE_MAX))
+
+      self.accel = accel
+      self.gas = gas
 
     ### ui ###
     send_ui = (self.main_on_last != main_on) or (self.lkas_enabled_last != CC.latActive) or (self.steer_alert_last != steer_alert)
