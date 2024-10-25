@@ -19,6 +19,9 @@ class CarInterface(CarInterfaceBase):
     ret.steerActuatorDelay = 0.2
     ret.steerLimitTimer = 1.0
 
+    ret.longitudinalTuning.kiBP = [0.]
+    ret.longitudinalTuning.kiV = [0.5]
+
     if DBC[candidate]['radar'] == RADAR.DELPHI_MRR:
       # average of 33.3 Hz radar timestep / 4 scan modes = 60 ms
       # MRR_Header_Timestamps->CAN_DET_TIME_SINCE_MEAS reports 61.3 ms
