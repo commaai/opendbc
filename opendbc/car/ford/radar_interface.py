@@ -144,6 +144,8 @@ class RadarInterface(RadarInterfaceBase):
       # TODO: can we group into 2 groups?
       scanIndex = msg[f"CAN_SCAN_INDEX_2LSB_{ii:02d}"]
       i = (ii - 1) * 4 + scanIndex
+      # if scanIndex not in (2, 3):
+      #   continue
 
       # Throw out old measurements. Very unlikely to happen, but is proper behavior
       if scanIndex != headerScanIndex:
@@ -189,36 +191,35 @@ class RadarInterface(RadarInterfaceBase):
     if headerScanIndex != 3:
       return []
 
-    points = [[p.dRel, p.yRel] for p in self.temp_pts.values()]
-    labels = self.dbscan.fit_predict(points)
+    keys = [[p.dRel, p.yRel * 2, p.vRel] for p in self.temp_pts.values()]
+    labels = self.dbscan.fit_predict(keys)
     clusters = [[] for _ in range(max(labels) + 1)]
 
     for i, label in enumerate(labels):
       if label == -1:
         raise Exception("DBSCAN should not return -1")
 
-      clusters[label].append(points[i])
+      clusters[label].append(list(self.temp_pts.values())[i])
 
     # print(clusters)
     # plt.clf()
     self.ax.clear()
 
     self.ax.set_title(f'clusters: {len(clusters)}')
-    self.ax.scatter([np.mean([p[0] for p in c]) for c in clusters], [np.mean([p[1] for p in c]) for c in clusters], s=40, label='clusters')
-    self.ax.scatter([p[0] for p in points], [p[1] for p in points], s=5, label='points', color='red')
+    self.ax.scatter([np.mean([p.dRel for p in c]) for c in clusters], [np.mean([p.yRel for p in c]) for c in clusters], s=80, label='clusters')
+    self.ax.scatter([p.dRel for p in self.temp_pts.values()], [p.yRel for p in self.temp_pts.values()], s=10, label='points', color='red')
     self.ax.legend()
-    self.ax.set_xlim(0, 100)
-    self.ax.set_ylim(-15, 15)
+    self.ax.set_xlim(0, 180)
+    self.ax.set_ylim(-30, 30)
     plt.pause(1/15)
 
     for i, cluster in enumerate(clusters):
       if len(cluster) == 0:
         continue
 
-      dRel, yRel = zip(*cluster)
-      dRel = sum(dRel) / len(cluster)
-      yRel = sum(yRel) / len(cluster)
-      # vRel = sum(vRel) / len(cluster)
+      dRel = float(np.mean([p.dRel for p in cluster]))
+      yRel = float(np.mean([p.yRel for p in cluster]))
+      vRel = float(np.mean([p.vRel for p in cluster]))
 
       if i not in self.pts:
         self.pts[i] = structs.RadarData.RadarPoint()
@@ -227,7 +228,7 @@ class RadarInterface(RadarInterfaceBase):
 
       self.pts[i].dRel = dRel
       self.pts[i].yRel = yRel
-      # self.pts[i].vRel = vRel
+      self.pts[i].vRel = vRel
 
       self.pts[i].measured = True
 
