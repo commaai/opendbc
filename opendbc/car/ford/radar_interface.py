@@ -1,10 +1,18 @@
+import matplotlib
+matplotlib.use('Qt5Agg')  # Use the Qt5Agg backend
+matplotlib.rcParams['figure.raise_window'] = False
+
+import numpy as np
 from math import cos, sin
+from sklearn.cluster import DBSCAN
 from opendbc.can.parser import CANParser
 from opendbc.car import structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.ford.fordcan import CanBus
 from opendbc.car.ford.values import DBC, RADAR
 from opendbc.car.interfaces import RadarInterfaceBase
+from scipy.cluster.hierarchy import dendrogram, linkage
+import matplotlib.pyplot as plt
 
 DELPHI_ESR_RADAR_MSGS = list(range(0x500, 0x540))
 
@@ -14,6 +22,8 @@ DELPHI_MRR_RADAR_MSG_COUNT = 64
 
 DELPHI_MRR_RADAR_RANGE_COVERAGE = {0: 42, 1: 164, 2: 45, 3: 175}  # scan index to detection range (m)
 MIN_LONG_RANGE_DIST = 30  # meters
+
+
 
 
 def _create_delphi_esr_radar_can_parser(CP) -> CANParser:
@@ -39,6 +49,14 @@ def _create_delphi_mrr_radar_can_parser(CP) -> CANParser:
 class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
     super().__init__(CP)
+
+    self.frame = 0
+
+    self.dbscan = DBSCAN(eps=2.5, min_samples=1)
+
+    self.fig, self.ax = plt.subplots()
+
+    self.temp_pts = {}
 
     self.updated_messages = set()
     self.track_id = 0
@@ -116,6 +134,7 @@ class RadarInterface(RadarInterfaceBase):
     if DELPHI_MRR_RADAR_RANGE_COVERAGE[headerScanIndex] != int(self.rcp.vl["MRR_Header_SensorCoverage"]["CAN_RANGE_COVERAGE"]):
       errors.append("wrongConfig")
 
+    # points = []
     for ii in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
       msg = self.rcp.vl[f"MRR_Detection_{ii:03d}"]
 
@@ -130,11 +149,11 @@ class RadarInterface(RadarInterfaceBase):
       if scanIndex != headerScanIndex:
         continue
 
-      if i not in self.pts:
-        self.pts[i] = structs.RadarData.RadarPoint()
-        self.pts[i].trackId = self.track_id
-        self.pts[i].aRel = float('nan')
-        self.pts[i].yvRel = float('nan')
+      if i not in self.temp_pts:
+        self.temp_pts[i] = structs.RadarData.RadarPoint()
+        self.temp_pts[i].trackId = self.track_id
+        self.temp_pts[i].aRel = float('nan')
+        self.temp_pts[i].yvRel = float('nan')
         self.track_id += 1
 
       valid = bool(msg[f"CAN_DET_VALID_LEVEL_{ii:02d}"])
@@ -150,19 +169,116 @@ class RadarInterface(RadarInterfaceBase):
         dRel = cos(azimuth) * dist                              # m from front of car
         yRel = -sin(azimuth) * dist                             # in car frame's y axis, left is positive
 
+        # TODO: multiply yRel by 2
+        # points.append([dRel, yRel * 2])
+
         # delphi doesn't notify of track switches, so do it manually
         # TODO: refactor this to radard if more radars behave this way
-        if abs(self.pts[i].vRel - distRate) > 2 or abs(self.pts[i].dRel - dRel) > 5:
+        if abs(self.temp_pts[i].vRel - distRate) > 2 or abs(self.temp_pts[i].dRel - dRel) > 5:
           self.track_id += 1
-          self.pts[i].trackId = self.track_id
+          self.temp_pts[i].trackId = self.track_id
 
-        self.pts[i].dRel = dRel
-        self.pts[i].yRel = yRel
-        self.pts[i].vRel = distRate
+        self.temp_pts[i].dRel = dRel
+        self.temp_pts[i].yRel = yRel
+        self.temp_pts[i].vRel = distRate
 
-        self.pts[i].measured = True
-
+        self.temp_pts[i].measured = True
       else:
-        del self.pts[i]
+        del self.temp_pts[i]
+
+    if headerScanIndex != 3:
+      return []
+
+    points = [[p.dRel, p.yRel] for p in self.temp_pts.values()]
+    labels = self.dbscan.fit_predict(points)
+    clusters = [[] for _ in range(max(labels) + 1)]
+
+    for i, label in enumerate(labels):
+      if label == -1:
+        raise Exception("DBSCAN should not return -1")
+
+      clusters[label].append(points[i])
+
+    # print(clusters)
+    # plt.clf()
+    self.ax.clear()
+
+    self.ax.set_title(f'clusters: {len(clusters)}')
+    self.ax.scatter([np.mean([p[0] for p in c]) for c in clusters], [np.mean([p[1] for p in c]) for c in clusters], s=40, label='clusters')
+    self.ax.scatter([p[0] for p in points], [p[1] for p in points], s=5, label='points', color='red')
+    self.ax.legend()
+    self.ax.set_xlim(0, 100)
+    self.ax.set_ylim(-15, 15)
+    plt.pause(1/15)
+
+    for i, cluster in enumerate(clusters):
+      if len(cluster) == 0:
+        continue
+
+      dRel, yRel = zip(*cluster)
+      dRel = sum(dRel) / len(cluster)
+      yRel = sum(yRel) / len(cluster)
+      # vRel = sum(vRel) / len(cluster)
+
+      if i not in self.pts:
+        self.pts[i] = structs.RadarData.RadarPoint()
+        self.pts[i].trackId = self.track_id
+        self.track_id += 1
+
+      self.pts[i].dRel = dRel
+      self.pts[i].yRel = yRel
+      # self.pts[i].vRel = vRel
+
+      self.pts[i].measured = True
+
+
+    # for ii in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
+    #   msg = self.rcp.vl[f"MRR_Detection_{ii:03d}"]
+    #
+    #   # SCAN_INDEX rotates through 0..3 on each message for different measurement modes
+    #   # Indexes 0 and 2 have a max range of ~40m, 1 and 3 are ~170m (MRR_Header_SensorCoverage->CAN_RANGE_COVERAGE)
+    #   # Indexes 0 and 1 have a Doppler coverage of +-71 m/s, 2 and 3 have +-60 m/s
+    #   # TODO: can we group into 2 groups?
+    #   scanIndex = msg[f"CAN_SCAN_INDEX_2LSB_{ii:02d}"]
+    #   i = (ii - 1) * 4 + scanIndex
+    #
+    #   # Throw out old measurements. Very unlikely to happen, but is proper behavior
+    #   if scanIndex != headerScanIndex:
+    #     continue
+    #
+    #   if i not in self.pts:
+    #     self.pts[i] = structs.RadarData.RadarPoint()
+    #     self.pts[i].trackId = self.track_id
+    #     self.pts[i].aRel = float('nan')
+    #     self.pts[i].yvRel = float('nan')
+    #     self.track_id += 1
+    #
+    #   valid = bool(msg[f"CAN_DET_VALID_LEVEL_{ii:02d}"])
+    #
+    #   # Long range measurement mode is more sensitive and can detect the road surface
+    #   dist = msg[f"CAN_DET_RANGE_{ii:02d}"]  # m [0|255.984]
+    #   if scanIndex in (1, 3) and dist < MIN_LONG_RANGE_DIST:
+    #     valid = False
+    #
+    #   if valid:
+    #     azimuth = msg[f"CAN_DET_AZIMUTH_{ii:02d}"]              # rad [-3.1416|3.13964]
+    #     distRate = msg[f"CAN_DET_RANGE_RATE_{ii:02d}"]          # m/s [-128|127.984]
+    #     dRel = cos(azimuth) * dist                              # m from front of car
+    #     yRel = -sin(azimuth) * dist                             # in car frame's y axis, left is positive
+    #
+    #     # delphi doesn't notify of track switches, so do it manually
+    #     # TODO: refactor this to radard if more radars behave this way
+    #     if abs(self.pts[i].vRel - distRate) > 2 or abs(self.pts[i].dRel - dRel) > 5:
+    #       self.track_id += 1
+    #       self.pts[i].trackId = self.track_id
+    #
+    #     self.pts[i].dRel = dRel
+    #     self.pts[i].yRel = yRel
+    #     self.pts[i].vRel = distRate
+    #
+    #     self.pts[i].measured = True
+    #
+    #   else:
+    #     del self.pts[i]
 
     return errors
