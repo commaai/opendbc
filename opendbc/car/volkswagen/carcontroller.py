@@ -41,7 +41,6 @@ class CarController(CarControllerBase):
     self.hca_frame_timer_running = 0
     self.hca_frame_same_torque = 0
     self.steering_power = 0
-    self.long_heartbeat = 0
     self.accel_last = 0
 
   def update(self, CC, CS, now_nanos):
@@ -70,7 +69,6 @@ class CarController(CarControllerBase):
           apply_angle = clip(apply_angle, -self.CCP.ANGLE_MAX, self.CCP.ANGLE_MAX)
           if CS.out.steeringPressed:
             apply_angle = clip(apply_angle, CS.out.steeringAngleDeg - self.CCP.ANGLE_ERROR, CS.out.steeringAngleDeg + self.CCP.ANGLE_ERROR)
-
           
         else:
           if self.steering_power > 0: # keep HCA alive until steering power has reduced to zero
@@ -137,27 +135,18 @@ class CarController(CarControllerBase):
       starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
 
       if self.CP.flags & VolkswagenFlags.MEB:
-        accel = clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.enabled else 0
+        accel = clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.enabled and CS.out.cruiseState.enabled else 0
         self.accel_last = accel
         current_speed = CS.out.vEgo * CV.MS_TO_KPH
         reversing = CS.out.gearShifter in [structs.CarState.GearShifter.reverse]
-        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
+        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled and CS.out.cruiseState.enabled,
                                                  CS.esp_hold_confirmation, CC.cruiseControl.override or CS.out.gasPressed)
-        acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
+        acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled and CS.out.cruiseState.enabled,
                                                starting, stopping, CS.esp_hold_confirmation, CC.cruiseControl.override or CS.out.gasPressed)
-        required_jerk = min(3, abs(accel - CS.out.aEgo) * 50) ## pfeiferj:openpilot:pfeifer-hkg-long-control-tune
-        lower_jerk = required_jerk
-        upper_jerk = required_jerk
-
-        if CS.out.aEgo < accel:
-          lower_jerk = 0
-        else:
-          upper_jerk = 0
           
         can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.enabled,
-                                                           accel, acc_control, acc_hold_type, stopping, starting, lower_jerk, upper_jerk,
-                                                           CS.esp_hold_confirmation, CC.cruiseControl.override or CS.out.gasPressed,
-                                                           current_speed, reversing, CS.travel_assist_available))
+                                                           accel, acc_control, acc_hold_type, stopping, starting, CS.esp_hold_confirmation,
+                                                           CC.cruiseControl.override or CS.out.gasPressed, CS.travel_assist_available))
 
       else:
         accel = clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0
@@ -187,21 +176,13 @@ class CarController(CarControllerBase):
 
     if self.frame % self.CCP.ACC_HUD_STEP == 0 and self.CP.openpilotLongitudinalControl:
       if self.CP.flags & VolkswagenFlags.MEB:
-        self.long_heartbeat = self.generate_vw_meb_hud_heartbeat(self.long_heartbeat)
         desired_gap = max(1, CS.out.vEgo * 1) #get_T_FOLLOW(hud_control.leadDistanceBars))
         distance = 50 #min(self.lead_distance, 100)
 
-        change_distance_bar = False
-        if hud_control.leadDistanceBars != self.lead_distance_bars_last:
-          self.lead_distance_bar_timer = 0
-        self.lead_distance_bars_last = hud_control.leadDistanceBars
-        change_distance_bar = True if self.lead_distance_bar_timer <= 3 else False
-
-        acc_hud_status = self.CCS.acc_hud_status_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
+        acc_hud_status = self.CCS.acc_hud_status_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled and CS.out.cruiseState.enabled,
                                                        CS.esp_hold_confirmation, CC.cruiseControl.override or CS.out.gasPressed)
-        can_sends.append(self.CCS.create_acc_hud_control(self.packer_pt, CANBUS.pt, acc_hud_status, hud_control.setSpeed * CV.MS_TO_KPH,
-                                                         hud_control.leadVisible, hud_control.leadDistanceBars, change_distance_bar,
-                                                         desired_gap, distance, self.long_heartbeat, CS.esp_hold_confirmation))
+        can_sends.append(self.CCS.create_acc_hud_control(self.packer_pt, CANBUS.pt, acc_hud_status, hud_control.setSpeed * CV.MS_TO_KPH, hud_control.leadVisible,
+                                                         hud_control.leadDistanceBars, desired_gap, distance, CS.esp_hold_confirmation))
 
       else:
         lead_distance = 0
@@ -230,12 +211,6 @@ class CarController(CarControllerBase):
     self.gra_acc_counter_last = CS.gra_stock_values["COUNTER"]
     self.frame += 1
     return new_actuators, can_sends
-
-  def generate_vw_meb_hud_heartbeat(self, long_heartbeat_prev):
-    if long_heartbeat_prev != 221:
-      return 221
-    elif long_heartbeat_prev == 221:
-      return 360
 
   def generate_vw_meb_steering_power(self, CS, lat_active, apply_angle, steering_power_prev):
     # Steering power counter is used to:
