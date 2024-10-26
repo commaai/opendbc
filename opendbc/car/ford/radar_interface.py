@@ -2,6 +2,7 @@ import matplotlib
 matplotlib.use('Qt5Agg')  # Use the Qt5Agg backend
 matplotlib.rcParams['figure.raise_window'] = False
 
+import copy
 import numpy as np
 from math import cos, sin
 from sklearn.cluster import DBSCAN
@@ -77,7 +78,7 @@ class RadarInterface(RadarInterfaceBase):
 
     self.frame = 0
 
-    self.dbscan = DBSCAN(eps=2.5, min_samples=1)
+    self.dbscan = DBSCAN(eps=5, min_samples=1)
 
     self.fig, self.ax = plt.subplots()
 
@@ -198,10 +199,7 @@ class RadarInterface(RadarInterfaceBase):
       if valid:
         azimuth = msg[f"CAN_DET_AZIMUTH_{ii:02d}"]              # rad [-3.1416|3.13964]
         distRate = msg[f"CAN_DET_RANGE_RATE_{ii:02d}"]          # m/s [-128|127.984]
-        vRel = cos(azimuth) * distRate
         yRel = -sin(azimuth) * dist                             # in car frame's y axis, left is positive
-        if abs(distRate - vRel) > 0.5:
-          print('distRate', abs(distRate - vRel), distRate, vRel, yRel)
         dRel = cos(azimuth) * dist                              # m from front of car
 
         # TODO: multiply yRel by 2
@@ -254,41 +252,57 @@ class RadarInterface(RadarInterfaceBase):
       print()
 
     new_clusters = []
+
+    print('prev clusters', [(c.dRel, c.yRel, c.vRel) for c in self.clusters])
+
     for cluster in clusters:  # TODO: make clusters a list of Cluster objects
       dRel = float(np.mean([p.dRel for p in cluster]))
       yRel = float(np.mean([p.yRel for p in cluster]))
       vRel = float(np.mean([p.vRel for p in cluster]))
+      print()
+      print('working on cluster', (dRel, yRel, vRel))
 
       closest_previous_cluster = None
-      closest_euclidean_dist = None
+      closest_euclidean_dist = 999999999
+      print('searching! ...')
       for idx, c in enumerate(self.clusters):
-        if c.cluster_id in taken_clusters:
-          continue
+        # if c.cluster_id in taken_clusters:
+        #   continue
 
         # if this new cluster is close to any previous ones, use its previous cluster id with the new points and mark the old cluster as used
+        print('comparing with prev cluster', (c.dRel, c.yRel, c.vRel))
         euclidean_dist = np.sqrt((c.dRel - dRel) ** 2 + (c.yRel - yRel) ** 2 + (c.vRel - vRel) ** 2)
+        print('got', euclidean_dist)
         # print(abs(c.dRel - dRel), abs(c.yRel - yRel), euclidean_dist)
         # if abs(c.dRel - dRel) < 5 and abs(c.yRel - yRel) < 5:# and abs(c.vRel - vRel) < 5:
-        if euclidean_dist < 20:# and abs(c.vRel - vRel) < 5:
+        if euclidean_dist < 5:# and abs(c.vRel - vRel) < 5:
           if closest_previous_cluster is None or euclidean_dist < closest_euclidean_dist:
+            print('new low!')
             closest_previous_cluster = c
             closest_euclidean_dist = euclidean_dist
           # new_clusters.append(Cluster(cluster, c.cluster_id))
           # taken_clusters.add(idx)
           # break
 
+      print()
       if closest_previous_cluster is not None:
-        new_clusters.append(Cluster(cluster, closest_previous_cluster.cluster_id))
+        print('settled on', closest_euclidean_dist, (closest_previous_cluster.dRel, closest_previous_cluster.yRel, closest_previous_cluster.vRel))
+        # TODO: anything better than deepcopy?
+        new_clusters.append(Cluster(copy.deepcopy(cluster), closest_previous_cluster.cluster_id))
         taken_clusters.add(closest_previous_cluster.cluster_id)
         # print('new!', self.cluster_id)
       else:
-        new_clusters.append(Cluster(cluster, self.cluster_id))
+        print('making cluster', self.cluster_id, (dRel, yRel, vRel))
+        new_clusters.append(Cluster(copy.deepcopy(cluster), self.cluster_id))
+        print(new_clusters[-1].dRel, new_clusters[-1].yRel, new_clusters[-1].vRel)
         self.cluster_id += 1
 
         if len(temp_points_list) == 60:
           print('new cluster', (new_clusters[-1].cluster_id, new_clusters[-1].dRel, new_clusters[-1].yRel, new_clusters[-1].vRel, [p.to_dict() for p in new_clusters[-1].pts]))
 
     self.clusters = new_clusters
+
+    print('post clusters', [(c.dRel, c.yRel, c.vRel) for c in self.clusters])
 
     if len(temp_points_list) == 60:
     #   print('new self.clusters')
@@ -310,10 +324,15 @@ class RadarInterface(RadarInterfaceBase):
       self.ax.set_title(f'clusters: {len(self.clusters)}')
       self.ax.scatter([c.closestDRel for c in self.clusters], [c.yRel for c in self.clusters], s=80, label='clusters', c=colors)
       self.ax.scatter([p.dRel for p in self.temp_pts.values()], [p.yRel for p in self.temp_pts.values()], s=10, label='points', color='red')  # c=colors_pts)
+      # text above each point with its dRel and vRel:
+      # for p in self.temp_pts.values():
+      #   self.ax.text(p.dRel, p.yRel, f'{p.dRel:.1f}, {p.vRel:.1f}', fontsize=8)
+      for c in self.clusters:
+        self.ax.text(c.closestDRel, c.yRel, f'{c.dRel:.1f}, {c.yRel:.1f}, {c.vRel:.1f}, {c.cluster_id}', fontsize=8)
       self.ax.legend()
       self.ax.set_xlim(0, 180)
       self.ax.set_ylim(-30, 30)
-      plt.pause(1/15)
+      plt.pause(1/2)
 
     self.pts = {}
     for i, cluster in enumerate(self.clusters):
