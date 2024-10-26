@@ -12,6 +12,7 @@ from opendbc.car.ford.fordcan import CanBus
 from opendbc.car.ford.values import DBC, RADAR
 from opendbc.car.interfaces import RadarInterfaceBase
 from scipy.cluster.hierarchy import dendrogram, linkage
+from scipy.optimize import linear_sum_assignment
 import matplotlib.pyplot as plt
 
 DELPHI_ESR_RADAR_MSGS = list(range(0x500, 0x540))
@@ -23,7 +24,28 @@ DELPHI_MRR_RADAR_MSG_COUNT = 64
 DELPHI_MRR_RADAR_RANGE_COVERAGE = {0: 42, 1: 164, 2: 45, 3: 175}  # scan index to detection range (m)
 MIN_LONG_RANGE_DIST = 30  # meters
 
+cmap = plt.cm.get_cmap('tab20', 20)  # 'tab20' colormap with 20 colors
 
+class Cluster:
+  def __init__(self, pts: list[structs.RadarData.RadarPoint], cluster_id: int):
+    self.pts = pts
+    self.cluster_id = cluster_id
+
+  @property
+  def dRel(self):
+    return sum([p.dRel for p in self.pts]) / len(self.pts)
+
+  @property
+  def closestDRel(self):
+    return min([p.dRel for p in self.pts])
+
+  @property
+  def yRel(self):
+    return sum([p.yRel for p in self.pts]) / len(self.pts)
+
+  @property
+  def vRel(self):
+    return sum([p.vRel for p in self.pts]) / len(self.pts)
 
 
 def _create_delphi_esr_radar_can_parser(CP) -> CANParser:
@@ -49,6 +71,9 @@ def _create_delphi_mrr_radar_can_parser(CP) -> CANParser:
 class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
     super().__init__(CP)
+
+    self.clusters: list[Cluster] = []
+    self.cluster_id = 0
 
     self.frame = 0
 
@@ -91,7 +116,10 @@ class RadarInterface(RadarInterfaceBase):
     if self.radar == RADAR.DELPHI_ESR:
       self._update_delphi_esr()
     elif self.radar == RADAR.DELPHI_MRR:
-      errors.extend(self._update_delphi_mrr())
+      _errors, _update = self._update_delphi_mrr()
+      errors.extend(_errors)
+      # if not _update:
+      #   return None
 
     ret.points = list(self.pts.values())
     ret.errors = errors
@@ -165,11 +193,16 @@ class RadarInterface(RadarInterfaceBase):
       if scanIndex in (1, 3) and dist < MIN_LONG_RANGE_DIST:
         valid = False
 
+      # valid = valid and dist < 50
+
       if valid:
         azimuth = msg[f"CAN_DET_AZIMUTH_{ii:02d}"]              # rad [-3.1416|3.13964]
         distRate = msg[f"CAN_DET_RANGE_RATE_{ii:02d}"]          # m/s [-128|127.984]
-        dRel = cos(azimuth) * dist                              # m from front of car
+        vRel = cos(azimuth) * distRate
         yRel = -sin(azimuth) * dist                             # in car frame's y axis, left is positive
+        if abs(distRate - vRel) > 0.5:
+          print('distRate', abs(distRate - vRel), distRate, vRel, yRel)
+        dRel = cos(azimuth) * dist                              # m from front of car
 
         # TODO: multiply yRel by 2
         # points.append([dRel, yRel * 2])
@@ -188,10 +221,12 @@ class RadarInterface(RadarInterfaceBase):
       else:
         del self.temp_pts[i]
 
+    # wait for all measurements to happen (TODO: do we need to? i don't know if too much benefit to update at 33hz)
     if headerScanIndex != 3:
-      return []
+      return [], False
 
-    keys = [[p.dRel, p.yRel, p.vRel] for p in self.temp_pts.values()]
+    temp_points_list = list(self.temp_pts.values())
+    keys = [[p.dRel, p.yRel, p.vRel] for p in temp_points_list]
     labels = self.dbscan.fit_predict(keys)
     clusters = [[] for _ in range(max(labels) + 1)]
 
@@ -199,36 +234,106 @@ class RadarInterface(RadarInterfaceBase):
       if label == -1:
         raise Exception("DBSCAN should not return -1")
 
-      clusters[label].append(list(self.temp_pts.values())[i])
+      clusters[label].append(temp_points_list[i])
 
-    # print(clusters)
-    # plt.clf()
-    self.ax.clear()
+    # find closest previous clusters (2.5 max diff)
 
-    self.ax.set_title(f'clusters: {len(clusters)}')
-    self.ax.scatter([np.mean([p.dRel for p in c]) for c in clusters], [np.mean([p.yRel for p in c]) for c in clusters], s=80, label='clusters')
-    self.ax.scatter([p.dRel for p in self.temp_pts.values()], [p.yRel for p in self.temp_pts.values()], s=10, label='points', color='red')
-    self.ax.legend()
-    self.ax.set_xlim(0, 180)
-    self.ax.set_ylim(-30, 30)
-    plt.pause(1/15)
+    taken_clusters: set[int] = set()
 
-    for i, cluster in enumerate(clusters):
-      if len(cluster) == 0:
-        continue
+    if len(temp_points_list) == 60:
+      print('clusters', len(clusters))
+      print('len points', len(temp_points_list))
+      print('sum of clusters', sum([len(c) for c in clusters]))
+      print()
 
+      print('self.clusters')
+      for c in self.clusters:
+        print((c.cluster_id, c.dRel, c.yRel, c.vRel, [p.to_dict() for p in c.pts]))
+      # print('----')
+      # print('clusters', [[p.to_dict() for p in c] for c in clusters])
+      print()
+
+    new_clusters = []
+    for cluster in clusters:  # TODO: make clusters a list of Cluster objects
       dRel = float(np.mean([p.dRel for p in cluster]))
       yRel = float(np.mean([p.yRel for p in cluster]))
       vRel = float(np.mean([p.vRel for p in cluster]))
 
+      closest_previous_cluster = None
+      closest_euclidean_dist = None
+      for idx, c in enumerate(self.clusters):
+        if c.cluster_id in taken_clusters:
+          continue
+
+        # if this new cluster is close to any previous ones, use its previous cluster id with the new points and mark the old cluster as used
+        euclidean_dist = np.sqrt((c.dRel - dRel) ** 2 + (c.yRel - yRel) ** 2 + (c.vRel - vRel) ** 2)
+        # print(abs(c.dRel - dRel), abs(c.yRel - yRel), euclidean_dist)
+        # if abs(c.dRel - dRel) < 5 and abs(c.yRel - yRel) < 5:# and abs(c.vRel - vRel) < 5:
+        if euclidean_dist < 20:# and abs(c.vRel - vRel) < 5:
+          if closest_previous_cluster is None or euclidean_dist < closest_euclidean_dist:
+            closest_previous_cluster = c
+            closest_euclidean_dist = euclidean_dist
+          # new_clusters.append(Cluster(cluster, c.cluster_id))
+          # taken_clusters.add(idx)
+          # break
+
+      if closest_previous_cluster is not None:
+        new_clusters.append(Cluster(cluster, closest_previous_cluster.cluster_id))
+        taken_clusters.add(closest_previous_cluster.cluster_id)
+        # print('new!', self.cluster_id)
+      else:
+        new_clusters.append(Cluster(cluster, self.cluster_id))
+        self.cluster_id += 1
+
+        if len(temp_points_list) == 60:
+          print('new cluster', (new_clusters[-1].cluster_id, new_clusters[-1].dRel, new_clusters[-1].yRel, new_clusters[-1].vRel, [p.to_dict() for p in new_clusters[-1].pts]))
+
+    self.clusters = new_clusters
+
+    if len(temp_points_list) == 60:
+    #   print('new self.clusters')
+    #   for c in self.clusters:
+    #     print((c.cluster_id, c.dRel, c.yRel, c.vRel, [p.to_dict() for p in c.pts]))
+      print()
+
+    # print('clusters', clusters)
+    # print('new_clusters', new_clusters)
+    # print('track_id', self.track_id)
+    # print('cluster_id', self.cluster_id)
+
+    if PLOT := True:
+      self.ax.clear()
+
+      colors = [cmap(c.cluster_id % 20) for c in self.clusters]
+      colors_pts = [cmap(c.trackId % 20) for c in self.temp_pts.values()]
+
+      self.ax.set_title(f'clusters: {len(self.clusters)}')
+      self.ax.scatter([c.closestDRel for c in self.clusters], [c.yRel for c in self.clusters], s=80, label='clusters', c=colors)
+      self.ax.scatter([p.dRel for p in self.temp_pts.values()], [p.yRel for p in self.temp_pts.values()], s=10, label='points', color='red')  # c=colors_pts)
+      self.ax.legend()
+      self.ax.set_xlim(0, 180)
+      self.ax.set_ylim(-30, 30)
+      plt.pause(1/15)
+
+    self.pts = {}
+    for i, cluster in enumerate(self.clusters):
+      if len(cluster.pts) == 0:
+        continue
+
+      # dRel = float(np.mean([p.dRel for p in cluster]))
+      # yRel = float(np.mean([p.yRel for p in cluster]))
+      # vRel = float(np.mean([p.vRel for p in cluster]))
+
       if i not in self.pts:
         self.pts[i] = structs.RadarData.RadarPoint()
-        self.pts[i].trackId = self.track_id
-        self.track_id += 1
+        # self.pts[i].trackId = self.track_id
+        # self.track_id += 1
 
-      self.pts[i].dRel = dRel
-      self.pts[i].yRel = yRel
-      self.pts[i].vRel = vRel
+      self.pts[i].trackId = cluster.cluster_id
+
+      self.pts[i].dRel = cluster.closestDRel
+      self.pts[i].yRel = cluster.yRel
+      self.pts[i].vRel = cluster.vRel
 
       self.pts[i].measured = True
 
@@ -282,4 +387,4 @@ class RadarInterface(RadarInterfaceBase):
     #   else:
     #     del self.pts[i]
 
-    return errors
+    return errors, True
