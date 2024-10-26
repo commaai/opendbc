@@ -1642,7 +1642,7 @@ BO_ 768 MEB_ACC_01: 48 XXX
  SG_ Heartbeat : 150|9@1+ (1,0) [0|3] "" XXX
  SG_ SET_ME_0XFFFF : 160|16@1+ (1,0) [0|65535] "" XXX
  SG_ ACC_Enabled : 186|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_Zeitluecke_Farbe : 189|1@0+ (1,0) [0|1] "" XXX
+ SG_ Zeitluecke_Farbe : 189|1@0+ (1,0) [0|1] "" XXX
  SG_ SET_ME_0X1 : 199|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_Status_ACC : 208|3@1+ (1,0) [0|7] "" XXX
  SG_ Unknown_04 : 211|1@0+ (1,0) [0|1] "" XXX
