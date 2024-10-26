@@ -460,7 +460,7 @@ class CAR(Platforms):
     [
       VWCarDocs("CUPRA Born 2021"),
     ],
-    VolkswagenCarSpecs(mass=1950, wheelbase=2.77),
+    VolkswagenCarSpecs(mass=1950, wheelbase=2.77, steerRatio=14.2),
     chassis_codes={"K1"},
     wmis={WMI.SEAT},
   )
