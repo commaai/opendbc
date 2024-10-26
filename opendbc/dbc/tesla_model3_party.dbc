@@ -53,7 +53,7 @@ BO_ 905 DAS_status2: 8 PARTY
  SG_ DAS_activationFailureStatus : 14|2@1+ (1,0) [0|2] ""  aps
  SG_ DAS_pmmLoggingRequest : 13|1@1+ (1,0) [0|1] ""  aps
  SG_ DAS_pmmObstacleSeverity : 10|3@1+ (1,0) [0|7] ""  aps
- SG_ DAS_accSpeedLimit : 0|10@1+ (0.2,0) [0|204.6] "mph"  aps
+ SG_ DAS_accSpeedLimit : 0|10@1+ (0.4,0) [0|204.6] "mph"  aps
 
 BO_ 264 DI_torque: 8 PARTY
  SG_ DI_axleSpeed : 40|16@1- (0.1,0.0) [-2750|2750] "RPM"  epas3s
@@ -143,6 +143,11 @@ BO_ 880 EPAS3S_sysStatus: 8 PARTY
  SG_ EPAS3S_steeringReduced : 3|1@0+ (1,0) [0|1] ""  das
  SG_ EPAS3S_internalSASQF : 4|1@0+ (1,0) [0|1] ""  gtw
  SG_ EPAS3S_currentTuneMode : 7|3@0+ (1,0) [0|5] ""  gtw
+
+BO_ 637 APS_eacMonitor: 3 PARTY
+ SG_ APS_eacAllow : 0|2@1+ (1,0) [0|0] "" X
+ SG_ APS_eacMonitorChecksum : 16|8@1+ (1,0) [0|0] "" X
+ SG_ APS_eacMonitorCounter : 8|4@1+ (1,0) [0|0] "" X
 
 BO_ 599 DI_speed: 8 PARTY
  SG_ DI_uiSpeedUnits : 32|1@1+ (1,0) [0|1] ""  das
@@ -296,6 +301,7 @@ VAL_ 880 EPAS3S_currentTuneMode 3 "STEERING_TUNE_RWD_COMFORT" 1 "STEERING_TUNE_D
 VAL_ 599 DI_uiSpeedUnits 0 "DI_SPEED_MPH" 1 "DI_SPEED_KPH" ;
 VAL_ 599 DI_uiSpeed 255 "DI_UI_SPEED_SNA" ;
 VAL_ 599 DI_vehicleSpeed 4095 "SNA" ;
+VAL_ 637 APS_eacAllow 0 "INHIBIT" 1 "ALLOW" 2 "RESERVED" 3 "SNA";
 VAL_ 1160 DAS_steeringControlType 2 "LANE_KEEP_ASSIST" 0 "NONE" 1 "ANGLE_CONTROL" 3 "EMERGENCY_LANE_KEEP" ;
 VAL_ 1160 DAS_steeringAngleRequest 16384 "ZERO_ANGLE" ;
 VAL_ 297 SCCM_steeringAngleValidity 3 "SNA" 2 "INIT" 0 "INVALID" 1 "VALID" ;

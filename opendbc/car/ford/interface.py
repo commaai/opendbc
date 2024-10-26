@@ -2,7 +2,7 @@ from panda import Panda
 from opendbc.car import get_safety_config, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.ford.fordcan import CanBus
-from opendbc.car.ford.values import Ecu, FordFlags
+from opendbc.car.ford.values import DBC, Ecu, FordFlags, RADAR
 from opendbc.car.interfaces import CarInterfaceBase
 
 TransmissionType = structs.CarParams.TransmissionType
@@ -18,6 +18,14 @@ class CarInterface(CarInterfaceBase):
     ret.steerControlType = structs.CarParams.SteerControlType.angle
     ret.steerActuatorDelay = 0.2
     ret.steerLimitTimer = 1.0
+
+    ret.longitudinalTuning.kiBP = [0.]
+    ret.longitudinalTuning.kiV = [0.5]
+
+    if DBC[candidate]['radar'] == RADAR.DELPHI_MRR:
+      # average of 33.3 Hz radar timestep / 4 scan modes = 60 ms
+      # MRR_Header_Timestamps->CAN_DET_TIME_SINCE_MEAS reports 61.3 ms
+      ret.radarDelay = 0.06
 
     CAN = CanBus(fingerprint=fingerprint)
     cfgs = [get_safety_config(structs.CarParams.SafetyModel.ford)]
