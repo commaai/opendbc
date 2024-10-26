@@ -12,8 +12,8 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.ford.fordcan import CanBus
 from opendbc.car.ford.values import DBC, RADAR
 from opendbc.car.interfaces import RadarInterfaceBase
-from scipy.cluster.hierarchy import dendrogram, linkage
-from scipy.optimize import linear_sum_assignment
+# from scipy.cluster.hierarchy import dendrogram, linkage
+# from scipy.optimize import linear_sum_assignment
 import matplotlib.pyplot as plt
 
 DELPHI_ESR_RADAR_MSGS = list(range(0x500, 0x540))
