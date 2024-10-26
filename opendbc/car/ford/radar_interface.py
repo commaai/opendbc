@@ -191,7 +191,7 @@ class RadarInterface(RadarInterfaceBase):
     if headerScanIndex != 3:
       return []
 
-    keys = [[p.dRel, p.yRel * 2, p.vRel] for p in self.temp_pts.values()]
+    keys = [[p.dRel, p.yRel, p.vRel] for p in self.temp_pts.values()]
     labels = self.dbscan.fit_predict(keys)
     clusters = [[] for _ in range(max(labels) + 1)]
 
