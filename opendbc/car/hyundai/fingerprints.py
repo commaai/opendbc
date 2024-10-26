@@ -231,6 +231,7 @@ FW_VERSIONS = {
     (Ecu.abs, 0x7d1, None): [
       b'\xf1\x00TM ESC \x02 100\x18\x030 58910-S2600',
       b'\xf1\x00TM ESC \x02 102\x18\x07\x01 58910-S2600',
+      b'\xf1\x00TM ESC \x02 103\x18\x11\x05 58910-S2500',
       b'\xf1\x00TM ESC \x02 103\x18\x11\x07 58910-S2600',
       b'\xf1\x00TM ESC \x02 104\x19\x07\x07 58910-S2600',
       b'\xf1\x00TM ESC \x03 103\x18\x11\x07 58910-S2600',
@@ -616,10 +617,12 @@ FW_VERSIONS = {
       b'\xf1\x00OS IEB \x03 210 \x02\x14 58520-K4000',
       b'\xf1\x00OS IEB \x03 211 \x04\x02 58520-K4000',
       b'\xf1\x00OS IEB \x03 212 \x11\x13 58520-K4000',
+      b'\xf1\x00OS IEB \x04 212 \x11\x13 58520-K4000',
       b'\xf1\x00OS IEB \r 105\x18\t\x18 58520-K4000',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00OE2 LKAS AT EUR LHD 1.00 1.00 95740-K4200 200',
+      b'\xf1\x00OSE LKAS AT AUS RHD 1.00 1.00 95740-K4300 W50',
       b'\xf1\x00OSE LKAS AT EUR LHD 1.00 1.00 95740-K4100 W40',
       b'\xf1\x00OSE LKAS AT EUR RHD 1.00 1.00 95740-K4100 W40',
       b'\xf1\x00OSE LKAS AT KOR LHD 1.00 1.00 95740-K4100 W40',
@@ -629,6 +632,7 @@ FW_VERSIONS = {
     (Ecu.eps, 0x7d4, None): [
       b'\xf1\x00OS  MDPS C 1.00 1.03 56310/K4550 4OEDC103',
       b'\xf1\x00OS  MDPS C 1.00 1.04 56310-XX000 4OEDC104',
+      b'\xf1\x00OS  MDPS C 1.00 1.04 56310/K4550 4OEDC104',
       b'\xf1\x00OS  MDPS C 1.00 1.04 56310K4000\x00 4OEDC104',
       b'\xf1\x00OS  MDPS C 1.00 1.04 56310K4050\x00 4OEDC104',
     ],

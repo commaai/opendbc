@@ -1,6 +1,6 @@
 import math
 from opendbc.car import carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
-                        make_tester_present_msg, rate_limit, structs
+                        make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY
 from opendbc.car.can_definitions import CanData
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car.secoc import add_mac, build_sync_mac
@@ -14,8 +14,6 @@ from opendbc.can.packer import CANPacker
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 SteerControlType = structs.CarParams.SteerControlType
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
-
-ACCELERATION_DUE_TO_GRAVITY = 9.81  # m/s^2
 
 ACCEL_WINDUP_LIMIT = 0.5  # m/s^2 / frame
 
@@ -46,7 +44,7 @@ class CarController(CarControllerBase):
     self.distance_button = 0
 
     self.pcm_accel_compensation = 0.0
-    self.permit_braking = 0.0
+    self.permit_braking = True
 
     self.packer = CANPacker(dbc_name)
     self.accel = 0
@@ -146,10 +144,13 @@ class CarController(CarControllerBase):
 
     # *** gas and brake ***
     # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot and imprecise braking
-    # TODO: sometimes when switching from brake to gas quickly, CLUTCH->ACCEL_NET shows a slow unwind. make it go to 0 immediately
     if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
       # calculate amount of acceleration PCM should apply to reach target, given pitch
-      accel_due_to_pitch = math.sin(CS.slope_angle) * ACCELERATION_DUE_TO_GRAVITY
+      if len(CC.orientationNED) == 3:
+        accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY
+      else:
+        accel_due_to_pitch = 0.0
+
       net_acceleration_request = actuators.accel + accel_due_to_pitch
 
       # let PCM handle stopping for now

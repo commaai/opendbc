@@ -278,7 +278,7 @@ struct CarState {
       accelCruise @3;
       decelCruise @4;
       cancel @5;
-      altButton1 @6;
+      lkas @6;
       altButton2 @7;
       mainCruise @8;
       setCruise @9;
@@ -508,7 +508,6 @@ struct CarParams {
   transmissionType @43 :TransmissionType;
   carFw @44 :List(CarFw);
 
-  radarTimeStep @45: Float32 = 0.05;  # time delta between radar updates, 20Hz is very standard
   radarDelay @74 :Float32;
   fingerprintSource @49: FingerprintSource;
   networkLocation @50 :NetworkLocation;  # Where Panda/C2 is integrated into the car's CAN network
@@ -720,4 +719,5 @@ struct CarParams {
   maxSteeringAngleDegDEPRECATED @54 :Float32;
   longitudinalActuatorDelayLowerBoundDEPRECATED @61 :Float32;
   stoppingControlDEPRECATED @31 :Bool; # Does the car allow full control even at lows speeds when stopping
+  radarTimeStepDEPRECATED @45: Float32 = 0.05;  # time delta between radar updates, 20Hz is very standard
 }

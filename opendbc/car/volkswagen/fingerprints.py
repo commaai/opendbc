@@ -52,6 +52,7 @@ FW_VERSIONS = {
   CAR.VOLKSWAGEN_ATLAS_MK1: {
     (Ecu.engine, 0x7e0, None): [
       b'\xf1\x8703H906026AA\xf1\x899970',
+      b'\xf1\x8703H906026AG\xf1\x899971',
       b'\xf1\x8703H906026AG\xf1\x899973',
       b'\xf1\x8703H906026AJ\xf1\x890638',
       b'\xf1\x8703H906026AJ\xf1\x891017',
@@ -355,11 +356,13 @@ FW_VERSIONS = {
       b'\xf1\x8704E906024L \xf1\x895595',
       b'\xf1\x8704E906024L \xf1\x899970',
       b'\xf1\x8704E906027MS\xf1\x896223',
+      b'\xf1\x8705E906013BN\xf1\x893711',
       b'\xf1\x8705E906013DB\xf1\x893361',
       b'\xf1\x875G0906259T \xf1\x890003',
     ],
     (Ecu.transmission, 0x7e1, None): [
       b'\xf1\x8709G927158BQ\xf1\x893545',
+      b'\xf1\x8709H927158  \xf1\x890515',
       b'\xf1\x8709S927158BS\xf1\x893642',
       b'\xf1\x8709S927158BS\xf1\x893694',
       b'\xf1\x8709S927158CK\xf1\x893770',
@@ -387,8 +390,10 @@ FW_VERSIONS = {
       b'\xf1\x875QM909144C \xf1\x891082\xf1\x82\x0521A00642A1',
       b'\xf1\x875QM909144C \xf1\x891082\xf1\x82\x0521A10A01A1',
       b'\xf1\x875QN909144B \xf1\x895082\xf1\x82\x0571A10A11A1',
+      b'\xf1\x875QV907144F \xf1\x891122\xf1\x82\x0001A00701]V',
     ],
     (Ecu.fwdRadar, 0x757, None): [
+      b'\xf1\x872Q0907567B \xf1\x890534',
       b'\xf1\x872Q0907572AA\xf1\x890396',
       b'\xf1\x875Q0907572N \xf1\x890681',
       b'\xf1\x875Q0907572P \xf1\x890682',

@@ -9,7 +9,11 @@ from opendbc.car.interfaces import RadarInterfaceBase
 DELPHI_ESR_RADAR_MSGS = list(range(0x500, 0x540))
 
 DELPHI_MRR_RADAR_START_ADDR = 0x120
+DELPHI_MRR_RADAR_HEADER_ADDR = 0x174  # MRR_Header_SensorCoverage
 DELPHI_MRR_RADAR_MSG_COUNT = 64
+
+DELPHI_MRR_RADAR_RANGE_COVERAGE = {0: 42, 1: 164, 2: 45, 3: 175}  # scan index to detection range (m)
+MIN_LONG_RANGE_DIST = 30  # meters
 
 
 def _create_delphi_esr_radar_can_parser(CP) -> CANParser:
@@ -20,11 +24,14 @@ def _create_delphi_esr_radar_can_parser(CP) -> CANParser:
 
 
 def _create_delphi_mrr_radar_can_parser(CP) -> CANParser:
-  messages = []
+  messages = [
+    ("MRR_Header_InformationDetections", 33),
+    ("MRR_Header_SensorCoverage", 33),
+  ]
 
   for i in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
     msg = f"MRR_Detection_{i:03d}"
-    messages += [(msg, 20)]
+    messages += [(msg, 33)]
 
   return CANParser(RADAR.DELPHI_MRR, messages, CanBus(CP).radar)
 
@@ -36,7 +43,7 @@ class RadarInterface(RadarInterfaceBase):
     self.updated_messages = set()
     self.track_id = 0
     self.radar = DBC[CP.carFingerprint]['radar']
-    if self.radar is None or CP.radarUnavailable:
+    if CP.radarUnavailable:
       self.rcp = None
     elif self.radar == RADAR.DELPHI_ESR:
       self.rcp = _create_delphi_esr_radar_can_parser(CP)
@@ -44,7 +51,7 @@ class RadarInterface(RadarInterfaceBase):
       self.valid_cnt = {key: 0 for key in DELPHI_ESR_RADAR_MSGS}
     elif self.radar == RADAR.DELPHI_MRR:
       self.rcp = _create_delphi_mrr_radar_can_parser(CP)
-      self.trigger_msg = DELPHI_MRR_RADAR_START_ADDR + DELPHI_MRR_RADAR_MSG_COUNT - 1
+      self.trigger_msg = DELPHI_MRR_RADAR_HEADER_ADDR
     else:
       raise ValueError(f"Unsupported radar: {self.radar}")
 
@@ -62,14 +69,14 @@ class RadarInterface(RadarInterfaceBase):
     errors = []
     if not self.rcp.can_valid:
       errors.append("canError")
-    ret.errors = errors
 
     if self.radar == RADAR.DELPHI_ESR:
       self._update_delphi_esr()
     elif self.radar == RADAR.DELPHI_MRR:
-      self._update_delphi_mrr()
+      errors.extend(self._update_delphi_mrr())
 
     ret.points = list(self.pts.values())
+    ret.errors = errors
     self.updated_messages.clear()
     return ret
 
@@ -103,13 +110,25 @@ class RadarInterface(RadarInterfaceBase):
           del self.pts[ii]
 
   def _update_delphi_mrr(self):
+    headerScanIndex = int(self.rcp.vl["MRR_Header_InformationDetections"]['CAN_SCAN_INDEX']) & 0b11
+
+    errors = []
+    if DELPHI_MRR_RADAR_RANGE_COVERAGE[headerScanIndex] != int(self.rcp.vl["MRR_Header_SensorCoverage"]["CAN_RANGE_COVERAGE"]):
+      errors.append("wrongConfig")
+
     for ii in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
       msg = self.rcp.vl[f"MRR_Detection_{ii:03d}"]
 
-      # SCAN_INDEX rotates through 0..3 on each message
-      # treat these as separate points
+      # SCAN_INDEX rotates through 0..3 on each message for different measurement modes
+      # Indexes 0 and 2 have a max range of ~40m, 1 and 3 are ~170m (MRR_Header_SensorCoverage->CAN_RANGE_COVERAGE)
+      # Indexes 0 and 1 have a Doppler coverage of +-71 m/s, 2 and 3 have +-60 m/s
+      # TODO: can we group into 2 groups?
       scanIndex = msg[f"CAN_SCAN_INDEX_2LSB_{ii:02d}"]
       i = (ii - 1) * 4 + scanIndex
+
+      # Throw out old measurements. Very unlikely to happen, but is proper behavior
+      if scanIndex != headerScanIndex:
+        continue
 
       if i not in self.pts:
         self.pts[i] = structs.RadarData.RadarPoint()
@@ -120,9 +139,13 @@ class RadarInterface(RadarInterfaceBase):
 
       valid = bool(msg[f"CAN_DET_VALID_LEVEL_{ii:02d}"])
 
+      # Long range measurement mode is more sensitive and can detect the road surface
+      dist = msg[f"CAN_DET_RANGE_{ii:02d}"]  # m [0|255.984]
+      if scanIndex in (1, 3) and dist < MIN_LONG_RANGE_DIST:
+        valid = False
+
       if valid:
         azimuth = msg[f"CAN_DET_AZIMUTH_{ii:02d}"]              # rad [-3.1416|3.13964]
-        dist = msg[f"CAN_DET_RANGE_{ii:02d}"]                   # m [0|255.984]
         distRate = msg[f"CAN_DET_RANGE_RATE_{ii:02d}"]          # m/s [-128|127.984]
         dRel = cos(azimuth) * dist                              # m from front of car
         yRel = -sin(azimuth) * dist                             # in car frame's y axis, left is positive
@@ -141,3 +164,5 @@ class RadarInterface(RadarInterfaceBase):
 
       else:
         del self.pts[i]
+
+    return errors
