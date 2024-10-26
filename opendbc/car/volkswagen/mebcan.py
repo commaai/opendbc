@@ -106,7 +106,7 @@ def acc_hold_type(main_switch_on, acc_faulted, long_active, starting, stopping, 
   return acc_hold_type
 
 
-def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, acc_hold_type, stopping, starting, lower_jerk, upper_jerk, esp_hold, override, speed, reversing, travel_assist_available):
+def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, acc_hold_type, stopping, starting, esp_hold, override, travel_assist_available):
   # active longitudinal control disables one pedal driving (regen mode of accelerator) while using overriding mechnism
   commands = []
 
@@ -123,8 +123,8 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
     "ACC_Status_ACC":             acc_control,
     "ACC_StartStopp_Info":        acc_enabled,
     "ACC_Sollbeschleunigung_02":  acceleration,
-    "ACC_zul_Regelabw_unten":     max(0.05, lower_jerk) if acc_control == ACC_CTRL_ACTIVE else 0,
-    "ACC_zul_Regelabw_oben":      min(3.0, upper_jerk) if acc_control == ACC_CTRL_ACTIVE else 0,
+    "ACC_zul_Regelabw_unten":     0.2 if acc_control == ACC_CTRL_ACTIVE else 0,
+    "ACC_zul_Regelabw_oben":      0.2 if acc_control == ACC_CTRL_ACTIVE else 0,
     "ACC_neg_Sollbeschl_Grad_02": 4.0 if acc_control == ACC_CTRL_ACTIVE else 0,  # TODO: dynamic adjustment of jerk limits
     "ACC_pos_Sollbeschl_Grad_02": 4.0 if acc_control == ACC_CTRL_ACTIVE else 0,  # TODO: dynamic adjustment of jerk limits
     "ACC_Anfahren":               starting,
@@ -132,8 +132,6 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
     "ACC_Anhalteweg":             20.46,
     "ACC_Anforderung_HMS":        acc_hold_type,
     "ACC_AKTIV_regelt":           1 if acc_control == ACC_CTRL_ACTIVE else 0,
-    "Speed":                      speed, # dont know if neccessary
-    "Reversing":                  reversing, # dont know if neccessary
     "SET_ME_0XFE":                0xFE,
     "SET_ME_0X1":                 0x1,
     "SET_ME_0X9":                 0x9,
@@ -175,25 +173,17 @@ def acc_hud_status_value(main_switch_on, acc_faulted, long_active, esp_hold, ove
   return acc_hud_control
 
 
-def get_desired_gap(distance_bars, desired_gap):
+def get_desired_gap(distance_bars, desired_gap, current_gap_signal):
   # mapping desired gap to correct signal of corresponding distance bar
   gap = 0
-
-  if distance_bars == 1:
+  
+  if distance_bars == current_gap_signal:
     gap = desired_gap 
-  elif distance_bars == 2:
-    gap = desired_gap
-  elif distance_bars == 3:
-    gap = desired_gap
-  elif distance_bars == 4:
-    gap = desired_gap
-  elif distance_bars == 5:
-    gap = desired_gap
 
   return gap
 
 
-def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, distance_bars, change_distance_bar, desired_gap, distance, heartbeat, esp_hold):
+def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, distance_bars, desired_gap, distance, esp_hold):
 
   values = {
     #"STA_Primaeranz": acc_hud_status,
@@ -212,12 +202,11 @@ def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, di
     "ACC_AKTIV_regelt":        1 if acc_control == ACC_HUD_ACTIVE else 0,
     "Lead_Brightness":         3 if acc_control == ACC_HUD_ACTIVE else 0, # object shows in colour
     "ACC_Events":              3 if esp_hold and acc_control == ACC_HUD_ACTIVE else 0, # acc ready message at standstill
-    "Zeitluecke_1":            get_desired_gap(distance_bars, desired_gap), # desired distance to lead object for distance bar 1
-    "Zeitluecke_2":            get_desired_gap(distance_bars, desired_gap), # desired distance to lead object for distance bar 2
-    "Zeitluecke_3":            get_desired_gap(distance_bars, desired_gap), # desired distance to lead object for distance bar 3
-    "Zeitluecke_4":            get_desired_gap(distance_bars, desired_gap), # desired distance to lead object for distance bar 4
-    "Zeitluecke_5":            get_desired_gap(distance_bars, desired_gap), # desired distance to lead object for distance bar 5
-    "ACC_Anzeige_Zeitluecke":  change_distance_bar if acc_control != ACC_HUD_DISABLED else 0, # show distance bar selection
+    "Zeitluecke_1":            get_desired_gap(distance_bars, desired_gap, 1), # desired distance to lead object for distance bar 1
+    "Zeitluecke_2":            get_desired_gap(distance_bars, desired_gap, 2), # desired distance to lead object for distance bar 2
+    "Zeitluecke_3":            get_desired_gap(distance_bars, desired_gap, 3), # desired distance to lead object for distance bar 3
+    "Zeitluecke_4":            get_desired_gap(distance_bars, desired_gap, 4), # desired distance to lead object for distance bar 4
+    "Zeitluecke_5":            get_desired_gap(distance_bars, desired_gap, 5), # desired distance to lead object for distance bar 5
     "Zeitluecke_Farbe":        1 if acc_control in (ACC_HUD_ENABLED, ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0, # yellow (1) or white (0) time gap
     "SET_ME_0X1":              0x1,    # unknown
     "SET_ME_0X6A":             0x6A,   # unknown
