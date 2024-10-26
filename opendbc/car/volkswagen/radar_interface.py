@@ -5,13 +5,11 @@ from opendbc.car import structs
 from opendbc.car.interfaces import RadarInterfaceBase
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.volkswagen.values import DBC, VolkswagenFlags
-from collections import defaultdict
 
 RADAR_ADDR = 0x24F
-NO_OBJECT  = -5
+NO_OBJECT  = 0
 LANE_TYPES = ['Same_Lane', 'Left_Lane', 'Right_Lane']
 
-# info: distance signals can move without physical distance change ...
 
 def get_radar_can_parser(CP):
   if CP.flags & VolkswagenFlags.MEB:
@@ -28,7 +26,6 @@ class RadarInterface(RadarInterfaceBase):
     self.updated_messages = set()
     self.trigger_msg = RADAR_ADDR
     self.track_id = 0
-    self.previous_offsets = defaultdict(lambda: NO_OBJECT)
 
     self.radar_off_can = CP.radarUnavailable
     self.rcp = get_radar_can_parser(CP)
@@ -52,40 +49,51 @@ class RadarInterface(RadarInterfaceBase):
     ret = structs.RadarData()
 
     if self.rcp is None or not self.rcp.can_valid:
-      ret.errors = ["canError"]
-      return ret
+        ret.errors = ["canError"]
+        return ret
 
     msg = self.rcp.vl["MEB_Distance_01"]
 
-    # Iterate over lane types and dynamic signal parts (01, 02)
+    active_objects = {}
+
     for lane_type in LANE_TYPES:
       for idx in range(1, 3):
         signal_part = f'{lane_type}_0{idx}'
         long_distance = f'{signal_part}_Long_Distance'
-        ld_offset = f'{signal_part}_LD_Offset'
+        object_id = f'{signal_part}_ObjectID'
         lat_distance = f'{signal_part}_Lat_Distance'
         rel_velo = f'{signal_part}_Rel_Velo'
 
-        current_offset = msg[ld_offset]
-            
-        if signal_part not in self.pts:
-          self.pts[signal_part] = structs.RadarData.RadarPoint()
-          self.pts[signal_part].trackId = self.track_id
-          self.track_id += 1
+        current_object_id = msg[object_id]
 
-        # offset changes occur when another object is detected
-        # this skips a frame of data
-        if current_offset != NO_OBJECT and current_offset == self.previous_offsets[signal_part]:            
-          self.pts[signal_part].measured = True
-          self.pts[signal_part].dRel = msg[long_distance] + current_offset
-          self.pts[signal_part].yRel = msg[lat_distance]
-          self.pts[signal_part].vRel = msg[rel_velo] * CV.KPH_TO_MS
-          self.pts[signal_part].aRel = float('nan')
-          self.pts[signal_part].yvRel = float('nan')
-        else:
-          self.pts.pop(signal_part, None)
+        if current_object_id != NO_OBJECT:
+          if current_object_id not in active_objects:
+            active_objects[current_object_id] = {
+              "long_distance": msg[long_distance],
+              "lat_distance": msg[lat_distance],
+              "rel_velo": msg[rel_velo] * CV.KPH_TO_MS
+            }
+          else:
+            ret.errors = ["canError"]
+            return ret
             
-        self.previous_offsets[signal_part] = current_offset
+    for object_id, data in active_objects.items():
+      if object_id not in self.pts:
+        self.pts[object_id] = structs.RadarData.RadarPoint()
+        self.pts[object_id].trackId = self.track_id
+        self.track_id += 1
+
+      self.pts[object_id].measured = True
+      self.pts[object_id].dRel = data["long_distance"]
+      self.pts[object_id].yRel = data["lat_distance"]
+      self.pts[object_id].vRel = data["rel_velo"]
+      self.pts[object_id].aRel = float('nan')
+      self.pts[object_id].yvRel = float('nan')
+
+    tracked_ids = set(self.pts.keys())
+    active_ids = set(active_objects.keys())
+    for object_id in tracked_ids - active_ids:
+      self.pts.pop(object_id, None)
 
     ret.points = list(self.pts.values())
     return ret
