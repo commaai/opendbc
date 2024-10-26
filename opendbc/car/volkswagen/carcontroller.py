@@ -42,6 +42,7 @@ class CarController(CarControllerBase):
     self.hca_frame_same_torque = 0
     self.steering_power = 0
     self.accel_last = 0
+    self.long_heartbeat = 0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -173,13 +174,14 @@ class CarController(CarControllerBase):
 
     if self.frame % self.CCP.ACC_HUD_STEP == 0 and self.CP.openpilotLongitudinalControl:
       if self.CP.flags & VolkswagenFlags.MEB:
+        self.long_heartbeat = self.generate_vw_meb_hud_heartbeat(self.long_heartbeat)
         desired_gap = max(1, CS.out.vEgo * 1) #get_T_FOLLOW(hud_control.leadDistanceBars))
         distance = 50 #min(self.lead_distance, 100)
 
         acc_hud_status = self.CCS.acc_hud_status_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled and CS.out.cruiseState.enabled,
                                                        CS.esp_hold_confirmation, CC.cruiseControl.override or CS.out.gasPressed)
         can_sends.append(self.CCS.create_acc_hud_control(self.packer_pt, CANBUS.pt, acc_hud_status, hud_control.setSpeed * CV.MS_TO_KPH, hud_control.leadVisible,
-                                                         hud_control.leadDistanceBars, desired_gap, distance, CS.esp_hold_confirmation))
+                                                         hud_control.leadDistanceBars, desired_gap, distance, self.long_heartbeat, CS.esp_hold_confirmation))
 
       else:
         lead_distance = 0
@@ -240,3 +242,9 @@ class CarController(CarControllerBase):
         steering_power = 0
         
     return steering_power
+
+  def generate_vw_meb_hud_heartbeat(self, long_heartbeat_prev):
+    if long_heartbeat_prev != 221:
+      return 221
+    elif long_heartbeat_prev == 221:
+      return 360
