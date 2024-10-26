@@ -79,6 +79,7 @@ class RadarInterface(RadarInterfaceBase):
     self.frame = 0
 
     # TODO: 2.5 good enough?
+    # TODO: write simple cluster function
     self.dbscan = DBSCAN(eps=5, min_samples=1)
 
     self.fig, self.ax = plt.subplots()
