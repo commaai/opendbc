@@ -33,7 +33,7 @@ class CarInterface(CarInterfaceBase):
       # Panda ALLOW_DEBUG firmware required.
       ret.dashcamOnly = True
       
-    elif ret.flags & VolkswagenFlags.MEB: # TODO
+    elif ret.flags & VolkswagenFlags.MEB:
       # Set global MEB parameters
       ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.volkswagenMeb)]
       ret.enableBsm = 0x24C in fingerprint[0]  # MEB_Side_Assist_01
@@ -75,7 +75,7 @@ class CarInterface(CarInterfaceBase):
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
     elif ret.flags & VolkswagenFlags.MEB:
     #  ret.steerLimitTimer = 1.2
-      ret.steerActuatorDelay = 0.12
+      ret.steerActuatorDelay = 0.16
     else:
       ret.steerActuatorDelay = 0.1
       ret.lateralTuning.pid.kpBP = [0.]
@@ -89,10 +89,6 @@ class CarInterface(CarInterfaceBase):
     if ret.flags & VolkswagenFlags.MEB:
       ret.longitudinalActuatorDelay = 0.1
       ret.radarTimeStep = (1.0 / 25) # 25Hz
-      #ret.longitudinalTuning.kpBP = [0., 5., 35.]
-      #ret.longitudinalTuning.kpV  = [0., 0.1, 0.4]
-      ret.longitudinalTuning.kiBP = [0., 5., 35.]
-      ret.longitudinalTuning.kiV  = [1.2, 0.8, 0.5]
 
     ret.experimentalLongitudinalAvailable = ret.networkLocation == NetworkLocation.gateway or docs
     if experimental_long:
