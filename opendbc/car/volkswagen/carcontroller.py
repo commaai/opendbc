@@ -136,13 +136,13 @@ class CarController(CarControllerBase):
       starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
 
       if self.CP.flags & VolkswagenFlags.MEB:
-        accel = clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.enabled and CS.out.cruiseState.enabled else 0
+        accel = clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.enabled else 0
         self.accel_last = accel
         current_speed = CS.out.vEgo * CV.MS_TO_KPH
         reversing = CS.out.gearShifter in [structs.CarState.GearShifter.reverse]
-        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled and CS.out.cruiseState.enabled,
+        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
                                                  CS.esp_hold_confirmation, CC.cruiseControl.override or CS.out.gasPressed)
-        acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled and CS.out.cruiseState.enabled,
+        acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
                                                starting, stopping, CS.esp_hold_confirmation, CC.cruiseControl.override or CS.out.gasPressed)
           
         can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.enabled,
@@ -178,7 +178,7 @@ class CarController(CarControllerBase):
         desired_gap = max(1, CS.out.vEgo * 1) #get_T_FOLLOW(hud_control.leadDistanceBars))
         distance = 50 #min(self.lead_distance, 100)
 
-        acc_hud_status = self.CCS.acc_hud_status_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled and CS.out.cruiseState.enabled,
+        acc_hud_status = self.CCS.acc_hud_status_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
                                                        CS.esp_hold_confirmation, CC.cruiseControl.override or CS.out.gasPressed)
         can_sends.append(self.CCS.create_acc_hud_control(self.packer_pt, CANBUS.pt, acc_hud_status, hud_control.setSpeed * CV.MS_TO_KPH, hud_control.leadVisible,
                                                          hud_control.leadDistanceBars, desired_gap, distance, self.long_heartbeat, CS.esp_hold_confirmation))
