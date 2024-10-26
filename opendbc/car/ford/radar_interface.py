@@ -78,6 +78,7 @@ class RadarInterface(RadarInterfaceBase):
 
     self.frame = 0
 
+    # TODO: 2.5 good enough?
     self.dbscan = DBSCAN(eps=5, min_samples=1)
 
     self.fig, self.ax = plt.subplots()
@@ -263,11 +264,13 @@ class RadarInterface(RadarInterfaceBase):
       print('working on cluster', (dRel, yRel, vRel))
 
       closest_previous_cluster = None
-      closest_euclidean_dist = 999999999
+      closest_euclidean_dist = None
       print('searching! ...')
       for idx, c in enumerate(self.clusters):
-        # if c.cluster_id in taken_clusters:
-        #   continue
+        # TODO: need to re-enable this
+        # TODO: some clusters might not match optimally with this, but maybe rare enough?
+        if c.cluster_id in taken_clusters:
+          continue
 
         # if this new cluster is close to any previous ones, use its previous cluster id with the new points and mark the old cluster as used
         print('comparing with prev cluster', (c.dRel, c.yRel, c.vRel))
@@ -315,7 +318,7 @@ class RadarInterface(RadarInterfaceBase):
     # print('track_id', self.track_id)
     # print('cluster_id', self.cluster_id)
 
-    if PLOT := True:
+    if PLOT := False:
       self.ax.clear()
 
       colors = [cmap(c.cluster_id % 20) for c in self.clusters]
@@ -332,7 +335,7 @@ class RadarInterface(RadarInterfaceBase):
       self.ax.legend()
       self.ax.set_xlim(0, 180)
       self.ax.set_ylim(-30, 30)
-      plt.pause(1/2)
+      plt.pause(1/100)
 
     self.pts = {}
     for i, cluster in enumerate(self.clusters):
