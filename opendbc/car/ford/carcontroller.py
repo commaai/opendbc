@@ -100,7 +100,6 @@ class CarController(CarControllerBase):
     # send acc msg at 50Hz
     if self.CP.openpilotLongitudinalControl and (self.frame % CarControllerParams.ACC_CONTROL_STEP) == 0:
       accel = actuators.accel
-      gas = accel
 
       if CC.longActive:
         # Compensate for engine creep at low speed.
@@ -115,6 +114,7 @@ class CarController(CarControllerBase):
       accel = clip(accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
 
       # Both gas and accel are in m/s^2, accel is used solely for braking
+      gas = accel
       if not CC.longActive or gas < CarControllerParams.MIN_GAS:
         gas = CarControllerParams.INACTIVE_GAS
 
