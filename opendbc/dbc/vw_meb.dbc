@@ -1594,22 +1594,22 @@ BO_ 591 MEB_Distance_01: 64 XXX
  SG_ Unknown_03 : 54|10@1+ (1,0) [0|3] "" XXX
  SG_ Same_Lane_01_Long_Distance : 64|12@1+ (0.062,-4.5) [0|200] "Unit_Meter" XXX
  SG_ Same_Lane_01_Lat_Distance : 76|10@1+ (0.065,-33.28) [0|31] "Unit_Meter" XXX
- SG_ Same_Lane_01_Rel_Velo : 86|10@1+ (0.85,-435.2) [0|300] "Unit_KilometerPerHour" XXX
+ SG_ Same_Lane_01_Rel_Velo : 86|10@1+ (0.87,-445.44) [0|300] "Unit_KilometerPerHour" XXX
  SG_ Left_Lane_01_Long_Distance : 96|12@1+ (0.062,-4.5) [0|200] "Unit_Meter" XXX
  SG_ Left_Lane_01_Lat_Distance : 108|10@1+ (0.065,-33.28) [0|15] "Unit_Meter" XXX
- SG_ Left_Lane_01_Rel_Velo : 118|10@1+ (0.85,-435.2) [0|300] "Unit_KilometerPerHour" XXX
+ SG_ Left_Lane_01_Rel_Velo : 118|10@1+ (0.87,-445.44) [0|300] "Unit_KilometerPerHour" XXX
  SG_ Right_Lane_01_Long_Distance : 128|12@1+ (0.062,-4.5) [0|200] "Unit_Meter" XXX
  SG_ Right_Lane_01_Lat_Distance : 140|10@1+ (0.065,-33.28) [0|15] "Unit_Meter" XXX
- SG_ Right_Lane_01_Rel_Velo : 150|10@1+ (0.85,-435.2) [0|300] "Unit_KilometerPerHour" XXX
+ SG_ Right_Lane_01_Rel_Velo : 150|10@1+ (0.87,-445.44) [0|300] "Unit_KilometerPerHour" XXX
  SG_ Same_Lane_02_Long_Distance : 160|12@1+ (0.062,-4.5) [0|200] "Unit_Meter" XXX
  SG_ Same_Lane_02_Lat_Distance : 172|10@1+ (0.065,-33.28) [0|31] "Unit_Meter" XXX
- SG_ Same_Lane_02_Rel_Velo : 182|10@1+ (0.85,-435.2) [0|300] "Unit_KilometerPerHour" XXX
+ SG_ Same_Lane_02_Rel_Velo : 182|10@1+ (0.87,-445.44) [0|300] "Unit_KilometerPerHour" XXX
  SG_ Left_Lane_02_Long_Distance : 192|12@1+ (0.062,-4.5) [0|200] "Unit_Meter" XXX
  SG_ Left_Lane_02_Lat_Distance : 204|10@1+ (0.065,-33.28) [0|1023] "Unit_Meter" XXX
- SG_ Left_Lane_02_Rel_Velo : 214|10@1+ (0.85,-435.2) [0|300] "Unit_KilometerPerHour" XXX
+ SG_ Left_Lane_02_Rel_Velo : 214|10@1+ (0.87,-445.44) [0|300] "Unit_KilometerPerHour" XXX
  SG_ Right_Lane_02_Long_Distance : 224|12@1+ (0.062,-4.5) [0|200] "Unit_Meter" XXX
  SG_ Right_Lane_02_Lat_Distance : 236|10@1+ (0.065,-33.28) [0|1023] "Unit_Meter" XXX
- SG_ Right_Lane_02_Rel_Velo : 246|10@1+ (0.85,-435.2) [0|300] "Unit_KilometerPerHour" XXX
+ SG_ Right_Lane_02_Rel_Velo : 246|10@1+ (0.87,-445.44) [0|300] "Unit_KilometerPerHour" XXX
  SG_ Unknown_04 : 256|8@1+ (1,-128) [0|31] "" XXX
  SG_ Unknown_05 : 264|6@1+ (1,-15) [0|31] "" XXX
  SG_ Unknown_06 : 270|6@1+ (1,0) [0|127] "" XXX
