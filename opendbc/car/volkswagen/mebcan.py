@@ -181,7 +181,7 @@ def get_desired_gap(distance_bars, desired_gap, current_gap_signal):
   return gap
 
 
-def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, distance_bars, desired_gap, distance, esp_hold):
+def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, distance_bars, desired_gap, distance, heartbeat, esp_hold):
 
   values = {
     #"STA_Primaeranz": acc_hud_status,
@@ -191,6 +191,7 @@ def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, di
     "ACC_Display_Prio":        1,
     "ACC_Abstandsindex_02":    512,
     "ACC_EGO_Fahrzeug":        1 if acc_control == ACC_HUD_ACTIVE else 0,
+    "Heartbeat":               heartbeat,
     "Lead_Type_Detected":      1 if lead_visible else 0, # object should be displayed
     "Lead_Type":               3 if lead_visible else 0, # displaying a car
     "Lead_Distance":           distance if lead_visible else 0, # hud distance of object
