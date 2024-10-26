@@ -1,5 +1,3 @@
-from opendbc.car.common.numpy_fast import clip
-
 ACC_CTRL_ERROR    = 6
 ACC_CTRL_OVERRIDE = 4
 ACC_CTRL_ACTIVE   = 3
