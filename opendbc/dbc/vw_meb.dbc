@@ -1650,6 +1650,7 @@ BO_ 768 MEB_ACC_01: 48 XXX
  SG_ Unknown_06 : 226|1@0+ (1,0) [0|1] "" XXX
  SG_ Unknown_07 : 228|1@0+ (1,0) [0|1] "" XXX
  SG_ SET_ME_0X7FFF : 240|16@1+ (1,0) [0|65535] "" XXX
+ SG_ Unknown_09 : 262|1@0+ (1,0) [0|3] "" XXX
  SG_ Lead_Type_Detected : 265|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_Standby_Override : 266|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_AKTIV_regelt : 267|1@0+ (1,0) [0|1] "" XXX
