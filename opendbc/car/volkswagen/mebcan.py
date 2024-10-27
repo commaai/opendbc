@@ -189,7 +189,7 @@ def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, di
     "ACC_Wunschgeschw_02":     set_speed if set_speed < 250 else 327.36,
     "ACC_Gesetzte_Zeitluecke": distance_bars, # 5 distance bars available (3 are used by OP)
     "ACC_Display_Prio":        1,
-    "ACC_Abstandsindex_02":    512,
+    "ACC_Abstandsindex_02":    569,
     "ACC_EGO_Fahrzeug":        1 if acc_control == ACC_HUD_ACTIVE else 0,
     #"Heartbeat":               heartbeat,
     "Lead_Type_Detected":      1 if lead_visible else 0, # object should be displayed
