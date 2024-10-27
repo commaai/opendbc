@@ -1562,6 +1562,7 @@ BO_ 267 MEB_Motor_01: 32 XXX
  SG_ Accel_Pedal_Pressure : 12|9@1+ (0.4,0) [0|255] "" XXX
  SG_ Accel_Low_Pressed_Support : 21|1@1+ (1,0) [0|7] "" XXX
  SG_ TSK_Status : 88|3@1+ (1,0) [0|7] "" XXX
+ SG_ TSK_Limiter_ausgewaehlt : 95|1@1+ (1,0) [0|3] "" XXX
 
 BO_ 588 MEB_Side_Assist_01: 16 XXX
  SG_ Blind_Spot_Right : 12|7@1+ (1,0) [0|15] "" XXX
