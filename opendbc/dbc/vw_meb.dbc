@@ -1617,7 +1617,6 @@ BO_ 591 MEB_Distance_01: 64 XXX
  SG_ Unknown_08 : 286|3@0+ (1,0) [0|1] "" XXX
 
 BO_ 768 MEB_ACC_01: 48 XXX
- SG_ Unknown_Area_01 : 0|64@1+ (1,0) [0|1.84467440737096e+19] "" XXX
  SG_ ACC_Tempolimit : 64|5@1+ (1,0) [0|31] "" OTA_FC
  SG_ ACC_Wunschgeschw_Farbe : 69|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ ACC_Warnung_Verkehrszeichen_1 : 70|1@1+ (1,0) [0|1] "" Vector__XXX
