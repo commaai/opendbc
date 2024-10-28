@@ -278,7 +278,7 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint == CAR.HONDA_ODYSSEY_BOSCH and not self.CP.openpilotLongitudinalControl:
       if steer_requested_prev and not eps_steer_active:
         self.eps_steer_invalid_cnt += 1
-      if ret.steerFaultTemporary or not ret.cruiseState.enabled:
+      if eps_steer_active or not ret.cruiseState.enabled:
         self.eps_steer_invalid_cnt = 0
       ret.steerFaultTemporary |= self.eps_steer_invalid_cnt >= int(1. / DT_CTRL)
 
