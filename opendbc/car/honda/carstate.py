@@ -271,7 +271,8 @@ class CarState(CarStateBase):
       self.min_steer_alert_speed = self.CP.minSteerSpeed + 1.5
     if ret.vEgo < self.CP.minSteerSpeed + 0.5:
       self.min_steer_alert_speed = self.CP.minSteerSpeed
-    ret.lowSpeedAlert = self.CP.minSteerSpeed > 6.0 and (0.5 < ret.vEgo <= self.min_steer_alert_speed)
+    if self.CP.minSteerSpeed > 6.0:
+      ret.lowSpeedAlert = not ret.standstill and ret.vEgo < self.min_steer_alert_speed
 
     # Depending on vehicle state, ODYSSEY_BOSCH can forcibly disengage lateral controls.
     # Return a fault if the car hasn't enabled steering within 1000ms. Latches on until disengaged or if the EPS reports a fault.
