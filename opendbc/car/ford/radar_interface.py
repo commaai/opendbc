@@ -60,18 +60,16 @@ def cluster_points(pts: list[list[float]], max_dist: float):
   clusters = []
   cluster_idxs = []
 
-  for pt_idx, pt in enumerate(pts):
+  for pt in pts:
     if len(clusters) == 0:
       cluster_idxs.append(len(clusters))
-      clusters.append([pt_idx])
+      clusters.append([pt])
     else:
       closest_cluster = None
       closest_cluster_dist = None
 
       for cluster_idx, cluster in enumerate(clusters):
-        # TODO: clusters can hold points again
-        cluster_pts = [pts[c] for c in cluster]
-        mean_pt = [sum(ax) / len(ax) for ax in zip(*cluster_pts, strict=True)]
+        mean_pt = [sum(ax) / len(ax) for ax in zip(*cluster, strict=True)]
         cluster_dist = calc_dist(pt, mean_pt)
 
         if cluster_dist < max_dist:
@@ -81,10 +79,10 @@ def cluster_points(pts: list[list[float]], max_dist: float):
 
       if closest_cluster is None:
         cluster_idxs.append(len(clusters))
-        clusters.append([pt_idx])
+        clusters.append([pt])
       else:
         cluster_idxs.append(closest_cluster)
-        clusters[closest_cluster].append(pt_idx)  # TODO: append point index!
+        clusters[closest_cluster].append(pt)
 
   return cluster_idxs  # clusters
 
@@ -270,6 +268,7 @@ class RadarInterface(RadarInterfaceBase):
     keys = [[p.dRel, p.yRel, p.vRel] for p in temp_points_list]
     # labels = self.dbscan.fit_predict(keys)
     labels = cluster_points(keys, 5)
+    # TODO: can be empty
     clusters = [[] for _ in range(max(labels) + 1)]
 
     for i, label in enumerate(labels):
