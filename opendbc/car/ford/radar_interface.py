@@ -282,33 +282,33 @@ class RadarInterface(RadarInterfaceBase):
 
     taken_clusters: set[int] = set()
 
-    if len(temp_points_list) == 60:
-      print('clusters', len(clusters))
-      print('len points', len(temp_points_list))
-      print('sum of clusters', sum([len(c) for c in clusters]))
-      print()
-
-      print('self.clusters')
-      for c in self.clusters:
-        print((c.cluster_id, c.dRel, c.yRel, c.vRel, [p.to_dict() for p in c.pts]))
-      # print('----')
-      # print('clusters', [[p.to_dict() for p in c] for c in clusters])
-      print()
+    # if len(temp_points_list) == 60:
+    #   print('clusters', len(clusters))
+    #   print('len points', len(temp_points_list))
+    #   print('sum of clusters', sum([len(c) for c in clusters]))
+    #   print()
+    #
+    #   print('self.clusters')
+    #   for c in self.clusters:
+    #     print((c.cluster_id, c.dRel, c.yRel, c.vRel, [p.to_dict() for p in c.pts]))
+    #   # print('----')
+    #   # print('clusters', [[p.to_dict() for p in c] for c in clusters])
+    #   print()
 
     new_clusters = []
 
-    print('prev clusters', [(c.dRel, c.yRel, c.vRel) for c in self.clusters])
+    # print('prev clusters', [(c.dRel, c.yRel, c.vRel) for c in self.clusters])
 
     for cluster in clusters:  # TODO: make clusters a list of Cluster objects
       dRel = float(np.mean([p.dRel for p in cluster]))
       yRel = float(np.mean([p.yRel for p in cluster]))
       vRel = float(np.mean([p.vRel for p in cluster]))
-      print()
-      print('working on cluster', (dRel, yRel, vRel))
+      # print()
+      # print('working on cluster', (dRel, yRel, vRel))
 
       closest_previous_cluster = None
       closest_euclidean_dist = None
-      print('searching! ...')
+      # print('searching! ...')
       for idx, c in enumerate(self.clusters):
         # TODO: need to re-enable this
         # TODO: some clusters might not match optimally with this, but maybe rare enough?
@@ -316,31 +316,31 @@ class RadarInterface(RadarInterfaceBase):
           continue
 
         # if this new cluster is close to any previous ones, use its previous cluster id with the new points and mark the old cluster as used
-        print('comparing with prev cluster', (c.dRel, c.yRel, c.vRel))
+        # print('comparing with prev cluster', (c.dRel, c.yRel, c.vRel))
         euclidean_dist = np.sqrt((c.dRel - dRel) ** 2 + (c.yRel - yRel) ** 2 + (c.vRel - vRel) ** 2)
-        print('got', euclidean_dist)
+        # print('got', euclidean_dist)
         # print(abs(c.dRel - dRel), abs(c.yRel - yRel), euclidean_dist)
         # if abs(c.dRel - dRel) < 5 and abs(c.yRel - yRel) < 5:# and abs(c.vRel - vRel) < 5:
         if euclidean_dist < 5:# and abs(c.vRel - vRel) < 5:
           if closest_previous_cluster is None or euclidean_dist < closest_euclidean_dist:
-            print('new low!')
+            # print('new low!')
             closest_previous_cluster = c
             closest_euclidean_dist = euclidean_dist
           # new_clusters.append(Cluster(cluster, c.cluster_id))
           # taken_clusters.add(idx)
           # break
 
-      print()
+      # print()
       if closest_previous_cluster is not None:
-        print('settled on', closest_euclidean_dist, (closest_previous_cluster.dRel, closest_previous_cluster.yRel, closest_previous_cluster.vRel))
+        # print('settled on', closest_euclidean_dist, (closest_previous_cluster.dRel, closest_previous_cluster.yRel, closest_previous_cluster.vRel))
         # TODO: anything better than deepcopy?
         new_clusters.append(Cluster(copy.deepcopy(cluster), closest_previous_cluster.cluster_id))
         taken_clusters.add(closest_previous_cluster.cluster_id)
         # print('new!', self.cluster_id)
       else:
-        print('making cluster', self.cluster_id, (dRel, yRel, vRel))
+        # print('making cluster', self.cluster_id, (dRel, yRel, vRel))
         new_clusters.append(Cluster(copy.deepcopy(cluster), self.cluster_id))
-        print(new_clusters[-1].dRel, new_clusters[-1].yRel, new_clusters[-1].vRel)
+        # print(new_clusters[-1].dRel, new_clusters[-1].yRel, new_clusters[-1].vRel)
         self.cluster_id += 1
 
         if len(temp_points_list) == 60:
@@ -348,13 +348,13 @@ class RadarInterface(RadarInterfaceBase):
 
     self.clusters = new_clusters
 
-    print('post clusters', [(c.dRel, c.yRel, c.vRel) for c in self.clusters])
+    # print('post clusters', [(c.dRel, c.yRel, c.vRel) for c in self.clusters])
 
-    if len(temp_points_list) == 60:
-    #   print('new self.clusters')
-    #   for c in self.clusters:
-    #     print((c.cluster_id, c.dRel, c.yRel, c.vRel, [p.to_dict() for p in c.pts]))
-      print()
+    # if len(temp_points_list) == 60:
+    # #   print('new self.clusters')
+    # #   for c in self.clusters:
+    # #     print((c.cluster_id, c.dRel, c.yRel, c.vRel, [p.to_dict() for p in c.pts]))
+    #   print()
 
     # print('clusters', clusters)
     # print('new_clusters', new_clusters)
