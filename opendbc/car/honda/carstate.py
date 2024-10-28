@@ -266,14 +266,14 @@ class CarState(CarStateBase):
       self.lkas_hud = cp_cam.vl["LKAS_HUD"]
 
     # Low speed steer alert logic; only for steer cutoffs above 6 m/s.
-    # Default to no early alert. A modest increase in speed will raise the alert threshold.
+    # Default to a brief early alert. A speed increase raises the alert threshold.
     if ret.vEgo > (self.CP.minSteerSpeed + 3.5):
       self.min_steer_alert_speed = self.CP.minSteerSpeed + 1.5
     if ret.vEgo < self.CP.minSteerSpeed + 0.5:
       self.min_steer_alert_speed = self.CP.minSteerSpeed
-    ret.lowSpeedAlert = self.CP.minSteerSpeed > 6.0 and (0 < ret.vEgo <= self.min_steer_alert_speed)
+    ret.lowSpeedAlert = self.CP.minSteerSpeed > 6.0 and (0.5 < ret.vEgo <= self.min_steer_alert_speed)
 
-    # Depending on vehicle state, ODYSSEY_BOSCH & ACURA_RDX_3G can forcibly disengage lateral controls.
+    # Depending on vehicle state, ODYSSEY_BOSCH can forcibly disengage lateral controls.
     # Return a fault if the car hasn't enabled steering within 1000ms. Latches on until disengaged or if the EPS reports a fault.
     if self.CP.carFingerprint == CAR.HONDA_ODYSSEY_BOSCH and not self.CP.openpilotLongitudinalControl:
       if steer_requested_prev and not eps_steer_active:
