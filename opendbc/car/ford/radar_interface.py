@@ -2,6 +2,7 @@ import matplotlib
 matplotlib.use('Qt5Agg')  # Use the Qt5Agg backend
 matplotlib.rcParams['figure.raise_window'] = False
 
+import math
 import copy
 import numpy as np
 from math import cos, sin
@@ -26,6 +27,7 @@ DELPHI_MRR_RADAR_RANGE_COVERAGE = {0: 42, 1: 164, 2: 45, 3: 175}  # scan index t
 MIN_LONG_RANGE_DIST = 30  # meters
 
 cmap = plt.cm.get_cmap('tab20', 20)  # 'tab20' colormap with 20 colors
+PLOT = False
 
 class Cluster:
   def __init__(self, pts: list[structs.RadarData.RadarPoint], cluster_id: int):
@@ -47,6 +49,44 @@ class Cluster:
   @property
   def vRel(self):
     return sum([p.vRel for p in self.pts]) / len(self.pts)
+
+
+# TODO: linalg.norm faster?
+def calc_dist(pt1, pt2):
+  return math.sqrt(sum([(p1 - p2) ** 2 for p1, p2 in zip(pt1, pt2, strict=True)]))
+
+
+def cluster_points(pts: list[list[float]], max_dist: float):
+  clusters = []
+  cluster_idxs = []
+
+  for pt_idx, pt in enumerate(pts):
+    if len(clusters) == 0:
+      cluster_idxs.append(len(clusters))
+      clusters.append([pt_idx])
+    else:
+      closest_cluster = None
+      closest_cluster_dist = None
+
+      for cluster_idx, cluster in enumerate(clusters):
+        # TODO: clusters can hold points again
+        cluster_pts = [pts[c] for c in cluster]
+        mean_pt = [sum(ax) / len(ax) for ax in zip(*cluster_pts, strict=True)]
+        cluster_dist = calc_dist(pt, mean_pt)
+
+        if cluster_dist < max_dist:
+          if closest_cluster is None or cluster_dist < closest_cluster_dist:
+            closest_cluster = cluster_idx
+            closest_cluster_dist = cluster_dist
+
+      if closest_cluster is None:
+        cluster_idxs.append(len(clusters))
+        clusters.append([pt_idx])
+      else:
+        cluster_idxs.append(closest_cluster)
+        clusters[closest_cluster].append(pt_idx)  # TODO: append point index!
+
+  return cluster_idxs  # clusters
 
 
 def _create_delphi_esr_radar_can_parser(CP) -> CANParser:
@@ -82,7 +122,8 @@ class RadarInterface(RadarInterfaceBase):
     # TODO: write simple cluster function
     self.dbscan = DBSCAN(eps=5, min_samples=1)
 
-    self.fig, self.ax = plt.subplots()
+    if PLOT:
+      self.fig, self.ax = plt.subplots()
 
     self.temp_pts = {}
 
@@ -227,7 +268,8 @@ class RadarInterface(RadarInterfaceBase):
 
     temp_points_list = list(self.temp_pts.values())
     keys = [[p.dRel, p.yRel, p.vRel] for p in temp_points_list]
-    labels = self.dbscan.fit_predict(keys)
+    # labels = self.dbscan.fit_predict(keys)
+    labels = cluster_points(keys, 5)
     clusters = [[] for _ in range(max(labels) + 1)]
 
     for i, label in enumerate(labels):
