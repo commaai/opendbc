@@ -101,9 +101,16 @@ def cluster_points(pts: list[list[float]], pts2: list[list[float]], max_dist: fl
   pts = np.array(pts)
   pts2 = np.array(pts2)
 
-  # Calculate distance between every point
-  diff = pts2[:, np.newaxis, :] - pts[np.newaxis, :, :]
-  dist_sq = np.sum(diff ** 2, axis=2)
+  # Compute squared norms
+  pts_norm_sq = np.sum(pts ** 2, axis=1)
+  pts2_norm_sq = np.sum(pts2 ** 2, axis=1)
+
+  # Compute squared Euclidean distances using the identity
+  # dist_sq[i, j] = ||pts2[i]||^2 + ||pts[j]||^2 - 2 * pts2[i] . pts[j]
+  dist_sq = pts2_norm_sq[:, np.newaxis] + pts_norm_sq[np.newaxis, :] - 2 * np.dot(pts2, pts.T)
+
+  # Ensure no negative distances due to floating-point errors
+  dist_sq = np.maximum(dist_sq, 0.0)
 
   # Find the closest cluster for each point and assign its index
   closest_clusters = np.argmin(dist_sq, axis=1)
