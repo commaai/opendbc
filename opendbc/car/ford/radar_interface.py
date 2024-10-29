@@ -322,11 +322,11 @@ class RadarInterface(RadarInterfaceBase):
 
         # if this new cluster is close to any previous ones, use its previous cluster id with the new points and mark the old cluster as used
         # print('comparing with prev cluster', (c.dRel, c.yRel, c.vRel))
-        euclidean_dist = np.sqrt((c.dRel - dRel) ** 2 + (c.yRel - yRel) ** 2 + (c.vRel - vRel) ** 2)
+        euclidean_dist = (c.dRel - dRel) ** 2 + (c.yRel - yRel) ** 2 + (c.vRel - vRel) ** 2
         # print('got', euclidean_dist)
         # print(abs(c.dRel - dRel), abs(c.yRel - yRel), euclidean_dist)
         # if abs(c.dRel - dRel) < 5 and abs(c.yRel - yRel) < 5:# and abs(c.vRel - vRel) < 5:
-        if euclidean_dist < 5:# and abs(c.vRel - vRel) < 5:
+        if euclidean_dist < 25:# and abs(c.vRel - vRel) < 5:
           if closest_previous_cluster is None or euclidean_dist < closest_euclidean_dist:
             # print('new low!')
             closest_previous_cluster = c
