@@ -272,7 +272,7 @@ class RadarInterface(RadarInterfaceBase):
         # points.append([dRel, yRel * 2])
 
         if i not in self.temp_pts:
-          self.temp_pts[i] = structs.RadarData.RadarPoint()
+          self.temp_pts[i] = RadarPoint()
           self.temp_pts[i].trackId = self.track_id
           self.temp_pts[i].aRel = float('nan')
           self.temp_pts[i].yvRel = float('nan')
