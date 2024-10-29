@@ -316,6 +316,7 @@ class RadarInterface(RadarInterfaceBase):
         # assert False
         continue
 
+      # TODO: somehow store the previous mean dRel for the next clustering step
       dRel = min([p.dRel for p in pts])
       yRel = [p.yRel for p in pts]
       yRel = sum(yRel) / len(yRel)
