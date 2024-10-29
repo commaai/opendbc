@@ -1,3 +1,11 @@
+import matplotlib
+matplotlib.use('Qt5Agg')  # Use the Qt5Agg backend
+matplotlib.rcParams['figure.raise_window'] = False
+
+import math
+import copy
+import numpy as np
+
 from math import cos, sin
 from opendbc.can.parser import CANParser
 from opendbc.car import structs
@@ -5,6 +13,7 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.ford.fordcan import CanBus
 from opendbc.car.ford.values import DBC, RADAR
 from opendbc.car.interfaces import RadarInterfaceBase
+import matplotlib.pyplot as plt
 
 DELPHI_ESR_RADAR_MSGS = list(range(0x500, 0x540))
 
@@ -14,6 +23,9 @@ DELPHI_MRR_RADAR_MSG_COUNT = 64
 
 DELPHI_MRR_RADAR_RANGE_COVERAGE = {0: 42, 1: 164, 2: 45, 3: 175}  # scan index to detection range (m)
 MIN_LONG_RANGE_DIST = 30  # meters
+
+cmap = plt.cm.get_cmap('tab20', 20)  # 'tab20' colormap with 20 colors
+PLOT = False
 
 
 def _create_delphi_esr_radar_can_parser(CP) -> CANParser:
@@ -40,9 +52,13 @@ class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
     super().__init__(CP)
 
+    if PLOT:
+      self.fig, self.ax = plt.subplots()
+
     self.updated_messages = set()
     self.track_id = 0
     self.radar = DBC[CP.carFingerprint]['radar']
+    self.temp_pts = {}
     if CP.radarUnavailable:
       self.rcp = None
     elif self.radar == RADAR.DELPHI_ESR:
@@ -130,12 +146,25 @@ class RadarInterface(RadarInterfaceBase):
       if scanIndex != headerScanIndex:
         continue
 
-      if i not in self.pts:
-        self.pts[i] = structs.RadarData.RadarPoint()
-        self.pts[i].trackId = self.track_id
-        self.pts[i].aRel = float('nan')
-        self.pts[i].yvRel = float('nan')
-        self.track_id += 1
+      # try to find similar previous track id from last full update cycle (self.pts)
+      closest_dst = None
+      closest_track_id = None
+      for pt in self.pts.values():
+        # dst =
+        if abs(pt.dRel - msg[f"CAN_DET_RANGE_{ii:02d}"]) < 5 and abs(pt.vRel - msg[f"CAN_DET_RANGE_RATE_{ii:02d}"]) < 5:
+          closest_track_id = pt.trackId
+          break
+
+      if i not in self.temp_pts:
+        track_id = closest_track_id if closest_track_id is not None else self.track_id
+
+
+        self.temp_pts[i] = structs.RadarData.RadarPoint()
+        self.temp_pts[i].trackId = track_id
+        self.temp_pts[i].aRel = float('nan')
+        self.temp_pts[i].yvRel = float('nan')
+        if closest_track_id is None:
+          self.track_id += 1
 
       valid = bool(msg[f"CAN_DET_VALID_LEVEL_{ii:02d}"])
 
@@ -152,17 +181,24 @@ class RadarInterface(RadarInterfaceBase):
 
         # delphi doesn't notify of track switches, so do it manually
         # TODO: refactor this to radard if more radars behave this way
-        if abs(self.pts[i].vRel - distRate) > 2 or abs(self.pts[i].dRel - dRel) > 5:
-          self.track_id += 1
-          self.pts[i].trackId = self.track_id
+        if abs(self.temp_pts[i].vRel - distRate) > 2 or abs(self.temp_pts[i].dRel - dRel) > 5:
+          track_id = closest_track_id if closest_track_id is not None else self.track_id
 
-        self.pts[i].dRel = dRel
-        self.pts[i].yRel = yRel
-        self.pts[i].vRel = distRate
+          self.temp_pts[i].trackId = track_id
+          if closest_track_id is None:
+            self.track_id += 1
 
-        self.pts[i].measured = True
+        self.temp_pts[i].dRel = dRel
+        self.temp_pts[i].yRel = yRel
+        self.temp_pts[i].vRel = distRate
+
+        self.temp_pts[i].measured = True
 
       else:
-        del self.pts[i]
+        del self.temp_pts[i]
+
+    if headerScanIndex == 4:
+      self.pts = copy.deepcopy(self.temp_pts)
+      self.temp_pts.clear()
 
     return errors
