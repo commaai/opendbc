@@ -78,7 +78,7 @@ class Cluster:
     return self._vRel
 
 
-def cluster_points(pts: list[list[float]], pts2: list[list[float]], max_dist: float):
+def cluster_points(pts: list[list[float]], pts2: list[list[float]], max_dist: float) -> list[int]:
   """
   Clusters a collection of points based on another collection of points. This is useful for correlating clusters of points through time.
   Points in pts2 not close enough to any point in pts are assigned -1.
@@ -97,23 +97,20 @@ def cluster_points(pts: list[list[float]], pts2: list[list[float]], max_dist: fl
   if not len(pts):
     return [-1] * len(pts2)
 
-  max_dist = max_dist ** 2
+  max_dist_sq = max_dist ** 2
   pts = np.array(pts)
   pts2 = np.array(pts2)
 
-  cluster_idxs = []
+  diff = pts2[:, np.newaxis, :] - pts[np.newaxis, :, :]
+  dist_sq = np.sum(diff ** 2, axis=2)
 
-  for pt2 in pts2:
-    # squared euclidean distance
-    cluster_dists = np.sum((pts - pt2) ** 2, axis=1)
-    closest_cluster = np.argmin(cluster_dists)
+  closest_clusters = np.argmin(dist_sq, axis=1)
 
-    if cluster_dists[closest_cluster] < max_dist:
-      cluster_idxs.append(closest_cluster)
-    else:
-      cluster_idxs.append(-1)
+  closest_dist_sq = dist_sq[np.arange(len(pts2)), closest_clusters]
 
-  return cluster_idxs
+  cluster_idxs = np.where(closest_dist_sq < max_dist_sq, closest_clusters, -1)
+
+  return cluster_idxs.tolist()
 
 
 def _create_delphi_esr_radar_can_parser(CP) -> CANParser:
