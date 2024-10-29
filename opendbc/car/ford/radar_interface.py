@@ -61,18 +61,19 @@ def calc_dist(pt1, pt2):
 def cluster_points(pts: list[list[float]], max_dist: float):
   clusters = []
   cluster_idxs = []
+  cluster_means = []
 
   for pt in pts:
     if len(clusters) == 0:
       cluster_idxs.append(len(clusters))
       clusters.append([pt])
+      cluster_means.append(pt)
     else:
       closest_cluster = None
       closest_cluster_dist = None
 
-      for cluster_idx, cluster in enumerate(clusters):
-        mean_pt = [sum(ax) / len(ax) for ax in zip(*cluster, strict=True)]
-        cluster_dist = calc_dist(pt, mean_pt)
+      cluster_dists = np.sum((np.array(cluster_means) - np.array(pt)) ** 2, axis=1)
+      for cluster_idx, cluster_dist in enumerate(cluster_dists):
 
         if cluster_dist < max_dist:
           if closest_cluster is None or cluster_dist < closest_cluster_dist:
@@ -82,9 +83,11 @@ def cluster_points(pts: list[list[float]], max_dist: float):
       if closest_cluster is None:
         cluster_idxs.append(len(clusters))
         clusters.append([pt])
+        cluster_means.append(pt)
       else:
         cluster_idxs.append(closest_cluster)
         clusters[closest_cluster].append(pt)
+        cluster_means[closest_cluster] = [sum(ax) / len(ax) for ax in zip(*clusters[closest_cluster], strict=True)]
 
   return cluster_idxs  # clusters
 
