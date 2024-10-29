@@ -130,13 +130,6 @@ class RadarInterface(RadarInterfaceBase):
       if scanIndex != headerScanIndex:
         continue
 
-      if i not in self.pts:
-        self.pts[i] = structs.RadarData.RadarPoint()
-        self.pts[i].trackId = self.track_id
-        self.pts[i].aRel = float('nan')
-        self.pts[i].yvRel = float('nan')
-        self.track_id += 1
-
       valid = bool(msg[f"CAN_DET_VALID_LEVEL_{ii:02d}"])
 
       # Long range measurement mode is more sensitive and can detect the road surface
@@ -150,9 +143,16 @@ class RadarInterface(RadarInterfaceBase):
         dRel = cos(azimuth) * dist                              # m from front of car
         yRel = -sin(azimuth) * dist                             # in car frame's y axis, left is positive
 
-        # delphi doesn't notify of track switches, so do it manually
-        # TODO: refactor this to radard if more radars behave this way
-        if abs(self.pts[i].vRel - distRate) > 2 or abs(self.pts[i].dRel - dRel) > 5:
+        if i not in self.pts:
+          self.pts[i] = structs.RadarData.RadarPoint()
+          self.pts[i].trackId = self.track_id
+          self.pts[i].aRel = float('nan')
+          self.pts[i].yvRel = float('nan')
+          self.track_id += 1
+
+        elif abs(self.pts[i].vRel - distRate) > 2 or abs(self.pts[i].dRel - dRel) > 5:
+          # delphi doesn't notify of track switches, so do it manually
+          # TODO: refactor this to radard if more radars behave this way
           self.pts[i].trackId = self.track_id
           self.track_id += 1
 
@@ -163,6 +163,7 @@ class RadarInterface(RadarInterfaceBase):
         self.pts[i].measured = True
 
       else:
-        del self.pts[i]
+        if i in self.pts:
+          del self.pts[i]
 
     return errors
