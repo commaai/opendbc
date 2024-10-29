@@ -10,7 +10,6 @@ except:
 import math
 import copy
 import numpy as np
-from functools import cached_property
 from math import cos, sin
 from dataclasses import dataclass
 from opendbc.can.parser import CANParser
@@ -44,24 +43,29 @@ class RadarPoint:
 
 class Cluster:
   def __init__(self, pts: list[RadarPoint], cluster_id: int):
-    self.pts = pts
+    self.n_pts = len(pts)
     self.cluster_id = cluster_id
 
-  @cached_property
+    self._dRel = sum([p.dRel for p in pts]) / self.n_pts
+    self._closestDRel = min([p.dRel for p in pts])
+    self._yRel = sum([p.yRel for p in pts]) / self.n_pts
+    self._vRel = sum([p.vRel for p in pts]) / self.n_pts
+
+  @property
   def dRel(self):
-    return sum([p.dRel for p in self.pts]) / len(self.pts)
+    return self._dRel
 
-  @cached_property
+  @property
   def closestDRel(self):
-    return min([p.dRel for p in self.pts])
+    return self._closestDRel
 
-  @cached_property
+  @property
   def yRel(self):
-    return sum([p.yRel for p in self.pts]) / len(self.pts)
+    return self._yRel
 
-  @cached_property
+  @property
   def vRel(self):
-    return sum([p.vRel for p in self.pts]) / len(self.pts)
+    return self._vRel
 
 
 # TODO: linalg.norm faster?
@@ -312,8 +316,7 @@ class RadarInterface(RadarInterfaceBase):
     # print('prev clusters', [(c.dRel, c.yRel, c.vRel) for c in self.clusters])
 
     for cluster in clusters:  # TODO: make clusters a list of Cluster objects
-      # TODO: anything better than deepcopy?
-      new_c = Cluster(copy.deepcopy(cluster), -1)
+      new_c = Cluster(cluster, -1)
       # print()
       # print('working on cluster', (new_c.dRel, new_c.yRel, new_c.vRel))
 
@@ -394,7 +397,7 @@ class RadarInterface(RadarInterfaceBase):
 
     self.pts = {}
     for i, cluster in enumerate(self.clusters):
-      if len(cluster.pts) == 0:
+      if cluster.n_pts == 0:
         continue
 
       # dRel = float(np.mean([p.dRel for p in cluster]))
