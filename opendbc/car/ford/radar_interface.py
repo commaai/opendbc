@@ -7,6 +7,7 @@ try:
 except:
   plt = None
 
+from collections import defaultdict
 import math
 import copy
 import numpy as np
@@ -68,28 +69,38 @@ class Cluster:
     return self._vRel
 
 
-def cluster_points(pts: list[list[float]], max_dist: float):
-  if not len(pts):
+def cluster_points(pts: list[list[float]], pts2: list[list[float]], max_dist: float):
+  """
+  Clusters a collection of points based on another collection of points. This is useful for correlating clusters of points through time.
+  Points in pts2 not close enough to any point in pts are assigned -1.
+  Args:
+    pts: List of points to base the new clusters on
+    pts2: List of points to cluster using pts
+    max_dist: Max distance from cluster center to candidate point
+
+  Returns:
+    List of cluster indices for pts2 that correspond to pts
+  """
+
+  if not len(pts2):
     return []
 
-  cluster_idxs = [0]
-  cluster_means = [pts[0]]
-  cluster_sizes = [1]
+  if not len(pts):
+    return [-1] * len(pts2)
 
-  for pt in pts[1:]:
+  max_dist = max_dist ** 2
+
+  cluster_idxs = []
+
+  for pt2 in pts2:
     # squared euclidean distance
-    cluster_dists = np.sum((np.array(cluster_means) - np.array(pt)) ** 2, axis=1)
+    cluster_dists = np.sum((np.array(pts) - np.array(pt2)) ** 2, axis=1)
     closest_cluster = np.argmin(cluster_dists)
 
     if cluster_dists[closest_cluster] < max_dist:
       cluster_idxs.append(closest_cluster)
-      cluster_sizes[closest_cluster] += 1
-      cluster_means[closest_cluster] = (np.array(cluster_means[closest_cluster]) * np.array(cluster_sizes[closest_cluster]) +
-                                        np.array(pt)) / (np.array(cluster_sizes[closest_cluster]) + 1)
     else:
-      cluster_idxs.append(len(cluster_means))
-      cluster_sizes.append(1)
-      cluster_means.append(pt)
+      cluster_idxs.append(-1)
 
   return cluster_idxs
 
@@ -276,19 +287,46 @@ class RadarInterface(RadarInterfaceBase):
       return [], False
 
     temp_points_list = list(self.temp_pts.values())
+    points_list = list(self.pts.values())
     keys = [[p.dRel, p.yRel, p.vRel] for p in temp_points_list]
+    prev_keys = [[p.dRel, p.yRel, p.vRel] for p in points_list]
     # labels = self.dbscan.fit_predict(keys)
-    labels = cluster_points(keys, 25)
+    labels = cluster_points(prev_keys, keys, 5)
     # TODO: can be empty
+    # print(prev_keys, keys, labels)
     clusters = [[] for _ in range(max(labels) + 1)]
+    clusters_by_track_id = defaultdict(list)
 
     for i, label in enumerate(labels):
-      if label == -1:
-        raise Exception("DBSCAN should not return -1")
+      if label != -1:
+        clusters_by_track_id[points_list[label].trackId].append(temp_points_list[i])
+        # raise Exception("DBSCAN should not return -1")
+      else:
+        clusters_by_track_id[self.track_id].append(temp_points_list[i])
+        self.track_id += 1
 
-      clusters[label].append(temp_points_list[i])
+      # clusters[label].append(temp_points_list[i])
 
     # find closest previous clusters (2.5 max diff)
+
+    print(clusters_by_track_id)
+    self.pts.clear()
+    for track_id, pts in clusters_by_track_id.items():
+      if len(pts) == 0:
+        # assert False
+        continue
+
+      dRel = float(min([p.dRel for p in pts]))
+      yRel = float(np.mean([p.yRel for p in pts]))
+      vRel = float(np.mean([p.vRel for p in pts]))
+
+      self.pts[track_id] = RadarPoint()
+      self.pts[track_id].trackId = track_id
+      self.pts[track_id].dRel = dRel
+      self.pts[track_id].yRel = yRel
+      self.pts[track_id].vRel = vRel
+
+    return errors, True
 
     taken_clusters: set[int] = set()
 
