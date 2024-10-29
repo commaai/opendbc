@@ -74,30 +74,28 @@ def calc_dist(pt1, pt2):
 
 
 def cluster_points(pts: list[list[float]], max_dist: float):
-  clusters = []
-  cluster_idxs = []
-  cluster_means = []
+  if not len(pts):
+    return []
+
+  cluster_idxs = [0]
+  cluster_means = [pts[0]]
+  cluster_sizes = [1]
 
   for pt in pts:
-    if len(clusters) == 0:
-      cluster_idxs.append(len(clusters))
-      clusters.append([pt])
-      cluster_means.append(pt)
+    cluster_dists = np.sum((np.array(cluster_means) - np.array(pt)) ** 2, axis=1)
+    closest_cluster = np.argmin(cluster_dists)
+
+    if cluster_dists[closest_cluster] < max_dist:
+      cluster_idxs.append(closest_cluster)
+      cluster_sizes[closest_cluster] += 1
+      cluster_means[closest_cluster] = (np.array(cluster_means[closest_cluster]) * np.array(cluster_sizes[closest_cluster]) +
+                                        np.array(pt)) / (np.array(cluster_sizes[closest_cluster]) + 1)
     else:
+      cluster_idxs.append(len(cluster_means))
+      cluster_sizes.append(1)
+      cluster_means.append(pt)
 
-      cluster_dists = np.sum((np.array(cluster_means) - np.array(pt)) ** 2, axis=1)
-      closest_cluster = np.argmin(cluster_dists)
-
-      if cluster_dists[closest_cluster] < max_dist:
-        cluster_idxs.append(closest_cluster)
-        clusters[closest_cluster].append(pt)
-        cluster_means[closest_cluster] = [sum(ax) / len(ax) for ax in zip(*clusters[closest_cluster], strict=True)]
-      else:
-        cluster_idxs.append(len(clusters))
-        clusters.append([pt])
-        cluster_means.append(pt)
-
-  return cluster_idxs  # clusters
+  return cluster_idxs
 
 
 def _create_delphi_esr_radar_can_parser(CP) -> CANParser:
