@@ -290,8 +290,8 @@ class RadarInterface(RadarInterfaceBase):
         #   self.temp_pts[i].trackId = self.track_id
         #   self.track_id += 1
 
-        self.temp_pts[i] = RadarPoint(dRel=dRel, yRel=yRel, vRel=distRate)
-        # self.temp_pts[i] = [dRel, yRel, distRate]
+        # self.temp_pts[i] = RadarPoint(dRel=dRel, yRel=yRel, vRel=distRate)
+        self.temp_pts[i] = [dRel, yRel, distRate]
 
         # self.temp_pts[i].dRel = dRel
         # self.temp_pts[i].yRel = yRel
@@ -308,7 +308,7 @@ class RadarInterface(RadarInterfaceBase):
 
     temp_points_list = list(self.temp_pts.values())
     points_list = list(self.clusters2)
-    keys = [[p.dRel, p.yRel, p.vRel] for p in temp_points_list]
+    keys = temp_points_list
     prev_keys = [[p.dRel, p.yRel, p.vRel] for p in points_list]
     # labels = self.dbscan.fit_predict(keys)
     labels = cluster_points(prev_keys, keys, 5)
@@ -358,7 +358,7 @@ class RadarInterface(RadarInterfaceBase):
 
       self.ax.set_title(f'clusters: {len(self.clusters2)}')
       self.ax.scatter([c.dRelClosest for c in self.clusters2], [c.yRel for c in self.clusters2], s=80, label='clusters', c=colors)
-      self.ax.scatter([p.dRel for p in self.temp_pts.values()], [p.yRel for p in self.temp_pts.values()], s=10, label='points', color='red')  # c=colors_pts)
+      self.ax.scatter([p[0] for p in self.temp_pts.values()], [p[1] for p in self.temp_pts.values()], s=10, label='points', color='red')  # c=colors_pts)
       # text above each point with its dRel and vRel:
       # for p in self.temp_pts.values():
       #   self.ax.text(p.dRel, p.yRel, f'{p.dRel:.1f}, {p.vRel:.1f}', fontsize=8)
