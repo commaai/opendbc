@@ -22,6 +22,11 @@ from opendbc.car.interfaces import RadarInterfaceBase
 # from scipy.cluster.hierarchy import dendrogram, linkage
 # from scipy.optimize import linear_sum_assignment
 
+try:
+  profile
+except:
+  profile = lambda x: x
+
 DELPHI_ESR_RADAR_MSGS = list(range(0x500, 0x540))
 
 DELPHI_MRR_RADAR_START_ADDR = 0x120
@@ -78,6 +83,7 @@ class Cluster:
     return self._vRel
 
 
+@profile
 def cluster_points(pts: list[list[float]], pts2: list[list[float]], max_dist: float) -> list[int]:
   """
   Clusters a collection of points based on another collection of points. This is useful for correlating clusters of points through time.
@@ -175,6 +181,7 @@ class RadarInterface(RadarInterfaceBase):
     else:
       raise ValueError(f"Unsupported radar: {self.radar}")
 
+  @profile
   def update(self, can_strings):
     if self.rcp is None:
       return super().update(None)
@@ -235,6 +242,7 @@ class RadarInterface(RadarInterfaceBase):
         if ii in self.pts:
           del self.pts[ii]
 
+  @profile
   def _update_delphi_mrr(self):
     headerScanIndex = int(self.rcp.vl["MRR_Header_InformationDetections"]['CAN_SCAN_INDEX']) & 0b11
 
