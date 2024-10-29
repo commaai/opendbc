@@ -312,11 +312,10 @@ class RadarInterface(RadarInterfaceBase):
     # print('prev clusters', [(c.dRel, c.yRel, c.vRel) for c in self.clusters])
 
     for cluster in clusters:  # TODO: make clusters a list of Cluster objects
-      dRel = float(np.mean([p.dRel for p in cluster]))
-      yRel = float(np.mean([p.yRel for p in cluster]))
-      vRel = float(np.mean([p.vRel for p in cluster]))
+      # TODO: anything better than deepcopy?
+      new_c = Cluster(copy.deepcopy(cluster), -1)
       # print()
-      # print('working on cluster', (dRel, yRel, vRel))
+      # print('working on cluster', (new_c.dRel, new_c.yRel, new_c.vRel))
 
       closest_previous_cluster = None
       closest_euclidean_dist = None
@@ -329,7 +328,7 @@ class RadarInterface(RadarInterfaceBase):
 
         # if this new cluster is close to any previous ones, use its previous cluster id with the new points and mark the old cluster as used
         # print('comparing with prev cluster', (c.dRel, c.yRel, c.vRel))
-        euclidean_dist = (c.dRel - dRel) ** 2 + (c.yRel - yRel) ** 2 + (c.vRel - vRel) ** 2
+        euclidean_dist = (c.dRel - new_c.dRel) ** 2 + (c.yRel - new_c.yRel) ** 2 + (c.vRel - new_c.vRel) ** 2
         # print('got', euclidean_dist)
         # print(abs(c.dRel - dRel), abs(c.yRel - yRel), euclidean_dist)
         # if abs(c.dRel - dRel) < 5 and abs(c.yRel - yRel) < 5:# and abs(c.vRel - vRel) < 5:
@@ -345,13 +344,14 @@ class RadarInterface(RadarInterfaceBase):
       # print()
       if closest_previous_cluster is not None:
         # print('settled on', closest_euclidean_dist, (closest_previous_cluster.dRel, closest_previous_cluster.yRel, closest_previous_cluster.vRel))
-        # TODO: anything better than deepcopy?
-        new_clusters.append(Cluster(copy.deepcopy(cluster), closest_previous_cluster.cluster_id))
+        new_c.cluster_id = closest_previous_cluster.cluster_id
+        new_clusters.append(new_c)
         taken_clusters.add(closest_previous_cluster.cluster_id)
         # print('new!', self.cluster_id)
       else:
         # print('making cluster', self.cluster_id, (dRel, yRel, vRel))
-        new_clusters.append(Cluster(copy.deepcopy(cluster), self.cluster_id))
+        new_c.cluster_id = self.cluster_id
+        new_clusters.append(new_c)
         # print(new_clusters[-1].dRel, new_clusters[-1].yRel, new_clusters[-1].vRel)
         self.cluster_id += 1
 
