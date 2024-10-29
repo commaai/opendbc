@@ -191,8 +191,8 @@ class RadarInterface(RadarInterfaceBase):
     elif self.radar == RADAR.DELPHI_MRR:
       _errors, _update = self._update_delphi_mrr()
       errors.extend(_errors)
-      # if not _update:
-      #   return None
+      if not _update:
+        return None
 
     # ret.points = list(self.pts.values())
     ret.points = [structs.RadarData.RadarPoint(dRel=pt.dRelClosest, yRel=pt.yRel, vRel=pt.vRel, trackId=pt.trackId,
