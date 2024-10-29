@@ -98,12 +98,14 @@ def cluster_points(pts: list[list[float]], pts2: list[list[float]], max_dist: fl
     return [-1] * len(pts2)
 
   max_dist = max_dist ** 2
+  pts = np.array(pts)
+  pts2 = np.array(pts2)
 
   cluster_idxs = []
 
   for pt2 in pts2:
     # squared euclidean distance
-    cluster_dists = np.sum((np.array(pts) - np.array(pt2)) ** 2, axis=1)
+    cluster_dists = np.sum((pts - pt2) ** 2, axis=1)
     closest_cluster = np.argmin(cluster_dists)
 
     if cluster_dists[closest_cluster] < max_dist:
