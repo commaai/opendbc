@@ -1,4 +1,6 @@
 import matplotlib
+from rich.progress import track
+
 matplotlib.use('Qt5Agg')  # Use the Qt5Agg backend
 matplotlib.rcParams['figure.raise_window'] = False
 
@@ -164,18 +166,19 @@ class RadarInterface(RadarInterfaceBase):
         closest_track_id = None
         for pt in self.pts.values():
           dst = (pt.dRel - dRel) ** 2 + (pt.yRel - yRel) ** 2 + (pt.vRel - distRate) ** 2
-          if dst < (2.5 ** 2) and (closest_dst is None or dst < closest_dst):
+          if dst < (5 ** 2) and (closest_dst is None or dst < closest_dst):
             closest_track_id = pt.trackId
             closest_dst = dst
 
         track_id = closest_track_id if closest_track_id is not None else self.track_id
 
-        if i not in self.temp_pts:
+        if i not in self.temp_pts or True:
           self.temp_pts[i] = structs.RadarData.RadarPoint()
           self.temp_pts[i].trackId = track_id
           self.temp_pts[i].aRel = float('nan')
           self.temp_pts[i].yvRel = float('nan')
-          self.track_id += 1
+          if closest_track_id is None:
+            self.track_id += 1
 
         elif abs(self.temp_pts[i].vRel - distRate) > 2 or abs(self.temp_pts[i].dRel - dRel) > 5:
           # delphi doesn't notify of track switches, so do it manually
@@ -198,7 +201,44 @@ class RadarInterface(RadarInterfaceBase):
           del self.temp_pts[i]
 
     if headerScanIndex == 3:
-      self.pts = copy.deepcopy(self.temp_pts)
+      pts_by_track_id = {}
+      for pt in self.temp_pts.values():
+        # print(pt)
+        pts_by_track_id.setdefault(pt.trackId, []).append(pt)
+
+      new_pts = {}
+      for idx, pts in enumerate(pts_by_track_id.values()):
+        new_pts[idx] = min(pts, key=lambda pt: pt.dRel)
+         # new_pts.append(min(pts, key=lambda pt: pt.dRel))
+
+
+      # self.pts = copy.deepcopy(self.temp_pts)
+      self.pts = copy.deepcopy(new_pts)
+
+      if PLOT:
+        self.ax.clear()
+
+        colors = [cmap(pt.trackId % 20) for pt in self.pts.values()]
+        colors_pts = [cmap(c.trackId % 20) for c in self.temp_pts.values()]
+
+        # self.ax.set_title(f'clusters: {len(self.clusters)}')
+        self.ax.scatter([pt.dRel for pt in self.pts.values()], [pt.yRel for pt in self.pts.values()], s=80, label='points', c=colors)
+        # self.ax.scatter([c.closestDRel for c in self.clusters], [c.yRel for c in self.clusters], s=80, label='clusters', c=colors)
+        self.ax.scatter([p.dRel for p in self.temp_pts.values()], [p.yRel for p in self.temp_pts.values()], s=10, label='points', color='red')  # c=colors_pts)
+        # text above each point with its dRel and vRel:
+        # for p in self.temp_pts.values():
+        #   self.ax.text(p.dRel, p.yRel, f'{p.dRel:.1f}, {p.vRel:.1f}', fontsize=8)
+        # for c in self.clusters:
+        #   self.ax.text(c.closestDRel, c.yRel, f'{c.dRel:.1f}, {c.yRel:.1f}, {c.vRel:.1f}, {c.cluster_id}', fontsize=8)
+        self.ax.legend()
+        self.ax.set_xlim(0, 180)
+        self.ax.set_ylim(-30, 30)
+        plt.pause(1 / 15)
+
+    if headerScanIndex ==  3:
       self.temp_pts.clear()
+
+
+    print(self.track_id)
 
     return errors
