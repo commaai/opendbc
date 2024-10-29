@@ -8,6 +8,9 @@ import math
 import copy
 import numpy as np
 
+from dataclasses import dataclass
+from typing import NamedTuple
+from collections import namedtuple
 from math import cos, sin
 from opendbc.can.parser import CANParser
 from opendbc.car import structs
@@ -28,6 +31,14 @@ MIN_LONG_RANGE_DIST = 30  # meters
 
 cmap = plt.cm.get_cmap('tab20', 20)  # 'tab20' colormap with 20 colors
 PLOT = False
+
+
+@dataclass
+class RadarPoint:
+  dRel: float = 0.0
+  yRel: float = 0.0
+  vRel: float = 0.0
+  trackId: int = 0
 
 
 def _create_delphi_esr_radar_can_parser(CP) -> CANParser:
@@ -173,10 +184,11 @@ class RadarInterface(RadarInterfaceBase):
         track_id = closest_track_id if closest_track_id is not None else self.track_id
 
         if i not in self.temp_pts or True:
-          self.temp_pts[i] = structs.RadarData.RadarPoint()
+          # self.temp_pts[i] = structs.RadarData.RadarPoint()
+          self.temp_pts[i] = RadarPoint()
           self.temp_pts[i].trackId = track_id
-          self.temp_pts[i].aRel = float('nan')
-          self.temp_pts[i].yvRel = float('nan')
+          # self.temp_pts[i].aRel = float('nan')
+          # self.temp_pts[i].yvRel = float('nan')
           if closest_track_id is None:
             self.track_id += 1
 
@@ -211,9 +223,11 @@ class RadarInterface(RadarInterfaceBase):
         new_pts[idx] = min(pts, key=lambda pt: pt.dRel)
          # new_pts.append(min(pts, key=lambda pt: pt.dRel))
 
-
       # self.pts = copy.deepcopy(self.temp_pts)
-      self.pts = copy.deepcopy(new_pts)
+      # self.pts = copy.deepcopy(new_pts)
+      self.pts = {i: structs.RadarData.RadarPoint(dRel=pt.dRel, yRel=pt.yRel,
+                                                  vRel=pt.vRel, trackId=pt.trackId, measured=True,
+                                                  aRel=float('nan'), yvRel=float('nan')) for i, pt in new_pts.items()}
 
       if PLOT:
         self.ax.clear()
