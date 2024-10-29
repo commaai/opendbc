@@ -316,15 +316,14 @@ class RadarInterface(RadarInterfaceBase):
         # assert False
         continue
 
-      dRel = float(min([p.dRel for p in pts]))
-      yRel = float(np.mean([p.yRel for p in pts]))
-      vRel = float(np.mean([p.vRel for p in pts]))
+      dRel = min([p.dRel for p in pts])
+      yRel = [p.yRel for p in pts]
+      yRel = sum(yRel) / len(yRel)
 
-      self.pts[track_id] = RadarPoint()
-      self.pts[track_id].trackId = track_id
-      self.pts[track_id].dRel = dRel
-      self.pts[track_id].yRel = yRel
-      self.pts[track_id].vRel = vRel
+      vRel = [p.vRel for p in pts]
+      vRel = sum(vRel) / len(vRel)
+
+      self.pts[track_id] = RadarPoint(dRel=dRel, yRel=yRel, vRel=vRel, trackId=track_id)
 
     return errors, True
 
