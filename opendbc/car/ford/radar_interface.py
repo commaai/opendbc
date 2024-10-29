@@ -153,8 +153,8 @@ class RadarInterface(RadarInterfaceBase):
         # delphi doesn't notify of track switches, so do it manually
         # TODO: refactor this to radard if more radars behave this way
         if abs(self.pts[i].vRel - distRate) > 2 or abs(self.pts[i].dRel - dRel) > 5:
-          self.track_id += 1
           self.pts[i].trackId = self.track_id
+          self.track_id += 1
 
         self.pts[i].dRel = dRel
         self.pts[i].yRel = yRel
