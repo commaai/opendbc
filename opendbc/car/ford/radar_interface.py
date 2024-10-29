@@ -1,12 +1,16 @@
-import matplotlib
-matplotlib.use('Qt5Agg')  # Use the Qt5Agg backend
-matplotlib.rcParams['figure.raise_window'] = False
+try:
+  import matplotlib
+  matplotlib.use('Qt5Agg')  # Use the Qt5Agg backend
+  matplotlib.rcParams['figure.raise_window'] = False
+  import matplotlib.pyplot as plt
+  from sklearn.cluster import DBSCAN
+except:
+  plt = None
 
 import math
 import copy
 import numpy as np
 from math import cos, sin
-from sklearn.cluster import DBSCAN
 from opendbc.can.parser import CANParser
 from opendbc.car import structs
 from opendbc.car.common.conversions import Conversions as CV
@@ -15,7 +19,6 @@ from opendbc.car.ford.values import DBC, RADAR
 from opendbc.car.interfaces import RadarInterfaceBase
 # from scipy.cluster.hierarchy import dendrogram, linkage
 # from scipy.optimize import linear_sum_assignment
-import matplotlib.pyplot as plt
 
 DELPHI_ESR_RADAR_MSGS = list(range(0x500, 0x540))
 
@@ -26,7 +29,6 @@ DELPHI_MRR_RADAR_MSG_COUNT = 64
 DELPHI_MRR_RADAR_RANGE_COVERAGE = {0: 42, 1: 164, 2: 45, 3: 175}  # scan index to detection range (m)
 MIN_LONG_RANGE_DIST = 30  # meters
 
-cmap = plt.cm.get_cmap('tab20', 20)  # 'tab20' colormap with 20 colors
 PLOT = False
 
 class Cluster:
@@ -53,7 +55,7 @@ class Cluster:
 
 # TODO: linalg.norm faster?
 def calc_dist(pt1, pt2):
-  return math.sqrt(sum([(p1 - p2) ** 2 for p1, p2 in zip(pt1, pt2, strict=True)]))
+  return sum([(p1 - p2) ** 2 for p1, p2 in zip(pt1, pt2, strict=True)])
 
 
 def cluster_points(pts: list[list[float]], max_dist: float):
@@ -118,10 +120,11 @@ class RadarInterface(RadarInterfaceBase):
 
     # TODO: 2.5 good enough?
     # TODO: write simple cluster function
-    self.dbscan = DBSCAN(eps=5, min_samples=1)
+    # self.dbscan = DBSCAN(eps=5, min_samples=1)
 
     if PLOT:
       self.fig, self.ax = plt.subplots()
+      self.cmap = plt.cm.get_cmap('tab20', 20)  # 'tab20' colormap with 20 colors
 
     self.temp_pts = {}
 
@@ -267,7 +270,7 @@ class RadarInterface(RadarInterfaceBase):
     temp_points_list = list(self.temp_pts.values())
     keys = [[p.dRel, p.yRel, p.vRel] for p in temp_points_list]
     # labels = self.dbscan.fit_predict(keys)
-    labels = cluster_points(keys, 5)
+    labels = cluster_points(keys, 25)
     # TODO: can be empty
     clusters = [[] for _ in range(max(labels) + 1)]
 
@@ -360,11 +363,11 @@ class RadarInterface(RadarInterfaceBase):
     # print('track_id', self.track_id)
     # print('cluster_id', self.cluster_id)
 
-    if PLOT := False:
+    if PLOT:
       self.ax.clear()
 
-      colors = [cmap(c.cluster_id % 20) for c in self.clusters]
-      colors_pts = [cmap(c.trackId % 20) for c in self.temp_pts.values()]
+      colors = [self.cmap(c.cluster_id % 20) for c in self.clusters]
+      colors_pts = [self.cmap(c.trackId % 20) for c in self.temp_pts.values()]
 
       self.ax.set_title(f'clusters: {len(self.clusters)}')
       self.ax.scatter([c.closestDRel for c in self.clusters], [c.yRel for c in self.clusters], s=80, label='clusters', c=colors)
