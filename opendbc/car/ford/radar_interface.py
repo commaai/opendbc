@@ -42,6 +42,15 @@ class RadarPoint:
   trackId: int = 0
 
 
+@dataclass
+class Cluster2:
+  dRel: float = 0.0
+  dRelClosest: float = 0.0
+  yRel: float = 0.0
+  vRel: float = 0.0
+  trackId: int = 0
+
+
 class Cluster:
   def __init__(self, pts: list[RadarPoint], cluster_id: int):
     self.n_pts = len(pts)
@@ -133,6 +142,7 @@ class RadarInterface(RadarInterfaceBase):
     self.cluster_id = 0
 
     self.frame = 0
+    self.clusters2 = []
 
     # TODO: 2.5 good enough?
     # TODO: write simple cluster function
@@ -183,9 +193,9 @@ class RadarInterface(RadarInterfaceBase):
       #   return None
 
     # ret.points = list(self.pts.values())
-    ret.points = [structs.RadarData.RadarPoint(dRel=pt.dRel, yRel=pt.yRel, vRel=pt.vRel, trackId=pt.trackId,
+    ret.points = [structs.RadarData.RadarPoint(dRel=pt.dRelClosest, yRel=pt.yRel, vRel=pt.vRel, trackId=pt.trackId,
                                                measured=True, aRel=float('nan'), yvRel=float('nan'))
-                  for pt in self.pts.values()]
+                  for pt in self.clusters2]
     ret.errors = errors
     self.updated_messages.clear()
     return ret
@@ -287,7 +297,7 @@ class RadarInterface(RadarInterfaceBase):
       return [], False
 
     temp_points_list = list(self.temp_pts.values())
-    points_list = list(self.pts.values())
+    points_list = list(self.clusters2)
     keys = [[p.dRel, p.yRel, p.vRel] for p in temp_points_list]
     prev_keys = [[p.dRel, p.yRel, p.vRel] for p in points_list]
     # labels = self.dbscan.fit_predict(keys)
@@ -311,20 +321,44 @@ class RadarInterface(RadarInterfaceBase):
 
     # print(clusters_by_track_id)
     self.pts.clear()
+    self.clusters2 = []
     for track_id, pts in clusters_by_track_id.items():
       if len(pts) == 0:
         # assert False
         continue
 
-      # TODO: somehow store the previous mean dRel for the next clustering step
-      dRel = min([p.dRel for p in pts])
+      dRel = [p.dRel for p in pts]
+      min_dRel = min(dRel)
+      dRel = sum(dRel) / len(dRel)
+
       yRel = [p.yRel for p in pts]
       yRel = sum(yRel) / len(yRel)
 
       vRel = [p.vRel for p in pts]
       vRel = sum(vRel) / len(vRel)
 
-      self.pts[track_id] = RadarPoint(dRel=dRel, yRel=yRel, vRel=vRel, trackId=track_id)
+      self.pts[track_id] = RadarPoint(dRel=min_dRel, yRel=yRel, vRel=vRel, trackId=track_id)
+      self.clusters2.append(Cluster2(dRel=dRel, dRelClosest=min_dRel, yRel=yRel, vRel=vRel, trackId=track_id))
+
+    if PLOT:
+      self.ax.clear()
+
+      colors = [self.cmap(c.trackId % 20) for c in self.pts.values()]
+      # colors_pts = [self.cmap(c.trackId % 20) for c in self.temp_pts.values()]
+
+      self.ax.set_title(f'clusters: {len(self.pts)}')
+      self.ax.scatter([c.dRel for c in self.pts.values()], [c.yRel for c in self.pts.values()], s=80, label='clusters', c=colors)
+      self.ax.scatter([p.dRel for p in self.temp_pts.values()], [p.yRel for p in self.temp_pts.values()], s=10, label='points', color='red')  # c=colors_pts)
+      # text above each point with its dRel and vRel:
+      # for p in self.temp_pts.values():
+      #   self.ax.text(p.dRel, p.yRel, f'{p.dRel:.1f}, {p.vRel:.1f}', fontsize=8)
+      for c in self.pts.values():
+        self.ax.text(c.dRel, c.yRel, f'{c.dRel:.1f}, {c.yRel:.1f}, {c.vRel:.1f}, {c.trackId}', fontsize=8)
+      self.ax.legend()
+      self.ax.set_xlim(0, 180)
+      self.ax.set_ylim(-30, 30)
+      plt.pause(1/15)
+
 
     return errors, True
 
@@ -407,25 +441,6 @@ class RadarInterface(RadarInterfaceBase):
     # print('new_clusters', new_clusters)
     # print('track_id', self.track_id)
     # print('cluster_id', self.cluster_id)
-
-    if PLOT:
-      self.ax.clear()
-
-      colors = [self.cmap(c.cluster_id % 20) for c in self.clusters]
-      colors_pts = [self.cmap(c.trackId % 20) for c in self.temp_pts.values()]
-
-      self.ax.set_title(f'clusters: {len(self.clusters)}')
-      self.ax.scatter([c.closestDRel for c in self.clusters], [c.yRel for c in self.clusters], s=80, label='clusters', c=colors)
-      self.ax.scatter([p.dRel for p in self.temp_pts.values()], [p.yRel for p in self.temp_pts.values()], s=10, label='points', color='red')  # c=colors_pts)
-      # text above each point with its dRel and vRel:
-      # for p in self.temp_pts.values():
-      #   self.ax.text(p.dRel, p.yRel, f'{p.dRel:.1f}, {p.vRel:.1f}', fontsize=8)
-      for c in self.clusters:
-        self.ax.text(c.closestDRel, c.yRel, f'{c.dRel:.1f}, {c.yRel:.1f}, {c.vRel:.1f}, {c.cluster_id}', fontsize=8)
-      self.ax.legend()
-      self.ax.set_xlim(0, 180)
-      self.ax.set_ylim(-30, 30)
-      plt.pause(1/100)
 
     self.pts = {}
     for i, cluster in enumerate(self.clusters):
