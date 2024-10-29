@@ -101,13 +101,13 @@ def cluster_points(pts: list[list[float]], pts2: list[list[float]], max_dist: fl
   pts = np.array(pts)
   pts2 = np.array(pts2)
 
+  # Calculate distance between every point
   diff = pts2[:, np.newaxis, :] - pts[np.newaxis, :, :]
   dist_sq = np.sum(diff ** 2, axis=2)
 
+  # Find the closest cluster for each point and assign its index
   closest_clusters = np.argmin(dist_sq, axis=1)
-
   closest_dist_sq = dist_sq[np.arange(len(pts2)), closest_clusters]
-
   cluster_idxs = np.where(closest_dist_sq < max_dist_sq, closest_clusters, -1)
 
   return cluster_idxs.tolist()
@@ -320,7 +320,7 @@ class RadarInterface(RadarInterfaceBase):
     # find closest previous clusters (2.5 max diff)
 
     # print(clusters_by_track_id)
-    self.pts.clear()
+    # self.pts.clear()
     self.clusters2 = []
     for track_id, pts in clusters_by_track_id.items():
       if len(pts) == 0:
@@ -337,23 +337,23 @@ class RadarInterface(RadarInterfaceBase):
       vRel = [p.vRel for p in pts]
       vRel = sum(vRel) / len(vRel)
 
-      self.pts[track_id] = RadarPoint(dRel=min_dRel, yRel=yRel, vRel=vRel, trackId=track_id)
+      # self.pts[track_id] = RadarPoint(dRel=min_dRel, yRel=yRel, vRel=vRel, trackId=track_id)
       self.clusters2.append(Cluster2(dRel=dRel, dRelClosest=min_dRel, yRel=yRel, vRel=vRel, trackId=track_id))
 
     if PLOT:
       self.ax.clear()
 
-      colors = [self.cmap(c.trackId % 20) for c in self.pts.values()]
+      colors = [self.cmap(c.trackId % 20) for c in self.clusters2]
       # colors_pts = [self.cmap(c.trackId % 20) for c in self.temp_pts.values()]
 
-      self.ax.set_title(f'clusters: {len(self.pts)}')
-      self.ax.scatter([c.dRel for c in self.pts.values()], [c.yRel for c in self.pts.values()], s=80, label='clusters', c=colors)
+      self.ax.set_title(f'clusters: {len(self.clusters2)}')
+      self.ax.scatter([c.dRelClosest for c in self.clusters2], [c.yRel for c in self.clusters2], s=80, label='clusters', c=colors)
       self.ax.scatter([p.dRel for p in self.temp_pts.values()], [p.yRel for p in self.temp_pts.values()], s=10, label='points', color='red')  # c=colors_pts)
       # text above each point with its dRel and vRel:
       # for p in self.temp_pts.values():
       #   self.ax.text(p.dRel, p.yRel, f'{p.dRel:.1f}, {p.vRel:.1f}', fontsize=8)
-      for c in self.pts.values():
-        self.ax.text(c.dRel, c.yRel, f'{c.dRel:.1f}, {c.yRel:.1f}, {c.vRel:.1f}, {c.trackId}', fontsize=8)
+      for c in self.clusters:
+        self.ax.text(c.dRelClosest, c.yRel, f'{c.dRel:.1f}, {c.yRel:.1f}, {c.vRel:.1f}, {c.trackId}', fontsize=8)
       self.ax.legend()
       self.ax.set_xlim(0, 180)
       self.ax.set_ylim(-30, 30)
