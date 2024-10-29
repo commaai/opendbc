@@ -345,14 +345,14 @@ class RadarInterface(RadarInterfaceBase):
         # assert False
         continue
 
-      dRel = [p.dRel for p in pts]
+      dRel = [p[0] for p in pts]
       min_dRel = min(dRel)
       dRel = sum(dRel) / len(dRel)
 
-      yRel = [p.yRel for p in pts]
+      yRel = [p[1] for p in pts]
       yRel = sum(yRel) / len(yRel)
 
-      vRel = [p.vRel for p in pts]
+      vRel = [p[2] for p in pts]
       vRel = sum(vRel) / len(vRel)
 
       # self.pts[track_id] = RadarPoint(dRel=min_dRel, yRel=yRel, vRel=vRel, trackId=track_id)
