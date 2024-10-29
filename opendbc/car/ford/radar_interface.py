@@ -11,6 +11,7 @@ import math
 import copy
 import numpy as np
 from math import cos, sin
+from dataclasses import dataclass
 from opendbc.can.parser import CANParser
 from opendbc.car import structs
 from opendbc.car.common.conversions import Conversions as CV
@@ -31,8 +32,17 @@ MIN_LONG_RANGE_DIST = 30  # meters
 
 PLOT = False
 
+
+@dataclass
+class RadarPoint:
+  dRel: float = 0.0
+  yRel: float = 0.0
+  vRel: float = 0.0
+  trackId: int = 0
+
+
 class Cluster:
-  def __init__(self, pts: list[structs.RadarData.RadarPoint], cluster_id: int):
+  def __init__(self, pts: list[RadarPoint], cluster_id: int):
     self.pts = pts
     self.cluster_id = cluster_id
 
@@ -169,7 +179,10 @@ class RadarInterface(RadarInterfaceBase):
       # if not _update:
       #   return None
 
-    ret.points = list(self.pts.values())
+    # ret.points = list(self.pts.values())
+    ret.points = [structs.RadarData.RadarPoint(dRel=pt.dRel, yRel=pt.yRel, vRel=pt.vRel, trackId=pt.trackId,
+                                               measured=True, aRel=float('nan'), yvRel=float('nan'))
+                  for pt in self.pts.values()]
     ret.errors = errors
     self.updated_messages.clear()
     return ret
@@ -228,7 +241,7 @@ class RadarInterface(RadarInterfaceBase):
         continue
 
       if i not in self.temp_pts:
-        self.temp_pts[i] = structs.RadarData.RadarPoint()
+        self.temp_pts[i] = RadarPoint()
         self.temp_pts[i].trackId = self.track_id
         self.temp_pts[i].aRel = float('nan')
         self.temp_pts[i].yvRel = float('nan')
@@ -395,7 +408,7 @@ class RadarInterface(RadarInterfaceBase):
       # vRel = float(np.mean([p.vRel for p in cluster]))
 
       if i not in self.pts:
-        self.pts[i] = structs.RadarData.RadarPoint()
+        self.pts[i] = RadarPoint()
         # self.pts[i].trackId = self.track_id
         # self.track_id += 1
 
@@ -423,7 +436,7 @@ class RadarInterface(RadarInterfaceBase):
     #     continue
     #
     #   if i not in self.pts:
-    #     self.pts[i] = structs.RadarData.RadarPoint()
+    #     self.pts[i] = RadarPoint()
     #     self.pts[i].trackId = self.track_id
     #     self.pts[i].aRel = float('nan')
     #     self.pts[i].yvRel = float('nan')
