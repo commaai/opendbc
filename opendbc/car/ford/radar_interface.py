@@ -355,8 +355,8 @@ class RadarInterface(RadarInterfaceBase):
         # print(new_clusters[-1].dRel, new_clusters[-1].yRel, new_clusters[-1].vRel)
         self.cluster_id += 1
 
-        if len(temp_points_list) == 60:
-          print('new cluster', (new_clusters[-1].cluster_id, new_clusters[-1].dRel, new_clusters[-1].yRel, new_clusters[-1].vRel, [p.to_dict() for p in new_clusters[-1].pts]))
+        # if len(temp_points_list) == 60:
+        #   print('new cluster', (new_clusters[-1].cluster_id, new_clusters[-1].dRel, new_clusters[-1].yRel, new_clusters[-1].vRel, [p.to_dict() for p in new_clusters[-1].pts]))
 
     self.clusters = new_clusters
 
