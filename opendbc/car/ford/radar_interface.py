@@ -10,6 +10,7 @@ except:
 import math
 import copy
 import numpy as np
+from functools import cached_property
 from math import cos, sin
 from dataclasses import dataclass
 from opendbc.can.parser import CANParser
@@ -46,19 +47,19 @@ class Cluster:
     self.pts = pts
     self.cluster_id = cluster_id
 
-  @property
+  @cached_property
   def dRel(self):
     return sum([p.dRel for p in self.pts]) / len(self.pts)
 
-  @property
+  @cached_property
   def closestDRel(self):
     return min([p.dRel for p in self.pts])
 
-  @property
+  @cached_property
   def yRel(self):
     return sum([p.yRel for p in self.pts]) / len(self.pts)
 
-  @property
+  @cached_property
   def vRel(self):
     return sum([p.vRel for p in self.pts]) / len(self.pts)
 
