@@ -270,27 +270,30 @@ class RadarInterface(RadarInterfaceBase):
         # TODO: multiply yRel by 2
         # points.append([dRel, yRel * 2])
 
-        if i not in self.temp_pts:
-          self.temp_pts[i] = RadarPoint()
-          self.temp_pts[i].trackId = self.track_id
-          self.temp_pts[i].aRel = float('nan')
-          self.temp_pts[i].yvRel = float('nan')
-          self.track_id += 1
+        # if i not in self.temp_pts:
+        #   self.temp_pts[i] = RadarPoint()
+        #   self.temp_pts[i].trackId = self.track_id
+        #   self.temp_pts[i].aRel = float('nan')
+        #   self.temp_pts[i].yvRel = float('nan')
+        #   self.track_id += 1
+        #
+        # elif abs(self.temp_pts[i].vRel - distRate) > 2 or abs(self.temp_pts[i].dRel - dRel) > 5:
+        #   # delphi doesn't notify of track switches, so do it manually
+        #   # TODO: refactor this to radard if more radars behave this way
+        #   self.temp_pts[i].trackId = self.track_id
+        #   self.track_id += 1
 
-        elif abs(self.temp_pts[i].vRel - distRate) > 2 or abs(self.temp_pts[i].dRel - dRel) > 5:
-          # delphi doesn't notify of track switches, so do it manually
-          # TODO: refactor this to radard if more radars behave this way
-          self.temp_pts[i].trackId = self.track_id
-          self.track_id += 1
+        self.temp_pts[i] = RadarPoint(dRel=dRel, yRel=yRel, vRel=distRate)
+        # self.temp_pts[i] = [dRel, yRel, distRate]
 
-        self.temp_pts[i].dRel = dRel
-        self.temp_pts[i].yRel = yRel
-        self.temp_pts[i].vRel = distRate
+        # self.temp_pts[i].dRel = dRel
+        # self.temp_pts[i].yRel = yRel
+        # self.temp_pts[i].vRel = distRate
 
-        self.temp_pts[i].measured = True
-      else:
-        if i in self.temp_pts:
-          del self.temp_pts[i]
+        # self.temp_pts[i].measured = True
+      # else:
+      #   if i in self.temp_pts:
+      #     del self.temp_pts[i]
 
     # wait for all measurements to happen (TODO: do we need to? i don't know if too much benefit to update at 33hz)
     if headerScanIndex != 3:
@@ -359,7 +362,7 @@ class RadarInterface(RadarInterfaceBase):
       self.ax.set_ylim(-30, 30)
       plt.pause(1/15)
 
-
+    self.temp_pts.clear()
     return errors, True
 
     taken_clusters: set[int] = set()
