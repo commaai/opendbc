@@ -68,11 +68,6 @@ class Cluster:
     return self._vRel
 
 
-# TODO: linalg.norm faster?
-def calc_dist(pt1, pt2):
-  return sum([(p1 - p2) ** 2 for p1, p2 in zip(pt1, pt2, strict=True)])
-
-
 def cluster_points(pts: list[list[float]], max_dist: float):
   if not len(pts):
     return []
@@ -82,6 +77,7 @@ def cluster_points(pts: list[list[float]], max_dist: float):
   cluster_sizes = [1]
 
   for pt in pts[1:]:
+    # squared euclidean distance
     cluster_dists = np.sum((np.array(cluster_means) - np.array(pt)) ** 2, axis=1)
     closest_cluster = np.argmin(cluster_dists)
 
