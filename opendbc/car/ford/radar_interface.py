@@ -81,7 +81,7 @@ def cluster_points(pts: list[list[float]], max_dist: float):
   cluster_means = [pts[0]]
   cluster_sizes = [1]
 
-  for pt in pts:
+  for pt in pts[1:]:
     cluster_dists = np.sum((np.array(cluster_means) - np.array(pt)) ** 2, axis=1)
     closest_cluster = np.argmin(cluster_dists)
 
