@@ -294,7 +294,7 @@ class RadarInterface(RadarInterfaceBase):
     labels = cluster_points(prev_keys, keys, 5)
     # TODO: can be empty
     # print(prev_keys, keys, labels)
-    clusters = [[] for _ in range(max(labels) + 1)]
+    # clusters = [[] for _ in range(max(labels) + 1)]
     clusters_by_track_id = defaultdict(list)
 
     for i, label in enumerate(labels):
@@ -309,7 +309,7 @@ class RadarInterface(RadarInterfaceBase):
 
     # find closest previous clusters (2.5 max diff)
 
-    print(clusters_by_track_id)
+    # print(clusters_by_track_id)
     self.pts.clear()
     for track_id, pts in clusters_by_track_id.items():
       if len(pts) == 0:
