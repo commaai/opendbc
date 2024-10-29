@@ -146,26 +146,6 @@ class RadarInterface(RadarInterfaceBase):
       if scanIndex != headerScanIndex:
         continue
 
-      # try to find similar previous track id from last full update cycle (self.pts)
-      closest_dst = None
-      closest_track_id = None
-      for pt in self.pts.values():
-        # dst =
-        if abs(pt.dRel - msg[f"CAN_DET_RANGE_{ii:02d}"]) < 5 and abs(pt.vRel - msg[f"CAN_DET_RANGE_RATE_{ii:02d}"]) < 5:
-          closest_track_id = pt.trackId
-          break
-
-      if i not in self.temp_pts:
-        track_id = closest_track_id if closest_track_id is not None else self.track_id
-
-
-        self.temp_pts[i] = structs.RadarData.RadarPoint()
-        self.temp_pts[i].trackId = track_id
-        self.temp_pts[i].aRel = float('nan')
-        self.temp_pts[i].yvRel = float('nan')
-        if closest_track_id is None:
-          self.track_id += 1
-
       valid = bool(msg[f"CAN_DET_VALID_LEVEL_{ii:02d}"])
 
       # Long range measurement mode is more sensitive and can detect the road surface
@@ -179,14 +159,32 @@ class RadarInterface(RadarInterfaceBase):
         dRel = cos(azimuth) * dist                              # m from front of car
         yRel = -sin(azimuth) * dist                             # in car frame's y axis, left is positive
 
-        # delphi doesn't notify of track switches, so do it manually
-        # TODO: refactor this to radard if more radars behave this way
-        if abs(self.temp_pts[i].vRel - distRate) > 2 or abs(self.temp_pts[i].dRel - dRel) > 5:
-          track_id = closest_track_id if closest_track_id is not None else self.track_id
+        # try to find similar previous track id from last full update cycle (self.pts)
+        closest_dst = None
+        closest_track_id = None
+        for pt in self.pts.values():
+          dst = (pt.dRel - dRel) ** 2 + (pt.yRel - yRel) ** 2 + (pt.vRel - distRate) ** 2
+          if dst < (2.5 ** 2) and (closest_dst is None or dst < closest_dst):
+            closest_track_id = pt.trackId
+            closest_dst = dst
 
+        track_id = closest_track_id if closest_track_id is not None else self.track_id
+
+        if i not in self.temp_pts:
+          self.temp_pts[i] = structs.RadarData.RadarPoint()
           self.temp_pts[i].trackId = track_id
-          if closest_track_id is None:
-            self.track_id += 1
+          self.temp_pts[i].aRel = float('nan')
+          self.temp_pts[i].yvRel = float('nan')
+          self.track_id += 1
+
+        elif abs(self.temp_pts[i].vRel - distRate) > 2 or abs(self.temp_pts[i].dRel - dRel) > 5:
+          # delphi doesn't notify of track switches, so do it manually
+          # TODO: refactor this to radard if more radars behave this way
+          assert False
+          self.temp_pts[i].trackId = track_id
+          self.track_id += 1
+        else:
+          assert False
 
         self.temp_pts[i].dRel = dRel
         self.temp_pts[i].yRel = yRel
@@ -195,9 +193,11 @@ class RadarInterface(RadarInterfaceBase):
         self.temp_pts[i].measured = True
 
       else:
-        del self.temp_pts[i]
+        if i in self.temp_pts:
+          assert False
+          del self.temp_pts[i]
 
-    if headerScanIndex == 4:
+    if headerScanIndex == 3:
       self.pts = copy.deepcopy(self.temp_pts)
       self.temp_pts.clear()
 
