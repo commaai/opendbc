@@ -1,16 +1,17 @@
-import matplotlib
-from rich.progress import track
+try:
+  import matplotlib
 
-matplotlib.use('Qt5Agg')  # Use the Qt5Agg backend
-matplotlib.rcParams['figure.raise_window'] = False
+  matplotlib.use('Qt5Agg')  # Use the Qt5Agg backend
+  matplotlib.rcParams['figure.raise_window'] = False
+  import matplotlib.pyplot as plt
+except Exception:
+  plt = None
 
 import math
 import copy
 import numpy as np
 
 from dataclasses import dataclass
-from typing import NamedTuple
-from collections import namedtuple
 from math import cos, sin
 from opendbc.can.parser import CANParser
 from opendbc.car import structs
@@ -18,7 +19,6 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.ford.fordcan import CanBus
 from opendbc.car.ford.values import DBC, RADAR
 from opendbc.car.interfaces import RadarInterfaceBase
-import matplotlib.pyplot as plt
 
 DELPHI_ESR_RADAR_MSGS = list(range(0x500, 0x540))
 
@@ -29,7 +29,6 @@ DELPHI_MRR_RADAR_MSG_COUNT = 64
 DELPHI_MRR_RADAR_RANGE_COVERAGE = {0: 42, 1: 164, 2: 45, 3: 175}  # scan index to detection range (m)
 MIN_LONG_RANGE_DIST = 30  # meters
 
-cmap = plt.cm.get_cmap('tab20', 20)  # 'tab20' colormap with 20 colors
 PLOT = False
 
 
@@ -67,11 +66,13 @@ class RadarInterface(RadarInterfaceBase):
 
     if PLOT:
       self.fig, self.ax = plt.subplots()
+      self.cmap = plt.cm.get_cmap('tab20', 20)  # 'tab20' colormap with 20 colors
 
     self.updated_messages = set()
     self.track_id = 0
     self.radar = DBC[CP.carFingerprint]['radar']
     self.temp_pts = {}
+    self.prev_pts = {}
     if CP.radarUnavailable:
       self.rcp = None
     elif self.radar == RADAR.DELPHI_ESR:
@@ -175,7 +176,8 @@ class RadarInterface(RadarInterfaceBase):
         # try to find similar previous track id from last full update cycle (self.pts)
         closest_dst = None
         closest_track_id = None
-        for pt in self.pts.values():
+        # TODO: just use self.pts, and build capnp object at the end
+        for pt in self.temp_pts.values():
           dst = (pt.dRel - dRel) ** 2 + (pt.yRel - yRel) ** 2 + (pt.vRel - distRate) ** 2
           if dst < (5 ** 2) and (closest_dst is None or dst < closest_dst):
             closest_track_id = pt.trackId
@@ -225,6 +227,7 @@ class RadarInterface(RadarInterfaceBase):
 
       # self.pts = copy.deepcopy(self.temp_pts)
       # self.pts = copy.deepcopy(new_pts)
+      self.prev_pts = new_pts
       self.pts = {i: structs.RadarData.RadarPoint(dRel=pt.dRel, yRel=pt.yRel,
                                                   vRel=pt.vRel, trackId=pt.trackId, measured=True,
                                                   aRel=float('nan'), yvRel=float('nan')) for i, pt in new_pts.items()}
@@ -232,8 +235,8 @@ class RadarInterface(RadarInterfaceBase):
       if PLOT:
         self.ax.clear()
 
-        colors = [cmap(pt.trackId % 20) for pt in self.pts.values()]
-        colors_pts = [cmap(c.trackId % 20) for c in self.temp_pts.values()]
+        colors = [self.cmap(pt.trackId % 20) for pt in self.pts.values()]
+        colors_pts = [self.cmap(c.trackId % 20) for c in self.temp_pts.values()]
 
         # self.ax.set_title(f'clusters: {len(self.clusters)}')
         self.ax.scatter([pt.dRel for pt in self.pts.values()], [pt.yRel for pt in self.pts.values()], s=80, label='points', c=colors)
