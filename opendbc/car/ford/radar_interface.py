@@ -40,47 +40,12 @@ PLOT = False
 
 
 @dataclass
-class RadarPoint:
-  dRel: float = 0.0
-  yRel: float = 0.0
-  vRel: float = 0.0
-  trackId: int = 0
-
-
-@dataclass
 class Cluster:
   dRel: float = 0.0
   dRelClosest: float = 0.0
   yRel: float = 0.0
   vRel: float = 0.0
   trackId: int = 0
-
-
-# class Cluster:
-#   def __init__(self, pts: list[RadarPoint], cluster_id: int):
-#     self.n_pts = len(pts)
-#     self.cluster_id = cluster_id
-#
-#     self._dRel = sum([p.dRel for p in pts]) / self.n_pts
-#     self._closestDRel = min([p.dRel for p in pts])
-#     self._yRel = sum([p.yRel for p in pts]) / self.n_pts
-#     self._vRel = sum([p.vRel for p in pts]) / self.n_pts
-#
-#   @property
-#   def dRel(self):
-#     return self._dRel
-#
-#   @property
-#   def closestDRel(self):
-#     return self._closestDRel
-#
-#   @property
-#   def yRel(self):
-#     return self._yRel
-#
-#   @property
-#   def vRel(self):
-#     return self._vRel
 
 
 @profile
@@ -150,8 +115,6 @@ class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
     super().__init__(CP)
 
-    self.cluster_id = 0
-
     self.frame = 0
     self.clusters: list[Cluster] = []
 
@@ -159,7 +122,7 @@ class RadarInterface(RadarInterfaceBase):
       self.fig, self.ax = plt.subplots()
       self.cmap = plt.cm.get_cmap('tab20', 20)  # 'tab20' colormap with 20 colors
 
-    self.temp_pts = []
+    self.cluster_keys = []
 
     self.updated_messages = set()
     self.track_id = 0
@@ -278,22 +241,22 @@ class RadarInterface(RadarInterfaceBase):
         dRel = cos(azimuth) * dist                              # m from front of car
         yRel = -sin(azimuth) * dist                             # in car frame's y axis, left is positive
 
-        self.temp_pts.append([dRel, yRel * 2, distRate * 2])
+        self.cluster_keys.append([dRel, yRel * 2, distRate * 2])
 
     # Update once we've cycled through all 4 scan modes
     if headerScanIndex != 3:
       return False, []
 
+    # Cluster points from this cycle against the centroids from the previous cycle
     prev_keys = [[p.dRel, p.yRel * 2, p.vRel * 2] for p in self.clusters]
-    labels = cluster_points(prev_keys, self.temp_pts, DELPHI_MRR_CLUSTER_THRESHOLD)
+    labels = cluster_points(prev_keys, self.cluster_keys, DELPHI_MRR_CLUSTER_THRESHOLD)
 
     clusters_by_track_id = defaultdict(list)
-
     for i, label in enumerate(labels):
       if label != -1:
-        clusters_by_track_id[self.clusters[label].trackId].append(self.temp_pts[i])
+        clusters_by_track_id[self.clusters[label].trackId].append(self.cluster_keys[i])
       else:
-        clusters_by_track_id[self.track_id].append(self.temp_pts[i])
+        clusters_by_track_id[self.track_id].append(self.cluster_keys[i])
         self.track_id += 1
 
     self.clusters = []
@@ -308,20 +271,19 @@ class RadarInterface(RadarInterfaceBase):
       vRel = [p[2] for p in pts]
       vRel = sum(vRel) / len(vRel) / 2
 
-      # self.pts[track_id] = RadarPoint(dRel=min_dRel, yRel=yRel, vRel=vRel, trackId=track_id)
       self.clusters.append(Cluster(dRel=dRel, dRelClosest=min_dRel, yRel=yRel, vRel=vRel, trackId=track_id))
 
     if PLOT:
       self.ax.clear()
 
       colors = [self.cmap(c.trackId % 20) for c in self.clusters]
-      # colors_pts = [self.cmap(c.trackId % 20) for c in self.temp_pts.values()]
+      # colors_pts = [self.cmap(c.trackId % 20) for c in self.cluster_keys.values()]
 
       self.ax.set_title(f'clusters: {len(self.clusters)}')
       self.ax.scatter([c.dRelClosest for c in self.clusters], [c.yRel for c in self.clusters], s=80, label='clusters', c=colors)
-      self.ax.scatter([p[0] for p in self.temp_pts.values()], [p[1] / 2 for p in self.temp_pts.values()], s=10, label='points', color='red')  # c=colors_pts)
+      self.ax.scatter([p[0] for p in self.cluster_keys.values()], [p[1] / 2 for p in self.cluster_keys.values()], s=10, label='points', color='red')  # c=colors_pts)
       # text above each point with its dRel and vRel:
-      # for p in self.temp_pts.values():
+      # for p in self.cluster_keys.values():
       #   self.ax.text(p.dRel, p.yRel, f'{p.dRel:.1f}, {p.vRel:.1f}', fontsize=8)
       for c in self.clusters:
         self.ax.text(c.dRelClosest, c.yRel, f'{c.dRel:.1f}, {c.yRel:.1f}, {c.vRel:.1f}, {c.trackId}', fontsize=8)
@@ -330,6 +292,6 @@ class RadarInterface(RadarInterfaceBase):
       self.ax.set_ylim(-30, 30)
       plt.pause(1/15)
 
-    self.temp_pts = []
+    self.cluster_keys = []
 
     return True, errors
