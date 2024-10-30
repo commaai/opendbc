@@ -114,6 +114,8 @@ class RadarInterface(RadarInterfaceBase):
 
   def _update_delphi_mrr(self):
     headerScanIndex = int(self.rcp.vl["MRR_Header_InformationDetections"]['CAN_SCAN_INDEX']) & 0b11
+
+    # Use points with Doppler coverage of +-60 m/s, reduces similar points
     if headerScanIndex in (0, 1):
       return False, []
 
@@ -127,7 +129,6 @@ class RadarInterface(RadarInterfaceBase):
       # SCAN_INDEX rotates through 0..3 on each message for different measurement modes
       # Indexes 0 and 2 have a max range of ~40m, 1 and 3 are ~170m (MRR_Header_SensorCoverage->CAN_RANGE_COVERAGE)
       # Indexes 0 and 1 have a Doppler coverage of +-71 m/s, 2 and 3 have +-60 m/s
-      # TODO: can we group into 2 groups?
       scanIndex = msg[f"CAN_SCAN_INDEX_2LSB_{ii:02d}"]
       i = (ii - 1) * 2 + scanIndex
 
@@ -172,4 +173,7 @@ class RadarInterface(RadarInterfaceBase):
         if i in self.pts:
           del self.pts[i]
 
-    return True, errors
+    # Update once we've cycled through all 4 scan modes
+    if headerScanIndex == 3:
+      return True, errors
+    return False, []
