@@ -64,8 +64,8 @@ class RadarInterface(RadarInterfaceBase):
 
     if self.trigger_msg not in self.updated_messages:
       return None
+    self.updated_messages.clear()
 
-    ret = structs.RadarData()
     errors = []
     if not self.rcp.can_valid:
       errors.append("canError")
@@ -73,11 +73,14 @@ class RadarInterface(RadarInterfaceBase):
     if self.radar == RADAR.DELPHI_ESR:
       self._update_delphi_esr()
     elif self.radar == RADAR.DELPHI_MRR:
-      errors.extend(self._update_delphi_mrr())
+      _update, _errors = self._update_delphi_mrr()
+      errors.extend(_errors)
+      if not _update:
+        return None
 
+    ret = structs.RadarData()
     ret.points = list(self.pts.values())
     ret.errors = errors
-    self.updated_messages.clear()
     return ret
 
   def _update_delphi_esr(self):
@@ -111,6 +114,8 @@ class RadarInterface(RadarInterfaceBase):
 
   def _update_delphi_mrr(self):
     headerScanIndex = int(self.rcp.vl["MRR_Header_InformationDetections"]['CAN_SCAN_INDEX']) & 0b11
+    if headerScanIndex in (0, 1):
+      return False, []
 
     errors = []
     if DELPHI_MRR_RADAR_RANGE_COVERAGE[headerScanIndex] != int(self.rcp.vl["MRR_Header_SensorCoverage"]["CAN_RANGE_COVERAGE"]):
@@ -124,7 +129,7 @@ class RadarInterface(RadarInterfaceBase):
       # Indexes 0 and 1 have a Doppler coverage of +-71 m/s, 2 and 3 have +-60 m/s
       # TODO: can we group into 2 groups?
       scanIndex = msg[f"CAN_SCAN_INDEX_2LSB_{ii:02d}"]
-      i = (ii - 1) * 4 + scanIndex
+      i = (ii - 1) * 2 + scanIndex
 
       # Throw out old measurements. Very unlikely to happen, but is proper behavior
       if scanIndex != headerScanIndex:
@@ -159,6 +164,7 @@ class RadarInterface(RadarInterfaceBase):
         self.pts[i].dRel = dRel
         self.pts[i].yRel = yRel
         self.pts[i].vRel = distRate
+        self.pts[i].flags2 = scanIndex
 
         self.pts[i].measured = True
 
@@ -166,4 +172,4 @@ class RadarInterface(RadarInterfaceBase):
         if i in self.pts:
           del self.pts[i]
 
-    return errors
+    return True, errors
