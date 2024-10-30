@@ -93,9 +93,8 @@ class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
     super().__init__(CP)
 
+    self.points: list[list[float]] = []
     self.clusters: list[Cluster] = []
-
-    self.cluster_keys = []
 
     self.updated_messages = set()
     self.track_id = 0
@@ -136,7 +135,6 @@ class RadarInterface(RadarInterfaceBase):
         return None
 
     ret = structs.RadarData()
-
     ret.points = list(self.pts.values())
     ret.errors = errors
     return ret
@@ -181,7 +179,6 @@ class RadarInterface(RadarInterfaceBase):
     if DELPHI_MRR_RADAR_RANGE_COVERAGE[headerScanIndex] != int(self.rcp.vl["MRR_Header_SensorCoverage"]["CAN_RANGE_COVERAGE"]):
       errors.append("wrongConfig")
 
-    # points = []
     for ii in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
       msg = self.rcp.vl[f"MRR_Detection_{ii:03d}"]
 
@@ -207,7 +204,7 @@ class RadarInterface(RadarInterfaceBase):
         dRel = cos(azimuth) * dist                              # m from front of car
         yRel = -sin(azimuth) * dist                             # in car frame's y axis, left is positive
 
-        self.cluster_keys.append([dRel, yRel * 2, distRate * 2])
+        self.points.append([dRel, yRel * 2, distRate * 2])
 
     # Update once we've cycled through all 4 scan modes
     if headerScanIndex != 3:
@@ -215,14 +212,14 @@ class RadarInterface(RadarInterfaceBase):
 
     # Cluster points from this cycle against the centroids from the previous cycle
     prev_keys = [[p.dRel, p.yRel * 2, p.vRel * 2] for p in self.clusters]
-    labels = cluster_points(prev_keys, self.cluster_keys, DELPHI_MRR_CLUSTER_THRESHOLD)
+    labels = cluster_points(prev_keys, self.points, DELPHI_MRR_CLUSTER_THRESHOLD)
 
     points_by_track_id = defaultdict(list)
     for idx, label in enumerate(labels):
       if label != -1:
-        points_by_track_id[self.clusters[label].trackId].append(self.cluster_keys[idx])
+        points_by_track_id[self.clusters[label].trackId].append(self.points[idx])
       else:
-        points_by_track_id[self.track_id].append(self.cluster_keys[idx])
+        points_by_track_id[self.track_id].append(self.points[idx])
         self.track_id += 1
 
     self.clusters = []
@@ -251,6 +248,6 @@ class RadarInterface(RadarInterfaceBase):
     for idx in range(len(points_by_track_id), len(self.pts)):
       del self.pts[idx]
 
-    self.cluster_keys = []
+    self.points = []
 
     return True, errors
