@@ -13,7 +13,7 @@ DELPHI_MRR_RADAR_HEADER_ADDR = 0x174  # MRR_Header_SensorCoverage
 DELPHI_MRR_RADAR_MSG_COUNT = 64
 
 DELPHI_MRR_RADAR_RANGE_COVERAGE = {0: 42, 1: 164, 2: 45, 3: 175}  # scan index to detection range (m)
-MIN_LONG_RANGE_DIST = 30  # meters
+DELPHI_MRR_MIN_LONG_RANGE_DIST = 30  # meters
 
 
 def _create_delphi_esr_radar_can_parser(CP) -> CANParser:
@@ -140,7 +140,7 @@ class RadarInterface(RadarInterfaceBase):
 
       # Long range measurement mode is more sensitive and can detect the road surface
       dist = msg[f"CAN_DET_RANGE_{ii:02d}"]  # m [0|255.984]
-      if scanIndex in (1, 3) and dist < MIN_LONG_RANGE_DIST:
+      if scanIndex in (1, 3) and dist < DELPHI_MRR_MIN_LONG_RANGE_DIST:
         valid = False
 
       if valid:
