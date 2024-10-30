@@ -3,7 +3,6 @@ try:
   matplotlib.use('Qt5Agg')  # Use the Qt5Agg backend
   matplotlib.rcParams['figure.raise_window'] = False
   import matplotlib.pyplot as plt
-  from sklearn.cluster import DBSCAN
 except:
   plt = None
 
@@ -34,7 +33,8 @@ DELPHI_MRR_RADAR_HEADER_ADDR = 0x174  # MRR_Header_SensorCoverage
 DELPHI_MRR_RADAR_MSG_COUNT = 64
 
 DELPHI_MRR_RADAR_RANGE_COVERAGE = {0: 42, 1: 164, 2: 45, 3: 175}  # scan index to detection range (m)
-MIN_LONG_RANGE_DIST = 30  # meters
+DELPHI_MRR_MIN_LONG_RANGE_DIST = 30  # meters
+DELPHI_MRR_CLUSTER_THRESHOLD = 5  # meters, lateral distance and relative velocity are weighted
 
 PLOT = False
 
@@ -48,7 +48,7 @@ class RadarPoint:
 
 
 @dataclass
-class Cluster2:
+class Cluster:
   dRel: float = 0.0
   dRelClosest: float = 0.0
   yRel: float = 0.0
@@ -56,31 +56,31 @@ class Cluster2:
   trackId: int = 0
 
 
-class Cluster:
-  def __init__(self, pts: list[RadarPoint], cluster_id: int):
-    self.n_pts = len(pts)
-    self.cluster_id = cluster_id
-
-    self._dRel = sum([p.dRel for p in pts]) / self.n_pts
-    self._closestDRel = min([p.dRel for p in pts])
-    self._yRel = sum([p.yRel for p in pts]) / self.n_pts
-    self._vRel = sum([p.vRel for p in pts]) / self.n_pts
-
-  @property
-  def dRel(self):
-    return self._dRel
-
-  @property
-  def closestDRel(self):
-    return self._closestDRel
-
-  @property
-  def yRel(self):
-    return self._yRel
-
-  @property
-  def vRel(self):
-    return self._vRel
+# class Cluster:
+#   def __init__(self, pts: list[RadarPoint], cluster_id: int):
+#     self.n_pts = len(pts)
+#     self.cluster_id = cluster_id
+#
+#     self._dRel = sum([p.dRel for p in pts]) / self.n_pts
+#     self._closestDRel = min([p.dRel for p in pts])
+#     self._yRel = sum([p.yRel for p in pts]) / self.n_pts
+#     self._vRel = sum([p.vRel for p in pts]) / self.n_pts
+#
+#   @property
+#   def dRel(self):
+#     return self._dRel
+#
+#   @property
+#   def closestDRel(self):
+#     return self._closestDRel
+#
+#   @property
+#   def yRel(self):
+#     return self._yRel
+#
+#   @property
+#   def vRel(self):
+#     return self._vRel
 
 
 @profile
@@ -150,21 +150,16 @@ class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
     super().__init__(CP)
 
-    self.clusters: list[Cluster] = []
     self.cluster_id = 0
 
     self.frame = 0
-    self.clusters2 = []
-
-    # TODO: 2.5 good enough?
-    # TODO: write simple cluster function
-    # self.dbscan = DBSCAN(eps=5, min_samples=1)
+    self.clusters: list[Cluster] = []
 
     if PLOT:
       self.fig, self.ax = plt.subplots()
       self.cmap = plt.cm.get_cmap('tab20', 20)  # 'tab20' colormap with 20 colors
 
-    self.temp_pts = {}
+    self.temp_pts = []
 
     self.updated_messages = set()
     self.track_id = 0
@@ -209,7 +204,7 @@ class RadarInterface(RadarInterfaceBase):
     # ret.points = list(self.pts.values())
     ret.points = [structs.RadarData.RadarPoint(dRel=pt.dRelClosest, yRel=pt.yRel, vRel=pt.vRel, trackId=pt.trackId,
                                                measured=True, aRel=float('nan'), yvRel=float('nan'))
-                  for pt in self.clusters2]
+                  for pt in self.clusters]
     ret.errors = errors
     return ret
 
@@ -274,80 +269,35 @@ class RadarInterface(RadarInterfaceBase):
 
       # Long range measurement mode is more sensitive and can detect the road surface
       dist = msg[f"CAN_DET_RANGE_{ii:02d}"]  # m [0|255.984]
-      if scanIndex in (1, 3) and dist < MIN_LONG_RANGE_DIST:
+      if scanIndex in (1, 3) and dist < DELPHI_MRR_MIN_LONG_RANGE_DIST:
         valid = False
-
-      # valid = valid and dist < 50
 
       if valid:
         azimuth = msg[f"CAN_DET_AZIMUTH_{ii:02d}"]              # rad [-3.1416|3.13964]
         distRate = msg[f"CAN_DET_RANGE_RATE_{ii:02d}"]          # m/s [-128|127.984]
-        yRel = -sin(azimuth) * dist                             # in car frame's y axis, left is positive
         dRel = cos(azimuth) * dist                              # m from front of car
+        yRel = -sin(azimuth) * dist                             # in car frame's y axis, left is positive
 
-        # TODO: multiply yRel by 2
-        # points.append([dRel, yRel * 2])
-
-        # if i not in self.temp_pts:
-        #   self.temp_pts[i] = RadarPoint()
-        #   self.temp_pts[i].trackId = self.track_id
-        #   self.temp_pts[i].aRel = float('nan')
-        #   self.temp_pts[i].yvRel = float('nan')
-        #   self.track_id += 1
-        #
-        # elif abs(self.temp_pts[i].vRel - distRate) > 2 or abs(self.temp_pts[i].dRel - dRel) > 5:
-        #   # delphi doesn't notify of track switches, so do it manually
-        #   # TODO: refactor this to radard if more radars behave this way
-        #   self.temp_pts[i].trackId = self.track_id
-        #   self.track_id += 1
-
-        # self.temp_pts[i] = RadarPoint(dRel=dRel, yRel=yRel, vRel=distRate)
-        self.temp_pts[i] = [dRel, yRel * 2, distRate * 2]
-
-        # self.temp_pts[i].dRel = dRel
-        # self.temp_pts[i].yRel = yRel
-        # self.temp_pts[i].vRel = distRate
-
-        # self.temp_pts[i].measured = True
-      # else:
-      #   if i in self.temp_pts:
-      #     del self.temp_pts[i]
+        self.temp_pts.append([dRel, yRel * 2, distRate * 2])
 
     # Update once we've cycled through all 4 scan modes
     if headerScanIndex != 3:
       return False, []
 
-    temp_points_list = list(self.temp_pts.values())
-    points_list = list(self.clusters2)
-    keys = temp_points_list
-    prev_keys = [[p.dRel, p.yRel * 2, p.vRel * 2] for p in points_list]
-    # labels = self.dbscan.fit_predict(keys)
-    labels = cluster_points(prev_keys, keys, 5)
-    # TODO: can be empty
-    # print(prev_keys, keys, labels)
-    # clusters = [[] for _ in range(max(labels) + 1)]
+    prev_keys = [[p.dRel, p.yRel * 2, p.vRel * 2] for p in self.clusters]
+    labels = cluster_points(prev_keys, self.temp_pts, DELPHI_MRR_CLUSTER_THRESHOLD)
+
     clusters_by_track_id = defaultdict(list)
 
     for i, label in enumerate(labels):
       if label != -1:
-        clusters_by_track_id[points_list[label].trackId].append(temp_points_list[i])
-        # raise Exception("DBSCAN should not return -1")
+        clusters_by_track_id[self.clusters[label].trackId].append(self.temp_pts[i])
       else:
-        clusters_by_track_id[self.track_id].append(temp_points_list[i])
+        clusters_by_track_id[self.track_id].append(self.temp_pts[i])
         self.track_id += 1
 
-      # clusters[label].append(temp_points_list[i])
-
-    # find closest previous clusters (2.5 max diff)
-
-    # print(clusters_by_track_id)
-    # self.pts.clear()
-    self.clusters2 = []
+    self.clusters = []
     for track_id, pts in clusters_by_track_id.items():
-      if len(pts) == 0:
-        # assert False
-        continue
-
       dRel = [p[0] for p in pts]
       min_dRel = min(dRel)
       dRel = sum(dRel) / len(dRel)
@@ -359,27 +309,27 @@ class RadarInterface(RadarInterfaceBase):
       vRel = sum(vRel) / len(vRel) / 2
 
       # self.pts[track_id] = RadarPoint(dRel=min_dRel, yRel=yRel, vRel=vRel, trackId=track_id)
-      self.clusters2.append(Cluster2(dRel=dRel, dRelClosest=min_dRel, yRel=yRel, vRel=vRel, trackId=track_id))
+      self.clusters.append(Cluster(dRel=dRel, dRelClosest=min_dRel, yRel=yRel, vRel=vRel, trackId=track_id))
 
     if PLOT:
       self.ax.clear()
 
-      colors = [self.cmap(c.trackId % 20) for c in self.clusters2]
+      colors = [self.cmap(c.trackId % 20) for c in self.clusters]
       # colors_pts = [self.cmap(c.trackId % 20) for c in self.temp_pts.values()]
 
-      self.ax.set_title(f'clusters: {len(self.clusters2)}')
-      self.ax.scatter([c.dRelClosest for c in self.clusters2], [c.yRel for c in self.clusters2], s=80, label='clusters', c=colors)
+      self.ax.set_title(f'clusters: {len(self.clusters)}')
+      self.ax.scatter([c.dRelClosest for c in self.clusters], [c.yRel for c in self.clusters], s=80, label='clusters', c=colors)
       self.ax.scatter([p[0] for p in self.temp_pts.values()], [p[1] / 2 for p in self.temp_pts.values()], s=10, label='points', color='red')  # c=colors_pts)
       # text above each point with its dRel and vRel:
       # for p in self.temp_pts.values():
       #   self.ax.text(p.dRel, p.yRel, f'{p.dRel:.1f}, {p.vRel:.1f}', fontsize=8)
-      for c in self.clusters2:
+      for c in self.clusters:
         self.ax.text(c.dRelClosest, c.yRel, f'{c.dRel:.1f}, {c.yRel:.1f}, {c.vRel:.1f}, {c.trackId}', fontsize=8)
       self.ax.legend()
       self.ax.set_xlim(0, 180)
       self.ax.set_ylim(-30, 30)
       plt.pause(1/15)
 
-    self.temp_pts.clear()
+    self.temp_pts = []
 
     return True, errors
