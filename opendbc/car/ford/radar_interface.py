@@ -219,9 +219,6 @@ class RadarInterface(RadarInterfaceBase):
       # Indexes 0 and 2 have a max range of ~40m, 1 and 3 are ~170m (MRR_Header_SensorCoverage->CAN_RANGE_COVERAGE)
       # Indexes 0 and 1 have a Doppler coverage of +-71 m/s, 2 and 3 have +-60 m/s
       scanIndex = msg[f"CAN_SCAN_INDEX_2LSB_{ii:02d}"]
-      i = (ii - 1) * 2 + (scanIndex - 2)
-      # if scanIndex not in (2, 3):
-      #   continue
 
       # Throw out old measurements. Very unlikely to happen, but is proper behavior
       if scanIndex != headerScanIndex:
@@ -270,7 +267,7 @@ class RadarInterface(RadarInterfaceBase):
       vRel = [p[2] for p in pts]
       vRel = sum(vRel) / len(vRel) / 2
 
-      # Creating RadarPoint and accessing attributes are both expensive, so we store a dataclass and re-use the RadarPoint
+      # FIXME: creating capnp RadarPoint and accessing attributes are both expensive, so we store a dataclass and re-use the RadarPoint
       self.clusters.append(Cluster(dRel=dRel, dRelClosest=min_dRel, yRel=yRel, vRel=vRel, trackId=track_id))
 
       if idx not in self.pts:
