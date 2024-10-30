@@ -1,4 +1,8 @@
+import numpy as np
+from typing import cast
+from collections import defaultdict
 from math import cos, sin
+from dataclasses import dataclass
 from opendbc.can.parser import CANParser
 from opendbc.car import structs
 from opendbc.car.common.conversions import Conversions as CV
@@ -14,6 +18,55 @@ DELPHI_MRR_RADAR_MSG_COUNT = 64
 
 DELPHI_MRR_RADAR_RANGE_COVERAGE = {0: 42, 1: 164, 2: 45, 3: 175}  # scan index to detection range (m)
 DELPHI_MRR_MIN_LONG_RANGE_DIST = 30  # meters
+DELPHI_MRR_CLUSTER_THRESHOLD = 5  # meters, lateral distance and relative velocity are weighted
+
+
+@dataclass
+class Cluster:
+  dRel: float = 0.0
+  yRel: float = 0.0
+  vRel: float = 0.0
+  trackId: int = 0
+
+
+def cluster_points(pts_l: list[list[float]], pts2_l: list[list[float]], max_dist: float) -> list[int]:
+  """
+  Clusters a collection of points based on another collection of points. This is useful for correlating clusters through time.
+  Points in pts2 not close enough to any point in pts are assigned -1.
+  Args:
+    pts_l: List of points to base the new clusters on
+    pts2_l: List of points to cluster using pts
+    max_dist: Max distance from cluster center to candidate point
+
+  Returns:
+    List of cluster indices for pts2 that correspond to pts
+  """
+
+  if not len(pts2_l):
+    return []
+
+  if not len(pts_l):
+    return [-1] * len(pts2_l)
+
+  max_dist_sq = max_dist ** 2
+  pts = np.array(pts_l)
+  pts2 = np.array(pts2_l)
+
+  # Compute squared norms
+  pts_norm_sq = np.sum(pts ** 2, axis=1)
+  pts2_norm_sq = np.sum(pts2 ** 2, axis=1)
+
+  # Compute squared Euclidean distances using the identity
+  # dist_sq[i, j] = ||pts2[i]||^2 + ||pts[j]||^2 - 2 * pts2[i] . pts[j]
+  dist_sq = pts2_norm_sq[:, np.newaxis] + pts_norm_sq[np.newaxis, :] - 2 * np.dot(pts2, pts.T)
+  dist_sq = np.maximum(dist_sq, 0.0)
+
+  # Find the closest cluster for each point and assign its index
+  closest_clusters = np.argmin(dist_sq, axis=1)
+  closest_dist_sq = dist_sq[np.arange(len(pts2)), closest_clusters]
+  cluster_idxs = np.where(closest_dist_sq < max_dist_sq, closest_clusters, -1)
+
+  return cast(list[int], cluster_idxs.tolist())
 
 
 def _create_delphi_esr_radar_can_parser(CP) -> CANParser:
@@ -39,6 +92,9 @@ def _create_delphi_mrr_radar_can_parser(CP) -> CANParser:
 class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
     super().__init__(CP)
+
+    self.points: list[list[float]] = []
+    self.clusters: list[Cluster] = []
 
     self.updated_messages = set()
     self.track_id = 0
@@ -130,7 +186,6 @@ class RadarInterface(RadarInterfaceBase):
       # Indexes 0 and 2 have a max range of ~40m, 1 and 3 are ~170m (MRR_Header_SensorCoverage->CAN_RANGE_COVERAGE)
       # Indexes 0 and 1 have a Doppler coverage of +-71 m/s, 2 and 3 have +-60 m/s
       scanIndex = msg[f"CAN_SCAN_INDEX_2LSB_{ii:02d}"]
-      i = (ii - 1) * 2 + (scanIndex - 2)
 
       # Throw out old measurements. Very unlikely to happen, but is proper behavior
       if scanIndex != headerScanIndex:
@@ -149,30 +204,50 @@ class RadarInterface(RadarInterfaceBase):
         dRel = cos(azimuth) * dist                              # m from front of car
         yRel = -sin(azimuth) * dist                             # in car frame's y axis, left is positive
 
-        if i not in self.pts:
-          self.pts[i] = structs.RadarData.RadarPoint()
-          self.pts[i].trackId = self.track_id
-          self.pts[i].aRel = float('nan')
-          self.pts[i].yvRel = float('nan')
-          self.pts[i].measured = True
-          self.track_id += 1
-
-        elif abs(self.pts[i].vRel - distRate) > 2 or abs(self.pts[i].dRel - dRel) > 5:
-          # delphi doesn't notify of track switches, so do it manually
-          # TODO: refactor this to radard if more radars behave this way
-          self.pts[i].trackId = self.track_id
-          self.track_id += 1
-
-        self.pts[i].dRel = dRel
-        self.pts[i].yRel = yRel
-        self.pts[i].vRel = distRate
-
-      else:
-        if i in self.pts:
-          del self.pts[i]
+        self.points.append([dRel, yRel * 2, distRate * 2])
 
     # Update once we've cycled through all 4 scan modes
     if headerScanIndex != 3:
       return False, []
+
+    # Cluster points from this cycle against the centroids from the previous cycle
+    prev_keys = [[p.dRel, p.yRel * 2, p.vRel * 2] for p in self.clusters]
+    labels = cluster_points(prev_keys, self.points, DELPHI_MRR_CLUSTER_THRESHOLD)
+
+    points_by_track_id = defaultdict(list)
+    for idx, label in enumerate(labels):
+      if label != -1:
+        points_by_track_id[self.clusters[label].trackId].append(self.points[idx])
+      else:
+        points_by_track_id[self.track_id].append(self.points[idx])
+        self.track_id += 1
+
+    self.clusters = []
+    for idx, (track_id, pts) in enumerate(points_by_track_id.items()):
+      dRel = [p[0] for p in pts]
+      min_dRel = min(dRel)
+      dRel = sum(dRel) / len(dRel)
+
+      yRel = [p[1] for p in pts]
+      yRel = sum(yRel) / len(yRel) / 2
+
+      vRel = [p[2] for p in pts]
+      vRel = sum(vRel) / len(vRel) / 2
+
+      # FIXME: creating capnp RadarPoint and accessing attributes are both expensive, so we store a dataclass and reuse the RadarPoint
+      self.clusters.append(Cluster(dRel=dRel, yRel=yRel, vRel=vRel, trackId=track_id))
+
+      if idx not in self.pts:
+        self.pts[idx] = structs.RadarData.RadarPoint(measured=True, aRel=float('nan'), yvRel=float('nan'))
+
+      self.pts[idx].dRel = min_dRel
+      self.pts[idx].yRel = yRel
+      self.pts[idx].vRel = vRel
+      self.pts[idx].trackId = track_id
+
+    for idx in range(len(points_by_track_id), len(self.pts)):
+      del self.pts[idx]
+
+    self.points = []
 
     return True, errors
