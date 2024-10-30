@@ -31,7 +31,7 @@ class Cluster:
 
 def cluster_points(pts: list[list[float]], pts2: list[list[float]], max_dist: float) -> list[int]:
   """
-  Clusters a collection of points based on another collection of points. This is useful for correlating clusters of points through time.
+  Clusters a collection of points based on another collection of points. This is useful for correlating clusters through time.
   Points in pts2 not close enough to any point in pts are assigned -1.
   Args:
     pts: List of points to base the new clusters on
