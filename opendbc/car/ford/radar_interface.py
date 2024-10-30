@@ -370,7 +370,7 @@ class RadarInterface(RadarInterfaceBase):
       # text above each point with its dRel and vRel:
       # for p in self.temp_pts.values():
       #   self.ax.text(p.dRel, p.yRel, f'{p.dRel:.1f}, {p.vRel:.1f}', fontsize=8)
-      for c in self.clusters:
+      for c in self.clusters2:
         self.ax.text(c.dRelClosest, c.yRel, f'{c.dRel:.1f}, {c.yRel:.1f}, {c.vRel:.1f}, {c.trackId}', fontsize=8)
       self.ax.legend()
       self.ax.set_xlim(0, 180)
