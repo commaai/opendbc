@@ -174,6 +174,7 @@ class RadarInterface(RadarInterfaceBase):
           del self.pts[i]
 
     # Update once we've cycled through all 4 scan modes
-    if headerScanIndex == 3:
-      return True, errors
-    return False, []
+    if headerScanIndex != 3:
+      return False, []
+
+    return True, errors
