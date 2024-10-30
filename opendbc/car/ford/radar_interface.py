@@ -23,7 +23,6 @@ DELPHI_MRR_CLUSTER_THRESHOLD = 5  # meters, lateral distance and relative veloci
 @dataclass
 class Cluster:
   dRel: float = 0.0
-  dRelClosest: float = 0.0
   yRel: float = 0.0
   vRel: float = 0.0
   trackId: int = 0
@@ -235,12 +234,12 @@ class RadarInterface(RadarInterfaceBase):
       vRel = sum(vRel) / len(vRel) / 2
 
       # FIXME: creating capnp RadarPoint and accessing attributes are both expensive, so we store a dataclass and re-use the RadarPoint
-      self.clusters.append(Cluster(dRel=dRel, dRelClosest=min_dRel, yRel=yRel, vRel=vRel, trackId=track_id))
+      self.clusters.append(Cluster(dRel=dRel, yRel=yRel, vRel=vRel, trackId=track_id))
 
       if idx not in self.pts:
         self.pts[idx] = structs.RadarData.RadarPoint(measured=True, aRel=float('nan'), yvRel=float('nan'))
 
-      self.pts[idx].dRel = dRel
+      self.pts[idx].dRel = min_dRel
       self.pts[idx].yRel = yRel
       self.pts[idx].vRel = vRel
       self.pts[idx].trackId = track_id
