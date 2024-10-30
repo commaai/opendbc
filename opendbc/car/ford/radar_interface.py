@@ -275,13 +275,13 @@ class RadarInterface(RadarInterfaceBase):
       self.ax.clear()
 
       colors = [self.cmap(c.trackId % 20) for c in self.clusters]
-      # colors_pts = [self.cmap(c.trackId % 20) for c in self.cluster_keys.values()]
+      # colors_pts = [self.cmap(c.trackId % 20) for c in self.cluster_keys]
 
       self.ax.set_title(f'clusters: {len(self.clusters)}')
       self.ax.scatter([c.dRelClosest for c in self.clusters], [c.yRel for c in self.clusters], s=80, label='clusters', c=colors)
-      self.ax.scatter([p[0] for p in self.cluster_keys.values()], [p[1] / 2 for p in self.cluster_keys.values()], s=10, label='points', color='red')  # c=colors_pts)
+      self.ax.scatter([p[0] for p in self.cluster_keys], [p[1] / 2 for p in self.cluster_keys], s=10, label='points', color='red')  # c=colors_pts)
       # text above each point with its dRel and vRel:
-      # for p in self.cluster_keys.values():
+      # for p in self.cluster_keys:
       #   self.ax.text(p.dRel, p.yRel, f'{p.dRel:.1f}, {p.vRel:.1f}', fontsize=8)
       for c in self.clusters:
         self.ax.text(c.dRelClosest, c.yRel, f'{c.dRel:.1f}, {c.yRel:.1f}, {c.vRel:.1f}, {c.trackId}', fontsize=8)
