@@ -18,7 +18,6 @@ class RadarInterface(RadarInterfaceBase):
     self.radar_fault = False
     self.radar_wrong_config = False
     self.radar_off_can = CP.radarUnavailable
-    self.radar_ts = CP.radarTimeStep
 
     # Nidec
     if self.radar_off_can:
