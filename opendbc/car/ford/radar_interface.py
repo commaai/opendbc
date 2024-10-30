@@ -162,10 +162,11 @@ class RadarInterface(RadarInterfaceBase):
         return None
 
     ret = structs.RadarData()
-    # ret.points = list(self.pts.values())
-    ret.points = [structs.RadarData.RadarPoint(dRel=pt.dRelClosest, yRel=pt.yRel, vRel=pt.vRel, trackId=pt.trackId,
-                                               measured=True, aRel=float('nan'), yvRel=float('nan'))
-                  for pt in self.clusters]
+
+    ret.points = list(self.pts.values())
+    # ret.points = [structs.RadarData.RadarPoint(dRel=pt.dRelClosest, yRel=pt.yRel, vRel=pt.vRel, trackId=pt.trackId,
+    #                                            measured=True, aRel=float('nan'), yvRel=float('nan'))
+    #               for pt in self.clusters]
     ret.errors = errors
     return ret
 
@@ -258,7 +259,7 @@ class RadarInterface(RadarInterfaceBase):
         self.track_id += 1
 
     self.clusters = []
-    for track_id, pts in points_by_track_id.items():
+    for idx, (track_id, pts) in enumerate(points_by_track_id.items()):
       dRel = [p[0] for p in pts]
       min_dRel = min(dRel)
       dRel = sum(dRel) / len(dRel)
@@ -269,7 +270,19 @@ class RadarInterface(RadarInterfaceBase):
       vRel = [p[2] for p in pts]
       vRel = sum(vRel) / len(vRel) / 2
 
+      # Creating RadarPoint and accessing attributes are both expensive, so we store a dataclass and re-use the RadarPoint
       self.clusters.append(Cluster(dRel=dRel, dRelClosest=min_dRel, yRel=yRel, vRel=vRel, trackId=track_id))
+
+      if idx not in self.pts:
+        self.pts[idx] = structs.RadarData.RadarPoint(measured=True, aRel=float('nan'), yvRel=float('nan'))
+
+      self.pts[idx].dRel = dRel
+      self.pts[idx].yRel = yRel
+      self.pts[idx].vRel = vRel
+      self.pts[idx].trackId = track_id
+
+    for idx in range(len(points_by_track_id), len(self.pts)):
+      del self.pts[idx]
 
     if PLOT:
       self.ax.clear()
