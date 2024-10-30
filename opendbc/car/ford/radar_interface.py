@@ -79,8 +79,6 @@ def cluster_points(pts: list[list[float]], pts2: list[list[float]], max_dist: fl
   # Compute squared Euclidean distances using the identity
   # dist_sq[i, j] = ||pts2[i]||^2 + ||pts[j]||^2 - 2 * pts2[i] . pts[j]
   dist_sq = pts2_norm_sq[:, np.newaxis] + pts_norm_sq[np.newaxis, :] - 2 * np.dot(pts2, pts.T)
-
-  # Ensure no negative distances due to floating-point errors
   dist_sq = np.maximum(dist_sq, 0.0)
 
   # Find the closest cluster for each point and assign its index
@@ -251,16 +249,16 @@ class RadarInterface(RadarInterfaceBase):
     prev_keys = [[p.dRel, p.yRel * 2, p.vRel * 2] for p in self.clusters]
     labels = cluster_points(prev_keys, self.cluster_keys, DELPHI_MRR_CLUSTER_THRESHOLD)
 
-    clusters_by_track_id = defaultdict(list)
-    for i, label in enumerate(labels):
+    points_by_track_id = defaultdict(list)
+    for idx, label in enumerate(labels):
       if label != -1:
-        clusters_by_track_id[self.clusters[label].trackId].append(self.cluster_keys[i])
+        points_by_track_id[self.clusters[label].trackId].append(self.cluster_keys[idx])
       else:
-        clusters_by_track_id[self.track_id].append(self.cluster_keys[i])
+        points_by_track_id[self.track_id].append(self.cluster_keys[idx])
         self.track_id += 1
 
     self.clusters = []
-    for track_id, pts in clusters_by_track_id.items():
+    for track_id, pts in points_by_track_id.items():
       dRel = [p[0] for p in pts]
       min_dRel = min(dRel)
       dRel = sum(dRel) / len(dRel)
