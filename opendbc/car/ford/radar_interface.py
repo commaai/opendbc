@@ -233,7 +233,7 @@ class RadarInterface(RadarInterfaceBase):
       vRel = [p[2] for p in pts]
       vRel = sum(vRel) / len(vRel) / 2
 
-      # FIXME: creating capnp RadarPoint and accessing attributes are both expensive, so we store a dataclass and re-use the RadarPoint
+      # FIXME: creating capnp RadarPoint and accessing attributes are both expensive, so we store a dataclass and reuse the RadarPoint
       self.clusters.append(Cluster(dRel=dRel, yRel=yRel, vRel=vRel, trackId=track_id))
 
       if idx not in self.pts:
