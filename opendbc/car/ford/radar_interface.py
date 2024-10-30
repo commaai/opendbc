@@ -1,4 +1,5 @@
 import numpy as np
+from typing import cast
 from collections import defaultdict
 from math import cos, sin
 from dataclasses import dataclass
@@ -28,28 +29,28 @@ class Cluster:
   trackId: int = 0
 
 
-def cluster_points(pts: list[list[float]], pts2: list[list[float]], max_dist: float) -> list[int]:
+def cluster_points(pts_l: list[list[float]], pts2_l: list[list[float]], max_dist: float) -> list[int]:
   """
   Clusters a collection of points based on another collection of points. This is useful for correlating clusters through time.
   Points in pts2 not close enough to any point in pts are assigned -1.
   Args:
-    pts: List of points to base the new clusters on
-    pts2: List of points to cluster using pts
+    pts_l: List of points to base the new clusters on
+    pts2_l: List of points to cluster using pts
     max_dist: Max distance from cluster center to candidate point
 
   Returns:
     List of cluster indices for pts2 that correspond to pts
   """
 
-  if not len(pts2):
+  if not len(pts2_l):
     return []
 
-  if not len(pts):
-    return [-1] * len(pts2)
+  if not len(pts_l):
+    return [-1] * len(pts2_l)
 
   max_dist_sq = max_dist ** 2
-  pts = np.array(pts)
-  pts2 = np.array(pts2)
+  pts = np.array(pts_l)
+  pts2 = np.array(pts2_l)
 
   # Compute squared norms
   pts_norm_sq = np.sum(pts ** 2, axis=1)
@@ -65,7 +66,7 @@ def cluster_points(pts: list[list[float]], pts2: list[list[float]], max_dist: fl
   closest_dist_sq = dist_sq[np.arange(len(pts2)), closest_clusters]
   cluster_idxs = np.where(closest_dist_sq < max_dist_sq, closest_clusters, -1)
 
-  return cluster_idxs.tolist()
+  return cast(list[int], cluster_idxs.tolist())
 
 
 def _create_delphi_esr_radar_can_parser(CP) -> CANParser:
