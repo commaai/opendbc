@@ -64,8 +64,8 @@ class RadarInterface(RadarInterfaceBase):
 
     if self.trigger_msg not in self.updated_messages:
       return None
+    self.updated_messages.clear()
 
-    ret = structs.RadarData()
     errors = []
     if not self.rcp.can_valid:
       errors.append("canError")
@@ -73,11 +73,14 @@ class RadarInterface(RadarInterfaceBase):
     if self.radar == RADAR.DELPHI_ESR:
       self._update_delphi_esr()
     elif self.radar == RADAR.DELPHI_MRR:
-      errors.extend(self._update_delphi_mrr())
+      _update, _errors = self._update_delphi_mrr()
+      errors.extend(_errors)
+      if not _update:
+        return None
 
+    ret = structs.RadarData()
     ret.points = list(self.pts.values())
     ret.errors = errors
-    self.updated_messages.clear()
     return ret
 
   def _update_delphi_esr(self):
@@ -112,6 +115,10 @@ class RadarInterface(RadarInterfaceBase):
   def _update_delphi_mrr(self):
     headerScanIndex = int(self.rcp.vl["MRR_Header_InformationDetections"]['CAN_SCAN_INDEX']) & 0b11
 
+    # Use points with Doppler coverage of +-60 m/s, reduces similar points
+    if headerScanIndex in (0, 1):
+      return False, []
+
     errors = []
     if DELPHI_MRR_RADAR_RANGE_COVERAGE[headerScanIndex] != int(self.rcp.vl["MRR_Header_SensorCoverage"]["CAN_RANGE_COVERAGE"]):
       errors.append("wrongConfig")
@@ -122,9 +129,8 @@ class RadarInterface(RadarInterfaceBase):
       # SCAN_INDEX rotates through 0..3 on each message for different measurement modes
       # Indexes 0 and 2 have a max range of ~40m, 1 and 3 are ~170m (MRR_Header_SensorCoverage->CAN_RANGE_COVERAGE)
       # Indexes 0 and 1 have a Doppler coverage of +-71 m/s, 2 and 3 have +-60 m/s
-      # TODO: can we group into 2 groups?
       scanIndex = msg[f"CAN_SCAN_INDEX_2LSB_{ii:02d}"]
-      i = (ii - 1) * 4 + scanIndex
+      i = (ii - 1) * 2 + scanIndex
 
       # Throw out old measurements. Very unlikely to happen, but is proper behavior
       if scanIndex != headerScanIndex:
@@ -165,4 +171,8 @@ class RadarInterface(RadarInterfaceBase):
         if i in self.pts:
           del self.pts[i]
 
-    return errors
+    # Update once we've cycled through all 4 scan modes
+    if headerScanIndex != 3:
+      return False, []
+
+    return True, errors
