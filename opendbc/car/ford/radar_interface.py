@@ -191,6 +191,7 @@ class RadarInterface(RadarInterfaceBase):
 
     if self.trigger_msg not in self.updated_messages:
       return None
+    self.updated_messages.clear()
 
     ret = structs.RadarData()
     errors = []
@@ -210,7 +211,6 @@ class RadarInterface(RadarInterfaceBase):
                                                measured=True, aRel=float('nan'), yvRel=float('nan'))
                   for pt in self.clusters2]
     ret.errors = errors
-    self.updated_messages.clear()
     return ret
 
   def _update_delphi_esr(self):
