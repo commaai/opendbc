@@ -155,6 +155,7 @@ class RadarInterface(RadarInterfaceBase):
 
     self.frame = 0
     self.clusters2 = []
+    self.points = {}
 
     # TODO: 2.5 good enough?
     # TODO: write simple cluster function
@@ -206,10 +207,28 @@ class RadarInterface(RadarInterfaceBase):
       if not _update:
         return None
 
-    # ret.points = list(self.pts.values())
-    ret.points = [structs.RadarData.RadarPoint(dRel=pt.dRelClosest, yRel=pt.yRel, vRel=pt.vRel, trackId=pt.trackId,
-                                               measured=True, aRel=float('nan'), yvRel=float('nan'))
-                  for pt in self.clusters2]
+    ret.points = list(self.pts.values())
+    # ret.points = [structs.RadarData.RadarPoint(dRel=pt.dRelClosest, yRel=pt.yRel, vRel=pt.vRel, trackId=pt.trackId,
+    #                                            measured=True, aRel=float('nan'), yvRel=float('nan'))
+    #               for pt in self.clusters2]
+
+    a = set()
+    for pt in self.clusters2:
+      if pt.trackId not in self.points:
+        self.points[pt.trackId] = structs.RadarData.RadarPoint(measured=True, aRel=float('nan'), yvRel=float('nan'))
+
+      capnp_pt = self.points[pt.trackId]
+      capnp_pt.dRel = pt.dRelClosest
+      capnp_pt.yRel = pt.yRel
+      capnp_pt.vRel = pt.vRel
+      capnp_pt.trackId = pt.trackId
+      a.add(pt.trackId)
+
+    for track_id in self.points.keys():
+      if track_id not in a:
+        del self.points[track_id]
+
+    ret.points = list(self.points.values())
     ret.errors = errors
     return ret
 
