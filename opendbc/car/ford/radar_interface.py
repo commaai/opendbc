@@ -148,6 +148,7 @@ class RadarInterface(RadarInterfaceBase):
           self.pts[i].trackId = self.track_id
           self.pts[i].aRel = float('nan')
           self.pts[i].yvRel = float('nan')
+          self.pts[i].measured = True
           self.track_id += 1
 
         elif abs(self.pts[i].vRel - distRate) > 2 or abs(self.pts[i].dRel - dRel) > 5:
@@ -159,8 +160,6 @@ class RadarInterface(RadarInterfaceBase):
         self.pts[i].dRel = dRel
         self.pts[i].yRel = yRel
         self.pts[i].vRel = distRate
-
-        self.pts[i].measured = True
 
       else:
         if i in self.pts:
