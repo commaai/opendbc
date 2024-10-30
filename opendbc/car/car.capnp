@@ -324,8 +324,6 @@ struct RadarData @0x888ad6581cf0aacb {
 
     # some radars flag measurements VS estimates
     measured @6 :Bool;
-
-    flags2 @7 :UInt32;
   }
 
   # deprecated

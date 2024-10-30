@@ -1,15 +1,5 @@
-try:
-  import matplotlib
-  matplotlib.use('Qt5Agg')  # Use the Qt5Agg backend
-  matplotlib.rcParams['figure.raise_window'] = False
-  import matplotlib.pyplot as plt
-except:
-  plt = None
-
-from collections import defaultdict
-import math
-import copy
 import numpy as np
+from collections import defaultdict
 from math import cos, sin
 from dataclasses import dataclass
 from opendbc.can.parser import CANParser
@@ -18,13 +8,6 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.ford.fordcan import CanBus
 from opendbc.car.ford.values import DBC, RADAR
 from opendbc.car.interfaces import RadarInterfaceBase
-# from scipy.cluster.hierarchy import dendrogram, linkage
-# from scipy.optimize import linear_sum_assignment
-
-try:
-  profile
-except:
-  profile = lambda x: x
 
 DELPHI_ESR_RADAR_MSGS = list(range(0x500, 0x540))
 
@@ -36,8 +19,6 @@ DELPHI_MRR_RADAR_RANGE_COVERAGE = {0: 42, 1: 164, 2: 45, 3: 175}  # scan index t
 DELPHI_MRR_MIN_LONG_RANGE_DIST = 30  # meters
 DELPHI_MRR_CLUSTER_THRESHOLD = 5  # meters, lateral distance and relative velocity are weighted
 
-PLOT = False
-
 
 @dataclass
 class Cluster:
@@ -48,7 +29,6 @@ class Cluster:
   trackId: int = 0
 
 
-@profile
 def cluster_points(pts: list[list[float]], pts2: list[list[float]], max_dist: float) -> list[int]:
   """
   Clusters a collection of points based on another collection of points. This is useful for correlating clusters of points through time.
@@ -113,12 +93,7 @@ class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
     super().__init__(CP)
 
-    self.frame = 0
     self.clusters: list[Cluster] = []
-
-    if PLOT:
-      self.fig, self.ax = plt.subplots()
-      self.cmap = plt.cm.get_cmap('tab20', 20)  # 'tab20' colormap with 20 colors
 
     self.cluster_keys = []
 
@@ -137,7 +112,6 @@ class RadarInterface(RadarInterfaceBase):
     else:
       raise ValueError(f"Unsupported radar: {self.radar}")
 
-  @profile
   def update(self, can_strings):
     if self.rcp is None:
       return super().update(None)
@@ -164,9 +138,6 @@ class RadarInterface(RadarInterfaceBase):
     ret = structs.RadarData()
 
     ret.points = list(self.pts.values())
-    # ret.points = [structs.RadarData.RadarPoint(dRel=pt.dRelClosest, yRel=pt.yRel, vRel=pt.vRel, trackId=pt.trackId,
-    #                                            measured=True, aRel=float('nan'), yvRel=float('nan'))
-    #               for pt in self.clusters]
     ret.errors = errors
     return ret
 
@@ -199,7 +170,6 @@ class RadarInterface(RadarInterfaceBase):
         if ii in self.pts:
           del self.pts[ii]
 
-  @profile
   def _update_delphi_mrr(self):
     headerScanIndex = int(self.rcp.vl["MRR_Header_InformationDetections"]['CAN_SCAN_INDEX']) & 0b11
 
@@ -280,25 +250,6 @@ class RadarInterface(RadarInterfaceBase):
 
     for idx in range(len(points_by_track_id), len(self.pts)):
       del self.pts[idx]
-
-    if PLOT:
-      self.ax.clear()
-
-      colors = [self.cmap(c.trackId % 20) for c in self.clusters]
-      # colors_pts = [self.cmap(c.trackId % 20) for c in self.cluster_keys]
-
-      self.ax.set_title(f'clusters: {len(self.clusters)}')
-      self.ax.scatter([c.dRelClosest for c in self.clusters], [c.yRel for c in self.clusters], s=80, label='clusters', c=colors)
-      self.ax.scatter([p[0] for p in self.cluster_keys], [p[1] / 2 for p in self.cluster_keys], s=10, label='points', color='red')  # c=colors_pts)
-      # text above each point with its dRel and vRel:
-      # for p in self.cluster_keys:
-      #   self.ax.text(p.dRel, p.yRel, f'{p.dRel:.1f}, {p.vRel:.1f}', fontsize=8)
-      for c in self.clusters:
-        self.ax.text(c.dRelClosest, c.yRel, f'{c.dRel:.1f}, {c.yRel:.1f}, {c.vRel:.1f}, {c.trackId}', fontsize=8)
-      self.ax.legend()
-      self.ax.set_xlim(0, 180)
-      self.ax.set_ylim(-30, 30)
-      plt.pause(1/15)
 
     self.cluster_keys = []
 
