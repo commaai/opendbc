@@ -299,7 +299,7 @@ class RadarInterface(RadarInterfaceBase):
         #   self.track_id += 1
 
         # self.temp_pts[i] = RadarPoint(dRel=dRel, yRel=yRel, vRel=distRate)
-        self.temp_pts[i] = [dRel, yRel, distRate]
+        self.temp_pts[i] = [dRel, yRel * 2, distRate * 2]
 
         # self.temp_pts[i].dRel = dRel
         # self.temp_pts[i].yRel = yRel
@@ -317,7 +317,7 @@ class RadarInterface(RadarInterfaceBase):
     temp_points_list = list(self.temp_pts.values())
     points_list = list(self.clusters2)
     keys = temp_points_list
-    prev_keys = [[p.dRel, p.yRel, p.vRel] for p in points_list]
+    prev_keys = [[p.dRel, p.yRel * 2, p.vRel * 2] for p in points_list]
     # labels = self.dbscan.fit_predict(keys)
     labels = cluster_points(prev_keys, keys, 5)
     # TODO: can be empty
@@ -350,10 +350,10 @@ class RadarInterface(RadarInterfaceBase):
       dRel = sum(dRel) / len(dRel)
 
       yRel = [p[1] for p in pts]
-      yRel = sum(yRel) / len(yRel)
+      yRel = sum(yRel) / len(yRel) / 2
 
       vRel = [p[2] for p in pts]
-      vRel = sum(vRel) / len(vRel)
+      vRel = sum(vRel) / len(vRel) / 2
 
       # self.pts[track_id] = RadarPoint(dRel=min_dRel, yRel=yRel, vRel=vRel, trackId=track_id)
       self.clusters2.append(Cluster2(dRel=dRel, dRelClosest=min_dRel, yRel=yRel, vRel=vRel, trackId=track_id))
@@ -366,7 +366,7 @@ class RadarInterface(RadarInterfaceBase):
 
       self.ax.set_title(f'clusters: {len(self.clusters2)}')
       self.ax.scatter([c.dRelClosest for c in self.clusters2], [c.yRel for c in self.clusters2], s=80, label='clusters', c=colors)
-      self.ax.scatter([p[0] for p in self.temp_pts.values()], [p[1] for p in self.temp_pts.values()], s=10, label='points', color='red')  # c=colors_pts)
+      self.ax.scatter([p[0] for p in self.temp_pts.values()], [p[1] / 2 for p in self.temp_pts.values()], s=10, label='points', color='red')  # c=colors_pts)
       # text above each point with its dRel and vRel:
       # for p in self.temp_pts.values():
       #   self.ax.text(p.dRel, p.yRel, f'{p.dRel:.1f}, {p.vRel:.1f}', fontsize=8)
