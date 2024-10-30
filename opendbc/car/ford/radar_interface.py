@@ -130,7 +130,7 @@ class RadarInterface(RadarInterfaceBase):
       # Indexes 0 and 2 have a max range of ~40m, 1 and 3 are ~170m (MRR_Header_SensorCoverage->CAN_RANGE_COVERAGE)
       # Indexes 0 and 1 have a Doppler coverage of +-71 m/s, 2 and 3 have +-60 m/s
       scanIndex = msg[f"CAN_SCAN_INDEX_2LSB_{ii:02d}"]
-      i = (ii - 1) * 2 + scanIndex
+      i = (ii - 1) * 2 + (scanIndex - 2)
 
       # Throw out old measurements. Very unlikely to happen, but is proper behavior
       if scanIndex != headerScanIndex:
