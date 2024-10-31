@@ -1,8 +1,9 @@
+import math
 from opendbc.can.packer import CANPacker
-from opendbc.car import apply_std_steer_angle_limits, structs
+from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, DT_CTRL, apply_std_steer_angle_limits, structs
 from opendbc.car.ford import fordcan
 from opendbc.car.ford.values import CarControllerParams, FordFlags
-from opendbc.car.common.numpy_fast import clip
+from opendbc.car.common.numpy_fast import clip, interp
 from opendbc.car.interfaces import CarControllerBase, V_CRUISE_MAX
 
 LongCtrlState = structs.CarControl.Actuators.LongControlState
@@ -21,6 +22,13 @@ def apply_ford_curvature_limits(apply_curvature, apply_curvature_last, current_c
   return clip(apply_curvature, -CarControllerParams.CURVATURE_MAX, CarControllerParams.CURVATURE_MAX)
 
 
+def apply_creep_compensation(accel: float, v_ego: float) -> float:
+  creep_accel = interp(v_ego, [1., 3.], [0.6, 0.])
+  if accel < 0.:
+    accel -= creep_accel
+  return accel
+
+
 class CarController(CarControllerBase):
   def __init__(self, dbc_name, CP):
     super().__init__(dbc_name, CP)
@@ -28,10 +36,14 @@ class CarController(CarControllerBase):
     self.CAN = fordcan.CanBus(CP)
 
     self.apply_curvature_last = 0
+    self.accel = 0.0
+    self.gas = 0.0
+    self.brake_request = False
     self.main_on_last = False
     self.lkas_enabled_last = False
     self.steer_alert_last = False
     self.lead_distance_bars_last = None
+    self.distance_bar_frame = 0
 
   def update(self, CC, CS, now_nanos):
     can_sends = []
@@ -87,14 +99,42 @@ class CarController(CarControllerBase):
     ### longitudinal control ###
     # send acc msg at 50Hz
     if self.CP.openpilotLongitudinalControl and (self.frame % CarControllerParams.ACC_CONTROL_STEP) == 0:
-      # Both gas and accel are in m/s^2, accel is used solely for braking
-      accel = clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
+      accel = actuators.accel
       gas = accel
+
+      if CC.longActive:
+        # Compensate for engine creep at low speed.
+        # Either the ABS does not account for engine creep, or the correction is very slow
+        # TODO: verify this applies to EV/hybrid
+        accel = apply_creep_compensation(accel, CS.out.vEgo)
+
+        # The stock system has been seen rate limiting the brake accel to 5 m/s^3,
+        # however even 3.5 m/s^3 causes some overshoot with a step response.
+        accel = max(accel, self.accel - (3.5 * CarControllerParams.ACC_CONTROL_STEP * DT_CTRL))
+
+      accel = clip(accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
+
+      # Both gas and accel are in m/s^2, accel is used solely for braking
       if not CC.longActive or gas < CarControllerParams.MIN_GAS:
         gas = CarControllerParams.INACTIVE_GAS
+
+      # PCM applies pitch compensation to gas/accel, but we need to compensate for the brake/pre-charge bits
+      accel_due_to_pitch = 0.0
+      if len(CC.orientationNED) == 3:
+        accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY
+
+      accel_pitch_compensated = accel + accel_due_to_pitch
+      if accel_pitch_compensated > 0.3 or not CC.longActive:
+        self.brake_request = False
+      elif accel_pitch_compensated < 0.0:
+        self.brake_request = True
+
       stopping = CC.actuators.longControlState == LongCtrlState.stopping
       # TODO: look into using the actuators packet to send the desired speed
-      can_sends.append(fordcan.create_acc_msg(self.packer, self.CAN, CC.longActive, gas, accel, stopping, v_ego_kph=V_CRUISE_MAX))
+      can_sends.append(fordcan.create_acc_msg(self.packer, self.CAN, CC.longActive, gas, accel, stopping, self.brake_request, v_ego_kph=V_CRUISE_MAX))
+
+      self.accel = accel
+      self.gas = gas
 
     ### ui ###
     send_ui = (self.main_on_last != main_on) or (self.lkas_enabled_last != CC.latActive) or (self.steer_alert_last != steer_alert)
@@ -105,10 +145,13 @@ class CarController(CarControllerBase):
     # send acc ui msg at 5Hz or if ui state changes
     if hud_control.leadDistanceBars != self.lead_distance_bars_last:
       send_ui = True
+      self.distance_bar_frame = self.frame
+
     if (self.frame % CarControllerParams.ACC_UI_STEP) == 0 or send_ui:
+      show_distance_bars = self.frame - self.distance_bar_frame < 400
       can_sends.append(fordcan.create_acc_ui_msg(self.packer, self.CAN, self.CP, main_on, CC.latActive,
-                                                 fcw_alert, CS.out.cruiseState.standstill, hud_control,
-                                                 CS.acc_tja_status_stock_values))
+                                                 fcw_alert, CS.out.cruiseState.standstill, show_distance_bars,
+                                                 hud_control, CS.acc_tja_status_stock_values))
 
     self.main_on_last = main_on
     self.lkas_enabled_last = CC.latActive
@@ -117,6 +160,8 @@ class CarController(CarControllerBase):
 
     new_actuators = actuators.as_builder()
     new_actuators.curvature = self.apply_curvature_last
+    new_actuators.accel = self.accel
+    new_actuators.gas = self.gas
 
     self.frame += 1
     return new_actuators, can_sends
