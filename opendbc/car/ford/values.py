@@ -25,11 +25,12 @@ class CarControllerParams:
   STEER_DRIVER_ALLOWANCE = 1.0  # Driver intervention threshold, Nm
 
   # Curvature rate limits
-  # The curvature signal is limited to 0.003 to 0.009 m^-1/sec by the EPS depending on speed and direction
-  # Limit to ~2 m/s^3 up, ~3 m/s^3 down at 75 mph
-  # Worst case, the low speed limits will allow 4.3 m/s^3 up, 4.9 m/s^3 down at 75 mph
-  ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[5, 25], angle_v=[0.0002, 0.0001])
-  ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[5, 25], angle_v=[0.000225, 0.00015])
+  # Max curvature is limited by the EPS to an equivalent of ~2.0 m/s^2 at all speeds,
+  #  however max curvature rate linearly decreases as speed increases:
+  #  ~0.009 m^-1/sec at 7 m/s, ~0.002 m^-1/sec at 35 m/s
+  # Limit to ~2 m/s^3 up, ~3.3 m/s^3 down at 75 mph and match EPS limit at low speed
+  ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[5, 25], angle_v=[0.00045, 0.0001])
+  ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[5, 25], angle_v=[0.00045, 0.00015])
   CURVATURE_ERROR = 0.002  # ~6 degrees at 10 m/s, ~10 degrees at 35 m/s
 
   ACCEL_MAX = 2.0               # m/s^2 max acceleration
@@ -98,7 +99,7 @@ class FordCANFDPlatformConfig(FordPlatformConfig):
 
 class CAR(Platforms):
   FORD_BRONCO_SPORT_MK1 = FordPlatformConfig(
-    [FordCarDocs("Ford Bronco Sport 2021-23")],
+    [FordCarDocs("Ford Bronco Sport 2021-24")],
     CarSpecs(mass=1625, wheelbase=2.67, steerRatio=17.7),
   )
   FORD_ESCAPE_MK4 = FordPlatformConfig(
@@ -111,7 +112,7 @@ class CAR(Platforms):
   FORD_EXPLORER_MK6 = FordPlatformConfig(
     [
       FordCarDocs("Ford Explorer 2020-23", hybrid=True),  # Hybrid: Limited and Platinum only
-      FordCarDocs("Lincoln Aviator 2020-23", "Co-Pilot360 Plus", plug_in_hybrid=True),  # Hybrid: Grand Touring only
+      FordCarDocs("Lincoln Aviator 2020-24", "Co-Pilot360 Plus", plug_in_hybrid=True),  # Hybrid: Grand Touring only
     ],
     CarSpecs(mass=2050, wheelbase=3.025, steerRatio=16.8),
   )
