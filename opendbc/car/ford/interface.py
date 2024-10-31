@@ -15,7 +15,7 @@ class CarInterface(CarInterfaceBase):
     # PCM doesn't allow acceleration near cruise_speed,
     # so limit limits of pid to prevent windup
     ACCEL_MAX_VALS = [CarControllerParams.ACCEL_MAX, 0.2]
-    ACCEL_MAX_BP = [cruise_speed - 2., cruise_speed - .2]
+    ACCEL_MAX_BP = [cruise_speed - 2., cruise_speed - .4]
     return CarControllerParams.ACCEL_MIN, interp(current_speed, ACCEL_MAX_BP, ACCEL_MAX_VALS)
 
   @staticmethod
