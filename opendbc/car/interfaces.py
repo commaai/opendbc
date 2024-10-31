@@ -259,12 +259,11 @@ class RadarInterfaceBase(ABC):
     self.CP = CP
     self.rcp = None
     self.pts: dict[int, structs.RadarData.RadarPoint] = {}
-    self.radar_ts = CP.radarTimeStep
     self.frame = 0
 
   def update(self, can_packets: list[tuple[int, list[CanData]]]) -> structs.RadarDataT | None:
     self.frame += 1
-    if (self.frame % int(100 * self.radar_ts)) == 0:
+    if (self.frame % 5) == 0:  # 20 Hz is very standard
       return structs.RadarData()
     return None
 

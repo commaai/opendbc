@@ -322,12 +322,14 @@ BO_ 806 SCM_FEEDBACK: 8 SCM
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
 BO_ 862 CAMERA_MESSAGES: 8 CAM
- SG_ ZEROS_BOH : 7|50@0+ (1,0) [0|127] "" BDY
- SG_ AUTO_HIGHBEAMS_ACTIVE : 53|1@0+ (1,0) [0|1] "" XXX
- SG_ HIGHBEAMS_ON : 52|1@0+ (1,0) [0|1] "" XXX
+ SG_ ZEROS_BOH : 7|16@0+ (1,0) [0|127] "" BDY
+ SG_ SPEED_LIMIT_SIGN : 23|8@0+ (1,0) [0|255] "" XXX
+ SG_ ROAD_SIGN : 31|8@0+ (1,0) [0|255] "" XXX
  SG_ ZEROS_BOH_2 : 51|4@0+ (1,0) [0|15] "" XXX
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
+ SG_ HIGHBEAMS_ON : 52|1@0+ (1,0) [0|1] "" XXX
+ SG_ AUTO_HIGHBEAMS_ACTIVE : 53|1@0+ (1,0) [0|1] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
 
 BO_ 927 RADAR_HUD: 8 RADAR
  SG_ ZEROS_BOH : 7|10@0+ (1,0) [0|127] "" BDY
@@ -396,7 +398,8 @@ CM_ SG_ 577 LINE_DASHED "1 = line is dashed";
 CM_ SG_ 577 LINE_SOLID "1 = line is solid";
 
 VAL_ 399 STEER_STATUS 6 "tmp_fault" 5 "fault_1" 4 "no_torque_alert_2" 3 "low_speed_lockout" 2 "no_torque_alert_1" 0 "normal";
-
+VAL_ 862 SPEED_LIMIT_SIGN 97 "SPEED_LIMIT_5" 98 "SPEED_LIMIT_10" 99 "SPEED_LIMIT_15" 100 "SPEED_LIMIT_20" 101 "SPEED_LIMIT_25" 102 "SPEED_LIMIT_30" 103 "SPEED_LIMIT_35" 104 "SPEED_LIMIT_40" 105 "SPEED_LIMIT_45" 106 "SPEED_LIMIT_50" 107 "SPEED_LIMIT_55" 108 "SPEED_LIMIT_60" 109 "SPEED_LIMIT_65" 110 "SPEED_LIMIT_70" 111 "SPEED_LIMIT_75" 112 "SPEED_LIMIT_80" 113 "SPEED_LIMIT_85" 125 "SPEED_LIMIT_NA" 0 "STOP_SIGN";
+VAL_ 862 ROAD_SIGN 0 "NO_SIGN" 89 "STOP_SIGN";
 
 CM_ "Imported file _steering_sensors_a.dbc starts here";
 BO_ 330 STEERING_SENSORS: 8 EPS
@@ -458,6 +461,16 @@ BO_ 467 CRUISE_FAULT_STATUS: 8 XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
 
+BO_ 477 GEARBOX_ALT_2: 8 XXX
+ SG_ GEAR_MT : 39|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
+
+BO_ 495 SPEED_LIMIT_DASH_DISPLAY: 8 ADAS
+ SG_ SPEED_LIMIT : 47|8@0+ (1,0) [0|255] "mph" XXX
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
+
 BO_ 829 LKAS_HUD: 8 ADAS
  SG_ CAM_TEMP_HIGH : 7|1@0+ (1,0) [0|255] "" BDY
  SG_ SET_ME_X41 : 6|7@0+ (1,0) [0|127] "" BDY
@@ -498,7 +511,9 @@ BO_ 254913108 LKAS_HUD_2: 8 ADAS
 CM_ 446 "If exists, describes cruise faults and what the PCM uses for brake press detection.";
 CM_ SG_ 456 IDLESTOP_ALLOW "allows car to turn off engine at a standstill";
 CM_ SG_ 456 STANDSTILL "set to 1 when camera requests -4.0 m/s^2";
+CM_ SG_ 495 SPEED_LIMIT "Defaults to 0xFF if no speed limit found";
 
 VAL_ 401 GEAR_SHIFTER 32 "L" 16 "S" 8 "D" 4 "N" 2 "R" 1 "P";
 VAL_ 401 GEAR 7 "L" 10 "S" 4 "D" 3 "N" 2 "R" 1 "P";
 VAL_ 419 GEAR_SHIFTER  32 "D" 16 "N" 8 "R" 4 "P" 0 "B" ;
+VAL_ 477 GEAR_MT 14 "reverse" 6 "6th" 5 "5th" 4 "4th" 3 "3rd" 2 "2nd" 1 "1st" 0 "Clutch";
