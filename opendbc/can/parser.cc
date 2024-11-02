@@ -153,11 +153,14 @@ CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum
 }
 
 std::set<uint32_t> CANParser::update(const std::vector<CanData> &can_data) {
+  if (can_data.empty()) return;
+
   // Clear all_values
   for (auto &state : message_states) {
     for (auto &vals : state.second.all_vals) vals.clear();
   }
 
+  // used to check for updated messages in earlier frames when we receive multiple at once
   uint64_t current_nanos = 0;
   std::set<uint32_t> updated_addresses;
   for (const auto &c : can_data) {
@@ -167,6 +170,7 @@ std::set<uint32_t> CANParser::update(const std::vector<CanData> &can_data) {
     if (current_nanos == 0) {
       current_nanos = c.nanos;
     }
+
     UpdateCans(c, updated_addresses);
     UpdateValid(c.nanos);
   }

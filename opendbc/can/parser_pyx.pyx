@@ -7,7 +7,7 @@ from libcpp.vector cimport vector
 from libc.stdint cimport uint32_t
 
 from .common cimport CANParser as cpp_CANParser
-from .common cimport dbc_lookup, Msg, DBC, CanData, CanFrame
+from .common cimport dbc_lookup, Msg, DBC, CanData
 
 import numbers
 from collections import defaultdict
@@ -17,16 +17,18 @@ cdef class CANParser:
   cdef:
     cpp_CANParser *can
     const DBC *dbc
-    vector[uint32_t] addresses
+    set addresses
 
   cdef readonly:
     dict vl
     dict vl_all
     dict ts_nanos
     string dbc_name
+    uint32_t bus
 
   def __init__(self, dbc_name, messages, bus=0):
     self.dbc_name = dbc_name
+    self.bus = bus
     self.dbc = dbc_lookup(dbc_name)
     if not self.dbc:
       raise RuntimeError(f"Can't find DBC: {dbc_name}")
@@ -34,6 +36,7 @@ cdef class CANParser:
     self.vl = {}
     self.vl_all = {}
     self.ts_nanos = {}
+    self.addresses = set()
 
     # Convert message names into addresses and check existence in DBC
     cdef vector[pair[uint32_t, int]] message_v
@@ -46,16 +49,16 @@ cdef class CANParser:
 
       address = m.address
       message_v.push_back((address, c[1]))
-      self.addresses.push_back(address)
+      self.addresses.add(address)
 
       name = m.name.decode("utf8")
       signal_names = [sig.name.decode("utf-8") for sig in (<Msg*>m).sigs]
 
-      self.vl[address] = {name : 0 for name in signal_names}
+      self.vl[address] = {name: 0.0 for name in signal_names}
       self.vl[name] = self.vl[address]
       self.vl_all[address] = defaultdict(list)
       self.vl_all[name] = self.vl_all[address]
-      self.ts_nanos[address] = {name : 0 for name in signal_names}
+      self.ts_nanos[address] = {name: 0.0 for name in signal_names}
       self.ts_nanos[name] = self.ts_nanos[address]
 
     self.can = new cpp_CANParser(bus, dbc_name, message_v)
@@ -71,8 +74,6 @@ cdef class CANParser:
     for address in self.addresses:
       self.vl_all[address].clear()
 
-    cdef CanFrame* frame
-    cdef CanData* can_data
     cdef vector[CanData] can_data_array
 
     try:
@@ -84,11 +85,13 @@ cdef class CANParser:
         can_data = &(can_data_array.emplace_back())
         can_data.nanos = s[0]
         can_data.frames.reserve(len(s[1]))
-        for f in s[1]:
-          frame = &(can_data.frames.emplace_back())
-          frame.address = f[0]
-          frame.dat = f[1]
-          frame.src = f[2]
+        for address, dat, src in s[1]:
+          source_bus = <uint32_t>src
+          if source_bus == self.bus and address in self.addresses:
+            frame = &(can_data.frames.emplace_back())
+            frame.address = address
+            frame.dat = dat
+            frame.src = source_bus
     except TypeError:
       raise RuntimeError("invalid parameter")
 
