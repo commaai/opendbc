@@ -1,14 +1,13 @@
 # distutils: language = c++
 # cython: c_string_encoding=ascii, language_level=3
 
-from cython.operator cimport dereference as deref, preincrement as preinc
 from libcpp.pair cimport pair
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libc.stdint cimport uint32_t
 
 from .common cimport CANParser as cpp_CANParser
-from .common cimport dbc_lookup, Msg, SignalValue, DBC, CanData
+from .common cimport dbc_lookup, Msg, DBC, CanData
 
 import numbers
 from collections import defaultdict
@@ -75,13 +74,6 @@ cdef class CANParser:
     for address in self.addresses:
       self.vl_all[address].clear()
 
-    cur_address = -1
-    vl = {}
-    vl_all = {}
-    ts_nanos = {}
-    updated_addrs = set()
-
-    cdef vector[SignalValue] new_vals
     cdef vector[CanData] can_data_array
 
     try:
@@ -103,27 +95,18 @@ cdef class CANParser:
     except TypeError:
       raise RuntimeError("invalid parameter")
 
-    self.can.update(can_data_array, new_vals)
+    updated_addrs = self.can.update(can_data_array)
+    for addr in updated_addrs:
+      vl = self.vl[addr]
+      vl_all = self.vl_all[addr]
+      ts_nanos = self.ts_nanos[addr]
 
-    cdef vector[SignalValue].iterator it = new_vals.begin()
-    cdef SignalValue* cv
-    while it != new_vals.end():
-      cv = &deref(it)
-
-      # Check if the address has changed
-      if cv.address != cur_address:
-        cur_address = cv.address
-        vl = self.vl[cur_address]
-        vl_all = self.vl_all[cur_address]
-        ts_nanos = self.ts_nanos[cur_address]
-        updated_addrs.add(cur_address)
-
-      # Cast char * directly to unicode
-      cv_name = <unicode>cv.name
-      vl[cv_name] = cv.value
-      vl_all[cv_name] = cv.all_values
-      ts_nanos[cv_name] = cv.ts_nanos
-      preinc(it)
+      state = self.can.getMessageState(addr)
+      for i in range(state.parse_sigs.size()):
+        name = <unicode>state.parse_sigs[i].name
+        vl[name] = state.vals[i]
+        vl_all[name] = state.all_vals[i]
+        ts_nanos[name] = state.last_seen_nanos
 
     return updated_addrs
 
