@@ -1,8 +1,9 @@
 from panda import Panda
+from opendbc.car.common.numpy_fast import interp
 from opendbc.car import get_safety_config, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.ford.fordcan import CanBus
-from opendbc.car.ford.values import Ecu, FordFlags
+from opendbc.car.ford.values import CarControllerParams, DBC, Ecu, FordFlags, RADAR
 from opendbc.car.interfaces import CarInterfaceBase
 
 TransmissionType = structs.CarParams.TransmissionType
@@ -10,14 +11,30 @@ TransmissionType = structs.CarParams.TransmissionType
 
 class CarInterface(CarInterfaceBase):
   @staticmethod
+  def get_pid_accel_limits(CP, current_speed, cruise_speed):
+    # PCM doesn't allow acceleration near cruise_speed,
+    # so limit limits of pid to prevent windup
+    ACCEL_MAX_VALS = [CarControllerParams.ACCEL_MAX, 0.2]
+    ACCEL_MAX_BP = [cruise_speed - 2., cruise_speed - .4]
+    return CarControllerParams.ACCEL_MIN, interp(current_speed, ACCEL_MAX_BP, ACCEL_MAX_VALS)
+
+  @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
     ret.carName = "ford"
     ret.dashcamOnly = bool(ret.flags & FordFlags.CANFD)
 
-    ret.radarUnavailable = True
+    ret.radarUnavailable = DBC[candidate]['radar'] is None
     ret.steerControlType = structs.CarParams.SteerControlType.angle
     ret.steerActuatorDelay = 0.2
     ret.steerLimitTimer = 1.0
+
+    ret.longitudinalTuning.kiBP = [0.]
+    ret.longitudinalTuning.kiV = [0.5]
+
+    if DBC[candidate]['radar'] == RADAR.DELPHI_MRR:
+      # average of 33.3 Hz radar timestep / 4 scan modes = 60 ms
+      # MRR_Header_Timestamps->CAN_DET_TIME_SINCE_MEAS reports 61.3 ms
+      ret.radarDelay = 0.06
 
     CAN = CanBus(fingerprint=fingerprint)
     cfgs = [get_safety_config(structs.CarParams.SafetyModel.ford)]
