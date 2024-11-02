@@ -56,7 +56,7 @@ cdef class CANParser:
 
       self.vl[address] = {name: 0.0 for name in signal_names}
       self.vl[name] = self.vl[address]
-      self.vl_all[address] = defaultdict(list)
+      self.vl_all[address] = {name: [] for name in signal_names}
       self.vl_all[name] = self.vl_all[address]
       self.ts_nanos[address] = {name: 0.0 for name in signal_names}
       self.ts_nanos[name] = self.ts_nanos[address]
@@ -71,8 +71,6 @@ cdef class CANParser:
     # input format:
     # [nanos, [[address, data, src], ...]]
     # [[nanos, [[address, data, src], ...], ...]]
-    for address in self.addresses:
-      self.vl_all[address].clear()
 
     cdef vector[CanData] can_data_array
 
@@ -95,7 +93,8 @@ cdef class CANParser:
     except TypeError:
       raise RuntimeError("invalid parameter")
 
-    updated_addrs = self.can.update(can_data_array)
+    cdef set updated_addrs = self.can.update(can_data_array)
+
     for addr in updated_addrs:
       vl = self.vl[addr]
       vl_all = self.vl_all[addr]
@@ -107,6 +106,12 @@ cdef class CANParser:
         vl[name] = state.vals[i]
         vl_all[name] = state.all_vals[i]
         ts_nanos[name] = state.last_seen_nanos
+
+    # Clear vl_all for unupdated addresses
+    for addr in self.addresses:
+      if addr not in updated_addrs:
+        for value in self.vl_all[addr].values():
+          value.clear()
 
     return updated_addrs
 
