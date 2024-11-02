@@ -160,6 +160,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum
 void CANParser::update(const std::vector<CanData> &can_data, std::vector<SignalValue> &vals) {
   if (can_data.empty()) return;
 
+  // used to check for updated messages in earlier frames when we receive multiple at once
   uint64_t current_nanos = 0;
   for (const auto &c : can_data) {
     if (first_nanos == 0) {
@@ -242,10 +243,10 @@ void CANParser::UpdateValid(uint64_t nanos) {
   can_valid = (can_invalid_cnt < CAN_INVALID_CNT) && _counters_valid;
 }
 
-void CANParser::query_latest(std::vector<SignalValue> &vals, uint64_t last_ts) {
+void CANParser::query_latest(std::vector<SignalValue> &vals, uint64_t current_nanos) {
   for (auto& kv : message_states) {
     auto& state = kv.second;
-    if (state.last_seen_nanos < last_ts) {
+    if (state.last_seen_nanos < current_nanos) {
       continue;
     }
 
