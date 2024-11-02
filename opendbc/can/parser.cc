@@ -158,15 +158,10 @@ std::set<uint32_t> CANParser::update(const std::vector<CanData> &can_data) {
     for (auto &vals : state.second.all_vals) vals.clear();
   }
 
-  // used to check for updated messages in earlier frames when we receive multiple at once
-  uint64_t current_nanos = 0;
   std::set<uint32_t> updated_addresses;
   for (const auto &c : can_data) {
     if (first_nanos == 0) {
       first_nanos = c.nanos;
-    }
-    if (current_nanos == 0) {
-      current_nanos = c.nanos;
     }
 
     UpdateCans(c, updated_addresses);
