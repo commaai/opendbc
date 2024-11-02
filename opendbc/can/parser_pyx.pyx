@@ -87,7 +87,7 @@ cdef class CANParser:
         can_data.frames.reserve(len(s[1]))
         for address, dat, src in s[1]:
           source_bus = <uint32_t>src
-          if source_bus == self.bus and address in self.addresses:
+          if source_bus == self.bus:
             frame = &(can_data.frames.emplace_back())
             frame.address = address
             frame.dat = dat
