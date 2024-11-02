@@ -153,8 +153,6 @@ CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum
 }
 
 std::set<uint32_t> CANParser::update(const std::vector<CanData> &can_data) {
-  if (can_data.empty()) return;
-
   // Clear all_values
   for (auto &state : message_states) {
     for (auto &vals : state.second.all_vals) vals.clear();
