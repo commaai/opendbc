@@ -212,9 +212,9 @@ class CarController(CarControllerBase):
         # internal PCM gas command can get stuck unwinding from negative accel so we apply a generous rate limit
         pcm_accel_cmd = min(pcm_accel_cmd, self.accel + ACCEL_WINDUP_LIMIT) if CC.longActive else 0.0
 
-        can_sends.append(toyotacan.create_accel_command(self.packer, pcm_accel_cmd, pcm_cancel_cmd, self.permit_braking, self.standstill_req, lead,
-                                                        CS.acc_type, fcw_alert, self.distance_button))
         if self.CP.flags & ToyotaFlags.SECOC.value:
+          can_sends.append(toyotacan.create_accel_command(self.packer, 0, pcm_cancel_cmd, self.permit_braking, self.standstill_req, lead,
+                                                          CS.acc_type, fcw_alert, self.distance_button))
           acc_cmd_2 = toyotacan.create_accel_command_2(self.packer, pcm_accel_cmd)
           acc_cmd_2 = add_mac(self.secoc_key,
                               int(CS.secoc_synchronization['TRIP_CNT']),
@@ -223,6 +223,9 @@ class CarController(CarControllerBase):
                               acc_cmd_2)
           self.secoc_acc_message_counter += 1
           can_sends.append(acc_cmd_2)
+        else:
+          can_sends.append(toyotacan.create_accel_command(self.packer, pcm_accel_cmd, pcm_cancel_cmd, self.permit_braking, self.standstill_req, lead,
+                                                          CS.acc_type, fcw_alert, self.distance_button))
 
         self.accel = pcm_accel_cmd
       else:
