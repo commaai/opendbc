@@ -55,11 +55,11 @@ cdef class CANParser:
       name = m.name.decode("utf8")
       signal_names = [sig.name.decode("utf-8") for sig in (<Msg*>m).sigs]
 
-      self.vl[address] = {name : 0 for name in signal_names}
+      self.vl[address] = {name: 0.0 for name in signal_names}
       self.vl[name] = self.vl[address]
       self.vl_all[address] = defaultdict(list)
       self.vl_all[name] = self.vl_all[address]
-      self.ts_nanos[address] = {name : 0 for name in signal_names}
+      self.ts_nanos[address] = {name: 0.0 for name in signal_names}
       self.ts_nanos[name] = self.ts_nanos[address]
 
     self.can = new cpp_CANParser(bus, dbc_name, message_v)
