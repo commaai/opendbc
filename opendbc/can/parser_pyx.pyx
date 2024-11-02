@@ -101,7 +101,7 @@ cdef class CANParser:
       vl_all = self.vl_all[addr]
       ts_nanos = self.ts_nanos[addr]
 
-      state = self.can.messageState(addr)
+      state = self.can.getMessageState(addr)
       for i in range(state.parse_sigs.size()):
         name = <unicode>state.parse_sigs[i].name
         vl[name] = state.vals[i]

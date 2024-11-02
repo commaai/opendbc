@@ -81,7 +81,7 @@ public:
             const std::vector<std::pair<uint32_t, int>> &messages);
   CANParser(int abus, const std::string& dbc_name, bool ignore_checksum, bool ignore_counter);
   std::set<uint32_t> update(const std::vector<CanData> &can_data);
-  MessageState *messageState(uint32_t address) { return &message_states.at(address); }
+  MessageState *getMessageState(uint32_t address) { return &message_states.at(address); }
 
 protected:
   void UpdateCans(const CanData &can, std::set<uint32_t> &updated_addresses);
