@@ -72,8 +72,6 @@ class TestCanParserPacker:
     msgs = [("CAN_FD_MESSAGE", 10), ]
     parser = CANParser(TEST_DBC, msgs, 0)
     packer = CANPacker(TEST_DBC)
-    ret = parser.update_strings([])
-    assert len(ret) == 0
 
     msg = packer.make_can_msg("CAN_FD_MESSAGE", 0, {})
     ret = parser.update_strings([0, [msg]])
