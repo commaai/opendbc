@@ -22,7 +22,7 @@ class CarState(CarStateBase):
     # Vehicle speed
     ret.vEgoRaw = cp.vl["DI_speed"]["DI_vehicleSpeed"] * CV.KPH_TO_MS
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
-    ret.standstill = cp.vl["DI_state"]["DI_vehicleHoldState"] == 3
+    ret.standstill = ret.vEgo < 0.1
 
     # Gas pedal
     pedal_status = cp.vl["DI_systemStatus"]["DI_accelPedalPos"]
