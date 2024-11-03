@@ -6,11 +6,63 @@ from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libc.stdint cimport uint32_t
 
-from .common cimport CANParser as cpp_CANParser
-from .common cimport dbc_lookup, Msg, DBC, CanData
+from .common cimport CANParser as cpp_CANParser, MessageState as cpp_MessageState
+from .common cimport dbc_lookup, DBC, CanData
 
 import numbers
+from collections.abc import Mapping
 from collections import defaultdict
+
+cdef class MessageState:
+  cdef cpp_MessageState *_state
+  cdef list _signal_names
+
+  def value(self, key):
+    return self._state.signal_values.at(key).value
+
+  def ts_nanos(self, key):
+    return self._state.signal_values.at(key).ts_nanos
+
+  def all_values(self, key):
+    return self._state.signal_values.at(key).all_values
+
+  @property
+  def signal_names(self):
+    return self._signal_names
+
+  @staticmethod
+  cdef create(cpp_MessageState *state):
+    message_state = MessageState()
+    message_state._state = state
+    message_state._signal_names = [it.first.decode("utf-8") for it in state.signal_values]
+    return message_state
+
+
+class ReadonlyDict(Mapping):
+  def __init__(self, state):
+    self.state = state
+    self.keys = self.state.signal_names
+
+  def __iter__(self):
+    return iter(self.keys)
+
+  def __len__(self):
+    return len(self.keys)
+
+
+class ValueDict(ReadonlyDict):
+  def __getitem__(self, key):
+    return self.state.value(key)
+
+
+class NanosDict(ReadonlyDict):
+  def __getitem__(self, key):
+    return self.state.ts_nanos(key)
+
+
+class AllValueDict(ReadonlyDict):
+  def __getitem__(self, key):
+    return self.state.all_values(key)
 
 
 cdef class CANParser:
@@ -47,21 +99,19 @@ cdef class CANParser:
       except IndexError:
         raise RuntimeError(f"could not find message {repr(c[0])} in DBC {self.dbc_name}")
 
-      address = m.address
-      message_v.push_back((address, c[1]))
-      self.addresses.add(address)
-
-      name = m.name.decode("utf8")
-      signal_names = [sig.name.decode("utf-8") for sig in (<Msg*>m).sigs]
-
-      self.vl[address] = {name: 0.0 for name in signal_names}
-      self.vl[name] = self.vl[address]
-      self.vl_all[address] = defaultdict(list)
-      self.vl_all[name] = self.vl_all[address]
-      self.ts_nanos[address] = {name: 0.0 for name in signal_names}
-      self.ts_nanos[name] = self.ts_nanos[address]
+      message_v.push_back((m.address, c[1]))
+      self.addresses.add(m.address)
 
     self.can = new cpp_CANParser(bus, dbc_name, message_v)
+
+    for addr in self.addresses:
+      msg = self.dbc.addr_to_msg.at(addr)
+      msg_name = msg.name.decode("utf8")
+      message_state = MessageState.create(self.can.getMessageState(addr))
+
+      self.vl[msg_name] = self.vl[addr] = ValueDict(message_state)
+      self.vl_all[msg_name] = self.vl_all[addr] = AllValueDict(message_state)
+      self.ts_nanos[msg_name] = self.ts_nanos[addr] = NanosDict(message_state)
 
   def __dealloc__(self):
     if self.can:
@@ -71,9 +121,6 @@ cdef class CANParser:
     # input format:
     # [nanos, [[address, data, src], ...]]
     # [[nanos, [[address, data, src], ...], ...]]
-    for address in self.addresses:
-      self.vl_all[address].clear()
-
     cdef vector[CanData] can_data_array
 
     try:
@@ -95,20 +142,7 @@ cdef class CANParser:
     except TypeError:
       raise RuntimeError("invalid parameter")
 
-    updated_addrs = self.can.update(can_data_array)
-    for addr in updated_addrs:
-      vl = self.vl[addr]
-      vl_all = self.vl_all[addr]
-      ts_nanos = self.ts_nanos[addr]
-
-      state = self.can.getMessageState(addr)
-      for i in range(state.parse_sigs.size()):
-        name = <unicode>state.parse_sigs[i].name
-        vl[name] = state.vals[i]
-        vl_all[name] = state.all_vals[i]
-        ts_nanos[name] = state.last_seen_nanos
-
-    return updated_addrs
+    return self.can.update(can_data_array)
 
   @property
   def can_valid(self):

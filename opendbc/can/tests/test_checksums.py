@@ -17,7 +17,7 @@ class TestCanChecksums:
     for data in test_messages:
       expected_msg = (msg_addr, data, 0)
       parser.update_strings([0, [expected_msg]])
-      expected = copy.deepcopy(parser.vl[msg_name])
+      expected = {key: parser.vl[msg_name][key] for key in parser.vl[msg_name]}
 
       modified = copy.deepcopy(expected)
       modified.pop(checksum_field, None)
