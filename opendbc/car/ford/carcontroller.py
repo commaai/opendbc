@@ -24,8 +24,8 @@ def apply_ford_curvature_limits(apply_curvature, apply_curvature_last, current_c
 
 def apply_creep_compensation(accel: float, v_ego: float) -> float:
   creep_accel = interp(v_ego, [1., 3.], [0.6, 0.])
-  if accel < 0.:
-    accel -= creep_accel
+  creep_accel = interp(accel, [0., 0.2], [creep_accel, 0.])
+  accel -= creep_accel
   return accel
 
 

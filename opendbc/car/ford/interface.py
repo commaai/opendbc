@@ -1,14 +1,23 @@
 from panda import Panda
+from opendbc.car.common.numpy_fast import interp
 from opendbc.car import get_safety_config, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.ford.fordcan import CanBus
-from opendbc.car.ford.values import DBC, Ecu, FordFlags, RADAR
+from opendbc.car.ford.values import CarControllerParams, DBC, Ecu, FordFlags, RADAR
 from opendbc.car.interfaces import CarInterfaceBase
 
 TransmissionType = structs.CarParams.TransmissionType
 
 
 class CarInterface(CarInterfaceBase):
+  @staticmethod
+  def get_pid_accel_limits(CP, current_speed, cruise_speed):
+    # PCM doesn't allow acceleration near cruise_speed,
+    # so limit limits of pid to prevent windup
+    ACCEL_MAX_VALS = [CarControllerParams.ACCEL_MAX, 0.2]
+    ACCEL_MAX_BP = [cruise_speed - 2., cruise_speed - .4]
+    return CarControllerParams.ACCEL_MIN, interp(current_speed, ACCEL_MAX_BP, ACCEL_MAX_VALS)
+
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
     ret.carName = "ford"
