@@ -440,16 +440,17 @@ FW_VERSIONS = {
     ],
   },
   CAR.HYUNDAI_VELOSTER: {
-    (Ecu.fwdRadar, 0x7d0, None): [
-      b'\xf1\x00JS__ SCC H-CUP      1.00 1.02 95650-J3200         ',
-      b'\xf1\x00JS__ SCC HNCUP      1.00 1.02 95650-J3100         ',
+    (Ecu.fwdCamera, 0x7c4, None): [
+     b'\xf1\x00JS  LKAS AT USA LHD 1.00 1.03 95740-J3000 K33',
+     b'\xf1\x00JS  LKAS AT USA LHD 1.00 1.03 95740-J3000 K33',
+     b'\xf1\x00JS  LKAS AT USA LHD 1.00 1.03 95740-J3000 K33',
+     b'\xf1\x00JS  LKAS AT USA LHD 1.00 1.03 95740-J3000 K33',
     ],
     (Ecu.eps, 0x7d4, None): [
+     b'\xf1\x00JSL MDPS C 1.00 1.03 56340-J3000 8308',
       b'\xf1\x00JSL MDPS C 1.00 1.03 56340-J3000 8308',
-    ],
-    (Ecu.fwdCamera, 0x7c4, None): [
-      b'\xf1\x00JS  LKAS AT KOR LHD 1.00 1.03 95740-J3000 K33',
-      b'\xf1\x00JS  LKAS AT USA LHD 1.00 1.02 95740-J3000 K32',
+      b'\xf1\x00JSL MDPS C 1.00 1.03 56340-J3000 8308',
+      b'\xf1\x00JSL MDPS C 1.00 1.03 56340-J3000 8308',
     ],
   },
   CAR.GENESIS_G70: {
