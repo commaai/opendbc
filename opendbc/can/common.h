@@ -1,6 +1,5 @@
 #pragma once
 
-#include <map>
 #include <set>
 #include <string>
 #include <utility>
@@ -91,8 +90,16 @@ protected:
 class CANPacker {
 private:
   const DBC *dbc = NULL;
-  std::map<std::pair<uint32_t, std::string>, Signal> signal_lookup;
-  std::map<uint32_t, uint32_t> counters;
+
+  struct MessageData {
+    uint32_t msg_size = 0;
+    const Signal *counter_signal = nullptr;
+    const Signal *checksum_signal = nullptr;
+    uint32_t counter_value = 0;
+    std::unordered_map<std::string, const Signal *> signals;
+  };
+
+  std::unordered_map<uint32_t, MessageData> msg_lookup;
 
 public:
   CANPacker(const std::string& dbc_name);

@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <map>
 #include <stdexcept>
 #include <utility>
 
@@ -33,64 +32,64 @@ CANPacker::CANPacker(const std::string& dbc_name) {
   assert(dbc);
 
   for (const auto& msg : dbc->msgs) {
+    MessageData &msg_data = msg_lookup[msg.address];
+    msg_data.msg_size = msg.size;
+
     for (const auto& sig : msg.sigs) {
-      signal_lookup[std::make_pair(msg.address, sig.name)] = sig;
+      msg_data.signals[sig.name] = &sig;
+
+      if (sig.name == "COUNTER") {
+        msg_data.counter_signal = &sig;
+      } else if (sig.name == "CHECKSUM") {
+        msg_data.checksum_signal = &sig;
+      }
     }
   }
 }
 
 std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalPackValue> &signals) {
-  auto msg_it = dbc->addr_to_msg.find(address);
-  if (msg_it == dbc->addr_to_msg.end()) {
+  auto msg_it = msg_lookup.find(address);
+  if (msg_it == msg_lookup.end()) {
     LOGE("undefined address %d", address);
     return {};
   }
 
-  std::vector<uint8_t> ret(msg_it->second->size, 0);
+  MessageData &msg = msg_it->second;
+  std::vector<uint8_t> ret(msg.msg_size, 0);
 
   // set all values for all given signal/value pairs
   bool counter_set = false;
   for (const auto& sigval : signals) {
-    auto sig_it = signal_lookup.find(std::make_pair(address, sigval.name));
-    if (sig_it == signal_lookup.end()) {
+    auto sig_it = msg.signals.find(sigval.name);
+    if (sig_it == msg.signals.end()) {
       // TODO: do something more here. invalid flag like CANParser?
       LOGE("undefined signal %s - %d\n", sigval.name.c_str(), address);
       continue;
     }
-    const auto &sig = sig_it->second;
 
-    int64_t ival = (int64_t)(round((sigval.value - sig.offset) / sig.factor));
+    const Signal *sig = sig_it->second;
+    int64_t ival = (int64_t)(round((sigval.value - sig->offset) / sig->factor));
     if (ival < 0) {
-      ival = (1ULL << sig.size) + ival;
+      ival = (1ULL << sig->size) + ival;
     }
-    set_value(ret, sig, ival);
+    set_value(ret, *sig, ival);
 
-    if (sigval.name == "COUNTER") {
-      counters[address] = sigval.value;
+    if (sig == msg.counter_signal) {
+      msg.counter_value = sigval.value;
       counter_set = true;
     }
   }
 
-  // set message counter
-  auto sig_it_counter = signal_lookup.find(std::make_pair(address, "COUNTER"));
-  if (!counter_set && sig_it_counter != signal_lookup.end()) {
-    const auto& sig = sig_it_counter->second;
-
-    if (counters.find(address) == counters.end()) {
-      counters[address] = 0;
-    }
-    set_value(ret, sig, counters[address]);
-    counters[address] = (counters[address] + 1) % (1 << sig.size);
+  // set message counter if not already set
+  if (msg.counter_signal && !counter_set) {
+    set_value(ret, *msg.counter_signal, msg.counter_value);
+    msg.counter_value = (msg.counter_value + 1) % (1 << msg.counter_signal->size);
   }
 
   // set message checksum
-  auto sig_it_checksum = signal_lookup.find(std::make_pair(address, "CHECKSUM"));
-  if (sig_it_checksum != signal_lookup.end()) {
-    const auto &sig = sig_it_checksum->second;
-    if (sig.calc_checksum != nullptr) {
-      unsigned int checksum = sig.calc_checksum(address, sig, ret);
-      set_value(ret, sig, checksum);
-    }
+  if (msg.checksum_signal && msg.checksum_signal->calc_checksum) {
+    unsigned int checksum = msg.checksum_signal->calc_checksum(address, *msg.checksum_signal, ret);
+    set_value(ret, *msg.checksum_signal, checksum);
   }
 
   return ret;
