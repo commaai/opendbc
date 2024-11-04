@@ -1,6 +1,6 @@
 import math
 from opendbc.car import carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
-                        make_tester_present_msg, rate_limit, structs
+                        make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY
 from opendbc.car.can_definitions import CanData
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car.secoc import add_mac, build_sync_mac
@@ -14,8 +14,6 @@ from opendbc.can.packer import CANPacker
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 SteerControlType = structs.CarParams.SteerControlType
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
-
-ACCELERATION_DUE_TO_GRAVITY = 9.81  # m/s^2
 
 ACCEL_WINDUP_LIMIT = 0.5  # m/s^2 / frame
 
