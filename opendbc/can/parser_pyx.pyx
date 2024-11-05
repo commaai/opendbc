@@ -39,30 +39,19 @@ cdef class MessageState:
 
 
 class ReadonlyDict(Mapping):
-  def __init__(self, state):
-    self.state = state
-    self.keys = self.state.signal_names
+  def __init__(self, state, value_accessor):
+    self._state = state
+    self._keys = state.signal_names
+    self._get_value = value_accessor
+
+  def __getitem__(self, key):
+    return self._get_value(self._state, key)
 
   def __iter__(self):
-    return iter(self.keys)
+    return iter(self._keys)
 
   def __len__(self):
-    return len(self.keys)
-
-
-class ValueDict(ReadonlyDict):
-  def __getitem__(self, key):
-    return self.state.value(key)
-
-
-class NanosDict(ReadonlyDict):
-  def __getitem__(self, key):
-    return self.state.ts_nanos(key)
-
-
-class AllValueDict(ReadonlyDict):
-  def __getitem__(self, key):
-    return self.state.all_values(key)
+    return len(self._keys)
 
 
 cdef class CANParser:
@@ -109,9 +98,9 @@ cdef class CANParser:
       msg_name = msg.name.decode("utf8")
       message_state = MessageState.create(self.can.getMessageState(addr))
 
-      self.vl[msg_name] = self.vl[addr] = ValueDict(message_state)
-      self.vl_all[msg_name] = self.vl_all[addr] = AllValueDict(message_state)
-      self.ts_nanos[msg_name] = self.ts_nanos[addr] = NanosDict(message_state)
+      self.vl[msg_name] = self.vl[addr] = ReadonlyDict(message_state, MessageState.value)
+      self.vl_all[msg_name] = self.vl_all[addr] = ReadonlyDict(message_state, MessageState.all_values)
+      self.ts_nanos[msg_name] = self.ts_nanos[addr] = ReadonlyDict(message_state, MessageState.ts_nanos)
 
   def __dealloc__(self):
     if self.can:
