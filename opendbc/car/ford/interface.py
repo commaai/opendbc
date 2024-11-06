@@ -42,10 +42,9 @@ class CarInterface(CarInterfaceBase):
       cfgs.insert(0, get_safety_config(structs.CarParams.SafetyModel.noOutput))
     ret.safetyConfigs = cfgs
 
-    ret.experimentalLongitudinalAvailable = True
-    if experimental_long:
-      ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_FORD_LONG_CONTROL
-      ret.openpilotLongitudinalControl = True
+    # TODO: verify stock AEB compatibility and longitudinal limit safety before shipping to release
+    ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_FORD_LONG_CONTROL
+    ret.openpilotLongitudinalControl = True
 
     if ret.flags & FordFlags.CANFD:
       ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_FORD_CANFD
