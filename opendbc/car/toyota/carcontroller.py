@@ -167,7 +167,7 @@ class CarController(CarControllerBase):
 
       # Along with rate limiting positive jerk below, this greatly improves gas response time
       # Consider the net acceleration request that the PCM should be applying (pitch included)
-      if net_acceleration_request < 0.1:
+      if net_acceleration_request < 0.1 or actuators.longControlState == LongCtrlState.stopping:
         self.permit_braking = True
       elif net_acceleration_request > 0.2:
         self.permit_braking = False
