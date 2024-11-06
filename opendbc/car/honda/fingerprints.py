@@ -439,6 +439,7 @@ FW_VERSIONS = {
       b'36161-TPA-E050\x00\x00',
       b'36161-TPG-A030\x00\x00',
       b'36161-TPG-A040\x00\x00',
+      b'36161-TPG-A050\x00\x00',
     ],
     (Ecu.fwdRadar, 0x18dab0f1, None): [
       b'36802-TMB-H040\x00\x00',
