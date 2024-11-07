@@ -4,7 +4,7 @@
 from libcpp.pair cimport pair
 from libcpp.string cimport string
 from libcpp.vector cimport vector
-from libc.stdint cimport uint32_t, int
+from libc.stdint cimport uint32_t, uintptr_t
 
 from .common cimport CANParser as cpp_CANParser
 from .common cimport dbc_lookup, Msg, DBC, CanData
@@ -75,13 +75,18 @@ cdef class CANParser:
       with nogil:
         del self.can
 
-  def update_strings(self, strings, sendcan=False):
+  def update_strings(self, data, sendcan=False):
+    if not hasattr(data, "get_data_pointer"):
+      return self.update_from_list(data, sendcan)
+
+    cdef uintptr_t pointer = data.get_data_pointer()
+    can_data = <vector[CanData]*> pointer
+    return self._update(can_data[0], sendcan)
+
+  def update_from_list(self, strings, sendcan=False):
     # input format:
     # [nanos, [[address, data, src], ...]]
     # [[nanos, [[address, data, src], ...], ...]]
-    for address in self.addresses:
-      self.vl_all[address].clear()
-
     cdef vector[CanData] can_data_array
 
     try:
@@ -102,6 +107,12 @@ cdef class CANParser:
             frame.src = source_bus
     except TypeError:
       raise RuntimeError("invalid parameter")
+
+    return self._update(can_data_array, sendcan)
+
+  cdef _update(self, vector[CanData] &can_data_array, sendcan):
+    for address in self.addresses:
+      self.vl_all[address].clear()
 
     with nogil:
       updated_addrs = self.can.update(can_data_array)
