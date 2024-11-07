@@ -1,6 +1,10 @@
 from enum import IntFlag
 from opendbc.car.structs import CarParams
+<<<<<<< HEAD
 from opendbc.car import Bus, structs
+=======
+from opendbc.car import structs
+>>>>>>> f5c2ceb (more wip on carstate)
 from opendbc.car import AngleRateLimit, CarSpecs, PlatformConfig, Platforms
 from opendbc.car.docs_definitions import CarDocs
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
@@ -12,24 +16,33 @@ class CAR(Platforms):
   TESLA_MODEL_3 = PlatformConfig(
     [CarDocs("Tesla Model 3", "All")],
     CarSpecs(mass=1899., wheelbase=2.875, steerRatio=12.0),
+<<<<<<< HEAD
     {Bus.party: 'tesla_model3_party'},
+=======
+    {'party': 'tesla_model3_party'},
+>>>>>>> f5c2ceb (more wip on carstate)
   )
   TESLA_MODEL_Y = PlatformConfig(
     [CarDocs("Tesla Model Y", "All")],
     CarSpecs(mass=2072., wheelbase=2.890, steerRatio=12.0),
+<<<<<<< HEAD
     {Bus.party: 'tesla_model3_party'},
+=======
+    {'party': 'tesla_model3_party'},
+>>>>>>> f5c2ceb (more wip on carstate)
   )
   TESLA_MODEL_S_RAVEN = PlatformConfig(
     [CarDocs("Tesla Model S Raven", "All")],
     CarSpecs(mass=2100., wheelbase=2.959, steerRatio=15.0),
     {
-      'pt': 'tesla_powertrain',
-      'party': 'tesla_raven_party',
       'chassis': 'tesla_can',
+      'party': 'tesla_raven_party',
+      'powertrain': 'tesla_powertrain',
       'radar': 'tesla_radar_continental_generated',
     },
   )
 
+PLATFORM_3Y = (CAR.TESLA_MODEL_3, CAR.TESLA_MODEL_Y)
 
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
