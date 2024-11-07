@@ -11,6 +11,7 @@ from opendbc.car.toyota import toyotacan
 from opendbc.car.toyota.values import CAR, STATIC_DSU_MSGS, NO_STOP_TIMER_CAR, TSS2_CAR, \
                                         CarControllerParams, ToyotaFlags, \
                                         UNSUPPORTED_DSU_CAR
+from collections import deque
 from opendbc.can.packer import CANPacker
 
 PLOT = False
@@ -49,9 +50,12 @@ class CarController(CarControllerBase):
     self.steer_rate_counter = 0
     self.distance_button = 0
 
+    self.deque = deque([0] * 50, maxlen=100)
+
     self.aegos = []
     self.pcm_accel_nets_old = []
     self.pcm_accel_nets_new = []
+    self.offsets = []
 
     self.filter = FirstOrderFilter(0, 1., DT_CTRL)  # 1.5 might be okay
     self.pid = PIDController(0.5, 0.5)
@@ -172,20 +176,27 @@ class CarController(CarControllerBase):
       # TODO: error correct on acceleration request 0.5s in past
       # TODO: don't error correct when jerk is high
       # TODO: don't error correct near a stop (instead of resetting)? think resetting is fine since brake offset != gas offset when starting
-      offset = self.filter.update((CS.pcm_accel_net - accel_due_to_pitch) - CS.out.aEgo)
+      offset = self.filter.update((self.deque[-40] - accel_due_to_pitch) - CS.out.aEgo)
+      self.offsets.append(offset)
       new_pcm_accel_net = CS.pcm_accel_net - offset
-      print((CS.pcm_accel_net), CS.out.aEgo, offset, new_pcm_accel_net)
+      print(CS.pcm_accel_net, CS.out.aEgo, offset, new_pcm_accel_net)
       if PLOT:
+        self.deque.append(CS.pcm_accel_net)
         self.aegos.append(CS.out.aEgo)
         self.pcm_accel_nets_old.append(CS.pcm_accel_net - accel_due_to_pitch)
         self.pcm_accel_nets_new.append(new_pcm_accel_net - accel_due_to_pitch)
-        if self.frame > 20000:
+        if len(self.aegos) > 20000:
           plt.plot(self.aegos, label='aEgo')
           plt.plot(self.pcm_accel_nets_old, label='pcm_accel_net')
           plt.plot(self.pcm_accel_nets_new, label='new_pcm_accel_net')
           plt.legend()
+
+          plt.figure()
+          plt.plot(self.offsets, label='offset')
+          plt.legend()
+
           plt.show()
-          plt.pause(100)
+          plt.pause(1000)
 
       if CS.out.standstill or stopping:
         self.filter.x = 0
