@@ -191,31 +191,32 @@ class CarController(CarControllerBase):
     # handle UI messages
     fcw_alert = hud_control.visualAlert == VisualAlert.fcw
     steer_alert = hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw)
+    lead = hud_control.leadVisible or CS.out.vEgo < 12.  # at low speed we always assume the lead is present so ACC can be engaged
 
-    # we can spam can to cancel the system even if we are using lat only control
-    if (self.frame % 3 == 0 and self.CP.openpilotLongitudinalControl) or pcm_cancel_cmd:
-      lead = hud_control.leadVisible or CS.out.vEgo < 12.  # at low speed we always assume the lead is present so ACC can be engaged
+    if self.CP.openpilotLongitudinalControl:
+      if self.frame % 3 == 0:
+        # Press distance button until we are at the correct bar length. Only change while enabled to avoid skipping startup popup
+        if self.frame % 6 == 0 and self.CP.openpilotLongitudinalControl:
+          desired_distance = 4 - hud_control.leadDistanceBars
+          if CS.out.cruiseState.enabled and CS.pcm_follow_distance != desired_distance:
+            self.distance_button = not self.distance_button
+          else:
+            self.distance_button = 0
 
-      # Press distance button until we are at the correct bar length. Only change while enabled to avoid skipping startup popup
-      if self.frame % 6 == 0 and self.CP.openpilotLongitudinalControl:
-        desired_distance = 4 - hud_control.leadDistanceBars
-        if CS.out.cruiseState.enabled and CS.pcm_follow_distance != desired_distance:
-          self.distance_button = not self.distance_button
-        else:
-          self.distance_button = 0
-
-      # Lexus IS uses a different cancellation message
-      if pcm_cancel_cmd and self.CP.carFingerprint in UNSUPPORTED_DSU_CAR:
-        can_sends.append(toyotacan.create_acc_cancel_command(self.packer))
-      elif self.CP.openpilotLongitudinalControl:
         # internal PCM gas command can get stuck unwinding from negative accel so we apply a generous rate limit
         pcm_accel_cmd = min(pcm_accel_cmd, self.accel + ACCEL_WINDUP_LIMIT) if CC.longActive else 0.0
 
         can_sends.append(toyotacan.create_accel_command(self.packer, pcm_accel_cmd, pcm_cancel_cmd, self.permit_braking, self.standstill_req, lead,
                                                         CS.acc_type, fcw_alert, self.distance_button))
         self.accel = pcm_accel_cmd
-      else:
-        can_sends.append(toyotacan.create_accel_command(self.packer, 0, pcm_cancel_cmd, True, False, lead, CS.acc_type, False, self.distance_button))
+
+    else:
+      # we can spam can to cancel the system even if we are using lat only control
+      if pcm_cancel_cmd:
+        if self.CP.carFingerprint in UNSUPPORTED_DSU_CAR:
+          can_sends.append(toyotacan.create_acc_cancel_command(self.packer))
+        else:
+          can_sends.append(toyotacan.create_accel_command(self.packer, 0, pcm_cancel_cmd, True, False, lead, CS.acc_type, False, self.distance_button))
 
     # *** hud ui ***
     if self.CP.carFingerprint != CAR.TOYOTA_PRIUS_V:
