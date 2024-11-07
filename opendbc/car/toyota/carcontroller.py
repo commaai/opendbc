@@ -1,7 +1,9 @@
 import math
 from opendbc.car import carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
-                        make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY
+                        make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY, DT_CTRL
 from opendbc.car.can_definitions import CanData
+from opendbc.car.common.filter_simple import FirstOrderFilter
+from opendbc.car.common.pid import PIDController
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car.secoc import add_mac, build_sync_mac
 from opendbc.car.interfaces import CarControllerBase
@@ -42,6 +44,9 @@ class CarController(CarControllerBase):
     self.standstill_req = False
     self.steer_rate_counter = 0
     self.distance_button = 0
+
+    self.filter = FirstOrderFilter(0, 0.5, DT_CTRL)
+    self.pid = PIDController(0.5, 0.5)
 
     self.pcm_accel_compensation = 0.0
     self.permit_braking = True
@@ -154,10 +159,24 @@ class CarController(CarControllerBase):
 
       net_acceleration_request = actuators.accel + accel_due_to_pitch
 
+      # Corolla (and others?) have accel net signals that somewhat describe the acceleration request and future aEgo, but exhibit unexplainable offsets
+      # that we haven't been able to model correctly yet. For now, learn the offset and error correct on it, as that is better than error correcting on aEgo
+      # TODO: error correct on acceleration request 0.5s in past
+      # TODO: don't error correct when jerk is high
+      # TODO: don't error correct near a stop (instead of resetting)? think resetting is fine since brake offset != gas offset when starting
+      offset = self.filter.update((CS.pcm_accel_net - accel_due_to_pitch) - CS.out.aEgo)
+      new_pcm_accel_net = CS.pcm_accel_net - offset
+      print((CS.pcm_accel_net), CS.out.aEgo, offset, new_pcm_accel_net)
+
+      if CS.out.standstill or stopping:
+        self.filter.x = 0
+        self.pid.reset()
+
       # let PCM handle stopping for now
       pcm_accel_compensation = 0.0
       if not stopping:
-        pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - net_acceleration_request)
+        # pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - net_acceleration_request)
+        pcm_accel_compensation = 2.0 * (new_pcm_accel_net - net_acceleration_request)
 
       # prevent compensation windup
       pcm_accel_compensation = clip(pcm_accel_compensation, actuators.accel - self.params.ACCEL_MAX,
@@ -176,6 +195,9 @@ class CarController(CarControllerBase):
       self.pcm_accel_compensation = 0.0
       pcm_accel_cmd = actuators.accel
       self.permit_braking = True
+
+      self.filter.x = 0
+      self.pid.reset()
 
     pcm_accel_cmd = clip(pcm_accel_cmd, self.params.ACCEL_MIN, self.params.ACCEL_MAX)
 

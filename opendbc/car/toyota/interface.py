@@ -47,7 +47,7 @@ class CarInterface(CarInterfaceBase):
     found_ecus = [fw.ecu for fw in car_fw]
     ret.enableDsu = len(found_ecus) > 0 and Ecu.dsu not in found_ecus and candidate not in (NO_DSU_CAR | UNSUPPORTED_DSU_CAR)
 
-    if candidate == CAR.LEXUS_ES_TSS2 and Ecu.hybrid not in found_ecus:
+    if candidate in (CAR.LEXUS_ES_TSS2, CAR.TOYOTA_COROLLA_TSS2) and Ecu.hybrid not in found_ecus:
       ret.flags |= ToyotaFlags.RAISED_ACCEL_LIMIT.value
 
     if candidate == CAR.TOYOTA_PRIUS:
@@ -143,8 +143,8 @@ class CarInterface(CarInterfaceBase):
 
       # Since we compensate for imprecise acceleration in carcontroller, we can be less aggressive with tuning
       # This also prevents unnecessary request windup due to internal car jerk limits
-      if ret.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
-        tune.kiV = [0.25]
+      # if ret.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
+      #   tune.kiV = [0.25]
     else:
       tune.kiBP = [0., 5., 35.]
       tune.kiV = [3.6, 2.4, 1.5]
