@@ -4,7 +4,7 @@ from opendbc.can.parser import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP
+from opendbc.car.tesla.values import CAR, DBC, CANBUS, GEAR_MAP
 
 ButtonType = structs.CarState.ButtonEvent.Type
 
@@ -22,8 +22,12 @@ class CarState(CarStateBase):
     ret = structs.CarState()
 
     # Vehicle speed
-    ret.vEgoRaw = cp_party.vl["DI_speed"]["DI_vehicleSpeed"] * CV.KPH_TO_MS
-    ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
+    if self.CP.carFingerprint == CAR.TESLA_MODEL_S_RAVEN:
+      ret.vEgoRaw = cp_party.vl["DI_speed"]["DI_vehicleSpeed"] * CV.KPH_TO_MS
+      ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
+    else:
+      ret.vEgoRaw = cp_party.vl["DI_speed"]["DI_vehicleSpeed"] * CV.KPH_TO_MS
+      ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
 
     # Gas pedal
     pedal_status = cp_party.vl["DI_systemStatus"]["DI_accelPedalPos"]
