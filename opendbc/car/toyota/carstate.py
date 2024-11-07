@@ -70,9 +70,9 @@ class CarState(CarStateBase):
       # TODO: re-evaluate this, on the Corolla it goes negative instantly after taking off from a stop,
       #  but the positive offset seen at a standstill still exists for a few m/s
       # add creeping force at low speeds only for braking, CLUTCH->ACCEL_NET already shows this
-      neutral_accel = max(cp.vl["PCM_CRUISE"]["NEUTRAL_FORCE"] / self.CP.mass, 0.0)
-      if self.pcm_accel_net + neutral_accel < 0.0:
-        self.pcm_accel_net += neutral_accel
+      #neutral_accel = max(cp.vl["PCM_CRUISE"]["NEUTRAL_FORCE"] / self.CP.mass, 0.0)
+      #if self.pcm_accel_net + neutral_accel < 0.0:
+      #  self.pcm_accel_net += neutral_accel
 
     ret.doorOpen = any([cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_FL"], cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_FR"],
                         cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_RL"], cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_RR"]])
