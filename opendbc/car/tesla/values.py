@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from enum import IntFlag
+
 from opendbc.car import Bus, CarSpecs, DbcDict,  PlatformConfig, Platforms, AngleRateLimit
 from opendbc.car.structs import CarParams, CarState
 from opendbc.car.docs_definitions import CarDocs
@@ -22,22 +23,25 @@ class CAR(Platforms):
   TESLA_MODEL_3 = TeslaPlatformConfig(
     [TeslaCarDocs("Tesla Model 3 2019-24")],
     CarSpecs(mass=1899., wheelbase=2.875, steerRatio=12.0),
+    {Bus.party: 'tesla_model3_party'},
   )
   TESLA_MODEL_Y = TeslaPlatformConfig(
     [TeslaCarDocs("Tesla Model Y 2020-24")],
     CarSpecs(mass=2072., wheelbase=2.890, steerRatio=12.0),
+    {Bus.party: 'tesla_model3_party'},
   )
   TESLA_MODEL_S_RAVEN = PlatformConfig(
     [CarDocs("Tesla Model S Raven", "All")],
     CarSpecs(mass=2100., wheelbase=2.959, steerRatio=15.0),
     {
-      'pt': 'tesla_powertrain',
-      'party': 'tesla_raven_party',
-      'chassis': 'tesla_can',
-      'radar': 'tesla_radar_continental_generated',
+      Bus.chassis: 'tesla_can',
+      Bus.party: 'tesla_raven_party',
+      Bus.pt: 'tesla_powertrain',
+      Bus.radar: 'tesla_radar_continental_generated',
     },
   )
 
+PLATFORM_3Y = (CAR.TESLA_MODEL_3, CAR.TESLA_MODEL_Y)
 
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
