@@ -76,9 +76,11 @@ cdef class CANParser:
         del self.can
 
   def update_strings(self, data, sendcan=False):
+    # If data is a Python nested list, update using the legacy method
     if not hasattr(data, "get_data_pointer"):
       return self.update_from_list(data, sendcan)
 
+    # If data is a ParsedCanData object, directly use the underlying C++ vector[CanData]
     cdef uintptr_t pointer = data.get_data_pointer()
     can_data = <vector[CanData]*> pointer
     return self._update(can_data[0], sendcan)
