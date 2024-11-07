@@ -27,6 +27,16 @@ class CAR(Platforms):
     [TeslaCarDocs("Tesla Model Y 2020-24")],
     CarSpecs(mass=2072., wheelbase=2.890, steerRatio=12.0),
   )
+  TESLA_MODEL_S_RAVEN = PlatformConfig(
+    [CarDocs("Tesla Model S Raven", "All")],
+    CarSpecs(mass=2100., wheelbase=2.959, steerRatio=15.0),
+    {
+      'pt': 'tesla_powertrain',
+      'party': 'tesla_raven_party',
+      'chassis': 'tesla_can',
+      'radar': 'tesla_radar_continental_generated',
+    },
+  )
 
 
 FW_QUERY_CONFIG = FwQueryConfig(
@@ -37,14 +47,33 @@ FW_QUERY_CONFIG = FwQueryConfig(
       whitelist_ecus=[Ecu.eps],
       rx_offset=0x08,
       bus=0,
-    )
+    ),
+    Request(
+      [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.UDS_VERSION_REQUEST],
+      [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.UDS_VERSION_REQUEST],
+      whitelist_ecus=[Ecu.eps],
+      rx_offset=0x08,
+      bus=0,
+    ),
+    Request(
+      [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.UDS_VERSION_REQUEST],
+      [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.UDS_VERSION_RESPONSE],
+      whitelist_ecus=[Ecu.adas, Ecu.electricBrakeBooster, Ecu.fwdRadar],
+      rx_offset=0x10,
+      bus=0,
+    ),
   ]
 )
 
 class CANBUS:
   party = 0
-  vehicle = 1
+  radar = 1
   autopilot_party = 2
+
+  # only needed on raven
+  powertrain = 4
+  chassis = 5
+  autopilot_powertrain = 6
 
 
 GEAR_MAP = {
