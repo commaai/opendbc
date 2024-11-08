@@ -158,6 +158,7 @@ class CarController(CarControllerBase):
       net_acceleration_request = actuators.accel + accel_due_to_pitch
 
       # Our model of the PCM's acceleration request isn't perfect, so we learn the offset when moving
+      # TODO: unwind during high jerk events
       new_pcm_accel_net = CS.pcm_accel_net
       if CS.out.standstill or stopping:
         self.pcm_accel_net_filter.x = 0
