@@ -1,7 +1,8 @@
 import math
 from opendbc.car import carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
-                        make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY
+                        make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY, DT_CTRL
 from opendbc.car.can_definitions import CanData
+from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car.secoc import add_mac, build_sync_mac
 from opendbc.car.interfaces import CarControllerBase
@@ -43,6 +44,7 @@ class CarController(CarControllerBase):
     self.steer_rate_counter = 0
     self.distance_button = 0
 
+    self.pcm_accel_net_filter = FirstOrderFilter(0, 0.75, DT_CTRL)
     self.pcm_accel_compensation = 0.0
     self.permit_braking = True
 
@@ -154,10 +156,18 @@ class CarController(CarControllerBase):
 
       net_acceleration_request = actuators.accel + accel_due_to_pitch
 
+      # Our model of the PCM's acceleration request isn't perfect, so we learn the offset when moving
+      # TODO: unwind during high jerk events
+      new_pcm_accel_net = CS.pcm_accel_net
+      if CS.out.standstill or stopping:
+        self.pcm_accel_net_filter.x = 0.0
+      else:
+        new_pcm_accel_net -= self.pcm_accel_net_filter.update((CS.pcm_accel_net - accel_due_to_pitch) - CS.out.aEgo)
+
       # let PCM handle stopping for now
       pcm_accel_compensation = 0.0
       if not stopping:
-        pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - net_acceleration_request)
+        pcm_accel_compensation = 2.0 * (new_pcm_accel_net - net_acceleration_request)
 
       # prevent compensation windup
       pcm_accel_compensation = clip(pcm_accel_compensation, actuators.accel - self.params.ACCEL_MAX,
@@ -173,6 +183,7 @@ class CarController(CarControllerBase):
       elif net_acceleration_request > 0.2:
         self.permit_braking = False
     else:
+      self.pcm_accel_net_filter.x = 0.0
       self.pcm_accel_compensation = 0.0
       pcm_accel_cmd = actuators.accel
       self.permit_braking = True
