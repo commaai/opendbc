@@ -100,16 +100,12 @@ double MessageState::getAverageFreq(uint64_t current_nanos) const {
     return 0.0; // Not enough messages
   }
 
-  // Calculate the total interval from the first message to the current time
   double total_interval = ((current_nanos - last_seen_nanos) + sum_intervals) / 1e9;
-  // Calculate the average interval
-  double average_interval = total_interval / (message_count - 1);
-  return 1.0 / average_interval;
+  return (message_count - 1) / total_interval;
 }
 
 bool MessageState::isFreqBelowThreshold(uint64_t current_nanos, double threshold) const {
-  double avg_freq = getAverageFreq(current_nanos);
-  return avg_freq < (frequency * (1.0 - threshold));
+  return getAverageFreq(current_nanos) < (frequency * (1.0 - threshold));
 }
 
 
@@ -242,9 +238,7 @@ void CANParser::UpdateValid(uint64_t nanos) {
 
   bool _valid = true;
   bool _counters_valid = true;
-  for (const auto& kv : message_states) {
-    const auto& state = kv.second;
-
+  for (const auto& [_, state] : message_states) {
     if (state.counter_fail >= MAX_BAD_COUNTER) {
       _counters_valid = false;
     }
