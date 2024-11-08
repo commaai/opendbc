@@ -181,6 +181,7 @@ class CarController(CarControllerBase):
         # find closest value to aEgo in pcm_accel_net_deque
         arr = np.array(self.pcm_accel_net_deque) - accel_due_to_pitch
         idx = (np.abs(arr - CS.out.aEgo)).argmin()
+        # TODO: move into 33hz update loop!
         self.cur_idx = clip(idx, self.cur_idx - 1/3, self.cur_idx + 1/3)
         self.debug3 = round(float(self.cur_idx))
         print(self.cur_idx)
