@@ -213,12 +213,12 @@ class CarController(CarControllerBase):
       if not stopping:
         # pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - net_acceleration_request)
         #pcm_accel_compensation = 2.0 * (new_pcm_accel_net - net_acceleration_request)
-        pcm_accel_compensation = 2.0 * (new_pcm_accel_net - net_acceleration_request)
+        # pcm_accel_compensation = 2.0 * (new_pcm_accel_net - net_acceleration_request)
 
         # TODO: test this in the car on the start from stop maneuver
         self.pid.pos_limit = actuators_accel - self.params.ACCEL_MIN
         self.pid.neg_limit = actuators_accel - self.params.ACCEL_MAX
-        # pcm_accel_compensation = self.pid.update(new_pcm_accel_net - net_acceleration_request, freeze_integrator=CS.out.standstill)
+        pcm_accel_compensation = self.pid.update(new_pcm_accel_net - net_acceleration_request, freeze_integrator=CS.out.standstill)
 
       # prevent compensation windup
       pcm_accel_compensation = clip(pcm_accel_compensation, actuators_accel - self.params.ACCEL_MAX,
