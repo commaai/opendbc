@@ -58,7 +58,8 @@ class CarController(CarControllerBase):
     self.offsets = []
 
     self.filter = FirstOrderFilter(0, 1.0, DT_CTRL)  # 1.5 might be okay
-    self.pid = PIDController(0.5, 0.5)
+    self.pcm_comp_filter = FirstOrderFilter(0, 1.0, DT_CTRL)
+    self.pid = PIDController(0.5, 1.0)  # TODO: we can't fully test this offline since the output affects the input, and so it will wind up w/ regen
 
     self.pcm_accel_compensation = 0.0
     self.permit_braking = True
@@ -214,13 +215,19 @@ class CarController(CarControllerBase):
         #pcm_accel_compensation = 2.0 * (new_pcm_accel_net - net_acceleration_request)
         pcm_accel_compensation = 2.0 * (new_pcm_accel_net - net_acceleration_request)
 
+        # TODO: test this in the car on the start from stop maneuver
+        self.pid.pos_limit = actuators_accel - self.params.ACCEL_MIN
+        self.pid.neg_limit = actuators_accel - self.params.ACCEL_MAX
+        # pcm_accel_compensation = self.pid.update(new_pcm_accel_net - net_acceleration_request, freeze_integrator=CS.out.standstill)
+
       # prevent compensation windup
       pcm_accel_compensation = clip(pcm_accel_compensation, actuators_accel - self.params.ACCEL_MAX,
                                     actuators_accel - self.params.ACCEL_MIN)
 
       # TODO: we need a better way to allow the compensation to prevent the request from rising other than insane limits
       up_limit = 0.1 if CS.out.vEgo < 5 else 0.01
-      self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.01, up_limit)
+      # self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.01, up_limit)
+      self.pcm_accel_compensation = self.pcm_comp_filter.update(pcm_accel_compensation)
       pcm_accel_cmd = actuators_accel - self.pcm_accel_compensation
 
       # Along with rate limiting positive jerk below, this greatly improves gas response time
