@@ -181,9 +181,9 @@ class CarController(CarControllerBase):
       # TODO: error correct on acceleration request 0.5s in past
       # TODO: don't error correct when jerk is high
       # TODO: don't error correct near a stop (instead of resetting)? think resetting is fine since brake offset != gas offset when starting
-      offset = self.pcm_accel_net_filter.update((self.deque[-40] - accel_due_to_pitch) - CS.out.aEgo)
-      new_pcm_accel_net = CS.pcm_accel_net - offset
-      print(CS.pcm_accel_net, CS.out.aEgo, offset, new_pcm_accel_net)
+      # offset = self.pcm_accel_net_filter.update((self.deque[-40] - accel_due_to_pitch) - CS.out.aEgo)
+      # new_pcm_accel_net = CS.pcm_accel_net - offset
+      # print(CS.pcm_accel_net, CS.out.aEgo, offset, new_pcm_accel_net)
       self.deque.append(CS.pcm_accel_net)
       if PLOT:
         self.offsets.append(offset)
@@ -203,17 +203,15 @@ class CarController(CarControllerBase):
           plt.show()
           plt.pause(1000)
 
-      if CS.out.standstill or stopping:
-        self.pcm_accel_net_filter.x = 0
-        self.pid.reset()
-        new_pcm_accel_net = CS.pcm_accel_net
-
       # Our model of the PCM's acceleration request isn't perfect, so we learn the offset when moving
       # TODO: unwind during high jerk events
       new_pcm_accel_net = CS.pcm_accel_net
       if CS.out.standstill or stopping:
+        self.pid.reset()
         self.pcm_accel_net_filter.x = 0.0
       else:
+        # TODO: try both
+        # new_pcm_accel_net -= self.pcm_accel_net_filter.update((self.deque[-40] - accel_due_to_pitch) - CS.out.aEgo)
         new_pcm_accel_net -= self.pcm_accel_net_filter.update((CS.pcm_accel_net - accel_due_to_pitch) - CS.out.aEgo)
 
       # let PCM handle stopping for now
