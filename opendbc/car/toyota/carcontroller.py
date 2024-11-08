@@ -161,7 +161,7 @@ class CarController(CarControllerBase):
       # TODO: unwind during high jerk events
       new_pcm_accel_net = CS.pcm_accel_net
       if CS.out.standstill or stopping:
-        self.pcm_accel_net_filter.x = 0
+        self.pcm_accel_net_filter.x = 0.0
       else:
         new_pcm_accel_net -= self.pcm_accel_net_filter.update((CS.pcm_accel_net - accel_due_to_pitch) - CS.out.aEgo)
 
@@ -184,7 +184,7 @@ class CarController(CarControllerBase):
       elif net_acceleration_request > 0.2:
         self.permit_braking = False
     else:
-      self.pcm_accel_net_filter.x = 0
+      self.pcm_accel_net_filter.x = 0.0
       self.pcm_accel_compensation = 0.0
       pcm_accel_cmd = actuators.accel
       self.permit_braking = True
