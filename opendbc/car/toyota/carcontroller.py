@@ -1,5 +1,4 @@
 import math
-import numpy as np
 from opendbc.car import carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
                         make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY, DT_CTRL
 from opendbc.car.can_definitions import CanData
