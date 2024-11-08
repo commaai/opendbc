@@ -57,7 +57,7 @@ class CarController(CarControllerBase):
     self.pcm_accel_nets_new = []
     self.offsets = []
 
-    self.filter = FirstOrderFilter(0, 1.0, DT_CTRL)  # 1.5 might be okay
+    self.pcm_accel_net_filter = FirstOrderFilter(0, 1.0, DT_CTRL)  # 1.5 might be okay
     self.pcm_comp_filter = FirstOrderFilter(0, 1.0, DT_CTRL)
     self.pid = PIDController(0.5, 1.0)  # TODO: we can't fully test this offline since the output affects the input, and so it will wind up w/ regen
 
@@ -181,7 +181,7 @@ class CarController(CarControllerBase):
       # TODO: error correct on acceleration request 0.5s in past
       # TODO: don't error correct when jerk is high
       # TODO: don't error correct near a stop (instead of resetting)? think resetting is fine since brake offset != gas offset when starting
-      offset = self.filter.update((self.deque[-40] - accel_due_to_pitch) - CS.out.aEgo)
+      offset = self.pcm_accel_net_filter.update((self.deque[-40] - accel_due_to_pitch) - CS.out.aEgo)
       new_pcm_accel_net = CS.pcm_accel_net - offset
       print(CS.pcm_accel_net, CS.out.aEgo, offset, new_pcm_accel_net)
       self.deque.append(CS.pcm_accel_net)
@@ -204,9 +204,17 @@ class CarController(CarControllerBase):
           plt.pause(1000)
 
       if CS.out.standstill or stopping:
-        self.filter.x = 0
+        self.pcm_accel_net_filter.x = 0
         self.pid.reset()
         new_pcm_accel_net = CS.pcm_accel_net
+
+      # Our model of the PCM's acceleration request isn't perfect, so we learn the offset when moving
+      # TODO: unwind during high jerk events
+      new_pcm_accel_net = CS.pcm_accel_net
+      if CS.out.standstill or stopping:
+        self.pcm_accel_net_filter.x = 0.0
+      else:
+        new_pcm_accel_net -= self.pcm_accel_net_filter.update((CS.pcm_accel_net - accel_due_to_pitch) - CS.out.aEgo)
 
       # let PCM handle stopping for now
       pcm_accel_compensation = 0.0
@@ -237,11 +245,12 @@ class CarController(CarControllerBase):
       elif net_acceleration_request > 0.2:
         self.permit_braking = False
     else:
+      self.pcm_accel_net_filter.x = 0.0
       self.pcm_accel_compensation = 0.0
       pcm_accel_cmd = actuators.accel
       self.permit_braking = True
 
-      self.filter.x = 0
+      self.pcm_accel_net_filter.x = 0
       self.pid.reset()
 
     pcm_accel_cmd = clip(pcm_accel_cmd, self.params.ACCEL_MIN, self.params.ACCEL_MAX)
