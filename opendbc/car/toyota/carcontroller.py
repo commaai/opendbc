@@ -173,7 +173,7 @@ class CarController(CarControllerBase):
       else:
         accel_due_to_pitch = 0.0
 
-      net_acceleration_request = actuators.accel + accel_due_to_pitch
+      net_acceleration_request = actuators_accel + accel_due_to_pitch
 
       # Corolla (and others?) have accel net signals that somewhat describe the acceleration request and future aEgo, but exhibit unexplainable offsets
       # that we haven't been able to model correctly yet. For now, learn the offset and error correct on it, as that is better than error correcting on aEgo
