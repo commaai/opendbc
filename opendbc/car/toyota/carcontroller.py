@@ -175,6 +175,7 @@ class CarController(CarControllerBase):
         accel_due_to_pitch = 0.0
 
       net_acceleration_request = actuators_accel + accel_due_to_pitch
+      net_acceleration_request2 = actuators.accel + accel_due_to_pitch
 
       # Corolla (and others?) have accel net signals that somewhat describe the acceleration request and future aEgo, but exhibit unexplainable offsets
       # that we haven't been able to model correctly yet. For now, learn the offset and error correct on it, as that is better than error correcting on aEgo
@@ -238,9 +239,9 @@ class CarController(CarControllerBase):
 
       # Along with rate limiting positive jerk below, this greatly improves gas response time
       # Consider the net acceleration request that the PCM should be applying (pitch included)
-      if net_acceleration_request < 0.1 or stopping:
+      if net_acceleration_request2 < 0.1 or stopping:
         self.permit_braking = True
-      elif net_acceleration_request > 0.2:
+      elif net_acceleration_request2 > 0.2:
         self.permit_braking = False
     else:
       self.pcm_accel_net_filter.x = 0.0
