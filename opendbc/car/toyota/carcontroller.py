@@ -52,9 +52,9 @@ class CarController(CarControllerBase):
     self.debug4 = 0
 
     # TODO: these can be in CarState
-    self.pcm_accel_net_filter = FirstOrderFilter(0, 0.75, DT_CTRL)  # TODO: 1.5 might be okay
-    self.pcm_accel_net_deque = deque([0] * 50, maxlen=50)
-    self.cur_idx = 49
+    self.pcm_accel_net_filter = FirstOrderFilter(0, 0.75, DT_CTRL)
+    self.pcm_accel_net_deque = deque([0] * 15, maxlen=15)
+    self.cur_idx = 14
 
     self.pcm_accel_compensation = 0.0
     self.permit_braking = True
@@ -167,9 +167,9 @@ class CarController(CarControllerBase):
 
       net_acceleration_request = actuators.accel + accel_due_to_pitch
 
-      jerk1 = float(np.mean(np.abs(np.diff(list(self.pcm_accel_net_deque)[-50:])))) * 100
-      jerk2 = abs(self.pcm_accel_net_deque[-1] - self.pcm_accel_net_deque[-50]) * 2
-      jerk3 = abs(self.pcm_accel_net_filter.x - ((self.pcm_accel_net_deque[-1] - accel_due_to_pitch) - CS.out.aEgo))
+      # jerk1 = float(np.mean(np.abs(np.diff(list(self.pcm_accel_net_deque)[-50:])))) * 100
+      # jerk2 = abs(self.pcm_accel_net_deque[-1] - self.pcm_accel_net_deque[-50]) * 2
+      # jerk3 = abs(self.pcm_accel_net_filter.x - ((self.pcm_accel_net_deque[-1] - accel_due_to_pitch) - CS.out.aEgo))
       # self.debug3 = jerk1
       # self.debug4 = jerk3
       if CS.out.standstill or stopping:# or (abs(self.pcm_accel_net_deque[-1] - self.pcm_accel_net_deque[-10]) * 10) > 1.5:
@@ -182,12 +182,12 @@ class CarController(CarControllerBase):
         arr = np.array(self.pcm_accel_net_deque) - accel_due_to_pitch
         idx = (np.abs(arr - CS.out.aEgo)).argmin()
         # TODO: move into 33hz update loop!
-        self.cur_idx = clip(idx, self.cur_idx - 1/3, self.cur_idx + 1/3)
+        self.cur_idx = clip(idx, self.cur_idx - 1, self.cur_idx + 1)
         self.debug3 = round(float(self.cur_idx))
         print(self.cur_idx)
 
         # offset = self.pcm_accel_net_filter.update((self.pcm_accel_net_deque[-15] - accel_due_to_pitch) - CS.out.aEgo)
-        offset = self.pcm_accel_net_filter.update(float(arr[round(self.cur_idx)] - CS.out.aEgo))
+        offset = self.pcm_accel_net_filter.update(float(arr[round(14)] - CS.out.aEgo))
         new_pcm_accel_net = CS.pcm_accel_net - offset
 
       # let PCM handle stopping for now
