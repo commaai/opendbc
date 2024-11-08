@@ -157,12 +157,12 @@ class CarController(CarControllerBase):
 
       net_acceleration_request = actuators.accel + accel_due_to_pitch
 
+      # Our model of the PCM's acceleration request isn't perfect, so we learn the offset when moving
+      new_pcm_accel_net = CS.pcm_accel_net
       if CS.out.standstill or stopping:
         self.pcm_accel_net_filter.x = 0
-        new_pcm_accel_net = CS.pcm_accel_net
       else:
-        offset = self.pcm_accel_net_filter.update((CS.pcm_accel_net - accel_due_to_pitch) - CS.out.aEgo)
-        new_pcm_accel_net = CS.pcm_accel_net - offset
+        new_pcm_accel_net -= self.pcm_accel_net_filter.update((CS.pcm_accel_net - accel_due_to_pitch) - CS.out.aEgo)
 
       # let PCM handle stopping for now
       pcm_accel_compensation = 0.0
@@ -183,6 +183,7 @@ class CarController(CarControllerBase):
       elif net_acceleration_request > 0.2:
         self.permit_braking = False
     else:
+      self.pcm_accel_net_filter.x = 0
       self.pcm_accel_compensation = 0.0
       pcm_accel_cmd = actuators.accel
       self.permit_braking = True
