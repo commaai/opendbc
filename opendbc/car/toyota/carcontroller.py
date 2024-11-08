@@ -1,7 +1,10 @@
 import math
+import numpy as np
+from collections import deque
 from opendbc.car import carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
-                        make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY
+                        make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY, DT_CTRL
 from opendbc.car.can_definitions import CanData
+from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car.secoc import add_mac, build_sync_mac
 from opendbc.car.interfaces import CarControllerBase
@@ -42,6 +45,16 @@ class CarController(CarControllerBase):
     self.standstill_req = False
     self.steer_rate_counter = 0
     self.distance_button = 0
+
+    self.debug = 0
+    self.debug2 = 0
+    self.debug3 = 0
+    self.debug4 = 0
+
+    # TODO: these can be in CarState
+    self.pcm_accel_net_filter = FirstOrderFilter(0, 0.75, DT_CTRL)  # TODO: 1.5 might be okay
+    self.pcm_accel_net_deque = deque([0] * 50, maxlen=50)
+    self.cur_idx = 49
 
     self.pcm_accel_compensation = 0.0
     self.permit_braking = True
@@ -145,7 +158,7 @@ class CarController(CarControllerBase):
 
     # *** gas and brake ***
     # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot and imprecise braking
-    if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
+    if CC.longActive and not CS.out.cruiseState.standstill:
       # calculate amount of acceleration PCM should apply to reach target, given pitch
       if len(CC.orientationNED) == 3:
         accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY
@@ -154,10 +167,36 @@ class CarController(CarControllerBase):
 
       net_acceleration_request = actuators.accel + accel_due_to_pitch
 
+      jerk1 = float(np.mean(np.abs(np.diff(list(self.pcm_accel_net_deque)[-50:])))) * 100
+      jerk2 = abs(self.pcm_accel_net_deque[-1] - self.pcm_accel_net_deque[-50]) * 2
+      jerk3 = abs(self.pcm_accel_net_filter.x - ((self.pcm_accel_net_deque[-1] - accel_due_to_pitch) - CS.out.aEgo))
+      # self.debug3 = jerk1
+      # self.debug4 = jerk3
+      if CS.out.standstill or stopping:# or (abs(self.pcm_accel_net_deque[-1] - self.pcm_accel_net_deque[-10]) * 10) > 1.5:
+        self.pcm_accel_net_filter.x = 0
+        # self.pid.reset()
+        new_pcm_accel_net = CS.pcm_accel_net
+      else:
+        # TODO: decide a good value for past pcm accel net
+        # find closest value to aEgo in pcm_accel_net_deque
+        arr = np.array(self.pcm_accel_net_deque) - accel_due_to_pitch
+        idx = (np.abs(arr - CS.out.aEgo)).argmin()
+        self.cur_idx = clip(idx, self.cur_idx - 1/3, self.cur_idx + 1/3)
+        self.debug3 = round(float(self.cur_idx))
+        print(self.cur_idx)
+
+        # offset = self.pcm_accel_net_filter.update((self.pcm_accel_net_deque[-15] - accel_due_to_pitch) - CS.out.aEgo)
+        offset = self.pcm_accel_net_filter.update(float(arr[round(self.cur_idx)] - CS.out.aEgo))
+        new_pcm_accel_net = CS.pcm_accel_net - offset
+
       # let PCM handle stopping for now
       pcm_accel_compensation = 0.0
       if not stopping:
-        pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - net_acceleration_request)
+        self.debug = CS.pcm_accel_net - accel_due_to_pitch
+        self.debug2 = new_pcm_accel_net - accel_due_to_pitch
+        pcm_accel_compensation = 2.0 * (new_pcm_accel_net - net_acceleration_request)
+
+      self.pcm_accel_net_deque.append(CS.pcm_accel_net)
 
       # prevent compensation windup
       pcm_accel_compensation = clip(pcm_accel_compensation, actuators.accel - self.params.ACCEL_MAX,
@@ -254,6 +293,11 @@ class CarController(CarControllerBase):
     new_actuators.steerOutputCan = apply_steer
     new_actuators.steeringAngleDeg = self.last_angle
     new_actuators.accel = self.accel
+
+    new_actuators.debug = self.debug
+    new_actuators.debug2 = self.debug2
+    new_actuators.debug3 = self.debug3
+    new_actuators.debug4 = self.debug4
 
     self.frame += 1
     return new_actuators, can_sends
