@@ -169,6 +169,9 @@ class CarController(CarControllerBase):
           else:
             self.distance_button = 0
 
+        # internal PCM gas command can get stuck unwinding from negative accel so we apply a generous rate limit
+        pcm_accel_cmd = min(actuators.accel, self.accel + ACCEL_WINDUP_LIMIT) if CC.longActive else 0.0
+
         # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot and imprecise braking
         if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
           # calculate amount of acceleration PCM should apply to reach target, given pitch
@@ -177,7 +180,7 @@ class CarController(CarControllerBase):
           else:
             accel_due_to_pitch = 0.0
 
-          net_acceleration_request = actuators.accel + accel_due_to_pitch
+          net_acceleration_request = pcm_accel_cmd + accel_due_to_pitch
 
           # let PCM handle stopping for now
           pcm_accel_compensation = 0.0
@@ -185,13 +188,13 @@ class CarController(CarControllerBase):
             pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - net_acceleration_request)
 
           # prevent compensation windup
-          pcm_accel_compensation = clip(pcm_accel_compensation, actuators.accel - self.params.ACCEL_MAX,
-                                        actuators.accel - self.params.ACCEL_MIN)
+          pcm_accel_compensation = clip(pcm_accel_compensation, pcm_accel_cmd - self.params.ACCEL_MAX,
+                                        pcm_accel_cmd - self.params.ACCEL_MIN)
 
           self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.03, 0.03)
-          pcm_accel_cmd = actuators.accel - self.pcm_accel_compensation
+          pcm_accel_cmd = pcm_accel_cmd - self.pcm_accel_compensation
 
-          # Along with rate limiting positive jerk below, this greatly improves gas response time
+          # Along with rate limiting positive jerk above, this greatly improves gas response time
           # Consider the net acceleration request that the PCM should be applying (pitch included)
           if net_acceleration_request < 0.1 or stopping:
             self.permit_braking = True
@@ -199,13 +202,9 @@ class CarController(CarControllerBase):
             self.permit_braking = False
         else:
           self.pcm_accel_compensation = 0.0
-          pcm_accel_cmd = actuators.accel
           self.permit_braking = True
 
         pcm_accel_cmd = clip(pcm_accel_cmd, self.params.ACCEL_MIN, self.params.ACCEL_MAX)
-
-        # internal PCM gas command can get stuck unwinding from negative accel so we apply a generous rate limit
-        pcm_accel_cmd = min(pcm_accel_cmd, self.accel + ACCEL_WINDUP_LIMIT) if CC.longActive else 0.0
 
         can_sends.append(toyotacan.create_accel_command(self.packer, pcm_accel_cmd, pcm_cancel_cmd, self.permit_braking, self.standstill_req, lead,
                                                         CS.acc_type, fcw_alert, self.distance_button))
