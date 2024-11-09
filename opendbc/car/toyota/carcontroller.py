@@ -144,40 +144,6 @@ class CarController(CarControllerBase):
         can_sends.append(lta_steer_2)
 
     # *** gas and brake ***
-    # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot and imprecise braking
-    if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
-      # calculate amount of acceleration PCM should apply to reach target, given pitch
-      if len(CC.orientationNED) == 3:
-        accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY
-      else:
-        accel_due_to_pitch = 0.0
-
-      net_acceleration_request = actuators.accel + accel_due_to_pitch
-
-      # let PCM handle stopping for now
-      pcm_accel_compensation = 0.0
-      if not stopping:
-        pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - net_acceleration_request)
-
-      # prevent compensation windup
-      pcm_accel_compensation = clip(pcm_accel_compensation, actuators.accel - self.params.ACCEL_MAX,
-                                    actuators.accel - self.params.ACCEL_MIN)
-
-      self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.01, 0.01)
-      pcm_accel_cmd = actuators.accel - self.pcm_accel_compensation
-
-      # Along with rate limiting positive jerk below, this greatly improves gas response time
-      # Consider the net acceleration request that the PCM should be applying (pitch included)
-      if net_acceleration_request < 0.1 or stopping:
-        self.permit_braking = True
-      elif net_acceleration_request > 0.2:
-        self.permit_braking = False
-    else:
-      self.pcm_accel_compensation = 0.0
-      pcm_accel_cmd = actuators.accel
-      self.permit_braking = True
-
-    pcm_accel_cmd = clip(pcm_accel_cmd, self.params.ACCEL_MIN, self.params.ACCEL_MAX)
 
     # on entering standstill, send standstill request
     if CS.out.standstill and not self.last_standstill and (self.CP.carFingerprint not in NO_STOP_TIMER_CAR):
@@ -202,6 +168,41 @@ class CarController(CarControllerBase):
             self.distance_button = not self.distance_button
           else:
             self.distance_button = 0
+
+        # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot and imprecise braking
+        if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
+          # calculate amount of acceleration PCM should apply to reach target, given pitch
+          if len(CC.orientationNED) == 3:
+            accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY
+          else:
+            accel_due_to_pitch = 0.0
+
+          net_acceleration_request = actuators.accel + accel_due_to_pitch
+
+          # let PCM handle stopping for now
+          pcm_accel_compensation = 0.0
+          if not stopping:
+            pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - net_acceleration_request)
+
+          # prevent compensation windup
+          pcm_accel_compensation = clip(pcm_accel_compensation, actuators.accel - self.params.ACCEL_MAX,
+                                        actuators.accel - self.params.ACCEL_MIN)
+
+          self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.03, 0.03)
+          pcm_accel_cmd = actuators.accel - self.pcm_accel_compensation
+
+          # Along with rate limiting positive jerk below, this greatly improves gas response time
+          # Consider the net acceleration request that the PCM should be applying (pitch included)
+          if net_acceleration_request < 0.1 or stopping:
+            self.permit_braking = True
+          elif net_acceleration_request > 0.2:
+            self.permit_braking = False
+        else:
+          self.pcm_accel_compensation = 0.0
+          pcm_accel_cmd = actuators.accel
+          self.permit_braking = True
+
+        pcm_accel_cmd = clip(pcm_accel_cmd, self.params.ACCEL_MIN, self.params.ACCEL_MAX)
 
         # internal PCM gas command can get stuck unwinding from negative accel so we apply a generous rate limit
         pcm_accel_cmd = min(pcm_accel_cmd, self.accel + ACCEL_WINDUP_LIMIT) if CC.longActive else 0.0
