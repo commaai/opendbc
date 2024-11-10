@@ -1,0 +1,15 @@
+Import('env')
+
+# Get generator script path
+generator = File('generator/generator.py')
+output_dir = Dir('.')
+
+# Run generator script as a build step
+generated = env.Command(
+    target=['#opendbc/dbc/*_generated.dbc'],  # Wildcard for all generated DBCs
+    source=[generator],
+    action='python3 ${SOURCE} ${TARGET.dir}'
+)
+
+# Export the generated files target
+Return('generated')
