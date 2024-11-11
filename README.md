@@ -1,8 +1,28 @@
-# opendbc
+<div align="center" style="text-align: center;">
 
-opendbc is a Python API for your car. Read the speed, steering angle, and more. Send gas, braking, and steering commands.
+<h1>opendbc</h1>
 
-## Structure
+<p>
+  <b>opendbc is a Python API for your car.</b>
+  <br>
+  Read the speed, steering angle, and more. Send gas, braking, and steering commands.
+</p>
+
+<h3>
+  <a href="https://docs.comma.ai">Docs</a>
+  <span> · </span>
+  <a href="https://github.com/commaai/openpilot/blob/master/docs/CONTRIBUTING.md">Contribute</a>
+  <span> · </span>
+  <a href="https://discord.comma.ai">Discord</a>
+</h3>
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![X Follow](https://img.shields.io/twitter/follow/comma_ai)](https://x.com/comma_ai)
+[![Discord](https://img.shields.io/discord/469524606043160576)](https://discord.comma.ai)
+
+</div>
+
+## Project Structure
 * [`opendbc/dbc/`](opendbc/dbc/) is a repository of [DBC](https://en.wikipedia.org/wiki/CAN_bus#DBC) files
 * [`opendbc/can/`](opendbc/can/) is a library for parsing and building CAN messages from DBC files
 * [`opendbc/car/`](opendbc/car/) is a high-level library for interfacing with cars using Python
@@ -49,7 +69,8 @@ may end up going in openpilot.
 * Make car ports easier: refactors, tools, tests, and docs
 * Expose the state of all supported cars better: https://github.com/commaai/opendbc/issues/1144
 
-Contributions towards anything here is welcome. Join the [Discord](https://discord.comma.ai)!
+Contributions towards anything here are welcome.
+Join the [Discord](https://discord.comma.ai)!
 
 ## FAQ
 
