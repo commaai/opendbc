@@ -11,5 +11,8 @@ generated = env.Command(
     action='python3 ${SOURCE} ${TARGET.dir}'
 )
 
+# Make generated files part of the default target
+env.Default(generated)
+
 # Export the generated files target
 Return('generated')
