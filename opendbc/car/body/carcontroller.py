@@ -15,9 +15,9 @@ MAX_TURN_INTEGRATOR = 0.1  # meters
 
 
 class CarController(CarControllerBase):
-  def __init__(self, dbc_name, CP):
-    super().__init__(dbc_name, CP)
-    self.packer = CANPacker(dbc_name)
+  def __init__(self, dbc_names, CP):
+    super().__init__(dbc_names, CP)
+    self.packer = CANPacker(dbc_names['main'])
 
     # PIDs
     self.turn_pid = PIDController(110, k_i=11.5, rate=1/DT_CTRL)
