@@ -1,13 +1,72 @@
-# opendbc
+<div align="center" style="text-align: center;">
 
-opendbc is a Python API for your car. Read the speed, steering angle, and more. Send gas, braking, and steering commands.
+<h1>opendbc</h1>
 
-## Structure
+<p>
+  <b>opendbc is a Python API for your car.</b>
+  <br>
+  Read the speed, steering angle, and more. Send gas, braking, and steering commands.
+</p>
+
+<h3>
+  <a href="https://docs.comma.ai">Docs</a>
+  <span> · </span>
+  <a href="https://github.com/commaai/openpilot/blob/master/docs/CONTRIBUTING.md">Contribute</a>
+  <span> · </span>
+  <a href="https://discord.comma.ai">Discord</a>
+</h3>
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![X Follow](https://img.shields.io/twitter/follow/comma_ai)](https://x.com/comma_ai)
+[![Discord](https://img.shields.io/discord/469524606043160576)](https://discord.comma.ai)
+
+</div>
+
+---
+
+Most cars since 2016 have electronically-actuatable steering, gas, and brakes thanks to [LKAS](https://en.wikipedia.org/wiki/Lane_departure_warning_system#Lane_keeping_and_next_technologies) and [ACC](https://en.wikipedia.org/wiki/Adaptive_cruise_control).
+The goal of this project is to support controlling every single one of those cars. See [docs/CARS.md](docs/CARS.md) for the current supported cars list.
+
+While the primary focus is on ADAS interfaces for [openpilot](https://github.com/commaai/openpilot), we're also interested in reading and writing as many things as we can: EV charge status, lock/unlocking doors, etc.
+
+
+
+## Contributing
+
+All opendbc development is coordinated on GitHub and [Discord](https://discord.comma.ai). Check out the `#dev-opendbc-cars` channel and `Vehicle Specific` section. 
+
+### Roadmap
+
+Shorter term
+- [ ] `pip install opendbc`
+- [ ] 100% type coverage
+- [ ] 100% line coverage
+- [ ] Make car ports easier: refactors, tools, tests, and docs
+- [ ] Expose the state of all supported cars better: https://github.com/commaai/opendbc/issues/1144
+
+Longer term
+- [ ] Extend support to every car with LKAS + ACC interfaces
+- [ ] Automatic lateral and longitudinal control/tuning evaluation
+- [ ] Auto-tuning for [lateral](https://blog.comma.ai/090release/#torqued-an-auto-tuner-for-lateral-control) and longitudinal control
+- [ ] [Automatic Emergency Braking](https://en.wikipedia.org/wiki/Automated_emergency_braking_system)
+
+Contributions towards anything here are welcome.
+
+### Bounties
+
+Every car port is eligible for a bounty:
+* $2000 - [Any car brand / platform port](https://github.com/orgs/commaai/projects/26/views/1?pane=issue&itemId=47913774)
+* $250 - [Any car model port](https://github.com/orgs/commaai/projects/26/views/1?pane=issue&itemId=47913790)
+* $300 - [Reverse Engineering a new Actuation Message](https://github.com/orgs/commaai/projects/26/views/1?pane=issue&itemId=73445563)
+
+In addition to the standard bounties, we also offer higher value bounties for more popular cars. See those at [comma.ai/bounties](comma.ai/bounties).
+
+### Project Structure
 * [`opendbc/dbc/`](opendbc/dbc/) is a repository of [DBC](https://en.wikipedia.org/wiki/CAN_bus#DBC) files
 * [`opendbc/can/`](opendbc/can/) is a library for parsing and building CAN messages from DBC files
 * [`opendbc/car/`](opendbc/car/) is a high-level library for interfacing with cars using Python
 
-## Quick start
+### Quick start
 
 ```bash
 git clone https://github.com/commaai/opendbc.git
@@ -32,24 +91,6 @@ pre-commit run --all-files
 
 [`examples/`](examples/) contains small example programs that can read state from the car and control the steering, gas, and brakes.
 [`examples/joystick.py`](examples/joystick.py) allows you to control a car with a joystick.
-
-## Roadmap
-
-This project was pulled out from [openpilot](https://github.com/commaai/openpilot).
-We're still figuring out the exact API between openpilot and opendbc, so some of these
-may end up going in openpilot.
-
-* Extend support to every car with LKAS + ACC interfaces
-* Automatic lateral and longitudinal control/tuning evaluation
-* Auto-tuning for [lateral](https://blog.comma.ai/090release/#torqued-an-auto-tuner-for-lateral-control) and longitudinal control
-* [Automatic Emergency Braking](https://en.wikipedia.org/wiki/Automated_emergency_braking_system)
-* `pip install opendbc`
-* 100% type coverage
-* 100% line coverage
-* Make car ports easier: refactors, tools, tests, and docs
-* Expose the state of all supported cars better: https://github.com/commaai/opendbc/issues/1144
-
-Contributions towards anything here is welcome. Join the [Discord](https://discord.comma.ai)!
 
 ## FAQ
 
