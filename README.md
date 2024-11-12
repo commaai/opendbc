@@ -27,9 +27,7 @@
 Most cars since 2016 have electronically-actuatable steering, gas, and brakes thanks to [LKAS](https://en.wikipedia.org/wiki/Lane_departure_warning_system#Lane_keeping_and_next_technologies) and [ACC](https://en.wikipedia.org/wiki/Adaptive_cruise_control).
 The goal of this project is to support controlling every single one of those cars. See [docs/CARS.md](docs/CARS.md) for the current supported cars list.
 
-While the primary focus is on ADAS interfaces for [openpilot](https://github.com/commaai/openpilot), we're also interested in reading and writing as many things as we can: EV charge status, lock/unlocking doors, etc.
-
-
+While the primary focus is on supporting ADAS interfaces for [openpilot](https://github.com/commaai/openpilot), we're also interested in reading and writing as many things as we can: EV charge status, lock/unlocking doors, etc.
 
 ## Contributing
 
@@ -37,7 +35,7 @@ All opendbc development is coordinated on GitHub and [Discord](https://discord.c
 
 ### Roadmap
 
-Shorter term
+Short term
 - [ ] `pip install opendbc`
 - [ ] 100% type coverage
 - [ ] 100% line coverage
@@ -94,6 +92,29 @@ pre-commit run --all-files
 
 ## FAQ
 
-* **How do I use this?** Depends on what you want to do. [openpilot](https://github.com/commaai/openpilot) is our development target, but you can also use a [panda](https://comma.ai/shop/panda) for basic control or just reading state from your car.
-* **Can I add support for my car?** Yes, most car support comes from the community. Join the [Discord](https://discord.comma.ai) and watch this [talk](https://www.youtube.com/watch?v=XxPS5TpTUnI&t=142s&pp=ygUPY29tbWFfY29uIGphc29u) to get started. (We also offer [paid bounties](https://comma.ai/bounties) on car ports.)
-* **Which cars are supported?** See the openpilot [supported cars list](https://github.com/commaai/openpilot/blob/master/docs/CARS.md) and `grep` around the codebase.
+***How do I use this?***
+
+Depends on what you want to do. [openpilot](https://github.com/commaai/openpilot) is our development target and offers a replacement for your car's ADAS, but you can also use a [panda](https://comma.ai/shop/panda) for basic control or just reading state from your car.
+
+***What hardware do I need?***
+
+* a [supported car](docs/CARS.md)
+* a [car harness](https://comma.ai/shop/car-harness)
+* a [comma 3X](https://comma.ai/shop/comma-3x) or [panda](https://comma.ai/shop/panda)
+
+***Which cars are supported?***
+
+See the [supported cars list](docs/CARS.md).
+
+***Can I add support for my car?***
+
+Yes, most car support comes from the community. Join the [Discord](https://discord.comma.ai) and watch this [talk](https://www.youtube.com/watch?v=XxPS5TpTUnI&t=142s&pp=ygUPY29tbWFfY29uIGphc29u) to get started. (We also offer [paid bounties](https://comma.ai/bounties) on car ports.)
+
+***Which cars can be supported?***
+
+Any car with LKAS and ACC. More info [here](https://github.com/commaai/openpilot/blob/master/docs/CARS.md#dont-see-your-car-here).
+
+***How does this work?***
+
+In short, we designed hardware to sit at a convenient spot on your car's communication bus that allows for filtering out interesting messages and replacing them with our own.  
+See [this talk](https://www.youtube.com/watch?v=FL8CxUSfipM) for an in-depth explanation.
