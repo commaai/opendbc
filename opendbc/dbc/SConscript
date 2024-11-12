@@ -1,0 +1,34 @@
+'''
+This script is used to generate the DBC files from the
+source DBC files using the generator script.
+'''
+Import('env')
+
+# Get generator script path
+generator = File('generator/generator.py')
+
+# Find all source files that could affect generation
+import glob
+import os
+
+source_files = []
+output_files = []
+
+# Add all Python scripts and DBC files as dependencies
+for src_dir, _, files in os.walk('generator'):
+    for f in files:
+        if f.endswith('.py') or (f.endswith('.dbc') and not f.startswith('_')):
+            source_files.append(File(os.path.join(src_dir, f)))
+            # Track expected output files for DBCs
+            if f.endswith('.dbc') and not f.startswith('_'):
+                output_files.append(f.replace('.dbc', '_generated.dbc'))
+
+# Run generator script once to process everything
+generated = env.Command(
+    target=output_files,
+    source=[generator] + source_files,
+    action='python3 ${SOURCES[0]}'
+)
+
+# Clean up all generated files
+env.Clean(generated, output_files)
