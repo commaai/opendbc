@@ -61,6 +61,7 @@ class CarState(CarStateBase):
     # CLUTCH->ACCEL_NET is only accurate for gas, PCM_CRUISE->ACCEL_NET is only accurate for brake
     # These signals only have meaning when ACC is active
     if "CLUTCH" in cp.vl:
+      self.aslp = cp.vl["VSC1S07"]["ASLP"]
       self.pcm_accel_net = max(cp.vl["CLUTCH"]["ACCEL_NET"], 0.0)
 
       # Sometimes ACC_BRAKING can be 1 while showing we're applying gas already
@@ -234,6 +235,7 @@ class CarState(CarStateBase):
 
     if CP.carFingerprint in (TSS2_CAR - SECOC_CAR - {CAR.LEXUS_NX_TSS2, CAR.TOYOTA_ALPHARD_TSS2, CAR.LEXUS_IS_TSS2}):
       messages.append(("CLUTCH", 15))
+      messages.append(("VSC1S07", 15))
 
     if CP.carFingerprint in UNSUPPORTED_DSU_CAR:
       messages.append(("DSU_CRUISE", 5))
