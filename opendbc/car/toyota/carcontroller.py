@@ -48,6 +48,7 @@ class CarController(CarControllerBase):
 
     self.packer = CANPacker(dbc_name)
     self.accel = 0
+    self.prev_accel = 0
 
     self.secoc_lka_message_counter = 0
     self.secoc_lta_message_counter = 0
@@ -170,7 +171,7 @@ class CarController(CarControllerBase):
             self.distance_button = 0
 
         # internal PCM gas command can get stuck unwinding from negative accel so we apply a generous rate limit
-        pcm_accel_cmd = min(actuators.accel, self.accel + ACCEL_WINDUP_LIMIT) if CC.longActive else 0.0
+        pcm_accel_cmd = min(actuators.accel, self.prev_accel + ACCEL_WINDUP_LIMIT) if CC.longActive else 0.0
 
         # calculate amount of acceleration PCM should apply to reach target, given pitch
         accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY if len(CC.orientationNED) == 3 else 0.0
@@ -206,6 +207,7 @@ class CarController(CarControllerBase):
         can_sends.append(toyotacan.create_accel_command(self.packer, pcm_accel_cmd, pcm_cancel_cmd, self.permit_braking, self.standstill_req, lead,
                                                         CS.acc_type, fcw_alert, self.distance_button))
         self.accel = pcm_accel_cmd
+        self.prev_accel = actuators.accel
 
     else:
       # we can spam can to cancel the system even if we are using lat only control
