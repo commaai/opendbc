@@ -3,6 +3,7 @@ from opendbc.car import carlog, apply_meas_steer_torque_limits, apply_std_steer_
                         make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY
 from opendbc.car.can_definitions import CanData
 from opendbc.car.common.numpy_fast import clip
+from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.secoc import add_mac, build_sync_mac
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.toyota import toyotacan
@@ -31,6 +32,22 @@ MAX_LTA_ANGLE = 94.9461  # deg
 MAX_LTA_DRIVER_TORQUE_ALLOWANCE = 150  # slightly above steering pressed allows some resistance when changing lanes
 
 
+class Oscillator:
+  def __init__(self, decay, stiffness):
+    self.position = 0
+    self.velocity = 0
+    self.decay = decay
+    self.stiffness = stiffness
+
+  def update(self, target):
+    force = self.stiffness * (target - self.position)
+    self.velocity = self.decay * (self.velocity + force)
+
+    self.position += self.velocity
+
+    return self.position
+
+
 class CarController(CarControllerBase):
   def __init__(self, dbc_name, CP):
     super().__init__(dbc_name, CP)
@@ -43,11 +60,15 @@ class CarController(CarControllerBase):
     self.steer_rate_counter = 0
     self.distance_button = 0
 
+    self.filter = FirstOrderFilter(0, 0.5, 0.03)
+    self.osc = Oscillator(0.8, 0.01)
+
     self.pcm_accel_compensation = 0.0
     self.permit_braking = True
 
     self.packer = CANPacker(dbc_name)
     self.accel = 0
+    self.prev_accel = 0
 
     self.secoc_lka_message_counter = 0
     self.secoc_lta_message_counter = 0
@@ -174,14 +195,26 @@ class CarController(CarControllerBase):
         if CC.longActive:
           # TODO: does the lower up limit provide even faster accel with less overshoot?
           # TODO: does the ramp down limit prevent brake overshoot with a step response? what about an insanely low limit?
-          pcm_accel_cmd = rate_limit(actuators.accel, self.accel, -4.8 / 100 * 3, ACCEL_WINDUP_LIMIT / 6)
+          pcm_accel_cmd = rate_limit(actuators.accel, self.prev_accel, -4.8 / 100 * 3, ACCEL_WINDUP_LIMIT / 3)
+          #pcm_accel_cmd = rate_limit(actuators.accel, self.prev_accel, -100, ACCEL_WINDUP_LIMIT)
+          self.prev_accel = pcm_accel_cmd
+
+          #if not stopping:
+          #  pcm_accel_cmd += math.sin(self.frame) / 4
+
+          #new = self.filter.update(pcm_accel_cmd)
+          #pcm_accel_cmd += (pcm_accel_cmd - new)
+          #pcm_accel_cmd = self.osc.update(pcm_accel_cmd)
+        else:
+          self.prev_accel = pcm_accel_cmd
 
         # calculate amount of acceleration PCM should apply to reach target, given pitch
-        accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY if len(CC.orientationNED) == 3 else 0.0
+        accel_due_to_pitch = 0 #math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY if len(CC.orientationNED) == 3 else 0.0
         net_acceleration_request = pcm_accel_cmd + accel_due_to_pitch
+        net_acceleration_request2 = actuators.accel + accel_due_to_pitch
 
         # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot and imprecise braking
-        if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
+        if CC.longActive and not CS.out.cruiseState.standstill:
           # let PCM handle stopping for now
           pcm_accel_compensation = 0.0
           if not stopping:
@@ -191,18 +224,20 @@ class CarController(CarControllerBase):
           pcm_accel_compensation = clip(pcm_accel_compensation, pcm_accel_cmd - self.params.ACCEL_MAX,
                                         pcm_accel_cmd - self.params.ACCEL_MIN)
 
-          self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.03, 0.03)
+          #self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.03, 0.03)
+          self.pcm_accel_compensation = self.filter.update(pcm_accel_compensation)
           pcm_accel_cmd = pcm_accel_cmd - self.pcm_accel_compensation
 
         else:
           self.pcm_accel_compensation = 0.0
           self.permit_braking = True
+          self.filter.x = 0
 
         # Along with rate limiting positive jerk above, this greatly improves gas response time
         # Consider the net acceleration request that the PCM should be applying (pitch included)
-        if net_acceleration_request < 0.1 or stopping or not CC.longActive:
+        if net_acceleration_request2 < 0.1 or stopping or not CC.longActive:
           self.permit_braking = True
-        elif net_acceleration_request > 0.2:
+        elif net_acceleration_request2 > 0.2:
           self.permit_braking = False
 
         pcm_accel_cmd = clip(pcm_accel_cmd, self.params.ACCEL_MIN, self.params.ACCEL_MAX)
