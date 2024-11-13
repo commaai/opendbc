@@ -19,7 +19,7 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 # The up limit allows the brakes/gas to unwind quickly leaving a stop,
 # the down limit matches the rate of ACCEL_NET, reducing PCM compensation windup
 ACCEL_WINDUP_LIMIT = 0.5  # m/s^2 / frame
-ACCEL_WINDDOWN_LIMIT = -5.0 * DT_CTRL * 3  # m/s^2 / frame
+ACCEL_WINDDOWN_LIMIT = -4.0 * DT_CTRL * 3  # m/s^2 / frame
 
 # LKA limits
 # EPS faults if you apply torque while the steering rate is above 100 deg/s for too long
@@ -47,6 +47,7 @@ class CarController(CarControllerBase):
     self.steer_rate_counter = 0
     self.distance_button = 0
 
+    self.pitch = FirstOrderFilter(0, 2, DT_CTRL)
     self.pcm_accel_compensation = FirstOrderFilter(0, 0.5, DT_CTRL * 3)
     self.permit_braking = True
 
@@ -65,6 +66,10 @@ class CarController(CarControllerBase):
     hud_control = CC.hudControl
     pcm_cancel_cmd = CC.cruiseControl.cancel
     lat_active = CC.latActive and abs(CS.out.steeringTorque) < MAX_USER_TORQUE
+
+    # update pitch within sane bounds
+    if abs(CS.out.aEgo) < 0.5 and not CS.out.standstill and len(CC.orientationNED) == 3:
+      self.pitch.update(CC.orientationNED[1])
 
     # *** control msgs ***
     can_sends = []
@@ -177,10 +182,10 @@ class CarController(CarControllerBase):
         # internal PCM gas command can get stuck unwinding from negative accel so we apply a generous rate limit
         pcm_accel_cmd = actuators.accel
         if CC.longActive:
-          pcm_accel_cmd = rate_limit(pcm_accel_cmd, self.prev_accel, ACCEL_WINDDOWN_LIMIT, ACCEL_WINDUP_LIMIT)
+          pcm_accel_cmd = rate_limit(pcm_accel_cmd, self.prev_accel, ACCEL_WINDDOWN_LIMIT, ACCEL_WINDUP_LIMIT / 3)
 
         # calculate amount of acceleration PCM should apply to reach target, given pitch
-        accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY if len(CC.orientationNED) == 3 else 0.0
+        accel_due_to_pitch = math.sin(self.pitch.x) * ACCELERATION_DUE_TO_GRAVITY
         net_acceleration_request = pcm_accel_cmd + accel_due_to_pitch
 
         # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot and imprecise braking
@@ -201,10 +206,11 @@ class CarController(CarControllerBase):
           self.permit_braking = True
 
         # Along with rate limiting positive jerk above, this greatly improves gas response time
-        # Consider the net acceleration request that the PCM should be applying (pitch included)
-        if net_acceleration_request < 0.1 or stopping or not CC.longActive:
+        # Consider the net acceleration request that the PCM should be applying before rate limiting (pitch included)
+        net_acceleration_request_raw = actuators.accel + accel_due_to_pitch
+        if net_acceleration_request_raw < 0.1 or stopping or not CC.longActive:
           self.permit_braking = True
-        elif net_acceleration_request > 0.2:
+        elif net_acceleration_request_raw > 0.2:
           self.permit_braking = False
 
         pcm_accel_cmd = clip(pcm_accel_cmd, self.params.ACCEL_MIN, self.params.ACCEL_MAX)
