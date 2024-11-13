@@ -170,7 +170,11 @@ class CarController(CarControllerBase):
             self.distance_button = 0
 
         # internal PCM gas command can get stuck unwinding from negative accel so we apply a generous rate limit
-        pcm_accel_cmd = min(actuators.accel, self.accel + ACCEL_WINDUP_LIMIT) if CC.longActive else 0.0
+        pcm_accel_cmd = actuators.accel
+        if CC.longActive:
+          # TODO: does the lower up limit provide even faster accel with less overshoot?
+          # TODO: does the ramp down limit prevent brake overshoot with a step response? what about an insanely low limit?
+          pcm_accel_cmd = rate_limit(actuators.accel, self.accel, -4.8 / 100 * 3, ACCEL_WINDUP_LIMIT / 6)
 
         # calculate amount of acceleration PCM should apply to reach target, given pitch
         accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY if len(CC.orientationNED) == 3 else 0.0
