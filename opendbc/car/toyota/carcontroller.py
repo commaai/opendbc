@@ -1,7 +1,8 @@
 import math
 from opendbc.car import carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
-                        make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY
+                        make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY, DT_CTRL
 from opendbc.car.can_definitions import CanData
+from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car.secoc import add_mac, build_sync_mac
 from opendbc.car.interfaces import CarControllerBase
@@ -43,7 +44,7 @@ class CarController(CarControllerBase):
     self.steer_rate_counter = 0
     self.distance_button = 0
 
-    self.pcm_accel_compensation = 0.0
+    self.pcm_accel_compensation = FirstOrderFilter(0, 0.5, DT_CTRL * 3)
     self.permit_braking = True
 
     self.packer = CANPacker(dbc_name)
@@ -187,11 +188,10 @@ class CarController(CarControllerBase):
           pcm_accel_compensation = clip(pcm_accel_compensation, pcm_accel_cmd - self.params.ACCEL_MAX,
                                         pcm_accel_cmd - self.params.ACCEL_MIN)
 
-          self.pcm_accel_compensation = rate_limit(pcm_accel_compensation, self.pcm_accel_compensation, -0.03, 0.03)
-          pcm_accel_cmd = pcm_accel_cmd - self.pcm_accel_compensation
+          pcm_accel_cmd = pcm_accel_cmd - self.pcm_accel_compensation.update(pcm_accel_compensation)
 
         else:
-          self.pcm_accel_compensation = 0.0
+          self.pcm_accel_compensation.x = 0.0
           self.permit_braking = True
 
         # Along with rate limiting positive jerk above, this greatly improves gas response time
