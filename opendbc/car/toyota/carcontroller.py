@@ -44,7 +44,6 @@ class CarController(CarControllerBase):
     self.steer_rate_counter = 0
     self.distance_button = 0
 
-    self.pitch = FirstOrderFilter(0, 2, DT_CTRL)
     self.pcm_accel_compensation = FirstOrderFilter(0, 0.5, DT_CTRL * 3)
     self.permit_braking = True
 
@@ -62,10 +61,6 @@ class CarController(CarControllerBase):
     hud_control = CC.hudControl
     pcm_cancel_cmd = CC.cruiseControl.cancel
     lat_active = CC.latActive and abs(CS.out.steeringTorque) < MAX_USER_TORQUE
-
-    # update pitch within sane bounds
-    if abs(CS.out.aEgo) < 0.5 and abs(CS.out.vEgo) > 0.2 and len(CC.orientationNED) == 3:
-      self.pitch.update(CC.orientationNED[1])
 
     # *** control msgs ***
     can_sends = []
@@ -176,7 +171,7 @@ class CarController(CarControllerBase):
             self.distance_button = 0
 
         # internal PCM gas command can get stuck unwinding from negative accel so we apply a generous rate limit
-        pcm_accel_cmd = min(actuators.accel, self.accel + ACCEL_WINDUP_LIMIT / 3) if CC.longActive else 0.0
+        pcm_accel_cmd = min(actuators.accel, self.accel + ACCEL_WINDUP_LIMIT) if CC.longActive else 0.0
 
         # calculate amount of acceleration PCM should apply to reach target, given pitch
         accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY if len(CC.orientationNED) == 3 else 0.0
