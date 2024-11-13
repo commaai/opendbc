@@ -15,7 +15,10 @@ LongCtrlState = structs.CarControl.Actuators.LongControlState
 SteerControlType = structs.CarParams.SteerControlType
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 
-ACCEL_WINDUP_LIMIT = 0.5  # m/s^2 / frame
+# The up limit allows the brakes/gas to unwind quickly leaving a stop,
+# the down limit matches what the rate of ACCEL_NET, reducing PCM compensation windup
+ACCEL_UP_LIMIT = 0.5  # m/s^2 / frame
+ACCEL_WINDDOWN_LIMIT = -5.0 * DT_CTRL * 3  # m/s^2 / frame
 
 # LKA limits
 # EPS faults if you apply torque while the steering rate is above 100 deg/s for too long
@@ -172,6 +175,7 @@ class CarController(CarControllerBase):
 
         # internal PCM gas command can get stuck unwinding from negative accel so we apply a generous rate limit
         pcm_accel_cmd = min(actuators.accel, self.prev_accel + ACCEL_WINDUP_LIMIT) if CC.longActive else 0.0
+        pcm_accel_cmd = rate_limit(actuators.accel, self.prev_accel, ACCEL_WINDDOWN_LIMIT, ACCEL_WINDUP_LIMIT)
 
         # calculate amount of acceleration PCM should apply to reach target, given pitch
         accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY if len(CC.orientationNED) == 3 else 0.0
