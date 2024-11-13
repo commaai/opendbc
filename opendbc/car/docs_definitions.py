@@ -46,6 +46,13 @@ class Star(Enum):
   EMPTY = "empty"
 
 
+class PowertrainType(Enum):
+  ICE = "ICE"                       # Internal combustion engine
+  HYBRID = "Hybrid"                 # Regular hybrid (non plug-in)
+  PHEV = "PHEV"                     # Plug-in hybrid electric vehicle
+  EV = "Electric"                   # Pure electric vehicle
+
+
 # A part + its comprised parts
 @dataclass
 class BasePart:
@@ -241,6 +248,9 @@ def split_name(name: str) -> tuple[str, str, str]:
 class CarDocs:
   # make + model + model years
   name: str
+
+  # Default to ICE for backward compatibility
+  powertrain: PowertrainType = PowertrainType.ICE
 
   # Example for Toyota Corolla MY20
   # requirements: Lane Tracing Assist (LTA) and Dynamic Radar Cruise Control (DRCC)
