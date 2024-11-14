@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from panda import uds
 from opendbc.car import CarSpecs, DbcDict, PlatformConfig, Platforms, dbc_dict
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
+from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts, PowertrainType
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, p16
 
 Ecu = CarParams.Ecu
@@ -33,11 +33,11 @@ class ChryslerCarSpecs(CarSpecs):
 class CAR(Platforms):
   # Chrysler
   CHRYSLER_PACIFICA_2018_HYBRID = ChryslerPlatformConfig(
-    [ChryslerCarDocs("Chrysler Pacifica Hybrid 2017-18")],
+    [ChryslerCarDocs("Chrysler Pacifica Hybrid 2017-18", PowertrainType.HYBRID)],
     ChryslerCarSpecs(mass=2242., wheelbase=3.089, steerRatio=16.2),
   )
   CHRYSLER_PACIFICA_2019_HYBRID = ChryslerPlatformConfig(
-    [ChryslerCarDocs("Chrysler Pacifica Hybrid 2019-24")],
+    [ChryslerCarDocs("Chrysler Pacifica Hybrid 2019-24", PowertrainType.HYBRID)],
     CHRYSLER_PACIFICA_2018_HYBRID.specs,
   )
   CHRYSLER_PACIFICA_2018 = ChryslerPlatformConfig(
