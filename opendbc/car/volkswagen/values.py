@@ -178,7 +178,7 @@ class Footnote(Enum):
   VW_EXP_LONG = CarFootnote(
     "Only available for vehicles using a gateway (J533) harness. At this time, vehicles using a camera harness " +
     "are limited to using stock ACC.",
-    Column.LONGITUDINAL)
+    Column.LONGITUDINAL, docs_only=True)
   VW_MQB_A0 = CarFootnote(
     "Model-years 2022 and beyond may have a combined CAN gateway and BCM, which is supported by openpilot " +
     "in software, but doesn't yet have a harness available from the comma store.",
