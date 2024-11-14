@@ -48,6 +48,7 @@ class Star(Enum):
 
 class PowertrainType(Enum):
   ICE = "ICE"                       # Internal combustion engine
+  MHEV = "MHEV"                     # Mild hybrid electric vehicle
   HYBRID = "Hybrid"                 # Regular hybrid (non plug-in)
   PHEV = "PHEV"                     # Plug-in hybrid electric vehicle
   EV = "Electric"                   # Pure electric vehicle
