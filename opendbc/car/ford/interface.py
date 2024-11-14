@@ -23,7 +23,7 @@ class CarInterface(CarInterfaceBase):
     ret.carName = "ford"
     ret.dashcamOnly = bool(ret.flags & FordFlags.CANFD)
 
-    ret.radarUnavailable = DBC[candidate]['radar'] is None
+    ret.radarUnavailable = 'radar' not in DBC[candidate]
     ret.steerControlType = structs.CarParams.SteerControlType.angle
     ret.steerActuatorDelay = 0.2
     ret.steerLimitTimer = 1.0
@@ -31,7 +31,7 @@ class CarInterface(CarInterfaceBase):
     ret.longitudinalTuning.kiBP = [0.]
     ret.longitudinalTuning.kiV = [0.5]
 
-    if DBC[candidate]['radar'] == RADAR.DELPHI_MRR:
+    if not ret.radarUnavailable and DBC[candidate]['radar'] == RADAR.DELPHI_MRR:
       # average of 33.3 Hz radar timestep / 4 scan modes = 60 ms
       # MRR_Header_Timestamps->CAN_DET_TIME_SINCE_MEAS reports 61.3 ms
       ret.radarDelay = 0.06

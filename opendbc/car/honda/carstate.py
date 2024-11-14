@@ -109,7 +109,11 @@ class CarState(CarStateBase):
     # However, on cars without a digital speedometer this is not always present (HRV, FIT, CRV 2016, ILX and RDX)
     self.dash_speed_seen = False
 
-  def update(self, cp, cp_cam, _, cp_body, __) -> structs.CarState:
+  def update(self, can_parsers) -> structs.CarState:
+    cp = can_parsers['pt']
+    cp_cam = can_parsers['cam']
+    cp_body = can_parsers['body']
+
     ret = structs.CarState()
 
     # car params
@@ -270,38 +274,34 @@ class CarState(CarStateBase):
 
     return ret
 
-  def get_can_parser(self, CP):
-    messages = get_can_messages(CP, self.gearbox_msg)
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, CanBus(CP).pt)
+  def get_can_parsers(self, CP):
+    pt_messages = get_can_messages(CP, self.gearbox_msg)
 
-  @staticmethod
-  def get_cam_can_parser(CP):
-    messages = [
+    cam_messages = [
       ("STEERING_CONTROL", 100),
     ]
 
     if CP.carFingerprint in HONDA_BOSCH_RADARLESS:
-      messages += [
+      cam_messages += [
         ("ACC_HUD", 10),
         ("LKAS_HUD", 10),
       ]
 
     elif CP.carFingerprint not in HONDA_BOSCH:
-      messages += [
+      cam_messages += [
         ("ACC_HUD", 10),
         ("LKAS_HUD", 10),
         ("BRAKE_COMMAND", 50),
       ]
 
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, CanBus(CP).camera)
+    body_messages = [
+      ("BSM_STATUS_LEFT", 3),
+      ("BSM_STATUS_RIGHT", 3),
+    ]
 
-  @staticmethod
-  def get_body_can_parser(CP):
-    if CP.enableBsm:
-      messages = [
-        ("BSM_STATUS_LEFT", 3),
-        ("BSM_STATUS_RIGHT", 3),
-      ]
-      bus_body = CanBus(CP).radar # B-CAN is forwarded to ACC-CAN radar side (CAN 0 on fake ethernet port)
-      return CANParser(DBC[CP.carFingerprint]["body"], messages, bus_body)
-    return None
+    return {
+      'pt': CANParser(DBC[CP.carFingerprint]["pt"], pt_messages, CanBus(CP).pt),
+      'cam': CANParser(DBC[CP.carFingerprint]["pt"], cam_messages, CanBus(CP).camera),
+      'body': CANParser(DBC[CP.carFingerprint]["body"], body_messages, CanBus(CP).radar) if CP.enableBsm else None,
+    }
+

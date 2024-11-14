@@ -95,13 +95,14 @@ class RadarInterface(RadarInterfaceBase):
 
     self.points: list[list[float]] = []
     self.clusters: list[Cluster] = []
+    self.rcp = None
+    if CP.radarUnavailable:
+      return
 
     self.updated_messages = set()
     self.track_id = 0
     self.radar = DBC[CP.carFingerprint]['radar']
-    if CP.radarUnavailable:
-      self.rcp = None
-    elif self.radar == RADAR.DELPHI_ESR:
+    if self.radar == RADAR.DELPHI_ESR:
       self.rcp = _create_delphi_esr_radar_can_parser(CP)
       self.trigger_msg = DELPHI_ESR_RADAR_MSGS[-1]
       self.valid_cnt = {key: 0 for key in DELPHI_ESR_RADAR_MSGS}

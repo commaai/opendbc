@@ -156,5 +156,5 @@ class CarState(CarStateBase):
 
     return {
       'pt': CANParser(DBC[CP.carFingerprint]["pt"], pt_messages, 0),
-      'cam': CANParser(DBC[CP.carFingerprint]["cam"], cam_messages, 2),
+      'cam': CANParser(DBC[CP.carFingerprint]["pt"], cam_messages, 2),
     }

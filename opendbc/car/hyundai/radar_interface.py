@@ -11,7 +11,7 @@ RADAR_MSG_COUNT = 32
 # POC for parsing corner radars: https://github.com/commaai/openpilot/pull/24221/
 
 def get_radar_can_parser(CP):
-  if DBC[CP.carFingerprint]['radar'] is None:
+  if 'radar' not in DBC[CP.carFingerprint]:
     return None
 
   messages = [(f"RADAR_TRACK_{addr:x}", 50) for addr in range(RADAR_START_ADDR, RADAR_START_ADDR + RADAR_MSG_COUNT)]

@@ -7,15 +7,13 @@ from opendbc.car.tesla.values import CarControllerParams
 
 
 class CarController(CarControllerBase):
-  def __init__(self, dbc_name, CP):
-    self.CP = CP
-    self.frame = 0
+  def __init__(self, dbc_names, CP):
+    super().__init__(dbc_names, CP)
     self.apply_angle_last = 0
-    self.packer = CANPacker(dbc_name)
+    self.packer = CANPacker(dbc_names['party'])
     self.tesla_can = TeslaCAN(self.packer)
 
   def update(self, CC, CS, now_nanos):
-
     actuators = CC.actuators
     can_sends = []
 

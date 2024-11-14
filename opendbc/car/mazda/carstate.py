@@ -22,7 +22,9 @@ class CarState(CarStateBase):
 
     self.distance_button = 0
 
-  def update(self, cp, cp_cam, *_) -> structs.CarState:
+  def update(self, can_parsers) -> structs.CarState:
+    cp = can_parsers['pt']
+    cp_cam = can_parsers['cam']
 
     ret = structs.CarState()
 
@@ -121,8 +123,8 @@ class CarState(CarStateBase):
     return ret
 
   @staticmethod
-  def get_can_parser(CP):
-    messages = [
+  def get_can_parsers(CP):
+    pt_messages = [
       # sig_address, frequency
       ("BLINK_INFO", 10),
       ("STEER", 67),
@@ -132,7 +134,7 @@ class CarState(CarStateBase):
     ]
 
     if CP.flags & MazdaFlags.GEN1:
-      messages += [
+      pt_messages += [
         ("ENGINE_DATA", 100),
         ("CRZ_CTRL", 50),
         ("CRZ_EVENTS", 50),
@@ -145,17 +147,15 @@ class CarState(CarStateBase):
         ("BSM", 10),
       ]
 
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, 0)
-
-  @staticmethod
-  def get_cam_can_parser(CP):
-    messages = []
-
+    cam_messages = []
     if CP.flags & MazdaFlags.GEN1:
-      messages += [
+      cam_messages += [
         # sig_address, frequency
         ("CAM_LANEINFO", 2),
         ("CAM_LKAS", 16),
       ]
 
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, 2)
+    return {
+      'pt': CANParser(DBC[CP.carFingerprint]["pt"], pt_messages, 0),
+      'cam': CANParser(DBC[CP.carFingerprint]["pt"], cam_messages, 2),
+    }

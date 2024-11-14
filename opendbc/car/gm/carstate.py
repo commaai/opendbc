@@ -33,7 +33,11 @@ class CarState(CarStateBase):
 
     self.distance_button = 0
 
-  def update(self, pt_cp, cam_cp, _, __, loopback_cp) -> structs.CarState:
+  def update(self, can_parsers) -> structs.CarState:
+    pt_cp = can_parsers['pt']
+    cam_cp = can_parsers['cam']
+    loopback_cp = can_parsers['loopback']
+
     ret = structs.CarState()
 
     prev_cruise_buttons = self.cruise_buttons
@@ -142,23 +146,8 @@ class CarState(CarStateBase):
     return ret
 
   @staticmethod
-  def get_cam_can_parser(CP):
-    messages = []
-    if CP.networkLocation == NetworkLocation.fwdCamera:
-      messages += [
-        ("ASCMLKASteeringCmd", 10),
-        ("ASCMActiveCruiseControlStatus", 25),
-      ]
-      if CP.carFingerprint not in SDGM_CAR:
-        messages += [
-          ("AEBCmd", 10),
-        ]
-
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, CanBus.CAMERA)
-
-  @staticmethod
-  def get_can_parser(CP):
-    messages = [
+  def get_can_parsers(CP):
+    pt_messages = [
       ("BCMTurnSignals", 1),
       ("ECMPRDNL2", 10),
       ("PSCMStatus", 10),
@@ -176,23 +165,35 @@ class CarState(CarStateBase):
     ]
 
     if CP.enableBsm:
-      messages.append(("BCMBlindSpotMonitor", 10))
+      pt_messages.append(("BCMBlindSpotMonitor", 10))
 
     # Used to read back last counter sent to PT by camera
     if CP.networkLocation == NetworkLocation.fwdCamera:
-      messages += [
+      pt_messages += [
         ("ASCMLKASteeringCmd", 0),
       ]
 
     if CP.transmissionType == TransmissionType.direct:
-      messages.append(("EBCMRegenPaddle", 50))
+      pt_messages.append(("EBCMRegenPaddle", 50))
 
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, CanBus.POWERTRAIN)
+    cam_messages = []
+    if CP.networkLocation == NetworkLocation.fwdCamera:
+      cam_messages += [
+        ("ASCMLKASteeringCmd", 10),
+        ("ASCMActiveCruiseControlStatus", 25),
+      ]
+      if CP.carFingerprint not in SDGM_CAR:
+        cam_messages += [
+          ("AEBCmd", 10),
+        ]
 
-  @staticmethod
-  def get_loopback_can_parser(CP):
-    messages = [
+    loopback_messages = [
       ("ASCMLKASteeringCmd", 0),
     ]
 
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, CanBus.LOOPBACK)
+    return {
+      'pt': CANParser(DBC[CP.carFingerprint]["pt"], pt_messages, CanBus.POWERTRAIN),
+      'cam': CANParser(DBC[CP.carFingerprint]["pt"], cam_messages, CanBus.CAMERA),
+      'loopback': CANParser(DBC[CP.carFingerprint]["pt"], loopback_messages, CanBus.LOOPBACK),
+    }
+
