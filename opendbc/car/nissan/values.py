@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from panda import uds
 from opendbc.car import AngleRateLimit, CarSpecs, DbcDict, PlatformConfig, Platforms, dbc_dict
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarDocs, CarHarness, CarParts
+from opendbc.car.docs_definitions import CarDocs, CarHarness, CarParts, PowertrainType
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
@@ -46,7 +46,7 @@ class CAR(Platforms):
     NissanCarSpecs(mass=1610, wheelbase=2.705)
   )
   NISSAN_LEAF = NissanPlatformConfig(
-    [NissanCarDocs("Nissan Leaf 2018-23", video_link="https://youtu.be/vaMbtAh_0cY")],
+    [NissanCarDocs("Nissan Leaf 2018-23", PowertrainType.EV, video_link="https://youtu.be/vaMbtAh_0cY")],
     NissanCarSpecs(mass=1610, wheelbase=2.705),
     dbc_dict('nissan_leaf_2018_generated', None),
   )
