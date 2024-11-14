@@ -27,6 +27,3 @@ generated = env.Command(
     source=[generator] + source_files,
     action="python3 ${SOURCES[0]}",
 )
-
-# Clean up all generated files
-env.Clean(generated, output_files)
