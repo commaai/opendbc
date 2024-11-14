@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 
 from opendbc.car import dbc_dict, PlatformConfig, DbcDict, Platforms, CarSpecs
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
+from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts, PowertrainType
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
@@ -102,7 +102,7 @@ class CAR(Platforms):
     GMCarSpecs(mass=1363, wheelbase=2.662, steerRatio=15.7, centerToFrontRatio=0.4),
   )
   CHEVROLET_VOLT = GMASCMPlatformConfig(
-    [GMCarDocs("Chevrolet Volt 2017-18", min_enable_speed=0, video_link="https://youtu.be/QeMCN_4TFfQ")],
+    [GMCarDocs("Chevrolet Volt 2017-18", PowertrainType.PHEV, min_enable_speed=0, video_link="https://youtu.be/QeMCN_4TFfQ")],
     GMCarSpecs(mass=1607, wheelbase=2.69, steerRatio=17.7, centerToFrontRatio=0.45, tireStiffnessFactor=0.469),
   )
   CADILLAC_ATS = GMASCMPlatformConfig(
@@ -139,8 +139,8 @@ class CAR(Platforms):
   )
   CHEVROLET_BOLT_EUV = GMPlatformConfig(
     [
-      GMCarDocs("Chevrolet Bolt EUV 2022-23", "Premier or Premier Redline Trim without Super Cruise Package", video_link="https://youtu.be/xvwzGMUA210"),
-      GMCarDocs("Chevrolet Bolt EV 2022-23", "2LT Trim with Adaptive Cruise Control Package"),
+      GMCarDocs("Chevrolet Bolt EUV 2022-23", PowertrainType.EV, "Premier or Premier Redline Trim without Super Cruise Package", video_link="https://youtu.be/xvwzGMUA210"),
+      GMCarDocs("Chevrolet Bolt EV 2022-23", PowertrainType.EV, "2LT Trim with Adaptive Cruise Control Package"),
     ],
     GMCarSpecs(mass=1669, wheelbase=2.63779, steerRatio=16.8, centerToFrontRatio=0.4, tireStiffnessFactor=1.0),
   )
@@ -164,7 +164,7 @@ class CAR(Platforms):
     CarSpecs(mass=1660, wheelbase=2.78, steerRatio=14.4, centerToFrontRatio=0.4),
   )
   CHEVROLET_VOLT_2019 = GMSDGMPlatformConfig(
-    [GMCarDocs("Chevrolet Volt 2019", "Adaptive Cruise Control (ACC) & LKAS")],
+    [GMCarDocs("Chevrolet Volt 2019", PowertrainType.PHEV, "Adaptive Cruise Control (ACC) & LKAS")],
     GMCarSpecs(mass=1607, wheelbase=2.69, steerRatio=15.7, centerToFrontRatio=0.45),
   )
   CHEVROLET_TRAVERSE = GMSDGMPlatformConfig(
