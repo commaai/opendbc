@@ -52,6 +52,7 @@ class PowertrainType(Enum):
   HYBRID = "Hybrid"                 # Regular hybrid (non plug-in)
   PHEV = "PHEV"                     # Plug-in hybrid electric vehicle
   EV = "Electric"                   # Pure electric vehicle
+  FCEV = "FCEV"                     # Fuel cell electric vehicle
 
 
 # A part + its comprised parts
