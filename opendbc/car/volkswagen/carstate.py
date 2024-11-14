@@ -1,6 +1,6 @@
 import numpy as np
 from opendbc.can.parser import CANParser
-from opendbc.car import structs
+from opendbc.car import Bus, structs
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.volkswagen.values import DBC, CANBUS, NetworkLocation, TransmissionType, GearShifter, \
@@ -33,8 +33,8 @@ class CarState(CarStateBase):
     return button_events
 
   def update(self, can_parsers) -> structs.CarState:
-    pt_cp = can_parsers['pt']
-    cam_cp = can_parsers['cam']
+    pt_cp = can_parsers[Bus.PT]
+    cam_cp = can_parsers[Bus.CAM]
     ext_cp = pt_cp if self.CP.networkLocation == NetworkLocation.fwdCamera else cam_cp
 
     if self.CP.flags & VolkswagenFlags.PQ:
@@ -319,8 +319,8 @@ class CarState(CarStateBase):
         cam_messages += MqbExtraSignals.bsm_radar_messages
 
     return {
-      'pt': CANParser(DBC[CP.carFingerprint]["pt"], pt_messages, CANBUS.pt),
-      'cam': CANParser(DBC[CP.carFingerprint]["pt"], cam_messages, CANBUS.cam),
+      Bus.PT: CANParser(DBC[CP.carFingerprint][Bus.PT], pt_messages, CANBUS.pt),
+      Bus.CAM: CANParser(DBC[CP.carFingerprint][Bus.PT], cam_messages, CANBUS.cam),
     }
 
   @staticmethod
@@ -367,8 +367,8 @@ class CarState(CarStateBase):
         cam_messages += PqExtraSignals.bsm_radar_messages
 
     return {
-      'pt': CANParser(DBC[CP.carFingerprint]["pt"], pt_messages, CANBUS.pt),
-      'cam': CANParser(DBC[CP.carFingerprint]["pt"], cam_messages, CANBUS.cam),
+      Bus.PT: CANParser(DBC[CP.carFingerprint][Bus.PT], pt_messages, CANBUS.pt),
+      Bus.CAM: CANParser(DBC[CP.carFingerprint][Bus.PT], cam_messages, CANBUS.cam),
     }
 
 

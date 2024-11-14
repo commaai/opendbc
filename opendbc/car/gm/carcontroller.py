@@ -1,5 +1,5 @@
 from opendbc.can.packer import CANPacker
-from opendbc.car import DT_CTRL, apply_driver_steer_torque_limits, structs
+from opendbc.car import Bus, DT_CTRL, apply_driver_steer_torque_limits, structs
 from opendbc.car.gm import gmcan
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.gm.values import DBC, CanBus, CarControllerParams, CruiseButtons
@@ -32,9 +32,9 @@ class CarController(CarControllerBase):
 
     self.params = CarControllerParams(self.CP)
 
-    self.packer_pt = CANPacker(DBC[self.CP.carFingerprint]['pt'])
-    self.packer_obj = CANPacker(DBC[self.CP.carFingerprint]['radar'])
-    self.packer_ch = CANPacker(DBC[self.CP.carFingerprint]['chassis'])
+    self.packer_pt = CANPacker(DBC[self.CP.carFingerprint][Bus.PT])
+    self.packer_obj = CANPacker(DBC[self.CP.carFingerprint][Bus.RADAR])
+    self.packer_ch = CANPacker(DBC[self.CP.carFingerprint][Bus.CHASSIS])
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators

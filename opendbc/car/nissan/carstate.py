@@ -2,7 +2,7 @@ import copy
 from collections import deque
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
-from opendbc.car import create_button_events, structs
+from opendbc.car import Bus, create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.nissan.values import CAR, DBC, CarControllerParams
@@ -15,7 +15,7 @@ TORQUE_SAMPLES = 12
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    can_define = CANDefine(DBC[CP.carFingerprint]["pt"])
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.PT])
 
     self.lkas_hud_msg = {}
     self.lkas_hud_info_msg = {}
@@ -26,9 +26,9 @@ class CarState(CarStateBase):
     self.distance_button = 0
 
   def update(self, can_parsers) -> structs.CarState:
-    cp = can_parsers['pt']
-    cp_cam = can_parsers['cam']
-    cp_adas = can_parsers['adas']
+    cp = can_parsers[Bus.PT]
+    cp_cam = can_parsers[Bus.CAM]
+    cp_adas = can_parsers[Bus.ADAS]
 
     ret = structs.CarState()
 
@@ -192,7 +192,7 @@ class CarState(CarStateBase):
       ]
 
     return {
-      'pt': CANParser(DBC[CP.carFingerprint]["pt"], pt_messages, 1 if CP.carFingerprint == CAR.NISSAN_ALTIMA else 0),
-      'cam': CANParser(DBC[CP.carFingerprint]["pt"], cam_messages, 0 if CP.carFingerprint == CAR.NISSAN_ALTIMA else 1),
-      'adas': CANParser(DBC[CP.carFingerprint]["pt"], adas_messages, 2),
+      Bus.PT: CANParser(DBC[CP.carFingerprint][Bus.PT], pt_messages, 1 if CP.carFingerprint == CAR.NISSAN_ALTIMA else 0),
+      Bus.CAM: CANParser(DBC[CP.carFingerprint][Bus.PT], cam_messages, 0 if CP.carFingerprint == CAR.NISSAN_ALTIMA else 1),
+      Bus.ADAS: CANParser(DBC[CP.carFingerprint][Bus.PT], adas_messages, 2),
     }

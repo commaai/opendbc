@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
 from panda import uds
-from opendbc.car import CarSpecs, DbcDict, PlatformConfig, Platforms
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Tool, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
@@ -104,11 +104,11 @@ class SubaruCarDocs(CarDocs):
 
 @dataclass
 class SubaruPlatformConfig(PlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: {'pt': 'subaru_global_2017_generated'})
+  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.PT: 'subaru_global_2017_generated'})
 
   def init(self):
     if self.flags & SubaruFlags.HYBRID:
-      self.dbc_dict = {'pt': 'subaru_global_2020_hybrid_generated'}
+      self.dbc_dict = {Bus.PT: 'subaru_global_2020_hybrid_generated'}
 
 
 @dataclass
@@ -171,25 +171,25 @@ class CAR(Platforms):
   SUBARU_FORESTER_PREGLOBAL = SubaruPlatformConfig(
     [SubaruCarDocs("Subaru Forester 2017-18")],
     CarSpecs(mass=1568, wheelbase=2.67, steerRatio=20),
-    {'pt': 'subaru_forester_2017_generated'},
+    {Bus.PT: 'subaru_forester_2017_generated'},
     flags=SubaruFlags.PREGLOBAL,
   )
   SUBARU_LEGACY_PREGLOBAL = SubaruPlatformConfig(
     [SubaruCarDocs("Subaru Legacy 2015-18")],
     CarSpecs(mass=1568, wheelbase=2.67, steerRatio=12.5),
-    {'pt': 'subaru_outback_2015_generated'},
+    {Bus.PT: 'subaru_outback_2015_generated'},
     flags=SubaruFlags.PREGLOBAL,
   )
   SUBARU_OUTBACK_PREGLOBAL = SubaruPlatformConfig(
     [SubaruCarDocs("Subaru Outback 2015-17")],
     SUBARU_FORESTER_PREGLOBAL.specs,
-    {'pt': 'subaru_outback_2015_generated'},
+    {Bus.PT: 'subaru_outback_2015_generated'},
     flags=SubaruFlags.PREGLOBAL,
   )
   SUBARU_OUTBACK_PREGLOBAL_2018 = SubaruPlatformConfig(
     [SubaruCarDocs("Subaru Outback 2018-19")],
     SUBARU_FORESTER_PREGLOBAL.specs,
-    {'pt': 'subaru_outback_2019_generated'},
+    {Bus.PT: 'subaru_outback_2019_generated'},
     flags=SubaruFlags.PREGLOBAL,
   )
   # Angle LKAS

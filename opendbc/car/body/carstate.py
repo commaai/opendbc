@@ -1,12 +1,12 @@
 from opendbc.can.parser import CANParser
-from opendbc.car import structs
+from opendbc.car import Bus, structs
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.body.values import DBC
 
 
 class CarState(CarStateBase):
   def update(self, can_parsers) -> structs.CarState:
-    cp = can_parsers['main']
+    cp = can_parsers[Bus.MAIN]
     ret = structs.CarState()
 
     ret.wheelSpeeds.fl = cp.vl['MOTORS_DATA']['SPEED_L']
@@ -38,5 +38,5 @@ class CarState(CarStateBase):
       ("BODY_DATA", 1),
     ]
     return {
-      'main': CANParser(DBC[CP.carFingerprint]["main"], messages, 0)
+      Bus.MAIN: CANParser(DBC[CP.carFingerprint][Bus.MAIN], messages, 0)
     }

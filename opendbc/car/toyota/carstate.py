@@ -2,7 +2,7 @@ import copy
 
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
-from opendbc.car import DT_CTRL, create_button_events, structs
+from opendbc.car import Bus, DT_CTRL, create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.common.numpy_fast import mean
@@ -28,7 +28,7 @@ PERM_STEER_FAULTS = (3, 17)
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    can_define = CANDefine(DBC[CP.carFingerprint]["pt"])
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.PT])
     self.eps_torque_scale = EPS_SCALE[CP.carFingerprint] / 100.
     self.cluster_speed_hyst_gap = CV.KPH_TO_MS / 2.
     self.cluster_min_speed = CV.KPH_TO_MS / 2.
@@ -54,8 +54,8 @@ class CarState(CarStateBase):
     self.secoc_synchronization = None
 
   def update(self, can_parsers) -> structs.CarState:
-    cp = can_parsers['pt']
-    cp_cam = can_parsers['cam']
+    cp = can_parsers[Bus.PT]
+    cp_cam = can_parsers[Bus.CAM]
 
     ret = structs.CarState()
     cp_acc = cp_cam if self.CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR) else cp
@@ -277,7 +277,7 @@ class CarState(CarStateBase):
         ]
 
     return {
-      'pt': CANParser(DBC[CP.carFingerprint]["pt"], pt_messages, 0),
-      'cam': CANParser(DBC[CP.carFingerprint]["pt"], cam_messages, 2),
+      Bus.PT: CANParser(DBC[CP.carFingerprint][Bus.PT], pt_messages, 0),
+      Bus.CAM: CANParser(DBC[CP.carFingerprint][Bus.PT], cam_messages, 2),
     }
 

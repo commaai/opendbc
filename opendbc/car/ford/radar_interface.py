@@ -4,7 +4,7 @@ from collections import defaultdict
 from math import cos, sin
 from dataclasses import dataclass
 from opendbc.can.parser import CANParser
-from opendbc.car import structs
+from opendbc.car import Bus, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.ford.fordcan import CanBus
 from opendbc.car.ford.values import DBC, RADAR
@@ -101,7 +101,7 @@ class RadarInterface(RadarInterfaceBase):
 
     self.updated_messages = set()
     self.track_id = 0
-    self.radar = DBC[CP.carFingerprint]['radar']
+    self.radar = DBC[CP.carFingerprint][Bus.RADAR]
     if self.radar == RADAR.DELPHI_ESR:
       self.rcp = _create_delphi_esr_radar_can_parser(CP)
       self.trigger_msg = DELPHI_ESR_RADAR_MSGS[-1]

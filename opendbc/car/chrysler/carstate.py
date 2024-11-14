@@ -1,6 +1,6 @@
 from opendbc.can.parser import CANParser
 from opendbc.can.can_define import CANDefine
-from opendbc.car import create_button_events, structs
+from opendbc.car import Bus, create_button_events, structs
 from opendbc.car.chrysler.values import DBC, STEER_THRESHOLD, RAM_CARS
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
@@ -12,7 +12,7 @@ class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
     self.CP = CP
-    can_define = CANDefine(DBC[CP.carFingerprint]["pt"])
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.PT])
 
     self.auto_high_beam = 0
     self.button_counter = 0
@@ -26,8 +26,8 @@ class CarState(CarStateBase):
     self.distance_button = 0
 
   def update(self, can_parsers) -> structs.CarState:
-    cp = can_parsers['pt']
-    cp_cam = can_parsers['cam']
+    cp = can_parsers[Bus.PT]
+    cp_cam = can_parsers[Bus.CAM]
 
     ret = structs.CarState()
 
@@ -155,6 +155,6 @@ class CarState(CarStateBase):
       cam_messages += CarState.get_cruise_messages()
 
     return {
-      'pt': CANParser(DBC[CP.carFingerprint]["pt"], pt_messages, 0),
-      'cam': CANParser(DBC[CP.carFingerprint]["pt"], cam_messages, 2),
+      Bus.PT: CANParser(DBC[CP.carFingerprint][Bus.PT], pt_messages, 0),
+      Bus.CAM: CANParser(DBC[CP.carFingerprint][Bus.PT], cam_messages, 2),
     }

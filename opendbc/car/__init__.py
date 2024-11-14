@@ -2,7 +2,7 @@
 import logging
 from collections import namedtuple
 from dataclasses import dataclass, field
-from enum import IntFlag, ReprEnum, EnumType
+from enum import IntFlag, ReprEnum, StrEnum, EnumType, auto
 from dataclasses import replace
 
 from panda import uds
@@ -84,7 +84,20 @@ def scale_tire_stiffness(mass, wheelbase, center_to_front, tire_stiffness_factor
   return tire_stiffness_front, tire_stiffness_rear
 
 
-DbcDict = dict[str, str]
+DbcDict = dict[str | StrEnum, str]
+
+class Bus(StrEnum):
+  PT = auto()
+  CAM = auto()
+  RADAR = auto()
+  BODY = auto()
+  CHASSIS = auto()
+  ADAS = auto()
+  MAIN = auto()
+  ALT = auto()
+  LOOPBACK = auto()
+  PARTY = auto()
+  AP_PARTY = auto()
 
 
 def apply_driver_steer_torque_limits(apply_torque, apply_torque_last, driver_torque, LIMITS):

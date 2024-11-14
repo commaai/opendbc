@@ -2,7 +2,7 @@ from enum import IntFlag
 from dataclasses import dataclass, field
 
 from panda import uds
-from opendbc.car import CarSpecs, DbcDict, PlatformConfig, Platforms
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, p16
@@ -23,8 +23,8 @@ class ChryslerCarDocs(CarDocs):
 @dataclass
 class ChryslerPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {
-    'pt': 'chrysler_pacifica_2017_hybrid_generated',
-    'radar': 'chrysler_pacifica_2017_hybrid_private_fusion',
+    Bus.PT: 'chrysler_pacifica_2017_hybrid_generated',
+    Bus.RADAR: 'chrysler_pacifica_2017_hybrid_private_fusion',
   })
 
 
@@ -76,7 +76,7 @@ class CAR(Platforms):
   RAM_1500_5TH_GEN = ChryslerPlatformConfig(
     [ChryslerCarDocs("Ram 1500 2019-24", car_parts=CarParts.common([CarHarness.ram]))],
     ChryslerCarSpecs(mass=2493., wheelbase=3.88, steerRatio=16.3, minSteerSpeed=14.5),
-    {'pt': 'chrysler_ram_dt_generated'},
+    {Bus.PT: 'chrysler_ram_dt_generated'},
   )
   RAM_HD_5TH_GEN = ChryslerPlatformConfig(
     [
@@ -84,7 +84,7 @@ class CAR(Platforms):
       ChryslerCarDocs("Ram 3500 2019-22", car_parts=CarParts.common([CarHarness.ram])),
     ],
     ChryslerCarSpecs(mass=3405., wheelbase=3.785, steerRatio=15.61, minSteerSpeed=16.),
-    {'pt': 'chrysler_ram_hd_generated'},
+    {Bus.PT: 'chrysler_ram_hd_generated'},
   )
 
 

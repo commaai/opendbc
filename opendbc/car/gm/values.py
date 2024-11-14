@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from opendbc.car import PlatformConfig, DbcDict, Platforms, CarSpecs
+from opendbc.car import Bus, PlatformConfig, DbcDict, Platforms, CarSpecs
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
@@ -81,9 +81,9 @@ class GMCarSpecs(CarSpecs):
 @dataclass
 class GMPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {
-    'pt': 'gm_global_a_powertrain_generated',
-    'radar': 'gm_global_a_object',
-    'chassis': 'gm_global_a_chassis',
+    Bus.PT: 'gm_global_a_powertrain_generated',
+    Bus.RADAR: 'gm_global_a_object',
+    Bus.CHASSIS: 'gm_global_a_chassis',
   })
 
 
@@ -198,7 +198,6 @@ class CanBus:
   CHASSIS = 2
   LOOPBACK = 128
   DROPPED = 192
-
 
 # In a Data Module, an identifier is a string used to recognize an object,
 # either by itself or together with the identifiers of parent objects.

@@ -1,11 +1,11 @@
 import copy
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
-from opendbc.car import create_button_events, structs
+from opendbc.car import Bus, create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.numpy_fast import mean
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.gm.values import DBC, AccState, CanBus, CruiseButtons, STEER_THRESHOLD, SDGM_CAR
+from opendbc.car.gm.values import DBC, AccState, CruiseButtons, STEER_THRESHOLD, SDGM_CAR
 
 ButtonType = structs.CarState.ButtonEvent.Type
 TransmissionType = structs.CarParams.TransmissionType
@@ -20,7 +20,7 @@ BUTTONS_DICT = {CruiseButtons.RES_ACCEL: ButtonType.accelCruise, CruiseButtons.D
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    can_define = CANDefine(DBC[CP.carFingerprint]["pt"])
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.PT])
     self.shifter_values = can_define.dv["ECMPRDNL2"]["PRNDL2"]
     self.cluster_speed_hyst_gap = CV.KPH_TO_MS / 2.
     self.cluster_min_speed = CV.KPH_TO_MS / 2.
@@ -34,9 +34,9 @@ class CarState(CarStateBase):
     self.distance_button = 0
 
   def update(self, can_parsers) -> structs.CarState:
-    pt_cp = can_parsers['pt']
-    cam_cp = can_parsers['cam']
-    loopback_cp = can_parsers['loopback']
+    pt_cp = can_parsers[Bus.PT]
+    cam_cp = can_parsers[Bus.CAM]
+    loopback_cp = can_parsers[Bus.LOOPBACK]
 
     ret = structs.CarState()
 
@@ -192,8 +192,8 @@ class CarState(CarStateBase):
     ]
 
     return {
-      'pt': CANParser(DBC[CP.carFingerprint]["pt"], pt_messages, CanBus.POWERTRAIN),
-      'cam': CANParser(DBC[CP.carFingerprint]["pt"], cam_messages, CanBus.CAMERA),
-      'loopback': CANParser(DBC[CP.carFingerprint]["pt"], loopback_messages, CanBus.LOOPBACK),
+      Bus.PT: CANParser(DBC[CP.carFingerprint][Bus.PT], pt_messages, 0),
+      Bus.CAM: CANParser(DBC[CP.carFingerprint][Bus.PT], cam_messages, 2),
+      Bus.LOOPBACK: CANParser(DBC[CP.carFingerprint][Bus.PT], loopback_messages, 128),
     }
 

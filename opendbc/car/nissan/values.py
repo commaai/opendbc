@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 
 from panda import uds
-from opendbc.car import AngleRateLimit, CarSpecs, DbcDict, PlatformConfig, Platforms
+from opendbc.car import AngleRateLimit, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarDocs, CarHarness, CarParts
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
@@ -37,7 +37,7 @@ class NissanCarSpecs(CarSpecs):
 
 @dataclass
 class NissanPlatformConfig(PlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: {'pt': 'nissan_x_trail_2017_generated'})
+  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.PT: 'nissan_x_trail_2017_generated'})
 
 
 class CAR(Platforms):
@@ -48,7 +48,7 @@ class CAR(Platforms):
   NISSAN_LEAF = NissanPlatformConfig(
     [NissanCarDocs("Nissan Leaf 2018-23", video_link="https://youtu.be/vaMbtAh_0cY")],
     NissanCarSpecs(mass=1610, wheelbase=2.705),
-    {'pt': 'nissan_leaf_2018_generated'},
+    {Bus.PT: 'nissan_leaf_2018_generated'},
   )
   # Leaf with ADAS ECU found behind instrument cluster instead of glovebox
   # Currently the only known difference between them is the inverted seatbelt signal.

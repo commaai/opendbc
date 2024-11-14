@@ -2,7 +2,7 @@ from collections import defaultdict
 
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
-from opendbc.car import create_button_events, structs
+from opendbc.car import Bus, create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.numpy_fast import interp
 from opendbc.car.honda.hondacan import CanBus, get_cruise_speed_conversion
@@ -88,7 +88,7 @@ def get_can_messages(CP, gearbox_msg):
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    can_define = CANDefine(DBC[CP.carFingerprint]["pt"])
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.PT])
     self.gearbox_msg = "GEARBOX"
     if CP.carFingerprint == CAR.HONDA_ACCORD and CP.transmissionType == TransmissionType.cvt:
       self.gearbox_msg = "GEARBOX_15T"
@@ -110,9 +110,9 @@ class CarState(CarStateBase):
     self.dash_speed_seen = False
 
   def update(self, can_parsers) -> structs.CarState:
-    cp = can_parsers['pt']
-    cp_cam = can_parsers['cam']
-    cp_body = can_parsers['body']
+    cp = can_parsers[Bus.PT]
+    cp_cam = can_parsers[Bus.CAM]
+    cp_body = can_parsers[Bus.BODY]
 
     ret = structs.CarState()
 
@@ -300,8 +300,8 @@ class CarState(CarStateBase):
     ]
 
     return {
-      'pt': CANParser(DBC[CP.carFingerprint]["pt"], pt_messages, CanBus(CP).pt),
-      'cam': CANParser(DBC[CP.carFingerprint]["pt"], cam_messages, CanBus(CP).camera),
-      'body': CANParser(DBC[CP.carFingerprint]["body"], body_messages, CanBus(CP).radar) if CP.enableBsm else None,
+      Bus.PT: CANParser(DBC[CP.carFingerprint][Bus.PT], pt_messages, CanBus(CP).pt),
+      Bus.CAM: CANParser(DBC[CP.carFingerprint][Bus.PT], cam_messages, CanBus(CP).camera),
+      Bus.BODY: CANParser(DBC[CP.carFingerprint][Bus.BODY], body_messages, CanBus(CP).radar) if CP.enableBsm else None,
     }
 

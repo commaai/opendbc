@@ -1,22 +1,23 @@
 from enum import IntFlag
 from opendbc.car.structs import CarParams
-from opendbc.car import structs
+from opendbc.car import Bus, structs
 from opendbc.car import AngleRateLimit, CarSpecs, PlatformConfig, Platforms
 from opendbc.car.docs_definitions import CarDocs
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
 
+
 class CAR(Platforms):
   TESLA_MODEL_3 = PlatformConfig(
     [CarDocs("Tesla Model 3", "All")],
     CarSpecs(mass=1899., wheelbase=2.875, steerRatio=12.0),
-    {'party': 'tesla_model3_party'},
+    {Bus.PARTY: 'tesla_model3_party'},
   )
   TESLA_MODEL_Y = PlatformConfig(
     [CarDocs("Tesla Model Y", "All")],
     CarSpecs(mass=2072., wheelbase=2.890, steerRatio=12.0),
-    {'party': 'tesla_model3_party'},
+    {Bus.PARTY: 'tesla_model3_party'},
   )
 
 

@@ -1,6 +1,6 @@
 from opendbc.can.packer import CANPacker
 from opendbc.car.common.numpy_fast import clip
-from opendbc.car import apply_std_steer_angle_limits, structs
+from opendbc.car import Bus, apply_std_steer_angle_limits, structs
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.nissan import nissancan
 from opendbc.car.nissan.values import CAR, CarControllerParams
@@ -16,7 +16,7 @@ class CarController(CarControllerBase):
     self.lkas_max_torque = 0
     self.apply_angle_last = 0
 
-    self.packer = CANPacker(dbc_names['pt'])
+    self.packer = CANPacker(dbc_names[Bus.PT])
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators

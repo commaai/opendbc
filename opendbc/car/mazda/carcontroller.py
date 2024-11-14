@@ -1,5 +1,5 @@
 from opendbc.can.packer import CANPacker
-from opendbc.car import apply_driver_steer_torque_limits, structs
+from opendbc.car import Bus, apply_driver_steer_torque_limits, structs
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.mazda import mazdacan
 from opendbc.car.mazda.values import CarControllerParams, Buttons
@@ -11,7 +11,7 @@ class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
     self.apply_steer_last = 0
-    self.packer = CANPacker(dbc_names['pt'])
+    self.packer = CANPacker(dbc_names[Bus.PT])
     self.brake_counter = 0
 
   def update(self, CC, CS, now_nanos):

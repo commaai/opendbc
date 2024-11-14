@@ -1,7 +1,7 @@
 import copy
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
-from opendbc.car import structs
+from opendbc.car import Bus, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP
@@ -11,14 +11,14 @@ ButtonType = structs.CarState.ButtonEvent.Type
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    self.can_define = CANDefine(DBC[CP.carFingerprint]['party'])
+    self.can_define = CANDefine(DBC[CP.carFingerprint][Bus.PARTY])
 
     self.hands_on_level = 0
     self.das_control = None
 
   def update(self, can_parsers) -> structs.CarState:
-    cp_party = can_parsers['party']
-    cp_ap_party = can_parsers['ap_party']
+    cp_party = can_parsers[Bus.PARTY]
+    cp_ap_party = can_parsers[Bus.AP_PARTY]
     ret = structs.CarState()
 
     # Vehicle speed
@@ -105,7 +105,7 @@ class CarState(CarStateBase):
     ]
 
     return {
-      'party': CANParser(DBC[CP.carFingerprint]['party'], party_messages, CANBUS.party),
-      'ap_party': CANParser(DBC[CP.carFingerprint]['party'], ap_party_messages, CANBUS.autopilot_party)
+      Bus.PARTY: CANParser(DBC[CP.carFingerprint][Bus.PARTY], party_messages, CANBUS.party),
+      Bus.AP_PARTY: CANParser(DBC[CP.carFingerprint][Bus.PARTY], ap_party_messages, CANBUS.autopilot_party)
     }
 
