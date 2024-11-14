@@ -121,10 +121,7 @@ class HyundaiPlatformConfig(PlatformConfig):
 
   def init(self):
     if self.flags & HyundaiFlags.MANDO_RADAR:
-      self.dbc_dict = {
-        'pt': "hyundai_kia_generic",
-        'radar': 'hyundai_kia_mando_front_radar_generated',
-      }
+      self.dbc_dict = {'pt': "hyundai_kia_generic", 'radar': 'hyundai_kia_mando_front_radar_generated'}
 
     if self.flags & HyundaiFlags.MIN_STEER_32_MPH:
       self.specs = self.specs.override(minSteerSpeed=32 * CV.MPH_TO_MS)

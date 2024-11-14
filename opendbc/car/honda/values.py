@@ -117,10 +117,7 @@ class HondaNidecPlatformConfig(PlatformConfig):
 
 
 def honda_with_radar_dbc_dict(pt_dict):
-  return {
-    'pt': pt_dict,
-    'radar': 'acura_ilx_2016_nidec',
-  }
+  return {'pt': pt_dict, 'radar': 'acura_ilx_2016_nidec'}
 
 class CAR(Platforms):
   # Bosch Cars
@@ -161,10 +158,7 @@ class CAR(Platforms):
     [HondaCarDocs("Honda CR-V 2017-22", min_steer_speed=12. * CV.MPH_TO_MS)],
     # steerRatio: 12.3 is spec end-to-end
     CarSpecs(mass=3410 * CV.LB_TO_KG, wheelbase=2.66, steerRatio=16.0, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),
-    {
-      'pt': 'honda_crv_ex_2017_can_generated',
-      'body': 'honda_crv_ex_2017_body_generated',
-    },
+    {'pt': 'honda_crv_ex_2017_can_generated', 'body': 'honda_crv_ex_2017_body_generated'},
     flags=HondaFlags.BOSCH_ALT_BRAKE,
   )
   HONDA_CRV_HYBRID = HondaBoschPlatformConfig(
