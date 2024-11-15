@@ -84,7 +84,7 @@ def scale_tire_stiffness(mass, wheelbase, center_to_front, tire_stiffness_factor
   return tire_stiffness_front, tire_stiffness_rear
 
 
-DbcDict = dict[str | StrEnum, str]
+DbcDict = dict[StrEnum, str]
 
 class Bus(StrEnum):
   pt = auto()
