@@ -18,10 +18,11 @@ class TestCarDocs:
     make_model_years = defaultdict(list)
     for car in self.all_cars:
       with subtests.test(car_docs_name=car.name):
-        make_model = (car.make, car.model)
+        make_model_powertrain = (car.make, car.model, car.powertrain)
         for year in car.year_list:
-          assert year not in make_model_years[make_model], f"{car.name}: Duplicate model year"
-          make_model_years[make_model].append(year)
+          assert year not in make_model_years[make_model_powertrain], \
+            f"{car.name} ({car.powertrain.value}): Duplicate model year"
+          make_model_years[make_model_powertrain].append(year)
 
   def test_missing_car_docs(self, subtests):
     all_car_docs_platforms = [name for name, config in PLATFORMS.items()]
