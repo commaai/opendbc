@@ -80,11 +80,21 @@ class FordPlatformConfig(PlatformConfig):
 
   def init(self):
     for car_docs in list(self.car_docs):
-      if car_docs.hybrid:
-        name = f"{car_docs.make} {car_docs.model} Hybrid {car_docs.years}"
+      # PowertrainType.ICE is default, no need to change name
+      if car_docs.powertrain == PowertrainType.MHEV:
+        name = f"{car_docs.make} {car_docs.model} {PowertrainType.MHEV.value} {car_docs.years}"
         self.car_docs.append(replace(copy.deepcopy(car_docs), name=name))
-      if car_docs.plug_in_hybrid:
-        name = f"{car_docs.make} {car_docs.model} Plug-in Hybrid {car_docs.years}"
+      if car_docs.powertrain == PowertrainType.HYBRID:
+        name = f"{car_docs.make} {car_docs.model} {PowertrainType.HYBRID.value} {car_docs.years}"
+        self.car_docs.append(replace(copy.deepcopy(car_docs), name=name))
+      if car_docs.powertrain == PowertrainType.PHEV:
+        name = f"{car_docs.make} {car_docs.model} {PowertrainType.PHEV.value} {car_docs.years}"
+        self.car_docs.append(replace(copy.deepcopy(car_docs), name=name))
+      if car_docs.powertrain == PowertrainType.EV:
+        name = f"{car_docs.make} {car_docs.model} {PowertrainType.EV.value} {car_docs.years}"
+        self.car_docs.append(replace(copy.deepcopy(car_docs), name=name))
+      if car_docs.powertrain == PowertrainType.FCEV:
+        name = f"{car_docs.make} {car_docs.model} {PowertrainType.FCEV.value} {car_docs.years}"
         self.car_docs.append(replace(copy.deepcopy(car_docs), name=name))
 
 
