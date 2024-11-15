@@ -48,6 +48,8 @@ class CarController(CarControllerBase):
     self.distance_button = 0
 
     self.pcm_accel_compensation = FirstOrderFilter(0, 0.5, DT_CTRL * 3)
+    # the PCM's reported acceleration request can sometimes not match aEgo, close the loop
+    self.pcm_accel_net_offset = FirstOrderFilter(0, 1.0, DT_CTRL * 3)  # 1.5 might be okay
     self.permit_braking = True
 
     self.packer = CANPacker(dbc_name)
@@ -183,12 +185,16 @@ class CarController(CarControllerBase):
         accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY if len(CC.orientationNED) == 3 else 0.0
         net_acceleration_request = pcm_accel_cmd + accel_due_to_pitch
 
+        offset = self.pcm_accel_net_offset.update((CS.pcm_accel_net - accel_due_to_pitch) - CS.out.aEgo)
+        new_pcm_accel_net = CS.pcm_accel_net - offset
+
         # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot and imprecise braking
         if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
           # let PCM handle stopping for now
           pcm_accel_compensation = 0.0
           if not stopping:
-            pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - net_acceleration_request)
+            # pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - net_acceleration_request)
+            pcm_accel_compensation = 2.0 * (new_pcm_accel_net - net_acceleration_request)
 
           # prevent compensation windup
           pcm_accel_compensation = clip(pcm_accel_compensation, pcm_accel_cmd - self.params.ACCEL_MAX,
@@ -198,6 +204,7 @@ class CarController(CarControllerBase):
 
         else:
           self.pcm_accel_compensation.x = 0.0
+          self.pcm_accel_net_offset.x = 0.0
           self.permit_braking = True
 
         # Along with rate limiting positive jerk above, this greatly improves gas response time
