@@ -18,7 +18,7 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 
 # The up limit allows the brakes/gas to unwind quickly leaving a stop,
 # the down limit roughly matches the rate of ACCEL_NET, reducing PCM compensation windup
-ACCEL_WINDUP_LIMIT = 0.5  # m/s^2 / frame
+ACCEL_WINDUP_LIMIT = 16 * DT_CTRL * 3  # m/s^2 / frame
 ACCEL_WINDDOWN_LIMIT = -4.0 * DT_CTRL * 3  # m/s^2 / frame
 
 # LKA limits
@@ -180,6 +180,7 @@ class CarController(CarControllerBase):
         pcm_accel_cmd = actuators.accel
         if CC.longActive:
           pcm_accel_cmd = rate_limit(pcm_accel_cmd, self.prev_accel, ACCEL_WINDDOWN_LIMIT, ACCEL_WINDUP_LIMIT)
+        self.prev_accel = pcm_accel_cmd
 
         # calculate amount of acceleration PCM should apply to reach target, given pitch
         accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY if len(CC.orientationNED) == 3 else 0.0
@@ -193,14 +194,14 @@ class CarController(CarControllerBase):
           # let PCM handle stopping for now
           pcm_accel_compensation = 0.0
           if not stopping:
-            # pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - net_acceleration_request)
-            pcm_accel_compensation = 2.0 * (new_pcm_accel_net - net_acceleration_request)
+            pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - net_acceleration_request)
+            # pcm_accel_compensation = 2.0 * (new_pcm_accel_net - net_acceleration_request)
 
           # prevent compensation windup
           pcm_accel_compensation = clip(pcm_accel_compensation, pcm_accel_cmd - self.params.ACCEL_MAX,
                                         pcm_accel_cmd - self.params.ACCEL_MIN)
 
-          pcm_accel_cmd = pcm_accel_cmd - self.pcm_accel_compensation.update(pcm_accel_compensation)
+          # pcm_accel_cmd = pcm_accel_cmd - self.pcm_accel_compensation.update(pcm_accel_compensation)
 
         else:
           self.pcm_accel_compensation.x = 0.0
@@ -219,7 +220,6 @@ class CarController(CarControllerBase):
         can_sends.append(toyotacan.create_accel_command(self.packer, pcm_accel_cmd, pcm_cancel_cmd, self.permit_braking, self.standstill_req, lead,
                                                         CS.acc_type, fcw_alert, self.distance_button))
         self.accel = pcm_accel_cmd
-        self.prev_accel = actuators.accel
 
     else:
       # we can spam can to cancel the system even if we are using lat only control
