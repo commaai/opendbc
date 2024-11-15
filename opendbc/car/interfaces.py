@@ -93,7 +93,7 @@ class CarInterfaceBase(ABC):
     self.v_ego_cluster_seen = False
 
     self.CS: CarStateBase = CarState(CP)
-    self.can_parsers = self.CS.get_can_parsers(CP)
+    self.can_parsers: dict[StrEnum, CANParser] = self.CS.get_can_parsers(CP)
 
     dbc_names = {bus: cp.dbc_name for bus, cp in self.can_parsers.items()}
     self.CC: CarControllerBase = CarController(dbc_names, CP)
