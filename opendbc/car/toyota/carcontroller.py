@@ -12,6 +12,7 @@ from opendbc.car.toyota.values import CAR, STATIC_DSU_MSGS, NO_STOP_TIMER_CAR, T
                                         UNSUPPORTED_DSU_CAR
 from opendbc.can.packer import CANPacker
 
+Ecu = structs.CarParams.Ecu
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 SteerControlType = structs.CarParams.SteerControlType
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
@@ -44,15 +45,23 @@ class CarController(CarControllerBase):
     self.alert_active = False
     self.last_standstill = False
     self.standstill_req = False
+    self.permit_braking = True
     self.steer_rate_counter = 0
     self.distance_button = 0
 
     self.pcm_accel_compensation = FirstOrderFilter(0, 0.5, DT_CTRL * 3)
-    # the PCM's reported acceleration request can sometimes not match aEgo, close the loop
+
+    # the PCM's reported acceleration request can sometimes mismatch aEgo, close the loop
     self.pcm_accel_net_offset = FirstOrderFilter(0, 1.0, DT_CTRL * 3)  # 1.5 might be okay
     self.pcm_accel_net_offset2 = FirstOrderFilter(0, 1.0, DT_CTRL * 3)  # 1.5 might be okay
-    self.pcm_accel_net = FirstOrderFilter(0, 0.25, DT_CTRL * 3)
-    self.permit_braking = True
+
+    # aEgo often lags behind the PCM request due to physical brake lag which varies by car,
+    # so we error correct on the filtered PCM acceleration request using the actuator delay.
+    # TODO: move this into the interface
+    pcm_accel_net_rc = self.CP.longitudinalActuatorDelay
+    if not any(fw.ecu == Ecu.hybrid for fw in self.CP.carFw):
+      pcm_accel_net_rc += 0.2
+    self.pcm_accel_net = FirstOrderFilter(0, pcm_accel_net_rc, DT_CTRL * 3)
 
     self.packer = CANPacker(dbc_name)
     self.accel = 0
