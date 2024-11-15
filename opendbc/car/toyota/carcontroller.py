@@ -3,7 +3,7 @@ from opendbc.car import carlog, apply_meas_steer_torque_limits, apply_std_steer_
                         make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY, DT_CTRL
 from opendbc.car.can_definitions import CanData
 from opendbc.car.common.filter_simple import FirstOrderFilter
-from opendbc.car.common.numpy_fast import clip
+from opendbc.car.common.numpy_fast import clip, interp
 from opendbc.car.secoc import add_mac, build_sync_mac
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.toyota import toyotacan
@@ -50,11 +50,19 @@ class CarController(CarControllerBase):
     self.pcm_accel_compensation = FirstOrderFilter(0, 0.5, DT_CTRL * 3)
     # the PCM's reported acceleration request can sometimes not match aEgo, close the loop
     self.pcm_accel_net_offset = FirstOrderFilter(0, 1.0, DT_CTRL * 3)  # 1.5 might be okay
+    self.pcm_accel_net_offset2 = FirstOrderFilter(0, 1.0, DT_CTRL * 3)  # 1.5 might be okay
+    self.pcm_accel_net = FirstOrderFilter(0, 0.25, DT_CTRL * 3)
     self.permit_braking = True
 
     self.packer = CANPacker(dbc_name)
     self.accel = 0
     self.prev_accel = 0
+
+    self.debug = 0.0
+    self.debug2 = 0.0
+    self.debug3 = 0.0
+    self.debug4 = 0.0
+    self.debug5 = 0.0
 
     self.secoc_lka_message_counter = 0
     self.secoc_lta_message_counter = 0
@@ -183,15 +191,33 @@ class CarController(CarControllerBase):
         self.prev_accel = pcm_accel_cmd
 
         # calculate amount of acceleration PCM should apply to reach target, given pitch
-        accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY if len(CC.orientationNED) == 3 else 0.0
+        accel_due_to_pitch = 0.0  # math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY if len(CC.orientationNED) == 3 else 0.0
         net_acceleration_request = pcm_accel_cmd + accel_due_to_pitch
+
+        # self.pcm_accel_net.update(CS.out.aEgo)
+
+        prev_aego = self.pcm_accel_net.x
+        jerk = abs(self.pcm_accel_net.update(CS.pcm_accel_net) - prev_aego) / (DT_CTRL * 3)
 
         if stopping or CS.out.standstill:
           offset = 0
+          offset2 = 0
           self.pcm_accel_net_offset.x = 0.0
+          self.pcm_accel_net_offset2.x = 0.0
         else:
+          # jerk = abs(CS.out.aEgo)
+          # self.pcm_accel_net_offset.update_alpha(interp(jerk, [0.5, 2.0], [1.0, 3.0]))
+          self.pcm_accel_net_offset2.update_alpha(interp(jerk, [0.5, 2.0], [1.0, 4.0]))
+
           offset = self.pcm_accel_net_offset.update((CS.pcm_accel_net - accel_due_to_pitch) - CS.out.aEgo)
+          offset2 = self.pcm_accel_net_offset2.update((CS.pcm_accel_net - accel_due_to_pitch) - CS.out.aEgo)
         new_pcm_accel_net = CS.pcm_accel_net - offset
+        new_pcm_accel_net2 = CS.pcm_accel_net - offset2
+        self.debug = CS.pcm_accel_net
+        self.debug2 = new_pcm_accel_net
+        self.debug3 = new_pcm_accel_net2
+        self.debug4 = self.pcm_accel_net.x
+        self.debug5 = jerk
 
         # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot and imprecise braking
         if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
@@ -210,6 +236,7 @@ class CarController(CarControllerBase):
         else:
           self.pcm_accel_compensation.x = 0.0
           self.pcm_accel_net_offset.x = 0.0
+          self.pcm_accel_net_offset2.x = 0.0
           self.permit_braking = True
 
         # Along with rate limiting positive jerk above, this greatly improves gas response time
@@ -270,6 +297,11 @@ class CarController(CarControllerBase):
     new_actuators.steerOutputCan = apply_steer
     new_actuators.steeringAngleDeg = self.last_angle
     new_actuators.accel = self.accel
+    new_actuators.debug = self.debug
+    new_actuators.debug2 = self.debug2
+    new_actuators.debug3 = self.debug3
+    new_actuators.debug4 = self.debug4
+    new_actuators.debug5 = self.debug5
 
     self.frame += 1
     return new_actuators, can_sends
