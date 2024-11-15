@@ -213,7 +213,7 @@ class CAR(Platforms):
     [
       VWCarDocs("Volkswagen Arteon 2018-23", video_link="https://youtu.be/FAomFKPFlDA"),
       VWCarDocs("Volkswagen Arteon R 2020-23", video_link="https://youtu.be/FAomFKPFlDA"),
-      VWCarDocs("Volkswagen Arteon eHybrid 2020-23", PowertrainType.PHEV, video_link="https://youtu.be/FAomFKPFlDA"),
+      VWCarDocs("Volkswagen Arteon eHybrid 2020-23", powertrain=PowertrainType.PHEV, video_link="https://youtu.be/FAomFKPFlDA"),
       VWCarDocs("Volkswagen Arteon Shooting Brake 2020-23", video_link="https://youtu.be/FAomFKPFlDA"),
       VWCarDocs("Volkswagen CC 2018-22", video_link="https://youtu.be/FAomFKPFlDA"),
     ],
@@ -245,10 +245,10 @@ class CAR(Platforms):
   VOLKSWAGEN_CRAFTER_MK2 = VolkswagenMQBPlatformConfig(
     [
       VWCarDocs("Volkswagen Crafter 2017-24", video_link="https://youtu.be/4100gLeabmo"),
-      VWCarDocs("Volkswagen e-Crafter 2018-24", PowertrainType.EV, video_link="https://youtu.be/4100gLeabmo"),
+      VWCarDocs("Volkswagen e-Crafter 2018-24", powertrain=PowertrainType.EV, video_link="https://youtu.be/4100gLeabmo"),
       VWCarDocs("Volkswagen Grand California 2019-24", video_link="https://youtu.be/4100gLeabmo"),
       VWCarDocs("MAN TGE 2017-24", video_link="https://youtu.be/4100gLeabmo"),
-      VWCarDocs("MAN eTGE 2020-24", PowertrainType.EV, video_link="https://youtu.be/4100gLeabmo"),
+      VWCarDocs("MAN eTGE 2020-24", powertrain=PowertrainType.EV, video_link="https://youtu.be/4100gLeabmo"),
     ],
     VolkswagenCarSpecs(mass=2100, wheelbase=3.64, minSteerSpeed=50 * CV.KPH_TO_MS),
     chassis_codes={"SY", "SZ", "UY", "UZ"},
@@ -256,11 +256,11 @@ class CAR(Platforms):
   )
   VOLKSWAGEN_GOLF_MK7 = VolkswagenMQBPlatformConfig(
     [
-      VWCarDocs("Volkswagen e-Golf 2014-20", PowertrainType.EV),
+      VWCarDocs("Volkswagen e-Golf 2014-20", powertrain=PowertrainType.EV),
       VWCarDocs("Volkswagen Golf 2015-20", auto_resume=False),
       VWCarDocs("Volkswagen Golf Alltrack 2015-19", auto_resume=False),
       VWCarDocs("Volkswagen Golf GTD 2015-20"),
-      VWCarDocs("Volkswagen Golf GTE 2015-20", PowertrainType.PHEV),
+      VWCarDocs("Volkswagen Golf GTE 2015-20", powertrain=PowertrainType.PHEV),
       VWCarDocs("Volkswagen Golf GTI 2015-21", auto_resume=False),
       VWCarDocs("Volkswagen Golf R 2015-19"),
       VWCarDocs("Volkswagen Golf SportsVan 2015-20"),
@@ -288,7 +288,7 @@ class CAR(Platforms):
     [
       VWCarDocs("Volkswagen Passat 2015-22", footnotes=[Footnote.PASSAT]),
       VWCarDocs("Volkswagen Passat Alltrack 2015-22"),
-      VWCarDocs("Volkswagen Passat GTE 2015-22", PowertrainType.PHEV),
+      VWCarDocs("Volkswagen Passat GTE 2015-22", powertrain=PowertrainType.PHEV),
     ],
     VolkswagenCarSpecs(mass=1551, wheelbase=2.79),
     chassis_codes={"3C", "3G"},
@@ -333,7 +333,7 @@ class CAR(Platforms):
   VOLKSWAGEN_TIGUAN_MK2 = VolkswagenMQBPlatformConfig(
     [
       VWCarDocs("Volkswagen Tiguan 2018-24"),
-      VWCarDocs("Volkswagen Tiguan eHybrid 2021-23", PowertrainType.PHEV),
+      VWCarDocs("Volkswagen Tiguan eHybrid 2021-23", powertrain=PowertrainType.PHEV),
     ],
     VolkswagenCarSpecs(mass=1715, wheelbase=2.74),
     chassis_codes={"5N", "AD", "AX", "BW"},
@@ -363,7 +363,7 @@ class CAR(Platforms):
   AUDI_A3_MK3 = VolkswagenMQBPlatformConfig(
     [
       VWCarDocs("Audi A3 2014-19"),
-      VWCarDocs("Audi A3 Sportback e-tron 2017-18", PowertrainType.PHEV),
+      VWCarDocs("Audi A3 Sportback e-tron 2017-18", powertrain=PowertrainType.PHEV),
       VWCarDocs("Audi RS3 2018"),
       VWCarDocs("Audi S3 2015-17"),
     ],

@@ -9,12 +9,12 @@ Ecu = CarParams.Ecu
 
 class CAR(Platforms):
   TESLA_MODEL_3 = PlatformConfig(
-    [CarDocs("Tesla Model 3", PowertrainType.EV, "All")],
+    [CarDocs("Tesla Model 3", "All", powertrain=PowertrainType.EV)],
     CarSpecs(mass=1899., wheelbase=2.875, steerRatio=12.0),
     dbc_dict('tesla_model3_party', None)
   )
   TESLA_MODEL_Y = PlatformConfig(
-    [CarDocs("Tesla Model Y", PowertrainType.EV, "All")],
+    [CarDocs("Tesla Model Y", "All", powertrain=PowertrainType.EV)],
     CarSpecs(mass=2072., wheelbase=2.890, steerRatio=12.0),
     dbc_dict('tesla_model3_party', None)
   )

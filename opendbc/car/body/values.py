@@ -21,7 +21,7 @@ class CarControllerParams:
 
 class CAR(Platforms):
   COMMA_BODY = PlatformConfig(
-    [CarDocs("comma body", PowertrainType.EV, package="All")],
+    [CarDocs("comma body", package="All", powertrain=PowertrainType.EV)],
     CarSpecs(mass=9, wheelbase=0.406, steerRatio=0.5, centerToFrontRatio=0.44),
     dbc_dict('comma_body', None),
   )
