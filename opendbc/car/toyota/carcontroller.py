@@ -186,7 +186,11 @@ class CarController(CarControllerBase):
         accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY if len(CC.orientationNED) == 3 else 0.0
         net_acceleration_request = pcm_accel_cmd + accel_due_to_pitch
 
-        offset = self.pcm_accel_net_offset.update((CS.pcm_accel_net - accel_due_to_pitch) - CS.out.aEgo)
+        if stopping or CS.out.standstill:
+          offset = 0
+          self.pcm_accel_net_offset.x = 0.0
+        else:
+          offset = self.pcm_accel_net_offset.update((CS.pcm_accel_net - accel_due_to_pitch) - CS.out.aEgo)
         new_pcm_accel_net = CS.pcm_accel_net - offset
 
         # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot and imprecise braking
