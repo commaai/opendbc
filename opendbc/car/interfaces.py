@@ -353,7 +353,7 @@ class CarStateBase(ABC):
     return GEAR_SHIFTER_MAP.get(gear.upper(), GearShifter.unknown)
 
   @staticmethod
-  def get_can_parsers(CP) -> dict[str | StrEnum, CANParser]:
+  def get_can_parsers(CP) -> dict[StrEnum, CANParser]:
     return {}
 
 
