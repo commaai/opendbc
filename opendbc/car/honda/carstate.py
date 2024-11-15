@@ -305,6 +305,6 @@ class CarState(CarStateBase):
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).camera),
     }
     if CP.enableBsm:
-      parsers += {Bus.body: CANParser(DBC[CP.carFingerprint][Bus.body], body_messages, CanBus(CP).radar)}
+      parsers |= {Bus.body: CANParser(DBC[CP.carFingerprint][Bus.body], body_messages, CanBus(CP).radar)}
 
     return parsers
