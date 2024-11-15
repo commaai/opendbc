@@ -17,9 +17,9 @@ SteerControlType = structs.CarParams.SteerControlType
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 
 # The up limit allows the brakes/gas to unwind quickly leaving a stop,
-# the down limit matches the rate of ACCEL_NET, reducing PCM compensation windup
+# the down limit roughly matches the rate of ACCEL_NET, reducing PCM compensation windup
 ACCEL_WINDUP_LIMIT = 0.5  # m/s^2 / frame
-ACCEL_WINDDOWN_LIMIT = -5.0 * DT_CTRL * 3  # m/s^2 / frame
+ACCEL_WINDDOWN_LIMIT = -4.0 * DT_CTRL * 3  # m/s^2 / frame
 
 # LKA limits
 # EPS faults if you apply torque while the steering rate is above 100 deg/s for too long
