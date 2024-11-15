@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from opendbc.can.parser import CANParser
+from opendbc.car import Bus
 from opendbc.car.structs import RadarData
 from opendbc.car.toyota.values import DBC, TSS2_CAR
 from opendbc.car.interfaces import RadarInterfaceBase
@@ -17,7 +18,7 @@ def _create_radar_can_parser(car_fingerprint):
   msg_b_n = len(RADAR_B_MSGS)
   messages = list(zip(RADAR_A_MSGS + RADAR_B_MSGS, [20] * (msg_a_n + msg_b_n), strict=True))
 
-  return CANParser(DBC[car_fingerprint]['radar'], messages, 1)
+  return CANParser(DBC[car_fingerprint][Bus.radar], messages, 1)
 
 class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):

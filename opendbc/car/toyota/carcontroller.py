@@ -1,5 +1,5 @@
 import math
-from opendbc.car import carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
+from opendbc.car import Bus, carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
                         make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY, DT_CTRL
 from opendbc.car.can_definitions import CanData
 from opendbc.car.common.filter_simple import FirstOrderFilter
@@ -36,8 +36,8 @@ MAX_LTA_DRIVER_TORQUE_ALLOWANCE = 150  # slightly above steering pressed allows 
 
 
 class CarController(CarControllerBase):
-  def __init__(self, dbc_name, CP):
-    super().__init__(dbc_name, CP)
+  def __init__(self, dbc_names, CP):
+    super().__init__(dbc_names, CP)
     self.params = CarControllerParams(self.CP)
     self.last_steer = 0
     self.last_angle = 0
@@ -50,7 +50,7 @@ class CarController(CarControllerBase):
     self.pcm_accel_compensation = FirstOrderFilter(0, 0.5, DT_CTRL * 3)
     self.permit_braking = True
 
-    self.packer = CANPacker(dbc_name)
+    self.packer = CANPacker(dbc_names[Bus.pt])
     self.accel = 0
     self.prev_accel = 0
 
