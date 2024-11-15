@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from opendbc.can.parser import CANParser
-from opendbc.car import structs
+from opendbc.car import Bus, structs
 from opendbc.car.interfaces import RadarInterfaceBase
 from opendbc.car.honda.values import DBC
 
@@ -8,7 +8,7 @@ from opendbc.car.honda.values import DBC
 def _create_nidec_can_parser(car_fingerprint):
   radar_messages = [0x400] + list(range(0x430, 0x43A)) + list(range(0x440, 0x446))
   messages = [(m, 20) for m in radar_messages]
-  return CANParser(DBC[car_fingerprint]['radar'], messages, 1)
+  return CANParser(DBC[car_fingerprint][Bus.radar], messages, 1)
 
 
 class RadarInterface(RadarInterfaceBase):

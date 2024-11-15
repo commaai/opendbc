@@ -4,7 +4,7 @@ from enum import Enum, IntFlag, StrEnum
 
 from panda import uds
 from opendbc.can.can_define import CANDefine
-from opendbc.car import dbc_dict, CarSpecs, DbcDict, PlatformConfig, Platforms
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car import structs
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, \
@@ -40,7 +40,7 @@ class CarControllerParams:
   ACCEL_MIN = -3.5                         # 3.5 m/s max deceleration
 
   def __init__(self, CP):
-    can_define = CANDefine(DBC[CP.carFingerprint]["pt"])
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
 
     if CP.flags & VolkswagenFlags.PQ:
       self.LDW_STEP = 5                   # LDW_1 message frequency 20Hz
@@ -142,7 +142,7 @@ class VolkswagenFlags(IntFlag):
 
 @dataclass
 class VolkswagenMQBPlatformConfig(PlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: dbc_dict('vw_mqb_2010', None))
+  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'vw_mqb_2010'})
   # Volkswagen uses the VIN WMI and chassis code to match in the absence of the comma power
   # on camera-integrated cars, as we lose too many ECUs to reliably identify the vehicle
   chassis_codes: set[str] = field(default_factory=set)
@@ -151,7 +151,7 @@ class VolkswagenMQBPlatformConfig(PlatformConfig):
 
 @dataclass
 class VolkswagenPQPlatformConfig(VolkswagenMQBPlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: dbc_dict('vw_golf_mk4', None))
+  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'vw_golf_mk4'})
 
   def init(self):
     self.flags |= VolkswagenFlags.PQ
