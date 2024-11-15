@@ -119,6 +119,7 @@ class HondaNidecPlatformConfig(PlatformConfig):
 def honda_with_radar_dbc_dict(pt_dict):
   return {Bus.pt: pt_dict, Bus.radar: 'acura_ilx_2016_nidec'}
 
+
 class CAR(Platforms):
   # Bosch Cars
   HONDA_ACCORD = HondaBoschPlatformConfig(

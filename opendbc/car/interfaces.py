@@ -358,7 +358,7 @@ class CarStateBase(ABC):
 
 
 class CarControllerBase(ABC):
-  def __init__(self, dbc_names: dict[str | StrEnum, str], CP: structs.CarParams):
+  def __init__(self, dbc_names: dict[StrEnum, str], CP: structs.CarParams):
     self.CP = CP
     self.frame = 0
     self.secoc_key: bytes = b"00" * 16
