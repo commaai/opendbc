@@ -10,7 +10,7 @@ LAST_MSG = max(RADAR_MSGS_C + RADAR_MSGS_D)
 NUMBER_MSGS = len(RADAR_MSGS_C) + len(RADAR_MSGS_D)
 
 def _create_radar_can_parser(car_fingerprint):
-  if Bus.RADAR not in DBC[car_fingerprint]:
+  if Bus.radar not in DBC[car_fingerprint]:
     return None
 
   msg_n = len(RADAR_MSGS_C)
@@ -26,7 +26,7 @@ def _create_radar_can_parser(car_fingerprint):
                       [20] * msg_n +  # 20Hz (0.05s)
                       [20] * msg_n, strict=True))  # 20Hz (0.05s)
 
-  return CANParser(DBC[car_fingerprint][Bus.RADAR], messages, 1)
+  return CANParser(DBC[car_fingerprint][Bus.radar], messages, 1)
 
 def _address_to_track(address):
   if address in RADAR_MSGS_C:

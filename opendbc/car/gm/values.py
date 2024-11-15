@@ -81,9 +81,9 @@ class GMCarSpecs(CarSpecs):
 @dataclass
 class GMPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {
-    Bus.PT: 'gm_global_a_powertrain_generated',
-    Bus.RADAR: 'gm_global_a_object',
-    Bus.CHASSIS: 'gm_global_a_chassis',
+    Bus.pt: 'gm_global_a_powertrain_generated',
+    Bus.radar: 'gm_global_a_object',
+    Bus.chassis: 'gm_global_a_chassis',
   })
 
 

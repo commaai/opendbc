@@ -10,7 +10,7 @@ class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
     self.apply_angle_last = 0
-    self.packer = CANPacker(dbc_names[Bus.PARTY])
+    self.packer = CANPacker(dbc_names[Bus.party])
     self.tesla_can = TeslaCAN(self.packer)
 
   def update(self, CC, CS, now_nanos):

@@ -11,15 +11,15 @@ from opendbc.car import CanSignalRateCalculator
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    can_define = CANDefine(DBC[CP.carFingerprint][Bus.PT])
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
     self.shifter_values = can_define.dv["Transmission"]["Gear"]
 
     self.angle_rate_calulator = CanSignalRateCalculator(50)
 
   def update(self, can_parsers) -> structs.CarState:
-    cp = can_parsers[Bus.PT]
-    cp_cam = can_parsers[Bus.CAM]
-    cp_alt = can_parsers[Bus.ALT]
+    cp = can_parsers[Bus.pt]
+    cp_cam = can_parsers[Bus.cam]
+    cp_alt = can_parsers[Bus.alt]
     ret = structs.CarState()
 
     throttle_msg = cp.vl["Throttle"] if not (self.CP.flags & SubaruFlags.HYBRID) else cp_alt.vl["Throttle_Hybrid"]
@@ -220,8 +220,8 @@ class CarState(CarStateBase):
       ]
 
     return {
-      Bus.PT: CANParser(DBC[CP.carFingerprint][Bus.PT], pt_messages, CanBus.main),
-      Bus.CAM: CANParser(DBC[CP.carFingerprint][Bus.PT], cam_messages, CanBus.camera),
-      Bus.ALT: CANParser(DBC[CP.carFingerprint][Bus.PT], alt_messages, CanBus.alt)
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus.main),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus.camera),
+      Bus.alt: CANParser(DBC[CP.carFingerprint][Bus.pt], alt_messages, CanBus.alt)
     }
 

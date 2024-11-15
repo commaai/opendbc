@@ -30,7 +30,7 @@ class TestToyotaInterfaces:
     # like looking up certain signals only in this DBC
     for car_model, dbc in DBC.items():
       if car_model in TSS2_CAR and car_model not in SECOC_CAR:
-        assert dbc[Bus.PT] == "toyota_nodsu_pt_generated"
+        assert dbc[Bus.pt] == "toyota_nodsu_pt_generated"
 
   def test_essential_ecus(self, subtests):
     # Asserts standard ECUs exist for each platform

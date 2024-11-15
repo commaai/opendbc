@@ -50,7 +50,7 @@ class CarController(CarControllerBase):
     self.pcm_accel_compensation = FirstOrderFilter(0, 0.5, DT_CTRL * 3)
     self.permit_braking = True
 
-    self.packer = CANPacker(dbc_names[Bus.PT])
+    self.packer = CANPacker(dbc_names[Bus.pt])
     self.accel = 0
     self.prev_accel = 0
 

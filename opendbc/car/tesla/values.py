@@ -12,12 +12,12 @@ class CAR(Platforms):
   TESLA_MODEL_3 = PlatformConfig(
     [CarDocs("Tesla Model 3", "All")],
     CarSpecs(mass=1899., wheelbase=2.875, steerRatio=12.0),
-    {Bus.PARTY: 'tesla_model3_party'},
+    {Bus.party: 'tesla_model3_party'},
   )
   TESLA_MODEL_Y = PlatformConfig(
     [CarDocs("Tesla Model Y", "All")],
     CarSpecs(mass=2072., wheelbase=2.890, steerRatio=12.0),
-    {Bus.PARTY: 'tesla_model3_party'},
+    {Bus.party: 'tesla_model3_party'},
   )
 
 

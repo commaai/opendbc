@@ -20,7 +20,7 @@ class CarController(CarControllerBase):
     self.steer_rate_counter = 0
 
     self.p = CarControllerParams(CP)
-    self.packer = CANPacker(DBC[CP.carFingerprint][Bus.PT])
+    self.packer = CANPacker(DBC[CP.carFingerprint][Bus.pt])
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators

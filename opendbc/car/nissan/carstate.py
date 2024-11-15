@@ -15,7 +15,7 @@ TORQUE_SAMPLES = 12
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    can_define = CANDefine(DBC[CP.carFingerprint][Bus.PT])
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
 
     self.lkas_hud_msg = {}
     self.lkas_hud_info_msg = {}
@@ -26,9 +26,9 @@ class CarState(CarStateBase):
     self.distance_button = 0
 
   def update(self, can_parsers) -> structs.CarState:
-    cp = can_parsers[Bus.PT]
-    cp_cam = can_parsers[Bus.CAM]
-    cp_adas = can_parsers[Bus.ADAS]
+    cp = can_parsers[Bus.pt]
+    cp_cam = can_parsers[Bus.cam]
+    cp_adas = can_parsers[Bus.adas]
 
     ret = structs.CarState()
 
@@ -192,7 +192,7 @@ class CarState(CarStateBase):
       ]
 
     return {
-      Bus.PT: CANParser(DBC[CP.carFingerprint][Bus.PT], pt_messages, 1 if CP.carFingerprint == CAR.NISSAN_ALTIMA else 0),
-      Bus.CAM: CANParser(DBC[CP.carFingerprint][Bus.PT], cam_messages, 0 if CP.carFingerprint == CAR.NISSAN_ALTIMA else 1),
-      Bus.ADAS: CANParser(DBC[CP.carFingerprint][Bus.PT], adas_messages, 2),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 1 if CP.carFingerprint == CAR.NISSAN_ALTIMA else 0),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, 0 if CP.carFingerprint == CAR.NISSAN_ALTIMA else 1),
+      Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.pt], adas_messages, 2),
     }

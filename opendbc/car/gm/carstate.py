@@ -20,7 +20,7 @@ BUTTONS_DICT = {CruiseButtons.RES_ACCEL: ButtonType.accelCruise, CruiseButtons.D
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    can_define = CANDefine(DBC[CP.carFingerprint][Bus.PT])
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
     self.shifter_values = can_define.dv["ECMPRDNL2"]["PRNDL2"]
     self.cluster_speed_hyst_gap = CV.KPH_TO_MS / 2.
     self.cluster_min_speed = CV.KPH_TO_MS / 2.
@@ -34,9 +34,9 @@ class CarState(CarStateBase):
     self.distance_button = 0
 
   def update(self, can_parsers) -> structs.CarState:
-    pt_cp = can_parsers[Bus.PT]
-    cam_cp = can_parsers[Bus.CAM]
-    loopback_cp = can_parsers[Bus.LOOPBACK]
+    pt_cp = can_parsers[Bus.pt]
+    cam_cp = can_parsers[Bus.cam]
+    loopback_cp = can_parsers[Bus.loopback]
 
     ret = structs.CarState()
 
@@ -192,8 +192,8 @@ class CarState(CarStateBase):
     ]
 
     return {
-      Bus.PT: CANParser(DBC[CP.carFingerprint][Bus.PT], pt_messages, 0),
-      Bus.CAM: CANParser(DBC[CP.carFingerprint][Bus.PT], cam_messages, 2),
-      Bus.LOOPBACK: CANParser(DBC[CP.carFingerprint][Bus.PT], loopback_messages, 128),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 0),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, 2),
+      Bus.loopback: CANParser(DBC[CP.carFingerprint][Bus.pt], loopback_messages, 128),
     }
 

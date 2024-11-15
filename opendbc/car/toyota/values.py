@@ -74,7 +74,7 @@ class ToyotaCarDocs(CarDocs):
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.toyota_a]))
 
 def toyota_dbc_dict(pt, radar):
-  return {Bus.PT: pt, Bus.RADAR: radar}
+  return {Bus.pt: pt, Bus.radar: radar}
 
 @dataclass
 class ToyotaTSS2PlatformConfig(PlatformConfig):
@@ -84,7 +84,7 @@ class ToyotaTSS2PlatformConfig(PlatformConfig):
     self.flags |= ToyotaFlags.TSS2 | ToyotaFlags.NO_STOP_TIMER | ToyotaFlags.NO_DSU
 
     if self.flags & ToyotaFlags.RADAR_ACC:
-      self.dbc_dict = {Bus.PT: 'toyota_nodsu_pt_generated'}
+      self.dbc_dict = {Bus.pt: 'toyota_nodsu_pt_generated'}
 
 
 class CAR(Platforms):

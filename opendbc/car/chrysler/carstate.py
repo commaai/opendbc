@@ -12,7 +12,7 @@ class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
     self.CP = CP
-    can_define = CANDefine(DBC[CP.carFingerprint][Bus.PT])
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
 
     self.auto_high_beam = 0
     self.button_counter = 0
@@ -26,8 +26,8 @@ class CarState(CarStateBase):
     self.distance_button = 0
 
   def update(self, can_parsers) -> structs.CarState:
-    cp = can_parsers[Bus.PT]
-    cp_cam = can_parsers[Bus.CAM]
+    cp = can_parsers[Bus.pt]
+    cp_cam = can_parsers[Bus.cam]
 
     ret = structs.CarState()
 
@@ -155,6 +155,6 @@ class CarState(CarStateBase):
       cam_messages += CarState.get_cruise_messages()
 
     return {
-      Bus.PT: CANParser(DBC[CP.carFingerprint][Bus.PT], pt_messages, 0),
-      Bus.CAM: CANParser(DBC[CP.carFingerprint][Bus.PT], cam_messages, 2),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 0),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, 2),
     }

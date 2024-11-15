@@ -87,17 +87,17 @@ def scale_tire_stiffness(mass, wheelbase, center_to_front, tire_stiffness_factor
 DbcDict = dict[str | StrEnum, str]
 
 class Bus(StrEnum):
-  PT = auto()
-  CAM = auto()
-  RADAR = auto()
-  BODY = auto()
-  CHASSIS = auto()
-  ADAS = auto()
-  MAIN = auto()
-  ALT = auto()
-  LOOPBACK = auto()
-  PARTY = auto()
-  AP_PARTY = auto()
+  pt = auto()
+  cam = auto()
+  radar = auto()
+  adas = auto()
+  alt = auto()
+  body = auto()
+  chassis = auto()
+  loopback = auto()
+  main = auto()
+  party = auto()
+  ap_party = auto()
 
 
 def apply_driver_steer_torque_limits(apply_torque, apply_torque_last, driver_torque, LIMITS):

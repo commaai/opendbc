@@ -32,7 +32,7 @@ def apply_creep_compensation(accel: float, v_ego: float) -> float:
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
-    self.packer = CANPacker(dbc_names[Bus.PT])
+    self.packer = CANPacker(dbc_names[Bus.pt])
     self.CAN = fordcan.CanBus(CP)
 
     self.apply_curvature_last = 0

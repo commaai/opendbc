@@ -23,7 +23,7 @@ BUTTONS_DICT = {Buttons.RES_ACCEL: ButtonType.accelCruise, Buttons.SET_DECEL: Bu
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    can_define = CANDefine(DBC[CP.carFingerprint][Bus.PT])
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
 
     self.cruise_buttons: deque = deque([Buttons.NONE] * PREV_BUTTON_SAMPLES, maxlen=PREV_BUTTON_SAMPLES)
     self.main_buttons: deque = deque([Buttons.NONE] * PREV_BUTTON_SAMPLES, maxlen=PREV_BUTTON_SAMPLES)
@@ -58,8 +58,8 @@ class CarState(CarStateBase):
     self.params = CarControllerParams(CP)
 
   def update(self, can_parsers) -> structs.CarState:
-    cp = can_parsers[Bus.PT]
-    cp_cam = can_parsers[Bus.CAM]
+    cp = can_parsers[Bus.pt]
+    cp_cam = can_parsers[Bus.cam]
 
     if self.CP.flags & HyundaiFlags.CANFD:
       return self.update_canfd(can_parsers)
@@ -181,8 +181,8 @@ class CarState(CarStateBase):
     return ret
 
   def update_canfd(self, can_parsers) -> structs.CarState:
-    cp = can_parsers[Bus.PT]
-    cp_cam = can_parsers[Bus.CAM]
+    cp = can_parsers[Bus.pt]
+    cp_cam = can_parsers[Bus.cam]
 
     ret = structs.CarState()
 
@@ -317,8 +317,8 @@ class CarState(CarStateBase):
       ]
 
     return {
-      Bus.PT: CANParser(DBC[CP.carFingerprint][Bus.PT], pt_messages, CanBus(CP).ECAN),
-      Bus.CAM: CANParser(DBC[CP.carFingerprint][Bus.PT], cam_messages, CanBus(CP).CAM),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).ECAN),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).CAM),
     }
 
 
@@ -385,6 +385,6 @@ class CarState(CarStateBase):
 
 
     return {
-      Bus.PT: CANParser(DBC[CP.carFingerprint][Bus.PT], pt_messages, 0),
-      Bus.CAM: CANParser(DBC[CP.carFingerprint][Bus.PT], cam_messages, 2),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 0),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, 2),
     }

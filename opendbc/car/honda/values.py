@@ -117,7 +117,7 @@ class HondaNidecPlatformConfig(PlatformConfig):
 
 
 def honda_with_radar_dbc_dict(pt_dict):
-  return {Bus.PT: pt_dict, Bus.RADAR: 'acura_ilx_2016_nidec'}
+  return {Bus.pt: pt_dict, Bus.radar: 'acura_ilx_2016_nidec'}
 
 class CAR(Platforms):
   # Bosch Cars
@@ -129,7 +129,7 @@ class CAR(Platforms):
     ],
     # steerRatio: 11.82 is spec end-to-end
     CarSpecs(mass=3279 * CV.LB_TO_KG, wheelbase=2.83, steerRatio=16.33, centerToFrontRatio=0.39, tireStiffnessFactor=0.8467),
-    {Bus.PT: 'honda_accord_2018_can_generated'},
+    {Bus.pt: 'honda_accord_2018_can_generated'},
   )
   HONDA_CIVIC_BOSCH = HondaBoschPlatformConfig(
     [
@@ -138,12 +138,12 @@ class CAR(Platforms):
       HondaCarDocs("Honda Civic Hatchback 2017-21", min_steer_speed=12. * CV.MPH_TO_MS),
     ],
     CarSpecs(mass=1326, wheelbase=2.7, steerRatio=15.38, centerToFrontRatio=0.4),  # steerRatio: 10.93 is end-to-end spec
-    {Bus.PT: 'honda_civic_hatchback_ex_2017_can_generated'},
+    {Bus.pt: 'honda_civic_hatchback_ex_2017_can_generated'},
   )
   HONDA_CIVIC_BOSCH_DIESEL = HondaBoschPlatformConfig(
     [],  # don't show in docs
     HONDA_CIVIC_BOSCH.specs,
-    {Bus.PT: 'honda_accord_2018_can_generated'},
+    {Bus.pt: 'honda_accord_2018_can_generated'},
   )
   HONDA_CIVIC_2022 = HondaBoschPlatformConfig(
     [
@@ -151,43 +151,43 @@ class CAR(Platforms):
       HondaCarDocs("Honda Civic Hatchback 2022-24", "All", video_link="https://youtu.be/ytiOT5lcp6Q"),
     ],
     HONDA_CIVIC_BOSCH.specs,
-    {Bus.PT: 'honda_civic_ex_2022_can_generated'},
+    {Bus.pt: 'honda_civic_ex_2022_can_generated'},
     flags=HondaFlags.BOSCH_RADARLESS,
   )
   HONDA_CRV_5G = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda CR-V 2017-22", min_steer_speed=12. * CV.MPH_TO_MS)],
     # steerRatio: 12.3 is spec end-to-end
     CarSpecs(mass=3410 * CV.LB_TO_KG, wheelbase=2.66, steerRatio=16.0, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),
-    {Bus.PT: 'honda_crv_ex_2017_can_generated', Bus.BODY: 'honda_crv_ex_2017_body_generated'},
+    {Bus.pt: 'honda_crv_ex_2017_can_generated', Bus.body: 'honda_crv_ex_2017_body_generated'},
     flags=HondaFlags.BOSCH_ALT_BRAKE,
   )
   HONDA_CRV_HYBRID = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda CR-V Hybrid 2017-22", min_steer_speed=12. * CV.MPH_TO_MS)],
     # mass: mean of 4 models in kg, steerRatio: 12.3 is spec end-to-end
     CarSpecs(mass=1667, wheelbase=2.66, steerRatio=16, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),
-    {Bus.PT: 'honda_accord_2018_can_generated'},
+    {Bus.pt: 'honda_accord_2018_can_generated'},
   )
   HONDA_HRV_3G = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda HR-V 2023", "All")],
     CarSpecs(mass=3125 * CV.LB_TO_KG, wheelbase=2.61, steerRatio=15.2, centerToFrontRatio=0.41, tireStiffnessFactor=0.5),
-    {Bus.PT: 'honda_civic_ex_2022_can_generated'},
+    {Bus.pt: 'honda_civic_ex_2022_can_generated'},
     flags=HondaFlags.BOSCH_RADARLESS,
   )
   ACURA_RDX_3G = HondaBoschPlatformConfig(
     [HondaCarDocs("Acura RDX 2019-22", "All", min_steer_speed=3. * CV.MPH_TO_MS)],
     CarSpecs(mass=4068 * CV.LB_TO_KG, wheelbase=2.75, steerRatio=11.95, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),  # as spec
-    {Bus.PT: 'acura_rdx_2020_can_generated'},
+    {Bus.pt: 'acura_rdx_2020_can_generated'},
     flags=HondaFlags.BOSCH_ALT_BRAKE,
   )
   HONDA_INSIGHT = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda Insight 2019-22", "All", min_steer_speed=3. * CV.MPH_TO_MS)],
     CarSpecs(mass=2987 * CV.LB_TO_KG, wheelbase=2.7, steerRatio=15.0, centerToFrontRatio=0.39, tireStiffnessFactor=0.82),  # as spec
-    {Bus.PT: 'honda_insight_ex_2019_can_generated'},
+    {Bus.pt: 'honda_insight_ex_2019_can_generated'},
   )
   HONDA_E = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda e 2020", "All", min_steer_speed=3. * CV.MPH_TO_MS)],
     CarSpecs(mass=3338.8 * CV.LB_TO_KG, wheelbase=2.5, centerToFrontRatio=0.5, steerRatio=16.71, tireStiffnessFactor=0.82),
-    {Bus.PT: 'acura_rdx_2020_can_generated'},
+    {Bus.pt: 'acura_rdx_2020_can_generated'},
   )
 
   # Nidec Cars

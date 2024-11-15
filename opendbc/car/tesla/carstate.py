@@ -11,14 +11,14 @@ ButtonType = structs.CarState.ButtonEvent.Type
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    self.can_define = CANDefine(DBC[CP.carFingerprint][Bus.PARTY])
+    self.can_define = CANDefine(DBC[CP.carFingerprint][Bus.party])
 
     self.hands_on_level = 0
     self.das_control = None
 
   def update(self, can_parsers) -> structs.CarState:
-    cp_party = can_parsers[Bus.PARTY]
-    cp_ap_party = can_parsers[Bus.AP_PARTY]
+    cp_party = can_parsers[Bus.party]
+    cp_ap_party = can_parsers[Bus.ap_party]
     ret = structs.CarState()
 
     # Vehicle speed
@@ -105,7 +105,7 @@ class CarState(CarStateBase):
     ]
 
     return {
-      Bus.PARTY: CANParser(DBC[CP.carFingerprint][Bus.PARTY], party_messages, CANBUS.party),
-      Bus.AP_PARTY: CANParser(DBC[CP.carFingerprint][Bus.PARTY], ap_party_messages, CANBUS.autopilot_party)
+      Bus.party: CANParser(DBC[CP.carFingerprint][Bus.party], party_messages, CANBUS.party),
+      Bus.ap_party: CANParser(DBC[CP.carFingerprint][Bus.party], ap_party_messages, CANBUS.autopilot_party)
     }
 

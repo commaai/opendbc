@@ -15,7 +15,7 @@ class CarController(CarControllerBase):
     self.lkas_control_bit_prev = False
     self.last_button_frame = 0
 
-    self.packer = CANPacker(dbc_names[Bus.PT])
+    self.packer = CANPacker(dbc_names[Bus.pt])
     self.params = CarControllerParams(CP)
 
   def update(self, CC, CS, now_nanos):

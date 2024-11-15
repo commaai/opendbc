@@ -22,7 +22,7 @@ class CAR(Platforms):
   COMMA_BODY = PlatformConfig(
     [CarDocs("comma body", package="All")],
     CarSpecs(mass=9, wheelbase=0.406, steerRatio=0.5, centerToFrontRatio=0.44),
-    {Bus.MAIN: 'comma_body'},
+    {Bus.main: 'comma_body'},
   )
 
 

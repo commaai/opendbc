@@ -101,7 +101,7 @@ class RadarInterface(RadarInterfaceBase):
 
     self.updated_messages = set()
     self.track_id = 0
-    self.radar = DBC[CP.carFingerprint][Bus.RADAR]
+    self.radar = DBC[CP.carFingerprint][Bus.radar]
     if self.radar == RADAR.DELPHI_ESR:
       self.rcp = _create_delphi_esr_radar_can_parser(CP)
       self.trigger_msg = DELPHI_ESR_RADAR_MSGS[-1]
