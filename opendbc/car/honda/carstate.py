@@ -112,7 +112,8 @@ class CarState(CarStateBase):
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
     cp_cam = can_parsers[Bus.cam]
-    cp_body = can_parsers[Bus.body]
+    if self.CP.enableBsm:
+      cp_body = can_parsers[Bus.body]
 
     ret = structs.CarState()
 
@@ -299,9 +300,11 @@ class CarState(CarStateBase):
       ("BSM_STATUS_RIGHT", 3),
     ]
 
-    return {
+    parsers = {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).pt),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).camera),
-      Bus.body: CANParser(DBC[CP.carFingerprint][Bus.body], body_messages, CanBus(CP).radar) if CP.enableBsm else None,
     }
+    if CP.enableBsm:
+      parsers += {Bus.body: CANParser(DBC[CP.carFingerprint][Bus.body], body_messages, CanBus(CP).radar)}
 
+    return parsers

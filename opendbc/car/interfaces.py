@@ -95,7 +95,7 @@ class CarInterfaceBase(ABC):
     self.CS: CarStateBase = CarState(CP)
     self.can_parsers = self.CS.get_can_parsers(CP)
 
-    dbc_names = {bus: cp.dbc_name for bus, cp in self.can_parsers.items() if cp is not None}
+    dbc_names = {bus: cp.dbc_name for bus, cp in self.can_parsers.items()}
     self.CC: CarControllerBase = CarController(dbc_names, CP)
 
   def apply(self, c: structs.CarControl, now_nanos: int | None = None) -> tuple[structs.CarControl.Actuators, list[CanData]]:
