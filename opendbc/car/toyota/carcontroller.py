@@ -200,6 +200,7 @@ class CarController(CarControllerBase):
           # filter ACCEL_NET so it more closely matches aEgo delay for error correction
           self.pcm_accel_net.update(CS.pcm_accel_net)
 
+          # Our model of the PCM's acceleration request isn't perfect, so we learn the offset when moving
           new_pcm_accel_net = CS.pcm_accel_net
           if stopping or CS.out.standstill:
             # TODO: check if maintaining the offset from before stopping is beneficial
