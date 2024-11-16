@@ -2,7 +2,7 @@
 import logging
 from collections import namedtuple
 from dataclasses import dataclass, field
-from enum import IntFlag, ReprEnum, EnumType
+from enum import IntFlag, ReprEnum, StrEnum, EnumType, auto
 from dataclasses import replace
 
 from panda import uds
@@ -84,11 +84,20 @@ def scale_tire_stiffness(mass, wheelbase, center_to_front, tire_stiffness_factor
   return tire_stiffness_front, tire_stiffness_rear
 
 
-DbcDict = dict[str, str]
+DbcDict = dict[StrEnum, str]
 
-
-def dbc_dict(pt_dbc, radar_dbc, chassis_dbc=None, body_dbc=None) -> DbcDict:
-  return {'pt': pt_dbc, 'radar': radar_dbc, 'chassis': chassis_dbc, 'body': body_dbc}
+class Bus(StrEnum):
+  pt = auto()
+  cam = auto()
+  radar = auto()
+  adas = auto()
+  alt = auto()
+  body = auto()
+  chassis = auto()
+  loopback = auto()
+  main = auto()
+  party = auto()
+  ap_party = auto()
 
 
 def apply_driver_steer_torque_limits(apply_torque, apply_torque_last, driver_torque, LIMITS):
@@ -306,7 +315,7 @@ class PlatformConfig(PlatformConfigBase):
 class ExtraPlatformConfig(PlatformConfigBase):
   car_docs: list[ExtraCarDocs]
   specs: CarSpecs = CarSpecs(mass=0., wheelbase=0., steerRatio=0.)
-  dbc_dict: DbcDict = field(default_factory=lambda: dbc_dict('unknown', None))
+  dbc_dict: DbcDict = field(default_factory=lambda: dict())
 
 
 class PlatformsType(EnumType):
