@@ -351,6 +351,8 @@ struct CarControl {
   cruiseControl @4 :CruiseControl;
   hudControl @5 :HUDControl;
 
+  sunnypilotParams @8 :UInt32;
+
   struct Actuators {
     # lateral commands, mutually exclusive
     steer @2: Float32;  # [0.0, 1.0]
@@ -429,7 +431,6 @@ struct CarControl {
   brakeDEPRECATED @2 :Float32;
   steeringTorqueDEPRECATED @3 :Float32;
   activeDEPRECATED @7 :Bool;
-  rollDEPRECATED @8 :Float32;
   pitchDEPRECATED @9 :Float32;
   actuatorsOutputDEPRECATED @10 :Actuators;
 }
@@ -516,6 +517,8 @@ struct CarParams {
 
   secOcRequired @75 :Bool;  # Car requires SecOC message authentication to operate
   secOcKeyAvailable @76 :Bool;  # Stored SecOC key loaded from params
+
+  sunnypilotFlags @54 :UInt32;
 
   struct SafetyConfig {
     safetyModel @0 :SafetyModel;
@@ -715,7 +718,6 @@ struct CarParams {
   brakeMaxBPDEPRECATED @15 :List(Float32);
   brakeMaxVDEPRECATED @16 :List(Float32);
   directAccelControlDEPRECATED @30 :Bool;
-  maxSteeringAngleDegDEPRECATED @54 :Float32;
   longitudinalActuatorDelayLowerBoundDEPRECATED @61 :Float32;
   stoppingControlDEPRECATED @31 :Bool; # Does the car allow full control even at lows speeds when stopping
   radarTimeStepDEPRECATED @45: Float32 = 0.05;  # time delta between radar updates, 20Hz is very standard
