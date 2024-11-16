@@ -4,7 +4,7 @@ from dataclasses import dataclass, field, replace
 from enum import Enum, IntFlag
 
 from panda import uds
-from opendbc.car import AngleRateLimit, CarSpecs, dbc_dict, DbcDict, PlatformConfig, Platforms
+from opendbc.car import AngleRateLimit, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, \
                                                      Device, SupportType
@@ -76,7 +76,10 @@ class FordCarDocs(CarDocs):
 
 @dataclass
 class FordPlatformConfig(PlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: dbc_dict('ford_lincoln_base_pt', RADAR.DELPHI_MRR))
+  dbc_dict: DbcDict = field(default_factory=lambda: {
+    Bus.pt: 'ford_lincoln_base_pt',
+    Bus.radar: RADAR.DELPHI_MRR,
+  })
 
   def init(self):
     for car_docs in list(self.car_docs):
@@ -90,7 +93,9 @@ class FordPlatformConfig(PlatformConfig):
 
 @dataclass
 class FordCANFDPlatformConfig(FordPlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: dbc_dict('ford_lincoln_base_pt', None))
+  dbc_dict: DbcDict = field(default_factory=lambda: {
+    Bus.pt: 'ford_lincoln_base_pt',
+  })
 
   def init(self):
     super().init()

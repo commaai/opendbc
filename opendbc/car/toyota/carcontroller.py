@@ -1,5 +1,5 @@
 import math
-from opendbc.car import carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
+from opendbc.car import Bus, carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
                         make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY, DT_CTRL
 from opendbc.car.can_definitions import CanData
 from opendbc.car.common.filter_simple import FirstOrderFilter
@@ -37,8 +37,8 @@ MAX_LTA_DRIVER_TORQUE_ALLOWANCE = 150  # slightly above steering pressed allows 
 
 
 class CarController(CarControllerBase):
-  def __init__(self, dbc_name, CP):
-    super().__init__(dbc_name, CP)
+  def __init__(self, dbc_names, CP):
+    super().__init__(dbc_names, CP)
     self.params = CarControllerParams(self.CP)
     self.last_steer = 0
     self.last_angle = 0
@@ -61,7 +61,7 @@ class CarController(CarControllerBase):
     if not any(fw.ecu == Ecu.hybrid for fw in self.CP.carFw):
       self.pcm_accel_net.update_alpha(self.CP.longitudinalActuatorDelay + 0.2)
 
-    self.packer = CANPacker(dbc_name)
+    self.packer = CANPacker(dbc_names[Bus.pt])
     self.accel = 0
     self.prev_accel = 0
 
@@ -228,9 +228,10 @@ class CarController(CarControllerBase):
 
         # Along with rate limiting positive jerk above, this greatly improves gas response time
         # Consider the net acceleration request that the PCM should be applying (pitch included)
-        if net_acceleration_request < 0.1 or stopping or not CC.longActive:
+        net_acceleration_request_min = min(actuators.accel + accel_due_to_pitch, net_acceleration_request)
+        if net_acceleration_request_min < 0.1 or stopping or not CC.longActive:
           self.permit_braking = True
-        elif net_acceleration_request > 0.2:
+        elif net_acceleration_request_min > 0.2:
           self.permit_braking = False
 
         pcm_accel_cmd = clip(pcm_accel_cmd, self.params.ACCEL_MIN, self.params.ACCEL_MAX)

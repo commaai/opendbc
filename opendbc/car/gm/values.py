@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from opendbc.car import dbc_dict, PlatformConfig, DbcDict, Platforms, CarSpecs
+from opendbc.car import Bus, PlatformConfig, DbcDict, Platforms, CarSpecs
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
@@ -80,7 +80,11 @@ class GMCarSpecs(CarSpecs):
 
 @dataclass
 class GMPlatformConfig(PlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: dbc_dict('gm_global_a_powertrain_generated', 'gm_global_a_object', chassis_dbc='gm_global_a_chassis'))
+  dbc_dict: DbcDict = field(default_factory=lambda: {
+    Bus.pt: 'gm_global_a_powertrain_generated',
+    Bus.radar: 'gm_global_a_object',
+    Bus.chassis: 'gm_global_a_chassis',
+  })
 
 
 @dataclass
