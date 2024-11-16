@@ -218,7 +218,7 @@ class CarController(CarControllerBase):
           # self.pcm_accel_net_offset.update_alpha(interp(jerk, [0.5, 2.0], [1.0, 3.0]))
           self.pcm_accel_net_offset2.update_alpha(interp(jerk, [0.5, 2.0], [1.0, 4.0]))
 
-          offset = self.pcm_accel_net_offset.update((self.pcm_accel_net - accel_due_to_pitch) - CS.out.aEgo)
+          offset = self.pcm_accel_net_offset.update((self.pcm_accel_net.x - accel_due_to_pitch) - CS.out.aEgo)
           offset2 = self.pcm_accel_net_offset2.update((CS.pcm_accel_net - accel_due_to_pitch) - CS.out.aEgo)
         new_pcm_accel_net = CS.pcm_accel_net - offset
         new_pcm_accel_net2 = CS.pcm_accel_net - offset2
