@@ -1,7 +1,7 @@
 import numpy as np
 
 from opendbc.can.packer import CANPacker
-from opendbc.car import DT_CTRL
+from opendbc.car import Bus, DT_CTRL
 from opendbc.car.common.pid import PIDController
 from opendbc.car.body import bodycan
 from opendbc.car.body.values import SPEED_FROM_RPM
@@ -15,9 +15,9 @@ MAX_TURN_INTEGRATOR = 0.1  # meters
 
 
 class CarController(CarControllerBase):
-  def __init__(self, dbc_name, CP):
-    super().__init__(dbc_name, CP)
-    self.packer = CANPacker(dbc_name)
+  def __init__(self, dbc_names, CP):
+    super().__init__(dbc_names, CP)
+    self.packer = CANPacker(dbc_names[Bus.main])
 
     # PIDs
     self.turn_pid = PIDController(110, k_i=11.5, rate=1/DT_CTRL)
