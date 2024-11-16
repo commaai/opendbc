@@ -54,9 +54,9 @@ class CarController(CarControllerBase):
     # the PCM's reported acceleration request can sometimes mismatch aEgo, close the loop
     self.pcm_accel_net_offset = FirstOrderFilter(0, 1.0, DT_CTRL * 3)
 
-    # aEgo often lags behind the PCM request due to physical brake lag which varies by car,
+    # aEgo also often lags behind the PCM request due to physical brake lag which varies by car,
     # so we error correct on the filtered PCM acceleration request using the actuator delay.
-    # TODO: move this into the interface
+    # TODO: move the delay into the interface
     pcm_accel_net_rc = self.CP.longitudinalActuatorDelay
     if not any(fw.ecu == Ecu.hybrid for fw in self.CP.carFw):
       pcm_accel_net_rc += 0.2
@@ -211,7 +211,6 @@ class CarController(CarControllerBase):
           # let PCM handle stopping for now
           pcm_accel_compensation = 0.0
           if not stopping:
-            # pcm_accel_compensation = 2.0 * (CS.pcm_accel_net - net_acceleration_request)
             pcm_accel_compensation = 2.0 * (new_pcm_accel_net - net_acceleration_request)
 
           # prevent compensation windup
