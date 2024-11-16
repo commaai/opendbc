@@ -200,7 +200,7 @@ class CarController(CarControllerBase):
         self.prev_accel = pcm_accel_cmd
 
         # calculate amount of acceleration PCM should apply to reach target, given pitch
-        accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY if len(CC.orientationNED) == 3 else 0.0
+        accel_due_to_pitch = 0.0  # math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY if len(CC.orientationNED) == 3 else 0.0
         net_acceleration_request = pcm_accel_cmd + accel_due_to_pitch
 
         # self.pcm_accel_net.update(CS.out.aEgo)
