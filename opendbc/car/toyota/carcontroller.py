@@ -52,7 +52,7 @@ class CarController(CarControllerBase):
     self.pcm_accel_compensation = FirstOrderFilter(0, 0.5, DT_CTRL * 3)
 
     # the PCM's reported acceleration request can sometimes mismatch aEgo, close the loop
-    self.pcm_accel_net_offset = FirstOrderFilter(0, 1.0, DT_CTRL * 3)  # 1.5 might be okay
+    self.pcm_accel_net_offset = FirstOrderFilter(0, 1.0, DT_CTRL * 3)
 
     # aEgo often lags behind the PCM request due to physical brake lag which varies by car,
     # so we error correct on the filtered PCM acceleration request using the actuator delay.
@@ -223,6 +223,7 @@ class CarController(CarControllerBase):
         else:
           self.pcm_accel_compensation.x = 0.0
           self.pcm_accel_net_offset.x = 0.0
+          self.pcm_accel_net.x = CS.pcm_accel_net
           self.permit_braking = True
 
         # Along with rate limiting positive jerk above, this greatly improves gas response time
