@@ -57,10 +57,9 @@ class CarController(CarControllerBase):
     # aEgo also often lags behind the PCM request due to physical brake lag which varies by car,
     # so we error correct on the filtered PCM acceleration request using the actuator delay.
     # TODO: move the delay into the interface
-    pcm_accel_net_rc = self.CP.longitudinalActuatorDelay
+    self.pcm_accel_net = FirstOrderFilter(0, self.CP.longitudinalActuatorDelay, DT_CTRL * 3)
     if not any(fw.ecu == Ecu.hybrid for fw in self.CP.carFw):
-      pcm_accel_net_rc += 0.2
-    self.pcm_accel_net = FirstOrderFilter(0, pcm_accel_net_rc, DT_CTRL * 3)
+      self.pcm_accel_net.update_alpha(self.CP.longitudinalActuatorDelay + 0.2)
 
     self.packer = CANPacker(dbc_name)
     self.accel = 0
@@ -196,18 +195,20 @@ class CarController(CarControllerBase):
         accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY if len(CC.orientationNED) == 3 else 0.0
         net_acceleration_request = pcm_accel_cmd + accel_due_to_pitch
 
-        self.pcm_accel_net.update(CS.pcm_accel_net)
-
-        if stopping or CS.out.standstill:
-          offset = 0
-          self.pcm_accel_net_offset.x = 0.0
-        else:
-          offset = self.pcm_accel_net_offset.update((self.pcm_accel_net.x - accel_due_to_pitch) - CS.out.aEgo)
-
-        new_pcm_accel_net = CS.pcm_accel_net - offset
-
         # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot and imprecise braking
         if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
+          # filter ACCEL_NET so it more closely matches aEgo delay for error correction
+          self.pcm_accel_net.update(CS.pcm_accel_net)
+
+          if not stopping and not CS.out.standstill:
+            offset = self.pcm_accel_net_offset.update((self.pcm_accel_net.x - accel_due_to_pitch) - CS.out.aEgo)
+          else:
+            # TODO: check if maintaining the offset before stopping is beneficial, can move down
+            offset = 0
+            self.pcm_accel_net_offset.x = 0.0
+
+          new_pcm_accel_net = CS.pcm_accel_net - offset
+
           # let PCM handle stopping for now
           pcm_accel_compensation = 0.0
           if not stopping:
