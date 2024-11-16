@@ -235,7 +235,7 @@ class CarState(CarStateBase):
         ("GEAR_PACKET", 1),
       ]
 
-    if ret.flags & ToyotaFlags.RAISED_ACCEL_LIMIT.value:
+    if CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT.value:
       pt_messages.append(("CLUTCH", 15))
 
     if CP.carFingerprint in UNSUPPORTED_DSU_CAR:
