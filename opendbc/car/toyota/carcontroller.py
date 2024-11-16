@@ -200,14 +200,12 @@ class CarController(CarControllerBase):
           # filter ACCEL_NET so it more closely matches aEgo delay for error correction
           self.pcm_accel_net.update(CS.pcm_accel_net)
 
-          if not stopping and not CS.out.standstill:
-            offset = self.pcm_accel_net_offset.update((self.pcm_accel_net.x - accel_due_to_pitch) - CS.out.aEgo)
-          else:
-            # TODO: check if maintaining the offset before stopping is beneficial, can move down
-            offset = 0
+          new_pcm_accel_net = CS.pcm_accel_net
+          if stopping or CS.out.standstill:
+            # TODO: check if maintaining the offset from before stopping is beneficial
             self.pcm_accel_net_offset.x = 0.0
-
-          new_pcm_accel_net = CS.pcm_accel_net - offset
+          else:
+            new_pcm_accel_net -= self.pcm_accel_net_offset.update((self.pcm_accel_net.x - accel_due_to_pitch) - CS.out.aEgo)
 
           # let PCM handle stopping for now
           pcm_accel_compensation = 0.0
