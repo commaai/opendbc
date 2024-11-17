@@ -304,20 +304,12 @@ class PlatformConfigBase(Freezable):
     ICE vehicles keep their original names.
     For non-ICE, append powertrain type to name
     """
-    parent_init = super().init if hasattr(super(), 'init') else None
-    if parent_init is not None:
-        parent_init()
-
     if hasattr(self, 'car_docs'):
-      docs = []
-      for car_doc in list(self.car_docs):
-        if car_doc.powertrain == PowertrainType.ICE:  # ICE is the default powertrain
-          docs.append(car_doc)
-          continue
-        name = f"{car_doc.make} {car_doc.model} {car_doc.powertrain.value} {car_doc.years}"
-        docs.append(replace(copy.deepcopy(car_doc), name=name))
-
-      self.car_docs = docs
+      original_docs = list(self.car_docs)
+      for car_doc in original_docs:
+        if car_doc.powertrain != PowertrainType.ICE:  # ICE is the default powertrain type
+          name = f"{car_doc.make} {car_doc.model} {car_doc.powertrain.value} {car_doc.years}"
+          self.car_docs.append(replace(copy.deepcopy(car_doc), name=name))
 
 
 @dataclass(order=True)
