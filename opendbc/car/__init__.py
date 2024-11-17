@@ -299,7 +299,6 @@ class PlatformConfigBase(Freezable):
     return replace(self, **kwargs)
 
   def init(self):
-    """Initialize platform config."""
     pass
 
   def __post_init__(self):
