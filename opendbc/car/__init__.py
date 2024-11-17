@@ -304,6 +304,10 @@ class PlatformConfigBase(Freezable):
     ICE vehicles keep their original names.
     For non-ICE, append powertrain type to name
     """
+    parent_init = super().init if hasattr(super(), 'init') else None
+    if parent_init is not None:
+        parent_init()
+
     if hasattr(self, 'car_docs'):
       docs = []
       for car_doc in list(self.car_docs):
