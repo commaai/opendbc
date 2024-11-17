@@ -126,7 +126,7 @@ class CAR(Platforms):
     [
       HondaCarDocs("Honda Accord 2018-22", "All", video_link="https://www.youtube.com/watch?v=mrUwlj3Mi58", min_steer_speed=3. * CV.MPH_TO_MS),
       HondaCarDocs("Honda Inspire 2018", "All", min_steer_speed=3. * CV.MPH_TO_MS),
-      HondaCarDocs("Honda Accord Hybrid 2018-22", "All", powertrain=PowertrainType.HYBRID, min_steer_speed=3. * CV.MPH_TO_MS),
+      HondaCarDocs("Honda Accord 2018-22", "All", powertrain=PowertrainType.HYBRID, min_steer_speed=3. * CV.MPH_TO_MS),
     ],
     # steerRatio: 11.82 is spec end-to-end
     CarSpecs(mass=3279 * CV.LB_TO_KG, wheelbase=2.83, steerRatio=16.33, centerToFrontRatio=0.39, tireStiffnessFactor=0.8467),
@@ -163,7 +163,7 @@ class CAR(Platforms):
     flags=HondaFlags.BOSCH_ALT_BRAKE,
   )
   HONDA_CRV_HYBRID = HondaBoschPlatformConfig(
-    [HondaCarDocs("Honda CR-V Hybrid 2017-22", powertrain=PowertrainType.HYBRID, min_steer_speed=12. * CV.MPH_TO_MS)],
+    [HondaCarDocs("Honda CR-V 2017-22", powertrain=PowertrainType.HYBRID, min_steer_speed=12. * CV.MPH_TO_MS)],
     # mass: mean of 4 models in kg, steerRatio: 12.3 is spec end-to-end
     CarSpecs(mass=1667, wheelbase=2.66, steerRatio=16, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),
     {Bus.pt: 'honda_accord_2018_can_generated'},
