@@ -4,11 +4,12 @@ from collections import namedtuple
 from dataclasses import dataclass, field
 from enum import IntFlag, ReprEnum, StrEnum, EnumType, auto
 from dataclasses import replace
+import copy
 
 from panda import uds
 from opendbc.car import structs
 from opendbc.car.can_definitions import CanData
-from opendbc.car.docs_definitions import CarDocs, ExtraCarDocs
+from opendbc.car.docs_definitions import CarDocs, ExtraCarDocs, PowertrainType
 from opendbc.car.common.numpy_fast import clip, interp
 
 # set up logging
@@ -298,10 +299,21 @@ class PlatformConfigBase(Freezable):
     return replace(self, **kwargs)
 
   def init(self):
-    pass
+    """
+    Standardizes car names based on powertrain type.
+    ICE vehicles keep their original names.
+    For non-ICE, append powertrain type to name
+    """
+    if hasattr(self, 'car_docs'):
+      docs = []
+      for car_doc in list(self.car_docs):
+        if car_doc.powertrain == PowertrainType.ICE:  # ICE is the default powertrain
+          docs.append(car_doc)
+          continue
+        name = f"{car_doc.make} {car_doc.model} {car_doc.powertrain.value} {car_doc.years}"
+        docs.append(replace(copy.deepcopy(car_doc), name=name))
 
-  def __post_init__(self):
-    self.init()
+      self.car_docs = docs
 
 
 @dataclass(order=True)
