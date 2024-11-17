@@ -1,6 +1,5 @@
-import copy
 import re
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
 from panda import uds
