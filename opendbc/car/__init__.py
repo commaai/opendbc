@@ -299,6 +299,13 @@ class PlatformConfigBase(Freezable):
     return replace(self, **kwargs)
 
   def init(self):
+    """Initialize platform config."""
+    pass
+
+  def __post_init__(self):
+    self.init()
+
+  def standardize_powertrain_names(self):
     """
     Standardizes car names based on powertrain type.
     ICE vehicles keep their original names.
