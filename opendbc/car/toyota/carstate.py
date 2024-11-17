@@ -64,16 +64,29 @@ class CarState(CarStateBase):
     # CLUTCH->ACCEL_NET is only accurate for gas, PCM_CRUISE->ACCEL_NET is only accurate for brake
     # These signals only have meaning when ACC is active
     if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT.value:
-      self.pcm_accel_net = max(cp.vl["CLUTCH"]["ACCEL_NET"], 0.0)
+      # TODO: clutch more closely matches when braking
+      self.pcm_accel_net = cp.vl["CLUTCH"]["ACCEL_NET"]
 
-      # Sometimes ACC_BRAKING can be 1 while showing we're applying gas already
-      if cp.vl["PCM_CRUISE"]["ACC_BRAKING"]:
-        self.pcm_accel_net += min(cp.vl["PCM_CRUISE"]["ACCEL_NET"], 0.0)
+      # neutral force behavior is inconsistent across hybrid and ice, TODO: is there a commom formula?
 
-      # add creeping force at low speeds only for braking, CLUTCH->ACCEL_NET already shows this
-      neutral_accel = max(cp.vl["PCM_CRUISE"]["NEUTRAL_FORCE"] / self.CP.mass, 0.0)
-      if self.pcm_accel_net + neutral_accel < 0.0:
+      # TODO: we can also use FDRVREAL and BRAKE->BRAKE_FORCE on hybrids, but it's less understood
+      # FDRVREAL is the estimated force applied longitudinally, and goes negative before ACC_BRAKING does, so we need to use it to add neutral force
+      neutral_accel = cp.vl["PCM_CRUISE"]["NEUTRAL_FORCE"] / self.CP.mass
+      gas_regen_accel = cp.vl["GEAR_PACKET_HYBRID"]["FDRVREAL"] / self.CP.mass
+      if gas_regen_accel < 0:
+        self.pcm_accel_net += gas_regen_accel
+
+      if neutral_accel > 0 and cp.vl["PCM_CRUISE"]["ACC_BRAKING"]:
         self.pcm_accel_net += neutral_accel
+
+      # # Sometimes ACC_BRAKING can be 1 while showing we're applying gas already
+      # if cp.vl["PCM_CRUISE"]["ACC_BRAKING"]:
+      #   self.pcm_accel_net += min(cp.vl["PCM_CRUISE"]["ACCEL_NET"], 0.0)
+
+      # # add creeping force at low speeds only for braking, CLUTCH->ACCEL_NET already shows this
+      #   neutral_accel = max(cp.vl["PCM_CRUISE"]["NEUTRAL_FORCE"] / self.CP.mass, 0.0)
+      # # if self.pcm_accel_net + neutral_accel < 0.0:
+      #   self.pcm_accel_net += neutral_accel
 
     ret.doorOpen = any([cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_FL"], cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_FR"],
                         cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_RL"], cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_RR"]])
@@ -219,11 +232,11 @@ class CarState(CarStateBase):
       ("PCM_CRUISE", 33),
       ("PCM_CRUISE_SM", 1),
       ("STEER_TORQUE_SENSOR", 50),
+      ("GEAR_PACKET_HYBRID", 60),
     ]
 
     if CP.flags & ToyotaFlags.SECOC.value:
       pt_messages += [
-        ("GEAR_PACKET_HYBRID", 60),
         ("SECOC_SYNCHRONIZATION", 10),
         ("GAS_PEDAL", 42),
       ]
