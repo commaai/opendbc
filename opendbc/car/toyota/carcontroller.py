@@ -49,7 +49,7 @@ class CarController(CarControllerBase):
     self.steer_rate_counter = 0
     self.distance_button = 0
 
-    self.pitch = FirstOrderFilter(0, 2.0, DT_CTRL * 3)
+    self.pitch = FirstOrderFilter(0, 1.5, DT_CTRL * 3)
 
     self.pcm_accel_compensation = FirstOrderFilter(0, 0.5, DT_CTRL * 3)
 
@@ -80,7 +80,9 @@ class CarController(CarControllerBase):
     lat_active = CC.latActive and abs(CS.out.steeringTorque) < MAX_USER_TORQUE
 
     if len(CC.orientationNED) == 3:
+      self.debug = CC.orientationNED[1]
       self.pitch.update(CC.orientationNED[1])
+      self.debug2 = self.pitch.x
 
     # *** control msgs ***
     can_sends = []
@@ -288,6 +290,9 @@ class CarController(CarControllerBase):
     new_actuators.steerOutputCan = apply_steer
     new_actuators.steeringAngleDeg = self.last_angle
     new_actuators.accel = self.accel
+
+    new_actuators.debug = self.debug
+    new_actuators.debug2 = self.debug2
 
     self.frame += 1
     return new_actuators, can_sends
