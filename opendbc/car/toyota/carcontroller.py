@@ -49,7 +49,7 @@ class CarController(CarControllerBase):
     self.steer_rate_counter = 0
     self.distance_button = 0
 
-    self.pitch = FirstOrderFilter(0, 1.5, DT_CTRL * 3)
+    self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
 
     self.pcm_accel_compensation = FirstOrderFilter(0, 0.5, DT_CTRL * 3)
 
