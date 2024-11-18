@@ -44,6 +44,9 @@ def create_all(output_path: str):
   for f in glob.glob(f"{output_path}/*{generated_suffix}"):
     os.remove(f)
 
+  # Create output directory if it doesn't exist
+  os.makedirs(output_path, exist_ok=True)
+
   # run python generator scripts first
   for f in glob.glob(f"{generator_path}/*/*.py"):
     subprocess.check_call(f)
