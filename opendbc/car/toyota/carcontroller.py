@@ -80,7 +80,8 @@ class CarController(CarControllerBase):
     lat_active = CC.latActive and abs(CS.out.steeringTorque) < MAX_USER_TORQUE
 
     if len(CC.orientationNED) == 3:
-      self.pitch.update(CC.orientationNED[1])
+      # self.pitch.update(CC.orientationNED[1])
+      self.pitch.x = CC.orientationNED[1]
 
     # *** control msgs ***
     can_sends = []
@@ -198,12 +199,12 @@ class CarController(CarControllerBase):
 
         # calculate amount of acceleration PCM should apply to reach target, given pitch
         accel_due_to_pitch = math.sin(self.pitch.x) * ACCELERATION_DUE_TO_GRAVITY
-        net_acceleration_request = pcm_accel_cmd + accel_due_to_pitch
+        net_acceleration_request = pcm_accel_cmd + accel_due_to_pitch  # clip!
 
         # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot and imprecise braking
         if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
           # filter ACCEL_NET so it more closely matches aEgo delay for error correction
-          self.pcm_accel_net.update(CS.pcm_accel_net)
+          self.pcm_accel_net.update(CS.pcm_accel_net - accel_due_to_pitch)
 
           # Our model of the PCM's acceleration request isn't perfect, so we learn the offset when moving
           new_pcm_accel_net = CS.pcm_accel_net
@@ -211,7 +212,7 @@ class CarController(CarControllerBase):
             # TODO: check if maintaining the offset from before stopping is beneficial
             self.pcm_accel_net_offset.x = 0.0
           else:
-            new_pcm_accel_net -= self.pcm_accel_net_offset.update((self.pcm_accel_net.x - accel_due_to_pitch) - CS.out.aEgo)
+            new_pcm_accel_net -= self.pcm_accel_net_offset.update(self.pcm_accel_net.x - CS.out.aEgo)
 
           # let PCM handle stopping for now
           pcm_accel_compensation = 0.0
