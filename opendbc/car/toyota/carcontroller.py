@@ -80,9 +80,7 @@ class CarController(CarControllerBase):
     lat_active = CC.latActive and abs(CS.out.steeringTorque) < MAX_USER_TORQUE
 
     if len(CC.orientationNED) == 3:
-      self.debug = CC.orientationNED[1]
       self.pitch.update(CC.orientationNED[1])
-      self.debug2 = self.pitch.x
 
     # *** control msgs ***
     can_sends = []
@@ -290,9 +288,6 @@ class CarController(CarControllerBase):
     new_actuators.steerOutputCan = apply_steer
     new_actuators.steeringAngleDeg = self.last_angle
     new_actuators.accel = self.accel
-
-    new_actuators.debug = self.debug
-    new_actuators.debug2 = self.debug2
 
     self.frame += 1
     return new_actuators, can_sends
