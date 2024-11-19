@@ -249,7 +249,7 @@ class CarController(CarControllerBase):
 
         if net_acceleration_request_min < 0.1 or stopping or not CC.longActive:
           self.permit_braking = True
-        elif net_acceleration_request_min > 0.3:
+        elif net_acceleration_request_min > 0.2:
           self.permit_braking = False
 
         pcm_accel_cmd = clip(pcm_accel_cmd, self.params.ACCEL_MIN, self.params.ACCEL_MAX)
