@@ -47,7 +47,7 @@ class CarInterface(CarInterfaceBase):
     found_ecus = [fw.ecu for fw in car_fw]
     ret.enableDsu = len(found_ecus) > 0 and Ecu.dsu not in found_ecus and candidate not in (NO_DSU_CAR | UNSUPPORTED_DSU_CAR)
 
-    if candidate == CAR.LEXUS_ES_TSS2 and Ecu.hybrid not in found_ecus:
+    if candidate in (TSS2_CAR - SECOC_CAR - {CAR.LEXUS_NX_TSS2, CAR.TOYOTA_ALPHARD_TSS2, CAR.LEXUS_IS_TSS2}):
       ret.flags |= ToyotaFlags.RAISED_ACCEL_LIMIT.value
 
     if candidate == CAR.TOYOTA_PRIUS:
