@@ -240,7 +240,8 @@ class CarController(CarControllerBase):
 
         # Along with rate limiting positive jerk above, this greatly improves gas response time
         # Consider the net acceleration request that the PCM should be applying (pitch included)
-        net_acceleration_request_min = min(actuators.accel + accel_due_to_pitch, net_acceleration_request)
+        # net_acceleration_request_min = min(actuators.accel + accel_due_to_pitch, net_acceleration_request)
+        net_acceleration_request_min = actuators.accel + accel_due_to_pitch
 
         # Prevents releasing brakes while stopping by considering engine creep force
         # TODO: should this be if CS.neutral_accel > 0 instead?
