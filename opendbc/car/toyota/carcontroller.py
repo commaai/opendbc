@@ -80,6 +80,7 @@ class CarController(CarControllerBase):
     lat_active = CC.latActive and abs(CS.out.steeringTorque) < MAX_USER_TORQUE
 
     if len(CC.orientationNED) == 3:
+      # self.pitch.x = CC.orientationNED[1]
       self.pitch.update(CC.orientationNED[1])
 
     # *** control msgs ***
@@ -198,7 +199,14 @@ class CarController(CarControllerBase):
 
         # calculate amount of acceleration PCM should apply to reach target, given pitch
         accel_due_to_pitch = math.sin(self.pitch.x) * ACCELERATION_DUE_TO_GRAVITY
+        # TODO: add neutral force offset to this variable to avoid needing to calculate it twice
+        #  but it's not a zero-diff change, we filter pcm_accel_net which includes neutral force now
         net_acceleration_request = pcm_accel_cmd + accel_due_to_pitch
+
+        # This isn't needed because pcm_accel_net already includes neutral accel
+        # # TODO: should this be if CS.neutral_accel > 0 instead?
+        # if CS.acc_braking:
+        #   net_acceleration_request -= CS.neutral_accel
 
         # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot and imprecise braking
         if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
@@ -233,6 +241,12 @@ class CarController(CarControllerBase):
         # Along with rate limiting positive jerk above, this greatly improves gas response time
         # Consider the net acceleration request that the PCM should be applying (pitch included)
         net_acceleration_request_min = min(actuators.accel + accel_due_to_pitch, net_acceleration_request)
+
+        # Prevents releasing brakes while stopping by considering engine creep force
+        # TODO: should this be if CS.neutral_accel > 0 instead?
+        if CS.acc_braking:
+          net_acceleration_request_min -= CS.neutral_accel
+
         if net_acceleration_request_min < 0.1 or stopping or not CC.longActive:
           self.permit_braking = True
         elif net_acceleration_request_min > 0.2:
