@@ -59,10 +59,10 @@ class CarController(CarControllerBase):
 
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
 
-    self.pcm_accel_compensation = FirstOrderFilter(0, 1.0, DT_CTRL * 3)  # TODO 0.5
+    self.pcm_accel_compensation = FirstOrderFilter(0, 0.5, DT_CTRL * 3)  # TODO 0.5
 
     # the PCM's reported acceleration request can sometimes mismatch aEgo, close the loop
-    self.pcm_accel_net_offset = FirstOrderFilter(0, 1.5, DT_CTRL * 3)  # TODO 1.0
+    self.pcm_accel_net_offset = FirstOrderFilter(0, 1.0, DT_CTRL * 3)  # TODO 1.0
 
     # aEgo also often lags behind the PCM request due to physical brake lag which varies by car,
     # so we error correct on the filtered PCM acceleration request using the actuator delay.
@@ -71,7 +71,7 @@ class CarController(CarControllerBase):
     self.request = FirstOrderFilter(0, self.CP.longitudinalActuatorDelay, DT_CTRL * 3)
     if not any(fw.ecu == Ecu.hybrid for fw in self.CP.carFw):
       self.pcm_accel_net.update_alpha(self.CP.longitudinalActuatorDelay + 0.2)
-      self.request.update_alpha(self.CP.longitudinalActuatorDelay + 0.2)  # TODO +0.1
+      self.request.update_alpha(self.CP.longitudinalActuatorDelay + 0.1)  # TODO +0.1
 
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.accel = 0
