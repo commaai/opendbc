@@ -3,7 +3,7 @@ from opendbc.car import Bus, carlog, apply_meas_steer_torque_limits, apply_std_s
                         make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY, DT_CTRL
 from opendbc.car.can_definitions import CanData
 from opendbc.car.common.filter_simple import FirstOrderFilter
-from opendbc.car.common.numpy_fast import clip
+from opendbc.car.common.numpy_fast import clip, interp
 from opendbc.car.secoc import add_mac, build_sync_mac
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.toyota import toyotacan
@@ -49,9 +49,15 @@ class CarController(CarControllerBase):
     self.steer_rate_counter = 0
     self.distance_button = 0
 
+    self.debug = 0
+    self.debug2 = 0
+    self.debug3 = 0
+
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
 
     self.pcm_accel_compensation = FirstOrderFilter(0, 0.25, DT_CTRL * 3)
+
+    self.aego = FirstOrderFilter(0, 0.3, DT_CTRL * 3)
 
     # the PCM's reported acceleration request can sometimes mismatch aEgo, close the loop
     self.pcm_accel_net_offset = FirstOrderFilter(0, 1.0, DT_CTRL * 3)
@@ -61,7 +67,7 @@ class CarController(CarControllerBase):
     # TODO: move the delay into the interface
     self.pcm_accel_net = FirstOrderFilter(0, self.CP.longitudinalActuatorDelay, DT_CTRL * 3)
     if not any(fw.ecu == Ecu.hybrid for fw in self.CP.carFw):
-      self.pcm_accel_net.update_alpha(self.CP.longitudinalActuatorDelay + 0.2)
+      self.pcm_accel_net.update_alpha((self.CP.longitudinalActuatorDelay + 0.2))
 
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.accel = 0
@@ -190,6 +196,11 @@ class CarController(CarControllerBase):
           else:
             self.distance_button = 0
 
+        prev_aego = self.aego.x
+        self.aego.update(CS.pcm_accel_net)
+        jerk = (self.aego.x - prev_aego) / DT_CTRL
+        self.debug3 = jerk
+
         # internal PCM gas command can get stuck unwinding from negative accel so we apply a generous rate limit
         pcm_accel_cmd = actuators.accel
         if CC.longActive:
@@ -204,6 +215,7 @@ class CarController(CarControllerBase):
         if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
           # filter ACCEL_NET so it more closely matches aEgo delay for error correction
           self.pcm_accel_net.update(CS.pcm_accel_net)
+          # self.debug3 = max(self.pcm_accel_net.x, CS.pcm_accel_net)
 
           # Our model of the PCM's acceleration request isn't perfect, so we learn the offset when moving
           new_pcm_accel_net = CS.pcm_accel_net
@@ -211,7 +223,13 @@ class CarController(CarControllerBase):
             # TODO: check if maintaining the offset from before stopping is beneficial
             self.pcm_accel_net_offset.x = 0.0
           else:
+            self.pcm_accel_net_offset.update_alpha(interp(abs(jerk), [0.5, 1], [1, 3]))
+
             new_pcm_accel_net -= self.pcm_accel_net_offset.update((self.pcm_accel_net.x - accel_due_to_pitch) - CS.out.aEgo)
+
+          # new_pcm_accel_net should be the max of filtered and
+          self.debug = new_pcm_accel_net
+          self.debug2 = CS.pcm_accel_net
 
           # let PCM handle stopping for now
           pcm_accel_compensation = 0.0
@@ -288,6 +306,10 @@ class CarController(CarControllerBase):
     new_actuators.steerOutputCan = apply_steer
     new_actuators.steeringAngleDeg = self.last_angle
     new_actuators.accel = self.accel
+
+    new_actuators.debug = self.debug
+    new_actuators.debug2 = self.debug2
+    new_actuators.debug3 = self.debug3
 
     self.frame += 1
     return new_actuators, can_sends
