@@ -51,6 +51,8 @@ class CarController(CarControllerBase):
 
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
 
+    self.aego = FirstOrderFilter(0, 0.15 * 2, DT_CTRL)
+
     self.pcm_accel_compensation = FirstOrderFilter(0, 0.25, DT_CTRL * 3)
 
     # the PCM's reported acceleration request can sometimes mismatch aEgo, close the loop
@@ -69,6 +71,7 @@ class CarController(CarControllerBase):
 
     self.debug = 0
     self.debug2 = 0
+    self.debug3 = 0
 
     self.secoc_lka_message_counter = 0
     self.secoc_lta_message_counter = 0
@@ -84,6 +87,15 @@ class CarController(CarControllerBase):
 
     if len(CC.orientationNED) == 3:
       self.pitch.update(CC.orientationNED[1])
+
+    prev_aego = self.aego.x
+    # if stopping or CS.out.standstill:
+    #   self.aego.x = 0
+    # else:
+    self.aego.update(CS.out.aEgo)
+    self.debug2 = self.aego.x
+
+    self.debug3 = (self.aego.x - prev_aego) / DT_CTRL
 
     # *** control msgs ***
     can_sends = []
@@ -296,6 +308,7 @@ class CarController(CarControllerBase):
 
     new_actuators.debug = self.debug
     new_actuators.debug2 = self.debug2
+    new_actuators.debug3 = self.debug3
 
     self.frame += 1
     return new_actuators, can_sends
