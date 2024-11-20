@@ -51,7 +51,7 @@ class CarController(CarControllerBase):
 
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
 
-    self.pcm_accel_compensation = FirstOrderFilter(0, 0.5, DT_CTRL * 3)
+    self.pcm_accel_compensation = FirstOrderFilter(0, 0.25, DT_CTRL * 3)
 
     # the PCM's reported acceleration request can sometimes mismatch aEgo, close the loop
     self.pcm_accel_net_offset = FirstOrderFilter(0, 1.0, DT_CTRL * 3)
@@ -61,11 +61,14 @@ class CarController(CarControllerBase):
     # TODO: move the delay into the interface
     self.pcm_accel_net = FirstOrderFilter(0, self.CP.longitudinalActuatorDelay, DT_CTRL * 3)
     if not any(fw.ecu == Ecu.hybrid for fw in self.CP.carFw):
-      self.pcm_accel_net.update_alpha(self.CP.longitudinalActuatorDelay + 0.2)
+      self.pcm_accel_net.update_alpha((self.CP.longitudinalActuatorDelay + 0.2))
 
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.accel = 0
     self.prev_accel = 0
+
+    self.debug = 0
+    self.debug2 = 0
 
     self.secoc_lka_message_counter = 0
     self.secoc_lta_message_counter = 0
@@ -197,13 +200,15 @@ class CarController(CarControllerBase):
         self.prev_accel = pcm_accel_cmd
 
         # calculate amount of acceleration PCM should apply to reach target, given pitch
-        accel_due_to_pitch = math.sin(self.pitch.x) * ACCELERATION_DUE_TO_GRAVITY
+        accel_due_to_pitch = 0.0  # math.sin(self.pitch.x) * ACCELERATION_DUE_TO_GRAVITY
         net_acceleration_request = pcm_accel_cmd + accel_due_to_pitch
 
         # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot and imprecise braking
         if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
           # filter ACCEL_NET so it more closely matches aEgo delay for error correction
           self.pcm_accel_net.update(CS.pcm_accel_net)
+
+          self.debug = self.pcm_accel_net.x
 
           # Our model of the PCM's acceleration request isn't perfect, so we learn the offset when moving
           new_pcm_accel_net = CS.pcm_accel_net
@@ -288,6 +293,9 @@ class CarController(CarControllerBase):
     new_actuators.steerOutputCan = apply_steer
     new_actuators.steeringAngleDeg = self.last_angle
     new_actuators.accel = self.accel
+
+    new_actuators.debug = self.debug
+    new_actuators.debug2 = self.debug2
 
     self.frame += 1
     return new_actuators, can_sends
