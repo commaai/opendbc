@@ -57,7 +57,7 @@ class CarController(CarControllerBase):
 
     self.pcm_accel_compensation = FirstOrderFilter(0, 0.25, DT_CTRL * 3)
 
-    self.aego = FirstOrderFilter(0, 0.3, DT_CTRL * 3)
+    self.aego = FirstOrderFilter(0, 0.3, DT_CTRL)
 
     # the PCM's reported acceleration request can sometimes mismatch aEgo, close the loop
     self.pcm_accel_net_offset = FirstOrderFilter(0, 1.0, DT_CTRL * 3)
@@ -87,6 +87,11 @@ class CarController(CarControllerBase):
 
     if len(CC.orientationNED) == 3:
       self.pitch.update(CC.orientationNED[1])
+
+    prev_aego = self.aego.x
+    self.aego.update(CS.pcm_accel_net)
+    jerk = (self.aego.x - prev_aego) / DT_CTRL
+    self.debug3 = jerk
 
     # *** control msgs ***
     can_sends = []
@@ -195,11 +200,6 @@ class CarController(CarControllerBase):
             self.distance_button = not self.distance_button
           else:
             self.distance_button = 0
-
-        prev_aego = self.aego.x
-        self.aego.update(CS.pcm_accel_net)
-        jerk = (self.aego.x - prev_aego) / DT_CTRL
-        self.debug3 = jerk
 
         # internal PCM gas command can get stuck unwinding from negative accel so we apply a generous rate limit
         pcm_accel_cmd = actuators.accel
