@@ -5,6 +5,7 @@ from opendbc.car import Bus, carlog, apply_meas_steer_torque_limits, apply_std_s
                         make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY, DT_CTRL
 from opendbc.car.can_definitions import CanData
 from opendbc.car.common.filter_simple import FirstOrderFilter
+from opendbc.car.common.pid import PIDController
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car.secoc import add_mac, build_sync_mac
 from opendbc.car.interfaces import CarControllerBase
@@ -51,15 +52,17 @@ class CarController(CarControllerBase):
     self.steer_rate_counter = 0
     self.distance_button = 0
 
+    self.pid = PIDController(2.0, 1.0, rate=33.33333333333)
+
     self.pcm_accel_net_deque = deque([0] * 100, maxlen=100)
     self.cur_idx = 49
 
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
 
-    self.pcm_accel_compensation = FirstOrderFilter(0, 1.0, DT_CTRL * 3)
+    self.pcm_accel_compensation = FirstOrderFilter(0, 1.0, DT_CTRL * 3)  # TODO 0.5
 
     # the PCM's reported acceleration request can sometimes mismatch aEgo, close the loop
-    self.pcm_accel_net_offset = FirstOrderFilter(0, 1.5, DT_CTRL * 3)
+    self.pcm_accel_net_offset = FirstOrderFilter(0, 1.5, DT_CTRL * 3)  # TODO 1.0
 
     # aEgo also often lags behind the PCM request due to physical brake lag which varies by car,
     # so we error correct on the filtered PCM acceleration request using the actuator delay.
@@ -68,7 +71,7 @@ class CarController(CarControllerBase):
     self.request = FirstOrderFilter(0, self.CP.longitudinalActuatorDelay, DT_CTRL * 3)
     if not any(fw.ecu == Ecu.hybrid for fw in self.CP.carFw):
       self.pcm_accel_net.update_alpha(self.CP.longitudinalActuatorDelay + 0.2)
-      self.request.update_alpha(self.CP.longitudinalActuatorDelay + 0.2)
+      self.request.update_alpha(self.CP.longitudinalActuatorDelay + 0.2)  # TODO +0.1
 
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.accel = 0
@@ -250,15 +253,20 @@ class CarController(CarControllerBase):
           # let PCM handle stopping for now
           pcm_accel_compensation = 0.0
           if not stopping:
+            self.pid.neg_limit = pcm_accel_cmd - self.params.ACCEL_MAX
+            self.pid.pos_limit = pcm_accel_cmd - self.params.ACCEL_MIN
+            pcm_accel_compensation = self.pid.update(new_pcm_accel_net - self.request.x)
+
             #pcm_accel_compensation = 2.0 * (new_pcm_accel_net - net_acceleration_request)
             #pcm_accel_compensation = 2.0 * (new_pcm_accel_net - max(self.request.x, net_acceleration_request))
-            pcm_accel_compensation = 2.0 * (new_pcm_accel_net - self.request.x)
+            # pcm_accel_compensation = 2.0 * (new_pcm_accel_net - self.request.x)
 
           # prevent compensation windup
-          pcm_accel_compensation = clip(pcm_accel_compensation, pcm_accel_cmd - self.params.ACCEL_MAX,
-                                        pcm_accel_cmd - self.params.ACCEL_MIN)
+          # pcm_accel_compensation = clip(pcm_accel_compensation, pcm_accel_cmd - self.params.ACCEL_MAX,
+          #                               pcm_accel_cmd - self.params.ACCEL_MIN)
 
-          pcm_accel_cmd = pcm_accel_cmd - self.pcm_accel_compensation.update(pcm_accel_compensation)
+          # pcm_accel_cmd = pcm_accel_cmd - self.pcm_accel_compensation.update(pcm_accel_compensation)
+          pcm_accel_cmd = pcm_accel_cmd - pcm_accel_compensation
           self.request.update(net_acceleration_request)
 
         else:
