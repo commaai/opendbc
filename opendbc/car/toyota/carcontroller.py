@@ -50,7 +50,9 @@ class CarController(CarControllerBase):
     self.steer_rate_counter = 0
     self.distance_button = 0
 
-    self.pid = PIDController(0.0, 0.5, k_f=1.0, k_d=0.1, rate=1 / DT_CTRL / 3)
+    self.pid = PIDController(0.0, 0.5, k_f=1.0, k_d=0.1,
+                             pos_limit=self.params.ACCEL_MAX, neg_limit=self.params.ACCEL_MIN,
+                             rate=1 / DT_CTRL / 3)
 
     self.error = FirstOrderFilter(0.0, 0.15, DT_CTRL * 3)
 
@@ -218,8 +220,8 @@ class CarController(CarControllerBase):
           # let PCM handle stopping for now
           pcm_accel_compensation = 0.0
           if not stopping and not CS.out.standstill:
-            self.pid.neg_limit = pcm_accel_cmd - self.params.ACCEL_MAX
-            self.pid.pos_limit = pcm_accel_cmd - self.params.ACCEL_MIN
+            # self.pid.neg_limit = pcm_accel_cmd - self.params.ACCEL_MAX
+            # self.pid.pos_limit = pcm_accel_cmd - self.params.ACCEL_MIN
 
             # TODO: freeze_integrator when stopping or at standstill?
             pcm_accel_cmd = self.pid.update(pcm_accel_cmd - CS.out.aEgo,
