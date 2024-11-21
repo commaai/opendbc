@@ -2,7 +2,7 @@ import copy
 
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
-from opendbc.car import DT_CTRL, create_button_events, structs
+from opendbc.car import Bus, DT_CTRL, create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.common.numpy_fast import mean
@@ -28,7 +28,7 @@ PERM_STEER_FAULTS = (3, 17)
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    can_define = CANDefine(DBC[CP.carFingerprint]["pt"])
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
     self.eps_torque_scale = EPS_SCALE[CP.carFingerprint] / 100.
     self.cluster_speed_hyst_gap = CV.KPH_TO_MS / 2.
     self.cluster_min_speed = CV.KPH_TO_MS / 2.
@@ -53,7 +53,10 @@ class CarState(CarStateBase):
     self.pcm_accel_net = 0.0
     self.secoc_synchronization = None
 
-  def update(self, cp, cp_cam, *_) -> structs.CarState:
+  def update(self, can_parsers) -> structs.CarState:
+    cp = can_parsers[Bus.pt]
+    cp_cam = can_parsers[Bus.cam]
+
     ret = structs.CarState()
     cp_acc = cp_cam if self.CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR) else cp
 
@@ -67,9 +70,8 @@ class CarState(CarStateBase):
       if cp.vl["PCM_CRUISE"]["ACC_BRAKING"]:
         self.pcm_accel_net += min(cp.vl["PCM_CRUISE"]["ACCEL_NET"], 0.0)
 
-      # add creeping force at low speeds only for braking, CLUTCH->ACCEL_NET already shows this
-      neutral_accel = max(cp.vl["PCM_CRUISE"]["NEUTRAL_FORCE"] / self.CP.mass, 0.0)
-      if self.pcm_accel_net + neutral_accel < 0.0:
+        # add creeping force at low speeds only for braking, CLUTCH->ACCEL_NET already shows this
+        neutral_accel = max(cp.vl["PCM_CRUISE"]["NEUTRAL_FORCE"] / self.CP.mass, 0.0)
         self.pcm_accel_net += neutral_accel
 
     ret.doorOpen = any([cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_FL"], cp.vl["BODY_CONTROL_STATE"]["DOOR_OPEN_FR"],
@@ -202,8 +204,8 @@ class CarState(CarStateBase):
     return ret
 
   @staticmethod
-  def get_can_parser(CP):
-    messages = [
+  def get_can_parsers(CP):
+    pt_messages = [
       ("LIGHT_STALK", 1),
       ("BLINKERS_STATE", 0.15),
       ("BODY_CONTROL_STATE", 3),
@@ -219,63 +221,61 @@ class CarState(CarStateBase):
     ]
 
     if CP.flags & ToyotaFlags.SECOC.value:
-      messages += [
+      pt_messages += [
         ("GEAR_PACKET_HYBRID", 60),
         ("SECOC_SYNCHRONIZATION", 10),
         ("GAS_PEDAL", 42),
       ]
     else:
       if CP.carFingerprint not in [CAR.TOYOTA_MIRAI]:
-        messages.append(("ENGINE_RPM", 42))
+        pt_messages.append(("ENGINE_RPM", 42))
 
-      messages += [
+      pt_messages += [
         ("GEAR_PACKET", 1),
       ]
 
     if CP.carFingerprint in (TSS2_CAR - SECOC_CAR - {CAR.LEXUS_NX_TSS2, CAR.TOYOTA_ALPHARD_TSS2, CAR.LEXUS_IS_TSS2}):
-      messages.append(("CLUTCH", 15))
+      pt_messages.append(("CLUTCH", 15))
 
     if CP.carFingerprint in UNSUPPORTED_DSU_CAR:
-      messages.append(("DSU_CRUISE", 5))
-      messages.append(("PCM_CRUISE_ALT", 1))
+      pt_messages.append(("DSU_CRUISE", 5))
+      pt_messages.append(("PCM_CRUISE_ALT", 1))
     else:
-      messages.append(("PCM_CRUISE_2", 33))
+      pt_messages.append(("PCM_CRUISE_2", 33))
 
     if CP.enableBsm:
-      messages.append(("BSM", 1))
+      pt_messages.append(("BSM", 1))
 
     if CP.carFingerprint in RADAR_ACC_CAR and not CP.flags & ToyotaFlags.DISABLE_RADAR.value:
-      messages += [
+      pt_messages += [
         ("PCS_HUD", 1),
         ("ACC_CONTROL", 33),
       ]
 
     if CP.carFingerprint not in (TSS2_CAR - RADAR_ACC_CAR) and not CP.enableDsu and not CP.flags & ToyotaFlags.DISABLE_RADAR.value:
-      messages += [
+      pt_messages += [
         ("PRE_COLLISION", 33),
       ]
 
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, 0)
-
-  @staticmethod
-  def get_cam_can_parser(CP):
-    messages = []
-
+    cam_messages = []
     if CP.carFingerprint != CAR.TOYOTA_PRIUS_V:
-      messages += [
+      cam_messages += [
         ("LKAS_HUD", 1),
       ]
 
     if CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR):
-      messages += [
+      cam_messages += [
         ("ACC_CONTROL", 33),
         ("PCS_HUD", 1),
       ]
 
       # TODO: Figure out new layout of the PRE_COLLISION message
       if not CP.flags & ToyotaFlags.SECOC.value:
-        messages += [
+        cam_messages += [
           ("PRE_COLLISION", 33),
         ]
 
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, 2)
+    return {
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 0),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, 2),
+    }
