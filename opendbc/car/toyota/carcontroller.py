@@ -50,6 +50,7 @@ class CarController(CarControllerBase):
     self.distance_button = 0
 
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
+    self.net_acceleration_request = FirstOrderFilter(0, 0.15, DT_CTRL * 3)
 
     self.pcm_accel_compensation = FirstOrderFilter(0, 0.5, DT_CTRL * 3)
 
@@ -198,7 +199,7 @@ class CarController(CarControllerBase):
 
         # calculate amount of acceleration PCM should apply to reach target, given pitch
         accel_due_to_pitch = math.sin(self.pitch.x) * ACCELERATION_DUE_TO_GRAVITY
-        net_acceleration_request = pcm_accel_cmd + accel_due_to_pitch
+        self.net_acceleration_request.update(pcm_accel_cmd + accel_due_to_pitch)
 
         # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot and imprecise braking
         if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
@@ -216,7 +217,7 @@ class CarController(CarControllerBase):
           # let PCM handle stopping for now
           pcm_accel_compensation = 0.0
           if not stopping:
-            pcm_accel_compensation = 2.0 * (new_pcm_accel_net - net_acceleration_request)
+            pcm_accel_compensation = 2.0 * (new_pcm_accel_net - self.net_acceleration_request.x)
 
           # prevent compensation windup
           pcm_accel_compensation = clip(pcm_accel_compensation, pcm_accel_cmd - self.params.ACCEL_MAX,
@@ -227,6 +228,7 @@ class CarController(CarControllerBase):
         else:
           self.pcm_accel_compensation.x = 0.0
           self.pcm_accel_net_offset.x = 0.0
+          self.net_acceleration_request.x = 0.0
           self.pcm_accel_net.x = CS.pcm_accel_net
           self.permit_braking = True
 
