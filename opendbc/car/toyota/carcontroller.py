@@ -215,7 +215,7 @@ class CarController(CarControllerBase):
           else:
             new_pcm_accel_net -= self.pcm_accel_net_offset.update((self.pcm_accel_net.x - accel_due_to_pitch) - CS.out.aEgo)
 
-          # let PCM handle stopping for now
+          # let PCM handle stopping for now, error correct on a delayed acceleration request
           pcm_accel_compensation = 0.0
           if not stopping:
             pcm_accel_compensation = 2.0 * (new_pcm_accel_net - self.net_acceleration_request.x)
