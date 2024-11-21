@@ -199,7 +199,8 @@ class CarController(CarControllerBase):
 
         # calculate amount of acceleration PCM should apply to reach target, given pitch
         accel_due_to_pitch = math.sin(self.pitch.x) * ACCELERATION_DUE_TO_GRAVITY
-        self.net_acceleration_request.update(pcm_accel_cmd + accel_due_to_pitch)
+        net_acceleration_request = pcm_accel_cmd + accel_due_to_pitch
+        self.net_acceleration_request.update(net_acceleration_request)
 
         # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot and imprecise braking
         if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
@@ -234,7 +235,7 @@ class CarController(CarControllerBase):
 
         # Along with rate limiting positive jerk above, this greatly improves gas response time
         # Consider the net acceleration request that the PCM should be applying (pitch included)
-        net_acceleration_request_min = min(actuators.accel + accel_due_to_pitch, self.net_acceleration_request.x)
+        net_acceleration_request_min = min(actuators.accel + accel_due_to_pitch, net_acceleration_request)
         if net_acceleration_request_min < 0.1 or stopping or not CC.longActive:
           self.permit_braking = True
         elif net_acceleration_request_min > 0.2:
