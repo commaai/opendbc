@@ -69,7 +69,6 @@ class CarController(CarControllerBase):
     # so we error correct on the filtered PCM acceleration request using the actuator delay.
     # TODO: move the delay into the interface
     self.pcm_accel_net = FirstOrderFilter(0, self.CP.longitudinalActuatorDelay, DT_CTRL * 3)
-    self.net_acceleration_request = FirstOrderFilter(0, self.CP.longitudinalActuatorDelay, DT_CTRL * 3)
     if not any(fw.ecu == Ecu.hybrid for fw in self.CP.carFw):
       self.pcm_accel_net.update_alpha(self.CP.longitudinalActuatorDelay + 0.2)
 
@@ -264,6 +263,7 @@ class CarController(CarControllerBase):
             # pcm_accel_compensation = 2.0 * (new_pcm_accel_net - self.net_acceleration_request.x)
           else:
             self.pid.reset()
+            self.pcm_accel_compensation.x = 0.0
 
           # prevent compensation windup
           # pcm_accel_compensation = clip(pcm_accel_compensation, pcm_accel_cmd - self.params.ACCEL_MAX,
@@ -271,7 +271,6 @@ class CarController(CarControllerBase):
 
           pcm_accel_cmd = pcm_accel_cmd - self.pcm_accel_compensation.update(pcm_accel_compensation)
           #pcm_accel_cmd = pcm_accel_cmd - pcm_accel_compensation
-          self.net_acceleration_request.update(net_acceleration_request)
 
         else:
           self.pcm_accel_compensation.x = 0.0
@@ -280,7 +279,6 @@ class CarController(CarControllerBase):
           self.net_acceleration_request.x = 0.0
           self.pcm_accel_net.x = CS.pcm_accel_net
           self.permit_braking = True
-          self.net_acceleration_request.x = 0
 
         # Along with rate limiting positive jerk above, this greatly improves gas response time
         # Consider the net acceleration request that the PCM should be applying (pitch included)
