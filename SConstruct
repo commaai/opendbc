@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sysconfig
+import sys
 import numpy as np
 
 arch = subprocess.check_output(["uname", "-m"], encoding='utf8').rstrip()
@@ -60,8 +61,9 @@ envCython["CCFLAGS"] += ["-Wno-#warnings", "-Wno-shadow", "-Wno-deprecated-decla
 envCython["CCFLAGS"].remove("-Werror")
 
 python_libs = []
-if arch == "Darwin":
-  envCython["LINKFLAGS"] = ["-bundle", "-undefined", "dynamic_lookup"]
+# macOS (both Intel and Apple Silicon)
+if sys.platform == "darwin":
+    envCython["LINKFLAGS"] = ["-bundle", "-undefined", "dynamic_lookup"]
 elif arch == "aarch64":
   envCython["LINKFLAGS"] = ["-shared"]
 
