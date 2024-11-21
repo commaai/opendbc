@@ -52,7 +52,7 @@ class CarController(CarControllerBase):
     self.steer_rate_counter = 0
     self.distance_button = 0
 
-    self.pid = PIDController(1.0,0.55, rate=33.33333333333)
+    self.pid = PIDController(1.0, 0.5, rate=33.33333333333)
 
     self.pcm_accel_net_deque = deque([0] * 100, maxlen=100)
     self.cur_idx = 49
@@ -215,29 +215,29 @@ class CarController(CarControllerBase):
 
         # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot and imprecise braking
         if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
-          #jerk1 = float(np.mean(np.abs(np.diff(list(self.pcm_accel_net_deque)[-50:])))) * 100
-          #jerk2 = abs(self.pcm_accel_net_deque[-1] - self.pcm_accel_net_deque[-50]) * 2
-          #jerk3 = abs(self.pcm_accel_net_filter.x - ((self.pcm_accel_net_deque[-1] - accel_due_to_pitch) - CS.out.aEgo))
-          # self.debug3 = jerk1
-          # self.debug4 = jerk3
-          offset = 0
-          if CS.out.standstill or stopping:# or (abs(self.pcm_accel_net_deque[-1] - self.pcm_accel_net_deque[-10]) * 10) > 1.5:
-            self.pcm_accel_net_offset.x = 0
-            # self.pid.reset()
-            new_pcm_accel_net = CS.pcm_accel_net
-          else:
-            # TODO: decide a good value for past pcm accel net
-            # find closest value to aEgo in pcm_accel_net_deque
-            arr = np.array(self.pcm_accel_net_deque) - accel_due_to_pitch
-            idx = (np.abs(arr - CS.out.aEgo)).argmin()
-            # TODO: move into 33hz update loop!
-            self.cur_idx = clip(idx, self.cur_idx - 3, self.cur_idx + 3)
-            self.debug3 = round(float(self.cur_idx))
-            print(self.cur_idx)
-
-            offset = self.pcm_accel_net_offset.update(float(arr[round(self.cur_idx)] - CS.out.aEgo))
-          #offset = 0
-          new_pcm_accel_net = CS.pcm_accel_net - offset
+          # #jerk1 = float(np.mean(np.abs(np.diff(list(self.pcm_accel_net_deque)[-50:])))) * 100
+          # #jerk2 = abs(self.pcm_accel_net_deque[-1] - self.pcm_accel_net_deque[-50]) * 2
+          # #jerk3 = abs(self.pcm_accel_net_filter.x - ((self.pcm_accel_net_deque[-1] - accel_due_to_pitch) - CS.out.aEgo))
+          # # self.debug3 = jerk1
+          # # self.debug4 = jerk3
+          # offset = 0
+          # if CS.out.standstill or stopping:# or (abs(self.pcm_accel_net_deque[-1] - self.pcm_accel_net_deque[-10]) * 10) > 1.5:
+          #   self.pcm_accel_net_offset.x = 0
+          #   # self.pid.reset()
+          #   new_pcm_accel_net = CS.pcm_accel_net
+          # else:
+          #   # TODO: decide a good value for past pcm accel net
+          #   # find closest value to aEgo in pcm_accel_net_deque
+          #   arr = np.array(self.pcm_accel_net_deque) - accel_due_to_pitch
+          #   idx = (np.abs(arr - CS.out.aEgo)).argmin()
+          #   # TODO: move into 33hz update loop!
+          #   self.cur_idx = clip(idx, self.cur_idx - 3, self.cur_idx + 3)
+          #   self.debug3 = round(float(self.cur_idx))
+          #   print(self.cur_idx)
+          #
+          #   offset = self.pcm_accel_net_offset.update(float(arr[round(self.cur_idx)] - CS.out.aEgo))
+          # #offset = 0
+          # new_pcm_accel_net = CS.pcm_accel_net - offset
 
           # filter ACCEL_NET so it more closely matches aEgo delay for error correction
           self.pcm_accel_net.update(CS.pcm_accel_net)
