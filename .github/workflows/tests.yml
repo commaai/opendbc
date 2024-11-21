@@ -22,19 +22,15 @@ jobs:
         #run: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
     steps:
     - uses: actions/checkout@v4
-    - name: setup python 3.12
-      uses: actions/setup-python@v5
-      with:
-        python-version: 3.12
-    - name: Install coreutils on macOS
+    - name: nproc alias for macOS
       if: matrix.os == 'macos-latest'
       run: |
-        brew update
-        brew install coreutils
+        # Create alias for nproc using sysctl
+        echo 'alias nproc="sysctl -n hw.ncpu"' >> $GITHUB_ENV
     - name: install uv and dependencies
       run: |
         curl -LsSf https://astral.sh/uv/install.sh | sh
-        uv venv
+        uv venv --python 3.12
         # TODO: remove setuptools once https://github.com/cython/cython/issues/5751 is fixed
         uv pip install -e .[testing,docs] setuptools
     - run: uv run scons -j$(nproc)
