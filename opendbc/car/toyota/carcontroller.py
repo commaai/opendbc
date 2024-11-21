@@ -52,7 +52,7 @@ class CarController(CarControllerBase):
     self.steer_rate_counter = 0
     self.distance_button = 0
 
-    self.pid = PIDController(2.0, 1.0, rate=33.33333333333)
+    self.pid = PIDController(1.0,0.55, rate=33.33333333333)
 
     self.pcm_accel_net_deque = deque([0] * 100, maxlen=100)
     self.cur_idx = 49
@@ -71,7 +71,7 @@ class CarController(CarControllerBase):
     self.request = FirstOrderFilter(0, self.CP.longitudinalActuatorDelay, DT_CTRL * 3)
     if not any(fw.ecu == Ecu.hybrid for fw in self.CP.carFw):
       self.pcm_accel_net.update_alpha(self.CP.longitudinalActuatorDelay + 0.2)
-      self.request.update_alpha(self.CP.longitudinalActuatorDelay + 0.1)  # TODO +0.1
+      self.request.update_alpha(self.CP.longitudinalActuatorDelay)  # TODO +0.1
 
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.accel = 0
@@ -260,17 +260,20 @@ class CarController(CarControllerBase):
             #pcm_accel_compensation = 2.0 * (new_pcm_accel_net - net_acceleration_request)
             #pcm_accel_compensation = 2.0 * (new_pcm_accel_net - max(self.request.x, net_acceleration_request))
             # pcm_accel_compensation = 2.0 * (new_pcm_accel_net - self.request.x)
+          else:
+            self.pid.reset()
 
           # prevent compensation windup
           # pcm_accel_compensation = clip(pcm_accel_compensation, pcm_accel_cmd - self.params.ACCEL_MAX,
           #                               pcm_accel_cmd - self.params.ACCEL_MIN)
 
-          # pcm_accel_cmd = pcm_accel_cmd - self.pcm_accel_compensation.update(pcm_accel_compensation)
-          pcm_accel_cmd = pcm_accel_cmd - pcm_accel_compensation
+          pcm_accel_cmd = pcm_accel_cmd - self.pcm_accel_compensation.update(pcm_accel_compensation)
+          #pcm_accel_cmd = pcm_accel_cmd - pcm_accel_compensation
           self.request.update(net_acceleration_request)
 
         else:
           self.pcm_accel_compensation.x = 0.0
+          self.pid.reset()
           self.pcm_accel_net_offset.x = 0.0
           self.pcm_accel_net.x = CS.pcm_accel_net
           self.permit_braking = True
