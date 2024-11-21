@@ -2,6 +2,7 @@ import math
 from opendbc.car import Bus, carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
                         make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY, DT_CTRL
 from opendbc.car.can_definitions import CanData
+from opendbc.car.common.pid import PIDController
 from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car.secoc import add_mac, build_sync_mac
@@ -19,7 +20,7 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 
 # The up limit allows the brakes/gas to unwind quickly leaving a stop,
 # the down limit roughly matches the rate of ACCEL_NET, reducing PCM compensation windup
-ACCEL_WINDUP_LIMIT = 0.5  # m/s^2 / frame
+ACCEL_WINDUP_LIMIT = 2.0 * DT_CTRL * 3  # m/s^2 / frame
 ACCEL_WINDDOWN_LIMIT = -4.0 * DT_CTRL * 3  # m/s^2 / frame
 
 # LKA limits
@@ -48,6 +49,10 @@ class CarController(CarControllerBase):
     self.permit_braking = True
     self.steer_rate_counter = 0
     self.distance_button = 0
+
+    self.pid = PIDController(0.0, 0.5, k_f=1.0, k_d=0.1, rate=1 / DT_CTRL / 3)
+
+    self.error = FirstOrderFilter(0.0, 0.15, DT_CTRL * 3)
 
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
     self.net_acceleration_request = FirstOrderFilter(0, 0.15, DT_CTRL * 3)
@@ -198,12 +203,39 @@ class CarController(CarControllerBase):
         self.prev_accel = pcm_accel_cmd
 
         # calculate amount of acceleration PCM should apply to reach target, given pitch
-        accel_due_to_pitch = math.sin(self.pitch.x) * ACCELERATION_DUE_TO_GRAVITY
-        net_acceleration_request = pcm_accel_cmd + accel_due_to_pitch
-        self.net_acceleration_request.update(net_acceleration_request)
+        # accel_due_to_pitch = math.sin(self.pitch.x) * ACCELERATION_DUE_TO_GRAVITY
+        # net_acceleration_request = pcm_accel_cmd + accel_due_to_pitch
+        # self.net_acceleration_request.update(net_acceleration_request)
+
+        if CC.longActive and not CS.out.cruiseState.standstill:
+          # filter ACCEL_NET so it more closely matches aEgo delay for error correction
+          # self.pcm_accel_net.update(CS.pcm_accel_net)
+
+          prev_error = self.error.x
+          self.error.update(pcm_accel_cmd - CS.out.aEgo)
+          error_rate = (self.error.x - prev_error) / (DT_CTRL * 3)
+
+          # let PCM handle stopping for now
+          pcm_accel_compensation = 0.0
+          if not stopping and not CS.out.standstill:
+            self.pid.neg_limit = pcm_accel_cmd - self.params.ACCEL_MAX
+            self.pid.pos_limit = pcm_accel_cmd - self.params.ACCEL_MIN
+
+            # TODO: freeze_integrator when stopping or at standstill?
+            pcm_accel_cmd = self.pid.update(pcm_accel_cmd - CS.out.aEgo,
+                                            error_rate=error_rate, feedforward=pcm_accel_cmd)
+          else:
+            self.pid.reset()
+            self.error.x = 0.0
+
+          # pcm_accel_cmd = pcm_accel_cmd + self.pcm_accel_compensation.update(pcm_accel_compensation)
+
+        else:
+          self.pid.reset()
+          self.error.x = 0.0
 
         # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot and imprecise braking
-        if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
+        if False:  #  self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
           # filter ACCEL_NET so it more closely matches aEgo delay for error correction
           self.pcm_accel_net.update(CS.pcm_accel_net)
 
@@ -218,7 +250,12 @@ class CarController(CarControllerBase):
           # let PCM handle stopping for now, error correct on a delayed acceleration request
           pcm_accel_compensation = 0.0
           if not stopping:
-            pcm_accel_compensation = 2.0 * (new_pcm_accel_net - self.net_acceleration_request.x)
+            self.pid.neg_limit = pcm_accel_cmd - self.params.ACCEL_MAX
+            self.pid.pos_limit = pcm_accel_cmd - self.params.ACCEL_MIN
+
+            pcm_accel_compensation = self.pid.update(new_pcm_accel_net - self.net_acceleration_request.x)
+
+            # pcm_accel_compensation = 2.0 * (new_pcm_accel_net - self.net_acceleration_request.x)
 
           # prevent compensation windup
           pcm_accel_compensation = clip(pcm_accel_compensation, pcm_accel_cmd - self.params.ACCEL_MAX,
