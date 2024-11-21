@@ -53,12 +53,12 @@ class CarController(CarControllerBase):
 
     self.deque = deque([0] * 300, maxlen=300)
 
-    self.pid = PIDController(0, 0.25, k_f=0.0, k_d=0.25,
+    self.pid = PIDController(0, 0.5, k_f=0.0, k_d=0.25,
                              pos_limit=self.params.ACCEL_MAX, neg_limit=self.params.ACCEL_MIN,
                              rate=1 / DT_CTRL / 3)
 
     self.error = FirstOrderFilter(0.0, 2.0, DT_CTRL * 3)
-    self.error_rate = FirstOrderFilter(0.0, 0.15, DT_CTRL * 3)
+    self.error_rate = FirstOrderFilter(0.0, 0.25, DT_CTRL * 3)
     self.prev_error = 0.0
 
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
