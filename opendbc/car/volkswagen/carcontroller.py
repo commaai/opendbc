@@ -1,5 +1,5 @@
 from opendbc.can.packer import CANPacker
-from opendbc.car import DT_CTRL, apply_driver_steer_torque_limits, apply_std_steer_angle_limits, structs
+from opendbc.car import Bus, DT_CTRL, apply_driver_steer_torque_limits, apply_std_steer_angle_limits, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.numpy_fast import clip, interp
 from opendbc.car.interfaces import CarControllerBase
@@ -19,18 +19,16 @@ LongCtrlState = structs.CarControl.Actuators.LongControlState
 
 
 class CarController(CarControllerBase):
-  def __init__(self, dbc_name, CP):
-    super().__init__(dbc_name, CP)
+  def __init__(self, dbc_names, CP):
+    super().__init__(dbc_names, CP)
     self.CCP = CarControllerParams(CP)
-
     if CP.flags & VolkswagenFlags.PQ:
       self.CCS = pqcan
     elif CP.flags & VolkswagenFlags.MEB:
       self.CCS = mebcan
     else:
       self.CCS = mqbcan
-
-    self.packer_pt = CANPacker(dbc_name)
+    self.packer_pt = CANPacker(dbc_names[Bus.pt])
     self.ext_bus = CANBUS.pt if CP.networkLocation == structs.CarParams.NetworkLocation.fwdCamera else CANBUS.cam
 
     self.apply_steer_last = 0

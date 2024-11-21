@@ -52,7 +52,7 @@ testpaths = [
 
 [tool.codespell]
 quiet-level = 3
-ignore-words-list = "alo,ba,bu,deque,hda,grey"
+ignore-words-list = "alo,ba,bu,deque,hda,grey,arange"
 builtin = "clear,rare,informal,code,names,en-GB_to_en-US"
 check-hidden = true
 
@@ -89,6 +89,7 @@ select = [
   "RUF008", "RUF100",
   "TID251",
   "PLR1704",
+  "INP001",
 ]
 ignore = [
   "W292",
@@ -101,6 +102,9 @@ ignore = [
   "NPY002",  # new numpy random syntax is worse
 ]
 flake8-implicit-str-concat.allow-multiline=false
+
+[tool.ruff.lint.per-file-ignores]
+"site_scons/*" = ["ALL"]
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "pytest.main".msg = "pytest.main requires special handling that is easy to mess up!"

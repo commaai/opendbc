@@ -69,7 +69,6 @@ struct OnroadEventDEPRECATED @0x9b1657f34caf3ad3 {
     commIssueAvgFreq @109;
     tooDistracted @54;
     posenetInvalid @55;
-    soundsUnavailable @56;
     preLaneChangeLeft @57;
     preLaneChangeRight @58;
     laneChange @59;
@@ -149,6 +148,7 @@ struct OnroadEventDEPRECATED @0x9b1657f34caf3ad3 {
     startupNoFwDEPRECATED @104;
     lowSpeedLockoutDEPRECATED @31;
     lkasDisabledDEPRECATED @107;
+    soundsUnavailableDEPRECATED @56;
   }
 }
 
