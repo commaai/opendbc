@@ -71,7 +71,7 @@ class CarState(CarStateBase):
       # ideally we get this from the car, but unclear if it exists. diagnostic software doesn't even have it
       ret.steeringRateDeg = self.angle_rate_calulator.update(ret.steeringAngleDeg, cp.vl["Steering_Torque"]["COUNTER"])
 
-    ret.steeringTorque = cp.vl["Steering_Torque"]["Steer_Torque_Sensor"]
+    ret.steeringTorque = cp.vl["Steering_Torque_2"]["Steer_Torque_Sensor"]
     ret.steeringTorqueEps = cp.vl["Steering_Torque"]["Steer_Torque_Output"]
 
     steer_threshold = 75 if self.CP.flags & SubaruFlags.PREGLOBAL else 80
@@ -172,6 +172,7 @@ class CarState(CarStateBase):
       # sig_address, frequency
       ("Dashlights", 10),
       ("Steering_Torque", 50),
+      ("Steering_Torque_2", 50),
       ("BodyInfo", 1),
       ("Brake_Pedal", 50),
     ]
