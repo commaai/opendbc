@@ -1,8 +1,7 @@
-import copy
 from collections import namedtuple
 
 from opendbc.can.packer import CANPacker
-from opendbc.car import DT_CTRL, rate_limit, make_tester_present_msg, structs
+from opendbc.car import Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
 from opendbc.car.common.numpy_fast import clip, interp
 from opendbc.car.honda import hondacan
 from opendbc.car.honda.values import CruiseButtons, VISUAL_HUD, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, HONDA_NIDEC_ALT_PCM_ACCEL, CarControllerParams
@@ -83,11 +82,11 @@ def process_hud_alert(hud_alert):
 
   # priority is: FCW, steer required, all others
   if hud_alert == VisualAlert.fcw:
-    fcw_display = VISUAL_HUD[hud_alert]
+    fcw_display = VISUAL_HUD[hud_alert.raw]
   elif hud_alert in (VisualAlert.steerRequired, VisualAlert.ldw):
-    steer_required = VISUAL_HUD[hud_alert]
+    steer_required = VISUAL_HUD[hud_alert.raw]
   else:
-    acc_alert = VISUAL_HUD[hud_alert]
+    acc_alert = VISUAL_HUD[hud_alert.raw]
 
   return fcw_display, steer_required, acc_alert
 
@@ -98,9 +97,9 @@ HUDData = namedtuple("HUDData",
 
 
 class CarController(CarControllerBase):
-  def __init__(self, dbc_name, CP):
-    super().__init__(dbc_name, CP)
-    self.packer = CANPacker(dbc_name)
+  def __init__(self, dbc_names, CP):
+    super().__init__(dbc_names, CP)
+    self.packer = CANPacker(dbc_names[Bus.pt])
     self.params = CarControllerParams(CP)
     self.CAN = hondacan.CanBus(CP)
 
@@ -238,7 +237,7 @@ class CarController(CarControllerBase):
         self.speed = pcm_speed
         self.gas = pcm_accel / self.params.NIDEC_GAS_MAX
 
-    new_actuators = copy.copy(actuators)
+    new_actuators = actuators.as_builder()
     new_actuators.speed = self.speed
     new_actuators.accel = self.accel
     new_actuators.gas = self.gas
