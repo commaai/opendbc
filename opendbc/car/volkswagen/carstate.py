@@ -1,6 +1,6 @@
 import numpy as np
 from opendbc.can.parser import CANParser
-from opendbc.car import structs
+from opendbc.car import Bus, structs
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.volkswagen.values import DBC, CANBUS, NetworkLocation, TransmissionType, GearShifter, \
@@ -32,8 +32,9 @@ class CarState(CarStateBase):
 
     return button_events
 
-  def update(self, pt_cp, cam_cp, *_) -> structs.CarState:
-
+  def update(self, can_parsers) -> structs.CarState:
+    pt_cp = can_parsers[Bus.pt]
+    cam_cp = can_parsers[Bus.cam]
     ext_cp = pt_cp if self.CP.networkLocation == NetworkLocation.fwdCamera else cam_cp
 
     if self.CP.flags & VolkswagenFlags.PQ:
@@ -266,11 +267,11 @@ class CarState(CarStateBase):
     return temp_fault, perm_fault
 
   @staticmethod
-  def get_can_parser(CP):
+  def get_can_parsers(CP):
     if CP.flags & VolkswagenFlags.PQ:
-      return CarState.get_can_parser_pq(CP)
+      return CarState.get_can_parsers_pq(CP)
 
-    messages = [
+    pt_messages = [
       # sig_address, frequency
       ("LWI_01", 100),      # From J500 Steering Assist with integrated sensors
       ("LH_EPS_03", 100),   # From J500 Steering Assist with integrated sensors
@@ -290,46 +291,41 @@ class CarState(CarStateBase):
     ]
 
     if CP.transmissionType == TransmissionType.automatic:
-      messages.append(("Getriebe_11", 20))  # From J743 Auto transmission control module
+      pt_messages.append(("Getriebe_11", 20))  # From J743 Auto transmission control module
     elif CP.transmissionType == TransmissionType.direct:
-      messages.append(("Motor_EV_01", 10))  # From J??? unknown EV control module
+      pt_messages.append(("Motor_EV_01", 10))  # From J??? unknown EV control module
 
     if CP.networkLocation == NetworkLocation.fwdCamera:
       # Radars are here on CANBUS.pt
-      messages += MqbExtraSignals.fwd_radar_messages
+      pt_messages += MqbExtraSignals.fwd_radar_messages
       if CP.enableBsm:
-        messages += MqbExtraSignals.bsm_radar_messages
+        pt_messages += MqbExtraSignals.bsm_radar_messages
 
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, CANBUS.pt)
-
-  @staticmethod
-  def get_cam_can_parser(CP):
-    if CP.flags & VolkswagenFlags.PQ:
-      return CarState.get_cam_can_parser_pq(CP)
-
-    messages = []
-
+    cam_messages = []
     if CP.flags & VolkswagenFlags.STOCK_HCA_PRESENT:
-      messages += [
+      cam_messages += [
         ("HCA_01", 1),  # From R242 Driver assistance camera, 50Hz if steering/1Hz if not
       ]
 
     if CP.networkLocation == NetworkLocation.fwdCamera:
-      messages += [
+      cam_messages += [
         # sig_address, frequency
         ("LDW_02", 10)      # From R242 Driver assistance camera
       ]
     else:
       # Radars are here on CANBUS.cam
-      messages += MqbExtraSignals.fwd_radar_messages
+      cam_messages += MqbExtraSignals.fwd_radar_messages
       if CP.enableBsm:
-        messages += MqbExtraSignals.bsm_radar_messages
+        cam_messages += MqbExtraSignals.bsm_radar_messages
 
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, CANBUS.cam)
+    return {
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CANBUS.pt),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CANBUS.cam),
+    }
 
   @staticmethod
-  def get_can_parser_pq(CP):
-    messages = [
+  def get_can_parsers_pq(CP):
+    pt_messages = [
       # sig_address, frequency
       ("Bremse_1", 100),    # From J104 ABS/ESP controller
       ("Bremse_3", 100),    # From J104 ABS/ESP controller
@@ -347,36 +343,33 @@ class CarState(CarStateBase):
     ]
 
     if CP.transmissionType == TransmissionType.automatic:
-      messages += [("Getriebe_1", 100)]  # From J743 Auto transmission control module
+      pt_messages += [("Getriebe_1", 100)]  # From J743 Auto transmission control module
     elif CP.transmissionType == TransmissionType.manual:
-      messages += [("Motor_1", 100)]  # From J623 Engine control module
+      pt_messages += [("Motor_1", 100)]  # From J623 Engine control module
 
     if CP.networkLocation == NetworkLocation.fwdCamera:
       # Extended CAN devices other than the camera are here on CANBUS.pt
-      messages += PqExtraSignals.fwd_radar_messages
+      pt_messages += PqExtraSignals.fwd_radar_messages
       if CP.enableBsm:
-        messages += PqExtraSignals.bsm_radar_messages
+        pt_messages += PqExtraSignals.bsm_radar_messages
 
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, CANBUS.pt)
-
-  @staticmethod
-  def get_cam_can_parser_pq(CP):
-
-    messages = []
-
+    cam_messages = []
     if CP.networkLocation == NetworkLocation.fwdCamera:
-      messages += [
+      cam_messages += [
         # sig_address, frequency
         ("LDW_Status", 10)      # From R242 Driver assistance camera
       ]
 
     if CP.networkLocation == NetworkLocation.gateway:
       # Radars are here on CANBUS.cam
-      messages += PqExtraSignals.fwd_radar_messages
+      cam_messages += PqExtraSignals.fwd_radar_messages
       if CP.enableBsm:
-        messages += PqExtraSignals.bsm_radar_messages
+        cam_messages += PqExtraSignals.bsm_radar_messages
 
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, CANBUS.cam)
+    return {
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CANBUS.pt),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CANBUS.cam),
+    }
 
 
 class MqbExtraSignals:

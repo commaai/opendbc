@@ -20,7 +20,7 @@ ALL_ECUS |= {ecu for config in FW_QUERY_CONFIGS.values() for ecu in config.extra
 
 ALL_REQUESTS = {tuple(r.request) for config in FW_QUERY_CONFIGS.values() for r in config.requests}
 
-MAX_EXAMPLES = int(os.environ.get('MAX_EXAMPLES', '5'))
+MAX_EXAMPLES = int(os.environ.get('MAX_EXAMPLES', '15'))
 
 
 def get_fuzzy_car_interface_args(draw: DrawType) -> dict:
