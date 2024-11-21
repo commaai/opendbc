@@ -53,11 +53,13 @@ class CarController(CarControllerBase):
 
     self.deque = deque([0] * 300, maxlen=300)
 
-    self.pid = PIDController(0.0, 0.5, k_f=0.0, k_d=0.5,
+    self.pid = PIDController(0, 0.25, k_f=0.0, k_d=0.25,
                              pos_limit=self.params.ACCEL_MAX, neg_limit=self.params.ACCEL_MIN,
                              rate=1 / DT_CTRL / 3)
 
     self.error = FirstOrderFilter(0.0, 2.0, DT_CTRL * 3)
+    self.error_rate = FirstOrderFilter(0.0, 0.15, DT_CTRL * 3)
+    self.prev_error = 0.0
 
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
     self.net_acceleration_request = FirstOrderFilter(0, 0.15, DT_CTRL * 3)
@@ -224,9 +226,17 @@ class CarController(CarControllerBase):
           # self.pcm_accel_net.update(CS.pcm_accel_net)
 
           prev_error = self.error.x
-          self.error.update(self.pcm_accel_cmd.x - CS.out.aEgo)
+          error = pcm_accel_cmd - CS.out.aEgo
+          self.error.update(error)
           error_rate = (self.error.x - prev_error) / (DT_CTRL * 3)
           self.debug = error_rate
+
+          self.error_rate.update((error - self.prev_error) / (DT_CTRL * 3))
+
+          self.debug2 = self.error_rate.x
+          self.debug3 = (error - self.prev_error) / (DT_CTRL * 3)
+
+          self.prev_error = error
 
           # let PCM handle stopping for now
           pcm_accel_compensation = 0.0
@@ -237,7 +247,7 @@ class CarController(CarControllerBase):
             # TODO: freeze_integrator when stopping or at standstill?
             #pcm_accel_compensation = self.pid.update(self.deque[round(-40 / 3)] - CS.out.aEgo,
             pcm_accel_compensation = self.pid.update(self.pcm_accel_cmd.x - CS.out.aEgo,
-                                                     error_rate=error_rate)  #, feedforward=pcm_accel_cmd)
+                                                     error_rate=self.error_rate.x)  #, feedforward=pcm_accel_cmd)
             #pcm_accel_cmd += self.pcm_accel_compensation.update(pcm_accel_compensation)
             pcm_accel_cmd += pcm_accel_compensation
           else:
