@@ -77,3 +77,4 @@ envCython["LIBS"] = python_libs
 Export('envCython')
 
 SConscript(['opendbc/can/SConscript'])
+SConscript(['opendbc/dbc/SConscript'])
