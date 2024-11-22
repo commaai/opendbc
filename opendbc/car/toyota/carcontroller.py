@@ -48,7 +48,7 @@ class CarController(CarControllerBase):
     self.permit_braking = True
     self.steer_rate_counter = 0
     self.distance_button = 0
-
+k
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
     self.net_acceleration_request = FirstOrderFilter(0, 0.15, DT_CTRL * 3)
 
