@@ -20,7 +20,7 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 
 # The up limit allows the brakes/gas to unwind quickly leaving a stop,
 # the down limit roughly matches the rate of ACCEL_NET, reducing PCM compensation windup
-ACCEL_WINDUP_LIMIT = 0.5  # m/s^2 / frame
+ACCEL_WINDUP_LIMIT = 6.0 * DT_CTRL * 3  # m/s^2 / frame
 ACCEL_WINDDOWN_LIMIT = -4.0 * DT_CTRL * 3  # m/s^2 / frame
 
 # LKA limits
@@ -51,7 +51,6 @@ class CarController(CarControllerBase):
     self.distance_button = 0
 
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
-    self.net_acceleration_request = FirstOrderFilter(0, 0.15, DT_CTRL * 3)
 
     self.accel_pid = PIDController(2.0, 0.5, 1 / (DT_CTRL * 3))
     self.pcm_accel_compensation = FirstOrderFilter(0, 0.5, DT_CTRL * 3)
@@ -63,8 +62,10 @@ class CarController(CarControllerBase):
     # so we error correct on the filtered PCM acceleration request using the actuator delay.
     # TODO: move the delay into the interface
     self.pcm_accel_net = FirstOrderFilter(0, self.CP.longitudinalActuatorDelay, DT_CTRL * 3)
+    self.net_acceleration_request = FirstOrderFilter(0, 0.15, DT_CTRL * 3)
     if not any(fw.ecu == Ecu.hybrid for fw in self.CP.carFw):
       self.pcm_accel_net.update_alpha(self.CP.longitudinalActuatorDelay + 0.2)
+      self.net_acceleration_request.update_alpha(self.CP.longitudinalActuatorDelay + 0.2)
 
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.accel = 0
