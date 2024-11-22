@@ -4,6 +4,7 @@ from opendbc.car import Bus, carlog, apply_meas_steer_torque_limits, apply_std_s
 from opendbc.car.can_definitions import CanData
 from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.common.numpy_fast import clip
+from opendbc.car.common.pid import PIDController
 from opendbc.car.secoc import add_mac, build_sync_mac
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.toyota import toyotacan
@@ -48,10 +49,11 @@ class CarController(CarControllerBase):
     self.permit_braking = True
     self.steer_rate_counter = 0
     self.distance_button = 0
-k
+
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
     self.net_acceleration_request = FirstOrderFilter(0, 0.15, DT_CTRL * 3)
 
+    self.accel_pid = PIDController(2.0, 0.5, 1 / (DT_CTRL * 3))
     self.pcm_accel_compensation = FirstOrderFilter(0, 0.5, DT_CTRL * 3)
 
     # the PCM's reported acceleration request can sometimes mismatch aEgo, close the loop
@@ -218,11 +220,12 @@ k
           # let PCM handle stopping for now, error correct on a delayed acceleration request
           pcm_accel_compensation = 0.0
           if not stopping:
-            pcm_accel_compensation = 2.0 * (new_pcm_accel_net - self.net_acceleration_request.x)
-
-          # prevent compensation windup
-          pcm_accel_compensation = clip(pcm_accel_compensation, pcm_accel_cmd - self.params.ACCEL_MAX,
-                                        pcm_accel_cmd - self.params.ACCEL_MIN)
+            # prevent compensation windup
+            self.accel_pid.neg_limit = pcm_accel_cmd - self.params.ACCEL_MAX
+            self.accel_pid.pos_limit = pcm_accel_cmd - self.params.ACCEL_MIN
+            pcm_accel_compensation = self.accel_pid.update(new_pcm_accel_net - self.net_acceleration_request.x)
+          else:
+            self.accel_pid.reset()
 
           pcm_accel_cmd = pcm_accel_cmd - self.pcm_accel_compensation.update(pcm_accel_compensation)
 
@@ -231,6 +234,7 @@ k
           self.pcm_accel_net_offset.x = 0.0
           self.net_acceleration_request.x = 0.0
           self.pcm_accel_net.x = CS.pcm_accel_net
+          self.accel_pid.reset()
           self.permit_braking = True
 
         # Along with rate limiting positive jerk above, this greatly improves gas response time
