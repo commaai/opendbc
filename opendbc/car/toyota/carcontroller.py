@@ -241,8 +241,8 @@ class CarController(CarControllerBase):
           # let PCM handle stopping for now
           pcm_accel_compensation = 0.0
           if not stopping and not CS.out.standstill:
-            self.pid.neg_limit = pcm_accel_cmd - self.params.ACCEL_MAX
-            self.pid.pos_limit = pcm_accel_cmd - self.params.ACCEL_MIN
+            self.pid.neg_limit = self.params.ACCEL_MIN - pcm_accel_cmd
+            self.pid.pos_limit = self.params.ACCEL_MAX - pcm_accel_cmd
 
             # TODO: freeze_integrator when stopping or at standstill?
             #pcm_accel_compensation = self.pid.update(self.deque[round(-40 / 3)] - CS.out.aEgo,
