@@ -1,4 +1,4 @@
 Import("env")
 
-SConscript(['opendbc/can/SConscript'])
-SConscript(['opendbc/dbc/SConscript'])
+SConscript(['opendbc/can/SConscript'], exports={'env': env})
+SConscript(['opendbc/dbc/SConscript'], exports={'env': env})
