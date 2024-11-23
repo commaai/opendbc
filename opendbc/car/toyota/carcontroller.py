@@ -38,6 +38,69 @@ MAX_LTA_ANGLE = 94.9461  # deg
 MAX_LTA_DRIVER_TORQUE_ALLOWANCE = 150  # slightly above steering pressed allows some resistance when changing lanes
 
 
+class SimpleKalmanFilter:
+  def __init__(self, initial_estimate, initial_error_covariance, process_noise_covariance, measurement_noise_covariance):
+    # Initial estimates
+    self.aEgo_est = initial_estimate  # Estimated acceleration
+    self.P = initial_error_covariance  # Estimated error covariance
+
+    # Kalman filter parameters
+    self.Q = process_noise_covariance  # Process noise covariance (Q)
+    self.R = measurement_noise_covariance  # Measurement noise covariance (R)
+
+    # For extrapolation
+    self.aEgo_prev_est = initial_estimate  # Previous estimated acceleration
+    self.dt = None  # Time step (to be set later)
+    self.delay = 0.0  # Delay to predict ahead (seconds)
+
+    # For filtering jerk estimate
+    self.jerk_est_filtered = 0.0
+    self.alpha_jerk = None  # Filter coefficient, to be set later
+
+  def set_time_step_and_delay(self, dt, delay, jerk_filter_rc=None):
+    self.dt = dt
+    self.delay = delay
+
+    if jerk_filter_rc is not None:
+      self.alpha_jerk = dt / (jerk_filter_rc + dt)
+    else:
+      self.alpha_jerk = 1.0  # No filtering
+
+  def update(self, measurement):
+    # Predict step (since we have no control input, prediction is the same)
+    self.P = self.P + self.Q
+
+    # Store previous estimate before updating
+    aEgo_est_prev = self.aEgo_est
+
+    # Update step
+    K = self.P / (self.P + self.R)
+    self.aEgo_est = self.aEgo_est + K * (measurement - self.aEgo_est)
+    self.P = (1 - K) * self.P
+
+    # Update previous estimate after the estimate is used in jerk calculation
+    self.aEgo_prev_est = aEgo_est_prev  # Now aEgo_prev_est holds the previous estimate
+
+    # Return the updated estimate
+    return self.aEgo_est
+
+  def predict_future_aEgo(self):
+    # Check that time step and delay have been set
+    if self.dt is None:
+      raise ValueError("Time step 'dt' and delay must be set using 'set_time_step_and_delay' method.")
+
+    # Estimate jerk (rate of change of acceleration)
+    jerk_est = (self.aEgo_est - self.aEgo_prev_est) / self.dt
+
+    # Apply low-pass filter to jerk_est
+    self.jerk_est_filtered = self.alpha_jerk * jerk_est + (1 - self.alpha_jerk) * self.jerk_est_filtered
+
+    # Predict future acceleration
+    aEgo_future_est = self.aEgo_est + self.jerk_est_filtered * self.delay
+
+    return aEgo_future_est
+
+
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
@@ -53,9 +116,18 @@ class CarController(CarControllerBase):
 
     self.deque = deque([0] * 300, maxlen=300)
 
-    self.pid = PIDController(0, 0.5, k_f=0.0, k_d=0.25,
+    self.pid = PIDController(1, 0.0, k_f=0.0, k_d=0.0,
                              pos_limit=self.params.ACCEL_MAX, neg_limit=self.params.ACCEL_MIN,
                              rate=1 / DT_CTRL / 3)
+
+    self.aego_kf = SimpleKalmanFilter(
+      initial_estimate=0.0,
+      initial_error_covariance=1.0,
+      process_noise_covariance=0.1,
+      measurement_noise_covariance=0.2
+    )
+
+    self.aego_kf.set_time_step_and_delay(dt=DT_CTRL, delay=0.15)
 
     self.error = FirstOrderFilter(0.0, 2.0, DT_CTRL * 3)
     self.error_rate = FirstOrderFilter(0.0, 0.25, DT_CTRL * 3)
@@ -184,6 +256,10 @@ class CarController(CarControllerBase):
 
     # *** gas and brake ***
 
+    aEgo_est = self.aego_kf.update(CS.out.aEgo)
+    self.debug = aEgo_est
+    self.debug2 = self.aego_kf.predict_future_aEgo()
+
     # on entering standstill, send standstill request
     if CS.out.standstill and not self.last_standstill and (self.CP.carFingerprint not in NO_STOP_TIMER_CAR):
       self.standstill_req = True
@@ -229,14 +305,18 @@ class CarController(CarControllerBase):
           error = pcm_accel_cmd - CS.out.aEgo
           self.error.update(error)
           error_rate = (self.error.x - prev_error) / (DT_CTRL * 3)
-          self.debug = error_rate
+          # self.debug = error_rate
 
           self.error_rate.update((error - self.prev_error) / (DT_CTRL * 3))
 
-          self.debug2 = self.error_rate.x
-          self.debug3 = (error - self.prev_error) / (DT_CTRL * 3)
+          # self.debug2 = self.error_rate.x
+          # self.debug3 = (error - self.prev_error) / (DT_CTRL * 3)
 
           self.prev_error = error
+
+          # aEgo_est = self.aego_kf.update(CS.out.aEgo)
+          # self.debug = aEgo_est
+          # self.debug2 = self.aego_kf.predict_future_aEgo()
 
           # let PCM handle stopping for now
           pcm_accel_compensation = 0.0
@@ -246,7 +326,7 @@ class CarController(CarControllerBase):
 
             # TODO: freeze_integrator when stopping or at standstill?
             #pcm_accel_compensation = self.pid.update(self.deque[round(-40 / 3)] - CS.out.aEgo,
-            pcm_accel_compensation = self.pid.update(self.pcm_accel_cmd.x - CS.out.aEgo,
+            pcm_accel_compensation = self.pid.update(pcm_accel_cmd - CS.out.aEgo,
                                                      error_rate=self.error_rate.x)  #, feedforward=pcm_accel_cmd)
             #pcm_accel_cmd += self.pcm_accel_compensation.update(pcm_accel_compensation)
             pcm_accel_cmd += pcm_accel_compensation

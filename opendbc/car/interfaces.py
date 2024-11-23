@@ -280,12 +280,42 @@ class CarStateBase(ABC):
     self.cluster_min_speed = 0.0  # min speed before dropping to 0
     self.secoc_key: bytes = b"00" * 16
 
-    Q = [[0.0, 0.0], [0.0, 100.0]]
+    Q = [
+      [0.0, 0.0, 0.0],
+      [0.0, 100.0, 0.0],
+      [0.0, 0.0, 1000.0]  # Adjust this value based on expected jerk variability
+    ]
+
+    # Measurement noise covariance R (scalar)
     R = 0.3
-    A = [[1.0, DT_CTRL], [0.0, 1.0]]
-    C = [[1.0, 0.0]]
-    x0=[[0.0], [0.0]]
-    K = get_kalman_gain(DT_CTRL, np.array(A), np.array(C), np.array(Q), R)
+
+    # State transition matrix A (3x3)
+    A = [
+      [1.0, DT_CTRL, 0.5 * DT_CTRL ** 2],
+      [0.0, 1.0, DT_CTRL],
+      [0.0, 0.0, 1.0]
+    ]
+
+    # Observation matrix C (1x3)
+    C = [[1.0, 0.0, 0.0]]  # Assuming we only measure vEgoRaw
+
+    # Initial state vector x0 (3x1)
+    x0 = [
+      [0.0],  # Initial vEgo
+      [0.0],  # Initial aEgo
+      [0.0]  # Initial jEgo
+    ]
+
+    # Convert lists to NumPy arrays
+    A = np.array(A)
+    C = np.array(C)
+    Q = np.array(Q)
+    x0 = np.array(x0)
+
+    # Compute Kalman gain K using the updated matrices
+    K = get_kalman_gain(DT_CTRL, A, C, Q, R)
+
+    # Initialize the Kalman filter with the updated matrices
     self.v_ego_kf = KF1D(x0=x0, A=A, C=C[0], K=K)
 
   @abstractmethod
@@ -294,10 +324,10 @@ class CarStateBase(ABC):
 
   def update_speed_kf(self, v_ego_raw):
     if abs(v_ego_raw - self.v_ego_kf.x[0][0]) > 2.0:  # Prevent large accelerations when car starts at non zero speed
-      self.v_ego_kf.set_x([[v_ego_raw], [0.0]])
+      self.v_ego_kf.set_x([[v_ego_raw], [0.0], [0.0]])
 
     v_ego_x = self.v_ego_kf.update(v_ego_raw)
-    return float(v_ego_x[0]), float(v_ego_x[1])
+    return float(v_ego_x[0]), float(v_ego_x[1]), float(v_ego_x[2])
 
   def get_wheel_speeds(self, fl, fr, rl, rr, unit=CV.KPH_TO_MS):
     factor = unit * self.CP.wheelSpeedFactor
