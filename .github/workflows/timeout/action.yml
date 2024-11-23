@@ -20,7 +20,7 @@ runs:
     - if: ${{ inputs.start_time >= 0 }}
       shell: bash
       run: |
-        if [[ $(( $(date +%s) - ${{ inputs.start_time }} -gt ${{ inputs.duration }} )) ]]; then echo "TIMEOUT!" && exit 1; fi
+        if [[ $(( $(date +%s) - ${{ inputs.start_time }} )) -gt ${{ inputs.duration }} ]]; then echo "TIMEOUT!" && exit 1; fi
     - id: timeout-check
       shell: bash
       run: |
