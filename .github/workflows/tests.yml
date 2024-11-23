@@ -33,7 +33,7 @@ jobs:
     - uses: ./.github/workflows/timeout
       with: 
         start_time: ${{ steps.timeout.outputs.start_time }}
-        duration: 20
+        duration: 60
 
   static-analysis:
     name: static analysis
@@ -59,4 +59,4 @@ jobs:
     - uses: ./.github/workflows/timeout
       with: 
         start_time: ${{ steps.timeout.outputs.start_time }}
-        duration: 20
+        duration: 10

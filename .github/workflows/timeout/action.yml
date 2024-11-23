@@ -21,7 +21,7 @@ runs:
       shell: bash
       run: |
         if [[ $(( $(date +%s) - ${{ inputs.start_time }} )) -gt ${{ inputs.duration }} ]]; then
-          echo "This workflow took more than ${{ inputs.duration }}s !" && exit 1;
+          echo -e "\033[0;31mTHIS WORKFLOW TOOK MORE THAN ${{ inputs.duration }}s !\033[0m" && exit 1;
         fi
     - id: timeout-check
       shell: bash
