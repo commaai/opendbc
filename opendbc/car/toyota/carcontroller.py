@@ -21,7 +21,7 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 
 # The up limit allows the brakes/gas to unwind quickly leaving a stop,
 # the down limit roughly matches the rate of ACCEL_NET, reducing PCM compensation windup
-ACCEL_WINDUP_LIMIT = 5.0 * DT_CTRL * 3  # m/s^2 / frame
+ACCEL_WINDUP_LIMIT = 3.0 * DT_CTRL * 3  # m/s^2 / frame
 ACCEL_WINDDOWN_LIMIT = -5.0 * DT_CTRL * 3  # m/s^2 / frame
 
 # LKA limits
@@ -189,7 +189,7 @@ class CarController(CarControllerBase):
     prev_aego = self.aego.x
     self.aego.update(CS.out.aEgo)
     jEgo = (self.aego.x - prev_aego) / DT_CTRL
-    future_aego = CS.out.aEgo + jEgo * 0.15
+    future_aego = CS.out.aEgo + jEgo * 0.15  # TODO: only for hybrid
 
     self.debug = jEgo
     self.debug2 = future_aego
