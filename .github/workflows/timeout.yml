@@ -1,0 +1,27 @@
+name: 'timeout'
+
+inputs:
+  duration:
+    description: 'Maximum duration allowed for a workflow'
+    required: false
+    default: 60
+  start_time:
+    description: 'Starting time of the workflow'
+    required: false
+    default: -1
+outputs:
+  start_time:
+    descriptions: 'Starting time of this workflow'
+    value: ${{ steps.timeout-check.outputs.start_time }}
+
+runs:
+  using: "composite"
+  steps:
+    - if: ${{ inputs.start_time >= 0 }}
+      shell: bash
+      run: |
+        if [[ $(( $(date +%s) - ${{ inputs.start_time }} -gt ${{ inputs.duration }} )) ]]; then echo "TIMEOUT!" && exit 1; fi
+      run: echo "check timeout"
+    - id: timeout-check
+      run: |
+        echo "start_time=$(date +%s)" >> "$GITHUB_OUTPUT"
