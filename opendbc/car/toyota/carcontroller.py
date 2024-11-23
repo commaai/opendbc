@@ -57,6 +57,8 @@ class CarController(CarControllerBase):
                              pos_limit=self.params.ACCEL_MAX, neg_limit=self.params.ACCEL_MIN,
                              rate=1 / DT_CTRL / 3)
 
+    self.aego = FirstOrderFilter(0.0, 0.5, DT_CTRL)
+
     self.error = FirstOrderFilter(0.0, 2.0, DT_CTRL * 3)
     self.error_rate = FirstOrderFilter(0.0, 0.25, DT_CTRL * 3)
     self.prev_error = 0.0
@@ -184,6 +186,14 @@ class CarController(CarControllerBase):
 
     # *** gas and brake ***
 
+    prev_aego = self.aego.x
+    self.aego.update(CS.out.aEgo)
+    jEgo = (self.aego.x - prev_aego) / DT_CTRL
+    future_aego = CS.out.aEgo + jEgo * 0.5
+
+    self.debug = jEgo
+    self.debug2 = future_aego
+
     # on entering standstill, send standstill request
     if CS.out.standstill and not self.last_standstill and (self.CP.carFingerprint not in NO_STOP_TIMER_CAR):
       self.standstill_req = True
@@ -226,15 +236,15 @@ class CarController(CarControllerBase):
           # self.pcm_accel_net.update(CS.pcm_accel_net)
 
           prev_error = self.error.x
-          error = pcm_accel_cmd - CS.out.aEgo
+          error = pcm_accel_cmd - future_aego  # CS.out.aEgo
           self.error.update(error)
           error_rate = (self.error.x - prev_error) / (DT_CTRL * 3)
-          self.debug = error_rate
+          # self.debug = error_rate
 
           self.error_rate.update((error - self.prev_error) / (DT_CTRL * 3))
 
-          self.debug2 = self.error_rate.x
-          self.debug3 = (error - self.prev_error) / (DT_CTRL * 3)
+          # self.debug2 = self.error_rate.x
+          # self.debug3 = (error - self.prev_error) / (DT_CTRL * 3)
 
           self.prev_error = error
 
@@ -246,7 +256,7 @@ class CarController(CarControllerBase):
 
             # TODO: freeze_integrator when stopping or at standstill?
             #pcm_accel_compensation = self.pid.update(self.deque[round(-40 / 3)] - CS.out.aEgo,
-            pcm_accel_compensation = self.pid.update(self.pcm_accel_cmd.x - CS.out.aEgo,
+            pcm_accel_compensation = self.pid.update(pcm_accel_cmd - future_aego,
                                                      error_rate=self.error_rate.x)  #, feedforward=pcm_accel_cmd)
             #pcm_accel_cmd += self.pcm_accel_compensation.update(pcm_accel_compensation)
             pcm_accel_cmd += pcm_accel_compensation
