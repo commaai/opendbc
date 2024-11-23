@@ -21,6 +21,7 @@ jobs:
           close-pr-message: 'This PR has been automatically closed due to inactivity. Feel free to re-open once activity resumes.'
           stale-pr-label: stale
           delete-branch: ${{ github.event.pull_request.head.repo.full_name == 'sunnypilot/opendbc' }} # only delete branches on the main repo
+          exempt-draft-pr: true
           exempt-pr-labels: "ignore stale" # if wip, don't mark as stale
           days-before-pr-stale: ${{ env.DAYS_BEFORE_PR_STALE }}
           days-before-pr-close: ${{ env.DAYS_BEFORE_PR_CLOSE }}

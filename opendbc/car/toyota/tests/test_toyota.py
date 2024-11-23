@@ -1,5 +1,6 @@
 from hypothesis import given, settings, strategies as st
 
+from opendbc.car import Bus
 from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
 from opendbc.car.toyota.fingerprints import FW_VERSIONS
@@ -29,7 +30,7 @@ class TestToyotaInterfaces:
     # like looking up certain signals only in this DBC
     for car_model, dbc in DBC.items():
       if car_model in TSS2_CAR and car_model not in SECOC_CAR:
-        assert dbc["pt"] == "toyota_nodsu_pt_generated"
+        assert dbc[Bus.pt] == "toyota_nodsu_pt_generated"
 
   def test_essential_ecus(self, subtests):
     # Asserts standard ECUs exist for each platform
