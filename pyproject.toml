@@ -18,7 +18,7 @@ dependencies = [
   "crcmod",
   "tqdm",
   "pycapnp",
-  "pandacan@git+https://github.com/commaai/panda.git@master",
+  "pandacan@git+https://github.com/sunnypilot/panda.git@master-new",
   "setuptools",
   "pycryptodome",
 ]
