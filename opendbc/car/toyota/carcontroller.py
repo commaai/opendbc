@@ -53,13 +53,12 @@ class CarController(CarControllerBase):
 
     self.deque = deque([0] * 300, maxlen=300)
 
-    self.pid = PIDController(0.5, 0.25, k_f=0.0, k_d=0.1,
+    self.pid = PIDController(0.5, 0.25, k_f=0.0, k_d=0.125,
                              pos_limit=self.params.ACCEL_MAX, neg_limit=self.params.ACCEL_MIN,
                              rate=1 / DT_CTRL / 3)
 
     self.aego = FirstOrderFilter(0.0, 0.5, DT_CTRL)
 
-    self.error = FirstOrderFilter(0.0, 2.0, DT_CTRL * 3)
     self.error_rate = FirstOrderFilter(0.0, 0.25, DT_CTRL * 3)
     self.prev_error = 0.0
 
@@ -235,13 +234,7 @@ class CarController(CarControllerBase):
           # filter ACCEL_NET so it more closely matches aEgo delay for error correction
           # self.pcm_accel_net.update(CS.pcm_accel_net)
 
-          prev_error = self.error.x
-          #error = pcm_accel_cmd - future_aego  # CS.out.aEgo
           error = pcm_accel_cmd - CS.out.aEgo
-          self.error.update(error)
-          error_rate = (self.error.x - prev_error) / (DT_CTRL * 3)
-          # self.debug = error_rate
-
           self.error_rate.update((error - self.prev_error) / (DT_CTRL * 3))
 
           # self.debug2 = self.error_rate.x
