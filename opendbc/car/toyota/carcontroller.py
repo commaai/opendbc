@@ -22,7 +22,7 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 # The up limit allows the brakes/gas to unwind quickly leaving a stop,
 # the down limit roughly matches the rate of ACCEL_NET, reducing PCM compensation windup
 ACCEL_WINDUP_LIMIT = 2.0 * DT_CTRL * 3  # m/s^2 / frame
-ACCEL_WINDDOWN_LIMIT = -4.0 * DT_CTRL * 3  # m/s^2 / frame
+ACCEL_WINDDOWN_LIMIT = -8.0 * DT_CTRL * 3  # m/s^2 / frame
 
 # LKA limits
 # EPS faults if you apply torque while the steering rate is above 100 deg/s for too long
@@ -53,7 +53,7 @@ class CarController(CarControllerBase):
 
     self.deque = deque([0] * 300, maxlen=300)
 
-    self.pid = PIDController(0.5, 0.25, k_f=0.0, k_d=0.,
+    self.pid = PIDController(0.5, 0.25, k_f=0.0, k_d=0.1,
                              pos_limit=self.params.ACCEL_MAX, neg_limit=self.params.ACCEL_MIN,
                              rate=1 / DT_CTRL / 3)
 
@@ -189,7 +189,7 @@ class CarController(CarControllerBase):
     prev_aego = self.aego.x
     self.aego.update(CS.out.aEgo)
     jEgo = (self.aego.x - prev_aego) / DT_CTRL
-    future_aego = CS.out.aEgo + jEgo * 0.35
+    future_aego = CS.out.aEgo + jEgo * 0.15
 
     self.debug = jEgo
     self.debug2 = future_aego
@@ -236,7 +236,8 @@ class CarController(CarControllerBase):
           # self.pcm_accel_net.update(CS.pcm_accel_net)
 
           prev_error = self.error.x
-          error = pcm_accel_cmd - future_aego  # CS.out.aEgo
+          #error = pcm_accel_cmd - future_aego  # CS.out.aEgo
+          error = pcm_accel_cmd - CS.out.aEgo
           self.error.update(error)
           error_rate = (self.error.x - prev_error) / (DT_CTRL * 3)
           # self.debug = error_rate
