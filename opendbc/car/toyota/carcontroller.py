@@ -256,14 +256,12 @@ class CarController(CarControllerBase):
             #pcm_accel_cmd += pcm_accel_compensation
           else:
             self.pid.reset()
-            self.error.x = 0.0
             self.pcm_accel_compensation.x = 0.0
 
           # pcm_accel_cmd = pcm_accel_cmd + self.pcm_accel_compensation.update(pcm_accel_compensation)
 
         else:
           self.pid.reset()
-          self.error.x = 0.0
           self.pcm_accel_cmd.x = 0.0
           self.pcm_accel_compensation.x = 0.0
 
