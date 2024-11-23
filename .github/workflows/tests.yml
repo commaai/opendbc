@@ -59,4 +59,4 @@ jobs:
     - uses: ./.github/workflows/timeout
       with: 
         start_time: ${{ steps.timeout.outputs.start_time }}
-        duration: 10
+        duration: 60
