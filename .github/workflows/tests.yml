@@ -32,7 +32,7 @@ jobs:
     - run: uv run scons -j8
     - run: uv run pytest .
     - uses: ./.github/workflows/timeout
-      with: ${{ steps.timeout.outputs.start_time }}
+      with: steps.timeout.outputs.start_time
 
   static-analysis:
     name: static analysis
