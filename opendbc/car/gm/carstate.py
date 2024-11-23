@@ -126,10 +126,11 @@ class CarState(CarStateBase):
       ret.cruiseState.speed = cam_cp.vl["ASCMActiveCruiseControlStatus"]["ACCSpeedSetpoint"] * CV.KPH_TO_MS
       # This FCW signal only works for SDGM cars. CAM cars send FCW on GMLAN but this bit is always 0 for them
       ret.stockFcw = cam_cp.vl["ASCMActiveCruiseControlStatus"]["FCWAlert"] != 0
-      if self.CP.carFingerprint not in SDGM_CAR or ASCM_INT:
+      if self.CP.carFingerprint not in SDGM_CAR and self.CP.carFingerprint not in ASCM_INT:
+        print("checking for AEB fuckhead")
         ret.stockAeb = cam_cp.vl["AEBCmd"]["AEBCmdActive"] != 0
       # openpilot controls nonAdaptive when not pcmCruise
-      if self.CP.pcmCruise:
+      if self.CP.pcmCruise and self.CP.carFingerprint not in ASCM_INT:
         ret.cruiseState.nonAdaptive = cam_cp.vl["ASCMActiveCruiseControlStatus"]["ACCCruiseState"] not in (2, 3)
 
     if self.CP.enableBsm:
@@ -185,7 +186,7 @@ class CarState(CarStateBase):
         ("ASCMLKASteeringCmd", 10),
         ("ASCMActiveCruiseControlStatus", 25),
       ]
-      if CP.carFingerprint not in SDGM_CAR or ASCM_INT:
+      if CP.carFingerprint not in SDGM_CAR and CP.carFingerprint not in ASCM_INT:
         cam_messages += [
           ("AEBCmd", 10),
         ]
