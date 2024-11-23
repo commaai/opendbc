@@ -22,8 +22,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: ./.github/workflows/timeout
-      with:
-        duration: 10
       id: timeout
     - name: install uv and dependencies
       run: |
@@ -36,6 +34,7 @@ jobs:
     - uses: ./.github/workflows/timeout
       with: 
         start_time: ${{ steps.timeout.outputs.start_time }}
+        duration: 10
 
   static-analysis:
     name: static analysis
