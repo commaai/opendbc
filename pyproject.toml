@@ -5,7 +5,7 @@ description = "CAN bus databases and tools"
 license = { file = "LICENSE" }
 authors = [{ name = "Vehicle Researcher", email = "user@comma.ai" }]
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.9,<3.13"  # pycapnp doesn't work with 3.13
 
 urls = { "homepage" = "https://github.com/commaai/opendbc" }
 
@@ -89,6 +89,7 @@ select = [
   "RUF008", "RUF100",
   "TID251",
   "PLR1704",
+  "INP001",
 ]
 ignore = [
   "W292",
@@ -101,6 +102,9 @@ ignore = [
   "NPY002",  # new numpy random syntax is worse
 ]
 flake8-implicit-str-concat.allow-multiline=false
+
+[tool.ruff.lint.per-file-ignores]
+"site_scons/*" = ["ALL"]
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "pytest.main".msg = "pytest.main requires special handling that is easy to mess up!"
