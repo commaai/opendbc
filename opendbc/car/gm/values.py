@@ -258,6 +258,7 @@ CAMERA_ACC_CAR = {CAR.CHEVROLET_BOLT_EUV, CAR.CHEVROLET_SILVERADO, CAR.CHEVROLET
 # We're integrated at the Safety Data Gateway Module on these cars
 SDGM_CAR = {CAR.CADILLAC_XT4, CAR.CHEVROLET_VOLT_2019, CAR.CHEVROLET_TRAVERSE}
 
+# New harness for Volt intercepts at ASCM, hybrid between SDGM and CAM 
 ASCM_INT = {CAR.CHEVROLET_VOLT}
 
 STEER_THRESHOLD = 1.0

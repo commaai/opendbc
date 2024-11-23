@@ -82,6 +82,8 @@ class CarState(CarStateBase):
       # that the brake is being intermittently pressed without user interaction.
       # To avoid a cruise fault we need to use a conservative brake position threshold
       # https://static.nhtsa.gov/odi/tsbs/2017/MC-10137629-9999.pdf
+
+      # can't check ECMAcceleratorPos on Volt since its not transmitted when ASCM is active 
       ret.brake = pt_cp.vl["ECMAcceleratorPos"]["BrakePedalPos"]
       ret.brakePressed = ret.brake >= 8
 
@@ -130,6 +132,7 @@ class CarState(CarStateBase):
         print("checking for AEB fuckhead")
         ret.stockAeb = cam_cp.vl["AEBCmd"]["AEBCmdActive"] != 0
       # openpilot controls nonAdaptive when not pcmCruise
+      # 2016-2018 Volt won't identify non-adaptive cruise state since switchable cruise state was not introduced till 2019 model year / SDGM Global A
       if self.CP.pcmCruise and self.CP.carFingerprint not in ASCM_INT:
         ret.cruiseState.nonAdaptive = cam_cp.vl["ASCMActiveCruiseControlStatus"]["ACCCruiseState"] not in (2, 3)
 
@@ -165,6 +168,7 @@ class CarState(CarStateBase):
       ("ECMEngineStatus", 100),
       ("PSCMSteeringAngle", 100),
     ]
+    # ECMAcceleratorPos only seen when ASCM not active on Volt
     if CP.carFingerprint not in ASCM_INT:
       pt_messages.append(("ECMAcceleratorPos", 80))
 
