@@ -4,7 +4,7 @@ import math
 
 from opendbc.can.parser import CANParser
 from opendbc.can.can_define import CANDefine
-from opendbc.car import create_button_events, structs
+from opendbc.car import Bus, create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.hyundai.hyundaicanfd import CanBus
 from opendbc.car.hyundai.values import HyundaiFlags, CAR, DBC, Buttons, CarControllerParams
@@ -26,7 +26,7 @@ class CarState(CarStateBase, EsccCarStateBase):
   def __init__(self, CP):
     CarStateBase.__init__(self, CP)
     EsccCarStateBase.__init__(self)
-    can_define = CANDefine(DBC[CP.carFingerprint]["pt"])
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
 
     self.cruise_buttons: deque = deque([Buttons.NONE] * PREV_BUTTON_SAMPLES, maxlen=PREV_BUTTON_SAMPLES)
     self.main_buttons: deque = deque([Buttons.NONE] * PREV_BUTTON_SAMPLES, maxlen=PREV_BUTTON_SAMPLES)
@@ -60,9 +60,12 @@ class CarState(CarStateBase, EsccCarStateBase):
 
     self.params = CarControllerParams(CP)
 
-  def update(self, cp, cp_cam, *_) -> structs.CarState:
+  def update(self, can_parsers) -> structs.CarState:
+    cp = can_parsers[Bus.pt]
+    cp_cam = can_parsers[Bus.cam]
+
     if self.CP.flags & HyundaiFlags.CANFD:
-      return self.update_canfd(cp, cp_cam)
+      return self.update_canfd(can_parsers)
 
     ret = structs.CarState()
     cp_cruise = cp_cam if self.CP.flags & HyundaiFlags.CAMERA_SCC else cp
@@ -171,16 +174,19 @@ class CarState(CarStateBase, EsccCarStateBase):
     self.clu11 = copy.copy(cp.vl["CLU11"])
     self.steer_state = cp.vl["MDPS12"]["CF_Mdps_ToiActive"]  # 0 NOT ACTIVE, 1 ACTIVE
     prev_cruise_buttons = self.cruise_buttons[-1]
+    prev_main_buttons = self.main_buttons[-1]
     self.cruise_buttons.extend(cp.vl_all["CLU11"]["CF_Clu_CruiseSwState"])
     self.main_buttons.extend(cp.vl_all["CLU11"]["CF_Clu_CruiseSwMain"])
 
-    # TODO: always publish buttons. the pause/resume button is classified as cancel on some cars
-    if self.CP.openpilotLongitudinalControl:
-      ret.buttonEvents = create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT)
+    ret.buttonEvents = [*create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT),
+                        *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise})]
 
     return ret
 
-  def update_canfd(self, cp, cp_cam) -> structs.CarState:
+  def update_canfd(self, can_parsers) -> structs.CarState:
+    cp = can_parsers[Bus.pt]
+    cp_cam = can_parsers[Bus.cam]
+
     ret = structs.CarState()
 
     self.is_metric = cp.vl["CRUISE_BUTTONS_ALT"]["DISTANCE_UNIT"] != 1
@@ -251,6 +257,7 @@ class CarState(CarStateBase, EsccCarStateBase):
       ret.cruiseState.nonAdaptive = cp.vl["MANUAL_SPEED_LIMIT_ASSIST"]["MSLA_ENABLED"] == 1
 
     prev_cruise_buttons = self.cruise_buttons[-1]
+    prev_main_buttons = self.main_buttons[-1]
     self.cruise_buttons.extend(cp.vl_all[self.cruise_btns_msg_canfd]["CRUISE_BUTTONS"])
     self.main_buttons.extend(cp.vl_all[self.cruise_btns_msg_canfd]["ADAPTIVE_CRUISE_MAIN_BTN"])
     self.buttons_counter = cp.vl[self.cruise_btns_msg_canfd]["COUNTER"]
@@ -260,17 +267,67 @@ class CarState(CarStateBase, EsccCarStateBase):
       self.hda2_lfa_block_msg = copy.copy(cp_cam.vl["CAM_0x362"] if self.CP.flags & HyundaiFlags.CANFD_HDA2_ALT_STEERING
                                           else cp_cam.vl["CAM_0x2a4"])
 
-    # TODO: always publish buttons. the pause/resume button is classified as cancel on some cars
-    if self.CP.openpilotLongitudinalControl:
-      ret.buttonEvents = create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT)
+    ret.buttonEvents = [*create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT),
+                        *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise})]
 
     return ret
 
-  def get_can_parser(self, CP):
-    if CP.flags & HyundaiFlags.CANFD:
-      return self.get_can_parser_canfd(CP)
+  def get_can_parsers_canfd(self, CP):
+    pt_messages = [
+      ("WHEEL_SPEEDS", 100),
+      ("STEERING_SENSORS", 100),
+      ("MDPS", 100),
+      ("TCS", 50),
+      ("CRUISE_BUTTONS_ALT", 50),
+      ("BLINKERS", 4),
+      ("DOORS_SEATBELTS", 4),
+    ]
 
-    messages = [
+    if CP.flags & HyundaiFlags.EV:
+      pt_messages += [
+        ("ACCELERATOR", 100),
+        ("MANUAL_SPEED_LIMIT_ASSIST", 10),
+      ]
+    else:
+      pt_messages += [
+        (self.gear_msg_canfd, 100),
+        (self.accelerator_msg_canfd, 100),
+      ]
+
+    if not (CP.flags & HyundaiFlags.CANFD_ALT_BUTTONS):
+      pt_messages += [
+        ("CRUISE_BUTTONS", 50)
+      ]
+
+    if CP.enableBsm:
+      pt_messages += [
+        ("BLINDSPOTS_REAR_CORNERS", 20),
+      ]
+
+    if not (CP.flags & HyundaiFlags.CANFD_CAMERA_SCC.value) and not CP.openpilotLongitudinalControl:
+      pt_messages += [
+        ("SCC_CONTROL", 50),
+      ]
+
+    cam_messages = []
+    if CP.flags & HyundaiFlags.CANFD_HDA2:
+      block_lfa_msg = "CAM_0x362" if CP.flags & HyundaiFlags.CANFD_HDA2_ALT_STEERING else "CAM_0x2a4"
+      cam_messages += [(block_lfa_msg, 20)]
+    elif CP.flags & HyundaiFlags.CANFD_CAMERA_SCC:
+      cam_messages += [
+        ("SCC_CONTROL", 50),
+      ]
+
+    return {
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).ECAN),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).CAM),
+    }
+
+  def get_can_parsers(self, CP):
+    if CP.flags & HyundaiFlags.CANFD:
+      return self.get_can_parsers_canfd(CP)
+
+    pt_messages = [
       # address, frequency
       ("MDPS12", 50),
       ("TCS11", 100),
@@ -287,103 +344,48 @@ class CarState(CarStateBase, EsccCarStateBase):
     ]
 
     if not CP.openpilotLongitudinalControl and not (CP.flags & HyundaiFlags.CAMERA_SCC):
-      messages += [
+      pt_messages += [
         ("SCC11", 50),
         ("SCC12", 50),
       ]
       if CP.flags & HyundaiFlags.USE_FCA.value:
-        messages.append(("FCA11", 50))
+        pt_messages.append(("FCA11", 50))
 
     if CP.enableBsm:
-      messages.append(("LCA11", 50))
+      pt_messages.append(("LCA11", 50))
 
     if CP.flags & (HyundaiFlags.HYBRID | HyundaiFlags.EV):
-      messages.append(("E_EMS11", 50))
+      pt_messages.append(("E_EMS11", 50))
     else:
-      messages += [
+      pt_messages += [
         ("EMS12", 100),
         ("EMS16", 100),
       ]
 
     if CP.flags & (HyundaiFlags.HYBRID | HyundaiFlags.EV):
-      messages.append(("ELECT_GEAR", 20))
+      pt_messages.append(("ELECT_GEAR", 20))
     elif CP.flags & HyundaiFlags.CLUSTER_GEARS:
       pass
     elif CP.flags & HyundaiFlags.TCU_GEARS:
-      messages.append(("TCU12", 100))
+      pt_messages.append(("TCU12", 100))
     else:
-      messages.append(("LVR12", 100))
+      pt_messages.append(("LVR12", 100))
 
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, 0)
-
-  @staticmethod
-  def get_cam_can_parser(CP):
-    if CP.flags & HyundaiFlags.CANFD:
-      return CarState.get_cam_can_parser_canfd(CP)
-
-    messages = [
+    cam_messages = [
       ("LKAS11", 100)
     ]
 
     if not CP.openpilotLongitudinalControl and CP.flags & HyundaiFlags.CAMERA_SCC:
-      messages += [
+      cam_messages += [
         ("SCC11", 50),
         ("SCC12", 50),
       ]
 
       if CP.flags & HyundaiFlags.USE_FCA.value:
-        messages.append(("FCA11", 50))
+        cam_messages.append(("FCA11", 50))
 
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, 2)
 
-  def get_can_parser_canfd(self, CP):
-    messages = [
-      ("WHEEL_SPEEDS", 100),
-      ("STEERING_SENSORS", 100),
-      ("MDPS", 100),
-      ("TCS", 50),
-      ("CRUISE_BUTTONS_ALT", 50),
-      ("BLINKERS", 4),
-      ("DOORS_SEATBELTS", 4),
-    ]
-
-    if CP.flags & HyundaiFlags.EV:
-      messages += [
-        ("ACCELERATOR", 100),
-        ("MANUAL_SPEED_LIMIT_ASSIST", 10),
-      ]
-    else:
-      messages += [
-        (self.gear_msg_canfd, 100),
-        (self.accelerator_msg_canfd, 100),
-      ]
-
-    if not (CP.flags & HyundaiFlags.CANFD_ALT_BUTTONS):
-      messages += [
-        ("CRUISE_BUTTONS", 50)
-      ]
-
-    if CP.enableBsm:
-      messages += [
-        ("BLINDSPOTS_REAR_CORNERS", 20),
-      ]
-
-    if not (CP.flags & HyundaiFlags.CANFD_CAMERA_SCC.value) and not CP.openpilotLongitudinalControl:
-      messages += [
-        ("SCC_CONTROL", 50),
-      ]
-
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, CanBus(CP).ECAN)
-
-  @staticmethod
-  def get_cam_can_parser_canfd(CP):
-    messages = []
-    if CP.flags & HyundaiFlags.CANFD_HDA2:
-      block_lfa_msg = "CAM_0x362" if CP.flags & HyundaiFlags.CANFD_HDA2_ALT_STEERING else "CAM_0x2a4"
-      messages += [(block_lfa_msg, 20)]
-    elif CP.flags & HyundaiFlags.CANFD_CAMERA_SCC:
-      messages += [
-        ("SCC_CONTROL", 50),
-      ]
-
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, CanBus(CP).CAM)
+    return {
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 0),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, 2),
+    }

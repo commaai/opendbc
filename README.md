@@ -118,3 +118,7 @@ Any car with LKAS and ACC. More info [here](https://github.com/commaai/openpilot
 
 In short, we designed hardware to sit at a convenient spot on your car's communication bus that allows for filtering out interesting messages and replacing them with our own.  
 See [this talk](https://www.youtube.com/watch?v=FL8CxUSfipM) for an in-depth explanation.
+
+## Come work with us -- [comma.ai/jobs](https://comma.ai/jobs)
+
+comma is hiring engineers to work on opendbc and [openpilot](https://github.com/commaai/openpilot). We love contributors.

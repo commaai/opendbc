@@ -1,5 +1,5 @@
 from opendbc.can.packer import CANPacker
-from opendbc.car import DT_CTRL, apply_driver_steer_torque_limits, common_fault_avoidance, make_tester_present_msg, structs
+from opendbc.car import Bus, DT_CTRL, apply_driver_steer_torque_limits, common_fault_avoidance, make_tester_present_msg, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car.hyundai import hyundaicanfd, hyundaican
@@ -45,12 +45,12 @@ def process_hud_alert(enabled, fingerprint, hud_control):
 
 
 class CarController(CarControllerBase, EsccCarController):
-  def __init__(self, dbc_name, CP):
-    CarControllerBase.__init__(self, dbc_name, CP)
+  def __init__(self, dbc_names, CP):
+    CarControllerBase.__init__(self, dbc_names, CP)
     EsccCarController.__init__(self, CP)
     self.CAN = CanBus(CP)
     self.params = CarControllerParams(CP)
-    self.packer = CANPacker(dbc_name)
+    self.packer = CANPacker(dbc_names[Bus.pt])
     self.angle_limit_counter = 0
 
     self.accel_last = 0

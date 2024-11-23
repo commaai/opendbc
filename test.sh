@@ -5,10 +5,8 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
 cd $DIR
 
 # ensure we're up to date
-uv venv --allow-existing
+uv sync --all-extras
 source .venv/bin/activate
-
-uv pip install -e .[testing,docs]
 
 uv run scons -j8
 

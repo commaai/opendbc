@@ -14,7 +14,7 @@ on:
 jobs:
   unit-tests:
     name: unit tests
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 1
     strategy:
       fail-fast: false
@@ -23,13 +23,13 @@ jobs:
         #run: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
     steps:
     - uses: actions/checkout@v4
-    - name: setup python
+    - name: install uv and dependencies
       run: |
         curl -LsSf https://astral.sh/uv/install.sh | sh
         uv venv
         # TODO: remove setuptools once https://github.com/cython/cython/issues/5751 is fixed
         uv pip install -e .[testing,docs] setuptools
-    - run: uv run scons -j$(nproc)
+    - run: uv run scons -j8
     - run: uv run pytest .
 
   static-analysis:
