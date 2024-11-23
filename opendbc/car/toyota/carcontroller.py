@@ -53,7 +53,7 @@ class CarController(CarControllerBase):
 
     self.deque = deque([0] * 300, maxlen=300)
 
-    self.pid = PIDController(0, 0.5, k_f=0.0, k_d=0.25,
+    self.pid = PIDController(0.5, 0.25, k_f=0.0, k_d=0.,
                              pos_limit=self.params.ACCEL_MAX, neg_limit=self.params.ACCEL_MIN,
                              rate=1 / DT_CTRL / 3)
 
@@ -189,7 +189,7 @@ class CarController(CarControllerBase):
     prev_aego = self.aego.x
     self.aego.update(CS.out.aEgo)
     jEgo = (self.aego.x - prev_aego) / DT_CTRL
-    future_aego = CS.out.aEgo + jEgo * 0.5
+    future_aego = CS.out.aEgo + jEgo * 0.35
 
     self.debug = jEgo
     self.debug2 = future_aego
@@ -256,10 +256,10 @@ class CarController(CarControllerBase):
 
             # TODO: freeze_integrator when stopping or at standstill?
             #pcm_accel_compensation = self.pid.update(self.deque[round(-40 / 3)] - CS.out.aEgo,
-            pcm_accel_compensation = self.pid.update(pcm_accel_cmd - future_aego,
+            pcm_accel_compensation = self.pid.update(self.pcm_accel_cmd.x - future_aego,
                                                      error_rate=self.error_rate.x)  #, feedforward=pcm_accel_cmd)
-            #pcm_accel_cmd += self.pcm_accel_compensation.update(pcm_accel_compensation)
-            pcm_accel_cmd += pcm_accel_compensation
+            pcm_accel_cmd += self.pcm_accel_compensation.update(pcm_accel_compensation)
+            #pcm_accel_cmd += pcm_accel_compensation
           else:
             self.pid.reset()
             self.error.x = 0.0
