@@ -5,7 +5,7 @@ from opendbc.car import Bus, create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.numpy_fast import mean
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.gm.values import DBC, AccState, CruiseButtons, STEER_THRESHOLD, SDGM_CAR
+from opendbc.car.gm.values import DBC, AccState, CruiseButtons, STEER_THRESHOLD, SDGM_CAR, ASCM_INT
 
 ButtonType = structs.CarState.ButtonEvent.Type
 TransmissionType = structs.CarParams.TransmissionType
@@ -75,7 +75,6 @@ class CarState(CarStateBase):
     else:
       ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(pt_cp.vl["ECMPRDNL2"]["PRNDL2"], None))
 
-    ret.brake = pt_cp.vl["ECMAcceleratorPos"]["BrakePedalPos"]
     if self.CP.networkLocation == NetworkLocation.fwdCamera:
       ret.brakePressed = pt_cp.vl["ECMEngineStatus"]["BrakePressed"] != 0
     else:
@@ -83,6 +82,7 @@ class CarState(CarStateBase):
       # that the brake is being intermittently pressed without user interaction.
       # To avoid a cruise fault we need to use a conservative brake position threshold
       # https://static.nhtsa.gov/odi/tsbs/2017/MC-10137629-9999.pdf
+      ret.brake = pt_cp.vl["ECMAcceleratorPos"]["BrakePedalPos"]
       ret.brakePressed = ret.brake >= 8
 
     # Regen braking is braking
@@ -126,7 +126,7 @@ class CarState(CarStateBase):
       ret.cruiseState.speed = cam_cp.vl["ASCMActiveCruiseControlStatus"]["ACCSpeedSetpoint"] * CV.KPH_TO_MS
       # This FCW signal only works for SDGM cars. CAM cars send FCW on GMLAN but this bit is always 0 for them
       ret.stockFcw = cam_cp.vl["ASCMActiveCruiseControlStatus"]["FCWAlert"] != 0
-      if self.CP.carFingerprint not in SDGM_CAR:
+      if self.CP.carFingerprint not in SDGM_CAR or ASCM_INT:
         ret.stockAeb = cam_cp.vl["AEBCmd"]["AEBCmdActive"] != 0
       # openpilot controls nonAdaptive when not pcmCruise
       if self.CP.pcmCruise:
@@ -163,8 +163,9 @@ class CarState(CarStateBase):
       ("ASCMSteeringButton", 33),
       ("ECMEngineStatus", 100),
       ("PSCMSteeringAngle", 100),
-      ("ECMAcceleratorPos", 80),
     ]
+    if CP.carFingerprint not in ASCM_INT:
+      pt_messages.append(("ECMAcceleratorPos", 80))
 
     if CP.enableBsm:
       pt_messages.append(("BCMBlindSpotMonitor", 10))
@@ -184,7 +185,7 @@ class CarState(CarStateBase):
         ("ASCMLKASteeringCmd", 10),
         ("ASCMActiveCruiseControlStatus", 25),
       ]
-      if CP.carFingerprint not in SDGM_CAR:
+      if CP.carFingerprint not in SDGM_CAR or ASCM_INT:
         cam_messages += [
           ("AEBCmd", 10),
         ]
