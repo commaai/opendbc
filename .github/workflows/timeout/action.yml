@@ -11,7 +11,7 @@ inputs:
     default: -1
 outputs:
   start_time:
-    descriptions: 'Starting time of this workflow'
+    description: 'Starting time of this workflow'
     value: ${{ steps.timeout-check.outputs.start_time }}
 
 runs:
@@ -21,7 +21,7 @@ runs:
       shell: bash
       run: |
         if [[ $(( $(date +%s) - ${{ inputs.start_time }} -gt ${{ inputs.duration }} )) ]]; then echo "TIMEOUT!" && exit 1; fi
-      run: echo "check timeout"
     - id: timeout-check
+      shell: bash
       run: |
         echo "start_time=$(date +%s)" >> "$GITHUB_OUTPUT"
