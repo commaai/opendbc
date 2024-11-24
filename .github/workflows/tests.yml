@@ -19,8 +19,8 @@ jobs:
       matrix:
         os: [ubuntu-24.04, macos-latest]
     steps:
-    - uses: actions/checkout@v4
     - uses: commaai/timeout@v1
+    - uses: actions/checkout@v4
     - name: install uv and dependencies
       run: |
         curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -34,8 +34,10 @@ jobs:
     name: static analysis
     runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v4
     - uses: commaai/timeout@v1
+      with:
+        timeout: 3
+    - uses: actions/checkout@v4
     - run: sudo apt install --no-install-recommends -y cppcheck
     - name: setup python
       run: |
