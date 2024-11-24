@@ -510,10 +510,7 @@ class CarState(CarStateBase):
       if CP.enableBsm:
         pt_messages += MebExtraSignals.bsm_radar_messages
 
-    return CANParser(DBC[CP.carFingerprint]["pt"], pt_messages, CANBUS.pt)
-
     cam_messages = []
-
     if CP.networkLocation == NetworkLocation.fwdCamera:
       cam_messages += [
         # sig_address, frequency
