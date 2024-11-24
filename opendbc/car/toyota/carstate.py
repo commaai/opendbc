@@ -5,7 +5,7 @@ from opendbc.can.parser import CANParser
 from opendbc.car import Bus, DT_CTRL, create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.filter_simple import FirstOrderFilter
-from opendbc.car.common.numpy_fast import mean
+from opendbc.car.common.numpy_fast import interp, mean
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.toyota.values import ToyotaFlags, CAR, DBC, STEER_THRESHOLD, NO_STOP_TIMER_CAR, \
                                                   TSS2_CAR, RADAR_ACC_CAR, EPS_SCALE, UNSUPPORTED_DSU_CAR, SECOC_CAR
@@ -104,6 +104,10 @@ class CarState(CarStateBase):
     ret.vEgoRaw = mean([ret.wheelSpeeds.fl, ret.wheelSpeeds.fr, ret.wheelSpeeds.rl, ret.wheelSpeeds.rr])
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.vEgoCluster = ret.vEgo * 1.015  # minimum of all the cars
+
+    # TODO: check that this isn't crazy on inclines, one ego acceleration signal was
+    # GVC can capture ego acceleration 0.5s earlier than aEgo, this is useful for start from stop control
+    ret.aEgoBlended = interp(ret.vEgo, [1, 2], [cp.vl["VSC1S07"]["GVC"], ret.aEgo])
 
     ret.standstill = abs(ret.vEgoRaw) < 1e-3
 
@@ -218,6 +222,7 @@ class CarState(CarStateBase):
       ("PCM_CRUISE", 33),
       ("PCM_CRUISE_SM", 1),
       ("STEER_TORQUE_SENSOR", 50),
+      ("VSC1S07", 20),
     ]
 
     if CP.flags & ToyotaFlags.SECOC.value:

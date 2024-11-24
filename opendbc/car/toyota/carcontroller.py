@@ -186,9 +186,9 @@ class CarController(CarControllerBase):
     # *** gas and brake ***
 
     prev_aego = self.aego.x
-    self.aego.update(CS.out.aEgo)
+    self.aego.update(CS.out.aEgoBlended)
     jEgo = (self.aego.x - prev_aego) / DT_CTRL
-    future_aego = CS.out.aEgo + jEgo * 0.15  # TODO: only for hybrid
+    future_aego = CS.out.aEgoBlended + jEgo * 0.15  # TODO: only for hybrid
 
     self.debug = jEgo
     self.debug2 = future_aego
@@ -234,7 +234,7 @@ class CarController(CarControllerBase):
           # filter ACCEL_NET so it more closely matches aEgo delay for error correction
           # self.pcm_accel_net.update(CS.pcm_accel_net)
 
-          error = pcm_accel_cmd - CS.out.aEgo
+          error = pcm_accel_cmd - CS.out.aEgoBlended
           self.error_rate.update((error - self.prev_error) / (DT_CTRL * 3))
 
           # self.debug2 = self.error_rate.x
@@ -249,7 +249,7 @@ class CarController(CarControllerBase):
             self.pid.pos_limit = self.params.ACCEL_MAX - pcm_accel_cmd
 
             # TODO: freeze_integrator when stopping or at standstill?
-            #pcm_accel_compensation = self.pid.update(self.deque[round(-40 / 3)] - CS.out.aEgo,
+            #pcm_accel_compensation = self.pid.update(self.deque[round(-40 / 3)] - CS.out.aEgoBlended,
             pcm_accel_compensation = self.pid.update(self.pcm_accel_cmd.x - future_aego,
                                                      error_rate=self.error_rate.x)  #, feedforward=pcm_accel_cmd)
             pcm_accel_cmd += self.pcm_accel_compensation.update(pcm_accel_compensation)
@@ -276,7 +276,7 @@ class CarController(CarControllerBase):
             # TODO: check if maintaining the offset from before stopping is beneficial
             self.pcm_accel_net_offset.x = 0.0
           else:
-            new_pcm_accel_net -= self.pcm_accel_net_offset.update((self.pcm_accel_net.x - accel_due_to_pitch) - CS.out.aEgo)
+            new_pcm_accel_net -= self.pcm_accel_net_offset.update((self.pcm_accel_net.x - accel_due_to_pitch) - CS.out.aEgoBlended)
 
           # let PCM handle stopping for now, error correct on a delayed acceleration request
           pcm_accel_compensation = 0.0
