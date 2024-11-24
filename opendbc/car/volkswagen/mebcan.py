@@ -1,3 +1,5 @@
+from opendbc.car.common.conversions import Conversions as CV
+
 ACC_CTRL_ERROR    = 6
 ACC_CTRL_OVERRIDE = 4
 ACC_CTRL_ACTIVE   = 3
@@ -15,13 +17,13 @@ ACC_HUD_ENABLED  = 2
 ACC_HUD_DISABLED = 0
 
 
-def create_steering_control(packer, bus, apply_curvature, lkas_enabled, power):
+def create_steering_control(packer, bus, apply_curvature, lkas_enabled, power, power_boost):
   # active lateral control deactivates active steering wheel centering 
   values = {
-    #"Curvature": abs(apply_curvature) * 1000, # in 1/mm
-    "Steering_Angle": abs(apply_curvature),
-    "VZ": 1 if apply_curvature < 0 and lkas_enabled == 1 else 0, # > for curvature
+    "Curvature": abs(apply_curvature) * CV.RAD_TO_DEG, # in deg/m
+    "VZ": 1 if apply_curvature > 0 and lkas_enabled else 0,
     "Power": power if lkas_enabled else 0,
+    "Power_Boost": 1 if power_boost and lkas_enabled else 0,
     "Active": lkas_enabled,
     "Request": lkas_enabled,
     "Standby": not lkas_enabled,
@@ -133,20 +135,16 @@ def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_cont
     "SET_ME_0XFE":                0xFE,
     "SET_ME_0X1":                 0x1,
     "SET_ME_0X9":                 0x9,
-    "SET_ME_0XFE":                0xFE,
-    "SET_ME_0X1":                 0x1,
-    "SET_ME_0X9":                 0x9,
   }
 
   commands.append(packer.make_can_msg("MEB_ACC_02", bus, values))
 
   if travel_assist_available:
     # satisfy car to prevent errors when pressing Travel Assist Button
-    # testing effects of enabling this while acc enabled
     values_ta = {
        "Travel_Assist_Status":    4 if acc_enabled else 2,
        "Travel_Assist_Request":   0,
-       "Travel_Assist_Available": 1, # button is illuminated
+       "Travel_Assist_Available": 1,
     }
 
     commands.append(packer.make_can_msg("MEB_Travel_Assist_01", bus, values_ta))
@@ -181,17 +179,15 @@ def get_desired_gap(distance_bars, desired_gap, current_gap_signal):
   return gap
 
 
-def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, distance_bars, desired_gap, distance, heartbeat, esp_hold):
+def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, distance_bars, desired_gap, distance, esp_hold):
 
   values = {
-    #"STA_Primaeranz": acc_hud_status,
     "ACC_Status_ACC":          acc_control,
     "ACC_Wunschgeschw_02":     set_speed if set_speed < 250 else 327.36,
     "ACC_Gesetzte_Zeitluecke": distance_bars, # 5 distance bars available (3 are used by OP)
     "ACC_Display_Prio":        1,
     "ACC_Abstandsindex_02":    569,
     "ACC_EGO_Fahrzeug":        1 if acc_control == ACC_HUD_ACTIVE else 0,
-    #"Heartbeat":               heartbeat,
     "Lead_Type_Detected":      1 if lead_visible else 0, # object should be displayed
     "Lead_Type":               3 if lead_visible else 0, # displaying a car
     "Lead_Distance":           distance if lead_visible else 0, # hud distance of object
