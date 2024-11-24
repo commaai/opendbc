@@ -1495,11 +1495,11 @@ BO_ 332 MEB_ESP_03: 32 XXX
  SG_ Accelerator_Pressure : 175|8@0+ (0.391,-14.467) [0|100] "Unit_Percent" XXX
 
 BO_ 258 MEB_ESP_04: 48 XXX
- SG_ NEW_SIGNAL_1 : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_2 : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Lateral_Accel : 16|8@1+ (1,-128) [0|255] "" XXX
- SG_ Longitudinal_Accel : 24|8@1- (1,0) [0|255] "" XXX
- SG_ Yaw_Rate : 40|14@1+ (1,0) [0|16383] "" XXX
+ SG_ Longitudinal_Accel : 24|9@1- (0.0325,0) [0|255] "Unit_MeterPerSquareSecond" XXX
+ SG_ Yaw_Rate : 40|14@1+ (0.01,0) [0|16383] "Unit_DegreePerSecond" XXX
  SG_ Yaw_Rate_Sign : 54|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_7 : 99|1@0+ (1,0) [0|1] "" XXX
  SG_ ESP_Hold : 120|1@0+ (1,0) [0|1] "" XXX
@@ -1522,7 +1522,7 @@ BO_ 522 MEB_ABS_01: 64 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Yaw_Rate_VZ : 33|1@1+ (1,0) [0|1] "" XXX
- SG_ Yaw_Rate : 200|16@1+ (0.007,-229.36) [0|255] "" XXX
+ SG_ Yaw_Rate : 200|16@1+ (0.007,-229.34) [0|255] "" XXX
 
 BO_ 261 MEB_ABS_02: 8 XXX
  SG_ CRC : 0|8@1+ (1,0) [0|255] "" XXX
@@ -1549,8 +1549,10 @@ BO_ 317 MEB_EPS_01: 32 XXX
 BO_ 771 HCA_03: 24 XXX
  SG_ Standby : 13|1@1+ (1,0) [0|1] "" XXX
  SG_ Request : 14|1@1+ (1,0) [0|1] "" XXX
+ SG_ Unknown_02 : 15|1@1+ (1,0) [0|1] "" XXX
  SG_ Power : 16|7@1+ (1,0) [0|125] "" XXX
- SG_ Steering_Angle : 24|15@1+ (0.0174,0) [0|360] "Unit_DegreOfArc" XXX
+ SG_ Power_Boost : 23|1@1+ (1,0) [0|1] "" XXX
+ SG_ Curvature : 24|15@1+ (0.00036,0) [0|200] "Unit_deg/m" XXX
  SG_ VZ : 39|1@1+ (1,0) [0|1] "" XXX
  SG_ Unknown_01 : 53|1@0+ (1,0) [0|1] "" XXX
  SG_ Vibration : 56|1@0+ (1,0) [0|1] "" XXX
@@ -1593,24 +1595,24 @@ BO_ 591 MEB_Distance_01: 64 XXX
  SG_ Right_Lane_02_ObjectID : 46|6@1+ (1,0) [0|63] "Unit_ObjectID" XXX
  SG_ Unknown_02 : 52|2@1+ (1,0) [0|3] "" XXX
  SG_ Unknown_03 : 54|10@1+ (1,0) [0|3] "" XXX
- SG_ Same_Lane_01_Long_Distance : 64|12@1+ (0.062,-4.5) [0|200] "Unit_Meter" XXX
+ SG_ Same_Lane_01_Long_Distance : 64|12@1+ (0.07,-5.6) [0|200] "Unit_Meter" XXX
  SG_ Same_Lane_01_Lat_Distance : 76|10@1+ (0.065,-33.28) [0|31] "Unit_Meter" XXX
- SG_ Same_Lane_01_Rel_Velo : 86|10@1+ (0.87,-445.44) [0|300] "Unit_KilometerPerHour" XXX
- SG_ Left_Lane_01_Long_Distance : 96|12@1+ (0.062,-4.5) [0|200] "Unit_Meter" XXX
+ SG_ Same_Lane_01_Rel_Velo : 86|10@1+ (0.33,-168.96) [0|50] "Unit_MeterPerSecond" XXX
+ SG_ Left_Lane_01_Long_Distance : 96|12@1+ (0.07,-5.6) [0|200] "Unit_Meter" XXX
  SG_ Left_Lane_01_Lat_Distance : 108|10@1+ (0.065,-33.28) [0|15] "Unit_Meter" XXX
- SG_ Left_Lane_01_Rel_Velo : 118|10@1+ (0.87,-445.44) [0|300] "Unit_KilometerPerHour" XXX
- SG_ Right_Lane_01_Long_Distance : 128|12@1+ (0.062,-4.5) [0|200] "Unit_Meter" XXX
+ SG_ Left_Lane_01_Rel_Velo : 118|10@1+ (0.33,-168.96) [0|50] "Unit_MeterPerSecond" XXX
+ SG_ Right_Lane_01_Long_Distance : 128|12@1+ (0.07,-5.6) [0|200] "Unit_Meter" XXX
  SG_ Right_Lane_01_Lat_Distance : 140|10@1+ (0.065,-33.28) [0|15] "Unit_Meter" XXX
- SG_ Right_Lane_01_Rel_Velo : 150|10@1+ (0.87,-445.44) [0|300] "Unit_KilometerPerHour" XXX
- SG_ Same_Lane_02_Long_Distance : 160|12@1+ (0.062,-4.5) [0|200] "Unit_Meter" XXX
+ SG_ Right_Lane_01_Rel_Velo : 150|10@1+ (0.33,-168.96) [0|50] "Unit_MeterPerSecond" XXX
+ SG_ Same_Lane_02_Long_Distance : 160|12@1+ (0.07,-5.6) [0|200] "Unit_Meter" XXX
  SG_ Same_Lane_02_Lat_Distance : 172|10@1+ (0.065,-33.28) [0|31] "Unit_Meter" XXX
- SG_ Same_Lane_02_Rel_Velo : 182|10@1+ (0.87,-445.44) [0|300] "Unit_KilometerPerHour" XXX
- SG_ Left_Lane_02_Long_Distance : 192|12@1+ (0.062,-4.5) [0|200] "Unit_Meter" XXX
+ SG_ Same_Lane_02_Rel_Velo : 182|10@1+ (0.33,-168.96) [0|50] "Unit_MeterPerSecond" XXX
+ SG_ Left_Lane_02_Long_Distance : 192|12@1+ (0.07,-5.6) [0|200] "Unit_Meter" XXX
  SG_ Left_Lane_02_Lat_Distance : 204|10@1+ (0.065,-33.28) [0|1023] "Unit_Meter" XXX
- SG_ Left_Lane_02_Rel_Velo : 214|10@1+ (0.87,-445.44) [0|300] "Unit_KilometerPerHour" XXX
- SG_ Right_Lane_02_Long_Distance : 224|12@1+ (0.062,-4.5) [0|200] "Unit_Meter" XXX
+ SG_ Left_Lane_02_Rel_Velo : 214|10@1+ (0.33,-168.96) [0|50] "Unit_MeterPerSecond" XXX
+ SG_ Right_Lane_02_Long_Distance : 224|12@1+ (0.07,-5.6) [0|200] "Unit_Meter" XXX
  SG_ Right_Lane_02_Lat_Distance : 236|10@1+ (0.065,-33.28) [0|1023] "Unit_Meter" XXX
- SG_ Right_Lane_02_Rel_Velo : 246|10@1+ (0.87,-445.44) [0|300] "Unit_KilometerPerHour" XXX
+ SG_ Right_Lane_02_Rel_Velo : 246|10@1+ (0.33,-168.96) [0|50] "Unit_MeterPerSecond" XXX
  SG_ Unknown_04 : 256|8@1+ (1,-128) [0|31] "" XXX
  SG_ Unknown_05 : 264|6@1+ (1,-15) [0|31] "" XXX
  SG_ Unknown_06 : 270|6@1+ (1,0) [0|127] "" XXX
