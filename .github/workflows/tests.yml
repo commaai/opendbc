@@ -20,7 +20,7 @@ jobs:
         os: [ubuntu-24.04, macos-latest]
     steps:
     - uses: actions/checkout@v4
-    - uses: maxime-desroches/timeout@master
+    - uses: maxime-desroches/timeout@v1
     - name: install uv and dependencies
       run: |
         curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v4
-    - uses: maxime-desroches/timeout@master
+    - uses: maxime-desroches/timeout@v1
     - run: sudo apt install --no-install-recommends -y cppcheck
     - name: setup python
       run: |
