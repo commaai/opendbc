@@ -20,8 +20,7 @@ jobs:
         os: [ubuntu-24.04, macos-latest]
     steps:
     - uses: actions/checkout@v4
-    - uses: ./.github/workflows/timeout
-      id: timeout
+    - uses: maxime-desroches/timeout@master
     - name: install uv and dependencies
       run: |
         curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -30,18 +29,13 @@ jobs:
         uv pip install -e .[testing,docs] setuptools
     - run: uv run scons -j8
     - run: uv run pytest .
-    - uses: ./.github/workflows/timeout
-      with: 
-        start_time: ${{ steps.timeout.outputs.start_time }}
-        duration: 60
 
   static-analysis:
     name: static analysis
     runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v4
-    - uses: ./.github/workflows/timeout
-      id: timeout
+    - uses: maxime-desroches/timeout@master
     - run: sudo apt install --no-install-recommends -y cppcheck
     - name: setup python
       run: |
@@ -56,7 +50,3 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pre-commit-
     - run: uv run pre-commit run --all
-    - uses: ./.github/workflows/timeout
-      with: 
-        start_time: ${{ steps.timeout.outputs.start_time }}
-        duration: 60
