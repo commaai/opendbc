@@ -17,7 +17,7 @@ def get_radar_can_parser(CP):
   else:
     return None
 
-  return CANParser(DBC[CP.carFingerprint]['radar'], messages, 2)
+  return CANParser(DBC[CP.carFingerprint][Bus.radar], messages, 2)
   
 
 class RadarInterface(RadarInterfaceBase):
