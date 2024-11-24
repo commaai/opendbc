@@ -94,8 +94,6 @@ BO_ 679 ACC_13: 8 XXX
  SG_ ACC_ADAPTIVE : 63|2@0+ (1,0) [0|3] "" XXX
 
 BO_ 681 ACC_15: 8 XXX
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  XXX
  SG_ AWV_Warnung : 16|3@1+ (1,0) [0|7] ""  XXX
  SG_ AWV_Texte : 24|3@1+ (1,0) [0|7] ""  XXX
  SG_ AWV_Status_Anzeige : 32|2@1+ (1,0) [0|3] ""  XXX
@@ -1197,8 +1195,8 @@ BO_ 288 TSK_06: 8 Motor_Diesel_MQB
  SG_ TSK_zul_Regelabw : 58|6@1+ (0.024,0) [0|1.512] "Unit_MeterPerSeconSquar" Gateway_MQB,Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB
 
 BO_ 798 TSK_07: 8 Motor_Diesel_MQB
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  Gateway_MQB,Getriebe_AQ
- SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  Gateway_MQB,Getriebe_AQ
+ SG_ TSK_07_CRC : 0|8@1+ (1,0) [0|255] ""  Gateway_MQB,Getriebe_AQ
+ SG_ TSK_07_BZ : 8|4@1+ (1,0) [0|15] ""  Gateway_MQB,Getriebe_AQ
  SG_ TSK_Wunschgeschw : 12|10@1+ (0.32,0) [0.00|326.72] "Unit_KiloMeterPerHour"  Gateway_MQB,Getriebe_AQ
  SG_ TSK_Texte : 40|5@1+ (1.0,0.0) [0.0|31] ""  Gateway_MQB
  SG_ TSK_Akustik : 45|3@1+ (1.0,0.0) [0.0|7] ""  Gateway_MQB
@@ -1284,15 +1282,13 @@ BO_ 294 HCA_01: 8 Frontsensorik
  SG_ HCA_01_LM_Offset : 16|9@1+ (1,0) [0|511] "Unit_centiNewtoMeter" Vector__XXX
  SG_ EA_ACC_Sollstatus : 25|2@1+ (1,0) [0|3] ""  Frontradar
  SG_ EA_Ruckprofil : 27|3@1+ (1,0) [0|7] "" Vector__XXX
- SG_ HCA_01_Enable : 30|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ HCA_01_Sendestatus : 30|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ HCA_01_LM_OffSign : 31|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ HCA_01_Available : 32|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ HCA_01_Standby : 33|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ HCA_01_Request : 34|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ HCA_01_Status_HCA : 32|4@1+ (1,0) [0|15] "" Vector__XXX
  SG_ HCA_01_Vib_Amp : 36|4@1+ (0.2,0) [0|3] "Unit_NewtoMeter" Vector__XXX
  SG_ EA_Ruckfreigabe : 40|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ EA_ACC_Wunschgeschwindigkeit : 41|10@1+ (0.32,0) [0|327.04] "Unit_KiloMeterPerHour"  Frontradar
- 
+
 BO_ 159 LH_EPS_03: 8 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  XXX
@@ -1575,12 +1571,6 @@ BO_ 391 Motor_EV_01: 8 Motor_MQB_BEV
  SG_ MO_Tankklappensteuerung : 52|2@1+ (1.0,0.0) [0.0|3] ""  XXX
  SG_ MO_HVEM_Eskalation : 54|1@1+ (1.0,0.0) [0.0|1] ""  XXX
  SG_ MO_HVEM_MaxLeistung : 55|9@1+ (50,0) [0|25450] "Unit_Watt"  XXX
-
-BO_ 2536708353 BAP_LDW_01: 2 XXX
- SG_ Stream : 0|16@1+ (1,0) [0|65535] ""  XXX
-
-BO_ 2536708368 BAP_LDW_10: 8 XXX
- SG_ Stream : 0|64@1+ (1,0) [0|18446744073709551615] ""  XXX
 
 CM_ SG_ 134 LWI_Lenkradwinkel "Steering angle WITH variable ratio effect included";
 CM_ SG_ 159 EPS_HCA_Status "Status of Heading Control Assist feature";
