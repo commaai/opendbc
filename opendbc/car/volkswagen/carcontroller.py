@@ -27,12 +27,11 @@ class CarController(CarControllerBase):
     self.apply_steer_last = 0
     self.apply_curvature_last = 0
     self.steering_power_last = 0
+    self.accel_last = 0
     self.gra_acc_counter_last = None
     self.eps_timer_soft_disable_alert = False
     self.hca_frame_timer_running = 0
     self.hca_frame_same_torque = 0
-    self.steering_power = 0
-    self.accel_last = 0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -205,8 +204,7 @@ class CarController(CarControllerBase):
     new_actuators = actuators.as_builder()
     new_actuators.steer = self.apply_steer_last / self.CCP.STEER_MAX
     new_actuators.steerOutputCan = self.apply_steer_last
-    #new_actuators.curvature = self.apply_curvature_last
-    new_actuators.steeringAngleDeg = self.apply_angle_last
+    new_actuators.curvature = self.apply_curvature_last
     new_actuators.accel = self.accel_last
 
     self.gra_acc_counter_last = CS.gra_stock_values["COUNTER"]
