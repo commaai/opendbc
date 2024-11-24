@@ -83,7 +83,7 @@ class CarState(CarStateBase):
       # To avoid a cruise fault we need to use a conservative brake position threshold
       # https://static.nhtsa.gov/odi/tsbs/2017/MC-10137629-9999.pdf
 
-      # can't check ECMAcceleratorPos on Volt since its not transmitted when ASCM is active 
+      # can't check ECMAcceleratorPos on Volt since its not transmitted when ASCM is active
       ret.brake = pt_cp.vl["ECMAcceleratorPos"]["BrakePedalPos"]
       ret.brakePressed = ret.brake >= 8
 
