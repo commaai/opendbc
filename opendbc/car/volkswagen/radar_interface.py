@@ -1,7 +1,7 @@
 import math
 
 from opendbc.can.parser import CANParser
-from opendbc.car import structs
+from opendbc.car import Bus, structs
 from opendbc.car.interfaces import RadarInterfaceBase
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.volkswagen.values import DBC, VolkswagenFlags
