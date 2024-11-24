@@ -53,7 +53,7 @@ class CarController(CarControllerBase):
 
     self.deque = deque([0] * 300, maxlen=300)
 
-    self.pid = PIDController(0.5, 0.25, k_f=0.0, k_d=0.125,
+    self.pid = PIDController(0.5, 0.25, k_f=0.0, k_d=0.0,
                              pos_limit=self.params.ACCEL_MAX, neg_limit=self.params.ACCEL_MIN,
                              rate=1 / DT_CTRL / 3)
 
