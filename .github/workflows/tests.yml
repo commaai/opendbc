@@ -21,8 +21,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: maxime-desroches/timeout@master
-      with:
-        duration: 10
     - name: install uv and dependencies
       run: |
         curl -LsSf https://astral.sh/uv/install.sh | sh
