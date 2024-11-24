@@ -10,13 +10,6 @@ from opendbc.car.volkswagen.values import CANBUS, CarControllerParams, Volkswage
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 
-#def apply_meb_curvature_limits(apply_curvature, apply_curvature_last, current_curvature, v_ego_raw, CCP):
-#  if v_ego_raw > 1: # we don't enforce checks for this in panda at the moment, but keep it near measured current curv to project user input
-#    apply_curvature = clip(apply_curvature, current_curvature - CCP.CURVATURE_ERROR, current_curvature + CCP.CURVATURE_ERROR)
-#  apply_curvature = apply_std_steer_angle_limits(apply_curvature, apply_curvature_last, v_ego_raw, CCP)
-#
-#  return clip(apply_curvature, -CCP.CURVATURE_MAX, CCP.CURVATURE_MAX)
-
 
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
@@ -32,15 +25,14 @@ class CarController(CarControllerBase):
     self.ext_bus = CANBUS.pt if CP.networkLocation == structs.CarParams.NetworkLocation.fwdCamera else CANBUS.cam
 
     self.apply_steer_last = 0
-    #self.apply_curvature_last = 0
-    self.apply_angle_last = 0
+    self.apply_curvature_last = 0
+    self.steering_power_last = 0
     self.gra_acc_counter_last = None
     self.eps_timer_soft_disable_alert = False
     self.hca_frame_timer_running = 0
     self.hca_frame_same_torque = 0
     self.steering_power = 0
     self.accel_last = 0
-    self.long_heartbeat = 0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -62,29 +54,27 @@ class CarController(CarControllerBase):
 
         if CC.latActive:
           hca_enabled = True
-          #current_curvature    = -CS.out.yawRate / max(CS.out.vEgoRaw, 0.1) # TODO verify sign (clockwise is negative)
-          #apply_curvature      = apply_meb_curvature_limits(actuators.curvature, self.apply_curvature_last, current_curvature, CS.out.vEgoRaw, self.CCP)
-          apply_angle = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, self.CCP)
-          apply_angle = clip(apply_angle, -self.CCP.ANGLE_MAX, self.CCP.ANGLE_MAX)
-          if CS.out.steeringPressed:
-            apply_angle = clip(apply_angle, CS.out.steeringAngleDeg - self.CCP.ANGLE_ERROR, CS.out.steeringAngleDeg + self.CCP.ANGLE_ERROR)
+          current_curvature = -CS.out.yawRate / max(CS.out.vEgoRaw, 0.1)
+          apply_curvature = apply_std_steer_angle_limits(actuators.curvature, self.apply_curvature_last, CS.out.vEgoRaw, self.CCP)
+          apply_curvature = clip(apply_curvature, -self.CCP.CURVATURE_MAX, self.CCP.CURVATURE_MAX)
+          if CS.out.steeringPressed: # roughly sync with user input
+            apply_angle = clip(apply_curvature, current_curvature - self.CCP.CURVATURE_ERROR, current_curvature + self.CCP.CURVATURE_ERROR)
           
         else:
-          if self.steering_power > 0: # keep HCA alive until steering power has reduced to zero
-            hca_enabled            = True
-            #current_curvature      = -CS.out.yawRate / max(CS.out.vEgoRaw, 0.1)
-            #apply_curvature        = current_curvature
-            apply_angle            = CS.out.steeringAngleDeg # synchronize with current steering angle
+          if self.steering_power_last > 0: # keep HCA alive until steering power has reduced to zero
+            hca_enabled = True
+            current_curvature = -CS.out.yawRate / max(CS.out.vEgoRaw, 0.1)
+            apply_curvature = current_curvature # synchronize with current steering angle
           else:
-            hca_enabled           = False
-            #apply_curvature       = 0.
-            apply_angle           = 0
+            hca_enabled = False
+            apply_curvature = 0. # inactive curvature
 
-        self.steering_power = self.generate_vw_meb_steering_power(CS, CC.latActive, apply_angle, self.steering_power)
-        #self.apply_curvature_last = apply_curvature
-        self.apply_angle_last = apply_angle
-        can_sends.append(self.CCS.create_steering_control(self.packer_pt, CANBUS.pt, apply_angle, hca_enabled, self.steering_power))
-
+        steering_power = self.generate_vw_meb_steering_power(CS, CC.latActive, apply_curvature, self.steering_power_last)
+        steering_power_boost = True if steering_power == self.CCP.STEERING_POWER_MAX else False
+        can_sends.append(self.CCS.create_steering_control(self.packer_pt, CANBUS.pt, apply_curvature, hca_enabled, steering_power, steering_power_boost))
+        self.apply_curvature_last = apply_curvature
+        self.steering_power_last = steering_power
+        
       else:
         # Logic to avoid HCA state 4 "refused":
         #   * Don't steer unless HCA is in state 3 "ready" or 5 "active"
@@ -136,8 +126,6 @@ class CarController(CarControllerBase):
       if self.CP.flags & VolkswagenFlags.MEB:
         accel = clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.enabled else 0
         self.accel_last = accel
-        current_speed = CS.out.vEgo * CV.MS_TO_KPH
-        reversing = CS.out.gearShifter in [structs.CarState.GearShifter.reverse]
         acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
                                                  CS.esp_hold_confirmation, CC.cruiseControl.override or CS.out.gasPressed)
         acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
@@ -160,6 +148,7 @@ class CarController(CarControllerBase):
     if self.frame % self.CCP.LDW_STEP == 0:
       hud_alert = 0
       sound_alert = 0
+      
       if hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw):
         hud_alert = self.CCP.LDW_MESSAGES["laneAssistTakeOverUrgent"]
         sound_alert = 1
@@ -172,14 +161,13 @@ class CarController(CarControllerBase):
 
     if self.frame % self.CCP.ACC_HUD_STEP == 0 and self.CP.openpilotLongitudinalControl:
       if self.CP.flags & VolkswagenFlags.MEB:
-        self.long_heartbeat = self.generate_vw_meb_hud_heartbeat(self.long_heartbeat)
         desired_gap = max(1, CS.out.vEgo * 1) #get_T_FOLLOW(hud_control.leadDistanceBars))
         distance = 50 #min(self.lead_distance, 100)
 
         acc_hud_status = self.CCS.acc_hud_status_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
                                                        CS.esp_hold_confirmation, CC.cruiseControl.override or CS.out.gasPressed)
         can_sends.append(self.CCS.create_acc_hud_control(self.packer_pt, CANBUS.pt, acc_hud_status, hud_control.setSpeed * CV.MS_TO_KPH, hud_control.leadVisible,
-                                                         hud_control.leadDistanceBars, desired_gap, distance, self.long_heartbeat, CS.esp_hold_confirmation))
+                                                         hud_control.leadDistanceBars, desired_gap, distance, CS.esp_hold_confirmation))
 
       else:
         lead_distance = 0
@@ -209,17 +197,18 @@ class CarController(CarControllerBase):
     self.frame += 1
     return new_actuators, can_sends
 
-  def generate_vw_meb_steering_power(self, CS, lat_active, apply_angle, steering_power_prev):
+  def generate_vw_meb_steering_power(self, CS, lat_active, apply_curvature, steering_power_prev):
     # Steering power counter is used to:
     #   * prevent sudden fluctuations at low speeds
     #   * avoid HCA refused
     #   * easy user intervention
     #   * keep it near maximum regarding speed to get full steering power in shortest time
     if lat_active:
+      current_curvature = -CS.out.yawRate / max(CS.out.vEgoRaw, 0.1)
       steering_power_min_by_speed = interp(CS.out.vEgoRaw, [0, self.CCP.STEERING_POWER_MAX_BY_SPEED], [self.CCP.STEERING_POWER_MIN, self.CCP.STEERING_POWER_MAX])
-      steering_angle_diff = abs(apply_angle - CS.out.steeringAngleDeg)
-      steering_power_target_angle = steering_power_min_by_speed + self.CCP.ANGLE_POWER_FACTOR * steering_angle_diff + abs(apply_angle)
-      steering_power_target = clip(steering_power_target_angle, self.CCP.STEERING_POWER_MIN, self.CCP.STEERING_POWER_MAX)
+      steering_curvature_diff = abs(apply_curvature - current_curvature)
+      steering_power_target_curvature = steering_power_min_by_speed + self.CCP.CURVATURE_POWER_FACTOR * (steering_curvature_diff + abs(apply_curvature))
+      steering_power_target = clip(steering_power_target_curvature, self.CCP.STEERING_POWER_MIN, self.CCP.STEERING_POWER_MAX)
 
       if steering_power_prev < self.CCP.STEERING_POWER_MIN:  # OP lane assist just activated
         steering_power = min(steering_power_prev + self.CCP.STEERING_POWER_STEPS, self.CCP.STEERING_POWER_MIN)
@@ -240,9 +229,3 @@ class CarController(CarControllerBase):
         steering_power = 0
         
     return steering_power
-
-  def generate_vw_meb_hud_heartbeat(self, long_heartbeat_prev):
-    if long_heartbeat_prev != 221:
-      return 221
-    elif long_heartbeat_prev == 221:
-      return 360
