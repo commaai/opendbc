@@ -40,7 +40,6 @@ class CarInterface(CarInterfaceBase):
       ret.transmissionType = TransmissionType.direct
       ret.steerControlType = structs.CarParams.SteerControlType.angle
       ret.radarUnavailable = False
-      #ret.flags |= VolkswagenFlags.STOCK_HCA_PRESENT.value
 
       if any(msg in fingerprint[1] for msg in (0x520, 0x86, 0xFD, 0x13D)):  # Airbag_02, LWI_01, ESP_21, MEB_EPS_01
         ret.networkLocation = NetworkLocation.gateway
@@ -74,10 +73,7 @@ class CarInterface(CarInterfaceBase):
       ret.steerActuatorDelay = 0.2
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
     elif ret.flags & VolkswagenFlags.MEB:
-    #  ret.steerLimitTimer = 1.2
-      ret.steerActuatorDelay = 0.14
-      ret.longitudinalTuning.kiBP = [0., 5., 15.]
-      ret.longitudinalTuning.kiV  = [1.4, 1.2, 1.]
+      ret.steerActuatorDelay = 0.1
     else:
       ret.steerActuatorDelay = 0.1
       ret.lateralTuning.pid.kpBP = [0.]
