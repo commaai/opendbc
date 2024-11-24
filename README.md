@@ -66,12 +66,19 @@ In addition to the standard bounties, we also offer higher value bounties for mo
 
 ### Quick start
 
-Use [panda](https://github.com/commaai/panda) to connect your car to a computer.
+```bash
+git clone https://github.com/commaai/opendbc.git
 
-## How to use reverse engineered DBC
-To create custom CAN simulations or send reverse engineered signals back to the car you can use [CANdevStudio](https://github.com/GENIVI/CANdevStudio) project.
+cd opendbc
 
-## DBC file preprocessor
+# Install the dependencies
+pip3 install -e .[testing,docs]
+
+# Build
+scons -j8
+
+# Run the tests
+pytest .
 
 # Run the linter
 pre-commit run --all-files
