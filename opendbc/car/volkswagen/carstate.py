@@ -275,17 +275,18 @@ class CarState(CarStateBase):
     ret.standstill = ret.vEgoRaw == 0
 
     # Update EPS position and state info. For signed values, VW sends the sign in a separate signal.
-    ret.steeringAngleDeg = pt_cp.vl["MEB_EPS_01"]["Steering_Angle"] * (1, -1)[int(pt_cp.vl["MEB_EPS_01"]["Steering_Angle_VZ"])]
+    # LWI_01, MEP_EPS_01 steering angle differs from real steering angle! Do not use
+    ret.steeringAngleDeg = pt_cp.vl["LH_EPS_03"]["EPS_Berechneter_LW"] * (1, -1)[int(pt_cp.vl["LH_EPS_03"]["EPS_VZ_BLW"])]
     ret.steeringRateDeg = pt_cp.vl["LWI_01"]["LWI_Lenkradw_Geschw"] * (1, -1)[int(pt_cp.vl["LWI_01"]["LWI_VZ_Lenkradw_Geschw"])]
     ret.steeringTorque = pt_cp.vl["LH_EPS_03"]["EPS_Lenkmoment"] * (1, -1)[int(pt_cp.vl["LH_EPS_03"]["EPS_VZ_Lenkmoment"])]
     ret.steeringPressed = abs(ret.steeringTorque) > self.CCP.STEER_DRIVER_ALLOWANCE
-    ret.yawRate = pt_cp.vl["MEB_ABS_01"]["Yaw_Rate"] * CV.DEG_TO_RAD
+    ret.yawRate = pt_cp.vl["MEB_ESP_04"]["Yaw_Rate"] * (1, -1)[int(pt_cp.vl["MEB_ESP_04"]["Yaw_Rate_Sign"])] * CV.DEG_TO_RAD
     hca_status = self.CCP.hca_status_values.get(pt_cp.vl["MEB_EPS_01"]["LatCon_HCA_Status"])
     ret.steerFaultTemporary, ret.steerFaultPermanent = self.update_hca_state(hca_status)
 
     # VW Emergency Assist status tracking and mitigation
     self.eps_stock_values = pt_cp.vl["LH_EPS_03"]
-    #ret.carFaultedNonCritical =
+    #ret.carFaultedNonCritical = TODO
 
     # Update gas, brakes, and gearshift.
     ret.gasPressed = pt_cp.vl["MEB_ESP_03"]["Accelerator_Pressure"] > 0
@@ -293,6 +294,7 @@ class CarState(CarStateBase):
     ret.brakePressed = bool(pt_cp.vl["Motor_14"]["MO_Fahrer_bremst"]) # includes regen braking by user
     ret.brake = pt_cp.vl["MEB_ESP_01"]["Brake_Pressure"]
     ret.parkingBrake = pt_cp.vl["MEB_EPB_01"]["EPB_Status"] in (1, 4) # EPB closing or closed
+    # regen braking bool(pt_cp.vl["MEB_ESP_04"]['Regen_Braking']) TODO
 
     # Update gear and/or clutch position data.
     ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Getriebe_11"]["GE_Fahrstufe"], None))
