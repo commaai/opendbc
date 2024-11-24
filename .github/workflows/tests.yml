@@ -35,8 +35,6 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
     - uses: commaai/timeout@v1
-      with:
-        timeout: 3
     - uses: actions/checkout@v4
     - run: sudo apt install --no-install-recommends -y cppcheck
     - name: setup python
