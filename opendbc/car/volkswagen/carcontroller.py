@@ -146,12 +146,12 @@ class CarController(CarControllerBase):
         self.accel_last = accel
         long_override = CC.cruiseControl.override or CS.out.gasPressed
         self.long_override_counter = self.long_override_counter + 1 if long_override else 0
-        override_begin = True if long_override and long_override_counter < 5 else False
+        long_override_begin = True if long_override and self.long_override_counter < 5 else False
         
         acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
                                                  CS.esp_hold_confirmation, long_override)          
         acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, starting, stopping,
-                                               CS.esp_hold_confirmation, long_override, override_begin)
+                                               CS.esp_hold_confirmation, long_override, long_override_begin)
         can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.enabled,
                                                            accel, acc_control, acc_hold_type, stopping, starting, CS.esp_hold_confirmation,
                                                            long_override, CS.travel_assist_available))
