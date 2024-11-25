@@ -152,8 +152,6 @@ class CarController(CarControllerBase):
                                                  CS.esp_hold_confirmation, long_override)          
         acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, starting, stopping,
                                                CS.esp_hold_confirmation, long_override, override_begin)
-        self.acc_hold_type_prev = acc_hold_type
-          
         can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.enabled,
                                                            accel, acc_control, acc_hold_type, stopping, starting, CS.esp_hold_confirmation,
                                                            long_override, CS.travel_assist_available))
