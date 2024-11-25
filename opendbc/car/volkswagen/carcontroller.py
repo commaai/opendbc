@@ -28,6 +28,7 @@ class CarController(CarControllerBase):
     self.apply_curvature_last = 0
     self.steering_power_last = 0
     self.accel_last = 0
+    self.acc_hold_type_prev = 0
     self.gra_acc_counter_last = None
     self.eps_timer_soft_disable_alert = False
     self.hca_frame_timer_running = 0
@@ -143,8 +144,9 @@ class CarController(CarControllerBase):
         self.accel_last = accel
         acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
                                                  CS.esp_hold_confirmation, CC.cruiseControl.override or CS.out.gasPressed)
-        acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
+        acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, self.acc_hold_type_prev,
                                                starting, stopping, CS.esp_hold_confirmation, CC.cruiseControl.override or CS.out.gasPressed)
+        self.acc_hold_type_prev = acc_hold_type
           
         can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.enabled,
                                                            accel, acc_control, acc_hold_type, stopping, starting, CS.esp_hold_confirmation,
