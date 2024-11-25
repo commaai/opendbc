@@ -189,7 +189,7 @@ class CarController(CarControllerBase):
         acc_hud_status = self.CCS.acc_hud_status_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
                                                        CS.esp_hold_confirmation, CC.cruiseControl.override or CS.out.gasPressed)
         can_sends.append(self.CCS.create_acc_hud_control(self.packer_pt, CANBUS.pt, acc_hud_status, hud_control.setSpeed * CV.MS_TO_KPH, hud_control.leadVisible,
-                                                         hud_control.leadDistanceBars, CS.esp_hold_confirmation))
+                                                         hud_control.leadDistanceBars, CS.esp_hold_confirmation, CS.acc_hud_stock_values))
 
       else:
         lead_distance = 0
