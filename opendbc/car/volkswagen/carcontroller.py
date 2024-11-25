@@ -182,8 +182,8 @@ class CarController(CarControllerBase):
 
     if self.frame % self.CCP.ACC_HUD_STEP == 0 and self.CP.openpilotLongitudinalControl:
       if self.CP.flags & VolkswagenFlags.MEB:
-        desired_gap = max(1, CS.out.vEgo * 1) #get_T_FOLLOW(hud_control.leadDistanceBars))
-        distance = 50 #min(self.lead_distance, 100)
+        desired_gap = max(1, CS.out.vEgo * 1) # TODO gap from model, get_T_FOLLOW(hud_control.leadDistanceBars))
+        distance = 50 # TODO lead distance from model, min(self.lead_distance, 100)
 
         acc_hud_status = self.CCS.acc_hud_status_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
                                                        CS.esp_hold_confirmation, CC.cruiseControl.override or CS.out.gasPressed)
