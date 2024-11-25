@@ -6,9 +6,10 @@ ACC_CTRL_ACTIVE   = 3
 ACC_CTRL_ENABLED  = 2
 ACC_CTRL_DISABLED = 0
 
-ACC_HMS_NO_REQUEST = 0
-ACC_HMS_RELEASE    = 4
-ACC_HMS_HOLD       = 1
+ACC_HMS_RAMP_RELEASE = 5
+ACC_HMS_RELEASE      = 4
+ACC_HMS_HOLD         = 1
+ACC_HMS_NO_REQUEST   = 0
 
 ACC_HUD_ERROR    = 6
 ACC_HUD_OVERRIDE = 4
@@ -89,13 +90,16 @@ def acc_control_value(main_switch_on, acc_faulted, long_active, esp_hold, overri
   return acc_control
 
 
-def acc_hold_type(main_switch_on, acc_faulted, long_active, starting, stopping, esp_hold, override):
+def acc_hold_type(main_switch_on, acc_faulted, long_active, acc_hold_type_prev, starting, stopping, esp_hold, override):
   # warning: car is reacting to hold mechanic even with long control off
 
   if acc_faulted or not long_active:
     acc_hold_type = ACC_HMS_NO_REQUEST # no hold request
   elif override:
-    acc_hold_type = ACC_HMS_NO_REQUEST # overriding / no request
+    if acc_hold_type_prev != ACC_HMS_NO_REQUEST:
+      acc_hold_type = ACC_HMS_RAMP_RELEASE # ramp release of requests at the beginning of override
+    else:
+      acc_hold_type = ACC_HMS_NO_REQUEST # overriding / no request
   elif starting:
     acc_hold_type = ACC_HMS_RELEASE # release request and startup
   elif stopping or esp_hold:
