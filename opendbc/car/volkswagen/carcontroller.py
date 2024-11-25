@@ -28,7 +28,7 @@ class CarController(CarControllerBase):
     self.apply_curvature_last = 0
     self.steering_power_last = 0
     self.accel_last = 0
-    self.long_override_prev = False
+    self.long_override_counter = 0
     self.gra_acc_counter_last = None
     self.eps_timer_soft_disable_alert = False
     self.hca_frame_timer_running = 0
@@ -140,16 +140,18 @@ class CarController(CarControllerBase):
       starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
 
       if self.CP.flags & VolkswagenFlags.MEB:
+        # Logic to prevent car error with EPB:
+        #    * send a few frames of HMS RAMP RELEASE command at the very begin of long override
         accel = clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.enabled else 0
         self.accel_last = accel
         long_override = CC.cruiseControl.override or CS.out.gasPressed
-        first_override = True if long_override and not self.long_override_prev else False
-        self.long_override_prev = long_override
+        self.long_override_counter = self.long_override_counter + 1 if long_override else 0
+        override_begin = True if long_override and long_override_counter < 5 else False
         
         acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
                                                  CS.esp_hold_confirmation, long_override)          
         acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, starting, stopping,
-                                               CS.esp_hold_confirmation, long_override, first_override)
+                                               CS.esp_hold_confirmation, long_override, override_begin)
         self.acc_hold_type_prev = acc_hold_type
           
         can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.enabled,
