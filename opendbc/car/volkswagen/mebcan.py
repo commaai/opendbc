@@ -97,7 +97,7 @@ def acc_hold_type(main_switch_on, acc_faulted, long_active, acc_hold_type_prev, 
     acc_hold_type = ACC_HMS_NO_REQUEST # no hold request
   elif override:
     if acc_hold_type_prev != ACC_HMS_NO_REQUEST:
-      acc_hold_type = ACC_HMS_RAMP_RELEASE # ramp release of requests at the beginning of override
+      acc_hold_type = ACC_HMS_RAMP_RELEASE # ramp release of requests at the beginning of override (prevents car error with EPB at low speed, 1 frame is enough)
     else:
       acc_hold_type = ACC_HMS_NO_REQUEST # overriding / no request
   elif starting:
@@ -111,12 +111,12 @@ def acc_hold_type(main_switch_on, acc_faulted, long_active, acc_hold_type_prev, 
 
 
 def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, acc_hold_type, stopping, starting, esp_hold, override, travel_assist_available):
-  # active longitudinal control disables one pedal driving (regen mode of accelerator) while using overriding mechnism
+  # active longitudinal control disables one pedal driving (regen mode) while using overriding mechnism
   commands = []
 
   if acc_enabled:
     if override: # the car expects a non inactive accel while overriding
-      acceleration = 0.00
+      acceleration = 0.00 # original ACC still sends active accel in this case (seamless experience)
     else:
       acceleration = accel
   else:
