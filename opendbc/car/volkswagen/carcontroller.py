@@ -29,6 +29,7 @@ class CarController(CarControllerBase):
     self.steering_power_last = 0
     self.accel_last = 0
     self.long_override_counter = 0
+    self.long_disabled_counter = 0
     self.gra_acc_counter_last = None
     self.eps_timer_soft_disable_alert = False
     self.hca_frame_timer_running = 0
@@ -141,16 +142,21 @@ class CarController(CarControllerBase):
 
       if self.CP.flags & VolkswagenFlags.MEB:
         # Logic to prevent car error with EPB:
-        #    * send a few frames of HMS RAMP RELEASE command at the very begin of long override
+        #   * send a few frames of HMS RAMP RELEASE command at the very begin of long override
+        #   * a good handling of ACC and HMS states keeps car and radar happy in a non faulted state
         accel = clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.enabled else 0
         self.accel_last = accel
+
+        # 1 frame of long_override_begin is enough, but lower the possibility of panda safety blocking it for now until we adapt panda safety correctly
         long_override = CC.cruiseControl.override or CS.out.gasPressed
         self.long_override_counter = self.long_override_counter + 1 if long_override else 0
-        # 1 frame of long_override_begin is enough, but lower the possibility of panda safety blocking it for now until we adapt panda safety correctly
         long_override_begin = True if long_override and self.long_override_counter < 5 else False
+        # prevents radar faults / retesting
+        self.long_disabled_counter = self.long_disabled_counter + 1 if not CC.enabled else 0
+        long_disabling = True if not CC.enabled and self.long_disabled_counter < 5 else False
         
         acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
-                                                 CS.esp_hold_confirmation, long_override)          
+                                                 CS.esp_hold_confirmation, long_override, long_disabling)          
         acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, starting, stopping,
                                                CS.esp_hold_confirmation, long_override, long_override_begin)
         can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.enabled,
