@@ -28,7 +28,7 @@ class CarController(CarControllerBase):
     self.apply_curvature_last = 0
     self.steering_power_last = 0
     self.accel_last = 0
-    self.acc_hold_type_prev = 0
+    self.long_override_prev = False
     self.gra_acc_counter_last = None
     self.eps_timer_soft_disable_alert = False
     self.hca_frame_timer_running = 0
@@ -142,15 +142,19 @@ class CarController(CarControllerBase):
       if self.CP.flags & VolkswagenFlags.MEB:
         accel = clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.enabled else 0
         self.accel_last = accel
+        long_override = CC.cruiseControl.override or CS.out.gasPressed
+        first_override = True if long_override and not self.long_override_prev else False
+        self.long_override_prev = long_override
+        
         acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
-                                                 CS.esp_hold_confirmation, CC.cruiseControl.override or CS.out.gasPressed)
-        acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, self.acc_hold_type_prev,
-                                               starting, stopping, CS.esp_hold_confirmation, CC.cruiseControl.override or CS.out.gasPressed)
+                                                 CS.esp_hold_confirmation, long_override)          
+        acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, starting, stopping,
+                                               CS.esp_hold_confirmation, long_override, first_override)
         self.acc_hold_type_prev = acc_hold_type
           
         can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.enabled,
                                                            accel, acc_control, acc_hold_type, stopping, starting, CS.esp_hold_confirmation,
-                                                           CC.cruiseControl.override or CS.out.gasPressed, CS.travel_assist_available))
+                                                           long_override, CS.travel_assist_available))
 
       else:
         accel = clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0
