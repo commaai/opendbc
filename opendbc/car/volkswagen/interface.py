@@ -39,12 +39,14 @@ class CarInterface(CarInterfaceBase):
       ret.enableBsm = 0x24C in fingerprint[0]  # MEB_Side_Assist_01
       ret.transmissionType = TransmissionType.direct
       ret.steerControlType = structs.CarParams.SteerControlType.angle
-      ret.radarUnavailable = False
 
       if any(msg in fingerprint[1] for msg in (0x520, 0x86, 0xFD, 0x13D)):  # Airbag_02, LWI_01, ESP_21, MEB_EPS_01
         ret.networkLocation = NetworkLocation.gateway
       else:
         ret.networkLocation = NetworkLocation.fwdCamera
+
+      if ret.networkLocation == NetworkLocation.gateway:
+        ret.radarUnavailable = False
 
     else:
       # Set global MQB parameters
