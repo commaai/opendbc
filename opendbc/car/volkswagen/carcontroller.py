@@ -29,7 +29,6 @@ class CarController(CarControllerBase):
     self.steering_power_last = 0
     self.accel_last = 0
     self.long_override_counter = 0
-    self.long_disabled_counter = 0
     self.gra_acc_counter_last = None
     self.eps_timer_soft_disable_alert = False
     self.hca_frame_timer_running = 0
@@ -152,7 +151,7 @@ class CarController(CarControllerBase):
         long_override_begin = long_override and self.long_override_counter < 5
         
         acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
-                                                 CS.esp_hold_confirmation, long_override, long_disabling)          
+                                                 CS.esp_hold_confirmation, long_override)          
         acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, starting, stopping,
                                                CS.esp_hold_confirmation, long_override, long_override_begin)
         can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.enabled,
