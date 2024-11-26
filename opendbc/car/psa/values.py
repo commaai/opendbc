@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 
 from opendbc.car.structs import CarParams
-from opendbc.car import AngleRateLimit, CarSpecs, dbc_dict, PlatformConfig, Platforms
+from opendbc.car import AngleRateLimit, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.docs_definitions import CarDocs, CarHarness, CarParts
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
@@ -22,19 +22,28 @@ class CarControllerParams:
   def __init__(self, CP):
     pass
 
+@dataclass(frozen=True, kw_only=True)
+class PSACarSpecs(CarSpecs):
+  centerToFrontRatio: float = 0.45
+  steerRatio: float = 14.2
 
 @dataclass
 class PSACarDocs(CarDocs):
-  package: str = "Adaptive Cruise Control"
+  package: str = "Adaptive Cruise Control (ACC) & Lane Assist"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.psa_a]))
 
 
+@dataclass
+class PSAPlatformConfig(PlatformConfig):
+  dbc_dict: DbcDict = field(default_factory=lambda: {
+    Bus.pt: 'AEE2010_R3_HS1',
+  })
+
 class CAR(Platforms):
-  OPEL_CORSA_F = PlatformConfig(
-    "OPEL CORSA F",
-    [PSACarDocs("Vauxhall Corsa 2020")],
-    CarSpecs(mass=1200, wheelbase=2.538, steerRatio=19.0),  # TODO: check steer ratio
-    dbc_dict=dbc_dict('opel_corsa_f_hs1_generated', None, body_dbc='AEE2010_R3_HS2'),
+  config: PSAPlatformConfig
+  OPEL_CORSA_F = PSAPlatformConfig(
+    [PSACarDocs("Opel Corsa F")],
+    PSACarSpecs(mass=1200, wheelbase=2.538, steerRatio=19.0)
   )
 
 PSA_RX_OFFSETS = {
