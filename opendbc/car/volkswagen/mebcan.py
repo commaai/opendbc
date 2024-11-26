@@ -90,14 +90,14 @@ def acc_control_value(main_switch_on, acc_faulted, long_active, esp_hold, overri
   return acc_control
 
 
-def acc_hold_type(main_switch_on, acc_faulted, long_active, acc_hold_type_prev, starting, stopping, esp_hold, override):
+def acc_hold_type(main_switch_on, acc_faulted, long_active, starting, stopping, esp_hold, override, override_begin):
   # warning: car is reacting to hold mechanic even with long control off
 
   if acc_faulted or not long_active:
     acc_hold_type = ACC_HMS_NO_REQUEST # no hold request
   elif override:
-    if acc_hold_type_prev != ACC_HMS_NO_REQUEST:
-      acc_hold_type = ACC_HMS_RAMP_RELEASE # ramp release of requests at the beginning of override
+    if override_begin:
+      acc_hold_type = ACC_HMS_RAMP_RELEASE # ramp release of requests at the beginning of override (prevents car error with EPB at low speed, 1 frame is enough)
     else:
       acc_hold_type = ACC_HMS_NO_REQUEST # overriding / no request
   elif starting:
@@ -111,12 +111,12 @@ def acc_hold_type(main_switch_on, acc_faulted, long_active, acc_hold_type_prev, 
 
 
 def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, acc_hold_type, stopping, starting, esp_hold, override, travel_assist_available):
-  # active longitudinal control disables one pedal driving (regen mode of accelerator) while using overriding mechnism
+  # active longitudinal control disables one pedal driving (regen mode) while using overriding mechnism
   commands = []
 
   if acc_enabled:
     if override: # the car expects a non inactive accel while overriding
-      acceleration = 0.00
+      acceleration = 0.00 # original ACC still sends active accel in this case (seamless experience)
     else:
       acceleration = accel
   else:
@@ -183,7 +183,7 @@ def get_desired_gap(distance_bars, desired_gap, current_gap_signal):
   return gap
 
 
-def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, distance_bars, desired_gap, distance, esp_hold):
+def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, distance_bars, esp_hold, distance, desired_gap):
 
   values = {
     "ACC_Status_ACC":          acc_control,
@@ -195,9 +195,9 @@ def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, di
     "Lead_Type_Detected":      1 if lead_visible else 0, # object should be displayed
     "Lead_Type":               3 if lead_visible else 0, # displaying a car
     "Lead_Distance":           distance if lead_visible else 0, # hud distance of object
-    "ACC_Enabled":             1 if acc_control == ACC_HUD_ACTIVE else 0,
+    "ACC_Enabled":             1 if acc_control in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0,
     "ACC_Standby_Override":    1 if acc_control != ACC_HUD_ACTIVE else 0,
-    "ACC_AKTIV_regelt":        1 if acc_control == ACC_HUD_ACTIVE else 0,
+    "Street_Color":            1 if acc_control in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0, # light grey (1) or dark (0) street
     "Lead_Brightness":         3 if acc_control == ACC_HUD_ACTIVE else 0, # object shows in colour
     "ACC_Events":              3 if esp_hold and acc_control == ACC_HUD_ACTIVE else 0, # acc ready message at standstill
     "Zeitluecke_1":            get_desired_gap(distance_bars, desired_gap, 1), # desired distance to lead object for distance bar 1

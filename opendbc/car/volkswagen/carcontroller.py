@@ -28,7 +28,7 @@ class CarController(CarControllerBase):
     self.apply_curvature_last = 0
     self.steering_power_last = 0
     self.accel_last = 0
-    self.acc_hold_type_prev = 0
+    self.long_override_counter = 0
     self.gra_acc_counter_last = None
     self.eps_timer_soft_disable_alert = False
     self.hca_frame_timer_running = 0
@@ -140,17 +140,23 @@ class CarController(CarControllerBase):
       starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
 
       if self.CP.flags & VolkswagenFlags.MEB:
+        # Logic to prevent car error with EPB:
+        #   * send a few frames of HMS RAMP RELEASE command at the very begin of long override
         accel = clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.enabled else 0
         self.accel_last = accel
+
+        # 1 frame of long_override_begin is enough, but lower the possibility of panda safety blocking it for now until we adapt panda safety correctly
+        long_override = CC.cruiseControl.override or CS.out.gasPressed
+        self.long_override_counter = min(self.long_override_counter + 1, 5) if long_override else 0
+        long_override_begin = long_override and self.long_override_counter < 5
+        
         acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
-                                                 CS.esp_hold_confirmation, CC.cruiseControl.override or CS.out.gasPressed)
-        acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, self.acc_hold_type_prev,
-                                               starting, stopping, CS.esp_hold_confirmation, CC.cruiseControl.override or CS.out.gasPressed)
-        self.acc_hold_type_prev = acc_hold_type
-          
+                                                 CS.esp_hold_confirmation, long_override)          
+        acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, starting, stopping,
+                                               CS.esp_hold_confirmation, long_override, long_override_begin)
         can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.enabled,
                                                            accel, acc_control, acc_hold_type, stopping, starting, CS.esp_hold_confirmation,
-                                                           CC.cruiseControl.override or CS.out.gasPressed, CS.travel_assist_available))
+                                                           long_override, CS.travel_assist_available))
 
       else:
         accel = clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0
@@ -178,13 +184,13 @@ class CarController(CarControllerBase):
 
     if self.frame % self.CCP.ACC_HUD_STEP == 0 and self.CP.openpilotLongitudinalControl:
       if self.CP.flags & VolkswagenFlags.MEB:
-        desired_gap = max(1, CS.out.vEgo * 1) #get_T_FOLLOW(hud_control.leadDistanceBars))
-        distance = 50 #min(self.lead_distance, 100)
+        desired_gap = max(1, CS.out.vEgo * 1.5) # TODO gap from OP, get_T_FOLLOW(hud_control.leadDistanceBars))
+        distance = 30 if hud_control.leadVisible else 0 # TODO lead distance from model
 
         acc_hud_status = self.CCS.acc_hud_status_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
                                                        CS.esp_hold_confirmation, CC.cruiseControl.override or CS.out.gasPressed)
         can_sends.append(self.CCS.create_acc_hud_control(self.packer_pt, CANBUS.pt, acc_hud_status, hud_control.setSpeed * CV.MS_TO_KPH, hud_control.leadVisible,
-                                                         hud_control.leadDistanceBars, desired_gap, distance, CS.esp_hold_confirmation))
+                                                         hud_control.leadDistanceBars, CS.esp_hold_confirmation, distance, desired_gap))
 
       else:
         lead_distance = 0

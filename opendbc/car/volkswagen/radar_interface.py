@@ -71,7 +71,7 @@ class RadarInterface(RadarInterfaceBase):
             active_objects[current_object_id] = {
               "long_distance": msg[long_distance],
               "lat_distance": msg[lat_distance],
-              "rel_velo": msg[rel_velo] * CV.KPH_TO_MS
+              "rel_velo": msg[rel_velo]
             }
           else:
             ret.errors = ["canError"]
