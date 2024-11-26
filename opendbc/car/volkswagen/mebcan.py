@@ -1,7 +1,6 @@
 from opendbc.car.common.conversions import Conversions as CV
 
 ACC_CTRL_ERROR    = 6
-ACC_CTRL_DISABLE  = 5
 ACC_CTRL_OVERRIDE = 4
 ACC_CTRL_ACTIVE   = 3
 ACC_CTRL_ENABLED  = 2
@@ -83,8 +82,6 @@ def acc_control_value(main_switch_on, acc_faulted, long_active, esp_hold, overri
       acc_control = ACC_CTRL_OVERRIDE # overriding
     else:
       acc_control = ACC_CTRL_ACTIVE # active long control state
-  elif disabling:
-    acc_control = ACC_CTRL_DISABLE # disabling long control (keeps radar happy?)
   elif main_switch_on:
     acc_control = ACC_CTRL_ENABLED # long control ready
   else:
