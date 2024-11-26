@@ -1,4 +1,4 @@
-VERSION "HIPBNYYYYYYYYYNYNYYYYYYYYYYNYYNYNNNNNNNNNN/4/%%%/4/'%**4NNN///"
+VERSION "AEE2010_H91_v1p1_pf"
 
 
 NS_ :
@@ -75,7 +75,7 @@ BO_ 3221225472 VECTOR__INDEPENDENT_SIG_MSG: 0 Vector__XXX
  SG_ P348_Alt_bFault : 0|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ P251_Com_stScndStrtReq : 0|2@1+ (1,0) [0|3] "" Vector__XXX
  SG_ P107_Com_stAddPmpLvl : 0|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ P093_Temp_aval_FAP : 0|8@1+ (4,-40) [0|255] "�C" Vector__XXX
+ SG_ P093_Temp_aval_FAP : 0|8@1+ (4,-40) [0|255] "°C" Vector__XXX
  SG_ P041_Cde_RVV : 0|2@1+ (1,0) [0|3] "-" Vector__XXX
  SG_ P069_Act_RVV : 0|1@1+ (1,0) [0|1] "-" Vector__XXX
  SG_ P033_sABS : 0|16@0+ (0.1,0) [0|6553.5] "m" Vector__XXX
@@ -196,7 +196,7 @@ BO_ 1554 Dat7_BSI: 8 Vector__XXX
 BO_ 1458 Contexte1_5B2: 8 Vector__XXX
  SG_ P__Com_stEOBD : 39|8@0+ (1,0) [0|255] "-" Vector__XXX
  SG_ P100_Com_stAddPmpDef : 24|8@1+ (1,0) [0|255] "-" Vector__XXX
- SG_ P146_Com_tEnvT : 16|8@1+ (0.5,-40) [-40|87] "�C" Vector__XXX
+ SG_ P146_Com_tEnvT : 16|8@1+ (0.5,-40) [-40|87] "°C" Vector__XXX
 
 BO_ 1362 DAT4_BSI_AEE2010: 8 Vector__XXX
  SG_ P015_Com_lTotDst : 39|24@0+ (1,0) [0|16777215] "km" Vector__XXX
@@ -213,8 +213,10 @@ BO_ 1293 Dat_ABR: 7 ABS___Antiblockiersystem
  SG_ P351_Com_bABSIntvActv : 5|1@1+ (1,0) [0|1] "" Vector__XXX
 
 BO_ 781 Dyn4_FRE: 8 CDS___Fahrdynamikregelung
- SG_ P264_VehV_VPsvValWhlFrtR : 23|16@0+ (0.01,0) [0|655.35] "" Vector__XXX
- SG_ P263_VehV_VPsvValWhlFrtL : 7|16@0+ (0.01,0) [0|655.35] "" Vector__XXX
+ SG_ P263_VehV_VPsvValWhlFrtL : 7|16@0+ (0.01,0) [0|655.35] "km/h" Vector__XXX
+ SG_ P264_VehV_VPsvValWhlFrtR : 23|16@0+ (0.01,0) [0|655.35] "km/h" Vector__XXX
+ SG_ P265_VehV_VPsvValWhlBckL : 39|16@0+ (0.01,0) [0|655.35] "km/h" Vector__XXX
+ SG_ P266_VehV_VPsvValWhlBckR : 55|16@0+ (0.01,0) [0|655.35] "km/h" Vector__XXX
 
 BO_ 1426 Dat6_BSI: 8 CMM___Motor_SG
  SG_ P421_Com_xBattCrnt : 55|16@0+ (1,0) [0|0] "" Vector__XXX
@@ -308,7 +310,7 @@ BO_ 1161 Dat_V2_BV: 8 BVA___Automatikgetriebe
 
 BO_ 1160 Dat_CMM: 8 CMM___Motor_SG
  SG_ P056_ACCD_p : 48|8@1+ (25,0) [100|3100] "kPa" Vector__XXX
- SG_ P158_Air_tAFS : 56|8@1+ (1,-40) [-40|214] "�C" Vector__XXX
+ SG_ P158_Air_tAFS : 56|8@1+ (1,-40) [-40|214] "°C" Vector__XXX
  SG_ P051_ACCD_stPres : 33|2@1+ (1,0) [0|3] "" Vector__XXX
  SG_ P053_ACCtl_stHys : 32|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ P011_Oil_tSwmp : 40|8@1+ (1,-40) [-40|213] "" Vector__XXX
@@ -322,7 +324,7 @@ BO_ 1160 Dat_CMM: 8 CMM___Motor_SG
  SG_ P032_Com_bEngStrt : 24|1@1+ (1,0) [0|1] "-" Vector__XXX
  SG_ P022_Com_nSetPLo : 16|8@1+ (8,0) [0|2032] "1/min" Vector__XXX
  SG_ P021_Com_volFlCons : 8|8@1+ (80,0) [0|20400] "mm^3" Vector__XXX
- SG_ P005_CEngDst_tSens : 0|8@1+ (1,-40) [-40|214] "�C" Vector__XXX
+ SG_ P005_CEngDst_tSens : 0|8@1+ (1,-40) [-40|214] "°C" Vector__XXX
 
 BO_ 1128 Dyn3_CMM: 6 CMM___Motor_SG
  SG_ P234_Com_stAcvWarn : 13|2@0+ (1,0) [0|0] "" Vector__XXX
@@ -353,6 +355,8 @@ BO_ 1074 Dat_BSI1: 8 BSI___Kombiinstrument
  SG_ P249_Com_stEngStopReq : 0|2@1+ (1,0) [0|3] "" Vector__XXX
 
 BO_ 1042 Dat_BSI: 8 BSI___Kombiinstrument
+ SG_ DRIVER_DOOR : 51|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ PASSENGER_DOOR : 52|1@0+ (1,0) [0|1] "" Vector__XXX
  SG_ P328_Com_stEHRPmp : 27|2@1+ (1,0) [0|3] "" Vector__XXX
  SG_ P104_Dspl_stAOHt : 30|2@1+ (1,0) [0|3] "-"  CMM___Motor_SG
  SG_ P086_Com_stFlLvlDia : 25|2@1+ (1,0) [0|3] "-" Vector__XXX
@@ -360,6 +364,7 @@ BO_ 1042 Dat_BSI: 8 BSI___Kombiinstrument
  SG_ P298_Req_RTE_Ena : 11|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ P277_Com_bOilLvlDem : 10|1@1+ (1,0) [0|0] "" Vector__XXX
  SG_ P013_MainBrake : 5|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ PARKING_BRAKE : 3|1@0+ (1,0) [0|1] "" Vector__XXX
  SG_ P103_Com_bRevGear : 2|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ P040_MainBrakeFault : 0|1@1+ (1,0) [0|1] "-" Vector__XXX
 
@@ -381,7 +386,7 @@ BO_ 941 Dyn_EasyMove: 8 CDS___Fahrdynamikregelung
  SG_ P337_Com_stPrkBrk : 24|3@1+ (1,0) [0|0] "" Vector__XXX
  SG_ P299_Com_bCrCtlInhib : 17|1@1+ (1,0) [0|1] "" Vector__XXX
 
-BO_ 909 Dyn_ABR: 7 ABS___Antiblockiersystem
+BO_ 909 Dyn_ABR: 8 ABS___Antiblockiersystem
  SG_ P688_Com_bAuthHllAsstStop : 54|1@0+ (1,0) [0|0] "" Vector__XXX
  SG_ P052_Com_aLng : 32|8@1+ (0.08,-14) [-14|6.32] "m/s**2" Vector__XXX
  SG_ P010_Com_v : 7|16@0+ (0.01,0) [0|655.34] "km/h" Vector__XXX
@@ -518,26 +523,26 @@ oder wegen Komfortfunktionen";
 CM_ SG_ 3221225472 P049_Com_bMIL "P049  Ansteuerung DIA-Lampe";
 CM_ SG_ 3221225472 P028_Gbx_stEOBDFault "P028  MIL request gearbox";
 CM_ SG_ 3221225472 P284_T15CD_stPart_byte6 "ECU electronic state";
-CM_ BO_ 2024 "Le m�canisme d'�mission utilis� est �v�nementiel du CMM vers l'outil branch� sur le r�seau Can
+CM_ BO_ 2024 "Le mécanisme d'émission utilisé est événementiel du CMM vers l'outil branché sur le réseau Can
 
-Trame r�ponse EOBD On Can du CMM";
-CM_ BO_ 2016 "Le m�canisme d'�mission utilis� est �v�nementiel de l'outil branch� sur le r�seau Can vers le CMM
+Trame réponse EOBD On Can du CMM";
+CM_ BO_ 2016 "Le mécanisme d'émission utilisé est événementiel de l'outil branché sur le réseau Can vers le CMM
 
-Trame question EOBD On Can adress� au CMM";
-CM_ BO_ 2015 "Le m�canisme d'�mission utilis� est �v�nementiel de l'outil branch� sur le r�seau Can vers les calculateurs.
+Trame question EOBD On Can adresse au CMM";
+CM_ BO_ 2015 "Le mécanisme d'émission utilisé est événementiel de l'outil branché sur le réseau Can vers les calculateurs.
 
-Trame question EOBD On Can adress� a tous les calculateurs";
-CM_ BO_ 1704 "Le m�canisme d'�mission utilis� est �v�nementiel de l'outil vers le calculateur via la BSI
-Trame question pour le t�l�chargement et le Diag On CAN.";
+Trame question EOBD On Can adresse a tous les calculateurs";
+CM_ BO_ 1704 "Le mécanisme d'émission utilisé est événementiel de l'outil vers le calculateur via la BSI
+Trame question pour le téléchargement et le Diag On CAN.";
 CM_ BO_ 1375 "trame utilisable uniquement pour le JDD en archi EE 2010";
-CM_ BO_ 1554 "trame consomm�e uniquement sur v�hicules en archi EE 2010";
-CM_ BO_ 1458 "trame utilisable uniquement sur v�hicules en archi EE 2010";
+CM_ BO_ 1554 "trame consommée uniquement sur véhicules en archi EE 2010";
+CM_ BO_ 1458 "trame utilisable uniquement sur véhicules en archi EE 2010";
 CM_ SG_ 1458 P__Com_stEOBD "Pxxx: EOBD relevant errors in the network";
 CM_ SG_ 1458 P100_Com_stAddPmpDef "P100: Status of additive for FAP";
 CM_ SG_ 1458 P146_Com_tEnvT "P146: Environment air temperature";
-CM_ BO_ 1362 "Trame utilisable uniquement sur v�hicules en archi EE 2010
+CM_ BO_ 1362 "Trame utilisable uniquement sur véhicules en archi EE 2010
 
-cette trame est �mise toutes les 100ms pendant 1seconde puis toutes les secondes";
+cette trame est émise toutes les 100ms pendant 1seconde puis toutes les secondes";
 CM_ SG_ 1362 P015_Com_lTotDst "P015: covered distance from dashboard";
 CM_ BO_ 1101 "ID 44D: Rear unfiltered wheel speeds, used for EasyMove";
 CM_ SG_ 1101 P331_VehV_vWhlRrR "P010  vehicle speed of ABS. This signal is loaded into VSSCD_v";
@@ -547,16 +552,16 @@ CM_ SG_ 1928 P284_T15CD_stPart "ECU electronic state";
 CM_ SG_ 1928 P242_T15CD_stElec "ECU electronic state";
 CM_ SG_ 1928 P071_ConfirmedAbsentFlags "P071  confirmed absent status flags of the ECU";
 CM_ SG_ 1928 P073_SupervisionFaultCodes "P073  Supervision fault codes";
-CM_ BO_ 1906 "Le m�canisme d��mission utilis� est �v�nementiel de la BSI vers le CMM.
+CM_ BO_ 1906 "Le mécanisme d'émission utilisé est événementiel de la BSI vers le CMM.
 
-Trame d�acquittement du Journal Des D�fauts BSI.";
+Trame d'acquittement du Journal Des Défauts BSI.";
 CM_ BO_ 1294 "ID 50E: Body Car & Air Conditioning Data Frame (Period time 100 ms)";
 CM_ SG_ 1294 P050_Com_stAC "P050  Fahrerwunsch Klimakompressor ein/aus ermitteln";
 CM_ SG_ 1294 P164_Com_stPFltFan "P164:  Fan speed setpoint increase";
 CM_ BO_ 1224 "ID 4C8: Crash status by Airbag Control (Event triggered / Period time 50 ms)";
 CM_ SG_ 1224 P223_CrashInfo "Crash Information";
 CM_ BO_ 1160 "ID 488:  Engine Data Frame (Period time 100 ms)";
-CM_ SG_ 1160 P056_ACCD_p "P056  K�ltemitteldruck";
+CM_ SG_ 1160 P056_ACCD_p "P056  Kältemitteldruck";
 CM_ SG_ 1160 P158_Air_tAFS "P158: Intake air temperature.";
 CM_ SG_ 1160 P154_PFlt_bPFltClnReq "P154: Tell-tale lamp for \"risk of clogged filter\"";
 CM_ SG_ 1160 P063_vehV_bXVVErr "P063  FGR-Fehler";
@@ -617,13 +622,13 @@ CM_ SG_ 840 P017_Com_trqFrc "P017 Torque lost by AC, friction, high pressure pum
 CM_ SG_ 840 P211_AirC_pClnt "P084  Vorweggenommenes Drehmoment";
 CM_ SG_ 840 P019_Com_trqPrp "P019 Requested torque before processing.";
 CM_ SG_ 840 P152_Gearbx_stGear "P152: Gear detected by ratio vehicule speed to engine speed";
-CM_ SG_ 840 P165_FlFCD_stWtLvlSensDebVal "P165: Water in fuel indication (1 = water in fueel detected / 0 = no water in fuel)";
+CM_ SG_ 840 P165_FlFCD_stWtLvlSensDebVal "P165: Water in fuel indication (1 = water in fuel detected / 0 = no water in fuel)";
 CM_ BO_ 520 "ID 208:  Engine Dynamic Frame (Period time 10 ms)";
 CM_ SG_ 520 P027_ACCtl_stLogicOut "P027  Klimakompressor Status ein/aus";
 CM_ SG_ 520 P198_ActMod_trqClthTraIntv "P084  Vorweggenommenes Drehmoment";
 CM_ SG_ 520 P127_EGT_st_Bit30 "P127: Regeneration aid by electric consumers (engine load increase).";
 CM_ SG_ 520 P042_Inm_bCanMon "P042  CAN-Fehlerbehandlung im Startfall mit Hilfe der
-          Startendekennung unterdr�cken";
+          Startendekennung unterdrücken";
 CM_ SG_ 520 P153_Com_bTrqInacc "P153: Indicates to the torque consumers that the accuracy of the
 torque data output is not guaranteed by the CMM.";
 CM_ SG_ 520 P037_VehV_stXVV "P037  Zustand des FGR (Ein/Aus,Ueberdruecken)";
@@ -633,7 +638,7 @@ CM_ SG_ 520 P003_Com_trqActOut "P003  Actual torque ";
 CM_ SG_ 520 P000_Com_nEng "P000  Motordrehzahl";
 CM_ BO_ 264 "ID 108:  ECM Version Frame - Vers_CMM (Period: Single shot)
 
-Le contenu de la trame est une recopie d'un sous-ensemble de la zone d'identification de la Flash Eprom d�finie dans le document Application flash EPROM 2000 ref. 96.285.582.9.
+Le contenu de la trame est une recopie d'un sous-ensemble de la zone d'identification de la Flash Eprom définie dans le document Application flash EPROM 2000 ref. 96.285.582.9.
 
 ";
 CM_ SG_ 264 P083_Calibration "P083  Calibration issue";
@@ -650,7 +655,7 @@ CM_ SG_ 168 ADC2_Key_Byte1 "KEY3 of CFD_BSI (low byte)";
 CM_ SG_ 168 ADC2_Key_Byte2 "KEY2 of CFD_BSI (high byte)";
 CM_ SG_ 168 ADC2_Key_Byte3 "KEY1 of CFD_BSI (highest byte)";
 CM_ SG_ 168 ADC2_Key_Status "Unlock permission";
-CM_ BO_ 146 "Trame BSI �mise toutes les 100 ms pendant 1 seconde.";
+CM_ BO_ 146 "Trame BSI émise toutes les 100 ms pendant 1 seconde.";
 CM_ BO_ 114 "ID 072: Unlock Request Frame or LockingStatus (Event triggered)";
 CM_ SG_ 114 ADC2_Seed_Byte0 "SEED4 of RQD_CMM (lowest byte)";
 CM_ SG_ 114 ADC2_Seed_Byte1 "SEED3 of RQD_CMM (low byte)";
@@ -660,10 +665,5 @@ CM_ SG_ 114 ADC2_Req_Status "Unlock request";
 BA_DEF_ BO_  "???" HEX 0 0;
 BA_DEF_DEF_  "???" 0;
 BA_ "???" BO_ 520 0;
-VAL_ 3221225472 P252_ImpluseStart 1 "" ;
-VAL_ 3221225472 P250_MajorStartRequest 1 "" ;
-VAL_ 3221225472 P251_Com_stScndStrtReq 1 "" ;
-VAL_ 1074 P214_Com_stMnWkUp 1 "" ;
-VAL_ 1074 P249_Com_stEngStopReq 1 "" ;
 VAL_ 840 P134_Com_stEng 7 "RESERVED" 6 "DegradedGO" 5 "GO" 4 "Stopped" 3 "Running" 2 "Starting" 1 "Cut" 0 "Locked" ;
 
