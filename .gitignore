@@ -12,6 +12,7 @@
 *.egg-info/
 *.html
 uv.lock
+.scons_cache/
 
 opendbc/can/*.so
 opendbc/can/*.a

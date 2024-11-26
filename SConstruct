@@ -4,6 +4,8 @@ import sysconfig
 import platform
 import numpy as np
 
+CacheDir('.scons_cache')
+
 arch = subprocess.check_output(["uname", "-m"], encoding='utf8').rstrip()
 if platform.system() == "Darwin":
   arch = "Darwin"
