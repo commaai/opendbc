@@ -1,11 +1,11 @@
 from dataclasses import dataclass, field
 
-from cereal import car
-from openpilot.selfdrive.car import AngleRateLimit, CarSpecs, dbc_dict, PlatformConfig, Platforms
-from openpilot.selfdrive.car.docs_definitions import CarDocs, CarHarness, CarParts
-from openpilot.selfdrive.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
+from opendbc.car.structs import CarParams
+from opendbc.car import AngleRateLimit, CarSpecs, dbc_dict, PlatformConfig, Platforms
+from opendbc.car.docs_definitions import CarDocs, CarHarness, CarParts
+from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
-Ecu = car.CarParams.Ecu
+Ecu = CarParams.Ecu
 
 
 class CarControllerParams:

@@ -1,7 +1,7 @@
-from cereal import car
-from openpilot.selfdrive.car.psa.values import CAR
+from opendbc.car.structs import CarParams
+from opendbc.car.psa.values import CAR
 
-Ecu = car.CarParams.Ecu
+Ecu = CarParams.Ecu
 
 FW_VERSIONS = {
   CAR.OPEL_CORSA_F: {

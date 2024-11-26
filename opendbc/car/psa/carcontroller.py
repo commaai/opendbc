@@ -1,9 +1,9 @@
 from opendbc.can.packer import CANPacker
-from openpilot.common.numpy_fast import clip
-from openpilot.selfdrive.car import apply_std_steer_angle_limits
-from openpilot.selfdrive.car.interfaces import CarControllerBase
-from openpilot.selfdrive.car.psa import psacan
-from openpilot.selfdrive.car.psa.values import CarControllerParams
+from opendbc.car.common.numpy_fast import clip
+from opendbc.car import apply_std_steer_angle_limits
+from opendbc.car.interfaces  import CarControllerBase
+from opendbc.car.psa import psacan
+from opendbc.car.psa.values import CarControllerParams
 
 
 class CarController(CarControllerBase):

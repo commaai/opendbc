@@ -1,17 +1,17 @@
-from cereal import car
+from opendbc.car import structs
 from opendbc.can.parser import CANParser
-from openpilot.common.conversions import Conversions as CV
-from openpilot.selfdrive.car.psa.psacan import CanBus
-from openpilot.selfdrive.car.psa.values import DBC, CarControllerParams
-from openpilot.selfdrive.car.interfaces import CarStateBase
+from opendbc.car.common.conversions import Conversions as CV
+from opendbc.car.psa.psacan import CanBus
+from opendbc.car.psa.values import DBC, CarControllerParams
+from opendbc.car.interfaces import CarStateBase
 
-GearShifter = car.CarState.GearShifter
-TransmissionType = car.CarParams.TransmissionType
+GearShifter = structs.CarState.GearShifter
+TransmissionType = structs.CarParams.TransmissionType
 
 
 class CarState(CarStateBase):
-  def update(self, cp, cp_adas, cp_cam):
-    ret = car.CarState.new_message()
+  def update(self, cp, cp_adas, cp_cam) -> structs.CarState:
+    ret = structs.CarState.new_message()
 
     # car speed
     ret.wheelSpeeds = self.get_wheel_speeds(

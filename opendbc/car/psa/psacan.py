@@ -1,5 +1,5 @@
-from openpilot.common.numpy_fast import clip
-from openpilot.selfdrive.car import CanBusBase
+from opendbc.car.common.numpy_fast import clip
+from opendbc.car import CanBusBase
 
 
 class CanBus(CanBusBase):
