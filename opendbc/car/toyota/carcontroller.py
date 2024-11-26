@@ -53,7 +53,7 @@ class CarController(CarControllerBase):
 
     self.deque = deque([0] * 300, maxlen=300)
 
-    self.pid = PIDController(0.5, 0.0, k_f=0.0, k_d=0.0,
+    self.pid = PIDController(0.5, 0.25, k_f=0.0, k_d=0.125,
                              pos_limit=self.params.ACCEL_MAX, neg_limit=self.params.ACCEL_MIN,
                              rate=1 / DT_CTRL / 3)
 
@@ -77,6 +77,8 @@ class CarController(CarControllerBase):
     self.pcm_accel_net = FirstOrderFilter(0, self.CP.longitudinalActuatorDelay, DT_CTRL * 3)
     if not any(fw.ecu == Ecu.hybrid for fw in self.CP.carFw):
       self.pcm_accel_net.update_alpha(self.CP.longitudinalActuatorDelay + 0.2)
+
+    self.last_brake_frame = 0
 
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.accel = 0
@@ -246,15 +248,24 @@ class CarController(CarControllerBase):
 
           # let PCM handle stopping for now
           pcm_accel_compensation = 0.0
-          if not stopping and not CS.out.standstill:
+          if not stopping:
             self.pid.neg_limit = self.params.ACCEL_MIN - pcm_accel_cmd
             self.pid.pos_limit = self.params.ACCEL_MAX - pcm_accel_cmd
+
+            if self.permit_braking or CS.acc_braking:
+              self.last_brake_frame = self.frame
+
+            if (self.frame - self.last_brake_frame) == 2 and pcm_accel_cmd < 0:
+              # unwind from diff of CS.pcm_accel_net and pcm_accel_cmd
+              self.i = (CS.pcm_accel_net - pcm_accel_cmd)  # * self.pid.k_i  # TODO: try different combos with with override
 
             # TODO: freeze_integrator when stopping or at standstill?
             #pcm_accel_compensation = self.pid.update(self.deque[round(-40 / 3)] - CS.out.aEgoBlended,
             pcm_accel_compensation = self.pid.update(self.pcm_accel_cmd.x - future_aego,
             # pcm_accel_compensation = self.pid.update(pcm_accel_cmd - future_aego,
-                                                     error_rate=self.error_rate.x)  #, feedforward=pcm_accel_cmd)
+                                                     error_rate=self.error_rate.x,  #, feedforward=pcm_accel_cmd)
+                                                     freeze_integrator=CS.out.standstill,  # TODO: useless with override
+                                                     override=CS.out.standstill)
             pcm_accel_cmd += self.pcm_accel_compensation.update(pcm_accel_compensation)
             # pcm_accel_cmd += pcm_accel_compensation
           else:

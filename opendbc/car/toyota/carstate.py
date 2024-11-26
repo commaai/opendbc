@@ -48,6 +48,7 @@ class CarState(CarStateBase):
 
     self.pcm_follow_distance = 0
 
+    self.acc_braking = False
     self.acc_type = 1
     self.lkas_hud = {}
     self.pcm_accel_net = 0.0
@@ -67,7 +68,8 @@ class CarState(CarStateBase):
       self.pcm_accel_net = max(cp.vl["CLUTCH"]["ACCEL_NET"], 0.0)
 
       # Sometimes ACC_BRAKING can be 1 while showing we're applying gas already
-      if cp.vl["PCM_CRUISE"]["ACC_BRAKING"]:
+      self.acc_braking = cp.vl["PCM_CRUISE"]["ACC_BRAKING"]
+      if self.acc_braking:
         self.pcm_accel_net += min(cp.vl["PCM_CRUISE"]["ACCEL_NET"], 0.0)
 
         # add creeping force at low speeds only for braking, CLUTCH->ACCEL_NET already shows this
