@@ -195,7 +195,7 @@ def create_acc_hud_control(packer, bus, acc_control, set_speed, lead_visible, di
     "Lead_Type_Detected":      1 if lead_visible else 0, # object should be displayed
     "Lead_Type":               3 if lead_visible else 0, # displaying a car
     "Lead_Distance":           distance if lead_visible else 0, # hud distance of object
-    "ACC_Enabled":             1 if acc_control == ACC_HUD_ACTIVE else 0,
+    "ACC_Enabled":             1 if acc_control in (ACC_HUD_ACTIVE, ACC_HUD_OVERRIDE) else 0,
     "ACC_Standby_Override":    1 if acc_control != ACC_HUD_ACTIVE else 0,
     "ACC_AKTIV_regelt":        1 if acc_control == ACC_HUD_ACTIVE else 0,
     "Lead_Brightness":         3 if acc_control == ACC_HUD_ACTIVE else 0, # object shows in colour
