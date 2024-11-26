@@ -286,9 +286,6 @@ FW_VERSIONS = {
     (Ecu.srs, 0x18da53f1, None): [
       b'77959-T6A-J220\x00\x00',
     ],
-    (Ecu.combinationMeter, 0x18da60f1, None): [
-      b'78109-T6A-JC30\x00\x00',
-    ],
     (Ecu.gateway, 0x18daeff1, None): [
       b'38897-T6A-J210\x00\x00',
     ],
