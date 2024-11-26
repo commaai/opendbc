@@ -53,7 +53,7 @@ class CarController(CarControllerBase):
 
     self.deque = deque([0] * 300, maxlen=300)
 
-    self.pid = PIDController(1, 0.0, k_f=0.0, k_d=0.0,
+    self.pid = PIDController(0.5, 0.0, k_f=0.0, k_d=0.0,
                              pos_limit=self.params.ACCEL_MAX, neg_limit=self.params.ACCEL_MIN,
                              rate=1 / DT_CTRL / 3)
 
@@ -189,7 +189,7 @@ class CarController(CarControllerBase):
     self.aego.update(CS.out.aEgoBlended)
     jEgo = (self.aego.x - prev_aego) / DT_CTRL
     # TODO: adjust for hybrid
-    future_aego = CS.out.aEgoBlended + jEgo * 0.35
+    future_aego = CS.out.aEgoBlended + jEgo * 0.5
 
     self.debug = jEgo
     self.debug2 = future_aego
