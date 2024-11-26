@@ -17,7 +17,6 @@ class CarState(CarStateBase):
     self.esp_hold_confirmation = False
     self.upscale_lead_car_signal = False
     self.eps_stock_values = False
-    self.acc_hud_stock_values = False
 
   def create_button_events(self, pt_cp, buttons):
     button_events = []
@@ -325,7 +324,6 @@ class CarState(CarStateBase):
 
     self.acc_type = ext_cp.vl["MEB_ACC_02"]["ACC_Typ"]
     self.travel_assist_available = bool(ext_cp.vl["MEB_Travel_Assist_01"]["Travel_Assist_Available"])
-    self.acc_hud_stock_values = ext_cp.vl["MEB_ACC_01"]
 
     ret.cruiseState.available = pt_cp.vl["MEB_Motor_01"]["TSK_Status"] in (2, 3, 4, 5)
     ret.cruiseState.enabled   = pt_cp.vl["MEB_Motor_01"]["TSK_Status"] in (3, 4, 5)
