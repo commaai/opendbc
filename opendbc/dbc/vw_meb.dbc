@@ -1595,22 +1595,22 @@ BO_ 591 MEB_Distance_01: 64 XXX
  SG_ Right_Lane_02_ObjectID : 46|6@1+ (1,0) [0|63] "Unit_ObjectID" XXX
  SG_ Unknown_02 : 52|2@1+ (1,0) [0|3] "" XXX
  SG_ Unknown_03 : 54|10@1+ (1,0) [0|3] "" XXX
- SG_ Same_Lane_01_Long_Distance : 64|12@1+ (0.07,-5.6) [0|200] "Unit_Meter" XXX
+ SG_ Same_Lane_01_Long_Distance : 64|12@1+ (0.07,-6) [0|200] "Unit_Meter" XXX
  SG_ Same_Lane_01_Lat_Distance : 76|10@1+ (0.065,-33.28) [0|31] "Unit_Meter" XXX
  SG_ Same_Lane_01_Rel_Velo : 86|10@1+ (0.25,-128) [0|50] "Unit_MeterPerSecond" XXX
- SG_ Left_Lane_01_Long_Distance : 96|12@1+ (0.07,-5.6) [0|200] "Unit_Meter" XXX
+ SG_ Left_Lane_01_Long_Distance : 96|12@1+ (0.07,-6) [0|200] "Unit_Meter" XXX
  SG_ Left_Lane_01_Lat_Distance : 108|10@1+ (0.065,-33.28) [0|15] "Unit_Meter" XXX
  SG_ Left_Lane_01_Rel_Velo : 118|10@1+ (0.25,-128) [0|50] "Unit_MeterPerSecond" XXX
- SG_ Right_Lane_01_Long_Distance : 128|12@1+ (0.07,-5.6) [0|200] "Unit_Meter" XXX
+ SG_ Right_Lane_01_Long_Distance : 128|12@1+ (0.07,-6) [0|200] "Unit_Meter" XXX
  SG_ Right_Lane_01_Lat_Distance : 140|10@1+ (0.065,-33.28) [0|15] "Unit_Meter" XXX
  SG_ Right_Lane_01_Rel_Velo : 150|10@1+ (0.25,-128) [0|50] "Unit_MeterPerSecond" XXX
- SG_ Same_Lane_02_Long_Distance : 160|12@1+ (0.07,-5.6) [0|200] "Unit_Meter" XXX
+ SG_ Same_Lane_02_Long_Distance : 160|12@1+ (0.07,-6) [0|200] "Unit_Meter" XXX
  SG_ Same_Lane_02_Lat_Distance : 172|10@1+ (0.065,-33.28) [0|31] "Unit_Meter" XXX
  SG_ Same_Lane_02_Rel_Velo : 182|10@1+ (0.25,-128) [0|50] "Unit_MeterPerSecond" XXX
- SG_ Left_Lane_02_Long_Distance : 192|12@1+ (0.07,-5.6) [0|200] "Unit_Meter" XXX
+ SG_ Left_Lane_02_Long_Distance : 192|12@1+ (0.07,-6) [0|200] "Unit_Meter" XXX
  SG_ Left_Lane_02_Lat_Distance : 204|10@1+ (0.065,-33.28) [0|1023] "Unit_Meter" XXX
  SG_ Left_Lane_02_Rel_Velo : 214|10@1+ (0.25,-128) [0|50] "Unit_MeterPerSecond" XXX
- SG_ Right_Lane_02_Long_Distance : 224|12@1+ (0.07,-5.6) [0|200] "Unit_Meter" XXX
+ SG_ Right_Lane_02_Long_Distance : 224|12@1+ (0.07,-6) [0|200] "Unit_Meter" XXX
  SG_ Right_Lane_02_Lat_Distance : 236|10@1+ (0.065,-33.28) [0|1023] "Unit_Meter" XXX
  SG_ Right_Lane_02_Rel_Velo : 246|10@1+ (0.25,-128) [0|50] "Unit_MeterPerSecond" XXX
  SG_ Unknown_04 : 256|8@1+ (1,-128) [0|31] "" XXX
