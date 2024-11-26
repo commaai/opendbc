@@ -57,7 +57,7 @@ class CarController(CarControllerBase):
                              pos_limit=self.params.ACCEL_MAX, neg_limit=self.params.ACCEL_MIN,
                              rate=1 / DT_CTRL / 3)
 
-    self.aego = FirstOrderFilter(0.0, 0.5, DT_CTRL)
+    self.aego = FirstOrderFilter(0.0, 0.25, DT_CTRL)
 
     self.error_rate = FirstOrderFilter(0.0, 0.25, DT_CTRL * 3)
     self.prev_error = 0.0
