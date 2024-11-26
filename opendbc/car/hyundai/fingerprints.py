@@ -171,6 +171,7 @@ FW_VERSIONS = {
     (Ecu.eps, 0x7d4, None): [
       b'\xf1\x00DN8 MDPS C 1,00 1,01 56310L0010\x00 4DNAC101',
       b'\xf1\x00DN8 MDPS C 1.00 1.01 56310-L0010 4DNAC101',
+      b'\xf1\x00DN8 MDPS C 1.00 1.01 56310-L0200 4DNAC101',
       b'\xf1\x00DN8 MDPS C 1.00 1.01 56310-L0200 4DNAC102',
       b'\xf1\x00DN8 MDPS C 1.00 1.01 56310-L0210 4DNAC101',
       b'\xf1\x00DN8 MDPS C 1.00 1.01 56310-L0210 4DNAC102',
@@ -589,6 +590,7 @@ FW_VERSIONS = {
       b'\xf1\x00DL ESC \x01 104 \x07\x12 58910-L2200',
       b'\xf1\x00DL ESC \x03 100 \x08\x02 58910-L3600',
       b'\xf1\x00DL ESC \x06 101 \x04\x02 58910-L3200',
+      b'\xf1\x00DL ESC \x06 102 \x07\x02 58910-L3200',
       b'\xf1\x00DL ESC \x06 103"\x08\x06 58910-L3200',
       b'\xf1\x00DL ESC \t 100 \x06\x02 58910-L3800',
       b'\xf1\x00DL ESC \t 101 \x07\x02 58910-L3800',
@@ -704,6 +706,7 @@ FW_VERSIONS = {
       b'\xf1\x00DEE MFC  AT KOR LHD 1.00 1.03 95740-Q4000 180821',
       b'\xf1\x00DEE MFC  AT USA LHD 1.00 1.00 99211-Q4000 191211',
       b'\xf1\x00DEE MFC  AT USA LHD 1.00 1.01 99211-Q4500 210428',
+      b'\xf1\x00DEE MFC  AT USA LHD 1.00 1.02 99211-Q4100 201218',
       b'\xf1\x00DEE MFC  AT USA LHD 1.00 1.03 95740-Q4000 180821',
     ],
   },
@@ -797,6 +800,7 @@ FW_VERSIONS = {
     (Ecu.abs, 0x7d1, None): [
       b"\xf1\x00JF ESC \t 11 \x18\x03' 58920-D5260",
       b'\xf1\x00JF ESC \x0b 11 \x18\x030 58920-D5180',
+      b'\xf1\x00JF ESC \x0c 11 \x18\x030 58920-D5180',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00JFA LKAS AT USA LHD 1.00 1.00 95895-D5001 h32',
@@ -962,6 +966,7 @@ FW_VERSIONS = {
       b'\xf1\x00CV1 MFC  AT EUR LHD 1.00 1.06 99210-CV000 220328',
       b'\xf1\x00CV1 MFC  AT EUR RHD 1.00 1.00 99210-CV100 220630',
       b'\xf1\x00CV1 MFC  AT KOR LHD 1.00 1.00 99210-CV100 220630',
+      b'\xf1\x00CV1 MFC  AT KOR LHD 1.00 1.00 99210-CV200 230510',
       b'\xf1\x00CV1 MFC  AT KOR LHD 1.00 1.04 99210-CV000 210823',
       b'\xf1\x00CV1 MFC  AT KOR LHD 1.00 1.05 99210-CV000 211027',
       b'\xf1\x00CV1 MFC  AT KOR LHD 1.00 1.06 99210-CV000 220328',
@@ -1145,6 +1150,7 @@ FW_VERSIONS = {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00KA4_ SCC F-CUP      1.00 1.03 99110-R0000         ',
       b'\xf1\x00KA4_ SCC FHCUP      1.00 1.00 99110-R0100         ',
+      b'\xf1\x00KA4_ SCC FHCUP      1.00 1.02 99110-R0000         ',
       b'\xf1\x00KA4_ SCC FHCUP      1.00 1.03 99110-R0000         ',
       b'\xf1\x00KA4c SCC FHCUP      1.00 1.01 99110-I4000         ',
     ],
