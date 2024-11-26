@@ -278,22 +278,26 @@ FW_VERSIONS = {
   },
   CAR.HONDA_ODYSSEY_RC5: {
     (Ecu.vsa, 0x18da28f1, None): [
-      b'57114-T6A-JA10\x00\x00'
+      b'57114-T6A-JA10\x00\x00',
     ],
     (Ecu.eps, 0x18da30f1, None): [
-      b'39990-T6A-H230\x00\x00'
+      b'39990-T6A-H230\x00\x00',
     ],
     (Ecu.srs, 0x18da53f1, None): [
       b'77959-T6A-J220\x00\x00',
     ],
     (Ecu.combinationMeter, 0x18da60f1, None): [
-      [b'78109-T6A-JC30\x00\x00'],
+      b'78109-T6A-JC30\x00\x00',
     ],
     (Ecu.gateway, 0x18daeff1, None): [
       b'38897-T6A-J210\x00\x00',
     ],
     (Ecu.electricBrakeBooster, 0x18da2bf1, None): [
       b'54008-TKN-H810\x00\x00',
+      b'54008-TKN-H820\x00\x00',
+    ],
+    (Ecu.fwdRadar, 0x18dab0f1, None): [
+      b'8S102-T6A-J050\x00\x00',
     ],
   },
   CAR.HONDA_CIVIC_BOSCH_DIESEL: {
