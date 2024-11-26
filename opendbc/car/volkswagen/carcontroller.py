@@ -149,10 +149,10 @@ class CarController(CarControllerBase):
 
         # 1 frame of long_override_begin is enough, but lower the possibility of panda safety blocking it for now until we adapt panda safety correctly
         long_override = CC.cruiseControl.override or CS.out.gasPressed
-        self.long_override_counter = (self.long_override_counter + 1) if long_override else 0
+        self.long_override_counter = min(self.long_override_counter + 1, 5) if long_override else 0
         long_override_begin = long_override and self.long_override_counter < 5
         # prevents radar faults / retesting
-        self.long_disabled_counter = (self.long_disabled_counter + 1) if not CC.enabled else 0
+        self.long_disabled_counter = min(self.long_disabled_counter + 1, 5) if not CC.enabled else 0
         long_disabling = not CC.enabled and self.long_disabled_counter < 5
         
         acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
