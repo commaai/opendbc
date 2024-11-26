@@ -143,7 +143,6 @@ class CarController(CarControllerBase):
       if self.CP.flags & VolkswagenFlags.MEB:
         # Logic to prevent car error with EPB:
         #   * send a few frames of HMS RAMP RELEASE command at the very begin of long override
-        #   * a good handling of ACC and HMS states keeps car and radar happy in a non faulted state
         accel = clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.enabled else 0
         self.accel_last = accel
 
@@ -151,9 +150,6 @@ class CarController(CarControllerBase):
         long_override = CC.cruiseControl.override or CS.out.gasPressed
         self.long_override_counter = min(self.long_override_counter + 1, 5) if long_override else 0
         long_override_begin = long_override and self.long_override_counter < 5
-        # prevents radar faults / retesting
-        self.long_disabled_counter = min(self.long_disabled_counter + 1, 5) if not CC.enabled else 0
-        long_disabling = not CC.enabled and self.long_disabled_counter < 5
         
         acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
                                                  CS.esp_hold_confirmation, long_override, long_disabling)          
@@ -190,8 +186,12 @@ class CarController(CarControllerBase):
     if self.frame % self.CCP.ACC_HUD_STEP == 0 and self.CP.openpilotLongitudinalControl:
       if self.CP.flags & VolkswagenFlags.MEB:
         # TODO gap from OP, get_T_FOLLOW(hud_control.leadDistanceBars))
-        desired_gap = 0 #next((gap for gap in (CS.acc_hud_stock_values.get(f"Zeitluecke_{i}") for i in range(1, 6)) if gap), 0) # just pass through active gap signal for now
-        distance = CS.acc_hud_stock_values["Lead_Distance"] # TODO lead distance from model, min(self.lead_distance, 100)
+        # TODO lead distance from model
+        # For now: pass through active gap signal and distance
+        desired_gap = next((gap for gap in (CS.acc_hud_stock_values.get(f"Zeitluecke_{i}") for i in range(1, 6)) if gap), 0)
+        distance = CS.acc_hud_stock_values["Lead_Distance"]
+        if distance == 0 and hud_control.leadVisible:
+          distance = 40
 
         acc_hud_status = self.CCS.acc_hud_status_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
                                                        CS.esp_hold_confirmation, CC.cruiseControl.override or CS.out.gasPressed)
