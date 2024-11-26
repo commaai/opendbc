@@ -292,7 +292,7 @@ FW_VERSIONS = {
     (Ecu.gateway, 0x18daeff1, None): [
       b'38897-T6A-J210\x00\x00',
     ],
-    (Ecu.shiftByWire, 0x18da2bf1, None): [
+    (Ecu.electricBrakeBooster, 0x18da2bf1, None): [
       b'54008-TKN-H810\x00\x00',
     ],
   },
