@@ -37,6 +37,23 @@ MAX_LTA_ANGLE = 94.9461  # deg
 MAX_LTA_DRIVER_TORQUE_ALLOWANCE = 150  # slightly above steering pressed allows some resistance when changing lanes
 
 
+def get_long_tune(CP, params):
+  kiBP = [0.]
+  if CP.carFingerprint in TSS2_CAR:
+    kiV = [0.5]
+
+    # Since we compensate for imprecise acceleration in carcontroller and error correct on aEgo, we can avoid using gains
+    if CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
+      kiV = [0.0]
+  else:
+    kiBP = [0., 5., 35.]
+    kiV = [3.6, 2.4, 1.5]
+
+  return PIDController(0.0, (kiBP, kiV),
+                       pos_limit=params.ACCEL_MAX, neg_limit=params.ACCEL_MIN,
+                       rate=1 / (DT_CTRL * 3))
+
+
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
@@ -50,9 +67,13 @@ class CarController(CarControllerBase):
     self.steer_rate_counter = 0
     self.distance_button = 0
 
+    self.long_pid = get_long_tune(self.CP, self.params)
+
+    # *** start PCM compensation state ***
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
 
-    self.accel_pid = PIDController(2.0, 0.5, 1 / (DT_CTRL * 3))
+    # FIXME: rate isn't set properly
+    self.pcm_pid = PIDController(2.0, 0.5, 1 / (DT_CTRL * 3))
     self.pcm_accel_compensation = FirstOrderFilter(0, 0.5, DT_CTRL * 3)
 
     # the PCM's reported acceleration request can sometimes mismatch aEgo, close the loop
@@ -66,6 +87,7 @@ class CarController(CarControllerBase):
     if not any(fw.ecu == Ecu.hybrid for fw in self.CP.carFw):
       self.pcm_accel_net.update_alpha(self.CP.longitudinalActuatorDelay + 0.2)
       self.net_acceleration_request.update_alpha(self.CP.longitudinalActuatorDelay + 0.2)
+    # *** end PCM compensation state ***
 
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.accel = 0
@@ -222,11 +244,11 @@ class CarController(CarControllerBase):
           pcm_accel_compensation = 0.0
           if not stopping:
             # prevent compensation windup
-            self.accel_pid.neg_limit = pcm_accel_cmd - self.params.ACCEL_MAX
-            self.accel_pid.pos_limit = pcm_accel_cmd - self.params.ACCEL_MIN
-            pcm_accel_compensation = self.accel_pid.update(new_pcm_accel_net - self.net_acceleration_request.x)
+            self.pcm_pid.neg_limit = pcm_accel_cmd - self.params.ACCEL_MAX
+            self.pcm_pid.pos_limit = pcm_accel_cmd - self.params.ACCEL_MIN
+            pcm_accel_compensation = self.pcm_pid.update(new_pcm_accel_net - self.net_acceleration_request.x)
           else:
-            self.accel_pid.reset()
+            self.pcm_pid.reset()
 
           pcm_accel_cmd = pcm_accel_cmd - self.pcm_accel_compensation.update(pcm_accel_compensation)
 
@@ -235,8 +257,16 @@ class CarController(CarControllerBase):
           self.pcm_accel_net_offset.x = 0.0
           self.net_acceleration_request.x = 0.0
           self.pcm_accel_net.x = CS.pcm_accel_net
-          self.accel_pid.reset()
+          self.pcm_pid.reset()
           self.permit_braking = True
+
+        if not (self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT):
+          if actuators.longControlState == LongCtrlState.pid:
+            error = pcm_accel_cmd - CS.out.aEgo
+            pcm_accel_cmd = self.long_pid.update(error, speed=CS.out.vEgo,
+                                                 feedforward=pcm_accel_cmd)
+          else:
+            self.long_pid.reset()
 
         # Along with rate limiting positive jerk above, this greatly improves gas response time
         # Consider the net acceleration request that the PCM should be applying (pitch included)
