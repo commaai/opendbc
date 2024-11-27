@@ -960,7 +960,7 @@ FW_VERSIONS = {
   CAR.KIA_EV6: {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00CV1_ RDR -----      1.00 1.01 99110-CV000         ',
-      b'\xf1\x00CV__ RDR -----      1.00 1.01 99110-CV500',
+      b'\xf1\x00CV__ RDR -----      1.00 1.01 99110-CV500         ',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00CV1 MFC  AT EUR LHD 1.00 1.05 99210-CV000 211027',
