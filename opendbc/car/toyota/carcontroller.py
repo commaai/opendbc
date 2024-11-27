@@ -206,6 +206,7 @@ class CarController(CarControllerBase):
     else:
       a_ego_blended = CS.out.aEgo
 
+    # TODO: this can be moved in the 33hz loop with no side-effects
     prev_aego = self.aego.x
     self.aego.update(a_ego_blended)
     jEgo = (self.aego.x - prev_aego) / DT_CTRL
