@@ -51,6 +51,7 @@ class CarState(CarStateBase):
     self.acc_type = 1
     self.lkas_hud = {}
     self.pcm_accel_net = 0.0
+    self.gvc = 0.0
     self.secoc_synchronization = None
 
   def update(self, can_parsers) -> structs.CarState:
@@ -59,6 +60,8 @@ class CarState(CarStateBase):
 
     ret = structs.CarState()
     cp_acc = cp_cam if self.CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR) else cp
+
+    self.gvc = cp.vl["VSC1S07"]["GVC"]
 
     # Describes the acceleration request from the PCM if on flat ground, may be higher or lower if pitched
     # CLUTCH->ACCEL_NET is only accurate for gas, PCM_CRUISE->ACCEL_NET is only accurate for brake
@@ -218,6 +221,7 @@ class CarState(CarStateBase):
       ("PCM_CRUISE", 33),
       ("PCM_CRUISE_SM", 1),
       ("STEER_TORQUE_SENSOR", 50),
+      ("VSC1S07", 20),
     ]
 
     if CP.flags & ToyotaFlags.SECOC.value:
