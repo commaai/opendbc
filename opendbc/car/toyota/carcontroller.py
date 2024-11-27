@@ -262,7 +262,7 @@ class CarController(CarControllerBase):
 
         if not (self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT):
           if actuators.longControlState == LongCtrlState.pid:
-            # GVC can capture ego acceleration 0.5s earlier than aEgo, this is useful when starting from stop
+            # GVC does not overshoot ego acceleration when starting from stop, but still has a similar delay
             if not self.CP.flags & ToyotaFlags.SECOC.value:
               a_ego_blended = interp(CS.out.vEgo, [1.0, 2.0], [CS.gvc, CS.out.aEgo])
             else:
