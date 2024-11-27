@@ -97,12 +97,12 @@ def acc_hold_type(main_switch_on, acc_faulted, long_active, starting, stopping, 
     acc_hold_type = ACC_HMS_NO_REQUEST # no hold request
   elif not long_active:
     if long_disabling:
-      acc_hold_type = ACC_HMS_RAMP_RELEASE
+      acc_hold_type = ACC_HMS_RAMP_RELEASE # ramp release of requests right after disabling long control (prevents car error with EPB at low speed)
     else:
       acc_hold_type = ACC_HMS_NO_REQUEST # no hold request
   elif override:
     if override_begin:
-      acc_hold_type = ACC_HMS_RAMP_RELEASE # ramp release of requests at the beginning of override (prevents car error with EPB at low speed, 1 frame is enough)
+      acc_hold_type = ACC_HMS_RAMP_RELEASE # ramp release of requests at the beginning of override (prevents car error with EPB at low speed)
     else:
       acc_hold_type = ACC_HMS_NO_REQUEST # overriding / no request
   elif starting:
