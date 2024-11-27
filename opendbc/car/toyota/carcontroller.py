@@ -272,13 +272,12 @@ class CarController(CarControllerBase):
               a_ego_blended = CS.out.aEgo
 
             error = pcm_accel_cmd - a_ego_blended
-
             self.error_rate.update((error - self.prev_error) / (DT_CTRL * 3))
             self.prev_error = error
 
-            pcm_accel_cmd = self.long_pid.update(error, speed=CS.out.vEgo,
-                                                 feedforward=pcm_accel_cmd,
-                                                 error_rate=self.error_rate.x)
+            pcm_accel_cmd = self.long_pid.update(error, error_rate=self.error_rate.x,
+                                                 speed=CS.out.vEgo,
+                                                 feedforward=pcm_accel_cmd)
           else:
             self.long_pid.reset()
             self.prev_error = 0.0
