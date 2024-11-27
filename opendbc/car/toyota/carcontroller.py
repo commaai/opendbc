@@ -75,7 +75,7 @@ class CarController(CarControllerBase):
     self.error_rate = FirstOrderFilter(0.0, 0.5, DT_CTRL * 3)
     self.prev_error = 0.0
 
-    self.aego = FirstOrderFilter(0.0, 0.25, DT_CTRL)
+    self.aego = FirstOrderFilter(0.0, 0.5, DT_CTRL)
 
     # *** start PCM compensation state ***
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
@@ -211,7 +211,7 @@ class CarController(CarControllerBase):
     self.aego.update(a_ego_blended)
     jEgo = (self.aego.x - prev_aego) / DT_CTRL
     # TODO: adjust for hybrid
-    future_aego = a_ego_blended + jEgo * 0.5
+    future_aego = a_ego_blended + jEgo * 0.35
 
     # on entering standstill, send standstill request
     if CS.out.standstill and not self.last_standstill and (self.CP.carFingerprint not in NO_STOP_TIMER_CAR):
