@@ -262,9 +262,11 @@ class CarController(CarControllerBase):
 
         if not (self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT):
           if actuators.longControlState == LongCtrlState.pid:
-            # TODO: check that this isn't crazy on inclines, one ego acceleration signal was
             # GVC can capture ego acceleration 0.5s earlier than aEgo, this is useful when starting from stop
-            a_ego_blended = interp(CS.out.vEgo, [1.0, 2.0], [CS.gvc, CS.out.aEgo])
+            if not self.CP.flags & ToyotaFlags.SECOC.value:
+              a_ego_blended = interp(CS.out.vEgo, [1.0, 2.0], [CS.gvc, CS.out.aEgo])
+            else:
+              a_ego_blended = CS.out.aEgo
 
             error = pcm_accel_cmd - a_ego_blended
             pcm_accel_cmd = self.long_pid.update(error, speed=CS.out.vEgo,
