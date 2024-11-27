@@ -39,8 +39,11 @@ MAX_LTA_DRIVER_TORQUE_ALLOWANCE = 150  # slightly above steering pressed allows 
 
 def get_long_tune(CP, params):
   kiBP = [0.]
+  kdBP = [0.]
+  kdV = [0.]
   if CP.carFingerprint in TSS2_CAR:
     kiV = [0.5]
+    kdV = [0.25 / 4]
 
     # Since we compensate for imprecise acceleration in carcontroller and error correct on aEgo, we can avoid using gains
     if CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
@@ -49,7 +52,7 @@ def get_long_tune(CP, params):
     kiBP = [0., 5., 35.]
     kiV = [3.6, 2.4, 1.5]
 
-  return PIDController(0.0, (kiBP, kiV), k_f=1.0, k_d=0.25 / 4,
+  return PIDController(0.0, (kiBP, kiV), k_f=1.0, k_d=(kdBP, kdV),
                        pos_limit=params.ACCEL_MAX, neg_limit=params.ACCEL_MIN,
                        rate=1 / (DT_CTRL * 3))
 
