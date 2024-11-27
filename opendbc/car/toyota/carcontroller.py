@@ -3,7 +3,7 @@ from opendbc.car import Bus, carlog, apply_meas_steer_torque_limits, apply_std_s
                         make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY, DT_CTRL
 from opendbc.car.can_definitions import CanData
 from opendbc.car.common.filter_simple import FirstOrderFilter
-from opendbc.car.common.numpy_fast import clip
+from opendbc.car.common.numpy_fast import clip, interp
 from opendbc.car.common.pid import PIDController
 from opendbc.car.secoc import add_mac, build_sync_mac
 from opendbc.car.interfaces import CarControllerBase
@@ -262,7 +262,13 @@ class CarController(CarControllerBase):
 
         if not (self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT):
           if actuators.longControlState == LongCtrlState.pid:
-            error = pcm_accel_cmd - CS.out.aEgo
+            # GVC does not overshoot ego acceleration when starting from stop, but still has a similar delay
+            if not self.CP.flags & ToyotaFlags.SECOC.value:
+              a_ego_blended = interp(CS.out.vEgo, [1.0, 2.0], [CS.gvc, CS.out.aEgo])
+            else:
+              a_ego_blended = CS.out.aEgo
+
+            error = pcm_accel_cmd - a_ego_blended
             pcm_accel_cmd = self.long_pid.update(error, speed=CS.out.vEgo,
                                                  feedforward=pcm_accel_cmd)
           else:
