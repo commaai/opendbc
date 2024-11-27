@@ -70,10 +70,9 @@ class CarController(CarControllerBase):
     self.long_pid = get_long_tune(self.CP, self.params)
 
     # *** start PCM compensation state ***
-
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
 
-    # FIXME: rate isn't set properly lol
+    # FIXME: rate isn't set properly
     self.pcm_pid = PIDController(2.0, 0.5, 1 / (DT_CTRL * 3))
     self.pcm_accel_compensation = FirstOrderFilter(0, 0.5, DT_CTRL * 3)
 
@@ -88,7 +87,6 @@ class CarController(CarControllerBase):
     if not any(fw.ecu == Ecu.hybrid for fw in self.CP.carFw):
       self.pcm_accel_net.update_alpha(self.CP.longitudinalActuatorDelay + 0.2)
       self.net_acceleration_request.update_alpha(self.CP.longitudinalActuatorDelay + 0.2)
-
     # *** end PCM compensation state ***
 
     self.packer = CANPacker(dbc_names[Bus.pt])
@@ -263,7 +261,6 @@ class CarController(CarControllerBase):
           self.permit_braking = True
 
         if not (self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT):
-          # if CC.longActive and not CS.out.cruiseState.standstill:
           if actuators.longControlState == LongCtrlState.pid:
             error = pcm_accel_cmd - CS.out.aEgo
             pcm_accel_cmd = self.long_pid.update(error, speed=CS.out.vEgo,
