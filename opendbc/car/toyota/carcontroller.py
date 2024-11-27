@@ -42,7 +42,7 @@ def get_long_tune(CP, params):
   kdBP = [0.]
   kdV = [0.]
   if CP.carFingerprint in TSS2_CAR:
-    kiV = [0.25]
+    kiV = [0.5]
     kdV = [0.25 / 4]
 
     # Since we compensate for imprecise acceleration in carcontroller and error correct on aEgo, we can avoid using gains
@@ -74,8 +74,6 @@ class CarController(CarControllerBase):
 
     self.error_rate = FirstOrderFilter(0.0, 0.5, DT_CTRL * 3)
     self.prev_error = 0.0
-
-    self.aego = FirstOrderFilter(0.0, 0.25, DT_CTRL)
 
     # *** start PCM compensation state ***
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
@@ -200,18 +198,6 @@ class CarController(CarControllerBase):
 
     # *** gas and brake ***
 
-    # GVC does not overshoot ego acceleration when starting from stop, but still has a similar delay
-    if not self.CP.flags & ToyotaFlags.SECOC.value:
-      a_ego_blended = interp(CS.out.vEgo, [1.0, 2.0], [CS.gvc, CS.out.aEgo])
-    else:
-      a_ego_blended = CS.out.aEgo
-
-    prev_aego = self.aego.x
-    self.aego.update(a_ego_blended)
-    jEgo = (self.aego.x - prev_aego) / DT_CTRL
-    # TODO: adjust for hybrid
-    future_aego = a_ego_blended + jEgo * 0.5
-
     # on entering standstill, send standstill request
     if CS.out.standstill and not self.last_standstill and (self.CP.carFingerprint not in NO_STOP_TIMER_CAR):
       self.standstill_req = True
@@ -282,11 +268,16 @@ class CarController(CarControllerBase):
 
         if not (self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT):
           if actuators.longControlState == LongCtrlState.pid:
+            # GVC does not overshoot ego acceleration when starting from stop, but still has a similar delay
+            if not self.CP.flags & ToyotaFlags.SECOC.value:
+              a_ego_blended = interp(CS.out.vEgo, [1.0, 2.0], [CS.gvc, CS.out.aEgo])
+            else:
+              a_ego_blended = CS.out.aEgo
+
             error = pcm_accel_cmd - a_ego_blended
             self.error_rate.update((error - self.prev_error) / (DT_CTRL * 3))
             self.prev_error = error
 
-            error = pcm_accel_cmd - future_aego
             pcm_accel_cmd = self.long_pid.update(error, error_rate=self.error_rate.x,
                                                  speed=CS.out.vEgo,
                                                  feedforward=pcm_accel_cmd)
