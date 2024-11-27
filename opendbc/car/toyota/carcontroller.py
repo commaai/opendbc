@@ -40,7 +40,7 @@ MAX_LTA_DRIVER_TORQUE_ALLOWANCE = 150  # slightly above steering pressed allows 
 def get_long_tune(CP, params):
   kiBP = [0.]
   if CP.carFingerprint in TSS2_CAR:
-    kiV = [0.5]
+    kiV = [0.25]
 
     # Since we compensate for imprecise acceleration in carcontroller and error correct on aEgo, we can avoid using gains
     if CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
@@ -49,7 +49,7 @@ def get_long_tune(CP, params):
     kiBP = [0., 5., 35.]
     kiV = [3.6, 2.4, 1.5]
 
-  return PIDController(0.0, (kiBP, kiV), k_f=1.0,
+  return PIDController(0.0, (kiBP, kiV), k_f=1.0, k_d=0.25 / 4,
                        pos_limit=params.ACCEL_MAX, neg_limit=params.ACCEL_MIN,
                        rate=1 / (DT_CTRL * 3))
 
@@ -68,6 +68,9 @@ class CarController(CarControllerBase):
     self.distance_button = 0
 
     self.long_pid = get_long_tune(self.CP, self.params)
+
+    self.error_rate = FirstOrderFilter(0.0, 0.5, DT_CTRL * 3)
+    self.prev_error = 0.0
 
     # *** start PCM compensation state ***
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
@@ -269,10 +272,16 @@ class CarController(CarControllerBase):
               a_ego_blended = CS.out.aEgo
 
             error = pcm_accel_cmd - a_ego_blended
+            self.error_rate.update((error - self.prev_error) / (DT_CTRL * 3))
+            self.prev_error = error
+
             pcm_accel_cmd = self.long_pid.update(error, speed=CS.out.vEgo,
-                                                 feedforward=pcm_accel_cmd)
+                                                 feedforward=pcm_accel_cmd,
+                                                 error_rate=self.error_rate.x)
           else:
             self.long_pid.reset()
+            self.prev_error = 0.0
+            self.error_rate.x = 0.0
 
         # Along with rate limiting positive jerk above, this greatly improves gas response time
         # Consider the net acceleration request that the PCM should be applying (pitch included)
