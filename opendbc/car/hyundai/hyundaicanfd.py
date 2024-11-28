@@ -119,6 +119,14 @@ def create_lfahda_cluster(packer, CAN, enabled):
   }
   return packer.make_can_msg("LFAHDA_CLUSTER", CAN.ECAN, values)
 
+def block_faults(packer, CAN, enabled, block_faults):
+  values = {s: block_faults[s] for s in block_faults.keys()}
+  values.update({
+    "FAULT_1": 0,
+    "FAULT_2": 0,
+  })
+  return packer.make_can_msg("NEW_MSG_162", CAN.ECAN, values)
+
 
 def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_override, set_speed, hud_control):
   jerk = 5
