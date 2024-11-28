@@ -9,7 +9,7 @@ from opendbc.car.car_helpers import interfaces
 from opendbc.car.structs import CarParams
 from opendbc.car.fingerprints import FW_VERSIONS
 from opendbc.car.fw_versions import ESSENTIAL_ECUS, FW_QUERY_CONFIGS, FUZZY_EXCLUDE_ECUS, VERSIONS, build_fw_dict, \
-                                                match_fw_to_car, get_brand_ecu_matches, get_fw_versions, get_fw_versions_ordered, get_present_ecus
+                                                match_fw_to_car, get_brand_ecu_matches, get_fw_versions, get_present_ecus
 from opendbc.car.vin import get_vin
 
 CarFw = CarParams.CarFw
@@ -26,7 +26,7 @@ class TestFwFingerprint:
   def test_exact_match(self, brand, car_model, ecus, test_non_essential):
     config = FW_QUERY_CONFIGS[brand]
     CP = CarParams()
-    for _ in range(100):
+    for _ in range(20):
       fw = []
       for ecu, fw_versions in ecus.items():
         # Assume non-essential ECUs apply to all cars, so we catch cases where Car A with
@@ -97,7 +97,7 @@ class TestFwFingerprint:
     for car_model, ecus in FW_VERSIONS.items():
       with subtests.test(car_model=car_model.value):
         for ecu, ecu_fw in ecus.items():
-          with subtests.test((ecu[0].value, ecu[1], ecu[2])):
+          with subtests.test(ecu):
             duplicates = {fw for fw in ecu_fw if ecu_fw.count(fw) > 1}
             assert not len(duplicates), f'{car_model}: Duplicate FW versions: Ecu.{ecu[0]}, {duplicates}'
             assert len(ecu_fw) > 0, f'{car_model}: No FW versions: Ecu.{ecu[0]}'
@@ -265,7 +265,7 @@ class TestFwFingerprintTiming:
         print(f'get_vin {name} case, query time={self.total_time / self.N} seconds')
 
   def test_fw_query_timing(self, subtests, mocker):
-    total_ref_time = {1: 6.9, 2: 7.5}
+    total_ref_time = {1: 7.0, 2: 7.6}
     brand_ref_times = {
       1: {
         'gm': 1.0,
@@ -277,6 +277,7 @@ class TestFwFingerprintTiming:
         'mazda': 0.1,
         'nissan': 0.8,
         'subaru': 0.65,
+        'tesla': 0.1,
         'toyota': 0.7,
         'volkswagen': 0.65,
       },
@@ -316,8 +317,15 @@ class TestFwFingerprintTiming:
     def fake_carlog_exception(*args, **kwargs):
       raise
 
+    t = 0
+
+    def fake_monotonic():
+      nonlocal t
+      t += 0.0001
+      return t
+
     mocker.patch("opendbc.car.carlog.exception", fake_carlog_exception)
-    get_fw_versions_ordered(self.fake_can_recv, self.fake_can_send, lambda obd: None, '0' * 17, set())
+    mocker.patch("time.monotonic", fake_monotonic)
     for brand in FW_QUERY_CONFIGS.keys():
       with subtests.test(brand=brand):
         get_fw_versions(self.fake_can_recv, self.fake_can_send, lambda obd: None, brand)

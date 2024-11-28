@@ -3,7 +3,7 @@ import time
 
 from opendbc.car import carlog, gen_empty_fingerprint
 from opendbc.car.can_definitions import CanRecvCallable, CanSendCallable
-from opendbc.car.structs import CarParams
+from opendbc.car.structs import CarParams, CarParamsT
 from opendbc.car.fingerprints import eliminate_incompatible_cars, all_legacy_fingerprint_cars
 from opendbc.car.fw_versions import ObdCallback, get_fw_versions_ordered, get_present_ecus, match_fw_to_car
 from opendbc.car.interfaces import get_interface_attr
@@ -20,8 +20,9 @@ def load_interfaces(brand_names):
     CarInterface = __import__(path + '.interface', fromlist=['CarInterface']).CarInterface
     CarState = __import__(path + '.carstate', fromlist=['CarState']).CarState
     CarController = __import__(path + '.carcontroller', fromlist=['CarController']).CarController
+    RadarInterface = __import__(path + '.radar_interface', fromlist=['RadarInterface']).RadarInterface
     for model_name in brand_names[brand_name]:
-      ret[model_name] = (CarInterface, CarController, CarState)
+      ret[model_name] = (CarInterface, CarController, CarState, RadarInterface)
   return ret
 
 
@@ -82,7 +83,7 @@ def can_fingerprint(can_recv: CanRecvCallable) -> tuple[str | None, dict[int, di
 
 # **** for use live only ****
 def fingerprint(can_recv: CanRecvCallable, can_send: CanSendCallable, set_obd_multiplexing: ObdCallback, num_pandas: int,
-                cached_params: CarParams | None) -> tuple[str | None, dict, str, list[CarParams.CarFw], CarParams.FingerprintSource, bool]:
+                cached_params: CarParamsT | None) -> tuple[str | None, dict, str, list[CarParams.CarFw], CarParams.FingerprintSource, bool]:
   fixed_fingerprint = os.environ.get('FINGERPRINT', "")
   skip_fw_query = os.environ.get('SKIP_FW_QUERY', False)
   disable_fw_cache = os.environ.get('DISABLE_FW_CACHE', False)
@@ -149,19 +150,24 @@ def fingerprint(can_recv: CanRecvCallable, can_send: CanSendCallable, set_obd_mu
 
 
 def get_car_interface(CP: CarParams):
-  CarInterface, CarController, CarState = interfaces[CP.carFingerprint]
+  CarInterface, CarController, CarState, _ = interfaces[CP.carFingerprint]
   return CarInterface(CP, CarController, CarState)
 
 
+def get_radar_interface(CP: CarParams):
+  _, _, _, RadarInterface = interfaces[CP.carFingerprint]
+  return RadarInterface(CP)
+
+
 def get_car(can_recv: CanRecvCallable, can_send: CanSendCallable, set_obd_multiplexing: ObdCallback, experimental_long_allowed: bool,
-            num_pandas: int = 1, cached_params: CarParams | None = None):
+            num_pandas: int = 1, cached_params: CarParamsT | None = None):
   candidate, fingerprints, vin, car_fw, source, exact_match = fingerprint(can_recv, can_send, set_obd_multiplexing, num_pandas, cached_params)
 
   if candidate is None:
     carlog.error({"event": "car doesn't match any fingerprints", "fingerprints": repr(fingerprints)})
     candidate = "MOCK"
 
-  CarInterface, _, _ = interfaces[candidate]
+  CarInterface, _, _, _ = interfaces[candidate]
   CP: CarParams = CarInterface.get_params(candidate, fingerprints, car_fw, experimental_long_allowed, docs=False)
   CP.carVin = vin
   CP.carFw = car_fw
@@ -173,6 +179,6 @@ def get_car(can_recv: CanRecvCallable, can_send: CanSendCallable, set_obd_multip
 
 def get_demo_car_params():
   platform = MOCK.MOCK
-  CarInterface, _, _ = interfaces[platform]
+  CarInterface, _, _, _ = interfaces[platform]
   CP = CarInterface.get_non_essential_params(platform)
   return CP

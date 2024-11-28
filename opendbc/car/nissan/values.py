@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 
 from panda import uds
-from opendbc.car import AngleRateLimit, CarSpecs, DbcDict, PlatformConfig, Platforms, dbc_dict
+from opendbc.car import AngleRateLimit, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarDocs, CarHarness, CarParts
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
@@ -14,6 +14,10 @@ class CarControllerParams:
   ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[5., 3.5, 0.4])
   LKAS_MAX_TORQUE = 1               # A value of 1 is easy to overpower
   STEER_THRESHOLD = 1.0
+
+  # When output steering Angle not within range -1311 and 1310,
+  #   CANPacker packs wrong angle output to be decoded by panda
+  MAX_STEER_ANGLE = 1310
 
   def __init__(self, CP):
     pass
@@ -33,7 +37,7 @@ class NissanCarSpecs(CarSpecs):
 
 @dataclass
 class NissanPlatformConfig(PlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: dbc_dict('nissan_x_trail_2017_generated', None))
+  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'nissan_x_trail_2017_generated'})
 
 
 class CAR(Platforms):
@@ -44,7 +48,7 @@ class CAR(Platforms):
   NISSAN_LEAF = NissanPlatformConfig(
     [NissanCarDocs("Nissan Leaf 2018-23", video_link="https://youtu.be/vaMbtAh_0cY")],
     NissanCarSpecs(mass=1610, wheelbase=2.705),
-    dbc_dict('nissan_leaf_2018_generated', None),
+    {Bus.pt: 'nissan_leaf_2018_generated'},
   )
   # Leaf with ADAS ECU found behind instrument cluster instead of glovebox
   # Currently the only known difference between them is the inverted seatbelt signal.
