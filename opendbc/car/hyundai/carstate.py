@@ -320,7 +320,7 @@ class CarState(CarStateBase):
     cam_messages += [
       ("NEW_MSG_162", 20),
     ]
-    
+
     return {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).ECAN),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).CAM),
