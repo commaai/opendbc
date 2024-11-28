@@ -3,7 +3,7 @@ from opendbc.car import Bus, carlog, apply_meas_steer_torque_limits, apply_std_s
                         make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY, DT_CTRL
 from opendbc.car.can_definitions import CanData
 from opendbc.car.common.filter_simple import FirstOrderFilter
-from opendbc.car.common.numpy_fast import clip
+from opendbc.car.common.numpy_fast import clip, interp
 from opendbc.car.common.pid import PIDController
 from opendbc.car.secoc import add_mac, build_sync_mac
 from opendbc.car.interfaces import CarControllerBase
@@ -37,6 +37,26 @@ MAX_LTA_ANGLE = 94.9461  # deg
 MAX_LTA_DRIVER_TORQUE_ALLOWANCE = 150  # slightly above steering pressed allows some resistance when changing lanes
 
 
+def get_long_tune(CP, params):
+  kiBP = [0.]
+  kdBP = [0.]
+  kdV = [0.]
+  if CP.carFingerprint in TSS2_CAR:
+    kiV = [0.5]
+    kdV = [0.25 / 4]
+
+    # Since we compensate for imprecise acceleration in carcontroller and error correct on aEgo, we can avoid using gains
+    if CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
+      kiV = [0.0]
+  else:
+    kiBP = [0., 5., 35.]
+    kiV = [3.6, 2.4, 1.5]
+
+  return PIDController(0.0, (kiBP, kiV), k_f=1.0, k_d=(kdBP, kdV),
+                       pos_limit=params.ACCEL_MAX, neg_limit=params.ACCEL_MIN,
+                       rate=1 / (DT_CTRL * 3))
+
+
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
@@ -50,9 +70,16 @@ class CarController(CarControllerBase):
     self.steer_rate_counter = 0
     self.distance_button = 0
 
+    self.long_pid = get_long_tune(self.CP, self.params)
+
+    self.error_rate = FirstOrderFilter(0.0, 0.5, DT_CTRL * 3)
+    self.prev_error = 0.0
+
+    # *** start PCM compensation state ***
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
 
-    self.accel_pid = PIDController(2.0, 0.5, 1 / (DT_CTRL * 3))
+    # FIXME: rate isn't set properly
+    self.pcm_pid = PIDController(2.0, 0.5, 1 / (DT_CTRL * 3))
     self.pcm_accel_compensation = FirstOrderFilter(0, 0.5, DT_CTRL * 3)
 
     # the PCM's reported acceleration request can sometimes mismatch aEgo, close the loop
@@ -66,6 +93,7 @@ class CarController(CarControllerBase):
     if not any(fw.ecu == Ecu.hybrid for fw in self.CP.carFw):
       self.pcm_accel_net.update_alpha(self.CP.longitudinalActuatorDelay + 0.2)
       self.net_acceleration_request.update_alpha(self.CP.longitudinalActuatorDelay + 0.2)
+    # *** end PCM compensation state ***
 
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.accel = 0
@@ -222,11 +250,11 @@ class CarController(CarControllerBase):
           pcm_accel_compensation = 0.0
           if not stopping:
             # prevent compensation windup
-            self.accel_pid.neg_limit = pcm_accel_cmd - self.params.ACCEL_MAX
-            self.accel_pid.pos_limit = pcm_accel_cmd - self.params.ACCEL_MIN
-            pcm_accel_compensation = self.accel_pid.update(new_pcm_accel_net - self.net_acceleration_request.x)
+            self.pcm_pid.neg_limit = pcm_accel_cmd - self.params.ACCEL_MAX
+            self.pcm_pid.pos_limit = pcm_accel_cmd - self.params.ACCEL_MIN
+            pcm_accel_compensation = self.pcm_pid.update(new_pcm_accel_net - self.net_acceleration_request.x)
           else:
-            self.accel_pid.reset()
+            self.pcm_pid.reset()
 
           pcm_accel_cmd = pcm_accel_cmd - self.pcm_accel_compensation.update(pcm_accel_compensation)
 
@@ -235,8 +263,28 @@ class CarController(CarControllerBase):
           self.pcm_accel_net_offset.x = 0.0
           self.net_acceleration_request.x = 0.0
           self.pcm_accel_net.x = CS.pcm_accel_net
-          self.accel_pid.reset()
+          self.pcm_pid.reset()
           self.permit_braking = True
+
+        if not (self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT):
+          if actuators.longControlState == LongCtrlState.pid:
+            # GVC does not overshoot ego acceleration when starting from stop, but still has a similar delay
+            if not self.CP.flags & ToyotaFlags.SECOC.value:
+              a_ego_blended = interp(CS.out.vEgo, [1.0, 2.0], [CS.gvc, CS.out.aEgo])
+            else:
+              a_ego_blended = CS.out.aEgo
+
+            error = pcm_accel_cmd - a_ego_blended
+            self.error_rate.update((error - self.prev_error) / (DT_CTRL * 3))
+            self.prev_error = error
+
+            pcm_accel_cmd = self.long_pid.update(error, error_rate=self.error_rate.x,
+                                                 speed=CS.out.vEgo,
+                                                 feedforward=pcm_accel_cmd)
+          else:
+            self.long_pid.reset()
+            self.error_rate.x = 0.0
+            self.prev_error = 0.0
 
         # Along with rate limiting positive jerk above, this greatly improves gas response time
         # Consider the net acceleration request that the PCM should be applying (pitch included)
