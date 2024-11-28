@@ -50,6 +50,7 @@ class CarState(CarStateBase):
     self.buttons_counter = 0
 
     self.cruise_info = {}
+    self.block_faults = {}
 
     # On some cars, CLU15->CF_Clu_VehicleSpeed can oscillate faster than the dash updates. Sample at 5 Hz
     self.cluster_speed = 0
@@ -267,6 +268,8 @@ class CarState(CarStateBase):
     ret.buttonEvents = [*create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT),
                         *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise})]
 
+    self.block_faults = copy.copy(cp_cam.vl["NEW_MSG_162"])
+
     return ret
 
   def get_can_parsers_canfd(self, CP):
@@ -314,7 +317,10 @@ class CarState(CarStateBase):
       cam_messages += [
         ("SCC_CONTROL", 50),
       ]
-
+    cam_messages += [
+      ("NEW_MSG_162", 20),
+    ]
+    
     return {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).ECAN),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).CAM),
