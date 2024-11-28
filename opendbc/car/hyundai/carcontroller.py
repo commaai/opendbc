@@ -114,7 +114,7 @@ class CarController(CarControllerBase):
       # torque for a while, so we will apply the full max torque value, adjusted
       # by the ego weight (based on driving speed)
       self.lkas_max_torque = MAX_TORQUE * ego_weight
-    
+
     if not CC.latActive:
       apply_angle = CS.out.steeringAngleDeg
       apply_steer = 0
