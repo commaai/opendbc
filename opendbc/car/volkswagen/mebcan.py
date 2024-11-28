@@ -23,8 +23,8 @@ def create_steering_control(packer, bus, apply_curvature, lkas_enabled, power, p
   values = {
     "Curvature": abs(apply_curvature) * CV.RAD_TO_DEG, # in deg/m
     "VZ": 1 if apply_curvature > 0 and lkas_enabled else 0,
-    "Power": power if lkas_enabled else 0,
-    "Power_Boost": 1 if power_boost and lkas_enabled else 0,
+    "Power": power if lkas_enabled else 0, # maximum working value is 127, but observed max value with VW travel assist is 125
+    "Power_Boost": 1 if power_boost and lkas_enabled else 0, # this bit has not been observed with VW travel assist yet, keep it separated from POWER for now
     "Active": lkas_enabled,
     "Request": lkas_enabled,
     "Standby": not lkas_enabled,
@@ -90,14 +90,19 @@ def acc_control_value(main_switch_on, acc_faulted, long_active, esp_hold, overri
   return acc_control
 
 
-def acc_hold_type(main_switch_on, acc_faulted, long_active, starting, stopping, esp_hold, override, override_begin):
+def acc_hold_type(main_switch_on, acc_faulted, long_active, starting, stopping, esp_hold, override, override_begin, long_disabling):
   # warning: car is reacting to hold mechanic even with long control off
 
-  if acc_faulted or not long_active:
+  if acc_faulted:
     acc_hold_type = ACC_HMS_NO_REQUEST # no hold request
+  elif not long_active:
+    if long_disabling:
+      acc_hold_type = ACC_HMS_RAMP_RELEASE # ramp release of requests right after disabling long control (prevents car error with EPB at low speed)
+    else:
+      acc_hold_type = ACC_HMS_NO_REQUEST # no hold request
   elif override:
     if override_begin:
-      acc_hold_type = ACC_HMS_RAMP_RELEASE # ramp release of requests at the beginning of override (prevents car error with EPB at low speed, 1 frame is enough)
+      acc_hold_type = ACC_HMS_RAMP_RELEASE # ramp release of requests at the beginning of override (prevents car error with EPB at low speed)
     else:
       acc_hold_type = ACC_HMS_NO_REQUEST # overriding / no request
   elif starting:
