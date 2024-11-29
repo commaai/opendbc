@@ -7,7 +7,6 @@ from opendbc.car.hyundai.carstate import CarState
 from opendbc.car.hyundai.hyundaicanfd import CanBus
 from opendbc.car.hyundai.values import HyundaiFlags, Buttons, CarControllerParams, CAR, ANGLE_CONTROL_CAR
 from opendbc.car.interfaces import CarControllerBase
-from openpilot.selfdrive.controls.lib.desire_helper import LANE_CHANGE_SPEED_MIN
 
 
 GearShifter = structs.CarState.GearShifter
@@ -109,7 +108,7 @@ class CarController(CarControllerBase):
     hud_control = CC.hudControl
 
     # steering torque
-    if abs(CS.out.steeringTorque) > 170 and CS.out.vEgo < LANE_CHANGE_SPEED_MIN and not (self.CP.flags & HyundaiFlags.CANFD):
+    if abs(CS.out.steeringTorque) > 170 and not (self.CP.flags & HyundaiFlags.CANFD):
       self.driver_steering_torque_above_timer -= 1
       if self.driver_steering_torque_above_timer <= 0:
         self.driver_steering_torque_above_timer = 0
