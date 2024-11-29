@@ -33,6 +33,27 @@ While the primary focus is on supporting ADAS interfaces for [openpilot](https:/
 This README and the [supported cars list](docs/CARS.md) are all the docs for the opendbc project.
 Everything you need to know to use, contribute, and extend opendbc are in these docs.
 
+## Quick start
+
+```bash
+git clone https://github.com/commaai/opendbc.git
+cd opendbc
+
+pip3 install -e .[testing,docs]  # install dependencies
+scons -j8                        # build with 8 cores
+pytest .                         # run the tests
+pre-commit run --all-files       # run the linter
+./test.sh                        # all-in-one for setup, build, lint, and test
+```
+
+[`examples/`](examples/) contains small example programs that can read state from the car and control the steering, gas, and brakes.
+[`examples/joystick.py`](examples/joystick.py) allows you to control a car with a joystick.
+
+### Project Structure
+* [`opendbc/dbc/`](opendbc/dbc/) is a repository of [DBC](https://en.wikipedia.org/wiki/CAN_bus#DBC) files
+* [`opendbc/can/`](opendbc/can/) is a library for parsing and building CAN messages from DBC files
+* [`opendbc/car/`](opendbc/car/) is a high-level library for interfacing with cars using Python
+
 ## Contributing
 
 All opendbc development is coordinated on GitHub and [Discord](https://discord.comma.ai). Check out the `#dev-opendbc-cars` channel and `Vehicle Specific` section. 
@@ -63,36 +84,7 @@ Every car port is eligible for a bounty:
 
 In addition to the standard bounties, we also offer higher value bounties for more popular cars. See those at [comma.ai/bounties](comma.ai/bounties).
 
-### Project Structure
-* [`opendbc/dbc/`](opendbc/dbc/) is a repository of [DBC](https://en.wikipedia.org/wiki/CAN_bus#DBC) files
-* [`opendbc/can/`](opendbc/can/) is a library for parsing and building CAN messages from DBC files
-* [`opendbc/car/`](opendbc/car/) is a high-level library for interfacing with cars using Python
 
-### Quick start
-
-```bash
-git clone https://github.com/commaai/opendbc.git
-
-cd opendbc
-
-# Install the dependencies
-pip3 install -e .[testing,docs]
-
-# Build
-scons -j8
-
-# Run the tests
-pytest .
-
-# Run the linter
-pre-commit run --all-files
-
-# ./test.sh is the all-in-one that will install deps, build, lint, and test
-./test.sh
-```
-
-[`examples/`](examples/) contains small example programs that can read state from the car and control the steering, gas, and brakes.
-[`examples/joystick.py`](examples/joystick.py) allows you to control a car with a joystick.
 
 ## How to Port a car
 
@@ -112,18 +104,16 @@ If you're not so lucky, start with a "developer harness" from comma.ai/shop and 
 
 ### Structure of a port
 
+Depending on , most of this basic structure will already be in place.
+
 The entirery of a car port lives in `opendbc/car/<brand>/`:
-* carstate.py: parses out the relevant information from the CAN stream using the car's DBC file
-* carcontroller.py: packs up messages to . contains logic for actuation
-* <brand>can.py: helpers 
-* fingerprints.py: big list of ECU firwmare versions
-* interface.py
-* radar_interface.py: parses out the radar 
-* values.py
-
-```
-
-```
+* `carstate.py`: parses out the relevant information from the CAN stream using the car's DBC file
+* `carcontroller.py`: packs up messages to . contains logic for actuation
+* `<brand>can.py`: thin helpers around the DBC file
+* `fingerprints.py`: database of ECU firwmare versions for identifying car models
+* `interface.py`: 
+* `radar_interface.py`: parses out the radar 
+* `values.py`: 
 
 ### Reverse Engineer CAN messages
 
