@@ -8,16 +8,6 @@ from opendbc.car.hyundai.hyundaicanfd import CanBus
 from opendbc.car.hyundai.values import HyundaiFlags, Buttons, CarControllerParams, CAR, ANGLE_CONTROL_CAR
 from opendbc.car.interfaces import CarControllerBase
 
-import capnp
-import os
-from opendbc.car.common.basedir import BASEDIR
-
-# TODO: remove car from cereal/__init__.py and always import from opendbc
-try:
-  from cereal import car, messaging
-except ImportError:
-  capnp.remove_import_hook()
-  car = capnp.load(os.path.join(BASEDIR, "car.capnp"))
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
@@ -65,23 +55,23 @@ class CarController(CarControllerBase):
     self.apply_steer_last = 0
     self.car_fingerprint = CP.carFingerprint
     self.last_button_frame = 0
-    
+
     self.apply_angle_now = 0
     self.apply_angle_last = 0
     self.lkas_max_torque = 0
-    
+
     self.driver_steering_torque_above_timer = 150
     self.driver_steering_angle_above_timer = 150
-    
+
     self.to_avoid_lkas_fault_enabled = True
     self.to_avoid_lkas_fault_max_angle = 85
     self.to_avoid_lkas_fault_max_frame = 89
     self.enable_steer_more = False
     self.no_mdps_mods = False
-    
+
     self.steer_timer_apply_torque = 1.0
     self.DT_STEER = 0.005             # 0.01 1sec, 0.005  2sec
-    
+
     self.lkas_onoff_counter = 0
     self.lkas_temp_disabled = False
     self.lkas_temp_disabled_timer = 0
@@ -143,7 +133,7 @@ class CarController(CarControllerBase):
       new_steer = int(round(actuators.steer * self.params.STEER_MAX * (self.driver_steering_torque_above_timer / 150)))
     else:
       new_steer = int(round(actuators.steer * self.params.STEER_MAX))
-    
+
     apply_steer = apply_driver_steer_torque_limits(new_steer, self.apply_steer_last, CS.out.steeringTorque, self.params)
 
     if self.to_avoid_lkas_fault_max_angle == 90:
