@@ -21,7 +21,7 @@ ACC_HUD_DISABLED = 0
 def create_steering_control(packer, bus, apply_curvature, lkas_enabled, power, power_boost):
   # active lateral control deactivates active steering wheel centering 
   values = {
-    "Curvature": abs(apply_curvature) * CV.RAD_TO_DEG, # in deg/m
+    "Curvature": abs(apply_curvature), # in rad/m
     "VZ": 1 if apply_curvature > 0 and lkas_enabled else 0,
     "Power": power if lkas_enabled else 0, # maximum working value is 127, but observed max value with VW travel assist is 125
     "Power_Boost": 1 if power_boost and lkas_enabled else 0, # this bit has not been observed with VW travel assist yet, keep it separated from POWER for now
