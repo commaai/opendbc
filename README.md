@@ -110,20 +110,12 @@ The car harness gets you connected to two different CAN buses and splits one of 
 If you're lucky, a harness compatible with your car will already be desgined and sold on comma.ai/shop. 
 If you're not so lucky, start with a "developer harness" from comma.ai/shop and crimp on whatever connector you need.
 
-### Initializing a Brand port
-
 
 ### Reverse Engineer a CAN message
 
-We built [cabana](https://github.com/commaai/openpilot/tree/master/tools/cabana).
-Tools:
-* 
+Start off by recording a route with lots of interesting events: enable LKAS and ACC, turn the weel to the max, etc. Then, load up that route in [cabana](https://github.com/commaai/openpilot/tree/master/tools/cabana).
 
 ### Tuning
-
-#### Lateral
-
-TODO
 
 #### Longitudinal
 
