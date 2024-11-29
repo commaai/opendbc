@@ -110,10 +110,24 @@ The car harness gets you connected to two different CAN buses and splits one of 
 If you're lucky, a harness compatible with your car will already be desgined and sold on comma.ai/shop. 
 If you're not so lucky, start with a "developer harness" from comma.ai/shop and crimp on whatever connector you need.
 
+### Structure of a port
 
-### Reverse Engineer a CAN message
+The entirery of a car port lives in `opendbc/car/<brand>/`:
+* carstate.py: parses out the relevant information from the CAN stream using the car's DBC file
+* carcontroller.py: packs up messages to . contains logic for actuation
+* <brand>can.py: helpers 
+* fingerprints.py: big list of ECU firwmare versions
+* interface.py
+* radar_interface.py: parses out the radar 
+* values.py
 
-Start off by recording a route with lots of interesting events: enable LKAS and ACC, turn the weel to the max, etc. Then, load up that route in [cabana](https://github.com/commaai/openpilot/tree/master/tools/cabana).
+```
+
+```
+
+### Reverse Engineer CAN messages
+
+Start off by recording a route with lots of interesting events: enable LKAS and ACC, turn the steering weel both extremes, etc. Then, load up that route in [cabana](https://github.com/commaai/openpilot/tree/master/tools/cabana).
 
 ### Tuning
 
@@ -155,6 +169,7 @@ See [this talk](https://www.youtube.com/watch?v=FL8CxUSfipM) for an in-depth exp
 * **port**: refers to the integration and support of a specific car
 * **lateral control**: aka steering control
 * **longitudinal control**: aka gas/brakes control
+* **fingerprinting**: automatic process for identifying the car 
 * **[harness](https://comma.ai/shop/car-harness)**: car-specific hardware to attach to the car and intercept the ADAS messages
 * **[panda](https://github.com/commaai/panda)**: hardware used to get on a car's CAN bus
 * **[ECU](https://en.wikipedia.org/wiki/Electronic_control_unit)**: computers or control modules inside the car
