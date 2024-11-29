@@ -7,6 +7,7 @@ from opendbc.car.hyundai.carstate import CarState
 from opendbc.car.hyundai.hyundaicanfd import CanBus
 from opendbc.car.hyundai.values import HyundaiFlags, Buttons, CarControllerParams, CAR, ANGLE_CONTROL_CAR
 from opendbc.car.interfaces import CarControllerBase
+from openpilot.selfdrive.controls.lib.desire_helper import LANE_CHANGE_SPEED_MIN
 
 
 GearShifter = structs.CarState.GearShifter
