@@ -10,6 +10,7 @@ from opendbc.car.interfaces import CarControllerBase
 
 import capnp
 import os
+import cereal.messaging as messaging
 from opendbc.car.common.basedir import BASEDIR
 
 # TODO: remove car from cereal/__init__.py and always import from opendbc
