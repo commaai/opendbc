@@ -1552,7 +1552,7 @@ BO_ 771 HCA_03: 24 XXX
  SG_ Unknown_02 : 15|1@1+ (1,0) [0|1] "" XXX
  SG_ Power : 16|7@1+ (1,0) [0|125] "" XXX
  SG_ Power_Boost : 23|1@1+ (1,0) [0|1] "" XXX
- SG_ Curvature : 24|15@1+ (0.00036,0) [0|200] "Unit_deg/m" XXX
+ SG_ Curvature : 24|15@1+ (0.0000067,0) [0|0.219] "Unit_rad/m" XXX
  SG_ VZ : 39|1@1+ (1,0) [0|1] "" XXX
  SG_ Unknown_01 : 53|1@0+ (1,0) [0|1] "" XXX
  SG_ Vibration : 56|1@0+ (1,0) [0|1] "" XXX
