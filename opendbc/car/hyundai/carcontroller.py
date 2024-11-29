@@ -9,6 +9,7 @@ from opendbc.car.hyundai.values import HyundaiFlags, Buttons, CarControllerParam
 from opendbc.car.interfaces import CarControllerBase
 
 import capnp
+import os
 from opendbc.car.common.basedir import BASEDIR
 
 # TODO: remove car from cereal/__init__.py and always import from opendbc
