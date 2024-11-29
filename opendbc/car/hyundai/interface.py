@@ -65,6 +65,8 @@ class CarInterface(CarInterfaceBase):
         ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_CANFD_ALT_BUTTONS
       if ret.flags & HyundaiFlags.CANFD_CAMERA_SCC:
         ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_CAMERA_SCC
+      if ret.flags & HyundaiFlags.CANFD_LFA2:
+        ret.steerControlType = structs.CarParams.SteerControlType.angle
 
     else:
       # Shared configuration for non CAN-FD cars
