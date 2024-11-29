@@ -9,6 +9,7 @@ from opendbc.car.hyundai.values import HyundaiFlags, Buttons, CarControllerParam
 from opendbc.car.interfaces import CarControllerBase
 
 
+GearShifter = structs.CarState.GearShifter
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 
@@ -76,17 +77,6 @@ class CarController(CarControllerBase):
     self.lkas_temp_disabled = False
     self.lkas_temp_disabled_timer = 0
 
-    if self.car_fingerprint not in ANGLE_CONTROL_CAR:
-      if CP.lateralTuning.which() == 'pid':
-        self.str_log2 = 'T={:0.2f}/{:0.3f}/{:0.5f}/{:0.2f}'.format(CP.lateralTuning.pid.kpV[1], CP.lateralTuning.pid.kiV[1], CP.lateralTuning.pid.kf, CP.lateralTuning.pid.kd)
-      elif CP.lateralTuning.which() == 'indi':
-        self.str_log2 = 'T={:03.1f}/{:03.1f}/{:03.1f}/{:03.1f}'.format(CP.lateralTuning.indi.innerLoopGainV[0], CP.lateralTuning.indi.outerLoopGainV[0], \
-        CP.lateralTuning.indi.timeConstantV[0], CP.lateralTuning.indi.actuatorEffectivenessV[0])
-      elif CP.lateralTuning.which() == 'lqr':
-        self.str_log2 = 'T={:04.0f}/{:05.3f}/{:07.5f}'.format(CP.lateralTuning.lqr.scale, CP.lateralTuning.lqr.ki, CP.lateralTuning.lqr.dcGain)
-      elif CP.lateralTuning.which() == 'torque':
-        self.str_log2 = 'T={:0.2f}/{:0.2f}/{:0.2f}/{:0.3f}'.format(CP.lateralTuning.torque.kp, CP.lateralTuning.torque.kf, CP.lateralTuning.torque.ki, CP.lateralTuning.torque.friction)
-
 
   def smooth_steer( self, apply_torque, CS ):
     if self.CP.smoothSteer.maxSteeringAngle and abs(CS.out.steeringAngleDeg) > self.CP.smoothSteer.maxSteeringAngle:
@@ -137,10 +127,12 @@ class CarController(CarControllerBase):
     apply_steer = apply_driver_steer_torque_limits(new_steer, self.apply_steer_last, CS.out.steeringTorque, self.params)
 
     if self.to_avoid_lkas_fault_max_angle == 90:
-      lat_active = CC.latActive and abs(CS.out.steeringAngleDeg) < self.to_avoid_lkas_fault_max_angle and (CS.out.gearShifter == GearShifter.drive or self.user_specific_feature == 11)
+      lat_active = CC.latActive and abs(CS.out.steeringAngleDeg) < self.to_avoid_lkas_fault_max_angle and \
+      (CS.out.gearShifter == GearShifter.drive or self.user_specific_feature == 11)
     elif self.to_avoid_lkas_fault_max_angle > 90:
       str_angle_limit = interp(CS.out.vEgo * CV.MS_TO_KPH, [0, 20], [self.to_avoid_lkas_fault_max_angle+60, self.to_avoid_lkas_fault_max_angle])
-      lat_active = CC.latActive and abs(CS.out.steeringAngleDeg) < str_angle_limit and (CS.out.gearShifter == GearShifter.drive or self.user_specific_feature == 11)
+      lat_active = CC.latActive and abs(CS.out.steeringAngleDeg) < str_angle_limit and \
+      (CS.out.gearShifter == GearShifter.drive or self.user_specific_feature == 11)
     else:
       lat_active = CC.latActive and (CS.out.gearShifter == GearShifter.drive or self.user_specific_feature == 11)
 
@@ -222,7 +214,6 @@ class CarController(CarControllerBase):
     # CAN-FD platforms
     if self.CP.flags & HyundaiFlags.CANFD:
       hda2 = self.CP.flags & HyundaiFlags.CANFD_HDA2
-      hda2_long = hda2 and self.CP.openpilotLongitudinalControl
 
       # steering control
       angle_control = self.CP.carFingerprint in ANGLE_CONTROL_CAR
