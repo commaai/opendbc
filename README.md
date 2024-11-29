@@ -1,11 +1,10 @@
 <div align="center" style="text-align: center;">
 
 <h1>opendbc</h1>
-
 <p>
   <b>opendbc is a Python API for your car.</b>
   <br>
-  Read the speed, steering angle, and more. Send gas, braking, and steering commands.
+  Control the gas, brake, steering, and more. Read the speed, steering angle, and more.
 </p>
 
 <h3>
@@ -31,38 +30,8 @@ While the primary focus is on supporting ADAS interfaces for [openpilot](https:/
 
 ---
 
-<!--
-TODO:
-- LLM.txt
-- glossary
-- how to port a car
-- references + tools
--->
-
 This README and the [supported cars list](docs/CARS.md) are all the docs for the opendbc project.
 Everything you need to know to use, contribute, and extend opendbc are in these docs.
-
-### Terms
-
-* **port**: 
-* **platform**: 
-* **[comma](https://github.com/commaai)**: the company behind opendbc
-* **[comma 3X](https://comma.ai/shop/comma-3x)**: the hardware used to run openpilot
-* **harness**:
-* **panda**: hardware used to get on the car's CAN bus
-* **CAN bus**:
-* **cabana**: our tool for reverse engineering CAN messages
-* **DBC**: 
-* **openpilot**:
-
-### References
-
-* [*How Do We Control The Car?*](https://www.youtube.com/watch?v=nNU6ipme878&pp=ygUoY29tbWEgY29uIDIwMjEgaG93IGRvIHdlIGNvbnRyb2wgdGhlIGNhcg%3D%3D) by @robbederks from COMMA_CON 2021
-* [*How to Port a Car*](https://www.youtube.com/watch?v=XxPS5TpTUnI&t=142s&pp=ygUPamFzb24gY29tbWEgY29u) by @jyoung8607 from COMMA_CON 2023
-
-### Tools
-
-* [cabana](https://github.com/commaai/openpilot/tree/master/tools/cabana)
 
 ## Contributing
 
@@ -153,6 +122,24 @@ Any car with LKAS and ACC. More info [here](https://github.com/commaai/openpilot
 
 In short, we designed hardware to sit at a convenient spot on your car's communication bus that allows for filtering out interesting messages and replacing them with our own.  
 See [this talk](https://www.youtube.com/watch?v=FL8CxUSfipM) for an in-depth explanation.
+
+### Terms
+
+* **port**: refers to the integration and support of a specific car
+* **[harness](https://comma.ai/shop/car-harness)**: car-specific hardware to attach to the car and intercept the ADAS messages
+* **[panda](https://github.com/commaai/panda)**: hardware used to get on a car's CAN bus
+* **[ECU](https://en.wikipedia.org/wiki/Electronic_control_unit)**: computers or control modules inside the car
+* **[CAN bus](https://en.wikipedia.org/wiki/CAN_bus)**: a bus that connects the ECUs in a car
+* **[cabana](https://github.com/commaai/openpilot/tree/master/tools/cabana#readme)**: our tool for reverse engineering CAN messages
+* **[DBC file](https://en.wikipedia.org/wiki/CAN_bus#DBC)**: contains definitions for messages on a CAN bus
+* **[openpilot](https://github.com/commaai/openpilot)**: an ADAS system for cars supported by opendbc
+* **[comma](https://github.com/commaai)**: the company behind opendbc
+* **[comma 3X](https://comma.ai/shop/comma-3x)**: the hardware used to run openpilot
+
+### Even more docs
+
+* [*How Do We Control The Car?*](https://www.youtube.com/watch?v=nNU6ipme878&pp=ygUoY29tbWEgY29uIDIwMjEgaG93IGRvIHdlIGNvbnRyb2wgdGhlIGNhcg%3D%3D) by [@robbederks](https://github.com/robbederks) from COMMA_CON 2021
+* [*How to Port a Car*](https://www.youtube.com/watch?v=XxPS5TpTUnI&t=142s&pp=ygUPamFzb24gY29tbWEgY29u) by [@jyoung8607](https://github.com/jyoung8607) from COMMA_CON 2023
 
 ## Come work with us -- [comma.ai/jobs](https://comma.ai/jobs)
 
