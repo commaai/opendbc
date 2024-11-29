@@ -18,7 +18,7 @@ try:
 except ImportError:
   capnp.remove_import_hook()
   car = capnp.load(os.path.join(BASEDIR, "car.capnp"))
-  messaging = capnp.load(os.path.join(BASEDIR, "../../../cereal/messaging"))
+  messaging = capnp.load(os.path.join(BASEDIR, "../../../../cereal/messaging"))
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
