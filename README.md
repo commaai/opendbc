@@ -54,13 +54,11 @@ pre-commit run --all-files       # run the linter
 * [`opendbc/can/`](opendbc/can/) is a library for parsing and building CAN messages from DBC files
 * [`opendbc/car/`](opendbc/car/) is a high-level library for interfacing with cars using Python
 
-## How to Port a car
+## How to Port a Car
 
 This guide covers everything from adding support to a new car all the way to improving existing cars (e.g. adding longitudinal control or radar parsing). If similar cars to yours are already compatible, most of this work is likely already done for you.
 
-At its most basic, a car port will control the steering on a car. A "complete" car port will have all of: lateral control, longitudinal control, good tuning for both lateral and longitudinal, radar parsing (if equipped), fuzzy fingerprinting, and more.
-
-The new car support docs will reflect 
+At its most basic, a car port will control the steering on a car. A "complete" car port will have all of: lateral control, longitudinal control, good tuning for both lateral and longitudinal, radar parsing (if equipped), fuzzy fingerprinting, and more. The new car support docs will clearly communicate each car's support level.
 
 ### Connect to the Car
 
@@ -76,12 +74,12 @@ Depending on , most of this basic structure will already be in place.
 
 The entirery of a car port lives in `opendbc/car/<brand>/`:
 * `carstate.py`: parses out the relevant information from the CAN stream using the car's DBC file
-* `carcontroller.py`: packs up messages to . contains logic for actuation
-* `<brand>can.py`: thin helpers around the DBC file
+* `carcontroller.py`: outputs CAN messages to control the car 
+* `<brand>can.py`: thin Python helpers around the DBC file to build CAN messages
 * `fingerprints.py`: database of ECU firwmare versions for identifying car models
-* `interface.py`: 
+* `interface.py`: high level class for interfacing with the car
 * `radar_interface.py`: parses out the radar 
-* `values.py`: 
+* `values.py`: enumerates the brand's supported cars
 
 ### Reverse Engineer CAN messages
 
