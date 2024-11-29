@@ -94,6 +94,18 @@ pre-commit run --all-files
 [`examples/`](examples/) contains small example programs that can read state from the car and control the steering, gas, and brakes.
 [`examples/joystick.py`](examples/joystick.py) allows you to control a car with a joystick.
 
+## How to Port a car
+
+### Initializing a Brand port
+
+### Reverse Engineer a CAN message
+
+### Tuning
+
+#### Lateral
+
+#### Longitudinal
+
 ## FAQ
 
 ***How do I use this?***
@@ -126,6 +138,8 @@ See [this talk](https://www.youtube.com/watch?v=FL8CxUSfipM) for an in-depth exp
 ### Terms
 
 * **port**: refers to the integration and support of a specific car
+* **lateral control**: aka steering control
+* **longitudinal control**: aka gas/brakes control
 * **[harness](https://comma.ai/shop/car-harness)**: car-specific hardware to attach to the car and intercept the ADAS messages
 * **[panda](https://github.com/commaai/panda)**: hardware used to get on a car's CAN bus
 * **[ECU](https://en.wikipedia.org/wiki/Electronic_control_unit)**: computers or control modules inside the car
