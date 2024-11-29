@@ -146,10 +146,10 @@ class CarController(CarControllerBase):
     
     apply_steer = apply_driver_steer_torque_limits(new_steer, self.apply_steer_last, CS.out.steeringTorque, self.params)
 
-    if self.kisa_maxanglelimit == 90:
-      lat_active = CC.latActive and abs(CS.out.steeringAngleDeg) < self.kisa_maxanglelimit and (CS.out.gearShifter == GearShifter.drive or self.user_specific_feature == 11)
-    elif self.kisa_maxanglelimit > 90:
-      str_angle_limit = interp(CS.out.vEgo * CV.MS_TO_KPH, [0, 20], [self.kisa_maxanglelimit+60, self.kisa_maxanglelimit])
+    if self.to_avoid_lkas_fault_max_angle == 90:
+      lat_active = CC.latActive and abs(CS.out.steeringAngleDeg) < self.to_avoid_lkas_fault_max_angle and (CS.out.gearShifter == GearShifter.drive or self.user_specific_feature == 11)
+    elif self.to_avoid_lkas_fault_max_angle > 90:
+      str_angle_limit = interp(CS.out.vEgo * CV.MS_TO_KPH, [0, 20], [self.to_avoid_lkas_fault_max_angle+60, self.to_avoid_lkas_fault_max_angle])
       lat_active = CC.latActive and abs(CS.out.steeringAngleDeg) < str_angle_limit and (CS.out.gearShifter == GearShifter.drive or self.user_specific_feature == 11)
     else:
       lat_active = CC.latActive and (CS.out.gearShifter == GearShifter.drive or self.user_specific_feature == 11)
