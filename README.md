@@ -54,38 +54,6 @@ pre-commit run --all-files       # run the linter
 * [`opendbc/can/`](opendbc/can/) is a library for parsing and building CAN messages from DBC files
 * [`opendbc/car/`](opendbc/car/) is a high-level library for interfacing with cars using Python
 
-## Contributing
-
-All opendbc development is coordinated on GitHub and [Discord](https://discord.comma.ai). Check out the `#dev-opendbc-cars` channel and `Vehicle Specific` section. 
-
-### Roadmap
-
-Short term
-- [ ] `pip install opendbc`
-- [ ] 100% type coverage
-- [ ] 100% line coverage
-- [ ] Make car ports easier: refactors, tools, tests, and docs
-- [ ] Expose the state of all supported cars better: https://github.com/commaai/opendbc/issues/1144
-
-Longer term
-- [ ] Extend support to every car with LKAS + ACC interfaces
-- [ ] Automatic lateral and longitudinal control/tuning evaluation
-- [ ] Auto-tuning for [lateral](https://blog.comma.ai/090release/#torqued-an-auto-tuner-for-lateral-control) and longitudinal control
-- [ ] [Automatic Emergency Braking](https://en.wikipedia.org/wiki/Automated_emergency_braking_system)
-
-Contributions towards anything here are welcome.
-
-### Bounties
-
-Every car port is eligible for a bounty:
-* $2000 - [Any car brand / platform port](https://github.com/orgs/commaai/projects/26/views/1?pane=issue&itemId=47913774)
-* $250 - [Any car model port](https://github.com/orgs/commaai/projects/26/views/1?pane=issue&itemId=47913790)
-* $300 - [Reverse Engineering a new Actuation Message](https://github.com/orgs/commaai/projects/26/views/1?pane=issue&itemId=73445563)
-
-In addition to the standard bounties, we also offer higher value bounties for more popular cars. See those at [comma.ai/bounties](comma.ai/bounties).
-
-
-
 ## How to Port a car
 
 This guide covers everything from adding support to a new car all the way to improving existing cars (e.g. adding longitudinal control or radar parsing). If similar cars to yours are already compatible, most of this work is likely already done for you.
@@ -124,6 +92,36 @@ Start off by recording a route with lots of interesting events: enable LKAS and 
 #### Longitudinal
 
 Use the [longitudinal maneuvers](https://github.com/commaai/openpilot/tree/master/tools/longitudinal_maneuvers) report to evaluate your car's longitudinal control and tune it.
+
+## Contributing
+
+All opendbc development is coordinated on GitHub and [Discord](https://discord.comma.ai). Check out the `#dev-opendbc-cars` channel and `Vehicle Specific` section. 
+
+### Roadmap
+
+Short term
+- [ ] `pip install opendbc`
+- [ ] 100% type coverage
+- [ ] 100% line coverage
+- [ ] Make car ports easier: refactors, tools, tests, and docs
+- [ ] Expose the state of all supported cars better: https://github.com/commaai/opendbc/issues/1144
+
+Longer term
+- [ ] Extend support to every car with LKAS + ACC interfaces
+- [ ] Automatic lateral and longitudinal control/tuning evaluation
+- [ ] Auto-tuning for [lateral](https://blog.comma.ai/090release/#torqued-an-auto-tuner-for-lateral-control) and longitudinal control
+- [ ] [Automatic Emergency Braking](https://en.wikipedia.org/wiki/Automated_emergency_braking_system)
+
+Contributions towards anything here are welcome.
+
+### Bounties
+
+Every car port is eligible for a bounty:
+* $2000 - [Any car brand / platform port](https://github.com/orgs/commaai/projects/26/views/1?pane=issue&itemId=47913774)
+* $250 - [Any car model port](https://github.com/orgs/commaai/projects/26/views/1?pane=issue&itemId=47913790)
+* $300 - [Reverse Engineering a new Actuation Message](https://github.com/orgs/commaai/projects/26/views/1?pane=issue&itemId=73445563)
+
+In addition to the standard bounties, we also offer higher value bounties for more popular cars. See those at [comma.ai/bounties](comma.ai/bounties).
 
 ## FAQ
 
