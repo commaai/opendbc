@@ -18,7 +18,6 @@ try:
 except ImportError:
   capnp.remove_import_hook()
   car = capnp.load(os.path.join(BASEDIR, "car.capnp"))
-  messaging = capnp.load(os.path.join(BASEDIR, "../../../../cereal/messaging"))
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
@@ -98,8 +97,6 @@ class CarController(CarControllerBase):
       elif CP.lateralTuning.which() == 'torque':
         self.str_log2 = 'T={:0.2f}/{:0.2f}/{:0.2f}/{:0.3f}'.format(CP.lateralTuning.torque.kp, CP.lateralTuning.torque.kf, CP.lateralTuning.torque.ki, CP.lateralTuning.torque.friction)
 
-    self.sm = messaging.SubMaster(['controlsState', 'radarState', 'lateralPlan', 'longitudinalPlan', 'liveTorqueParameters', 'carState'])
-
 
   def smooth_steer( self, apply_torque, CS ):
     if self.CP.smoothSteer.maxSteeringAngle and abs(CS.out.steeringAngleDeg) > self.CP.smoothSteer.maxSteeringAngle:
@@ -125,22 +122,10 @@ class CarController(CarControllerBase):
 
 
   def update(self, CC, CS, now_nanos):
-    self.sm.update(0)
-    
     actuators = CC.actuators
     hud_control = CC.hudControl
 
     # steering torque
-    if self.frame % 10 == 0:
-      self.model_speed = self.sm['lateralPlan'].modelSpeed
-
-    self.dRel = self.sm['radarState'].leadOne.dRel #Vision Lead
-    self.vRel = self.sm['radarState'].leadOne.vRel #Vision Lead
-    self.yRel = self.sm['radarState'].leadOne.yRel #Vision Lead
-
-    if len(self.sm['longitudinalPlan'].e2eX) > 12:
-      self.e2e_x = self.sm['longitudinalPlan'].e2eX[12]
-
     if abs(CS.out.steeringTorque) > 170 and CS.out.vEgo < LANE_CHANGE_SPEED_MIN and not (self.CP.flags & HyundaiFlags.CANFD):
       self.driver_steering_torque_above_timer -= 1
       if self.driver_steering_torque_above_timer <= 0:
@@ -179,7 +164,6 @@ class CarController(CarControllerBase):
                                                                          MAX_ANGLE_CONSECUTIVE_FRAMES)
       apply_angle = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, self.params)
       self.apply_angle_now = apply_angle
-      # apply_angle = interp(self.model_speed, [50, 80], [CS.stock_str_angle, apply_angle])
 
       # Figure out torque value.  On Stock when LKAS is active, this is variable,
       # but 0 when LKAS is not actively steering, so because we're "tricking" ADAS
