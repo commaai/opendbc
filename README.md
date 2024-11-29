@@ -96,14 +96,19 @@ pre-commit run --all-files
 
 ## How to Port a car
 
-This guide covers everything from adding support to a new all the way to improving existing cars (e.g. adding longitudinal control or radar parsing). If similar cars to yours are already compatible, most of this work is likely already done for you.
+This guide covers everything from adding support to a new car all the way to improving existing cars (e.g. adding longitudinal control or radar parsing). If similar cars to yours are already compatible, most of this work is likely already done for you.
+
+At its most basic, a car port will control the steering on a car. A "complete" car port will have all of: lateral control, longitudinal control, good tuning for both lateral and longitudinal, radar parsing (if equipped), fuzzy fingerprinting, and more.
+
+The new car support docs will reflect 
 
 ### Connect to the Car
 
-The first step is to get connected to the car.
-A comma 3X and a car harness.
+The first step is to get connected to the car with a comma 3X and a car harness.
+The car harness gets you connected to two different CAN buses and splits one of those buses to send our own actuation messages.
 
-TODO: making a harness and choosing .
+If you're lucky, a harness compatible with your car will already be desgined and sold on comma.ai/shop. 
+If you're not so lucky, start with a "developer harness" from comma.ai/shop and crimp on whatever connector you need.
 
 ### Initializing a Brand port
 
@@ -118,7 +123,11 @@ Tools:
 
 #### Lateral
 
+TODO
+
 #### Longitudinal
+
+Use the [longitudinal maneuvers](https://github.com/commaai/openpilot/tree/master/tools/longitudinal_maneuvers) report to evaluate your car's longitudinal control and tune it.
 
 ## FAQ
 
@@ -178,4 +187,4 @@ Tools
 
 ## Come work with us -- [comma.ai/jobs](https://comma.ai/jobs)
 
-comma is hiring engineers to work on opendbc and [openpilot](https://github.com/commaai/openpilot). We love contributors.
+comma is hiring engineers to work on opendbc and [openpilot](https://github.com/commaai/openpilot). We love hiring contributors.
