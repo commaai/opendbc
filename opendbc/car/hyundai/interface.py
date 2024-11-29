@@ -28,7 +28,6 @@ class CarInterface(CarInterfaceBase):
       # Shared configuration for CAN-FD cars
       ret.experimentalLongitudinalAvailable = candidate not in (CANFD_UNSUPPORTED_LONGITUDINAL_CAR | CANFD_RADAR_SCC_CAR)
       ret.enableBsm = 0x1e5 in fingerprint[CAN.ECAN]
-      ret.lfaHdaAvailable = False
 
       if 0x105 in fingerprint[CAN.ECAN]:
         ret.flags |= HyundaiFlags.HYBRID.value
@@ -71,7 +70,6 @@ class CarInterface(CarInterfaceBase):
       # Shared configuration for non CAN-FD cars
       ret.experimentalLongitudinalAvailable = candidate not in (UNSUPPORTED_LONGITUDINAL_CAR | CAMERA_SCC_CAR)
       ret.enableBsm = 0x58b in fingerprint[0]
-      ret.lfaHdaAvailable = 1157 in fingerprint[0]
 
       # Send LFA message on cars with HDA
       if 0x485 in fingerprint[2]:
