@@ -29,6 +29,41 @@ The goal of this project is to support controlling every single one of those car
 
 While the primary focus is on supporting ADAS interfaces for [openpilot](https://github.com/commaai/openpilot), we're also interested in reading and writing as many things as we can: EV charge status, lock/unlocking doors, etc.
 
+---
+
+<!--
+TODO:
+- LLM.txt
+- glossary
+- how to port a car
+- references + tools
+-->
+
+This README and the [supported cars list](docs/CARS.md) are all the docs for the opendbc project.
+Everything you need to know to use, contribute, and extend opendbc are in these docs.
+
+### Terms
+
+* **port**: 
+* **platform**: 
+* **[comma](https://github.com/commaai)**: the company behind opendbc
+* **[comma 3X](https://comma.ai/shop/comma-3x)**: the hardware used to run openpilot
+* **harness**:
+* **panda**: hardware used to get on the car's CAN bus
+* **CAN bus**:
+* **cabana**: our tool for reverse engineering CAN messages
+* **DBC**: 
+* **openpilot**:
+
+### References
+
+* [*How Do We Control The Car?*](https://www.youtube.com/watch?v=nNU6ipme878&pp=ygUoY29tbWEgY29uIDIwMjEgaG93IGRvIHdlIGNvbnRyb2wgdGhlIGNhcg%3D%3D) by @robbederks from COMMA_CON 2021
+* [*How to Port a Car*](https://www.youtube.com/watch?v=XxPS5TpTUnI&t=142s&pp=ygUPamFzb24gY29tbWEgY29u) by @jyoung8607 from COMMA_CON 2023
+
+### Tools
+
+* [cabana](https://github.com/commaai/openpilot/tree/master/tools/cabana)
+
 ## Contributing
 
 All opendbc development is coordinated on GitHub and [Discord](https://discord.comma.ai). Check out the `#dev-opendbc-cars` channel and `Vehicle Specific` section. 
