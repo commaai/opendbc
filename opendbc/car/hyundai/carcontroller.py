@@ -76,7 +76,7 @@ class CarController(CarControllerBase):
     self.lkas_onoff_counter = 0
     self.lkas_temp_disabled = False
     self.lkas_temp_disabled_timer = 0
-    
+
     self.stock_lfa_counter = 0
 
 
