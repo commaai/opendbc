@@ -24,7 +24,7 @@
 ---
 
 Most cars since 2016 have electronically-actuatable steering, gas, and brakes thanks to [LKAS](https://en.wikipedia.org/wiki/Lane_departure_warning_system#Lane_keeping_and_next_technologies) and [ACC](https://en.wikipedia.org/wiki/Adaptive_cruise_control).
-The goal of this project is to support controlling the steering, gas, and brakes on every single one of those cars. See [docs/CARS.md](docs/CARS.md) for the current supported cars list.
+The goal of this project is to support controlling the steering, gas, and brakes on every single one of those cars.
 
 While the primary focus is on supporting ADAS interfaces for [openpilot](https://github.com/commaai/openpilot), we're also interested in reading and writing as many things as we can (EV charge status, lock/unlocking doors, etc) such that we can build the best vehicle management app ever.
 
