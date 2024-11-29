@@ -10,15 +10,15 @@ from opendbc.car.interfaces import CarControllerBase
 
 import capnp
 import os
-import cereal.messaging as messaging
 from opendbc.car.common.basedir import BASEDIR
 
 # TODO: remove car from cereal/__init__.py and always import from opendbc
 try:
-  from cereal import car
+  from cereal import car, messaging
 except ImportError:
   capnp.remove_import_hook()
   car = capnp.load(os.path.join(BASEDIR, "car.capnp"))
+  messaging = capnp.load(os.path.join(BASEDIR, "../../cereal/messaging"))
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
