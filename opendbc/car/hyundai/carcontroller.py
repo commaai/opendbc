@@ -73,14 +73,11 @@ class CarController(CarControllerBase):
     self.driver_steering_torque_above_timer = 150
     self.driver_steering_angle_above_timer = 150
     
-    self.kisa_turnsteeringdisable = self.c_params.get_bool("KisaTurnSteeringDisable")
-    self.kisa_maxanglelimit = float(int(self.c_params.get("KisaMaxAngleLimit", encoding="utf8")))
-    
-    self.to_avoid_lkas_fault_enabled = self.c_params.get_bool("AvoidLKASFaultEnabled")
-    self.to_avoid_lkas_fault_max_angle = int(self.c_params.get("AvoidLKASFaultMaxAngle", encoding="utf8"))
-    self.to_avoid_lkas_fault_max_frame = int(self.c_params.get("AvoidLKASFaultMaxFrame", encoding="utf8"))
-    self.enable_steer_more = self.c_params.get_bool("AvoidLKASFaultBeyond")
-    self.no_mdps_mods = self.c_params.get_bool("NoSmartMDPS")
+    self.to_avoid_lkas_fault_enabled = True
+    self.to_avoid_lkas_fault_max_angle = 85
+    self.to_avoid_lkas_fault_max_frame = 89
+    self.enable_steer_more = False
+    self.no_mdps_mods = False
     
     self.steer_timer_apply_torque = 1.0
     self.DT_STEER = 0.005             # 0.01 1sec, 0.005  2sec
