@@ -96,9 +96,23 @@ pre-commit run --all-files
 
 ## How to Port a car
 
+This guide covers everything from adding support to a new all the way to improving existing cars (e.g. adding longitudinal control or radar parsing). If similar cars to yours are already compatible, most of this work is likely already done for you.
+
+### Connect to the Car
+
+The first step is to get connected to the car.
+A comma 3X and a car harness.
+
+TODO: making a harness and choosing .
+
 ### Initializing a Brand port
 
+
 ### Reverse Engineer a CAN message
+
+We built [cabana](https://github.com/commaai/openpilot/tree/master/tools/cabana).
+Tools:
+* 
 
 ### Tuning
 
@@ -154,6 +168,10 @@ See [this talk](https://www.youtube.com/watch?v=FL8CxUSfipM) for an in-depth exp
 
 * [*How Do We Control The Car?*](https://www.youtube.com/watch?v=nNU6ipme878&pp=ygUoY29tbWEgY29uIDIwMjEgaG93IGRvIHdlIGNvbnRyb2wgdGhlIGNhcg%3D%3D) by [@robbederks](https://github.com/robbederks) from COMMA_CON 2021
 * [*How to Port a Car*](https://www.youtube.com/watch?v=XxPS5TpTUnI&t=142s&pp=ygUPamFzb24gY29tbWEgY29u) by [@jyoung8607](https://github.com/jyoung8607) from COMMA_CON 2023
+
+Tools
+* [can_print_changes.py](https://github.com/commaai/openpilot/blob/master/selfdrive/debug/can_print_changes.py): diff the whole CAN bus accross two drives, such as one without any LKAS and one with LKAS 
+* [cabana](https://github.com/commaai/openpilot/tree/master/tools/cabana#readme): our tool for reverse engineering CAN messages
 
 ## Come work with us -- [comma.ai/jobs](https://comma.ai/jobs)
 
