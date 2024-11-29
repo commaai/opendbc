@@ -165,11 +165,11 @@ See [this talk](https://www.youtube.com/watch?v=FL8CxUSfipM) for an in-depth exp
 * **[comma](https://github.com/commaai)**: the company behind opendbc
 * **[comma 3X](https://comma.ai/shop/comma-3x)**: the hardware used to run openpilot
 
-### Even more docs
+### More resources
 
 * [*How Do We Control The Car?*](https://www.youtube.com/watch?v=nNU6ipme878&pp=ygUoY29tbWEgY29uIDIwMjEgaG93IGRvIHdlIGNvbnRyb2wgdGhlIGNhcg%3D%3D) by [@robbederks](https://github.com/robbederks) from COMMA_CON 2021
 * [*How to Port a Car*](https://www.youtube.com/watch?v=XxPS5TpTUnI&t=142s&pp=ygUPamFzb24gY29tbWEgY29u) by [@jyoung8607](https://github.com/jyoung8607) from COMMA_CON 2023
-* [opendbc data](https://commaai.github.io/opendbc-data/)
+* [opendbc data](https://commaai.github.io/opendbc-data/): a repository of longitudinal maneuver evaluations
 * [commaCarSegments](https://huggingface.co/datasets/commaai/commaCarSegments): a massive dataset of CAN data from 300 different car models
 
 Tools
