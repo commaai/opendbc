@@ -125,39 +125,24 @@ In addition to the standard bounties, we also offer higher value bounties for mo
 
 ## FAQ
 
-***How do I use this?***
+***How do I use this?*** A [comma 3X](https://comma.ai/shop/comma-3x) is custom-designed to be the best way to run and develop opendbc and openpilot.
 
-Depends on what you want to do. [openpilot](https://github.com/commaai/openpilot) is our development target and offers a replacement for your car's ADAS, but you can also use a [panda](https://comma.ai/shop/panda) for basic control or just reading state from your car.
+***Which cars are supported?*** See the [supported cars list](docs/CARS.md).
 
-***What hardware do I need?***
+***Can I add support for my car?*** Yes, most car support comes from the community. Read the guide [here](https://github.com/commaai/opendbc/blob/docs/README.md#how-to-port-a-car).
 
-* a [supported car](docs/CARS.md)
-* a [car harness](https://comma.ai/shop/car-harness)
-* a [comma 3X](https://comma.ai/shop/comma-3x) or [panda](https://comma.ai/shop/panda)
+***Which cars can be supported?*** Any car with LKAS and ACC. More info [here](https://github.com/commaai/openpilot/blob/master/docs/CARS.md#dont-see-your-car-here).
 
-***Which cars are supported?***
-
-See the [supported cars list](docs/CARS.md).
-
-***Can I add support for my car?***
-
-Yes, most car support comes from the community. Read the guide [here](https://github.com/commaai/opendbc/blob/docs/README.md#how-to-port-a-car).
-
-***Which cars can be supported?***
-
-Any car with LKAS and ACC. More info [here](https://github.com/commaai/openpilot/blob/master/docs/CARS.md#dont-see-your-car-here).
-
-***How does this work?***
-
-In short, we designed hardware to sit at a convenient spot on your car's communication bus that allows for filtering out interesting messages and replacing them with our own.  
-See [this talk](https://www.youtube.com/watch?v=FL8CxUSfipM) for an in-depth explanation.
+***How does this work?*** In short, we designed hardware to replace your car's built-in lane keep and adaptive cruise features. See [this talk](https://www.youtube.com/watch?v=FL8CxUSfipM) for an in-depth explanation.
 
 ### Terms
 
 * **port**: refers to the integration and support of a specific car
 * **lateral control**: aka steering control
 * **longitudinal control**: aka gas/brakes control
-* **fingerprinting**: automatic process for identifying the car 
+* **fingerprinting**: automatic process for identifying the car
+* **[LKAS](https://en.wikipedia.org/wiki/Lane_departure_warning_system)**: lane keeping assist
+* **[ACC](https://en.wikipedia.org/wiki/Adaptive_cruise_control)**: adaptive cruise control
 * **[harness](https://comma.ai/shop/car-harness)**: car-specific hardware to attach to the car and intercept the ADAS messages
 * **[panda](https://github.com/commaai/panda)**: hardware used to get on a car's CAN bus
 * **[ECU](https://en.wikipedia.org/wiki/Electronic_control_unit)**: computers or control modules inside the car
