@@ -139,7 +139,7 @@ See the [supported cars list](docs/CARS.md).
 
 ***Can I add support for my car?***
 
-Yes, most car support comes from the community. Join the [Discord](https://discord.comma.ai) and watch this [talk](https://www.youtube.com/watch?v=XxPS5TpTUnI&t=142s&pp=ygUPY29tbWFfY29uIGphc29u) to get started. (We also offer [paid bounties](https://comma.ai/bounties) on car ports.)
+Yes, most car support comes from the community. Read the guide [here](https://github.com/commaai/opendbc/blob/docs/README.md#how-to-port-a-car).
 
 ***Which cars can be supported?***
 
