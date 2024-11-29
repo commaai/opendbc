@@ -8,7 +8,15 @@ from opendbc.car.hyundai.hyundaicanfd import CanBus
 from opendbc.car.hyundai.values import HyundaiFlags, Buttons, CarControllerParams, CAR
 from opendbc.car.interfaces import CarControllerBase
 
-from cereal import car, messaging
+import capnp
+from opendbc.car.common.basedir import BASEDIR
+
+# TODO: remove car from cereal/__init__.py and always import from opendbc
+try:
+  from cereal import car
+except ImportError:
+  capnp.remove_import_hook()
+  car = capnp.load(os.path.join(BASEDIR, "car.capnp"))
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
