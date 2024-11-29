@@ -65,7 +65,7 @@ At its most basic, a car port will control the steering on a car. A "complete" c
 The first step is to get connected to the car with a comma 3X and a car harness.
 The car harness gets you connected to two different CAN buses and splits one of those buses to send our own actuation messages.
 
-If you're lucky, a harness compatible with your car will already be desgined and sold on comma.ai/shop. 
+If you're lucky, a harness compatible with your car will already be designed and sold on comma.ai/shop. 
 If you're not so lucky, start with a "developer harness" from comma.ai/shop and crimp on whatever connector you need.
 
 ### Structure of a port
@@ -76,7 +76,7 @@ The entirery of a car port lives in `opendbc/car/<brand>/`:
 * `carstate.py`: parses out the relevant information from the CAN stream using the car's DBC file
 * `carcontroller.py`: outputs CAN messages to control the car 
 * `<brand>can.py`: thin Python helpers around the DBC file to build CAN messages
-* `fingerprints.py`: database of ECU firwmare versions for identifying car models
+* `fingerprints.py`: database of ECU firmware versions for identifying car models
 * `interface.py`: high level class for interfacing with the car
 * `radar_interface.py`: parses out the radar 
 * `values.py`: enumerates the brand's supported cars
@@ -157,7 +157,7 @@ In addition to the standard bounties, we also offer higher value bounties for mo
 * [*How to Port a Car*](https://www.youtube.com/watch?v=XxPS5TpTUnI&t=142s&pp=ygUPamFzb24gY29tbWEgY29u) by [@jyoung8607](https://github.com/jyoung8607) from COMMA_CON 2023
 * [commaCarSegments](https://huggingface.co/datasets/commaai/commaCarSegments): a massive dataset of CAN data from 300 different car models
 * [cabana](https://github.com/commaai/openpilot/tree/master/tools/cabana#readme): our tool for reverse engineering CAN messages
-* [can_print_changes.py](https://github.com/commaai/openpilot/blob/master/selfdrive/debug/can_print_changes.py): diff the whole CAN bus accross two drives, such as one without any LKAS and one with LKAS 
+* [can_print_changes.py](https://github.com/commaai/openpilot/blob/master/selfdrive/debug/can_print_changes.py): diff the whole CAN bus across two drives, such as one without any LKAS and one with LKAS 
 * [longitudinal maneuvers](https://github.com/commaai/openpilot/tree/master/tools/longitudinal_maneuvers): a tool for evaluating and tuning longitudinal control
 * [opendbc data](https://commaai.github.io/opendbc-data/): a repository of longitudinal maneuver evaluations
 
