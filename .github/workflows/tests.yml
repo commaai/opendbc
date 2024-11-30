@@ -36,7 +36,6 @@ jobs:
     steps:
     - uses: commaai/timeout@v1
     - uses: actions/checkout@v4
-    - run: sudo apt install --no-install-recommends -y cppcheck
     - name: setup python
       run: |
         curl -LsSf https://astral.sh/uv/install.sh | sh
