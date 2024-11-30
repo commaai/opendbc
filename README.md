@@ -133,6 +133,8 @@ In addition to the standard bounties, we also offer higher value bounties for mo
 
 ***How does this work?*** In short, we designed hardware to replace your car's built-in lane keep and adaptive cruise features. See [this talk](https://www.youtube.com/watch?v=FL8CxUSfipM) for an in-depth explanation.
 
+***Is there a timeline or roadmap for adding car support?*** No, most car support comes from the community, with comma doing final safety and quality validation. The more complete the community car port is and the more popular the car is, the more likely we are to pick it up as the next one to validate. 
+
 ### Terms
 
 * **port**: refers to the integration and support of a specific car
