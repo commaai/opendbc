@@ -65,4 +65,4 @@ volkswagen:
 
 fingerprint:
   - changed-files:
-    - any-glob-to-any-file: 'opendbc/car/*/fingerprints.py'
+    - any-glob-to-all-files: 'opendbc/car/*/fingerprints.py'

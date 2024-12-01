@@ -41,6 +41,7 @@ FW_VERSIONS = {
       b'46114-TVA-A080\x00\x00',
       b'46114-TVA-A120\x00\x00',
       b'46114-TVA-A320\x00\x00',
+      b'46114-TVA-A410\x00\x00',
       b'46114-TVE-H550\x00\x00',
       b'46114-TVE-H560\x00\x00',
     ],
@@ -438,6 +439,7 @@ FW_VERSIONS = {
       b'36161-TPA-E050\x00\x00',
       b'36161-TPG-A030\x00\x00',
       b'36161-TPG-A040\x00\x00',
+      b'36161-TPG-A050\x00\x00',
     ],
     (Ecu.fwdRadar, 0x18dab0f1, None): [
       b'36802-TMB-H040\x00\x00',
