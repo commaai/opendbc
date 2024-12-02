@@ -1,4 +1,6 @@
 import math
+from collections import deque
+
 from opendbc.car import Bus, carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
                         make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY, DT_CTRL
 from opendbc.car.can_definitions import CanData
@@ -42,8 +44,8 @@ def get_long_tune(CP, params):
   kdBP = [0.]
   kdV = [0.]
   if CP.carFingerprint in TSS2_CAR:
-    kiV = [0.25]
-    kdV = [0.25 / 4]
+    kiV = [0.5]
+    kdV = [0.5 / 4]
 
     # Since we compensate for imprecise acceleration in carcontroller and error correct on aEgo, we can avoid using gains
     if CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
@@ -73,7 +75,11 @@ class CarController(CarControllerBase):
     self.long_pid = get_long_tune(self.CP, self.params)
 
     self.error_rate = FirstOrderFilter(0.0, 0.5, DT_CTRL * 3)
+    self.error_rate2 = FirstOrderFilter(0.0, 1, DT_CTRL * 3)
+    self.error_rate3 = FirstOrderFilter(0.0, 1, DT_CTRL)
+    self.d = deque([0.0] * 100, maxlen=100)
     self.prev_error = 0.0
+    self.prev_error2 = 0.0
 
     self.aego = FirstOrderFilter(0.0, 0.5, DT_CTRL)
 
@@ -285,6 +291,9 @@ class CarController(CarControllerBase):
           if actuators.longControlState == LongCtrlState.pid:
             error = pcm_accel_cmd - a_ego_blended
             self.error_rate.update((error - self.prev_error) / (DT_CTRL * 3))
+            self.error_rate2.update((error - self.prev_error) / (DT_CTRL * 3))
+            # self.error_rate.x = (error - self.prev_error) / (DT_CTRL * 3)
+            print(error, self.prev_error, self.error_rate.x)
             self.prev_error = error
 
             error = pcm_accel_cmd - future_aego
@@ -294,14 +303,18 @@ class CarController(CarControllerBase):
           else:
             self.long_pid.reset()
             self.error_rate.x = 0.0
+            self.error_rate2.x = 0.0
             self.prev_error = 0.0
+
+        self.debug = self.error_rate.x
+        self.debug2 = self.error_rate2.x
 
         # Along with rate limiting positive jerk above, this greatly improves gas response time
         # Consider the net acceleration request that the PCM should be applying (pitch included)
         net_acceleration_request_min = min(actuators.accel + accel_due_to_pitch, net_acceleration_request)
-        if net_acceleration_request_min < 0.1 or stopping or not CC.longActive:
+        if net_acceleration_request_min < 0.2 or stopping or not CC.longActive:
           self.permit_braking = True
-        elif net_acceleration_request_min > 0.2:
+        elif net_acceleration_request_min > 0.3:
           self.permit_braking = False
 
         pcm_accel_cmd = clip(pcm_accel_cmd, self.params.ACCEL_MIN, self.params.ACCEL_MAX)
@@ -349,11 +362,24 @@ class CarController(CarControllerBase):
     if self.frame % 20 == 0 and self.CP.flags & ToyotaFlags.DISABLE_RADAR.value:
       can_sends.append(make_tester_present_msg(0x750, 0, 0xF))
 
+    pcm_accel_cmd = actuators.accel
+    error = pcm_accel_cmd - a_ego_blended
+    self.error_rate3.update((error - self.prev_error2) / (DT_CTRL))
+    self.d.append(error)
+    # self.debug3 = self.error_rate3.x
+    if self.frame % 3 == 0:
+      self.debug3 = (error - self.d[-100])
+    self.prev_error2 = error
+
     new_actuators = actuators.as_builder()
     new_actuators.steer = apply_steer / self.params.STEER_MAX
     new_actuators.steerOutputCan = apply_steer
     new_actuators.steeringAngleDeg = self.last_angle
     new_actuators.accel = self.accel
+
+    new_actuators.debug = self.debug
+    new_actuators.debug2 = self.debug2
+    new_actuators.debug3 = self.debug3
 
     self.frame += 1
     return new_actuators, can_sends
