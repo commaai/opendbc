@@ -76,7 +76,8 @@ class CarController(CarControllerBase):
 
     self.error_rate = FirstOrderFilter(0.0, 0.5, DT_CTRL * 3)
     self.error_rate2 = FirstOrderFilter(0.0, 1, DT_CTRL * 3)
-    self.error_rate3 = FirstOrderFilter(0.0, 1, DT_CTRL)
+    self.error_rate3 = FirstOrderFilter(0.0, 0.75, DT_CTRL)
+    self.error_rate4 = FirstOrderFilter(0.0, 0.15, DT_CTRL)
     self.d = deque([0.0] * 100, maxlen=100)
     self.prev_error = 0.0
     self.prev_error2 = 0.0
@@ -297,7 +298,7 @@ class CarController(CarControllerBase):
             self.prev_error = error
 
             error = pcm_accel_cmd - future_aego
-            pcm_accel_cmd = self.long_pid.update(error, error_rate=self.error_rate.x,
+            pcm_accel_cmd = self.long_pid.update(error, error_rate=self.error_rate4.x,  # self.error_rate.x,
                                                  speed=CS.out.vEgo,
                                                  feedforward=pcm_accel_cmd)
           else:
@@ -305,6 +306,14 @@ class CarController(CarControllerBase):
             self.error_rate.x = 0.0
             self.error_rate2.x = 0.0
             self.prev_error = 0.0
+
+        error = pcm_accel_cmd - a_ego_blended
+        # self.error_rate3.update((error - self.prev_error2) / (DT_CTRL))
+        # self.debug3 = self.error_rate3.x
+        self.debug3 = (error - self.d[-15 // 3]) / (DT_CTRL * 25)
+        self.debug3 = self.error_rate4.update(self.debug3)
+        self.prev_error2 = error
+        self.d.append(error)
 
         self.debug = self.error_rate.x
         self.debug2 = self.error_rate2.x
@@ -362,14 +371,15 @@ class CarController(CarControllerBase):
     if self.frame % 20 == 0 and self.CP.flags & ToyotaFlags.DISABLE_RADAR.value:
       can_sends.append(make_tester_present_msg(0x750, 0, 0xF))
 
-    pcm_accel_cmd = actuators.accel
-    error = pcm_accel_cmd - a_ego_blended
-    self.error_rate3.update((error - self.prev_error2) / (DT_CTRL))
-    self.d.append(error)
-    # self.debug3 = self.error_rate3.x
-    if self.frame % 3 == 0:
-      self.debug3 = (error - self.d[-100])
-    self.prev_error2 = error
+    # pcm_accel_cmd = actuators.accel
+    # error = pcm_accel_cmd - a_ego_blended
+    # self.error_rate3.update((error - self.prev_error2) / (DT_CTRL))
+    # self.d.append(error)
+    # # self.debug3 = self.error_rate3.x
+    # if self.frame % 3 == 0:
+    #   self.debug3 = (error - self.d[-10]) / (DT_CTRL * 10)
+    #   # self.debug3 = self.error_rate4.update(self.debug3)
+    # self.prev_error2 = error
 
     new_actuators = actuators.as_builder()
     new_actuators.steer = apply_steer / self.params.STEER_MAX
