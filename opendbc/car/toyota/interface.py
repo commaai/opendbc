@@ -51,7 +51,7 @@ class CarInterface(CarInterfaceBase):
       ret.flags |= ToyotaFlags.HYBRID.value
 
     if candidate in (CAR.LEXUS_ES_TSS2,) and not (ret.flags & ToyotaFlags.HYBRID.value):
-     ret.flags |= ToyotaFlags.RAISED_ACCEL_LIMIT.value
+      ret.flags |= ToyotaFlags.RAISED_ACCEL_LIMIT.value
 
     if candidate == CAR.TOYOTA_PRIUS:
       stop_and_go = True
