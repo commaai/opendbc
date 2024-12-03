@@ -456,7 +456,7 @@ class CAR(Platforms):
       VWCarDocs("CUPRA Born 2021"),
     ],
     # for CUPRA BORN 77kWh 170 kW, tire stiffness is an approximation
-    VolkswagenCarSpecs(mass=1950, wheelbase=2.766, steerRatio=15.9, centerToFront=1383, tireStiffnessFactor=1.2),
+    VolkswagenCarSpecs(mass=1950, wheelbase=2.766, steerRatio=15.9, centerToFrontRatio=0.55, tireStiffnessFactor=1.2),
     chassis_codes={"K1"},
     wmis={WMI.SEAT},
   )
