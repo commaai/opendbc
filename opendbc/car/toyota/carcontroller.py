@@ -1,4 +1,5 @@
 import math
+from collections import deque
 from opendbc.car import Bus, carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
                         make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY, DT_CTRL
 from opendbc.car.can_definitions import CanData
@@ -42,7 +43,7 @@ def get_long_tune(CP, params):
   kdBP = [0.]
   kdV = [0.]
   if CP.carFingerprint in TSS2_CAR:
-    kiV = [0.5]
+    kiV = [0.25]
     kdV = [0.25 / 4]
 
     # Since we compensate for imprecise acceleration in carcontroller and error correct on aEgo, we can avoid using gains
@@ -70,10 +71,18 @@ class CarController(CarControllerBase):
     self.steer_rate_counter = 0
     self.distance_button = 0
 
+    self.debug = 0
+    self.debug2 = 0
+    self.debug3 = 0
+
     self.long_pid = get_long_tune(self.CP, self.params)
 
     self.error_rate = FirstOrderFilter(0.0, 0.5, DT_CTRL * 3)
+    self.error_rate2 = FirstOrderFilter(0.0, 0.15, DT_CTRL * 3)
     self.prev_error = 0.0
+    self.prev_error2 = 0.0
+
+    self.d = deque([0.0] * 100, maxlen=100)
 
     # *** start PCM compensation state ***
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
@@ -267,24 +276,30 @@ class CarController(CarControllerBase):
           self.permit_braking = True
 
         if not (self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT):
-          if actuators.longControlState == LongCtrlState.pid:
-            # GVC does not overshoot ego acceleration when starting from stop, but still has a similar delay
-            if not self.CP.flags & ToyotaFlags.SECOC.value:
-              a_ego_blended = interp(CS.out.vEgo, [1.0, 2.0], [CS.gvc, CS.out.aEgo])
-            else:
-              a_ego_blended = CS.out.aEgo
+          # GVC does not overshoot ego acceleration when starting from stop, but still has a similar delay
+          if not self.CP.flags & ToyotaFlags.SECOC.value:
+            a_ego_blended = interp(CS.out.vEgo, [1.0, 2.0], [CS.gvc, CS.out.aEgo])
+          else:
+            a_ego_blended = CS.out.aEgo
 
-            error = pcm_accel_cmd - a_ego_blended
+          error = pcm_accel_cmd - a_ego_blended
+
+          if actuators.longControlState == LongCtrlState.pid:
             self.error_rate.update((error - self.prev_error) / (DT_CTRL * 3))
             self.prev_error = error
+            self.debug = self.error_rate.x
 
-            pcm_accel_cmd = self.long_pid.update(error, error_rate=self.error_rate.x,
+            pcm_accel_cmd = self.long_pid.update(error, error_rate=self.error_rate2.x,
                                                  speed=CS.out.vEgo,
                                                  feedforward=pcm_accel_cmd)
           else:
             self.long_pid.reset()
             self.error_rate.x = 0.0
             self.prev_error = 0.0
+
+          self.debug2 = (error - self.d[-50 // 3]) / (DT_CTRL * 50)
+          self.debug2 = self.error_rate2.update(self.debug2)
+          self.d.append(error)
 
         # Along with rate limiting positive jerk above, this greatly improves gas response time
         # Consider the net acceleration request that the PCM should be applying (pitch included)
@@ -344,6 +359,10 @@ class CarController(CarControllerBase):
     new_actuators.steerOutputCan = apply_steer
     new_actuators.steeringAngleDeg = self.last_angle
     new_actuators.accel = self.accel
+
+    new_actuators.debug = self.debug
+    new_actuators.debug2 = self.debug2
+    new_actuators.debug3 = self.debug3
 
     self.frame += 1
     return new_actuators, can_sends
