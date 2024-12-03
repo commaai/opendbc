@@ -294,7 +294,7 @@ class CAR(Platforms):
   LEXUS_ES_TSS2 = ToyotaTSS2PlatformConfig(
     [
       ToyotaCarDocs("Lexus ES 2019-24"),
-      ToyotaCarDocs("Lexus ES Hybrid 2019-24", video_link="https://youtu.be/BZ29osRVJeg?t=12"),
+      ToyotaCarDocs("Lexus ES Hybrid 2019-25", video_link="https://youtu.be/BZ29osRVJeg?t=12"),
     ],
     LEXUS_ES.specs,
   )
