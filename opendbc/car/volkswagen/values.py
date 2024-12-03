@@ -455,7 +455,7 @@ class CAR(Platforms):
     [
       VWCarDocs("CUPRA Born 2021"),
     ],
-    # most of these car parameters are rough approximations
+    # these car parameters are rough approximations and properties for CUPRA BORN 77kWh
     VolkswagenCarSpecs(mass=1950, wheelbase=2.766, steerRatio=15.9, rotationalInertia=5228, centerToFront=1383, tireStiffnessFront=120000, tireStiffnessRear=100000),
     chassis_codes={"K1"},
     wmis={WMI.SEAT},
