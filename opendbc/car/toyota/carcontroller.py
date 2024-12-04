@@ -44,8 +44,8 @@ def get_long_tune(CP, params):
   kdBP = [0.]
   kdV = [0.]
   if CP.carFingerprint in TSS2_CAR:
-    kiV = [0.5]
-    kdV = [0.5 / 4]
+    kiV = [0.25]
+    kdV = [0.0 / 4]
 
     # Since we compensate for imprecise acceleration in carcontroller and error correct on aEgo, we can avoid using gains
     if CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
@@ -71,6 +71,8 @@ class CarController(CarControllerBase):
     self.permit_braking = True
     self.steer_rate_counter = 0
     self.distance_button = 0
+
+    self.aego_d = deque([0.0] * 100, maxlen=100)
 
     self.long_pid = get_long_tune(self.CP, self.params)
 
@@ -220,6 +222,11 @@ class CarController(CarControllerBase):
     # TODO: adjust for hybrid
     future_aego = a_ego_blended + jEgo * 0.5
 
+
+    jEgo = (a_ego_blended - self.aego_d[-15]) / (DT_CTRL * 15)
+    future_aego2 = a_ego_blended + jEgo * 0.5
+    self.aego_d.append(a_ego_blended)
+
     # on entering standstill, send standstill request
     if CS.out.standstill and not self.last_standstill and (self.CP.carFingerprint not in NO_STOP_TIMER_CAR):
       self.standstill_req = True
@@ -297,7 +304,7 @@ class CarController(CarControllerBase):
             print(error, self.prev_error, self.error_rate.x)
             self.prev_error = error
 
-            error = pcm_accel_cmd - future_aego
+            error = pcm_accel_cmd - future_aego2
             pcm_accel_cmd = self.long_pid.update(error, error_rate=self.error_rate4.x,  # self.error_rate.x,
                                                  speed=CS.out.vEgo,
                                                  feedforward=pcm_accel_cmd)
@@ -315,8 +322,8 @@ class CarController(CarControllerBase):
         self.prev_error2 = error
         self.d.append(error)
 
-        self.debug = self.error_rate.x
-        self.debug2 = self.error_rate2.x
+        self.debug = future_aego
+        self.debug2 = future_aego2
 
         # Along with rate limiting positive jerk above, this greatly improves gas response time
         # Consider the net acceleration request that the PCM should be applying (pitch included)
