@@ -3,7 +3,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
-from opendbc.car import CarSpecs, PlatformConfig, Platforms, AngleRateLimit, dbc_dict
+from opendbc.car import Bus, CarSpecs, PlatformConfig, Platforms, AngleRateLimit
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarDocs, Column, CarParts, CarHarness
@@ -73,6 +73,8 @@ class ToyotaCarDocs(CarDocs):
   package: str = "All"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.toyota_a]))
 
+def dbc_dict(pt, radar):
+  return {Bus.pt: pt, Bus.radar: radar}
 
 @dataclass
 class ToyotaTSS2PlatformConfig(PlatformConfig):
@@ -82,7 +84,7 @@ class ToyotaTSS2PlatformConfig(PlatformConfig):
     self.flags |= ToyotaFlags.TSS2 | ToyotaFlags.NO_STOP_TIMER | ToyotaFlags.NO_DSU
 
     if self.flags & ToyotaFlags.RADAR_ACC:
-      self.dbc_dict = dbc_dict('toyota_nodsu_pt_generated', None)
+      self.dbc_dict = {Bus.pt: 'toyota_nodsu_pt_generated'}
 
 
 class CAR(Platforms):

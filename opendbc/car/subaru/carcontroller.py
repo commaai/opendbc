@@ -1,5 +1,5 @@
 from opendbc.can.packer import CANPacker
-from opendbc.car import apply_driver_steer_torque_limits, common_fault_avoidance, make_tester_present_msg
+from opendbc.car import Bus, apply_driver_steer_torque_limits, common_fault_avoidance, make_tester_present_msg
 from opendbc.car.common.numpy_fast import clip, interp
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.subaru import subarucan
@@ -12,15 +12,15 @@ MAX_STEER_RATE_FRAMES = 7  # tx control frames needed before torque can be cut
 
 
 class CarController(CarControllerBase):
-  def __init__(self, dbc_name, CP):
-    super().__init__(dbc_name, CP)
+  def __init__(self, dbc_names, CP):
+    super().__init__(dbc_names, CP)
     self.apply_steer_last = 0
 
     self.cruise_button_prev = 0
     self.steer_rate_counter = 0
 
     self.p = CarControllerParams(CP)
-    self.packer = CANPacker(DBC[CP.carFingerprint]['pt'])
+    self.packer = CANPacker(DBC[CP.carFingerprint][Bus.pt])
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
