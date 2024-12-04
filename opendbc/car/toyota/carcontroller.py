@@ -1,6 +1,6 @@
 import math
 from opendbc.car import Bus, carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
-                        make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY, DT_CTRL
+                        make_tester_present_msg, structs, ACCELERATION_DUE_TO_GRAVITY, DT_CTRL
 from opendbc.car.can_definitions import CanData
 from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.common.numpy_fast import clip, interp
@@ -225,7 +225,6 @@ class CarController(CarControllerBase):
         # internal PCM gas command can get stuck unwinding from negative accel so we apply a generous rate limit
         pcm_accel_cmd = actuators.accel
         if CC.longActive:
-          # pcm_accel_cmd = rate_limit(pcm_accel_cmd, self.prev_accel, ACCEL_WINDDOWN_LIMIT, ACCEL_WINDUP_LIMIT)
           pcm_accel_cmd = min(pcm_accel_cmd, self.prev_accel + ACCEL_WINDUP_LIMIT)
         self.prev_accel = pcm_accel_cmd
 
