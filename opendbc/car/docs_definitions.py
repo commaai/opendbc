@@ -46,15 +46,6 @@ class Star(Enum):
   EMPTY = "empty"
 
 
-class PowertrainType(Enum):
-  ICE = "ICE"                       # Internal combustion engine
-  MHEV = "MHEV"                     # Mild hybrid electric vehicle
-  HYBRID = "Hybrid"                 # Regular hybrid (non plug-in)
-  PHEV = "PHEV"                     # Plug-in hybrid electric vehicle
-  EV = "Electric"                   # Pure electric vehicle
-  FCEV = "FCEV"                     # Fuel cell electric vehicle
-
-
 # A part + its comprised parts
 @dataclass
 class BasePart:
@@ -257,9 +248,6 @@ class CarDocs:
 
   # the simplest description of the requirements for the US market
   package: str
-
-  # Default to ICE for backward compatibility
-  powertrain: PowertrainType = PowertrainType.ICE
 
   # the minimum compatibility requirements for this model, regardless
   # of market. can be a package, trim, or list of features
