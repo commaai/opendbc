@@ -107,11 +107,15 @@ class Footnote(Enum):
 
 
 class HondaBoschPlatformConfig(PlatformConfig):
+  safety_file = "safety_honda.h"
+
   def init(self):
     self.flags |= HondaFlags.BOSCH
 
 
 class HondaNidecPlatformConfig(PlatformConfig):
+  safety_file = "safety_honda.h"
+
   def init(self):
     self.flags |= HondaFlags.NIDEC
 

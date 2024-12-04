@@ -26,6 +26,7 @@ class ChryslerPlatformConfig(PlatformConfig):
     Bus.pt: 'chrysler_pacifica_2017_hybrid_generated',
     Bus.radar: 'chrysler_pacifica_2017_hybrid_private_fusion',
   })
+  safety_file = "safety_chrysler.h"
 
 
 @dataclass(frozen=True)

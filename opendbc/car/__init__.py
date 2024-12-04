@@ -290,6 +290,7 @@ class PlatformConfigBase(Freezable):
   flags: int = 0
 
   platform_str: str | None = None
+  safety_file: str = "safety_defaults.h"
 
   def __hash__(self) -> int:
     return hash(self.platform_str)

@@ -85,6 +85,7 @@ class GMPlatformConfig(PlatformConfig):
     Bus.radar: 'gm_global_a_object',
     Bus.chassis: 'gm_global_a_chassis',
   })
+  safety_file = "safety_gm.h"
 
 
 @dataclass

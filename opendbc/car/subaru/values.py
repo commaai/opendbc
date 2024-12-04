@@ -105,6 +105,7 @@ class SubaruCarDocs(CarDocs):
 @dataclass
 class SubaruPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'subaru_global_2017_generated'})
+  safety_file = "safety_subaru.h"
 
   def init(self):
     if self.flags & SubaruFlags.HYBRID:
@@ -173,24 +174,28 @@ class CAR(Platforms):
     CarSpecs(mass=1568, wheelbase=2.67, steerRatio=20),
     {Bus.pt: 'subaru_forester_2017_generated'},
     flags=SubaruFlags.PREGLOBAL,
+    safety_file="safety_subaru_preglobal.h",
   )
   SUBARU_LEGACY_PREGLOBAL = SubaruPlatformConfig(
     [SubaruCarDocs("Subaru Legacy 2015-18")],
     CarSpecs(mass=1568, wheelbase=2.67, steerRatio=12.5),
     {Bus.pt: 'subaru_outback_2015_generated'},
     flags=SubaruFlags.PREGLOBAL,
+    safety_file="safety_subaru_preglobal.h",
   )
   SUBARU_OUTBACK_PREGLOBAL = SubaruPlatformConfig(
     [SubaruCarDocs("Subaru Outback 2015-17")],
     SUBARU_FORESTER_PREGLOBAL.specs,
     {Bus.pt: 'subaru_outback_2015_generated'},
     flags=SubaruFlags.PREGLOBAL,
+    safety_file="safety_subaru_preglobal.h",
   )
   SUBARU_OUTBACK_PREGLOBAL_2018 = SubaruPlatformConfig(
     [SubaruCarDocs("Subaru Outback 2018-19")],
     SUBARU_FORESTER_PREGLOBAL.specs,
     {Bus.pt: 'subaru_outback_2019_generated'},
     flags=SubaruFlags.PREGLOBAL,
+    safety_file="safety_subaru_preglobal.h",
   )
   # Angle LKAS
   SUBARU_FORESTER_2022 = SubaruPlatformConfig(

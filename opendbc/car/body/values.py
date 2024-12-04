@@ -24,6 +24,7 @@ class CAR(Platforms):
     [CarDocs("comma body", package="All")],
     CarSpecs(mass=9, wheelbase=0.406, steerRatio=0.5, centerToFrontRatio=0.44),
     {Bus.main: 'comma_body'},
+    "safety_body.h",
   )
 
 

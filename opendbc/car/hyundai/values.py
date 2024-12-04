@@ -118,6 +118,7 @@ class HyundaiCarDocs(CarDocs):
 @dataclass
 class HyundaiPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: "hyundai_kia_generic"})
+  safety_file = "safety_hyundai.h"
 
   def init(self):
     if self.flags & HyundaiFlags.MANDO_RADAR:
@@ -130,6 +131,7 @@ class HyundaiPlatformConfig(PlatformConfig):
 @dataclass
 class HyundaiCanFDPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: "hyundai_canfd"})
+  safety_file = "safety_hyundai_canfd.h"
 
   def init(self):
     self.flags |= HyundaiFlags.CANFD

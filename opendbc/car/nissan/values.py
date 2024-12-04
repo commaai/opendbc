@@ -38,6 +38,7 @@ class NissanCarSpecs(CarSpecs):
 @dataclass
 class NissanPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'nissan_x_trail_2017_generated'})
+  safety_file = "safety_nissan.h"
 
 
 class CAR(Platforms):

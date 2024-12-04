@@ -80,6 +80,7 @@ class FordPlatformConfig(PlatformConfig):
     Bus.pt: 'ford_lincoln_base_pt',
     Bus.radar: RADAR.DELPHI_MRR,
   })
+  safety_file = "safety_ford.h"
 
   def init(self):
     for car_docs in list(self.car_docs):

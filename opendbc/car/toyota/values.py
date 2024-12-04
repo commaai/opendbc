@@ -79,6 +79,7 @@ def dbc_dict(pt, radar):
 @dataclass
 class ToyotaTSS2PlatformConfig(PlatformConfig):
   dbc_dict: dict = field(default_factory=lambda: dbc_dict('toyota_nodsu_pt_generated', 'toyota_tss2_adas'))
+  safety_file = "safety_toyota.h"
 
   def init(self):
     self.flags |= ToyotaFlags.TSS2 | ToyotaFlags.NO_STOP_TIMER | ToyotaFlags.NO_DSU

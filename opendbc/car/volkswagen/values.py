@@ -143,6 +143,7 @@ class VolkswagenFlags(IntFlag):
 @dataclass
 class VolkswagenMQBPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'vw_mqb_2010'})
+  safety_file = "safety_volkswagen_mqb.h"
   # Volkswagen uses the VIN WMI and chassis code to match in the absence of the comma power
   # on camera-integrated cars, as we lose too many ECUs to reliably identify the vehicle
   chassis_codes: set[str] = field(default_factory=set)
@@ -152,6 +153,7 @@ class VolkswagenMQBPlatformConfig(PlatformConfig):
 @dataclass
 class VolkswagenPQPlatformConfig(VolkswagenMQBPlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'vw_golf_mk4'})
+  safety_file = "safety_volkswagen_pq.h"
 
   def init(self):
     self.flags |= VolkswagenFlags.PQ
