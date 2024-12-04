@@ -10,6 +10,11 @@ from opendbc.car.fw_query_definitions import FwQueryConfig, Request, p16
 Ecu = CarParams.Ecu
 
 
+class ChryslerPandaFlags(IntFlag):
+  FLAG_CHRYSLER_RAM_DT = 1
+  FLAG_CHRYSLER_RAM_HD = 2
+
+
 class ChryslerFlags(IntFlag):
   # Detected flags
   HIGHER_MIN_STEERING_SPEED = 1
