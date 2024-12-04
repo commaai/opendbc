@@ -7,7 +7,7 @@ from opendbc.car import get_safety_config, get_friction, structs
 from opendbc.car.common.basedir import BASEDIR
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.gm.radar_interface import RADAR_HEADER_MSG
-from opendbc.car.gm.values import CAR, CarControllerParams, EV_CAR, CAMERA_ACC_CAR, SDGM_CAR, CanBus
+from opendbc.car.gm.values import CAR, CarControllerParams, EV_CAR, CAMERA_ACC_CAR, SDGM_CAR, ASCM_INT, CanBus
 from opendbc.car.interfaces import CarInterfaceBase, TorqueFromLateralAccelCallbackType, FRICTION_THRESHOLD, LatControlInputs, NanoFFModel
 
 TransmissionType = structs.CarParams.TransmissionType
@@ -93,14 +93,16 @@ class CarInterface(CarInterfaceBase):
 
     ret.longitudinalTuning.kiBP = [5., 35.]
 
-    if candidate in (CAMERA_ACC_CAR | SDGM_CAR):
-      ret.experimentalLongitudinalAvailable = candidate not in SDGM_CAR
+    if candidate in (CAMERA_ACC_CAR | SDGM_CAR | ASCM_INT):
+      ret.experimentalLongitudinalAvailable = candidate not in SDGM_CAR or candidate not in ASCM_INT
       ret.networkLocation = NetworkLocation.fwdCamera
       ret.radarUnavailable = True  # no radar
       ret.pcmCruise = True
       ret.safetyConfigs[0].safetyParam |= Panda.FLAG_GM_HW_CAM
       ret.minEnableSpeed = -1 if candidate in SDGM_CAR else 5 * CV.KPH_TO_MS
       ret.minSteerSpeed = 10 * CV.KPH_TO_MS
+      if candidate in ASCM_INT:
+        ret.minSteerSpeed = 7 * CV.MPH_TO_MS
 
       # Tuning for experimental long
       ret.longitudinalTuning.kiV = [2.0, 1.5]
