@@ -1,5 +1,6 @@
 from opendbc.car.interfaces import get_interface_attr
 from opendbc.car.body.values import CAR as BODY
+from opendbc.car.byd.values import CAR as BYD
 from opendbc.car.chrysler.values import CAR as CHRYSLER
 from opendbc.car.ford.values import CAR as FORD
 from opendbc.car.gm.values import CAR as GM
