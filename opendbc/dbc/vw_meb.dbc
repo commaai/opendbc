@@ -1498,7 +1498,7 @@ BO_ 258 MEB_ESP_04: 48 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Lateral_Accel : 16|8@1+ (1,-128) [0|255] "" XXX
- SG_ Longitudinal_Accel : 24|9@1- (0.0325,0) [0|255] "Unit_MeterPerSquareSecond" XXX
+ SG_ Longitudinal_Accel : 24|10@1+ (0.03125,-16) [0|255] "Unit_MeterPerSquareSecond" XXX
  SG_ Yaw_Rate : 40|14@1+ (0.01,0) [0|16383] "Unit_DegreePerSecond" XXX
  SG_ Yaw_Rate_Sign : 54|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_7 : 99|1@0+ (1,0) [0|1] "" XXX
