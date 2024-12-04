@@ -132,6 +132,10 @@ class WMI(StrEnum):
   VOLKSWAGEN_GROUP_RUS = "XW8"
 
 
+class VolkswagenPandaFlags(IntFlag):
+  FLAG_VOLKSWAGEN_LONG_CONTROL = 1
+
+
 class VolkswagenFlags(IntFlag):
   # Detected flags
   STOCK_HCA_PRESENT = 1

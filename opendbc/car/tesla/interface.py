@@ -14,7 +14,7 @@ class CarInterface(CarInterfaceBase):
 
     # Not merged yet
     #ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.tesla)]
-    #ret.safetyConfigs[0].safetyParam |= Panda.FLAG_TESLA_LONG_CONTROL
+    #ret.safetyConfigs[0].safetyParam |= TeslaPandaFlags.FLAG_TESLA_LONG_CONTROL
 
     ret.steerLimitTimer = 1.0
     ret.steerActuatorDelay = 0.25
