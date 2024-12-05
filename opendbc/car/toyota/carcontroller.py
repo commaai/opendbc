@@ -38,6 +38,29 @@ MAX_LTA_ANGLE = 94.9461  # deg
 MAX_LTA_DRIVER_TORQUE_ALLOWANCE = 150  # slightly above steering pressed allows some resistance when changing lanes
 
 
+class Oscillator:
+  def __init__(self, damping_ratio, natural_frequency, time_step):
+    self.position = 0.0
+    self.velocity = 0.0
+    self.damping_ratio = damping_ratio
+    self.natural_frequency = natural_frequency
+    self.time_step = time_step
+
+  def update(self, target):
+    omega_n = self.natural_frequency
+    zeta = self.damping_ratio
+    dt = self.time_step
+
+    force = omega_n ** 2 * (target - self.position)
+    damping = 2 * zeta * omega_n * self.velocity
+    acceleration = force - damping
+
+    self.velocity += acceleration * dt
+    self.position += self.velocity * dt
+
+    return self.position
+
+
 def get_long_tune(CP, params):
   kiBP = [0.]
   kdBP = [0.]
@@ -71,6 +94,8 @@ class CarController(CarControllerBase):
     self.steer_rate_counter = 0
     self.distance_button = 0
 
+    self.osc = Oscillator(0.7, 1.0, DT_CTRL * 3)
+
     self.debug = 0
     self.debug2 = 0
     self.debug3 = 0
@@ -99,6 +124,9 @@ class CarController(CarControllerBase):
       self.pcm_accel_net.update_alpha(self.CP.longitudinalActuatorDelay + 0.2)
       self.net_acceleration_request.update_alpha(self.CP.longitudinalActuatorDelay + 0.2)
     # *** end PCM compensation state ***
+
+    self.f = FirstOrderFilter(0.0, 0.5, DT_CTRL * 3)
+    self.f2 = FirstOrderFilter(0.0, 1., DT_CTRL * 3)
 
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.accel = 0
@@ -289,20 +317,37 @@ class CarController(CarControllerBase):
                                                  feedforward=pcm_accel_cmd)
 
             self.debug += (pcm_accel_cmd - self.prev_accel2) / 3
+            print(self.debug)
 
             i_unwind_rate = 0.1 * (DT_CTRL * 3)
             self.debug -= i_unwind_rate * float(np.sign(self.debug))
             # self.debug -= self.debug * 1 * (DT_CTRL * 3)
 
+            # if self.frame > 100:
+            #   pcm_accel_cmd = -2
+
             self.prev_accel2 = pcm_accel_cmd
 
-            pcm_accel_cmd -= self.debug
+            # pcm_accel_cmd -= self.debug
+
+            self.f.update(pcm_accel_cmd)
+            self.f2.update(pcm_accel_cmd)
+            self.debug = self.f.x - self.f2.x
+
+            self.debug2 = self.f.x
+            self.debug3 = self.f2.x
+
+            pcm_accel_cmd -= (self.debug)
+
+            # pcm_accel_cmd = self.osc.update(pcm_accel_cmd)
 
           else:
             self.long_pid.reset()
             self.error_rate.x = 0.0
             self.prev_error = 0.0
             self.debug = 0.0
+            self.f.x = 0
+            self.f2.x = 0
 
         # Along with rate limiting positive jerk above, this greatly improves gas response time
         # Consider the net acceleration request that the PCM should be applying (pitch included)
