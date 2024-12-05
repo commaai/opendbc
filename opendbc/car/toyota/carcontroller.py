@@ -302,6 +302,7 @@ class CarController(CarControllerBase):
             self.long_pid.reset()
             self.error_rate.x = 0.0
             self.prev_error = 0.0
+            self.debug = 0.0
 
         # Along with rate limiting positive jerk above, this greatly improves gas response time
         # Consider the net acceleration request that the PCM should be applying (pitch included)
