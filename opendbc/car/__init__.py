@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from enum import IntFlag, ReprEnum, StrEnum, EnumType, auto
 from dataclasses import replace
 
-from panda import uds
+from opendbc.can import uds
 from opendbc.car import structs
 from opendbc.car.can_definitions import CanData
 from opendbc.car.docs_definitions import CarDocs, ExtraCarDocs

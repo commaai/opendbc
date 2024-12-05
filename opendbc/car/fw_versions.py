@@ -4,7 +4,7 @@ from typing import Protocol, TypeVar
 
 from tqdm import tqdm
 
-from panda import uds
+from opendbc.can import uds
 from opendbc.car import carlog
 from opendbc.car.can_definitions import CanRecvCallable, CanSendCallable
 from opendbc.car.structs import CarParams
