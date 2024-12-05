@@ -43,7 +43,7 @@ def get_long_tune(CP, params):
   kdBP = [0.]
   kdV = [0.]
   if CP.carFingerprint in TSS2_CAR:
-    kiV = [0.0]
+    kiV = [0.25]
     kdV = [0.0 / 4]
 
     # Since we compensate for imprecise acceleration in carcontroller and error correct on aEgo, we can avoid using gains
@@ -109,10 +109,6 @@ class CarController(CarControllerBase):
     self.secoc_lta_message_counter = 0
     self.secoc_prev_reset_counter = 0
     self.secoc_mismatch_counter = 0
-
-  def reset_eager(self):
-    self.delayed_accel = 0.
-    self.delayed_derivative = 0.
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -238,25 +234,6 @@ class CarController(CarControllerBase):
           pcm_accel_cmd = rate_limit(pcm_accel_cmd, self.prev_accel, ACCEL_WINDDOWN_LIMIT, ACCEL_WINDUP_LIMIT)
         self.prev_accel = pcm_accel_cmd
 
-        # *** eager accel ***
-        if not CC.longActive:  # reset states
-          self.reset_eager()
-
-        y = [1, 1, 1.0]
-        RC = interp(CS.out.vEgo, [0, 5, 35], y)
-        alpha = 1. - (DT_CTRL * 3) / (RC + (DT_CTRL * 3.))
-        self.delayed_accel = self.delayed_accel * alpha + pcm_accel_cmd * (1. - alpha)
-
-        eagerness = 1.0  # self.op_params.get('accel_eagerness')
-        if False:  # eager_accel_method == 1:  # new accel is simply accel - change in accel over exponential time (time constant varies with speed)
-          pcm_accel_cmd = pcm_accel_cmd - (self.delayed_accel - pcm_accel_cmd) * eagerness
-        else:  # subtracting difference in smoothened accel derivative and current derivative (jerk, takes one more variable to keep track of derivative over time but control is more tight)
-          derivative = pcm_accel_cmd - self.delayed_accel  # store change in accel over some time constant (using exponential moving avg.)
-          self.delayed_derivative = self.delayed_derivative * alpha + derivative * (1. - alpha)  # calc exp. moving average for derivative
-          pcm_accel_cmd = pcm_accel_cmd - (self.delayed_derivative - derivative) * eagerness  # then modify accel using jerk of accel
-
-        # *** end eager accel ***
-
         # calculate amount of acceleration PCM should apply to reach target, given pitch
         accel_due_to_pitch = math.sin(self.pitch.x) * ACCELERATION_DUE_TO_GRAVITY
         net_acceleration_request = pcm_accel_cmd + accel_due_to_pitch
@@ -319,7 +296,7 @@ class CarController(CarControllerBase):
 
             self.prev_accel2 = pcm_accel_cmd
 
-            # pcm_accel_cmd -= self.debug
+            pcm_accel_cmd -= self.debug
 
           else:
             self.long_pid.reset()
