@@ -1,4 +1,5 @@
 import math
+import numpy as np
 from opendbc.car import Bus, carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
                         make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY, DT_CTRL
 from opendbc.car.can_definitions import CanData
@@ -42,12 +43,12 @@ def get_long_tune(CP, params):
   kdBP = [0.]
   kdV = [0.]
   if CP.carFingerprint in TSS2_CAR:
-    kiV = [0.5]
-    kdV = [0.25 / 4]
+    kiV = [0.25]
+    kdV = [0.0 / 4]
 
     # Since we compensate for imprecise acceleration in carcontroller and error correct on aEgo, we can avoid using gains
-    if CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
-      kiV = [0.0]
+    # if CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
+    #   kiV = [0.0]
   else:
     kiBP = [0., 5., 35.]
     kiV = [3.6, 2.4, 1.5]
@@ -69,6 +70,10 @@ class CarController(CarControllerBase):
     self.permit_braking = True
     self.steer_rate_counter = 0
     self.distance_button = 0
+
+    self.debug = 0
+    self.debug2 = 0
+    self.debug3 = 0
 
     self.long_pid = get_long_tune(self.CP, self.params)
 
@@ -98,6 +103,7 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.accel = 0
     self.prev_accel = 0
+    self.prev_accel2 = 0
 
     self.secoc_lka_message_counter = 0
     self.secoc_lta_message_counter = 0
@@ -234,7 +240,7 @@ class CarController(CarControllerBase):
         self.net_acceleration_request.update(net_acceleration_request)
 
         # For cars where we allow a higher max acceleration of 2.0 m/s^2, compensate for PCM request overshoot and imprecise braking
-        if self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
+        if False:  # self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT and CC.longActive and not CS.out.cruiseState.standstill:
           # filter ACCEL_NET so it more closely matches aEgo delay for error correction
           self.pcm_accel_net.update(CS.pcm_accel_net)
 
@@ -266,7 +272,7 @@ class CarController(CarControllerBase):
           self.pcm_pid.reset()
           self.permit_braking = True
 
-        if not (self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT):
+        if True:  # not (self.CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT):
           if actuators.longControlState == LongCtrlState.pid:
             # GVC does not overshoot ego acceleration when starting from stop, but still has a similar delay
             if not self.CP.flags & ToyotaFlags.SECOC.value:
@@ -281,6 +287,17 @@ class CarController(CarControllerBase):
             pcm_accel_cmd = self.long_pid.update(error, error_rate=self.error_rate.x,
                                                  speed=CS.out.vEgo,
                                                  feedforward=pcm_accel_cmd)
+
+            self.debug += (pcm_accel_cmd - self.prev_accel2) / 3
+
+            i_unwind_rate = 0.1 * (DT_CTRL * 3)
+            self.debug -= i_unwind_rate * float(np.sign(self.debug))
+            # self.debug -= self.debug * 1 * (DT_CTRL * 3)
+
+            self.prev_accel2 = pcm_accel_cmd
+
+            pcm_accel_cmd -= self.debug
+
           else:
             self.long_pid.reset()
             self.error_rate.x = 0.0
@@ -344,6 +361,10 @@ class CarController(CarControllerBase):
     new_actuators.steerOutputCan = apply_steer
     new_actuators.steeringAngleDeg = self.last_angle
     new_actuators.accel = self.accel
+
+    new_actuators.debug = self.debug
+    new_actuators.debug2 = self.debug2
+    new_actuators.debug3 = self.debug3
 
     self.frame += 1
     return new_actuators, can_sends
