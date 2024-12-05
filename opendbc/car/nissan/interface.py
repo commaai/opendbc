@@ -20,6 +20,6 @@ class CarInterface(CarInterfaceBase):
 
     if candidate == CAR.NISSAN_ALTIMA:
       # Altima has EPS on C-CAN unlike the others that have it on V-CAN
-      ret.safetyConfigs[0].safetyParam |= NissanPandaFlags.FLAG_NISSAN_ALT_EPS_BUS
+      ret.safetyConfigs[0].safetyParam |= NissanPandaFlags.FLAG_NISSAN_ALT_EPS_BUS.value
 
     return ret
