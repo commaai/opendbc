@@ -22,7 +22,7 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 # The up limit allows the brakes/gas to unwind quickly leaving a stop,
 # the down limit roughly matches the rate of ACCEL_NET, reducing PCM compensation windup
 ACCEL_WINDUP_LIMIT = 4.0 * DT_CTRL * 3  # m/s^2 / frame
-ACCEL_WINDDOWN_LIMIT = -4.0 * DT_CTRL * 3  # m/s^2 / frame
+ACCEL_WINDDOWN_LIMIT = -400.0 * DT_CTRL * 3  # m/s^2 / frame
 
 # LKA limits
 # EPS faults if you apply torque while the steering rate is above 100 deg/s for too long
@@ -125,8 +125,8 @@ class CarController(CarControllerBase):
       self.net_acceleration_request.update_alpha(self.CP.longitudinalActuatorDelay + 0.2)
     # *** end PCM compensation state ***
 
-    self.f = FirstOrderFilter(0.0, 0.5, DT_CTRL * 3)
-    self.f2 = FirstOrderFilter(0.0, 1., DT_CTRL * 3)
+    self.f = FirstOrderFilter(0.0, 0.4, DT_CTRL * 3)
+    self.f2 = FirstOrderFilter(0.0, 0.8, DT_CTRL * 3)
 
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.accel = 0
