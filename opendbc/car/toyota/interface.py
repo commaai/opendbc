@@ -22,15 +22,15 @@ class CarInterface(CarInterfaceBase):
 
     # BRAKE_MODULE is on a different address for these cars
     if DBC[candidate][Bus.pt] == "toyota_new_mc_pt_generated":
-      ret.safetyConfigs[0].safetyParam |= ToyotaPandaFlags.FLAG_TOYOTA_ALT_BRAKE
+      ret.safetyConfigs[0].safetyParam |= ToyotaPandaFlags.FLAG_TOYOTA_ALT_BRAKE.value
 
     if ret.flags & ToyotaFlags.SECOC.value:
       ret.secOcRequired = True
-      ret.safetyConfigs[0].safetyParam |= ToyotaPandaFlags.FLAG_TOYOTA_SECOC
+      ret.safetyConfigs[0].safetyParam |= ToyotaPandaFlags.FLAG_TOYOTA_SECOC.value
 
     if candidate in ANGLE_CONTROL_CAR:
       ret.steerControlType = SteerControlType.angle
-      ret.safetyConfigs[0].safetyParam |= ToyotaPandaFlags.FLAG_TOYOTA_LTA
+      ret.safetyConfigs[0].safetyParam |= ToyotaPandaFlags.FLAG_TOYOTA_LTA.value
 
       # LTA control can be more delayed and winds up more often
       ret.steerActuatorDelay = 0.18
@@ -127,7 +127,7 @@ class CarInterface(CarInterfaceBase):
     ret.autoResumeSng = ret.openpilotLongitudinalControl and candidate in NO_STOP_TIMER_CAR
 
     if not ret.openpilotLongitudinalControl:
-      ret.safetyConfigs[0].safetyParam |= ToyotaPandaFlags.FLAG_TOYOTA_STOCK_LONGITUDINAL
+      ret.safetyConfigs[0].safetyParam |= ToyotaPandaFlags.FLAG_TOYOTA_STOCK_LONGITUDINAL.value
 
     # min speed to enable ACC. if car can do stop and go, then set enabling speed
     # to a negative value, so it won't matter.
