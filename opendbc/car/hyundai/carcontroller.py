@@ -80,29 +80,6 @@ class CarController(CarControllerBase):
     self.stock_lfa_counter = 0
 
 
-  def smooth_steer( self, apply_torque, CS ):
-    if self.CP.smoothSteer.maxSteeringAngle and abs(CS.out.steeringAngleDeg) > self.CP.smoothSteer.maxSteeringAngle:
-      if self.CP.smoothSteer.maxDriverAngleWait and CS.out.steeringPressed:
-        self.steer_timer_apply_torque -= self.CP.smoothSteer.maxDriverAngleWait # 0.002 #self.DT_STEER   # 0.01 1sec, 0.005  2sec   0.002  5sec
-      elif self.CP.smoothSteer.maxSteerAngleWait:
-        self.steer_timer_apply_torque -= self.CP.smoothSteer.maxSteerAngleWait # 0.001  # 10 sec
-    elif self.CP.smoothSteer.driverAngleWait and CS.out.steeringPressed:
-      self.steer_timer_apply_torque -= self.CP.smoothSteer.driverAngleWait #0.001
-    else:
-      if self.steer_timer_apply_torque >= 1:
-          return int(round(float(apply_torque)))
-      self.steer_timer_apply_torque += self.DT_STEER
-
-    if self.steer_timer_apply_torque < 0:
-      self.steer_timer_apply_torque = 0
-    elif self.steer_timer_apply_torque > 1:
-      self.steer_timer_apply_torque = 1
-
-    apply_torque *= self.steer_timer_apply_torque
-
-    return  int(round(float(apply_torque)))
-
-
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     hud_control = CC.hudControl
@@ -118,10 +95,7 @@ class CarController(CarControllerBase):
         self.driver_steering_torque_above_timer = 150
 
     # steering torque
-    if self.CP.smoothSteer.method == 1:
-      new_steer = int(round(actuators.steer * self.params.STEER_MAX))
-      new_steer = self.smooth_steer( new_steer, CS )
-    elif 0 <= self.driver_steering_torque_above_timer < 150 and not self.user_specific_feature == 60:
+    if 0 <= self.driver_steering_torque_above_timer < 150 and not self.user_specific_feature == 60:
       new_steer = int(round(actuators.steer * self.params.STEER_MAX * (self.driver_steering_torque_above_timer / 150)))
     else:
       new_steer = int(round(actuators.steer * self.params.STEER_MAX))
