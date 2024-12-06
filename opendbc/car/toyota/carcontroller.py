@@ -87,6 +87,9 @@ class CarController(CarControllerBase):
     self.f = FirstOrderFilter(0.0, 0.4, DT_CTRL * 3)
     self.f2 = FirstOrderFilter(0.0, 0.8, DT_CTRL * 3)
 
+    self.pcm_accel_cmd = FirstOrderFilter(0, 0.05, DT_CTRL * 3)
+    self.pcm_accel_cmd_d = deque([0.0] * 100, maxlen=100)
+
     self.aego = FirstOrderFilter(0.0, 0.25, DT_CTRL)
 
     # *** start PCM compensation state ***
@@ -316,7 +319,18 @@ class CarController(CarControllerBase):
             self.f2.update(pcm_accel_cmd)
             self.debug = self.f.x - self.f2.x
 
-            pcm_accel_cmd -= (self.debug)
+            prev_pcm_accel_cmd = pcm_accel_cmd
+            self.pcm_accel_cmd_d.append(pcm_accel_cmd)
+            self.pcm_accel_cmd.update(pcm_accel_cmd)
+
+            pcm_accel_cmd_jerk = (pcm_accel_cmd - prev_pcm_accel_cmd) / (DT_CTRL * 3)
+            # pcm_accel_cmd_jerk = (self.pcm_accel_cmd_d[-1] - self.pcm_accel_cmd_d[-15 // 3]) / (DT_CTRL * 15)
+            pcm_accel_cmd_future = pcm_accel_cmd + pcm_accel_cmd_jerk * 0.5
+
+            self.debug2 = self.f.x - pcm_accel_cmd_future
+
+
+            pcm_accel_cmd -= (self.debug2)
 
           else:
             self.long_pid.reset()
@@ -325,6 +339,7 @@ class CarController(CarControllerBase):
             self.prev_error = 0.0
             self.f.x = 0
             self.f2.x = 0
+            self.pcm_accel_cmd.x = 0
 
         error = pcm_accel_cmd - a_ego_blended
         # self.error_rate3.update((error - self.prev_error2) / (DT_CTRL))
