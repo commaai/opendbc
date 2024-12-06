@@ -228,6 +228,8 @@ class CarController(CarControllerBase):
     # TODO: adjust for hybrid
     future_aego = a_ego_blended + jEgo * 0.5
 
+    # self.debug = self.aego.x + jEgo * 0.5
+
 
     jEgo = (a_ego_blended - self.aego_d[-15]) / (DT_CTRL * 15)
     future_aego2 = a_ego_blended + jEgo * 0.5
@@ -313,11 +315,12 @@ class CarController(CarControllerBase):
             error = pcm_accel_cmd - future_aego
             pcm_accel_cmd = self.long_pid.update(error, error_rate=self.error_rate4.x,  # self.error_rate.x,
                                                  speed=CS.out.vEgo,
+                                                 override=abs(error) > 0.5,
                                                  feedforward=pcm_accel_cmd)
 
             self.f.update(pcm_accel_cmd)
             self.f2.update(pcm_accel_cmd)
-            self.debug = self.f.x - self.f2.x
+            # self.debug = self.f.x - self.f2.x
 
             prev_pcm_accel_cmd = pcm_accel_cmd
             self.pcm_accel_cmd_d.append(pcm_accel_cmd)
