@@ -123,6 +123,10 @@ class CarController(CarControllerBase):
     self.secoc_prev_reset_counter = 0
     self.secoc_mismatch_counter = 0
 
+    self.debug = 0
+    self.debug2 = 0
+    self.debug3 = 0
+
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     stopping = actuators.longControlState == LongCtrlState.stopping
@@ -315,10 +319,12 @@ class CarController(CarControllerBase):
             self.prev_error = error
 
             error_future = pcm_accel_cmd - future_aego
+
             error = pcm_accel_cmd - a_ego_blended
+            override = error * pcm_accel_cmd > 0 and abs(error) > 0.5
             pcm_accel_cmd = self.long_pid.update(error_future, error_rate=self.error_rate4.x,  # self.error_rate.x,
                                                  speed=CS.out.vEgo,
-                                                 override=abs(error) > 0.5,
+                                                 override=override,
                                                  feedforward=pcm_accel_cmd)
             p = self.p.update(pcm_accel_cmd - future_aego) * 0.25
             #pcm_accel_cmd += p
