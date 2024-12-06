@@ -87,6 +87,8 @@ class CarController(CarControllerBase):
     self.f = FirstOrderFilter(0.0, 0.4, DT_CTRL * 3)
     self.f2 = FirstOrderFilter(0.0, 0.8, DT_CTRL * 3)
 
+    self.p = FirstOrderFilter(0, 0.5, DT_CTRL * 3)
+
     self.pcm_accel_cmd = FirstOrderFilter(0, 0.05, DT_CTRL * 3)
     self.pcm_accel_cmd_d = deque([0.0] * 100, maxlen=100)
 
@@ -312,11 +314,14 @@ class CarController(CarControllerBase):
             print(error, self.prev_error, self.error_rate.x)
             self.prev_error = error
 
-            error = pcm_accel_cmd - future_aego
-            pcm_accel_cmd = self.long_pid.update(error, error_rate=self.error_rate4.x,  # self.error_rate.x,
+            error_future = pcm_accel_cmd - future_aego
+            error = pcm_accel_cmd - a_ego_blended
+            pcm_accel_cmd = self.long_pid.update(error_future, error_rate=self.error_rate4.x,  # self.error_rate.x,
                                                  speed=CS.out.vEgo,
                                                  override=abs(error) > 0.5,
                                                  feedforward=pcm_accel_cmd)
+            p = self.p.update(pcm_accel_cmd - future_aego) * 0.25
+            #pcm_accel_cmd += p
 
             self.f.update(pcm_accel_cmd)
             self.f2.update(pcm_accel_cmd)
@@ -333,7 +338,7 @@ class CarController(CarControllerBase):
             self.debug2 = self.f.x - pcm_accel_cmd_future
 
 
-            pcm_accel_cmd -= (self.debug2)
+            #pcm_accel_cmd -= (self.debug2)
 
           else:
             self.long_pid.reset()
@@ -343,6 +348,7 @@ class CarController(CarControllerBase):
             self.f.x = 0
             self.f2.x = 0
             self.pcm_accel_cmd.x = 0
+            self.p.x = 0
 
         error = pcm_accel_cmd - a_ego_blended
         # self.error_rate3.update((error - self.prev_error2) / (DT_CTRL))
