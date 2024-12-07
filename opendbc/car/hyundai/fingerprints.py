@@ -535,6 +535,16 @@ FW_VERSIONS = {
       b'\xf1\x00OS9 LKAS AT USA LHD 1.00 1.00 95740-J9300 g21',
     ],
   },
+  CAR.HYUNDAI_KONA_2ND_GEN: {
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00SX2_ RDR -----      1.00 1.02 99110-BE000         ',
+      b'\xf1\x00SX2_ RDR -----      1.00 1.02 99110-BE500         ',
+    ],
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00SX2 MFC  AT USA LHD 1.00 1.03 99211-BE000 230517',
+      b'\xf1\x00SX2 MFC  AT USA LHD 1.00 1.07 99211-BE000 240611',
+    ],
+  },
   CAR.KIA_CEED: {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00CD__ SCC F-CUP      1.00 1.02 99110-J7000         ',
@@ -679,6 +689,7 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00SX2EMFC  AT KOR LHD 1.00 1.00 99211-BF000 230410',
+      b'\xf1\x00SX2EMFC  AT USA LHD 1.00 1.02 99211-BF000 230823',
     ],
   },
   CAR.KIA_NIRO_EV: {
