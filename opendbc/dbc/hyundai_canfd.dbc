@@ -599,6 +599,8 @@ BO_ 442 BLINDSPOTS_REAR_CORNERS: 24 XXX
  SG_ FL_INDICATOR : 46|6@0+ (1,0) [0|1] "" XXX
  SG_ FR_INDICATOR : 54|6@0+ (1,0) [0|63] "" XXX
  SG_ RIGHT_BLOCKED : 64|1@0+ (1,0) [0|1] "" XXX
+ SG_ FL_INDICATOR_ALT : 138|1@0+ (1,0) [0|1] "" XXX
+ SG_ FR_INDICATOR_ALT : 141|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 874 BLINDSPOTS_FRONT_CORNER_2: 16 XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
@@ -657,6 +659,116 @@ BO_ 1264 LOCAL_TIME: 8 XXX
  SG_ HOURS : 12|5@0+ (1,0) [0|31] "" XXX
  SG_ MINUTES : 21|6@0+ (1,0) [0|63] "" XXX
  SG_ SECONDS : 31|8@0+ (1,0) [0|59] "" XXX
+
+BO_ 353 MSG_161: 32 CCNC
+ SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
+ SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ FCA_ICON : 24|3@1+ (1,0) [0|7] "" XXX
+ SG_ FCA_ALT_ICON : 27|3@1+ (1,0) [0|7] "" XXX
+ SG_ LKA_ICON : 30|3@1+ (1,0) [0|3] "" XXX
+ SG_ HBA_ICON : 33|3@1+ (1,0) [0|7] "" XXX
+ SG_ ZEROS_1 : 36|4@1+ (1,0) [0|15] "" XXX
+ SG_ ZEROS_2 : 40|2@1+ (1,0) [0|3] "" XXX
+ SG_ FCA_IMAGE : 42|3@1+ (1,0) [0|7] "" XXX
+ SG_ ZEROS_3 : 45|3@1+ (1,0) [0|7] "" XXX
+ SG_ ZEROS_4 : 48|3@1+ (1,0) [0|7] "" XXX
+ SG_ BCA_LEFT : 51|3@1+ (1,0) [0|7] "" XXX
+ SG_ BCA_RIGHT : 54|3@1+ (1,0) [0|7] "" XXX
+ SG_ LCA_LEFT_ARROW : 57|3@1+ (1,0) [0|7] "" XXX
+ SG_ LCA_RIGHT_ARROW : 60|3@1+ (1,0) [0|7] "" XXX
+ SG_ ZEROS_5 : 63|1@0+ (1,0) [0|1] "" XXX
+ SG_ CENTERLINE : 64|2@1+ (1,0) [0|3] "" XXX
+ SG_ TARGET : 66|3@1+ (1,0) [0|7] "" XXX
+ SG_ TARGET_POSITION : 69|11@1+ (1,0) [0|7] "" XXX
+ SG_ LANELINE_LEFT : 80|4@1+ (1,0) [0|15] "" XXX
+ SG_ LANELINE_LEFT_POSITION : 84|6@1+ (1,0) [0|15] "" XXX
+ SG_ LANELINE_RIGHT : 90|4@1+ (1,0) [0|15] "" XXX
+ SG_ LANELINE_RIGHT_POSITION : 94|6@1+ (1,0) [0|3] "" XXX
+ SG_ LANELINE_CURVATURE : 100|5@1- (1,15) [0|31] "" XXX
+ SG_ LANE_HIGHLIGHT : 105|4@1+ (1,0) [0|15] "" XXX
+ SG_ LANE_HIGHLIGHT_DISTANCE : 109|11@1+ (1,0) [0|7] "" XXX
+ SG_ LANE_LEFT : 120|3@1+ (1,0) [0|7] "" XXX
+ SG_ LANE_RIGHT : 123|3@1+ (1,0) [0|7] "" XXX
+ SG_ LANE_ZOOM : 126|2@1+ (1,0) [0|3] "" XXX
+ SG_ ALERTS_1 : 128|6@1+ (1,0) [0|63] "" XXX
+ SG_ ALERTS_2 : 134|5@1+ (1,0) [0|3] "" XXX
+ SG_ ALERTS_3 : 139|4@1+ (1,0) [0|15] "" XXX
+ SG_ ALERTS_4 : 143|9@1+ (1,0) [0|511] "" XXX
+ SG_ ALERTS_5 : 152|5@1+ (1,0) [0|7] "" XXX
+ SG_ MUTE : 157|3@1+ (1,0) [0|7] "" XXX
+ SG_ SOUNDS_1 : 160|4@1+ (1,0) [0|3] "" XXX
+ SG_ SOUNDS_2 : 164|4@1+ (1,0) [0|3] "" XXX
+ SG_ SOUNDS_3 : 168|4@1+ (1,0) [0|15] "" XXX
+ SG_ SOUNDS_4 : 172|3@1+ (1,0) [0|7] "" XXX
+ SG_ ZEROS_6 : 175|1@0+ (1,0) [0|1] "" XXX
+ SG_ ZEROS_7 : 176|5@1+ (1,0) [0|31] "" XXX
+ SG_ SETSPEED_HUD : 181|3@1+ (1,0) [0|3] "" XXX
+ SG_ DISTANCE_LEAD : 184|5@1+ (1,0) [0|31] "" XXX
+ SG_ DISTANCE_CAR : 189|3@1+ (1,0) [0|7] "" XXX
+ SG_ DISTANCE_SPACING : 192|4@1+ (1,0) [0|15] "" XXX
+ SG_ DISTANCE : 196|4@1+ (1,0) [0|7] "" XXX
+ SG_ SETSPEED_SPEED : 200|8@1+ (1,0) [0|255] "" XXX
+ SG_ SETSPEED : 208|4@1+ (1,0) [0|3] "" XXX
+ SG_ HDA_ICON : 212|4@1+ (1,0) [0|3] "" XXX
+ SG_ SLA_ICON : 216|4@1+ (1,0) [0|15] "" XXX
+ SG_ NAV_ICON : 220|4@1+ (1,0) [0|3] "" XXX
+ SG_ LFA_ICON : 224|4@1+ (1,0) [0|3] "" XXX
+ SG_ LCA_LEFT_ICON : 228|4@1+ (1,0) [0|15] "" XXX
+ SG_ LCA_RIGHT_ICON : 232|4@1+ (1,0) [0|15] "" XXX
+ SG_ BACKGROUND : 236|4@1+ (1,0) [0|15] "" XXX
+ SG_ DAW_ICON : 240|3@1+ (1,0) [0|7] "" XXX
+ SG_ CAR_CIRCLE : 243|3@1+ (1,0) [0|7] "" XXX
+ SG_ ZEROS_8 : 246|2@1+ (1,0) [0|3] "" XXX
+ SG_ ZEROS_9 : 248|8@1+ (1,0) [0|255] "" XXX
+
+BO_ 354 MSG_162: 32 CCNC
+ SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
+ SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ SPEEDLIMIT_STYLE : 24|4@1+ (1,0) [0|7] "" XXX
+ SG_ SPEEDLIMIT_FLASH : 28|4@1+ (1,0) [0|15] "" XXX
+ SG_ SPEEDLIMIT : 32|8@1+ (1,0) [0|255] "" XXX
+ SG_ SIGNS : 40|8@1+ (1,0) [0|15] "" XXX
+ SG_ SPEEDLIMIT_WEATHER : 48|4@1+ (1,0) [0|15] "" XXX
+ SG_ VIBRATE : 52|3@1+ (1,0) [0|7] "" XXX
+ SG_ ZEROS_1 : 55|1@0+ (1,0) [0|1] "" XXX
+ SG_ ZEROS_2 : 56|8@1+ (1,0) [0|255] "" XXX
+ SG_ LEAD : 64|5@1+ (1,0) [0|31] "" XXX
+ SG_ LEAD_DISTANCE : 69|11@1+ (1,0) [0|2047] "" XXX
+ SG_ LEAD_LATERAL : 80|7@1+ (1,0) [0|127] "" XXX
+ SG_ ZEROS_3 : 87|1@0+ (1,0) [0|1] "" XXX
+ SG_ LEAD_ALT : 88|5@1+ (1,0) [0|31] "" XXX
+ SG_ LEAD_ALT_DISTANCE : 93|11@1+ (1,0) [0|2047] "" XXX
+ SG_ LEAD_ALT_LATERAL : 104|7@1+ (1,0) [0|127] "" XXX
+ SG_ ZEROS_4 : 111|1@0+ (1,0) [0|1] "" XXX
+ SG_ LEAD_LEFT : 112|5@1+ (1,0) [0|31] "" XXX
+ SG_ LEAD_LEFT_DISTANCE : 117|11@1+ (1,0) [0|2047] "" XXX
+ SG_ LEAD_LEFT_LATERAL : 128|7@1+ (1,0) [0|127] "" XXX
+ SG_ ZEROS_5 : 135|1@0+ (1,0) [0|1] "" XXX
+ SG_ LEAD_RIGHT : 136|5@1+ (1,0) [0|31] "" XXX
+ SG_ LEAD_RIGHT_DISTANCE : 141|11@1+ (1,0) [0|2047] "" XXX
+ SG_ LEAD_RIGHT_LATERAL : 152|7@1+ (1,0) [0|127] "" XXX
+ SG_ ZEROS_6 : 159|1@0+ (1,0) [0|1] "" XXX
+ SG_ ZEROS_7 : 160|8@1+ (1,0) [0|255] "" XXX
+ SG_ ZEROS_8 : 168|8@1+ (1,0) [0|255] "" XXX
+ SG_ ZEROS_9 : 176|8@1+ (1,0) [0|255] "" XXX
+ SG_ ZEROS_10 : 184|8@1+ (1,0) [0|255] "" XXX
+ SG_ ZEROS_11 : 192|8@1+ (1,0) [0|255] "" XXX
+ SG_ ZEROS_12 : 200|8@1+ (1,0) [0|255] "" XXX
+ SG_ ZEROS_13 : 208|5@1+ (1,0) [0|31] "" XXX
+ SG_ FAULT_FSS : 213|3@1+ (1,0) [0|7] "" XXX
+ SG_ FAULT_FCA : 216|3@1+ (1,0) [0|7] "" XXX
+ SG_ FAULT_LSS : 219|3@1+ (1,0) [0|7] "" XXX
+ SG_ FAULT_SLA : 222|3@1+ (1,0) [0|7] "" XXX
+ SG_ FAULT_DAW : 225|3@1+ (1,0) [0|7] "" XXX
+ SG_ FAULT_HBA : 228|3@1+ (1,0) [0|7] "" XXX
+ SG_ FAULT_SCC : 231|3@1+ (1,0) [0|7] "" XXX
+ SG_ FAULT_LFA : 234|3@1+ (1,0) [0|7] "" XXX
+ SG_ FAULT_HDA : 237|3@1+ (1,0) [0|7] "" XXX
+ SG_ FAULT_LCA : 240|3@1+ (1,0) [0|7] "" XXX
+ SG_ FAULT_HDP : 243|3@1+ (1,0) [0|7] "" XXX
+ SG_ FAULT_DAS : 246|3@1+ (1,0) [0|7] "" XXX
+ SG_ FAULT_ESS : 249|3@1+ (1,0) [0|7] "" XXX
+ SG_ ZEROS_14 : 252|4@1+ (1,0) [0|15] "" XXX
 
 CM_ 272 "Alternative LKAS message, used on cars such as 2023 Ioniq 6, 2nd gen Kona. Matches LKAS except size is 32 bytes";
 CM_ 676 "Contains signals with detailed lane line information. Used by ADAS ECU on HDA 2 vehicles to operate LFA.";
