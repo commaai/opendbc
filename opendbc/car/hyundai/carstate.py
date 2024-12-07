@@ -270,7 +270,7 @@ class CarState(CarStateBase):
     ret.buttonEvents = [*create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT),
                         *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise})]
 
-    if self.CP.carFingerprint in (HYUNDAI_KONA_EV_2ND_GEN, CAR.HYUNDAI_KONA_2ND_GEN,):
+    if self.CP.carFingerprint in (CAR.HYUNDAI_KONA_EV_2ND_GEN, CAR.HYUNDAI_KONA_2ND_GEN,):
       self.msg_161 = copy.copy(cp_cam.vl["MSG_161"])
       self.msg_162 = copy.copy(cp_cam.vl["MSG_162"])
 
@@ -321,7 +321,7 @@ class CarState(CarStateBase):
       cam_messages += [
         ("SCC_CONTROL", 50),
       ]
-    if self.CP.carFingerprint in (HYUNDAI_KONA_EV_2ND_GEN, CAR.HYUNDAI_KONA_2ND_GEN,):
+    if self.CP.carFingerprint in (CAR.HYUNDAI_KONA_EV_2ND_GEN, CAR.HYUNDAI_KONA_2ND_GEN,):
       cam_messages += [
         ("MSG_161", 20),
         ("MSG_162", 20),
