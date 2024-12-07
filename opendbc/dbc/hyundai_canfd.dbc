@@ -710,7 +710,7 @@ BO_ 353 MSG_161: 32 CCNC
  SG_ SETSPEED_SPEED : 200|8@1+ (1,0) [0|255] "" XXX
  SG_ SETSPEED : 208|4@1+ (1,0) [0|3] "" XXX
  SG_ HDA_ICON : 212|4@1+ (1,0) [0|3] "" XXX
- SG_ SHIFT_ICON : 216|4@1+ (1,0) [0|15] "" XXX
+ SG_ SLA_ICON : 216|4@1+ (1,0) [0|15] "" XXX
  SG_ NAV_ICON : 220|4@1+ (1,0) [0|3] "" XXX
  SG_ LFA_ICON : 224|4@1+ (1,0) [0|3] "" XXX
  SG_ LCA_LEFT_ICON : 228|4@1+ (1,0) [0|15] "" XXX
@@ -730,18 +730,31 @@ BO_ 354 MSG_162: 32 CCNC
  SG_ SIGNS : 40|8@1+ (1,0) [0|15] "" XXX
  SG_ SPEEDLIMIT_WEATHER : 48|4@1+ (1,0) [0|15] "" XXX
  SG_ VIBRATE : 52|3@1+ (1,0) [0|7] "" XXX
+ SG_ ZEROS_1 : 55|1@0+ (1,0) [0|1] "" XXX
+ SG_ ZEROS_2 : 56|8@1+ (1,0) [0|255] "" XXX
  SG_ LEAD : 64|5@1+ (1,0) [0|31] "" XXX
  SG_ LEAD_DISTANCE : 69|11@1+ (1,0) [0|2047] "" XXX
  SG_ LEAD_LATERAL : 80|7@1+ (1,0) [0|127] "" XXX
- SG_ LEAD2 : 88|5@1+ (1,0) [0|31] "" XXX
- SG_ LEAD2_DISTANCE : 93|11@1+ (1,0) [0|2047] "" XXX
- SG_ LEAD2_LATERAL : 104|7@1+ (1,0) [0|127] "" XXX
- SG_ LEAD3 : 112|5@1+ (1,0) [0|31] "" XXX
- SG_ LEAD3_DISTANCE : 117|11@1+ (1,0) [0|2047] "" XXX
- SG_ LEAD3_LATERAL : 128|7@1+ (1,0) [0|127] "" XXX
- SG_ LEAD4 : 136|5@1+ (1,0) [0|31] "" XXX
- SG_ LEAD4_DISTANCE : 141|11@1+ (1,0) [0|2047] "" XXX
- SG_ LEAD4_LATERAL : 152|7@1+ (1,0) [0|127] "" XXX
+ SG_ ZEROS_3 : 87|1@0+ (1,0) [0|1] "" XXX
+ SG_ LEAD_ALT : 88|5@1+ (1,0) [0|31] "" XXX
+ SG_ LEAD_ALT_DISTANCE : 93|11@1+ (1,0) [0|2047] "" XXX
+ SG_ LEAD_ALT_LATERAL : 104|7@1+ (1,0) [0|127] "" XXX
+ SG_ ZEROS_4 : 111|1@0+ (1,0) [0|1] "" XXX
+ SG_ LEAD_LEFT : 112|5@1+ (1,0) [0|31] "" XXX
+ SG_ LEAD_LEFT_DISTANCE : 117|11@1+ (1,0) [0|2047] "" XXX
+ SG_ LEAD_LEFT_LATERAL : 128|7@1+ (1,0) [0|127] "" XXX
+ SG_ ZEROS_5 : 135|1@0+ (1,0) [0|1] "" XXX
+ SG_ LEAD_RIGHT : 136|5@1+ (1,0) [0|31] "" XXX
+ SG_ LEAD_RIGHT_DISTANCE : 141|11@1+ (1,0) [0|2047] "" XXX
+ SG_ LEAD_RIGHT_LATERAL : 152|7@1+ (1,0) [0|127] "" XXX
+ SG_ ZEROS_6 : 159|1@0+ (1,0) [0|1] "" XXX
+ SG_ ZEROS_7 : 160|8@1+ (1,0) [0|255] "" XXX
+ SG_ ZEROS_8 : 168|8@1+ (1,0) [0|255] "" XXX
+ SG_ ZEROS_9 : 176|8@1+ (1,0) [0|255] "" XXX
+ SG_ ZEROS_10 : 184|8@1+ (1,0) [0|255] "" XXX
+ SG_ ZEROS_11 : 192|8@1+ (1,0) [0|255] "" XXX
+ SG_ ZEROS_12 : 200|8@1+ (1,0) [0|255] "" XXX
+ SG_ ZEROS_13 : 208|5@1+ (1,0) [0|31] "" XXX
  SG_ FAULT_FSS : 213|3@1+ (1,0) [0|7] "" XXX
  SG_ FAULT_FCA : 216|3@1+ (1,0) [0|7] "" XXX
  SG_ FAULT_LSS : 219|3@1+ (1,0) [0|7] "" XXX
@@ -755,6 +768,7 @@ BO_ 354 MSG_162: 32 CCNC
  SG_ FAULT_HDP : 243|3@1+ (1,0) [0|7] "" XXX
  SG_ FAULT_DAS : 246|3@1+ (1,0) [0|7] "" XXX
  SG_ FAULT_ESS : 249|3@1+ (1,0) [0|7] "" XXX
+ SG_ ZEROS_14 : 252|4@1+ (1,0) [0|15] "" XXX
 
 CM_ 272 "Alternative LKAS message, used on cars such as 2023 Ioniq 6, 2nd gen Kona. Matches LKAS except size is 32 bytes";
 CM_ 676 "Contains signals with detailed lane line information. Used by ADAS ECU on HDA 2 vehicles to operate LFA.";
