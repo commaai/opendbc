@@ -67,7 +67,7 @@ class CarController(CarControllerBase):
     self.steer_rate_counter = 0
     self.distance_button = 0
 
-    # *** start long control variables ***
+    # *** start long control state ***
     self.long_pid = get_long_tune(self.CP, self.params)
 
     self.error_rate = FirstOrderFilter(0.0, 0.5, DT_CTRL * 3)
@@ -76,7 +76,7 @@ class CarController(CarControllerBase):
     self.aego = FirstOrderFilter(0.0, 0.25, DT_CTRL * 3)
 
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
-    # *** end PCM compensation state ***
+    # *** end long control state ***
 
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.accel = 0
