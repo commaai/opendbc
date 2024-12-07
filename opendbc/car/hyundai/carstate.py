@@ -50,6 +50,8 @@ class CarState(CarStateBase):
     self.buttons_counter = 0
 
     self.cruise_info = {}
+    self.msg_161 = {}
+    self.msg_162 = {}
 
     # On some cars, CLU15->CF_Clu_VehicleSpeed can oscillate faster than the dash updates. Sample at 5 Hz
     self.cluster_speed = 0
@@ -229,8 +231,9 @@ class CarState(CarStateBase):
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_lamp(50, cp.vl["BLINKERS"][left_blinker_sig],
                                                                       cp.vl["BLINKERS"][right_blinker_sig])
     if self.CP.enableBsm:
-      ret.leftBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"]["FL_INDICATOR"] != 0
-      ret.rightBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"]["FR_INDICATOR"] != 0
+      alt = "_ALT" if self.CP.carFingerprint == CAR.HYUNDAI_KONA_2ND_GEN else ""
+      ret.leftBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"][f"FL_INDICATOR{alt}"] != 0
+      ret.rightBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"][f"FR_INDICATOR{alt}"] != 0
 
     # cruise state
     # CAN FD cars enable on main button press, set available if no TCS faults preventing engagement
@@ -266,6 +269,10 @@ class CarState(CarStateBase):
 
     ret.buttonEvents = [*create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT),
                         *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise})]
+
+    if self.CP.carFingerprint in (CAR.HYUNDAI_KONA_2ND_GEN,):
+      self.msg_161 = copy.copy(cp_cam.vl["MSG_161"])
+      self.msg_162 = copy.copy(cp_cam.vl["MSG_162"])
 
     return ret
 
@@ -313,6 +320,11 @@ class CarState(CarStateBase):
     elif CP.flags & HyundaiFlags.CANFD_CAMERA_SCC:
       cam_messages += [
         ("SCC_CONTROL", 50),
+      ]
+    if self.CP.carFingerprint in (CAR.HYUNDAI_KONA_2ND_GEN,):
+      cam_messages += [
+        ("MSG_161", 20),
+        ("MSG_162", 20),
       ]
 
     return {
