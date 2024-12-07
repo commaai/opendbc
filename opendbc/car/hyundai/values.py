@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
 from panda import uds
-from opendbc.car import CarSpecs, DbcDict, PlatformConfig, Platforms, dbc_dict
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
@@ -25,7 +25,7 @@ class CarControllerParams:
     self.STEER_THRESHOLD = 150
     self.STEER_STEP = 1  # 100 Hz
 
-    if CP.carFingerprint in CANFD_CAR:
+    if CP.flags & HyundaiFlags.CANFD:
       self.STEER_MAX = 270
       self.STEER_DRIVER_ALLOWANCE = 250
       self.STEER_DRIVER_MULTIPLIER = 2
@@ -85,6 +85,7 @@ class HyundaiFlags(IntFlag):
 
   # The radar does SCC on these cars when HDA I, rather than the camera
   RADAR_SCC = 2 ** 14
+  # The camera does SCC on these cars, rather than the radar
   CAMERA_SCC = 2 ** 15
   CHECKSUM_CRC8 = 2 ** 16
   CHECKSUM_6B = 2 ** 17
@@ -95,6 +96,8 @@ class HyundaiFlags(IntFlag):
   # these cars have not been verified to work with longitudinal yet - radar disable, sending correct messages, etc.
   UNSUPPORTED_LONGITUDINAL = 2 ** 19
 
+  # These CAN FD cars do not accept communication control to disable the ADAS ECU,
+  # responds with 0x7F2822 - 'conditions not correct'
   CANFD_NO_RADAR_DISABLE = 2 ** 20
 
   CLUSTER_GEARS = 2 ** 21
@@ -123,11 +126,11 @@ class HyundaiCarDocs(CarDocs):
 
 @dataclass
 class HyundaiPlatformConfig(PlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: dbc_dict("hyundai_kia_generic", None))
+  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: "hyundai_kia_generic"})
 
   def init(self):
     if self.flags & HyundaiFlags.MANDO_RADAR:
-      self.dbc_dict = dbc_dict('hyundai_kia_generic', 'hyundai_kia_mando_front_radar_generated')
+      self.dbc_dict = {Bus.pt: "hyundai_kia_generic", Bus.radar: 'hyundai_kia_mando_front_radar_generated'}
 
     if self.flags & HyundaiFlags.MIN_STEER_32_MPH:
       self.specs = self.specs.override(minSteerSpeed=32 * CV.MPH_TO_MS)
@@ -138,7 +141,7 @@ class HyundaiPlatformConfig(PlatformConfig):
 
 @dataclass
 class HyundaiCanFDPlatformConfig(PlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: dbc_dict("hyundai_canfd_generated", None))
+  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: "hyundai_canfd_generated"})
 
   def init(self):
     self.flags |= HyundaiFlags.CANFD
@@ -229,17 +232,17 @@ class CAR(Platforms):
   HYUNDAI_KONA = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Kona 2020", min_enable_speed=6 * CV.MPH_TO_MS, car_parts=CarParts.common([CarHarness.hyundai_b]))],
     CarSpecs(mass=1275, wheelbase=2.6, steerRatio=13.42, tireStiffnessFactor=0.385),
-    flags=HyundaiFlags.CLUSTER_GEARS,
+    flags=HyundaiFlags.CLUSTER_GEARS | HyundaiFlags.ALT_LIMITS,
   )
   HYUNDAI_KONA_EV = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Kona Electric 2018-21", car_parts=CarParts.common([CarHarness.hyundai_g]))],
     CarSpecs(mass=1685, wheelbase=2.6, steerRatio=13.42, tireStiffnessFactor=0.385),
-    flags=HyundaiFlags.EV,
+    flags=HyundaiFlags.EV | HyundaiFlags.ALT_LIMITS,
   )
   HYUNDAI_KONA_EV_2022 = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Kona Electric 2022-23", car_parts=CarParts.common([CarHarness.hyundai_o]))],
     CarSpecs(mass=1743, wheelbase=2.6, steerRatio=13.42, tireStiffnessFactor=0.385),
-    flags=HyundaiFlags.CAMERA_SCC | HyundaiFlags.EV,
+    flags=HyundaiFlags.CAMERA_SCC | HyundaiFlags.EV | HyundaiFlags.ALT_LIMITS,
   )
   HYUNDAI_KONA_EV_2ND_GEN = HyundaiCanFDPlatformConfig(
     [HyundaiCarDocs("Hyundai Kona Electric (with HDA II, Korea only) 2023", video_link="https://www.youtube.com/watch?v=U2fOCmcQ8hw",
@@ -250,7 +253,7 @@ class CAR(Platforms):
   HYUNDAI_KONA_HEV = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Kona Hybrid 2020", car_parts=CarParts.common([CarHarness.hyundai_i]))],  # TODO: check packages,
     CarSpecs(mass=1425, wheelbase=2.6, steerRatio=13.42, tireStiffnessFactor=0.385),
-    flags=HyundaiFlags.HYBRID,
+    flags=HyundaiFlags.HYBRID | HyundaiFlags.ALT_LIMITS,
   )
   HYUNDAI_SANTA_FE = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Santa Fe 2019-20", "All", video_link="https://youtu.be/bjDR0YjM__s",
@@ -518,9 +521,9 @@ class CAR(Platforms):
   GENESIS_GV60_EV_1ST_GEN = HyundaiCanFDPlatformConfig(
     [
       HyundaiCarDocs("Genesis GV60 (Advanced Trim) 2023", "All", car_parts=CarParts.common([CarHarness.hyundai_a])),
-      HyundaiCarDocs("Genesis GV60 (Performance Trim) 2023", "All", car_parts=CarParts.common([CarHarness.hyundai_k])),
+      HyundaiCarDocs("Genesis GV60 (Performance Trim) 2022-23", "All", car_parts=CarParts.common([CarHarness.hyundai_k])),
     ],
-    CarSpecs(mass=2205, wheelbase=2.9, steerRatio=12.6),  # steerRatio: https://www.motor1.com/reviews/586376/2023-genesis-gv60-first-drive/#:~:text=Relative%20to%20the%20related%20Ioniq,5%2FEV6%27s%2014.3%3A1.
+    CarSpecs(mass=2205, wheelbase=2.9, steerRatio=17.6),
     flags=HyundaiFlags.EV,
   )
   GENESIS_G70 = HyundaiPlatformConfig(
@@ -763,16 +766,13 @@ CAN_GEARS = {
 }
 
 CANFD_CAR = CAR.with_flags(HyundaiFlags.CANFD)
-CANFD_RADAR_SCC_CAR = CAR.with_flags(HyundaiFlags.RADAR_SCC)
+CANFD_RADAR_SCC_CAR = CAR.with_flags(HyundaiFlags.RADAR_SCC)  # TODO: merge with UNSUPPORTED_LONGITUDINAL_CAR
 
-# These CAN FD cars do not accept communication control to disable the ADAS ECU,
-# responds with 0x7F2822 - 'conditions not correct'
-CANFD_UNSUPPORTED_LONGITUDINAL_CAR = CAR.with_flags(HyundaiFlags.CANFD_NO_RADAR_DISABLE)
+CANFD_UNSUPPORTED_LONGITUDINAL_CAR = CAR.with_flags(HyundaiFlags.CANFD_NO_RADAR_DISABLE)  # TODO: merge with UNSUPPORTED_LONGITUDINAL_CAR
 
 # These cars have both CAN and CAN-FD definitions required in openpilot
 CAN_CANFD_HYBRID_CAR = CAR.with_flags(HyundaiFlags.CAN_CANFD_HYBRID)
 
-# The camera does SCC on these cars, rather than the radar
 CAMERA_SCC_CAR = CAR.with_flags(HyundaiFlags.CAMERA_SCC)
 
 HYBRID_CAR = CAR.with_flags(HyundaiFlags.HYBRID)
@@ -781,6 +781,8 @@ EV_CAR = CAR.with_flags(HyundaiFlags.EV)
 
 LEGACY_SAFETY_MODE_CAR = CAR.with_flags(HyundaiFlags.LEGACY)
 
+# TODO: another PR with (HyundaiFlags.LEGACY | HyundaiFlags.UNSUPPORTED_LONGITUDINAL | HyundaiFlags.CAMERA_SCC |
+#       HyundaiFlags.CANFD_RADAR_SCC | HyundaiFlags.CANFD_NO_RADAR_DISABLE | )
 UNSUPPORTED_LONGITUDINAL_CAR = CAR.with_flags(HyundaiFlags.LEGACY) | CAR.with_flags(HyundaiFlags.UNSUPPORTED_LONGITUDINAL)
 
 DBC = CAR.create_dbc_map()

@@ -2,6 +2,7 @@ from hypothesis import settings, given, strategies as st
 
 import pytest
 
+from panda import Panda
 from opendbc.car import gen_empty_fingerprint
 from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
@@ -60,6 +61,13 @@ class TestHyundaiFingerprint:
         fingerprint[1][RADAR_START_ADDR] = 8
       CP = CarInterface.get_params(CAR.HYUNDAI_SONATA, fingerprint, [], False, False)
       assert CP.radarUnavailable != radar
+
+  def test_alternate_limits(self):
+    # Alternate lateral control limits, for high torque cars, verify Panda safety mode flag is set
+    fingerprint = gen_empty_fingerprint()
+    for car_model in CAR:
+      CP = CarInterface.get_params(car_model, fingerprint, [], False, False)
+      assert bool(CP.flags & HyundaiFlags.ALT_LIMITS) == bool(CP.safetyConfigs[-1].safetyParam & Panda.FLAG_HYUNDAI_ALT_LIMITS)
 
   def test_can_features(self):
     # Test no EV/HEV in any gear lists (should all use ELECT_GEAR)

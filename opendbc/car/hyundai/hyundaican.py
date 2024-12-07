@@ -178,15 +178,12 @@ def create_clu11(packer, frame, clu11, button, CP, CAN):
   return packer.make_can_msg("CLU11", bus, values)
 
 
-def create_lfahda_mfc(packer, frame, CP, enabled, hda_set_speed=0):
+def create_lfahda_mfc(packer, frame, CP, enabled):
   can_canfd_hybrid = CP.flags & HyundaiFlags.CAN_CANFD_HYBRID
   bus = CanBus(CP).ECAN if can_canfd_hybrid else 0
 
   values = {
     "LFA_Icon_State": 2 if enabled else 0,
-    "HDA_Active": 1 if hda_set_speed else 0,
-    "HDA_Icon_State": 2 if hda_set_speed else 0,
-    "HDA_VSetReq": hda_set_speed,
   }
 
   if can_canfd_hybrid:
