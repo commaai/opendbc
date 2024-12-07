@@ -124,6 +124,9 @@ def create_msg_161(packer, CAN, enabled, msg_161):
   values.update({
     "LFA_ICON": 2 if enabled else 0,
     "LKA_ICON": 4 if enabled else 0,
+    "LANELINE_LEFT": 2 if enabled else 0,
+    "LANELINE_RIGHT": 2 if enabled else 0,
+    "CENTERLINE": 1 if enabled else 0,
     "DAW_ICON": 0,
   })
   if values.get("ALERTS_5") == 5:  # use_switch_or_pedal_to_accelerate
