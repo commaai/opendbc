@@ -44,7 +44,7 @@ def get_long_tune(CP, params):
   kdBP = [0.]
   kdV = [0.]
   if CP.carFingerprint in TSS2_CAR:
-    kiV = [0.25]
+    kiV = [0.5]
     kdV = [0.0 / 4]
 
     # Since we compensate for imprecise acceleration in carcontroller and error correct on aEgo, we can avoid using gains
@@ -320,8 +320,18 @@ class CarController(CarControllerBase):
 
             error_future = pcm_accel_cmd - future_aego
 
-            error = pcm_accel_cmd - a_ego_blended
-            override = error * pcm_accel_cmd > 0 and abs(error) > 0.5
+            i_unwind_rate = 0.3 / 33
+
+            error = actuators.accel - future_aego
+            override = False  # error * actuators.accel > 0 and abs(error) > 0.5
+            if abs(error) > 0.5:
+              if actuators.accel < future_aego and actuators.accel < 0:
+                override = True
+                #self.long_pid.i -= i_unwind_rate * float(np.sign(self.i))
+              elif actuators.accel > future_aego and actuators.accel > 0:
+                override = True
+                #self.long_pid.i -= i_unwind_rate * float(np.sign(self.i))
+
             pcm_accel_cmd = self.long_pid.update(error_future, error_rate=self.error_rate4.x,  # self.error_rate.x,
                                                  speed=CS.out.vEgo,
                                                  override=override,
