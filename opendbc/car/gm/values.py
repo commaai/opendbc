@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from opendbc.car import dbc_dict, PlatformConfig, DbcDict, Platforms, CarSpecs
+from opendbc.car import Bus, PlatformConfig, DbcDict, Platforms, CarSpecs
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
@@ -80,7 +80,11 @@ class GMCarSpecs(CarSpecs):
 
 @dataclass
 class GMPlatformConfig(PlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: dbc_dict('gm_global_a_powertrain_generated', 'gm_global_a_object', chassis_dbc='gm_global_a_chassis'))
+  dbc_dict: DbcDict = field(default_factory=lambda: {
+    Bus.pt: 'gm_global_a_powertrain_generated',
+    Bus.radar: 'gm_global_a_object',
+    Bus.chassis: 'gm_global_a_chassis',
+  })
 
 
 @dataclass
@@ -161,11 +165,15 @@ class CAR(Platforms):
   )
   CADILLAC_XT4 = GMSDGMPlatformConfig(
     [GMCarDocs("Cadillac XT4 2023", "Driver Assist Package")],
-    CarSpecs(mass=1660, wheelbase=2.78, steerRatio=14.4, centerToFrontRatio=0.4),
+    GMCarSpecs(mass=1660, wheelbase=2.78, steerRatio=14.4, centerToFrontRatio=0.4),
   )
   CHEVROLET_VOLT_2019 = GMSDGMPlatformConfig(
     [GMCarDocs("Chevrolet Volt 2019", "Adaptive Cruise Control (ACC) & LKAS")],
     GMCarSpecs(mass=1607, wheelbase=2.69, steerRatio=15.7, centerToFrontRatio=0.45),
+  )
+  CHEVROLET_TRAVERSE = GMSDGMPlatformConfig(
+    [GMCarDocs("Chevrolet Traverse 2022-23", "RS, Premier, or High Country Trim")],
+    GMCarSpecs(mass=1955, wheelbase=3.07, steerRatio=17.9, centerToFrontRatio=0.4),
   )
 
 
@@ -248,7 +256,7 @@ EV_CAR = {CAR.CHEVROLET_VOLT, CAR.CHEVROLET_VOLT_2019, CAR.CHEVROLET_BOLT_EUV}
 CAMERA_ACC_CAR = {CAR.CHEVROLET_BOLT_EUV, CAR.CHEVROLET_SILVERADO, CAR.CHEVROLET_EQUINOX, CAR.CHEVROLET_TRAILBLAZER}
 
 # We're integrated at the Safety Data Gateway Module on these cars
-SDGM_CAR = {CAR.CADILLAC_XT4, CAR.CHEVROLET_VOLT_2019}
+SDGM_CAR = {CAR.CADILLAC_XT4, CAR.CHEVROLET_VOLT_2019, CAR.CHEVROLET_TRAVERSE}
 
 STEER_THRESHOLD = 1.0
 

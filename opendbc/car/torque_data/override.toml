@@ -15,6 +15,10 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 # Toyota LTA also has torque
 "TOYOTA_RAV4_TSS2_2023" = [nan, 3.0, nan]
 
+# Tesla angle based controllers
+"TESLA_MODEL_3" = [nan, 2.5, nan]
+"TESLA_MODEL_Y" = [nan, 2.5, nan]
+
 # Guess
 "FORD_BRONCO_SPORT_MK1" = [nan, 1.5, nan]
 "FORD_ESCAPE_MK4" = [nan, 1.5, nan]
@@ -40,6 +44,7 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 "CHEVROLET_BOLT_EUV" = [2.0, 2.0, 0.05]
 "CHEVROLET_SILVERADO" = [1.9, 1.9, 0.112]
 "CHEVROLET_TRAILBLAZER" = [1.33, 1.9, 0.16]
+"CHEVROLET_TRAVERSE" = [1.33, 1.33, 0.18]
 "CHEVROLET_EQUINOX" = [2.5, 2.5, 0.05]
 "CHEVROLET_VOLT_2019" = [1.4, 1.4, 0.16]
 "VOLKSWAGEN_CADDY_MK3" = [1.2, 1.2, 0.1]
@@ -65,6 +70,8 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 "HYUNDAI_CUSTIN_1ST_GEN" = [2.5, 2.5, 0.1]
 "LEXUS_GS_F" = [2.5, 2.5, 0.08]
 "HYUNDAI_STARIA_4TH_GEN" = [1.8, 2.0, 0.15]
+"GENESIS_GV70_ELECTRIFIED_1ST_GEN" = [1.9, 1.9, 0.09]
+"GENESIS_G80_2ND_GEN_FL" = [2.5819356441497803, 2.5, 0.11244568973779678]
 
 # Dashcam or fallback configured as ideal car
 "MOCK" = [10.0, 10, 0.0]

@@ -1,4 +1,4 @@
-from opendbc.car import CarSpecs, PlatformConfig, Platforms, dbc_dict
+from opendbc.car import Bus, CarSpecs, PlatformConfig, Platforms
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarDocs
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
@@ -23,7 +23,7 @@ class CAR(Platforms):
   COMMA_BODY = PlatformConfig(
     [CarDocs("comma body", package="All")],
     CarSpecs(mass=9, wheelbase=0.406, steerRatio=0.5, centerToFrontRatio=0.44),
-    dbc_dict('comma_body', None),
+    {Bus.main: 'comma_body'},
   )
 
 
