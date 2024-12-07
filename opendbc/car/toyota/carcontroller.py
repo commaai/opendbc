@@ -275,17 +275,18 @@ class CarController(CarControllerBase):
           else:
             a_ego_blended = CS.out.aEgo
 
+          # wind down integral when approaching target for step changes and smooth ramps to reduce overshoot
           prev_aego = self.aego.x
           self.aego.update(a_ego_blended)
-          jEgo = (self.aego.x - prev_aego) / DT_CTRL
-          future_aego = a_ego_blended + jEgo * 0.5
+          j_ego = (self.aego.x - prev_aego) / DT_CTRL
+          a_ego_future = a_ego_blended + j_ego * 0.5
 
           if actuators.longControlState == LongCtrlState.pid:
             error = pcm_accel_cmd - a_ego_blended
             self.error_rate.update((error - self.prev_error) / (DT_CTRL * 3))
             self.prev_error = error
 
-            error_future = pcm_accel_cmd - future_aego
+            error_future = pcm_accel_cmd - a_ego_future
             pcm_accel_cmd = self.long_pid.update(error_future, error_rate=self.error_rate.x,
                                                  speed=CS.out.vEgo,
                                                  feedforward=pcm_accel_cmd)
