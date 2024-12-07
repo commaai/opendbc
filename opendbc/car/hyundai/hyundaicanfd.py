@@ -130,9 +130,9 @@ def create_msg_161(packer, CAN, enabled, msg_161):
     "DAW_ICON": 0,
   })
   if values.get("ALERTS_5") == 5:  # use_switch_or_pedal_to_accelerate
-      values["ALERTS_5"] = 0
+    values["ALERTS_5"] = 0
   if values.get("ALERTS_2") == 5:  # coffee
-      values.update({"ALERTS_2": 0, "SOUNDS_2": 0})
+    values.update({"ALERTS_2": 0, "SOUNDS_2": 0})
   return packer.make_can_msg("MSG_161", CAN.ECAN, values)
 
 def create_msg_162(packer, CAN, enabled, msg_162):
