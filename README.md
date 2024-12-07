@@ -83,7 +83,7 @@ The entirery of a car port lives in `opendbc/car/<brand>/`:
 
 ### Reverse Engineer CAN messages
 
-Start off by recording a route with lots of interesting events: enable LKAS and ACC, turn the steering weel both extremes, etc. Then, load up that route in [cabana](https://github.com/commaai/openpilot/tree/master/tools/cabana).
+Start off by recording a route with lots of interesting events: enable LKAS and ACC, turn the steering wheel both extremes, etc. Then, load up that route in [cabana](https://github.com/commaai/openpilot/tree/master/tools/cabana).
 
 ### Tuning
 
@@ -132,6 +132,8 @@ In addition to the standard bounties, we also offer higher value bounties for mo
 ***Which cars can be supported?*** Any car with LKAS and ACC. More info [here](https://github.com/commaai/openpilot/blob/master/docs/CARS.md#dont-see-your-car-here).
 
 ***How does this work?*** In short, we designed hardware to replace your car's built-in lane keep and adaptive cruise features. See [this talk](https://www.youtube.com/watch?v=FL8CxUSfipM) for an in-depth explanation.
+
+***Is there a timeline or roadmap for adding car support?*** No, most car support comes from the community, with comma doing final safety and quality validation. The more complete the community car port is and the more popular the car is, the more likely we are to pick it up as the next one to validate. 
 
 ### Terms
 
