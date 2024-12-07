@@ -76,11 +76,12 @@ class CarController(CarControllerBase):
     self.aego = FirstOrderFilter(0.0, 0.25, DT_CTRL * 3)
 
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
+
+    self.accel = 0
+    self.prev_accel = 0
     # *** end long control state ***
 
     self.packer = CANPacker(dbc_names[Bus.pt])
-    self.accel = 0
-    self.prev_accel = 0
 
     self.secoc_lka_message_counter = 0
     self.secoc_lta_message_counter = 0
