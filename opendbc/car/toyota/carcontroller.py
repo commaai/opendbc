@@ -327,7 +327,7 @@ class CarController(CarControllerBase):
                                                  override=override,
                                                  feedforward=pcm_accel_cmd)
             p = self.p.update(pcm_accel_cmd - future_aego) * 0.25
-            pcm_accel_cmd += p
+            #pcm_accel_cmd += p
 
             self.f.update(pcm_accel_cmd)
             self.f2.update(pcm_accel_cmd)
