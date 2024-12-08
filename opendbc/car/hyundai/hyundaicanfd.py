@@ -200,12 +200,8 @@ def create_msg_162(packer, CAN, enabled, msg_162, car_params, hud_control):
     values["VIBRATE"] = 1
 
   if car_params.openpilotLongitudinalControl:
+    # *** TODO *** LEAD_DISTANCE/LEAD_LATERAL
     # LEAD
-
-    # *** TODO ***
-    # LEAD_DISTANCE
-    # LEAD_LATERAL
-    
     if hud_control.leadVisible:
       values["LEAD"] = 2 if enabled else 1
       values["LEAD_DISTANCE"] = 100
