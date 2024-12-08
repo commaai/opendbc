@@ -132,7 +132,7 @@ def read_variables_from_file(file_path):
       variables[name] = int(value)
   return variables
 
-def create_msg_161(packer, CAN, enabled, msg_161, cp, hud_control, car_state, frame):
+def create_msg_161(packer, CAN, enabled, msg_161, car_params, hud_control, car_state, car_control, frame):
   values = msg_161.copy()
 
   # HIDE ALERTS
@@ -155,13 +155,20 @@ def create_msg_161(packer, CAN, enabled, msg_161, cp, hud_control, car_state, fr
     "CENTERLINE": 1 if enabled else 0,
   })
 
+  # LCA
+  if enabled:
+    values["LCA_LEFT_ICON"] = 0 if car_state.out.leftBlindspot else 2 if car_control.leftBlinker else 1
+    values["LCA_RIGHT_ICON"] = 0 if car_state.out.rightBlindspot else 2 if car_control.rightBlinker else 1
+  else:
+    values.update({"LCA_LEFT_ICON": 0, "LCA_RIGHT_ICON": 0})
+
   # LANE DEPARTURE
   if hud_control.leftLaneDepart:
     values["LANELINE_LEFT"] = 4 if (frame // 50) % 2 == 0 else 1
   if hud_control.rightLaneDepart:
     values["LANELINE_RIGHT"] = 4 if (frame // 50) % 2 == 0 else 1
 
-  if cp.openpilotLongitudinalControl:
+  if car_params.openpilotLongitudinalControl:
     # HIDE ALERTS
     if values.get("ALERTS_5") == 4:  # SMART CRUISE CONTROL CONDITIONS NOT MET
       values["ALERTS_5"] = 0
@@ -193,7 +200,7 @@ def create_msg_161(packer, CAN, enabled, msg_161, cp, hud_control, car_state, fr
     print('MSG_161 not ready')
   return packer.make_can_msg("MSG_161", CAN.ECAN, values)
 
-def create_msg_162(packer, CAN, enabled, msg_162, cp, hud_control):
+def create_msg_162(packer, CAN, enabled, msg_162, car_params, hud_control):
   values = msg_162.copy()
 
   # HIDE FAULTS
@@ -207,7 +214,7 @@ def create_msg_162(packer, CAN, enabled, msg_162, cp, hud_control):
   if hud_control.leftLaneDepart or hud_control.rightLaneDepart:
     values["VIBRATE"] = 1
 
-  if cp.openpilotLongitudinalControl:
+  if car_params.openpilotLongitudinalControl:
     # LEAD
 
     # *** TODO ***
