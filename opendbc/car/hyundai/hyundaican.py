@@ -38,7 +38,7 @@ def create_lkas11(packer, frame, CP, apply_steer, steer_req,
                            CAR.HYUNDAI_ELANTRA_HEV_2021, CAR.HYUNDAI_SONATA_HYBRID, CAR.HYUNDAI_KONA_EV, CAR.HYUNDAI_KONA_HEV, CAR.HYUNDAI_KONA_EV_2022,
                            CAR.HYUNDAI_SANTA_FE_2022, CAR.KIA_K5_2021, CAR.HYUNDAI_IONIQ_HEV_2022, CAR.HYUNDAI_SANTA_FE_HEV_2022,
                            CAR.HYUNDAI_SANTA_FE_PHEV_2022, CAR.KIA_STINGER_2022, CAR.KIA_K5_HEV_2020, CAR.KIA_CEED,
-                           CAR.HYUNDAI_AZERA_6TH_GEN, CAR.HYUNDAI_AZERA_HEV_6TH_GEN, CAR.HYUNDAI_CUSTIN_1ST_GEN):
+                           CAR.HYUNDAI_AZERA_6TH_GEN, CAR.HYUNDAI_AZERA_HEV_6TH_GEN, CAR.HYUNDAI_CUSTIN_1ST_GEN, CAR.GENESIS_G70_2024):
     values["CF_Lkas_LdwsActivemode"] = int(left_lane) + (int(right_lane) << 1)
     values["CF_Lkas_LdwsOpt_USM"] = 2
 
@@ -117,11 +117,29 @@ def create_clu11(packer, frame, clu11, button, CP):
   return packer.make_can_msg("CLU11", bus, values)
 
 
+def create_hda11_mfc(packer, frame, hda11_mfc):
+  values = {s: hda11_mfc[s] for s in [
+    "Counter",
+    "NEW_SIGNAL_1",
+    "NEW_SIGNAL_2",
+    "NEW_SIGNAL_3",
+    "NEW_SIGNAL_5",
+    "NEW_SIGNAL_6",
+    "NEW_SIGNAL_7",
+    "NEW_SIGNAL_9",
+  ]}
+  values["NEW_SIGNAL_4"] = 0x00
+  values["NEW_SIGNAL_8"] = 0x00
+  values["Counter"] = frame % 0x10
+  return packer.make_can_msg("HDA11_MFC", 0, values)
+
+
 def create_lfahda_mfc(packer, enabled):
   values = {
     "LFA_Icon_State": 2 if enabled else 0,
   }
   return packer.make_can_msg("LFAHDA_MFC", 0, values)
+
 
 def create_acc_commands(packer, enabled, accel, upper_jerk, idx, hud_control, set_speed, stopping, long_override, use_fca):
   commands = []
@@ -184,6 +202,7 @@ def create_acc_commands(packer, enabled, accel, upper_jerk, idx, hud_control, se
 
   return commands
 
+
 def create_acc_opt(packer):
   commands = []
 
@@ -202,6 +221,7 @@ def create_acc_opt(packer):
   commands.append(packer.make_can_msg("FCA12", 0, fca12_values))
 
   return commands
+
 
 def create_frt_radar_opt(packer):
   frt_radar11_values = {
