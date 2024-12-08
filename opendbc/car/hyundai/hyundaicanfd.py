@@ -121,17 +121,6 @@ def create_lfahda_cluster(packer, CAN, enabled):
   }
   return packer.make_can_msg("LFAHDA_CLUSTER", CAN.ECAN, values)
 
-def read_variables_from_file(file_path):
-  variables = {}
-  with open(file_path, 'r') as file:
-    for line in file:
-      line = line.strip()
-      if not line or len(line.split()) != 2:
-        continue
-      name, value = line.split()
-      variables[name] = int(value)
-  return variables
-
 def create_msg_161(packer, CAN, enabled, msg_161, car_params, hud_control, car_state, car_control, frame):
   values = msg_161.copy()
 
@@ -194,10 +183,6 @@ def create_msg_161(packer, CAN, enabled, msg_161, car_params, hud_control, car_s
     # BACKGROUND
     values["BACKGROUND"] = 3 if enabled and Params().get_bool("ExperimentalMode") else 1 if enabled else 7
 
-  try:
-    values.update(read_variables_from_file('/data/openpilot/opendbc/car/hyundai/MSG_161.txt'))
-  except FileNotFoundError:
-    print('MSG_161 not ready')
   return packer.make_can_msg("MSG_161", CAN.ECAN, values)
 
 def create_msg_162(packer, CAN, enabled, msg_162, car_params, hud_control):
@@ -228,10 +213,6 @@ def create_msg_162(packer, CAN, enabled, msg_162, car_params, hud_control):
       values["LEAD"] = 0
       values["LEAD_DISTANCE"] = 0
 
-  try:
-    values.update(read_variables_from_file('/data/openpilot/opendbc/car/hyundai/MSG_162.txt'))
-  except FileNotFoundError:
-    print('MSG_162 not ready')
   return packer.make_can_msg("MSG_162", CAN.ECAN, values)
 
 def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_override, set_speed, hud_control):
