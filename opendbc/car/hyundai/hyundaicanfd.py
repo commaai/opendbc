@@ -119,6 +119,30 @@ def create_lfahda_cluster(packer, CAN, enabled):
   }
   return packer.make_can_msg("LFAHDA_CLUSTER", CAN.ECAN, values)
 
+def create_msg_161(packer, CAN, enabled, msg_161):
+  values = msg_161.copy()
+  values.update({
+    "LFA_ICON": 2 if enabled else 0,
+    "LKA_ICON": 4 if enabled else 0,
+    "LANELINE_LEFT": 2 if enabled else 0,
+    "LANELINE_RIGHT": 2 if enabled else 0,
+    "CENTERLINE": 1 if enabled else 0,
+    "DAW_ICON": 0,
+  })
+  if values.get("ALERTS_5") == 5:  # use_switch_or_pedal_to_accelerate
+    values["ALERTS_5"] = 0
+  if values.get("ALERTS_2") == 5:  # coffee
+    values.update({"ALERTS_2": 0, "SOUNDS_2": 0})
+  return packer.make_can_msg("MSG_161", CAN.ECAN, values)
+
+def create_msg_162(packer, CAN, enabled, msg_162):
+  values = msg_162.copy()
+  values.update({
+    "FAULT_LSS": 0,
+    "FAULT_HDA": 0,
+    "FAULT_DAS": 0,
+  })
+  return packer.make_can_msg("MSG_162", CAN.ECAN, values)
 
 def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_override, set_speed, hud_control):
   jerk = 5
