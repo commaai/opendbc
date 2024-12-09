@@ -135,7 +135,7 @@ def create_msg_161(packer, CAN, enabled, msg_161, car_params, hud_control, car_s
     for i in range(-15, 16)
   }
   values.update({
-    "LANELINE_CURVATURE": curvature.get(max(-15, min(int(car_state.out.steeringAngleDeg / 4), 15)), 14) if enabled else 15,
+    "LANELINE_CURVATURE": curvature.get(max(-15, min(int(car_state.out.steeringAngleDeg / 3), 15)), 14) if enabled else 15,
     "LFA_ICON": 2 if enabled else 0,
     "LKA_ICON": 4 if enabled else 0,
     "LANELINE_LEFT": 2 if enabled else 0,
