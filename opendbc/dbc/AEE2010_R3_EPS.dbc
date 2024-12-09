@@ -1,0 +1,430 @@
+VERSION ""
+
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: Tester PSCM
+
+
+BO_ 3221225472 VECTOR__INDEPENDENT_SIG_MSG: 0 Vector__XXX
+ SG_ CHKSUM_VOL : 0|4@0+ (1,0) [0|15] "N/A" Vector__XXX
+ SG_ CPT_PROCESS_4B_A_VOL : 0|4@0+ (1,0) [0|15] "" Vector__XXX
+
+BO_ 1485 PROTO_HS1_DYN_UCF_5CD: 4 Tester
+ SG_ ACQ_INTERRUPT_DAE : 26|1@0+ (1,0) [0|1] "N/A"  PSCM
+ SG_ PRECISION_OFFSET : 31|5@0+ (1,0) [0|31] "Deg"  PSCM
+ SG_ OFFSET : 15|16@0- (0.1,0) [-1630|1630] "Deg"  PSCM
+ SG_ CPT_PROCESS_4B_UCF : 3|4@0+ (1,0) [0|15] ""  PSCM
+ SG_ CHKSUM_TRME_DYN_UCF : 7|4@0+ (1,0) [0|15] "UNM"  PSCM
+
+BO_ 1394 IS_DAT_BSI_572: 2 Tester
+ SG_ CONFIG_VHL : 15|3@0+ (1,0) [0|7] ""  PSCM
+
+BO_ 1293 IS_DAT_ABR_50D: 8 Tester
+ SG_ Regul_ABR : 5|1@0+ (1,0) [0|1] ""  PSCM
+
+BO_ 973 IS_DYN2_FRE_3CD: 4 Tester
+ SG_ Accel_Lat : 7|16@0- (0.05,0) [0|0] ""  PSCM
+
+BO_ 845 IS_DYN_CDS_34D: 8 Tester
+ SG_ REQ_Lampe_DEF_ESP : 4|1@0+ (1,0) [0|1] ""  PSCM
+ SG_ Regul_ESP : 6|1@0+ (1,0) [0|1] ""  PSCM
+ SG_ ESP_Deconnecte : 7|1@0+ (1,0) [0|1] ""  PSCM
+
+BO_ 1906 IS_ACQ_JDD_CAN_BSI_772: 1 Tester
+ SG_ DATA_ACQ_JDD_BSI : 7|8@0+ (1,0) [0|255] ""  PSCM
+
+BO_ 1375 IS_ACQ_NEW_JDD_55F: 1 Tester
+ SG_ DATA_ACQ_JDD_BSI_2 : 7|8@0+ (1,0) [0|255] ""  PSCM
+
+BO_ 1909 IS_EMIS_NEW_JDD_CAN_DIRA: 8 PSCM
+ SG_ JDD_Byte7 : 63|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ JDD_Byte6 : 55|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ JDD_Byte5 : 47|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ JDD_Byte4 : 39|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ JDD_Byte3 : 31|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ JDD_Byte2 : 23|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ JDD_Byte1 : 15|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ Type_of_Message : 1|2@0+ (1,0) [0|3] ""  Tester
+ SG_ DTC_State : 3|1@0+ (1,0) [0|1] ""  Tester
+ SG_ Number_of_Frames : 7|2@0+ (1,0) [0|3] ""  Tester
+ SG_ Frame_Number : 5|2@0+ (1,0) [0|3] ""  Tester
+
+BO_ 1362 IS_DAT4_V2_BSI_552: 8 Tester
+ SG_ Msg552_Byte7 : 63|8@0+ (1,0) [0|255] ""  PSCM
+ SG_ Msg552_Byte6 : 55|8@0+ (1,0) [0|255] ""  PSCM
+ SG_ Msg552_Byte5 : 47|8@0+ (1,0) [0|255] ""  PSCM
+ SG_ Msg552_Byte4 : 39|8@0+ (1,0) [0|255] ""  PSCM
+ SG_ Msg552_Byte3 : 31|8@0+ (1,0) [0|255] ""  PSCM
+ SG_ Msg552_Byte2 : 23|8@0+ (1,0) [0|255] ""  PSCM
+ SG_ Msg552_Byte1 : 15|8@0+ (1,0) [0|255] ""  PSCM
+ SG_ Msg552_Byte0 : 7|8@0+ (1,0) [0|255] ""  PSCM
+
+BO_ 1010 IS_DAT_BSI_3F2: 8 Tester
+ SG_ COLUMN_ANGLE_SETPOINT : 55|14@0- (0.1,0) [-780|780] ""  PSCM
+ SG_ LXA_ACTIVATION : 40|1@0+ (1,0) [0|0] ""  PSCM
+ SG_ LKA_TRQ_FACT_REQ : 47|7@0+ (0.01,0) [0|0] ""  PSCM
+ SG_ LKA_STATE : 36|3@0+ (1,0) [0|0] ""  PSCM
+ SG_ DMD_DELEST_DA : 2|1@0+ (1,0) [0|1] ""  PSCM
+
+BO_ 146 IS_INTE_ELECTRON_BSI: 8 Tester
+ SG_ DIAG_INTEGRA_ELEC : 7|1@0+ (1,0) [0|1] ""  PSCM
+ SG_ MODE_DIAG : 6|1@0+ (1,0) [0|1] ""  PSCM
+ SG_ EFFAC_DEFAULT_DIAG : 0|1@0+ (1,0) [0|1] ""  PSCM
+
+BO_ 904 IS_DYN_CMM_388: 8 Tester
+ SG_ VITESSE_VEHICLE_BV : 7|16@0+ (0.01,0) [0|655.34] "Kph"  PSCM
+
+BO_ 773 IS_DYN_VOL: 7 Tester
+ SG_ FLG_INIT_AVOL : 55|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ FLG_AVOL_ICN : 54|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ ANGLE_VOLANT_ORIGINE : 53|2@0+ (1,0) [0|3] "" Vector__XXX
+ SG_ RESERVED : 51|4@0+ (1,0) [0|15] "" Vector__XXX
+ SG_ VITESSE_ROT_VOL_OPTIMISE : 47|8@0+ (4,0) [0|1016] "" Vector__XXX
+ SG_ CODE_DEFAUT_VOL : 30|4@0+ (1,0) [0|15] "N/A" Vector__XXX
+ SG_ TRIM_VOL : 26|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ CALIBRATION_VOL : 25|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ ETAT_CAPT_VOL : 24|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ SENS_ROT_VOL : 31|1@0+ (1,0) [0|1] ""  PSCM
+ SG_ CHKSUM_VOL : 39|4@0+ (1,0) [0|15] ""  PSCM
+ SG_ CPT_PROCESS_4B_A_VOL : 35|4@0+ (1,0) [0|15] ""  PSCM
+ SG_ VITESSE_ROT_VOL : 23|8@0+ (4,0) [0|1016] "Deg/s"  PSCM
+ SG_ ANGLE_VOLANT : 7|16@0- (0.1,0) [-780|780] "Deg"  PSCM
+
+BO_ 1042 IS_DAT_BSI_412: 8 Tester
+ SG_ Req_Mode_DA : 31|2@0+ (1,0) [0|3] ""  PSCM
+
+BO_ 747 IS_DYN_AAS: 8 Tester
+ SG_ CPT_PROCESS_4B_CPK : 27|4@0+ (1,0) [0|15] ""  PSCM
+ SG_ CHKSUM_TRME_DYN_CPK : 31|4@0+ (1,0) [0|15] ""  PSCM
+ SG_ DMD_RELAXE_CPK : 21|2@0+ (1,0) [0|3] ""  PSCM
+ SG_ DMD_FCT_CPK : 23|2@0+ (1,0) [0|3] ""  PSCM
+ SG_ CONS_ANGLE_CPK : 7|16@0- (0.1,0) [-780|780] "Deg"  PSCM
+
+BO_ 2047 IS_DIAG_UDS_ON_CAN_7FF: 8 Tester
+ SG_ Diagnostic_Func_Req : 7|64@0+ (1,0) [0|4294967295] ""  PSCM
+
+BO_ 1968 XCP_RES: 8 PSCM
+ SG_ XCP_Data_Res : 7|64@0+ (1,0) [0|4294967295] ""  PSCM,Tester
+
+BO_ 1966 XCP_REQ: 8 Tester
+ SG_ XCP_Data_Req : 7|64@0+ (1,0) [0|4294967295] ""  Tester,PSCM
+
+BO_ 1074 IS_DAT_BSI_432: 8 Tester
+ SG_ ETAT_RESEAU_ELEC : 63|4@0+ (1,0) [0|15] ""  PSCM
+ SG_ Power_Supplies : 52|3@0+ (1,0) [0|7] ""  PSCM
+ SG_ Shunt_Position : 54|2@0+ (1,0) [0|3] ""  PSCM
+ SG_ ETAT_PRINCIP_SEV : 49|2@0+ (1,0) [0|3] ""  PSCM
+
+BO_ 840 IS_DYN2_CMM_348: 8 Tester
+ SG_ ETAT_MT : 43|4@0+ (1,0) [0|15] ""  PSCM
+
+BO_ 520 IS_DYN_CMM_208: 8 Tester
+ SG_ DIAG_MUX_ON : 38|1@0+ (1,0) [0|1] ""  PSCM
+
+BO_ 909 IS_DYN_ABR: 8 Tester
+ SG_ VITESSE_VEHICULE_ROUES : 7|16@0+ (0.01,0) [0|655.34] "Kph"  PSCM
+ SG_ CPT_PROCESS_4B_UC_FREIN : 47|4@0+ (1,0) [0|15] ""  PSCM
+ SG_ CHKSUM_TRME_DYN_UC_FREIN : 43|4@0+ (1,0) [0|15] ""  PSCM
+
+BO_ 1941 IS_SUPV_DIRA: 6 PSCM
+ SG_ STATUS_CONFABSENT : 15|32@0+ (1,0) [0|4294967295] ""  Tester
+ SG_ ETAT_LIGNE_APC : 47|1@0+ (1,0) [0|1] ""  Tester
+ SG_ ETAT_ASSIST_DA : 46|3@0+ (1,0) [0|7] ""  Tester
+ SG_ CODE_DEFAUT : 7|8@0+ (1,0) [0|255] ""  Tester
+
+BO_ 1173 IS_DAT_DIRA: 4 PSCM
+ SG_ Reserved : 31|8@0+ (1,0) [0|255] ""  Tester
+ SG_ TRQ_LIMIT_STATE : 16|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ STEERWHL_HOLD_BY_DRV : 17|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ EPS_STATE_LKA : 20|3@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ETAT_DA_2004 : 9|2@0+ (1,0) [0|3] ""  Tester
+ SG_ ETAT_DA_DYN : 13|2@0+ (1,0) [0|3] ""  Tester
+ SG_ ETAT_DA_2010 : 15|2@0+ (1,0) [0|3] ""  Tester
+ SG_ DDE_REDEM_DA : 23|1@0+ (1,0) [0|1] ""  Tester
+ SG_ CPLE_VOLANT : 7|8@0- (0.25,0) [-32|31.5] "Nm"  Tester
+ SG_ AUTOR_ARRET_MOT_DA : 21|1@0+ (1,0) [0|1] ""  Tester
+
+BO_ 757 IS_DYN_DAE: 7 PSCM
+ SG_ ETAT_DAE_CAV3_VIRTUEL : 51|3@0+ (1,0) [0|7] "N/A" Vector__XXX
+ SG_ VITESSE_COLONNE : 47|12@0- (1,0) [-2000|2000] "Deg/s"  Tester
+ SG_ ETAT_SECU_ANGLE_COL : 48|1@0+ (1,0) [0|1] ""  Tester
+ SG_ ETAT_DAE_CPK : 22|2@0+ (1,0) [0|3] ""  Tester
+ SG_ CPT_PROCESS_4B_DAE : 3|4@0+ (1,0) [0|15] ""  Tester
+ SG_ CPLE_VOLANT_OPTMSE : 15|8@0- (0.1,0) [-10|10] "Nm"  Tester
+ SG_ CHKSUM_TRME_DYN_DAE : 7|4@0+ (1,0) [0|15] ""  Tester
+ SG_ CAUSE_DESACTIV_CPK : 20|3@0+ (1,0) [0|7] ""  Tester
+ SG_ ANGLE_COLONNE : 31|16@0- (0.1,0) [-1630|1630] "Deg"  Tester
+
+BO_ 277 IS_VERS_DIRA_115: 8 PSCM
+ SG_ Software_Edition_LSB : 63|8@0+ (1,0) [0|255] ""  Tester
+ SG_ Software_Edition_MSB : 55|8@0+ (1,0) [0|255] ""  Tester
+ SG_ Software_Version : 47|8@0+ (1,0) [0|255] ""  Tester
+ SG_ Application_Code : 39|8@0+ (1,0) [0|255] ""  Tester
+ SG_ Download_Year : 31|8@0+ (1,0) [0|99] ""  Tester
+ SG_ Download_Month : 23|8@0+ (1,0) [1|12] ""  Tester
+ SG_ Download_Day : 15|8@0+ (1,0) [1|31] ""  Tester
+ SG_ System_Code : 7|8@0+ (1,0) [0|255] ""  Tester
+
+BO_ 1717 IS_REQ_DIAG_ON_CAN: 8 Tester
+ SG_ Diagnostic_Data_Req : 7|64@0+ (1,0) [0|4294967295] ""  PSCM
+
+BO_ 1685 IS_RES_DIAG_ON_CAN: 8 PSCM
+ SG_ Diagnostic_Data_Res : 7|64@0+ (1,0) [0|4294967295] ""  Tester
+
+BO_TX_BU_ 773 : PSCM,Tester;
+BO_TX_BU_ 1968 : Tester,PSCM;
+BO_TX_BU_ 1966 : PSCM,Tester;
+
+
+CM_ BO_ 3221225472 "This is a message for not used signals, created by Vector CANdb++ DBC OLE DB Provider.";
+BA_DEF_ BO_  "GenMsgStartDelayTime" INT 0 65535;
+BA_DEF_ BO_  "GenMsgMinAcceptLength" INT -1 8;
+BA_DEF_ BO_  "DiagState" ENUM  "No","Yes";
+BA_DEF_ BO_  "GenMsgDelayTime" INT 0 65535;
+BA_DEF_ SG_  "GenSigSendType" ENUM  "Cyclic","OnWrite","OnWriteWithRepetition","OnChange","OnChangeWithRepetition","IfActive","IfActiveWithRepetition","NoSigSendType","OnChangeAndIfActive","OnChangeAndIfActiveWithRepetition";
+BA_DEF_ BU_  "ILUsed" ENUM  "No","Yes";
+BA_DEF_  "Manufacturer" STRING ;
+BA_DEF_ BO_  "GenMsgILSupport" ENUM  "No","Yes";
+BA_DEF_ BO_  "DiagResponse" ENUM  "No","Yes";
+BA_DEF_ BO_  "DiagRequest" ENUM  "No","Yes";
+BA_DEF_  "BusType" STRING ;
+BA_DEF_  "DBName" STRING ;
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 65535;
+BA_DEF_ BO_  "GenMsgSendType" ENUM  "Cyclic","NotUsed","NotUsed","NotUsed","NotUsed","NotUsed","NotUsed","IfActive","NoMsgSendType";
+BA_DEF_ SG_  "GenSigStartValue" INT 0 1000000000;
+BA_DEF_DEF_  "GenMsgStartDelayTime" 0;
+BA_DEF_DEF_  "GenMsgMinAcceptLength" -1;
+BA_DEF_DEF_  "DiagState" "No";
+BA_DEF_DEF_  "GenMsgDelayTime" 0;
+BA_DEF_DEF_  "GenSigSendType" "NoSigSendType";
+BA_DEF_DEF_  "ILUsed" "No";
+BA_DEF_DEF_  "Manufacturer" "PSA";
+BA_DEF_DEF_  "GenMsgILSupport" "No";
+BA_DEF_DEF_  "DiagResponse" "No";
+BA_DEF_DEF_  "DiagRequest" "No";
+BA_DEF_DEF_  "BusType" "";
+BA_DEF_DEF_  "DBName" "";
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
+BA_DEF_DEF_  "GenMsgSendType" "NoMsgSendType";
+BA_DEF_DEF_  "GenSigStartValue" 0;
+BA_ "BusType" "CAN";
+BA_ "Manufacturer" "PSA";
+BA_ "DBName" "PSA_BMPV";
+BA_ "ILUsed" BU_ PSCM 1;
+BA_ "GenMsgILSupport" BO_ 1485 1;
+BA_ "GenMsgSendType" BO_ 1485 0;
+BA_ "GenMsgCycleTime" BO_ 1485 1000;
+BA_ "GenMsgMinAcceptLength" BO_ 1485 4;
+BA_ "GenMsgSendType" BO_ 1394 0;
+BA_ "GenMsgCycleTime" BO_ 1394 100;
+BA_ "GenMsgILSupport" BO_ 1394 1;
+BA_ "GenMsgMinAcceptLength" BO_ 1394 2;
+BA_ "GenMsgMinAcceptLength" BO_ 1293 1;
+BA_ "GenMsgILSupport" BO_ 1293 1;
+BA_ "GenMsgCycleTime" BO_ 1293 100;
+BA_ "GenMsgSendType" BO_ 1293 0;
+BA_ "GenMsgMinAcceptLength" BO_ 973 4;
+BA_ "GenMsgILSupport" BO_ 973 1;
+BA_ "GenMsgCycleTime" BO_ 973 10;
+BA_ "GenMsgSendType" BO_ 973 0;
+BA_ "GenMsgMinAcceptLength" BO_ 845 5;
+BA_ "GenMsgILSupport" BO_ 845 1;
+BA_ "GenMsgCycleTime" BO_ 845 20;
+BA_ "GenMsgSendType" BO_ 845 0;
+BA_ "GenMsgILSupport" BO_ 1906 1;
+BA_ "GenMsgMinAcceptLength" BO_ 1906 1;
+BA_ "GenMsgMinAcceptLength" BO_ 1375 1;
+BA_ "GenMsgILSupport" BO_ 1375 1;
+BA_ "GenMsgILSupport" BO_ 1909 1;
+BA_ "GenMsgSendType" BO_ 1909 8;
+BA_ "GenMsgMinAcceptLength" BO_ 1362 5;
+BA_ "GenMsgILSupport" BO_ 1362 1;
+BA_ "GenMsgCycleTime" BO_ 1362 1000;
+BA_ "GenMsgSendType" BO_ 1362 0;
+BA_ "GenMsgMinAcceptLength" BO_ 1010 3;
+BA_ "GenMsgILSupport" BO_ 1010 1;
+BA_ "GenMsgCycleTime" BO_ 1010 50;
+BA_ "GenMsgSendType" BO_ 1010 0;
+BA_ "GenMsgMinAcceptLength" BO_ 146 1;
+BA_ "GenMsgILSupport" BO_ 146 1;
+BA_ "GenMsgCycleTime" BO_ 146 100;
+BA_ "GenMsgSendType" BO_ 146 7;
+BA_ "GenMsgMinAcceptLength" BO_ 904 5;
+BA_ "GenMsgILSupport" BO_ 904 1;
+BA_ "GenMsgCycleTime" BO_ 904 40;
+BA_ "GenMsgSendType" BO_ 904 0;
+BA_ "GenMsgMinAcceptLength" BO_ 773 5;
+BA_ "GenMsgSendType" BO_ 773 0;
+BA_ "GenMsgCycleTime" BO_ 773 10;
+BA_ "GenMsgILSupport" BO_ 773 1;
+BA_ "GenMsgMinAcceptLength" BO_ 1042 8;
+BA_ "GenMsgILSupport" BO_ 1042 1;
+BA_ "GenMsgCycleTime" BO_ 1042 50;
+BA_ "GenMsgSendType" BO_ 1042 0;
+BA_ "GenMsgMinAcceptLength" BO_ 747 4;
+BA_ "GenMsgCycleTime" BO_ 747 20;
+BA_ "GenMsgSendType" BO_ 747 0;
+BA_ "GenMsgMinAcceptLength" BO_ 2047 8;
+BA_ "DiagState" BO_ 2047 1;
+BA_ "GenMsgMinAcceptLength" BO_ 1968 0;
+BA_ "GenMsgMinAcceptLength" BO_ 1966 0;
+BA_ "GenMsgMinAcceptLength" BO_ 1074 8;
+BA_ "GenMsgILSupport" BO_ 1074 1;
+BA_ "GenMsgSendType" BO_ 1074 0;
+BA_ "GenMsgCycleTime" BO_ 1074 50;
+BA_ "GenMsgMinAcceptLength" BO_ 840 6;
+BA_ "GenMsgCycleTime" BO_ 840 20;
+BA_ "GenMsgILSupport" BO_ 840 1;
+BA_ "GenMsgSendType" BO_ 840 0;
+BA_ "GenMsgMinAcceptLength" BO_ 520 6;
+BA_ "GenMsgCycleTime" BO_ 520 10;
+BA_ "GenMsgILSupport" BO_ 520 1;
+BA_ "GenMsgSendType" BO_ 520 0;
+BA_ "GenMsgMinAcceptLength" BO_ 909 6;
+BA_ "GenMsgCycleTime" BO_ 909 40;
+BA_ "GenMsgSendType" BO_ 909 0;
+BA_ "GenMsgILSupport" BO_ 1941 1;
+BA_ "GenMsgCycleTime" BO_ 1941 1000;
+BA_ "GenMsgSendType" BO_ 1941 0;
+BA_ "GenMsgStartDelayTime" BO_ 1941 5;
+BA_ "GenMsgDelayTime" BO_ 1941 10;
+BA_ "GenMsgILSupport" BO_ 1173 1;
+BA_ "GenMsgCycleTime" BO_ 1173 100;
+BA_ "GenMsgSendType" BO_ 1173 0;
+BA_ "GenMsgSendType" BO_ 757 0;
+BA_ "GenMsgCycleTime" BO_ 757 10;
+BA_ "GenMsgILSupport" BO_ 757 1;
+BA_ "GenMsgStartDelayTime" BO_ 757 5;
+BA_ "GenMsgILSupport" BO_ 277 1;
+BA_ "GenMsgSendType" BO_ 277 8;
+BA_ "GenMsgMinAcceptLength" BO_ 1717 8;
+BA_ "GenMsgSendType" BO_ 1717 1;
+BA_ "DiagRequest" BO_ 1717 1;
+BA_ "GenMsgSendType" BO_ 1685 1;
+BA_ "DiagResponse" BO_ 1685 1;
+BA_ "GenSigStartValue" SG_ 1909 Type_of_Message 1;
+BA_ "GenSigStartValue" SG_ 1909 Number_of_Frames 2;
+BA_ "GenSigSendType" SG_ 1909 Frame_Number 1;
+BA_ "GenSigStartValue" SG_ 773 ANGLE_VOLANT_ORIGINE 3;
+BA_ "GenSigStartValue" SG_ 773 TRIM_VOL 1;
+BA_ "GenSigStartValue" SG_ 773 CALIBRATION_VOL 1;
+BA_ "GenSigStartValue" SG_ 773 ETAT_CAPT_VOL 1;
+BA_ "GenSigStartValue" SG_ 2047 Diagnostic_Func_Req 0;
+BA_ "GenSigStartValue" SG_ 1968 XCP_Data_Res 0;
+BA_ "GenSigStartValue" SG_ 1966 XCP_Data_Req 0;
+BA_ "GenSigSendType" SG_ 1941 STATUS_CONFABSENT 3;
+BA_ "GenSigSendType" SG_ 1941 ETAT_LIGNE_APC 3;
+BA_ "GenSigSendType" SG_ 1941 ETAT_ASSIST_DA 3;
+BA_ "GenSigSendType" SG_ 1941 CODE_DEFAUT 3;
+BA_ "GenSigStartValue" SG_ 1173 Reserved 60;
+BA_ "GenSigStartValue" SG_ 1173 CPLE_VOLANT 127;
+BA_ "GenSigStartValue" SG_ 757 ETAT_DAE_CPK 0;
+BA_ "GenSigStartValue" SG_ 757 CPLE_VOLANT_OPTMSE 0;
+BA_ "GenSigStartValue" SG_ 757 CHKSUM_TRME_DYN_DAE 4;
+BA_ "GenSigSendType" SG_ 277 Software_Edition_LSB 1;
+BA_ "GenSigSendType" SG_ 277 Software_Edition_MSB 1;
+BA_ "GenSigSendType" SG_ 277 Software_Version 1;
+BA_ "GenSigSendType" SG_ 277 Application_Code 1;
+BA_ "GenSigSendType" SG_ 277 Download_Year 1;
+BA_ "GenSigSendType" SG_ 277 Download_Month 1;
+BA_ "GenSigStartValue" SG_ 277 Download_Month 1;
+BA_ "GenSigSendType" SG_ 277 Download_Day 1;
+BA_ "GenSigStartValue" SG_ 277 Download_Day 1;
+BA_ "GenSigSendType" SG_ 277 System_Code 1;
+BA_ "GenSigStartValue" SG_ 1717 Diagnostic_Data_Req 0;
+BA_ "GenSigStartValue" SG_ 1685 Diagnostic_Data_Res 0;
+VAL_ 1485 ACQ_INTERRUPT_DAE 1 "Acknowledge" 0 "No Acknowledge" ;
+VAL_ 1485 PRECISION_OFFSET 31 "Invalid" 30 "Unavailable" ;
+VAL_ 1485 OFFSET 32766 "Unavailable" 32767 "Invalid" ;
+VAL_ 1394 CONFIG_VHL 7 "INVALID" 6 "SHOW_ROOM" 5 "APV" 4 "CLIENT" 3 "STORAGE / TRANSPORT" 2 "CHECK" 1 "PLANT" 0 "FITTING" ;
+VAL_ 1293 Regul_ABR 1 "Active Regulation" 0 "No Regulation" ;
+VAL_ 973 Accel_Lat 32767 "Invalid" ;
+VAL_ 845 REQ_Lampe_DEF_ESP 1 "Request On" 0 "No Request" ;
+VAL_ 845 Regul_ESP 1 "Active Regulation" 0 "No Regulation" ;
+VAL_ 845 ESP_Deconnecte 1 "Disconnected" 0 "Connected" ;
+VAL_ 1909 DTC_State 1 "Current" 0 "History" ;
+VAL_ 1010 LXA_ACTIVATION 1 "LPA Function" 0 "LKA Function" ;
+VAL_ 1010 LKA_TRQ_FACT_REQ 127 "Invalid" 126 "Unavailable" ;
+VAL_ 1010 LKA_STATE 7 "Reserved" 6 "Collision" 5 "Defect" 4 "Active" 3 "Authorized" 2 "Selected" 1 "Unselected" 0 "Unavailable" ;
+VAL_ 1010 DMD_DELEST_DA 1 "Power Cut Request" 0 "Not Requested" ;
+VAL_ 146 DIAG_INTEGRA_ELEC 1 "No Frame Transmission" 0 "No Particular Operation" ;
+VAL_ 146 MODE_DIAG 1 "Operation and Comm Inhibited" 0 "No Particular Operation" ;
+VAL_ 146 EFFAC_DEFAULT_DIAG 1 "Default Memory Erase" 0 "No Specific Action" ;
+VAL_ 904 VITESSE_VEHICLE_BV 65535 "Invalid" ;
+VAL_ 773 FLG_INIT_AVOL 1 "Steering Wheel Angle Memorized" 0 "Steering Wheel Angle Available" ;
+VAL_ 773 FLG_AVOL_ICN 1 "Uncertain yet Valid Value" 0 "Valid Value in Range" ;
+VAL_ 773 ANGLE_VOLANT_ORIGINE 3 "Other" 2 "CAV3" 1 "Integreated CAV3" 0 "Estimator" ;
+VAL_ 773 VITESSE_ROT_VOL_OPTIMISE 255 "Invalid" ;
+VAL_ 773 CODE_DEFAUT_VOL 4 "Internal Failures by SWS " 3 "Failure on SWS Angle, RotSpeed " 2 "Failure on SWS Angle" 1 "Failure on SWS Rotation Speed " 0 "No Default / Failure" ;
+VAL_ 773 TRIM_VOL 1 "Trimmed" 0 "Not Trimmed" ;
+VAL_ 773 CALIBRATION_VOL 1 "Calibrated" 0 "Not Calibrated" ;
+VAL_ 773 ETAT_CAPT_VOL 1 "Sensor Is Okay" 0 "Sensor Is Faulty" ;
+VAL_ 773 SENS_ROT_VOL 1 "Clockwise" 0 "Counter Clockwise" ;
+VAL_ 773 VITESSE_ROT_VOL 255 "Invalid" ;
+VAL_ 773 ANGLE_VOLANT 32767 "Invalid" ;
+VAL_ 1042 Req_Mode_DA 3 "Reserved" 2 "Adjustable Mode Request" 1 "Dynamic Mode Request" 0 "Normal Mode Request" ;
+VAL_ 747 DMD_RELAXE_CPK 3 "Invalid" 2 "Relaxe Request" 1 "No Request" 0 "Reserved" ;
+VAL_ 747 DMD_FCT_CPK 3 "Invalid" 2 "SCP9 Control Request" 1 "SCP6 Control Request" 0 "No Request" ;
+VAL_ 747 CONS_ANGLE_CPK 32767 "Invalid" ;
+VAL_ 1074 ETAT_RESEAU_ELEC 7 "TA_SECU" 6 "TA_DEGRADE" 5 "TA_NOMINAL" 4 "REDEMARRAGE" 3 "DEMARRAGE" 2 "TI_DISPO_DEM" 1 "TI_Degrade" 0 "TI_Nominal" ;
+VAL_ 1074 ETAT_PRINCIP_SEV 2 "DEM" 1 "Contact" 0 "Stop" ;
+VAL_ 840 ETAT_MT 15 "Invalid" 13 "Autonomous Restart" 10 "Autonomous Starting" 7 "Engine Preparing" 6 "Degraded Restart" 5 "Driven Restart" 4 "Stopped" 3 "Engine Running" 2 "Starting" 1 "Cut" 0 "Locked" ;
+VAL_ 520 DIAG_MUX_ON 1 "Enable SCom Diagnostics" 0 "Disable SCom Diagnostics" ;
+VAL_ 909 VITESSE_VEHICULE_ROUES 65535 "Invalid" ;
+VAL_ 1941 ETAT_LIGNE_APC 1 "Ignition On" 0 "Ignition Off" ;
+VAL_ 1941 ETAT_ASSIST_DA 7 "Disability Parameter" 4 "STTd Assist Active" 3 "STTa Assist Active" 2 "Dmg Assist Active" 1 "Nominal Assist Active" 0 "Assist Not Active" ;
+VAL_ 1941 CODE_DEFAUT 1 "Fault Code Exists" 0 "No Fault Code" ;
+VAL_ 1173 TRQ_LIMIT_STATE 1 "Saturation Effective" 0 "No Saturation" ;
+VAL_ 1173 STEERWHL_HOLD_BY_DRV 1 "Steer Activity From Drv Trq" 0 "No Steer Activity From Drv Trq" ;
+VAL_ 1173 EPS_STATE_LKA 4 "Defect" 3 "Active" 2 "Available" 1 "Authorised" 0 "Unauthorised" ;
+VAL_ 1173 ETAT_DA_2004 3 "Reserved" 2 "Orange LED" 1 "Red LED" 0 "No Demand" ;
+VAL_ 1173 ETAT_DA_DYN 3 "Invalid" 2 "Adjustable Mode" 1 "Dynamic Mode" 0 "Normal Mode" ;
+VAL_ 1173 ETAT_DA_2010 3 "Reserved" 2 "Orange LED" 1 "Red LED" 0 "No Demand" ;
+VAL_ 1173 DDE_REDEM_DA 1 "Request Reboot" 0 "No Reboot Required" ;
+VAL_ 1173 CPLE_VOLANT 127 "Invalid" ;
+VAL_ 1173 AUTOR_ARRET_MOT_DA 1 "Permission to Stop" 0 "No Permission to Stop" ;
+VAL_ 757 ETAT_DAE_CAV3_VIRTUEL 7 "Invalid" 6 "Reserved" 5 "EPS Works with SelfDet Offset" 4 "EPS Works with Calibrated Offset" 3 "EPS Works with ESC Offset" 2 "Offset Search Authorization" 1 "Offset Initialization Request" 0 "Initialization" ;
+VAL_ 757 VITESSE_COLONNE 2047 "Invalid" ;
+VAL_ 757 ETAT_SECU_ANGLE_COL 1 "Secure" 0 "Not Secure" ;
+VAL_ 757 ETAT_DAE_CPK 3 "Invalid" 2 "Control In Progress" 1 "Available" 0 "Unavailable" ;
+VAL_ 757 CPLE_VOLANT_OPTMSE 127 "Invalid" ;
+VAL_ 757 CAUSE_DESACTIV_CPK 7 "Other Faults" 6 "EPS Thermal Safety Catch" 5 "Maneuvering Number Too High" 4 "Obstacle At Wheel" 3 "Angular Error Too High" 2 "Vehicle Speed Too High" 1 "Driver Hands On" 0 "No Control Interruption" ;
+VAL_ 757 ANGLE_COLONNE 32767 "Invalid" ;
+VAL_ 277 Download_Month 12 "December" 11 "November" 10 "October" 9 "September" 8 "August" 7 "July" 6 "June" 5 "May" 4 "April" 3 "March" 2 "February" 1 "January" ;
+SIG_GROUP_ 773 IS_DYN_VOL_GroupAdd 1 : FLG_INIT_AVOL FLG_AVOL_ICN ANGLE_VOLANT_ORIGINE RESERVED VITESSE_ROT_VOL_OPTIMISE CODE_DEFAUT_VOL TRIM_VOL CALIBRATION_VOL ETAT_CAPT_VOL;
+SIG_GROUP_ 773 IS_DYN_VOL_GroupBase 1 : CHKSUM_VOL SENS_ROT_VOL CPT_PROCESS_4B_A_VOL VITESSE_ROT_VOL ANGLE_VOLANT;
+SIG_GROUP_ 1941 IS_SUPV_DIRA_Group 1 : CODE_DEFAUT ETAT_ASSIST_DA ETAT_LIGNE_APC STATUS_CONFABSENT;
+SIG_GROUP_ 1173 IS_DAT_DIRA_Group 1 : AUTOR_ARRET_MOT_DA CPLE_VOLANT DDE_REDEM_DA ETAT_DA_2010 ETAT_DA_DYN ETAT_DA_2004 EPS_STATE_LKA STEERWHL_HOLD_BY_DRV TRQ_LIMIT_STATE;
+SIG_GROUP_ 757 IS_DYN_DAE_Group 1 : ANGLE_COLONNE CAUSE_DESACTIV_CPK CHKSUM_TRME_DYN_DAE CPLE_VOLANT_OPTMSE CPT_PROCESS_4B_DAE ETAT_DAE_CPK ETAT_SECU_ANGLE_COL VITESSE_COLONNE ETAT_DAE_CAV3_VIRTUEL;
+
