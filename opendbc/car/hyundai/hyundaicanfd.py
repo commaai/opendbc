@@ -2,7 +2,6 @@ from opendbc.car import CanBusBase
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car.hyundai.values import HyundaiFlags
-from openpilot.common.params import Params
 
 
 class CanBus(CanBusBase):
@@ -181,7 +180,7 @@ def create_msg_161(packer, CAN, enabled, msg_161, car_params, hud_control, car_s
       values["DISTANCE_CAR"] = 0
 
     # BACKGROUND
-    values["BACKGROUND"] = 3 if enabled and Params().get_bool("ExperimentalMode") else 1 if enabled else 7
+    values["BACKGROUND"] = 1 if enabled else 7
 
   return packer.make_can_msg("MSG_161", CAN.ECAN, values)
 
