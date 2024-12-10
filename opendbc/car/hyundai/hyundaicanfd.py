@@ -145,10 +145,13 @@ def create_msg_161(packer, CAN, enabled, msg_161, car_params, hud_control, car_s
 
   # LCA
   if enabled:
-    values["LCA_LEFT_ICON"] = 0 if car_state.out.leftBlindspot else 2 if car_control.leftBlinker else 1
-    values["LCA_RIGHT_ICON"] = 0 if car_state.out.rightBlindspot else 2 if car_control.rightBlinker else 1
-  else:
-    values.update({"LCA_LEFT_ICON": 0, "LCA_RIGHT_ICON": 0})
+    speed_below_threshold = car_state.out.vEgo < 8.94
+    values.update({
+      "LCA_LEFT_ICON": 0 if car_state.out.leftBlindspot or speed_below_threshold else 2 if car_control.leftBlinker else 1,
+      "LCA_RIGHT_ICON": 0 if car_state.out.rightBlindspot or speed_below_threshold else 2 if car_control.rightBlinker else 1,
+      "LCA_LEFT_ARROW": 2 if car_control.leftBlinker else 0,
+      "LCA_RIGHT_ARROW": 2 if car_control.rightBlinker else 0,
+    })
 
   # LANE DEPARTURE
   if hud_control.leftLaneDepart:
@@ -164,7 +167,7 @@ def create_msg_161(packer, CAN, enabled, msg_161, car_params, hud_control, car_s
     # SETSPEED
     values["SETSPEED"] = 3 if enabled else 1
     values["SETSPEED_HUD"] = 2 if enabled else 1
-    values["SETSPEED_SPEED"] = 25 if (s := int(round(car_state.out.vCruiseCluster * CV.KPH_TO_MPH))) > 100 else s
+    values["SETSPEED_SPEED"] = 25 if (s := round(car_state.out.vCruiseCluster * CV.KPH_TO_MPH)) > 100 else s
 
     # DISTANCE
     if 1 <= hud_control.leadDistanceBars <= 3:
