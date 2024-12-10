@@ -3,7 +3,12 @@ from opendbc.car.psa.values import CAR
 
 Ecu = CarParams.Ecu
 
+FINGERPRINTS = {
+  CAR.PSA_OPEL_CORSA_F: [
+  ]
+}
+
 FW_VERSIONS = {
-  CAR.OPEL_CORSA_F: {
+  CAR.PSA_OPEL_CORSA_F: {
   }
 }

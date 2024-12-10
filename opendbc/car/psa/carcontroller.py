@@ -1,15 +1,15 @@
 from opendbc.can.packer import CANPacker
 from opendbc.car.common.numpy_fast import clip
-from opendbc.car import apply_std_steer_angle_limits
+from opendbc.car import apply_std_steer_angle_limits, Bus
 from opendbc.car.interfaces  import CarControllerBase
 from opendbc.car.psa import psacan
 from opendbc.car.psa.values import CarControllerParams
 
 
 class CarController(CarControllerBase):
-  def __init__(self, dbc_name, CP, VM):
+  def __init__(self, dbc_names, CP):
     self.CP = CP
-    self.packer = CANPacker(dbc_name)
+    self.packer = CANPacker(dbc_names[Bus.pt])
     self.frame = 0
 
     self.lkas_max_torque = 0
@@ -50,7 +50,7 @@ class CarController(CarControllerBase):
     ### cruise buttons ###
     # TODO: find cruise buttons msg
 
-    new_actuators = actuators.copy()
+    new_actuators = actuators.as_builder()
     new_actuators.steeringAngleDeg = self.apply_angle_last
     new_actuators.steer = self.lkas_max_torque
 

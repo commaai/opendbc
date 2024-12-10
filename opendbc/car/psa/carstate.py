@@ -1,4 +1,5 @@
-from opendbc.car import structs
+from opendbc.car import structs, Bus
+from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.psa.psacan import CanBus
@@ -10,8 +11,13 @@ TransmissionType = structs.CarParams.TransmissionType
 
 
 class CarState(CarStateBase):
-  def update(self, cp, cp_adas, cp_cam) -> structs.CarState:
-    ret = structs.CarState.new_message()
+  def __init__(self, CP):
+    super().__init__(CP)
+
+  def update(self, can_parsers) -> structs.CarState:
+    cp = can_parsers[Bus.pt]
+    cp_adas = can_parsers[Bus.adas]
+    ret = structs.CarState()
 
     # car speed
     ret.wheelSpeeds = self.get_wheel_speeds(
@@ -35,9 +41,9 @@ class CarState(CarStateBase):
     ret.parkingBrake = bool(cp.vl['Dat_BSI']['PARKING_BRAKE'])  # TODO: check e-brake
 
     # steering wheel
-    ret.steeringAngleDeg = cp.vl['STEERING_ALT']['ANGLE']
-    ret.steeringRateDeg = cp.vl['STEERING_ALT']['RATE'] * cp.vl['STEERING_ALT']['RATE_SIGN']  # TODO: check units
-    ret.steeringTorque = cp.vl['STEERING']['DRIVER_TORQUE']  # TODO: check units
+    # ret.steeringAngleDeg = cp.vl['STEERING_ALT']['ANGLE'] # TODO: check signals
+    # ret.steeringRateDeg = cp.vl['STEERING_ALT']['RATE'] * cp.vl['STEERING_ALT']['RATE_SIGN']  # TODO: check signals and units
+    # ret.steeringTorque = cp.vl['STEERING']['DRIVER_TORQUE']  # TODO: check signal and units
     ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > CarControllerParams.STEER_DRIVER_ALLOWANCE, 5)  # TODO: adjust threshold
     ret.steerFaultTemporary = False  # TODO
     ret.steerFaultPermanent = False  # TODO
@@ -71,30 +77,29 @@ class CarState(CarStateBase):
     ret.rightBlinker = blinker == 2
 
     # lock info
-    ret.doorOpen = any([cp.vl['Dat_BSI']['DRIVER_DOOR'], cp.vl['Dat_BSI']['PASSENGER_DOOR']])
-    ret.seatbeltUnlatched = cp.vl['RESTRAINTS']['DRIVER_SEATBELT'] != 2  # TODO: check LHD
+    #ret.doorOpen = any([cp.vl['Dat_BSI']['DRIVER_DOOR'], cp.vl['Dat_BSI']['PASSENGER_DOOR']]) # TODO: check signal
+    #ret.seatbeltUnlatched = cp.vl['RESTRAINTS']['DRIVER_SEATBELT'] != 2  # TODO: check LHD
 
     return ret
 
   @staticmethod
-  def get_can_parser(CP):
-    messages = [
+  def get_can_parsers(CP):
+    pt_messages = [
       ('Dyn4_FRE', 50),
       ('Dat_BSI', 20),
-      ('STEERING_ALT', 100),
-      ('STEERING', 100),
+      # ('STEERING_ALT', 100), #TODO check signals
+      # ('STEERING', 100),
       ('Dyn2_CMM', 50),
-      ('RESTRAINTS', 10),
+      # ('RESTRAINTS', 10),
     ]
-    return CANParser(DBC[CP.carFingerprint]['pt'], messages, CanBus(CP).main)
-
-  @staticmethod
-  def get_adas_can_parser(CP):
-    messages = [
+    adas_messages = [
       ('HS2_DYN_ABR_38D', 25),
       ('HS2_DYN_UCF_MDD_32D', 50),
       ('HS2_BGE_DYN5_CMM_228', 100),
       ('HS2_DAT_MDD_CMD_452', 20),
       ('HS2_DAT7_BSI_612', 10),
     ]
-    return CANParser(DBC[CP.carFingerprint]['body'], messages, CanBus(CP).adas)
+    return {
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 0),
+      Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.adas], adas_messages, 1)
+    }

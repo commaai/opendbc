@@ -74,6 +74,9 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 "GENESIS_GV70_ELECTRIFIED_1ST_GEN" = [1.9, 1.9, 0.09]
 "GENESIS_G80_2ND_GEN_FL" = [2.5819356441497803, 2.5, 0.11244568973779678]
 
+# TODO: check values for PSA
+"PSA_OPEL_CORSA_F" = [2.5, 1.5, 0.1]
+
 # Dashcam or fallback configured as ideal car
 "MOCK" = [10.0, 10, 0.0]
 

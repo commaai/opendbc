@@ -20,8 +20,8 @@ class CarInterface(CarInterfaceBase):
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.psa)]
 
     if not docs:
-      ret.transmissionType = TransmissionType.manual
-      ret.minEnableSpeed = 40 * CV.KPH_TO_MS  # 25mph, FIXME: manual transmission
+      ret.transmissionType = TransmissionType.automatic # TODO: implement manual
+      ret.minEnableSpeed = 30 * CV.KPH_TO_MS  # 19 mph, TODO: 40kph/25mph for other variants
     ret.minSteerSpeed = 0.  # TODO: verify
 
     ret.autoResumeSng = ret.minEnableSpeed == -1
@@ -29,11 +29,12 @@ class CarInterface(CarInterfaceBase):
     ret.wheelSpeedFactor = 1.04
     return ret
 
-  def _update(self, c):
-    ret = self.CS.update(self.cp, self.cp_adas, self.cp_cam)
-    events = self.create_common_events(ret)
-    ret.events = events.to_msg()
-    return ret
+# TODO: check if needed
+  # def _update(self, c):
+  #   ret = self.CS.update(self.cp, self.cp_adas, self.cp_cam)
+  #   events = self.create_common_events(ret)
+  #   ret.events = events.to_msg()
+  #   return ret
 
   def apply(self, c, now_nanos):
     return self.CC.update(c, self.CS, now_nanos)

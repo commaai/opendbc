@@ -39,8 +39,9 @@ def create_lka_msg(packer, CP, apply_steer: float, frame: int, lat_active: bool,
     'CHECKSUM': 0,
   }
 
+# TODO: fix checksum
   # calculate checksum
-  dat = packer.make_can_msg('LANE_KEEP_ASSIST', 0, values)[2]
-  values['CHECKSUM'] = calculate_checksum(dat, 0xD)
+  # dat = packer.make_can_msg('LANE_KEEP_ASSIST', 0, values)[2]
+  # values['CHECKSUM'] = calculate_checksum(dat, 0xD)
 
-  return packer.make_can_msg('LANE_KEEP_ASSIST', CanBus(CP).main, values)
+  return 0#packer.make_can_msg('LANE_KEEP_ASSIST', CanBus(CP).main, values)
