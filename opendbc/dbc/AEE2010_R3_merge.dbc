@@ -41,24 +41,486 @@ BU_: UTIL__Traminator CMM___Motor_SG CDS___Fahrdynamikregelung BVA___Automatikge
 ; ############################### HS1 B0 #####################################
 ; #############################################################################
 
-BO_ 114 RQD_CMM: 5 CMM___Motor_SG
- SG_ ADC2_Req_Status : 0|8@1+ (1,0) [0|255] "-" Vector__XXX
- SG_ ADC2_Seed_Byte3 : 8|8@1+ (1,0) [0|255] "-" Vector__XXX
- SG_ ADC2_Seed_Byte2 : 16|8@1+ (1,0) [0|255] "-" Vector__XXX
- SG_ ADC2_Seed_Byte1 : 24|8@1+ (1,0) [0|255] "-" Vector__XXX
- SG_ ADC2_Seed_Byte0 : 32|8@1+ (1,0) [0|255] "-" BSI___Kombiinstrument
+BO_ 3221225472 VECTOR__INDEPENDENT_SIG_MSG: 0 Vector__XXX
+ SG_ P257_Com_tiYr : 0|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ P256_Com_tiDay : 0|12@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ P255_Com_tiSec : 0|20@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ P229_Com_xTCChkSum : 0|4@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ P325_Com_tiEngOffLSB : 0|16@1+ (1,0) [0|65535] "" Vector__XXX
+ SG_ P325_Com_tiEngOffMSB : 0|16@1+ (1,0) [0|65535] "" Vector__XXX
+ SG_ P261_PCH_WakeUP : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P252_ImpluseStart : 0|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ P250_MajorStartRequest : 0|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ P248_StarterStopReq : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P298_Com_stEHRCtl : 0|1@1- (1,0) [0|1] "" Vector__XXX
+ SG_ P317_FrmMng_dtBVMPChkSum : 0|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ P318_FrmMng_ctBVMPCntr : 0|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ P292_FrmMng_stGearTrqReq : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P145_Saturation_Active : 0|1@1+ (1,0) [0|1] "-" Vector__XXX
+ SG_ P128_Forcage_Encl_GMV : 0|1@1+ (1,0) [0|1] "-" Vector__XXX
+ SG_ P101_Com_mAddPmpTot : 0|16@0+ (0.05,0) [0|3276.5] "g" Vector__XXX
+ SG_ Local_ID : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ Diagnostic_On_Can : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ P308_EOBD_Rediness : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P314_VehDa_stTrqMax : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P315_VehDa_stEngSpdMax : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P297_RTE_Fun_StErr : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P268_AddPmpCD_volAddInjStp : 0|8@1+ (10,0) [0|255] "" Vector__XXX
+ SG_ P364_Gbx_nGbxIPSpeedFlt : 0|12@0+ (2,0) [0|0] "rpm" Vector__XXX
+ SG_ P363_Com_trqRelCrSConv : 0|8@1- (3,-150) [0|0] "Nm" Vector__XXX
+ SG_ P361_Com_stTscEngDemTyp : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P087_Com_stClth : 0|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ P290_StSys_stGlwAuth : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P135_StSys_stAR2s : 0|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ P133_StSys_stEngSTT2Rls : 0|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ P227_Pwr_Gen_Support_state : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P084_CoDT_trqGearbxDes : 0|8@1+ (2,-100) [-100|408] "Nm" Vector__XXX
+ SG_ P004_ActualTorqueNoGearbox : 0|8@1+ (2,-100) [-100|408] "Nm" Vector__XXX
+ SG_ P399_Com_stProd : 0|3@1+ (1,0) [0|7] "" Vector__XXX
+ SG_ P348_Alt_bFault : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P251_Com_stScndStrtReq : 0|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ P107_Com_stAddPmpLvl : 0|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ P093_Temp_aval_FAP : 0|8@1+ (4,-40) [0|255] "°C" Vector__XXX
+ SG_ P041_Cde_RVV : 0|2@1+ (1,0) [0|3] "-" Vector__XXX
+ SG_ P069_Act_RVV : 0|1@1+ (1,0) [0|1] "-" Vector__XXX
+ SG_ P033_sABS : 0|16@0+ (0.1,0) [0|6553.5] "m" Vector__XXX
+ SG_ P407_Com_stRly2DiagRaw : 0|3@1- (1,0) [-4|3] "" Vector__XXX
+ SG_ P405_Com_stRly1DiagRaw : 0|3@1- (1,0) [0|7] "" Vector__XXX
+ SG_ P284_T15CD_stPart_byte8 : 0|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ Reserved_1 : 0|16@1+ (1,0) [0|255] "-" Vector__XXX
+ SG_ P416_Com_bStSpCabReqRaw : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ Input4 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Input3 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Input2 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Input1 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ code : 0|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ OutputNumber : 0|3@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Output3 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Output2 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Output1 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Output0 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ commande : 0|5@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ P296_Fans_bEHRPmpReq : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P243_FrmMng_stFlCnsmp_mp : 0|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ P095_EngPrt_stOvrSpd : 0|2@1+ (1,0) [0|1] "-" Vector__XXX
+ SG_ P051_ACCD_stPres : 0|2@1+ (1,0) [0|3] "-" Vector__XXX
+ SG_ P053_ACCtl_stHys : 0|1@1+ (1,0) [0|1] "-" Vector__XXX
+ SG_ P049_Com_bMIL : 0|1@1+ (1,0) [0|1] "-" Vector__XXX
+ SG_ VersionInput : 0|4@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Data1 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Mask0 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Mask1 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ VersionMode : 0|4@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ VersionActel : 0|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ VersionBaudRate : 0|3@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Data0 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Data2 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Mask2 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Data3 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Mask3 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Rate : 0|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ VersionYear : 0|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Data4 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Mask4 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ VersionMonth : 0|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ConfIdStatus : 0|11@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Data5 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ GetConfIdStatus : 0|11@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Mask5 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ MaskIdPert : 0|11@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ VersionDate : 0|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Data6 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Mask6 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ VersionMinor : 0|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Edge : 0|2@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ConfIdCde : 0|11@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Data7 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ GetConfIdCde : 0|11@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ IdPert : 0|11@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Mask7 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ VersionMajor : 0|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ Code : 0|5@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ NumScenario : 0|3@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ P055_Com_trqTCSAbs : 0|8@1+ (2,-100) [-100|408] "Nm" Vector__XXX
+ SG_ P028_Gbx_stEOBDFault : 0|4@1+ (1,0) [0|15] "-" Vector__XXX
+ SG_ P427_Com_stBattTypEstRaw : 0|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ P436_Com_uPrdcVltgStrtRaw : 0|11@0+ (0.01,0) [0|13] "" Vector__XXX
+ SG_ P284_T15CD_stPart_byte6 : 0|4@0+ (1,0) [0|15] "" Vector__XXX
+ SG_ P040_Com_stBrkRaw1 : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P013_Com_stBrk1 : 0|1@1+ (1,0) [0|1] "" Vector__XXX
 
-BO_ 146 IS_INTE_ELECTRON_BSI: 8 Tester
- SG_ EFFAC_DEFAULT_DIAG : 0|1@0+ (1,0) [0|1] "" PSCM
- SG_ MODE_DIAG : 6|1@0+ (1,0) [0|1] "" PSCM
- SG_ DIAG_INTEGRA_ELEC : 7|1@0+ (1,0) [0|1] "" PSCM
+;TODO
+;BO_ 968 Dyn_STT_CMM: 2 Vector__XXX
+; SG_ P412_Com_stDeadPnt : 2|2@1+ (1,0) [0|3] "" Vector__XXX
+; SG_ P428_Com_stCDTReq : 6|2@1+ (1,0) [0|3] "" Vector__XXX
+
+BO_ 2024 Rep_EOBD_On_Can_7E8: 8 Vector__XXX
+
+BO_ 2016 Req_EOBD_On_Can_7E0: 8 Vector__XXX
+
+BO_ 2015 Req_EOBD_On_Can_7DF: 8 Vector__XXX
+
+BO_ 1672 Rep_Diag_On_CAN_688: 8 Vector__XXX
+
+BO_ 1704 Req_Diag_On_CAN_6A8: 8 Vector__XXX
+
+;TODO
+;BO_ 1266 Dat3_BSI: 8 Vector__XXX
+; SG_ P494_Com_stPrioVoltMax : 49|2@0+ (1,0) [0|0] "" Vector__XXX
+; SG_ P493_Com_stPrioVoltMin : 41|2@0+ (1,0) [0|0] "" Vector__XXX
+; SG_ P492_Com_uVarProdMax : 63|7@0+ (1,0) [0|0] "" Vector__XXX
+; SG_ P491_Com_uVoltCtlProdMax : 55|6@0+ (1,0) [0|0] "" Vector__XXX
+; SG_ P490_Com_uVoltCtlProdMin : 47|6@0+ (1,0) [0|0] "" Vector__XXX
+; SG_ P437_Com_uBattOpnCir : 24|9@0+ (0.01,0) [0|14] "" Vector__XXX
+; SG_ P438_Com_uBattIntRstnRaw : 23|10@0+ (0.01,0) [0|10.23] "" Vector__XXX
+; SG_ P429_Com_stSOCInfoInvldRaw : 8|2@1+ (1,0) [0|3] "" Vector__XXX
+; SG_ P435_Com_stUCAPRechCrntRaw : 10|2@1+ (1,0) [0|3] "" Vector__XXX
+; SG_ P434_Com_rBattChHiRes : 7|10@0+ (0.1,0) [0|100] "" Vector__XXX
+;TODO
+;BO_ 1173 DAT_DIRA: 3 Vector__XXX
+; SG_ P448_Com_bStrgWhlEngStopReqRaw : 21|1@1+ (1,0) [0|1] "" Vector__XXX
+; SG_ P447_Com_bStrgWhlEngRstrtReqRaw : 23|1@1+ (1,0) [0|1] "" Vector__XXX
+
+;TODO
+;BO_ 809 Dyn_STT_BV: 4 BVA___Automatikgetriebe
+; SG_ P340_Com_xChkSum3 : 7|4@0+ (1,0) [0|0] "" Vector__XXX
+; SG_ P230_Com_ctGbxCnt3 : 3|4@0+ (1,0) [0|15] "" Vector__XXX
+; SG_ P441_Com_bGbxAuthRstrtRaw : 12|1@1+ (1,0) [0|1] "" Vector__XXX
+; SG_ P444_Com_bGbxSysFaultRaw : 13|1@1+ (1,0) [0|1] "" Vector__XXX
+; SG_ P442_Com_bGbxAuthStopRaw : 15|1@1+ (1,0) [0|1] "" Vector__XXX
+; SG_ P443_Com_bGbxRstrtReq : 14|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 488 DAT3_CMM: 3 Vector__XXX
+ SG_ Reserved_3 : 5|6@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ P426_Com_ctRstrtStSp : 15|16@0+ (1,0) [0|3276750] "" Vector__XXX
+ SG_ P413_Com_stRstrtStSpPrgs : 7|2@0+ (1,0) [0|3] "" Vector__XXX
+
+;TODO
+;BO_ 1375 ACQ_NEW_JDD: 1 Vector__XXX
+; SG_ P__JDD_Com_stFaultAck : 7|8@0+ (1,0) [0|255] "" Vector__XXX
+
+;TODO
+;BO_ 1554 Dat7_BSI: 8 Vector__XXX
+; SG_ P409_Com_stRly3DiagRaw : 61|3@1+ (1,0) [0|7] "" Vector__XXX
+
+BO_ 1458 Contexte1_5B2: 8 Vector__XXX
+ SG_ P__Com_stEOBD : 39|8@0+ (1,0) [0|255] "-" Vector__XXX
+ SG_ P100_Com_stAddPmpDef : 24|8@1+ (1,0) [0|255] "-" Vector__XXX
+ SG_ P146_Com_tEnvT : 16|8@1+ (0.5,-40) [-40|87] "°C" Vector__XXX
+
+;TODO
+;BO_ 1362 DAT4_BSI_AEE2010: 8 Vector__XXX
+; SG_ P015_Com_lTotDst : 39|24@0+ (1,0) [0|16777215] "km" Vector__XXX
+; SG_ P325_Com_tiEngOff : 7|32@0+ (1,0) [0|1000] "" Vector__XXX
+; SG_ P326_Com_ctTmrRst : 63|8@0+ (1,0) [0|255] "" Vector__XXX
+
+BO_ 1101 Vroues_ABR: 8 CDS___Fahrdynamikregelung
+ SG_ P354_VehV_nWhlAvrg : 55|16@0+ (0.04,0) [0|0] "rpm" Vector__XXX
+ SG_ P331_VehV_vWhlRrR : 39|16@0+ (0.01,0) [0|655.34] "km/h" Vector__XXX
+ SG_ P330_VehV_vWhlRrL : 23|16@0+ (0.01,0) [0|655.34] "km/h" Vector__XXX
+
+;TODO
+;BO_ 1293 Dat_ABR: 7 ABS___Antiblockiersystem
+; SG_ P415_Com_stABSSTTReqRaw : 52|2@1+ (1,0) [0|3] "" Vector__XXX
+; SG_ P351_Com_bABSIntvActv : 5|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 781 Dyn4_FRE: 8 CDS___Fahrdynamikregelung
+ SG_ P263_VehV_VPsvValWhlFrtL : 7|16@0+ (0.01,0) [0|655.35] "km/h" Vector__XXX
+ SG_ P264_VehV_VPsvValWhlFrtR : 23|16@0+ (0.01,0) [0|655.35] "km/h" Vector__XXX
+ SG_ P265_VehV_VPsvValWhlBckL : 39|16@0+ (0.01,0) [0|655.35] "km/h" Vector__XXX
+ SG_ P266_VehV_VPsvValWhlBckR : 55|16@0+ (0.01,0) [0|655.35] "km/h" Vector__XXX
+
+;TODO
+;BO_ 1426 Dat6_BSI: 8 CMM___Motor_SG
+; SG_ P421_Com_xBattCrnt : 55|16@0+ (1,0) [0|0] "" Vector__XXX
+; SG_ P420_Com_stBattCrntMeasRaw : 40|2@1+ (1,0) [0|3] "" Vector__XXX
+; SG_ P418_Com_uBattRaw : 28|11@0+ (0.01,5) [5|25.47] "" Vector__XXX
+; SG_ P419_Com_stSTTActvRaw : 44|2@1+ (1,0) [0|3] "" Vector__XXX
+; SG_ P349_EEM_stAltCtlType : 29|3@1+ (1,0) [0|7] "" Vector__XXX
+; SG_ P273_Com_tBatt : 8|8@1+ (0.5,-30) [-30|97.5] "deg C" Vector__XXX
+; SG_ P272_Com_rBattCh : 0|8@1+ (1,0) [0|100] "%" Vector__XXX
+
+BO_ 1928 Supv_CMM: 8 CMM___Motor_SG
+ SG_ P284_T15CD_stPart : 43|12@0+ (1,0) [0|4095] "" Vector__XXX
+ SG_ P242_T15CD_stElec : 44|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ P071_ConfirmedAbsentFlags : 15|32@0+ (1,0) [0|4294967295] "-" Vector__XXX
+ SG_ P073_SupervisionFaultCodes : 7|8@0+ (1,0) [0|255] "-" Vector__XXX
+
+;TODO
+;BO_ 1906 FaultLog_Ack: 1 BSI___Kombiinstrument
+; SG_ P__FaultLog_Ack : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+
+BO_ 1896 BSI_FaultLog: 8 CMM___Motor_SG
+ SG_ P__BSI_FaultLog_Env5 : 56|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ P__BSI_FaultLog_Env4 : 48|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ P__BSI_FaultLog_Env3 : 40|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ P__BSI_FaultLog_Env2 : 32|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ P__BSI_FaultLog_Env1 : 24|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ P__BSI_FaultLog_DTC2 : 16|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ P__BSI_FaultLog_DTC1 : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ P__BSI_FaultLog_Header : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+
+BO_ 1544 EOBD_CMM: 8 CMM___Motor_SG
+ SG_ P__Data7_PID : 56|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ P__Data6_PID : 48|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ P__Data5_PID : 40|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ P__Data4_PID : 32|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ P__Data3_PID : 24|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ P__Data2_PID : 16|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ P__Data1_PID : 8|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ P__LID_No : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 1416 Dat2_CMM: 8 CMM___Motor_SG
+ SG_ P446_Com_bAuthAdPmp : 52|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P425_Com_stVltgSysLd : 53|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P422_Com_bSyncDlyStSp : 54|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P338_EnvP_p : 42|5@1+ (15,685) [0|1120] "" Vector__XXX
+ SG_ P424_Com_bMMIClthReq : 22|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P423_Com_bMMIStSpAvl : 23|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P414_Com_stSTTFunc : 40|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ P366_CoEom_stEngOpm : 48|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ P275_EngOilLvl : 7|8@0- (3,0) [0|0] "" Vector__XXX
+ SG_ P357_RAP_CIBLE_TRANSMIS : 63|3@0+ (1,0) [0|7] "" Vector__XXX
+ SG_ P358_SENS_CHGMT_RAP : 60|2@0+ (1,0) [0|3] "" Vector__XXX
+ SG_ P359_SITUATION_VIE : 58|3@0+ (1,0) [0|7] "" Vector__XXX
+ SG_ P373_CoETS_rTrq : 32|8@1+ (0.39215686275,0) [0|100] "%" Vector__XXX
+ SG_ P278_Oil_stPSwmp : 16|1@1- (1,0) [0|1] "" Vector__XXX
+ SG_ P288_Com_bSVSLmp : 47|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P316_FlSys_volFlConsVirt : 24|8@1+ (80,0) [0|20400] "mm^3" Vector__XXX
+ SG_ P268_AdPmp_volAddInjStp : 8|8@1+ (5,0) [0|255] "mm3" Vector__XXX
+
+;TODO
+;BO_ 1294 Dat_CLIM: 8 BSI___Kombiinstrument
+; SG_ P050_Com_stAC : 0|1@1+ (1,0) [0|1] "-" Vector__XXX
+; SG_ P433_Com_bCmptEngStopReqRaw : 2|1@1+ (1,0) [0|1] "" Vector__XXX
+; SG_ P432_Com_bCmptEngRstrtReqRaw : 23|1@1+ (1,0) [0|1] "" Vector__XXX
+; SG_ P417_Com_stDrvPrsRaw : 25|2@1+ (1,0) [0|3] "" Vector__XXX
+; SG_ P220_Com_stPrpMsgRaw : 63|1@1+ (1,0) [0|1] "" Vector__XXX
+; SG_ P221_Speed_setPoint_Typ : 61|2@1+ (1,0) [0|3] "" Vector__XXX
+; SG_ P222_Typ_PrpCtl_Req : 60|1@1+ (1,0) [0|1] "" Vector__XXX
+; SG_ P231_Com_ctBSIFrm : 56|4@1+ (1,0) [0|15] "" Vector__XXX
+; SG_ P219_Com_xPrpReqRaw : 48|8@1+ (1,0) [0|255] "" Vector__XXX
+; SG_ P208_Com_nACIdlDem : 40|8@1+ (8,0) [0|2032] "" Vector__XXX
+; SG_ P210_Com_pwrACDem : 32|8@1+ (25,0) [0|6350] "W" Vector__XXX
+; SG_ P189_Com_stEEMIdlDem : 19|1@1+ (1,0) [0|1] "" Vector__XXX
+; SG_ P144_Com_bPFltGlw : 17|1@1+ (1,0) [0|1] "-" Vector__XXX
+; SG_ P164_Com_stPFltFan : 14|2@1+ (1,0) [0|0] "" Vector__XXX
+; SG_ P046_Com_rFanClgDes : 8|6@1+ (2,0) [0|110] "%" Vector__XXX
+; SG_ P232_Com_stXVVChkSum : 4|2@1+ (1,0) [0|3] "" Vector__XXX
+; SG_ P209_Com_stACRaw : 1|1@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 1224 Etat_Crash: 3 BSI___Kombiinstrument
+ SG_ Reserved_2 : 23|8@0+ (1,0) [0|0] "-" Vector__XXX
+ SG_ P223_CrashInfo : 8|1@0+ (1,0) [0|0] "-" Vector__XXX
+ SG_ Reserved_1 : 7|8@0+ (1,0) [0|0] "-" Vector__XXX
+
+BO_ 1161 Dat_V2_BV: 8 BVA___Automatikgetriebe
+ SG_ P376_Com_bMILcntResDemRaw : 18|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ P375_Com_bMILDem : 16|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ P374_Com_bOBDRdy : 8|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ P282_Com_stGbxErr : 12|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ P029_Com_stPrg : 11|2@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ P218_Com_stDrvIdx : 48|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ P285_Com_bPNDia : 20|1@1+ (1,0) [0|1] "" Vector__XXX
+
+;TODO
+;BO_ 1160 Dat_CMM: 8 CMM___Motor_SG
+; SG_ P056_ACCD_p : 48|8@1+ (25,0) [100|3100] "kPa" Vector__XXX
+; SG_ P158_Air_tAFS : 56|8@1+ (1,-40) [-40|214] "°C" Vector__XXX
+; SG_ P051_ACCD_stPres : 33|2@1+ (1,0) [0|3] "" Vector__XXX
+; SG_ P053_ACCtl_stHys : 32|1@1+ (1,0) [0|1] "" Vector__XXX
+; SG_ P011_Oil_tSwmp : 40|8@1+ (1,-40) [-40|213] "" Vector__XXX
+; SG_ P154_PFlt_bPFltClnReq : 38|1@1+ (1,0) [0|0] "" Vector__XXX
+; SG_ P233_Fid_PFltDef_mp : 31|1@1+ (1,0) [0|1] "" Vector__XXX
+; SG_ P063_vehV_bXVVErr : 30|1@1+ (1,0) [0|1] "-" Vector__XXX
+; SG_ P296_AOHt_stPmp : 29|1@1+ (1,0) [0|1] "" Vector__XXX
+; SG_ P108_Fid_ComAddPmpLvl : 28|1@1+ (1,0) [0|1] "-" Vector__XXX
+; SG_ P105_Com_bTtLmp : 27|1@1+ (1,0) [0|1] "-" Vector__XXX
+; SG_ P031_GlwLmp_st : 25|1@1+ (1,0) [0|1] "-" Vector__XXX
+; SG_ P032_Com_bEngStrt : 24|1@1+ (1,0) [0|1] "-" Vector__XXX
+; SG_ P022_Com_nSetPLo : 16|8@1+ (8,0) [0|2032] "1/min" Vector__XXX
+; SG_ P021_Com_volFlCons : 8|8@1+ (80,0) [0|20400] "mm^3" Vector__XXX
+; SG_ P005_CEngDst_tSens : 0|8@1+ (1,-40) [-40|214] "°C" Vector__XXX
+
+BO_ 1128 Dyn3_CMM: 6 CMM___Motor_SG
+ SG_ P234_Com_stAcvWarn : 13|2@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ P408_Com_bRly3CtlReq : 40|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P401_Com_stStrtAuth : 10|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ P400_Com_stDrvTrnTx : 8|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ P347_Alt_uSetPoint : 25|6@0+ (1,0) [0|63] "" Vector__XXX
+ SG_ P346_Alt_enumPwrProd : 26|3@1+ (1,0) [0|7] "-" Vector__XXX
+ SG_ P244_Com_bSta : 7|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P245_Com_stRedBrkPlaus : 6|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P246_Com_bStaPrt : 5|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P247_Com_stStaFunc : 3|2@1+ (1,0) [0|3] "" Vector__XXX
+
+;TODO
+;BO_ 1074 Dat_BSI1: 8 BSI___Kombiinstrument
+; SG_ P439_Com_bUCAPSWkUpReqRaw : 45|1@1+ (1,0) [0|1] "" Vector__XXX
+; SG_ P369_Com_stElecNetRaw : 60|4@1+ (1,0) [0|15] "" Vector__XXX
+; SG_ P368_Com_stMnSEVRaw : 48|2@1+ (1,0) [0|3] "" Vector__XXX
+; SG_ P367_Com_stCtxJDDRaw : 50|6@1+ (1,0) [0|63] "" Vector__XXX
+; SG_ P403_Com_stStaReq : 43|1@1+ (1,0) [0|1] "" Vector__XXX
+; SG_ P402_Com_stStaDemActv : 12|2@1+ (1,0) [0|3] "" Vector__XXX
+; SG_ P350_Com_bPstVtln : 46|1@1+ (1,0) [0|0] "" Vector__XXX
+; SG_ P274_Exh_ctRefl : 40|3@1+ (1,0) [0|7] "" Vector__XXX
+; SG_ P276_Com_bOilWkUp : 36|1@1+ (1,0) [0|1] "" Vector__XXX
+; SG_ P267_Exh_volRefl : 24|8@1+ (0.5,0) [0|255] "l" Vector__XXX
+; SG_ P253_Com_bEngPrepReq : 21|1@1+ (1,0) [0|1] "" Vector__XXX
+; SG_ P214_Com_stMnWkUp : 6|2@1+ (1,0) [0|3] "" Vector__XXX
+; SG_ P216_Com_bSiaWkUp : 4|1@1+ (1,0) [0|1] "" Vector__XXX
+; SG_ P249_Com_stEngStopReq : 0|2@1+ (1,0) [0|3] "" Vector__XXX
+
+BO_ 1042 Dat_BSI: 8 BSI___Kombiinstrument
+ SG_ DRIVER_DOOR : 51|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ PASSENGER_DOOR : 52|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ P328_Com_stEHRPmp : 27|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ P104_Dspl_stAOHt : 30|2@1+ (1,0) [0|3] "-"  CMM___Motor_SG
+ SG_ P086_Com_stFlLvlDia : 25|2@1+ (1,0) [0|3] "-" Vector__XXX
+ SG_ P012_Com_bFlMin : 24|1@1+ (1,0) [0|0] "-" Vector__XXX
+ SG_ P298_Req_RTE_Ena : 11|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P277_Com_bOilLvlDem : 10|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ P013_MainBrake : 5|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ PARKING_BRAKE : 3|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ P103_Com_bRevGear : 2|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P040_MainBrakeFault : 0|1@1+ (1,0) [0|1] "-" Vector__XXX
+
+BO_ 973 Dyn2_FRE: 8 ABS___Antiblockiersystem
+ SG_ P515_Com_pStSpMstCyl : 47|12@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ P226_Com_stBrkActv : 0|2@1+ (1,0) [0|4] "" Vector__XXX
+ SG_ P319_FrmMng_rClthPos : 56|8@1+ (0.5,0) [0|255] "%" Vector__XXX
+ SG_ P224_Com_stBrkRaw_1 : 38|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ P225_Com_stBrkRaw_0 : 37|1@1+ (1,0) [0|0] "" Vector__XXX
+
+BO_ 969 Dyn2_V2_BV: 6 BVA___Automatikgetriebe
+ SG_ P230_Com_ctGbxCnt2 : 27|4@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ P340_Com_xChkSum2 : 31|4@0+ (1,0) [0|15] "" Vector__XXX
+ SG_ P__Rapport_cible : 23|4@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ P293_Com_stGbxEngShOff : 38|2@0+ (1,0) [0|3] "" Vector__XXX
+ SG_ P291_Com_trqMaxConv : 7|8@0+ (3,-150) [-150|615] "" Vector__XXX
+
+BO_ 941 Dyn_EasyMove: 8 CDS___Fahrdynamikregelung
+ SG_ P337_Com_stPrkBrk : 24|3@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ P299_Com_bCrCtlInhib : 17|1@1+ (1,0) [0|1] "" Vector__XXX
+
+;TODO
+;BO_ 909 Dyn_ABR: 8 ABS___Antiblockiersystem
+; SG_ P688_Com_bAuthHllAsstStop : 54|1@0+ (1,0) [0|0] "" Vector__XXX
+; SG_ P052_Com_aLng : 32|8@1+ (0.08,-14) [-14|6.32] "m/s**2" Vector__XXX
+; SG_ P010_Com_v : 7|16@0+ (0.01,0) [0|655.34] "km/h" Vector__XXX
+
+BO_ 904 Dyn_Veh: 7 CMM___Motor_SG
+ SG_ P066_aECU : 32|8@1+ (0.08,-14) [-14|6.32] "m/s**2" Vector__XXX
+ SG_ P062_sECU : 23|16@0+ (0.1,0) [0|6553.5] "m" Vector__XXX
+ SG_ P060_vECU : 7|16@0+ (0.01,0) [0|655.34] "km/h" Vector__XXX
+
+;TODO
+;BO_ 845 Dyn_CDS: 8 CDS___Fahrdynamikregelung
+; SG_ P353_StbIntv_bESPExclvIntvActv : 52|1@1+ (1,0) [0|1] "" Vector__XXX
+; SG_ P352_StbIntv_bTCSIntvActv : 50|1@1+ (1,0) [0|1] "" Vector__XXX
+; SG_ P157_Com_ctESP : 40|4@1+ (1,0) [0|15] "" Vector__XXX
+; SG_ P045_Com_trqDCSRaw : 32|8@1+ (2,-100) [-100|410] "Nm" Vector__XXX
+; SG_ P044_Com_trqTCSRaw : 24|8@1+ (2,-100) [-100|410] "Nm" Vector__XXX
+; SG_ P043_Com_xTCSStatRaw : 16|8@1+ (3,-150) [-150|612] "Nm" Vector__XXX
+; SG_ P147_Com_bESPIntvActv : 6|1@1+ (1,0) [0|0] "" Vector__XXX
+; SG_ P088_CutOffForbidden : 3|1@1+ (1,0) [0|1] "-" Vector__XXX
+; SG_ P047_Com_stESPIntv : 0|3@1+ (1,0) [0|7] "-"  CMM___Motor_SG
+
+BO_ 841 Dyn_V2_BVMP: 8 BVA___Automatikgetriebe
+ SG_ P340_Com_xTSCChkSum : 55|4@0+ (1,0) [0|15] "-" Vector__XXX
+ SG_ P440_Com_bUCAPSWkUpReqRaw : 5|3@1+ (1,0) [0|7] "" Vector__XXX
+ SG_ P360_Com_stIntvTyp : 2|3@1+ (1,0) [0|7] "" Vector__XXX
+ SG_ P057_Com_xTrqTIIDes : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ P362_Com_bGearShftExpt : 17|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P287_Com_stGearRat : 24|4@1+ (1,0) [0|15] "-" Vector__XXX
+ SG_ P283_Com_stGearTrgtPos : 28|4@1+ (1,0) [0|15] "-" Vector__XXX
+ SG_ P333_Com_stGbxTrqIntv : 18|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ P030_Gbx_stDrvTrnEgd : 0|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ P166_Com_nEngTSC : 56|8@1+ (25,750) [750|7075] "RPM" Vector__XXX
+ SG_ P230_Com_ctTSCCntr : 51|4@0+ (1,0) [0|15] "-" Vector__XXX
+ SG_ P167_Com_stEngSpdCtl : 21|1@1+ (1,0) [0|1] "-" Vector__XXX
+ SG_ P085_Com_bGbxACCmprShOff : 20|1@1+ (1,0) [0|1] "-" Vector__XXX
+ SG_ P009_Com_bGearShftActv : 16|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 840 Dyn2_CMM: 8 CMM___Motor_SG
+ SG_ P091_ConvCD_stDebVal : 35|2@1+ (1,0) [0|3] "-" Vector__XXX
+ SG_ P372_T15_st : 54|1@1- (1,0) [0|0] "" Vector__XXX
+ SG_ P371_Com_bDrivingCycl : 53|1@1- (1,0) [0|0] "" Vector__XXX
+ SG_ P370_Com_bWUC : 52|1@1- (1,0) [0|0] "" Vector__XXX
+ SG_ P345_Com_bMILBln : 51|1@1- (1,0) [0|0] "" Vector__XXX
+ SG_ P344_Com_bMILOn : 50|1@1- (1,0) [0|0] "" Vector__XXX
+ SG_ P343_Com_bOBDErr : 49|1@1- (1,0) [0|0] "" Vector__XXX
+ SG_ P269_StSys_stStrtBVMPAuth : 62|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ P207_Fan_rAct : 56|6@1+ (2,0) [0|100] "" Vector__XXX
+ SG_ P134_Com_stEng : 40|4@1+ (1,0) [0|0] "-" Vector__XXX
+ SG_ P212_Comp_load_shed : 37|3@1+ (1,0) [0|7] "" Vector__XXX
+ SG_ P025_Com_stESPErr : 33|2@1+ (1,0) [0|0] "-" Vector__XXX
+ SG_ P026_Com_bESPAck : 32|1@1+ (1,0) [0|0] "-" Vector__XXX
+ SG_ P017_Com_trqFrc : 24|8@1+ (2,-100) [-100|408] "Nm" Vector__XXX
+ SG_ P211_AirC_pClnt : 16|8@1+ (1,110) [110|2904] "kpa" Vector__XXX
+ SG_ P019_Com_trqPrp : 8|8@1+ (2,-100) [-100|410] "Nm" Vector__XXX
+ SG_ P152_Gearbx_stGear : 4|4@1+ (1,0) [0|15] "-" Vector__XXX
+ SG_ P165_FlFCD_stWtLvlSensDebVal : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+
+;TODO
+;BO_ 552 Dyn5_CMM: 5 CMM___Motor_SG
+; SG_ P388_Com_rClthPedPos : 39|8@0+ (0.5,0) [0|100] "" Vector__XXX
+; SG_ P411_Com_stTrqAvlStSp : 12|1@1+ (1,0) [0|0] "" Vector__XXX
+; SG_ P410_Com_stEngTrqStSp : 13|1@1+ (1,0) [0|0] "" Vector__XXX
+; SG_ P335_Com_ctDyn5CMMCntr : 28|4@1+ (1,0) [0|15] "" Vector__XXX
+; SG_ P336_Com_xDyn5CMMChkSum : 24|4@1+ (1,0) [0|15] "" Vector__XXX
+; SG_ P334_ACCPed_Position : 16|8@1+ (0.5,0) [0|100] "%" Vector__XXX
+; SG_ P321_StatusOfEasyMvTrq : 14|2@1+ (1,0) [0|3] "" Vector__XXX
+; SG_ P320_EasyMvTrqInfo : 0|8@1+ (3,-150) [-150|615] "Nm" Vector__XXX
+
+BO_ 520 Dyn_CMM: 8 CMM___Motor_SG
+ SG_ P027_ACCtl_stLogicOut : 32|1@1+ (1,0) [0|1] "-" Vector__XXX
+ SG_ P198_ActMod_trqClthTraIntv : 56|8@1+ (2,-100) [-100|410] "Nm" Vector__XXX
+ SG_ P127_EGT_st_Bit30 : 39|1@1+ (1,0) [0|0] "-" Vector__XXX
+ SG_ P042_Inm_bCanMon : 38|1@1+ (1,0) [0|1] "-" Vector__XXX
+ SG_ P153_Com_bTrqInacc : 36|1@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ P037_VehV_stXVV : 34|2@1+ (1,0) [0|2] "-" Vector__XXX
+ SG_ P014_Brk_stRed : 33|1@1+ (1,0) [0|1] "-" Vector__XXX
+ SG_ P002_Com_rAPP : 24|8@1+ (0.5,0) [0|100] "%" Vector__XXX
+ SG_ P003_Com_trqActOut : 16|8@1+ (3,-150) [-150|615] "Nm" Vector__XXX
+ SG_ P000_Com_nEng : 7|16@0+ (0.125,0) [0|8191.75] "1/min" Vector__XXX
+
+BO_ 264 Vers_CMM: 8 CMM___Motor_SG
+ SG_ P083_Calibration : 56|8@1+ (1,0) [0|255] "-" Vector__XXX
+ SG_ P082_Edition : 48|8@1+ (1,0) [0|255] "-" Vector__XXX
+ SG_ P081_Version : 40|8@1+ (1,0) [0|255] "-" Vector__XXX
+ SG_ P080_Application : 32|8@1+ (1,0) [0|255] "-" Vector__XXX
+ SG_ P079_Year : 24|8@1+ (1,0) [0|255] "-" Vector__XXX
+ SG_ P078_Month : 16|8@1+ (1,0) [0|255] "-" Vector__XXX
+ SG_ P077_Day : 8|8@1+ (1,0) [0|255] "-" Vector__XXX
+ SG_ P076_System : 0|8@1+ (1,0) [0|255] "-" Vector__XXX
 
 BO_ 168 CFD_BSI: 5 BSI___Kombiinstrument
- SG_ ADC2_Key_Status : 0|8@1+ (1,0) [0|0] "-" Vector__XXX
- SG_ ADC2_Key_Byte3 : 8|8@1+ (1,0) [0|255] "-" CMM___Motor_SG
- SG_ ADC2_Key_Byte2 : 16|8@1+ (1,0) [0|255] "-" Vector__XXX
- SG_ ADC2_Key_Byte1 : 24|8@1+ (1,0) [0|255] "-" Vector__XXX
  SG_ ADC2_Key_Byte0 : 32|8@1+ (1,0) [0|255] "-" Vector__XXX
+ SG_ ADC2_Key_Byte1 : 24|8@1+ (1,0) [0|255] "-" Vector__XXX
+ SG_ ADC2_Key_Byte2 : 16|8@1+ (1,0) [0|255] "-" Vector__XXX
+ SG_ ADC2_Key_Byte3 : 8|8@1+ (1,0) [0|255] "-"  CMM___Motor_SG
+ SG_ ADC2_Key_Status : 0|8@1+ (1,0) [0|0] "-" Vector__XXX
+;TODO
+;BO_ 146 Elec_Int: 1 BSI___Kombiinstrument
+; SG_ P__Elec_Int_Cntrl_Word : 7|8@0+ (1,0) [0|255] "" Vector__XXX
+
+BO_ 114 RQD_CMM: 5 CMM___Motor_SG
+ SG_ ADC2_Seed_Byte0 : 32|8@1+ (1,0) [0|255] "-"  BSI___Kombiinstrument
+ SG_ ADC2_Seed_Byte1 : 24|8@1+ (1,0) [0|255] "-" Vector__XXX
+ SG_ ADC2_Seed_Byte2 : 16|8@1+ (1,0) [0|255] "-" Vector__XXX
+ SG_ ADC2_Seed_Byte3 : 8|8@1+ (1,0) [0|255] "-" Vector__XXX
+ SG_ ADC2_Req_Status : 0|8@1+ (1,0) [0|255] "-" Vector__XXX
+
+
+; #############################################################################
+; ############################### HS2 B0 #####################################
+; #############################################################################
+;TODO
+;BO_ 146 HS2_INTE_ELECTRON_BSI_092: 1 BSI
+; SG_ EFFAC_DEFAUT_DIAG : 0|1@0+ (1,0) [0|0] "" BVN,ARTIV,EBB,AVAS
+; SG_ MODE_DIAG : 6|1@0+ (1,0) [0|0] "" BVN,ARTIV,EBB,AVAS
+; SG_ DIAG_INTEGRA_ELEC : 7|1@0+ (1,0) [0|0] "" BVN,ARTIV,EBB,AVAS
 
 BO_ 238 HS2_VERS_AVAS_0EE: 8 AVAS
  SG_ VERSION_SYSTEME : 7|8@0+ (1,0) [0|255] "" Vector__XXX
@@ -80,16 +542,6 @@ BO_ 239 HS2_VERS_EBB_0EF: 8 EBB
  SG_ EDITION_SOFT : 55|8@0+ (1,0) [0|255] "" Vector__XXX
  SG_ EDITION_CALIB : 63|8@0+ (1,0) [0|255] "" Vector__XXX
 
-BO_ 264 Vers_CMM: 8 CMM___Motor_SG
- SG_ P076_System : 0|8@1+ (1,0) [0|255] "-" Vector__XXX
- SG_ P077_Day : 8|8@1+ (1,0) [0|255] "-" Vector__XXX
- SG_ P078_Month : 16|8@1+ (1,0) [0|255] "-" Vector__XXX
- SG_ P079_Year : 24|8@1+ (1,0) [0|255] "-" Vector__XXX
- SG_ P080_Application : 32|8@1+ (1,0) [0|255] "-" Vector__XXX
- SG_ P081_Version : 40|8@1+ (1,0) [0|255] "-" Vector__XXX
- SG_ P082_Edition : 48|8@1+ (1,0) [0|255] "-" Vector__XXX
- SG_ P083_Calibration : 56|8@1+ (1,0) [0|255] "-" Vector__XXX
-
 BO_ 274 HS2_VERS_BSI_112: 8 BSI
  SG_ VERSION_SYSTEME : 7|8@0+ (1,0) [0|255] "" Vector__XXX
  SG_ VERS_DATE2_JOUR : 15|8@0+ (1,0) [0|31] "" Vector__XXX
@@ -99,16 +551,6 @@ BO_ 274 HS2_VERS_BSI_112: 8 BSI
  SG_ VERSION_SOFT : 47|8@0+ (1,0) [0|255] "" Vector__XXX
  SG_ EDITION_SOFT : 55|8@0+ (1,0) [0|255] "" Vector__XXX
  SG_ EDITION_CALIB : 63|8@0+ (1,0) [0|255] "" Vector__XXX
-
-BO_ 277 IS_VERS_DIRA_115: 8 PSCM
- SG_ System_Code : 7|8@0+ (1,0) [0|255] "" Tester
- SG_ Download_Day : 15|8@0+ (1,0) [1|31] "" Tester
- SG_ Download_Month : 23|8@0+ (1,0) [1|12] "" Tester
- SG_ Download_Year : 31|8@0+ (1,0) [0|99] "" Tester
- SG_ Application_Code : 39|8@0+ (1,0) [0|255] "" Tester
- SG_ Software_Version : 47|8@0+ (1,0) [0|255] "" Tester
- SG_ Software_Edition_MSB : 55|8@0+ (1,0) [0|255] "" Tester
- SG_ Software_Edition_LSB : 63|8@0+ (1,0) [0|255] "" Tester
 
 BO_ 278 HS2_VERS_ARTIV_116: 8 ARTIV
  SG_ VERSION_SYSTEME : 7|8@0+ (1,0) [0|255] "" Vector__XXX
@@ -139,23 +581,6 @@ BO_ 300 HS2_VERS_BVN_12C: 8 BVN
  SG_ VERSION_SOFT : 47|8@0+ (1,0) [0|255] "" Vector__XXX
  SG_ EDITION_SOFT : 55|8@0+ (1,0) [0|255] "" Vector__XXX
  SG_ EDITION_CALIB : 63|8@0+ (1,0) [0|255] "" Vector__XXX
-
-BO_ 488 DAT3_CMM: 3 Vector__XXX
- SG_ Reserved_3 : 5|6@0+ (1,0) [0|0] "" Vector__XXX
- SG_ P413_Com_stRstrtStSpPrgs : 7|2@0+ (1,0) [0|3] "" Vector__XXX
- SG_ P426_Com_ctRstrtStSp : 15|16@0+ (1,0) [0|3276750] "" Vector__XXX
-
-BO_ 520 Dyn_CMM: 8 CMM___Motor_SG
- SG_ P000_Com_nEng : 7|16@0+ (0.125,0) [0|8191.75] "1/min" Vector__XXX
- SG_ P003_Com_trqActOut : 16|8@1+ (3,-150) [-150|615] "Nm" Vector__XXX
- SG_ P002_Com_rAPP : 24|8@1+ (0.5,0) [0|100] "%" Vector__XXX
- SG_ P027_ACCtl_stLogicOut : 32|1@1+ (1,0) [0|1] "-" Vector__XXX
- SG_ P014_Brk_stRed : 33|1@1+ (1,0) [0|1] "-" Vector__XXX
- SG_ P037_VehV_stXVV : 34|2@1+ (1,0) [0|2] "-" Vector__XXX
- SG_ P153_Com_bTrqInacc : 36|1@1+ (1,0) [0|0] "" Vector__XXX
- SG_ P042_Inm_bCanMon : 38|1@1+ (1,0) [0|1] "-" Vector__XXX
- SG_ P127_EGT_st_Bit30 : 39|1@1+ (1,0) [0|0] "-" Vector__XXX
- SG_ P198_ActMod_trqClthTraIntv : 56|8@1+ (2,-100) [-100|410] "Nm" Vector__XXX
 
 BO_ 525 HS2_ESC_20D: 8 UC_FREIN
  SG_ CHKSUM_FRAME_4B_20D : 3|4@0+ (1,0) [0|0] "" EBB,CMM
@@ -307,24 +732,6 @@ BO_ 744 HS2_DYN_CMM_BV_2E8: 8 CMM
  SG_ CHKSUM_TRAME_4B_2E8 : 59|4@0+ (1,0) [0|0] "" BV
  SG_ CPT_PROCESS_4B_2E8 : 63|4@0+ (1,0) [0|15] "" BV
 
-BO_ 747 IS_DYN_AAS: 8 Tester
- SG_ CONS_ANGLE_CPK : 7|16@0- (0.1,0) [-780|780] "Deg" PSCM
- SG_ DMD_RELAXE_CPK : 21|2@0+ (1,0) [0|3] "" PSCM
- SG_ DMD_FCT_CPK : 23|2@0+ (1,0) [0|3] "" PSCM
- SG_ CPT_PROCESS_4B_CPK : 27|4@0+ (1,0) [0|15] "" PSCM
- SG_ CHKSUM_TRME_DYN_CPK : 31|4@0+ (1,0) [0|15] "" PSCM
-
-BO_ 757 IS_DYN_DAE: 7 PSCM
- SG_ CPT_PROCESS_4B_DAE : 3|4@0+ (1,0) [0|15] "" Tester
- SG_ CHKSUM_TRME_DYN_DAE : 7|4@0+ (1,0) [0|15] "" Tester
- SG_ CPLE_VOLANT_OPTMSE : 15|8@0- (0.1,0) [-10|10] "Nm" Tester
- SG_ CAUSE_DESACTIV_CPK : 20|3@0+ (1,0) [0|7] "" Tester
- SG_ ETAT_DAE_CPK : 22|2@0+ (1,0) [0|3] "" Tester
- SG_ ANGLE_COLONNE : 31|16@0- (0.1,0) [-1630|1630] "Deg" Tester
- SG_ VITESSE_COLONNE : 47|12@0- (1,0) [-2000|2000] "Deg/s" Tester
- SG_ ETAT_SECU_ANGLE_COL : 48|1@0+ (1,0) [0|1] "" Tester
- SG_ ETAT_DAE_CAV3_VIRTUEL : 51|3@0+ (1,0) [0|7] "N/A" Vector__XXX
-
 BO_ 758 HS2_DYN_MDD_ETAT_2F6: 8 ARTIV
  SG_ CIBLE_DETECTEE : 0|1@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
  SG_ DDE_REPRISE_COND : 2|2@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
@@ -361,28 +768,6 @@ BO_ 761 HS2_DYN_TRICPTR_BOSCH_2F9: 7 CAPT_ALG
  SG_ CPT_MSG_RB : 23|4@0+ (1,0) [0|15] "" RITCS,UC_FREIN
  SG_ ACCEL_LAT_12B_RB : 39|12@0+ (0.02,-40.96) [-40.96|40.92] "m/s2" RITCS,UC_FREIN
  SG_ VITESSE_LACET_12B_RB : 43|12@0+ (0.08,-163.84) [-163.84|163.68] "Degré/s" RITCS,UC_FREIN
-
-BO_ 773 IS_DYN_VOL: 7 Tester
- SG_ ANGLE_VOLANT : 7|16@0- (0.1,0) [-780|780] "Deg" PSCM
- SG_ VITESSE_ROT_VOL : 23|8@0+ (4,0) [0|1016] "Deg/s" PSCM
- SG_ ETAT_CAPT_VOL : 24|1@0+ (1,0) [0|1] "" Vector__XXX
- SG_ CALIBRATION_VOL : 25|1@0+ (1,0) [0|1] "" Vector__XXX
- SG_ TRIM_VOL : 26|1@0+ (1,0) [0|1] "" Vector__XXX
- SG_ CODE_DEFAUT_VOL : 30|4@0+ (1,0) [0|15] "N/A" Vector__XXX
- SG_ SENS_ROT_VOL : 31|1@0+ (1,0) [0|1] "" PSCM
- SG_ CPT_PROCESS_4B_A_VOL : 35|4@0+ (1,0) [0|15] "" PSCM
- SG_ CHKSUM_VOL : 39|4@0+ (1,0) [0|15] "" PSCM
- SG_ VITESSE_ROT_VOL_OPTIMISE : 47|8@0+ (4,0) [0|1016] "" Vector__XXX
- SG_ RESERVED : 51|4@0+ (1,0) [0|15] "" Vector__XXX
- SG_ ANGLE_VOLANT_ORIGINE : 53|2@0+ (1,0) [0|3] "" Vector__XXX
- SG_ FLG_AVOL_ICN : 54|1@0+ (1,0) [0|1] "" Vector__XXX
- SG_ FLG_INIT_AVOL : 55|1@0+ (1,0) [0|1] "" Vector__XXX
-
-BO_ 781 Dyn4_FRE: 8 CDS___Fahrdynamikregelung
- SG_ P263_VehV_VPsvValWhlFrtL : 7|16@0+ (0.01,0) [0|655.35] "km/h" Vector__XXX
- SG_ P264_VehV_VPsvValWhlFrtR : 23|16@0+ (0.01,0) [0|655.35] "km/h" Vector__XXX
- SG_ P265_VehV_VPsvValWhlBckL : 39|16@0+ (0.01,0) [0|655.35] "km/h" Vector__XXX
- SG_ P266_VehV_VPsvValWhlBckR : 55|16@0+ (0.01,0) [0|655.35] "km/h" Vector__XXX
 
 BO_ 792 HS2_DYN_CMM_318: 5 CMM
  SG_ CNS_CPL_GMP_COORD_XVV : 15|14@0+ (1,-4000) [-4000|11000] "N.m" CMF,ARTIV,UC_FREIN
@@ -436,42 +821,6 @@ BO_ 813 HS2_DYN_UCF_MDD_32D: 8 UC_FREIN
  SG_ CHKSUM_TRME_DYN_UCF_ACC : 59|4@0+ (1,0) [0|15] "" CMM,BSI,PASS_HCU2,CMF,ARTIV
  SG_ CPT_PROCESS_4B_UC_FREIN : 63|4@0+ (1,0) [0|15] "" CMM,BSI,PASS_HCU2,CMF,ARTIV
 
-BO_ 840 Dyn2_CMM: 8 CMM___Motor_SG
- SG_ P165_FlFCD_stWtLvlSensDebVal : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P152_Gearbx_stGear : 4|4@1+ (1,0) [0|15] "-" Vector__XXX
- SG_ P019_Com_trqPrp : 8|8@1+ (2,-100) [-100|410] "Nm" Vector__XXX
- SG_ P211_AirC_pClnt : 16|8@1+ (1,110) [110|2904] "kpa" Vector__XXX
- SG_ P017_Com_trqFrc : 24|8@1+ (2,-100) [-100|408] "Nm" Vector__XXX
- SG_ P026_Com_bESPAck : 32|1@1+ (1,0) [0|0] "-" Vector__XXX
- SG_ P025_Com_stESPErr : 33|2@1+ (1,0) [0|0] "-" Vector__XXX
- SG_ P091_ConvCD_stDebVal : 35|2@1+ (1,0) [0|3] "-" Vector__XXX
- SG_ P212_Comp_load_shed : 37|3@1+ (1,0) [0|7] "" Vector__XXX
- SG_ P134_Com_stEng : 40|4@1+ (1,0) [0|0] "-" Vector__XXX
- SG_ P343_Com_bOBDErr : 49|1@1- (1,0) [0|0] "" Vector__XXX
- SG_ P344_Com_bMILOn : 50|1@1- (1,0) [0|0] "" Vector__XXX
- SG_ P345_Com_bMILBln : 51|1@1- (1,0) [0|0] "" Vector__XXX
- SG_ P370_Com_bWUC : 52|1@1- (1,0) [0|0] "" Vector__XXX
- SG_ P371_Com_bDrivingCycl : 53|1@1- (1,0) [0|0] "" Vector__XXX
- SG_ P372_T15_st : 54|1@1- (1,0) [0|0] "" Vector__XXX
- SG_ P207_Fan_rAct : 56|6@1+ (2,0) [0|100] "" Vector__XXX
- SG_ P269_StSys_stStrtBVMPAuth : 62|1@1+ (1,0) [0|1] "" Vector__XXX
-
-BO_ 841 Dyn_V2_BVMP: 8 BVA___Automatikgetriebe
- SG_ P030_Gbx_stDrvTrnEgd : 0|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ P360_Com_stIntvTyp : 2|3@1+ (1,0) [0|7] "" Vector__XXX
- SG_ P440_Com_bUCAPSWkUpReqRaw : 5|3@1+ (1,0) [0|7] "" Vector__XXX
- SG_ P057_Com_xTrqTIIDes : 8|8@1+ (1,0) [0|255] "" Vector__XXX
- SG_ P009_Com_bGearShftActv : 16|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P362_Com_bGearShftExpt : 17|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P333_Com_stGbxTrqIntv : 18|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ P085_Com_bGbxACCmprShOff : 20|1@1+ (1,0) [0|1] "-" Vector__XXX
- SG_ P167_Com_stEngSpdCtl : 21|1@1+ (1,0) [0|1] "-" Vector__XXX
- SG_ P287_Com_stGearRat : 24|4@1+ (1,0) [0|15] "-" Vector__XXX
- SG_ P283_Com_stGearTrgtPos : 28|4@1+ (1,0) [0|15] "-" Vector__XXX
- SG_ P230_Com_ctTSCCntr : 51|4@0+ (1,0) [0|15] "-" Vector__XXX
- SG_ P340_Com_xTSCChkSum : 55|4@0+ (1,0) [0|15] "-" Vector__XXX
- SG_ P166_Com_nEngTSC : 56|8@1+ (25,750) [750|7075] "RPM" Vector__XXX
-
 BO_ 845 HS2_DYN_CDS_34D: 8 UC_FREIN
  SG_ TYPE_PIL_CPLE_ESP : 2|3@0+ (1,0) [0|7] "" ARTIV,ASR
  SG_ ASR_DECONNECTE : 3|1@0+ (1,0) [0|1] "" ARTIV,ASR
@@ -496,11 +845,6 @@ BO_ 845 HS2_DYN_CDS_34D: 8 UC_FREIN
  SG_ REQ_LAMPE_REGUL_ASR_ESP : 55|1@0+ (1,0) [0|1] "" ARTIV,ASR
  SG_ PENTE_STATIQUE : 61|6@0+ (1,-30) [-30|30] "%" ARTIV,ASR
 
-BO_ 904 Dyn_Veh: 7 CMM___Motor_SG
- SG_ P060_vECU : 7|16@0+ (0.01,0) [0|655.34] "km/h" Vector__XXX
- SG_ P062_sECU : 23|16@0+ (0.1,0) [0|6553.5] "m" Vector__XXX
- SG_ P066_aECU : 32|8@1+ (0.08,-14) [-14|6.32] "m/s**2" Vector__XXX
-
 BO_ 905 HS2_BGE_DYN_BV_389: 5 BV
  SG_ VITESSE_VEHICULE : 7|16@0+ (0.01,0) [0|655.34] "km/h" PASS_BSI
  SG_ DISTANCE : 23|16@0+ (0.1,0) [0|6553.5] "m" PASS_BSI
@@ -521,10 +865,6 @@ BO_ 909 HS2_DYN_ABR_38D: 8 UC_FREIN
  SG_ HADC_STATUS : 60|2@0+ (1,0) [0|3] "" CMF,CMM,BV,BSI,HCU1,ARTIV,BVN,AVAS
  SG_ HADC_SPEED_CONDITION : 61|1@0+ (1,0) [0|1] "" CMF,CMM,BV,BSI,HCU1,ARTIV,BVN,AVAS
  SG_ HADC_CLUTCH_CONDITION : 63|2@0+ (1,0) [0|3] "" CMF,CMM,BV,BSI,HCU1,ARTIV,BVN,AVAS
-
-BO_ 941 Dyn_EasyMove: 8 CDS___Fahrdynamikregelung
- SG_ P299_Com_bCrCtlInhib : 17|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P337_Com_stPrkBrk : 24|3@1+ (1,0) [0|0] "" Vector__XXX
 
 BO_ 946 HS2_DYN_BSI_3B2: 2 BSI
  SG_ ASSIETTE_VEHICULE : 7|10@0- (0.006,0) [-3|3] "Degré" BVN
@@ -553,55 +893,14 @@ BO_ 968 HS2_DYN_STT_CMM_3C8: 2 CMM
  SG_ TYPE_REDEM : 5|1@0+ (1,0) [0|1] "" RITCS,BV,UC_FREIN,BSI
  SG_ DDE_OUV_CDT : 7|2@0+ (1,0) [0|3] "" RITCS,BV,UC_FREIN,BSI
 
-BO_ 969 Dyn2_V2_BV: 6 BVA___Automatikgetriebe
- SG_ P291_Com_trqMaxConv : 7|8@0+ (3,-150) [-150|615] "" Vector__XXX
- SG_ P__Rapport_cible : 23|4@0+ (1,0) [0|0] "" Vector__XXX
- SG_ P230_Com_ctGbxCnt2 : 27|4@0+ (1,0) [0|0] "" Vector__XXX
- SG_ P340_Com_xChkSum2 : 31|4@0+ (1,0) [0|15] "" Vector__XXX
- SG_ P293_Com_stGbxEngShOff : 38|2@0+ (1,0) [0|3] "" Vector__XXX
-
-BO_ 973 Dyn2_FRE: 8 ABS___Antiblockiersystem
- SG_ P226_Com_stBrkActv : 0|2@1+ (1,0) [0|4] "" Vector__XXX
- SG_ P225_Com_stBrkRaw_0 : 37|1@1+ (1,0) [0|0] "" Vector__XXX
- SG_ P224_Com_stBrkRaw_1 : 38|1@1+ (1,0) [0|0] "" Vector__XXX
- SG_ P515_Com_pStSpMstCyl : 47|12@0+ (1,0) [0|0] "" Vector__XXX
- SG_ P319_FrmMng_rClthPos : 56|8@1+ (0.5,0) [0|255] "%" Vector__XXX
-
 BO_ 1001 HS2_DAT_BV_3E9: 2 BV
  SG_ REGIME_MOTEUR_AFF_BV : 7|8@0+ (50,0) [0|8200] "tr/min" BSI
-
-BO_ 1010 IS_DAT_BSI_3F2: 8 Tester
- SG_ DMD_DELEST_DA : 2|1@0+ (1,0) [0|1] "" PSCM
- SG_ UNKNOWN_1 : 6|1@0+ (1,0) [0|1] "" XXX
- SG_ COUNTER : 11|4@0+ (1,0) [0|15] "" XXX
- SG_ CHECKSUM : 15|4@0+ (1,0) [0|15] "" XXX
- SG_ UNKNOWN_2 : 19|4@0+ (1,0) [0|15] "" XXX
- SG_ UNKNOWN_3 : 20|1@0+ (1,0) [0|1] "" XXX
- SG_ LKA_STATE : 36|3@0+ (1,0) [0|0] "" PSCM
- SG_ LXA_ACTIVATION : 40|1@0+ (1,0) [0|0] "" PSCM
- SG_ LKA_TRQ_FACT_REQ : 47|7@0+ (0.01,0) [0|0] "" PSCM
- SG_ COLUMN_ANGLE_SETPOINT : 55|14@0- (0.1,0) [-780|780] "" PSCM
- SG_ UNKNOWN_4 : 57|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1032 HS2_DYN_CMM_408: 4 CMM
  SG_ TPS_CONF_MIN_RAP_MON_XVV : 4|6@0+ (0.1,0) [0|6.2] "s" BV,UC_FREIN
  SG_ ABORT_CRITICITY_FOR_CPK : 5|1@0+ (1,0) [0|1] "" BV,UC_FREIN
  SG_ PWT_STATUS_FOR_CPK : 7|2@0+ (1,0) [0|3] "" BV,UC_FREIN
  SG_ TPS_CONF_MIN_RAP_DES_XVV : 14|6@0+ (0.1,0) [0|6.2] "s" BV,UC_FREIN
-
-BO_ 1042 Dat_BSI: 8 BSI___Kombiinstrument
- SG_ P040_MainBrakeFault : 0|1@1+ (1,0) [0|1] "-" Vector__XXX
- SG_ P103_Com_bRevGear : 2|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ PARKING_BRAKE : 3|1@0+ (1,0) [0|1] "" Vector__XXX
- SG_ P013_MainBrake : 5|1@1+ (1,0) [0|0] "" Vector__XXX
- SG_ P277_Com_bOilLvlDem : 10|1@1+ (1,0) [0|0] "" Vector__XXX
- SG_ P298_Req_RTE_Ena : 11|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P012_Com_bFlMin : 24|1@1+ (1,0) [0|0] "-" Vector__XXX
- SG_ P086_Com_stFlLvlDia : 25|2@1+ (1,0) [0|3] "-" Vector__XXX
- SG_ P328_Com_stEHRPmp : 27|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ P104_Dspl_stAOHt : 30|2@1+ (1,0) [0|3] "-" CMM___Motor_SG
- SG_ DRIVER_DOOR : 51|1@0+ (1,0) [0|1] "" Vector__XXX
- SG_ PASSENGER_DOOR : 52|1@0+ (1,0) [0|1] "" Vector__XXX
 
 BO_ 1069 HS2_DAT_ESC_42D: 4 UC_FREIN
  SG_ DYN_SLOPE_VALUE : 5|6@0+ (1,-30) [-30|30] "%" CMF,ARTIV,AAS,PASS_HCU2,CMM,BV,BSI
@@ -660,11 +959,6 @@ BO_ 1080 HS2_DAT_CMM_438: 8 CMM
  SG_ CPLE_AFF_DYN : 55|9@0+ (1,0) [0|500] "N.m" RITCS,BV,BSI
  SG_ PRCT_CPLE_AFF_DYN : 62|7@0+ (1,0) [0|100] "%" RITCS,BV,BSI
 
-BO_ 1101 Vroues_ABR: 8 CDS___Fahrdynamikregelung
- SG_ P330_VehV_vWhlRrL : 23|16@0+ (0.01,0) [0|655.34] "km/h" Vector__XXX
- SG_ P331_VehV_vWhlRrR : 39|16@0+ (0.01,0) [0|655.34] "km/h" Vector__XXX
- SG_ P354_VehV_nWhlAvrg : 55|16@0+ (0.04,0) [0|0] "rpm" Vector__XXX
-
 BO_ 1106 HS2_DAT_MDD_CMD_452: 6 BSI
  SG_ TYPE_REGUL_LONGI : 1|2@0+ (1,0) [0|3] "" CMF,ARTIV,CMM,UC_FREIN
  SG_ ETAT_CLIGNOTANTS : 5|2@0+ (1,0) [0|3] "" CMF,ARTIV,CMM,UC_FREIN
@@ -683,18 +977,6 @@ BO_ 1106 HS2_DAT_MDD_CMD_452: 6 BSI
  SG_ CHKSUM_FRAME_4B_452 : 43|4@0+ (1,0) [0|15] "" CMF,ARTIV,CMM,UC_FREIN
  SG_ COCKPIT_GO_ACC_REQUEST : 45|1@0+ (1,0) [0|1] "" CMF,ARTIV,CMM,UC_FREIN
  SG_ PROGRAMME_ACC : 47|2@0+ (1,0) [0|3] "" CMF,ARTIV,CMM,UC_FREIN
-
-BO_ 1128 Dyn3_CMM: 6 CMM___Motor_SG
- SG_ P247_Com_stStaFunc : 3|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ P246_Com_bStaPrt : 5|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P245_Com_stRedBrkPlaus : 6|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P244_Com_bSta : 7|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P400_Com_stDrvTrnTx : 8|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ P401_Com_stStrtAuth : 10|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ P234_Com_stAcvWarn : 13|2@0+ (1,0) [0|0] "" Vector__XXX
- SG_ P347_Alt_uSetPoint : 25|6@0+ (1,0) [0|63] "" Vector__XXX
- SG_ P346_Alt_enumPwrProd : 26|3@1+ (1,0) [0|7] "-" Vector__XXX
- SG_ P408_Com_bRly3CtlReq : 40|1@1+ (1,0) [0|1] "" Vector__XXX
 
 BO_ 1160 HS2_BGE_DAT_CMM_488: 8 PASS_BSI
  SG_ TEMP_EAU_MOT : 7|8@0+ (1,-40) [-40|214] "Degré C" PASS_HCU2,RITCS,UC_FREIN,CSS,BV,BSI,HCU1
@@ -719,15 +1001,6 @@ BO_ 1160 HS2_BGE_DAT_CMM_488: 8 PASS_BSI
  SG_ PRESSION_REFRI : 55|8@0+ (25,0) [100|3100] "kPa" PASS_HCU2,RITCS,UC_FREIN,CSS,BV,BSI,HCU1
  SG_ TEMP_AIR_MOT : 63|8@0+ (1,-40) [-40|214] "Degré C" PASS_HCU2,RITCS,UC_FREIN,CSS,BV,BSI,HCU1
 
-BO_ 1161 Dat_V2_BV: 8 BVA___Automatikgetriebe
- SG_ P374_Com_bOBDRdy : 8|1@0+ (1,0) [0|1] "" Vector__XXX
- SG_ P029_Com_stPrg : 11|2@0+ (1,0) [0|0] "" Vector__XXX
- SG_ P282_Com_stGbxErr : 12|4@1+ (1,0) [0|15] "" Vector__XXX
- SG_ P375_Com_bMILDem : 16|1@0+ (1,0) [0|1] "" Vector__XXX
- SG_ P376_Com_bMILcntResDemRaw : 18|1@0+ (1,0) [0|1] "" Vector__XXX
- SG_ P285_Com_bPNDia : 20|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P218_Com_stDrvIdx : 48|8@1+ (1,0) [0|255] "" Vector__XXX
-
 BO_ 1166 HS2_DAT_BSI_48E: 4 BSI
  SG_ AC_AEROLIC_REQ : 6|7@0+ (1,0) [0|100] "%" CMM
  SG_ POS_MEAP_2_ACT : 11|4@0+ (1,0) [0|0] "" CMM
@@ -741,18 +1014,6 @@ BO_ 1170 HS2_VIN_VDS_BSI_492: 6 BSI
  SG_ VDS_5 : 39|8@0+ (1,0) [0|0] "" BVN,CMM
  SG_ VDS_6 : 47|8@0+ (1,0) [0|0] "" BVN,CMM
 
-BO_ 1173 IS_DAT_DIRA: 4 PSCM
- SG_ CPLE_VOLANT : 7|8@0- (0.25,0) [-32|31.5] "Nm" Tester
- SG_ ETAT_DA_2004 : 9|2@0+ (1,0) [0|3] "" Tester
- SG_ ETAT_DA_DYN : 13|2@0+ (1,0) [0|3] "" Tester
- SG_ ETAT_DA_2010 : 15|2@0+ (1,0) [0|3] "" Tester
- SG_ TRQ_LIMIT_STATE : 16|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ STEERWHL_HOLD_BY_DRV : 17|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ EPS_STATE_LKA : 20|3@0+ (1,0) [0|0] "" Vector__XXX
- SG_ AUTOR_ARRET_MOT_DA : 21|1@0+ (1,0) [0|1] "" Tester
- SG_ DDE_REDEM_DA : 23|1@0+ (1,0) [0|1] "" Tester
- SG_ Reserved : 31|8@0+ (1,0) [0|255] "" Tester
-
 BO_ 1202 HS2_VIN_VIS_BSI_4B2: 8 BSI
  SG_ VIS_1 : 7|8@0+ (1,0) [0|0] "" CMM,BVN
  SG_ VIS_2 : 15|8@0+ (1,0) [0|0] "" CMM,BVN
@@ -762,11 +1023,6 @@ BO_ 1202 HS2_VIN_VIS_BSI_4B2: 8 BSI
  SG_ VIS_6 : 47|8@0+ (1,0) [0|0] "" CMM,BVN
  SG_ VIS_7 : 55|8@0+ (1,0) [0|0] "" CMM,BVN
  SG_ VIS_8 : 63|8@0+ (1,0) [0|0] "" CMM,BVN
-
-BO_ 1224 Etat_Crash: 3 BSI___Kombiinstrument
- SG_ Reserved_1 : 7|8@0+ (1,0) [0|0] "-" Vector__XXX
- SG_ P223_CrashInfo : 8|1@0+ (1,0) [0|0] "-" Vector__XXX
- SG_ Reserved_2 : 23|8@0+ (1,0) [0|0] "-" Vector__XXX
 
 BO_ 1234 HS2_VIN_WMI_BSI_4D2: 3 BSI
  SG_ WMI_1 : 7|8@0+ (1,0) [0|0] "" BVN,CMM
@@ -834,9 +1090,6 @@ BO_ 1277 HS2_DAT_SEL_4FD: 2 MCM
  SG_ OVF_DOWN : 14|1@0+ (1,0) [0|0] "" UC_FREIN
  SG_ OVF_UP : 15|1@0+ (1,0) [0|0] "" UC_FREIN
 
-BO_ 1293 IS_DAT_ABR_50D: 8 Tester
- SG_ Regul_ABR : 5|1@0+ (1,0) [0|1] "" PSCM
-
 BO_ 1294 HS2_DAT_CLIM_50E: 8 BSI
  SG_ ETAT_EMB_COMP : 1|1@0+ (1,0) [0|1] "" PASS_HCU2,RITCS,UC_FREIN,SCDT,CMM,BV
  SG_ AUTOR_ARRET_MOT_HAB : 2|1@0+ (1,0) [0|1] "" PASS_HCU2,RITCS,UC_FREIN,SCDT,CMM,BV
@@ -874,18 +1127,15 @@ BO_ 1356 HS2_DAT_BVN_54C: 4 BVN
  SG_ AVN_DETECT_ANIMAL : 5|2@0+ (1,0) [0|0] "" BSI
  SG_ AVN_DETECT_PEDESTRIAN : 7|2@0+ (1,0) [0|0] "" BSI
 
-BO_ 1362 IS_DAT4_V2_BSI_552: 8 Tester
- SG_ Msg552_Byte0 : 7|8@0+ (1,0) [0|255] "" PSCM
- SG_ Msg552_Byte1 : 15|8@0+ (1,0) [0|255] "" PSCM
- SG_ Msg552_Byte2 : 23|8@0+ (1,0) [0|255] "" PSCM
- SG_ Msg552_Byte3 : 31|8@0+ (1,0) [0|255] "" PSCM
- SG_ Msg552_Byte4 : 39|8@0+ (1,0) [0|255] "" PSCM
- SG_ Msg552_Byte5 : 47|8@0+ (1,0) [0|255] "" PSCM
- SG_ Msg552_Byte6 : 55|8@0+ (1,0) [0|255] "" PSCM
- SG_ Msg552_Byte7 : 63|8@0+ (1,0) [0|255] "" PSCM
+;TODO
+;BO_ 1362 HS2_DAT4_V2_BSI_552: 8 BSI
+; SG_ CPT_TEMPOREL : 7|32@0+ (0.1,0) [0|429496729.3] "s" BVN,ARTIV,EBB,AVAS
+; SG_ KILOMETRAGE : 39|24@0+ (1,0) [0|16777214] "km" BVN,ARTIV,EBB,AVAS
+; SG_ COMPTEUR_RAZ_GCT : 63|8@0+ (1,0) [0|253] "" BVN,ARTIV,EBB,AVAS
 
-BO_ 1375 IS_ACQ_NEW_JDD_55F: 1 Tester
- SG_ DATA_ACQ_JDD_BSI_2 : 7|8@0+ (1,0) [0|255] "" PSCM
+;TODO
+;BO_ 1375 HS2_ACQ_NEW_JDD_55F: 1 BSI
+; SG_ DATA_ACQ_JDD_BSI_2 : 7|8@0+ (1,0) [0|0] "" BVN,CAPT_ALG,MCM,ARTIV
 
 BO_ 1389 HS2_DAT2_FRE_56D: 3 UC_FREIN
  SG_ CRC_TRICPTR_RB : 7|8@0+ (1,0) [0|255] "" CAPT_ALG
@@ -896,9 +1146,6 @@ BO_ 1389 HS2_DAT2_FRE_56D: 3 UC_FREIN
 BO_ 1393 HS2_AVAS_571: 1 AVAS
  SG_ DIAG_AVERT_SON_VEH_SIL : 6|1@0+ (1,0) [0|0] "" BSI
  SG_ ETAT_AVERT_SON_VEH_SIL : 7|1@0+ (1,0) [0|0] "" BSI
-
-BO_ 1394 IS_DAT_BSI_572: 2 Tester
- SG_ CONFIG_VHL : 15|3@0+ (1,0) [0|7] "" PSCM
 
 BO_ 1400 HS2_DAT_CMM_578: 4 CMM
  SG_ BRK_ASSIST_GMP_LAMP_REQ : 0|1@0+ (1,0) [0|0] "" BV,BSI
@@ -919,25 +1166,6 @@ BO_ 1401 HS2_DAT2_CAPT_ALG_579: 8 CAPT_ALG
  SG_ CARACT_3_RB : 47|6@0+ (1,0) [0|0] "" UC_FREIN
  SG_ CARACT_1_RB : 51|6@0+ (1,0) [0|0] "" UC_FREIN
  SG_ CARACT_0_RB : 61|6@0+ (1,0) [0|0] "" UC_FREIN
-
-BO_ 1416 Dat2_CMM: 8 CMM___Motor_SG
- SG_ P275_EngOilLvl : 7|8@0- (3,0) [0|0] "" Vector__XXX
- SG_ P268_AdPmp_volAddInjStp : 8|8@1+ (5,0) [0|255] "mm3" Vector__XXX
- SG_ P278_Oil_stPSwmp : 16|1@1- (1,0) [0|1] "" Vector__XXX
- SG_ P424_Com_bMMIClthReq : 22|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P423_Com_bMMIStSpAvl : 23|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P316_FlSys_volFlConsVirt : 24|8@1+ (80,0) [0|20400] "mm^3" Vector__XXX
- SG_ P373_CoETS_rTrq : 32|8@1+ (0.39215686275,0) [0|100] "%" Vector__XXX
- SG_ P414_Com_stSTTFunc : 40|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ P338_EnvP_p : 42|5@1+ (15,685) [0|1120] "" Vector__XXX
- SG_ P288_Com_bSVSLmp : 47|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P366_CoEom_stEngOpm : 48|4@1+ (1,0) [0|15] "" Vector__XXX
- SG_ P446_Com_bAuthAdPmp : 52|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P425_Com_stVltgSysLd : 53|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P422_Com_bSyncDlyStSp : 54|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P359_SITUATION_VIE : 58|3@0+ (1,0) [0|7] "" Vector__XXX
- SG_ P358_SENS_CHGMT_RAP : 60|2@0+ (1,0) [0|3] "" Vector__XXX
- SG_ P357_RAP_CIBLE_TRANSMIS : 63|3@0+ (1,0) [0|7] "" Vector__XXX
 
 BO_ 1420 HS2_REP_DIAG_ON_CAN_58C: 8 BVN
  SG_ DATA_DIAG : 7|64@0+ (1,0) [0|0] "" PASS_BSI
@@ -983,11 +1211,6 @@ BO_ 1455 HS2_REP_DIAG_ON_CAN_5AF: 8 AVAS
 BO_ 1456 HS2_REQ_DIAG_ON_CAN_5B0: 8 PASS_VCU
  SG_ DATA_DIAG : 7|64@0+ (1,0) [0|0] "" AVAS
 
-BO_ 1458 Contexte1_5B2: 8 Vector__XXX
- SG_ P146_Com_tEnvT : 16|8@1+ (0.5,-40) [-40|87] "°C" Vector__XXX
- SG_ P100_Com_stAddPmpDef : 24|8@1+ (1,0) [0|255] "-" Vector__XXX
- SG_ P__Com_stEOBD : 39|8@0+ (1,0) [0|255] "-" Vector__XXX
-
 BO_ 1464 HS2_DAT_CMM_5B8: 8 CMM
  SG_ NOTE_GLOBAL_ECOACH_TRIP : 3|4@0+ (1,0) [0|0] "" BSI
  SG_ NOTE_GLOBAL_ECOACH_DAY : 7|4@0+ (1,0) [0|0] "" BSI
@@ -1007,13 +1230,6 @@ BO_ 1484 HS2_SUPV_BVN_5CC: 8 BVN
  SG_ STATUS_CONFABSENT : 15|32@0+ (1,0) [0|0] "" Vector__XXX
  SG_ STATUS_REVEIL_PARTIEL_GMP : 43|16@0+ (1,0) [0|0] "" Vector__XXX
  SG_ ETAT_ELECTR_UCE : 47|4@0+ (1,0) [0|0] "" Vector__XXX
-
-BO_ 1485 PROTO_HS1_DYN_UCF_5CD: 4 Tester
- SG_ CPT_PROCESS_4B_UCF : 3|4@0+ (1,0) [0|15] "" PSCM
- SG_ CHKSUM_TRME_DYN_UCF : 7|4@0+ (1,0) [0|15] "UNM" PSCM
- SG_ OFFSET : 15|16@0- (0.1,0) [-1630|1630] "Deg" PSCM
- SG_ ACQ_INTERRUPT_DAE : 26|1@0+ (1,0) [0|1] "N/A" PSCM
- SG_ PRECISION_OFFSET : 31|5@0+ (1,0) [0|31] "Deg" PSCM
 
 BO_ 1487 HS2_REP_DIAG_ON_CAN_5CF: 8 EBB
  SG_ DATA_DIAG : 7|64@0+ (1,0) [0|0] "" PASS_VCU
@@ -1096,16 +1312,6 @@ BO_ 1521 HS2_EMIS_NEW_JDD_AVAS_5F1: 8 AVAS
  SG_ ETAT_DTC : 3|1@0+ (1,0) [0|0] "" BSI
  SG_ NOMBRE_TRAMES : 7|2@0+ (1,0) [0|0] "" BSI
 
-BO_ 1544 EOBD_CMM: 8 CMM___Motor_SG
- SG_ P__LID_No : 0|8@1+ (1,0) [0|0] "" Vector__XXX
- SG_ P__Data1_PID : 8|8@1+ (1,0) [0|0] "" Vector__XXX
- SG_ P__Data2_PID : 16|8@1+ (1,0) [0|0] "" Vector__XXX
- SG_ P__Data3_PID : 24|8@1+ (1,0) [0|0] "" Vector__XXX
- SG_ P__Data4_PID : 32|8@1+ (1,0) [0|0] "" Vector__XXX
- SG_ P__Data5_PID : 40|8@1+ (1,0) [0|0] "" Vector__XXX
- SG_ P__Data6_PID : 48|8@1+ (1,0) [0|0] "" Vector__XXX
- SG_ P__Data7_PID : 56|8@1+ (1,0) [0|0] "" Vector__XXX
-
 BO_ 1554 HS2_DAT7_BSI_612: 8 BSI
  SG_ INH_ECLAIRAGE_VIRAGE_DYN : 5|1@0+ (1,0) [0|0] "" CMM,BV,BVN
  SG_ INH_ECLAIRAGE_AUTOROUTE : 6|1@0+ (1,0) [0|0] "" CMM,BV,BVN
@@ -1130,11 +1336,6 @@ BO_ 1554 HS2_DAT7_BSI_612: 8 BSI
  SG_ CONFIG_VHL : 60|3@0+ (1,0) [0|0] "" CMM,BV,BVN
  SG_ D_LIGNE_REL_R3 : 63|3@0+ (1,0) [0|0] "" CMM,BV,BVN
 
-BO_ 1672 Rep_Diag_On_CAN_688: 8 Vector__XXX
-
-BO_ 1685 IS_RES_DIAG_ON_CAN: 8 PSCM
- SG_ Diagnostic_Data_Res : 7|64@0+ (1,0) [0|4294967295] "" Tester
-
 BO_ 1686 HS2_REP_DIAG_ON_CAN_696: 8 ARTIV
  SG_ DATA_DIAG : 7|64@0+ (1,0) [0|0] "" PASS_BSI
 
@@ -1144,11 +1345,6 @@ BO_ 1689 HS2_REP_DIAG_ON_CAN_699: 8 CAPT_ALG
 BO_ 1693 HS2_REP_DIAG_ON_CAN_69D: 8 MCM
  SG_ DATA_DIAG : 7|64@0+ (1,0) [0|0] "" OUTIL_DIAG
 
-BO_ 1704 Req_Diag_On_CAN_6A8: 8 Vector__XXX
-
-BO_ 1717 IS_REQ_DIAG_ON_CAN: 8 Tester
- SG_ Diagnostic_Data_Req : 7|64@0+ (1,0) [0|4294967295] "" PSCM
-
 BO_ 1718 HS2_REQ_DIAG_ON_CAN_6B6: 8 PASS_BSI
  SG_ DATA_DIAG : 7|64@0+ (1,0) [0|0] "" ARTIV
 
@@ -1157,32 +1353,6 @@ BO_ 1721 HS2_REQ_DIAG_ON_CAN_6B9: 8 PASS_BSI
 
 BO_ 1725 HS2_REQ_DIAG_ON_CAN_6BD: 8 OUTIL_DIAG
  SG_ DATA_DIAG : 7|64@0+ (1,0) [0|0] "" MCM
-
-BO_ 1896 BSI_FaultLog: 8 CMM___Motor_SG
- SG_ P__BSI_FaultLog_Header : 0|8@1+ (1,0) [0|255] "" Vector__XXX
- SG_ P__BSI_FaultLog_DTC1 : 8|8@1+ (1,0) [0|255] "" Vector__XXX
- SG_ P__BSI_FaultLog_DTC2 : 16|8@1+ (1,0) [0|255] "" Vector__XXX
- SG_ P__BSI_FaultLog_Env1 : 24|8@1+ (1,0) [0|255] "" Vector__XXX
- SG_ P__BSI_FaultLog_Env2 : 32|8@1+ (1,0) [0|255] "" Vector__XXX
- SG_ P__BSI_FaultLog_Env3 : 40|8@1+ (1,0) [0|255] "" Vector__XXX
- SG_ P__BSI_FaultLog_Env4 : 48|8@1+ (1,0) [0|255] "" Vector__XXX
- SG_ P__BSI_FaultLog_Env5 : 56|8@1+ (1,0) [0|255] "" Vector__XXX
-
-BO_ 1906 IS_ACQ_JDD_CAN_BSI_772: 1 Tester
- SG_ DATA_ACQ_JDD_BSI : 7|8@0+ (1,0) [0|255] "" PSCM
-
-BO_ 1909 IS_EMIS_NEW_JDD_CAN_DIRA: 8 PSCM
- SG_ Type_of_Message : 1|2@0+ (1,0) [0|3] "" Tester
- SG_ DTC_State : 3|1@0+ (1,0) [0|1] "" Tester
- SG_ Frame_Number : 5|2@0+ (1,0) [0|3] "" Tester
- SG_ Number_of_Frames : 7|2@0+ (1,0) [0|3] "" Tester
- SG_ JDD_Byte1 : 15|8@0+ (1,0) [0|255] "" Vector__XXX
- SG_ JDD_Byte2 : 23|8@0+ (1,0) [0|255] "" Vector__XXX
- SG_ JDD_Byte3 : 31|8@0+ (1,0) [0|255] "" Vector__XXX
- SG_ JDD_Byte4 : 39|8@0+ (1,0) [0|255] "" Vector__XXX
- SG_ JDD_Byte5 : 47|8@0+ (1,0) [0|255] "" Vector__XXX
- SG_ JDD_Byte6 : 55|8@0+ (1,0) [0|255] "" Vector__XXX
- SG_ JDD_Byte7 : 63|8@0+ (1,0) [0|255] "" Vector__XXX
 
 BO_ 1910 HS2_EMIS_NEW_JDD_ARTIV_776: 8 ARTIV
  SG_ NUMERO_TRAME M : 5|2@0+ (1,0) [0|0] "" BSI
@@ -1204,24 +1374,12 @@ BO_ 1917 HS2_EMIS_NEW_JDD_ASR_PLUS_77D: 8 MCM
  SG_ ETAT_DTC : 3|1@0+ (1,0) [0|0] "" BSI
  SG_ NOMBRE_TRAMES : 7|2@0+ (1,0) [0|0] "" BSI
 
-BO_ 1928 Supv_CMM: 8 CMM___Motor_SG
- SG_ P073_SupervisionFaultCodes : 7|8@0+ (1,0) [0|255] "-" Vector__XXX
- SG_ P071_ConfirmedAbsentFlags : 15|32@0+ (1,0) [0|4294967295] "-" Vector__XXX
- SG_ P284_T15CD_stPart : 43|12@0+ (1,0) [0|4095] "" Vector__XXX
- SG_ P242_T15CD_stElec : 44|4@1+ (1,0) [0|15] "" Vector__XXX
-
 BO_ 1938 HS2_SUPV_BSI_792: 8 BSI
  SG_ CODE_DEFAUT : 7|8@0+ (1,0) [0|0] "" Vector__XXX
  SG_ STATUS_CONFABSENT : 15|32@0+ (1,0) [0|0] "" Vector__XXX
  SG_ STATUS_REVEIL_PARTIEL : 43|16@0+ (1,0) [0|0] "" Vector__XXX
  SG_ ETAT_ELECTR_UCE : 47|4@0+ (1,0) [0|0] "" Vector__XXX
  SG_ ETAT_LIGNE_RCD : 56|1@0+ (1,0) [0|0] "" Vector__XXX
-
-BO_ 1941 IS_SUPV_DIRA: 6 PSCM
- SG_ CODE_DEFAUT : 7|8@0+ (1,0) [0|255] "" Tester
- SG_ STATUS_CONFABSENT : 15|32@0+ (1,0) [0|4294967295] "" Tester
- SG_ ETAT_ASSIST_DA : 46|3@0+ (1,0) [0|7] "" Tester
- SG_ ETAT_LIGNE_APC : 47|1@0+ (1,0) [0|1] "" Tester
 
 BO_ 1942 HS2_SUPV_ARTIV_796: 8 ARTIV
  SG_ CODE_DEFAUT : 7|8@0+ (1,0) [0|0] "" Vector__XXX
@@ -1233,143 +1391,370 @@ BO_ 1949 HS2_SUPV_ASR_PLUS_79D: 6 MCM
  SG_ CODE_DEFAUT : 7|8@0+ (1,0) [0|0] "" Vector__XXX
  SG_ STATUS_CONFABSENT : 15|32@0+ (1,0) [0|0] "" Vector__XXX
  SG_ ETAT_ELECTR_UCE : 47|4@0+ (1,0) [0|0] "" Vector__XXX
+;TODO
+;BO_ 2047 HS2_DIAG_UDS_ON_CAN_7FF: 8 OUTIL_DIAG
+; SG_ DATA_DIAG : 7|64@0+ (1,0) [0|0] "" UC_DIRA,UC_FREIN,CMM,BV,FAMILLE_DSG,SUSP,FSE,PROJ,SBW,PASS_BSM,CAPT_VOL
 
-BO_ 1966 XCP_REQ: 8 Tester
- SG_ XCP_Data_Req : 7|64@0+ (1,0) [0|4294967295] "" Tester,PSCM
+BO_TX_BU_ 694 : ARTIV,CMF;
+BO_TX_BU_ 758 : ARTIV,CMF;
+BO_TX_BU_ 1270 : ARTIV,CMF;
+BO_TX_BU_ 1721 : PASS_BSI,OUTIL_DIAG;
 
-BO_ 1968 XCP_RES: 8 PSCM
- SG_ XCP_Data_Res : 7|64@0+ (1,0) [0|4294967295] "" PSCM,Tester
 
-BO_ 2015 Req_EOBD_On_Can_7DF: 8 Vector__XXX
+; #############################################################################
+; ############################### EPS B0 #####################################
+; #############################################################################
 
-BO_ 2016 Req_EOBD_On_Can_7E0: 8 Vector__XXX
+;TODO
+;BO_ 3221225472 VECTOR__INDEPENDENT_SIG_MSG: 0 Vector__XXX
+; SG_ CHKSUM_VOL : 0|4@0+ (1,0) [0|15] "N/A" Vector__XXX
+; SG_ CPT_PROCESS_4B_A_VOL : 0|4@0+ (1,0) [0|15] "" Vector__XXX
 
-BO_ 2024 Rep_EOBD_On_Can_7E8: 8 Vector__XXX
+BO_ 1485 PROTO_HS1_DYN_UCF_5CD: 4 Tester
+ SG_ ACQ_INTERRUPT_DAE : 26|1@0+ (1,0) [0|1] "N/A"  PSCM
+ SG_ PRECISION_OFFSET : 31|5@0+ (1,0) [0|31] "Deg"  PSCM
+ SG_ OFFSET : 15|16@0- (0.1,0) [-1630|1630] "Deg"  PSCM
+ SG_ CPT_PROCESS_4B_UCF : 3|4@0+ (1,0) [0|15] ""  PSCM
+ SG_ CHKSUM_TRME_DYN_UCF : 7|4@0+ (1,0) [0|15] "UNM"  PSCM
+
+BO_ 1394 IS_DAT_BSI_572: 2 Tester
+ SG_ CONFIG_VHL : 15|3@0+ (1,0) [0|7] ""  PSCM
+
+BO_ 1293 IS_DAT_ABR_50D: 8 Tester
+ SG_ Regul_ABR : 5|1@0+ (1,0) [0|1] ""  PSCM
+;TODO
+;BO_ 973 IS_DYN2_FRE_3CD: 4 Tester
+; SG_ Accel_Lat : 7|16@0- (0.05,0) [0|0] ""  PSCM
+
+;TODO
+;BO_ 845 IS_DYN_CDS_34D: 8 Tester
+; SG_ REQ_Lampe_DEF_ESP : 4|1@0+ (1,0) [0|1] ""  PSCM
+; SG_ Regul_ESP : 6|1@0+ (1,0) [0|1] ""  PSCM
+; SG_ ESP_Deconnecte : 7|1@0+ (1,0) [0|1] ""  PSCM
+
+BO_ 1906 IS_ACQ_JDD_CAN_BSI_772: 1 Tester
+ SG_ DATA_ACQ_JDD_BSI : 7|8@0+ (1,0) [0|255] ""  PSCM
+
+BO_ 1375 IS_ACQ_NEW_JDD_55F: 1 Tester
+ SG_ DATA_ACQ_JDD_BSI_2 : 7|8@0+ (1,0) [0|255] ""  PSCM
+
+BO_ 1909 IS_EMIS_NEW_JDD_CAN_DIRA: 8 PSCM
+ SG_ JDD_Byte7 : 63|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ JDD_Byte6 : 55|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ JDD_Byte5 : 47|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ JDD_Byte4 : 39|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ JDD_Byte3 : 31|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ JDD_Byte2 : 23|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ JDD_Byte1 : 15|8@0+ (1,0) [0|255] "" Vector__XXX
+ SG_ Type_of_Message : 1|2@0+ (1,0) [0|3] ""  Tester
+ SG_ DTC_State : 3|1@0+ (1,0) [0|1] ""  Tester
+ SG_ Number_of_Frames : 7|2@0+ (1,0) [0|3] ""  Tester
+ SG_ Frame_Number : 5|2@0+ (1,0) [0|3] ""  Tester
+
+BO_ 1362 IS_DAT4_V2_BSI_552: 8 Tester
+ SG_ Msg552_Byte7 : 63|8@0+ (1,0) [0|255] ""  PSCM
+ SG_ Msg552_Byte6 : 55|8@0+ (1,0) [0|255] ""  PSCM
+ SG_ Msg552_Byte5 : 47|8@0+ (1,0) [0|255] ""  PSCM
+ SG_ Msg552_Byte4 : 39|8@0+ (1,0) [0|255] ""  PSCM
+ SG_ Msg552_Byte3 : 31|8@0+ (1,0) [0|255] ""  PSCM
+ SG_ Msg552_Byte2 : 23|8@0+ (1,0) [0|255] ""  PSCM
+ SG_ Msg552_Byte1 : 15|8@0+ (1,0) [0|255] ""  PSCM
+ SG_ Msg552_Byte0 : 7|8@0+ (1,0) [0|255] ""  PSCM
+
+BO_ 1010 IS_DAT_BSI_3F2: 8 Tester
+ SG_ COLUMN_ANGLE_SETPOINT : 55|14@0- (0.1,0) [-780|780] ""  PSCM
+ SG_ LXA_ACTIVATION : 40|1@0+ (1,0) [0|0] ""  PSCM
+ SG_ LKA_TRQ_FACT_REQ : 47|7@0+ (0.01,0) [0|0] ""  PSCM
+ SG_ LKA_STATE : 36|3@0+ (1,0) [0|0] ""  PSCM
+ SG_ DMD_DELEST_DA : 2|1@0+ (1,0) [0|1] ""  PSCM
+
+BO_ 146 IS_INTE_ELECTRON_BSI: 8 Tester
+ SG_ DIAG_INTEGRA_ELEC : 7|1@0+ (1,0) [0|1] ""  PSCM
+ SG_ MODE_DIAG : 6|1@0+ (1,0) [0|1] ""  PSCM
+ SG_ EFFAC_DEFAULT_DIAG : 0|1@0+ (1,0) [0|1] ""  PSCM
+;TODO
+;BO_ 904 IS_DYN_CMM_388: 8 Tester
+; SG_ VITESSE_VEHICLE_BV : 7|16@0+ (0.01,0) [0|655.34] "Kph"  PSCM
+
+BO_ 773 IS_DYN_VOL: 7 Tester
+ SG_ FLG_INIT_AVOL : 55|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ FLG_AVOL_ICN : 54|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ ANGLE_VOLANT_ORIGINE : 53|2@0+ (1,0) [0|3] "" Vector__XXX
+ SG_ RESERVED : 51|4@0+ (1,0) [0|15] "" Vector__XXX
+ SG_ VITESSE_ROT_VOL_OPTIMISE : 47|8@0+ (4,0) [0|1016] "" Vector__XXX
+ SG_ CODE_DEFAUT_VOL : 30|4@0+ (1,0) [0|15] "N/A" Vector__XXX
+ SG_ TRIM_VOL : 26|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ CALIBRATION_VOL : 25|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ ETAT_CAPT_VOL : 24|1@0+ (1,0) [0|1] "" Vector__XXX
+ SG_ SENS_ROT_VOL : 31|1@0+ (1,0) [0|1] ""  PSCM
+ SG_ CHKSUM_VOL : 39|4@0+ (1,0) [0|15] ""  PSCM
+ SG_ CPT_PROCESS_4B_A_VOL : 35|4@0+ (1,0) [0|15] ""  PSCM
+ SG_ VITESSE_ROT_VOL : 23|8@0+ (4,0) [0|1016] "Deg/s"  PSCM
+ SG_ ANGLE_VOLANT : 7|16@0- (0.1,0) [-780|780] "Deg"  PSCM
+;TODO
+;BO_ 1042 IS_DAT_BSI_412: 8 Tester
+; SG_ Req_Mode_DA : 31|2@0+ (1,0) [0|3] ""  PSCM
+
+BO_ 747 IS_DYN_AAS: 8 Tester
+ SG_ CPT_PROCESS_4B_CPK : 27|4@0+ (1,0) [0|15] ""  PSCM
+ SG_ CHKSUM_TRME_DYN_CPK : 31|4@0+ (1,0) [0|15] ""  PSCM
+ SG_ DMD_RELAXE_CPK : 21|2@0+ (1,0) [0|3] ""  PSCM
+ SG_ DMD_FCT_CPK : 23|2@0+ (1,0) [0|3] ""  PSCM
+ SG_ CONS_ANGLE_CPK : 7|16@0- (0.1,0) [-780|780] "Deg"  PSCM
 
 BO_ 2047 IS_DIAG_UDS_ON_CAN_7FF: 8 Tester
- SG_ Diagnostic_Func_Req : 7|64@0+ (1,0) [0|4294967295] "" PSCM
+ SG_ Diagnostic_Func_Req : 7|64@0+ (1,0) [0|4294967295] ""  PSCM
 
-BO_ 3221225472 VECTOR__INDEPENDENT_SIG_MSG: 0 Vector__XXX
- SG_ Code : 0|5@0+ (1,0) [0|0] "" Vector__XXX
- SG_ ConfIdCde : 0|11@0+ (1,0) [0|0] "" Vector__XXX
- SG_ ConfIdStatus : 0|11@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Data0 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Data1 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Data2 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Data3 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Data4 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Data5 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Data6 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Data7 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Diagnostic_On_Can : 0|8@1+ (1,0) [0|255] "" Vector__XXX
- SG_ Edge : 0|2@0+ (1,0) [0|0] "" Vector__XXX
- SG_ GetConfIdCde : 0|11@0+ (1,0) [0|0] "" Vector__XXX
- SG_ GetConfIdStatus : 0|11@0+ (1,0) [0|0] "" Vector__XXX
- SG_ IdPert : 0|11@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Input1 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Input2 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Input3 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Input4 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Local_ID : 0|8@1+ (1,0) [0|255] "" Vector__XXX
- SG_ Mask0 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Mask1 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Mask2 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Mask3 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Mask4 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Mask5 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Mask6 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Mask7 : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ MaskIdPert : 0|11@0+ (1,0) [0|0] "" Vector__XXX
- SG_ NumScenario : 0|3@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Output0 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Output1 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Output2 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Output3 : 0|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ OutputNumber : 0|3@0+ (1,0) [0|0] "" Vector__XXX
- SG_ P004_ActualTorqueNoGearbox : 0|8@1+ (2,-100) [-100|408] "Nm" Vector__XXX
- SG_ P013_Com_stBrk1 : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P028_Gbx_stEOBDFault : 0|4@1+ (1,0) [0|15] "-" Vector__XXX
- SG_ P033_sABS : 0|16@0+ (0.1,0) [0|6553.5] "m" Vector__XXX
- SG_ P040_Com_stBrkRaw1 : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P041_Cde_RVV : 0|2@1+ (1,0) [0|3] "-" Vector__XXX
- SG_ P049_Com_bMIL : 0|1@1+ (1,0) [0|1] "-" Vector__XXX
- SG_ P051_ACCD_stPres : 0|2@1+ (1,0) [0|3] "-" Vector__XXX
- SG_ P053_ACCtl_stHys : 0|1@1+ (1,0) [0|1] "-" Vector__XXX
- SG_ P055_Com_trqTCSAbs : 0|8@1+ (2,-100) [-100|408] "Nm" Vector__XXX
- SG_ P069_Act_RVV : 0|1@1+ (1,0) [0|1] "-" Vector__XXX
- SG_ P084_CoDT_trqGearbxDes : 0|8@1+ (2,-100) [-100|408] "Nm" Vector__XXX
- SG_ P087_Com_stClth : 0|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ P093_Temp_aval_FAP : 0|8@1+ (4,-40) [0|255] "°C" Vector__XXX
- SG_ P095_EngPrt_stOvrSpd : 0|2@1+ (1,0) [0|1] "-" Vector__XXX
- SG_ P101_Com_mAddPmpTot : 0|16@0+ (0.05,0) [0|3276.5] "g" Vector__XXX
- SG_ P107_Com_stAddPmpLvl : 0|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ P128_Forcage_Encl_GMV : 0|1@1+ (1,0) [0|1] "-" Vector__XXX
- SG_ P133_StSys_stEngSTT2Rls : 0|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ P135_StSys_stAR2s : 0|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ P145_Saturation_Active : 0|1@1+ (1,0) [0|1] "-" Vector__XXX
- SG_ P227_Pwr_Gen_Support_state : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P229_Com_xTCChkSum : 0|4@1+ (1,0) [0|0] "" Vector__XXX
- SG_ P243_FrmMng_stFlCnsmp_mp : 0|1@1+ (1,0) [0|0] "" Vector__XXX
- SG_ P248_StarterStopReq : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P250_MajorStartRequest : 0|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ P251_Com_stScndStrtReq : 0|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ P252_ImpluseStart : 0|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ P255_Com_tiSec : 0|20@0+ (1,0) [0|0] "" Vector__XXX
- SG_ P256_Com_tiDay : 0|12@0+ (1,0) [0|0] "" Vector__XXX
- SG_ P257_Com_tiYr : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ P261_PCH_WakeUP : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P268_AddPmpCD_volAddInjStp : 0|8@1+ (10,0) [0|255] "" Vector__XXX
- SG_ P284_T15CD_stPart_byte6 : 0|4@0+ (1,0) [0|15] "" Vector__XXX
- SG_ P284_T15CD_stPart_byte8 : 0|4@1+ (1,0) [0|15] "" Vector__XXX
- SG_ P290_StSys_stGlwAuth : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P292_FrmMng_stGearTrqReq : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P296_Fans_bEHRPmpReq : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P297_RTE_Fun_StErr : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P298_Com_stEHRCtl : 0|1@1- (1,0) [0|1] "" Vector__XXX
- SG_ P308_EOBD_Rediness : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P314_VehDa_stTrqMax : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P315_VehDa_stEngSpdMax : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P317_FrmMng_dtBVMPChkSum : 0|4@1+ (1,0) [0|15] "" Vector__XXX
- SG_ P318_FrmMng_ctBVMPCntr : 0|4@1+ (1,0) [0|15] "" Vector__XXX
- SG_ P325_Com_tiEngOffLSB : 0|16@1+ (1,0) [0|65535] "" Vector__XXX
- SG_ P325_Com_tiEngOffMSB : 0|16@1+ (1,0) [0|65535] "" Vector__XXX
- SG_ P348_Alt_bFault : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P361_Com_stTscEngDemTyp : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P363_Com_trqRelCrSConv : 0|8@1- (3,-150) [0|0] "Nm" Vector__XXX
- SG_ P364_Gbx_nGbxIPSpeedFlt : 0|12@0+ (2,0) [0|0] "rpm" Vector__XXX
- SG_ P399_Com_stProd : 0|3@1+ (1,0) [0|7] "" Vector__XXX
- SG_ P405_Com_stRly1DiagRaw : 0|3@1- (1,0) [0|7] "" Vector__XXX
- SG_ P407_Com_stRly2DiagRaw : 0|3@1- (1,0) [-4|3] "" Vector__XXX
- SG_ P416_Com_bStSpCabReqRaw : 0|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P427_Com_stBattTypEstRaw : 0|2@1+ (1,0) [0|3] "" Vector__XXX
- SG_ P436_Com_uPrdcVltgStrtRaw : 0|11@0+ (0.01,0) [0|13] "" Vector__XXX
- SG_ Rate : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ Reserved_1 : 0|16@1+ (1,0) [0|255] "-" Vector__XXX
- SG_ VersionActel : 0|1@0+ (1,0) [0|0] "" Vector__XXX
- SG_ VersionBaudRate : 0|3@0+ (1,0) [0|0] "" Vector__XXX
- SG_ VersionDate : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ VersionInput : 0|4@0+ (1,0) [0|0] "" Vector__XXX
- SG_ VersionMajor : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ VersionMinor : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ VersionMode : 0|4@0+ (1,0) [0|0] "" Vector__XXX
- SG_ VersionMonth : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ VersionYear : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ code : 0|8@0+ (1,0) [0|0] "" Vector__XXX
- SG_ commande : 0|5@0+ (1,0) [0|0] "" Vector__XXX
+BO_ 1968 XCP_RES: 8 PSCM
+ SG_ XCP_Data_Res : 7|64@0+ (1,0) [0|4294967295] ""  PSCM,Tester
 
-CM_ BO_ 114 "ID 072: Unlock Request Frame or LockingStatus (Event triggered)";
-CM_ SG_ 114 ADC2_Req_Status "Unlock request";
-CM_ SG_ 114 ADC2_Seed_Byte3 "SEED1 of RQD_CMM (highest byte)";
-CM_ SG_ 114 ADC2_Seed_Byte2 "SEED2 of RQD_CMM (high byte)";
-CM_ SG_ 114 ADC2_Seed_Byte1 "SEED3 of RQD_CMM (low byte)";
-CM_ SG_ 114 ADC2_Seed_Byte0 "SEED4 of RQD_CMM (lowest byte)";
-CM_ BO_ 146 "Trame BSI émise toutes les 100 ms pendant 1 seconde.";
+BO_ 1966 XCP_REQ: 8 Tester
+ SG_ XCP_Data_Req : 7|64@0+ (1,0) [0|4294967295] ""  Tester,PSCM
+
+;TODO
+;BO_ 1074 IS_DAT_BSI_432: 8 Tester
+; SG_ ETAT_RESEAU_ELEC : 63|4@0+ (1,0) [0|15] ""  PSCM
+; SG_ Power_Supplies : 52|3@0+ (1,0) [0|7] ""  PSCM
+; SG_ Shunt_Position : 54|2@0+ (1,0) [0|3] ""  PSCM
+; SG_ ETAT_PRINCIP_SEV : 49|2@0+ (1,0) [0|3] ""  PSCM
+;TODO
+;BO_ 840 IS_DYN2_CMM_348: 8 Tester
+; SG_ ETAT_MT : 43|4@0+ (1,0) [0|15] ""  PSCM
+;TODO
+;BO_ 520 IS_DYN_CMM_208: 8 Tester
+; SG_ DIAG_MUX_ON : 38|1@0+ (1,0) [0|1] ""  PSCM
+;TODO
+;BO_ 909 IS_DYN_ABR: 8 Tester
+; SG_ VITESSE_VEHICULE_ROUES : 7|16@0+ (0.01,0) [0|655.34] "Kph"  PSCM
+; SG_ CPT_PROCESS_4B_UC_FREIN : 47|4@0+ (1,0) [0|15] ""  PSCM
+; SG_ CHKSUM_TRME_DYN_UC_FREIN : 43|4@0+ (1,0) [0|15] ""  PSCM
+
+BO_ 1941 IS_SUPV_DIRA: 6 PSCM
+ SG_ STATUS_CONFABSENT : 15|32@0+ (1,0) [0|4294967295] ""  Tester
+ SG_ ETAT_LIGNE_APC : 47|1@0+ (1,0) [0|1] ""  Tester
+ SG_ ETAT_ASSIST_DA : 46|3@0+ (1,0) [0|7] ""  Tester
+ SG_ CODE_DEFAUT : 7|8@0+ (1,0) [0|255] ""  Tester
+
+BO_ 1173 IS_DAT_DIRA: 4 PSCM
+ SG_ Reserved : 31|8@0+ (1,0) [0|255] ""  Tester
+ SG_ TRQ_LIMIT_STATE : 16|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ STEERWHL_HOLD_BY_DRV : 17|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ EPS_STATE_LKA : 20|3@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ ETAT_DA_2004 : 9|2@0+ (1,0) [0|3] ""  Tester
+ SG_ ETAT_DA_DYN : 13|2@0+ (1,0) [0|3] ""  Tester
+ SG_ ETAT_DA_2010 : 15|2@0+ (1,0) [0|3] ""  Tester
+ SG_ DDE_REDEM_DA : 23|1@0+ (1,0) [0|1] ""  Tester
+ SG_ CPLE_VOLANT : 7|8@0- (0.25,0) [-32|31.5] "Nm"  Tester
+ SG_ AUTOR_ARRET_MOT_DA : 21|1@0+ (1,0) [0|1] ""  Tester
+
+BO_ 757 IS_DYN_DAE: 7 PSCM
+ SG_ ETAT_DAE_CAV3_VIRTUEL : 51|3@0+ (1,0) [0|7] "N/A" Vector__XXX
+ SG_ VITESSE_COLONNE : 47|12@0- (1,0) [-2000|2000] "Deg/s"  Tester
+ SG_ ETAT_SECU_ANGLE_COL : 48|1@0+ (1,0) [0|1] ""  Tester
+ SG_ ETAT_DAE_CPK : 22|2@0+ (1,0) [0|3] ""  Tester
+ SG_ CPT_PROCESS_4B_DAE : 3|4@0+ (1,0) [0|15] ""  Tester
+ SG_ CPLE_VOLANT_OPTMSE : 15|8@0- (0.1,0) [-10|10] "Nm"  Tester
+ SG_ CHKSUM_TRME_DYN_DAE : 7|4@0+ (1,0) [0|15] ""  Tester
+ SG_ CAUSE_DESACTIV_CPK : 20|3@0+ (1,0) [0|7] ""  Tester
+ SG_ ANGLE_COLONNE : 31|16@0- (0.1,0) [-1630|1630] "Deg"  Tester
+
+BO_ 277 IS_VERS_DIRA_115: 8 PSCM
+ SG_ Software_Edition_LSB : 63|8@0+ (1,0) [0|255] ""  Tester
+ SG_ Software_Edition_MSB : 55|8@0+ (1,0) [0|255] ""  Tester
+ SG_ Software_Version : 47|8@0+ (1,0) [0|255] ""  Tester
+ SG_ Application_Code : 39|8@0+ (1,0) [0|255] ""  Tester
+ SG_ Download_Year : 31|8@0+ (1,0) [0|99] ""  Tester
+ SG_ Download_Month : 23|8@0+ (1,0) [1|12] ""  Tester
+ SG_ Download_Day : 15|8@0+ (1,0) [1|31] ""  Tester
+ SG_ System_Code : 7|8@0+ (1,0) [0|255] ""  Tester
+
+BO_ 1717 IS_REQ_DIAG_ON_CAN: 8 Tester
+ SG_ Diagnostic_Data_Req : 7|64@0+ (1,0) [0|4294967295] ""  PSCM
+
+BO_ 1685 IS_RES_DIAG_ON_CAN: 8 PSCM
+ SG_ Diagnostic_Data_Res : 7|64@0+ (1,0) [0|4294967295] ""  Tester
+
+BO_TX_BU_ 773 : PSCM,Tester;
+BO_TX_BU_ 1968 : Tester,PSCM;
+BO_TX_BU_ 1966 : PSCM,Tester;
+
+
+; #############################################################################
+; ############################### HS1 CM ######################################
+; #############################################################################
+CM_ "EDC17 CAN data base for DT20C C10
+-Sharath Tengse (RBIN/EDR2)";
+CM_ BU_ UTIL__Traminator "Control of Traminator by CAN2 of CANalyzer";
+CM_ BU_ AR2S_StartStop "This node is for start stop function. For DV4E4";
+CM_ BO_ 3221225472 "This is a message for not used signals, created by Vector CANdb++ DBC OLE DB Provider.";
+CM_ SG_ 3221225472 P252_ImpluseStart "Momentary starting request";
+CM_ SG_ 3221225472 P250_MajorStartRequest "Main latch starting request";
+CM_ SG_ 3221225472 P248_StarterStopReq "starter stop request";
+CM_ SG_ 3221225472 P107_Com_stAddPmpLvl "P107 Minimum of FAP additive exeeded";
+CM_ SG_ 3221225472 P101_Com_mAddPmpTot "P101: absolute Menge des eingespritztem Additivs (Cerium)";
+CM_ SG_ 3221225472 P087_Com_stClth "Clutch signal for AM6";
+CM_ SG_ 3221225472 P227_Pwr_Gen_Support_state "P165: Water in fuel indication (1 = water in fueel detected / 0 = no water in fuel)";
+CM_ SG_ 3221225472 P084_CoDT_trqGearbxDes "P084  Vorweggenommenes Drehmoment";
+CM_ SG_ 3221225472 P004_ActualTorqueNoGearbox "P004  Actual torque before torque intervention by automatic gearbox";
+CM_ SG_ 3221225472 P251_Com_stScndStrtReq "Secondary latched starting request";
+CM_ SG_ 3221225472 P093_Temp_aval_FAP "P093  FAP-Temperatur";
+CM_ SG_ 3221225472 P041_Cde_RVV "P041  FGR-Bedienteilinfo";
+CM_ SG_ 3221225472 P069_Act_RVV "P069  FGR-Hauptschalter";
+CM_ SG_ 3221225472 P033_sABS "P033 odometer";
+CM_ SG_ 3221225472 P284_T15CD_stPart_byte8 "ECU electronic state";
+CM_ SG_ 3221225472 Reserved_1 "P074  Number of BusOff in driving cycle";
+CM_ SG_ 3221225472 P243_FrmMng_stFlCnsmp_mp "P155: Preparation of glow activation.";
+CM_ SG_ 3221225472 P051_ACCD_stPres "P051  Abschaltung Klimakompressor wegen Ueber- oder
+Unterdruck im Kaeltemittelkreislauf";
+CM_ SG_ 3221225472 P053_ACCtl_stHys "P053  Abschaltung Klimakompressor aus Sicherheitsgruenden
+oder wegen Komfortfunktionen";
+CM_ SG_ 3221225472 P049_Com_bMIL "P049  Ansteuerung DIA-Lampe";
+CM_ SG_ 3221225472 P028_Gbx_stEOBDFault "P028  MIL request gearbox";
+CM_ SG_ 3221225472 P284_T15CD_stPart_byte6 "ECU electronic state";
+CM_ BO_ 2024 "Le mécanisme d'émission utilisé est événementiel du CMM vers l'outil branché sur le réseau Can
+
+Trame réponse EOBD On Can du CMM";
+CM_ BO_ 2016 "Le mécanisme d'émission utilisé est événementiel de l'outil branché sur le réseau Can vers le CMM
+
+Trame question EOBD On Can adresse au CMM";
+CM_ BO_ 2015 "Le mécanisme d'émission utilisé est événementiel de l'outil branché sur le réseau Can vers les calculateurs.
+
+Trame question EOBD On Can adresse a tous les calculateurs";
+CM_ BO_ 1704 "Le mécanisme d'émission utilisé est événementiel de l'outil vers le calculateur via la BSI
+Trame question pour le téléchargement et le Diag On CAN.";
+CM_ BO_ 1375 "trame utilisable uniquement pour le JDD en archi EE 2010";
+CM_ BO_ 1554 "trame consommée uniquement sur véhicules en archi EE 2010";
+CM_ BO_ 1458 "trame utilisable uniquement sur véhicules en archi EE 2010";
+CM_ SG_ 1458 P__Com_stEOBD "Pxxx: EOBD relevant errors in the network";
+CM_ SG_ 1458 P100_Com_stAddPmpDef "P100: Status of additive for FAP";
+CM_ SG_ 1458 P146_Com_tEnvT "P146: Environment air temperature";
+CM_ BO_ 1362 "Trame utilisable uniquement sur véhicules en archi EE 2010
+
+cette trame est émise toutes les 100ms pendant 1seconde puis toutes les secondes";
+CM_ SG_ 1362 P015_Com_lTotDst "P015: covered distance from dashboard";
+CM_ BO_ 1101 "ID 44D: Rear unfiltered wheel speeds, used for EasyMove";
+CM_ SG_ 1101 P331_VehV_vWhlRrR "P010  vehicle speed of ABS. This signal is loaded into VSSCD_v";
+CM_ SG_ 1101 P330_VehV_vWhlRrL "P010  vehicle speed of ABS. This signal is loaded into VSSCD_v";
+CM_ BO_ 1928 "ID 788:  CMM Supervision Frame (Period time 1000 ms)";
+CM_ SG_ 1928 P284_T15CD_stPart "ECU electronic state";
+CM_ SG_ 1928 P242_T15CD_stElec "ECU electronic state";
+CM_ SG_ 1928 P071_ConfirmedAbsentFlags "P071  confirmed absent status flags of the ECU";
+CM_ SG_ 1928 P073_SupervisionFaultCodes "P073  Supervision fault codes";
+CM_ BO_ 1906 "Le mécanisme d'émission utilisé est événementiel de la BSI vers le CMM.
+
+Trame d'acquittement du Journal Des Défauts BSI.";
+CM_ BO_ 1294 "ID 50E: Body Car & Air Conditioning Data Frame (Period time 100 ms)";
+CM_ SG_ 1294 P050_Com_stAC "P050  Fahrerwunsch Klimakompressor ein/aus ermitteln";
+CM_ SG_ 1294 P164_Com_stPFltFan "P164:  Fan speed setpoint increase";
+CM_ BO_ 1224 "ID 4C8: Crash status by Airbag Control (Event triggered / Period time 50 ms)";
+CM_ SG_ 1224 P223_CrashInfo "Crash Information";
+CM_ BO_ 1160 "ID 488:  Engine Data Frame (Period time 100 ms)";
+CM_ SG_ 1160 P056_ACCD_p "P056  Kältemitteldruck";
+CM_ SG_ 1160 P158_Air_tAFS "P158: Intake air temperature.";
+CM_ SG_ 1160 P154_PFlt_bPFltClnReq "P154: Tell-tale lamp for \"risk of clogged filter\"";
+CM_ SG_ 1160 P063_vehV_bXVVErr "P063  FGR-Fehler";
+CM_ SG_ 1160 P108_Fid_ComAddPmpLvl "P106  Temperaturwarnlampe : blinken";
+CM_ SG_ 1160 P105_Com_bTtLmp "P105  Temperaturwarnlampe: ein/aus";
+CM_ SG_ 1160 P031_GlwLmp_st "P031  Ansteuerung Gluehanzeige";
+CM_ SG_ 1160 P032_Com_bEngStrt "P032  Zustand Motor";
+CM_ SG_ 1160 P021_Com_volFlCons "P021  Kraftstoffverbrauch";
+CM_ SG_ 1160 P005_CEngDst_tSens "P005  Wassertemperatur";
+CM_ SG_ 1128 P244_Com_bSta "Starter state";
+CM_ SG_ 1128 P245_Com_stRedBrkPlaus "Uncertain redendant brake contact";
+CM_ SG_ 1128 P246_Com_bStaPrt "Starter protection";
+CM_ SG_ 1128 P247_Com_stStaFunc "CMM DAMP function state";
+CM_ SG_ 1074 P253_Com_bEngPrepReq "Engine preparation request";
+CM_ SG_ 1074 P214_Com_stMnWkUp "Main wake-up (RCD )";
+CM_ SG_ 1074 P216_Com_bSiaWkUp "Immobilizer anticipation with wake up";
+CM_ SG_ 1074 P249_Com_stEngStopReq "Engine stop request";
+CM_ BO_ 1042 "ID 412: Body Car Data Frame (Period time 50 ms)";
+CM_ SG_ 1042 P104_Dspl_stAOHt "P104  Ansteuerung Zusatzheizer";
+CM_ SG_ 1042 P086_Com_stFlLvlDia "P086 Minimum fuel level diagnosis status. (00 Minimum fuel is valid / 01 Minimum fuel is not valid / others are not defined)";
+CM_ SG_ 1042 P012_Com_bFlMin "P012 Minimum fuel level detected. If fuel level < 15 % signal P012 will be set to one.";
+CM_ SG_ 1042 P013_MainBrake "P013 main brake signal";
+CM_ SG_ 1042 P103_Com_bRevGear "P013 main brake signal";
+CM_ SG_ 1042 P040_MainBrakeFault "P040  Main brake switch is defect.";
+CM_ BO_ 969 "Pour application MCP SSTG";
+CM_ BO_ 909 "ID 38D: ABS Vehicle Dynamic Frame (Period time 40 ms)";
+CM_ SG_ 909 P052_Com_aLng "P052 longitudinal acceleration (FrmMng_a)";
+CM_ SG_ 909 P010_Com_v "P010  vehicle speed of ABS. This signal is loaded into VSSCD_v";
+CM_ BO_ 904 "ID 388: Engine Dynamic Frame 3 (Period time 40ms)";
+CM_ SG_ 904 P066_aECU "P066 longitudinal acceleration by engine ECU";
+CM_ SG_ 904 P062_sECU "P062 odometer by engine ECU";
+CM_ SG_ 904 P060_vECU "P060 velocity by engine ECU";
+CM_ BO_ 845 "ID 34D: ESP Synchronisation frame (Period time 20 ms)";
+CM_ SG_ 845 P157_Com_ctESP "P157 Check counter";
+CM_ SG_ 845 P045_Com_trqDCSRaw "P045 DCS (MSR) torque request = min. threshold";
+CM_ SG_ 845 P044_Com_trqTCSRaw "P044 TCS (ASR) dynamic torque request";
+CM_ SG_ 845 P043_Com_xTCSStatRaw "P043 TCS (ASR) static torque request = max. threshold";
+CM_ SG_ 845 P147_Com_bESPIntvActv "P147 ESP-TCS (ASR) in regulation";
+CM_ SG_ 845 P088_CutOffForbidden "P088 Cut off of injection is forbidden.";
+CM_ SG_ 845 P047_Com_stESPIntv "P047 ESP torque request status";
+CM_ BO_ 841 "ID 349: Gearbox Synchronisation Frame (Period time 20 ms)";
+CM_ SG_ 841 P340_Com_xTSCChkSum "P097  request to increase the idle speed";
+CM_ SG_ 841 P287_Com_stGearRat "P008  transmission range engaged";
+CM_ SG_ 841 P283_Com_stGearTrgtPos "P087 gearbox converter state";
+CM_ SG_ 841 P166_Com_nEngTSC "P055 torque limitation for gearbox";
+CM_ SG_ 841 P230_Com_ctTSCCntr "P048  fan request for gearbox";
+CM_ SG_ 841 P167_Com_stEngSpdCtl "P009  shift in progress";
+CM_ SG_ 841 P085_Com_bGbxACCmprShOff "P085  AC compressor inhibit";
+CM_ SG_ 841 P009_Com_bGearShftActv "P057  Gearbox torque request";
+CM_ BO_ 840 "ID 348:  Engine Dynamic Frame 2 (Period time 20 ms)";
+CM_ SG_ 840 P091_ConvCD_stDebVal "P091 clutch pedal switch and status";
+CM_ SG_ 840 P134_Com_stEng "Engine status";
+CM_ SG_ 840 P212_Comp_load_shed "Compressor load shedding command";
+CM_ SG_ 840 P025_Com_stESPErr "P025 TCS/DCS (ASR/MSR) request state";
+CM_ SG_ 840 P026_Com_bESPAck "P026 TCS/DCS (ASR/MSR) acknowledgement by engine ECU
+(1 = communication correct)";
+CM_ SG_ 840 P017_Com_trqFrc "P017 Torque lost by AC, friction, high pressure pump and acsessories.";
+CM_ SG_ 840 P211_AirC_pClnt "P084  Vorweggenommenes Drehmoment";
+CM_ SG_ 840 P019_Com_trqPrp "P019 Requested torque before processing.";
+CM_ SG_ 840 P152_Gearbx_stGear "P152: Gear detected by ratio vehicule speed to engine speed";
+CM_ SG_ 840 P165_FlFCD_stWtLvlSensDebVal "P165: Water in fuel indication (1 = water in fuel detected / 0 = no water in fuel)";
+CM_ BO_ 520 "ID 208:  Engine Dynamic Frame (Period time 10 ms)";
+CM_ SG_ 520 P027_ACCtl_stLogicOut "P027  Klimakompressor Status ein/aus";
+CM_ SG_ 520 P198_ActMod_trqClthTraIntv "P084  Vorweggenommenes Drehmoment";
+CM_ SG_ 520 P127_EGT_st_Bit30 "P127: Regeneration aid by electric consumers (engine load increase).";
+CM_ SG_ 520 P042_Inm_bCanMon "P042  CAN-Fehlerbehandlung im Startfall mit Hilfe der
+          Startendekennung unterdrücken";
+CM_ SG_ 520 P153_Com_bTrqInacc "P153: Indicates to the torque consumers that the accuracy of the
+torque data output is not guaranteed by the CMM.";
+CM_ SG_ 520 P037_VehV_stXVV "P037  Zustand des FGR (Ein/Aus,Ueberdruecken)";
+CM_ SG_ 520 P014_Brk_stRed "P014  Redundanter Bremskontakt";
+CM_ SG_ 520 P002_Com_rAPP "P002  rueckgerechnete PWG-Stellung";
+CM_ SG_ 520 P003_Com_trqActOut "P003  Actual torque ";
+CM_ SG_ 520 P000_Com_nEng "P000  Motordrehzahl";
+CM_ BO_ 264 "ID 108:  ECM Version Frame - Vers_CMM (Period: Single shot)
+
+Le contenu de la trame est une recopie d'un sous-ensemble de la zone d'identification de la Flash Eprom définie dans le document Application flash EPROM 2000 ref. 96.285.582.9.
+
+";
+CM_ SG_ 264 P083_Calibration "P083  Calibration issue";
+CM_ SG_ 264 P082_Edition "P082  Software issue";
+CM_ SG_ 264 P081_Version "P081  Software version";
+CM_ SG_ 264 P080_Application "P080  supplier application";
+CM_ SG_ 264 P079_Year "P079  Date: year of the version";
+CM_ SG_ 264 P078_Month "P078  Date: month of the version";
+CM_ SG_ 264 P077_Day "P077  Date: day of the version";
+CM_ SG_ 264 P076_System "P076  system version";
 CM_ BO_ 168 "ID A8: Unlock Permission Frame Code (Period time 10 ms)";
-CM_ SG_ 168 ADC2_Key_Status "Unlock permission";
-CM_ SG_ 168 ADC2_Key_Byte3 "KEY1 of CFD_BSI (highest byte)";
-CM_ SG_ 168 ADC2_Key_Byte2 "KEY2 of CFD_BSI (high byte)";
-CM_ SG_ 168 ADC2_Key_Byte1 "KEY3 of CFD_BSI (low byte)";
 CM_ SG_ 168 ADC2_Key_Byte0 "KEY4 of CFD_BSI (lowest byte)";
+CM_ SG_ 168 ADC2_Key_Byte1 "KEY3 of CFD_BSI (low byte)";
+CM_ SG_ 168 ADC2_Key_Byte2 "KEY2 of CFD_BSI (high byte)";
+CM_ SG_ 168 ADC2_Key_Byte3 "KEY1 of CFD_BSI (highest byte)";
+CM_ SG_ 168 ADC2_Key_Status "Unlock permission";
+CM_ BO_ 146 "Trame BSI émise toutes les 100 ms pendant 1 seconde.";
+CM_ BO_ 114 "ID 072: Unlock Request Frame or LockingStatus (Event triggered)";
+CM_ SG_ 114 ADC2_Seed_Byte0 "SEED4 of RQD_CMM (lowest byte)";
+CM_ SG_ 114 ADC2_Seed_Byte1 "SEED3 of RQD_CMM (low byte)";
+CM_ SG_ 114 ADC2_Seed_Byte2 "SEED2 of RQD_CMM (high byte)";
+CM_ SG_ 114 ADC2_Seed_Byte3 "SEED1 of RQD_CMM (highest byte)";
+CM_ SG_ 114 ADC2_Req_Status "Unlock request";
+
+
+; #############################################################################
+; ############################### HS2 CM ######################################
+; #############################################################################
 CM_ BO_ 238 "La définition du contenu dépend du type de calculateur :
 - Téléchargeable (logiciel et calibrage) en Flash Eprom : le contenu de la trame est une recopie d'un sous-ensemble de la zone d'identification de la Flash Eprom définie dans le document Application flash EPROM 2000 ref. 96.285.582.99.
 - Téléchargeable (calibrage) en Eeprom : le contenu de la trame est une recopie d'un sous-ensemble de la zone d'identification de l'Eeprom définie dans le document Téléchargement de calibrations pour UCEs sans flash Eprom ref. 96.401.797.9A.
@@ -1406,17 +1791,6 @@ CM_ SG_ 239 VERSION_SOFT "Caractérise la version du logiciel";
 CM_ SG_ 239 EDITION_SOFT "Caractérise l'evolution de la version du logiciel.";
 CM_ SG_ 239 EDITION_CALIB "Caractérise les évolutions de calibrage.
 S'il n'y a pas d'indice de calibrage, cette donnée doit etre mise à zéro.";
-CM_ BO_ 264 "ID 108:  ECM Version Frame - Vers_CMM (Period: Single shot)
-
-Le contenu de la trame est une recopie d'un sous-ensemble de la zone d'identification de la Flash Eprom définie dans le document Application flash EPROM 2000 ref. 96.285.582.9.";
-CM_ SG_ 264 P076_System "P076  system version";
-CM_ SG_ 264 P077_Day "P077  Date: day of the version";
-CM_ SG_ 264 P078_Month "P078  Date: month of the version";
-CM_ SG_ 264 P079_Year "P079  Date: year of the version";
-CM_ SG_ 264 P080_Application "P080  supplier application";
-CM_ SG_ 264 P081_Version "P081  Software version";
-CM_ SG_ 264 P082_Edition "P082  Software issue";
-CM_ SG_ 264 P083_Calibration "P083  Calibration issue";
 CM_ BO_ 274 "La définition du contenu dépend du type de calculateur :
 - Téléchargeable (logiciel et calibration) en Flash Eprom : le contenu de la trame est une recopie d'un sous-ensemble de la zone d'identification de la Flash Eprom définie dans le document Application flash EPROM 2000 ref. 96.285.582.99.
 - Téléchargeable (calibration) en Eeprom : le contenu de la trame est une recopie d'un sous-ensemble de la zone d'identification de l'Eeprom définie dans le document Téléchargement de calibrations pour UCEs sans flash Eprom ref. 96.401.797.9A.
@@ -1485,19 +1859,6 @@ CM_ SG_ 300 VERSION_SOFT "Caractérise la version du logiciel";
 CM_ SG_ 300 EDITION_SOFT "Caractérise l'evolution de la version du logiciel.";
 CM_ SG_ 300 EDITION_CALIB "Caractérise les évolutions de calibrage.
 S'il n'y a pas d'indice de calibrage, cette donnée doit etre mise à zéro.";
-CM_ BO_ 520 "ID 208:  Engine Dynamic Frame (Period time 10 ms)";
-CM_ SG_ 520 P000_Com_nEng "P000  Motordrehzahl";
-CM_ SG_ 520 P003_Com_trqActOut "P003  Actual torque";
-CM_ SG_ 520 P002_Com_rAPP "P002  rueckgerechnete PWG-Stellung";
-CM_ SG_ 520 P027_ACCtl_stLogicOut "P027  Klimakompressor Status ein/aus";
-CM_ SG_ 520 P014_Brk_stRed "P014  Redundanter Bremskontakt";
-CM_ SG_ 520 P037_VehV_stXVV "P037  Zustand des FGR (Ein/Aus,Ueberdruecken)";
-CM_ SG_ 520 P153_Com_bTrqInacc "P153: Indicates to the torque consumers that the accuracy of the
-torque data output is not guaranteed by the CMM.";
-CM_ SG_ 520 P042_Inm_bCanMon "P042  CAN-Fehlerbehandlung im Startfall mit Hilfe der
-          Startendekennung unterdrücken";
-CM_ SG_ 520 P127_EGT_st_Bit30 "P127: Regeneration aid by electric consumers (engine load increase).";
-CM_ SG_ 520 P198_ActMod_trqClthTraIntv "P084  Vorweggenommenes Drehmoment";
 CM_ SG_ 525 CHKSUM_FRAME_4B_20D "CHK_INI = 0xD";
 CM_ BO_ 552 "Emise pour la fonction Easy Move";
 CM_ SG_ 557 CHKSUM_FRAME_4B_22D "CHK_INI = 0x3";
@@ -1520,34 +1881,7 @@ pour la trame 0x3C9, CHK_INI = 0x1.";
 CM_ SG_ 809 CPLE_RESIST_PREDIT "CPLE_RESIST_PREDIT = N* 1";
 CM_ SG_ 813 CHKSUM_TRME_DYN_UCF_ACC "CHK_INI = 0x2";
 CM_ SG_ 813 CPT_PROCESS_4B_UC_FREIN "Ce compteur s'incrémente de 0 à 15 à chaque activation du processus de calcul.";
-CM_ BO_ 840 "ID 348:  Engine Dynamic Frame 2 (Period time 20 ms)";
-CM_ SG_ 840 P165_FlFCD_stWtLvlSensDebVal "P165: Water in fuel indication (1 = water in fuel detected / 0 = no water in fuel)";
-CM_ SG_ 840 P152_Gearbx_stGear "P152: Gear detected by ratio vehicule speed to engine speed";
-CM_ SG_ 840 P019_Com_trqPrp "P019 Requested torque before processing.";
-CM_ SG_ 840 P211_AirC_pClnt "P084  Vorweggenommenes Drehmoment";
-CM_ SG_ 840 P017_Com_trqFrc "P017 Torque lost by AC, friction, high pressure pump and acsessories.";
-CM_ SG_ 840 P026_Com_bESPAck "P026 TCS/DCS (ASR/MSR) acknowledgement by engine ECU
-(1 = communication correct)";
-CM_ SG_ 840 P025_Com_stESPErr "P025 TCS/DCS (ASR/MSR) request state";
-CM_ SG_ 840 P091_ConvCD_stDebVal "P091 clutch pedal switch and status";
-CM_ SG_ 840 P212_Comp_load_shed "Compressor load shedding command";
-CM_ SG_ 840 P134_Com_stEng "Engine status";
-CM_ BO_ 841 "ID 349: Gearbox Synchronisation Frame (Period time 20 ms)";
-CM_ SG_ 841 P009_Com_bGearShftActv "P057  Gearbox torque request";
-CM_ SG_ 841 P085_Com_bGbxACCmprShOff "P085  AC compressor inhibit";
-CM_ SG_ 841 P167_Com_stEngSpdCtl "P009  shift in progress";
-CM_ SG_ 841 P287_Com_stGearRat "P008  transmission range engaged";
-CM_ SG_ 841 P283_Com_stGearTrgtPos "P087 gearbox converter state";
-CM_ SG_ 841 P230_Com_ctTSCCntr "P048  fan request for gearbox";
-CM_ SG_ 841 P340_Com_xTSCChkSum "P097  request to increase the idle speed";
-CM_ SG_ 841 P166_Com_nEngTSC "P055 torque limitation for gearbox";
-CM_ BO_ 845 "ID 34D: ESP Synchronisation frame (Period time 20 ms)";
 CM_ SG_ 845 CPT_PROCESS_4B_ESP "Ce compteur s'incrémente de 0 à 15 à chaque activation du processus de calcul.";
-CM_ BO_ 904 "ID 388: Engine Dynamic Frame 3 (Period time 40ms)";
-CM_ SG_ 904 P060_vECU "P060 velocity by engine ECU";
-CM_ SG_ 904 P062_sECU "P062 odometer by engine ECU";
-CM_ SG_ 904 P066_aECU "P066 longitudinal acceleration by engine ECU";
-CM_ BO_ 909 "ID 38D: ABS Vehicle Dynamic Frame (Period time 40 ms)";
 CM_ SG_ 909 DISTANCE_ROUES "Distance mesurée avec les capteurs de roues";
 CM_ SG_ 909 ACCEL_LONGI_ROUES "Acceleration mesurée avec les capteurs de roues";
 CM_ SG_ 909 CHKSUM_TRME_DYN_UC_FREIN "CHK_INI = 0x8";
@@ -1557,14 +1891,6 @@ CM_ SG_ 952 CPLMT1_VOLONTE_COND "Complément à 1 de la volonté conducteur (VOL
 CM_ SG_ 952 CPLMT1_CPL_POT_AP_TR "Complément à 1 du couple potentiel demandé par le conducteur après traitement (CPLE_POT_APR_TRT) pour la SDF";
 CM_ SG_ 952 CPLMT1_CPL_CND_AP_TR "Complément à 1 du couple demande par le conducteur après traitement (CPLE_COND_APR_TRT)
  pour la SDF";
-CM_ BO_ 969 "Pour application MCP SSTG";
-CM_ BO_ 1042 "ID 412: Body Car Data Frame (Period time 50 ms)";
-CM_ SG_ 1042 P040_MainBrakeFault "P040  Main brake switch is defect.";
-CM_ SG_ 1042 P103_Com_bRevGear "P013 main brake signal";
-CM_ SG_ 1042 P013_MainBrake "P013 main brake signal";
-CM_ SG_ 1042 P012_Com_bFlMin "P012 Minimum fuel level detected. If fuel level < 15 % signal P012 will be set to one.";
-CM_ SG_ 1042 P086_Com_stFlLvlDia "P086 Minimum fuel level diagnosis status. (00 Minimum fuel is valid / 01 Minimum fuel is not valid / others are not defined)";
-CM_ SG_ 1042 P104_Dspl_stAOHt "P104  Ansteuerung Zusatzheizer";
 CM_ SG_ 1069 CHKSUM_FRAME_4B_42D "CHK_INI = 0x6";
 CM_ SG_ 1074 DDE_COUP_MT "Demande de coupure du moteur thermique faîte par le véhicule au CMM";
 CM_ SG_ 1074 DDE_ARRET_DEMARREUR "Demande d'arrêt démarreur faîte par le véhicule au CMM";
@@ -1591,19 +1917,11 @@ bits 7.6 à 7.5 : Position du shunt BSI
 bits 7.4 à 7.2 : Alimentations
 
 Se référer à la STE n° CSEO_APPT07_0032 : Mécanismes du JDD AEE2010 Packs A & B.";
-CM_ BO_ 1101 "ID 44D: Rear unfiltered wheel speeds, used for EasyMove";
-CM_ SG_ 1101 P330_VehV_vWhlRrL "P010  vehicle speed of ABS. This signal is loaded into VSSCD_v";
-CM_ SG_ 1101 P331_VehV_vWhlRrR "P010  vehicle speed of ABS. This signal is loaded into VSSCD_v";
 CM_ SG_ 1106 TYPE_REGUL_LONGI "Définit si on est en LVV ou RVV ou ACC ou sans régulation.";
 CM_ SG_ 1106 ETAT_ESSUYAGE_AV "Emis si capteur de pluie";
 CM_ SG_ 1106 CONS_LIM_VITESSE_VEH "Consigne ou limite : selon la valeur du bit 'type de Vitesse V demandée'";
 CM_ SG_ 1106 CHKSUM_CONS_RVV_LVV2 "Sert à sécuriser la consigne RVV ou consigne LVV émise par le réseau CAN (signal CONS_LIM_VITESSE_VEH)";
 CM_ SG_ 1106 CHKSUM_FRAME_4B_452 "CHK_INI = 0xB";
-CM_ SG_ 1128 P247_Com_stStaFunc "CMM DAMP function state";
-CM_ SG_ 1128 P246_Com_bStaPrt "Starter protection";
-CM_ SG_ 1128 P245_Com_stRedBrkPlaus "Uncertain redendant brake contact";
-CM_ SG_ 1128 P244_Com_bSta "Starter state";
-CM_ BO_ 1160 "ID 488:  Engine Data Frame (Period time 100 ms)";
 CM_ SG_ 1160 CONSO_CARBURANT "carburant : essence, diesel, GPL...";
 CM_ SG_ 1160 ALERTE_NIV_MIN_ADDITIF "Information au conducteur pour qu'il effectue le plein d'additif dans le réseau après vente";
 CM_ SG_ 1160 DDE_ALLUM_VOY_MLGE_PVRE "Allume un voyant pour signaler que le démarrage du moteur à froid sera difficile.";
@@ -1631,8 +1949,6 @@ CM_ SG_ 1202 VIS_5 "Cinqiueme caractere de VIS";
 CM_ SG_ 1202 VIS_6 "Sixieme caractere de VIS";
 CM_ SG_ 1202 VIS_7 "Septieme caractere de VIS";
 CM_ SG_ 1202 VIS_8 "Huitieme caractere de VIS";
-CM_ BO_ 1224 "ID 4C8: Crash status by Airbag Control (Event triggered / Period time 50 ms)";
-CM_ SG_ 1224 P223_CrashInfo "Crash Information";
 CM_ BO_ 1234 "Trame WMI d'identification de la marque de la voiture (World Manufacturer Identifier)";
 CM_ SG_ 1234 WMI_1 "Premier caractere de WMI";
 CM_ SG_ 1234 WMI_2 "Second caractere de WMI";
@@ -1649,9 +1965,9 @@ CM_ SG_ 1294 DDE_HABITACLE_SG "Décrit le besoin en énergie à fournir par le m
 CM_ SG_ 1294 DEM_RAL_HAB "Permet de démander une augmentatrion du ralenti pour les besoins habitacle (ex: climatisation)";
 CM_ SG_ 1294 CONS_LIM_VITESSE_VEH "Consigne ou limite : selon la valeur du bit 'type de Vitesse V demandée'";
 CM_ SG_ 1294 TYPE_REGUL_LONGI "Définit si on est en LVV ou RVV ou ACC ou sans régulation.";
-CM_ BO_ 1362 "Trame utilisable uniquement sur véhicules en archi EE 2010
-
-cette trame est émise toutes les 100ms pendant 1seconde puis toutes les secondes";
+CM_ SG_ 1362 CPT_TEMPOREL "0xFFFFFFFE : indisponible";
+CM_ SG_ 1362 KILOMETRAGE "Kilométrage absolu parcouru par le véhicule (en cohérence avec l'indication donnée au conducteur)";
+CM_ SG_ 1362 COMPTEUR_RAZ_GCT "Indisponible FE";
 CM_ BO_ 1375 "Trame d'acquittement du journal des défauts BSI.";
 CM_ BO_ 1389 "Emise vers le tricapteur Bosch pour réponse de celui-ci dans la trame 579h";
 CM_ BO_ 1420 "Trame Réponse pour le téléchargement et le Diag On CAN réservé pour bi capteur.";
@@ -1660,10 +1976,6 @@ CM_ SG_ 1426 ETAT_ESSUYAGE "Emis si capteur de pluie";
 CM_ BO_ 1452 "Trame question pour le téléchargement et le Diag On CAN réservé pour le calculateur ACC .";
 CM_ BO_ 1455 "Trame Réponse pour le téléchargement et le Diag On CAN réservé pour bi capteur.";
 CM_ BO_ 1456 "Trame question pour le téléchargement et le Diag On CAN réservé pour le calculateur ACC .";
-CM_ BO_ 1458 "trame utilisable uniquement sur véhicules en archi EE 2010";
-CM_ SG_ 1458 P146_Com_tEnvT "P146: Environment air temperature";
-CM_ SG_ 1458 P100_Com_stAddPmpDef "P100: Status of additive for FAP";
-CM_ SG_ 1458 P__Com_stEOBD "Pxxx: EOBD relevant errors in the network";
 CM_ BO_ 1484 "Cette trame regroupe les données d'instrumentation qui permettent de juger de la qualité de la transmission ainsi que de déterminer si un défaut au moins est présent sur le calculateur. Cette trame n'est pas impliquée dans le fonctionnement des calculateurs en mode normal.";
 CM_ SG_ 1484 CODE_DEFAUT "Etat de la memoire diagnostic du systeme";
 CM_ SG_ 1484 STATUS_CONFABSENT "Recopie des flags de status des calculateurs supervises, information ConfirmedAbsent (Se reporter à la spécification du diagnostic de communication). Pour chaque calculateur, le bit prend la valeur 0 si le calculateur est present, ou 1 s'il est Confirmed Absent.
@@ -1706,17 +2018,11 @@ Octet 2 : LSB,
 Octet 3 : 0x00.";
 CM_ SG_ 1521 KILOMETRAGE_JDD "Kilométrage absolu parcouru par le véhicule (en cohérence avec l'indication donnée au conducteur)";
 CM_ SG_ 1521 SITUATION_VIE_JDD "Décrit dans la ST JDD SOUS_CAPOT";
-CM_ BO_ 1554 "trame consommée uniquement sur véhicules en archi EE 2010";
 CM_ BO_ 1686 "Trame Réponse pour le téléchargement et le Diag On CAN réservé pour le calculateur ACC.";
 CM_ BO_ 1689 "Trame Réponse pour le téléchargement et le Diag On CAN réservé pour bi capteur.";
 CM_ BO_ 1693 "Trame Réponse pour le téléchargement et le Diag On CAN.";
-CM_ BO_ 1704 "Le mécanisme d'émission utilisé est événementiel de l'outil vers le calculateur via la BSI
-Trame question pour le téléchargement et le Diag On CAN.";
 CM_ BO_ 1718 "Trame question pour le téléchargement et le Diag On CAN réservé pour le calculateur ACC .";
 CM_ BO_ 1721 "Trame question pour le téléchargement et le Diag On CAN réservé pour le bi capteur .";
-CM_ BO_ 1906 "Le mécanisme d'émission utilisé est événementiel de la BSI vers le CMM.
-
-Trame d'acquittement du Journal Des Défauts BSI.";
 CM_ BO_ 1910 "Trame d'émission du journal des défauts du calculateur DIRA ou GEP.";
 CM_ SG_ 1910 CODES_DEFAUT "Le codage du défaut correspond à :
 Octet 1 : MSB,
@@ -1731,11 +2037,6 @@ Octet 2 : LSB,
 Octet 3 : 0x00.";
 CM_ SG_ 1917 KILOMETRAGE_JDD "Kilométrage absolu parcouru par le véhicule (en cohérence avec l'indication donnée au conducteur)";
 CM_ SG_ 1917 SITUATION_VIE_JDD "Décrit dans la ST JDD SOUS_CAPOT";
-CM_ BO_ 1928 "ID 788:  CMM Supervision Frame (Period time 1000 ms)";
-CM_ SG_ 1928 P073_SupervisionFaultCodes "P073  Supervision fault codes";
-CM_ SG_ 1928 P071_ConfirmedAbsentFlags "P071  confirmed absent status flags of the ECU";
-CM_ SG_ 1928 P284_T15CD_stPart "ECU electronic state";
-CM_ SG_ 1928 P242_T15CD_stElec "ECU electronic state";
 CM_ BO_ 1938 "Cette trame regroupe les données d'instrumentation qui permettent de juger de la qualité de la transmission ainsi que de déterminer si un défaut au moins est présent sur le calculateur et renseigne la phase de vie du calculateur (RCD). Cette trame n'est pas impliquée dans le fonctionnement des calculateurs en mode normal.";
 CM_ SG_ 1938 CODE_DEFAUT "Etat de la memoire diagnostic du systeme";
 CM_ SG_ 1938 STATUS_CONFABSENT "Recopie des flags de status des calculateurs supervises, information ConfirmedAbsent (Se reporter à la spécification du diagnostic de communication). Pour chaque calculateur, le bit prend la valeur 0 si le calculateur est present, ou 1 s'il est Confirmed Absent.
@@ -1753,44 +2054,390 @@ CM_ SG_ 1949 CODE_DEFAUT "Etat de la memoire diagnostic du systeme";
 CM_ SG_ 1949 STATUS_CONFABSENT "Recopie des flags de status des calculateurs supervises, information ConfirmedAbsent (Se reporter à la spécification du diagnostic de communication). Pour chaque calculateur, le bit prend la valeur 0 si le calculateur est present, ou 1 s'il est Confirmed Absent.
 Si une UCE n'est pas supervisée, on place par défaut le bit correspondant à 0.";
 CM_ SG_ 1949 ETAT_ELECTR_UCE "Phase de vie de l'UCE (RCD)";
-CM_ BO_ 2015 "Le mécanisme d'émission utilisé est événementiel de l'outil branché sur le réseau Can vers les calculateurs.
 
-Trame question EOBD On Can adresse a tous les calculateurs";
-CM_ BO_ 2016 "Le mécanisme d'émission utilisé est événementiel de l'outil branché sur le réseau Can vers le CMM
 
-Trame question EOBD On Can adresse au CMM";
-CM_ BO_ 2024 "Le mécanisme d'émission utilisé est événementiel du CMM vers l'outil branché sur le réseau Can
-
-Trame réponse EOBD On Can du CMM";
+; #############################################################################
+; ############################### EPS CM ######################################
+; #############################################################################
 CM_ BO_ 3221225472 "This is a message for not used signals, created by Vector CANdb++ DBC OLE DB Provider.";
-CM_ SG_ 3221225472 P004_ActualTorqueNoGearbox "P004  Actual torque before torque intervention by automatic gearbox";
-CM_ SG_ 3221225472 P028_Gbx_stEOBDFault "P028  MIL request gearbox";
-CM_ SG_ 3221225472 P033_sABS "P033 odometer";
-CM_ SG_ 3221225472 P041_Cde_RVV "P041  FGR-Bedienteilinfo";
-CM_ SG_ 3221225472 P049_Com_bMIL "P049  Ansteuerung DIA-Lampe";
-CM_ SG_ 3221225472 P051_ACCD_stPres "P051  Abschaltung Klimakompressor wegen Ueber- oder
-Unterdruck im Kaeltemittelkreislauf";
-CM_ SG_ 3221225472 P053_ACCtl_stHys "P053  Abschaltung Klimakompressor aus Sicherheitsgruenden
-oder wegen Komfortfunktionen";
-CM_ SG_ 3221225472 P069_Act_RVV "P069  FGR-Hauptschalter";
-CM_ SG_ 3221225472 P084_CoDT_trqGearbxDes "P084  Vorweggenommenes Drehmoment";
-CM_ SG_ 3221225472 P087_Com_stClth "Clutch signal for AM6";
-CM_ SG_ 3221225472 P093_Temp_aval_FAP "P093  FAP-Temperatur";
-CM_ SG_ 3221225472 P101_Com_mAddPmpTot "P101: absolute Menge des eingespritztem Additivs (Cerium)";
-CM_ SG_ 3221225472 P107_Com_stAddPmpLvl "P107 Minimum of FAP additive exeeded";
-CM_ SG_ 3221225472 P227_Pwr_Gen_Support_state "P165: Water in fuel indication (1 = water in fueel detected / 0 = no water in fuel)";
-CM_ SG_ 3221225472 P243_FrmMng_stFlCnsmp_mp "P155: Preparation of glow activation.";
-CM_ SG_ 3221225472 P248_StarterStopReq "starter stop request";
-CM_ SG_ 3221225472 P250_MajorStartRequest "Main latch starting request";
-CM_ SG_ 3221225472 P251_Com_stScndStrtReq "Secondary latched starting request";
-CM_ SG_ 3221225472 P252_ImpluseStart "Momentary starting request";
-CM_ SG_ 3221225472 P284_T15CD_stPart_byte6 "ECU electronic state";
-CM_ SG_ 3221225472 P284_T15CD_stPart_byte8 "ECU electronic state";
-CM_ SG_ 3221225472 Reserved_1 "P074  Number of BusOff in driving cycle";
-VAL_ 146 EFFAC_DEFAULT_DIAG 1 "Default Memory Erase" 0 "No Specific Action";
-VAL_ 146 MODE_DIAG 0 "Pas de fonctionnement particulier" 1 "Inhibition du fonctionnel et de la communication" 1 "Operation and Comm Inhibited" 0 "No Particular Operation";
-VAL_ 146 DIAG_INTEGRA_ELEC 0 "Pas de fonctionnement particulier" 1 "Pas de transmission de trames" 1 "No Frame Transmission" 0 "No Particular Operation";
-VAL_ 277 Download_Month 12 "December" 11 "November" 10 "October" 9 "September" 8 "August" 7 "July" 6 "June" 5 "May" 4 "April" 3 "March" 2 "February" 1 "January";
+
+
+; #############################################################################
+; ############################### HS1 BA ######################################
+; #############################################################################
+BA_DEF_ BO_  "???" HEX 0 0;
+BA_DEF_DEF_  "???" 0;
+BA_ "???" BO_ 520 0;
+
+
+; #############################################################################
+; ############################### HS2 BA ######################################
+; #############################################################################
+BA_DEF_ BO_  "ModeTransmission" ENUM  "P","E","P+E";
+BA_DEF_ BO_  "Période" INT 0 0;
+BA_DEF_DEF_  "ModeTransmission" "P";
+BA_DEF_DEF_  "Période" 100;
+BA_ "Période" BO_ 146 0;
+BA_ "ModeTransmission" BO_ 146 1;
+BA_ "Période" BO_ 238 0;
+BA_ "ModeTransmission" BO_ 238 1;
+BA_ "Période" BO_ 239 0;
+BA_ "ModeTransmission" BO_ 239 1;
+BA_ "Période" BO_ 274 0;
+BA_ "ModeTransmission" BO_ 274 1;
+BA_ "Période" BO_ 278 0;
+BA_ "ModeTransmission" BO_ 278 1;
+BA_ "Période" BO_ 285 0;
+BA_ "ModeTransmission" BO_ 285 1;
+BA_ "Période" BO_ 300 0;
+BA_ "ModeTransmission" BO_ 300 1;
+BA_ "Période" BO_ 525 10;
+BA_ "ModeTransmission" BO_ 525 0;
+BA_ "Période" BO_ 551 10;
+BA_ "ModeTransmission" BO_ 551 0;
+BA_ "Période" BO_ 552 10;
+BA_ "ModeTransmission" BO_ 552 0;
+BA_ "Période" BO_ 557 20;
+BA_ "ModeTransmission" BO_ 557 0;
+BA_ "Période" BO_ 584 10;
+BA_ "ModeTransmission" BO_ 584 0;
+BA_ "Période" BO_ 632 10;
+BA_ "ModeTransmission" BO_ 632 0;
+BA_ "Période" BO_ 642 10;
+BA_ "ModeTransmission" BO_ 642 0;
+BA_ "Période" BO_ 653 10;
+BA_ "ModeTransmission" BO_ 653 0;
+BA_ "Période" BO_ 664 20;
+BA_ "ModeTransmission" BO_ 664 0;
+BA_ "Période" BO_ 690 20;
+BA_ "ModeTransmission" BO_ 690 0;
+BA_ "Période" BO_ 694 20;
+BA_ "ModeTransmission" BO_ 694 0;
+BA_ "Période" BO_ 696 20;
+BA_ "ModeTransmission" BO_ 696 0;
+BA_ "Période" BO_ 717 20;
+BA_ "ModeTransmission" BO_ 717 0;
+BA_ "Période" BO_ 728 20;
+BA_ "ModeTransmission" BO_ 728 0;
+BA_ "Période" BO_ 744 20;
+BA_ "ModeTransmission" BO_ 744 0;
+BA_ "Période" BO_ 758 20;
+BA_ "ModeTransmission" BO_ 758 0;
+BA_ "Période" BO_ 760 20;
+BA_ "ModeTransmission" BO_ 760 0;
+BA_ "Période" BO_ 761 10;
+BA_ "ModeTransmission" BO_ 761 0;
+BA_ "Période" BO_ 792 20;
+BA_ "ModeTransmission" BO_ 792 0;
+BA_ "Période" BO_ 802 20;
+BA_ "ModeTransmission" BO_ 802 0;
+BA_ "Période" BO_ 809 20;
+BA_ "ModeTransmission" BO_ 809 0;
+BA_ "Période" BO_ 813 20;
+BA_ "ModeTransmission" BO_ 813 0;
+BA_ "Période" BO_ 845 20;
+BA_ "ModeTransmission" BO_ 845 0;
+BA_ "Période" BO_ 905 40;
+BA_ "ModeTransmission" BO_ 905 0;
+BA_ "Période" BO_ 909 40;
+BA_ "ModeTransmission" BO_ 909 0;
+BA_ "Période" BO_ 946 40;
+BA_ "ModeTransmission" BO_ 946 0;
+BA_ "Période" BO_ 952 40;
+BA_ "ModeTransmission" BO_ 952 0;
+BA_ "Période" BO_ 968 20;
+BA_ "ModeTransmission" BO_ 968 0;
+BA_ "Période" BO_ 1001 50;
+BA_ "ModeTransmission" BO_ 1001 0;
+BA_ "Période" BO_ 1032 40;
+BA_ "ModeTransmission" BO_ 1032 0;
+BA_ "Période" BO_ 1069 50;
+BA_ "ModeTransmission" BO_ 1069 0;
+BA_ "Période" BO_ 1070 100;
+BA_ "ModeTransmission" BO_ 1070 0;
+BA_ "Période" BO_ 1074 50;
+BA_ "ModeTransmission" BO_ 1074 0;
+BA_ "Période" BO_ 1080 50;
+BA_ "ModeTransmission" BO_ 1080 0;
+BA_ "Période" BO_ 1106 50;
+BA_ "ModeTransmission" BO_ 1106 0;
+BA_ "Période" BO_ 1160 100;
+BA_ "ModeTransmission" BO_ 1160 0;
+BA_ "Période" BO_ 1166 100;
+BA_ "ModeTransmission" BO_ 1166 0;
+BA_ "Période" BO_ 1170 1000;
+BA_ "ModeTransmission" BO_ 1170 0;
+BA_ "Période" BO_ 1202 1000;
+BA_ "ModeTransmission" BO_ 1202 0;
+BA_ "Période" BO_ 1234 1000;
+BA_ "ModeTransmission" BO_ 1234 0;
+BA_ "Période" BO_ 1261 100;
+BA_ "ModeTransmission" BO_ 1261 0;
+BA_ "Période" BO_ 1266 100;
+BA_ "ModeTransmission" BO_ 1266 0;
+BA_ "Période" BO_ 1270 100;
+BA_ "ModeTransmission" BO_ 1270 0;
+BA_ "Période" BO_ 1277 100;
+BA_ "ModeTransmission" BO_ 1277 0;
+BA_ "Période" BO_ 1294 100;
+BA_ "ModeTransmission" BO_ 1294 2;
+BA_ "Période" BO_ 1330 100;
+BA_ "ModeTransmission" BO_ 1330 0;
+BA_ "Période" BO_ 1356 200;
+BA_ "ModeTransmission" BO_ 1356 2;
+BA_ "Période" BO_ 1362 1000;
+BA_ "ModeTransmission" BO_ 1362 2;
+BA_ "Période" BO_ 1375 0;
+BA_ "ModeTransmission" BO_ 1375 1;
+BA_ "Période" BO_ 1389 0;
+BA_ "ModeTransmission" BO_ 1389 1;
+BA_ "Période" BO_ 1393 100;
+BA_ "ModeTransmission" BO_ 1393 2;
+BA_ "Période" BO_ 1400 100;
+BA_ "ModeTransmission" BO_ 1400 0;
+BA_ "Période" BO_ 1401 0;
+BA_ "ModeTransmission" BO_ 1401 1;
+BA_ "Période" BO_ 1420 0;
+BA_ "ModeTransmission" BO_ 1420 1;
+BA_ "Période" BO_ 1426 100;
+BA_ "ModeTransmission" BO_ 1426 0;
+BA_ "Période" BO_ 1448 1000;
+BA_ "ModeTransmission" BO_ 1448 2;
+BA_ "Période" BO_ 1449 1000;
+BA_ "ModeTransmission" BO_ 1449 0;
+BA_ "Période" BO_ 1452 0;
+BA_ "ModeTransmission" BO_ 1452 1;
+BA_ "Période" BO_ 1455 0;
+BA_ "ModeTransmission" BO_ 1455 1;
+BA_ "Période" BO_ 1456 0;
+BA_ "ModeTransmission" BO_ 1456 1;
+BA_ "Période" BO_ 1464 1000;
+BA_ "ModeTransmission" BO_ 1464 0;
+BA_ "Période" BO_ 1484 1000;
+BA_ "ModeTransmission" BO_ 1484 2;
+BA_ "Période" BO_ 1487 0;
+BA_ "ModeTransmission" BO_ 1487 1;
+BA_ "Période" BO_ 1488 0;
+BA_ "ModeTransmission" BO_ 1488 1;
+BA_ "Période" BO_ 1489 1000;
+BA_ "ModeTransmission" BO_ 1489 2;
+BA_ "Période" BO_ 1490 1000;
+BA_ "ModeTransmission" BO_ 1490 2;
+BA_ "Période" BO_ 1496 1000;
+BA_ "ModeTransmission" BO_ 1496 0;
+BA_ "Période" BO_ 1516 0;
+BA_ "ModeTransmission" BO_ 1516 1;
+BA_ "Période" BO_ 1517 300;
+BA_ "ModeTransmission" BO_ 1517 0;
+BA_ "Période" BO_ 1518 1000;
+BA_ "ModeTransmission" BO_ 1518 2;
+BA_ "Période" BO_ 1519 0;
+BA_ "ModeTransmission" BO_ 1519 1;
+BA_ "Période" BO_ 1520 1000;
+BA_ "ModeTransmission" BO_ 1520 2;
+BA_ "Période" BO_ 1521 0;
+BA_ "ModeTransmission" BO_ 1521 1;
+BA_ "Période" BO_ 1554 100;
+BA_ "ModeTransmission" BO_ 1554 0;
+BA_ "Période" BO_ 1686 0;
+BA_ "ModeTransmission" BO_ 1686 1;
+BA_ "Période" BO_ 1689 0;
+BA_ "ModeTransmission" BO_ 1689 1;
+BA_ "Période" BO_ 1693 0;
+BA_ "ModeTransmission" BO_ 1693 1;
+BA_ "Période" BO_ 1718 0;
+BA_ "ModeTransmission" BO_ 1718 1;
+BA_ "Période" BO_ 1721 0;
+BA_ "ModeTransmission" BO_ 1721 1;
+BA_ "Période" BO_ 1725 0;
+BA_ "ModeTransmission" BO_ 1725 1;
+BA_ "Période" BO_ 1910 0;
+BA_ "ModeTransmission" BO_ 1910 1;
+BA_ "Période" BO_ 1917 0;
+BA_ "ModeTransmission" BO_ 1917 1;
+BA_ "Période" BO_ 1938 1000;
+BA_ "ModeTransmission" BO_ 1938 2;
+BA_ "Période" BO_ 1942 1000;
+BA_ "ModeTransmission" BO_ 1942 0;
+BA_ "Période" BO_ 1949 1000;
+BA_ "ModeTransmission" BO_ 1949 2;
+BA_ "Période" BO_ 2047 0;
+BA_ "ModeTransmission" BO_ 2047 1;
+
+
+; #############################################################################
+; ############################### EPS BA ######################################
+; #############################################################################
+BA_DEF_ BO_  "GenMsgStartDelayTime" INT 0 65535;
+BA_DEF_ BO_  "GenMsgMinAcceptLength" INT -1 8;
+BA_DEF_ BO_  "DiagState" ENUM  "No","Yes";
+BA_DEF_ BO_  "GenMsgDelayTime" INT 0 65535;
+BA_DEF_ SG_  "GenSigSendType" ENUM  "Cyclic","OnWrite","OnWriteWithRepetition","OnChange","OnChangeWithRepetition","IfActive","IfActiveWithRepetition","NoSigSendType","OnChangeAndIfActive","OnChangeAndIfActiveWithRepetition";
+BA_DEF_ BU_  "ILUsed" ENUM  "No","Yes";
+BA_DEF_  "Manufacturer" STRING ;
+BA_DEF_ BO_  "GenMsgILSupport" ENUM  "No","Yes";
+BA_DEF_ BO_  "DiagResponse" ENUM  "No","Yes";
+BA_DEF_ BO_  "DiagRequest" ENUM  "No","Yes";
+BA_DEF_  "BusType" STRING ;
+BA_DEF_  "DBName" STRING ;
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 65535;
+BA_DEF_ BO_  "GenMsgSendType" ENUM  "Cyclic","NotUsed","NotUsed","NotUsed","NotUsed","NotUsed","NotUsed","IfActive","NoMsgSendType";
+BA_DEF_ SG_  "GenSigStartValue" INT 0 1000000000;
+BA_DEF_DEF_  "GenMsgStartDelayTime" 0;
+BA_DEF_DEF_  "GenMsgMinAcceptLength" -1;
+BA_DEF_DEF_  "DiagState" "No";
+BA_DEF_DEF_  "GenMsgDelayTime" 0;
+BA_DEF_DEF_  "GenSigSendType" "NoSigSendType";
+BA_DEF_DEF_  "ILUsed" "No";
+BA_DEF_DEF_  "Manufacturer" "PSA";
+BA_DEF_DEF_  "GenMsgILSupport" "No";
+BA_DEF_DEF_  "DiagResponse" "No";
+BA_DEF_DEF_  "DiagRequest" "No";
+BA_DEF_DEF_  "BusType" "";
+BA_DEF_DEF_  "DBName" "";
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
+BA_DEF_DEF_  "GenMsgSendType" "NoMsgSendType";
+BA_DEF_DEF_  "GenSigStartValue" 0;
+BA_ "BusType" "CAN";
+BA_ "Manufacturer" "PSA";
+BA_ "DBName" "PSA_BMPV";
+BA_ "ILUsed" BU_ PSCM 1;
+BA_ "GenMsgILSupport" BO_ 1485 1;
+BA_ "GenMsgSendType" BO_ 1485 0;
+BA_ "GenMsgCycleTime" BO_ 1485 1000;
+BA_ "GenMsgMinAcceptLength" BO_ 1485 4;
+BA_ "GenMsgSendType" BO_ 1394 0;
+BA_ "GenMsgCycleTime" BO_ 1394 100;
+BA_ "GenMsgILSupport" BO_ 1394 1;
+BA_ "GenMsgMinAcceptLength" BO_ 1394 2;
+BA_ "GenMsgMinAcceptLength" BO_ 1293 1;
+BA_ "GenMsgILSupport" BO_ 1293 1;
+BA_ "GenMsgCycleTime" BO_ 1293 100;
+BA_ "GenMsgSendType" BO_ 1293 0;
+BA_ "GenMsgMinAcceptLength" BO_ 973 4;
+BA_ "GenMsgILSupport" BO_ 973 1;
+BA_ "GenMsgCycleTime" BO_ 973 10;
+BA_ "GenMsgSendType" BO_ 973 0;
+BA_ "GenMsgMinAcceptLength" BO_ 845 5;
+BA_ "GenMsgILSupport" BO_ 845 1;
+BA_ "GenMsgCycleTime" BO_ 845 20;
+BA_ "GenMsgSendType" BO_ 845 0;
+BA_ "GenMsgILSupport" BO_ 1906 1;
+BA_ "GenMsgMinAcceptLength" BO_ 1906 1;
+BA_ "GenMsgMinAcceptLength" BO_ 1375 1;
+BA_ "GenMsgILSupport" BO_ 1375 1;
+BA_ "GenMsgILSupport" BO_ 1909 1;
+BA_ "GenMsgSendType" BO_ 1909 8;
+BA_ "GenMsgMinAcceptLength" BO_ 1362 5;
+BA_ "GenMsgILSupport" BO_ 1362 1;
+BA_ "GenMsgCycleTime" BO_ 1362 1000;
+BA_ "GenMsgSendType" BO_ 1362 0;
+BA_ "GenMsgMinAcceptLength" BO_ 1010 3;
+BA_ "GenMsgILSupport" BO_ 1010 1;
+BA_ "GenMsgCycleTime" BO_ 1010 50;
+BA_ "GenMsgSendType" BO_ 1010 0;
+BA_ "GenMsgMinAcceptLength" BO_ 146 1;
+BA_ "GenMsgILSupport" BO_ 146 1;
+BA_ "GenMsgCycleTime" BO_ 146 100;
+BA_ "GenMsgSendType" BO_ 146 7;
+BA_ "GenMsgMinAcceptLength" BO_ 904 5;
+BA_ "GenMsgILSupport" BO_ 904 1;
+BA_ "GenMsgCycleTime" BO_ 904 40;
+BA_ "GenMsgSendType" BO_ 904 0;
+BA_ "GenMsgMinAcceptLength" BO_ 773 5;
+BA_ "GenMsgSendType" BO_ 773 0;
+BA_ "GenMsgCycleTime" BO_ 773 10;
+BA_ "GenMsgILSupport" BO_ 773 1;
+BA_ "GenMsgMinAcceptLength" BO_ 1042 8;
+BA_ "GenMsgILSupport" BO_ 1042 1;
+BA_ "GenMsgCycleTime" BO_ 1042 50;
+BA_ "GenMsgSendType" BO_ 1042 0;
+BA_ "GenMsgMinAcceptLength" BO_ 747 4;
+BA_ "GenMsgCycleTime" BO_ 747 20;
+BA_ "GenMsgSendType" BO_ 747 0;
+BA_ "GenMsgMinAcceptLength" BO_ 2047 8;
+BA_ "DiagState" BO_ 2047 1;
+BA_ "GenMsgMinAcceptLength" BO_ 1968 0;
+BA_ "GenMsgMinAcceptLength" BO_ 1966 0;
+BA_ "GenMsgMinAcceptLength" BO_ 1074 8;
+BA_ "GenMsgILSupport" BO_ 1074 1;
+BA_ "GenMsgSendType" BO_ 1074 0;
+BA_ "GenMsgCycleTime" BO_ 1074 50;
+BA_ "GenMsgMinAcceptLength" BO_ 840 6;
+BA_ "GenMsgCycleTime" BO_ 840 20;
+BA_ "GenMsgILSupport" BO_ 840 1;
+BA_ "GenMsgSendType" BO_ 840 0;
+BA_ "GenMsgMinAcceptLength" BO_ 520 6;
+BA_ "GenMsgCycleTime" BO_ 520 10;
+BA_ "GenMsgILSupport" BO_ 520 1;
+BA_ "GenMsgSendType" BO_ 520 0;
+BA_ "GenMsgMinAcceptLength" BO_ 909 6;
+BA_ "GenMsgCycleTime" BO_ 909 40;
+BA_ "GenMsgSendType" BO_ 909 0;
+BA_ "GenMsgILSupport" BO_ 1941 1;
+BA_ "GenMsgCycleTime" BO_ 1941 1000;
+BA_ "GenMsgSendType" BO_ 1941 0;
+BA_ "GenMsgStartDelayTime" BO_ 1941 5;
+BA_ "GenMsgDelayTime" BO_ 1941 10;
+BA_ "GenMsgILSupport" BO_ 1173 1;
+BA_ "GenMsgCycleTime" BO_ 1173 100;
+BA_ "GenMsgSendType" BO_ 1173 0;
+BA_ "GenMsgSendType" BO_ 757 0;
+BA_ "GenMsgCycleTime" BO_ 757 10;
+BA_ "GenMsgILSupport" BO_ 757 1;
+BA_ "GenMsgStartDelayTime" BO_ 757 5;
+BA_ "GenMsgILSupport" BO_ 277 1;
+BA_ "GenMsgSendType" BO_ 277 8;
+BA_ "GenMsgMinAcceptLength" BO_ 1717 8;
+BA_ "GenMsgSendType" BO_ 1717 1;
+BA_ "DiagRequest" BO_ 1717 1;
+BA_ "GenMsgSendType" BO_ 1685 1;
+BA_ "DiagResponse" BO_ 1685 1;
+BA_ "GenSigStartValue" SG_ 1909 Type_of_Message 1;
+BA_ "GenSigStartValue" SG_ 1909 Number_of_Frames 2;
+BA_ "GenSigSendType" SG_ 1909 Frame_Number 1;
+BA_ "GenSigStartValue" SG_ 773 ANGLE_VOLANT_ORIGINE 3;
+BA_ "GenSigStartValue" SG_ 773 TRIM_VOL 1;
+BA_ "GenSigStartValue" SG_ 773 CALIBRATION_VOL 1;
+BA_ "GenSigStartValue" SG_ 773 ETAT_CAPT_VOL 1;
+BA_ "GenSigStartValue" SG_ 2047 Diagnostic_Func_Req 0;
+BA_ "GenSigStartValue" SG_ 1968 XCP_Data_Res 0;
+BA_ "GenSigStartValue" SG_ 1966 XCP_Data_Req 0;
+BA_ "GenSigSendType" SG_ 1941 STATUS_CONFABSENT 3;
+BA_ "GenSigSendType" SG_ 1941 ETAT_LIGNE_APC 3;
+BA_ "GenSigSendType" SG_ 1941 ETAT_ASSIST_DA 3;
+BA_ "GenSigSendType" SG_ 1941 CODE_DEFAUT 3;
+BA_ "GenSigStartValue" SG_ 1173 Reserved 60;
+BA_ "GenSigStartValue" SG_ 1173 CPLE_VOLANT 127;
+BA_ "GenSigStartValue" SG_ 757 ETAT_DAE_CPK 0;
+BA_ "GenSigStartValue" SG_ 757 CPLE_VOLANT_OPTMSE 0;
+BA_ "GenSigStartValue" SG_ 757 CHKSUM_TRME_DYN_DAE 4;
+BA_ "GenSigSendType" SG_ 277 Software_Edition_LSB 1;
+BA_ "GenSigSendType" SG_ 277 Software_Edition_MSB 1;
+BA_ "GenSigSendType" SG_ 277 Software_Version 1;
+BA_ "GenSigSendType" SG_ 277 Application_Code 1;
+BA_ "GenSigSendType" SG_ 277 Download_Year 1;
+BA_ "GenSigSendType" SG_ 277 Download_Month 1;
+BA_ "GenSigStartValue" SG_ 277 Download_Month 1;
+BA_ "GenSigSendType" SG_ 277 Download_Day 1;
+BA_ "GenSigStartValue" SG_ 277 Download_Day 1;
+BA_ "GenSigSendType" SG_ 277 System_Code 1;
+BA_ "GenSigStartValue" SG_ 1717 Diagnostic_Data_Req 0;
+BA_ "GenSigStartValue" SG_ 1685 Diagnostic_Data_Res 0;
+
+
+; #############################################################################
+; ############################### HS1 VAL #####################################
+; #############################################################################
+VAL_ 840 P134_Com_stEng 7 "RESERVED" 6 "DegradedGO" 5 "GO" 4 "Stopped" 3 "Running" 2 "Starting" 1 "Cut" 0 "Locked" ;
+
+
+; #############################################################################
+; ############################### HS2 VAL #####################################
+; #############################################################################
+VAL_ 146 EFFAC_DEFAUT_DIAG 0 "Pas d'action spécifique" 1 "Effacement mémoire des défauts";
+VAL_ 146 MODE_DIAG 0 "Pas de fonctionnement particulier" 1 "Inhibition du fonctionnel et de la communication";
+VAL_ 146 DIAG_INTEGRA_ELEC 0 "Pas de fonctionnement particulier" 1 "Pas de transmission de trames";
 VAL_ 525 REGUL_ABR 0 "Non en régulation" 1 "En régulation";
 VAL_ 525 PFC_STRATEGY_ACT 0 "PFC_inactive" 1 "PFC_hold" 2 "PFC_active" 3 "Réservé";
 VAL_ 551 MD_NRJ_ROUTE 0 "pas de mode dégradé" 1 "mode dégradé en cours";
@@ -1842,16 +2489,6 @@ VAL_ 744 CURRENT_GBX_DYN_MODE 0 "Normal" 1 "Sport" 2 "Eco" 3 "Neige";
 VAL_ 744 CTRL_CPLE_GMP_ACT 0 "Faux" 1 "Vrai";
 VAL_ 744 STS_PIL_TRANS_GMP 0 "Pilotage non demandé" 1 "Pilotage demandé ou demandé mode 1" 2 "Pilotage demandé en mode Fullpass ou demandé mode 2" 3 "Réservé ou demandé mode 3";
 VAL_ 744 ETAT_MT_STT 0 "Init" 1 "Actif" 2 "Preparation_Stop" 3 "Stop_Arret_En_Cours" 4 "Moteur_Arrete" 5 "Redem_sous_MEL" 6 "Redem_Autonome" 7 "Moteur_Apte_Fournir_Couple" 8 "Coupe" 9 "Cale" 10 "Réservé" 11 "Réservé" 12 "Réservé" 13 "Réservé" 14 "Réservé" 15 "Réservé";
-VAL_ 747 CONS_ANGLE_CPK 32767 "Invalid";
-VAL_ 747 DMD_RELAXE_CPK 3 "Invalid" 2 "Relaxe Request" 1 "No Request" 0 "Reserved";
-VAL_ 747 DMD_FCT_CPK 3 "Invalid" 2 "SCP9 Control Request" 1 "SCP6 Control Request" 0 "No Request";
-VAL_ 757 CPLE_VOLANT_OPTMSE 127 "Invalid";
-VAL_ 757 CAUSE_DESACTIV_CPK 7 "Other Faults" 6 "EPS Thermal Safety Catch" 5 "Maneuvering Number Too High" 4 "Obstacle At Wheel" 3 "Angular Error Too High" 2 "Vehicle Speed Too High" 1 "Driver Hands On" 0 "No Control Interruption";
-VAL_ 757 ETAT_DAE_CPK 3 "Invalid" 2 "Control In Progress" 1 "Available" 0 "Unavailable";
-VAL_ 757 ANGLE_COLONNE 32767 "Invalid";
-VAL_ 757 VITESSE_COLONNE 2047 "Invalid";
-VAL_ 757 ETAT_SECU_ANGLE_COL 1 "Secure" 0 "Not Secure";
-VAL_ 757 ETAT_DAE_CAV3_VIRTUEL 7 "Invalid" 6 "Reserved" 5 "EPS Works with SelfDet Offset" 4 "EPS Works with Calibrated Offset" 3 "EPS Works with ESC Offset" 2 "Offset Search Authorization" 1 "Offset Initialization Request" 0 "Initialization";
 VAL_ 758 CIBLE_DETECTEE 0 "initialisation ou pas de cible détectée" 1 "cible détectée";
 VAL_ 758 DDE_REPRISE_COND 0 "Pas de demande" 1 "Demande non critique" 2 "Demande critique" 3 "Invalide";
 VAL_ 758 CAPT_AVEUGLE 0 "Faux" 1 "Vrai";
@@ -1870,17 +2507,6 @@ VAL_ 761 SOUSTENSION_SURTENSION_RB 0 "Pas de sous tension / Surtension détecté
 VAL_ 761 ETAT_VITESSE_LACET_BRUTE_RB 0 "Signal dans la plage de mesure" 1 "Erreur temporaire" 2 "Erreur permanente" 3 "Capteur en cours d'initialisation";
 VAL_ 761 ETAT_ACCEL_LAT_BRUTE_RB 0 "Signal dans la plage de mesure" 1 "Erreur temporaire" 2 "Erreur permanente" 3 "Capteur en cours d'initialisation";
 VAL_ 761 ETAT_ACCEL_LONGI_BRUTE_RB 0 "Signal dans la plage de mesure" 1 "Erreur temporaire" 2 "Erreur permanente" 3 "Capteur en cours d'initialisation";
-VAL_ 773 ANGLE_VOLANT 32767 "Invalid";
-VAL_ 773 VITESSE_ROT_VOL 255 "Invalid";
-VAL_ 773 ETAT_CAPT_VOL 1 "Sensor Is Okay" 0 "Sensor Is Faulty";
-VAL_ 773 CALIBRATION_VOL 1 "Calibrated" 0 "Not Calibrated";
-VAL_ 773 TRIM_VOL 1 "Trimmed" 0 "Not Trimmed";
-VAL_ 773 CODE_DEFAUT_VOL 4 "Internal Failures by SWS" 3 "Failure on SWS Angle, RotSpeed" 2 "Failure on SWS Angle" 1 "Failure on SWS Rotation Speed" 0 "No Default / Failure";
-VAL_ 773 SENS_ROT_VOL 1 "Clockwise" 0 "Counter Clockwise";
-VAL_ 773 VITESSE_ROT_VOL_OPTIMISE 255 "Invalid";
-VAL_ 773 ANGLE_VOLANT_ORIGINE 3 "Other" 2 "CAV3" 1 "Integreated CAV3" 0 "Estimator";
-VAL_ 773 FLG_AVOL_ICN 1 "Uncertain yet Valid Value" 0 "Valid Value in Range";
-VAL_ 773 FLG_INIT_AVOL 1 "Steering Wheel Angle Memorized" 0 "Steering Wheel Angle Available";
 VAL_ 792 DISP_XVV_BV_EN_PRISE 0 "Non active" 1 "Active";
 VAL_ 792 DISP_XVV_GMP_ACTIF 0 "Non active" 1 "Active";
 VAL_ 792 CPLE_ACC_EFFECTIF 0 "Le couple demandé par le MDD n'est pas réalisé (Couple conducteur réalisé)" 1 "Le couple demandé par le MDD est réalisé";
@@ -1910,7 +2536,6 @@ VAL_ 813 BRAKE_RELEASED_FAILSAFE 0 "Pas besoin de relâcher les freins à cause 
 VAL_ 813 EFFORT_FREIN_ERRONE 0 "Pas d'effort de freinage erroné" 1 "Effort de freinage erroné";
 VAL_ 813 ARRET_VHL_ADAS 0 "Pas de maintien à l'arrêt véhicule par une fonction ADAS" 1 "Maintien à l'arrêt véhicule pour une fonction de confort" 2 "Maintien à l'arrêt véhicule pour une fonction de de sécurité" 3 "Réservé";
 VAL_ 813 DEFAUT_ACC_FREIN 0 "Pas de défaut ACC vue du frein" 1 "Défaut ACC vue du frein";
-VAL_ 840 P134_Com_stEng 7 "RESERVED" 6 "DegradedGO" 5 "GO" 4 "Stopped" 3 "Running" 2 "Starting" 1 "Cut" 0 "Locked";
 VAL_ 845 TYPE_PIL_CPLE_ESP 0 "Pas d'action sur le couple" 1 "Réservé" 2 "Réservé" 3 "Réservé" 4 "Réservé" 5 "Consigne de réduction (ASR)" 6 "Consigne d'augmentation (MSR)" 7 "Réservé";
 VAL_ 845 ASR_DECONNECTE 0 "Connecté par le conducteur" 1 "Déconnecté par le conducteur";
 VAL_ 845 REQ_LAMPE_DEF_ESP 0 "Pas de demande" 1 "Demande d'allumage";
@@ -1928,7 +2553,6 @@ VAL_ 845 REGUL_MSR 0 "Non en régulation" 1 "En régulation";
 VAL_ 845 REGUL_ESP_SEUL 0 "Non en régulation" 1 "En régulation";
 VAL_ 845 REGUL_AFU 0 "Non en régulation" 1 "En régulation";
 VAL_ 845 REQ_LAMPE_REGUL_ASR_ESP 0 "Pas de demande" 1 "Demande d'allumage";
-VAL_ 909 VITESSE_VEHICULE_ROUES 65535 "Invalid";
 VAL_ 909 VHL_MVT 0 "Invalide" 1 "Véhicule roulant" 2 "Véhicule à l'arrêt" 3 "Invalide";
 VAL_ 909 VVH_INDISP 0 "Invalide" 1 "Informations vitesses disponible" 2 "Informations vitesses indisponible" 3 "Invalide";
 VAL_ 909 SENS_ROULAGE 0 "Indéterminé" 1 "Vers l'avant" 2 "Vers l'arrière" 3 "Invalide";
@@ -1952,10 +2576,6 @@ VAL_ 968 ETAT_POINT_MORT 0 "Réservé" 1 "Hors point mort" 2 "Point mort" 3 "Inv
 VAL_ 968 ARRET_MOT_EN_COURS 0 "Pas d'arrêt moteur en cours" 1 "Arrêt moteur en cours";
 VAL_ 968 TYPE_REDEM 0 "Redémarrage classique" 1 "Redémarrage doux";
 VAL_ 968 DDE_OUV_CDT 0 "Pas de demande" 1 "Demande d'ouverture CDT pour stop" 2 "Réservé" 3 "Réservé";
-VAL_ 1010 DMD_DELEST_DA 1 "Power Cut Request" 0 "Not Requested";
-VAL_ 1010 LKA_STATE 7 "Reserved" 6 "Collision" 5 "Defect" 4 "Active" 3 "Authorized" 2 "Selected" 1 "Unselected" 0 "Unavailable";
-VAL_ 1010 LXA_ACTIVATION 1 "LPA Function" 0 "LKA Function";
-VAL_ 1010 LKA_TRQ_FACT_REQ 127 "Invalid" 126 "Unavailable";
 VAL_ 1032 ABORT_CRITICITY_FOR_CPK 0 "Confort" 1 "Urgent";
 VAL_ 1032 PWT_STATUS_FOR_CPK 0 "Indisponible" 1 "Attente" 2 "Actif" 3 "Réservé";
 VAL_ 1069 DYN_SLOPE_ACCURACY 0 "Bonne" 1 "Moyenne" 2 "Faible" 3 "Indéfini";
@@ -1987,11 +2607,11 @@ VAL_ 1074 STATUT_DMD_DEM 0 "Demande nominal" 1 "Demande secondaire";
 VAL_ 1074 REVEIL_PRECH_UCAPS 0 "Pas de demande de réveil" 1 "Demande de réveil";
 VAL_ 1074 REVEIL_POST_VENTIL_MOT 0 "Pas de demande de réveil" 1 "Demande de réveil";
 VAL_ 1074 REVEIL_PREPA_GEP 0 "Pas de demande de réveil" 1 "Demande de réveil";
-VAL_ 1074 ETAT_PRINCIP_SEV 0 "Arret" 1 "Contact" 2 "DEM" 3 "Reserve" 2 "DEM" 1 "Contact" 0 "Stop";
+VAL_ 1074 ETAT_PRINCIP_SEV 0 "Arret" 1 "Contact" 2 "DEM" 3 "Reserve";
 VAL_ 1074 VOLONTE_DEM_GENE 0 "Valeur non utilisée" 1 "Volonté de démarrer" 2 "Pas de volonté démarrer" 3 "Valeur non utilisée";
 VAL_ 1074 PUSH_PWT_ECO 0 "Mode éco non demandé" 1 "Mode éco demandé";
 VAL_ 1074 REVEIL_POWER_LATCH_HYB 0 "Pas de demande reveil power latch" 1 "Demande reveil power latch";
-VAL_ 1074 ETAT_RESEAU_ELEC 0 "TI_NOMINAL" 1 "TI_DEGRADE" 2 "TI_DISPO_DEM" 3 "DEMARRAGE" 4 "REDEMARRAGE" 5 "TA_NOMINAL" 6 "TA_DEGRADE" 7 "TA_SECU" 8 "Réservé" 9 "Réservé" 10 "Réservé" 11 "Réservé" 12 "Réservé" 13 "Réservé" 14 "Réservé" 15 "Réservé" 7 "TA_SECU" 6 "TA_DEGRADE" 5 "TA_NOMINAL" 4 "REDEMARRAGE" 3 "DEMARRAGE" 2 "TI_DISPO_DEM" 1 "TI_Degrade" 0 "TI_Nominal";
+VAL_ 1074 ETAT_RESEAU_ELEC 0 "TI_NOMINAL" 1 "TI_DEGRADE" 2 "TI_DISPO_DEM" 3 "DEMARRAGE" 4 "REDEMARRAGE" 5 "TA_NOMINAL" 6 "TA_DEGRADE" 7 "TA_SECU" 8 "Réservé" 9 "Réservé" 10 "Réservé" 11 "Réservé" 12 "Réservé" 13 "Réservé" 14 "Réservé" 15 "Réservé";
 VAL_ 1106 TYPE_REGUL_LONGI 0 "Aucune" 1 "RVV : régulateur de vitesse véhicule" 2 "LVV : limiteur de vitesse véhicule" 3 "ACC : régulateur de vitesse véhicule automatique";
 VAL_ 1106 ETAT_CLIGNOTANTS 0 "Clignotant inactif" 1 "Clignotant droit actif" 2 "Clignotant gauche actif" 3 "Clignotant gauche et clignotant droit actifs";
 VAL_ 1106 ETAT_ESSUYAGE_AV 0 "Arrèt" 1 "Essuyage AV confirmé" 2 "Petite vitesse" 3 "Grande vitesse";
@@ -2022,15 +2642,6 @@ VAL_ 1160 RISQUE_COLMATAGE_FAP 0 "Aucune commande d'affichage du risque de colma
 VAL_ 1160 FORCAGE_PRESSION_BVA 0 "Pas de demande d'augmentation de pression" 1 "Demande d'augmentation de pression";
 VAL_ 1166 POS_MEAP_2_ACT 0 "Indisponible" 1 "Position 0" 2 "Position 1" 3 "Position 2" 4 "Position 3" 5 "Position 4" 6 "Position 5" 7 "Position 6" 8 "Position 7" 9 "Position 8" 10 "Position 9" 11 "Position 10" 12 "Non utilisée" 13 "Non utilisée" 14 "Non utilisée" 15 "Position inconnue";
 VAL_ 1166 ETAT_MEAP_2 0 "Indisponible" 1 "MEAP sans mouvement" 2 "MEAP en mouvement" 3 "MEAP en référencement" 4 "Non utilisé" 5 "Non utilisé" 6 "Non utilisé" 7 "MEAP défaillant";
-VAL_ 1173 CPLE_VOLANT 127 "Invalid";
-VAL_ 1173 ETAT_DA_2004 3 "Reserved" 2 "Orange LED" 1 "Red LED" 0 "No Demand";
-VAL_ 1173 ETAT_DA_DYN 3 "Invalid" 2 "Adjustable Mode" 1 "Dynamic Mode" 0 "Normal Mode";
-VAL_ 1173 ETAT_DA_2010 3 "Reserved" 2 "Orange LED" 1 "Red LED" 0 "No Demand";
-VAL_ 1173 TRQ_LIMIT_STATE 1 "Saturation Effective" 0 "No Saturation";
-VAL_ 1173 STEERWHL_HOLD_BY_DRV 1 "Steer Activity From Drv Trq" 0 "No Steer Activity From Drv Trq";
-VAL_ 1173 EPS_STATE_LKA 4 "Defect" 3 "Active" 2 "Available" 1 "Authorised" 0 "Unauthorised";
-VAL_ 1173 AUTOR_ARRET_MOT_DA 1 "Permission to Stop" 0 "No Permission to Stop";
-VAL_ 1173 DDE_REDEM_DA 1 "Request Reboot" 0 "No Reboot Required";
 VAL_ 1261 D_OBD_ESP_F_CAPT_PRESS 0 "pas de defaut" 1 "défaut présent";
 VAL_ 1261 D_OBD_ESP_COM_TRICAPT 0 "pas de defaut" 1 "défaut présent";
 VAL_ 1261 D_OBD_ESP_COM_CMM 0 "pas de defaut" 1 "défaut présent";
@@ -2074,7 +2685,6 @@ VAL_ 1270 SENS_CIRCU 0 "droite" 1 "gauche" 2 "réservé" 3 "indéterminé";
 VAL_ 1277 DEFAUT_MOLETTE 0 "Pas de défaut" 1 "Cohérence non diagnostiquée" 2 "Valeur réservée" 3 "Défaut";
 VAL_ 1277 OVF_DOWN 0 "Overflow down inactif" 1 "Overflow down actif";
 VAL_ 1277 OVF_UP 0 "Overfow Up inactif" 1 "Overflow Up actif";
-VAL_ 1293 Regul_ABR 1 "Active Regulation" 0 "No Regulation";
 VAL_ 1294 ETAT_EMB_COMP 0 "Compresseur débrayé" 1 "Compresseur embrayé";
 VAL_ 1294 AUTOR_ARRET_MOT_HAB 0 "Pas d'autorisation de stop" 1 "Autorisation de stop";
 VAL_ 1294 DEF_IDENT_HAB 0 "pas de de défaut" 1 "défaut";
@@ -2103,7 +2713,6 @@ VAL_ 1389 PTR_INFO_TRICPT_RB 0 "Numéro de série" 1 "Numéro de pièce client" 
 VAL_ 1389 CPT_INCR_CONTACT_RB 0 "Pas de demande d'incrémentation compteur interne capteur" 1 "Demande d'incrémentation compteur interne capteur";
 VAL_ 1393 DIAG_AVERT_SON_VEH_SIL 0 "Pas de défaut" 1 "Défaut";
 VAL_ 1393 ETAT_AVERT_SON_VEH_SIL 0 "Non inhibé" 1 "Inhibé";
-VAL_ 1394 CONFIG_VHL 7 "INVALID" 6 "SHOW_ROOM" 5 "APV" 4 "CLIENT" 3 "STORAGE / TRANSPORT" 2 "CHECK" 1 "PLANT" 0 "FITTING";
 VAL_ 1400 BRK_ASSIST_GMP_LAMP_REQ 0 "Pas de demande d'allumage" 1 "Demande d'allumage lampe défaut";
 VAL_ 1400 ETAT_GMP_DYN 0 "Normal" 1 "Sport" 2 "Eco" 3 "Neige" 4 "Invalide" 5 "Réservé" 6 "Réservé" 7 "Réservé";
 VAL_ 1400 CMD_MEAP_2 0 "Indisponible" 1 "Position 0" 2 "Position 1" 3 "Position 2" 4 "Position 3" 5 "Position 4" 6 "Position 5" 7 "Position 6" 8 "Position 7" 9 "Position 8" 10 "Position 9" 11 "Position 10" 12 "Non utilisée" 13 "Non utilisée" 14 "Référencement" 15 "Mouvement stoppé";
@@ -2139,9 +2748,6 @@ VAL_ 1464 NOTE_ECOACH_SPEED 0 "Note 0" 1 "Note 1" 2 "Note 2" 3 "Note 3" 4 "Note 
 VAL_ 1484 CODE_DEFAUT 0 "aucun defaut present" 1 "Un ou plusieurs defauts presents. Chaque bit donne un code defaut";
 VAL_ 1484 STATUS_REVEIL_PARTIEL_GMP 0 "Valeur a l initialisation" 1 "Etat reveil preparation GEP BV" 2 "Etat reveil preparation Stop & Start avec AR2S (type C3)" 4 "Etat reveil charge/decharge Ucaps" 8 "Etat reveil overload vehicle indicator" 16 "Etat reveil mecatronic headlamp" 32 "Reserve" 64 "Etat reveil Anticipation ADC" 128 "Etat reveil preparation demarrage moteur" 256 "Reserve" 512 "Etat reveil demande etat BV" 1024 "Reserve" 2048 "Etat reveil purge SCR" 4096 "Etat reveil Flex Start" 8192 "Etat reveil Power-latch HY" 16384 "Etat reveil mesures huile moteur" 32768 "Etat reveil post ventilation moteur";
 VAL_ 1484 ETAT_ELECTR_UCE 0 "Veille (theorique car jamais atteint)" 1 "Partiel ou ComLatch" 2 "Partiel interne (theoriquement non utilise)" 3 "Transitoire" 4 "Principal" 5 "Principal degrade" 6 "Init / Endormissement" 7 "Valeur par defaut (absence fonction)" 8 "Pre/Post Principal" 9 "Réservé" 10 "Réservé" 11 "Réservé" 12 "Réservé" 13 "Réservé" 14 "Réservé" 15 "Réservé";
-VAL_ 1485 OFFSET 32766 "Unavailable" 32767 "Invalid";
-VAL_ 1485 ACQ_INTERRUPT_DAE 1 "Acknowledge" 0 "No Acknowledge";
-VAL_ 1485 PRECISION_OFFSET 31 "Invalid" 30 "Unavailable";
 VAL_ 1489 CODE_DEFAUT 0 "aucun defaut present" 1 "Un ou plusieurs defauts presents. Chaque bit donne un code defaut";
 VAL_ 1489 STATUS_REVEIL_PARTIEL_LAS 0 "Valeur a l initialisation" 1 "Etat reveil correction de hauteur" 2 "Etat reveil fonction manuelle CAAR" 4 "Reveil demande état hauteur CAAR par FSE" 8 "Reveil fonction Easymove par FSE" 16 "Reveil vitesse vehicule par BSI" 32 "Reveil affichage par FSE" 64 "Reveil demande etat FSE" 128 "Reveil partiel court 1 post reveil principal";
 VAL_ 1489 ETAT_ELECTR_UCE 0 "Veille (theorique car jamais atteint)" 1 "Partiel ou ComLatch" 2 "Partiel interne (theoriquement non utilise)" 3 "Transitoire" 4 "Principal" 5 "Principal degrade" 6 "Init / Endormissement" 7 "Valeur par defaut (absence fonction)" 8 "Pre/Post Principal" 9 "Réservé" 10 "Réservé" 11 "Réservé" 12 "Réservé" 13 "Réservé" 14 "Réservé" 15 "Réservé";
@@ -2195,7 +2801,6 @@ VAL_ 1554 D_LIGNE_REL_R2 0 "Indéterminé" 1 "Pas de défaut / Commande relais i
 VAL_ 1554 D_LIGNE_REL_R1 0 "Indéterminé" 1 "Pas de défaut / Commande relais inactive" 2 "Pas de défaut / Commande relais active" 3 "CC à la masse" 4 "CC au +BAT" 5 "CO" 6 "Défaut non identifié" 7 "Valeur non utilisée";
 VAL_ 1554 CONFIG_VHL 0 "Montage" 1 "Usine" 2 "Contrôle" 3 "Sockage/Transport" 4 "Client" 5 "APV" 6 "Show room" 7 "Invalide";
 VAL_ 1554 D_LIGNE_REL_R3 0 "Indéterminé" 1 "Pas de défaut / Commande relais inactive" 2 "Pas de défaut / Commande relais active" 3 "CC à la masse" 4 "CC au +BAT" 5 "CO" 6 "Défaut non identifié" 7 "Valeur non utilisée";
-VAL_ 1909 DTC_State 1 "Current" 0 "History";
 VAL_ 1910 NUMERO_TRAME 0 "Réservé" 1 "Trame numéro 1" 2 "Trame numéro 2" 3 "Trame numéro 3";
 VAL_ 1910 TYPE_MESSAGE 0 "Calculateur reconduit AEE2004" 1 "Calculateur répondant à l'AEE2010";
 VAL_ 1910 ETAT_DTC 0 "Passage de défaut PERMANENT à défaut FUGITIF (non détection d'une défaillance auparavant confir" 1 "Passage du défaut à PERMANENT";
@@ -2208,11 +2813,81 @@ VAL_ 1938 CODE_DEFAUT 0 "aucun defaut present" 1 "Un ou plusieurs defauts presen
 VAL_ 1938 STATUS_REVEIL_PARTIEL 0 "Valeur a l initialisation" 1 "Etat reveil preparation GEP" 2 "Etat reveil preparation Stop & Start" 4 "Etat reveil fonction manuelle CAAR" 8 "Etat reveil correction de hauteur pneumatique" 16 "Etat reveil vitesse vehicule par BSI" 32 "Etat reveil vitesse vehicule par FSE" 64 "Etat reveil anticipation ADC" 128 "Etat reveil preparation demarrage moteur" 256 "Etat reveil preconditionnement habitacle" 512 "Etat reveil demande etat BV" 1024 "Etat reveil correction de hauteur" 2048 "Etat reveil demande état FSE" 4096 "Etat reveil affichage état FSE" 8192 "Etat reveil reception plip" 16384 "Etat reveil mesures huile moteur" 32768 "Etat reveil post ventilation moteur";
 VAL_ 1938 ETAT_ELECTR_UCE 0 "Veille (theorique car jamais atteint)" 1 "Partiel ou ComLatch" 2 "Partiel interne (theoriquement non utilise)" 3 "Transitoire" 4 "Principal" 5 "Principal degrade" 6 "Init / Endormissement" 7 "Valeur par defaut (absence fonction)" 8 "Pre/Post Principal" 9 "Réservé" 10 "Réservé" 11 "Réservé" 12 "Réservé" 13 "Réservé" 14 "Réservé" 15 "Réservé";
 VAL_ 1938 ETAT_LIGNE_RCD 0 "Ligne RCD à l'etat BAS" 1 "Ligne RCD à l'etat HAUT";
-VAL_ 1941 CODE_DEFAUT 1 "Fault Code Exists" 0 "No Fault Code";
-VAL_ 1941 ETAT_ASSIST_DA 7 "Disability Parameter" 4 "STTd Assist Active" 3 "STTa Assist Active" 2 "Dmg Assist Active" 1 "Nominal Assist Active" 0 "Assist Not Active";
-VAL_ 1941 ETAT_LIGNE_APC 1 "Ignition On" 0 "Ignition Off";
 VAL_ 1942 CODE_DEFAUT 0 "aucun defaut present" 1 "Un ou plusieurs defauts presents. Chaque bit donne un code defaut";
 VAL_ 1942 STATUS_REVEIL_PARTIEL_GMP 0 "Valeur a l initialisation" 1 "Etat reveil preparation GEP BV" 2 "Etat reveil preparation Stop & Start avec AR2S (type C3)" 4 "Etat reveil charge/decharge Ucaps" 8 "Etat reveil overload vehicle indicator" 16 "Etat reveil mecatronic headlamp" 32 "Reserve" 64 "Etat reveil Anticipation ADC" 128 "Etat reveil preparation demarrage moteur" 256 "Reserve" 512 "Etat reveil demande etat BV" 1024 "Reserve" 2048 "Etat reveil purge SCR" 4096 "Etat reveil Flex Start" 8192 "Etat reveil Power-latch HY" 16384 "Etat reveil mesures huile moteur" 32768 "Etat reveil post ventilation moteur";
 VAL_ 1942 ETAT_ELECTR_UCE 0 "Veille (theorique car jamais atteint)" 1 "Partiel ou ComLatch" 2 "Partiel interne (theoriquement non utilise)" 3 "Transitoire" 4 "Principal" 5 "Principal degrade" 6 "Init / Endormissement" 7 "Valeur par defaut (absence fonction)" 8 "Pre/Post Principal" 9 "Réservé" 10 "Réservé" 11 "Réservé" 12 "Réservé" 13 "Réservé" 14 "Réservé" 15 "Réservé";
 VAL_ 1949 CODE_DEFAUT 0 "aucun defaut present" 1 "Un ou plusieurs defauts presents. Chaque bit donne un code defaut";
 VAL_ 1949 ETAT_ELECTR_UCE 0 "Veille (theorique car jamais atteint)" 1 "Partiel ou ComLatch" 2 "Partiel interne (theoriquement non utilise)" 3 "Transitoire" 4 "Principal" 5 "Principal degrade" 6 "Init / Endormissement" 7 "Valeur par defaut (absence fonction)" 8 "Pre/Post Principal" 9 "Réservé" 10 "Réservé" 11 "Réservé" 12 "Réservé" 13 "Réservé" 14 "Réservé" 15 "Réservé";
+
+
+; #############################################################################
+; ############################### EPS VAL #####################################
+; #############################################################################
+VAL_ 1485 ACQ_INTERRUPT_DAE 1 "Acknowledge" 0 "No Acknowledge" ;
+VAL_ 1485 PRECISION_OFFSET 31 "Invalid" 30 "Unavailable" ;
+VAL_ 1485 OFFSET 32766 "Unavailable" 32767 "Invalid" ;
+VAL_ 1394 CONFIG_VHL 7 "INVALID" 6 "SHOW_ROOM" 5 "APV" 4 "CLIENT" 3 "STORAGE / TRANSPORT" 2 "CHECK" 1 "PLANT" 0 "FITTING" ;
+VAL_ 1293 Regul_ABR 1 "Active Regulation" 0 "No Regulation" ;
+VAL_ 973 Accel_Lat 32767 "Invalid" ;
+VAL_ 845 REQ_Lampe_DEF_ESP 1 "Request On" 0 "No Request" ;
+VAL_ 845 Regul_ESP 1 "Active Regulation" 0 "No Regulation" ;
+VAL_ 845 ESP_Deconnecte 1 "Disconnected" 0 "Connected" ;
+VAL_ 1909 DTC_State 1 "Current" 0 "History" ;
+VAL_ 1010 LXA_ACTIVATION 1 "LPA Function" 0 "LKA Function" ;
+VAL_ 1010 LKA_TRQ_FACT_REQ 127 "Invalid" 126 "Unavailable" ;
+VAL_ 1010 LKA_STATE 7 "Reserved" 6 "Collision" 5 "Defect" 4 "Active" 3 "Authorized" 2 "Selected" 1 "Unselected" 0 "Unavailable" ;
+VAL_ 1010 DMD_DELEST_DA 1 "Power Cut Request" 0 "Not Requested" ;
+VAL_ 146 DIAG_INTEGRA_ELEC 1 "No Frame Transmission" 0 "No Particular Operation" ;
+VAL_ 146 MODE_DIAG 1 "Operation and Comm Inhibited" 0 "No Particular Operation" ;
+VAL_ 146 EFFAC_DEFAULT_DIAG 1 "Default Memory Erase" 0 "No Specific Action" ;
+VAL_ 904 VITESSE_VEHICLE_BV 65535 "Invalid" ;
+VAL_ 773 FLG_INIT_AVOL 1 "Steering Wheel Angle Memorized" 0 "Steering Wheel Angle Available" ;
+VAL_ 773 FLG_AVOL_ICN 1 "Uncertain yet Valid Value" 0 "Valid Value in Range" ;
+VAL_ 773 ANGLE_VOLANT_ORIGINE 3 "Other" 2 "CAV3" 1 "Integreated CAV3" 0 "Estimator" ;
+VAL_ 773 VITESSE_ROT_VOL_OPTIMISE 255 "Invalid" ;
+VAL_ 773 CODE_DEFAUT_VOL 4 "Internal Failures by SWS " 3 "Failure on SWS Angle, RotSpeed " 2 "Failure on SWS Angle" 1 "Failure on SWS Rotation Speed " 0 "No Default / Failure" ;
+VAL_ 773 TRIM_VOL 1 "Trimmed" 0 "Not Trimmed" ;
+VAL_ 773 CALIBRATION_VOL 1 "Calibrated" 0 "Not Calibrated" ;
+VAL_ 773 ETAT_CAPT_VOL 1 "Sensor Is Okay" 0 "Sensor Is Faulty" ;
+VAL_ 773 SENS_ROT_VOL 1 "Clockwise" 0 "Counter Clockwise" ;
+VAL_ 773 VITESSE_ROT_VOL 255 "Invalid" ;
+VAL_ 773 ANGLE_VOLANT 32767 "Invalid" ;
+VAL_ 1042 Req_Mode_DA 3 "Reserved" 2 "Adjustable Mode Request" 1 "Dynamic Mode Request" 0 "Normal Mode Request" ;
+VAL_ 747 DMD_RELAXE_CPK 3 "Invalid" 2 "Relaxe Request" 1 "No Request" 0 "Reserved" ;
+VAL_ 747 DMD_FCT_CPK 3 "Invalid" 2 "SCP9 Control Request" 1 "SCP6 Control Request" 0 "No Request" ;
+VAL_ 747 CONS_ANGLE_CPK 32767 "Invalid" ;
+VAL_ 1074 ETAT_RESEAU_ELEC 7 "TA_SECU" 6 "TA_DEGRADE" 5 "TA_NOMINAL" 4 "REDEMARRAGE" 3 "DEMARRAGE" 2 "TI_DISPO_DEM" 1 "TI_Degrade" 0 "TI_Nominal" ;
+VAL_ 1074 ETAT_PRINCIP_SEV 2 "DEM" 1 "Contact" 0 "Stop" ;
+VAL_ 840 ETAT_MT 15 "Invalid" 13 "Autonomous Restart" 10 "Autonomous Starting" 7 "Engine Preparing" 6 "Degraded Restart" 5 "Driven Restart" 4 "Stopped" 3 "Engine Running" 2 "Starting" 1 "Cut" 0 "Locked" ;
+VAL_ 520 DIAG_MUX_ON 1 "Enable SCom Diagnostics" 0 "Disable SCom Diagnostics" ;
+VAL_ 909 VITESSE_VEHICULE_ROUES 65535 "Invalid" ;
+VAL_ 1941 ETAT_LIGNE_APC 1 "Ignition On" 0 "Ignition Off" ;
+VAL_ 1941 ETAT_ASSIST_DA 7 "Disability Parameter" 4 "STTd Assist Active" 3 "STTa Assist Active" 2 "Dmg Assist Active" 1 "Nominal Assist Active" 0 "Assist Not Active" ;
+VAL_ 1941 CODE_DEFAUT 1 "Fault Code Exists" 0 "No Fault Code" ;
+VAL_ 1173 TRQ_LIMIT_STATE 1 "Saturation Effective" 0 "No Saturation" ;
+VAL_ 1173 STEERWHL_HOLD_BY_DRV 1 "Steer Activity From Drv Trq" 0 "No Steer Activity From Drv Trq" ;
+VAL_ 1173 EPS_STATE_LKA 4 "Defect" 3 "Active" 2 "Available" 1 "Authorised" 0 "Unauthorised" ;
+VAL_ 1173 ETAT_DA_2004 3 "Reserved" 2 "Orange LED" 1 "Red LED" 0 "No Demand" ;
+VAL_ 1173 ETAT_DA_DYN 3 "Invalid" 2 "Adjustable Mode" 1 "Dynamic Mode" 0 "Normal Mode" ;
+VAL_ 1173 ETAT_DA_2010 3 "Reserved" 2 "Orange LED" 1 "Red LED" 0 "No Demand" ;
+VAL_ 1173 DDE_REDEM_DA 1 "Request Reboot" 0 "No Reboot Required" ;
+VAL_ 1173 CPLE_VOLANT 127 "Invalid" ;
+VAL_ 1173 AUTOR_ARRET_MOT_DA 1 "Permission to Stop" 0 "No Permission to Stop" ;
+VAL_ 757 ETAT_DAE_CAV3_VIRTUEL 7 "Invalid" 6 "Reserved" 5 "EPS Works with SelfDet Offset" 4 "EPS Works with Calibrated Offset" 3 "EPS Works with ESC Offset" 2 "Offset Search Authorization" 1 "Offset Initialization Request" 0 "Initialization" ;
+VAL_ 757 VITESSE_COLONNE 2047 "Invalid" ;
+VAL_ 757 ETAT_SECU_ANGLE_COL 1 "Secure" 0 "Not Secure" ;
+VAL_ 757 ETAT_DAE_CPK 3 "Invalid" 2 "Control In Progress" 1 "Available" 0 "Unavailable" ;
+VAL_ 757 CPLE_VOLANT_OPTMSE 127 "Invalid" ;
+VAL_ 757 CAUSE_DESACTIV_CPK 7 "Other Faults" 6 "EPS Thermal Safety Catch" 5 "Maneuvering Number Too High" 4 "Obstacle At Wheel" 3 "Angular Error Too High" 2 "Vehicle Speed Too High" 1 "Driver Hands On" 0 "No Control Interruption" ;
+VAL_ 757 ANGLE_COLONNE 32767 "Invalid" ;
+VAL_ 277 Download_Month 12 "December" 11 "November" 10 "October" 9 "September" 8 "August" 7 "July" 6 "June" 5 "May" 4 "April" 3 "March" 2 "February" 1 "January" ;
+
+
+; #############################################################################
+; ############################### EPS SIG_GROUP_ ##############################
+; #############################################################################
+SIG_GROUP_ 773 IS_DYN_VOL_GroupAdd 1 : FLG_INIT_AVOL FLG_AVOL_ICN ANGLE_VOLANT_ORIGINE RESERVED VITESSE_ROT_VOL_OPTIMISE CODE_DEFAUT_VOL TRIM_VOL CALIBRATION_VOL ETAT_CAPT_VOL;
+SIG_GROUP_ 773 IS_DYN_VOL_GroupBase 1 : CHKSUM_VOL SENS_ROT_VOL CPT_PROCESS_4B_A_VOL VITESSE_ROT_VOL ANGLE_VOLANT;
+SIG_GROUP_ 1941 IS_SUPV_DIRA_Group 1 : CODE_DEFAUT ETAT_ASSIST_DA ETAT_LIGNE_APC STATUS_CONFABSENT;
+SIG_GROUP_ 1173 IS_DAT_DIRA_Group 1 : AUTOR_ARRET_MOT_DA CPLE_VOLANT DDE_REDEM_DA ETAT_DA_2010 ETAT_DA_DYN ETAT_DA_2004 EPS_STATE_LKA STEERWHL_HOLD_BY_DRV TRQ_LIMIT_STATE;
+SIG_GROUP_ 757 IS_DYN_DAE_Group 1 : ANGLE_COLONNE CAUSE_DESACTIV_CPK CHKSUM_TRME_DYN_DAE CPLE_VOLANT_OPTMSE CPT_PROCESS_4B_DAE ETAT_DAE_CPK ETAT_SECU_ANGLE_COL VITESSE_COLONNE ETAT_DAE_CAV3_VIRTUEL;
