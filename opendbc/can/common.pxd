@@ -62,11 +62,14 @@ cdef extern from "common_dbc.h":
 cdef extern from "common.h":
   cdef const DBC* dbc_lookup(const string) except +
 
+  cdef struct SignalValue:
+    uint64_t ts_nanos
+    double value
+    vector[double] all_values
+
   cdef cppclass MessageState:
     vector[Signal] parse_sigs
-    vector[double] vals
-    vector[vector[double]] all_vals
-    uint64_t last_seen_nanos
+    unordered_map[string, SignalValue] signal_values
 
   cdef struct CanFrame:
     long src
