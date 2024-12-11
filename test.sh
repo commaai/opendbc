@@ -7,7 +7,7 @@ cd $DIR
 # check if uv is installed
 if ! command -v uv &>/dev/null; then
     echo "'uv' is not installed. Installing 'uv'..."
-    pip install uv
+   curl -LsSf https://astral.sh/uv/install.sh | sh
 fi
 
 # ensure we're up to date
