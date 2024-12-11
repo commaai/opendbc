@@ -55,7 +55,7 @@ class CarState(CarStateBase):
     ret.cruiseState.speed = cp.vl['HS2_DAT_MDD_CMD_452']['CONS_LIM_VITESSE_VEH'] * CV.KPH_TO_MS # HS2, set to 255 when ACC is off
     ret.cruiseState.enabled = cp.vl['HS2_DAT_MDD_CMD_452']['DDE_ACTIVATION_RVV_ACC'] == 1 # HS2
     ret.cruiseState.available = True  # TODO
-    ret.cruiseState.nonAdaptive = False  # cp.vl['HS2_DAT_MDD_CMD_452']['COCKPIT_GO_ACC_REQUEST'] == 0
+    ret.cruiseState.nonAdaptive = cp.vl['HS2_DAT_MDD_CMD_452']['COCKPIT_GO_ACC_REQUEST'] == 0 # HS2, 0: ACC, 1: CC
     ret.cruiseState.standstill = False  # TODO
     ret.accFaulted = False
 
@@ -79,7 +79,7 @@ class CarState(CarStateBase):
 
     # lock info
     ret.doorOpen = any([cp.vl['Dat_BSI']['DRIVER_DOOR'], cp.vl['Dat_BSI']['PASSENGER_DOOR']]) # HS1
-    ret.seatbeltUnlatched = False # TODO: cp.vl['RESTRAINTS']['DRIVER_SEATBELT'] != 2
+    ret.seatbeltUnlatched = cp.vl['RESTRAINTS']['DRIVER_SEATBELT'] != 2
 
     return ret
 
@@ -93,7 +93,7 @@ class CarState(CarStateBase):
       ('Dyn2_FRE', 100),
       ('Dyn2_CMM', 50),
       ('Dyn_CMM', 100),
-      # ('RESTRAINTS', 10), # TODO, must be identical to seatbeltUnlatched Signal
+      ('RESTRAINTS', 10),
       ('HS2_DYN_ABR_38D', 25),
       ('HS2_DYN_UCF_MDD_32D', 50),
       # ('HS2_BGE_DYN5_CMM_228', 100), # TODO relevant? no signals in route
