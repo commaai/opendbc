@@ -15,3 +15,9 @@ BO_ 630 LKAS_COMMAND: 8 XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
+BO_ 816 Center_Stack_1: 8 XXX
+ SG_ LKAS_Button : 53|1@1+ (1,0) [0|0] "" XXX
+ SG_ Traction_Button : 54|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 650 Center_Stack_2: 8 XXX
+ SG_ LKAS_Button : 57|1@1+ (1,0) [0|0] "" XXX
