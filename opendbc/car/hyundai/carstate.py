@@ -34,11 +34,13 @@ class CarState(CarStateBase):
                           "GEAR_SHIFTER"
     if CP.flags & HyundaiFlags.CANFD:
       self.shifter_values = can_define.dv[self.gear_msg_canfd]["GEAR"]
+    elif CP.flags & (HyundaiFlags.HYBRID | HyundaiFlags.EV):
+      self.shifter_values = can_define.dv["ELECT_GEAR"]["Elect_Gear_Shifter"]
     elif self.CP.flags & HyundaiFlags.CLUSTER_GEARS:
       self.shifter_values = can_define.dv["CLU15"]["CF_Clu_Gear"]
     elif self.CP.flags & HyundaiFlags.TCU_GEARS:
       self.shifter_values = can_define.dv["TCU12"]["CUR_GR"]
-    else:  # preferred and elect gear methods use same definition
+    else:
       self.shifter_values = can_define.dv["LVR12"]["CF_Lvr_Gear"]
 
     self.accelerator_msg_canfd = "ACCELERATOR" if CP.flags & HyundaiFlags.EV else \
