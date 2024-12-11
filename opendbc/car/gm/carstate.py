@@ -128,8 +128,7 @@ class CarState(CarStateBase):
       ret.cruiseState.speed = cam_cp.vl["ASCMActiveCruiseControlStatus"]["ACCSpeedSetpoint"] * CV.KPH_TO_MS
       # This FCW signal only works for SDGM cars. CAM cars send FCW on GMLAN but this bit is always 0 for them
       ret.stockFcw = cam_cp.vl["ASCMActiveCruiseControlStatus"]["FCWAlert"] != 0
-      if self.CP.carFingerprint not in SDGM_CAR and self.CP.carFingerprint not in ASCM_INT:
-        print("checking for AEB fuckhead")
+      if self.CP.carFingerprint not in (SDGM_CAR|ASCM_INT):
         ret.stockAeb = cam_cp.vl["AEBCmd"]["AEBCmdActive"] != 0
       # openpilot controls nonAdaptive when not pcmCruise
       # 2016-2018 Volt won't identify non-adaptive cruise state since switchable cruise state was not introduced till 2019 model year / SDGM Global A
@@ -190,7 +189,7 @@ class CarState(CarStateBase):
         ("ASCMLKASteeringCmd", 10),
         ("ASCMActiveCruiseControlStatus", 25),
       ]
-      if CP.carFingerprint not in SDGM_CAR and CP.carFingerprint not in ASCM_INT:
+      if CP.carFingerprint not in (SDGM_CAR|ASCM_INT):
         cam_messages += [
           ("AEBCmd", 10),
         ]
