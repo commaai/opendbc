@@ -166,9 +166,12 @@ class CarState(CarStateBase):
       ret.leftBlindspot = cp.vl["LCA11"]["CF_Lca_IndLeft"] != 0
       ret.rightBlindspot = cp.vl["LCA11"]["CF_Lca_IndRight"] != 0
 
-    # save the entire LKAS11 and CLU11
+    # save the entire LKAS11, CLU11, and HDA11_MFC
     self.lkas11 = copy.copy(cp_cam.vl["LKAS11"])
     self.clu11 = copy.copy(cp.vl["CLU11"])
+    if not self.CP.openpilotLongitudinalControl and self.CP.flags & HyundaiFlags.CAMERA_SCC:
+      self.hda11_mfc = copy.copy(cp_cam.vl["HDA11_MFC"])
+
     self.steer_state = cp.vl["MDPS12"]["CF_Mdps_ToiActive"]  # 0 NOT ACTIVE, 1 ACTIVE
     prev_cruise_buttons = self.cruise_buttons[-1]
     prev_main_buttons = self.main_buttons[-1]
@@ -376,6 +379,7 @@ class CarState(CarStateBase):
       cam_messages += [
         ("SCC11", 50),
         ("SCC12", 50),
+        ("HDA11_MFC", 14),
       ]
 
       if CP.flags & HyundaiFlags.USE_FCA.value:
