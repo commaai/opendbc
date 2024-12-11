@@ -115,11 +115,12 @@ class CarState(CarStateBase):
       ret.cruiseState.standstill = False
       ret.cruiseState.nonAdaptive = False
     else:
-      ret.cruiseState.available = cp_cruise.vl["SCC11"]["MainMode_ACC"] == 1
+      scc_bus = "SCC12" if self.CP.flags & HyundaiFlags.CAN_CANFD_HYBRID else "SCC11"
+      ret.cruiseState.available = cp_cruise.vl[scc_bus]["MainMode_ACC"] == 1
       ret.cruiseState.enabled = cp_cruise.vl["SCC12"]["ACCMode"] != 0
-      ret.cruiseState.standstill = cp_cruise.vl["SCC11"]["SCCInfoDisplay"] == 4.
-      ret.cruiseState.nonAdaptive = cp_cruise.vl["SCC11"]["SCCInfoDisplay"] == 2.  # Shows 'Cruise Control' on dash
-      ret.cruiseState.speed = cp_cruise.vl["SCC11"]["VSetDis"] * speed_conv
+      ret.cruiseState.standstill = cp_cruise.vl[scc_bus]["SCCInfoDisplay"] == 4.
+      ret.cruiseState.nonAdaptive = cp_cruise.vl[scc_bus]["SCCInfoDisplay"] == 2.  # Shows 'Cruise Control' on dash
+      ret.cruiseState.speed = cp_cruise.vl[scc_bus]["VSetDis"] * speed_conv
 
     # TODO: Find brake pressure
     ret.brake = 0
@@ -153,7 +154,7 @@ class CarState(CarStateBase):
 
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(gear))
 
-    if not self.CP.openpilotLongitudinalControl:
+    if not self.CP.openpilotLongitudinalControl and not (self.CP.flags & HyundaiFlags.CAN_CANFD_HYBRID):
       aeb_src = "FCA11" if self.CP.flags & HyundaiFlags.USE_FCA.value else "SCC12"
       aeb_sig = "FCA_CmdAct" if self.CP.flags & HyundaiFlags.USE_FCA.value else "AEB_CmdAct"
       aeb_warning = cp_cruise.vl[aeb_src]["CF_VSM_Warn"] != 0
@@ -324,9 +325,11 @@ class CarState(CarStateBase):
     if CP.flags & HyundaiFlags.CANFD:
       return self.get_can_parsers_canfd(CP)
 
+    mdps12_freq = 100 if CP.flags & HyundaiFlags.CAN_CANFD_HYBRID else 50
+
     pt_messages = [
       # address, frequency
-      ("MDPS12", 50),
+      ("MDPS12", mdps12_freq),
       ("TCS11", 100),
       ("TCS13", 50),
       ("TCS15", 10),
@@ -342,14 +345,18 @@ class CarState(CarStateBase):
 
     if not CP.openpilotLongitudinalControl and not (CP.flags & HyundaiFlags.CAMERA_SCC):
       pt_messages += [
-        ("SCC11", 50),
         ("SCC12", 50),
       ]
+
+      if not (CP.flags & HyundaiFlags.CAN_CANFD_HYBRID):
+        pt_messages.append(("SCC11", 50))
+
       if CP.flags & HyundaiFlags.USE_FCA.value:
         pt_messages.append(("FCA11", 50))
 
     if CP.enableBsm:
-      pt_messages.append(("LCA11", 50))
+      lca11_freq = 20 if CP.flags & HyundaiFlags.CAN_CANFD_HYBRID else 50
+      pt_messages.append(("LCA11", lca11_freq))
 
     if CP.flags & (HyundaiFlags.HYBRID | HyundaiFlags.EV):
       pt_messages.append(("E_EMS11", 50))
@@ -383,6 +390,6 @@ class CarState(CarStateBase):
 
 
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 0),
-      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, 2),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).ECAN if CP.flags & HyundaiFlags.CAN_CANFD_HYBRID else 0),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).CAM if CP.flags & HyundaiFlags.CAN_CANFD_HYBRID else 2),
     }
