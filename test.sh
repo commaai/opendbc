@@ -4,6 +4,12 @@ set -e
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
 cd $DIR
 
+# check if uv is installed
+if ! command -v uv &>/dev/null; then
+    echo "'uv' is not installed. Installing 'uv'..."
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+fi
+
 # ensure we're up to date
 uv sync --all-extras
 source .venv/bin/activate

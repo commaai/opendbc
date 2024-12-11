@@ -83,7 +83,7 @@ The entirery of a car port lives in `opendbc/car/<brand>/`:
 
 ### Reverse Engineer CAN messages
 
-Start off by recording a route with lots of interesting events: enable LKAS and ACC, turn the steering weel both extremes, etc. Then, load up that route in [cabana](https://github.com/commaai/openpilot/tree/master/tools/cabana).
+Start off by recording a route with lots of interesting events: enable LKAS and ACC, turn the steering wheel both extremes, etc. Then, load up that route in [cabana](https://github.com/commaai/openpilot/tree/master/tools/cabana).
 
 ### Tuning
 
