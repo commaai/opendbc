@@ -37,7 +37,7 @@ class PSACarDocs(CarDocs):
 class PSAPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {
     Bus.pt: 'AEE2010_R3',
-    #Bus.adas: 'AEE2010_R3_HS2'
+    Bus.adas: 'AEE2010_R3'
   })
 
 class CAR(Platforms):

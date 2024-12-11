@@ -234,7 +234,7 @@ BO_ 973 Dyn2_FRE: 8 ABS___Antiblockiersystem
  SG_ P226_Com_stBrkActv : 0|2@1+ (1,0) [0|4] "" Vector__XXX
  SG_ P225_Com_stBrkRaw_0 : 37|1@1+ (1,0) [0|0] "" Vector__XXX
  SG_ P224_Com_stBrkRaw_1 : 38|1@1+ (1,0) [0|0] "" Vector__XXX
- SG_ P515_Com_pStSpMstCyl : 47|12@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ BRAKE_PRESSURE : 47|12@0+ (1,0) [0|0] "" Vector__XXX
  SG_ P319_FrmMng_rClthPos : 56|8@1+ (0.5,0) [0|255] "%" Vector__XXX
 
 BO_ 1010 LANE_KEEP_ASSIST: 8 XXX
