@@ -115,9 +115,9 @@ class CarController(CarControllerBase):
                                                           self.CP.flags & HyundaiFlags.CANFD_HDA2_ALT_STEERING))
 
       # LFA and HDA icons
-      if self.frame % 5 == 0 and (not hda2 or hda2_long) and self.car_fingerprint not in (CAR.HYUNDAI_SONATA_2024,):
+      if self.frame % 5 == 0 and (not hda2 or hda2_long) and self.car_fingerprint not in (CAR.KIA_SORENTO_2024,):
         can_sends.append(hyundaicanfd.create_lfahda_cluster(self.packer, self.CAN, CC.enabled))
-      if self.frame % 5 == 0 and (not hda2 or hda2_long) and self.car_fingerprint in (CAR.HYUNDAI_SONATA_2024,):
+      if self.frame % 5 == 0 and (not hda2 or hda2_long) and self.car_fingerprint in (CAR.KIA_SORENTO_2024,):
         can_sends.append(hyundaicanfd.create_msg_161(self.packer, self.CAN, CC.enabled, CS.msg_161, self.CP, hud_control, CS, CC, self.frame))
         can_sends.append(hyundaicanfd.create_msg_162(self.packer, self.CAN, CC.enabled, CS.msg_162, self.CP, hud_control))
 
