@@ -1,4 +1,3 @@
-from collections import namedtuple
 from enum import IntFlag
 from opendbc.car.structs import CarParams
 from opendbc.car import structs
@@ -8,12 +7,14 @@ from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
 
+
 class CAR(Platforms):
   RIVIAN_R1S = PlatformConfig(
     [CarDocs("Rivian R1S", "All")],
     CarSpecs(mass=3206., wheelbase=3.08, steerRatio=15.0),
     dbc_dict('rivian_can', None)
   )
+
 
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
@@ -35,7 +36,6 @@ FW_QUERY_CONFIG = FwQueryConfig(
   ]
 )
 
-
 GEAR_MAP = [
   structs.CarState.GearShifter.unknown,
   structs.CarState.GearShifter.park,
@@ -44,14 +44,19 @@ GEAR_MAP = [
   structs.CarState.GearShifter.drive,
 ]
 
+
 class CarControllerParams:
-  ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0., 15.], angle_v=[.4, .1])
-  ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0., 15.], angle_v=[.4, .1])
+  STEER_MAX = 270
+  STEER_DELTA_UP = 6  # torque increase per refresh
+  STEER_DELTA_DOWN = 6  # torque decrease per refresh
+  STEER_DRIVER_ALLOWANCE = 15  # allowed driver torque before start limiting
+  STEER_DRIVER_MULTIPLIER = 1  # weight driver torque
+  STEER_DRIVER_FACTOR = 1
+
   ACCEL_MIN = -3.48  # m/s^2
-  ACCEL_MAX = 2.0    # m/s^2
+  ACCEL_MAX = 2.0  # m/s^2
   JERK_LIMIT_MAX = 5
   JERK_LIMIT_MIN = -5
-  ACCEL_TO_SPEED_MULTIPLIER = 3
 
   def __init__(self, CP):
     pass

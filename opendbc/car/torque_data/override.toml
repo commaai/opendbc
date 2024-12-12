@@ -7,8 +7,6 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 "NISSAN_LEAF" = [nan, 1.5, nan]
 "NISSAN_ROGUE" = [nan, 1.5, nan]
 
-"RIVIAN_R1S" = [nan, 3.0, nan]
-
 # New subarus angle based controllers
 "SUBARU_FORESTER_2022" = [nan, 3.0, nan]
 "SUBARU_OUTBACK_2023" = [nan, 3.0, nan]
@@ -68,7 +66,7 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 "LEXUS_GS_F" = [2.5, 2.5, 0.08]
 "HYUNDAI_STARIA_4TH_GEN" = [1.8, 2.0, 0.15]
 
-# Dashcam or fallback configured as ideal car
+# Dashcam or fallback configured as ideal car^
 "MOCK" = [10.0, 10, 0.0]
 
 # Manually checked

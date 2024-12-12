@@ -9,14 +9,8 @@ class CarState(CarStateBase):
     super().__init__(CP)
 
     # Needed by carcontroller
-    self.steering_control_counter = 0
-    self.steering_control = None
-    self.longitudinal_request_counter = 0
-    self.longitudinal_request = None
-    self.vdm_adas_status = None
     self.acm_lka_hba_cmd = None
-    self.adas_acm_lka_hba_cmd = None
-    self.acm_status = None
+    self.epas_system_status_cmd = None
 
   def update(self, cp, cp_cam, cp_adas, *_) -> structs.CarState:
     ret = structs.CarState()
@@ -49,7 +43,7 @@ class CarState(CarStateBase):
     ret.cruiseState.enabled = cp_cam.vl["ACM_Status"]["ACM_FeatureStatus"] != 0
     ret.cruiseState.speed = 15 #cp.vl["ESPiB1"]["ESPiB1_VehicleSpeed"] # todo
     ret.cruiseState.available = True # cp.vl["VDM_AdasSts"]["VDM_AdasInterfaceStatus"] == 1
-    ret.cruiseState.standstill = False  # This needs to be false, since we can resume from stop without sending anything special
+    ret.cruiseState.standstill = False
 
     # Gear
     ret.gearShifter = GEAR_MAP[int(cp.vl["VDM_PropStatus"]["VDM_Prndl_Status"])]
@@ -72,14 +66,8 @@ class CarState(CarStateBase):
     ret.stockAeb = cp_cam.vl["ACM_AebRequest"]["ACM_EnableRequest"] != 0
 
     # Messages needed by carcontroller
-    self.steering_control_counter = cp_cam.vl["ACM_SteeringControl"]["ACM_SteeringControl_Counter"]
-    self.steering_control = copy.copy(cp_cam.vl["ACM_SteeringControl"])
-    self.longitudinal_request_counter = cp_cam.vl["ACM_longitudinalRequest"]["ACM_longitudinalRequest_Counter"]
-    self.longitudinal_request = copy.copy(cp_cam.vl["ACM_longitudinalRequest"])
-    self.vdm_adas_status = copy.copy(cp.vl["VDM_AdasSts"])
     self.acm_lka_hba_cmd = copy.copy(cp_cam.vl["ACM_lkaHbaCmd"])
-    self.adas_acm_lka_hba_cmd = copy.copy(cp_adas.vl["ACM_lkaHbaCmd"])
-    self.acm_status = copy.copy(cp_cam.vl["ACM_Status"])
+    self.epas_system_status_cmd = copy.copy(cp.vl["EPAS_SystemStatus"])
 
     return ret
 
@@ -93,7 +81,7 @@ class CarState(CarStateBase):
       ("EPAS_AdasStatus", 100),
       ("EPAS_SystemStatus", 100),
       ("RCM_Status", 8),
-      ("VDM_AdasSts", 100),
+      ("VDM_AdasSts", 100)
     ]
 
     return CANParser(DBC[CP.carFingerprint]['pt'], messages, 0)
@@ -103,7 +91,6 @@ class CarState(CarStateBase):
     messages = [
       ("ACM_longitudinalRequest", 100),
       ("ACM_AebRequest", 100),
-      ("ACM_SteeringControl", 100),
       ("ACM_Status", 100),
       ("ACM_lkaHbaCmd", 100)
     ]
@@ -113,8 +100,7 @@ class CarState(CarStateBase):
   @staticmethod
   def get_adas_can_parser(CP):
     messages = [
-      ("IndicatorLights", 10),
-      ("ACM_lkaHbaCmd", 100)
+      ("IndicatorLights", 10)
     ]
 
     return CANParser(DBC[CP.carFingerprint]['pt'], messages, 1)

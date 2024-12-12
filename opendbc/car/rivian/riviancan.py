@@ -10,17 +10,47 @@ def checksum(data, poly, xor_output):
       crc &= 0xFF
   return crc ^ xor_output
 
-def create_steering(packer, frame, angle, active):
-  values = {
-    "ACM_SteeringControl_Counter": frame % 15,
-    "ACM_EacEnabled": 1 if active else 0,
-    "ACM_HapticRequired": 0,
-    "ACM_SteeringAngleRequest": angle,
-  }
 
-  data = packer.make_can_msg("ACM_SteeringControl", 0, values)[1]
-  values["ACM_SteeringControl_Checksum"] = checksum(data[1:], 0x1D, 0x41)
-  return packer.make_can_msg("ACM_SteeringControl", 0, values)
+def create_lka_steering(packer, acm_lka_hba_cmd, apply_steer, enabled):
+  values = {s: acm_lka_hba_cmd[s] for s in [
+    "ACM_lkaHbaCmd_Counter",
+    "ACM_lkaHbaCmd_Checksum",
+    "ACM_lkaActive",
+    "ACM_HapticRequest",
+    "ACM_lkaStrToqReq",
+    "ACM_lkaSymbolState",
+    "ACM_lkaToiFlt",
+    "ACM_lkaActToi",
+    "ACM_hbaSysState",
+    "ACM_FailinfoAeb",
+    "ACM_lkaRHWarning",
+    "ACM_lkaLHWarning",
+    "ACM_lkaLaneRecogState",
+    "ACM_hbaOpt",
+    "ACM_hbaLamp",
+    "ACM_lkaHandsoffSoundWarning",
+    "ACM_lkaHandsoffDisplayWarning",
+    "ACM_unkown1",
+    "ACM_unkown2",
+    "ACM_unkown3",
+    "ACM_unkown4",
+    "ACM_unkown6",
+  ]}
+
+  if enabled:
+    values["ACM_lkaActToi"] = 1
+    values["ACM_lkaSymbolState"] = 3
+    values["ACM_lkaLaneRecogState"] = 3
+    values["ACM_lkaStrToqReq"] = apply_steer / 100.0
+    values["ACM_unkown2"] = 1
+    values["ACM_unkown3"] = 4
+    values["ACM_unkown4"] = 160
+    values["ACM_unkown6"] = 1
+
+  data = packer.make_can_msg("ACM_lkaHbaCmd", 0, values)[1]
+  values["ACM_lkaHbaCmd_Checksum"] = checksum(data[1:], 0x1D, 0x63)
+  return packer.make_can_msg("ACM_lkaHbaCmd", 0, values)
+
 
 def create_longitudinal(packer, frame, accel, enabled):
   values = {
@@ -34,6 +64,46 @@ def create_longitudinal(packer, frame, accel, enabled):
   data = packer.make_can_msg("ACM_longitudinalRequest", 0, values)[1]
   values["ACM_longitudinalRequest_Checksum"] = checksum(data[1:], 0x1D, 0x12)
   return packer.make_can_msg("ACM_longitudinalRequest", 0, values)
+
+def create_epas_system_status(packer, epas_system_status_cmd, enabled):
+  values = {s: epas_system_status_cmd[s] for s in [
+    "EPAS_SytemStatus_Checksum",
+    "EPAS_SystemStatus_Counter",
+    "EPAS_SteeringReduced",
+    "EPAS_SteeringFault",
+    "EPAS_SteeringMode",
+    "EPAS_TorsionBarTorque",
+    "EPAS_StcFault",
+    "EPAS_StcActive",
+    "EPAS_StcUnavailable",
+    "H_CAN_EPSS_ToiFlt",
+    "H_CAN_EPSS_ToiActive",
+    "H_CAN_EPS_ToiUnavailable",
+    "EPAS_HandsOnLevel"
+  ]}
+
+  if enabled:
+    values["EPAS_HandsOnLevel"] = 1
+
+  data = packer.make_can_msg("EPAS_SystemStatus", 2, values)[1]
+  values["EPAS_SytemStatus_Checksum"] = checksum(data[1:], 0x1D, 0x1E)
+  return packer.make_can_msg("EPAS_SystemStatus", 2, values)
+
+#################################################################
+######################### ↓ NOT USED ↓ ##########################
+#################################################################
+
+def create_angle_steering(packer, frame, angle, active):
+  values = {
+    "ACM_SteeringControl_Counter": frame % 15,
+    "ACM_EacEnabled": 1 if active else 0,
+    "ACM_HapticRequired": 0,
+    "ACM_SteeringAngleRequest": angle,
+  }
+
+  data = packer.make_can_msg("ACM_SteeringControl", 0, values)[1]
+  values["ACM_SteeringControl_Checksum"] = checksum(data[1:], 0x1D, 0x41)
+  return packer.make_can_msg("ACM_SteeringControl", 0, values)
 
 
 def create_acm_status(packer, acm_status, active):
@@ -53,38 +123,6 @@ def create_acm_status(packer, acm_status, active):
   values["ACM_Status_Checksum"] = checksum(data[1:], 0x1D, 0x5F)
   return packer.make_can_msg("ACM_Status", 0, values)
 
-def create_acm_lka_hba_cmd(packer, acm_lka_hba_cmd, cntr, bus):
-  values = {s: acm_lka_hba_cmd[s] for s in [
-    "ACM_lkaHbaCmd_Counter",
-    "ACM_lkaHbaCmd_Checksum",
-    "ACM_unkown1",
-    "ACM_HapticRequest",
-    "ACM_lkaStrToqReq",
-    "ACM_lkaSymbolState",
-    "ACM_lkaToiFlt",
-    "ACM_lkaActToi",
-    "ACM_hbaSysState",
-    "ACM_FailinfoAeb",
-    "ACM_unkown2",
-    "ACM_lkaRHWarning",
-    "ACM_lkaLHWarning",
-    "ACM_lkaLaneRecogState",
-    "ACM_hbaOpt",
-    "ACM_hbaLamp",
-    "ACM_unkown3",
-    "ACM_lkaHandsoffSoundWarning",
-    "ACM_lkaHandsoffDisplayWarning",
-    "ACM_unkown4"
-  ]}
-
-  values["ACM_lkaHbaCmd_Counter"] = cntr
-  values["ACM_lkaActToi"] = 0
-  values["ACM_lkaSymbolState"] = 3
-  values["ACM_lkaLaneRecogState"] = 3
-
-  data = packer.make_can_msg("ACM_lkaHbaCmd", bus, values)[1]
-  values["ACM_lkaHbaCmd_Checksum"] = checksum(data[1:], 0x1D, 0x63)
-  return packer.make_can_msg("ACM_lkaHbaCmd", bus, values)
 
 def create_vdm_adas_status(packer, vdm_adas_status, acc_on):
   values = {s: vdm_adas_status[s] for s in [
