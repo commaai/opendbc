@@ -166,24 +166,22 @@ class CarState(CarStateBase):
       ("ECMAcceleratorPos", 80),
     ]
 
+    if CP.transmissionType == TransmissionType.direct:
+      pt_messages.append(("EBCMRegenPaddle", 50))
+
     if CP.enableBsm:
       pt_messages.append(("BCMBlindSpotMonitor", 10))
 
-    # Used to read back last counter sent to PT by camera
+    cam_messages = []
     if CP.networkLocation == NetworkLocation.fwdCamera:
       pt_messages += [
         ("ASCMLKASteeringCmd", 0),
       ]
-
-    if CP.transmissionType == TransmissionType.direct:
-      pt_messages.append(("EBCMRegenPaddle", 50))
-
-    cam_messages = []
-    if CP.networkLocation == NetworkLocation.fwdCamera:
       cam_messages += [
         ("ASCMLKASteeringCmd", 10),
         ("ASCMActiveCruiseControlStatus", 25),
       ]
+
       if CP.carFingerprint not in SDGM_CAR:
         cam_messages += [
           ("AEBCmd", 10),
