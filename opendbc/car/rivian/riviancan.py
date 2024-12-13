@@ -15,7 +15,6 @@ def create_lka_steering(packer, acm_lka_hba_cmd, apply_steer, enabled):
   values = {s: acm_lka_hba_cmd[s] for s in [
     "ACM_lkaHbaCmd_Counter",
     "ACM_lkaHbaCmd_Checksum",
-    "ACM_lkaActive",
     "ACM_HapticRequest",
     "ACM_lkaStrToqReq",
     "ACM_lkaSymbolState",
@@ -41,7 +40,7 @@ def create_lka_steering(packer, acm_lka_hba_cmd, apply_steer, enabled):
     values["ACM_lkaActToi"] = 1
     values["ACM_lkaSymbolState"] = 3
     values["ACM_lkaLaneRecogState"] = 3
-    values["ACM_lkaStrToqReq"] = apply_steer / 100.0
+    values["ACM_lkaStrToqReq"] = apply_steer
     values["ACM_unkown2"] = 1
     values["ACM_unkown3"] = 4
     values["ACM_unkown4"] = 160

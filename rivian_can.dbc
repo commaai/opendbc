@@ -1,7 +1,7 @@
 VERSION "PrimaryActuatorCAN"
 
 
-NS_ : 
+NS_ :
 	NS_DESC_
 	CM_
 	BA_DEF_
@@ -87,7 +87,7 @@ BO_ 288 ACM_lkaHbaCmd: 8 ACM
  SG_ ACM_lkaHbaCmd_Counter : 11|4@0+ (1,0) [0|0] "" EPAS_P
  SG_ ACM_unkown1 : 14|3@0+ (1,0) [0|7] "" XXX
  SG_ ACM_HapticRequest : 15|1@0+ (1,0) [0|1] "" EPAS_P
- SG_ ACM_lkaStrToqReq : 23|11@0+ (0.0078125,-8) [-8|7.9921875] "Nm" EPAS_P
+ SG_ ACM_lkaStrToqReq : 23|11@0+ (1.0,-1024) [-1024.0|1024.0] "" EPAS_P
  SG_ ACM_lkaSymbolState : 26|3@0+ (1,0) [0|7] "" EPAS_P
  SG_ ACM_lkaToiFlt : 27|1@0+ (1,0) [0|1] "" EPAS_P
  SG_ ACM_lkaActToi : 28|1@0+ (1,0) [0|1] "" EPAS_P
