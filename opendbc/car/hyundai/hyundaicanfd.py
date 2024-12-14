@@ -141,26 +141,22 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
   if msg_161.get("ALERTS_2") == 5:  # CONSIDER TAKING A BREAK
     msg_161.update({"ALERTS_2": 0, "SOUNDS_2": 0, "DAW_ICON": 0})
 
-  # LANELINES, ICONS
+  # LANELINES, ICONS, LCA
   curvature = {i: (31 if i == -1 else 13 - abs(i + 15)) if i < 0 else 15 + i for i in range(-15, 16)}
+  lca_min = CS.out.vEgo < 8.94
+
   msg_161.update({
-    "LANELINE_CURVATURE": curvature.get(max(-15, min(int(CS.out.steeringAngleDeg / 3), 15)), 14) if enabled else 15,
     "LFA_ICON": 2 if enabled else 0,
     "LKA_ICON": 4 if enabled else 0,
+    "LCA_LEFT_ICON": 0 if CS.out.leftBlindspot or lca_min or not enabled else 2 if CC.leftBlinker else 1,
+    "LCA_RIGHT_ICON": 0 if CS.out.rightBlindspot or lca_min or not enabled else 2 if CC.rightBlinker else 1,
+    "LCA_LEFT_ARROW": 2 if CC.leftBlinker and enabled else 0,
+    "LCA_RIGHT_ARROW": 2 if CC.rightBlinker and enabled else 0,
     "LANELINE_LEFT": 4 if hud.leftLaneDepart and (frame // 50) % 2 == 0 else 1 if hud.leftLaneDepart else 2 if enabled else 0,
     "LANELINE_RIGHT": 4 if hud.rightLaneDepart and (frame // 50) % 2 == 0 else 1 if hud.rightLaneDepart else 2 if enabled else 0,
+    "LANELINE_CURVATURE": curvature.get(max(-15, min(int(CS.out.steeringAngleDeg / 3), 15)), 14) if enabled else 15,
     "CENTERLINE": 1 if enabled else 0,
   })
-
-  # LCA
-  if enabled:
-    lca_min = CS.out.vEgo < 8.94
-    msg_161.update({
-      "LCA_LEFT_ICON": 0 if CS.out.leftBlindspot or lca_min else 2 if CC.leftBlinker else 1,
-      "LCA_RIGHT_ICON": 0 if CS.out.rightBlindspot or lca_min else 2 if CC.rightBlinker else 1,
-      "LCA_LEFT_ARROW": 2 if CC.leftBlinker else 0,
-      "LCA_RIGHT_ARROW": 2 if CC.rightBlinker else 0,
-    })
 
   # LDW
   if hud.leftLaneDepart or hud.rightLaneDepart:
