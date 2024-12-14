@@ -181,7 +181,7 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
     # LEAD
     msg_162.update({
       "LEAD": 2 if enabled else 1 if hud.leadVisible else 0,
-      "LEAD_DISTANCE": 100 if hud.leadVisible else 0,
+      "LEAD_DISTANCE": 150,
     })
 
   ret.append(packer.make_can_msg("MSG_161", CAN.ECAN, msg_161))
