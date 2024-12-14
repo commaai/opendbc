@@ -50,6 +50,8 @@ class CarState(CarStateBase):
     self.buttons_counter = 0
 
     self.cruise_info = {}
+
+    self.ccnc_car = CP.carFingerprint in (CAR.HYUNDAI_SONATA_HEV_2024,)
     self.msg_161 = {}
     self.msg_162 = {}
 
@@ -224,14 +226,14 @@ class CarState(CarStateBase):
     ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > self.params.STEER_THRESHOLD, 5)
     ret.steerFaultTemporary = cp.vl["MDPS"]["LKA_FAULT"] != 0
 
-    # TODO: alt signal usage may be described by cp.vl['BLINKERS']['USE_ALT_LAMP']
-    left_blinker_sig, right_blinker_sig = "LEFT_LAMP", "RIGHT_LAMP"
-    if self.CP.carFingerprint in (CAR.HYUNDAI_KONA_EV_2ND_GEN, CAR.HYUNDAI_SONATA_2024):
-      left_blinker_sig, right_blinker_sig = "LEFT_LAMP_ALT", "RIGHT_LAMP_ALT"
-    ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_lamp(50, cp.vl["BLINKERS"][left_blinker_sig],
-                                                                      cp.vl["BLINKERS"][right_blinker_sig])
+    if self.ccnc_car:
+      self.msg_161 = copy.copy(cp_cam.vl["MSG_161"])
+      self.msg_162 = copy.copy(cp_cam.vl["MSG_162"])
+
+    alt = "_ALT" if self.ccnc_car else ""
+    ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_lamp(50, cp.vl["BLINKERS"][f"LEFT_LAMP{alt}"],
+                                                                      cp.vl["BLINKERS"][f"RIGHT_LAMP{alt}"])
     if self.CP.enableBsm:
-      alt = "_ALT" if self.CP.carFingerprint == CAR.HYUNDAI_SONATA_2024 else ""
       ret.leftBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"][f"FL_INDICATOR{alt}"] != 0
       ret.rightBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"][f"FR_INDICATOR{alt}"] != 0
 
@@ -269,10 +271,6 @@ class CarState(CarStateBase):
 
     ret.buttonEvents = [*create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT),
                         *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise})]
-
-    if self.CP.carFingerprint in (CAR.HYUNDAI_SONATA_2024,):
-      self.msg_161 = copy.copy(cp_cam.vl["MSG_161"])
-      self.msg_162 = copy.copy(cp_cam.vl["MSG_162"])
 
     return ret
 
@@ -321,7 +319,7 @@ class CarState(CarStateBase):
       cam_messages += [
         ("SCC_CONTROL", 50),
       ]
-    if self.CP.carFingerprint in (CAR.HYUNDAI_SONATA_2024,):
+    if self.ccnc_car:
       cam_messages += [
         ("MSG_161", 20),
         ("MSG_162", 20),
