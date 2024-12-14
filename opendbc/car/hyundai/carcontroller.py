@@ -117,11 +117,11 @@ class CarController(CarControllerBase):
       # LFA and HDA icons
       if self.frame % 5 == 0 and (not hda2 or hda2_long):
         if self.car_fingerprint in (
-            CAR.HYUNDAI_SONATA_2024, 
-            CAR.HYUNDAI_SONATA_HEV_2024, 
-            CAR.HYUNDAI_KONA_2ND_GEN, 
-            CAR.HYUNDAI_KONA_EV_2ND_GEN, 
-            CAR.KIA_SORENTO_2024, 
+            CAR.HYUNDAI_SONATA_2024,
+            CAR.HYUNDAI_SONATA_HEV_2024,
+            CAR.HYUNDAI_KONA_2ND_GEN,
+            CAR.HYUNDAI_KONA_EV_2ND_GEN,
+            CAR.KIA_SORENTO_2024,
             CAR.KIA_K5_2025,
         ):
           can_sends.extend(hyundaicanfd.create_ccnc(self.packer, self.CAN, self.frame, self.CP, CC, CS))
