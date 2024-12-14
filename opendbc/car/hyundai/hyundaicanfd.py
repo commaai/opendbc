@@ -154,10 +154,10 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
 
   # LCA
   if enabled:
-    speed_below_threshold = CS.out.vEgo < 8.94
+    lca_min = CS.out.vEgo < 8.94
     msg_161.update({
-      "LCA_LEFT_ICON": 0 if CS.out.leftBlindspot or speed_below_threshold else 2 if CC.leftBlinker else 1,
-      "LCA_RIGHT_ICON": 0 if CS.out.rightBlindspot or speed_below_threshold else 2 if CC.rightBlinker else 1,
+      "LCA_LEFT_ICON": 0 if CS.out.leftBlindspot or lca_min else 2 if CC.leftBlinker else 1,
+      "LCA_RIGHT_ICON": 0 if CS.out.rightBlindspot or lca_min else 2 if CC.rightBlinker else 1,
       "LCA_LEFT_ARROW": 2 if CC.leftBlinker else 0,
       "LCA_RIGHT_ARROW": 2 if CC.rightBlinker else 0,
     })
