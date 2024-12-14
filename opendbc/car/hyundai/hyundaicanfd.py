@@ -170,33 +170,27 @@ def create_ccnc(packer, CAN, frame, car_params, car_control, car_state):
     if hud_control.rightLaneDepart:
         msg_161["LANELINE_RIGHT"] = 4 if (frame // 50) % 2 == 0 else 1
 
-
+  # OPENPILOT LONGITUDINAL
   if car_params.openpilotLongitudinalControl:
+
     # HIDE ALERTS
     if msg_161.get("ALERTS_5") == 4:  # SMART CRUISE CONTROL CONDITIONS NOT MET
       msg_161["ALERTS_5"] = 0
 
-    # BACKGROUND,SETSPEED
+    # BACKGROUND, SETSPEED, DISTANCE
     msg_161.update({
       "BACKGROUND": 1 if enabled else 7,
       "SETSPEED": 3 if enabled else 1,
       "SETSPEED_HUD": 2 if enabled else 1,
       "SETSPEED_SPEED": 25 if (s := round(car_state.out.vCruiseCluster * CV.KPH_TO_MPH)) > 100 else s,
+      "DISTANCE": hud_control.leadDistanceBars,
+      "DISTANCE_SPACING": 1 if enabled else 0,
+      "DISTANCE_LEAD": 2 if enabled and hud_control.leadVisible else 1 if enabled else 0,
+      "DISTANCE_CAR": 2 if enabled else 1,
+      "ALERTS_3": hud_control.leadDistanceBars + 6,
     })
 
-    # DISTANCE
-    if 1 <= hud_control.leadDistanceBars <= 3:
-      msg_161["DISTANCE"] = hud_control.leadDistanceBars
-      msg_161["DISTANCE_SPACING"] = 1 if enabled else 0
-      msg_161["DISTANCE_LEAD"] = 2 if enabled and hud_control.leadVisible else 1 if enabled else 0
-      msg_161["DISTANCE_CAR"] = 2 if enabled else 1
-      msg_161["ALERTS_3"] = hud_control.leadDistanceBars + 6
-    else:
-      msg_161["DISTANCE"] = 0
-      msg_161["DISTANCE_SPACING"] = 0
-      msg_161["DISTANCE_LEAD"] = 0
-      msg_161["DISTANCE_CAR"] = 0
-
+    # LEAD
     msg_162.update({
       "LEAD": 2 if enabled else 1 if hud_control.leadVisible else 0,
       "LEAD_DISTANCE": 100 if hud_control.leadVisible else 0,
