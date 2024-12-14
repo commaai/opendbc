@@ -951,6 +951,14 @@ FW_VERSIONS = {
       b'\xf1\x00DN8HMFC  AT USA LHD 1.00 1.07 99211-L1000 211223',
     ],
   },
+  CAR.HYUNDAI_SONATA_HEV_2024: {
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00DN8_ RDR -----      1.00 1.00 99110-L1800         ',
+    ],
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00DN8HMFC  AT USA LHD 1.00 1.01 99211-L1800 230512',
+    ],
+  },
   CAR.KIA_SORENTO: {
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00UMP LKAS AT KOR LHD 1.00 1.00 95740-C5550 S30',

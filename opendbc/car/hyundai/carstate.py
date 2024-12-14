@@ -51,7 +51,7 @@ class CarState(CarStateBase):
 
     self.cruise_info = {}
 
-    self.ccnc_car = CP.carFingerprint in (CAR.HYUNDAI_SONATA_2024,)
+    self.ccnc_car = CP.carFingerprint in (CAR.HYUNDAI_SONATA_2024, CAR.HYUNDAI_SONATA_HEV_2024,)
     self.msg_161 = {}
     self.msg_162 = {}
 
