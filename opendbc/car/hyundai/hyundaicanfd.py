@@ -129,15 +129,13 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
   hud = CC.hudControl
 
   # HIDE FAULTS
-  msg_162.update({
-    "FAULT_LSS": 0,
-    "FAULT_HDA": 0,
-    "FAULT_DAS": 0,
-  })
+  for f in ("FAULT_LSS", "FAULT_HDA", "FAULT_DAS"):
+    msg_162[f] = 0
 
   # HIDE ALERTS
   if msg_161.get("ALERTS_5") == 5:  # USE SWITCH OR PEDAL TO ACCELERATE
     msg_161["ALERTS_5"] = 0
+
   if msg_161.get("ALERTS_2") == 5:  # CONSIDER TAKING A BREAK
     msg_161.update({"ALERTS_2": 0, "SOUNDS_2": 0, "DAW_ICON": 0})
 
