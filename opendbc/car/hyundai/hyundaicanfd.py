@@ -142,10 +142,7 @@ def create_ccnc(packer, CAN, frame, car_params, car_control, car_state):
     msg_161.update({"ALERTS_2": 0, "SOUNDS_2": 0, "DAW_ICON": 0})
 
   # LANELINES
-  curvature = {
-    i: (31 if i == -1 else 13 - abs(i + 15)) if i < 0 else 15 + i
-    for i in range(-15, 16)
-  }
+  curvature = {i: (31 if i == -1 else 13 - abs(i + 15)) if i < 0 else 15 + i for i in range(-15, 16)}
   msg_161.update({
     "LANELINE_CURVATURE": curvature.get(max(-15, min(int(car_state.out.steeringAngleDeg / 3), 15)), 14) if enabled else 15,
     "LFA_ICON": 2 if enabled else 0,
@@ -179,13 +176,13 @@ def create_ccnc(packer, CAN, frame, car_params, car_control, car_state):
     if msg_161.get("ALERTS_5") == 4:  # SMART CRUISE CONTROL CONDITIONS NOT MET
       msg_161["ALERTS_5"] = 0
 
-    # BACKGROUND
-    msg_161["BACKGROUND"] = 1 if enabled else 7
-
-    # SETSPEED
-    msg_161["SETSPEED"] = 3 if enabled else 1
-    msg_161["SETSPEED_HUD"] = 2 if enabled else 1
-    msg_161["SETSPEED_SPEED"] = 25 if (s := round(car_state.out.vCruiseCluster * CV.KPH_TO_MPH)) > 100 else s
+    # BACKGROUND,SETSPEED
+    msg_161.update({
+      "BACKGROUND": 1 if enabled else 7,
+      "SETSPEED": 3 if enabled else 1,
+      "SETSPEED_HUD": 2 if enabled else 1,
+      "SETSPEED_SPEED": 25 if (s := round(car_state.out.vCruiseCluster * CV.KPH_TO_MPH)) > 100 else s,
+    })
 
     # DISTANCE
     if 1 <= hud_control.leadDistanceBars <= 3:
@@ -200,13 +197,10 @@ def create_ccnc(packer, CAN, frame, car_params, car_control, car_state):
       msg_161["DISTANCE_LEAD"] = 0
       msg_161["DISTANCE_CAR"] = 0
 
-    # LEAD
-    if hud_control.leadVisible:
-      msg_162["LEAD"] = 2 if enabled else 1
-      msg_162["LEAD_DISTANCE"] = 100
-    else:
-      msg_162["LEAD"] = 0
-      msg_162["LEAD_DISTANCE"] = 0
+    msg_162.update({
+      "LEAD": 2 if enabled else 1 if hud_control.leadVisible else 0,
+      "LEAD_DISTANCE": 100 if hud_control.leadVisible else 0,
+    })
 
   ret.append(packer.make_can_msg("MSG_161", CAN.ECAN, msg_161))
   ret.append(packer.make_can_msg("MSG_162", CAN.ECAN, msg_162))
