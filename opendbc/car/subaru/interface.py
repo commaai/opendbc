@@ -71,7 +71,8 @@ class CarInterface(CarInterfaceBase):
       ret.steerActuatorDelay = 0.1
 
     elif candidate in (CAR.SUBARU_FORESTER_PREGLOBAL, CAR.SUBARU_OUTBACK_PREGLOBAL_2018):
-      ret.safetyConfigs[0].safetyParam = SubaruPandaFlags.FLAG_SUBARU_PREGLOBAL_REVERSED_DRIVER_TORQUE.value  # Outback 2018-2019 and Forester have reversed driver torque signal.value
+      # Outback 2018-2019 and Forester have reversed driver torque signal.value
+      ret.safetyConfigs[0].safetyParam = SubaruPandaFlags.FLAG_SUBARU_PREGLOBAL_REVERSED_DRIVER_TORQUE.value
 
     elif candidate == CAR.SUBARU_LEGACY_PREGLOBAL:
       ret.steerActuatorDelay = 0.15

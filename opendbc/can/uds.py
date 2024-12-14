@@ -1,7 +1,7 @@
 import time
 import struct
 from collections import deque
-from typing import NamedTuple, Deque, cast
+from typing import NamedTuple, cast
 from collections.abc import Callable, Generator
 from enum import IntEnum
 from functools import partial
@@ -300,14 +300,14 @@ def get_dtc_status_names(status):
       result.append(m.name)
   return result
 
-class CanClient():
+class CanClient:
   def __init__(self, can_send: Callable[[int, bytes, int], None], can_recv: Callable[[], list[tuple[int, bytes, int]]],
                tx_addr: int, rx_addr: int, bus: int, sub_addr: int | None = None, debug: bool = False):
     self.tx = can_send
     self.rx = can_recv
     self.tx_addr = tx_addr
     self.rx_addr = rx_addr
-    self.rx_buff: Deque[bytes] = deque()
+    self.rx_buff: deque[bytes] = deque()
     self.sub_addr = sub_addr
     self.bus = bus
     self.debug = debug
@@ -386,7 +386,7 @@ class CanClient():
       if i % 10 == 9:
         self._recv_buffer()
 
-class IsoTpMessage():
+class IsoTpMessage:
   def __init__(self, can_client: CanClient, timeout: float = 1, single_frame_mode: bool = False, separation_time: float = 0,
                debug: bool = False, max_len: int = 8):
     self._can_client = can_client
@@ -575,7 +575,7 @@ def get_rx_addr_for_tx_addr(tx_addr, rx_offset=0x8):
   raise ValueError(f"invalid tx_addr: {tx_addr}")
 
 
-class UdsClient():
+class UdsClient:
   def __init__(self, panda, tx_addr: int, rx_addr: int | None = None, bus: int = 0, sub_addr: int | None = None, timeout: float = 1,
                debug: bool = False, tx_timeout: float = 1, response_pending_timeout: float = 10):
     self.bus = bus
