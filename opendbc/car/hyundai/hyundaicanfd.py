@@ -147,8 +147,8 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
     "LANELINE_CURVATURE": curvature.get(max(-15, min(int(CS.out.steeringAngleDeg / 3), 15)), 14) if enabled else 15,
     "LFA_ICON": 2 if enabled else 0,
     "LKA_ICON": 4 if enabled else 0,
-    "LANELINE_LEFT": 2 if enabled else 0,
-    "LANELINE_RIGHT": 2 if enabled else 0,
+    "LANELINE_LEFT": 4 if hud.leftLaneDepart and (frame // 50) % 2 == 0 else 1 if hud.leftLaneDepart else 2 if enabled else 0,
+    "LANELINE_RIGHT": 4 if hud.rightLaneDepart and (frame // 50) % 2 == 0 else 1 if hud.rightLaneDepart else 2 if enabled else 0,
     "CENTERLINE": 1 if enabled else 0,
   })
 
@@ -165,10 +165,6 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
   # LDW
   if hud.leftLaneDepart or hud.rightLaneDepart:
     msg_162["VIBRATE"] = 1
-    if hud.leftLaneDepart:
-        msg_161["LANELINE_LEFT"] = 4 if (frame // 50) % 2 == 0 else 1
-    if hud.rightLaneDepart:
-        msg_161["LANELINE_RIGHT"] = 4 if (frame // 50) % 2 == 0 else 1
 
   # OP LONG
   if CP.openpilotLongitudinalControl:
