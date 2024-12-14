@@ -133,10 +133,10 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
     msg_162[f] = 0
 
   # HIDE ALERTS
-  if msg_161.get("ALERTS_5") == 5:  # USE SWITCH OR PEDAL TO ACCELERATE
+  if msg_161.get("ALERTS_5") == 5:  # USE_SWITCH_OR_PEDAL_TO_ACCELERATE
     msg_161["ALERTS_5"] = 0
 
-  if msg_161.get("ALERTS_2") == 5:  # CONSIDER TAKING A BREAK
+  if msg_161.get("ALERTS_2") == 5:  # CONSIDER_TAKING_A_BREAK
     msg_161.update({"ALERTS_2": 0, "SOUNDS_2": 0, "DAW_ICON": 0})
 
   # LANELINES, ICONS, LCA
@@ -162,7 +162,7 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
   if CP.openpilotLongitudinalControl:
 
     # HIDE ALERTS
-    if msg_161.get("ALERTS_5") == 4:  # SMART CRUISE CONTROL CONDITIONS NOT MET
+    if msg_161.get("ALERTS_5") == 4:  # SMART_CRUISE_CONTROL_CONDITIONS_NOT_MET
       msg_161["ALERTS_5"] = 0
 
     # BACKGROUND, SETSPEED, DISTANCE
