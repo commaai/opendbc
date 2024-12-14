@@ -6,7 +6,7 @@ from opendbc.car import get_safety_config, get_friction, structs
 from opendbc.car.common.basedir import BASEDIR
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.gm.radar_interface import RADAR_HEADER_MSG
-from opendbc.car.gm.values import CAR, CarControllerParams, EV_CAR, CAMERA_ACC_CAR, SDGM_CAR, CanBus, GMPandaFlags
+from opendbc.car.gm.values import CAR, CarControllerParams, EV_CAR, CAMERA_ACC_CAR, SDGM_CAR, CanBus, ALT_ACCS, GMPandaFlags
 from opendbc.car.interfaces import CarInterfaceBase, TorqueFromLateralAccelCallbackType, FRICTION_THRESHOLD, LatControlInputs, NanoFFModel
 
 TransmissionType = structs.CarParams.TransmissionType
@@ -112,6 +112,11 @@ class CarInterface(CarInterfaceBase):
         ret.openpilotLongitudinalControl = True
         ret.safetyConfigs[0].safetyParam |= GMPandaFlags.FLAG_GM_HW_CAM_LONG.value
 
+      if candidate in ALT_ACCS:
+        ret.experimentalLongitudinalAvailable = False
+        ret.openpilotLongitudinalControl = False
+        ret.minEnableSpeed = -1.  # engage speed is decided by PCM
+
     else:  # ASCM, OBD-II harness
       ret.openpilotLongitudinalControl = True
       ret.networkLocation = NetworkLocation.gateway
@@ -201,5 +206,10 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.CHEVROLET_TRAVERSE:
       ret.steerActuatorDelay = 0.2
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
+
+    elif candidate == CAR.GMC_YUKON:
+      ret.steerActuatorDelay = 0.5
+      CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
+      ret.dashcamOnly = True  # Needs steerRatio, tireStiffness, and lat accel factor tuning
 
     return ret
