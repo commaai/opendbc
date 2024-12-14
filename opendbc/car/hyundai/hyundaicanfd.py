@@ -120,13 +120,13 @@ def create_lfahda_cluster(packer, CAN, enabled):
   }
   return packer.make_can_msg("LFAHDA_CLUSTER", CAN.ECAN, values)
 
-def create_ccnc(packer, CAN, frame, car_params, car_control, car_state):
+def create_ccnc(packer, CAN, frame, CP, CC, CS):
   ret = []
 
-  msg_161 = car_state.msg_161.copy()
-  msg_162 = car_state.msg_162.copy()
-  enabled = car_control.enabled
-  hud_control = car_control.hudControl
+  msg_161 = CS.msg_161.copy()
+  msg_162 = CS.msg_162.copy()
+  enabled = CC.enabled
+  hud = CC.hudControl
 
   # HIDE FAULTS
   msg_162.update({
@@ -141,10 +141,10 @@ def create_ccnc(packer, CAN, frame, car_params, car_control, car_state):
   if msg_161.get("ALERTS_2") == 5:  # CONSIDER TAKING A BREAK
     msg_161.update({"ALERTS_2": 0, "SOUNDS_2": 0, "DAW_ICON": 0})
 
-  # LANELINES
+  # LANELINES, ICONS
   curvature = {i: (31 if i == -1 else 13 - abs(i + 15)) if i < 0 else 15 + i for i in range(-15, 16)}
   msg_161.update({
-    "LANELINE_CURVATURE": curvature.get(max(-15, min(int(car_state.out.steeringAngleDeg / 3), 15)), 14) if enabled else 15,
+    "LANELINE_CURVATURE": curvature.get(max(-15, min(int(CS.out.steeringAngleDeg / 3), 15)), 14) if enabled else 15,
     "LFA_ICON": 2 if enabled else 0,
     "LKA_ICON": 4 if enabled else 0,
     "LANELINE_LEFT": 2 if enabled else 0,
@@ -154,24 +154,24 @@ def create_ccnc(packer, CAN, frame, car_params, car_control, car_state):
 
   # LCA
   if enabled:
-    speed_below_threshold = car_state.out.vEgo < 8.94
+    speed_below_threshold = CS.out.vEgo < 8.94
     msg_161.update({
-      "LCA_LEFT_ICON": 0 if car_state.out.leftBlindspot or speed_below_threshold else 2 if car_control.leftBlinker else 1,
-      "LCA_RIGHT_ICON": 0 if car_state.out.rightBlindspot or speed_below_threshold else 2 if car_control.rightBlinker else 1,
-      "LCA_LEFT_ARROW": 2 if car_control.leftBlinker else 0,
-      "LCA_RIGHT_ARROW": 2 if car_control.rightBlinker else 0,
+      "LCA_LEFT_ICON": 0 if CS.out.leftBlindspot or speed_below_threshold else 2 if CC.leftBlinker else 1,
+      "LCA_RIGHT_ICON": 0 if CS.out.rightBlindspot or speed_below_threshold else 2 if CC.rightBlinker else 1,
+      "LCA_LEFT_ARROW": 2 if CC.leftBlinker else 0,
+      "LCA_RIGHT_ARROW": 2 if CC.rightBlinker else 0,
     })
 
-  # LANE DEPARTURE
-  if hud_control.leftLaneDepart or hud_control.rightLaneDepart:
+  # LDW
+  if hud.leftLaneDepart or hud.rightLaneDepart:
     msg_162["VIBRATE"] = 1
-    if hud_control.leftLaneDepart:
+    if hud.leftLaneDepart:
         msg_161["LANELINE_LEFT"] = 4 if (frame // 50) % 2 == 0 else 1
-    if hud_control.rightLaneDepart:
+    if hud.rightLaneDepart:
         msg_161["LANELINE_RIGHT"] = 4 if (frame // 50) % 2 == 0 else 1
 
-  # OPENPILOT LONGITUDINAL
-  if car_params.openpilotLongitudinalControl:
+  # OP LONG
+  if CP.openpilotLongitudinalControl:
 
     # HIDE ALERTS
     if msg_161.get("ALERTS_5") == 4:  # SMART CRUISE CONTROL CONDITIONS NOT MET
@@ -182,18 +182,18 @@ def create_ccnc(packer, CAN, frame, car_params, car_control, car_state):
       "BACKGROUND": 1 if enabled else 7,
       "SETSPEED": 3 if enabled else 1,
       "SETSPEED_HUD": 2 if enabled else 1,
-      "SETSPEED_SPEED": 25 if (s := round(car_state.out.vCruiseCluster * CV.KPH_TO_MPH)) > 100 else s,
-      "DISTANCE": hud_control.leadDistanceBars,
+      "SETSPEED_SPEED": 25 if (s := round(CS.out.vCruiseCluster * CV.KPH_TO_MPH)) > 100 else s,
+      "DISTANCE": hud.leadDistanceBars,
       "DISTANCE_SPACING": 1 if enabled else 0,
-      "DISTANCE_LEAD": 2 if enabled and hud_control.leadVisible else 1 if enabled else 0,
+      "DISTANCE_LEAD": 2 if enabled and hud.leadVisible else 1 if enabled else 0,
       "DISTANCE_CAR": 2 if enabled else 1,
-      "ALERTS_3": hud_control.leadDistanceBars + 6,
+      "ALERTS_3": hud.leadDistanceBars + 6,
     })
 
     # LEAD
     msg_162.update({
-      "LEAD": 2 if enabled else 1 if hud_control.leadVisible else 0,
-      "LEAD_DISTANCE": 100 if hud_control.leadVisible else 0,
+      "LEAD": 2 if enabled else 1 if hud.leadVisible else 0,
+      "LEAD_DISTANCE": 100 if hud.leadVisible else 0,
     })
 
   ret.append(packer.make_can_msg("MSG_161", CAN.ECAN, msg_161))
