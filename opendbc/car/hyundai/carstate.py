@@ -53,14 +53,6 @@ class CarState(CarStateBase):
 
     self.cruise_info = {}
 
-    self.ccnc_car = CP.carFingerprint in (
-      CAR.HYUNDAI_SONATA_2024,
-      CAR.HYUNDAI_SONATA_HEV_2024,
-      CAR.HYUNDAI_KONA_2ND_GEN,
-      CAR.HYUNDAI_KONA_EV_2ND_GEN,
-      CAR.KIA_SORENTO_2024,
-      CAR.KIA_K5_2025,
-    )
     self.msg_161 = {}
     self.msg_162 = {}
 
@@ -235,11 +227,11 @@ class CarState(CarStateBase):
     ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > self.params.STEER_THRESHOLD, 5)
     ret.steerFaultTemporary = cp.vl["MDPS"]["LKA_FAULT"] != 0
 
-    if self.ccnc_car:
+    if HyundaiFlags.CCNC:
       self.msg_161 = copy.copy(cp_cam.vl["MSG_161"])
       self.msg_162 = copy.copy(cp_cam.vl["MSG_162"])
 
-    alt = "_ALT" if self.ccnc_car else ""
+    alt = "_ALT" if HyundaiFlags.CCNC else ""
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_lamp(50, cp.vl["BLINKERS"][f"LEFT_LAMP{alt}"],
                                                                       cp.vl["BLINKERS"][f"RIGHT_LAMP{alt}"])
     if self.CP.enableBsm:
@@ -328,7 +320,7 @@ class CarState(CarStateBase):
       cam_messages += [
         ("SCC_CONTROL", 50),
       ]
-    if self.ccnc_car:
+    if HyundaiFlags.CCNC:
       cam_messages += [
         ("MSG_161", 20),
         ("MSG_162", 20),
