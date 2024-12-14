@@ -246,7 +246,7 @@ static int hyundai_fwd_hook(int bus_num, int addr) {
 
   int bus_fwd = -1;
 
-  // forward cam to ccan and viceversa, except lkas cmd
+  // forward cam to ccan and vice-versa, except lkas cmd
   if (bus_num == 0) {
     bus_fwd = 2;
   }
