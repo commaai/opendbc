@@ -250,8 +250,17 @@ static int hyundai_fwd_hook(int bus_num, int addr) {
   if (bus_num == 0) {
     bus_fwd = 2;
   }
-  if ((bus_num == 2) && (addr != 0x340) && (addr != 0x485)) {
-    bus_fwd = 0;
+
+  if (bus_num == 2) {
+    // Stock LKAS11 messages
+    bool is_lkas_11 = (addr == 0x340);
+    // LFA and HDA cluster icons
+    bool is_lfahda_mfc = (addr == 0x485);
+
+    bool block_msg = is_lkas_11 || is_lfahda_mfc;
+    if (!block_msg) {
+      bus_fwd = 0;
+    }
   }
 
   return bus_fwd;
