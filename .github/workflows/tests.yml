@@ -8,7 +8,7 @@ on:
 
 jobs:
   tests:
-    name: unit tests
+    name: ./test.sh
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
