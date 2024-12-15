@@ -15,6 +15,7 @@ class CarState(CarStateBase):
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
     cp_adas = can_parsers[Bus.adas]
+    cp_main = can_parsers[Bus.main]
     ret = structs.CarState()
 
     # car speed
@@ -30,7 +31,7 @@ class CarState(CarStateBase):
     ret.standstill = False  # TODO
 
     # gas
-    ret.gas = cp.vl['DRIVER']['GAS_PEDAL'] / 99.5 # HS1
+    ret.gas = cp_main.vl['DRIVER']['GAS_PEDAL'] / 99.5 # HS1
     ret.gasPressed = ret.gas > 0  # TODO
 
     # brake
@@ -77,7 +78,7 @@ class CarState(CarStateBase):
 
     # lock info
     ret.doorOpen = any([cp.vl['Dat_BSI']['DRIVER_DOOR'], cp.vl['Dat_BSI']['PASSENGER_DOOR']]) # HS1
-    ret.seatbeltUnlatched = cp.vl['RESTRAINTS']['DRIVER_SEATBELT'] != 2
+    ret.seatbeltUnlatched = cp_main.vl['RESTRAINTS']['DRIVER_SEATBELT'] != 2
 
     return ret
 
@@ -90,8 +91,6 @@ class CarState(CarStateBase):
       ('STEERING', 100),
       ('Dyn2_FRE', 100),
       ('Dyn2_CMM', 50),
-      ('RESTRAINTS', 10),
-      ('DRIVER', 10),
     ]
     adas_messages = [
       ('HS2_DYN_ABR_38D', 25),
@@ -99,7 +98,12 @@ class CarState(CarStateBase):
       ('HS2_DAT_MDD_CMD_452', 20),
       ('HS2_DAT7_BSI_612', 10),
     ]
+    main_messages = [
+      ('RESTRAINTS', 10),
+      ('DRIVER', 10),
+    ]
     return {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 2),
-      Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.adas], adas_messages, 1) #TODO: check CAN number
+      Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.adas], adas_messages, 1),
+      Bus.main: CANParser(DBC[CP.carFingerprint][Bus.main], main_messages, 0)
     }
