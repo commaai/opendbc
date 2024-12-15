@@ -28,7 +28,7 @@ class CarInterface(CarInterfaceBase):
       ret.experimentalLongitudinalAvailable = candidate not in (CANFD_UNSUPPORTED_LONGITUDINAL_CAR | CANFD_RADAR_SCC_CAR)
       ret.enableBsm = 0x1e5 in fingerprint[CAN.ECAN]
 
-      if 0x105 in fingerprint[CAN.ECAN]:
+      if 0x105 in fingerprint[CAN.ECAN] and not ret.flags & HyundaiFlags.ICE:
         ret.flags |= HyundaiFlags.HYBRID.value
 
       # detect HDA2 with ADAS Driving ECU
@@ -123,6 +123,9 @@ class CarInterface(CarInterfaceBase):
     # Dashcam cars are missing a test route, or otherwise need validation
     # TODO: Optima Hybrid 2017 uses a different SCC12 checksum
     ret.dashcamOnly = candidate in {CAR.KIA_OPTIMA_H, }
+
+    #print(ret.flags)
+    #print(ret.safetyConfigs)
 
     return ret
 
