@@ -25,4 +25,4 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pre-commit-
     - name: run ./test.sh
-      run: ./test.sh
+      run: PYTHONPATH=. ./test.sh
