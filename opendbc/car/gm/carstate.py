@@ -5,7 +5,7 @@ from opendbc.car import Bus, create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.numpy_fast import mean
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.gm.values import DBC, AccState, CruiseButtons, STEER_THRESHOLD, SDGM_CAR
+from opendbc.car.gm.values import DBC, AccState, CruiseButtons, STEER_THRESHOLD, SDGM_CAR, ALT_ACCS
 
 ButtonType = structs.CarState.ButtonEvent.Type
 TransmissionType = structs.CarParams.TransmissionType
@@ -123,14 +123,18 @@ class CarState(CarStateBase):
     ret.cruiseState.enabled = pt_cp.vl["AcceleratorPedal2"]["CruiseState"] != AccState.OFF
     ret.cruiseState.standstill = pt_cp.vl["AcceleratorPedal2"]["CruiseState"] == AccState.STANDSTILL
     if self.CP.networkLocation == NetworkLocation.fwdCamera:
-      ret.cruiseState.speed = cam_cp.vl["ASCMActiveCruiseControlStatus"]["ACCSpeedSetpoint"] * CV.KPH_TO_MS
-      # This FCW signal only works for SDGM cars. CAM cars send FCW on GMLAN but this bit is always 0 for them
-      ret.stockFcw = cam_cp.vl["ASCMActiveCruiseControlStatus"]["FCWAlert"] != 0
+      if self.CP.carFingerprint not in ALT_ACCS:
+        ret.cruiseState.speed = cam_cp.vl["ASCMActiveCruiseControlStatus"]["ACCSpeedSetpoint"] * CV.KPH_TO_MS
+        # This FCW signal only works for SDGM cars. CAM cars send FCW on GMLAN but this bit is always 0 for them
+        ret.stockFcw = cam_cp.vl["ASCMActiveCruiseControlStatus"]["FCWAlert"] != 0
+        if self.CP.pcmCruise:
+          # openpilot controls nonAdaptive when not pcmCruise
+          ret.cruiseState.nonAdaptive = cam_cp.vl["ASCMActiveCruiseControlStatus"]["ACCCruiseState"] not in (2, 3)
+      else:
+        ret.cruiseState.speed = pt_cp.vl["ECMCruiseControl"]["CruiseSetSpeed"] * CV.KPH_TO_MS
+
       if self.CP.carFingerprint not in SDGM_CAR:
         ret.stockAeb = cam_cp.vl["AEBCmd"]["AEBCmdActive"] != 0
-      # openpilot controls nonAdaptive when not pcmCruise
-      if self.CP.pcmCruise:
-        ret.cruiseState.nonAdaptive = cam_cp.vl["ASCMActiveCruiseControlStatus"]["ACCCruiseState"] not in (2, 3)
 
     if self.CP.enableBsm:
       ret.leftBlindspot = pt_cp.vl["BCMBlindSpotMonitor"]["LeftBSM"] == 1
@@ -166,24 +170,26 @@ class CarState(CarStateBase):
       ("ECMAcceleratorPos", 80),
     ]
 
+    if CP.transmissionType == TransmissionType.direct:
+      pt_messages.append(("EBCMRegenPaddle", 50))
+
     if CP.enableBsm:
       pt_messages.append(("BCMBlindSpotMonitor", 10))
 
-    # Used to read back last counter sent to PT by camera
+    cam_messages = []
     if CP.networkLocation == NetworkLocation.fwdCamera:
       pt_messages += [
         ("ASCMLKASteeringCmd", 0),
       ]
-
-    if CP.transmissionType == TransmissionType.direct:
-      pt_messages.append(("EBCMRegenPaddle", 50))
-
-    cam_messages = []
-    if CP.networkLocation == NetworkLocation.fwdCamera:
       cam_messages += [
         ("ASCMLKASteeringCmd", 10),
-        ("ASCMActiveCruiseControlStatus", 25),
       ]
+
+      if CP.carFingerprint in ALT_ACCS:
+        pt_messages.append(("ECMCruiseControl", 10))
+      else:
+        cam_messages.append(("ASCMActiveCruiseControlStatus", 25))
+
       if CP.carFingerprint not in SDGM_CAR:
         cam_messages += [
           ("AEBCmd", 10),
