@@ -81,6 +81,9 @@ class HyundaiFlags(IntFlag):
 
   # Static flags
 
+  # Some cars may otherwise be improperly detected as HYBRID/EV.
+  ICE = 2 ** 24
+
   # If 0x500 is present on bus 1 it probably has a Mando radar outputting radar points.
   # If no points are outputted by default it might be possible to turn it on using  selfdrive/debug/hyundai_enable_radar_points.py
   MANDO_RADAR = 2 ** 12
@@ -108,6 +111,7 @@ class HyundaiFlags(IntFlag):
 
   MIN_STEER_32_MPH = 2 ** 23
 
+  # Next index: 25
 
 class Footnote(Enum):
   CANFD = CarFootnote(
@@ -506,7 +510,7 @@ class CAR(Platforms):
       HyundaiCarDocs("Kia Carnival (with HDA II) 2025", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_q])),
     ],
     CarSpecs(mass=2087, wheelbase=3.09, steerRatio=14.23),
-    flags=HyundaiFlags.RADAR_SCC,
+    flags=HyundaiFlags.RADAR_SCC | HyundaiFlags.ICE,
   )
   KIA_CARNIVAL_HEV_4TH_GEN = HyundaiCanFDPlatformConfig(
     [
