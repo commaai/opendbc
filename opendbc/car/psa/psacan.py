@@ -30,13 +30,14 @@ def calculate_checksum(dat: bytearray, init: int) -> int:
 def create_lka_msg(packer, CP, apply_steer: float, frame: int, lat_active: bool, max_torque: int):
   # TODO: hud control for lane departure, status
   values = {
+    'CHECKSUM': 0,
+    'COUNTER': frame % 0x10,
     'TORQUE': max_torque if lat_active else 0,
-    'LANE_DEPARTURE': 0,
+    'LANE_DEPARTURE': 2 if apply_steer > 0 else 1 if apply_steer < 0 else 0, # 2: departed left, 1: departed right
+    'LKA_DENY': 0,
     'STATUS': 2 if lat_active else 0,
     'RAMP': 100 if lat_active else 0,  # TODO
     'ANGLE': clip(apply_steer, -90, 90),  # (-90, 90)
-    'COUNTER': frame % 0x10,
-    'CHECKSUM': 0,
   }
 
   # calculate checksum
