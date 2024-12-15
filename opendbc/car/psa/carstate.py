@@ -37,8 +37,8 @@ class CarState(CarStateBase):
     # brake
     #ret.brake = cp.vl['HS2_DYN_UCF_2CD']['AUTO_BRAKING_PRESSURE'] / 50.6 # HS2 alternative
     ret.brake = cp.vl['Dyn2_FRE']['BRAKE_PRESSURE'] / 1500.  # HS1
-    ret.brakePressed = bool(cp.vl['Dat_BSI']['P013_MainBrake']) # HS1
-    ret.parkingBrake = False # TODO bool(cp.vl['Dat_BSI']['PARKING_BRAKE']) is wrong signal
+    ret.brakePressed = bool(cp_main.vl['Dat_BSI']['P013_MainBrake']) # HS1
+    ret.parkingBrake = False # TODO bool(cp_main.vl['Dat_BSI']['PARKING_BRAKE']) is wrong signal
 
     # steering wheel
     ret.steeringAngleDeg = cp.vl['STEERING_ALT']['ANGLE'] # EPS
@@ -62,7 +62,7 @@ class CarState(CarStateBase):
     # reverse is same for automatic and manual
     if self.CP.transmissionType == TransmissionType.manual:
       ret.clutchPressed = bool(cp.vl['Dyn2_CMM']['P091_ConvCD_stDebVal']) # HS1
-    if bool(cp.vl['Dat_BSI']['P103_Com_bRevGear']): # HS1
+    if bool(cp_main.vl['Dat_BSI']['P103_Com_bRevGear']): # HS1
         ret.gearShifter = GearShifter.reverse
     else:
         ret.gearShifter = GearShifter.drive
@@ -77,7 +77,7 @@ class CarState(CarStateBase):
     ret.rightBlinker = blinker == 2
 
     # lock info
-    ret.doorOpen = any([cp.vl['Dat_BSI']['DRIVER_DOOR'], cp.vl['Dat_BSI']['PASSENGER_DOOR']]) # HS1
+    ret.doorOpen = any([cp_main.vl['Dat_BSI']['DRIVER_DOOR'], cp_main.vl['Dat_BSI']['PASSENGER_DOOR']]) # HS1
     ret.seatbeltUnlatched = cp_main.vl['RESTRAINTS']['DRIVER_SEATBELT'] != 2
 
     return ret
@@ -86,7 +86,6 @@ class CarState(CarStateBase):
   def get_can_parsers(CP):
     pt_messages = [
       ('Dyn4_FRE', 50),
-      ('Dat_BSI', 20),
       ('STEERING_ALT', 100),
       ('STEERING', 100),
       ('Dyn2_FRE', 100),
@@ -99,6 +98,7 @@ class CarState(CarStateBase):
       ('HS2_DAT7_BSI_612', 10),
     ]
     main_messages = [
+      ('Dat_BSI', 20),
       ('RESTRAINTS', 10),
       ('DRIVER', 10),
     ]
