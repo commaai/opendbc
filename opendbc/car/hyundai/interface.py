@@ -29,8 +29,9 @@ class CarInterface(CarInterfaceBase):
       ret.experimentalLongitudinalAvailable = candidate not in (CANFD_UNSUPPORTED_LONGITUDINAL_CAR | CANFD_RADAR_SCC_CAR)
       ret.enableBsm = 0x1e5 in fingerprint[CAN.ECAN]
 
-      #if 0x105 in fingerprint[CAN.ECAN]:
-      #  ret.flags |= HyundaiFlags.HYBRID.value
+      for fw in car_fw:
+        if fw.ecu == "fwdCamera" and (fw.fwVersion.startswith(b'\xf1\x00KA4HMFC')):
+          ret.flags |= HyundaiFlags.HYBRID.value
 
       # detect HDA2 with ADAS Driving ECU
       if hda2:
