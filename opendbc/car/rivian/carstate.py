@@ -11,6 +11,7 @@ class CarState(CarStateBase):
     # Needed by carcontroller
     self.acm_lka_hba_cmd = None
     self.epas_system_status_cmd = None
+    self.acm_status_cmd = None
 
   def update(self, cp, cp_cam, cp_adas, *_) -> structs.CarState:
     ret = structs.CarState()
@@ -68,6 +69,7 @@ class CarState(CarStateBase):
     # Messages needed by carcontroller
     self.acm_lka_hba_cmd = copy.copy(cp_cam.vl["ACM_lkaHbaCmd"])
     self.epas_system_status_cmd = copy.copy(cp.vl["EPAS_SystemStatus"])
+    self.acm_status_cmd = copy.copy(cp_adas.vl["ACM_Status"])
 
     return ret
 
@@ -100,7 +102,8 @@ class CarState(CarStateBase):
   @staticmethod
   def get_adas_can_parser(CP):
     messages = [
-      ("IndicatorLights", 10)
+      ("IndicatorLights", 10),
+      ("ACM_Status", 100),
     ]
 
     return CANParser(DBC[CP.carFingerprint]['pt'], messages, 1)

@@ -116,11 +116,12 @@ def create_acm_status(packer, acm_status, active):
   ]}
 
   if active:
-    values["ACM_FeatureStatus"] = 2
+    values["ACM_Status_Checksum"] = (int(values["ACM_Status_Checksum"]) + 2) % 15
+    values["ACM_Unkown1"] = 1
 
-  data = packer.make_can_msg("ACM_Status", 0, values)[1]
+  data = packer.make_can_msg("ACM_Status", 1, values)[1]
   values["ACM_Status_Checksum"] = checksum(data[1:], 0x1D, 0x5F)
-  return packer.make_can_msg("ACM_Status", 0, values)
+  return packer.make_can_msg("ACM_Status", 1, values)
 
 
 def create_vdm_adas_status(packer, vdm_adas_status, acc_on):
