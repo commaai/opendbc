@@ -16,7 +16,11 @@ source .venv/bin/activate
 
 uv run scons -j8
 
-uv run pre-commit run --all-files
+
+# TODO: pre-commit is slow; replace it with openpilot's "op lint"
+#uv run pre-commit run --all-files
+uv run ruff check .
+
 uv run pytest -n8
 
 GREEN='\033[0;32m'
