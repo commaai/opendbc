@@ -29,8 +29,8 @@ class CarInterface(CarInterfaceBase):
       ret.experimentalLongitudinalAvailable = candidate not in (CANFD_UNSUPPORTED_LONGITUDINAL_CAR | CANFD_RADAR_SCC_CAR)
       ret.enableBsm = 0x1e5 in fingerprint[CAN.ECAN]
 
-      if 0x105 in fingerprint[CAN.ECAN]:
-        ret.flags |= HyundaiFlags.HYBRID.value
+      #if 0x105 in fingerprint[CAN.ECAN]:
+      #  ret.flags |= HyundaiFlags.HYBRID.value
 
       # detect HDA2 with ADAS Driving ECU
       if hda2:
@@ -38,9 +38,6 @@ class CarInterface(CarInterfaceBase):
         if 0x110 in fingerprint[CAN.CAM]:
           ret.flags |= HyundaiFlags.CANFD_HDA2_ALT_STEERING.value
       else:
-        # non-HDA2
-        if 0x1cf not in fingerprint[CAN.ECAN]:
-          ret.flags |= HyundaiFlags.CANFD_ALT_BUTTONS.value
         if not ret.flags & HyundaiFlags.RADAR_SCC:
           ret.flags |= HyundaiFlags.CANFD_CAMERA_SCC.value
 
@@ -51,6 +48,10 @@ class CarInterface(CarInterfaceBase):
           ret.flags |= HyundaiFlags.CANFD_ALT_GEARS_2.value
         else:
           ret.flags |= HyundaiFlags.CANFD_ALT_GEARS.value
+
+      # Some HDA2 do not have 0x1cf
+      if 0x1cf not in fingerprint[CAN.ECAN]:
+        ret.flags |= HyundaiFlags.CANFD_ALT_BUTTONS.value
 
       cfgs = [get_safety_config(structs.CarParams.SafetyModel.hyundaiCanfd), ]
       if CAN.ECAN >= 4:
