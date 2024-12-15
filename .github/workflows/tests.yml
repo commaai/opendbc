@@ -17,5 +17,4 @@ jobs:
     steps:
     - uses: commaai/timeout@v1
     - uses: actions/checkout@v4
-    - name: run ./test.sh
-      run: PYTHONPATH=. ./test.sh
+    - run: ./test.sh
