@@ -238,15 +238,18 @@ BO_ 973 Dyn2_FRE: 8 ABS___Antiblockiersystem
  SG_ P319_FrmMng_rClthPos : 56|8@1+ (0.5,0) [0|255] "%" Vector__XXX
 
 BO_ 1010 LANE_KEEP_ASSIST: 8 XXX
+ SG_ unknown1 : 6|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 11|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 15|4@0+ (1,0) [0|15] "" XXX
+ SG_ unknown2 : 23|8@0+ (1,0) [0|255] "" XXX
  SG_ TORQUE : 31|11@0- (1,0) [0|2047] "" XXX
  SG_ LANE_DEPARTURE : 33|2@0+ (1,0) [0|3] "" XXX
  SG_ LKA_DENY : 34|1@0+ (1,0) [0|1] "" XXX
  SG_ STATUS : 36|2@0+ (1,0) [0|3] "" XXX
+ SG_ unknown3 : 40|1@0+ (1,0) [0|1] "" XXX
  SG_ RAMP : 47|7@0+ (1,0) [0|127] "" XXX
  SG_ ANGLE : 55|14@0- (0.1,0) [-90|90] "" XXX
- SG_ NEW_SIGNAL_1 : 57|1@0+ (1,0) [0|1] "" XXX
+ SG_ unknown4 : 57|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1042 Dat_BSI: 8 BSI___Kombiinstrument
  SG_ P040_MainBrakeFault : 0|1@1+ (1,0) [0|1] "-" Vector__XXX
