@@ -1,4 +1,5 @@
 from opendbc.car import CanBusBase
+from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car.hyundai.values import HyundaiFlags
 
@@ -119,6 +120,92 @@ def create_lfahda_cluster(packer, CAN, enabled):
   }
   return packer.make_can_msg("LFAHDA_CLUSTER", CAN.ECAN, values)
 
+def create_ccnc(packer, CAN, frame, car_params, car_control, car_state):
+  ret = []
+
+  msg_161 = car_state.msg_161.copy()
+  msg_162 = car_state.msg_162.copy()
+  enabled = car_control.enabled
+  hud_control = car_control.hudControl
+
+  # HIDE FAULTS
+  msg_162.update({
+    "FAULT_LSS": 0,
+    "FAULT_HDA": 0,
+    "FAULT_DAS": 0,
+  })
+
+  # HIDE ALERTS
+  if msg_161.get("ALERTS_5") == 5:  # USE SWITCH OR PEDAL TO ACCELERATE
+    msg_161["ALERTS_5"] = 0
+  if msg_161.get("ALERTS_2") == 5:  # CONSIDER TAKING A BREAK
+    msg_161.update({"ALERTS_2": 0, "SOUNDS_2": 0, "DAW_ICON": 0})
+
+  # LANELINES
+  curvature = {i: (31 if i == -1 else 13 - abs(i + 15)) if i < 0 else 15 + i for i in range(-15, 16)}
+  msg_161.update({
+    "LANELINE_CURVATURE": curvature.get(max(-15, min(int(car_state.out.steeringAngleDeg / 3), 15)), 14) if enabled else 15,
+    "LFA_ICON": 2 if enabled else 0,
+    "LKA_ICON": 4 if enabled else 0,
+    "LANELINE_LEFT": 2 if enabled else 0,
+    "LANELINE_RIGHT": 2 if enabled else 0,
+    "CENTERLINE": 1 if enabled else 0,
+  })
+
+  # LCA
+  if enabled:
+    speed_below_threshold = car_state.out.vEgo < 8.94
+    msg_161.update({
+      "LCA_LEFT_ICON": 0 if car_state.out.leftBlindspot or speed_below_threshold else 2 if car_control.leftBlinker else 1,
+      "LCA_RIGHT_ICON": 0 if car_state.out.rightBlindspot or speed_below_threshold else 2 if car_control.rightBlinker else 1,
+      "LCA_LEFT_ARROW": 2 if car_control.leftBlinker else 0,
+      "LCA_RIGHT_ARROW": 2 if car_control.rightBlinker else 0,
+    })
+
+  # LANE DEPARTURE
+  if hud_control.leftLaneDepart or hud_control.rightLaneDepart:
+    msg_162["VIBRATE"] = 1
+    if hud_control.leftLaneDepart:
+        msg_161["LANELINE_LEFT"] = 4 if (frame // 50) % 2 == 0 else 1
+    if hud_control.rightLaneDepart:
+        msg_161["LANELINE_RIGHT"] = 4 if (frame // 50) % 2 == 0 else 1
+
+
+  if car_params.openpilotLongitudinalControl:
+    # HIDE ALERTS
+    if msg_161.get("ALERTS_5") == 4:  # SMART CRUISE CONTROL CONDITIONS NOT MET
+      msg_161["ALERTS_5"] = 0
+
+    # BACKGROUND,SETSPEED
+    msg_161.update({
+      "BACKGROUND": 1 if enabled else 7,
+      "SETSPEED": 3 if enabled else 1,
+      "SETSPEED_HUD": 2 if enabled else 1,
+      "SETSPEED_SPEED": 25 if (s := round(car_state.out.vCruiseCluster * CV.KPH_TO_MPH)) > 100 else s,
+    })
+
+    # DISTANCE
+    if 1 <= hud_control.leadDistanceBars <= 3:
+      msg_161["DISTANCE"] = hud_control.leadDistanceBars
+      msg_161["DISTANCE_SPACING"] = 1 if enabled else 0
+      msg_161["DISTANCE_LEAD"] = 2 if enabled and hud_control.leadVisible else 1 if enabled else 0
+      msg_161["DISTANCE_CAR"] = 2 if enabled else 1
+      msg_161["ALERTS_3"] = hud_control.leadDistanceBars + 6
+    else:
+      msg_161["DISTANCE"] = 0
+      msg_161["DISTANCE_SPACING"] = 0
+      msg_161["DISTANCE_LEAD"] = 0
+      msg_161["DISTANCE_CAR"] = 0
+
+    msg_162.update({
+      "LEAD": 2 if enabled else 1 if hud_control.leadVisible else 0,
+      "LEAD_DISTANCE": 100 if hud_control.leadVisible else 0,
+    })
+
+  ret.append(packer.make_can_msg("MSG_161", CAN.ECAN, msg_161))
+  ret.append(packer.make_can_msg("MSG_162", CAN.ECAN, msg_162))
+
+  return ret
 
 def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_override, set_speed, hud_control):
   jerk = 5
