@@ -1,12 +1,10 @@
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car import CanBusBase
 
-# TODO do not use global
-global ramp_value
-
 class CanBus(CanBusBase):
   def __init__(self, CP=None, fingerprint=None) -> None:
     super().__init__(CP, fingerprint)
+    self.ramp_value = 0
 
   @property
   def main(self) -> int:
@@ -36,7 +34,7 @@ def create_lka_msg(packer, CP, apply_steer: float, frame: int, lat_active: bool,
     # TODO find better way to handle this
     max_torque = max_torque if lat_active else 0
     # ramp up/down
-    ramp_value = max(min(ramp_value + (1 if lat_active else -1), 100), 0)
+    CanBus(CP).ramp_value = max(min(CanBus(CP).ramp_value + (1 if lat_active else -1), 100), 0)
 
     values = {
         'unknown1': 0 if reverse else 1,
@@ -48,7 +46,7 @@ def create_lka_msg(packer, CP, apply_steer: float, frame: int, lat_active: bool,
         'LKA_DENY': 0 if lat_active else 1,
         'STATUS': 2 if lat_active else 1,
         'unknown3': 0, # TODO check
-        'RAMP': ramp_value, # TODO check, currently ramps up 100/s
+        'RAMP': CanBus(CP).ramp_value, # TODO check, currently ramps up 100/s
         'ANGLE': clip(apply_steer, -90, 90),
         'unknown4': 1,
     }
