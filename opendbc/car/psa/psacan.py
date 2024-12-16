@@ -1,6 +1,9 @@
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car import CanBusBase
 
+# TODO do not use global
+global ramp_value
+
 class CanBus(CanBusBase):
   def __init__(self, CP=None, fingerprint=None) -> None:
     super().__init__(CP, fingerprint)
@@ -23,7 +26,6 @@ def calculate_checksum(dat: bytearray) -> int:
         high_nibble = b >> 4
         low_nibble = b & 0xF
         checksum += high_nibble + low_nibble
-
     # find CHK so that (checksum + CHK) % 16 = 11 (0xB)
     needed = (11 - checksum) & 0xF
     return needed
@@ -31,17 +33,22 @@ def calculate_checksum(dat: bytearray) -> int:
 def create_lka_msg(packer, CP, apply_steer: float, frame: int, lat_active: bool, max_torque: int, reverse: bool):
     # TODO: hud control for lane departure, status
     # TODO: unknowns could be recuperation mode/drive mode
+    # TODO find better way to handle this
+    max_torque = max_torque if lat_active else 0
+    # ramp up/down
+    ramp_value = max(min(ramp_value + (1 if lat_active else -1), 100), 0)
+
     values = {
         'unknown1': 0 if reverse else 1,
         'COUNTER': (frame//5) % 0x10,
         'CHECKSUM': 0,
-        'unknown2': 0x0C, #TODO: analyze original signal
+        'unknown2': min(frame // 100, 0x0B), # TODO: check, currently ramps up 1/s up to 0x0B
         'TORQUE': max_torque if lat_active else 0,
-        'LANE_DEPARTURE': 2 if max_torque > 0 else 1 if max_torque < 0 else 0, # TODO: check sign
-        'LKA_DENY': 0,
-        'STATUS': 2 if lat_active else 0,
-        'unknown3': 1,
-        'RAMP': 100 if lat_active else 0, # TODO maybe implement ramping
+        'LANE_DEPARTURE': 2 if max_torque < 0 else 1 if max_torque > 0 else 0, # TODO: check sign
+        'LKA_DENY': 0 if lat_active else 1,
+        'STATUS': 2 if lat_active else 1,
+        'unknown3': 0, # TODO check
+        'RAMP': ramp_value, # TODO check, currently ramps up 100/s
         'ANGLE': clip(apply_steer, -90, 90),
         'unknown4': 1,
     }
