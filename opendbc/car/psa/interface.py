@@ -13,7 +13,7 @@ class CarInterface(CarInterfaceBase):
     ret.dashcamOnly = False
 
     ret.radarUnavailable = True
-    ret.steerControlType = structs.CarParams.SteerControlType.angle
+    ret.steerControlType = structs.CarParams.SteerControlType.angle # TODO: check angle or torque controlled
     ret.steerActuatorDelay = 0.2  # not measured
     ret.steerLimitTimer = 1.0
 

@@ -80,6 +80,8 @@ class CarState(CarStateBase):
     ret.doorOpen = any([cp_main.vl['Dat_BSI']['DRIVER_DOOR'], cp_main.vl['Dat_BSI']['PASSENGER_DOOR']]) # HS1
     ret.seatbeltUnlatched = cp_main.vl['RESTRAINTS']['DRIVER_SEATBELT'] != 2
 
+    # TODO: for testing, original LKA message
+    self.original_lka_values = cp_main.vl['LANE_KEEP_ASSIST']
     return ret
 
   @staticmethod
@@ -101,6 +103,7 @@ class CarState(CarStateBase):
       ('Dat_BSI', 20),
       ('RESTRAINTS', 10),
       ('DRIVER', 10),
+      ('LANE_KEEP_ASSIST', 20),
     ]
     return {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 2),

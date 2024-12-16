@@ -46,7 +46,9 @@ class CarController(CarControllerBase):
         apply_angle = CS.out.steeringAngleDeg
         self.lkas_max_torque = 0
 
-      can_sends.append(psacan.create_lka_msg(self.packer, self.CP, apply_angle, self.frame, CC.latActive, self.lkas_max_torque, reverse))
+      # can_sends.append(psacan.create_lka_msg(self.packer, self.CP, apply_angle, self.frame, CC.latActive, self.lkas_max_torque, reverse))
+      # TODO: this copies the original lkas message
+      can_sends.append(psacan.create_lka_msg(self.packer, self.CP, CS.original_lka_values))
 
       self.apply_angle_last = apply_angle
 
