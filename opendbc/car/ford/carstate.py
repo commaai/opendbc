@@ -6,14 +6,17 @@ from opendbc.car.ford.fordcan import CanBus
 from opendbc.car.ford.values import DBC, CarControllerParams, FordFlags
 from opendbc.car.interfaces import CarStateBase
 
+from opendbc.sunnypilot.car.ford.mads import MadsCarState
+
 ButtonType = structs.CarState.ButtonEvent.Type
 GearShifter = structs.CarState.GearShifter
 TransmissionType = structs.CarParams.TransmissionType
 
 
-class CarState(CarStateBase):
+class CarState(CarStateBase, MadsCarState):
   def __init__(self, CP):
-    super().__init__(CP)
+    CarStateBase.__init__(self, CP)
+    MadsCarState.__init__(self, CP)
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
     if CP.transmissionType == TransmissionType.automatic:
       self.shifter_values = can_define.dv["PowertrainData_10"]["TrnRng_D_Rq"]
@@ -110,7 +113,11 @@ class CarState(CarStateBase):
     self.acc_tja_status_stock_values = cp_cam.vl["ACCDATA_3"]
     self.lkas_status_stock_values = cp_cam.vl["IPMA_Data"]
 
-    ret.buttonEvents = create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise})
+    MadsCarState.update_mads(self, ret, can_parsers)
+
+    ret.buttonEvents = [
+      *create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise}),
+      *create_button_events(self.lkas_button, self.prev_lkas_button, {1: ButtonType.lkas})]
 
     return ret
 

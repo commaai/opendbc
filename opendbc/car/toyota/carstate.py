@@ -10,6 +10,8 @@ from opendbc.car.interfaces import CarStateBase
 from opendbc.car.toyota.values import ToyotaFlags, CAR, DBC, STEER_THRESHOLD, NO_STOP_TIMER_CAR, \
                                                   TSS2_CAR, RADAR_ACC_CAR, EPS_SCALE, UNSUPPORTED_DSU_CAR
 
+from opendbc.sunnypilot.car.toyota.mads import MadsCarState
+
 ButtonType = structs.CarState.ButtonEvent.Type
 SteerControlType = structs.CarParams.SteerControlType
 
@@ -25,9 +27,10 @@ TEMP_STEER_FAULTS = (0, 9, 11, 21, 25)
 PERM_STEER_FAULTS = (3, 17)
 
 
-class CarState(CarStateBase):
+class CarState(CarStateBase, MadsCarState):
   def __init__(self, CP):
-    super().__init__(CP)
+    CarStateBase.__init__(self, CP)
+    MadsCarState.__init__(self, CP)
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
     self.eps_torque_scale = EPS_SCALE[CP.carFingerprint] / 100.
     self.cluster_speed_hyst_gap = CV.KPH_TO_MS / 2.
@@ -188,7 +191,14 @@ class CarState(CarStateBase):
       prev_distance_button = self.distance_button
       self.distance_button = cp_acc.vl["ACC_CONTROL"]["DISTANCE"]
 
-      ret.buttonEvents = create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise})
+      self.distance_button_events = create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise})
+
+    MadsCarState.update_mads(self, ret, can_parsers)
+
+    ret.buttonEvents = [
+      *self.distance_button_events,
+      *self.lkas_button_events,
+    ]
 
     return ret
 

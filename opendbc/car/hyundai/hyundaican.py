@@ -8,7 +8,8 @@ hyundai_checksum = crcmod.mkCrcFun(0x11D, initCrc=0xFD, rev=False, xorOut=0xdf)
 def create_lkas11(packer, frame, CP, apply_steer, steer_req,
                   torque_fault, lkas11, sys_warning, sys_state, enabled,
                   left_lane, right_lane,
-                  left_lane_depart, right_lane_depart):
+                  left_lane_depart, right_lane_depart,
+                  lkas_icon):
   values = {s: lkas11[s] for s in [
     "CF_Lkas_LdwsActivemode",
     "CF_Lkas_LdwsSysState",
@@ -50,7 +51,7 @@ def create_lkas11(packer, frame, CP, apply_steer, steer_req,
     # FcwOpt_USM 2 = Green car + lanes
     # FcwOpt_USM 1 = White car + lanes
     # FcwOpt_USM 0 = No car + lanes
-    values["CF_Lkas_FcwOpt_USM"] = 2 if enabled else 1
+    values["CF_Lkas_FcwOpt_USM"] = lkas_icon
 
     # SysWarning 4 = keep hands on wheel
     # SysWarning 5 = keep hands on wheel (red)
@@ -67,7 +68,7 @@ def create_lkas11(packer, frame, CP, apply_steer, steer_req,
     # SysState 1-2 = white car + lanes
     # SysState 3 = green car + lanes, green steering wheel
     # SysState 4 = green car + lanes
-    values["CF_Lkas_LdwsSysState"] = 3 if enabled else 1
+    values["CF_Lkas_LdwsSysState"] = lkas_icon
     values["CF_Lkas_LdwsOpt_USM"] = 2  # non-2 changes above SysState definition
 
     # these have no effect
@@ -119,18 +120,18 @@ def create_clu11(packer, frame, clu11, button, CP):
   return packer.make_can_msg("CLU11", bus, values)
 
 
-def create_lfahda_mfc(packer, enabled):
+def create_lfahda_mfc(packer, enabled, lfa_icon):
   values = {
-    "LFA_Icon_State": 2 if enabled else 0,
+    "LFA_Icon_State": lfa_icon,
   }
   return packer.make_can_msg("LFAHDA_MFC", 0, values)
 
 def create_acc_commands(packer, enabled, accel, upper_jerk, idx, hud_control, set_speed, stopping, long_override, use_fca,
-                        ESCC: EnhancedSmartCruiseControl = None):
+                        main_cruise_enabled, ESCC: EnhancedSmartCruiseControl = None):
 
   def get_scc11_values():
     return {
-      "MainMode_ACC": 1,
+      "MainMode_ACC": 1 if main_cruise_enabled else 0,
       "TauGapSet": hud_control.leadDistanceBars,
       "VSetDis": set_speed if enabled else 0,
       "AliveCounterACC": idx % 0x10,

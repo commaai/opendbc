@@ -5,12 +5,15 @@ from opendbc.car.chrysler.values import DBC, STEER_THRESHOLD, RAM_CARS
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
 
+from opendbc.sunnypilot.car.chrysler.mads import MadsCarState
+
 ButtonType = structs.CarState.ButtonEvent.Type
 
 
-class CarState(CarStateBase):
+class CarState(CarStateBase, MadsCarState):
   def __init__(self, CP):
-    super().__init__(CP)
+    CarStateBase.__init__(self, CP)
+    MadsCarState.__init__(self, CP)
     self.CP = CP
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
 
@@ -104,7 +107,12 @@ class CarState(CarStateBase):
     self.lkas_car_model = cp_cam.vl["DAS_6"]["CAR_MODEL"]
     self.button_counter = cp.vl["CRUISE_BUTTONS"]["COUNTER"]
 
-    ret.buttonEvents = create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise})
+    MadsCarState.update_mads(self, ret, can_parsers)
+
+    ret.buttonEvents = [
+      *create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise}),
+      *create_button_events(self.lkas_button, self.prev_lkas_button, {1: ButtonType.lkas}),
+    ]
 
     return ret
 
@@ -153,6 +161,8 @@ class CarState(CarStateBase):
 
     if CP.carFingerprint in RAM_CARS:
       cam_messages += CarState.get_cruise_messages()
+
+    MadsCarState.get_parser(CP, pt_messages, cam_messages)
 
     return {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 0),

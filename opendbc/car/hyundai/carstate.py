@@ -11,6 +11,7 @@ from opendbc.car.hyundai.values import HyundaiFlags, CAR, DBC, Buttons, CarContr
 from opendbc.car.interfaces import CarStateBase
 
 from opendbc.sunnypilot.car.hyundai.escc import EsccCarStateBase
+from opendbc.sunnypilot.car.hyundai.mads import MadsCarState
 
 ButtonType = structs.CarState.ButtonEvent.Type
 
@@ -22,10 +23,11 @@ BUTTONS_DICT = {Buttons.RES_ACCEL: ButtonType.accelCruise, Buttons.SET_DECEL: Bu
                 Buttons.GAP_DIST: ButtonType.gapAdjustCruise, Buttons.CANCEL: ButtonType.cancel}
 
 
-class CarState(CarStateBase, EsccCarStateBase):
+class CarState(CarStateBase, EsccCarStateBase, MadsCarState):
   def __init__(self, CP):
     CarStateBase.__init__(self, CP)
     EsccCarStateBase.__init__(self)
+    MadsCarState.__init__(self, CP)
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
 
     self.cruise_buttons: deque = deque([Buttons.NONE] * PREV_BUTTON_SAMPLES, maxlen=PREV_BUTTON_SAMPLES)
@@ -178,8 +180,14 @@ class CarState(CarStateBase, EsccCarStateBase):
     self.cruise_buttons.extend(cp.vl_all["CLU11"]["CF_Clu_CruiseSwState"])
     self.main_buttons.extend(cp.vl_all["CLU11"]["CF_Clu_CruiseSwMain"])
 
+    MadsCarState.update_mads(self, ret, can_parsers)
+
     ret.buttonEvents = [*create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT),
-                        *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise})]
+                        *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise}),
+                        *create_button_events(self.lkas_button, self.prev_lkas_button, {1: ButtonType.lkas})]
+
+    if self.CP.openpilotLongitudinalControl:
+      ret.cruiseState.available = self.get_main_cruise(ret)
 
     return ret
 
@@ -267,8 +275,14 @@ class CarState(CarStateBase, EsccCarStateBase):
       self.hda2_lfa_block_msg = copy.copy(cp_cam.vl["CAM_0x362"] if self.CP.flags & HyundaiFlags.CANFD_HDA2_ALT_STEERING
                                           else cp_cam.vl["CAM_0x2a4"])
 
+    MadsCarState.update_mads_canfd(self, ret, can_parsers)
+
     ret.buttonEvents = [*create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT),
-                        *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise})]
+                        *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise}),
+                        *create_button_events(self.lkas_button, self.prev_lkas_button, {1: ButtonType.lkas})]
+
+    if self.CP.openpilotLongitudinalControl:
+      ret.cruiseState.available = self.get_main_cruise(ret)
 
     return ret
 
@@ -384,6 +398,7 @@ class CarState(CarStateBase, EsccCarStateBase):
       if CP.flags & HyundaiFlags.USE_FCA.value:
         cam_messages.append(("FCA11", 50))
 
+    MadsCarState.get_parser(CP, pt_messages)
 
     return {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 0),
