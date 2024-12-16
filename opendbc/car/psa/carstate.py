@@ -54,7 +54,7 @@ class CarState(CarStateBase):
     ret.cruiseState.speed = cp_adas.vl['HS2_DAT_MDD_CMD_452']['CONS_LIM_VITESSE_VEH'] * CV.KPH_TO_MS # HS2, set to 255 when ACC is off
     ret.cruiseState.enabled = cp_adas.vl['HS2_DAT_MDD_CMD_452']['DDE_ACTIVATION_RVV_ACC'] == 1 # HS2
     ret.cruiseState.available = True  # TODO
-    ret.cruiseState.nonAdaptive = cp_adas.vl['HS2_DAT_MDD_CMD_452']['COCKPIT_GO_ACC_REQUEST'] == 0 # HS2, 0: ACC, 1: CC
+    ret.cruiseState.nonAdaptive = False # cp_adas.vl['HS2_DAT_MDD_CMD_452']['COCKPIT_GO_ACC_REQUEST'] == 0 # HS2, 0: CC, 1: ACC, no signal in route
     ret.cruiseState.standstill = False  # TODO
     ret.accFaulted = False
 
