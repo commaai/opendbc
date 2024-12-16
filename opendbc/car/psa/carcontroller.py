@@ -1,3 +1,4 @@
+from opendbc.car import structs
 from opendbc.can.packer import CANPacker
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car import apply_std_steer_angle_limits, Bus
@@ -5,6 +6,7 @@ from opendbc.car.interfaces  import CarControllerBase
 from opendbc.car.psa import psacan
 from opendbc.car.psa.values import CarControllerParams
 
+GearShifter = structs.CarState.GearShifter
 
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
@@ -19,6 +21,7 @@ class CarController(CarControllerBase):
     can_sends = []
 
     actuators = CC.actuators
+    reverse = CS.out.gearShifter == GearShifter.reverse
 
     ### lateral control ###
     if (self.frame % CarControllerParams.STEER_STEP) == 0:
@@ -43,7 +46,7 @@ class CarController(CarControllerBase):
         apply_angle = CS.out.steeringAngleDeg
         self.lkas_max_torque = 0
 
-      can_sends.append(psacan.create_lka_msg(self.packer, self.CP, apply_angle, self.frame, CC.latActive, self.lkas_max_torque))
+      can_sends.append(psacan.create_lka_msg(self.packer, self.CP, apply_angle, self.frame, CC.latActive, self.lkas_max_torque, reverse))
 
       self.apply_angle_last = apply_angle
 

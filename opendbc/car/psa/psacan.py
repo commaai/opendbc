@@ -28,11 +28,11 @@ def calculate_checksum(dat: bytearray) -> int:
     needed = (11 - checksum) & 0xF
     return needed
 
-def create_lka_msg(packer, CP, apply_steer: float, frame: int, lat_active: bool, max_torque: int):
+def create_lka_msg(packer, CP, apply_steer: float, frame: int, lat_active: bool, max_torque: int, reverse: bool):
     # TODO: hud control for lane departure, status
     # TODO: unknowns could be recuperation mode/drive mode
     values = {
-        'unknown1': 1,
+        'unknown1': 0 if reverse else 1,
         'COUNTER': (frame//5) % 0x10,
         'CHECKSUM': 0,
         'unknown2': 0x0C, #TODO: analyze original signal
