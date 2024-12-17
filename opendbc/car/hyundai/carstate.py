@@ -7,7 +7,7 @@ from opendbc.can.can_define import CANDefine
 from opendbc.car import Bus, create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.hyundai.hyundaicanfd import CanBus
-from opendbc.car.hyundai.values import HyundaiFlags, CAR, DBC, Buttons, CarControllerParams, ANGLE_CONTROL_CAR
+from opendbc.car.hyundai.values import HyundaiFlags, CAR, DBC, Buttons, CarControllerParams
 from opendbc.car.interfaces import CarStateBase
 
 ButtonType = structs.CarState.ButtonEvent.Type
@@ -56,10 +56,6 @@ class CarState(CarStateBase):
     self.cluster_speed_counter = CLUSTER_SAMPLE_RATE
 
     self.params = CarControllerParams(CP)
-
-    # LFA2
-    self.lkas_button_on = True
-    self.mdps_error_cnt = 0
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
@@ -179,11 +175,6 @@ class CarState(CarStateBase):
     self.cruise_buttons.extend(cp.vl_all["CLU11"]["CF_Clu_CruiseSwState"])
     self.main_buttons.extend(cp.vl_all["CLU11"]["CF_Clu_CruiseSwMain"])
 
-    self.mdps12 = copy.copy(cp.vl["MDPS12"])
-    self.lkas_error = cp_cam.vl["LKAS11"]["CF_Lkas_LdwsSysState"] == 7
-    if not self.lkas_error:
-      self.lkas_button_on = cp_cam.vl["LKAS11"]["CF_Lkas_LdwsSysState"]
-
     ret.buttonEvents = [*create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT),
                         *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise})]
 
@@ -238,12 +229,8 @@ class CarState(CarStateBase):
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_lamp(50, cp.vl["BLINKERS"][left_blinker_sig],
                                                                       cp.vl["BLINKERS"][right_blinker_sig])
     if self.CP.enableBsm:
-      if self.CP.carFingerprint in ANGLE_CONTROL_CAR:
-        ret.leftBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"]["INDICATOR_LEFT_FOUR"] != 0
-        ret.rightBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"]["INDICATOR_RIGHT_FOUR"] != 0
-      else:
-        ret.leftBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"]["FL_INDICATOR"] != 0
-        ret.rightBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"]["FR_INDICATOR"] != 0
+      ret.leftBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"]["FL_INDICATOR"] != 0
+      ret.rightBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"]["FR_INDICATOR"] != 0
 
     # cruise state
     # CAN FD cars enable on main button press, set available if no TCS faults preventing engagement
@@ -399,51 +386,3 @@ class CarState(CarStateBase):
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 0),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, 2),
     }
-
-
-  @staticmethod
-  def get_cam_can_parser(CP):
-    if CP.flags & HyundaiFlags.CANFD:
-      return CarState.get_cam_can_parser_canfd(CP)
-
-    messages = [
-      ("LKAS11", 100)
-    ]
-
-    if CP.openpilotLongitudinalControl and CP.sccBus == 2:
-      messages += [
-        ("SCC11", 50),
-        ("SCC12", 50),
-      ]
-
-      if CP.scc13Available:
-        messages += [
-          ("SCC13", 50),
-        ]
-
-      if CP.scc14Available:
-        messages += [
-          ("SCC14", 50),
-        ]
-
-      if CP.flags & HyundaiFlags.USE_FCA.value:
-        messages.append(("FCA11", 50))
-
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, 2)
-
-  @staticmethod
-  def get_cam_can_parser_canfd(CP):
-    messages = []
-    if CP.flags & HyundaiFlags.CANFD_HDA2:
-      block_lfa_msg = "CAM_0x362" if CP.flags & HyundaiFlags.CANFD_HDA2_ALT_STEERING else "CAM_0x2a4"
-      messages += [(block_lfa_msg, 20)]
-      if CP.carFingerprint in ANGLE_CONTROL_CAR:
-        messages += [
-          ("LKAS_ALT", 100),
-        ]
-    elif CP.flags & HyundaiFlags.CANFD_CAMERA_SCC:
-      messages += [
-        ("SCC_CONTROL", 50),
-      ]
-
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, CanBus(CP).CAM)
