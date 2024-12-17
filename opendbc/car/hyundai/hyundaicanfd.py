@@ -133,6 +133,9 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
     msg_162[f] = 0
 
   # HIDE ALERTS
+  if msg_161.get("ALERTS_5") == 4:  # SMART_CRUISE_CONTROL_CONDITIONS_NOT_MET
+    msg_161["ALERTS_5"] = 0
+
   if msg_161.get("ALERTS_5") == 5:  # USE_SWITCH_OR_PEDAL_TO_ACCELERATE
     msg_161["ALERTS_5"] = 0
 
@@ -162,10 +165,6 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
 
   # OP LONG
   if CP.openpilotLongitudinalControl:
-
-    # HIDE ALERTS
-    if msg_161.get("ALERTS_5") == 4:  # SMART_CRUISE_CONTROL_CONDITIONS_NOT_MET
-      msg_161["ALERTS_5"] = 0
 
     # BACKGROUND, SETSPEED, DISTANCE
     msg_161.update({
