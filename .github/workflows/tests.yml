@@ -7,13 +7,9 @@ on:
       - master-new
   pull_request:
 
-# TODO: enable this
-#env:
-#  PYTHONWARNINGS: error,default::DeprecationWarning
-
 jobs:
-  unit-tests:
-    name: unit tests
+  tests:
+    name: ./test.sh
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -22,31 +18,4 @@ jobs:
     steps:
     - uses: commaai/timeout@v1
     - uses: actions/checkout@v4
-    - name: install uv and dependencies
-      run: |
-        curl -LsSf https://astral.sh/uv/install.sh | sh
-        uv venv
-        # TODO: remove setuptools once https://github.com/cython/cython/issues/5751 is fixed
-        uv pip install -e .[testing,docs] setuptools
-    - run: uv run scons -j8
-    - run: uv run pytest .
-
-  static-analysis:
-    name: static analysis
-    runs-on: ubuntu-24.04
-    steps:
-    - uses: commaai/timeout@v1
-    - uses: actions/checkout@v4
-    - name: setup python
-      run: |
-        curl -LsSf https://astral.sh/uv/install.sh | sh
-        uv venv
-        uv pip install -e . pre-commit
-    - name: cache pre-commit environments
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/pre-commit
-        key: ${{ runner.os }}-pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-pre-commit-
-    - run: uv run pre-commit run --all
+    - run: ./test.sh

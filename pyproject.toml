@@ -85,7 +85,7 @@ select = [
   "E", "F", "W", "PIE", "C4", "ISC", "A", "B",
   "NPY", # numpy
   "UP",  # pyupgrade
-  "TRY302", "TRY400", "TRY401", # try/excepts
+  "TRY203", "TRY400", "TRY401", # try/excepts
   "RUF008", "RUF100",
   "TID251",
   "PLR1704",
@@ -99,6 +99,7 @@ ignore = [
   "ISC003",
   "B027",
   "B024",
+  "UP031",
   "NPY002",  # new numpy random syntax is worse
 ]
 flake8-implicit-str-concat.allow-multiline=false
