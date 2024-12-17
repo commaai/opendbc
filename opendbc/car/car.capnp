@@ -517,22 +517,6 @@ struct CarParams {
   secOcRequired @75 :Bool;  # Car requires SecOC message authentication to operate
   secOcKeyAvailable @76 :Bool;  # Stored SecOC key loaded from params
 
-  smoothSteer @77 :SmoothSteerData;
-  mdpsBus @78: Int8;
-  bsmAvailable @79: Bool;
-  lfaAvailable @80: Bool;
-  lfaHdaAvailable @81 :Bool;
-  isCanFD @82 :Bool;
-
-  struct SmoothSteerData
-  {
-    method @0: Int8;
-    maxSteeringAngle @1 :Float32;
-    maxDriverAngleWait @2 :Float32;
-    maxSteerAngleWait @3 :Float32;
-    driverAngleWait @4 :Float32;
-  }
-
   struct SafetyConfig {
     safetyModel @0 :SafetyModel;
     safetyParam @3 :UInt16;
