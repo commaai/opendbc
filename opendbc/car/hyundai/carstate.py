@@ -227,11 +227,11 @@ class CarState(CarStateBase):
     ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > self.params.STEER_THRESHOLD, 5)
     ret.steerFaultTemporary = cp.vl["MDPS"]["LKA_FAULT"] != 0
 
-    if self.CP.flags & HyundaiFlags.CCNC:
+    if self.CP.flags & HyundaiFlags.CCNC and not self.CP.flags & HyundaiFlags.CANFD_HDA2:
       self.msg_161 = copy.copy(cp_cam.vl["MSG_161"])
       self.msg_162 = copy.copy(cp_cam.vl["MSG_162"])
 
-    alt = "_ALT" if self.CP.flags & HyundaiFlags.CCNC else ""
+    alt = "_ALT" if self.CP.flags & HyundaiFlags.CCNC and not self.CP.flags & HyundaiFlags.CANFD_HDA2 else ""
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_lamp(50, cp.vl["BLINKERS"][f"LEFT_LAMP{alt}"],
                                                                       cp.vl["BLINKERS"][f"RIGHT_LAMP{alt}"])
     if self.CP.enableBsm:
@@ -320,7 +320,7 @@ class CarState(CarStateBase):
       cam_messages += [
         ("SCC_CONTROL", 50),
       ]
-    if CP.flags & HyundaiFlags.CCNC:
+    if self.CP.flags & HyundaiFlags.CCNC and not self.CP.flags & HyundaiFlags.CANFD_HDA2:
       cam_messages += [
         ("MSG_161", 20),
         ("MSG_162", 20),

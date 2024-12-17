@@ -116,7 +116,7 @@ class CarController(CarControllerBase):
 
       # LFA and HDA icons
       if self.frame % 5 == 0 and (not hda2 or hda2_long):
-        if self.CP.flags & HyundaiFlags.CCNC:
+        if self.CP.flags & HyundaiFlags.CCNC and not hda2:
           can_sends.extend(hyundaicanfd.create_ccnc(self.packer, self.CAN, self.frame, self.CP, CC, CS))
         else:
           can_sends.append(hyundaicanfd.create_lfahda_cluster(self.packer, self.CAN, CC.enabled))
