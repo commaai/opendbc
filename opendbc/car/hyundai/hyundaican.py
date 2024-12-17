@@ -126,8 +126,9 @@ def create_lfahda_mfc(packer, enabled, lfa_icon):
   }
   return packer.make_can_msg("LFAHDA_MFC", 0, values)
 
-def create_acc_commands(packer, enabled, accel, upper_jerk, idx, hud_control, set_speed, stopping, long_override, use_fca,
+def create_acc_commands(packer, enabled, accel, upper_jerk, idx, hud_control, set_speed, stopping, long_override, use_fca, CP,
                         main_cruise_enabled, ESCC: EnhancedSmartCruiseControl = None):
+  commands = []
 
   def get_scc11_values():
     return {
@@ -203,9 +204,10 @@ def create_acc_commands(packer, enabled, accel, upper_jerk, idx, hud_control, se
   scc14_values = get_scc14_values()
   commands.append(packer.make_can_msg("SCC14", 0, scc14_values))
 
-  # Only send FCA11 on cars where it exists on the bus, and
-  # if we don't use ESCC since ESCC does not block FCA11 from stock radar
-  if use_fca and not (ESCC and ESCC.enabled):
+  # Only send FCA11 on cars where it exists on the bus
+  # On Camera SCC cars, FCA11 is not disabled, so we forward stock FCA11 back to the car forward hooks
+  # If we don't use ESCC since ESCC does not block FCA11 from stock radar
+  if use_fca and not ((CP.flags & HyundaiFlags.CAMERA_SCC) or (ESCC and ESCC.enabled)):
     # note that some vehicles most likely have an alternate checksum/counter definition
     # https://github.com/commaai/opendbc/commit/9ddcdb22c4929baf310295e832668e6e7fcfa602
     fca11_values = get_fca11_values()
@@ -214,7 +216,7 @@ def create_acc_commands(packer, enabled, accel, upper_jerk, idx, hud_control, se
 
   return commands
 
-def create_acc_opt(packer, ESCC: EnhancedSmartCruiseControl = None):
+def create_acc_opt(packer, CP, ESCC: EnhancedSmartCruiseControl = None):
   """
     Creates SCC13 and FCA12. If ESCC is enabled, it will only create SCC13 since ESCC does not block FCA12.
     :param packer:
@@ -245,8 +247,10 @@ def create_acc_opt(packer, ESCC: EnhancedSmartCruiseControl = None):
     return commands
 
   # TODO: this needs to be detected and conditionally sent on unsupported long cars
-  fca12_values = get_fca12_values()
-  commands.append(packer.make_can_msg("FCA12", 0, fca12_values))
+  # On Camera SCC cars, FCA12 is not disabled, so we forward stock FCA12 back to the car forward hooks
+  if not (CP.flags & HyundaiFlags.CAMERA_SCC):
+    fca12_values = get_fca12_values()
+    commands.append(packer.make_can_msg("FCA12", 0, fca12_values))
 
   return commands
 
