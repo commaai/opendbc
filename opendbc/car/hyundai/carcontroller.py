@@ -1,7 +1,7 @@
 from opendbc.can.packer import CANPacker
-from opendbc.car import Bus, DT_CTRL, apply_driver_steer_torque_limits, common_fault_avoidance, make_tester_present_msg, structs, apply_std_steer_angle_limits
+from opendbc.car import Bus, DT_CTRL, apply_driver_steer_torque_limits, common_fault_avoidance, make_tester_present_msg, structs
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.common.numpy_fast import clip, interp
+from opendbc.car.common.numpy_fast import clip
 from opendbc.car.hyundai import hyundaicanfd, hyundaican
 from opendbc.car.hyundai.carstate import CarState
 from opendbc.car.hyundai.hyundaicanfd import CanBus
@@ -89,6 +89,9 @@ class CarController(CarControllerBase):
       self.apply_angle_now = 0
       self.lkas_max_torque = 0
 
+    # Hold torque with induced temporary fault when cutting the actuation bit
+    torque_fault = CC.latActive and not apply_steer_req
+
     self.apply_angle_last = self.apply_angle_now
     self.apply_steer_last = apply_steer
 
@@ -121,11 +124,11 @@ class CarController(CarControllerBase):
     if self.CP.flags & HyundaiFlags.CANFD:
       hda2 = self.CP.flags & HyundaiFlags.CANFD_HDA2
       hda2_long = hda2 and self.CP.openpilotLongitudinalControl
+      lateral_paused = CS.madsEnabled and not CC.latActive
 
       # steering control
       can_sends.extend(hyundaicanfd.create_steering_messages(self.packer, self.CP, self.CAN, CC.enabled,
                                                              apply_steer_req, apply_steer, lateral_paused,
-                                                             blinking_icon,
                                                              self.apply_angle_now, self.lkas_max_torque,
                                                              is_angle_control))
 
