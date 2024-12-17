@@ -59,107 +59,37 @@ class CarController(CarControllerBase):
 
     self.apply_angle_now = 0
     self.apply_angle_last = 0
+    self.max_steering_angle = 90
+    self.max_driver_angle_wait = 0.002
+    self.max_steer_angle_wait = 0.001
+    self.driver_angle_wait = 0.001
     self.lkas_max_torque = 0
-
-    self.driver_steering_torque_above_timer = 150
     self.driver_steering_angle_above_timer = 150
 
-    self.to_avoid_lkas_fault_enabled = True
-    self.to_avoid_lkas_fault_max_angle = 85
-    self.to_avoid_lkas_fault_max_frame = 89
-    self.enable_steer_more = False
-    self.no_mdps_mods = False
-
     self.steer_timer_apply_torque = 1.0
-    self.DT_STEER = 0.005             # 0.01 1sec, 0.005  2sec
-
-    self.lkas_onoff_counter = 0
-    self.lkas_temp_disabled = False
-    self.lkas_temp_disabled_timer = 0
-
-    self.stock_lfa_counter = 0
+    self.DT_STEER = 0.005  # 0.01 1sec, 0.005  2sec
 
 
   def update(self, CC, CS, now_nanos):
+    is_angle_control = self.CP.carFingerprint in ANGLE_CONTROL_CAR
     actuators = CC.actuators
     hud_control = CC.hudControl
 
     # steering torque
-    if abs(CS.out.steeringTorque) > 170 and not (self.CP.flags & HyundaiFlags.CANFD):
-      self.driver_steering_torque_above_timer -= 1
-      if self.driver_steering_torque_above_timer <= 0:
-        self.driver_steering_torque_above_timer = 0
-    else:
-      self.driver_steering_torque_above_timer += 10
-      if self.driver_steering_torque_above_timer >= 150:
-        self.driver_steering_torque_above_timer = 150
-
-    # steering torque
-    if 0 <= self.driver_steering_torque_above_timer < 150 and not self.user_specific_feature == 60:
-      new_steer = int(round(actuators.steer * self.params.STEER_MAX * (self.driver_steering_torque_above_timer / 150)))
-    else:
-      new_steer = int(round(actuators.steer * self.params.STEER_MAX))
-
+    new_steer = int(round(actuators.steer * self.params.STEER_MAX))
     apply_steer = apply_driver_steer_torque_limits(new_steer, self.apply_steer_last, CS.out.steeringTorque, self.params)
 
-    if self.to_avoid_lkas_fault_max_angle == 90:
-      lat_active = CC.latActive and abs(CS.out.steeringAngleDeg) < self.to_avoid_lkas_fault_max_angle and \
-      (CS.out.gearShifter == GearShifter.drive or self.user_specific_feature == 11)
-    elif self.to_avoid_lkas_fault_max_angle > 90:
-      str_angle_limit = interp(CS.out.vEgo * CV.MS_TO_KPH, [0, 20], [self.to_avoid_lkas_fault_max_angle+60, self.to_avoid_lkas_fault_max_angle])
-      lat_active = CC.latActive and abs(CS.out.steeringAngleDeg) < str_angle_limit and \
-      (CS.out.gearShifter == GearShifter.drive or self.user_specific_feature == 11)
-    else:
-      lat_active = CC.latActive and (CS.out.gearShifter == GearShifter.drive or self.user_specific_feature == 11)
-
-    if self.no_mdps_mods and CS.out.vEgo < self.CP.minSteerSpeed:
-      lat_active = False
-
     # >90 degree steering fault prevention
-    if self.to_avoid_lkas_fault_enabled or self.CP.flags & HyundaiFlags.CANFD:
-      self.angle_limit_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringAngleDeg) >= self.to_avoid_lkas_fault_max_angle, lat_active,
-                                                                         self.angle_limit_counter, self.to_avoid_lkas_fault_max_frame,
-                                                                         MAX_ANGLE_CONSECUTIVE_FRAMES)
-      apply_angle = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, self.params)
-      self.apply_angle_now = apply_angle
+    self.angle_limit_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringAngleDeg) >= MAX_ANGLE, CC.latActive,
+                                                                       self.angle_limit_counter, MAX_ANGLE_FRAMES,
+                                                                       MAX_ANGLE_CONSECUTIVE_FRAMES)
 
-      # Figure out torque value.  On Stock when LKAS is active, this is variable,
-      # but 0 when LKAS is not actively steering, so because we're "tricking" ADAS
-      # into thinking LKAS is always active, we need to make sure we're applying
-      # torque when the driver is not actively steering. The default value chosen
-      # here is based on observations of the stock LKAS system when it's engaged
-      # CS.out.steeringPressed and steeringTorque are based on the
-      # STEERING_COL_TORQUE value
-
-      lkas_max_torque = 180
-      if abs(CS.out.steeringTorque) > 200:
-        self.driver_steering_angle_above_timer -= 1
-        if self.driver_steering_angle_above_timer <= 30:
-          self.driver_steering_angle_above_timer = 30
-      else:
-        self.driver_steering_angle_above_timer += 1
-        if self.driver_steering_angle_above_timer >= 150:
-          self.driver_steering_angle_above_timer = 150
-
-      ego_weight = interp(CS.out.vEgo, [0, 5, 10, 20], [0.2, 0.3, 0.5, 1.0])
-
-      if 0 <= self.driver_steering_angle_above_timer < 150:
-        self.lkas_max_torque = int(round(lkas_max_torque * (self.driver_steering_angle_above_timer / 150) * ego_weight))
-      else:
-        self.lkas_max_torque = lkas_max_torque * ego_weight
-
-      # Hold torque with induced temporary fault when cutting the actuation bit
-      torque_fault = lat_active and not apply_steer_req
-    else:
-      torque_fault = False
-
-    if not lat_active:
-      apply_angle = CS.out.steeringAngleDeg
+    if not CC.latActive:
       apply_steer = 0
+      self.apply_angle_now = 0
       self.lkas_max_torque = 0
 
-    self.apply_angle_last = apply_angle
-
+    self.apply_angle_last = self.apply_angle_now
     self.apply_steer_last = apply_steer
 
     # accel + longitudinal
@@ -190,25 +120,22 @@ class CarController(CarControllerBase):
     # CAN-FD platforms
     if self.CP.flags & HyundaiFlags.CANFD:
       hda2 = self.CP.flags & HyundaiFlags.CANFD_HDA2
+      hda2_long = hda2 and self.CP.openpilotLongitudinalControl
 
       # steering control
-      angle_control = self.CP.carFingerprint in ANGLE_CONTROL_CAR
       can_sends.extend(hyundaicanfd.create_steering_messages(self.packer, self.CP, self.CAN, CC.enabled,
-                                                             apply_steer_req, CS.out.steeringPressed,
-                                                             apply_steer, apply_angle, self.lkas_max_torque, angle_control))
+                                                             apply_steer_req, apply_steer, lateral_paused,
+                                                             blinking_icon,
+                                                             self.apply_angle_now, self.lkas_max_torque,
+                                                             is_angle_control))
 
       # prevent LFA from activating on HDA2 by sending "no lane lines detected" to ADAS ECU
       if self.frame % 5 == 0 and hda2:
-        if not CC.enabled:
-          self.stock_lfa_counter += 1 if self.stock_lfa_counter < 100 else 0
-        elif self.stock_lfa_counter:
-          self.stock_lfa_counter -= 1
         can_sends.append(hyundaicanfd.create_suppress_lfa(self.packer, self.CAN, CS.hda2_lfa_block_msg,
-                                                          self.CP.flags & HyundaiFlags.CANFD_HDA2_ALT_STEERING, CC.enabled, bool(self.stock_lfa_counter)))
+                                                          self.CP.flags & HyundaiFlags.CANFD_HDA2_ALT_STEERING))
 
       # LFA and HDA icons
-      updateLfaHdaIcons = (not hda2) or angle_control
-      if self.frame % 5 == 0 and updateLfaHdaIcons:
+      if self.frame % 5 == 0 and (not hda2 or hda2_long):
         can_sends.append(hyundaicanfd.create_lfahda_cluster(self.packer, self.CAN, CC.enabled))
 
       # blinkers
@@ -257,7 +184,7 @@ class CarController(CarControllerBase):
     new_actuators = actuators.as_builder()
     new_actuators.steer = apply_steer / self.params.STEER_MAX
     new_actuators.steerOutputCan = apply_steer
-    new_actuators.steeringAngleDeg = apply_angle
+    new_actuators.steeringAngleDeg = self.apply_angle_now
     new_actuators.accel = accel
 
     self.frame += 1
