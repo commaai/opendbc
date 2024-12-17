@@ -43,7 +43,8 @@ class CarState(CarStateBase):
     # steering wheel
     ret.steeringAngleDeg = cp.vl['STEERING_ALT']['ANGLE'] # EPS
     ret.steeringRateDeg = cp.vl['STEERING_ALT']['RATE'] * cp.vl['STEERING_ALT']['RATE_SIGN']  # EPS: Rotation speed * rotation sign/direction
-    ret.steeringTorque = cp.vl['STEERING']['DRIVER_TORQUE']  # EPS: Driver torque
+    ret.steeringTorque = cp.vl['STEERING']['DRIVER_TORQUE']
+    ret.steeringTorqueEps = cp_main.vl['LANE_KEEP_ASSIST']['TORQUE']
     ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > CarControllerParams.STEER_DRIVER_ALLOWANCE, 5)  # TODO: adjust threshold
     ret.steerFaultTemporary = False  # TODO
     ret.steerFaultPermanent = False  # TODO
