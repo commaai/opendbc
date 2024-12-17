@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from enum import IntFlag
 
 from panda import uds
 from opendbc.car import AngleRateLimit, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
@@ -21,6 +22,10 @@ class CarControllerParams:
 
   def __init__(self, CP):
     pass
+
+
+class NissanPandaFlags(IntFlag):
+  FLAG_NISSAN_ALT_EPS_BUS = 1
 
 
 @dataclass

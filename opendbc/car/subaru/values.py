@@ -54,6 +54,12 @@ class CarControllerParams:
   BRAKE_LOOKUP_V = [BRAKE_MAX, BRAKE_MIN]
 
 
+class SubaruPandaFlags(IntFlag):
+  FLAG_SUBARU_GEN2 = 1
+  FLAG_SUBARU_LONG = 2
+  FLAG_SUBARU_PREGLOBAL_REVERSED_DRIVER_TORQUE = 4
+
+
 class SubaruFlags(IntFlag):
   # Detected flags
   SEND_INFOTAINMENT = 1
