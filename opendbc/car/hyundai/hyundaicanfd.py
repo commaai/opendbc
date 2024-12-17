@@ -34,7 +34,8 @@ class CanBus(CanBusBase):
     return self._cam
 
 
-def create_steering_messages(packer, CP, CAN, enabled, lat_active, steering_pressed, apply_steer, apply_angle, max_torque, angle_control):
+def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_steer , lateral_paused, blinking_icon,
+                             apply_angle, max_torque, angle_control):
 
   ret = []
 
@@ -42,7 +43,7 @@ def create_steering_messages(packer, CP, CAN, enabled, lat_active, steering_pres
     values = {
       "LKA_MODE": 0,
       "LKA_ICON": 2 if enabled else 1,
-      "TORQUE_REQUEST": 0, #apply_steer,
+      "TORQUE_REQUEST": 0,  # apply_steer,
       "LKA_ASSIST": 0,
       "STEER_REQ": 0,  # 1 if lat_active else 0,
       "STEER_MODE": 0,
@@ -64,7 +65,7 @@ def create_steering_messages(packer, CP, CAN, enabled, lat_active, steering_pres
   else:
     values = {
       "LKA_MODE": 2,
-      "LKA_ICON": 2 if enabled else 1,
+      "LKA_ICON": 2 if lat_active else 3 if blinking_icon else 1 if lateral_paused else 0,
       "TORQUE_REQUEST": apply_steer,
       "LKA_ASSIST": 0,
       "STEER_REQ": 1 if lat_active else 0,
@@ -84,7 +85,7 @@ def create_steering_messages(packer, CP, CAN, enabled, lat_active, steering_pres
 
   return ret
 
-def create_suppress_lfa(packer, CAN, hda2_lfa_block_msg, hda2_alt_steering, enabled, lfa_cnt):
+def create_suppress_lfa(packer, CAN, hda2_lfa_block_msg, hda2_alt_steering):
   suppress_msg = "CAM_0x362" if hda2_alt_steering else "CAM_0x2a4"
   msg_bytes = 32 if hda2_alt_steering else 24
 
@@ -92,8 +93,8 @@ def create_suppress_lfa(packer, CAN, hda2_lfa_block_msg, hda2_alt_steering, enab
   values["COUNTER"] = hda2_lfa_block_msg["COUNTER"]
   values["SET_ME_0"] = 0
   values["SET_ME_0_2"] = 0
-  values["LEFT_LANE_LINE"] = 0 if enabled else 3
-  values["RIGHT_LANE_LINE"] = 0 if enabled else 3
+  values["LEFT_LANE_LINE"] = 0
+  values["RIGHT_LANE_LINE"] = 0
   return packer.make_can_msg(suppress_msg, CAN.ACAN, values)
 
 def create_buttons(packer, CP, CAN, cnt, btn):
