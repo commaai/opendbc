@@ -33,9 +33,9 @@ class CarController(CarControllerBase):
 
     self.apply_steer_last = apply_steer
 
-    can_sends.append(psacan.create_lka_msg(self.packer, self.CP, apply_steer, CS.out.steeringAngleDeg, self.frame, CC.latActive, self.lkas_max_torque, reverse))
-    # # TODO: this copies the original lkas message
-    # can_sends.append(psacan.create_lka_msg(self.packer, self.CP, CS.original_lka_values))
+    # can_sends.append(psacan.create_lka_msg(self.packer, self.CP, apply_steer, CS.out.steeringAngleDeg, self.frame, CC.latActive, self.lkas_max_torque, reverse))
+    # TODO: this forwards the original lkas message
+    can_sends.append(psacan.create_lka_msg(self.packer, self.CP, CS.original_lka_values))
 
 
     ### cruise buttons ###
