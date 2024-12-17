@@ -124,7 +124,7 @@ class CarController(CarControllerBase):
     if self.CP.flags & HyundaiFlags.CANFD:
       hda2 = self.CP.flags & HyundaiFlags.CANFD_HDA2
       hda2_long = hda2 and self.CP.openpilotLongitudinalControl
-      lateral_paused = CS.madsEnabled and not CC.latActive
+      lateral_paused = not CC.latActive
 
       # steering control
       can_sends.extend(hyundaicanfd.create_steering_messages(self.packer, self.CP, self.CAN, CC.enabled,
