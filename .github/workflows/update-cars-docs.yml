@@ -15,6 +15,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: |
           pip install -e .
+          scons -c && scons -j$(nproc)
           python -m pip install jinja2==3.1.4 natsort==8.4.0
           python opendbc/car/docs.py
           
