@@ -13,13 +13,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          pip install -e .
-          scons -c && scons -j$(nproc)
-          python -m pip install jinja2==3.1.4 natsort==8.4.0
-          python opendbc/car/docs.py
+          scons -j$(nproc) --minimal opendbc_repo
+          PYTHONPATH=. python opendbc/car/docs.py
           
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'docs: Scheduled auto-update CARS.md'
           file_pattern: 'docs/CARS.md'
-          
