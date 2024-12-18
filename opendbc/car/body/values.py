@@ -1,6 +1,6 @@
 from opendbc.car import Bus, CarSpecs, PlatformConfig, Platforms
 from opendbc.car.structs import CarParams
-from docs.lib.docs_definitions import CarDocs
+from metadata.lib.definitions import CarDocs
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu

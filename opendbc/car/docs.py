@@ -11,7 +11,7 @@ from natsort import natsorted
 from opendbc.car.common.basedir import BASEDIR
 from opendbc.car import gen_empty_fingerprint
 from opendbc.car.structs import CarParams
-from docs.lib.docs_definitions import CarDocs, Device, ExtraCarDocs, Column, ExtraCarsColumn, CommonFootnote, PartType
+from metadata.lib.definitions import CarDocs, Device, ExtraCarDocs, Column, ExtraCarsColumn, CommonFootnote, PartType
 from opendbc.car.car_helpers import interfaces, get_interface_attr
 from opendbc.car.values import Platform, PLATFORMS
 from opendbc.car.mock.values import CAR as MOCK

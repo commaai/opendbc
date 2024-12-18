@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from panda import uds
 from opendbc.car import AngleRateLimit, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.structs import CarParams
-from docs.lib.docs_definitions import CarDocs, CarHarness, CarParts
+from metadata.lib.definitions import CarDocs, CarHarness, CarParts
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
