@@ -8,7 +8,7 @@ on:
 jobs:
   update-cars:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/md-updated-every-night'
+    if: github.repository == 'ugtthis/opendbc'
     permissions:
       contents: write
     steps:
