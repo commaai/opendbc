@@ -1,9 +1,9 @@
 name: Update CARS.md
 
 on:
-  workflow_dispatch:
   schedule:
     - cron: '0 0 * * *'  # Midnight UTC
+  workflow_dispatch:
 
 jobs:
   update-cars:
