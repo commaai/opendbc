@@ -1,0 +1,23 @@
+name: Update CARS.md
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Midnight UTC
+  workflow_dispatch:
+
+jobs:
+  update-cars:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          python -m pip install jinja2==3.1.4 natsort==8.4.0
+          python opendbc/car/docs.py
+          
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'docs: Nightly update CARS.md'
+          file_pattern: 'docs/CARS.md'
+          
