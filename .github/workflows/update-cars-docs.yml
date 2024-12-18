@@ -2,7 +2,7 @@ name: Update CARS.md
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Midnight UTC
+    - cron: '0 8 * * *'  # 12am PST (8am UTC)
   workflow_dispatch:
 
 jobs:
