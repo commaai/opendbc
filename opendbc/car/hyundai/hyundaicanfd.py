@@ -1,4 +1,4 @@
-blahfrom opendbc.car import CanBusBase
+from opendbc.car import CanBusBase
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car.hyundai.values import HyundaiFlags
