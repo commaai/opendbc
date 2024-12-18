@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum, IntFlag
 
-from panda import uds
+from opendbc.can import uds
 from opendbc.car import Bus, CarSpecs, PlatformConfig, Platforms, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
@@ -46,6 +46,13 @@ class CarControllerParams:
     assert(CP.lateralParams.torqueBP[0] == 0)
     self.STEER_LOOKUP_BP = [v * -1 for v in CP.lateralParams.torqueBP][1:][::-1] + list(CP.lateralParams.torqueBP)
     self.STEER_LOOKUP_V = [v * -1 for v in CP.lateralParams.torqueV][1:][::-1] + list(CP.lateralParams.torqueV)
+
+
+class HondaPandaFlags(IntFlag):
+  FLAG_HONDA_ALT_BRAKE = 1
+  FLAG_HONDA_BOSCH_LONG = 2
+  FLAG_HONDA_NIDEC_ALT = 4
+  FLAG_HONDA_RADARLESS = 8
 
 
 class HondaFlags(IntFlag):
@@ -107,11 +114,15 @@ class Footnote(Enum):
 
 
 class HondaBoschPlatformConfig(PlatformConfig):
+  safety_file = "safety_honda.h"
+
   def init(self):
     self.flags |= HondaFlags.BOSCH
 
 
 class HondaNidecPlatformConfig(PlatformConfig):
+  safety_file = "safety_honda.h"
+
   def init(self):
     self.flags |= HondaFlags.NIDEC
 

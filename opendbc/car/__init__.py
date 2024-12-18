@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from enum import IntFlag, ReprEnum, StrEnum, EnumType, auto
 from dataclasses import replace
 
-from panda import uds
+from opendbc.can import uds
 from opendbc.car import structs
 from opendbc.car.can_definitions import CanData
 from opendbc.car.docs_definitions import CarDocs, ExtraCarDocs
@@ -290,6 +290,7 @@ class PlatformConfigBase(Freezable):
   flags: int = 0
 
   platform_str: str | None = None
+  safety_file: str = "safety_defaults.h"
 
   def __hash__(self) -> int:
     return hash(self.platform_str)

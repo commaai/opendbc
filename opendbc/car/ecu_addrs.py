@@ -1,6 +1,6 @@
 import time
 
-from panda import uds
+from opendbc.can import uds
 from opendbc.car import make_tester_present_msg, carlog
 from opendbc.car.can_definitions import CanData, CanRecvCallable, CanSendCallable
 from opendbc.car.fw_query_definitions import EcuAddrBusType
