@@ -8,6 +8,7 @@ on:
 jobs:
   update-cars:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/md-updated-every-night'
     permissions:
       contents: write
     steps:
