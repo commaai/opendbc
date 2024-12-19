@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from opendbc.car import structs, Platforms, ExtraPlatformConfig
-from opendbc.car.docs_definitions import ExtraCarDocs, SupportType
+from metadata.lib.definitions import ExtraCarDocs, SupportType
 
 
 @dataclass

@@ -4,7 +4,7 @@ import re
 
 from opendbc.car.car_helpers import interfaces
 from opendbc.car.docs import get_all_car_docs
-from opendbc.car.docs_definitions import Cable, Column, PartType, Star
+from metadata.lib.definitions import Cable, Column, PartType, Star
 from opendbc.car.honda.values import CAR as HONDA
 from opendbc.car.values import PLATFORMS
 

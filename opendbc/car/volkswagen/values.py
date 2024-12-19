@@ -7,7 +7,7 @@ from opendbc.can.can_define import CANDefine
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car import structs
-from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, \
+from metadata.lib.definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, \
                                                      Device
 from opendbc.car.fw_query_definitions import EcuAddrSubAddr, FwQueryConfig, Request, p16
 
