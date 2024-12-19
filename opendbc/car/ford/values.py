@@ -6,7 +6,7 @@ from enum import Enum, IntFlag
 from panda import uds
 from opendbc.car import AngleRateLimit, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, \
+from metadata.lib.definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, \
                                                      Device, SupportType
 from opendbc.car.fw_query_definitions import FwQueryConfig, LiveFwVersions, OfflineFwVersions, Request, StdQueries, p16
 
