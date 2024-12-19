@@ -142,33 +142,20 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
   if msg_161.get("ALERTS_2") == 5:  # CONSIDER_TAKING_A_BREAK
     msg_161.update({"ALERTS_2": 0, "SOUNDS_2": 0, "DAW_ICON": 0})
 
-  # LANELINES, ICONS, LCA
-  curvature = {i: (31 if i == -1 else 13 - abs(i + 15)) if i < 0 else 15 + i for i in range(-15, 16)}
+  # ICONS, LANELINES
   msg_161.update({
     "LFA_ICON": 2 if enabled else 0,
     "LKA_ICON": 4 if enabled else 0,
-    "LCA_LEFT_ICON": 0 if CS.out.leftBlindspot or CS.out.vEgo < 8.94 or not enabled else 2 if CC.leftBlinker else 1,
-    "LCA_RIGHT_ICON": 0 if CS.out.rightBlindspot or CS.out.vEgo < 8.94 or not enabled else 2 if CC.rightBlinker else 1,
-    "LCA_LEFT_ARROW": 2 if CC.leftBlinker else 0,
-    "LCA_RIGHT_ARROW": 2 if CC.rightBlinker else 0,
-    "LANE_LEFT": 1 if CC.leftBlinker else 0,
-    "LANE_RIGHT": 1 if CC.rightBlinker else 0,
-    "LANELINE_LEFT": 4 if hud.leftLaneDepart and (frame // 50) % 2 == 0 else 1 if hud.leftLaneDepart else 2 if enabled else 0,
-    "LANELINE_RIGHT": 4 if hud.rightLaneDepart and (frame // 50) % 2 == 0 else 1 if hud.rightLaneDepart else 2 if enabled else 0,
-    "LANELINE_CURVATURE": curvature.get(max(-15, min(int(CS.out.steeringAngleDeg / 3), 15)), 14) if enabled else 15,
+    "LANELINE_LEFT": 2 if enabled else 0,
+    "LANELINE_RIGHT": 2 if enabled else 0,
     "CENTERLINE": 1 if enabled else 0,
   })
-
-  # LDW
-  if hud.leftLaneDepart or hud.rightLaneDepart:
-    msg_162["VIBRATE"] = 1
 
   # OP LONG
   if CP.openpilotLongitudinalControl:
 
-    # BACKGROUND, SETSPEED, DISTANCE
+    # SETSPEED, DISTANCE
     msg_161.update({
-      "BACKGROUND": 1 if enabled else 7,
       "SETSPEED": 3 if enabled else 1,
       "SETSPEED_HUD": 2 if enabled else 1,
       "SETSPEED_SPEED": 25 if (s := round(CS.out.vCruiseCluster * CV.KPH_TO_MPH)) > 100 else s,
