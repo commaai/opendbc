@@ -21,21 +21,25 @@ class CarController(CarControllerBase):
   def update(self, CC, CS, now_nanos):
     can_sends = []
 
+    apply_steer = 0
+
     actuators = CC.actuators
     reverse = CS.out.gearShifter == GearShifter.reverse
 
-    # steering torque
-    new_steer = int(round(actuators.steer * self.params.STEER_MAX))
-    apply_steer = apply_driver_steer_torque_limits(new_steer, self.apply_steer_last, CS.out.steeringTorque, self.params)
+    # TODO: if not done this way, torque is sent every frame (100Hz instead of 20Hz)
+    if (self.frame % CarControllerParams.STEER_STEP) == 0:
+      # steering torque
+      new_steer = int(round(actuators.steer * self.params.STEER_MAX))
+      apply_steer = apply_driver_steer_torque_limits(new_steer, self.apply_steer_last, CS.out.steeringTorque, self.params)
 
-    if not CC.latActive:
-      apply_steer = 0
+      if not CC.latActive:
+        apply_steer = 0
 
-    self.apply_steer_last = apply_steer
+      self.apply_steer_last = apply_steer
 
-    # can_sends.append(psacan.create_lka_msg(self.packer, self.CP, apply_steer, CS.out.steeringAngleDeg, self.frame, CC.latActive, self.lkas_max_torque, reverse))
-    # TODO: this forwards the original lkas message
-    can_sends.append(psacan.create_lka_msg(self.packer, self.CP, CS.original_lka_values))
+      # can_sends.append(psacan.create_lka_msg(self.packer, self.CP, apply_steer, CS.out.steeringAngleDeg, self.frame, CC.latActive, self.lkas_max_torque, reverse))
+      # TODO: this forwards the original lkas message
+      can_sends.append(psacan.create_lka_msg(self.packer, self.CP, CS.original_lka_values))
 
 
     ### cruise buttons ###
