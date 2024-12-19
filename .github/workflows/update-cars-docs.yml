@@ -12,7 +12,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      - run: |
+      - name: Generate Car Docs
+        run: |
           pip install -e .
           scons -c && scons -j$(nproc)
           python -m pip install jinja2==3.1.4 natsort==8.4.0
