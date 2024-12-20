@@ -150,6 +150,12 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
     "LFA_ICON": 2 if enabled else 0,
   })
 
+  # LFAHDA_CLUSTER
+  lfahda_cluster = {
+    "NEW_SIGNAL_5": 1,
+    "LFA_ICON": 2 if enabled else 0,
+  }
+
   # OP LONG
   if CP.openpilotLongitudinalControl:
 
@@ -171,6 +177,7 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
       "LEAD_DISTANCE": 150,
     })
 
+  ret.append(packer.make_can_msg("LFAHDA_CLUSTER", CAN.ECAN, lfahda_cluster))
   ret.append(packer.make_can_msg("MSG_161", CAN.ECAN, msg_161))
   ret.append(packer.make_can_msg("MSG_162", CAN.ECAN, msg_162))
 
