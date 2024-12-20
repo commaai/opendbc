@@ -3,7 +3,7 @@ import re
 from dataclasses import dataclass, field, replace
 from enum import Enum, IntFlag
 
-from panda import uds
+from opendbc.can import uds
 from opendbc.car import AngleRateLimit, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, \
@@ -40,6 +40,11 @@ class CarControllerParams:
 
   def __init__(self, CP):
     pass
+
+
+class FordPandaFlags(IntFlag):
+  FLAG_FORD_LONG_CONTROL = 1
+  FLAG_FORD_CANFD = 2
 
 
 class FordFlags(IntFlag):
@@ -80,6 +85,7 @@ class FordPlatformConfig(PlatformConfig):
     Bus.pt: 'ford_lincoln_base_pt',
     Bus.radar: RADAR.DELPHI_MRR,
   })
+  safety_file = "safety_ford.h"
 
   def init(self):
     for car_docs in list(self.car_docs):

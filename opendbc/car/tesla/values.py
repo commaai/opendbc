@@ -13,11 +13,13 @@ class CAR(Platforms):
     [CarDocs("Tesla Model 3", "All")],
     CarSpecs(mass=1899., wheelbase=2.875, steerRatio=12.0),
     {Bus.party: 'tesla_model3_party'},
+    safety_file="safety_tesla.h",
   )
   TESLA_MODEL_Y = PlatformConfig(
     [CarDocs("Tesla Model Y", "All")],
     CarSpecs(mass=2072., wheelbase=2.890, steerRatio=12.0),
     {Bus.party: 'tesla_model3_party'},
+    safety_file="safety_tesla.h",
   )
 
 
@@ -55,6 +57,12 @@ class CarControllerParams:
   ACCEL_MAX = 2.0    # m/s^2
   JERK_LIMIT_MAX = 5
   JERK_LIMIT_MIN = -5
+
+
+class TeslaPandaFlags(IntFlag):
+  FLAG_TESLA_POWERTRAIN = 1
+  FLAG_TESLA_LONG_CONTROL = 2
+  FLAG_TESLA_RAVEN = 4
 
 
 class TeslaFlags(IntFlag):

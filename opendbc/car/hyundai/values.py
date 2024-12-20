@@ -2,7 +2,7 @@ import re
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
-from panda import uds
+from opendbc.can import uds
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.structs import CarParams
@@ -49,6 +49,17 @@ class CarControllerParams:
     # Default for most HKG
     else:
       self.STEER_MAX = 384
+
+
+class HyundaiPandaFlags(IntFlag):
+  FLAG_HYUNDAI_EV_GAS = 1
+  FLAG_HYUNDAI_HYBRID_GAS = 2
+  FLAG_HYUNDAI_LONG = 4
+  FLAG_HYUNDAI_CAMERA_SCC = 8
+  FLAG_HYUNDAI_CANFD_HDA2 = 16
+  FLAG_HYUNDAI_CANFD_ALT_BUTTONS = 32
+  FLAG_HYUNDAI_ALT_LIMITS = 64
+  FLAG_HYUNDAI_CANFD_HDA2_ALT_STEERING = 128
 
 
 class HyundaiFlags(IntFlag):
@@ -118,6 +129,7 @@ class HyundaiCarDocs(CarDocs):
 @dataclass
 class HyundaiPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: "hyundai_kia_generic"})
+  safety_file = "safety_hyundai.h"
 
   def init(self):
     if self.flags & HyundaiFlags.MANDO_RADAR:
@@ -130,6 +142,7 @@ class HyundaiPlatformConfig(PlatformConfig):
 @dataclass
 class HyundaiCanFDPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: "hyundai_canfd"})
+  safety_file = "safety_hyundai_canfd.h"
 
   def init(self):
     self.flags |= HyundaiFlags.CANFD

@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
+from enum import IntFlag
 
-from panda import uds
+from opendbc.can import uds
 from opendbc.car import AngleRateLimit, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarDocs, CarHarness, CarParts
@@ -23,6 +24,10 @@ class CarControllerParams:
     pass
 
 
+class NissanPandaFlags(IntFlag):
+  FLAG_NISSAN_ALT_EPS_BUS = 1
+
+
 @dataclass
 class NissanCarDocs(CarDocs):
   package: str = "ProPILOT Assist"
@@ -38,6 +43,7 @@ class NissanCarSpecs(CarSpecs):
 @dataclass
 class NissanPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'nissan_x_trail_2017_generated'})
+  safety_file = "safety_nissan.h"
 
 
 class CAR(Platforms):

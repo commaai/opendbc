@@ -43,6 +43,14 @@ class CarControllerParams:
       self.STEER_DELTA_DOWN = 25     # always lower than 45 otherwise the Rav4 faults (Prius seems ok with 50)
 
 
+class ToyotaPandaFlags(IntFlag):
+  # first byte is for EPS scaling factor
+  FLAG_TOYOTA_ALT_BRAKE = (1 << 8)
+  FLAG_TOYOTA_STOCK_LONGITUDINAL = (2 << 8)
+  FLAG_TOYOTA_LTA = (4 << 8)
+  FLAG_TOYOTA_SECOC = (8 << 8)
+
+
 class ToyotaFlags(IntFlag):
   # Detected flags
   HYBRID = 1
@@ -79,6 +87,7 @@ def dbc_dict(pt, radar):
 @dataclass
 class ToyotaTSS2PlatformConfig(PlatformConfig):
   dbc_dict: dict = field(default_factory=lambda: dbc_dict('toyota_nodsu_pt_generated', 'toyota_tss2_adas'))
+  safety_file = "safety_toyota.h"
 
   def init(self):
     self.flags |= ToyotaFlags.TSS2 | ToyotaFlags.NO_STOP_TIMER | ToyotaFlags.NO_DSU
