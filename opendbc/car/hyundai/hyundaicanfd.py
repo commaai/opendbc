@@ -146,7 +146,7 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
     "LANELINE_LEFT": 2 if enabled else 0,
     "LANELINE_RIGHT": 2 if enabled else 0,
     "LFA_ICON": 2 if enabled else 0,
-    "LKA_ICON": 4 if enabled else 0,
+    "LKA_ICON": 0,
   })
 
   # LFAHDA_CLUSTER
