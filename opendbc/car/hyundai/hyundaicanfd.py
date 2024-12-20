@@ -46,7 +46,7 @@ def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_steer):
     "STEER_REQ": 1 if lat_active else 0,
     "NEW_SIGNAL_4": 9,
     # TODO: NEW_SIGNAL_3 is 10-32+ sometimes
-    "NEW_SIGNAL_3": 10 if lat_active else 100, 
+    "NEW_SIGNAL_3": 10 if lat_active else 100,
   }
 
   if CP.flags & HyundaiFlags.CANFD_HDA2:
