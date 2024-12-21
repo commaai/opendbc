@@ -142,6 +142,9 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
     msg_162[f] = 0
 
   # HIDE ALERTS
+  if msg_161.get("ALERTS_5") == 2:  # WATCH_FOR_SURROUNDING_VEHICLES
+    msg_161["ALERTS_5"] = 0
+
   if msg_161.get("ALERTS_5") == 4:  # SMART_CRUISE_CONTROL_CONDITIONS_NOT_MET
     msg_161["ALERTS_5"] = 0
 
