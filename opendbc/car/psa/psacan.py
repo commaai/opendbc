@@ -36,7 +36,7 @@ def create_lka_msg_only_chks(packer, CP, original_lka_values):
     # if isinstance(dat, int):
     #     dat = dat.to_bytes(1, 'big')
     # values['CHECKSUM'] = calculate_checksum(dat)
-    return packer.make_can_msg('LANE_KEEP_ASSIST', CanBus(CP).main, original_lka_values)
+    return packer.make_can_msg('LANE_KEEP_ASSIST', CanBus(CP).camera, original_lka_values)
 
 def create_lka_msg(packer, CP, apply_steer: float, steering_angle: float, frame: int, lat_active: bool, max_torque: int, reverse: bool):
     # TODO: hud control for lane departure, status
@@ -67,4 +67,4 @@ def create_lka_msg(packer, CP, apply_steer: float, steering_angle: float, frame:
 
     values['CHECKSUM'] = calculate_checksum(dat)
 
-    return packer.make_can_msg('LANE_KEEP_ASSIST', CanBus(CP).main, values)
+    return packer.make_can_msg('LANE_KEEP_ASSIST', CanBus(CP).camera, values)
