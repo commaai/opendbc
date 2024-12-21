@@ -20,7 +20,7 @@ class CarControllerParams:
   STEER_DRIVER_MULTIPLIER = 1 # TODO: verify
   STEER_DELTA_UP = 1  # TODO: verify
   STEER_DELTA_DOWN = 1  # TODO: verify
-  STEER_DRIVER_ALLOWANCE = 2  # Driver intervention threshold
+  STEER_DRIVER_ALLOWANCE = 10  # Driver intervention threshold
 
   def __init__(self, CP):
     pass

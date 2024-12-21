@@ -27,11 +27,11 @@ class CarController(CarControllerBase):
     apply_steer = 0
 
     actuators = CC.actuators
-    reverse = CS.out.gearShifter == GearShifter.reverse
+    driving = CS.out.vEgo > 0
 
     # Ramp up/down logic
     if CC.latActive:
-      self.ramp_value = min(self.ramp_value + 1, 100)  # Ramp up the torque factor
+      self.ramp_value = min(self.ramp_value + 3.5, 100)  # Ramp up the torque factor
     else:
       self.ramp_value = max(self.ramp_value - 1, 0)    # Ramp down the torque factor
 
@@ -57,7 +57,8 @@ class CarController(CarControllerBase):
               CC.latActive,
               self.lkas_max_torque,
               self.ramp_value,
-              reverse,
+              driving,
+              CS.original_lka_values,
           )
       )
 

@@ -41,7 +41,8 @@ class CarState(CarStateBase):
     ret.parkingBrake = False # TODO bool(cp_main.vl['Dat_BSI']['PARKING_BRAKE']) is wrong signal
 
     # steering wheel
-    ret.steeringAngleDeg = cp.vl['STEERING_ALT']['ANGLE'] # EPS
+    # ret.steeringAngleDeg = cp.vl['STEERING_ALT']['ANGLE'] # EPS
+    ret.steeringAngleDeg = cp_main.vl['LANE_KEEP_ASSIST']['ANGLE'] # this is in degrees.
     ret.steeringRateDeg = cp.vl['STEERING_ALT']['RATE'] * cp.vl['STEERING_ALT']['RATE_SIGN']  # EPS: Rotation speed * rotation sign/direction
     ret.steeringTorque = cp.vl['STEERING']['DRIVER_TORQUE']
     ret.steeringTorqueEps = cp_main.vl['LANE_KEEP_ASSIST']['TORQUE']

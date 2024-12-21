@@ -37,17 +37,17 @@ def create_lka_msg_only_chks(packer, CP, original_lka_values):
     # values['CHECKSUM'] = calculate_checksum(dat)
     return packer.make_can_msg('LANE_KEEP_ASSIST', CanBus(CP).camera, original_lka_values)
 
-def create_lka_msg(packer, CP, apply_steer: float, steering_angle: float, frame: int, lat_active: bool, max_torque: int, ramp_value: int, reverse: bool):
+def create_lka_msg(packer, CP, apply_steer: float, steering_angle: float, frame: int, lat_active: bool, max_torque: int, ramp_value: int, driving: bool, original_lkas_values):
 
     # Construct message
     values = {
-        'unknown1': 0 if reverse else 1, # TODO: rename to REVERSE
+        'unknown1': 1 if driving else 0, # TODO: rename to DRIVING
         'COUNTER': (frame // 5) % 0x10,
         'CHECKSUM': 0,
-        'unknown2': 0x0B, # TODO: check, currently ramps up 1/s up to 0x0B
+        'unknown2': original_lkas_values['unknown2'], # TODO: check if forward is ok, currently ramps up 1/s up to 0x0B
         'TORQUE': apply_steer,
         'LANE_DEPARTURE': 2 if apply_steer < 0 else 1 if apply_steer > 0 else 0,
-        'LKA_DENY': 0 if apply_steer != 0 else 1,
+        'LKA_DENY': 0, # TODO: check       if apply_steer != 0 else 1,
         'STATUS': 2 if apply_steer != 0 else 1,
         'unknown3': 0,
         'RAMP': ramp_value,
