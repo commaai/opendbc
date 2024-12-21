@@ -29,13 +29,13 @@ def calculate_checksum(dat: bytearray) -> int:
     return needed
 
 def create_lka_msg_only_chks(packer, CP, original_lka_values):
-    values = original_lka_values.copy()
-    values['CHECKSUM'] = 0
-    msg = packer.make_can_msg('LANE_KEEP_ASSIST', CanBus(CP).main, values)
-    dat = msg[1]
-    if isinstance(dat, int):
-        dat = dat.to_bytes(1, 'big')
-    values['CHECKSUM'] = calculate_checksum(dat)
+    # values = original_lka_values.copy()
+    # values['CHECKSUM'] = 0
+    # msg = packer.make_can_msg('LANE_KEEP_ASSIST', CanBus(CP).main, values)
+    # dat = msg[1]
+    # if isinstance(dat, int):
+    #     dat = dat.to_bytes(1, 'big')
+    # values['CHECKSUM'] = calculate_checksum(dat)
     return packer.make_can_msg('LANE_KEEP_ASSIST', CanBus(CP).main, original_lka_values)
 
 def create_lka_msg(packer, CP, apply_steer: float, steering_angle: float, frame: int, lat_active: bool, max_torque: int, reverse: bool):
