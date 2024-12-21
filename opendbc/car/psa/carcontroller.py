@@ -18,6 +18,9 @@ class CarController(CarControllerBase):
     self.lkas_max_torque = 0
     self.apply_steer_last = 0
 
+    # Add a variable to track the ramp value
+    self.ramp_value = 0
+
   def update(self, CC, CS, now_nanos):
     can_sends = []
 
@@ -26,9 +29,15 @@ class CarController(CarControllerBase):
     actuators = CC.actuators
     reverse = CS.out.gearShifter == GearShifter.reverse
 
-    # TODO: if not done this way, torque is sent every frame (100Hz instead of 20Hz)
+    # Ramp up/down logic
+    if CC.latActive:
+      self.ramp_value = min(self.ramp_value + 1, 100)  # Ramp up the torque factor
+    else:
+      self.ramp_value = max(self.ramp_value - 1, 0)    # Ramp down the torque factor
+
+    # Steering torque logic (executed every STEER_STEP frames)
     if (self.frame % CarControllerParams.STEER_STEP) == 0:
-      # steering torque
+      # Calculate new steering torque
       new_steer = int(round(actuators.steer * self.params.STEER_MAX))
       apply_steer = apply_driver_steer_torque_limits(new_steer, self.apply_steer_last, CS.out.steeringTorque, self.params)
 
@@ -37,13 +46,23 @@ class CarController(CarControllerBase):
 
       self.apply_steer_last = apply_steer
 
-      can_sends.append(psacan.create_lka_msg(self.packer, self.CP, apply_steer, CS.out.steeringAngleDeg, self.frame, CC.latActive, self.lkas_max_torque, reverse))
-      # TODO: this forwards the original lkas message
-      # can_sends.append(psacan.create_lka_msg_only_chks(self.packer, self.CP, CS.original_lka_values))
+      # Create LKA message with ramp_value
+      can_sends.append(
+          psacan.create_lka_msg(
+              self.packer,
+              self.CP,
+              apply_steer,
+              CS.out.steeringAngleDeg,
+              self.frame,
+              CC.latActive,
+              self.lkas_max_torque,
+              self.ramp_value,
+              reverse,
+          )
+      )
 
-
-    ### cruise buttons ###
-    # TODO: find cruise buttons msg
+    # Cruise buttons (placeholder)
+    # TODO: Implement cruise buttons message
 
     new_actuators = actuators.as_builder()
     new_actuators.steer = apply_steer / self.params.STEER_MAX

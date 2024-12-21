@@ -2,8 +2,6 @@ from opendbc.car.common.numpy_fast import clip
 from opendbc.car import CanBusBase
 
 class CanBus(CanBusBase):
-  ramp_value = 0
-
   def __init__(self, CP=None, fingerprint=None) -> None:
     super().__init__(CP, fingerprint)
 
@@ -39,22 +37,7 @@ def create_lka_msg_only_chks(packer, CP, original_lka_values):
     # values['CHECKSUM'] = calculate_checksum(dat)
     return packer.make_can_msg('LANE_KEEP_ASSIST', CanBus(CP).camera, original_lka_values)
 
-def create_lka_msg(packer, CP, apply_steer: float, steering_angle: float, frame: int, lat_active: bool, max_torque: int, reverse: bool):
-    # Log all input parameters
-    print("##### DEBUG #####")
-    print(f"apply_steer: {apply_steer}, steering_angle: {steering_angle}, frame: {frame}")
-    print(f"lat_active: {lat_active}, max_torque: {max_torque}, reverse: {reverse}")
-    print(f"Current ramp_value: {CanBus(CP).ramp_value}")
-
-    # Update ramp_value
-    new_ramp_value = max(min(CanBus(CP).ramp_value + (1 if lat_active else -1), 100), 0)
-    print(f"New calculated ramp_value: {new_ramp_value}")
-
-    # Set ramp_value
-    CanBus(CP).ramp_value = new_ramp_value
-
-    # Log the updated state
-    print(f"Updated ramp_value: {CanBus(CP).ramp_value}")
+def create_lka_msg(packer, CP, apply_steer: float, steering_angle: float, frame: int, lat_active: bool, max_torque: int, ramp_value: int, reverse: bool):
 
     # Construct message
     values = {
@@ -67,7 +50,7 @@ def create_lka_msg(packer, CP, apply_steer: float, steering_angle: float, frame:
         'LKA_DENY': 0 if apply_steer != 0 else 1,
         'STATUS': 2 if apply_steer != 0 else 1,
         'unknown3': 0,
-        'RAMP': CanBus(CP).ramp_value,
+        'RAMP': ramp_value,
         'ANGLE': steering_angle,
         'unknown4': 1,
     }
