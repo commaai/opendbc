@@ -2,9 +2,10 @@ from opendbc.car.common.numpy_fast import clip
 from opendbc.car import CanBusBase
 
 class CanBus(CanBusBase):
+  ramp_value = 0
+
   def __init__(self, CP=None, fingerprint=None) -> None:
     super().__init__(CP, fingerprint)
-    self.ramp_value = 0
 
   @property
   def main(self) -> int:
