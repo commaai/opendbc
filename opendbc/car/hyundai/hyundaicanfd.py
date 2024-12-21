@@ -137,27 +137,25 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
   enabled = CC.enabled
   hud = CC.hudControl
 
-  if enabled:
+  # HIDE FAULTS
+  for f in ("FAULT_LSS", "FAULT_HDA", "FAULT_DAS"):
+    msg_162[f] = 0
 
-    # HIDE FAULTS
-    for f in ("FAULT_LSS", "FAULT_HDA", "FAULT_DAS"):
-      msg_162[f] = 0
+  # HIDE ALERTS
+  if msg_161.get("ALERTS_5") == 2:  # WATCH_FOR_SURROUNDING_VEHICLES
+    msg_161["ALERTS_5"] = 0
 
-    # HIDE ALERTS
-    if msg_161.get("ALERTS_5") == 2:  # WATCH_FOR_SURROUNDING_VEHICLES
-      msg_161["ALERTS_5"] = 0
+  if msg_161.get("ALERTS_5") == 4:  # SMART_CRUISE_CONTROL_CONDITIONS_NOT_MET
+    msg_161["ALERTS_5"] = 0
 
-    if msg_161.get("ALERTS_5") == 4:  # SMART_CRUISE_CONTROL_CONDITIONS_NOT_MET
-      msg_161["ALERTS_5"] = 0
+  if msg_161.get("ALERTS_5") == 5:  # USE_SWITCH_OR_PEDAL_TO_ACCELERATE
+    msg_161["ALERTS_5"] = 0
 
-    if msg_161.get("ALERTS_5") == 5:  # USE_SWITCH_OR_PEDAL_TO_ACCELERATE
-      msg_161["ALERTS_5"] = 0
+  if msg_161.get("ALERTS_2") == 5:  # CONSIDER_TAKING_A_BREAK
+    msg_161.update({"ALERTS_2": 0, "SOUNDS_2": 0, "DAW_ICON": 0})
 
-    if msg_161.get("ALERTS_2") == 5:  # CONSIDER_TAKING_A_BREAK
-      msg_161.update({"ALERTS_2": 0, "SOUNDS_2": 0, "DAW_ICON": 0})
-
-    if msg_161.get("SOUNDS_4") == 2 and msg_161.get("LFA_ICON") in (3, 0,):  # LFA BEEPS
-      msg_161["SOUNDS_4"] = 0
+  if msg_161.get("SOUNDS_4") == 2 and msg_161.get("LFA_ICON") in (3, 0,):  # LFA BEEPS
+    msg_161["SOUNDS_4"] = 0
 
   # ICONS, LANELINES
   msg_161.update({
