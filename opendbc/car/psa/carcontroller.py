@@ -19,6 +19,9 @@ class CarController(CarControllerBase):
     # torque factor ramp
     self.ramp_value = 0
 
+    # sync to send out frames
+    self.last_counter = 0
+
   def update(self, CC, CS, now_nanos):
     can_sends = []
 
@@ -54,7 +57,9 @@ class CarController(CarControllerBase):
       self.lkas_max_torque = 0
 
     apply_angle = clip(apply_angle, -CarControllerParams.STEER_MAX, CarControllerParams.STEER_MAX)
-    can_sends.append(psacan.create_lka_msg(self.packer, self.CP, apply_angle, self.frame, CC.latActive, self.lkas_max_torque, self.ramp_value, driving, CS.original_lka_values))
+    if(self.last_counter != CS.original_lka_values['COUNTER']):
+      can_sends.append(psacan.create_lka_msg(self.packer, self.CP, apply_angle, self.frame, CC.latActive, self.lkas_max_torque, self.ramp_value, driving, CS.original_lka_values))
+      self.last_counter = CS.original_lka_values['COUNTER']
 
     self.apply_angle_last = apply_angle
     ### lateral control end ###
