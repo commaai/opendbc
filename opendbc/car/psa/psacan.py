@@ -30,7 +30,7 @@ def create_lka_msg(packer, CP, apply_angle: float, frame: int, lat_active: bool,
     values = {
         'COUNTER': (frame // 5) % 0x10,
         'CHECKSUM': 0,
-        'STATUS': 2 if lat_active and ((frame % 15) // 5) == 0 else 3 if ((frame % 15) // 5) == 1 else 4 if lat_active else 4 if not lat_active and ((frame % 15) // 5) == 2 else 3 if ((frame % 15) // 5) == 1 else 2,
+        'STATUS': 4 if lat_active else 3, #2 if lat_active and ((frame % 15) // 5) == 0 else 3 if ((frame % 15) // 5) == 1 else 4 if lat_active else 4 if not lat_active and ((frame % 15) // 5) == 2 else 3 if ((frame % 15) // 5) == 1 else 2,
         'LXA_ACTIVATION': lat_active,
         'TORQUE_FACTOR': ramp_value,
         'SET_ANGLE': apply_angle,
