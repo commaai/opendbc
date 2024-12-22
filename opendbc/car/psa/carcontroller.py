@@ -58,7 +58,7 @@ class CarController(CarControllerBase):
 
     apply_angle = clip(apply_angle, -CarControllerParams.STEER_MAX, CarControllerParams.STEER_MAX)
     if(self.last_counter != CS.original_lka_values['COUNTER']):
-      can_sends.append(psacan.create_lka_msg(self.packer, self.CP, apply_angle, self.frame, CC.latActive, self.lkas_max_torque, self.ramp_value, driving, CS.original_lka_values))
+      can_sends.append(psacan.create_lka_msg(self.packer, self.CP, apply_angle, self.frame, CC.latActive, self.lkas_max_torque, self.ramp_value, driving))
       self.last_counter = CS.original_lka_values['COUNTER']
 
     self.apply_angle_last = apply_angle

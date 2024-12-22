@@ -27,21 +27,20 @@ def calculate_checksum(dat: bytearray) -> int:
     needed = (11 - checksum) & 0xF
     return needed
 
-# TODO: remove original values
-def create_lka_msg(packer, CP, apply_angle: float, frame: int, lat_active: bool, max_torque: int, ramp_value: int, driving: bool, original_lka_values):
+def create_lka_msg(packer, CP, apply_angle: float, frame: int, lat_active: bool, max_torque: int, ramp_value: int, driving: bool):
     # Construct message
     values = {
-        'unknown1': 1 if driving else 0, # TODO: rename to DRIVING
-        'COUNTER': (frame // 5) % 0x10,
-        'CHECKSUM': 0,
-        'unknown2': 0x0B,# original_lkas_values['unknown2'], # TODO: check if forward is ok, currently ramps up 1/s up to 0x0B
-        'TORQUE': 0, # TODO: where did I see this: "oscillates around 2043"
-        'LANE_DEPARTURE': 0, # not used in HDA # 2 if apply_steer < 0 else 1 if apply_steer > 0 else 0,
-        'STATUS': 2 if lat_active and ((frame % 15) // 5) == 0 else 3 if ((frame % 15) // 5) == 1 else 4 if lat_active else 4 if not lat_active and ((frame % 15) // 5) == 2 else 3 if ((frame % 15) // 5) == 1 else 2, # 4 if lat_active else 2,
-        'LXA_ACTIVATION': lat_active, # TODO: either status of LKA or HDA
-        'TORQUE_FACTOR': ramp_value, #TODO: rename to torque_factor
-        'SET_ANGLE': apply_angle, #TODO: rename dbc to APPLY_ANGLE
-        'unknown4': 1,
+        'unknown1': 1 if driving else 0, # TODO: check if required
+        'COUNTER': (frame // 5) % 0x10, # REQUIRED
+        'CHECKSUM': 0, # REQUIRED
+        'unknown2': 0x0B, #TODO: check if required
+        'TORQUE': 0, # check if required
+        'LANE_DEPARTURE': 0, # check if required
+        'STATUS': 4 if lat_active else 2, # REQUIRED
+        'LXA_ACTIVATION': lat_active, # REQUIRED
+        'TORQUE_FACTOR': ramp_value, # REQUIRED
+        'SET_ANGLE': apply_angle, # TODO: rename dbc to APPLY_ANGLE
+        'unknown4': 1, # check if required
     }
 
     print(f"\nlat_active: {lat_active}")
