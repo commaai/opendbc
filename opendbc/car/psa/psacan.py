@@ -30,17 +30,14 @@ def calculate_checksum(dat: bytearray) -> int:
 def create_lka_msg(packer, CP, apply_angle: float, frame: int, lat_active: bool, max_torque: int, ramp_value: int, driving: bool):
     # Construct message
     values = {
-        'unknown1': 1 if driving else 0, # TODO: check if required
+        # 'unknown1': 1 if driving else 0, # TODO: check if required
         'COUNTER': (frame // 5) % 0x10, # REQUIRED
         'CHECKSUM': 0, # REQUIRED
-        # 'unknown2': 0x0B, #TODO: check if required
-        # 'TORQUE': 0, # check if required
-        # 'LANE_DEPARTURE': 0, # check if required
         'STATUS': 2 if lat_active and ((frame % 15) // 5) == 0 else 3 if ((frame % 15) // 5) == 1 else 4 if lat_active else 4 if not lat_active and ((frame % 15) // 5) == 2 else 3 if ((frame % 15) // 5) == 1 else 2, # REQUIRED
         'LXA_ACTIVATION': lat_active, # REQUIRED
         'TORQUE_FACTOR': ramp_value, # REQUIRED
-        'SET_ANGLE': apply_angle, # TODO: rename dbc to APPLY_ANGLE
-        'unknown4': 1, # check if required
+        'SET_ANGLE': apply_angle,
+        # 'unknown4': 1, # check if required
     }
 
     msg = packer.make_can_msg('LANE_KEEP_ASSIST', 0, values)
