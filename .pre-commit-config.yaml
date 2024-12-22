@@ -37,20 +37,6 @@ repos:
         - --filter=-build,-legal,-readability,-runtime,-whitespace,+build/include_subdir,+build/forward_decl,+build/include_what_you_use,+build/deprecated,+whitespace/comma,+whitespace/line_length,+whitespace/empty_if_body,+whitespace/empty_loop_body,+whitespace/empty_conditional_body,+whitespace/forcolon,+whitespace/parens,+whitespace/semicolon,+whitespace/tab,+readability/braces
 -   repo: local
     hooks:
-    -   id: cppcheck
-        name: cppcheck
-        entry: cppcheck
-        language: system
-        types: [c++]
-        args:
-        - --error-exitcode=1
-        - --language=c++
-        - --inline-suppr
-        - --force
-        - --quiet
-        - -j4
--   repo: local
-    hooks:
     -   id: generator
         name: dbc generator
         entry: opendbc/dbc/generator/test_generator.py
