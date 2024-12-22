@@ -103,7 +103,7 @@
 |Hyundai|Elantra Hybrid 2021-23|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|Genesis 2015-16|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|i30 2017-19|Smart Cruise Control (SCC)|[Upstream](#upstream)|
-|Hyundai|Ioniq 5 (Non-US only) 2022-24|All|[Upstream](#upstream)|
+|Hyundai|Ioniq 5 (Southeast Asia and Europe only) 2022-24|All|[Upstream](#upstream)|
 |Hyundai|Ioniq 5 (with HDA II) 2022-24|Highway Driving Assist II|[Upstream](#upstream)|
 |Hyundai|Ioniq 5 (without HDA II) 2022-24|Highway Driving Assist|[Upstream](#upstream)|
 |Hyundai|Ioniq 6 (with HDA II) 2023-24|Highway Driving Assist II|[Upstream](#upstream)|
