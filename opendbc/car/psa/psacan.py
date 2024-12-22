@@ -44,6 +44,7 @@ def create_lka_msg(packer, CP, apply_angle: float, frame: int, lat_active: bool,
         'unknown4': 1,
     }
 
+    print(f"\nlat_active: {lat_active}")
     print(f"Message values: {values}")
 
     msg = packer.make_can_msg('LANE_KEEP_ASSIST', 0, values)
