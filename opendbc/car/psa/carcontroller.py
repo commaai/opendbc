@@ -26,7 +26,6 @@ class CarController(CarControllerBase):
     can_sends = []
 
     actuators = CC.actuators
-    driving = CS.out.vEgo > 0
 
     # Ramp up/down logic
     if CC.latActive:
@@ -35,7 +34,7 @@ class CarController(CarControllerBase):
       self.ramp_value = max(self.ramp_value - 1, 0)    # Ramp down the torque factor
 
     ### lateral control ###
-    # if (self.frame % CarControllerParams.STEER_STEP) == 0:
+    # Generate message with 100 Hz and send out synced with car messages at 20 Hz
     if CC.latActive:
       # windup slower
       apply_angle = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, CarControllerParams)
@@ -57,8 +56,13 @@ class CarController(CarControllerBase):
       self.lkas_max_torque = 0
 
     apply_angle = clip(apply_angle, -CarControllerParams.STEER_MAX, CarControllerParams.STEER_MAX)
+
+    # Sync to original message
+    # If sent unsynced, steering still works but driving mode is set to normal and recuperation set to low.
+    # Steer quality is also slightly better.
+    # TODO: test spamming at 100 Hz
     if(self.last_counter != CS.original_lka_values['COUNTER']):
-      can_sends.append(psacan.create_lka_msg(self.packer, self.CP, apply_angle, self.frame, CC.latActive, self.lkas_max_torque, self.ramp_value, driving))
+      can_sends.append(psacan.create_lka_msg(self.packer, self.CP, apply_angle, self.frame, CC.latActive, self.ramp_value))
       self.last_counter = CS.original_lka_values['COUNTER']
 
     self.apply_angle_last = apply_angle
