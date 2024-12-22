@@ -36,32 +36,32 @@ class CarController(CarControllerBase):
       self.ramp_value = max(self.ramp_value - 1, 0)    # Ramp down the torque factor
 
     # Steering torque logic (executed every STEER_STEP frames)
-    # if (self.frame % CarControllerParams.STEER_STEP) == 0:
-    # Calculate new steering torque
-    new_steer = int(round(actuators.steer * self.params.STEER_MAX))
-    apply_steer = apply_driver_steer_torque_limits(new_steer, self.apply_steer_last, CS.out.steeringTorque, self.params)
+    if (self.frame % CarControllerParams.STEER_STEP) == 0:
+      # Calculate new steering torque
+      new_steer = int(round(actuators.steer * self.params.STEER_MAX))
+      apply_steer = apply_driver_steer_torque_limits(new_steer, self.apply_steer_last, CS.out.steeringTorque, self.params)
 
-    if not CC.latActive:
-      apply_steer = 0
+      if not CC.latActive:
+        apply_steer = 0
 
-    self.apply_steer_last = apply_steer
+      self.apply_steer_last = apply_steer
 
-    # can_sends.append(psacan.create_lka_msg_only_chks(self.packer, self.CP, CS.original_lka_values))
-    # Create LKA message with ramp_value
-    can_sends.append(
-        psacan.create_lka_msg(
-            self.packer,
-            self.CP,
-            apply_steer,
-            CS.out.steeringAngleDeg,
-            self.frame,
-            CC.latActive,
-            self.lkas_max_torque,
-            self.ramp_value,
-            driving,
-            CS.original_lka_values,
-        )
-    )
+      # can_sends.append(psacan.create_lka_msg_only_chks(self.packer, self.CP, CS.original_lka_values))
+      # Create LKA message with ramp_value
+      can_sends.append(
+          psacan.create_lka_msg(
+              self.packer,
+              self.CP,
+              apply_steer,
+              CS.out.steeringAngleDeg,
+              self.frame,
+              CC.latActive,
+              self.lkas_max_torque,
+              self.ramp_value,
+              driving,
+              CS.original_lka_values,
+          )
+      )
 
     # Cruise buttons (placeholder)
     # TODO: Implement cruise buttons message
