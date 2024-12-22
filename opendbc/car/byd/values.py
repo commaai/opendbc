@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from opendbc.car import CarSpecs, PlatformConfig, Platforms, dbc_dict
+from opendbc.car import CarSpecs, PlatformConfig, Platforms, DbcDict, Bus
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarDocs, CarParts, CarHarness, SupportType
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
@@ -29,8 +29,8 @@ class BYDCarDocs(CarDocs):
 
 @ dataclass
 class BYDPlatformConfig(PlatformConfig):
-    dbc_dict: dict = field(
-        default_factory=lambda: dbc_dict('byd_general_pt', None))
+    dbc_dict: DbcDict = field(
+        default_factory=lambda: {Bus.pt: 'byd_general_pt'})
 
 
 class CAR(Platforms):
