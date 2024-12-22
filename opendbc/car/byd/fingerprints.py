@@ -1,7 +1,7 @@
-# from opendbc.car.structs import CarParams
+from opendbc.car.structs import CarParams
 from opendbc.car.byd.values import CAR
 
-# Ecu = CarParams.Ecu
+Ecu = CarParams.Ecu
 
 # Added fingerprint for BYD ATTO3 India Version. Line 2 is the BYD Fingerprint.
 
@@ -53,5 +53,19 @@ FINGERPRINTS = {
 }
 
 # Found this snippet in car/gm/fingerprint.py codes. This takes care of FW_VERSIONS
-FW_VERSIONS: dict[str, dict[tuple, list[bytes]]] = {
+# FW_VERSIONS: dict[str, dict[tuple, list[bytes]]] = {
+# }
+# Found an FW_Versions definition from the chinese BYD Code
+FW_VERSIONS = {
+    CAR.BYD_ATTO3: {
+        (Ecu.engine, 0x720, None): [
+            b'0.0.01',
+            b'0.3.00a',
+            b'02/27/2022',
+        ],
+        (Ecu.debug, 0x721, None): [
+            b'166bd860',
+            b'dc780f85',
+        ],
+    },
 }
