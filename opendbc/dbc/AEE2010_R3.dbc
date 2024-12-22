@@ -67,6 +67,10 @@ BO_ 264 Vers_CMM: 8 CMM___Motor_SG
  SG_ P082_Edition : 48|8@1+ (1,0) [0|255] "-" Vector__XXX
  SG_ P083_Calibration : 56|8@1+ (1,0) [0|255] "-" Vector__XXX
 
+BO_ 461 NEW_MSG_1CD: 3 XXX
+ SG_ ESP_STATUS : 15|1@0+ (1,0) [0|1] "" XXX
+ SG_ ESP_STATUS_INV : 20|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 488 DAT3_CMM: 3 Vector__XXX
  SG_ Reserved_3 : 5|6@0+ (1,0) [0|0] "" Vector__XXX
  SG_ P413_Com_stRstrtStSpPrgs : 7|2@0+ (1,0) [0|3] "" Vector__XXX
@@ -94,9 +98,16 @@ BO_ 552 Dyn5_CMM: 5 CMM___Motor_SG
  SG_ P335_Com_ctDyn5CMMCntr : 28|4@1+ (1,0) [0|15] "" Vector__XXX
  SG_ P388_Com_rClthPedPos : 39|8@0+ (0.5,0) [0|100] "" Vector__XXX
 
+BO_ 694 NEW_MSG_2B6: 8 XXX
+ SG_ ESP_STATUS : 24|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 717 HS2_DYN_UCF_2CD: 3 UC_FREIN
  SG_ AUTO_BRAKING_PRESSURE : 7|8@0+ (0.2,0) [0|50.6] "bar" BV,BVN
  SG_ VITESSE_LACET : 15|16@0- (0.1,0) [-100|100] "Degré/s" BV,BVN
+
+BO_ 728 NEW_MSG_2D8: 7 XXX
+ SG_ ESP_STATUS : 28|1@0+ (1,0) [0|1] "" XXX
+ SG_ ESP_STATUS_INV : 29|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 757 STEERING: 7 XXX
  SG_ COUNTER : 3|4@0+ (1,0) [0|255] "" XXX
@@ -105,6 +116,10 @@ BO_ 757 STEERING: 7 XXX
  SG_ ANGLE : 31|16@0- (0.1,0) [-3276.8|3276.7] "degrees" XXX
  SG_ RATE : 47|12@0- (1,0) [0|4095] "" XXX
  SG_ NEW_SIGNAL_1 : 48|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 760 NEW_MSG_2F8: 7 XXX
+ SG_ ESP_STATUS : 12|1@0+ (1,0) [0|1] "" XXX
+ SG_ ESP_STATUS_INV : 13|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 773 STEERING_ALT: 7 XXX
  SG_ ANGLE : 7|16@0- (0.1,0) [-3276.8|3276.7] "degrees" XXX
@@ -135,7 +150,7 @@ BO_ 813 HS2_DYN_UCF_MDD_32D: 8 UC_FREIN
  SG_ FA_ETAT_DECEL : 11|2@0+ (1,0) [0|3] "" CMM,BSI,PASS_HCU2,CMF,ARTIV
  SG_ APPUI_FREIN_RECONSTRUIT : 17|2@0+ (1,0) [0|3] "" CMM,BSI,PASS_HCU2,CMF,ARTIV
  SG_ PREFILL_EN_COURS : 18|1@0+ (1,0) [0|1] "" CMM,BSI,PASS_HCU2,CMF,ARTIV
- SG_ ACC_ETAT_DECEL : 20|2@0+ (1,0) [0|3] "" CMM,BSI,PASS_HCU2,CMF,ARTIV
+ SG_ ACC_ETAT_DECEL_OR_ESP_STATUS : 20|2@0+ (1,0) [0|3] "" CMM,BSI,PASS_HCU2,CMF,ARTIV
  SG_ VEHICLE_STANDSTILL : 21|1@0+ (1,0) [0|1] "" CMM,BSI,PASS_HCU2,CMF,ARTIV
  SG_ FREINAGE_DYN_EN_COURS : 22|1@0+ (1,0) [0|1] "" CMM,BSI,PASS_HCU2,CMF,ARTIV
  SG_ BRAKE_RELEASED_FAILSAFE : 23|1@0+ (1,0) [0|1] "" CMM,BSI,PASS_HCU2,CMF,ARTIV
@@ -184,7 +199,7 @@ BO_ 841 Dyn_V2_BVMP: 8 BVA___Automatikgetriebe
 
 BO_ 845 Dyn_CDS: 8 CDS___Fahrdynamikregelung
  SG_ P047_Com_stESPIntv : 0|3@1+ (1,0) [0|7] "-" CMM___Motor_SG
- SG_ P088_CutOffForbidden : 3|1@1+ (1,0) [0|1] "-" Vector__XXX
+ SG_ P088_CutOffForbidden_OR_ESP_STATUS_INV : 3|1@1+ (1,0) [0|1] "-" Vector__XXX
  SG_ P147_Com_bESPIntvActv : 6|1@1+ (1,0) [0|0] "" Vector__XXX
  SG_ P043_Com_xTCSStatRaw : 16|8@1+ (3,-150) [-150|612] "Nm" Vector__XXX
  SG_ P044_Com_trqTCSRaw : 24|8@1+ (2,-100) [-100|410] "Nm" Vector__XXX
@@ -395,6 +410,9 @@ BO_ 1362 DAT4_BSI_AEE2010: 8 Vector__XXX
 BO_ 1375 ACQ_NEW_JDD: 1 Vector__XXX
  SG_ P__JDD_Com_stFaultAck : 7|8@0+ (1,0) [0|255] "" Vector__XXX
 
+BO_ 1379 NEW_MSG_563: 7 XXX
+ SG_ MAYBE_RELATED_TO_ESP_STATUS : 45|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 1390 DRIVER: 6 XXX
  SG_ NEW_SIGNAL_3 : 0|1@0+ (1,0) [0|1] "" XXX
  SG_ BRIGHTNESS_SETTING : 7|4@0+ (1,0) [0|15] "" XXX
@@ -439,6 +457,10 @@ BO_ 1458 Contexte1_5B2: 8 Vector__XXX
  SG_ P146_Com_tEnvT : 16|8@1+ (0.5,-40) [-40|87] "°C" Vector__XXX
  SG_ P100_Com_stAddPmpDef : 24|8@1+ (1,0) [0|255] "-" Vector__XXX
  SG_ P__Com_stEOBD : 39|8@0+ (1,0) [0|255] "-" Vector__XXX
+
+BO_ 1475 NEW_MSG_5C3: 8 XXX
+ SG_ MAYBE_RELATED_TO_ESP_STATUS1 : 27|2@0+ (1,0) [0|3] "" XXX
+ SG_ MAYBE_RELATED_TO_ESP_STATUS2 : 28|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1544 EOBD_CMM: 8 CMM___Motor_SG
  SG_ P__LID_No : 0|8@1+ (1,0) [0|0] "" Vector__XXX
@@ -674,7 +696,7 @@ CM_ SG_ 841 P340_Com_xTSCChkSum "P097  request to increase the idle speed";
 CM_ SG_ 841 P166_Com_nEngTSC "P055 torque limitation for gearbox";
 CM_ BO_ 845 "ID 34D: ESP Synchronisation frame (Period time 20 ms)";
 CM_ SG_ 845 P047_Com_stESPIntv "P047 ESP torque request status";
-CM_ SG_ 845 P088_CutOffForbidden "P088 Cut off of injection is forbidden.";
+CM_ SG_ 845 P088_CutOffForbidden_OR_ESP_STATUS_INV "P088 Cut off of injection is forbidden.";
 CM_ SG_ 845 P147_Com_bESPIntvActv "P147 ESP-TCS (ASR) in regulation";
 CM_ SG_ 845 P043_Com_xTCSStatRaw "P043 TCS (ASR) static torque request = max. threshold";
 CM_ SG_ 845 P044_Com_trqTCSRaw "P044 TCS (ASR) dynamic torque request";
@@ -781,6 +803,13 @@ CM_ SG_ 3221225472 P252_ImpluseStart "Momentary starting request";
 CM_ SG_ 3221225472 P284_T15CD_stPart_byte6 "ECU electronic state";
 CM_ SG_ 3221225472 P284_T15CD_stPart_byte8 "ECU electronic state";
 CM_ SG_ 3221225472 Reserved_1 "P074  Number of BusOff in driving cycle";
+VAL_ 461 ESP_STATUS 0 "DISABLED" 1 "ENABLED";
+VAL_ 461 ESP_STATUS_INV 0 "ENABLED" 1 "DISABLED";
+VAL_ 694 ESP_STATUS 0 "DISABLED" 1 "ENABLED";
+VAL_ 728 ESP_STATUS 0 "DISABLED" 1 "ENABLED";
+VAL_ 728 ESP_STATUS_INV 0 "ENABLED" 1 "DISABLED";
+VAL_ 760 ESP_STATUS 0 "DISABLED" 1 "ENABLED";
+VAL_ 760 ESP_STATUS_INV 0 "ENABLED" 1 "DISABLED";
 VAL_ 840 P134_Com_stEng 7 "RESERVED" 6 "DegradedGO" 5 "GO" 4 "Stopped" 3 "Running" 2 "Starting" 1 "Cut" 0 "Locked";
 VAL_ 909 VITESSE_VEHICULE_ROUES 65535 "Invalid";
 VAL_ 1010 LANE_DEPARTURE 0 "NOT_DEPARTED" 1 "DEPARTED_RIGHT" 2 "DEPARTED_LEFT";
