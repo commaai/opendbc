@@ -36,7 +36,6 @@ class CarController(CarControllerBase):
     if CC.latActive:
       # windup slower
       apply_angle = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, CarControllerParams)
-      apply_angle = clip(apply_angle, -CarControllerParams.STEER_MAX, CarControllerParams.STEER_MAX)
 
       # Max torque from driver before EPS will give up and not apply torque
       if not bool(CS.out.steeringPressed):
@@ -54,6 +53,7 @@ class CarController(CarControllerBase):
       apply_angle = CS.out.steeringAngleDeg
       self.lkas_max_torque = 0
 
+    apply_angle = clip(apply_angle, -CarControllerParams.STEER_MAX, CarControllerParams.STEER_MAX)
     can_sends.append(psacan.create_lka_msg(self.packer, self.CP, apply_angle, self.frame, CC.latActive, self.lkas_max_torque, self.ramp_value, driving))
 
     self.apply_angle_last = apply_angle
