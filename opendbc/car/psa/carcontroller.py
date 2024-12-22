@@ -1,4 +1,4 @@
-from opendbc.car import apply_driver_steer_torque_limits, common_fault_avoidance, structs
+from opendbc.car import structs
 from opendbc.can.packer import CANPacker
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car import apply_std_steer_angle_limits, Bus
@@ -11,20 +11,16 @@ GearShifter = structs.CarState.GearShifter
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     self.CP = CP
-    self.params = CarControllerParams(CP)
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.frame = 0
 
     self.lkas_max_torque = 0
-    self.apply_steer_last = 0
-
-    # Add a variable to track the ramp value
+    self.apply_angle_last = 0
+    # torque factor ramp
     self.ramp_value = 0
 
   def update(self, CC, CS, now_nanos):
     can_sends = []
-
-    apply_steer = 0
 
     actuators = CC.actuators
     driving = CS.out.vEgo > 0
@@ -35,40 +31,40 @@ class CarController(CarControllerBase):
     else:
       self.ramp_value = max(self.ramp_value - 1, 0)    # Ramp down the torque factor
 
-    # Steering torque logic (executed every STEER_STEP frames)
-    if (self.frame % CarControllerParams.STEER_STEP) == 0:
-      # Calculate new steering torque
-      new_steer = int(round(actuators.steer * self.params.STEER_MAX))
-      apply_steer = apply_driver_steer_torque_limits(new_steer, self.apply_steer_last, CS.out.steeringTorque, self.params)
+    ### lateral control ###
+    # if (self.frame % CarControllerParams.STEER_STEP) == 0:
+    if CC.latActive:
+      # windup slower
+      apply_angle = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, CarControllerParams)
+      apply_angle = clip(apply_angle, -CarControllerParams.STEER_MAX, CarControllerParams.STEER_MAX)
 
-      if not CC.latActive:
-        apply_steer = 0
+      # Max torque from driver before EPS will give up and not apply torque
+      if not bool(CS.out.steeringPressed):
+        self.lkas_max_torque = CarControllerParams.LKAS_MAX_TORQUE
+      else:
+        # Scale max torque based on how much torque the driver is applying to the wheel
+        self.lkas_max_torque = max(
+          # Scale max torque down to half LKAX_MAX_TORQUE as a minimum
+          CarControllerParams.LKAS_MAX_TORQUE * 0.5,
+          # Start scaling torque at STEER_THRESHOLD
+          CarControllerParams.LKAS_MAX_TORQUE - 0.6 * max(0, abs(CS.out.steeringTorque) - CarControllerParams.STEER_THRESHOLD)
+        )
 
-      self.apply_steer_last = apply_steer
+    else:
+      apply_angle = CS.out.steeringAngleDeg
+      self.lkas_max_torque = 0
 
-      # can_sends.append(psacan.create_lka_msg_only_chks(self.packer, self.CP, CS.original_lka_values))
-      # Create LKA message with ramp_value
-      can_sends.append(
-          psacan.create_lka_msg(
-              self.packer,
-              self.CP,
-              apply_steer,
-              CS.out.steeringAngleDeg,
-              self.frame,
-              CC.latActive,
-              self.lkas_max_torque,
-              self.ramp_value,
-              driving,
-              CS.original_lka_values,
-          )
-      )
+    can_sends.append(psacan.create_lka_msg(self.packer, self.CP, apply_angle, self.frame, CC.latActive, self.lkas_max_torque, self.ramp_value, driving))
 
-    # Cruise buttons (placeholder)
-    # TODO: Implement cruise buttons message
+    self.apply_angle_last = apply_angle
+    ### lateral control end ###
+
+    ### cruise buttons ###
+    # TODO: find cruise buttons msg
 
     new_actuators = actuators.as_builder()
-    new_actuators.steer = apply_steer / self.params.STEER_MAX
-    new_actuators.steerOutputCan = apply_steer
+    new_actuators.steeringAngleDeg = self.apply_angle_last
+    new_actuators.steer = self.lkas_max_torque
 
     self.frame += 1
     return new_actuators, can_sends

@@ -14,8 +14,9 @@ class CarInterface(CarInterfaceBase):
     ret.dashcamOnly = False
 
     ret.radarUnavailable = True
+    ret.steerControlType = structs.CarParams.SteerControlType.angle # TODO: check angle or torque controlled
+    ret.steerActuatorDelay = 0.2  # TODO: not measured
     ret.steerLimitTimer = 1.0
-    ret.steerActuatorDelay = 0.2  # TODO: measure
 
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.psa)]
 
@@ -27,18 +28,4 @@ class CarInterface(CarInterfaceBase):
     ret.autoResumeSng = ret.minEnableSpeed == -1 # TODO: check
     ret.centerToFront = ret.wheelbase * 0.44  # TODO: verify
     ret.wheelSpeedFactor = 1.04
-
-    if False: # TODO: check: False: CC torque based, True: ACC angle based?
-      ret.steerControlType = structs.CarParams.SteerControlType.angle
-    else:
-      CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
-
-    if candidate == CAR.PSA_OPEL_CORSA_F:
-      ret.lateralTuning.init('pid') # TODO: tune
-      ret.lateralTuning.pid.kf = 0.00003
-      ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0., 20.], [0., 20.]]
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.0025, 0.1], [0.00025, 0.01]]
-    else:
-      raise ValueError(f"unknown car: {candidate}")
-
     return ret

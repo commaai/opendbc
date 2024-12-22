@@ -41,11 +41,10 @@ class CarState(CarStateBase):
     ret.parkingBrake = False # TODO bool(cp_main.vl['Dat_BSI']['PARKING_BRAKE']) is wrong signal
 
     # steering wheel
-    # ret.steeringAngleDeg = cp.vl['STEERING_ALT']['ANGLE'] # EPS
-    ret.steeringAngleDeg = cp_main.vl['LANE_KEEP_ASSIST']['ANGLE'] # this is in degrees.
+    ret.steeringAngleDeg = cp.vl['STEERING_ALT']['ANGLE'] # EPS
     ret.steeringRateDeg = cp.vl['STEERING_ALT']['RATE'] * cp.vl['STEERING_ALT']['RATE_SIGN']  # EPS: Rotation speed * rotation sign/direction
     ret.steeringTorque = cp.vl['STEERING']['DRIVER_TORQUE']
-    ret.steeringTorqueEps = cp_main.vl['LANE_KEEP_ASSIST']['TORQUE']
+    # ret.steeringTorqueEps = cp_main.vl['LANE_KEEP_ASSIST']['TORQUE']# TODO: check if correct
     ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > CarControllerParams.STEER_DRIVER_ALLOWANCE, 5)  # TODO: adjust threshold
     ret.steerFaultTemporary = False  # TODO
     ret.steerFaultPermanent = False  # TODO
@@ -82,7 +81,7 @@ class CarState(CarStateBase):
     ret.doorOpen = any([cp_main.vl['Dat_BSI']['DRIVER_DOOR'], cp_main.vl['Dat_BSI']['PASSENGER_DOOR']]) # HS1
     ret.seatbeltUnlatched = cp_main.vl['RESTRAINTS']['DRIVER_SEATBELT'] != 2
 
-    # TODO: for testing, original LKA message
+    # TODO: remove, for testing, original LKA message
     self.original_lka_values = cp_main.vl['LANE_KEEP_ASSIST']
     return ret
 
@@ -105,7 +104,7 @@ class CarState(CarStateBase):
       ('Dat_BSI', 20),
       ('RESTRAINTS', 10),
       ('DRIVER', 10),
-      ('LANE_KEEP_ASSIST', 20),
+      ('LANE_KEEP_ASSIST', 20), # TODO remove if unused
     ]
     return {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 2),

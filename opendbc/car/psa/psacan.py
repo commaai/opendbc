@@ -27,31 +27,20 @@ def calculate_checksum(dat: bytearray) -> int:
     needed = (11 - checksum) & 0xF
     return needed
 
-def create_lka_msg_only_chks(packer, CP, original_lka_values):
-    # values = original_lka_values.copy()
-    # values['CHECKSUM'] = 0
-    # msg = packer.make_can_msg('LANE_KEEP_ASSIST', CanBus(CP).main, values)
-    # dat = msg[1]
-    # if isinstance(dat, int):
-    #     dat = dat.to_bytes(1, 'big')
-    # values['CHECKSUM'] = calculate_checksum(dat)
-    return packer.make_can_msg('LANE_KEEP_ASSIST', CanBus(CP).camera, original_lka_values)
-
-def create_lka_msg(packer, CP, apply_steer: float, steering_angle: float, frame: int, lat_active: bool, max_torque: int, ramp_value: int, driving: bool, original_lkas_values):
-
+# TODO: remove original values
+def create_lka_msg(packer, CP, apply_angle: float, frame: int, lat_active: bool, max_torque: int, ramp_value: int, driving: bool):
     # Construct message
     values = {
         'unknown1': 1 if driving else 0, # TODO: rename to DRIVING
         'COUNTER': (frame // 5) % 0x10,
         'CHECKSUM': 0,
-        'unknown2': original_lkas_values['unknown2'], # TODO: check if forward is ok, currently ramps up 1/s up to 0x0B
-        'TORQUE': apply_steer,
-        'LANE_DEPARTURE': 2 if apply_steer < 0 else 1 if apply_steer > 0 else 0,
-        'LKA_DENY': 0, # TODO: check       if apply_steer != 0 else 1,
-        'STATUS': 2 if apply_steer != 0 else 1,
-        'unknown3': 0,
-        'RAMP': ramp_value,
-        'ANGLE': steering_angle,
+        'unknown2': 0x8B,# original_lkas_values['unknown2'], # TODO: check if forward is ok, currently ramps up 1/s up to 0x0B
+        'TORQUE': 2043 if lat_active else 0, # TODO: maybe better to do with apply-angle_active or something. oscillates around 2043
+        'LANE_DEPARTURE': 0, # not used in HDA # 2 if apply_steer < 0 else 1 if apply_steer > 0 else 0,
+        'STATUS': 4 if lat_active else 2,
+        'LXA_ACTIVATION': 0,
+        'TORQUE_FACTOR': ramp_value, #TODO: rename to torque_factor
+        'SET_ANGLE': apply_angle, #TODO: rename dbc to APPLY_ANGLE
         'unknown4': 1,
     }
 
