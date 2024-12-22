@@ -28,6 +28,8 @@ def calculate_checksum(dat: bytearray) -> int:
     return needed
 
 def create_lka_msg(packer, CP, apply_angle: float, frame: int, lat_active: bool, max_torque: int, ramp_value: int, driving: bool):
+    # Used for status phase change 2->3->4->3->2
+    phase = (frame % 10) // 5
     # Construct message
     values = {
         'unknown1': 1 if driving else 0, # TODO: check if required
@@ -36,7 +38,7 @@ def create_lka_msg(packer, CP, apply_angle: float, frame: int, lat_active: bool,
         'unknown2': 0x0B, #TODO: check if required
         'TORQUE': 0, # check if required
         'LANE_DEPARTURE': 0, # check if required
-        'STATUS':  2 if lat_active and ((frame % 15) // 5) == 0 else 3 if ((frame % 15) // 5) == 1 else 4 if lat_active else 4 if not lat_active and ((frame % 15) // 5) == 2 else 3 if ((frame % 15) // 5) == 1 else 2, # 4 if lat_active else 2, # REQUIRED
+        'STATUS': 2 if (lat_active and phase == 0) else 3 if phase == 1 else 4 if phase == 2 else 2,
         'LXA_ACTIVATION': lat_active, # REQUIRED
         'TORQUE_FACTOR': ramp_value, # REQUIRED
         'SET_ANGLE': apply_angle, # TODO: rename dbc to APPLY_ANGLE
