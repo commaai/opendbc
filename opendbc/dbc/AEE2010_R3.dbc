@@ -244,11 +244,10 @@ BO_ 1010 LANE_KEEP_ASSIST: 8 XXX
  SG_ unknown2 : 23|8@0+ (1,0) [0|255] "" XXX
  SG_ TORQUE : 31|11@0- (1,0) [0|2047] "" XXX
  SG_ LANE_DEPARTURE : 33|2@0+ (1,0) [0|3] "" XXX
- SG_ LKA_DENY : 34|1@0+ (1,0) [0|1] "" XXX
- SG_ STATUS : 36|2@0+ (1,0) [0|3] "" XXX
- SG_ unknown3 : 40|1@0+ (1,0) [0|1] "" XXX
- SG_ RAMP : 47|7@0+ (1,0) [0|127] "" XXX
- SG_ ANGLE : 55|14@0- (0.1,0) [-90|90] "" XXX
+ SG_ STATUS : 36|3@0+ (1,0) [0|3] "" XXX
+ SG_ LXA_ACTIVATION : 40|1@0+ (1,0) [0|1] "" XXX
+ SG_ TORQUE_FACTOR : 47|7@0+ (1,0) [0|127] "" XXX
+ SG_ SET_ANGLE : 55|14@0- (0.1,0) [-90|90] "" XXX
  SG_ unknown4 : 57|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1042 Dat_BSI: 8 BSI___Kombiinstrument
@@ -688,8 +687,10 @@ CM_ SG_ 904 P066_aECU "P066 longitudinal acceleration by engine ECU";
 CM_ BO_ 909 "ID 38D: ABS Vehicle Dynamic Frame (Period time 40 ms)";
 CM_ SG_ 909 P052_Com_aLng "P052 longitudinal acceleration (FrmMng_a)";
 CM_ BO_ 969 "Pour application MCP SSTG";
-CM_ SG_ 1010 LKA_DENY "1=LKA OFF (button in console)";
+CM_ SG_ 1010 TORQUE "Set to ~2043 when active";
+CM_ SG_ 1010 LANE_DEPARTURE "UNUSED in HDA";
 CM_ SG_ 1010 STATUS "0=LKA OFF (button in console)";
+CM_ SG_ 1010 LXA_ACTIVATION "Set = 0, no activity seen in routes";
 CM_ BO_ 1042 "ID 412: Body Car Data Frame (Period time 50 ms)";
 CM_ SG_ 1042 P040_MainBrakeFault "P040  Main brake switch is defect.";
 CM_ SG_ 1042 P103_Com_bRevGear "P013 main brake signal";
@@ -783,4 +784,4 @@ CM_ SG_ 3221225472 Reserved_1 "P074  Number of BusOff in driving cycle";
 VAL_ 840 P134_Com_stEng 7 "RESERVED" 6 "DegradedGO" 5 "GO" 4 "Stopped" 3 "Running" 2 "Starting" 1 "Cut" 0 "Locked";
 VAL_ 909 VITESSE_VEHICULE_ROUES 65535 "Invalid";
 VAL_ 1010 LANE_DEPARTURE 0 "NOT_DEPARTED" 1 "DEPARTED_RIGHT" 2 "DEPARTED_LEFT";
-VAL_ 1010 STATUS 0 "UNAVAILABLE" 1 "READY" 2 "ACTIVE";
+VAL_ 1010 STATUS 0 "UNAVAILABLE" 1 "UNSELECTED" 2 "SELECTED" 3 "AUTHORIZED" 4 "ACTIVE" 5 "DEFECT" 6 "COLLISION" 7 "RESERVED";
