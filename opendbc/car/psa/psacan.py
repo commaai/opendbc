@@ -28,7 +28,7 @@ def calculate_checksum(dat: bytearray) -> int:
     return needed
 
 # TODO: remove original values
-def create_lka_msg(packer, CP, apply_angle: float, frame: int, lat_active: bool, max_torque: int, ramp_value: int, driving: bool):
+def create_lka_msg(packer, CP, apply_angle: float, frame: int, lat_active: bool, max_torque: int, ramp_value: int, driving: bool, original_lka_values):
     # Construct message
     values = {
         'unknown1': 1 if driving else 0, # TODO: rename to DRIVING
@@ -40,7 +40,7 @@ def create_lka_msg(packer, CP, apply_angle: float, frame: int, lat_active: bool,
         'STATUS': 4 if lat_active else 2,
         'LXA_ACTIVATION': 0,
         'TORQUE_FACTOR': ramp_value, #TODO: rename to torque_factor
-        'SET_ANGLE': apply_angle, #TODO: rename dbc to APPLY_ANGLE
+        'SET_ANGLE': apply_angle if lat_active else original_lka_values['SET_ANGLE'], #TODO: rename dbc to APPLY_ANGLE, use original frame value unless lat_active, otherwise ESP error!
         'unknown4': 1,
     }
 
