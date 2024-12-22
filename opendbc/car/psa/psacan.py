@@ -40,7 +40,7 @@ def create_lka_msg(packer, CP, apply_angle: float, frame: int, lat_active: bool,
         'STATUS': 4 if lat_active else 2,
         'LXA_ACTIVATION': 0,
         'TORQUE_FACTOR': ramp_value, #TODO: rename to torque_factor
-        'SET_ANGLE': apply_angle if lat_active else original_lka_values['SET_ANGLE'], #TODO: rename dbc to APPLY_ANGLE, use original frame value unless lat_active, otherwise ESP error!
+        'SET_ANGLE': apply_angle, #TODO: rename dbc to APPLY_ANGLE
         'unknown4': 1,
     }
 
