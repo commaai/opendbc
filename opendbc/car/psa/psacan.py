@@ -36,23 +36,17 @@ def create_lka_msg(packer, CP, apply_angle: float, frame: int, lat_active: bool,
         'unknown2': 0x0B, #TODO: check if required
         'TORQUE': 0, # check if required
         'LANE_DEPARTURE': 0, # check if required
-        'STATUS': 4 if lat_active else 2, # REQUIRED
+        'STATUS':  2 if lat_active and ((frame % 15) // 5) == 0 else 3 if ((frame % 15) // 5) == 1 else 4 if lat_active else 4 if not lat_active and ((frame % 15) // 5) == 2 else 3 if ((frame % 15) // 5) == 1 else 2, # 4 if lat_active else 2, # REQUIRED
         'LXA_ACTIVATION': lat_active, # REQUIRED
         'TORQUE_FACTOR': ramp_value, # REQUIRED
         'SET_ANGLE': apply_angle, # TODO: rename dbc to APPLY_ANGLE
         'unknown4': 1, # check if required
     }
 
-    print(f"\nlat_active: {lat_active}")
-    print(f"Message values: {values}")
-
     msg = packer.make_can_msg('LANE_KEEP_ASSIST', 0, values)
     dat = msg[1]
     if isinstance(dat, int):
         dat = dat.to_bytes(1, 'big')
-
-    # Compute and log checksum
     values['CHECKSUM'] = calculate_checksum(dat)
-    print(f"Final CHECKSUM: {values['CHECKSUM']}")
 
     return packer.make_can_msg('LANE_KEEP_ASSIST', CanBus(CP).camera, values)
