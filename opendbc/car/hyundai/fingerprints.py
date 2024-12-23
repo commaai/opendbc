@@ -1157,9 +1157,11 @@ FW_VERSIONS = {
   CAR.GENESIS_GV80: {
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00JX1 MFC  AT USA LHD 1.00 1.02 99211-T6110 220513',
+      b'\xf1\x00JX  MFC  AT USA LHD 1.00 1.03 99211-T6510 240124',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00JX1_ SCC FHCUP      1.00 1.01 99110-T6100         ',
+      b'\xf1\x00JX__ RDR -----      1.00 1.03 99110-T6500         ',
     ],
   },
   CAR.KIA_CARNIVAL_4TH_GEN: {

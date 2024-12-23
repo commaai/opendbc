@@ -64,6 +64,7 @@
 |Genesis|GV70 Electrified (Australia Only) 2022|All|[Upstream](#upstream)|
 |Genesis|GV70 Electrified (with HDA II) 2023|Highway Driving Assist II|[Upstream](#upstream)|
 |Genesis|GV80 2023|All|[Upstream](#upstream)|
+|Genesis|GV80 2025|All|[Upstream](#upstream)|
 |GMC|Sierra 1500 2020-21|Driver Alert Package II|[Upstream](#upstream)|
 |GMC|Yukon 2019-20|Adaptive Cruise Control (ACC) & LKAS|[Dashcam mode](#dashcam)|
 |Honda|Accord 2018-22|All|[Upstream](#upstream)|
