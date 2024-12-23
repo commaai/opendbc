@@ -61,9 +61,12 @@ class CarController(CarControllerBase):
     # If sent unsynced, steering still works but driving mode is set to normal and recuperation set to low.
     # Steer quality is also slightly better.
     # TODO: test spamming at 100 Hz
-    if(self.last_counter != CS.original_lka_values['COUNTER']):
-      can_sends.append(psacan.create_lka_msg(self.packer, self.CP, apply_angle, self.frame, CC.latActive, self.ramp_value))
-      self.last_counter = CS.original_lka_values['COUNTER']
+    # if(self.last_counter != CS.original_lka_values['COUNTER']):
+    #   self.last_counter = CS.original_lka_values['COUNTER']
+
+    # TEST: spamming at 100 Hz
+    can_sends.append(psacan.create_lka_msg(self.packer, self.CP, apply_angle, self.frame, CC.latActive, self.ramp_value))
+
 
     self.apply_angle_last = apply_angle
     ### lateral control end ###
