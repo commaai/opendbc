@@ -10,8 +10,6 @@ class CarState(CarStateBase):
 
     # Needed by carcontroller
     self.acm_lka_hba_cmd = None
-    self.epas_system_status_cmd = None
-    self.acm_status_cmd = None
 
   def update(self, cp, cp_cam, cp_adas, *_) -> structs.CarState:
     ret = structs.CarState()
@@ -36,13 +34,11 @@ class CarState(CarStateBase):
     ret.steeringTorque = cp.vl["EPAS_SystemStatus"]["EPAS_TorsionBarTorque"]
     ret.steeringPressed = abs(ret.steeringTorque) > 1.0
 
-    # 5 = EPAS_Feature_Status_Invalid_Err
-    ret.steerFaultPermanent = cp.vl["EPAS_AdasStatus"]["EPAS_EacErrorCode"] == 5
-    ret.steerFaultTemporary = False # "EPAS_Angle_Control_Cntr_Err", EPAS_Angle_Control_Crc_Err
+    ret.steerFaultTemporary = cp.vl["EPAS_AdasStatus"]["EPAS_EacErrorCode"] != 0
 
     # Cruise state
     ret.cruiseState.enabled = cp_cam.vl["ACM_Status"]["ACM_FeatureStatus"] != 0
-    ret.cruiseState.speed = 15 #cp.vl["ESPiB1"]["ESPiB1_VehicleSpeed"] # todo
+    ret.cruiseState.speed = 15 # cp.vl["ESPiB1"]["ESPiB1_VehicleSpeed"]
     ret.cruiseState.available = True # cp.vl["VDM_AdasSts"]["VDM_AdasInterfaceStatus"] == 1
     ret.cruiseState.standstill = False
 
@@ -57,19 +53,17 @@ class CarState(CarStateBase):
     ret.rightBlinker = cp_adas.vl["IndicatorLights"]["TurnLightRight"] in (1, 2)
 
     # Seatbelt
-    ret.seatbeltUnlatched = False # cp.vl["RCM_Status"]["RCM_Status_IND_WARN_BELT_DRIVER"] != 0
+    ret.seatbeltUnlatched = cp.vl["RCM_Status"]["RCM_Status_IND_WARN_BELT_DRIVER"] != 0
 
     # Blindspot
-    ret.leftBlindspot = False
-    ret.rightBlindspot = False
+    # ret.leftBlindspot = False
+    # ret.rightBlindspot = False
 
     # AEB
     ret.stockAeb = cp_cam.vl["ACM_AebRequest"]["ACM_EnableRequest"] != 0
 
     # Messages needed by carcontroller
     self.acm_lka_hba_cmd = copy.copy(cp_cam.vl["ACM_lkaHbaCmd"])
-    self.epas_system_status_cmd = copy.copy(cp.vl["EPAS_SystemStatus"])
-    self.acm_status_cmd = copy.copy(cp_adas.vl["ACM_Status"])
 
     return ret
 
@@ -103,7 +97,6 @@ class CarState(CarStateBase):
   def get_adas_can_parser(CP):
     messages = [
       ("IndicatorLights", 10),
-      ("ACM_Status", 100),
     ]
 
     return CANParser(DBC[CP.carFingerprint]['pt'], messages, 1)

@@ -64,6 +64,10 @@ def create_longitudinal(packer, frame, accel, enabled):
   values["ACM_longitudinalRequest_Checksum"] = checksum(data[1:], 0x1D, 0x12)
   return packer.make_can_msg("ACM_longitudinalRequest", 0, values)
 
+#################################################################
+######################### ↓ NOT USED ↓ ##########################
+#################################################################
+
 def create_epas_system_status(packer, epas_system_status_cmd, enabled):
   values = {s: epas_system_status_cmd[s] for s in [
     "EPAS_SytemStatus_Checksum",
@@ -88,9 +92,6 @@ def create_epas_system_status(packer, epas_system_status_cmd, enabled):
   values["EPAS_SytemStatus_Checksum"] = checksum(data[1:], 0x1D, 0x1E)
   return packer.make_can_msg("EPAS_SystemStatus", 2, values)
 
-#################################################################
-######################### ↓ NOT USED ↓ ##########################
-#################################################################
 
 def create_angle_steering(packer, frame, angle, active):
   values = {
