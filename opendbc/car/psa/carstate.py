@@ -32,7 +32,7 @@ class CarState(CarStateBase):
 
     # gas
     ret.gas = cp_main.vl['DRIVER']['GAS_PEDAL'] / 99.5 # HS1
-    ret.gasPressed = ret.gas > 0  # TODO
+    ret.gasPressed = ret.gas > 0  # TODO find binary signal
 
     # brake
     #ret.brake = cp.vl['HS2_DYN_UCF_2CD']['AUTO_BRAKING_PRESSURE'] / 50.6 # HS2 alternative
@@ -44,11 +44,11 @@ class CarState(CarStateBase):
     ret.steeringAngleDeg = cp.vl['STEERING_ALT']['ANGLE'] # EPS
     ret.steeringRateDeg = cp.vl['STEERING_ALT']['RATE'] * cp.vl['STEERING_ALT']['RATE_SIGN']  # EPS: Rotation speed * rotation sign/direction
     ret.steeringTorque = cp.vl['STEERING']['DRIVER_TORQUE']
-    # ret.steeringTorqueEps = cp_main.vl['LANE_KEEP_ASSIST']['TORQUE']# TODO: check if correct
+    # ret.steeringTorqueEps = cp_main.vl['LANE_KEEP_ASSIST']['TORQUE']# TODO: find signal
     ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > CarControllerParams.STEER_DRIVER_ALLOWANCE, 5)  # TODO: adjust threshold
     ret.steerFaultTemporary = False  # TODO
     ret.steerFaultPermanent = False  # TODO
-    ret.espDisabled = False  # TODO
+    ret.espDisabled = False  # TODO found possible signal: LKAS_RELATED: ESP_STATUS
 
     # cruise
     # note: this is just for CC car not ACC right now

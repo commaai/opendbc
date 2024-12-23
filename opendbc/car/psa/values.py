@@ -11,16 +11,11 @@ Ecu = CarParams.Ecu
 class CarControllerParams:
   STEER_STEP = 1  # TODO: sync in panda, LANE_KEEP_ASSIST, 100Hz
 
-  STEER_MAX = 180.0  # Max angle for LKA
+  STEER_MAX = 360.0  # TODO: test >360°  - Max angle for LKA
   ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[10., 1.6, .3])
   ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[10., 7., 0.8])
-  LKAS_MAX_TORQUE = 100  # TODO: verify (max seen is 60, signal max is 2047...)
+  LKAS_MAX_TORQUE = 100  # not used in LCA TODO: verify (max seen is 60, signal max is 2047...)
   STEER_THRESHOLD = 25  # TODO: verify
-  # Torque based steering configs
-  # STEER_DRIVER_FACTOR = 1 # TODO: verify
-  # STEER_DRIVER_MULTIPLIER = 1 # TODO: verify
-  # STEER_DELTA_UP = 1  # TODO: verify
-  # STEER_DELTA_DOWN = 1  # TODO: verify
   STEER_DRIVER_ALLOWANCE = 10  # Driver intervention threshold
 
   def __init__(self, CP):
