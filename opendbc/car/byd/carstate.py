@@ -5,7 +5,7 @@ from opendbc.car.common.numpy_fast import mean
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.byd.values import DBC
-from opendbc.car import structs
+from opendbc.car import structs, Bus
 # from opendbc.car.byd.values import CAR, HUD_MULTIPLIER
 
 
@@ -30,8 +30,9 @@ class CarState(CarStateBase):
         self.pt5 = 0
         self.lkas_rdy_btn = False
 
-    def update(self, cp, cp_cam, *_) -> structs.CarState:
-        # ret = car.CarState.new_message()
+    def update(self, can_parsers) -> structs.CarState:
+        cp = can_parsers[Bus.pt]
+        cp_cam = can_parsers[Bus.cam]
         ret = structs.CarState()
 
         self.tsr = cp.vl["LKAS_HUD_ADAS"]['TSR']
