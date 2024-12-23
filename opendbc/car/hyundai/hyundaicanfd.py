@@ -142,6 +142,9 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
     msg_162[f] = 0
 
   # HIDE ALERTS
+  if msg_161.get("ALERTS_3") == 17:  # DRIVE_CAREFULLY
+    msg_161["ALERTS_3"] = 0
+
   if msg_161.get("ALERTS_5") == 2:  # WATCH_FOR_SURROUNDING_VEHICLES
     msg_161["ALERTS_5"] = 0
 
