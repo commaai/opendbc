@@ -11,7 +11,7 @@ Ecu = CarParams.Ecu
 class CarControllerParams:
   STEER_STEP = 1  # TODO: sync in panda, LANE_KEEP_ASSIST, 100Hz
 
-  STEER_MAX = 90.0  # Max angle for LKA
+  STEER_MAX = 180.0  # Max angle for LKA
   ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[10., 1.6, .3])
   ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[10., 7., 0.8])
   LKAS_MAX_TORQUE = 100  # TODO: verify (max seen is 60, signal max is 2047...)
