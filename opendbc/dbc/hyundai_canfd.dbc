@@ -694,8 +694,8 @@ BO_ 353 MSG_161: 32 CCNC
  SG_ LANE_ZOOM : 126|2@1+ (1,0) [0|3] "" XXX
  SG_ ALERTS_1 : 128|6@1+ (1,0) [0|63] "" XXX
  SG_ ALERTS_2 : 134|5@1+ (1,0) [0|3] "" XXX
- SG_ ALERTS_3 : 139|4@1+ (1,0) [0|15] "" XXX
- SG_ ALERTS_4 : 143|9@1+ (1,0) [0|511] "" XXX
+ SG_ ALERTS_3 : 139|5@1+ (1,0) [0|15] "" XXX
+ SG_ ALERTS_4 : 144|8@1+ (1,0) [0|511] "" XXX
  SG_ ALERTS_5 : 152|5@1+ (1,0) [0|7] "" XXX
  SG_ MUTE : 157|3@1+ (1,0) [0|7] "" XXX
  SG_ SOUNDS_1 : 160|4@1+ (1,0) [0|3] "" XXX
