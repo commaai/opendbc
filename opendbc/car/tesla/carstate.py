@@ -4,33 +4,47 @@ from opendbc.can.parser import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.tesla.values import CAR, DBC, CANBUS, GEAR_MAP, PLATFORM_3Y
+from opendbc.car.tesla.values import CAR, DBC, CANBUS, GEAR_MAP, PLATFORM_3Y, DOORS
 
 ButtonType = structs.CarState.ButtonEvent.Type
 
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    self.can_define = CANDefine(DBC[CP.carFingerprint][Bus.party])
+    self.can_define_party = CANDefine(DBC[CP.carFingerprint][Bus.party])
+    self.can_define_pt = CANDefine(DBC[CP.carFingerprint][Bus.pt])
+    self.can_define_chassis = CANDefine(DBC[CP.carFingerprint][Bus.chassis])
+    self.can_defines = {
+      **self.can_define_party.dv,
+      **self.can_define_pt.dv,
+      **self.can_define_chassis.dv,
+    }
+
+    # TODO: fix this in the car
+    CANBUS.chassis = 1
+    CANBUS.radar = 5
 
     self.hands_on_level = 0
     self.das_control = None
 
   def update(self, can_parsers) -> structs.CarState:
+    is_3Y = self.CP.carFingerprint in PLATFORM_3Y
+
     cp_party = can_parsers[Bus.party]
-    cp_ap_party = can_parsers[Bus.ap_party]
+    cp_ap = can_parsers[Bus.ap_party] if is_3Y else can_parsers[Bus.ap_pt]
     cp_pt = can_parsers[Bus.pt]
+    cp_chassis = can_parsers[Bus.chassis] if not is_3Y else None
     ret = structs.CarState()
 
     # Vehicle speed
-    if self.CP.carFingerprint in PLATFORM_3Y:
+    if is_3Y:
       ret.vEgoRaw = cp_party.vl["DI_speed"]["DI_vehicleSpeed"] * CV.KPH_TO_MS
     else:
       ret.vEgoRaw = cp_party.vl["ESP_private1"]["ESP_vehicleSpeed"] * CV.KPH_TO_MS
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
 
     # Gas pedal
-    if self.CP.carFingerprint in PLATFORM_3Y:
+    if is_3Y:
       pedal_status = cp_party.vl["DI_systemStatus"]["DI_accelPedalPos"]
     else:
       pedal_status = cp_pt.vl["DI_torque1"]["DI_pedalPos"]
@@ -40,32 +54,32 @@ class CarState(CarStateBase):
     # Brake pedal
     ret.brake = 0
 
-    if self.CP.carFingerprint in PLATFORM_3Y:
+    if is_3Y:
       ret.brakePressed = cp_party.vl["IBST_status"]["IBST_driverBrakeApply"] == 2
     else:
       ret.brakePressed = cp_party.vl["IBST_private2"]["IBST_brakePedalApplied"] == 1
 
     # Steering wheel
-    epas_name = "EPAS3S" if self.CP.carFingerprint in PLATFORM_3Y else "EPAS"
+    epas_name = "EPAS3S" if is_3Y else "EPAS"
     epas_status = cp_party.vl[f"{epas_name}_sysStatus"]
     self.hands_on_level = epas_status[f"{epas_name}_handsOnLevel"]
     ret.steeringAngleDeg = -epas_status[f"{epas_name}_internalSAS"]
-    if self.CP.carFingerprint in PLATFORM_3Y:
-      ret.steeringRateDeg = -cp_ap_party.vl["SCCM_steeringAngleSensor"]["SCCM_steeringAngleSpeed"]
+    if is_3Y:
+      ret.steeringRateDeg = -cp_ap.vl["SCCM_steeringAngleSensor"]["SCCM_steeringAngleSpeed"]
     else:
       ret.steeringRateDeg = -cp_party.vl["STW_ANGLHP_STAT"]["StW_AnglHP_Spd"]
     ret.steeringTorque = -epas_status[f"{epas_name}_torsionBarTorque"]
 
     ret.steeringPressed = self.hands_on_level > 0
-    eac_status = self.can_define.dv[f"{epas_name}_sysStatus"][f"{epas_name}_eacStatus"].get(int(epas_status[f"{epas_name}_eacStatus"]), None)
+    eac_status = self.can_defines[f"{epas_name}_sysStatus"][f"{epas_name}_eacStatus"].get(int(epas_status[f"{epas_name}_eacStatus"]), None)
     ret.steerFaultPermanent = eac_status == "EAC_FAULT"
     ret.steerFaultTemporary = eac_status == "EAC_INHIBITED"
 
     # Cruise state
-    di_state = cp_party.vl["DI_state"] if self.CP.carFingerprint in PLATFORM_3Y else cp_pt.vl["DI_state"]
-    # TODO: this needs a different can_define
-    cruise_state = self.can_define.dv["DI_state"]["DI_cruiseState"].get(int(di_state["DI_cruiseState"]), None)
-    speed_units = self.can_define.dv["DI_state"]["DI_speedUnits"].get(int(di_state["DI_speedUnits"]), None)
+    di_state = cp_party.vl["DI_state"] if is_3Y else cp_pt.vl["DI_state"]
+
+    cruise_state = self.can_defines["DI_state"]["DI_cruiseState"].get(int(di_state["DI_cruiseState"]), None)
+    speed_units = self.can_defines["DI_state"]["DI_speedUnits"].get(int(di_state["DI_speedUnits"]), None)
 
     ret.cruiseState.enabled = cruise_state in ("ENABLED", "STANDSTILL", "OVERRIDE", "PRE_FAULT", "PRE_CANCEL")
     if speed_units == "KPH":
@@ -77,29 +91,30 @@ class CarState(CarStateBase):
     ret.standstill = cruise_state == "STANDSTILL"
 
     # Gear
-    ret.gearShifter = GEAR_MAP[self.can_define.dv["DI_systemStatus"]["DI_gear"].get(int(cp_party.vl["DI_systemStatus"]["DI_gear"]), "DI_GEAR_INVALID")]
+    gear_msg = "DI_systemStatus" if is_3Y else "DI_torque2"
+    ret.gearShifter = GEAR_MAP[self.can_defines[gear_msg]["DI_gear"].get(int((cp_party if is_3Y else cp_pt).vl[gear_msg]["DI_gear"]), "DI_GEAR_INVALID")]
 
-    # Doors
-    ret.doorOpen = cp_party.vl["UI_warning"]["anyDoorOpen"] == 1
+    if is_3Y:
+      ret.doorOpen = cp_party.vl["UI_warning"]["anyDoorOpen"] == 1
+      ret.leftBlinker = cp_party.vl["UI_warning"]["leftBlinkerOn"] != 0
+      ret.rightBlinker = cp_party.vl["UI_warning"]["rightBlinkerOn"] != 0
+      ret.seatbeltUnlatched = cp_party.vl["UI_warning"]["buckleStatus"] != 1
+    else:
+      ret.doorOpen = any((self.can_defines["GTW_carState"][door].get(int(cp_chassis.vl["GTW_carState"][door]), "OPEN") == "OPEN") for door in DOORS)
+      ret.leftBlinker = cp_chassis.vl["GTW_carState"]["BC_indicatorLStatus"] == 1
+      ret.rightBlinker = cp_chassis.vl["GTW_carState"]["BC_indicatorRStatus"] == 1
+      ret.seatbeltUnlatched = cp_chassis.vl["DriverSeat"]["buckleStatus"] != 1
 
-    # Blinkers
-    ret.leftBlinker = cp_party.vl["UI_warning"]["leftBlinkerOn"] != 0
-    ret.rightBlinker = cp_party.vl["UI_warning"]["rightBlinkerOn"] != 0
-
-    # Seatbelt
-    ret.seatbeltUnlatched = cp_party.vl["UI_warning"]["buckleStatus"] != 1
-
-    # Blindspot
-    ret.leftBlindspot = cp_ap_party.vl["DAS_status"]["DAS_blindSpotRearLeft"] != 0
-    ret.rightBlindspot = cp_ap_party.vl["DAS_status"]["DAS_blindSpotRearRight"] != 0
+    ret.leftBlindspot = cp_ap.vl["DAS_status"]["DAS_blindSpotRearLeft"] != 0
+    ret.rightBlindspot = cp_ap.vl["DAS_status"]["DAS_blindSpotRearRight"] != 0
 
     # AEB
-    ret.stockAeb = cp_ap_party.vl["DAS_control"]["DAS_aebEvent"] == 1
+    ret.stockAeb = cp_ap.vl["DAS_control"]["DAS_aebEvent"] == 1
 
     # Buttons # ToDo: add Gap adjust button
 
     # Messages needed by carcontroller
-    self.das_control = copy.copy(cp_ap_party.vl["DAS_control"])
+    self.das_control = copy.copy(cp_ap.vl["DAS_control"])
 
     return ret
 
@@ -124,30 +139,37 @@ class CarState(CarStateBase):
         ("IBST_private2", 50),
       ]
 
-    ap_party_messages = [
+    ap_messages = [
       ("DAS_control", 25),
       ("DAS_status", 2),
     ]
 
-    parser = None
     if CP.carFingerprint in PLATFORM_3Y:
-      messages += [
+      party_messages += [
         ("SCCM_steeringAngleSensor", 100),
       ]
-      parser = CANParser(DBC[CP.carFingerprint][Bus.party], party_messages, CANBUS.autopilot_party)
+
+      parsers = {
+        Bus.party: CANParser(DBC[CP.carFingerprint][Bus.party], party_messages, CANBUS.party),
+        Bus.ap_party: CANParser(DBC[CP.carFingerprint][Bus.party], ap_messages, CANBUS.autopilot_party),
+      }
     elif CP.carFingerprint == CAR.TESLA_MODEL_S_RAVEN:
-      parser = CANParser(DBC[CP.carFingerprint][Bus.pt], party_messages, CANBUS.autopilot_powertrain)
-
-    parsers = {
-      Bus.party: parser,
-      Bus.ap_party: CANParser(DBC[CP.carFingerprint][Bus.party], ap_party_messages, CANBUS.autopilot_party),
-    }
-
-    if CP.carFingerprint == CAR.TESLA_MODEL_S_RAVEN:
       pt_messages = [
         ("DI_torque1", 100),
+        ("DI_torque2", 100),
         ("DI_state", 10),
       ]
-      parsers[Bus.pt] = CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CANBUS.powertrain),
+
+      chassis_messages = [
+        ("GTW_carState", 10),
+        ("DriverSeat", 20),
+      ]
+
+      parsers = {
+        Bus.party: CANParser(DBC[CP.carFingerprint][Bus.party], party_messages, CANBUS.party),
+        Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CANBUS.powertrain),
+        Bus.ap_pt: CANParser(DBC[CP.carFingerprint][Bus.pt], ap_messages, CANBUS.autopilot_powertrain),
+        Bus.chassis: CANParser(DBC[CP.carFingerprint][Bus.chassis], chassis_messages, CANBUS.chassis),
+      }
 
     return parsers
