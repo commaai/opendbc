@@ -3,7 +3,7 @@ from opendbc.can.packer import CANPacker
 from opendbc.car import Bus, apply_std_steer_angle_limits
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.tesla.teslacan import TeslaCAN
-from opendbc.car.tesla.values import CarControllerParams
+from opendbc.car.tesla.values import CarControllerParams, PLATFORM_3Y
 
 
 class CarController(CarControllerBase):
@@ -11,7 +11,7 @@ class CarController(CarControllerBase):
     super().__init__(dbc_names, CP)
     self.apply_angle_last = 0
     self.packer = CANPacker(dbc_names[Bus.party])
-    self.tesla_can = TeslaCAN(self.packer)
+    self.tesla_can = TeslaCAN(self.packer, is_3Y=CP.carFingerprint in PLATFORM_3Y)
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
