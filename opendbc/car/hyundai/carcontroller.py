@@ -1,7 +1,8 @@
 from opendbc.can.packer import CANPacker
-from opendbc.car import Bus, DT_CTRL, apply_driver_steer_torque_limits, common_fault_avoidance, make_tester_present_msg, structs
+from opendbc.car import Bus, DT_CTRL, apply_driver_steer_torque_limits, common_fault_avoidance, make_tester_present_msg, \
+  structs, apply_std_steer_angle_limits
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.common.numpy_fast import clip
+from opendbc.car.common.numpy_fast import clip, interp
 from opendbc.car.hyundai import hyundaicanfd, hyundaican
 from opendbc.car.hyundai.carstate import CarState
 from opendbc.car.hyundai.hyundaicanfd import CanBus
@@ -83,6 +84,27 @@ class CarController(CarControllerBase):
     self.angle_limit_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringAngleDeg) >= MAX_ANGLE, CC.latActive,
                                                                        self.angle_limit_counter, MAX_ANGLE_FRAMES,
                                                                        MAX_ANGLE_CONSECUTIVE_FRAMES)
+
+    self.apply_angle_now = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last,
+                                                        CS.out.vEgoRaw,
+                                                        self.params)
+
+    self.lkas_max_torque = 200
+    if abs(CS.out.steeringTorque) > 200:
+      self.driver_steering_angle_above_timer -= 1
+      if self.driver_steering_angle_above_timer <= 30:
+        self.driver_steering_angle_above_timer = 30
+    else:
+      self.driver_steering_angle_above_timer += 1
+      if self.driver_steering_angle_above_timer >= 150:
+        self.driver_steering_angle_above_timer = 150
+
+    ego_weight = interp(CS.out.vEgo, [0, 5, 10, 20], [0.2, 0.3, 0.5, 1.0])
+
+    if 0 <= self.driver_steering_angle_above_timer < 150:
+      self.lkas_max_torque = int(round(lkas_max_torque * (self.driver_steering_angle_above_timer / 150) * ego_weight))
+    else:
+      self.lkas_max_torque = lkas_max_torque * ego_weight
 
     if not CC.latActive:
       apply_steer = 0
