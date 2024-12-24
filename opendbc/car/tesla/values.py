@@ -78,6 +78,7 @@ class CANBUS:
   chassis = 5
   autopilot_powertrain = 6
 
+DOORS = ["DOOR_STATE_FL", "DOOR_STATE_FR", "DOOR_STATE_RL", "DOOR_STATE_RR", "DOOR_STATE_FrontTrunk", "BOOT_STATE"]
 
 GEAR_MAP = {
   "DI_GEAR_INVALID": CarState.GearShifter.unknown,
