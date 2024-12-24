@@ -15,7 +15,7 @@ class CarInterface(CarInterfaceBase):
 
     ret.radarUnavailable = True
     ret.steerControlType = structs.CarParams.SteerControlType.angle # TODO: check angle or torque controlled
-    ret.steerActuatorDelay = 0.2  # TODO: not measured
+    ret.steerActuatorDelay = 0.1  # measured
     ret.steerLimitTimer = 1.0
 
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.psa)]
