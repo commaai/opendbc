@@ -1,7 +1,7 @@
 from opendbc.car import CanBusBase
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.numpy_fast import clip
-from opendbc.car.hyundai.values import HyundaiFlags, CAR
+from opendbc.car.hyundai.values import HyundaiFlags
 
 
 class CanBus(CanBusBase):
@@ -178,13 +178,11 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
   # OP LONG
   if CP.openpilotLongitudinalControl:
 
-    setspeed_factor = 1 if CS.is_metric and CP.carFingerprint in (CAR.KIA_SORENTO_2024,) else CV.KPH_TO_MPH
-
     # SETSPEED, DISTANCE
     msg_161.update({
       "SETSPEED": 3 if enabled else 1,
       "SETSPEED_HUD": 2 if enabled else 1,
-      "SETSPEED_SPEED": 25 if (s := round(CS.out.vCruiseCluster * setspeed_factor)) > 100 else s,
+      "SETSPEED_SPEED": 25 if (s := round(CS.out.vCruiseCluster * (1 if CS.is_metric else CV.KPH_TO_MPH))) > 100 else s,
       "DISTANCE": hud.leadDistanceBars,
       "DISTANCE_SPACING": 1 if enabled else 0,
       "DISTANCE_LEAD": 2 if enabled and hud.leadVisible else 1 if enabled else 0,
