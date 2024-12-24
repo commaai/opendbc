@@ -60,6 +60,7 @@ def create_longitudinal(packer, frame, accel, enabled):
     "ACM_longInterfaceEnable": 1 if enabled else 0,
     "ACM_AccelerationRequestType": 0,
   }
+
   data = packer.make_can_msg("ACM_longitudinalRequest", 0, values)[1]
   values["ACM_longitudinalRequest_Checksum"] = checksum(data[1:], 0x1D, 0x12)
   return packer.make_can_msg("ACM_longitudinalRequest", 0, values)

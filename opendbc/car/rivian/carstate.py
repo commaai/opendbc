@@ -3,10 +3,12 @@ from opendbc.can.parser import CANParser
 from opendbc.car import structs
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.rivian.values import DBC, GEAR_MAP
+from opendbc.car.common.conversions import Conversions as CV
 
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
+    self.last_speed = 30
 
     # Needed by carcontroller
     self.acm_lka_hba_cmd = None
@@ -37,10 +39,12 @@ class CarState(CarStateBase):
     ret.steerFaultTemporary = cp.vl["EPAS_AdasStatus"]["EPAS_EacErrorCode"] != 0
 
     # Cruise state
+    speed = min(int(cp_adas.vl["ACM_tsrCmd"]["ACM_tsrSpdDisClsMain"]), 85)
+    self.last_speed = speed if speed != 0 else self.last_speed
     ret.cruiseState.enabled = cp_cam.vl["ACM_Status"]["ACM_FeatureStatus"] != 0
-    ret.cruiseState.speed = 15 # cp.vl["ESPiB1"]["ESPiB1_VehicleSpeed"]
+    ret.cruiseState.speed = self.last_speed * CV.MPH_TO_MS  # detected speed limit
     ret.cruiseState.available = True # cp.vl["VDM_AdasSts"]["VDM_AdasInterfaceStatus"] == 1
-    ret.cruiseState.standstill = False
+    ret.cruiseState.standstill = cp.vl["VDM_AdasSts"]["VDM_AdasAccelRequestAcknowledged"]
 
     # Gear
     ret.gearShifter = GEAR_MAP[int(cp.vl["VDM_PropStatus"]["VDM_Prndl_Status"])]
@@ -97,6 +101,7 @@ class CarState(CarStateBase):
   def get_adas_can_parser(CP):
     messages = [
       ("IndicatorLights", 10),
+      ("ACM_tsrCmd", 10),
     ]
 
     return CANParser(DBC[CP.carFingerprint]['pt'], messages, 1)
