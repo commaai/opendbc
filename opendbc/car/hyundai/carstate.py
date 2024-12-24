@@ -220,9 +220,6 @@ class CarState(CarStateBase):
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.standstill = ret.wheelSpeeds.fl <= STANDSTILL_THRESHOLD and ret.wheelSpeeds.rr <= STANDSTILL_THRESHOLD
 
-    if self.is_metric and self.CP.carFingerprint in (CAR.KIA_SORENTO_2024,):
-      ret.vEgoCluster = ret.vEgo * CV.MPH_TO_KPH
-
     ret.steeringRateDeg = cp.vl["STEERING_SENSORS"]["STEERING_RATE"]
     ret.steeringAngleDeg = cp.vl["STEERING_SENSORS"]["STEERING_ANGLE"] * -1
     ret.steeringTorque = cp.vl["MDPS"]["STEERING_COL_TORQUE"]
