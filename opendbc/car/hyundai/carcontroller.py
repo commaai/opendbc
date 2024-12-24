@@ -104,7 +104,7 @@ class CarController(CarControllerBase):
     if 0 <= self.driver_steering_angle_above_timer < 150:
       self.lkas_max_torque = int(round(self.lkas_max_torque * (self.driver_steering_angle_above_timer / 150) * ego_weight))
     else:
-      self.lkas_max_torque = lkas_max_torque * ego_weight
+      self.lkas_max_torque = self.lkas_max_torque * ego_weight
 
     if not CC.latActive:
       apply_steer = 0
