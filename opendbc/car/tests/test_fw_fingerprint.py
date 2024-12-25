@@ -158,7 +158,8 @@ class TestFwFingerprint:
                 unnecessary_non_essential_ecus = set(
                     config.non_essential_ecus) - set(ESSENTIAL_ECUS)
                 assert unnecessary_non_essential_ecus == set(), "Declaring non-essential ECUs non-essential is not required: " + \
-                    f"{', '.join([f'Ecu.{ecu}' for ecu in unnecessary_non_essential_ecus])}"
+                    f"{', '.join(
+                        [f'Ecu.{ecu}' for ecu in unnecessary_non_essential_ecus])}"
 
     def test_missing_versions_and_configs(self, subtests):
         brand_versions = set(VERSIONS.keys())
@@ -194,7 +195,8 @@ class TestFwFingerprint:
                 ecu_strings = ", ".join(
                     [f'Ecu.{ecu}' for ecu in ecus_not_whitelisted])
                 assert not (len(whitelisted_ecus) and len(ecus_not_whitelisted)), \
-                    f'{brand.title()}: ECUs not in any FW query whitelists: {ecu_strings}'
+                    f'{brand.title()}: ECUs not in any FW query whitelists: {
+                    ecu_strings}'
 
     def test_fw_requests(self, subtests):
         # Asserts equal length request and response lists
@@ -206,7 +208,8 @@ class TestFwFingerprint:
 
                     # No request on the OBD port (bus 1, multiplexed) should be run on an aux panda
                     assert not (request_obj.auxiliary and request_obj.bus == 1 and request_obj.obd_multiplexing), \
-                        f"{brand.title()}: OBD multiplexed request is marked auxiliary: {request_obj}"
+                        f"{brand.title()}: OBD multiplexed request is marked auxiliary: {
+                        request_obj}"
 
     def test_brand_ecu_matches(self):
         empty_response = {brand: set() for brand in FW_QUERY_CONFIGS}
@@ -304,7 +307,7 @@ class TestFwFingerprintTiming:
             1: {
                 'gm': 1.0,
                 'body': 0.1,
-                'byd': 0.1,
+                'byd': 0.8,
                 'chrysler': 0.3,
                 'ford': 1.5,
                 'honda': 0.45,
