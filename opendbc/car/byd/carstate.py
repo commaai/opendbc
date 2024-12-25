@@ -37,7 +37,7 @@ class CarState(CarStateBase):
 
         self.tsr = cp.vl["LKAS_HUD_ADAS"]['TSR']
         self.lka_on = cp.vl["LKAS_HUD_ADAS"]['STEER_ACTIVE_ACTIVE_LOW']
-        # self.lkas_rdy_btn = cp_cam.vl["PCM_BUTTONS"]['LKAS_ON_BTN']
+        self.lkas_rdy_btn = cp_cam.vl["PCM_BUTTONS"]['LKAS_ON_BTN']
         self.abh = cp.vl["LKAS_HUD_ADAS"]['SET_ME_XFF']
         self.passthrough = cp.vl["LKAS_HUD_ADAS"]['SET_ME_X5F']
         self.HMA = cp.vl["LKAS_HUD_ADAS"]['HMA']
