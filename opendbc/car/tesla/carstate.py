@@ -1,7 +1,7 @@
 import copy
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
-from opendbc.car import Bus, structs
+from opendbc.car import Bus, CanSignalRateCalculator, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.tesla.values import CAR, DBC, CANBUS, GEAR_MAP, PLATFORM_3Y, DOORS
@@ -20,12 +20,14 @@ class CarState(CarStateBase):
       **self.can_define_chassis.dv,
     }
 
-    # TODO: fix this in the car
-    CANBUS.chassis = 1
-    CANBUS.radar = 5
+    if self.CP.carFingerprint not in PLATFORM_3Y:
+      # TODO: this should be swapped on the harnesses
+      CANBUS.chassis = 1
+      CANBUS.radar = 5
 
     self.hands_on_level = 0
     self.das_control = None
+    self.angle_rate_calulator = CanSignalRateCalculator(100)
 
   def update(self, can_parsers) -> structs.CarState:
     is_3Y = self.CP.carFingerprint in PLATFORM_3Y
@@ -64,10 +66,7 @@ class CarState(CarStateBase):
     epas_status = cp_party.vl[f"{epas_name}_sysStatus"]
     self.hands_on_level = epas_status[f"{epas_name}_handsOnLevel"]
     ret.steeringAngleDeg = -epas_status[f"{epas_name}_internalSAS"]
-    if is_3Y:
-      ret.steeringRateDeg = -cp_ap.vl["SCCM_steeringAngleSensor"]["SCCM_steeringAngleSpeed"]
-    else:
-      ret.steeringRateDeg = -cp_party.vl["STW_ANGLHP_STAT"]["StW_AnglHP_Spd"]
+    ret.steeringRateDeg = self.angle_rate_calulator.update(ret.steeringAngleDeg, epas_status[f"{epas_name}_sysStatusCounter"]) 
     ret.steeringTorque = -epas_status[f"{epas_name}_torsionBarTorque"]
 
     ret.steeringPressed = self.hands_on_level > 0
@@ -122,6 +121,11 @@ class CarState(CarStateBase):
   @staticmethod
   def get_can_parsers(CP):
     party_messages = []
+    ap_messages = [
+      ("DAS_control", 25),
+      ("DAS_status", 2),
+    ]
+
     if CP.carFingerprint in PLATFORM_3Y:
       party_messages += [
         ("DI_speed", 50),
@@ -134,22 +138,12 @@ class CarState(CarStateBase):
     elif CP.carFingerprint == CAR.TESLA_MODEL_S_RAVEN:
       # TODO: verify frequencies
       party_messages += [
-        ("STW_ANGLHP_STAT", 100),
         ("EPAS_sysStatus", 100),
         ("ESP_private1", 50),
         ("IBST_private2", 50),
       ]
 
-    ap_messages = [
-      ("DAS_control", 25),
-      ("DAS_status", 2),
-    ]
-
     if CP.carFingerprint in PLATFORM_3Y:
-      party_messages += [
-        ("SCCM_steeringAngleSensor", 100),
-      ]
-
       parsers = {
         Bus.party: CANParser(DBC[CP.carFingerprint][Bus.party], party_messages, CANBUS.party),
         Bus.ap_party: CANParser(DBC[CP.carFingerprint][Bus.party], ap_messages, CANBUS.autopilot_party),
