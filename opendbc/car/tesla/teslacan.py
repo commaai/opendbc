@@ -38,7 +38,7 @@ class TeslaCAN:
       "DAS_controlChecksum": 0,
     }
 
-    bus = CANBUS.party if self.is_3Y else CANBUS.pt
+    bus = CANBUS.party if self.is_3Y else CANBUS.powertrain
     data = self.packer.make_can_msg("DAS_control", bus, values)[1]
     values["DAS_controlChecksum"] = self.checksum(0x2b9, data[:7])
     return self.packer.make_can_msg("DAS_control", bus, values)
