@@ -14,7 +14,7 @@ class CarInterface(CarInterfaceBase):
     ret.dashcamOnly = False
 
     ret.radarUnavailable = True
-    ret.steerControlType = structs.CarParams.SteerControlType.angle # TODO: check angle or torque controlled
+    ret.steerControlType = structs.CarParams.SteerControlType.angle
     ret.steerActuatorDelay = 0.1  # measured
     ret.steerLimitTimer = 1.0
 
@@ -23,7 +23,7 @@ class CarInterface(CarInterfaceBase):
     if not docs:
       ret.transmissionType = TransmissionType.automatic # TODO: implement manual
       ret.minEnableSpeed = 30 * CV.KPH_TO_MS  # 19 mph, TODO: 40kph/25mph for non-ACC variants
-    ret.minSteerSpeed = 0.  # TODO: verify
+    ret.minSteerSpeed = 0.
 
     ret.autoResumeSng = ret.minEnableSpeed == -1 # TODO: check
     ret.centerToFront = ret.wheelbase * 0.44  # TODO: verify
