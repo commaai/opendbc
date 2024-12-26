@@ -8,7 +8,7 @@ class TeslaCAN:
   def __init__(self, dbc_names, is_3Y):
     self.is_3Y = is_3Y
     self.packers = {CANBUS.party: CANPacker(dbc_names[Bus.party])}
-    if self.is_3Y:
+    if not self.is_3Y:
       self.packers[CANBUS.powertrain] = CANPacker(dbc_names[Bus.pt])
 
   @staticmethod
