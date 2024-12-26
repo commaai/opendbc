@@ -26,9 +26,7 @@ class CarInterface(CarInterfaceBase):
     ret.steerLimitTimer = 1.0
     ret.steerActuatorDelay = 0.25
     ret.steerControlType = structs.CarParams.SteerControlType.angle
-
-    # TODO: remove after adding back the radar parser
-    ret.radarUnavailable = True
+    ret.radarUnavailable = candidate in PLATFORM_3Y
 
     ret.experimentalLongitudinalAvailable = True
     if experimental_long:
