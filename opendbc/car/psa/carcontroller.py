@@ -1,12 +1,9 @@
-from opendbc.car import structs
+from opendbc.car import structs, apply_std_steer_angle_limits, Bus
 from opendbc.can.packer import CANPacker
 from opendbc.car.common.numpy_fast import clip
-from opendbc.car import apply_std_steer_angle_limits, Bus
-from opendbc.car.interfaces  import CarControllerBase
+from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.psa import psacan
 from opendbc.car.psa.values import CarControllerParams
-
-GearShifter = structs.CarState.GearShifter
 
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
@@ -43,9 +40,7 @@ class CarController(CarControllerBase):
 
     ### cruise buttons ###
     # TODO: find cruise buttons msg
-
     new_actuators = actuators.as_builder()
     new_actuators.steeringAngleDeg = self.apply_angle_last
-
     self.frame += 1
     return new_actuators, can_sends
