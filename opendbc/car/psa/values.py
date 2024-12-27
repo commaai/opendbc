@@ -7,7 +7,6 @@ from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
 
-
 class CarControllerParams:
   STEER_STEP = 1  # TODO: sync in panda, LANE_KEEP_ASSIST, 100Hz
 
@@ -30,7 +29,6 @@ class PSACarSpecs(CarSpecs):
 class PSACarDocs(CarDocs):
   package: str = "Adaptive Cruise Control (ACC) & Lane Assist"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.psa_a]))
-
 
 @dataclass
 class PSAPlatformConfig(PlatformConfig):
