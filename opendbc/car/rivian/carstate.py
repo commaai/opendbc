@@ -39,12 +39,12 @@ class CarState(CarStateBase):
     ret.steerFaultTemporary = cp.vl["EPAS_AdasStatus"]["EPAS_EacErrorCode"] != 0
 
     # Cruise state
-    speed = min(int(cp_adas.vl["ACM_tsrCmd"]["ACM_tsrSpdDisClsMain"]), 85)
-    self.last_speed = speed if speed != 0 else self.last_speed
+    # speed = min(int(cp_adas.vl["ACM_tsrCmd"]["ACM_tsrSpdDisClsMain"]), 85)
+    # self.last_speed = speed if speed != 0 else self.last_speed
     ret.cruiseState.enabled = cp_cam.vl["ACM_Status"]["ACM_FeatureStatus"] == 1
-    ret.cruiseState.speed = self.last_speed * CV.MPH_TO_MS  # detected speed limit
+    ret.cruiseState.speed = 15 # self.last_speed * CV.MPH_TO_MS  # detected speed limit
     ret.cruiseState.available = True # cp.vl["VDM_AdasSts"]["VDM_AdasInterfaceStatus"] == 1
-    ret.cruiseState.standstill = cp.vl["VDM_AdasSts"]["VDM_AdasAccelRequestAcknowledged"]
+    ret.cruiseState.standstill = False # cp.vl["VDM_AdasSts"]["VDM_AdasAccelRequestAcknowledged"]
 
     # Gear
     ret.gearShifter = GEAR_MAP[int(cp.vl["VDM_PropStatus"]["VDM_Prndl_Status"])]
@@ -101,7 +101,7 @@ class CarState(CarStateBase):
   def get_adas_can_parser(CP):
     messages = [
       ("IndicatorLights", 10),
-      ("ACM_tsrCmd", 10),
+      # ("ACM_tsrCmd", 10),
     ]
 
     return CANParser(DBC[CP.carFingerprint]['pt'], messages, 1)
