@@ -52,7 +52,7 @@ class CarState(CarStateBase):
     ret.espDisabled = False  # TODO found possible signal: LKAS_RELATED: ESP_STATUS
 
     # cruise
-    # note: this is just for CC car not ACC right now
+    # note: this is just for ACC car not CC right now
     ret.cruiseState.speed = cp_adas.vl['HS2_DAT_MDD_CMD_452']['CONS_LIM_VITESSE_VEH'] * CV.KPH_TO_MS # HS2, set to 255 when ACC is off
     ret.cruiseState.enabled = cp_adas.vl['HS2_DAT_MDD_CMD_452']['DDE_ACTIVATION_RVV_ACC'] == 1 # HS2
     ret.cruiseState.available = True  # TODO

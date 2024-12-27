@@ -14,8 +14,8 @@ class CarControllerParams:
   ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[10., 1.6, .3])
   ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[10., 7., 0.8])
   LKAS_MAX_TORQUE = 100  # not used in LCA TODO: verify (max seen is 60, signal max is 2047...)
-  STEER_THRESHOLD = 25  # TODO: verify
-  STEER_DRIVER_ALLOWANCE = 10  # Driver intervention threshold, Nm/10
+  STEER_THRESHOLD = 25  # TODO: likly unused due to angle based steering
+  STEER_DRIVER_ALLOWANCE = 10  # Driver intervention threshold, 1 Nm
 
   def __init__(self, CP):
     pass
