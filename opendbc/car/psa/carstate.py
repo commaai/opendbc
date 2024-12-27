@@ -13,6 +13,7 @@ class CarState(CarStateBase):
     super().__init__(CP)
 
   def update(self, can_parsers) -> structs.CarState:
+    # TODO: swap CAN 0/2 on harness
     cp = can_parsers[Bus.pt]
     cp_adas = can_parsers[Bus.adas]
     cp_main = can_parsers[Bus.main]
