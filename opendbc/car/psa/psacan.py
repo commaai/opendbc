@@ -18,13 +18,8 @@ class CanBus(CanBusBase):
     return self.offset + 2
 
 def calculate_checksum(dat: bytearray) -> int:
-    checksum = 0
-    for i, b in enumerate(dat):
-        high_nibble = b >> 4
-        low_nibble = b & 0xF
-        checksum += high_nibble + low_nibble
-    needed = (11 - checksum) & 0xF
-    return needed
+    checksum = sum((b >> 4) + (b & 0xF) for b in dat)
+    return (11 - checksum) & 0xF
 
 def create_lka_msg(packer, CP, apply_angle: float, frame: int, lat_active: bool, ramp_value: int):
     values = {
