@@ -36,7 +36,7 @@ class CarState(CarStateBase):
     ret.gasPressed = ret.gas > 0  # TODO find binary signal
 
     # brake
-    #ret.brake = cp.vl['HS2_DYN_UCF_2CD']['AUTO_BRAKING_PRESSURE'] / 50.6 # HS2 alternative
+    # ret.brake = cp.vl['HS2_DYN_UCF_2CD']['AUTO_BRAKING_PRESSURE'] / 50.6 # HS2 alternative
     ret.brake = cp.vl['Dyn2_FRE']['BRAKE_PRESSURE'] / 1500.  # HS1
     ret.brakePressed = bool(cp_main.vl['Dat_BSI']['P013_MainBrake']) # HS1
     ret.parkingBrake = False # TODO bool(cp_main.vl['Dat_BSI']['PARKING_BRAKE']) is wrong signal
@@ -65,9 +65,9 @@ class CarState(CarStateBase):
     if self.CP.transmissionType == TransmissionType.manual:
       ret.clutchPressed = bool(cp.vl['Dyn2_CMM']['P091_ConvCD_stDebVal']) # HS1
     if bool(cp_main.vl['Dat_BSI']['P103_Com_bRevGear']): # HS1
-        ret.gearShifter = GearShifter.reverse
+      ret.gearShifter = GearShifter.reverse
     else:
-        ret.gearShifter = GearShifter.drive
+      ret.gearShifter = GearShifter.drive
 
     # TODO: safety
     ret.stockFcw = False

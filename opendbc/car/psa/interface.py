@@ -1,11 +1,10 @@
 from opendbc.car import structs
-from opendbc.car.common.conversions  import Conversions as CV
+from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car import get_safety_config
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.psa.values import CAR
 
 TransmissionType = structs.CarParams.TransmissionType
-
 
 class CarInterface(CarInterfaceBase):
   @staticmethod
