@@ -2,7 +2,7 @@ from opendbc.can.packer import CANPacker
 from opendbc.car import apply_driver_steer_torque_limits, structs
 from opendbc.car.byd import bydcan
 import numpy as np
-from opendbc.car.byd.values import CarControllerParams
+from opendbc.car.byd.values import CarControllerParams, DBC
 from opendbc.car.interfaces import CarControllerBase
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
@@ -19,7 +19,7 @@ class CarController(CarControllerBase):
     def __init__(self, dbc_name, CP):
         super().__init__(dbc_name, CP)
 
-        self.packer = CANPacker(dbc_name)
+        self.packer = CANPacker(DBC[self.CP.carFingerprint]['pt'])
         self.params = CarControllerParams(self.CP)
 
         self.last_steer_frame = 0
