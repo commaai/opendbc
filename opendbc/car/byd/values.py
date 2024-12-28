@@ -6,6 +6,8 @@ from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 from opendbc.car.docs_definitions import CarDocs, CarParts, CarHarness, SupportType
 from dataclasses import dataclass, field
 
+HUD_MULTIPLIER = 0.718
+
 Ecu = CarParams.Ecu
 Button = namedtuple('Button', ['event_type', 'can_addr', 'can_msg', 'values'])
 
@@ -98,5 +100,23 @@ BUTTONS = [
     Button(structs.CarState.ButtonEvent.Type.cancel,
            "PCM_BUTTONS", "BTN_AccCancel", [0x01]),
 ]
+
+# QZWF GR
+FW_QUERY_CONFIG = FwQueryConfig(
+    requests=[
+        Request(
+            [StdQueries.UDS_VERSION_REQUEST],
+            [StdQueries.UDS_VERSION_RESPONSE],
+            bus=0,
+        ),
+    ],
+    extra_ecus=[
+        # All known ECUs translated from the DBC file
+        (Ecu.unknown, 0x1E2, None),
+        (Ecu.unknown, 0x32D, None),  # ACC_HUD_ADAS
+        (Ecu.unknown, 0x316, None),  # LKAS_HUD_ADAS
+        (Ecu.unknown, 0x11F, None),  # STEER Angle
+    ]
+)
 
 DBC = CAR.create_dbc_map()
