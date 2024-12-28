@@ -2,7 +2,6 @@ from collections import namedtuple
 
 from opendbc.car import DbcDict, PlatformConfig, Platforms, CarSpecs, structs, Bus
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarDocs
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 from opendbc.car.docs_definitions import CarDocs, CarParts, CarHarness, SupportType
 from dataclasses import dataclass, field
