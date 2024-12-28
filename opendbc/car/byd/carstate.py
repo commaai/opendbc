@@ -15,7 +15,7 @@ class CarState(CarStateBase):
     def __init__(self, CP):
         super().__init__(CP)
 
-        can_define = CANDefine(DBC[CP.carFingerprint]["pt"])
+        can_define = CANDefine(DBC[CP.carFingerprint]["byd_general_pt"])
         self.shifter_values = can_define.dv["DRIVE_STATE"]["GEAR"]
 
         self.acc_hud_adas_counter = 0
