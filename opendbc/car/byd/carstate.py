@@ -15,7 +15,7 @@ class CarState(CarStateBase):
         super().__init__(CP)
 
         can_define = CANDefine(DBC[CP.carFingerprint]["pt"])
-        self.shifter_values = can_define.dv["DRIVE_STATE"]["Gear"]
+        self.shifter_values = can_define.dv["DRIVE_STATE"]["GEAR"]
 
         self.acc_hud_adas_counter = 0
         self.acc_mpc_state_counter = 0
@@ -76,7 +76,7 @@ class CarState(CarStateBase):
         else:
             self.lkas_allowed_speed = True
 
-        can_gear = int(cp.vl["DRIVE_STATE"]["Gear"])
+        can_gear = int(cp.vl["DRIVE_STATE"]["GEAR"])
         ret.gearShifter = self.parse_gear_shifter(
             self.shifter_values.get(can_gear, None))
 
