@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 
-from opendbc.car import get_safety_config, structs, TransmissionType, STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness
+from opendbc.car import get_safety_config, structs, STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.byd.values import CAR, HUD_MULTIPLIER
 from opendbc.car.interfaces import CarInterfaceBase
 
 ButtonType = structs.CarState.ButtonEvent.Type
 GearShifter = structs.CarState.GearShifter
+
+TransmissionType = structs.CarParams.TransmissionType  # GR QZWF
 
 
 class CarInterface(CarInterfaceBase):
