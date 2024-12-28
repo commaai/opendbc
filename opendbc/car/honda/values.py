@@ -144,7 +144,7 @@ class CAR(Platforms):
       HondaCarDocs("Honda N-Box 2018", "All", min_steer_speed=5.),
     ],
     CarSpecs(mass=890., wheelbase=2.520, steerRatio=18.64),  # https://www.honda.co.jp/auto-archive/nbox/2019/ sterRatio is from liveParameters
-    dbc_dict('honda_nbox_2018_can_generated', None),
+    {Bus.pt: 'honda_nbox_2018_can_generated'},
   )
   HONDA_ACCORD = HondaBoschPlatformConfig(
     [
