@@ -1,7 +1,7 @@
 from opendbc.can.packer import CANPacker
 from opendbc.car import apply_driver_steer_torque_limits, structs
 from opendbc.car.byd import bydcan
-import numpy as np
+from opendbc.car.common.numpy_fast import clip
 from opendbc.car.byd.values import CarControllerParams, DBC
 from opendbc.car.interfaces import CarControllerBase
 
@@ -59,7 +59,7 @@ class CarController(CarControllerBase):
 
                     if self.steer_softstart_limit < CarControllerParams.STEER_MAX:
                         self.steer_softstart_limit = self.steer_softstart_limit + STEER_SOFTSTART_STEP
-                        new_steer = np.clip(
+                        new_steer = clip(
                             new_steer, -self.steer_softstart_limit, self.steer_softstart_limit)
 
                     apply_steer = apply_driver_steer_torque_limits(new_steer, self.apply_steer_last,
@@ -100,8 +100,8 @@ class CarController(CarControllerBase):
 
         accel = 0
         if (self.frame - self.last_acc_frame) >= ACC_STEP:
-            accel = np.clip(CC.actuators.accel, CarControllerParams.ACCEL_MIN,
-                            CarControllerParams.ACCEL_MAX)
+            accel = clip(CC.actuators.accel, CarControllerParams.ACCEL_MIN,
+                         CarControllerParams.ACCEL_MAX)
 
             self.last_acc_frame = self.frame
             can_sends.append(bydcan.acc_command(
