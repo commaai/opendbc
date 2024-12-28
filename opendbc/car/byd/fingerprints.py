@@ -50,6 +50,14 @@ FINGERPRINTS = {
         1215: 8, 1217: 8, 1246: 8, 1274: 8, 1278: 8, 1297: 8, 1319: 8, 1322: 8, 1542: 2, 1798: 3,
         1824: 8, 1832: 8
     }],
+
+}
+
+# Found this snippet in car/gm/fingerprint.py codes. This takes care of FW_VERSIONS
+FW_VERSIONS: dict[str, dict[tuple, list[bytes]]] = {
+}
+
+"""
     CAR.HAN_DM_20: [{
         85: 8, 140: 8, 213: 8, 269: 8, 287: 5, 289: 8, 290: 8, 291: 8, 301: 8, 303: 8, 307: 8,
         309: 8, 315: 8, 384: 8, 496: 8, 530: 8, 536: 8, 544: 8, 546: 8, 547: 8, 576: 8, 578: 8,
@@ -74,8 +82,4 @@ FINGERPRINTS = {
         1971: 8, 1973: 8, 1984: 8, 1986: 8, 1987: 8, 1991: 8, 1994: 8, 2002: 8, 2004: 8, 2006: 8,
         2012: 8, 2033: 8, 2034: 8, 2042: 8
     }],
-}
-
-# Found this snippet in car/gm/fingerprint.py codes. This takes care of FW_VERSIONS
-FW_VERSIONS: dict[str, dict[tuple, list[bytes]]] = {
-}
+    """

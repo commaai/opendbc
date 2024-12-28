@@ -16,7 +16,7 @@ class CarInterface(CarInterfaceBase):
         ret.safetyConfigs = [get_safety_config(
             structs.CarParams.SafetyModel.byd)]
 
-        ret.dashcamOnly = candidate not in (CAR.HAN_DM_20, CAR.HAN_EV_20)
+        ret.dashcamOnly = candidate not in (CAR.BYD_ATTO3)
 
         CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
