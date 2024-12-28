@@ -1,9 +1,11 @@
 from collections import namedtuple
 
-from opendbc.car import dbc_dict, PlatformConfig, Platforms, CarSpecs, structs
+from opendbc.car import DbcDict, PlatformConfig, Platforms, CarSpecs, structs, Bus
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarDocs
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
+from opendbc.car.docs_definitions import CarDocs, CarParts, CarHarness, SupportType
+from dataclasses import dataclass, field
 
 Ecu = CarParams.Ecu
 Button = namedtuple('Button', ['event_type', 'can_addr', 'can_msg', 'values'])
@@ -28,18 +30,32 @@ class CarControllerParams:
         pass
 
 
-class CAR(Platforms):
+@dataclass
+class BYDCarDocs(CarDocs):
+    package: str = "All"
+    car_parts: CarParts = field(
+        default_factory=CarParts.common([CarHarness.custom]))
 
-    BYD_ATTO3 = PlatformConfig(
+
+@ dataclass
+class BYDPlatformConfig(PlatformConfig):
+    dbc_dict: DbcDict = field(
+        default_factory=lambda: {Bus.pt: 'byd_general_pt'})
+
+
+class CAR(Platforms):
+    BYD_ATTO3 = BYDPlatformConfig(
         [
             # The year has to be 4 digits followed by hyphen and 4 digits
-            CarDocs("BYD ATTO3 Electric 2022-24",
-                    "ALL")
+            BYDCarDocs("BYD ATTO3 Electric 2022-24",
+                       support_type=SupportType.COMMUNITY)
         ],
         CarSpecs(mass=1750, wheelbase=2.72, steerRatio=14.8,
                  tireStiffnessFactor=0.7983),
-        dbc_dict('byd_general_pt', None),
     )
+
+
+"""
     HAN_DM_20 = PlatformConfig(
         [CarDocs("BYD HAN DM 20", "All")],
         CarSpecs(mass=2080., wheelbase=2.920, steerRatio=15.0,
@@ -51,7 +67,7 @@ class CAR(Platforms):
         CarSpecs(mass=2100., wheelbase=2.959, steerRatio=15.0),
         dbc_dict('byd_han_dm_2020', None),
     )
-
+"""
 
 FW_QUERY_CONFIG = FwQueryConfig(
     requests=[
