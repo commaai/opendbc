@@ -16,6 +16,7 @@ class CarState(CarStateBase):
         super().__init__(CP)
 
         can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
+
         self.shifter_values = can_define.dv["DRIVE_STATE"]["GEAR"]
 
         self.acc_hud_adas_counter = 0
@@ -57,6 +58,7 @@ class CarState(CarStateBase):
     def update(self, can_parsers) -> structs.CarState:
         cp = can_parsers[Bus.pt]
         cp_cam = can_parsers[Bus.cam]
+
         ret = structs.CarState()
 
         # self.distance_button = cp.vl["PCM_BUTTONS"]["BTN_AccDistanceIncrease"]
@@ -313,7 +315,7 @@ class CarState(CarStateBase):
             ("LKAS_HUD_ADAS", 10),
         ]
 
-        return CANParser(DBC[CP.carFingerprint]["pt"], messages, 0)
+        return {Bus.pt: CANParser(DBC[CP.carFingerprint]["pt"], messages, 0)}
 
     @staticmethod
     def get_cam_can_parser(CP):
@@ -323,4 +325,4 @@ class CarState(CarStateBase):
             ("ACC_MPC_STATE", 50),
         ]
 
-        return CANParser(DBC[CP.carFingerprint]["pt"], messages, 2)
+        return {Bus.cam: CANParser(DBC[CP.carFingerprint]["pt"], messages, 2)}
