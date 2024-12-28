@@ -1,77 +1,115 @@
 from opendbc.can.packer import CANPacker
-from opendbc.car.common.numpy_fast import clip
+from opendbc.car import apply_driver_steer_torque_limits, structs
 from opendbc.car.byd import bydcan
-from opendbc.car.byd.values import DBC, CarControllerParams
+from openpilot.common.numpy_fast import clip
+from opendbc.car.byd.values import CarControllerParams
 from opendbc.car.interfaces import CarControllerBase
 
+VisualAlert = structs.CarControl.HUDControl.VisualAlert
+ButtonType = structs.CarState.ButtonEvent.Type
 
-def apply_byd_steer_angle_limits(apply_angle, actual_angle, v_ego, LIMITS):
-    # pick angle rate limits based on wind up/down
-    steer_up = actual_angle * \
-        apply_angle >= 0. and abs(apply_angle) > abs(actual_angle)
-    rate_limits = LIMITS.ANGLE_RATE_LIMIT_UP if steer_up else LIMITS.ANGLE_RATE_LIMIT_DOWN
+STEER_STEP = 2  # 100/2=50hz
+ACC_STEP = 2  # 50hz
 
-    return clip(apply_angle, actual_angle - rate_limits, actual_angle + rate_limits)
+# 20ms(50Hz) * 200 / 6 = 666ms. This means the clip ceiling will be increased to 200 in 666ms
+STEER_SOFTSTART_STEP = 6
 
 
 class CarController(CarControllerBase):
     def __init__(self, dbc_name, CP):
         super().__init__(dbc_name, CP)
+
+        self.packer = CANPacker(dbc_name)
         self.params = CarControllerParams(self.CP)
-        self.packer = CANPacker(DBC[self.CP.carFingerprint]['pt'])
-        self.steer_rate_limited = False
-        self.lka_active = False
-        self.send_resume = False
-        self.resume_counter = 0
+
+        self.last_steer_frame = 0
+        self.last_acc_frame = 0
+
+        self.apply_steer_last = 0
+
+        self.mpc_lkas_counter = 0
+        self.mpc_acc_counter = 0
+        self.eps_fake318_counter = 0
+
+        self.lkas_req_prepare = 0
+        self.lkas_active = 0
+
+        self.steer_softstart_limit = 0
+
+        self.first_start = True
 
     def update(self, CC, CS, now_nanos):
-        # Send CAN Commands
         can_sends = []
 
-        actuators = CC.actuators
+        if (self.frame - self.last_steer_frame) >= STEER_STEP:
 
-        # steer
-        apply_angle = apply_byd_steer_angle_limits(
-            actuators.steeringAngleDeg, CS.out.steeringAngleDeg, CS.out.vEgo, self.params)
-        self.steer_rate_limited = (
-            abs(apply_angle - CS.out.steeringAngleDeg) > 2.5)
+            # Resolve counter mismatch problem
+            if self.first_start:
+                self.mpc_lkas_counter = CS.acc_mpc_state_counter
+                self.mpc_acc_counter = CS.acc_cmd_counter
+                self.eps_fake318_counter = CS.eps_state_counter
+                self.first_start = False
 
-        # BYD CAN controlled lateral running at 50hz
-        if (self.frame % 2) == 0:
+            apply_steer = 0
 
-            # logic to activate and deactivate lane keep, cannot tie to the lka_on state because it will occasionally deactivate itself
-            if CS.lka_on:
-                self.lka_active = True
-            if not CS.lka_on and CS.lkas_rdy_btn:
-                self.lka_active = False
+            if CC.latActive:
+                if self.lkas_active:
+                    new_steer = int(
+                        round(CC.actuators.steer * CarControllerParams.STEER_MAX))
 
-            if CS.out.steeringTorqueEps > 15:
-                apply_angle = CS.out.steeringAngleDeg
+                    if self.steer_softstart_limit < CarControllerParams.STEER_MAX:
+                        self.steer_softstart_limit = self.steer_softstart_limit + STEER_SOFTSTART_STEP
+                        new_steer = clip(
+                            new_steer, -self.steer_softstart_limit, self.steer_softstart_limit)
 
-            lat_active = CC.enabled and abs(
-                CS.out.steeringAngleDeg) < 90 and self.lka_active and not CS.out.standstill
-            # temporary hardcode 60 because if 90 degrees it will fault
-            # brake_hold = False
-            can_sends.append(bydcan.create_can_steer_command(
-                self.packer, apply_angle, lat_active, CS.out.standstill, (self.frame/2) % 16))
-#      can_sends.append(create_accel_command(self.packer, actuators.accel, enabled, brake_hold, (frame/2) % 16))
-            can_sends.append(bydcan.create_lkas_hud(self.packer, CC.enabled, CS.lss_state, CS.lss_alert, CS.tsr, CS.abh, CS.passthrough, CS.HMA, CS.pt2, CS.pt3,
-                                                    CS.pt4, CS.pt5, self.lka_active, self.frame % 16))
+                    apply_steer = apply_driver_steer_torque_limits(new_steer, self.apply_steer_last,
+                                                                   CS.out.steeringTorque, CarControllerParams)
 
-        # frequency doesn't matter (original 20hz), but the counter must match + 1 else it will fault
-        if (CS.out.standstill or CS.out.cruiseState.standstill) and CC.enabled and (self.frame % 50 == 0):
-            self.send_resume = True
+                else:
+                    if CS.lkas_prepared:
+                        self.lkas_active = 1
+                        self.lkas_req_prepare = 0
+                        self.steer_softstart_limit = 0
+                    else:
+                        self.lkas_req_prepare = 1
 
-        # send 3 consecutive resume command
-        if (self.frame % 10) == 0 and self.send_resume:
-            if self.resume_counter >= 2:
-                self.send_resume = False
-                self.resume_counter = 0
-            can_sends.append(bydcan.send_buttons(
-                self.packer, 1, (CS.counter_pcm_buttons + 1) % 16))
-            self.resume_counter += 1
+            else:
+                self.lkas_req_prepare = 0
+                self.lkas_active = 0
+                self.soft_start_torque_limit = 0
+                self.steer_softstart_limit = 0
 
-        new_actuators = actuators.as_builder()
-        new_actuators.steeringAngleDeg = apply_angle
+            self.apply_steer_last = apply_steer
 
+            self.mpc_lkas_counter = int(self.mpc_lkas_counter + 1) & 0xF
+            self.eps_fake318_counter = int(self.eps_fake318_counter + 1) & 0xF
+            self.last_steer_frame = self.frame
+
+            # send steering command, op to esc
+            can_sends.append(bydcan.create_steering_control(self.packer, self.CP, CS.cam_lkas,
+                                                            self.apply_steer_last, self.lkas_req_prepare, self.lkas_active, self.mpc_lkas_counter))
+
+            # send fake 318 from op to mpc
+            can_sends.append(bydcan.create_fake_318(self.packer, self.CP, CS.esc_eps,
+                                                    CS.mpc_laks_output, CS.mpc_laks_reqprepare, CS.mpc_laks_active,
+                                                    CC.latActive, self.eps_fake318_counter))
+
+        # handle wrap around // note not necessary for python 3 as int has no limit, good for lazy people
+        # if self.frame < self.last_acc_frame:
+        #  self.last_acc_frame = self.frame - 1
+
+        accel = 0
+        if (self.frame - self.last_acc_frame) >= ACC_STEP:
+            accel = clip(CC.actuators.accel, CarControllerParams.ACCEL_MIN,
+                         CarControllerParams.ACCEL_MAX)
+
+            self.last_acc_frame = self.frame
+            can_sends.append(bydcan.acc_command(
+                self.packer, self.CP, CS.cam_acc, accel, CC.enabled))
+
+        new_actuators = CC.actuators.as_builder()
+        new_actuators.steer = self.apply_steer_last / CarControllerParams.STEER_MAX
+        new_actuators.steerOutputCan = self.apply_steer_last
+
+        self.frame += 1
         return new_actuators, can_sends

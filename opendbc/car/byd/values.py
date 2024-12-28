@@ -1,23 +1,32 @@
-from dataclasses import dataclass, field
-from opendbc.car import CarSpecs, PlatformConfig, Platforms, DbcDict, Bus
-from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarDocs, CarParts, CarHarness, SupportType
-from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
+from collections import namedtuple
 
-HUD_MULTIPLIER = 0.718
+from opendbc.car import DbcDict, PlatformConfig, Platforms, CarSpecs, structs, Bus
+from opendbc.car.structs import CarParams
+from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
+from opendbc.car.docs_definitions import CarDocs, CarParts, CarHarness, SupportType
+from dataclasses import dataclass, field
 
 Ecu = CarParams.Ecu
-
-# MIN_ACC_SPEED = 19. * CV.MPH_TO_MS
-# PEDAL_TRANSITION = 10. * CV.MPH_TO_MS
+Button = namedtuple('Button', ['event_type', 'can_addr', 'can_msg', 'values'])
 
 
 class CarControllerParams:
+    STEER_MAX = 300
+    STEER_DELTA_UP = 17
+    STEER_DELTA_DOWN = 17
+
+    STEER_DRIVER_ALLOWANCE = 68
+    STEER_DRIVER_MULTIPLIER = 3
+    STEER_DRIVER_FACTOR = 1
+    STEER_ERROR_MAX = 50
+    # Steer torque clip = STEER_MAX - (DriverTorque - STEER_DRIVER_ALLOWANCE) * STEER_DRIVER_MULTIPLIER (Only work when DriverTorque > STEER_DRIVER_ALLOWANCE)
+    # So DriverTorque(max) = STEER_MAX / STEER_DRIVER_MULTIPLIER + STEER_DRIVER_ALLOWANCE = 300/3+68 = 168
+    # i.e. when drivertorque > 168, new_steer will be cliped to 0
+
+    STEER_STEP = 2  # 2=50 Hz
 
     def __init__(self, CP):
-        # maximum allow 150 degree per second, 100Hz loop means 1.5
-        self.ANGLE_RATE_LIMIT_UP = 3
-        self.ANGLE_RATE_LIMIT_DOWN = 3
+        pass
 
 
 @dataclass
@@ -45,25 +54,49 @@ class CAR(Platforms):
     )
 
 
-# QZWF GR
+"""
+    HAN_DM_20 = PlatformConfig(
+        [CarDocs("BYD HAN DM 20", "All")],
+        CarSpecs(mass=2080., wheelbase=2.920, steerRatio=15.0,
+                 centerToFrontRatio=0.44, tireStiffnessFactor=0.81),
+        dbc_dict('byd_han_dm_2020', None),
+    )
+    HAN_EV_20 = PlatformConfig(
+        [CarDocs("BYD HAN EV 20", "All")],
+        CarSpecs(mass=2100., wheelbase=2.959, steerRatio=15.0),
+        dbc_dict('byd_han_dm_2020', None),
+    )
+"""
+
 FW_QUERY_CONFIG = FwQueryConfig(
     requests=[
         Request(
-            [StdQueries.UDS_VERSION_REQUEST],
-            [StdQueries.UDS_VERSION_RESPONSE],
+            [StdQueries.MANUFACTURER_SOFTWARE_VERSION_REQUEST],
+            [StdQueries.MANUFACTURER_SOFTWARE_VERSION_RESPONSE],
             bus=0,
         ),
     ],
-    extra_ecus=[
-        # All known ECUs translated from the DBC file
-        (Ecu.unknown, 0x1E2, None),
-        (Ecu.unknown, 0x32D, None),  # ACC_HUD_ADAS
-        (Ecu.unknown, 0x316, None),  # LKAS_HUD_ADAS
-        (Ecu.unknown, 0x11F, None),  # STEER Angle
-    ]
 )
 
-# So the DBC files contain Decimal Address. This needs to be converted to Hexadecimal Address. This is all that FW_QUERY_CONFIG Is looking for in most cases
 
+class CanBus:
+    ESC = 0
+    MRR = 1
+    MPC = 2
+    LOOPBACK = 128
+
+
+BUTTONS = [
+    Button(structs.CarState.ButtonEvent.Type.leftBlinker,
+           "STALKS", "LeftIndicator", [0x01]),
+    Button(structs.CarState.ButtonEvent.Type.rightBlinker,
+           "STALKS", "RightIndicator", [0x01]),
+    Button(structs.CarState.ButtonEvent.Type.accelCruise,
+           "PCM_BUTTONS", "BTN_AccUpDown_Cmd", [0x02]),
+    Button(structs.CarState.ButtonEvent.Type.decelCruise,
+           "PCM_BUTTONS", "BTN_AccUpDown_Cmd", [0x03]),
+    Button(structs.CarState.ButtonEvent.Type.cancel,
+           "PCM_BUTTONS", "BTN_AccCancel", [0x01]),
+]
 
 DBC = CAR.create_dbc_map()
