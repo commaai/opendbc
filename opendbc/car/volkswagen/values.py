@@ -332,7 +332,7 @@ class CAR(Platforms):
   )
   VOLKSWAGEN_TIGUAN_MK2 = VolkswagenMQBPlatformConfig(
     [
-      VWCarDocs("Volkswagen Tiguan 2018-24"),
+      VWCarDocs("Volkswagen Tiguan 2018-23"),
       VWCarDocs("Volkswagen Tiguan eHybrid 2021-23"),
     ],
     VolkswagenCarSpecs(mass=1715, wheelbase=2.74),
