@@ -17,8 +17,4 @@ jobs:
     steps:
     - uses: commaai/timeout@v1
     - uses: actions/checkout@v4
-    - run: |
-        find /opt -name "re2.h"
-        find /usr -name "re2.h"
-        [[ $OSTYPE = "linux-gnu" ]] && sudo apt-get install -y --no-install-recommends libre2-dev || brew install re2 # TODO: move to container with re2 library built-in
-        ./test.sh
+    - run: ./test.sh
