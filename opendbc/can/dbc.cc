@@ -3,6 +3,7 @@
 #include <fstream>
 #include <map>
 #include <regex>
+#include <re2/re2.h>
 #include <set>
 #include <sstream>
 #include <vector>
@@ -14,11 +15,11 @@
 #include "opendbc/can/common.h"
 #include "opendbc/can/common_dbc.h"
 
-std::regex bo_regexp(R"(^BO_ (\w+) (\w+) *: (\w+) (\w+))");
+RE2 bo_regexp(R"(^BO_ (\w+) (\w+) *: (\w+) (\w+))");
 std::regex sg_regexp(R"(^SG_ (\w+) : (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*))");
 std::regex sgm_regexp(R"(^SG_ (\w+) (\w+) *: (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*))");
-std::regex val_regexp(R"(VAL_ (\w+) (\w+) (\s*[-+]?[0-9]+\s+\".+?\"[^;]*))");
-std::regex val_split_regexp{R"([\"]+)"};  // split on "
+RE2 val_regexp(R"(VAL_ (\w+) (\w+) (.*))");
+RE2 val_split_regexp(R"((([0-9]) \"(.+?)\"))");
 
 #define DBC_ASSERT(condition, message)                             \
   do {                                                             \
@@ -121,6 +122,7 @@ DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, Ch
 
   std::string line;
   int line_num = 0;
+  std::string match1, match2, match3;
   std::smatch match;
   // TODO: see if we can speed up the regex statements in this loop, SG_ is specifically the slowest
   while (std::getline(stream, line)) {
@@ -128,13 +130,13 @@ DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, Ch
     line_num += 1;
     if (startswith(line, "BO_ ")) {
       // new group
-      bool ret = std::regex_match(line, match, bo_regexp);
+      bool ret = RE2::FullMatch(line, bo_regexp, &match1, &match2, &match3);
       DBC_ASSERT(ret, "bad BO: " << line);
 
       Msg& msg = dbc->msgs.emplace_back();
-      address = msg.address = std::stoul(match[1].str());  // could be hex
-      msg.name = match[2].str();
-      msg.size = std::stoul(match[3].str());
+      address = msg.address = std::stoul(match1);  // could be hex
+      msg.name = match2;
+      msg.size = std::stoul(match3);
 
       // check for duplicates
       DBC_ASSERT(address_set.find(address) == address_set.end(), "Duplicate message address: " << address << " (" << msg.name << ")");
@@ -176,21 +178,23 @@ DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, Ch
       signal_name_sets[address].insert(sig.name);
     } else if (startswith(line, "VAL_ ")) {
       // new signal value/definition
-      bool ret = std::regex_search(line, match, val_regexp);
+      bool ret = RE2::FullMatch(line, val_regexp, &match1, &match2, &match3);
       DBC_ASSERT(ret, "bad VAL: " << line);
 
       auto& val = dbc->vals.emplace_back();
-      val.address = std::stoul(match[1].str());  // could be hex
-      val.name = match[2].str();
+      val.address = std::stoul(match1);  // could be hex
+      val.name = match2;
 
-      auto defvals = match[3].str();
-      std::sregex_token_iterator it{defvals.begin(), defvals.end(), val_split_regexp, -1};
+      auto defvals = match3;
       // convert strings to UPPER_CASE_WITH_UNDERSCORES
-      std::vector<std::string> words{it, {}};
-      for (auto& w : words) {
-        w = trim(w);
-        std::transform(w.begin(), w.end(), w.begin(), ::toupper);
-        std::replace(w.begin(), w.end(), ' ', '_');
+      std::vector<std::string> words;
+      std::string full_match, number, word;
+      while (RE2::PartialMatch(defvals, val_split_regexp, &full_match, &number, &word)) {
+        std::transform(word.begin(), word.end(), word.begin(), ::toupper);
+        std::replace(word.begin(), word.end(), ' ', '_');
+        word = trim(word);
+        words.push_back(number + " " + word);
+        defvals = defvals.substr(full_match.length(), defvals.length() - full_match.length());
       }
       // join string
       std::stringstream s;
