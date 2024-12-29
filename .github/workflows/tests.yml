@@ -17,4 +17,6 @@ jobs:
     steps:
     - uses: commaai/timeout@v1
     - uses: actions/checkout@v4
-    - run: ./test.sh
+    - run: |
+      apt-get install -y --no-install-recommends libre2-dev
+      ./test.sh
