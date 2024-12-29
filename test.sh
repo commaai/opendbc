@@ -20,7 +20,7 @@ RE2 x("");int main(void) {return 0;}
 ' > $DIR/.tmp/re2.c
 g++ -o $DIR/.tmp/re2.o $DIR/.tmp/re2.c -lre2 &>/dev/null || {
   echo "'re2' is not installed. Installing 're2'..."
-  [[ $OSTYPE = "linux-gnu" ]] && sudo apt-get install -y --no-install-recommends libre2-dev || brew install re2
+  [[ $OSTYPE = "linux-gnu" ]] && sudo apt-get install -y --no-install-recommends libre2-dev || brew install re2; find /opt/homebrew/ -name "re2.h"
 }
 rm -rf $DIR/.tmp
 
