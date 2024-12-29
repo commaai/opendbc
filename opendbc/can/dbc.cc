@@ -2,7 +2,6 @@
 #include <filesystem>
 #include <fstream>
 #include <map>
-#include <regex>
 #include <re2/re2.h>
 #include <set>
 #include <sstream>
@@ -16,8 +15,8 @@
 #include "opendbc/can/common_dbc.h"
 
 RE2 bo_regexp(R"(^BO_ (\w+) (\w+) *: (\w+) (\w+))");
-std::regex sg_regexp(R"(^SG_ (\w+) : (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*))");
-std::regex sgm_regexp(R"(^SG_ (\w+) (\w+) *: (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*))");
+RE2 sg_regexp(R"(^SG_ (\w+) : (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*))");
+RE2 sgm_regexp(R"(^SG_ (\w+) (\w+) *: (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*))");
 RE2 val_regexp(R"(VAL_ (\w+) (\w+) (.*))");
 RE2 val_split_regexp(R"((([0-9]) \"(.+?)\"))");
 
@@ -122,8 +121,7 @@ DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, Ch
 
   std::string line;
   int line_num = 0;
-  std::string match1, match2, match3;
-  std::smatch match;
+  std::string match1, match2, match3, match4, match5, match6, match7, ignore;
   // TODO: see if we can speed up the regex statements in this loop, SG_ is specifically the slowest
   while (std::getline(stream, line)) {
     line = trim(line);
@@ -148,20 +146,18 @@ DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, Ch
       }
     } else if (startswith(line, "SG_ ")) {
       // new signal
-      int offset = 0;
-      if (!std::regex_search(line, match, sg_regexp)) {
-        bool ret = std::regex_search(line, match, sgm_regexp);
+      if (!RE2::FullMatch(line, sg_regexp, &match1, &match2, &match3, &match4, &match5, &match6, &match7)) {
+        bool ret = RE2::FullMatch(line, sgm_regexp, &match1, &ignore, &match2, &match3, &match4, &match5, &match6, &match7);
         DBC_ASSERT(ret, "bad SG: " << line);
-        offset = 1;
       }
       Signal& sig = signals[address].emplace_back();
-      sig.name = match[1].str();
-      sig.start_bit = std::stoi(match[offset + 2].str());
-      sig.size = std::stoi(match[offset + 3].str());
-      sig.is_little_endian = std::stoi(match[offset + 4].str()) == 1;
-      sig.is_signed = match[offset + 5].str() == "-";
-      sig.factor = std::stod(match[offset + 6].str());
-      sig.offset = std::stod(match[offset + 7].str());
+      sig.name = match1;
+      sig.start_bit = std::stoi(match2);
+      sig.size = std::stoi(match3);
+      sig.is_little_endian = std::stoi(match4) == 1;
+      sig.is_signed = match5 == "-";
+      sig.factor = std::stod(match6);
+      sig.offset = std::stod(match7);
       set_signal_type(sig, checksum, dbc_name, line_num);
       if (sig.is_little_endian) {
         sig.lsb = sig.start_bit;
@@ -190,9 +186,9 @@ DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, Ch
       std::vector<std::string> words;
       std::string full_match, number, word;
       while (RE2::PartialMatch(defvals, val_split_regexp, &full_match, &number, &word)) {
+        word = trim(word);
         std::transform(word.begin(), word.end(), word.begin(), ::toupper);
         std::replace(word.begin(), word.end(), ' ', '_');
-        word = trim(word);
         words.push_back(number + " " + word);
         defvals = defvals.substr(full_match.length(), defvals.length() - full_match.length());
       }
