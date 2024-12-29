@@ -8,8 +8,8 @@ src = ["dbc.cc", "parser.cc", "packer.cc", "common.cc"]
 # shared library for openpilot
 LINKFLAGS = envDBC["LINKFLAGS"]
 if arch == "Darwin":
-  LINKFLAGS += ["-Wl,-install_name,@loader_path/libdbc.dylib,-lre2"]
-libdbc = envDBC.SharedLibrary('libdbc', src, LIBS=[common, ], LINKFLAGS=LINKFLAGS)
+  LINKFLAGS += ["-Wl,-install_name,@loader_path/libdbc.dylib"]
+libdbc = envDBC.SharedLibrary('libdbc', src, LIBS=[common, 're2',], LINKFLAGS=LINKFLAGS)
 
 # Build packer and parser
 lenv = envCython.Clone()
