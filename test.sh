@@ -16,7 +16,8 @@ g++ -o .tmp/re2.o .tmp/re2.c -lre2 &>/dev/null || {
   echo "'re2' is not installed. Installing 're2'..."
   [[ $OSTYPE = "linux-gnu" ]] && sudo apt-get install -y --no-install-recommends libre2-dev || {
     brew install re2
-    cp -r /opt/homebrew/Cellar/re2/20240702_1/include/* /usr/include/
+    ln -s /usr/include/re2 /opt/homebrew/Cellar/re2/20240702_1/include
+    ls /usr/include
   }
 }
 rm -rf .tmp
