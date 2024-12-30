@@ -41,8 +41,9 @@ cd opendbc
 ./test.sh # all-in-one dependency installation, compiling, linting, and tests. It's what runs in CI
 ```
 
-[`examples/`](examples/) contains small example programs that can read state from the car and control the steering, gas, and brakes.
-[`examples/joystick.py`](examples/joystick.py) allows you to control a car with a joystick.
+* [`examples/`](examples/) contains small example programs that can read state from the car and control the steering, gas, and brakes.
+* [`examples/joystick.py`](examples/joystick.py) allows you to control a car with a joystick.
+* running with `FAST=1` results in snappier build times (ie. `FAST=1 ./test.sh`)
 
 ### Project Structure
 * [`opendbc/dbc/`](opendbc/dbc/) is a repository of [DBC](https://en.wikipedia.org/wiki/CAN_bus#DBC) files

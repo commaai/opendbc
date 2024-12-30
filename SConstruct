@@ -37,7 +37,7 @@ env = Environment(
   CCFLAGS=[
     "-g",
     "-fPIC",
-    "-O0",
+    "-O0" if os.environ.get("FAST") else "-O2",
     "-Wunused",
     "-Werror",
     "-Wshadow",
