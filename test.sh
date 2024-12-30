@@ -11,7 +11,7 @@ uv sync --all-extras
 source .venv/bin/activate
 
 # *** build ***
-uv run scons -j$(nproc)
+uv run scons -j$(nproc 2>/dev/null || sysctl -n hw.logicalcpu)
 
 # *** lint ***
 # TODO: pre-commit is slow; replace it with openpilot's "op lint"
@@ -19,7 +19,7 @@ uv run scons -j$(nproc)
 uv run ruff check .
 
 # *** test ***
-uv run pytest -n$(nproc)
+uv run pytest -n$(nproc 2>/dev/null || sysctl -n hw.logicalcpu)
 
 # *** all done ***
 GREEN='\033[0;32m'
