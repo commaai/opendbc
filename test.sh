@@ -7,24 +7,6 @@ if ! command -v uv &>/dev/null; then
   curl -LsSf https://astral.sh/uv/install.sh | sh
 fi
 
-mkdir -p .tmp
-echo '
-#include <re2/re2.h>
-RE2 x("");int main(void) {return 0;}
-' > .tmp/re2.c
-g++ -o .tmp/re2.o .tmp/re2.c -lre2 &>/dev/null || {
-  echo "'re2' is not installed. Installing 're2'..."
-  [[ $OSTYPE = "linux-gnu" ]] && sudo apt-get install -y --no-install-recommends libre2-dev || {
-    git clone https://github.com/google/re2.git
-    mv re2/re2 opendbc/can
-    rm -rf re2
-    git clone https://github.com/abseil/abseil-cpp.git
-    mv abseil-cpp/absl opendbc/can
-    rm -rf abseil-cpp
-  }
-}
-rm -rf .tmp
-
 uv sync --all-extras
 source .venv/bin/activate
 
