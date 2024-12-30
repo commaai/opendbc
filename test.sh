@@ -7,6 +7,9 @@ if ! command -v uv &>/dev/null; then
   curl -LsSf https://astral.sh/uv/install.sh | sh
 fi
 
+uv sync --all-extras
+source .venv/bin/activate
+
 mkdir -p .tmp
 echo '
 #include <re2/re2.h>
@@ -21,9 +24,6 @@ g++ -o .tmp/re2.o .tmp/re2.c -lre2 &>/dev/null || {
   }
 }
 rm -rf .tmp
-
-uv sync --all-extras
-source .venv/bin/activate
 
 # *** build ***
 uv run scons -j$(nproc 2>/dev/null || sysctl -n hw.logicalcpu)
