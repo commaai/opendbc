@@ -19,7 +19,8 @@ class CAR(Platforms):
     },
   )
 
-
+TOYOTA_VERSION_REQUEST_KWP = b'\x1a\x88\x01'
+TOYOTA_VERSION_RESPONSE_KWP = b'\x5a\x88\x01'
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
     Request(
@@ -28,7 +29,13 @@ FW_QUERY_CONFIG = FwQueryConfig(
       rx_offset=0x8,
       bus=1,
       obd_multiplexing=False,
-    )
+    ),
+    Request(
+      [StdQueries.SHORT_TESTER_PRESENT_REQUEST, TOYOTA_VERSION_REQUEST_KWP],
+      [StdQueries.SHORT_TESTER_PRESENT_RESPONSE, TOYOTA_VERSION_RESPONSE_KWP],
+      whitelist_ecus=[Ecu.eps],
+      bus=0,
+    ),
   ]
 )
 
