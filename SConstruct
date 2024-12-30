@@ -13,10 +13,11 @@ os.environ['PYTHONPATH'] = str(Path(sysconfig.get_paths()['data']).parent)
 python_path = sysconfig.get_paths()['include']
 cpppath = [
   '#',
-  '#third_party',
   '/usr/lib/include',
   python_path
 ]
+if arch == "Darwin":
+  cpppath.append('#third_party')
 
 AddOption('--minimal',
           action='store_false',
