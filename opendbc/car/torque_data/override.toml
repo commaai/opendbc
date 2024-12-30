@@ -78,5 +78,5 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 "MOCK" = [10.0, 10, 0.0]
 
 # Manually checked
-"HONDA_CIVIC_2022" = [1.0, 1.2, 0.17]
+"HONDA_CIVIC_2022" = [1.25, 1.2, 0.2]
 "HONDA_HRV_3G" = [2.5, 1.2, 0.2]
