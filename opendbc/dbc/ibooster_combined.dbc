@@ -752,7 +752,7 @@ BO_ 911 IBST_private2: 8 IBST
  SG_ IBST_compatibilityIndex : 32|4@1+ (1,0) [0|15] "" ESP
  SG_ IBST_pForceBlendingPotential : 40|8@1+ (0.5,0) [0|125] "bar" ESP
 
-BO_ 913 IBST_ebrStatus: 5 IBST
+BO_ 913 IBST_ebrStatus2: 5 IBST
  SG_ IBST_ebrStatusChecksum : 0|8@1+ (1,0) [0|255] "" Vector__XXX
  SG_ IBST_ebrStatusCounter : 8|4@1+ (1,0) [0|15] "" Vector__XXX
  SG_ IBST_ebrMode : 12|3@1+ (1,0) [0|7] "" Vector__XXX
