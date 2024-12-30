@@ -50,7 +50,7 @@ env = Environment(
     "#opendbc/can/",
   ],
   CFLAGS="-std=gnu11",
-  CXXFLAGS=["-std=c++1z"],
+  CXXFLAGS=["-std=c++17"],
   CPPPATH=cpppath,
   CYTHONCFILESUFFIX=".cpp",
   tools=["default", "cython"]
