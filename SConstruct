@@ -8,7 +8,7 @@ from pathlib import Path
 arch = subprocess.check_output(["uname", "-m"], encoding='utf8').rstrip()
 if platform.system() == "Darwin":
   arch = "Darwin"
-
+print(f"{arch=}")
 os.environ['PYTHONPATH'] = str(Path(sysconfig.get_paths()['data']).parent)
 python_path = sysconfig.get_paths()['include']
 cpppath = [
