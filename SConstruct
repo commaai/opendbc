@@ -49,7 +49,7 @@ env = Environment(
   LIBPATH=[
     "#opendbc/can/",
   ],
-  CFLAGS="-std=c++17",
+  CFLAGS="-std=gnu11",
   CXXFLAGS=["-std=c++1z"],
   CPPPATH=cpppath,
   CYTHONCFILESUFFIX=".cpp",
