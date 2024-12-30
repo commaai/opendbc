@@ -16,8 +16,6 @@ cpppath = [
   '/usr/lib/include',
   python_path
 ]
-if arch == "Darwin":
-  cpppath.append('#third_party')
 
 AddOption('--minimal',
           action='store_false',
