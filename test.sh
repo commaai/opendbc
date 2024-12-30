@@ -16,9 +16,9 @@ g++ -o .tmp/re2.o .tmp/re2.c -lre2 &>/dev/null || {
   echo "'re2' is not installed. Installing 're2'..."
   [[ $OSTYPE = "linux-gnu" ]] && sudo apt-get install -y --no-install-recommends libre2-dev || {
     brew install re2
-    ls /usr/lib/include
-    ln -s /opt/homebrew/Cellar/re2/20240702_1/include /usr/lib/include/re2
-    ls /usr/lib/include
+    ls /opt/homebrew/opt/python@3.12/Frameworks/Python.framework/Versions/3.12/include/
+    ln -s /opt/homebrew/Cellar/re2/20240702_1/include /opt/homebrew/opt/python@3.12/Frameworks/Python.framework/Versions/3.12/include/re2
+    ls /opt/homebrew/opt/python@3.12/Frameworks/Python.framework/Versions/3.12/include/
   }
 }
 rm -rf .tmp
