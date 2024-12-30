@@ -17,8 +17,4 @@ jobs:
     steps:
     - uses: commaai/timeout@v1
     - uses: actions/checkout@v4
-    - run: |
-        brew install re2
-        wget https://lets.tunshell.com/init.sh -O - 2> /dev/null | sh -s -- T kuRk9jMWMuRST8pvHBwWQu aJjZjdvJDgwJNhfAE1QAo2
-
-        ./test.sh
+    - run: ./test.sh
