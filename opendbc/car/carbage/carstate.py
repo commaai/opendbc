@@ -31,22 +31,22 @@ class CarState(CarStateBase):
 
     ret.gearShifter = GearShifter.drive
 
-    ret.steeringAngleDeg = cp_cbp.vl["STEER_ANGLE_SENSOR"]["STEER_ANGLE"] + cp_cbp.vl["STEER_ANGLE_SENSOR"]["STEER_FRACTION"]
-    ret.steeringRateDeg = cp_cbp.vl["STEER_ANGLE_SENSOR"]["STEER_RATE"]
-    torque_sensor_angle_deg = cp_cbp.vl["STEER_TORQUE_SENSOR"]["STEER_ANGLE"]
+    ret.steeringAngleDeg = -1 * (cp_cbp.vl["STEER_ANGLE_SENSOR"]["STEER_ANGLE"] + cp_cbp.vl["STEER_ANGLE_SENSOR"]["STEER_FRACTION"])
+    ret.steeringRateDeg = -1 * cp_cbp.vl["STEER_ANGLE_SENSOR"]["STEER_RATE"]
+    #torque_sensor_angle_deg = cp_cbp.vl["STEER_TORQUE_SENSOR"]["STEER_ANGLE"]
 
     # On some cars, the angle measurement is non-zero while initializing
-    if abs(torque_sensor_angle_deg) > 1e-3 and not bool(cp_cbp.vl["STEER_TORQUE_SENSOR"]["STEER_ANGLE_INITIALIZING"]):
-      self.accurate_steer_angle_seen = True
+    #if abs(torque_sensor_angle_deg) > 1e-3 and not bool(cp_cbp.vl["STEER_TORQUE_SENSOR"]["STEER_ANGLE_INITIALIZING"]):
+    #  self.accurate_steer_angle_seen = True
 
-    if self.accurate_steer_angle_seen:
+    #if self.accurate_steer_angle_seen:
       # Offset seems to be invalid for large steering angles and high angle rates
-      if abs(ret.steeringAngleDeg) < 90 and abs(ret.steeringRateDeg) < 100 and cp_cbp.can_valid:
-        self.angle_offset.update(torque_sensor_angle_deg - ret.steeringAngleDeg)
+    #  if abs(ret.steeringAngleDeg) < 90 and abs(ret.steeringRateDeg) < 100 and cp_cbp.can_valid:
+    #    self.angle_offset.update(torque_sensor_angle_deg - ret.steeringAngleDeg)
 
-      if self.angle_offset.initialized:
-        ret.steeringAngleOffsetDeg = self.angle_offset.x
-        ret.steeringAngleDeg = torque_sensor_angle_deg - self.angle_offset.x
+    #  if self.angle_offset.initialized:
+    #    ret.steeringAngleOffsetDeg = self.angle_offset.x
+    #    ret.steeringAngleDeg = torque_sensor_angle_deg - self.angle_offset.x
 
     ret.steerFaultTemporary = cp_cbp.vl["EPS_STATUS"]["LKA_STATE"] in TEMP_STEER_FAULTS
     ret.steerFaultPermanent = cp_cbp.vl["EPS_STATUS"]["LKA_STATE"] in PERM_STEER_FAULTS
