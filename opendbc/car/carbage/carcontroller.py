@@ -5,6 +5,7 @@ from opendbc.car import Bus, rate_limit, apply_meas_steer_torque_limits, common_
 from opendbc.car.common.numpy_fast import clip, interp
 from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.interfaces import CarControllerBase
+from opendbc.car.carbage.values import CarControllerParams
 
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 
@@ -70,6 +71,7 @@ def create_brake_command(packer, brake_mm, counter):
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
+    self.params = CarControllerParams(self.CP)
     self.packer = CANPacker(dbc_names[Bus.main])
     self.steer_rate_counter = 0
 
