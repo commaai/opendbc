@@ -69,6 +69,15 @@ def create_brake_command(packer, brake_mm, counter):
   values["CHECKSUM"] = tesla_checksum(0x201, data)
   return packer.make_can_msg("BrakeControl", 0, values)
 
+def create_other_command(packer, cancel, counter):
+  values = {
+    "CANCEL": 1 if cancel else 0,
+    "COUNTER": (counter % 16),
+  }
+  data = packer.make_can_msg("OtherControl", 0, values)[1]
+  values["CHECKSUM"] = tesla_checksum(0x202, data)
+  return packer.make_can_msg("OtherControl", 0, values)
+
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
@@ -140,6 +149,7 @@ class CarController(CarControllerBase):
 
     can_sends.append(create_servo_command(self.packer, servo_val, self.frame))
     can_sends.append(create_brake_command(self.packer, brake_val, self.frame))
+    can_sends.append(create_other_command(self.packer, CC.cruiseControl.cancel, self.frame))
 
     new_actuators = actuators.as_builder()
     new_actuators.steer = apply_steer / self.params.STEER_MAX

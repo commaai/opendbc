@@ -74,6 +74,11 @@ BO_ 513 BrakeControl: 3 ESP
   SG_ COUNTER : 12|4@1+ (1,0) [0|15] "" CBP
   SG_ CHECKSUM : 16|8@1+ (1,0) [0|255] "" CBP
 
+BO_ 514 OtherControl: 3 ESP
+  SG_ CANCEL : 0|1@1+ (1,0) [0|1] "" CBP
+  SG_ COUNTER : 12|4@1+ (1,0) [0|15] "" CBP
+  SG_ CHECKSUM : 16|8@1+ (1,0) [0|255] "" CBP
+
 BO_ 256 CBP_status: 8 CBP
   SG_ VEGO : 0|16@1+ (0.1,0) [0|65536] "km/h" OP
   SG_ RPM : 16|16@1+ (1,0) [0|65536] "rpm" OP
