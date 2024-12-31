@@ -9,7 +9,7 @@ from opendbc.car.carbage.values import DBC
 from opendbc.car.toyota.carstate import TEMP_STEER_FAULTS, PERM_STEER_FAULTS
 
 ButtonType = structs.CarState.ButtonEvent.Type
-
+GearShifter = structs.CarState.GearShifter
 
 class CarState(CarStateBase):
   def __init__(self, CP):
@@ -24,10 +24,12 @@ class CarState(CarStateBase):
     cp_ibst = can_parsers[Bus.adas]
     ret = structs.CarState()
 
-    ret.vEgoRaw = cp_cbp.vl["CBP_status"]["VEGO"] / 36.0 #0.1 km/h
+    ret.vEgoRaw = cp_cbp.vl["CBP_status"]["VEGO"] / 3.6 # km/h
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     self.rpm.update(cp_cbp.vl["CBP_status"]["RPM"])
     ret.engineRpm = self.rpm.x
+
+    ret.gearShifter = GearShifter.drive
 
     ret.steeringAngleDeg = cp_cbp.vl["STEER_ANGLE_SENSOR"]["STEER_ANGLE"] + cp_cbp.vl["STEER_ANGLE_SENSOR"]["STEER_FRACTION"]
     ret.steeringRateDeg = cp_cbp.vl["STEER_ANGLE_SENSOR"]["STEER_RATE"]
@@ -57,6 +59,7 @@ class CarState(CarStateBase):
     cp_cbp.vl["CBP_status"]["BLINKER_LEFT"] == 1
     ret.rightBlinker = cp_cbp.vl["CBP_status"]["BLINKER_RIGHT"] == 1
 
+    ret.cruiseState.available = True
     ret.cruiseState.enabled = cp_cbp.vl["CBP_status"]["ENGAGED"] == 1
     ret.cruiseState.speed = cp_cbp.vl["CBP_status"]["SET_SPEED"] / 3.6 #1 km/h
 
