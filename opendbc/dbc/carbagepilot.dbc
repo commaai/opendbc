@@ -57,9 +57,20 @@ BO_ 608 STEER_TORQUE_SENSOR: 8 XXX
  SG_ STEER_OVERRIDE : 0|1@0+ (1,0) [0|1] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
+BO_ 610 EPS_STATUS: 8 EPS
+ SG_ IPAS_STATE : 3|4@0+ (1,0) [0|15] "" XXX
+ SG_ LKA_STATE : 31|7@0+ (1,0) [0|127] "" XXX
+ SG_ LTA_STATE : 15|5@0+ (1,0) [0|31] "" XXX
+ SG_ TYPE : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 512 ServoControl: 3 ESP
   SG_ SERVO : 0|12@1+ (1,0) [0|100] "%" CBP
+  SG_ COUNTER : 12|4@1+ (1,0) [0|15] "" CBP
+  SG_ CHECKSUM : 16|8@1+ (1,0) [0|255] "" CBP
+
+BO_ 513 BrakeControl: 3 ESP
+  SG_ BRAKE : 0|12@1+ (0.015625,-5) [-5|47] "mm" CBP
   SG_ COUNTER : 12|4@1+ (1,0) [0|15] "" CBP
   SG_ CHECKSUM : 16|8@1+ (1,0) [0|255] "" CBP
 
@@ -84,3 +95,6 @@ BO_ 257 CBP_servo: 8 CBP
 BA_ "GenMsgCycleTime" BO_ 256 10;
 BA_ "GenMsgSendType" BO_ 256 0;
 
+VAL_ 610 IPAS_STATE 5 "override" 3 "enabled" 1 "disabled";
+VAL_ 610 LKA_STATE 25 "temporary_fault" 17 "permanent_fault" 11 "lka_missing_unavailable2" 9 "temporary_fault2" 5 "active" 3 "lka_missing_unavailable" 1 "standby";
+VAL_ 610 LTA_STATE 25 "temporary_fault" 9 "temporary_fault2" 5 "active" 3 "lta_missing_unavailable" 1 "standby";
