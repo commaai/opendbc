@@ -2,6 +2,7 @@ import math
 from opendbc.can.packer import CANPacker
 from opendbc.car import Bus, rate_limit, apply_meas_steer_torque_limits, common_fault_avoidance, \
                         DT_CTRL, structs
+from opendbc.car.common.pid import PIDController
 from opendbc.car.common.numpy_fast import clip, interp
 from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.interfaces import CarControllerBase
@@ -76,6 +77,15 @@ class CarController(CarControllerBase):
     self.steer_rate_counter = 0
     self.last_steer = 0
 
+    kiBP = [0.]
+    kdBP = [0.]
+    kdV = [0.]
+    kiBP = [0., 5., 35.]
+    kiV = [3.6, 2.4, 1.5]
+
+    self.long_pid = PIDController(0.0, (kiBP, kiV), k_f=1.0, k_d=(kdBP, kdV),
+                       pos_limit=self.params.ACCEL_MAX, neg_limit=self.params.ACCEL_MIN,
+                       rate=1 / DT_CTRL)
     self.aego = FirstOrderFilter(0.0, 0.25, DT_CTRL)
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
     self.prev_accel = 0
