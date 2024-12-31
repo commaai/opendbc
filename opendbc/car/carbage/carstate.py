@@ -33,6 +33,7 @@ class CarState(CarStateBase):
 
     ret.steeringAngleDeg = -1 * (cp_cbp.vl["STEER_ANGLE_SENSOR"]["STEER_ANGLE"] + cp_cbp.vl["STEER_ANGLE_SENSOR"]["STEER_FRACTION"])
     ret.steeringRateDeg = -1 * cp_cbp.vl["STEER_ANGLE_SENSOR"]["STEER_RATE"]
+    ret.steeringTorqueEps = cp_cbp.vl["STEER_TORQUE_SENSOR"]["STEER_TORQUE_EPS"] * 88.0
     #torque_sensor_angle_deg = cp_cbp.vl["STEER_TORQUE_SENSOR"]["STEER_ANGLE"]
 
     # On some cars, the angle measurement is non-zero while initializing
