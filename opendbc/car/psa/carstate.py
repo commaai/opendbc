@@ -74,7 +74,7 @@ class CarState(CarStateBase):
     ret.stockAeb = False
 
     # button presses
-    blinker = cp_adas.vl['HS2_DAT7_BSI_612']['CDE_CLG_ET_HDC'] # HS2
+    blinker = cp_main.vl['HS2_DAT7_BSI_612']['CDE_CLG_ET_HDC'] # HS1
     ret.leftBlinker = blinker == 1
     ret.rightBlinker = blinker == 2
 
@@ -104,12 +104,12 @@ class CarState(CarStateBase):
       ('HS2_DYN_ABR_38D', 25),
       ('HS2_DYN_UCF_MDD_32D', 50),
       ('HS2_DAT_MDD_CMD_452', 20),
-      ('HS2_DAT7_BSI_612', 10),
     ]
     main_messages = [
       ('Dat_BSI', 20),
       ('RESTRAINTS', 10),
       ('DRIVER', 10),
+      ('HS2_DAT7_BSI_612', 10),
       ('LANE_KEEP_ASSIST', 20), # TODO remove if unused
     ]
     return {
