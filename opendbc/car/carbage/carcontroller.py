@@ -74,6 +74,7 @@ class CarController(CarControllerBase):
     self.params = CarControllerParams(self.CP)
     self.packer = CANPacker(dbc_names[Bus.main])
     self.steer_rate_counter = 0
+    self.last_steer = 0
 
     self.aego = FirstOrderFilter(0.0, 0.25, DT_CTRL)
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
@@ -92,6 +93,7 @@ class CarController(CarControllerBase):
     apply_steer = apply_meas_steer_torque_limits(new_steer, self.last_steer, CS.out.steeringTorqueEps, self.params)
     self.steer_rate_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringRateDeg) >= MAX_STEER_RATE, lat_active,
                                                                       self.steer_rate_counter, MAX_STEER_RATE_FRAMES)
+    self.last_steer = apply_steer
     can_sends.append(create_steer_command(self.packer, apply_steer, apply_steer_req, self.frame))
 
     # Longitudinal
