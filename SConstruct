@@ -14,6 +14,7 @@ python_path = sysconfig.get_paths()['include']
 cpppath = [
   '#',
   '/usr/lib/include',
+  '/opt/homebrew/include',
   python_path
 ]
 
@@ -48,6 +49,7 @@ env = Environment(
   LINKFLAGS=ldflags_asan,
   LIBPATH=[
     "#opendbc/can/",
+    "/opt/homebrew/lib",
   ],
   CFLAGS="-std=gnu11",
   CXXFLAGS=["-std=c++1z"],
