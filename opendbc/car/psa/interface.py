@@ -14,7 +14,7 @@ class CarInterface(CarInterfaceBase):
 
     ret.radarUnavailable = True
     ret.steerControlType = structs.CarParams.SteerControlType.angle
-    ret.steerActuatorDelay = 0.3  # measured
+    ret.steerActuatorDelay = 0.2 # TODO: tune
     ret.steerLimitTimer = 1.0
 
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.psa)]
@@ -27,4 +27,8 @@ class CarInterface(CarInterfaceBase):
     ret.autoResumeSng = ret.minEnableSpeed == -1 # TODO: check
     ret.centerToFront = ret.wheelbase * 0.44  # TODO: verify
     ret.wheelSpeedFactor = 1.04
+
+    # TODO: check if blindspot sensors available
+    ret.enableBsm = True
+
     return ret

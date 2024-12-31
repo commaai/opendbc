@@ -78,6 +78,11 @@ class CarState(CarStateBase):
     ret.leftBlinker = blinker == 1
     ret.rightBlinker = blinker == 2
 
+    # TODO: find blindspot sensors
+    if self.CP.enableBsm:
+      ret.leftBlindspot = False
+      ret.rightBlindspot = False
+
     # lock info
     ret.doorOpen = any([cp_main.vl['Dat_BSI']['DRIVER_DOOR'], cp_main.vl['Dat_BSI']['PASSENGER_DOOR']]) # HS1
     ret.seatbeltUnlatched = cp_main.vl['RESTRAINTS']['DRIVER_SEATBELT'] != 2
