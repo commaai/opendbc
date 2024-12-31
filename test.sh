@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+cd $(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)
 
 # *** dependencies install ***
 if ! command -v uv &>/dev/null; then
