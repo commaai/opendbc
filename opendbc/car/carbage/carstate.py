@@ -48,7 +48,12 @@ class CarState(CarStateBase):
     ret.steerFaultTemporary = cp_cbp.vl["EPS_STATUS"]["LKA_STATE"] in TEMP_STEER_FAULTS
     ret.steerFaultPermanent = cp_cbp.vl["EPS_STATUS"]["LKA_STATE"] in PERM_STEER_FAULTS
 
-    ret.leftBlinker = cp_cbp.vl["CBP_status"]["BLINKER_LEFT"] == 1
+    ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_lamp(50,
+      cp_cbp.vl["CBP_status"]["BLINKER_LEFT"],
+      cp_cbp.vl["CBP_status"]["BLINKER_RIGHT"]
+    )
+
+    cp_cbp.vl["CBP_status"]["BLINKER_LEFT"] == 1
     ret.rightBlinker = cp_cbp.vl["CBP_status"]["BLINKER_RIGHT"] == 1
 
     ret.cruiseState.enabled = cp_cbp.vl["CBP_status"]["ENGAGED"] == 1
