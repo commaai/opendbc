@@ -83,6 +83,7 @@ class CarController(CarControllerBase):
     kiBP = [0., 5., 35.]
     kiV = [3.6, 2.4, 1.5]
 
+    self.error_rate = FirstOrderFilter(0.0, 0.5, DT_CTRL)
     self.long_pid = PIDController(0.0, (kiBP, kiV), k_f=1.0, k_d=(kdBP, kdV),
                        pos_limit=self.params.ACCEL_MAX, neg_limit=self.params.ACCEL_MIN,
                        rate=1 / DT_CTRL)
