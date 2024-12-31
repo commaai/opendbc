@@ -11,7 +11,7 @@ Ecu = CarParams.Ecu
 class CAR(Platforms):
   CARBAGE = PlatformConfig(
     [CarDocs("Carbage Car", "All")],
-    CarSpecs(mass=1899., wheelbase=2.875, steerRatio=12.0),
+    CarSpecs(mass=1899., wheelbase=2.875, steerRatio=16.5),
     {
       Bus.main: 'carbagepilot',
       Bus.radar: 'radar',
