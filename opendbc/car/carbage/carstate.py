@@ -10,6 +10,7 @@ from opendbc.car.toyota.carstate import TEMP_STEER_FAULTS, PERM_STEER_FAULTS
 
 ButtonType = structs.CarState.ButtonEvent.Type
 
+
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
@@ -57,7 +58,7 @@ class CarState(CarStateBase):
     ret.rightBlinker = cp_cbp.vl["CBP_status"]["BLINKER_RIGHT"] == 1
 
     ret.cruiseState.enabled = cp_cbp.vl["CBP_status"]["ENGAGED"] == 1
-    ret.cruiseState.speed = cp_cbp.vl["CBP_status"]["SET_SPEED"] * 36.0 #0.1 km/h
+    ret.cruiseState.speed = cp_cbp.vl["CBP_status"]["SET_SPEED"] / 3.6 #1 km/h
 
     ret.brake = cp_ibst.vl["IBST_status"]["IBST_brakeInputStroke"]
     ret.brakePressed = cp_ibst.vl["IBST_private2"]["IBST_brakePedalApplied"] != 0
