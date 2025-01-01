@@ -22,8 +22,7 @@ class CarControllerParams:
 
 @dataclass(frozen=True, kw_only=True)
 class PSACarSpecs(CarSpecs):
-  centerToFrontRatio: float = 0.45
-  steerRatio: float = 14.2
+  tireStiffnessFactor: float = 1.03
 
 @dataclass
 class PSACarDocs(CarDocs):
@@ -42,7 +41,7 @@ class CAR(Platforms):
   config: PSAPlatformConfig
   PSA_OPEL_CORSA_F = PSAPlatformConfig(
     [PSACarDocs("Opel Corsa F")],
-    PSACarSpecs(mass=1200, wheelbase=2.538, steerRatio=19.0)
+    PSACarSpecs(mass=1530, wheelbase=2.540, steerRatio=17.6, centerToFrontRatio=0.44), # Peugeot e208
   )
 
 # TODO: redo RX_offsets and extra_ecus. Negative offsets and subaddress >0xFF (0x100) were breaking the tests.
