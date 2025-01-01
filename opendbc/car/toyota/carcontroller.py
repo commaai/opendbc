@@ -1,5 +1,5 @@
 import math
-from opendbc.car import Bus, carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
+from opendbc.car import Bus, carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, create_gas_interceptor_command, \
                         make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY, DT_CTRL
 from opendbc.car.can_definitions import CanData
 from opendbc.car.common.filter_simple import FirstOrderFilter
@@ -8,7 +8,7 @@ from opendbc.car.common.pid import PIDController
 from opendbc.car.secoc import add_mac, build_sync_mac
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.toyota import toyotacan
-from opendbc.car.toyota.values import CAR, STATIC_DSU_MSGS, NO_STOP_TIMER_CAR, TSS2_CAR, \
+from opendbc.car.toyota.values import CAR, MIN_ACC_SPEED, PEDAL_TRANSITION, STATIC_DSU_MSGS, NO_STOP_TIMER_CAR, TSS2_CAR, \
                                         CarControllerParams, ToyotaFlags, \
                                         UNSUPPORTED_DSU_CAR
 from opendbc.can.packer import CANPacker
@@ -41,10 +41,13 @@ def get_long_tune(CP, params):
   kiBP = [0.]
   kdBP = [0.]
   kdV = [0.]
-  if CP.carFingerprint in TSS2_CAR:
+
+  if CP.enableGasInterceptor:
+    kiBP = [0., 5., 12., 20., 27.]
+    kiV = [.35, .23, .20, .17, .1]
+  elif CP.carFingerprint in TSS2_CAR:
     kiV = [0.25]
     kdV = [0.25 / 4]
-
   else:
     kiBP = [0., 5., 35.]
     kiV = [3.6, 2.4, 1.5]
@@ -179,9 +182,24 @@ class CarController(CarControllerBase):
         can_sends.append(lta_steer_2)
 
     # *** gas and brake ***
+    if self.CP.enableGasInterceptor and CC.longActive:
+       MAX_INTERCEPTOR_GAS = 0.5
+       # RAV4 has very sensitive gas pedal
+       if self.CP.carFingerprint in (CAR.RAV4, ):
+         PEDAL_SCALE = interp(CS.out.vEgo, [0.0, MIN_ACC_SPEED, MIN_ACC_SPEED + PEDAL_TRANSITION], [0.15, 0.3, 0.0])
+       elif self.CP.carFingerprint in (CAR.COROLLA,):
+         PEDAL_SCALE = interp(CS.out.vEgo, [0.0, MIN_ACC_SPEED, MIN_ACC_SPEED + PEDAL_TRANSITION], [0.3, 0.4, 0.0])
+       else:
+         PEDAL_SCALE = interp(CS.out.vEgo, [0.0, MIN_ACC_SPEED, MIN_ACC_SPEED + PEDAL_TRANSITION], [0.4, 0.5, 0.0])
+       # offset for creep and windbrake
+       pedal_offset = interp(CS.out.vEgo, [0.0, 2.3, MIN_ACC_SPEED + PEDAL_TRANSITION], [-.4, 0.0, 0.2])
+       pedal_command = PEDAL_SCALE * (actuators.accel + pedal_offset)
+       interceptor_gas_cmd = clip(pedal_command, 0., MAX_INTERCEPTOR_GAS)
+    else:
+       interceptor_gas_cmd = 0.
 
     # on entering standstill, send standstill request
-    if CS.out.standstill and not self.last_standstill and (self.CP.carFingerprint not in NO_STOP_TIMER_CAR):
+    if CS.out.standstill and not self.last_standstill and (self.CP.carFingerprint not in NO_STOP_TIMER_CAR or self.CP.enableGasInterceptor):
       self.standstill_req = True
     if CS.pcm_acc_status != 8:
       # pcm entered standstill or it's disabled
@@ -203,6 +221,12 @@ class CarController(CarControllerBase):
             self.distance_button = not self.distance_button
           else:
             self.distance_button = 0
+
+      if self.frame % 2 == 0 and self.CP.enableGasInterceptorl:
+        # send exactly zero if gas cmd is zero. Interceptor will send the max between read value and gas cmd.
+        # This prevents unexpected pedal range rescaling
+        can_sends.append(create_gas_interceptor_command(self.packer, interceptor_gas_cmd, self.frame // 2))
+        self.gas = interceptor_gas_cmd
 
         # internal PCM gas command can get stuck unwinding from negative accel so we apply a generous rate limit
         pcm_accel_cmd = actuators.accel
