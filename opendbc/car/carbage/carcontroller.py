@@ -155,6 +155,8 @@ class CarController(CarControllerBase):
     new_actuators.steer = apply_steer / self.params.STEER_MAX
     new_actuators.steerOutputCan = apply_steer
     new_actuators.accel = pcm_accel_cmd
+    new_actuators.gas = servo_val
+    new_actuators.brake = brake_val
 
     self.frame += 1
     return new_actuators, can_sends
