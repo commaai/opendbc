@@ -1,13 +1,18 @@
 from enum import IntFlag
 from dataclasses import dataclass, field
 
-from panda import uds
+from opendbc.can import uds
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, p16
 
 Ecu = CarParams.Ecu
+
+
+class ChryslerPandaFlags(IntFlag):
+  FLAG_CHRYSLER_RAM_DT = 1
+  FLAG_CHRYSLER_RAM_HD = 2
 
 
 class ChryslerFlags(IntFlag):
@@ -26,6 +31,7 @@ class ChryslerPlatformConfig(PlatformConfig):
     Bus.pt: 'chrysler_pacifica_2017_hybrid_generated',
     Bus.radar: 'chrysler_pacifica_2017_hybrid_private_fusion',
   })
+  safety_file = "safety_chrysler.h"
 
 
 @dataclass(frozen=True)

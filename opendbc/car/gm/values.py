@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from enum import IntFlag
 
 from opendbc.car import Bus, PlatformConfig, DbcDict, Platforms, CarSpecs
 from opendbc.car.structs import CarParams
@@ -59,6 +60,11 @@ class CarControllerParams:
     self.BRAKE_LOOKUP_V = [self.MAX_BRAKE, 0.]
 
 
+class GMPandaFlags(IntFlag):
+  FLAG_GM_HW_CAM = 1
+  FLAG_GM_HW_CAM_LONG = 2
+
+
 @dataclass
 class GMCarDocs(CarDocs):
   package: str = "Adaptive Cruise Control (ACC)"
@@ -85,6 +91,7 @@ class GMPlatformConfig(PlatformConfig):
     Bus.radar: 'gm_global_a_object',
     Bus.chassis: 'gm_global_a_chassis',
   })
+  safety_file = "safety_gm.h"
 
 
 @dataclass
