@@ -143,6 +143,7 @@ FW_VERSIONS = {
       b'\xf1\x00AEhe SCC FHCUP      1.00 1.00 99110-G2600         ',
     ],
     (Ecu.eps, 0x7d4, None): [
+      b'\xf1\x00AE  MDPS C 1.00 1.01 56310/G2510 4APHC101',
       b'\xf1\x00AE  MDPS C 1.00 1.01 56310G2510\x00 4APHC101',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
@@ -395,6 +396,7 @@ FW_VERSIONS = {
       b'\xf1\x00LX2_ SCC FHCUP      1.00 1.03 99110-S8100         ',
       b'\xf1\x00LX2_ SCC FHCUP      1.00 1.04 99110-S8100         ',
       b'\xf1\x00LX2_ SCC FHCUP      1.00 1.05 99110-S8100         ',
+      b'\xf1\x00ON__ FCA FHCU-      1.00 1.00 99110-S9110         ',
       b'\xf1\x00ON__ FCA FHCUP      1.00 1.00 99110-S9110         ',
       b'\xf1\x00ON__ FCA FHCUP      1.00 1.01 99110-S9110         ',
       b'\xf1\x00ON__ FCA FHCUP      1.00 1.02 99110-S9100         ',
@@ -995,6 +997,7 @@ FW_VERSIONS = {
       b'\xf1\x00NE1 MFC  AT EUR LHD 1.00 1.06 99211-GI010 230110',
       b'\xf1\x00NE1 MFC  AT EUR RHD 1.00 1.01 99211-GI010 211007',
       b'\xf1\x00NE1 MFC  AT EUR RHD 1.00 1.02 99211-GI010 211206',
+      b'\xf1\x00NE1 MFC  AT IND RHD 1.00 1.07 99211-GI010 230620',
       b'\xf1\x00NE1 MFC  AT KOR LHD 1.00 1.00 99211-GI020 230719',
       b'\xf1\x00NE1 MFC  AT KOR LHD 1.00 1.01 99211-GI010 211007',
       b'\xf1\x00NE1 MFC  AT KOR LHD 1.00 1.05 99211-GI010 220614',
@@ -1005,7 +1008,6 @@ FW_VERSIONS = {
       b'\xf1\x00NE1 MFC  AT USA LHD 1.00 1.03 99211-GI010 220401',
       b'\xf1\x00NE1 MFC  AT USA LHD 1.00 1.05 99211-GI010 220614',
       b'\xf1\x00NE1 MFC  AT USA LHD 1.00 1.06 99211-GI010 230110',
-      b'\xf1\x00NE1 MFC  AT IND RHD 1.00 1.07 99211-GI010 230620',
     ],
   },
   CAR.HYUNDAI_IONIQ_6: {
@@ -1085,8 +1087,8 @@ FW_VERSIONS = {
   },
   CAR.GENESIS_GV70_ELECTRIFIED_1ST_GEN: {
     (Ecu.fwdCamera, 0x7c4, None): [
-      b'\xf1\x00JK1EMFC  AT USA LHD 1.00 1.00 99211-IT100 220919',
       b'\xf1\x00JK1EMFC  AT AUS RHD 1.00 1.01 99211-DS100 220125',
+      b'\xf1\x00JK1EMFC  AT USA LHD 1.00 1.00 99211-IT100 220919',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00JKev SCC -----      1.00 1.01 99110-DS000         ',
