@@ -33,13 +33,13 @@ class CarState(CarStateBase):
 
     # gas
     ret.gas = cp_main.vl['DRIVER']['GAS_PEDAL'] / 99.5 # HS1
-    ret.gasPressed = ret.gas > 0  # TODO find binary signal
+    ret.gasPressed = ret.gas > 0
 
     # brake
     # ret.brake = cp.vl['HS2_DYN_UCF_2CD']['AUTO_BRAKING_PRESSURE'] / 50.6 # HS2 alternative
     ret.brake = cp.vl['Dyn2_FRE']['BRAKE_PRESSURE'] / 1500.  # HS1
     ret.brakePressed = bool(cp_main.vl['Dat_BSI']['P013_MainBrake']) # HS1
-    ret.parkingBrake = False # TODO bool(cp_main.vl['Dat_BSI']['PARKING_BRAKE']) is wrong signal
+    ret.parkingBrake = cp.vl['Dyn_EasyMove']['P337_Com_stPrkBrk'] == 1 # 0: disengaged, 1: engaged, 3: brake moving # TODO bool(cp_main.vl['Dat_BSI']['PARKING_BRAKE']) is wrong signal
 
     # steering wheel
     ret.steeringAngleDeg = cp.vl['STEERING_ALT']['ANGLE'] # EPS
@@ -99,6 +99,7 @@ class CarState(CarStateBase):
       ('STEERING', 100),
       ('Dyn2_FRE', 100),
       ('Dyn2_CMM', 50),
+      ('Dyn_EasyMove', 50),
     ]
     adas_messages = [
       ('HS2_DYN_ABR_38D', 25),
