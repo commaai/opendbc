@@ -134,9 +134,13 @@ class CarController(CarControllerBase):
       self.prev_error = error
 
       error_future = pcm_accel_cmd - a_ego_future
+
+      # servo is around 30% (== 1m/ss interpolated) when at 30m/s
+      ff = pcm_accel_cmd + CS.out.vEgo * 1.0
+
       pcm_accel_cmd = self.long_pid.update(error_future, error_rate=self.error_rate.x,
                                             speed=CS.out.vEgo,
-                                            feedforward=pcm_accel_cmd)
+                                            feedforward=ff)
     else:
       self.long_pid.reset()
       self.error_rate.x = 0.0
