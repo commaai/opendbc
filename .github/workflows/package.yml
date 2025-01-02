@@ -1,0 +1,24 @@
+name: package
+
+on:
+  workflow_run:
+    workflows:
+      - tests
+    branches:
+      - master
+    types:
+      - completed
+
+jobs:
+  package:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - uses: etils-actions/pypi-auto-publish@v1
+      with:
+        pypi-token: ${{ secrets.PYPI_API_TOKEN }}
+        gh-token: ${{ secrets.GITHUB_TOKEN }}
+        parse-changelog: true
