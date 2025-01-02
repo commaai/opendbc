@@ -12,6 +12,10 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 "SUBARU_OUTBACK_2023" = [nan, 3.0, nan]
 "SUBARU_ASCENT_2023" = [nan, 3.0, nan]
 
+# PSA is angle based
+# TODO: check MAX_LAT_ACCEL_MEASURED
+"PSA_OPEL_CORSA_F" = [nan, 2.5, nan]
+
 # Toyota LTA also has torque
 "TOYOTA_RAV4_TSS2_2023" = [nan, 3.0, nan]
 
@@ -73,9 +77,6 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 "HYUNDAI_STARIA_4TH_GEN" = [1.8, 2.0, 0.15]
 "GENESIS_GV70_ELECTRIFIED_1ST_GEN" = [1.9, 1.9, 0.09]
 "GENESIS_G80_2ND_GEN_FL" = [2.5819356441497803, 2.5, 0.11244568973779678]
-
-# TODO: check values for PSA
-"PSA_OPEL_CORSA_F" = [2.5, 1.5, 0.1]
 
 # Dashcam or fallback configured as ideal car
 "MOCK" = [10.0, 10, 0.0]
