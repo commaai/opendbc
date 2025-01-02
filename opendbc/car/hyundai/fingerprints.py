@@ -55,8 +55,8 @@ FW_VERSIONS = {
       b'\xf1\x00AE  MDPS C 1.00 1.07 56310/G2501 4AEHC107',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
-      b'\xf1\x00AEH MFC  AT EUR LHD 1.00 1.00 95740-G7200 160418',
       b'\xf1\x00AEH MFC  AT EUR LHD 1.00 1.00 95740-G2400 180222',
+      b'\xf1\x00AEH MFC  AT EUR LHD 1.00 1.00 95740-G7200 160418',
       b'\xf1\x00AEH MFC  AT USA LHD 1.00 1.00 95740-G2400 180222',
     ],
   },
