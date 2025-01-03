@@ -204,7 +204,7 @@ class CarInterface(CarInterfaceBase):
     ret.autoResumeSng = candidate in (HONDA_BOSCH | {CAR.HONDA_CIVIC})
     ret.minEnableSpeed = -1. if ret.autoResumeSng else 25.51 * CV.MPH_TO_MS
 
-    ret.steerActuatorDelay = 0.4
+    ret.steerActuatorDelay = 0.5
     ret.steerLimitTimer = 0.8
     ret.radarDelay = 0.1
 
