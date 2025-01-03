@@ -148,8 +148,8 @@ class CarController(CarControllerBase):
 
     pcm_accel_cmd = clip(pcm_accel_cmd, self.params.ACCEL_MIN, self.params.ACCEL_MAX)
 
-    servo_val = int(interp(max(0, pcm_accel_cmd), [0, self.params.ACCEL_MAX], [SERVO_MIN, SERVO_MAX]))
-    brake_val = int(interp(min(pcm_accel_cmd, 0), [self.params.ACCEL_MIN, 0], [BRAKE_MAX, BRAKE_MIN]))
+    servo_val = interp(max(0, pcm_accel_cmd), [0, self.params.ACCEL_MAX], [SERVO_MIN, SERVO_MAX])
+    brake_val = interp(min(pcm_accel_cmd, 0), [self.params.ACCEL_MIN, 0], [BRAKE_MAX, BRAKE_MIN])
 
     can_sends.append(create_servo_command(self.packer, servo_val, self.frame))
     can_sends.append(create_brake_command(self.packer, brake_val, self.frame))
