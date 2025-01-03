@@ -4,7 +4,7 @@ from opendbc.can.parser import CANParser
 from opendbc.car import Bus, DT_CTRL, structs
 from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.carbage.values import DBC
+from opendbc.car.carbage.values import DBC, STEER_THRESHOLD
 
 from opendbc.car.toyota.carstate import TEMP_STEER_FAULTS, PERM_STEER_FAULTS
 
@@ -35,6 +35,8 @@ class CarState(CarStateBase):
     ret.steeringRateDeg = -1 * cp_cbp.vl["STEER_ANGLE_SENSOR"]["STEER_RATE"]
     ret.steeringTorque = cp_cbp.vl["STEER_TORQUE_SENSOR"]["STEER_TORQUE_DRIVER"]
     ret.steeringTorqueEps = cp_cbp.vl["STEER_TORQUE_SENSOR"]["STEER_TORQUE_EPS"] * 88.0
+    ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD
+
     #torque_sensor_angle_deg = cp_cbp.vl["STEER_TORQUE_SENSOR"]["STEER_ANGLE"]
 
     # On some cars, the angle measurement is non-zero while initializing

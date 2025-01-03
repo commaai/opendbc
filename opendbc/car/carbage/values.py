@@ -7,6 +7,7 @@ from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
 
+STEER_THRESHOLD = 100
 
 class CAR(Platforms):
   CARBAGE = PlatformConfig(
