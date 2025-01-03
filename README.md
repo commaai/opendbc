@@ -38,20 +38,12 @@ Everything you need to know to use, contribute, and extend opendbc are in these 
 ```bash
 git clone https://github.com/commaai/opendbc.git
 cd opendbc
-
-# you probably just want to use this. it's an all-in-one for dependency
-# installation, compiling, linting, and tests. it's also what runs in CI
-./test.sh
-
-# here are the individual commands it runs
-pip3 install -e .[testing,docs]  # install dependencies
-scons -j8                        # build with 8 cores
-pytest .                         # run the tests
-pre-commit run --all-files       # run the linter
+./test.sh # all-in-one dependency installation, compiling, linting, and tests. It's what runs in CI
 ```
 
-[`examples/`](examples/) contains small example programs that can read state from the car and control the steering, gas, and brakes.
-[`examples/joystick.py`](examples/joystick.py) allows you to control a car with a joystick.
+* [`examples/`](examples/) contains small example programs that can read state from the car and control the steering, gas, and brakes.
+* [`examples/joystick.py`](examples/joystick.py) allows you to control a car with a joystick.
+* running with `FAST=1` results in snappier build times (ie. `FAST=1 ./test.sh`)
 
 ### Project Structure
 * [`opendbc/dbc/`](opendbc/dbc/) is a repository of [DBC](https://en.wikipedia.org/wiki/CAN_bus#DBC) files

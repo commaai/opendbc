@@ -3,15 +3,18 @@ import subprocess
 import sysconfig
 import platform
 import numpy as np
+from pathlib import Path
 
 arch = subprocess.check_output(["uname", "-m"], encoding='utf8').rstrip()
 if platform.system() == "Darwin":
   arch = "Darwin"
 
+os.environ['PYTHONPATH'] = str(Path(sysconfig.get_paths()['data']).parent)
 python_path = sysconfig.get_paths()['include']
 cpppath = [
   '#',
   '/usr/lib/include',
+  '/opt/homebrew/include',
   python_path
 ]
 
@@ -35,7 +38,7 @@ env = Environment(
   CCFLAGS=[
     "-g",
     "-fPIC",
-    "-O2",
+    "-O0" if os.environ.get("FAST") else "-O2",
     "-Wunused",
     "-Werror",
     "-Wshadow",
@@ -46,6 +49,7 @@ env = Environment(
   LINKFLAGS=ldflags_asan,
   LIBPATH=[
     "#opendbc/can/",
+    "/opt/homebrew/lib",
   ],
   CFLAGS="-std=gnu11",
   CXXFLAGS=["-std=c++1z"],
