@@ -29,7 +29,7 @@ class CarState(CarStateBase):
     ret.vEgoRaw = cp_adas.vl['HS2_DYN_ABR_38D']['VITESSE_VEHICULE_ROUES'] * CV.KPH_TO_MS # HS2
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.yawRate = cp_adas.vl['HS2_DYN_UCF_MDD_32D']['VITESSE_LACET_BRUTE'] * CV.DEG_TO_RAD # HS2 TODO: only on BUS1
-    ret.standstill = not ret.vEgoRaw > 0.01  # TODO
+    ret.standstill = bool(cp_adas.vl['HS2_DYN_UCF_MDD_32D']['VEHICLE_STANDSTILL'])
 
     # gas
     ret.gas = cp_main.vl['DRIVER']['GAS_PEDAL'] / 99.5 # HS1
