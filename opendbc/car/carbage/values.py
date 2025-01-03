@@ -40,7 +40,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
 
 class CarControllerParams:
   STEER_STEP = 1
-  STEER_MAX = 1500
+  STEER_MAX = 500 # TODO: put this back at 1500 when hydraulic is reduced
   STEER_ERROR_MAX = 350     # max delta between torque cmd and torque motor
 
   # Lane Tracing Assist (LTA) control limits
