@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
 from panda import uds
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, AngleRateLimit
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
@@ -15,6 +15,11 @@ Ecu = CarParams.Ecu
 class CarControllerParams:
   ACCEL_MIN = -3.5 # m/s
   ACCEL_MAX = 2.0 # m/s
+
+  # TODO: seen changing at 0.2 deg/frame down, 0.1 deg/frame up at 100Hz, testing with IONIQ5_PE 2025(The New IONIQ5)
+  ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[7.0, 1.12, 0.21])
+  ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[7.0, 4.9, 0.56])
+  LKAS_MAX_TORQUE = 180  # max 255, seems related to steer movement speed or power
 
   def __init__(self, CP):
     self.STEER_DELTA_UP = 3
@@ -97,6 +102,8 @@ class HyundaiFlags(IntFlag):
   TCU_GEARS = 2 ** 22
 
   MIN_STEER_32_MPH = 2 ** 23
+
+  ANGLE_CONTROL = 2 ** 24
 
 
 class Footnote(Enum):
@@ -488,6 +495,13 @@ class CAR(Platforms):
     CarSpecs(mass=2055, wheelbase=2.9, steerRatio=16, tireStiffnessFactor=0.65),
     flags=HyundaiFlags.EV,
   )
+  KIA_EV6_2025 = HyundaiCanFDPlatformConfig(
+    [
+      HyundaiCarDocs("Kia EV6 (with HDA II) 2025", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_p]))
+    ],
+    CarSpecs(mass=2055, wheelbase=2.9, steerRatio=16, tireStiffnessFactor=0.65),
+    flags=HyundaiFlags.EV | HyundaiFlags.ANGLE_CONTROL,
+  )
   KIA_CARNIVAL_4TH_GEN = HyundaiCanFDPlatformConfig(
     [
       HyundaiCarDocs("Kia Carnival 2022-24", car_parts=CarParts.common([CarHarness.hyundai_a])),
@@ -555,6 +569,13 @@ class CAR(Platforms):
     [HyundaiCarDocs("Genesis GV80 2023", "All", car_parts=CarParts.common([CarHarness.hyundai_m]))],
     CarSpecs(mass=2258, wheelbase=2.95, steerRatio=14.14),
     flags=HyundaiFlags.RADAR_SCC,
+  )
+  KIA_EV9 = HyundaiCanFDPlatformConfig(
+    [
+      HyundaiCarDocs("Kia EV9", "All", car_parts=CarParts.common([CarHarness.hyundai_r]))
+    ],
+    CarSpecs(mass=2960, wheelbase=3.1, steerRatio=16.02),
+    flags=HyundaiFlags.EV | HyundaiFlags.ANGLE_CONTROL,
   )
 
 
@@ -758,6 +779,8 @@ HYBRID_CAR = CAR.with_flags(HyundaiFlags.HYBRID)
 EV_CAR = CAR.with_flags(HyundaiFlags.EV)
 
 LEGACY_SAFETY_MODE_CAR = CAR.with_flags(HyundaiFlags.LEGACY)
+
+ANGLE_CONTROL_CAR = CAR.with_flags(HyundaiFlags.ANGLE_CONTROL)
 
 # TODO: another PR with (HyundaiFlags.LEGACY | HyundaiFlags.UNSUPPORTED_LONGITUDINAL | HyundaiFlags.CAMERA_SCC |
 #       HyundaiFlags.CANFD_RADAR_SCC | HyundaiFlags.CANFD_NO_RADAR_DISABLE | )
