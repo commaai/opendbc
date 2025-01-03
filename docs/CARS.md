@@ -92,7 +92,7 @@
 |Honda|Passport 2019-23|All|[Upstream](#upstream)|
 |Honda|Pilot 2016-22|Honda Sensing|[Upstream](#upstream)|
 |Honda|Pilot 2023-24|All|[Community](#community)|
-|Honda|Ridgeline 2017-24|Honda Sensing|[Upstream](#upstream)|
+|Honda|Ridgeline 2017-25|Honda Sensing|[Upstream](#upstream)|
 |Hyundai|Azera 2022|All|[Upstream](#upstream)|
 |Hyundai|Azera Hybrid 2019|All|[Upstream](#upstream)|
 |Hyundai|Azera Hybrid 2020|All|[Upstream](#upstream)|
