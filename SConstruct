@@ -3,11 +3,13 @@ import subprocess
 import sysconfig
 import platform
 import numpy as np
+from pathlib import Path
 
 arch = subprocess.check_output(["uname", "-m"], encoding='utf8').rstrip()
 if platform.system() == "Darwin":
   arch = "Darwin"
 
+os.environ['PYTHONPATH'] = str(Path(sysconfig.get_paths()['data']).parent)
 python_path = sysconfig.get_paths()['include']
 cpppath = [
   '#',
