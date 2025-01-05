@@ -36,16 +36,15 @@ class CarState(CarStateBase):
     ret.gasPressed = ret.gas > 0
 
     # brake
-    # ret.brake = cp.vl['HS2_DYN_UCF_2CD']['AUTO_BRAKING_PRESSURE'] / 50.6 # HS2 alternative
     ret.brake = cp.vl['Dyn2_FRE']['BRAKE_PRESSURE'] / 1500.  # HS1
     ret.brakePressed = bool(cp_main.vl['Dat_BSI']['P013_MainBrake']) # HS1
-    ret.parkingBrake = cp.vl['Dyn_EasyMove']['P337_Com_stPrkBrk'] == 1 # 0: disengaged, 1: engaged, 3: brake moving # TODO bool(cp_main.vl['Dat_BSI']['PARKING_BRAKE']) is wrong signal
+    ret.parkingBrake = cp.vl['Dyn_EasyMove']['P337_Com_stPrkBrk'] == 1 # 0: disengaged, 1: engaged, 3: brake actuator moving
+    # TODO (corsa-e only?) bool(cp_main.vl['Dat_BSI']['PARKING_BRAKE'])
 
     # steering wheel
     ret.steeringAngleDeg = cp.vl['STEERING_ALT']['ANGLE'] # EPS
     ret.steeringRateDeg = cp.vl['STEERING_ALT']['RATE'] * cp.vl['STEERING_ALT']['RATE_SIGN']  # EPS: Rotation speed * rotation sign/direction
     ret.steeringTorque = cp.vl['STEERING']['DRIVER_TORQUE']
-    # ret.steeringTorqueEps = cp_main.vl['LANE_KEEP_ASSIST']['TORQUE']# TODO: find signal
     ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > CarControllerParams.STEER_DRIVER_ALLOWANCE, 5)  # TODO: adjust threshold
     ret.steerFaultTemporary = False  # TODO
     ret.steerFaultPermanent = False  # TODO
@@ -61,7 +60,6 @@ class CarState(CarStateBase):
     ret.accFaulted = False
 
     # gear
-    # reverse is same for automatic and manual
     if self.CP.transmissionType == TransmissionType.manual:
       ret.clutchPressed = bool(cp.vl['Dyn2_CMM']['P091_ConvCD_stDebVal']) # HS1
     if bool(cp_main.vl['Dat_BSI']['P103_Com_bRevGear']): # HS1
@@ -87,8 +85,6 @@ class CarState(CarStateBase):
     ret.doorOpen = any([cp_main.vl['Dat_BSI']['DRIVER_DOOR'], cp_main.vl['Dat_BSI']['PASSENGER_DOOR']]) # HS1
     ret.seatbeltUnlatched = cp_main.vl['RESTRAINTS']['DRIVER_SEATBELT'] != 2
 
-    # TODO: remove, for testing, original LKA message
-    self.original_lka_values = cp_main.vl['LANE_KEEP_ASSIST']
     return ret
 
   @staticmethod

@@ -21,14 +21,14 @@ class CarInterface(CarInterfaceBase):
 
     if not docs:
       ret.transmissionType = TransmissionType.automatic # TODO: implement manual
-      ret.minEnableSpeed = 30 * CV.KPH_TO_MS  # 19 mph, TODO: 40kph/25mph for non-ACC variants
+      ret.minEnableSpeed = 0 # for ACC-variants TODO: 40kph/25mph for non-ACC variants
     ret.minSteerSpeed = 0.
 
     ret.autoResumeSng = ret.minEnableSpeed == -1 # TODO: check
     ret.centerToFront = ret.wheelbase * 0.44  # TODO: verify
     ret.wheelSpeedFactor = 1.04
 
-    # TODO: check if blindspot sensors available
-    ret.enableBsm = True
+    # TODO: find Blindspot variants
+    ret.enableBsm = False
 
     return ret

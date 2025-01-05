@@ -21,7 +21,7 @@ def calculate_checksum(dat: bytearray) -> int:
   checksum = sum((b >> 4) + (b & 0xF) for b in dat)
   return (11 - checksum) & 0xF
 
-def create_lka_msg(packer, CP, apply_angle: float, frame: int, lat_active: bool, ramp_value: int):
+def create_lka_msg(packer, CP, frame: int, lat_active: bool, apply_angle: float):
   values = {
     'DRIVE': 1,
     'COUNTER': (frame // 5) % 0x10,
