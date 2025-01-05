@@ -21,14 +21,22 @@ def calculate_checksum(dat: bytearray) -> int:
   checksum = sum((b >> 4) + (b & 0xF) for b in dat)
   return (11 - checksum) & 0xF
 
-def create_lka_msg(packer, CP, apply_angle: float, frame: int, lat_active: bool, ramp_value: int):
+def get_status(frame: int, lat_active: bool, _state={"activation_frame": 0, "lat_active_prev": False}) -> int:
+    if not _state["lat_active_prev"] and lat_active:
+        _state["activation_frame"] = frame
+    _state["lat_active_prev"] = lat_active
+    if not lat_active:
+        return 2
+    return 2 + min((frame - _state["activation_frame"]), 2)
+
+def create_lka_msg(packer, CP, apply_angle: float, frame: int, lat_active: bool, ramp_value: int, steeringPressed: bool):
   values = {
     'DRIVE': 1,
     'COUNTER': (frame // 5) % 0x10,
     'CHECKSUM': 0,
-    'STATUS': (((frame // 5) % 3) + 2) if lat_active else 2,  # ramp status 2->3->4->2->3->4, 2: READY, 3: AUTHORIZED, 4: ACTIVE
+    'STATUS': get_status(frame, lat_active), # 2: READY, 3: AUTHORIZED, 4: ACTIVE
     'LXA_ACTIVATION': 1,
-    'TORQUE_FACTOR': ramp_value,
+    'TORQUE_FACTOR': lat_active * 100,
     'SET_ANGLE': apply_angle,
   }
 
