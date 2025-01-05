@@ -259,7 +259,7 @@ BO_ 973 Dyn2_FRE: 8 ABS___Antiblockiersystem
  SG_ P319_FrmMng_rClthPos : 56|8@1+ (0.5,0) [0|255] "%" Vector__XXX
 
 BO_ 1010 LANE_KEEP_ASSIST: 8 XXX
- SG_ unknown1 : 6|1@0+ (1,0) [0|1] "" XXX
+ SG_ DRIVE : 6|1@0+ (1,0) [0|1] "" XXX
  SG_ COUNTER : 11|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 15|4@0+ (1,0) [0|15] "" XXX
  SG_ unknown2 : 23|8@0+ (1,0) [0|255] "" XXX

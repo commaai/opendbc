@@ -23,10 +23,11 @@ def calculate_checksum(dat: bytearray) -> int:
 
 def create_lka_msg(packer, CP, apply_angle: float, frame: int, lat_active: bool, ramp_value: int):
   values = {
+    'DRIVE': 1,
     'COUNTER': (frame // 5) % 0x10,
     'CHECKSUM': 0,
     'STATUS': (((frame // 5) % 3) + 2) if lat_active else 2,  # ramp status 2->3->4->2->3->4, 2: READY, 3: AUTHORIZED, 4: ACTIVE
-    'LXA_ACTIVATION': lat_active,
+    'LXA_ACTIVATION': 1,
     'TORQUE_FACTOR': ramp_value,
     'SET_ANGLE': apply_angle,
   }
