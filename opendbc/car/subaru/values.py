@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
-from panda import uds
+from opendbc.can import uds
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Tool, Column
@@ -52,6 +52,12 @@ class CarControllerParams:
 
   BRAKE_LOOKUP_BP = [-3.5, 0]
   BRAKE_LOOKUP_V = [BRAKE_MAX, BRAKE_MIN]
+
+
+class SubaruPandaFlags(IntFlag):
+  FLAG_SUBARU_GEN2 = 1
+  FLAG_SUBARU_LONG = 2
+  FLAG_SUBARU_PREGLOBAL_REVERSED_DRIVER_TORQUE = 4
 
 
 class SubaruFlags(IntFlag):
@@ -105,6 +111,7 @@ class SubaruCarDocs(CarDocs):
 @dataclass
 class SubaruPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'subaru_global_2017_generated'})
+  safety_file = "safety_subaru.h"
 
   def init(self):
     if self.flags & SubaruFlags.HYBRID:
@@ -173,24 +180,28 @@ class CAR(Platforms):
     CarSpecs(mass=1568, wheelbase=2.67, steerRatio=20),
     {Bus.pt: 'subaru_forester_2017_generated'},
     flags=SubaruFlags.PREGLOBAL,
+    safety_file="safety_subaru_preglobal.h",
   )
   SUBARU_LEGACY_PREGLOBAL = SubaruPlatformConfig(
     [SubaruCarDocs("Subaru Legacy 2015-18")],
     CarSpecs(mass=1568, wheelbase=2.67, steerRatio=12.5),
     {Bus.pt: 'subaru_outback_2015_generated'},
     flags=SubaruFlags.PREGLOBAL,
+    safety_file="safety_subaru_preglobal.h",
   )
   SUBARU_OUTBACK_PREGLOBAL = SubaruPlatformConfig(
     [SubaruCarDocs("Subaru Outback 2015-17")],
     SUBARU_FORESTER_PREGLOBAL.specs,
     {Bus.pt: 'subaru_outback_2015_generated'},
     flags=SubaruFlags.PREGLOBAL,
+    safety_file="safety_subaru_preglobal.h",
   )
   SUBARU_OUTBACK_PREGLOBAL_2018 = SubaruPlatformConfig(
     [SubaruCarDocs("Subaru Outback 2018-19")],
     SUBARU_FORESTER_PREGLOBAL.specs,
     {Bus.pt: 'subaru_outback_2019_generated'},
     flags=SubaruFlags.PREGLOBAL,
+    safety_file="safety_subaru_preglobal.h",
   )
   # Angle LKAS
   SUBARU_FORESTER_2022 = SubaruPlatformConfig(

@@ -2,7 +2,7 @@ from collections import defaultdict, namedtuple
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag, StrEnum
 
-from panda import uds
+from opendbc.can import uds
 from opendbc.can.can_define import CANDefine
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.common.conversions import Conversions as CV
@@ -132,6 +132,10 @@ class WMI(StrEnum):
   VOLKSWAGEN_GROUP_RUS = "XW8"
 
 
+class VolkswagenPandaFlags(IntFlag):
+  FLAG_VOLKSWAGEN_LONG_CONTROL = 1
+
+
 class VolkswagenFlags(IntFlag):
   # Detected flags
   STOCK_HCA_PRESENT = 1
@@ -143,6 +147,7 @@ class VolkswagenFlags(IntFlag):
 @dataclass
 class VolkswagenMQBPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'vw_mqb_2010'})
+  safety_file = "safety_volkswagen_mqb.h"
   # Volkswagen uses the VIN WMI and chassis code to match in the absence of the comma power
   # on camera-integrated cars, as we lose too many ECUs to reliably identify the vehicle
   chassis_codes: set[str] = field(default_factory=set)
@@ -152,6 +157,7 @@ class VolkswagenMQBPlatformConfig(PlatformConfig):
 @dataclass
 class VolkswagenPQPlatformConfig(VolkswagenMQBPlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'vw_golf_mk4'})
+  safety_file = "safety_volkswagen_pq.h"
 
   def init(self):
     self.flags |= VolkswagenFlags.PQ
