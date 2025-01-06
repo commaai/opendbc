@@ -104,6 +104,10 @@ class Footnote(Enum):
   CIVIC_DIESEL = CarFootnote(
     "2019 Honda Civic 1.6L Diesel Sedan does not have ALC below 12mph.",
     Column.FSR_STEERING)
+  OP_STEER_TO_ZERO = CarFootnote(
+    "This car is capable of ALC at all speeds when openpilot ACC is enabled. " +
+    "<b><i>NOTE: The car's radar and all related features such as AEB and FCW will be disabled.</i></b>",
+    Column.FSR_STEERING)
 
 
 class HondaBoschPlatformConfig(PlatformConfig):
@@ -173,6 +177,12 @@ class CAR(Platforms):
     CarSpecs(mass=3125 * CV.LB_TO_KG, wheelbase=2.61, steerRatio=15.2, centerToFrontRatio=0.41, tireStiffnessFactor=0.5),
     {Bus.pt: 'honda_civic_ex_2022_can_generated'},
     flags=HondaFlags.BOSCH_RADARLESS,
+  )
+  HONDA_ODYSSEY_BOSCH = HondaBoschPlatformConfig(
+    [HondaCarDocs("Honda Odyssey 2021-25", "All", footnotes=[Footnote.OP_STEER_TO_ZERO])],
+    CarSpecs(mass=2087, wheelbase=3.0, steerRatio=14.35, centerToFrontRatio=0.41, tireStiffnessFactor=0.82, minSteerSpeed=47. * CV.MPH_TO_MS),
+    {Bus.pt: 'acura_rdx_2020_can_generated'},
+    flags=HondaFlags.BOSCH_ALT_BRAKE,
   )
   ACURA_RDX_3G = HondaBoschPlatformConfig(
     [HondaCarDocs("Acura RDX 2019-22", "All", min_steer_speed=3. * CV.MPH_TO_MS)],
@@ -308,9 +318,9 @@ FW_QUERY_CONFIG = FwQueryConfig(
   # Note that we still attempt to match with them when they are present
   # This is or'd with (ALL_ECUS - ESSENTIAL_ECUS) from fw_versions.py
   non_essential_ecus={
-    Ecu.eps: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_CIVIC_2022, CAR.HONDA_E, CAR.HONDA_HRV_3G],
+    Ecu.eps: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_CIVIC_2022, CAR.HONDA_E, CAR.HONDA_HRV_3G, CAR.HONDA_ODYSSEY_BOSCH],
     Ecu.vsa: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_CIVIC, CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_2022, CAR.HONDA_CRV_5G, CAR.HONDA_CRV_HYBRID,
-              CAR.HONDA_E, CAR.HONDA_HRV_3G, CAR.HONDA_INSIGHT],
+              CAR.HONDA_E, CAR.HONDA_HRV_3G, CAR.HONDA_INSIGHT, CAR.HONDA_ODYSSEY_BOSCH],
   },
   extra_ecus=[
     (Ecu.combinationMeter, 0x18da60f1, None),
