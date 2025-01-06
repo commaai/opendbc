@@ -5,6 +5,8 @@ from opendbc.car.psa.psacan import CanBus
 from opendbc.car.psa.values import DBC, CarControllerParams
 from opendbc.car.interfaces import CarStateBase
 
+STANDSTILL_THRESHOLD = 0.375 # kph
+
 GearShifter = structs.CarState.GearShifter
 TransmissionType = structs.CarParams.TransmissionType
 
@@ -28,8 +30,8 @@ class CarState(CarStateBase):
     )
     ret.vEgoRaw = cp_adas.vl['HS2_DYN_ABR_38D']['VITESSE_VEHICULE_ROUES'] * CV.KPH_TO_MS # HS2
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
-    ret.yawRate = cp_adas.vl['HS2_DYN_UCF_MDD_32D']['VITESSE_LACET_BRUTE'] * CV.DEG_TO_RAD # HS2 TODO: only on BUS1
-    ret.standstill = bool(cp_adas.vl['HS2_DYN_UCF_MDD_32D']['VEHICLE_STANDSTILL'])
+    ret.yawRate = cp_adas.vl['HS2_DYN_UCF_MDD_32D']['VITESSE_LACET_BRUTE'] * CV.DEG_TO_RAD # HS2
+    ret.standstill = abs(ret.wheelSpeeds.rl) <= STANDSTILL_THRESHOLD and abs(ret.wheelSpeeds.rr) <= STANDSTILL_THRESHOLD
 
     # gas
     ret.gas = cp_main.vl['DRIVER']['GAS_PEDAL'] / 99.5 # HS1
@@ -48,15 +50,15 @@ class CarState(CarStateBase):
     ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > CarControllerParams.STEER_DRIVER_ALLOWANCE, 5)  # TODO: adjust threshold
     ret.steerFaultTemporary = False  # TODO
     ret.steerFaultPermanent = False  # TODO
-    ret.espDisabled = False  # TODO found possible signal: LKAS_RELATED: ESP_STATUS
+    ret.espDisabled = bool(cp_adas.vl['ESP']['ESP_STATUS_INV'])
 
     # cruise
     # note: this is just for ACC car not CC right now
     ret.cruiseState.speed = cp_adas.vl['HS2_DAT_MDD_CMD_452']['CONS_LIM_VITESSE_VEH'] * CV.KPH_TO_MS # HS2, set to 255 when ACC is off
     ret.cruiseState.enabled = cp_adas.vl['HS2_DAT_MDD_CMD_452']['DDE_ACTIVATION_RVV_ACC'] == 1 # HS2
-    ret.cruiseState.available = True  # TODO
+    ret.cruiseState.available = cp_adas.vl['HS2_DYN1_MDD_ETAT_2B6']['ACC_STATUS'] > 2 # HS2
     ret.cruiseState.nonAdaptive = False # cp_adas.vl['HS2_DAT_MDD_CMD_452']['COCKPIT_GO_ACC_REQUEST'] == 0 # HS2, 0: CC, 1: ACC, no signal in route
-    ret.cruiseState.standstill = False  # TODO
+    ret.cruiseState.standstill = bool(cp_adas.vl['HS2_DYN_UCF_MDD_32D']['VEHICLE_STANDSTILL'])
     ret.accFaulted = False
 
     # gear
@@ -98,9 +100,11 @@ class CarState(CarStateBase):
       ('Dyn_EasyMove', 50),
     ]
     adas_messages = [
+      ('ESP', 50),
       ('HS2_DYN_ABR_38D', 25),
       ('HS2_DYN_UCF_MDD_32D', 50),
       ('HS2_DAT_MDD_CMD_452', 20),
+      ('HS2_DYN1_MDD_ETAT_2B6', 50),
     ]
     main_messages = [
       ('Dat_BSI', 20),
@@ -110,7 +114,7 @@ class CarState(CarStateBase):
       ('LANE_KEEP_ASSIST', 20), # TODO remove if unused
     ]
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 2),
+      Bus.main: CANParser(DBC[CP.carFingerprint][Bus.main], main_messages, 0),
       Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.adas], adas_messages, 1),
-      Bus.main: CANParser(DBC[CP.carFingerprint][Bus.main], main_messages, 0)
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 2),
     }

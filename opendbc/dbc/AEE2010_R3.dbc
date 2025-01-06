@@ -67,7 +67,7 @@ BO_ 264 Vers_CMM: 8 CMM___Motor_SG
  SG_ P082_Edition : 48|8@1+ (1,0) [0|255] "-" Vector__XXX
  SG_ P083_Calibration : 56|8@1+ (1,0) [0|255] "-" Vector__XXX
 
-BO_ 461 LKA_RELATED_2: 3 XXX
+BO_ 461 ESP: 3 XXX
  SG_ COUNTER : 3|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 4|4@1+ (1,0) [0|15] "" XXX
  SG_ UNCLEAR : 14|10@0+ (1,0) [0|1023] "" XXX
@@ -101,11 +101,22 @@ BO_ 552 Dyn5_CMM: 5 CMM___Motor_SG
  SG_ P335_Com_ctDyn5CMMCntr : 28|4@1+ (1,0) [0|15] "" Vector__XXX
  SG_ P388_Com_rClthPedPos : 39|8@0+ (0.5,0) [0|100] "" Vector__XXX
 
-BO_ 694 LKA_RELATED: 8 XXX
- SG_ LKA_ACTIVE : 11|5@1+ (1,0) [0|31] "" XXX
- SG_ ESP_STATUS_RELATED : 24|1@0+ (1,0) [0|1] "" XXX
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
- SG_ COUNTER : 63|4@0+ (1,0) [0|15] "" XXX
+BO_ 694 HS2_DYN1_MDD_ETAT_2B6: 8 ARTIV
+ SG_ MDD_DESIRED_DECELERATION : 7|8@0+ (0.05,-10.65) [-10.65|2] "m/s2" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
+ SG_ POTENTIAL_TORQUE_WHEEL_REQUEST : 9|2@0+ (1,0) [0|0] "" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
+ SG_ MIN_TIME_FOR_DESIRED_GEAR : 15|6@0+ (0.1,0) [0|6.2] "s" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
+ SG_ MIN_TIME_FOR_MONITORED_GEAR : 15|6@0+ (0.1,0) [0|6.2] "s" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
+ SG_ GMP_POTENTIAL_WHEEL_TORQUE : 23|12@0+ (4,-4000) [-4000|11000] "N.m" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
+ SG_ ACC_STATUS : 27|4@0+ (1,0) [0|0] "" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
+ SG_ GMP_WHEEL_TORQUE : 39|14@0+ (1,-4000) [-4000|11000] "N.m" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
+ SG_ WHEEL_TORQUE_REQUEST : 41|2@0+ (1,0) [0|0] "" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
+ SG_ FA_SYSTEM_STATE : 50|3@0+ (1,0) [0|0] "" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
+ SG_ MDD_DECEL_TYPE : 52|2@0+ (1,0) [0|0] "" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
+ SG_ MDD_PLT_DECEL_REQUEST : 53|1@0+ (1,0) [0|0] "" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
+ SG_ GEAR_TYPE : 54|1@0+ (1,0) [0|0] "" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
+ SG_ PREFILL_REQUEST : 55|1@0+ (1,0) [0|0] "" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
+ SG_ DYN_ACC_CHECKSUM : 59|4@0+ (1,0) [0|0] "" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
+ SG_ DYN_ACC_PROCESS_COUNTER : 63|4@0+ (1,0) [0|15] "" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
 
 BO_ 717 HS2_DYN_UCF_2CD: 3 UC_FREIN
  SG_ AUTO_BRAKING_PRESSURE : 7|8@0+ (0.2,0) [0|50.6] "bar" BV,BVN
@@ -416,7 +427,6 @@ BO_ 1362 DAT4_BSI_AEE2010: 8 Vector__XXX
 BO_ 1375 ACQ_NEW_JDD: 1 Vector__XXX
  SG_ P__JDD_Com_stFaultAck : 7|8@0+ (1,0) [0|255] "" Vector__XXX
 
-
 BO_ 1390 DRIVER: 6 XXX
  SG_ NEW_SIGNAL_3 : 0|1@0+ (1,0) [0|1] "" XXX
  SG_ BRIGHTNESS_SETTING : 7|4@0+ (1,0) [0|15] "" XXX
@@ -674,6 +684,9 @@ CM_ SG_ 520 P042_Inm_bCanMon "P042  CAN-Fehlerbehandlung im Startfall mit Hilfe 
           Startendekennung unterdrücken";
 CM_ SG_ 520 P127_EGT_st_Bit30 "P127: Regeneration aid by electric consumers (engine load increase).";
 CM_ SG_ 520 P198_ActMod_trqClthTraIntv "P084  Vorweggenommenes Drehmoment";
+CM_ SG_ 694 ACC_STATUS "Indicates the operating state of the Adaptive Cruise Control (ACC) system.";
+CM_ SG_ 694 DYN_ACC_CHECKSUM "CHK_INI = 0x3";
+CM_ SG_ 694 DYN_ACC_PROCESS_COUNTER "This counter increments from 0 to 15 at each activation of the calculation process.";
 CM_ SG_ 757 ANGLE "asymmetric, could be init";
 CM_ SG_ 773 ANGLE "-565 to 560, seems like estimate and not init";
 CM_ SG_ 773 RATE_SIGN "1=moving clockwise, 0=moving anticlockwise";
@@ -809,8 +822,14 @@ CM_ SG_ 3221225472 P284_T15CD_stPart_byte8 "ECU electronic state";
 CM_ SG_ 3221225472 Reserved_1 "P074  Number of BusOff in driving cycle";
 VAL_ 461 ESP_STATUS 0 "DISABLED" 1 "ENABLED";
 VAL_ 461 ESP_STATUS_INV 0 "ENABLED" 1 "DISABLED";
-VAL_ 694 LKA_ACTIVE 0 "INACTIVE" 31 "ACTIVE";
-VAL_ 694 ESP_STATUS_RELATED 0 "DISABLED" 1 "ENABLED";
+VAL_ 694 POTENTIAL_TORQUE_WHEEL_REQUEST 0 "Not requested" 1 "Requested in GMP mode" 2 "Requested in Brake mode" 3 "Not used";
+VAL_ 694 ACC_STATUS 0 "Initialization" 1 "OFF" 2 "Inhibited" 3 "Waiting" 4 "Active" 5 "Suspended" 6 "Brake only" 7 "Waiting ramp" 8 "Reserved" 9 "Reserved" 10 "Reserved" 11 "Reserved" 12 "Reserved" 13 "Reserved" 14 "Reserved" 15 "Fault";
+VAL_ 694 WHEEL_TORQUE_REQUEST 0 "Not requested" 1 "High range requested" 2 "Low range requested" 3 "Not used";
+VAL_ 694 FA_SYSTEM_STATE 0 "Unavailable" 1 "Initialization" 2 "Not used" 3 "Inhibited" 4 "Not used" 5 "Waiting" 6 "Active" 7 "Fault";
+VAL_ 694 MDD_DECEL_TYPE 0 "No braking" 1 "ACC" 2 "FA_HV (high-speed automatic braking) / AFUi braking" 3 "FA_BV (low-speed automatic braking) / FARC2 braking";
+VAL_ 694 MDD_PLT_DECEL_REQUEST 0 "No pilot request UCF" 1 "Pilot request UCF";
+VAL_ 694 GEAR_TYPE 0 "Downshift" 1 "Upshift";
+VAL_ 694 PREFILL_REQUEST 0 "No prefill request" 1 "Prefill request";
 VAL_ 728 ESP_STATUS_RELATED 0 "DISABLED" 1 "ENABLED";
 VAL_ 728 ESP_STATUS_RELATED_INV 0 "ENABLED" 1 "DISABLED";
 VAL_ 760 ESP_STATUS_RELATED 0 "DISABLED" 1 "ENABLED";
