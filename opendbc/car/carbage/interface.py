@@ -13,7 +13,12 @@ class CarInterface(CarInterfaceBase):
     # don't want have another custom submodule
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.volkswagenMqbEvo)]
 
-    CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
+    #CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
+    ret.lateralTuning.init('pid')
+    ret.lateralTuning.pid.kpBP, ret.lateralTuning.pid.kiBP = [[9., 20.], [9., 20.]]
+    ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.15, 0.30], [0.03, 0.05]]
+    ret.lateralTuning.pid.kf = 0.00006
+
     ret.steerLimitTimer = 0.4
     ret.steerActuatorDelay = 0.12
 
