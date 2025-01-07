@@ -375,28 +375,29 @@ INTERFACE_ATTR_FILE = {
 
 # interface-specific helpers
 
-_brand_values = {}  # attr_file => brand_name => module
-_brand_names = None
+@cache
+def _get_brand_names() -> list[str]:
+  return [folder.split('/')[-1] for folder in sorted(x[0] for x in os.walk(BASEDIR))]
+
+
+@cache
+def _get_brand_values_for_attr(brand_name: str, attr: str) -> Any | None:
+  attr_file = INTERFACE_ATTR_FILE.get(attr, "values")
+  try:
+    return __import__(f'opendbc.car.{brand_name}.{attr_file}', fromlist=[attr])
+  except (ImportError, OSError):
+    pass
+  return None
+
+
 def get_interface_attr(attr: str, combine_brands: bool = False, ignore_none: bool = False) -> dict[str | StrEnum, Any]:
-  global _brand_names
   # read all the folders in opendbc/car and return a dict where:
   # - keys are all the car models or brand names
   # - values are attr values from all car folders
   result = {}
-  attr_file = INTERFACE_ATTR_FILE.get(attr, "values")
-  if _brand_names is None:
-    _brand_names = [folder.split('/')[-1] for folder in sorted(x[0] for x in os.walk(BASEDIR))]
-  if attr_file not in _brand_values:
-    _brand_values[attr_file] = {}
-    for brand_name in _brand_names:
-      try:
-        brand_values = __import__(f'opendbc.car.{brand_name}.{attr_file}', fromlist=[attr])
-        _brand_values[attr_file][brand_name] = brand_values
-      except (ImportError, OSError):
-        pass
 
-  for brand_name in _brand_names:
-    brand_values = _brand_values[attr_file].get(brand_name)
+  for brand_name in _get_brand_names():
+    brand_values = _get_brand_values_for_attr(brand_name, attr)
     if brand_values is None:
       # This was an ImportError or OSError, so we skip it
       continue
