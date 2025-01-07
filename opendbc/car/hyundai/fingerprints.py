@@ -1172,6 +1172,7 @@ FW_VERSIONS = {
       b'\xf1\x00KA4 MFC  AT USA LHD 1.00 1.05 99210-R0000 201221',
       b'\xf1\x00KA4 MFC  AT USA LHD 1.00 1.06 99210-R0000 220221',
       b'\xf1\x00KA4CMFC  AT CHN LHD 1.00 1.01 99211-I4000 210525',
+      b'\xf1\x00KA4 MFC  AT USA LHD 1.00 1.05 99210-R0500 240305',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00KA4_ SCC F-CUP      1.00 1.03 99110-R0000         ',
@@ -1179,6 +1180,8 @@ FW_VERSIONS = {
       b'\xf1\x00KA4_ SCC FHCUP      1.00 1.02 99110-R0000         ',
       b'\xf1\x00KA4_ SCC FHCUP      1.00 1.03 99110-R0000         ',
       b'\xf1\x00KA4c SCC FHCUP      1.00 1.01 99110-I4000         ',
+      b'\xf1\x00KA4_ SCC FHCUP      1.00 1.01 99110-R0510         ',
+      b'\xf1\x00KA4_ RDR -----      1.00 1.01 99110-R0510         ',
     ],
   },
   CAR.KIA_CARNIVAL_HEV_4TH_GEN: {
