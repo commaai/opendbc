@@ -1,9 +1,12 @@
 import os
 import subprocess
 import sysconfig
+import platform
 import numpy as np
 
 arch = subprocess.check_output(["uname", "-m"], encoding='utf8').rstrip()
+if platform.system() == "Darwin":
+  arch = "Darwin"
 
 python_path = sysconfig.get_paths()['include']
 cpppath = [
@@ -73,4 +76,4 @@ envCython["LIBS"] = python_libs
 
 Export('envCython')
 
-SConscript(['opendbc/can/SConscript'])
+SConscript(['SConscript'])

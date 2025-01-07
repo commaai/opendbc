@@ -1,14 +1,14 @@
 # functions common among cars
 import logging
 from collections import namedtuple
-from dataclasses import dataclass
-from enum import IntFlag, ReprEnum, EnumType
+from dataclasses import dataclass, field
+from enum import IntFlag, ReprEnum, StrEnum, EnumType, auto
 from dataclasses import replace
 
 from panda import uds
 from opendbc.car import structs
 from opendbc.car.can_definitions import CanData
-from opendbc.car.docs_definitions import CarDocs
+from opendbc.car.docs_definitions import CarDocs, ExtraCarDocs
 from opendbc.car.common.numpy_fast import clip, interp
 
 # set up logging
@@ -20,6 +20,8 @@ DT_CTRL = 0.01  # car state and control loop timestep (s)
 
 # kg of standard extra cargo to count for drive, gas, etc...
 STD_CARGO_KG = 136.
+
+ACCELERATION_DUE_TO_GRAVITY = 9.81  # m/s^2
 
 ButtonType = structs.CarState.ButtonEvent.Type
 AngleRateLimit = namedtuple('AngleRateLimit', ['speed_bp', 'angle_v'])
@@ -82,11 +84,20 @@ def scale_tire_stiffness(mass, wheelbase, center_to_front, tire_stiffness_factor
   return tire_stiffness_front, tire_stiffness_rear
 
 
-DbcDict = dict[str, str]
+DbcDict = dict[StrEnum, str]
 
-
-def dbc_dict(pt_dbc, radar_dbc, chassis_dbc=None, body_dbc=None) -> DbcDict:
-  return {'pt': pt_dbc, 'radar': radar_dbc, 'chassis': chassis_dbc, 'body': body_dbc}
+class Bus(StrEnum):
+  pt = auto()
+  cam = auto()
+  radar = auto()
+  adas = auto()
+  alt = auto()
+  body = auto()
+  chassis = auto()
+  loopback = auto()
+  main = auto()
+  party = auto()
+  ap_party = auto()
 
 
 def apply_driver_steer_torque_limits(apply_torque, apply_torque_last, driver_torque, LIMITS):
@@ -270,8 +281,8 @@ class Freezable:
 
 
 @dataclass(order=True)
-class PlatformConfig(Freezable):
-  car_docs: list[CarDocs]
+class PlatformConfigBase(Freezable):
+  car_docs: list[CarDocs] | list[ExtraCarDocs]
   specs: CarSpecs
 
   dbc_dict: DbcDict
@@ -293,6 +304,20 @@ class PlatformConfig(Freezable):
     self.init()
 
 
+@dataclass(order=True)
+class PlatformConfig(PlatformConfigBase):
+  car_docs: list[CarDocs]
+  specs: CarSpecs
+  dbc_dict: DbcDict
+
+
+@dataclass(order=True)
+class ExtraPlatformConfig(PlatformConfigBase):
+  car_docs: list[ExtraCarDocs]
+  specs: CarSpecs = CarSpecs(mass=0., wheelbase=0., steerRatio=0.)
+  dbc_dict: DbcDict = field(default_factory=lambda: dict())
+
+
 class PlatformsType(EnumType):
   def __new__(metacls, cls, bases, classdict, *, boundary=None, _simple=False, **kwds):
     for key in classdict._member_names.keys():
@@ -303,7 +328,7 @@ class PlatformsType(EnumType):
 
 
 class Platforms(str, ReprEnum, metaclass=PlatformsType):
-  config: PlatformConfig
+  config: PlatformConfigBase
 
   def __new__(cls, platform_config: PlatformConfig):
     member = str.__new__(cls, platform_config.platform_str)

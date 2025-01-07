@@ -5,8 +5,65 @@ from opendbc.can.packer import CANPacker
 
 class TestCanChecksums:
 
+  def verify_checksum(self, subtests, dbc_file: str, msg_name: str, msg_addr: int, test_messages: list[bytes],
+                      checksum_field: str = 'CHECKSUM', counter_field = 'COUNTER'):
+    """
+    Verify that opendbc calculates payload CRCs/checksums matching those received in known-good sample messages
+    Depends on all non-zero bits in the sample message having a corresponding DBC signal, add UNKNOWN signals if needed
+    """
+    parser = CANParser(dbc_file, [(msg_name, 0)], 0)
+    packer = CANPacker(dbc_file)
+
+    for data in test_messages:
+      expected_msg = (msg_addr, data, 0)
+      parser.update_strings([0, [expected_msg]])
+      expected = copy.deepcopy(parser.vl[msg_name])
+
+      modified = copy.deepcopy(expected)
+      modified.pop(checksum_field, None)
+      modified_msg = packer.make_can_msg(msg_name, 0, modified)
+
+      parser.update_strings([0, [modified_msg]])
+      tested = parser.vl[msg_name]
+      with subtests.test(counter=expected[counter_field]):
+        assert tested[checksum_field] == expected[checksum_field]
+
+  def verify_fca_giorgio_crc(self, subtests, msg_name: str, msg_addr: int, test_messages: list[bytes]):
+    """Test modified SAE J1850 CRCs, with special final XOR cases for EPS messages"""
+    assert len(test_messages) == 3
+    self.verify_checksum(subtests, "fca_giorgio", msg_name, msg_addr, test_messages)
+
+  def test_fca_giorgio_eps_1(self, subtests):
+    self.verify_fca_giorgio_crc(subtests, "EPS_1", 0xDE, [
+      b'\x17\x51\x97\xcc\x00\xdf',
+      b'\x17\x51\x97\xc9\x01\xa3',
+      b'\x17\x51\x97\xcc\x02\xe5',
+    ])
+
+  def test_fca_giorgio_eps_2(self, subtests):
+    self.verify_fca_giorgio_crc(subtests, "EPS_2", 0x106, [
+      b'\x7c\x43\x57\x60\x00\x00\xa1',
+      b'\x7c\x63\x58\xe0\x00\x01\xd5',
+      b'\x7c\x63\x58\xe0\x00\x02\xf2',
+    ])
+
+  def test_fca_giorgio_eps_3(self, subtests):
+    self.verify_fca_giorgio_crc(subtests, "EPS_3", 0x122, [
+      b'\x7b\x30\x00\xf8',
+      b'\x7b\x10\x01\x90',
+      b'\x7b\xf0\x02\x6e',
+    ])
+
+  def test_fca_giorgio_abs_2(self, subtests):
+    self.verify_fca_giorgio_crc(subtests, "ABS_2", 0xFE, [
+      b'\x7e\x38\x00\x7d\x10\x31\x80\x32',
+      b'\x7e\x38\x00\x7d\x10\x31\x81\x2f',
+      b'\x7e\x38\x00\x7d\x20\x31\x82\x20',
+    ])
+
   def test_honda_checksum(self):
     """Test checksums for Honda standard and extended CAN ids"""
+    # TODO: refactor to use self.verify_checksum()
     dbc_file = "honda_accord_2018_can_generated"
     msgs = [("LKAS_HUD", 0), ("LKAS_HUD_A", 0)]
     parser = CANParser(dbc_file, msgs, 0)
@@ -33,30 +90,13 @@ class TestCanChecksums:
       assert parser.vl['LKAS_HUD']['CHECKSUM'] == std
       assert parser.vl['LKAS_HUD_A']['CHECKSUM'] == ext
 
-  def verify_vw_mqb_crc(self, subtests, msg_name: str, msg_addr: int, test_messages: list[int], crc_field: str = 'CHECKSUM', counter_field: str = 'COUNTER'):
-    """Validates AUTOSAR E2E Profile 2 CRC calculation against recorded reference messages"""
-    dbc_file = "vw_mqb_2010"
-    parser = CANParser(dbc_file, [(msg_name, 0)], 0)
-    packer = CANPacker(dbc_file)
-
+  def verify_volkswagen_mqb_crc(self, subtests, msg_name: str, msg_addr: int, test_messages: list[bytes], counter_field: str = 'COUNTER'):
+    """Test AUTOSAR E2E Profile 2 CRCs"""
     assert len(test_messages) == 16  # All counter values must be tested
+    self.verify_checksum(subtests, "vw_mqb_2010", msg_name, msg_addr, test_messages, counter_field=counter_field)
 
-    for data in test_messages:
-      expected_msg = (msg_addr, data, 0)
-      parser.update_strings([0, [expected_msg]])
-      expected = copy.deepcopy(parser.vl[msg_name])
-
-      modified = copy.deepcopy(expected)
-      modified.pop(crc_field, None)
-      modified_msg = packer.make_can_msg(msg_name, 0, modified)
-
-      parser.update_strings([0, [modified_msg]])
-      tested = parser.vl[msg_name]
-      with subtests.test(counter=expected[counter_field]):
-        assert tested[crc_field] == expected[crc_field]
-
-  def test_vw_mqb_crc_LWI_01(self, subtests):
-    self.verify_vw_mqb_crc(subtests, "LWI_01", 0x86, [
+  def test_volkswagen_mqb_crc_lwi_01(self, subtests):
+    self.verify_volkswagen_mqb_crc(subtests, "LWI_01", 0x86, [
       b'\x6b\x00\xbd\x00\x00\x00\x00\x00',
       b'\xee\x01\x0a\x00\x00\x00\x00\x00',
       b'\xd8\x02\xa9\x00\x00\x00\x00\x00',
@@ -75,28 +115,8 @@ class TestCanChecksums:
       b'\x60\x0f\x62\xc0\x00\x00\x00\x00',
     ])
 
-  def test_vw_mqb_crc_ACC_02(self, subtests):
-    self.verify_vw_mqb_crc(subtests, "ACC_02", 780, [
-      b'\x82\xf0\x3f\x00\x40\x30\x00\x40',
-      b'\xe6\xf1\x3f\x00\x40\x30\x00\x40',
-      b'\x4a\xf2\x3f\x00\x40\x30\x00\x40',
-      b'\x2e\xf3\x3f\x00\x40\x30\x00\x40',
-      b'\x3d\xf4\x3f\x00\x40\x30\x00\x40',
-      b'\x59\xf5\x3f\x00\x40\x30\x00\x40',
-      b'\xf5\xf6\x3f\x00\x40\x30\x00\x40',
-      b'\x91\xf7\x3f\x00\x40\x30\x00\x40',
-      b'\xd3\xf8\x3f\x00\x40\x30\x00\x40',
-      b'\xb7\xf9\x3f\x00\x40\x30\x00\x40',
-      b'\x1b\xfa\x3f\x00\x40\x30\x00\x40',
-      b'\x7f\xfb\x3f\x00\x40\x30\x00\x40',
-      b'\x6c\xfc\x3f\x00\x40\x30\x00\x40',
-      b'\x08\xfd\x3f\x00\x40\x30\x00\x40',
-      b'\xa4\xfe\x3f\x00\x40\x30\x00\x40',
-      b'\xc0\xff\x3f\x00\x40\x30\x00\x40',
-    ])
-
-  def test_vw_mqb_crc_Airbag_01(self, subtests):
-    self.verify_vw_mqb_crc(subtests, "Airbag_01", 0x40, [
+  def test_volkswagen_mqb_crc_airbag_01(self, subtests):
+    self.verify_volkswagen_mqb_crc(subtests, "Airbag_01", 0x40, [
       b'\xaf\x00\x00\x80\xc0\x00\x20\x3e',
       b'\x54\x01\x00\x80\xc0\x00\x20\x1a',
       b'\x54\x02\x00\x80\xc0\x00\x60\x00',
@@ -115,8 +135,8 @@ class TestCanChecksums:
       b'\xe5\x0f\x00\x80\xc0\x00\x40\xf6',
     ])
 
-  def test_vw_mqb_crc_LH_EPS_03(self, subtests):
-    self.verify_vw_mqb_crc(subtests, "LH_EPS_03", 0x9F, [
+  def test_volkswagen_mqb_crc_lh_eps_03(self, subtests):
+    self.verify_volkswagen_mqb_crc(subtests, "LH_EPS_03", 0x9F, [
       b'\x11\x30\x2e\x00\x05\x1c\x80\x30',
       b'\x5b\x31\x8e\x03\x05\x53\x00\x30',
       b'\xcb\x32\xd3\x06\x05\x73\x00\x30',
@@ -135,8 +155,8 @@ class TestCanChecksums:
       b'\xe2\x3f\x05\x00\x05\x0a\x00\x30',
     ])
 
-  def test_vw_mqb_crc_Getriebe_11(self, subtests):
-    self.verify_vw_mqb_crc(subtests, "Getriebe_11", 0xAD, [
+  def test_volkswagen_mqb_crc_getriebe_11(self, subtests):
+    self.verify_volkswagen_mqb_crc(subtests, "Getriebe_11", 0xAD, [
       b'\xf8\xe0\xbf\xff\x5f\x20\x20\x20',
       b'\xb0\xe1\xbf\xff\xc6\x98\x21\x80',
       b'\xd2\xe2\xbf\xff\x5f\x20\x20\x20',
@@ -155,8 +175,8 @@ class TestCanChecksums:
       b'\x36\xef\xbf\xff\xaa\x20\x20\x10',
     ], counter_field="COUNTER_DISABLED")  # see opendbc#1235
 
-  def test_vw_mqb_crc_ESP_21(self, subtests):
-    self.verify_vw_mqb_crc(subtests, "ESP_21", 0xFD, [
+  def test_volkswagen_mqb_crc_esp_21(self, subtests):
+    self.verify_volkswagen_mqb_crc(subtests, "ESP_21", 0xFD, [
       b'\x66\xd0\x1f\x80\x45\x05\x00\x00',
       b'\x87\xd1\x1f\x80\x52\x05\x00\x00',
       b'\xcd\xd2\x1f\x80\x50\x06\x00\x00',
@@ -175,8 +195,8 @@ class TestCanChecksums:
       b'\xfb\xdf\x1f\x80\x46\x00\x00\x00',
     ])
 
-  def test_vw_mqb_crc_ESP_02(self, subtests):
-    self.verify_vw_mqb_crc(subtests, "ESP_02", 0x101, [
+  def test_volkswagen_mqb_crc_esp_02(self, subtests):
+    self.verify_volkswagen_mqb_crc(subtests, "ESP_02", 0x101, [
       b'\xf2\x00\x7e\xff\xa1\x2a\x40\x00',
       b'\xd3\x01\x7d\x00\xa2\x0c\x02\x00',
       b'\x03\x02\x7a\x06\xa2\x49\x42\x00',
@@ -195,8 +215,8 @@ class TestCanChecksums:
       b'\x49\x0f\x85\x12\xa2\xf6\x01\x00',
     ])
 
-  def test_vw_mqb_crc_ESP_05(self, subtests):
-    self.verify_vw_mqb_crc(subtests, "ESP_05", 0x106, [
+  def test_volkswagen_mqb_crc_esp_05(self, subtests):
+    self.verify_volkswagen_mqb_crc(subtests, "ESP_05", 0x106, [
       b'\x90\x80\x64\x00\x00\x00\xe7\x10',
       b'\xf4\x81\x64\x00\x00\x00\xe7\x10',
       b'\x90\x82\x63\x00\x00\x00\xe8\x10',
@@ -215,8 +235,8 @@ class TestCanChecksums:
       b'\x3f\x8f\x82\x04\x00\x00\xe6\x30',
     ])
 
-  def test_vw_mqb_crc_ESP_10(self, subtests):
-    self.verify_vw_mqb_crc(subtests, "ESP_10", 0x116, [
+  def test_volkswagen_mqb_crc_esp_10(self, subtests):
+    self.verify_volkswagen_mqb_crc(subtests, "ESP_10", 0x116, [
       b'\x2d\x00\xd5\x98\x9f\x26\x25\x0f',
       b'\x24\x01\x60\x63\x2c\x5e\x3b\x0f',
       b'\x08\x02\xb2\x2f\xee\x9a\x29\x0f',
@@ -235,8 +255,8 @@ class TestCanChecksums:
       b'\x15\x0f\x51\x59\x56\x35\xb1\x0f',
     ])
 
-  def test_vw_mqb_crc_ACC_10(self, subtests):
-    self.verify_vw_mqb_crc(subtests, "ACC_10", 0x117, [
+  def test_volkswagen_mqb_crc_acc_10(self, subtests):
+    self.verify_volkswagen_mqb_crc(subtests, "ACC_10", 0x117, [
       b'\x9b\x00\x00\x40\x68\x00\x00\xff',
       b'\xff\x01\x00\x40\x68\x00\x00\xff',
       b'\x53\x02\x00\x40\x68\x00\x00\xff',
@@ -255,8 +275,8 @@ class TestCanChecksums:
       b'\xd9\x0f\x00\x40\x68\x00\x00\xff',
     ])
 
-  def test_vw_mqb_crc_TSK_06(self, subtests):
-    self.verify_vw_mqb_crc(subtests, "TSK_06", 0x120, [
+  def test_volkswagen_mqb_crc_tsk_06(self, subtests):
+    self.verify_volkswagen_mqb_crc(subtests, "TSK_06", 0x120, [
       b'\xc1\x00\x00\x02\x00\x08\xff\x21',
       b'\x34\x01\x00\x02\x00\x08\xff\x21',
       b'\xcc\x02\x00\x02\x00\x08\xff\x21',
@@ -275,8 +295,8 @@ class TestCanChecksums:
       b'\x0b\x0f\x00\x02\x00\x08\xff\x21',
     ])
 
-  def test_vw_mqb_crc_Motor_20(self, subtests):
-    self.verify_vw_mqb_crc(subtests, "Motor_20", 0x121, [
+  def test_volkswagen_mqb_crc_motor_20(self, subtests):
+    self.verify_volkswagen_mqb_crc(subtests, "Motor_20", 0x121, [
       b'\xb9\x00\x00\xc0\x39\x46\x7e\xfe',
       b'\x85\x31\x20\x00\x1a\x46\x7e\xfe',
       b'\xc7\x12\x00\x40\x1a\x46\x7e\xfe',
@@ -295,8 +315,8 @@ class TestCanChecksums:
       b'\xaf\x0f\x20\x80\x39\x4c\x7e\xfe',
     ])
 
-  def test_vw_mqb_crc_ACC_06(self, subtests):
-    self.verify_vw_mqb_crc(subtests, "ACC_06", 0x122, [
+  def test_volkswagen_mqb_crc_acc_06(self, subtests):
+    self.verify_volkswagen_mqb_crc(subtests, "ACC_06", 0x122, [
       b'\x14\x80\x00\xfe\x07\x00\x00\x18',
       b'\x9f\x81\x00\xfe\x07\x00\x00\x18',
       b'\x0a\x82\x00\xfe\x07\x00\x00\x28',
@@ -315,8 +335,8 @@ class TestCanChecksums:
       b'\x6f\x8f\x00\xfe\x07\x00\x00\x28',
     ])
 
-  def test_vw_mqb_crc_HCA_01(self, subtests):
-    self.verify_vw_mqb_crc(subtests, "HCA_01", 0x126, [
+  def test_volkswagen_mqb_crc_hca_01(self, subtests):
+    self.verify_volkswagen_mqb_crc(subtests, "HCA_01", 0x126, [
       b'\x00\x30\x0d\xc0\x05\xfe\x07\x00',
       b'\x3e\x31\x54\xc0\x05\xfe\x07\x00',
       b'\xa7\x32\xbb\x40\x05\xfe\x07\x00',
@@ -335,8 +355,8 @@ class TestCanChecksums:
       b'\x9b\x3f\x20\x40\x05\xfe\x07\x00',
     ])
 
-  def test_vw_mqb_crc_GRA_ACC_01(self, subtests):
-    self.verify_vw_mqb_crc(subtests, "GRA_ACC_01", 0x12B, [
+  def test_volkswagen_mqb_crc_gra_acc_01(self, subtests):
+    self.verify_volkswagen_mqb_crc(subtests, "GRA_ACC_01", 0x12B, [
       b'\x86\x40\x80\x2a\x00\x00\x00\x00',
       b'\xf4\x41\x80\x2a\x00\x00\x00\x00',
       b'\x50\x42\x80\x2a\x00\x00\x00\x00',
@@ -355,8 +375,8 @@ class TestCanChecksums:
       b'\x0d\x4f\x80\x2a\x00\x00\x00\x00',
     ])
 
-  def test_vw_mqb_crc_ACC_07(self, subtests):
-    self.verify_vw_mqb_crc(subtests, "ACC_07", 0x12E, [
+  def test_volkswagen_mqb_crc_acc_07(self, subtests):
+    self.verify_volkswagen_mqb_crc(subtests, "ACC_07", 0x12E, [
       b'\xac\xe0\x7f\x00\xfe\x00\xc0\xff',
       b'\xa2\xe1\x7f\x00\xfe\x00\xc0\xff',
       b'\x6b\xe2\x7f\x00\xfe\x00\xc0\xff',
@@ -375,8 +395,8 @@ class TestCanChecksums:
       b'\x85\xef\x7f\x00\xfe\x00\xc0\xff',
     ])
 
-  def test_vw_mqb_crc_Motor_EV_01(self, subtests):
-    self.verify_vw_mqb_crc(subtests, "Motor_EV_01", 0x187, [
+  def test_volkswagen_mqb_crc_motor_ev_01(self, subtests):
+    self.verify_volkswagen_mqb_crc(subtests, "Motor_EV_01", 0x187, [
       b'\x70\x80\x15\x00\x00\x00\x00\xF0',
       b'\x07\x81\x15\x00\x00\x00\x00\xF0',
       b'\x7A\x82\x15\x00\x00\x00\x00\xF0',
@@ -395,8 +415,8 @@ class TestCanChecksums:
       b'\x00\x8F\x15\x00\x00\x00\x00\xF0',
     ])
 
-  def test_vw_mqb_crc_ESP_33(self, subtests):
-    self.verify_vw_mqb_crc(subtests, "ESP_33", 0x1AB, [
+  def test_volkswagen_mqb_crc_esp_33(self, subtests):
+    self.verify_volkswagen_mqb_crc(subtests, "ESP_33", 0x1AB, [
       b'\x64\x00\x80\x02\x00\x00\x00\x00',
       b'\x19\x01\x00\x00\x00\x00\x00\x00',
       b'\xfc\x02\x00\x10\x01\x00\x00\x00',
@@ -415,8 +435,28 @@ class TestCanChecksums:
       b'\x68\x0f\x80\x02\x00\x00\x00\x00',
     ])
 
-  def test_vw_mqb_crc_SWA_01(self, subtests):
-    self.verify_vw_mqb_crc(subtests, "SWA_01", 0x30F, [
+  def test_volkswagen_mqb_crc_acc_02(self, subtests):
+    self.verify_volkswagen_mqb_crc(subtests, "ACC_02", 0x30C, [
+      b'\x82\xf0\x3f\x00\x40\x30\x00\x40',
+      b'\xe6\xf1\x3f\x00\x40\x30\x00\x40',
+      b'\x4a\xf2\x3f\x00\x40\x30\x00\x40',
+      b'\x2e\xf3\x3f\x00\x40\x30\x00\x40',
+      b'\x3d\xf4\x3f\x00\x40\x30\x00\x40',
+      b'\x59\xf5\x3f\x00\x40\x30\x00\x40',
+      b'\xf5\xf6\x3f\x00\x40\x30\x00\x40',
+      b'\x91\xf7\x3f\x00\x40\x30\x00\x40',
+      b'\xd3\xf8\x3f\x00\x40\x30\x00\x40',
+      b'\xb7\xf9\x3f\x00\x40\x30\x00\x40',
+      b'\x1b\xfa\x3f\x00\x40\x30\x00\x40',
+      b'\x7f\xfb\x3f\x00\x40\x30\x00\x40',
+      b'\x6c\xfc\x3f\x00\x40\x30\x00\x40',
+      b'\x08\xfd\x3f\x00\x40\x30\x00\x40',
+      b'\xa4\xfe\x3f\x00\x40\x30\x00\x40',
+      b'\xc0\xff\x3f\x00\x40\x30\x00\x40',
+    ])
+
+  def test_volkswagen_mqb_crc_swa_01(self, subtests):
+    self.verify_volkswagen_mqb_crc(subtests, "SWA_01", 0x30F, [
       b'\x10\x00\x10\x00\x00\x00\x00\x00',
       b'\x74\x01\x10\x00\x00\x00\x00\x00',
       b'\xD8\x02\x10\x00\x00\x00\x00\x00',
@@ -435,8 +475,8 @@ class TestCanChecksums:
       b'\x52\x0F\x10\x00\x00\x00\x00\x00',
     ])
 
-  def test_vw_mqb_crc_ACC_04(self, subtests):
-    self.verify_vw_mqb_crc(subtests, "ACC_04", 0x324, [
+  def test_volkswagen_mqb_crc_acc_04(self, subtests):
+    self.verify_volkswagen_mqb_crc(subtests, "ACC_04", 0x324, [
       b'\xba\x00\x00\x00\x00\x00\x00\x10',
       b'\xde\x01\x00\x00\x00\x00\x00\x10',
       b'\x72\x02\x00\x00\x00\x00\x00\x10',
@@ -455,8 +495,8 @@ class TestCanChecksums:
       b'\xdd\x0f\x00\x00\x00\x00\x00\x00',
     ])
 
-  def test_vw_mqb_crc_Klemmen_Status_01(self, subtests):
-    self.verify_vw_mqb_crc(subtests, "Klemmen_Status_01", 0x3C0, [
+  def test_volkswagen_mqb_crc_klemmen_status_01(self, subtests):
+    self.verify_volkswagen_mqb_crc(subtests, "Klemmen_Status_01", 0x3C0, [
       b'\x74\x00\x03\x00',
       b'\xc1\x01\x03\x00',
       b'\x31\x02\x03\x00',
@@ -475,8 +515,8 @@ class TestCanChecksums:
       b'\x35\x0f\x03\x00',
     ])
 
-  def test_vw_mqb_crc_Licht_Anf_01(self, subtests):
-    self.verify_vw_mqb_crc(subtests, "Licht_Anf_01", 0x3D5, [
+  def test_volkswagen_mqb_crc_licht_anf_01(self, subtests):
+    self.verify_volkswagen_mqb_crc(subtests, "Licht_Anf_01", 0x3D5, [
       b'\xc8\x00\x00\x04\x00\x00\x00\x00',
       b'\x9f\x01\x00\x04\x00\x00\x00\x00',
       b'\x5e\x02\x00\x04\x00\x00\x00\x00',
@@ -495,8 +535,8 @@ class TestCanChecksums:
       b'\x98\x0f\x00\x04\x00\x00\x00\x00',
     ])
 
-  def test_vw_mqb_crc_ESP_20(self, subtests):
-    self.verify_vw_mqb_crc(subtests, "ESP_20", 0x65D, [
+  def test_volkswagen_mqb_crc_esp_20(self, subtests):
+    self.verify_volkswagen_mqb_crc(subtests, "ESP_20", 0x65D, [
       b'\x98\x30\x2b\x10\x00\x00\x22\x81',
       b'\xc8\x31\x2b\x10\x00\x00\x22\x81',
       b'\x9d\x32\x2b\x10\x00\x00\x22\x81',

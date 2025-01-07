@@ -4,7 +4,7 @@ from enum import Enum, IntFlag, StrEnum
 
 from panda import uds
 from opendbc.can.can_define import CANDefine
-from opendbc.car import dbc_dict, CarSpecs, DbcDict, PlatformConfig, Platforms
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car import structs
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, \
@@ -40,7 +40,7 @@ class CarControllerParams:
   ACCEL_MIN = -3.5                         # 3.5 m/s max deceleration
 
   def __init__(self, CP):
-    can_define = CANDefine(DBC[CP.carFingerprint]["pt"])
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
 
     if CP.flags & VolkswagenFlags.PQ:
       self.LDW_STEP = 5                   # LDW_1 message frequency 20Hz
@@ -142,7 +142,7 @@ class VolkswagenFlags(IntFlag):
 
 @dataclass
 class VolkswagenMQBPlatformConfig(PlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: dbc_dict('vw_mqb_2010', None))
+  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'vw_mqb_2010'})
   # Volkswagen uses the VIN WMI and chassis code to match in the absence of the comma power
   # on camera-integrated cars, as we lose too many ECUs to reliably identify the vehicle
   chassis_codes: set[str] = field(default_factory=set)
@@ -151,7 +151,7 @@ class VolkswagenMQBPlatformConfig(PlatformConfig):
 
 @dataclass
 class VolkswagenPQPlatformConfig(VolkswagenMQBPlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: dbc_dict('vw_golf_mk4', None))
+  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'vw_golf_mk4'})
 
   def init(self):
     self.flags |= VolkswagenFlags.PQ
@@ -178,7 +178,7 @@ class Footnote(Enum):
   VW_EXP_LONG = CarFootnote(
     "Only available for vehicles using a gateway (J533) harness. At this time, vehicles using a camera harness " +
     "are limited to using stock ACC.",
-    Column.LONGITUDINAL)
+    Column.LONGITUDINAL, docs_only=True)
   VW_MQB_A0 = CarFootnote(
     "Model-years 2022 and beyond may have a combined CAN gateway and BCM, which is supported by openpilot " +
     "in software, but doesn't yet have a harness available from the comma store.",
@@ -270,15 +270,15 @@ class CAR(Platforms):
     wmis={WMI.VOLKSWAGEN_MEXICO_CAR, WMI.VOLKSWAGEN_EUROPE_CAR},
   )
   VOLKSWAGEN_JETTA_MK6 = VolkswagenPQPlatformConfig(
-    [VWCarDocs("Volkswagen Jetta 2015-2018")],
+    [VWCarDocs("Volkswagen Jetta 2015-18")],
     VolkswagenCarSpecs(mass=1518, wheelbase=2.65, minSteerSpeed=50 * CV.KPH_TO_MS, minEnableSpeed=20 * CV.KPH_TO_MS),
     chassis_codes={"5K", "AJ"},
     wmis={WMI.VOLKSWAGEN_MEXICO_CAR},
   )
   VOLKSWAGEN_JETTA_MK7 = VolkswagenMQBPlatformConfig(
     [
-      VWCarDocs("Volkswagen Jetta 2018-24"),
-      VWCarDocs("Volkswagen Jetta GLI 2021-24"),
+      VWCarDocs("Volkswagen Jetta 2018-23"),
+      VWCarDocs("Volkswagen Jetta GLI 2021-23"),
     ],
     VolkswagenCarSpecs(mass=1328, wheelbase=2.71),
     chassis_codes={"BU"},
@@ -332,7 +332,7 @@ class CAR(Platforms):
   )
   VOLKSWAGEN_TIGUAN_MK2 = VolkswagenMQBPlatformConfig(
     [
-      VWCarDocs("Volkswagen Tiguan 2018-24"),
+      VWCarDocs("Volkswagen Tiguan 2018-23"),
       VWCarDocs("Volkswagen Tiguan eHybrid 2021-23"),
     ],
     VolkswagenCarSpecs(mass=1715, wheelbase=2.74),
