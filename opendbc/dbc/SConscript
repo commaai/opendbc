@@ -24,7 +24,7 @@ output_files += [
 ]
 
 generated = env.Command(
-  target=output_files,
+  target=list(set(output_files)),
   source=[generator] + source_files,
   action="python3 ${SOURCES[0]}",
 )
