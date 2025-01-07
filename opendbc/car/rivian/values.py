@@ -1,7 +1,7 @@
 from enum import IntFlag
 from opendbc.car.structs import CarParams
-from opendbc.car import structs
-from opendbc.car import CarSpecs, PlatformConfig, Platforms, dbc_dict
+from opendbc.car import Bus, structs
+from opendbc.car import CarSpecs, PlatformConfig, Platforms
 from opendbc.car.docs_definitions import CarDocs
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
@@ -12,7 +12,7 @@ class CAR(Platforms):
   RIVIAN_R1S = PlatformConfig(
     [CarDocs("Rivian R1S", "All")],
     CarSpecs(mass=3206., wheelbase=3.08, steerRatio=15.2),
-    dbc_dict('rivian_can', None)
+    {Bus.pt: 'rivian_can'}
   )
 
 
@@ -55,10 +55,6 @@ class CarControllerParams:
 
   ACCEL_MIN = -3.48  # m/s^2
   ACCEL_MAX = 2.0  # m/s^2
-
-  def __init__(self, CP):
-    pass
-
 
 class RivianFlags(IntFlag):
   FLAG_RIVIAN_LONG_CONTROL = 1

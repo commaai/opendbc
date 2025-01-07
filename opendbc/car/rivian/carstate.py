@@ -1,6 +1,6 @@
 import copy
 from opendbc.can.parser import CANParser
-from opendbc.car import structs
+from opendbc.car import Bus, structs
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.rivian.values import DBC, GEAR_MAP
 from opendbc.car.common.conversions import Conversions as CV
@@ -13,7 +13,10 @@ class CarState(CarStateBase):
     # Needed by carcontroller
     self.acm_lka_hba_cmd = None
 
-  def update(self, cp, cp_cam, cp_adas, *_) -> structs.CarState:
+  def update(self, can_parsers) -> structs.CarState:
+    cp = can_parsers[Bus.pt]
+    cp_cam = can_parsers[Bus.pt]
+    cp_adas = can_parsers[Bus.pt]
     ret = structs.CarState()
 
     # Vehicle speed
@@ -72,8 +75,8 @@ class CarState(CarStateBase):
     return ret
 
   @staticmethod
-  def get_can_parser(CP):
-    messages = [
+  def get_can_parsers(CP):
+    pt_messages = [
       # sig_address, frequency
       ("ESPiB1", 50),
       ("VDM_PropStatus", 50),
@@ -84,24 +87,20 @@ class CarState(CarStateBase):
       ("VDM_AdasSts", 100)
     ]
 
-    return CANParser(DBC[CP.carFingerprint]['pt'], messages, 0)
-
-  @staticmethod
-  def get_cam_can_parser(CP):
-    messages = [
+    cam_messages = [
       ("ACM_longitudinalRequest", 100),
       ("ACM_AebRequest", 100),
       ("ACM_Status", 100),
       ("ACM_lkaHbaCmd", 100)
     ]
 
-    return CANParser(DBC[CP.carFingerprint]['pt'], messages, 2)
-
-  @staticmethod
-  def get_adas_can_parser(CP):
-    messages = [
+    adas_messages = [
       ("IndicatorLights", 10),
       # ("ACM_tsrCmd", 10),
     ]
 
-    return CANParser(DBC[CP.carFingerprint]['pt'], messages, 1)
+    return {
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 0),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, 2),
+      Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.pt], adas_messages, 1)
+    }
