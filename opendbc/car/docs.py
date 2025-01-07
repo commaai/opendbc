@@ -11,7 +11,7 @@ from natsort import natsorted
 from opendbc.car.common.basedir import BASEDIR
 from opendbc.car import gen_empty_fingerprint
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarDocs, ExtraCarDocs, Column, ExtraCarsColumn, CommonFootnote, PartType
+from opendbc.car.docs_definitions import CarDocs, Device, ExtraCarDocs, Column, ExtraCarsColumn, CommonFootnote, PartType
 from opendbc.car.car_helpers import interfaces, get_interface_attr
 from opendbc.car.values import Platform, PLATFORMS
 from opendbc.car.mock.values import CAR as MOCK
@@ -41,7 +41,7 @@ def get_all_footnotes() -> dict[Enum, int]:
   return {fn: idx + 1 for idx, fn in enumerate(all_footnotes)}
 
 
-def build_sorted_car_docs_list(platforms, footnotes=None, include_dashcam=False, include_custom=False):
+def build_sorted_car_docs_list(platforms, footnotes=None, include_dashcam=False):
   collected_car_docs: list[CarDocs | ExtraCarDocs] = []
   for model, platform in platforms.items():
     car_docs = platform.config.car_docs
@@ -70,7 +70,7 @@ def get_all_car_docs() -> list[CarDocs]:
 
 
 def get_car_docs_with_extras() -> list[CarDocs | ExtraCarDocs]:
-  sorted_list: list[CarDocs] = build_sorted_car_docs_list(EXTRA_PLATFORMS, include_custom=True, include_dashcam=True)
+  sorted_list: list[CarDocs] = build_sorted_car_docs_list(EXTRA_PLATFORMS, include_dashcam=True)
   return sorted_list
 
 
@@ -89,7 +89,7 @@ def generate_cars_md(all_car_docs: list[CarDocs], template_fn: str) -> str:
   footnotes = [fn.value.text for fn in get_all_footnotes()]
   cars_md: str = template.render(all_car_docs=all_car_docs, PartType=PartType,
                                  group_by_make=group_by_make, footnotes=footnotes,
-                                 Column=Column)
+                                 Device=Device, Column=Column)
   return cars_md
 
 

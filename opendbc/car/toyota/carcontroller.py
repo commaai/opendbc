@@ -86,7 +86,6 @@ class CarController(CarControllerBase):
     self.secoc_lka_message_counter = 0
     self.secoc_lta_message_counter = 0
     self.secoc_prev_reset_counter = 0
-    self.secoc_mismatch_counter = 0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -109,9 +108,8 @@ class CarController(CarControllerBase):
         self.secoc_prev_reset_counter = CS.secoc_synchronization['RESET_CNT']
 
         expected_mac = build_sync_mac(self.secoc_key, int(CS.secoc_synchronization['TRIP_CNT']), int(CS.secoc_synchronization['RESET_CNT']))
-        if int(CS.secoc_synchronization['AUTHENTICATOR']) != expected_mac and self.secoc_mismatch_counter < 100:
+        if int(CS.secoc_synchronization['AUTHENTICATOR']) != expected_mac:
           carlog.error("SecOC synchronization MAC mismatch, wrong key?")
-          self.secoc_mismatch_counter += 1
 
     # *** steer torque ***
     new_steer = int(round(actuators.steer * self.params.STEER_MAX))
