@@ -41,7 +41,7 @@ def get_all_footnotes() -> dict[Enum, int]:
   return {fn: idx + 1 for idx, fn in enumerate(all_footnotes)}
 
 
-def build_sorted_car_docs_list(platforms, footnotes=None, include_dashcam=False, include_custom=False):
+def build_sorted_car_docs_list(platforms, footnotes=None, include_dashcam=False):
   collected_car_docs: list[CarDocs | ExtraCarDocs] = []
   for model, platform in platforms.items():
     car_docs = platform.config.car_docs
@@ -70,7 +70,7 @@ def get_all_car_docs() -> list[CarDocs]:
 
 
 def get_car_docs_with_extras() -> list[CarDocs | ExtraCarDocs]:
-  sorted_list: list[CarDocs] = build_sorted_car_docs_list(EXTRA_PLATFORMS, include_custom=True, include_dashcam=True)
+  sorted_list: list[CarDocs] = build_sorted_car_docs_list(EXTRA_PLATFORMS, include_dashcam=True)
   return sorted_list
 
 
