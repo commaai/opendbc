@@ -174,6 +174,7 @@ class WMI(StrEnum):
 class VolkswagenFlags(IntFlag):
   # Detected flags
   STOCK_HCA_PRESENT = 1
+  TRAVEL_ASSIST_PRESENT = 8
 
   # Static flags
   PQ = 2
