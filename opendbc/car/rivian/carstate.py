@@ -15,8 +15,8 @@ class CarState(CarStateBase):
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
-    cp_cam = can_parsers[Bus.pt]
-    cp_adas = can_parsers[Bus.pt]
+    cp_cam = can_parsers[Bus.cam]
+    cp_adas = can_parsers[Bus.adas]
     ret = structs.CarState()
 
     # Vehicle speed
