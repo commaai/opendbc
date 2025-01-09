@@ -1585,6 +1585,7 @@ BO_ 589 MEB_Side_Assist_02: 64 XXX
 
 BO_ 591 MEB_Distance_01: 64 XXX
  SG_ Unknown_01 : 12|1@0+ (1,0) [0|1] "" XXX
+ SG_ Distance_Status : 13|2@1+ (1,0) [0|3] "" XXX
  SG_ Same_Lane_01_ObjectID : 16|6@1+ (1,0) [0|63] "Unit_ObjectID" XXX
  SG_ Left_Lane_01_ObjectID : 22|6@1+ (1,0) [0|63] "Unit_ObjectID" XXX
  SG_ Right_Lane_01_ObjectID : 28|6@1+ (1,0) [0|63] "Unit_ObjectID" XXX
@@ -1769,6 +1770,7 @@ VAL_ 496 zFAS_Warnblinken 0 "Aus" 1 "Statisch" 2 "Taster" 3 "Statisch_ohne_WBT" 
 VAL_ 496 STP_Primaeranz 0 "keine_Anzeige" 1 "Verfuegbar" 2 "Aktiv" 3 "Uebernahme" 4 "Aktiv_Warnung" 5 "Nicht_Verfuegbar" ;
 VAL_ 496 EA_Bremslichtblinken 0 "kein_Blinken" 1 "Anforderung_Bremslichtblinken" ;
 VAL_ 496 EA_Blinken 0 "Kein_Blinken" 1 "Wechselblinken_links" 2 "Wechselblinken_rechts" 3 "Warnblinken" 4 "Warnblinken_Taster" ;
+VAL_ 591 Distance_Status 0 "Valid" 3 "Invalid";
 VAL_ 619 Travel_Assist_Status 4 "enabled" 0 "disabled" 2 "ready" 3 "pre_ready";
 VAL_ 619 Travel_Assist_Request 4 "enable" 3 "disable" 0 "no_request" 1 "error";
 VAL_ 619 Travel_Assist_Available 0 "not_available" 1 "available";
