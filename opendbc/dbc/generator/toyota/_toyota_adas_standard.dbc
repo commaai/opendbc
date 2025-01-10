@@ -1,0 +1,33 @@
+BO_ 643 PRE_COLLISION: 7 DSU
+ SG_ _COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ SET_ME_X00 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ FORCE : 23|16@0- (2,0) [0|255] "N" XXX
+ SG_ SET_ME_X002 : 33|8@0+ (1,0) [0|3] "" XXX
+ SG_ BRAKE_STATUS : 39|3@0+ (1,0) [0|255] "" XXX
+ SG_ STATE : 36|3@0+ (1,0) [0|255] "" XXX
+ SG_ SET_ME_X003 : 40|1@0+ (1,0) [0|1] "" XXX
+ SG_ PRECOLLISION_ACTIVE : 41|1@0+ (1,0) [0|255] "" XXX
+ SG_ CHECKSUM : 55|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 740 STEERING_LKA: 5 XXX
+ SG_ LKA_STATE : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ STEER_REQUEST : 0|1@0+ (1,0) [0|1] "" XXX
+ SG_ COUNTER : 6|6@0+ (1,0) [0|63] "" XXX
+ SG_ SET_ME_1 : 7|1@0+ (1,0) [0|1] "" XXX
+ SG_ STEER_TORQUE_CMD : 15|16@0- (1,0) [0|65535] "" XXX
+ SG_ CHECKSUM : 39|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 836 PRE_COLLISION_2: 8 DSU
+ SG_ DSS1GDRV : 7|10@0- (0.1,0) [0|0] "m/s^2" Vector__XXX
+ SG_ PCSALM : 17|1@0+ (1,0) [0|0] "" FCM
+ SG_ IBTRGR : 27|1@0+ (1,0) [0|0] "" FCM
+ SG_ PBATRGR : 30|2@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ PREFILL : 33|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ AVSTRGR : 36|1@0+ (1,0) [0|0] "" SCS
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|0] "" XXX
+
+CM_ SG_ 643 _COUNTER "only used on cars that use this msg for cruise control";
+CM_ SG_ 643 BRAKE_STATUS "only used on cars that use this msg for cruise control";
+CM_ SG_ 643 PRECOLLISION_ACTIVE "set 0.5s before any braking";
+
+VAL_ 643 STATE 0 "normal" 1 "adaptive_cruise_control" 3 "emergency_braking";
