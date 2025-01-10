@@ -255,7 +255,7 @@ class CAR(Platforms):
     # [ToyotaCarDocs("Toyota RAV4 Prime 2021-23", min_enable_speed=MIN_ACC_SPEED)],
     [],
     CarSpecs(mass=4372. * CV.LB_TO_KG, wheelbase=2.68, steerRatio=16.88, tireStiffnessFactor=0.5533),
-    dbc_dict('toyota_rav4_prime_generated', 'toyota_tss2_adas'),
+    dbc_dict('toyota_secoc_pt_generated', 'toyota_tss2_adas'),
     flags=ToyotaFlags.TSS2 | ToyotaFlags.NO_STOP_TIMER | ToyotaFlags.NO_DSU | ToyotaFlags.SECOC,
   )
   TOYOTA_MIRAI = ToyotaTSS2PlatformConfig( # TSS 2.5
@@ -273,7 +273,7 @@ class CAR(Platforms):
     # [ToyotaCarDocs("Toyota Sienna 2021-23", min_enable_speed=MIN_ACC_SPEED)],
     [],
     CarSpecs(mass=4625. * CV.LB_TO_KG, wheelbase=3.06, steerRatio=17.8, tireStiffnessFactor=0.444),
-    dbc_dict('toyota_rav4_prime_generated', 'toyota_tss2_adas'),
+    dbc_dict('toyota_secoc_pt_generated', 'toyota_tss2_adas'),
     flags=ToyotaFlags.TSS2 | ToyotaFlags.NO_STOP_TIMER | ToyotaFlags.NO_DSU | ToyotaFlags.SECOC,
   )
 
