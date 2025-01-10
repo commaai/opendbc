@@ -88,16 +88,6 @@ BO_ 452 ENGINE_RPM: 8 CGW
  SG_ RPM : 7|16@0- (0.78125,0) [0|0] "rpm" SCS
  SG_ ENGINE_RUNNING : 27|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 466 PCM_CRUISE: 8 XXX
- SG_ GAS_RELEASED : 4|1@0+ (1,0) [0|1] "" XXX
- SG_ CRUISE_ACTIVE : 5|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_BRAKING : 12|1@0+ (1,0) [0|1] "" XXX
- SG_ ACCEL_NET : 23|16@0- (0.0009765625,0) [-20|20] "m/s^2" XXX
- SG_ NEUTRAL_FORCE : 39|16@0- (2,0) [-65536|65534] "N" XXX
- SG_ CRUISE_STATE : 55|4@0+ (1,0) [0|15] "" XXX
- SG_ CANCEL_REQ : 49|1@1+ (1,0) [0|1] "" XXX
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
 BO_ 467 PCM_CRUISE_2: 8 XXX
  SG_ BRAKE_PRESSED : 3|1@0+ (1,0) [0|1] "" XXX
  SG_ PCM_FOLLOW_DISTANCE : 12|2@0+ (1,0) [0|3] "" XXX
@@ -135,14 +125,6 @@ BO_ 614 STEERING_IPAS: 8 IPAS
  SG_ SET_ME_X40 : 47|8@0+ (1,0) [0|255] "" XXX
  SG_ SET_ME_X00_1 : 55|8@0+ (1,0) [0|255] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
-
-BO_ 705 GAS_PEDAL: 8 XXX
- SG_ GAS_RELEASED : 3|1@0+ (1,0) [0|1] "" XXX
- SG_ ETQLVSC : 15|16@0- (0.03125,0) [0|0] "Nm" XXX
- SG_ ETQREAL : 31|16@0- (0.03125,0) [0|0] "Nm" SCS
- SG_ ETQISC : 47|8@0+ (1,-192) [0|0] "Nm" XXX
- SG_ GAS_PEDAL : 55|8@0+ (0.5,0) [0|0] "%" DS1,FCM
- SG_ CHECKSUM : 63|8@0+ (1,0) [0|0] "" DS1,FCM
 
 BO_ 742 LEAD_INFO: 8 DSU
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" HCU
@@ -441,10 +423,6 @@ CM_ SG_ 37 STEER_RATE "factor is tbd";
 CM_ SG_ 119 FDRVREAL "ICE only: force applied by wheels from the engine. includes creeping force, regen, and engine braking";
 CM_ SG_ 166 BRAKE_FORCE "hybrid only: force applied by friction brakes from user or ACC command";
 CM_ SG_ 295 FDRVREAL "hybrid only: force applied by wheels from the engine and/or electric motors. includes creeping force, regen, and engine braking";
-CM_ SG_ 466 NEUTRAL_FORCE "force in newtons the engine/electric motors are applying without any acceleration commands or user input";
-CM_ SG_ 466 ACC_BRAKING "whether brakes are being actuated from ACC command";
-CM_ SG_ 466 ACCEL_NET "net negative acceleration (braking) applied by the system if on flat ground";
-CM_ SG_ 466 CRUISE_STATE "Active state is 8, if standstill is requested will switch to state 11(3 sec timer), after timer is elapsed will switch into state 7(standstill). If plus button was pressed - status 9, minus button pressed - status 10";
 CM_ SG_ 467 ACC_FAULTED "1 when ACC is faulted and the PCM disallows engagement";
 CM_ SG_ 467 SET_SPEED "43 km/h are shown as 28 mph, so conversion isn't perfect";
 CM_ SG_ 467 LOW_SPEED_LOCKOUT "in low speed lockout, system would always disengage below 28mph";
@@ -521,7 +499,6 @@ CM_ SG_ 1592 LOCK_STATUS "The next 3 bits always seem to follow this signal.";
 CM_ SG_ 1592 LOCKED_VIA_KEYFOB "1 for as long as car is locked with key fob or door handle touch";
 
 VAL_ 295 GEAR 0 "P" 1 "R" 2 "N" 3 "D" 4 "B";
-VAL_ 466 CRUISE_STATE 11 "timer_3sec" 10 "adaptive click down" 9 "adaptive click up" 8 "adaptive engaged" 7 "standstill" 6 "non-adaptive click up" 5 "non-adaptive click down" 4 "non-adaptive hold down" 3 "non-adaptive hold up" 2 "non-adaptive being engaged" 1 "non-adaptive engaged" 0 "off";
 VAL_ 467 LOW_SPEED_LOCKOUT 2 "low speed locked" 1 "ok";
 VAL_ 467 PCM_FOLLOW_DISTANCE 1 "far" 2 "medium" 3 "close";
 VAL_ 614 STATE 3 "enabled" 1 "disabled";
