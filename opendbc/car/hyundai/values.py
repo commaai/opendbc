@@ -63,8 +63,8 @@ class HyundaiSafetyFlags(IntFlag):
 
 class HyundaiFlags(IntFlag):
   # Dynamic Flags
-  CANFD_HDA2 = 1
-  CANFD_ALT_BUTTONS = 2
+  CANFD_HDA2 = 2 ** 0
+  CANFD_ALT_BUTTONS = 2 ** 1
   CANFD_ALT_GEARS = 2 ** 2
   CANFD_CAMERA_SCC = 2 ** 3
 
@@ -81,7 +81,7 @@ class HyundaiFlags(IntFlag):
 
   # Static flags
 
-  # Some cars may otherwise be improperly detected as HYBRID/EV.
+  # Some new ICE have corrupt HYBRID messages and need this to override the HYBRID dynamic flag.
   ICE = 2 ** 24
 
   # If 0x500 is present on bus 1 it probably has a Mando radar outputting radar points.
@@ -511,6 +511,14 @@ class CAR(Platforms):
     ],
     CarSpecs(mass=2087, wheelbase=3.09, steerRatio=14.23),
     flags=HyundaiFlags.RADAR_SCC | HyundaiFlags.ICE,
+  )
+  KIA_CARNIVAL_2025 = HyundaiCanFDPlatformConfig(
+    [
+      HyundaiCarDocs("Kia Carnival 2025", car_parts=CarParts.common([CarHarness.hyundai_k])),
+      HyundaiCarDocs("Kia Carnival (with HDA II) 2025", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_q])),
+    ],
+    CarSpecs(mass=2087, wheelbase=3.09, steerRatio=14.23),
+    flags=HyundaiFlags.ICE,
   )
   KIA_CARNIVAL_HEV_4TH_GEN = HyundaiCanFDPlatformConfig(
     [
