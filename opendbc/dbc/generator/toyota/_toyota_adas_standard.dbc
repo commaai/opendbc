@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 BO_ 466 PCM_CRUISE: 8 XXX
  SG_ GAS_RELEASED : 4|1@0+ (1,0) [0|1] "" XXX
  SG_ CRUISE_ACTIVE : 5|1@0+ (1,0) [0|1] "" XXX
@@ -8,6 +9,8 @@ BO_ 466 PCM_CRUISE: 8 XXX
  SG_ CANCEL_REQ : 49|1@1+ (1,0) [0|1] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
+=======
+>>>>>>> 3c09071 (Toyota: Separate DBC generator include for certain ADAS messages (#1617))
 BO_ 643 PRE_COLLISION: 7 DSU
  SG_ _COUNTER : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ SET_ME_X00 : 15|8@0+ (1,0) [0|255] "" XXX
@@ -19,6 +22,7 @@ BO_ 643 PRE_COLLISION: 7 DSU
  SG_ PRECOLLISION_ACTIVE : 41|1@0+ (1,0) [0|255] "" XXX
  SG_ CHECKSUM : 55|8@0+ (1,0) [0|255] "" XXX
 
+<<<<<<< HEAD
 BO_ 705 GAS_PEDAL: 8 XXX
  SG_ GAS_RELEASED : 3|1@0+ (1,0) [0|1] "" XXX
  SG_ ETQLVSC : 15|16@0- (0.03125,0) [0|0] "Nm" XXX
@@ -27,6 +31,8 @@ BO_ 705 GAS_PEDAL: 8 XXX
  SG_ GAS_PEDAL : 55|8@0+ (0.5,0) [0|0] "%" DS1,FCM
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|0] "" DS1,FCM
 
+=======
+>>>>>>> 3c09071 (Toyota: Separate DBC generator include for certain ADAS messages (#1617))
 BO_ 740 STEERING_LKA: 5 XXX
  SG_ LKA_STATE : 31|8@0+ (1,0) [0|255] "" XXX
  SG_ STEER_REQUEST : 0|1@0+ (1,0) [0|1] "" XXX
@@ -44,13 +50,19 @@ BO_ 836 PRE_COLLISION_2: 8 DSU
  SG_ AVSTRGR : 36|1@0+ (1,0) [0|0] "" SCS
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|0] "" XXX
 
+<<<<<<< HEAD
 CM_ SG_ 466 NEUTRAL_FORCE "force in newtons the engine/electric motors are applying without any acceleration commands or user input";
 CM_ SG_ 466 ACC_BRAKING "whether brakes are being actuated from ACC command";
 CM_ SG_ 466 ACCEL_NET "net negative acceleration (braking) applied by the system if on flat ground";
 CM_ SG_ 466 CRUISE_STATE "Active state is 8, if standstill is requested will switch to state 11(3 sec timer), after timer is elapsed will switch into state 7(standstill). If plus button was pressed - status 9, minus button pressed - status 10";
+=======
+>>>>>>> 3c09071 (Toyota: Separate DBC generator include for certain ADAS messages (#1617))
 CM_ SG_ 643 _COUNTER "only used on cars that use this msg for cruise control";
 CM_ SG_ 643 BRAKE_STATUS "only used on cars that use this msg for cruise control";
 CM_ SG_ 643 PRECOLLISION_ACTIVE "set 0.5s before any braking";
 
+<<<<<<< HEAD
 VAL_ 466 CRUISE_STATE 11 "timer_3sec" 10 "adaptive click down" 9 "adaptive click up" 8 "adaptive engaged" 7 "standstill" 6 "non-adaptive click up" 5 "non-adaptive click down" 4 "non-adaptive hold down" 3 "non-adaptive hold up" 2 "non-adaptive being engaged" 1 "non-adaptive engaged" 0 "off";
+=======
+>>>>>>> 3c09071 (Toyota: Separate DBC generator include for certain ADAS messages (#1617))
 VAL_ 643 STATE 0 "normal" 1 "adaptive_cruise_control" 3 "emergency_braking";

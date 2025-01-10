@@ -126,6 +126,17 @@ BO_ 614 STEERING_IPAS: 8 IPAS
  SG_ SET_ME_X00_1 : 55|8@0+ (1,0) [0|255] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
+<<<<<<< HEAD
+=======
+BO_ 705 GAS_PEDAL: 8 XXX
+ SG_ GAS_RELEASED : 3|1@0+ (1,0) [0|1] "" XXX
+ SG_ ETQLVSC : 15|16@0- (0.03125,0) [0|0] "Nm" XXX
+ SG_ ETQREAL : 31|16@0- (0.03125,0) [0|0] "Nm" SCS
+ SG_ ETQISC : 47|8@0+ (1,-192) [0|0] "Nm" XXX
+ SG_ GAS_PEDAL : 55|8@0+ (0.5,0) [0|0] "%" DS1,FCM
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|0] "" DS1,FCM
+
+>>>>>>> 3c09071 (Toyota: Separate DBC generator include for certain ADAS messages (#1617))
 BO_ 742 LEAD_INFO: 8 DSU
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" HCU
  SG_ LEAD_REL_SPEED : 23|12@0- (0.025,0) [-100|100] "m/s" HCU
