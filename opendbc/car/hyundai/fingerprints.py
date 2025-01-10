@@ -983,6 +983,14 @@ FW_VERSIONS = {
       b'\xf1\x00CV1 MFC  AT USA LHD 1.00 1.06 99210-CV000 220328',
     ],
   },
+  CAR.KIA_EV6_2025: {
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00CV__ RDR -----      1.00 1.01 99110-CV500         ',
+    ],
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00CV  MFC  AT KOR LHD 1.00 1.01 99210-CV500 240405',
+    ],
+  },
   CAR.HYUNDAI_IONIQ_5: {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00NE1_ RDR -----      1.00 1.00 99110-GI000         ',
@@ -1182,6 +1190,19 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00US4_ RDR -----      1.00 1.00 99110-CG000         ',
+    ],
+  },
+  CAR.KIA_EV9: {
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00MV__ RDR -----      1.00 1.02 99110-DO000         ',
+      b'\xf1\x00MV__ RDR -----      1.00 1.03 99110-DO000         ',
+      b'\xf1\x00MV__ RDR -----      1.00 1.02 99110-DO700         ',
+    ],
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00MV  MFC  AT KOR LHD 1.00 1.01 99211-DO000 230419',
+      b'\xf1\x00MV  MFC  AT USA LHD 1.00 1.02 99211-DO000 230616',
+      b'\xf1\x00MV  MFC  AT EUR LHD 1.00 1.02 99211-DO000 230616',
+      b'\xf1\x00MV  MFC  AT CAN LHD 1.00 1.00 99211-DO100 240403',
     ],
   },
 }
