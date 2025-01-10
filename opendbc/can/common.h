@@ -51,7 +51,9 @@ public:
   std::vector<std::vector<double>> all_vals;
 
   uint64_t last_seen_nanos;
-  uint64_t check_threshold;
+  double frequency = 0.0;
+  uint64_t sum_intervals = 0;
+  uint64_t message_count = 0;
 
   uint8_t counter;
   uint8_t counter_fail;
@@ -61,6 +63,8 @@ public:
 
   bool parse(uint64_t nanos, const std::vector<uint8_t> &dat);
   bool update_counter_generic(int64_t v, int cnt_size);
+  double getAverageFreq(uint64_t current_nanos) const;
+  bool isFreqBelowThreshold(uint64_t current_nanos, double threshold) const;
 };
 
 class CANParser {
