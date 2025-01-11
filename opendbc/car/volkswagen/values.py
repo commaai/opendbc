@@ -237,7 +237,7 @@ class Footnote(Enum):
     "in software, but doesn't yet have a harness available from the comma store.",
     Column.HARDWARE)
   VW_MEB = CarFootnote(
-    "For MEB plattform only steering is supported by openpilot.",
+    "Volkswagen MEB plattform is using CAN-FD, which is supported by comma 3x or red panda.",
     Column.HARDWARE)
 
 
@@ -254,9 +254,6 @@ class VWCarDocs(CarDocs):
     if CP.carFingerprint in (CAR.VOLKSWAGEN_CRAFTER_MK2, CAR.VOLKSWAGEN_TRANSPORTER_T61):
       self.car_parts = CarParts([Device.threex_angled_mount, CarHarness.vw_j533])
 
-    if CP.carFingerprint in (CAR.CUPRA_BORN_MK1):
-      self.footnotes.append(Footnote.VW_MEB)
-
     if abs(CP.minSteerSpeed - CarControllerParams.DEFAULT_MIN_STEER_SPEED) < 1e-3:
       self.min_steer_speed = 0
 
@@ -266,7 +263,7 @@ class VWCarDocs(CarDocs):
 # FW_VERSIONS for that existing CAR.
 
 class CAR(Platforms):
-  config: VolkswagenMQBPlatformConfig | VolkswagenPQPlatformConfig
+  config: VolkswagenMQBPlatformConfig | VolkswagenPQPlatformConfig | VolkswagenMEBPlatformConfig
 
   VOLKSWAGEN_ARTEON_MK1 = VolkswagenMQBPlatformConfig(
     [
@@ -453,9 +450,7 @@ class CAR(Platforms):
     wmis={WMI.SEAT},
   )
   CUPRA_BORN_MK1 = VolkswagenMEBPlatformConfig(
-    [
-      VWCarDocs("CUPRA Born 2021"),
-    ],
+    [VWCarDocs("CUPRA Born 2021", footnotes=[Footnote.VW_MEB])],
     # for CUPRA BORN 77kWh 170 kW, tireStiffnessFactor and centerToFrontRatio are approximations
     VolkswagenCarSpecs(mass=1950, wheelbase=2.766, steerRatio=15.9, centerToFrontRatio=0.55, tireStiffnessFactor=1.1),
     chassis_codes={"K1"},
