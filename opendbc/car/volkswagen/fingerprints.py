@@ -346,6 +346,21 @@ FW_VERSIONS = {
       b'\xf1\x875Q0907572S \xf1\x890780',
     ],
   },
+  # preparation for ID.x models, firmwares have to be verified
+  CAR.VOLKSWAGEN_ID3_MK1: {
+    (Ecu.fwdRadar, 0x757, None): [
+      b'\xf1\x871EA907572H \xf1\x890234',
+      b'\xf1\x871EA907572H \xf1\x890236',
+    ],
+  },
+  CAR.VOLKSWAGEN_ID4_MK1: {
+    (Ecu.fwdRadar, 0x757, None): [
+      b'\xf1\x871EA907572J \xf1\x890235',
+      b'\xf1\x871EA907572J \xf1\x890237',
+      b'\xf1\x871EA907572K \xf1\x890236', # ID.5
+      b'\xf1\x871EA907572K \xf1\x890238', # ID.5
+    ],
+  },
   CAR.VOLKSWAGEN_JETTA_MK6: {
     (Ecu.srs, 0x715, None): [
       b'\xf1\x875C0959655M \xf1\x890726\xf1\x82\t00NB1108--------24',
