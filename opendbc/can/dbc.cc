@@ -15,8 +15,7 @@
 #include "opendbc/can/common_dbc.h"
 
 RE2 bo_regexp(R"(^BO_ (\w+) (\w+) *: (\w+) (\w+))");
-RE2 sg_regexp(R"(^SG_ (\w+) : (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*))");
-RE2 sgm_regexp(R"(^SG_ (\w+) (\w+) *: (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*))");
+RE2 sg_regexp(R"(^SG_ (\w+) .*: (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*))");
 RE2 val_regexp(R"(VAL_ (\w+) (\w+) (.*))");
 RE2 val_split_regexp(R"((([0-9]) \"(.+?)\"))");
 
@@ -121,8 +120,7 @@ DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, Ch
 
   std::string line;
   int line_num = 0;
-  std::string match1, match2, match3, match4, match5, match6, match7, ignore;
-  // TODO: see if we can speed up the regex statements in this loop, SG_ is specifically the slowest
+  std::string match1, match2, match3, match4, match5, match6, match7;
   while (std::getline(stream, line)) {
     line = trim(line);
     line_num += 1;
@@ -146,10 +144,8 @@ DBC* dbc_parse_from_stream(const std::string &dbc_name, std::istream &stream, Ch
       }
     } else if (startswith(line, "SG_ ")) {
       // new signal
-      if (!RE2::FullMatch(line, sg_regexp, &match1, &match2, &match3, &match4, &match5, &match6, &match7)) {
-        bool ret = RE2::FullMatch(line, sgm_regexp, &match1, &ignore, &match2, &match3, &match4, &match5, &match6, &match7);
-        DBC_ASSERT(ret, "bad SG: " << line);
-      }
+      bool ret = RE2::FullMatch(line, sg_regexp, &match1, &match2, &match3, &match4, &match5, &match6, &match7);
+      DBC_ASSERT(ret, "bad SG: " << line);
       Signal& sig = signals[address].emplace_back();
       sig.name = match1;
       sig.start_bit = std::stoi(match2);
