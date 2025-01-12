@@ -248,8 +248,8 @@ def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str
 # Check the WMI and chassis code to determine the platform
   wmi = vin[:3]
   year = vin[9:10]
-  fourth_digit = vin[4:5]
-  fifth_digit = vin[5:6]
+  fourth_digit = vin[3:4]
+  fifth_digit = vin[4:5]
   for platform in CAR:
     if (wmi in platform.config.wmis and year in platform.config.years and \
         fourth_digit in platform.config.fourth_digits and fifth_digit in platform.config.fifth_digits):
