@@ -118,7 +118,7 @@ class GMPlatformConfig(PlatformConfig):
   })
   wmis: set[str] = field(default_factory=set)
   years: set[str] = field(default_factory=set)
-  forth_digits: set[str] = field(default_factory=set) # Passanger cars , See https://en.m.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/GM/VIN_Codes
+  fourth_digits: set[str] = field(default_factory=set) # Passanger cars , See https://en.m.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/GM/VIN_Codes
   fifth_digits: set[str] = field(default_factory=set) # SUV/Truck
 
 
@@ -183,7 +183,7 @@ class CAR(Platforms):
     ],
     GMCarSpecs(mass=1669, wheelbase=2.63779, steerRatio=16.8, centerToFrontRatio=0.4, tireStiffnessFactor=1.0),
     wmis = WMI.CHEVROLET.MPV,
-    forth_digits = {"F"},
+    fourth_digits = {"F"},
     fifth_digits = ANY.ALL,
     years = {YEARS._2022, YEARS._2023},
   )
@@ -194,7 +194,7 @@ class CAR(Platforms):
     ],
     GMCarSpecs(mass=2450, wheelbase=3.75, steerRatio=16.3, tireStiffnessFactor=1.0),
     wmis = WMI.CHEVROLET.TRUCK | WMI.GMC.TRUCK,
-    forth_digits = ANY.ALL,
+    fourth_digits = ANY.ALL,
     fifth_digits = {"8", "9", "W", "Y"},
     years = {YEARS._2020, YEARS._2021},
   )
@@ -202,7 +202,7 @@ class CAR(Platforms):
     [GMCarDocs("Chevrolet Equinox 2019-22")],
     GMCarSpecs(mass=1588, wheelbase=2.72, steerRatio=14.4, centerToFrontRatio=0.4),
     wmis = WMI.CHEVROLET.MPV,
-    forth_digits = ANY.ALL,
+    fourth_digits = ANY.ALL,
     fifth_digits = {"X"},
     years = {YEARS._2019, YEARS._2020, YEARS._2021, YEARS._2022},
   )
@@ -210,7 +210,7 @@ class CAR(Platforms):
     [GMCarDocs("Chevrolet Trailblazer 2021-22")],
     GMCarSpecs(mass=1345, wheelbase=2.64, steerRatio=16.8, centerToFrontRatio=0.4, tireStiffnessFactor=1.0),
     wmis = WMI.CHEVROLET.MPV,
-    forth_digits = ANY.ALL,
+    fourth_digits = ANY.ALL,
     fifth_digits = {"M"},
     years = {YEARS._2021, YEARS._2022},
   )
@@ -218,7 +218,7 @@ class CAR(Platforms):
     [GMCarDocs("Cadillac XT4 2023", "Driver Assist Package")],
     GMCarSpecs(mass=1660, wheelbase=2.78, steerRatio=14.4, centerToFrontRatio=0.4),
     wmis = WMI.CADILLAC.MPV,
-    forth_digits = ANY.ALL,
+    fourth_digits = ANY.ALL,
     fifth_digits = {"Z"},
     years = {YEARS._2023},
   )
@@ -226,7 +226,7 @@ class CAR(Platforms):
     [GMCarDocs("Chevrolet Volt 2019", "Adaptive Cruise Control (ACC) & LKAS")],
     GMCarSpecs(mass=1607, wheelbase=2.69, steerRatio=15.7, centerToFrontRatio=0.45),
     wmis = WMI.CHEVROLET.MPV,
-    forth_digits = {"R"},
+    fourth_digits = {"R"},
     fifth_digits = ANY.ALL,
     years = {YEARS._2019},
   )
@@ -234,7 +234,7 @@ class CAR(Platforms):
     [GMCarDocs("Chevrolet Traverse 2022-23", "RS, Premier, or High Country Trim")],
     GMCarSpecs(mass=1955, wheelbase=3.07, steerRatio=17.9, centerToFrontRatio=0.4),
     wmis = WMI.CHEVROLET.MPV,
-    forth_digits = ANY.ALL,
+    fourth_digits = ANY.ALL,
     fifth_digits = {"R", "V"},
     years = {YEARS._2022, YEARS._2023},
   )
@@ -248,11 +248,11 @@ def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str
 # Check the WMI and chassis code to determine the platform
   wmi = vin[:3]
   year = vin[9:10]
-  forth_digit = vin[4:5]
+  fourth_digit = vin[4:5]
   fifth_digit = vin[5:6]
   for platform in CAR:
     if (wmi in platform.config.wmis and year in platform.config.years and \
-        forth_digit in platform.config.forth_digits and fifth_digit in platform.config.fifth_digits):
+        fourth_digit in platform.config.fourth_digits and fifth_digit in platform.config.fifth_digits):
       candidates.add(platform)
   return {str(c) for c in candidates}
 
