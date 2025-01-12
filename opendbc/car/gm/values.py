@@ -85,6 +85,8 @@ class GMPlatformConfig(PlatformConfig):
     Bus.radar: 'gm_global_a_object',
     Bus.chassis: 'gm_global_a_chassis',
   })
+  wmis: set[str] = field(default_factory=set)
+  years: set[str] = field(default_factory=set)
 
 
 @dataclass
@@ -154,6 +156,8 @@ class CAR(Platforms):
       GMCarDocs("GMC Sierra 1500 2020-21", "Driver Alert Package II", video_link="https://youtu.be/5HbNoBLzRwE"),
     ],
     GMCarSpecs(mass=2450, wheelbase=3.75, steerRatio=16.3, tireStiffnessFactor=1.0),
+    wmis={"3GC", "3GT", "1GC", "1GT"},
+    years={"L", "M"},
   )
   CHEVROLET_EQUINOX = GMPlatformConfig(
     [GMCarDocs("Chevrolet Equinox 2019-22")],
@@ -162,6 +166,8 @@ class CAR(Platforms):
   CHEVROLET_TRAILBLAZER = GMPlatformConfig(
     [GMCarDocs("Chevrolet Trailblazer 2021-22")],
     GMCarSpecs(mass=1345, wheelbase=2.64, steerRatio=16.8, centerToFrontRatio=0.4, tireStiffnessFactor=1.0),
+    wmis={"KL7"},
+    years={"M", "N"},
   )
   CADILLAC_XT4 = GMSDGMPlatformConfig(
     [GMCarDocs("Cadillac XT4 2023", "Driver Assist Package")],
@@ -179,6 +185,16 @@ class CAR(Platforms):
     [GMCarDocs("GMC Yukon 2019-20", "Adaptive Cruise Control (ACC) & LKAS")],
     GMCarSpecs(mass=2490, wheelbase=2.94, steerRatio=17.3, centerToFrontRatio=0.5, tireStiffnessFactor=1.0),
   )
+
+def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str]:
+  candidates = set()
+# Check the WMI and chassis code to determine the platform
+  wmi = vin[:3]
+  year = vin[9:10]
+  for platform in CAR:
+    if wmi in platform.config.wmis and year in platform.config.years:
+      candidates.add(platform)
+  return {str(c) for c in candidates}
 
 
 class CruiseButtons:
@@ -251,6 +267,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
     ),
   ]],
   extra_ecus=[(Ecu.fwdCamera, 0x24b, None)],
+  match_fw_to_car_fuzzy=match_fw_to_car_fuzzy,
 )
 
 # TODO: detect most of these sets live
