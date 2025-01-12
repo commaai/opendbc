@@ -20,15 +20,12 @@ class CarInterface(CarInterfaceBase):
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.psa)]
 
     if not docs:
-      ret.transmissionType = TransmissionType.automatic # TODO: implement manual
-      ret.minEnableSpeed = 0 # for ACC-variants TODO: 40kph/25mph for non-ACC variants
+      ret.transmissionType = TransmissionType.automatic
+      ret.minEnableSpeed = 0 # only for ACC variants
     ret.minSteerSpeed = 0.
 
-    ret.autoResumeSng = ret.minEnableSpeed == -1 # TODO: check
-    ret.centerToFront = ret.wheelbase * 0.44  # TODO: verify
+    ret.autoResumeSng = ret.minEnableSpeed == -1
+    ret.centerToFront = ret.wheelbase * 0.44
     ret.wheelSpeedFactor = 1.04
-
-    # TODO: find Blindspot variants
-    ret.enableBsm = False
 
     return ret

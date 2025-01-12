@@ -5,7 +5,7 @@ from opendbc.car.psa.psacan import CanBus
 from opendbc.car.psa.values import DBC, CarControllerParams
 from opendbc.car.interfaces import CarStateBase
 
-STANDSTILL_THRESHOLD = 0.375 # kph
+STANDSTILL_THRESHOLD = 1 # TODO: stop wheel twitching at low speeds 0.375 # kph
 
 GearShifter = structs.CarState.GearShifter
 TransmissionType = structs.CarParams.TransmissionType
@@ -54,10 +54,10 @@ class CarState(CarStateBase):
 
     # cruise
     # note: this is just for ACC car not CC right now
-    ret.cruiseState.speed = cp_adas.vl['HS2_DAT_MDD_CMD_452']['CONS_LIM_VITESSE_VEH'] * CV.KPH_TO_MS # HS2, set to 255 when ACC is off
+    ret.cruiseState.speed = cp_adas.vl['HS2_DAT_MDD_CMD_452']['CONS_LIM_VITESSE_VEH'] * CV.KPH_TO_MS # HS2, set to 255 when ACC is off, -2 kph offset from dashboard speed
     ret.cruiseState.enabled = cp_adas.vl['HS2_DAT_MDD_CMD_452']['DDE_ACTIVATION_RVV_ACC'] == 1 # HS2
     ret.cruiseState.available = cp_adas.vl['HS2_DYN1_MDD_ETAT_2B6']['ACC_STATUS'] > 2 # HS2
-    ret.cruiseState.nonAdaptive = False # cp_adas.vl['HS2_DAT_MDD_CMD_452']['COCKPIT_GO_ACC_REQUEST'] == 0 # HS2, 0: CC, 1: ACC, no signal in route
+    ret.cruiseState.nonAdaptive = cp_adas.vl['HS2_DAT_MDD_CMD_452']['TYPE_REGUL_LONGI'] != 3 # HS2, 0: None, 1: CC, 2: Limiter, 3: ACC
     ret.cruiseState.standstill = bool(cp_adas.vl['HS2_DYN_UCF_MDD_32D']['VEHICLE_STANDSTILL'])
     ret.accFaulted = False
 
@@ -77,11 +77,6 @@ class CarState(CarStateBase):
     blinker = cp_main.vl['HS2_DAT7_BSI_612']['CDE_CLG_ET_HDC'] # HS1
     ret.leftBlinker = blinker == 1
     ret.rightBlinker = blinker == 2
-
-    # TODO: find blindspot sensors
-    if self.CP.enableBsm:
-      ret.leftBlindspot = False
-      ret.rightBlindspot = False
 
     # lock info
     ret.doorOpen = any([cp_main.vl['Dat_BSI']['DRIVER_DOOR'], cp_main.vl['Dat_BSI']['PASSENGER_DOOR']]) # HS1
@@ -111,7 +106,6 @@ class CarState(CarStateBase):
       ('RESTRAINTS', 10),
       ('DRIVER', 10),
       ('HS2_DAT7_BSI_612', 10),
-      ('LANE_KEEP_ASSIST', 20), # TODO remove if unused
     ]
     return {
       Bus.main: CANParser(DBC[CP.carFingerprint][Bus.main], main_messages, 0),

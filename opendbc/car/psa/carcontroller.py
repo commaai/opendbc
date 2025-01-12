@@ -25,7 +25,6 @@ class CarController(CarControllerBase):
 
     apply_angle = clip(apply_angle, -CarControllerParams.STEER_MAX, CarControllerParams.STEER_MAX)
 
-    # TODO: recuperation and driving mode is inactive when sending own messages
     can_sends.append(psacan.create_lka_msg(self.packer, self.CP, self.frame, CC.latActive, apply_angle))
 
     self.apply_angle_last = apply_angle
