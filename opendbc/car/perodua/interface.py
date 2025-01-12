@@ -4,6 +4,7 @@ from opendbc.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, g
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.perodua.values import CAR
 
+
 class CarInterface(CarInterfaceBase):
 
   @staticmethod
@@ -58,6 +59,7 @@ class CarInterface(CarInterfaceBase):
     ret.stoppingDecelRate = 0.25 # reach stopping target smoothly
 
     ret.rotationalInertia = scale_rot_inertia(ret.mass, ret.wheelbase)
-    ret.tireStiffnessFront, ret.tireStiffnessRear = scale_tire_stiffness(ret.mass, ret.wheelbase, ret.centerToFront, tire_stiffness_factor=tire_stiffness_factor)
+    ret.tireStiffnessFront, ret.tireStiffnessRear = scale_tire_stiffness(
+      ret.mass, ret.wheelbase, ret.centerToFront, tire_stiffness_factor=tire_stiffness_factor)
 
     return ret

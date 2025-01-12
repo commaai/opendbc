@@ -96,7 +96,7 @@ def psd_brake(apply_brake, last_pump):
 
   return pump, brake_req, last_pump
 
-class CarControllerParams():
+class CarControllerParams:
   def __init__(self, CP):
 
     self.STEER_BP = CP.lateralParams.torqueBP
@@ -112,7 +112,7 @@ class CarControllerParams():
     self.BRAKE_ALERT_PERCENT = 60                   # percentage of brake to sound stock AEB alert
     self.ADAS_STEP = 5                              # 100/5 approx ASA frequency of 20 hz
 
-class CarController():
+class CarController:
   def __init__(self, dbc_name, CP, VM):
     self.last_steer = 0
     self.steer_rate_limited = False
@@ -233,7 +233,11 @@ class CarController():
       # Let stock AEB kick in only when system not engaged
       aeb = not enabled and CS.out.stockAdas.aebV
       can_sends.append(perodua_create_brake_command(self.packer, enabled, brake_req, pump, apply_brake, aeb, (frame/5) % 8))
-      can_sends.append(perodua_create_hud(self.packer, CS.out.cruiseState.available and CS.lkas_latch, enabled, llane_visible, rlane_visible, self.stockLdw, CS.out.stockFcw, CS.out.stockAeb, CS.out.stockAdas.frontDepartureHUD, CS.stock_lkc_off, CS.stock_fcw_off))
+      can_sends.append(perodua_create_hud(
+        self.packer, CS.out.cruiseState.available and CS.lkas_latch,
+        enabled, llane_visible, rlane_visible, self.stockLdw, CS.out.stockFcw,
+        CS.out.stockAeb, CS.out.stockAdas.frontDepartureHUD, CS.stock_lkc_off,
+        CS.stock_fcw_off))
 
     self.last_steer = apply_steer
     new_actuators = actuators.copy()

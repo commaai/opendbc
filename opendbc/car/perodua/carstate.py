@@ -172,8 +172,6 @@ class CarState(CarStateBase):
       self.lkas_btn_rising_edge_seen = False
 
     ret.cruiseState.available = bool(cp.vl["ACC_CMD_HUD"]["SET_ME_1_2"])
-    distance_val = int(cp.vl["ACC_CMD_HUD"]['FOLLOW_DISTANCE'])
-    ret.cruiseState.setDistance = self.parse_set_distance(self.set_distance_values.get(distance_val, None))
 
     # set speed logic
     minus_button = bool(cp.vl["PCM_BUTTONS"]["SET_MINUS"])
@@ -318,7 +316,6 @@ class CarState(CarStateBase):
       ("RIGHT_BACK_DOOR", "METER_CLUSTER", 1),
       ("LEFT_BACK_DOOR", "METER_CLUSTER", 1)
     ]
-    checks = []
 
     if CP.carFingerprint in ACC_CAR:
       signals.append(("BSM_CHIME","BSM", 0))
