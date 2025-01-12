@@ -1,5 +1,5 @@
 from panda import Panda
-from opendbc.car.common.numpy_fast import interp
+from numpy import interp
 from opendbc.car import Bus, get_safety_config, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.ford.fordcan import CanBus

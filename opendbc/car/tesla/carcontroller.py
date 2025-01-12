@@ -1,4 +1,4 @@
-from opendbc.car.common.numpy_fast import clip
+from numpy import clip
 from opendbc.can.packer import CANPacker
 from opendbc.car import Bus, apply_std_steer_angle_limits
 from opendbc.car.interfaces import CarControllerBase

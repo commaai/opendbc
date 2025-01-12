@@ -1,5 +1,5 @@
 from opendbc.car import CanBusBase
-from opendbc.car.common.numpy_fast import clip
+from numpy import clip
 from opendbc.car.hyundai.values import HyundaiFlags
 
 
