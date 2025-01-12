@@ -24,7 +24,7 @@ class TestCanFingerprint:
 
   def test_timing(self, subtests):
     # just pick any CAN fingerprinting car
-    car_model = "CHEVROLET_BOLT_EUV"
+    car_model = "CHEVROLET_VOLT"
     fingerprint = FINGERPRINTS[car_model][0]
 
     cases = []

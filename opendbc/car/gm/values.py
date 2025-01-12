@@ -58,6 +58,37 @@ class CarControllerParams:
     self.BRAKE_LOOKUP_BP = [self.ACCEL_MIN, max_regen_acceleration]
     self.BRAKE_LOOKUP_V = [self.MAX_BRAKE, 0.]
 
+class WMI:
+    class CHEVROLET:
+        TRUCK = {"1GC", "2GC", "3GC"}
+        MPV = {"1G1", "1GN", "2G1", "2GN", "3G1", "3GN", "KL1", "KL7"}
+
+    class GMC:
+        TRUCK = {"1GT", "2GT", "3GT"}
+        MPV = {"1GK", "2GK", "3GK"}
+
+    class CADILLAC:
+        MPV = {"1G6", "1GY", "2G6", "3GY"}
+
+class ANY:
+  ALL = {
+    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
+    "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+    "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
+    }
+
+class YEARS:
+    _2016 = "G"
+    _2017 = "H"
+    _2018 = "J"
+    _2019 = "K"
+    _2020 = "L"
+    _2021 = "M"
+    _2022 = "N"
+    _2023 = "P"
+    _2024 = "R"
+    _2025 = "S"
+
 
 @dataclass
 class GMCarDocs(CarDocs):
@@ -87,6 +118,8 @@ class GMPlatformConfig(PlatformConfig):
   })
   wmis: set[str] = field(default_factory=set)
   years: set[str] = field(default_factory=set)
+  forth_digits: set[str] = field(default_factory=set) # Passanger cars , See https://en.m.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/GM/VIN_Codes
+  fifth_digits: set[str] = field(default_factory=set) # SUV/Truck
 
 
 @dataclass
@@ -149,6 +182,10 @@ class CAR(Platforms):
       GMCarDocs("Chevrolet Bolt EV 2022-23", "2LT Trim with Adaptive Cruise Control Package"),
     ],
     GMCarSpecs(mass=1669, wheelbase=2.63779, steerRatio=16.8, centerToFrontRatio=0.4, tireStiffnessFactor=1.0),
+    wmis = WMI.CHEVROLET.MPV,
+    forth_digits = {"F"},
+    fifth_digits = ANY.ALL,
+    years = {YEARS._2022, YEARS._2023},
   )
   CHEVROLET_SILVERADO = GMPlatformConfig(
     [
@@ -156,30 +193,50 @@ class CAR(Platforms):
       GMCarDocs("GMC Sierra 1500 2020-21", "Driver Alert Package II", video_link="https://youtu.be/5HbNoBLzRwE"),
     ],
     GMCarSpecs(mass=2450, wheelbase=3.75, steerRatio=16.3, tireStiffnessFactor=1.0),
-    wmis={"3GC", "3GT", "1GC", "1GT"},
-    years={"L", "M"},
+    wmis = WMI.CHEVROLET.TRUCK | WMI.GMC.TRUCK,
+    forth_digits = ANY.ALL,
+    fifth_digits = {"8", "9", "W", "Y"},
+    years = {YEARS._2020, YEARS._2021},
   )
   CHEVROLET_EQUINOX = GMPlatformConfig(
     [GMCarDocs("Chevrolet Equinox 2019-22")],
     GMCarSpecs(mass=1588, wheelbase=2.72, steerRatio=14.4, centerToFrontRatio=0.4),
+    wmis = WMI.CHEVROLET.MPV,
+    forth_digits = ANY.ALL,
+    fifth_digits = {"X"},
+    years = {YEARS._2019, YEARS._2020, YEARS._2021, YEARS._2022},
   )
   CHEVROLET_TRAILBLAZER = GMPlatformConfig(
     [GMCarDocs("Chevrolet Trailblazer 2021-22")],
     GMCarSpecs(mass=1345, wheelbase=2.64, steerRatio=16.8, centerToFrontRatio=0.4, tireStiffnessFactor=1.0),
-    wmis={"KL7"},
-    years={"M", "N"},
+    wmis = WMI.CHEVROLET.MPV,
+    forth_digits = ANY.ALL,
+    fifth_digits = {"M"},
+    years = {YEARS._2021, YEARS._2022},
   )
   CADILLAC_XT4 = GMSDGMPlatformConfig(
     [GMCarDocs("Cadillac XT4 2023", "Driver Assist Package")],
     GMCarSpecs(mass=1660, wheelbase=2.78, steerRatio=14.4, centerToFrontRatio=0.4),
+    wmis = WMI.CADILLAC.MPV,
+    forth_digits = ANY.ALL,
+    fifth_digits = {"Z"},
+    years = {YEARS._2023},
   )
   CHEVROLET_VOLT_2019 = GMSDGMPlatformConfig(
     [GMCarDocs("Chevrolet Volt 2019", "Adaptive Cruise Control (ACC) & LKAS")],
     GMCarSpecs(mass=1607, wheelbase=2.69, steerRatio=15.7, centerToFrontRatio=0.45),
+    wmis = WMI.CHEVROLET.MPV,
+    forth_digits = {"R"},
+    fifth_digits = ANY.ALL,
+    years = {YEARS._2019},
   )
   CHEVROLET_TRAVERSE = GMSDGMPlatformConfig(
     [GMCarDocs("Chevrolet Traverse 2022-23", "RS, Premier, or High Country Trim")],
     GMCarSpecs(mass=1955, wheelbase=3.07, steerRatio=17.9, centerToFrontRatio=0.4),
+    wmis = WMI.CHEVROLET.MPV,
+    forth_digits = ANY.ALL,
+    fifth_digits = {"R", "V"},
+    years = {YEARS._2022, YEARS._2023},
   )
   GMC_YUKON = GMPlatformConfig(
     [GMCarDocs("GMC Yukon 2019-20", "Adaptive Cruise Control (ACC) & LKAS")],
@@ -191,8 +248,11 @@ def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str
 # Check the WMI and chassis code to determine the platform
   wmi = vin[:3]
   year = vin[9:10]
+  forth_digit = vin[4:5]
+  fifth_digit = vin[5:6]
   for platform in CAR:
-    if wmi in platform.config.wmis and year in platform.config.years:
+    if (wmi in platform.config.wmis and year in platform.config.years and \
+        forth_digit in platform.config.forth_digits and fifth_digit in platform.config.fifth_digits):
       candidates.add(platform)
   return {str(c) for c in candidates}
 
