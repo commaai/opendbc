@@ -10,7 +10,7 @@ Ecu = CarParams.Ecu
 class CarControllerParams:
   STEER_STEP = 1  # spamming at 100 Hz works well, stock lkas is 20 Hz
 
-  STEER_MAX = 1000.0  # Max angle for EPS
+  STEER_MAX = 390.0  # EPS can actuate the full range of steering
   ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[10., 1.6, .3])
   ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[10., 7., 0.8])
   STEER_DRIVER_ALLOWANCE = 10  # Driver intervention threshold, 1 Nm
