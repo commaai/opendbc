@@ -20,6 +20,7 @@ from opendbc.car.values import PLATFORMS
 from opendbc.can.parser import CANParser
 
 GearShifter = structs.CarState.GearShifter
+SetDistance = structs.CarState.CruiseState.SetDistance
 
 V_CRUISE_MAX = 145
 MAX_CTRL_SPEED = (V_CRUISE_MAX + 4) * CV.KPH_TO_MS
@@ -41,6 +42,13 @@ GEAR_SHIFTER_MAP: dict[str, structs.CarState.GearShifter] = {
   'S': GearShifter.sport, 'SPORT': GearShifter.sport,
   'L': GearShifter.low, 'LOW': GearShifter.low,
   'B': GearShifter.brake, 'BRAKE': GearShifter.brake,
+}
+
+SET_DISTANCE_MAP: dict[str, structs.CarState.CruiseState.SetDistance] = {
+  '1BAR': SetDistance.agressive,
+  '2BAR': SetDistance.reverse,
+  '3BAR': SetDistance.neutral,
+  '4BAR': SetDistance.eco
 }
 
 
@@ -351,6 +359,11 @@ class CarStateBase(ABC):
     if gear is None:
       return GearShifter.unknown
     return GEAR_SHIFTER_MAP.get(gear.upper(), GearShifter.unknown)
+
+  @staticmethod
+  def parse_set_distance(val_str: str) -> structs.CarState.CruiseState.SetDistance:
+    return SET_DISTANCE_MAP.get(val_str, SetDistance.normal)
+
 
   @staticmethod
   def get_can_parsers(CP) -> dict[StrEnum, CANParser]:
