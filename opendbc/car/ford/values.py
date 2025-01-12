@@ -42,6 +42,11 @@ class CarControllerParams:
     pass
 
 
+class FordPandaFlags(IntFlag):
+  FLAG_FORD_LONG_CONTROL = 1
+  FLAG_FORD_CANFD = 2
+
+
 class FordFlags(IntFlag):
   # Static flags
   CANFD = 1
