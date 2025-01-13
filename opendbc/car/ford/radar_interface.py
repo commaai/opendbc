@@ -183,7 +183,7 @@ class RadarInterface(RadarInterfaceBase):
       self.invalid_cnt = 0
 
     # Rarely MRR_Header_InformationDetections can fail to send a message. The scan index is skipped in this case
-    if self.invalid_cnt > 5:
+    if self.invalid_cnt >= 5:
       errors.append("wrongConfig")
 
     for ii in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
