@@ -91,7 +91,7 @@ BO_ 288 ACM_lkaHbaCmd: 8 ACM
  SG_ ACM_unkown6 : 13|1@0+ (1,0) [0|1] "" XXX
  SG_ ACM_unkown5 : 14|1@0+ (1,0) [0|1] "" XXX
  SG_ ACM_HapticRequest : 15|1@0+ (1,0) [0|1] "" EPAS_P
- SG_ ACM_lkaStrToqReq : 23|11@0+ (1.0,-1024) [-1024.0|1024.0] "" EPAS_P
+ SG_ ACM_lkaStrToqReq : 23|11@0+ (1,-1024) [-1024|1024] "" EPAS_P
  SG_ ACM_lkaSymbolState : 26|3@0+ (1,0) [0|7] "" EPAS_P
  SG_ ACM_lkaToiFlt : 27|1@0+ (1,0) [0|1] "" EPAS_P
  SG_ ACM_lkaActToi : 28|1@0+ (1,0) [0|1] "" EPAS_P
@@ -478,6 +478,9 @@ BO_ 1024 VehicleConfig: 7 CGM
  SG_ VCM_HandOfDrive : 9|1@0+ (1,0) [0|1] "" ACM,ESP
  SG_ VCM_BatterySize : 15|6@0+ (1,0) [0|63] "" ACM,ESP
  SG_ VCM_Market : 23|8@0+ (1,0) [0|255] "" ACM,ESP
+
+BO_ 1265 Cluster: 6 XXX
+ SG_ Cluster_VehicleSpeed : 8|8@1+ (1,0) [0|255] "mph" XXX
 
 BO_ 1280 RCM_Dtc: 8 RCM
  SG_ RCM_Dtc_Checksum : 7|8@0+ (1,0) [0|25] "" VDM
