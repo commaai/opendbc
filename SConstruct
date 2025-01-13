@@ -31,6 +31,7 @@ AddOption('--asan',
 ccflags_asan = ["-fsanitize=address", "-fno-omit-frame-pointer"] if GetOption('asan') else []
 ldflags_asan = ["-fsanitize=address"] if GetOption('asan') else []
 
+DefaultEnvironment(tools=[])
 env = Environment(
   ENV=os.environ,
   CC='gcc',
@@ -55,7 +56,7 @@ env = Environment(
   CXXFLAGS=["-std=c++1z"],
   CPPPATH=cpppath,
   CYTHONCFILESUFFIX=".cpp",
-  tools=["default", "cython"]
+  tools=['g++','gnulink', 'cython'],
 )
 
 common = ''
