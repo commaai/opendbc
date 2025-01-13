@@ -56,7 +56,7 @@ env = Environment(
   CXXFLAGS=["-std=c++1z"],
   CPPPATH=cpppath,
   CYTHONCFILESUFFIX=".cpp",
-  tools=["default", "cython"] if arch == "Darwin" else ['g++', 'gnulink', 'cython'],
+  tools=['g++', 'applelink', 'cython'] if arch == "Darwin" else ['g++', 'gnulink', 'cython'],
 )
 
 common = ''
