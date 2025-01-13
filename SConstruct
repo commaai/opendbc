@@ -10,7 +10,6 @@ if platform.system() == "Darwin":
   arch = "Darwin"
   tools = ["default", "cython"]
 else:
-  DefaultEnvironment(tools=[])
   tools = ['g++', 'gnulink', 'cython']
 
 os.environ['PYTHONPATH'] = str(Path(sysconfig.get_paths()['data']).parent)
