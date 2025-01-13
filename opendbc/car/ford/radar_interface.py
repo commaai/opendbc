@@ -182,7 +182,7 @@ class RadarInterface(RadarInterfaceBase):
     else:
       self.invalid_cnt = 0
 
-    # Sometimes MRR_Header_InformationDetections can fail to send a message. The scan index is skipped in this case
+    # Rarely MRR_Header_InformationDetections can fail to send a message. The scan index is skipped in this case
     if self.invalid_cnt > 5:
       errors.append("wrongConfig")
 
