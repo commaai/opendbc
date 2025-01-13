@@ -56,7 +56,7 @@ env = Environment(
   CXXFLAGS=["-std=c++1z"],
   CPPPATH=cpppath,
   CYTHONCFILESUFFIX=".cpp",
-  tools=['g++', 'gcc', 'gnulink', 'cython'],
+  tools=['g++', 'gcc', 'gas', 'gnulink', 'cython'],
 )
 
 common = ''
