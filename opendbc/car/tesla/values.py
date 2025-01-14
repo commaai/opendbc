@@ -1,19 +1,22 @@
 from dataclasses import dataclass, field
 from enum import IntFlag
-from opendbc.car.structs import CarParams, CarState
 from opendbc.car import Bus, CarSpecs, DbcDict,  PlatformConfig, Platforms, AngleRateLimit
+from opendbc.car.structs import CarParams, CarState
 from opendbc.car.docs_definitions import CarDocs
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
 
+
 @dataclass
 class TeslaCarDocs(CarDocs):
   package: str = "Traffic Aware Cruise Control"
 
+
 @dataclass
 class TeslaPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {Bus.party: 'tesla_model3_party'})
+
 
 class CAR(Platforms):
   TESLA_MODEL_3 = TeslaPlatformConfig(
