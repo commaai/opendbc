@@ -1,4 +1,3 @@
-import copy
 from opendbc.can.packer import CANPacker
 from opendbc.car import Bus, apply_driver_steer_torque_limits
 from opendbc.car.interfaces import CarControllerBase
@@ -31,7 +30,7 @@ class CarController(CarControllerBase):
       accel = actuators.accel
       can_sends.append(create_longitudinal(self.packer, self.frame % 15, accel, CC.longActive))
 
-    new_actuators = copy.copy(CC.actuators)
+    new_actuators = actuators.as_builder()
     new_actuators.steer = apply_steer / CarControllerParams.STEER_MAX
     new_actuators.steerOutputCan = apply_steer
 
