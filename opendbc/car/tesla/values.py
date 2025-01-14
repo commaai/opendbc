@@ -1,23 +1,31 @@
+from dataclasses import dataclass, field
 from enum import IntFlag
-from opendbc.car.structs import CarParams
-from opendbc.car import Bus, structs
-from opendbc.car import AngleRateLimit, CarSpecs, PlatformConfig, Platforms
+from opendbc.car import Bus, CarSpecs, DbcDict,  PlatformConfig, Platforms, AngleRateLimit
+from opendbc.car.structs import CarParams, CarState
 from opendbc.car.docs_definitions import CarDocs
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
 
 
+@dataclass
+class TeslaCarDocs(CarDocs):
+  package: str = "Traffic Aware Cruise Control"
+
+
+@dataclass
+class TeslaPlatformConfig(PlatformConfig):
+  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.party: 'tesla_model3_party'})
+
+
 class CAR(Platforms):
-  TESLA_MODEL_3 = PlatformConfig(
-    [CarDocs("Tesla Model 3", "All")],
+  TESLA_MODEL_3 = TeslaPlatformConfig(
+    [TeslaCarDocs("Tesla Model 3 2019-24")],
     CarSpecs(mass=1899., wheelbase=2.875, steerRatio=12.0),
-    {Bus.party: 'tesla_model3_party'},
   )
-  TESLA_MODEL_Y = PlatformConfig(
-    [CarDocs("Tesla Model Y", "All")],
+  TESLA_MODEL_Y = TeslaPlatformConfig(
+    [TeslaCarDocs("Tesla Model Y 2020-24")],
     CarSpecs(mass=2072., wheelbase=2.890, steerRatio=12.0),
-    {Bus.party: 'tesla_model3_party'},
   )
 
 
@@ -40,12 +48,12 @@ class CANBUS:
 
 
 GEAR_MAP = {
-  "DI_GEAR_INVALID": structs.CarState.GearShifter.unknown,
-  "DI_GEAR_P": structs.CarState.GearShifter.park,
-  "DI_GEAR_R": structs.CarState.GearShifter.reverse,
-  "DI_GEAR_N": structs.CarState.GearShifter.neutral,
-  "DI_GEAR_D": structs.CarState.GearShifter.drive,
-  "DI_GEAR_SNA": structs.CarState.GearShifter.unknown,
+  "DI_GEAR_INVALID": CarState.GearShifter.unknown,
+  "DI_GEAR_P": CarState.GearShifter.park,
+  "DI_GEAR_R": CarState.GearShifter.reverse,
+  "DI_GEAR_N": CarState.GearShifter.neutral,
+  "DI_GEAR_D": CarState.GearShifter.drive,
+  "DI_GEAR_SNA": CarState.GearShifter.unknown,
 }
 
 class CarControllerParams:
