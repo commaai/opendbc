@@ -1,4 +1,6 @@
+import numpy as np
 import math
+from collections import deque
 from opendbc.car import Bus, carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
                         make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY, DT_CTRL
 from opendbc.car.can_definitions import CanData
@@ -43,7 +45,7 @@ def get_long_tune(CP, params):
   kdV = [0.]
   if CP.carFingerprint in TSS2_CAR:
     kiV = [0.25]
-    kdV = [0.25 / 4]
+    kdV = [0.0 / 4]
 
   else:
     kiBP = [0., 5., 35.]
@@ -52,6 +54,26 @@ def get_long_tune(CP, params):
   return PIDController(0.0, (kiBP, kiV), k_f=1.0, k_d=(kdBP, kdV),
                        pos_limit=params.ACCEL_MAX, neg_limit=params.ACCEL_MIN,
                        rate=1 / (DT_CTRL * 3))
+
+
+class DelayEstimator:
+  def __init__(self):
+    self.history = deque([0.0] * 500, maxlen=500)  # at highway speeds, trying to maintain speed, delays on the order of 5s is achievable
+    # TODO: fofs?
+    self.buckets = {i * 10: FirstOrderFilter(0, 1, 0.01) for i in range(1, 11)}  # TODO: exponential buckets
+
+  def update(self, aEgo, pcm_accel_cmd):
+    lowest_delay = 10
+    for k in self.buckets.keys():
+      # print(self.history[-k])
+      self.buckets[k].update(abs(aEgo - self.history[-k]))
+
+      if self.buckets[k].x < self.buckets[lowest_delay].x:
+        lowest_delay = k
+
+    self.history.append(pcm_accel_cmd)
+
+    return lowest_delay
 
 
 class CarController(CarControllerBase):
@@ -67,11 +89,15 @@ class CarController(CarControllerBase):
     self.steer_rate_counter = 0
     self.distance_button = 0
 
+    self.de = DelayEstimator()
+
     # *** start long control state ***
     self.long_pid = get_long_tune(self.CP, self.params)
 
     self.error_rate = FirstOrderFilter(0.0, 0.5, DT_CTRL * 3)
     self.prev_error = 0.0
+
+    self.pcm_accel_cmds = deque([0.0] * 50, maxlen=50)
 
     self.aego = FirstOrderFilter(0.0, 0.25, DT_CTRL * 3)
 
@@ -86,6 +112,9 @@ class CarController(CarControllerBase):
     self.secoc_lka_message_counter = 0
     self.secoc_lta_message_counter = 0
     self.secoc_prev_reset_counter = 0
+
+    self.debug = 0
+    self.debug2 = 0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -194,6 +223,8 @@ class CarController(CarControllerBase):
     steer_alert = hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw)
     lead = hud_control.leadVisible or CS.out.vEgo < 12.  # at low speed we always assume the lead is present so ACC can be engaged
 
+    self.debug2 = self.de.update(CS.out.aEgo, actuators.accel)
+
     if self.CP.openpilotLongitudinalControl:
       if self.frame % 3 == 0:
         # Press distance button until we are at the correct bar length. Only change while enabled to avoid skipping startup popup
@@ -225,14 +256,19 @@ class CarController(CarControllerBase):
         prev_aego = self.aego.x
         self.aego.update(a_ego_blended)
         j_ego = (self.aego.x - prev_aego) / (DT_CTRL * 3)
-        a_ego_future = a_ego_blended + j_ego * 0.5
+        a_ego_future = a_ego_blended + j_ego * 0.0
 
         if actuators.longControlState == LongCtrlState.pid:
           error = pcm_accel_cmd - a_ego_blended
           self.error_rate.update((error - self.prev_error) / (DT_CTRL * 3))
           self.prev_error = error
 
-          error_future = pcm_accel_cmd - a_ego_future
+          # print(self.pcm_accel_cmds[-round(0.5 / 0.03)], pcm_accel_cmd,)
+          error_future = self.pcm_accel_cmds[-round(0.5 / 0.03)] - a_ego_future
+          # error_future = pcm_accel_cmd - a_ego_future
+          # error_future = pcm_accel_cmd - CS.out.aEgo
+          self.debug = a_ego_future
+          self.pcm_accel_cmds.append(pcm_accel_cmd)
           pcm_accel_cmd = self.long_pid.update(error_future, error_rate=self.error_rate.x,
                                                speed=CS.out.vEgo,
                                                feedforward=pcm_accel_cmd)
@@ -240,6 +276,7 @@ class CarController(CarControllerBase):
           self.long_pid.reset()
           self.error_rate.x = 0.0
           self.prev_error = 0.0
+          self.pcm_accel_cmds = deque([0.0] * 50, maxlen=50)  # TODO: clear
 
         # Along with rate limiting positive jerk above, this greatly improves gas response time
         # Consider the net acceleration request that the PCM should be applying (pitch included)
@@ -299,6 +336,8 @@ class CarController(CarControllerBase):
     new_actuators.steerOutputCan = apply_steer
     new_actuators.steeringAngleDeg = self.last_angle
     new_actuators.accel = self.accel
+    new_actuators.debug = self.debug
+    new_actuators.debug2 = self.debug2
 
     self.frame += 1
     return new_actuators, can_sends
