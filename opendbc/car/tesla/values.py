@@ -17,11 +17,11 @@ class TeslaPlatformConfig(PlatformConfig):
 
 class CAR(Platforms):
   TESLA_MODEL_3 = TeslaPlatformConfig(
-    [TeslaCarDocs("Tesla Model 3 2019-2024")],
+    [TeslaCarDocs("Tesla Model 3 2019-24")],
     CarSpecs(mass=1899., wheelbase=2.875, steerRatio=12.0),
   )
   TESLA_MODEL_Y = TeslaPlatformConfig(
-    [TeslaCarDocs("Tesla Model Y 2020-2024")],
+    [TeslaCarDocs("Tesla Model Y 2020-24")],
     CarSpecs(mass=2072., wheelbase=2.890, steerRatio=12.0),
   )
 
