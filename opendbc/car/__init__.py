@@ -1,6 +1,6 @@
-import numpy as np
 # functions common among cars
 import logging
+import numpy as np
 from collections import namedtuple
 from dataclasses import dataclass, field
 from enum import IntFlag, ReprEnum, StrEnum, EnumType, auto
