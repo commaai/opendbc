@@ -100,7 +100,7 @@
 |Hyundai|Elantra 2017-18|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|Elantra 2019|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|Elantra 2021-23|Smart Cruise Control (SCC)|[Upstream](#upstream)|
-|Hyundai|Elantra GT 2017-19|Smart Cruise Control (SCC)|[Upstream](#upstream)|
+|Hyundai|Elantra GT 2017-20|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|Elantra Hybrid 2021-23|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|Genesis 2015-16|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|i30 2017-19|Smart Cruise Control (SCC)|[Upstream](#upstream)|
