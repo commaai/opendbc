@@ -7,7 +7,7 @@
 |Acura|ILX 2016-19|AcuraWatch Plus|[Upstream](#upstream)|
 |Acura|Integra 2024|All|[Community](#community)|
 |Acura|RDX 2016-18|AcuraWatch Plus|[Upstream](#upstream)|
-|Acura|RDX 2019-22|All|[Upstream](#upstream)|
+|Acura|RDX 2019-21|All|[Upstream](#upstream)|
 |Audi|A3 2014-19|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Audi|A3 Sportback e-tron 2017-18|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Audi|A4 2016-24|All|[Not compatible](#flexray)|
@@ -100,7 +100,7 @@
 |Hyundai|Elantra 2017-18|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|Elantra 2019|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|Elantra 2021-23|Smart Cruise Control (SCC)|[Upstream](#upstream)|
-|Hyundai|Elantra GT 2017-19|Smart Cruise Control (SCC)|[Upstream](#upstream)|
+|Hyundai|Elantra GT 2017-20|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|Elantra Hybrid 2021-23|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|Genesis 2015-16|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|i30 2017-19|Smart Cruise Control (SCC)|[Upstream](#upstream)|
