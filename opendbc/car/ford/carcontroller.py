@@ -1,9 +1,9 @@
 import math
+import numpy as np
 from opendbc.can.packer import CANPacker
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, apply_std_steer_angle_limits, structs
 from opendbc.car.ford import fordcan
 from opendbc.car.ford.values import CarControllerParams, FordFlags
-from opendbc.car.common.numpy_fast import clip, interp
 from opendbc.car.interfaces import CarControllerBase, V_CRUISE_MAX
 
 LongCtrlState = structs.CarControl.Actuators.LongControlState
@@ -13,20 +13,20 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 def apply_ford_curvature_limits(apply_curvature, apply_curvature_last, current_curvature, v_ego_raw):
   # No blending at low speed due to lack of torque wind-up and inaccurate current curvature
   if v_ego_raw > 9:
-    apply_curvature = clip(apply_curvature, current_curvature - CarControllerParams.CURVATURE_ERROR,
+    apply_curvature = np.clip(apply_curvature, current_curvature - CarControllerParams.CURVATURE_ERROR,
                            current_curvature + CarControllerParams.CURVATURE_ERROR)
 
   # Curvature rate limit after driver torque limit
   apply_curvature = apply_std_steer_angle_limits(apply_curvature, apply_curvature_last, v_ego_raw, CarControllerParams)
 
-  return clip(apply_curvature, -CarControllerParams.CURVATURE_MAX, CarControllerParams.CURVATURE_MAX)
+  return float(np.clip(apply_curvature, -CarControllerParams.CURVATURE_MAX, CarControllerParams.CURVATURE_MAX))
 
 
 def apply_creep_compensation(accel: float, v_ego: float) -> float:
-  creep_accel = interp(v_ego, [1., 3.], [0.6, 0.])
-  creep_accel = interp(accel, [0., 0.2], [creep_accel, 0.])
+  creep_accel = np.interp(v_ego, [1., 3.], [0.6, 0.])
+  creep_accel = np.interp(accel, [0., 0.2], [creep_accel, 0.])
   accel -= creep_accel
-  return accel
+  return float(accel)
 
 
 class CarController(CarControllerBase):
@@ -112,7 +112,7 @@ class CarController(CarControllerBase):
         # however even 3.5 m/s^3 causes some overshoot with a step response.
         accel = max(accel, self.accel - (3.5 * CarControllerParams.ACC_CONTROL_STEP * DT_CTRL))
 
-      accel = clip(accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
+      accel = float(np.clip(accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
 
       # Both gas and accel are in m/s^2, accel is used solely for braking
       if not CC.longActive or gas < CarControllerParams.MIN_GAS:
