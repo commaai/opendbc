@@ -141,7 +141,7 @@
 |Jeep|Grand Cherokee 2019-21|Adaptive Cruise Control (ACC)|[Upstream](#upstream)|
 |Kia|Carnival 2022-24|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Kia|Carnival (China only) 2023|Smart Cruise Control (SCC)|[Upstream](#upstream)|
-|Kia|Ceed 2019|Smart Cruise Control (SCC)|[Upstream](#upstream)|
+|Kia|Ceed 2019-21|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Kia|EV6 (Southeast Asia only) 2022-24|All|[Upstream](#upstream)|
 |Kia|EV6 (with HDA II) 2022-24|Highway Driving Assist II|[Upstream](#upstream)|
 |Kia|EV6 (without HDA II) 2022-24|Highway Driving Assist|[Upstream](#upstream)|
@@ -250,8 +250,8 @@
 |Škoda|Octavia Scout 2017-19|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Škoda|Scala 2020-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Škoda|Superb 2015-22|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
-|Tesla|Model 3|All|[Dashcam mode](#dashcam)|
-|Tesla|Model Y|All|[Dashcam mode](#dashcam)|
+|Tesla|Model 3 2019-24|Traffic Aware Cruise Control|[Dashcam mode](#dashcam)|
+|Tesla|Model Y 2020-24|Traffic Aware Cruise Control|[Dashcam mode](#dashcam)|
 |Toyota|Alphard 2019-20|All|[Upstream](#upstream)|
 |Toyota|Alphard Hybrid 2021|All|[Upstream](#upstream)|
 |Toyota|Avalon 2016|Toyota Safety Sense P|[Upstream](#upstream)|
