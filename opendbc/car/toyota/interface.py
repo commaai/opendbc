@@ -1,6 +1,5 @@
 from panda import Panda
-from panda import uds
-from opendbc.car import Bus, structs, get_safety_config
+from opendbc.car import Bus, structs, get_safety_config, uds
 from opendbc.car.toyota.values import Ecu, CAR, DBC, ToyotaFlags, CarControllerParams, TSS2_CAR, RADAR_ACC_CAR, NO_DSU_CAR, \
                                                   MIN_ACC_SPEED, EPS_SCALE, UNSUPPORTED_DSU_CAR, NO_STOP_TIMER_CAR, ANGLE_CONTROL_CAR
 from opendbc.car.disable_ecu import disable_ecu
