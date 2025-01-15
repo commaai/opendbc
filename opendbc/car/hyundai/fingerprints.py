@@ -389,6 +389,7 @@ FW_VERSIONS = {
   CAR.HYUNDAI_PALISADE: {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00LX2 SCC FHCUP      1.00 1.04 99110-S8100         ',
+      b'\xf1\x00LX2_ SCC F-CUP      1.00 1.00 99110-S8110         ',
       b'\xf1\x00LX2_ SCC F-CUP      1.00 1.04 99110-S8100         ',
       b'\xf1\x00LX2_ SCC F-CUP      1.00 1.05 99110-S8100         ',
       b'\xf1\x00LX2_ SCC FHCU-      1.00 1.05 99110-S8100         ',
@@ -426,6 +427,7 @@ FW_VERSIONS = {
       b'\xf1\x00LX2 MDPS C 1.00 1.03 56310-S8000 4LXDC103',
       b'\xf1\x00LX2 MDPS C 1.00 1.03 56310-S8020 4LXDC103',
       b'\xf1\x00LX2 MDPS C 1.00 1.03 56310-XX000 4LXDC103',
+      b'\xf1\x00LX2 MDPS C 1.00 1.04 56310-S8000 4LXDC104',
       b'\xf1\x00LX2 MDPS C 1.00 1.04 56310-S8020 4LXDC104',
       b'\xf1\x00LX2 MDPS C 1.00 1.04 56310-S8420 4LXDC104',
       b'\xf1\x00LX2 MDPS R 1.00 1.02 56370-S8300 9318',
@@ -542,15 +544,19 @@ FW_VERSIONS = {
   CAR.KIA_CEED: {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00CD__ SCC F-CUP      1.00 1.02 99110-J7000         ',
+      b'\xf1\x00CD__ SCC F-CUP      1.00 1.00 99110-J7500         ',
     ],
     (Ecu.eps, 0x7d4, None): [
       b'\xf1\x00CD  MDPS C 1.00 1.06 56310-XX000 4CDEC106',
+      b'\xf1\x00CDT MDPS C 1.00 1.00 56310-XX000 4CDTC100',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00CD  LKAS AT EUR LHD 1.00 1.01 99211-J7000 B40',
+      b'\xf1\x00CDT LKAS AT EUR LHD 1.00 1.01 99211-J7210 521',
     ],
     (Ecu.abs, 0x7d1, None): [
       b'\xf1\x00CD ESC \x03 102\x18\x08\x05 58920-J7350',
+      b'\xf1\x00CD ESC \x0b 101 \x10\x03 58910-J7AC0',
     ],
   },
   CAR.KIA_FORTE: {
@@ -763,6 +769,7 @@ FW_VERSIONS = {
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00DEH MFC  AT KOR LHD 1.00 1.04 99211-G5000 190516',
       b'\xf1\x00DEH MFC  AT USA LHD 1.00 1.00 99211-G5500 210428',
+      b'\xf1\x00DEH MFC  AT USA LHD 1.00 1.06 99211-G5000 201028',
       b'\xf1\x00DEH MFC  AT USA LHD 1.00 1.07 99211-G5000 201221',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
@@ -993,6 +1000,7 @@ FW_VERSIONS = {
       b'\xf1\x00NE1 MFC  AT EUR LHD 1.00 1.00 99211-GI100 230915',
       b'\xf1\x00NE1 MFC  AT EUR LHD 1.00 1.01 99211-GI010 211007',
       b'\xf1\x00NE1 MFC  AT EUR LHD 1.00 1.01 99211-GI100 240110',
+      b'\xf1\x00NE1 MFC  AT EUR LHD 1.00 1.03 99211-GI010 220401',
       b'\xf1\x00NE1 MFC  AT EUR LHD 1.00 1.06 99211-GI000 210813',
       b'\xf1\x00NE1 MFC  AT EUR LHD 1.00 1.06 99211-GI010 230110',
       b'\xf1\x00NE1 MFC  AT EUR RHD 1.00 1.01 99211-GI010 211007',
@@ -1152,6 +1160,7 @@ FW_VERSIONS = {
   CAR.KIA_CARNIVAL_4TH_GEN: {
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00KA4 MFC  AT EUR LHD 1.00 1.06 99210-R0000 220221',
+      b'\xf1\x00KA4 MFC  AT KOR LHD 1.00 1.05 99210-R0000 201221',
       b'\xf1\x00KA4 MFC  AT KOR LHD 1.00 1.06 99210-R0000 220221',
       b'\xf1\x00KA4 MFC  AT USA LHD 1.00 1.00 99210-R0100 230105',
       b'\xf1\x00KA4 MFC  AT USA LHD 1.00 1.01 99210-R0100 230710',
