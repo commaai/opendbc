@@ -60,7 +60,7 @@ class CarState(CarStateBase):
     ret = structs.CarState()
     cp_acc = cp_cam if self.CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR) else cp
 
-    self.brake_force = cp.vl['BRAKE']['BRAKE_FORCE']
+    # self.brake_force = cp.vl['BRAKE']['BRAKE_FORCE']
 
     if not self.CP.flags & ToyotaFlags.SECOC.value:
       self.gvc = cp.vl["VSC1S07"]["GVC"]
@@ -88,7 +88,8 @@ class CarState(CarStateBase):
 
       if self.CP.flags & ToyotaFlags.HYBRID:
         ret.gas = cp.vl["GAS_PEDAL_HYBRID"]["GAS_PEDAL"]
-        ret.brake = cp.vl["BRAKE"]["BRAKE_AMOUNT"]
+        ret.brake = -cp.vl["BRAKE"]["BRAKE_FORCE"]
+        self.fdrv = cp.vl["GEAR_PACKET_HYBRID"]["FDRVREAL"]
 
     ret.wheelSpeeds = self.get_wheel_speeds(
       cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FL"],
@@ -213,7 +214,6 @@ class CarState(CarStateBase):
       ("PCM_CRUISE", 33),
       ("PCM_CRUISE_SM", 1),
       ("STEER_TORQUE_SENSOR", 50),
-      ("BRAKE", 33),
     ]
 
     if CP.flags & ToyotaFlags.SECOC.value:
@@ -230,6 +230,7 @@ class CarState(CarStateBase):
       if CP.flags & ToyotaFlags.HYBRID:
         pt_messages.append(("BRAKE", 83))
         pt_messages.append(("GAS_PEDAL_HYBRID", 33))
+        pt_messages.append(("GEAR_PACKET_HYBRID", 33))
 
       pt_messages += [
         ("GEAR_PACKET", 1),
