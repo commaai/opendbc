@@ -299,7 +299,7 @@
 |Toyota|RAV4 Hybrid 2017-18|All|[Upstream](#upstream)|
 |Toyota|RAV4 Hybrid 2019-21|All|[Upstream](#upstream)|
 |Toyota|RAV4 Hybrid 2022|All|[Upstream](#upstream)|
-|Toyota|RAV4 Hybrid 2023-24|All|[Upstream](#upstream)|
+|Toyota|RAV4 Hybrid 2023-25|All|[Upstream](#upstream)|
 |Toyota|RAV4 Prime 2021-23|Any|[Community](#community)|
 |Toyota|RAV4 Prime 2024-25|Any|[Not compatible](#can-bus-security)|
 |Toyota|Sequoia 2023-25|Any|[Not compatible](#can-bus-security)|
