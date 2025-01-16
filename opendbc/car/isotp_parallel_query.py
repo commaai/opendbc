@@ -2,10 +2,9 @@ import time
 from collections import defaultdict
 from functools import partial
 
-from opendbc.car import carlog
+from opendbc.car import carlog, uds
 from opendbc.car.can_definitions import CanData, CanRecvCallable, CanSendCallable
 from opendbc.car.fw_query_definitions import AddrType
-from panda import uds
 
 
 class IsoTpParallelQuery:
