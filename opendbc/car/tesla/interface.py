@@ -22,6 +22,8 @@ class CarInterface(CarInterfaceBase):
 
     ret.steerControlType = structs.CarParams.SteerControlType.angle
     ret.radarUnavailable = True
+    ret.startAccel = 0.16
+    ret.stopAccel = -0.52
 
     ret.openpilotLongitudinalControl = True
 
