@@ -85,10 +85,8 @@ class CarState(CarStateBase):
         ret.engineRpm = cp.vl["ENGINE_RPM"]["RPM"]
 
       if self.CP.flags & ToyotaFlags.HYBRID:
-        ret.brake = cp.vl["BRAKE"]["BRAKE_FORCE"]
         ret.gas = cp.vl["GAS_PEDAL_HYBRID"]["GAS_PEDAL"]
-      else:
-        ret.gas = cp.vl["GAS_PEDAL"]["GAS_PEDAL"]
+        ret.brake = cp.vl["BRAKE"]["BRAKE_FORCE"]  # includes user and computer
 
     ret.wheelSpeeds = self.get_wheel_speeds(
       cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FL"],
@@ -229,8 +227,6 @@ class CarState(CarStateBase):
       if CP.flags & ToyotaFlags.HYBRID:
         pt_messages.append(("BRAKE", 83))
         pt_messages.append(("GAS_PEDAL_HYBRID", 33))
-      else:
-        pt_messages.append(("GAS_PEDAL", 33))
 
       pt_messages += [
         ("GEAR_PACKET", 1),
