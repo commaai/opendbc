@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from collections import deque
 from opendbc.car import Bus, carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
                         make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY, DT_CTRL
 from opendbc.car.can_definitions import CanData
@@ -38,9 +39,9 @@ MAX_LTA_DRIVER_TORQUE_ALLOWANCE = 150  # slightly above steering pressed allows 
 
 
 def get_long_tune(CP, params):
-  kiBP = [0.]
+  kiBP = [5, 35]
   if CP.carFingerprint in TSS2_CAR:
-    kiV = [0.25]
+    kiV = [0.5, 0.25]
 
   else:
     kiBP = [0., 5., 35.]
@@ -63,6 +64,10 @@ class CarController(CarControllerBase):
     self.permit_braking = True
     self.steer_rate_counter = 0
     self.distance_button = 0
+
+    self.brake_force_filter = FirstOrderFilter(0.0, 0.25, DT_CTRL * 3)
+
+    self.deque = deque([0] * 50, maxlen=50)
 
     # *** start long control state ***
     self.long_pid = get_long_tune(self.CP, self.params)
@@ -219,13 +224,20 @@ class CarController(CarControllerBase):
         j_ego = (self.aego.x - prev_aego) / (DT_CTRL * 3)
         a_ego_future = a_ego_blended + j_ego * 0.5
 
+        self.brake_force_filter.update(CS.brake_force)
+
         if actuators.longControlState == LongCtrlState.pid:
           error_future = pcm_accel_cmd - a_ego_future
+
+          error_future = self.deque[-50 // 3] - CS.out.aEgo
+          self.deque.append(pcm_accel_cmd)
+
           pcm_accel_cmd = self.long_pid.update(error_future,
                                                speed=CS.out.vEgo,
                                                feedforward=pcm_accel_cmd)
         else:
           self.long_pid.reset()
+          self.deque = deque([0] * 50, maxlen=50)
 
         # Along with rate limiting positive jerk above, this greatly improves gas response time
         # Consider the net acceleration request that the PCM should be applying (pitch included)

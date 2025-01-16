@@ -60,6 +60,8 @@ class CarState(CarStateBase):
     ret = structs.CarState()
     cp_acc = cp_cam if self.CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR) else cp
 
+    self.brake_force = cp.vl['BRAKE']['BRAKE_FORCE']
+
     if not self.CP.flags & ToyotaFlags.SECOC.value:
       self.gvc = cp.vl["VSC1S07"]["GVC"]
 
@@ -211,6 +213,7 @@ class CarState(CarStateBase):
       ("PCM_CRUISE", 33),
       ("PCM_CRUISE_SM", 1),
       ("STEER_TORQUE_SENSOR", 50),
+      ("BRAKE", 33),
     ]
 
     if CP.flags & ToyotaFlags.SECOC.value:
