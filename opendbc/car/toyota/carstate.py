@@ -86,7 +86,7 @@ class CarState(CarStateBase):
 
       if self.CP.flags & ToyotaFlags.HYBRID:
         ret.gas = cp.vl["GAS_PEDAL_HYBRID"]["GAS_PEDAL"]
-        ret.brake = cp.vl["BRAKE"]["BRAKE_FORCE"]  # includes user and computer
+        ret.brake = cp.vl["BRAKE"]["BRAKE_AMOUNT"]
 
     ret.wheelSpeeds = self.get_wheel_speeds(
       cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FL"],
