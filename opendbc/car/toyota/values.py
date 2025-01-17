@@ -258,7 +258,7 @@ class CAR(Platforms):
   TOYOTA_RAV4_TSS2_2023 = ToyotaTSS2PlatformConfig(
     [
       ToyotaCarDocs("Toyota RAV4 2023-24"),
-      ToyotaCarDocs("Toyota RAV4 Hybrid 2023-24"),
+      ToyotaCarDocs("Toyota RAV4 Hybrid 2023-25", video_link="https://youtu.be/4eIsEq4L4Ng"),
     ],
     TOYOTA_RAV4_TSS2.specs,
     flags=ToyotaFlags.RADAR_ACC | ToyotaFlags.ANGLE_CONTROL,
@@ -268,7 +268,7 @@ class CAR(Platforms):
     CarSpecs(mass=4372. * CV.LB_TO_KG, wheelbase=2.68, steerRatio=16.88, tireStiffnessFactor=0.5533),
   )
   TOYOTA_YARIS = ToyotaSecOCPlatformConfig(
-    [ToyotaCarDocs("Toyota Yaris 2023 (Non-US only)", min_enable_speed=MIN_ACC_SPEED)],
+    [ToyotaCarDocs("Toyota Yaris Hybrid 2020 (Non-US only)", min_enable_speed=MIN_ACC_SPEED)],
     CarSpecs(mass=1170, wheelbase=2.55, steerRatio=14.80, tireStiffnessFactor=0.5533),
     flags=ToyotaFlags.RADAR_ACC,
   )
