@@ -64,8 +64,10 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
   }
 
   for (int i = 0; i < parse_sigs.size(); i++) {
-    vals[i] = tmp_vals[i];
-    all_vals[i].push_back(vals[i]);
+    auto &val = signal_values.at(parse_sigs[i].name);
+    val.ts_nanos = nanos;
+    val.value = tmp_vals[i];
+    val.all_values.push_back(val.value);
   }
   last_seen_nanos = nanos;
 
@@ -121,8 +123,9 @@ CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<st
 
     // track all signals for this message
     state.parse_sigs = msg->sigs;
-    state.vals.resize(msg->sigs.size());
-    state.all_vals.resize(msg->sigs.size());
+    for (auto &sig : msg->sigs) {
+      state.signal_values[sig.name] = {};
+    }
   }
 }
 
@@ -142,10 +145,9 @@ CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum
       .ignore_counter = ignore_counter,
     };
 
-    for (const auto& sig : msg.sigs) {
-      state.parse_sigs.push_back(sig);
-      state.vals.push_back(0);
-      state.all_vals.push_back({});
+    state.parse_sigs = msg.sigs;
+    for (auto &sig : msg.sigs) {
+      message_states[state.address].signal_values[sig.name] = {};
     }
 
     message_states[state.address] = state;
@@ -155,7 +157,9 @@ CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum
 std::set<uint32_t> CANParser::update(const std::vector<CanData> &can_data) {
   // Clear all_values
   for (auto &state : message_states) {
-    for (auto &vals : state.second.all_vals) vals.clear();
+    for (auto &value : state.second.signal_values) {
+      value.second.all_values.clear();
+    }
   }
 
   std::set<uint32_t> updated_addresses;
