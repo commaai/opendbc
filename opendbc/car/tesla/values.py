@@ -45,12 +45,12 @@ class CANBUS:
 
 
 GEAR_MAP = {
-  "DI_GEAR_INVALID": structs.CarState.GearShifter.unknown,
-  "DI_GEAR_P": structs.CarState.GearShifter.park,
-  "DI_GEAR_R": structs.CarState.GearShifter.reverse,
-  "DI_GEAR_N": structs.CarState.GearShifter.neutral,
-  "DI_GEAR_D": structs.CarState.GearShifter.drive,
-  "DI_GEAR_SNA": structs.CarState.GearShifter.unknown,
+  "DI_GEAR_INVALID": CarState.GearShifter.unknown,
+  "DI_GEAR_P": CarState.GearShifter.park,
+  "DI_GEAR_R": CarState.GearShifter.reverse,
+  "DI_GEAR_N": CarState.GearShifter.neutral,
+  "DI_GEAR_D": CarState.GearShifter.drive,
+  "DI_GEAR_SNA": CarState.GearShifter.unknown,
 }
 
 class CarControllerParams:
