@@ -42,7 +42,7 @@ def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_steer):
   if CP.flags & HyundaiFlags.CCNC:
     values = {
       "NEW_SIGNAL_1": 3 if lat_active else 1,
-      "TORQUE_REQUEST": apply_steer if lat_active else 0,
+      "TORQUE_REQUEST": apply_steer,
       "STEER_REQ": 1 if lat_active else 0,
       "NEW_SIGNAL_4": 9,
       "NEW_SIGNAL_3": 10 if lat_active else 100, # TODO: value between 10-32+ sometimes
