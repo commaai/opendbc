@@ -1,32 +1,73 @@
-# flake8: noqa
-from opendbc.car.structs import CarParams
-from opendbc.car import dbc_dict
+from dataclasses import dataclass, field
+from enum import IntFlag
 
-from collections import defaultdict
+from opendbc.car import CarSpecs, PlatformConfig, Platforms, dbc_dict
+from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
+from opendbc.car.structs import CarParams
+from opendbc.car.docs_definitions import CarDocs, CarParts, CarHarness
+
 Ecu = CarParams.Ecu
+
+
+@dataclass
+class PeroduaCarDocs(CarDocs):
+  package: str = "All"
+  car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.toyota_a]))
+
+class PeroduaFlags(IntFlag):
+  # Static flags
+  ACC = 1
+
+class CAR(Platforms):
+  """
+  For illustration, we create a PERODUA brand class with a single model:
+  Myvi PSD. If you'd like to keep everything under one `CAR` class, you can do so.
+  """
+  MYVI_PSD = PlatformConfig(
+    [PeroduaCarDocs("Perodua Myvi AV 2022+", "Perodua Smart Drive Assist")],
+    # TODO: see if steer ratio correct, comma logs reports 13
+    CarSpecs(mass=1025.,wheelbase=2.5,steerRatio=17.44,tireStiffnessFactor=0.9871,centerToFrontRatio=0.44),
+    dbc_dict('perodua_psd_pt_generated', None),
+    flags=PeroduaFlags.ACC
+  )
+
+class CarControllerParams:
+  def __init__(self, CP):
+
+    self.STEER_MAX = 300 # TODO: check if need change
+    self.STEER_STEP = 3  # TODO: check if need change
+    self.STEER_BP = CP.lateralParams.torqueBP
+    self.STEER_LIM_TORQ = CP.lateralParams.torqueV
+
+    # for torque limit calculation
+    self.STEER_DELTA_UP = 10
+    self.STEER_DELTA_DOWN = 30
+
+    self.STEER_REDUCE_FACTOR = 1000                 # how much to divide the steer when reducing fighting torque
+    self.GAS_MAX = 2600                             # KommuActuator dac gas value
+    self.GAS_STEP = 2                               # how often we update the longitudinal cmd
+    self.BRAKE_ALERT_PERCENT = 60                   # percentage of brake to sound stock AEB alert
+    self.ADAS_STEP = 5                              # 100/5 approx ASA frequency of 20 hz
+
+DBC = CAR.create_dbc_map()
 
 HUD_MULTIPLIER = 1.04
 
-class CAR:
-  MYVI_PSD = "PERODUA MYVI PSD"
+ACC_CAR = CAR.with_flags(PeroduaFlags.ACC)
 
-FINGERPRINTS = {
-  CAR.MYVI_PSD: [{
-    160: 5, 161: 8, 164: 8, 165: 4, 308: 6, 385: 3, 398: 8, 399: 8, 400: 8, 405: 5, 409: 8, 410: 8, 416: 8, 417: 7, 427: 8, 429: 8, 448: 4, 449: 8, 464: 8, 496: 5, 516: 8, 520: 6, 524: 6, 608: 8, 609: 8, 624: 8, 625: 8, 627: 8, 628: 8, 682: 2, 752: 8, 834: 8, 848: 5, 856: 8, 857: 4, 900: 4, 976: 5, 980: 8, 1012: 7, 1032: 8, 1033: 8, 1034: 8, 1088: 8, 1090: 8, 1100: 8, 1152: 8, 1160: 4, 1162: 8, 1163: 8, 1164: 8, 1168: 8, 1176: 3, 1188: 8, 1200: 3, 1204: 8, 1217: 8, 1218: 8, 1219: 8, 1224: 8, 1245: 8, 1247: 8, 1248: 8, 1267: 8, 1312: 8, 1329: 8, 1408: 8, 1409: 8, 1410: 8, 1416: 8, 1417: 8, 1418: 8, 1434: 8, 1435: 8, 1542: 2, 1798: 3
-  }]
-}
+def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions):
+  # For now FW-based query not implemented
+  return set()
 
-ECU_FINGERPRINT = {
-  # ASA Camera CAN fingerprint
-  Ecu.fwdCamera: [679, 680, 681, 1267]
-}
+# TODO: maybe fix this, i have no idea how this works
+FW_QUERY_CONFIG = FwQueryConfig(
+  requests=[
+    Request(
+      [StdQueries.SHORT_TESTER_PRESENT_REQUEST, StdQueries.OBD_VERSION_REQUEST],
+      [StdQueries.SHORT_TESTER_PRESENT_RESPONSE, StdQueries.OBD_VERSION_RESPONSE],
+      whitelist_ecus=[Ecu.engine, Ecu.srs, Ecu.abs, Ecu.dsu],
+      bus=0,
+    )],        # no active queries
+  extra_ecus=[],      # or minimal list
+)
 
-DBC = {
-  CAR.MYVI_PSD: dbc_dict('perodua_psd_pt', None),
-}
-
-
-BRAKE_SCALE = defaultdict(lambda: 1, {CAR.MYVI_PSD: 3.3})
-GAS_SCALE = defaultdict(lambda: 2600, {CAR.MYVI_PSD: 0.35})
-
-ACC_CAR = {CAR.MYVI_PSD}

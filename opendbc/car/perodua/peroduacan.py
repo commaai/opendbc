@@ -1,16 +1,5 @@
 from opendbc.car.common.numpy_fast import clip
-from opendbc.car import structs
 from opendbc.car.common.conversions import Conversions as CV
-
-SetDistance = structs.CarState.CruiseState.SetDistance
-
-def compute_set_distance(state):
-  if state == SetDistance.aggresive:
-    return 2
-  elif state == SetDistance.normal:
-    return 1
-  else:
-    return 0
 
 def lkc_checksum(addr,dat):
   return ( addr + len(dat) + 1 + 1 + sum(dat)) & 0xFF
@@ -29,7 +18,7 @@ def create_can_steer_command(packer, steer, steer_req, raw_cnt):
     "SET_ME_1_2": 1,
   }
 
-  dat = packer.make_can_msg("STEERING_LKAS", 0, values)[2]
+  dat = packer.make_can_msg("STEERING_LKAS", 0, values)[1]
   crc = lkc_checksum(0x1d0, dat[:-1])
   values["CHECKSUM"] = crc
 
@@ -123,19 +112,17 @@ def perodua_create_brake_command(packer, enabled, decel_req, pump, decel_cmd, ae
     "AEB_1019": aeb,
   }
 
-  dat = packer.make_can_msg("ACC_BRAKE", 0, values)[2]
+  dat = packer.make_can_msg("ACC_BRAKE", 0, values)[1]
   crc = (perodua_checksum(0x271, dat[:-1]))
   values["CHECKSUM"] = crc
 
   return packer.make_can_msg("ACC_BRAKE", 0, values)
 
-def perodua_create_accel_command(packer, set_speed, acc_rdy, enabled, is_lead, des_speed, brake_amt, brake_pump, set_distance):
+def perodua_create_accel_command(packer, set_speed, acc_rdy, enabled, des_speed, brake_amt, brake_pump):
   is_braking = (brake_amt > 0.0 or brake_pump > 0.0)
 
   values = {
     "SET_SPEED": set_speed * CV.MS_TO_KPH,
-    "FOLLOW_DISTANCE": compute_set_distance(set_distance),
-    "IS_LEAD": is_lead,
     "IS_ACCEL": (not is_braking) and enabled,
     "IS_DECEL": is_braking and enabled,
     "SET_ME_1_2": acc_rdy, #rdy buton
@@ -145,29 +132,26 @@ def perodua_create_accel_command(packer, set_speed, acc_rdy, enabled, is_lead, d
     "ACC_CMD": des_speed * CV.MS_TO_KPH if enabled else 0,
   }
 
-  dat = packer.make_can_msg("ACC_CMD_HUD", 0, values)[2]
+  dat = packer.make_can_msg("ACC_CMD_HUD", 0, values)[1]
   crc = (perodua_checksum(0x273, dat[:-1]))
   values["CHECKSUM"] = crc
 
   return packer.make_can_msg("ACC_CMD_HUD", 0, values)
 
-def perodua_create_hud(packer, lkas_rdy, enabled, llane_visible, rlane_visible, ldw, fcw, aeb, front_depart, ldp_off, fcw_off):
+def perodua_create_hud(packer, lkas_rdy, enabled, llane_visible, rlane_visible, ldw, fcw, aeb):
 
   values = {
     "LKAS_SET": lkas_rdy,
     "LKAS_ENGAGED": enabled,
     "LDA_ALERT": ldw,
-    "LDA_OFF": ldp_off,
     "LANE_RIGHT_DETECT": rlane_visible,
     "LANE_LEFT_DETECT": llane_visible,
     "SET_ME_X02": 0x2,
     "AEB_ALARM": fcw,
-    "AEB_BRAKE": aeb,
-    "FRONT_DEPART": front_depart,
-    "FCW_DISABLE": fcw_off,
+    "AEB_BRAKE": aeb
   }
 
-  dat = packer.make_can_msg("LKAS_HUD", 0, values)[2]
+  dat = packer.make_can_msg("LKAS_HUD", 0, values)[1]
   crc = (perodua_checksum(0x274, dat[:-1]))
   values["CHECKSUM"] = crc
 

@@ -1,9 +1,9 @@
 from opendbc.car import DT_CTRL
+from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.perodua.peroduacan import create_can_steer_command, \
                                              perodua_create_accel_command, \
-                                             perodua_create_brake_command, perodua_create_hud, \
-                                             perodua_buttons
-from opendbc.car.perodua.values import ACC_CAR, DBC, BRAKE_SCALE, GAS_SCALE
+                                             perodua_create_brake_command, perodua_create_hud
+from opendbc.car.perodua.values import ACC_CAR, DBC, CarControllerParams
 from opendbc.can.packer import CANPacker
 from opendbc.car.common.numpy_fast import clip, interp
 
@@ -14,6 +14,8 @@ BRAKE_MAG = [BRAKE_THRESHOLD,.32,.46,.61,.76,.90,1.06,1.21,1.35,1.51,4.0]
 PUMP_VALS = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1.0]
 PUMP_RESET_INTERVAL = 1.5
 PUMP_RESET_DURATION = 0.1
+# todo: check max !IMPORTANT
+MAX_USER_TORQUE = 500
 
 class BrakingStatus:
   STANDSTILL_INIT = 0
@@ -96,24 +98,11 @@ def psd_brake(apply_brake, last_pump):
 
   return pump, brake_req, last_pump
 
-class CarControllerParams:
-  def __init__(self, CP):
 
-    self.STEER_BP = CP.lateralParams.torqueBP
-    self.STEER_LIM_TORQ = CP.lateralParams.torqueV
 
-    # for torque limit calculation
-    self.STEER_DELTA_UP = 10
-    self.STEER_DELTA_DOWN = 30
-
-    self.STEER_REDUCE_FACTOR = 1000                 # how much to divide the steer when reducing fighting torque
-    self.GAS_MAX = 2600                             # KommuActuator dac gas value
-    self.GAS_STEP = 2                               # how often we update the longitudinal cmd
-    self.BRAKE_ALERT_PERCENT = 60                   # percentage of brake to sound stock AEB alert
-    self.ADAS_STEP = 5                              # 100/5 approx ASA frequency of 20 hz
-
-class CarController:
-  def __init__(self, dbc_name, CP, VM):
+class CarController(CarControllerBase):
+  def __init__(self, dbc_names, CP):
+    super().__init__(dbc_names, CP)
     self.last_steer = 0
     self.steer_rate_limited = False
     self.steering_direction = False
@@ -121,9 +110,8 @@ class CarController:
     self.params = CarControllerParams(CP)
     self.packer = CANPacker(DBC[CP.carFingerprint]['pt'])
     self.brake = 0
-    self.brake_scale = BRAKE_SCALE[CP.carFingerprint]
-    self.gas_scale = GAS_SCALE[CP.carFingerprint]
-
+    self.brake_scale = 3.3
+    self.gas_scale = 0.35
     self.need_clear_engine = True
 
     self.last_pump = 0
@@ -137,9 +125,16 @@ class CarController:
     self.using_stock_acc = False
     self.force_use_stock_acc = False
 
-  def update(self, enabled, CS, frame, actuators, lead_visible, rlane_visible, llane_visible, pcm_cancel, ldw, laneActive):
-    can_sends = []
+    # self.packer = CANPacker(dbc_names[Bus.pt])
 
+  def update(self, CC, CS, now_nanos):
+    can_sends = []
+    actuators = CC.actuators
+    # stopping = actuators.longControlState == LongCtrlState.stopping
+    hud_control = CC.hudControl
+    # cm_cancel_cmd = CC.cruiseControl.cancel
+    # lat_active = CC.latActive and abs(CS.out.steeringTorque) < MAX_USER_TORQUE
+    enabled = CC.enabled
     # steer
     steer_max_interp = interp(CS.out.vEgo, self.params.STEER_BP, self.params.STEER_LIM_TORQ)
     new_steer = int(round(actuators.steer * steer_max_interp))
@@ -157,51 +152,49 @@ class CarController:
     apply_brake *= self.brake_scale
     apply_brake = clip(apply_brake, 0., 1.56)
 
-    if self.using_stock_acc:
-      apply_brake = max(CS.stock_brake_mag * 0.85, apply_brake)
+    # if self.using_stock_acc:
+    #   apply_brake = max(CS.stock_brake_mag * 0.85, apply_brake)
 
     if CS.out.gasPressed:
       apply_brake = 0
     apply_gas *= self.gas_scale
 
-    ts = frame * DT_CTRL
+    ts = self.frame * DT_CTRL
 
-    if self.need_clear_engine or frame < 1000:
-      can_sends.append(self.packer.make_can_msg(2015, b'\x01\x04\x00\x00\x00\x00\x00\x00', 0))
 
     # CAN controlled lateral
-    if (frame % 2) == 0:
+    if (self.frame % 2) == 0:
 
       # allow stock LDP passthrough
-      self.stockLdw = CS.out.stockAdas.laneDepartureHUD
-      if self.stockLdw:
-          apply_steer = -CS.out.stockAdas.ldpSteerV
+      # self.stockLdw = CS.out.stockAdas.laneDepartureHUD
+      # if self.stockLdw:
+      #     apply_steer = -CS.out.stockAdas.ldpSteerV
 
-      steer_req = (enabled or self.stockLdw) and CS.lkas_latch
-      can_sends.append(create_can_steer_command(self.packer, apply_steer, steer_req and laneActive, (frame/2) % 16))
+      steer_req = (enabled or self.stockLdw)
+      can_sends.append(create_can_steer_command(self.packer, apply_steer, steer_req, (self.frame/2) % 16))
 
     # CAN controlled longitudinal
-    if (frame % 5) == 0 and CS.CP.openpilotLongitudinalControl:
+    if (self.frame % 5) == 0 and CS.CP.openpilotLongitudinalControl:
 
       # check if need to revert to stock acc
-      if enabled and CS.out.vEgo > 10: # 36kmh
-        if CS.stock_acc_engaged and self.force_use_stock_acc:
-          self.using_stock_acc = True
-      else:
-        if enabled:
-          # spam engage until stock ACC engages
-          can_sends.append(perodua_buttons(self.packer, 0, 1, (frame/5) % 16))
+      # if enabled and CS.out.vEgo > 10: # 36kmh
+      #   if CS.stock_acc_engaged and self.force_use_stock_acc:
+      #     self.using_stock_acc = True
+      # else:
+      #   if enabled:
+      #     # spam engage until stock ACC engages
+      #     can_sends.append(perodua_buttons(self.packer, 0, 1, (frame/5) % 16))
 
       # check if need to revert to openpilot acc
-      if CS.out.vEgo < 8.3: # 30kmh
-        self.using_stock_acc = False
-
-      # set stock acc follow speed
-      if enabled and self.using_stock_acc:
-        if CS.out.cruiseState.speedCluster - (CS.stock_acc_set_speed // 3.6) > 0.3:
-          can_sends.append(perodua_buttons(self.packer, 0, 1, (frame/5) % 16))
-        if (CS.stock_acc_set_speed // 3.6) - CS.out.cruiseState.speedCluster > 0.3:
-          can_sends.append(perodua_buttons(self.packer, 1, 0, (frame/5) % 16))
+      # if CS.out.vEgo < 8.3: # 30kmh
+      #   self.using_stock_acc = False
+      #
+      # # set stock acc follow speed
+      # if enabled and self.using_stock_acc:
+      #   if CS.out.cruiseState.speedCluster - (CS.stock_acc_set_speed // 3.6) > 0.3:
+      #     can_sends.append(perodua_buttons(self.packer, 0, 1, (frame/5) % 16))
+      #   if (CS.stock_acc_set_speed // 3.6) - CS.out.cruiseState.speedCluster > 0.3:
+      #     can_sends.append(perodua_buttons(self.packer, 1, 0, (frame/5) % 16))
 
       # standstill logic
       if enabled and apply_brake > 0 and CS.out.standstill:
@@ -219,28 +212,21 @@ class CarController:
       boost = interp(CS.out.vEgo, [0.2, 0.5], [0., 1.0])
       des_speed = actuators.speed + min((actuators.accel * boost), 1.0)
 
-      if self.using_stock_acc:
-        combined_cmd = (CS.stock_acc_cmd / 3.6 + des_speed)/2 if CS.stock_acc_cmd > 0 else des_speed
-        des_speed = min(combined_cmd, des_speed)
-        can_sends.append(perodua_create_accel_command(self.packer, CS.out.cruiseState.speedCluster,
-                                                      CS.out.cruiseState.available, enabled, lead_visible,
-                                                      des_speed, apply_brake, pump, CS.out.cruiseState.setDistance))
-      else:
-        can_sends.append(perodua_create_accel_command(self.packer, CS.out.cruiseState.speedCluster,
-                                                      CS.out.cruiseState.available, enabled, lead_visible,
-                                                      des_speed, apply_brake, pump, CS.out.cruiseState.setDistance))
+      can_sends.append(perodua_create_accel_command(self.packer, CS.out.cruiseState.speedCluster,
+                                                      CS.out.cruiseState.available, enabled,
+                                                      des_speed, apply_brake, pump))
 
       # Let stock AEB kick in only when system not engaged
-      aeb = not enabled and CS.out.stockAdas.aebV
-      can_sends.append(perodua_create_brake_command(self.packer, enabled, brake_req, pump, apply_brake, aeb, (frame/5) % 8))
+      # aeb = not enabled and CS.out.stockAdas.aebV
+      aeb = not enabled
+      can_sends.append(perodua_create_brake_command(self.packer, enabled, brake_req, pump, apply_brake, aeb, (self.frame/5) % 8))
       can_sends.append(perodua_create_hud(
-        self.packer, CS.out.cruiseState.available and CS.lkas_latch,
-        enabled, llane_visible, rlane_visible, self.stockLdw, CS.out.stockFcw,
-        CS.out.stockAeb, CS.out.stockAdas.frontDepartureHUD, CS.stock_lkc_off,
-        CS.stock_fcw_off))
+        self.packer, CS.out.cruiseState.available,
+        enabled, hud_control.leftLaneVisible, hud_control.rightLaneVisible, self.stockLdw, CS.out.stockFcw,
+        CS.out.stockAeb))
 
     self.last_steer = apply_steer
-    new_actuators = actuators.copy()
+    new_actuators = actuators.as_builder()
     new_actuators.steer = apply_steer / steer_max_interp
 
     return new_actuators, can_sends

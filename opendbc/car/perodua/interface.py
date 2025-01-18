@@ -13,20 +13,17 @@ class CarInterface(CarInterfaceBase):
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.perodua)]
     ret.safetyConfigs[0].safetyParam = 1
     ret.transmissionType = structs.CarParams.TransmissionType.automatic
-    ret.radarOffCan = True
-    ret.enableApgs = False                 # advanced parking guidance system
     ret.enableDsu = False                  # driving support unit
 
-    ret.steerRateCost = 0.7                # Lateral MPC cost on steering rate, higher value = sharper turn
+    # ret.steerRateCost = 0.7                # Lateral MPC cost on steering rate, higher value = sharper turn
     ret.steerLimitTimer = 0.1              # time before steerLimitAlert is issued
     ret.steerControlType = structs.CarParams.SteerControlType.torque
-    ret.steerActuatorDelay = 0.48          # Steering wheel actuator delay in seconds
+    # ret.steerActuatorDelay = 0.48          # Steering wheel actuator delay in seconds
 
     ret.lateralTuning.init('pid')
     ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
     ret.longitudinalTuning.kpV = [0.9, 0.8, 0.8]
 
-    ret.enableGasInterceptor = 0x201 in fingerprint[0] or 0x401 in fingerprint[0]
     ret.openpilotLongitudinalControl = True
 
     if candidate == CAR.MYVI_PSD:
@@ -45,9 +42,6 @@ class CarInterface(CarInterfaceBase):
       ret.longitudinalTuning.kpV = [0.5, 0.5, 0.4, 0.3]
       ret.longitudinalTuning.kiBP = [5, 7, 20, 30]
       ret.longitudinalTuning.kiV = [0.11, 0.1, 0.08, 0.07]
-      ret.longitudinalActuatorDelayLowerBound = 0.32
-      ret.longitudinalActuatorDelayUpperBound = 0.40
-      ret.speedControlled = True
 
     else:
       ret.dashcamOnly = True

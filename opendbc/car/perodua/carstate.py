@@ -1,4 +1,4 @@
-from opendbc.car import structs
+from opendbc.car import structs, Bus
 from opendbc.can.parser import CANParser
 from opendbc.can.can_define import CANDefine
 from opendbc.car.common.numpy_fast import mean, interp
@@ -45,10 +45,20 @@ class CarState(CarStateBase):
     self.stock_brake_mag = 0
     self.stock_acc_set_speed = 0
 
-  def update(self, cp):
-    ret = structs.CarState.new_message()
+  def update(self, can_parsers) -> structs.CarState:
+    """
+    Like Toyota, this method now takes a dictionary of CANParser objects:
+      can_parsers = {
+        "pt":  <CANParser for powertrain bus>,
+        "cam": <CANParser for camera bus>,  # optional
+        ...
+      }
 
-    ret.lkaDisabled = not self.lkas_latch
+    Then we pick out whichever parser(s) we need before calling .vl[...] on them.
+    """
+
+    cp = can_parsers[Bus.pt]
+    ret = structs.CarState.new_message()
 
     # there is a backwheel speed, but it will overflow to 0 when reach 60kmh
     # perodua vehicles doesn't have a good standard for their wheelspeed scaling
@@ -113,8 +123,6 @@ class CarState(CarStateBase):
     else:
       ret.steeringPressed = bool(abs(ret.steeringTorque) > 70)
 
-    ret.steerWarning = False
-    ret.steerError = False
 
     # if self.CP.carFingerprint not in ACC_CAR:
     #
@@ -146,10 +154,10 @@ class CarState(CarStateBase):
     # else:
 
     ret.vEgoCluster = cp.vl["BUTTONS"]["UI_SPEED"] * CV.KPH_TO_MS * HUD_MULTIPLIER
-    ret.stockAdas.frontDepartureHUD = bool(cp.vl["LKAS_HUD"]["FRONT_DEPART"])
-    ret.stockAdas.laneDepartureHUD = bool(cp.vl["LKAS_HUD"]["LDA_ALERT"])
-    ret.stockAdas.ldpSteerV = cp.vl["STEERING_LKAS"]['STEER_CMD']
-    ret.stockAdas.aebV = cp.vl["ACC_BRAKE"]['AEB_1019']
+    # ret.stockAdas.frontDepartureHUD = bool(cp.vl["LKAS_HUD"]["FRONT_DEPART"])
+    # ret.stockAdas.laneDepartureHUD = bool(cp.vl["LKAS_HUD"]["LDA_ALERT"])
+    # ret.stockAdas.ldpSteerV = cp.vl["STEERING_LKAS"]['STEER_CMD']
+    # ret.stockAdas.aebV = cp.vl["ACC_BRAKE"]['AEB_1019']
 
     ret.stockAeb = bool(cp.vl["LKAS_HUD"]['AEB_BRAKE'])
     ret.stockFcw = bool(cp.vl["LKAS_HUD"]['AEB_ALARM'])
@@ -297,68 +305,44 @@ class CarState(CarStateBase):
 
 
   @staticmethod
-  def get_can_parser(CP):
+  def get_can_parsers(CP):
+    """
+      Returns the parser for the 'pt' bus.
+      If you want a second parser for ACC or camera signals, you can define another function
+      or a create_can_parsers(...) method returning {'pt': parser_pt, 'cam': parser_cam, ...}.
+    """
+
     signals = [
       # sig_name, sig_address, default
-      ("WHEELSPEED_F", "WHEEL_SPEED", 0.),
-      ("GEAR", "TRANSMISSION", 0),
-      ("APPS_1", "GAS_PEDAL", 0.),
-      ("BRAKE_PRESSURE", "BRAKE", 0.),
-      ("BRAKE_ENGAGED", "BRAKE", 0),
-      ("INTERCEPTOR_GAS", "GAS_SENSOR", 0),
-      ("GENERIC_TOGGLE", "RIGHT_STALK", 0),
-      ("FOG_LIGHT", "RIGHT_STALK", 0),
-      ("LEFT_SIGNAL", "METER_CLUSTER", 0),
-      ("RIGHT_SIGNAL", "METER_CLUSTER", 0),
-      ("SEAT_BELT_WARNING", "METER_CLUSTER", 0),
-      ("MAIN_DOOR", "METER_CLUSTER", 1),
-      ("LEFT_FRONT_DOOR", "METER_CLUSTER", 1),
-      ("RIGHT_BACK_DOOR", "METER_CLUSTER", 1),
-      ("LEFT_BACK_DOOR", "METER_CLUSTER", 1)
+      ("WHEEL_SPEED", 0.),
+      ("TRANSMISSION", 0),
+      ("GAS_PEDAL", 0.),
+      ("BRAKE", 0.),
+      ("GAS_SENSOR", 0),
+      ("RIGHT_STALK", 0),
+      ("METER_CLUSTER", 0)
     ]
 
     if CP.carFingerprint in ACC_CAR:
-      signals.append(("BSM_CHIME","BSM", 0))
-      signals.append(("SEAT_BELT_WARNING2","METER_CLUSTER", 0))
-      signals.append(("STEER_ANGLE", "STEERING_MODULE", 0.))
-      signals.append(("MAIN_TORQUE", "STEERING_MODULE", 0.))
-      signals.append(("STEERING_TORQUE", "EPS_SHAFT_TORQUE", 0.))
-      signals.append(("ACC_RDY", "PCM_BUTTONS", 0))
-      signals.append(("GAS_PRESSED", "PCM_BUTTONS_HYBRID", 0))
-      signals.append(("SET_MINUS", "PCM_BUTTONS", 0))
-      signals.append(("SET_MINUS", "PCM_BUTTONS_HYBRID", 0))
-      signals.append(("RES_PLUS", "PCM_BUTTONS_HYBRID", 0))
-      signals.append(("CANCEL", "PCM_BUTTONS_HYBRID", 0))
-      signals.append(("RES_PLUS","PCM_BUTTONS", 0))
-      signals.append(("CANCEL","PCM_BUTTONS", 0))
-      signals.append(("PEDAL_DEPRESSED","PCM_BUTTONS", 0))
-      signals.append(("LKAS_ENGAGED", "LKAS_HUD", 0))
-      signals.append(("LDA_OFF", "LKAS_HUD", 0))
-      signals.append(("FCW_DISABLE", "LKAS_HUD", 0))
-      signals.append(("LDA_RELATED1", "LKAS_HUD", 0))
-      signals.append(("LDA_ALERT", "LKAS_HUD", 0))
-      signals.append(("LKAS_SET", "LKAS_HUD", 0))
-      signals.append(("ACC_CMD", "ACC_CMD_HUD", 0))
-      signals.append(("SET_ME_1_2", "ACC_CMD_HUD", 0))
-      signals.append(("STEER_CMD", "STEERING_LKAS", 0))
-      signals.append(("STEER_REQ", "STEERING_LKAS", 0))
-      signals.append(("FRONT_DEPART", "LKAS_HUD", 0))
-      signals.append(("AEB_BRAKE", "LKAS_HUD", 0))
-      signals.append(("AEB_ALARM", "LKAS_HUD", 0))
-      signals.append(("SET_SPEED", "ACC_CMD_HUD", 0))
-      signals.append(("FOLLOW_DISTANCE", "ACC_CMD_HUD", 0))
-      signals.append(("LDA_ALERT", "LKAS_HUD", 0))
-      signals.append(("GAS_PEDAL_STEP", "GAS_PEDAL_2", 0))
-      signals.append(("UI_SPEED", "BUTTONS", 0))
-      signals.append(("LKC_BTN", "BUTTONS", 0))
-      signals.append(("CRUISE_STANDSTILL", "ACC_BRAKE", 0))
-      signals.append(("MAGNITUDE", "ACC_BRAKE", 0))
-      signals.append(("AEB_1019", "ACC_BRAKE", 0))
+      signals.append(("BSM", 0))
+      signals.append(("STEERING_MODULE", 0.))
+      signals.append(("EPS_SHAFT_TORQUE", 0.))
+      signals.append(("PCM_BUTTONS", 0))
+      signals.append(("PCM_BUTTONS_HYBRID", 0))
+      signals.append(("LKAS_HUD", 0))
+      signals.append(("ACC_CMD_HUD", 0))
+      signals.append(("STEERING_LKAS", 0))
+      signals.append(("GAS_PEDAL_2", 0))
+      signals.append(("BUTTONS", 0))
+      signals.append(("ACC_BRAKE", 0))
     else:
-      signals.append(("MAIN_TORQUE", "STEERING_TORQUE", 0))
-      signals.append(("STEER_ANGLE", "STEERING_ANGLE_SENSOR", 0.))
-      signals.append(("AEB_ALARM", "ADAS_HUD", 0))
-      signals.append(("BRAKE_REQ", "ADAS_AEB", 0))
-      signals.append(("WHEELSPEED_B", "WHEEL_SPEED", 0.))
+      signals.append(("STEERING_TORQUE", 0))
+      signals.append(("STEERING_ANGLE_SENSOR", 0.))
+      signals.append(("ADAS_HUD", 0))
+      signals.append(("ADAS_AEB", 0))
+      signals.append(("WHEEL_SPEED", 0.))
 
-    return CANParser(DBC[CP.carFingerprint]['pt'], signals, 0)
+    return {
+      Bus.pt: CANParser(DBC[CP.carFingerprint]['pt'], signals, 0)
+    }
+
