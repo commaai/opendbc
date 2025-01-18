@@ -1,6 +1,6 @@
+import numpy as np
 from opendbc.car import structs, apply_std_steer_angle_limits, Bus
 from opendbc.can.packer import CANPacker
-from opendbc.car.common.numpy_fast import clip
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.psa import psacan
 from opendbc.car.psa.values import CarControllerParams
@@ -23,7 +23,7 @@ class CarController(CarControllerBase):
     else:
       apply_angle = CS.out.steeringAngleDeg
 
-    apply_angle = clip(apply_angle, -CarControllerParams.STEER_MAX, CarControllerParams.STEER_MAX)
+    apply_angle = float(np.clip(apply_angle, -CarControllerParams.STEER_MAX, CarControllerParams.STEER_MAX))
 
     can_sends.append(psacan.create_lka_msg(self.packer, self.CP, self.frame, CC.latActive, apply_angle))
 
