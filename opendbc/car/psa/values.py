@@ -42,32 +42,60 @@ class CAR(Platforms):
     PSACarSpecs(mass=1530, wheelbase=2.540, steerRatio=17.6, centerToFrontRatio=0.44), # Peugeot e208
   )
 
+# TODO: redo RX_offsets and extra_ecus. Negative offsets and subaddress >0xFF (0x100) were breaking the tests.
+print("[DEBUG] Setting up PSA_RX_OFFSETS...")
 PSA_RX_OFFSETS = {
-  0x100: (
-    Ecu.fwdCamera, Ecu.engine, Ecu.epb, Ecu.transmission, Ecu.hud,
-    Ecu.vsa, Ecu.hvac, Ecu.hybrid, Ecu.unknown, Ecu.combinationMeter,
-    Ecu.adas, Ecu.telematics, Ecu.gateway, Ecu.eps, Ecu.fwdRadar
-  ),
+  # Provide at least two offsets so we can see some queries,
+  # and include multiple example ECUs in each list.
   0x20: (
-    Ecu.dsu, Ecu.abs, Ecu.parkingAdas, Ecu.electricBrakeBooster,
-    Ecu.srs, Ecu.body, Ecu.programmedFuelInjection, Ecu.shiftByWire,
-    Ecu.cornerRadar
+    Ecu.fwdCamera,
+    Ecu.engine,
+    Ecu.epb,
+    Ecu.transmission,
+    Ecu.fwdRadar,
+    Ecu.abs,
   ),
-  0xC0: (
-    Ecu.debug,
+  0x100: (
+    Ecu.combinationMeter,
+    Ecu.gateway,
+    Ecu.adas,
+    Ecu.eps,
   ),
 }
+print(f"[DEBUG] PSA_RX_OFFSETS = {PSA_RX_OFFSETS}")
 
-FW_QUERY_CONFIG = FwQueryConfig(
-  requests=[
-    Request(
+# We'll build up the requests list with debug prints. We'll run queries on bus=0 and bus=2.
+requests_list = []
+for rx_offset, whitelist_ecus in PSA_RX_OFFSETS.items():
+  print(f"[DEBUG] Building firmware queries for rx_offset=0x{rx_offset:X}, ecus={whitelist_ecus}")
+  for bus_num in (0, 2):
+    print(f"[DEBUG]  -> Creating Request on bus={bus_num}")
+    req = Request(
       [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.MANUFACTURER_SOFTWARE_VERSION_REQUEST],
       [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.MANUFACTURER_SOFTWARE_VERSION_RESPONSE],
       whitelist_ecus=whitelist_ecus,
       rx_offset=rx_offset,
-    ) for rx_offset, whitelist_ecus in PSA_RX_OFFSETS.items()
+      bus=bus_num,
+      logging=True,
+    )
+    requests_list.append(req)
+
+print("[DEBUG] Creating FwQueryConfig with the generated requests_list...")
+
+FW_QUERY_CONFIG = FwQueryConfig(
+  requests=requests_list,
+
+  # If you want to forcibly detect some extra ECUs, put them here:
+  extra_ecus=[
+    # Example: these won't break anything, but might or might not respond
+    (Ecu.eps, 0x75D, None),
+    (Ecu.srs, 0x731, None),
   ],
-  extra_ecus=[],
+
+  # Additional debug prints if you want them:
+  # non_essential_ecus={ ... } could go here
+
 )
+print("[DEBUG] Finished constructing FW_QUERY_CONFIG.")
 
 DBC = CAR.create_dbc_map()
