@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
-from opendbc.car import Bus, create_button_events, structs
+from opendbc.car import Bus, create_button_events, structs, DT_CTRL
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.honda.hondacan import CanBus, get_cruise_speed_conversion
 from opendbc.car.honda.values import CAR, DBC, STEER_THRESHOLD, HONDA_BOSCH, \
@@ -44,7 +44,7 @@ def get_can_messages(CP, gearbox_msg):
       ("SCM_BUTTONS", 25),
     ]
 
-  if CP.carFingerprint in (CAR.HONDA_CRV_HYBRID, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.ACURA_RDX_3G, CAR.HONDA_E):
+  if CP.carFingerprint in (CAR.HONDA_CRV_HYBRID, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.ACURA_RDX_3G, CAR.HONDA_E, CAR.HONDA_ODYSSEY_BOSCH):
     messages.append((gearbox_msg, 50))
   else:
     messages.append((gearbox_msg, 100))
@@ -69,8 +69,9 @@ def get_can_messages(CP, gearbox_msg):
       messages.append(("CRUISE_PARAMS", 50))
 
   # TODO: clean this up
+  # TODO: verify odyssey_bosch
   if CP.carFingerprint in (CAR.HONDA_ACCORD, CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.HONDA_CRV_HYBRID, CAR.HONDA_INSIGHT,
-                           CAR.ACURA_RDX_3G, CAR.HONDA_E, CAR.HONDA_CIVIC_2022, CAR.HONDA_HRV_3G):
+                           CAR.ACURA_RDX_3G, CAR.HONDA_E, CAR.HONDA_CIVIC_2022, CAR.HONDA_HRV_3G, CAR.HONDA_ODYSSEY_BOSCH):
     pass
   elif CP.carFingerprint in (CAR.HONDA_ODYSSEY_CHN, CAR.HONDA_FREED, CAR.HONDA_HRV):
     pass
@@ -99,6 +100,8 @@ class CarState(CarStateBase):
 
     self.shifter_values = can_define.dv[self.gearbox_msg]["GEAR_SHIFTER"]
     self.steer_status_values = defaultdict(lambda: "UNKNOWN", can_define.dv["STEER_STATUS"]["STEER_STATUS"])
+    self.eps_steer_invalid_cnt = 0
+    self.min_steer_alert_speed = self.CP.minSteerSpeed
 
     self.brake_switch_prev = False
     self.brake_switch_active = False
@@ -112,6 +115,7 @@ class CarState(CarStateBase):
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
     cp_cam = can_parsers[Bus.cam]
+    cp_loopback = can_parsers[Bus.loopback]
     if self.CP.enableBsm:
       cp_body = can_parsers[Bus.body]
 
@@ -134,9 +138,10 @@ class CarState(CarStateBase):
     # STANDSTILL->WHEELS_MOVING bit can be noisy around zero, so use XMISSION_SPEED
     # panda checks if the signal is non-zero
     ret.standstill = cp.vl["ENGINE_DATA"]["XMISSION_SPEED"] < 1e-5
+    # TODO: verify odyssey_bosch
     # TODO: find a common signal across all cars
     if self.CP.carFingerprint in (CAR.HONDA_ACCORD, CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.HONDA_CRV_HYBRID, CAR.HONDA_INSIGHT,
-                                  CAR.ACURA_RDX_3G, CAR.HONDA_E, CAR.HONDA_CIVIC_2022, CAR.HONDA_HRV_3G):
+                                  CAR.ACURA_RDX_3G, CAR.HONDA_E, CAR.HONDA_CIVIC_2022, CAR.HONDA_HRV_3G, CAR.HONDA_ODYSSEY_BOSCH):
       ret.doorOpen = bool(cp.vl["SCM_FEEDBACK"]["DRIVERS_DOOR_OPEN"])
     elif self.CP.carFingerprint in (CAR.HONDA_ODYSSEY_CHN, CAR.HONDA_FREED, CAR.HONDA_HRV):
       ret.doorOpen = bool(cp.vl["SCM_BUTTONS"]["DRIVERS_DOOR_OPEN"])
@@ -144,6 +149,10 @@ class CarState(CarStateBase):
       ret.doorOpen = any([cp.vl["DOORS_STATUS"]["DOOR_OPEN_FL"], cp.vl["DOORS_STATUS"]["DOOR_OPEN_FR"],
                           cp.vl["DOORS_STATUS"]["DOOR_OPEN_RL"], cp.vl["DOORS_STATUS"]["DOOR_OPEN_RR"]])
     ret.seatbeltUnlatched = bool(cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LAMP"] or not cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LATCHED"])
+
+    # Triggered by STEER_TORQUE_REQUEST in CAN frame STEERING_CONTROL.
+    eps_steer_active = bool(cp.vl["STEER_STATUS"]["STEER_CONTROL_ACTIVE"])
+    steer_requested_prev = bool(cp_loopback.vl["STEERING_CONTROL"]["STEER_TORQUE_REQUEST"])
 
     steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]["STEER_STATUS"]]
     ret.steerFaultPermanent = steer_status not in ("NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT")
@@ -263,6 +272,24 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
       self.lkas_hud = cp_cam.vl["LKAS_HUD"]
 
+    # Low speed steer alert logic; only for steer cutoffs above 6 m/s.
+    # Default to a brief early alert. A speed increase raises the alert threshold.
+    if ret.vEgo > (self.CP.minSteerSpeed + 3.5):
+      self.min_steer_alert_speed = self.CP.minSteerSpeed + 1.5
+    if ret.vEgo < self.CP.minSteerSpeed + 0.5:
+      self.min_steer_alert_speed = self.CP.minSteerSpeed
+    if self.CP.minSteerSpeed > 6.0:
+      ret.lowSpeedAlert = not ret.standstill and ret.vEgo < self.min_steer_alert_speed
+
+    # Depending on vehicle state, ODYSSEY_BOSCH can forcibly disengage lateral controls.
+    # Return a fault if the car hasn't enabled steering within 1000ms. Latches on until disengaged or if the EPS reports a fault.
+    if self.CP.carFingerprint == CAR.HONDA_ODYSSEY_BOSCH and not self.CP.openpilotLongitudinalControl:
+      if steer_requested_prev and not eps_steer_active:
+        self.eps_steer_invalid_cnt += 1
+      if eps_steer_active or not ret.cruiseState.enabled:
+        self.eps_steer_invalid_cnt = 0
+      ret.steerFaultTemporary |= self.eps_steer_invalid_cnt >= int(1. / DT_CTRL)
+
     if self.CP.enableBsm:
       # BSM messages are on B-CAN, requires a panda forwarding B-CAN messages to CAN 0
       # more info here: https://github.com/commaai/openpilot/pull/1867
@@ -301,9 +328,14 @@ class CarState(CarStateBase):
       ("BSM_STATUS_RIGHT", 3),
     ]
 
+    loopback_messages = [
+      ("STEERING_CONTROL", 0),
+    ]
+
     parsers = {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).pt),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).camera),
+      Bus.loopback: CANParser(DBC[CP.carFingerprint][Bus.pt], loopback_messages, CanBus(CP).loopback),
     }
     if CP.enableBsm:
       parsers[Bus.body] = CANParser(DBC[CP.carFingerprint][Bus.body], body_messages, CanBus(CP).radar)
