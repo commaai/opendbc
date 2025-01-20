@@ -49,6 +49,10 @@ class CarControllerParams:
     else:
       self.STEER_MAX = 384
 
+    # These cars have been observed to do 10 Nm/sec stock. Conservatively, double their deltas (vs. CANFD).
+    if CP.carFingerprint in (CAR.KIA_CARNIVAL_2025, CAR.KIA_CARNIVAL_HEV_4TH_GEN):
+      self.STEER_DELTA_DOWN = 4
+      self.STEER_DELTA_DOWN = 6
 
 class HyundaiSafetyFlags(IntFlag):
   FLAG_HYUNDAI_EV_GAS = 1
