@@ -1,5 +1,6 @@
 import numpy as np
 from opendbc.car import CanBusBase
+from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.hyundai.values import HyundaiFlags
 
 
@@ -117,11 +118,17 @@ def create_acc_cancel(packer, CP, CAN, cruise_info_copy):
   })
   return packer.make_can_msg("SCC_CONTROL", CAN.ECAN, values)
 
-def create_lfahda_cluster(packer, CAN, enabled):
-  values = {
-    "HDA_ICON": 1 if enabled else 0,
-    "LFA_ICON": 2 if enabled else 0,
-  }
+def create_lfahda_cluster(packer, CAN, CP, enabled):
+  if CP.flags & HyundaiFlags.CCNC:
+    values = {
+      "NEW_SIGNAL_5": 1,
+      "LFA_ICON": 2 if enabled else 0,
+    }
+  else:
+    values = {
+      "HDA_ICON": 1 if enabled else 0,
+      "LFA_ICON": 2 if enabled else 0,
+    }
   return packer.make_can_msg("LFAHDA_CLUSTER", CAN.ECAN, values)
 
 
@@ -189,16 +196,18 @@ def create_adrv_messages(packer, CAN, frame):
   if frame % 2 == 0:
     values = {
       'AEB_SETTING': 0x1,  # show AEB disabled icon
-      'SET_ME_2': 0x2,
+      #'SET_ME_2': 0x2,
       'SET_ME_FF': 0xff,
       'SET_ME_FC': 0xfc,
-      'SET_ME_9': 0x9,
+      'SET_ME_9': 0x1,
+      'SET_ME_A8': 0xa8,
+      'SET_ME_10': 0x10,
     }
     ret.append(packer.make_can_msg("ADRV_0x160", CAN.ECAN, values))
 
   if frame % 5 == 0:
     values = {
-      'SET_ME_1C': 0x1c,
+      'SET_ME_1C': 0x8,
       'SET_ME_FF': 0xff,
       'SET_ME_TMP_F': 0xf,
       'SET_ME_TMP_F_2': 0xf,
@@ -206,14 +215,16 @@ def create_adrv_messages(packer, CAN, frame):
     ret.append(packer.make_can_msg("ADRV_0x1ea", CAN.ECAN, values))
 
     values = {
-      'SET_ME_E1': 0xe1,
-      'SET_ME_3A': 0x3a,
+      'SET_ME_E1': 0x14,
+      'SET_ME_3A': 0x80,
+      'SET_ME_2C': 0x2c,
     }
     ret.append(packer.make_can_msg("ADRV_0x200", CAN.ECAN, values))
 
   if frame % 20 == 0:
     values = {
       'SET_ME_15': 0x15,
+      'SET_ME_56': 0x56,
     }
     ret.append(packer.make_can_msg("ADRV_0x345", CAN.ECAN, values))
 
@@ -223,5 +234,80 @@ def create_adrv_messages(packer, CAN, frame):
       'SET_ME_41': 0x41,
     }
     ret.append(packer.make_can_msg("ADRV_0x1da", CAN.ECAN, values))
+
+  if frame % 20 == 0:
+    values = {
+      'SET_ME_F7': 0xf7,
+      'SET_ME_9F': 0x9f,
+    }
+    ret.append(packer.make_can_msg("ADRV_0x38C", CAN.ECAN, values))
+
+  return ret
+
+def create_ccnc(packer, CAN, CP, CC, CS):
+  ret = []
+
+  msg_161 = CS.msg_161.copy()
+  msg_162 = CS.msg_162.copy()
+
+  enabled = CC.enabled
+  hud = CC.hudControl
+
+  # HIDE FAULTS
+  for f in ("FAULT_LSS", "FAULT_HDA", "FAULT_DAS"):
+    msg_162[f] = 0
+
+  # HIDE ALERTS
+  if msg_161.get("ALERTS_3") == 17:  # DRIVE_CAREFULLY
+    msg_161["ALERTS_3"] = 0
+
+  if msg_161.get("ALERTS_5") == 2:  # WATCH_FOR_SURROUNDING_VEHICLES
+    msg_161["ALERTS_5"] = 0
+
+  if msg_161.get("ALERTS_5") == 4:  # SMART_CRUISE_CONTROL_CONDITIONS_NOT_MET
+    msg_161["ALERTS_5"] = 0
+
+  if msg_161.get("ALERTS_5") == 5:  # USE_SWITCH_OR_PEDAL_TO_ACCELERATE
+    msg_161["ALERTS_5"] = 0
+
+  if msg_161.get("ALERTS_2") == 5:  # CONSIDER_TAKING_A_BREAK
+    msg_161.update({"ALERTS_2": 0, "SOUNDS_2": 0, "DAW_ICON": 0})
+
+  if msg_161.get("SOUNDS_4") == 2 and msg_161.get("LFA_ICON") in (3, 0,):  # LFA BEEPS
+    msg_161["SOUNDS_4"] = 0
+
+  # ICONS, LANELINES
+  msg_161.update({
+    "CENTERLINE": 1 if enabled else 0,
+    "LANELINE_LEFT": 2 if enabled else 0,
+    "LANELINE_RIGHT": 2 if enabled else 0,
+    "LFA_ICON": 2 if enabled else 0,
+    "LKA_ICON": 0,
+  })
+
+
+  # OP LONG
+  if CP.openpilotLongitudinalControl:
+
+    # SETSPEED, DISTANCE
+    msg_161.update({
+      "SETSPEED": 3 if enabled else 1,
+      "SETSPEED_HUD": 2 if enabled else 1,
+      "SETSPEED_SPEED": 25 if (s := round(CS.out.vCruiseCluster * (1 if CS.is_metric else CV.KPH_TO_MPH))) > 100 else s,
+      "DISTANCE": hud.leadDistanceBars,
+      "DISTANCE_SPACING": 1 if enabled else 0,
+      "DISTANCE_LEAD": 2 if enabled and hud.leadVisible else 1 if enabled else 0,
+      "DISTANCE_CAR": 2 if enabled else 1,
+      "ALERTS_3": hud.leadDistanceBars + 6,
+    })
+
+    # LEAD
+    msg_162.update({
+      "LEAD": 2 if enabled and hud.leadVisible else 1 if hud.leadVisible else 0,
+      "LEAD_DISTANCE": 150,
+    })
+
+  ret.append(packer.make_can_msg("MSG_161", CAN.ECAN, msg_161))
+  ret.append(packer.make_can_msg("MSG_162", CAN.ECAN, msg_162))
 
   return ret

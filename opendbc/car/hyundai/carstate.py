@@ -53,6 +53,9 @@ class CarState(CarStateBase):
 
     self.cruise_info = {}
 
+    self.msg_161 = {}
+    self.msg_162 = {}
+
     # On some cars, CLU15->CF_Clu_VehicleSpeed can oscillate faster than the dash updates. Sample at 5 Hz
     self.cluster_speed = 0
     self.cluster_speed_counter = CLUSTER_SAMPLE_RATE
@@ -235,6 +238,10 @@ class CarState(CarStateBase):
       ret.leftBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"]["FL_INDICATOR"] != 0
       ret.rightBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"]["FR_INDICATOR"] != 0
 
+    if self.CP.flags & HyundaiFlags.CCNC and not self.CP.flags & HyundaiFlags.CANFD_HDA2:
+      self.msg_161 = copy.copy(cp_cam.vl["MSG_161"])
+      self.msg_162 = copy.copy(cp_cam.vl["MSG_162"])
+
     # cruise state
     # CAN FD cars enable on main button press, set available if no TCS faults preventing engagement
     ret.cruiseState.available = cp.vl["TCS"]["ACCEnable"] == 0
@@ -316,6 +323,12 @@ class CarState(CarStateBase):
     elif CP.flags & HyundaiFlags.CANFD_CAMERA_SCC:
       cam_messages += [
         ("SCC_CONTROL", 50),
+      ]
+
+    if CP.flags & HyundaiFlags.CCNC and not CP.flags & HyundaiFlags.CANFD_HDA2:
+      cam_messages += [
+        ("MSG_161", 20),
+        ("MSG_162", 20),
       ]
 
     return {
