@@ -74,7 +74,7 @@ class CarControllerParams:
       self.LDW_STEP                        = 10    # LDW_02 message frequency 10Hz
       self.ACC_HUD_STEP                    = 6     # MEB_ACC_01 message frequency 16Hz
       self.STEER_DRIVER_ALLOWANCE          = 80    # Driver intervention threshold 0.6 Nm
-      self.STEERING_POWER_USER_REDUCTION   = 30    # HCA_03 driver intervention power reduction in percent
+      self.STEERING_POWER_USER_REDUCTION   = 40    # HCA_03 driver intervention power reduction in percent
       self.STEERING_POWER_MAX              = 125   # HCA_03 maximum steering power
       self.STEERING_POWER_MIN              = 40    # HCA_03 minimum steering power
       self.STEERING_POWER_STEPS            = 6     # HCA_03 steering power counter steps
