@@ -27,6 +27,8 @@ class CarInterface(CarInterfaceBase):
       # Shared configuration for CAN-FD cars
       ret.experimentalLongitudinalAvailable = candidate not in (CANFD_UNSUPPORTED_LONGITUDINAL_CAR | CANFD_RADAR_SCC_CAR)
       ret.enableBsm = 0x1e5 in fingerprint[CAN.ECAN]
+      # TODO: Fix this. Currently not working with ADAS disabled.
+      ret.enableBsm = False
 
       if 0x105 in fingerprint[CAN.ECAN] and not ret.flags & HyundaiFlags.ICE:
         ret.flags |= HyundaiFlags.HYBRID.value

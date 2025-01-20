@@ -111,7 +111,9 @@ class HyundaiFlags(IntFlag):
 
   MIN_STEER_32_MPH = 2 ** 23
 
-  # Next index: 25
+  CCNC = 2 ** 25
+
+  # Next index: 26
 
 class Footnote(Enum):
   CANFD = CarFootnote(
@@ -516,13 +518,15 @@ class CAR(Platforms):
       HyundaiCarDocs("Kia Carnival (with HDA II) 2025", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_q])),
     ],
     CarSpecs(mass=2087, wheelbase=3.09, steerRatio=14.23),
-    flags=HyundaiFlags.ICE,
+    flags=HyundaiFlags.ICE | HyundaiFlags.CCNC,
   )
   KIA_CARNIVAL_HEV_4TH_GEN = HyundaiCanFDPlatformConfig(
     [
+      HyundaiCarDocs("Kia Carnival Hybrid 2025", car_parts=CarParts.common([CarHarness.hyundai_k])),
       HyundaiCarDocs("Kia Carnival Hybrid (with HDA II) 2025", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_q])),
     ],
     CarSpecs(mass=2253, wheelbase=3.09, steerRatio=14.23),
+    flags=HyundaiFlags.CCNC,
   )
 
   # Genesis
