@@ -118,7 +118,7 @@ class CarController(CarControllerBase):
       if self.frame % 5 == 0 and (not hda2 or hda2_long):
         can_sends.append(hyundaicanfd.create_lfahda_cluster(self.packer, self.CAN, self.CP, CC.enabled))
         if self.CP.flags & HyundaiFlags.CCNC:
-          can_sends.extend(hyundaicanfd.create_ccnc(self.packer, self.CAN, self.frame, self.CP, CC, CS))
+          can_sends.extend(hyundaicanfd.create_ccnc(self.packer, self.CAN, self.CP, CC, CS))
 
       # blinkers
       if hda2 and self.CP.flags & HyundaiFlags.ENABLE_BLINKERS:

@@ -244,7 +244,7 @@ def create_adrv_messages(packer, CAN, frame):
 
   return ret
 
-def create_ccnc(packer, CAN, frame, CP, CC, CS):
+def create_ccnc(packer, CAN, CP, CC, CS):
   ret = []
 
   msg_161 = CS.msg_161.copy()
@@ -307,7 +307,8 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
       "LEAD_DISTANCE": 150,
     })
 
-  ret.append(packer.make_can_msg("MSG_161", CAN.ECAN, msg_161))
-  ret.append(packer.make_can_msg("MSG_162", CAN.ECAN, msg_162))
+  canout = CAN.ECAN if CP.flags & HyundaiFlags.CANFD_HDA2 else CAN.ACAN
+  ret.append(packer.make_can_msg("MSG_161", canout, msg_161))
+  ret.append(packer.make_can_msg("MSG_162", canout, msg_162))
 
   return ret
