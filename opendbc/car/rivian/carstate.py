@@ -20,9 +20,9 @@ class CarState(CarStateBase):
     ret = structs.CarState()
 
     # Vehicle speed
-    ret.vEgoRaw = cp.vl["ESPiB1"]["ESPiB1_VehicleSpeed"]
+    ret.vEgoRaw = cp.vl["ESP_Status"]["ESP_Vehicle_Speed"] * CV.KPH_TO_MS
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
-    ret.standstill = (ret.vEgo < 0.1)
+    ret.standstill = abs(ret.vEgoRaw) < 0.01
 
     # Gas pedal
     pedal_status = cp.vl["VDM_PropStatus"]["VDM_AcceleratorPedalPosition"]
@@ -78,7 +78,7 @@ class CarState(CarStateBase):
   def get_can_parsers(CP):
     pt_messages = [
       # sig_address, frequency
-      ("ESPiB1", 50),
+      ("ESP_Status", 50),
       ("VDM_PropStatus", 50),
       ("iBESP2", 50),
       ("EPAS_AdasStatus", 100),
