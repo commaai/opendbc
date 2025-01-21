@@ -51,14 +51,14 @@ def create_lka_steering(packer, acm_lka_hba_cmd, apply_steer, enabled):
   return packer.make_can_msg("ACM_lkaHbaCmd", 0, values)
 
 
-def create_longitudinal(packer, frame, accel, enabled):
+def create_longitudinal(packer, frame, accel, enabled, stopping):
   values = {
     "ACM_longitudinalRequest_Counter": frame % 15,
     "ACM_AccelerationRequest": accel if enabled else 0,
     "ACM_VehicleHoldRequired": 0,
     "ACM_PrndRequired": 0,
     "ACM_longInterfaceEnable": 1 if enabled else 0,
-    "ACM_AccelerationRequestType": 0,
+    "ACM_AccelerationRequestType": 1 if stopping else 0,
   }
 
   data = packer.make_can_msg("ACM_longitudinalRequest", 0, values)[1]
