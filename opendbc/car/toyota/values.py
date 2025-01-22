@@ -258,7 +258,7 @@ class CAR(Platforms):
   TOYOTA_RAV4_TSS2_2023 = ToyotaTSS2PlatformConfig(
     [
       ToyotaCarDocs("Toyota RAV4 2023-24"),
-      ToyotaCarDocs("Toyota RAV4 Hybrid 2023-24"),
+      ToyotaCarDocs("Toyota RAV4 Hybrid 2023-25", video_link="https://youtu.be/4eIsEq4L4Ng"),
     ],
     TOYOTA_RAV4_TSS2.specs,
     flags=ToyotaFlags.RADAR_ACC | ToyotaFlags.ANGLE_CONTROL,

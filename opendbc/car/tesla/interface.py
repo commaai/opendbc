@@ -14,7 +14,6 @@ class CarInterface(CarInterfaceBase):
 
     # Not merged yet
     #ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.tesla)]
-    #ret.safetyConfigs[0].safetyParam |= Panda.FLAG_TESLA_LONG_CONTROL
 
     ret.steerLimitTimer = 1.0
     ret.steerActuatorDelay = 0.25
@@ -22,6 +21,9 @@ class CarInterface(CarInterfaceBase):
     ret.steerControlType = structs.CarParams.SteerControlType.angle
     ret.radarUnavailable = True
 
-    ret.openpilotLongitudinalControl = True
+    ret.experimentalLongitudinalAvailable = True
+    if experimental_long:
+      ret.openpilotLongitudinalControl = True
+      # ret.safetyConfigs[0].safetyParam |= Panda.FLAG_TESLA_LONG_CONTROL
 
     return ret
