@@ -22,6 +22,7 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 # the down limit roughly matches the rate of ACCEL_NET, reducing PCM compensation windup
 ACCEL_WINDUP_LIMIT = 4.0 * DT_CTRL * 3  # m/s^2 / frame
 ACCEL_WINDDOWN_LIMIT = -4.0 * DT_CTRL * 3  # m/s^2 / frame
+ACCEL_PID_UNWIND = 0.03  # m/s^2 / frame
 
 # LKA limits
 # EPS faults if you apply torque while the steering rate is above 100 deg/s for too long
@@ -39,8 +40,8 @@ MAX_LTA_DRIVER_TORQUE_ALLOWANCE = 150  # slightly above steering pressed allows 
 
 def get_long_tune(CP, params):
   if CP.carFingerprint in TSS2_CAR:
-    kiBP = [0., 3.]
-    kiV = [0.5, 0.25]
+    kiBP = [0., 5.]
+    kiV = [0.25, 0.25]
   else:
     kiBP = [0., 5., 35.]
     kiV = [3.6, 2.4, 1.5]
@@ -217,8 +218,12 @@ class CarController(CarControllerBase):
         self.aego.update(a_ego_blended)
         j_ego = (self.aego.x - prev_aego) / (DT_CTRL * 3)
         a_ego_future = a_ego_blended + j_ego * 0.5
+        self.debug = a_ego_future
 
         if actuators.longControlState == LongCtrlState.pid:
+          # constantly slowly unwind integral to recover from large temporary errors
+          self.long_pid.i -= (ACCEL_PID_UNWIND * DT_CTRL * 3) * float(np.sign(self.long_pid.i))
+
           error_future = pcm_accel_cmd - a_ego_future
           pcm_accel_cmd = self.long_pid.update(error_future,
                                                speed=CS.out.vEgo,
@@ -284,6 +289,7 @@ class CarController(CarControllerBase):
     new_actuators.steerOutputCan = apply_steer
     new_actuators.steeringAngleDeg = float(self.last_angle)
     new_actuators.accel = self.accel
+    new_actuators.debug = float(self.debug)
 
     self.frame += 1
     return new_actuators, can_sends
