@@ -1,5 +1,6 @@
 # functions common among cars
 import logging
+import numpy as np
 from collections import namedtuple
 from dataclasses import dataclass, field
 from enum import IntFlag, ReprEnum, StrEnum, EnumType, auto
@@ -8,7 +9,6 @@ from dataclasses import replace
 from opendbc.car import structs, uds
 from opendbc.car.can_definitions import CanData
 from opendbc.car.docs_definitions import CarDocs, ExtraCarDocs
-from opendbc.car.common.numpy_fast import clip, interp
 
 # set up logging
 carlog = logging.getLogger('carlog')
@@ -106,14 +106,14 @@ def apply_driver_steer_torque_limits(apply_torque, apply_torque_last, driver_tor
   driver_min_torque = -LIMITS.STEER_MAX + (-LIMITS.STEER_DRIVER_ALLOWANCE + driver_torque * LIMITS.STEER_DRIVER_FACTOR) * LIMITS.STEER_DRIVER_MULTIPLIER
   max_steer_allowed = max(min(LIMITS.STEER_MAX, driver_max_torque), 0)
   min_steer_allowed = min(max(-LIMITS.STEER_MAX, driver_min_torque), 0)
-  apply_torque = clip(apply_torque, min_steer_allowed, max_steer_allowed)
+  apply_torque = np.clip(apply_torque, min_steer_allowed, max_steer_allowed)
 
   # slow rate if steer torque increases in magnitude
   if apply_torque_last > 0:
-    apply_torque = clip(apply_torque, max(apply_torque_last - LIMITS.STEER_DELTA_DOWN, -LIMITS.STEER_DELTA_UP),
+    apply_torque = np.clip(apply_torque, max(apply_torque_last - LIMITS.STEER_DELTA_DOWN, -LIMITS.STEER_DELTA_UP),
                         apply_torque_last + LIMITS.STEER_DELTA_UP)
   else:
-    apply_torque = clip(apply_torque, apply_torque_last - LIMITS.STEER_DELTA_UP,
+    apply_torque = np.clip(apply_torque, apply_torque_last - LIMITS.STEER_DELTA_UP,
                         min(apply_torque_last + LIMITS.STEER_DELTA_DOWN, LIMITS.STEER_DELTA_UP))
 
   return int(round(float(apply_torque)))
@@ -126,15 +126,15 @@ def apply_dist_to_meas_limits(val, val_last, val_meas,
   max_lim = min(max(val_meas + STEER_ERROR_MAX, STEER_ERROR_MAX), STEER_MAX)
   min_lim = max(min(val_meas - STEER_ERROR_MAX, -STEER_ERROR_MAX), -STEER_MAX)
 
-  val = clip(val, min_lim, max_lim)
+  val = np.clip(val, min_lim, max_lim)
 
   # slow rate if val increases in magnitude
   if val_last > 0:
-    val = clip(val,
+    val = np.clip(val,
                max(val_last - STEER_DELTA_DOWN, -STEER_DELTA_UP),
                val_last + STEER_DELTA_UP)
   else:
-    val = clip(val,
+    val = np.clip(val,
                val_last - STEER_DELTA_UP,
                min(val_last + STEER_DELTA_DOWN, STEER_DELTA_UP))
 
@@ -152,8 +152,9 @@ def apply_std_steer_angle_limits(apply_angle, apply_angle_last, v_ego, LIMITS):
   steer_up = apply_angle_last * apply_angle >= 0. and abs(apply_angle) > abs(apply_angle_last)
   rate_limits = LIMITS.ANGLE_RATE_LIMIT_UP if steer_up else LIMITS.ANGLE_RATE_LIMIT_DOWN
 
-  angle_rate_lim = interp(v_ego, rate_limits.speed_bp, rate_limits.angle_v)
-  return clip(apply_angle, apply_angle_last - angle_rate_lim, apply_angle_last + angle_rate_lim)
+  angle_rate_lim = np.interp(v_ego, rate_limits.speed_bp, rate_limits.angle_v)
+  angle_rate_lim = float(angle_rate_lim)
+  return float(np.clip(apply_angle, apply_angle_last - angle_rate_lim, apply_angle_last + angle_rate_lim))
 
 
 def common_fault_avoidance(fault_condition: bool, request: bool, above_limit_frames: int,
@@ -187,12 +188,12 @@ def apply_center_deadzone(error, deadzone):
 
 
 def rate_limit(new_value, last_value, dw_step, up_step):
-  return clip(new_value, last_value + dw_step, last_value + up_step)
+  return float(np.clip(new_value, last_value + dw_step, last_value + up_step))
 
 
 def get_friction(lateral_accel_error: float, lateral_accel_deadzone: float, friction_threshold: float,
                  torque_params: structs.CarParams.LateralTorqueTuning, friction_compensation: bool) -> float:
-  friction_interp = interp(
+  friction_interp = np.interp(
     apply_center_deadzone(lateral_accel_error, lateral_accel_deadzone),
     [-friction_threshold, friction_threshold],
     [-torque_params.friction, torque_params.friction]
