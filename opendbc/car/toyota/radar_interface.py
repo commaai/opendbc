@@ -21,8 +21,8 @@ def _create_radar_can_parser(car_fingerprint):
   return CANParser(DBC[car_fingerprint][Bus.radar], messages, 1)
 
 class RadarInterface(RadarInterfaceBase):
-  def __init__(self, CP):
-    super().__init__(CP)
+  def __init__(self, CP, CP_SP):
+    super().__init__(CP, CP_SP)
     self.track_id = 0
 
     if CP.carFingerprint in TSS2_CAR:

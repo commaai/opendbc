@@ -21,9 +21,9 @@ def get_radar_can_parser(CP):
 
 
 class RadarInterface(RadarInterfaceBase, EsccRadarInterfaceBase):
-  def __init__(self, CP):
-    RadarInterfaceBase.__init__(self, CP)
-    EsccRadarInterfaceBase.__init__(self, CP)
+  def __init__(self, CP, CP_SP):
+    RadarInterfaceBase.__init__(self, CP, CP_SP)
+    EsccRadarInterfaceBase.__init__(self, CP, CP_SP)
     self.updated_messages = set()
     self.trigger_msg = RADAR_START_ADDR + RADAR_MSG_COUNT - 1
     self.track_id = 0

@@ -99,8 +99,8 @@ HUDData = namedtuple("HUDData",
 
 
 class CarController(CarControllerBase, MadsCarController):
-  def __init__(self, dbc_names, CP):
-    CarControllerBase.__init__(self, dbc_names, CP)
+  def __init__(self, dbc_names, CP, CP_SP):
+    CarControllerBase.__init__(self, dbc_names, CP, CP_SP)
     MadsCarController.__init__(self)
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.params = CarControllerParams(CP)

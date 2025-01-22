@@ -8,8 +8,8 @@ from opendbc.sunnypilot.car.chrysler.mads import MadsCarController
 
 
 class CarController(CarControllerBase, MadsCarController):
-  def __init__(self, dbc_names, CP):
-    CarControllerBase.__init__(self, dbc_names, CP)
+  def __init__(self, dbc_names, CP, CP_SP):
+    CarControllerBase.__init__(self, dbc_names, CP, CP_SP)
     MadsCarController.__init__(self)
     self.apply_steer_last = 0
 

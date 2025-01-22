@@ -18,6 +18,7 @@ from opendbc.car.common.simple_kalman import KF1D, get_kalman_gain
 from opendbc.car.common.numpy_fast import clip
 from opendbc.car.values import PLATFORMS
 from opendbc.can.parser import CANParser
+from opendbc.car import carlog
 
 GearShifter = structs.CarState.GearShifter
 
@@ -86,17 +87,18 @@ def get_torque_params():
 # generic car and radar interfaces
 
 class CarInterfaceBase(ABC):
-  def __init__(self, CP: structs.CarParams, CarController, CarState):
+  def __init__(self, CP: structs.CarParams, CP_SP: structs.CarParamsSP, CarController, CarState):
     self.CP = CP
+    self.CP_SP = CP_SP
 
     self.frame = 0
     self.v_ego_cluster_seen = False
 
-    self.CS: CarStateBase = CarState(CP)
-    self.can_parsers: dict[StrEnum, CANParser] = self.CS.get_can_parsers(CP)
+    self.CS: CarStateBase = CarState(CP, CP_SP)
+    self.can_parsers: dict[StrEnum, CANParser] = self.CS.get_can_parsers(CP, CP_SP)
 
     dbc_names = {bus: cp.dbc_name for bus, cp in self.can_parsers.items()}
-    self.CC: CarControllerBase = CarController(dbc_names, CP)
+    self.CC: CarControllerBase = CarController(dbc_names, CP, CP_SP)
 
   def apply(self, c: structs.CarControl, now_nanos: int | None = None) -> tuple[structs.CarControl.Actuators, list[CanData]]:
     if now_nanos is None:
@@ -113,6 +115,10 @@ class CarInterfaceBase(ABC):
     Parameters essential to controlling the car may be incomplete or wrong without FW versions or fingerprints.
     """
     return cls.get_params(candidate, gen_empty_fingerprint(), list(), False, False)
+
+  @classmethod
+  def get_non_essential_params_sp(cls, car_params, candidate: str) -> structs.CarParamsSP:
+    return cls.get_params_sp(car_params, candidate, gen_empty_fingerprint(), list(), False, False)
 
   @classmethod
   def get_params(cls, candidate: str, fingerprint: dict[int, dict[int, int]], car_fw: list[structs.CarParams.CarFw],
@@ -141,6 +147,13 @@ class CarInterfaceBase(ABC):
 
     return ret
 
+  @classmethod
+  def get_params_sp(cls, car_params, candidate: str, fingerprint: dict[int, dict[int, int]], car_fw: list[structs.CarParams.CarFw], experimental_long: bool,
+                    docs: bool) -> structs.CarParamsSP:
+    car_params_sp = structs.CarParamsSP()
+
+    return cls._get_params_sp(car_params, car_params_sp, candidate, fingerprint, car_fw, experimental_long, docs)
+
   @staticmethod
   @abstractmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint: dict[int, dict[int, int]],
@@ -148,7 +161,13 @@ class CarInterfaceBase(ABC):
     raise NotImplementedError
 
   @staticmethod
-  def init(CP: structs.CarParams, can_recv: CanRecvCallable, can_send: CanSendCallable):
+  def _get_params_sp(stock_cp: structs.CarParams, ret: structs.CarParamsSP, candidate, fingerprint: dict[int, dict[int, int]],
+                     car_fw: list[structs.CarParams.CarFw], experimental_long: bool, docs: bool) -> structs.CarParamsSP:
+    carlog.info(f"Car {candidate} does not have a _get_params_sp method, using defaults")
+    return ret
+
+  @staticmethod
+  def init(CP: structs.CarParams, CP_SP: structs.CarParamsSP, can_recv: CanRecvCallable, can_send: CanSendCallable):
     pass
 
   @staticmethod
@@ -251,8 +270,9 @@ class CarInterfaceBase(ABC):
 
 
 class RadarInterfaceBase(ABC):
-  def __init__(self, CP: structs.CarParams):
+  def __init__(self, CP: structs.CarParams, CP_SP: structs.CarParamsSP):
     self.CP = CP
+    self.CP_SP = CP_SP
     self.rcp = None
     self.pts: dict[int, structs.RadarData.RadarPoint] = {}
     self.frame = 0
@@ -265,8 +285,9 @@ class RadarInterfaceBase(ABC):
 
 
 class CarStateBase(ABC):
-  def __init__(self, CP: structs.CarParams):
+  def __init__(self, CP: structs.CarParams, CP_SP: structs.CarParamsSP):
     self.CP = CP
+    self.CP_SP = CP_SP
     self.car_fingerprint = CP.carFingerprint
     self.out = structs.CarState()
 
@@ -353,13 +374,14 @@ class CarStateBase(ABC):
     return GEAR_SHIFTER_MAP.get(gear.upper(), GearShifter.unknown)
 
   @staticmethod
-  def get_can_parsers(CP) -> dict[StrEnum, CANParser]:
+  def get_can_parsers(CP, CP_SP) -> dict[StrEnum, CANParser]:
     return {}
 
 
 class CarControllerBase(ABC):
-  def __init__(self, dbc_names: dict[StrEnum, str], CP: structs.CarParams):
+  def __init__(self, dbc_names: dict[StrEnum, str], CP: structs.CarParams, CP_SP: structs.CarParamsSP):
     self.CP = CP
+    self.CP_SP = CP_SP
     self.frame = 0
     self.secoc_key: bytes = b"00" * 16
 

@@ -32,8 +32,9 @@ from opendbc.can.parser import CANParser
 
 
 class MadsCarStateBase(ABC):
-  def __init__(self, CP: structs.CarParams):
+  def __init__(self, CP: structs.CarParams, CP_SP: structs.CarParamsSP):
     self.CP = CP
+    self.CP_SP = CP_SP
 
     self.lkas_button = 0
     self.prev_lkas_button = 0

@@ -76,8 +76,8 @@ class MadsCarController:
 
 
 class MadsCarState(MadsCarStateBase):
-  def __init__(self, CP: structs.CarParams):
-    super().__init__(CP)
+  def __init__(self, CP: structs.CarParams, CP_SP: structs.CarParamsSP):
+    super().__init__(CP, CP_SP)
     self.lkas_heartbit = 0
 
     self.init_lkas_disabled = False

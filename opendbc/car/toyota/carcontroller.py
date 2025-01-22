@@ -52,8 +52,8 @@ def get_long_tune(CP, params):
 
 
 class CarController(CarControllerBase):
-  def __init__(self, dbc_names, CP):
-    super().__init__(dbc_names, CP)
+  def __init__(self, dbc_names, CP, CP_SP):
+    super().__init__(dbc_names, CP, CP_SP)
     self.params = CarControllerParams(self.CP)
     self.last_steer = 0
     self.last_angle = 0

@@ -13,8 +13,8 @@ TORQUE_SAMPLES = 12
 
 
 class CarState(CarStateBase):
-  def __init__(self, CP):
-    super().__init__(CP)
+  def __init__(self, CP, CP_SP):
+    super().__init__(CP, CP_SP)
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
 
     self.lkas_hud_msg = {}
@@ -134,7 +134,7 @@ class CarState(CarStateBase):
     return ret
 
   @staticmethod
-  def get_can_parsers(CP):
+  def get_can_parsers(CP, CP_SP):
     pt_messages = [
       # sig_address, frequency
       ("STEER_ANGLE_SENSOR", 100),

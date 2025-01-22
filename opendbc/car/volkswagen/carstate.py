@@ -8,8 +8,8 @@ from opendbc.car.volkswagen.values import DBC, CANBUS, NetworkLocation, Transmis
 
 
 class CarState(CarStateBase):
-  def __init__(self, CP):
-    super().__init__(CP)
+  def __init__(self, CP, CP_SP):
+    super().__init__(CP, CP_SP)
     self.frame = 0
     self.eps_init_complete = False
     self.CCP = CarControllerParams(CP)
@@ -267,7 +267,7 @@ class CarState(CarStateBase):
     return temp_fault, perm_fault
 
   @staticmethod
-  def get_can_parsers(CP):
+  def get_can_parsers(CP, CP_SP):
     if CP.flags & VolkswagenFlags.PQ:
       return CarState.get_can_parsers_pq(CP)
 

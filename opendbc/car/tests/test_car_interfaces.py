@@ -59,8 +59,11 @@ class TestCarInterfaces:
 
     car_params = CarInterface.get_params(car_name, args['fingerprints'], args['car_fw'],
                                          experimental_long=args['experimental_long'], docs=False)
-    car_interface = CarInterface(car_params, CarController, CarState)
+    car_params_sp = CarInterface.get_params_sp(car_params, car_name, args['fingerprints'], args['car_fw'],
+                                                           experimental_long=args['experimental_long'], docs=False)
+    car_interface = CarInterface(car_params, car_params_sp, CarController, CarState)
     assert car_params
+    assert car_params_sp
     assert car_interface
 
     assert car_params.mass > 1
@@ -104,7 +107,7 @@ class TestCarInterfaces:
       now_nanos += DT_CTRL * 1e9  # 10ms
 
     # Test radar interface
-    radar_interface = RadarInterface(car_params)
+    radar_interface = RadarInterface(car_params, car_params_sp)
     assert radar_interface
 
     # Run radar interface once
