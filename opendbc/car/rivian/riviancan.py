@@ -65,6 +65,20 @@ def create_longitudinal(packer, frame, accel, enabled, stopping):
   values["ACM_longitudinalRequest_Checksum"] = checksum(data[1:], 0x1D, 0x12)
   return packer.make_can_msg("ACM_longitudinalRequest", 0, values)
 
+def create_acm_status(packer, frame, acm_status, active):
+  values = {s: acm_status[s] for s in [
+    "ACM_Unkown1",
+    "ACM_Unkown2"
+    "ACM_FaultStatus",
+  ]}
+
+  values["ACM_Status_Counter"] = frame % 15
+  values["ACM_FeatureStatus"] = 1 if active else 0
+
+  data = packer.make_can_msg("ACM_Status", 0, values)[1]
+  values["ACM_Status_Checksum"] = checksum(data[1:], 0x1D, 0x5F)
+  return packer.make_can_msg("ACM_Status", 0, values)
+
 #################################################################
 ######################### ↓ NOT USED ↓ ##########################
 #################################################################
@@ -105,26 +119,6 @@ def create_angle_steering(packer, frame, angle, active):
   data = packer.make_can_msg("ACM_SteeringControl", 0, values)[1]
   values["ACM_SteeringControl_Checksum"] = checksum(data[1:], 0x1D, 0x41)
   return packer.make_can_msg("ACM_SteeringControl", 0, values)
-
-
-def create_acm_status(packer, acm_status, active):
-  values = {s: acm_status[s] for s in [
-    "ACM_Status_Checksum",
-    "ACM_Status_Counter",
-    "ACM_Unkown1",
-    "ACM_FeatureStatus",
-    "ACM_FaultStatus",
-    "ACM_Unkown2"
-  ]}
-
-  if active:
-    values["ACM_Status_Checksum"] = (int(values["ACM_Status_Checksum"]) + 2) % 15
-    values["ACM_Unkown1"] = 1
-
-  data = packer.make_can_msg("ACM_Status", 1, values)[1]
-  values["ACM_Status_Checksum"] = checksum(data[1:], 0x1D, 0x5F)
-  return packer.make_can_msg("ACM_Status", 1, values)
-
 
 def create_vdm_adas_status(packer, vdm_adas_status, acc_on):
   values = {s: vdm_adas_status[s] for s in [

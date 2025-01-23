@@ -71,6 +71,7 @@ class CarState(CarStateBase):
 
     # Messages needed by carcontroller
     self.acm_lka_hba_cmd = copy.copy(cp_cam.vl["ACM_lkaHbaCmd"])
+    self.acm_status = copy.copy(cp_cam.vl["ACM_Status"])
 
     return ret
 
