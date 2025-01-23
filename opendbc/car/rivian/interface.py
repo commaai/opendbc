@@ -9,10 +9,6 @@ class CarInterface(CarInterfaceBase):
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
     ret.carName = "rivian"
-    # There is no safe way to do steer blending with user torque,
-    # so the steering behaves like autopilot. This is not
-    # how openpilot should be, hence dashcamOnly
-    ret.dashcamOnly = False
 
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.rivian)]
 
