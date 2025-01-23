@@ -39,10 +39,9 @@ MAX_LTA_DRIVER_TORQUE_ALLOWANCE = 150  # slightly above steering pressed allows 
 
 
 def get_long_tune(CP, params):
-  kiBP = [0., 5.]
   if CP.carFingerprint in TSS2_CAR:
+    kiBP = [2., 5.]
     kiV = [0.5, 0.25]
-
   else:
     kiBP = [0., 5., 35.]
     kiV = [3.6, 2.4, 1.5]
