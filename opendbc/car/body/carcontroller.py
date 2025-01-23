@@ -34,7 +34,7 @@ class CarController(CarControllerBase):
       torque -= deadband
     return torque
 
-  def update(self, CC, CS, now_nanos):
+  def update(self, CC, CC_SP, CS, now_nanos):
 
     torque_l = 0
     torque_r = 0

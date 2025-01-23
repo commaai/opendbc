@@ -79,7 +79,7 @@ class CarController(CarControllerBase):
     self.secoc_lta_message_counter = 0
     self.secoc_prev_reset_counter = 0
 
-  def update(self, CC, CS, now_nanos):
+  def update(self, CC, CC_SP, CS, now_nanos):
     actuators = CC.actuators
     stopping = actuators.longControlState == LongCtrlState.stopping
     hud_control = CC.hudControl

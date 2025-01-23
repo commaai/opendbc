@@ -1,5 +1,5 @@
 from dataclasses import dataclass as _dataclass, field, is_dataclass
-from enum import Enum, StrEnum as _StrEnum
+from enum import Enum, StrEnum as _StrEnum, auto
 from typing import dataclass_transform, get_origin
 
 import os
@@ -62,3 +62,25 @@ class StrEnum(_StrEnum):
 @auto_dataclass
 class CarParamsSP:
   flags: int = auto_field()  # flags for car specific quirks
+
+
+@auto_dataclass
+class ModularAssistiveDrivingSystem:
+  state: 'ModularAssistiveDrivingSystem.ModularAssistiveDrivingSystemState' = field(
+    default_factory=lambda: ModularAssistiveDrivingSystem.ModularAssistiveDrivingSystemState.disabled
+  )
+  enabled: bool = auto_field()
+  active: bool = auto_field()
+  available: bool = auto_field()
+
+  class ModularAssistiveDrivingSystemState(StrEnum):
+    disabled = auto()
+    paused = auto()
+    enabled = auto()
+    softDisabling = auto()
+    overriding = auto()
+
+
+@auto_dataclass
+class CarControlSP:
+  mads: 'ModularAssistiveDrivingSystem' = field(default_factory=lambda: ModularAssistiveDrivingSystem())

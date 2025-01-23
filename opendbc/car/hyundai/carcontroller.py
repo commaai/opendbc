@@ -60,9 +60,9 @@ class CarController(CarControllerBase, EsccCarController, MadsCarController):
     self.car_fingerprint = CP.carFingerprint
     self.last_button_frame = 0
 
-  def update(self, CC, CS, now_nanos):
+  def update(self, CC, CC_SP, CS, now_nanos):
     EsccCarController.update(self, CS)
-    MadsCarController.update(self, self.CP, CC, self.frame)
+    MadsCarController.update(self, self.CP, CC, CC_SP, self.frame)
     actuators = CC.actuators
     hud_control = CC.hudControl
 

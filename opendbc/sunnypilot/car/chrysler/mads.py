@@ -30,7 +30,6 @@ from collections import namedtuple
 from opendbc.car import Bus, structs
 from opendbc.car.chrysler.values import RAM_CARS
 
-from opendbc.sunnypilot import SunnypilotParamFlags
 from opendbc.sunnypilot.mads_base import MadsCarStateBase
 from opendbc.can.parser import CANParser
 
@@ -62,17 +61,17 @@ class MadsCarController:
     return packer.make_can_msg("LKAS_HEARTBIT", 0, values)
 
   @staticmethod
-  def mads_status_update(CC: structs.CarControl, CS) -> MadsDataSP:
-    enable_mads = CC.sunnypilotParams & SunnypilotParamFlags.ENABLE_MADS
-    paused = CC.madsEnabled and not CC.latActive
+  def mads_status_update(CC: structs.CarControl, CC_SP: structs.CarControlSP, CS) -> MadsDataSP:
+    enable_mads = CC_SP.mads.available
+    paused = CC_SP.mads.enabled and not CC.latActive
 
     if any(be.type == ButtonType.lkas and be.pressed for be in CS.out.buttonEvents):
       CS.lkas_disabled = not CS.lkas_disabled
 
     return MadsDataSP(enable_mads, paused, CS.lkas_disabled)
 
-  def update(self, CC: structs.CarControl, CS) -> None:
-    self.mads = self.mads_status_update(CC, CS)
+  def update(self, CC: structs.CarControl, CC_SP: structs.CarControlSP, CS) -> None:
+    self.mads = self.mads_status_update(CC, CC_SP, CS)
 
 
 class MadsCarState(MadsCarStateBase):
