@@ -10,8 +10,6 @@ class CarInterface(CarInterfaceBase):
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
     ret.carName = "rivian"
 
-    ret.dashcamOnly = False
-
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.rivian)]
 
     ret.steerActuatorDelay = 0.25
