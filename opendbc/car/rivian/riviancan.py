@@ -68,7 +68,7 @@ def create_longitudinal(packer, frame, accel, enabled, stopping):
 def create_acm_status(packer, frame, acm_status, active):
   values = {s: acm_status[s] for s in [
     "ACM_Unkown1",
-    "ACM_Unkown2"
+    "ACM_Unkown2",
     "ACM_FaultStatus",
   ]}
 
