@@ -222,7 +222,6 @@ class CarState(CarStateBase):
         ("GEAR_PACKET_HYBRID", 60),
         ("SECOC_SYNCHRONIZATION", 10),
         ("GAS_PEDAL", 42),
-        ("PCM_CRUISE_4", 1),
       ]
     else:
       pt_messages.append(("VSC1S07", 20))
