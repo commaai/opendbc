@@ -65,6 +65,10 @@ def create_longitudinal(packer, frame, accel, enabled, stopping):
   values["ACM_longitudinalRequest_Checksum"] = checksum(data[1:], 0x1D, 0x12)
   return packer.make_can_msg("ACM_longitudinalRequest", 0, values)
 
+#################################################################
+######################### ↓ NOT USED ↓ ##########################
+#################################################################
+
 def create_acm_status(packer, frame, acm_status, active):
   values = {s: acm_status[s] for s in [
     "ACM_Unkown1",
@@ -78,10 +82,6 @@ def create_acm_status(packer, frame, acm_status, active):
   data = packer.make_can_msg("ACM_Status", 0, values)[1]
   values["ACM_Status_Checksum"] = checksum(data[1:], 0x1D, 0x5F)
   return packer.make_can_msg("ACM_Status", 0, values)
-
-#################################################################
-######################### ↓ NOT USED ↓ ##########################
-#################################################################
 
 def create_epas_system_status(packer, epas_system_status_cmd, enabled):
   values = {s: epas_system_status_cmd[s] for s in [
