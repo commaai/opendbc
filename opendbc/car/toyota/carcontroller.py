@@ -22,6 +22,7 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 # the down limit roughly matches the rate of ACCEL_NET, reducing PCM compensation windup
 ACCEL_WINDUP_LIMIT = 4.0 * DT_CTRL * 3  # m/s^2 / frame
 ACCEL_WINDDOWN_LIMIT = -4.0 * DT_CTRL * 3  # m/s^2 / frame
+ACCEL_PID_UNWIND = 0.03 * DT_CTRL * 3  # m/s^2 / frame
 
 # LKA limits
 # EPS faults if you apply torque while the steering rate is above 100 deg/s for too long
@@ -209,7 +210,7 @@ class CarController(CarControllerBase):
 
         # GVC does not overshoot ego acceleration when starting from stop, but still has a similar delay
         if not self.CP.flags & ToyotaFlags.SECOC.value:
-          a_ego_blended = np.interp(CS.out.vEgo, [1.0, 2.0], [CS.gvc, CS.out.aEgo])
+          a_ego_blended = float(np.interp(CS.out.vEgo, [1.0, 2.0], [CS.gvc, CS.out.aEgo]))
         else:
           a_ego_blended = CS.out.aEgo
 
@@ -220,6 +221,9 @@ class CarController(CarControllerBase):
         a_ego_future = a_ego_blended + j_ego * 0.5
 
         if actuators.longControlState == LongCtrlState.pid:
+          # constantly slowly unwind integral to recover from large temporary errors
+          self.long_pid.i -= ACCEL_PID_UNWIND * float(np.sign(self.long_pid.i))
+
           error_future = pcm_accel_cmd - a_ego_future
           pcm_accel_cmd = self.long_pid.update(error_future,
                                                speed=CS.out.vEgo,
@@ -283,7 +287,7 @@ class CarController(CarControllerBase):
     new_actuators = actuators.as_builder()
     new_actuators.steer = apply_steer / self.params.STEER_MAX
     new_actuators.steerOutputCan = apply_steer
-    new_actuators.steeringAngleDeg = float(self.last_angle)
+    new_actuators.steeringAngleDeg = self.last_angle
     new_actuators.accel = self.accel
 
     self.frame += 1
