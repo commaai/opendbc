@@ -1,4 +1,4 @@
-from opendbc.car.common.numpy_fast import clip
+import numpy as np
 from opendbc.can.packer import CANPacker
 from opendbc.car import Bus, apply_std_steer_angle_limits
 from opendbc.car.interfaces import CarControllerBase
@@ -27,7 +27,7 @@ class CarController(CarControllerBase):
         apply_angle = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgo, CarControllerParams)
 
         # To not fault the EPS
-        apply_angle = clip(apply_angle, CS.out.steeringAngleDeg - 20, CS.out.steeringAngleDeg + 20)
+        apply_angle = float(np.clip(apply_angle, CS.out.steeringAngleDeg - 20, CS.out.steeringAngleDeg + 20))
       else:
         apply_angle = CS.out.steeringAngleDeg
 
@@ -40,7 +40,7 @@ class CarController(CarControllerBase):
     # Longitudinal control
     if self.CP.openpilotLongitudinalControl and self.frame % 4 == 0:
       state = 4 if not hands_on_fault else 13  # 4=ACC_ON, 13=ACC_CANCEL_GENERIC_SILENT
-      accel = clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
+      accel = float(np.clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
       cntr = (self.frame // 4) % 8
       can_sends.append(self.tesla_can.create_longitudinal_command(state, accel, cntr, CC.longActive))
 
