@@ -221,14 +221,15 @@ class CarController(CarControllerBase):
         future_t = float(np.interp(CS.out.vEgo, [0., 5.], [0.25, 0.5]))
         a_ego_future = a_ego_blended + j_ego * future_t
 
-        if actuators.longControlState == LongCtrlState.pid:
+        if CC.longActive:
           # constantly slowly unwind integral to recover from large temporary errors
           self.long_pid.i -= ACCEL_PID_UNWIND * float(np.sign(self.long_pid.i))
 
           error_future = pcm_accel_cmd - a_ego_future
           pcm_accel_cmd = self.long_pid.update(error_future,
                                                speed=CS.out.vEgo,
-                                               feedforward=pcm_accel_cmd)
+                                               feedforward=pcm_accel_cmd,
+                                               freeze_integrator=actuators.longControlState != LongCtrlState.pid)
         else:
           self.long_pid.reset()
 
