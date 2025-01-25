@@ -39,7 +39,7 @@ class CarControllerParams:
   ACCEL_MIN = -3.5                         # 3.5 m/s max deceleration
 
   def __init__(self, CP):
-    can_define = CANDefine(DBC[CP.platform][Bus.pt])
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
 
     if CP.flags & VolkswagenFlags.PQ:
       self.LDW_STEP = 5                   # LDW_1 message frequency 20Hz
@@ -191,10 +191,10 @@ class VWCarDocs(CarDocs):
 
   def init_make(self, CP: structs.CarParams):
     self.footnotes.append(Footnote.VW_EXP_LONG)
-    if "SKODA" in CP.platform:
+    if "SKODA" in CP.carFingerprint:
       self.footnotes.append(Footnote.SKODA_HEATED_WINDSHIELD)
 
-    if CP.platform in (CAR.VOLKSWAGEN_CRAFTER_MK2, CAR.VOLKSWAGEN_TRANSPORTER_T61):
+    if CP.carFingerprint in (CAR.VOLKSWAGEN_CRAFTER_MK2, CAR.VOLKSWAGEN_TRANSPORTER_T61):
       self.car_parts = CarParts([Device.threex_angled_mount, CarHarness.vw_j533])
 
     if abs(CP.minSteerSpeed - CarControllerParams.DEFAULT_MIN_STEER_SPEED) < 1e-3:

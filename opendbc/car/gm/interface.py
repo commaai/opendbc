@@ -35,7 +35,7 @@ class CarInterface(CarInterfaceBase):
     return 0.10006696 * sigmoid * (v_ego + 3.12485927)
 
   def get_steer_feedforward_function(self):
-    if self.CP.platform == CAR.CHEVROLET_VOLT:
+    if self.CP.carFingerprint == CAR.CHEVROLET_VOLT:
       return self.get_steer_feedforward_volt
     else:
       return CarInterfaceBase.get_steer_feedforward_default
@@ -56,7 +56,7 @@ class CarInterface(CarInterfaceBase):
     # An important thing to consider is that the slope at 0 should be > 0 (ideally >1)
     # This has big effect on the stability about 0 (noise when going straight)
     # ToDo: To generalize to other GMs, explore tanh function as the nonlinear
-    non_linear_torque_params = NON_LINEAR_TORQUE_PARAMS.get(self.CP.platform)
+    non_linear_torque_params = NON_LINEAR_TORQUE_PARAMS.get(self.CP.carFingerprint)
     assert non_linear_torque_params, "The params are not defined"
     a, b, c, _ = non_linear_torque_params
     steer_torque = (sig(latcontrol_inputs.lateral_acceleration * a) * b) + (latcontrol_inputs.lateral_acceleration * c)
@@ -71,10 +71,10 @@ class CarInterface(CarInterfaceBase):
     return float(self.neural_ff_model.predict(inputs)) + friction
 
   def torque_from_lateral_accel(self) -> TorqueFromLateralAccelCallbackType:
-    if self.CP.platform == CAR.CHEVROLET_BOLT_EUV:
-      self.neural_ff_model = NanoFFModel(NEURAL_PARAMS_PATH, self.CP.platform)
+    if self.CP.carFingerprint == CAR.CHEVROLET_BOLT_EUV:
+      self.neural_ff_model = NanoFFModel(NEURAL_PARAMS_PATH, self.CP.carFingerprint)
       return self.torque_from_lateral_accel_neural
-    elif self.CP.platform in NON_LINEAR_TORQUE_PARAMS:
+    elif self.CP.carFingerprint in NON_LINEAR_TORQUE_PARAMS:
       return self.torque_from_lateral_accel_siglin
     else:
       return self.torque_from_lateral_accel_linear

@@ -20,7 +20,7 @@ BUTTONS_DICT = {CruiseButtons.RES_ACCEL: ButtonType.accelCruise, CruiseButtons.D
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    can_define = CANDefine(DBC[CP.platform][Bus.pt])
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
     self.shifter_values = can_define.dv["ECMPRDNL2"]["PRNDL2"]
     self.cluster_speed_hyst_gap = CV.KPH_TO_MS / 2.
     self.cluster_min_speed = CV.KPH_TO_MS / 2.
@@ -123,7 +123,7 @@ class CarState(CarStateBase):
     ret.cruiseState.enabled = pt_cp.vl["AcceleratorPedal2"]["CruiseState"] != AccState.OFF
     ret.cruiseState.standstill = pt_cp.vl["AcceleratorPedal2"]["CruiseState"] == AccState.STANDSTILL
     if self.CP.networkLocation == NetworkLocation.fwdCamera:
-      if self.CP.platform not in ALT_ACCS:
+      if self.CP.carFingerprint not in ALT_ACCS:
         ret.cruiseState.speed = cam_cp.vl["ASCMActiveCruiseControlStatus"]["ACCSpeedSetpoint"] * CV.KPH_TO_MS
         # This FCW signal only works for SDGM cars. CAM cars send FCW on GMLAN but this bit is always 0 for them
         ret.stockFcw = cam_cp.vl["ASCMActiveCruiseControlStatus"]["FCWAlert"] != 0
@@ -133,7 +133,7 @@ class CarState(CarStateBase):
       else:
         ret.cruiseState.speed = pt_cp.vl["ECMCruiseControl"]["CruiseSetSpeed"] * CV.KPH_TO_MS
 
-      if self.CP.platform not in SDGM_CAR:
+      if self.CP.carFingerprint not in SDGM_CAR:
         ret.stockAeb = cam_cp.vl["AEBCmd"]["AEBCmdActive"] != 0
 
     if self.CP.enableBsm:
@@ -185,12 +185,12 @@ class CarState(CarStateBase):
         ("ASCMLKASteeringCmd", 10),
       ]
 
-      if CP.platform in ALT_ACCS:
+      if CP.carFingerprint in ALT_ACCS:
         pt_messages.append(("ECMCruiseControl", 10))
       else:
         cam_messages.append(("ASCMActiveCruiseControlStatus", 25))
 
-      if CP.platform not in SDGM_CAR:
+      if CP.carFingerprint not in SDGM_CAR:
         cam_messages += [
           ("AEBCmd", 10),
         ]
@@ -200,8 +200,8 @@ class CarState(CarStateBase):
     ]
 
     return {
-      Bus.pt: CANParser(DBC[CP.platform][Bus.pt], pt_messages, 0),
-      Bus.cam: CANParser(DBC[CP.platform][Bus.pt], cam_messages, 2),
-      Bus.loopback: CANParser(DBC[CP.platform][Bus.pt], loopback_messages, 128),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 0),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, 2),
+      Bus.loopback: CANParser(DBC[CP.carFingerprint][Bus.pt], loopback_messages, 128),
     }
 

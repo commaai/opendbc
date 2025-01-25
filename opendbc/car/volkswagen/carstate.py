@@ -319,8 +319,8 @@ class CarState(CarStateBase):
         cam_messages += MqbExtraSignals.bsm_radar_messages
 
     return {
-      Bus.pt: CANParser(DBC[CP.platform][Bus.pt], pt_messages, CANBUS.pt),
-      Bus.cam: CANParser(DBC[CP.platform][Bus.pt], cam_messages, CANBUS.cam),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CANBUS.pt),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CANBUS.cam),
     }
 
   @staticmethod
@@ -367,8 +367,8 @@ class CarState(CarStateBase):
         cam_messages += PqExtraSignals.bsm_radar_messages
 
     return {
-      Bus.pt: CANParser(DBC[CP.platform][Bus.pt], pt_messages, CANBUS.pt),
-      Bus.cam: CANParser(DBC[CP.platform][Bus.pt], cam_messages, CANBUS.cam),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CANBUS.pt),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CANBUS.cam),
     }
 
 

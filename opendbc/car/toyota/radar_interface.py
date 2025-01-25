@@ -25,7 +25,7 @@ class RadarInterface(RadarInterfaceBase):
     super().__init__(CP)
     self.track_id = 0
 
-    if CP.platform in TSS2_CAR:
+    if CP.carFingerprint in TSS2_CAR:
       self.RADAR_A_MSGS = list(range(0x180, 0x190))
       self.RADAR_B_MSGS = list(range(0x190, 0x1a0))
     else:
@@ -34,7 +34,7 @@ class RadarInterface(RadarInterfaceBase):
 
     self.valid_cnt = {key: 0 for key in self.RADAR_A_MSGS}
 
-    self.rcp = None if CP.radarUnavailable else _create_radar_can_parser(CP.platform)
+    self.rcp = None if CP.radarUnavailable else _create_radar_can_parser(CP.carFingerprint)
     self.trigger_msg = self.RADAR_B_MSGS[-1]
     self.updated_messages = set()
 

@@ -11,7 +11,7 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
-    self.car_fingerprint = CP.platform
+    self.car_fingerprint = CP.carFingerprint
 
     self.lkas_max_torque = 0
     self.apply_angle_last = 0
@@ -51,21 +51,21 @@ class CarController(CarControllerBase):
     apply_angle = float(np.clip(apply_angle, -CarControllerParams.MAX_STEER_ANGLE, CarControllerParams.MAX_STEER_ANGLE))
     self.apply_angle_last = apply_angle
 
-    if self.CP.platform in (CAR.NISSAN_ROGUE, CAR.NISSAN_XTRAIL, CAR.NISSAN_ALTIMA) and pcm_cancel_cmd:
+    if self.CP.carFingerprint in (CAR.NISSAN_ROGUE, CAR.NISSAN_XTRAIL, CAR.NISSAN_ALTIMA) and pcm_cancel_cmd:
       can_sends.append(nissancan.create_acc_cancel_cmd(self.packer, self.car_fingerprint, CS.cruise_throttle_msg))
 
     # TODO: Find better way to cancel!
     # For some reason spamming the cancel button is unreliable on the Leaf
     # We now cancel by making propilot think the seatbelt is unlatched,
     # this generates a beep and a warning message every time you disengage
-    if self.CP.platform in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC) and self.frame % 2 == 0:
+    if self.CP.carFingerprint in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC) and self.frame % 2 == 0:
       can_sends.append(nissancan.create_cancel_msg(self.packer, CS.cancel_msg, pcm_cancel_cmd))
 
     can_sends.append(nissancan.create_steering_control(
       self.packer, apply_angle, self.frame, CC.latActive, self.lkas_max_torque))
 
     # Below are the HUD messages. We copy the stock message and modify
-    if self.CP.platform != CAR.NISSAN_ALTIMA:
+    if self.CP.carFingerprint != CAR.NISSAN_ALTIMA:
       if self.frame % 2 == 0:
         can_sends.append(nissancan.create_lkas_hud_msg(self.packer, CS.lkas_hud_msg, CC.enabled, hud_control.leftLaneVisible, hud_control.rightLaneVisible,
                                                        hud_control.leftLaneDepart, hud_control.rightLaneDepart))

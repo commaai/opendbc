@@ -12,13 +12,13 @@ class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
     self.CP = CP
-    can_define = CANDefine(DBC[CP.platform][Bus.pt])
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
 
     self.auto_high_beam = 0
     self.button_counter = 0
     self.lkas_car_model = -1
 
-    if CP.platform in RAM_CARS:
+    if CP.carFingerprint in RAM_CARS:
       self.shifter_values = can_define.dv["Transmission_Status"]["Gear_State"]
     else:
       self.shifter_values = can_define.dv["GEAR"]["PRNDL"]
@@ -50,7 +50,7 @@ class CarState(CarStateBase):
     ret.gasPressed = ret.gas > 1e-5
 
     # car speed
-    if self.CP.platform in RAM_CARS:
+    if self.CP.carFingerprint in RAM_CARS:
       ret.vEgoRaw = cp.vl["ESP_8"]["Vehicle_Speed"] * CV.KPH_TO_MS
       ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(cp.vl["Transmission_Status"]["Gear_State"], None))
     else:
@@ -79,7 +79,7 @@ class CarState(CarStateBase):
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD
 
     # cruise state
-    cp_cruise = cp_cam if self.CP.platform in RAM_CARS else cp
+    cp_cruise = cp_cam if self.CP.carFingerprint in RAM_CARS else cp
 
     ret.cruiseState.available = cp_cruise.vl["DAS_3"]["ACC_AVAILABLE"] == 1
     ret.cruiseState.enabled = cp_cruise.vl["DAS_3"]["ACC_ACTIVE"] == 1
@@ -88,7 +88,7 @@ class CarState(CarStateBase):
     ret.cruiseState.standstill = cp_cruise.vl["DAS_3"]["ACC_STANDSTILL"] == 1
     ret.accFaulted = cp_cruise.vl["DAS_3"]["ACC_FAULTED"] != 0
 
-    if self.CP.platform in RAM_CARS:
+    if self.CP.carFingerprint in RAM_CARS:
       # Auto High Beam isn't Located in this message on chrysler or jeep currently located in 729 message
       self.auto_high_beam = cp_cam.vl["DAS_6"]['AUTO_HIGH_BEAM_ON']
       ret.steerFaultTemporary = cp.vl["EPS_3"]["DASM_FAULT"] == 1
@@ -134,7 +134,7 @@ class CarState(CarStateBase):
     if CP.enableBsm:
       pt_messages.append(("BSM_1", 2))
 
-    if CP.platform in RAM_CARS:
+    if CP.carFingerprint in RAM_CARS:
       pt_messages += [
         ("ESP_8", 50),
         ("EPS_3", 50),
@@ -151,10 +151,10 @@ class CarState(CarStateBase):
       ("DAS_6", 4),
     ]
 
-    if CP.platform in RAM_CARS:
+    if CP.carFingerprint in RAM_CARS:
       cam_messages += CarState.get_cruise_messages()
 
     return {
-      Bus.pt: CANParser(DBC[CP.platform][Bus.pt], pt_messages, 0),
-      Bus.cam: CANParser(DBC[CP.platform][Bus.pt], cam_messages, 2),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 0),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, 2),
     }

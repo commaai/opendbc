@@ -23,7 +23,7 @@ BUTTONS_DICT = {Buttons.RES_ACCEL: ButtonType.accelCruise, Buttons.SET_DECEL: Bu
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    can_define = CANDefine(DBC[CP.platform][Bus.pt])
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
 
     self.cruise_buttons: deque = deque([Buttons.NONE] * PREV_BUTTON_SAMPLES, maxlen=PREV_BUTTON_SAMPLES)
     self.main_buttons: deque = deque([Buttons.NONE] * PREV_BUTTON_SAMPLES, maxlen=PREV_BUTTON_SAMPLES)
@@ -94,7 +94,7 @@ class CarState(CarStateBase):
       # Mimic how dash converts to imperial.
       # Sorento is the only platform where CF_Clu_VehicleSpeed is already imperial when not is_metric
       # TODO: CGW_USM1->CF_Gway_DrLockSoundRValue may describe this
-      if not self.is_metric and self.CP.platform not in (CAR.KIA_SORENTO,):
+      if not self.is_metric and self.CP.carFingerprint not in (CAR.KIA_SORENTO,):
         self.cluster_speed = math.floor(self.cluster_speed * CV.KPH_TO_MPH + CV.KPH_TO_MPH)
 
     ret.vEgoCluster = self.cluster_speed * speed_conv
@@ -226,7 +226,7 @@ class CarState(CarStateBase):
 
     # TODO: alt signal usage may be described by cp.vl['BLINKERS']['USE_ALT_LAMP']
     left_blinker_sig, right_blinker_sig = "LEFT_LAMP", "RIGHT_LAMP"
-    if self.CP.platform == CAR.HYUNDAI_KONA_EV_2ND_GEN:
+    if self.CP.carFingerprint == CAR.HYUNDAI_KONA_EV_2ND_GEN:
       left_blinker_sig, right_blinker_sig = "LEFT_LAMP_ALT", "RIGHT_LAMP_ALT"
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_lamp(50, cp.vl["BLINKERS"][left_blinker_sig],
                                                                       cp.vl["BLINKERS"][right_blinker_sig])
@@ -318,8 +318,8 @@ class CarState(CarStateBase):
       ]
 
     return {
-      Bus.pt: CANParser(DBC[CP.platform][Bus.pt], pt_messages, CanBus(CP).ECAN),
-      Bus.cam: CANParser(DBC[CP.platform][Bus.pt], cam_messages, CanBus(CP).CAM),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).ECAN),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).CAM),
     }
 
   def get_can_parsers(self, CP):
@@ -385,6 +385,6 @@ class CarState(CarStateBase):
 
 
     return {
-      Bus.pt: CANParser(DBC[CP.platform][Bus.pt], pt_messages, 0),
-      Bus.cam: CANParser(DBC[CP.platform][Bus.pt], cam_messages, 2),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 0),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, 2),
     }

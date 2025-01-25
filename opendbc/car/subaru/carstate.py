@@ -11,7 +11,7 @@ from opendbc.car import CanSignalRateCalculator
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    can_define = CANDefine(DBC[CP.platform][Bus.pt])
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
     self.shifter_values = can_define.dv["Transmission"]["Gear"]
 
     self.angle_rate_calulator = CanSignalRateCalculator(50)
@@ -220,7 +220,7 @@ class CarState(CarStateBase):
       ]
 
     return {
-      Bus.pt: CANParser(DBC[CP.platform][Bus.pt], pt_messages, CanBus.main),
-      Bus.cam: CANParser(DBC[CP.platform][Bus.pt], cam_messages, CanBus.camera),
-      Bus.alt: CANParser(DBC[CP.platform][Bus.pt], alt_messages, CanBus.alt)
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus.main),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus.camera),
+      Bus.alt: CANParser(DBC[CP.carFingerprint][Bus.pt], alt_messages, CanBus.alt)
     }

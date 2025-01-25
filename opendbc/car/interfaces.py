@@ -171,7 +171,7 @@ class CarInterfaceBase(ABC):
   @staticmethod
   def get_std_params(candidate: str) -> structs.CarParams:
     ret = structs.CarParams()
-    ret.platform = candidate
+    ret.carFingerprint = candidate
 
     # Car docs fields
     ret.maxLateralAccel = get_torque_params()[candidate]['MAX_LAT_ACCEL_MEASURED']
@@ -266,7 +266,7 @@ class RadarInterfaceBase(ABC):
 class CarStateBase(ABC):
   def __init__(self, CP: structs.CarParams):
     self.CP = CP
-    self.car_fingerprint = CP.platform
+    self.car_fingerprint = CP.carFingerprint
     self.out = structs.CarState()
 
     self.cruise_buttons = 0

@@ -39,7 +39,7 @@ MAX_LTA_DRIVER_TORQUE_ALLOWANCE = 150  # slightly above steering pressed allows 
 
 
 def get_long_tune(CP, params):
-  if CP.platform in TSS2_CAR:
+  if CP.carFingerprint in TSS2_CAR:
     kiBP = [2., 5.]
     kiV = [0.5, 0.25]
   else:
@@ -148,7 +148,7 @@ class CarController(CarControllerBase):
     can_sends.append(steer_command)
 
     # STEERING_LTA does not seem to allow more rate by sending faster, and may wind up easier
-    if self.frame % 2 == 0 and self.CP.platform in TSS2_CAR:
+    if self.frame % 2 == 0 and self.CP.carFingerprint in TSS2_CAR:
       lta_active = lat_active and self.CP.steerControlType == SteerControlType.angle
       # cut steering torque with TORQUE_WIND_DOWN when either EPS torque or driver torque is above
       # the threshold, to limit max lateral acceleration and for driver torque blending respectively.
@@ -173,7 +173,7 @@ class CarController(CarControllerBase):
     # *** gas and brake ***
 
     # on entering standstill, send standstill request
-    if CS.out.standstill and not self.last_standstill and (self.CP.platform not in NO_STOP_TIMER_CAR):
+    if CS.out.standstill and not self.last_standstill and (self.CP.carFingerprint not in NO_STOP_TIMER_CAR):
       self.standstill_req = True
     if CS.pcm_acc_status != 8:
       # pcm entered standstill or it's disabled
@@ -250,13 +250,13 @@ class CarController(CarControllerBase):
     else:
       # we can spam can to cancel the system even if we are using lat only control
       if pcm_cancel_cmd:
-        if self.CP.platform in UNSUPPORTED_DSU_CAR:
+        if self.CP.carFingerprint in UNSUPPORTED_DSU_CAR:
           can_sends.append(toyotacan.create_acc_cancel_command(self.packer))
         else:
           can_sends.append(toyotacan.create_accel_command(self.packer, 0, pcm_cancel_cmd, True, False, lead, CS.acc_type, False, self.distance_button))
 
     # *** hud ui ***
-    if self.CP.platform != CAR.TOYOTA_PRIUS_V:
+    if self.CP.carFingerprint != CAR.TOYOTA_PRIUS_V:
       # ui mesg is at 1Hz but we send asap if:
       # - there is something to display
       # - there is something to stop displaying
@@ -279,7 +279,7 @@ class CarController(CarControllerBase):
 
     # *** static msgs ***
     for addr, cars, bus, fr_step, vl in STATIC_DSU_MSGS:
-      if self.frame % fr_step == 0 and self.CP.enableDsu and self.CP.platform in cars:
+      if self.frame % fr_step == 0 and self.CP.enableDsu and self.CP.carFingerprint in cars:
         can_sends.append(CanData(addr, vl, bus))
 
     # keep radar disabled

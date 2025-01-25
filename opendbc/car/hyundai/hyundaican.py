@@ -33,7 +33,7 @@ def create_lkas11(packer, frame, CP, apply_steer, steer_req,
   values["CF_Lkas_ToiFlt"] = torque_fault  # seems to allow actuation on CR_Lkas_StrToqReq
   values["CF_Lkas_MsgCount"] = frame % 0x10
 
-  if CP.platform in (CAR.HYUNDAI_SONATA, CAR.HYUNDAI_PALISADE, CAR.KIA_NIRO_EV, CAR.KIA_NIRO_HEV_2021, CAR.HYUNDAI_SANTA_FE,
+  if CP.carFingerprint in (CAR.HYUNDAI_SONATA, CAR.HYUNDAI_PALISADE, CAR.KIA_NIRO_EV, CAR.KIA_NIRO_HEV_2021, CAR.HYUNDAI_SANTA_FE,
                            CAR.HYUNDAI_IONIQ_EV_2020, CAR.HYUNDAI_IONIQ_PHEV, CAR.KIA_SELTOS, CAR.HYUNDAI_ELANTRA_2021, CAR.GENESIS_G70_2020,
                            CAR.HYUNDAI_ELANTRA_HEV_2021, CAR.HYUNDAI_SONATA_HYBRID, CAR.HYUNDAI_KONA_EV, CAR.HYUNDAI_KONA_HEV, CAR.HYUNDAI_KONA_EV_2022,
                            CAR.HYUNDAI_SANTA_FE_2022, CAR.KIA_K5_2021, CAR.HYUNDAI_IONIQ_HEV_2022, CAR.HYUNDAI_SANTA_FE_HEV_2022,
@@ -57,7 +57,7 @@ def create_lkas11(packer, frame, CP, apply_steer, steer_req,
     values["CF_Lkas_SysWarning"] = 4 if sys_warning else 0
 
   # Likely cars lacking the ability to show individual lane lines in the dash
-  elif CP.platform in (CAR.KIA_OPTIMA_G4, CAR.KIA_OPTIMA_G4_FL):
+  elif CP.carFingerprint in (CAR.KIA_OPTIMA_G4, CAR.KIA_OPTIMA_G4_FL):
     # SysWarning 4 = keep hands on wheel + beep
     values["CF_Lkas_SysWarning"] = 4 if sys_warning else 0
 
@@ -72,7 +72,7 @@ def create_lkas11(packer, frame, CP, apply_steer, steer_req,
     values["CF_Lkas_LdwsActivemode"] = 0
     values["CF_Lkas_FcwOpt_USM"] = 0
 
-  elif CP.platform == CAR.HYUNDAI_GENESIS:
+  elif CP.carFingerprint == CAR.HYUNDAI_GENESIS:
     # This field is actually LdwsActivemode
     # Genesis and Optima fault when forwarding while engaged
     values["CF_Lkas_LdwsActivemode"] = 2

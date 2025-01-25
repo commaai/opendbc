@@ -12,7 +12,7 @@ class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
 
-    can_define = CANDefine(DBC[CP.platform][Bus.pt])
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
     self.shifter_values = can_define.dv["GEAR"]["GEAR"]
 
     self.crz_btns_counter = 0
@@ -156,6 +156,6 @@ class CarState(CarStateBase):
       ]
 
     return {
-      Bus.pt: CANParser(DBC[CP.platform][Bus.pt], pt_messages, 0),
-      Bus.cam: CANParser(DBC[CP.platform][Bus.pt], cam_messages, 2),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 0),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, 2),
     }

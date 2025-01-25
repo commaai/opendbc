@@ -272,7 +272,7 @@ class CarDocs:
 
   def init(self, CP: CarParams, all_footnotes=None):
     self.brand = CP.brand
-    self.car_fingerprint = CP.platform
+    self.car_fingerprint = CP.carFingerprint
 
     if self.merged and CP.dashcamOnly:
       if self.support_type != SupportType.REVIEW:
@@ -295,7 +295,7 @@ class CarDocs:
     # min steer & enable speed columns
     # TODO: set all the min steer speeds in carParams and remove this
     if self.min_steer_speed is not None:
-      assert CP.minSteerSpeed < 0.5, f"{CP.platform}: Minimum steer speed set in both CarDocs and CarParams"
+      assert CP.minSteerSpeed < 0.5, f"{CP.carFingerprint}: Minimum steer speed set in both CarDocs and CarParams"
     else:
       self.min_steer_speed = CP.minSteerSpeed
 
@@ -387,10 +387,10 @@ class CarDocs:
       return sentence_builder.format(car_model=f"{self.make} {self.model}", alc=alc, acc=acc)
 
     else:
-      if CP.platform == "COMMA_BODY":
+      if CP.carFingerprint == "COMMA_BODY":
         return "The body is a robotics dev kit that can run openpilot. <a href='https://www.commabody.com'>Learn more.</a>"
       else:
-        raise Exception(f"This notCar does not have a detail sentence: {CP.platform}")
+        raise Exception(f"This notCar does not have a detail sentence: {CP.carFingerprint}")
 
   def get_column(self, column: Column, star_icon: str, video_icon: str, footnote_tag: str) -> str:
     item: str | Star = self.row[column]

@@ -98,7 +98,7 @@ class RadarInterface(RadarInterfaceBase):
 
     self.updated_messages = set()
     self.track_id = 0
-    self.radar = DBC[CP.platform].get(Bus.radar)
+    self.radar = DBC[CP.carFingerprint].get(Bus.radar)
     self.invalid_cnt = 0
     if CP.radarUnavailable:
       self.rcp = None
