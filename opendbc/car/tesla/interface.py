@@ -7,7 +7,7 @@ class CarInterface(CarInterfaceBase):
 
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
-    ret.carName = "tesla"
+    ret.brand = "tesla"
 
     # Needs safety validation and final testing before pulling out of dashcam
     ret.dashcamOnly = True

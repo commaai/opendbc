@@ -20,7 +20,7 @@ class CarInterface(CarInterfaceBase):
 
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
-    ret.carName = "ford"
+    ret.brand = "ford"
     ret.dashcamOnly = bool(ret.flags & FordFlags.CANFD)
 
     ret.radarUnavailable = Bus.radar not in DBC[candidate]
