@@ -14,7 +14,7 @@ class CanBus(CanBusBase):
     # use fingerprint if specified
     super().__init__(CP if fingerprint is None else None, fingerprint)
 
-    if CP.carFingerprint in (HONDA_BOSCH - HONDA_BOSCH_RADARLESS):
+    if CP.platform in (HONDA_BOSCH - HONDA_BOSCH_RADARLESS):
       self._pt, self._radar = self.offset + 1, self.offset
       # normally steering commands are sent to radar, which forwards them to powertrain bus
       # when radar is disabled, steering commands are sent directly to powertrain bus
@@ -137,7 +137,7 @@ def create_bosch_supplemental_1(packer, CAN):
 
 def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_hud, lkas_hud):
   commands = []
-  radar_disabled = CP.carFingerprint in (HONDA_BOSCH - HONDA_BOSCH_RADARLESS) and CP.openpilotLongitudinalControl
+  radar_disabled = CP.platform in (HONDA_BOSCH - HONDA_BOSCH_RADARLESS) and CP.openpilotLongitudinalControl
 
   if CP.openpilotLongitudinalControl:
     acc_hud_values = {
@@ -150,7 +150,7 @@ def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_
       'SET_ME_X01_2': 1,
     }
 
-    if CP.carFingerprint in HONDA_BOSCH:
+    if CP.platform in HONDA_BOSCH:
       acc_hud_values['ACC_ON'] = int(enabled)
       acc_hud_values['FCM_OFF'] = 1
       acc_hud_values['FCM_OFF_2'] = 1
@@ -173,7 +173,7 @@ def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_
     'BEEP': 0,
   }
 
-  if CP.carFingerprint in HONDA_BOSCH_RADARLESS:
+  if CP.platform in HONDA_BOSCH_RADARLESS:
     lkas_hud_values['LANE_LINES'] = 3
     lkas_hud_values['DASHED_LANES'] = hud.lanes_visible
     # car likely needs to see LKAS_PROBLEM fall within a specific time frame, so forward from camera
@@ -195,7 +195,7 @@ def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_
     }
     commands.append(packer.make_can_msg('RADAR_HUD', CAN.pt, radar_hud_values))
 
-    if CP.carFingerprint == CAR.HONDA_CIVIC_BOSCH:
+    if CP.platform == CAR.HONDA_CIVIC_BOSCH:
       commands.append(packer.make_can_msg("LEGACY_BRAKE_COMMAND", CAN.pt, {}))
 
   return commands

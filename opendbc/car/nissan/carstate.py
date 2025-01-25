@@ -15,7 +15,7 @@ TORQUE_SAMPLES = 12
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
+    can_define = CANDefine(DBC[CP.platform][Bus.pt])
 
     self.lkas_hud_msg = {}
     self.lkas_hud_info_msg = {}
@@ -35,16 +35,16 @@ class CarState(CarStateBase):
     prev_distance_button = self.distance_button
     self.distance_button = cp.vl["CRUISE_THROTTLE"]["FOLLOW_DISTANCE_BUTTON"]
 
-    if self.CP.carFingerprint in (CAR.NISSAN_ROGUE, CAR.NISSAN_XTRAIL, CAR.NISSAN_ALTIMA):
+    if self.CP.platform in (CAR.NISSAN_ROGUE, CAR.NISSAN_XTRAIL, CAR.NISSAN_ALTIMA):
       ret.gas = cp.vl["GAS_PEDAL"]["GAS_PEDAL"]
-    elif self.CP.carFingerprint in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC):
+    elif self.CP.platform in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC):
       ret.gas = cp.vl["CRUISE_THROTTLE"]["GAS_PEDAL"]
 
     ret.gasPressed = bool(ret.gas > 3)
 
-    if self.CP.carFingerprint in (CAR.NISSAN_ROGUE, CAR.NISSAN_XTRAIL, CAR.NISSAN_ALTIMA):
+    if self.CP.platform in (CAR.NISSAN_ROGUE, CAR.NISSAN_XTRAIL, CAR.NISSAN_ALTIMA):
       ret.brakePressed = bool(cp.vl["DOORS_LIGHTS"]["USER_BRAKE_PRESSED"])
-    elif self.CP.carFingerprint in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC):
+    elif self.CP.platform in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC):
       ret.brakePressed = bool(cp.vl["CRUISE_THROTTLE"]["USER_BRAKE_PRESSED"])
 
     ret.wheelSpeeds = self.get_wheel_speeds(
@@ -58,38 +58,38 @@ class CarState(CarStateBase):
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.standstill = cp.vl["WHEEL_SPEEDS_REAR"]["WHEEL_SPEED_RL"] == 0.0 and cp.vl["WHEEL_SPEEDS_REAR"]["WHEEL_SPEED_RR"] == 0.0
 
-    if self.CP.carFingerprint == CAR.NISSAN_ALTIMA:
+    if self.CP.platform == CAR.NISSAN_ALTIMA:
       ret.cruiseState.enabled = bool(cp.vl["CRUISE_STATE"]["CRUISE_ENABLED"])
     else:
       ret.cruiseState.enabled = bool(cp_adas.vl["CRUISE_STATE"]["CRUISE_ENABLED"])
 
-    if self.CP.carFingerprint in (CAR.NISSAN_ROGUE, CAR.NISSAN_XTRAIL):
+    if self.CP.platform in (CAR.NISSAN_ROGUE, CAR.NISSAN_XTRAIL):
       ret.seatbeltUnlatched = cp.vl["HUD"]["SEATBELT_DRIVER_LATCHED"] == 0
       ret.cruiseState.available = bool(cp_cam.vl["PRO_PILOT"]["CRUISE_ON"])
-    elif self.CP.carFingerprint in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC):
-      if self.CP.carFingerprint == CAR.NISSAN_LEAF:
+    elif self.CP.platform in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC):
+      if self.CP.platform == CAR.NISSAN_LEAF:
         ret.seatbeltUnlatched = cp.vl["SEATBELT"]["SEATBELT_DRIVER_LATCHED"] == 0
-      elif self.CP.carFingerprint == CAR.NISSAN_LEAF_IC:
+      elif self.CP.platform == CAR.NISSAN_LEAF_IC:
         ret.seatbeltUnlatched = cp.vl["CANCEL_MSG"]["CANCEL_SEATBELT"] == 1
       ret.cruiseState.available = bool(cp.vl["CRUISE_THROTTLE"]["CRUISE_AVAILABLE"])
-    elif self.CP.carFingerprint == CAR.NISSAN_ALTIMA:
+    elif self.CP.platform == CAR.NISSAN_ALTIMA:
       ret.seatbeltUnlatched = cp.vl["HUD"]["SEATBELT_DRIVER_LATCHED"] == 0
       ret.cruiseState.available = bool(cp_adas.vl["PRO_PILOT"]["CRUISE_ON"])
 
-    if self.CP.carFingerprint == CAR.NISSAN_ALTIMA:
+    if self.CP.platform == CAR.NISSAN_ALTIMA:
       speed = cp.vl["PROPILOT_HUD"]["SET_SPEED"]
     else:
       speed = cp_adas.vl["PROPILOT_HUD"]["SET_SPEED"]
 
     if speed != 255:
-      if self.CP.carFingerprint in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC):
+      if self.CP.platform in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC):
         conversion = CV.MPH_TO_MS if cp.vl["HUD_SETTINGS"]["SPEED_MPH"] else CV.KPH_TO_MS
       else:
         conversion = CV.MPH_TO_MS if cp.vl["HUD"]["SPEED_MPH"] else CV.KPH_TO_MS
       ret.cruiseState.speed = speed * conversion
       ret.cruiseState.speedCluster = (speed - 1) * conversion  # Speed on HUD is always 1 lower than actually sent on can bus
 
-    if self.CP.carFingerprint == CAR.NISSAN_ALTIMA:
+    if self.CP.platform == CAR.NISSAN_ALTIMA:
       ret.steeringTorque = cp_cam.vl["STEER_TORQUE_SENSOR"]["STEER_TORQUE_DRIVER"]
     else:
       ret.steeringTorque = cp.vl["STEER_TORQUE_SENSOR"]["STEER_TORQUE_DRIVER"]
@@ -115,17 +115,17 @@ class CarState(CarStateBase):
 
     # stock lkas should be off
     # TODO: is this needed?
-    if self.CP.carFingerprint == CAR.NISSAN_ALTIMA:
+    if self.CP.platform == CAR.NISSAN_ALTIMA:
       ret.invalidLkasSetting = bool(cp.vl["LKAS_SETTINGS"]["LKAS_ENABLED"])
     else:
       ret.invalidLkasSetting = bool(cp_adas.vl["LKAS_SETTINGS"]["LKAS_ENABLED"])
 
     self.cruise_throttle_msg = copy.copy(cp.vl["CRUISE_THROTTLE"])
 
-    if self.CP.carFingerprint in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC):
+    if self.CP.platform in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC):
       self.cancel_msg = copy.copy(cp.vl["CANCEL_MSG"])
 
-    if self.CP.carFingerprint != CAR.NISSAN_ALTIMA:
+    if self.CP.platform != CAR.NISSAN_ALTIMA:
       self.lkas_hud_msg = copy.copy(cp_adas.vl["PROPILOT_HUD"])
       self.lkas_hud_info_msg = copy.copy(cp_adas.vl["PROPILOT_HUD_INFO_MSG"])
 
@@ -146,14 +146,14 @@ class CarState(CarStateBase):
       ("LIGHTS", 10),
     ]
 
-    if CP.carFingerprint in (CAR.NISSAN_ROGUE, CAR.NISSAN_XTRAIL, CAR.NISSAN_ALTIMA):
+    if CP.platform in (CAR.NISSAN_ROGUE, CAR.NISSAN_XTRAIL, CAR.NISSAN_ALTIMA):
       pt_messages += [
         ("GAS_PEDAL", 100),
         ("CRUISE_THROTTLE", 50),
         ("HUD", 25),
       ]
 
-    elif CP.carFingerprint in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC):
+    elif CP.platform in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC):
       pt_messages += [
         ("BRAKE_PEDAL", 100),
         ("CRUISE_THROTTLE", 50),
@@ -162,7 +162,7 @@ class CarState(CarStateBase):
         ("SEATBELT", 10),
       ]
 
-    if CP.carFingerprint == CAR.NISSAN_ALTIMA:
+    if CP.platform == CAR.NISSAN_ALTIMA:
       pt_messages += [
         ("CRUISE_STATE", 10),
         ("LKAS_SETTINGS", 10),
@@ -172,12 +172,12 @@ class CarState(CarStateBase):
       pt_messages.append(("STEER_TORQUE_SENSOR", 100))
 
     cam_messages = []
-    if CP.carFingerprint in (CAR.NISSAN_ROGUE, CAR.NISSAN_XTRAIL):
+    if CP.platform in (CAR.NISSAN_ROGUE, CAR.NISSAN_XTRAIL):
       cam_messages.append(("PRO_PILOT", 100))
-    elif CP.carFingerprint == CAR.NISSAN_ALTIMA:
+    elif CP.platform == CAR.NISSAN_ALTIMA:
       cam_messages.append(("STEER_TORQUE_SENSOR", 100))
 
-    if CP.carFingerprint == CAR.NISSAN_ALTIMA:
+    if CP.platform == CAR.NISSAN_ALTIMA:
       adas_messages = [
         ("LKAS", 100),
         ("PRO_PILOT", 100),
@@ -192,7 +192,7 @@ class CarState(CarStateBase):
       ]
 
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 1 if CP.carFingerprint == CAR.NISSAN_ALTIMA else 0),
-      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, 0 if CP.carFingerprint == CAR.NISSAN_ALTIMA else 1),
-      Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.pt], adas_messages, 2),
+      Bus.pt: CANParser(DBC[CP.platform][Bus.pt], pt_messages, 1 if CP.platform == CAR.NISSAN_ALTIMA else 0),
+      Bus.cam: CANParser(DBC[CP.platform][Bus.pt], cam_messages, 0 if CP.platform == CAR.NISSAN_ALTIMA else 1),
+      Bus.adas: CANParser(DBC[CP.platform][Bus.pt], adas_messages, 2),
     }

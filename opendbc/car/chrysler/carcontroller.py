@@ -25,7 +25,7 @@ class CarController(CarControllerBase):
 
     # cruise buttons
     if (self.frame - self.last_button_frame)*DT_CTRL > 0.05:
-      das_bus = 2 if self.CP.carFingerprint in RAM_CARS else 0
+      das_bus = 2 if self.CP.platform in RAM_CARS else 0
 
       # ACC cancellation
       if CC.cruiseControl.cancel:
@@ -54,7 +54,7 @@ class CarController(CarControllerBase):
       elif self.CP.flags & ChryslerFlags.HIGHER_MIN_STEERING_SPEED:
         if CS.out.vEgo < (self.CP.minSteerSpeed - 3.0):
           lkas_control_bit = False
-      elif self.CP.carFingerprint in RAM_CARS:
+      elif self.CP.platform in RAM_CARS:
         if CS.out.vEgo < (self.CP.minSteerSpeed - 0.5):
           lkas_control_bit = False
 

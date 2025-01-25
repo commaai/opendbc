@@ -52,7 +52,7 @@ class CarController(CarControllerBase):
 
     self.accel_last = 0
     self.apply_steer_last = 0
-    self.car_fingerprint = CP.carFingerprint
+    self.car_fingerprint = CP.platform
     self.last_button_frame = 0
 
   def update(self, CC, CS, now_nanos):

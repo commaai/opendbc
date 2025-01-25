@@ -37,4 +37,4 @@ class CarState(CarStateBase):
       ("VAR_VALUES", 10),
       ("BODY_DATA", 1),
     ]
-    return {Bus.main: CANParser(DBC[CP.carFingerprint][Bus.main], messages, 0)}
+    return {Bus.main: CANParser(DBC[CP.platform][Bus.main], messages, 0)}

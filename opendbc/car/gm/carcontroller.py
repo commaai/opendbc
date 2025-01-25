@@ -32,9 +32,9 @@ class CarController(CarControllerBase):
 
     self.params = CarControllerParams(self.CP)
 
-    self.packer_pt = CANPacker(DBC[self.CP.carFingerprint][Bus.pt])
-    self.packer_obj = CANPacker(DBC[self.CP.carFingerprint][Bus.radar])
-    self.packer_ch = CANPacker(DBC[self.CP.carFingerprint][Bus.chassis])
+    self.packer_pt = CANPacker(DBC[self.CP.platform][Bus.pt])
+    self.packer_obj = CANPacker(DBC[self.CP.platform][Bus.radar])
+    self.packer_ch = CANPacker(DBC[self.CP.platform][Bus.chassis])
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators

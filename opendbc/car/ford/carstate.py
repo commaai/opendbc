@@ -14,7 +14,7 @@ TransmissionType = structs.CarParams.TransmissionType
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
+    can_define = CANDefine(DBC[CP.platform][Bus.pt])
     if CP.transmissionType == TransmissionType.automatic:
       self.shifter_values = can_define.dv["PowertrainData_10"]["TrnRng_D_Rq"]
 
@@ -173,6 +173,6 @@ class CarState(CarStateBase):
       ]
 
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).main),
-      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).camera),
+      Bus.pt: CANParser(DBC[CP.platform][Bus.pt], pt_messages, CanBus(CP).main),
+      Bus.cam: CANParser(DBC[CP.platform][Bus.pt], cam_messages, CanBus(CP).camera),
     }
