@@ -26,7 +26,7 @@ class CarInterface(CarInterfaceBase):
 
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
-    ret.carName = "honda"
+    ret.brand = "honda"
 
     CAN = CanBus(ret, fingerprint)
 
