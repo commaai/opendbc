@@ -447,7 +447,7 @@ struct CarOutput {
 
 struct CarParams {
   brand @0 :Text;
-  platform @1 :Text;
+  carFingerprint @1 :Text;
   fuzzyFingerprint @55 :Bool;
 
   notCar @66 :Bool;  # flag for non-car robotics platforms
