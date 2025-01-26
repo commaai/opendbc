@@ -39,10 +39,9 @@ MAX_LTA_DRIVER_TORQUE_ALLOWANCE = 150  # slightly above steering pressed allows 
 
 
 def get_long_tune(CP, params):
-  kiBP = [0.]
   if CP.carFingerprint in TSS2_CAR:
-    kiV = [0.25]
-
+    kiBP = [2., 5.]
+    kiV = [0.5, 0.25]
   else:
     kiBP = [0., 5., 35.]
     kiV = [3.6, 2.4, 1.5]
@@ -218,16 +217,19 @@ class CarController(CarControllerBase):
         prev_aego = self.aego.x
         self.aego.update(a_ego_blended)
         j_ego = (self.aego.x - prev_aego) / (DT_CTRL * 3)
-        a_ego_future = a_ego_blended + j_ego * 0.5
 
-        if actuators.longControlState == LongCtrlState.pid:
+        future_t = float(np.interp(CS.out.vEgo, [2., 5.], [0.25, 0.5]))
+        a_ego_future = a_ego_blended + j_ego * future_t
+
+        if CC.longActive:
           # constantly slowly unwind integral to recover from large temporary errors
           self.long_pid.i -= ACCEL_PID_UNWIND * float(np.sign(self.long_pid.i))
 
           error_future = pcm_accel_cmd - a_ego_future
           pcm_accel_cmd = self.long_pid.update(error_future,
                                                speed=CS.out.vEgo,
-                                               feedforward=pcm_accel_cmd)
+                                               feedforward=pcm_accel_cmd,
+                                               freeze_integrator=actuators.longControlState != LongCtrlState.pid)
         else:
           self.long_pid.reset()
 
