@@ -10,7 +10,7 @@ class CarInterface(CarInterfaceBase):
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate: CAR, fingerprint, car_fw, experimental_long, docs):
     ret.carName = 'psa'
-    ret.dashcamOnly = True # TODO DEBUG!
+    ret.dashcamOnly = False
 
     ret.radarUnavailable = True
     ret.steerControlType = structs.CarParams.SteerControlType.angle
