@@ -41,7 +41,7 @@ class TestLateralLimits:
     if CP.notCar:
       pytest.skip()
 
-    CarControllerParams = importlib.import_module(f'opendbc.car.{CP.carName}.values').CarControllerParams
+    CarControllerParams = importlib.import_module(f'opendbc.car.{CP.brand}.values').CarControllerParams
     cls.control_params = CarControllerParams(CP)
     cls.torque_params = get_torque_params()[cls.car_model]
 
