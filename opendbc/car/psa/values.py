@@ -54,28 +54,43 @@ class CAR(Platforms):
 #   Ecu.<enum_name>: (request_id, response_id)
 ################################################################################
 
+# PSA Diagnostic Route:
+# 6a7075a4fdd765ee/0000024b--450fa192db
+
 PSA_ECU_ADDRS = {
   # Engine ECU (example: 0x6A8 -> 0x688 offset = -0x20, sometimes it's 0xE0 difference)
-  Ecu.engine:        (0x6A8, 0x688),
+  Ecu.engine:        (0x6A8, 0x688), #(no reply)
   # Transmission ECU
-  Ecu.transmission:  (0x6A9, 0x689),
+  Ecu.transmission:  (0x6A9, 0x689), #(no reply)
   # VCU (Electric Vehicle Control Unit) e.g. 0x6A2 -> 0x682 offset=+0x40
   Ecu.hybrid:        (0x6A2, 0x682),
   # OBC / DC-DC converter, e.g. 0x590 -> 0x58F offset=-1
   Ecu.electricBrakeBooster: (0x590, 0x58F),
   # BSI / Body
-  Ecu.body:          (0x752, 0x652),
+  Ecu.body:          (0x752, 0x652), #(no reply)
   # Instrument Cluster
-  Ecu.combinationMeter: (0x75F, 0x65F),
+  Ecu.combinationMeter: (0x75F, 0x65F), #(no reply)
   # Telematic / Headunit
-  Ecu.telematics:    (0x764, 0x664),
-  # Steering
+  Ecu.telematics:    (0x764, 0x664), #(no reply)
+  # Steering / DIRECTN
   Ecu.eps:           (0x6B5, 0x695),
   # ABS/ESP
-  Ecu.abs:           (0x6AD, 0x68D),
+  Ecu.abs:           (0x6AD, 0x68D),  #(no reply)
   # HUD or Display
-  Ecu.hud:           (0x765, 0x665),
-  # ... add more from the PSA ECU list as desired ...
+  Ecu.hud:           (0x765, 0x665), #(no reply)
+
+  # CVM / CVM_3, CVM_2, CVM
+  Ecu.gateway:       (0x74A, 0x64A),
+  # HCU2 / Hydraulic Control Unit
+  Ecu.hvac:       (0x6A6, 0x686),
+  # MSB / TBMU, TBMU_PHEV, BMU_CTE1
+  Ecu.srs:      (0x6B4, 0x694),
+  # ARTIV / ARTIV, RADAR_AV_4, LIDAR, ARTIV_UDS
+  Ecu.epb:      (0x6B6, 0x696),
+  # BAAST
+  Ecu.vsa:      (0x732, 0x712),
+  # CTPA
+  Ecu.debug:      (0x737, 0x717),
 }
 
 ################################################################################
