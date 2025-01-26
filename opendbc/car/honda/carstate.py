@@ -174,8 +174,7 @@ class CarState(CarStateBase):
     v_wheel = (ret.wheelSpeeds.fl + ret.wheelSpeeds.fr + ret.wheelSpeeds.rl + ret.wheelSpeeds.rr) / 4.0
 
     # blend in transmission speed at low speed, since it has more low speed accuracy
-    v_weight = np.interp(v_wheel, v_weight_bp, v_weight_v)
-    v_weight = float(v_weight)
+    v_weight = float(np.interp(v_wheel, v_weight_bp, v_weight_v))
     ret.vEgoRaw = (1. - v_weight) * cp.vl["ENGINE_DATA"]["XMISSION_SPEED"] * CV.KPH_TO_MS * self.CP.wheelSpeedFactor + v_weight * v_wheel
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
 

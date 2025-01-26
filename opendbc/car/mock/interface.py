@@ -8,7 +8,7 @@ class CarInterface(CarInterfaceBase):
 
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
-    ret.carName = "mock"
+    ret.brand = "mock"
     ret.mass = 1700.
     ret.wheelbase = 2.70
     ret.centerToFront = ret.wheelbase * 0.5

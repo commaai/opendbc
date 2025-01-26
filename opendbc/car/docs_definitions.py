@@ -271,7 +271,7 @@ class CarDocs:
     self.year_list = get_year_list(self.years)
 
   def init(self, CP: CarParams, all_footnotes=None):
-    self.car_name = CP.carName
+    self.brand = CP.brand
     self.car_fingerprint = CP.carFingerprint
 
     if self.merged and CP.dashcamOnly:
