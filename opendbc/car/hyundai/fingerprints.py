@@ -543,8 +543,8 @@ FW_VERSIONS = {
   },
   CAR.KIA_CEED: {
     (Ecu.fwdRadar, 0x7d0, None): [
-      b'\xf1\x00CD__ SCC F-CUP      1.00 1.02 99110-J7000         ',
       b'\xf1\x00CD__ SCC F-CUP      1.00 1.00 99110-J7500         ',
+      b'\xf1\x00CD__ SCC F-CUP      1.00 1.02 99110-J7000         ',
     ],
     (Ecu.eps, 0x7d4, None): [
       b'\xf1\x00CD  MDPS C 1.00 1.06 56310-XX000 4CDEC106',
