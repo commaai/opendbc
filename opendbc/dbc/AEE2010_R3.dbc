@@ -458,6 +458,10 @@ BO_ 1416 Dat2_CMM: 8 CMM___Motor_SG
  SG_ P358_SENS_CHGMT_RAP : 60|2@0+ (1,0) [0|3] "" Vector__XXX
  SG_ P357_RAP_CIBLE_TRANSMIS : 63|3@0+ (1,0) [0|7] "" Vector__XXX
 
+BO_ 1423 Rep_Diag_OBC_DCDC: 7 XXX
+
+BO_ 1424 Req_Diag_OBC_DCDC: 3 XXX
+
 BO_ 1426 Dat6_BSI: 8 CMM___Motor_SG
  SG_ P272_Com_rBattCh : 0|8@1+ (1,0) [0|100] "%" Vector__XXX
  SG_ P273_Com_tBatt : 8|8@1+ (0.5,-30) [-30|97.5] "deg C" Vector__XXX
@@ -510,9 +514,85 @@ BO_ 1554 HS2_DAT7_BSI_612: 8 BSI
  SG_ CONFIG_VHL : 60|3@0+ (1,0) [0|0] "" CMM,BV,BVN
  SG_ D_LIGNE_REL_R3 : 63|3@0+ (1,0) [0|0] "" CMM,BV,BVN
 
+BO_ 1610 Rep_Diag_CVM: 7 XXX
+
+BO_ 1666 Rep_Diag_VCU: 7 XXX
+
+BO_ 1670 Rep_Diag_HCU2: 7 XXX
+
 BO_ 1672 Rep_Diag_On_CAN_688: 8 Vector__XXX
 
+BO_ 1677 Rep_Diag_ABRASR: 7 XXX
+
+BO_ 1684 Rep_Diag_MSB: 7 XXX
+
+BO_ 1685 Rep_Diag_DIRECTN: 7 XXX
+
+BO_ 1686 Rep_Diag_ARTIV: 7 XXX
+
+BO_ 1697 Req_Diag_SCR: 3 XXX
+
+BO_ 1698 Req_Diag_VCU: 3 XXX
+
+BO_ 1702 Req_Diag_HCU2: 3 XXX
+
 BO_ 1704 Req_Diag_On_CAN_6A8: 8 Vector__XXX
+
+BO_ 1705 Req_Diag_BOITEVIT: 3 XXX
+
+BO_ 1709 Req_Diag_ABRASR: 3 XXX
+
+BO_ 1716 Req_Diag_MSB: 3 XXX
+
+BO_ 1717 Req_Diag_DIRECTN: 3 XXX
+
+BO_ 1718 Req_Diag_ARTIV: 3 XXX
+
+BO_ 1719 Req_Diag_CORPRO: 3 XXX
+
+BO_ 1722 Req_Diag_CONV_PUIS: 3 XXX
+
+BO_ 1792 Req_Diag_BMF_UDS_CQCA: 8 XXX
+
+BO_ 1793 Req_Diag_COMBINE_UDS_CQCA: 8 XXX
+
+BO_ 1810 Rep_Diag_BAAST: 8 XXX
+
+BO_ 1815 Rep_Diag_CTPA: 8 XXX
+
+BO_ 1824 Req_Diag_BSP: 8 XXX
+
+BO_ 1840 Req_Diag_CPL_MOTED_SUSPVAR: 8 XXX
+
+BO_ 1842 Req_Diag_BAAST_BAASL_FEU_AR_C_CCE: 8 XXX
+
+BO_ 1847 Req_Diag_CTPA: 4 XXX
+
+BO_ 1856 Req_Diag_IDB: 8 XXX
+
+BO_ 1858 Req_Diag_HDC: 8 XXX
+
+BO_ 1859 Req_Diag_AFFICHEUR_LVDS_BD: 8 XXX
+
+BO_ 1860 Req_Diag_AIRBAG: 8 XXX
+
+BO_ 1862 Req_Diag_RHF: 8 XXX
+
+BO_ 1866 Req_Diag_CVM_CPL: 3 XXX
+
+BO_ 1871 Req_Diag_AVM_AVE: 8 XXX
+
+BO_ 1872 Req_Diag_PDSP_DCU_FD_AUTDEM_BML_ES_CSP: 8 XXX
+
+BO_ 1875 Req_Diag_RETRO_INT: 8 XXX
+
+BO_ 1879 Req_Diag_BDMAR_DCU_RL: 8 XXX
+
+BO_ 1888 Req_Diag_AUTORADIO: 8 XXX
+
+BO_ 1889 Req_Diag_BMU_IVC_D: 8 XXX
+
+BO_ 1892 Req_Diag_TELEMAT: 8 XXX
 
 BO_ 1896 BSI_FaultLog: 8 CMM___Motor_SG
  SG_ P__BSI_FaultLog_Header : 0|8@1+ (1,0) [0|255] "" Vector__XXX
@@ -527,17 +607,27 @@ BO_ 1896 BSI_FaultLog: 8 CMM___Motor_SG
 BO_ 1906 FaultLog_Ack: 1 BSI___Kombiinstrument
  SG_ P__FaultLog_Ack : 0|8@1+ (1,0) [0|255] "" Vector__XXX
 
+BO_ 1922 Req_Diag_CMB: 8 XXX
+
+BO_ 1927 Req_Diag_TRANSMISSION: 8 XXX
+
 BO_ 1928 Supv_CMM: 8 CMM___Motor_SG
  SG_ P073_SupervisionFaultCodes : 7|8@0+ (1,0) [0|255] "-" Vector__XXX
  SG_ P071_ConfirmedAbsentFlags : 15|32@0+ (1,0) [0|4294967295] "-" Vector__XXX
  SG_ P284_T15CD_stPart : 43|12@0+ (1,0) [0|4095] "" Vector__XXX
  SG_ P242_T15CD_stElec : 44|4@1+ (1,0) [0|15] "" Vector__XXX
 
+BO_ 1942 Req_Diag_DIRECTN_M: 8 XXX
+
+BO_ 1953 Rep_Diag_BMF_CAN_MMC_2: 8 XXX
+
+BO_ 1968 Req_Diag_BMF_CAN_FIAT_CONBINE_CAN_FIAT_SUSPVAR: 8 XXX
+
 BO_ 2015 Req_EOBD_On_Can_7DF: 8 Vector__XXX
 
-BO_ 2016 Req_EOBD_On_Can_7E0: 8 Vector__XXX
+BO_ 2016 Req_Diag_INT_J: 8 Vector__XXX
 
-BO_ 2024 Rep_EOBD_On_Can_7E8: 8 Vector__XXX
+BO_ 2024 Rep_Diag_INJ_T: 8 Vector__XXX
 
 BO_ 3221225472 VECTOR__INDEPENDENT_SIG_MSG: 0 Vector__XXX
  SG_ Code : 0|5@0+ (1,0) [0|0] "" Vector__XXX
@@ -776,8 +866,17 @@ CM_ SG_ 1458 P146_Com_tEnvT "P146: Environment air temperature";
 CM_ SG_ 1458 P100_Com_stAddPmpDef "P100: Status of additive for FAP";
 CM_ SG_ 1458 P__Com_stEOBD "Pxxx: EOBD relevant errors in the network";
 CM_ BO_ 1554 "trame consommée uniquement sur véhicules en archi EE 2010";
+CM_ BO_ 1610 "CVM_3, CVM_2, CVM";
+CM_ BO_ 1666 "VCU_EMS8000, E_VCU";
+CM_ BO_ 1670 "HCU2";
+CM_ BO_ 1677 "ABS81, ESP81, ABS8_BOSCH, ESP8_BOSCH, ESP90, ABSMK100, ESPMK100, ESP_KP1, ABS_KP1, ASC, ABS, ESP, ABS80, ESP80, ASR80, ABS90_D, ESP90_D, ESP90_F, ESPMK100_UDS, ESP_EBC_440_CAN, ESP_EBC_440_K, ESP_EBC_440, ABSMK70_1, ESPMK60_O, ABSMK100_UDS, ABS90_T, ABS_8_0_C1, ESP_8_0_C1, ABS_4x4, ESP_4x4, ABS81_BOSCH, ESP81_BOSCH, ABS90_F, RBV";
+CM_ BO_ 1684 "TBMU, TBMU_PHEV, BMU_CTE1";
+CM_ BO_ 1685 "GEP, DAE_BVH2, DAE, DAE_A515, DAE_UDS, EPS, SSCU, DAE_D, GEP_UDS, EPS_T";
+CM_ BO_ 1686 "ARTIV, RADAR_AV_4, LIDAR, ARTIV_UDS";
 CM_ BO_ 1704 "Le mécanisme d'émission utilisé est événementiel de l'outil vers le calculateur via la BSI
 Trame question pour le téléchargement et le Diag On CAN.";
+CM_ BO_ 1810 "BAAST";
+CM_ BO_ 1815 "CTPA";
 CM_ BO_ 1906 "Le mécanisme d'émission utilisé est événementiel de la BSI vers le CMM.
 
 Trame d'acquittement du Journal Des Défauts BSI.";
@@ -786,15 +885,19 @@ CM_ SG_ 1928 P073_SupervisionFaultCodes "P073  Supervision fault codes";
 CM_ SG_ 1928 P071_ConfirmedAbsentFlags "P071  confirmed absent status flags of the ECU";
 CM_ SG_ 1928 P284_T15CD_stPart "ECU electronic state";
 CM_ SG_ 1928 P242_T15CD_stElec "ECU electronic state";
+CM_ BO_ 1953 "BSI";
 CM_ BO_ 2015 "Le mécanisme d'émission utilisé est événementiel de l'outil branché sur le réseau Can vers les calculateurs.
 
 Trame question EOBD On Can adresse a tous les calculateurs";
 CM_ BO_ 2016 "Le mécanisme d'émission utilisé est événementiel de l'outil branché sur le réseau Can vers le CMM
 
-Trame question EOBD On Can adresse au CMM";
+Trame question EOBD On Can adresse au CMM
+ECU Family: INT_J";
 CM_ BO_ 2024 "Le mécanisme d'émission utilisé est événementiel du CMM vers l'outil branché sur le réseau Can
 
-Trame réponse EOBD On Can du CMM";
+Trame réponse EOBD On Can du CMM
+
+ECU  Family: INJ_T";
 CM_ BO_ 3221225472 "This is a message for not used signals, created by Vector CANdb++ DBC OLE DB Provider.";
 CM_ SG_ 3221225472 P004_ActualTorqueNoGearbox "P004  Actual torque before torque intervention by automatic gearbox";
 CM_ SG_ 3221225472 P028_Gbx_stEOBDFault "P028  MIL request gearbox";
