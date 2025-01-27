@@ -18,7 +18,7 @@ ENABLE_BUTTONS = (ButtonType.accelCruise, ButtonType.decelCruise, ButtonType.can
 class CarInterface(CarInterfaceBase):
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
-    ret.carName = "hyundai"
+    ret.brand = "hyundai"
 
     cam_can = CanBus(None, fingerprint).CAM
     hda2 = 0x50 in fingerprint[cam_can] or 0x110 in fingerprint[cam_can]
