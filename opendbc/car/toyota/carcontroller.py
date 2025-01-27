@@ -87,7 +87,7 @@ class CarController(CarControllerBase):
     lat_active = CC.latActive and abs(CS.out.steeringTorque) < MAX_USER_TORQUE
 
     if len(CC.orientationNED) == 3:
-      self.pitch.update(min(CC.orientationNED[1], 0.0))
+      self.pitch.update(CC.orientationNED[1])
 
     # *** control msgs ***
     can_sends = []
