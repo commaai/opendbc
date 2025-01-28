@@ -446,7 +446,7 @@ struct CarOutput {
 # ****** car param ******
 
 struct CarParams {
-  carName @0 :Text;
+  brand @0 :Text;  # Designates which group a platform falls under. Each folder in opendbc/car is assigned one brand string
   carFingerprint @1 :Text;
   fuzzyFingerprint @55 :Bool;
 

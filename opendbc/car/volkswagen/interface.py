@@ -7,7 +7,7 @@ from opendbc.car.volkswagen.values import CAR, NetworkLocation, TransmissionType
 class CarInterface(CarInterfaceBase):
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate: CAR, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
-    ret.carName = "volkswagen"
+    ret.brand = "volkswagen"
     ret.radarUnavailable = True
 
     if ret.flags & VolkswagenFlags.PQ:
