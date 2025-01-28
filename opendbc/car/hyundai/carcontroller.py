@@ -85,7 +85,7 @@ class CarController(CarControllerBase):
     # Interpolate a percent to apply to max torque based on vEgo value, which is
     # the "best estimate of speed".  This means that under 20 (units?) we will
     # apply less torque, and over 20 we will apply the full calculated torque.
-    ego_weight = interp(CS.out.vEgo, [0, 5, 10, 20], [0.2, 0.3, 0.5, 1.0])
+    ego_weight = np.interp(CS.out.vEgo, [0, 5, 10, 20], [0.2, 0.3, 0.5, 1.0])
 
     # Track if and how long the driver has been applying torque and create a
     # value to reduce the max torque applied. This block will cause the
