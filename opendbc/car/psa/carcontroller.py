@@ -19,7 +19,6 @@ class CarController(CarControllerBase):
     ### lateral control ###
     if CC.latActive:
       apply_angle = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, CarControllerParams)
-      # TODO: check absolute STEER_MAX - EPS accepts any angle from at least -360 - 360° (STEER_MAX)
     else:
       apply_angle = CS.out.steeringAngleDeg
 

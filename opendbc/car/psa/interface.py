@@ -14,14 +14,14 @@ class CarInterface(CarInterfaceBase):
 
     ret.radarUnavailable = True
     ret.steerControlType = structs.CarParams.SteerControlType.angle
-    ret.steerActuatorDelay = 0.4
+    ret.steerActuatorDelay = 0.2
     ret.steerLimitTimer = 1.0
 
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.psa)]
 
     if not docs:
       ret.transmissionType = TransmissionType.automatic
-      ret.minEnableSpeed = 0 # only for ACC variants
+      ret.minEnableSpeed = 0
     ret.minSteerSpeed = 0.
 
     ret.autoResumeSng = ret.minEnableSpeed == -1

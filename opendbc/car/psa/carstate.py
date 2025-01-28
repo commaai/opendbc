@@ -5,8 +5,6 @@ from opendbc.car.psa.psacan import CanBus
 from opendbc.car.psa.values import DBC, CarControllerParams
 from opendbc.car.interfaces import CarStateBase
 
-STANDSTILL_THRESHOLD = 1 # TODO: stop wheel twitching at low speeds 0.375 # kph
-
 GearShifter = structs.CarState.GearShifter
 TransmissionType = structs.CarParams.TransmissionType
 
@@ -15,7 +13,6 @@ class CarState(CarStateBase):
     super().__init__(CP)
 
   def update(self, can_parsers) -> structs.CarState:
-    # TODO: swap CAN 0/2 on harness
     cp = can_parsers[Bus.pt]
     cp_adas = can_parsers[Bus.adas]
     cp_main = can_parsers[Bus.main]
@@ -31,7 +28,7 @@ class CarState(CarStateBase):
     ret.vEgoRaw = cp_adas.vl['HS2_DYN_ABR_38D']['VITESSE_VEHICULE_ROUES'] * CV.KPH_TO_MS # HS2
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.yawRate = cp_adas.vl['HS2_DYN_UCF_MDD_32D']['VITESSE_LACET_BRUTE'] * CV.DEG_TO_RAD # HS2
-    ret.standstill = abs(ret.wheelSpeeds.rl) <= STANDSTILL_THRESHOLD and abs(ret.wheelSpeeds.rr) <= STANDSTILL_THRESHOLD
+    ret.standstill = bool(cp_adas.vl['HS2_DYN_UCF_MDD_32D']['VEHICLE_STANDSTILL']) # steering possible down to standstill
 
     # gas
     ret.gas = cp_main.vl['DRIVER']['GAS_PEDAL'] / 99.5 # HS1
@@ -41,7 +38,7 @@ class CarState(CarStateBase):
     ret.brake = cp.vl['Dyn2_FRE']['BRAKE_PRESSURE'] / 1500.  # HS1
     ret.brakePressed = bool(cp_main.vl['Dat_BSI']['P013_MainBrake']) # HS1
     ret.parkingBrake = cp.vl['Dyn_EasyMove']['P337_Com_stPrkBrk'] == 1 # 0: disengaged, 1: engaged, 3: brake actuator moving
-    # TODO (corsa-e only?) bool(cp_main.vl['Dat_BSI']['PARKING_BRAKE'])
+    # TODO (corsa only?) bool(cp_main.vl['Dat_BSI']['PARKING_BRAKE'])
 
     # steering wheel
     ret.steeringAngleDeg = cp.vl['STEERING_ALT']['ANGLE'] # EPS
