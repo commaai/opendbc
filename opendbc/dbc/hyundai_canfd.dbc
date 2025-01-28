@@ -803,12 +803,14 @@ CM_ 1043 "Lamp signals do not seem universal on cars that use LKAS_ALT, but stal
 CM_ SG_ 80 HAS_LANE_SAFETY "If 0, hides LKAS 'Lane Safety' menu from vehicle settings";
 CM_ SG_ 96 BRAKE_PRESSURE "User applied brake pedal pressure. Ramps from computer applied pressure on falling edge of cruise. Cruise cancels if !=0";
 CM_ SG_ 101 BRAKE_POSITION "User applied brake pedal position, max is ~700. Signed on some vehicles";
+CM_ SG_ 298 NEW_SIGNAL_4 "todo: figure out why always set to 9";
 CM_ SG_ 373 PROBABLY_EQUIP "aeb equip?";
 CM_ SG_ 373 ACCEnable "Likely a copy of CAN's TCS13->ACCEnable";
 CM_ SG_ 373 DriverBraking "Likely derived from BRAKE->BRAKE_POSITION";
 CM_ SG_ 373 DriverBrakingLowSens "Higher threshold version of DriverBraking";
 CM_ SG_ 352 SET_ME_9 "has something to do with AEB settings";
 CM_ SG_ 416 VSetDis "set speed in display units";
+CM_ SG_ 480 NEW_SIGNAL_5 "todo: figure out why always set to 1";
 CM_ SG_ 676 LEFT_LANE_LINE "Left lane line confidence";
 CM_ SG_ 676 RIGHT_LANE_LINE "Right lane line confidence";
 CM_ SG_ 736 MAX_SPEED "Display units. Restricts car from driving above this speed unless accelerator pedal is depressed beyond pressure point";
