@@ -325,23 +325,23 @@ class CAR(Platforms):
     chassis_codes={"5G", "AU", "BA", "BE"},
     wmis={WMI.VOLKSWAGEN_MEXICO_CAR, WMI.VOLKSWAGEN_EUROPE_CAR},
   )
-  VOLKSWAGEN_ID3_MK1 = VolkswagenMEBPlatformConfig(
-    [VWCarDocs("Volkswagen ID.3 2020-2023", footnotes=[Footnote.VW_MEB])],
-    # Für den ID.3 Pro S mit 77 kWh Batterie: ca. 1.935 kg
-    # 45 kWh: ca. 1.772 kg
-    # 58 kWh: ca. 1.812 kg
-    VolkswagenCarSpecs(mass=1935, wheelbase=2.770),
-    chassis_codes={"E1"},
-    wmis={WMI.VOLKSWAGEN_EUROPE_CAR},
-  )
-  VOLKSWAGEN_ID4_MK1 = VolkswagenMEBPlatformConfig(
-    [VWCarDocs("Volkswagen ID.4 2020-2023", footnotes=[Footnote.VW_MEB])],
-    # Für den ID.4 Pro Performance mit 77 kWh Batterie: ca. 2.099 kg
-    # 52 kWh: ca. 1.966 kg
-    VolkswagenCarSpecs(mass=2099, wheelbase=2.771),
-    chassis_codes={"E2"},
-    wmis={WMI.VOLKSWAGEN_EUROPE_CAR},
-  )
+  #VOLKSWAGEN_ID3_MK1 = VolkswagenMEBPlatformConfig(
+  #  [VWCarDocs("Volkswagen ID.3 2020-2023", footnotes=[Footnote.VW_MEB])],
+  #  # Für den ID.3 Pro S mit 77 kWh Batterie: ca. 1.935 kg
+  #  # 45 kWh: ca. 1.772 kg
+  #  # 58 kWh: ca. 1.812 kg
+  #  VolkswagenCarSpecs(mass=1935, wheelbase=2.770),
+  #  chassis_codes={"E1"},
+  #  wmis={WMI.VOLKSWAGEN_EUROPE_CAR},
+  #)
+  #VOLKSWAGEN_ID4_MK1 = VolkswagenMEBPlatformConfig(
+  #  [VWCarDocs("Volkswagen ID.4 2020-2023", footnotes=[Footnote.VW_MEB])],
+  #  # Für den ID.4 Pro Performance mit 77 kWh Batterie: ca. 2.099 kg
+  #  # 52 kWh: ca. 1.966 kg
+  #  VolkswagenCarSpecs(mass=2099, wheelbase=2.771),
+  #  chassis_codes={"E2"},
+  #  wmis={WMI.VOLKSWAGEN_EUROPE_CAR},
+  #)
   #VOLKSWAGEN_ID5_MK1 = VolkswagenMEBPlatformConfig(
   #  [VWCarDocs("Volkswagen ID.5 2022-", footnotes=[Footnote.VW_MEB])],
   #  # Für den ID.5 Pro 77 kWh: ca. 2.143 kg
