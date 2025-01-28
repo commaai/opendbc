@@ -200,7 +200,7 @@
 |Lexus|RX Hybrid 2016|Lexus Safety System+|[Upstream](#upstream)|
 |Lexus|RX Hybrid 2017-19|All|[Upstream](#upstream)|
 |Lexus|RX Hybrid 2020-22|All|[Upstream](#upstream)|
-|Lexus|UX Hybrid 2019-23|All|[Upstream](#upstream)|
+|Lexus|UX Hybrid 2019-24|All|[Upstream](#upstream)|
 |Lincoln|Aviator 2020-24|Co-Pilot360 Plus|[Upstream](#upstream)|
 |Lincoln|Aviator Plug-in Hybrid 2020-24|Co-Pilot360 Plus|[Upstream](#upstream)|
 |MAN|eTGE 2020-24|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|

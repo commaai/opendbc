@@ -180,7 +180,7 @@ class CAR(Platforms):
       ToyotaCarDocs("Toyota Corolla Hybrid 2020-22"),
       ToyotaCarDocs("Toyota Corolla Hybrid (South America only) 2020-23", min_enable_speed=7.5),
       ToyotaCarDocs("Toyota Corolla Cross Hybrid (Non-US only) 2020-22", min_enable_speed=7.5),
-      ToyotaCarDocs("Lexus UX Hybrid 2019-23"),
+      ToyotaCarDocs("Lexus UX Hybrid 2019-24"),
     ],
     CarSpecs(mass=3060. * CV.LB_TO_KG, wheelbase=2.67, steerRatio=13.9, tireStiffnessFactor=0.444),
   )
