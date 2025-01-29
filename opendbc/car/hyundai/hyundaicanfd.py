@@ -50,7 +50,13 @@ def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_steer, 
     "NEW_SIGNAL_2": 0,
     "LKAS_ANGLE_CMD": -apply_angle,
     "LKAS_ANGLE_ACTIVE": 2 if lat_active else 1,
-    "UNKNOWN": max_torque if lat_active else 0,
+    "LKAS_ANGLE_MAX_TORQUE": max_torque if lat_active else 0,
+    "LKAS_SIGNAL_1": 10,
+    "NEW_SIGNAL_3": 9,
+    "LKAS_SIGNAL_2": 1,
+    "LKAS_SIGNAL_3": 1,
+    "LKAS_SIGNAL_4": 1,
+    "LKAS_SIGNAL_5": 1,
   }
 
   if CP.flags & HyundaiFlags.CANFD_HDA2:
