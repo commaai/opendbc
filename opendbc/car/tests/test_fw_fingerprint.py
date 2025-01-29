@@ -125,11 +125,11 @@ class TestFwFingerprint:
     for car_model, ecus in FW_VERSIONS.items():
       with subtests.test(car_model=car_model.value):
         CP = interfaces[car_model][0].get_non_essential_params(car_model)
-        if CP.carName == 'subaru':
+        if CP.brand == 'subaru':
           for ecu in ecus.keys():
             assert ecu[1] not in blacklisted_addrs, f'{car_model}: Blacklisted ecu: (Ecu.{ecu[0]}, {hex(ecu[1])})'
 
-        elif CP.carName == "chrysler":
+        elif CP.brand == "chrysler":
           # Some HD trucks have a combined TCM and ECM
           if CP.carFingerprint.startswith("RAM_HD"):
             for ecu in ecus.keys():

@@ -99,6 +99,7 @@ class RadarInterface(RadarInterfaceBase):
     self.updated_messages = set()
     self.track_id = 0
     self.radar = DBC[CP.carFingerprint].get(Bus.radar)
+    self.invalid_cnt = 0
     if CP.radarUnavailable:
       self.rcp = None
     elif self.radar == RADAR.DELPHI_ESR:
@@ -177,6 +178,12 @@ class RadarInterface(RadarInterfaceBase):
 
     errors = []
     if DELPHI_MRR_RADAR_RANGE_COVERAGE[headerScanIndex] != int(self.rcp.vl["MRR_Header_SensorCoverage"]["CAN_RANGE_COVERAGE"]):
+      self.invalid_cnt += 1
+    else:
+      self.invalid_cnt = 0
+
+    # Rarely MRR_Header_InformationDetections can fail to send a message. The scan index is skipped in this case
+    if self.invalid_cnt >= 5:
       errors.append("wrongConfig")
 
     for ii in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):

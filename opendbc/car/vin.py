@@ -1,7 +1,6 @@
 import re
 
-from panda import uds
-from opendbc.car import carlog
+from opendbc.car import carlog, uds
 from opendbc.car.isotp_parallel_query import IsoTpParallelQuery
 from opendbc.car.fw_query_definitions import STANDARD_VIN_ADDRS, StdQueries
 
