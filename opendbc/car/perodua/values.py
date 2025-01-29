@@ -65,7 +65,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
     Request(
       [StdQueries.SHORT_TESTER_PRESENT_REQUEST, StdQueries.OBD_VERSION_REQUEST],
       [StdQueries.SHORT_TESTER_PRESENT_RESPONSE, StdQueries.OBD_VERSION_RESPONSE],
-      whitelist_ecus=[Ecu.engine, Ecu.srs, Ecu.abs, Ecu.dsu],
+      whitelist_ecus=[Ecu.engine],
       bus=0,
     )],        # no active queries
   extra_ecus=[],      # or minimal list
