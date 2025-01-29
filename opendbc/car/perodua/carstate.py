@@ -1,7 +1,7 @@
 from opendbc.car import structs, Bus
 from opendbc.can.parser import CANParser
 from opendbc.can.can_define import CANDefine
-from opendbc.car.common.numpy_fast import mean, interp
+import numpy as np
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.perodua.values import DBC, ACC_CAR, HUD_MULTIPLIER
@@ -68,7 +68,7 @@ class CarState(CarStateBase):
       cp.vl["WHEEL_SPEED"]['WHEELSPEED_F'],
       cp.vl["WHEEL_SPEED"]['WHEELSPEED_F'],
     )
-    ret.vEgoRaw = mean([ret.wheelSpeeds.rr, ret.wheelSpeeds.rl, ret.wheelSpeeds.fr, ret.wheelSpeeds.fl])
+    ret.vEgoRaw = np.mean([ret.wheelSpeeds.rr, ret.wheelSpeeds.rl, ret.wheelSpeeds.fr, ret.wheelSpeeds.fl])
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.standstill = ret.vEgoRaw < 0.01
 
@@ -242,7 +242,7 @@ class CarState(CarStateBase):
     #print(self.stock_acc_cmd, self.stock_acc_set_speed, self.cruise_speed * 3.6)
     self.cruise_speed = max(min(self.cruise_speed, 125 * CV.KPH_TO_MS), 30 * CV.KPH_TO_MS)
     ret.cruiseState.speedCluster = self.cruise_speed
-    ret.cruiseState.speed = ret.cruiseState.speedCluster / interp(ret.vEgo, [0,140], [1.0615,1.0170])
+    ret.cruiseState.speed = ret.cruiseState.speedCluster / np.interp(ret.vEgo, [0,140], [1.0615,1.0170])
 
     ret.cruiseState.standstill = False
     ret.cruiseState.nonAdaptive = False

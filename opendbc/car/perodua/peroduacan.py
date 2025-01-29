@@ -1,4 +1,4 @@
-from opendbc.car.common.numpy_fast import clip
+import numpy as np
 from opendbc.car.common.conversions import Conversions as CV
 
 def lkc_checksum(addr,dat):
@@ -96,8 +96,8 @@ def perodua_create_brake_command(packer, enabled, decel_req, pump, decel_cmd, ae
   # Value overflow check
   # MAGNITUDE a max value 2.0 to prevent overflow, maximum seen on porto is 1.56
   # PUMP_REACTION{N} has a max value of 1.2, maximum seen on porto is 1.0
-  decel_req = clip(decel_req, 0., 0.5)
-  pump = clip(pump, 0., 1.0)
+  decel_req = np.clip(decel_req, 0., 0.5)
+  pump = np.clip(pump, 0., 1.0)
 
   values = {
     "COUNTER": idx,
