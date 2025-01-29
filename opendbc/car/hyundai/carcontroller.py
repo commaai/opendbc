@@ -93,7 +93,7 @@ class CarController(CarControllerBase):
     # `driver_applied_torque_reducer` to settle to value between 30 and 150.
     # While the driver applies torque the value will decrease to 30, and while
     # the driver is not applying torque the value will increase to 150.
-    if abs(CS.out.steeringTorque) > 200:
+    if abs(CS.out.steeringTorque) > 700:
       # If the driver is applying some torque manually, reduce the value down to 30 (the min)
       self.driver_applied_torque_reducer -= 1
       if self.driver_applied_torque_reducer < 30:
