@@ -482,7 +482,7 @@ class IsoTpMessage:
       if self.rx_len == 0x0 and len(rx_data) > 8:
         self.rx_len = rx_data[1]
         offset = 2
-        # assert self.rx_len < self.max_len, f"isotp - rx: invalid single frame length: {self.rx_len}"
+      # assert self.rx_len < self.max_len, f"isotp - rx: invalid single frame length: {self.rx_len}"
       self.rx_dat = rx_data[offset:offset + self.rx_len]
       self.rx_idx = 0
       self.rx_done = True
