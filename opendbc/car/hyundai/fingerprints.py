@@ -476,10 +476,10 @@ FW_VERSIONS = {
       b'\xf1\x00071       ',
       b'\xf1\x8b #\t\x19  ',
     ],
-    (ecu.cornerRadar, 0x7b7, None) : [
+    (Ecu.cornerRadar, 0x7b7, None) : [
       b'\xf1\x8b !\x11\x18',
     ],
-    (ecu.engine, 0x7e0, None): [
+    (Ecu.engine, 0x7e0, None): [
       b'IPPNHM_Y_T0B\x00\x00\x00\x00',
       b'\xf1\x82IPPNHM_Y_T0B\x00\x00\x00\x00',
     ],
@@ -508,11 +508,11 @@ FW_VERSIONS = {
       b'\xf1\x00IK  MFC  AT USA LHD 1.00 1.04 99211-G9000 220401',
       b'\xf1\x8b #\t\x11                                        ',
     ],
-    (ecu.transmission, 0x7e1, None): [
+    (Ecu.transmission, 0x7e1, None): [
       b'SIK4T20NH0                                                                                                ',
       b'\xf1\x82SIK4T20NH0                                                                                        ',
       b'\xf1\x87WBPTH13315662CN7feVVwvWw\x86fffxuWy\x88wgw\x97vvfUD?\xffD[\xf1\x89E31\x00\x00\x00\x00\x00\x00\x00 ',
-    ],    
+    ],
   },
   CAR.GENESIS_G80: {
     (Ecu.fwdRadar, 0x7d0, None): [
