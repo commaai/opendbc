@@ -138,7 +138,7 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
   hud = CC.hudControl
 
   # HIDE FAULTS
-  for f in ("FAULT_LSS", "FAULT_HDA", "FAULT_DAS"):
+  for f in ("FAULT_LSS", "FAULT_HDA", "FAULT_DAS", "FAULT_LFA"):
     msg_162[f] = 0
 
   # HIDE ALERTS
