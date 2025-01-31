@@ -140,7 +140,7 @@ class CAR(Platforms):
     CarSpecs(mass=1650, wheelbase=3.076, steerRatio=17.0),
   )
   FORD_MUSTANG_MACH_E_MK1 = FordCANFDPlatformConfig(
-    [FordCarDocs("Ford Mustang Mach-E 2021-23", "Co-Pilot360 Active 2.0", support_type=SupportType.REVIEW)],
+    [FordCarDocs("Ford Mustang Mach-E 2021-23", "All", support_type=SupportType.REVIEW)],
     CarSpecs(mass=2200, wheelbase=2.984, steerRatio=17.0),  # TODO: check steer ratio
   )
   FORD_RANGER_MK2 = FordCANFDPlatformConfig(
