@@ -508,6 +508,9 @@ FW_VERSIONS = {
       b'\xf1\x00IK  MFC  AT USA LHD 1.00 1.04 99211-G9000 220401',
       b'\xf1\x8b #\t\x11                                        ',
     ],
+    (Ecu.HVAC, 0x7b3, None): [
+      b"\xf1\x00IK PE 97255-G9NB0CONTROL ASS'Y-DATC  1.03IKPE DATC(-) 0.7     ",
+    ],
     (Ecu.transmission, 0x7e1, None): [
       b'SIK4T20NH0                                                                                                ',
       b'\xf1\x82SIK4T20NH0                                                                                        ',
