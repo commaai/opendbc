@@ -9,7 +9,7 @@ TransmissionType = structs.CarParams.TransmissionType
 class CarInterface(CarInterfaceBase):
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate: CAR, fingerprint, car_fw, experimental_long, docs):
-    ret.carName = 'psa'
+    ret.brand = 'psa'
     ret.dashcamOnly = False
 
     ret.radarUnavailable = True
