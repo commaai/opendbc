@@ -1,11 +1,6 @@
 #!/bin/bash
 set -e
-
-DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
-cd $DIR
-
-# TODO: why doesn't uv do this?
-export PYTHONPATH=$DIR
+cd $(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)
 
 # *** dependencies install ***
 if ! command -v uv &>/dev/null; then
@@ -16,8 +11,19 @@ fi
 uv sync --all-extras
 source .venv/bin/activate
 
+mkdir -p .tmp
+echo '
+#include <re2/re2.h>
+RE2 x("");int main(void) {return 0;}
+' > .tmp/re2.c
+g++ -o .tmp/re2.o .tmp/re2.c -lre2 &>/dev/null || {
+  echo "'re2' is not installed. Installing 're2'..."
+  [[ $OSTYPE = "linux-gnu" ]] && sudo apt-get install -y --no-install-recommends libre2-dev || brew install re2
+}
+rm -rf .tmp
+
 # *** build ***
-uv run scons -j8
+uv run scons -j$(nproc 2>/dev/null || sysctl -n hw.logicalcpu)
 
 # *** lint ***
 # TODO: pre-commit is slow; replace it with openpilot's "op lint"
@@ -25,7 +31,7 @@ uv run scons -j8
 uv run ruff check .
 
 # *** test ***
-uv run pytest -n8
+uv run pytest -n$(nproc 2>/dev/null || sysctl -n hw.logicalcpu)
 
 # *** all done ***
 GREEN='\033[0;32m'
