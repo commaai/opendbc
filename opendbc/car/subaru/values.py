@@ -202,6 +202,11 @@ class CAR(Platforms):
     SUBARU_OUTBACK.specs,
     flags=SubaruFlags.LKAS_ANGLE,
   )
+  SUBARU_OUTBACK_2025 = SubaruGen2PlatformConfig(
+    [SubaruCarDocs("Subaru Outback 2025", "All", car_parts=CarParts.common([CarHarness.subaru_d]))],
+    CarSpecs(mass=1836, wheelbase=2.70, steerRatio=13),
+    flags=SubaruFlags.LKAS_ANGLE,
+  )
   SUBARU_ASCENT_2023 = SubaruGen2PlatformConfig(
     [SubaruCarDocs("Subaru Ascent 2023", "All", car_parts=CarParts.common([CarHarness.subaru_d]))],
     SUBARU_ASCENT.specs,
