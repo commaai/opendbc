@@ -562,11 +562,11 @@ FW_VERSIONS = {
       b'\x08,\xa1@\x07',
       b'\xed,\xa2q\x07',
     ],
-    (Ecu.transmission, 0x7a3, None): [
-      b'\xa8\x8e\xf41\x00',
-      b'\xa8\xfe\xf41\x00',
-      b'\xa9\x17w!t',
-    ],
+ #   (Ecu.transmission, 0x7a3, None): [
+ #     b'\xa8\x8e\xf41\x00',
+ #     b'\xa8\xfe\xf41\x00',
+ #     b'\xa9\x17w!t',
+ #   ],
     (Ecu.hvac, 0x7b3, None): [
       b'\xf1\x00\xb9\x01\x00',
     ],
