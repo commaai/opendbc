@@ -2,7 +2,7 @@ import re
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car import AngleRateLimit, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
@@ -14,6 +14,10 @@ Ecu = CarParams.Ecu
 class CarControllerParams:
   ACCEL_MIN = -3.5 # m/s
   ACCEL_MAX = 2.0 # m/s
+
+  # seen changing at 0.2 deg/frame down, 0.1 deg/frame up at 100Hz
+  ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[5., .8, .15])
+  ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[5., 3.5, 0.4])
 
   def __init__(self, CP):
     self.STEER_DELTA_UP = 3
@@ -97,6 +101,7 @@ class HyundaiFlags(IntFlag):
 
   MIN_STEER_32_MPH = 2 ** 23
 
+  ANGLE_CONTROL = 2 ** 24
 
 class Footnote(Enum):
   CANFD = CarFootnote(
@@ -314,6 +319,11 @@ class CAR(Platforms):
     ],
     CarSpecs(mass=1948, wheelbase=2.97, steerRatio=14.26, tireStiffnessFactor=0.65),
     flags=HyundaiFlags.EV,
+  )
+  HYUNDAI_IONIQ_5_PE = HyundaiCanFDPlatformConfig(
+    [HyundaiCarDocs("Hyundai Ioniq 5 PE (with HDA II) 2025+", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_q]))],
+    HYUNDAI_IONIQ_5.specs,
+    flags=HyundaiFlags.EV | HyundaiFlags.ANGLE_CONTROL,
   )
   HYUNDAI_IONIQ_6 = HyundaiCanFDPlatformConfig(
     [HyundaiCarDocs("Hyundai Ioniq 6 (with HDA II) 2023-24", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_p]))],
@@ -761,5 +771,7 @@ LEGACY_SAFETY_MODE_CAR = CAR.with_flags(HyundaiFlags.LEGACY)
 # TODO: another PR with (HyundaiFlags.LEGACY | HyundaiFlags.UNSUPPORTED_LONGITUDINAL | HyundaiFlags.CAMERA_SCC |
 #       HyundaiFlags.CANFD_RADAR_SCC | HyundaiFlags.CANFD_NO_RADAR_DISABLE | )
 UNSUPPORTED_LONGITUDINAL_CAR = CAR.with_flags(HyundaiFlags.LEGACY) | CAR.with_flags(HyundaiFlags.UNSUPPORTED_LONGITUDINAL)
+
+ANGLE_CONTROL_CAR = CAR.with_flags(HyundaiFlags.ANGLE_CONTROL)
 
 DBC = CAR.create_dbc_map()
