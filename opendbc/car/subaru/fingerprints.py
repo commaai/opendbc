@@ -544,6 +544,7 @@ FW_VERSIONS = {
     (Ecu.abs, 0x7b0, None): [
       b'\xa1 #\x14\x00',
       b'\xa1 #\x17\x00',
+      b'\xa1 $\x17\x00',
     ],
     (Ecu.eps, 0x746, None): [
       b'+\xc0\x10\x11\x00',
