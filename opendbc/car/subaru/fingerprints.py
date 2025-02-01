@@ -544,21 +544,38 @@ FW_VERSIONS = {
     (Ecu.abs, 0x7b0, None): [
       b'\xa1 #\x14\x00',
       b'\xa1 #\x17\x00',
+      b'\xa1 $\x17\x00',
     ],
     (Ecu.eps, 0x746, None): [
       b'+\xc0\x10\x11\x00',
       b'+\xc0\x12\x11\x00',
+      b'[\xc0\xd0\x10\x00',
     ],
     (Ecu.fwdCamera, 0x787, None): [
       b'\t!\x08\x046\x05!\x08\x01/',
+      b'\x1a!\x08\x00C\x00\x00\x00\x00\x00',
+      b' \x02\x0e',
+      b'\x1a!\x08\x00C\x0e!\x08\x018',
+      b'\xf1\x00\xac\x03\x00',
     ],
     (Ecu.engine, 0x7a2, None): [
       b'\xed,\xa0q\x07',
+      b'\x08,\xa1@\x07',
       b'\xed,\xa2q\x07',
     ],
-    (Ecu.transmission, 0x7a3, None): [
-      b'\xa8\x8e\xf41\x00',
-      b'\xa8\xfe\xf41\x00',
+ #   (Ecu.transmission, 0x7a3, None): [
+ #     b'\xa8\x8e\xf41\x00',
+ #     b'\xa8\xfe\xf41\x00',
+ #     b'\xa9\x17w!t',
+ #   ],
+    (Ecu.hvac, 0x7b3, None): [
+      b'\xf1\x00\xb9\x01\x00',
+    ],
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00\x00\x00\x02',
+    ],
+    (Ecu.adas, 0x730, None): [
+      b'\xf1\x00\xbb\r\x07',
     ],
   },
 }
