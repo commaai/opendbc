@@ -291,6 +291,8 @@ class PlatformConfigBase(Freezable):
 
   platform_str: str | None = None
 
+  origin_car_docs: list[CarDocs] | list[ExtraCarDocs] = field(init=False)
+
   def __hash__(self) -> int:
     return hash(self.platform_str)
 
@@ -301,7 +303,11 @@ class PlatformConfigBase(Freezable):
     pass
 
   def __post_init__(self):
+    self.origin_car_docs = self.car_docs
     self.init()
+
+  def get_all_docs(self):
+    return self.origin_car_docs
 
 
 @dataclass(order=True)
