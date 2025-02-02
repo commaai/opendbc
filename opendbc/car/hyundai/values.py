@@ -281,6 +281,13 @@ class CAR(Platforms):
     HYUNDAI_SANTA_FE.specs,
     flags=HyundaiFlags.CHECKSUM_CRC8 | HyundaiFlags.HYBRID,
   )
+  HYUNDAI_SANTA_FE_5TH_GEN = HyundaiCanFDPlatformConfig(
+    [
+      HyundaiCarDocs("Hyundai Santa Fe (with HDA II) 2024-25", "Highway Driving Assit II", car_parts=CarParts.common([CarHarness.hyundai_p])),
+    ],
+    CarSpecs(mass=2258, wheelbase=2.95, steerRatio=14.14),
+    flags=HyundaiFlags.ANGLE_CONTROL,
+  )
   HYUNDAI_SONATA = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Sonata 2020-23", "All", video_link="https://www.youtube.com/watch?v=ix63r9kE3Fw",
                    car_parts=CarParts.common([CarHarness.hyundai_a]))],
@@ -573,13 +580,6 @@ class CAR(Platforms):
     ],
     CarSpecs(mass=2258, wheelbase=2.95, steerRatio=14.14),
     flags=HyundaiFlags.RADAR_SCC,
-  )
-  GENESIS_GV80_2025 = HyundaiCanFDPlatformConfig(
-    [
-      HyundaiCarDocs("Genesis GV80 2025", "All", car_parts=CarParts.common([CarHarness.hyundai_q])),
-    ],
-    CarSpecs(mass=2258, wheelbase=2.95, steerRatio=14.14),
-    flags=HyundaiFlags.ANGLE_CONTROL,
   )
 
 

@@ -1198,12 +1198,12 @@ FW_VERSIONS = {
       b'\xf1\x00US4_ RDR -----      1.00 1.00 99110-CG000         ',
     ],
   },
-  CAR.GENESIS_GV80_2025: {
+  CAR.HYUNDAI_SANTA_FE_5TH_GEN: {
     (Ecu.fwdCamera, 0x7c4, None): [
-      b'\xf1\x00JX  MFC  AT USA LHD 1.00 1.03 99211-T6510 240124',
+      b'\xf1\x00MX5HMFC  AT KOR LHD 1.00 1.07 99211-P6000 231218',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
-      b'\xf1\x00JX__ RDR -----      1.00 1.03 99110-T6500         ',
+      b'\xf1\x00MX5_ RDR -----      1.00 1.01 99110-P6000         ',
     ],
   },
 }
