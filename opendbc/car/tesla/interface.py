@@ -2,7 +2,7 @@
 from panda import Panda
 from opendbc.car import structs, get_safety_config
 from opendbc.car.interfaces import CarInterfaceBase
-from opendbc.car.tesla.values import PLATFORM_3Y
+from opendbc.car.tesla.values import CAR, PLATFORM_3Y
 
 class CarInterface(CarInterfaceBase):
 
@@ -29,7 +29,7 @@ class CarInterface(CarInterfaceBase):
     ret.radarUnavailable = candidate in PLATFORM_3Y
 
     ret.experimentalLongitudinalAvailable = True
-    if experimental_long:
+    if experimental_long or (candidate == CAR.TESLA_MODEL_S_RAVEN):
       ret.openpilotLongitudinalControl = True
       # ret.safetyConfigs[0].safetyParam |= Panda.FLAG_TESLA_LONG_CONTROL
 
