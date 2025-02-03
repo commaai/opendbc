@@ -202,7 +202,7 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
 
   return ret
 
-def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_override, set_speed, hud_control):
+def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_override, set_speed, hud_control, cruise_info):
   jerk = 5
   jn = jerk / 50
   if not enabled or gas_override:
@@ -211,7 +211,11 @@ def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_ov
     a_raw = accel
     a_val = np.clip(accel, accel_last - jn, accel_last + jn)
 
-  values = {
+  values = {s: cruise_info[s] for s in [
+    "ACC_ObjDist",
+    "ACC_ObjRelSpd",
+  ]}
+  values.update({
     "ACCMode": 0 if not enabled else (2 if gas_override else 1),
     "MainMode_ACC": 1,
     "StopReq": 1 if stopping else 0,
@@ -221,14 +225,13 @@ def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_ov
     "JerkLowerLimit": jerk if enabled else 1,
     "JerkUpperLimit": 3.0,
 
-    "ACC_ObjDist": 1,
     "ObjValid": 0,
     "OBJ_STATUS": 2,
     "SET_ME_2": 0x4,
     "SET_ME_3": 0x3,
     "SET_ME_TMP_64": 0x64,
     "DISTANCE_SETTING": hud_control.leadDistanceBars,
-  }
+  })
 
   return packer.make_can_msg("SCC_CONTROL", CAN.ECAN, values)
 
