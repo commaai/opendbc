@@ -383,12 +383,11 @@ class CanClient:
         self._recv_buffer()
 
 class IsoTpMessage:
-  def __init__(self, can_client: CanClient, timeout: float = 1, single_frame_mode: bool = False, separation_time: float = 0,
-               max_len: int = 8):
+  def __init__(self, can_client: CanClient, timeout: float = 1, single_frame_mode: bool = False, separation_time: float = 0):
     self._can_client = can_client
     self.timeout = timeout
     self.single_frame_mode = single_frame_mode
-    self.max_len = max_len
+    self.max_len = 8 if self._can_client.sub_addr is None else 7
 
     # <= 127, separation time in milliseconds
     # 0xF1 to 0xF9 UF, 100 to 900 microseconds
@@ -584,8 +583,7 @@ class UdsClient:
       req += data
 
     # send request, wait for response
-    max_len = 8 if self.sub_addr is None else 7
-    isotp_msg = IsoTpMessage(self._can_client, timeout=self.timeout, max_len=max_len)
+    isotp_msg = IsoTpMessage(self._can_client, timeout=self.timeout)
     isotp_msg.send(req)
     response_pending = False
     while True:

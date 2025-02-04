@@ -68,11 +68,10 @@ class IsoTpParallelQuery:
     can_client = uds.CanClient(self._can_tx, partial(self._can_rx, rx_addr, sub_addr=sub_addr), tx_addr, rx_addr,
                                self.bus, sub_addr=sub_addr)
 
-    max_len = 8 if sub_addr is None else 7
     # uses iso-tp frame separation time of 10 ms
     # TODO: use single_frame_mode so ECUs can send as fast as they want,
     # as well as reduces chances we process messages from previous queries
-    return uds.IsoTpMessage(can_client, timeout=0, separation_time=0.01, max_len=max_len)
+    return uds.IsoTpMessage(can_client, timeout=0, separation_time=0.01)
 
   def get_data(self, timeout: float, total_timeout: float = 60.) -> dict[AddrType, bytes]:
     self._drain_rx()
