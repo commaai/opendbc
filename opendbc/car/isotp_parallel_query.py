@@ -67,7 +67,6 @@ class IsoTpParallelQuery:
   def _create_isotp_msg(self, tx_addr: int, sub_addr: int | None, rx_addr: int):
     can_client = uds.CanClient(self._can_tx, partial(self._can_rx, rx_addr, sub_addr=sub_addr), tx_addr, rx_addr,
                                self.bus, sub_addr=sub_addr)
-    print(can_client.tx_addr, can_client.rx_addr, can_client.sub_addr)
 
     # uses iso-tp frame separation time of 10 ms
     # TODO: use single_frame_mode so ECUs can send as fast as they want,
