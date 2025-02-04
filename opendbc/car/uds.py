@@ -6,6 +6,9 @@ from collections.abc import Callable, Generator
 from enum import IntEnum
 from functools import partial
 
+from opendbc.car.logging import carlog
+
+
 class SERVICE_TYPE(IntEnum):
   DIAGNOSTIC_SESSION_CONTROL = 0x10
   ECU_RESET = 0x11
