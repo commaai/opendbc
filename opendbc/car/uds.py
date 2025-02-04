@@ -493,9 +493,16 @@ class IsoTpMessage:
       # TODO: support CAN FD first frames
       # Once a first frame is received, further frames must be consecutive
       assert self.rx_dat == b"" or self.rx_done, "isotp - rx: first frame with active frame"
-      self.rx_len = ((rx_data[0] & 0x0F) << 8) + rx_data[1]
+
+      # "if the first 2 bytes are 0x1000, then it's a CAN-FD FF, and the following 4 bytes
+      # specifies the size of data in high byte first order."
+      # - https://en.wikipedia.org/wiki/CAN_FD
+      self.rx_len = ((rx_data[0] & 0x0F) << 8) | rx_data[1]
+      if self.rx_len == 0 and len(rx_data) > 8:
+        self.rx_len = (rx_data[2] << 24) | (rx_data[3] << 16) | (rx_data[4] << 8) | (rx_data[5])
+
       assert self.rx_len >= self.max_len, f"isotp - rx: invalid first frame length: {self.rx_len}"
-      assert len(rx_data) == self.max_len, f"isotp - rx: invalid CAN frame length: {len(rx_data)}"
+      assert len(rx_data) == self.max_len, f"isotp - rx: invalid CAN frame length: {len(rx_data)}"  # TODO: wrong
       self.rx_dat = rx_data[2:]
       self.rx_idx = 0
       self.rx_done = False
