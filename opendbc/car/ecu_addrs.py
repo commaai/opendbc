@@ -1,7 +1,8 @@
 import time
 
-from opendbc.car import make_tester_present_msg, carlog, uds
+from opendbc.car import make_tester_present_msg, uds
 from opendbc.car.can_definitions import CanData, CanRecvCallable, CanSendCallable
+from opendbc.car.carlog import carlog
 from opendbc.car.fw_query_definitions import EcuAddrBusType
 
 
