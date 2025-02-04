@@ -480,8 +480,8 @@ class IsoTpMessage:
         max_len = 62 if self._can_client.sub_addr is None else 61
         assert self.rx_len <= max_len, f"isotp - rx: invalid single frame length: {self.rx_len}"
       else:
-        offset = 1
         self.rx_len = rx_data[0] & 0x0F
+        offset = 1
         assert self.rx_len < self.max_len, f"isotp - rx: invalid single frame length: {self.rx_len}"
 
       self.rx_dat = rx_data[offset:offset + self.rx_len]
