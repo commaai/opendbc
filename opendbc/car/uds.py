@@ -320,16 +320,14 @@ class CanClient:
     if self.tx_addr == 0x7DF:
       is_response = addr >= 0x7E8 and addr <= 0x7EF
       if is_response:
-        if self.debug:
-          print(f"switch to physical addr {hex(addr)}")
+        carlog.debug(f"switch to physical addr {hex(addr)}")
         self.tx_addr = addr - 8
         self.rx_addr = addr
       return is_response
     if self.tx_addr == 0x18DB33F1:
       is_response = addr >= 0x18DAF100 and addr <= 0x18DAF1FF
       if is_response:
-        if self.debug:
-          print(f"switch to physical addr {hex(addr)}")
+        carlog.debug(f"switch to physical addr {hex(addr)}")
         self.tx_addr = 0x18DA00F1 + (addr << 8 & 0xFF00)
         self.rx_addr = addr
     return bus == self.bus and addr == self.rx_addr
@@ -338,16 +336,14 @@ class CanClient:
     while True:
       msgs = self.rx()
       if drain:
-        if self.debug:
-          print(f"CAN-RX: drain - {len(msgs)}")
+        carlog.debug(f"CAN-RX: drain - {len(msgs)}")
         self.rx_buff.clear()
       else:
         for rx_addr, rx_data, rx_bus in msgs or []:
           if self._recv_filter(rx_bus, rx_addr) and len(rx_data) > 0:
             rx_data = bytes(rx_data)  # convert bytearray to bytes
 
-            if self.debug:
-              print(f"CAN-RX: {hex(rx_addr)} - 0x{bytes.hex(rx_data)}")
+            carlog.debug(f"CAN-RX: {hex(rx_addr)} - 0x{bytes.hex(rx_data)}")
 
             # Cut off sub addr in first byte
             if self.sub_addr is not None:
@@ -373,15 +369,13 @@ class CanClient:
   def send(self, msgs: list[bytes], delay: float = 0) -> None:
     for i, msg in enumerate(msgs):
       if delay and i != 0:
-        if self.debug:
-          print(f"CAN-TX: delay - {delay}")
+        carlog.debug(f"CAN-TX: delay - {delay}")
         time.sleep(delay)
 
       if self.sub_addr is not None:
         msg = bytes([self.sub_addr]) + msg
 
-      if self.debug:
-        print(f"CAN-TX: {hex(self.tx_addr)} - 0x{bytes.hex(msg)}")
+      carlog.debug(f"CAN-TX: {hex(self.tx_addr)} - 0x{bytes.hex(msg)}")
       assert len(msg) <= 8
 
       self.tx(self.tx_addr, msg, self.bus)
@@ -483,8 +477,7 @@ class IsoTpMessage:
       self.rx_dat = rx_data[1:1 + self.rx_len]
       self.rx_idx = 0
       self.rx_done = True
-      if self.debug:
-        print(f"ISO-TP: RX - single frame - {hex(self._can_client.rx_addr)} idx={self.rx_idx} done={self.rx_done}")
+      carlog.debug(f"ISO-TP: RX - single frame - {hex(self._can_client.rx_addr)} idx={self.rx_idx} done={self.rx_done}")
       return ISOTP_FRAME_TYPE.SINGLE
 
     elif rx_data[0] >> 4 == ISOTP_FRAME_TYPE.FIRST:
@@ -496,10 +489,8 @@ class IsoTpMessage:
       self.rx_dat = rx_data[2:]
       self.rx_idx = 0
       self.rx_done = False
-      if self.debug:
-        print(f"ISO-TP: RX - first frame - {hex(self._can_client.rx_addr)} idx={self.rx_idx} done={self.rx_done}")
-      if self.debug:
-        print(f"ISO-TP: TX - flow control continue - {hex(self._can_client.tx_addr)}")
+      carlog.debug(f"ISO-TP: RX - first frame - {hex(self._can_client.rx_addr)} idx={self.rx_idx} done={self.rx_done}")
+      carlog.debug(f"ISO-TP: TX - flow control continue - {hex(self._can_client.tx_addr)}")
       # send flow control message
       self._can_client.send([self.flow_control_msg])
       return ISOTP_FRAME_TYPE.FIRST
@@ -515,8 +506,7 @@ class IsoTpMessage:
       elif self.single_frame_mode:
         # notify ECU to send next frame
         self._can_client.send([self.flow_control_msg])
-      if self.debug:
-        print(f"ISO-TP: RX - consecutive frame - {hex(self._can_client.rx_addr)} idx={self.rx_idx} done={self.rx_done}")
+      carlog.debug(f"ISO-TP: RX - consecutive frame - {hex(self._can_client.rx_addr)} idx={self.rx_idx} done={self.rx_done}")
       return ISOTP_FRAME_TYPE.CONSECUTIVE
 
     elif rx_data[0] >> 4 == ISOTP_FRAME_TYPE.FLOW:
@@ -524,8 +514,7 @@ class IsoTpMessage:
       assert rx_data[0] != 0x32, "isotp - rx: flow-control overflow/abort"
       assert rx_data[0] == 0x30 or rx_data[0] == 0x31, "isotp - rx: flow-control transfer state indicator invalid"
       if rx_data[0] == 0x30:
-        if self.debug:
-          print(f"ISO-TP: RX - flow control continue - {hex(self._can_client.tx_addr)}")
+        carlog.debug(f"ISO-TP: RX - flow control continue - {hex(self._can_client.tx_addr)}")
         delay_ts = rx_data[2] & 0x7F
         # scale is 1 milliseconds if first bit == 0, 100 micro seconds if first bit == 1
         delay_div = 1000. if rx_data[2] & 0x80 == 0 else 10000.
@@ -546,12 +535,10 @@ class IsoTpMessage:
         self._can_client.send(tx_msgs, delay=delay_sec)
         if end >= self.tx_len:
           self.tx_done = True
-        if self.debug:
-          print(f"ISO-TP: TX - consecutive frame - {hex(self._can_client.tx_addr)} idx={self.tx_idx} done={self.tx_done}")
+        carlog.debug(f"ISO-TP: TX - consecutive frame - {hex(self._can_client.tx_addr)} idx={self.tx_idx} done={self.tx_done}")
       elif rx_data[0] == 0x31:
         # wait (do nothing until next flow control message)
-        if self.debug:
-          print(f"ISO-TP: TX - flow control wait - {hex(self._can_client.tx_addr)}")
+        carlog.debug(f"ISO-TP: TX - flow control wait - {hex(self._can_client.tx_addr)}")
       return ISOTP_FRAME_TYPE.FLOW
 
     # 4-15 - reserved
@@ -629,8 +616,7 @@ class UdsClient:
         # wait for another message if response pending
         if error_code == 0x78:
           response_pending = True
-          if self.debug:
-            print("UDS-RX: response pending")
+          carlog.debug("UDS-RX: response pending")
           continue
         raise NegativeResponseError(f'{service_desc} - {error_desc}', service_id, error_code)
 
