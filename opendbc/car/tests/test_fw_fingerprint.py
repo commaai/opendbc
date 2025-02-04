@@ -324,7 +324,7 @@ class TestFwFingerprintTiming:
       t += 0.0001
       return t
 
-    mocker.patch("opendbc.car.carlog.exception", fake_carlog_exception)
+    mocker.patch("opendbc.car.carlog.carlog.exception", fake_carlog_exception)
     mocker.patch("time.monotonic", fake_monotonic)
     for brand in FW_QUERY_CONFIGS.keys():
       with subtests.test(brand=brand):

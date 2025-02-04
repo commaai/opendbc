@@ -4,8 +4,9 @@ from typing import Protocol, TypeVar
 
 from tqdm import tqdm
 
-from opendbc.car import carlog, uds
+from opendbc.car import uds
 from opendbc.car.can_definitions import CanRecvCallable, CanSendCallable
+from opendbc.car.carlog import carlog
 from opendbc.car.structs import CarParams
 from opendbc.car.ecu_addrs import get_ecu_addrs
 from opendbc.car.fingerprints import FW_VERSIONS

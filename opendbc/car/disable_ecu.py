@@ -1,4 +1,4 @@
-from opendbc.car import carlog
+from opendbc.car.carlog import carlog
 from opendbc.car.isotp_parallel_query import IsoTpParallelQuery
 
 EXT_DIAG_REQUEST = b'\x10\x03'

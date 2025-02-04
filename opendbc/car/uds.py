@@ -6,7 +6,7 @@ from collections.abc import Callable, Generator
 from enum import IntEnum
 from functools import partial
 
-from opendbc.car.logging import carlog
+from opendbc.car.carlog import carlog
 
 
 class SERVICE_TYPE(IntEnum):
