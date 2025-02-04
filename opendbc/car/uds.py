@@ -470,7 +470,7 @@ class IsoTpMessage:
     if rx_data[0] >> 4 == ISOTP_FRAME_TYPE.SINGLE:
       assert self.rx_dat == b"" or self.rx_done, "isotp - rx: single frame with active frame"
 
-      # "if the first byte of SF=0, then second byte specifies the size of the data."
+      # "if the first byte is 0x00, then it's a CAN-FD SF, and the second byte specifies the size of the data."
       # - https://en.wikipedia.org/wiki/CAN_FD
       if rx_data[0] & 0x0F == 0 and len(rx_data) > 8:
         self.rx_len = rx_data[1]
