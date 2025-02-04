@@ -469,15 +469,28 @@ class IsoTpMessage:
 
     if rx_data[0] >> 4 == ISOTP_FRAME_TYPE.SINGLE:
       assert self.rx_dat == b"" or self.rx_done, "isotp - rx: single frame with active frame"
-      self.rx_len = rx_data[0] & 0x0F
-      assert self.rx_len < self.max_len, f"isotp - rx: invalid single frame length: {self.rx_len}"
-      self.rx_dat = rx_data[1:1 + self.rx_len]
+
+      # "if the first byte is 0x00, then it's a CAN-FD SF, and the second byte specifies the size of the data."
+      # - https://en.wikipedia.org/wiki/CAN_FD
+      if rx_data[0] & 0x0F == 0 and len(rx_data) > 8:
+        self.rx_len = rx_data[1]
+        offset = 2
+        # TODO: update self.max_len for CAN FD
+        max_len = 62 if self._can_client.sub_addr is None else 61
+        assert self.rx_len <= max_len, f"isotp - rx: invalid single frame length: {self.rx_len}"
+      else:
+        self.rx_len = rx_data[0] & 0x0F
+        offset = 1
+        assert self.rx_len < self.max_len, f"isotp - rx: invalid single frame length: {self.rx_len}"
+
+      self.rx_dat = rx_data[offset:offset + self.rx_len]
       self.rx_idx = 0
       self.rx_done = True
       carlog.debug(f"ISO-TP: RX - single frame - {hex(self._can_client.rx_addr)} idx={self.rx_idx} done={self.rx_done}")
       return ISOTP_FRAME_TYPE.SINGLE
 
     elif rx_data[0] >> 4 == ISOTP_FRAME_TYPE.FIRST:
+      # TODO: support CAN FD first frames
       # Once a first frame is received, further frames must be consecutive
       assert self.rx_dat == b"" or self.rx_done, "isotp - rx: first frame with active frame"
       self.rx_len = ((rx_data[0] & 0x0F) << 8) + rx_data[1]
