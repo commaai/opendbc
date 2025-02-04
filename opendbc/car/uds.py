@@ -305,7 +305,7 @@ def get_dtc_status_names(status):
 
 class CanClient:
   def __init__(self, can_send: Callable[[int, bytes, int], None], can_recv: Callable[[], list[tuple[int, bytes, int]]],
-               tx_addr: int, rx_addr: int, bus: int, sub_addr: int | None = None, debug: bool = False):
+               tx_addr: int, rx_addr: int, bus: int, sub_addr: int | None = None):
     self.tx = can_send
     self.rx = can_recv
     self.tx_addr = tx_addr
@@ -313,7 +313,6 @@ class CanClient:
     self.rx_buff: deque[bytes] = deque()
     self.sub_addr = sub_addr
     self.bus = bus
-    self.debug = debug
 
   def _recv_filter(self, bus: int, addr: int) -> bool:
     # handle functional addresses (switch to first addr to respond)
@@ -385,11 +384,10 @@ class CanClient:
 
 class IsoTpMessage:
   def __init__(self, can_client: CanClient, timeout: float = 1, single_frame_mode: bool = False, separation_time: float = 0,
-               debug: bool = False, max_len: int = 8):
+               max_len: int = 8):
     self._can_client = can_client
     self.timeout = timeout
     self.single_frame_mode = single_frame_mode
-    self.debug = debug
     self.max_len = max_len
 
     # <= 127, separation time in milliseconds
@@ -422,21 +420,21 @@ class IsoTpMessage:
     self.rx_idx = 0
     self.rx_done = False
 
-    if self.debug and not setup_only:
-      print(f"ISO-TP: REQUEST - {hex(self._can_client.tx_addr)} 0x{bytes.hex(self.tx_dat)}")
+    if not setup_only:
+      carlog.debug(f"ISO-TP: REQUEST - {hex(self._can_client.tx_addr)} 0x{bytes.hex(self.tx_dat)}")
     self._tx_first_frame(setup_only=setup_only)
 
   def _tx_first_frame(self, setup_only: bool = False) -> None:
     if self.tx_len < self.max_len:
       # single frame (send all bytes)
-      if self.debug and not setup_only:
-        print(f"ISO-TP: TX - single frame - {hex(self._can_client.tx_addr)}")
+      if not setup_only:
+        carlog.debug(f"ISO-TP: TX - single frame - {hex(self._can_client.tx_addr)}")
       msg = (bytes([self.tx_len]) + self.tx_dat).ljust(self.max_len, b"\x00")
       self.tx_done = True
     else:
       # first frame (send first 6 bytes)
-      if self.debug and not setup_only:
-        print(f"ISO-TP: TX - first frame - {hex(self._can_client.tx_addr)}")
+      if not setup_only:
+        carlog.debug(f"ISO-TP: TX - first frame - {hex(self._can_client.tx_addr)}")
       msg = (struct.pack("!H", 0x1000 | self.tx_len) + self.tx_dat[:self.max_len - 2]).ljust(self.max_len - 2, b"\x00")
     if not setup_only:
       self._can_client.send([msg])
@@ -462,8 +460,8 @@ class IsoTpMessage:
         if time.monotonic() - start_time > timeout:
           raise MessageTimeoutError("timeout waiting for response")
     finally:
-      if self.debug and self.rx_dat:
-        print(f"ISO-TP: RESPONSE - {hex(self._can_client.rx_addr)} 0x{bytes.hex(self.rx_dat)}")
+      if self.rx_dat:
+        carlog.debug(f"ISO-TP: RESPONSE - {hex(self._can_client.rx_addr)} 0x{bytes.hex(self.rx_dat)}")
 
   def _isotp_rx_next(self, rx_data: bytes) -> ISOTP_FRAME_TYPE:
     # TODO: Handle CAN frame data optimization, which is allowed with some frame types
@@ -567,15 +565,14 @@ def get_rx_addr_for_tx_addr(tx_addr, rx_offset=0x8):
 
 class UdsClient:
   def __init__(self, panda, tx_addr: int, rx_addr: int | None = None, bus: int = 0, sub_addr: int | None = None, timeout: float = 1,
-               debug: bool = False, tx_timeout: float = 1, response_pending_timeout: float = 10):
+               tx_timeout: float = 1, response_pending_timeout: float = 10):
     self.bus = bus
     self.tx_addr = tx_addr
     self.rx_addr = rx_addr if rx_addr is not None else get_rx_addr_for_tx_addr(tx_addr)
     self.sub_addr = sub_addr
     self.timeout = timeout
-    self.debug = debug
     can_send_with_timeout = partial(panda.can_send, timeout=int(tx_timeout*1000))
-    self._can_client = CanClient(can_send_with_timeout, panda.can_recv, self.tx_addr, self.rx_addr, self.bus, self.sub_addr, debug=self.debug)
+    self._can_client = CanClient(can_send_with_timeout, panda.can_recv, self.tx_addr, self.rx_addr, self.bus, self.sub_addr)
     self.response_pending_timeout = response_pending_timeout
 
   # generic uds request
@@ -588,7 +585,7 @@ class UdsClient:
 
     # send request, wait for response
     max_len = 8 if self.sub_addr is None else 7
-    isotp_msg = IsoTpMessage(self._can_client, timeout=self.timeout, debug=self.debug, max_len=max_len)
+    isotp_msg = IsoTpMessage(self._can_client, timeout=self.timeout, max_len=max_len)
     isotp_msg.send(req)
     response_pending = False
     while True:

@@ -12,7 +12,7 @@ def is_valid_vin(vin: str):
   return re.fullmatch(VIN_RE, vin) is not None
 
 
-def get_vin(can_recv, can_send, buses, timeout=0.1, retry=2, debug=False):
+def get_vin(can_recv, can_send, buses, timeout=0.1, retry=2):
   for i in range(retry):
     for bus in buses:
       for request, response, valid_buses, vin_addrs, functional_addrs, rx_offset in (
@@ -33,7 +33,7 @@ def get_vin(can_recv, can_send, buses, timeout=0.1, retry=2, debug=False):
 
         try:
           query = IsoTpParallelQuery(can_send, can_recv, bus, tx_addrs, [request, ], [response, ], response_offset=rx_offset,
-                                     functional_addrs=functional_addrs, debug=debug)
+                                     functional_addrs=functional_addrs)
           results = query.get_data(timeout)
 
           for addr in vin_addrs:
