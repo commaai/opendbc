@@ -54,7 +54,7 @@ class CarState(CarStateBase):
     ret.gearShifter = GEAR_MAP[int(cp.vl["VDM_PropStatus"]["VDM_Prndl_Status"])]
 
     # Doors
-    ret.doorOpen = False
+    ret.doorOpen = cp.vl["DoorStatus"]["DoorOpen"] == 1
 
     # Blinkers
     ret.leftBlinker = cp_adas.vl["IndicatorLights"]["TurnLightLeft"] in (1, 2)
@@ -87,7 +87,8 @@ class CarState(CarStateBase):
       ("EPAS_AdasStatus", 100),
       ("EPAS_SystemStatus", 100),
       ("RCM_Status", 8),
-      ("VDM_AdasSts", 100)
+      ("VDM_AdasSts", 100),
+      ("DoorStatus", 10)
     ]
 
     cam_messages = [
