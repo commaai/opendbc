@@ -9,7 +9,7 @@ Ecu = CarParams.Ecu
 
 
 class CAR(Platforms):
-  RIVIAN_R1S_GEN1 = PlatformConfig(
+  RIVIAN_R1S = PlatformConfig(
     [CarDocs("Rivian R1S 2022-24", "All")],
     CarSpecs(mass=3206., wheelbase=3.08, steerRatio=15.2),
     {Bus.pt: 'rivian_can'}
