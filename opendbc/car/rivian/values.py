@@ -29,7 +29,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
       [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.UDS_VERSION_REQUEST],
       [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.UDS_VERSION_RESPONSE],
       whitelist_ecus=[Ecu.engine],
-      rx_offset=0x10,
+      rx_offset=-0x6e,
       bus=1,
       obd_multiplexing=False,
     ),
