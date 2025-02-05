@@ -46,6 +46,9 @@ examples = [
 [tool.pytest.ini_options]
 addopts = "--ignore=panda/ -Werror --strict-config --strict-markers --durations=10 -n auto"
 python_files = "test_*.py"
+markers = [
+  "slow: tests that take awhile to run and can be skipped with -m 'not slow'",
+]
 testpaths = [
   "opendbc"
 ]
