@@ -7,7 +7,7 @@ FW_VERSIONS = {
   CAR.RIVIAN_R1S_GEN1: {
     (Ecu.eps, 0x730, None): [
     ],
-    (Ecu.engine, 0x606, None): [
+    (Ecu.engine, 0x7e0, None): [
     ],
   },
 }
