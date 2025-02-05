@@ -6,6 +6,7 @@ from opendbc.car.rivian.values import CarControllerParams
 
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 
+
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
