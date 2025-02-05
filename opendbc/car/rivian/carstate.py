@@ -5,6 +5,7 @@ from opendbc.car.interfaces import CarStateBase
 from opendbc.car.rivian.values import DBC, GEAR_MAP
 from opendbc.car.common.conversions import Conversions as CV
 
+
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
