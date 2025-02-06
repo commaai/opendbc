@@ -1,3 +1,9 @@
+<p>
+  <b>VW MEB DBC signals with MEB_ prefix are candidates and could be wrong or have incorrect scalings</b><br>
+  <b>The same is valid for following signals that were named with probably correct VW signal names: </b><br>
+  <b>EM1_01, AWV_03, ESC_51, ESC_50, VMM_01, Motor_51, VMM_02, QFK_01, Motor_54, ACC_18, SAM_01, Parken_01, EML_06, TA_01, APS_Master, Gateway_73</b><br>
+</p>
+
 <div align="center" style="text-align: center;">
 
 <h1>opendbc</h1>
