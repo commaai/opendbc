@@ -19,10 +19,10 @@ class CarInterface(CarInterfaceBase):
     ret.steerControlType = structs.CarParams.SteerControlType.torque
     ret.radarUnavailable = True
 
-    ret.experimentalLongitudinalAvailable = True
-    if experimental_long:
-      ret.openpilotLongitudinalControl = True
-      ret.safetyConfigs[0].safetyParam |= Panda.FLAG_RIVIAN_LONG_CONTROL
+    ret.experimentalLongitudinalAvailable = False
+    # if experimental_long:
+    #   ret.openpilotLongitudinalControl = True
+    #   ret.safetyConfigs[0].safetyParam |= Panda.FLAG_RIVIAN_LONG_CONTROL
 
     ret.longitudinalActuatorDelay = 0.35
     ret.vEgoStopping = 0.25
