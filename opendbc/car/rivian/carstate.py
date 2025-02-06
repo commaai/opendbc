@@ -49,6 +49,7 @@ class CarState(CarStateBase):
     ret.cruiseState.speed = self.last_speed * CV.MPH_TO_MS  # detected speed limit
     ret.cruiseState.available = True # cp.vl["VDM_AdasSts"]["VDM_AdasInterfaceStatus"] == 1
     ret.cruiseState.standstill = cp.vl["VDM_AdasSts"]["VDM_AdasAccelRequestAcknowledged"]
+    ret.accFaulted = cp_cam.vl["ACM_Status"]["ACM_FaultStatus"] == 1
 
     # Gear
     ret.gearShifter = GEAR_MAP[int(cp.vl["VDM_PropStatus"]["VDM_Prndl_Status"])]
@@ -72,7 +73,6 @@ class CarState(CarStateBase):
 
     # Messages needed by carcontroller
     self.acm_lka_hba_cmd = copy.copy(cp_cam.vl["ACM_lkaHbaCmd"])
-    self.acm_status = copy.copy(cp_cam.vl["ACM_Status"])
 
     return ret
 
