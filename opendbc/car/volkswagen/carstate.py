@@ -17,6 +17,7 @@ class CarState(CarStateBase):
     self.esp_hold_confirmation = False
     self.upscale_lead_car_signal = False
     self.eps_stock_values = False
+    self.curvature = 0.
 
   def create_button_events(self, pt_cp, buttons):
     button_events = []
@@ -264,10 +265,10 @@ class CarState(CarStateBase):
     ret = structs.CarState()
     # Update vehicle speed and acceleration from ABS wheel speeds.
     ret.wheelSpeeds = self.get_wheel_speeds(
-      pt_cp.vl["MEB_ESP_01"]["VL_Radgeschw"],
-      pt_cp.vl["MEB_ESP_01"]["VR_Radgeschw"],
-      pt_cp.vl["MEB_ESP_01"]["HL_Radgeschw"],
-      pt_cp.vl["MEB_ESP_01"]["HR_Radgeschw"],
+      pt_cp.vl["ESC_51"]["VL_Radgeschw"],
+      pt_cp.vl["ESC_51"]["VR_Radgeschw"],
+      pt_cp.vl["ESC_51"]["HL_Radgeschw"],
+      pt_cp.vl["ESC_51"]["HR_Radgeschw"],
     )
 
     ret.vEgoRaw = float(np.mean([ret.wheelSpeeds.fl, ret.wheelSpeeds.fr, ret.wheelSpeeds.rl, ret.wheelSpeeds.rr]))
@@ -280,8 +281,11 @@ class CarState(CarStateBase):
     ret.steeringRateDeg = pt_cp.vl["LWI_01"]["LWI_Lenkradw_Geschw"] * (1, -1)[int(pt_cp.vl["LWI_01"]["LWI_VZ_Lenkradw_Geschw"])]
     ret.steeringTorque = pt_cp.vl["LH_EPS_03"]["EPS_Lenkmoment"] * (1, -1)[int(pt_cp.vl["LH_EPS_03"]["EPS_VZ_Lenkmoment"])]
     ret.steeringPressed = abs(ret.steeringTorque) > self.CCP.STEER_DRIVER_ALLOWANCE
-    ret.yawRate = pt_cp.vl["MEB_ESP_04"]["Yaw_Rate"] * (1, -1)[int(pt_cp.vl["MEB_ESP_04"]["Yaw_Rate_Sign"])] * CV.DEG_TO_RAD
-    hca_status = self.CCP.hca_status_values.get(pt_cp.vl["MEB_EPS_01"]["LatCon_HCA_Status"])
+    
+    ret.yawRate = pt_cp.vl["ESC_50"]["Yaw_Rate"] * (1, -1)[int(pt_cp.vl["ESC_50"]["Yaw_Rate_Sign"])] * CV.DEG_TO_RAD
+    self.curvature = -pt_cp.vl["QFK_01"]["Curvature"] * (1, -1)[int(pt_cp.vl["QFK_01"]["Curvature_VZ"])]
+    
+    hca_status = self.CCP.hca_status_values.get(pt_cp.vl["QFK_01"]["LatCon_HCA_Status"])
     ret.steerFaultTemporary, ret.steerFaultPermanent = self.update_hca_state(hca_status)
 
     # VW Emergency Assist status tracking and mitigation
@@ -289,12 +293,12 @@ class CarState(CarStateBase):
     #ret.carFaultedNonCritical = cam_cp.vl["EA_01"]["EA_Funktionsstatus"] in (3, 4, 5, 6) # prepared, not tested
 
     # Update gas, brakes, and gearshift.
-    ret.gasPressed = pt_cp.vl["MEB_ESP_03"]["Accelerator_Pressure"] > 0
-    ret.gas = pt_cp.vl["MEB_ESP_03"]["Accelerator_Pressure"]
+    ret.gasPressed = pt_cp.vl["Motor_54"]["Accelerator_Pressure"] > 0
+    ret.gas = pt_cp.vl["Motor_54"]["Accelerator_Pressure"]
     ret.brakePressed = bool(pt_cp.vl["Motor_14"]["MO_Fahrer_bremst"]) # includes regen braking by user
-    ret.brake = pt_cp.vl["MEB_ESP_01"]["Brake_Pressure"]
-    ret.parkingBrake = pt_cp.vl["MEB_EPB_01"]["EPB_Status"] in (1, 4) # EPB closing or closed
-    # regen braking bool(pt_cp.vl["MEB_ESP_04"]['Regen_Braking']) TODO
+    ret.brake = pt_cp.vl["ESC_51"]["Brake_Pressure"]
+    ret.parkingBrake = pt_cp.vl["Gateway_73"]["EPB_Status"] in (1, 4) # EPB closing or closed
+    # regen braking bool(pt_cp.vl["ESC_50"]['Regen_Braking']) TODO
 
     # Update gear and/or clutch position data.
     ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Getriebe_11"]["GE_Fahrstufe"], None))
@@ -319,14 +323,14 @@ class CarState(CarStateBase):
     # and capture it for forwarding to the blind spot radar controller
     self.ldw_stock_values = cam_cp.vl["LDW_02"] if self.CP.networkLocation == NetworkLocation.fwdCamera else {}
 
-    ret.stockFcw = bool(pt_cp.vl["MEB_ESP_05"]["FCW_Active"])
-    ret.stockAeb = bool(pt_cp.vl["MEB_ESP_05"]["AEB_Active"])
+    ret.stockFcw = bool(pt_cp.vl["VMM_02"]["FCW_Active"]) or bool(ext_cp.vl["AWV_03"]["FCW_Active"])
+    ret.stockAeb = bool(pt_cp.vl["VMM_02"]["AEB_Active"])
 
-    self.acc_type = ext_cp.vl["MEB_ACC_02"]["ACC_Typ"]
-    self.travel_assist_available = bool(ext_cp.vl["MEB_Travel_Assist_01"]["Travel_Assist_Available"]) if self.CP.flags & VolkswagenFlags.TRAVEL_ASSIST_PRESENT else False
+    self.acc_type = ext_cp.vl["ACC_18"]["ACC_Typ"]
+    self.travel_assist_available = bool(ext_cp.vl["TA_01"]["Travel_Assist_Available"]) if self.CP.flags & VolkswagenFlags.TRAVEL_ASSIST_PRESENT else False
 
-    ret.cruiseState.available = pt_cp.vl["MEB_Motor_01"]["TSK_Status"] in (2, 3, 4, 5)
-    ret.cruiseState.enabled   = pt_cp.vl["MEB_Motor_01"]["TSK_Status"] in (3, 4, 5)
+    ret.cruiseState.available = pt_cp.vl["Motor_51"]["TSK_Status"] in (2, 3, 4, 5)
+    ret.cruiseState.enabled   = pt_cp.vl["Motor_51"]["TSK_Status"] in (3, 4, 5)
 
     if self.CP.pcmCruise:
       # Cruise Control mode; check for distance UI setting from the radar.
@@ -334,11 +338,11 @@ class CarState(CarStateBase):
       ret.cruiseState.nonAdaptive = bool(ext_cp.vl["MEB_ACC_01"]["ACC_Limiter_Mode"])
     else:
       # Speed limiter mode; ECM faults if we command ACC while not pcmCruise
-      ret.cruiseState.nonAdaptive = bool(pt_cp.vl["MEB_Motor_01"]["TSK_Limiter_ausgewaehlt"])
+      ret.cruiseState.nonAdaptive = bool(pt_cp.vl["Motor_51"]["TSK_Limiter_ausgewaehlt"])
 
-    ret.accFaulted = pt_cp.vl["MEB_Motor_01"]["TSK_Status"] in (6, 7)
+    ret.accFaulted = pt_cp.vl["Motor_51"]["TSK_Status"] in (6, 7)
 
-    self.esp_hold_confirmation = bool(pt_cp.vl["MEB_ESP_05"]["ESP_Hold"])
+    self.esp_hold_confirmation = bool(pt_cp.vl["VMM_02"]["ESP_Hold"])
     ret.cruiseState.standstill = self.CP.pcmCruise and self.esp_hold_confirmation
 
     # Update ACC setpoint. When the setpoint is zero or there's an error, the
@@ -492,16 +496,16 @@ class CarState(CarStateBase):
       ("LH_EPS_03", 100),         # From J500 Steering Assist with integrated sensors
       ("Getriebe_11", 100),       # From J743 Auto transmission control module
       ("ZV_02", 5),               # From ZV
-      ("MEB_EPS_01", 100),        #
+      ("QFK_01", 100),            # From Steering
       ("ESP_21", 50),             #
-      ("MEB_ABS_01", 50),         #
-      ("MEB_ESP_01", 100),        #
-      ("MEB_ESP_03", 10),         #
-      ("MEB_ESP_04", 50),         #
-      ("MEB_ESP_05", 50),         #
-      ("MEB_EPB_01", 20),         #
-      ("MEB_Light_01", 5),        #
-      ("MEB_Motor_01", 50),       #
+      ("EML_061", 50),            #
+      ("ESC_51", 100),            #
+      ("Motor_54", 10),           #
+      ("ESC_50", 50),             #
+      ("VMM_02", 50),             #
+      ("Gateway_73", 20),         #
+      ("SAM_01", 5),              #
+      ("Motor_51", 50),           #
     ]
 
     if CP.networkLocation == NetworkLocation.fwdCamera:
@@ -556,13 +560,14 @@ class PqExtraSignals:
 class MebExtraSignals:
   # Additional signal and message lists for optional or bus-portable controllers
   fwd_radar_messages = [
-    ("MEB_ACC_01", 17),           #
-    ("MEB_ACC_02", 50),           #
-    #("MEB_Distance_01", 25),     #
+    ("MEB_ACC_01", 17),        #
+    ("ACC_18", 50),            #
+    ("AWV_03", 1),             # Front Collision Detection (1 Hz when inactive, 50 Hz when active)
+    #("MEB_Distance_01", 25),  #
   ]
   bsm_radar_messages = [
     ("MEB_Side_Assist_01", 20),
   ]
   travel_assist_message = [
-    ("MEB_Travel_Assist_01", 10), #
+    ("TA_01", 10), #
   ]
