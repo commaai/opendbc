@@ -17,6 +17,7 @@ class CarState(CarStateBase):
     self.esp_hold_confirmation = False
     self.upscale_lead_car_signal = False
     self.eps_stock_values = False
+    self.travel_assist_available = False
 
   def create_button_events(self, pt_cp, buttons):
     button_events = []
@@ -259,7 +260,7 @@ class CarState(CarStateBase):
 
     self.frame += 1
     return ret
-    
+
   def update_meb(self, pt_cp, cam_cp, ext_cp) -> structs.CarState:
     ret = structs.CarState()
     # Update vehicle speed and acceleration from ABS wheel speeds.
@@ -323,7 +324,9 @@ class CarState(CarStateBase):
     ret.stockAeb = bool(pt_cp.vl["MEB_ESP_05"]["AEB_Active"])
 
     self.acc_type = ext_cp.vl["MEB_ACC_02"]["ACC_Typ"]
-    self.travel_assist_available = bool(ext_cp.vl["MEB_Travel_Assist_01"]["Travel_Assist_Available"]) if self.CP.flags & VolkswagenFlags.TRAVEL_ASSIST_PRESENT else False
+    # TODO: is this conditional necessary?
+    if self.CP.flags & VolkswagenFlags.TRAVEL_ASSIST_PRESENT:
+      self.travel_assist_available = bool(ext_cp.vl["MEB_Travel_Assist_01"]["Travel_Assist_Available"])
 
     ret.cruiseState.available = pt_cp.vl["MEB_Motor_01"]["TSK_Status"] in (2, 3, 4, 5)
     ret.cruiseState.enabled   = pt_cp.vl["MEB_Motor_01"]["TSK_Status"] in (3, 4, 5)
@@ -478,7 +481,7 @@ class CarState(CarStateBase):
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CANBUS.pt),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CANBUS.cam),
     }
-    
+
   @staticmethod
   def get_can_parsers_meb(CP):
     pt_messages = [

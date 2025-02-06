@@ -1,9 +1,6 @@
-import math
-
 from opendbc.can.parser import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.interfaces import RadarInterfaceBase
-from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.volkswagen.values import DBC, VolkswagenFlags
 
 RADAR_ADDR = 0x24F
@@ -18,7 +15,7 @@ def get_radar_can_parser(CP):
     return None
 
   return CANParser(DBC[CP.carFingerprint][Bus.radar], messages, 2)
-  
+
 
 class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
@@ -76,7 +73,7 @@ class RadarInterface(RadarInterfaceBase):
           else:
             ret.errors = ["canError"]
             return ret
-            
+
     for object_id, data in active_objects.items():
       if object_id not in self.pts:
         self.pts[object_id] = structs.RadarData.RadarPoint()
