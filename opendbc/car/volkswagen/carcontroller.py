@@ -51,11 +51,11 @@ class CarController(CarControllerBase):
 
         if CC.latActive:
           hca_enabled = True
-          current_curvature = -CS.out.yawRate / max(CS.out.vEgoRaw, 0.1)
+          current_curvature = CS.curvature #-CS.out.yawRate / max(CS.out.vEgoRaw, 0.1)
           apply_curvature = apply_std_steer_angle_limits(actuators.curvature, self.apply_curvature_last, CS.out.vEgoRaw, self.CCP)
-          apply_curvature = np.clip(apply_curvature, -self.CCP.CURVATURE_MAX, self.CCP.CURVATURE_MAX)
           if CS.out.steeringPressed: # roughly sync with user input
             apply_curvature = np.clip(apply_curvature, current_curvature - self.CCP.CURVATURE_ERROR, current_curvature + self.CCP.CURVATURE_ERROR)
+          apply_curvature = np.clip(apply_curvature, -self.CCP.CURVATURE_MAX, self.CCP.CURVATURE_MAX)
 
           steering_power_min_by_speed = np.interp(CS.out.vEgoRaw, [0, self.CCP.STEERING_POWER_MAX_BY_SPEED], [self.CCP.STEERING_POWER_MIN, self.CCP.STEERING_POWER_MAX])
           steering_curvature_diff = abs(apply_curvature - current_curvature)
@@ -83,8 +83,8 @@ class CarController(CarControllerBase):
           steering_power_boost = False
           if self.steering_power_last > 0: # keep HCA alive until steering power has reduced to zero
             hca_enabled = True
-            current_curvature = -CS.out.yawRate / max(CS.out.vEgoRaw, 0.1)
-            apply_curvature = current_curvature # synchronize with current curvature
+            current_curvature = CS.curvature #-CS.out.yawRate / max(CS.out.vEgoRaw, 0.1)
+            apply_curvature = np.clip(current_curvature, -self.CCP.CURVATURE_MAX, self.CCP.CURVATURE_MAX) # synchronize with current curvature
             steering_power = max(self.steering_power_last - self.CCP.STEERING_POWER_STEPS, 0)
           else:
             hca_enabled = False
@@ -145,11 +145,10 @@ class CarController(CarControllerBase):
 
       if self.CP.flags & VolkswagenFlags.MEB:
         # Logic to prevent car error with EPB:
-        #   * send a few frames of HMS RAMP RELEASE command at the very begin of long override
-        #   * send a few frames of HMS RAMP RELEASE command right at the end of active long control
+        #   * send a few frames of HMS RAMP RELEASE command at the very begin of long overrideand and at the end of active long control
         accel = np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.enabled else 0
         self.accel_last = accel
-
+        
         # 1 frame of long_override_begin is enough, but lower the possibility of panda safety blocking it for now until we adapt panda safety correctly
         long_override = CC.cruiseControl.override or CS.out.gasPressed
         self.long_override_counter = min(self.long_override_counter + 1, 5) if long_override else 0
@@ -166,7 +165,7 @@ class CarController(CarControllerBase):
         can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.enabled,
                                                            accel, acc_control, acc_hold_type, stopping, starting, CS.esp_hold_confirmation,
                                                            long_override, CS.travel_assist_available))
-
+      
       else:
         accel = np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0
         self.accel_last = accel
@@ -183,8 +182,8 @@ class CarController(CarControllerBase):
       
       if hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw):
         hud_alert = self.CCP.LDW_MESSAGES["laneAssistTakeOverUrgent"]
-        sound_alert = 1
       if self.CP.flags & VolkswagenFlags.MEB:
+        sound_alert = self.CCP.LDW_SOUNDS["Chime"] if hud_alert == self.CCP.LDW_MESSAGES["laneAssistTakeOverUrgent"] else self.CCP.LDW_SOUNDS["None"]
         can_sends.append(self.CCS.create_lka_hud_control(self.packer_pt, CANBUS.pt, CS.ldw_stock_values, CC.latActive,
                                                          CS.out.steeringPressed, hud_alert, hud_control, sound_alert))
       else:
