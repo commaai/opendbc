@@ -2,6 +2,7 @@ from typing import NamedTuple
 
 from opendbc.car.chrysler.values import CAR as CHRYSLER
 from opendbc.car.gm.values import CAR as GM
+from opendbc.car.fca_giorgio.values import CAR as FCA_GIORGIO
 from opendbc.car.ford.values import CAR as FORD
 from opendbc.car.honda.values import CAR as HONDA
 from opendbc.car.hyundai.values import CAR as HYUNDAI
@@ -303,6 +304,8 @@ routes = [
   CarTestRoute("a4af1602d8e668ac|2022-02-03--12-17-07", MAZDA.MAZDA_CX5_2022),
 
   #CarTestRoute("46cdc864ec865f4b/00000007--42f94db730", TESLA.TESLA_MODEL_Y),
+
+  CarTestRoute("6a3e5d31bf499cfe/0000000b--a48d1b4e42", FCA_GIORGIO.ALFA_ROMEO_STELVIO_1ST_GEN),
 
   # Segments that test specific issues
   # Controls mismatch due to standstill threshold
