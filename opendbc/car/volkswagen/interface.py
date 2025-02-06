@@ -40,7 +40,7 @@ class CarInterface(CarInterfaceBase):
       ret.transmissionType = TransmissionType.direct
       ret.steerControlType = structs.CarParams.SteerControlType.angle
 
-      if any(msg in fingerprint[1] for msg in (0x520, 0x86, 0xFD, 0x13D)):  # Airbag_02, LWI_01, ESP_21, MEB_EPS_01
+      if any(msg in fingerprint[1] for msg in (0x520, 0x86, 0xFD, 0x13D)):  # Airbag_02, LWI_01, ESP_21, QFK_01
         ret.networkLocation = NetworkLocation.gateway
       else:
         ret.networkLocation = NetworkLocation.fwdCamera
