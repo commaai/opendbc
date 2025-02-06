@@ -80,9 +80,9 @@ class CarControllerParams:
       self.STEERING_POWER_STEPS            = 6     # HCA_03 steering power counter steps
       self.STEERING_POWER_MAX_BY_SPEED     = 20    # HCA_03 speed in m/s^2 where maximum steering power is reached
       self.CURVATURE_MAX                   = 0.195 # HCA_03 maximum curvature in 1/m
-      self.CURVATURE_ERROR                 = 0.01
-      self.ANGLE_RATE_LIMIT_UP             = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[0.005, 0.0015, 0.00015]) # curvature safety limit up
-      self.ANGLE_RATE_LIMIT_DOWN           = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[0.005, 0.0034, 0.00034]) # curvature safety limit down
+      self.CURVATURE_ERROR                 = 0.01  # HCA_03 curvature error
+      self.ANGLE_RATE_LIMIT_UP             = AngleRateLimit(speed_bp=[5., 25.], angle_v=[0.0015, 0.00015])  # curvature safety limit up
+      self.ANGLE_RATE_LIMIT_DOWN           = AngleRateLimit(speed_bp=[5., 25.], angle_v=[0.002, 0.00035])   # curvature safety limit down
       self.CURVATURE_POWER_FACTOR          = 4000
 
       self.shifter_values    = can_define.dv["Getriebe_11"]["GE_Fahrstufe"]
@@ -98,16 +98,15 @@ class CarControllerParams:
         Button(structs.CarState.ButtonEvent.Type.gapAdjustCruise, "GRA_ACC_01", "GRA_Verstellung_Zeitluecke", [3]),
       ]
 
-      self.LDW_MESSAGES = { # verify TODO
-        "none": 0,                            # Nothing to display
-        "laneAssistUnavailChime": 1,          # "Lane Assist currently not available." with chime
-        "laneAssistUnavailNoSensorChime": 3,  # "Lane Assist not available. No sensor view." with chime
-        "laneAssistTakeOverUrgent": 4,        # "Lane Assist: Please Take Over Steering" with urgent beep
-        "emergencyAssistUrgent": 6,           # "Emergency Assist: Please Take Over Steering" with urgent beep
-        "laneAssistTakeOverChime": 7,         # "Lane Assist: Please Take Over Steering" with chime
-        "laneAssistTakeOver": 8,              # "Lane Assist: Please Take Over Steering" silent
-        "emergencyAssistChangingLanes": 9,    # "Emergency Assist: Changing lanes..." with urgent beep
-        "laneAssistDeactivated": 10,          # "Lane Assist deactivated." silent with persistent icon afterward
+      self.LDW_MESSAGES = {
+        "none": 0,                        # Nothing to display
+        "laneAssistTakeOverUrgent": 4,    # "Lane Assist: Please Take Over Steering" (red)
+        "laneAssistTakeOver": 8,          # "Lane Assist: Please Take Over Steering" (white)
+      }
+      self.LDW_SOUNDS = {
+        "None": 0,                        # No sound
+        "Chime": 1,                       # Play a chime
+        "Beep": 2,                        # Play a loud beep
       }
 
     else:
