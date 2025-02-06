@@ -498,7 +498,7 @@ class CarState(CarStateBase):
       ("ZV_02", 5),               # From ZV
       ("QFK_01", 100),            # From Steering
       ("ESP_21", 50),             #
-      ("EML_061", 50),            #
+      ("EML_06", 50),             #
       ("ESC_51", 100),            #
       ("Motor_54", 10),           #
       ("ESC_50", 50),             #
