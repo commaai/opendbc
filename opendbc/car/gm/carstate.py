@@ -35,11 +35,10 @@ class CarState(CarStateBase):
 
   def update_button_enable(self, buttonEvents: list[structs.CarState.ButtonEvent]):
     """ The ECM allows enabling on falling edge of set, but only rising edge of resume """
-    if not self.CP.pcmCruise:
-      for b in buttonEvents:
-        if (b.type == ButtonType.accelCruise and b.pressed) or \
-          (b.type == ButtonType.decelCruise and not b.pressed):
-          return True
+    for b in buttonEvents:
+      if (b.type == ButtonType.accelCruise and b.pressed) or \
+        (b.type == ButtonType.decelCruise and not b.pressed):
+        return True
     return False
 
   def update(self, can_parsers) -> structs.CarState:

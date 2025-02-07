@@ -244,7 +244,8 @@ class CarInterfaceBase(ABC):
     if ret.cruiseState.speedCluster == 0:
       ret.cruiseState.speedCluster = ret.cruiseState.speed
 
-    ret.buttonEnable = self.CS.update_button_enable(ret.buttonEvents)
+    if not self.CP.pcmCruise:
+      ret.buttonEnable = self.CS.update_button_enable(ret.buttonEvents)
 
     # save for next iteration
     self.CS.out = ret
@@ -349,11 +350,10 @@ class CarStateBase(ABC):
     return bool(left_blinker_stalk or self.left_blinker_cnt > 0), bool(right_blinker_stalk or self.right_blinker_cnt > 0)
 
   def update_button_enable(self, buttonEvents: list[structs.CarState.ButtonEvent]):
-    if not self.CP.pcmCruise:
-      for b in buttonEvents:
-        # Enable OP long on falling edge of enable buttons
-        if b.type in (ButtonType.accelCruise, ButtonType.decelCruise) and not b.pressed:
-          return True
+    for b in buttonEvents:
+      # Enable OP long on falling edge of enable buttons
+      if b.type in (ButtonType.accelCruise, ButtonType.decelCruise) and not b.pressed:
+        return True
     return False
 
   @staticmethod
