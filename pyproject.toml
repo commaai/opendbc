@@ -33,6 +33,7 @@ testing = [
   "hypothesis==6.47.*",
   "parameterized>=0.8,<0.9",
   "pre-commit",
+  "openpilot_logging",
 ]
 docs = [
   "Jinja2",
