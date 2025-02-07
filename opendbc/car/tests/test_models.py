@@ -9,7 +9,7 @@ import hypothesis.strategies as st
 from hypothesis import Phase, given, settings
 from parameterized import parameterized_class
 
-from cereal import messaging, log, car
+# from cereal import log, car
 from opendbc.car.common.basedir import BASEDIR
 # from openpilot.common.params import Params
 from opendbc.car import DT_CTRL, gen_empty_fingerprint, structs
