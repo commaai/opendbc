@@ -149,6 +149,13 @@ class CarState(CarStateBase):
                               {1: ButtonType.gapAdjustCruise})
       ]
 
+      if not self.CP.pcmCruise:
+        # The ECM allows enabling on falling edge of set, but only rising edge of resume
+        for b in ret.buttonEvents:
+          if (b.type == ButtonType.accelCruise and b.pressed) or \
+            (b.type == ButtonType.decelCruise and not b.pressed):
+            ret.buttonEnable = True
+
     return ret
 
   @staticmethod
