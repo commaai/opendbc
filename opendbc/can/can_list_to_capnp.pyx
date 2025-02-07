@@ -20,7 +20,7 @@ cdef extern from "can_list_to_can_capnp.cc":
   void can_list_to_can_capnp_cpp(const vector[CanFrame] &can_list, string &out, bool sendcan, bool valid)
   void can_capnp_to_can_list_cpp(const vector[string] &strings, vector[CanData] &can_data, bool sendcan)
 
-def can_list_to_can_capnp(can_msgs, msgtype='can', valid=True):
+def can_list_to_capnp(can_msgs, msgtype='can', valid=True):
   cdef CanFrame *f
   cdef vector[CanFrame] can_list
 
