@@ -18,6 +18,10 @@ lenv["RPATH"] = [libdbc[0].dir.abspath, ]
 parser = lenv.Program('parser_pyx.so', 'parser_pyx.pyx', LIBS=[common, libdbc[0].name])
 packer = lenv.Program('packer_pyx.so', 'packer_pyx.pyx', LIBS=[common, libdbc[0].name])
 
-opendbc_python = Alias("opendbc_python", [parser, packer])
+# build capnp can data conversion library
+env.Library('libcan_list_to_can_capnp', ['can_list_to_can_capnp.cc'])
+extra = lenv.Program('pandad_api_impl.so', 'pandad_api_impl.pyx', LIBS=["can_list_to_can_capnp", 'capnp', 'kj'] + envCython["LIBS"])
+
+opendbc_python = Alias("opendbc_python", [parser, packer, extra])
 
 Export('opendbc_python')
