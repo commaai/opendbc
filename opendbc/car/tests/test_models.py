@@ -18,11 +18,11 @@ from opendbc.car.car_helpers import FRAME_FINGERPRINT, interfaces
 from opendbc.car.honda.values import CAR as HONDA, HondaFlags
 from opendbc.car.values import Platform
 from opendbc.car.tests.routes import non_tested_cars, routes, CarTestRoute
-# from openpilot.selfdrive.selfdrived.events import ET
+# from openpilot.selfdrive.selfdrived.events import ET  # TODO: re-copy
 # from openpilot.selfdrive.selfdrived.selfdrived import SelfdriveD
-from openpilot.selfdrive.pandad import can_capnp_to_list
-from openpilot.selfdrive.test.helpers import read_segment_list
-from openpilot.system.hardware.hw import DEFAULT_DOWNLOAD_CACHE_ROOT
+# from openpilot.selfdrive.pandad import can_capnp_to_list
+# from openpilot.selfdrive.test.helpers import read_segment_list
+from openpilot_logging.hw import DEFAULT_DOWNLOAD_CACHE_ROOT
 from openpilot_logging.logreader import LogReader, LogsUnavailable, openpilotci_source_zst, openpilotci_source, internal_source, \
                                         internal_source_zst, comma_api_source, auto_source
 from openpilot_logging.route import SegmentName
