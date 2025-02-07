@@ -923,14 +923,18 @@ FW_VERSIONS = {
   CAR.HYUNDAI_KONA_HEV: {
     (Ecu.abs, 0x7d1, None): [
       b'\xf1\x00OS IEB \x01 104 \x11  58520-CM000',
+      b'\xf1\x00OS IEB \x03 104 \x11  58520-CM000',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00OShe SCC FNCUP      1.00 1.01 99110-CM000         ',
+      b'\xf1\x00OShe SCC F-CUP      1.00 1.01 99110-CM000         ',
     ],
     (Ecu.eps, 0x7d4, None): [
+      b'\xf1\x00OS  MDPS C 1.00 1.00 56310CM020\x00 4OHDC100',
       b'\xf1\x00OS  MDPS C 1.00 1.00 56310CM030\x00 4OHDC100',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00OSH LKAS AT EUR LHD 1.00 1.01 95740-CM000 l31',
       b'\xf1\x00OSH LKAS AT KOR LHD 1.00 1.01 95740-CM000 l31',
     ],
   },
