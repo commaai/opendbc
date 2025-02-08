@@ -12,6 +12,7 @@ from parameterized import parameterized_class
 # from cereal import log, car
 from opendbc.car.common.basedir import BASEDIR
 # from openpilot.common.params import Params
+from opendbc.car.structs import car
 from opendbc.car import DT_CTRL, gen_empty_fingerprint, structs
 from opendbc.car.fingerprints import all_known_cars, MIGRATION
 from opendbc.car.car_helpers import FRAME_FINGERPRINT, interfaces
@@ -29,8 +30,8 @@ from openpilot_logging.route import SegmentName
 
 from panda.tests.libpanda import libpanda_py
 
-EventName = log.OnroadEvent.EventName
-PandaType = log.PandaState.PandaType
+# EventName = log.OnroadEvent.EventName
+# PandaType = log.PandaState.PandaType
 SafetyModel = car.CarParams.SafetyModel
 
 NUM_JOBS = int(os.environ.get("NUM_JOBS", "1"))
