@@ -15,9 +15,13 @@ class CAR(Platforms):
     {Bus.pt: 'rivian_can'}
   )
 
-# TODO ↓
+# TODO: Placeholder ↓
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
+    Request(
+      [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.SUPPLIER_SOFTWARE_VERSION_REQUEST],
+      [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.SUPPLIER_SOFTWARE_VERSION_RESPONSE]
+    )
   ]
 )
 
