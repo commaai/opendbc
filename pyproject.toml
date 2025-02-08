@@ -34,6 +34,7 @@ testing = [
   "parameterized>=0.8,<0.9",
   "pre-commit",
   "openpilot_logging",
+  "cffi",
 ]
 docs = [
   "Jinja2",
