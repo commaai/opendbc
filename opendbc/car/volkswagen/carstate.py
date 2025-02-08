@@ -6,6 +6,8 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.volkswagen.values import DBC, CANBUS, NetworkLocation, TransmissionType, GearShifter, \
                                                       CarControllerParams, VolkswagenFlags
 
+ButtonType = structs.CarState.ButtonEvent.Type
+
 
 class CarState(CarStateBase):
   def __init__(self, CP):
@@ -17,6 +19,14 @@ class CarState(CarStateBase):
     self.esp_hold_confirmation = False
     self.upscale_lead_car_signal = False
     self.eps_stock_values = False
+
+  def update_button_enable(self, buttonEvents: list[structs.CarState.ButtonEvent]):
+    if not self.CP.pcmCruise:
+      for b in buttonEvents:
+        # Enable OP long on falling edge of enable buttons
+        if b.type in (ButtonType.setCruise, ButtonType.resumeCruise) and not b.pressed:
+          return True
+    return False
 
   def create_button_events(self, pt_cp, buttons):
     button_events = []
