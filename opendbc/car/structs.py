@@ -6,8 +6,9 @@ from opendbc.car.common.basedir import BASEDIR
 try:
   from cereal import car
 except ImportError:
+  from openpilot_logging.cereal import car
   capnp.remove_import_hook()
-  car = capnp.load(os.path.join(BASEDIR, "car.capnp"))
+  # car = capnp.load(os.path.join(BASEDIR, "car.capnp"))
 
 CarState = car.CarState
 RadarData = car.RadarData
