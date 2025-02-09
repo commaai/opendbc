@@ -269,10 +269,10 @@ class CarState(CarStateBase):
     return ret
 
   def update_hca_state(self, hca_status):
-    # Treat INITIALIZING and FAULT as temporary for worst likely EPS recovery time, for cars without factory Lane Assist
+    # Treat FAULT as temporary for worst likely EPS recovery time, for cars without factory Lane Assist
     # DISABLED means the EPS hasn't been configured to support Lane Assist
     self.eps_init_complete = self.eps_init_complete or (hca_status in ("DISABLED", "READY", "ACTIVE") or self.frame > 600)
-    perm_fault = hca_status == "DISABLED" or (self.eps_init_complete and hca_status in ("INITIALIZING", "FAULT"))
+    perm_fault = hca_status == "DISABLED" or (self.eps_init_complete and hca_status == "FAULT")
     temp_fault = hca_status in ("REJECTED", "PREEMPTED") or not self.eps_init_complete
     return temp_fault, perm_fault
 
