@@ -472,17 +472,6 @@ FW_VERSIONS = {
     ],
   },
   CAR.GENESIS_G70_2020: {
-    (Ecu.combinationMeter, 0x7c6, None): [
-      b'\xf1\x00071       ',
-      b'\xf1\x8b #\t\x19  ',
-    ],
-    (Ecu.cornerRadar, 0x7b7, None) : [
-      b'\xf1\x8b !\x11\x18',
-    ],
-    (Ecu.engine, 0x7e0, None): [
-      b'IPPNHM_Y_T0B\x00\x00\x00\x00',
-      b'\xf1\x82IPPNHM_Y_T0B\x00\x00\x00\x00',
-    ],
     (Ecu.eps, 0x7d4, None): [
       b'\xf1\x00IK  MDPS R 1.00 1.06 57700-G9220 4I2VL106',
       b'\xf1\x00IK  MDPS R 1.00 1.07 57700-G9220 4I2VL107',
@@ -510,11 +499,6 @@ FW_VERSIONS = {
     ],
     (Ecu.hvac, 0x7b3, None): [
       b"\xf1\x00IK PE 97255-G9NB0CONTROL ASS'Y-DATC  1.03IKPE DATC(-) 0.7     ",
-    ],
-    (Ecu.transmission, 0x7e1, None): [
-      b'SIK4T20NH0                                                                                                ',
-      b'\xf1\x82SIK4T20NH0                                                                                        ',
-      b'\xf1\x87WBPTH13315662CN7feVVwvWw\x86fffxuWy\x88wgw\x97vvfUD?\xffD[\xf1\x89E31\x00\x00\x00\x00\x00\x00\x00 ',
     ],
   },
   CAR.GENESIS_G80: {
