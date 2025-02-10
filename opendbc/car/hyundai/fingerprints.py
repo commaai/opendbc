@@ -227,6 +227,7 @@ FW_VERSIONS = {
   },
   CAR.HYUNDAI_SANTA_FE: {
     (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00TM__ SCC F-CUP      1.00 1.00 99110-S1200         ',
       b'\xf1\x00TM__ SCC F-CUP      1.00 1.00 99110-S1210         ',
       b'\xf1\x00TM__ SCC F-CUP      1.00 1.01 99110-S2000         ',
       b'\xf1\x00TM__ SCC F-CUP      1.00 1.02 99110-S2000         ',
@@ -250,8 +251,10 @@ FW_VERSIONS = {
       b'\xf1\x00TM  MDPS C 1.00 1.00 56340-S2000 8A12',
       b'\xf1\x00TM  MDPS C 1.00 1.01 56340-S2000 9129',
       b'\xf1\x00TM  MDPS R 1.00 1.02 57700-S1100 4TMDP102',
+      b'\xf1\x00TM  MDPS R 1.00 1.02 57700-S1190 4TMDP102',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00TM  MFC  AT AUS RHD 1.00 1.01 99211-S1010 181207',
       b'\xf1\x00TM  MFC  AT EUR LHD 1.00 1.01 99211-S1010 181207',
       b'\xf1\x00TM  MFC  AT USA LHD 1.00 1.00 99211-S2000 180409',
     ],
