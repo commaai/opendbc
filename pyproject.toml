@@ -1,6 +1,6 @@
 [project]
 name = "opendbc"
-version = "1.0.0"
+version = "0.1.0"
 description = "CAN bus databases and tools"
 license = { file = "LICENSE" }
 authors = [{ name = "Vehicle Researcher", email = "user@comma.ai" }]
