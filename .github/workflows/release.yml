@@ -17,18 +17,8 @@ jobs:
 
       - name: Build distribution
         run: |
-          # which python
-          # ./test.sh
-          # which python
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          uv sync --all-extras
-          # which python
-          # which pip
+          ./test.sh
           source .venv/bin/activate
-          which python
-          which python3
-          which pip
-          which pip3
           uv pip install build
           python -m build
 
