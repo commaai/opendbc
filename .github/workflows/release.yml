@@ -1,0 +1,14 @@
+jobs:
+  pypi-publish:
+    name: Upload release to PyPI
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/opendbc
+    permissions:
+      id-token: write  # trusted publishing
+    steps:
+    # retrieve your distributions here
+
+    - name: Publish package distributions to PyPI
+      uses: pypa/gh-action-pypi-publish@v1.12.4
