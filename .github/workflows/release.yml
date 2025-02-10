@@ -20,6 +20,7 @@ jobs:
           # which python
           # ./test.sh
           # which python
+          curl -LsSf https://astral.sh/uv/install.sh | sh
           uv sync --all-extras
           # which python
           # which pip
