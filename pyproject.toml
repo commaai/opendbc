@@ -1,6 +1,6 @@
 [project]
 name = "opendbc"
-version = "1.0.0"
+version = "0.1.0"
 description = "CAN bus databases and tools"
 license = { file = "LICENSE" }
 authors = [{ name = "Vehicle Researcher", email = "user@comma.ai" }]
@@ -42,6 +42,10 @@ examples = [
   "inputs",
   "matplotlib",
 ]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
 addopts = "--ignore=panda/ -Werror --strict-config --strict-markers --durations=10 -n auto"

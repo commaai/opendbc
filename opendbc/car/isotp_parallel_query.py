@@ -2,23 +2,22 @@ import time
 from collections import defaultdict
 from functools import partial
 
-from opendbc.car import carlog
+from opendbc.car import uds
 from opendbc.car.can_definitions import CanData, CanRecvCallable, CanSendCallable
+from opendbc.car.carlog import carlog
 from opendbc.car.fw_query_definitions import AddrType
-from panda import uds
 
 
 class IsoTpParallelQuery:
   def __init__(self, can_send: CanSendCallable, can_recv: CanRecvCallable, bus: int, addrs: list[int] | list[AddrType],
                request: list[bytes], response: list[bytes], response_offset: int = 0x8,
-               functional_addrs: list[int] = None, debug: bool = False, response_pending_timeout: float = 10) -> None:
+               functional_addrs: list[int] = None, response_pending_timeout: float = 10) -> None:
     self.can_send = can_send
     self.can_recv = can_recv
     self.bus = bus
     self.request = request
     self.response = response
     self.functional_addrs = functional_addrs or []
-    self.debug = debug
     self.response_pending_timeout = response_pending_timeout
 
     real_addrs = [a if isinstance(a, tuple) else (a, None) for a in addrs]
@@ -67,13 +66,12 @@ class IsoTpParallelQuery:
 
   def _create_isotp_msg(self, tx_addr: int, sub_addr: int | None, rx_addr: int):
     can_client = uds.CanClient(self._can_tx, partial(self._can_rx, rx_addr, sub_addr=sub_addr), tx_addr, rx_addr,
-                           self.bus, sub_addr=sub_addr, debug=self.debug)
+                               self.bus, sub_addr=sub_addr)
 
-    max_len = 8 if sub_addr is None else 7
     # uses iso-tp frame separation time of 10 ms
     # TODO: use single_frame_mode so ECUs can send as fast as they want,
     # as well as reduces chances we process messages from previous queries
-    return uds.IsoTpMessage(can_client, timeout=0, separation_time=0.01, debug=self.debug, max_len=max_len)
+    return uds.IsoTpMessage(can_client, timeout=0, separation_time=0.01)
 
   def get_data(self, timeout: float, total_timeout: float = 60.) -> dict[AddrType, bytes]:
     self._drain_rx()
