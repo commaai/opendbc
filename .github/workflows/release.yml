@@ -17,12 +17,12 @@ jobs:
 
       - name: Build distribution
         run: |
-#          which python
-#          ./test.sh
-#          which python
+          # which python
+          # ./test.sh
+          # which python
           uv sync --all-extras
-#          which python
-#          which pip
+          # which python
+          # which pip
           source .venv/bin/activate
           which python
           which python3
