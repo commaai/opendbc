@@ -8,7 +8,11 @@ jobs:
     permissions:
       id-token: write  # trusted publishing
     steps:
-    # retrieve your distributions here
+      - name: Build distribution
+        run: |
+          uv sync --all-extras
+          source .venv/bin/activate
+          python -m build
 
-    - name: Publish package distributions to PyPI
-      uses: pypa/gh-action-pypi-publish@v1.12.4
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@v1.12.4
