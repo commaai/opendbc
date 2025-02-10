@@ -389,6 +389,7 @@ FW_VERSIONS = {
   CAR.HYUNDAI_PALISADE: {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00LX2 SCC FHCUP      1.00 1.04 99110-S8100         ',
+      b'\xf1\x00LX2_ SCC F-CU-      1.00 1.05 99110-S8100         ',
       b'\xf1\x00LX2_ SCC F-CUP      1.00 1.00 99110-S8110         ',
       b'\xf1\x00LX2_ SCC F-CUP      1.00 1.04 99110-S8100         ',
       b'\xf1\x00LX2_ SCC F-CUP      1.00 1.05 99110-S8100         ',
@@ -926,8 +927,8 @@ FW_VERSIONS = {
       b'\xf1\x00OS IEB \x03 104 \x11  58520-CM000',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
-      b'\xf1\x00OShe SCC FNCUP      1.00 1.01 99110-CM000         ',
       b'\xf1\x00OShe SCC F-CUP      1.00 1.01 99110-CM000         ',
+      b'\xf1\x00OShe SCC FNCUP      1.00 1.01 99110-CM000         ',
     ],
     (Ecu.eps, 0x7d4, None): [
       b'\xf1\x00OS  MDPS C 1.00 1.00 56310CM020\x00 4OHDC100',
