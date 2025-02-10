@@ -18,7 +18,7 @@ dependencies = [
   "crcmod",
   "tqdm",
   "pycapnp",
-  "pandacan@git+https://github.com/commaai/panda.git@master",
+  "pandacan@git+https://github.com/commaai/panda.git@package-tests",
   "setuptools",
   "pycryptodome",
 ]
@@ -33,6 +33,8 @@ testing = [
   "hypothesis==6.47.*",
   "parameterized>=0.8,<0.9",
   "pre-commit",
+  "openpilot-logging",
+  "cffi",
 ]
 docs = [
   "Jinja2",
@@ -46,6 +48,9 @@ examples = [
 [tool.pytest.ini_options]
 addopts = "--ignore=panda/ -Werror --strict-config --strict-markers --durations=10 -n auto"
 python_files = "test_*.py"
+markers = [
+  "slow: tests that take awhile to run and can be skipped with -m 'not slow'",
+]
 testpaths = [
   "opendbc"
 ]

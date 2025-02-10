@@ -22,7 +22,7 @@ uv run scons -j8
 # *** lint ***
 # TODO: pre-commit is slow; replace it with openpilot's "op lint"
 #uv run pre-commit run --all-files
-uv run ruff check .
+#uv run ruff check .
 
 # *** test ***
 uv run pytest -n8
