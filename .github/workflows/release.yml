@@ -13,6 +13,8 @@ jobs:
     permissions:
       id-token: write  # trusted publishing
     steps:
+      - uses: actions/checkout@v4
+
       - name: Build distribution
         run: |
           ./test.sh
