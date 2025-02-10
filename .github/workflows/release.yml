@@ -2,7 +2,6 @@ name: Publish to PyPI
 on:
   workflow_dispatch:
   push:
-  pull_request:
 
 jobs:
   pypi-publish:
@@ -16,6 +15,7 @@ jobs:
     steps:
       - name: Build distribution
         run: |
+          ./test.sh
           uv sync --all-extras
           source .venv/bin/activate
           python -m build
