@@ -23,7 +23,7 @@ class CarControllerParams:
     pass
 
 
-class NissanPandaFlags(IntFlag):
+class NissanSafetyFlags(IntFlag):
   FLAG_NISSAN_ALT_EPS_BUS = 1
 
 
