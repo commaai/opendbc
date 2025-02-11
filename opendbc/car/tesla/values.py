@@ -65,7 +65,7 @@ class CarControllerParams:
   JERK_LIMIT_MIN = -4.9  # m/s^3, ACC faults at 5.0
 
 
-class TeslaPandaFlags(IntFlag):
+class TeslaSafetyFlags(IntFlag):
   FLAG_TESLA_POWERTRAIN = 1
   FLAG_TESLA_LONG_CONTROL = 2
   FLAG_TESLA_RAVEN = 4
