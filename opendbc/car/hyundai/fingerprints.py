@@ -498,12 +498,6 @@ FW_VERSIONS = {
       b'\xf1\x00IK  MFC  AT USA LHD 1.00 1.04 99211-G9000 220401',
       b'\xf1\x8b #\t\x11                                        ',
     ],
-
-
-
-
-
-
   },
   CAR.GENESIS_G80: {
     (Ecu.fwdRadar, 0x7d0, None): [
