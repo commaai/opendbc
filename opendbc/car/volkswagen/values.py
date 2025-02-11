@@ -131,7 +131,7 @@ class WMI(StrEnum):
   VOLKSWAGEN_GROUP_RUS = "XW8"
 
 
-class VolkswagenPandaFlags(IntFlag):
+class VolkswagenSafetyFlags(IntFlag):
   FLAG_VOLKSWAGEN_LONG_CONTROL = 1
 
 

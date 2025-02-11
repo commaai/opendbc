@@ -50,7 +50,7 @@ class CarControllerParams:
       self.STEER_MAX = 384
 
 
-class HyundaiPandaFlags(IntFlag):
+class HyundaiSafetyFlags(IntFlag):
   FLAG_HYUNDAI_EV_GAS = 1
   FLAG_HYUNDAI_HYBRID_GAS = 2
   FLAG_HYUNDAI_LONG = 4

@@ -2,7 +2,7 @@ import numpy as np
 from opendbc.car import Bus, get_safety_config, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.ford.fordcan import CanBus
-from opendbc.car.ford.values import CarControllerParams, DBC, Ecu, FordFlags, RADAR, FordPandaFlags
+from opendbc.car.ford.values import CarControllerParams, DBC, Ecu, FordFlags, RADAR, FordSafetyFlags
 from opendbc.car.interfaces import CarInterfaceBase
 
 TransmissionType = structs.CarParams.TransmissionType
@@ -44,11 +44,11 @@ class CarInterface(CarInterfaceBase):
     # TODO: verify stock AEB compatibility and longitudinal limit safety before shipping to release
     ret.experimentalLongitudinalAvailable = ret.radarUnavailable
     if experimental_long or not ret.radarUnavailable:
-      ret.safetyConfigs[-1].safetyParam |= FordPandaFlags.FLAG_FORD_LONG_CONTROL.value
+      ret.safetyConfigs[-1].safetyParam |= FordSafetyFlags.FLAG_FORD_LONG_CONTROL.value
       ret.openpilotLongitudinalControl = True
 
     if ret.flags & FordFlags.CANFD:
-      ret.safetyConfigs[-1].safetyParam |= FordPandaFlags.FLAG_FORD_CANFD.value
+      ret.safetyConfigs[-1].safetyParam |= FordSafetyFlags.FLAG_FORD_CANFD.value
     else:
       # Lock out if the car does not have needed lateral and longitudinal control APIs.
       # Note that we also check CAN for adaptive cruise, but no known signal for LCA exists

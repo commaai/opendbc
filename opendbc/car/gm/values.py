@@ -60,7 +60,7 @@ class CarControllerParams:
     self.BRAKE_LOOKUP_V = [self.MAX_BRAKE, 0.]
 
 
-class GMPandaFlags(IntFlag):
+class GMSafetyFlags(IntFlag):
   FLAG_GM_HW_CAM = 1
   FLAG_GM_HW_CAM_LONG = 2
 

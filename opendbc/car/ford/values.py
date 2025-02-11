@@ -41,7 +41,7 @@ class CarControllerParams:
     pass
 
 
-class FordPandaFlags(IntFlag):
+class FordSafetyFlags(IntFlag):
   FLAG_FORD_LONG_CONTROL = 1
   FLAG_FORD_CANFD = 2
 
