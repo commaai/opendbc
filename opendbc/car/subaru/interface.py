@@ -8,7 +8,7 @@ class CarInterface(CarInterfaceBase):
 
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate: CAR, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
-    ret.carName = "subaru"
+    ret.brand = "subaru"
     ret.radarUnavailable = True
     # for HYBRID CARS to be upstreamed, we need:
     # - replacement for ES_Distance so we can cancel the cruise control
@@ -71,7 +71,7 @@ class CarInterface(CarInterfaceBase):
       ret.steerActuatorDelay = 0.1
 
     elif candidate in (CAR.SUBARU_FORESTER_PREGLOBAL, CAR.SUBARU_OUTBACK_PREGLOBAL_2018):
-      # Outback 2018-2019 and Forester have reversed driver torque signal.value
+      # Outback 2018-2019 and Forester have reversed driver torque signal
       ret.safetyConfigs[0].safetyParam = SubaruPandaFlags.FLAG_SUBARU_PREGLOBAL_REVERSED_DRIVER_TORQUE.value
 
     elif candidate == CAR.SUBARU_LEGACY_PREGLOBAL:

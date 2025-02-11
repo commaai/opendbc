@@ -1520,7 +1520,9 @@ BO_ 865 ADAS_PRK_11: 8 ADAS_PRK
  SG_ PCA_CHECK_SUM : 48|8@1+ (1,0) [0|0] "" Vector__XXX
 
 BO_ 882 ELECT_GEAR: 8 XXX
- SG_ Elect_Gear_Shifter : 16|4@1+ (1,0) [0|7] ""  CLU
+ SG_ Elect_Gear_Shifter : 16|4@1+ (1,0) [0|7] "" CLU
+ SG_ SLC_ON : 31|1@0+ (1,0) [0|1] "" CLU
+ SG_ SLC_SET_SPEED : 32|8@1+ (1,0) [0|255] "" CLU
 
 BO_ 881 E_EMS11: 8 XXX
  SG_ Brake_Pedal_Pos : 0|8@1+ (1,0) [0|127] "" XXX
