@@ -23,5 +23,12 @@ jobs:
           uv pip install build
           python -m build
 
-      - name: Publish package distributions to PyPI
+      - name: Publish to Test PyPI
+        if: github.event_name == 'workflow_dispatch'
+        uses: pypa/gh-action-pypi-publish@v1.12.4
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+      - name: Publish to Production PyPI
+        if: github.event_name == 'release'
         uses: pypa/gh-action-pypi-publish@v1.12.4
