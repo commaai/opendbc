@@ -18,14 +18,10 @@ jobs:
 
       - name: Build distribution
         run: |
-          # ./test.sh
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          uv venv
+          ./test.sh
           source .venv/bin/activate
           uv pip install build
           python -m build
-          uv pip install dist/*.whl
-          python -c "from opendbc import car"
 
       - name: Publish to Test PyPI
         if: github.event_name == 'workflow_dispatch'
