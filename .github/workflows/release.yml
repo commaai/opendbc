@@ -24,7 +24,7 @@ jobs:
           source .venv/bin/activate
           uv pip install build
           python -m build
-          uv pip install dist/*
+          uv pip install dist/*.whl
           python -c "from opendbc import car"
 
       - name: Publish to Test PyPI
