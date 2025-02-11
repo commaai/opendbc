@@ -16,20 +16,17 @@ class TeslaCarDocs(CarDocs):
 @dataclass
 class TeslaPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {Bus.party: 'tesla_model3_party'})
+  safety_file = "safety_tesla.h"
 
 
 class CAR(Platforms):
   TESLA_MODEL_3 = TeslaPlatformConfig(
     [TeslaCarDocs("Tesla Model 3 2019-24")],
     CarSpecs(mass=1899., wheelbase=2.875, steerRatio=12.0),
-    {Bus.party: 'tesla_model3_party'},
-    safety_file="safety_tesla.h",
   )
   TESLA_MODEL_Y = TeslaPlatformConfig(
     [TeslaCarDocs("Tesla Model Y 2020-24")],
     CarSpecs(mass=2072., wheelbase=2.890, steerRatio=12.0),
-    {Bus.party: 'tesla_model3_party'},
-    safety_file="safety_tesla.h",
   )
 
 
@@ -67,12 +64,6 @@ class CarControllerParams:
   ACCEL_MAX = 2.0    # m/s^2
   JERK_LIMIT_MAX = 4.9  # m/s^3, ACC faults at 5.0
   JERK_LIMIT_MIN = -4.9  # m/s^3, ACC faults at 5.0
-
-
-class TeslaPandaFlags(IntFlag):
-  FLAG_TESLA_POWERTRAIN = 1
-  FLAG_TESLA_LONG_CONTROL = 2
-  FLAG_TESLA_RAVEN = 4
 
 
 class TeslaPandaFlags(IntFlag):
