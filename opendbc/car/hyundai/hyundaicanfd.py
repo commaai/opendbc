@@ -39,24 +39,9 @@ def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_steer, 
   ret = []
 
   values = {
-    "LKA_MODE": 0,
-    "LKA_ICON": 2 if enabled else 1,
-    "TORQUE_REQUEST": 0,
-    "LKA_ASSIST": 0,
-    "STEER_REQ": 0,
-    "STEER_MODE": 0,
-    "HAS_LANE_SAFETY": 0,  # hide LKAS settings
-    "LKA_ACTIVE": 3 if lat_active else 0,
-    "NEW_SIGNAL_2": 0,
     "LKAS_ANGLE_CMD": -apply_angle,
     "LKAS_ANGLE_ACTIVE": 2 if lat_active else 1,
     "LKAS_ANGLE_MAX_TORQUE": max_torque if lat_active else 0,
-    "LKAS_SIGNAL_1": 10,
-    "NEW_SIGNAL_3": 9,
-    "LKAS_SIGNAL_2": 1,
-    "LKAS_SIGNAL_3": 1,
-    "LKAS_SIGNAL_4": 1,
-    "LKAS_SIGNAL_5": 1,
   }
 
   if CP.flags & HyundaiFlags.CANFD_HDA2:
@@ -65,7 +50,7 @@ def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_steer, 
       ret.append(packer.make_can_msg("LFA", CAN.ECAN, values))
     ret.append(packer.make_can_msg(hda2_lkas_msg, CAN.ACAN, values))
   else:
-    ret.append(packer.make_can_msg("LFA", CAN.ECAN, values))
+    ret.append(packer.make_can_msg("LKAS_ADAS", CAN.ECAN, values))
 
   return ret
 
