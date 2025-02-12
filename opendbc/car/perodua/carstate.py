@@ -68,7 +68,7 @@ class CarState(CarStateBase):
       cp.vl["WHEEL_SPEED"]['WHEELSPEED_F'],
       cp.vl["WHEEL_SPEED"]['WHEELSPEED_F'],
     )
-    ret.vEgoRaw = np.mean([ret.wheelSpeeds.rr, ret.wheelSpeeds.rl, ret.wheelSpeeds.fr, ret.wheelSpeeds.fl])
+    ret.vEgoRaw = float(np.mean([ret.wheelSpeeds.rr, ret.wheelSpeeds.rl, ret.wheelSpeeds.fr, ret.wheelSpeeds.fl]))
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.standstill = ret.vEgoRaw < 0.01
 
@@ -242,7 +242,7 @@ class CarState(CarStateBase):
     #print(self.stock_acc_cmd, self.stock_acc_set_speed, self.cruise_speed * 3.6)
     self.cruise_speed = max(min(self.cruise_speed, 125 * CV.KPH_TO_MS), 30 * CV.KPH_TO_MS)
     ret.cruiseState.speedCluster = self.cruise_speed
-    ret.cruiseState.speed = ret.cruiseState.speedCluster / np.interp(ret.vEgo, [0,140], [1.0615,1.0170])
+    ret.cruiseState.speed = float(ret.cruiseState.speedCluster / np.interp(ret.vEgo, [0,140], [1.0615,1.0170]))
 
     ret.cruiseState.standstill = False
     ret.cruiseState.nonAdaptive = False

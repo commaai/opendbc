@@ -227,6 +227,6 @@ class CarController(CarControllerBase):
 
     self.last_steer = apply_steer
     new_actuators = actuators.as_builder()
-    new_actuators.steer = apply_steer / steer_max_interp
+    new_actuators.steer = float(apply_steer / steer_max_interp)
 
     return new_actuators, can_sends
