@@ -681,14 +681,14 @@ BO_ 353 MSG_161: 32 CCNC
  SG_ ZEROS_5 : 63|1@0+ (1,0) [0|1] "" XXX
  SG_ CENTERLINE : 64|2@1+ (1,0) [0|3] "" XXX
  SG_ TARGET : 66|3@1+ (1,0) [0|7] "" XXX
- SG_ TARGET_POSITION : 69|11@1+ (1,0) [0|7] "" XXX
+ SG_ TARGET_POSITION : 69|11@1+ (0.1,0) [0|204.7] "m" XXX
  SG_ LANELINE_LEFT : 80|4@1+ (1,0) [0|15] "" XXX
  SG_ LANELINE_LEFT_POSITION : 84|6@1+ (1,0) [0|15] "" XXX
  SG_ LANELINE_RIGHT : 90|4@1+ (1,0) [0|15] "" XXX
  SG_ LANELINE_RIGHT_POSITION : 94|6@1+ (1,0) [0|3] "" XXX
  SG_ LANELINE_CURVATURE : 100|5@1- (1,15) [0|31] "" XXX
  SG_ LANE_HIGHLIGHT : 105|4@1+ (1,0) [0|15] "" XXX
- SG_ LANE_HIGHLIGHT_DISTANCE : 109|11@1+ (1,0) [0|7] "" XXX
+ SG_ LANE_HIGHLIGHT_DISTANCE : 109|11@1+ (0.1,0) [0|204.7] "m" XXX
  SG_ LANE_LEFT : 120|3@1+ (1,0) [0|7] "" XXX
  SG_ LANE_RIGHT : 123|3@1+ (1,0) [0|7] "" XXX
  SG_ LANE_ZOOM : 126|2@1+ (1,0) [0|3] "" XXX
@@ -735,19 +735,19 @@ BO_ 354 MSG_162: 32 CCNC
  SG_ ZEROS_1 : 55|1@0+ (1,0) [0|1] "" XXX
  SG_ ZEROS_2 : 56|8@1+ (1,0) [0|255] "" XXX
  SG_ LEAD : 64|5@1+ (1,0) [0|31] "" XXX
- SG_ LEAD_DISTANCE : 69|11@1+ (1,0) [0|2047] "" XXX
+ SG_ LEAD_DISTANCE : 69|11@1+ (0.1,0) [0|204.7] "m" XXX
  SG_ LEAD_LATERAL : 80|7@1+ (1,0) [0|127] "" XXX
  SG_ ZEROS_3 : 87|1@0+ (1,0) [0|1] "" XXX
  SG_ LEAD_ALT : 88|5@1+ (1,0) [0|31] "" XXX
- SG_ LEAD_ALT_DISTANCE : 93|11@1+ (1,0) [0|2047] "" XXX
+ SG_ LEAD_ALT_DISTANCE : 93|11@1+ (0.1,0) [0|204.7] "m" XXX
  SG_ LEAD_ALT_LATERAL : 104|7@1+ (1,0) [0|127] "" XXX
  SG_ ZEROS_4 : 111|1@0+ (1,0) [0|1] "" XXX
  SG_ LEAD_LEFT : 112|5@1+ (1,0) [0|31] "" XXX
- SG_ LEAD_LEFT_DISTANCE : 117|11@1+ (1,0) [0|2047] "" XXX
+ SG_ LEAD_LEFT_DISTANCE : 117|11@1+ (0.1,0) [0|204.7] "m" XXX
  SG_ LEAD_LEFT_LATERAL : 128|7@1+ (1,0) [0|127] "" XXX
  SG_ ZEROS_5 : 135|1@0+ (1,0) [0|1] "" XXX
  SG_ LEAD_RIGHT : 136|5@1+ (1,0) [0|31] "" XXX
- SG_ LEAD_RIGHT_DISTANCE : 141|11@1+ (1,0) [0|2047] "" XXX
+ SG_ LEAD_RIGHT_DISTANCE : 141|11@1+ (0.1,0) [0|204.7] "m" XXX
  SG_ LEAD_RIGHT_LATERAL : 152|7@1+ (1,0) [0|127] "" XXX
  SG_ ZEROS_6 : 159|1@0+ (1,0) [0|1] "" XXX
  SG_ ZEROS_7 : 160|8@1+ (1,0) [0|255] "" XXX
@@ -793,7 +793,7 @@ BO_ 437 MSG_1B5: 32 XXX
  SG_ LEAD_1 : 194|6@1+ (1,0) [0|63] "" XXX
  SG_ LEAD_2 : 200|11@1- (1,0) [0|4095] "" XXX
  SG_ LEAD_3 : 211|1@0+ (1,0) [0|1] "" XXX
- SG_ LEAD_DISTANCE : 213|11@1+ (1,0) [0|2047] "" XXX
+ SG_ LEAD_DISTANCE : 213|11@1+ (0.1,0) [0|204.7] "m" XXX
 
 CM_ 272 "Alternative LKAS message, used on cars such as 2023 Ioniq 6, 2nd gen Kona. Matches LKAS except size is 32 bytes";
 CM_ 676 "Contains signals with detailed lane line information. Used by ADAS ECU on HDA 2 vehicles to operate LFA.";
