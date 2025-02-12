@@ -197,8 +197,8 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
     })
 
   ret.append(packer.make_can_msg("LFAHDA_CLUSTER", CAN.ECAN, lfahda_cluster))
-  ret.append(packer.make_can_msg("MSG_161", CAN.ECAN, msg_161))
-  ret.append(packer.make_can_msg("MSG_162", CAN.ECAN, msg_162))
+  ret.append(packer.make_can_msg("CCNC_0x161", CAN.ECAN, msg_161))
+  ret.append(packer.make_can_msg("CCNC_0x162", CAN.ECAN, msg_162))
 
   return ret
 

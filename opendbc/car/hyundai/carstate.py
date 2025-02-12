@@ -228,8 +228,8 @@ class CarState(CarStateBase):
     ret.steerFaultTemporary = cp.vl["MDPS"]["LKA_FAULT"] != 0
 
     if self.CP.flags & HyundaiFlags.CCNC and not self.CP.flags & HyundaiFlags.CANFD_HDA2:
-      self.msg_161 = copy.copy(cp_cam.vl["MSG_161"])
-      self.msg_162 = copy.copy(cp_cam.vl["MSG_162"])
+      self.msg_161 = copy.copy(cp_cam.vl["CCNC_0x161"])
+      self.msg_162 = copy.copy(cp_cam.vl["CCNC_0x162"])
       cp_cruise_info = cp_cam if self.CP.flags & HyundaiFlags.CANFD_CAMERA_SCC else cp
       self.cruise_info = copy.copy(cp_cruise_info.vl["SCC_CONTROL"])
 
@@ -324,8 +324,8 @@ class CarState(CarStateBase):
       ]
     if self.CP.flags & HyundaiFlags.CCNC and not self.CP.flags & HyundaiFlags.CANFD_HDA2:
       cam_messages += [
-        ("MSG_161", 20),
-        ("MSG_162", 20),
+        ("CCNC_0x161", 20),
+        ("CCNC_0x162", 20),
       ]
 
     return {
