@@ -293,7 +293,7 @@ class CAR(Platforms):
   HYUNDAI_SONATA_2024 = HyundaiCanFDPlatformConfig(
     [HyundaiCarDocs("Hyundai Sonata 2024", "All", car_parts=CarParts.common([CarHarness.hyundai_a]))],
     CarSpecs(mass=1556, wheelbase=2.84, steerRatio=12.81),
-    flags=HyundaiFlags.CCNC | HyundaiFlags.MANDO_RADAR,
+    flags=HyundaiFlags.CCNC,
   )
   HYUNDAI_SONATA_LF = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Sonata 2018-19", car_parts=CarParts.common([CarHarness.hyundai_e]))],
@@ -334,7 +334,7 @@ class CAR(Platforms):
   HYUNDAI_SONATA_HEV_2024 = HyundaiCanFDPlatformConfig(
     [HyundaiCarDocs("Hyundai Sonata Hybrid 2024", "All", car_parts=CarParts.common([CarHarness.hyundai_a]))],
     CarSpecs(mass=1616, wheelbase=2.84, steerRatio=13.27),
-    flags=HyundaiFlags.CCNC,
+    flags=HyundaiFlags.CCNC | HyundaiFlags.MANDO_RADAR,
   )
   HYUNDAI_IONIQ_5 = HyundaiCanFDPlatformConfig(
     [
