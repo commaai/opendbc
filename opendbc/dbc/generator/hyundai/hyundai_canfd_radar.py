@@ -46,7 +46,7 @@ BU_: XXX
 
     for a in range(0x3A5, 0x3A5 + 32):
         f.write(f"""
-BO_ {a} RADAR_TRACK_{a:X}: 24 RADAR
+BO_ {a} RADAR_TRACK_{a:x}: 24 RADAR
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_1 : 25|2@0+ (1,0) [0|3] "" XXX

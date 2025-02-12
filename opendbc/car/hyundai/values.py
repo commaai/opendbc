@@ -145,6 +145,8 @@ class HyundaiCanFDPlatformConfig(PlatformConfig):
 
   def init(self):
     self.flags |= HyundaiFlags.CANFD
+    if self.flags & HyundaiFlags.MANDO_RADAR:
+      self.dbc_dict = {Bus.pt: "hyundai_canfd", Bus.radar: 'hyundai_canfd_radar_generated'}
 
 
 class CAR(Platforms):
@@ -291,7 +293,7 @@ class CAR(Platforms):
   HYUNDAI_SONATA_2024 = HyundaiCanFDPlatformConfig(
     [HyundaiCarDocs("Hyundai Sonata 2024", "All", car_parts=CarParts.common([CarHarness.hyundai_a]))],
     CarSpecs(mass=1556, wheelbase=2.84, steerRatio=12.81),
-    flags=HyundaiFlags.CCNC,
+    flags=HyundaiFlags.CCNC | HyundaiFlags.MANDO_RADAR,
   )
   HYUNDAI_SONATA_LF = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Sonata 2018-19", car_parts=CarParts.common([CarHarness.hyundai_e]))],

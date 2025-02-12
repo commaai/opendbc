@@ -3,14 +3,15 @@ import math
 from opendbc.can.parser import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.interfaces import RadarInterfaceBase
-from opendbc.car.hyundai.values import DBC
+from opendbc.car.hyundai.values import DBC, HyundaiFlags
 
-RADAR_START_ADDR = 0x500
+RADAR_START_ADDR_CAN = 0x500
+RADAR_START_ADDR_CANFD = 0x3A5
 RADAR_MSG_COUNT = 32
 
 # POC for parsing corner radars: https://github.com/commaai/openpilot/pull/24221/
 
-def get_radar_can_parser(CP):
+def get_radar_can_parser(CP, RADAR_START_ADDR):
   if Bus.radar not in DBC[CP.carFingerprint]:
     return None
 
@@ -21,12 +22,13 @@ def get_radar_can_parser(CP):
 class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
     super().__init__(CP)
+    self.RADAR_START_ADDR = RADAR_START_ADDR_CANFD if CP.flags & HyundaiFlags.CANFD else RADAR_START_ADDR_CAN
     self.updated_messages = set()
-    self.trigger_msg = RADAR_START_ADDR + RADAR_MSG_COUNT - 1
+    self.trigger_msg = self.RADAR_START_ADDR + RADAR_MSG_COUNT - 1
     self.track_id = 0
 
     self.radar_off_can = CP.radarUnavailable
-    self.rcp = get_radar_can_parser(CP)
+    self.rcp = get_radar_can_parser(CP, self.RADAR_START_ADDR)
 
   def update(self, can_strings):
     if self.radar_off_can or (self.rcp is None):
@@ -54,7 +56,7 @@ class RadarInterface(RadarInterfaceBase):
       errors.append("canError")
     ret.errors = errors
 
-    for addr in range(RADAR_START_ADDR, RADAR_START_ADDR + RADAR_MSG_COUNT):
+    for addr in range(self.RADAR_START_ADDR, self.RADAR_START_ADDR + RADAR_MSG_COUNT):
       msg = self.rcp.vl[f"RADAR_TRACK_{addr:x}"]
 
       if addr not in self.pts:
