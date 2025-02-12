@@ -47,7 +47,7 @@ class CarControllerParams:
     self.STEER_LOOKUP_V = [v * -1 for v in CP.lateralParams.torqueV][1:][::-1] + list(CP.lateralParams.torqueV)
 
 
-class HondaPandaFlags(IntFlag):
+class HondaSafetyFlags(IntFlag):
   FLAG_HONDA_ALT_BRAKE = 1
   FLAG_HONDA_BOSCH_LONG = 2
   FLAG_HONDA_NIDEC_ALT = 4

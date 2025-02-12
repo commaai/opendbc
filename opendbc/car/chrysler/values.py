@@ -9,7 +9,7 @@ from opendbc.car.fw_query_definitions import FwQueryConfig, Request, p16
 Ecu = CarParams.Ecu
 
 
-class ChryslerPandaFlags(IntFlag):
+class ChryslerSafetyFlags(IntFlag):
   FLAG_CHRYSLER_RAM_DT = 1
   FLAG_CHRYSLER_RAM_HD = 2
 
