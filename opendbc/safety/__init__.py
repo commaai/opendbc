@@ -1,5 +1,6 @@
 class Safety:
   # matches opendbc.structs.CarParams.SafetyModel
+  # TODO: just use SafetyModel in panda repo
   SAFETY_SILENT = 0
   SAFETY_HONDA_NIDEC = 1
   SAFETY_TOYOTA = 2
