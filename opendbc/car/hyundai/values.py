@@ -102,6 +102,7 @@ class HyundaiFlags(IntFlag):
   MIN_STEER_32_MPH = 2 ** 23
 
   ANGLE_CONTROL = 2 ** 24
+  CANFD_BLOCK_LFA = 2 ** 25
 
 
 class Footnote(Enum):

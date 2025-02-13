@@ -37,6 +37,9 @@ class CarInterface(CarInterfaceBase):
         ret.flags |= HyundaiFlags.CANFD_HDA2.value
         if 0x110 in fingerprint[CAN.CAM]:
           ret.flags |= HyundaiFlags.CANFD_HDA2_ALT_STEERING.value
+
+        if 0x362 in fingerprint[CAN.CAM] or 0x2A4 in fingerprint[CAN.CAM]:
+          ret.flags |= HyundaiFlags.CANFD_BLOCK_LFA.value
       else:
         # non-HDA2
         if 0x1cf not in fingerprint[CAN.ECAN]:
