@@ -1,7 +1,6 @@
-from panda import Panda
 from opendbc.car import get_safety_config, structs
 from opendbc.car.interfaces import CarInterfaceBase
-from opendbc.car.nissan.values import CAR
+from opendbc.car.nissan.values import CAR, NissanSafetyFlags
 
 
 class CarInterface(CarInterfaceBase):
@@ -21,6 +20,6 @@ class CarInterface(CarInterfaceBase):
 
     if candidate == CAR.NISSAN_ALTIMA:
       # Altima has EPS on C-CAN unlike the others that have it on V-CAN
-      ret.safetyConfigs[0].safetyParam |= Panda.FLAG_NISSAN_ALT_EPS_BUS
+      ret.safetyConfigs[0].safetyParam |= NissanSafetyFlags.FLAG_NISSAN_ALT_EPS_BUS.value
 
     return ret
