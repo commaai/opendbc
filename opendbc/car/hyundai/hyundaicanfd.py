@@ -65,7 +65,10 @@ def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_steer, 
       ret.append(packer.make_can_msg("LFA", CAN.ECAN, values))
     ret.append(packer.make_can_msg(hda2_lkas_msg, CAN.ACAN, values))
   else:
-    ret.append(packer.make_can_msg("LFA", CAN.ECAN, values))
+    if CP.flags & HyundaiFlags.ANGLE_CONTROL:
+      ret.append(packer.make_can_msg("LKAS_ALT", CAN.ECAN, values))
+    else:
+      ret.append(packer.make_can_msg("LFA", CAN.ECAN, values))
 
   return ret
 
