@@ -1,8 +1,5 @@
 #pragma once
 
-// bump this when changing the CAN packet
-#define CAN_PACKET_VERSION 4
-
 #define CANPACKET_HEAD_SIZE 6U
 
 #if !defined(STM32F4)
