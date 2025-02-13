@@ -3348,6 +3348,8 @@ BO_ 982 LateralMotionControl2: 16 IPMA_ADAS
  SG_ LatCtlPathOffst_L_Actl : 33|10@0+ (0.01,-5.12) [-5.12|5.11] "meter"  PSCM
  SG_ LatCtlPath_An_Actl : 28|11@0+ (0.0005,-0.5) [-0.5|0.5235] "radians"  PSCM
  SG_ LatCtlCurv_No_Actl : 23|11@0+ (2E-005,-0.02) [-0.02|0.02094] "1/meter"  PSCM
+ SG_ Security_Counter : 68|7@0+ (1,0) [0|127] "" XXX
+ SG_ Security_Checksum : 76|53@0+ (1,0) [0|9.00719925474099e+15] "" XXX
 
 BO_ 981 GlareFreeBeam: 8 IPMA_ADAS
  SG_ AdbRamping_T_Rq : 44|4@0+ (200,0) [0|3000] "millisecond"  GWM
