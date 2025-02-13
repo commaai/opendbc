@@ -1798,7 +1798,7 @@ BO_ 1102 SelectDriveModeData2: 8 ABS_ESC
  SG_ SelDrvMdePos02_D_Stat : 2|5@0+ (1,0) [0|31] "SED"  GWM
  SG_ SelDrvMdePos01_D_Stat : 7|5@0+ (1,0) [0|31] "SED"  GWM
 
-BO_ 1056 SelectDriveModeData: 8 ABS_ESC
+BO_ 1056 SelectDriveModeData: 16 ABS_ESC
  SG_ AutoEpbMsgTxt_D_Rq : 58|3@0+ (1,0) [0|7] "SED"  GWM
  SG_ AutoEpbDsply_D_Stat : 37|2@0+ (1,0) [0|3] "SED"  GWM
  SG_ AutoEpbButtnOn_B_Stat : 48|1@0+ (1,0) [0|1] "SED"  GWM
@@ -1955,14 +1955,14 @@ BO_ 125 BrakeSnData_4: 16 ABS_ESC
  SG_ BrkTot_Tq_Actl : 27|13@0+ (4,0) [0|32756] "Nm"  ECM_Diesel,PCM,PCM_HEV,PSCM,GWM,TCCM
  SG_ HsaStat_D_Actl : 7|3@0+ (1,0) [0|7] "SED"  ECM_Diesel,PCM,PCM_HEV,TCM_DSL,GWM
 
-BO_ 119 BrakeSnData_3: 8 ABS_ESC
+BO_ 119 BrakeSnData_3: 16 ABS_ESC
  SG_ VehTrvlDir_D_Stat : 23|3@0+ (1,0) [0|7] "SED"  GWM
  SG_ VehOverGnd_V_Est : 7|16@0+ (0.01,0) [0|655.33] "kph"  VDM,IPMA_ADAS,TCCM,PSCM,GWM
  SG_ VehLongComp_A_Actl : 49|10@0+ (0.035,-17.9) [-17.9|17.835] "m/s^2"  VDM,ECM_Diesel,PCM,PCM_HEV,TCM_DSL,PSCM,GWM
  SG_ VehLatComp_A_Actl : 43|10@0+ (0.035,-17.9) [-17.9|17.835] "m/s^2"  VDM,ECM_Diesel,PCM,PCM_HEV,TCM_DSL,PSCM,TCCM,GWM
  SG_ VehYawComp_W_Actl : 19|12@0+ (0.03663,-75) [-75|74.92659] "deg/s"  VDM,TCCM,IPMA_ADAS,ECM_Diesel,PCM,PCM_HEV,TCM_DSL,PSCM,GWM
 
-BO_ 118 BrakeSnData_5: 8 ABS_ESC
+BO_ 118 BrakeSnData_5: 16 ABS_ESC
  SG_ BrkCtrFnd_B_Stat : 39|1@0+ (1,0) [0|1] "SED"  GWM
  SG_ AwdLck_Tq_RqMx : 35|12@0+ (1,0) [0|4095] "Nm"  GWM,TCCM
  SG_ AwdLck_Tq_RqMn : 51|12@0+ (1,0) [0|4095] "Nm"  GWM,TCCM
@@ -2061,7 +2061,7 @@ BO_ 560 TransGearData: 8 TCM_DSL
  SG_ GearLvrPos_D_Actl : 12|4@0+ (1,0) [0|15] "SED"  VDM,IPMA_ADAS,GWM,ABS_ESC,PSCM,TCCM,ECM_Diesel
  SG_ GboxOil_Te_Actl : 39|8@0+ (1,-60) [-60|193] "degC"  SOBDMC_HPCM_FD1,GWM,TCCM,ECM_Diesel
 
-BO_ 369 EngineData_1: 8 PCM
+BO_ 369 EngineData_1: 16 PCM
  SG_ SeatWorkSrfc_B_Falt : 12|1@0+ (1,0) [0|1] "SED"  GWM
  SG_ TrnIpcDsplyRng2_D_Actl : 23|4@0+ (1,0) [0|15] "SED"  GWM
  SG_ TrnIpcDsplyRng_D_Stat : 9|2@0+ (1,0) [0|3] "SED"  GWM
@@ -3530,7 +3530,7 @@ BO_ 1778 TesterPhysicalReqSODCMC: 64 TSTR
 BO_ 1153 All_Terrain_Data_FD1: 8 GWM
  SG_ TerrMde_D_RqDrv : 3|3@0+ (1,0) [0|7] "SED" Vector__XXX
 
-BO_ 942 ParkAid_Data2: 8 IPMA_ADAS
+BO_ 942 ParkAid_Data2: 16 IPMA_ADAS
  SG_ PrkAidRdiusRight_L_Dsply : 15|8@0+ (1,0) [0|255] "unitless"  GWM
  SG_ PrkAidRdiusLeft_L_Dsply : 7|8@0+ (1,0) [0|255] "unitless"  GWM
  SG_ PrkAidDrvDir_D_Stat : 23|3@0+ (1,0) [0|7] "SED"  GWM
