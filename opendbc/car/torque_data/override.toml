@@ -81,5 +81,6 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 "HONDA_CIVIC_2022" = [2.5, 1.2, 0.15]
 "HONDA_HRV_3G" = [2.5, 1.2, 0.2]
 
-# Hyundai/Kia/Genesis LFA2 also has torque
+# Hyundai/Kia/Genesis LFA1.5/2 also has torque
 "HYUNDAI_SANTA_FE_5TH_GEN" = [nan, 3.0, nan]
+"HYUNDAI_SANTA_FE_HEV_5TH_GEN" = [nan, 3.0, nan]
