@@ -993,7 +993,7 @@ BO_ 530 OffBrdChrg_Signals: 8 GWM
 BO_ 1142 ConsTip_Data_FD1: 8 SOBDMC_HPCM_FD1
  SG_ ConsTipV_No_Dsply : 49|10@0+ (0.1,0) [0|102.1] "percent" GWM
 
-BO_ 817 Locking_Systems_2_FD1: 8 GWM
+BO_ 817 Locking_Systems_2_FD1: 16 GWM
  SG_ ChildLckMde_B_Stat : 56|1@0+ (1,0) [0|1] "SED" Vector__XXX
  SG_ VehLckInd_D_Rq : 58|2@0+ (1,0) [0|3] "SED" Vector__XXX
  SG_ DrTgateOpen_B_Rq : 59|1@0+ (1,0) [0|1] "SED" Vector__XXX
@@ -1112,7 +1112,7 @@ BO_ 2610126917 OTAPhysSODCMCtoGWM_ECG: 8 IPMA_ADAS
 BO_ 2610126869 OTAPhysCCMtoGWM_ECG: 8 IPMA_ADAS
  SG_ OTAPhysCCMtoGWM_ECG : 7|29@0+ (1,0) [0|536870911] "unitless" GWM
 
-BO_ 984 IPMA_Data: 8 IPMA_ADAS
+BO_ 984 IPMA_Data: 16 IPMA_ADAS
  SG_ FeatConfigIpmaActl : 7|16@0+ (1,0) [0|65535] "Undefined" GWM
  SG_ FeatNoIpmaActl : 23|16@0+ (1,0) [0|65535] "Number" GWM
  SG_ PersIndexIpma_D_Actl : 39|3@0+ (1,0) [0|7] "SED" GWM
@@ -1129,7 +1129,7 @@ BO_ 984 IPMA_Data: 8 IPMA_ADAS
  SG_ Passthru_63 : 63|4@0+ (1,0) [0|15] "" XXX
  SG_ Passthru_48 : 48|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 985 IPMA_Data2: 8 IPMA_ADAS
+BO_ 985 IPMA_Data2: 16 IPMA_ADAS
  SG_ LdwChime_B_Rq : 34|1@0+ (1,0) [0|1] "SED" GWM
  SG_ TsrRegionTxt_D_Stat : 47|5@0+ (1,0) [0|31] "SED" GWM
  SG_ SblmPedCrossScnr_B_Stat : 33|1@0+ (1,0) [0|1] "SED" GWM
@@ -1549,7 +1549,7 @@ BO_ 1119 Voltage_Power_Data2_FD1: 8 GWM
  SG_ CoolFanDcdc_D_Rq : 5|2@0+ (1,0) [0|3] "SED"  SOBDMC_HPCM_FD1
  SG_ DcdcClntFlw_D_Rq : 7|2@0+ (1,0) [0|3] "SED"  SOBDMC_HPCM_FD1
 
-BO_ 132 GlobalClock_Data_FD1: 8 GWM
+BO_ 132 GlobalClock_Data_FD1: 16 GWM
  SG_ GlblClkYr_No_Actl : 7|8@0+ (1,2000) [2000|2255] "year"  CMR_DSMC,SOBDMC_HPCM_FD1,IPMA_ADAS
  SG_ GlblClkScnd_No_Actl : 47|8@0+ (1,0) [0|255] "second"  CMR_DSMC,SOBDMC_HPCM_FD1,IPMA_ADAS
  SG_ GlblClkMnte_No_Actl : 39|8@0+ (1,0) [0|255] "minute"  CMR_DSMC,SOBDMC_HPCM_FD1,IPMA_ADAS
@@ -1587,7 +1587,7 @@ BO_ 1122 APIMGPS_Data_Nav_1_FD1: 8 GWM
  SG_ GPS_Latitude_Min_dec : 23|14@0+ (0.0001,0) [0|1.6381] "Minutes"  SOBDMC_HPCM_FD1,IPMA_ADAS
  SG_ GPS_Latitude_Degrees : 7|8@0+ (1,-89) [-89|164] "Degrees"  SOBDMC_HPCM_FD1,IPMA_ADAS
 
-BO_ 1003 Personality_BCM2_Data_FD1: 8 GWM
+BO_ 1003 Personality_BCM2_Data_FD1: 16 GWM
  SG_ PersRecallSrc_D_Actl : 63|3@0+ (1,0) [0|7] "SED" Vector__XXX
  SG_ Pers4Key_D_Stat : 49|2@0+ (1,0) [0|3] "SED" Vector__XXX
  SG_ Pers3Key_D_Stat : 41|2@0+ (1,0) [0|3] "SED" Vector__XXX
@@ -1651,7 +1651,7 @@ BO_ 551 APIM_Request_Signals_1_FD1: 8 GWM
  SG_ Em_D_Stat : 63|2@0+ (1,0) [0|3] "SED" Vector__XXX
  SG_ ChrgOvrdExitScrn_D_Rq : 58|2@0+ (1,0) [0|3] "SED" Vector__XXX
 
-BO_ 1010 IPMA_Data3: 8 IPMA_ADAS
+BO_ 1010 IPMA_Data3: 16 IPMA_ADAS
  SG_ MbdblActv_B_RqAdas : 48|1@0+ (1,0) [0|1] "SED"  GWM
  SG_ CbdblActv_B_RqAdas : 49|1@0+ (1,0) [0|1] "SED"  GWM
  SG_ AdbUrbanArea_B_Stat : 40|1@0+ (1,0) [0|1] "SED"  GWM
@@ -1716,7 +1716,7 @@ BO_ 1047 TrailerAid_Data2: 8 PSCM
  SG_ HitchToTrlrAxle_L_Calc : 7|9@0+ (0.0254,0) [0|12.9794] "meter"  IPMA_ADAS
  SG_ SelDrvMdeSte_D_Stat : 17|2@0+ (1,0) [0|3] "SED"  ABS_ESC
 
-BO_ 972 Lane_Assist_Data3_FD1: 8 PSCM
+BO_ 972 Lane_Assist_Data3_FD1: 16 PSCM
  SG_ LatCtlSte_D_Stat : 18|3@0+ (1,0) [0|7] "SED"  IPMA_ADAS,GWM
  SG_ LatCtlLim_D_Stat : 33|2@0+ (1,0) [0|3] "SED"  IPMA_ADAS,GWM
  SG_ LatCtlCpblty_D_Stat : 39|2@0+ (1,0) [0|3] "SED"  IPMA_ADAS,GWM
@@ -1730,7 +1730,7 @@ BO_ 972 Lane_Assist_Data3_FD1: 8 PSCM
  SG_ LaActAvail_D_Actl : 5|2@0+ (1,0) [0|3] "SED"  IPMA_ADAS,GWM
  SG_ LsmcBrk_Tq_Rq : 15|13@0+ (4,0) [0|32764] "Nm"  ABS_ESC
 
-BO_ 130 EPAS_INFO: 8 PSCM
+BO_ 130 EPAS_INFO: 16 PSCM
  SG_ TrlrHitchLamp_D_Rqst : 24|1@0+ (1,0) [0|1] "SED"  IPMA_ADAS,GWM
  SG_ VehVTrlrAid_B_Rq : 25|1@0+ (1,0) [0|1] "SED"  PCM_HEV,GWM,ECM_Diesel,PCM
  SG_ Veh_V_RqMxTrlrAid : 63|8@0+ (0.1,0) [0|25.5] "km/h"  PCM_HEV,GWM,ECM_Diesel,PCM
@@ -1774,7 +1774,7 @@ BO_ 1430 ABS_AutoSar_NetworkMgt: 8 ABS_ESC
  SG_ ABS_AutoSarNMNodeId : 7|8@0+ (1,0) [0|255] "unitless"  GWM
  SG_ ABS_AutoSarNMControl : 15|8@0+ (1,0) [0|255] "unitless"  GWM
 
-BO_ 1200 ABS_BrkBst_Data: 8 ABS_ESC
+BO_ 1200 ABS_BrkBst_Data: 16 ABS_ESC
  SG_ BrkHold_D_Stat : 34|3@0+ (1,0) [0|7] "SED"  ECM_Diesel,GWM,IPMA_ADAS,PCM,PCM_HEV
  SG_ HsaTrnAout_Tq_Rq : 23|16@0+ (4,-131072) [-131072|131060] "Nm"  GWM
  SG_ BrkBstrVac_P_Actl : 7|7@0+ (8,0) [0|1008] "Millibar"  ECM_Diesel,PCM,PCM_HEV,GWM
@@ -1821,7 +1821,7 @@ BO_ 1056 SelectDriveModeData: 8 ABS_ESC
  SG_ SelDrvMde_D_Stat : 26|2@0+ (1,0) [0|3] "SED"  GWM
  SG_ AwdMde_D_RqBrk : 35|3@0+ (1,0) [0|7] "SED"  GWM
 
-BO_ 1054 BrakeSysFeatures_3: 8 ABS_ESC
+BO_ 1054 BrakeSysFeatures_3: 16 ABS_ESC
  SG_ AirDamUp_B_RqBrk : 32|1@0+ (1,0) [0|1] "SED"  ECM_Diesel,PCM_HEV,PCM
  SG_ RbaBrk_D_Stat : 63|2@0+ (1,0) [0|3] "SED"  IPMA_ADAS,GWM
  SG_ SelDrvMdeChassis2_D_Rq : 45|5@0+ (1,0) [0|31] "SED"  PSCM,GWM
@@ -1838,7 +1838,7 @@ BO_ 1054 BrakeSysFeatures_3: 8 ABS_ESC
  SG_ SelDrvMdeChassis_D_Rq : 39|5@0+ (1,0) [0|31] "SED"  VDM,GWM
  SG_ ApaBrk_D_Stat : 34|2@0+ (1,0) [0|3] "SED"  ECM_Diesel,IPMA_ADAS,PCM,PCM_HEV,GWM
 
-BO_ 1046 BrakeSysFeatures_2: 8 ABS_ESC
+BO_ 1046 BrakeSysFeatures_2: 16 ABS_ESC
  SG_ HsaMde_D_Mem : 33|2@0+ (1,0) [0|3] "SED"  GWM
  SG_ BrkBstrVac_B_Rq : 27|1@0+ (1,0) [0|1] "Discrete"  ECM_Diesel,PCM,PCM_HEV,GWM
  SG_ HdcMde_D_Actl : 31|3@0+ (1,0) [0|7] "SED"  GWM
@@ -1861,7 +1861,7 @@ BO_ 1046 BrakeSysFeatures_2: 8 ABS_ESC
  SG_ HILL_DESC_MC : 47|3@0+ (1,0) [0|7] "SED"  GWM
  SG_ RearDiffElckrOpen_B_Rq : 40|1@0+ (1,0) [0|1] "SED"  GWM,TCCM
 
-BO_ 1045 BrakeSysFeatures: 8 ABS_ESC
+BO_ 1045 BrakeSysFeatures: 16 ABS_ESC
  SG_ VehStab_D_Stat : 55|4@0+ (1,0) [0|15] "SED"  TCCM,PCM_HEV,PCM,GWM
  SG_ BrkFluidLvl_D_Stat : 17|2@0+ (1,0) [0|3] "SED"  GWM
  SG_ LsmcBrkDecel_D_Stat : 39|3@0+ (1,0) [0|7] "SED"  PSCM,GWM
@@ -1872,7 +1872,7 @@ BO_ 1045 BrakeSysFeatures: 8 ABS_ESC
  SG_ VehVActlBrk_No_Cnt : 21|4@0+ (1,0) [0|15] "Unitless"  TCCM,CMR_DSMC,SOBDMC_HPCM_FD1,ECM_Diesel,PCM,PCM_HEV,PSCM,TCM_DSL,GWM,IPMA_ADAS
  SG_ VehVActlBrk_D_Qf : 23|2@0+ (1,0) [0|3] "SED"  TCCM,CMR_DSMC,SOBDMC_HPCM_FD1,IPMA_ADAS,ECM_Diesel,PCM,PCM_HEV,PSCM,TCM_DSL,GWM
 
-BO_ 1044 BrakeSnData_6: 8 ABS_ESC
+BO_ 1044 BrakeSnData_6: 16 ABS_ESC
  SG_ StePinOffst_An_Est : 7|16@0+ (0.1,-3200) [-3200|3353.3] "degrees"  GWM,PSCM
  SG_ StePinOffst_No_Cs : 31|8@0+ (1,0) [0|255] "Unitless"  GWM,PSCM
  SG_ StePinOffst_No_Cnt : 21|4@0+ (1,0) [0|15] "unitless"  GWM,PSCM
@@ -1883,13 +1883,13 @@ BO_ 1042 TrailerBrakeData: 8 ABS_ESC
  SG_ VehPtch_An_Dsply : 23|7@0+ (1,-64) [-64|61] "degrees"  GWM,TCCM
  SG_ TrlrBrk_Pc_Rq : 14|7@0+ (1,0) [0|127] "percent"  GWM
 
-BO_ 535 WheelSpeed: 8 ABS_ESC
+BO_ 535 WheelSpeed: 16 ABS_ESC
  SG_ WhlRr_W_Meas : 54|15@0+ (0.01,0) [0|327.65] "rad/s"  VDM,IPMA_ADAS,GWM,ECM_Diesel,PCM,PCM_HEV,PSCM,TCCM,TCM_DSL
  SG_ WhlRl_W_Meas : 38|15@0+ (0.01,0) [0|327.65] "rad/s"  VDM,IPMA_ADAS,GWM,ECM_Diesel,PCM,PCM_HEV,PSCM,TCCM,TCM_DSL
  SG_ WhlFr_W_Meas : 22|15@0+ (0.01,0) [0|327.65] "rad/s"  VDM,IPMA_ADAS,GWM,ECM_Diesel,PCM,PCM_HEV,PSCM,TCCM,TCM_DSL
  SG_ WhlFl_W_Meas : 6|15@0+ (0.01,0) [0|327.65] "rad/s"  VDM,IPMA_ADAS,GWM,ECM_Diesel,PCM,PCM_HEV,PSCM,TCCM,TCM_DSL
 
-BO_ 534 WheelData: 8 ABS_ESC
+BO_ 534 WheelData: 16 ABS_ESC
  SG_ BrkObdData_No_Actl : 63|8@0+ (1,0) [0|255] "unitless"  SOBDMC_HPCM_FD1,GWM
  SG_ BrkObdIndex_No_Actl : 53|6@0+ (1,0) [0|63] "unitless"  SOBDMC_HPCM_FD1,GWM
  SG_ WhlRotatRr_No_Cnt : 23|8@0+ (1,0) [0|255] "Unitless"  IPMA_ADAS,GWM,PSCM
@@ -1908,7 +1908,7 @@ BO_ 532 DesiredTorqBrk_2: 8 ABS_ESC
  SG_ PrplWhlTot_Tq_RqMn : 7|16@0+ (4,-131072) [-131072|131068] "Nm"  GWM,ECM_Diesel,PCM,PCM_HEV
  SG_ PrplWhlTqRqMn_No_Cnt : 63|4@0+ (1,0) [0|15] "Unitless"  GWM,ECM_Diesel,PCM,PCM_HEV
 
-BO_ 531 DesiredTorqBrk: 8 ABS_ESC
+BO_ 531 DesiredTorqBrk: 16 ABS_ESC
  SG_ VehStop_D_Stat : 28|2@0+ (1,0) [0|3] "SED"  IPMA_ADAS,GWM
  SG_ TracCtlPtActv_B_Actl : 31|1@0+ (1,0) [0|1] "SED"  VDM,IPMA_ADAS,TCCM,ECM_Diesel,PCM,PCM_HEV,TCM_DSL,GWM
  SG_ LscmbbMntr_B_Err : 17|1@0+ (1,0) [0|1] "SED"  GWM
@@ -1946,7 +1946,7 @@ BO_ 136 ActiveFronSteering_Req: 8 ABS_ESC
  SG_ SteWhlBrkAnRq_No_Cs : 23|8@0+ (1,0) [0|255] "Unitless"  GWM
  SG_ SteWhlBrkAnRq_No_Cnt : 31|4@0+ (1,0) [0|15] "Unitless"  GWM
 
-BO_ 125 BrakeSnData_4: 8 ABS_ESC
+BO_ 125 BrakeSnData_4: 16 ABS_ESC
  SG_ VehRolComp_W_Actl : 51|12@0+ (0.03663,-75) [-75|74.92659] "degrees/sec"  VDM,GWM
  SG_ VehVertComp_A_Actl : 45|10@0+ (0.035,-17.9) [-17.9|17.835] "m/s^2"  VDM,PSCM,GWM
  SG_ BrkTotTqRqArb_No_Cs : 23|8@0+ (1,0) [0|255] "Unitless"  ECM_Diesel,PCM,PCM_HEV,GWM
@@ -1975,7 +1975,7 @@ BO_ 73 Global_PATS_SubTarget: 8 ABS_ESC
  SG_ immoSubTarget1Data_T1 : 15|40@0+ (1,0) [0|1099511627775] "Encrypted"  ECM_Diesel,GWM,PCM,PCM_HEV
  SG_ immoSubTarget1Cmd_T1 : 7|3@0+ (1,0) [0|7] "SED"  ECM_Diesel,GWM,PCM,PCM_HEV
 
-BO_ 1034 GGCC_Config_Mgmt_ID_1_FD1: 8 GWM
+BO_ 1034 GGCC_Config_Mgmt_ID_1_FD1: 16 GWM
  SG_ VehicleGGCCData : 7|64@0+ (1,0) [0|1.84467E+019] "mixed"  VDM,CMR_DSMC,SOBDMC_HPCM_FD1,IPMA_ADAS,ABS_ESC,ECM_Diesel,PCM,PCM_HEV,PSCM,TCCM,TCM_DSL
 
 BO_ 1440 TCM_AutoSar_NetworkMgt: 8 TCM_DSL
@@ -2070,7 +2070,7 @@ BO_ 369 EngineData_1: 8 PCM
  SG_ TrnIpcDsplyMde_D_Actl : 15|3@0+ (1,0) [0|7] "SED"  GWM
  SG_ TrnIpcDsplyGear_D_Stat : 1|2@0+ (1,0) [0|3] "SED"  GWM
 
-BO_ 92 Gear_Shift_by_Wire_3: 8 PCM_HEV
+BO_ 92 Gear_Shift_by_Wire_3: 16 PCM_HEV
  SG_ TrnLvrV_D_Rq : 43|2@0+ (1,0) [0|3] "SED"  GWM
  SG_ TrnSbwSysHlth_D_Actl : 1|2@0+ (1,0) [0|3] "SED"  GWM
  SG_ TrnGearNtmAllow_B_Stat : 47|1@0+ (1,0) [0|1] "SED"  GWM
@@ -2090,7 +2090,7 @@ BO_ 92 Gear_Shift_by_Wire_3: 8 PCM_HEV
 BO_ 2030 TesterPhysicalResSOBDMCFD1: 64 ECM_Diesel
  SG_ TesterPhysicalResSOBDMC : 7|64@0+ (1,0) [0|1.84467E+019] "unitless"  TSTR
 
-BO_ 1087 Powertrain_Data_5: 8 PCM_HEV
+BO_ 1087 Powertrain_Data_5: 16 PCM_HEV
  SG_ BattRgenLoChrg_D_RqEng : 15|2@0+ (1,0) [0|3] "SED"  GWM
  SG_ AdasLcObtclAbrt_B_Stat : 0|1@0+ (1,0) [0|1] "SED"  IPMA_ADAS,GWM
  SG_ BattRgenLoDChrg_D_RqEng : 13|2@0+ (1,0) [0|3] "SED"  GWM
@@ -2179,7 +2179,7 @@ BO_ 1429 PCM_AutoSar_NetworkMgmt: 8 PCM_HEV
  SG_ PCM_AutoSarNMNodeId : 7|8@0+ (1,0) [0|255] "unitless"  TCM_DSL
  SG_ PCM_AutoSarNMControl : 15|8@0+ (1,0) [0|255] "unitless"  TCM_DSL
 
-BO_ 1100 PowertrainData_9: 8 PCM_HEV
+BO_ 1100 PowertrainData_9: 16 PCM_HEV
  SG_ EngExhMdeQuiet_D2_Stat : 28|3@0+ (1,0) [0|7] "SED"  GWM
  SG_ HvacCmprLim_D_Stat : 34|3@0+ (1,0) [0|7] "SED"  GWM
  SG_ WakeAlarm1_T_Rq : 55|15@0+ (1,0) [0|32767] "minute"  GWM
@@ -2270,12 +2270,12 @@ BO_ 523 Engine_Data_18: 8 ECM_Diesel
  SG_ VehUreaRnge3_L_DsplyMx : 31|16@0+ (1,0) [0|65535] "unitless"  GWM
  SG_ UreaMxAdd_L2_Actl : 47|9@0+ (0.1,0) [0|51] "litre"  GWM
 
-BO_ 517 PowertrainData_6: 8 PCM_HEV
+BO_ 517 PowertrainData_6: 16 PCM_HEV
  SG_ FapLc_B_Err : 10|1@0+ (1,0) [0|1] "SED"  IPMA_ADAS,GWM
  SG_ BrkTot_Tq_RqFapLc : 7|13@0+ (4,0) [0|32764] "Nm"  ABS_ESC,GWM
  SG_ TrnAin_Pc_RqDrv : 9|10@0+ (0.1,0) [0|102.3] "percent"  TCCM,GWM
 
-BO_ 516 EngVehicleSpThrottle: 8 PCM_HEV
+BO_ 516 EngVehicleSpThrottle: 16 PCM_HEV
  SG_ EngAoutNActl_D_QF : 31|2@0+ (1,0) [0|3] "SED"  TCM_DSL,GWM
  SG_ EngAout3_N_Actl : 55|16@0+ (0.25,0) [0|16383.5] "RPM"  SOBDMC_HPCM_FD1,GWM
  SG_ ApedPos_PcRate_ActlArb : 23|8@0+ (0.04,-5) [-5|5.12] "%/ms"  TCM_DSL,GWM
@@ -2285,7 +2285,7 @@ BO_ 516 EngVehicleSpThrottle: 8 PCM_HEV
  SG_ ApedPosPcActl_No_Cnt : 5|4@0+ (1,0) [0|15] "Unitless"  ABS_ESC,SOBDMC_HPCM_FD1,GWM
  SG_ ApedPosPcActl_No_Cs : 47|8@0+ (1,0) [0|255] "Unitless"  ABS_ESC,SOBDMC_HPCM_FD1,GWM
 
-BO_ 514 EngVehicleSpThrottle2: 8 PCM_HEV
+BO_ 514 EngVehicleSpThrottle2: 16 PCM_HEV
  SG_ StrtrMtrDlyStrt_B_Stat : 39|1@0+ (1,0) [0|1] "SED"  GWM
  SG_ VehVTrlrAid_B_Avail : 23|1@0+ (1,0) [0|1] "SED"  PSCM,GWM
  SG_ StrtrMtrCtlMsgTxt_D_Rq : 7|3@0+ (1,0) [0|7] "SED"  GWM
@@ -2297,7 +2297,7 @@ BO_ 514 EngVehicleSpThrottle2: 8 PCM_HEV
  SG_ GearRvrse_D_Actl : 4|3@0+ (1,0) [0|7] "SED"  CMR_DSMC,IPMA_ADAS,ABS_ESC,PSCM,GWM
  SG_ StrtrMtrCtlMsgTxt_D2_Rq : 1|2@0+ (1,0) [0|3] "SED"  GWM
 
-BO_ 512 TorqueDataEngFlags: 8 PCM_HEV
+BO_ 512 TorqueDataEngFlags: 16 PCM_HEV
  SG_ PrplWhlTotTqRq_No_Cs : 63|8@0+ (1,0) [0|255] "Unitless"  ABS_ESC,GWM
  SG_ PrplWhlTotTqRq_No_Cnt : 51|4@0+ (1,0) [0|15] "Unitless"  ABS_ESC,GWM
  SG_ PrplWhlTot_Tq_Rq : 39|16@0+ (4,-131072) [-131072|131068] "Nm"  VDM,TCCM,ABS_ESC,GWM
@@ -2330,7 +2330,7 @@ BO_ 377 EngineData_7: 8 PCM_HEV
  SG_ AirCondRec_B_Rq : 55|1@0+ (1,0) [0|1] "SED"  GWM
  SG_ AirCondClutch_B_Stats : 51|1@0+ (1,0) [0|1] "SED"  GWM
 
-BO_ 376 EngineClimateData: 8 PCM_HEV
+BO_ 376 EngineClimateData: 16 PCM_HEV
  SG_ GasPrtc_D_RqDsply : 22|3@0+ (1,0) [0|7] "SED"  GWM
  SG_ EngAout_Aa_Actl : 17|10@0+ (0.05,-25.6) [-25.6|25.55] "rpm/ms"  ABS_ESC,GWM
  SG_ DynoMde_B_Cmd : 4|1@0+ (1,0) [0|1] "SED"  TCM_DSL,ABS_ESC,GWM
@@ -2343,13 +2343,13 @@ BO_ 376 EngineClimateData: 8 PCM_HEV
  SG_ AirAmb_Te_Actl : 33|10@0+ (0.25,-128) [-128|127.75] "degC"  ABS_ESC,TCCM,GWM
  SG_ AirAmb_P_Actl : 55|6@0+ (10,500) [500|1110] "mbar"  ABS_ESC,TCM_DSL,GWM
 
-BO_ 373 EngineData_11: 8 ECM_Diesel
+BO_ 373 EngineData_11: 16 ECM_Diesel
  SG_ DieslPrtc2_D_RqDsply : 47|4@0+ (1,0) [0|15] "SED"  GWM
  SG_ DieslPrtcRgen_D_Actl : 38|2@0+ (1,0) [0|3] "SED"  TCM_DSL,GWM
  SG_ EngTeColdPrtct_D_Stats : 4|2@0+ (1,0) [0|3] "SED"  GWM
  SG_ EngExhOvrTe_B_RqDsply : 39|1@0+ (1,0) [0|1] "SED"  GWM
 
-BO_ 359 VehicleOperatingModes: 8 PCM_HEV
+BO_ 359 VehicleOperatingModes: 16 PCM_HEV
  SG_ PrplWhlRgenMn_Tq_Actl : 25|13@0+ (4,-16380) [-16380|16380] "Nm"  ABS_ESC,GWM
  SG_ ElPw_D_StatStrtStop : 31|4@0+ (1,0) [0|15] "SED"  ABS_ESC,PSCM,GWM
  SG_ TrnAin_Tq_Actl : 42|11@0+ (1,-500) [-500|1547] "Nm"  ABS_ESC,GWM
@@ -2360,7 +2360,7 @@ BO_ 359 VehicleOperatingModes: 8 PCM_HEV
  SG_ ElPw_D_Stat : 3|3@0+ (1,0) [0|7] "SED"  VDM,CMR_DSMC,IPMA_ADAS,ABS_ESC,PSCM,TCCM,TCM_DSL,GWM
  SG_ TrnAinTq_D_Qf : 44|2@0+ (1,0) [0|3] "SED"  ABS_ESC,GWM
 
-BO_ 358 Stop_Start: 8 PCM_HEV
+BO_ 358 Stop_Start: 16 PCM_HEV
  SG_ StopStrtStdby_D_Indic : 55|3@0+ (1,0) [0|7] "SED"  GWM
  SG_ StopStrtIODTxt_D_Rq : 52|5@0+ (1,0) [0|31] "SED"  GWM
  SG_ StopStrtDrvMde_D_Indic : 13|2@0+ (1,0) [0|3] "SED"  GWM
@@ -2369,7 +2369,7 @@ BO_ 358 Stop_Start: 8 PCM_HEV
  SG_ HiElPwInhbt_B_Stat : 15|1@0+ (1,0) [0|1] "SED"  GWM
  SG_ AutoStopPtDelta_I_Est : 7|8@0+ (1,-127) [-127|127] "Amps"  GWM
 
-BO_ 357 EngBrakeData: 8 PCM_HEV
+BO_ 357 EngBrakeData: 16 PCM_HEV
  SG_ BPedDrvAppl_D_QF : 15|2@0+ (1,0) [0|3] "SED"  CMR_DSMC,SOBDMC_HPCM_FD1,IPMA_ADAS,ABS_ESC,PSCM,TCM_DSL,GWM
  SG_ CmbbDeny_B_ActlPrpl : 3|1@0+ (1,0) [0|1] "SED"  IPMA_ADAS,GWM
  SG_ PrplTqMnSat_B_Actl : 41|1@0+ (1,0) [0|1] "SED"  IPMA_ADAS,GWM
@@ -2416,7 +2416,7 @@ BO_ 1438 GWM_AutoSar_NetMgmt_FD1: 8 GWM
  SG_ GWM_AutoSarNMNodeId : 7|8@0+ (1,0) [0|255] "unitless"  PCM_HEV,PCM,SOBDMC_HPCM_FD1,PSCM,ABS_ESC
  SG_ GWM_AutoSarNMControl : 15|8@0+ (1,0) [0|255] "unitless"  PCM_HEV,PCM,SOBDMC_HPCM_FD1,PSCM,ABS_ESC
 
-BO_ 954 Body_Info_10_FD1: 8 GWM
+BO_ 954 Body_Info_10_FD1: 16 GWM
  SG_ GenericSwtch3_No_Actl : 15|3@0+ (1,0) [0|7] "unitless" Vector__XXX
  SG_ GenericSwtch2_No_Actl : 4|3@0+ (1,0) [0|7] "unitless" Vector__XXX
  SG_ GenericSwtch1_No_Actl : 7|3@0+ (1,0) [0|7] "unitless" Vector__XXX
@@ -2426,7 +2426,7 @@ BO_ 1006 Personality_IPMB_Data: 8 IPMA_ADAS
  SG_ FeatNoIpmbActl : 23|16@0+ (1,0) [0|65535] "Number"  GWM
  SG_ FeatConfigIpmbActl : 7|16@0+ (1,0) [0|65535] "Undefined"  GWM
 
-BO_ 820 Adaptive_Headlamp_Stat: 8 GWM
+BO_ 820 Adaptive_Headlamp_Stat: 16 GWM
  SG_ AhbStatGfhbFdbk_D_Actl : 53|2@0+ (1,0) [0|3] "SED"  IPMA_ADAS
  SG_ HeadLghtDrvSide_B_Stat : 33|1@0+ (1,0) [0|1] "SED"  IPMA_ADAS
  SG_ HeadLghtHiOn_B_StatHcm : 0|1@0+ (1,0) [0|1] "SED" Vector__XXX
@@ -2462,7 +2462,7 @@ BO_ 129 Steering_Wheel_Data2_FD1: 8 GWM
  SG_ SteWhlSwtchHome_B_Stat : 19|1@0+ (1,0) [0|1] "SED" Vector__XXX
  SG_ SteWhlSwtchInfo_B_Stat : 18|1@0+ (1,0) [0|1] "SED" Vector__XXX
 
-BO_ 935 Side_Detect_R_Stat: 8 IPMA_ADAS
+BO_ 935 Side_Detect_R_Stat: 16 IPMA_ADAS
  SG_ SodRight_D_Stat : 15|3@0+ (1,0) [0|7] "SED"  GWM
  SG_ CtaAlrtRight2_D_Stat : 30|3@0+ (1,0) [0|7] "SED"  GWM
  SG_ BttRight_D_Stat : 45|3@0+ (1,0) [0|7] "SED"  GWM
@@ -2627,7 +2627,7 @@ BO_ 1050 Climate_Control_Data_FD1: 8 GWM
 BO_ 1137 Cluster_HEV_Data10_FD1: 8 PCM_HEV
  SG_ RngPerChrgAvg_L_Dsply : 7|12@0+ (0.1,0) [0|409.3] "km"  GWM
 
-BO_ 1255 BoundaryAlert_Right_4: 8 IPMA_ADAS
+BO_ 1255 BoundaryAlert_Right_4: 16 IPMA_ADAS
  SG_ BalrRight4Threat_D_Stat : 16|1@0+ (1,0) [0|1] "SED"  GWM
  SG_ BalrRight4Prev3Y_L_Actl : 51|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
  SG_ BalrRight4Prev3X_L_Actl : 42|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
@@ -2640,7 +2640,7 @@ BO_ 1255 BoundaryAlert_Right_4: 8 IPMA_ADAS
  SG_ BalrRight4CurntY_L_Actl : 15|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
  SG_ BalrRight4CurntX_L_Actl : 7|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
 
-BO_ 1254 BoundaryAlert_Right_3: 8 IPMA_ADAS
+BO_ 1254 BoundaryAlert_Right_3: 16 IPMA_ADAS
  SG_ BalrRight3Threat_D_Stat : 16|1@0+ (1,0) [0|1] "SED"  GWM
  SG_ BalrRight3Prev3Y_L_Actl : 51|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
  SG_ BalrRight3Prev3X_L_Actl : 42|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
@@ -2653,7 +2653,7 @@ BO_ 1254 BoundaryAlert_Right_3: 8 IPMA_ADAS
  SG_ BalrRight3CurntY_L_Actl : 15|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
  SG_ BalrRight3CurntX_L_Actl : 7|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
 
-BO_ 1253 BoundaryAlert_Right_2: 8 IPMA_ADAS
+BO_ 1253 BoundaryAlert_Right_2: 16 IPMA_ADAS
  SG_ BalrRight2Prev3Y_L_Actl : 51|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
  SG_ BalrRight2Prev3X_L_Actl : 42|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
  SG_ BalrRight2Threat_D_Stat : 16|1@0+ (1,0) [0|1] "SED"  GWM
@@ -2666,7 +2666,7 @@ BO_ 1253 BoundaryAlert_Right_2: 8 IPMA_ADAS
  SG_ BalrRight2CurntY_L_Actl : 15|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
  SG_ BalrRight2CurntX_L_Actl : 7|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
 
-BO_ 1252 BoundaryAlert_Right_1: 8 IPMA_ADAS
+BO_ 1252 BoundaryAlert_Right_1: 16 IPMA_ADAS
  SG_ BalrRight1Prev3Y_L_Actl : 51|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
  SG_ BalrRight1Prev3X_L_Actl : 42|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
  SG_ BalrRight1Threat_D_Stat : 16|1@0+ (1,0) [0|1] "SED"  GWM
@@ -2679,7 +2679,7 @@ BO_ 1252 BoundaryAlert_Right_1: 8 IPMA_ADAS
  SG_ BalrRight1CurntY_L_Actl : 15|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
  SG_ BalrRight1CurntX_L_Actl : 7|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
 
-BO_ 1251 BoundaryAlert_Left_4: 8 IPMA_ADAS
+BO_ 1251 BoundaryAlert_Left_4: 16 IPMA_ADAS
  SG_ BalrLeft4Threat_D_Stat : 16|1@0+ (1,0) [0|1] "SED"  GWM
  SG_ BalrLeft4Prev3Y_L_Actl : 51|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
  SG_ BalrLeft4Prev3X_L_Actl : 42|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
@@ -2692,7 +2692,7 @@ BO_ 1251 BoundaryAlert_Left_4: 8 IPMA_ADAS
  SG_ BalrLeft4CurntY_L_Actl : 15|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
  SG_ BalrLeft4CurntX_L_Actl : 7|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
 
-BO_ 1250 BoundaryAlert_Left_3: 8 IPMA_ADAS
+BO_ 1250 BoundaryAlert_Left_3: 16 IPMA_ADAS
  SG_ BalrLeft3Threat_D_Stat : 16|1@0+ (1,0) [0|1] "SED"  GWM
  SG_ BalrLeft3Prev3Y_L_Actl : 51|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
  SG_ BalrLeft3Prev3X_L_Actl : 42|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
@@ -2705,7 +2705,7 @@ BO_ 1250 BoundaryAlert_Left_3: 8 IPMA_ADAS
  SG_ BalrLeft3CurntY_L_Actl : 15|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
  SG_ BalrLeft3CurntX_L_Actl : 7|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
 
-BO_ 1249 BoundaryAlert_Left_2: 8 IPMA_ADAS
+BO_ 1249 BoundaryAlert_Left_2: 16 IPMA_ADAS
  SG_ BalrLeft2Prev3Y_L_Actl : 51|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
  SG_ BalrLeft2Prev3X_L_Actl : 42|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
  SG_ BalrLeft2Threat_D_Stat : 16|1@0+ (1,0) [0|1] "SED"  GWM
@@ -2718,7 +2718,7 @@ BO_ 1249 BoundaryAlert_Left_2: 8 IPMA_ADAS
  SG_ BalrLeft2CurntY_L_Actl : 15|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
  SG_ BalrLeft2CurntX_L_Actl : 7|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
 
-BO_ 1248 BoundaryAlert_Left_1: 8 IPMA_ADAS
+BO_ 1248 BoundaryAlert_Left_1: 16 IPMA_ADAS
  SG_ BalrLeft1Threat_D_Stat : 16|1@0+ (1,0) [0|1] "SED"  GWM
  SG_ BalrLeft1Prev3Y_L_Actl : 51|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
  SG_ BalrLeft1Prev3X_L_Actl : 42|7@0+ (0.5,-32) [-32|31.5] "meter"  GWM
@@ -2744,7 +2744,7 @@ BO_ 1113 TrailerAid_Stat3: 8 IPMA_ADAS
  SG_ HitchToVehAxle_L_Calc : 7|8@0+ (0.0127,-0.508) [-0.508|2.7178] "meter"  PSCM,GWM
  SG_ HitchToTrlrAxle_L_Calc2 : 15|9@0+ (0.0254,0) [0|12.9794] "meter"  GWM
 
-BO_ 1105 Image_Processing_Data: 8 IPMA_ADAS
+BO_ 1105 Image_Processing_Data: 16 IPMA_ADAS
  SG_ TrlrAidSwtchLamp_B_Rq : 32|1@0+ (1,0) [0|1] "SED"  GWM
  SG_ TrlrHitchMsgTxt_D_Rq : 47|6@0+ (1,0) [0|63] "SED"  GWM
  SG_ TrlrHitchIcon_D_Rq : 36|4@0+ (1,0) [0|15] "SED"  GWM
@@ -2761,7 +2761,7 @@ BO_ 1105 Image_Processing_Data: 8 IPMA_ADAS
  SG_ CamraFrntStat_D_Stat : 7|2@0+ (1,0) [0|3] "SED"  GWM
  SG_ TrlrHitchLamp_D_Rq2 : 15|1@0+ (1,0) [0|1] "SED"  GWM
 
-BO_ 938 ParkAid_Aud_Warn_Stat: 8 IPMA_ADAS
+BO_ 938 ParkAid_Aud_Warn_Stat: 16 IPMA_ADAS
  SG_ SidePrkSnsR2_D_Stat : 59|4@0+ (1,0) [0|15] "SED"  GWM
  SG_ SidePrkSnsR1_D_Stat : 63|4@0+ (1,0) [0|15] "SED"  GWM
  SG_ SidePrkSnsL2_D_Stat : 51|4@0+ (1,0) [0|15] "SED"  GWM
@@ -2780,7 +2780,7 @@ BO_ 938 ParkAid_Aud_Warn_Stat: 8 IPMA_ADAS
  SG_ SidePrkSnsL1_D_Stat : 55|4@0+ (1,0) [0|15] "SED"  GWM
  SG_ PrkAidAudioMute_B_Rq : 15|1@0+ (1,0) [0|1] "SED"  GWM
 
-BO_ 939 ParkAid_Aud_Warn_Stat2: 8 IPMA_ADAS
+BO_ 939 ParkAid_Aud_Warn_Stat2: 16 IPMA_ADAS
  SG_ ApaBrk_D_Rq : 51|2@0+ (1,0) [0|3] "SED"  GWM
  SG_ SidePrkSnsR4_D_Stat : 55|4@0+ (1,0) [0|15] "SED"  GWM
  SG_ SidePrkSnsR3_D_Stat : 47|4@0+ (1,0) [0|15] "SED"  GWM
@@ -2798,14 +2798,14 @@ BO_ 939 ParkAid_Aud_Warn_Stat2: 8 IPMA_ADAS
  SG_ ApaBrk_A_Rq : 63|8@0+ (0.05,-12.75) [-12.75|0] "m/sec^2"  ABS_ESC,ECM_Diesel,PCM,PCM_HEV,GWM
  SG_ PrkAidLamp_D_Rq : 33|2@0+ (1,0) [0|3] "SED"  GWM
 
-BO_ 937 ParkAid_Data_2: 8 IPMA_ADAS
+BO_ 937 ParkAid_Data_2: 16 IPMA_ADAS
  SG_ Veh_V_RqFap : 31|8@0+ (0.1,0) [0|25.5] "km/h"  ECM_Diesel,PCM,PCM_HEV
  SG_ TrnRngDRqFap_No_Cs : 23|8@0+ (1,0) [0|255] "unitless"  PCM,PCM_HEV,TCM_DSL
  SG_ TrnRngDRqFap_No_Cnt : 15|4@0+ (1,0) [0|15] "unitless"  PCM,PCM_HEV,TCM_DSL
  SG_ TrnRng_D_RqFap : 11|3@0+ (1,0) [0|7] "SED"  ECM_Diesel,PCM,PCM_HEV,TCM_DSL,GWM
  SG_ FapLcDistToObj_L_Actl : 7|8@0+ (0.01,0) [0|2.53] "meter"  ECM_Diesel,PCM,PCM_HEV
 
-BO_ 936 ParkAid_Data: 8 IPMA_ADAS
+BO_ 936 ParkAid_Data: 16 IPMA_ADAS
  SG_ ApaButtnPrssd_B_Stat : 58|1@0+ (1,0) [0|1] "SED"  PSCM
  SG_ SAPPStatusCoding : 7|8@0+ (1,0) [0|255] "unitless"  GWM
  SG_ ApaSys_D_Stat : 61|3@0+ (1,0) [0|7] "SED"  PSCM,GWM,ECM_Diesel,PCM,PCM_HEV
@@ -2878,7 +2878,7 @@ BO_ 1009 APIM_Send_Signals1_FD1: 8 GWM
  SG_ ValetMode_D_Stat : 57|2@0+ (1,0) [0|3] "SED" Vector__XXX
  SG_ TrlrAidSetup_D_Stat : 55|3@0+ (1,0) [0|7] "SED" Vector__XXX
 
-BO_ 360 Gear_Shift_by_Wire_2_FD1: 8 GWM
+BO_ 360 Gear_Shift_by_Wire_2_FD1: 16 GWM
  SG_ GsmSrvcRqd_B_Rq : 23|1@0+ (1,0) [0|1] "SED" Vector__XXX
  SG_ TrnGearPwmFalt_B_Actl : 15|1@0+ (1,0) [0|1] "SED"  PCM,PCM_HEV
  SG_ GearButtnStuck_B_Actl : 14|1@0+ (1,0) [0|1] "SED"  PCM,PCM_HEV,TCM_DSL
@@ -2893,7 +2893,7 @@ BO_ 122 Battery_Traction_1_FD1: 8 GWM
  SG_ BattTrac_U_Actl : 17|10@0+ (0.5,0) [0|510.5] "Volts"  SOBDMC_HPCM_FD1,PCM_HEV
  SG_ BattTrac_I_Actl : 6|15@0+ (0.05,-750) [-750|888.25] "Amps"  SOBDMC_HPCM_FD1,PCM_HEV
 
-BO_ 90 Gear_Shift_by_Wire_FD1: 8 GWM
+BO_ 90 Gear_Shift_by_Wire_FD1: 16 GWM
  SG_ TrnGsmNtmState_D_Actl : 55|2@0+ (1,0) [0|3] "SED"  ABS_ESC,PCM,PCM_HEV,TCM_DSL
  SG_ DrQltyDrv_D_StatGsm : 42|3@0+ (1,0) [0|7] "SED"  ABS_ESC,PCM,PCM_HEV,TCM_DSL,IPMA_ADAS
  SG_ TrnBtsiOvrrd_B_Stat : 43|1@0+ (1,0) [0|1] "SED"  PCM,PCM_HEV,TCM_DSL
@@ -3011,7 +3011,7 @@ BO_ 968 Cluster_Lighting_Rq_FD1: 8 GWM
  SG_ SlMde_D_Rq : 27|2@0+ (1,0) [0|3] "SED"  ECM_Diesel
  SG_ IsaOffst_D_Rq : 31|4@0+ (1,0) [0|15] "SED"  ECM_Diesel
 
-BO_ 819 Pass_Dr_Stat_FD1: 8 GWM
+BO_ 819 Pass_Dr_Stat_FD1: 16 GWM
  SG_ RollCode_No_ActlPdm : 31|16@0+ (1,0) [0|65535] "Unitless" Vector__XXX
  SG_ Memory_3_SwPsngr_Stat : 22|1@0+ (1,0) [0|1] "SED" Vector__XXX
  SG_ Memory_2_SwPsngr_Stat : 23|1@0+ (1,0) [0|1] "SED" Vector__XXX
@@ -3022,7 +3022,7 @@ BO_ 819 Pass_Dr_Stat_FD1: 8 GWM
  SG_ Pasngr_Lock_Sw_Cnt : 15|8@0+ (1,0) [0|255] "Cnt" Vector__XXX
  SG_ ChildLckFdbckRp_B_Stat : 7|1@0+ (1,0) [0|1] "SED" Vector__XXX
 
-BO_ 818 Driver_Dr_Stat_FD1: 8 GWM
+BO_ 818 Driver_Dr_Stat_FD1: 16 GWM
  SG_ BLISLEDStatDriverSide : 47|2@0+ (1,0) [0|3] "SED"  IPMA_ADAS
  SG_ ChildLckPw_N_Cnt : 39|8@0+ (1,0) [0|255] "unitless" Vector__XXX
  SG_ WndwDrvSide_D_Stat : 1|2@0+ (1,0) [0|3] "SED"  ECM_Diesel,PCM
@@ -3071,7 +3071,7 @@ BO_ 559 ElecHorizon_Data2_FD1: 8 GWM
 BO_ 558 ElecHorizon_Data1_FD1: 8 GWM
  SG_ EhData1_No_Actl : 7|64@0+ (1,0) [0|1.84467440737096E+019] "unitless"  IPMA_ADAS,ECM_Diesel
 
-BO_ 934 Side_Detect_L_Stat: 8 IPMA_ADAS
+BO_ 934 Side_Detect_L_Stat: 16 IPMA_ADAS
  SG_ CtaAlrtLeft2_D_Stat : 30|3@0+ (1,0) [0|7] "SED"  GWM
  SG_ CtaBrkLeftMsgTxt_B_Rq : 42|1@0+ (1,0) [0|1] "SED"  GWM
  SG_ CtaLeftBrkDecel_B_Rq : 7|1@0+ (1,0) [0|1] "SED"  GWM,ABS_ESC
@@ -3112,7 +3112,7 @@ BO_ 1072 Cluster_Info1_FD1: 8 GWM
  SG_ KeyTypeChngMykey_D_Rq : 41|2@0+ (1,0) [0|3] "SED" Vector__XXX
  SG_ ManRgen_D_Rq : 5|2@0+ (1,0) [0|3] "SED"  ECM_Diesel
 
-BO_ 909 Body_Info_6_FD1: 8 GWM
+BO_ 909 Body_Info_6_FD1: 16 GWM
  SG_ IgnPsswrdDsply_B_Rq : 57|1@0+ (1,0) [0|1] "SED" Vector__XXX
  SG_ ElPwPoint_D_Rq : 59|2@0+ (1,0) [0|3] "SED" Vector__XXX
  SG_ PoliceIdlMde_D_Stat : 55|4@0+ (1,0) [0|15] "SED" Vector__XXX
@@ -3129,7 +3129,7 @@ BO_ 909 Body_Info_6_FD1: 8 GWM
  SG_ Keycode_Status : 15|20@0+ (1,0) [0|1048575] "unitless" Vector__XXX
  SG_ KeyAdmnTot_No_Cnt : 7|4@0+ (1,0) [0|15] "Counts" Vector__XXX
 
-BO_ 963 BCM_Lamp_Stat_FD1: 8 GWM
+BO_ 963 BCM_Lamp_Stat_FD1: 16 GWM
  SG_ Illuminated_Entry_Stat : 63|2@0+ (1,0) [0|3] "SED" Vector__XXX
  SG_ Dr_Courtesy_Light_Stat : 49|2@0+ (1,0) [0|3] "SED" Vector__XXX
  SG_ Courtesy_Delay_Status : 51|2@0+ (1,0) [0|3] "SED" Vector__XXX
@@ -3216,7 +3216,7 @@ BO_ 862 Climate_Cntrl_Data_2_FD1: 8 GWM
  SG_ HvacRec_Pc_Est : 23|7@0+ (1,0) [0|127] "Percent"  PCM_HEV,SOBDMC_HPCM_FD1
  SG_ HvacAir_Flw_Est : 16|9@0+ (0.5,0) [0|255.5] "liter/second"  SOBDMC_HPCM_FD1
 
-BO_ 931 Body_Info_9_FD1: 8 GWM
+BO_ 931 Body_Info_9_FD1: 16 GWM
  SG_ PtWakeReas_D_Stat : 38|4@0+ (1,0) [0|15] "SED"  PCM_HEV
  SG_ VehOnSrc_D_Stat : 19|4@0+ (1,0) [0|15] "SED"  ABS_ESC,PCM_HEV,ECM_Diesel,PCM
  SG_ StrtrMtrCtlDStat_No_Cs : 31|8@0+ (1,0) [0|255] "unitless"  PCM_HEV,ECM_Diesel,PCM
@@ -3229,7 +3229,7 @@ BO_ 931 Body_Info_9_FD1: 8 GWM
  SG_ CrnkInhbt_B_Stat : 7|1@0+ (1,0) [0|1] "SED"  ECM_Diesel,PCM,PCM_HEV
  SG_ IgnPreOffActv_B_Stat : 2|1@0+ (1,0) [0|1] "SED"  PCM,PCM_HEV,TCM_DSL
 
-BO_ 578 Body_Info_4_FD1: 8 GWM
+BO_ 578 Body_Info_4_FD1: 16 GWM
  SG_ PtLatchActv_B_RqBcm : 56|1@0+ (1,0) [0|1] "SED"  ECM_Diesel,PCM,PCM_HEV,TCM_DSL
  SG_ immoSecureIdleMode : 61|2@0+ (1,0) [0|3] "SED"  ECM_Diesel,PCM,PCM_HEV
  SG_ ReFuelSwtchStat_D_Actl : 63|2@0+ (1,0) [0|3] "SED" Vector__XXX
@@ -3246,7 +3246,7 @@ BO_ 578 Body_Info_4_FD1: 8 GWM
  SG_ DcacElPw_D_Rq : 53|2@0+ (1,0) [0|3] "SED"  ECM_Diesel,PCM
  SG_ BattULo_I_Actl : 21|14@0+ (0.0625,-512) [-512|511.875] "ampere"  ECM_Diesel,PCM,PCM_HEV
 
-BO_ 947 BodyInfo_3_FD1: 8 GWM
+BO_ 947 BodyInfo_3_FD1: 16 GWM
  SG_ ValetMode_D_Mem : 16|1@0+ (1,0) [0|1] "SED" Vector__XXX
  SG_ DimmingLvlEvnt_No_Actl : 18|2@0+ (1,0) [0|3] "unitless" Vector__XXX
  SG_ DrStatDrvErrCnt_B_Stat : 19|1@0+ (1,0) [0|1] "SED"  ECM_Diesel,PCM,PCM_HEV
@@ -3290,7 +3290,7 @@ BO_ 1084 Battery_Mgmt_3_FD1: 8 GWM
  SG_ BSBattQDeltaRideAh : 6|15@0+ (0.0078125,-100) [-100|155.9921875] "ampere*hour"  ECM_Diesel,PCM,PCM_HEV
  SG_ BSBattQCapAh : 38|7@0+ (1,0) [0|127] "ampere*hour"  ECM_Diesel,PCM,PCM_HEV
 
-BO_ 1068 Battery_Mgmt_2_FD1: 8 GWM
+BO_ 1068 Battery_Mgmt_2_FD1: 16 GWM
  SG_ EngStrtInhbt_B_RqBatt : 2|1@0+ (1,0) [0|1] "SED"  ECM_Diesel,PCM
  SG_ BattULoChrg_D_Rq : 7|2@0+ (1,0) [0|3] "SED"  ECM_Diesel,PCM
  SG_ PwSysULoFalt_D_Stat : 12|4@0+ (1,0) [0|15] "SED" Vector__XXX
@@ -3327,7 +3327,7 @@ BO_ 997 Personality_CCM_Data: 8 IPMA_ADAS
  SG_ FeatNoCcmActl : 23|16@0+ (1,0) [0|65535] "Number"  GWM
  SG_ FeatConfigCcmActl : 7|16@0+ (1,0) [0|65535] "Undefined"  GWM
 
-BO_ 983 Steer_Assist_Data: 8 IPMA_ADAS
+BO_ 983 Steer_Assist_Data: 16 IPMA_ADAS
  SG_ CmbbObjRelLong_V_Actl : 39|10@0+ (0.1,-102.1) [-102.1|0] "meters/sec"  PSCM
  SG_ CmbbObjRelLat_V_Actl : 23|9@0+ (0.1,-25.5) [-25.5|25.4] "meters/sec"  PSCM
  SG_ CmbbObjDistLong_L_Actl : 7|10@0+ (0.1,0) [0|102.1] "meter"  PSCM
@@ -3337,7 +3337,7 @@ BO_ 983 Steer_Assist_Data: 8 IPMA_ADAS
  SG_ CmbbObjClass_D_Stat : 13|4@0+ (1,0) [0|15] "SED"  PSCM
  SG_ EsaEnbl_D2_Rq : 52|2@0+ (1,0) [0|3] "SED"  PSCM
 
-BO_ 982 LateralMotionControl2: 8 IPMA_ADAS
+BO_ 982 LateralMotionControl2: 16 IPMA_ADAS
  SG_ LatCtlCrv_NoRate2_Actl : 55|11@0+ (1E-006,-0.001024) [-0.001024|0.001023] "meter^2"  PSCM
  SG_ LatCtlPath_No_Cnt : 60|4@0+ (1,0) [0|15] "Unitless"  PSCM
  SG_ LatCtlPath_No_Cs : 15|8@0+ (1,0) [0|255] "Unitless"  PSCM
@@ -3412,7 +3412,7 @@ BO_ 973 Traffic_RecognitnData: 8 IPMA_ADAS
  SG_ TsrOswWarnMsgTxt_D_Rq : 3|2@0+ (1,0) [0|3] "SED"  GWM
  SG_ TsrMsgTxt_D_Rq : 7|4@0+ (1,0) [0|15] "SED"  GWM
 
-BO_ 970 Lane_Assist_Data1: 8 IPMA_ADAS
+BO_ 970 Lane_Assist_Data1: 16 IPMA_ADAS
  SG_ LkaDrvOvrrd_D_Rq : 38|2@0+ (1,0) [0|3] "SED"  PSCM
  SG_ LkaActvStats_D2_Req : 7|3@0+ (1,0) [0|7] "SED"  PSCM
  SG_ LaRefAng_No_Req : 19|12@0+ (0.05,-102.4) [-102.4|102.3] "mrad"  PSCM
@@ -3445,7 +3445,7 @@ BO_ 961 AutoDriveBeam_Data2: 8 IPMA_ADAS
  SG_ AdbBrdr2CritRigh_T_Stat : 43|4@0+ (100,0) [0|1500] "millisecond"  GWM
  SG_ AdbBrdr2CritLeft_T_Stat : 55|4@0+ (100,0) [0|1500] "millisecond"  GWM
 
-BO_ 394 ACCDATA_3: 8 IPMA_ADAS
+BO_ 394 ACCDATA_3: 16 IPMA_ADAS
  SG_ HaDsply_No_Cs : 63|8@0+ (1,0) [0|255] "Unitless"  GWM
  SG_ HaDsply_No_Cnt : 4|4@0+ (1,0) [0|15] "Unitless"  GWM
  SG_ AccStopStat_D_Dsply : 41|2@0+ (1,0) [0|3] "SED"  GWM
@@ -3473,7 +3473,7 @@ BO_ 394 ACCDATA_3: 8 IPMA_ADAS
  SG_ AccMemEnbl_B_RqDrv : 36|1@0+ (1,0) [0|1] "SED"  GWM
  SG_ FdaMem_B_Stat : 37|1@0+ (1,0) [0|1] "SED"  GWM
 
-BO_ 391 ACCDATA_2: 8 IPMA_ADAS
+BO_ 391 ACCDATA_2: 16 IPMA_ADAS
  SG_ CmbbBrkDecel_No_Cnt : 47|4@0+ (1,0) [0|15] "Unitless"  GWM,ABS_ESC
  SG_ HudDsplyIntns_No_Actl : 31|8@0+ (0.5,0) [0|100] "%"  GWM
  SG_ HudBlk3_B_Rq : 37|1@0+ (1,0) [0|1] "SED"  GWM
@@ -3486,7 +3486,7 @@ BO_ 391 ACCDATA_2: 8 IPMA_ADAS
  SG_ CmbbBrkDecel_B_Rq : 15|1@0+ (1,0) [0|1] "SED"  ABS_ESC,GWM
  SG_ CmbbBaSens_D_Rq : 14|2@0+ (1,0) [0|3] "SED"  ABS_ESC,GWM
 
-BO_ 390 ACCDATA: 8 IPMA_ADAS
+BO_ 390 ACCDATA: 16 IPMA_ADAS
  SG_ AccBrkPulse_B_Rq : 36|1@0+ (1,0) [0|1] "SED"  ABS_ESC,GWM
  SG_ AccAutoResum_D_Rq : 7|2@0+ (1,0) [0|3] "SED"  PCM_HEV,PCM,ECM_Diesel
  SG_ AccBrkTot_A_Rq : 4|13@0+ (0.0039,-20) [-20|11.9449] "m/s^2"  GWM,ABS_ESC
@@ -3537,7 +3537,7 @@ BO_ 942 ParkAid_Data2: 8 IPMA_ADAS
  SG_ PrkAidAcsyRear_D_Stat : 18|2@0+ (1,0) [0|3] "SED"  GWM
  SG_ PrkAidAcsyFront_D_Stat : 20|2@0+ (1,0) [0|3] "SED"  GWM
 
-BO_ 930 Bndry_Alert_R_Data: 8 IPMA_ADAS
+BO_ 930 Bndry_Alert_R_Data: 16 IPMA_ADAS
  SG_ BalrWndwRight_B_Stat : 19|1@0+ (1,0) [0|1] "SED"  GWM
  SG_ BalrSnsRight_D_Falt : 21|2@0+ (1,0) [0|3] "SED"  GWM
  SG_ WndwPsngrRear_D_RqBalrr : 25|2@0+ (1,0) [0|3] "SED"  GWM
@@ -3553,7 +3553,7 @@ BO_ 930 Bndry_Alert_R_Data: 8 IPMA_ADAS
  SG_ DrLckCnt_No_ActlBalrr : 5|3@0+ (1,0) [0|7] "unitless"  GWM
  SG_ DrLckActv_B_RqBalrr : 6|1@0+ (1,0) [0|1] "SED"  GWM
 
-BO_ 929 Bndry_Alert_L_Data: 8 IPMA_ADAS
+BO_ 929 Bndry_Alert_L_Data: 16 IPMA_ADAS
  SG_ BalrChimeLeft_D_Rq : 2|2@0+ (1,0) [0|3] "SED"  GWM
  SG_ BalrLeft_D_Stat : 10|2@0+ (1,0) [0|3] "SED"  GWM
  SG_ BalrWndwLeft_B_Stat : 0|1@0+ (1,0) [0|1] "SED"  GWM
