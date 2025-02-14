@@ -1,3 +1,5 @@
+import math
+
 from opendbc.can.parser import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.interfaces import RadarInterfaceBase
@@ -64,10 +66,14 @@ class RadarInterface(RadarInterfaceBase):
 
       valid = msg['STATE'] in (3, 4)
       if valid:
-        # todo: gate for ccnc and undo changes
+        if CP.flags & HyundaiFlags.CANFD:
+          self.pts[addr].dRel = msg['LONG_DIST']
+          self.pts[addr].yRel = msg['LAT_DIST']
+        else:
+          azimuth = math.radians(msg['AZIMUTH'])
+          self.pts[addr].dRel = math.cos(azimuth) * msg['LONG_DIST']
+          self.pts[addr].yRel = 0.5 * -math.sin(azimuth) * msg['LONG_DIST']
         self.pts[addr].measured = True
-        self.pts[addr].dRel = msg['LONG_DIST']
-        self.pts[addr].yRel = msg['LAT_DIST']
         self.pts[addr].vRel = msg['REL_SPEED']
         self.pts[addr].aRel = msg['REL_ACCEL']
         self.pts[addr].yvRel = float('nan')
