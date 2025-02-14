@@ -58,10 +58,10 @@ BO_ {a} RADAR_TRACK_{a:x}: 24 RADAR
  SG_ STATE : 54|3@0+ (1,0) [0|7] "" XXX
  SG_ NEW_SIGNAL_8 : 62|7@0- (1,0) [0|127] "" XXX
  SG_ LONG_DIST : 63|12@1+ (0.05,0) [0|8191] "m" XXX
- SG_ AZIMUTH : 76|12@1- (0.2,0) [0|127] "" XXX
+ SG_ LAT_DIST : 76|12@1- (0.2,0) [0|127] "" XXX
  SG_ REL_SPEED : 88|14@1- (0.01,0) [0|16383] "" XXX
  SG_ NEW_SIGNAL_4 : 103|2@0+ (1,0) [0|3] "" XXX
- SG_ AZIMUTH_ACCEL : 104|13@1- (1,0) [0|8191] "" XXX
+ SG_ AZIMUTH : 104|13@1- (1,0) [0|8191] "" XXX
  SG_ REL_ACCEL : 118|10@1- (0.02,0) [0|1023] "" XXX
  SG_ NEW_SIGNAL_5 : 133|4@0+ (1,0) [0|15] "" XXX
     """)
