@@ -67,7 +67,7 @@ class RadarInterface(RadarInterfaceBase):
         # todo: gate for ccnc and undo changes
         self.pts[addr].measured = True
         self.pts[addr].dRel = msg['LONG_DIST']
-        self.pts[addr].yRel = msg['LAT_DIST'] * 0.25
+        self.pts[addr].yRel = msg['LAT_DIST']
         self.pts[addr].vRel = msg['REL_SPEED']
         self.pts[addr].aRel = msg['REL_ACCEL']
         self.pts[addr].yvRel = float('nan')
