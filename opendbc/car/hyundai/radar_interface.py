@@ -22,7 +22,8 @@ def get_radar_can_parser(CP, RADAR_START_ADDR):
 class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
     super().__init__(CP)
-    self.RADAR_START_ADDR = RADAR_START_ADDR_CANFD if CP.flags & HyundaiFlags.CANFD else RADAR_START_ADDR_CAN
+    self.CP_flags = CP.flags
+    self.RADAR_START_ADDR = RADAR_START_ADDR_CANFD if self.CP_flags & HyundaiFlags.CANFD else RADAR_START_ADDR_CAN
     self.updated_messages = set()
     self.trigger_msg = self.RADAR_START_ADDR + RADAR_MSG_COUNT - 1
     self.track_id = 0
@@ -66,7 +67,7 @@ class RadarInterface(RadarInterfaceBase):
 
       valid = msg['STATE'] in (3, 4)
       if valid:
-        if CP.flags & HyundaiFlags.CANFD:
+        if self.CP.flags & HyundaiFlags.CANFD:
           self.pts[addr].dRel = msg['LONG_DIST']
           self.pts[addr].yRel = msg['LAT_DIST']
         else:
