@@ -64,6 +64,7 @@ class RadarInterface(RadarInterfaceBase):
 
       valid = msg['STATE'] in (3, 4)
       if valid:
+        # todo: gate for ccnc and undo changes
         self.pts[addr].measured = True
         self.pts[addr].dRel = msg['LONG_DIST']
         self.pts[addr].yRel = msg['LAT_DIST'] * 0.25
