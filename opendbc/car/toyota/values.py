@@ -43,6 +43,14 @@ class CarControllerParams:
       self.STEER_DELTA_DOWN = 25     # always lower than 45 otherwise the Rav4 faults (Prius seems ok with 50)
 
 
+class ToyotaSafetyFlags(IntFlag):
+  # first byte is for EPS scaling factor
+  FLAG_TOYOTA_ALT_BRAKE = (1 << 8)
+  FLAG_TOYOTA_STOCK_LONGITUDINAL = (2 << 8)
+  FLAG_TOYOTA_LTA = (4 << 8)
+  FLAG_TOYOTA_SECOC = (8 << 8)
+
+
 class ToyotaFlags(IntFlag):
   # Detected flags
   HYBRID = 1
@@ -180,7 +188,7 @@ class CAR(Platforms):
       ToyotaCarDocs("Toyota Corolla Hybrid 2020-22"),
       ToyotaCarDocs("Toyota Corolla Hybrid (South America only) 2020-23", min_enable_speed=7.5),
       ToyotaCarDocs("Toyota Corolla Cross Hybrid (Non-US only) 2020-22", min_enable_speed=7.5),
-      ToyotaCarDocs("Lexus UX Hybrid 2019-23"),
+      ToyotaCarDocs("Lexus UX Hybrid 2019-24"),
     ],
     CarSpecs(mass=3060. * CV.LB_TO_KG, wheelbase=2.67, steerRatio=13.9, tireStiffnessFactor=0.444),
   )
@@ -266,11 +274,6 @@ class CAR(Platforms):
   TOYOTA_RAV4_PRIME = ToyotaSecOCPlatformConfig(
     [ToyotaCarDocs("Toyota RAV4 Prime 2021-23", min_enable_speed=MIN_ACC_SPEED)],
     CarSpecs(mass=4372. * CV.LB_TO_KG, wheelbase=2.68, steerRatio=16.88, tireStiffnessFactor=0.5533),
-  )
-  TOYOTA_YARIS = ToyotaSecOCPlatformConfig(
-    [ToyotaCarDocs("Toyota Yaris Hybrid 2020 (Non-US only)", min_enable_speed=MIN_ACC_SPEED)],
-    CarSpecs(mass=1170, wheelbase=2.55, steerRatio=14.80, tireStiffnessFactor=0.5533),
-    flags=ToyotaFlags.RADAR_ACC,
   )
   TOYOTA_MIRAI = ToyotaTSS2PlatformConfig( # TSS 2.5
     [ToyotaCarDocs("Toyota Mirai 2021")],

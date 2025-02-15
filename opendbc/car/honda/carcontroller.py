@@ -181,7 +181,7 @@ class CarController(CarControllerBase):
                      np.clip(CS.out.vEgo - 3.0, 0.0, 100.0),
                      np.clip(CS.out.vEgo + 0.0, 0.0, 100.0),
                      np.clip(CS.out.vEgo + 5.0, 0.0, 100.0)]
-      pcm_speed = np.interp(gas - brake, pcm_speed_BP, pcm_speed_V)
+      pcm_speed = float(np.interp(gas - brake, pcm_speed_BP, pcm_speed_V))
       pcm_accel = int(1.0 * self.params.NIDEC_GAS_MAX)
     else:
       pcm_speed_V = [0.0,
