@@ -193,7 +193,7 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
     # LEAD
     msg_162.update({
       "LEAD": 2 if enabled and hud.leadVisible else 1 if hud.leadVisible else 0,
-      "LEAD_DISTANCE": 150,
+      "LEAD_DISTANCE": 10,
     })
 
   ret.append(packer.make_can_msg("LFAHDA_CLUSTER", CAN.ECAN, lfahda_cluster))
