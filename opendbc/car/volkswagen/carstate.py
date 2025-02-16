@@ -6,6 +6,8 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.volkswagen.values import DBC, CANBUS, NetworkLocation, TransmissionType, GearShifter, \
                                                       CarControllerParams, VolkswagenFlags
 
+ButtonType = structs.CarState.ButtonEvent.Type
+
 
 class CarState(CarStateBase):
   def __init__(self, CP, CP_SP):
@@ -17,6 +19,14 @@ class CarState(CarStateBase):
     self.esp_hold_confirmation = False
     self.upscale_lead_car_signal = False
     self.eps_stock_values = False
+
+  def update_button_enable(self, buttonEvents: list[structs.CarState.ButtonEvent]):
+    if not self.CP.pcmCruise:
+      for b in buttonEvents:
+        # Enable OP long on falling edge of enable buttons
+        if b.type in (ButtonType.setCruise, ButtonType.resumeCruise) and not b.pressed:
+          return True
+    return False
 
   def create_button_events(self, pt_cp, buttons):
     button_events = []
@@ -259,10 +269,10 @@ class CarState(CarStateBase):
     return ret
 
   def update_hca_state(self, hca_status):
-    # Treat INITIALIZING and FAULT as temporary for worst likely EPS recovery time, for cars without factory Lane Assist
+    # Treat FAULT as temporary for worst likely EPS recovery time, for cars without factory Lane Assist
     # DISABLED means the EPS hasn't been configured to support Lane Assist
     self.eps_init_complete = self.eps_init_complete or (hca_status in ("DISABLED", "READY", "ACTIVE") or self.frame > 600)
-    perm_fault = hca_status == "DISABLED" or (self.eps_init_complete and hca_status in ("INITIALIZING", "FAULT"))
+    perm_fault = hca_status == "DISABLED" or (self.eps_init_complete and hca_status == "FAULT")
     temp_fault = hca_status in ("REJECTED", "PREEMPTED") or not self.eps_init_complete
     return temp_fault, perm_fault
 
