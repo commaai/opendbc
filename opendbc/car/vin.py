@@ -19,9 +19,10 @@ def get_vin(can_recv, can_send, buses, timeout=0.1, retry=2):
       for request, response, valid_buses, vin_addrs, functional_addrs, rx_offset in (
         (StdQueries.UDS_VIN_REQUEST, StdQueries.UDS_VIN_RESPONSE, (0, 1), STANDARD_VIN_ADDRS, uds.FUNCTIONAL_ADDRS, 0x8),
         (StdQueries.OBD_VIN_REQUEST, StdQueries.OBD_VIN_RESPONSE, (0, 1), STANDARD_VIN_ADDRS, uds.FUNCTIONAL_ADDRS, 0x8),
-        (StdQueries.GM_VIN_REQUEST, StdQueries.GM_VIN_RESPONSE, (0,), [0x24b], None, 0x400),  # Bolt fwdCamera
-        (StdQueries.KWP_VIN_REQUEST, StdQueries.KWP_VIN_RESPONSE, (0,), [0x797], None, 0x3),  # Nissan Leaf VCM
+        (StdQueries.GM_VIN_REQUEST, StdQueries.GM_VIN_RESPONSE, (0,), [0x24b], None, 0x400),   # Bolt fwdCamera
+        (StdQueries.KWP_VIN_REQUEST, StdQueries.KWP_VIN_RESPONSE, (0,), [0x797], None, 0x3),   # Nissan Leaf VCM
         (StdQueries.UDS_VIN_REQUEST, StdQueries.UDS_VIN_RESPONSE, (0,), [0x74f], None, 0x6a),  # Volkswagen fwdCamera
+        (StdQueries.UDS_VIN_REQUEST, StdQueries.UDS_VIN_RESPONSE, (0,), [0x733], None, 0x40),  # Rivian EPAS
       ):
         if bus not in valid_buses:
           continue
