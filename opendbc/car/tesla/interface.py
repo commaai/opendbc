@@ -12,7 +12,6 @@ class CarInterface(CarInterfaceBase):
     # Needs safety validation and final testing before pulling out of dashcam
     ret.dashcamOnly = True
 
-    # Not merged yet
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.tesla)]
 
     ret.steerLimitTimer = 1.0
