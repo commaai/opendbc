@@ -48,16 +48,6 @@ class CANBUS:
   autopilot_party = 2
 
 
-GEAR_MAP = {
-  "DI_GEAR_INVALID": CarState.GearShifter.unknown,
-  "DI_GEAR_P": CarState.GearShifter.park,
-  "DI_GEAR_R": CarState.GearShifter.reverse,
-  "DI_GEAR_N": CarState.GearShifter.neutral,
-  "DI_GEAR_D": CarState.GearShifter.drive,
-  "DI_GEAR_SNA": CarState.GearShifter.unknown,
-}
-
-
 class CarControllerParams:
   ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[10., 1.6, .3])
   ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[10., 7.0, 0.8])
