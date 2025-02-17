@@ -1,5 +1,5 @@
 from opendbc.car.interfaces import RadarInterfaceBase
 
-class RadarInterface(RadarInterfaceBase):
 
+class RadarInterface(RadarInterfaceBase):
   pass
