@@ -26,6 +26,7 @@ class TeslaCAN:
 
   def create_longitudinal_command(self, acc_state, accel, cntr, active):
     values = {
+      # TODO: this causes jerking after gas override when above set speed
       "DAS_setSpeed": 0 if (accel < 0 or not active) else V_CRUISE_MAX,
       "DAS_accState": acc_state,
       "DAS_aebEvent": 0,

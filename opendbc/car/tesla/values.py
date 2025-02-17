@@ -60,16 +60,14 @@ class CarControllerParams:
   # Angle command is sent at 50 Hz
   ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[10., 1.6, .3])
   ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[10., 7.0, 0.8])
-  ACCEL_MIN = -3.48  # m/s^2
   ACCEL_MAX = 2.0    # m/s^2
+  ACCEL_MIN = -3.48  # m/s^2
   JERK_LIMIT_MAX = 4.9  # m/s^3, ACC faults at 5.0
   JERK_LIMIT_MIN = -4.9  # m/s^3, ACC faults at 5.0
 
 
 class TeslaSafetyFlags(IntFlag):
-  FLAG_TESLA_POWERTRAIN = 1
-  FLAG_TESLA_LONG_CONTROL = 2
-  FLAG_TESLA_RAVEN = 4
+  FLAG_TESLA_LONG_CONTROL = 1
 
 
 class TeslaFlags(IntFlag):
