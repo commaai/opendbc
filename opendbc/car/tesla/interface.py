@@ -12,7 +12,7 @@ class CarInterface(CarInterfaceBase):
     # Needs safety validation and final testing before pulling out of dashcam
     ret.dashcamOnly = True
 
-    ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.tesla)]
+    #ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.tesla)]
 
     ret.steerLimitTimer = 1.0
     ret.steerActuatorDelay = 0.1
@@ -23,6 +23,6 @@ class CarInterface(CarInterfaceBase):
     ret.experimentalLongitudinalAvailable = True
     if experimental_long:
       ret.openpilotLongitudinalControl = True
-      ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.FLAG_TESLA_LONG_CONTROL.value
+      # ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.FLAG_TESLA_LONG_CONTROL.value
 
     return ret
