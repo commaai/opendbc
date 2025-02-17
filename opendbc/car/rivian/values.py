@@ -8,6 +8,7 @@ from opendbc.car.fw_query_definitions import FwQueryConfig
 
 Ecu = CarParams.Ecu
 
+
 @dataclass
 class RivianCarDocs(CarDocs):
   package: str = "All"
@@ -21,6 +22,7 @@ class CAR(Platforms):
     CarSpecs(mass=3206., wheelbase=3.08, steerRatio=15.2),
     {Bus.pt: 'rivian_can'}
   )
+
 
 # TODO: Placeholder ↓
 FW_QUERY_CONFIG = FwQueryConfig(
@@ -47,5 +49,6 @@ class CarControllerParams:
 
   ACCEL_MIN = -3.48  # m/s^2
   ACCEL_MAX = 2.0  # m/s^2
+
 
 DBC = CAR.create_dbc_map()

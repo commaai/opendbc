@@ -25,7 +25,7 @@ class CarController(CarControllerBase):
 
     # send steering command
     self.apply_steer_last = apply_steer
-    can_sends.append(create_lka_steering(self.packer,  CS.acm_lka_hba_cmd, apply_steer, CC.latActive))
+    can_sends.append(create_lka_steering(self.packer, CS.acm_lka_hba_cmd, apply_steer, CC.latActive))
 
     # Longitudinal control
     if self.CP.openpilotLongitudinalControl:
