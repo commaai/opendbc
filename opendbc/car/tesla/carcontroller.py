@@ -18,6 +18,7 @@ class CarController(CarControllerBase):
     can_sends = []
 
     # Disengage and allow for user override
+    # TODO: implement and use CC.cruiseControl.cancel for this
     hands_on_fault = CS.hands_on_level >= 3
     lkas_enabled = CC.latActive and not hands_on_fault
 
