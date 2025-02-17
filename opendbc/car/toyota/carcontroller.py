@@ -1,8 +1,9 @@
 import math
 import numpy as np
-from opendbc.car import Bus, carlog, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
+from opendbc.car import Bus, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
                         make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY, DT_CTRL
 from opendbc.car.can_definitions import CanData
+from opendbc.car.carlog import carlog
 from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.common.pid import PIDController
 from opendbc.car.secoc import add_mac, build_sync_mac
@@ -202,8 +203,9 @@ class CarController(CarControllerBase):
           pcm_accel_cmd = rate_limit(pcm_accel_cmd, self.prev_accel, ACCEL_WINDDOWN_LIMIT, ACCEL_WINDUP_LIMIT)
         self.prev_accel = pcm_accel_cmd
 
-        # calculate amount of acceleration PCM should apply to reach target, given pitch
-        accel_due_to_pitch = math.sin(self.pitch.x) * ACCELERATION_DUE_TO_GRAVITY
+        # calculate amount of acceleration PCM should apply to reach target, given pitch.
+        # clipped to only include downhill angles, avoids erroneously unsetting PERMIT_BRAKING when stopping on uphills
+        accel_due_to_pitch = math.sin(min(self.pitch.x, 0.0)) * ACCELERATION_DUE_TO_GRAVITY
         # TODO: on uphills this sometimes sets PERMIT_BRAKING low not considering the creep force
         net_acceleration_request = pcm_accel_cmd + accel_due_to_pitch
 

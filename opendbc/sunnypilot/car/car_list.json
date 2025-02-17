@@ -2102,7 +2102,7 @@
     ],
     "package": "All"
   },
-  "Lexus UX Hybrid 2019-23": {
+  "Lexus UX Hybrid 2019-24": {
     "platform": "TOYOTA_COROLLA_TSS2",
     "make": "Lexus",
     "brand": "toyota",
@@ -2112,7 +2112,8 @@
       "2020",
       "2021",
       "2022",
-      "2023"
+      "2023",
+      "2024"
     ],
     "package": "All"
   },

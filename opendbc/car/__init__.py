@@ -1,5 +1,4 @@
 # functions common among cars
-import logging
 import numpy as np
 from collections import namedtuple
 from dataclasses import dataclass, field
@@ -9,11 +8,6 @@ from dataclasses import replace
 from opendbc.car import structs, uds
 from opendbc.car.can_definitions import CanData
 from opendbc.car.docs_definitions import CarDocs, ExtraCarDocs
-
-# set up logging
-carlog = logging.getLogger('carlog')
-carlog.setLevel(logging.INFO)
-carlog.propagate = False
 
 DT_CTRL = 0.01  # car state and control loop timestep (s)
 

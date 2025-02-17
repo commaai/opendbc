@@ -5,7 +5,8 @@ This file is part of sunnypilot and is licensed under the MIT License.
 See the LICENSE.md file in the root directory for more details.
 """
 
-from opendbc.car import carlog, uds
+from opendbc.car import uds
+from opendbc.car.carlog import carlog
 from opendbc.car.isotp_parallel_query import IsoTpParallelQuery
 
 DEVELOPER_DIAGNOSTIC = 0x07
