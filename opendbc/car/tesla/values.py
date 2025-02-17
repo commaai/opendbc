@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from enum import IntFlag
-from opendbc.car import Bus, CarSpecs, DbcDict,  PlatformConfig, Platforms, AngleRateLimit
-from opendbc.car.structs import CarParams, CarState
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, AngleRateLimit
+from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarDocs
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
@@ -34,12 +34,11 @@ FW_QUERY_CONFIG = FwQueryConfig(
     Request(
       [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.SUPPLIER_SOFTWARE_VERSION_REQUEST],
       [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.SUPPLIER_SOFTWARE_VERSION_RESPONSE],
-      whitelist_ecus=[Ecu.eps],
-      rx_offset=0x08,
       bus=0,
     )
   ]
 )
+
 
 class CANBUS:
   party = 0
@@ -47,16 +46,8 @@ class CANBUS:
   autopilot_party = 2
 
 
-GEAR_MAP = {
-  "DI_GEAR_INVALID": CarState.GearShifter.unknown,
-  "DI_GEAR_P": CarState.GearShifter.park,
-  "DI_GEAR_R": CarState.GearShifter.reverse,
-  "DI_GEAR_N": CarState.GearShifter.neutral,
-  "DI_GEAR_D": CarState.GearShifter.drive,
-  "DI_GEAR_SNA": CarState.GearShifter.unknown,
-}
-
 class CarControllerParams:
+  # Angle command is sent at 50 Hz
   ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[10., 1.6, .3])
   ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[10., 7.0, 0.8])
   ACCEL_MIN = -3.48  # m/s^2

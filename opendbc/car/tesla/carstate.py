@@ -5,14 +5,16 @@ from opendbc.can.parser import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP, STEER_THRESHOLD
+from opendbc.car.tesla.values import DBC, CANBUS, STEER_THRESHOLD
 
 ButtonType = structs.CarState.ButtonEvent.Type
+
 
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
     self.can_define = CANDefine(DBC[CP.carFingerprint][Bus.party])
+    self.shifter_values = self.can_define.dv["DI_systemStatus"]["DI_gear"]
 
     self.hands_on_level = 0
     self.das_control = None
@@ -36,7 +38,7 @@ class CarState(CarStateBase):
     # Gas pedal
     pedal_status = cp_party.vl["DI_systemStatus"]["DI_accelPedalPos"]
     ret.gas = pedal_status / 100.0
-    ret.gasPressed = (pedal_status > 0)
+    ret.gasPressed = pedal_status > 0
 
     # Brake pedal
     ret.brake = 0
@@ -71,7 +73,8 @@ class CarState(CarStateBase):
     ret.accFaulted = cruise_state == "FAULT"
 
     # Gear
-    ret.gearShifter = GEAR_MAP[self.can_define.dv["DI_systemStatus"]["DI_gear"].get(int(cp_party.vl["DI_systemStatus"]["DI_gear"]), "DI_GEAR_INVALID")]
+    can_gear = int(cp_party.vl["DI_systemStatus"]["DI_gear"])
+    ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(can_gear, None))
 
     # Doors
     ret.doorOpen = cp_party.vl["UI_warning"]["anyDoorOpen"] == 1
