@@ -22,9 +22,9 @@ class CarInterface(CarInterfaceBase):
     ret.radarUnavailable = True
 
     ret.experimentalLongitudinalAvailable = False
-    # if experimental_long:
-    #   ret.openpilotLongitudinalControl = True
-    #   ret.safetyConfigs[0].safetyParam |= Panda.FLAG_RIVIAN_LONG_CONTROL
+    if experimental_long:
+      ret.openpilotLongitudinalControl = True
+      #ret.safetyConfigs[0].safetyParam |= Panda.FLAG_RIVIAN_LONG_CONTROL
 
     ret.longitudinalActuatorDelay = 0.35
     ret.vEgoStopping = 0.25
