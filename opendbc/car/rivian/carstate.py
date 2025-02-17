@@ -11,7 +11,6 @@ class CarState(CarStateBase):
     super().__init__(CP)
     self.last_speed = 30
 
-    # Needed by carcontroller
     self.acm_lka_hba_cmd = None
 
   def update(self, can_parsers) -> structs.CarState:
@@ -28,7 +27,7 @@ class CarState(CarStateBase):
     # Gas pedal
     pedal_status = cp.vl["VDM_PropStatus"]["VDM_AcceleratorPedalPosition"]
     ret.gas = pedal_status / 100.0
-    ret.gasPressed = (pedal_status > 0)
+    ret.gasPressed = pedal_status > 0
 
     # Brake pedal
     ret.brake = cp.vl["ESPiB3"]["ESPiB3_pMC1"] / 250.0  # pressure in Bar
