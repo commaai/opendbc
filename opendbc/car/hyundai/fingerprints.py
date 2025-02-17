@@ -1198,4 +1198,12 @@ FW_VERSIONS = {
       b'\xf1\x00US4_ RDR -----      1.00 1.00 99110-CG000         ',
     ],
   },
+  CAR.HYUNDAI_SANTA_FE_5TH_GEN: {
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00MX5 MFC  AT USA LHD 1.00 1.06 99211-R6000 231218',
+    ],
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00MX5_ RDR -----      1.00 1.01 99110-R6000         ',
+    ],
+  },
 }
