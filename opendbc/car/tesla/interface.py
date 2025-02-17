@@ -1,6 +1,5 @@
-from opendbc.car import get_safety_config, structs
+from opendbc.car import structs
 from opendbc.car.interfaces import CarInterfaceBase
-from opendbc.car.tesla.values import TeslaSafetyFlags
 
 
 class CarInterface(CarInterfaceBase):
