@@ -9,6 +9,7 @@ from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP, STEER_THRESHOLD
 
 ButtonType = structs.CarState.ButtonEvent.Type
 
+
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)

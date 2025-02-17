@@ -13,7 +13,7 @@ class CarInterface(CarInterfaceBase):
     ret.dashcamOnly = True
 
     # Not merged yet
-    #ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.tesla)]
+    # ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.tesla)]
 
     ret.steerLimitTimer = 1.0
     ret.steerActuatorDelay = 0.25
