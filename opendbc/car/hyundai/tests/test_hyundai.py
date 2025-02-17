@@ -2,7 +2,6 @@ from hypothesis import settings, given, strategies as st
 
 import pytest
 
-from panda import Panda
 from opendbc.car import gen_empty_fingerprint
 from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
@@ -12,7 +11,7 @@ from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
 from opendbc.car.hyundai.values import CAMERA_SCC_CAR, CANFD_CAR, CAN_GEARS, CAR, CHECKSUM, DATE_FW_ECUS, \
                                          HYBRID_CAR, EV_CAR, FW_QUERY_CONFIG, LEGACY_SAFETY_MODE_CAR, CANFD_FUZZY_WHITELIST, \
                                          UNSUPPORTED_LONGITUDINAL_CAR, PLATFORM_CODE_ECUS, HYUNDAI_VERSION_REQUEST_LONG, \
-                                         HyundaiFlags, get_platform_codes
+                                         HyundaiFlags, get_platform_codes, HyundaiSafetyFlags
 from opendbc.car.hyundai.fingerprints import FW_VERSIONS
 
 Ecu = CarParams.Ecu
@@ -67,7 +66,7 @@ class TestHyundaiFingerprint:
     fingerprint = gen_empty_fingerprint()
     for car_model in CAR:
       CP = CarInterface.get_params(car_model, fingerprint, [], False, False)
-      assert bool(CP.flags & HyundaiFlags.ALT_LIMITS) == bool(CP.safetyConfigs[-1].safetyParam & Panda.FLAG_HYUNDAI_ALT_LIMITS)
+      assert bool(CP.flags & HyundaiFlags.ALT_LIMITS) == bool(CP.safetyConfigs[-1].safetyParam & HyundaiSafetyFlags.FLAG_HYUNDAI_ALT_LIMITS)
 
   def test_can_features(self):
     # Test no EV/HEV in any gear lists (should all use ELECT_GEAR)

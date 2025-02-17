@@ -1,9 +1,8 @@
-from panda import Panda
 from opendbc.car import Bus, get_safety_config, structs
 from opendbc.car.hyundai.hyundaicanfd import CanBus
 from opendbc.car.hyundai.values import HyundaiFlags, CAR, DBC, CANFD_RADAR_SCC_CAR, \
                                                    CANFD_UNSUPPORTED_LONGITUDINAL_CAR, \
-                                                   UNSUPPORTED_LONGITUDINAL_CAR
+                                                   UNSUPPORTED_LONGITUDINAL_CAR, HyundaiSafetyFlags
 from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.disable_ecu import disable_ecu
@@ -58,13 +57,13 @@ class CarInterface(CarInterfaceBase):
       ret.safetyConfigs = cfgs
 
       if ret.flags & HyundaiFlags.CANFD_HDA2:
-        ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_CANFD_HDA2
+        ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.FLAG_HYUNDAI_CANFD_HDA2.value
         if ret.flags & HyundaiFlags.CANFD_HDA2_ALT_STEERING:
-          ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_CANFD_HDA2_ALT_STEERING
+          ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.FLAG_HYUNDAI_CANFD_HDA2_ALT_STEERING.value
       if ret.flags & HyundaiFlags.CANFD_ALT_BUTTONS:
-        ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_CANFD_ALT_BUTTONS
+        ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.FLAG_HYUNDAI_CANFD_ALT_BUTTONS.value
       if ret.flags & HyundaiFlags.CANFD_CAMERA_SCC:
-        ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_CAMERA_SCC
+        ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.FLAG_HYUNDAI_CAMERA_SCC.value
 
     else:
       # Shared configuration for non CAN-FD cars
@@ -86,7 +85,7 @@ class CarInterface(CarInterfaceBase):
         ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.hyundai, 0)]
 
       if ret.flags & HyundaiFlags.CAMERA_SCC:
-        ret.safetyConfigs[0].safetyParam |= Panda.FLAG_HYUNDAI_CAMERA_SCC
+        ret.safetyConfigs[0].safetyParam |= HyundaiSafetyFlags.FLAG_HYUNDAI_CAMERA_SCC.value
 
     # Common lateral control setup
 
@@ -96,7 +95,7 @@ class CarInterface(CarInterfaceBase):
     CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
     if ret.flags & HyundaiFlags.ALT_LIMITS:
-      ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_ALT_LIMITS
+      ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.FLAG_HYUNDAI_ALT_LIMITS.value
 
     # Common longitudinal control setup
 
@@ -109,11 +108,11 @@ class CarInterface(CarInterfaceBase):
     ret.longitudinalActuatorDelay = 0.5
 
     if ret.openpilotLongitudinalControl:
-      ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_LONG
+      ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.FLAG_HYUNDAI_LONG.value
     if ret.flags & HyundaiFlags.HYBRID:
-      ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_HYBRID_GAS
+      ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.FLAG_HYUNDAI_HYBRID_GAS.value
     elif ret.flags & HyundaiFlags.EV:
-      ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_EV_GAS
+      ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.FLAG_HYUNDAI_EV_GAS.value
 
     # Car specific configuration overrides
 
