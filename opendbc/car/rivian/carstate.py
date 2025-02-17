@@ -11,7 +11,6 @@ class CarState(CarStateBase):
     super().__init__(CP)
     self.last_speed = 30
 
-    # Needed by carcontroller
     self.acm_lka_hba_cmd = None
 
   def update(self, can_parsers) -> structs.CarState:
@@ -28,10 +27,10 @@ class CarState(CarStateBase):
     # Gas pedal
     pedal_status = cp.vl["VDM_PropStatus"]["VDM_AcceleratorPedalPosition"]
     ret.gas = pedal_status / 100.0
-    ret.gasPressed = (pedal_status > 0)
+    ret.gasPressed = pedal_status > 0
 
     # Brake pedal
-    ret.brake = cp.vl["ESPiB3"]["ESPiB3_pMC1"] / 250.0 # pressure in Bar
+    ret.brake = cp.vl["ESPiB3"]["ESPiB3_pMC1"] / 250.0  # pressure in Bar
     ret.brakePressed = cp.vl["iBESP2"]["iBESP2_BrakePedalApplied"] == 1
 
     # Steering wheel
@@ -47,7 +46,7 @@ class CarState(CarStateBase):
     self.last_speed = speed if speed != 0 else self.last_speed
     ret.cruiseState.enabled = cp_cam.vl["ACM_Status"]["ACM_FeatureStatus"] == 1
     ret.cruiseState.speed = self.last_speed * CV.MPH_TO_MS  # detected speed limit
-    ret.cruiseState.available = True # cp.vl["VDM_AdasSts"]["VDM_AdasInterfaceStatus"] == 1
+    ret.cruiseState.available = True  # cp.vl["VDM_AdasSts"]["VDM_AdasInterfaceStatus"] == 1
     ret.cruiseState.standstill = cp.vl["VDM_AdasSts"]["VDM_AdasAccelRequestAcknowledged"] == 1
     ret.accFaulted = cp_cam.vl["ACM_Status"]["ACM_FaultStatus"] == 1
 

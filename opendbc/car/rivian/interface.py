@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from opendbc.car import get_safety_config, structs
 from opendbc.car.interfaces import CarInterfaceBase
 
