@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from opendbc.car import structs
 from opendbc.car.interfaces import CarInterfaceBase
 
