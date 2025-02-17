@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from enum import IntFlag
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, AngleRateLimit
-from opendbc.car.structs import CarParams, CarState
+from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarDocs
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
