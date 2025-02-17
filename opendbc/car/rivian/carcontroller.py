@@ -1,7 +1,7 @@
 from opendbc.can.packer import CANPacker
 from opendbc.car import Bus, apply_driver_steer_torque_limits, structs
 from opendbc.car.interfaces import CarControllerBase
-from opendbc.car.rivian.riviancan import create_lka_steering, create_longitudinal
+from opendbc.car.rivian.riviancan import create_lka_steering
 from opendbc.car.rivian.values import CarControllerParams
 
 LongCtrlState = structs.CarControl.Actuators.LongControlState

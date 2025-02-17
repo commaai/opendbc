@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from opendbc.car import get_safety_config, structs
 from opendbc.car.interfaces import CarInterfaceBase
-from panda import Panda
 
 
 class CarInterface(CarInterfaceBase):
@@ -11,6 +10,9 @@ class CarInterface(CarInterfaceBase):
     ret.brand = "rivian"
 
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.rivian)]
+
+    # pending validation
+    ret.dashcamOnly = True
 
     ret.steerActuatorDelay = 0.25
     ret.steerLimitTimer = 0.4
