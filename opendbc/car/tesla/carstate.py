@@ -5,7 +5,7 @@ from opendbc.can.parser import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.tesla.values import DBC, CANBUS, STEER_THRESHOLD
+from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP, STEER_THRESHOLD
 
 ButtonType = structs.CarState.ButtonEvent.Type
 
@@ -73,8 +73,7 @@ class CarState(CarStateBase):
     ret.accFaulted = cruise_state == "FAULT"
 
     # Gear
-    can_gear = int(cp_party.vl["DI_systemStatus"]["DI_gear"])
-    ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(can_gear, None))
+    ret.gearShifter = GEAR_MAP[self.can_define.dv["DI_systemStatus"]["DI_gear"].get(int(cp_party.vl["DI_systemStatus"]["DI_gear"]), "DI_GEAR_INVALID")]
 
     # Doors
     ret.doorOpen = cp_party.vl["UI_warning"]["anyDoorOpen"] == 1

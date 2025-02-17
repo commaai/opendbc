@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from enum import IntFlag
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, AngleRateLimit
-from opendbc.car.structs import CarParams
+from opendbc.car.structs import CarParams, CarState
 from opendbc.car.docs_definitions import CarDocs
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
@@ -44,6 +44,16 @@ class CANBUS:
   party = 0
   vehicle = 1
   autopilot_party = 2
+
+
+GEAR_MAP = {
+  "DI_GEAR_INVALID": CarState.GearShifter.unknown,
+  "DI_GEAR_P": CarState.GearShifter.park,
+  "DI_GEAR_R": CarState.GearShifter.reverse,
+  "DI_GEAR_N": CarState.GearShifter.neutral,
+  "DI_GEAR_D": CarState.GearShifter.drive,
+  "DI_GEAR_SNA": CarState.GearShifter.unknown,
+}
 
 
 class CarControllerParams:
