@@ -213,6 +213,41 @@ def get_brand_ecu_matches(ecu_rx_addrs: set[EcuAddrBusType]) -> dict[str, set[Ad
 
   brand_addrs = {brand: {(addr, subaddr) for _, addr, subaddr in config.get_all_ecus(VERSIONS[brand])} for
                  brand, config in FW_QUERY_CONFIGS.items()}
+  print('brand_addrs', brand_addrs)
+  brand_matches: dict[str, set[AddrType]] = {brand: set() for brand, _, _ in REQUESTS}
+
+  brand_rx_offsets = {(brand, r.rx_offset) for brand, _, r in REQUESTS}
+  for addr, sub_addr, _ in ecu_rx_addrs:
+    # Since we can't know what request an ecu responded to, add matches for all possible rx offsets
+    for brand, rx_offset in brand_rx_offsets:
+      a = (uds.get_rx_addr_for_tx_addr(addr, -rx_offset), sub_addr)
+      if a in brand_addrs[brand]:
+        brand_matches[brand].add(a)
+
+  return brand_matches
+
+
+def get_brand_ecu_matches_new(ecu_rx_addrs: set[EcuAddrBusType]) -> dict[str, set[AddrType]]:
+  """Returns dictionary of brands and matches with ECUs in their FW versions"""
+
+  brand_matches: dict[str, set[AddrType]] = {brand: [] for brand, _, _ in REQUESTS}
+
+  # brand, ecu -> addr, subaddr
+  brand_addrs = {(brand, ecu): (addr, subaddr) for brand, config in FW_QUERY_CONFIGS.items() for
+                 ecu, addr, subaddr in config.get_all_ecus(VERSIONS[brand])}
+
+  for brand, _, r in REQUESTS:
+    print(brand, r)
+    print([brand_addrs[(brand, ecu)] for ecu in r.whitelist_ecus])
+
+
+
+  return brand_matches
+
+
+  brand_addrs = {brand: {(addr, subaddr) for _, addr, subaddr in config.get_all_ecus(VERSIONS[brand])} for
+                 brand, config in FW_QUERY_CONFIGS.items()}
+  print('brand_addrs', brand_addrs)
   brand_matches: dict[str, set[AddrType]] = {brand: set() for brand, _, _ in REQUESTS}
 
   brand_rx_offsets = {(brand, r.rx_offset) for brand, _, r in REQUESTS}
