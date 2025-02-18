@@ -339,6 +339,7 @@ BO_ 317 QFK_01: 32 XXX
  SG_ NEW_SIGNAL_2 : 19|1@0+ (1,0) [0|1] "" XXX
  SG_ LatCon_HCA_Status : 20|3@1+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_1 : 23|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_10 : 24|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_6 : 30|3@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_7 : 34|3@0+ (1,0) [0|1] "" XXX
  SG_ Steering_Angle_VZ : 36|1@0+ (1,0) [0|1] "" XXX
