@@ -513,6 +513,7 @@ BO_ 589 MEB_Side_Assist_02: 64 XXX
 
 BO_ 591 MEB_Distance_01: 64 XXX
  SG_ Unknown_01 : 12|1@0+ (1,0) [0|1] "" XXX
+ SG_ Distance_Status : 13|2@1+ (1,0) [0|3] "" XXX
  SG_ Same_Lane_01_ObjectID : 16|6@1+ (1,0) [0|63] "Unit_ObjectID" XXX
  SG_ Left_Lane_01_ObjectID : 22|6@1+ (1,0) [0|63] "Unit_ObjectID" XXX
  SG_ Right_Lane_01_ObjectID : 28|6@1+ (1,0) [0|63] "Unit_ObjectID" XXX
@@ -649,6 +650,8 @@ BO_ 771 HCA_03: 24 XXX
  SG_ Unknown_01 : 53|1@0+ (1,0) [0|1] "" XXX
  SG_ Vibration : 56|1@0+ (1,0) [0|1] "" XXX
  SG_ Active : 66|1@1+ (1,0) [0|1] "" XXX
+
+BO_ 792 MEB_Camera_03: 8 XXX
 
 BO_ 795 ESP_24: 8 Gateway
  SG_ ESP_Lampe : 12|1@1+ (1,0) [0|1] "" Sub_Gateway
@@ -2057,13 +2060,30 @@ BO_ 1716 VIN_01: 8 Gateway_MQB
  SG_ VIN_16 m2 : 48|8@1+ (1,0) [0|255] "" Airbag_MQB
  SG_ VIN_17 m2 : 56|8@1+ (1,0) [0|255] "" Airbag_MQB
 
+BO_ 316495015 MEB_Camera_04: 32 XXX
+
 BO_ 316495049 SAL_01: 8 XXX
  SG_ CRC : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ CNT : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ Brake_Unknown : 18|1@0+ (1,0) [0|1] "" XXX
+ SG_ Brake_Light_01 : 20|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_2 : 22|1@0+ (1,0) [0|1] "" XXX
+ SG_ Right_Blinker : 25|1@0+ (1,0) [0|1] "" XXX
+ SG_ Left_Blinker : 26|1@1+ (1,0) [0|3] "" XXX
+ SG_ Reverse_Light : 27|1@0+ (1,0) [0|1] "" XXX
+ SG_ Brake_Light_02 : 30|1@0+ (1,0) [0|1] "" XXX
+ SG_ Right_Blinker_02 : 44|1@1+ (1,0) [0|3] "" XXX
+ SG_ Left_Blinker_02 : 45|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_3 : 52|8@1+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_4 : 63|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 316495081 MEB_Camera_05: 8 XXX
 
 BO_ 316495106 AAA_01: 8 XXX
  SG_ CRC : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ CHK : 8|4@1+ (1,0) [0|15] "" XXX
+
+BO_ 316495140 MEB_Camera_06: 64 XXX
 
 BO_ 316495165 HVL_01: 8 XXX
  SG_ CRC : 0|8@1+ (1,0) [0|255] "" XXX
@@ -2071,9 +2091,25 @@ BO_ 316495165 HVL_01: 8 XXX
 
 BO_ 380195935 IPA_02: 8 XXX
 
+BO_ 380196019 MEB_Camera_07: 16 XXX
+
+BO_ 380196036 MEB_Camera_08: 8 XXX
+
+BO_ 389241616 MEB_Camera_09: 8 XXX
+
+BO_ 389241617 MEB_Camera_10: 8 XXX
+
+BO_ 401604687 MEB_Camera_11: 8 XXX
+
+BO_ 402522959 MEB_Camera_14: 8 XXX
+
 BO_ 441800001 EML_02: 8 XXX
  SG_ CRC : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ CHK : 8|4@1+ (1,0) [0|15] "" XXX
+
+BO_ 441800082 MEB_Camera_12: 8 XXX
+
+BO_ 452984911 MEB_Camera_13: 8 XXX
 
 CM_ BO_ 184 "Motorsteuergerät";
 CM_ BO_ 192 "Motorsteuergerät";
@@ -2083,7 +2119,6 @@ CM_ BO_ 522 "Steuergerät für Fahrzeugbewegung";
 CM_ BO_ 1622 "Steuergerät für Lenkungsverriegelung";
 CM_ BO_ 316495165 "Steuergerät ICAS1";
 CM_ BO_ 441800001 "Steuergerät für Fahrzeugbewegung";
-
 VAL_ 64 AB_RGS_Anst 4 "aktiv_Niveau_1" 5 "aktiv_Niveau_2" 6 "aktiv_Niveau_3" 7 "aktiv_Niveau_4" 8 "deaktiviert";
 VAL_ 64 AB_Front_Crash 0 "kein_Front_Crash" 1 "Front_Crash";
 VAL_ 64 AB_Heck_Crash 0 "kein_Heck_Crash" 1 "Heck_Crash";
@@ -2265,6 +2300,7 @@ VAL_ 496 zFAS_Warnblinken 0 "Aus" 1 "Statisch" 2 "Taster" 3 "Statisch_ohne_WBT";
 VAL_ 496 STP_Primaeranz 0 "keine_Anzeige" 1 "Verfuegbar" 2 "Aktiv" 3 "Uebernahme" 4 "Aktiv_Warnung" 5 "Nicht_Verfuegbar";
 VAL_ 496 EA_Bremslichtblinken 0 "kein_Blinken" 1 "Anforderung_Bremslichtblinken";
 VAL_ 496 EA_Blinken 0 "Kein_Blinken" 1 "Wechselblinken_links" 2 "Wechselblinken_rechts" 3 "Warnblinken" 4 "Warnblinken_Taster";
+VAL_ 591 Distance_Status 0 "Valid" 3 "Invalid";
 VAL_ 619 Travel_Assist_Status 4 "enabled" 0 "disabled" 2 "ready" 3 "pre_ready";
 VAL_ 619 Travel_Assist_Request 4 "enable" 3 "disable" 0 "no_request" 1 "error";
 VAL_ 619 Travel_Assist_Available 0 "not_available" 1 "available";
