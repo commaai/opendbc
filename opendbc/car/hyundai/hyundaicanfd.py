@@ -222,7 +222,7 @@ def create_ccnc_acc_control(packer, CAN, enabled, accel_last, accel, stopping, g
     "aReqValue": a_val,
     "aReqRaw": a_raw,
     "VSetDis": set_speed,
-    "JerkLowerLimit": jerk if enabled else 1,
+    "JerkLowerLimit": jerk if enabled else 0,
     "JerkUpperLimit": 0.5 if enabled else 0,
 
     "ObjValid": 0,
