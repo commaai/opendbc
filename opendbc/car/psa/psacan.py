@@ -6,7 +6,7 @@ class CanBus(CanBusBase):
 
   @property
   def main(self) -> int:
-    return self.offset
+    return self.offset + 2
 
   @property
   def adas(self) -> int:
@@ -14,7 +14,7 @@ class CanBus(CanBusBase):
 
   @property
   def camera(self) -> int:
-    return self.offset + 2
+    return self.offset
 
 def calculate_checksum(dat: bytearray) -> int:
   checksum = sum((b >> 4) + (b & 0xF) for b in dat)

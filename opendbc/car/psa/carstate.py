@@ -105,7 +105,7 @@ class CarState(CarStateBase):
       ('HS2_DAT7_BSI_612', 10),
     ]
     return {
-      Bus.main: CANParser(DBC[CP.carFingerprint][Bus.main], main_messages, 0),
+      Bus.main: CANParser(DBC[CP.carFingerprint][Bus.main], main_messages, 2),
       Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.adas], adas_messages, 1),
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 2),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 0),
     }
