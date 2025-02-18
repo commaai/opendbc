@@ -111,16 +111,16 @@ class FwQueryConfig:
 
     # These ECUs are already not in ESSENTIAL_ECUS which the fingerprint functions give a pass if missing
     unnecessary_non_essential_ecus = set(self.non_essential_ecus) - set(ESSENTIAL_ECUS)
-    assert unnecessary_non_essential_ecus == set(), ("Declaring non-essential ECUs non-essential is not required: "
+    assert unnecessary_non_essential_ecus == set(), ("Declaring non-essential ECUs non-essential is not required: " +
                                                      f"{', '.join([f'Ecu.{ECU_NAME[ecu]}' for ecu in unnecessary_non_essential_ecus])}")
 
     # Asserts equal length request and response lists
     for request_obj in self.requests:
-      assert len(request_obj.request) == len(request_obj.response), (f"Request and response lengths do not match: "
+      assert len(request_obj.request) == len(request_obj.response), (f"Request and response lengths do not match: " +
                                                                      f"{request_obj.request} vs. {request_obj.response}")
 
       # No request on the OBD port (bus 1, multiplexed) should be run on an aux panda
-      assert not (request_obj.auxiliary and request_obj.bus == 1 and request_obj.obd_multiplexing), (f"OBD multiplexed request should not "
+      assert not (request_obj.auxiliary and request_obj.bus == 1 and request_obj.obd_multiplexing), (f"OBD multiplexed request should not " +
                                                                                                      f"be marked auxiliary: {request_obj}")
 
     # Add aux requests (second panda) for all requests that are marked as auxiliary
