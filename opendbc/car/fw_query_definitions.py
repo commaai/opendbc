@@ -105,6 +105,10 @@ class FwQueryConfig:
   match_fw_to_car_fuzzy: Callable[[LiveFwVersions, str, OfflineFwVersions], set[str]] | None = None
 
   def __post_init__(self):
+    # Asserts that a request exists if extra ecus are used
+    if len(self.extra_ecus):
+      assert len(self.requests), "Must define a request with extra ecus"
+
     # These ECUs are already not in ESSENTIAL_ECUS which the fingerprint functions give a pass if missing
     unnecessary_non_essential_ecus = set(self.non_essential_ecus) - set(ESSENTIAL_ECUS)
     assert unnecessary_non_essential_ecus == set(), ("Declaring non-essential ECUs non-essential is not required: "

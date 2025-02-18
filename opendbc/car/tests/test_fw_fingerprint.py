@@ -15,10 +15,6 @@ from opendbc.car.vin import get_vin
 CarFw = CarParams.CarFw
 Ecu = CarParams.Ecu
 
-# TODO: this is a hack, we should support dashcam ports without fingeprinting
-IGNORED_BRANDS = {"rivian"}
-FW_QUERY_CONFIGS = {brand: config for brand, config in FW_QUERY_CONFIGS.items() if brand not in IGNORED_BRANDS}
-
 
 class TestFwFingerprint:
   def assertFingerprints(self, candidates, expected):
@@ -146,15 +142,15 @@ class TestFwFingerprint:
       with subtests.test():
         pytest.fail(f"Brands do not implement FW_VERSIONS: {brand_configs - brand_versions}")
 
-    if len(brand_versions - brand_configs - IGNORED_BRANDS):
+    if len(brand_versions - brand_configs):
       with subtests.test():
         pytest.fail(f"Brands do not implement FW_QUERY_CONFIG: {brand_versions - brand_configs}")
 
     # Ensure each brand has at least 1 ECU to query, and extra ECU retrieval
     for brand, config in FW_QUERY_CONFIGS.items():
-      if brand not in IGNORED_BRANDS:
-        assert len(config.get_all_ecus({}, include_extra_ecus=False)) == 0
-        assert config.get_all_ecus({}) == set(config.extra_ecus)
+      assert len(config.get_all_ecus({}, include_extra_ecus=False)) == 0
+      assert config.get_all_ecus({}) == set(config.extra_ecus)
+      if len(VERSIONS[brand]) > 0:
         assert len(config.get_all_ecus(VERSIONS[brand])) > 0
 
   def test_fw_request_ecu_whitelist(self, subtests):
@@ -172,7 +168,7 @@ class TestFwFingerprint:
                          f'{brand.title()}: ECUs not in any FW query whitelists: {ecu_strings}'
 
   def test_brand_ecu_matches(self):
-    empty_response = {brand: set() for brand in FW_QUERY_CONFIGS}
+    empty_response = {brand: set() for brand, config in FW_QUERY_CONFIGS.items() if len(config.requests)}
     assert get_brand_ecu_matches(set()) == empty_response
 
     # we ignore bus
