@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
-from panda import Panda
+from opendbc.car import structs
 from opendbc.car import get_safety_config, structs
 from opendbc.car.interfaces import CarInterfaceBase
-from opendbc.car.tesla.values import CAR
+from opendbc.car.tesla.values import TeslaSafetyFlags
+
 
 class CarInterface(CarInterfaceBase):
 
@@ -25,7 +25,7 @@ class CarInterface(CarInterfaceBase):
     ret.experimentalLongitudinalAvailable = True
     if experimental_long:
       ret.openpilotLongitudinalControl = True
-      ret.safetyConfigs[0].safetyParam |= Panda.FLAG_TESLA_LONG_CONTROL
+      ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.FLAG_TESLA_LONG_CONTROL.value
 
     ret.startAccel = 0.04
     ret.stopAccel = -0.52

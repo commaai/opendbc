@@ -1,20 +1,30 @@
 import copy
+import numpy as np
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP
+from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP, STEER_THRESHOLD
 
 ButtonType = structs.CarState.ButtonEvent.Type
+
 
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
     self.can_define = CANDefine(DBC[CP.carFingerprint][Bus.party])
+    self.shifter_values = self.can_define.dv["DI_systemStatus"]["DI_gear"]
 
     self.hands_on_level = 0
     self.das_control = None
+
+  def update_steering_pressed(self, steering_pressed, steering_pressed_min_count):
+    """Applies filtering on steering pressed for noisy driver torque signals."""
+    # TODO: this differs from the base implementation by resetting the counter to 0 immediately, unify this
+    self.steering_pressed_cnt = self.steering_pressed_cnt + 1 if steering_pressed else 0
+    self.steering_pressed_cnt = float(np.clip(self.steering_pressed_cnt, 0, steering_pressed_min_count * 2))
+    return self.steering_pressed_cnt > steering_pressed_min_count
 
   def update(self, can_parsers) -> structs.CarState:
     cp_party = can_parsers[Bus.party]
@@ -28,7 +38,7 @@ class CarState(CarStateBase):
     # Gas pedal
     pedal_status = cp_party.vl["DI_systemStatus"]["DI_accelPedalPos"]
     ret.gas = pedal_status / 100.0
-    ret.gasPressed = (pedal_status > 0)
+    ret.gasPressed = pedal_status > 0
 
     # Brake pedal
     ret.brake = 0
@@ -41,7 +51,9 @@ class CarState(CarStateBase):
     ret.steeringRateDeg = -cp_ap_party.vl["SCCM_steeringAngleSensor"]["SCCM_steeringAngleSpeed"]
     ret.steeringTorque = -epas_status["EPAS3S_torsionBarTorque"]
 
-    ret.steeringPressed = self.hands_on_level > 0
+    # This matches stock logic, but with halved minimum frames (0.25-0.3s)
+    ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > STEER_THRESHOLD, 15)
+
     eac_status = self.can_define.dv["EPAS3S_sysStatus"]["EPAS3S_eacStatus"].get(int(epas_status["EPAS3S_eacStatus"]), None)
     ret.steerFaultPermanent = eac_status == "EAC_FAULT"
     ret.steerFaultTemporary = eac_status == "EAC_INHIBITED"
