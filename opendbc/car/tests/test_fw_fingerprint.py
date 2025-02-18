@@ -16,9 +16,9 @@ CarFw = CarParams.CarFw
 Ecu = CarParams.Ecu
 
 # TODO: this is a hack, we should support dashcam ports without fingeprinting
-IGNORED_BRANDS = [
-  "rivian",
-]
+IGNORED_BRANDS = {"rivian"}
+FW_QUERY_CONFIGS = {brand: config for brand, config in FW_QUERY_CONFIGS.items() if brand not in IGNORED_BRANDS}
+
 
 class TestFwFingerprint:
   def assertFingerprints(self, candidates, expected):
@@ -154,16 +154,13 @@ class TestFwFingerprint:
       with subtests.test():
         pytest.fail(f"Brands do not implement FW_VERSIONS: {brand_configs - brand_versions}")
 
-    if len(brand_versions - brand_configs):
+    if len(brand_versions - brand_configs - IGNORED_BRANDS):
       with subtests.test():
         pytest.fail(f"Brands do not implement FW_QUERY_CONFIG: {brand_versions - brand_configs}")
 
     # Ensure each brand has at least 1 ECU to query, and extra ECU retrieval
     for brand, config in FW_QUERY_CONFIGS.items():
-      # TODO: remove once rivian has fingerprinting support
-      if brand in IGNORED_BRANDS and len(config.get_all_ecus(VERSIONS[brand])) == 0:
-        continue
-      with subtests.test(brand):
+      if brand not in IGNORED_BRANDS:
         assert len(config.get_all_ecus({}, include_extra_ecus=False)) == 0
         assert config.get_all_ecus({}) == set(config.extra_ecus)
         assert len(config.get_all_ecus(VERSIONS[brand])) > 0
@@ -194,7 +191,7 @@ class TestFwFingerprint:
                            f"{brand.title()}: OBD multiplexed request is marked auxiliary: {request_obj}"
 
   def test_brand_ecu_matches(self):
-    empty_response = {brand: set() for brand in FW_QUERY_CONFIGS if brand not in IGNORED_BRANDS}
+    empty_response = {brand: set() for brand in FW_QUERY_CONFIGS}
     assert get_brand_ecu_matches(set()) == empty_response
 
     # we ignore bus
@@ -288,7 +285,7 @@ class TestFwFingerprintTiming:
         'tesla': 0.1,
         'toyota': 0.7,
         'volkswagen': 0.65,
-        'rivian': 0.,
+        'rivian': 0.
       },
       2: {
         'ford': 1.6,
