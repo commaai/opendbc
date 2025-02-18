@@ -203,11 +203,11 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
   return ret
 
 def create_ccnc_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_override, set_speed, hud_control, cruise_info):
-  jn = 0.1
   if not enabled or gas_override:
     a_val, a_raw = 0, 0
   else:
     a_raw = accel
+    jn = 0.1
     a_val = np.clip(accel, accel_last - jn, accel_last + jn)
 
   values = {s: cruise_info[s] for s in [
