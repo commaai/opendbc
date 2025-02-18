@@ -7,6 +7,7 @@ from opendbc.car import uds
 from opendbc.car.structs import CarParams
 
 Ecu = CarParams.Ecu
+
 AddrType = tuple[int, int | None]
 EcuAddrBusType = tuple[int, int | None, int]
 EcuAddrSubAddr = tuple[Ecu, int, int | None]
