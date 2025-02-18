@@ -327,7 +327,7 @@ class CarState(CarStateBase):
     ret.stockAeb = bool(pt_cp.vl["VMM_02"]["AEB_Active"])
 
     self.acc_type = ext_cp.vl["ACC_18"]["ACC_Typ"]
-    self.travel_assist_available = bool(ext_cp.vl["TA_01"]["Travel_Assist_Available"]) if self.CP.flags & VolkswagenFlags.TRAVEL_ASSIST_PRESENT else False
+    self.travel_assist_available = bool(cam_cp.vl["TA_01"]["Travel_Assist_Available"])
 
     ret.cruiseState.available = pt_cp.vl["Motor_51"]["TSK_Status"] in (2, 3, 4, 5)
     ret.cruiseState.enabled   = pt_cp.vl["Motor_51"]["TSK_Status"] in (3, 4, 5)
@@ -518,15 +518,14 @@ class CarState(CarStateBase):
     if CP.networkLocation == NetworkLocation.fwdCamera:
       cam_messages += [
         # sig_address, frequency
-        ("LDW_02", 10)      # From R242 Driver assistance camera
+        ("LDW_02", 10),     # From R242 Driver assistance camera
+        ("TA_01", 10),      # From R242 Driver assistance camera (Travel Assist)
       ]
     else:
       # Radars are here on CANBUS.cam
       cam_messages += MebExtraSignals.fwd_radar_messages
       if CP.enableBsm:
         cam_messages += MebExtraSignals.bsm_radar_messages
-      if CP.flags & VolkswagenFlags.TRAVEL_ASSIST_PRESENT:
-        cam_messages += MebExtraSignals.travel_assist_message
 
     return {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CANBUS.pt),
@@ -567,7 +566,4 @@ class MebExtraSignals:
   ]
   bsm_radar_messages = [
     ("MEB_Side_Assist_01", 20),
-  ]
-  travel_assist_message = [
-    ("TA_01", 10), #
   ]
