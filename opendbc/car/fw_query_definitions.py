@@ -101,6 +101,16 @@ class FwQueryConfig:
   match_fw_to_car_fuzzy: Callable[[LiveFwVersions, str, OfflineFwVersions], set[str]] | None = None
 
   def __post_init__(self):
+    # Asserts equal length request and response lists
+    for request_obj in self.requests:
+      assert len(request_obj.request) == len(request_obj.response), (f"Request and response lengths do not match: "
+                                                                     f"{request_obj.request} vs. {request_obj.response}")
+
+      # No request on the OBD port (bus 1, multiplexed) should be run on an aux panda
+      assert not (request_obj.auxiliary and request_obj.bus == 1 and request_obj.obd_multiplexing), (f"OBD multiplexed request should not "
+                                                                                                     f"be marked auxiliary: {request_obj}")
+
+    # Add aux requests (second panda) for all requests that are marked as auxiliary
     for i in range(len(self.requests)):
       if self.requests[i].auxiliary:
         new_request = copy.deepcopy(self.requests[i])
