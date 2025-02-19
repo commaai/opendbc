@@ -3,9 +3,9 @@ import unittest
 
 from opendbc.car.volkswagen.values import VolkswagenSafetyFlags
 from opendbc.safety import Safety
-from panda.tests.libsafety import libsafety_py
-import panda.tests.safety.common as common
-from panda.tests.safety.common import CANPackerPanda
+from opendbc.safety.tests.libsafety import libsafety_py
+import opendbc.safety.tests.common as common
+from opendbc.safety.tests.common import CANPackerPanda
 
 MSG_LENKHILFE_3 = 0x0D0       # RX from EPS, for steering angle and driver steering torque
 MSG_HCA_1 = 0x0D2             # TX by OP, Heading Control Assist steering torque

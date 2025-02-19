@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 import unittest
 
-import panda.tests.safety.common as common
+import opendbc.safety.tests.common as common
 
 from opendbc.safety import Safety
-from panda.tests.libsafety import libsafety_py
+from opendbc.safety.tests.libsafety import libsafety_py
 
 
 class TestDefaultRxHookBase(common.PandaSafetyTest):

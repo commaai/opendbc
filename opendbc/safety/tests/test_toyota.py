@@ -6,9 +6,9 @@ import itertools
 
 from opendbc.car.toyota.values import ToyotaSafetyFlags
 from opendbc.safety import Safety
-from panda.tests.libsafety import libsafety_py
-import panda.tests.safety.common as common
-from panda.tests.safety.common import CANPackerPanda
+from opendbc.safety.tests.libsafety import libsafety_py
+import opendbc.safety.tests.common as common
+from opendbc.safety.tests.common import CANPackerPanda
 
 TOYOTA_COMMON_TX_MSGS = [[0x2E4, 0], [0x191, 0], [0x412, 0], [0x343, 0], [0x1D2, 0]]  # LKAS + LTA + ACC & PCM cancel cmds
 TOYOTA_SECOC_TX_MSGS = [[0x131, 0]] + TOYOTA_COMMON_TX_MSGS

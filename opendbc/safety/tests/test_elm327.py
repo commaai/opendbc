@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 import unittest
 
-import panda.tests.safety.common as common
+import opendbc.safety.tests.common as common
 
 from opendbc.safety import Safety
 from panda import DLC_TO_LEN
-from panda.tests.libsafety import libsafety_py
-from panda.tests.safety.test_defaults import TestDefaultRxHookBase
+from opendbc.safety.tests.libsafety import libsafety_py
+from opendbc.safety.tests.test_defaults import TestDefaultRxHookBase
 
 GM_CAMERA_DIAG_ADDR = 0x24B
 

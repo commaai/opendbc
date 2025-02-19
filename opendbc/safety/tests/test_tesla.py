@@ -3,9 +3,9 @@ import unittest
 
 from opendbc.car.tesla.values import TeslaSafetyFlags
 from opendbc.safety import Safety
-from panda.tests.libsafety import libsafety_py
-import panda.tests.safety.common as common
-from panda.tests.safety.common import CANPackerPanda
+from opendbc.safety.tests.libsafety import libsafety_py
+import opendbc.safety.tests.common as common
+from opendbc.safety.tests.common import CANPackerPanda
 
 MSG_DAS_steeringControl = 0x488
 MSG_APS_eacMonitor = 0x27d

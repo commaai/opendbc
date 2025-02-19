@@ -7,7 +7,7 @@ from collections.abc import Callable
 
 from opendbc.can.packer import CANPacker  # pylint: disable=import-error
 from opendbc.safety import ALTERNATIVE_EXPERIENCE
-from panda.tests.libsafety import libsafety_py
+from opendbc.safety.tests.libsafety import libsafety_py
 
 MAX_WRONG_COUNTERS = 5
 MAX_SAMPLE_VALS = 6
@@ -743,7 +743,7 @@ class PandaSafetyTest(PandaSafetyTestBase):
 
     all_tx = []
     for tf in test_files:
-      test = importlib.import_module("panda.tests.safety."+tf[:-3])
+      test = importlib.import_module("opendbc.safety.tests."+tf[:-3])
       for attr in dir(test):
         if attr.startswith("Test") and attr != current_test:
           tc = getattr(test, attr)

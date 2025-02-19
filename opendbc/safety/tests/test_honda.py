@@ -4,9 +4,9 @@ import numpy as np
 
 from opendbc.car.honda.values import HondaSafetyFlags
 from opendbc.safety import Safety
-from panda.tests.libsafety import libsafety_py
-import panda.tests.safety.common as common
-from panda.tests.safety.common import CANPackerPanda, MAX_WRONG_COUNTERS
+from opendbc.safety.tests.libsafety import libsafety_py
+import opendbc.safety.tests.common as common
+from opendbc.safety.tests.common import CANPackerPanda, MAX_WRONG_COUNTERS
 
 HONDA_N_COMMON_TX_MSGS = [[0xE4, 0], [0x194, 0], [0x1FA, 0], [0x30C, 0], [0x33D, 0]]
 

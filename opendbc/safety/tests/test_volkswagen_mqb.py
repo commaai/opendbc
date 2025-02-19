@@ -2,9 +2,9 @@
 import unittest
 import numpy as np
 from opendbc.safety import Safety
-from panda.tests.libsafety import libsafety_py
-import panda.tests.safety.common as common
-from panda.tests.safety.common import CANPackerPanda
+from opendbc.safety.tests.libsafety import libsafety_py
+import opendbc.safety.tests.common as common
+from opendbc.safety.tests.common import CANPackerPanda
 from opendbc.car.volkswagen.values import VolkswagenSafetyFlags
 
 MAX_ACCEL = 2.0
