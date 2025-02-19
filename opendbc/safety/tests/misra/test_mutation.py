@@ -19,7 +19,6 @@ mutations = [
   # default
   (None, None, False),
   # general safety
-  ("opendbc/safety/safety/safety_toyota.h", "", False),
   ("opendbc/safety/safety/safety_toyota.h", "s/is_lkas_msg =.*;/is_lkas_msg = addr == 1 || addr == 2;/g", True),
 ]
 
