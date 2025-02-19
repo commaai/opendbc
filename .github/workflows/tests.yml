@@ -88,13 +88,16 @@ jobs:
           key: cppcheck-cache-${{ runner.os }}-${{ github.ref }}
 
   mutation:
-    name: Mutation tests
+    name: Safety mutation tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # need master to get diff
-      - name: Mutation tests
+      - name: Run mutation tests
         timeout-minutes: 5
-        run: GIT_REF=${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && github.event.before || 'origin/master' }} cd opendbc/safety/tests && ./mutation.sh
+        run: |
+          source setup.sh
+          scons -j8
+          GIT_REF=${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && github.event.before || 'origin/master' }} cd opendbc/safety/tests && ./mutation.sh
