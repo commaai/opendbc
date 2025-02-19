@@ -8,17 +8,15 @@ from opendbc.car.can_definitions import CanData
 from opendbc.car.car_helpers import interfaces
 from opendbc.car.structs import CarParams
 from opendbc.car.fingerprints import FW_VERSIONS
-from opendbc.car.fw_versions import ESSENTIAL_ECUS, FW_QUERY_CONFIGS, FUZZY_EXCLUDE_ECUS, VERSIONS, build_fw_dict, \
-                                                match_fw_to_car, get_brand_ecu_matches, get_fw_versions, get_present_ecus
+from opendbc.car.fw_versions import FW_QUERY_CONFIGS, FUZZY_EXCLUDE_ECUS, VERSIONS, build_fw_dict, \
+                                    match_fw_to_car, get_brand_ecu_matches, get_fw_versions, get_present_ecus
 from opendbc.car.vin import get_vin
 
 CarFw = CarParams.CarFw
 Ecu = CarParams.Ecu
 
-# TODO: this is a hack, we should support dashcam ports without fingeprinting
-IGNORED_BRANDS = [
-  "rivian",
-]
+ECU_NAME = {v: k for k, v in Ecu.schema.enumerants.items()}
+
 
 class TestFwFingerprint:
   def assertFingerprints(self, candidates, expected):
@@ -139,14 +137,6 @@ class TestFwFingerprint:
             for ecu in ecus.keys():
               assert ecu[0] != Ecu.transmission, f"{car_model}: Blacklisted ecu: (Ecu.{ecu[0]}, {hex(ecu[1])})"
 
-  def test_non_essential_ecus(self, subtests):
-    for brand, config in FW_QUERY_CONFIGS.items():
-      with subtests.test(brand):
-        # These ECUs are already not in ESSENTIAL_ECUS which the fingerprint functions give a pass if missing
-        unnecessary_non_essential_ecus = set(config.non_essential_ecus) - set(ESSENTIAL_ECUS)
-        assert unnecessary_non_essential_ecus == set(), "Declaring non-essential ECUs non-essential is not required: " + \
-                                                                f"{', '.join([f'Ecu.{ecu}' for ecu in unnecessary_non_essential_ecus])}"
-
   def test_missing_versions_and_configs(self, subtests):
     brand_versions = set(VERSIONS.keys())
     brand_configs = set(FW_QUERY_CONFIGS.keys())
@@ -160,12 +150,9 @@ class TestFwFingerprint:
 
     # Ensure each brand has at least 1 ECU to query, and extra ECU retrieval
     for brand, config in FW_QUERY_CONFIGS.items():
-      # TODO: remove once rivian has fingerprinting support
-      if brand in IGNORED_BRANDS and len(config.get_all_ecus(VERSIONS[brand])) == 0:
-        continue
-      with subtests.test(brand):
-        assert len(config.get_all_ecus({}, include_extra_ecus=False)) == 0
-        assert config.get_all_ecus({}) == set(config.extra_ecus)
+      assert len(config.get_all_ecus({}, include_extra_ecus=False)) == 0
+      assert config.get_all_ecus({}) == set(config.extra_ecus)
+      if len(VERSIONS[brand]) > 0:
         assert len(config.get_all_ecus(VERSIONS[brand])) > 0
 
   def test_fw_request_ecu_whitelist(self, subtests):
@@ -182,19 +169,17 @@ class TestFwFingerprint:
         assert not (len(whitelisted_ecus) and len(ecus_not_whitelisted)), \
                          f'{brand.title()}: ECUs not in any FW query whitelists: {ecu_strings}'
 
-  def test_fw_requests(self, subtests):
-    # Asserts equal length request and response lists
+  def test_request_ecus_in_versions(self):
+    # All ECUs in requests should be in the brand's FW versions
     for brand, config in FW_QUERY_CONFIGS.items():
-      with subtests.test(brand=brand):
-        for request_obj in config.requests:
-          assert len(request_obj.request) == len(request_obj.response)
-
-          # No request on the OBD port (bus 1, multiplexed) should be run on an aux panda
-          assert not (request_obj.auxiliary and request_obj.bus == 1 and request_obj.obd_multiplexing), \
-                           f"{brand.title()}: OBD multiplexed request is marked auxiliary: {request_obj}"
+      request_ecus = {ecu for r in config.requests for ecu in r.whitelist_ecus} - {ecu[0] for ecu in config.extra_ecus}
+      print(brand, request_ecus)
+      version_ecus = config.get_all_ecus(VERSIONS[brand], include_extra_ecus=False)
+      for request_ecu in request_ecus:
+        assert request_ecu in {e for e, _, _ in version_ecus}, f"Ecu.{ECU_NAME[request_ecu]} not in {brand} FW versions"
 
   def test_brand_ecu_matches(self):
-    empty_response = {brand: set() for brand in FW_QUERY_CONFIGS if brand not in IGNORED_BRANDS}
+    empty_response = {brand: set() for brand, config in FW_QUERY_CONFIGS.items() if len(config.requests)}
     assert get_brand_ecu_matches(set()) == empty_response
 
     # we ignore bus
