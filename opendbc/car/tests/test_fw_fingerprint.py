@@ -186,7 +186,7 @@ class TestFwFingerprint:
     # we ignore bus
     brand_matches = get_brand_ecu_matches({(0x758, 0xf, 99)})
     assert True in brand_matches['toyota']
-    assert not any([any(e) for b, e in brand_matches.items() if b != 'toyota'])
+    assert not any(any(e) for b, e in brand_matches.items() if b != 'toyota')
 
 
 class TestFwFingerprintTiming:
