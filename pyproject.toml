@@ -27,6 +27,7 @@ testing = [
   "cffi",
   "ruff",
   "pytest",
+  "pytest-coverage",
   "pytest-mock",
   "pytest-xdist",
   "pytest-subtests",
