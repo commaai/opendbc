@@ -19,9 +19,9 @@ source ../../../.venv/bin/activate
 # reset coverage data and generate gcc note file
 rm -f ./libsafety/*.gcda
 if [ "$1" == "--ubsan" ]; then
-  scons -j$(nproc) -D --coverage --ubsan
+  scons -j8 -D --coverage --ubsan
 else
-  scons -j$(nproc) -D --coverage
+  scons -j8 -D --coverage
 fi
 
 # run safety tests and generate coverage data
