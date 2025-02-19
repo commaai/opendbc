@@ -37,6 +37,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
+      - name: Set up
+        run: sudo apt-get install -y --no-install-recommends gcc-arm-none-eabi libnewlib-arm-none-eabi
       - uses: actions/checkout@v4
       - name: Run MISRA C:2012 analysis
         timeout-minutes: 2
