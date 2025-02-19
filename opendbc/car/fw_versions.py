@@ -210,9 +210,10 @@ def get_present_ecus(can_recv: CanRecvCallable, can_send: CanSendCallable, set_o
 def get_brand_ecu_matches(ecu_rx_addrs: set[EcuAddrBusType]) -> dict[str, list[bool]]:
   """Returns dictionary of brands and matches with ECUs in their FW versions"""
 
+  brand_rx_addrs = {brand: set() for brand in FW_QUERY_CONFIGS}
   brand_matches = {brand: [] for brand, _, _ in REQUESTS}
 
-  brand_rx_addrs = {brand: set() for brand in FW_QUERY_CONFIGS}
+  # Since we can't know what request an ecu responded to, check all possible rx addresses
   for brand, config, r in REQUESTS:
     for ecu in config.get_all_ecus(VERSIONS[brand]):
       if len(r.whitelist_ecus) == 0 or ecu[0] in r.whitelist_ecus:
@@ -221,7 +222,6 @@ def get_brand_ecu_matches(ecu_rx_addrs: set[EcuAddrBusType]) -> dict[str, list[b
   for brand, addrs in brand_rx_addrs.items():
     for addr in addrs:
       # TODO: check bus from request as well
-      print('checking', addr, ecu_rx_addrs, [addr[:2] for addr in ecu_rx_addrs])
       brand_matches[brand].append(addr in [addr[:2] for addr in ecu_rx_addrs])
 
   return brand_matches
