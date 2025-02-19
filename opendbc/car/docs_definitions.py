@@ -107,7 +107,7 @@ class CarHarness(EnumBase):
   fca = BaseCarHarness("FCA connector")
   ram = BaseCarHarness("Ram connector")
   vw_a = BaseCarHarness("VW A connector")
-  vw_j533 = BaseCarHarness("VW J533 connector", parts=[Accessory.comma_power_v2, Accessory.harness_box, Cable.long_obdc_cable, Cable.usbc_coupler])
+  vw_j533 = BaseCarHarness("VW J533 connector", parts=[Accessory.harness_box, Cable.long_obdc_cable, Cable.usbc_coupler, Accessory.comma_power_v2])
   hyundai_a = BaseCarHarness("Hyundai A connector")
   hyundai_b = BaseCarHarness("Hyundai B connector")
   hyundai_c = BaseCarHarness("Hyundai C connector")
@@ -129,14 +129,12 @@ class CarHarness(EnumBase):
   custom = BaseCarHarness("Developer connector")
   obd_ii = BaseCarHarness("OBD-II connector", parts=[Cable.long_obdc_cable], has_connector=False)
   gm = BaseCarHarness("GM connector", parts=[Accessory.harness_box])
-  gmsdgm = BaseCarHarness("GM SDGM connector", parts=[Accessory.harness_box, Cable.long_obdc_cable,
-                                                      Cable.usbc_coupler, Accessory.comma_power_v2])
+  gmsdgm = BaseCarHarness("GM SDGM connector", parts=[Accessory.harness_box, Cable.long_obdc_cable, Cable.usbc_coupler, Accessory.comma_power_v2])
   nissan_a = BaseCarHarness("Nissan A connector", parts=[Accessory.harness_box, Cable.long_obdc_cable, Cable.usbc_coupler])
   nissan_b = BaseCarHarness("Nissan B connector", parts=[Accessory.harness_box, Cable.long_obdc_cable, Cable.usbc_coupler])
   mazda = BaseCarHarness("Mazda connector")
   ford_q3 = BaseCarHarness("Ford Q3 connector")
-  ford_q4 = BaseCarHarness("Ford Q4 connector", parts=[Accessory.harness_box, Accessory.comma_power_v2, Cable.long_obdc_cable,
-                                                       Cable.usbc_coupler])
+  ford_q4 = BaseCarHarness("Ford Q4 connector", parts=[Accessory.harness_box, Accessory.comma_power_v2, Cable.long_obdc_cable, Cable.usbc_coupler])
   rivian = BaseCarHarness("Rivian connector")
 
 
