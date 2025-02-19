@@ -29,6 +29,7 @@ testing = [
   "pytest",
   "pytest-coverage",
   "pytest-mock",
+  "pytest-randomly",
   "pytest-xdist",
   "pytest-subtests",
   "hypothesis==6.47.*",

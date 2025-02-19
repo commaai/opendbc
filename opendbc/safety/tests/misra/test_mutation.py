@@ -8,32 +8,19 @@ import tempfile
 import random
 
 HERE = os.path.abspath(os.path.dirname(__file__))
-ROOT = os.path.join(HERE, "../../")
+ROOT = os.path.join(HERE, "../../../../")
 
 IGNORED_PATHS = (
-  'board/obj',
-  'board/jungle',
-  'board/stm32h7/inc',
-  'board/stm32f4/inc',
-  'board/fake_stm.h',
-
-  # bootstub only files
-  'board/flasher.h',
-  'board/bootstub.c',
-  'board/bootstub_declarations.h',
-  'board/stm32h7/llflash.h',
-  'board/stm32f4/llflash.h',
+  'opendbc/safety/tests/',
+  'opendbc/safety/board/',
 )
 
 mutations = [
   # default
   (None, None, False),
-  # F4 only
-  ("board/stm32f4/llbxcan.h", "s/1U/1/g", True),
-  # H7 only
-  ("board/stm32h7/llfdcan.h", "s/return ret;/if (true) { return ret; } else { return false; }/g", True),
   # general safety
-  ("board/safety/safety_toyota.h", "s/is_lkas_msg =.*;/is_lkas_msg = addr == 1 || addr == 2;/g", True),
+  ("opendbc/safety/safety/safety_toyota.h", "", False),
+  ("opendbc/safety/safety/safety_toyota.h", "s/is_lkas_msg =.*;/is_lkas_msg = addr == 1 || addr == 2;/g", True),
 ]
 
 patterns = [
@@ -59,9 +46,12 @@ patterns = [
   r"$a #define TEST 1\n#undef TEST\n",
 ]
 
-all_files = glob.glob('board/**', root_dir=ROOT, recursive=True)
+all_files = glob.glob('**', root_dir=ROOT, recursive=True)
 files = [f for f in all_files if f.endswith(('.c', '.h')) and not f.startswith(IGNORED_PATHS)]
-assert len(files) > 70, all(d in files for d in ('board/main.c', 'board/stm32f4/llbxcan.h', 'board/stm32h7/llfdcan.h', 'board/safety/safety_toyota.h'))
+assert len(files) >= 25, files
+
+# build now so we don't need to build each time
+subprocess.run("scons -j8", cwd=ROOT, shell=True, check=True)
 
 for p in patterns:
   mutations.append((random.choice(files), p, True))
@@ -70,6 +60,7 @@ for p in patterns:
 def test_misra_mutation(fn, patch, should_fail):
   with tempfile.TemporaryDirectory() as tmp:
     shutil.copytree(ROOT, tmp, dirs_exist_ok=True)
+    shutil.rmtree(os.path.join(tmp, '.venv'), ignore_errors=True)
 
     # apply patch
     if fn is not None:
@@ -77,6 +68,6 @@ def test_misra_mutation(fn, patch, should_fail):
       assert r == 0
 
     # run test
-    r = subprocess.run("SKIP_TABLES_DIFF=1 tests/misra/test_misra.sh", cwd=tmp, shell=True)
+    r = subprocess.run("SKIP_TABLES_DIFF=1 SKIP_BUILD=1 opendbc/safety/tests/misra/test_misra.sh", cwd=tmp, shell=True)
     failed = r.returncode != 0
     assert failed == should_fail

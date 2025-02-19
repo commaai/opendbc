@@ -43,3 +43,13 @@ jobs:
       - name: Run MISRA C:2012 analysis
         timeout-minutes: 2
         run: cd opendbc/safety/tests/misra && ./test_misra.sh
+
+  misra_mutation:
+    name: MISRA C:2012 Mutation
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: MISRA mutation tests
+        timeout-minutes: 5
+        run: source setup.sh && cd opendbc/safety/tests/misra && pytest -n8 --randomly-seed $RANDOM test_mutation.py

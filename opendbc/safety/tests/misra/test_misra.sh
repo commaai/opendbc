@@ -2,6 +2,7 @@
 set -e
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd $DIR
 
 source ../../../../setup.sh
 
@@ -18,7 +19,6 @@ if [ -z "${SKIP_CPPCHECK_INSTALL}" ]; then
 fi
 
 # ensure checked in coverage table is up to date
-cd $DIR
 if [ -z "$SKIP_TABLES_DIFF" ]; then
   python3 $CPPCHECK_DIR/addons/misra.py -generate-table > coverage_table
   if ! git diff --quiet coverage_table; then
