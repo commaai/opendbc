@@ -110,6 +110,11 @@ class FwQueryConfig:
     if len(self.extra_ecus):
       assert len(self.requests), "Must define a request with extra ecus"
 
+    # All extra ecus should be used in a request
+    for ecu, _, _ in self.extra_ecus:
+      assert (any(ecu in request.whitelist_ecus for request in self.requests) or
+              any(not request.whitelist_ecus for request in self.requests)), f"Ecu.{ECU_NAME[ecu]} not in any request"
+
     # These ECUs are already not in ESSENTIAL_ECUS which the fingerprint functions give a pass if missing
     unnecessary_non_essential_ecus = set(self.non_essential_ecus) - set(ESSENTIAL_ECUS)
     assert unnecessary_non_essential_ecus == set(), ("Declaring non-essential ECUs non-essential is not required: " +
