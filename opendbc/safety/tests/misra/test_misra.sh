@@ -2,7 +2,6 @@
 set -e
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-PANDA_DIR=$(realpath $DIR/../../)
 
 source ../../../../setup.sh
 
@@ -46,7 +45,8 @@ cppcheck() {
   echo -e "\n\n\n\n\nTEST variant options:" >> $CHECKLIST
   echo -e ""${@//$BASEDIR/}"\n\n" >> $CHECKLIST # (absolute path removed)
 
-  $CPPCHECK_DIR/cppcheck --inline-suppr -I $BASEDIR/opendbc/safety/safety/ \
+  $CPPCHECK_DIR/cppcheck --inline-suppr -I $BASEDIR/opendbc/safety/ \
+          -I $BASEDIR/opendbc/safety/safety/ -I $BASEDIR/opendbc/safety/board/ \
           -I "$(arm-none-eabi-gcc -print-file-name=include)" \
           --suppressions-list=$DIR/suppressions.txt --suppress=*:*inc/* \
           --suppress=*:*include/* --error-exitcode=2 --check-level=exhaustive --safety \
@@ -66,14 +66,14 @@ cppcheck() {
 PANDA_OPTS="--enable=all --disable=unusedFunction -DPANDA --addon=misra"
 
 printf "\n${GREEN}** PANDA F4 CODE **${NC}\n"
-cppcheck $PANDA_OPTS -DSTM32F4 -DSTM32F413xx $PANDA_DIR/board/main.c
+cppcheck $PANDA_OPTS -DSTM32F4 -DSTM32F413xx $BASEDIR/opendbc/safety/main.c
 
 printf "\n${GREEN}** PANDA H7 CODE **${NC}\n"
-cppcheck $PANDA_OPTS -DSTM32H7 -DSTM32H725xx $PANDA_DIR/board/main.c
+cppcheck $PANDA_OPTS -DSTM32H7 -DSTM32H725xx $BASEDIR/opendbc/safety/main.c
 
 # unused needs to run globally
 #printf "\n${GREEN}** UNUSED ALL CODE **${NC}\n"
-#cppcheck --enable=unusedFunction --quiet $PANDA_DIR/board/
+#cppcheck --enable=unusedFunction --quiet $BASEDIR/opendbc/safety/board/
 
 printf "\n${GREEN}Success!${NC} took $SECONDS seconds\n"
 

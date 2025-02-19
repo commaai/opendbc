@@ -31,3 +31,13 @@ jobs:
     - uses: actions/checkout@v4
     - name: Run safety tests
       run: ./opendbc/safety/tests/test.sh ${{ matrix.flags }}
+
+  misra_linter:
+    name: MISRA C:2012 Linter
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run MISRA C:2012 analysis
+        timeout-minutes: 2
+        run: ${{ env.RUN }} "cd opendbc/safety/tests/misra && ./test_misra.sh"

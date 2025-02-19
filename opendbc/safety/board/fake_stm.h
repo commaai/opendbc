@@ -5,7 +5,6 @@
 
 #include "utils.h"
 
-#define CANFD
 #define ALLOW_DEBUG
 #define PANDA
 
