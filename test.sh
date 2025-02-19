@@ -17,15 +17,15 @@ uv sync --all-extras
 source .venv/bin/activate
 
 # *** build ***
-run scons -j8
+scons -j8
 
 # *** lint ***
 # TODO: pre-commit is slow; replace it with openpilot's "op lint"
 #pre-commit run --all-files
-run ruff check .
+ruff check .
 
 # *** test ***
-run pytest -n8
+pytest -n8
 
 # *** all done ***
 GREEN='\033[0;32m'
