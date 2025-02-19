@@ -18,5 +18,5 @@ for safety_model in ${SAFETY_MODELS[@]}; do
   echo ""
   echo ""
   echo -e "Testing mutations on : $safety_model"
-  mull-runner-17 --ld-search-path /lib/x86_64-linux-gnu/ ../libpanda/libpanda.so -test-program=./$safety_model
+  mull-runner-17 --ld-search-path /lib/x86_64-linux-gnu/ ./libsafety/libsafety.so -test-program=./$safety_model
 done
