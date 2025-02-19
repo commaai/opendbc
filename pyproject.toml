@@ -24,6 +24,7 @@ dependencies = [
 
 [project.optional-dependencies]
 testing = [
+  "cffi",
   "ruff",
   "pytest",
   "pytest-mock",
