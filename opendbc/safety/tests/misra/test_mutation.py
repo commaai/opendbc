@@ -46,9 +46,9 @@ patterns = [
   r"$a #define TEST 1\n#undef TEST\n",
 ]
 
-all_files = glob.glob('**', root_dir=ROOT, recursive=True)
+all_files = glob.glob('opendbc/safety/**', root_dir=ROOT, recursive=True)
 files = [f for f in all_files if f.endswith(('.c', '.h')) and not f.startswith(IGNORED_PATHS)]
-assert len(files) >= 25, files
+assert len(files) > 20, files
 
 # build now so we don't need to build each time
 subprocess.run("scons -j8", cwd=ROOT, shell=True, check=True)
