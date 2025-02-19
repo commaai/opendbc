@@ -40,4 +40,4 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run MISRA C:2012 analysis
         timeout-minutes: 2
-        run: ${{ env.RUN }} "cd opendbc/safety/tests/misra && ./test_misra.sh"
+        run: cd opendbc/safety/tests/misra && ./test_misra.sh
