@@ -34,6 +34,9 @@ class CarControllerParams:
   BOSCH_GAS_LOOKUP_BP = [-0.2, 2.0]  # 2m/s^2
   BOSCH_GAS_LOOKUP_V = [0, 1600]
 
+  BOSCH_GAS_IMPERIAL_LOOKUP_BP = [-0.2, 2.0]  # 2m/s^2
+  BOSCH_GAS_IMPERIAL_LOOKUP_V = [0, 1999] # imperial version fits this curve better, ACC crashes at slightly over 2000 so set to 1999 for stability 
+
   STEER_STEP = 1  # 100 Hz
   STEER_DELTA_UP = 3  # min/max in 0.33s for all Honda
   STEER_DELTA_DOWN = 3
@@ -54,6 +57,7 @@ class HondaSafetyFlags(IntFlag):
   FLAG_HONDA_RADARLESS = 8
 
 
+
 class HondaFlags(IntFlag):
   # Detected flags
   # Bosch models with alternate set of LKAS_HUD messages
@@ -63,11 +67,11 @@ class HondaFlags(IntFlag):
   # Static flags
   BOSCH = 4
   BOSCH_RADARLESS = 8
-
+    
   NIDEC = 16
   NIDEC_ALT_PCM_ACCEL = 32
   NIDEC_ALT_SCM_MESSAGES = 64
-
+  HONDA_BOSCH_IMPERIAL = 128
 
 # Car button codes
 class CruiseButtons:
@@ -185,6 +189,12 @@ class CAR(Platforms):
     CarSpecs(mass=4068 * CV.LB_TO_KG, wheelbase=2.75, steerRatio=11.95, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),  # as spec
     {Bus.pt: 'acura_rdx_2020_can_generated'},
     flags=HondaFlags.BOSCH_ALT_BRAKE,
+  )
+  ACURA_RDX_3G_MMR = HondaBoschPlatformConfig(
+    [HondaCarDocs("Acura RDX 2022-24", "All", min_steer_speed=70. * CV.KPH_TO_MS)],
+    CarSpecs(mass=4079 * CV.LB_TO_KG, wheelbase=2.75, steerRatio=12.0, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),  # as spec
+    {Bus.pt: 'acura_rdx_3G_MMR_generated'},
+    flags=HondaFlags.BOSCH_ALT_BRAKE, HondaFlags.HONDA_BOSCH_IMPERIAL
   )
   HONDA_INSIGHT = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda Insight 2019-22", "All", min_steer_speed=3. * CV.MPH_TO_MS)],
