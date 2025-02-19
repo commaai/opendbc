@@ -52,4 +52,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: MISRA mutation tests
         timeout-minutes: 5
-        run: source setup.sh && cd opendbc/safety/tests/misra && pytest -n8 --randomly-seed $RANDOM test_mutation.py
+        run: |
+          source setup.sh
+          scons -j8
+          cd opendbc/safety/tests/misra
+          pytest -n8 --randomly-seed $RANDOM test_mutation.py
