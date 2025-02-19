@@ -62,6 +62,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
+      - name: Set up
+        run: sudo apt-get install -y --no-install-recommends gcc-arm-none-eabi libnewlib-arm-none-eabi
       - uses: actions/checkout@v4
       - name: Restore cached cppcheck
         uses: actions/cache@v4
