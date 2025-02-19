@@ -124,7 +124,7 @@ Safety modes optionally support `controls_allowed`, which allows or blocks a sub
 
 ## Code Rigor
 
-The opendbc safety firmware is written for its use in conjunction with [openpilot](https://github.com/commaai/openpilot). The safety firmware, through its safety model, provides and enforces the
+The opendbc safety firmware is written for its use in conjunction with [openpilot](https://github.com/commaai/openpilot) and [panda](https://github.com/commaai/panda). The safety firmware, through its safety model, provides and enforces the
 [openpilot safety](https://github.com/commaai/openpilot/blob/master/docs/SAFETY.md). Due to its critical function, it's important that the application code rigor within the `safety` folder is held to high standards.
 
 These are the [CI regression tests](https://github.com/commaai/opendbc/actions) we have in place:
