@@ -12,5 +12,6 @@ if ! command -v uv &>/dev/null; then
   curl -LsSf https://astral.sh/uv/install.sh | sh
 fi
 
-uv sync --all-extras --python "$BASEDIR/.venv"
+export UV_PROJECT_ENVIRONMENT="$BASEDIR/.venv"
+uv sync --all-extras
 source "$PYTHONPATH/.venv/bin/activate"
