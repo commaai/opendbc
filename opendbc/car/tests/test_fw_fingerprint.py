@@ -15,6 +15,8 @@ from opendbc.car.vin import get_vin
 CarFw = CarParams.CarFw
 Ecu = CarParams.Ecu
 
+ECU_NAME = {v: k for k, v in Ecu.schema.enumerants.items()}
+
 
 class TestFwFingerprint:
   def assertFingerprints(self, candidates, expected):
@@ -166,6 +168,15 @@ class TestFwFingerprint:
         ecu_strings = ", ".join([f'Ecu.{ecu}' for ecu in ecus_not_whitelisted])
         assert not (len(whitelisted_ecus) and len(ecus_not_whitelisted)), \
                          f'{brand.title()}: ECUs not in any FW query whitelists: {ecu_strings}'
+
+  def test_request_ecus_in_versions(self):
+    # All ECUs in requests should be in the brand's FW versions
+    for brand, config in FW_QUERY_CONFIGS.items():
+      request_ecus = {ecu for r in config.requests for ecu in r.whitelist_ecus} - {ecu[0] for ecu in config.extra_ecus}
+      print(brand, request_ecus)
+      version_ecus = config.get_all_ecus(VERSIONS[brand], include_extra_ecus=False)
+      for request_ecu in request_ecus:
+        assert request_ecu in {e for e, _, _ in version_ecus}, f"Ecu.{ECU_NAME[request_ecu]} not in {brand} FW versions"
 
   def test_brand_ecu_matches(self):
     empty_response = {brand: set() for brand, config in FW_QUERY_CONFIGS.items() if len(config.requests)}
