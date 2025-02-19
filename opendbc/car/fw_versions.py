@@ -252,7 +252,9 @@ def get_fw_versions_ordered(can_recv: CanRecvCallable, can_send: CanSendCallable
   all_car_fw = []
   brand_matches = get_brand_ecu_matches(ecu_rx_addrs)
 
-  for brand in sorted(brand_matches, key=lambda b: len(brand_matches[b]), reverse=True):
+  # Sort brands by number of matching ECUs first, then percentage of matching ECUs in the database
+  # This allows brands with only one ECU to be queried first (e.g. Tesla)
+  for brand in sorted(brand_matches, key=lambda b: (brand_matches[b].count(True), brand_matches[b].count(True) / len(brand_matches[b])), reverse=True):
     # Skip this brand if there are no matching present ECUs
     if not len(brand_matches[brand]):
       continue
