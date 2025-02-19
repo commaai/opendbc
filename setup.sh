@@ -1,11 +1,10 @@
 #!/bin/bash
 set -e
 
-DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
-cd $DIR
+BASEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
 
 # TODO: why doesn't uv do this?
-export PYTHONPATH=$DIR
+export PYTHONPATH=$BASEDIR
 
 # *** dependencies install ***
 if ! command -v uv &>/dev/null; then
@@ -13,5 +12,6 @@ if ! command -v uv &>/dev/null; then
   curl -LsSf https://astral.sh/uv/install.sh | sh
 fi
 
+export UV_PROJECT_ENVIRONMENT="$BASEDIR/.venv"
 uv sync --all-extras
-source .venv/bin/activate
+source "$PYTHONPATH/.venv/bin/activate"
