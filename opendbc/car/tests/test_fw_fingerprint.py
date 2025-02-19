@@ -179,14 +179,12 @@ class TestFwFingerprint:
         assert request_ecu in {e for e, _, _ in version_ecus}, f"Ecu.{ECU_NAME[request_ecu]} not in {brand} FW versions"
 
   def test_brand_ecu_matches(self):
-    brand_matches = get_brand_ecu_matches(set())
-    assert len(brand_matches) > 0
-    assert all(len(e) and not any(e) for e in brand_matches.values())
+    empty_response = {brand: set() for brand, config in FW_QUERY_CONFIGS.items() if len(config.requests)}
+    assert get_brand_ecu_matches(set()) == empty_response
 
     # we ignore bus
-    brand_matches = get_brand_ecu_matches({(0x758, 0xf, 99)})
-    assert True in brand_matches['toyota']
-    assert not any(any(e) for b, e in brand_matches.items() if b != 'toyota')
+    expected_response = empty_response | {'toyota': {(0x750, 0xf)}}
+    assert get_brand_ecu_matches({(0x758, 0xf, 99)}) == expected_response
 
 
 class TestFwFingerprintTiming:
