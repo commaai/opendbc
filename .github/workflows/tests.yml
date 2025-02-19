@@ -40,9 +40,22 @@ jobs:
       - name: Set up
         run: sudo apt-get install -y --no-install-recommends gcc-arm-none-eabi libnewlib-arm-none-eabi
       - uses: actions/checkout@v4
+      - name: Restore cached cppcheck
+        uses: actions/cache@v4
+        with:
+          path: opendbc/safety/tests/misra/cppcheck/
+          key: cppcheck-cache-${{ runner.os }}-${{ github.ref }}
+          restore-keys: |
+            cppcheck-cache-${{ runner.os }}-${{ github.ref }}
+            cppcheck-cache-${{ runner.os }}-
       - name: Run MISRA C:2012 analysis
         timeout-minutes: 2
         run: cd opendbc/safety/tests/misra && ./test_misra.sh
+      - name: Save cppcheck cache
+        uses: actions/cache@v4
+        with:
+          path: opendbc/safety/tests/misra/cppcheck/
+          key: cppcheck-cache-${{ runner.os }}-${{ github.ref }}
 
   misra_mutation:
     name: MISRA C:2012 Mutation
@@ -50,6 +63,14 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Restore cached cppcheck
+        uses: actions/cache@v4
+        with:
+          path: opendbc/safety/tests/misra/cppcheck/
+          key: cppcheck-cache-${{ runner.os }}-${{ github.ref }}
+          restore-keys: |
+            cppcheck-cache-${{ runner.os }}-${{ github.ref }}
+            cppcheck-cache-${{ runner.os }}-
       - name: MISRA mutation tests
         timeout-minutes: 10
         run: |
@@ -57,3 +78,8 @@ jobs:
           scons -j8
           cd opendbc/safety/tests/misra
           pytest -s -n8 --randomly-seed $RANDOM test_mutation.py
+      - name: Save cppcheck cache
+        uses: actions/cache@v4
+        with:
+          path: opendbc/safety/tests/misra/cppcheck/
+          key: cppcheck-cache-${{ runner.os }}-${{ github.ref }}
