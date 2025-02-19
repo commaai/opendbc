@@ -156,8 +156,6 @@ class CarInterface(CarInterfaceBase):
      elif candidate == CAR.ACURA_RDX_3G_MMR:
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 3840], [0, 3840]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2], [0.06]]
-      if candidate == CAR.ACURA_RDX_3G_MMR and not ret.openpilotLongitudinalControl:
-        ret.minSteerSpeed = 70 * CV.KPH_TO_MS
 
     elif candidate in (CAR.HONDA_ODYSSEY, CAR.HONDA_ODYSSEY_CHN):
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.28], [0.08]]
