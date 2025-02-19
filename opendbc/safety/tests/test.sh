@@ -4,12 +4,24 @@ set -e
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
 cd $DIR
 
+# TODO: why doesn't uv do this?
+export PYTHONPATH=../../../$DIR
+
+# *** dependencies install ***
+if ! command -v uv &>/dev/null; then
+  echo "'uv' is not installed. Installing 'uv'..."
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+fi
+
+uv sync --all-extras
+source .venv/bin/activate
+
 # reset coverage data and generate gcc note file
 rm -f ./libsafety/*.gcda
-scons -j$(nproc) -D --coverage
+uv run scons -j$(nproc) -D --coverage
 
 # run safety tests and generate coverage data
-pytest test_*.py
+uv run pytest test_*.py
 
 # generate and open report
 if [ "$1" == "--report" ]; then
