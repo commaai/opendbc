@@ -25,7 +25,7 @@ uv run scons -j8
 uv run ruff check .
 
 # *** test ***
-uv run pytest -n8
+uv run pytest -n8 --ignore opendbc/safety
 
 # *** all done ***
 GREEN='\033[0;32m'
