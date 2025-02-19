@@ -14,7 +14,7 @@ if ! command -v uv &>/dev/null; then
 fi
 
 uv sync --all-extras
-source .venv/bin/activate
+source ../../../.venv/bin/activate
 
 # reset coverage data and generate gcc note file
 rm -f ./libsafety/*.gcda
