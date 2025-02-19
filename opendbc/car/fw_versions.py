@@ -213,7 +213,7 @@ def get_brand_ecu_matches(ecu_rx_addrs: set[EcuAddrBusType]) -> dict[str, list[b
   brand_rx_addrs = {brand: set() for brand in FW_QUERY_CONFIGS}
   brand_matches = {brand: [] for brand, _, _ in REQUESTS}
 
-  # Since we can't know what request an ecu responded to, check all possible rx addresses
+  # Since we can't know what request an ecu responded to, add matches for all possible rx offsets
   for brand, config, r in REQUESTS:
     for ecu in config.get_all_ecus(VERSIONS[brand]):
       if len(r.whitelist_ecus) == 0 or ecu[0] in r.whitelist_ecus:
