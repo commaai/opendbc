@@ -154,10 +154,11 @@ BO_ 298 LFA: 16 ADRV
  SG_ NEW_SIGNAL_1 : 27|2@1+ (1,0) [0|255] "" XXX
  SG_ LKA_WARNING : 32|1@1+ (1,0) [0|1] "" XXX
  SG_ LKA_ICON : 38|2@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_5 : 40|1@0+ (1,0) [0|1] "" XXX
  SG_ TORQUE_REQUEST : 41|11@1+ (1,-1024) [0|4095] "" XXX
  SG_ STEER_REQ : 52|1@1+ (1,0) [0|1] "" XXX
  SG_ LFA_BUTTON : 56|1@1+ (1,0) [0|255] "" XXX
- SG_ LKA_ASSIST : 62|1@1+ (1,0) [0|1] "" XXX
+ SG_ LKA_ASSIST : 60|4@1+ (1,0) [0|15] "" XXX
  SG_ STEER_MODE : 65|3@1+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_2 : 70|2@0+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_4 : 72|4@1+ (1,0) [0|15] "" XXX
@@ -484,6 +485,7 @@ BO_ 480 LFAHDA_CLUSTER: 16 ADRV
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_4 : 24|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_5 : 25|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_6 : 26|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_2 : 30|1@0+ (1,0) [0|1] "" XXX
  SG_ HDA_ICON : 31|1@1+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_1 : 32|3@1+ (1,0) [0|7] "" XXX
