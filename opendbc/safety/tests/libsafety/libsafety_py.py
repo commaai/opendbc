@@ -2,7 +2,7 @@ import os
 from cffi import FFI
 from typing import Protocol
 
-from panda import LEN_TO_DLC
+from opendbc.safety import LEN_TO_DLC
 from opendbc.safety.tests.libsafety.safety_helpers import PandaSafety, setup_safety_helpers
 
 libsafety_dir = os.path.dirname(os.path.abspath(__file__))

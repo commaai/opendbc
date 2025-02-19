@@ -3,8 +3,7 @@ import unittest
 
 import opendbc.safety.tests.common as common
 
-from opendbc.safety import Safety
-from panda import DLC_TO_LEN
+from opendbc.safety import Safety, DLC_TO_LEN
 from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.safety.tests.test_defaults import TestDefaultRxHookBase
 
