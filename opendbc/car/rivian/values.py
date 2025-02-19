@@ -9,9 +9,11 @@ from opendbc.car.fw_query_definitions import FwQueryConfig
 
 Ecu = CarParams.Ecu
 
+
 class WMI(StrEnum):
   RIVIAN_TRUCK = "7FC"
   RIVIAN_MPV = "7PD"
+
 
 @dataclass
 class RivianCarDocs(CarDocs):

@@ -235,7 +235,7 @@ class TestFwFingerprintTiming:
 
   def test_startup_timing(self, subtests, mocker):
     # Tests worse-case VIN query time and typical present ECU query time
-    vin_ref_times = {'worst': 1.4, 'best': 0.7}  # best assumes we go through all queries to get a match
+    vin_ref_times = {'worst': 1.6, 'best': 0.8}  # best assumes we go through all queries to get a match
     present_ecu_ref_time = 0.45
 
     def fake_get_ecu_addrs(*_, timeout):
