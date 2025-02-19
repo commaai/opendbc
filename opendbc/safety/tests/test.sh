@@ -18,10 +18,14 @@ source .venv/bin/activate
 
 # reset coverage data and generate gcc note file
 rm -f ./libsafety/*.gcda
-uv run scons -j$(nproc) -D --coverage
+if [ "$1" == "--ubsan" ]; then
+  scons -j$(nproc) -D --coverage --ubsan
+else
+  scons -j$(nproc) -D --coverage
+fi
 
 # run safety tests and generate coverage data
-uv run pytest test_*.py
+pytest test_*.py
 
 # generate and open report
 if [ "$1" == "--report" ]; then

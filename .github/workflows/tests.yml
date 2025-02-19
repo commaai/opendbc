@@ -20,13 +20,15 @@ jobs:
     - run: ./test.sh
 
   safety_tests:
-    name: safety/tests/test.sh
+    name: safety
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-24.04, macos-latest]
+        flags: ['', '--ubsan']
     steps:
     - uses: commaai/timeout@v1
     - uses: actions/checkout@v4
-    - run: ./opendbc/safety/tests/test.sh
+    - name: Run safety tests
+      run: ./opendbc/safety/tests/test.sh ${{ matrix.flags }}
