@@ -32,7 +32,7 @@ jobs:
     - name: Run safety tests
       run: ./opendbc/safety/tests/test.sh ${{ matrix.flags }}
 
-  misra_linter:  # TODO: make fast
+  misra_linter:
     name: MISRA C:2012 Linter
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -41,5 +41,5 @@ jobs:
         run: sudo apt-get install -y --no-install-recommends gcc-arm-none-eabi libnewlib-arm-none-eabi
       - uses: actions/checkout@v4
       - name: Run MISRA C:2012 analysis
-        timeout-minutes: 3
+        timeout-minutes: 2
         run: cd opendbc/safety/tests/misra && ./test_misra.sh
