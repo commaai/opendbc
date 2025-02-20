@@ -15,8 +15,7 @@ echo -e "timeout: 10000\ngitDiffRef: $GIT_REF\ngitProjectRoot: $GIT_ROOT" >> $GI
 
 SAFETY_MODELS=$(find * | grep "^test_.*\.py")
 #pytest -n8 test_*.py -s --co
-pytest
-mull-runner-17 --ld-search-path /lib/x86_64-linux-gnu/ ./libsafety/libsafety.so -test-program=$(which pytest) -- -s . --dist=loadfile
+mull-runner-17 --ld-search-path /lib/x86_64-linux-gnu/ ./libsafety/libsafety.so -test-program=$(which pytest) -- -n16 -s . --dist=loadfile
 #for safety_model in ${SAFETY_MODELS[@]}; do
 #  echo ""
 #  echo ""
