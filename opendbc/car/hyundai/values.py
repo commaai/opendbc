@@ -2,7 +2,7 @@ import re
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car import Bus, CarSpecs, CarControllerParamsBase, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
@@ -11,11 +11,12 @@ from opendbc.car.fw_query_definitions import FwQueryConfig, Request, p16
 Ecu = CarParams.Ecu
 
 
-class CarControllerParams:
+class CarControllerParams(CarControllerParamsBase):
   ACCEL_MIN = -3.5 # m/s
   ACCEL_MAX = 2.0 # m/s
 
   def __init__(self, CP):
+    super().__init__(CP)
     self.STEER_DELTA_UP = 3
     self.STEER_DELTA_DOWN = 7
     self.STEER_DRIVER_ALLOWANCE = 50

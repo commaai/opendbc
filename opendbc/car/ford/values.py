@@ -3,7 +3,7 @@ import re
 from dataclasses import dataclass, field, replace
 from enum import Enum, IntFlag
 
-from opendbc.car import AngleRateLimit, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car import AngleRateLimit, Bus, CarSpecs, CarControllerParamsBase, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, \
                                                      Device, SupportType
@@ -12,7 +12,7 @@ from opendbc.car.fw_query_definitions import FwQueryConfig, LiveFwVersions, Offl
 Ecu = CarParams.Ecu
 
 
-class CarControllerParams:
+class CarControllerParams(CarControllerParamsBase):
   STEER_STEP = 5        # LateralMotionControl, 20Hz
   LKA_STEP = 3          # Lane_Assist_Data1, 33Hz
   ACC_CONTROL_STEP = 2  # ACCDATA, 50Hz
@@ -36,9 +36,6 @@ class CarControllerParams:
   ACCEL_MIN = -3.5              # m/s^2 max deceleration
   MIN_GAS = -0.5
   INACTIVE_GAS = -5.0
-
-  def __init__(self, CP):
-    pass
 
 
 class FordSafetyFlags(IntFlag):

@@ -1,7 +1,7 @@
 from enum import IntFlag
 from dataclasses import dataclass, field
 
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car import Bus, CarSpecs, CarControllerParamsBase, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, p16
@@ -92,8 +92,9 @@ class CAR(Platforms):
   )
 
 
-class CarControllerParams:
+class CarControllerParams(CarControllerParamsBase):
   def __init__(self, CP):
+    super().__init__(CP)
     self.STEER_STEP = 2  # 50 Hz
     self.STEER_ERROR_MAX = 80
     if CP.carFingerprint in RAM_HD:

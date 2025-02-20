@@ -35,6 +35,7 @@ def create_radar_can_parser(car_fingerprint):
 class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
     super().__init__(CP)
+    super().__init__(CP)
 
     self.rcp = None if CP.radarUnavailable else create_radar_can_parser(CP.carFingerprint)
 

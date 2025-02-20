@@ -1,11 +1,10 @@
 from dataclasses import dataclass, field
 from enum import StrEnum
 
-from opendbc.car.structs import CarParams
-from opendbc.car import Bus, structs
-from opendbc.car import CarSpecs, PlatformConfig, Platforms
+from opendbc.car import CarControllerParamsBase, CarSpecs, CarControllerParamsBase, Bus, PlatformConfig, Platforms, structs
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
 from opendbc.car.fw_query_definitions import FwQueryConfig
+from opendbc.car.structs import CarParams
 
 Ecu = CarParams.Ecu
 
@@ -48,10 +47,11 @@ GEAR_MAP = [
 ]
 
 
-class CarControllerParams:
+class CarControllerParams(CarControllerParamsBase):
   STEER_MAX = 350
-  STEER_DELTA_UP = 8  # torque increase per refresh
-  STEER_DELTA_DOWN = 8  # torque decrease per refresh
+  STEER_STEP = 1
+  STEER_DELTA_UP = 4  # torque increase per refresh
+  STEER_DELTA_DOWN = 6  # torque decrease per refresh
   STEER_DRIVER_ALLOWANCE = 15  # allowed driver torque before start limiting
   STEER_DRIVER_MULTIPLIER = 1  # weight driver torque
   STEER_DRIVER_FACTOR = 1

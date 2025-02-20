@@ -2,7 +2,7 @@ from collections import defaultdict, namedtuple
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag, StrEnum
 
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car import Bus, CarSpecs, CarControllerParamsBase, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.can.can_define import CANDefine
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car import structs
@@ -17,7 +17,7 @@ GearShifter = structs.CarState.GearShifter
 Button = namedtuple('Button', ['event_type', 'can_addr', 'can_msg', 'values'])
 
 
-class CarControllerParams:
+class CarControllerParams(CarControllerParamsBase):
   STEER_STEP = 2                           # HCA_01/HCA_1 message frequency 50Hz
   ACC_CONTROL_STEP = 2                     # ACC_06/ACC_07/ACC_System frequency 50Hz
 
@@ -39,6 +39,7 @@ class CarControllerParams:
   ACCEL_MIN = -3.5                         # 3.5 m/s max deceleration
 
   def __init__(self, CP):
+    super().__init__(CP)
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
 
     if CP.flags & VolkswagenFlags.PQ:

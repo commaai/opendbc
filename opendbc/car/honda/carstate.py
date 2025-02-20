@@ -88,6 +88,7 @@ def get_can_messages(CP, gearbox_msg):
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
+    super().__init__(CP)
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
     self.gearbox_msg = "GEARBOX"
     if CP.carFingerprint == CAR.HONDA_ACCORD and CP.transmissionType == TransmissionType.cvt:

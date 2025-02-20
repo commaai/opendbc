@@ -9,6 +9,7 @@ from opendbc.car.common.conversions import Conversions as CV
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
+    super().__init__(CP)
     self.last_speed = 30
 
     self.acm_lka_hba_cmd = None

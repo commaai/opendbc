@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from enum import IntFlag
 
-from opendbc.car import Bus, PlatformConfig, DbcDict, Platforms, CarSpecs
+from opendbc.car import Bus, PlatformConfig, DbcDict, Platforms, CarSpecs, CarControllerParamsBase
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
@@ -9,7 +9,7 @@ from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 Ecu = CarParams.Ecu
 
 
-class CarControllerParams:
+class CarControllerParams(CarControllerParamsBase):
   STEER_MAX = 300  # GM limit is 3Nm. Used by carcontroller to generate LKA output
   STEER_STEP = 3  # Active control frames per command (~33hz)
   INACTIVE_STEER_STEP = 10  # Inactive control frames per command (10hz)
@@ -33,6 +33,7 @@ class CarControllerParams:
   ACCEL_MIN = -4.  # m/s^2
 
   def __init__(self, CP):
+    super().__init__(CP)
     # Gas/brake lookups
     self.ZERO_GAS = 2048  # Coasting
     self.MAX_BRAKE = 400  # ~ -4.0 m/s^2 with regen
