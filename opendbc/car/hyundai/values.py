@@ -81,7 +81,7 @@ class HyundaiFlags(IntFlag):
 
   # Static flags
 
-  # Some new ICE have corrupt HYBRID messages and need this to override the HYBRID dynamic flag.
+  # Some ICE have corrupt HYBRID messages and need this to override false detection as HYBRID.
   ICE = 2 ** 24
 
   # If 0x500 is present on bus 1 it probably has a Mando radar outputting radar points.
