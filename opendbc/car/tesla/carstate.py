@@ -1,5 +1,4 @@
 import copy
-import numpy as np
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
 from opendbc.car import Bus, structs
