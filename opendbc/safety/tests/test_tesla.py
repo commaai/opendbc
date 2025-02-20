@@ -109,6 +109,7 @@ class TestTeslaStockSafety(TestTeslaSafetyBase):
       self.assertEqual(should_tx, self._tx(self._long_control_msg(0, acc_val=accval)))
 
   def test_no_aeb(self):
+    raise Exception('crash')
     for aeb_event in range(4):
       self.assertEqual(self._tx(self._long_control_msg(10, acc_val=13, aeb_event=aeb_event)), aeb_event == 0)
 
