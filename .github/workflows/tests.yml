@@ -96,7 +96,7 @@ jobs:
         with:
           fetch-depth: 0  # need master to get diff
       - name: Run mutation tests
-        timeout-minutes: 5
+        timeout-minutes: 1
         run: |
           source setup.sh
           scons -j8
