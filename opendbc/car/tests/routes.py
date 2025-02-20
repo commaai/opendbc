@@ -8,6 +8,7 @@ from opendbc.car.hyundai.values import CAR as HYUNDAI
 from opendbc.car.nissan.values import CAR as NISSAN
 from opendbc.car.mazda.values import CAR as MAZDA
 from opendbc.car.mock.values import CAR as MOCK
+from opendbc.car.rivian.values import CAR as RIVIAN
 from opendbc.car.subaru.values import CAR as SUBARU
 from opendbc.car.tesla.values import CAR as TESLA
 from opendbc.car.toyota.values import CAR as TOYOTA
@@ -28,6 +29,7 @@ non_tested_cars = [
   SUBARU.SUBARU_FORESTER_HYBRID,
   TESLA.TESLA_MODEL_3,
   TESLA.TESLA_MODEL_Y,
+  RIVIAN.RIVIAN_R1_GEN1,
 ]
 
 
