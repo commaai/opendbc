@@ -9,16 +9,13 @@ on:
 jobs:
   tests:
     name: ./test.sh
-    runs-on: ${{ matrix.runner }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-24.04
-            runner:
-              ${{ ((github.repository == 'commaai/opendbc') && ((github.event_name != 'pull_request') || (github.event.pull_request.head.repo.full_name == 'commaai/opendbc'))) && 'namespace-profile-amd64-8x16' || 'ubuntu-24.04' }}
-          - os: macos-latest
-            runner: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-macos-8x14' || 'macos-latest' }}
+          - os: ${{ ((github.repository == 'commaai/opendbc') && ((github.event_name != 'pull_request') || (github.event.pull_request.head.repo.full_name == 'commaai/opendbc'))) && 'namespace-profile-amd64-8x16' || 'ubuntu-24.04' }}
+          - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-macos-8x14' || 'macos-latest' }}
     steps:
     - uses: commaai/timeout@v1
     - uses: actions/checkout@v4
