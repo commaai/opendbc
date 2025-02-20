@@ -87,17 +87,17 @@ jobs:
           path: opendbc/safety/tests/misra/cppcheck/
           key: cppcheck-cache-${{ runner.os }}-${{ github.ref }}
 
-#  mutation:
-#    name: Safety mutation tests
-#    runs-on: 'namespace-profile-amd64-8x16'
-#    timeout-minutes: 20
-#    steps:
-#      - uses: actions/checkout@v4
-#        with:
-#          fetch-depth: 0  # need master to get diff
-#      - name: Run mutation tests
-#        timeout-minutes: 5
-#        run: |
-#          source setup.sh
-#          scons -j8
-#          GIT_REF=${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && github.event.before || 'origin/master' }} cd opendbc/safety/tests && ./mutation.sh
+  mutation:
+    name: Safety mutation tests
+    runs-on: 'namespace-profile-amd64-8x16'
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # need master to get diff
+      - name: Run mutation tests
+        timeout-minutes: 5
+        run: |
+          source setup.sh
+          scons -j8
+          GIT_REF=${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && github.event.before || 'origin/master' }} cd opendbc/safety/tests && ./mutation.sh
