@@ -13,7 +13,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ['namespace-profile-amd64-8x16','namespace-profile-macos-8x14']
+        include:
+          - os: ${{ ((github.repository == 'commaai/opendbc') && ((github.event_name != 'pull_request') || (github.event.pull_request.head.repo.full_name == 'commaai/opendbc'))) && 'namespace-profile-amd64-8x16' || 'ubuntu-24.04' }}
+          - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-macos-8x14' || 'macos-latest' }}
     steps:
     - uses: commaai/timeout@v1
     - uses: actions/checkout@v4
@@ -21,7 +23,7 @@ jobs:
 
   safety_tests:
     name: safety
-    runs-on: 'namespace-profile-amd64-8x16'
+    runs-on: ${{ ((github.repository == 'commaai/opendbc') && ((github.event_name != 'pull_request') || (github.event.pull_request.head.repo.full_name == 'commaai/opendbc'))) && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
     strategy:
       fail-fast: false
       matrix:
@@ -34,7 +36,7 @@ jobs:
 
   misra_linter:
     name: MISRA C:2012 Linter
-    runs-on: 'namespace-profile-amd64-8x16'
+    runs-on: ${{ ((github.repository == 'commaai/opendbc') && ((github.event_name != 'pull_request') || (github.event.pull_request.head.repo.full_name == 'commaai/opendbc'))) && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
     timeout-minutes: 20
     steps:
       - name: Set up
@@ -59,7 +61,7 @@ jobs:
 
   misra_mutation:
     name: MISRA C:2012 Mutation
-    runs-on: 'namespace-profile-amd64-8x16'
+    runs-on: ${{ ((github.repository == 'commaai/opendbc') && ((github.event_name != 'pull_request') || (github.event.pull_request.head.repo.full_name == 'commaai/opendbc'))) && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
     timeout-minutes: 20
     steps:
       - name: Set up
@@ -89,7 +91,7 @@ jobs:
 
 #  mutation:
 #    name: Safety mutation tests
-#    runs-on: 'namespace-profile-amd64-8x16'
+#    runs-on: ${{ ((github.repository == 'commaai/opendbc') && ((github.event_name != 'pull_request') || (github.event.pull_request.head.repo.full_name == 'commaai/opendbc'))) && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
 #    timeout-minutes: 20
 #    steps:
 #      - uses: actions/checkout@v4
