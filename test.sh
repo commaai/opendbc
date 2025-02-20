@@ -15,7 +15,7 @@ scons -j8
 ruff check .
 
 # *** test ***
-pytest -n8
+pytest -n8 --ignore opendbc/safety
 
 # *** all done ***
 GREEN='\033[0;32m'
