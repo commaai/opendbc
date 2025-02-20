@@ -1,5 +1,6 @@
-from opendbc.car import structs
+from opendbc.car import get_safety_config, structs
 from opendbc.car.interfaces import CarInterfaceBase
+from opendbc.car.tesla.values import TeslaSafetyFlags
 
 
 class CarInterface(CarInterfaceBase):
@@ -11,8 +12,7 @@ class CarInterface(CarInterfaceBase):
     # Needs safety validation and final testing before pulling out of dashcam
     ret.dashcamOnly = True
 
-    # Not merged yet
-    #ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.tesla)]
+    ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.tesla)]
 
     ret.steerLimitTimer = 1.0
     ret.steerActuatorDelay = 0.1
@@ -23,6 +23,6 @@ class CarInterface(CarInterfaceBase):
     ret.experimentalLongitudinalAvailable = True
     if experimental_long:
       ret.openpilotLongitudinalControl = True
-      # ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.FLAG_TESLA_LONG_CONTROL.value
+      ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.FLAG_TESLA_LONG_CONTROL.value
 
     return ret
