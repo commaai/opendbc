@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum, IntFlag
 
-from opendbc.car import Bus, CarSpecs, CarControllerParamsBase, CarControllerParamsBase, PlatformConfig, Platforms, structs, uds
+from opendbc.car import Bus, CarSpecs, PlatformConfig, Platforms, structs, uds
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
@@ -10,7 +10,7 @@ Ecu = structs.CarParams.Ecu
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 
 
-class CarControllerParams(CarControllerParamsBase):
+class CarControllerParams:
   # Allow small margin below -3.5 m/s^2 from ISO 15622:2018 since we
   # perform the closed loop control, and might need some
   # to apply some more braking if we're on a downhill slope.
@@ -39,7 +39,6 @@ class CarControllerParams(CarControllerParamsBase):
   STEER_DELTA_DOWN = 3
 
   def __init__(self, CP):
-    super().__init__(CP)
     self.STEER_MAX = CP.lateralParams.torqueBP[-1]
     # mirror of list (assuming first item is zero) for interp of signed request values
     assert(CP.lateralParams.torqueBP[0] == 0)

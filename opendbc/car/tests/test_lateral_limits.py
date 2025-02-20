@@ -29,11 +29,8 @@ class TestLateralLimits:
     CarInterface, _, _, _ = interfaces[cls.car_model]
     CP = CarInterface.get_non_essential_params(cls.car_model)
 
-    if cls.car_model == 'MOCK':
-      pytest.skip("Mock platform")
-
-    # if CP.dashcamOnly:
-    #   pytest.skip("Platform is behind dashcamOnly")
+    if CP.dashcamOnly:
+      pytest.skip("Platform is behind dashcamOnly")
 
     # TODO: test all platforms
     if CP.steerControlType != 'torque':

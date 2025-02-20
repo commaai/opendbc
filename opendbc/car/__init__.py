@@ -20,25 +20,6 @@ ButtonType = structs.CarState.ButtonEvent.Type
 AngleRateLimit = namedtuple('AngleRateLimit', ['speed_bp', 'angle_v'])
 
 
-class CarControllerParamsBase:
-  STEER_CONTROL_TYPE: str = 'torque'
-  STEER_MAX: int
-  STEER_DELTA_UP: int
-  STEER_DELTA_DOWN: int
-
-  def __init__(self, CP: structs.CarParams):
-    attrs = ['STEER_STEP']
-
-    if self.STEER_CONTROL_TYPE == 'torque':
-      attrs.extend(['STEER_MAX', 'STEER_DELTA_UP', 'STEER_DELTA_DOWN'])
-    elif self.STEER_CONTROL_TYPE == 'angle':
-      attrs.extend(['ANGLE_RATE_LIMIT_UP', 'ANGLE_RATE_LIMIT_DOWN'])
-
-    for attr in attrs:
-      if not hasattr(self, attr):
-        raise ValueError(f"Missing attribute {attr} in {self.__class__.__name__}")
-
-
 def apply_hysteresis(val: float, val_steady: float, hyst_gap: float) -> float:
   if val > val_steady + hyst_gap:
     val_steady = val - hyst_gap
@@ -112,7 +93,7 @@ class Bus(StrEnum):
   ap_party = auto()
 
 
-def apply_driver_steer_torque_limits(apply_torque, apply_torque_last, driver_torque, LIMITS):  # CarControllerParamsBase
+def apply_driver_steer_torque_limits(apply_torque, apply_torque_last, driver_torque, LIMITS):
 
   # limits due to driver torque
   driver_max_torque = LIMITS.STEER_MAX + (LIMITS.STEER_DRIVER_ALLOWANCE + driver_torque * LIMITS.STEER_DRIVER_FACTOR) * LIMITS.STEER_DRIVER_MULTIPLIER
@@ -154,7 +135,7 @@ def apply_dist_to_meas_limits(val, val_last, val_meas,
   return float(val)
 
 
-def apply_meas_steer_torque_limits(apply_torque, apply_torque_last, motor_torque, LIMITS):  # CarControllerParamsBase
+def apply_meas_steer_torque_limits(apply_torque, apply_torque_last, motor_torque, LIMITS):
   return int(round(apply_dist_to_meas_limits(apply_torque, apply_torque_last, motor_torque,
                                              LIMITS.STEER_DELTA_UP, LIMITS.STEER_DELTA_DOWN,
                                              LIMITS.STEER_ERROR_MAX, LIMITS.STEER_MAX)))

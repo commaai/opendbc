@@ -1,4 +1,4 @@
-from opendbc.car import CarSpecs, CarControllerParamsBase, PlatformConfig, Platforms
+from opendbc.car import CarSpecs, PlatformConfig, Platforms
 
 
 class CAR(Platforms):

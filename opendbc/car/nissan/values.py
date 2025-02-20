@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from enum import IntFlag
 
-from opendbc.car import AngleRateLimit, Bus, CarSpecs, CarControllerParamsBase, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car import AngleRateLimit, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarDocs, CarHarness, CarParts
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
@@ -9,7 +9,7 @@ from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 Ecu = CarParams.Ecu
 
 
-class CarControllerParams(CarControllerParamsBase):
+class CarControllerParams:
   ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[5., .8, .15])
   ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[5., 3.5, 0.4])
   LKAS_MAX_TORQUE = 1               # A value of 1 is easy to overpower
@@ -18,6 +18,9 @@ class CarControllerParams(CarControllerParamsBase):
   # When output steering Angle not within range -1311 and 1310,
   #   CANPacker packs wrong angle output to be decoded by panda
   MAX_STEER_ANGLE = 1310
+
+  def __init__(self, CP):
+    pass
 
 
 class NissanSafetyFlags(IntFlag):

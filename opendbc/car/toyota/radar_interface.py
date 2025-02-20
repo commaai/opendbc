@@ -23,7 +23,6 @@ def _create_radar_can_parser(car_fingerprint):
 class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
     super().__init__(CP)
-    super().__init__(CP)
     self.track_id = 0
 
     if CP.carFingerprint in TSS2_CAR:
