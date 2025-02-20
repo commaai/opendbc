@@ -67,16 +67,16 @@ jobs:
       - name: Set up
         run: sudo apt-get install -y --no-install-recommends gcc-arm-none-eabi libnewlib-arm-none-eabi
       - uses: actions/checkout@v4
-#      - name: Restore cached cppcheck
-#        uses: actions/cache@v4
-#        with:
-#          path: opendbc/safety/tests/misra/cppcheck/
-#          key: cppcheck-cache-${{ runner.os }}-${{ github.ref }}
-#          restore-keys: |
-#            cppcheck-cache-${{ runner.os }}-${{ github.ref }}
-#            cppcheck-cache-${{ runner.os }}-
+      - name: Restore cached cppcheck
+        uses: actions/cache@v4
+        with:
+          path: opendbc/safety/tests/misra/cppcheck/
+          key: cppcheck-cache-${{ runner.os }}-${{ github.ref }}
+          restore-keys: |
+            cppcheck-cache-${{ runner.os }}-${{ github.ref }}
+            cppcheck-cache-${{ runner.os }}-
       - name: MISRA mutation tests
-        timeout-minutes: ${{ ((steps.restore-scons-cache.outputs.cache-hit == 'true') && 2 || 10) }}
+        timeout-minutes: 1
         run: |
           source setup.sh
           scons -j8
