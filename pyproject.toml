@@ -24,9 +24,12 @@ dependencies = [
 
 [project.optional-dependencies]
 testing = [
+  "cffi",
   "ruff",
   "pytest",
+  "pytest-coverage",
   "pytest-mock",
+  "pytest-randomly",
   "pytest-xdist",
   "pytest-subtests",
   "hypothesis==6.47.*",
@@ -112,4 +115,5 @@ flake8-implicit-str-concat.allow-multiline=false
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "pytest.main".msg = "pytest.main requires special handling that is easy to mess up!"
-"unittest".msg = "Use pytest"
+# TODO: re-enable when all tests are converted to pytest
+#"unittest".msg = "Use pytest"
