@@ -24,6 +24,7 @@
 // CAN-FD only safety modes
 #ifdef CANFD
 #include "safety/safety_hyundai_canfd.h"
+#include "safety/safety_volkswagen_meb.h"
 #endif
 
 // from cereal.car.CarParams.SafetyModel
@@ -53,6 +54,7 @@
 #define SAFETY_FAW 26U
 #define SAFETY_BODY 27U
 #define SAFETY_HYUNDAI_CANFD 28U
+#define SAFETY_VOLKSWAGEN_MEB 34U
 
 uint32_t GET_BYTES(const CANPacket_t *msg, int start, int len) {
   uint32_t ret = 0U;
@@ -378,6 +380,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
     {SAFETY_FORD, &ford_hooks},
 #ifdef CANFD
     {SAFETY_HYUNDAI_CANFD, &hyundai_canfd_hooks},
+	{SAFETY_VOLKSWAGEN_MEB, &volkswagen_meb_hooks},
 #endif
 #ifdef ALLOW_DEBUG
     {SAFETY_TESLA, &tesla_hooks},
