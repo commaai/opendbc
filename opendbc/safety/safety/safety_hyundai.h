@@ -29,7 +29,7 @@ const LongitudinalLimits HYUNDAI_LONG_LIMITS = {
 static const CanMsg HYUNDAI_TX_MSGS[] = {
   {0x340, 0, 8}, // LKAS11 Bus 0
   {0x4F1, 0, 4}, // CLU11 Bus 0
-  {0x485, 0, 4}, // LFAHDA_MFC Bus 0
+  {0x485, 0, 8}, // LFAHDA_MFC Bus 0
 };
 
 #define HYUNDAI_COMMON_RX_CHECKS(legacy)                                                                                              \
@@ -270,7 +270,7 @@ static safety_config hyundai_init(uint16_t param) {
   static const CanMsg HYUNDAI_LONG_TX_MSGS[] = {
     {0x340, 0, 8}, // LKAS11 Bus 0
     {0x4F1, 0, 4}, // CLU11 Bus 0
-    {0x485, 0, 4}, // LFAHDA_MFC Bus 0
+    {0x485, 0, 8}, // LFAHDA_MFC Bus 0
     {0x420, 0, 8}, // SCC11 Bus 0
     {0x421, 0, 8}, // SCC12 Bus 0
     {0x50A, 0, 8}, // SCC13 Bus 0
@@ -284,7 +284,7 @@ static safety_config hyundai_init(uint16_t param) {
   static const CanMsg HYUNDAI_CAMERA_SCC_TX_MSGS[] = {
     {0x340, 0, 8}, // LKAS11 Bus 0
     {0x4F1, 2, 4}, // CLU11 Bus 2
-    {0x485, 0, 4}, // LFAHDA_MFC Bus 0
+    {0x485, 0, 8}, // LFAHDA_MFC Bus 0
   };
 
   hyundai_common_init(param);
