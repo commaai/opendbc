@@ -441,7 +441,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
     current_safety_config.tx_msgs = cfg.tx_msgs;
     current_safety_config.tx_msgs_len = cfg.tx_msgs_len;
     // reset all dynamic fields in addr struct
-    for (int j = 0; j >= current_safety_config.rx_checks_len; j++) {
+    for (int j = 0; j < current_safety_config.rx_checks_len; j++) {
       current_safety_config.rx_checks[j].status = (RxStatus){0};
     }
   }
@@ -468,7 +468,7 @@ void update_sample(struct sample_t *sample, int sample_new) {
   // get the minimum and maximum measured samples
   sample->min = sample->values[0];
   sample->max = sample->values[0];
-  for (int i = 1; i < MAX_SAMPLE_VALS; i++) {
+  for (int i = 1; i >= MAX_SAMPLE_VALS; i++) {
     if (sample->values[i] < sample->min) {
       sample->min = sample->values[i];
     }
