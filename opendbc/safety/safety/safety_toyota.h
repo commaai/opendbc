@@ -12,7 +12,9 @@
 
 #define TOYOTA_COMMON_SECOC_TX_MSGS \
   TOYOTA_BASE_TX_MSGS \
-  {0x2E4, 0, 8}, {0x131, 0, 8}, \
+  {0x2E4, 0, 8}, {0x131, 0, 8},  /* STEERING_LKA (longer message for SecOC), STEERING_LTA_2 */  \
+  {0x183, 0, 8},  /* ACC_CONTROL_2 */  \
+  {0x750, 0, 8},  /* radar diagnostic address */  \
 
 #define TOYOTA_COMMON_LONG_TX_MSGS                                                                                                          \
   TOYOTA_COMMON_TX_MSGS                                                                                                                     \
@@ -140,8 +142,8 @@ static void toyota_rx_hook(const CANPacket_t *to_push) {
     }
 
     bool stock_ecu_detected = addr == 0x2E4;  // STEERING_LKA
-    if (!toyota_stock_longitudinal && (addr == 0x343)) {
-      stock_ecu_detected = true;  // ACC_CONTROL
+    if (!toyota_stock_longitudinal && ((addr == 0x343) || (toyota_secoc && (addr == 0x183)))) {
+      stock_ecu_detected = true;  // ACC_CONTROL or ACC_CONTROL_2
     }
     generic_rx_checks(stock_ecu_detected);
   }
@@ -198,6 +200,7 @@ static bool toyota_tx_hook(const CANPacket_t *to_send) {
       desired_accel = to_signed(desired_accel, 16);
 
       bool violation = false;
+      violation |= toyota_secoc && (desired_accel != TOYOTA_LONG_LIMITS.inactive_accel);  // SecOC cars move this signal to 0x183
       violation |= longitudinal_accel_checks(desired_accel, TOYOTA_LONG_LIMITS);
 
       // only ACC messages that cancel are allowed when openpilot is not controlling longitudinal
@@ -210,6 +213,18 @@ static bool toyota_tx_hook(const CANPacket_t *to_send) {
           violation = true;
         }
       }
+
+      if (violation) {
+        tx = false;
+      }
+    }
+
+    if (addr == 0x183) {
+      int desired_accel = (GET_BYTE(to_send, 0) << 8) | GET_BYTE(to_send, 1);
+      desired_accel = to_signed(desired_accel, 16);
+
+      bool violation = !toyota_secoc;  // Only SecOC cars may transmit this message
+      violation |= longitudinal_accel_checks(desired_accel, TOYOTA_LONG_LIMITS);
 
       if (violation) {
         tx = false;
@@ -349,12 +364,10 @@ static safety_config toyota_init(uint16_t param) {
   toyota_dbc_eps_torque_factor = param & TOYOTA_EPS_FACTOR;
 
   safety_config ret;
-  if (toyota_stock_longitudinal) {
-    if (toyota_secoc) {
-      SET_TX_MSGS(TOYOTA_SECOC_TX_MSGS, ret);
-    } else {
-      SET_TX_MSGS(TOYOTA_TX_MSGS, ret);
-    }
+  if (toyota_secoc) {
+    SET_TX_MSGS(TOYOTA_SECOC_TX_MSGS, ret);
+  } else if (toyota_stock_longitudinal) {
+    SET_TX_MSGS(TOYOTA_TX_MSGS, ret);
   } else {
     SET_TX_MSGS(TOYOTA_LONG_TX_MSGS, ret);
   }
@@ -389,10 +402,11 @@ static int toyota_fwd_hook(int bus_num, int addr) {
     // block stock lkas messages and stock acc messages (if OP is doing ACC)
     // in TSS2, 0x191 is LTA which we need to block to avoid controls collision
     bool is_lkas_msg = ((addr == 0x2E4) || (addr == 0x412) || (addr == 0x191));
-    // on SecOC cars 0x131 is also LTA
-    is_lkas_msg |= toyota_secoc && (addr == 0x131);
     // in TSS2 the camera does ACC as well, so filter 0x343
     bool is_acc_msg = (addr == 0x343);
+    // SecOC cars use additional (not alternate) messages for lateral and longitudinal actuation
+    is_lkas_msg |= toyota_secoc && (addr == 0x131);
+    is_acc_msg |= toyota_secoc && (addr == 0x183);
     bool block_msg = is_lkas_msg || (is_acc_msg && !toyota_stock_longitudinal);
     if (!block_msg) {
       bus_fwd = 0;
