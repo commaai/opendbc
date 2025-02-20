@@ -15,7 +15,7 @@ else
 fi
 
 # run safety tests and generate coverage data
-pytest
+pytest .
 
 # generate and open report
 if [ "$1" == "--report" ]; then
