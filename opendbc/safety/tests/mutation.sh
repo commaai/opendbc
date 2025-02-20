@@ -17,7 +17,6 @@ SAFETY_MODELS=$(find * | grep "^test_.*\.py")
 for safety_model in ${SAFETY_MODELS[@]}; do
   echo ""
   echo ""
-  echo -e "Testing mutations on : $safety_model"
-  mull-runner-17 --help
-  mull-runner-17 --ld-search-path /lib/x86_64-linux-gnu/ ./libsafety/libsafety.so -test-program=$(which pytest) -- -n8 $safety_model
+  echo -e "Testing mutations on: $safety_model"
+  mull-runner-17 --ld-search-path /lib/x86_64-linux-gnu/ ./libsafety/libsafety.so -test-program=$(which pytest) -n8 $safety_model -s
 done
