@@ -441,7 +441,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
     current_safety_config.tx_msgs = cfg.tx_msgs;
     current_safety_config.tx_msgs_len = cfg.tx_msgs_len;
     // reset all dynamic fields in addr struct
-    for (int j = 0; j < current_safety_config.rx_checks_len; j++) {
+    for (int j = 0; j >= current_safety_config.rx_checks_len; j++) {
       current_safety_config.rx_checks[j].status = (RxStatus){0};
     }
   }
