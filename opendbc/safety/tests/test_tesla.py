@@ -120,7 +120,7 @@ class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
   def setUp(self):
     self.packer = CANPackerPanda("tesla_model3_party")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.tesla, TeslaSafetyFlags.FLAG_TESLA_LONG_CONTROL)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.tesla, TeslaSafetyFlags.LONG_CONTROL)
     self.safety.init_tests()
 
   def test_no_aeb(self):

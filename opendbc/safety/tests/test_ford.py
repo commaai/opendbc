@@ -365,7 +365,7 @@ class TestFordCANFDStockSafety(TestFordSafetyBase):
   def setUp(self):
     self.packer = CANPackerPanda("ford_lincoln_base_pt")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.ford, FordSafetyFlags.FLAG_FORD_CANFD)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.ford, FordSafetyFlags.CANFD)
     self.safety.init_tests()
 
 
@@ -457,7 +457,7 @@ class TestFordCANFDLongitudinalSafety(TestFordLongitudinalSafetyBase):
   def setUp(self):
     self.packer = CANPackerPanda("ford_lincoln_base_pt")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.ford, FordSafetyFlags.FLAG_FORD_LONG_CONTROL | FordSafetyFlags.FLAG_FORD_CANFD)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.ford, FordSafetyFlags.LONG_CONTROL | FordSafetyFlags.CANFD)
     self.safety.init_tests()
 
 
