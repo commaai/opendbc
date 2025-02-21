@@ -167,7 +167,7 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
   def setUp(self):
     self.packer = CANPackerPanda("toyota_nodsu_pt_generated")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE | ToyotaSafetyFlags.FLAG_TOYOTA_LTA)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE | ToyotaSafetyFlags.LTA)
     self.safety.init_tests()
 
   # Only allow LKA msgs with no actuation
@@ -269,7 +269,7 @@ class TestToyotaAltBrakeSafety(TestToyotaSafetyTorque):
   def setUp(self):
     self.packer = CANPackerPanda("toyota_new_mc_pt_generated")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE | ToyotaSafetyFlags.FLAG_TOYOTA_ALT_BRAKE)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE | ToyotaSafetyFlags.ALT_BRAKE)
     self.safety.init_tests()
 
   def _user_brake_msg(self, brake):
@@ -314,7 +314,7 @@ class TestToyotaStockLongitudinalTorque(TestToyotaStockLongitudinalBase, TestToy
   def setUp(self):
     self.packer = CANPackerPanda("toyota_nodsu_pt_generated")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE | ToyotaSafetyFlags.FLAG_TOYOTA_STOCK_LONGITUDINAL)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE | ToyotaSafetyFlags.STOCK_LONGITUDINAL)
     self.safety.init_tests()
 
 
@@ -324,7 +324,7 @@ class TestToyotaStockLongitudinalAngle(TestToyotaStockLongitudinalBase, TestToyo
     self.packer = CANPackerPanda("toyota_nodsu_pt_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.toyota,
-                                 self.EPS_SCALE | ToyotaSafetyFlags.FLAG_TOYOTA_STOCK_LONGITUDINAL | ToyotaSafetyFlags.FLAG_TOYOTA_LTA)
+                                 self.EPS_SCALE | ToyotaSafetyFlags.STOCK_LONGITUDINAL | ToyotaSafetyFlags.LTA)
     self.safety.init_tests()
 
 
@@ -338,7 +338,7 @@ class TestToyotaSecOcSafety(TestToyotaStockLongitudinalBase):
     self.packer = CANPackerPanda("toyota_secoc_pt_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.toyota,
-                                 self.EPS_SCALE | ToyotaSafetyFlags.FLAG_TOYOTA_STOCK_LONGITUDINAL | ToyotaSafetyFlags.FLAG_TOYOTA_SECOC)
+                                 self.EPS_SCALE | ToyotaSafetyFlags.STOCK_LONGITUDINAL | ToyotaSafetyFlags.SECOC)
     self.safety.init_tests()
 
   # This platform also has alternate brake and PCM messages, but same naming in the DBC, so same packers work

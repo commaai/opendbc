@@ -66,7 +66,7 @@ class TestHyundaiFingerprint:
     fingerprint = gen_empty_fingerprint()
     for car_model in CAR:
       CP = CarInterface.get_params(car_model, fingerprint, [], False, False)
-      assert bool(CP.flags & HyundaiFlags.ALT_LIMITS) == bool(CP.safetyConfigs[-1].safetyParam & HyundaiSafetyFlags.FLAG_HYUNDAI_ALT_LIMITS)
+      assert bool(CP.flags & HyundaiFlags.ALT_LIMITS) == bool(CP.safetyConfigs[-1].safetyParam & HyundaiSafetyFlags.ALT_LIMITS)
 
   def test_can_features(self):
     # Test no EV/HEV in any gear lists (should all use ELECT_GEAR)

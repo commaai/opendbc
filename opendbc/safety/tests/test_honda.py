@@ -358,7 +358,7 @@ class TestHondaNidecPcmAltSafety(TestHondaNidecPcmSafety):
   def setUp(self):
     self.packer = CANPackerPanda("acura_ilx_2016_can_generated")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaNidec, HondaSafetyFlags.FLAG_HONDA_NIDEC_ALT)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaNidec, HondaSafetyFlags.NIDEC_ALT)
     self.safety.init_tests()
 
   def _acc_state_msg(self, main_on):
@@ -423,7 +423,7 @@ class TestHondaBoschAltBrakeSafetyBase(TestHondaBoschSafetyBase):
   """
   def setUp(self):
     super().setUp()
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.FLAG_HONDA_ALT_BRAKE)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.ALT_BRAKE)
     self.safety.init_tests()
 
   def _user_brake_msg(self, brake):
@@ -472,7 +472,7 @@ class TestHondaBoschLongSafety(HondaButtonEnableBase, TestHondaBoschSafetyBase):
 
   def setUp(self):
     super().setUp()
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.FLAG_HONDA_BOSCH_LONG)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.BOSCH_LONG)
     self.safety.init_tests()
 
   def _send_gas_brake_msg(self, gas, accel):
@@ -532,7 +532,7 @@ class TestHondaBoschRadarlessSafety(HondaPcmEnableBase, TestHondaBoschRadarlessS
 
   def setUp(self):
     super().setUp()
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.FLAG_HONDA_RADARLESS)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.RADARLESS)
     self.safety.init_tests()
 
 
@@ -543,7 +543,7 @@ class TestHondaBoschRadarlessAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschRa
 
   def setUp(self):
     super().setUp()
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.FLAG_HONDA_RADARLESS | HondaSafetyFlags.FLAG_HONDA_ALT_BRAKE)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.RADARLESS | HondaSafetyFlags.ALT_BRAKE)
     self.safety.init_tests()
 
 
@@ -557,7 +557,7 @@ class TestHondaBoschRadarlessLongSafety(common.LongitudinalAccelSafetyTest, Hond
 
   def setUp(self):
     super().setUp()
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.FLAG_HONDA_RADARLESS | HondaSafetyFlags.FLAG_HONDA_BOSCH_LONG)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.RADARLESS | HondaSafetyFlags.BOSCH_LONG)
     self.safety.init_tests()
 
   def _accel_msg(self, accel):

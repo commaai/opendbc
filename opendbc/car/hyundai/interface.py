@@ -57,13 +57,13 @@ class CarInterface(CarInterfaceBase):
       ret.safetyConfigs = cfgs
 
       if ret.flags & HyundaiFlags.CANFD_HDA2:
-        ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.FLAG_HYUNDAI_CANFD_HDA2.value
+        ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CANFD_HDA2.value
         if ret.flags & HyundaiFlags.CANFD_HDA2_ALT_STEERING:
-          ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.FLAG_HYUNDAI_CANFD_HDA2_ALT_STEERING.value
+          ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CANFD_HDA2_ALT_STEERING.value
       if ret.flags & HyundaiFlags.CANFD_ALT_BUTTONS:
-        ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.FLAG_HYUNDAI_CANFD_ALT_BUTTONS.value
+        ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CANFD_ALT_BUTTONS.value
       if ret.flags & HyundaiFlags.CANFD_CAMERA_SCC:
-        ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.FLAG_HYUNDAI_CAMERA_SCC.value
+        ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CAMERA_SCC.value
 
     else:
       # Shared configuration for non CAN-FD cars
@@ -85,7 +85,7 @@ class CarInterface(CarInterfaceBase):
         ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.hyundai, 0)]
 
       if ret.flags & HyundaiFlags.CAMERA_SCC:
-        ret.safetyConfigs[0].safetyParam |= HyundaiSafetyFlags.FLAG_HYUNDAI_CAMERA_SCC.value
+        ret.safetyConfigs[0].safetyParam |= HyundaiSafetyFlags.CAMERA_SCC.value
 
     # Common lateral control setup
 
@@ -95,7 +95,7 @@ class CarInterface(CarInterfaceBase):
     CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
     if ret.flags & HyundaiFlags.ALT_LIMITS:
-      ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.FLAG_HYUNDAI_ALT_LIMITS.value
+      ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.ALT_LIMITS.value
 
     # Common longitudinal control setup
 
@@ -108,11 +108,11 @@ class CarInterface(CarInterfaceBase):
     ret.longitudinalActuatorDelay = 0.5
 
     if ret.openpilotLongitudinalControl:
-      ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.FLAG_HYUNDAI_LONG.value
+      ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.LONG.value
     if ret.flags & HyundaiFlags.HYBRID:
-      ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.FLAG_HYUNDAI_HYBRID_GAS.value
+      ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.HYBRID_GAS.value
     elif ret.flags & HyundaiFlags.EV:
-      ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.FLAG_HYUNDAI_EV_GAS.value
+      ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.EV_GAS.value
 
     # Car specific configuration overrides
 
