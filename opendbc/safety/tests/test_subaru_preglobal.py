@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import unittest
 
+from opendbc.car.structs import CarParams
 from opendbc.car.subaru.values import SubaruSafetyFlags
-from opendbc.safety import Safety
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerPanda
@@ -30,7 +30,7 @@ class TestSubaruPreglobalSafety(common.PandaCarSafetyTest, common.DriverTorqueSt
   def setUp(self):
     self.packer = CANPackerPanda(self.DBC)
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(Safety.SAFETY_SUBARU_PREGLOBAL, self.FLAGS)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.subaruPreglobal, self.FLAGS)
     self.safety.init_tests()
 
   def _set_prev_torque(self, t):
@@ -64,7 +64,7 @@ class TestSubaruPreglobalSafety(common.PandaCarSafetyTest, common.DriverTorqueSt
 
 
 class TestSubaruPreglobalReversedDriverTorqueSafety(TestSubaruPreglobalSafety):
-  FLAGS = SubaruSafetyFlags.FLAG_SUBARU_PREGLOBAL_REVERSED_DRIVER_TORQUE
+  FLAGS = SubaruSafetyFlags.PREGLOBAL_REVERSED_DRIVER_TORQUE
   DBC = "subaru_outback_2019_generated"
 
 
