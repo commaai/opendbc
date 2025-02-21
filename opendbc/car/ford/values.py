@@ -42,8 +42,8 @@ class CarControllerParams:
 
 
 class FordSafetyFlags(IntFlag):
-  FLAG_FORD_LONG_CONTROL = 1
-  FLAG_FORD_CANFD = 2
+  LONG_CONTROL = 1
+  CANFD = 2
 
 
 class FordFlags(IntFlag):

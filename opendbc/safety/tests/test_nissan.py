@@ -2,7 +2,7 @@
 import unittest
 
 from opendbc.car.nissan.values import NissanSafetyFlags
-from opendbc.safety import Safety
+from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerPanda
@@ -30,7 +30,7 @@ class TestNissanSafety(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest
   def setUp(self):
     self.packer = CANPackerPanda("nissan_x_trail_2017_generated")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(Safety.SAFETY_NISSAN, 0)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.nissan, 0)
     self.safety.init_tests()
 
   def _angle_cmd_msg(self, angle: float, enabled: bool):
@@ -90,7 +90,7 @@ class TestNissanSafetyAltEpsBus(TestNissanSafety):
   def setUp(self):
     self.packer = CANPackerPanda("nissan_x_trail_2017_generated")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(Safety.SAFETY_NISSAN, NissanSafetyFlags.FLAG_NISSAN_ALT_EPS_BUS)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.nissan, NissanSafetyFlags.ALT_EPS_BUS)
     self.safety.init_tests()
 
 
@@ -99,7 +99,7 @@ class TestNissanLeafSafety(TestNissanSafety):
   def setUp(self):
     self.packer = CANPackerPanda("nissan_leaf_2018_generated")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(Safety.SAFETY_NISSAN, 0)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.nissan, 0)
     self.safety.init_tests()
 
   def _user_brake_msg(self, brake):

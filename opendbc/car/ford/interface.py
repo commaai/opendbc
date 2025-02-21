@@ -44,11 +44,11 @@ class CarInterface(CarInterfaceBase):
     # TODO: verify stock AEB compatibility and longitudinal limit safety before shipping to release
     ret.experimentalLongitudinalAvailable = ret.radarUnavailable
     if experimental_long or not ret.radarUnavailable:
-      ret.safetyConfigs[-1].safetyParam |= FordSafetyFlags.FLAG_FORD_LONG_CONTROL.value
+      ret.safetyConfigs[-1].safetyParam |= FordSafetyFlags.LONG_CONTROL.value
       ret.openpilotLongitudinalControl = True
 
     if ret.flags & FordFlags.CANFD:
-      ret.safetyConfigs[-1].safetyParam |= FordSafetyFlags.FLAG_FORD_CANFD.value
+      ret.safetyConfigs[-1].safetyParam |= FordSafetyFlags.CANFD.value
     else:
       # Lock out if the car does not have needed lateral and longitudinal control APIs.
       # Note that we also check CAN for adaptive cruise, but no known signal for LCA exists

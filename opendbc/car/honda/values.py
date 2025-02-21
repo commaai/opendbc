@@ -48,10 +48,10 @@ class CarControllerParams:
 
 
 class HondaSafetyFlags(IntFlag):
-  FLAG_HONDA_ALT_BRAKE = 1
-  FLAG_HONDA_BOSCH_LONG = 2
-  FLAG_HONDA_NIDEC_ALT = 4
-  FLAG_HONDA_RADARLESS = 8
+  ALT_BRAKE = 1
+  BOSCH_LONG = 2
+  NIDEC_ALT = 4
+  RADARLESS = 8
 
 
 class HondaFlags(IntFlag):

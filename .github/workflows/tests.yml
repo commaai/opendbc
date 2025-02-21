@@ -14,7 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ${{ ((github.repository == 'commaai/opendbc') && ((github.event_name != 'pull_request') || (github.event.pull_request.head.repo.full_name == 'commaai/opendbc'))) && 'namespace-profile-amd64-8x16' || 'ubuntu-24.04' }}
+          - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-24.04' }}
           - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-macos-8x14' || 'macos-latest' }}
     steps:
     - uses: commaai/timeout@v1
@@ -23,7 +23,7 @@ jobs:
 
   safety_tests:
     name: safety
-    runs-on: ${{ ((github.repository == 'commaai/opendbc') && ((github.event_name != 'pull_request') || (github.event.pull_request.head.repo.full_name == 'commaai/opendbc'))) && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
+    runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
     strategy:
       fail-fast: false
       matrix:
@@ -36,7 +36,7 @@ jobs:
 
   misra_linter:
     name: MISRA C:2012 Linter
-    runs-on: ${{ ((github.repository == 'commaai/opendbc') && ((github.event_name != 'pull_request') || (github.event.pull_request.head.repo.full_name == 'commaai/opendbc'))) && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
+    runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
     timeout-minutes: 20
     steps:
       - name: Set up
@@ -61,7 +61,7 @@ jobs:
 
   misra_mutation:
     name: MISRA C:2012 Mutation
-    runs-on: ${{ ((github.repository == 'commaai/opendbc') && ((github.event_name != 'pull_request') || (github.event.pull_request.head.repo.full_name == 'commaai/opendbc'))) && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
+    runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
     timeout-minutes: 20
     steps:
       - name: Set up
@@ -89,17 +89,17 @@ jobs:
           path: opendbc/safety/tests/misra/cppcheck/
           key: cppcheck-cache-${{ runner.os }}-${{ github.ref }}
 
-#  mutation:
-#    name: Safety mutation tests
-#    runs-on: ${{ ((github.repository == 'commaai/opendbc') && ((github.event_name != 'pull_request') || (github.event.pull_request.head.repo.full_name == 'commaai/opendbc'))) && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
-#    timeout-minutes: 20
-#    steps:
-#      - uses: actions/checkout@v4
-#        with:
-#          fetch-depth: 0  # need master to get diff
-#      - name: Run mutation tests
-#        timeout-minutes: 5
-#        run: |
-#          source setup.sh
-#          scons -j8
-#          GIT_REF=${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && github.event.before || 'origin/master' }} cd opendbc/safety/tests && ./mutation.sh
+  mutation:
+    name: Safety mutation tests
+    runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # need master to get diff
+      - name: Run mutation tests
+        timeout-minutes: 5
+        run: |
+          source setup.sh
+          scons -j8
+          GIT_REF=${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && github.event.before || 'origin/master' }} cd opendbc/safety/tests && ./mutation.sh
