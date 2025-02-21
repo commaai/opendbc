@@ -1,5 +1,3 @@
-from opendbc.car.common.conversions import Conversions as CV
-
 ACC_CTRL_ERROR    = 6
 ACC_CTRL_OVERRIDE = 4
 ACC_CTRL_ACTIVE   = 3
