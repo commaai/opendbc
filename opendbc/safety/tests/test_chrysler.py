@@ -2,7 +2,7 @@
 import unittest
 
 from opendbc.car.chrysler.values import ChryslerSafetyFlags
-from opendbc.safety import Safety
+from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerPanda
@@ -27,9 +27,9 @@ class TestChryslerSafety(common.PandaCarSafetyTest, common.MotorTorqueSteeringSa
   DAS_BUS = 0
 
   def setUp(self):
-    self.packer = CANPackerPanda("chrysler_pacifica_2017_hybrid_generated")
+    self.packer = CANPackerPanda("chrysler_pacifica_2017_hybrid")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(Safety.SAFETY_CHRYSLER, 0)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.chrysler, 0)
     self.safety.init_tests()
 
   def _button_msg(self, cancel=False, resume=False):
@@ -89,9 +89,9 @@ class TestChryslerRamDTSafety(TestChryslerSafety):
   LKAS_ACTIVE_VALUE = 2
 
   def setUp(self):
-    self.packer = CANPackerPanda("chrysler_ram_dt_generated")
+    self.packer = CANPackerPanda("chrysler_ram_dt")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(Safety.SAFETY_CHRYSLER, ChryslerSafetyFlags.FLAG_CHRYSLER_RAM_DT)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.chrysler, ChryslerSafetyFlags.FLAG_CHRYSLER_RAM_DT)
     self.safety.init_tests()
 
   def _speed_msg(self, speed):
@@ -113,9 +113,9 @@ class TestChryslerRamHDSafety(TestChryslerSafety):
   LKAS_ACTIVE_VALUE = 2
 
   def setUp(self):
-    self.packer = CANPackerPanda("chrysler_ram_hd_generated")
+    self.packer = CANPackerPanda("chrysler_ram_hd")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(Safety.SAFETY_CHRYSLER, ChryslerSafetyFlags.FLAG_CHRYSLER_RAM_HD)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.chrysler, ChryslerSafetyFlags.FLAG_CHRYSLER_RAM_HD)
     self.safety.init_tests()
 
   def _speed_msg(self, speed):
