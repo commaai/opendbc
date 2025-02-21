@@ -27,7 +27,7 @@ class TestChryslerSafety(common.PandaCarSafetyTest, common.MotorTorqueSteeringSa
   DAS_BUS = 0
 
   def setUp(self):
-    self.packer = CANPackerPanda("chrysler_pacifica_2017_hybrid")
+    self.packer = CANPackerPanda("chrysler_pacifica_2017_hybrid_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.chrysler, 0)
     self.safety.init_tests()
@@ -89,7 +89,7 @@ class TestChryslerRamDTSafety(TestChryslerSafety):
   LKAS_ACTIVE_VALUE = 2
 
   def setUp(self):
-    self.packer = CANPackerPanda("chrysler_ram_dt")
+    self.packer = CANPackerPanda("chrysler_ram_dt_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.chrysler, ChryslerSafetyFlags.FLAG_CHRYSLER_RAM_DT)
     self.safety.init_tests()
@@ -113,7 +113,7 @@ class TestChryslerRamHDSafety(TestChryslerSafety):
   LKAS_ACTIVE_VALUE = 2
 
   def setUp(self):
-    self.packer = CANPackerPanda("chrysler_ram_hd")
+    self.packer = CANPackerPanda("chrysler_ram_hd_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.chrysler, ChryslerSafetyFlags.FLAG_CHRYSLER_RAM_HD)
     self.safety.init_tests()

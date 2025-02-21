@@ -22,14 +22,6 @@ class TestNoOutput(TestDefaultRxHookBase):
     self.safety.set_safety_hooks(CarParams.SafetyModel.noOutput, 0)
     self.safety.init_tests()
 
-  def test_default_controls_not_allowed(self):
-    self.safety.set_safety_hooks(CarParams.SafetyModel.noOutput, 0)
-    self.assertFalse(self.safety.get_controls_allowed())
-
-  def test_silent_no_output(self):
-    self.safety.set_safety_hooks(CarParams.SafetyModel.silent, 0)
-    self.assertFalse(self.safety.get_controls_allowed())
-
 
 class TestSilent(TestNoOutput):
   """SILENT uses same hooks as NOOUTPUT"""
@@ -57,12 +49,8 @@ class TestAllOutput(TestDefaultRxHookBase):
         should_tx = [addr, bus] in self.TX_MSGS
         self.assertEqual(should_tx, self._tx(common.make_msg(bus, addr, 8)), f"allowed TX {addr=} {bus=}")
 
-  def test_all_output(self):
-    self.safety.set_safety_hooks(CarParams.SafetyModel.allOutput, 0)
-    self.assertFalse(self.safety.get_controls_allowed())
-
-  def test_all_output_allow(self):
-    self.safety.set_safety_hooks(CarParams.SafetyModel.allOutput, 1)
+  def test_default_controls_not_allowed(self):
+    # controls always allowed
     self.assertTrue(self.safety.get_controls_allowed())
 
   def test_tx_hook_on_wrong_safety_mode(self):

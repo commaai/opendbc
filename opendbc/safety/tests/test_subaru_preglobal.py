@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import unittest
 
-from opendbc.car.subaru.values import SubaruSafetyFlags
 from opendbc.car.structs import CarParams
+from opendbc.car.subaru.values import SubaruSafetyFlags
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerPanda
@@ -10,7 +10,7 @@ from opendbc.safety.tests.common import CANPackerPanda
 
 class TestSubaruPreglobalSafety(common.PandaCarSafetyTest, common.DriverTorqueSteeringSafetyTest):
   FLAGS = 0
-  DBC = "subaru_outback_2015_eyesight"
+  DBC = "subaru_outback_2015_generated"
   TX_MSGS = [[0x161, 0], [0x164, 0]]
   STANDSTILL_THRESHOLD = 0  # kph
   RELAY_MALFUNCTION_ADDRS = {0: (0x164,)}

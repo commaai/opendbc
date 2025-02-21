@@ -144,7 +144,7 @@ class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafety):
   def setUp(self):
     self.packer = CANPackerPanda("vw_mqb_2010")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMqb, 0)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagen, 0)
     self.safety.init_tests()
 
   def test_spam_cancel_safety_check(self):
@@ -166,7 +166,7 @@ class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafety):
   def setUp(self):
     self.packer = CANPackerPanda("vw_mqb_2010")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenMqb, VolkswagenSafetyFlags.FLAG_VOLKSWAGEN_LONG_CONTROL)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagen, VolkswagenSafetyFlags.FLAG_VOLKSWAGEN_LONG_CONTROL)
     self.safety.init_tests()
 
   # stock cruise controls are entirely bypassed under openpilot longitudinal control
