@@ -68,12 +68,12 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
   const SteeringLimits TESLA_STEERING_LIMITS = {
     .angle_deg_to_can = 10,
     .angle_rate_up_lookup = {
-      {0., 5., 15.},
-      {10., 1.6, .3}
+      {0., 5., 25.},
+      {2.5, 1.5, 0.2}
     },
     .angle_rate_down_lookup = {
-      {0., 5., 15.},
-      {10., 7.0, .8}
+      {0., 5., 25.},
+      {5., 2.0, 0.3}
     },
   };
 
