@@ -118,7 +118,7 @@ def create_acc_cancel(packer, CP, CAN, cruise_info_copy):
   })
   return packer.make_can_msg("SCC_CONTROL", CAN.ECAN, values)
 
-def create_lfahda_cluster(packer, CAN, CP, enabled, lfa_icon):
+def create_lfahda_cluster(packer, CAN, CP, enabled):
   if CP.flags & HyundaiFlags.CCNC:
     values = {
       "NEW_SIGNAL_5": 1,
