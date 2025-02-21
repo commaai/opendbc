@@ -58,7 +58,7 @@ static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *to_push) {
     crc ^= (uint8_t)GET_BYTE(to_push, i);
     crc = volkswagen_crc8_lut_8h2f[crc];
   }
-  
+
   uint8_t counter = volkswagen_meb_get_counter(to_push);
   if (addr == MSG_LH_EPS_03) {
     crc ^= (uint8_t[]){0xF5,0xF5,0xF5,0xF5,0xF5,0xF5,0xF5,0xF5,0xF5,0xF5,0xF5,0xF5,0xF5,0xF5,0xF5,0xF5}[counter];
@@ -92,7 +92,7 @@ static safety_config volkswagen_meb_init(uint16_t param) {
   // Transmit of GRA_ACC_01 is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
   static const CanMsg VOLKSWAGEN_MEB_STOCK_TX_MSGS[] = {{MSG_HCA_03, 0, 24}, {MSG_GRA_ACC_01, 0, 8},
                                                        {MSG_GRA_ACC_01, 2, 8}, {MSG_LDW_02, 0, 8}, {MSG_LH_EPS_03, 2, 8}};
-  
+
   static const CanMsg VOLKSWAGEN_MEB_LONG_TX_MSGS[] = {{MSG_MEB_ACC_01, 0, 48}, {MSG_ACC_18, 0, 32}, {MSG_HCA_03, 0, 24},
                                                        {MSG_LDW_02, 0, 8}, {MSG_LH_EPS_03, 2, 8}, {MSG_TA_01, 0, 8}};
 
@@ -125,7 +125,7 @@ static safety_config volkswagen_meb_init(uint16_t param) {
 
 // lateral limits for curvature
 static const SteeringLimits VOLKSWAGEN_MEB_STEERING_LIMITS = {
-  // keep in mind, we do have a false tx block problem with same limits as in opendbc values, have them a little bit higher +0.0002 
+  // keep in mind, we do have a false tx block problem with same limits as in opendbc values, have them a little bit higher +0.0002
   // for FORD enforce_angle_error is active with margin of 0.002 which could solve the issue, we have here
   .max_steer = 29105, // 0.195 rad/m
   .angle_deg_to_can = 149253.7313, // 1 / 6.7e-6 rad/m to can
@@ -138,7 +138,7 @@ static const SteeringLimits VOLKSWAGEN_MEB_STEERING_LIMITS = {
     {0.0022, 0.00055, 0.00055}
   },
   //.max_angle_error = ,         // THIS WOULD ALLOW MORE ROOM FOR OUR RATE LIMITS see comment above, but we want correct safety limit checks? and
-  //.enforce_angle_error = true, // to allow some difference for our power control handling at the same time 
+  //.enforce_angle_error = true, // to allow some difference for our power control handling at the same time
   .inactive_angle_is_zero = true,
 };
 
@@ -166,7 +166,7 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *to_push) {
     //  if (volkswagen_yaw_rate_sign) {
     //    volkswagen_yaw_rate *= -1;
     //  }
-    //  
+    //
     //  float current_curvature = volkswagen_yaw_rate / MAX(vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR, 0.1);
     //  // convert current curvature into units on CAN for comparison with desired curvature
     //  update_sample(&angle_meas, ROUND(current_curvature * VOLKSWAGEN_MEB_STEERING_LIMITS.angle_deg_to_can));
@@ -174,7 +174,7 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *to_push) {
 
     if (addr == MSG_QFK_01) { // we do not need conversion deg to can, same scaling as HCA_03 curvature
       int current_curvature = ((GET_BYTE(to_push, 5U) & 0x7F) << 8 | GET_BYTE(to_push, 4U));
-      
+
       bool current_curvature_sign = GET_BIT(to_push, 55U);
       if (current_curvature_sign) {
         current_curvature *= -1;
@@ -247,7 +247,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *to_send) {
   };
 
   const int volkswagen_accel_override = 0;
-  
+
   int addr = GET_ADDR(to_send);
   bool tx = true;
 
@@ -268,7 +268,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *to_send) {
 
       // steer power is still allowed to decrease to zero monotonously
       // while controls are not allowed anymore
-      if (steer_req && steer_power != 0) {        
+      if (steer_req && steer_power != 0) {
         if (steer_power < volkswagen_steer_power_prev) {
           tx = true;
         }
@@ -310,7 +310,13 @@ static int volkswagen_meb_fwd_hook(int bus_num, int addr) {
 
   switch (bus_num) {
     case 0:
-      bus_fwd = 2;
+      if (addr == MSG_LH_EPS_03) {
+        // openpilot needs to replace apparent driver steering input torque to pacify VW Emergency Assist
+        bus_fwd = -1;
+      } else {
+        // Forward all remaining traffic from Extended CAN onward
+        bus_fwd = 2;
+      }
       break;
     case 2:
       if ((addr == MSG_HCA_03) || (addr == MSG_LDW_02)) {
