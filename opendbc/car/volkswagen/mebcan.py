@@ -19,7 +19,7 @@ ACC_HUD_DISABLED = 0
 
 
 def create_steering_control(packer, bus, apply_curvature, lkas_enabled, power, power_boost):
-  # active lateral control deactivates active steering wheel centering 
+  # active lateral control deactivates active steering wheel centering
   values = {
     "Curvature": abs(apply_curvature), # in rad/m
     "VZ": 1 if apply_curvature > 0 and lkas_enabled else 0,
@@ -52,7 +52,7 @@ def create_eps_update(packer, bus, eps_stock_values, ea_simulated_torque):
 
 def create_lka_hud_control(packer, bus, ldw_stock_values, lat_active, steering_pressed, hud_alert, hud_control, sound_alert):
   display_mode = 1 if lat_active else 0 # travel assist style showing yellow lanes when op is active
-  
+
   values = {}
   if len(ldw_stock_values):
     values = {s: ldw_stock_values[s] for s in [
@@ -72,7 +72,7 @@ def create_lka_hud_control(packer, bus, ldw_stock_values, lat_active, steering_p
     "LDW_Texte": hud_alert,
   })
   return packer.make_can_msg("LDW_02", bus, values)
-  
+
 
 def create_acc_buttons_control(packer, bus, gra_stock_values, cancel=False, resume=False):
   values = {s: gra_stock_values[s] for s in [
@@ -89,7 +89,7 @@ def create_acc_buttons_control(packer, bus, gra_stock_values, cancel=False, resu
     "GRA_Tip_Wiederaufnahme": resume,
   })
   return packer.make_can_msg("GRA_ACC_01", bus, values)
-  
+
 
 def acc_control_value(main_switch_on, acc_faulted, long_active, esp_hold, override):
 
@@ -133,7 +133,8 @@ def acc_hold_type(main_switch_on, acc_faulted, long_active, starting, stopping, 
   return acc_hold_type
 
 
-def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, acc_hold_type, stopping, starting, esp_hold, override, travel_assist_available):
+def create_acc_accel_control(packer, bus, acc_type, acc_enabled, accel, acc_control, acc_hold_type, stopping, starting,
+                             esp_hold, override, travel_assist_available):
   # active longitudinal control disables one pedal driving (regen mode) while using overriding mechnism
   commands = []
 
@@ -199,9 +200,9 @@ def acc_hud_status_value(main_switch_on, acc_faulted, long_active, esp_hold, ove
 def get_desired_gap(distance_bars, desired_gap, current_gap_signal):
   # mapping desired gap to correct signal of corresponding distance bar
   gap = 0
-  
+
   if distance_bars == current_gap_signal:
-    gap = desired_gap 
+    gap = desired_gap
 
   return gap
 

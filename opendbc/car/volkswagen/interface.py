@@ -31,7 +31,7 @@ class CarInterface(CarInterfaceBase):
       #   https://blog.willemmelching.nl/carhacking/2022/01/02/vw-part1/
       # Panda ALLOW_DEBUG firmware required.
       ret.dashcamOnly = True
-      
+
     elif ret.flags & VolkswagenFlags.MEB:
       # Set global MEB parameters
       ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.volkswagenMeb)]
