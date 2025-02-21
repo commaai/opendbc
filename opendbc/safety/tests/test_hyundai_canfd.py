@@ -190,7 +190,9 @@ class TestHyundaiCanfdHDA2EVAltSteering(TestHyundaiCanfdHDA2EVBase):
   RELAY_MALFUNCTION_ADDRS = {0: (0x110,)}
   FWD_BLACKLISTED_ADDRS = {2: [0x110, 0x362]}
   STEER_MSG = "LKAS_ALT"
-  SAFETY_PARAM = HyundaiSafetyFlags.FLAG_HYUNDAI_CANFD_HDA2 | HyundaiSafetyFlags.FLAG_HYUNDAI_EV_GAS | HyundaiSafetyFlags.FLAG_HYUNDAI_CANFD_HDA2_ALT_STEERING
+  SAFETY_PARAM = (HyundaiSafetyFlags.FLAG_HYUNDAI_CANFD_HDA2 |
+                  HyundaiSafetyFlags.FLAG_HYUNDAI_EV_GAS |
+                  HyundaiSafetyFlags.FLAG_HYUNDAI_CANFD_HDA2_ALT_STEERING)
 
 
 class TestHyundaiCanfdHDA2EVAltButtons(HyundaiCanfdAltButtonsMixin, TestHyundaiCanfdHDA2EV):
@@ -216,7 +218,35 @@ class TestHyundaiCanfdHDA2LongEV(HyundaiLongitudinalBase, TestHyundaiCanfdHDA2EV
   STEER_MSG = "LFA"
   GAS_MSG = ("ACCELERATOR", "ACCELERATOR_PEDAL")
   STEER_BUS = 1
-  SAFETY_PARAM = HyundaiSafetyFlags.FLAG_HYUNDAI_CANFD_HDA2 | HyundaiSafetyFlags.FLAG_HYUNDAI_LONG | HyundaiSafetyFlags.FLAG_HYUNDAI_EV_GAS
+  SAFETY_PARAM = (HyundaiSafetyFlags.FLAG_HYUNDAI_CANFD_HDA2 |
+                  HyundaiSafetyFlags.FLAG_HYUNDAI_LONG |
+                  HyundaiSafetyFlags.FLAG_HYUNDAI_EV_GAS)
+
+  def _accel_msg(self, accel, aeb_req=False, aeb_decel=0):
+    values = {
+      "aReqRaw": accel,
+      "aReqValue": accel,
+    }
+    return self.packer.make_can_msg_panda("SCC_CONTROL", 1, values)
+
+
+class TestHyundaiCanfdHDA2LongEVAltSteering(HyundaiLongitudinalBase, TestHyundaiCanfdHDA2EVAltSteering):
+
+  TX_MSGS = [[0x110, 0], [0x1CF, 1], [0x362, 0], [0x51, 0], [0x730, 1], [0x12a, 1], [0x160, 1],
+             [0x1e0, 1], [0x1a0, 1], [0x1ea, 1], [0x200, 1], [0x345, 1], [0x1da, 1]]
+
+  RELAY_MALFUNCTION_ADDRS = {0: (0x110,), 1: (0x1a0,)}  # LKAS, SCC_CONTROL
+
+  DISABLED_ECU_UDS_MSG = (0x730, 1)
+  DISABLED_ECU_ACTUATION_MSG = (0x1a0, 1)
+
+  STEER_MSG = "LFA"
+  GAS_MSG = ("ACCELERATOR", "ACCELERATOR_PEDAL")
+  STEER_BUS = 1
+  SAFETY_PARAM = (HyundaiSafetyFlags.FLAG_HYUNDAI_CANFD_HDA2 |
+                  HyundaiSafetyFlags.FLAG_HYUNDAI_LONG |
+                  HyundaiSafetyFlags.FLAG_HYUNDAI_EV_GAS |
+                  HyundaiSafetyFlags.FLAG_HYUNDAI_CANFD_HDA2_ALT_STEERING)
 
   def _accel_msg(self, accel, aeb_req=False, aeb_decel=0):
     values = {
