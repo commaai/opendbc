@@ -27,8 +27,10 @@ class CarInterface(CarInterfaceBase):
       # Shared configuration for CAN-FD cars
       ret.experimentalLongitudinalAvailable = candidate not in (CANFD_UNSUPPORTED_LONGITUDINAL_CAR | CANFD_RADAR_SCC_CAR)
       ret.enableBsm = 0x1e5 in fingerprint[CAN.ECAN]
+      # TODO: Fix this. Currently not working with ADAS disabled.
+      ret.enableBsm = False
 
-      if 0x105 in fingerprint[CAN.ECAN]:
+      if 0x105 in fingerprint[CAN.ECAN] and not ret.flags & HyundaiFlags.ICE:
         ret.flags |= HyundaiFlags.HYBRID.value
 
       # detect HDA2 with ADAS Driving ECU
@@ -38,10 +40,11 @@ class CarInterface(CarInterfaceBase):
           ret.flags |= HyundaiFlags.CANFD_HDA2_ALT_STEERING.value
       else:
         # non-HDA2
-        if 0x1cf not in fingerprint[CAN.ECAN]:
-          ret.flags |= HyundaiFlags.CANFD_ALT_BUTTONS.value
         if not ret.flags & HyundaiFlags.RADAR_SCC:
           ret.flags |= HyundaiFlags.CANFD_CAMERA_SCC.value
+
+      if 0x1cf not in fingerprint[CAN.ECAN]:
+        ret.flags |= HyundaiFlags.CANFD_ALT_BUTTONS.value
 
       # Some HDA2 cars have alternative messages for gear checks
       # ICE cars do not have 0x130; GEARS message on 0x40 or 0x70 instead
@@ -118,6 +121,8 @@ class CarInterface(CarInterfaceBase):
 
     if candidate == CAR.KIA_OPTIMA_G4_FL:
       ret.steerActuatorDelay = 0.2
+    elif candidate == CAR.KIA_CARNIVAL_HEV_4TH_GEN:
+      ret.steerActuatorDelay = 0.35
 
     # Dashcam cars are missing a test route, or otherwise need validation
     # TODO: Optima Hybrid 2017 uses a different SCC12 checksum

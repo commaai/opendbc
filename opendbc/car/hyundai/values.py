@@ -49,7 +49,6 @@ class CarControllerParams:
     else:
       self.STEER_MAX = 384
 
-
 class HyundaiSafetyFlags(IntFlag):
   FLAG_HYUNDAI_EV_GAS = 1
   FLAG_HYUNDAI_HYBRID_GAS = 2
@@ -63,8 +62,8 @@ class HyundaiSafetyFlags(IntFlag):
 
 class HyundaiFlags(IntFlag):
   # Dynamic Flags
-  CANFD_HDA2 = 1
-  CANFD_ALT_BUTTONS = 2
+  CANFD_HDA2 = 2 ** 0
+  CANFD_ALT_BUTTONS = 2 ** 1
   CANFD_ALT_GEARS = 2 ** 2
   CANFD_CAMERA_SCC = 2 ** 3
 
@@ -80,6 +79,9 @@ class HyundaiFlags(IntFlag):
   EV = 2 ** 11
 
   # Static flags
+
+  # Some ICE have corrupt HYBRID messages and need this to override false detection as HYBRID.
+  ICE = 2 ** 24
 
   # If 0x500 is present on bus 1 it probably has a Mando radar outputting radar points.
   # If no points are outputted by default it might be possible to turn it on using  selfdrive/debug/hyundai_enable_radar_points.py
@@ -108,6 +110,9 @@ class HyundaiFlags(IntFlag):
 
   MIN_STEER_32_MPH = 2 ** 23
 
+  CCNC = 2 ** 25
+
+  # Next index: 26
 
 class Footnote(Enum):
   CANFD = CarFootnote(
@@ -501,10 +506,26 @@ class CAR(Platforms):
   KIA_CARNIVAL_4TH_GEN = HyundaiCanFDPlatformConfig(
     [
       HyundaiCarDocs("Kia Carnival 2022-24", car_parts=CarParts.common([CarHarness.hyundai_a])),
-      HyundaiCarDocs("Kia Carnival (China only) 2023", car_parts=CarParts.common([CarHarness.hyundai_k]))
+      HyundaiCarDocs("Kia Carnival (China only) 2023", car_parts=CarParts.common([CarHarness.hyundai_k])),
     ],
     CarSpecs(mass=2087, wheelbase=3.09, steerRatio=14.23),
     flags=HyundaiFlags.RADAR_SCC,
+  )
+  KIA_CARNIVAL_HEV_4TH_GEN = HyundaiCanFDPlatformConfig(
+    [
+      HyundaiCarDocs("Kia Carnival Hybrid 2025", car_parts=CarParts.common([CarHarness.hyundai_k])),
+      HyundaiCarDocs("Kia Carnival Hybrid (with HDA II) 2025", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_q])),
+    ],
+    CarSpecs(mass=2253, wheelbase=3.09, steerRatio=14.23),
+    flags=HyundaiFlags.CCNC,
+  )
+  KIA_CARNIVAL_2025 = HyundaiCanFDPlatformConfig(
+    [
+      HyundaiCarDocs("Kia Carnival 2025", car_parts=CarParts.common([CarHarness.hyundai_k])),
+      HyundaiCarDocs("Kia Carnival (with HDA II) 2025", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_q])),
+    ],
+    CarSpecs(mass=2087, wheelbase=3.09, steerRatio=14.23),
+    flags=HyundaiFlags.ICE | HyundaiFlags.CCNC,
   )
 
   # Genesis
@@ -664,8 +685,7 @@ PART_NUMBER_FW_PATTERN = re.compile(b'(?<=[0-9][.,][0-9]{2} )([0-9]{5}[-/]?[A-Z]
 
 # We've seen both ICE and hybrid for these platforms, and they have hybrid descriptors (e.g. MQ4 vs MQ4H)
 CANFD_FUZZY_WHITELIST = {CAR.KIA_SORENTO_4TH_GEN, CAR.KIA_SORENTO_HEV_4TH_GEN, CAR.KIA_K8_HEV_1ST_GEN,
-                         # TODO: the hybrid variant is not out yet
-                         CAR.KIA_CARNIVAL_4TH_GEN}
+                         CAR.KIA_CARNIVAL_4TH_GEN, CAR.KIA_CARNIVAL_HEV_4TH_GEN, CAR.KIA_CARNIVAL_2025}
 
 # List of ECUs expected to have platform codes, camera and radar should exist on all cars
 # TODO: use abs, it has the platform code and part number on many platforms

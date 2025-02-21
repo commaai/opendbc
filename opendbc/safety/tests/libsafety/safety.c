@@ -6,6 +6,7 @@
 //int safety_tx_hook(CANPacket_t *to_send) { return 1; }
 
 #include "faults.h"
+#include "libc.h"
 #include "safety.h"
 #include "drivers/can_common.h"
 
