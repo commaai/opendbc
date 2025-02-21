@@ -348,7 +348,7 @@ static safety_config hyundai_canfd_init(uint16_t param) {
     // TX SCC_CONTROL.
   } else {
     // RX SCC_CONTROL.
-    const int scc_bus = hyundai_canfd_hda2 ? 1 : hyundai_camera_scc ? 2 : 0;
+    const int8_t scc_bus = hyundai_canfd_hda2 ? 1 : hyundai_camera_scc ? 2 : 0;
     add_rx_check(&ret, (RxCheck){.msg = {{0x1a0, (scc_bus), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 50U}, { 0 }, { 0 }}});
   }
 
