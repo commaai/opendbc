@@ -189,7 +189,7 @@ class TestGmCameraSafety(TestGmCameraSafetyBase):
     self.packer = CANPackerPanda("gm_global_a_powertrain_generated")
     self.packer_chassis = CANPackerPanda("gm_global_a_chassis")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.gm, GMSafetyFlags.FLAG_GM_HW_CAM)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.gm, GMSafetyFlags.HW_CAM)
     self.safety.init_tests()
 
   def test_buttons(self):
@@ -221,7 +221,7 @@ class TestGmCameraLongitudinalSafety(GmLongitudinalBase, TestGmCameraSafetyBase)
     self.packer = CANPackerPanda("gm_global_a_powertrain_generated")
     self.packer_chassis = CANPackerPanda("gm_global_a_chassis")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.gm, GMSafetyFlags.FLAG_GM_HW_CAM | GMSafetyFlags.FLAG_GM_HW_CAM_LONG)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.gm, GMSafetyFlags.HW_CAM | GMSafetyFlags.HW_CAM_LONG)
     self.safety.init_tests()
 
 

@@ -18,9 +18,9 @@ class CarInterface(CarInterfaceBase):
     # safety config
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.chrysler)]
     if candidate in RAM_HD:
-      ret.safetyConfigs[0].safetyParam |= ChryslerSafetyFlags.FLAG_CHRYSLER_RAM_HD.value
+      ret.safetyConfigs[0].safetyParam |= ChryslerSafetyFlags.RAM_HD.value
     elif candidate in RAM_DT:
-      ret.safetyConfigs[0].safetyParam |= ChryslerSafetyFlags.FLAG_CHRYSLER_RAM_DT.value
+      ret.safetyConfigs[0].safetyParam |= ChryslerSafetyFlags.RAM_DT.value
 
     CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
     if candidate not in RAM_CARS:

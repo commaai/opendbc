@@ -64,7 +64,7 @@ class TestSubaruPreglobalSafety(common.PandaCarSafetyTest, common.DriverTorqueSt
 
 
 class TestSubaruPreglobalReversedDriverTorqueSafety(TestSubaruPreglobalSafety):
-  FLAGS = SubaruSafetyFlags.FLAG_SUBARU_PREGLOBAL_REVERSED_DRIVER_TORQUE
+  FLAGS = SubaruSafetyFlags.PREGLOBAL_REVERSED_DRIVER_TORQUE
   DBC = "subaru_outback_2019_generated"
 
 

@@ -132,7 +132,7 @@ class WMI(StrEnum):
 
 
 class VolkswagenSafetyFlags(IntFlag):
-  FLAG_VOLKSWAGEN_LONG_CONTROL = 1
+  LONG_CONTROL = 1
 
 
 class VolkswagenFlags(IntFlag):
