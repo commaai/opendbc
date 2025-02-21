@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 import unittest
 
+from opendbc.car.structs import CarParams
 import opendbc.safety.tests.common as common
-
-from opendbc.safety import Safety
 from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.safety.tests.common import CANPackerPanda
 
@@ -15,7 +14,7 @@ class TestBody(common.PandaSafetyTest):
   def setUp(self):
     self.packer = CANPackerPanda("comma_body")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(Safety.SAFETY_BODY, 0)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.body, 0)
     self.safety.init_tests()
 
   def _motors_data_msg(self, speed_l, speed_r):
