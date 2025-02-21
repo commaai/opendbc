@@ -510,15 +510,7 @@ class CAR(Platforms):
       HyundaiCarDocs("Kia Carnival (China only) 2023", car_parts=CarParts.common([CarHarness.hyundai_k])),
     ],
     CarSpecs(mass=2087, wheelbase=3.09, steerRatio=14.23),
-    flags=HyundaiFlags.RADAR_SCC | HyundaiFlags.ICE,
-  )
-  KIA_CARNIVAL_2025 = HyundaiCanFDPlatformConfig(
-    [
-      HyundaiCarDocs("Kia Carnival 2025", car_parts=CarParts.common([CarHarness.hyundai_k])),
-      HyundaiCarDocs("Kia Carnival (with HDA II) 2025", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_q])),
-    ],
-    CarSpecs(mass=2087, wheelbase=3.09, steerRatio=14.23),
-    flags=HyundaiFlags.ICE | HyundaiFlags.CCNC,
+    flags=HyundaiFlags.RADAR_SCC,
   )
   KIA_CARNIVAL_HEV_4TH_GEN = HyundaiCanFDPlatformConfig(
     [
@@ -527,6 +519,14 @@ class CAR(Platforms):
     ],
     CarSpecs(mass=2253, wheelbase=3.09, steerRatio=14.23),
     flags=HyundaiFlags.CCNC,
+  )
+  KIA_CARNIVAL_2025 = HyundaiCanFDPlatformConfig(
+    [
+      HyundaiCarDocs("Kia Carnival 2025", car_parts=CarParts.common([CarHarness.hyundai_k])),
+      HyundaiCarDocs("Kia Carnival (with HDA II) 2025", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_q])),
+    ],
+    CarSpecs(mass=2087, wheelbase=3.09, steerRatio=14.23),
+    flags=HyundaiFlags.ICE | HyundaiFlags.CCNC,
   )
 
   # Genesis
