@@ -158,6 +158,18 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *to_push) {
       UPDATE_VEHICLE_SPEED(((fr + rr + rl + fl) / 4 ) * 0.0075 / 3.6);
     }
 
+    // Update driver input torque samples
+    // Signal: LH_EPS_03.EPS_Lenkmoment (absolute torque)
+    // Signal: LH_EPS_03.EPS_VZ_Lenkmoment (direction)
+    if (addr == MSG_LH_EPS_03) {
+      int torque_driver_new = GET_BYTE(to_push, 5) | ((GET_BYTE(to_push, 6) & 0x1FU) << 8);
+      int sign = (GET_BYTE(to_push, 6) & 0x80U) >> 7;
+      if (sign == 1) {
+        torque_driver_new *= -1;
+      }
+      update_sample(&torque_driver, torque_driver_new);
+    }
+
     // Update vehicle yaw rate for curvature checks
     //if (addr == MSG_ESC_50) {
     //  float volkswagen_yaw_rate = (GET_BYTE(to_push, 5U) | ((GET_BYTE(to_push, 6U) & 0x3F) << 8 )) * 0.01;
@@ -238,6 +250,8 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *to_push) {
 }
 
 static bool volkswagen_meb_tx_hook(const CANPacket_t *to_send) {
+  // FIXME: needs curvature-based lateral limits, with power backoff from driver input torque
+
   // longitudinal limits
   // acceleration in m/s2 * 1000 to avoid floating point math
   const LongitudinalLimits VOLKSWAGEN_MEB_LONG_LIMITS = {
