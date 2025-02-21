@@ -323,7 +323,8 @@ class TestToyotaStockLongitudinalAngle(TestToyotaStockLongitudinalBase, TestToyo
   def setUp(self):
     self.packer = CANPackerPanda("toyota_nodsu_pt_generated")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE | ToyotaSafetyFlags.FLAG_TOYOTA_STOCK_LONGITUDINAL | ToyotaSafetyFlags.FLAG_TOYOTA_LTA)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.toyota,
+                                 self.EPS_SCALE | ToyotaSafetyFlags.FLAG_TOYOTA_STOCK_LONGITUDINAL | ToyotaSafetyFlags.FLAG_TOYOTA_LTA)
     self.safety.init_tests()
 
 
@@ -336,7 +337,8 @@ class TestToyotaSecOcSafety(TestToyotaStockLongitudinalBase):
   def setUp(self):
     self.packer = CANPackerPanda("toyota_secoc_pt_generated")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE | ToyotaSafetyFlags.FLAG_TOYOTA_STOCK_LONGITUDINAL | ToyotaSafetyFlags.FLAG_TOYOTA_SECOC)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.toyota,
+                                 self.EPS_SCALE | ToyotaSafetyFlags.FLAG_TOYOTA_STOCK_LONGITUDINAL | ToyotaSafetyFlags.FLAG_TOYOTA_SECOC)
     self.safety.init_tests()
 
   # This platform also has alternate brake and PCM messages, but same naming in the DBC, so same packers work

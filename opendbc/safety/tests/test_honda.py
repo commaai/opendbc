@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import unittest
 import numpy as np
-from typing import Dict, List, Optional, Tuple
 
 from opendbc.car.honda.values import HondaSafetyFlags
 from opendbc.safety.tests.libsafety import libsafety_py
