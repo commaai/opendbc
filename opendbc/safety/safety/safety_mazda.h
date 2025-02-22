@@ -92,6 +92,8 @@ static bool mazda_tx_hook(const CANPacket_t *to_send) {
 }
 
 static int mazda_fwd_hook(int bus, int addr) {
+  UNUSED(addr);
+
   int bus_fwd = -1;
 
   if (bus == MAZDA_MAIN) {
