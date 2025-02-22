@@ -157,16 +157,11 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
   }
 
   // cruise buttons check
-  const int button_addr = hyundai_canfd_alt_buttons ? 0x1aa : 0x1cf;
-  if (addr == button_addr) {
-    int cruise_button = 0;
-    if (addr == 0x1cf) {
-      cruise_button = GET_BYTE(to_send, 2) & 0x7U;
-    } else {
-      cruise_button = (GET_BYTE(to_send, 4) >> 4) & 0x7U;
-    }
-    bool is_cancel = (cruise_button == HYUNDAI_BTN_CANCEL);
-    bool is_resume = (cruise_button == HYUNDAI_BTN_RESUME);
+  // TODO: Support ALT_BUTTONS.
+  if (addr == 0x1cf) {
+    int button = GET_BYTE(to_send, 2) & 0x7U;
+    bool is_cancel = (button == HYUNDAI_BTN_CANCEL);
+    bool is_resume = (button == HYUNDAI_BTN_RESUME);
 
     bool allowed = (is_cancel && cruise_engaged_prev) || (is_resume && controls_allowed);
     if (!allowed) {
@@ -219,13 +214,12 @@ static int hyundai_canfd_fwd_hook(int bus_num, int addr) {
     bool is_lfa_msg = ((addr == 0x12a) && !hyundai_canfd_lka_steering);
 
     // HUD icons
-    bool is_lfahda_msg = ((addr == 0x1e0) && !hyundai_canfd_hda2);
-    bool is_ccnc_msg = (((addr == 0x161) || (addr == 0x162)) && !hyundai_canfd_hda2);
+    bool is_lfahda_msg = ((addr == 0x1e0) && !hyundai_canfd_lka_steering);
 
     // SCC_CONTROL for camera SCC cars, we send our own longitudinal commands
     bool is_scc_msg = ((addr == 0x1a0) && hyundai_longitudinal && !hyundai_canfd_lka_steering);
 
-    bool block_msg = is_lkas_msg || is_lfa_msg || is_lfahda_msg || is_ccnc_msg || is_scc_msg;
+    bool block_msg = is_lka_msg || is_lfa_msg || is_lfahda_msg || is_scc_msg;
     if (!block_msg) {
       bus_fwd = 0;
     }
@@ -235,35 +229,26 @@ static int hyundai_canfd_fwd_hook(int bus_num, int addr) {
 }
 
 static safety_config hyundai_canfd_init(uint16_t param) {
-  const int HYUNDAI_PARAM_CANFD_HDA2_ALT_STEERING = 128;
+  const int HYUNDAI_PARAM_CANFD_LKA_STEERING_ALT = 128;
   const int HYUNDAI_PARAM_CANFD_ALT_BUTTONS = 32;
 
-  // TODO: Build these more precisely like RX_CHECKS.
-  static const CanMsg HYUNDAI_CANFD_HDA2_TX_MSGS[] = {
+  // TODO: Build TX checks more precisely (like RX checks).
+  static const CanMsg HYUNDAI_CANFD_LKA_STEERING_TX_MSGS[] = {
     {0x50, 0, 16},  // LKAS
     {0x1CF, 1, 8},  // CRUISE_BUTTON
-    // TODO: Include this iff CANFD_ALT_BUTTONS
-    {0x1AA, 1, 16}, // CRUISE_BUTTONS_ALT
     {0x2A4, 0, 24}, // CAM_0x2A4
   };
 
-  static const CanMsg HYUNDAI_CANFD_HDA2_ALT_STEERING_TX_MSGS[] = {
+  static const CanMsg HYUNDAI_CANFD_LKA_STEERING_ALT_TX_MSGS[] = {
     {0x110, 0, 32}, // LKAS_ALT
     {0x1CF, 1, 8},  // CRUISE_BUTTON
-    // TODO: Include this iff CANFD_ALT_BUTTONS
-    {0x1AA, 1, 16}, // CRUISE_BUTTONS_ALT
-    // Needed for cruise control in case of ALT_BUTTONS.
-    {0x1A0, 1, 32}, // CRUISE_INFO
     {0x362, 0, 32}, // CAM_0x362
   };
 
-  static const CanMsg HYUNDAI_CANFD_HDA2_LONG_TX_MSGS[] = {
+  static const CanMsg HYUNDAI_CANFD_LKA_STEERING_LONG_TX_MSGS[] = {
     {0x50, 0, 16},  // LKAS
     {0x1CF, 1, 8},  // CRUISE_BUTTON
-    // TODO: Include this iff CANFD_ALT_BUTTONS
-    {0x1AA, 1, 16}, // CRUISE_BUTTONS_ALT
     {0x2A4, 0, 24}, // CAM_0x2A4
-    // LONG start
     {0x51, 0, 32},  // ADRV_0x51
     {0x730, 1, 8},  // tester present for ADAS ECU disable
     {0x12A, 1, 16}, // LFA
@@ -274,41 +259,13 @@ static safety_config hyundai_canfd_init(uint16_t param) {
     {0x200, 1, 8},  // ADRV_0x200
     {0x345, 1, 8},  // ADRV_0x345
     {0x1DA, 1, 32}, // ADRV_0x1da
-    {0x38C, 1, 32}, // ADRV_0x38c
-    {0x161, 1, 32}, // MSG_161
-    {0x162, 1, 32}, // MSG_162
   };
 
-  static const CanMsg HYUNDAI_CANFD_HDA2_ALT_STEERING_LONG_TX_MSGS[] = {
-    {0x110, 0, 32}, // LKAS_ALT
-    {0x1CF, 1, 8},  // CRUISE_BUTTON
-    // TODO: Include this iff CANFD_ALT_BUTTONS
-    {0x1AA, 1, 16}, // CRUISE_BUTTONS_ALT
-    {0x1A0, 1, 32}, // CRUISE_INFO
-    {0x362, 0, 32}, // CAM_0x362
-    // LONG start
-    {0x51, 0, 32},  // ADRV_0x51
-    {0x730, 1, 8},  // tester present for ADAS ECU disable
-    {0x12A, 1, 16}, // LFA
-    {0x160, 1, 16}, // ADRV_0x160
-    {0x1E0, 1, 16}, // LFAHDA_CLUSTER
-    {0x1EA, 1, 32}, // ADRV_0x1ea
-    {0x200, 1, 8},  // ADRV_0x200
-    {0x345, 1, 8},  // ADRV_0x345
-    {0x1DA, 1, 32}, // ADRV_0x1da
-    {0x38C, 1, 32}, // ADRV_0x38c
-    {0x161, 1, 32}, // MSG_161
-    {0x162, 1, 32}, // MSG_162
-  };
-
-  static const CanMsg HYUNDAI_CANFD_HDA1_TX_MSGS[] = {
+  static const CanMsg HYUNDAI_CANFD_LFA_STEERING_TX_MSGS[] = {
     {0x12A, 0, 16}, // LFA
     {0x1A0, 0, 32}, // CRUISE_INFO
     {0x1CF, 2, 8},  // CRUISE_BUTTON
-    {0x1AA, 2, 16}, // CRUISE_BUTTONS_ALT
     {0x1E0, 0, 16}, // LFAHDA_CLUSTER
-    {0x161, 0, 32}, // MSG_161
-    {0x162, 0, 32}, // MSG_162
   };
 
 
