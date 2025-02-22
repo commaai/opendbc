@@ -2,7 +2,7 @@
 import unittest
 
 from opendbc.car.volkswagen.values import VolkswagenSafetyFlags
-from opendbc.safety import Safety
+from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerPanda
@@ -127,7 +127,7 @@ class TestVolkswagenPqStockSafety(TestVolkswagenPqSafety):
   def setUp(self):
     self.packer = CANPackerPanda("vw_golf_mk4")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(Safety.SAFETY_VOLKSWAGEN_PQ, 0)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenPq, 0)
     self.safety.init_tests()
 
   def test_spam_cancel_safety_check(self):
@@ -149,7 +149,7 @@ class TestVolkswagenPqLongSafety(TestVolkswagenPqSafety, common.LongitudinalAcce
   def setUp(self):
     self.packer = CANPackerPanda("vw_golf_mk4")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(Safety.SAFETY_VOLKSWAGEN_PQ, VolkswagenSafetyFlags.FLAG_VOLKSWAGEN_LONG_CONTROL)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenPq, VolkswagenSafetyFlags.LONG_CONTROL)
     self.safety.init_tests()
 
   # stock cruise controls are entirely bypassed under openpilot longitudinal control

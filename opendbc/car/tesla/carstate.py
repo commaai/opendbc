@@ -1,5 +1,4 @@
 import copy
-import numpy as np
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
 from opendbc.car import Bus, structs
@@ -18,13 +17,6 @@ class CarState(CarStateBase):
 
     self.hands_on_level = 0
     self.das_control = None
-
-  def update_steering_pressed(self, steering_pressed, steering_pressed_min_count):
-    """Applies filtering on steering pressed for noisy driver torque signals."""
-    # TODO: this differs from the base implementation by resetting the counter to 0 immediately, unify this
-    self.steering_pressed_cnt = self.steering_pressed_cnt + 1 if steering_pressed else 0
-    self.steering_pressed_cnt = float(np.clip(self.steering_pressed_cnt, 0, steering_pressed_min_count * 2))
-    return self.steering_pressed_cnt > steering_pressed_min_count
 
   def update(self, can_parsers) -> structs.CarState:
     cp_party = can_parsers[Bus.party]
