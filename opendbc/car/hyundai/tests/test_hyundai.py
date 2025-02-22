@@ -44,14 +44,14 @@ CANFD_EXPECTED_ECUS = {Ecu.fwdCamera, Ecu.fwdRadar}
 
 class TestHyundaiFingerprint:
   def test_feature_detection(self):
-    # HDA2
-    for hda2 in (True, False):
+    # LKA steering
+    for lka_steering in (True, False):
       fingerprint = gen_empty_fingerprint()
-      if hda2:
+      if lka_steering:
         cam_can = CanBus(None, fingerprint).CAM
-        fingerprint[cam_can] = [0x50, 0x110]  # HDA2 steering messages
+        fingerprint[cam_can] = [0x50, 0x110]  # LKA steering messages
       CP = CarInterface.get_params(CAR.KIA_EV6, fingerprint, [], False, False)
-      assert bool(CP.flags & HyundaiFlags.CANFD_HDA2) == hda2
+      assert bool(CP.flags & HyundaiFlags.CANFD_LKA_STEERING) == lka_steering
 
     # radar available
     for radar in (True, False):
@@ -66,7 +66,7 @@ class TestHyundaiFingerprint:
     fingerprint = gen_empty_fingerprint()
     for car_model in CAR:
       CP = CarInterface.get_params(car_model, fingerprint, [], False, False)
-      assert bool(CP.flags & HyundaiFlags.ALT_LIMITS) == bool(CP.safetyConfigs[-1].safetyParam & HyundaiSafetyFlags.FLAG_HYUNDAI_ALT_LIMITS)
+      assert bool(CP.flags & HyundaiFlags.ALT_LIMITS) == bool(CP.safetyConfigs[-1].safetyParam & HyundaiSafetyFlags.ALT_LIMITS)
 
   def test_can_features(self):
     # Test no EV/HEV in any gear lists (should all use ELECT_GEAR)
