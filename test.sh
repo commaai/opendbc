@@ -16,6 +16,7 @@ ruff check .
 
 # *** test ***
 pytest -n8 --ignore opendbc/safety
+opendbc/safety/tests/misra/test_misra.sh
 
 # *** all done ***
 GREEN='\033[0;32m'
