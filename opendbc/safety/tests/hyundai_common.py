@@ -144,7 +144,7 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
       tester_present = libsafety_py.make_CANPacket(addr, bus, msg)
       self.assertEqual(should_tx and ecu_disable, self._tx(tester_present))
 
-  def test_disabled_ecu_alive(self, ecu_disable: bool = True):
+  def test_disabled_ecu_alive(self):
     """
       If the ECU knockout failed, make sure the relay malfunction is shown
     """
@@ -152,4 +152,4 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
     addr, bus = self.DISABLED_ECU_ACTUATION_MSG
     self.assertFalse(self.safety.get_relay_malfunction())
     self._rx(make_msg(bus, addr, 8))
-    self.assertEqual(ecu_disable, self.safety.get_relay_malfunction())
+    self.assertTrue(self.safety.get_relay_malfunction())

@@ -166,7 +166,7 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
   }
 
   // UDS: only tester present ("\x02\x3E\x80\x00\x00\x00\x00\x00") allowed on diagnostics address
-  if ((addr == 0x730) || (addr == 0x7D0)) {
+  if (((addr == 0x730) && hyundai_canfd_lka_steering) || (addr == 0x7D0)) {
     if ((GET_BYTES(to_send, 0, 4) != 0x00803E02U) || (GET_BYTES(to_send, 4, 4) != 0x0U)) {
       tx = false;
     }
@@ -263,6 +263,14 @@ static safety_config hyundai_canfd_init(uint16_t param) {
     {0x1E0, 0, 16}, // LFAHDA_CLUSTER
     {0x160, 0, 16}, // ADRV_0x160
     {0x7D0, 0, 8},  // tester present for radar ECU disable
+  };
+
+  static const CanMsg HYUNDAI_CANFD_LFA_STEERING_CAMERA_SCC_TX_MSGS[] = {
+    {0x12A, 0, 16}, // LFA
+    {0x1A0, 0, 32}, // SCC_CONTROL
+    {0x1CF, 2, 8},  // CRUISE_BUTTON
+    {0x1E0, 0, 16}, // LFAHDA_CLUSTER
+    {0x160, 0, 16}, // ADRV_0x160
   };
 
   hyundai_common_init(param);

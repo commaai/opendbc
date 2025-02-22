@@ -271,12 +271,7 @@ class TestHyundaiCanfdLFASteeringLong(HyundaiLongitudinalBase, TestHyundaiCanfdL
     return self.packer.make_can_msg_panda("SCC_CONTROL", 0, values)
 
   def test_tester_present_allowed(self, ecu_disable: bool = True):
-    if self.SAFETY_PARAM & HyundaiSafetyFlags.CAMERA_SCC:
-      super().test_tester_present_allowed(ecu_disable=False)
-
-  def test_disabled_ecu_alive(self, ecu_disable: bool = True):
-    if self.SAFETY_PARAM & HyundaiSafetyFlags.CAMERA_SCC:
-      super().test_disabled_ecu_alive(ecu_disable=False)
+    super().test_tester_present_allowed(ecu_disable=not self.SAFETY_PARAM & HyundaiSafetyFlags.CAMERA_SCC)
 
 
 if __name__ == "__main__":
