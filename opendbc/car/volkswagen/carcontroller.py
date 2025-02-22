@@ -53,10 +53,13 @@ class CarController(CarControllerBase):
           hca_enabled = True
           current_curvature = CS.curvature #-CS.out.yawRate / max(CS.out.vEgoRaw, 0.1)
           apply_curvature = apply_std_steer_angle_limits(actuators.curvature, self.apply_curvature_last, CS.out.vEgoRaw, self.CCP)
-          if CS.out.steeringPressed: # roughly sync with user input
-            apply_curvature = np.clip(apply_curvature, current_curvature - self.CCP.CURVATURE_ERROR, current_curvature + self.CCP.CURVATURE_ERROR)
+          # TODO: verify, this shouldn't be necessary and appears to be hurting us in some cases
+          #if CS.out.steeringPressed: # roughly sync with user input
+          #  apply_curvature = np.clip(apply_curvature, current_curvature - self.CCP.CURVATURE_ERROR, current_curvature + self.CCP.CURVATURE_ERROR)
           apply_curvature = np.clip(apply_curvature, -self.CCP.CURVATURE_MAX, self.CCP.CURVATURE_MAX)
 
+          # FIXME: this power control is very complex and is interacting badly with the wheel touch threshold
+          #        it should ideally just use the max unless the driver is overriding, then simple smooth ramp up/down
           steering_power_min_by_speed = np.interp(CS.out.vEgoRaw, [0, self.CCP.STEERING_POWER_MAX_BY_SPEED],
                                                   [self.CCP.STEERING_POWER_MIN, self.CCP.STEERING_POWER_MAX])
           steering_curvature_diff = abs(apply_curvature - current_curvature)
@@ -78,9 +81,11 @@ class CarController(CarControllerBase):
             else:
               steering_power = self.steering_power_last
 
+          # TODO: investigate this "power boost", validity and utility are unclear
           steering_power_boost = True if steering_power == self.CCP.STEERING_POWER_MAX else False
 
         else:
+          # TODO: see if we can do without this extra ramp-down-on-disengage logic, it makes safety more complex and MQBevo didn't need it
           steering_power_boost = False
           if self.steering_power_last > 0: # keep HCA alive until steering power has reduced to zero
             hca_enabled = True
