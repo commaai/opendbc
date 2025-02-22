@@ -24,7 +24,7 @@ class TeslaCAN:
     values["DAS_steeringControlChecksum"] = self.checksum(0x488, data[:3])
     return self.packer.make_can_msg("DAS_steeringControl", CANBUS.party, values)
 
-  def create_longitudinal_command(self, v_ego, acc_state, accel, cntr, active):
+  def create_longitudinal_command(self, v_ego, acc_state, accel, cntr, enabled):
     set_speed = 0
     if enabled:
       # TODO: does this just tell the ECU which accel limit to use?
