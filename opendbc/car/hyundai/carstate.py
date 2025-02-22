@@ -178,15 +178,12 @@ class CarState(CarStateBase):
     prev_lfa_button = self.lfa_button
     self.cruise_buttons.extend(cp.vl_all["CLU11"]["CF_Clu_CruiseSwState"])
     self.main_buttons.extend(cp.vl_all["CLU11"]["CF_Clu_CruiseSwMain"])
-    self.lfa_button = cp.vl["BCM_PO_11"]["LFA_Pressed"] if self.CP.flags & HyundaiFlags.HAS_LFA_BUTTON else 0
+    if self.CP.flags & HyundaiFlags.HAS_LFA_BUTTON:
+      self.lfa_button = cp.vl["BCM_PO_11"]["LFA_Pressed"]
 
     ret.buttonEvents = [*create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT),
-                        *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise})]
-
-    ret.buttonEvents = [
-      *ret.buttonEvents,
-      *create_button_events(self.lfa_button, prev_lfa_button, {1: ButtonType.altButton1})
-    ]
+                        *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise}),
+                        *create_button_events(self.lfa_button, prev_lfa_button, {1: ButtonType.lkas})]
 
     return ret
 
