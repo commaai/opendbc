@@ -35,6 +35,8 @@ testing = [
   "hypothesis==6.47.*",
   "parameterized>=0.8,<0.9",
   "pre-commit",
+  "openpilot-logging",
+  "cffi",
 ]
 docs = [
   "Jinja2",
@@ -52,6 +54,9 @@ build-backend = "setuptools.build_meta"
 [tool.pytest.ini_options]
 addopts = "-Werror --strict-config --strict-markers --durations=10 -n auto"
 python_files = "test_*.py"
+markers = [
+  "slow: tests that take awhile to run and can be skipped with -m 'not slow'",
+]
 testpaths = [
   "opendbc"
 ]

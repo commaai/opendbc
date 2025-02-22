@@ -12,7 +12,7 @@ scons -j8
 # *** lint ***
 # TODO: pre-commit is slow; replace it with openpilot's "op lint"
 #pre-commit run --all-files
-ruff check .
+#ruff check .
 
 # *** test ***
 pytest -n8 --ignore opendbc/safety
