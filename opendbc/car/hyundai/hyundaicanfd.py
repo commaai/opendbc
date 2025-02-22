@@ -38,23 +38,33 @@ def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_steer, 
 
   ret = []
 
-  values = {
-    "LKA_ICON": 2 if enabled else 1,
-    "LKA_ACTIVE": 3 if lat_active else 0,  # this changes sometimes, 3 seems to indicate engaged
-  }
-
   if CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
-    values.update({
-      "LKAS_ANGLE_ACTIVE": 2 if lat_active else 1,
+    values = {
+      "LKA_MODE": 0,
+      "LKA_ICON": 2 if enabled else 1,
+      "TORQUE_REQUEST": 0,  # apply_steer,
+      "LKA_ASSIST": 0,
+      "STEER_REQ": 0,  # 1 if lat_active else 0,
+      "STEER_MODE": 0,
+      "HAS_LANE_SAFETY": 0,  # hide LKAS settings
+      "LKA_ACTIVE": 3 if lat_active else 0,  # this changes sometimes, 3 seems to indicate engaged
+      "NEW_SIGNAL_2": 0,
       "LKAS_ANGLE_CMD": -apply_angle,
+      "LKAS_ANGLE_ACTIVE": 2 if lat_active else 1,
       "LKAS_ANGLE_MAX_TORQUE": angle_max_torque if lat_active else 0,
-    })
+    }
   else:
-    values.update({
+    values = {
       "LKA_MODE": 2,
+      "LKA_ICON": 2 if enabled else 1,
       "TORQUE_REQUEST": apply_steer,
+      "LKA_ASSIST": 0,
       "STEER_REQ": 1 if lat_active else 0,
-    })
+      "STEER_MODE": 0,
+      "HAS_LANE_SAFETY": 0,  # hide LKAS settings
+      "NEW_SIGNAL_1": 0,
+      "NEW_SIGNAL_2": 0,
+    }
 
   if CP.flags & HyundaiFlags.CANFD_LKA_STEERING:
     lkas_msg = "LKAS_ALT" if CP.flags & HyundaiFlags.CANFD_LKA_STEERING_ALT else "LKAS"
