@@ -169,7 +169,7 @@ class CarController(CarControllerBase):
                                                           self.CP.flags & HyundaiFlags.CANFD_LKA_STEERING_ALT))
 
       # LFA and HDA icons
-      update_lfahda_icons = (not lka_steering or lka_steering_long) or self.CP.carFingerprint == CAR.KIA_EV9
+      update_lfahda_icons = (not lka_steering or lka_steering_long) or self.CP.flags & HyundaiFlags.ANGLE_CONTROL
       if self.frame % 5 == 0 and update_lfahda_icons:
         can_sends.append(hyundaicanfd.create_lfahda_cluster(self.packer, self.CAN, CC.enabled))
 
