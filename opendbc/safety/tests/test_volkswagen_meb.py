@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import unittest
+import numpy as np
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
@@ -25,15 +26,10 @@ MSG_LDW_02 = 0x397      # TX by OP, Lane line recognition and text alerts
 MSG_Motor_51 = 0x10B    # RX for TSK state
 MSG_TA_01 = 0x26B       # TX for Travel Assist status
 
+
 class TestVolkswagenMebSafety(common.PandaCarSafetyTest):
   STANDSTILL_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_03,)}
-
-  MAX_RATE_UP = 4
-  MAX_RATE_DOWN = 10
-  MAX_TORQUE = 300
-  MAX_RT_DELTA = 75
-  RT_INTERVAL = 250000
 
   DRIVER_TORQUE_ALLOWANCE = 80
   DRIVER_TORQUE_FACTOR = 3
@@ -99,16 +95,10 @@ class TestVolkswagenMebSafety(common.PandaCarSafetyTest):
     values = {"GRA_Abbrechen": cancel, "GRA_Tip_Setzen": _set, "GRA_Tip_Wiederaufnahme": resume}
     return self.packer.make_can_msg_panda("GRA_ACC_01", bus, values)
 
-  # TODO: add MEB ACC messages
   # Acceleration request to drivetrain coordinator
-  # def _acc_06_msg(self, accel):
-  #   values = {"ACC_Sollbeschleunigung_02": accel}
-  #   return self.packer.make_can_msg_panda("ACC_06", 0, values)
-
-  # Acceleration request to drivetrain coordinator
-  # def _acc_07_msg(self, accel, secondary_accel=3.02):
-  #   values = {"ACC_Sollbeschleunigung_02": accel, "ACC_Folgebeschl": secondary_accel}
-  #   return self.packer.make_can_msg_panda("ACC_07", 0, values)
+  def _acc_18_msg(self, accel):
+    values = {"ACC_Sollbeschleunigung_02": accel}
+    return self.packer.make_can_msg_panda("ACC_18", 0, values)
 
   # TODO: re-enable if a usable redundant brake signal is found
   # Verify brake_pressed is true if either the switch or pressure threshold signals are true
@@ -215,9 +205,15 @@ class TestVolkswagenMebLongSafety(TestVolkswagenMebSafety):
     self._rx(self._tsk_status_msg(False, main_switch=False))
     self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after ACC main switch off")
 
-  # TODO: implement this for MEB
   def test_accel_safety_check(self):
-    pass
+    for controls_allowed in [True, False]:
+      # enforce we don't skip over 0 or inactive accel
+      for accel in np.concatenate((np.arange(MIN_ACCEL - 2, MAX_ACCEL + 2, 0.03), [0, self.INACTIVE_ACCEL])):
+        accel = round(accel, 2)  # floats might not hit exact boundary conditions without rounding
+        is_inactive_accel = accel == self.INACTIVE_ACCEL
+        send = (controls_allowed and MIN_ACCEL <= accel <= MAX_ACCEL) or is_inactive_accel
+        self.safety.set_controls_allowed(controls_allowed)
+        self.assertEqual(send, self._tx(self._acc_18_msg(accel)), (controls_allowed, accel))
 
 
 if __name__ == "__main__":
