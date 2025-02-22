@@ -198,6 +198,7 @@ class TestSubaruGen2AngleSafetyBase(TestSubaruAngleSafetyBase):
   ALT_MAIN_BUS = SUBARU_ALT_BUS
   FLAGS = SubaruSafetyFlags.ANGLE | SubaruSafetyFlags.GEN2
 
+
 class TestSubaruGen1TorqueStockLongitudinalSafety(TestSubaruStockLongitudinalSafetyBase, TestSubaruTorqueSafetyBase):
   FLAGS = 0
   TX_MSGS = lkas_tx_msgs(SUBARU_MAIN_BUS)
