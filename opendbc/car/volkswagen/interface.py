@@ -41,11 +41,9 @@ class CarInterface(CarInterfaceBase):
 
       if any(msg in fingerprint[1] for msg in (0x520, 0x86, 0xFD, 0x13D)):  # Airbag_02, LWI_01, ESP_21, QFK_01
         ret.networkLocation = NetworkLocation.gateway
+        ret.radarUnavailable = False
       else:
         ret.networkLocation = NetworkLocation.fwdCamera
-
-      if ret.networkLocation == NetworkLocation.gateway:
-        ret.radarUnavailable = False
 
       # TODO for anti EA intervention: I do not have the native Emegrency Assist and can not test
       # also we do not get steering torque from OP for MEB
