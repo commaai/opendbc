@@ -276,6 +276,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *to_send) {
     if (steer_angle_cmd_checks(desired_curvature_raw, steer_req, VOLKSWAGEN_MEB_STEERING_LIMITS)) {
       tx = false;
 
+      // TODO: verify this is actually necessary, this wasn't a problem on MQBevo
       // steer power is still allowed to decrease to zero monotonously
       // while controls are not allowed anymore
       if (steer_req && steer_power != 0) {
