@@ -97,7 +97,7 @@ class CarInterface(CarInterfaceBase):
     ret.steerActuatorDelay = 0.1
     ret.steerLimitTimer = 0.4
 
-    if ret.flags & HyundaiFlags.ANGLE_CONTROL:
+    if ret.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
       ret.steerControlType = structs.CarParams.SteerControlType.angle
     else:
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)

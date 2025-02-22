@@ -63,6 +63,7 @@ class HyundaiSafetyFlags(IntFlag):
   CANFD_ALT_BUTTONS = 32
   ALT_LIMITS = 64
   CANFD_LKA_STEERING_ALT = 128
+  CANFD_ANGLE_STEERING = 256
 
 
 class HyundaiFlags(IntFlag):
@@ -119,7 +120,7 @@ class HyundaiFlags(IntFlag):
 
   HAS_LDA_BUTTON = 2 ** 24
 
-  ANGLE_CONTROL = 2 ** 25
+  CANFD_ANGLE_STEERING = 2 ** 25
 
 class Footnote(Enum):
   CANFD = CarFootnote(
@@ -523,7 +524,7 @@ class CAR(Platforms):
       HyundaiCarDocs("Kia EV9 2024", car_parts=CarParts.common([CarHarness.hyundai_r]))
     ],
     CarSpecs(mass=2625, wheelbase=3.1, steerRatio=16.02),
-    flags=HyundaiFlags.EV | HyundaiFlags.ANGLE_CONTROL,
+    flags=HyundaiFlags.EV | HyundaiFlags.CANFD_ANGLE_STEERING,
   )
 
   # Genesis
