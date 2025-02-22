@@ -295,6 +295,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *to_send) {
   // To avoid floating point math, scale upward and compare to pre-scaled safety m/s2 boundaries
   if (addr == MSG_ACC_18) {
     // WARNING: IF WE TAKE THE SIGNAL FROM THE CAR WHILE ACC ACTIVE AND BELOW ABOUT 3km/h, THE CAR ERRORS AND PUTS ITSELF IN PARKING MODE WITH EPB!
+    // TODO: JY note, this is probably just drivetrain coordinator starting/stopping logic
     int desired_accel = ((((GET_BYTE(to_send, 4) & 0x7U) << 8) | GET_BYTE(to_send, 3)) * 5U) - 7220U;
 
     // TODO: very unclear what this is doing, may not be necessary, try removing
