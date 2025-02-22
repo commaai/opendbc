@@ -255,8 +255,6 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *to_send) {
     .inactive_accel = 3010,  // VW sends one increment above the max range when inactive
   };
 
-  const int volkswagen_accel_override = 0;
-
   int addr = GET_ADDR(to_send);
   bool tx = true;
 
@@ -299,7 +297,8 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *to_send) {
     // WARNING: IF WE TAKE THE SIGNAL FROM THE CAR WHILE ACC ACTIVE AND BELOW ABOUT 3km/h, THE CAR ERRORS AND PUTS ITSELF IN PARKING MODE WITH EPB!
     int desired_accel = ((((GET_BYTE(to_send, 4) & 0x7U) << 8) | GET_BYTE(to_send, 3)) * 5U) - 7220U;
 
-    if (vw_meb_longitudinal_accel_checks(desired_accel, VOLKSWAGEN_MEB_LONG_LIMITS, volkswagen_accel_override)) {
+    // TODO: very unclear what this is doing, may not be necessary, try removing
+    if (vw_meb_longitudinal_accel_checks(desired_accel, VOLKSWAGEN_MEB_LONG_LIMITS, 0)) {
       tx = false;
     }
   }
