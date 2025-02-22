@@ -44,14 +44,14 @@ CANFD_EXPECTED_ECUS = {Ecu.fwdCamera, Ecu.fwdRadar}
 
 class TestHyundaiFingerprint:
   def test_feature_detection(self):
-    # HDA2
-    for hda2 in (True, False):
+    # LKA steering
+    for lka_steering in (True, False):
       fingerprint = gen_empty_fingerprint()
-      if hda2:
+      if lka_steering:
         cam_can = CanBus(None, fingerprint).CAM
-        fingerprint[cam_can] = [0x50, 0x110]  # HDA2 steering messages
+        fingerprint[cam_can] = [0x50, 0x110]  # LKA steering messages
       CP = CarInterface.get_params(CAR.KIA_EV6, fingerprint, [], False, False)
-      assert bool(CP.flags & HyundaiFlags.CANFD_HDA2) == hda2
+      assert bool(CP.flags & HyundaiFlags.CANFD_LKA_STEERING) == lka_steering
 
     # radar available
     for radar in (True, False):
