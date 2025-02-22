@@ -51,7 +51,7 @@ jobs:
         author: Vehicle Researcher <user@comma.ai>
         token: ${{ secrets.ACTIONS_CREATE_PR_PAT }}
         commit-message: test models
-        title: '[opendbc] test_models run for https://github.com/commaai/opendbc/pull/${{ github.event.issue.number }}'
+        title: '[opendbc] test_models run from ${{ github.event.issue.number }}'
         branch: test_models_${{ github.event.issue.number }}
         base: master
         delete-branch: true
