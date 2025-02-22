@@ -49,6 +49,7 @@ typedef struct {
   int addr;
   int bus;
   int len;
+  bool block_from_cam;
 } CanMsg;
 
 typedef enum {
