@@ -166,7 +166,7 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
   }
 
   // UDS: only tester present ("\x02\x3E\x80\x00\x00\x00\x00\x00") allowed on diagnostics address
-  if ((addr == 0x730) && hyundai_canfd_hda2) {
+  if ((addr == 0x730) && (addr == 0x7D0)) {
     if ((GET_BYTES(to_send, 0, 4) != 0x00803E02U) || (GET_BYTES(to_send, 4, 4) != 0x0U)) {
       tx = false;
     }
@@ -212,8 +212,8 @@ static int hyundai_canfd_fwd_hook(int bus_num, int addr) {
     // HUD icons
     bool is_lfahda_msg = ((addr == 0x1e0) && !hyundai_canfd_hda2);
 
-    // CRUISE_INFO for non-HDA2, we send our own longitudinal commands
-    bool is_scc_msg = ((addr == 0x1a0) && hyundai_longitudinal && !hyundai_canfd_hda2);
+    // SCC_CONTROL and ADRV_0x160 for non-HDA2, we send our own longitudinal commands and to show FCA light
+    bool is_scc_msg = (((addr == 0x1a0) || (addr == 0x160)) && hyundai_longitudinal && !hyundai_canfd_hda2);
 
     bool block_msg = is_lkas_msg || is_lfa_msg || is_lfahda_msg || is_scc_msg;
     if (!block_msg) {
@@ -258,22 +258,18 @@ static safety_config hyundai_canfd_init(uint16_t param) {
 
   static const CanMsg HYUNDAI_CANFD_HDA1_TX_MSGS[] = {
     {0x12A, 0, 16}, // LFA
-    {0x1A0, 0, 32}, // CRUISE_INFO
+    {0x1A0, 0, 32}, // SCC_CONTROL
     {0x1CF, 2, 8},  // CRUISE_BUTTON
     {0x1E0, 0, 16}, // LFAHDA_CLUSTER
+    {0x160, 0, 16}, // ADRV_0x160
+    {0x7D0, 0, 8},  // tester present for radar ECU disable
   };
-
 
   hyundai_common_init(param);
 
   gen_crc_lookup_table_16(0x1021, hyundai_canfd_crc_lut);
   hyundai_canfd_alt_buttons = GET_FLAG(param, HYUNDAI_PARAM_CANFD_ALT_BUTTONS);
   hyundai_canfd_hda2_alt_steering = GET_FLAG(param, HYUNDAI_PARAM_CANFD_HDA2_ALT_STEERING);
-
-  // no long for radar-SCC HDA1 yet
-  if (!hyundai_canfd_hda2 && !hyundai_camera_scc) {
-    hyundai_longitudinal = false;
-  }
 
   safety_config ret;
   if (hyundai_longitudinal) {
