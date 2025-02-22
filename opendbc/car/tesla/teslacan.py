@@ -1,3 +1,4 @@
+from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import V_CRUISE_MAX
 from opendbc.car.tesla.values import CANBUS, CarControllerParams
 
@@ -33,7 +34,7 @@ class TeslaCAN:
     values = {
       # TODO: this causes jerking after gas override when above set speed
       #"DAS_setSpeed": 0 if (accel < 0 or not enabled) else V_CRUISE_MAX,
-      "DAS_setSpeed": set_speed,
+      "DAS_setSpeed": set_speed * CV.MS_TO_KPH,
       "DAS_accState": acc_state,
       "DAS_aebEvent": 0,
       "DAS_jerkMin": CarControllerParams.JERK_LIMIT_MIN,
