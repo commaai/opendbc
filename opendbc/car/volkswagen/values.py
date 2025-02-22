@@ -253,7 +253,9 @@ class VWCarDocs(CarDocs):
     if "SKODA" in CP.carFingerprint:
       self.footnotes.append(Footnote.SKODA_HEATED_WINDSHIELD)
 
-    if CP.carFingerprint in (CAR.VOLKSWAGEN_CRAFTER_MK2, CAR.VOLKSWAGEN_TRANSPORTER_T61):
+    if CP.flags & VolkswagenFlags.MEB:
+      self.car_parts = CarParts.common([CarHarness.vw_c])
+    elif CP.carFingerprint in (CAR.VOLKSWAGEN_CRAFTER_MK2, CAR.VOLKSWAGEN_TRANSPORTER_T61):
       self.car_parts = CarParts([Device.threex_angled_mount, CarHarness.vw_j533])
 
     if abs(CP.minSteerSpeed - CarControllerParams.DEFAULT_MIN_STEER_SPEED) < 1e-3:
