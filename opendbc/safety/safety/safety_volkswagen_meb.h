@@ -250,7 +250,9 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *to_push) {
 }
 
 static bool volkswagen_meb_tx_hook(const CANPacket_t *to_send) {
+  // !!!!!
   // FIXME: needs curvature-based lateral limits, with power backoff from driver input torque
+  // !!!!!
 
   // longitudinal limits
   // acceleration in m/s2 * 1000 to avoid floating point math
@@ -265,6 +267,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *to_send) {
   int addr = GET_ADDR(to_send);
   bool tx = true;
 
+  // TODO: review and implement power backoff on driver input torque
   // Safety check for HCA_03 Heading Control Assist curvature
   if (addr == MSG_HCA_03) {
     int desired_curvature_raw = (GET_BYTE(to_send, 3U) | (GET_BYTE(to_send, 4U) & 0x7FU << 8));
