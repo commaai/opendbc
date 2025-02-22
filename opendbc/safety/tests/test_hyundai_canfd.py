@@ -124,12 +124,10 @@ class TestHyundaiCanfdHDA1(TestHyundaiCanfdHDA1Base):
 
 
 @parameterized_class([
-  # Radar SCC, test with long flag to ensure flag is not respected until it is supported
-  {"GAS_MSG": ("ACCELERATOR_BRAKE_ALT", "ACCELERATOR_PEDAL_PRESSED"), "SCC_BUS": 0, "SAFETY_PARAM": HyundaiSafetyFlags.LONG},
-  {"GAS_MSG": ("ACCELERATOR", "ACCELERATOR_PEDAL"), "SCC_BUS": 0, "SAFETY_PARAM": HyundaiSafetyFlags.EV_GAS |
-                                                                                  HyundaiSafetyFlags.LONG},
-  {"GAS_MSG": ("ACCELERATOR_ALT", "ACCELERATOR_PEDAL"), "SCC_BUS": 0, "SAFETY_PARAM": HyundaiSafetyFlags.HYBRID_GAS |
-                                                                                      HyundaiSafetyFlags.LONG},
+  # Radar SCC
+  {"GAS_MSG": ("ACCELERATOR_BRAKE_ALT", "ACCELERATOR_PEDAL_PRESSED"), "SCC_BUS": 0, "SAFETY_PARAM": 0},
+  {"GAS_MSG": ("ACCELERATOR", "ACCELERATOR_PEDAL"), "SCC_BUS": 0, "SAFETY_PARAM": HyundaiSafetyFlags.EV_GAS},
+  {"GAS_MSG": ("ACCELERATOR_ALT", "ACCELERATOR_PEDAL"), "SCC_BUS": 0, "SAFETY_PARAM": HyundaiSafetyFlags.HYBRID_GAS},
   # Camera SCC
   {"GAS_MSG": ("ACCELERATOR_BRAKE_ALT", "ACCELERATOR_PEDAL_PRESSED"), "SCC_BUS": 2, "SAFETY_PARAM": HyundaiSafetyFlags.CAMERA_SCC},
   {"GAS_MSG": ("ACCELERATOR", "ACCELERATOR_PEDAL"), "SCC_BUS": 2, "SAFETY_PARAM": HyundaiSafetyFlags.EV_GAS |
@@ -273,12 +271,10 @@ class TestHyundaiCanfdHDA1Long(HyundaiLongitudinalBase, TestHyundaiCanfdHDA1Base
     return self.packer.make_can_msg_panda("SCC_CONTROL", 0, values)
 
   def test_tester_present_allowed(self):
-    if self.SAFETY_PARAM & HyundaiSafetyFlags.CAMERA_SCC:
-      pass
+    super().test_tester_present_allowed()
 
   def test_disabled_ecu_alive(self):
-    if self.SAFETY_PARAM & HyundaiSafetyFlags.CAMERA_SCC:
-      pass
+    super().test_disabled_ecu_alive()
 
 
 if __name__ == "__main__":
