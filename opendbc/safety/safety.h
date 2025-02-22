@@ -248,16 +248,7 @@ bool safety_tx_hook(CANPacket_t *to_send) {
 }
 
 int safety_fwd_hook(int bus_num, int addr) {
-  bool blocked = false;
-  for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
-    const CanMsg *m = &current_safety_config.tx_msgs[i];
-    if ((bus_num == 2) && (m->addr == addr) && m->block_from_cam) {
-      blocked = true;
-      break;
-    }
-  }
-
-  return ((relay_malfunction || blocked) ? -1 : current_hooks->fwd(bus_num, addr));
+  return (relay_malfunction ? -1 : current_hooks->fwd(bus_num, addr));
 }
 
 bool get_longitudinal_allowed(void) {
