@@ -109,15 +109,12 @@ static safety_config volkswagen_meb_init(uint16_t param) {
     {.msg = {{MSG_EML_06, 0, 64, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
   };
 
-  UNUSED(param);
-
   volkswagen_set_button_prev = false;
   volkswagen_resume_button_prev = false;
   volkswagen_steer_power_prev = 0;
 
-#ifdef ALLOW_DEBUG
   volkswagen_longitudinal = GET_FLAG(param, FLAG_VOLKSWAGEN_LONG_CONTROL);
-#endif
+
   gen_crc_lookup_table_8(0x2F, volkswagen_crc8_lut_8h2f);
   return volkswagen_longitudinal ? BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_LONG_TX_MSGS) : \
                                    BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_STOCK_TX_MSGS);
