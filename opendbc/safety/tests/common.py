@@ -773,7 +773,7 @@ class PandaSafetyTest(PandaSafetyTestBase):
               continue
 
             # overlapping TX addrs, but they're not actuating messages for either car
-            if attr == 'TestHyundaiCanfdHDA2LongEV' and current_test.startswith('TestToyota'):
+            if attr == 'TestHyundaiCanfdLKASteeringLongEV' and current_test.startswith('TestToyota'):
               tx = list(filter(lambda m: m[0] not in [0x160, ], tx))
 
             # Volkswagen MQB longitudinal actuating message overlaps with the Subaru lateral actuating message
