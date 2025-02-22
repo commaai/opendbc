@@ -795,10 +795,10 @@ BO_ 437 CCNC_0x1B5: 32 CCNC
  SG_ LEAD_3 : 211|1@0+ (1,0) [0|1] "" XXX
  SG_ LEAD_DISTANCE : 213|11@1+ (0.1,0) [0|204.7] "m" XXX
 
-CM_ 272 "Alternative LKAS message, used on cars such as 2023 Ioniq 6, 2nd gen Kona. Matches LKAS except size is 32 bytes";
-CM_ 676 "Contains signals with detailed lane line information. Used by ADAS ECU on HDA 2 vehicles to operate LFA.";
-CM_ 866 "Contains signals with detailed lane line information. Used by ADAS ECU on HDA 2 vehicles to operate LFA. Used on cars that use message 272.";
-CM_ 1043 "Lamp signals do not seem universal on cars that use LKAS_ALT, but stalk signals do.";
+CM_ BO_ 272 "Alternative LKAS message, used on cars such as 2023 Ioniq 6, 2nd gen Kona. Matches LKAS except size is 32 bytes";
+CM_ BO_ 676 "Contains signals with detailed lane line information. Used by ADAS ECU on HDA 2 vehicles to operate LFA.";
+CM_ BO_ 866 "Contains signals with detailed lane line information. Used by ADAS ECU on HDA 2 vehicles to operate LFA. Used on cars that use message 272.";
+CM_ BO_ 1043 "Lamp signals do not seem universal on cars that use LKAS_ALT, but stalk signals do.";
 
 CM_ SG_ 80 HAS_LANE_SAFETY "If 0, hides LKAS 'Lane Safety' menu from vehicle settings";
 CM_ SG_ 96 BRAKE_PRESSURE "User applied brake pedal pressure. Ramps from computer applied pressure on falling edge of cruise. Cruise cancels if !=0";
