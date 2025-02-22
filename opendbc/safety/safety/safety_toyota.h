@@ -4,15 +4,15 @@
 
 // Stock longitudinal
 #define TOYOTA_BASE_TX_MSGS \
-  {0x191, 0, 8, true}, {0x412, 0, 8, true}, {0x343, 0, 8}, {0x1D2, 0, 8},  /* LKAS + LTA + ACC & PCM cancel cmds */  \
+  {0x191, 0, 8}, {0x412, 0, 8}, {0x343, 0, 8}, {0x1D2, 0, 8},  /* LKAS + LTA + ACC & PCM cancel cmds */  \
 
 #define TOYOTA_COMMON_TX_MSGS \
   TOYOTA_BASE_TX_MSGS \
-  {0x2E4, 0, 5, true}, \
+  {0x2E4, 0, 5}, \
 
 #define TOYOTA_COMMON_SECOC_TX_MSGS \
   TOYOTA_BASE_TX_MSGS \
-  {0x2E4, 0, 8, true}, {0x131, 0, 8, true}, \
+  {0x2E4, 0, 8}, {0x131, 0, 8}, \
 
 #define TOYOTA_COMMON_LONG_TX_MSGS                                                                                                          \
   TOYOTA_COMMON_TX_MSGS                                                                                                                     \
@@ -386,8 +386,14 @@ static int toyota_fwd_hook(int bus_num, int addr) {
   }
 
   if (bus_num == 2) {
+    // block stock lkas messages and stock acc messages (if OP is doing ACC)
+    // in TSS2, 0x191 is LTA which we need to block to avoid controls collision
+    bool is_lkas_msg = ((addr == 0x2E4) || (addr == 0x412) || (addr == 0x191));
+    // on SecOC cars 0x131 is also LTA
+    is_lkas_msg |= toyota_secoc && (addr == 0x131);
     // in TSS2 the camera does ACC as well, so filter 0x343
-    bool block_msg = ((addr == 0x343) && !toyota_stock_longitudinal);
+    bool is_acc_msg = (addr == 0x343);
+    bool block_msg = is_lkas_msg || (is_acc_msg && !toyota_stock_longitudinal);
     if (!block_msg) {
       bus_fwd = 0;
     }

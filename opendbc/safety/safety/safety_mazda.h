@@ -92,14 +92,15 @@ static bool mazda_tx_hook(const CANPacket_t *to_send) {
 }
 
 static int mazda_fwd_hook(int bus, int addr) {
-  UNUSED(addr);
-
   int bus_fwd = -1;
 
   if (bus == MAZDA_MAIN) {
     bus_fwd = MAZDA_CAM;
   } else if (bus == MAZDA_CAM) {
-    bus_fwd = MAZDA_MAIN;
+    bool block = (addr == MAZDA_LKAS) || (addr == MAZDA_LKAS_HUD);
+    if (!block) {
+      bus_fwd = MAZDA_MAIN;
+    }
   } else {
     // don't fwd
   }
@@ -108,7 +109,7 @@ static int mazda_fwd_hook(int bus, int addr) {
 }
 
 static safety_config mazda_init(uint16_t param) {
-  static const CanMsg MAZDA_TX_MSGS[] = {{MAZDA_LKAS, 0, 8, true}, {MAZDA_CRZ_BTNS, 0, 8}, {MAZDA_LKAS_HUD, 0, 8, true}};
+  static const CanMsg MAZDA_TX_MSGS[] = {{MAZDA_LKAS, 0, 8}, {MAZDA_CRZ_BTNS, 0, 8}, {MAZDA_LKAS_HUD, 0, 8}};
 
   static RxCheck mazda_rx_checks[] = {
     {.msg = {{MAZDA_CRZ_CTRL,     0, 8, .frequency = 50U}, { 0 }, { 0 }}},
