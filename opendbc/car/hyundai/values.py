@@ -55,15 +55,20 @@ class HyundaiSafetyFlags(IntFlag):
   HYBRID_GAS = 2
   LONG = 4
   CAMERA_SCC = 8
-  CANFD_HDA2 = 16
+  CANFD_LKA_STEERING = 16
   CANFD_ALT_BUTTONS = 32
   ALT_LIMITS = 64
-  CANFD_HDA2_ALT_STEERING = 128
+  CANFD_LKA_STEERING_ALT = 128
 
 
 class HyundaiFlags(IntFlag):
   # Dynamic Flags
-  CANFD_HDA2 = 1
+
+  # Default assumption: all cars use LFA (ADAS) steering from the camera.
+  # CANFD_LKA_STEERING/CANFD_LKA_STEERING_ALT cars typically have both LKA (camera) and LFA (ADAS) steering messages,
+  # with LKA commands forwarded to the ADAS DRV ECU.
+  # Most HDA2 trims are assumed to be equipped with the ADAS DRV ECU, though some variants may not be equipped with one.
+  CANFD_LKA_STEERING = 1
   CANFD_ALT_BUTTONS = 2
   CANFD_ALT_GEARS = 2 ** 2
   CANFD_CAMERA_SCC = 2 ** 3
@@ -73,7 +78,7 @@ class HyundaiFlags(IntFlag):
   CANFD_ALT_GEARS_2 = 2 ** 6
   SEND_LFA = 2 ** 7
   USE_FCA = 2 ** 8
-  CANFD_HDA2_ALT_STEERING = 2 ** 9
+  CANFD_LKA_STEERING_ALT = 2 ** 9
 
   # these cars use a different gas signal
   HYBRID = 2 ** 10
@@ -703,7 +708,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
     ),
 
     # CAN & CAN FD query to understand the three digit date code
-    # HDA2 cars usually use 6 digit date codes, so skip bus 1
+    # LKA steering cars usually use 6 digit date codes, so skip bus 1
     Request(
       [HYUNDAI_ECU_MANUFACTURING_DATE],
       [HYUNDAI_VERSION_RESPONSE],
@@ -737,7 +742,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
               CAR.KIA_CEED, CAR.KIA_SELTOS],
   },
   extra_ecus=[
-    (Ecu.adas, 0x730, None),              # ADAS Driving ECU on HDA2 platforms
+    (Ecu.adas, 0x730, None),              # ADAS Driving ECU on platforms with LKA steering
     (Ecu.parkingAdas, 0x7b1, None),       # ADAS Parking ECU (may exist on all platforms)
     (Ecu.hvac, 0x7b3, None),              # HVAC Control Assembly
     (Ecu.cornerRadar, 0x7b7, None),
