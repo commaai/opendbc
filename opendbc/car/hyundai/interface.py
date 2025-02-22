@@ -64,6 +64,9 @@ class CarInterface(CarInterfaceBase):
         ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CANFD_ALT_BUTTONS.value
       if ret.flags & HyundaiFlags.CANFD_CAMERA_SCC:
         ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CAMERA_SCC.value
+      if ret.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
+        ret.steerControlType = structs.CarParams.SteerControlType.angle
+        ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CANFD_ANGLE_STEERING.value
 
     else:
       # Shared configuration for non CAN-FD cars
@@ -98,7 +101,7 @@ class CarInterface(CarInterfaceBase):
     ret.steerLimitTimer = 0.4
 
     if ret.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
-      ret.steerControlType = structs.CarParams.SteerControlType.angle
+      pass
     else:
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
