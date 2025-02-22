@@ -201,7 +201,8 @@ class VolkswagenMEBPlatformConfig(PlatformConfig):
   wmis: set[WMI] = field(default_factory=set)
 
   def init(self):
-    self.flags |= VolkswagenFlags.MEB | VolkswagenFlags.STOCK_HCA_PRESENT
+    # TODO: add VolkswagenFlags.STOCK_HCA_PRESENT for EA mitigation once we have a torque substitute to send
+    self.flags |= VolkswagenFlags.MEB
 
 
 @dataclass
