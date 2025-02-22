@@ -91,10 +91,10 @@ static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *to_push) {
 static safety_config volkswagen_meb_init(uint16_t param) {
   // Transmit of GRA_ACC_01 is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
   static const CanMsg VOLKSWAGEN_MEB_STOCK_TX_MSGS[] = {{MSG_HCA_03, 0, 24}, {MSG_GRA_ACC_01, 0, 8},
-                                                       {MSG_GRA_ACC_01, 2, 8}, {MSG_LDW_02, 0, 8}, {MSG_LH_EPS_03, 2, 8}};
+                                                       {MSG_GRA_ACC_01, 2, 8}, {MSG_LDW_02, 0, 8}};
 
   static const CanMsg VOLKSWAGEN_MEB_LONG_TX_MSGS[] = {{MSG_MEB_ACC_01, 0, 48}, {MSG_ACC_18, 0, 32}, {MSG_HCA_03, 0, 24},
-                                                       {MSG_LDW_02, 0, 8}, {MSG_LH_EPS_03, 2, 8}, {MSG_TA_01, 0, 8}};
+                                                       {MSG_LDW_02, 0, 8}, {MSG_TA_01, 0, 8}};
 
   static RxCheck volkswagen_meb_rx_checks[] = {
     {.msg = {{MSG_LH_EPS_03, 0, 8, .check_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
@@ -321,13 +321,7 @@ static int volkswagen_meb_fwd_hook(int bus_num, int addr) {
 
   switch (bus_num) {
     case 0:
-      if (addr == MSG_LH_EPS_03) {
-        // openpilot needs to replace apparent driver steering input torque to pacify VW Emergency Assist
-        bus_fwd = -1;
-      } else {
-        // Forward all remaining traffic from Extended CAN onward
-        bus_fwd = 2;
-      }
+      bus_fwd = 2;
       break;
     case 2:
       if ((addr == MSG_HCA_03) || (addr == MSG_LDW_02)) {
