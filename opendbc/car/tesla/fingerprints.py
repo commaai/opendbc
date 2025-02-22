@@ -17,6 +17,7 @@ FW_VERSIONS = {
   CAR.TESLA_MODEL_Y: {
     (Ecu.eps, 0x730, None): [
       b'TeM3_E014p10_0.0.0 (16),Y002.18.00',
+      b'TeM3_E014p10_0.0.0 (16),YP002.18.00',
       b'TeM3_ES014p11_0.0.0 (16),YS002.17',
       b'TeM3_ES014p11_0.0.0 (25),YS002.19.0',
       b'TeMYG4_DCS_Update_0.0.0 (13),Y4002.27.1',

@@ -8,6 +8,7 @@ from opendbc.car.hyundai.values import CAR as HYUNDAI
 from opendbc.car.nissan.values import CAR as NISSAN
 from opendbc.car.mazda.values import CAR as MAZDA
 from opendbc.car.mock.values import CAR as MOCK
+from opendbc.car.rivian.values import CAR as RIVIAN
 from opendbc.car.subaru.values import CAR as SUBARU
 from opendbc.car.tesla.values import CAR as TESLA
 from opendbc.car.toyota.values import CAR as TOYOTA
@@ -28,6 +29,7 @@ non_tested_cars = [
   SUBARU.SUBARU_FORESTER_HYBRID,
   TESLA.TESLA_MODEL_3,
   TESLA.TESLA_MODEL_Y,
+  RIVIAN.RIVIAN_R1_GEN1,
 ]
 
 
@@ -76,6 +78,7 @@ routes = [
   CarTestRoute("162796f1469f2f1b/00000005--6f334eda14", GM.CADILLAC_XT4),
   CarTestRoute("477dd485611d1e6e/00000009--85fc06e10a", GM.CHEVROLET_VOLT_2019),
   CarTestRoute("a40976dc9f28ba62/0000001f--160e210119", GM.CHEVROLET_TRAVERSE),
+  CarTestRoute("36c62b5da6f08154/00000052--983c17c5b2", GM.GMC_YUKON),
 
   CarTestRoute("0e7a2ba168465df5|2020-10-18--14-14-22", HONDA.ACURA_RDX_3G),
   CarTestRoute("a74b011b32b51b56|2020-07-26--17-09-36", HONDA.HONDA_CIVIC),

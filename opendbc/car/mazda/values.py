@@ -71,7 +71,7 @@ class CAR(Platforms):
     MAZDA_CX9.specs
   )
   MAZDA_CX5_2022 = MazdaPlatformConfig(
-    [MazdaCarDocs("Mazda CX-5 2022-24")],
+    [MazdaCarDocs("Mazda CX-5 2022-25")],
     MAZDA_CX5.specs,
   )
 

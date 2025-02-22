@@ -1,5 +1,5 @@
+import numpy as np
 from opendbc.car import CanBusBase
-from opendbc.car.common.numpy_fast import clip
 from opendbc.car.hyundai.values import HyundaiFlags
 
 
@@ -127,7 +127,7 @@ def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_ov
     a_val, a_raw = 0, 0
   else:
     a_raw = accel
-    a_val = clip(accel, accel_last - jn, accel_last + jn)
+    a_val = np.clip(accel, accel_last - jn, accel_last + jn)
 
   values = {
     "ACCMode": 0 if not enabled else (2 if gas_override else 1),
