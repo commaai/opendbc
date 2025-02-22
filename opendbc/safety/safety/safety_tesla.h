@@ -4,6 +4,7 @@
 
 static bool tesla_longitudinal = false;
 static bool tesla_stock_aeb = false;
+static bool tesla_summon = false;
 
 static void tesla_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
