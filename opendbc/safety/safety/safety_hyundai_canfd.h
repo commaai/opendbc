@@ -21,6 +21,7 @@
 
 static bool hyundai_canfd_alt_buttons = false;
 static bool hyundai_canfd_lka_steering_alt = false;
+static bool hyundai_canfd_angle_steering = false;
 
 static int hyundai_canfd_get_lka_addr(void) {
   return hyundai_canfd_lka_steering_alt ? 0x110 : 0x50;
@@ -133,6 +134,16 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
     .max_invalid_request_frames = 2,
     .min_valid_request_rt_interval = 810000,  // 810ms; a ~10% buffer on cutting every 90 frames
     .has_steer_req_tolerance = true,
+
+    .angle_deg_to_can = 10,
+    .angle_rate_up_lookup = {
+      {0., 5., 25.},
+      {2.5, 1.5, 0.2}
+    },
+    .angle_rate_down_lookup = {
+      {0., 5., 25.},
+      {5., 2.0, 0.3}
+    },
   };
 
   bool tx = true;
@@ -144,8 +155,20 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
     int desired_torque = (((GET_BYTE(to_send, 6) & 0xFU) << 7U) | (GET_BYTE(to_send, 5) >> 1U)) - 1024U;
     bool steer_req = GET_BIT(to_send, 52U);
 
-    if (steer_torque_cmd_checks(desired_torque, steer_req, HYUNDAI_CANFD_STEERING_LIMITS)) {
-      tx = false;
+    if (hyundai_canfd_angle_steering) {
+      int angle_steer_req = GET_BYTE(to_send, 9) & 0x30U;
+      int desired_angle = (((GET_BYTE(to_send, 10) & 0x3FU) << 8) | GET_BYTE(to_send, 11));
+      desired_angle = to_signed(desired_angle, 14);
+
+      bool angle_steer_control_enabled = angle_steer_req != 2U;
+
+      if (steer_angle_cmd_checks(desired_angle, angle_steer_control_enabled, HYUNDAI_CANFD_STEERING_LIMITS)) {
+        tx = false;
+      }
+    } else {
+      if (steer_torque_cmd_checks(desired_torque, steer_req, HYUNDAI_CANFD_STEERING_LIMITS)) {
+        tx = false;
+      }
     }
   }
 
@@ -223,6 +246,7 @@ static int hyundai_canfd_fwd_hook(int bus_num, int addr) {
 static safety_config hyundai_canfd_init(uint16_t param) {
   const int HYUNDAI_PARAM_CANFD_LKA_STEERING_ALT = 128;
   const int HYUNDAI_PARAM_CANFD_ALT_BUTTONS = 32;
+  const int HYUNDAI_PARAM_CANFD_ANGLE_STEERING = 256;
 
   static const CanMsg HYUNDAI_CANFD_LKA_STEERING_TX_MSGS[] = {
     {0x50, 0, 16},  // LKAS
@@ -265,6 +289,7 @@ static safety_config hyundai_canfd_init(uint16_t param) {
   gen_crc_lookup_table_16(0x1021, hyundai_canfd_crc_lut);
   hyundai_canfd_alt_buttons = GET_FLAG(param, HYUNDAI_PARAM_CANFD_ALT_BUTTONS);
   hyundai_canfd_lka_steering_alt = GET_FLAG(param, HYUNDAI_PARAM_CANFD_LKA_STEERING_ALT);
+  hyundai_canfd_angle_steering = GET_FLAG(param, HYUNDAI_PARAM_CANFD_ANGLE_STEERING);
 
   // no long for radar-SCC with LFA steering yet
   if (!hyundai_canfd_lka_steering && !hyundai_camera_scc) {
