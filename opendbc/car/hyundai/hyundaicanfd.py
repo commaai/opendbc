@@ -4,17 +4,17 @@ from opendbc.car.hyundai.values import HyundaiFlags
 
 
 class CanBus(CanBusBase):
-  def __init__(self, CP, fingerprint=None, hda2=None) -> None:
+  def __init__(self, CP, fingerprint=None, lka_steering=None) -> None:
     super().__init__(CP, fingerprint)
 
-    if hda2 is None:
-      hda2 = CP.flags & HyundaiFlags.CANFD_HDA2.value if CP is not None else False
+    if lka_steering is None:
+      lka_steering = CP.flags & HyundaiFlags.CANFD_LKA_STEERING.value if CP is not None else False
 
-    # On the CAN-FD platforms, the LKAS camera is on both A-CAN and E-CAN. HDA2 cars
-    # have a different harness than the HDA1 and non-HDA variants in order to split
+    # On the CAN-FD platforms, the LKAS camera is on both A-CAN and E-CAN. LKA steering cars
+    # have a different harness than the LFA steering variants in order to split
     # a different bus, since the steering is done by different ECUs.
     self._a, self._e = 1, 0
-    if hda2:
+    if lka_steering:
       self._a, self._e = 0, 1
 
     self._a += self.offset
@@ -50,22 +50,22 @@ def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_steer):
     "NEW_SIGNAL_2": 0,
   }
 
-  if CP.flags & HyundaiFlags.CANFD_HDA2:
-    hda2_lkas_msg = "LKAS_ALT" if CP.flags & HyundaiFlags.CANFD_HDA2_ALT_STEERING else "LKAS"
+  if CP.flags & HyundaiFlags.CANFD_LKA_STEERING:
+    lkas_msg = "LKAS_ALT" if CP.flags & HyundaiFlags.CANFD_LKA_STEERING_ALT else "LKAS"
     if CP.openpilotLongitudinalControl:
       ret.append(packer.make_can_msg("LFA", CAN.ECAN, values))
-    ret.append(packer.make_can_msg(hda2_lkas_msg, CAN.ACAN, values))
+    ret.append(packer.make_can_msg(lkas_msg, CAN.ACAN, values))
   else:
     ret.append(packer.make_can_msg("LFA", CAN.ECAN, values))
 
   return ret
 
-def create_suppress_lfa(packer, CAN, hda2_lfa_block_msg, hda2_alt_steering):
-  suppress_msg = "CAM_0x362" if hda2_alt_steering else "CAM_0x2a4"
-  msg_bytes = 32 if hda2_alt_steering else 24
+def create_suppress_lfa(packer, CAN, lfa_block_msg, lka_steering_alt):
+  suppress_msg = "CAM_0x362" if lka_steering_alt else "CAM_0x2a4"
+  msg_bytes = 32 if lka_steering_alt else 24
 
-  values = {f"BYTE{i}": hda2_lfa_block_msg[f"BYTE{i}"] for i in range(3, msg_bytes) if i != 7}
-  values["COUNTER"] = hda2_lfa_block_msg["COUNTER"]
+  values = {f"BYTE{i}": lfa_block_msg[f"BYTE{i}"] for i in range(3, msg_bytes) if i != 7}
+  values["COUNTER"] = lfa_block_msg["COUNTER"]
   values["SET_ME_0"] = 0
   values["SET_ME_0_2"] = 0
   values["LEFT_LANE_LINE"] = 0
@@ -79,7 +79,7 @@ def create_buttons(packer, CP, CAN, cnt, btn):
     "CRUISE_BUTTONS": btn,
   }
 
-  bus = CAN.ECAN if CP.flags & HyundaiFlags.CANFD_HDA2 else CAN.CAM
+  bus = CAN.ECAN if CP.flags & HyundaiFlags.CANFD_LKA_STEERING else CAN.CAM
   return packer.make_can_msg("CRUISE_BUTTONS", bus, values)
 
 def create_acc_cancel(packer, CP, CAN, cruise_info_copy):
