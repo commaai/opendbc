@@ -153,11 +153,11 @@ static bool subaru_tx_hook(const CANPacket_t *to_send) {
   const SteeringLimits SUBARU_ANGLE_STEERING_LIMITS = {
     .angle_deg_to_can = 100.,
     .angle_rate_up_lookup = {
-      {0., 15., 15.},
-      {5.,  .8,  .8}
+      {0., 5., 15.},
+      {5.,  .8,  .15}
     },
     .angle_rate_down_lookup = {
-      {0., 15., 15.},
+      {0., 5., 15.},
       {5.,  .4,  .4}
     },
   };
