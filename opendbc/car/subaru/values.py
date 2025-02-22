@@ -57,6 +57,7 @@ class SubaruSafetyFlags(IntFlag):
   GEN2 = 1
   LONG = 2
   PREGLOBAL_REVERSED_DRIVER_TORQUE = 4
+  ANGLE = 8
 
 
 class SubaruFlags(IntFlag):
