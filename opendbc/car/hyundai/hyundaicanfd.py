@@ -1,15 +1,14 @@
+import numpy as np
 from opendbc.car import CanBusBase
-from opendbc.car.common.numpy_fast import clip
 from opendbc.car.hyundai.values import HyundaiFlags
 
 
 class CanBus(CanBusBase):
-  def __init__(self, CP, hda2=None, fingerprint=None) -> None:
+  def __init__(self, CP, fingerprint=None, hda2=None) -> None:
     super().__init__(CP, fingerprint)
 
     if hda2 is None:
-      assert CP is not None
-      hda2 = CP.flags & HyundaiFlags.CANFD_HDA2.value
+      hda2 = CP.flags & HyundaiFlags.CANFD_HDA2.value if CP is not None else False
 
     # On the CAN-FD platforms, the LKAS camera is on both A-CAN and E-CAN. HDA2 cars
     # have a different harness than the HDA1 and non-HDA variants in order to split
@@ -128,7 +127,7 @@ def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_ov
     a_val, a_raw = 0, 0
   else:
     a_raw = accel
-    a_val = clip(accel, accel_last - jn, accel_last + jn)
+    a_val = np.clip(accel, accel_last - jn, accel_last + jn)
 
   values = {
     "ACCMode": 0 if not enabled else (2 if gas_override else 1),

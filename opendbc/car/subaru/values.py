@@ -1,8 +1,7 @@
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
-from panda import uds
-from opendbc.car import CarSpecs, DbcDict, PlatformConfig, Platforms, dbc_dict
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Tool, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
@@ -52,6 +51,12 @@ class CarControllerParams:
 
   BRAKE_LOOKUP_BP = [-3.5, 0]
   BRAKE_LOOKUP_V = [BRAKE_MAX, BRAKE_MIN]
+
+
+class SubaruSafetyFlags(IntFlag):
+  GEN2 = 1
+  LONG = 2
+  PREGLOBAL_REVERSED_DRIVER_TORQUE = 4
 
 
 class SubaruFlags(IntFlag):
@@ -104,11 +109,11 @@ class SubaruCarDocs(CarDocs):
 
 @dataclass
 class SubaruPlatformConfig(PlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: dbc_dict('subaru_global_2017_generated', None))
+  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'subaru_global_2017_generated'})
 
   def init(self):
     if self.flags & SubaruFlags.HYBRID:
-      self.dbc_dict = dbc_dict('subaru_global_2020_hybrid_generated', None)
+      self.dbc_dict = {Bus.pt: 'subaru_global_2020_hybrid_generated'}
 
 
 @dataclass
@@ -171,25 +176,25 @@ class CAR(Platforms):
   SUBARU_FORESTER_PREGLOBAL = SubaruPlatformConfig(
     [SubaruCarDocs("Subaru Forester 2017-18")],
     CarSpecs(mass=1568, wheelbase=2.67, steerRatio=20),
-    dbc_dict('subaru_forester_2017_generated', None),
+    {Bus.pt: 'subaru_forester_2017_generated'},
     flags=SubaruFlags.PREGLOBAL,
   )
   SUBARU_LEGACY_PREGLOBAL = SubaruPlatformConfig(
     [SubaruCarDocs("Subaru Legacy 2015-18")],
     CarSpecs(mass=1568, wheelbase=2.67, steerRatio=12.5),
-    dbc_dict('subaru_outback_2015_generated', None),
+    {Bus.pt: 'subaru_outback_2015_generated'},
     flags=SubaruFlags.PREGLOBAL,
   )
   SUBARU_OUTBACK_PREGLOBAL = SubaruPlatformConfig(
     [SubaruCarDocs("Subaru Outback 2015-17")],
     SUBARU_FORESTER_PREGLOBAL.specs,
-    dbc_dict('subaru_outback_2015_generated', None),
+    {Bus.pt: 'subaru_outback_2015_generated'},
     flags=SubaruFlags.PREGLOBAL,
   )
   SUBARU_OUTBACK_PREGLOBAL_2018 = SubaruPlatformConfig(
     [SubaruCarDocs("Subaru Outback 2018-19")],
     SUBARU_FORESTER_PREGLOBAL.specs,
-    dbc_dict('subaru_outback_2019_generated', None),
+    {Bus.pt: 'subaru_outback_2019_generated'},
     flags=SubaruFlags.PREGLOBAL,
   )
   # Angle LKAS

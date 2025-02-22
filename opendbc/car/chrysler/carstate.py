@@ -1,6 +1,6 @@
 from opendbc.can.parser import CANParser
 from opendbc.can.can_define import CANDefine
-from opendbc.car import create_button_events, structs
+from opendbc.car import Bus, create_button_events, structs
 from opendbc.car.chrysler.values import DBC, STEER_THRESHOLD, RAM_CARS
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
@@ -12,7 +12,7 @@ class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
     self.CP = CP
-    can_define = CANDefine(DBC[CP.carFingerprint]["pt"])
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
 
     self.auto_high_beam = 0
     self.button_counter = 0
@@ -26,7 +26,9 @@ class CarState(CarStateBase):
     self.distance_button = 0
     self.lkas_button = 0
 
-  def update(self, cp, cp_cam, *_) -> structs.CarState:
+  def update(self, can_parsers) -> structs.CarState:
+    cp = can_parsers[Bus.pt]
+    cp_cam = can_parsers[Bus.cam]
 
     ret = structs.CarState()
 
@@ -122,8 +124,8 @@ class CarState(CarStateBase):
     return messages
 
   @staticmethod
-  def get_can_parser(CP):
-    messages = [
+  def get_can_parsers(CP):
+    pt_messages = [
       # sig_address, frequency
       ("ESP_1", 50),
       ("EPS_2", 100),
@@ -137,10 +139,10 @@ class CarState(CarStateBase):
     ]
 
     if CP.enableBsm:
-      messages.append(("BSM_1", 2))
+      pt_messages.append(("BSM_1", 2))
 
     if CP.carFingerprint in RAM_CARS:
-      messages += [
+      pt_messages += [
         ("ESP_8", 50),
         ("EPS_3", 50),
         ("Transmission_Status", 50),
@@ -148,22 +150,21 @@ class CarState(CarStateBase):
         ("Center_Stack_2", 1),
       ]
     else:
-      messages += [
+      pt_messages += [
         ("GEAR", 50),
         ("SPEED_1", 100),
         ("TRACTION_BUTTON", 1),
       ]
-      messages += CarState.get_cruise_messages()
+      pt_messages += CarState.get_cruise_messages()
 
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, 0)
-
-  @staticmethod
-  def get_cam_can_parser(CP):
-    messages = [
+    cam_messages = [
       ("DAS_6", 4),
     ]
 
     if CP.carFingerprint in RAM_CARS:
-      messages += CarState.get_cruise_messages()
+      cam_messages += CarState.get_cruise_messages()
 
-    return CANParser(DBC[CP.carFingerprint]["pt"], messages, 2)
+    return {
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 0),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, 2),
+    }
