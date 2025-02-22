@@ -24,16 +24,24 @@ class TeslaCAN:
     values["DAS_steeringControlChecksum"] = self.checksum(0x488, data[:3])
     return self.packer.make_can_msg("DAS_steeringControl", CANBUS.party, values)
 
-  def create_longitudinal_command(self, acc_state, accel, cntr, active):
+  def create_longitudinal_command(self, v_ego, acc_state, accel, cntr, active):
+    set_speed = 0
+    if enabled:
+      # TODO: does this just tell the ECU which accel limit to use?
+      set_speed = v_ego + 1 if accel > 0 else v_ego - 1
+
     values = {
       # TODO: this causes jerking after gas override when above set speed
-      "DAS_setSpeed": 0 if (accel < 0 or not active) else V_CRUISE_MAX,
+      #"DAS_setSpeed": 0 if (accel < 0 or not enabled) else V_CRUISE_MAX,
+      "DAS_setSpeed": set_speed,
       "DAS_accState": acc_state,
       "DAS_aebEvent": 0,
       "DAS_jerkMin": CarControllerParams.JERK_LIMIT_MIN,
       "DAS_jerkMax": CarControllerParams.JERK_LIMIT_MAX,
-      "DAS_accelMin": accel,
-      "DAS_accelMax": max(accel, 0),
+      #"DAS_accelMin": accel,
+      #"DAS_accelMax": max(accel, 0),
+      "DAS_accelMax": accel if accel >= 0 else 1.0,  # TODO FSD sets to ~1-2 m/s^2 when not using, wonder why
+      "DAS_accelMin": accel if accel <= 0 else -1.0,
       "DAS_controlCounter": cntr,
       "DAS_controlChecksum": 0,
     }
