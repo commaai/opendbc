@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import unittest
-import numpy as np
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
