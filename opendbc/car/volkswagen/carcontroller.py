@@ -23,6 +23,7 @@ class CarController(CarControllerBase):
       self.CCS = mqbcan
     self.packer_pt = CANPacker(dbc_names[Bus.pt])
     self.ext_bus = CANBUS.pt if CP.networkLocation == structs.CarParams.NetworkLocation.fwdCamera else CANBUS.cam
+    self.aeb_available = not CP.flags & VolkswagenFlags.PQ
 
     self.apply_steer_last = 0
     self.apply_curvature_last = 0
@@ -145,40 +146,47 @@ class CarController(CarControllerBase):
 
     # **** Acceleration Controls ******************************************** #
 
-    if self.frame % self.CCP.ACC_CONTROL_STEP == 0 and self.CP.openpilotLongitudinalControl:
-      stopping = actuators.longControlState == LongCtrlState.stopping
-      starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
+    if self.CP.openpilotLongitudinalControl:
+      if self.frame % self.CCP.ACC_CONTROL_STEP == 0:
+        stopping = actuators.longControlState == LongCtrlState.stopping
+        starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
 
-      if self.CP.flags & VolkswagenFlags.MEB:
-        # Logic to prevent car error with EPB:
-        #   * send a few frames of HMS RAMP RELEASE command at the very begin of long overrideand and at the end of active long control
-        accel = np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.enabled else 0
-        self.accel_last = accel
+        if self.CP.flags & VolkswagenFlags.MEB:
+          # Logic to prevent car error with EPB:
+          #   * send a few frames of HMS RAMP RELEASE command at the very begin of long overrideand and at the end of active long control
+          accel = np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.enabled else 0
+          self.accel_last = accel
 
-        # 1 frame of long_override_begin is enough, but lower the possibility of panda safety blocking it for now until we adapt panda safety correctly
-        long_override = CC.cruiseControl.override or CS.out.gasPressed
-        self.long_override_counter = min(self.long_override_counter + 1, 5) if long_override else 0
-        long_override_begin = long_override and self.long_override_counter < 5
+          # 1 frame of long_override_begin is enough, but lower the possibility of panda safety blocking it for now until we adapt panda safety correctly
+          long_override = CC.cruiseControl.override or CS.out.gasPressed
+          self.long_override_counter = min(self.long_override_counter + 1, 5) if long_override else 0
+          long_override_begin = long_override and self.long_override_counter < 5
 
-        # 1 frame of long_disabling is enough, but lower the possibility of panda safety blocking it for now until we adapt panda safety correctly
-        self.long_disabled_counter = min(self.long_disabled_counter + 1, 5) if not CC.enabled else 0
-        long_disabling = not CC.enabled and self.long_disabled_counter < 5
+          # 1 frame of long_disabling is enough, but lower the possibility of panda safety blocking it for now until we adapt panda safety correctly
+          self.long_disabled_counter = min(self.long_disabled_counter + 1, 5) if not CC.enabled else 0
+          long_disabling = not CC.enabled and self.long_disabled_counter < 5
 
-        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
-                                                 CS.esp_hold_confirmation, long_override)
-        acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, starting, stopping,
-                                               CS.esp_hold_confirmation, long_override, long_override_begin, long_disabling)
-        can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.enabled,
-                                                           accel, acc_control, acc_hold_type, stopping, starting, CS.esp_hold_confirmation,
-                                                           long_override, CS.travel_assist_available))
+          acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled,
+                                                   CS.esp_hold_confirmation, long_override)
+          acc_hold_type = self.CCS.acc_hold_type(CS.out.cruiseState.available, CS.out.accFaulted, CC.enabled, starting, stopping,
+                                                 CS.esp_hold_confirmation, long_override, long_override_begin, long_disabling)
+          can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.enabled,
+                                                             accel, acc_control, acc_hold_type, stopping, starting, CS.esp_hold_confirmation,
+                                                             long_override, CS.travel_assist_available))
 
-      else:
-        accel = np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0
-        self.accel_last = accel
+        else:
+          accel = np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0
+          self.accel_last = accel
 
-        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
-        can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.longActive, accel,
-                                                           acc_control, stopping, starting, CS.esp_hold_confirmation))
+          acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
+          can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.longActive, accel,
+                                                             acc_control, stopping, starting, CS.esp_hold_confirmation))
+
+        #if self.aeb_available:
+        #  if self.frame % self.CCP.AEB_CONTROL_STEP == 0:
+        #    can_sends.append(self.CCS.create_aeb_control(self.packer_pt, False, False, 0.0))
+        #  if self.frame % self.CCP.AEB_HUD_STEP == 0:
+        #    can_sends.append(self.CCS.create_aeb_hud(self.packer_pt, False, False))
 
     # **** HUD Controls ***************************************************** #
 
