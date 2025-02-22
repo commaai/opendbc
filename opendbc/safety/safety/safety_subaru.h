@@ -93,7 +93,7 @@ static uint32_t subaru_compute_checksum(const CANPacket_t *to_push) {
 
 static void subaru_rx_hook(const CANPacket_t *to_push) {
   const int bus = GET_BUS(to_push);
-  const int alt_main_bus = (subaru_gen2 || subaru_lkas_angle) ? SUBARU_ALT_BUS : SUBARU_MAIN_BUS;
+  const int alt_main_bus = subaru_gen2 ? SUBARU_ALT_BUS : SUBARU_MAIN_BUS;
   const int stock_lkas_msg = subaru_lkas_angle ? MSG_SUBARU_ES_LKAS_ANGLE : MSG_SUBARU_ES_LKAS;
 
   int addr = GET_ADDR(to_push);
@@ -271,6 +271,11 @@ static safety_config subaru_init(uint16_t param) {
     SUBARU_COMMON_TX_MSGS(SUBARU_MAIN_BUS, MSG_SUBARU_ES_LKAS)
   };
 
+  static const CanMsg SUBARU_LKAS_ANGLE_TX_MSGS[] = {
+    SUBARU_COMMON_TX_MSGS(SUBARU_MAIN_BUS, MSG_SUBARU_ES_LKAS_ANGLE)
+    SUBARU_COMMON_TX_MSGS(SUBARU_MAIN_BUS, MSG_SUBARU_ES_LKAS)
+  };
+
   static const CanMsg SUBARU_LONG_TX_MSGS[] = {
     SUBARU_COMMON_TX_MSGS(SUBARU_MAIN_BUS, MSG_SUBARU_ES_LKAS)
     SUBARU_COMMON_LONG_TX_MSGS(SUBARU_MAIN_BUS)
@@ -280,15 +285,15 @@ static safety_config subaru_init(uint16_t param) {
     SUBARU_COMMON_TX_MSGS(SUBARU_ALT_BUS, MSG_SUBARU_ES_LKAS)
   };
 
+  static const CanMsg SUBARU_GEN2_LKAS_ANGLE_TX_MSGS[] = {
+    SUBARU_COMMON_TX_MSGS(SUBARU_ALT_BUS, MSG_SUBARU_ES_LKAS_ANGLE)
+    SUBARU_COMMON_TX_MSGS(SUBARU_ALT_BUS, MSG_SUBARU_ES_LKAS)
+  };
+
   static const CanMsg SUBARU_GEN2_LONG_TX_MSGS[] = {
     SUBARU_COMMON_TX_MSGS(SUBARU_ALT_BUS, MSG_SUBARU_ES_LKAS)
     SUBARU_COMMON_LONG_TX_MSGS(SUBARU_ALT_BUS)
     SUBARU_GEN2_LONG_ADDITIONAL_TX_MSGS()
-  };
-
-  static const CanMsg SUBARU_LKAS_ANGLE_TX_MSGS[] = {
-    SUBARU_COMMON_TX_MSGS(SUBARU_ALT_BUS, MSG_SUBARU_ES_LKAS_ANGLE)
-    SUBARU_COMMON_TX_MSGS(SUBARU_ALT_BUS, MSG_SUBARU_ES_LKAS)
   };
 
   static RxCheck subaru_rx_checks[] = {
@@ -311,14 +316,12 @@ static safety_config subaru_init(uint16_t param) {
 #endif
 
   safety_config ret;
-  if (subaru_lkas_angle) {
-    ret = BUILD_SAFETY_CFG(subaru_gen2_rx_checks, SUBARU_LKAS_ANGLE_TX_MSGS);
-  } else if (subaru_gen2) {
+  if (subaru_gen2) {
     ret = subaru_longitudinal ? BUILD_SAFETY_CFG(subaru_gen2_rx_checks, SUBARU_GEN2_LONG_TX_MSGS) : \
-                                BUILD_SAFETY_CFG(subaru_gen2_rx_checks, SUBARU_GEN2_TX_MSGS);
+                                BUILD_SAFETY_CFG(subaru_gen2_rx_checks, subaru_lkas_angle ? SUBARU_GEN2_LKAS_ANGLE_TX_MSGS : SUBARU_GEN2_TX_MSGS);
   } else {
     ret = subaru_longitudinal ? BUILD_SAFETY_CFG(subaru_rx_checks, SUBARU_LONG_TX_MSGS) : \
-                                BUILD_SAFETY_CFG(subaru_rx_checks, SUBARU_TX_MSGS);
+                                BUILD_SAFETY_CFG(subaru_rx_checks, subaru_lkas_angle ? SUBARU_LKAS_ANGLE_TX_MSGS : SUBARU_TX_MSGS);
   }
   return ret;
 }
