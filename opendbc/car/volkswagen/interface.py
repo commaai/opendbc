@@ -45,10 +45,6 @@ class CarInterface(CarInterfaceBase):
       else:
         ret.networkLocation = NetworkLocation.fwdCamera
 
-      # TODO for anti EA intervention: I do not have the native Emegrency Assist and can not test
-      # also we do not get steering torque from OP for MEB
-      #ret.flags |= VolkswagenFlags.STOCK_HCA_PRESENT.value # for MEB HCA_03 should be always present
-
     else:
       # Set global MQB parameters
       ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.volkswagen)]

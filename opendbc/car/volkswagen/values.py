@@ -201,7 +201,7 @@ class VolkswagenMEBPlatformConfig(PlatformConfig):
   wmis: set[WMI] = field(default_factory=set)
 
   def init(self):
-    self.flags |= VolkswagenFlags.MEB
+    self.flags |= VolkswagenFlags.MEB | VolkswagenFlags.STOCK_HCA_PRESENT
 
 
 @dataclass
