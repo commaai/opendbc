@@ -27,9 +27,6 @@ class CarController(CarControllerBase):
       if lat_active:
         # Angular rate limit based on speed
         apply_angle = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgo, CarControllerParams)
-
-        # FSD has been seen with deltas up to ~40
-        apply_angle = float(np.clip(apply_angle, CS.out.steeringAngleDeg - 40, CS.out.steeringAngleDeg + 40))
       else:
         apply_angle = CS.out.steeringAngleDeg
 
