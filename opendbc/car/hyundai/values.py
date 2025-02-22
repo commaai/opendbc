@@ -54,6 +54,17 @@ class CarControllerParams:
       self.STEER_MAX = 384
 
 
+class HyundaiSafetyFlags(IntFlag):
+  EV_GAS = 1
+  HYBRID_GAS = 2
+  LONG = 4
+  CAMERA_SCC = 8
+  CANFD_HDA2 = 16
+  CANFD_ALT_BUTTONS = 32
+  ALT_LIMITS = 64
+  CANFD_HDA2_ALT_STEERING = 128
+
+
 class HyundaiFlags(IntFlag):
   # Dynamic Flags
   CANFD_HDA2 = 1
