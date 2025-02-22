@@ -52,42 +52,18 @@ class CarController(CarControllerBase):
 
         if CC.latActive:
           hca_enabled = True
-          current_curvature = CS.curvature #-CS.out.yawRate / max(CS.out.vEgoRaw, 0.1)
+          #current_curvature = CS.curvature #-CS.out.yawRate / max(CS.out.vEgoRaw, 0.1)
           apply_curvature = apply_std_steer_angle_limits(actuators.curvature, self.apply_curvature_last, CS.out.vEgoRaw, self.CCP)
           # TODO: verify, this shouldn't be necessary and appears to be hurting us in some cases
           #if CS.out.steeringPressed: # roughly sync with user input
           #  apply_curvature = np.clip(apply_curvature, current_curvature - self.CCP.CURVATURE_ERROR, current_curvature + self.CCP.CURVATURE_ERROR)
           apply_curvature = np.clip(apply_curvature, -self.CCP.CURVATURE_MAX, self.CCP.CURVATURE_MAX)
 
-          # FIXME: this power control is very complex and is interacting badly with the wheel touch threshold
-          #        it should ideally just use the max unless the driver is overriding, then simple smooth ramp up/down
-          steering_power_min_by_speed = np.interp(CS.out.vEgoRaw, [0, self.CCP.STEERING_POWER_MAX_BY_SPEED],
-                                                  [self.CCP.STEERING_POWER_MIN, self.CCP.STEERING_POWER_MAX])
-          steering_curvature_diff = abs(apply_curvature - current_curvature)
-          steering_curvature_increase = max(0, abs(apply_curvature) - abs(current_curvature))
-          steering_curvature_change = np.interp(CS.out.vEgoRaw, [0., 3.], [steering_curvature_diff, steering_curvature_increase])
-          steering_power_target_curvature = steering_power_min_by_speed + self.CCP.CURVATURE_POWER_FACTOR * (steering_curvature_change + abs(apply_curvature))
-          steering_power_target = np.clip(steering_power_target_curvature, self.CCP.STEERING_POWER_MIN, self.CCP.STEERING_POWER_MAX)
-
-          if self.steering_power_last < self.CCP.STEERING_POWER_MIN:  # OP lane assist just activated
-            steering_power = min(self.steering_power_last + self.CCP.STEERING_POWER_STEPS, self.CCP.STEERING_POWER_MIN)
-          elif CS.out.steeringPressed:  # user action results in decreasing the steering power
-            steering_power_user = max(steering_power_target / 100 * (100 - self.CCP.STEERING_POWER_USER_REDUCTION), self.CCP.STEERING_POWER_MIN)
-            steering_power = max(self.steering_power_last - self.CCP.STEERING_POWER_STEPS, steering_power_user)
-          else: # following desired target
-            if self.steering_power_last < steering_power_target:
-              steering_power = min(self.steering_power_last + self.CCP.STEERING_POWER_STEPS, steering_power_target)
-            elif self.steering_power_last > steering_power_target:
-              steering_power = max(self.steering_power_last - self.CCP.STEERING_POWER_STEPS, steering_power_target)
-            else:
-              steering_power = self.steering_power_last
-
-          # TODO: investigate this "power boost", validity and utility are unclear
-          steering_power_boost = True if steering_power == self.CCP.STEERING_POWER_MAX else False
+          # FIXME: implement power control, backoff on driver input torque
+          steering_power = 125
 
         else:
           # TODO: see if we can do without this extra ramp-down-on-disengage logic, it makes safety more complex and MQBevo didn't need it
-          steering_power_boost = False
           if self.steering_power_last > 0: # keep HCA alive until steering power has reduced to zero
             hca_enabled = True
             current_curvature = CS.curvature #-CS.out.yawRate / max(CS.out.vEgoRaw, 0.1)
@@ -98,7 +74,7 @@ class CarController(CarControllerBase):
             apply_curvature = 0. # inactive curvature
             steering_power = 0
 
-        can_sends.append(self.CCS.create_steering_control(self.packer_pt, CANBUS.pt, apply_curvature, hca_enabled, steering_power, steering_power_boost))
+        can_sends.append(self.CCS.create_steering_control(self.packer_pt, CANBUS.pt, apply_curvature, hca_enabled, steering_power, False))
         self.apply_curvature_last = apply_curvature
         self.steering_power_last = steering_power
 
