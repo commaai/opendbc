@@ -89,7 +89,7 @@ class CarInterface(CarInterfaceBase):
 
       # These cars have the LFA button on the steering wheel
       if 0x391 in fingerprint[0]:
-        ret.flags |= HyundaiFlags.HAS_LFA_BUTTON.value
+        ret.flags |= HyundaiFlags.HAS_LDA_BUTTON.value
 
     # Common lateral control setup
 
