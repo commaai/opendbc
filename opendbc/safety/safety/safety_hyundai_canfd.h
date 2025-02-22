@@ -3,29 +3,6 @@
 #include "safety_declarations.h"
 #include "safety_hyundai_common.h"
 
-#define MAX_RX_CHECKS 16
-
-static safety_config hyundai_canfd_init_safety_config(void) {
-  static RxCheck hyundai_canfd_rx_checks[MAX_RX_CHECKS] = {0};
-  safety_config ret = {
-    .rx_checks = hyundai_canfd_rx_checks,
-    .rx_checks_len = 0,
-    .tx_msgs = NULL,
-    .tx_msgs_len = 0
-  };
-  return ret;
-}
-
-static void add_rx_check(safety_config *safetyConfig, RxCheck config) {
-  const uint8_t index = safetyConfig->rx_checks_len;
-  if (index < (uint8_t)MAX_RX_CHECKS) {
-    safetyConfig->rx_checks_len++;
-    (void)memcpy(&safetyConfig->rx_checks[index], &config, sizeof(RxCheck));
-  } else {
-    // TODO: Trigger safety_rx_checks_invalid.
-  }
-}
-
 static bool hyundai_canfd_alt_buttons = false;
 static bool hyundai_canfd_lka_steering_alt = false;
 
@@ -280,7 +257,7 @@ static safety_config hyundai_canfd_init(uint16_t param) {
     hyundai_longitudinal = false;
   }
 
-  safety_config ret = hyundai_canfd_init_safety_config();
+  safety_config ret = safety_config_init();
 
   // RX Common checks.
   const int pt_bus = hyundai_canfd_lka_steering ? 1 : 0;

@@ -80,6 +80,7 @@ bool vehicle_moving = false;
 bool acc_main_on = false;  // referred to as "ACC off" in ISO 15622:2018
 int cruise_button_prev = 0;
 bool safety_rx_checks_invalid = false;
+bool add_check_failed = false;
 
 // for safety modes with torque steering control
 int desired_torque_last = 0;       // last desired steer torque
@@ -166,6 +167,30 @@ static void update_counter(RxCheck addr_list[], int index, uint8_t counter) {
     addr_list[index].status.wrong_counters += (expected_counter == counter) ? -1 : 1;
     addr_list[index].status.wrong_counters = CLAMP(addr_list[index].status.wrong_counters, 0, MAX_WRONG_COUNTERS);
     addr_list[index].status.last_counter = counter;
+  }
+}
+
+// This is pretty arbirary. It's more than enough for now.
+#define MAX_RX_CHECKS 16
+
+static safety_config safety_config_init(void) {
+  static RxCheck rx_checks[MAX_RX_CHECKS] = {0};
+  safety_config ret = {
+    .rx_checks = rx_checks,
+    .rx_checks_len = 0,
+    .tx_msgs = NULL,
+    .tx_msgs_len = 0
+  };
+  return ret;
+}
+
+static void add_rx_check(safety_config *safetyConfig, RxCheck config) {
+  const uint8_t index = safetyConfig->rx_checks_len;
+  if (index < (uint8_t)MAX_RX_CHECKS) {
+    safetyConfig->rx_checks_len++;
+    (void)memcpy(&safetyConfig->rx_checks[index], &config, sizeof(RxCheck));
+  } else {
+    add_check_failed = true;
   }
 }
 
@@ -309,7 +334,7 @@ void safety_tick(const safety_config *cfg) {
     }
   }
 
-  safety_rx_checks_invalid = rx_checks_invalid;
+  safety_rx_checks_invalid = rx_checks_invalid || add_check_failed;
 }
 
 static void relay_malfunction_set(void) {
@@ -418,6 +443,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   controls_allowed = false;
   relay_malfunction_reset();
   safety_rx_checks_invalid = false;
+  add_check_failed = false;
 
   current_safety_config.rx_checks = NULL;
   current_safety_config.rx_checks_len = 0;
