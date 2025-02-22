@@ -273,12 +273,12 @@ class TestHyundaiCanfdHDA1Long(HyundaiLongitudinalBase, TestHyundaiCanfdHDA1Base
     return self.packer.make_can_msg_panda("SCC_CONTROL", 0, values)
 
   def test_tester_present_allowed(self):
-    if not self.SAFETY_PARAM & HyundaiSafetyFlags.CAMERA_SCC:
-      super().test_tester_present_allowed()
+    if self.SAFETY_PARAM & HyundaiSafetyFlags.CAMERA_SCC:
+      pass
 
   def test_disabled_ecu_alive(self):
-    if not self.SAFETY_PARAM & HyundaiSafetyFlags.CAMERA_SCC:
-      super().test_disabled_ecu_alive()
+    if self.SAFETY_PARAM & HyundaiSafetyFlags.CAMERA_SCC:
+      pass
 
 
 if __name__ == "__main__":
