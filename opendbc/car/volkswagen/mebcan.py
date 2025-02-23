@@ -43,7 +43,16 @@ def create_ea_control(packer, bus):
     "EA_Funktionsstatus": 1,  # Configured but disabled
     "EA_Sollbeschleunigung": 2046,  # Inactive value
   }
+
   return packer.make_can_msg("EA_01", bus, values)
+
+
+def create_ea_hud(packer, bus):
+  values = {
+    "EA_Unknown": 1,  # Undocumented, value when inactive
+  }
+
+  return packer.make_can_msg("EA_02", bus, values)
 
 
 def acc_control_value(main_switch_on, acc_faulted, long_active, esp_hold, override):

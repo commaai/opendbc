@@ -475,6 +475,7 @@ BO_ 496 EA_02: 8 Gateway
  SG_ STP_Primaeranz : 28|3@1+ (1,0) [0|7] "" Vector__XXX
  SG_ EA_Bremslichtblinken : 31|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ EA_Blinken : 32|3@1+ (1,0) [0|7] "" Vector__XXX
+ SG_ EA_Unknown : 60|3@0+ (1,0) [0|7] "" XXX
 
 BO_ 517 SAM_01: 8 XXX
  SG_ Brake_Light : 36|1@0+ (1,0) [0|1] "" XXX

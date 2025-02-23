@@ -8,6 +8,7 @@
 #define MSG_ESC_50           0x102   // RX, for yaw rate
 #define MSG_VMM_02           0x139   // RX, for ESP hold management
 #define MSG_EA_01            0x1A4   // TX, for EA mitigation
+#define MSG_EA_02            0x1F0   // TX, for EA mitigation
 #define MSG_EML_06           0x20A   // RX, for yaw rate
 #define MSG_HCA_03           0x303   // TX by OP, Heading Control Assist steering torque
 #define MSG_QFK_01           0x13D   // RX, for steering angle
@@ -91,11 +92,11 @@ static uint32_t volkswagen_meb_compute_crc(const CANPacket_t *to_push) {
 
 static safety_config volkswagen_meb_init(uint16_t param) {
   // Transmit of GRA_ACC_01 is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
-  static const CanMsg VOLKSWAGEN_MEB_STOCK_TX_MSGS[] = {{MSG_HCA_03, 0, 24}, {MSG_EA_01, 0, 8}, {MSG_GRA_ACC_01, 0, 8},
+  static const CanMsg VOLKSWAGEN_MEB_STOCK_TX_MSGS[] = {{MSG_HCA_03, 0, 24}, {MSG_EA_01, 0, 8}, {MSG_EA_02, 0, 8}, {MSG_GRA_ACC_01, 0, 8},
                                                        {MSG_GRA_ACC_01, 2, 8}, {MSG_LDW_02, 0, 8}};
 
   static const CanMsg VOLKSWAGEN_MEB_LONG_TX_MSGS[] = {{MSG_MEB_ACC_01, 0, 48}, {MSG_ACC_18, 0, 32}, {MSG_HCA_03, 0, 24},
-                                                       {MSG_EA_01, 0, 8}, {MSG_LDW_02, 0, 8}, {MSG_TA_01, 0, 8}};
+                                                       {MSG_EA_01, 0, 8}, {MSG_EA_02, 0, 8}, {MSG_LDW_02, 0, 8}, {MSG_TA_01, 0, 8}};
 
   static RxCheck volkswagen_meb_rx_checks[] = {
     {.msg = {{MSG_LH_EPS_03, 0, 8, .check_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
@@ -325,7 +326,7 @@ static int volkswagen_meb_fwd_hook(int bus_num, int addr) {
       bus_fwd = 2;
       break;
     case 2:
-      if ((addr == MSG_HCA_03) || (addr == MSG_LDW_02) || (addr == MSG_EA_01)) {
+      if ((addr == MSG_HCA_03) || (addr == MSG_LDW_02) || (addr == MSG_EA_01) || (addr == MSG_EA_02)) {
         // openpilot takes over LKAS steering control and related HUD messages from the camera
         bus_fwd = -1;
       } else if (volkswagen_longitudinal && ((addr == MSG_MEB_ACC_01) || (addr == MSG_ACC_18) || (addr == MSG_TA_01))) {

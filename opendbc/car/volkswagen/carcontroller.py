@@ -109,10 +109,7 @@ class CarController(CarControllerBase):
         self.apply_steer_last = apply_steer
         can_sends.append(self.CCS.create_steering_control(self.packer_pt, CANBUS.pt, apply_steer, hca_enabled))
 
-      if self.CP.flags & VolkswagenFlags.MEB:
-        # Mitigate VW Emergency Assist driver inactivity detection by filtering the stock EA_01 message
-        can_sends.append(mebcan.create_ea_control(self.packer_pt, CANBUS.pt))
-      elif self.CP.flags & VolkswagenFlags.STOCK_HCA_PRESENT:
+      if self.CP.flags & VolkswagenFlags.STOCK_HCA_PRESENT:
         # Pacify VW Emergency Assist driver inactivity detection by changing its view of driver steering input torque
         # to the greatest of actual driver input or 2x openpilot's output (1x openpilot output is not enough to
         # consistently reset inactivity detection on straight level roads). See commaai/openpilot#23274 for background.
@@ -120,6 +117,14 @@ class CarController(CarControllerBase):
         if abs(CS.out.steeringTorque) > abs(ea_simulated_torque):
           ea_simulated_torque = CS.out.steeringTorque
         can_sends.append(self.CCS.create_eps_update(self.packer_pt, CANBUS.cam, CS.eps_stock_values, ea_simulated_torque))
+
+    # TODO: refactor a bit
+    if self.CP.flags & VolkswagenFlags.MEB:
+      if self.frame % 2 == 0:
+        can_sends.append(mebcan.create_ea_control(self.packer_pt, CANBUS.pt))
+      if self.frame % 50 == 0:
+        can_sends.append(mebcan.create_ea_hud(self.packer_pt, CANBUS.pt))
+
 
     # **** Acceleration Controls ******************************************** #
 
