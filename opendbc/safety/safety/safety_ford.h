@@ -392,12 +392,11 @@ static safety_config ford_init(uint16_t param) {
     {FORD_LateralMotionControl, 0, 8},
   };
 
-  UNUSED(param);
+  const uint16_t FORD_PARAM_CANFD = 2;
+  ford_canfd = GET_FLAG(param, FORD_PARAM_CANFD);
 #ifdef ALLOW_DEBUG
   const uint16_t FORD_PARAM_LONGITUDINAL = 1;
-  const uint16_t FORD_PARAM_CANFD = 2;
   ford_longitudinal = GET_FLAG(param, FORD_PARAM_LONGITUDINAL);
-  ford_canfd = GET_FLAG(param, FORD_PARAM_CANFD);
 #endif
 
   // Longitudinal is the default for CAN, and optional for CAN FD w/ ALLOW_DEBUG
