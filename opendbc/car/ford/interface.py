@@ -2,7 +2,7 @@ import numpy as np
 from opendbc.car import Bus, get_safety_config, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.ford.fordcan import CanBus
-from opendbc.car.ford.values import CAR, CarControllerParams, DBC, Ecu, FordFlags, RADAR, FordSafetyFlags
+from opendbc.car.ford.values import CarControllerParams, DBC, Ecu, FordFlags, RADAR, FordSafetyFlags
 from opendbc.car.interfaces import CarInterfaceBase
 
 TransmissionType = structs.CarParams.TransmissionType
