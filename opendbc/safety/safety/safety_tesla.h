@@ -5,7 +5,6 @@
 static bool tesla_longitudinal = false;
 static bool tesla_stock_aeb = false;
 static bool tesla_autopark = false;
-static bool tesla_autopark_prev = false;
 
 static void tesla_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
@@ -38,6 +37,7 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
 
     // Cruise and Autopark/Summon state
     if (addr == 0x286) {
+
       // Autopark state
       int autopark_state = (GET_BYTE(to_push, 3) >> 1) & 0x0FU;  // DI_autoparkState
       // TODO: doing summon first, only seen these states
@@ -50,6 +50,7 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
                                 (autopark_state == 8) ||  // UNPARK_COMPLETE (TODO: not seen)
                                 (autopark_state == 9);    // SELFPARK_STARTED
 
+      static bool tesla_autopark_prev = false;
       if (tesla_autopark_now && !tesla_autopark_prev && !controls_allowed) {
         tesla_autopark = true;
       }
