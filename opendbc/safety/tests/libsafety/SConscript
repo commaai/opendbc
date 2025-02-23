@@ -7,6 +7,12 @@ if system == 'Darwin':
   # distinguishable from system one - which acts as a symlink to clang
   CC += '-13'
 
+# sanitization
+ubsan_flags = [
+"-fsanitize=undefined",
+"-fno-sanitize-recover=undefined",
+]
+
 env = Environment(
   CC=CC,
   CFLAGS=[
@@ -15,7 +21,8 @@ env = Environment(
     '-std=gnu11',
     '-Wfatal-errors',
     '-Wno-pointer-to-int-cast',
-  ],
+  ] + ubsan_flags,
+  LINKFLAGS=ubsan_flags,
   CPPPATH=[".", "../../board/", "../../"],
 )
 if system == "Darwin":
@@ -29,14 +36,6 @@ if GetOption('mutation'):
     '-fpass-plugin=/usr/lib/mull-ir-frontend-17',
     '-g',
     '-grecord-command-line',
-  ]
-  env['CFLAGS'] += flags
-  env['LINKFLAGS'] += flags
-
-if GetOption('ubsan'):
-  flags = [
-    "-fsanitize=undefined",
-    "-fno-sanitize-recover=undefined",
   ]
   env['CFLAGS'] += flags
   env['LINKFLAGS'] += flags
