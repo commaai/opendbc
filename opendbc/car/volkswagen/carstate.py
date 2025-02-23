@@ -78,7 +78,6 @@ class CarState(CarStateBase):
 
       ret.yawRate = pt_cp.vl["ESC_50"]["Yaw_Rate"] * (1, -1)[int(pt_cp.vl["ESC_50"]["Yaw_Rate_Sign"])] * CV.DEG_TO_RAD
       hca_status = self.CCP.hca_status_values.get(pt_cp.vl["QFK_01"]["LatCon_HCA_Status"])
-      #ret.carFaultedNonCritical = cam_cp.vl["EA_01"]["EA_Funktionsstatus"] in (3, 4, 5, 6) # TODO: test Emergency Assist
 
       drive_mode = ret.gearShifter == GearShifter.drive
       ret.gas = pt_cp.vl["Motor_54"]["Accelerator_Pressure"]

@@ -15,6 +15,7 @@ MSG_ESC_51 = 0xFC       # RX, for wheel speeds
 MSG_Motor_54 = 0x14C    # RX, for accel pedal
 MSG_ESC_50 = 0x102      # RX, for yaw rate
 MSG_VMM_02 = 0x139      # RX, for ESP hold management
+MSG_EA_01 = 0x1A4       # TX, for EA mitigation
 MSG_EML_06 = 0x20A      # RX, for yaw rate
 MSG_HCA_03 = 0x303      # TX by OP, Heading Control Assist steering torque
 MSG_QFK_01 = 0x13D      # RX, for steering angle
@@ -136,8 +137,8 @@ class TestVolkswagenMebSafety(common.PandaCarSafetyTest):
 
 
 class TestVolkswagenMebStockSafety(TestVolkswagenMebSafety):
-  TX_MSGS = [[MSG_HCA_03, 0], [MSG_LDW_02, 0], [MSG_GRA_ACC_01, 0], [MSG_GRA_ACC_01, 2]]
-  FWD_BLACKLISTED_ADDRS = {2: [MSG_HCA_03, MSG_LDW_02]}
+  TX_MSGS = [[MSG_HCA_03, 0], [MSG_LDW_02, 0], [MSG_GRA_ACC_01, 0], [MSG_EA_01, 0], [MSG_GRA_ACC_01, 2]]
+  FWD_BLACKLISTED_ADDRS = {2: [MSG_HCA_03, MSG_LDW_02, MSG_EA_01]}
   FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   def setUp(self):
@@ -157,8 +158,8 @@ class TestVolkswagenMebStockSafety(TestVolkswagenMebSafety):
 
 
 class TestVolkswagenMebLongSafety(TestVolkswagenMebSafety):
-  TX_MSGS = [[MSG_HCA_03, 0], [MSG_LDW_02, 0], [MSG_MEB_ACC_01, 0], [MSG_ACC_18, 0], [MSG_TA_01, 0]]
-  FWD_BLACKLISTED_ADDRS = {2: [MSG_HCA_03, MSG_LDW_02, MSG_MEB_ACC_01, MSG_ACC_18, MSG_TA_01]}
+  TX_MSGS = [[MSG_HCA_03, 0], [MSG_LDW_02, 0], [MSG_EA_01, 0], [MSG_MEB_ACC_01, 0], [MSG_ACC_18, 0], [MSG_TA_01, 0]]
+  FWD_BLACKLISTED_ADDRS = {2: [MSG_HCA_03, MSG_LDW_02, MSG_EA_01, MSG_MEB_ACC_01, MSG_ACC_18, MSG_TA_01]}
   FWD_BUS_LOOKUP = {0: 2, 2: 0}
   INACTIVE_ACCEL = 3.01
 

@@ -38,6 +38,14 @@ def create_steering_control(packer, bus, apply_curvature, lkas_enabled, power, p
   return packer.make_can_msg("HCA_03", bus, values)
 
 
+def create_ea_control(packer, bus):
+  values = {
+    "EA_Funktionsstatus": 1,  # Configured but disabled
+    "EA_Sollbeschleunigung": 2046,  # Inactive value
+  }
+  return packer.make_can_msg("EA_01", bus, values)
+
+
 def acc_control_value(main_switch_on, acc_faulted, long_active, esp_hold, override):
 
   if acc_faulted:
