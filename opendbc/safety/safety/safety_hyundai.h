@@ -27,8 +27,8 @@ const LongitudinalLimits HYUNDAI_LONG_LIMITS = {
 };
 
 #define HYUNDAI_COMMON_TX_MSGS(can_canfd_blended) \
-  {0x340, 0,                          8},        \
-  {0x4F1, 0,                          4},        \
+  {0x340, 0,                           8},        \
+  {0x4F1, 0,                           4},        \
   {0x485, 0, (can_canfd_blended) ? 8 : 4},        \
 
 static const CanMsg HYUNDAI_TX_MSGS[] = {
@@ -42,8 +42,8 @@ static const CanMsg HYUNDAI_TX_MSGS[] = {
   {.msg = {{0x386, 0, 8, .check_checksum = !(legacy), .max_counter = (legacy) ? 0U : 15U, .frequency = 100U}, { 0 }, { 0 }}}, \
   {.msg = {{0x394, 0, 8, .check_checksum = !(legacy), .max_counter = (legacy) ? 0U : 7U, .frequency = 100U}, { 0 }, { 0 }}},  \
 
-#define HYUNDAI_SCC12_ADDR_CHECK(scc_bus, can_canfd_blended)                                                                                     \
-  {.msg = {{0x421, (scc_bus), 8, .check_checksum = !(can_canfd_blended), .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},               \
+#define HYUNDAI_SCC12_ADDR_CHECK(scc_bus, can_canfd_blended)                                                                     \
+  {.msg = {{0x421, (scc_bus), 8, .check_checksum = !(can_canfd_blended), .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},  \
 
 static bool hyundai_legacy = false;
 
