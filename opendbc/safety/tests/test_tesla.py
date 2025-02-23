@@ -92,14 +92,13 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
 class TestTeslaStockSafety(TestTeslaSafetyBase):
 
+  LONGITUDINAL = False
+
   def setUp(self):
     self.packer = CANPackerPanda("tesla_model3_party")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.tesla, 0)
     self.safety.init_tests()
-
-  def test_accel_actuation_limits(self, stock_longitudinal=True):
-    super().test_accel_actuation_limits(stock_longitudinal)
 
   def test_cancel(self):
     for accval in range(16):
