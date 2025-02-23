@@ -37,21 +37,21 @@ BU_: XXX CAMERA FRONT_RADAR ADRV APRK
 
 
 BO_ 80 LKAS: 16 XXX
- SG_ CHECKSUM : 0|16@1+ (1,0) [0|0] "" XXX
- SG_ COUNTER : 16|8@1+ (1,0) [0|0] "" XXX
- SG_ LKA_MODE : 24|3@1+ (1,0) [0|0] "" XXX
- SG_ NEW_SIGNAL_1 : 27|2@1+ (1,0) [0|0] "" XXX
- SG_ LKA_WARNING : 32|1@1+ (1,0) [0|0] "" XXX
- SG_ LKA_ICON : 38|2@1+ (1,0) [0|0] "" XXX
- SG_ FCA_SYSWARN : 40|1@1+ (1,0) [0|3] "" XXX
- SG_ TORQUE_REQUEST : 41|11@1+ (1,-1024) [0|0] "" XXX
- SG_ STEER_REQ : 52|1@1+ (1,0) [0|0] "" XXX
- SG_ LFA_BUTTON : 56|1@1+ (1,0) [0|0] "" XXX
- SG_ LKA_ASSIST : 62|1@1+ (1,0) [0|0] "" XXX
- SG_ STEER_MODE : 65|3@1+ (1,0) [0|0] "" XXX
- SG_ NEW_SIGNAL_2 : 69|2@1+ (1,0) [0|3] "" XXX
- SG_ HAS_LANE_SAFETY : 80|1@1+ (1,0) [0|3] "" XXX
- SG_ NEW_SIGNAL_3 : 104|8@1+ (1,0) [0|255] "" XXX
+ SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
+ SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ LKA_MODE : 24|3@1+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_1 : 27|2@1+ (1,0) [0|255] "" XXX
+ SG_ LKA_WARNING : 32|1@1+ (1,0) [0|1] "" XXX
+ SG_ LKA_ICON : 38|2@1+ (1,0) [0|255] "" XXX
+ SG_ FCA_SYSWARN : 40|1@0+ (1,0) [0|1] "" XXX
+ SG_ TORQUE_REQUEST : 41|11@1+ (1,-1024) [0|4095] "" XXX
+ SG_ STEER_REQ : 52|1@1+ (1,0) [0|1] "" XXX
+ SG_ LFA_BUTTON : 56|1@1+ (1,0) [0|255] "" XXX
+ SG_ LKA_ASSIST : 62|1@1+ (1,0) [0|1] "" XXX
+ SG_ STEER_MODE : 65|3@1+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_2 : 70|2@0+ (1,0) [0|3] "" XXX
+ SG_ HAS_LANE_SAFETY : 80|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_3 : 111|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 81 ADRV_0x51: 32 ADRV
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
@@ -221,7 +221,7 @@ BO_ 702 CAM_0x2be: 32 CAMERA
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
 
-CM_ 676 "Contains signals with detailed lane line information. Used by ADAS ECU on HDA 2 vehicles to operate LFA.";
+CM_ BO_ 676 "Contains signals with detailed lane line information. Used by ADAS ECU on HDA 2 vehicles to operate LFA.";
 
 CM_ SG_ 80 HAS_LANE_SAFETY "If 0, hides LKAS 'Lane Safety' menu from vehicle settings";
 CM_ SG_ 676 LEFT_LANE_LINE "Left lane line confidence";
