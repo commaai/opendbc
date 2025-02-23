@@ -51,6 +51,25 @@ def create_lka_steering(packer, acm_lka_hba_cmd, apply_steer, enabled):
   return packer.make_can_msg("ACM_lkaHbaCmd", 0, values)
 
 
+def create_wheel_touch(packer, sccm_wheel_touch, enabled):
+  values = {s: sccm_wheel_touch[s] for s in (
+    "SCCM_WheelTouch_Counter",
+    "SCCM_WheelTouch_HandsOn",
+    "SCCM_WheelTouch_CapacitiveValue",
+    "SETME_X52",
+  )}
+
+  # When only using ACC without lateral, the ACM warns the driver to hold the steering wheel on engagement
+  # Tell the ACM that the user is holding the wheel to avoid this warning
+  if enabled:
+    values["SCCM_WheelTouch_HandsOn"] = 1
+    values["SCCM_WheelTouch_CapacitiveValue"] = 100  # only need to send this value, but both are set for consistency
+
+  data = packer.make_can_msg("SCCM_WheelTouch", 2, values)[1]
+  values["SCCM_WheelTouch_Checksum"] = checksum(data[1:], 0x1D, 0x97)
+  return packer.make_can_msg("SCCM_WheelTouch", 2, values)
+
+
 def create_longitudinal(packer, frame, accel, enabled, stopping):
   values = {
     "ACM_longitudinalRequest_Counter": frame % 15,

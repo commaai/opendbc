@@ -12,6 +12,7 @@ class CarState(CarStateBase):
     self.last_speed = 30
 
     self.acm_lka_hba_cmd = None
+    self.sccm_wheel_touch = None
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
@@ -72,6 +73,7 @@ class CarState(CarStateBase):
 
     # Messages needed by carcontroller
     self.acm_lka_hba_cmd = copy.copy(cp_cam.vl["ACM_lkaHbaCmd"])
+    self.sccm_wheel_touch = copy.copy(cp.vl["SCCM_WheelTouch"])
 
     return ret
 
@@ -87,7 +89,8 @@ class CarState(CarStateBase):
       ("EPAS_SystemStatus", 100),
       ("RCM_Status", 8),
       ("VDM_AdasSts", 100),
-      ("DoorStatus", 10)
+      ("DoorStatus", 10),
+      ("SCCM_WheelTouch", 20),
     ]
 
     cam_messages = [
