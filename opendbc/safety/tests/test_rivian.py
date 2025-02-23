@@ -7,7 +7,7 @@ import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerPanda
 
 
-class TestRivianSafety(common.PandaCarSafetyTest, common.DriverTorqueSteeringSafetyTest):
+class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteeringSafetyTest, common.LongitudinalAccelSafetyTest):
 
   TX_MSGS = [[0x120, 0]]
   STANDSTILL_THRESHOLD = 0
@@ -25,11 +25,10 @@ class TestRivianSafety(common.PandaCarSafetyTest, common.DriverTorqueSteeringSaf
   DRIVER_TORQUE_ALLOWANCE = 15
   DRIVER_TORQUE_FACTOR = 1
 
-  def setUp(self):
-    self.packer = CANPackerPanda("rivian_can")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.rivian, 0)
-    self.safety.init_tests()
+  @classmethod
+  def setUpClass(cls):
+    if cls.__name__ == "TestRivianSafetyBase":
+      raise unittest.SkipTest
 
   def _torque_driver_msg(self, torque):
     values = {"EPAS_SystemStatus": torque}
@@ -58,6 +57,17 @@ class TestRivianSafety(common.PandaCarSafetyTest, common.DriverTorqueSteeringSaf
   def _vehicle_moving_msg(self, speed: float):
     values = {"ESP_Vehicle_Speed": speed}
     return self.packer.make_can_msg_panda("ESP_Status", 0, values)
+
+class TestRivianStockSafety(TestRivianSafetyBase):
+
+  def setUp(self):
+    self.packer = CANPackerPanda("rivian_can")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.rivian, 0)
+    self.safety.init_tests()
+
+  def test_accel_actuation_limits(self, stock_longitudinal=True):
+    super().test_accel_actuation_limits(stock_longitudinal)
 
 if __name__ == "__main__":
   unittest.main()
