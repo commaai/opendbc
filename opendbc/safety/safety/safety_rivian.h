@@ -18,7 +18,7 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
 
     // Driver torque
     if (addr == 0x380) {
-      int torque_driver_new = ((((GET_BYTE(to_push, 2) << 4) | (GET_BYTE(to_push, 3) >> 4)) * 0.1) - 205);
+      int torque_driver_new = ((((GET_BYTE(to_push, 2) << 4) | (GET_BYTE(to_push, 3) >> 4))) - 2050);
       update_sample(&torque_driver, torque_driver_new);
     }
 
