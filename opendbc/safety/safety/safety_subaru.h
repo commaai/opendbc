@@ -32,6 +32,7 @@
 #define MSG_SUBARU_ES_Distance           0x221
 #define MSG_SUBARU_ES_Status             0x222
 #define MSG_SUBARU_ES_DashStatus         0x321
+#define MSG_SUBARU_ES_CruiseControl      0x22c
 #define MSG_SUBARU_ES_LKAS_State         0x322
 #define MSG_SUBARU_ES_Infotainment       0x323
 
@@ -111,8 +112,8 @@ static void subaru_rx_hook(const CANPacket_t *to_push) {
 
   // enter controls on rising edge of ACC, exit controls on ACC off
   if (subaru_lkas_angle) {
-    if ((addr == MSG_SUBARU_ES_DashStatus) && (bus == SUBARU_CAM_BUS)) {
-      bool cruise_engaged = GET_BIT(to_push, 36U);
+    if ((addr == MSG_SUBARU_ES_CruiseControl) && (bus == SUBARU_CAM_BUS)) {
+      bool cruise_engaged = GET_BIT(to_push, 63U);
       pcm_cruise_check(cruise_engaged);
     }
   } else {
