@@ -105,6 +105,17 @@ class FordCANFDPlatformConfig(FordPlatformConfig):
     super().init()
     self.flags |= FordFlags.CANFD
 
+@dataclass
+class FordF150LightningPlatform(FordPlatformConfig):
+  dbc_dict: DbcDict = field(default_factory=lambda: {
+    Bus.pt: 'ford_lincoln_base_pt',
+  })
+
+  def init(self):
+    # Don't show in docs until this issue is resolved. See https://github.com/commaai/openpilot/issues/30302
+    self.car_docs = []
+    self.flags |= FordFlags.CANFD
+
 
 class CAR(Platforms):
   FORD_BRONCO_SPORT_MK1 = FordPlatformConfig(
@@ -129,7 +140,7 @@ class CAR(Platforms):
     [FordCarDocs("Ford F-150 2022-23", "Co-Pilot360 Assist 2.0", hybrid=True, support_type=SupportType.REVIEW)],
     CarSpecs(mass=2000, wheelbase=3.69, steerRatio=17.0),
   )
-  FORD_F_150_LIGHTNING_MK1 = FordCANFDPlatformConfig(
+  FORD_F_150_LIGHTNING_MK1 = FordF150LightningPlatform(
     [FordCarDocs("Ford F-150 Lightning 2022-23", "Co-Pilot360 Assist 2.0", support_type=SupportType.REVIEW)],
     CarSpecs(mass=2948, wheelbase=3.70, steerRatio=16.9),
   )
