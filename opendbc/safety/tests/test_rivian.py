@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import unittest
 
-from opendbc.safety import Safety
+from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerPanda
@@ -28,7 +28,7 @@ class TestRivianSafety(common.PandaCarSafetyTest, common.DriverTorqueSteeringSaf
   def setUp(self):
     self.packer = CANPackerPanda("rivian_can")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(Safety.SAFETY_RIVIAN, 0)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.rivian, 0)
     self.safety.init_tests()
 
   def _torque_driver_msg(self, torque):
