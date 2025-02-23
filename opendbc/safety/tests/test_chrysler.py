@@ -91,7 +91,7 @@ class TestChryslerRamDTSafety(TestChryslerSafety):
   def setUp(self):
     self.packer = CANPackerPanda("chrysler_ram_dt_generated")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.chrysler, ChryslerSafetyFlags.FLAG_CHRYSLER_RAM_DT)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.chrysler, ChryslerSafetyFlags.RAM_DT)
     self.safety.init_tests()
 
   def _speed_msg(self, speed):
@@ -115,7 +115,7 @@ class TestChryslerRamHDSafety(TestChryslerSafety):
   def setUp(self):
     self.packer = CANPackerPanda("chrysler_ram_hd_generated")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.chrysler, ChryslerSafetyFlags.FLAG_CHRYSLER_RAM_HD)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.chrysler, ChryslerSafetyFlags.RAM_HD)
     self.safety.init_tests()
 
   def _speed_msg(self, speed):

@@ -135,3 +135,35 @@ def create_acc_hud_control(packer, bus, acc_hud_status, set_speed, lead_distance
   }
 
   return packer.make_can_msg("ACC_02", bus, values)
+
+
+# AWV = Stopping Distance Reduction
+# Refer to Self Study Program 890253: Volkswagen Driver Assistance Systems, Design and Function
+
+
+def create_aeb_control(packer, fcw_active, aeb_active, accel):
+  values = {
+    "AWV_Vorstufe": 0,  # Preliminary stage
+    "AWV1_Anf_Prefill": 0,  # Brake pre-fill request
+    "AWV1_HBA_Param": 0,  # Brake pre-fill level
+    "AWV2_Freigabe": 0,  # Stage 2 braking release
+    "AWV2_Ruckprofil": 0,  # Brake jerk level
+    "AWV2_Priowarnung": 0,  # Suppress lane departure warning in favor of FCW
+    "ANB_Notfallblinken": 0, # Hazard flashers request
+    "ANB_Teilbremsung_Freigabe": 0,  # Target braking release
+    "ANB_Zielbremsung_Freigabe": 0,  # Partial braking release
+    "ANB_Zielbrems_Teilbrems_Verz_Anf": 0.0,   # Acceleration requirement for target/partial braking, m/s/s
+    "AWV_Halten": 0,  # Vehicle standstill request
+    "PCF_Time_to_collision": 0xFF,  # Pre Crash Front, populated only with a target, might be used on Audi only
+  }
+
+  return packer.make_can_msg("ACC_10", 0, values)
+
+
+def create_aeb_hud(packer, aeb_supported, fcw_active):
+  values = {
+    "AWV_Texte": 5 if aeb_supported else 7,  # FCW/AEB system status, display text (from menu in VAL)
+    "AWV_Status_Anzeige": 1 if aeb_supported else 2,  #  FCW/AEB system status, available or disabled
+  }
+
+  return packer.make_can_msg("ACC_15", 0, values)

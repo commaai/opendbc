@@ -24,9 +24,9 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
   # Angle control limits
   DEG_TO_CAN = 10
 
-  ANGLE_RATE_BP = [0., 5., 15.]
-  ANGLE_RATE_UP = [10., 1.6, .3]  # windup limit
-  ANGLE_RATE_DOWN = [10., 7.0, .8]  # unwind limit
+  ANGLE_RATE_BP = [0., 5., 25.]
+  ANGLE_RATE_UP = [2.5, 1.5, 0.2]  # windup limit
+  ANGLE_RATE_DOWN = [5., 2.0, 0.3]  # unwind limit
 
   # Long control limits
   MAX_ACCEL = 2.0
@@ -120,7 +120,7 @@ class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
   def setUp(self):
     self.packer = CANPackerPanda("tesla_model3_party")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.tesla, TeslaSafetyFlags.FLAG_TESLA_LONG_CONTROL)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.tesla, TeslaSafetyFlags.LONG_CONTROL)
     self.safety.init_tests()
 
   def test_no_aeb(self):
