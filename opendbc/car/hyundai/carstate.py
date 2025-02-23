@@ -41,6 +41,8 @@ class CarState(CarStateBase):
       self.shifter_values = can_define.dv["CLU15"]["CF_Clu_Gear"]
     elif self.CP.flags & HyundaiFlags.TCU_GEARS:
       self.shifter_values = can_define.dv["TCU12"]["CUR_GR"]
+    elif CP.flags & HyundaiFlags.FCEV:
+      self.shifter_values = can_define.dv["EMS20"]["HYDROGEN_GEAR_SHIFTER"]
     else:
       self.shifter_values = can_define.dv["LVR12"]["CF_Lvr_Gear"]
 
@@ -133,8 +135,10 @@ class CarState(CarStateBase):
     ret.espActive = cp.vl["TCS11"]["ABS_ACT"] == 1
     ret.accFaulted = cp.vl["TCS13"]["ACCEnable"] != 0  # 0 ACC CONTROL ENABLED, 1-3 ACC CONTROL DISABLED
 
-    if self.CP.flags & (HyundaiFlags.HYBRID | HyundaiFlags.EV):
-      if self.CP.flags & HyundaiFlags.HYBRID:
+    if self.CP.flags & (HyundaiFlags.HYBRID | HyundaiFlags.EV | HyundaiFlags.FCEV):
+      if self.CP.flags & HyundaiFlags.FCEV:
+        ret.gas = cp.vl["FCEV_ACCELERATOR"]["ACCELERATOR_PEDAL"] / 254.
+      elif self.CP.flags & HyundaiFlags.HYBRID:
         ret.gas = cp.vl["E_EMS11"]["CR_Vcu_AccPedDep_Pos"] / 254.
       else:
         ret.gas = cp.vl["E_EMS11"]["Accel_Pedal_Pos"] / 254.
@@ -147,6 +151,8 @@ class CarState(CarStateBase):
     # as this seems to be standard over all cars, but is not the preferred method.
     if self.CP.flags & (HyundaiFlags.HYBRID | HyundaiFlags.EV):
       gear = cp.vl["ELECT_GEAR"]["Elect_Gear_Shifter"]
+    elif self.CP.flags & HyundaiFlags.FCEV:
+      gear = cp.vl["EMS20"]["HYDROGEN_GEAR_SHIFTER"]
     elif self.CP.flags & HyundaiFlags.CLUSTER_GEARS:
       gear = cp.vl["CLU15"]["CF_Clu_Gear"]
     elif self.CP.flags & HyundaiFlags.TCU_GEARS:
@@ -269,8 +275,8 @@ class CarState(CarStateBase):
     self.buttons_counter = cp.vl[self.cruise_btns_msg_canfd]["COUNTER"]
     ret.accFaulted = cp.vl["TCS"]["ACCEnable"] != 0  # 0 ACC CONTROL ENABLED, 1-3 ACC CONTROL DISABLED
 
-    if self.CP.flags & HyundaiFlags.CANFD_HDA2:
-      self.hda2_lfa_block_msg = copy.copy(cp_cam.vl["CAM_0x362"] if self.CP.flags & HyundaiFlags.CANFD_HDA2_ALT_STEERING
+    if self.CP.flags & HyundaiFlags.CANFD_LKA_STEERING:
+      self.lfa_block_msg = copy.copy(cp_cam.vl["CAM_0x362"] if self.CP.flags & HyundaiFlags.CANFD_LKA_STEERING_ALT
                                           else cp_cam.vl["CAM_0x2a4"])
 
     ret.buttonEvents = [*create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT),
@@ -317,8 +323,8 @@ class CarState(CarStateBase):
       ]
 
     cam_messages = []
-    if CP.flags & HyundaiFlags.CANFD_HDA2:
-      block_lfa_msg = "CAM_0x362" if CP.flags & HyundaiFlags.CANFD_HDA2_ALT_STEERING else "CAM_0x2a4"
+    if CP.flags & HyundaiFlags.CANFD_LKA_STEERING:
+      block_lfa_msg = "CAM_0x362" if CP.flags & HyundaiFlags.CANFD_LKA_STEERING_ALT else "CAM_0x2a4"
       cam_messages += [(block_lfa_msg, 20)]
     elif CP.flags & HyundaiFlags.CANFD_CAMERA_SCC:
       cam_messages += [
@@ -363,6 +369,8 @@ class CarState(CarStateBase):
 
     if CP.flags & (HyundaiFlags.HYBRID | HyundaiFlags.EV):
       pt_messages.append(("E_EMS11", 50))
+    elif CP.flags & HyundaiFlags.FCEV:
+      pt_messages.append(("FCEV_ACCELERATOR", 100))
     else:
       pt_messages += [
         ("EMS12", 100),
@@ -371,6 +379,8 @@ class CarState(CarStateBase):
 
     if CP.flags & (HyundaiFlags.HYBRID | HyundaiFlags.EV):
       pt_messages.append(("ELECT_GEAR", 20))
+    elif CP.flags & HyundaiFlags.FCEV:
+      pt_messages.append(("EMS20", 100))
     elif CP.flags & HyundaiFlags.CLUSTER_GEARS:
       pass
     elif CP.flags & HyundaiFlags.TCU_GEARS:

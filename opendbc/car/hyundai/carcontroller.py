@@ -93,7 +93,7 @@ class CarController(CarControllerBase):
     if self.frame % 100 == 0 and not (self.CP.flags & HyundaiFlags.CANFD_CAMERA_SCC) and self.CP.openpilotLongitudinalControl:
       # for longitudinal control, either radar or ADAS driving ECU
       addr, bus = 0x7d0, 0
-      if self.CP.flags & HyundaiFlags.CANFD_HDA2.value:
+      if self.CP.flags & HyundaiFlags.CANFD_LKA_STEERING.value:
         addr, bus = 0x730, self.CAN.ECAN
       can_sends.append(make_tester_present_msg(addr, bus, suppress_response=True))
 
@@ -103,27 +103,27 @@ class CarController(CarControllerBase):
 
     # CAN-FD platforms
     if self.CP.flags & HyundaiFlags.CANFD:
-      hda2 = self.CP.flags & HyundaiFlags.CANFD_HDA2
-      hda2_long = hda2 and self.CP.openpilotLongitudinalControl
+      lka_steering = self.CP.flags & HyundaiFlags.CANFD_LKA_STEERING
+      lka_steering_long = lka_steering and self.CP.openpilotLongitudinalControl
 
       # steering control
       can_sends.extend(hyundaicanfd.create_steering_messages(self.packer, self.CP, self.CAN, CC.enabled, apply_steer_req, apply_steer))
 
-      # prevent LFA from activating on HDA2 by sending "no lane lines detected" to ADAS ECU
-      if self.frame % 5 == 0 and hda2:
-        can_sends.append(hyundaicanfd.create_suppress_lfa(self.packer, self.CAN, CS.hda2_lfa_block_msg,
-                                                          self.CP.flags & HyundaiFlags.CANFD_HDA2_ALT_STEERING))
+      # prevent LFA from activating on LKA steering cars by sending "no lane lines detected" to ADAS ECU
+      if self.frame % 5 == 0 and lka_steering:
+        can_sends.append(hyundaicanfd.create_suppress_lfa(self.packer, self.CAN, CS.lfa_block_msg,
+                                                          self.CP.flags & HyundaiFlags.CANFD_LKA_STEERING_ALT))
 
       # LFA and HDA icons
-      if self.frame % 5 == 0 and (not hda2 or hda2_long):
+      if self.frame % 5 == 0 and (not lka_steering or lka_steering_long):
         can_sends.append(hyundaicanfd.create_lfahda_cluster(self.packer, self.CAN, CC.enabled))
 
       # blinkers
-      if hda2 and self.CP.flags & HyundaiFlags.ENABLE_BLINKERS:
+      if lka_steering and self.CP.flags & HyundaiFlags.ENABLE_BLINKERS:
         can_sends.extend(hyundaicanfd.create_spas_messages(self.packer, self.CAN, self.frame, CC.leftBlinker, CC.rightBlinker))
 
       if self.CP.openpilotLongitudinalControl:
-        if hda2:
+        if lka_steering:
           can_sends.extend(hyundaicanfd.create_adrv_messages(self.packer, self.CAN, self.frame))
         if self.frame % 2 == 0:
           can_sends.append(hyundaicanfd.create_acc_control(self.packer, self.CAN, CC.enabled, self.accel_last, accel, stopping, CC.cruiseControl.override,

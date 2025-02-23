@@ -1102,6 +1102,7 @@ FW_VERSIONS = {
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00JK1EMFC  AT AUS RHD 1.00 1.01 99211-DS100 220125',
       b'\xf1\x00JK1EMFC  AT USA LHD 1.00 1.00 99211-IT100 220919',
+      b'\xf1\x00JK1EMFC  AT USA LHD 1.00 1.01 99211-IT100 230628',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00JKev SCC -----      1.00 1.01 99110-DS000         ',
@@ -1196,6 +1197,20 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00US4_ RDR -----      1.00 1.00 99110-CG000         ',
+    ],
+  },
+  CAR.HYUNDAI_NEXO_1ST_GEN: {
+    (Ecu.abs, 0x7D1, None): [
+      b'\xf1\x00FE IEB \x01 312 \x11\x13 58520-M5000',
+    ],
+    (Ecu.fwdCamera, 0x7C4, None): [
+      b'\xf1\x00FE  MFC  AT KOR LHD 1.00 1.00 99211-M5100 201218',
+    ],
+    (Ecu.eps, 0x7D4, None): [
+      b'\xf1\x00FE  MDPS C 1.00 1.05 56340-M5000 9903',
+    ],
+    (Ecu.fwdRadar, 0x7D0, None): [
+      b'\xf1\x00FE__ SCC FHCUP      1.00 1.05 99110-M5000         ',
     ],
   },
 }

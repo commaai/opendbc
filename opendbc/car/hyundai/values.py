@@ -55,15 +55,21 @@ class HyundaiSafetyFlags(IntFlag):
   HYBRID_GAS = 2
   LONG = 4
   CAMERA_SCC = 8
-  CANFD_HDA2 = 16
+  CANFD_LKA_STEERING = 16
   CANFD_ALT_BUTTONS = 32
   ALT_LIMITS = 64
-  CANFD_HDA2_ALT_STEERING = 128
+  CANFD_LKA_STEERING_ALT = 128
+  FCEV_GAS = 256
 
 
 class HyundaiFlags(IntFlag):
   # Dynamic Flags
-  CANFD_HDA2 = 1
+
+  # Default assumption: all cars use LFA (ADAS) steering from the camera.
+  # CANFD_LKA_STEERING/CANFD_LKA_STEERING_ALT cars typically have both LKA (camera) and LFA (ADAS) steering messages,
+  # with LKA commands forwarded to the ADAS DRV ECU.
+  # Most HDA2 trims are assumed to be equipped with the ADAS DRV ECU, though some variants may not be equipped with one.
+  CANFD_LKA_STEERING = 1
   CANFD_ALT_BUTTONS = 2
   CANFD_ALT_GEARS = 2 ** 2
   CANFD_CAMERA_SCC = 2 ** 3
@@ -73,7 +79,7 @@ class HyundaiFlags(IntFlag):
   CANFD_ALT_GEARS_2 = 2 ** 6
   SEND_LFA = 2 ** 7
   USE_FCA = 2 ** 8
-  CANFD_HDA2_ALT_STEERING = 2 ** 9
+  CANFD_LKA_STEERING_ALT = 2 ** 9
 
   # these cars use a different gas signal
   HYBRID = 2 ** 10
@@ -110,12 +116,14 @@ class HyundaiFlags(IntFlag):
 
   HAS_LDA_BUTTON = 2 ** 24
 
+  FCEV = 2 ** 25
+
 
 class Footnote(Enum):
   CANFD = CarFootnote(
     "Requires a <a href=\"https://comma.ai/shop/can-fd-panda-kit\" target=\"_blank\">CAN FD panda kit</a> if not using " +
     "comma 3X for this <a href=\"https://en.wikipedia.org/wiki/CAN_FD\" target=\"_blank\">CAN FD car</a>.",
-    Column.MODEL, shop_footnote=False)
+    Column.MODEL)
 
 
 @dataclass
@@ -254,6 +262,11 @@ class CAR(Platforms):
     [HyundaiCarDocs("Hyundai Kona Hybrid 2020", car_parts=CarParts.common([CarHarness.hyundai_i]))],  # TODO: check packages,
     CarSpecs(mass=1425, wheelbase=2.6, steerRatio=13.42, tireStiffnessFactor=0.385),
     flags=HyundaiFlags.HYBRID | HyundaiFlags.ALT_LIMITS,
+  )
+  HYUNDAI_NEXO_1ST_GEN = HyundaiPlatformConfig(
+    [HyundaiCarDocs("Hyundai Nexo 2021", "All", car_parts=CarParts.common([CarHarness.hyundai_h]))],
+    CarSpecs(mass=3990 * CV.LB_TO_KG, wheelbase=2.79, steerRatio=14.19),  # https://www.hyundainews.com/assets/documents/original/42768-2021NEXOProductGuideSpecs.pdf
+    flags=HyundaiFlags.FCEV,
   )
   HYUNDAI_SANTA_FE = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Santa Fe 2019-20", "All", video_link="https://youtu.be/bjDR0YjM__s",
@@ -545,7 +558,7 @@ class CAR(Platforms):
   GENESIS_GV70_ELECTRIFIED_1ST_GEN = HyundaiCanFDPlatformConfig(
     [
       HyundaiCarDocs("Genesis GV70 Electrified (Australia Only) 2022", "All", car_parts=CarParts.common([CarHarness.hyundai_q])),
-      HyundaiCarDocs("Genesis GV70 Electrified (with HDA II) 2023", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_q])),
+      HyundaiCarDocs("Genesis GV70 Electrified (with HDA II) 2023-24", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_q])),
     ],
     CarSpecs(mass=2260, wheelbase=2.87, steerRatio=17.1),
     flags=HyundaiFlags.EV,
@@ -703,7 +716,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
     ),
 
     # CAN & CAN FD query to understand the three digit date code
-    # HDA2 cars usually use 6 digit date codes, so skip bus 1
+    # LKA steering cars usually use 6 digit date codes, so skip bus 1
     Request(
       [HYUNDAI_ECU_MANUFACTURING_DATE],
       [HYUNDAI_VERSION_RESPONSE],
@@ -737,7 +750,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
               CAR.KIA_CEED, CAR.KIA_SELTOS],
   },
   extra_ecus=[
-    (Ecu.adas, 0x730, None),              # ADAS Driving ECU on HDA2 platforms
+    (Ecu.adas, 0x730, None),              # ADAS Driving ECU on platforms with LKA steering
     (Ecu.parkingAdas, 0x7b1, None),       # ADAS Parking ECU (may exist on all platforms)
     (Ecu.hvac, 0x7b3, None),              # HVAC Control Assembly
     (Ecu.cornerRadar, 0x7b7, None),

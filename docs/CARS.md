@@ -36,8 +36,8 @@
 |Ford|Escape Plug-in Hybrid 2020-22|Co-Pilot360 Assist+|[Upstream](#upstream)|
 |Ford|Explorer 2020-24|Co-Pilot360 Assist+|[Upstream](#upstream)|
 |Ford|Explorer Hybrid 2020-24|Co-Pilot360 Assist+|[Upstream](#upstream)|
-|Ford|F-150 2022-23|Co-Pilot360 Assist 2.0|[Under review](#under-review)|
-|Ford|F-150 Hybrid 2022-23|Co-Pilot360 Assist 2.0|[Under review](#under-review)|
+|Ford|F-150 2022-23|Co-Pilot360 Assist 2.0|[Under review](#upstream)|
+|Ford|F-150 Hybrid 2022-23|Co-Pilot360 Assist 2.0|[Under review](#upstream)|
 |Ford|F-150 Lightning 2022-23|Co-Pilot360 Assist 2.0|[Under review](#under-review)|
 |Ford|Focus 2018|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
 |Ford|Focus Hybrid 2018|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
@@ -48,8 +48,8 @@
 |Ford|Maverick 2023-24|Co-Pilot360 Assist|[Upstream](#upstream)|
 |Ford|Maverick Hybrid 2022|LARIAT Luxury|[Upstream](#upstream)|
 |Ford|Maverick Hybrid 2023-24|Co-Pilot360 Assist|[Upstream](#upstream)|
-|Ford|Mustang Mach-E 2021-23|All|[Under review](#under-review)|
-|Ford|Ranger 2024|Adaptive Cruise Control with Lane Centering|[Under review](#under-review)|
+|Ford|Mustang Mach-E 2021-23|All|[Under review](#upstream)|
+|Ford|Ranger 2024|Adaptive Cruise Control with Lane Centering|[Under review](#upstream)|
 |Genesis|G70 2018|All|[Upstream](#upstream)|
 |Genesis|G70 2019-21|All|[Upstream](#upstream)|
 |Genesis|G70 2022-23|All|[Upstream](#upstream)|
@@ -62,7 +62,7 @@
 |Genesis|GV70 (2.5T Trim, without HDA II) 2022-23|All|[Upstream](#upstream)|
 |Genesis|GV70 (3.5T Trim, without HDA II) 2022-23|All|[Upstream](#upstream)|
 |Genesis|GV70 Electrified (Australia Only) 2022|All|[Upstream](#upstream)|
-|Genesis|GV70 Electrified (with HDA II) 2023|Highway Driving Assist II|[Upstream](#upstream)|
+|Genesis|GV70 Electrified (with HDA II) 2023-24|Highway Driving Assist II|[Upstream](#upstream)|
 |Genesis|GV80 2023|All|[Upstream](#upstream)|
 |GMC|Sierra 1500 2020-21|Driver Alert Package II|[Upstream](#upstream)|
 |GMC|Yukon 2019-20|Adaptive Cruise Control (ACC) & LKAS|[Dashcam mode](#dashcam)|
