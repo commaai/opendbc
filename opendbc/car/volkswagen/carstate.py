@@ -285,6 +285,10 @@ class CarState(CarStateBase):
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.standstill = ret.vEgoRaw == 0
 
+    # Update gear and/or clutch position data.
+    ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Getriebe_11"]["GE_Fahrstufe"], None))
+    drive_mode = ret.gearShifter == GearShifter.drive  # TODO: look for a cleaner bit, but this will do for now
+
     # Update EPS position and state info. For signed values, VW sends the sign in a separate signal.
     # LWI_01, MEP_EPS_01 steering angle differs from real steering angle (dynamic steering)
     ret.steeringAngleDeg = pt_cp.vl["LWI_01"]["LWI_Lenkradwinkel"] * (1, -1)[int(pt_cp.vl["LWI_01"]["LWI_VZ_Lenkradwinkel"])]
@@ -296,7 +300,7 @@ class CarState(CarStateBase):
     self.curvature = -pt_cp.vl["QFK_01"]["Curvature"] * (1, -1)[int(pt_cp.vl["QFK_01"]["Curvature_VZ"])]
 
     hca_status = self.CCP.hca_status_values.get(pt_cp.vl["QFK_01"]["LatCon_HCA_Status"])
-    ret.steerFaultTemporary, ret.steerFaultPermanent = self.update_hca_state(hca_status)
+    ret.steerFaultTemporary, ret.steerFaultPermanent = self.update_hca_state(hca_status, drive_mode)
 
     # VW Emergency Assist status tracking and mitigation
     self.eps_stock_values = pt_cp.vl["LH_EPS_03"]
@@ -309,9 +313,6 @@ class CarState(CarStateBase):
     ret.brake = pt_cp.vl["ESC_51"]["Brake_Pressure"]
     ret.parkingBrake = pt_cp.vl["Gateway_73"]["EPB_Status"] in (1, 4) # EPB closing or closed
     # regen braking bool(pt_cp.vl["ESC_50"]['Regen_Braking']) TODO
-
-    # Update gear and/or clutch position data.
-    ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Getriebe_11"]["GE_Fahrstufe"], None))
 
     # Update door and trunk/hatch lid open status.
     ret.doorOpen = any([pt_cp.vl["ZV_02"]["ZV_FT_offen"],
@@ -340,7 +341,8 @@ class CarState(CarStateBase):
     self.travel_assist_available = bool(cam_cp.vl["TA_01"]["Travel_Assist_Available"])
 
     ret.cruiseState.available = pt_cp.vl["Motor_51"]["TSK_Status"] in (2, 3, 4, 5)
-    ret.cruiseState.enabled   = pt_cp.vl["Motor_51"]["TSK_Status"] in (3, 4, 5)
+    ret.cruiseState.enabled = pt_cp.vl["Motor_51"]["TSK_Status"] in (3, 4, 5)
+    ret.accFaulted = drive_mode and pt_cp.vl["Motor_51"]["TSK_Status"] in (6, 7)
 
     if self.CP.pcmCruise:
       # Cruise Control mode; check for distance UI setting from the radar.
@@ -349,8 +351,6 @@ class CarState(CarStateBase):
     else:
       # Speed limiter mode; ECM faults if we command ACC while not pcmCruise
       ret.cruiseState.nonAdaptive = bool(pt_cp.vl["Motor_51"]["TSK_Limiter_ausgewaehlt"])
-
-    ret.accFaulted = pt_cp.vl["Motor_51"]["TSK_Status"] in (6, 7)
 
     self.esp_hold_confirmation = bool(pt_cp.vl["VMM_02"]["ESP_Hold"])
     ret.cruiseState.standstill = self.CP.pcmCruise and self.esp_hold_confirmation
@@ -378,12 +378,12 @@ class CarState(CarStateBase):
     self.frame += 1
     return ret
 
-  def update_hca_state(self, hca_status):
+  def update_hca_state(self, hca_status, drive_mode=True):
     # Treat FAULT as temporary for worst likely EPS recovery time, for cars without factory Lane Assist
     # DISABLED means the EPS hasn't been configured to support Lane Assist
     self.eps_init_complete = self.eps_init_complete or (hca_status in ("DISABLED", "READY", "ACTIVE") or self.frame > 600)
-    perm_fault = hca_status == "DISABLED" or (self.eps_init_complete and hca_status == "FAULT")
-    temp_fault = hca_status in ("REJECTED", "PREEMPTED") or not self.eps_init_complete
+    perm_fault = drive_mode and hca_status == "DISABLED" or (self.eps_init_complete and hca_status == "FAULT")
+    temp_fault = drive_mode and hca_status in ("REJECTED", "PREEMPTED") or not self.eps_init_complete
     return temp_fault, perm_fault
 
   @staticmethod
