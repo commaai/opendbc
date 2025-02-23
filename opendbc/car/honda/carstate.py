@@ -90,7 +90,7 @@ class CarState(CarStateBase):
     super().__init__(CP)
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
     self.gearbox_msg = "GEARBOX"
-    if CP.carFingerprint == CAR.HONDA_NBOX or (CP.carFingerprint == CAR.HONDA_ACCORD and CP.transmissionType == TransmissionType.cvt):
+    if CP.carFingerprint in (CAR.HONDA_ACCORD, CAR.HONDA_NBOX) and CP.transmissionType == TransmissionType.cvt):
       self.gearbox_msg = "GEARBOX_15T"
 
     self.main_on_sig_msg = "SCM_FEEDBACK"
