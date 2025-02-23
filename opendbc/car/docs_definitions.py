@@ -24,6 +24,22 @@ class Column(Enum):
   VIDEO = "Video"
 
 
+class ExtraCarsColumn(Enum):
+  MAKE = "Make"
+  MODEL = "Model"
+  PACKAGE = "Package"
+  SUPPORT = "Support Level"
+
+
+class SupportType(Enum):
+  UPSTREAM = "Upstream"             # Actively maintained by comma, plug-and-play in release versions of openpilot
+  REVIEW = "Under review"           # Dashcam, but planned for official support after safety validation
+  DASHCAM = "Dashcam mode"          # Dashcam, but may be drivable in a community fork
+  COMMUNITY = "Community"           # Not upstream, but available in a custom community fork, not validated by comma
+  CUSTOM = "Custom"                 # Upstream, but don't have a harness available or need an unusual custom install
+  INCOMPATIBLE = "Not compatible"   # Known fundamental incompatibility such as Flexray or hydraulic power steering
+
+
 class Star(Enum):
   FULL = "full"
   HALF = "half"
@@ -59,7 +75,6 @@ class Mount(EnumBase):
 
 
 class Cable(EnumBase):
-  rj45_cable_7ft = BasePart("RJ45 cable (7 ft)")
   long_obdc_cable = BasePart("long OBD-C cable")
   usb_a_2_a_cable = BasePart("USB A-A cable")
   usbc_otg_cable = BasePart("USB C OTG cable")
@@ -75,7 +90,7 @@ class Accessory(EnumBase):
 
 @dataclass
 class BaseCarHarness(BasePart):
-  parts: list[Enum] = field(default_factory=lambda: [Accessory.harness_box, Accessory.comma_power_v2, Cable.rj45_cable_7ft])
+  parts: list[Enum] = field(default_factory=lambda: [Accessory.harness_box, Accessory.comma_power_v2])
   has_connector: bool = True  # without are hidden on the harness connector page
 
 
@@ -92,7 +107,7 @@ class CarHarness(EnumBase):
   fca = BaseCarHarness("FCA connector")
   ram = BaseCarHarness("Ram connector")
   vw_a = BaseCarHarness("VW A connector")
-  vw_j533 = BaseCarHarness("VW J533 connector", parts=[Accessory.harness_box, Cable.long_obdc_cable, Cable.usbc_coupler])
+  vw_j533 = BaseCarHarness("VW J533 connector", parts=[Accessory.harness_box, Cable.long_obdc_cable, Cable.usbc_coupler, Accessory.comma_power_v2])
   hyundai_a = BaseCarHarness("Hyundai A connector")
   hyundai_b = BaseCarHarness("Hyundai B connector")
   hyundai_c = BaseCarHarness("Hyundai C connector")
@@ -112,16 +127,15 @@ class CarHarness(EnumBase):
   hyundai_q = BaseCarHarness("Hyundai Q connector")
   hyundai_r = BaseCarHarness("Hyundai R connector")
   custom = BaseCarHarness("Developer connector")
-  obd_ii = BaseCarHarness("OBD-II connector", parts=[Cable.long_obdc_cable, Cable.long_obdc_cable], has_connector=False)
+  obd_ii = BaseCarHarness("OBD-II connector", parts=[Cable.long_obdc_cable], has_connector=False)
   gm = BaseCarHarness("GM connector", parts=[Accessory.harness_box])
-  gmsdgm = BaseCarHarness("GM SDGM connector", parts=[Accessory.harness_box, Cable.rj45_cable_7ft, Cable.long_obdc_cable,
-                                                      Cable.usbc_coupler, Accessory.comma_power_v2])
-  nissan_a = BaseCarHarness("Nissan A connector", parts=[Accessory.harness_box, Cable.rj45_cable_7ft, Cable.long_obdc_cable, Cable.usbc_coupler])
-  nissan_b = BaseCarHarness("Nissan B connector", parts=[Accessory.harness_box, Cable.rj45_cable_7ft, Cable.long_obdc_cable, Cable.usbc_coupler])
+  gmsdgm = BaseCarHarness("GM SDGM connector", parts=[Accessory.harness_box, Cable.long_obdc_cable, Cable.usbc_coupler, Accessory.comma_power_v2])
+  nissan_a = BaseCarHarness("Nissan A connector", parts=[Accessory.harness_box, Cable.long_obdc_cable, Cable.usbc_coupler])
+  nissan_b = BaseCarHarness("Nissan B connector", parts=[Accessory.harness_box, Cable.long_obdc_cable, Cable.usbc_coupler])
   mazda = BaseCarHarness("Mazda connector")
   ford_q3 = BaseCarHarness("Ford Q3 connector")
-  ford_q4 = BaseCarHarness("Ford Q4 connector", parts=[Accessory.harness_box, Accessory.comma_power_v2, Cable.rj45_cable_7ft, Cable.long_obdc_cable,
-                                                       Cable.usbc_coupler])
+  ford_q4 = BaseCarHarness("Ford Q4 connector", parts=[Accessory.harness_box, Accessory.comma_power_v2, Cable.long_obdc_cable, Cable.usbc_coupler])
+  rivian = BaseCarHarness("Rivian connector")
 
 
 class Device(EnumBase):
@@ -246,13 +260,24 @@ class CarDocs:
   # all the parts needed for the supported car
   car_parts: CarParts = field(default_factory=CarParts)
 
+  merged: bool = True
+  support_type: SupportType = SupportType.UPSTREAM
+  support_link: str | None = "#upstream"
+
   def __post_init__(self):
     self.make, self.model, self.years = split_name(self.name)
     self.year_list = get_year_list(self.years)
 
-  def init(self, CP: CarParams, all_footnotes: dict[Enum, int]):
-    self.car_name = CP.carName
+  def init(self, CP: CarParams, all_footnotes=None):
+    self.brand = CP.brand
     self.car_fingerprint = CP.carFingerprint
+
+    if self.merged and CP.dashcamOnly:
+      if self.support_type != SupportType.REVIEW:
+        self.support_type = SupportType.DASHCAM
+        self.support_link = "#dashcam"
+      else:
+        self.support_link = "#under-review"
 
     # longitudinal column
     op_long = "Stock"
@@ -306,6 +331,18 @@ class CarDocs:
       Column.AUTO_RESUME: Star.FULL if self.auto_resume else Star.EMPTY,
       Column.HARDWARE: hardware_col,
       Column.VIDEO: self.video_link if self.video_link is not None else "",  # replaced with an image and link from template in get_column
+    }
+
+    if self.support_link is not None:
+      support_info = f"[{self.support_type.value}]({self.support_link})"
+    else:
+      support_info = self.support_type.value
+
+    self.extra_cars_row: dict[Enum, str] = {
+      ExtraCarsColumn.MAKE: self.make,
+      ExtraCarsColumn.MODEL: self.model,
+      ExtraCarsColumn.PACKAGE: self.package,
+      ExtraCarsColumn.SUPPORT: support_info,
     }
 
     # Set steering torque star from max lateral acceleration
@@ -368,3 +405,18 @@ class CarDocs:
       item += footnote_tag.format(f'{",".join(map(str, sups))}')
 
     return item
+
+  def get_extra_cars_column(self, column: ExtraCarsColumn) -> str:
+    item: str = self.extra_cars_row[column]
+    if column == ExtraCarsColumn.MODEL and len(self.years):
+      item += f" {self.years}"
+
+    return item
+
+
+@dataclass
+class ExtraCarDocs(CarDocs):
+  package: str = "Any"
+  merged: bool = False
+  support_type: SupportType = SupportType.INCOMPATIBLE
+  support_link: str | None = "#incompatible"
