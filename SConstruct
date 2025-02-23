@@ -1,9 +1,12 @@
 import os
 import subprocess
 import sysconfig
+import platform
 import numpy as np
 
 arch = subprocess.check_output(["uname", "-m"], encoding='utf8').rstrip()
+if platform.system() == "Darwin":
+  arch = "Darwin"
 
 python_path = sysconfig.get_paths()['include']
 cpppath = [
@@ -21,6 +24,19 @@ AddOption('--minimal',
 AddOption('--asan',
           action='store_true',
           help='turn on ASAN')
+
+# safety options
+AddOption('--ubsan',
+          action='store_true',
+          help='turn on UBSan')
+
+AddOption('--coverage',
+          action='store_true',
+          help='build with test coverage options')
+
+AddOption('--mutation',
+          action='store_true',
+          help='generate mutation-ready code')
 
 ccflags_asan = ["-fsanitize=address", "-fno-omit-frame-pointer"] if GetOption('asan') else []
 ldflags_asan = ["-fsanitize=address"] if GetOption('asan') else []
@@ -73,4 +89,4 @@ envCython["LIBS"] = python_libs
 
 Export('envCython')
 
-SConscript(['opendbc/can/SConscript'])
+SConscript(['SConscript'])
