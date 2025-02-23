@@ -116,7 +116,7 @@ struct CrcInitializer {
 
 static CrcInitializer crcInitializer;
 
-static const std::unordered_map<uint32_t, std::array<uint8_t, 16>> volkswagen_mqb_crc_constants {
+static const std::unordered_map<uint32_t, std::array<uint8_t, 16>> volkswagen_mqb_meb_crc_constants {
   {0x40,  {0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40}},  // Airbag_01
   {0x86,  {0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86, 0x86}},  // LWI_01
   {0x9F,  {0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5, 0xF5}},  // LH_EPS_03
@@ -142,7 +142,7 @@ static const std::unordered_map<uint32_t, std::array<uint8_t, 16>> volkswagen_mq
   {0x65D, {0xAC, 0xB3, 0xAB, 0xEB, 0x7A, 0xE1, 0x3B, 0xF7, 0x73, 0xBA, 0x7C, 0x9E, 0x06, 0x5F, 0x02, 0xD9}},  // ESP_20
 };
 
-unsigned int volkswagen_mqb_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
+unsigned int volkswagen_mqb_meb_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
   // This is AUTOSAR E2E Profile 2, CRC-8H2F with a "data ID" (varying by message/counter) appended to the payload
 
   uint8_t crc = 0xFF; // CRC-8H2F initial value
@@ -155,8 +155,9 @@ unsigned int volkswagen_mqb_checksum(uint32_t address, const Signal &sig, const 
 
   // Continue CRC over the "data ID"
   uint8_t counter = d[1] & 0x0F;
-  auto crc_const = volkswagen_mqb_crc_constants.find(address);
-  if (crc_const != volkswagen_mqb_crc_constants.end()) {
+
+  auto crc_const = volkswagen_mqb_meb_crc_constants.find(address);
+  if (crc_const != volkswagen_mqb_meb_crc_constants.end()) {
     crc ^= crc_const->second[counter];
     crc = crc8_lut_8h2f[crc];
   } else {
