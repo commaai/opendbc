@@ -24,8 +24,11 @@ class CarInterface(CarInterfaceBase):
     CAN = CanBus(None, fingerprint, lka_steering)
 
     if ret.flags & HyundaiFlags.CANFD:
-      # Shared configuration for CAN-FD cars
       ret.experimentalLongitudinalAvailable = candidate not in (CANFD_UNSUPPORTED_LONGITUDINAL_CAR | CANFD_RADAR_SCC_CAR)
+      if lka_steering and Ecu.adas not in [fw.ecu for fw in car_fw]:
+        # this needs to be figured out for cars without an ADAS ECU
+        ret.experimentalLongitudinalAvailable = False
+
       ret.enableBsm = 0x1e5 in fingerprint[CAN.ECAN]
 
       if 0x105 in fingerprint[CAN.ECAN]:
@@ -101,6 +104,12 @@ class CarInterface(CarInterfaceBase):
     if ret.flags & HyundaiFlags.ALT_LIMITS:
       ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.ALT_LIMITS.value
 
+    if ret.flags & HyundaiFlags.ALT_LIMITS_2:
+      ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.ALT_LIMITS_2.value
+
+      # see https://github.com/commaai/opendbc/pull/1137/
+      ret.dashcamOnly = True
+
     # Common longitudinal control setup
 
     ret.radarUnavailable = RADAR_START_ADDR not in fingerprint[1] or Bus.radar not in DBC[ret.carFingerprint]
@@ -117,6 +126,8 @@ class CarInterface(CarInterfaceBase):
       ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.HYBRID_GAS.value
     elif ret.flags & HyundaiFlags.EV:
       ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.EV_GAS.value
+    elif ret.flags & HyundaiFlags.FCEV:
+      ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.FCEV_GAS.value
 
     # Car specific configuration overrides
 
