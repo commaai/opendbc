@@ -139,6 +139,7 @@ class LongitudinalAccelSafetyTest(PandaSafetyTestBase, abc.ABC):
     self.assertLess(self.MIN_ACCEL, 0)
 
   def test_accel_actuation_limits(self, stock_longitudinal=False):
+    # TODO: make a panda safety config class, start with openpilot longitudinal
     limits = ((self.MIN_ACCEL, self.MAX_ACCEL, ALTERNATIVE_EXPERIENCE.DEFAULT),
               (self.MIN_ACCEL, self.MAX_ACCEL, ALTERNATIVE_EXPERIENCE.RAISE_LONGITUDINAL_LIMITS_TO_ISO_MAX))
 

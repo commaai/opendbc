@@ -36,14 +36,37 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
       brake_pressed = (GET_BYTE(to_push, 2) & 0x03U) == 2U;
     }
 
-    // Cruise state
+    // Cruise and Autopark/Summon state
     if (addr == 0x286) {
+      // Autopark state
+      int autopark_state = (GET_BYTE(to_push, 3) >> 1) & 0x0FU;  // DI_autoparkState
+      // Hand off from openpilot to Autopark can only happen while disabled TODO: add test
+      // TODO: doing summon first, only seen these states
+      bool tesla_autopark_now = (autopark_state == 2) ||  // STARTED (TODO: not seen)
+                                (autopark_state == 3) ||  // ACTIVE
+                                (autopark_state == 4) ||  // COMPLETE
+                                (autopark_state == 5) ||  // PAUSED (TODO: not seen)
+                                (autopark_state == 6) ||  // ABORTED
+                                (autopark_state == 7) ||  // RESUMED (TODO: not seen)
+                                (autopark_state == 8) ||  // UNPARK_COMPLETE (TODO: not seen)
+                                (autopark_state == 9);    // SELFPARK_STARTED
+
+      if (tesla_autopark_now && !tesla_autopark_prev && !controls_allowed) {
+        tesla_autopark = true;
+      }
+      if (!tesla_autopark_now) {
+        tesla_autopark = false;
+      }
+      tesla_autopark_prev = tesla_autopark_now;
+
+      // Cruise state
       int cruise_state = (GET_BYTE(to_push, 1) >> 4) & 0x07U;
       bool cruise_engaged = (cruise_state == 2) ||  // ENABLED
                             (cruise_state == 3) ||  // STANDSTILL
                             (cruise_state == 4) ||  // OVERRIDE
                             (cruise_state == 6) ||  // PRE_FAULT
                             (cruise_state == 7);    // PRE_CANCEL
+      cruise_engaged = cruise_engaged && !tesla_autopark;
 
       vehicle_moving = cruise_state != 3; // STANDSTILL
       pcm_cruise_check(cruise_engaged);
@@ -54,25 +77,6 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
     if (tesla_longitudinal && (addr == 0x2b9)) {  // TODO: always set
       // "AEB_ACTIVE"
       tesla_stock_aeb = (GET_BYTE(to_push, 2) & 0x03U) == 1U;
-    }
-
-    if (addr == 0x286) {  // DI_state
-      int autopark_state = (GET_BYTE(to_push, 3) >> 1) & 0x0FU;  // DI_autoparkState
-      // Hand off from openpilot to Autopark can only happen while disabled TODO: add test
-      // TODO: doing summon first, only seen these states
-      bool tesla_autopark_now = (autopark_state == 2) ||  // STARTED (TODO: not seen)
-                                (autopark_state == 3) ||  // ACTIVE
-                                (autopark_state == 4) ||  // COMPLETE (TODO: not seen)
-                                (autopark_state == 5) ||  // PAUSED (TODO: not seen)
-                                (autopark_state == 6) ||  // ABORTED
-                                (autopark_state == 7) ||  // RESUMED (TODO: not seen)
-                                (autopark_state == 8) ||  // UNPARK_COMPLETE (TODO: not seen)
-                                (autopark_state == 9);    // SELFPARK_STARTED
-
-      if (tesla_autopark_now && !tesla_autopark_prev && !controls_allowed) {
-        tesla_autopark = tesla_autopark_now;
-      }
-      tesla_autopark_prev = tesla_autopark_now;
     }
   }
 
