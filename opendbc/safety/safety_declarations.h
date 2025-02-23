@@ -21,7 +21,6 @@
     (config).tx_msgs_len = sizeof((tx)) / sizeof((tx)[0]); \
   } while(0);
 
-
 #define UPDATE_VEHICLE_SPEED(val_ms) (update_sample(&vehicle_speed, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
 
 uint32_t GET_BYTES(const CANPacket_t *msg, int start, int len);
@@ -169,8 +168,6 @@ typedef struct {
   get_quality_flag_valid_t get_quality_flag_valid;
 } safety_hooks;
 
-static safety_config safety_config_init(void);
-static void add_rx_check(safety_config *safetyConfig, RxCheck config);
 bool safety_rx_hook(const CANPacket_t *to_push);
 bool safety_tx_hook(CANPacket_t *to_send);
 uint32_t get_ts_elapsed(uint32_t ts, uint32_t ts_last);
@@ -209,7 +206,6 @@ extern bool vehicle_moving;
 extern bool acc_main_on; // referred to as "ACC off" in ISO 15622:2018
 extern int cruise_button_prev;
 extern bool safety_rx_checks_invalid;
-extern bool add_check_failed;
 
 // for safety modes with torque steering control
 extern int desired_torque_last;       // last desired steer torque
