@@ -103,7 +103,7 @@ class CarController(CarControllerBase):
 
     # Common shared configuration
 
-    can_canfd_hybrid = bool(self.CP.flags & HyundaiFlags.CAN_CANFD_BLENDED)
+    can_canfd_blended = bool(self.CP.flags & HyundaiFlags.CAN_CANFD_BLENDED)
 
     # CAN-FD platforms
     if self.CP.flags & HyundaiFlags.CANFD:
@@ -138,11 +138,11 @@ class CarController(CarControllerBase):
         can_sends.extend(self.create_button_messages(CC, CS, use_clu11=False))
     else:
       # TODO: this can be merged with hyundaican.create_lkas11
-      if can_canfd_hybrid:
-        can_sends.append(hyundaican.create_lkas11_can_canfd_hybrid(self.packer, self.frame, self.CP, apply_steer, apply_steer_req,
-                                                                   torque_fault, CS.lkas11, sys_warning, sys_state, CC.enabled,
-                                                                   hud_control.leftLaneVisible, hud_control.rightLaneVisible,
-                                                                   left_lane_warning, right_lane_warning))
+      if can_canfd_blended:
+        can_sends.append(hyundaican.create_lkas11_can_canfd_blended(self.packer, self.frame, self.CP, apply_steer, apply_steer_req,
+                                                                    torque_fault, CS.lkas11, sys_warning, sys_state, CC.enabled,
+                                                                    hud_control.leftLaneVisible, hud_control.rightLaneVisible,
+                                                                    left_lane_warning, right_lane_warning))
       else:
         can_sends.append(hyundaican.create_lkas11(self.packer, self.frame, self.CP, apply_steer, apply_steer_req,
                                                   torque_fault, CS.lkas11, sys_warning, sys_state, CC.enabled,

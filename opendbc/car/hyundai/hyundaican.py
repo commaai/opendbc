@@ -96,12 +96,12 @@ def create_lkas11(packer, frame, CP, apply_steer, steer_req,
   return packer.make_can_msg("LKAS11", 0, values)
 
 
-def create_lkas11_can_canfd_hybrid(packer, frame, CP, apply_steer, steer_req,
+def create_lkas11_can_canfd_blended(packer, frame, CP, apply_steer, steer_req,
                                    torque_fault, lkas11, sys_warning, sys_state, enabled,
                                    left_lane, right_lane,
                                    left_lane_depart, right_lane_depart):
-  can_canfd_hybrid = CP.flags & HyundaiFlags.CAN_CANFD_BLENDED
-  bus = CanBus(CP).ECAN if can_canfd_hybrid else 0
+  can_canfd_blended = CP.flags & HyundaiFlags.CAN_CANFD_BLENDED
+  bus = CanBus(CP).ECAN if can_canfd_blended else 0
 
   lkas11_sigs = [
     "CF_Lkas_LdwsActivemode",
@@ -110,7 +110,7 @@ def create_lkas11_can_canfd_hybrid(packer, frame, CP, apply_steer, steer_req,
     "CF_Lkas_FcwOpt_USM",
   ]
 
-  if not can_canfd_hybrid:
+  if not can_canfd_blended:
     lkas11_sigs += [
       "CF_Lkas_LdwsSysState",
       "CF_Lkas_SysWarning",
@@ -132,7 +132,7 @@ def create_lkas11_can_canfd_hybrid(packer, frame, CP, apply_steer, steer_req,
   values["CR_Lkas_StrToqReq"] = apply_steer
   values["CF_Lkas_ActToi"] = steer_req
   values["CF_Lkas_ToiFlt"] = torque_fault  # seems to allow actuation on CR_Lkas_StrToqReq
-  values["CF_Lkas_MsgCount"] = frame % (0xF if can_canfd_hybrid else 0x10)
+  values["CF_Lkas_MsgCount"] = frame % (0xF if can_canfd_blended else 0x10)
 
   values["CF_Lkas_LdwsActivemode"] = int(left_lane) + (int(right_lane) << 1)
   values["CF_Lkas_FcwOpt_USM"] = 2 if enabled else 1
@@ -142,7 +142,7 @@ def create_lkas11_can_canfd_hybrid(packer, frame, CP, apply_steer, steer_req,
   dat = packer.make_can_msg("LKAS11", bus, values)[1]
 
   # CRC Checksum as seen on 2019 Hyundai Santa Fe
-  dat = dat[1:8] if can_canfd_hybrid else dat[:6] + dat[7:8]
+  dat = dat[1:8] if can_canfd_blended else dat[:6] + dat[7:8]
   checksum = hyundai_checksum(dat)
 
   values["CF_Lkas_Chksum"] = checksum
@@ -179,14 +179,14 @@ def create_clu11(packer, frame, clu11, button, CP, CAN):
 
 
 def create_lfahda_mfc(packer, frame, CP, enabled):
-  can_canfd_hybrid = CP.flags & HyundaiFlags.CAN_CANFD_BLENDED
-  bus = CanBus(CP).ECAN if can_canfd_hybrid else 0
+  can_canfd_blended = CP.flags & HyundaiFlags.CAN_CANFD_BLENDED
+  bus = CanBus(CP).ECAN if can_canfd_blended else 0
 
   values = {
     "LFA_Icon_State": 2 if enabled else 0,
   }
 
-  if can_canfd_hybrid:
+  if can_canfd_blended:
     values["COUNTER"] = frame % 0xF
 
     dat = packer.make_can_msg("LFAHDA_MFC", bus, values)[1]
