@@ -51,8 +51,8 @@ GEAR_MAP = [
 class CarControllerParams:
   STEER_MAX = 350
   STEER_STEP = 1
-  STEER_DELTA_UP = 4  # torque increase per refresh
-  STEER_DELTA_DOWN = 6  # torque decrease per refresh
+  STEER_DELTA_UP = 3  # torque increase per refresh
+  STEER_DELTA_DOWN = 5  # torque decrease per refresh
   STEER_DRIVER_ALLOWANCE = 15  # allowed driver torque before start limiting
   STEER_DRIVER_MULTIPLIER = 1  # weight driver torque
   STEER_DRIVER_FACTOR = 1
