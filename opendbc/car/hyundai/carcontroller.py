@@ -1,12 +1,11 @@
-import copy
+import numpy as np
 from opendbc.can.packer import CANPacker
-from opendbc.car import DT_CTRL, apply_driver_steer_torque_limits, common_fault_avoidance, make_tester_present_msg, structs
+from opendbc.car import Bus, DT_CTRL, apply_driver_steer_torque_limits, common_fault_avoidance, make_tester_present_msg, structs
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.common.numpy_fast import clip
 from opendbc.car.hyundai import hyundaicanfd, hyundaican
 from opendbc.car.hyundai.carstate import CarState
 from opendbc.car.hyundai.hyundaicanfd import CanBus
-from opendbc.car.hyundai.values import HyundaiFlags, Buttons, CarControllerParams, CANFD_CAR, CAR
+from opendbc.car.hyundai.values import HyundaiFlags, Buttons, CarControllerParams, CAR
 from opendbc.car.interfaces import CarControllerBase
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
@@ -44,11 +43,11 @@ def process_hud_alert(enabled, fingerprint, hud_control):
 
 
 class CarController(CarControllerBase):
-  def __init__(self, dbc_name, CP):
-    super().__init__(dbc_name, CP)
+  def __init__(self, dbc_names, CP):
+    super().__init__(dbc_names, CP)
     self.CAN = CanBus(CP)
     self.params = CarControllerParams(CP)
-    self.packer = CANPacker(dbc_name)
+    self.packer = CANPacker(dbc_names[Bus.pt])
     self.angle_limit_counter = 0
 
     self.accel_last = 0
@@ -78,7 +77,7 @@ class CarController(CarControllerBase):
     self.apply_steer_last = apply_steer
 
     # accel + longitudinal
-    accel = clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
+    accel = float(np.clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
     stopping = actuators.longControlState == LongCtrlState.stopping
     set_speed_in_units = hud_control.setSpeed * (CV.MS_TO_KPH if CS.is_metric else CV.MS_TO_MPH)
 
@@ -91,10 +90,10 @@ class CarController(CarControllerBase):
     # *** common hyundai stuff ***
 
     # tester present - w/ no response (keeps relevant ECU disabled)
-    if self.frame % 100 == 0 and not (self.CP.flags & HyundaiFlags.CANFD_CAMERA_SCC.value) and self.CP.openpilotLongitudinalControl:
+    if self.frame % 100 == 0 and not (self.CP.flags & HyundaiFlags.CANFD_CAMERA_SCC) and self.CP.openpilotLongitudinalControl:
       # for longitudinal control, either radar or ADAS driving ECU
       addr, bus = 0x7d0, 0
-      if self.CP.flags & HyundaiFlags.CANFD_HDA2.value:
+      if self.CP.flags & HyundaiFlags.CANFD_LKA_STEERING.value:
         addr, bus = 0x730, self.CAN.ECAN
       can_sends.append(make_tester_present_msg(addr, bus, suppress_response=True))
 
@@ -103,28 +102,28 @@ class CarController(CarControllerBase):
         can_sends.append(make_tester_present_msg(0x7b1, self.CAN.ECAN, suppress_response=True))
 
     # CAN-FD platforms
-    if self.CP.carFingerprint in CANFD_CAR:
-      hda2 = self.CP.flags & HyundaiFlags.CANFD_HDA2
-      hda2_long = hda2 and self.CP.openpilotLongitudinalControl
+    if self.CP.flags & HyundaiFlags.CANFD:
+      lka_steering = self.CP.flags & HyundaiFlags.CANFD_LKA_STEERING
+      lka_steering_long = lka_steering and self.CP.openpilotLongitudinalControl
 
       # steering control
       can_sends.extend(hyundaicanfd.create_steering_messages(self.packer, self.CP, self.CAN, CC.enabled, apply_steer_req, apply_steer))
 
-      # prevent LFA from activating on HDA2 by sending "no lane lines detected" to ADAS ECU
-      if self.frame % 5 == 0 and hda2:
-        can_sends.append(hyundaicanfd.create_suppress_lfa(self.packer, self.CAN, CS.hda2_lfa_block_msg,
-                                                          self.CP.flags & HyundaiFlags.CANFD_HDA2_ALT_STEERING))
+      # prevent LFA from activating on LKA steering cars by sending "no lane lines detected" to ADAS ECU
+      if self.frame % 5 == 0 and lka_steering:
+        can_sends.append(hyundaicanfd.create_suppress_lfa(self.packer, self.CAN, CS.lfa_block_msg,
+                                                          self.CP.flags & HyundaiFlags.CANFD_LKA_STEERING_ALT))
 
       # LFA and HDA icons
-      if self.frame % 5 == 0 and (not hda2 or hda2_long):
+      if self.frame % 5 == 0 and (not lka_steering or lka_steering_long):
         can_sends.append(hyundaicanfd.create_lfahda_cluster(self.packer, self.CAN, CC.enabled))
 
       # blinkers
-      if hda2 and self.CP.flags & HyundaiFlags.ENABLE_BLINKERS:
+      if lka_steering and self.CP.flags & HyundaiFlags.ENABLE_BLINKERS:
         can_sends.extend(hyundaicanfd.create_spas_messages(self.packer, self.CAN, self.frame, CC.leftBlinker, CC.rightBlinker))
 
       if self.CP.openpilotLongitudinalControl:
-        if hda2:
+        if lka_steering:
           can_sends.extend(hyundaicanfd.create_adrv_messages(self.packer, self.CAN, self.frame))
         if self.frame % 2 == 0:
           can_sends.append(hyundaicanfd.create_acc_control(self.packer, self.CAN, CC.enabled, self.accel_last, accel, stopping, CC.cruiseControl.override,
@@ -148,7 +147,7 @@ class CarController(CarControllerBase):
         use_fca = self.CP.flags & HyundaiFlags.USE_FCA.value
         can_sends.extend(hyundaican.create_acc_commands(self.packer, CC.enabled, accel, jerk, int(self.frame / 2),
                                                         hud_control, set_speed_in_units, stopping,
-                                                        CC.cruiseControl.override, use_fca))
+                                                        CC.cruiseControl.override, use_fca, self.CP))
 
       # 20 Hz LFA MFA message
       if self.frame % 5 == 0 and self.CP.flags & HyundaiFlags.SEND_LFA.value:
@@ -156,13 +155,13 @@ class CarController(CarControllerBase):
 
       # 5 Hz ACC options
       if self.frame % 20 == 0 and self.CP.openpilotLongitudinalControl:
-        can_sends.extend(hyundaican.create_acc_opt(self.packer))
+        can_sends.extend(hyundaican.create_acc_opt(self.packer, self.CP))
 
       # 2 Hz front radar options
       if self.frame % 50 == 0 and self.CP.openpilotLongitudinalControl:
         can_sends.append(hyundaican.create_frt_radar_opt(self.packer))
 
-    new_actuators = copy.copy(actuators)
+    new_actuators = actuators.as_builder()
     new_actuators.steer = apply_steer / self.params.STEER_MAX
     new_actuators.steerOutputCan = apply_steer
     new_actuators.accel = accel
