@@ -9,6 +9,11 @@
 
 #define BUILD_SAFETY_CFG(rx, tx) ((safety_config){(rx), (sizeof((rx)) / sizeof((rx)[0])), \
                                                   (tx), (sizeof((tx)) / sizeof((tx)[0]))})
+
+// filename will be generated containing the two fns
+// based on the comment between the following macros.
+#define GENERATE_SAFETY_CFG_INIT_HEADER(filename, fn_name) filename
+
 #define SET_RX_CHECKS(rx, config) \
   do { \
     (config).rx_checks = (rx); \
