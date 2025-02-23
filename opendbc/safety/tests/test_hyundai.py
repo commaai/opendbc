@@ -65,9 +65,6 @@ class TestHyundaiSafety(HyundaiButtonBase, common.PandaCarSafetyTest, common.Dri
   MAX_INVALID_STEERING_FRAMES = 2
   MIN_VALID_STEERING_RT_INTERVAL = 810000  # a ~10% buffer, can send steer up to 110Hz
 
-  PT_BUS = 0
-  STEER_BUS = 0
-
   cnt_gas = 0
   cnt_speed = 0
   cnt_brake = 0
