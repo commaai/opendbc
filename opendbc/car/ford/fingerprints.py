@@ -112,6 +112,7 @@ FW_VERSIONS = {
     (Ecu.eps, 0x730, None): [
       b'LJ9C-14D003-AM\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
       b'LJ9C-14D003-CC\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+      b'LJ9C-14D003-GA\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
     ],
     (Ecu.abs, 0x760, None): [
       b'LK9C-2D053-CK\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
@@ -121,6 +122,7 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdCamera, 0x706, None): [
       b'ML3T-14H102-ABS\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+      b'RJ6T-14H102-BAE\x00\x00\x00\x00\x00\x00\x00\x00\x00',
     ],
   },
   CAR.FORD_FOCUS_MK4: {
