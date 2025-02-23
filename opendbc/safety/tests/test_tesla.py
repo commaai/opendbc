@@ -103,6 +103,8 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     # We should not respect Autopark that activates while controls are allowed
     self.safety.set_controls_allowed(True)
 
+    # TODO: add MSG_APS_eacMonitor
+
     self._rx(self._pcm_status_msg(True, self.autopark_states["SELFPARK_STARTED"]))
     self.assertTrue(self.safety.get_controls_allowed())
     self.assertTrue(self._tx(self._angle_cmd_msg(0, False)))
