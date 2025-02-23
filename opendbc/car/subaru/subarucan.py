@@ -66,7 +66,7 @@ def create_es_distance(packer, frame, es_distance_msg, bus, pcm_cancel_cmd, long
   return packer.make_can_msg("ES_Distance", bus, values)
 
 
-def create_es_lkas_state(packer, frame, es_lkas_state_msg, enabled, visual_alert, left_line, right_line, left_lane_depart, right_lane_depart, lat_active):
+def create_es_lkas_state(packer, frame, es_lkas_state_msg, enabled, visual_alert, left_line, right_line, left_lane_depart, right_lane_depart):
   values = {s: es_lkas_state_msg[s] for s in [
     "CHECKSUM",
     "LKAS_Alert_Msg",
@@ -126,8 +126,6 @@ def create_es_lkas_state(packer, frame, es_lkas_state_msg, enabled, visual_alert
 
   values["LKAS_Left_Line_Visible"] = int(left_line)
   values["LKAS_Right_Line_Visible"] = int(right_line)
-
-  values["Signal3"] = 34611600 if lat_active else 1057168
 
   return packer.make_can_msg("ES_LKAS_State", CanBus.main, values)
 
