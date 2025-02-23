@@ -1216,4 +1216,19 @@ FW_VERSIONS = {
       b'\xf1\x00FE__ SCC FHCUP      1.00 1.05 99110-M5000         ',
     ],
   },
+  CAR.HYUNDAI_KONA_2022: {
+    (Ecu.fwdCamera, 0x7C4, None): [
+      b'\xf1\x00OSP LKA  AT USA LHD 1.00 1.04 99211-J9200 904',
+    ],
+    (Ecu.eps, 0x7D4, None): [
+      b'\xf1\x00OSP MDPS C 1.00 1.04 56310/J9291 4OPCC104',
+    ],
+    (Ecu.fwdRadar, 0x7D0, None): [
+      b'\xf1\x00YB__ FCA -----      1.00 1.01 99110-J9000      \x00\x00\x00',
+    ],
+    (Ecu.transmission, 0x7e1, None): [
+      b'\xf1\x00T01G00BL  T01I00A1  DOS2T16X4XI00NS0\x99L\xeeq',
+      b'\xf1\x00T01G00BL  T01I00A1  DOS2T16X2XI00NS0\x8c`\xff\xe7',
+    ],
+  },
 }
