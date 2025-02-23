@@ -100,12 +100,12 @@ class CarInterface(CarInterfaceBase):
         ret.flags |= HyundaiFlags.HAS_LDA_BUTTON.value
 
       if ret.flags & HyundaiFlags.CAN_CANFD_BLENDED:
-        ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_CAN_CANFD_HYBRID
+        ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CAN_CANFD_BLENDED.value
 
     # Common shared configuration
 
-    if ret.flags & HyundaiFlags.CANFD_HDA2:
-      ret.safetyConfigs[-1].safetyParam |= Panda.FLAG_HYUNDAI_CANFD_HDA2
+    if ret.flags & HyundaiFlags.CANFD_LKA_STEERING:
+      ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CANFD_LKA_STEERING.value
 
     # Common lateral control setup
 
@@ -144,7 +144,7 @@ class CarInterface(CarInterfaceBase):
     # Dashcam cars are missing a test route, or otherwise need validation
     # TODO: Optima Hybrid 2017 uses a different SCC12 checksum
     # TODO: Palisade/Telluride 2023-24 HDA2 will be supported in another PR
-    ret.dashcamOnly = candidate in {CAR.KIA_OPTIMA_H, } or (candidate in (CAR.HYUNDAI_PALISADE_2023, ) and hda2)
+    ret.dashcamOnly = candidate in {CAR.KIA_OPTIMA_H, } or (candidate in (CAR.HYUNDAI_PALISADE_2023, ) and lka_steering)
 
     return ret
 
