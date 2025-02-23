@@ -120,12 +120,12 @@ class CarState(CarStateBase):
       ret.cruiseState.standstill = False
       ret.cruiseState.nonAdaptive = False
     else:
-      scc_bus = "SCC12" if self.CP.flags & HyundaiFlags.CAN_CANFD_BLENDED else "SCC11"
-      ret.cruiseState.available = cp_cruise.vl[scc_bus]["MainMode_ACC"] == 1
+      scc_msg = "SCC12" if self.CP.flags & HyundaiFlags.CAN_CANFD_BLENDED else "SCC11"
+      ret.cruiseState.available = cp_cruise.vl[scc_msg]["MainMode_ACC"] == 1
       ret.cruiseState.enabled = cp_cruise.vl["SCC12"]["ACCMode"] != 0
-      ret.cruiseState.standstill = cp_cruise.vl[scc_bus]["SCCInfoDisplay"] == 4.
-      ret.cruiseState.nonAdaptive = cp_cruise.vl[scc_bus]["SCCInfoDisplay"] == 2.  # Shows 'Cruise Control' on dash
-      ret.cruiseState.speed = cp_cruise.vl[scc_bus]["VSetDis"] * speed_conv
+      ret.cruiseState.standstill = cp_cruise.vl[scc_msg]["SCCInfoDisplay"] == 4.
+      ret.cruiseState.nonAdaptive = cp_cruise.vl[scc_msg]["SCCInfoDisplay"] == 2.  # Shows 'Cruise Control' on dash
+      ret.cruiseState.speed = cp_cruise.vl[scc_msg]["VSetDis"] * speed_conv
 
     # TODO: Find brake pressure
     ret.brake = 0
