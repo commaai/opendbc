@@ -52,8 +52,8 @@ class CarControllerParams:
   BRAKE_LOOKUP_BP = [-3.5, 0]
   BRAKE_LOOKUP_V = [BRAKE_MAX, BRAKE_MIN]
 
-  ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0.], angle_v=[1.])
-  ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0.], angle_v=[1.])
+  ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0., 15., 15.], angle_v=[0., .8, .8])
+  ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0., 15., 15.], angle_v=[1., .4, .4])
 
 
 class SubaruSafetyFlags(IntFlag):
