@@ -18,7 +18,6 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
   FWD_BLACKLISTED_ADDRS = {2: [MSG_DAS_steeringControl, MSG_APS_eacMonitor]}
   TX_MSGS = [[MSG_DAS_steeringControl, 0], [MSG_APS_eacMonitor, 0], [MSG_DAS_Control, 0]]
 
-  LONGITUDINAL = False
   STANDSTILL_THRESHOLD = 0.1
   GAS_PRESSED_THRESHOLD = 3
   FWD_BUS_LOOKUP = {0: 2, 2: 0}
@@ -91,9 +90,6 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     # For common.LongitudinalAccelSafetyTest
     return self._long_control_msg(10, accel_limits=(accel, max(accel, 0)))
 
-  def test_accel_actuation_limits(self, stock_longitudinal=False):
-    super().test_accel_actuation_limits(not self.LONGITUDINAL)
-
   def test_vehicle_speed_measurements(self):
     # OVERRIDDEN: 79.1667 is the max speed in m/s
     self._common_measurement_test(self._speed_msg, 0, 285 / 3.6, common.VEHICLE_SPEED_FACTOR,
@@ -125,8 +121,6 @@ class TestTeslaStockSafety(TestTeslaSafetyBase):
 class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_DAS_steeringControl, MSG_APS_eacMonitor, MSG_DAS_Control)}
   FWD_BLACKLISTED_ADDRS = {2: [MSG_DAS_steeringControl, MSG_APS_eacMonitor, MSG_DAS_Control]}
-
-  LONGITUDINAL = True
 
   def setUp(self):
     super().setUp()
