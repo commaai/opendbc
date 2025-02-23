@@ -40,7 +40,6 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
     if (addr == 0x286) {
       // Autopark state
       int autopark_state = (GET_BYTE(to_push, 3) >> 1) & 0x0FU;  // DI_autoparkState
-      // Hand off from openpilot to Autopark can only happen while disabled TODO: add test
       // TODO: doing summon first, only seen these states
       bool tesla_autopark_now = (autopark_state == 2) ||  // STARTED (TODO: not seen)
                                 (autopark_state == 3) ||  // ACTIVE
