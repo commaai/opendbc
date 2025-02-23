@@ -549,7 +549,7 @@ class CAR(Platforms):
   GENESIS_GV70_1ST_GEN = HyundaiCanFDPlatformConfig(
     [
       # TODO: Hyundai P is likely the correct harness for HDA II for 2.5T (unsupported due to missing ADAS ECU, is that the radar?)
-      HyundaiCarDocs("Genesis GV70 (2.5T Trim, without HDA II) 2022-23", "All", car_parts=CarParts.common([CarHarness.hyundai_l])),
+      HyundaiCarDocs("Genesis GV70 (2.5T Trim, without HDA II) 2022-24", "All", car_parts=CarParts.common([CarHarness.hyundai_l])),
       HyundaiCarDocs("Genesis GV70 (3.5T Trim, without HDA II) 2022-23", "All", car_parts=CarParts.common([CarHarness.hyundai_m])),
     ],
     CarSpecs(mass=1950, wheelbase=2.87, steerRatio=14.6),
