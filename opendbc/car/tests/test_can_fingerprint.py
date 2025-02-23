@@ -1,16 +1,13 @@
-from parameterized import parameterized
-
 from opendbc.car.can_definitions import CanData
 from opendbc.car.car_helpers import FRAME_FINGERPRINT, can_fingerprint
 from opendbc.car.fingerprints import _FINGERPRINTS as FINGERPRINTS
 
 
 class TestCanFingerprint:
-  @parameterized.expand(list(FINGERPRINTS.items()))
-  def test_can_fingerprint(self, car_model, fingerprints):
+  def test_can_fingerprint(self):
     """Tests online fingerprinting function on offline fingerprints"""
-
-    for fingerprint in fingerprints:  # can have multiple fingerprints for each platform
+    for car_model,fingerprints in FINGERPRINTS.items():
+     for fingerprint in fingerprints:  # can have multiple fingerprints for each platform
       can = [CanData(address=address, dat=b'\x00' * length, src=src)
              for address, length in fingerprint.items() for src in (0, 1)]
 

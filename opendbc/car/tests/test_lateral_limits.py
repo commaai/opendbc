@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from collections import defaultdict
 import importlib
-from parameterized import parameterized_class
 import pytest
 import sys
 
@@ -20,12 +19,12 @@ MAX_LAT_JERK_UP_TOLERANCE = 0.5  # m/s^3
 JERK_MEAS_T = 0.5
 
 
-@parameterized_class('car_model', [(c,) for c in sorted(PLATFORMS)])
 class TestLateralLimits:
   car_model: str
 
   @classmethod
-  def setup_class(cls):
+  def setup_class(cls, car_model):
+    cls.car_model = car_model
     CarInterface, _, _, _ = interfaces[cls.car_model]
     CP = CarInterface.get_non_essential_params(cls.car_model)
 
@@ -85,9 +84,11 @@ class LatAccelReport:
 
   @pytest.fixture(scope="class", autouse=True)
   def class_setup(self, request):
-    yield
     cls = request.cls
-    if hasattr(cls, "control_params"):
+    for car_model in sorted(PLATFORMS):
+     cls.setup_class(car_model)
+     yield cls
+     if hasattr(cls, "control_params"):
       up_jerk, down_jerk = TestLateralLimits.calculate_0_5s_jerk(cls.control_params, cls.torque_params)
       self.car_model_jerks[cls.car_model] = {"up_jerk": up_jerk, "down_jerk": down_jerk}
 
