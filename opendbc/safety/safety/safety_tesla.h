@@ -9,7 +9,7 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
   int addr = GET_ADDR(to_push);
 
-  if (bus == 0) {Update safety_tesla.h
+  if (bus == 0) {
     // Steering angle: (0.1 * val) - 819.2 in deg.
     if (addr == 0x370) {
       // Store it 1/10 deg to match steering request
