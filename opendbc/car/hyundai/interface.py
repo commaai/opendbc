@@ -24,6 +24,7 @@ class CarInterface(CarInterfaceBase):
     CAN = CanBus(None, fingerprint, lka_steering)
 
     if ret.flags & HyundaiFlags.CANFD:
+      # Shared configuration for CAN-FD cars
       ret.experimentalLongitudinalAvailable = candidate not in (CANFD_UNSUPPORTED_LONGITUDINAL_CAR | CANFD_RADAR_SCC_CAR)
       if lka_steering and Ecu.adas not in [fw.ecu for fw in car_fw]:
         # this needs to be figured out for cars without an ADAS ECU
@@ -70,22 +71,28 @@ class CarInterface(CarInterfaceBase):
 
     else:
       # Shared configuration for non CAN-FD cars
+      pt_bus = CAN.ECAN if ret.flags & HyundaiFlags.CANFD else 0
+      cam_bus = CAN.CAM if ret.flags & HyundaiFlags.CANFD else 2
+
       ret.experimentalLongitudinalAvailable = candidate not in UNSUPPORTED_LONGITUDINAL_CAR
-      ret.enableBsm = 0x58b in fingerprint[0]
+      ret.enableBsm = 0x58b in fingerprint[pt_bus]
 
       # Send LFA message on cars with HDA
-      if 0x485 in fingerprint[2]:
+      if 0x485 in fingerprint[cam_bus]:
         ret.flags |= HyundaiFlags.SEND_LFA.value
 
       # These cars use the FCA11 message for the AEB and FCW signals, all others use SCC12
-      if 0x38d in fingerprint[0] or 0x38d in fingerprint[2]:
+      if 0x38d in fingerprint[pt_bus] or 0x38d in fingerprint[cam_bus]:
         ret.flags |= HyundaiFlags.USE_FCA.value
 
       if ret.flags & HyundaiFlags.LEGACY:
         # these cars require a special panda safety mode due to missing counters and checksums in the messages
         ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.hyundaiLegacy)]
       else:
-        ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.hyundai, 0)]
+        cfgs = [get_safety_config(structs.CarParams.SafetyModel.hyundai), ]
+        if CAN.ECAN >= 4:
+          cfgs.insert(0, get_safety_config(structs.CarParams.SafetyModel.noOutput))
+        ret.safetyConfigs = cfgs
 
       if ret.flags & HyundaiFlags.CAMERA_SCC:
         ret.safetyConfigs[0].safetyParam |= HyundaiSafetyFlags.CAMERA_SCC.value
@@ -93,6 +100,9 @@ class CarInterface(CarInterfaceBase):
       # These cars have the LFA button on the steering wheel
       if 0x391 in fingerprint[0]:
         ret.flags |= HyundaiFlags.HAS_LDA_BUTTON.value
+
+      if ret.flags & HyundaiFlags.CAN_CANFD_BLENDED:
+        ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CAN_CANFD_BLENDED.value
 
     # Common lateral control setup
 
@@ -136,7 +146,8 @@ class CarInterface(CarInterfaceBase):
 
     # Dashcam cars are missing a test route, or otherwise need validation
     # TODO: Optima Hybrid 2017 uses a different SCC12 checksum
-    ret.dashcamOnly = candidate in {CAR.KIA_OPTIMA_H, }
+    # TODO: Palisade/Telluride 2023-24 HDA2 will be supported in another PR
+    ret.dashcamOnly = candidate in {CAR.KIA_OPTIMA_H, } or (candidate in (CAR.HYUNDAI_PALISADE_2023, ) and lka_steering)
 
     return ret
 

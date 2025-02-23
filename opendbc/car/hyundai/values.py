@@ -32,6 +32,13 @@ class CarControllerParams:
       self.STEER_DELTA_UP = 2
       self.STEER_DELTA_DOWN = 3
 
+    elif CP.flags & HyundaiFlags.CAN_CANFD_BLENDED:
+      self.STEER_MAX = 384
+      self.STEER_DRIVER_ALLOWANCE = 250
+      self.STEER_THRESHOLD = 250
+      self.STEER_DELTA_UP = 2
+      self.STEER_DELTA_DOWN = 3
+
     # To determine the limit for your car, find the maximum value that the stock LKAS will request.
     # If the max stock LKAS request is <384, add your car to this list.
     elif CP.carFingerprint in (CAR.GENESIS_G80, CAR.HYUNDAI_ELANTRA, CAR.HYUNDAI_ELANTRA_GT_I30, CAR.HYUNDAI_IONIQ,
@@ -66,6 +73,7 @@ class HyundaiSafetyFlags(IntFlag):
   CANFD_LKA_STEERING_ALT = 128
   FCEV_GAS = 256
   ALT_LIMITS_2 = 512
+  CAN_CANFD_BLENDED = 1024
 
 
 class HyundaiFlags(IntFlag):
@@ -126,6 +134,8 @@ class HyundaiFlags(IntFlag):
 
   ALT_LIMITS_2 = 2 ** 26
 
+  CAN_CANFD_BLENDED = 2 ** 27
+
 
 class Footnote(Enum):
   CANFD = CarFootnote(
@@ -153,6 +163,9 @@ class HyundaiPlatformConfig(PlatformConfig):
 
     if self.flags & HyundaiFlags.MIN_STEER_32_MPH:
       self.specs = self.specs.override(minSteerSpeed=32 * CV.MPH_TO_MS)
+
+    if self.flags & HyundaiFlags.CAN_CANFD_BLENDED:
+      self.dbc_dict = {Bus.pt: 'hyundai_palisade_2023_generated'}
 
 
 @dataclass
@@ -334,6 +347,14 @@ class CAR(Platforms):
     ],
     CarSpecs(mass=1999, wheelbase=2.9, steerRatio=15.6 * 1.15, tireStiffnessFactor=0.63),
     flags=HyundaiFlags.MANDO_RADAR | HyundaiFlags.CHECKSUM_CRC8,
+  )
+  HYUNDAI_PALISADE_2023 = HyundaiPlatformConfig(
+    [
+      HyundaiCarDocs("Hyundai Palisade (without HDA II) 2023-24", "Highway Driving Assist", car_parts=CarParts.common([CarHarness.hyundai_a])),
+      HyundaiCarDocs("Kia Telluride (without HDA II) 2023-24", "Highway Driving Assist", car_parts=CarParts.common([CarHarness.hyundai_l])),
+    ],
+    HYUNDAI_PALISADE.specs,
+    flags=HyundaiFlags.CHECKSUM_CRC8 | HyundaiFlags.CAN_CANFD_BLENDED | HyundaiFlags.UNSUPPORTED_LONGITUDINAL,
   )
   HYUNDAI_VELOSTER = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Veloster 2019-20", min_enable_speed=5. * CV.MPH_TO_MS, car_parts=CarParts.common([CarHarness.hyundai_e]))],
@@ -627,7 +648,7 @@ def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str
   # Non-electric CAN FD platforms often do not have platform code specifiers needed
   # to distinguish between hybrid and ICE. All EVs so far are either exclusively
   # electric or specify electric in the platform code.
-  fuzzy_platform_blacklist = {str(c) for c in (CANFD_CAR - EV_CAR - CANFD_FUZZY_WHITELIST)}
+  fuzzy_platform_blacklist = {str(c) for c in (CANFD_CAR - CAN_CANFD_BLENDED_CAR - EV_CAR - CANFD_FUZZY_WHITELIST)}
   candidates: set[str] = set()
 
   for candidate, fws in offline_fw_versions.items():
@@ -788,6 +809,9 @@ CANFD_CAR = CAR.with_flags(HyundaiFlags.CANFD)
 CANFD_RADAR_SCC_CAR = CAR.with_flags(HyundaiFlags.RADAR_SCC)  # TODO: merge with UNSUPPORTED_LONGITUDINAL_CAR
 
 CANFD_UNSUPPORTED_LONGITUDINAL_CAR = CAR.with_flags(HyundaiFlags.CANFD_NO_RADAR_DISABLE)  # TODO: merge with UNSUPPORTED_LONGITUDINAL_CAR
+
+# These cars have both CAN and CAN-FD definitions required in openpilot
+CAN_CANFD_BLENDED_CAR = CAR.with_flags(HyundaiFlags.CAN_CANFD_BLENDED)
 
 CAMERA_SCC_CAR = CAR.with_flags(HyundaiFlags.CAMERA_SCC)
 
