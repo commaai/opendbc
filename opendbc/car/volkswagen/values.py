@@ -2,7 +2,7 @@ from collections import defaultdict, namedtuple
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag, StrEnum
 
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, AngleRateLimit, uds
 from opendbc.can.can_define import CANDefine
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car import structs
@@ -70,6 +70,43 @@ class CarControllerParams:
         "laneAssistUnavailNoSensorView": 3,  # "Lane Assist not available. No sensor view."
         "laneAssistTakeOver": 4,  # "Lane Assist: Please Take Over Steering"
         "laneAssistDeactivTrailer": 5,  # "Lane Assist: no function with trailer"
+      }
+
+    elif CP.flags & VolkswagenFlags.MEB:
+      self.LDW_STEP                        = 10    # LDW_02 message frequency 10Hz
+      self.ACC_HUD_STEP                    = 6     # MEB_ACC_01 message frequency 16Hz
+      self.STEER_DRIVER_ALLOWANCE          = 80    # Driver intervention threshold 0.6 Nm
+      self.STEERING_POWER_USER_REDUCTION   = 40    # HCA_03 driver intervention power reduction in percent
+      self.STEERING_POWER_MAX              = 125   # HCA_03 maximum steering power
+      self.STEERING_POWER_MIN              = 40    # HCA_03 minimum steering power
+      self.STEERING_POWER_STEPS            = 6     # HCA_03 steering power counter steps
+      self.CURVATURE_MAX                   = 0.195 # HCA_03 maximum curvature in 1/m
+      self.ANGLE_RATE_LIMIT_UP             = AngleRateLimit(speed_bp=[5., 25.], angle_v=[0.0015, 0.00015])  # curvature safety limit up
+      self.ANGLE_RATE_LIMIT_DOWN           = AngleRateLimit(speed_bp=[5., 25.], angle_v=[0.002, 0.00035])   # curvature safety limit down
+      self.CURVATURE_POWER_FACTOR          = 4000
+
+      self.shifter_values    = can_define.dv["Getriebe_11"]["GE_Fahrstufe"]
+      self.hca_status_values = can_define.dv["QFK_01"]["LatCon_HCA_Status"]
+
+      self.BUTTONS = [
+        Button(structs.CarState.ButtonEvent.Type.setCruise, "GRA_ACC_01", "GRA_Tip_Setzen", [1]),
+        Button(structs.CarState.ButtonEvent.Type.resumeCruise, "GRA_ACC_01", "GRA_Tip_Wiederaufnahme", [1]),
+        Button(structs.CarState.ButtonEvent.Type.accelCruise, "GRA_ACC_01", "GRA_Tip_Hoch", [1]),
+        Button(structs.CarState.ButtonEvent.Type.decelCruise, "GRA_ACC_01", "GRA_Tip_Runter", [1]),
+        #Button(structs.CarState.ButtonEvent.Type.cancel, "GRA_ACC_01", "GRA_Abbrechen", [1]), # there is no physical cancel button
+        Button(structs.CarState.ButtonEvent.Type.cancel, "GRA_ACC_01", "GRA_Hauptschalter", [1]), # main button cancels ACC operation when ACC active
+        Button(structs.CarState.ButtonEvent.Type.gapAdjustCruise, "GRA_ACC_01", "GRA_Verstellung_Zeitluecke", [3]),
+      ]
+
+      self.LDW_MESSAGES = {
+        "none": 0,                        # Nothing to display
+        "laneAssistTakeOverUrgent": 4,    # "Lane Assist: Please Take Over Steering" (red)
+        "laneAssistTakeOver": 8,          # "Lane Assist: Please Take Over Steering" (white)
+      }
+      self.LDW_SOUNDS = {
+        "None": 0,                        # No sound
+        "Chime": 1,                       # Play a chime
+        "Beep": 2,                        # Play a loud beep
       }
 
     else:
@@ -143,6 +180,7 @@ class VolkswagenFlags(IntFlag):
 
   # Static flags
   PQ = 2
+  MEB = 4
 
 
 @dataclass
@@ -152,6 +190,19 @@ class VolkswagenMQBPlatformConfig(PlatformConfig):
   # on camera-integrated cars, as we lose too many ECUs to reliably identify the vehicle
   chassis_codes: set[str] = field(default_factory=set)
   wmis: set[WMI] = field(default_factory=set)
+
+
+@dataclass
+class VolkswagenMEBPlatformConfig(PlatformConfig):
+  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'vw_meb', Bus.radar: 'vw_meb'})
+  # Volkswagen uses the VIN WMI and chassis code to match in the absence of the comma power
+  # on camera-integrated cars, as we lose too many ECUs to reliably identify the vehicle
+  chassis_codes: set[str] = field(default_factory=set)
+  wmis: set[WMI] = field(default_factory=set)
+
+  def init(self):
+    # TODO: add VolkswagenFlags.STOCK_HCA_PRESENT for EA mitigation once we have a torque substitute to send
+    self.flags |= VolkswagenFlags.MEB
 
 
 @dataclass
@@ -188,6 +239,9 @@ class Footnote(Enum):
     "Model-years 2022 and beyond may have a combined CAN gateway and BCM, which is supported by openpilot " +
     "in software, but doesn't yet have a harness available from the comma store.",
     Column.HARDWARE)
+  VW_MEB = CarFootnote(
+    "Volkswagen MEB plattform is using CAN-FD, which is supported by comma 3x or red panda.",
+    Column.HARDWARE)
 
 
 @dataclass
@@ -200,7 +254,9 @@ class VWCarDocs(CarDocs):
     if "SKODA" in CP.carFingerprint:
       self.footnotes.append(Footnote.SKODA_HEATED_WINDSHIELD)
 
-    if CP.carFingerprint in (CAR.VOLKSWAGEN_CRAFTER_MK2, CAR.VOLKSWAGEN_TRANSPORTER_T61):
+    if CP.flags & VolkswagenFlags.MEB:
+      self.car_parts = CarParts.common([CarHarness.vw_c])
+    elif CP.carFingerprint in (CAR.VOLKSWAGEN_CRAFTER_MK2, CAR.VOLKSWAGEN_TRANSPORTER_T61):
       self.car_parts = CarParts([Device.threex_angled_mount, CarHarness.vw_j533])
 
     if abs(CP.minSteerSpeed - CarControllerParams.DEFAULT_MIN_STEER_SPEED) < 1e-3:
@@ -212,7 +268,7 @@ class VWCarDocs(CarDocs):
 # FW_VERSIONS for that existing CAR.
 
 class CAR(Platforms):
-  config: VolkswagenMQBPlatformConfig | VolkswagenPQPlatformConfig
+  config: VolkswagenMQBPlatformConfig | VolkswagenPQPlatformConfig | VolkswagenMEBPlatformConfig
 
   VOLKSWAGEN_ARTEON_MK1 = VolkswagenMQBPlatformConfig(
     [
@@ -273,6 +329,12 @@ class CAR(Platforms):
     VolkswagenCarSpecs(mass=1397, wheelbase=2.62),
     chassis_codes={"5G", "AU", "BA", "BE"},
     wmis={WMI.VOLKSWAGEN_MEXICO_CAR, WMI.VOLKSWAGEN_EUROPE_CAR},
+  )
+  VOLKSWAGEN_ID4_MK1 = VolkswagenMEBPlatformConfig(
+    [VWCarDocs("Volkswagen ID.4 2021-25", footnotes=[Footnote.VW_MEB])],
+    VolkswagenCarSpecs(mass=2099, wheelbase=2.77),
+    chassis_codes={"E2", "E8"},
+    wmis={WMI.VOLKSWAGEN_EUROPE_CAR, WMI.VOLKSWAGEN_USA_SUV},
   )
   VOLKSWAGEN_JETTA_MK6 = VolkswagenPQPlatformConfig(
     [VWCarDocs("Volkswagen Jetta 2015-18")],
