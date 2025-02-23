@@ -505,10 +505,10 @@ BO_ 564 MEB_Camera_02: 64 XXX
 BO_ 588 MEB_Side_Assist_01: 16 XXX
  SG_ Blind_Spot_Right : 12|7@1+ (1,0) [0|15] "" XXX
  SG_ Blind_Spot_Left : 19|7@1+ (1,0) [0|15] "" XXX
- SG_ Blind_Spot_Warn_Right : 26|1@0+ (1,0) [0|1] "" XXX
- SG_ Blind_Spot_Pre_Warn_Right : 27|1@0+ (1,0) [0|1] "" XXX
- SG_ Blind_Spot_Warn_Left : 29|1@0+ (1,0) [0|1] "" XXX
- SG_ Blind_Spot_Pre_Warn_Left : 30|1@0+ (1,0) [0|1] "" XXX
+ SG_ Blind_Spot_Info_Right : 26|1@0+ (1,0) [0|1] "" XXX
+ SG_ Blind_Spot_Warn_Right : 27|1@0+ (1,0) [0|1] "" XXX
+ SG_ Blind_Spot_Info_Left : 29|1@0+ (1,0) [0|1] "" XXX
+ SG_ Blind_Spot_Warn_Left : 30|1@0+ (1,0) [0|1] "" XXX
  SG_ Lower_Speed_01 : 32|1@0+ (1,0) [0|1] "" XXX
  SG_ Higher_Speed_01 : 33|1@0+ (1,0) [0|1] "" XXX
  SG_ Higher_Speed_02 : 83|1@0+ (1,0) [0|1] "" XXX
