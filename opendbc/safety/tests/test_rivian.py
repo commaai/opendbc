@@ -55,5 +55,9 @@ class TestRivianSafety(common.PandaCarSafetyTest, common.DriverTorqueSteeringSaf
     values = {"ACM_FeatureStatus": enable}
     return self.packer.make_can_msg_panda("ACM_Status", 2, values)
 
+  def _vehicle_moving_msg(self, speed: float):
+    values = {"ESP_Vehicle_Speed": speed}
+    return self.packer.make_can_msg_panda("ESP_Status", 0, values)
+
 if __name__ == "__main__":
   unittest.main()
