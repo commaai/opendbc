@@ -32,6 +32,9 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *to_push) {
   const int pt_bus = hyundai_canfd_lka_steering ? 1 : 0;
   const int scc_bus = hyundai_camera_scc ? 2 : pt_bus;
 
+  // TODO: this a bug? this what checks was using.
+  // const int8_t scc_bus = hyundai_canfd_lka_steering ? 1 : hyundai_camera_scc ? 2 : 0;
+
   if (bus == pt_bus) {
     // driver torque
     if (addr == 0xea) {
@@ -205,6 +208,106 @@ static int hyundai_canfd_fwd_hook(int bus_num, int addr) {
   return bus_fwd;
 }
 
+/*
+
+
+*/
+
+/*****************
+RX_CHECKS_CONFIG = [
+  # Common.
+  {
+    DEFAULT:
+      """
+      {.msg = {{0x175, (pt_bus), 24, .check_checksum = true, .max_counter = 0xffU, .frequency = 50U}, { 0 }, { 0 }}},
+      {.msg = {{0xa0, (pt_bus), 24, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U}, { 0 }, { 0 }}},
+      {.msg = {{0xea, (pt_bus), 24, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U}, { 0 }, { 0 }}},
+      """
+  }
+  # Accel.
+  {
+    "hyundai_ev_gas_signal":
+      """
+      {.msg = {{0x35, (pt_bus), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U}, { 0 }, { 0 }}},
+      """
+    "hyundai_hybrid_gas_signal":
+      """
+      {.msg = {{0x105, (pt_bus), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U}, { 0 }, { 0 }}},
+      """
+    DEFAULT:
+      """
+      {.msg = {{0x100, (pt_bus), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U}, { 0 }, { 0 }}},
+      """
+  },
+
+  # Cruise.
+  {
+    "hyundai_canfd_alt_buttons":
+      """
+      {.msg = {{0x1aa, (pt_bus), 16, .check_checksum = false, .max_counter = 0xffU, .frequency = 50U}, { 0 }, { 0 }}},
+      """
+    DEFAULT:
+      """
+      {.msg = {{0x1cf, (pt_bus), 8, .check_checksum = false, .max_counter = 0xfU, .frequency = 50U}, { 0 }, { 0 }}},
+      """
+  },
+
+  # SCC.
+  {
+    "hyundai_longitudinal":
+      # SCC_CONTROL sent, not read.
+      """"
+      {0},
+      """
+    DEFAULT:
+      # SCC_CONTROL read.
+      """
+      {.msg = {{0x1a0, (scc_bus), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 50U}, { 0 }, { 0 }}},
+      """
+  },
+]
+
+def gen_checks():
+  config_strs = []
+  for key_val_pairs in itertools.product(*[list(conf.items()) for conf in RX_CHECKS_CONFIG]):
+    checks = {}
+    for key, val in key_val_pairs:
+      checks[key] = val
+    config_str = ""
+    for check in checks:
+      if check is None:
+        continue
+      config_str += check
+    config_strs.append(config_str)
+  return "\n".join(config_strs)
+
+
+def get_rx_checks(hyundai_ev_gas_signal, hyundai_hybrid_gas_signal, hyundai_canfd_alt_buttons, hyundai_longitudinal):
+
+
+*****************/
+
+static RxCheck* get_rx_checks() {
+  int pt_bus = 1;
+  int scc_bus = 2;
+  static RxCheck foo[] = {
+      {.msg = {{0x175, (pt_bus), 24, .check_checksum = true, .max_counter = 0xffU, .frequency = 50U}, { 0 }, { 0 }}},
+      {.msg = {{0xa0, (pt_bus), 24, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U}, { 0 }, { 0 }}},
+      {.msg = {{0xea, (pt_bus), 24, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U}, { 0 }, { 0 }}},
+
+
+      {.msg = {{0x100, (pt_bus), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U}, { 0 }, { 0 }}},
+
+
+      {.msg = {{0x1cf, (pt_bus), 8, .check_checksum = false, .max_counter = 0xfU, .frequency = 50U}, { 0 }, { 0 }}},
+
+
+      {.msg = {{0x1a0, (scc_bus), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 50U}, { 0 }, { 0 }}},
+
+        };
+  return foo;
+}
+
 static safety_config hyundai_canfd_init(uint16_t param) {
   const int HYUNDAI_PARAM_CANFD_LKA_STEERING_ALT = 128;
   const int HYUNDAI_PARAM_CANFD_ALT_BUTTONS = 32;
@@ -245,7 +348,6 @@ static safety_config hyundai_canfd_init(uint16_t param) {
     {0x1E0, 0, 16}, // LFAHDA_CLUSTER
   };
 
-
   hyundai_common_init(param);
 
   gen_crc_lookup_table_16(0x1021, hyundai_canfd_crc_lut);
@@ -258,7 +360,6 @@ static safety_config hyundai_canfd_init(uint16_t param) {
   }
 
   safety_config ret = safety_config_init();
-
   // RX Common checks.
   const int pt_bus = hyundai_canfd_lka_steering ? 1 : 0;
   add_rx_check(&ret, (RxCheck){.msg = {{0x175, (pt_bus), 24, .check_checksum = true, .max_counter = 0xffU, .frequency = 50U}, { 0 }, { 0 }}});
@@ -288,6 +389,10 @@ static safety_config hyundai_canfd_init(uint16_t param) {
     const int8_t scc_bus = hyundai_canfd_lka_steering ? 1 : hyundai_camera_scc ? 2 : 0;
     add_rx_check(&ret, (RxCheck){.msg = {{0x1a0, (scc_bus), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 50U}, { 0 }, { 0 }}});
   }
+
+  //static const RxCheck RX_CHECKS[] = rx_checks();
+  //RX_CHECKS
+  //rx_checks();
 
   // TX checks.
   if (hyundai_longitudinal) {
