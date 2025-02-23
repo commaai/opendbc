@@ -80,9 +80,7 @@ class TestHyundaiSafety(HyundaiButtonBase, common.PandaCarSafetyTest, common.Dri
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, 0)
     self.safety.init_tests()
 
-  def _button_msg(self, buttons, main_button=0, bus=None):
-    if bus is None:
-      bus = self.PT_BUS
+  def _button_msg(self, buttons, main_button=0, bus=0):
     values = {"CF_Clu_CruiseSwState": buttons, "CF_Clu_CruiseSwMain": main_button, "CF_Clu_AliveCnt1": self.cnt_button}
     self.__class__.cnt_button += 1
     return self.packer.make_can_msg_panda("CLU11", bus, values)
@@ -90,13 +88,13 @@ class TestHyundaiSafety(HyundaiButtonBase, common.PandaCarSafetyTest, common.Dri
   def _user_gas_msg(self, gas):
     values = {"CF_Ems_AclAct": gas, "AliveCounter": self.cnt_gas % 4}
     self.__class__.cnt_gas += 1
-    return self.packer.make_can_msg_panda("EMS16", self.PT_BUS, values, fix_checksum=checksum)
+    return self.packer.make_can_msg_panda("EMS16", 0, values, fix_checksum=checksum)
 
   def _user_brake_msg(self, brake):
     values = {"DriverOverride": 2 if brake else random.choice((0, 1, 3)),
               "AliveCounterTCS": self.cnt_brake % 8}
     self.__class__.cnt_brake += 1
-    return self.packer.make_can_msg_panda("TCS13", self.PT_BUS, values, fix_checksum=checksum)
+    return self.packer.make_can_msg_panda("TCS13", 0, values, fix_checksum=checksum)
 
   def _speed_msg(self, speed):
     # panda safety doesn't scale, so undo the scaling
@@ -104,7 +102,7 @@ class TestHyundaiSafety(HyundaiButtonBase, common.PandaCarSafetyTest, common.Dri
     values["WHL_SPD_AliveCounter_LSB"] = (self.cnt_speed % 16) & 0x3
     values["WHL_SPD_AliveCounter_MSB"] = (self.cnt_speed % 16) >> 2
     self.__class__.cnt_speed += 1
-    return self.packer.make_can_msg_panda("WHL_SPD11", self.PT_BUS, values, fix_checksum=checksum)
+    return self.packer.make_can_msg_panda("WHL_SPD11", 0, values, fix_checksum=checksum)
 
   def _pcm_status_msg(self, enable):
     values = {"ACCMode": enable, "CR_VSM_Alive": self.cnt_cruise % 16}
@@ -113,11 +111,11 @@ class TestHyundaiSafety(HyundaiButtonBase, common.PandaCarSafetyTest, common.Dri
 
   def _torque_driver_msg(self, torque):
     values = {"CR_Mdps_StrColTq": torque}
-    return self.packer.make_can_msg_panda("MDPS12", self.PT_BUS, values)
+    return self.packer.make_can_msg_panda("MDPS12", 0, values)
 
   def _torque_cmd_msg(self, torque, steer_req=1):
     values = {"CR_Lkas_StrToqReq": torque, "CF_Lkas_ActToi": steer_req}
-    return self.packer.make_can_msg_panda("LKAS11", self.STEER_BUS, values)
+    return self.packer.make_can_msg_panda("LKAS11", 0, values)
 
 
 class TestHyundaiSafetyAltLimits(TestHyundaiSafety):
