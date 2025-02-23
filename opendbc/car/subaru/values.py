@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, AngleRateLimit, uds
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Tool, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
@@ -52,11 +52,15 @@ class CarControllerParams:
   BRAKE_LOOKUP_BP = [-3.5, 0]
   BRAKE_LOOKUP_V = [BRAKE_MAX, BRAKE_MIN]
 
+  ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0., 15., 15.], angle_v=[5., .8, .8])
+  ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0., 15., 15.], angle_v=[5., .4, .4])
+
 
 class SubaruSafetyFlags(IntFlag):
   GEN2 = 1
   LONG = 2
   PREGLOBAL_REVERSED_DRIVER_TORQUE = 4
+  ANGLE = 8
 
 
 class SubaruFlags(IntFlag):
