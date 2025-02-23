@@ -81,7 +81,7 @@ class CarState(CarStateBase):
     if self.CP.flags & SubaruFlags.LKAS_ANGLE:
       ret.cruiseState.enabled = cp_cam.vl["ES_CruiseControl"]['Cruise_Activated'] != 0
       ret.cruiseState.available = cp_cam.vl["ES_DashStatus"]['Cruise_On'] != 0
-    elif self.CP.flags & SubaruFlags.HYBRID :
+    elif self.CP.flags & SubaruFlags.HYBRID:
       ret.cruiseState.enabled = cp_cam.vl["ES_DashStatus"]['Cruise_Activated'] != 0 # FIXME: this is false on gas overrides
       ret.cruiseState.available = cp_cam.vl["ES_DashStatus"]['Cruise_On'] != 0
     else:
@@ -209,7 +209,7 @@ class CarState(CarStateBase):
         cam_messages += CarState.get_common_global_es_messages(CP)
 
       if CP.flags & SubaruFlags.LKAS_ANGLE:
-        cam_messages += [("ES_CruiseControl", 20)]
+        cam_messages.append(("ES_CruiseControl", 20))
 
       if CP.flags & SubaruFlags.SEND_INFOTAINMENT:
         cam_messages.append(("ES_Infotainment", 10))
