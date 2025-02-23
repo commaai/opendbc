@@ -403,7 +403,7 @@ BO_ 896 EPAS_SystemStatus: 5 EPAS_P
  SG_ EPAS_SteeringReduced : 12|1@0+ (1,0) [0|1] "" ACM,VDM
  SG_ EPAS_SteeringFault : 13|1@0+ (1,0) [0|1] "" ACM,VDM
  SG_ EPAS_SteeringMode : 15|2@0+ (1,0) [0|3] "" ACM,VDM
- SG_ EPAS_TorsionBarTorque : 23|12@0+ (0.01,-20.5) [-20.49|20.43] "" ACM,VDM
+ SG_ EPAS_TorsionBarTorque : 23|12@0+ (1,-2050) [-2049|2043] "" ACM,VDM
  SG_ EPAS_StcFault : 32|1@0+ (1,0) [0|1] "" ACM,VDM
  SG_ EPAS_StcActive : 33|1@0+ (1,0) [0|1] "" ACM,VDM
  SG_ EPAS_StcUnavailable : 34|1@0+ (1,0) [0|1] "" ACM,VDM
