@@ -208,7 +208,7 @@ class TestHyundaiCanCanfdBlendedSafety(TestHyundaiSafety):
   def _pcm_status_msg(self, enable):
     values = {"ACCMode": enable, "CR_VSM_Alive": self.cnt_cruise % 16}
     self.__class__.cnt_cruise += 1
-    return self.packer.make_can_msg_panda("SCC12", self.SCC_BUS, values)
+    return self.packer.make_can_msg_panda("SCC12", 0, values)
 
 
 class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
