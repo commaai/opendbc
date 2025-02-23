@@ -52,6 +52,11 @@ class CarControllerParams:
       self.STEER_DELTA_UP = 2
       self.STEER_DELTA_DOWN = 3
 
+    elif CP.flags & HyundaiFlags.ALT_LIMITS_2:
+      self.STEER_MAX = 170
+      self.STEER_DELTA_UP = 2
+      self.STEER_DELTA_DOWN = 3
+
     # Default for most HKG
     else:
       self.STEER_MAX = 384
@@ -67,7 +72,8 @@ class HyundaiSafetyFlags(IntFlag):
   ALT_LIMITS = 64
   CANFD_LKA_STEERING_ALT = 128
   FCEV_GAS = 256
-  CAN_CANFD_BLENDED = 512
+  ALT_LIMITS_2 = 512
+  CAN_CANFD_BLENDED = 1024
 
 
 class HyundaiFlags(IntFlag):
@@ -126,7 +132,9 @@ class HyundaiFlags(IntFlag):
 
   FCEV = 2 ** 25
 
-  CAN_CANFD_BLENDED = 2 ** 26
+  ALT_LIMITS_2 = 2 ** 26
+
+  CAN_CANFD_BLENDED = 2 ** 27
 
 
 class Footnote(Enum):
@@ -254,6 +262,11 @@ class CAR(Platforms):
     [HyundaiCarDocs("Hyundai Kona 2020", min_enable_speed=6 * CV.MPH_TO_MS, car_parts=CarParts.common([CarHarness.hyundai_b]))],
     CarSpecs(mass=1275, wheelbase=2.6, steerRatio=13.42, tireStiffnessFactor=0.385),
     flags=HyundaiFlags.CLUSTER_GEARS | HyundaiFlags.ALT_LIMITS,
+  )
+  HYUNDAI_KONA_2022 = HyundaiPlatformConfig(
+    [HyundaiCarDocs("Hyundai Kona 2022", car_parts=CarParts.common([CarHarness.hyundai_o]))],
+    CarSpecs(mass=1491, wheelbase=2.6, steerRatio=13.42, tireStiffnessFactor=0.385),
+    flags=HyundaiFlags.CAMERA_SCC,
   )
   HYUNDAI_KONA_EV = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Kona Electric 2018-21", car_parts=CarParts.common([CarHarness.hyundai_g]))],
