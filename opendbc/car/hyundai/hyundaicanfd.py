@@ -172,6 +172,7 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
   })
 
   # LFAHDA_CLUSTER
+  # todo: do we need this?
   lfahda_cluster = {
     "NEW_SIGNAL_5": 1,
     "LFA_ICON": 2 if enabled else 0,
