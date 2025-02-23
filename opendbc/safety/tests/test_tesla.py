@@ -3,6 +3,7 @@ import unittest
 
 from opendbc.car.tesla.values import TeslaSafetyFlags
 from opendbc.car.structs import CarParams
+from opendbc.can.can_define import CANDefine
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerPanda
@@ -40,6 +41,11 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     if cls.__name__ == "TestTeslaSafetyBase":
       raise unittest.SkipTest
 
+  def setUp(self):
+    self.packer = CANPackerPanda("tesla_model3_party")
+    self.define = CANDefine("tesla_model3_party")
+    self.acc_states = {d: v for v, d in self.define.dv["DAS_control"]["DAS_accState"].items()}
+
   def _angle_cmd_msg(self, angle: float, enabled: bool):
     values = {"DAS_steeringAngleRequest": angle, "DAS_steeringControlType": 1 if enabled else 0}
     return self.packer.make_can_msg_panda("DAS_steeringControl", 0, values)
@@ -68,10 +74,10 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     values = {"DI_cruiseState": 2 if enable else 0}
     return self.packer.make_can_msg_panda("DI_state", 0, values)
 
-  def _long_control_msg(self, set_speed, acc_val=0, jerk_limits=(0, 0), accel_limits=(0, 0), aeb_event=0, bus=0):
+  def _long_control_msg(self, set_speed, acc_state=0, jerk_limits=(0, 0), accel_limits=(0, 0), aeb_event=0, bus=0):
     values = {
       "DAS_setSpeed": set_speed,
-      "DAS_accState": acc_val,
+      "DAS_accState": acc_state,
       "DAS_aebEvent": aeb_event,
       "DAS_jerkMin": jerk_limits[0],
       "DAS_jerkMax": jerk_limits[1],
@@ -92,25 +98,24 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
 class TestTeslaStockSafety(TestTeslaSafetyBase):
 
+  LONGITUDINAL = False
+
   def setUp(self):
-    self.packer = CANPackerPanda("tesla_model3_party")
+    super().setUp()
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.tesla, 0)
     self.safety.init_tests()
 
-  def test_accel_actuation_limits(self, stock_longitudinal=True):
-    super().test_accel_actuation_limits(stock_longitudinal)
-
   def test_cancel(self):
-    for accval in range(16):
+    for acc_state in range(16):
       self.safety.set_controls_allowed(True)
-      should_tx = accval == 13  # ACC_CANCEL_GENERIC_SILENT
-      self.assertFalse(self._tx(self._long_control_msg(0, acc_val=accval, accel_limits=(self.MIN_ACCEL, self.MAX_ACCEL))))
-      self.assertEqual(should_tx, self._tx(self._long_control_msg(0, acc_val=accval)))
+      should_tx = acc_state == self.acc_states["ACC_CANCEL_GENERIC_SILENT"]
+      self.assertFalse(self._tx(self._long_control_msg(0, acc_state=acc_state, accel_limits=(self.MIN_ACCEL, self.MAX_ACCEL))))
+      self.assertEqual(should_tx, self._tx(self._long_control_msg(0, acc_state=acc_state)))
 
   def test_no_aeb(self):
     for aeb_event in range(4):
-      self.assertEqual(self._tx(self._long_control_msg(10, acc_val=13, aeb_event=aeb_event)), aeb_event == 0)
+      self.assertEqual(self._tx(self._long_control_msg(10, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"], aeb_event=aeb_event)), aeb_event == 0)
 
 
 class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
@@ -118,7 +123,7 @@ class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
   FWD_BLACKLISTED_ADDRS = {2: [MSG_DAS_steeringControl, MSG_APS_eacMonitor, MSG_DAS_Control]}
 
   def setUp(self):
-    self.packer = CANPackerPanda("tesla_model3_party")
+    super().setUp()
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.tesla, TeslaSafetyFlags.LONG_CONTROL)
     self.safety.init_tests()
