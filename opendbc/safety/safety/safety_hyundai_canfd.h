@@ -14,7 +14,6 @@
   {.msg = {{0xea, (pt_bus), 24, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U}, { 0 }, { 0 }}},   \
   {.msg = {{0x1cf, (pt_bus), 8, .check_checksum = false, .max_counter = 0xfU, .frequency = 50U},                    \
            {0x1aa, (pt_bus), 16, .check_checksum = false, .max_counter = 0xffU, .frequency = 50U}, { 0 }}},         \
-  {.msg = {{0x125, (pt_bus), 16, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U}, { 0 }, { 0 }}},  \
 
 // SCC_CONTROL (from ADAS unit or camera)
 #define HYUNDAI_CANFD_SCC_ADDR_CHECK(scc_bus)                                                                                 \
@@ -51,18 +50,15 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *to_push) {
   const int scc_bus = hyundai_camera_scc ? 2 : pt_bus;
 
   if (bus == pt_bus) {
-    // driver torque
     if (addr == 0xea) {
+      // driver torque
       int torque_driver_new = ((GET_BYTE(to_push, 11) & 0x1fU) << 8U) | GET_BYTE(to_push, 10);
       torque_driver_new -= 4095;
       update_sample(&torque_driver, torque_driver_new);
-    }
 
-    // steering angle
-    if (addr == 0x125) {
-      // Factor -0.1
-      int angle_meas_new = ((GET_BYTE(to_push, 3) << 8) | GET_BYTE(to_push, 4));
-      // Multiply by -10 to match scale of STEERING_ANGLE
+      // steering angle
+      int angle_meas_new = ((GET_BYTE(to_push, 12) << 8) | GET_BYTE(to_push, 13));
+      // Multiply by -10 to apply the DBC scaling factor of -0.1 for STEERING_ANGLE
       angle_meas_new = to_signed(angle_meas_new, 16) * -10;
       update_sample(&angle_meas, angle_meas_new);
     }
