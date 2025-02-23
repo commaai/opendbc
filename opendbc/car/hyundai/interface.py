@@ -24,8 +24,11 @@ class CarInterface(CarInterfaceBase):
     CAN = CanBus(None, fingerprint, lka_steering)
 
     if ret.flags & HyundaiFlags.CANFD:
-      # Shared configuration for CAN-FD cars
       ret.experimentalLongitudinalAvailable = candidate not in (CANFD_UNSUPPORTED_LONGITUDINAL_CAR | CANFD_RADAR_SCC_CAR)
+      if lka_steering and Ecu.adas not in [fw.ecu for fw in car_fw]:
+        # this needs to be figured out for cars without an ADAS ECU
+        ret.experimentalLongitudinalAvailable = False
+
       ret.enableBsm = 0x1e5 in fingerprint[CAN.ECAN]
 
       if 0x105 in fingerprint[CAN.ECAN]:
