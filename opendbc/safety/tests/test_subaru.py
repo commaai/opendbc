@@ -188,10 +188,10 @@ class TestSubaruAngleSafetyBase(TestSubaruSafetyBase, common.AngleSteeringSafety
     values = {"Steering_Angle": angle}
     return self.packer.make_can_msg_panda("Steering_Torque", 0, values)
 
-  # need to use ES_DashStatus Message
+  # need to use ES_CruiseControl Message
   def _pcm_status_msg(self, enable):
     values = {"Cruise_Activated": enable}
-    return self.packer.make_can_msg_panda("ES_DashStatus", self.ALT_CAM_BUS, values)
+    return self.packer.make_can_msg_panda("ES_CruiseControl", self.ALT_CAM_BUS, values)
 
 
 class TestSubaruGen2AngleSafetyBase(TestSubaruAngleSafetyBase):
