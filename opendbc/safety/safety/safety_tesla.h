@@ -49,7 +49,7 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
   }
 
   if (bus == 2) {
-    if (tesla_longitudinal && (addr == 0x2b9)) {
+    if (addr == 0x2b9) {
       // "AEB_ACTIVE"
       tesla_stock_aeb = (GET_BYTE(to_push, 2) & 0x03U) == 1U;
     }
@@ -128,7 +128,12 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
       violation |= longitudinal_accel_checks(raw_accel_max, TESLA_LONG_LIMITS);
       violation |= longitudinal_accel_checks(raw_accel_min, TESLA_LONG_LIMITS);
     } else {
-      // does allowing cancel here disrupt stock AEB? TODO: find out and add safety or remove comment
+      // No cancel longitudinal message when stock AEB is active
+      // TODO test
+      if (tesla_stock_aeb) {
+        violation = true;
+      }
+      
       // Can only send cancel longitudinal messages when not controlling longitudinal
       if (acc_state != 13) {  // ACC_CANCEL_GENERIC_SILENT
         violation = true;
