@@ -120,8 +120,6 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
     int acc_state = GET_BYTE(to_send, 1) >> 4;
 
     if (tesla_longitudinal) {
-      
-
       // Prevent both acceleration from being negative, as this could cause the car to reverse after coming to standstill
       if ((raw_accel_max < TESLA_LONG_LIMITS.inactive_accel) && (raw_accel_min < TESLA_LONG_LIMITS.inactive_accel)) {
         violation = true;
