@@ -138,7 +138,7 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
   hud = CC.hudControl
 
   # HIDE FAULTS
-  for f in ("FAULT_LSS", "FAULT_HDA", "FAULT_DAS", "FAULT_LFA"):
+  for f in ("FAULT_LSS", "FAULT_HDA", "FAULT_DAS", "FAULT_LFA", "FAULT_DAW"):
     msg_162[f] = 0
 
   # HIDE ALERTS
@@ -159,6 +159,8 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
 
   if msg_161.get("SOUNDS_4") == 2 and msg_161.get("LFA_ICON") in (3, 0,):  # LFA BEEPS
     msg_161["SOUNDS_4"] = 0
+
+  msg_161["DAW_ICON"] = 0 # ALWAYS HIDE NOW THAT WE BLOCK MDPS
 
   # ICONS, LANELINES
   msg_161.update({

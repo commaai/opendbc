@@ -197,7 +197,10 @@ static int hyundai_canfd_fwd_hook(int bus_num, int addr) {
   int bus_fwd = -1;
 
   if (bus_num == 0) {
-    bus_fwd = 2;
+    bool is_mdps_msg = (addr == 0xEA);
+    if (!is_mdps_msg) {
+      bus_fwd = 2;
+    }
   }
   if (bus_num == 2) {
     // LKAS for cars with LKAS and LFA messages, LFA for cars with no LKAS messages
