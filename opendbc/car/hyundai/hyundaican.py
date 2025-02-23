@@ -179,12 +179,12 @@ def create_clu11(packer, frame, clu11, button, CP, CAN):
 
 
 def create_lfahda_mfc(packer, frame, CP, enabled):
-  can_canfd_blended = CP.flags & HyundaiFlags.CAN_CANFD_BLENDED
-  bus = CanBus(CP).ECAN if can_canfd_blended else 0
-
   values = {
     "LFA_Icon_State": 2 if enabled else 0,
   }
+
+  can_canfd_blended = CP.flags & HyundaiFlags.CAN_CANFD_BLENDED
+  bus = CanBus(CP).ECAN if can_canfd_blended else 0
 
   if can_canfd_blended:
     values["COUNTER"] = frame % 0xF
