@@ -102,6 +102,8 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
 class TestTeslaStockSafety(TestTeslaSafetyBase):
 
+  LONGITUDINAL = False
+
   def setUp(self):
     super().setUp()
     self.safety = libsafety_py.libsafety
