@@ -152,20 +152,20 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
   // steering
   const int steer_addr = (hyundai_canfd_lka_steering && !hyundai_longitudinal) ? hyundai_canfd_get_lka_addr() : 0x12a;
   if (addr == steer_addr) {
-    int desired_torque = (((GET_BYTE(to_send, 6) & 0xFU) << 7U) | (GET_BYTE(to_send, 5) >> 1U)) - 1024U;
-    bool steer_req = GET_BIT(to_send, 52U);
-
     if (hyundai_canfd_angle_steering) {
-      int angle_steer_req = GET_BYTE(to_send, 9) & 0x30U;
+      int lka_active_angle = (GET_BYTE(to_send, 9) >> 5) & 0x3U;
+      bool steer_angle_req = (lka_active_angle == 2U);
+
       int desired_angle = (((GET_BYTE(to_send, 10) & 0x3FU) << 8) | GET_BYTE(to_send, 11));
       desired_angle = to_signed(desired_angle, 14);
 
-      bool angle_steer_control_enabled = angle_steer_req != 2U;
-
-      if (steer_angle_cmd_checks(desired_angle, angle_steer_control_enabled, HYUNDAI_CANFD_STEERING_LIMITS)) {
+      if (steer_angle_cmd_checks(desired_angle, steer_angle_req, HYUNDAI_CANFD_STEERING_LIMITS)) {
         tx = false;
       }
     } else {
+      int desired_torque = (((GET_BYTE(to_send, 6) & 0xFU) << 7U) | (GET_BYTE(to_send, 5) >> 1U)) - 1024U;
+      bool steer_req = GET_BIT(to_send, 52U);
+
       if (steer_torque_cmd_checks(desired_torque, steer_req, HYUNDAI_CANFD_STEERING_LIMITS)) {
         tx = false;
       }
