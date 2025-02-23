@@ -21,9 +21,6 @@ class CarInterface(CarInterfaceBase):
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
     ret.brand = "ford"
 
-    # see https://github.com/commaai/openpilot/issues/30302
-    ret.dashcamOnly = candidate == CAR.FORD_F_150_LIGHTNING_MK1
-
     ret.radarUnavailable = Bus.radar not in DBC[candidate]
     ret.steerControlType = structs.CarParams.SteerControlType.angle
     ret.steerActuatorDelay = 0.2
