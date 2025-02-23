@@ -180,8 +180,8 @@ static void hyundai_rx_hook(const CANPacket_t *to_push) {
 }
 
 static bool hyundai_tx_hook(const CANPacket_t *to_send) {
-  const SteeringLimits HYUNDAI_STEERING_LIMITS = HYUNDAI_LIMITS(384, 3, 7);
-  const SteeringLimits HYUNDAI_STEERING_LIMITS_ALT = HYUNDAI_LIMITS(270, 2, 3);
+  const SteeringLimits HYUNDAI_STEERING_LIMITS = HYUNDAI_LIMITS(384, 3, 7, 50);
+  const SteeringLimits HYUNDAI_STEERING_LIMITS_ALT = HYUNDAI_LIMITS(270, 2, 3, 50);
   const SteeringLimits HYUNDAI_STEERING_LIMITS_CAN_CANFD_BLENDED = HYUNDAI_LIMITS(384, 2, 3, 250);
 
   bool tx = true;
