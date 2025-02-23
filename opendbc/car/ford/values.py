@@ -106,15 +106,12 @@ class FordCANFDPlatformConfig(FordPlatformConfig):
     self.flags |= FordFlags.CANFD
 
 @dataclass
-class FordF150LightningPlatform(FordPlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: {
-    Bus.pt: 'ford_lincoln_base_pt',
-  })
-
+class FordF150LightningPlatform(FordCANFDPlatformConfig):
   def init(self):
+    super().init()
+
     # Don't show in docs until this issue is resolved. See https://github.com/commaai/openpilot/issues/30302
     self.car_docs = []
-    self.flags |= FordFlags.CANFD
 
 
 class CAR(Platforms):
