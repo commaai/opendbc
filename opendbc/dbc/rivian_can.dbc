@@ -346,7 +346,7 @@ BO_ 801 SCCM_WheelTouch: 7 SCCM
  SG_ SCCM_WheelTouch_Counter : 11|4@0+ (1,0) [0|15] "" XXX
  SG_ SCCM_WheelTouch_HandsOn : 21|1@0+ (1,0) [0|1] "" XXX
  SG_ SETME_X52 : 31|8@0+ (1,0) [0|255] "" XXX
- SG_ SCCM_WheelTouch_CapHandsOnValue : 32|12@1+ (1,0) [0|4095] "" XXX
+ SG_ SCCM_WheelTouch_CapacitiveHandsOnValue : 32|12@1+ (1,0) [0|4095] "" XXX
 
 BO_ 811 ESP_EpbStatus: 8 ESP
  SG_ ESP_EpbStatus_Checksum : 7|8@0+ (1,0) [0|255] "" ACM,VDM
