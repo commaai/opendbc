@@ -3464,7 +3464,7 @@ VAL_ 33 Active_Flt_Latched_byte0_bit3 1 "Fault Present" 0 "No Fault";
 VAL_ 33 KeepAliveChecksumFault 1 "Fault Present" 0 "No Fault";
 VAL_ 33 ProgramCalibrationFlashChecksum 1 "Fault Present" 0 "No Fault";
 VAL_ 33 ApplicationFlashChecksumFault 1 "Fault Present" 0 "No Fault";
-VAL_ 371 CAN_AUTO_ALIGN_HANGLE_QF 3 "Accurate" 2 "Innacurate" 1 "Temporarily undefined" 0 "Undefined";
+VAL_ 371 CAN_AUTO_ALIGN_HANGLE_QF 3 "Accurate" 2 "Inaccurate" 1 "Temporarily undefined" 0 "Undefined";
 VAL_ 371 CAN_ALIGNMENT_STATUS 15 "Undefined_2" 14 "Undefined_1" 13 "Low Amplitude (Flat-plate only)" 12 "No Peak (Flat-plate only)" 11 "Fail Ver and Hor OutOfRange" 10 "Fail Vertical Align OutOfRange" 9 "Fail Horizontal Align OutOfRange" 8 "Fail Time Out" 7 "Fail Only Right Target Found" 6 "Fail Only Left Target Found" 5 "Fail Variance Too Large" 4 "Fail Deviation Too Large" 3 "Fail No Target" 2 "Success" 1 "Busy" 0 "Off";
 VAL_ 371 CAN_ALIGNMENT_STATE 6 "Static alignment flat-plate" 5 "Static alignment 2-target" 4 "Static alignment 1-target" 3 "Service alignment" 2 "Short track alignment" 1 "Auto alignment" 0 "Off";
 VAL_ 291 CAN_DET_CONFID_AZIMUTH_04 3 "Low" 2 "Medium_Low" 1 "Medium_High" 0 "High";
