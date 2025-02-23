@@ -103,7 +103,7 @@ class CarController(CarControllerBase):
 
     # Common shared configuration
 
-    can_canfd_hybrid = bool(self.CP.flags & HyundaiFlags.CAN_CANFD_HYBRID)
+    can_canfd_hybrid = bool(self.CP.flags & HyundaiFlags.CAN_CANFD_BLENDED)
 
     # CAN-FD platforms
     if self.CP.flags & HyundaiFlags.CANFD:

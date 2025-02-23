@@ -100,7 +100,7 @@ def create_lkas11_can_canfd_hybrid(packer, frame, CP, apply_steer, steer_req,
                                    torque_fault, lkas11, sys_warning, sys_state, enabled,
                                    left_lane, right_lane,
                                    left_lane_depart, right_lane_depart):
-  can_canfd_hybrid = CP.flags & HyundaiFlags.CAN_CANFD_HYBRID
+  can_canfd_hybrid = CP.flags & HyundaiFlags.CAN_CANFD_BLENDED
   bus = CanBus(CP).ECAN if can_canfd_hybrid else 0
 
   lkas11_sigs = [
@@ -170,7 +170,7 @@ def create_clu11(packer, frame, clu11, button, CP, CAN):
 
   if CP.flags & HyundaiFlags.CAMERA_SCC:  # send buttons to camera on camera-scc based cars
     bus = 2
-  elif CP.flags & HyundaiFlags.CAN_CANFD_HYBRID:
+  elif CP.flags & HyundaiFlags.CAN_CANFD_BLENDED:
     bus = CAN.ECAN
   else:
     bus = 0
@@ -179,7 +179,7 @@ def create_clu11(packer, frame, clu11, button, CP, CAN):
 
 
 def create_lfahda_mfc(packer, frame, CP, enabled):
-  can_canfd_hybrid = CP.flags & HyundaiFlags.CAN_CANFD_HYBRID
+  can_canfd_hybrid = CP.flags & HyundaiFlags.CAN_CANFD_BLENDED
   bus = CanBus(CP).ECAN if can_canfd_hybrid else 0
 
   values = {

@@ -115,7 +115,7 @@ class CarState(CarStateBase):
       ret.cruiseState.standstill = False
       ret.cruiseState.nonAdaptive = False
     else:
-      scc_bus = "SCC12" if self.CP.flags & HyundaiFlags.CAN_CANFD_HYBRID else "SCC11"
+      scc_bus = "SCC12" if self.CP.flags & HyundaiFlags.CAN_CANFD_BLENDED else "SCC11"
       ret.cruiseState.available = cp_cruise.vl[scc_bus]["MainMode_ACC"] == 1
       ret.cruiseState.enabled = cp_cruise.vl["SCC12"]["ACCMode"] != 0
       ret.cruiseState.standstill = cp_cruise.vl[scc_bus]["SCCInfoDisplay"] == 4.
@@ -154,7 +154,7 @@ class CarState(CarStateBase):
 
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(gear))
 
-    if not self.CP.openpilotLongitudinalControl and not (self.CP.flags & HyundaiFlags.CAN_CANFD_HYBRID):
+    if not self.CP.openpilotLongitudinalControl and not (self.CP.flags & HyundaiFlags.CAN_CANFD_BLENDED):
       aeb_src = "FCA11" if self.CP.flags & HyundaiFlags.USE_FCA.value else "SCC12"
       aeb_sig = "FCA_CmdAct" if self.CP.flags & HyundaiFlags.USE_FCA.value else "AEB_CmdAct"
       aeb_warning = cp_cruise.vl[aeb_src]["CF_VSM_Warn"] != 0
@@ -325,7 +325,7 @@ class CarState(CarStateBase):
     if CP.flags & HyundaiFlags.CANFD:
       return self.get_can_parsers_canfd(CP)
 
-    mdps12_freq = 100 if CP.flags & HyundaiFlags.CAN_CANFD_HYBRID else 50
+    mdps12_freq = 100 if CP.flags & HyundaiFlags.CAN_CANFD_BLENDED else 50
 
     pt_messages = [
       # address, frequency
@@ -348,14 +348,14 @@ class CarState(CarStateBase):
         ("SCC12", 50),
       ]
 
-      if not (CP.flags & HyundaiFlags.CAN_CANFD_HYBRID):
+      if not (CP.flags & HyundaiFlags.CAN_CANFD_BLENDED):
         pt_messages.append(("SCC11", 50))
 
       if CP.flags & HyundaiFlags.USE_FCA.value:
         pt_messages.append(("FCA11", 50))
 
     if CP.enableBsm:
-      lca11_freq = 20 if CP.flags & HyundaiFlags.CAN_CANFD_HYBRID else 50
+      lca11_freq = 20 if CP.flags & HyundaiFlags.CAN_CANFD_BLENDED else 50
       pt_messages.append(("LCA11", lca11_freq))
 
     if CP.flags & (HyundaiFlags.HYBRID | HyundaiFlags.EV):
@@ -390,6 +390,6 @@ class CarState(CarStateBase):
 
 
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).ECAN if CP.flags & HyundaiFlags.CAN_CANFD_HYBRID else 0),
-      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).CAM if CP.flags & HyundaiFlags.CAN_CANFD_HYBRID else 2),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).ECAN if CP.flags & HyundaiFlags.CAN_CANFD_BLENDED else 0),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).CAM if CP.flags & HyundaiFlags.CAN_CANFD_BLENDED else 2),
     }
