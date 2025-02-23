@@ -55,9 +55,6 @@ class CarController(CarControllerBase):
           # Adjust our curvature command by the offset between openpilot's current curvature and the QFK's current curvature
           actuator_curvature_with_offset = actuators.curvature + (CS.curvature - CC.currentCurvature)
           apply_curvature = apply_std_steer_angle_limits(actuator_curvature_with_offset, self.apply_curvature_last, CS.out.vEgoRaw, self.CCP)
-          # TODO: verify, this shouldn't be necessary and appears to be hurting us in some cases
-          #if CS.out.steeringPressed: # roughly sync with user input
-          #  apply_curvature = np.clip(apply_curvature, current_curvature - self.CCP.CURVATURE_ERROR, current_curvature + self.CCP.CURVATURE_ERROR)
           apply_curvature = np.clip(apply_curvature, -self.CCP.CURVATURE_MAX, self.CCP.CURVATURE_MAX)
 
           # FIXME: implement power control, backoff on driver input torque
