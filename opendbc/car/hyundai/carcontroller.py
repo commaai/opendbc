@@ -116,7 +116,7 @@ class CarController(CarControllerBase):
 
       # LFA and HDA icons
       if self.frame % 5 == 0 and (not lka_steering or lka_steering_long):
-        if self.CP.flags & HyundaiFlags.CCNC and not hda2:
+        if self.CP.flags & HyundaiFlags.CCNC and not lka_steering:
           can_sends.extend(hyundaicanfd.create_ccnc(self.packer, self.CAN, self.frame, self.CP, CC, CS))
         else:
           can_sends.append(hyundaicanfd.create_lfahda_cluster(self.packer, self.CAN, CC.enabled))
@@ -129,7 +129,7 @@ class CarController(CarControllerBase):
         if lka_steering:
           can_sends.extend(hyundaicanfd.create_adrv_messages(self.packer, self.CAN, self.frame))
         if self.frame % 2 == 0:
-          if self.CP.flags & HyundaiFlags.CCNC and not hda2:
+          if self.CP.flags & HyundaiFlags.CCNC and not lka_steering:
             can_sends.append(hyundaicanfd.create_ccnc_acc_control(self.packer, self.CAN, CC.enabled, self.accel_last, accel, stopping,
                                                            CC.cruiseControl.override, set_speed_in_units, hud_control, CS.cruise_info))
           else:
