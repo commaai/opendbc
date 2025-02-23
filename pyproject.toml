@@ -1,6 +1,6 @@
 [project]
 name = "opendbc"
-version = "1.0.0"
+version = "0.2.1"
 description = "CAN bus databases and tools"
 license = { file = "LICENSE" }
 authors = [{ name = "Vehicle Researcher", email = "user@comma.ai" }]
@@ -18,16 +18,18 @@ dependencies = [
   "crcmod",
   "tqdm",
   "pycapnp",
-  "pandacan@git+https://github.com/commaai/panda.git@master",
   "setuptools",
   "pycryptodome",
 ]
 
 [project.optional-dependencies]
 testing = [
+  "cffi",
   "ruff",
   "pytest",
+  "pytest-coverage",
   "pytest-mock",
+  "pytest-randomly",
   "pytest-xdist",
   "pytest-subtests",
   "hypothesis==6.47.*",
@@ -43,8 +45,12 @@ examples = [
   "matplotlib",
 ]
 
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
 [tool.pytest.ini_options]
-addopts = "--ignore=panda/ -Werror --strict-config --strict-markers --durations=10 -n auto"
+addopts = "-Werror --strict-config --strict-markers --durations=10 -n auto"
 python_files = "test_*.py"
 testpaths = [
   "opendbc"
@@ -85,7 +91,7 @@ select = [
   "E", "F", "W", "PIE", "C4", "ISC", "A", "B",
   "NPY", # numpy
   "UP",  # pyupgrade
-  "TRY302", "TRY400", "TRY401", # try/excepts
+  "TRY203", "TRY400", "TRY401", # try/excepts
   "RUF008", "RUF100",
   "TID251",
   "PLR1704",
@@ -99,6 +105,7 @@ ignore = [
   "ISC003",
   "B027",
   "B024",
+  "UP031",
   "NPY002",  # new numpy random syntax is worse
 ]
 flake8-implicit-str-concat.allow-multiline=false
@@ -108,4 +115,5 @@ flake8-implicit-str-concat.allow-multiline=false
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "pytest.main".msg = "pytest.main requires special handling that is easy to mess up!"
-"unittest".msg = "Use pytest"
+# TODO: re-enable when all tests are converted to pytest
+#"unittest".msg = "Use pytest"

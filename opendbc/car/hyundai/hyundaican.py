@@ -123,7 +123,7 @@ def create_lfahda_mfc(packer, enabled):
   }
   return packer.make_can_msg("LFAHDA_MFC", 0, values)
 
-def create_acc_commands(packer, enabled, accel, upper_jerk, idx, hud_control, set_speed, stopping, long_override, use_fca):
+def create_acc_commands(packer, enabled, accel, upper_jerk, idx, hud_control, set_speed, stopping, long_override, use_fca, CP):
   commands = []
 
   scc11_values = {
@@ -169,7 +169,8 @@ def create_acc_commands(packer, enabled, accel, upper_jerk, idx, hud_control, se
   commands.append(packer.make_can_msg("SCC14", 0, scc14_values))
 
   # Only send FCA11 on cars where it exists on the bus
-  if use_fca:
+  # On Camera SCC cars, FCA11 is not disabled, so we forward stock FCA11 back to the car forward hooks
+  if use_fca and not (CP.flags & HyundaiFlags.CAMERA_SCC):
     # note that some vehicles most likely have an alternate checksum/counter definition
     # https://github.com/commaai/opendbc/commit/9ddcdb22c4929baf310295e832668e6e7fcfa602
     fca11_values = {
@@ -184,7 +185,7 @@ def create_acc_commands(packer, enabled, accel, upper_jerk, idx, hud_control, se
 
   return commands
 
-def create_acc_opt(packer):
+def create_acc_opt(packer, CP):
   commands = []
 
   scc13_values = {
@@ -195,11 +196,13 @@ def create_acc_opt(packer):
   commands.append(packer.make_can_msg("SCC13", 0, scc13_values))
 
   # TODO: this needs to be detected and conditionally sent on unsupported long cars
-  fca12_values = {
-    "FCA_DrvSetState": 2,
-    "FCA_USM": 1, # AEB disabled
-  }
-  commands.append(packer.make_can_msg("FCA12", 0, fca12_values))
+  # On Camera SCC cars, FCA12 is not disabled, so we forward stock FCA12 back to the car forward hooks
+  if not (CP.flags & HyundaiFlags.CAMERA_SCC):
+    fca12_values = {
+      "FCA_DrvSetState": 2,
+      "FCA_USM": 1, # AEB disabled
+    }
+    commands.append(packer.make_can_msg("FCA12", 0, fca12_values))
 
   return commands
 
