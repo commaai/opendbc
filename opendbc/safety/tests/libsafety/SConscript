@@ -35,8 +35,9 @@ if GetOption('mutation'):
 
 if GetOption('ubsan'):
   flags = [
-    "-fsanitize=undefined",
+    "-fsanitize=undefined,address",
     "-fno-sanitize-recover=undefined",
+    "-fno-omit-frame-pointer",
   ]
   env['CFLAGS'] += flags
   env['LINKFLAGS'] += flags
