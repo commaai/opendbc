@@ -171,15 +171,8 @@ def create_spas_messages(packer, CAN, frame, left_blink, right_blink):
   return ret
 
 
-def create_adrv_messages(packer, CAN, frame):
-  # messages needed to car happy after disabling
-  # the ADAS Driving ECU to do longitudinal control
-
+def create_fca_warning_light(packer, CAN, frame):
   ret = []
-
-  values = {
-  }
-  ret.append(packer.make_can_msg("ADRV_0x51", CAN.ACAN, values))
 
   if frame % 2 == 0:
     values = {
@@ -190,6 +183,20 @@ def create_adrv_messages(packer, CAN, frame):
       'SET_ME_9': 0x9,
     }
     ret.append(packer.make_can_msg("ADRV_0x160", CAN.ECAN, values))
+  return ret
+
+
+def create_adrv_messages(packer, CAN, frame):
+  # messages needed to car happy after disabling
+  # the ADAS Driving ECU to do longitudinal control
+
+  ret = []
+
+  values = {
+  }
+  ret.append(packer.make_can_msg("ADRV_0x51", CAN.ACAN, values))
+
+  ret.extend(create_fca_warning_light(packer, CAN, frame))
 
   if frame % 5 == 0:
     values = {
