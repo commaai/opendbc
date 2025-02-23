@@ -191,7 +191,7 @@ def create_lfahda_mfc(packer, frame, CP, enabled):
 
     dat = packer.make_can_msg("LFAHDA_MFC", bus, values)[1]
     checksum = hyundai_checksum(dat[1:8])
-    values["CHECKSUM"] = checksum
+    values["_CHECKSUM"] = checksum
 
   return packer.make_can_msg("LFAHDA_MFC", bus, values)
 
