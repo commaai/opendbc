@@ -236,12 +236,10 @@ class CarState(CarStateBase):
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_lamp(50, cp.vl["BLINKERS"][left_blinker_sig],
                                                                       cp.vl["BLINKERS"][right_blinker_sig])
     if self.CP.enableBsm:
-      if self.CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
-        ret.leftBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"]["INDICATOR_LEFT_FOUR"] != 0
-        ret.rightBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"]["INDICATOR_RIGHT_FOUR"] != 0
-      else:
-        ret.leftBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"]["FL_INDICATOR"] != 0
-        ret.rightBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"]["FR_INDICATOR"] != 0
+      left_bsm_sig = "FL_INDICATOR_ALT" if self.CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING else "FL_INDICATOR"
+      right_bsm_sig = "FR_INDICATOR_ALT" if self.CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING else "FR_INDICATOR"
+      ret.leftBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"][left_bsm_sig] != 0
+      ret.rightBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"][right_bsm_sig] != 0
 
     # cruise state
     # CAN FD cars enable on main button press, set available if no TCS faults preventing engagement
