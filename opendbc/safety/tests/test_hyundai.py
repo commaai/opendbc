@@ -238,5 +238,37 @@ class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
     self.assertFalse(self._tx(self._accel_msg(0, aeb_decel=1.0)))
 
 
+class TestHyundaiLongitudinalSafetyCameraSCC(HyundaiLongitudinalBase, TestHyundaiSafety):
+  TX_MSGS = [[0x340, 0], [0x4F1, 2], [0x485, 0], [0x420, 0], [0x421, 0], [0x50A, 0], [0x389, 0], [0x4A2, 0]]
+
+  FWD_BLACKLISTED_ADDRS = {2: [0x340, 0x485, 0x420, 0x421, 0x50A, 0x389]}
+
+  def setUp(self):
+    self.packer = CANPackerPanda("hyundai_kia_generic")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.LONG | HyundaiSafetyFlags.CAMERA_SCC)
+    self.safety.init_tests()
+
+  def _accel_msg(self, accel, aeb_req=False, aeb_decel=0):
+    values = {
+      "aReqRaw": accel,
+      "aReqValue": accel,
+      "AEB_CmdAct": int(aeb_req),
+      "CR_VSM_DecCmd": aeb_decel,
+    }
+    return self.packer.make_can_msg_panda("SCC12", self.SCC_BUS, values)
+
+  def test_no_aeb_scc12(self):
+    self.assertTrue(self._tx(self._accel_msg(0)))
+    self.assertFalse(self._tx(self._accel_msg(0, aeb_req=True)))
+    self.assertFalse(self._tx(self._accel_msg(0, aeb_decel=1.0)))
+
+  def test_tester_present_allowed(self):
+    pass
+
+  def test_disabled_ecu_alive(self):
+    pass
+
+
 if __name__ == "__main__":
   unittest.main()
