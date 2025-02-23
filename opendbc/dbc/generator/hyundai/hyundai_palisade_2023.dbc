@@ -348,7 +348,7 @@ BO_ 909 FCA11: 8 XXX
 BO_ 913 BCM_PO_11: 8 XXX
  SG_ BCM_Door_Dri_Status : 5|1@0+ (1,0) [0|0] "" XXX
  SG_ BCM_Shift_R_MT_SW_Status : 39|2@0+ (1,0) [0|0] "" XXX
- SG_ LFA_Pressed : 4|1@0+ (1,0) [0|0] "" XXX
+ SG_ LDA_BTN : 4|1@0+ (1,0) [0|0] "" XXX
 
 BO_ 916 TCS13: 8 XXX
  SG_ ACCEL_REF_ACC : 32|11@1+ (0.01,-10.23) [0|0] "" XXX
