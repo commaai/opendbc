@@ -9,10 +9,7 @@ RADAR_START_ADDR = 0x500
 RADAR_MSG_COUNT = 32
 
 def get_radar_can_parser(CP):
-  if Bus.radar not in DBC[CP.carFingerprint]:
-    return None
-
-  messages = [(f"RADAR_TRACK_{addr:x}", 50) for addr in range(RADAR_START_ADDR, RADAR_START_ADDR + RADAR_MSG_COUNT)]
+  messages = [(f"RADAR_TRACK_{addr:x}", 20) for addr in range(RADAR_START_ADDR, RADAR_START_ADDR + RADAR_MSG_COUNT)]
   return CANParser(DBC[CP.carFingerprint][Bus.radar], messages, 1)
 
 

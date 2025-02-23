@@ -18,7 +18,7 @@ class CarInterface(CarInterfaceBase):
     CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
     ret.steerControlType = structs.CarParams.SteerControlType.torque
-    ret.radarUnavailable = False
+    ret.radarUnavailable = True
 
     ret.experimentalLongitudinalAvailable = False
     if experimental_long:
