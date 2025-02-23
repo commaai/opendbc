@@ -63,12 +63,16 @@
   {MSG_SUBARU_ES_STATIC_1,       SUBARU_MAIN_BUS, 8}, \
   {MSG_SUBARU_ES_STATIC_2,       SUBARU_MAIN_BUS, 8}, \
 
-#define SUBARU_COMMON_RX_CHECKS(alt_bus)                                                                                                            \
-  {.msg = {{MSG_SUBARU_Throttle,        SUBARU_MAIN_BUS, 8, .check_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}}, \
-  {.msg = {{MSG_SUBARU_Steering_Torque, SUBARU_MAIN_BUS, 8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}}, \
-  {.msg = {{MSG_SUBARU_Wheel_Speeds,    alt_bus,         8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}}, \
-  {.msg = {{MSG_SUBARU_Brake_Status,    alt_bus,         8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}}, \
-  {.msg = {{MSG_SUBARU_CruiseControl,   alt_bus,         8, .check_checksum = true, .max_counter = 15U, .frequency = 20U}, { 0 }, { 0 }}}, \
+#define SUBARU_COMMON_RX_CHECKS(alt_bus) \
+  {.msg = {{MSG_SUBARU_Throttle,         SUBARU_MAIN_BUS, 8, .check_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}}, \
+  {.msg = {{MSG_SUBARU_Steering_Torque,  SUBARU_MAIN_BUS, 8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}}, \
+  {.msg = {{MSG_SUBARU_Wheel_Speeds,     alt_bus,         8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}}, \
+  {.msg = {{MSG_SUBARU_Brake_Status,     alt_bus,         8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}}, \
+  {.msg = {{MSG_SUBARU_CruiseControl,    alt_bus,         8, .check_checksum = true, .max_counter = 15U, .frequency = 20U}, { 0 }, { 0 }}}, \
+
+#define SUBARU_ANGLE_RX_CHECKS() \
+  {.msg = {{MSG_SUBARU_ES_CruiseControl, SUBARU_CAM_BUS,  8, .check_checksum = true, .max_counter = 15U, .frequency = 20U}, { 0 }, { 0 }}}, \
+
 
 static bool subaru_gen2 = false;
 static bool subaru_longitudinal = false;
@@ -111,7 +115,7 @@ static void subaru_rx_hook(const CANPacket_t *to_push) {
   }
 
   // enter controls on rising edge of ACC, exit controls on ACC off
-  if (subaru_lkas_angle) {
+  if (true) {
     if ((addr == MSG_SUBARU_ES_CruiseControl) && (bus == SUBARU_CAM_BUS)) {
       bool cruise_engaged = GET_BIT(to_push, 63U);
       pcm_cruise_check(cruise_engaged);
@@ -301,8 +305,18 @@ static safety_config subaru_init(uint16_t param) {
     SUBARU_COMMON_RX_CHECKS(SUBARU_MAIN_BUS)
   };
 
+  static RxCheck subaru_angle_rx_checks[] = {
+    SUBARU_COMMON_RX_CHECKS(SUBARU_MAIN_BUS)
+    SUBARU_ANGLE_RX_CHECKS()
+  };
+
   static RxCheck subaru_gen2_rx_checks[] = {
     SUBARU_COMMON_RX_CHECKS(SUBARU_ALT_BUS)
+  };
+
+  static RxCheck subaru_gen2_angle_rx_checks[] = {
+    SUBARU_COMMON_RX_CHECKS(SUBARU_ALT_BUS)
+    SUBARU_ANGLE_RX_CHECKS()
   };
 
   const uint16_t SUBARU_PARAM_GEN2 = 1;
@@ -318,11 +332,21 @@ static safety_config subaru_init(uint16_t param) {
 
   safety_config ret;
   if (subaru_gen2) {
-    ret = subaru_longitudinal ? BUILD_SAFETY_CFG(subaru_gen2_rx_checks, SUBARU_GEN2_LONG_TX_MSGS) : \
-          (subaru_lkas_angle ? BUILD_SAFETY_CFG(subaru_gen2_rx_checks, SUBARU_GEN2_LKAS_ANGLE_TX_MSGS) : BUILD_SAFETY_CFG(subaru_gen2_rx_checks, SUBARU_GEN2_TX_MSGS));
+    if (subaru_lkas_angle) {
+      ret = BUILD_SAFETY_CFG(subaru_gen2_angle_rx_checks, SUBARU_GEN2_LKAS_ANGLE_TX_MSGS);
+    } else if (subaru_longitudinal) {
+      ret = BUILD_SAFETY_CFG(subaru_gen2_rx_checks, SUBARU_GEN2_LONG_TX_MSGS);
+    } else {
+      ret = BUILD_SAFETY_CFG(subaru_gen2_rx_checks, SUBARU_GEN2_TX_MSGS);
+    }
   } else {
-    ret = subaru_longitudinal ? BUILD_SAFETY_CFG(subaru_rx_checks, SUBARU_LONG_TX_MSGS) : \
-          (subaru_lkas_angle ? BUILD_SAFETY_CFG(subaru_rx_checks, SUBARU_LKAS_ANGLE_TX_MSGS) : BUILD_SAFETY_CFG(subaru_rx_checks, SUBARU_TX_MSGS));
+    if (subaru_lkas_angle) {
+      ret = BUILD_SAFETY_CFG(subaru_angle_rx_checks, SUBARU_LKAS_ANGLE_TX_MSGS);
+    } else if (subaru_longitudinal) {
+      ret = BUILD_SAFETY_CFG(subaru_rx_checks, SUBARU_LONG_TX_MSGS);
+    } else {
+      ret = BUILD_SAFETY_CFG(subaru_rx_checks, SUBARU_TX_MSGS);
+    }
   }
   return ret;
 }
