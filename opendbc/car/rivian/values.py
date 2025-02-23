@@ -70,7 +70,6 @@ def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str
   return {str(c) for c in candidates}
 
 
-# TODO: Placeholder ↓
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
   ],
