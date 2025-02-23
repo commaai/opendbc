@@ -59,6 +59,7 @@ class HyundaiSafetyFlags(IntFlag):
   CANFD_ALT_BUTTONS = 32
   ALT_LIMITS = 64
   CANFD_LKA_STEERING_ALT = 128
+  FCEV_GAS = 256
 
 
 class HyundaiFlags(IntFlag):
@@ -114,6 +115,8 @@ class HyundaiFlags(IntFlag):
   MIN_STEER_32_MPH = 2 ** 23
 
   HAS_LDA_BUTTON = 2 ** 24
+
+  FCEV = 2 ** 25
 
 
 class Footnote(Enum):
@@ -259,6 +262,11 @@ class CAR(Platforms):
     [HyundaiCarDocs("Hyundai Kona Hybrid 2020", car_parts=CarParts.common([CarHarness.hyundai_i]))],  # TODO: check packages,
     CarSpecs(mass=1425, wheelbase=2.6, steerRatio=13.42, tireStiffnessFactor=0.385),
     flags=HyundaiFlags.HYBRID | HyundaiFlags.ALT_LIMITS,
+  )
+  HYUNDAI_NEXO_1ST_GEN = HyundaiPlatformConfig(
+    [HyundaiCarDocs("Hyundai Nexo 2021", "All", car_parts=CarParts.common([CarHarness.hyundai_h]))],
+    CarSpecs(mass=3990 * CV.LB_TO_KG, wheelbase=2.79, steerRatio=14.19),  # https://www.hyundainews.com/assets/documents/original/42768-2021NEXOProductGuideSpecs.pdf
+    flags=HyundaiFlags.FCEV,
   )
   HYUNDAI_SANTA_FE = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Santa Fe 2019-20", "All", video_link="https://youtu.be/bjDR0YjM__s",
