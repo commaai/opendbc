@@ -112,13 +112,13 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
   int addr = GET_ADDR(to_send);
   bool violation = false;
 
+  // Don't send messages when Autopark is active
+  if (tesla_autopark) {
+    violation = true;
+  }
+
   // Steering control: (0.1 * val) - 1638.35 in deg.
   if (addr == 0x488) {
-    // Don't send messages when Autopark is active
-    if (tesla_autopark) {
-      violation = true;
-    }
-
     // We use 1/10 deg as a unit here
     int raw_angle_can = ((GET_BYTE(to_send, 0) & 0x7FU) << 8) | GET_BYTE(to_send, 1);
     int desired_angle = raw_angle_can - 16384;
@@ -142,11 +142,6 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
     int raw_accel_max = ((GET_BYTE(to_send, 6) & 0x1FU) << 4) | (GET_BYTE(to_send, 5) >> 4);
     int raw_accel_min = ((GET_BYTE(to_send, 5) & 0x0FU) << 5) | (GET_BYTE(to_send, 4) >> 3);
     int acc_state = GET_BYTE(to_send, 1) >> 4;
-
-    // Don't send messages when Autopark is active
-    if (tesla_autopark) {
-      violation = true;
-    }
 
     if (tesla_longitudinal) {
       // Don't send messages when the stock AEB system is active
@@ -194,13 +189,15 @@ static int tesla_fwd_hook(int bus_num, int addr) {
   if (bus_num == 2) {
     bool block_msg = false;
     // DAS_steeringControl, APS_eacMonitor
-    if (((addr == 0x488) && !tesla_autopark) || (addr == 0x27d)) {
-      block_msg = true;
-    }
+    if (!tesla_autopark) {
+      if ((addr == 0x488) || (addr == 0x27d)) {
+        block_msg = true;
+      }
 
-    // DAS_control
-    if (tesla_longitudinal && (addr == 0x2b9) && !tesla_stock_aeb && !tesla_autopark) {
-      block_msg = true;
+      // DAS_control
+      if (tesla_longitudinal && (addr == 0x2b9) && !tesla_stock_aeb) {
+        block_msg = true;
+      }
     }
 
     if (!block_msg) {
