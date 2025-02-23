@@ -162,7 +162,7 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
   }
 
   // UDS: only tester present ("\x02\x3E\x80\x00\x00\x00\x00\x00") allowed on diagnostics address
-  if (((addr == 0x730) && hyundai_canfd_lka_steering) || (addr == 0x7D0)) {
+  if (((addr == 0x730) && hyundai_canfd_lka_steering) || ((addr == 0x7D0) && !hyundai_camera_scc)) {
     if ((GET_BYTES(to_send, 0, 4) != 0x00803E02U) || (GET_BYTES(to_send, 4, 4) != 0x0U)) {
       tx = false;
     }
@@ -254,6 +254,12 @@ static safety_config hyundai_canfd_init(uint16_t param) {
 
   static const CanMsg HYUNDAI_CANFD_LFA_STEERING_TX_MSGS[] = {
     {0x12A, 0, 16}, // LFA
+    {0x1CF, 2, 8},  // CRUISE_BUTTON
+    {0x1E0, 0, 16}, // LFAHDA_CLUSTER
+  };
+
+  static const CanMsg HYUNDAI_CANFD_LFA_STEERING_LONG_TX_MSGS[] = {
+    {0x12A, 0, 16}, // LFA
     {0x1A0, 0, 32}, // SCC_CONTROL
     {0x1CF, 2, 8},  // CRUISE_BUTTON
     {0x1E0, 0, 16}, // LFAHDA_CLUSTER
@@ -289,7 +295,8 @@ static safety_config hyundai_canfd_init(uint16_t param) {
         HYUNDAI_CANFD_COMMON_RX_CHECKS(0)
       };
 
-      ret = BUILD_SAFETY_CFG(hyundai_canfd_long_rx_checks, HYUNDAI_CANFD_LFA_STEERING_TX_MSGS);
+      ret = hyundai_camera_scc ? BUILD_SAFETY_CFG(hyundai_canfd_long_rx_checks, HYUNDAI_CANFD_LFA_STEERING_CAMERA_SCC_TX_MSGS) : \
+                                 BUILD_SAFETY_CFG(hyundai_canfd_long_rx_checks, HYUNDAI_CANFD_LFA_STEERING_LONG_TX_MSGS);
     }
   } else {
     if (hyundai_canfd_lka_steering) {
@@ -320,7 +327,7 @@ static safety_config hyundai_canfd_init(uint16_t param) {
         HYUNDAI_CANFD_SCC_ADDR_CHECK(2)
       };
 
-      ret = BUILD_SAFETY_CFG(hyundai_canfd_rx_checks, HYUNDAI_CANFD_LFA_STEERING_TX_MSGS);
+      ret = BUILD_SAFETY_CFG(hyundai_canfd_rx_checks, HYUNDAI_CANFD_LFA_STEERING_CAMERA_SCC_TX_MSGS);
     }
   }
 
