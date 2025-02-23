@@ -71,15 +71,18 @@ class CarInterface(CarInterfaceBase):
 
     else:
       # Shared configuration for non CAN-FD cars
+      pt_bus = CAN.ECAN if ret.flags & HyundaiFlags.CANFD else 0
+      cam_bus = CAN.CAM if ret.flags & HyundaiFlags.CANFD else 2
+
       ret.experimentalLongitudinalAvailable = candidate not in UNSUPPORTED_LONGITUDINAL_CAR
-      ret.enableBsm = 0x58b in fingerprint[CAN.ECAN]
+      ret.enableBsm = 0x58b in fingerprint[pt_bus]
 
       # Send LFA message on cars with HDA
-      if 0x485 in fingerprint[CAN.CAM]:
+      if 0x485 in fingerprint[cam_bus]:
         ret.flags |= HyundaiFlags.SEND_LFA.value
 
       # These cars use the FCA11 message for the AEB and FCW signals, all others use SCC12
-      if 0x38d in fingerprint[CAN.ECAN] or 0x38d in fingerprint[CAN.CAM]:
+      if 0x38d in fingerprint[pt_bus] or 0x38d in fingerprint[cam_bus]:
         ret.flags |= HyundaiFlags.USE_FCA.value
 
       if ret.flags & HyundaiFlags.LEGACY:
