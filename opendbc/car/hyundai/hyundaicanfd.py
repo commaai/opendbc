@@ -1,5 +1,6 @@
 import numpy as np
 from opendbc.car import CanBusBase
+from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.hyundai.values import HyundaiFlags
 
 
@@ -38,17 +39,26 @@ def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_steer):
 
   ret = []
 
-  values = {
-    "LKA_MODE": 2,
-    "LKA_ICON": 2 if enabled else 1,
-    "TORQUE_REQUEST": apply_steer,
-    "LKA_ASSIST": 0,
-    "STEER_REQ": 1 if lat_active else 0,
-    "STEER_MODE": 0,
-    "HAS_LANE_SAFETY": 0,  # hide LKAS settings
-    "NEW_SIGNAL_1": 0,
-    "NEW_SIGNAL_2": 0,
-  }
+  if CP.flags & HyundaiFlags.CCNC:
+    values = {
+      "NEW_SIGNAL_1": 3 if lat_active else 1,
+      "TORQUE_REQUEST": apply_steer,
+      "STEER_REQ": 1 if lat_active else 0,
+      "NEW_SIGNAL_4": 9,
+      "NEW_SIGNAL_3": 10 if lat_active else 100, # TODO: value between 10-32+ sometimes
+    }
+  else:
+    values = {
+      "LKA_MODE": 2,
+      "LKA_ICON": 2 if enabled else 1,
+      "TORQUE_REQUEST": apply_steer,
+      "LKA_ASSIST": 0,
+      "STEER_REQ": 1 if lat_active else 0,
+      "STEER_MODE": 0,
+      "HAS_LANE_SAFETY": 0,  # hide LKAS settings
+      "NEW_SIGNAL_1": 0,
+      "NEW_SIGNAL_2": 0,
+    }
 
   if CP.flags & HyundaiFlags.CANFD_LKA_STEERING:
     lkas_msg = "LKAS_ALT" if CP.flags & HyundaiFlags.CANFD_LKA_STEERING_ALT else "LKAS"
@@ -118,6 +128,111 @@ def create_lfahda_cluster(packer, CAN, enabled):
     "LFA_ICON": 2 if enabled else 0,
   }
   return packer.make_can_msg("LFAHDA_CLUSTER", CAN.ECAN, values)
+
+def create_ccnc(packer, CAN, frame, CP, CC, CS):
+  ret = []
+
+  msg_161 = CS.msg_161.copy()
+  msg_162 = CS.msg_162.copy()
+  enabled = CC.enabled
+  hud = CC.hudControl
+
+  # HIDE FAULTS
+  for f in ("FAULT_LSS", "FAULT_HDA", "FAULT_DAS", "FAULT_LFA"):
+    msg_162[f] = 0
+
+  # HIDE ALERTS
+  if msg_161.get("ALERTS_3") == 17:  # DRIVE_CAREFULLY
+    msg_161["ALERTS_3"] = 0
+
+  if msg_161.get("ALERTS_5") == 2:  # WATCH_FOR_SURROUNDING_VEHICLES
+    msg_161["ALERTS_5"] = 0
+
+  if msg_161.get("ALERTS_5") == 4:  # SMART_CRUISE_CONTROL_CONDITIONS_NOT_MET
+    msg_161["ALERTS_5"] = 0
+
+  if msg_161.get("ALERTS_5") == 5:  # USE_SWITCH_OR_PEDAL_TO_ACCELERATE
+    msg_161["ALERTS_5"] = 0
+
+  if msg_161.get("ALERTS_2") == 5:  # CONSIDER_TAKING_A_BREAK
+    msg_161.update({"ALERTS_2": 0, "SOUNDS_2": 0, "DAW_ICON": 0})
+
+  if msg_161.get("SOUNDS_4") == 2 and msg_161.get("LFA_ICON") in (3, 0,):  # LFA BEEPS
+    msg_161["SOUNDS_4"] = 0
+
+  # ICONS, LANELINES
+  msg_161.update({
+    "CENTERLINE": 1 if enabled else 0,
+    "LANELINE_LEFT": 2 if enabled else 0,
+    "LANELINE_RIGHT": 2 if enabled else 0,
+    "LFA_ICON": 2 if enabled else 0,
+    "LKA_ICON": 0,
+  })
+
+  # LFAHDA_CLUSTER
+  lfahda_cluster = {
+    "NEW_SIGNAL_5": 1,
+    "LFA_ICON": 2 if enabled else 0,
+  }
+
+  # OP LONG
+  if CP.openpilotLongitudinalControl:
+
+    # SETSPEED, DISTANCE
+    msg_161.update({
+      "SETSPEED": 3 if enabled else 1,
+      "SETSPEED_HUD": 2 if enabled else 1,
+      "SETSPEED_SPEED": 25 if (s := round(CS.out.vCruiseCluster * (1 if CS.is_metric else CV.KPH_TO_MPH))) > 100 else s,
+      "DISTANCE": hud.leadDistanceBars,
+      "DISTANCE_SPACING": 1 if enabled else 0,
+      "DISTANCE_LEAD": 2 if enabled and hud.leadVisible else 1 if enabled else 0,
+      "DISTANCE_CAR": 2 if enabled else 1,
+      "ALERTS_3": hud.leadDistanceBars + 6,
+    })
+
+    # LEAD
+    msg_162.update({
+      "LEAD": 2 if enabled and hud.leadVisible else 1 if hud.leadVisible else 0,
+      "LEAD_DISTANCE": 10,
+    })
+
+  ret.append(packer.make_can_msg("LFAHDA_CLUSTER", CAN.ECAN, lfahda_cluster))
+  ret.append(packer.make_can_msg("CCNC_0x161", CAN.ECAN, msg_161))
+  ret.append(packer.make_can_msg("CCNC_0x162", CAN.ECAN, msg_162))
+
+  return ret
+
+def create_ccnc_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_override, set_speed, hud_control, cruise_info):
+  if not enabled or gas_override:
+    a_val, a_raw = 0, 0
+  else:
+    a_raw = accel
+    jn = 0.1
+    a_val = np.clip(accel, accel_last - jn, accel_last + jn)
+
+  values = {s: cruise_info[s] for s in [
+    "ACC_ObjDist",
+    "ACC_ObjRelSpd",
+  ]}
+  values.update({
+    "ACCMode": 0 if not enabled else (2 if gas_override else 1),
+    "MainMode_ACC": 1,
+    "StopReq": 1 if stopping else 0,
+    "aReqValue": a_val,
+    "aReqRaw": a_raw,
+    "VSetDis": set_speed,
+    "JerkLowerLimit": 1.5 if enabled else 0,
+    "JerkUpperLimit": 0.5 if enabled else 0,
+
+    "ObjValid": 0,
+    "OBJ_STATUS": 2,
+    "SET_ME_2": 0x4,
+    "SET_ME_3": 0x3,
+    "SET_ME_TMP_64": 0x64,
+    "DISTANCE_SETTING": hud_control.leadDistanceBars,
+  })
+
+  return packer.make_can_msg("SCC_CONTROL", CAN.ECAN, values)
 
 
 def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_override, set_speed, hud_control):

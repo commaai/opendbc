@@ -211,7 +211,10 @@ static int hyundai_canfd_fwd_hook(int bus_num, int addr) {
     // SCC_CONTROL for camera SCC cars, we send our own longitudinal commands
     bool is_scc_msg = ((addr == 0x1a0) && hyundai_longitudinal && !hyundai_canfd_lka_steering);
 
-    bool block_msg = is_lka_msg || is_lfa_msg || is_lfahda_msg || is_scc_msg;
+    // CCNC messages
+    bool is_ccnc_msg = (addr == 0x161) || (addr == 0x162);
+
+    bool block_msg = is_lka_msg || is_lfa_msg || is_lfahda_msg || is_scc_msg || is_ccnc_msg;
     if (!block_msg) {
       bus_fwd = 0;
     }
@@ -257,6 +260,8 @@ static safety_config hyundai_canfd_init(uint16_t param) {
     {0x1A0, 0, 32}, // CRUISE_INFO
     {0x1CF, 2, 8},  // CRUISE_BUTTON
     {0x1E0, 0, 16}, // LFAHDA_CLUSTER
+    {0x161, 0, 32}, // CCNC_0x161
+    {0x162, 0, 32}, // CCNC_0x162
   };
 
 
