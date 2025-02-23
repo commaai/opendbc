@@ -15,11 +15,11 @@ class TestRivianSafety(common.PandaCarSafetyTest, common.DriverTorqueSteeringSaf
   FWD_BLACKLISTED_ADDRS = {2: [0x120]}
   FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
-  MAX_RATE_UP = 8
-  MAX_RATE_DOWN = 8
+  MAX_RATE_UP = 3
+  MAX_RATE_DOWN = 5
   MAX_TORQUE = 350
 
-  MAX_RT_DELTA = 300
+  MAX_RT_DELTA = 125
   RT_INTERVAL = 250000
 
   DRIVER_TORQUE_ALLOWANCE = 15
@@ -54,6 +54,10 @@ class TestRivianSafety(common.PandaCarSafetyTest, common.DriverTorqueSteeringSaf
   def _pcm_status_msg(self, enable):
     values = {"ACM_FeatureStatus": enable}
     return self.packer.make_can_msg_panda("ACM_Status", 2, values)
+
+  def _vehicle_moving_msg(self, speed: float):
+    values = {"ESP_Vehicle_Speed": speed}
+    return self.packer.make_can_msg_panda("ESP_Status", 0, values)
 
 if __name__ == "__main__":
   unittest.main()
