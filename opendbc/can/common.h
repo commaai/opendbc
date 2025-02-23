@@ -40,6 +40,12 @@ struct CanData {
   std::vector<CanFrame> frames;
 };
 
+struct SignalValue {
+  uint64_t ts_nanos;
+  double value;
+  std::vector<double> all_values;
+};
+
 class MessageState {
 public:
   std::string name;
@@ -47,8 +53,7 @@ public:
   unsigned int size;
 
   std::vector<Signal> parse_sigs;
-  std::vector<double> vals;
-  std::vector<std::vector<double>> all_vals;
+  std::unordered_map<std::string, SignalValue> signal_values;
 
   uint64_t last_seen_nanos;
   uint64_t check_threshold;
