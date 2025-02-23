@@ -2,9 +2,8 @@ from collections import defaultdict, namedtuple
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag, StrEnum
 
-from panda import uds
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.can.can_define import CANDefine
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car import structs
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, \
@@ -21,6 +20,8 @@ Button = namedtuple('Button', ['event_type', 'can_addr', 'can_msg', 'values'])
 class CarControllerParams:
   STEER_STEP = 2                           # HCA_01/HCA_1 message frequency 50Hz
   ACC_CONTROL_STEP = 2                     # ACC_06/ACC_07/ACC_System frequency 50Hz
+  AEB_CONTROL_STEP = 2                     # ACC_10 frequency 50Hz
+  AEB_HUD_STEP = 20                        # ACC_15 frequency 5Hz
 
   # Documented lateral limits: 3.00 Nm max, rate of change 5.00 Nm/sec.
   # MQB vs PQ maximums are shared, but rate-of-change limited differently
@@ -130,6 +131,10 @@ class WMI(StrEnum):
   VOLKSWAGEN_EUROPE_SUV = "WVG"
   VOLKSWAGEN_EUROPE_CAR = "WVW"
   VOLKSWAGEN_GROUP_RUS = "XW8"
+
+
+class VolkswagenSafetyFlags(IntFlag):
+  LONG_CONTROL = 1
 
 
 class VolkswagenFlags(IntFlag):
@@ -332,7 +337,7 @@ class CAR(Platforms):
   )
   VOLKSWAGEN_TIGUAN_MK2 = VolkswagenMQBPlatformConfig(
     [
-      VWCarDocs("Volkswagen Tiguan 2018-24"),
+      VWCarDocs("Volkswagen Tiguan 2018-23"),
       VWCarDocs("Volkswagen Tiguan eHybrid 2021-23"),
     ],
     VolkswagenCarSpecs(mass=1715, wheelbase=2.74),
