@@ -5,6 +5,7 @@
 static bool tesla_longitudinal = false;
 static bool tesla_stock_aeb = false;
 static bool tesla_autopark = false;
+static bool tesla_autopark_prev = false;
 
 static void tesla_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
@@ -55,16 +56,23 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
       tesla_stock_aeb = (GET_BYTE(to_push, 2) & 0x03U) == 1U;
     }
 
-    if (addr == 0x286) {
-      int autopark_state = (GET_BYTE(to_push, 3) >> 1) & 0x0FU;
-      tesla_autopark = (autopark_state == 9) ||  // SELFPARK_STARTED
-                       (autopark_state == 3) ||  // ACTIVE
-                       (autopark_state == 6) ||  // ABORTED
-                       (autopark_state == x) ||
-                       (autopark_state == x) ||
-                       (autopark_state == x) ||
-                       (autopark_state == x) ||
-                       (autopark_state == x);
+    if (addr == 0x286) {  // DI_state
+      int autopark_state = (GET_BYTE(to_push, 3) >> 1) & 0x0FU;  // DI_autoparkState
+      // Hand off from openpilot to Autopark can only happen while disabled TODO: add test
+      // TODO: doing summon first, only seen these states
+      bool tesla_autopark_now = (autopark_state == 2) ||  // STARTED (TODO: not seen)
+                                (autopark_state == 3) ||  // ACTIVE
+                                (autopark_state == 4) ||  // COMPLETE (TODO: not seen)
+                                (autopark_state == 5) ||  // PAUSED (TODO: not seen)
+                                (autopark_state == 6) ||  // ABORTED
+                                (autopark_state == 7) ||  // RESUMED (TODO: not seen)
+                                (autopark_state == 8) ||  // UNPARK_COMPLETE (TODO: not seen)
+                                (autopark_state == 9);    // SELFPARK_STARTED
+
+      if (tesla_autopark_now && !tesla_autopark_prev && !controls_allowed) {
+        tesla_autopark = tesla_autopark_now;
+      }
+      tesla_autopark_prev = tesla_autopark_now;
     }
   }
 
@@ -102,6 +110,11 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
 
   // Steering control: (0.1 * val) - 1638.35 in deg.
   if (addr == 0x488) {
+    // Don't send messages when Autopark is active
+    if (tesla_autopark) {
+      violation = true;
+    }
+
     // We use 1/10 deg as a unit here
     int raw_angle_can = ((GET_BYTE(to_send, 0) & 0x7FU) << 8) | GET_BYTE(to_send, 1);
     int desired_angle = raw_angle_can - 16384;
@@ -125,6 +138,11 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
     int raw_accel_max = ((GET_BYTE(to_send, 6) & 0x1FU) << 4) | (GET_BYTE(to_send, 5) >> 4);
     int raw_accel_min = ((GET_BYTE(to_send, 5) & 0x0FU) << 5) | (GET_BYTE(to_send, 4) >> 3);
     int acc_state = GET_BYTE(to_send, 1) >> 4;
+
+    // Don't send messages when Autopark is active
+    if (tesla_autopark) {
+      violation = true;
+    }
 
     if (tesla_longitudinal) {
       // Don't send messages when the stock AEB system is active
@@ -172,12 +190,12 @@ static int tesla_fwd_hook(int bus_num, int addr) {
   if (bus_num == 2) {
     bool block_msg = false;
     // DAS_steeringControl, APS_eacMonitor
-    if ((addr == 0x488) || (addr == 0x27d)) {
+    if (((addr == 0x488) && !tesla_autopark) || (addr == 0x27d)) {
       block_msg = true;
     }
 
     // DAS_control
-    if (tesla_longitudinal && (addr == 0x2b9) && !tesla_stock_aeb) {
+    if (tesla_longitudinal && (addr == 0x2b9) && !tesla_stock_aeb && !tesla_autopark) {
       block_msg = true;
     }
 
