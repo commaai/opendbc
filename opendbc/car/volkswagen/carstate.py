@@ -92,8 +92,8 @@ class CarState(CarStateBase):
                           pt_cp.vl["ZV_02"]["ZV_HD_offen"]])
 
       if self.CP.enableBsm:
-        ret.leftBlindspot = bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Left"]) or bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warning_Left"])
-        ret.rightBlindspot = bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Right"]) or bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warning_Right"])
+        ret.leftBlindspot = bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Left"]) or bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Left"])
+        ret.rightBlindspot = bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Right"]) or bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Right"])
 
       ret.stockFcw = bool(pt_cp.vl["VMM_02"]["FCW_Active"]) or bool(ext_cp.vl["AWV_03"]["FCW_Active"])
       ret.stockAeb = bool(pt_cp.vl["VMM_02"]["AEB_Active"])
