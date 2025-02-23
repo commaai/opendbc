@@ -34,6 +34,11 @@ class CarController(CarControllerBase):
       if self.CP.flags & SubaruFlags.LKAS_ANGLE:
         apply_steer = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_steer_last, CS.out.vEgoRaw, self.p)
 
+        MAX_ANGLE_DIFF = 19 # deg
+        # limit diff between current angle and command else ecu faults # TODO is this the correct place to do this?
+        # TODO is there a max angle too?
+        apply_steer = float(np.clip(apply_steer, apply_steer - MAX_ANGLE_DIFF, apply_steer + MAX_ANGLE_DIFF))
+
         if not CC.latActive:
           apply_steer = CS.out.steeringAngleDeg
 
