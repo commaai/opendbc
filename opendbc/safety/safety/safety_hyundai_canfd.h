@@ -1,7 +1,11 @@
 #pragma once
 
 #include "safety_declarations.h"
+#include "safety_generated.h"
 #include "safety_hyundai_common.h"
+
+GENERATE_SAFETY_CFG_INIT_HEADER("hyundai_canfd_init_generated.h",
+  hyundai_canfd_init_rx_checks)
 
 static bool hyundai_canfd_alt_buttons = false;
 static bool hyundai_canfd_lka_steering_alt = false;
@@ -285,19 +289,20 @@ static safety_config hyundai_canfd_init(uint16_t param) {
   return ret;
 }
 
-#define GENERATE_RX_CHECKS(func_name, params, template) \
-    /* GENERATE_RX_CHECKS(#func_name, #params, #template) */ \
+static void hyundai_canfd_init_rx_checks(safety_config *cfg) {
+/*
+generate_rx_checks(
 
-GENERATE_RX_CHECKS(hyundai_canfd_init_rx_checks,
-R"[
+condition_groups = [
   ['hyundai_canfd_lka_steering', 'hyundai_camera_scc'],
   ['hyundai_ev_gas_signal', 'hyundai_hybrid_gas_signal'],
   ['hyundai_canfd_alt_buttons'],
   ['hyundai_longitudinal'],
-]",
-R"
-{%- set pt_bus = 1 if hyundai_canfd_lka_steering else 0 -%}
-{%- set scc_bus = 1 if hyundai_canfd_lka_steering else (2 if hyundai_camera_scc else 0) -%}
+],
+
+template = """
+{% set pt_bus = 1 if hyundai_canfd_lka_steering else 0 %}
+{% set scc_bus = 1 if hyundai_canfd_lka_steering else (2 if hyundai_camera_scc else 0) %}
 
 {#- RX Common checks. #}
 {.msg = { {0x175, ({{pt_bus}}), 24, .check_checksum = true, .max_counter = 0xffU, .frequency = 50U}, { 0 }, { 0 }}},
@@ -305,28 +310,30 @@ R"
 {.msg = { {0xea, ({{pt_bus}}), 24, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U}, { 0 }, { 0 }}},
 
 {#- Accel signals. -#}
-{%- if hyundai_ev_gas_signal -%}
+{% if hyundai_ev_gas_signal %}
   {.msg = { {0x35, ({{pt_bus}}), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U}, { 0 }, { 0 }}},
-{%- elif hyundai_hybrid_gas_signal %}
+{% elif hyundai_hybrid_gas_signal %}
   {.msg = { {0x105, ({{pt_bus}}), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U}, { 0 }, { 0 }}},
-{%- else %}
+{% else %}
   {.msg = { {0x100, ({{pt_bus}}), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U}, { 0 }, { 0 }}},
-{%- endif -%}
+{% endif %}
 
 {#- Cruise signals. -#}
-{%- if hyundai_canfd_alt_buttons %}
+{% if hyundai_canfd_alt_buttons %}
   {.msg = { {0x1aa, ({{pt_bus}}), 16, .check_checksum = false, .max_counter = 0xffU, .frequency = 50U}, { 0 }, { 0 }}},
 {% else %}
   {.msg = { {0x1cf, ({{pt_bus}}), 8, .check_checksum = false, .max_counter = 0xfU, .frequency = 50U}, { 0 }, { 0 }}},
-{% endif -%}
+{% endif %}
 
-{%- if hyundai_longitudinal %}
+{% if hyundai_longitudinal %}
   {#- SCC_CONTROL sent, not read. -#}
 {% else %}
   {#- // SCC_CONTROL read. -#}
   {.msg = { {0x1a0, ({{scc_bus}}), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 50U}, { 0 }, { 0 }}},
-{% endif -%}
-");
+{% endif %}
+""")
+*/
+}
 
 const safety_hooks hyundai_canfd_hooks = {
   .init = hyundai_canfd_init,
