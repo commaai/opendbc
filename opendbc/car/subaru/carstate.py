@@ -79,7 +79,7 @@ class CarState(CarStateBase):
 
     cp_cruise = cp_alt if self.CP.flags & SubaruFlags.GLOBAL_GEN2 else cp
     if self.CP.flags & (SubaruFlags.HYBRID | SubaruFlags.LKAS_ANGLE) :
-      ret.cruiseState.enabled = cp_cam.vl["ES_DashStatus"]['Cruise_Activated'] != 0
+      ret.cruiseState.enabled = cp_cam.vl["ES_CruiseControl"]['Cruise_Activated'] != 0
       ret.cruiseState.available = cp_cam.vl["ES_DashStatus"]['Cruise_On'] != 0
     else:
       ret.cruiseState.enabled = cp_cruise.vl["CruiseControl"]["Cruise_Activated"] != 0
@@ -204,6 +204,9 @@ class CarState(CarStateBase):
 
       if not (CP.flags & SubaruFlags.GLOBAL_GEN2):
         cam_messages += CarState.get_common_global_es_messages(CP)
+
+      if CP.flags & SubaruFlags.LKAS_ANGLE:
+        cam_messages += [("ES_CruiseControl", 20)]
 
       if CP.flags & SubaruFlags.SEND_INFOTAINMENT:
         cam_messages.append(("ES_Infotainment", 10))
