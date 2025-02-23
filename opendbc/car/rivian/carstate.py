@@ -89,7 +89,8 @@ class CarState(CarStateBase):
       ("EPAS_SystemStatus", 100),
       ("RCM_Status", 8),
       ("VDM_AdasSts", 100),
-      ("DoorStatus", 10)
+      ("DoorStatus", 10),
+      ("SCCM_WheelTouch", 20),
     ]
 
     cam_messages = [
