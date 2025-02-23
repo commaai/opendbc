@@ -147,6 +147,8 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
 class TestTeslaStockSafety(TestTeslaSafetyBase):
 
+  LONGITUDINAL = False
+
   def setUp(self):
     super().setUp()
     self.safety = libsafety_py.libsafety
@@ -154,11 +156,11 @@ class TestTeslaStockSafety(TestTeslaSafetyBase):
     self.safety.init_tests()
 
   def test_cancel(self):
-    for accval in range(16):
+    for acc_state in range(16):
       self.safety.set_controls_allowed(True)
-      should_tx = accval == 13  # ACC_CANCEL_GENERIC_SILENT
-      self.assertFalse(self._tx(self._long_control_msg(0, acc_state=accval, accel_limits=(self.MIN_ACCEL, self.MAX_ACCEL))))
-      self.assertEqual(should_tx, self._tx(self._long_control_msg(0, acc_state=accval)))
+      should_tx = acc_state == self.acc_states["ACC_CANCEL_GENERIC_SILENT"]
+      self.assertFalse(self._tx(self._long_control_msg(0, acc_state=acc_state, accel_limits=(self.MIN_ACCEL, self.MAX_ACCEL))))
+      self.assertEqual(should_tx, self._tx(self._long_control_msg(0, acc_state=acc_state)))
 
   def test_no_aeb(self):
     for aeb_event in range(4):
