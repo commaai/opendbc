@@ -40,7 +40,6 @@ class CarInterface(CarInterfaceBase):
       cfgs.insert(0, get_safety_config(structs.CarParams.SafetyModel.noOutput))
     ret.safetyConfigs = cfgs
 
-    # TODO: verify stock AEB compatibility and longitudinal limit safety before shipping to release
     ret.experimentalLongitudinalAvailable = ret.radarUnavailable
     if experimental_long or not ret.radarUnavailable:
       ret.safetyConfigs[-1].safetyParam |= FordSafetyFlags.LONG_CONTROL.value
