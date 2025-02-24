@@ -338,7 +338,6 @@ struct CarControl {
   enabled @0 :Bool;
   latActive @11: Bool;
   longActive @12: Bool;
-  currentCurvature @17 :Float32;  # From vehicle model
 
   # Final actuator commands
   actuators @6 :Actuators;
