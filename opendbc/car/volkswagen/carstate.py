@@ -89,11 +89,12 @@ class CarState(CarStateBase):
       ret.brakePressed = bool(pt_cp.vl["Motor_14"]["MO_Fahrer_bremst"]) # includes regen braking by user
       ret.parkingBrake = pt_cp.vl["Gateway_73"]["EPB_Status"] in (1, 4) # EPB closing or closed
 
-      ret.doorOpen = any([pt_cp.vl["ZV_02"]["ZV_FT_offen"],
-                          pt_cp.vl["ZV_02"]["ZV_BT_offen"],
-                          pt_cp.vl["ZV_02"]["ZV_HFS_offen"],
-                          pt_cp.vl["ZV_02"]["ZV_HBFS_offen"],
-                          pt_cp.vl["ZV_02"]["ZV_HD_offen"]])
+      # TODO: Not available on MQBevo, see if Gateway_73 works (it's not populated on MEB) or see if TSG_FT_01/TSG_FT_02 will work
+      # ret.doorOpen = any([pt_cp.vl["ZV_02"]["ZV_FT_offen"],
+      #                     pt_cp.vl["ZV_02"]["ZV_BT_offen"],
+      #                     pt_cp.vl["ZV_02"]["ZV_HFS_offen"],
+      #                     pt_cp.vl["ZV_02"]["ZV_HBFS_offen"],
+      #                     pt_cp.vl["ZV_02"]["ZV_HD_offen"]])
 
       if self.CP.enableBsm:
         ret.leftBlindspot = bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Left"]) or bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Left"])
@@ -423,7 +424,7 @@ class CarState(CarStateBase):
       ("Motor_16", 2),            # From J623 Engine control module
       ("Blinkmodi_02", 1),        # From J519 BCM (sent at 1Hz when no lights active, 50Hz when active)
       ("LH_EPS_03", 100),         # From J500 Steering Assist with integrated sensors
-      ("ZV_02", 5),               # From ZV
+      # ("ZV_02", 5),               # From ZV
       ("QFK_01", 100),            # From Steering
       ("ESP_21", 50),             #
       ("ESC_51", 100),            #
