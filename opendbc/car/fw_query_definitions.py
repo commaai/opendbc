@@ -3,13 +3,14 @@ from dataclasses import dataclass, field
 import struct
 from collections.abc import Callable
 
-from panda import uds
-
+from opendbc.car import uds
 from opendbc.car.structs import CarParams
+
+Ecu = CarParams.Ecu
 
 AddrType = tuple[int, int | None]
 EcuAddrBusType = tuple[int, int | None, int]
-EcuAddrSubAddr = tuple[CarParams.Ecu, int, int | None]
+EcuAddrSubAddr = tuple[Ecu, int, int | None]
 
 LiveFwVersions = dict[AddrType, set[bytes]]
 OfflineFwVersions = dict[str, dict[EcuAddrSubAddr, list[bytes]]]
@@ -18,6 +19,9 @@ OfflineFwVersions = dict[str, dict[EcuAddrSubAddr, list[bytes]]]
 # engine, hybrid controller, Ford abs, Hyundai CAN FD cluster, 29-bit engine, PGM-FI
 # TODO: move these to each brand's FW query config
 STANDARD_VIN_ADDRS = [0x7e0, 0x7e2, 0x760, 0x7c6, 0x18da10f1, 0x18da0ef1]
+
+ESSENTIAL_ECUS = [Ecu.engine, Ecu.eps, Ecu.abs, Ecu.fwdRadar, Ecu.fwdCamera, Ecu.vsa]
+ECU_NAME = {v: k for k, v in Ecu.schema.enumerants.items()}
 
 
 def p16(val):
@@ -78,7 +82,7 @@ class StdQueries:
 class Request:
   request: list[bytes]
   response: list[bytes]
-  whitelist_ecus: list[CarParams.Ecu] = field(default_factory=list)
+  whitelist_ecus: list[Ecu] = field(default_factory=list)
   rx_offset: int = 0x8
   bus: int = 1
   # Whether this query should be run on the first auxiliary panda (CAN FD cars for example)
@@ -94,14 +98,38 @@ class FwQueryConfig:
   requests: list[Request]
   # TODO: make this automatic and remove hardcoded lists, or do fingerprinting with ecus
   # Overrides and removes from essential ecus for specific models and ecus (exact matching)
-  non_essential_ecus: dict[CarParams.Ecu, list[str]] = field(default_factory=dict)
+  non_essential_ecus: dict[Ecu, list[str]] = field(default_factory=dict)
   # Ecus added for data collection, not to be fingerprinted on
-  extra_ecus: list[tuple[CarParams.Ecu, int, int | None]] = field(default_factory=list)
+  extra_ecus: list[tuple[Ecu, int, int | None]] = field(default_factory=list)
   # Function a brand can implement to provide better fuzzy matching. Takes in FW versions and VIN,
   # returns set of candidates. Only will match if one candidate is returned
   match_fw_to_car_fuzzy: Callable[[LiveFwVersions, str, OfflineFwVersions], set[str]] | None = None
 
   def __post_init__(self):
+    # Asserts that a request exists if extra ecus are used
+    if len(self.extra_ecus):
+      assert len(self.requests), "Must define a request with extra ecus"
+
+    # All extra ecus should be used in a request
+    for ecu, _, _ in self.extra_ecus:
+      assert (any(ecu in request.whitelist_ecus for request in self.requests) or
+              any(not request.whitelist_ecus for request in self.requests)), f"Ecu.{ECU_NAME[ecu]} not in any request"
+
+    # These ECUs are already not in ESSENTIAL_ECUS which the fingerprint functions give a pass if missing
+    unnecessary_non_essential_ecus = set(self.non_essential_ecus) - set(ESSENTIAL_ECUS)
+    assert unnecessary_non_essential_ecus == set(), ("Declaring non-essential ECUs non-essential is not required: " +
+                                                     f"{', '.join([f'Ecu.{ECU_NAME[ecu]}' for ecu in unnecessary_non_essential_ecus])}")
+
+    # Asserts equal length request and response lists
+    for request_obj in self.requests:
+      assert len(request_obj.request) == len(request_obj.response), ("Request and response lengths do not match: " +
+                                                                     f"{request_obj.request} vs. {request_obj.response}")
+
+      # No request on the OBD port (bus 1, multiplexed) should be run on an aux panda
+      assert not (request_obj.auxiliary and request_obj.bus == 1 and request_obj.obd_multiplexing), ("OBD multiplexed request should not " +
+                                                                                                     f"be marked auxiliary: {request_obj}")
+
+    # Add aux requests (second panda) for all requests that are marked as auxiliary
     for i in range(len(self.requests)):
       if self.requests[i].auxiliary:
         new_request = copy.deepcopy(self.requests[i])
