@@ -53,7 +53,11 @@ class CarState(CarStateBase):
 
     ret = structs.CarState()
 
-    if self.CP.transmissionType == TransmissionType.automatic:
+    # TODO: Cleanup and consolidate
+    if self.CP.flags & VolkswagenFlags.MEB:
+      # TODO: Temp test/hack, but consider migrating everything to Gateway_73, especially if it works for e-Golf and manual trans
+      ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Gateway_73"]["GE_Fahrstufe"], None))
+    elif self.CP.transmissionType == TransmissionType.automatic:
       ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Getriebe_11"]["GE_Fahrstufe"], None))
     elif self.CP.transmissionType == TransmissionType.direct:
       ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Motor_EV_01"]["MO_Waehlpos"], None))
@@ -419,7 +423,6 @@ class CarState(CarStateBase):
       ("Motor_16", 2),            # From J623 Engine control module
       ("Blinkmodi_02", 1),        # From J519 BCM (sent at 1Hz when no lights active, 50Hz when active)
       ("LH_EPS_03", 100),         # From J500 Steering Assist with integrated sensors
-      ("Getriebe_11", 100),       # From J743 Auto transmission control module
       ("ZV_02", 5),               # From ZV
       ("QFK_01", 100),            # From Steering
       ("ESP_21", 50),             #
