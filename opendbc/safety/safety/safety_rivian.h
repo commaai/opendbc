@@ -129,7 +129,6 @@ static int rivian_fwd_hook(int bus, int addr) {
 }
 
 static safety_config rivian_init(uint16_t param) {
-
   // 0x120 = ACM_lkaHbaCmd, 0x160 = ACM_longitudinalRequest, 0x321 = SCCM_WheelTouch
   static const CanMsg RIVIAN_TX_MSGS[] = {{0x120, 0, 8}, {0x321, 2, 7}};
   static const CanMsg RIVIAN_LONG_TX_MSGS[] = {{0x120, 0, 8}, {0x321, 2, 7}, {0x160, 0, 5}};
