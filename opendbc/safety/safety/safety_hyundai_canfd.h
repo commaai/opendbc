@@ -5,7 +5,7 @@
 
 // *** Addresses checked in rx hook ***
 // EV, ICE, HYBRID: ACCELERATOR (0x35), ACCELERATOR_BRAKE_ALT (0x100), ACCELERATOR_ALT (0x105)
-#define HYUNDAI_CANFD_COMMON_RX_CHECKS(pt_bus)                                                                              \
+#define HYUNDAI_CANFD_COMMON_RX_CHECKS(pt_bus)                                                                      \
   {.msg = {{0x35, (pt_bus), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U},                   \
            {0x100, (pt_bus), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U},                  \
            {0x105, (pt_bus), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U}}},                \
@@ -17,7 +17,7 @@
   {.msg = {{0x125, (pt_bus), 16, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U}, { 0 }, { 0 }}},  \
 
 // SCC_CONTROL (from ADAS unit or camera)
-#define HYUNDAI_CANFD_SCC_ADDR_CHECK(scc_bus)                                                                                 \
+#define HYUNDAI_CANFD_SCC_ADDR_CHECK(scc_bus)                                                                      \
   {.msg = {{0x1a0, (scc_bus), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 50U}, { 0 }, { 0 }}}, \
 
 static bool hyundai_canfd_alt_buttons = false;
