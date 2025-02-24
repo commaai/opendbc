@@ -127,6 +127,18 @@ class TestHyundaiSafetyAltLimits(TestHyundaiSafety):
     self.safety.init_tests()
 
 
+class TestHyundaiSafetyAltLimits2(TestHyundaiSafety):
+  MAX_RATE_UP = 2
+  MAX_RATE_DOWN = 3
+  MAX_TORQUE = 170
+
+  def setUp(self):
+    self.packer = CANPackerPanda("hyundai_kia_generic")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.ALT_LIMITS_2)
+    self.safety.init_tests()
+
+
 class TestHyundaiSafetyCameraSCC(TestHyundaiSafety):
   BUTTONS_TX_BUS = 2  # tx on 2, rx on 0
   SCC_BUS = 2  # rx on 2
@@ -136,6 +148,18 @@ class TestHyundaiSafetyCameraSCC(TestHyundaiSafety):
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.CAMERA_SCC)
     self.safety.init_tests()
+
+
+class TestHyundaiSafetyFCEV(TestHyundaiSafety):
+  def setUp(self):
+    self.packer = CANPackerPanda("hyundai_kia_generic")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.FCEV_GAS)
+    self.safety.init_tests()
+
+  def _user_gas_msg(self, gas):
+    values = {"ACCELERATOR_PEDAL": gas}
+    return self.packer.make_can_msg_panda("FCEV_ACCELERATOR", 0, values)
 
 
 class TestHyundaiLegacySafety(TestHyundaiSafety):

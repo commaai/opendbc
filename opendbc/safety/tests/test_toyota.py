@@ -288,14 +288,13 @@ class TestToyotaStockLongitudinalBase(TestToyotaSafetyBase):
   RELAY_MALFUNCTION_ADDRS = {0: (0x2E4,)}
   FWD_BLACKLISTED_ADDRS = {2: [0x2E4, 0x412, 0x191]}
 
+  LONGITUDINAL = False
+
   def test_diagnostics(self, stock_longitudinal: bool = True):
     super().test_diagnostics(stock_longitudinal=stock_longitudinal)
 
   def test_block_aeb(self, stock_longitudinal: bool = True):
     super().test_block_aeb(stock_longitudinal=stock_longitudinal)
-
-  def test_accel_actuation_limits(self, stock_longitudinal=True):
-    super().test_accel_actuation_limits(stock_longitudinal=stock_longitudinal)
 
   def test_acc_cancel(self):
     """
