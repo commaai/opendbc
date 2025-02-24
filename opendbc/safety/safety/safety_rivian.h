@@ -10,30 +10,30 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
 
   if (bus == 0)  {
     // Vehicle speed
-    if(addr == 0x208){
-      float speed =  (((GET_BYTE(to_push, 6) << 8) | GET_BYTE(to_push, 7)) * 0.01);
-      vehicle_moving = speed != 0;
+    if (addr == 0x208) {
+      float speed =  ((GET_BYTE(to_push, 6) << 8) | GET_BYTE(to_push, 7)) * 0.01;
+      vehicle_moving = speed > 0.0;
       UPDATE_VEHICLE_SPEED(speed / 3.6);
     }
 
     // Driver torque
     if (addr == 0x380) {
-      int torque_driver_new = ((((GET_BYTE(to_push, 2) << 4) | (GET_BYTE(to_push, 3) >> 4))) - 2050);
+      int torque_driver_new = (((GET_BYTE(to_push, 2) << 4) | (GET_BYTE(to_push, 3) >> 4))) - 2050U;
       update_sample(&torque_driver, torque_driver_new);
     }
 
     // Gas pressed
-    if(addr == 0x150){
+    if (addr == 0x150) {
       gas_pressed = (((GET_BYTE(to_push, 3) << 2) | (GET_BYTE(to_push, 4) >> 6)) != 0U);
     }
 
     // Brake pressed
-    if(addr == 0x38f){
+    if (addr == 0x38f){
       brake_pressed = GET_BIT(to_push, 23U);
     }
 
     // Steering angle
-    if(addr == 0x390) {
+    if (addr == 0x390) {
       // Angle: (0.1 * val) - 819.2 in deg.
       // Store it 1/10 deg to match steering request
       int angle_meas_new = ((GET_BYTE(to_push, 5) << 6) | (GET_BYTE(to_push, 6) >> 2)) - 8192U;
@@ -43,7 +43,7 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
 
   if (bus == 2) {
     // Cruise state
-    if(addr == 0x100) {
+    if (addr == 0x100) {
       bool cruise_engaged = (((GET_BYTE(to_push, 2)) >> 5) != 0U);
       pcm_cruise_check(cruise_engaged);
     }
@@ -71,9 +71,9 @@ static bool rivian_tx_hook(const CANPacket_t *to_send) {
 
   bool tx = true;
   int bus = GET_BUS(to_send);
-  int addr = GET_ADDR(to_send);
 
   if (bus == 2) {
+    int addr = GET_ADDR(to_send);
 
     // Steering control
     if (addr == 0x120) {
@@ -138,7 +138,6 @@ static int rivian_fwd_hook(int bus, int addr) {
 }
 
 static safety_config rivian_init(uint16_t param) {
-  const int FLAG_RIVIAN_LONG_CONTROL = 1;
 
   // 0x120 = ACM_lkaHbaCmd, 0x160 = ACM_longitudinalRequest, 0x321 = SCCM_WheelTouch
   static const CanMsg RIVIAN_TX_MSGS[] = {{0x120, 0, 8}, {0x321, 2, 7}};
@@ -153,7 +152,9 @@ static safety_config rivian_init(uint16_t param) {
     {.msg = {{0x100, 2, 8, .frequency = 100U}, { 0 }, { 0 }}},  // ACM_Status (cruise state)
   };
 
+  UNUSED(param);
   #ifdef ALLOW_DEBUG
+    const int FLAG_RIVIAN_LONG_CONTROL = 1;
     rivian_longitudinal = GET_FLAG(param, FLAG_RIVIAN_LONG_CONTROL);
   #endif
 
