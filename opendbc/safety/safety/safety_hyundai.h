@@ -289,7 +289,7 @@ static int hyundai_fwd_hook(int bus_num, int addr) {
 
 static safety_config hyundai_init(uint16_t param) {
   static const CanMsg HYUNDAI_LONG_TX_MSGS[] = {
-    HYUNDAI_LONG_COMMON_TX_MSGS
+    HYUNDAI_LONG_COMMON_TX_MSGS(0)
     {0x38D, 0, 8}, // FCA11 Bus 0
     {0x483, 0, 8}, // FCA12 Bus 0
     {0x7D0, 0, 8}, // radar UDS TX addr Bus 0 (for radar disable)
@@ -300,7 +300,7 @@ static safety_config hyundai_init(uint16_t param) {
   };
 
   static const CanMsg HYUNDAI_CAMERA_SCC_LONG_TX_MSGS[] = {
-    HYUNDAI_LONG_COMMON_TX_MSGS
+    HYUNDAI_LONG_COMMON_TX_MSGS(2)
   };
 
   hyundai_common_init(param);
