@@ -322,6 +322,7 @@ class CarState(CarStateBase):
       ("TSK_06", 50),       # From J623 Engine control module
       ("ESP_02", 50),       # From J104 ABS/ESP controller
       ("GRA_ACC_01", 33),   # From J533 CAN gateway (via LIN from steering wheel controls)
+      ("Gateway_73", 20),   # From J533 CAN gateway (aggregated data)
       ("Gateway_72", 10),   # From J533 CAN gateway (aggregated data)
       ("Motor_14", 10),     # From J623 Engine control module
       ("Airbag_02", 5),     # From J234 Airbag control module
@@ -330,9 +331,7 @@ class CarState(CarStateBase):
       ("Kombi_03", 0),      # From J285 instrument cluster (not present on older cars, 1Hz when present)
     ]
 
-    if CP.transmissionType == TransmissionType.automatic:
-      pt_messages.append(("Gateway_73", 20))  # From J533 CAN gateway
-    elif CP.transmissionType == TransmissionType.direct:
+    if CP.transmissionType == TransmissionType.direct:
       pt_messages.append(("Motor_EV_01", 10))  # From J??? unknown EV control module
 
     if CP.networkLocation == NetworkLocation.fwdCamera:
