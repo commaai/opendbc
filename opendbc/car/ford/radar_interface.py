@@ -15,6 +15,7 @@ DELPHI_ESR_RADAR_MSGS = list(range(0x500, 0x540))
 DELPHI_MRR_RADAR_START_ADDR = 0x120
 DELPHI_MRR_RADAR_HEADER_ADDR = 0x174  # MRR_Header_SensorCoverage
 DELPHI_MRR_RADAR_MSG_COUNT = 64
+DELPHI_MRR_RADAR_MSG_COUNT_64 = 22 # 22 messages in CANFD
 
 DELPHI_MRR_RADAR_RANGE_COVERAGE = {0: 42, 1: 164, 2: 45, 3: 175}  # scan index to detection range (m)
 DELPHI_MRR_MIN_LONG_RANGE_DIST = 30  # meters
@@ -88,6 +89,14 @@ def _create_delphi_mrr_radar_can_parser(CP) -> CANParser:
 
   return CANParser(RADAR.DELPHI_MRR, messages, CanBus(CP).radar)
 
+def _create_delphi_mrr_radar_can_parser_64(CP) -> CANParser:
+  messages = []
+
+  for i in range(1, DELPHI_MRR_RADAR_MSG_COUNT_64 + 1):
+    msg = f"MRR_Detection_{i:03d}"
+    messages += [(msg, 20)]
+
+  return CANParser(RADAR.DELPHI_MRR_64, messages, CanBus(CP).radar)
 
 class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
@@ -109,6 +118,9 @@ class RadarInterface(RadarInterfaceBase):
     elif self.radar == RADAR.DELPHI_MRR:
       self.rcp = _create_delphi_mrr_radar_can_parser(CP)
       self.trigger_msg = DELPHI_MRR_RADAR_HEADER_ADDR
+    elif self.radar == RADAR.DELPHI_MRR_64:
+      self.rcp = _create_delphi_mrr_radar_can_parser_64(CP)
+      self.trigger_msg = DELPHI_MRR_RADAR_START_ADDR + DELPHI_MRR_RADAR_MSG_COUNT_64 - 1
     else:
       raise ValueError(f"Unsupported radar: {self.radar}")
 
@@ -131,6 +143,11 @@ class RadarInterface(RadarInterfaceBase):
       self._update_delphi_esr()
     elif self.radar == RADAR.DELPHI_MRR:
       _update, _errors = self._update_delphi_mrr()
+      errors.extend(_errors)
+      if not _update:
+        return None
+    elif self.radar == RADAR.DELPHI_MRR_64:
+      _update, _errors = self._update_delphi_mrr_64()
       errors.extend(_errors)
       if not _update:
         return None
@@ -217,6 +234,67 @@ class RadarInterface(RadarInterfaceBase):
     if headerScanIndex != 3:
       return False, []
 
+    return self.do_clustering(errors)
+
+  def _update_delphi_mrr_64(self):
+    # There is not discovered MRR_Header_InformationDetections message in CANFD
+    # headerScanIndex = int(self.rcp.vl["MRR_Header_InformationDetections"]['CAN_SCAN_INDEX']) & 0b11
+    headerScanIndex = int(self.rcp.vl["MRR_Detection_001"]['CAN_SCAN_INDEX_2LSB_01_01'])
+
+    # Use points with Doppler coverage of +-60 m/s, reduces similar points
+    if headerScanIndex in (0, 1):
+      return False, []
+
+    errors = []
+    # There is not discovered MRR_Header_SensorCoverage message in CANFD
+    # if DELPHI_MRR_RADAR_RANGE_COVERAGE[headerScanIndex] != int(self.rcp.vl["MRR_Header_SensorCoverage"]["CAN_RANGE_COVERAGE"]):
+    #   self.invalid_cnt += 1
+    # else:
+    #   self.invalid_cnt = 0
+
+    # # Rarely MRR_Header_InformationDetections can fail to send a message. The scan index is skipped in this case
+    # if self.invalid_cnt >= 5:
+    #   errors.append("wrongConfig")
+
+    for ii in range(1, DELPHI_MRR_RADAR_MSG_COUNT_64 + 1):
+      msg = self.rcp.vl[f"MRR_Detection_{ii:03d}"]
+
+      maxRangeID = 7 if ii < 22 else 4 # all messages have 7 points except the last one, which has only 4 points in CANFD
+      for iii in range(1,maxRangeID):
+
+        # SCAN_INDEX rotates through 0..3 on each message for different measurement modes
+        # Indexes 0 and 2 have a max range of ~40m, 1 and 3 are ~170m (MRR_Header_SensorCoverage->CAN_RANGE_COVERAGE)
+        # Indexes 0 and 1 have a Doppler coverage of +-71 m/s, 2 and 3 have +-60 m/s
+        scanIndex = msg[f"CAN_SCAN_INDEX_2LSB_{ii:02d}_{iii:02d}"]
+
+        # Throw out old measurements. Very unlikely to happen, but is proper behavior
+        if scanIndex != headerScanIndex:
+          continue
+
+        valid = bool(msg[f"CAN_DET_VALID_LEVEL_{ii:02d}_{iii:02d}"])
+
+        # Long range measurement mode is more sensitive and can detect the road surface
+        dist = msg[f"CAN_DET_RANGE_{ii:02d}_{iii:02d}"]  # m [0|255.984]
+        if scanIndex in (1, 3) and dist < DELPHI_MRR_MIN_LONG_RANGE_DIST:
+          valid = False
+
+        if valid:
+          print(f"CAN_DET_HOST_VEH_CLUTTER: {msg[f"CAN_DET_HOST_VEH_CLUTTER_{ii:02d}_{iii:02d}"] }") if msg[f"CAN_DET_HOST_VEH_CLUTTER_{ii:02d}_{iii:02d}"] > 0 else None
+          azimuth = msg[f"CAN_DET_AZIMUTH_{ii:02d}_{iii:02d}"]              # rad [-3.1416|3.13964]
+          distRate = msg[f"CAN_DET_RANGE_RATE_{ii:02d}_{iii:02d}"]          # m/s [-128|127.984]
+          dRel = cos(azimuth) * dist                                        # m from front of car
+          yRel = sin(azimuth) * dist                                        # in car frame's y axis, right is positive
+
+          self.points.append([dRel, yRel * 2, distRate * 2])
+
+    # Update once we've cycled through all 4 scan modes
+    if headerScanIndex != 3:
+      return True, [] # MRR_Detection_* messages in CANFD are at 20Hz, services.py expects liveTracks to be at 20Hz - we'll send messages to meet the 20Hz
+
+    return self.do_clustering(errors)
+
+  # Do the common work for CAN and CANFD clustering and prepare the points to be sued for liveTracks
+  def do_clustering(self, errors):
     # Cluster points from this cycle against the centroids from the previous cycle
     prev_keys = [[p.dRel, p.yRel * 2, p.vRel * 2] for p in self.clusters]
     labels = cluster_points(prev_keys, self.points, DELPHI_MRR_CLUSTER_THRESHOLD)
