@@ -138,7 +138,6 @@ static safety_config rivian_init(uint16_t param) {
     {.msg = {{0x208, 0, 8, .frequency = 50U}, { 0 }, { 0 }}},   // ESP_Status (speed)
     {.msg = {{0x150, 0, 7, .frequency = 50U}, { 0 }, { 0 }}},   // VDM_PropStatus (gas pedal)
     {.msg = {{0x38f, 0, 6, .frequency = 50U}, { 0 }, { 0 }}},   // iBESP2 (brakes)
-    {.msg = {{0x162, 0, 8, .frequency = 100U}, { 0 }, { 0 }}},  // VDM_AdasSts
     {.msg = {{0x100, 2, 8, .frequency = 100U}, { 0 }, { 0 }}},  // ACM_Status (cruise state)
   };
 

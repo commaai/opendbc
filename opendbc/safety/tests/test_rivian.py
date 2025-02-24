@@ -65,8 +65,14 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
 
   def test_wheel_touch(self):
     self.safety.set_controls_allowed(True)
-    values = {"SCCM_WheelTouch_HandsOn": 1, "SCCM_WheelTouch_CapacitiveValue": 100}
-    self.assertTrue(self._tx(self.packer.make_can_msg_panda("SCCM_WheelTouch", 2, values)))
+    for controls_allowed in (True, False):
+      self.safety.set_controls_allowed(controls_allowed)
+      values = {
+        "SCCM_WheelTouch_HandsOn": 1 if controls_allowed else 0,
+        "SCCM_WheelTouch_CapacitiveValue": 100 if controls_allowed else 0,
+        "SETME_X52": 100,
+      }
+      self.assertTrue(self._tx(self.packer.make_can_msg_panda("SCCM_WheelTouch", 2, values)))
 
 
 class TestRivianStockSafety(TestRivianSafetyBase):
