@@ -22,7 +22,7 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
 
     // Gas pressed
     if (addr == 0x150) {
-      gas_pressed = (((GET_BYTE(to_push, 3) << 2) | (GET_BYTE(to_push, 4) >> 6)) != 0U);
+      gas_pressed = GET_BYTE(to_push, 3) | (GET_BYTE(to_push, 4) & 0xC0U);
     }
 
     // Brake pressed
