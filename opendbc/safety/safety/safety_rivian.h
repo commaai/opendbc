@@ -44,7 +44,7 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
   if (bus == 2) {
     // Cruise state
     if (addr == 0x100) {
-      bool cruise_engaged = (((GET_BYTE(to_push, 2)) >> 5) != 0U);
+      bool cruise_engaged = ((GET_BYTE(to_push, 2)) >> 5) != 0U;
       pcm_cruise_check(cruise_engaged);
     }
   }
@@ -52,13 +52,13 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
 
 static bool rivian_tx_hook(const CANPacket_t *to_send) {
   const SteeringLimits RIVIAN_STEERING_LIMITS = {
-    .max_steer = 350,
+    .max_steer = 250,
     .max_rate_up = 3,
     .max_rate_down = 5,
     .max_rt_delta = 125,
     .max_rt_interval = 250000,
-    .driver_torque_factor = 1,
-    .driver_torque_allowance = 15,
+    .driver_torque_factor = 2,
+    .driver_torque_allowance = 100,
     .type = TorqueDriverLimited,
   };
 
@@ -68,11 +68,10 @@ static bool rivian_tx_hook(const CANPacket_t *to_send) {
     .inactive_accel = 0,
   };
 
-
   bool tx = true;
   int bus = GET_BUS(to_send);
 
-  if (bus == 2) {
+  if (bus == 0) {
     int addr = GET_ADDR(to_send);
 
     // Steering control
@@ -81,19 +80,19 @@ static bool rivian_tx_hook(const CANPacket_t *to_send) {
       bool steer_req = GET_BIT(to_send, 28U);
 
       if (steer_torque_cmd_checks(desired_torque, steer_req, RIVIAN_STEERING_LIMITS)) {
-         tx = false;
+        tx = false;
       }
     }
 
     // Longitudinal control
-    if(addr == 0x160) {
+    if (addr == 0x160) {
       if (rivian_longitudinal) {
         int raw_accel = ((GET_BYTE(to_send, 2) << 3) | (GET_BYTE(to_send, 3) >> 5)) - 1024U;
         if (longitudinal_accel_checks(raw_accel, RIVIAN_LONG_LIMITS)) {
           tx = false;
         }
       } else {
-         tx = false;
+        tx = false;
       }
     }
   }
@@ -106,19 +105,17 @@ static int rivian_fwd_hook(int bus, int addr) {
   bool block_msg = false;
 
   if (bus == 0) {
-
     // SCCM_WheelTouch
     if (addr == 0x321) {
       block_msg = true;
     }
 
-    if(!block_msg) {
+    if (!block_msg) {
       bus_fwd = 2;
     }
   }
 
   if (bus == 2) {
-
     // ACM_lkaHbaCmd
     if (addr == 0x120) {
       block_msg = true;
@@ -129,7 +126,7 @@ static int rivian_fwd_hook(int bus, int addr) {
       block_msg = true;
     }
 
-    if(!block_msg) {
+    if (!block_msg) {
       bus_fwd = 0;
     }
   }
