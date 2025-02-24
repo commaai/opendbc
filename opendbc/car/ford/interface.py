@@ -20,7 +20,6 @@ class CarInterface(CarInterfaceBase):
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
     ret.brand = "ford"
-    ret.dashcamOnly = bool(ret.flags & FordFlags.CANFD)
 
     ret.radarUnavailable = Bus.radar not in DBC[candidate]
     ret.steerControlType = structs.CarParams.SteerControlType.angle
@@ -41,7 +40,6 @@ class CarInterface(CarInterfaceBase):
       cfgs.insert(0, get_safety_config(structs.CarParams.SafetyModel.noOutput))
     ret.safetyConfigs = cfgs
 
-    # TODO: verify stock AEB compatibility and longitudinal limit safety before shipping to release
     ret.experimentalLongitudinalAvailable = ret.radarUnavailable
     if experimental_long or not ret.radarUnavailable:
       ret.safetyConfigs[-1].safetyParam |= FordSafetyFlags.LONG_CONTROL.value
