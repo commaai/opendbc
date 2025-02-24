@@ -32,8 +32,8 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
       raise unittest.SkipTest
 
   def _torque_driver_msg(self, torque):
-    values = {"EPAS_SystemStatus": torque}
-    return self.packer.make_can_msg_panda("EPAS_TorsionBarTorque", 0, values)
+    values = {"EPAS_TorsionBarTorque": torque}
+    return self.packer.make_can_msg_panda("EPAS_SystemStatus", 0, values)
 
   def _torque_cmd_msg(self, torque, steer_req=1):
     values = {"ACM_lkaStrToqReq": torque, "ACM_lkaActToi": steer_req}
