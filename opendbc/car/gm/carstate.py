@@ -161,7 +161,7 @@ class CarState(CarStateBase):
         *create_button_events(self.distance_button, prev_distance_button,
                               {1: ButtonType.gapAdjustCruise}),
         *create_button_events(self.lkas_button, prev_lkas_button,
-                              {1: ButtonType.altButton1})
+                              {1: ButtonType.lkas})
       ]
 
     return ret
