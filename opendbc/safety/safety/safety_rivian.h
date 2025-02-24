@@ -103,13 +103,21 @@ static bool rivian_tx_hook(const CANPacket_t *to_send) {
 
 static int rivian_fwd_hook(int bus, int addr) {
   int bus_fwd = -1;
+  bool block_msg = false;
 
   if (bus == 0) {
-    bus_fwd = 2;
+
+    // SCCM_WheelTouch
+    if (addr == 0x321) {
+      block_msg = true;
+    }
+
+    if(!block_msg) {
+      bus_fwd = 2;
+    }
   }
 
   if (bus == 2) {
-    bool block_msg = false;
 
     // ACM_lkaHbaCmd
     if (addr == 0x120) {
@@ -132,9 +140,9 @@ static int rivian_fwd_hook(int bus, int addr) {
 static safety_config rivian_init(uint16_t param) {
   const int FLAG_RIVIAN_LONG_CONTROL = 1;
 
-  // 0x120 = ACM_lkaHbaCmd, 0x160 = ACM_longitudinalRequest
-  static const CanMsg RIVIAN_TX_MSGS[] = {{0x120, 0, 8}};
-  static const CanMsg RIVIAN_LONG_TX_MSGS[] = {{0x120, 0, 8}, {0x160, 0, 5}};
+  // 0x120 = ACM_lkaHbaCmd, 0x160 = ACM_longitudinalRequest, 0x321 = SCCM_WheelTouch
+  static const CanMsg RIVIAN_TX_MSGS[] = {{0x120, 0, 8}, {0x321, 2, 7}};
+  static const CanMsg RIVIAN_LONG_TX_MSGS[] = {{0x120, 0, 8}, {0x321, 2, 7}, {0x160, 0, 5}};
 
   static RxCheck rivian_rx_checks[] = {
     {.msg = {{0x390, 0, 7, .frequency = 100U}, { 0 }, { 0 }}},  // EPAS_AdasStatus (steering angle)
