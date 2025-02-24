@@ -88,7 +88,7 @@ class CarState(CarStateBase):
 
     # Update gear and/or clutch position data.
     if self.CP.transmissionType == TransmissionType.automatic:
-      ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Getriebe_11"]["GE_Fahrstufe"], None))
+      ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Gateway_73"]["GE_Fahrstufe"], None))
     elif self.CP.transmissionType == TransmissionType.direct:
       ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Motor_EV_01"]["MO_Waehlpos"], None))
     elif self.CP.transmissionType == TransmissionType.manual:
@@ -292,6 +292,7 @@ class CarState(CarStateBase):
       ("TSK_06", 50),       # From J623 Engine control module
       ("ESP_02", 50),       # From J104 ABS/ESP controller
       ("GRA_ACC_01", 33),   # From J533 CAN gateway (via LIN from steering wheel controls)
+      ("Gateway_73", 20),   # From J533 CAN gateway (aggregated data)
       ("Gateway_72", 10),   # From J533 CAN gateway (aggregated data)
       ("Motor_14", 10),     # From J623 Engine control module
       ("Airbag_02", 5),     # From J234 Airbag control module
@@ -300,9 +301,7 @@ class CarState(CarStateBase):
       ("Kombi_03", 0),      # From J285 instrument cluster (not present on older cars, 1Hz when present)
     ]
 
-    if CP.transmissionType == TransmissionType.automatic:
-      pt_messages.append(("Getriebe_11", 20))  # From J743 Auto transmission control module
-    elif CP.transmissionType == TransmissionType.direct:
+    if CP.transmissionType == TransmissionType.direct:
       pt_messages.append(("Motor_EV_01", 10))  # From J??? unknown EV control module
 
     if CP.networkLocation == NetworkLocation.fwdCamera:
