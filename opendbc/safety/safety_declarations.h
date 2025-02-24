@@ -118,6 +118,7 @@ typedef struct {
   const int len;
   const bool check_checksum;         // true is checksum check is performed
   const uint8_t max_counter;         // maximum value of the counter. 0 means that the counter check is skipped
+  const bool skip_counter;  // true if counter check is skipped
   const bool quality_flag;           // true is quality flag check is performed
   const uint32_t frequency;      // expected frequency of the message [Hz]
 } CanMsgCheck;
