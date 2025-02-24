@@ -5,11 +5,6 @@
 #include <stdexcept>
 #include <sstream>
 
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-
 #include "opendbc/can/common.h"
 
 int64_t get_raw_value(const std::vector<uint8_t> &msg, const Signal &sig) {
@@ -157,24 +152,25 @@ CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum
   }
 }
 
-void CANParser::update(const std::vector<CanData> &can_data, std::vector<SignalValue> &vals) {
-  uint64_t current_nanos = 0;
+std::set<uint32_t> CANParser::update(const std::vector<CanData> &can_data) {
+  // Clear all_values
+  for (auto &state : message_states) {
+    for (auto &vals : state.second.all_vals) vals.clear();
+  }
+
+  std::set<uint32_t> updated_addresses;
   for (const auto &c : can_data) {
     if (first_nanos == 0) {
       first_nanos = c.nanos;
     }
-    if (current_nanos == 0) {
-      current_nanos = c.nanos;
-    }
-    last_nanos = c.nanos;
 
-    UpdateCans(c);
-    UpdateValid(last_nanos);
+    UpdateCans(c, updated_addresses);
+    UpdateValid(c.nanos);
   }
-  query_latest(vals, current_nanos);
+  return updated_addresses;
 }
 
-void CANParser::UpdateCans(const CanData &can) {
+void CANParser::UpdateCans(const CanData &can, std::set<uint32_t> &updated_addresses) {
   //DEBUG("got %zu messages\n", can.frames.size());
 
   bool bus_empty = true;
@@ -202,7 +198,9 @@ void CANParser::UpdateCans(const CanData &can) {
     //  continue;
     //}
 
-    state_it->second.parse(can.nanos, frame.dat);
+    if (state_it->second.parse(can.nanos, frame.dat)) {
+      updated_addresses.insert(state_it->first);
+    }
   }
 
   // update bus timeout
@@ -239,27 +237,4 @@ void CANParser::UpdateValid(uint64_t nanos) {
   }
   can_invalid_cnt = _valid ? 0 : (can_invalid_cnt + 1);
   can_valid = (can_invalid_cnt < CAN_INVALID_CNT) && _counters_valid;
-}
-
-void CANParser::query_latest(std::vector<SignalValue> &vals, uint64_t last_ts) {
-  if (last_ts == 0) {
-    last_ts = last_nanos;
-  }
-  for (auto& kv : message_states) {
-    auto& state = kv.second;
-    if (last_ts != 0 && state.last_seen_nanos < last_ts) {
-      continue;
-    }
-
-    for (int i = 0; i < state.parse_sigs.size(); i++) {
-      const Signal &sig = state.parse_sigs[i];
-      SignalValue &v = vals.emplace_back();
-      v.address = state.address;
-      v.ts_nanos = state.last_seen_nanos;
-      v.name = sig.name;
-      v.value = state.vals[i];
-      v.all_values = state.all_vals[i];
-      state.all_vals[i].clear();
-    }
-  }
 }

@@ -3,6 +3,8 @@
 *.pyc
 *.os
 *.o
+*.so
+*.a
 *.tmp
 *.dylib
 .*.swp
@@ -11,13 +13,15 @@
 .hypothesis
 *.egg-info/
 *.html
+*.gcda
+*.gcno
+
 uv.lock
 
-opendbc/can/*.so
-opendbc/can/*.a
 opendbc/can/build/
 opendbc/can/obj/
 opendbc/can/packer_pyx.cpp
 opendbc/can/parser_pyx.cpp
 opendbc/can/packer_pyx.html
 opendbc/can/parser_pyx.html
+opendbc/dbc/*_generated.dbc

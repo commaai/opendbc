@@ -9,7 +9,7 @@ class TestPlatformConfigs:
         assert platform.config._frozen
 
         if platform != "MOCK":
-          assert "pt" in platform.config.dbc_dict
+          assert len(platform.config.dbc_dict) > 0
         assert len(platform.config.platform_str) > 0
 
         assert name == platform.config.platform_str
