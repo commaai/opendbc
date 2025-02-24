@@ -78,7 +78,7 @@ class TestRivianStockSafety(TestRivianSafetyBase):
     self.safety.init_tests()
 
 
-class TestRivianLongitudinalSafety(TestRivianSafetyBase):
+class TestRivianLongitudinalSafety(TestRivianSafetyBase, common.LongitudinalAccelSafetyTest):
   RELAY_MALFUNCTION_ADDRS = {0: (0x120, 0x160)}
   FWD_BLACKLISTED_ADDRS = {0: [0x321], 2: [0x120, 0x160]}
 
