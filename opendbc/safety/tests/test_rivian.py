@@ -13,7 +13,7 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
   TX_MSGS = [[0x120, 0], [0x160, 0], [0x321, 2]]
   STANDSTILL_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS = {0: (0x120,)}
-  FWD_BLACKLISTED_ADDRS = {0: [0x321], 2: [0x120]}
+  FWD_BLACKLISTED_ADDRS = {2: [0x321], 0: [0x120]}
   FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   MAX_RATE_UP = 3
@@ -83,7 +83,7 @@ class TestRivianStockSafety(TestRivianSafetyBase):
 
 class TestRivianLongitudinalSafety(TestRivianSafetyBase):
   RELAY_MALFUNCTION_ADDRS = {2: (0x120, 0x160)}
-  FWD_BLACKLISTED_ADDRS = {2: [0x321], 0: [0x120, 0x160]}
+  FWD_BLACKLISTED_ADDRS = {0: [0x321], 2: [0x120, 0x160]}
 
   def setUp(self):
     self.packer = CANPackerPanda("rivian_can")

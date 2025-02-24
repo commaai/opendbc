@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from enum import StrEnum
+from enum import StrEnum, IntFlag
 
 from opendbc.car.structs import CarParams
 from opendbc.car import Bus, structs
@@ -66,5 +66,7 @@ class CarControllerParams:
   def __init__(self, CP):
     pass
 
+class RivianSafetyFlags(IntFlag):
+  LONG_CONTROL = 1
 
 DBC = CAR.create_dbc_map()
