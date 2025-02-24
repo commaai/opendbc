@@ -279,7 +279,6 @@ class RadarInterface(RadarInterfaceBase):
           valid = False
 
         if valid:
-          print(f"CAN_DET_HOST_VEH_CLUTTER: {msg[f"CAN_DET_HOST_VEH_CLUTTER_{ii:02d}_{iii:02d}"] }") if msg[f"CAN_DET_HOST_VEH_CLUTTER_{ii:02d}_{iii:02d}"] > 0 else None
           azimuth = msg[f"CAN_DET_AZIMUTH_{ii:02d}_{iii:02d}"]              # rad [-3.1416|3.13964]
           distRate = msg[f"CAN_DET_RANGE_RATE_{ii:02d}_{iii:02d}"]          # m/s [-128|127.984]
           dRel = cos(azimuth) * dist                                        # m from front of car
