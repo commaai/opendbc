@@ -1,10 +1,8 @@
 from opendbc.can.packer import CANPacker
-from opendbc.car import Bus, apply_driver_steer_torque_limits, structs
+from opendbc.car import Bus, apply_driver_steer_torque_limits
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.rivian.riviancan import create_lka_steering, create_longitudinal, create_wheel_touch
 from opendbc.car.rivian.values import CarControllerParams
-
-LongCtrlState = structs.CarControl.Actuators.LongControlState
 
 
 class CarController(CarControllerBase):
@@ -32,8 +30,7 @@ class CarController(CarControllerBase):
 
     # Longitudinal control
     if self.CP.openpilotLongitudinalControl:
-      stopping = actuators.longControlState == LongCtrlState.stopping
-      can_sends.append(create_longitudinal(self.packer, self.frame % 15, actuators.accel, CC.enabled, stopping))
+      can_sends.append(create_longitudinal(self.packer, self.frame % 15, actuators.accel, CC.enabled))
 
     new_actuators = actuators.as_builder()
     new_actuators.steer = apply_steer / CarControllerParams.STEER_MAX
