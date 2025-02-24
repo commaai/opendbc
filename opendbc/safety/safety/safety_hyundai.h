@@ -26,11 +26,18 @@ const LongitudinalLimits HYUNDAI_LONG_LIMITS = {
   .min_accel = -350,  // 1/100 m/s2
 };
 
-static const CanMsg HYUNDAI_TX_MSGS[] = {
-  {0x340, 0, 8}, // LKAS11 Bus 0
-  {0x4F1, 0, 4}, // CLU11 Bus 0
-  {0x485, 0, 4}, // LFAHDA_MFC Bus 0
-};
+#define HYUNDAI_COMMON_TX_MSGS(scc_bus) \
+  {0x340, 0,       8},  /* LKAS11 Bus 0                              */ \
+  {0x4F1, scc_bus, 4},  /* CLU11 Bus 0 (radar-SCC) or 2 (camera-SCC) */ \
+  {0x485, 0,       4},  /* LFAHDA_MFC Bus 0                          */ \
+
+#define HYUNDAI_LONG_COMMON_TX_MSGS(scc_bus) \
+  HYUNDAI_COMMON_TX_MSGS(scc_bus)                                       \
+  {0x420, 0,       8},  /* SCC11 Bus 0                               */ \
+  {0x421, 0,       8},  /* SCC12 Bus 0                               */ \
+  {0x50A, 0,       8},  /* SCC13 Bus 0                               */ \
+  {0x389, 0,       8},  /* SCC14 Bus 0                               */ \
+  {0x4A2, 0,       2},  /* FRT_RADAR11 Bus 0                         */ \
 
 #define HYUNDAI_COMMON_RX_CHECKS(legacy)                                                                                      \
   {.msg = {{0x260, 0, 8, .check_checksum = true, .max_counter = 3U, .frequency = 100U},                                       \
@@ -41,6 +48,10 @@ static const CanMsg HYUNDAI_TX_MSGS[] = {
 
 #define HYUNDAI_SCC12_ADDR_CHECK(scc_bus)                                                                                     \
   {.msg = {{0x421, (scc_bus), 8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},               \
+
+static const CanMsg HYUNDAI_TX_MSGS[] = {
+  HYUNDAI_COMMON_TX_MSGS(0)
+};
 
 static bool hyundai_legacy = false;
 
@@ -121,10 +132,12 @@ static void hyundai_rx_hook(const CANPacket_t *to_push) {
   int addr = GET_ADDR(to_push);
 
   // SCC12 is on bus 2 for camera-based SCC cars, bus 0 on all others
-  if ((addr == 0x421) && (((bus == 0) && !hyundai_camera_scc) || ((bus == 2) && hyundai_camera_scc))) {
-    // 2 bits: 13-14
-    int cruise_engaged = (GET_BYTES(to_push, 0, 4) >> 13) & 0x3U;
-    hyundai_common_cruise_state_check(cruise_engaged);
+  if (addr == 0x421) {
+    if (((bus == 0) && !hyundai_camera_scc) || ((bus == 2) && hyundai_camera_scc)) {
+      // 2 bits: 13-14
+      int cruise_engaged = (GET_BYTES(to_push, 0, 4) >> 13) & 0x3U;
+      hyundai_common_cruise_state_check(cruise_engaged);
+    }
   }
 
   if (bus == 0) {
@@ -168,7 +181,7 @@ static void hyundai_rx_hook(const CANPacket_t *to_push) {
 
     // If openpilot is controlling longitudinal we need to ensure the radar is turned off
     // Enforce by checking we don't see SCC12
-    if (hyundai_longitudinal && (addr == 0x421)) {
+    if (hyundai_longitudinal && !hyundai_camera_scc && (addr == 0x421)) {
       stock_ecu_detected = true;
     }
     generic_rx_checks(stock_ecu_detected);
@@ -262,8 +275,10 @@ static int hyundai_fwd_hook(int bus_num, int addr) {
     bool is_lkas_11 = (addr == 0x340);
     // LFA and HDA cluster icons
     bool is_lfahda_mfc = (addr == 0x485);
+    // Stock SCC messages, blocking when doing openpilot longitudinal on camera SCC cars
+    bool is_scc_msg = (addr == 0x420) || (addr == 0x421) || (addr == 0x50A) || (addr == 0x389);
 
-    bool block_msg = is_lkas_11 || is_lfahda_mfc;
+    bool block_msg = is_lkas_11 || is_lfahda_mfc || (is_scc_msg && hyundai_longitudinal && hyundai_camera_scc);
     if (!block_msg) {
       bus_fwd = 0;
     }
@@ -274,31 +289,22 @@ static int hyundai_fwd_hook(int bus_num, int addr) {
 
 static safety_config hyundai_init(uint16_t param) {
   static const CanMsg HYUNDAI_LONG_TX_MSGS[] = {
-    {0x340, 0, 8}, // LKAS11 Bus 0
-    {0x4F1, 0, 4}, // CLU11 Bus 0
-    {0x485, 0, 4}, // LFAHDA_MFC Bus 0
-    {0x420, 0, 8}, // SCC11 Bus 0
-    {0x421, 0, 8}, // SCC12 Bus 0
-    {0x50A, 0, 8}, // SCC13 Bus 0
-    {0x389, 0, 8}, // SCC14 Bus 0
-    {0x4A2, 0, 2}, // FRT_RADAR11 Bus 0
+    HYUNDAI_LONG_COMMON_TX_MSGS(0)
     {0x38D, 0, 8}, // FCA11 Bus 0
     {0x483, 0, 8}, // FCA12 Bus 0
     {0x7D0, 0, 8}, // radar UDS TX addr Bus 0 (for radar disable)
   };
 
   static const CanMsg HYUNDAI_CAMERA_SCC_TX_MSGS[] = {
-    {0x340, 0, 8}, // LKAS11 Bus 0
-    {0x4F1, 2, 4}, // CLU11 Bus 2
-    {0x485, 0, 4}, // LFAHDA_MFC Bus 0
+    HYUNDAI_COMMON_TX_MSGS(2)
+  };
+
+  static const CanMsg HYUNDAI_CAMERA_SCC_LONG_TX_MSGS[] = {
+    HYUNDAI_LONG_COMMON_TX_MSGS(2)
   };
 
   hyundai_common_init(param);
   hyundai_legacy = false;
-
-  if (hyundai_camera_scc) {
-    hyundai_longitudinal = false;
-  }
 
   safety_config ret;
   if (hyundai_longitudinal) {
@@ -308,7 +314,8 @@ static safety_config hyundai_init(uint16_t param) {
       {.msg = {{0x4F1, 0, 4, .check_checksum = false, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
     };
 
-    ret = BUILD_SAFETY_CFG(hyundai_long_rx_checks, HYUNDAI_LONG_TX_MSGS);
+    ret = hyundai_camera_scc ? BUILD_SAFETY_CFG(hyundai_long_rx_checks, HYUNDAI_CAMERA_SCC_LONG_TX_MSGS) : \
+                               BUILD_SAFETY_CFG(hyundai_long_rx_checks, HYUNDAI_LONG_TX_MSGS);
   } else if (hyundai_camera_scc) {
     static RxCheck hyundai_cam_scc_rx_checks[] = {
       HYUNDAI_COMMON_RX_CHECKS(false)
