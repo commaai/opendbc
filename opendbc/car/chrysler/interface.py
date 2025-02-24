@@ -1,27 +1,26 @@
 #!/usr/bin/env python3
-from panda import Panda
 from opendbc.car import get_safety_config, structs
-from opendbc.car.chrysler.values import CAR, RAM_HD, RAM_DT, RAM_CARS, ChryslerFlags
+from opendbc.car.chrysler.values import CAR, RAM_HD, RAM_DT, RAM_CARS, ChryslerFlags, ChryslerSafetyFlags
 from opendbc.car.interfaces import CarInterfaceBase
 
 
 class CarInterface(CarInterfaceBase):
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
-    ret.carName = "chrysler"
+    ret.brand = "chrysler"
     ret.dashcamOnly = candidate in RAM_HD
 
     # radar parsing needs some work, see https://github.com/commaai/openpilot/issues/26842
-    ret.radarUnavailable = True # DBC[candidate]['radar'] is None
+    ret.radarUnavailable = True # Bus.radar not in DBC[candidate][Bus.radar]
     ret.steerActuatorDelay = 0.1
     ret.steerLimitTimer = 0.4
 
     # safety config
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.chrysler)]
     if candidate in RAM_HD:
-      ret.safetyConfigs[0].safetyParam |= Panda.FLAG_CHRYSLER_RAM_HD
+      ret.safetyConfigs[0].safetyParam |= ChryslerSafetyFlags.RAM_HD.value
     elif candidate in RAM_DT:
-      ret.safetyConfigs[0].safetyParam |= Panda.FLAG_CHRYSLER_RAM_DT
+      ret.safetyConfigs[0].safetyParam |= ChryslerSafetyFlags.RAM_DT.value
 
     CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
     if candidate not in RAM_CARS:
