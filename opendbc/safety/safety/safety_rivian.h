@@ -11,8 +11,7 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
   if (bus == 0)  {
     // Vehicle speed
     if (addr == 0x208) {
-      int speed = (GET_BYTE(to_push, 6) << 8) | GET_BYTE(to_push, 7);
-      vehicle_moving = speed != 0;
+      vehicle_moving = GET_BYTE(to_push, 6) | GET_BYTE(to_push, 7);
     }
 
     // Driver torque
@@ -40,8 +39,7 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
   if (bus == 2) {
     // Cruise state
     if (addr == 0x100) {
-      bool cruise_engaged = ((GET_BYTE(to_push, 2)) >> 5) != 0U;
-      pcm_cruise_check(cruise_engaged);
+      pcm_cruise_check(GET_BIT(to_push, 21U));
     }
   }
 }

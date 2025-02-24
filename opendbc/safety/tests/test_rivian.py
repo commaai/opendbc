@@ -52,7 +52,7 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
     return self.packer.make_can_msg_panda("VDM_PropStatus", 0, values)
 
   def _pcm_status_msg(self, enable):
-    values = {"ACM_FeatureStatus": enable}
+    values = {"ACM_FeatureStatus": enable, "ACM_Unkown1": 1}
     return self.packer.make_can_msg_panda("ACM_Status", 2, values)
 
   def _vehicle_moving_msg(self, speed: float):
