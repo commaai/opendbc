@@ -72,6 +72,8 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
 
 class TestRivianStockSafety(TestRivianSafetyBase):
 
+  LONGITUDINAL = False
+
   def setUp(self):
     self.packer = CANPackerPanda("rivian_can")
     self.safety = libsafety_py.libsafety
@@ -79,13 +81,9 @@ class TestRivianStockSafety(TestRivianSafetyBase):
     self.safety.init_tests()
 
 
-  def test_accel_actuation_limits(self, stock_longitudinal=True):
-    super().test_accel_actuation_limits(stock_longitudinal)
-
-
 class TestRivianLongitudinalSafety(TestRivianSafetyBase):
-  RELAY_MALFUNCTION_ADDRS = {0: (0x120, 0x160)}
-  FWD_BLACKLISTED_ADDRS = {0: [0x321], 2: [0x120, 0x160]}
+  RELAY_MALFUNCTION_ADDRS = {2: (0x120, 0x160)}
+  FWD_BLACKLISTED_ADDRS = {2: [0x321], 0: [0x120, 0x160]}
 
   def setUp(self):
     self.packer = CANPackerPanda("rivian_can")
