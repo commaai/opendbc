@@ -55,7 +55,7 @@ class CarControllerParams:
   STEER_DELTA_DOWN = 5  # torque decrease per refresh
   STEER_DRIVER_ALLOWANCE = 15  # allowed driver torque before start limiting
   STEER_DRIVER_MULTIPLIER = 1  # weight driver torque
-  STEER_DRIVER_FACTOR = 1
+  STEER_DRIVER_FACTOR = 100
 
   ACCEL_MIN = -3.48  # m/s^2
   ACCEL_MAX = 2.0  # m/s^2

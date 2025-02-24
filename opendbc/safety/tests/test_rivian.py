@@ -58,6 +58,12 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
     values = {"ESP_Vehicle_Speed": speed}
     return self.packer.make_can_msg_panda("ESP_Status", 0, values)
 
+  def test_wheel_touch(self):
+    self.safety.set_controls_allowed(True)
+    values = {"SCCM_WheelTouch_HandsOn": 1, "SCCM_WheelTouch_CapacitiveValue": 100}
+    self.assertFalse(self._tx(self.packer.make_can_msg_panda("SCCM_WheelTouch", 2, values)))
+
+
 class TestRivianStockSafety(TestRivianSafetyBase):
 
   def setUp(self):
