@@ -54,6 +54,9 @@ class CarInterface(CarInterfaceBase):
     # Accord ICE 1.5T CVT has different gearbox message
     if candidate == CAR.HONDA_ACCORD and 0x191 in fingerprint[CAN.pt]:
       ret.transmissionType = TransmissionType.cvt
+    # New Civics can have manual transmission
+    elif candidate == CAR.HONDA_CIVIC_2022 and 0x191 not in fingerprint[CAN.pt]:
+      ret.transmissionType = TransmissionType.manual
 
     # Certain Hondas have an extra steering sensor at the bottom of the steering rack,
     # which improves controls quality as it removes the steering column torsion from feedback.
@@ -185,17 +188,17 @@ class CarInterface(CarInterfaceBase):
       ret.flags |= HondaFlags.BOSCH_ALT_BRAKE.value
 
     if ret.flags & HondaFlags.BOSCH_ALT_BRAKE:
-      ret.safetyConfigs[0].safetyParam |= HondaSafetyFlags.FLAG_HONDA_ALT_BRAKE.value
+      ret.safetyConfigs[0].safetyParam |= HondaSafetyFlags.ALT_BRAKE.value
 
     # These cars use alternate SCM messages (SCM_FEEDBACK AND SCM_BUTTON)
     if candidate in HONDA_NIDEC_ALT_SCM_MESSAGES:
-      ret.safetyConfigs[0].safetyParam |= HondaSafetyFlags.FLAG_HONDA_NIDEC_ALT.value
+      ret.safetyConfigs[0].safetyParam |= HondaSafetyFlags.NIDEC_ALT.value
 
     if ret.openpilotLongitudinalControl and candidate in HONDA_BOSCH:
-      ret.safetyConfigs[0].safetyParam |= HondaSafetyFlags.FLAG_HONDA_BOSCH_LONG.value
+      ret.safetyConfigs[0].safetyParam |= HondaSafetyFlags.BOSCH_LONG.value
 
     if candidate in HONDA_BOSCH_RADARLESS:
-      ret.safetyConfigs[0].safetyParam |= HondaSafetyFlags.FLAG_HONDA_RADARLESS.value
+      ret.safetyConfigs[0].safetyParam |= HondaSafetyFlags.RADARLESS.value
 
     # min speed to enable ACC. if car can do stop and go, then set enabling speed
     # to a negative value, so it won't matter. Otherwise, add 0.5 mph margin to not

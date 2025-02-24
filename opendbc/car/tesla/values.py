@@ -57,9 +57,12 @@ GEAR_MAP = {
 
 
 class CarControllerParams:
-  # Angle command is sent at 50 Hz
-  ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[10., 1.6, .3])
-  ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[10., 7.0, 0.8])
+  # Angle rate limits are set using the Tesla Model Y VehicleModel such that they maximally meet ISO 11270
+  # At 5 m/s, FSD has been seen hitting up to ~4 deg/frame with ~5 deg/frame at very low creeping speeds
+  # At 30 m/s, FSD has been seen hitting mostly 0.1 deg/frame, sometimes 0.2 deg/frame, and rarely 0.3 deg/frame
+  ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0., 5., 25.], angle_v=[2.5, 1.5, 0.2])
+  ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0., 5., 25.], angle_v=[5., 2.0, 0.3])
+  STEER_STEP = 2  # Angle command is sent at 50 Hz
   ACCEL_MAX = 2.0    # m/s^2
   ACCEL_MIN = -3.48  # m/s^2
   JERK_LIMIT_MAX = 4.9  # m/s^3, ACC faults at 5.0
@@ -67,11 +70,11 @@ class CarControllerParams:
 
 
 class TeslaSafetyFlags(IntFlag):
-  FLAG_TESLA_LONG_CONTROL = 1
+  LONG_CONTROL = 1
 
 
 class TeslaFlags(IntFlag):
-  FLAG_TESLA_LONG_CONTROL = 1
+  LONG_CONTROL = 1
 
 
 DBC = CAR.create_dbc_map()

@@ -341,6 +341,13 @@ BO_ 658 NEW_MSG_292: 8 XXX
 BO_ 789 BCM_Status: 8 VDM
  SG_ BCM_AmbientAirTemperature : 15|8@0- (1,0) [-60|100] "degC" ESP
 
+BO_ 801 SCCM_WheelTouch: 7 SCCM
+ SG_ SCCM_WheelTouch_Checksum : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ SCCM_WheelTouch_Counter : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ SCCM_WheelTouch_HandsOn : 21|1@0+ (1,0) [0|1] "" XXX
+ SG_ SETME_X52 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ SCCM_WheelTouch_CapacitiveValue : 32|12@1+ (1,0) [0|4095] "" XXX
+
 BO_ 811 ESP_EpbStatus: 8 ESP
  SG_ ESP_EpbStatus_Checksum : 7|8@0+ (1,0) [0|255] "" ACM,VDM
  SG_ ESP_EpbStatus_Counter : 11|4@0+ (1,0) [0|15] "" ACM,VDM
@@ -559,6 +566,7 @@ BO_ 1909 Diag_PhysResp_ESP_PrimaryActuato: 8 ESP
 BO_ 1910 Diag_PhysResp_IBM_PrimaryActuato: 8 IBM
 
 CM_ BO_ 64 "External steering angle sensor message.";
+CM_ BO_ 801 "Not a reference message. Suspected ECU source is SCCM (Steering Column Control Module). Used by ACM to show hold wheel message on ACC engagement.";
 CM_ SG_ 64 SAS_Status_Checksum "Actual steering wheel angle from the actual centre position of the steering wheel. The signal value is a signed value from zero (at centre steering wheel position) where a left turn (counterclockwise from steering wheel centre position) is represented by positive values and right turn (clockwise from steering wheel centre position) will have negative value.  Checksum for steering wheel sensor data.";
 CM_ SG_ 64 SAS_Status_Counter "Actual steering wheel angle from the actual centre position of the steering wheel. The signal value is a signed value from zero (at centre steering wheel position) where a left turn (counterclockwise from steering wheel centre position) is represented by positive values and right turn (clockwise from steering wheel centre position) will have negative value.  Counter value for steering wheel sensor data.";
 CM_ SG_ 64 SAS_Status_AngleSafe "Actual steering wheel angle from the actual centre position of the steering wheel. The signal value is a signed value from zero (at centre steering wheel position) where a left turn (counterclockwise from steering wheel centre position) is represented by positive values and right turn (clockwise from steering wheel centre position) will have negative value.  Actual steering wheel angle from the actual centre position of the steering wheel. The signal value is a signed value from zero (at centre steering wheel";
