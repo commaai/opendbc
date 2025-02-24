@@ -115,7 +115,7 @@ static void subaru_rx_hook(const CANPacket_t *to_push) {
   }
 
   // enter controls on rising edge of ACC, exit controls on ACC off
-  if (true) {
+  if (subaru_lkas_angle) {
     if ((addr == MSG_SUBARU_ES_CruiseControl) && (bus == SUBARU_CAM_BUS)) {
       bool cruise_engaged = GET_BIT(to_push, 63U);
       pcm_cruise_check(cruise_engaged);
