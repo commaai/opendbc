@@ -5,14 +5,15 @@ from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerPanda
+from opendbc.car.rivian.values import RivianSafetyFlags
 
 
 class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteeringSafetyTest, common.LongitudinalAccelSafetyTest):
 
-  TX_MSGS = [[0x120, 0]]
+  TX_MSGS = [[0x120, 0], [0x160, 0], [0x321, 2]]
   STANDSTILL_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS = {0: (0x120,)}
-  FWD_BLACKLISTED_ADDRS = {2: [0x120]}
+  FWD_BLACKLISTED_ADDRS = {0: [0x321], 2: [0x120]}
   FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   MAX_RATE_UP = 3
@@ -58,10 +59,15 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
     values = {"ESP_Vehicle_Speed": speed}
     return self.packer.make_can_msg_panda("ESP_Status", 0, values)
 
+  def _accel_msg(self, accel: float):
+    values = {"ACM_AccelerationRequest": accel}
+    return self.packer.make_can_msg_panda("ACM_longitudinalRequest", 0, values)
+
+
   def test_wheel_touch(self):
     self.safety.set_controls_allowed(True)
     values = {"SCCM_WheelTouch_HandsOn": 1, "SCCM_WheelTouch_CapacitiveValue": 100}
-    self.assertFalse(self._tx(self.packer.make_can_msg_panda("SCCM_WheelTouch", 2, values)))
+    self.assertTrue(self._tx(self.packer.make_can_msg_panda("SCCM_WheelTouch", 2, values)))
 
 
 class TestRivianStockSafety(TestRivianSafetyBase):
@@ -72,8 +78,21 @@ class TestRivianStockSafety(TestRivianSafetyBase):
     self.safety.set_safety_hooks(CarParams.SafetyModel.rivian, 0)
     self.safety.init_tests()
 
+
   def test_accel_actuation_limits(self, stock_longitudinal=True):
     super().test_accel_actuation_limits(stock_longitudinal)
+
+
+class TestRivianLongitudinalSafety(TestRivianSafetyBase):
+  RELAY_MALFUNCTION_ADDRS = {0: (0x120, 0x160)}
+  FWD_BLACKLISTED_ADDRS = {0: [0x321], 2: [0x120, 0x160]}
+
+  def setUp(self):
+    self.packer = CANPackerPanda("rivian_can")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.rivian, RivianSafetyFlags.LONG_CONTROL)
+    self.safety.init_tests()
+
 
 if __name__ == "__main__":
   unittest.main()
