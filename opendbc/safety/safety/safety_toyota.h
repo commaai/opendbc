@@ -22,13 +22,13 @@
   {0x750, 0, 8},  /* radar diagnostic address */                                                                                            \
 
 #define TOYOTA_COMMON_RX_CHECKS(lta)                                                                        \
-  {.msg = {{ 0xaa, 0, 8, .check_checksum = false, .frequency = 83U}, { 0 }, { 0 }}},                        \
-  {.msg = {{0x260, 0, 8, .check_checksum = true, .quality_flag = (lta), .frequency = 50U}, { 0 }, { 0 }}},  \
-  {.msg = {{0x1D2, 0, 8, .check_checksum = true, .frequency = 33U},                                         \
-           {0x176, 0, 8, .check_checksum = true, .frequency = 32U}, { 0 }}},                                \
-  {.msg = {{0x101, 0, 8, .check_checksum = false, .frequency = 50U},                                        \
-           {0x224, 0, 8, .check_checksum = false, .frequency = 40U},                                        \
-           {0x226, 0, 8, .check_checksum = false, .frequency = 40U}}},                                      \
+  {.msg = {{ 0xaa, 0, 8, .skip_checksum = true, .frequency = 83U}, { 0 }, { 0 }}},                        \
+  {.msg = {{0x260, 0, 8, .quality_flag = (lta), .frequency = 50U}, { 0 }, { 0 }}},  \
+  {.msg = {{0x1D2, 0, 8, .frequency = 33U},                                         \
+           {0x176, 0, 8, .frequency = 32U}, { 0 }}},                                \
+  {.msg = {{0x101, 0, 8, .skip_checksum = true, .frequency = 50U},                                        \
+           {0x224, 0, 8, .skip_checksum = true, .frequency = 40U},                                        \
+           {0x226, 0, 8, .skip_checksum = true, .frequency = 40U}}},                                      \
 
 static bool toyota_secoc = false;
 static bool toyota_alt_brake = false;
