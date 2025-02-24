@@ -2,8 +2,8 @@
 import unittest
 
 import opendbc.safety.tests.common as common
-
-from opendbc.safety import Safety, DLC_TO_LEN
+from opendbc.car.structs import CarParams
+from opendbc.safety import DLC_TO_LEN
 from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.safety.tests.test_defaults import TestDefaultRxHookBase
 
@@ -18,7 +18,7 @@ class TestElm327(TestDefaultRxHookBase):
 
   def setUp(self):
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(Safety.SAFETY_ELM327, 0)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.elm327, 0)
     self.safety.init_tests()
 
   def test_tx_hook(self):

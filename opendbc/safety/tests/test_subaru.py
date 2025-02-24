@@ -3,7 +3,7 @@ import enum
 import unittest
 
 from opendbc.car.subaru.values import SubaruSafetyFlags
-from opendbc.safety import Safety
+from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerPanda
@@ -77,7 +77,7 @@ class TestSubaruSafetyBase(common.PandaCarSafetyTest):
   def setUp(self):
     self.packer = CANPackerPanda("subaru_global_2017_generated")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(Safety.SAFETY_SUBARU, self.FLAGS)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.subaru, self.FLAGS)
     self.safety.init_tests()
 
   def _set_prev_torque(self, t):
@@ -184,17 +184,17 @@ class TestSubaruGen2TorqueSafetyBase(TestSubaruTorqueSafetyBase):
 
 
 class TestSubaruGen2TorqueStockLongitudinalSafety(TestSubaruStockLongitudinalSafetyBase, TestSubaruGen2TorqueSafetyBase):
-  FLAGS = SubaruSafetyFlags.FLAG_SUBARU_GEN2
+  FLAGS = SubaruSafetyFlags.GEN2
   TX_MSGS = lkas_tx_msgs(SUBARU_ALT_BUS)
 
 
 class TestSubaruGen1LongitudinalSafety(TestSubaruLongitudinalSafetyBase, TestSubaruTorqueSafetyBase):
-  FLAGS = SubaruSafetyFlags.FLAG_SUBARU_LONG
+  FLAGS = SubaruSafetyFlags.LONG
   TX_MSGS = lkas_tx_msgs(SUBARU_MAIN_BUS) + long_tx_msgs(SUBARU_MAIN_BUS)
 
 
 class TestSubaruGen2LongitudinalSafety(TestSubaruLongitudinalSafetyBase, TestSubaruGen2TorqueSafetyBase):
-  FLAGS = SubaruSafetyFlags.FLAG_SUBARU_LONG | SubaruSafetyFlags.FLAG_SUBARU_GEN2
+  FLAGS = SubaruSafetyFlags.LONG | SubaruSafetyFlags.GEN2
   TX_MSGS = lkas_tx_msgs(SUBARU_ALT_BUS) + long_tx_msgs(SUBARU_ALT_BUS) + gen2_long_additional_tx_msgs()
 
   def _rdbi_msg(self, did: int):

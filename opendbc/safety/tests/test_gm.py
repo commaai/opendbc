@@ -2,7 +2,7 @@
 import unittest
 
 from opendbc.car.gm.values import GMSafetyFlags
-from opendbc.safety import Safety
+from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerPanda
@@ -99,7 +99,7 @@ class TestGmSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteeringSaf
     self.packer = CANPackerPanda("gm_global_a_powertrain_generated")
     self.packer_chassis = CANPackerPanda("gm_global_a_chassis")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(Safety.SAFETY_GM, 0)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.gm, 0)
     self.safety.init_tests()
 
   def _pcm_status_msg(self, enable):
@@ -159,7 +159,7 @@ class TestGmAscmSafety(GmLongitudinalBase, TestGmSafetyBase):
     self.packer = CANPackerPanda("gm_global_a_powertrain_generated")
     self.packer_chassis = CANPackerPanda("gm_global_a_chassis")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(Safety.SAFETY_GM, 0)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.gm, 0)
     self.safety.init_tests()
 
 
@@ -189,7 +189,7 @@ class TestGmCameraSafety(TestGmCameraSafetyBase):
     self.packer = CANPackerPanda("gm_global_a_powertrain_generated")
     self.packer_chassis = CANPackerPanda("gm_global_a_chassis")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(Safety.SAFETY_GM, GMSafetyFlags.FLAG_GM_HW_CAM)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.gm, GMSafetyFlags.HW_CAM)
     self.safety.init_tests()
 
   def test_buttons(self):
@@ -221,7 +221,7 @@ class TestGmCameraLongitudinalSafety(GmLongitudinalBase, TestGmCameraSafetyBase)
     self.packer = CANPackerPanda("gm_global_a_powertrain_generated")
     self.packer_chassis = CANPackerPanda("gm_global_a_chassis")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(Safety.SAFETY_GM, GMSafetyFlags.FLAG_GM_HW_CAM | GMSafetyFlags.FLAG_GM_HW_CAM_LONG)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.gm, GMSafetyFlags.HW_CAM | GMSafetyFlags.HW_CAM_LONG)
     self.safety.init_tests()
 
 
