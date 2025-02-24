@@ -30,7 +30,9 @@ static inline int HYUNDAI_CANFD_E_CAN(bool lka_steering) {
   return lka_steering ? 1 : 0;
 }
 
-#define HYUNDAI_CANFD_SCC_CAN(lka_steering, camera_scc) (camera_scc ? 2 : HYUNDAI_CANFD_E_CAN(lka_steering))
+static inline int HYUNDAI_CANFD_SCC_CAN(bool lka_steering, bool camera_scc) {
+  return camera_scc ? 2 : HYUNDAI_CANFD_E_CAN(lka_steering);
+}
 
 static int hyundai_canfd_get_lka_addr(void) {
   return hyundai_canfd_lka_steering_alt ? 0x110 : 0x50;
