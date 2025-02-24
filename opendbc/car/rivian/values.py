@@ -60,13 +60,15 @@ class CarControllerParams:
   STEER_DRIVER_MULTIPLIER = 2  # weight driver torque
   STEER_DRIVER_FACTOR = 100
 
-  ACCEL_MIN = -3.48  # m/s^2
+  ACCEL_MIN = -3.5  # m/s^2
   ACCEL_MAX = 2.0  # m/s^2
 
   def __init__(self, CP):
     pass
 
+
 class RivianSafetyFlags(IntFlag):
   LONG_CONTROL = 1
+
 
 DBC = CAR.create_dbc_map()
