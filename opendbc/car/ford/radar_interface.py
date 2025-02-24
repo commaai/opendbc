@@ -292,7 +292,7 @@ class RadarInterface(RadarInterfaceBase):
 
     return self.do_clustering(errors)
 
-  # Do the common work for CAN and CANFD clustering and prepare the points to be sued for liveTracks
+  # Do the common work for CAN and CANFD clustering and prepare the points to be used for liveTracks
   def do_clustering(self, errors):
     # Cluster points from this cycle against the centroids from the previous cycle
     prev_keys = [[p.dRel, p.yRel * 2, p.vRel * 2] for p in self.clusters]
