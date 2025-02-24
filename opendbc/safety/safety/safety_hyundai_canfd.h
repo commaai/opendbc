@@ -254,6 +254,7 @@ static safety_config hyundai_canfd_init(uint16_t param) {
 
   static const CanMsg HYUNDAI_CANFD_LFA_STEERING_TX_MSGS[] = {
     {0x12A, 0, 16}, // LFA
+    {0x1A0, 0, 32}, // SCC_CONTROL
     {0x1CF, 2, 8},  // CRUISE_BUTTON
     {0x1E0, 0, 16}, // LFAHDA_CLUSTER
   };
