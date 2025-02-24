@@ -53,20 +53,18 @@ class CarState(CarStateBase):
 
     ret = structs.CarState()
 
-    # TODO: Cleanup and consolidate
-    if self.CP.flags & VolkswagenFlags.MEB:
-      # TODO: Temp test/hack, but consider migrating everything to Gateway_73, especially if it works for e-Golf and manual trans
-      ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Gateway_73"]["GE_Fahrstufe"], None))
-    elif self.CP.transmissionType == TransmissionType.automatic:
-      ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Getriebe_11"]["GE_Fahrstufe"], None))
-    elif self.CP.transmissionType == TransmissionType.direct:
+    if self.CP.transmissionType == TransmissionType.direct:
+      # TODO: See if e-Golf can use Gateway_73.GE_Fahrstufe, might be able to eliminate this
       ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Motor_EV_01"]["MO_Waehlpos"], None))
     elif self.CP.transmissionType == TransmissionType.manual:
+      # TODO: see what Gateway_73.GE_Fahrstufe does for manual trans cars, low chance but we might be able to eliminate this
       ret.clutchPressed = not pt_cp.vl["Motor_14"]["MO_Kuppl_schalter"]
       if bool(pt_cp.vl["Gateway_72"]["BCM1_Rueckfahrlicht_Schalter"]):
         ret.gearShifter = GearShifter.reverse
       else:
         ret.gearShifter = GearShifter.drive
+    else:
+      ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Gateway_73"]["GE_Fahrstufe"], None))
 
     if self.CP.flags & VolkswagenFlags.MEB:
       # MEB-specific
@@ -333,7 +331,7 @@ class CarState(CarStateBase):
     ]
 
     if CP.transmissionType == TransmissionType.automatic:
-      pt_messages.append(("Getriebe_11", 20))  # From J743 Auto transmission control module
+      pt_messages.append(("Gateway_73", 20))  # From J533 CAN gateway
     elif CP.transmissionType == TransmissionType.direct:
       pt_messages.append(("Motor_EV_01", 10))  # From J??? unknown EV control module
 
