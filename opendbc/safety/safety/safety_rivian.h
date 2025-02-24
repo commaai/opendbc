@@ -11,9 +11,8 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
   if (bus == 0)  {
     // Vehicle speed
     if (addr == 0x208) {
-      float speed =  ((GET_BYTE(to_push, 6) << 8) | GET_BYTE(to_push, 7)) * 0.01;
-      vehicle_moving = speed > 0.0;
-      UPDATE_VEHICLE_SPEED(speed / 3.6);
+      int speed = (GET_BYTE(to_push, 6) << 8) | GET_BYTE(to_push, 7);
+      vehicle_moving = speed != 0;
     }
 
     // Driver torque
@@ -28,16 +27,8 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
     }
 
     // Brake pressed
-    if (addr == 0x38f){
+    if (addr == 0x38f) {
       brake_pressed = GET_BIT(to_push, 23U);
-    }
-
-    // Steering angle
-    if (addr == 0x390) {
-      // Angle: (0.1 * val) - 819.2 in deg.
-      // Store it 1/10 deg to match steering request
-      int angle_meas_new = ((GET_BYTE(to_push, 5) << 6) | (GET_BYTE(to_push, 6) >> 2)) - 8192U;
-      update_sample(&angle_meas, angle_meas_new);
     }
 
     generic_rx_checks(addr == 0x120);  // ACM_lkaHbaCmd
@@ -146,7 +137,6 @@ static safety_config rivian_init(uint16_t param) {
   static const CanMsg RIVIAN_LONG_TX_MSGS[] = {{0x120, 0, 8}, {0x321, 2, 7}, {0x160, 0, 5}};
 
   static RxCheck rivian_rx_checks[] = {
-    {.msg = {{0x390, 0, 7, .frequency = 100U}, { 0 }, { 0 }}},  // EPAS_AdasStatus (steering angle)
     {.msg = {{0x208, 0, 8, .frequency = 50U}, { 0 }, { 0 }}},   // ESP_Status (speed)
     {.msg = {{0x150, 0, 7, .frequency = 50U}, { 0 }, { 0 }}},   // VDM_PropStatus (gas pedal)
     {.msg = {{0x38f, 0, 6, .frequency = 50U}, { 0 }, { 0 }}},   // iBESP2 (brakes)
