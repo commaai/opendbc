@@ -101,7 +101,7 @@ static bool gm_tx_hook(const CANPacket_t *to_send) {
     .max_rate_up = 10,
     .max_rate_down = 15,
     .driver_torque_allowance = 65,
-    .driver_torque_factor = 4,
+    .driver_torque_multiplier = 4,
     .max_rt_delta = 128,
     .max_rt_interval = 250000,
     .type = TorqueDriverLimited,

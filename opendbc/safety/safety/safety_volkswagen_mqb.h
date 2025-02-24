@@ -189,7 +189,7 @@ static bool volkswagen_mqb_tx_hook(const CANPacket_t *to_send) {
     .max_rate_up = 4,              // 2.0 Nm/s RoC limit (EPS rack has own soft-limit of 5.0 Nm/s)
     .max_rate_down = 10,           // 5.0 Nm/s RoC limit (EPS rack has own soft-limit of 5.0 Nm/s)
     .driver_torque_allowance = 80,
-    .driver_torque_factor = 3,
+    .driver_torque_multiplier = 3,
     .type = TorqueDriverLimited,
   };
 
