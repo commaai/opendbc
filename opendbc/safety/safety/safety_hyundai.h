@@ -31,7 +31,8 @@ const LongitudinalLimits HYUNDAI_LONG_LIMITS = {
   {0x4F1, scc_bus, 4},  /* CLU11 Bus 0 (radar-SCC) or 2 (camera-SCC) */ \
   {0x485, 0,       4},  /* LFAHDA_MFC Bus 0                          */ \
 
-#define HYUNDAI_LONG_COMMON_TX_MSGS \
+#define HYUNDAI_LONG_COMMON_TX_MSGS(scc_bus) \
+  HYUNDAI_COMMON_TX_MSGS(scc_bus)                                       \
   {0x420, 0,       8},  /* SCC11 Bus 0                               */ \
   {0x421, 0,       8},  /* SCC12 Bus 0                               */ \
   {0x50A, 0,       8},  /* SCC13 Bus 0                               */ \
@@ -288,7 +289,6 @@ static int hyundai_fwd_hook(int bus_num, int addr) {
 
 static safety_config hyundai_init(uint16_t param) {
   static const CanMsg HYUNDAI_LONG_TX_MSGS[] = {
-    HYUNDAI_COMMON_TX_MSGS(0)
     HYUNDAI_LONG_COMMON_TX_MSGS
     {0x38D, 0, 8}, // FCA11 Bus 0
     {0x483, 0, 8}, // FCA12 Bus 0
@@ -300,7 +300,6 @@ static safety_config hyundai_init(uint16_t param) {
   };
 
   static const CanMsg HYUNDAI_CAMERA_SCC_LONG_TX_MSGS[] = {
-    HYUNDAI_COMMON_TX_MSGS(2)
     HYUNDAI_LONG_COMMON_TX_MSGS
   };
 
