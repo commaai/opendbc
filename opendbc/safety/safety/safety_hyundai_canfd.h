@@ -3,10 +3,6 @@
 #include "safety_declarations.h"
 #include "safety_hyundai_common.h"
 
-#define HYUNDAI_CANFD_A_CAN(lka_steering) (lka_steering ? 0 : 1)
-#define HYUNDAI_CANFD_E_CAN(lka_steering) (lka_steering ? 1 : 0)
-#define HYUNDAI_CANFD_SCC_CAN(lka_steering, camera_scc) (camera_scc ? 2 : HYUNDAI_CANFD_E_CAN(lka_steering))
-
 // *** Addresses checked in rx hook ***
 // EV, ICE, HYBRID: ACCELERATOR (0x35), ACCELERATOR_BRAKE_ALT (0x100), ACCELERATOR_ALT (0x105)
 #define HYUNDAI_CANFD_COMMON_RX_CHECKS(pt_bus)                                                                     \
@@ -25,6 +21,16 @@
 
 static bool hyundai_canfd_alt_buttons = false;
 static bool hyundai_canfd_lka_steering_alt = false;
+
+static inline int HYUNDAI_CANFD_A_CAN(bool lka_steering) {
+  return lka_steering ? 0 : 1;
+}
+
+static inline int HYUNDAI_CANFD_E_CAN(bool lka_steering) {
+  return lka_steering ? 1 : 0;
+}
+
+#define HYUNDAI_CANFD_SCC_CAN(lka_steering, camera_scc) (camera_scc ? 2 : HYUNDAI_CANFD_E_CAN(lka_steering))
 
 static int hyundai_canfd_get_lka_addr(void) {
   return hyundai_canfd_lka_steering_alt ? 0x110 : 0x50;
