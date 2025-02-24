@@ -39,6 +39,11 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
       int angle_meas_new = ((GET_BYTE(to_push, 5) << 6) | (GET_BYTE(to_push, 6) >> 2)) - 8192U;
       update_sample(&angle_meas, angle_meas_new);
     }
+
+    generic_rx_checks(addr == 0x120);  // ACM_lkaHbaCmd
+    if (rivian_longitudinal) {
+      generic_rx_checks(addr == 0x160);  // ACM_longitudinalRequest
+    }
   }
 
   if (bus == 2) {
