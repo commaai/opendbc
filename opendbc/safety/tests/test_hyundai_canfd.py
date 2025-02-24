@@ -101,7 +101,7 @@ class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
       raise unittest.SkipTest
 
   def setUp(self):
-    self.packer = CANPackerPanda("hyundai_canfd")
+    self.packer = CANPackerPanda("hyundai_canfd_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, self.SAFETY_PARAM)
     self.safety.init_tests()
@@ -140,7 +140,7 @@ class TestHyundaiCanfdLFASteeringAltButtons(TestHyundaiCanfdLFASteeringBase):
   SAFETY_PARAM: int
 
   def setUp(self):
-    self.packer = CANPackerPanda("hyundai_canfd")
+    self.packer = CANPackerPanda("hyundai_canfd_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.CANFD_ALT_BUTTONS | self.SAFETY_PARAM)
     self.safety.init_tests()
@@ -175,7 +175,7 @@ class TestHyundaiCanfdLKASteeringEV(TestHyundaiCanfdBase):
   GAS_MSG = ("ACCELERATOR", "ACCELERATOR_PEDAL")
 
   def setUp(self):
-    self.packer = CANPackerPanda("hyundai_canfd")
+    self.packer = CANPackerPanda("hyundai_canfd_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.CANFD_LKA_STEERING | HyundaiSafetyFlags.EV_GAS)
     self.safety.init_tests()
@@ -195,7 +195,7 @@ class TestHyundaiCanfdLKASteeringAltEV(TestHyundaiCanfdBase):
   GAS_MSG = ("ACCELERATOR", "ACCELERATOR_PEDAL")
 
   def setUp(self):
-    self.packer = CANPackerPanda("hyundai_canfd")
+    self.packer = CANPackerPanda("hyundai_canfd_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.CANFD_LKA_STEERING | HyundaiSafetyFlags.EV_GAS |
                                  HyundaiSafetyFlags.CANFD_LKA_STEERING_ALT)
@@ -217,7 +217,7 @@ class TestHyundaiCanfdLKASteeringLongEV(HyundaiLongitudinalBase, TestHyundaiCanf
   STEER_BUS = 1
 
   def setUp(self):
-    self.packer = CANPackerPanda("hyundai_canfd")
+    self.packer = CANPackerPanda("hyundai_canfd_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.CANFD_LKA_STEERING |
                                  HyundaiSafetyFlags.LONG | HyundaiSafetyFlags.EV_GAS)
@@ -258,7 +258,7 @@ class TestHyundaiCanfdLFASteeringLong(HyundaiLongitudinalBase, TestHyundaiCanfdL
       raise unittest.SkipTest
 
   def setUp(self):
-    self.packer = CANPackerPanda("hyundai_canfd")
+    self.packer = CANPackerPanda("hyundai_canfd_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.LONG | self.SAFETY_PARAM)
     self.safety.init_tests()
