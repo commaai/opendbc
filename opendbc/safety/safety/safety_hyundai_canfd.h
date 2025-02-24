@@ -22,10 +22,6 @@
 static bool hyundai_canfd_alt_buttons = false;
 static bool hyundai_canfd_lka_steering_alt = false;
 
-static inline int HYUNDAI_CANFD_A_CAN(bool lka_steering) {
-  return lka_steering ? 0 : 1;
-}
-
 static inline int HYUNDAI_CANFD_E_CAN(bool lka_steering) {
   return lka_steering ? 1 : 0;
 }
