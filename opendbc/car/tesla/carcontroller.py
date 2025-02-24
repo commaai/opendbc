@@ -5,6 +5,9 @@ from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.tesla.teslacan import TeslaCAN
 from opendbc.car.tesla.values import CarControllerParams
 
+# EPAS faults above this angle
+MAX_ANGLE = 360  # deg
+
 
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
@@ -26,10 +29,8 @@ class CarController(CarControllerBase):
     if self.frame % 2 == 0:
       if lat_active:
         # Angular rate limit based on speed
-        apply_angle = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgo, CarControllerParams)
-
-        # To not fault the EPS
-        apply_angle = float(np.clip(apply_angle, CS.out.steeringAngleDeg - 20, CS.out.steeringAngleDeg + 20))
+        apply_angle = apply_std_steer_angle_limits(float(np.clip(actuators.steeringAngleDeg, -MAX_ANGLE, MAX_ANGLE)),
+                                                   self.apply_angle_last, CS.out.vEgo, CarControllerParams)
       else:
         apply_angle = CS.out.steeringAngleDeg
 

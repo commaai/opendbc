@@ -5,7 +5,7 @@ import unittest
 import itertools
 
 from opendbc.car.toyota.values import ToyotaSafetyFlags
-from opendbc.safety import Safety
+from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerPanda
@@ -147,7 +147,7 @@ class TestToyotaSafetyTorque(TestToyotaSafetyBase, common.MotorTorqueSteeringSaf
   def setUp(self):
     self.packer = CANPackerPanda("toyota_nodsu_pt_generated")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(Safety.SAFETY_TOYOTA, self.EPS_SCALE)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE)
     self.safety.init_tests()
 
 
@@ -167,7 +167,7 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
   def setUp(self):
     self.packer = CANPackerPanda("toyota_nodsu_pt_generated")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(Safety.SAFETY_TOYOTA, self.EPS_SCALE | ToyotaSafetyFlags.FLAG_TOYOTA_LTA)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE | ToyotaSafetyFlags.LTA)
     self.safety.init_tests()
 
   # Only allow LKA msgs with no actuation
@@ -269,7 +269,7 @@ class TestToyotaAltBrakeSafety(TestToyotaSafetyTorque):
   def setUp(self):
     self.packer = CANPackerPanda("toyota_new_mc_pt_generated")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(Safety.SAFETY_TOYOTA, self.EPS_SCALE | ToyotaSafetyFlags.FLAG_TOYOTA_ALT_BRAKE)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE | ToyotaSafetyFlags.ALT_BRAKE)
     self.safety.init_tests()
 
   def _user_brake_msg(self, brake):
@@ -288,14 +288,13 @@ class TestToyotaStockLongitudinalBase(TestToyotaSafetyBase):
   RELAY_MALFUNCTION_ADDRS = {0: (0x2E4,)}
   FWD_BLACKLISTED_ADDRS = {2: [0x2E4, 0x412, 0x191]}
 
+  LONGITUDINAL = False
+
   def test_diagnostics(self, stock_longitudinal: bool = True):
     super().test_diagnostics(stock_longitudinal=stock_longitudinal)
 
   def test_block_aeb(self, stock_longitudinal: bool = True):
     super().test_block_aeb(stock_longitudinal=stock_longitudinal)
-
-  def test_accel_actuation_limits(self, stock_longitudinal=True):
-    super().test_accel_actuation_limits(stock_longitudinal=stock_longitudinal)
 
   def test_acc_cancel(self):
     """
@@ -314,7 +313,7 @@ class TestToyotaStockLongitudinalTorque(TestToyotaStockLongitudinalBase, TestToy
   def setUp(self):
     self.packer = CANPackerPanda("toyota_nodsu_pt_generated")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(Safety.SAFETY_TOYOTA, self.EPS_SCALE | ToyotaSafetyFlags.FLAG_TOYOTA_STOCK_LONGITUDINAL)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE | ToyotaSafetyFlags.STOCK_LONGITUDINAL)
     self.safety.init_tests()
 
 
@@ -323,7 +322,8 @@ class TestToyotaStockLongitudinalAngle(TestToyotaStockLongitudinalBase, TestToyo
   def setUp(self):
     self.packer = CANPackerPanda("toyota_nodsu_pt_generated")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(Safety.SAFETY_TOYOTA, self.EPS_SCALE | ToyotaSafetyFlags.FLAG_TOYOTA_STOCK_LONGITUDINAL | ToyotaSafetyFlags.FLAG_TOYOTA_LTA)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.toyota,
+                                 self.EPS_SCALE | ToyotaSafetyFlags.STOCK_LONGITUDINAL | ToyotaSafetyFlags.LTA)
     self.safety.init_tests()
 
 
@@ -336,7 +336,8 @@ class TestToyotaSecOcSafety(TestToyotaStockLongitudinalBase):
   def setUp(self):
     self.packer = CANPackerPanda("toyota_secoc_pt_generated")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(Safety.SAFETY_TOYOTA, self.EPS_SCALE | ToyotaSafetyFlags.FLAG_TOYOTA_STOCK_LONGITUDINAL | ToyotaSafetyFlags.FLAG_TOYOTA_SECOC)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.toyota,
+                                 self.EPS_SCALE | ToyotaSafetyFlags.STOCK_LONGITUDINAL | ToyotaSafetyFlags.SECOC)
     self.safety.init_tests()
 
   # This platform also has alternate brake and PCM messages, but same naming in the DBC, so same packers work
