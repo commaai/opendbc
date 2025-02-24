@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <set>
 #include <string>
 #include <utility>
 #include <unordered_map>
@@ -22,7 +23,7 @@ unsigned int honda_checksum(uint32_t address, const Signal &sig, const std::vect
 unsigned int toyota_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int subaru_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int chrysler_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
-unsigned int volkswagen_mqb_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
+unsigned int volkswagen_mqb_meb_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int xor_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int hkg_can_fd_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int fca_giorgio_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
@@ -72,7 +73,6 @@ public:
   bool can_valid = false;
   bool bus_timeout = false;
   uint64_t first_nanos = 0;
-  uint64_t last_nanos = 0;
   uint64_t last_nonempty_nanos = 0;
   uint64_t bus_timeout_threshold = 0;
   uint64_t can_invalid_cnt = CAN_INVALID_CNT;
@@ -80,11 +80,11 @@ public:
   CANParser(int abus, const std::string& dbc_name,
             const std::vector<std::pair<uint32_t, int>> &messages);
   CANParser(int abus, const std::string& dbc_name, bool ignore_checksum, bool ignore_counter);
-  void update(const std::vector<CanData> &can_data, std::vector<SignalValue> &vals);
-  void query_latest(std::vector<SignalValue> &vals, uint64_t last_ts = 0);
+  std::set<uint32_t> update(const std::vector<CanData> &can_data);
+  MessageState *getMessageState(uint32_t address) { return &message_states.at(address); }
 
 protected:
-  void UpdateCans(const CanData &can);
+  void UpdateCans(const CanData &can, std::set<uint32_t> &updated_addresses);
   void UpdateValid(uint64_t nanos);
 };
 

@@ -4,6 +4,7 @@
 from libc.stdint cimport uint8_t, uint32_t, uint64_t
 from libcpp cimport bool
 from libcpp.pair cimport pair
+from libcpp.set cimport set
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp.unordered_map cimport unordered_map
@@ -18,7 +19,7 @@ cdef extern from "common_dbc.h":
     HONDA_CHECKSUM,
     TOYOTA_CHECKSUM,
     PEDAL_CHECKSUM,
-    VOLKSWAGEN_MQB_CHECKSUM,
+    VOLKSWAGEN_MQB_MEB_CHECKSUM,
     XOR_CHECKSUM,
     SUBARU_CHECKSUM,
     CHRYSLER_CHECKSUM
@@ -53,13 +54,6 @@ cdef extern from "common_dbc.h":
     unordered_map[uint32_t, const Msg*] addr_to_msg
     unordered_map[string, const Msg*] name_to_msg
 
-  cdef struct SignalValue:
-    uint32_t address
-    uint64_t ts_nanos
-    string name
-    double value
-    vector[double] all_values
-
   cdef struct SignalPackValue:
     string name
     double value
@@ -67,6 +61,12 @@ cdef extern from "common_dbc.h":
 
 cdef extern from "common.h":
   cdef const DBC* dbc_lookup(const string) except +
+
+  cdef cppclass MessageState:
+    vector[Signal] parse_sigs
+    vector[double] vals
+    vector[vector[double]] all_vals
+    uint64_t last_seen_nanos
 
   cdef struct CanFrame:
     long src
@@ -81,7 +81,8 @@ cdef extern from "common.h":
     bool can_valid
     bool bus_timeout
     CANParser(int, string, vector[pair[uint32_t, int]]) except +
-    void update(vector[CanData]&, vector[SignalValue]&) except +
+    set[uint32_t] update(vector[CanData]&) except +
+    MessageState *getMessageState(uint32_t address)
 
   cdef cppclass CANPacker:
    CANPacker(string)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import math
 from opendbc.can.parser import CANParser
-from opendbc.car import structs
+from opendbc.car import Bus, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.gm.values import DBC, CanBus
 from opendbc.car.interfaces import RadarInterfaceBase
@@ -29,7 +29,7 @@ def create_radar_can_parser(car_fingerprint):
 
   messages = list({(s[1], 14) for s in signals})
 
-  return CANParser(DBC[car_fingerprint]['radar'], messages, CanBus.OBSTACLE)
+  return CANParser(DBC[car_fingerprint][Bus.radar], messages, CanBus.OBSTACLE)
 
 
 class RadarInterface(RadarInterfaceBase):
@@ -40,7 +40,6 @@ class RadarInterface(RadarInterfaceBase):
 
     self.trigger_msg = LAST_RADAR_MSG
     self.updated_messages = set()
-    self.radar_ts = CP.radarTimeStep
 
   def update(self, can_strings):
     if self.rcp is None:

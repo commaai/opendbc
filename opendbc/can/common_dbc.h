@@ -10,21 +10,13 @@ struct SignalPackValue {
   double value;
 };
 
-struct SignalValue {
-  uint32_t address;
-  uint64_t ts_nanos;
-  std::string name;
-  double value;  // latest value
-  std::vector<double> all_values;  // all values from this cycle
-};
-
 enum SignalType {
   DEFAULT,
   COUNTER,
   HONDA_CHECKSUM,
   TOYOTA_CHECKSUM,
   PEDAL_CHECKSUM,
-  VOLKSWAGEN_MQB_CHECKSUM,
+  VOLKSWAGEN_MQB_MEB_CHECKSUM,
   XOR_CHECKSUM,
   SUBARU_CHECKSUM,
   CHRYSLER_CHECKSUM,
