@@ -1491,6 +1491,10 @@ BO_ 1123 PSD_05: 8 XXX
 BO_ 1124 PSD_06: 8 XXX
 
 BO_ 988 Gateway_73: 8 XXX
+ SG_ UNKNOWN_1 : 15|2@0+ (1,0) [0|3] "" XXX
+ SG_ GE_Fahrstufe : 40|4@1+ (1,0) [0|15] "" XXX
+ SG_ EPB_Status : 53|3@1+ (1,0) [0|7] "" XXX
+ SG_ UNKNOWN_2 : 58|3@0+ (1,0) [0|7] "" XXX
 
 BO_ 792 Kamera_Status: 8 XXX
 
