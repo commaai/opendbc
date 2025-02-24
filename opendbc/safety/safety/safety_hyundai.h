@@ -33,14 +33,14 @@ static const CanMsg HYUNDAI_TX_MSGS[] = {
 };
 
 #define HYUNDAI_LONG_COMMON_TX_MSGS(scc_bus) \
-  {0x340, 0,       8},                       \
-  {0x4F1, scc_bus, 4},                       \
-  {0x485, 0,       4},                       \
-  {0x420, 0,       8},                       \
-  {0x421, 0,       8},                       \
-  {0x50A, 0,       8},                       \
-  {0x389, 0,       8},                       \
-  {0x4A2, 0,       2},                       \
+  {0x340, 0,       8},  /* LKAS11 Bus 0                              */ \
+  {0x4F1, scc_bus, 4},  /* CLU11 Bus 0 (radar-SCC) or 2 (camera-SCC) */ \
+  {0x485, 0,       4},  /* LFAHDA_MFC Bus 0                          */ \
+  {0x420, 0,       8},  /* SCC11 Bus 0                               */ \
+  {0x421, 0,       8},  /* SCC12 Bus 0                               */ \
+  {0x50A, 0,       8},  /* SCC13 Bus 0                               */ \
+  {0x389, 0,       8},  /* SCC14 Bus 0                               */ \
+  {0x4A2, 0,       2},  /* FRT_RADAR11 Bus 0                         */ \
 
 #define HYUNDAI_COMMON_RX_CHECKS(legacy)                                                                                      \
   {.msg = {{0x260, 0, 8, .check_checksum = true, .max_counter = 3U, .frequency = 100U},                                       \
