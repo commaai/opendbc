@@ -60,9 +60,9 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *to_push) {
 
     // steering angle
     if (addr == 0x125) {
-      int angle_meas_new = ((GET_BYTE(to_push, 3) << 8) | GET_BYTE(to_push, 4));
-      // Multiply by -10 to apply the DBC scaling factor of -0.1 for STEERING_ANGLE
-      angle_meas_new = to_signed(angle_meas_new, 16) * -10;
+      int angle_meas_new = (GET_BYTE(to_push, 3) | (GET_BYTE(to_push, 4) << 8));
+      // Multiply by -1 to apply the DBC scaling factor of -0.1 for STEERING_ANGLE
+      angle_meas_new = to_signed(angle_meas_new, 16) * -1;
       update_sample(&angle_meas, angle_meas_new);
     }
 
