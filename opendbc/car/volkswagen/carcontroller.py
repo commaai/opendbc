@@ -30,7 +30,7 @@ def apply_iso_curvature_limits(v_ego, previous_curvature, time_step, desired_cur
   JERK_TIME_HORIZON = 0.5  # seconds
 
   if v_ego <= 0.1:
-    return 0.0
+    return desired_curvature
 
   # Calculate maximum change in curvature over the 0.5s time horizon, scale the max change to our current time step
   max_curvature_acc = MAX_LATERAL_ACCELERATION / (v_ego**2)
