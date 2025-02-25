@@ -112,7 +112,8 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *to_push) {
       uint32_t fr = (GET_BYTES(to_push, 10, 2)) & 0x3FFFU;
       uint32_t rl = (GET_BYTES(to_push, 12, 2)) & 0x3FFFU;
       uint32_t rr = (GET_BYTES(to_push, 14, 2)) & 0x3FFFU;
-      vehicle_moving = (fl > HYUNDAI_STANDSTILL_THRSLD) || (rr > HYUNDAI_STANDSTILL_THRSLD);
+      vehicle_moving = (fl > HYUNDAI_STANDSTILL_THRSLD) || (fr > HYUNDAI_STANDSTILL_THRSLD) ||
+                       (rl > HYUNDAI_STANDSTILL_THRSLD) || (rr > HYUNDAI_STANDSTILL_THRSLD);
 
       uint32_t speed_avg = (fr + rr + rl + fl) / 4U;
 
