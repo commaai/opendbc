@@ -73,7 +73,7 @@ class TestVolkswagenMebSafety(common.PandaCarSafetyTest):
     return self.packer.make_can_msg_panda("LH_EPS_03", 0, values)
 
   # Current curvature
-  def _curvature_msg(self, curvature):
+  def _vehicle_curvature_msg(self, curvature):
     values = {
       "Curvature": abs(curvature),
       "Curvature_VZ": curvature < 0,
@@ -81,7 +81,7 @@ class TestVolkswagenMebSafety(common.PandaCarSafetyTest):
     return self.packer.make_can_msg_panda("QFK_01", 0, values)
 
   # Steering actuation
-  def _curvature_actuation_msg(self, lat_active, power, curvature):
+  def _curvature_actuation_msg(self, lat_active=False, power=0, curvature=0):
     values = {
       "Curvature": abs(curvature),
       "Curvature_VZ": curvature < 0,
@@ -115,6 +115,27 @@ class TestVolkswagenMebSafety(common.PandaCarSafetyTest):
     self.assertEqual(0, self.safety.get_torque_driver_max())
     self.assertEqual(0, self.safety.get_torque_driver_min())
 
+  # FIXME: minimal stub, make this probe all combinations of inputs, verify ramp-down on disengage, etc
+  def test_actuation_control_bit(self):
+    self.safety.set_controls_allowed(1)
+    self.assertTrue(self._tx(self._curvature_actuation_msg(lat_active=True, power=100, curvature=1)))
+    self.assertFalse(self._tx(self._curvature_actuation_msg(lat_active=False, power=100, curvature=1)))
+    self.assertTrue(False)  # TODO
+
+  # FIXME: minimal stub, make this probe the valid range of inputs, check boundaries
+  def test_vehicle_curvature_message(self):
+    self.safety.set_controls_allowed(1)
+    self.assertTrue(self._rx(self._vehicle_curvature_msg(curvature=1)))
+    self.assertTrue(self._rx(self._vehicle_curvature_msg(curvature=-1)))
+    self.assertTrue(False)  # TODO
+
+  # TODO: implement Panda-side v_ego**2 * curvature safety
+  def test_safe_lateral_curvature(self):
+    self.assertTrue(False)  # TODO
+
+  # TODO: implement Panda-side HCA power safety based on driver torque input
+  def test_safe_lateral_power(self):
+    self.assertTrue(False)  # TODO
 
 class TestVolkswagenMebStockSafety(TestVolkswagenMebSafety):
   TX_MSGS = [[MSG_HCA_03, 0], [MSG_LDW_02, 0], [MSG_GRA_ACC_01, 0], [MSG_GRA_ACC_01, 2], [MSG_EA_01, 0], [MSG_EA_02, 0]]
