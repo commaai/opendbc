@@ -6,7 +6,6 @@ from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.volkswagen import mqbcan, pqcan, mebcan
 from opendbc.car.volkswagen.values import CANBUS, CarControllerParams, VolkswagenFlags
 
-
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 
@@ -149,13 +148,12 @@ class CarController(CarControllerBase):
 
     # **** Acceleration Controls ******************************************** #
 
-    if self.CP.openpilotLongitudinalControl:
+    if self.CP.openpilotLongitudinalControl and not self.CP.flags & VolkswagenFlags.MEB:
       if self.frame % self.CCP.ACC_CONTROL_STEP == 0:
         acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
         accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0)
         stopping = actuators.longControlState == LongCtrlState.stopping
         starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
-        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
         can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.longActive, accel,
                                                            acc_control, stopping, starting, CS.esp_hold_confirmation))
 
@@ -195,7 +193,6 @@ class CarController(CarControllerBase):
     new_actuators.steer = self.apply_steer_last / self.CCP.STEER_MAX
     new_actuators.steerOutputCan = self.apply_steer_last
     new_actuators.curvature = float(self.apply_curvature_last)
-    new_actuators.accel = float(self.accel_last)
 
     self.gra_acc_counter_last = CS.gra_stock_values["COUNTER"]
     self.frame += 1

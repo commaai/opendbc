@@ -23,22 +23,6 @@
 static uint8_t volkswagen_crc8_lut_8h2f[256]; // Static lookup table for CRC8 poly 0x2F, aka 8H2F/AUTOSAR
 static int volkswagen_steer_power_prev = 0;
 
-static bool vw_meb_get_longitudinal_allowed_override(void) {
-  return controls_allowed && gas_pressed_prev;
-}
-
-static bool vw_meb_max_limit_check(int val, const int MAX_VAL, const int MIN_VAL) {
-  return (val > MAX_VAL) || (val < MIN_VAL);
-}
-
-// Safety checks for longitudinal actuation
-static bool vw_meb_longitudinal_accel_checks(int desired_accel, const LongitudinalLimits limits, const int override_accel) {
-  bool accel_valid = get_longitudinal_allowed() && !vw_meb_max_limit_check(desired_accel, limits.max_accel, limits.min_accel);
-  bool accel_valid_override = vw_meb_get_longitudinal_allowed_override() && desired_accel == override_accel;
-  bool accel_inactive = desired_accel == limits.inactive_accel;
-  return !(accel_valid || accel_inactive || accel_valid_override);
-}
-
 static uint32_t volkswagen_meb_get_checksum(const CANPacket_t *to_push) {
   return (uint8_t)GET_BYTE(to_push, 0);
 }
@@ -95,9 +79,6 @@ static safety_config volkswagen_meb_init(uint16_t param) {
   static const CanMsg VOLKSWAGEN_MEB_STOCK_TX_MSGS[] = {{MSG_HCA_03, 0, 24}, {MSG_EA_01, 0, 8}, {MSG_EA_02, 0, 8}, {MSG_GRA_ACC_01, 0, 8},
                                                        {MSG_GRA_ACC_01, 2, 8}, {MSG_LDW_02, 0, 8}};
 
-  static const CanMsg VOLKSWAGEN_MEB_LONG_TX_MSGS[] = {{MSG_MEB_ACC_01, 0, 48}, {MSG_ACC_18, 0, 32}, {MSG_HCA_03, 0, 24},
-                                                       {MSG_EA_01, 0, 8}, {MSG_EA_02, 0, 8}, {MSG_LDW_02, 0, 8}, {MSG_TA_01, 0, 8}};
-
   static RxCheck volkswagen_meb_rx_checks[] = {
     {.msg = {{MSG_LH_EPS_03, 0, 8, .check_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
     {.msg = {{MSG_MOTOR_14, 0, 8, .check_checksum = true, .max_counter = 15U, .frequency = 10U}, { 0 }, { 0 }}},
@@ -113,13 +94,9 @@ static safety_config volkswagen_meb_init(uint16_t param) {
 
   volkswagen_set_button_prev = false;
   volkswagen_resume_button_prev = false;
-  volkswagen_steer_power_prev = 0;
-
-  volkswagen_longitudinal = GET_FLAG(param, FLAG_VOLKSWAGEN_LONG_CONTROL);
 
   gen_crc_lookup_table_8(0x2F, volkswagen_crc8_lut_8h2f);
-  return volkswagen_longitudinal ? BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_LONG_TX_MSGS) : \
-                                   BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_STOCK_TX_MSGS);
+  return BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_STOCK_TX_MSGS);
 }
 
 static void volkswagen_meb_rx_hook(const CANPacket_t *to_push) {
@@ -150,21 +127,7 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *to_push) {
       update_sample(&torque_driver, torque_driver_new);
     }
 
-    // Update vehicle yaw rate for curvature checks
-    //if (addr == MSG_ESC_50) {
-    //  float volkswagen_yaw_rate = (GET_BYTE(to_push, 5U) | ((GET_BYTE(to_push, 6U) & 0x3F) << 8 )) * 0.01;
-
-    //  bool volkswagen_yaw_rate_sign = GET_BIT(to_push, 54U);
-    //  if (volkswagen_yaw_rate_sign) {
-    //    volkswagen_yaw_rate *= -1;
-    //  }
-    //
-    //  float current_curvature = volkswagen_yaw_rate / MAX(vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR, 0.1);
-    //  // convert current curvature into units on CAN for comparison with desired curvature
-    //  update_sample(&angle_meas, ROUND(current_curvature * VOLKSWAGEN_MEB_STEERING_LIMITS.angle_deg_to_can));
-    //}
-
-    if (addr == MSG_QFK_01) { // we do not need conversion deg to can, same scaling as HCA_03 curvature
+    if (addr == MSG_QFK_01) {
       int current_curvature = ((GET_BYTE(to_push, 5U) & 0x7F) << 8 | GET_BYTE(to_push, 4U));
 
       bool current_curvature_sign = GET_BIT(to_push, 55U);
@@ -179,14 +142,11 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *to_push) {
     if (addr == MSG_Motor_51) {
       // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
       // Always exit controls on main switch off
-      // Signal: TSK_06.TSK_Status
       int acc_status = ((GET_BYTE(to_push, 11U) >> 0) & 0x07U);
       bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
       acc_main_on = cruise_engaged || (acc_status == 2);
 
-      if (!volkswagen_longitudinal) {
-        pcm_cruise_check(cruise_engaged);
-      }
+      pcm_cruise_check(cruise_engaged);
 
       if (!acc_main_on) {
         controls_allowed = false;
@@ -195,18 +155,6 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *to_push) {
 
     // update cruise buttons
     if (addr == MSG_GRA_ACC_01) {
-      // If using openpilot longitudinal, enter controls on falling edge of Set or Resume with main switch on
-      // Signal: GRA_ACC_01.GRA_Tip_Setzen
-      // Signal: GRA_ACC_01.GRA_Tip_Wiederaufnahme
-      if (volkswagen_longitudinal) {
-        bool set_button = GET_BIT(to_push, 16U);
-        bool resume_button = GET_BIT(to_push, 19U);
-        if ((volkswagen_set_button_prev && !set_button) || (volkswagen_resume_button_prev && !resume_button)) {
-          controls_allowed = acc_main_on;
-        }
-        volkswagen_set_button_prev = set_button;
-        volkswagen_resume_button_prev = resume_button;
-      }
       // Always exit controls on rising edge of Cancel
       // Signal: GRA_ACC_01.GRA_Abbrechen
       if (GET_BIT(to_push, 13U)) {
@@ -230,7 +178,7 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *to_push) {
 }
 
 static bool volkswagen_meb_tx_hook(const CANPacket_t *to_send) {
-  // TODO: Validate
+  // TODO: This has not really been tested/validated, or synced to the new curvature control in openpilot
   // lateral limits for curvature
   const SteeringLimits VOLKSWAGEN_MEB_STEERING_LIMITS = {
     // keep in mind, we do have a false tx block problem with same limits as in opendbc values, have them a little bit higher +0.0002
@@ -248,13 +196,6 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *to_send) {
     //.max_angle_error = ,         // THIS WOULD ALLOW MORE ROOM FOR OUR RATE LIMITS see comment above, but we want correct safety limit checks? and
     //.enforce_angle_error = true, // to allow some difference for our power control handling at the same time
     .inactive_angle_is_zero = true,
-  };
-  // longitudinal limits
-  // acceleration in m/s2 * 1000 to avoid floating point math
-  const LongitudinalLimits VOLKSWAGEN_MEB_LONG_LIMITS = {
-    .max_accel = 2000,
-    .min_accel = -3500,
-    .inactive_accel = 3010,  // VW sends one increment above the max range when inactive
   };
 
   int addr = GET_ADDR(to_send);
@@ -276,7 +217,6 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *to_send) {
     if (steer_angle_cmd_checks(desired_curvature_raw, steer_req, VOLKSWAGEN_MEB_STEERING_LIMITS)) {
       tx = false;
 
-      // TODO: verify this is actually necessary, this wasn't a problem on MQBevo
       // steer power is still allowed to decrease to zero monotonously
       // while controls are not allowed anymore
       if (steer_req && steer_power != 0) {
@@ -291,19 +231,6 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *to_send) {
     }
 
     volkswagen_steer_power_prev = steer_power;
-  }
-
-  // Safety check for MSG_ACC_18 acceleration requests
-  // To avoid floating point math, scale upward and compare to pre-scaled safety m/s2 boundaries
-  if (addr == MSG_ACC_18) {
-    // WARNING: IF WE TAKE THE SIGNAL FROM THE CAR WHILE ACC ACTIVE AND BELOW ABOUT 3km/h, THE CAR ERRORS AND PUTS ITSELF IN PARKING MODE WITH EPB!
-    // TODO: JY note, this is probably just drivetrain coordinator starting/stopping logic
-    int desired_accel = ((((GET_BYTE(to_send, 4) & 0x7U) << 8) | GET_BYTE(to_send, 3)) * 5U) - 7220U;
-
-    // TODO: very unclear what this is doing, may not be necessary, try removing
-    if (vw_meb_longitudinal_accel_checks(desired_accel, VOLKSWAGEN_MEB_LONG_LIMITS, 0)) {
-      tx = false;
-    }
   }
 
   // FORCE CANCEL: ensuring that only the cancel button press is sent when controls are off.
@@ -328,9 +255,6 @@ static int volkswagen_meb_fwd_hook(int bus_num, int addr) {
     case 2:
       if ((addr == MSG_HCA_03) || (addr == MSG_LDW_02) || (addr == MSG_EA_01) || (addr == MSG_EA_02)) {
         // openpilot takes over LKAS steering control and related HUD messages from the camera
-        bus_fwd = -1;
-      } else if (volkswagen_longitudinal && ((addr == MSG_MEB_ACC_01) || (addr == MSG_ACC_18) || (addr == MSG_TA_01))) {
-        // openpilot takes over acceleration/braking control and related HUD messages from the stock ACC radar
         bus_fwd = -1;
       } else {
         // Forward all remaining traffic from Extended CAN devices to J533 gateway
