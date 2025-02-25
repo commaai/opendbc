@@ -42,14 +42,6 @@
 static bool hyundai_canfd_alt_buttons = false;
 static bool hyundai_canfd_lka_steering_alt = false;
 
-static inline int HYUNDAI_CANFD_E_CAN(bool lka_steering) {
-  return lka_steering ? 1 : 0;
-}
-
-static inline int HYUNDAI_CANFD_SCC_CAN(bool lka_steering, bool camera_scc) {
-  return camera_scc ? 2 : HYUNDAI_CANFD_E_CAN(lka_steering);
-}
-
 static int hyundai_canfd_get_lka_addr(void) {
   return hyundai_canfd_lka_steering_alt ? 0x110 : 0x50;
 }
@@ -73,8 +65,8 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
   int addr = GET_ADDR(to_push);
 
-  const int pt_bus = HYUNDAI_CANFD_E_CAN(hyundai_canfd_lka_steering);
-  const int scc_bus = HYUNDAI_CANFD_SCC_CAN(hyundai_canfd_lka_steering, hyundai_camera_scc);
+  const int pt_bus = hyundai_canfd_lka_steering ? 1 : 0;
+  const int scc_bus = hyundai_camera_scc ? 2 : pt_bus;
 
   if (bus == pt_bus) {
     // driver torque
