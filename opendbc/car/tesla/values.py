@@ -10,12 +10,14 @@ Ecu = CarParams.Ecu
 
 @dataclass
 class TeslaCarDocsHW3(CarDocs):
+  # TODO: package not standard?
   package: str = "Traffic Aware Cruise Control"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.tesla_a]))
 
 
 @dataclass
 class TeslaCarDocsHW4(CarDocs):
+  # TODO: package not standard?
   package: str = "Traffic Aware Cruise Control"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.tesla_b]))
 
