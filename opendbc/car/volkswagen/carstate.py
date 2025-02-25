@@ -482,7 +482,6 @@ class MebExtraSignals:
     ("MEB_ACC_01", 17),        #
     ("ACC_18", 50),            #
     ("AWV_03", 1),             # Front Collision Detection (1 Hz when inactive, 50 Hz when active)
-    #("MEB_Distance_01", 25),  #
   ]
   bsm_radar_messages = [
     ("MEB_Side_Assist_01", 20),
