@@ -11,6 +11,40 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 
 
+def apply_iso_curvature_limits(v_ego, previous_curvature, time_step, desired_curvature):
+  """
+  Apply ISO 11270:2014(E) safety constraints to limit the desired curvature.
+
+  Args:
+      v_ego: Vehicle v_ego in meters per second (m/s)
+      previous_curvature: Previous path curvature in 1/meters
+      time_step: Time step in seconds
+      desired_curvature: Newly desired path curvature in 1/meters
+
+  Returns:
+      float: Limited curvature that respects acceleration and jerk constraints
+  """
+  # ISO 11270:2014 safety constraints
+  MAX_LATERAL_ACCELERATION = 3.0  # m/s^2
+  MAX_LATERAL_JERK = 5.0  # m/s^3
+  JERK_TIME_HORIZON = 0.5  # seconds
+
+  if v_ego <= 0.1:
+    return 0.0
+
+  # Calculate maximum change in curvature over the 0.5s time horizon, scale the max change to our current time step
+  max_curvature_acc = MAX_LATERAL_ACCELERATION / (v_ego**2)
+  max_delta_curvature = (MAX_LATERAL_JERK * JERK_TIME_HORIZON) / (v_ego**2) * (time_step / JERK_TIME_HORIZON)
+
+  min_curvature_jerk = previous_curvature - max_delta_curvature
+  max_curvature_jerk = previous_curvature + max_delta_curvature
+
+  max_curvature = min(max_curvature_acc, max_curvature_jerk)
+  min_curvature = max(-max_curvature_acc, min_curvature_jerk)
+
+  return max(min(desired_curvature, max_curvature), min_curvature)
+
+
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
@@ -50,29 +84,24 @@ class CarController(CarControllerBase):
         # MEB rack can be used continously without time limits
         # maximum real steering angle change ~ 120-130 deg/s
 
+        # Adjust our curvature command by the offset between openpilot's current curvature and the QFK's current curvature
+        calibrated_actuator_curvature = actuators.curvature + (CS.curvature - CC.currentCurvature)
+        apply_curvature = apply_iso_curvature_limits(CS.out.vEgo, self.apply_curvature_last, DT_CTRL * self.CCP.STEER_STEP, calibrated_actuator_curvature)
+
         if CC.latActive:
           hca_enabled = True
-          # Adjust our curvature command by the offset between openpilot's current curvature and the QFK's current curvature
-          actuator_curvature_with_offset = actuators.curvature + (CS.curvature - CC.currentCurvature)
-          apply_curvature = apply_std_steer_angle_limits(actuator_curvature_with_offset, self.apply_curvature_last, CS.out.vEgoRaw, self.CCP)
-          apply_curvature = np.clip(apply_curvature, -self.CCP.CURVATURE_MAX, self.CCP.CURVATURE_MAX)
-
-          # FIXME: implement power control, backoff on driver input torque
-          steering_power = 125
-
+          # FIXME: need power control scaling on driver override
+          steering_power = 100
         else:
-          # TODO: see if we can do without this extra ramp-down-on-disengage logic, it makes safety more complex and MQBevo didn't need it
           if self.steering_power_last > 0: # keep HCA alive until steering power has reduced to zero
             hca_enabled = True
-            current_curvature = CS.curvature #-CS.out.yawRate / max(CS.out.vEgoRaw, 0.1)
-            apply_curvature = np.clip(current_curvature, -self.CCP.CURVATURE_MAX, self.CCP.CURVATURE_MAX) # synchronize with current curvature
             steering_power = max(self.steering_power_last - self.CCP.STEERING_POWER_STEPS, 0)
           else:
             hca_enabled = False
             apply_curvature = 0. # inactive curvature
             steering_power = 0
 
-        can_sends.append(self.CCS.create_steering_control(self.packer_pt, CANBUS.pt, apply_curvature, hca_enabled, steering_power, False))
+        can_sends.append(self.CCS.create_steering_control(self.packer_pt, CANBUS.pt, apply_curvature, hca_enabled, steering_power))
         self.apply_curvature_last = apply_curvature
         self.steering_power_last = steering_power
 
