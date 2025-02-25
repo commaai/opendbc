@@ -46,7 +46,10 @@ class CarState(CarStateBase):
     speed = min(int(cp_adas.vl["ACM_tsrCmd"]["ACM_tsrSpdDisClsMain"]), 85)
     self.last_speed = speed if speed != 0 else self.last_speed
     ret.cruiseState.enabled = cp_cam.vl["ACM_Status"]["ACM_FeatureStatus"] == 1
+    # TODO: find cruise set speed on CAN
     ret.cruiseState.speed = self.last_speed * CV.MPH_TO_MS  # detected speed limit
+    if not self.CP.openpilotLongitudinalControl:
+      ret.cruiseState.speed = 0
     ret.cruiseState.available = True  # cp.vl["VDM_AdasSts"]["VDM_AdasInterfaceStatus"] == 1
     ret.cruiseState.standstill = cp.vl["VDM_AdasSts"]["VDM_AdasAccelRequestAcknowledged"] == 1
     ret.accFaulted = cp_cam.vl["ACM_Status"]["ACM_FaultStatus"] == 1
@@ -55,7 +58,10 @@ class CarState(CarStateBase):
     ret.gearShifter = GEAR_MAP[int(cp.vl["VDM_PropStatus"]["VDM_Prndl_Status"])]
 
     # Doors
-    ret.doorOpen = cp.vl["DoorStatus"]["DoorOpen"] == 1
+    ret.doorOpen = (cp_adas.vl["IndicatorLights"]["RearDriverDoor"] != 2 or
+                    cp_adas.vl["IndicatorLights"]["FrontPassengerDoor"] != 2 or
+                    cp_adas.vl["IndicatorLights"]["DriverDoor"] != 2 or
+                    cp_adas.vl["IndicatorLights"]["RearPassengerDoor"] != 2)
 
     # Blinkers
     ret.leftBlinker = cp_adas.vl["IndicatorLights"]["TurnLightLeft"] in (1, 2)
@@ -89,7 +95,6 @@ class CarState(CarStateBase):
       ("EPAS_SystemStatus", 100),
       ("RCM_Status", 8),
       ("VDM_AdasSts", 100),
-      ("DoorStatus", 10),
       ("SCCM_WheelTouch", 20),
     ]
 
