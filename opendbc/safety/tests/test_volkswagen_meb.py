@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 import unittest
-import numpy as np
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerPanda
-from opendbc.car.volkswagen.values import VolkswagenSafetyFlags
 
 MSG_LH_EPS_03 = 0x9F    # RX from EPS, for driver steering torque
 MSG_ESC_51 = 0xFC       # RX, for wheel speeds
@@ -44,13 +42,6 @@ class TestVolkswagenMebSafety(common.PandaCarSafetyTest):
     values = {"%s_Radgeschw" % s: speed for s in ["HL", "HR", "VL", "VR"]}
     return self.packer.make_can_msg_panda("ESC_51", 0, values)
 
-  # TODO: does MEB have a usable redundant brake signal?
-  # Driver brake pressure over threshold
-  # def _esp_05_msg(self, brake):
-  #   values = {"ESP_Fahrer_bremst": brake}
-  #   return self.packer.make_can_msg_panda("ESP_05", 0, values)
-
-  # TODO: consolidate with MQB
   # Brake pedal switch
   def _motor_14_msg(self, brake):
     values = {"MO_Fahrer_bremst": brake}
@@ -64,7 +55,6 @@ class TestVolkswagenMebSafety(common.PandaCarSafetyTest):
     values = {"Accelerator_Pressure": gas}
     return self.packer.make_can_msg_panda("Motor_54", 0, values)
 
-  # TODO: simplify to _pcm_status_msg, consolidate with MQB
   # ACC engagement status
   def _tsk_status_msg(self, enable, main_switch=True):
     if main_switch:
@@ -77,7 +67,6 @@ class TestVolkswagenMebSafety(common.PandaCarSafetyTest):
   def _pcm_status_msg(self, enable):
     return self._tsk_status_msg(enable)
 
-  # TODO: consolidate with MQB
   # Driver steering input torque
   def _torque_driver_msg(self, torque):
     values = {"EPS_Lenkmoment": abs(torque), "EPS_VZ_Lenkmoment": torque < 0}
@@ -88,20 +77,12 @@ class TestVolkswagenMebSafety(common.PandaCarSafetyTest):
   # def _torque_cmd_msg(self, torque, steer_req=1):
   #   pass
 
-  # TODO: consolidate with MQB
   # Cruise control buttons
   def _gra_acc_01_msg(self, cancel=0, resume=0, _set=0, bus=2):
     values = {"GRA_Abbrechen": cancel, "GRA_Tip_Setzen": _set, "GRA_Tip_Wiederaufnahme": resume}
     return self.packer.make_can_msg_panda("GRA_ACC_01", bus, values)
 
-  # Acceleration request to drivetrain coordinator
-  def _acc_18_msg(self, accel):
-    values = {"ACC_Sollbeschleunigung_02": accel}
-    return self.packer.make_can_msg_panda("ACC_18", 0, values)
-
-  # TODO: consolidate with MQB
   def test_torque_measurements(self):
-    # TODO: make this test work with all cars
     self._rx(self._torque_driver_msg(50))
     self._rx(self._torque_driver_msg(-50))
     self._rx(self._torque_driver_msg(0))
