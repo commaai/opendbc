@@ -5,7 +5,6 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.volkswagen import mqbcan, pqcan, mebcan
 from opendbc.car.volkswagen.values import CANBUS, CarControllerParams, VolkswagenFlags
-#from openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import get_T_FOLLOW
 
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
@@ -69,9 +68,6 @@ class CarController(CarControllerBase):
     self.apply_steer_power_last = 0
     self.apply_curvature_last = 0
     self.steering_power_last = 0
-    self.accel_last = 0
-    self.long_override_counter = 0
-    self.long_disabled_counter = 0
     self.gra_acc_counter_last = None
     self.eps_timer_soft_disable_alert = False
     self.hca_frame_timer_running = 0
@@ -155,21 +151,19 @@ class CarController(CarControllerBase):
 
     if self.CP.openpilotLongitudinalControl:
       if self.frame % self.CCP.ACC_CONTROL_STEP == 0:
+        acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
+        accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0)
         stopping = actuators.longControlState == LongCtrlState.stopping
         starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
-
-        accel = np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0
-        self.accel_last = accel
-
         acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
         can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, CANBUS.pt, CS.acc_type, CC.longActive, accel,
                                                            acc_control, stopping, starting, CS.esp_hold_confirmation))
 
-        #if self.aeb_available:
-        #  if self.frame % self.CCP.AEB_CONTROL_STEP == 0:
-        #    can_sends.append(self.CCS.create_aeb_control(self.packer_pt, False, False, 0.0))
-        #  if self.frame % self.CCP.AEB_HUD_STEP == 0:
-        #    can_sends.append(self.CCS.create_aeb_hud(self.packer_pt, False, False))
+      #if self.aeb_available:
+      #  if self.frame % self.CCP.AEB_CONTROL_STEP == 0:
+      #    can_sends.append(self.CCS.create_aeb_control(self.packer_pt, False, False, 0.0))
+      #  if self.frame % self.CCP.AEB_HUD_STEP == 0:
+      #    can_sends.append(self.CCS.create_aeb_hud(self.packer_pt, False, False))
 
     # **** HUD Controls ***************************************************** #
 
@@ -178,7 +172,7 @@ class CarController(CarControllerBase):
       if hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw):
         hud_alert = self.CCP.LDW_MESSAGES["laneAssistTakeOver"]
       can_sends.append(self.CCS.create_lka_hud_control(self.packer_pt, CANBUS.pt, CS.ldw_stock_values, CC.latActive,
-                                                      CS.out.steeringPressed, hud_alert, hud_control))
+                                                       CS.out.steeringPressed, hud_alert, hud_control))
 
     if self.frame % self.CCP.ACC_HUD_STEP == 0 and self.CP.openpilotLongitudinalControl:
       lead_distance = 0
