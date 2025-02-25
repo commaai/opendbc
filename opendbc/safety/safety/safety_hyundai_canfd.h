@@ -128,7 +128,7 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *to_push) {
       vehicle_moving = (speed_avg > HYUNDAI_STANDSTILL_THRSLD);
 
       // average of all 4 wheel speeds. Conversion: raw * 0.03125
-      UPDATE_VEHICLE_SPEED(speed_avg / 4U * 0.03125);
+      UPDATE_VEHICLE_SPEED(speed_avg * 0.03125);
     }
   }
 
