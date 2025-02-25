@@ -3,6 +3,26 @@
 #include "safety_declarations.h"
 #include "safety_hyundai_common.h"
 
+#define HYUNDAI_CANFD_CRUISE_BUTTON_TX_MSGS(bus) \
+  {0x1CF, bus, 8},  /* CRUISE_BUTTON */          \
+
+#define HYUNDAI_CANFD_LKA_STEERING_COMMON_TX_MSGS(a_can, e_can) \
+  HYUNDAI_CANFD_CRUISE_BUTTON_TX_MSGS(e_can)                    \
+  {0x50,  a_can, 16},  /* LKAS */                               \
+  {0x2A4, a_can, 24},  /* CAM_0x2A4 */                          \
+
+#define HYUNDAI_CANFD_LKA_STEERING_ALT_COMMON_TX_MSGS(a_can, e_can) \
+  HYUNDAI_CANFD_CRUISE_BUTTON_TX_MSGS(e_can)                        \
+  {0x110, a_can, 32},  /* LKAS_ALT */                               \
+  {0x362, a_can, 32},  /* CAM_0x362 */                              \
+
+#define HYUNDAI_CANFD_LFA_STEERING_COMMON_TX_MSGS(e_can) \
+  {0x12A, e_can, 16},  /* LFA */                         \
+  {0x1E0, e_can, 16},  /* LFAHDA_CLUSTER */              \
+
+#define HYUNDAI_CANFD_SCC_CONTROL_COMMON_TX_MSGS(e_can) \
+  {0x1A0, e_can, 32},  /* SCC_CONTROL */                \
+
 // *** Addresses checked in rx hook ***
 // EV, ICE, HYBRID: ACCELERATOR (0x35), ACCELERATOR_BRAKE_ALT (0x100), ACCELERATOR_ALT (0x105)
 #define HYUNDAI_CANFD_COMMON_RX_CHECKS(pt_bus)                                                                              \
@@ -225,40 +245,31 @@ static safety_config hyundai_canfd_init(uint16_t param) {
   const int HYUNDAI_PARAM_CANFD_ALT_BUTTONS = 32;
 
   static const CanMsg HYUNDAI_CANFD_LKA_STEERING_TX_MSGS[] = {
-    {0x50, 0, 16},  // LKAS
-    {0x1CF, 1, 8},  // CRUISE_BUTTON
-    {0x2A4, 0, 24}, // CAM_0x2A4
+    HYUNDAI_CANFD_LKA_STEERING_COMMON_TX_MSGS(0, 1)
   };
 
   static const CanMsg HYUNDAI_CANFD_LKA_STEERING_ALT_TX_MSGS[] = {
-    {0x110, 0, 32}, // LKAS_ALT
-    {0x1CF, 1, 8},  // CRUISE_BUTTON
-    {0x362, 0, 32}, // CAM_0x362
+    HYUNDAI_CANFD_LKA_STEERING_ALT_COMMON_TX_MSGS(0, 1)
   };
 
   static const CanMsg HYUNDAI_CANFD_LKA_STEERING_LONG_TX_MSGS[] = {
-    {0x50, 0, 16},  // LKAS
-    {0x1CF, 1, 8},  // CRUISE_BUTTON
-    {0x2A4, 0, 24}, // CAM_0x2A4
-    {0x51, 0, 32},  // ADRV_0x51
-    {0x730, 1, 8},  // tester present for ADAS ECU disable
-    {0x12A, 1, 16}, // LFA
-    {0x160, 1, 16}, // ADRV_0x160
-    {0x1E0, 1, 16}, // LFAHDA_CLUSTER
-    {0x1A0, 1, 32}, // CRUISE_INFO
-    {0x1EA, 1, 32}, // ADRV_0x1ea
-    {0x200, 1, 8},  // ADRV_0x200
-    {0x345, 1, 8},  // ADRV_0x345
-    {0x1DA, 1, 32}, // ADRV_0x1da
+    HYUNDAI_CANFD_LKA_STEERING_COMMON_TX_MSGS(0, 1)
+    HYUNDAI_CANFD_LFA_STEERING_COMMON_TX_MSGS(1)
+    HYUNDAI_CANFD_SCC_CONTROL_COMMON_TX_MSGS(1)
+    {0x51,  0, 32},  // ADRV_0x51
+    {0x730, 1,  8},  // tester present for ADAS ECU disable
+    {0x160, 1, 16},  // ADRV_0x160
+    {0x1EA, 1, 32},  // ADRV_0x1ea
+    {0x200, 1,  8},  // ADRV_0x200
+    {0x345, 1,  8},  // ADRV_0x345
+    {0x1DA, 1, 32},  // ADRV_0x1da
   };
 
   static const CanMsg HYUNDAI_CANFD_LFA_STEERING_TX_MSGS[] = {
-    {0x12A, 0, 16}, // LFA
-    {0x1A0, 0, 32}, // CRUISE_INFO
-    {0x1CF, 2, 8},  // CRUISE_BUTTON
-    {0x1E0, 0, 16}, // LFAHDA_CLUSTER
+    HYUNDAI_CANFD_CRUISE_BUTTON_TX_MSGS(2)
+    HYUNDAI_CANFD_LFA_STEERING_COMMON_TX_MSGS(0)
+    HYUNDAI_CANFD_SCC_CONTROL_COMMON_TX_MSGS(0)
   };
-
 
   hyundai_common_init(param);
 
