@@ -22,6 +22,7 @@ MSG_ACC_07 = 0x12E      # TX by OP, ACC control instructions to the drivetrain c
 MSG_ACC_02 = 0x30C      # TX by OP, ACC HUD data to the instrument cluster
 MSG_LDW_02 = 0x397      # TX by OP, Lane line recognition and text alerts
 
+
 class TestVolkswagenMqbSafety(common.PandaCarSafetyTest, common.DriverTorqueSteeringSafetyTest):
   STANDSTILL_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_01,)}
@@ -34,7 +35,6 @@ class TestVolkswagenMqbSafety(common.PandaCarSafetyTest, common.DriverTorqueStee
 
   DRIVER_TORQUE_ALLOWANCE = 80
   DRIVER_TORQUE_FACTOR = 3
-
 
   @classmethod
   def setUpClass(cls):
