@@ -219,10 +219,10 @@ class CarState(CarStateBase):
 
     # TODO: figure out positions
     ret.wheelSpeeds = self.get_wheel_speeds(
-      cp.vl["WHEEL_SPEEDS"]["WHL_SpdFLVal"],
-      cp.vl["WHEEL_SPEEDS"]["WHL_SpdFRVal"],
-      cp.vl["WHEEL_SPEEDS"]["WHL_SpdRLVal"],
-      cp.vl["WHEEL_SPEEDS"]["WHL_SpdRRVal"],
+      cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_1"],
+      cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_2"],
+      cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_3"],
+      cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_4"],
     )
     ret.vEgoRaw = (ret.wheelSpeeds.fl + ret.wheelSpeeds.fr + ret.wheelSpeeds.rl + ret.wheelSpeeds.rr) / 4.
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
