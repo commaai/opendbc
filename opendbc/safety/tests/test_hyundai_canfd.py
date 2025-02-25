@@ -10,27 +10,12 @@ from opendbc.safety.tests.common import CANPackerPanda
 from opendbc.safety.tests.hyundai_common import HyundaiButtonBase, HyundaiLongitudinalBase
 
 
-class TestHyundaiCanfdBase(HyundaiButtonBase, common.PandaCarSafetyTest, common.DriverTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
+class TestHyundaiCanfdBase(HyundaiButtonBase, common.PandaCarSafetyTest):
 
   TX_MSGS = [[0x50, 0], [0x1CF, 1], [0x2A4, 0]]
   STANDSTILL_THRESHOLD = 12  # 0.375 kph
   FWD_BLACKLISTED_ADDRS = {2: [0x50, 0x2a4]}
   FWD_BUS_LOOKUP = {0: 2, 2: 0}
-
-  MAX_RATE_UP = 2
-  MAX_RATE_DOWN = 3
-  MAX_TORQUE = 270
-
-  MAX_RT_DELTA = 112
-  RT_INTERVAL = 250000
-
-  DRIVER_TORQUE_ALLOWANCE = 250
-  DRIVER_TORQUE_FACTOR = 2
-
-  # Safety around steering req bit
-  MIN_VALID_STEERING_FRAMES = 89
-  MAX_INVALID_STEERING_FRAMES = 2
-  MIN_VALID_STEERING_RT_INTERVAL = 810000  # a ~10% buffer, can send steer up to 110Hz
 
   PT_BUS = 0
   SCC_BUS = 2
@@ -54,6 +39,14 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.PandaCarSafetyTest, common.
   def _torque_cmd_msg(self, torque, steer_req=1):
     values = {"TORQUE_REQUEST": torque, "STEER_REQ": steer_req}
     return self.packer.make_can_msg_panda(self.STEER_MSG, self.STEER_BUS, values)
+
+  def _angle_cmd_msg(self, angle: float, enabled: bool):
+    values = {"LKAS_ANGLE_CMD": angle, "LKAS_ANGLE_ACTIVE": 2 if enabled else 1}
+    return self.packer.make_can_msg_panda(self.STEER_MSG, self.STEER_BUS, values)
+
+  def _angle_meas_msg(self, angle: float):
+    values = {"STEERING_ANGLE": angle}
+    return self.packer.make_can_msg_panda("STEERING_SENSORS", self.PT_BUS, values)
 
   def _speed_msg(self, speed):
     values = {f"WHEEL_SPEED_{i}": speed * 0.03125 for i in range(1, 5)}
@@ -81,7 +74,67 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.PandaCarSafetyTest, common.
     return self.packer.make_can_msg_panda("CRUISE_BUTTONS", bus, values)
 
 
-class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
+class TestHyundaiCanfdTorqueSteering(TestHyundaiCanfdBase, common.DriverTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
+
+  MAX_RATE_UP = 2
+  MAX_RATE_DOWN = 3
+  MAX_TORQUE = 270
+
+  MAX_RT_DELTA = 112
+  RT_INTERVAL = 250000
+
+  DRIVER_TORQUE_ALLOWANCE = 250
+  DRIVER_TORQUE_FACTOR = 2
+
+  # Safety around steering req bit
+  MIN_VALID_STEERING_FRAMES = 89
+  MAX_INVALID_STEERING_FRAMES = 2
+  MIN_VALID_STEERING_RT_INTERVAL = 810000  # a ~10% buffer, can send steer up to 110Hz
+
+  SAFETY_PARAM: int
+
+  @classmethod
+  def setUpClass(cls):
+    super().setUpClass()
+    if cls.__name__ == "TestHyundaiCanfdTorqueSteering":
+      cls.packer = None
+      cls.safety = None
+      raise unittest.SkipTest
+
+  def setUp(self):
+    self.packer = CANPackerPanda("hyundai_canfd_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, self.SAFETY_PARAM)
+    self.safety.init_tests()
+
+
+class TestHyundaiCanfdAngleSteering(TestHyundaiCanfdBase, common.AngleSteeringSafetyTest):
+
+  # Angle control limits
+  DEG_TO_CAN = 10
+
+  ANGLE_RATE_BP = [0., 5., 25.]
+  ANGLE_RATE_UP = [2.5, 1.5, 0.2]  # windup limit
+  ANGLE_RATE_DOWN = [5., 2.0, 0.3]  # unwind limit
+
+  SAFETY_PARAM: int
+
+  @classmethod
+  def setUpClass(cls):
+    super().setUpClass()
+    if cls.__name__ == "TestHyundaiCanfdAngleSteering":
+      cls.packer = None
+      cls.safety = None
+      raise unittest.SkipTest
+
+  def setUp(self):
+    self.packer = CANPackerPanda("hyundai_canfd_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, self.SAFETY_PARAM)
+    self.safety.init_tests()
+
+
+class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdTorqueSteering):
 
   TX_MSGS = [[0x12A, 0], [0x1A0, 1], [0x1CF, 0], [0x1E0, 0]]
   RELAY_MALFUNCTION_ADDRS = {0: (0x12A,)}  # LFA
@@ -166,7 +219,7 @@ class TestHyundaiCanfdLFASteeringAltButtons(TestHyundaiCanfdLFASteeringBase):
         self.assertFalse(self._tx(self._button_msg(btn)))
 
 
-class TestHyundaiCanfdLKASteeringEV(TestHyundaiCanfdBase):
+class TestHyundaiCanfdLKASteeringEV(TestHyundaiCanfdTorqueSteering):
 
   TX_MSGS = [[0x50, 0], [0x1CF, 1], [0x2A4, 0]]
   RELAY_MALFUNCTION_ADDRS = {0: (0x50,)}  # LKAS
@@ -186,7 +239,7 @@ class TestHyundaiCanfdLKASteeringEV(TestHyundaiCanfdBase):
 
 
 # TODO: Handle ICE and HEV configurations once we see cars that use the new messages
-class TestHyundaiCanfdLKASteeringAltEV(TestHyundaiCanfdBase):
+class TestHyundaiCanfdLKASteeringAltEVBase(TestHyundaiCanfdBase):
 
   TX_MSGS = [[0x110, 0], [0x1CF, 1], [0x362, 0]]
   RELAY_MALFUNCTION_ADDRS = {0: (0x110,)}  # LKAS_ALT
@@ -203,6 +256,26 @@ class TestHyundaiCanfdLKASteeringAltEV(TestHyundaiCanfdBase):
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.CANFD_LKA_STEERING | HyundaiSafetyFlags.EV_GAS |
                                  HyundaiSafetyFlags.CANFD_LKA_STEERING_ALT)
+    self.safety.init_tests()
+
+
+class TestHyundaiCanfdLKASteeringAltEVTorque(TestHyundaiCanfdLKASteeringAltEVBase, TestHyundaiCanfdTorqueSteering):
+
+  def setUp(self):
+    self.packer = CANPackerPanda("hyundai_canfd_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.CANFD_LKA_STEERING | HyundaiSafetyFlags.EV_GAS |
+                                 HyundaiSafetyFlags.CANFD_LKA_STEERING_ALT)
+    self.safety.init_tests()
+
+
+class TestHyundaiCanfdLKASteeringAltEVAngle(TestHyundaiCanfdLKASteeringAltEVBase, TestHyundaiCanfdAngleSteering):
+
+  def setUp(self):
+    self.packer = CANPackerPanda("hyundai_canfd_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.CANFD_LKA_STEERING | HyundaiSafetyFlags.EV_GAS |
+                                 HyundaiSafetyFlags.CANFD_LKA_STEERING_ALT | HyundaiSafetyFlags.CANFD_ANGLE_STEERING)
     self.safety.init_tests()
 
 
