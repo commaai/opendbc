@@ -25,19 +25,19 @@
 
 // *** Addresses checked in rx hook ***
 // EV, ICE, HYBRID: ACCELERATOR (0x35), ACCELERATOR_BRAKE_ALT (0x100), ACCELERATOR_ALT (0x105)
-#define HYUNDAI_CANFD_COMMON_RX_CHECKS(pt_bus)                                                                              \
-  {.msg = {{0x35, (pt_bus), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U},                   \
-           {0x100, (pt_bus), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U},                  \
-           {0x105, (pt_bus), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U}}},                \
-  {.msg = {{0x175, (pt_bus), 24, .check_checksum = true, .max_counter = 0xffU, .frequency = 50U}, { 0 }, { 0 }}},   \
-  {.msg = {{0xa0, (pt_bus), 24, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U}, { 0 }, { 0 }}},   \
-  {.msg = {{0xea, (pt_bus), 24, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U}, { 0 }, { 0 }}},   \
-  {.msg = {{0x1cf, (pt_bus), 8, .check_checksum = false, .max_counter = 0xfU, .frequency = 50U},                    \
-           {0x1aa, (pt_bus), 16, .check_checksum = false, .max_counter = 0xffU, .frequency = 50U}, { 0 }}},         \
+#define HYUNDAI_CANFD_COMMON_RX_CHECKS(pt_bus)                                                                     \
+  {.msg = {{0x35, (pt_bus), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U},                  \
+           {0x100, (pt_bus), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U},                 \
+           {0x105, (pt_bus), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U}}},               \
+  {.msg = {{0x175, (pt_bus), 24, .check_checksum = true, .max_counter = 0xffU, .frequency = 50U}, { 0 }, { 0 }}},  \
+  {.msg = {{0xa0, (pt_bus), 24, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U}, { 0 }, { 0 }}},  \
+  {.msg = {{0xea, (pt_bus), 24, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U}, { 0 }, { 0 }}},  \
+  {.msg = {{0x1cf, (pt_bus), 8, .check_checksum = false, .max_counter = 0xfU, .frequency = 50U},                   \
+           {0x1aa, (pt_bus), 16, .check_checksum = false, .max_counter = 0xffU, .frequency = 50U}, { 0 }}},        \
 
 // SCC_CONTROL (from ADAS unit or camera)
-#define HYUNDAI_CANFD_SCC_ADDR_CHECK(scc_bus)                                                                                 \
-  {.msg = {{0x1a0, (scc_bus), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 50U}, { 0 }, { 0 }}}, \
+#define HYUNDAI_CANFD_SCC_ADDR_CHECK(scc_bus)                                                                       \
+  {.msg = {{0x1a0, (scc_bus), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 50U}, { 0 }, { 0 }}},  \
 
 static bool hyundai_canfd_alt_buttons = false;
 static bool hyundai_canfd_lka_steering_alt = false;
@@ -129,11 +129,9 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *to_push) {
   if (hyundai_longitudinal) {
     // on LKA steering cars, ensure ADRV ECU is still knocked out
     // on others, ensure accel msg is blocked from camera
-    const int stock_scc_bus = hyundai_canfd_lka_steering ? 1 : 0;
-    stock_ecu_detected = stock_ecu_detected || ((addr == 0x1a0) && (bus == stock_scc_bus));
+    stock_ecu_detected = stock_ecu_detected || ((addr == 0x1a0) && (bus == pt_bus));
   }
   generic_rx_checks(stock_ecu_detected);
-
 }
 
 static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
