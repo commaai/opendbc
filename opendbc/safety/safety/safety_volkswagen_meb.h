@@ -20,9 +20,6 @@ static safety_config volkswagen_meb_init(uint16_t param) {
     {.msg = {{MSG_QFK_01, 0, 32, .check_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
     {.msg = {{MSG_ESC_51, 0, 48, .check_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
     {.msg = {{MSG_Motor_54, 0, 32, .check_checksum = true, .max_counter = 15U, .frequency = 10U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_ESC_50, 0, 48, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_VMM_02, 0, 32, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_EML_06, 0, 64, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
   };
 
   volkswagen_set_button_prev = false;
