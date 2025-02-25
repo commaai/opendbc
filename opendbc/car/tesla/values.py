@@ -11,24 +11,22 @@ Ecu = CarParams.Ecu
 class Footnote(Enum):
   HW_TYPE = CarFootnote(
     "To verify which hardware type your vehicle has, refer to " +
-    "https://www.notateslaapp.com/news/2173/how-to-check-if-your-tesla-has-hardware-4-ai4-or-hardware-3",
-    Column.MODEL)
+    "<a href=\"https://www.notateslaapp.com/news/2173/how-to-check-if-your-tesla-has-hardware-4-ai4-or-hardware-3\">this documentation</a>.",
+    Column.PACKAGE)
 
 
 @dataclass
 class TeslaCarDocsHW3(CarDocs):
-  # TODO: package not standard?
-  package: str = "Traffic Aware Cruise Control"
+  package: str = "All"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.tesla_a]))
-  footnotes = [Footnote.HW_TYPE]
+  footnotes: list[Enum] = field(default_factory=lambda: [Footnote.HW_TYPE])
 
 
 @dataclass
 class TeslaCarDocsHW4(CarDocs):
-  # TODO: package not standard?
-  package: str = "Traffic Aware Cruise Control"
+  package: str = "All"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.tesla_b]))
-  footnotes = [Footnote.HW_TYPE]
+  footnotes: list[Enum] = field(default_factory=lambda: [Footnote.HW_TYPE])
 
 
 @dataclass
@@ -41,15 +39,15 @@ class CAR(Platforms):
     [
       # TODO: do we support 2017? It's HW3
       # TODO: do we support 2025? It's HW4
-      TeslaCarDocsHW3("Tesla Model 3 2019-23"),
-      TeslaCarDocsHW4("Tesla Model 3 2024"),
+      TeslaCarDocsHW3("Tesla Model 3 (with HW3) 2019-23"),
+      TeslaCarDocsHW4("Tesla Model 3 (with HW4) 2024"),
     ],
     CarSpecs(mass=1899., wheelbase=2.875, steerRatio=12.0),
   )
   TESLA_MODEL_Y = TeslaPlatformConfig(
     [
-      TeslaCarDocsHW3("Tesla Model Y 2020-23"),
-      TeslaCarDocsHW4("Tesla Model Y 2024"),
+      TeslaCarDocsHW3("Tesla Model Y (with HW3) 2020-23"),
+      TeslaCarDocsHW4("Tesla Model Y (with HW4) 2024"),
      ],
     CarSpecs(mass=2072., wheelbase=2.890, steerRatio=12.0),
   )

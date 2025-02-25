@@ -4,7 +4,7 @@ from enum import StrEnum, IntFlag
 from opendbc.car.structs import CarParams
 from opendbc.car import Bus, structs
 from opendbc.car import CarSpecs, PlatformConfig, Platforms
-from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
+from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts, Device
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
@@ -18,7 +18,7 @@ class WMI(StrEnum):
 @dataclass
 class RivianCarDocs(CarDocs):
   package: str = "All"
-  car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.rivian]))
+  car_parts: CarParts = field(default_factory=CarParts([Device.threex_angled_mount, CarHarness.rivian]))
 
 
 class CAR(Platforms):
