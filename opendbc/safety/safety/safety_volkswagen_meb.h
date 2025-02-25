@@ -28,6 +28,8 @@ static safety_config volkswagen_meb_init(uint16_t param) {
   volkswagen_set_button_prev = false;
   volkswagen_resume_button_prev = false;
 
+  UNUSED(param);
+
   gen_crc_lookup_table_8(0x2F, volkswagen_crc8_lut_8h2f);
   return BUILD_SAFETY_CFG(volkswagen_meb_rx_checks, VOLKSWAGEN_MEB_STOCK_TX_MSGS);
 }
