@@ -7,23 +7,12 @@ from opendbc.car.volkswagen import mqbcan, pqcan, mebcan
 from opendbc.car.volkswagen.values import CANBUS, CarControllerParams, VolkswagenFlags
 #from openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import get_T_FOLLOW
 
+
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 
 
 def apply_iso_curvature_limits(v_ego, previous_curvature, time_step, desired_curvature):
-  """
-  Apply ISO 11270:2014(E) safety constraints to limit the desired curvature.
-
-  Args:
-      v_ego: Vehicle v_ego in meters per second (m/s)
-      previous_curvature: Previous path curvature in 1/meters
-      time_step: Time step in seconds
-      desired_curvature: Newly desired path curvature in 1/meters
-
-  Returns:
-      float: Limited curvature that respects acceleration and jerk constraints
-  """
   # ISO 11270:2014 safety constraints
   MAX_LATERAL_ACCELERATION = 3.0  # m/s^2
   MAX_LATERAL_JERK = 5.0  # m/s^3
@@ -45,6 +34,23 @@ def apply_iso_curvature_limits(v_ego, previous_curvature, time_step, desired_cur
   return max(min(desired_curvature, max_curvature), min_curvature)
 
 
+def apply_lateral_control_power(CCP, lat_active, driver_input, previous_power):
+  qfk_enable = True
+
+  if lat_active:
+    if driver_input:
+      apply_power = max(previous_power - CCP.STEERING_POWER_STEP, CCP.STEERING_POWER_MIN)
+    else:
+      apply_power = min(previous_power + CCP.STEERING_POWER_STEP, CCP.STEERING_POWER_MAX)
+  elif previous_power > 0:
+    apply_power = max(previous_power - CCP.STEERING_POWER_STEP, 0)
+  else:
+    qfk_enable = False
+    apply_power = 0
+
+  return qfk_enable, apply_power
+
+
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
@@ -60,6 +66,7 @@ class CarController(CarControllerBase):
     self.aeb_available = not CP.flags & VolkswagenFlags.PQ
 
     self.apply_steer_last = 0
+    self.apply_steer_power_last = 0
     self.apply_curvature_last = 0
     self.steering_power_last = 0
     self.accel_last = 0
@@ -84,26 +91,15 @@ class CarController(CarControllerBase):
         # MEB rack can be used continously without time limits
         # maximum real steering angle change ~ 120-130 deg/s
 
-        # Adjust our curvature command by the offset between openpilot's current curvature and the QFK's current curvature
+        # Calibrate our curvature command by the offset between openpilot's current curvature and the QFK's current curvature
         calibrated_actuator_curvature = actuators.curvature + (CS.curvature - CC.currentCurvature)
         apply_curvature = apply_iso_curvature_limits(CS.out.vEgo, self.apply_curvature_last, DT_CTRL * self.CCP.STEER_STEP, calibrated_actuator_curvature)
+        qfk_enable, apply_steer_power = apply_lateral_control_power(self.CCP, CC.latActive, CS.out.steeringPressed, self.apply_steer_power_last)
 
-        if CC.latActive:
-          hca_enabled = True
-          # FIXME: need power control scaling on driver override
-          steering_power = 100
-        else:
-          if self.steering_power_last > 0: # keep HCA alive until steering power has reduced to zero
-            hca_enabled = True
-            steering_power = max(self.steering_power_last - self.CCP.STEERING_POWER_STEPS, 0)
-          else:
-            hca_enabled = False
-            apply_curvature = 0. # inactive curvature
-            steering_power = 0
+        can_sends.append(self.CCS.create_steering_control(self.packer_pt, CANBUS.pt, apply_curvature, qfk_enable, apply_steer_power))
 
-        can_sends.append(self.CCS.create_steering_control(self.packer_pt, CANBUS.pt, apply_curvature, hca_enabled, steering_power))
         self.apply_curvature_last = apply_curvature
-        self.steering_power_last = steering_power
+        self.apply_steer_power_last = apply_steer_power
 
       else:
         # Logic to avoid HCA state 4 "refused":

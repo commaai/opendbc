@@ -2,7 +2,7 @@ from collections import defaultdict, namedtuple
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag, StrEnum
 
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, AngleRateLimit, uds
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.can.can_define import CANDefine
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car import structs
@@ -75,15 +75,10 @@ class CarControllerParams:
     elif CP.flags & VolkswagenFlags.MEB:
       self.LDW_STEP                        = 10    # LDW_02 message frequency 10Hz
       self.ACC_HUD_STEP                    = 6     # MEB_ACC_01 message frequency 16Hz
-      self.STEER_DRIVER_ALLOWANCE          = 80    # Driver intervention threshold 0.6 Nm
-      self.STEERING_POWER_USER_REDUCTION   = 40    # HCA_03 driver intervention power reduction in percent
-      self.STEERING_POWER_MAX              = 125   # HCA_03 maximum steering power
-      self.STEERING_POWER_MIN              = 40    # HCA_03 minimum steering power
-      self.STEERING_POWER_STEPS            = 6     # HCA_03 steering power counter steps
-      self.CURVATURE_MAX                   = 0.195 # HCA_03 maximum curvature in 1/m
-      self.ANGLE_RATE_LIMIT_UP             = AngleRateLimit(speed_bp=[5., 25.], angle_v=[0.0015, 0.00015])  # curvature safety limit up
-      self.ANGLE_RATE_LIMIT_DOWN           = AngleRateLimit(speed_bp=[5., 25.], angle_v=[0.002, 0.00035])   # curvature safety limit down
-      self.CURVATURE_POWER_FACTOR          = 4000
+      self.STEER_DRIVER_ALLOWANCE          = 60    # Driver intervention threshold 0.6 Nm
+      self.STEERING_POWER_MAX              = 100   # HCA_03 maximum steering power
+      self.STEERING_POWER_MIN              = 40    # HCA_03 minimum steering power, used for driver intervention
+      self.STEERING_POWER_STEP             = 3     # HCA_03 steering power counter steps
 
       self.shifter_values    = can_define.dv["Gateway_73"]["GE_Fahrstufe"]
       self.hca_status_values = can_define.dv["QFK_01"]["LatCon_HCA_Status"]
