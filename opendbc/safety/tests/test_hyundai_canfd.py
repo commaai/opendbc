@@ -91,8 +91,6 @@ class TestHyundaiCanfdTorqueSteering(TestHyundaiCanfdBase, common.DriverTorqueSt
   MAX_INVALID_STEERING_FRAMES = 2
   MIN_VALID_STEERING_RT_INTERVAL = 810000  # a ~10% buffer, can send steer up to 110Hz
 
-  SAFETY_PARAM: int
-
   @classmethod
   def setUpClass(cls):
     super().setUpClass()
@@ -104,7 +102,7 @@ class TestHyundaiCanfdTorqueSteering(TestHyundaiCanfdBase, common.DriverTorqueSt
   def setUp(self):
     self.packer = CANPackerPanda("hyundai_canfd_generated")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, self.SAFETY_PARAM)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, 0)
     self.safety.init_tests()
 
 
@@ -117,8 +115,6 @@ class TestHyundaiCanfdAngleSteering(TestHyundaiCanfdBase, common.AngleSteeringSa
   ANGLE_RATE_UP = [2.5, 1.5, 0.2]  # windup limit
   ANGLE_RATE_DOWN = [5., 2.0, 0.3]  # unwind limit
 
-  SAFETY_PARAM: int
-
   @classmethod
   def setUpClass(cls):
     super().setUpClass()
@@ -130,7 +126,7 @@ class TestHyundaiCanfdAngleSteering(TestHyundaiCanfdBase, common.AngleSteeringSa
   def setUp(self):
     self.packer = CANPackerPanda("hyundai_canfd_generated")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, self.SAFETY_PARAM)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.CANFD_ANGLE_STEERING)
     self.safety.init_tests()
 
 
