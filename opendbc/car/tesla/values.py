@@ -2,15 +2,22 @@ from dataclasses import dataclass, field
 from enum import IntFlag
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, AngleRateLimit
 from opendbc.car.structs import CarParams, CarState
-from opendbc.car.docs_definitions import CarDocs
+from opendbc.car.docs_definitions import CarDocs, CarHarness, CarParts
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
 
 
 @dataclass
-class TeslaCarDocs(CarDocs):
+class TeslaCarDocsHW3(CarDocs):
   package: str = "Traffic Aware Cruise Control"
+  car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.tesla_a]))
+
+
+@dataclass
+class TeslaCarDocsHW4(CarDocs):
+  package: str = "Traffic Aware Cruise Control"
+  car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.tesla_b]))
 
 
 @dataclass
@@ -20,11 +27,19 @@ class TeslaPlatformConfig(PlatformConfig):
 
 class CAR(Platforms):
   TESLA_MODEL_3 = TeslaPlatformConfig(
-    [TeslaCarDocs("Tesla Model 3 2019-24")],
+    [
+      # TODO: do we support 2017? It's HW3
+      # TODO: do we support 2025? It's HW4
+      TeslaCarDocsHW3("Tesla Model 3 2019-23"),
+      TeslaCarDocsHW4("Tesla Model 3 2024"),
+    ],
     CarSpecs(mass=1899., wheelbase=2.875, steerRatio=12.0),
   )
   TESLA_MODEL_Y = TeslaPlatformConfig(
-    [TeslaCarDocs("Tesla Model Y 2020-24")],
+    [
+      TeslaCarDocsHW3("Tesla Model Y 2020-23"),
+      TeslaCarDocsHW4("Tesla Model Y 2024"),
+     ],
     CarSpecs(mass=2072., wheelbase=2.890, steerRatio=12.0),
   )
 
