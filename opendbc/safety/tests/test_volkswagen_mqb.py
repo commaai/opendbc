@@ -36,6 +36,7 @@ class TestVolkswagenMqbSafety(common.PandaCarSafetyTest, common.DriverTorqueStee
   DRIVER_TORQUE_ALLOWANCE = 80
   DRIVER_TORQUE_FACTOR = 3
 
+
   @classmethod
   def setUpClass(cls):
     if cls.__name__ == "TestVolkswagenMqbSafety":

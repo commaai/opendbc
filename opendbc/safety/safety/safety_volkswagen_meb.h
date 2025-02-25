@@ -88,15 +88,6 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *to_push) {
       }
     }
 
-    // update cruise buttons
-    if (addr == MSG_GRA_ACC_01) {
-      // Always exit controls on rising edge of Cancel
-      // Signal: GRA_ACC_01.GRA_Abbrechen
-      if (GET_BIT(to_push, 13U)) {
-        controls_allowed = false;
-      }
-    }
-
     // update brake pedal
     if (addr == MSG_MOTOR_14) {
       brake_pressed = GET_BIT(to_push, 28U);
@@ -113,30 +104,9 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *to_push) {
 }
 
 static bool volkswagen_meb_tx_hook(const CANPacket_t *to_send) {
-  // TODO: This has not really been tested/validated, or synced to the new curvature control in openpilot
-  // lateral limits for curvature
-  const SteeringLimits VOLKSWAGEN_MEB_STEERING_LIMITS = {
-    // keep in mind, we do have a false tx block problem with same limits as in opendbc values, have them a little bit higher +0.0002
-    // for FORD enforce_angle_error is active with margin of 0.002 which could solve the issue, we have here
-    .max_steer = 29105, // 0.195 rad/m
-    .angle_deg_to_can = 149253.7313, // 1 / 6.7e-6 rad/m to can
-    .angle_rate_up_lookup = {
-      {5., 25., 25.},
-      {0.0017, 0.00035, 0.00035} // in rad/m
-    },
-    .angle_rate_down_lookup = {
-      {5., 25., 25.},
-      {0.0022, 0.00055, 0.00055}
-    },
-    //.max_angle_error = ,         // THIS WOULD ALLOW MORE ROOM FOR OUR RATE LIMITS see comment above, but we want correct safety limit checks? and
-    //.enforce_angle_error = true, // to allow some difference for our power control handling at the same time
-    .inactive_angle_is_zero = true,
-  };
-
   int addr = GET_ADDR(to_send);
   bool tx = true;
 
-  // TODO: review and implement power backoff on driver input torque
   // Safety check for HCA_03 Heading Control Assist curvature
   if (addr == MSG_HCA_03) {
     int desired_curvature_raw = (GET_BYTE(to_send, 3U) | (GET_BYTE(to_send, 4U) & 0x7FU << 8));
@@ -149,17 +119,19 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *to_send) {
     bool steer_req = GET_BIT(to_send, 14U);
     int steer_power = (GET_BYTE(to_send, 2U) >> 0) & 0x7FU;
 
-    if (steer_angle_cmd_checks(desired_curvature_raw, steer_req, VOLKSWAGEN_MEB_STEERING_LIMITS)) {
-      tx = false;
-
-      // steer power is still allowed to decrease to zero monotonously
-      // while controls are not allowed anymore
-      if (steer_req && steer_power != 0) {
-        if (steer_power < volkswagen_steer_power_prev) {
-          tx = true;
-        }
-      }
-    }
+    // TODO: implement lateral accel limits based on vehicle speed and QFK curvature
+    // TODO: review and implement power backoff on driver input torque
+    // if (desired_curvature > conditions-tbd) {
+    //  tx = false;
+    //
+    //  // steer power is still allowed to decrease to zero monotonously
+    //  // while controls are not allowed anymore
+    //  if (steer_req && steer_power != 0) {
+    //    if (steer_power < volkswagen_steer_power_prev) {
+    //      tx = true;
+    //    }
+    //  }
+    // }
 
     if (!steer_req && steer_power != 0) {
       tx = false; // steer power is not 0 when disabled

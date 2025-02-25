@@ -28,8 +28,8 @@ class TestVolkswagenMebSafety(common.PandaCarSafetyTest):
   STANDSTILL_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_03,)}
 
-  DRIVER_TORQUE_ALLOWANCE = 80
-  DRIVER_TORQUE_FACTOR = 3
+  DRIVER_TORQUE_ALLOWANCE = 60
+
 
   @classmethod
   def setUpClass(cls):
@@ -72,13 +72,27 @@ class TestVolkswagenMebSafety(common.PandaCarSafetyTest):
     values = {"EPS_Lenkmoment": abs(torque), "EPS_VZ_Lenkmoment": torque < 0}
     return self.packer.make_can_msg_panda("LH_EPS_03", 0, values)
 
-  # FIXME: replace with curvature control
-  # openpilot steering output torque
-  # def _torque_cmd_msg(self, torque, steer_req=1):
-  #   pass
+  # Current curvature
+  def _curvature_msg(self, curvature):
+    values = {
+      "Curvature": abs(curvature),
+      "Curvature_VZ": curvature < 0,
+    }
+    return self.packer.make_can_msg_panda("QFK_01", 0, values)
+
+  # Steering actuation
+  def _curvature_actuation_msg(self, lat_active, power, curvature):
+    values = {
+      "Curvature": abs(curvature),
+      "Curvature_VZ": curvature < 0,
+      "Power": power,
+      "RequestStatus": 4 if lat_active else 2,
+      "HighSendRate": lat_active,
+    }
+    return self.packer.make_can_msg_panda("HCA_03", 0, values)
 
   # Cruise control buttons
-  def _gra_acc_01_msg(self, cancel=0, resume=0, _set=0, bus=2):
+  def _gra_acc_01_msg(self, cancel=0, resume=0, _set=0, bus=0):
     values = {"GRA_Abbrechen": cancel, "GRA_Tip_Setzen": _set, "GRA_Tip_Wiederaufnahme": resume}
     return self.packer.make_can_msg_panda("GRA_ACC_01", bus, values)
 
@@ -103,7 +117,7 @@ class TestVolkswagenMebSafety(common.PandaCarSafetyTest):
 
 
 class TestVolkswagenMebStockSafety(TestVolkswagenMebSafety):
-  TX_MSGS = [[MSG_HCA_03, 0], [MSG_LDW_02, 0], [MSG_GRA_ACC_01, 0], [MSG_EA_01, 0], [MSG_EA_02, 0], [MSG_GRA_ACC_01, 2]]
+  TX_MSGS = [[MSG_HCA_03, 0], [MSG_LDW_02, 0], [MSG_GRA_ACC_01, 0], [MSG_GRA_ACC_01, 2], [MSG_EA_01, 0], [MSG_EA_02, 0]]
   FWD_BLACKLISTED_ADDRS = {2: [MSG_HCA_03, MSG_LDW_02, MSG_EA_01, MSG_EA_02]}
   FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
