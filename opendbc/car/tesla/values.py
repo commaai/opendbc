@@ -1,11 +1,18 @@
 from dataclasses import dataclass, field
-from enum import IntFlag
+from enum import Enum, IntFlag
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, AngleRateLimit
 from opendbc.car.structs import CarParams, CarState
-from opendbc.car.docs_definitions import CarDocs, CarHarness, CarParts
+from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
+
+
+class Footnote(Enum):
+  HW_TYPE = CarFootnote(
+    "To verify which hardware type your vehicle has, refer to " +
+    "https://www.notateslaapp.com/news/2173/how-to-check-if-your-tesla-has-hardware-4-ai4-or-hardware-3",
+    Column.MODEL)
 
 
 @dataclass
@@ -13,6 +20,7 @@ class TeslaCarDocsHW3(CarDocs):
   # TODO: package not standard?
   package: str = "Traffic Aware Cruise Control"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.tesla_a]))
+  footnotes = [Footnote.HW_TYPE]
 
 
 @dataclass
@@ -20,6 +28,7 @@ class TeslaCarDocsHW4(CarDocs):
   # TODO: package not standard?
   package: str = "Traffic Aware Cruise Control"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.tesla_b]))
+  footnotes = [Footnote.HW_TYPE]
 
 
 @dataclass
