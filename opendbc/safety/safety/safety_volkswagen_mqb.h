@@ -3,20 +3,6 @@
 #include "safety_declarations.h"
 #include "safety_volkswagen_common.h"
 
-#define MSG_ESP_19      0x0B2   // RX from ABS, for wheel speeds
-#define MSG_LH_EPS_03   0x09F   // RX from EPS, for driver steering torque
-#define MSG_ESP_05      0x106   // RX from ABS, for brake switch state
-#define MSG_TSK_06      0x120   // RX from ECU, for ACC status from drivetrain coordinator
-#define MSG_MOTOR_20    0x121   // RX from ECU, for driver throttle input
-#define MSG_ACC_06      0x122   // TX by OP, ACC control instructions to the drivetrain coordinator
-#define MSG_HCA_01      0x126   // TX by OP, Heading Control Assist steering torque
-#define MSG_GRA_ACC_01  0x12B   // TX by OP, ACC control buttons for cancel/resume
-#define MSG_ACC_07      0x12E   // TX by OP, ACC control instructions to the drivetrain coordinator
-#define MSG_ACC_02      0x30C   // TX by OP, ACC HUD data to the instrument cluster
-#define MSG_MOTOR_14    0x3BE   // RX from ECU, for brake switch status
-#define MSG_LDW_02      0x397   // TX by OP, Lane line recognition and text alerts
-
-static uint8_t volkswagen_crc8_lut_8h2f[256]; // Static lookup table for CRC8 poly 0x2F, aka 8H2F/AUTOSAR
 static bool volkswagen_mqb_brake_pedal_switch = false;
 static bool volkswagen_mqb_brake_pressure_detected = false;
 
