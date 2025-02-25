@@ -327,6 +327,10 @@ BO_ 530 VDM_Torque_Rear: 8 VDM
 BO_ 565 IndicatorLights: 8 XXX
  SG_ checksum : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ counter : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ RearDriverDoor : 24|2@0+ (1,0) [0|3] "" XXX
+ SG_ FrontPassengerDoor : 26|2@0+ (1,0) [0|3] "" XXX
+ SG_ DriverDoor : 28|2@0+ (1,0) [0|3] "" XXX
+ SG_ RearPassengerDoor : 38|2@0+ (1,0) [0|3] "" XXX
  SG_ TurnLightLeft : 40|2@0+ (1,0) [0|3] "" XXX
  SG_ TurnLightRight : 54|2@0+ (1,0) [0|3] "" XXX
 
@@ -936,6 +940,10 @@ VAL_ 529 VDM_Torque_Front_MinQ 0 "VDM_Torque_Front_MinQ_Invalid" 1 "VDM_Torque_F
 VAL_ 530 VDM_Torque_Rear_MaxQ 0 "VDM_Torque_Rear_MaxQ_Invalid" 1 "VDM_Torque_Rear_MaxQ_Valid";
 VAL_ 530 VDM_OutputTorqueRearQ 0 "VDM_OutputTorqueRearQ_Invalid" 1 "VDM_OutputTorqueRearQ_Valid";
 VAL_ 530 VDM_Torque_Rear_MinQ 0 "VDM_Torque_Rear_MinQ_Invalid" 1 "VDM_Torque_Rear_MinQ_Valid";
+VAL_ 565 RearDriverDoor 0 "SNA" 1 "Open" 2 "Closed" 3 "SNA";
+VAL_ 565 FrontPassengerDoor 0 "SNA" 1 "Open" 2 "Closed" 3 "SNA";
+VAL_ 565 DriverDoor 0 "SNA" 1 "Open" 2 "Closed" 3 "SNA";
+VAL_ 565 RearPassengerDoor 0 "SNA" 1 "Open" 2 "Closed" 3 "SNA";
 VAL_ 811 ESP_EpbAvailable 0 "ESP_EpbAvailable_Not_Available" 1 "ESP_EpbAvailable_Available";
 VAL_ 811 ESP_EpbServiceMode 0 "ESP_EpbServiceMode_Not_Active" 1 "ESP_EpbServiceMode_Active";
 VAL_ 811 ESP_EpbWarningLamp 0 "ESP_EpbWarningLamp_Off" 1 "ESP_EpbWarningLamp_Continous" 2 "ESP_EpbWarningLamp_Blink" 3 "ESP_EpbWarningLamp_Sna";
