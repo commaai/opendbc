@@ -99,19 +99,6 @@ class TestVolkswagenMebSafety(common.PandaCarSafetyTest):
     values = {"ACC_Sollbeschleunigung_02": accel}
     return self.packer.make_can_msg_panda("ACC_18", 0, values)
 
-  # TODO: re-enable if a usable redundant brake signal is found
-  # Verify brake_pressed is true if either the switch or pressure threshold signals are true
-  # def test_redundant_brake_signals(self):
-  #   test_combinations = [(True, True, True), (True, True, False), (True, False, True), (False, False, False)]
-  #   for brake_pressed, motor_14_signal, esp_05_signal in test_combinations:
-  #     self._rx(self._motor_14_msg(False))
-  #     self._rx(self._esp_05_msg(False))
-  #     self.assertFalse(self.safety.get_brake_pressed_prev())
-  #     self._rx(self._motor_14_msg(motor_14_signal))
-  #     self._rx(self._esp_05_msg(esp_05_signal))
-  #     self.assertEqual(brake_pressed, self.safety.get_brake_pressed_prev(),
-  #                      f"expected {brake_pressed=} with {motor_14_signal=} and {esp_05_signal=}")
-
   # TODO: consolidate with MQB
   def test_torque_measurements(self):
     # TODO: make this test work with all cars
