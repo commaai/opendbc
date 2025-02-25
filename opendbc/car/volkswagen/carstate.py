@@ -54,10 +54,8 @@ class CarState(CarStateBase):
     ret = structs.CarState()
 
     if self.CP.transmissionType == TransmissionType.direct:
-      # TODO: See if e-Golf can use Gateway_73.GE_Fahrstufe, might be able to eliminate this
       ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Motor_EV_01"]["MO_Waehlpos"], None))
     elif self.CP.transmissionType == TransmissionType.manual:
-      # TODO: see what Gateway_73.GE_Fahrstufe does for manual trans cars, low chance but we might be able to eliminate this
       ret.clutchPressed = not pt_cp.vl["Motor_14"]["MO_Kuppl_schalter"]
       if bool(pt_cp.vl["Gateway_72"]["BCM1_Rueckfahrlicht_Schalter"]):
         ret.gearShifter = GearShifter.reverse
