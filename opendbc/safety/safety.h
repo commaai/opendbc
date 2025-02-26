@@ -106,7 +106,7 @@ struct sample_t angle_meas;         // last 6 steer angles/curvatures
 // ISO 11270
 const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
 
-// Limit to a worst case banked road since safety doesn't have the roll
+// Limit to worst case banked road since safety doesn't have the roll
 const float EARTH_G = 9.81;
 const float MAX_ROAD_ROLL = 0.1;  // ~5.7 degrees
 const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (EARTH_G * MAX_ROAD_ROLL);  // ~2 m/s^2
@@ -729,7 +729,7 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
     }
 
     if (limits.angle_is_curvature) {
-      const float speed = vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR;
+      const float speed = MAX(vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR, 1.0);
       const int max_curvature = MAX_LATERAL_ACCEL / (speed * speed) * limits.angle_deg_to_can + 1;
 
       // don't enforce above the max steer

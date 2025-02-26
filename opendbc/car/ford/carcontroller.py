@@ -10,6 +10,15 @@ LongCtrlState = structs.CarControl.Actuators.LongControlState
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 
 
+# ISO 11270
+ISO_LATERAL_ACCEL = 3.0  # m/s^2  # TODO: import from test lateral limits file?
+
+# Limit to worst case banked road since safety doesn't have the roll
+EARTH_G = 9.81
+MAX_ROAD_ROLL = 0.1  # ~5.7 degrees
+MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (EARTH_G * MAX_ROAD_ROLL)  # ~2 m/s^2
+
+
 def apply_ford_curvature_limits(apply_curvature, apply_curvature_last, current_curvature, v_ego_raw):
   # No blending at low speed due to lack of torque wind-up and inaccurate current curvature
   if v_ego_raw > 9:
@@ -18,6 +27,10 @@ def apply_ford_curvature_limits(apply_curvature, apply_curvature_last, current_c
 
   # Curvature rate limit after driver torque limit
   apply_curvature = apply_std_steer_angle_limits(apply_curvature, apply_curvature_last, v_ego_raw, CarControllerParams)
+
+  # Limit curvature to max lateral acceleration
+  max_curvature_for_accel = MAX_LATERAL_ACCEL / (max(v_ego_raw, 1) ** 2)
+  apply_curvature = np.clip(apply_curvature, -max_curvature_for_accel, max_curvature_for_accel)
 
   return float(np.clip(apply_curvature, -CarControllerParams.CURVATURE_MAX, CarControllerParams.CURVATURE_MAX))
 
