@@ -156,6 +156,9 @@ class CAR(Platforms):
     [
       HondaCarDocs("Honda Civic 2022-24", "All", video_link="https://youtu.be/ytiOT5lcp6Q"),
       HondaCarDocs("Honda Civic Hatchback 2022-24", "All", video_link="https://youtu.be/ytiOT5lcp6Q"),
+      HondaCarDocs("Honda Civic Hatchback Hybrid 2023 (Europe only)", "All"),
+      # TODO: Confirm 2024
+      HondaCarDocs("Honda Civic Hatchback Hybrid 2025", "All"),
     ],
     HONDA_CIVIC_BOSCH.specs,
     {Bus.pt: 'honda_civic_ex_2022_can_generated'},
