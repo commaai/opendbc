@@ -106,7 +106,7 @@ struct sample_t angle_meas;         // last 6 steer angles/curvatures
 // ISO 11270
 const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
 
-// Limit to a worst case banked road since panda doesn't have the roll
+// Limit to a worst case banked road since safety doesn't have the roll
 const float EARTH_G = 9.81;
 const float MAX_ROAD_ROLL = 0.1;  // ~5.7 degrees
 const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (EARTH_G * MAX_ROAD_ROLL);  // ~2 m/s^2
