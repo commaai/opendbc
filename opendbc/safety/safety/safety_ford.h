@@ -124,6 +124,7 @@ static const SteeringLimits FORD_STEERING_LIMITS = {
   // no blending at low speed due to lack of torque wind-up and inaccurate current curvature
   .angle_error_min_speed = 10.0,    // m/s
 
+  .angle_is_curvature = true,
   .enforce_angle_error = true,
   .inactive_angle_is_zero = true,
 };
