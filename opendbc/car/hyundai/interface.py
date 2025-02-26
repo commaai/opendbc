@@ -143,8 +143,7 @@ class CarInterface(CarInterfaceBase):
 
     # Dashcam cars are missing a test route, or otherwise need validation
     # TODO: Optima Hybrid 2017 uses a different SCC12 checksum
-    # TODO: Palisade/Telluride 2023-24 HDA2 will be supported in another PR
-    ret.dashcamOnly = candidate in {CAR.KIA_OPTIMA_H, } or (candidate in (CAR.HYUNDAI_PALISADE_2023, ) and lka_steering)
+    ret.dashcamOnly = candidate in {CAR.KIA_OPTIMA_H, }
 
     return ret
 
