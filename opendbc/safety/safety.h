@@ -238,13 +238,17 @@ static bool msg_allowed(const CANPacket_t *to_send, const CanMsg msg_list[], int
 }
 
 bool safety_tx_hook(CANPacket_t *to_send) {
-  bool whitelisted = msg_allowed(to_send, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
+  bool allowed = msg_allowed(to_send, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
   if ((current_safety_mode == SAFETY_ALLOUTPUT) || (current_safety_mode == SAFETY_ELM327)) {
-    whitelisted = true;
+    allowed = true;
   }
 
-  const bool safety_allowed = current_hooks->tx(to_send);
-  return !relay_malfunction && whitelisted && safety_allowed;
+  bool safety_allowed = false;
+  if (allowed) {
+    safety_allowed = current_hooks->tx(to_send);
+  }
+
+  return !relay_malfunction && allowed && safety_allowed;
 }
 
 int safety_fwd_hook(int bus_num, int addr) {
