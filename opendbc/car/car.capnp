@@ -214,6 +214,7 @@ struct CarState {
 
   # button presses
   buttonEvents @11 :List(ButtonEvent);
+  buttonEnable @57 :Bool;  # user is requesting enable, usually one frame. set if pcmCruise=False
   leftBlinker @20 :Bool;
   rightBlinker @21 :Bool;
   genericToggle @23 :Bool;
@@ -347,6 +348,7 @@ struct CarControl {
 
   orientationNED @13 :List(Float32);
   angularVelocity @14 :List(Float32);
+  currentCurvature @17 :Float32;  # From vehicle model
 
   cruiseControl @4 :CruiseControl;
   hudControl @5 :HUDControl;
@@ -389,12 +391,14 @@ struct CarControl {
     lanesVisible @2: Bool;
     leadVisible @3: Bool;
     visualAlert @4: VisualAlert;
-    audibleAlert @5: AudibleAlert;
     rightLaneVisible @6: Bool;
     leftLaneVisible @7: Bool;
     rightLaneDepart @8: Bool;
     leftLaneDepart @9: Bool;
     leadDistanceBars @10: Int8;  # 1-3: 1 is closest, 3 is farthest. some ports may utilize 2-4 bars instead
+
+    # not used with the dash, TODO: separate structs for dash UI and device UI
+    audibleAlert @5: AudibleAlert;
 
     enum VisualAlert {
       # these are the choices from the Honda
@@ -437,6 +441,7 @@ struct CarControl {
 struct CarOutput {
   # Any car specific rate limits or quirks applied by
   # the CarController are reflected in actuatorsOutput
+
   # and matches what is sent to the car
   actuatorsOutput @0 :CarControl.Actuators;
 }
@@ -444,7 +449,7 @@ struct CarOutput {
 # ****** car param ******
 
 struct CarParams {
-  carName @0 :Text;
+  brand @0 :Text;  # Designates which group a platform falls under. Each folder in opendbc/car is assigned one brand string
   carFingerprint @1 :Text;
   fuzzyFingerprint @55 :Bool;
 
@@ -622,7 +627,8 @@ struct CarParams {
     chryslerCusw @30;
     psa @31;
     fcaGiorgio @32;
-    byd @33;
+    rivian @33;
+    byd @34;
   }
 
   enum SteerControlType {
