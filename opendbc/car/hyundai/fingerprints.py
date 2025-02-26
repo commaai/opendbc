@@ -1093,12 +1093,14 @@ FW_VERSIONS = {
       b'\xf1\x00JK1 MFC  AT USA LHD 1.00 1.01 99211-AR300 220125',
       b'\xf1\x00JK1 MFC  AT USA LHD 1.00 1.04 99211-AR000 210204',
       b'\xf1\x00JK1 MFC  AT CAN LHD 1.00 1.02 99211-IY000 230627',
+      b'\xf1\x00JK1 MFC  AT USA LHD 1.00 1.04 99211-AR100 210204',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00JK1_ SCC FHCUP      1.00 1.00 99110-AR200         ',
       b'\xf1\x00JK1_ SCC FHCUP      1.00 1.00 99110-AR300         ',
       b'\xf1\x00JK1_ SCC FHCUP      1.00 1.02 99110-AR000         ',
       b'\xf1\x00JK1_ SCC FHCUP      1.00 1.00 99110-IY000         ',
+      b'\xf1\x00JK1_ SCC -----      1.00 1.02 99110-AR100         ',
     ],
   },
   CAR.GENESIS_GV70_ELECTRIFIED_1ST_GEN: {
