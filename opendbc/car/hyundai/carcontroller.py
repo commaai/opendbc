@@ -102,7 +102,6 @@ class CarController(CarControllerBase):
         can_sends.append(make_tester_present_msg(0x7b1, self.CAN.ECAN, suppress_response=True))
 
     # Common shared configuration
-
     can_canfd_blended = bool(self.CP.flags & HyundaiFlags.CAN_CANFD_BLENDED)
 
     # CAN-FD platforms
