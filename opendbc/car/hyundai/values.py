@@ -350,9 +350,9 @@ class CAR(Platforms):
   )
   HYUNDAI_PALISADE_2023 = HyundaiPlatformConfig(
     [
-      HyundaiCarDocs("Hyundai Palisade (without HDA II) 2023-24", "Highway Driving Assist",
+      HyundaiCarDocs("Hyundai Palisade (without HDA II) 2023-25", "Highway Driving Assist",
                      car_parts=CarParts([Device.threex_angled_mount, CarHarness.hyundai_a])),
-      HyundaiCarDocs("Kia Telluride (without HDA II) 2023-24", "Highway Driving Assist",
+      HyundaiCarDocs("Kia Telluride (without HDA II) 2023-25", "Highway Driving Assist",
                      car_parts=CarParts([Device.threex_angled_mount, CarHarness.hyundai_l])),
     ],
     HYUNDAI_PALISADE.specs,
@@ -650,7 +650,7 @@ def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str
   # Non-electric CAN FD platforms often do not have platform code specifiers needed
   # to distinguish between hybrid and ICE. All EVs so far are either exclusively
   # electric or specify electric in the platform code.
-  fuzzy_platform_blacklist = {str(c) for c in (CANFD_CAR - CAN_CANFD_BLENDED_CAR - EV_CAR - CANFD_FUZZY_WHITELIST)}
+  fuzzy_platform_blacklist = {str(c) for c in (CANFD_CAR - EV_CAR - CANFD_FUZZY_WHITELIST)}
   candidates: set[str] = set()
 
   for candidate, fws in offline_fw_versions.items():
