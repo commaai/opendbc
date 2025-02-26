@@ -134,6 +134,7 @@ class HyundaiFlags(IntFlag):
 
   ALT_LIMITS_2 = 2 ** 26
 
+  # These cars have both CAN and CAN FD message definitions
   CAN_CANFD_BLENDED = 2 ** 27
 
 
@@ -736,7 +737,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
       [HYUNDAI_VERSION_RESPONSE],
     ),
 
-    # CAN & CAN-FD queries (from camera)
+    # CAN & CAN FD queries (from camera)
     Request(
       [HYUNDAI_VERSION_REQUEST_LONG],
       [HYUNDAI_VERSION_RESPONSE],
@@ -761,7 +762,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
       logging=True,
     ),
 
-    # CAN-FD alt request logging queries for hvac and parkingAdas
+    # CAN FD alt request logging queries for hvac and parkingAdas
     Request(
       [HYUNDAI_VERSION_REQUEST_ALT],
       [HYUNDAI_VERSION_RESPONSE],
@@ -811,9 +812,6 @@ CANFD_CAR = CAR.with_flags(HyundaiFlags.CANFD)
 CANFD_RADAR_SCC_CAR = CAR.with_flags(HyundaiFlags.RADAR_SCC)  # TODO: merge with UNSUPPORTED_LONGITUDINAL_CAR
 
 CANFD_UNSUPPORTED_LONGITUDINAL_CAR = CAR.with_flags(HyundaiFlags.CANFD_NO_RADAR_DISABLE)  # TODO: merge with UNSUPPORTED_LONGITUDINAL_CAR
-
-# These cars have both CAN and CAN-FD definitions required in openpilot
-CAN_CANFD_BLENDED_CAR = CAR.with_flags(HyundaiFlags.CAN_CANFD_BLENDED)
 
 CAMERA_SCC_CAR = CAR.with_flags(HyundaiFlags.CAMERA_SCC)
 
