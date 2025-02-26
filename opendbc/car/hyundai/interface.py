@@ -72,21 +72,24 @@ class CarInterface(CarInterfaceBase):
     else:
       # Shared configuration for non CAN-FD cars
       ret.experimentalLongitudinalAvailable = candidate not in UNSUPPORTED_LONGITUDINAL_CAR
-      ret.enableBsm = 0x58b in fingerprint[0]
+      ret.enableBsm = 0x58b in fingerprint[CAN.ECAN]
 
       # Send LFA message on cars with HDA
-      if 0x485 in fingerprint[2]:
+      if 0x485 in fingerprint[CAN.CAM]:
         ret.flags |= HyundaiFlags.SEND_LFA.value
 
       # These cars use the FCA11 message for the AEB and FCW signals, all others use SCC12
-      if 0x38d in fingerprint[0] or 0x38d in fingerprint[2]:
+      if 0x38d in fingerprint[CAN.ECAN] or 0x38d in fingerprint[CAN.CAM]:
         ret.flags |= HyundaiFlags.USE_FCA.value
 
       if ret.flags & HyundaiFlags.LEGACY:
         # these cars require a special panda safety mode due to missing counters and checksums in the messages
         ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.hyundaiLegacy)]
       else:
-        ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.hyundai, 0)]
+        cfgs = [get_safety_config(structs.CarParams.SafetyModel.hyundai), ]
+        if CAN.ECAN >= 4:
+          cfgs.insert(0, get_safety_config(structs.CarParams.SafetyModel.noOutput))
+        ret.safetyConfigs = cfgs
 
       if ret.flags & HyundaiFlags.CAMERA_SCC:
         ret.safetyConfigs[0].safetyParam |= HyundaiSafetyFlags.CAMERA_SCC.value
@@ -94,6 +97,9 @@ class CarInterface(CarInterfaceBase):
       # These cars have the LFA button on the steering wheel
       if 0x391 in fingerprint[0]:
         ret.flags |= HyundaiFlags.HAS_LDA_BUTTON.value
+
+      if ret.flags & HyundaiFlags.CAN_CANFD_BLENDED:
+        ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CAN_CANFD_BLENDED.value
 
     # Common lateral control setup
 

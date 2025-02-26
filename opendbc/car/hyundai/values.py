@@ -5,7 +5,7 @@ from enum import Enum, IntFlag
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
+from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, Device
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, p16
 
 Ecu = CarParams.Ecu
@@ -31,6 +31,13 @@ class CarControllerParams:
       self.STEER_THRESHOLD = 250
       self.STEER_DELTA_UP = 2
       self.STEER_DELTA_DOWN = 3
+
+    elif CP.flags & HyundaiFlags.CAN_CANFD_BLENDED:
+      self.STEER_MAX = 270  # CAN FD max steer
+      self.STEER_DRIVER_ALLOWANCE = 50  # CAN driver torque signal scaling
+      self.STEER_THRESHOLD = 150  # CAN driver torque signal scaling
+      self.STEER_DELTA_UP = 2  # CAN FD rate limits
+      self.STEER_DELTA_DOWN = 3  # CAN FD rate limits
 
     # To determine the limit for your car, find the maximum value that the stock LKAS will request.
     # If the max stock LKAS request is <384, add your car to this list.
@@ -66,6 +73,7 @@ class HyundaiSafetyFlags(IntFlag):
   CANFD_LKA_STEERING_ALT = 2 ** 7
   FCEV_GAS = 2 ** 8
   ALT_LIMITS_2 = 2 ** 9
+  CAN_CANFD_BLENDED = 2 ** 10
 
 
 class HyundaiFlags(IntFlag):
@@ -126,6 +134,9 @@ class HyundaiFlags(IntFlag):
 
   ALT_LIMITS_2 = 2 ** 26
 
+  # These cars have both CAN and CAN FD message definitions
+  CAN_CANFD_BLENDED = 2 ** 27
+
 
 class Footnote(Enum):
   CANFD = CarFootnote(
@@ -153,6 +164,9 @@ class HyundaiPlatformConfig(PlatformConfig):
 
     if self.flags & HyundaiFlags.MIN_STEER_32_MPH:
       self.specs = self.specs.override(minSteerSpeed=32 * CV.MPH_TO_MS)
+
+    if self.flags & HyundaiFlags.CAN_CANFD_BLENDED:
+      self.dbc_dict = {Bus.pt: 'hyundai_palisade_2023_generated'}
 
 
 @dataclass
@@ -334,6 +348,16 @@ class CAR(Platforms):
     ],
     CarSpecs(mass=1999, wheelbase=2.9, steerRatio=15.6 * 1.15, tireStiffnessFactor=0.63),
     flags=HyundaiFlags.MANDO_RADAR | HyundaiFlags.CHECKSUM_CRC8,
+  )
+  HYUNDAI_PALISADE_2023 = HyundaiPlatformConfig(
+    [
+      HyundaiCarDocs("Hyundai Palisade (without HDA II) 2023-25", "Highway Driving Assist",
+                     car_parts=CarParts([Device.threex_angled_mount, CarHarness.hyundai_a])),
+      HyundaiCarDocs("Kia Telluride (without HDA II) 2023-25", "Highway Driving Assist",
+                     car_parts=CarParts([Device.threex_angled_mount, CarHarness.hyundai_l])),
+    ],
+    HYUNDAI_PALISADE.specs,
+    flags=HyundaiFlags.CHECKSUM_CRC8 | HyundaiFlags.CAN_CANFD_BLENDED | HyundaiFlags.UNSUPPORTED_LONGITUDINAL,
   )
   HYUNDAI_VELOSTER = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Veloster 2019-20", min_enable_speed=5. * CV.MPH_TO_MS, car_parts=CarParts.common([CarHarness.hyundai_e]))],
@@ -713,7 +737,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
       [HYUNDAI_VERSION_RESPONSE],
     ),
 
-    # CAN & CAN-FD queries (from camera)
+    # CAN & CAN FD queries (from camera)
     Request(
       [HYUNDAI_VERSION_REQUEST_LONG],
       [HYUNDAI_VERSION_RESPONSE],
@@ -738,7 +762,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
       logging=True,
     ),
 
-    # CAN-FD alt request logging queries for hvac and parkingAdas
+    # CAN FD alt request logging queries for hvac and parkingAdas
     Request(
       [HYUNDAI_VERSION_REQUEST_ALT],
       [HYUNDAI_VERSION_RESPONSE],
