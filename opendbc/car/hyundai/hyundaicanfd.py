@@ -208,7 +208,7 @@ def create_adrv_messages(packer, CAN, frame):
     ret.append(packer.make_can_msg("ADRV_0x1ea", CAN.MAIN, values))
 
     values = {
-      'SET_ME_1': 0xe1,
+      'SET_ME_E1': 0xe1,
       'SET_ME_3A': 0x3a,
     }
     ret.append(packer.make_can_msg("ADRV_0x200", CAN.MAIN, values))
