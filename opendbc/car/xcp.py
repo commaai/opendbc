@@ -109,7 +109,7 @@ class CommandResponseError(Exception):
   def __str__(self):
     return self.message
 
-class XcpClient():
+class XcpClient:
   def __init__(self, panda, tx_addr: int, rx_addr: int, bus: int=0, timeout: float=0.1, debug=False, pad=True):
     self.tx_addr = tx_addr
     self.rx_addr = rx_addr

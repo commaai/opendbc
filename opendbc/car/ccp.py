@@ -3,7 +3,6 @@ import time
 import struct
 from enum import IntEnum, Enum
 from dataclasses import dataclass
-from typing import Optional
 
 @dataclass
 class ExchangeStationIdsReturn:
@@ -20,7 +19,7 @@ class GetDaqListSizeReturn:
 @dataclass
 class GetSessionStatusReturn:
   status: int
-  info: Optional[int]
+  info: int | None
 
 @dataclass
 class DiagnosticServiceReturn:
@@ -102,7 +101,7 @@ class CommandResponseError(Exception):
   def __str__(self):
     return self.message
 
-class CcpClient():
+class CcpClient:
   def __init__(self, panda, tx_addr: int, rx_addr: int, bus: int=0, byte_order: BYTE_ORDER=BYTE_ORDER.BIG_ENDIAN, debug=False):
     self.tx_addr = tx_addr
     self.rx_addr = rx_addr
