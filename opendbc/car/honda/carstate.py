@@ -1,14 +1,14 @@
+import numpy as np
 from collections import defaultdict
 
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
 from opendbc.car import Bus, create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.common.numpy_fast import interp
 from opendbc.car.honda.hondacan import CanBus, get_cruise_speed_conversion
 from opendbc.car.honda.values import CAR, DBC, STEER_THRESHOLD, HONDA_BOSCH, \
                                                  HONDA_NIDEC_ALT_SCM_MESSAGES, HONDA_BOSCH_RADARLESS, \
-                                                 HondaFlags, CruiseButtons, CruiseSettings
+                                                 HondaFlags, CruiseButtons, CruiseSettings, GearShifter
 from opendbc.car.interfaces import CarStateBase
 
 TransmissionType = structs.CarParams.TransmissionType
@@ -92,12 +92,15 @@ class CarState(CarStateBase):
     self.gearbox_msg = "GEARBOX"
     if CP.carFingerprint == CAR.HONDA_ACCORD and CP.transmissionType == TransmissionType.cvt:
       self.gearbox_msg = "GEARBOX_15T"
+    elif CP.transmissionType == TransmissionType.manual:
+      self.gearbox_msg = "GEARBOX_ALT_2"
 
     self.main_on_sig_msg = "SCM_FEEDBACK"
     if CP.carFingerprint in HONDA_NIDEC_ALT_SCM_MESSAGES:
       self.main_on_sig_msg = "SCM_BUTTONS"
 
-    self.shifter_values = can_define.dv[self.gearbox_msg]["GEAR_SHIFTER"]
+    if CP.transmissionType != TransmissionType.manual:
+      self.shifter_values = can_define.dv[self.gearbox_msg]["GEAR_SHIFTER"]
     self.steer_status_values = defaultdict(lambda: "UNKNOWN", can_define.dv["STEER_STATUS"]["STEER_STATUS"])
 
     self.brake_switch_prev = False
@@ -174,7 +177,7 @@ class CarState(CarStateBase):
     v_wheel = (ret.wheelSpeeds.fl + ret.wheelSpeeds.fr + ret.wheelSpeeds.rl + ret.wheelSpeeds.rr) / 4.0
 
     # blend in transmission speed at low speed, since it has more low speed accuracy
-    v_weight = interp(v_wheel, v_weight_bp, v_weight_v)
+    v_weight = float(np.interp(v_wheel, v_weight_bp, v_weight_v))
     ret.vEgoRaw = (1. - v_weight) * cp.vl["ENGINE_DATA"]["XMISSION_SPEED"] * CV.KPH_TO_MS * self.CP.wheelSpeedFactor + v_weight * v_wheel
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
 
@@ -194,8 +197,15 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint in (HONDA_BOSCH | {CAR.HONDA_CIVIC, CAR.HONDA_ODYSSEY, CAR.HONDA_ODYSSEY_CHN}):
       ret.parkingBrake = cp.vl["EPB_STATUS"]["EPB_STATE"] != 0
 
-    gear = int(cp.vl[self.gearbox_msg]["GEAR_SHIFTER"])
-    ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(gear, None))
+    if self.CP.transmissionType == TransmissionType.manual:
+      ret.clutchPressed = cp.vl["GEARBOX_ALT_2"]["GEAR_MT"] == 0
+      if cp.vl["GEARBOX_ALT_2"]["GEAR_MT"] == 14:
+        ret.gearShifter = GearShifter.reverse
+      else:
+        ret.gearShifter = GearShifter.drive
+    else:
+      gear = int(cp.vl[self.gearbox_msg]["GEAR_SHIFTER"])
+      ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(gear, None))
 
     ret.gas = cp.vl["POWERTRAIN_DATA"]["PEDAL_GAS"]
     ret.gasPressed = ret.gas > 1e-5

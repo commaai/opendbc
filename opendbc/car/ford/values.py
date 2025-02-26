@@ -41,6 +41,11 @@ class CarControllerParams:
     pass
 
 
+class FordSafetyFlags(IntFlag):
+  LONG_CONTROL = 1
+  CANFD = 2
+
+
 class FordFlags(IntFlag):
   # Static flags
   CANFD = 1
@@ -100,6 +105,14 @@ class FordCANFDPlatformConfig(FordPlatformConfig):
     super().init()
     self.flags |= FordFlags.CANFD
 
+@dataclass
+class FordF150LightningPlatform(FordCANFDPlatformConfig):
+  def init(self):
+    super().init()
+
+    # Don't show in docs until this issue is resolved. See https://github.com/commaai/openpilot/issues/30302
+    self.car_docs = []
+
 
 class CAR(Platforms):
   FORD_BRONCO_SPORT_MK1 = FordPlatformConfig(
@@ -121,11 +134,11 @@ class CAR(Platforms):
     CarSpecs(mass=2050, wheelbase=3.025, steerRatio=16.8),
   )
   FORD_F_150_MK14 = FordCANFDPlatformConfig(
-    [FordCarDocs("Ford F-150 2022-23", "Co-Pilot360 Active 2.0", hybrid=True, support_type=SupportType.REVIEW)],
+    [FordCarDocs("Ford F-150 2021-23", "Co-Pilot360 Assist 2.0", hybrid=True, support_type=SupportType.REVIEW)],
     CarSpecs(mass=2000, wheelbase=3.69, steerRatio=17.0),
   )
-  FORD_F_150_LIGHTNING_MK1 = FordCANFDPlatformConfig(
-    [FordCarDocs("Ford F-150 Lightning 2021-23", "Co-Pilot360 Active 2.0", support_type=SupportType.REVIEW)],
+  FORD_F_150_LIGHTNING_MK1 = FordF150LightningPlatform(
+    [FordCarDocs("Ford F-150 Lightning 2022-23", "Co-Pilot360 Assist 2.0", support_type=SupportType.REVIEW)],
     CarSpecs(mass=2948, wheelbase=3.70, steerRatio=16.9),
   )
   FORD_FOCUS_MK4 = FordPlatformConfig(
@@ -140,7 +153,7 @@ class CAR(Platforms):
     CarSpecs(mass=1650, wheelbase=3.076, steerRatio=17.0),
   )
   FORD_MUSTANG_MACH_E_MK1 = FordCANFDPlatformConfig(
-    [FordCarDocs("Ford Mustang Mach-E 2021-23", "Co-Pilot360 Active 2.0", support_type=SupportType.REVIEW)],
+    [FordCarDocs("Ford Mustang Mach-E 2021-23", "All", support_type=SupportType.REVIEW)],
     CarSpecs(mass=2200, wheelbase=2.984, steerRatio=17.0),  # TODO: check steer ratio
   )
   FORD_RANGER_MK2 = FordCANFDPlatformConfig(

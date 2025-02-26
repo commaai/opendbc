@@ -359,6 +359,7 @@ FW_VERSIONS = {
   },
   CAR.VOLKSWAGEN_JETTA_MK7: {
     (Ecu.engine, 0x7e0, None): [
+      b'\xf1\x8704E906024AF\xf1\x899970',
       b'\xf1\x8704E906024AK\xf1\x899937',
       b'\xf1\x8704E906024AS\xf1\x899912',
       b'\xf1\x8704E906024B \xf1\x895594',
