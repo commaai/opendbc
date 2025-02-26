@@ -68,7 +68,7 @@ typedef struct {
 
   // driver torque limits
   const int driver_torque_allowance;
-  const int driver_torque_factor;
+  const int driver_torque_multiplier;
 
   // motor torque limits
   const int max_torque_error;
@@ -281,3 +281,4 @@ extern const safety_hooks tesla_hooks;
 extern const safety_hooks toyota_hooks;
 extern const safety_hooks volkswagen_mqb_hooks;
 extern const safety_hooks volkswagen_pq_hooks;
+extern const safety_hooks rivian_hooks;
