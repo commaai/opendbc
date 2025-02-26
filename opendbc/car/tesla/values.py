@@ -1,16 +1,33 @@
 from dataclasses import dataclass, field
-from enum import IntFlag
+from enum import Enum, IntFlag
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, AngleRateLimit
 from opendbc.car.structs import CarParams, CarState
-from opendbc.car.docs_definitions import CarDocs
+from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
 
 
+class Footnote(Enum):
+  HW_TYPE = CarFootnote(
+    "Some 2023 model years have HW4. To check which hardware type your vehicle has, look for " +
+    "<b>Autopilot computer</b> under <b>Software -> Additional Vehicle Information</b> on your vehicle's touchscreen. </br></br>" +
+    "See <a href=\"https://www.notateslaapp.com/news/2173/how-to-check-if-your-tesla-has-hardware-4-ai4-or-hardware-3\">this page</a> for more information.",
+    Column.MODEL)
+
+
 @dataclass
-class TeslaCarDocs(CarDocs):
-  package: str = "Traffic Aware Cruise Control"
+class TeslaCarDocsHW3(CarDocs):
+  package: str = "All"
+  car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.tesla_a]))
+  footnotes: list[Enum] = field(default_factory=lambda: [Footnote.HW_TYPE])
+
+
+@dataclass
+class TeslaCarDocsHW4(CarDocs):
+  package: str = "All"
+  car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.tesla_b]))
+  footnotes: list[Enum] = field(default_factory=lambda: [Footnote.HW_TYPE])
 
 
 @dataclass
@@ -20,11 +37,19 @@ class TeslaPlatformConfig(PlatformConfig):
 
 class CAR(Platforms):
   TESLA_MODEL_3 = TeslaPlatformConfig(
-    [TeslaCarDocs("Tesla Model 3 2019-24")],
+    [
+      # TODO: do we support 2017? It's HW3
+      # TODO: do we support 2025? It's HW4
+      TeslaCarDocsHW3("Tesla Model 3 (with HW3) 2019-23"),
+      TeslaCarDocsHW4("Tesla Model 3 (with HW4) 2024"),
+    ],
     CarSpecs(mass=1899., wheelbase=2.875, steerRatio=12.0),
   )
   TESLA_MODEL_Y = TeslaPlatformConfig(
-    [TeslaCarDocs("Tesla Model Y 2020-24")],
+    [
+      TeslaCarDocsHW3("Tesla Model Y (with HW3) 2020-23"),
+      TeslaCarDocsHW4("Tesla Model Y (with HW4) 2024"),
+     ],
     CarSpecs(mass=2072., wheelbase=2.890, steerRatio=12.0),
   )
 
