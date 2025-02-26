@@ -651,16 +651,13 @@ BO_ 768 MEB_ACC_01: 48 XXX
  SG_ Zeitluecke_5 : 374|9@1+ (0.171,0) [0|100] "Unit_Meter" XXX
 
 BO_ 771 HCA_03: 24 XXX
- SG_ Standby : 13|1@1+ (1,0) [0|1] "" XXX
- SG_ Request : 14|1@1+ (1,0) [0|1] "" XXX
- SG_ Unknown_02 : 15|1@1+ (1,0) [0|1] "" XXX
- SG_ Power : 16|7@1+ (1,0) [0|125] "" XXX
- SG_ Power_Boost : 23|1@1+ (1,0) [0|1] "" XXX
+ SG_ RequestStatus : 12|4@1+ (1,0) [0|15] "" XXX
+ SG_ Power : 16|8@1+ (0.4,0) [0.0|100.0] "percent" XXX
  SG_ Curvature : 24|15@1+ (6.7e-06,0) [0|0.219] "Unit_rad/m" XXX
- SG_ VZ : 39|1@1+ (1,0) [0|1] "" XXX
+ SG_ Curvature_VZ : 39|1@1+ (1,0) [0|1] "" XXX
  SG_ Unknown_01 : 53|1@0+ (1,0) [0|1] "" XXX
  SG_ Vibration : 56|1@0+ (1,0) [0|1] "" XXX
- SG_ Active : 66|1@1+ (1,0) [0|1] "" XXX
+ SG_ HighSendRate : 66|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 792 MEB_Camera_03: 8 XXX
 
@@ -1281,7 +1278,10 @@ BO_ 987 Gateway_72: 8 Gateway_MQB
  SG_ BCM1_Aussen_Temp_ungef : 56|8@1+ (0.5,-50) [-50|76] "Unit_DegreCelsi" Getriebe_DQ_Hybrid_MQB,Getriebe_DQ_MQB,Motor_Diesel_MQB,Motor_Hybrid_MQB,Motor_Otto_MQB
 
 BO_ 988 Gateway_73: 8 XXX
+ SG_ UNKNOWN_1 : 15|2@0+ (1,0) [0|3] "" XXX
+ SG_ GE_Fahrstufe : 40|4@1+ (1,0) [0|15] "" XXX
  SG_ EPB_Status : 53|3@1+ (1,0) [0|7] "" XXX
+ SG_ UNKNOWN_2 : 58|3@0+ (1,0) [0|7] "" XXX
 
 BO_ 997 TSG_FT_02: 8 Gateway
  SG_ TSG_FT_02_CRC : 0|8@1+ (1,0) [0|255] "" Vector__XXX
@@ -2828,6 +2828,7 @@ VAL_ 982 LH_Bremsl_mi_def 0 "OK" 1 "defekt";
 VAL_ 982 LH_Bremsl_li_ges_def 0 "OK" 1 "Alle Bremslichter hinten links defekt";
 VAL_ 982 LH_Bremsl_re_ges_def 0 "OK" 1 "Alle Bremslichter hinten rechts defekt";
 VAL_ 988 EPB_Status 0 "offen" 1 "geschlossen_Parken" 2 "teilgespannt_Halten" 3 "im_Lauf_oeffnen" 4 "im_Lauf_schliessen" 5 "tbd" 6 "Init" 7 "unbekannt";
+VAL_ 988 GE_Fahrstufe 0 "Zwischenstellung" 1 "Init" 5 "P" 6 "R" 7 "N" 8 "D" 9 "D" 10 "E" 13 "T" 14 "T" 15 "Fehler";
 VAL_ 997 FT_Tuer_Status 0 "Init" 1 "Tuer_geschlossen" 2 "Tuer_offen" 3 "Fehler";
 VAL_ 997 FT_Tuer_Status_QBit 0 "Status_Tuerkontakt_sicher" 1 "Status_Tuerkontakt_unsicher";
 VAL_ 997 FT_Lock_Taster_02 0 "nicht_betaetigt" 1 "betaetigt";
