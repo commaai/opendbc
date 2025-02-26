@@ -10,7 +10,7 @@
   .max_rt_delta = 112, \
   .max_rt_interval = 250000, \
   .driver_torque_allowance = 50, \
-  .driver_torque_factor = 2, \
+  .driver_torque_multiplier = 2, \
   .type = TorqueDriverLimited, \
    /* the EPS faults when the steering angle is above a certain threshold for too long. to prevent this, */ \
    /* we allow setting CF_Lkas_ActToi bit to 0 while maintaining the requested torque value for two consecutive frames */ \
