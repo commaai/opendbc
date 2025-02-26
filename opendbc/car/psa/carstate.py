@@ -13,7 +13,7 @@ class CarState(CarStateBase):
     super().__init__(CP)
 
   def update(self, can_parsers) -> structs.CarState:
-    cp = can_parsers[Bus.pt]
+    cp = can_parsers[Bus.cam]
     cp_adas = can_parsers[Bus.adas]
     cp_main = can_parsers[Bus.main]
     ret = structs.CarState()
@@ -44,10 +44,11 @@ class CarState(CarStateBase):
     ret.steeringAngleDeg = cp.vl['STEERING_ALT']['ANGLE'] # EPS
     ret.steeringRateDeg = cp.vl['STEERING_ALT']['RATE'] * cp.vl['STEERING_ALT']['RATE_SIGN']  # EPS: Rotation speed * rotation sign/direction
     ret.steeringTorque = cp.vl['STEERING']['DRIVER_TORQUE']
+    ret.steeringTorqueEps = cp.vl['IS_DAT_DIRA']['EPS_TORQUE']
     ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > CarControllerParams.STEER_DRIVER_ALLOWANCE, 5)  # TODO: adjust threshold
-    ret.steerFaultTemporary = False  # TODO
-    ret.steerFaultPermanent = False  # TODO
-    ret.espDisabled = bool(cp_adas.vl['ESP']['ESP_STATUS_INV'])
+    ret.steerFaultTemporary = False # TODO: test  bool(cp.vl['IS_DAT_DIRA']['TRQ_LIMIT_STATE']) # TRQ_LIMIT_STATE triggers before EPS actually gives up
+    ret.steerFaultPermanent = bool(cp.vl['IS_DAT_DIRA']['STEERING_REBOOT_REQUEST']) # TODO: test
+    ret.espDisabled = bool(cp_adas.vl['ESP']['ESP_STATUS_INV']) # TODO: test
 
     # cruise
     # note: this is just for ACC car not CC right now
@@ -56,7 +57,7 @@ class CarState(CarStateBase):
     ret.cruiseState.available = cp_adas.vl['HS2_DYN1_MDD_ETAT_2B6']['ACC_STATUS'] > 2 # HS2
     ret.cruiseState.nonAdaptive = cp_adas.vl['HS2_DAT_MDD_CMD_452']['TYPE_REGUL_LONGI'] != 3 # HS2, 0: None, 1: CC, 2: Limiter, 3: ACC
     ret.cruiseState.standstill = bool(cp_adas.vl['HS2_DYN_UCF_MDD_32D']['VEHICLE_STANDSTILL'])
-    ret.accFaulted = False
+    ret.accFaulted = cp_adas.vl['HS2_DYN_UCF_MDD_32D']['ACC_ETAT_DECEL_OR_ESP_STATUS'] == 3 # TODO: test # HS2 0: Inhibited, 1: Waiting, 2: Active, 3: Fault
 
     # gear
     if self.CP.transmissionType == TransmissionType.manual:
@@ -67,8 +68,8 @@ class CarState(CarStateBase):
       ret.gearShifter = GearShifter.drive
 
     # TODO: safety
-    ret.stockFcw = False
-    ret.stockAeb = False
+    ret.stockFcw = cp_adas.vl['HS2_DYN_MDD_STATUS_2F6']['REQ_CONDITION_RESUME'] == 2 # 0: no error, 1: non-critical request, 2: critical request
+    ret.stockAeb = bool(cp_adas.vl['HS2_DYN_MDD_STATUS_2F6']['BRAKING_IN_PROGRESS']) # TODO: test
 
     # button presses
     blinker = cp_main.vl['HS2_DAT7_BSI_612']['CDE_CLG_ET_HDC'] # HS1
@@ -83,13 +84,14 @@ class CarState(CarStateBase):
 
   @staticmethod
   def get_can_parsers(CP):
-    pt_messages = [
+    cam_messages = [
       ('Dyn4_FRE', 50),
       ('STEERING_ALT', 100),
       ('STEERING', 100),
       ('Dyn2_FRE', 100),
       ('Dyn2_CMM', 50),
       ('Dyn_EasyMove', 50),
+      ('IS_DAT_DIRA', 10),
     ]
     adas_messages = [
       ('ESP', 50),
@@ -97,6 +99,7 @@ class CarState(CarStateBase):
       ('HS2_DYN_UCF_MDD_32D', 50),
       ('HS2_DAT_MDD_CMD_452', 20),
       ('HS2_DYN1_MDD_ETAT_2B6', 50),
+      ('HS2_DYN_MDD_STATUS_2F6', 50),
     ]
     main_messages = [
       ('Dat_BSI', 20),
@@ -107,5 +110,5 @@ class CarState(CarStateBase):
     return {
       Bus.main: CANParser(DBC[CP.carFingerprint][Bus.main], main_messages, 2),
       Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.adas], adas_messages, 1),
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 0),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.cam], cam_messages, 0),
     }
