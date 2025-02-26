@@ -15,8 +15,8 @@ ISO_LATERAL_ACCEL = 3.0  # m/s^2  # TODO: import from test lateral limits file?
 
 # Limit to worst case banked road since safety doesn't have the roll
 EARTH_G = 9.81
-MAX_ROAD_ROLL = 0.1  # ~5.7 degrees
-MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (EARTH_G * MAX_ROAD_ROLL)  # ~2 m/s^2
+AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation
+MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (EARTH_G * AVERAGE_ROAD_ROLL)  # ~2 m/s^2
 
 
 def apply_ford_curvature_limits(apply_curvature, apply_curvature_last, current_curvature, v_ego_raw):

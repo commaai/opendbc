@@ -723,10 +723,10 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
       // ISO 11270
       static const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
 
-      // Limit to worst case banked road since safety doesn't have the roll
+      // Limit to average banked road since safety doesn't have the roll
       static const float EARTH_G = 9.81;
-      static const float MAX_ROAD_ROLL = 0.1;  // ~5.7 degrees
-      static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (EARTH_G * MAX_ROAD_ROLL);  // ~2 m/s^2
+      static const float AVERAGE_ROAD_ROLL = 0.06;  // ~3.4 degrees, 6% superelevation
+      static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (EARTH_G * AVERAGE_ROAD_ROLL);  // ~2 m/s^2
 
       const float speed = MAX(vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR, 1.0);
       const int max_curvature = (MAX_LATERAL_ACCEL / (speed * speed) * limits.angle_deg_to_can) + 1.;
