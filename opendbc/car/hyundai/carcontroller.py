@@ -92,7 +92,7 @@ class CarController(CarControllerBase):
     # tester present - w/ no response (keeps relevant ECU disabled)
     if self.frame % 100 == 0 and not (self.CP.flags & HyundaiFlags.CANFD_CAMERA_SCC) and self.CP.openpilotLongitudinalControl:
       # for longitudinal control, either radar or ADAS driving ECU
-      addr, bus = 0x7d0, self.CAN.MAIN if self.CP.flags & HyundaiFlags.CANFD else 0
+      addr, bus = 0x7d0, self.CAN.MAIN
       if self.CP.flags & HyundaiFlags.CANFD_LKA_STEERING.value:
         addr, bus = 0x730, self.CAN.MAIN
       can_sends.append(make_tester_present_msg(addr, bus, suppress_response=True))
