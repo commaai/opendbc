@@ -10,14 +10,15 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 
 
-def apply_lateral_control_power(CCP, lat_active, driver_input, previous_power):
+def apply_lateral_control_power(CCP, lat_active, steering_torque, previous_power):
   qfk_enable = True
 
   if lat_active:
-    if driver_input:
-      apply_power = max(previous_power - CCP.STEERING_POWER_STEP, CCP.STEERING_POWER_MIN)
-    else:
-      apply_power = min(previous_power + CCP.STEERING_POWER_STEP, CCP.STEERING_POWER_MAX)
+    min_power = max(previous_power - CCP.STEERING_POWER_STEP, CCP.STEERING_POWER_MIN)
+    max_power = max(previous_power + CCP.STEERING_POWER_STEP, CCP.STEERING_POWER_MAX)
+    target_power = float(np.interp(steering_torque, [CCP.STEER_DRIVER_ALLOWANCE, CCP.STEER_DRIVER_MAX],
+                                                    [CCP.STEERING_POWER_MAX, CCP.STEERING_POWER_MIN]))
+    apply_power = min(max(target_power, min_power), max_power)
   elif previous_power > 0:
     apply_power = max(previous_power - CCP.STEERING_POWER_STEP, 0)
   else:
@@ -67,7 +68,7 @@ class CarController(CarControllerBase):
 
         # Calibrate our curvature command by the offset between openpilot's current curvature and the QFK's current curvature
         apply_curvature = actuators.curvature + (CS.curvature - CC.currentCurvature)
-        qfk_enable, apply_steer_power = apply_lateral_control_power(self.CCP, CC.latActive, CS.out.steeringPressed, self.apply_steer_power_last)
+        qfk_enable, apply_steer_power = apply_lateral_control_power(self.CCP, CC.latActive, CS.out.steeringTorque, self.apply_steer_power_last)
 
         can_sends.append(self.CCS.create_steering_control(self.packer_pt, CANBUS.pt, apply_curvature, qfk_enable, apply_steer_power))
 
