@@ -29,7 +29,10 @@ class TestVolkswagenMebSafety(common.PandaCarSafetyTest):
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_03,)}
 
   DRIVER_TORQUE_ALLOWANCE = 60
-
+  DRIVER_TORQUE_MAX = 300
+  STEER_POWER_MIN = 20
+  STEER_POWER_MAX = 50
+  STEER_POWER_STEP = 2
 
   @classmethod
   def setUpClass(cls):
@@ -116,26 +119,16 @@ class TestVolkswagenMebSafety(common.PandaCarSafetyTest):
     self.assertEqual(0, self.safety.get_torque_driver_min())
 
   # FIXME: minimal stub, make this probe all combinations of inputs, verify ramp-down on disengage, etc
-  def test_actuation_control_bit(self):
-    self.safety.set_controls_allowed(1)
-    self.assertTrue(self._tx(self._curvature_actuation_msg(lat_active=True, power=100, curvature=1)))
-    self.assertFalse(self._tx(self._curvature_actuation_msg(lat_active=False, power=100, curvature=1)))
-    self.assertTrue(False)  # TODO
+  def test_lateral_control_message(self):
+    for controls_allowed in [True, False]:
+      self.safety.set_controls_allowed(controls_allowed)
+      for lat_active, curvature, power in [(True, 1, 0.00001)]:
+        well_formed_inactive = not lat_active and power == 0 and curvature == 0
+        well_formed_active = lat_active and power <= self.STEER_POWER_MAX
+        should_allow = controls_allowed and (well_formed_active or well_formed_inactive)
+        self.assertEqual(should_allow, self._tx(self._curvature_actuation_msg(lat_active, power, curvature)),
+                    f"{should_allow=} {controls_allowed=} {lat_active=} {power=} {curvature=}")
 
-  # FIXME: minimal stub, make this probe the valid range of inputs, check boundaries
-  def test_vehicle_curvature_message(self):
-    self.safety.set_controls_allowed(1)
-    self.assertTrue(self._rx(self._vehicle_curvature_msg(curvature=1)))
-    self.assertTrue(self._rx(self._vehicle_curvature_msg(curvature=-1)))
-    self.assertTrue(False)  # TODO
-
-  # TODO: implement Panda-side v_ego**2 * curvature safety
-  def test_safe_lateral_curvature(self):
-    self.assertTrue(False)  # TODO
-
-  # TODO: implement Panda-side HCA power safety based on driver torque input
-  def test_safe_lateral_power(self):
-    self.assertTrue(False)  # TODO
 
 class TestVolkswagenMebStockSafety(TestVolkswagenMebSafety):
   TX_MSGS = [[MSG_HCA_03, 0], [MSG_LDW_02, 0], [MSG_GRA_ACC_01, 0], [MSG_GRA_ACC_01, 2], [MSG_EA_01, 0], [MSG_EA_02, 0]]
