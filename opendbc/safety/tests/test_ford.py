@@ -307,22 +307,14 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
         (True, 1e-6, max_delta_down),  # TODO: safety should not allow down limits at 0
         (not limit_command, 1e-6, max_delta_up_lower),  # TODO: safety should not allow down limits at 0
         (True, 0, max_delta_up_lower),
-        # (True, 99 / 50000, 99 / 50000),
-        # (False, 99 / 50000, 98 / 50000),
         (True, 0, max_delta_up),
         (False, 0, max_delta_up + small_curvature),
         # stay at boundary limit
         (True, self.MAX_CURVATURE_ERROR - small_curvature, self.MAX_CURVATURE_ERROR - small_curvature),
         # 1 unit below boundary limit
         (not limit_command, self.MAX_CURVATURE_ERROR - small_curvature * 2, self.MAX_CURVATURE_ERROR - small_curvature * 2),
-        # (not limit_command, self.MAX_CURVATURE_ERROR - small_curvature, self.MAX_CURVATURE_ERROR - small_curvature),
         # shouldn't allow command to move outside the boundary limit if last was inside
         (not limit_command, self.MAX_CURVATURE_ERROR - small_curvature, self.MAX_CURVATURE_ERROR - small_curvature * 2),
-
-        # # mutation test
-        # (True, self.MAX_CURVATURE_ERROR - small_curvature, self.MAX_CURVATURE_ERROR - small_curvature),
-
-        # (not limit_command, self.MAX_CURVATURE_ERROR, self.MAX_CURVATURE_ERROR - small_curvature * 3),
       ])
 
       down_cases = (self.MAX_CURVATURE - self.MAX_CURVATURE_ERROR * 2, [
