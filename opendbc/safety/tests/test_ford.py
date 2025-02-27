@@ -279,7 +279,7 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
                                     curvature=curvature):
                     self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(steer_control_enabled, path_offset, path_angle, curvature, curvature_rate)))
 
-  def test_curvature_rate_limit_up(self):
+  def test_curvature_rate_limits(self):
     """
     When the curvature error is exceeded, commanded curvature must start moving towards meas respecting rate limits.
     Since panda allows higher rate limits to avoid false positives, we need to allow a lower rate to move towards meas.
