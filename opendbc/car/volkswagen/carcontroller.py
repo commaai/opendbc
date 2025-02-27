@@ -10,24 +10,6 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 
 
-def apply_lateral_control_power(CCP, lat_active, driver_torque, previous_power):
-  qfk_enable = True
-
-  if lat_active:
-    min_power = max(previous_power - CCP.STEERING_POWER_STEP, CCP.STEERING_POWER_MIN)
-    max_power = max(previous_power + CCP.STEERING_POWER_STEP, CCP.STEERING_POWER_MAX)
-    target_power = float(np.interp(driver_torque, [CCP.STEER_DRIVER_ALLOWANCE, CCP.STEER_DRIVER_MAX],
-                                                  [CCP.STEERING_POWER_MAX, CCP.STEERING_POWER_MIN]))
-    apply_power = min(max(target_power, min_power), max_power)
-  elif previous_power > 0:
-    apply_power = max(previous_power - CCP.STEERING_POWER_STEP, 0)
-  else:
-    qfk_enable = False
-    apply_power = 0
-
-  return qfk_enable, apply_power
-
-
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
@@ -44,9 +26,8 @@ class CarController(CarControllerBase):
     self.openpilot_longitudinal = self.CP.openpilotLongitudinalControl and not self.CP.flags & VolkswagenFlags.MEB
 
     self.apply_steer_last = 0
-    self.apply_steer_power_last = 0
     self.apply_curvature_last = 0
-    self.steering_power_last = 0
+    self.apply_steer_power_last = 0
     self.gra_acc_counter_last = None
     self.eps_timer_soft_disable_alert = False
     self.hca_frame_timer_running = 0
@@ -61,14 +42,22 @@ class CarController(CarControllerBase):
 
     if self.frame % self.CCP.STEER_STEP == 0:
       if self.CP.flags & VolkswagenFlags.MEB:
-        # Logic to avoid HCA refused state:
-        #   * steering power as counter and near zero before OP lane assist deactivation
-        # MEB rack can be used continously without time limits
-        # maximum real steering angle change ~ 120-130 deg/s
-
         # Calibrate our curvature command by the offset between openpilot's current curvature and the QFK's current curvature
         apply_curvature = actuators.curvature + (CS.curvature - CC.currentCurvature)
-        qfk_enable, apply_steer_power = apply_lateral_control_power(self.CCP, CC.latActive, CS.out.steeringTorque, self.apply_steer_power_last)
+
+        qfk_enable = True
+        if CC.latActive:
+          min_power = max(self.apply_steer_power_last - self.CCP.STEERING_POWER_STEP, self.CCP.STEERING_POWER_MIN)
+          max_power = max(self.apply_steer_power_last + self.CCP.STEERING_POWER_STEP, self.CCP.STEERING_POWER_MAX)
+          target_power = float(np.interp(CS.out.steeringTorque, [self.CCP.STEER_DRIVER_ALLOWANCE, self.CCP.STEER_DRIVER_MAX],
+                                                                [self.CCP.STEERING_POWER_MAX, self.CCP.STEERING_POWER_MIN]))
+          apply_steer_power = min(max(target_power, min_power), max_power)
+        elif self.apply_steer_power_last > 0:
+          apply_steer_power = max(self.apply_steer_power_last - self.CCP.STEERING_POWER_STEP, 0)
+        else:
+          qfk_enable = False
+          apply_curvature = 0
+          apply_steer_power = 0
 
         can_sends.append(self.CCS.create_steering_control(self.packer_pt, CANBUS.pt, apply_curvature, qfk_enable, apply_steer_power))
 
@@ -123,7 +112,6 @@ class CarController(CarControllerBase):
         can_sends.append(mebcan.create_ea_control(self.packer_pt, CANBUS.pt))
       if self.frame % 50 == 0:
         can_sends.append(mebcan.create_ea_hud(self.packer_pt, CANBUS.pt))
-
 
     # **** Acceleration Controls ******************************************** #
 
