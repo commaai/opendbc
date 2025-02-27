@@ -14,7 +14,7 @@ def apply_ford_curvature_limits(apply_curvature, apply_curvature_last, current_c
   # No blending at low speed due to lack of torque wind-up and inaccurate current curvature
   if v_ego_raw > 9:
     apply_curvature = np.clip(apply_curvature, current_curvature - CarControllerParams.CURVATURE_ERROR,
-                           current_curvature + CarControllerParams.CURVATURE_ERROR)
+                              current_curvature + CarControllerParams.CURVATURE_ERROR)
 
   # Curvature rate limit after driver torque limit
   apply_curvature = apply_std_steer_angle_limits(apply_curvature, apply_curvature_last, v_ego_raw, CarControllerParams)
