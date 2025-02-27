@@ -10,14 +10,14 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 
 
-def apply_lateral_control_power(CCP, lat_active, steering_torque, previous_power):
+def apply_lateral_control_power(CCP, lat_active, driver_torque, previous_power):
   qfk_enable = True
 
   if lat_active:
     min_power = max(previous_power - CCP.STEERING_POWER_STEP, CCP.STEERING_POWER_MIN)
     max_power = max(previous_power + CCP.STEERING_POWER_STEP, CCP.STEERING_POWER_MAX)
-    target_power = float(np.interp(steering_torque, [CCP.STEER_DRIVER_ALLOWANCE, CCP.STEER_DRIVER_MAX],
-                                                    [CCP.STEERING_POWER_MAX, CCP.STEERING_POWER_MIN]))
+    target_power = float(np.interp(driver_torque, [CCP.STEER_DRIVER_ALLOWANCE, CCP.STEER_DRIVER_MAX],
+                                                  [CCP.STEERING_POWER_MAX, CCP.STEERING_POWER_MIN]))
     apply_power = min(max(target_power, min_power), max_power)
   elif previous_power > 0:
     apply_power = max(previous_power - CCP.STEERING_POWER_STEP, 0)
