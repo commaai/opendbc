@@ -26,14 +26,10 @@ class TeslaCAN:
     return self.packer.make_can_msg("DAS_steeringControl", CANBUS.party, values)
 
   def create_longitudinal_command(self, acc_state, accel, cntr, active, override):
-
-    if override:
-      self.jerk = 0
-    else:
-      self.jerk += 0.025
+    # ramp up jerk after a gas overwrite
+    self.jerk = 0 if override else self.jerk + CarControllerParams.JERK_RATE_UP
 
     values = {
-      # TODO: this causes jerking after gas override when above set speed
       "DAS_setSpeed": 0 if (accel < 0 or not active) else V_CRUISE_MAX,
       "DAS_accState": acc_state,
       "DAS_aebEvent": 0,

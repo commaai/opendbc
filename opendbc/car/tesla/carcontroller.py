@@ -52,7 +52,7 @@ class CarController(CarControllerBase):
       # Increment counter so cancel is prioritized even without openpilot longitudinal
       if cruise_cancel:
         cntr = (CS.das_control["DAS_controlCounter"] + 1) % 8
-        can_sends.append(self.tesla_can.create_longitudinal_command(13, 0, cntr, False))
+        can_sends.append(self.tesla_can.create_longitudinal_command(13, 0, cntr, False, False))
 
     # TODO: HUD control
     new_actuators = actuators.as_builder()
