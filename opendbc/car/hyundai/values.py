@@ -19,6 +19,10 @@ class CarControllerParams:
   ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0., 5., 25.], angle_v=[2.5, 1.5, 0.2])
   ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0., 5., 25.], angle_v=[5., 2.0, 0.3])
 
+  # Stock LFA system is seen sending 250 max, but for LKAS events it's 175 max
+  # 250 can at least achieve 4 m/s^2
+  ANGLE_MAX_TORQUE = 250  # units unknown
+
   def __init__(self, CP):
     self.STEER_DELTA_UP = 3
     self.STEER_DELTA_DOWN = 7
@@ -544,7 +548,7 @@ class CAR(Platforms):
     [
       HyundaiCarDocs("Kia EV9 2024", car_parts=CarParts.common([CarHarness.hyundai_r]))
     ],
-    CarSpecs(mass=2625, wheelbase=3.1, steerRatio=16.02),
+    CarSpecs(mass=2625, wheelbase=3.1, steerRatio=17.2),
     flags=HyundaiFlags.EV | HyundaiFlags.CANFD_ANGLE_STEERING,
   )
 

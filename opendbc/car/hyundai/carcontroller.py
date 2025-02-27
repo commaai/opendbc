@@ -74,14 +74,14 @@ class CarController(CarControllerBase):
 
     apply_angle = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, self.params)
 
-    # Figure out torque value.  On Stock when LKAS is active, this is variable,
+    # Figure out max torque value.  On Stock when LKAS is active, this is variable,
     # but 0 when LKAS is not actively steering, so because we're "tricking" ADAS
     # into thinking LKAS is always active, we need to make sure we're applying
     # torque when the driver is not actively steering. The default value chosen
     # here is based on observations of the stock LKAS system when it's engaged
     # CS.out.steeringPressed and steeringTorque are based on the
     # STEERING_COL_TORQUE value
-    MAX_TORQUE = 240
+
     # Interpolate a percent to apply to max torque based on vEgo value, which is
     # the "best estimate of speed".  This means that under 20 (units?) we will
     # apply less torque, and over 20 we will apply the full calculated torque.
@@ -109,12 +109,12 @@ class CarController(CarControllerBase):
       # continues to apply torque, the reducer value will decrease to 30, so we
       # will reduce the max torque more to fight them less (at this level we'll
       # be doing 1/5 of the torque)
-      self.lkas_max_torque = int(round(MAX_TORQUE * ego_weight * (self.driver_applied_torque_reducer / 150)))
+      self.lkas_max_torque = int(round(self.params.ANGLE_MAX_TORQUE * ego_weight * (self.driver_applied_torque_reducer / 150)))
     else:
       # A torque reducer value of 150 means the driver has not been applying
       # torque for a while, so we will apply the full max torque value, adjusted
       # by the ego weight (based on driving speed)
-      self.lkas_max_torque = MAX_TORQUE * ego_weight
+      self.lkas_max_torque = self.params.ANGLE_MAX_TORQUE * ego_weight
 
     if not CC.latActive:
       apply_angle = CS.out.steeringAngleDeg
