@@ -8,10 +8,11 @@ from typing import Any
 
 from opendbc.car import DT_CTRL, CanData, gen_empty_fingerprint, structs
 from opendbc.car.car_helpers import interfaces
-from opendbc.car.fingerprints import all_known_cars
-from opendbc.car.fw_versions import FW_VERSIONS, FW_QUERY_CONFIGS
+from opendbc.car.fingerprints import FW_VERSIONS
+from opendbc.car.fw_versions import FW_QUERY_CONFIGS
 from opendbc.car.interfaces import get_interface_attr
 from opendbc.car.mock.values import CAR as MOCK
+from opendbc.car.values import PLATFORMS
 
 DrawType = Callable[[st.SearchStrategy], Any]
 
@@ -48,7 +49,7 @@ def get_fuzzy_car_interface_args(draw: DrawType) -> dict:
 class TestCarInterfaces:
   # FIXME: Due to the lists used in carParams, Phase.target is very slow and will cause
   #  many generated examples to overrun when max_examples > ~20, don't use it
-  @parameterized.expand([(car,) for car in sorted(all_known_cars())] + [MOCK.MOCK])
+  @parameterized.expand([(car,) for car in sorted(PLATFORMS)] + [MOCK.MOCK])
   @settings(max_examples=MAX_EXAMPLES, deadline=None,
             phases=(Phase.reuse, Phase.generate, Phase.shrink))
   @given(data=st.data())

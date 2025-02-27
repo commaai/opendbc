@@ -327,6 +327,10 @@ BO_ 530 VDM_Torque_Rear: 8 VDM
 BO_ 565 IndicatorLights: 8 XXX
  SG_ checksum : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ counter : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ RearDriverDoor : 24|2@0+ (1,0) [0|3] "" XXX
+ SG_ FrontPassengerDoor : 26|2@0+ (1,0) [0|3] "" XXX
+ SG_ DriverDoor : 28|2@0+ (1,0) [0|3] "" XXX
+ SG_ RearPassengerDoor : 38|2@0+ (1,0) [0|3] "" XXX
  SG_ TurnLightLeft : 40|2@0+ (1,0) [0|3] "" XXX
  SG_ TurnLightRight : 54|2@0+ (1,0) [0|3] "" XXX
 
@@ -340,6 +344,13 @@ BO_ 658 NEW_MSG_292: 8 XXX
 
 BO_ 789 BCM_Status: 8 VDM
  SG_ BCM_AmbientAirTemperature : 15|8@0- (1,0) [-60|100] "degC" ESP
+
+BO_ 801 SCCM_WheelTouch: 7 SCCM
+ SG_ SCCM_WheelTouch_Checksum : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ SCCM_WheelTouch_Counter : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ SCCM_WheelTouch_HandsOn : 21|1@0+ (1,0) [0|1] "" XXX
+ SG_ SETME_X52 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ SCCM_WheelTouch_CapacitiveValue : 32|12@1+ (1,0) [0|4095] "" XXX
 
 BO_ 811 ESP_EpbStatus: 8 ESP
  SG_ ESP_EpbStatus_Checksum : 7|8@0+ (1,0) [0|255] "" ACM,VDM
@@ -559,6 +570,7 @@ BO_ 1909 Diag_PhysResp_ESP_PrimaryActuato: 8 ESP
 BO_ 1910 Diag_PhysResp_IBM_PrimaryActuato: 8 IBM
 
 CM_ BO_ 64 "External steering angle sensor message.";
+CM_ BO_ 801 "Not a reference message. Suspected ECU source is SCCM (Steering Column Control Module). Used by ACM to show hold wheel message on ACC engagement.";
 CM_ SG_ 64 SAS_Status_Checksum "Actual steering wheel angle from the actual centre position of the steering wheel. The signal value is a signed value from zero (at centre steering wheel position) where a left turn (counterclockwise from steering wheel centre position) is represented by positive values and right turn (clockwise from steering wheel centre position) will have negative value.  Checksum for steering wheel sensor data.";
 CM_ SG_ 64 SAS_Status_Counter "Actual steering wheel angle from the actual centre position of the steering wheel. The signal value is a signed value from zero (at centre steering wheel position) where a left turn (counterclockwise from steering wheel centre position) is represented by positive values and right turn (clockwise from steering wheel centre position) will have negative value.  Counter value for steering wheel sensor data.";
 CM_ SG_ 64 SAS_Status_AngleSafe "Actual steering wheel angle from the actual centre position of the steering wheel. The signal value is a signed value from zero (at centre steering wheel position) where a left turn (counterclockwise from steering wheel centre position) is represented by positive values and right turn (clockwise from steering wheel centre position) will have negative value.  Actual steering wheel angle from the actual centre position of the steering wheel. The signal value is a signed value from zero (at centre steering wheel";
@@ -928,6 +940,10 @@ VAL_ 529 VDM_Torque_Front_MinQ 0 "VDM_Torque_Front_MinQ_Invalid" 1 "VDM_Torque_F
 VAL_ 530 VDM_Torque_Rear_MaxQ 0 "VDM_Torque_Rear_MaxQ_Invalid" 1 "VDM_Torque_Rear_MaxQ_Valid";
 VAL_ 530 VDM_OutputTorqueRearQ 0 "VDM_OutputTorqueRearQ_Invalid" 1 "VDM_OutputTorqueRearQ_Valid";
 VAL_ 530 VDM_Torque_Rear_MinQ 0 "VDM_Torque_Rear_MinQ_Invalid" 1 "VDM_Torque_Rear_MinQ_Valid";
+VAL_ 565 RearDriverDoor 0 "SNA" 1 "Open" 2 "Closed" 3 "SNA";
+VAL_ 565 FrontPassengerDoor 0 "SNA" 1 "Open" 2 "Closed" 3 "SNA";
+VAL_ 565 DriverDoor 0 "SNA" 1 "Open" 2 "Closed" 3 "SNA";
+VAL_ 565 RearPassengerDoor 0 "SNA" 1 "Open" 2 "Closed" 3 "SNA";
 VAL_ 811 ESP_EpbAvailable 0 "ESP_EpbAvailable_Not_Available" 1 "ESP_EpbAvailable_Available";
 VAL_ 811 ESP_EpbServiceMode 0 "ESP_EpbServiceMode_Not_Active" 1 "ESP_EpbServiceMode_Active";
 VAL_ 811 ESP_EpbWarningLamp 0 "ESP_EpbWarningLamp_Off" 1 "ESP_EpbWarningLamp_Continous" 2 "ESP_EpbWarningLamp_Blink" 3 "ESP_EpbWarningLamp_Sna";

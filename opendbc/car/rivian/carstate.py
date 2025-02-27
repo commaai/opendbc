@@ -12,6 +12,7 @@ class CarState(CarStateBase):
     self.last_speed = 30
 
     self.acm_lka_hba_cmd = None
+    self.sccm_wheel_touch = None
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
@@ -37,7 +38,7 @@ class CarState(CarStateBase):
     ret.steeringAngleDeg = cp.vl["EPAS_AdasStatus"]["EPAS_InternalSas"]
     ret.steeringRateDeg = cp.vl["EPAS_AdasStatus"]["EPAS_SteeringAngleSpeed"]
     ret.steeringTorque = cp.vl["EPAS_SystemStatus"]["EPAS_TorsionBarTorque"]
-    ret.steeringPressed = abs(ret.steeringTorque) > 1.0
+    ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > 1.0, 5)
 
     ret.steerFaultTemporary = cp.vl["EPAS_AdasStatus"]["EPAS_EacErrorCode"] != 0
 
@@ -45,7 +46,10 @@ class CarState(CarStateBase):
     speed = min(int(cp_adas.vl["ACM_tsrCmd"]["ACM_tsrSpdDisClsMain"]), 85)
     self.last_speed = speed if speed != 0 else self.last_speed
     ret.cruiseState.enabled = cp_cam.vl["ACM_Status"]["ACM_FeatureStatus"] == 1
+    # TODO: find cruise set speed on CAN
     ret.cruiseState.speed = self.last_speed * CV.MPH_TO_MS  # detected speed limit
+    if not self.CP.openpilotLongitudinalControl:
+      ret.cruiseState.speed = 0
     ret.cruiseState.available = True  # cp.vl["VDM_AdasSts"]["VDM_AdasInterfaceStatus"] == 1
     ret.cruiseState.standstill = cp.vl["VDM_AdasSts"]["VDM_AdasAccelRequestAcknowledged"] == 1
     ret.accFaulted = cp_cam.vl["ACM_Status"]["ACM_FaultStatus"] == 1
@@ -54,7 +58,10 @@ class CarState(CarStateBase):
     ret.gearShifter = GEAR_MAP[int(cp.vl["VDM_PropStatus"]["VDM_Prndl_Status"])]
 
     # Doors
-    ret.doorOpen = cp.vl["DoorStatus"]["DoorOpen"] == 1
+    ret.doorOpen = (cp_adas.vl["IndicatorLights"]["RearDriverDoor"] != 2 or
+                    cp_adas.vl["IndicatorLights"]["FrontPassengerDoor"] != 2 or
+                    cp_adas.vl["IndicatorLights"]["DriverDoor"] != 2 or
+                    cp_adas.vl["IndicatorLights"]["RearPassengerDoor"] != 2)
 
     # Blinkers
     ret.leftBlinker = cp_adas.vl["IndicatorLights"]["TurnLightLeft"] in (1, 2)
@@ -72,6 +79,7 @@ class CarState(CarStateBase):
 
     # Messages needed by carcontroller
     self.acm_lka_hba_cmd = copy.copy(cp_cam.vl["ACM_lkaHbaCmd"])
+    self.sccm_wheel_touch = copy.copy(cp.vl["SCCM_WheelTouch"])
 
     return ret
 
@@ -87,7 +95,7 @@ class CarState(CarStateBase):
       ("EPAS_SystemStatus", 100),
       ("RCM_Status", 8),
       ("VDM_AdasSts", 100),
-      ("DoorStatus", 10)
+      ("SCCM_WheelTouch", 20),
     ]
 
     cam_messages = [
