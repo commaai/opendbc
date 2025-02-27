@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import argparse
-import os
 from collections import Counter
 
+from opendbc.car.carlog import carlog
 from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.safety.tests.safety_replay.helpers import package_can_msg, init_segment
 
@@ -43,8 +43,7 @@ def replay_drive(lr, safety_mode, param, alternative_experience, segment=False):
           tx_controls_blocked += safety.get_controls_allowed()
           blocked_addrs[canmsg.address] += 1
 
-          if "DEBUG" in os.environ:
-            print("blocked bus %d msg %d at %f" % (canmsg.src, canmsg.address, (msg.logMonoTime - start_t) / 1e9))
+          carlog.debug("blocked bus %d msg %d at %f" % (canmsg.src, canmsg.address, (msg.logMonoTime - start_t) / 1e9))
         tx_controls += safety.get_controls_allowed()
         tx_tot += 1
     elif msg.which() == 'can':
