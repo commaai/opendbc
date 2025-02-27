@@ -293,13 +293,9 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
       # ensure our limits match the safety's rounded limits
       max_delta_up = (int(np.interp(speed - 1, self.ANGLE_RATE_BP, self.ANGLE_RATE_UP) * self.DEG_TO_CAN + 1) / self.DEG_TO_CAN)
       max_delta_up_lower = (int(np.interp(speed + 1, self.ANGLE_RATE_BP, self.ANGLE_RATE_UP) * self.DEG_TO_CAN - 1) / self.DEG_TO_CAN)
-      print('max_delta_up', max_delta_up * 50000, max_delta_up_lower * 50000)
 
       max_delta_down = int(np.interp(speed - 1, self.ANGLE_RATE_BP, self.ANGLE_RATE_DOWN) * self.DEG_TO_CAN + 1 + 1e-3) / self.DEG_TO_CAN
       max_delta_down_lower = int(np.interp(speed + 1, self.ANGLE_RATE_BP, self.ANGLE_RATE_DOWN) * self.DEG_TO_CAN - 1 + 1e-3) / self.DEG_TO_CAN
-
-      print('downhiii python', (np.interp(speed - 1, self.ANGLE_RATE_BP, self.ANGLE_RATE_DOWN) * self.DEG_TO_CAN + 1))
-      print("max_delta_down", max_delta_down * 50000, max_delta_down_lower * 50000)
 
       up_cases = (self.MAX_CURVATURE_ERROR * 2, [
         (not limit_command, 0, 0),
@@ -329,13 +325,10 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
         for angle_meas, cases in (up_cases, down_cases):
           self._reset_curvature_measurement(sign * angle_meas, speed)
           for idx, (should_tx, initial_curvature, desired_curvature) in enumerate(cases):
+            # small curvature ensures we're using up limits. at 0, safety allows down limits to allow to account for rounding errors
             curvature_offset = small_curvature if initial_curvature == 0 else 0
-            # small curvature ensures we're using up limits as 0 allows down limits to allow to account for rounding errors
-            # initial_curvature = small_curvature if initial_curvature == 0 else initial_curvature
             self._set_prev_desired_angle(sign * (curvature_offset + initial_curvature))
-            print('sending', sign * (small_curvature + desired_curvature) * 50000)
-            self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, sign * (curvature_offset + desired_curvature), 0)),
-                             f"speed: {speed}, sign: {sign}, idx: {idx}")
+            self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, sign * (curvature_offset + desired_curvature), 0)))
 
   def test_prevent_lkas_action(self):
     self.safety.set_controls_allowed(1)
