@@ -56,6 +56,7 @@ class CarInterface(CarInterfaceBase):
       ret.transmissionType = TransmissionType.cvt
     # Civic Type R is missing 0x191 and 0x1A3
     elif candidate == CAR.HONDA_CIVIC_2022 and (msg not in fingerprint[CAN.pt] for msg in (0x191, 0x1A3)):
+      ret.transmissionType = TransmissionType.manual
     # New Civics dont have 0x191, but do have 0x1A3
     elif candidate == CAR.HONDA_CIVIC_2022 and 0x1A3 in fingerprint[CAN.pt]:
       ret.transmissionType = TransmissionType.cvt
