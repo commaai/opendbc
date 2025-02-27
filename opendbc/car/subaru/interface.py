@@ -14,7 +14,7 @@ class CarInterface(CarInterfaceBase):
     # - replacement for ES_Distance so we can cancel the cruise control
     # - to find the Cruise_Activated bit from the car
     # - proper panda safety setup (use the correct cruise_activated bit, throttle from Throttle_Hybrid, etc)
-    ret.dashcamOnly = bool(ret.flags & (SubaruFlags.PREGLOBAL | SubaruFlags.LKAS_ANGLE | SubaruFlags.HYBRID))
+    ret.dashcamOnly = bool(ret.flags & (SubaruFlags.PREGLOBAL | SubaruFlags.HYBRID))
     ret.autoResumeSng = False
 
     # Detect infotainment message sent from the camera
@@ -29,6 +29,8 @@ class CarInterface(CarInterfaceBase):
       ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.subaru)]
       if ret.flags & SubaruFlags.GLOBAL_GEN2:
         ret.safetyConfigs[0].safetyParam |= SubaruSafetyFlags.GEN2.value
+      if ret.flags & SubaruFlags.LKAS_ANGLE:
+        ret.safetyConfigs[0].safetyParam |= SubaruSafetyFlags.ANGLE.value
 
     ret.steerLimitTimer = 0.4
     ret.steerActuatorDelay = 0.1
@@ -61,11 +63,21 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.SUBARU_CROSSTREK_HYBRID:
       ret.steerActuatorDelay = 0.1
 
-    elif candidate in (CAR.SUBARU_FORESTER, CAR.SUBARU_FORESTER_2022, CAR.SUBARU_FORESTER_HYBRID):
+    elif candidate in (CAR.SUBARU_FORESTER, CAR.SUBARU_FORESTER_HYBRID):
       ret.lateralTuning.init('pid')
       ret.lateralTuning.pid.kf = 0.000038
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0., 14., 23.], [0., 14., 23.]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.01, 0.065, 0.2], [0.001, 0.015, 0.025]]
+
+    elif candidate == CAR.SUBARU_FORESTER_2022:
+      ret.dashcamOnly = False
+      ret.steerActuatorDelay = 0.3  # end-to-end angle controller
+      ret.lateralTuning.init('pid')
+      ret.lateralTuning.pid.kf = 0.00003
+      ret.lateralTuning.pid.kpBP = [0., 20.]
+      ret.lateralTuning.pid.kiBP = [0., 20.]
+      ret.lateralTuning.pid.kpV = [0.0025, 0.1]
+      ret.lateralTuning.pid.kiV = [0.00025, 0.01]
 
     elif candidate in (CAR.SUBARU_OUTBACK, CAR.SUBARU_LEGACY, CAR.SUBARU_OUTBACK_2023):
       ret.steerActuatorDelay = 0.1
