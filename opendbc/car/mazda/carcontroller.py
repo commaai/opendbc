@@ -21,7 +21,7 @@ class CarController(CarControllerBase):
 
     if CC.latActive:
       # calculate steer and also set limits due to driver torque
-      new_torque = int(round(CC.actuators.steer * CarControllerParams.STEER_MAX))
+      new_torque = int(round(CC.actuators.torque * CarControllerParams.STEER_MAX))
       apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last,
                                                      CS.out.steeringTorque, CarControllerParams)
 
@@ -57,8 +57,8 @@ class CarController(CarControllerBase):
                                                       self.frame, apply_torque, CS.cam_lkas))
 
     new_actuators = CC.actuators.as_builder()
-    new_actuators.steer = apply_torque / CarControllerParams.STEER_MAX
-    new_actuators.steerOutputCan = apply_torque
+    new_actuators.torque = apply_torque / CarControllerParams.STEER_MAX
+    new_actuators.torqueOutputCan = apply_torque
 
     self.frame += 1
     return new_actuators, can_sends

@@ -60,7 +60,7 @@ class CarController(CarControllerBase):
     hud_control = CC.hudControl
 
     # steering torque
-    new_torque = int(round(actuators.steer * self.params.STEER_MAX))
+    new_torque = int(round(actuators.torque * self.params.STEER_MAX))
     apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.params)
 
     # >90 degree steering fault prevention
@@ -164,8 +164,8 @@ class CarController(CarControllerBase):
         can_sends.append(hyundaican.create_frt_radar_opt(self.packer))
 
     new_actuators = actuators.as_builder()
-    new_actuators.steer = apply_torque / self.params.STEER_MAX
-    new_actuators.steerOutputCan = apply_torque
+    new_actuators.torque = apply_torque / self.params.STEER_MAX
+    new_actuators.torqueOutputCan = apply_torque
     new_actuators.accel = accel
 
     self.frame += 1

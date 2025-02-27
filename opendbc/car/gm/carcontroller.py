@@ -70,7 +70,7 @@ class CarController(CarControllerBase):
         self.lka_steering_cmd_counter = CS.pt_lka_steering_cmd_counter + 1
 
       if CC.latActive:
-        new_torque = int(round(actuators.steer * self.params.STEER_MAX))
+        new_torque = int(round(actuators.torque * self.params.STEER_MAX))
         apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.params)
       else:
         apply_torque = 0
@@ -153,8 +153,8 @@ class CarController(CarControllerBase):
         can_sends.append(gmcan.create_pscm_status(self.packer_pt, CanBus.CAMERA, CS.pscm_status))
 
     new_actuators = actuators.as_builder()
-    new_actuators.steer = self.apply_torque_last / self.params.STEER_MAX
-    new_actuators.steerOutputCan = self.apply_torque_last
+    new_actuators.torque = self.apply_torque_last / self.params.STEER_MAX
+    new_actuators.torqueOutputCan = self.apply_torque_last
     new_actuators.gas = self.apply_gas
     new_actuators.brake = self.apply_brake
 

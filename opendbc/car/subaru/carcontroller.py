@@ -31,7 +31,7 @@ class CarController(CarControllerBase):
 
     # *** steering ***
     if (self.frame % self.p.STEER_STEP) == 0:
-      apply_torque = int(round(actuators.steer * self.p.STEER_MAX))
+      apply_torque = int(round(actuators.torque * self.p.STEER_MAX))
 
       # limits due to driver torque
 
@@ -136,8 +136,8 @@ class CarController(CarControllerBase):
           can_sends.append(subarucan.create_es_static_2(self.packer))
 
     new_actuators = actuators.as_builder()
-    new_actuators.steer = self.apply_torque_last / self.p.STEER_MAX
-    new_actuators.steerOutputCan = self.apply_torque_last
+    new_actuators.torque = self.apply_torque_last / self.p.STEER_MAX
+    new_actuators.torqueOutputCan = self.apply_torque_last
 
     self.frame += 1
     return new_actuators, can_sends

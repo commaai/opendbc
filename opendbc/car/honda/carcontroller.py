@@ -131,7 +131,7 @@ class CarController(CarControllerBase):
       gas, brake = 0.0, 0.0
 
     # *** rate limit steer ***
-    limited_steer = rate_limit(actuators.steer, self.last_steer, -self.params.STEER_DELTA_DOWN * DT_CTRL,
+    limited_steer = rate_limit(actuators.torque, self.last_steer, -self.params.STEER_DELTA_DOWN * DT_CTRL,
                                self.params.STEER_DELTA_UP * DT_CTRL)
     self.last_steer = limited_steer
 
@@ -241,8 +241,8 @@ class CarController(CarControllerBase):
     new_actuators.accel = self.accel
     new_actuators.gas = self.gas
     new_actuators.brake = self.brake
-    new_actuators.steer = self.last_steer
-    new_actuators.steerOutputCan = apply_torque
+    new_actuators.torque = self.last_steer
+    new_actuators.torqueOutputCan = apply_torque
 
     self.frame += 1
     return new_actuators, can_sends

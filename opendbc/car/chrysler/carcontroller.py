@@ -66,7 +66,7 @@ class CarController(CarControllerBase):
       self.lkas_control_bit_prev = lkas_control_bit
 
       # steer torque
-      new_torque = int(round(CC.actuators.steer * self.params.STEER_MAX))
+      new_torque = int(round(CC.actuators.torque * self.params.STEER_MAX))
       apply_torque = apply_meas_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorqueEps, self.params)
       if not lkas_active or not lkas_control_bit:
         apply_torque = 0
@@ -77,7 +77,7 @@ class CarController(CarControllerBase):
     self.frame += 1
 
     new_actuators = CC.actuators.as_builder()
-    new_actuators.steer = self.apply_torque_last / self.params.STEER_MAX
-    new_actuators.steerOutputCan = self.apply_torque_last
+    new_actuators.torque = self.apply_torque_last / self.params.STEER_MAX
+    new_actuators.torqueOutputCan = self.apply_torque_last
 
     return new_actuators, can_sends

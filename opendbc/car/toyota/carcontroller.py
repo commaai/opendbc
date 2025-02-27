@@ -105,7 +105,7 @@ class CarController(CarControllerBase):
           carlog.error("SecOC synchronization MAC mismatch, wrong key?")
 
     # *** steer torque ***
-    new_torque = int(round(actuators.steer * self.params.STEER_MAX))
+    new_torque = int(round(actuators.torque * self.params.STEER_MAX))
     apply_torque = apply_meas_steer_torque_limits(new_torque, self.last_steer, CS.out.steeringTorqueEps, self.params)
 
     # >100 degree/sec steering fault prevention
@@ -289,8 +289,8 @@ class CarController(CarControllerBase):
       can_sends.append(make_tester_present_msg(0x750, 0, 0xF))
 
     new_actuators = actuators.as_builder()
-    new_actuators.steer = apply_torque / self.params.STEER_MAX
-    new_actuators.steerOutputCan = apply_torque
+    new_actuators.torque = apply_torque / self.params.STEER_MAX
+    new_actuators.torqueOutputCan = apply_torque
     new_actuators.steeringAngleDeg = self.last_angle
     new_actuators.accel = self.accel
 

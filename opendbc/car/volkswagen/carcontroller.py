@@ -43,7 +43,7 @@ class CarController(CarControllerBase):
       # of HCA disabled; this is done whenever output happens to be zero.
 
       if CC.latActive:
-        new_torque = int(round(actuators.steer * self.CCP.STEER_MAX))
+        new_torque = int(round(actuators.torque * self.CCP.STEER_MAX))
         apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.CCP)
         self.hca_frame_timer_running += self.CCP.STEER_STEP
         if self.apply_torque_last == apply_torque:
@@ -118,8 +118,8 @@ class CarController(CarControllerBase):
                                                            cancel=CC.cruiseControl.cancel, resume=CC.cruiseControl.resume))
 
     new_actuators = actuators.as_builder()
-    new_actuators.steer = self.apply_torque_last / self.CCP.STEER_MAX
-    new_actuators.steerOutputCan = self.apply_torque_last
+    new_actuators.torque = self.apply_torque_last / self.CCP.STEER_MAX
+    new_actuators.torqueOutputCan = self.apply_torque_last
 
     self.gra_acc_counter_last = CS.gra_stock_values["COUNTER"]
     self.frame += 1
