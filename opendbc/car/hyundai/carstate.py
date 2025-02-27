@@ -219,14 +219,15 @@ class CarState(CarStateBase):
 
     # TODO: figure out positions
     ret.wheelSpeeds = self.get_wheel_speeds(
-      cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_1"],
-      cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_2"],
-      cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_3"],
-      cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_4"],
+      cp.vl["WHEEL_SPEEDS"]["WHL_SpdFLVal"],
+      cp.vl["WHEEL_SPEEDS"]["WHL_SpdFRVal"],
+      cp.vl["WHEEL_SPEEDS"]["WHL_SpdRLVal"],
+      cp.vl["WHEEL_SPEEDS"]["WHL_SpdRRVal"],
     )
     ret.vEgoRaw = (ret.wheelSpeeds.fl + ret.wheelSpeeds.fr + ret.wheelSpeeds.rl + ret.wheelSpeeds.rr) / 4.
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
-    ret.standstill = ret.wheelSpeeds.fl <= STANDSTILL_THRESHOLD and ret.wheelSpeeds.rr <= STANDSTILL_THRESHOLD
+    ret.standstill = ret.wheelSpeeds.fl <= STANDSTILL_THRESHOLD and ret.wheelSpeeds.fr <= STANDSTILL_THRESHOLD and \
+                     ret.wheelSpeeds.rl <= STANDSTILL_THRESHOLD and ret.wheelSpeeds.rr <= STANDSTILL_THRESHOLD
 
     ret.steeringRateDeg = cp.vl["STEERING_SENSORS"]["STEERING_RATE"]
     ret.steeringAngleDeg = cp.vl["STEERING_SENSORS"]["STEERING_ANGLE"]
