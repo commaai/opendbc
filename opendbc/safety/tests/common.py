@@ -120,6 +120,7 @@ class PandaSafetyTestBase(unittest.TestCase):
 
 class LongitudinalAccelSafetyTest(PandaSafetyTestBase, abc.ABC):
 
+  LONGITUDINAL = True
   MAX_ACCEL: float = 2.0
   MIN_ACCEL: float = -3.5
   INACTIVE_ACCEL: float = 0.0
@@ -137,22 +138,22 @@ class LongitudinalAccelSafetyTest(PandaSafetyTestBase, abc.ABC):
   def _accel_msg_2(self, accel: float):
     return None
 
-  def _should_tx_1(self, controls_allowed: bool, stock_longitudinal: bool, accel: float, min_accel: float, max_accel: float):
-    if stock_longitudinal:
-      should_tx = False
-    else:
+  def _should_tx_1(self, controls_allowed: bool, accel: float, min_accel: float, max_accel: float):
+    if self.LONGITUDINAL:
       should_tx = controls_allowed and min_accel <= accel <= max_accel
       should_tx = should_tx or accel == self.INACTIVE_ACCEL
+    else:
+      should_tx = False
     return should_tx
 
-  def _should_tx_2(self, controls_allowed: bool, stock_longitudinal: bool, accel: float, min_accel: float, max_accel: float):
+  def _should_tx_2(self, controls_allowed: bool, accel: float, min_accel: float, max_accel: float):
     return False
 
   def test_accel_limits_correct(self):
     self.assertGreater(self.MAX_ACCEL, 0)
     self.assertLess(self.MIN_ACCEL, 0)
 
-  def test_accel_actuation_limits(self, stock_longitudinal=False):
+  def test_accel_actuation_limits(self):
     limits = ((self.MIN_ACCEL, self.MAX_ACCEL, ALTERNATIVE_EXPERIENCE.DEFAULT),
               (self.MIN_ACCEL, self.MAX_ACCEL, ALTERNATIVE_EXPERIENCE.RAISE_LONGITUDINAL_LIMITS_TO_ISO_MAX))
 
@@ -163,11 +164,11 @@ class LongitudinalAccelSafetyTest(PandaSafetyTestBase, abc.ABC):
         for controls_allowed in [True, False]:
           self.safety.set_controls_allowed(controls_allowed)
           self.safety.set_alternative_experience(alternative_experience)
-          should_tx = self._should_tx_1(controls_allowed, stock_longitudinal, accel, min_accel, max_accel)
+          should_tx = self._should_tx_1(controls_allowed, accel, min_accel, max_accel)
           self.assertEqual(should_tx, self._tx(self._accel_msg(accel)))
           accel_msg_2 = self._accel_msg_2(accel)
           if accel_msg_2 is not None:
-            should_tx_2 = self._should_tx_2(controls_allowed, stock_longitudinal, accel, min_accel, max_accel)
+            should_tx_2 = self._should_tx_2(controls_allowed, accel, min_accel, max_accel)
             self.assertEqual(should_tx_2, self._tx(self._accel_msg_2(accel)))
 
 
@@ -806,6 +807,10 @@ class PandaSafetyTest(PandaSafetyTestBase):
             if attr.startswith('TestHonda'):
               # exceptions for common msgs across different hondas
               tx = list(filter(lambda m: m[0] not in [0x1FA, 0x30C, 0x33D, 0x33DB], tx))
+
+            if attr.startswith('TestHyundaiLongitudinal'):
+              # exceptions for common msgs across different Hyundai CAN platforms
+              tx = list(filter(lambda m: m[0] not in [0x420, 0x50A, 0x389, 0x4A2], tx))
             all_tx.append([[m[0], m[1], attr] for m in tx])
 
     # make sure we got all the msgs

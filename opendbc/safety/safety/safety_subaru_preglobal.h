@@ -62,7 +62,7 @@ static bool subaru_preglobal_tx_hook(const CANPacket_t *to_send) {
     .max_rt_interval = 250000,
     .max_rate_up = 50,
     .max_rate_down = 70,
-    .driver_torque_factor = 10,
+    .driver_torque_multiplier = 10,
     .driver_torque_allowance = 75,
     .type = TorqueDriverLimited,
   };

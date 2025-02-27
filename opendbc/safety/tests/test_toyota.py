@@ -288,14 +288,13 @@ class TestToyotaStockLongitudinalBase(TestToyotaSafetyBase):
   RELAY_MALFUNCTION_ADDRS = {0: (0x2E4,)}
   FWD_BLACKLISTED_ADDRS = {2: [0x2E4, 0x412, 0x191]}
 
+  LONGITUDINAL = False
+
   def test_diagnostics(self, stock_longitudinal: bool = True):
     super().test_diagnostics(stock_longitudinal=stock_longitudinal)
 
   def test_block_aeb(self, stock_longitudinal: bool = True):
     super().test_block_aeb(stock_longitudinal=stock_longitudinal)
-
-  def test_accel_actuation_limits(self, stock_longitudinal=True):
-    super().test_accel_actuation_limits(stock_longitudinal=stock_longitudinal)
 
   def test_acc_cancel(self):
     """
@@ -370,10 +369,10 @@ class TestToyotaSecOcSafety(TestToyotaSafetyBase):
 
   # On a SecOC vehicle, we still transmit ACC_CONTROL but the accel value moves to ACC_CONTROL_2
   # Verify that all non-idle accel values in ACC_CONTROL are rejected, verify ACC_CONTROL_2 accel normally
-  def _should_tx_1(self, controls_allowed: bool, stock_longitudinal: bool, accel: float, min_accel: float, max_accel: float):
+  def _should_tx_1(self, controls_allowed: bool, accel: float, min_accel: float, max_accel: float):
     return accel == self.INACTIVE_ACCEL
 
-  def _should_tx_2(self, controls_allowed: bool, stock_longitudinal: bool, accel: float, min_accel: float, max_accel: float):
+  def _should_tx_2(self, controls_allowed: bool, accel: float, min_accel: float, max_accel: float):
     return (controls_allowed and min_accel <= accel <= max_accel) or accel == self.INACTIVE_ACCEL
 
 
