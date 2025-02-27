@@ -322,9 +322,9 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
         (False, self.MAX_CURVATURE, self.MAX_CURVATURE - max_delta_down - small_curvature),
       ])
 
-      for sign in (1,):
+      for sign in (-1, 1):
         for angle_meas, cases in (up_cases, down_cases):
-          self._reset_curvature_measurement(sign * (self.MAX_CURVATURE_ERROR * 2), speed)
+          self._reset_curvature_measurement(sign * angle_meas, speed)
           for idx, (should_tx, initial_curvature, desired_curvature) in enumerate(cases):
             curvature_offset = small_curvature if initial_curvature == 0 else 0
             # small curvature ensures we're using up limits as 0 allows down limits to allow to account for rounding errors
