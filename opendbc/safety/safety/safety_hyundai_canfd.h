@@ -118,17 +118,9 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *to_push) {
 
     // vehicle moving
     if (addr == 0xa0) {
-      uint32_t fl = (GET_BYTES(to_push, 8, 2)) & 0x3FFFU;
-      uint32_t fr = (GET_BYTES(to_push, 10, 2)) & 0x3FFFU;
-      uint32_t rl = (GET_BYTES(to_push, 12, 2)) & 0x3FFFU;
-      uint32_t rr = (GET_BYTES(to_push, 14, 2)) & 0x3FFFU;
-
-      uint32_t speed_avg = (fr + rr + rl + fl) / 4U;
-
-      vehicle_moving = (speed_avg > HYUNDAI_STANDSTILL_THRSLD);
-
-      // average of all 4 wheel speeds. Conversion: raw * 0.03125
-      UPDATE_VEHICLE_SPEED(speed_avg * 0.03125);
+      uint32_t front_left_speed = GET_BYTES(to_push, 8, 2);
+      uint32_t rear_right_speed = GET_BYTES(to_push, 14, 2);
+      vehicle_moving = (front_left_speed > HYUNDAI_STANDSTILL_THRSLD) || (rear_right_speed > HYUNDAI_STANDSTILL_THRSLD);
     }
   }
 
@@ -160,7 +152,7 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
     .max_rate_up = 2,
     .max_rate_down = 3,
     .driver_torque_allowance = 250,
-    .driver_torque_factor = 2,
+    .driver_torque_multiplier = 2,
     .type = TorqueDriverLimited,
 
     // the EPS faults when the steering angle is above a certain threshold for too long. to prevent this,

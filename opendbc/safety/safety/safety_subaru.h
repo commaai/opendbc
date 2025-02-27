@@ -9,7 +9,7 @@
     .max_rt_interval = 250000,                                                        \
     .max_rate_up = (rate_up),                                                         \
     .max_rate_down = (rate_down),                                                     \
-    .driver_torque_factor = 50,                                                       \
+    .driver_torque_multiplier = 50,                                                   \
     .driver_torque_allowance = 60,                                                    \
     .type = TorqueDriverLimited,                                                      \
     /* the EPS will temporary fault if the steering rate is too high, so we cut the   \

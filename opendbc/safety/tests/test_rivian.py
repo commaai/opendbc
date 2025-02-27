@@ -78,7 +78,7 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
 class TestRivianStockSafety(TestRivianSafetyBase):
 
   def setUp(self):
-    self.packer = CANPackerPanda("rivian_can")
+    self.packer = CANPackerPanda("rivian_primary_actuator")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.rivian, 0)
     self.safety.init_tests()
@@ -91,7 +91,7 @@ class TestRivianLongitudinalSafety(TestRivianSafetyBase, common.LongitudinalAcce
   LONGITUDINAL = True
 
   def setUp(self):
-    self.packer = CANPackerPanda("rivian_can")
+    self.packer = CANPackerPanda("rivian_primary_actuator")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.rivian, RivianSafetyFlags.LONG_CONTROL)
     self.safety.init_tests()
