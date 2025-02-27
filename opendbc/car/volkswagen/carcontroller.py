@@ -10,28 +10,6 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 
 
-def apply_iso_curvature_limits(v_ego, previous_curvature, time_step, desired_curvature):
-  # ISO 11270:2014 safety constraints
-  MAX_LATERAL_ACCELERATION = 3.0  # m/s^2
-  MAX_LATERAL_JERK = 5.0  # m/s^3
-  JERK_TIME_HORIZON = 0.5  # seconds
-
-  if v_ego <= 0.1:
-    return desired_curvature
-
-  # Calculate maximum change in curvature over the 0.5s time horizon, scale the max change to our current time step
-  max_curvature_acc = MAX_LATERAL_ACCELERATION / (v_ego**2)
-  max_delta_curvature = (MAX_LATERAL_JERK * JERK_TIME_HORIZON) / (v_ego**2) * (time_step / JERK_TIME_HORIZON)
-
-  min_curvature_jerk = previous_curvature - max_delta_curvature
-  max_curvature_jerk = previous_curvature + max_delta_curvature
-
-  max_curvature = min(max_curvature_acc, max_curvature_jerk)
-  min_curvature = max(-max_curvature_acc, min_curvature_jerk)
-
-  return max(min(desired_curvature, max_curvature), min_curvature)
-
-
 def apply_lateral_control_power(CCP, lat_active, driver_input, previous_power):
   qfk_enable = True
 
@@ -88,8 +66,7 @@ class CarController(CarControllerBase):
         # maximum real steering angle change ~ 120-130 deg/s
 
         # Calibrate our curvature command by the offset between openpilot's current curvature and the QFK's current curvature
-        calibrated_actuator_curvature = actuators.curvature + (CS.curvature - CC.currentCurvature)
-        apply_curvature = apply_iso_curvature_limits(CS.out.vEgo, self.apply_curvature_last, DT_CTRL * self.CCP.STEER_STEP, calibrated_actuator_curvature)
+        apply_curvature = actuators.curvature + (CS.curvature - CC.currentCurvature)
         qfk_enable, apply_steer_power = apply_lateral_control_power(self.CCP, CC.latActive, CS.out.steeringPressed, self.apply_steer_power_last)
 
         can_sends.append(self.CCS.create_steering_control(self.packer_pt, CANBUS.pt, apply_curvature, qfk_enable, apply_steer_power))
