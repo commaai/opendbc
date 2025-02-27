@@ -770,16 +770,17 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
         lowest_desired_angle = MIN(desired_angle_last + delta_angle_up, lowest_desired_angle_error);
         printf("new lowest_desired_angle: %i\n", lowest_desired_angle);
       }
-//      if ((desired_angle_last > highest_desired_angle_error) && desired_angle_last < 0) {
-//        printf("highest_desired_angle: %i\n", highest_desired_angle);
-//        highest_desired_angle = MAX(desired_angle_last - delta_angle_up, highest_desired_angle_error);
-//        printf("new highest_desired_angle: %i\n", highest_desired_angle);
-//      }
+      if ((desired_angle_last > highest_desired_angle_error) && desired_angle_last < 0) {
+        printf("highest_desired_angle: %i\n", highest_desired_angle);
+        highest_desired_angle = MAX(desired_angle_last - delta_angle_up, highest_desired_angle_error);
+        printf("new highest_desired_angle: %i\n", highest_desired_angle);
+      }
       printf("delta_angle_down: %i\n", delta_angle_down);
+      printf("delta_angle_up: %i\n", delta_angle_up);
 
       printf("vehicle speed: %f\n", vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR);
       if (max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle)) {
-        printf("VIOLATION!");
+        printf("VIOLATION!\n");
 //        printf("delta_angle_up_lower: %i, delta_angle_down_lower: %i\n", delta_angle_up_lower, delta_angle_down_lower);
 //        printf("highest_desired_angle_lower: %i, lowest_desired_angle_lower: %i\n", highest_desired_angle_lower, lowest_desired_angle_lower);
 //        printf("prev desired angle: %i, current desired angle: %i\n", desired_angle_last, desired_angle);
