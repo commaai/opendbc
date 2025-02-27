@@ -62,26 +62,35 @@ class CarController(CarControllerBase):
     actuators = CC.actuators
     hud_control = CC.hudControl
 
-    # steering torque
-    new_steer = int(round(actuators.steer * self.params.STEER_MAX))
-    apply_steer = apply_driver_steer_torque_limits(new_steer, self.apply_steer_last, CS.out.steeringTorque, self.params)
-
+    # TODO: needed for angle control cars?
     # >90 degree steering fault prevention
     self.angle_limit_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringAngleDeg) >= MAX_ANGLE, CC.latActive,
                                                                        self.angle_limit_counter, MAX_ANGLE_FRAMES,
                                                                        MAX_ANGLE_CONSECUTIVE_FRAMES)
+    # Hold torque with induced temporary fault when cutting the actuation bit
+    torque_fault = CC.latActive and not apply_steer_req
 
-    apply_angle = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, self.params)
+    apply_angle = 0
+    apply_steer = 0
 
-    # Similar to torque control driver torque override, we ramp up and down the max allowed torque,
-    # but this is a single threshold in the opposite direction of angle for simplicity
-    if apply_angle > 0 and CS.out.steeringTorque < -self.params.ANGLE_DRIVER_TORQUE_THRESHOLD:
-      self.lkas_max_torque = max(self.lkas_max_torque - 1, self.params.ANGLE_MIN_TORQUE)
-    elif apply_angle < 0 and CS.out.steeringTorque > self.params.ANGLE_DRIVER_TORQUE_THRESHOLD:
-      self.lkas_max_torque = max(self.lkas_max_torque - 1, self.params.ANGLE_MIN_TORQUE)
+    # steering torque
+    if not self.CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
+      new_steer = int(round(actuators.steer * self.params.STEER_MAX))
+      apply_steer = apply_driver_steer_torque_limits(new_steer, self.apply_steer_last, CS.out.steeringTorque, self.params)
+
+    # angle control
     else:
-      # ramp back up on engage as well
-      self.lkas_max_torque = min(self.lkas_max_torque + 1, self.params.ANGLE_MAX_TORQUE)
+      apply_angle = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, self.params)
+
+      # Similar to torque control driver torque override, we ramp up and down the max allowed torque,
+      # but this is a single threshold in the opposite direction of angle for simplicity
+      if apply_angle > 0 and CS.out.steeringTorque < -self.params.ANGLE_DRIVER_TORQUE_THRESHOLD:
+        self.lkas_max_torque = max(self.lkas_max_torque - 1, self.params.ANGLE_MIN_TORQUE)
+      elif apply_angle < 0 and CS.out.steeringTorque > self.params.ANGLE_DRIVER_TORQUE_THRESHOLD:
+        self.lkas_max_torque = max(self.lkas_max_torque - 1, self.params.ANGLE_MIN_TORQUE)
+      else:
+        # ramp back up on engage as well
+        self.lkas_max_torque = min(self.lkas_max_torque + 1, self.params.ANGLE_MAX_TORQUE)
 
     if not CC.latActive:
       apply_angle = CS.out.steeringAngleDeg
@@ -89,10 +98,6 @@ class CarController(CarControllerBase):
       self.lkas_max_torque = 0
 
     self.apply_angle_last = apply_angle
-
-    # Hold torque with induced temporary fault when cutting the actuation bit
-    torque_fault = CC.latActive and not apply_steer_req
-
     self.apply_steer_last = apply_steer
 
     # accel + longitudinal
