@@ -57,7 +57,6 @@ class CarController(CarControllerBase):
     self.last_button_frame = 0
     self.apply_angle_last = 0
     self.lkas_max_torque = 0
-    self.driver_applied_torque_reducer = 0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -87,29 +86,15 @@ class CarController(CarControllerBase):
     # `driver_applied_torque_reducer` to settle to value between 30 and 150.
     # While the driver applies torque the value will decrease to 30, and while
     # the driver is not applying torque the value will increase to 150.
-    if abs(CS.out.steeringTorque) > 200:
-      # If the driver is applying some torque manually, reduce the value down to 30 (the min)
-      self.driver_applied_torque_reducer -= 5
-      if self.driver_applied_torque_reducer < 30:
-        self.driver_applied_torque_reducer = 30
+    # Similar to torque control driver torque override, we ramp up and down the max allowed torque,
+    # but this is a single threshold in the opposite direction of angle for simplicity
+    if apply_angle > 0 and CS.out.steeringTorque < -self.params.ANGLE_DRIVER_TORQUE_THRESHOLD:
+      self.lkas_max_torque = max(self.lkas_max_torque - 1, self.params.ANGLE_MIN_TORQUE)
+    elif apply_angle < 0 and CS.out.steeringTorque > self.params.ANGLE_DRIVER_TORQUE_THRESHOLD:
+      self.lkas_max_torque = max(self.lkas_max_torque - 1, self.params.ANGLE_MIN_TORQUE)
     else:
-      # While the driver is not applying torque, increase the value up to 150 (the max)
-      self.driver_applied_torque_reducer += 5
-      if self.driver_applied_torque_reducer > 150:
-        self.driver_applied_torque_reducer = 150
-
-    if self.driver_applied_torque_reducer < 150:
-      # If the driver has just started applying torque, the reducer value will
-      # be around 150 so we won't reduce the max torque much. As the driver
-      # continues to apply torque, the reducer value will decrease to 30, so we
-      # will reduce the max torque more to fight them less (at this level we'll
-      # be doing 1/5 of the torque)
-      self.lkas_max_torque = int(round(self.params.ANGLE_MAX_TORQUE * (self.driver_applied_torque_reducer / 150)))
-    else:
-      # A torque reducer value of 150 means the driver has not been applying
-      # torque for a while, so we will apply the full max torque value, adjusted
-      # by the ego weight (based on driving speed)
-      self.lkas_max_torque = self.params.ANGLE_MAX_TORQUE
+      # ramp back up on engage as well
+      self.lkas_max_torque = min(self.lkas_max_torque + 1, self.params.ANGLE_MAX_TORQUE)
 
     if not CC.latActive:
       apply_angle = CS.out.steeringAngleDeg

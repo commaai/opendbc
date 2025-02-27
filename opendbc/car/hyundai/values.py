@@ -22,6 +22,10 @@ class CarControllerParams:
   # Stock LFA system is seen sending 250 max, but for LKAS events it's 175 max
   # 250 can at least achieve 4 m/s^2
   ANGLE_MAX_TORQUE = 150  # units unknown
+  # start winding down max angle torque at this value
+  ANGLE_DRIVER_TORQUE_THRESHOLD = 100  # TODO: 150 might be better
+  # minimum max angle torque
+  ANGLE_MIN_TORQUE = 50
 
   def __init__(self, CP):
     self.STEER_DELTA_UP = 3
