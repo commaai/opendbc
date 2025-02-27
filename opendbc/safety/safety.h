@@ -767,27 +767,38 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 //        printf("new lowest_desired_angle: %i\n", lowest_desired_angle);
 //      }
 
-      // allow down limits at zero since small floats from openpilot will be rounded to 0
-      if ((desired_angle_last > highest_desired_angle_error) && desired_angle_last >= 0) {
-        printf("highest_desired_angle: %i\n", highest_desired_angle);
-        highest_desired_angle = MAX(desired_angle_last - delta_angle_down, highest_desired_angle_error);
-        printf("new highest_desired_angle: %i\n", highest_desired_angle);
+      if (desired_angle_last > highest_desired_angle_error) {
+        // allow down limits at zero since small floats from openpilot will be rounded to 0
+        const int delta = (desired_angle_last >= 0) ? delta_angle_down : delta_angle_up;
+        highest_desired_angle = MAX(desired_angle_last - delta, highest_desired_angle_error);
       }
-      if ((desired_angle_last < lowest_desired_angle_error) && desired_angle_last <= 0) {
-        printf("lowest_desired_angle: %i\n", lowest_desired_angle);
-        lowest_desired_angle = MIN(desired_angle_last + delta_angle_down, lowest_desired_angle_error);
-        printf("new lowest_desired_angle: %i\n", lowest_desired_angle);
+
+      if (desired_angle_last < lowest_desired_angle_error) {
+        const int delta = (desired_angle_last <= 0) ? delta_angle_down : delta_angle_up;
+        lowest_desired_angle = MIN(desired_angle_last + delta, lowest_desired_angle_error);
       }
-      if ((desired_angle_last < lowest_desired_angle_error) && desired_angle_last > 0) {
-        printf("lowest_desired_angle: %i\n", lowest_desired_angle);
-        lowest_desired_angle = MIN(desired_angle_last + delta_angle_up, lowest_desired_angle_error);
-        printf("new lowest_desired_angle: %i\n", lowest_desired_angle);
-      }
-      if ((desired_angle_last > highest_desired_angle_error) && desired_angle_last < 0) {
-        printf("highest_desired_angle: %i\n", highest_desired_angle);
-        highest_desired_angle = MAX(desired_angle_last - delta_angle_up, highest_desired_angle_error);
-        printf("new highest_desired_angle: %i\n", highest_desired_angle);
-      }
+
+//      // allow down limits at zero since small floats from openpilot will be rounded to 0
+//      if ((desired_angle_last > highest_desired_angle_error) && desired_angle_last >= 0) {
+//        printf("highest_desired_angle: %i\n", highest_desired_angle);
+//        highest_desired_angle = MAX(desired_angle_last - delta_angle_down, highest_desired_angle_error);
+//        printf("new highest_desired_angle: %i\n", highest_desired_angle);
+//      }
+//      if ((desired_angle_last < lowest_desired_angle_error) && desired_angle_last <= 0) {
+//        printf("lowest_desired_angle: %i\n", lowest_desired_angle);
+//        lowest_desired_angle = MIN(desired_angle_last + delta_angle_down, lowest_desired_angle_error);
+//        printf("new lowest_desired_angle: %i\n", lowest_desired_angle);
+//      }
+//      if ((desired_angle_last < lowest_desired_angle_error) && desired_angle_last > 0) {
+//        printf("lowest_desired_angle: %i\n", lowest_desired_angle);
+//        lowest_desired_angle = MIN(desired_angle_last + delta_angle_up, lowest_desired_angle_error);
+//        printf("new lowest_desired_angle: %i\n", lowest_desired_angle);
+//      }
+//      if ((desired_angle_last > highest_desired_angle_error) && desired_angle_last < 0) {
+//        printf("highest_desired_angle: %i\n", highest_desired_angle);
+//        highest_desired_angle = MAX(desired_angle_last - delta_angle_up, highest_desired_angle_error);
+//        printf("new highest_desired_angle: %i\n", highest_desired_angle);
+//      }
       printf("delta_angle_down: %i\n", delta_angle_down);
       printf("delta_angle_up: %i\n", delta_angle_up);
       printf("lowest_desired_angle: %i, highest_desired_angle: %i\n", lowest_desired_angle, highest_desired_angle);
