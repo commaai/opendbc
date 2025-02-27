@@ -62,6 +62,7 @@ class CarController(CarControllerBase):
     self.packer_pt = CANPacker(dbc_names[Bus.pt])
     self.ext_bus = CANBUS.pt if CP.networkLocation == structs.CarParams.NetworkLocation.fwdCamera else CANBUS.cam
     self.aeb_available = not CP.flags & VolkswagenFlags.PQ
+    self.openpilot_longitudinal = self.CP.openpilotLongitudinalControl and not self.CP.flags & VolkswagenFlags.MEB
 
     self.apply_steer_last = 0
     self.apply_steer_power_last = 0
@@ -148,7 +149,7 @@ class CarController(CarControllerBase):
 
     # **** Acceleration Controls ******************************************** #
 
-    if self.CP.openpilotLongitudinalControl and not self.CP.flags & VolkswagenFlags.MEB:
+    if self.openpilot_longitudinal:
       if self.frame % self.CCP.ACC_CONTROL_STEP == 0:
         acc_control = self.CCS.acc_control_value(CS.out.cruiseState.available, CS.out.accFaulted, CC.longActive)
         accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0)
@@ -172,7 +173,7 @@ class CarController(CarControllerBase):
       can_sends.append(self.CCS.create_lka_hud_control(self.packer_pt, CANBUS.pt, CS.ldw_stock_values, CC.latActive,
                                                        CS.out.steeringPressed, hud_alert, hud_control))
 
-    if self.frame % self.CCP.ACC_HUD_STEP == 0 and self.CP.openpilotLongitudinalControl:
+    if self.frame % self.CCP.ACC_HUD_STEP == 0 and self.openpilot_longitudinal:
       lead_distance = 0
       if hud_control.leadVisible and self.frame * DT_CTRL > 1.0:  # Don't display lead until we know the scaling factor
         lead_distance = 512 if CS.upscale_lead_car_signal else 8
