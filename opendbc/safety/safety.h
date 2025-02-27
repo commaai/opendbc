@@ -238,14 +238,21 @@ static bool msg_allowed(const CANPacket_t *to_send, const CanMsg msg_list[], int
 }
 
 bool safety_tx_hook(CANPacket_t *to_send) {
-  bool whitelisted = msg_allowed(to_send, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
+  bool is_allowed = false;
 
-  if ((current_safety_mode == SAFETY_ALLOUTPUT) || (current_safety_mode == SAFETY_ELM327)) {
-    whitelisted = true;
+  if (msg_allowed(to_send, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len)) {
+    is_allowed = true;
   }
 
-  const bool safety_allowed = current_hooks->tx(to_send);
-  return !relay_malfunction && whitelisted && safety_allowed;
+  if ((current_safety_mode == SAFETY_ALLOUTPUT) || (current_safety_mode == SAFETY_ELM327)) {
+    is_allowed = true;
+  }
+
+  if (!relay_malfunction && current_hooks->tx(to_send)) {
+    return is_allowed;
+  }
+
+  return false;
 }
 
 // Given a CRC-8 poly, generate a static lookup table to use with a fast CRC-8
