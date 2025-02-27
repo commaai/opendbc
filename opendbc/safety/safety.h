@@ -612,7 +612,7 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const SteeringLi
     if (limits.type == TorqueDriverLimited) {
       violation |= driver_limit_check(desired_torque, desired_torque_last, &torque_driver,
                                       limits.max_steer, limits.max_rate_up, limits.max_rate_down,
-                                      limits.driver_torque_allowance, limits.driver_torque_factor);
+                                      limits.driver_torque_allowance, limits.driver_torque_multiplier);
     } else {
       violation |= dist_to_meas_check(desired_torque, desired_torque_last, &torque_meas,
                                       limits.max_rate_up, limits.max_rate_down, limits.max_torque_error);
@@ -694,30 +694,41 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
     // add 1 to not false trigger the violation. also fudge the speed by 1 m/s so rate limits are
     // always slightly above openpilot's in case we read an updated speed in between angle commands
     // TODO: this speed fudge can be much lower, look at data to determine the lowest reasonable offset
-    int delta_angle_up = (interpolate(limits.angle_rate_up_lookup, (vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.) * limits.angle_deg_to_can) + 1.;
-    int delta_angle_down = (interpolate(limits.angle_rate_down_lookup, (vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.) * limits.angle_deg_to_can) + 1.;
+    const float fudged_speed = (vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.;
+    int delta_angle_up = (interpolate(limits.angle_rate_up_lookup, fudged_speed) * limits.angle_deg_to_can) + 1.;
+    int delta_angle_down = (interpolate(limits.angle_rate_down_lookup, fudged_speed) * limits.angle_deg_to_can) + 1.;
 
-    // allow down limits at zero since small floats will be rounded to 0
+    // allow down limits at zero since small floats from openpilot will be rounded to 0
+    // TODO: openpilot should be cognizant of this and not send small floats
     int highest_desired_angle = desired_angle_last + ((desired_angle_last > 0) ? delta_angle_up : delta_angle_down);
     int lowest_desired_angle = desired_angle_last - ((desired_angle_last >= 0) ? delta_angle_down : delta_angle_up);
 
     // check that commanded angle value isn't too far from measured, used to limit torque for some safety modes
-    // ensure we start moving in direction of meas while respecting rate limits if error is exceeded
+    // ensure we start moving in direction of meas while respecting relaxed rate limits if error is exceeded
     if (limits.enforce_angle_error && ((vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR) > limits.angle_error_min_speed)) {
-      // the rate limits above are liberally above openpilot's to avoid false positives.
-      // likewise, allow a lower rate for moving towards meas when error is exceeded
-      int delta_angle_up_lower = interpolate(limits.angle_rate_up_lookup, (vehicle_speed.max / VEHICLE_SPEED_FACTOR) + 1.) * limits.angle_deg_to_can;
-      int delta_angle_down_lower = interpolate(limits.angle_rate_down_lookup, (vehicle_speed.max / VEHICLE_SPEED_FACTOR) + 1.) * limits.angle_deg_to_can;
+      // flipped fudge to avoid false positives
+      const float fudged_speed_error = (vehicle_speed.max / VEHICLE_SPEED_FACTOR) + 1.;
+      const int delta_angle_up_relaxed = (interpolate(limits.angle_rate_up_lookup, fudged_speed_error) * limits.angle_deg_to_can) - 1.;
+      const int delta_angle_down_relaxed = (interpolate(limits.angle_rate_down_lookup, fudged_speed_error) * limits.angle_deg_to_can) - 1.;
 
-      int highest_desired_angle_lower = desired_angle_last + ((desired_angle_last > 0) ? delta_angle_up_lower : delta_angle_down_lower);
-      int lowest_desired_angle_lower = desired_angle_last - ((desired_angle_last >= 0) ? delta_angle_down_lower : delta_angle_up_lower);
+      // the minimum and maximum angle allowed based on the measured angle
+      const int lowest_desired_angle_error = angle_meas.min - limits.max_angle_error - 1;
+      const int highest_desired_angle_error = angle_meas.max + limits.max_angle_error + 1;
 
-      lowest_desired_angle = MIN(MAX(lowest_desired_angle, angle_meas.min - limits.max_angle_error - 1), highest_desired_angle_lower);
-      highest_desired_angle = MAX(MIN(highest_desired_angle, angle_meas.max + limits.max_angle_error + 1), lowest_desired_angle_lower);
+      // the MAX is to allow the desired angle to hit the edge of the bounds and not require going under it
+      if (desired_angle_last > highest_desired_angle_error) {
+        const int delta = (desired_angle_last >= 0) ? delta_angle_down_relaxed : delta_angle_up_relaxed;
+        highest_desired_angle = MAX(desired_angle_last - delta, highest_desired_angle_error);
 
-      // don't enforce above the max steer
-      lowest_desired_angle = CLAMP(lowest_desired_angle, -limits.max_steer, limits.max_steer);
-      highest_desired_angle = CLAMP(highest_desired_angle, -limits.max_steer, limits.max_steer);
+      } else if (desired_angle_last < lowest_desired_angle_error) {
+        const int delta = (desired_angle_last <= 0) ? delta_angle_down_relaxed : delta_angle_up_relaxed;
+        lowest_desired_angle = MIN(desired_angle_last + delta, lowest_desired_angle_error);
+
+      } else {
+        // already inside error boundary, don't allow commanding outside it
+        highest_desired_angle = MIN(highest_desired_angle, highest_desired_angle_error);
+        lowest_desired_angle = MAX(lowest_desired_angle, lowest_desired_angle_error);
+      }
     }
 
     // check for violation;
