@@ -82,11 +82,6 @@ class CarController(CarControllerBase):
     # CS.out.steeringPressed and steeringTorque are based on the
     # STEERING_COL_TORQUE value
 
-    # Interpolate a percent to apply to max torque based on vEgo value, which is
-    # the "best estimate of speed".  This means that under 20 (units?) we will
-    # apply less torque, and over 20 we will apply the full calculated torque.
-    ego_weight = np.interp(CS.out.vEgo, [0, 5, 10, 20], [0.2, 0.3, 0.5, 1.0])
-
     # Track if and how long the driver has been applying torque and create a
     # value to reduce the max torque applied. This block will cause the
     # `driver_applied_torque_reducer` to settle to value between 30 and 150.
@@ -109,12 +104,12 @@ class CarController(CarControllerBase):
       # continues to apply torque, the reducer value will decrease to 30, so we
       # will reduce the max torque more to fight them less (at this level we'll
       # be doing 1/5 of the torque)
-      self.lkas_max_torque = int(round(self.params.ANGLE_MAX_TORQUE * ego_weight * (self.driver_applied_torque_reducer / 150)))
+      self.lkas_max_torque = int(round(self.params.ANGLE_MAX_TORQUE * (self.driver_applied_torque_reducer / 150)))
     else:
       # A torque reducer value of 150 means the driver has not been applying
       # torque for a while, so we will apply the full max torque value, adjusted
       # by the ego weight (based on driving speed)
-      self.lkas_max_torque = self.params.ANGLE_MAX_TORQUE * ego_weight
+      self.lkas_max_torque = self.params.ANGLE_MAX_TORQUE
 
     if not CC.latActive:
       apply_angle = CS.out.steeringAngleDeg

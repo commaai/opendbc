@@ -21,7 +21,7 @@ class CarControllerParams:
 
   # Stock LFA system is seen sending 250 max, but for LKAS events it's 175 max
   # 250 can at least achieve 4 m/s^2
-  ANGLE_MAX_TORQUE = 250  # units unknown
+  ANGLE_MAX_TORQUE = 150  # units unknown
 
   def __init__(self, CP):
     self.STEER_DELTA_UP = 3
