@@ -43,7 +43,7 @@ class CarController(CarControllerBase):
     if self.frame % self.CCP.STEER_STEP == 0:
       if self.CP.flags & VolkswagenFlags.MEB:
         # The QFK (lateral control coordinator) control loop compares actuation curvature to its own current curvature
-        # Calibrate our actuator command by the offset between openpilot's vehicle model curvature and QFK curvature
+        # Calibrate our actuator command by the offset between openpilot's vehicle model and QFK perceived curvatures
         apply_curvature = actuators.curvature + (CS.qfk_curvature - CC.currentCurvature)
 
         # Progressive QFK power control: smooth engage and disengage, reduce power when the driver is overriding
