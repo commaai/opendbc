@@ -706,18 +706,18 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
     if (limits.enforce_angle_error && ((vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR) > limits.angle_error_min_speed)) {
       // the rate limits above are liberally above openpilot's to avoid false positives.
       // likewise, allow a lower rate for moving towards meas when error is exceeded
-      int delta_angle_up_lower = interpolate(limits.angle_rate_up_lookup, (vehicle_speed.max / VEHICLE_SPEED_FACTOR) + 1.) * limits.angle_deg_to_can;
-      int delta_angle_down_lower = interpolate(limits.angle_rate_down_lookup, (vehicle_speed.max / VEHICLE_SPEED_FACTOR) + 1.) * limits.angle_deg_to_can;
+      int delta_angle_up_lower = interpolate(limits.angle_rate_up_lookup, (vehicle_speed.max / VEHICLE_SPEED_FACTOR) + 1.) * limits.angle_deg_to_can;  // MUTATION
+      int delta_angle_down_lower = interpolate(limits.angle_rate_down_lookup, (vehicle_speed.max / VEHICLE_SPEED_FACTOR) + 1.) * limits.angle_deg_to_can;  // MUTATION
 
-      int highest_desired_angle_lower = desired_angle_last + ((desired_angle_last > 0) ? delta_angle_up_lower : delta_angle_down_lower);
-      int lowest_desired_angle_lower = desired_angle_last - ((desired_angle_last >= 0) ? delta_angle_down_lower : delta_angle_up_lower);
+      int highest_desired_angle_lower = desired_angle_last + ((desired_angle_last > 0) ? delta_angle_up_lower : delta_angle_down_lower);  // MUTATION
+      int lowest_desired_angle_lower = desired_angle_last - ((desired_angle_last >= 0) ? delta_angle_down_lower : delta_angle_up_lower);  // MUTATION
 
-      lowest_desired_angle = MIN(MAX(lowest_desired_angle, angle_meas.min - limits.max_angle_error - 1), highest_desired_angle_lower);
-      highest_desired_angle = MAX(MIN(highest_desired_angle, angle_meas.max + limits.max_angle_error + 1), lowest_desired_angle_lower);
+      lowest_desired_angle = MIN(MAX(lowest_desired_angle, angle_meas.min - limits.max_angle_error - 1), highest_desired_angle_lower);  // MUTATION
+      highest_desired_angle = MAX(MIN(highest_desired_angle, angle_meas.max + limits.max_angle_error + 1), lowest_desired_angle_lower);  // MUTATION
 
       // don't enforce above the max steer
-      lowest_desired_angle = CLAMP(lowest_desired_angle, -limits.max_steer, limits.max_steer);
-      highest_desired_angle = CLAMP(highest_desired_angle, -limits.max_steer, limits.max_steer);
+      lowest_desired_angle = CLAMP(lowest_desired_angle, -limits.max_steer, limits.max_steer);  // MUTATION
+      highest_desired_angle = CLAMP(highest_desired_angle, -limits.max_steer, limits.max_steer);  // MUTATION
     }
 
     // check for violation;
