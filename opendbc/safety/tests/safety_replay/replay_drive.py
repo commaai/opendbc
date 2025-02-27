@@ -4,7 +4,7 @@ import os
 from collections import Counter
 
 from opendbc.safety.tests.libsafety import libsafety_py
-from panda.tests.safety_replay.helpers import package_can_msg, init_segment
+from opendbc.safety.tests.safety_replay.helpers import package_can_msg, init_segment
 
 # replay a drive to check for safety violations
 def replay_drive(lr, safety_mode, param, alternative_experience, segment=False):
