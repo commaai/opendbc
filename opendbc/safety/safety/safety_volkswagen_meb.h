@@ -100,41 +100,56 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *to_push) {
   }
 }
 
+// TODO: move STEER constants somewhere sensible
+#define STEER_POWER_MAX 50
+#define STEER_POWER_MIN 20
+#define DRIVER_INPUT_MIN 60
+#define DRIVER_INPUT_MAX 300
+#define STEER_POWER_STEP 2
+
+bool volkswagen_curvature_cmd_checks(int steer_power, int steer_curvature, int steer_req) {
+  bool violation = false;
+
+  if (steer_req == 0) {
+    violation |= (steer_power != 0);
+    violation |= (steer_curvature != 0);
+  } else {
+    if (controls_allowed) {
+      violation |= steer_power > STEER_POWER_MAX;
+      violation |= steer_power < (volkswagen_steer_power_prev - STEER_POWER_STEP);
+      violation |= steer_power > (volkswagen_steer_power_prev + STEER_POWER_STEP);
+    } else {
+      bool disengaging_power = steer_power <= (volkswagen_steer_power_prev - STEER_POWER_STEP);
+      violation |= volkswagen_steer_power_prev == 0;
+      violation |= steer_power > 0 && !disengaging_power;
+    }
+  }
+
+  return violation;
+}
+
 static bool volkswagen_meb_tx_hook(const CANPacket_t *to_send) {
   int addr = GET_ADDR(to_send);
   bool tx = true;
 
   // Safety check for HCA_03 Heading Control Assist curvature
   if (addr == MSG_HCA_03) {
-    int desired_curvature_raw = (GET_BYTE(to_send, 3U) | (GET_BYTE(to_send, 4U) & 0x7FU << 8));
+    int steer_curvature = (GET_BYTE(to_send, 3U) | (GET_BYTE(to_send, 4U) & 0x7FU << 8));
 
     bool sign = GET_BIT(to_send, 39U);
     if (!sign) {
-      desired_curvature_raw *= -1;
+      steer_curvature *= -1;
     }
 
     bool steer_req = GET_BIT(to_send, 14U);
-    int steer_power = (GET_BYTE(to_send, 2U) >> 0) & 0x7FU;
+    int steer_power = GET_BYTE(to_send, 2U) * 0.4;
 
-    // TODO: implement lateral accel limits based on vehicle speed and QFK curvature
-    // TODO: review and implement power backoff on driver input torque
-    // if (desired_curvature > conditions-tbd) {
-    //  tx = false;
-    //
-    //  // steer power is still allowed to decrease to zero monotonously
-    //  // while controls are not allowed anymore
-    //  if (steer_req && steer_power != 0) {
-    //    if (steer_power < volkswagen_steer_power_prev) {
-    //      tx = true;
-    //    }
-    //  }
-    // }
-
-    if (!steer_req && steer_power != 0) {
-      tx = false; // steer power is not 0 when disabled
+    if (volkswagen_curvature_cmd_checks(steer_power, steer_curvature, steer_req)) {
+      tx = false;
+      volkswagen_steer_power_prev = 0;
+    } else {
+      volkswagen_steer_power_prev = steer_power;
     }
-
-    volkswagen_steer_power_prev = steer_power;
   }
 
   // FORCE CANCEL: ensuring that only the cancel button press is sent when controls are off.
