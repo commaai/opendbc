@@ -19,17 +19,16 @@ pytest -n8
 
 # generate and open report
 if [ "$1" == "--report" ]; then
-  geninfo ./libsafety/ -o coverage.info
-  genhtml coverage.info -o coverage-out
+  mkdir -p tests/coverage-out
+  gcovr -r . --html-details tests/coverage-out/index.html
   sensible-browser coverage-out/index.html
 fi
 
 # test coverage
-GCOV_OUTPUT=$(gcov -n ./libsafety/safety.c)
-INCOMPLETE_COVERAGE=$(echo "$GCOV_OUTPUT" | paste -s -d' \n' | grep -E "File.*(\/safety\/safety_.*)|(safety)\.h" | grep -v "100.00%" || true)
-if [ -n "$INCOMPLETE_COVERAGE" ]; then
-  echo "FAILED: Some files have less than 100% coverage:"
-  echo "$INCOMPLETE_COVERAGE"
+cd ..
+GCOV="gcovr -r . --fail-under-line=100 -e ^board/ -e ^tests/libsafety/"
+if ! GCOV_OUTPUT="$($GCOV)"; then
+  echo -e "FAILED:\n$GCOV_OUTPUT"
   exit 1
 else
   echo "SUCCESS: All checked files have 100% coverage!"
