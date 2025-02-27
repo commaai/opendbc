@@ -725,7 +725,11 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
       } else if (desired_angle_last < lowest_desired_angle_error) {
         const int delta = (desired_angle_last <= 0) ? delta_angle_down_relaxed : delta_angle_up_relaxed;
         lowest_desired_angle = MIN(desired_angle_last + delta, lowest_desired_angle_error);
+
       } else {
+        // already inside error boundary, don't allow commanding outside it
+        highest_desired_angle = MIN(highest_desired_angle, highest_desired_angle_error);
+        lowest_desired_angle = MAX(lowest_desired_angle, lowest_desired_angle_error);
       }
     }
 
