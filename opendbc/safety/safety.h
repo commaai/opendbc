@@ -698,12 +698,9 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
     const int delta_angle_up = (interpolate(limits.angle_rate_up_lookup, fudged_speed) * limits.angle_deg_to_can) + 1.;
     const int delta_angle_down = (interpolate(limits.angle_rate_down_lookup, fudged_speed) * limits.angle_deg_to_can) + 1.;
 
-    const int highest_angle_limit = (desired_angle_last > 0) ? delta_angle_up : delta_angle_down;
-    const int lowest_angle_limit = (desired_angle_last >= 0) ? delta_angle_down : delta_angle_up;
-
     // allow down limits at zero since small floats will be rounded to 0
-    int highest_desired_angle = desired_angle_last + highest_angle_limit;
-    int lowest_desired_angle = desired_angle_last - lowest_angle_limit;
+    int highest_desired_angle = desired_angle_last + (desired_angle_last > 0) ? delta_angle_up : delta_angle_down;
+    int lowest_desired_angle = desired_angle_last - (desired_angle_last >= 0) ? delta_angle_down : delta_angle_up;
 
     // check that commanded angle value isn't too far from measured, used to limit torque for some safety modes
     // ensure we start moving in direction of meas while respecting rate limits if error is exceeded
