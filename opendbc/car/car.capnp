@@ -366,7 +366,7 @@ struct CarControl {
     # these are only for logging the actual values sent to the car over CAN
     gas @0: Float32;   # [0.0, 1.0]
     brake @1: Float32; # [0.0, 1.0]
-    steerOutputCan @8: Float32;   # value sent over can to the car
+    torqueOutputCan @8: Float32;   # value sent over can to the car
     speed @6: Float32;  # m/s
 
     enum LongControlState @0xe40f3a917d908282{
