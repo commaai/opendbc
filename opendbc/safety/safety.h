@@ -705,20 +705,22 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
     // check that commanded angle value isn't too far from measured, used to limit torque for some safety modes
     // ensure we start moving in direction of meas while respecting relaxed rate limits if error is exceeded
     if (limits.enforce_angle_error && ((vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR) > limits.angle_error_min_speed)) {
-      const int delta_angle_up_lower = (interpolate(limits.angle_rate_up_lookup, (vehicle_speed.max / VEHICLE_SPEED_FACTOR) + 1.) * limits.angle_deg_to_can) - 1.;
-      const int delta_angle_down_lower = (interpolate(limits.angle_rate_down_lookup, (vehicle_speed.max / VEHICLE_SPEED_FACTOR) + 1.) * limits.angle_deg_to_can) - 1.;
+      // flipped fudge to avoid false positives
+      const float fudged_speed = (vehicle_speed.max / VEHICLE_SPEED_FACTOR) + 1.;
+      const int delta_angle_up_relaxed = (interpolate(limits.angle_rate_up_lookup, fudged_speed) * limits.angle_deg_to_can) - 1.;
+      const int delta_angle_down_relaxed = (interpolate(limits.angle_rate_down_lookup, fudged_speed) * limits.angle_deg_to_can) - 1.;
 
+      // the minimum and maximum angle allowed based on the measured angle
       const int lowest_desired_angle_error = angle_meas.min - limits.max_angle_error - 1;
       const int highest_desired_angle_error = angle_meas.max + limits.max_angle_error + 1;
 
-      // If previous desired angle is outside the bounds set by the measured angle error limit, enforce the new angle move towards it.
-      // The MAX is allow the desired angle to hit the upper edge of the bounds and not require going under it
+      // The MAX is allow the desired angle to hit the edge of the bounds and not require going under it
       if (desired_angle_last > highest_desired_angle_error) {
-        const int delta = (desired_angle_last >= 0) ? delta_angle_down_lower : delta_angle_up_lower;
+        const int delta = (desired_angle_last >= 0) ? delta_angle_down_relaxed : delta_angle_up_relaxed;
         highest_desired_angle = MAX(desired_angle_last - delta, highest_desired_angle_error);
 
       } else if (desired_angle_last < lowest_desired_angle_error) {
-        const int delta = (desired_angle_last <= 0) ? delta_angle_down_lower : delta_angle_up_lower;
+        const int delta = (desired_angle_last <= 0) ? delta_angle_down_relaxed : delta_angle_up_relaxed;
         lowest_desired_angle = MIN(desired_angle_last + delta, lowest_desired_angle_error);
       } else {
       }
