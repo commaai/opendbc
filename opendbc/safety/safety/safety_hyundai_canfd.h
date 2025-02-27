@@ -188,7 +188,6 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
     if (hyundai_canfd_angle_steering) {
       int lka_active_angle = (GET_BYTE(to_send, 9) >> 5) & 0x3U;
       bool steer_angle_req = (lka_active_angle != 0U) &&
-                             (lka_active_angle != 1U) &&
                              (lka_active_angle != 3U);
 
       int desired_angle = (((GET_BYTE(to_send, 10) >> 2) & 0x3F) | (GET_BYTE(to_send, 11) << 6));
