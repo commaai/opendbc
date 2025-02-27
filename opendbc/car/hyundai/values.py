@@ -16,8 +16,8 @@ class CarControllerParams:
   ACCEL_MAX = 2.0 # m/s
 
   # seen changing at 0.2 deg/frame down, 0.1 deg/frame up at 100Hz
-  ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0., 5., 25.], angle_v=[2.5, 1.5, 0.2])
-  ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0., 5., 25.], angle_v=[5., 2.0, 0.3])
+  ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[5, 25], angle_v=[0.3, 0.15])
+  ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[5, 25], angle_v=[0.36, 0.26])
 
   # Stock LFA system is seen sending 250 max, but for LKAS events it's 175 max
   # 250 can at least achieve 4 m/s^2
