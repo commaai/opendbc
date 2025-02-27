@@ -19,7 +19,7 @@ class CarState(CarStateBase):
     self.esp_hold_confirmation = False
     self.upscale_lead_car_signal = False
     self.eps_stock_values = False
-    self.curvature = 0.
+    self.qfk_curvature = 0.
 
   def update_button_enable(self, buttonEvents: list[structs.CarState.ButtonEvent]):
     if not self.CP.pcmCruise:
@@ -66,7 +66,7 @@ class CarState(CarStateBase):
 
     if self.CP.flags & VolkswagenFlags.MEB:
       # MEB-specific
-      self.curvature = -pt_cp.vl["QFK_01"]["Curvature"] * (1, -1)[int(pt_cp.vl["QFK_01"]["Curvature_VZ"])]
+      self.qfk_curvature = -pt_cp.vl["QFK_01"]["Curvature"] * (1, -1)[int(pt_cp.vl["QFK_01"]["Curvature_VZ"])]
       ret.fuelGauge = pt_cp.vl["Motor_16"]["MO_Energieinhalt_BMS"]  # TODO: is this available on MQB as well?
 
       ret.wheelSpeeds = self.get_wheel_speeds(

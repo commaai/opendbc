@@ -42,9 +42,11 @@ class CarController(CarControllerBase):
 
     if self.frame % self.CCP.STEER_STEP == 0:
       if self.CP.flags & VolkswagenFlags.MEB:
-        # Calibrate our curvature command by the offset between openpilot's current curvature and the QFK's current curvature
-        apply_curvature = actuators.curvature + (CS.curvature - CC.currentCurvature)
+        # The QFK (lateral control coordinator) control loop compares actuation curvature to its own current curvature
+        # Calibrate our actuator command by the offset between openpilot's vehicle model curvature and QFK curvature
+        apply_curvature = actuators.curvature + (CS.qfk_curvature - CC.currentCurvature)
 
+        # Progressive QFK power control: smooth engage and disengage, reduce power when the driver is overriding
         qfk_enable = True
         if CC.latActive:
           min_power = max(self.apply_steer_power_last - self.CCP.STEERING_POWER_STEP, self.CCP.STEERING_POWER_MIN)
@@ -59,7 +61,7 @@ class CarController(CarControllerBase):
           apply_curvature = 0
           apply_steer_power = 0
 
-        can_sends.append(self.CCS.create_steering_control(self.packer_pt, CANBUS.pt, apply_curvature, qfk_enable, apply_steer_power))
+        can_sends.append(mebcan.create_steering_control(self.packer_pt, CANBUS.pt, apply_curvature, qfk_enable, apply_steer_power))
 
         self.apply_curvature_last = apply_curvature
         self.apply_steer_power_last = apply_steer_power
