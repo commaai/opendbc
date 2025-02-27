@@ -44,15 +44,15 @@ class CarController(CarControllerBase):
       if self.CP.flags & SubaruFlags.PREGLOBAL:
         can_sends.append(subarucan.create_preglobal_steering_control(self.packer, self.frame // self.p.STEER_STEP, apply_torque, CC.latActive))
       else:
-        apply_torque_req = CC.latActive
+        apply_steer_req = CC.latActive
 
         if self.CP.flags & SubaruFlags.STEER_RATE_LIMITED:
           # Steering rate fault prevention
-          self.steer_rate_counter, apply_torque_req = \
-            common_fault_avoidance(abs(CS.out.steeringRateDeg) > MAX_STEER_RATE, apply_torque_req,
+          self.steer_rate_counter, apply_steer_req = \
+            common_fault_avoidance(abs(CS.out.steeringRateDeg) > MAX_STEER_RATE, apply_steer_req,
                                   self.steer_rate_counter, MAX_STEER_RATE_FRAMES)
 
-        can_sends.append(subarucan.create_steering_control(self.packer, apply_torque, apply_torque_req))
+        can_sends.append(subarucan.create_steering_control(self.packer, apply_torque, apply_steer_req))
 
       self.apply_torque_last = apply_torque
 
