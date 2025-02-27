@@ -123,33 +123,46 @@ class TestVolkswagenMebSafety(common.PandaCarSafetyTest):
     self.assertTrue(self._rx(self._vehicle_curvature_msg(curvature=-0.01)))
 
   # TODO: test against driver input torque
-  def test_lateral_control(self):
+  def test_lateral_control_transitions(self):
     test_sequence = [
       # The test order is meaningful, for testing certain violations and for ramp-down on exiting controls
-      # (LatAct,  power,                     curvature, comment)
-      (False,     0,                         0      ,   "Normal inactive"),
-      (True,      self.STEER_POWER_STEP * 1, 0.00001,   "Normal transition to active"),
-      (True,      self.STEER_POWER_STEP * 2, 0.00001,   "Normal active ramp-up"),
-      (True,      self.STEER_POWER_STEP * 4, 0.00001,   "Block for excessive ramp rate"),
-      (True,      self.STEER_POWER_STEP * 3, 0.00001,   "Block for failure to return to zero before steering again"),
-      (False,     0,                         0      ,   "Reset with normal inactive"),
-      (True,      self.STEER_POWER_STEP * 1, 0.00001,   "Normal transition to active"),
-      (False,     self.STEER_POWER_STEP * 1, 0.00001,   "Block for power/curvature without lat control active"),
+      # (controls_active, steer_req, steer_power, steer_curvature, comment)
+      (False, False,  0,                          0      ,  "Normal inactive"),
+      (True,  True,   self.STEER_POWER_STEP * 1,  0.00001,  "Transition to active"),
+      (True,  True,   self.STEER_POWER_STEP * 2,  0.00001,  "Active ramp-up"),
+      (True,  True,   self.STEER_POWER_STEP * 4,  0.00001,  "Excessive ramp-up rate"),
+      (True,  True,   self.STEER_POWER_STEP * 3,  0.00001,  "Failure to return to zero before steering again"),
+      (False, False,  0,                          0      ,  "Reset with normal inactive"),
+      (True,  True,   self.STEER_POWER_STEP * 1,  0.00001,  "Transition to active"),
+      (False, True,   self.STEER_POWER_STEP * 1,  0.00001,  "Power/curvature without lat control active"),
+      (False, False,  0,                          0,        "Normal inactive"),
+      (True,  True,   self.STEER_POWER_STEP * 1,  0.00001,  "Transition to active"),
+      (True,  True,   self.STEER_POWER_STEP * 2,  0.00001,  "Active ramp-up"),
+      (True,  True,   self.STEER_POWER_STEP * 3,  0.00001,  "Active ramp-up"),
+      (True,  True,   self.STEER_POWER_STEP * 1,  0.00001,  "Excessive ramp-down rate"),
+      (False, False,  0,                          0,        "Normal inactive"),
+      (True,  True,   self.STEER_POWER_STEP * 1,  0.00001,  "Transition to active"),
+      (True,  True,   self.STEER_POWER_STEP * 2,  0.00001,  "Active ramp-up"),
+      (True,  True,   self.STEER_POWER_STEP * 3,  0.00001,  "Active ramp-up"),
+      (True,  True,   self.STEER_POWER_STEP * 4,  0.00001,  "Active ramp-up"),
+      (False, True,   self.STEER_POWER_STEP * 3,  0.00001,  "Soft disengage on controls exit"),
+      (False, True,   self.STEER_POWER_STEP * 1,  0.00001,  "Excessive ramp-down rate on controls exit"),
+      (False, False,  0,                          0,        "Normal inactive"),
     ]
 
-    for controls_allowed in [True, False]:
-      last_power = 0
+    last_power = 0
+    for controls_allowed, lat_active, power, curvature, comment in test_sequence:
       self.safety.set_controls_allowed(controls_allowed)
-      for lat_active, power, curvature, comment in test_sequence:
-        min_valid_power = max(last_power - self.STEER_POWER_STEP, 0)
-        max_valid_power = min(last_power + self.STEER_POWER_STEP, self.STEER_POWER_MAX)
-        power_valid = min_valid_power <= power <= max_valid_power
-        well_formed_inactive = not lat_active and power == 0 and curvature == 0
-        well_formed_active = lat_active and power_valid
-        should_allow = well_formed_inactive or (controls_allowed and well_formed_active)
-        self.assertEqual(should_allow, self._tx(self._curvature_actuation_msg(lat_active, power, curvature)),
-                    f"{comment=} {controls_allowed=} {lat_active=} {power=} {curvature=}")
-        last_power = power if should_allow else 0
+      min_valid_power = max(last_power - self.STEER_POWER_STEP, 0)
+      max_valid_power = min(last_power + self.STEER_POWER_STEP, self.STEER_POWER_MAX)
+      power_valid = min_valid_power <= power <= max_valid_power
+      well_formed_inactive = not lat_active and power == 0 and curvature == 0
+      well_formed_active = controls_allowed and lat_active and power_valid
+      well_formed_disengaging = lat_active and not controls_allowed and power == last_power - self.STEER_POWER_STEP
+      should_allow = well_formed_active or well_formed_inactive or well_formed_disengaging
+      self.assertEqual(should_allow, self._tx(self._curvature_actuation_msg(lat_active, power, curvature)),
+                  f"{comment=} {controls_allowed=} {lat_active=} {power=} {curvature=}")
+      last_power = power if should_allow else 0
 
 
 class TestVolkswagenMebStockSafety(TestVolkswagenMebSafety):

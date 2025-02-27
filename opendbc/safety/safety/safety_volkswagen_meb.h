@@ -119,7 +119,7 @@ bool volkswagen_curvature_cmd_checks(int steer_power, int steer_curvature, int s
       violation |= steer_power < (volkswagen_steer_power_prev - STEER_POWER_STEP);
       violation |= steer_power > (volkswagen_steer_power_prev + STEER_POWER_STEP);
     } else {
-      bool disengaging_power = steer_power <= (volkswagen_steer_power_prev - STEER_POWER_STEP);
+      bool disengaging_power = steer_power == (volkswagen_steer_power_prev - STEER_POWER_STEP);
       violation |= volkswagen_steer_power_prev == 0;
       violation |= steer_power > 0 && !disengaging_power;
     }
