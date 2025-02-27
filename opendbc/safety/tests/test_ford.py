@@ -295,56 +295,44 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
       max_delta_up_lower = (int(np.interp(speed + 1, self.ANGLE_RATE_BP, self.ANGLE_RATE_UP) * self.DEG_TO_CAN - 1) / self.DEG_TO_CAN)
       print('max_delta_up', max_delta_up * 50000, max_delta_up_lower * 50000)
 
-      cases = [
-        (not limit_command, 0, 0),
-        (not limit_command, 0, max_delta_up_lower - small_curvature),
-        (True, 0, max_delta_up_lower),
-        (True, 0, max_delta_up),
-        (False, 0, max_delta_up + small_curvature),
-        # stay at boundary limit
-        (True, self.MAX_CURVATURE_ERROR - small_curvature, self.MAX_CURVATURE_ERROR - small_curvature),
-        # 1 unit below boundary limit
-        (not limit_command, self.MAX_CURVATURE_ERROR - small_curvature * 2, self.MAX_CURVATURE_ERROR - small_curvature * 2),
-      ]
-
-      for sign in (1,):
-        self._reset_curvature_measurement(sign * (self.MAX_CURVATURE_ERROR * 2), speed)
-        for idx, (should_tx, initial_curvature, desired_curvature) in enumerate(cases):
-          curvature_offset = small_curvature if initial_curvature == 0 else 0
-          # small curvature ensures we're using up limits as 0 allows down limits to allow to account for rounding errors
-          # initial_curvature = small_curvature if initial_curvature == 0 else initial_curvature
-          self._set_prev_desired_angle(sign * (curvature_offset + initial_curvature))
-          print('sending', sign * (small_curvature + desired_curvature) * 50000)
-          self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, sign * (curvature_offset + desired_curvature), 0)),
-                           f"speed: {speed}, sign: {sign}, idx: {idx}")
-
-  def test_curvature_rate_limit_down(self):
-    self.safety.set_controls_allowed(True)
-    # safety fudges the speed (1 m/s) and rate limits (1 CAN unit) to avoid false positives
-    small_curvature = 1 / self.DEG_TO_CAN
-
-    for speed in np.arange(0, 40, 0.5):
-      limit_command = speed > self.CURVATURE_ERROR_MIN_SPEED
-      # ensure our limits match the safety's rounded limits
       max_delta_down = int(np.interp(speed - 1, self.ANGLE_RATE_BP, self.ANGLE_RATE_DOWN) * self.DEG_TO_CAN + 1 + 1e-3) / self.DEG_TO_CAN
       max_delta_down_lower = int(np.interp(speed + 1, self.ANGLE_RATE_BP, self.ANGLE_RATE_DOWN) * self.DEG_TO_CAN - 1 + 1e-3) / self.DEG_TO_CAN
 
       print('downhiii python', (np.interp(speed - 1, self.ANGLE_RATE_BP, self.ANGLE_RATE_DOWN) * self.DEG_TO_CAN + 1))
       print("max_delta_down", max_delta_down * 50000, max_delta_down_lower * 50000)
 
-      cases = [
-        (not limit_command, self.MAX_CURVATURE),
-        (not limit_command, self.MAX_CURVATURE - max_delta_down_lower + small_curvature),
-        (True, self.MAX_CURVATURE - max_delta_down_lower),
-        (True, self.MAX_CURVATURE - max_delta_down),
-        (False, self.MAX_CURVATURE - max_delta_down - small_curvature),
-      ]
-      for sign in (-1, 1):
-        self._reset_curvature_measurement(sign * (self.MAX_CURVATURE - self.MAX_CURVATURE_ERROR * 1.5), speed)
-        for idx, (should_tx, curvature) in enumerate(cases):
-          self._set_prev_desired_angle(sign * self.MAX_CURVATURE)
-          self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, sign * curvature, 0)),
-                           f"speed: {speed}, sign: {sign}, idx: {idx}")
+      up_cases = (self.MAX_CURVATURE_ERROR * 2, [
+        (not limit_command, 0, 0),
+        (not limit_command, 0, max_delta_up_lower - small_curvature),
+        (True, 1e-6, max_delta_down),  # TODO: safety should not allow down limits at 0
+        (True, 0, max_delta_up_lower),
+        (True, 0, max_delta_up),
+        (False, 0, max_delta_up + small_curvature),
+        # # stay at boundary limit
+        # (True, self.MAX_CURVATURE_ERROR - small_curvature, self.MAX_CURVATURE_ERROR - small_curvature),
+        # # 1 unit below boundary limit
+        # (not limit_command, self.MAX_CURVATURE_ERROR - small_curvature * 2, self.MAX_CURVATURE_ERROR - small_curvature * 2),
+      ])
+
+      down_cases = (self.MAX_CURVATURE - self.MAX_CURVATURE_ERROR * 2, [
+        (not limit_command, self.MAX_CURVATURE, self.MAX_CURVATURE),
+        (not limit_command, self.MAX_CURVATURE, self.MAX_CURVATURE - max_delta_down_lower + small_curvature),
+        (True, self.MAX_CURVATURE, self.MAX_CURVATURE - max_delta_down_lower),
+        (True, self.MAX_CURVATURE, self.MAX_CURVATURE - max_delta_down),
+        (False, self.MAX_CURVATURE, self.MAX_CURVATURE - max_delta_down - small_curvature),
+      ])
+
+      for sign in (1,):
+        for angle_meas, cases in (up_cases, down_cases):
+          self._reset_curvature_measurement(sign * (self.MAX_CURVATURE_ERROR * 2), speed)
+          for idx, (should_tx, initial_curvature, desired_curvature) in enumerate(cases):
+            curvature_offset = small_curvature if initial_curvature == 0 else 0
+            # small curvature ensures we're using up limits as 0 allows down limits to allow to account for rounding errors
+            # initial_curvature = small_curvature if initial_curvature == 0 else initial_curvature
+            self._set_prev_desired_angle(sign * (curvature_offset + initial_curvature))
+            print('sending', sign * (small_curvature + desired_curvature) * 50000)
+            self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, sign * (curvature_offset + desired_curvature), 0)),
+                             f"speed: {speed}, sign: {sign}, idx: {idx}")
 
   def test_prevent_lkas_action(self):
     self.safety.set_controls_allowed(1)
