@@ -308,10 +308,10 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
         (True, 0, max_delta_up_lower),
         (True, 0, max_delta_up),
         (False, 0, max_delta_up + small_curvature),
-        # # stay at boundary limit
-        # (True, self.MAX_CURVATURE_ERROR - small_curvature, self.MAX_CURVATURE_ERROR - small_curvature),
-        # # 1 unit below boundary limit
-        # (not limit_command, self.MAX_CURVATURE_ERROR - small_curvature * 2, self.MAX_CURVATURE_ERROR - small_curvature * 2),
+        # stay at boundary limit
+        (True, self.MAX_CURVATURE_ERROR - small_curvature, self.MAX_CURVATURE_ERROR - small_curvature),
+        # 1 unit below boundary limit
+        (not limit_command, self.MAX_CURVATURE_ERROR - small_curvature * 2, self.MAX_CURVATURE_ERROR - small_curvature * 2),
       ])
 
       down_cases = (self.MAX_CURVATURE - self.MAX_CURVATURE_ERROR * 2, [
