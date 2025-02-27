@@ -152,14 +152,16 @@ class TestVolkswagenMebSafety(common.PandaCarSafetyTest):
 
     last_power = 0
     for controls_allowed, lat_active, power, curvature, comment in test_sequence:
-      self.safety.set_controls_allowed(controls_allowed)
       min_valid_power = max(last_power - self.STEER_POWER_STEP, 0)
       max_valid_power = min(last_power + self.STEER_POWER_STEP, self.STEER_POWER_MAX)
       power_valid = min_valid_power <= power <= max_valid_power
+
       well_formed_inactive = not lat_active and power == 0 and curvature == 0
       well_formed_active = controls_allowed and lat_active and power_valid
       well_formed_disengaging = lat_active and not controls_allowed and power == last_power - self.STEER_POWER_STEP
+
       should_allow = well_formed_active or well_formed_inactive or well_formed_disengaging
+      self.safety.set_controls_allowed(controls_allowed)
       self.assertEqual(should_allow, self._tx(self._curvature_actuation_msg(lat_active, power, curvature)),
                   f"{comment=} {controls_allowed=} {lat_active=} {power=} {curvature=}")
       last_power = power if should_allow else 0
