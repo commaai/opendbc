@@ -16,13 +16,13 @@ A depends on longitudinal speed, u [m/s], and vehicle parameters CP
 import numpy as np
 from numpy.linalg import solve
 
-from cereal import car
+from opendbc.car.structs import CarParams
 
 ACCELERATION_DUE_TO_GRAVITY = 9.8
 
 
 class VehicleModel:
-  def __init__(self, CP: car.CarParams):
+  def __init__(self, CP: CarParams):
     """
     Args:
       CP: Car Parameters
