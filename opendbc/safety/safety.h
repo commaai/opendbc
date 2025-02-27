@@ -716,11 +716,11 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
       const int highest_desired_angle_error = angle_meas.max + limits.max_angle_error + 1;
 
       // the MAX is to allow the desired angle to hit the edge of the bounds and not require going under it
-      if (desired_angle_last > highest_desired_angle_error) {
+      if (desired_angle_last > highest_desired_angle_error) {  // NOLINT(cxx_gt_to_ge)
         const int delta = (desired_angle_last >= 0) ? delta_angle_down_relaxed : delta_angle_up_relaxed;
         highest_desired_angle = MAX(desired_angle_last - delta, highest_desired_angle_error);
 
-      } else if (desired_angle_last < lowest_desired_angle_error) {
+      } else if (desired_angle_last < lowest_desired_angle_error) {  // NOLINT(cxx_gt_to_ge)
         const int delta = (desired_angle_last <= 0) ? delta_angle_down_relaxed : delta_angle_up_relaxed;
         lowest_desired_angle = MIN(desired_angle_last + delta, lowest_desired_angle_error);
 
