@@ -702,6 +702,8 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
     int highest_desired_angle = desired_angle_last + ((desired_angle_last > 0) ? delta_angle_up : delta_angle_down);
     int lowest_desired_angle = desired_angle_last - ((desired_angle_last >= 0) ? delta_angle_down : delta_angle_up);
 
+    printf("desired_angle: %d, desired_angle_last: %d, highest_desired_angle: %d, lowest_desired_angle: %d\n", desired_angle, desired_angle_last, highest_desired_angle, lowest_desired_angle);
+
     // check that commanded angle value isn't too far from measured, used to limit torque for some safety modes
     // ensure we start moving in direction of meas while respecting relaxed rate limits if error is exceeded
     if (limits.enforce_angle_error && ((vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR) > limits.angle_error_min_speed)) {

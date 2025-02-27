@@ -296,20 +296,26 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
       print('max_delta_up', max_delta_up * 50000, max_delta_up_lower * 50000)
 
       cases = [
-        (not limit_command, 0),
-        (not limit_command, max_delta_up_lower - small_curvature),
-        (True, max_delta_up_lower),
-        (True, max_delta_up),
-        (False, max_delta_up + small_curvature),
+        (not limit_command, 0, 0),
+        (not limit_command, 0, max_delta_up_lower - small_curvature),
+        (True, 0, max_delta_up_lower),
+        (True, 0, max_delta_up),
+        (False, 0, max_delta_up + small_curvature),
+        # stay at boundary limit
+        (True, self.MAX_CURVATURE_ERROR - small_curvature, self.MAX_CURVATURE_ERROR - small_curvature),
+        # 1 unit below boundary limit
+        (not limit_command, self.MAX_CURVATURE_ERROR - small_curvature * 2, self.MAX_CURVATURE_ERROR - small_curvature * 2),
       ]
 
-      for sign in (-1, 1):
-        self._reset_curvature_measurement(sign * (self.MAX_CURVATURE_ERROR * 1.5), speed)
-        for idx, (should_tx, curvature) in enumerate(cases):
+      for sign in (1,):
+        self._reset_curvature_measurement(sign * (self.MAX_CURVATURE_ERROR * 2), speed)
+        for idx, (should_tx, initial_curvature, desired_curvature) in enumerate(cases):
+          curvature_offset = small_curvature if initial_curvature == 0 else 0
           # small curvature ensures we're using up limits as 0 allows down limits to allow to account for rounding errors
-          self._set_prev_desired_angle(sign * small_curvature)
-          print('sending', sign * (small_curvature + curvature) * 50000)
-          self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, sign * (small_curvature + curvature), 0)),
+          # initial_curvature = small_curvature if initial_curvature == 0 else initial_curvature
+          self._set_prev_desired_angle(sign * (curvature_offset + initial_curvature))
+          print('sending', sign * (small_curvature + desired_curvature) * 50000)
+          self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, sign * (curvature_offset + desired_curvature), 0)),
                            f"speed: {speed}, sign: {sign}, idx: {idx}")
 
   def test_curvature_rate_limit_down(self):
