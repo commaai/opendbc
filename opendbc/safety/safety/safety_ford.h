@@ -248,8 +248,8 @@ static bool ford_tx_hook(const CANPacket_t *to_send) {
     // Violation if resume button is pressed while controls not allowed, or
     // if cancel button is pressed when cruise isn't engaged.
     bool violation = false;
-//    violation |= GET_BIT(to_send, 8U) && !cruise_engaged_prev;   // Signal: CcAslButtnCnclPress (cancel)
-//    violation |= GET_BIT(to_send, 25U) && !controls_allowed;     // Signal: CcAsllButtnResPress (resume)
+    violation |= GET_BIT(to_send, 8U) && !cruise_engaged_prev;   // Signal: CcAslButtnCnclPress (cancel)
+    violation |= GET_BIT(to_send, 25U) && !controls_allowed;     // Signal: CcAsllButtnResPress (resume)
 
     if (violation) {
       tx = false;
