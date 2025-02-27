@@ -38,6 +38,8 @@ def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_steer, 
 
   ret = []
 
+  # For cars with an ADAS ECU (commonly HDA2), by sending LKAS actuation messages we're
+  # telling the ADAS ECU to forward our steering and disable stock LFA lane centering.
   if CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
     values = {
       "LKA_MODE": 0,  # always 0

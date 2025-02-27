@@ -73,19 +73,6 @@ class CarController(CarControllerBase):
 
     apply_angle = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, self.params)
 
-    # Figure out max torque value.  On Stock when LKAS is active, this is variable,
-    # but 0 when LKAS is not actively steering, so because we're "tricking" ADAS
-    # into thinking LKAS is always active, we need to make sure we're applying
-    # torque when the driver is not actively steering. The default value chosen
-    # here is based on observations of the stock LKAS system when it's engaged
-    # CS.out.steeringPressed and steeringTorque are based on the
-    # STEERING_COL_TORQUE value
-
-    # Track if and how long the driver has been applying torque and create a
-    # value to reduce the max torque applied. This block will cause the
-    # `driver_applied_torque_reducer` to settle to value between 30 and 150.
-    # While the driver applies torque the value will decrease to 30, and while
-    # the driver is not applying torque the value will increase to 150.
     # Similar to torque control driver torque override, we ramp up and down the max allowed torque,
     # but this is a single threshold in the opposite direction of angle for simplicity
     if apply_angle > 0 and CS.out.steeringTorque < -self.params.ANGLE_DRIVER_TORQUE_THRESHOLD:
