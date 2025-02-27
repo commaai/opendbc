@@ -285,26 +285,35 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
     Since panda allows higher rate limits to avoid false positives, we need to allow a lower rate to move towards meas.
     """
     self.safety.set_controls_allowed(True)
-    small_curvature = 2 / self.DEG_TO_CAN  # significant small amount of curvature to cross boundary
+    # safety fudges the speed (1 m/s) and rate limits (1 CAN unit) to avoid false positives
+    small_curvature = 1 / self.DEG_TO_CAN  # significant small amount of curvature to cross boundary
 
     for speed in np.arange(0, 40, 0.5):
       limit_command = speed > self.CURVATURE_ERROR_MIN_SPEED
-      max_delta_up = np.interp(speed - 1, self.ANGLE_RATE_BP, self.ANGLE_RATE_UP)
-      max_delta_up_lower = np.interp(speed + 1, self.ANGLE_RATE_BP, self.ANGLE_RATE_UP)
+      # ensure our limits match the safety's rounded limits
+      max_delta_up = int(np.interp(speed - 1, self.ANGLE_RATE_BP, self.ANGLE_RATE_UP) * self.DEG_TO_CAN + 1) / self.DEG_TO_CAN
+      max_delta_up_lower = int(np.interp(speed + 1, self.ANGLE_RATE_BP, self.ANGLE_RATE_UP) * self.DEG_TO_CAN - 1) / self.DEG_TO_CAN
 
-      max_delta_down = np.interp(speed - 1, self.ANGLE_RATE_BP, self.ANGLE_RATE_DOWN)
-      max_delta_down_lower = np.interp(speed + 1, self.ANGLE_RATE_BP, self.ANGLE_RATE_DOWN)
+      max_delta_down = int(np.interp(speed - 1, self.ANGLE_RATE_BP, self.ANGLE_RATE_DOWN) * self.DEG_TO_CAN + 1 + 1e-3) / self.DEG_TO_CAN
+      max_delta_down_lower = int(np.interp(speed + 1, self.ANGLE_RATE_BP, self.ANGLE_RATE_DOWN) * self.DEG_TO_CAN - 1 + 1e-3) / self.DEG_TO_CAN
 
-      up_cases = (self.MAX_CURVATURE_ERROR + 1e-3, [
+      up_cases = (self.MAX_CURVATURE_ERROR * 2, [
         (not limit_command, 0, 0),
         (not limit_command, 0, max_delta_up_lower - small_curvature),
-        (True, 1e-6, max_delta_down),  # TODO: safety should not allow down limits at 0
+        (True, 1e-9, max_delta_down),  # TODO: safety should not allow down limits at 0
+        (not limit_command, 1e-9, max_delta_up_lower),  # TODO: safety should not allow down limits at 0
         (True, 0, max_delta_up_lower),
         (True, 0, max_delta_up),
         (False, 0, max_delta_up + small_curvature),
+        # stay at boundary limit
+        (True, self.MAX_CURVATURE_ERROR - small_curvature, self.MAX_CURVATURE_ERROR - small_curvature),
+        # 1 unit below boundary limit
+        (not limit_command, self.MAX_CURVATURE_ERROR - small_curvature * 2, self.MAX_CURVATURE_ERROR - small_curvature * 2),
+        # shouldn't allow command to move outside the boundary limit if last was inside
+        (not limit_command, self.MAX_CURVATURE_ERROR - small_curvature, self.MAX_CURVATURE_ERROR - small_curvature * 2),
       ])
 
-      down_cases = (self.MAX_CURVATURE - self.MAX_CURVATURE_ERROR - 1e-3, [
+      down_cases = (self.MAX_CURVATURE - self.MAX_CURVATURE_ERROR * 2, [
         (not limit_command, self.MAX_CURVATURE, self.MAX_CURVATURE),
         (not limit_command, self.MAX_CURVATURE, self.MAX_CURVATURE - max_delta_down_lower + small_curvature),
         (True, self.MAX_CURVATURE, self.MAX_CURVATURE - max_delta_down_lower),
@@ -316,8 +325,8 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
         for angle_meas, cases in (up_cases, down_cases):
           self._reset_curvature_measurement(sign * angle_meas, speed)
           for should_tx, initial_curvature, desired_curvature in cases:
+            # small curvature ensures we're using up limits. at 0, safety allows down limits to allow to account for rounding errors
             curvature_offset = small_curvature if initial_curvature == 0 else 0
-            print('curvature_offset:', curvature_offset)
             self._set_prev_desired_angle(sign * (curvature_offset + initial_curvature))
             self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, sign * (curvature_offset + desired_curvature), 0)))
 
