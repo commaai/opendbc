@@ -82,7 +82,6 @@ class CarController(CarControllerBase):
     # angle control
     else:
       apply_angle = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, self.params)
-      apply_angle = float(np.clip(apply_angle, -self.params.ANGLE_MAX, self.params.ANGLE_MAX))
 
       # Similar to torque control driver torque override, we ramp up and down the max allowed torque,
       # but this is a single threshold in the opposite direction of angle for simplicity
@@ -99,6 +98,7 @@ class CarController(CarControllerBase):
       apply_torque = 0
       self.lkas_max_torque = 0
 
+    apply_angle = float(np.clip(apply_angle, -self.params.ANGLE_MAX, self.params.ANGLE_MAX))
     self.apply_torque_last = apply_torque
     self.apply_angle_last = apply_angle
 
