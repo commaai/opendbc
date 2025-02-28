@@ -237,14 +237,51 @@ static bool msg_allowed(const CANPacket_t *to_send, const CanMsg msg_list[], int
   return allowed;
 }
 
+static bool tx_msg_safety_check(const CANPacket_t *to_send,
+                         const safety_config *cfg,
+                         const safety_hooks *safety_hooks) {
+
+  int index = get_addr_check_index(to_send, cfg->tx_msgs, cfg->tx_msgs_len);
+  update_addr_timestamp(cfg->tx_msgs, index);
+
+  if (index != -1) {
+    // checksum check
+    if ((safety_hooks->get_checksum != NULL) && (safety_hooks->compute_checksum != NULL) && cfg->tx_msgs[index].msg[cfg->tx_msgs[index].status.index].check_checksum) {
+      uint32_t checksum = safety_hooks->get_checksum(to_send);
+      uint32_t checksum_comp = safety_hooks->compute_checksum(to_send);
+      cfg->tx_msgs[index].status.valid_checksum = checksum_comp == checksum;
+    } else {
+      cfg->tx_msgs[index].status.valid_checksum = true;
+    }
+
+    // counter check (max_counter == 0 means skip check)
+    if ((safety_hooks->get_counter != NULL) && (cfg->tx_msgs[index].msg[cfg->tx_msgs[index].status.index].max_counter > 0U)) {
+      uint8_t counter = safety_hooks->get_counter(to_send);
+      update_counter(cfg->tx_msgs, index, counter);
+    } else {
+      cfg->tx_msgs[index].status.wrong_counters = 0U;
+    }
+
+    // quality flag check
+    if ((safety_hooks->get_quality_flag_valid != NULL) && cfg->tx_msgs[index].msg[cfg->tx_msgs[index].status.index].quality_flag) {
+      cfg->tx_msgs[index].status.valid_quality_flag = safety_hooks->get_quality_flag_valid(to_send);
+    } else {
+      cfg->tx_msgs[index].status.valid_quality_flag = true;
+    }
+  }
+  return is_msg_valid(cfg->tx_msgs, index);
+}
+
 bool safety_tx_hook(CANPacket_t *to_send) {
   bool whitelisted = msg_allowed(to_send, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
   if ((current_safety_mode == SAFETY_ALLOUTPUT) || (current_safety_mode == SAFETY_ELM327)) {
     whitelisted = true;
   }
 
-  const bool safety_allowed = current_hooks->tx(to_send);
-  return !relay_malfunction && whitelisted && safety_allowed;
+  valid = tx_msg_safety_check(to_send, &current_safety_config, current_hooks);
+  if (valid){
+    current_hooks->tx(to_push);
+  }
 }
 
 int safety_fwd_hook(int bus_num, int addr) {
