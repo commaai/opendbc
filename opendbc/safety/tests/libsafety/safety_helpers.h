@@ -75,16 +75,17 @@ bool get_acc_main_on(void){
   return acc_main_on;
 }
 
-int get_vehicle_speed_min(void){
-  return vehicle_speed.min;
+float get_vehicle_speed_min(void){
+  return vehicle_speed.min / VEHICLE_SPEED_FACTOR;
 }
 
-int get_vehicle_speed_max(void){
-  return vehicle_speed.max;
+float get_vehicle_speed_max(void){
+  return vehicle_speed.max / VEHICLE_SPEED_FACTOR;
 }
 
-int get_vehicle_speed_last(void){
-  return vehicle_speed.values[0];
+// TODO: this isn't used
+float get_vehicle_speed_last(void){
+  return vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR;
 }
 
 int get_current_safety_mode(void){

@@ -11,7 +11,7 @@ from opendbc.safety.tests.libsafety import libsafety_py
 
 MAX_WRONG_COUNTERS = 5
 MAX_SAMPLE_VALS = 6
-VEHICLE_SPEED_FACTOR = 100
+VEHICLE_SPEED_FACTOR = 1000
 
 MessageFunction = Callable[[float], libsafety_py.CANPacket]
 
