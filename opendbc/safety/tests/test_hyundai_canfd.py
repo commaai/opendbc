@@ -40,8 +40,8 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.PandaCarSafetyTest):
     values = {"TORQUE_REQUEST": torque, "STEER_REQ": steer_req}
     return self.packer.make_can_msg_panda(self.STEER_MSG, self.STEER_BUS, values)
 
-  def _angle_cmd_msg(self, angle: float, enabled: bool):
-    values = {"LKAS_ANGLE_CMD": angle, "LKAS_ANGLE_ACTIVE": 2 if enabled else 1}
+  def _angle_cmd_msg(self, angle: float, enabled: bool, max_torque: int = 0):
+    values = {"LKAS_ANGLE_CMD": angle, "LKAS_ANGLE_ACTIVE": 2 if enabled else 1, "LKAS_ANGLE_MAX_TORQUE": max_torque}
     return self.packer.make_can_msg_panda(self.STEER_MSG, self.STEER_BUS, values)
 
   def _angle_meas_msg(self, angle: float):

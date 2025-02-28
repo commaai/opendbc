@@ -44,6 +44,8 @@ static bool hyundai_canfd_alt_buttons = false;
 static bool hyundai_canfd_lka_steering_alt = false;
 static bool hyundai_canfd_angle_steering = false;
 
+int hyundai_canfd_angle_max_torque = 0;
+
 static int hyundai_canfd_get_lka_addr(void) {
   return hyundai_canfd_lka_steering_alt ? 0x110 : 0x50;
 }
@@ -61,6 +63,34 @@ static uint8_t hyundai_canfd_get_counter(const CANPacket_t *to_push) {
 static uint32_t hyundai_canfd_get_checksum(const CANPacket_t *to_push) {
   uint32_t chksum = GET_BYTE(to_push, 0) | (GET_BYTE(to_push, 1) << 8);
   return chksum;
+}
+
+bool hyundai_steer_lkas_angle_checks(int desired_angle, bool steer_req, int max_torque, const AngleSteeringLimits limits) {
+  const int MAX_LKAS_ANGLE_TORQUE = 80;
+  const int DRIVER_TORQUE_ALLOWANCE = 100;
+
+  bool violation = false;
+
+  // we should never command above torque limit
+  if (ABS(max_torque) > MAX_LKAS_ANGLE_TORQUE) {
+    violation = true;
+  }
+
+  // if we're not steering we shouldn't be commanding torque
+  if ((!controls_allowed || !steer_req) && (max_torque != 0)) {
+    violation = true;
+  }
+
+  // TODO: torque wind down based on driver torque
+
+  // TODO: check should not winding down
+  if ((torque_driver.values[0] > DRIVER_TORQUE_ALLOWANCE) && (max_torque != 0)) {
+    violation = true;
+  }
+
+  hyundai_canfd_angle_max_torque = max_torque;
+
+  return violation;
 }
 
 static void hyundai_canfd_rx_hook(const CANPacket_t *to_push) {
@@ -194,6 +224,13 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
       int desired_angle = (GET_BYTE(to_send, 11) << 6) | (GET_BYTE(to_send, 10) >> 2);
       desired_angle = to_signed(desired_angle, 14);
 
+      const int max_torque = GET_BYTE(to_send, 12);
+
+      // additional checks for max torque signal
+      if (hyundai_steer_lkas_angle_checks(desired_angle, steer_angle_req, max_torque, HYUNDAI_CANFD_ANGLE_STEERING_LIMITS)) {
+        tx = false;
+      }
+
       if (steer_angle_cmd_checks(desired_angle, steer_angle_req, HYUNDAI_CANFD_ANGLE_STEERING_LIMITS)) {
         tx = false;
       }
@@ -282,6 +319,9 @@ static safety_config hyundai_canfd_init(uint16_t param) {
   const int HYUNDAI_PARAM_CANFD_LKA_STEERING_ALT = 128;
   const int HYUNDAI_PARAM_CANFD_ALT_BUTTONS = 32;
   const int HYUNDAI_PARAM_CANFD_ANGLE_STEERING = 1024;
+
+  // TODO: make this a common safety check
+  hyundai_canfd_angle_max_torque = 0;
 
   static const CanMsg HYUNDAI_CANFD_LKA_STEERING_TX_MSGS[] = {
     HYUNDAI_CANFD_LKA_STEERING_COMMON_TX_MSGS(0, 1)
