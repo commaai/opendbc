@@ -147,7 +147,6 @@ def apply_std_steer_angle_limits(apply_angle, apply_angle_last, v_ego, steering_
   rate_limits = LIMITS.ANGLE_RATE_LIMIT_UP if steer_up else LIMITS.ANGLE_RATE_LIMIT_DOWN
 
   angle_rate_lim = np.interp(v_ego, rate_limits.speed_bp, rate_limits.angle_v)
-  angle_rate_lim = angle_rate_lim
   new_apply_angle = np.clip(apply_angle, apply_angle_last - angle_rate_lim, apply_angle_last + angle_rate_lim)
 
   # angle is current steering wheel angle when inactive on all angle cars
