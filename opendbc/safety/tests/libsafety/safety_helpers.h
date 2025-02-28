@@ -83,11 +83,6 @@ float get_vehicle_speed_max(void){
   return vehicle_speed.max / VEHICLE_SPEED_FACTOR;
 }
 
-// TODO: this isn't used
-float get_vehicle_speed_last(void){
-  return vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR;
-}
-
 int get_current_safety_mode(void){
   return current_safety_mode;
 }
