@@ -61,7 +61,7 @@ static bool toyota_get_quality_flag_valid(const CANPacket_t *to_push) {
   return valid;
 }
 
-const AngleSteeringLimits TOYOTA_ANGLE_STEERING_LIMITS = {
+static const AngleSteeringLimits TOYOTA_ANGLE_STEERING_LIMITS = {
   // LTA angle limits
   // factor for STEER_TORQUE_SENSOR->STEER_ANGLE and STEERING_LTA->STEER_ANGLE_CMD (1 / 0.0573)
   .max_angle = 1657,  // EPS only accepts up to 94.9461
