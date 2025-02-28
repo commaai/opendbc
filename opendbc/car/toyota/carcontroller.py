@@ -33,11 +33,6 @@ MAX_STEER_RATE_FRAMES = 18  # tx control frames needed before torque can be cut
 # EPS allows user torque above threshold for 50 frames before permanently faulting
 MAX_USER_TORQUE = 500
 
-# LTA limits
-# EPS ignores commands above this angle and causes PCS to fault
-MAX_LTA_ANGLE = 94.9461  # deg
-MAX_LTA_DRIVER_TORQUE_ALLOWANCE = 150  # slightly above steering pressed allows some resistance when changing lanes
-
 
 def get_long_tune(CP, params):
   if CP.carFingerprint in TSS2_CAR:
@@ -125,12 +120,9 @@ class CarController(CarControllerBase):
         apply_angle = actuators.steeringAngleDeg + CS.out.steeringAngleOffsetDeg
 
         # Angular rate limit based on speed
-        apply_angle = apply_std_steer_angle_limits(apply_angle, self.last_angle, CS.out.vEgoRaw, self.params)
-
-        if not lat_active:
-          apply_angle = CS.out.steeringAngleDeg + CS.out.steeringAngleOffsetDeg
-
-        self.last_angle = float(np.clip(apply_angle, -MAX_LTA_ANGLE, MAX_LTA_ANGLE))
+        self.last_angle = apply_std_steer_angle_limits(apply_angle, self.last_angle, CS.out.vEgoRaw,
+                                                       CS.out.steeringAngleDeg + CS.out.steeringAngleOffsetDeg,
+                                                       CC.latActive, self.params)
 
     self.last_steer = apply_torque
 
@@ -154,7 +146,7 @@ class CarController(CarControllerBase):
       # cut steering torque with TORQUE_WIND_DOWN when either EPS torque or driver torque is above
       # the threshold, to limit max lateral acceleration and for driver torque blending respectively.
       full_torque_condition = (abs(CS.out.steeringTorqueEps) < self.params.STEER_MAX and
-                               abs(CS.out.steeringTorque) < MAX_LTA_DRIVER_TORQUE_ALLOWANCE)
+                               abs(CS.out.steeringTorque) < self.params.MAX_LTA_DRIVER_TORQUE_ALLOWANCE)
 
       # TORQUE_WIND_DOWN at 0 ramps down torque at roughly the max down rate of 1500 units/sec
       torque_wind_down = 100 if lta_active and full_torque_condition else 0
