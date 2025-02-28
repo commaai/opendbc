@@ -11,7 +11,7 @@ def checksum(data, poly, xor_output):
   return crc ^ xor_output
 
 
-def create_lka_steering(packer, acm_lka_hba_cmd, apply_steer, enabled):
+def create_lka_steering(packer, acm_lka_hba_cmd, apply_torque, enabled):
   values = {s: acm_lka_hba_cmd[s] for s in [
     "ACM_lkaHbaCmd_Counter",
     "ACM_lkaHbaCmd_Checksum",
@@ -40,7 +40,7 @@ def create_lka_steering(packer, acm_lka_hba_cmd, apply_steer, enabled):
     values["ACM_lkaActToi"] = 1
     values["ACM_lkaSymbolState"] = 3
     values["ACM_lkaLaneRecogState"] = 3
-    values["ACM_lkaStrToqReq"] = apply_steer
+    values["ACM_lkaStrToqReq"] = apply_torque
     values["ACM_unkown2"] = 1
     values["ACM_unkown3"] = 4
     values["ACM_unkown4"] = 160
