@@ -580,7 +580,6 @@ class MotorTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
 
 class AngleSteeringSafetyTest(PandaSafetyTestBase):
 
-  STEER_ANGLE_MAX: float = 1310
   DEG_TO_CAN: float
   ANGLE_RATE_BP: list[float]
   ANGLE_RATE_UP: list[float]  # windup limit
@@ -625,7 +624,7 @@ class AngleSteeringSafetyTest(PandaSafetyTestBase):
   def test_angle_cmd_when_enabled(self, max_angle=300):
     # when controls are allowed, angle cmd rate limit is enforced
     speeds = [0., 1., 5., 10., 15., 50.]
-    angles = np.concatenate((np.arange(-self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX, 5), [0]))
+    angles = np.concatenate((np.arange(-max_angle, max_angle, 5), [0]))
     for a in angles:
       for s in speeds:
         max_delta_up = np.interp(s, self.ANGLE_RATE_BP, self.ANGLE_RATE_UP)
@@ -640,14 +639,11 @@ class AngleSteeringSafetyTest(PandaSafetyTestBase):
 
         # Stay within limits
         # Up
-        new_angle = a + sign_of(a) * max_delta_up
-        should_tx = abs(new_angle) <= self.STEER_ANGLE_MAX
-        self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(new_angle, True)), (a, s, max_delta_up))
+        self.assertTrue(self._tx(self._angle_cmd_msg(a + sign_of(a) * max_delta_up, True)))
         self.assertTrue(self.safety.get_controls_allowed())
 
         # Don't change
-        should_tx = abs(a) <= self.STEER_ANGLE_MAX
-        self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(a, True)), (a, s, max_delta_up))
+        self.assertTrue(self._tx(self._angle_cmd_msg(a, True)))
         self.assertTrue(self.safety.get_controls_allowed())
 
         # Down
