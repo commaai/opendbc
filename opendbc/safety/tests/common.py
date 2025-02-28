@@ -616,6 +616,7 @@ class AngleSteeringSafetyTest(PandaSafetyTestBase):
       self._rx(self._speed_msg(speed))
 
   def test_vehicle_speed_measurements(self):
+    # TODO: lower tolerance on these tests
     self._common_measurement_test(self._speed_msg, 0, 80, VEHICLE_SPEED_FACTOR, self.safety.get_vehicle_speed_min, self.safety.get_vehicle_speed_max)
 
   def test_steering_angle_measurements(self, max_angle=300):
