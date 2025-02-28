@@ -108,8 +108,8 @@ static bool ford_lkas_msg_check(int addr) {
 }
 
 // Curvature rate limits
-static const SteeringLimits FORD_STEERING_LIMITS = {
-  .max_steer = 1000,
+static const AngleSteeringLimits FORD_STEERING_LIMITS = {
+//  .max_steer = 1000,  // TODO: implement this
   .angle_deg_to_can = 50000,        // 1 / (2e-5) rad to can
   .max_angle_error = 100,           // 0.002 * FORD_STEERING_LIMITS.angle_deg_to_can
   .angle_rate_up_lookup = {
