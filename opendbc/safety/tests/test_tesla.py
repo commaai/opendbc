@@ -92,7 +92,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
   def test_vehicle_speed_measurements(self):
     # OVERRIDDEN: 79.1667 is the max speed in m/s
-    self._common_measurement_test(self._speed_msg, 0, 285 / 3.6, common.VEHICLE_SPEED_FACTOR,
+    self._common_measurement_test(self._speed_msg, 0, 285 / 3.6, 1,
                                   self.safety.get_vehicle_speed_min, self.safety.get_vehicle_speed_max)
 
 

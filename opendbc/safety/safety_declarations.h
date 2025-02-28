@@ -29,7 +29,7 @@ extern const int MAX_WRONG_COUNTERS;
 #define MAX_ADDR_CHECK_MSGS 3U
 #define MAX_SAMPLE_VALS 6
 // used to represent floating point vehicle speed in a sample_t
-#define VEHICLE_SPEED_FACTOR 100.0
+#define VEHICLE_SPEED_FACTOR 1000.0
 
 
 // sample struct that keeps 6 samples in memory
