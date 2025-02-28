@@ -141,14 +141,19 @@ def apply_meas_steer_torque_limits(apply_torque, apply_torque_last, motor_torque
                                              LIMITS.STEER_ERROR_MAX, LIMITS.STEER_MAX)))
 
 
-def apply_std_steer_angle_limits(apply_angle, apply_angle_last, v_ego, LIMITS):
+def apply_std_steer_angle_limits(apply_angle, apply_angle_last, v_ego, steering_angle, lat_active, LIMITS):
   # pick angle rate limits based on wind up/down
   steer_up = apply_angle_last * apply_angle >= 0. and abs(apply_angle) > abs(apply_angle_last)
   rate_limits = LIMITS.ANGLE_RATE_LIMIT_UP if steer_up else LIMITS.ANGLE_RATE_LIMIT_DOWN
 
   angle_rate_lim = np.interp(v_ego, rate_limits.speed_bp, rate_limits.angle_v)
-  angle_rate_lim = float(angle_rate_lim)
-  return float(np.clip(apply_angle, apply_angle_last - angle_rate_lim, apply_angle_last + angle_rate_lim))
+  new_apply_angle = np.clip(apply_angle, apply_angle_last - angle_rate_lim, apply_angle_last + angle_rate_lim)
+
+  # angle is current steering wheel angle when inactive on all angle cars
+  if not lat_active:
+    new_apply_angle = steering_angle
+
+  return float(np.clip(new_apply_angle, -LIMITS.STEER_ANGLE_MAX, LIMITS.STEER_ANGLE_MAX))
 
 
 def common_fault_avoidance(fault_condition: bool, request: bool, above_limit_frames: int,

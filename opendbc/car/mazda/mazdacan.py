@@ -1,9 +1,9 @@
 from opendbc.car.mazda.values import Buttons, MazdaFlags
 
 
-def create_steering_control(packer, CP, frame, apply_steer, lkas):
+def create_steering_control(packer, CP, frame, apply_torque, lkas):
 
-  tmp = apply_steer + 2048
+  tmp = apply_torque + 2048
 
   lo = tmp & 0xFF
   hi = tmp >> 8
@@ -47,7 +47,7 @@ def create_steering_control(packer, CP, frame, apply_steer, lkas):
   values = {}
   if CP.flags & MazdaFlags.GEN1:
     values = {
-      "LKAS_REQUEST": apply_steer,
+      "LKAS_REQUEST": apply_torque,
       "CTR": ctr,
       "ERR_BIT_1": er1,
       "LINE_NOT_VISIBLE" : lnv,

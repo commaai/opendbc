@@ -58,14 +58,14 @@ class CarControllerParams:
 class HyundaiSafetyFlags(IntFlag):
   EV_GAS = 1
   HYBRID_GAS = 2
-  LONG = 2 ** 2
-  CAMERA_SCC = 2 ** 3
-  CANFD_LKA_STEERING = 2 ** 4
-  CANFD_ALT_BUTTONS = 2 ** 5
-  ALT_LIMITS = 2 ** 6
-  CANFD_LKA_STEERING_ALT = 2 ** 7
-  FCEV_GAS = 2 ** 8
-  ALT_LIMITS_2 = 2 ** 9
+  LONG = 4
+  CAMERA_SCC = 8
+  CANFD_LKA_STEERING = 16
+  CANFD_ALT_BUTTONS = 32
+  ALT_LIMITS = 64
+  CANFD_LKA_STEERING_ALT = 128
+  FCEV_GAS = 256
+  ALT_LIMITS_2 = 512
 
 
 class HyundaiFlags(IntFlag):
