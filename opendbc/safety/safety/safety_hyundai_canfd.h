@@ -175,7 +175,7 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
     },
     .angle_rate_down_lookup = {
       {5., 25., 25.},
-      {0.3, 0.15, 0.15}
+      {0.36, 0.26, 0.26}
     },
   };
 
@@ -186,9 +186,8 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
   const int steer_addr = (hyundai_canfd_lka_steering && !hyundai_longitudinal) ? hyundai_canfd_get_lka_addr() : 0x12a;
   if (addr == steer_addr) {
     if (hyundai_canfd_angle_steering) {
-      int lka_active_angle = (GET_BYTE(to_send, 9) >> 5) & 0x3U;
-      bool steer_angle_req = (lka_active_angle != 0U) &&
-                             (lka_active_angle != 3U);
+      int lka_active_angle = (GET_BYTE(to_send, 9) >> 4) & 0x3U;
+      bool steer_angle_req = (lka_active_angle != 0) && (lka_active_angle != 3);  // TODO: just check the real value
 
       int desired_angle = (((GET_BYTE(to_send, 10) >> 2) & 0x3F) | (GET_BYTE(to_send, 11) << 6));
       // Multiply by 10 to apply the DBC scaling factor of 0.1 for LKAS_ANGLE_CMD
@@ -281,7 +280,7 @@ static int hyundai_canfd_fwd_hook(int bus_num, int addr) {
 static safety_config hyundai_canfd_init(uint16_t param) {
   const int HYUNDAI_PARAM_CANFD_LKA_STEERING_ALT = 128;
   const int HYUNDAI_PARAM_CANFD_ALT_BUTTONS = 32;
-  const int HYUNDAI_PARAM_CANFD_ANGLE_STEERING = 256;
+  const int HYUNDAI_PARAM_CANFD_ANGLE_STEERING = 1024;
 
   static const CanMsg HYUNDAI_CANFD_LKA_STEERING_TX_MSGS[] = {
     HYUNDAI_CANFD_LKA_STEERING_COMMON_TX_MSGS(0, 1)
