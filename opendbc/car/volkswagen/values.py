@@ -20,6 +20,8 @@ Button = namedtuple('Button', ['event_type', 'can_addr', 'can_msg', 'values'])
 class CarControllerParams:
   STEER_STEP = 2                           # HCA_01/HCA_1 message frequency 50Hz
   ACC_CONTROL_STEP = 2                     # ACC_06/ACC_07/ACC_System frequency 50Hz
+  AEB_CONTROL_STEP = 2                     # ACC_10 frequency 50Hz
+  AEB_HUD_STEP = 20                        # ACC_15 frequency 5Hz
 
   # Documented lateral limits: 3.00 Nm max, rate of change 5.00 Nm/sec.
   # MQB vs PQ maximums are shared, but rate-of-change limited differently
@@ -78,7 +80,7 @@ class CarControllerParams:
       self.STEER_DELTA_DOWN = 10          # Min HCA reached in 0.60s (STEER_MAX / (50Hz * 0.60))
 
       if CP.transmissionType == TransmissionType.automatic:
-        self.shifter_values = can_define.dv["Getriebe_11"]["GE_Fahrstufe"]
+        self.shifter_values = can_define.dv["Gateway_73"]["GE_Fahrstufe"]
       elif CP.transmissionType == TransmissionType.direct:
         self.shifter_values = can_define.dv["Motor_EV_01"]["MO_Waehlpos"]
       self.hca_status_values = can_define.dv["LH_EPS_03"]["EPS_HCA_Status"]
@@ -132,7 +134,7 @@ class WMI(StrEnum):
 
 
 class VolkswagenSafetyFlags(IntFlag):
-  FLAG_VOLKSWAGEN_LONG_CONTROL = 1
+  LONG_CONTROL = 1
 
 
 class VolkswagenFlags(IntFlag):

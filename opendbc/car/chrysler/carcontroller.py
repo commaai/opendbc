@@ -11,7 +11,7 @@ class CarController(CarControllerBase, MadsCarController):
   def __init__(self, dbc_names, CP, CP_SP):
     CarControllerBase.__init__(self, dbc_names, CP, CP_SP)
     MadsCarController.__init__(self)
-    self.apply_steer_last = 0
+    self.apply_torque_last = 0
 
     self.hud_count = 0
     self.last_lkas_falling_edge = 0
@@ -70,13 +70,13 @@ class CarController(CarControllerBase, MadsCarController):
       self.lkas_control_bit_prev = lkas_control_bit
 
       # steer torque
-      new_steer = int(round(CC.actuators.steer * self.params.STEER_MAX))
-      apply_steer = apply_meas_steer_torque_limits(new_steer, self.apply_steer_last, CS.out.steeringTorqueEps, self.params)
+      new_torque = int(round(CC.actuators.torque * self.params.STEER_MAX))
+      apply_torque = apply_meas_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorqueEps, self.params)
       if not lkas_active or not lkas_control_bit:
-        apply_steer = 0
-      self.apply_steer_last = apply_steer
+        apply_torque = 0
+      self.apply_torque_last = apply_torque
 
-      can_sends.append(chryslercan.create_lkas_command(self.packer, self.CP, int(apply_steer), lkas_control_bit))
+      can_sends.append(chryslercan.create_lkas_command(self.packer, self.CP, int(apply_torque), lkas_control_bit))
 
     if self.frame % 10 == 0 and self.CP.carFingerprint not in RAM_CARS:
       can_sends.append(MadsCarController.create_lkas_heartbit(self.packer, CS.lkas_heartbit, self.mads))
@@ -84,7 +84,7 @@ class CarController(CarControllerBase, MadsCarController):
     self.frame += 1
 
     new_actuators = CC.actuators.as_builder()
-    new_actuators.steer = self.apply_steer_last / self.params.STEER_MAX
-    new_actuators.steerOutputCan = self.apply_steer_last
+    new_actuators.torque = self.apply_torque_last / self.params.STEER_MAX
+    new_actuators.torqueOutputCan = self.apply_torque_last
 
     return new_actuators, can_sends

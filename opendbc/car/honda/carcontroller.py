@@ -135,7 +135,7 @@ class CarController(CarControllerBase, MadsCarController):
       gas, brake = 0.0, 0.0
 
     # *** rate limit steer ***
-    limited_steer = rate_limit(actuators.steer, self.last_steer, -self.params.STEER_DELTA_DOWN * DT_CTRL,
+    limited_steer = rate_limit(actuators.torque, self.last_steer, -self.params.STEER_DELTA_DOWN * DT_CTRL,
                                self.params.STEER_DELTA_UP * DT_CTRL)
     self.last_steer = limited_steer
 
@@ -152,7 +152,7 @@ class CarController(CarControllerBase, MadsCarController):
     # **** process the car messages ****
 
     # steer torque is converted back to CAN reference (positive when steering right)
-    apply_steer = int(np.interp(-limited_steer * self.params.STEER_MAX,
+    apply_torque = int(np.interp(-limited_steer * self.params.STEER_MAX,
                              self.params.STEER_LOOKUP_BP, self.params.STEER_LOOKUP_V))
 
     # Send CAN commands
@@ -164,7 +164,7 @@ class CarController(CarControllerBase, MadsCarController):
         can_sends.append(make_tester_present_msg(0x18DAB0F1, 1, suppress_response=True))
 
     # Send steering command.
-    can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_steer, CC.latActive))
+    can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, CC.latActive))
 
     # wind brake from air resistance decel at high speed
     wind_brake = np.interp(CS.out.vEgo, [0.0, 2.3, 35.0], [0.001, 0.002, 0.15])
@@ -246,8 +246,8 @@ class CarController(CarControllerBase, MadsCarController):
     new_actuators.accel = self.accel
     new_actuators.gas = self.gas
     new_actuators.brake = self.brake
-    new_actuators.steer = self.last_steer
-    new_actuators.steerOutputCan = apply_steer
+    new_actuators.torque = self.last_steer
+    new_actuators.torqueOutputCan = apply_torque
 
     self.frame += 1
     return new_actuators, can_sends
