@@ -51,13 +51,13 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.car_fingerprint = CP.carFingerprint
 
-    self.angle_limit_counter = 0
 
     self.accel_last = 0
     self.apply_torque_last = 0
     self.apply_angle_last = 0
     self.lkas_max_torque = 0
     self.last_button_frame = 0
+    self.angle_limit_counter = 0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
