@@ -600,7 +600,7 @@ bool longitudinal_brake_checks(int desired_brake, const LongitudinalLimits limit
 }
 
 // Safety checks for torque-based steering commands
-bool steer_torque_cmd_checks(int desired_torque, int steer_req, const SteeringLimits limits) {
+bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueSteeringLimits limits) {
   bool violation = false;
   uint32_t ts = microsecond_timer_get();
 
@@ -686,7 +686,7 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const SteeringLi
 }
 
 // Safety checks for angle-based steering commands
-bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const SteeringLimits limits) {
+bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits) {
   bool violation = false;
 
   if (controls_allowed && steer_control_enabled) {
@@ -729,6 +729,11 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
         highest_desired_angle = MIN(highest_desired_angle, highest_desired_angle_error);
         lowest_desired_angle = MAX(lowest_desired_angle, lowest_desired_angle_error);
       }
+
+      // don't enforce above the max steer
+      // TODO: this should always be done
+      lowest_desired_angle = CLAMP(lowest_desired_angle, -limits.max_angle, limits.max_angle);
+      highest_desired_angle = CLAMP(highest_desired_angle, -limits.max_angle, limits.max_angle);
     }
 
     // check for violation;
@@ -738,8 +743,10 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 
   // Angle should either be 0 or same as current angle while not steering
   if (!steer_control_enabled) {
+    const int max_inactive_angle = CLAMP(angle_meas.max, -limits.max_angle, limits.max_angle) + 1;
+    const int min_inactive_angle = CLAMP(angle_meas.min, -limits.max_angle, limits.max_angle) - 1;
     violation |= (limits.inactive_angle_is_zero ? (desired_angle != 0) :
-                  max_limit_check(desired_angle, angle_meas.max + 1, angle_meas.min - 1));
+                  max_limit_check(desired_angle, max_inactive_angle, min_inactive_angle));
   }
 
   // No angle control allowed when controls are not allowed

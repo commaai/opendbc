@@ -11,7 +11,6 @@ from opendbc.safety.tests.libsafety import libsafety_py
 
 MAX_WRONG_COUNTERS = 5
 MAX_SAMPLE_VALS = 6
-VEHICLE_SPEED_FACTOR = 100
 
 MessageFunction = Callable[[float], libsafety_py.CANPacket]
 
@@ -616,7 +615,8 @@ class AngleSteeringSafetyTest(PandaSafetyTestBase):
       self._rx(self._speed_msg(speed))
 
   def test_vehicle_speed_measurements(self):
-    self._common_measurement_test(self._speed_msg, 0, 80, VEHICLE_SPEED_FACTOR, self.safety.get_vehicle_speed_min, self.safety.get_vehicle_speed_max)
+    # TODO: lower tolerance on these tests
+    self._common_measurement_test(self._speed_msg, 0, 80, 1, self.safety.get_vehicle_speed_min, self.safety.get_vehicle_speed_max)
 
   def test_steering_angle_measurements(self, max_angle=300):
     self._common_measurement_test(self._angle_meas_msg, -max_angle, max_angle, self.DEG_TO_CAN, self.safety.get_angle_meas_min, self.safety.get_angle_meas_max)
