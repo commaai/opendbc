@@ -105,8 +105,7 @@ static void toyota_rx_hook(const CANPacket_t *to_push) {
       bool steer_angle_initializing = GET_BIT(to_push, 3U);
       if (!steer_angle_initializing) {
         int angle_meas_new = (GET_BYTE(to_push, 3) << 8U) | GET_BYTE(to_push, 4);
-        // TODO: let the angle safety limits handle this
-        angle_meas_new = CLAMP(to_signed(angle_meas_new, 16), -TOYOTA_ANGLE_STEERING_LIMITS.max_angle, TOYOTA_ANGLE_STEERING_LIMITS.max_angle);
+        angle_meas_new = to_signed(angle_meas_new, 16);
         update_sample(&angle_meas, angle_meas_new);
       }
     }
