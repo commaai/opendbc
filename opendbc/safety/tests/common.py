@@ -978,7 +978,6 @@ class PandaCarSafetyTest(PandaSafetyTest):
     self.assertFalse(self.safety.get_vehicle_moving())
 
     # speed is at threshold
-    print('sending speed at threshold', self.STANDSTILL_THRESHOLD)
     self._rx(self._vehicle_moving_msg(self.STANDSTILL_THRESHOLD))
     self.assertFalse(self.safety.get_vehicle_moving())
 
