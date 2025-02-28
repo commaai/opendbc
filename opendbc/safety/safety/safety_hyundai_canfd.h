@@ -80,7 +80,7 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *to_push) {
 
     // steering angle
     if (addr == 0x125) {
-      int angle_meas_new = (GET_BYTE(to_push, 3) | (GET_BYTE(to_push, 4) << 8));
+      int angle_meas_new = (GET_BYTE(to_push, 4) << 8) | GET_BYTE(to_push, 3);
       // Multiply by 10 to apply the DBC scaling factor of -0.1 for STEERING_ANGLE
       angle_meas_new = to_signed(angle_meas_new, 16);
       update_sample(&angle_meas, angle_meas_new);
@@ -118,15 +118,16 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *to_push) {
 
     // vehicle moving
     if (addr == 0xa0) {
-      uint32_t fl = (GET_BYTES(to_push, 8, 2)) & 0x3FFFU;
-      uint32_t fr = (GET_BYTES(to_push, 10, 2)) & 0x3FFFU;
-      uint32_t rl = (GET_BYTES(to_push, 12, 2)) & 0x3FFFU;
-      uint32_t rr = (GET_BYTES(to_push, 14, 2)) & 0x3FFFU;
+      const int fl = ((GET_BYTE(to_push, 9) & 0x3FU) << 8) | GET_BYTE(to_push, 8);
+      const int fr = ((GET_BYTE(to_push, 11) & 0x3FU) << 8) | GET_BYTE(to_push, 10);
+      const int rl = ((GET_BYTE(to_push, 13) & 0x3FU) << 8) | GET_BYTE(to_push, 12);
+      const int rr = ((GET_BYTE(to_push, 15) & 0x3FU) << 8) | GET_BYTE(to_push, 14);
+
       vehicle_moving = (fl > HYUNDAI_STANDSTILL_THRSLD) || (fr > HYUNDAI_STANDSTILL_THRSLD) ||
                        (rl > HYUNDAI_STANDSTILL_THRSLD) || (rr > HYUNDAI_STANDSTILL_THRSLD);
 
       // average of all 4 wheel speeds. Conversion: raw * 0.03125 / 3.6 = m/s
-      UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4U * 0.03125 / 3.6);
+      UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4. * 0.03125 / 3.6);
     }
   }
 
@@ -189,7 +190,7 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
       const int lkas_angle_active = (GET_BYTE(to_send, 9) >> 4) & 0x3U;
       const bool steer_angle_req = lkas_angle_active != 1;
 
-      int desired_angle = (GET_BYTE(to_send, 10) >> 2) | (GET_BYTE(to_send, 11) << 6);
+      int desired_angle = (GET_BYTE(to_send, 11) << 6) | (GET_BYTE(to_send, 10) >> 2);
 
       // Multiply by 10 to apply the DBC scaling factor of 0.1 for LKAS_ANGLE_CMD
       desired_angle = to_signed(desired_angle, 14);
