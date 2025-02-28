@@ -80,7 +80,7 @@ class CarControllerParams:
       self.STEER_DELTA_DOWN = 10          # Min HCA reached in 0.60s (STEER_MAX / (50Hz * 0.60))
 
       if CP.transmissionType == TransmissionType.automatic:
-        self.shifter_values = can_define.dv["Getriebe_11"]["GE_Fahrstufe"]
+        self.shifter_values = can_define.dv["Gateway_73"]["GE_Fahrstufe"]
       elif CP.transmissionType == TransmissionType.direct:
         self.shifter_values = can_define.dv["Motor_EV_01"]["MO_Waehlpos"]
       self.hca_status_values = can_define.dv["LH_EPS_03"]["EPS_HCA_Status"]
