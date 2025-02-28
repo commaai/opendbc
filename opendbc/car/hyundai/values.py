@@ -26,6 +26,8 @@ class CarControllerParams:
   ANGLE_DRIVER_TORQUE_THRESHOLD = 100  # TODO: 150 might be better
   # minimum max angle torque
   ANGLE_MIN_TORQUE = 50
+  # LKAS angle command is unlimited, but LFA is limited to 176.7 (but does not fault if requesting above)
+  ANGLE_MAX = 180
 
   def __init__(self, CP):
     self.STEER_DELTA_UP = 3

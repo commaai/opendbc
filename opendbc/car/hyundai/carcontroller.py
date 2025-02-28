@@ -14,9 +14,9 @@ LongCtrlState = structs.CarControl.Actuators.LongControlState
 
 # EPS faults if you apply torque while the steering angle is above 90 degrees for more than 1 second
 # All slightly below EPS thresholds to avoid fault
-MAX_ANGLE = 85
-MAX_ANGLE_FRAMES = 89
-MAX_ANGLE_CONSECUTIVE_FRAMES = 2
+MAX_FAULT_ANGLE = 85
+MAX_FAULT_ANGLE_FRAMES = 89
+MAX_FAULT_ANGLE_CONSECUTIVE_FRAMES = 2
 
 
 def process_hud_alert(enabled, fingerprint, hud_control):
@@ -65,9 +65,9 @@ class CarController(CarControllerBase):
 
     # TODO: needed for angle control cars?
     # >90 degree steering fault prevention
-    self.angle_limit_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringAngleDeg) >= MAX_ANGLE, CC.latActive,
-                                                                       self.angle_limit_counter, MAX_ANGLE_FRAMES,
-                                                                       MAX_ANGLE_CONSECUTIVE_FRAMES)
+    self.angle_limit_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringAngleDeg) >= MAX_FAULT_ANGLE, CC.latActive,
+                                                                       self.angle_limit_counter, MAX_FAULT_ANGLE_FRAMES,
+                                                                       MAX_FAULT_ANGLE_CONSECUTIVE_FRAMES)
     # Hold torque with induced temporary fault when cutting the actuation bit
     torque_fault = CC.latActive and not apply_steer_req
 
@@ -82,6 +82,7 @@ class CarController(CarControllerBase):
     # angle control
     else:
       apply_angle = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, self.params)
+      apply_angle = float(np.clip(apply_angle, -self.params.ANGLE_MAX, self.params.ANGLE_MAX))
 
       # Similar to torque control driver torque override, we ramp up and down the max allowed torque,
       # but this is a single threshold in the opposite direction of angle for simplicity
