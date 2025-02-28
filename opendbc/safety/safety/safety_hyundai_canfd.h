@@ -108,9 +108,15 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *to_push) {
 
     // vehicle moving
     if (addr == 0xa0) {
-      uint32_t front_left_speed = GET_BYTES(to_push, 8, 2);
-      uint32_t rear_right_speed = GET_BYTES(to_push, 14, 2);
-      vehicle_moving = (front_left_speed > HYUNDAI_STANDSTILL_THRSLD) || (rear_right_speed > HYUNDAI_STANDSTILL_THRSLD);
+      uint32_t fl = (GET_BYTES(to_push, 8, 2)) & 0x3FFFU;
+      uint32_t fr = (GET_BYTES(to_push, 10, 2)) & 0x3FFFU;
+      uint32_t rl = (GET_BYTES(to_push, 12, 2)) & 0x3FFFU;
+      uint32_t rr = (GET_BYTES(to_push, 14, 2)) & 0x3FFFU;
+      vehicle_moving = (fl > HYUNDAI_STANDSTILL_THRSLD) || (fr > HYUNDAI_STANDSTILL_THRSLD) ||
+                       (rl > HYUNDAI_STANDSTILL_THRSLD) || (rr > HYUNDAI_STANDSTILL_THRSLD);
+
+      // average of all 4 wheel speeds. Conversion: raw * 0.03125 / 3.6 = m/s
+      UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.03125 / 3.6);
     }
   }
 
