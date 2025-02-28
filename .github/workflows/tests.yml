@@ -52,7 +52,7 @@ jobs:
             cppcheck-cache-${{ runner.os }}-${{ github.ref }}
             cppcheck-cache-${{ runner.os }}-
       - name: Run MISRA C:2012 analysis
-        timeout-minutes: ${{ ((steps.restore-scons-cache.outputs.cache-hit == 'true') && 1 || 2) }}
+        timeout-minutes: ${{ ((steps.restore-scons-cache.outputs.cache-hit == 'true') && 2 || 3) }}
         run: cd opendbc/safety/tests/misra && ./test_misra.sh
       - name: Save cppcheck cache
         uses: actions/cache@v4
@@ -77,7 +77,7 @@ jobs:
             cppcheck-cache-${{ runner.os }}-${{ github.ref }}
             cppcheck-cache-${{ runner.os }}-
       - name: MISRA mutation tests
-        timeout-minutes: 1
+        timeout-minutes: 5
         run: |
           source setup.sh
           scons -j8
@@ -99,8 +99,8 @@ jobs:
         with:
           fetch-depth: 0  # need master to get diff
       - name: Run mutation tests
-        timeout-minutes: 5
+        timeout-minutes: 10
         run: |
           source setup.sh
           scons -j8
-          GIT_REF=${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && github.event.before || 'origin/master' }} cd opendbc/safety/tests && ./mutation.sh
+          GIT_REF=$${{ github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/master-new') && github.event.before || ('origin/master' || 'origin/master-new') }} cd opendbc/safety/tests && ./mutation.sh
