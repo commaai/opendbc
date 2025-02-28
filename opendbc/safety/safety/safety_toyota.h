@@ -61,21 +61,6 @@ static bool toyota_get_quality_flag_valid(const CANPacket_t *to_push) {
   return valid;
 }
 
-static const AngleSteeringLimits TOYOTA_ANGLE_STEERING_LIMITS = {
-  // LTA angle limits
-  // factor for STEER_TORQUE_SENSOR->STEER_ANGLE and STEERING_LTA->STEER_ANGLE_CMD (1 / 0.0573)
-  .max_angle = 1657,  // EPS only accepts up to 94.9461
-  .angle_deg_to_can = 17.452007,
-  .angle_rate_up_lookup = {
-    {5., 25., 25.},
-    {0.3, 0.15, 0.15}
-  },
-  .angle_rate_down_lookup = {
-    {5., 25., 25.},
-    {0.36, 0.26, 0.26}
-  },
-};
-
 static void toyota_rx_hook(const CANPacket_t *to_push) {
   if (GET_BUS(to_push) == 0U) {
     int addr = GET_ADDR(to_push);
@@ -176,6 +161,21 @@ static bool toyota_tx_hook(const CANPacket_t *to_send) {
     .max_invalid_request_frames = 1,
     .min_valid_request_rt_interval = 170000,  // 170ms; a ~10% buffer on cutting every 19 frames
     .has_steer_req_tolerance = true,
+  };
+
+  static const AngleSteeringLimits TOYOTA_ANGLE_STEERING_LIMITS = {
+    // LTA angle limits
+    // factor for STEER_TORQUE_SENSOR->STEER_ANGLE and STEERING_LTA->STEER_ANGLE_CMD (1 / 0.0573)
+    .max_angle = 1657,  // EPS only accepts up to 94.9461
+    .angle_deg_to_can = 17.452007,
+    .angle_rate_up_lookup = {
+      {5., 25., 25.},
+      {0.3, 0.15, 0.15}
+    },
+    .angle_rate_down_lookup = {
+      {5., 25., 25.},
+      {0.36, 0.26, 0.26}
+    },
   };
 
   const int TOYOTA_LTA_MAX_MEAS_TORQUE = 1500;
