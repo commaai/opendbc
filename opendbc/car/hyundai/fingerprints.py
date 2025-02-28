@@ -1232,11 +1232,11 @@ FW_VERSIONS = {
     ],
   },
   CAR.KIA_EV9: {
-     (Ecu.fwdRadar, 0x7d0, None): [
-       b'\xf1\x00MV__ RDR -----      1.00 1.02 99110-DO000         ',
-     ],
-     (Ecu.fwdCamera, 0x7c4, None): [
-       b'\xf1\x00MV  MFC  AT USA LHD 1.00 1.02 99211-DO000 230616',
-     ],
-   },
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00MV__ RDR -----      1.00 1.02 99110-DO000         ',
+    ],
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00MV  MFC  AT USA LHD 1.00 1.02 99211-DO000 230616',
+    ],
+  },
 }
