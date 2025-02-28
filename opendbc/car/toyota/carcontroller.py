@@ -33,6 +33,7 @@ MAX_STEER_RATE_FRAMES = 18  # tx control frames needed before torque can be cut
 # EPS allows user torque above threshold for 50 frames before permanently faulting
 MAX_USER_TORQUE = 500
 
+
 def get_long_tune(CP, params):
   if CP.carFingerprint in TSS2_CAR:
     kiBP = [2., 5.]

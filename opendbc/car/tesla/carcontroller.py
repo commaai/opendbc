@@ -6,8 +6,6 @@ from opendbc.car.tesla.teslacan import TeslaCAN
 from opendbc.car.tesla.values import CarControllerParams
 
 
-
-
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
