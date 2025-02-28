@@ -53,7 +53,7 @@ class CarState(CarStateBase):
       cp.vl["WHEEL_SPEEDS_REAR"]["WHEEL_SPEED_RL"],
       cp.vl["WHEEL_SPEEDS_REAR"]["WHEEL_SPEED_RR"],
     )
-    # safety uses the rear wheel speeds for the speed measurement for angle limiting
+    # safety uses the rear wheel speeds for the speed measurement and angle limiting
     ret.vEgoRaw = (ret.wheelSpeeds.rl + ret.wheelSpeeds.rr) / 2.0
 
     v_ego_raw_full = (ret.wheelSpeeds.fl + ret.wheelSpeeds.fr + ret.wheelSpeeds.rl + ret.wheelSpeeds.rr) / 4.0
