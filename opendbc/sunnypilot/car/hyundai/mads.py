@@ -106,8 +106,7 @@ class MadsCarState(MadsCarStateBase):
 
   @staticmethod
   def get_parser(CP, CP_SP, pt_messages) -> None:
-    if CP_SP.flags & HyundaiFlagsSP.HAS_LFA_BUTTON:
-      pt_messages.append(("BCM_PO_11", 50))
+    pass
 
   def get_main_cruise(self, ret: structs.CarState) -> bool:
     if self.CP_SP.flags & HyundaiFlagsSP.LONGITUDINAL_MAIN_CRUISE_TOGGLEABLE:
@@ -122,8 +121,8 @@ class MadsCarState(MadsCarStateBase):
     cp = can_parsers[Bus.pt]
 
     self.prev_lkas_button = self.lkas_button
-    if self.CP_SP.flags & HyundaiFlagsSP.HAS_LFA_BUTTON:
-      self.lkas_button = cp.vl["BCM_PO_11"]["LFA_Pressed"]
+    if self.CP.flags & HyundaiFlags.HAS_LDA_BUTTON:
+      self.lkas_button = cp.vl["BCM_PO_11"]["LDA_BTN"]
 
   def update_mads_canfd(self, ret, can_parsers) -> None:
     cp = can_parsers[Bus.pt]
@@ -134,5 +133,4 @@ class MadsCarState(MadsCarStateBase):
       ret.cruiseState.available = cp_cruise_info.vl["SCC_CONTROL"]["MainMode_ACC"] == 1
 
     self.prev_lkas_button = self.lkas_button
-    lfa_button = "LFA_BTN" if self.CP.flags & HyundaiFlags.CANFD_ALT_BUTTONS else "LKAS_BTN"
-    self.lkas_button = cp.vl[self.cruise_btns_msg_canfd][lfa_button]
+    self.lkas_button = cp.vl[self.cruise_btns_msg_canfd]["LDA_BTN"]

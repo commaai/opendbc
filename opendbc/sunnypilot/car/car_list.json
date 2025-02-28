@@ -420,6 +420,41 @@
     ],
     "package": "Co-Pilot360 Assist+"
   },
+  "Ford F-150 2021-23": {
+    "platform": "FORD_F_150_MK14",
+    "make": "Ford",
+    "brand": "ford",
+    "model": "F-150",
+    "year": [
+      "2021",
+      "2022",
+      "2023"
+    ],
+    "package": "Co-Pilot360 Assist 2.0"
+  },
+  "Ford F-150 Hybrid 2021-23": {
+    "platform": "FORD_F_150_MK14",
+    "make": "Ford",
+    "brand": "ford",
+    "model": "F-150 Hybrid",
+    "year": [
+      "2021",
+      "2022",
+      "2023"
+    ],
+    "package": "Co-Pilot360 Assist 2.0"
+  },
+  "Ford F-150 Lightning 2022-23": {
+    "platform": "FORD_F_150_LIGHTNING_MK1",
+    "make": "Ford",
+    "brand": "ford",
+    "model": "F-150 Lightning",
+    "year": [
+      "2022",
+      "2023"
+    ],
+    "package": "Co-Pilot360 Assist 2.0"
+  },
   "Ford Focus 2018": {
     "platform": "FORD_FOCUS_MK4",
     "make": "Ford",
@@ -517,6 +552,28 @@
       "2024"
     ],
     "package": "Co-Pilot360 Assist"
+  },
+  "Ford Mustang Mach-E 2021-23": {
+    "platform": "FORD_MUSTANG_MACH_E_MK1",
+    "make": "Ford",
+    "brand": "ford",
+    "model": "Mustang Mach-E",
+    "year": [
+      "2021",
+      "2022",
+      "2023"
+    ],
+    "package": "All"
+  },
+  "Ford Ranger 2024": {
+    "platform": "FORD_RANGER_MK2",
+    "make": "Ford",
+    "brand": "ford",
+    "model": "Ranger",
+    "year": [
+      "2024"
+    ],
+    "package": "Adaptive Cruise Control with Lane Centering"
   },
   "Genesis G70 2018": {
     "platform": "GENESIS_G70",
@@ -616,14 +673,15 @@
     ],
     "package": "All"
   },
-  "Genesis GV70 (2.5T Trim, without HDA II) 2022-23": {
+  "Genesis GV70 (2.5T Trim, without HDA II) 2022-24": {
     "platform": "GENESIS_GV70_1ST_GEN",
     "make": "Genesis",
     "brand": "hyundai",
     "model": "GV70 (2.5T Trim, without HDA II)",
     "year": [
       "2022",
-      "2023"
+      "2023",
+      "2024"
     ],
     "package": "All"
   },
@@ -648,13 +706,14 @@
     ],
     "package": "All"
   },
-  "Genesis GV70 Electrified (with HDA II) 2023": {
+  "Genesis GV70 Electrified (with HDA II) 2023-24": {
     "platform": "GENESIS_GV70_ELECTRIFIED_1ST_GEN",
     "make": "Genesis",
     "brand": "hyundai",
     "model": "GV70 Electrified (with HDA II)",
     "year": [
-      "2023"
+      "2023",
+      "2024"
     ],
     "package": "Highway Driving Assist II"
   },
@@ -1202,6 +1261,16 @@
     ],
     "package": "Smart Cruise Control (SCC)"
   },
+  "Hyundai Kona 2022": {
+    "platform": "HYUNDAI_KONA_2022",
+    "make": "Hyundai",
+    "brand": "hyundai",
+    "model": "Kona",
+    "year": [
+      "2022"
+    ],
+    "package": "Smart Cruise Control (SCC)"
+  },
   "Hyundai Kona Electric 2018-21": {
     "platform": "HYUNDAI_KONA_EV",
     "make": "Hyundai",
@@ -1245,6 +1314,16 @@
       "2020"
     ],
     "package": "Smart Cruise Control (SCC)"
+  },
+  "Hyundai Nexo 2021": {
+    "platform": "HYUNDAI_NEXO_1ST_GEN",
+    "make": "Hyundai",
+    "brand": "hyundai",
+    "model": "Nexo",
+    "year": [
+      "2021"
+    ],
+    "package": "All"
   },
   "Hyundai Palisade 2020-22": {
     "platform": "HYUNDAI_PALISADE",
@@ -2264,6 +2343,30 @@
     ],
     "package": "Adaptive Cruise Control (ACC)"
   },
+  "Rivian R1S 2022-24": {
+    "platform": "RIVIAN_R1_GEN1",
+    "make": "Rivian",
+    "brand": "rivian",
+    "model": "R1S",
+    "year": [
+      "2022",
+      "2023",
+      "2024"
+    ],
+    "package": "All"
+  },
+  "Rivian R1T 2022-24": {
+    "platform": "RIVIAN_R1_GEN1",
+    "make": "Rivian",
+    "brand": "rivian",
+    "model": "R1T",
+    "year": [
+      "2022",
+      "2023",
+      "2024"
+    ],
+    "package": "All"
+  },
   "SEAT Ateca 2016-23": {
     "platform": "SEAT_ATECA_MK1",
     "make": "SEAT",
@@ -2533,6 +2636,53 @@
       "2022"
     ],
     "package": "Adaptive Cruise Control (ACC) & Lane Assist"
+  },
+  "Tesla Model 3 (with HW3) 2019-23": {
+    "platform": "TESLA_MODEL_3",
+    "make": "Tesla",
+    "brand": "tesla",
+    "model": "Model 3 (with HW3)",
+    "year": [
+      "2019",
+      "2020",
+      "2021",
+      "2022",
+      "2023"
+    ],
+    "package": "All"
+  },
+  "Tesla Model 3 (with HW4) 2024": {
+    "platform": "TESLA_MODEL_3",
+    "make": "Tesla",
+    "brand": "tesla",
+    "model": "Model 3 (with HW4)",
+    "year": [
+      "2024"
+    ],
+    "package": "All"
+  },
+  "Tesla Model Y (with HW3) 2020-23": {
+    "platform": "TESLA_MODEL_Y",
+    "make": "Tesla",
+    "brand": "tesla",
+    "model": "Model Y (with HW3)",
+    "year": [
+      "2020",
+      "2021",
+      "2022",
+      "2023"
+    ],
+    "package": "All"
+  },
+  "Tesla Model Y (with HW4) 2024": {
+    "platform": "TESLA_MODEL_Y",
+    "make": "Tesla",
+    "brand": "tesla",
+    "model": "Model Y (with HW4)",
+    "year": [
+      "2024"
+    ],
+    "package": "All"
   },
   "Toyota Alphard 2019-20": {
     "platform": "TOYOTA_ALPHARD_TSS2",

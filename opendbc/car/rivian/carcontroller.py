@@ -6,12 +6,12 @@ from opendbc.car.rivian.values import CarControllerParams
 
 
 class CarController(CarControllerBase):
-  def __init__(self, dbc_names, CP):
-    super().__init__(dbc_names, CP)
+  def __init__(self, dbc_names, CP, CP_SP):
+    super().__init__(dbc_names, CP, CP_SP)
     self.apply_torque_last = 0
     self.packer = CANPacker(dbc_names[Bus.pt])
 
-  def update(self, CC, CS, now_nanos):
+  def update(self, CC, CC_SP, CS, now_nanos):
     actuators = CC.actuators
     can_sends = []
 

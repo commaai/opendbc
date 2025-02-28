@@ -153,9 +153,6 @@ class CarInterface(CarInterfaceBase):
       if ESCC_MSG in fingerprint[0]:
         ret.flags |= HyundaiFlagsSP.ENHANCED_SCC.value
 
-      if 0x391 in fingerprint[0]:
-        ret.flags |= HyundaiFlagsSP.HAS_LFA_BUTTON.value
-
     if ret.flags & HyundaiFlagsSP.ENHANCED_SCC:
       stock_cp.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.FLAG_HYUNDAI_ESCC.value
       stock_cp.radarUnavailable = False

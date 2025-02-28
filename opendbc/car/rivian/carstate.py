@@ -7,8 +7,8 @@ from opendbc.car.common.conversions import Conversions as CV
 
 
 class CarState(CarStateBase):
-  def __init__(self, CP):
-    super().__init__(CP)
+  def __init__(self, CP, CP_SP):
+    super().__init__(CP, CP_SP)
     self.last_speed = 30
 
     self.acm_lka_hba_cmd = None
@@ -84,7 +84,7 @@ class CarState(CarStateBase):
     return ret
 
   @staticmethod
-  def get_can_parsers(CP):
+  def get_can_parsers(CP, CP_SP):
     pt_messages = [
       # sig_address, frequency
       ("ESP_Status", 50),
