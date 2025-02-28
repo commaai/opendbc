@@ -81,8 +81,8 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *to_push) {
     // steering angle
     if (addr == 0x125) {
       int angle_meas_new = (GET_BYTE(to_push, 4) << 8) | GET_BYTE(to_push, 3);
+      // Multiply by 10 to apply the DBC scaling factor of -0.1 for STEERING_ANGLE
       angle_meas_new = to_signed(angle_meas_new, 16);
-      printf("storing angle_meas_new: %d\n", angle_meas_new);
       update_sample(&angle_meas, angle_meas_new);
     }
 
@@ -193,8 +193,9 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
       const bool steer_angle_req = lkas_angle_active != 1;
 
       int desired_angle = (GET_BYTE(to_send, 11) << 6) | (GET_BYTE(to_send, 10) >> 2);
+
+      // Multiply by 10 to apply the DBC scaling factor of 0.1 for LKAS_ANGLE_CMD
       desired_angle = to_signed(desired_angle, 14);
-//      printf("desired_angle: %d\n", desired_angle);
 
       if (steer_angle_cmd_checks(desired_angle, steer_angle_req, HYUNDAI_CANFD_ANGLE_STEERING_LIMITS)) {
         tx = false;

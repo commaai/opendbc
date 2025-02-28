@@ -50,6 +50,7 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.PandaCarSafetyTest):
 
   def _speed_msg(self, speed):
     values = {f"WHL_Spd{pos}Val": speed * 3.6 for pos in ["FL", "FR", "RL", "RR"]}
+    print(values, self.PT_BUS)
     return self.packer.make_can_msg_panda("WHEEL_SPEEDS", self.PT_BUS, values)
 
   def _user_brake_msg(self, brake):
@@ -129,8 +130,6 @@ class TestHyundaiCanfdAngleSteering(TestHyundaiCanfdBase, common.AngleSteeringSa
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiCanfd, HyundaiSafetyFlags.CANFD_ANGLE_STEERING)
     self.safety.init_tests()
 
-  def test_angle_cmd_when_enabled(self, max_angle=180):
-    super().test_angle_cmd_when_enabled(max_angle=max_angle)
 
 class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdTorqueSteering):
 
