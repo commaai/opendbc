@@ -93,6 +93,9 @@ class CarControllerParams:
   JERK_LIMIT_MAX = 4.9  # m/s^3, ACC faults at 5.0
   JERK_LIMIT_MIN = -4.9  # m/s^3, ACC faults at 5.0
 
+  # EPAS faults above this angle
+  STEER_ANGLE_MAX = 360  # deg
+
 
 class TeslaSafetyFlags(IntFlag):
   LONG_CONTROL = 1
