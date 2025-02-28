@@ -58,7 +58,7 @@ static void nissan_rx_hook(const CANPacket_t *to_push) {
 
 
 static bool nissan_tx_hook(const CANPacket_t *to_send) {
-  const SteeringLimits NISSAN_STEERING_LIMITS = {
+  const AngleSteeringLimits NISSAN_STEERING_LIMITS = {
     .angle_deg_to_can = 100,
     .angle_rate_up_lookup = {
       {0., 5., 15.},
