@@ -152,7 +152,7 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *to_push) {
 }
 
 static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
-  const TorqueSteeringLimits HYUNDAI_CANFD_STEERING_LIMITS = {
+  const TorqueSteeringLimits HYUNDAI_CANFD_TORQUE_STEERING_LIMITS = {
     .max_steer = 270,
     .max_rt_delta = 112,
     .max_rt_interval = 250000,
@@ -168,7 +168,10 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
     .max_invalid_request_frames = 2,
     .min_valid_request_rt_interval = 810000,  // 810ms; a ~10% buffer on cutting every 90 frames
     .has_steer_req_tolerance = true,
+  };
 
+  const AngleSteeringLimits HYUNDAI_CANFD_ANGLE_STEERING_LIMITS = {
+    .max_angle = 1800,
     .angle_deg_to_can = 10,
     .angle_rate_up_lookup = {
       {5., 25., 25.},
@@ -195,14 +198,14 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
       // Multiply by 10 to apply the DBC scaling factor of 0.1 for LKAS_ANGLE_CMD
       desired_angle = to_signed(desired_angle, 14);
 
-      if (steer_angle_cmd_checks(desired_angle, steer_angle_req, HYUNDAI_CANFD_STEERING_LIMITS)) {
+      if (steer_angle_cmd_checks(desired_angle, steer_angle_req, HYUNDAI_CANFD_ANGLE_STEERING_LIMITS)) {
         tx = false;
       }
     } else {
       int desired_torque = (((GET_BYTE(to_send, 6) & 0xFU) << 7U) | (GET_BYTE(to_send, 5) >> 1U)) - 1024U;
       bool steer_req = GET_BIT(to_send, 52U);
 
-      if (steer_torque_cmd_checks(desired_torque, steer_req, HYUNDAI_CANFD_STEERING_LIMITS)) {
+      if (steer_torque_cmd_checks(desired_torque, steer_req, HYUNDAI_CANFD_TORQUE_STEERING_LIMITS)) {
         tx = false;
       }
     }
