@@ -579,6 +579,7 @@ class MotorTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
 
 class AngleSteeringSafetyTest(PandaSafetyTestBase):
 
+  STEER_ANGLE_MAX: float = 300
   DEG_TO_CAN: float
   ANGLE_RATE_BP: list[float]
   ANGLE_RATE_UP: list[float]  # windup limit
@@ -618,13 +619,14 @@ class AngleSteeringSafetyTest(PandaSafetyTestBase):
     # TODO: lower tolerance on these tests
     self._common_measurement_test(self._speed_msg, 0, 80, 1, self.safety.get_vehicle_speed_min, self.safety.get_vehicle_speed_max)
 
-  def test_steering_angle_measurements(self, max_angle=300):
-    self._common_measurement_test(self._angle_meas_msg, -max_angle, max_angle, self.DEG_TO_CAN, self.safety.get_angle_meas_min, self.safety.get_angle_meas_max)
+  def test_steering_angle_measurements(self):
+    self._common_measurement_test(self._angle_meas_msg, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX, self.DEG_TO_CAN,
+                                  self.safety.get_angle_meas_min, self.safety.get_angle_meas_max)
 
-  def test_angle_cmd_when_enabled(self, max_angle=300):
+  def test_angle_cmd_when_enabled(self):
     # when controls are allowed, angle cmd rate limit is enforced
     speeds = [0., 1., 5., 10., 15., 50.]
-    angles = np.concatenate((np.arange(-max_angle, max_angle, 5), [0]))
+    angles = np.concatenate((np.arange(-self.STEER_ANGLE_MAX * 2, self.STEER_ANGLE_MAX * 2, 5), [0]))
     for a in angles:
       for s in speeds:
         max_delta_up = np.interp(s, self.ANGLE_RATE_BP, self.ANGLE_RATE_UP)
@@ -666,7 +668,8 @@ class AngleSteeringSafetyTest(PandaSafetyTestBase):
 
         # Check desired steer should be the same as steer angle when controls are off
         self.safety.set_controls_allowed(0)
-        self.assertTrue(self._tx(self._angle_cmd_msg(a, False)))
+        should_tx = abs(a) <= abs(self.STEER_ANGLE_MAX)
+        self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(a, False)))
 
   def test_angle_cmd_when_disabled(self):
     # Tests that only angles close to the meas are allowed while

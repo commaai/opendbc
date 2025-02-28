@@ -23,6 +23,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
   FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   # Angle control limits
+  STEER_ANGLE_MAX = 360  # deg
   DEG_TO_CAN = 10
 
   ANGLE_RATE_BP = [0., 5., 25.]
