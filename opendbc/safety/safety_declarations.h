@@ -88,7 +88,41 @@ typedef struct {
 
   const bool enforce_angle_error;        // enables max_angle_error check
   const bool inactive_angle_is_zero;     // if false, enforces angle near meas when disabled (default)
-} SteeringLimits;
+} TorqueSteeringLimits;
+
+typedef struct {
+  // torque cmd limits
+  const int max_steer;
+  const int max_rate_up;
+  const int max_rate_down;
+  const int max_rt_delta;
+  const uint32_t max_rt_interval;
+
+  const SteeringControlType type;
+
+  // driver torque limits
+  const int driver_torque_allowance;
+  const int driver_torque_multiplier;
+
+  // motor torque limits
+  const int max_torque_error;
+
+  // safety around steer req bit
+  const int min_valid_request_frames;
+  const int max_invalid_request_frames;
+  const uint32_t min_valid_request_rt_interval;
+  const bool has_steer_req_tolerance;
+
+  // angle cmd limits
+  const float angle_deg_to_can;
+  const struct lookup_t angle_rate_up_lookup;
+  const struct lookup_t angle_rate_down_lookup;
+  const int max_angle_error;             // used to limit error between meas and cmd while enabled
+  const float angle_error_min_speed;     // minimum speed to start limiting angle error
+
+  const bool enforce_angle_error;        // enables max_angle_error check
+  const bool inactive_angle_is_zero;     // if false, enforces angle near meas when disabled (default)
+} AngleSteeringLimits;
 
 typedef struct {
   // acceleration cmd limits
@@ -180,8 +214,8 @@ void gen_crc_lookup_table_8(uint8_t poly, uint8_t crc_lut[]);
 void gen_crc_lookup_table_16(uint16_t poly, uint16_t crc_lut[]);
 #endif
 void generic_rx_checks(bool stock_ecu_detected);
-bool steer_torque_cmd_checks(int desired_torque, int steer_req, const SteeringLimits limits);
-bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const SteeringLimits limits);
+bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueSteeringLimits limits);
+bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits);
 bool longitudinal_accel_checks(int desired_accel, const LongitudinalLimits limits);
 bool longitudinal_speed_checks(int desired_speed, const LongitudinalLimits limits);
 bool longitudinal_gas_checks(int desired_gas, const LongitudinalLimits limits);
