@@ -163,36 +163,9 @@ static bool toyota_tx_hook(const CANPacket_t *to_send) {
     .max_invalid_request_frames = 1,
     .min_valid_request_rt_interval = 170000,  // 170ms; a ~10% buffer on cutting every 19 frames
     .has_steer_req_tolerance = true,
-
-    // LTA angle limits
-    // factor for STEER_TORQUE_SENSOR->STEER_ANGLE and STEERING_LTA->STEER_ANGLE_CMD (1 / 0.0573)
-    .angle_deg_to_can = 17.452007,
-    .angle_rate_up_lookup = {
-      {5., 25., 25.},
-      {0.3, 0.15, 0.15}
-    },
-    .angle_rate_down_lookup = {
-      {5., 25., 25.},
-      {0.36, 0.26, 0.26}
-    },
   };
 
   const AngleSteeringLimits TOYOTA_ANGLE_STEERING_LIMITS = {
-    .max_steer = 1500,
-    .max_rate_up = 15,          // ramp up slow
-    .max_rate_down = 25,        // ramp down fast
-    .max_torque_error = 350,    // max torque cmd in excess of motor torque
-    .max_rt_delta = 450,        // the real time limit is 1800/sec, a 20% buffer
-    .max_rt_interval = 250000,
-    .type = TorqueMotorLimited,
-
-    // the EPS faults when the steering angle rate is above a certain threshold for too long. to prevent this,
-    // we allow setting STEER_REQUEST bit to 0 while maintaining the requested torque value for a single frame
-    .min_valid_request_frames = 18,
-    .max_invalid_request_frames = 1,
-    .min_valid_request_rt_interval = 170000,  // 170ms; a ~10% buffer on cutting every 19 frames
-    .has_steer_req_tolerance = true,
-
     // LTA angle limits
     // factor for STEER_TORQUE_SENSOR->STEER_ANGLE and STEERING_LTA->STEER_ANGLE_CMD (1 / 0.0573)
     .angle_deg_to_can = 17.452007,

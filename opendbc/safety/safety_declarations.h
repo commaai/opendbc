@@ -78,41 +78,9 @@ typedef struct {
   const int max_invalid_request_frames;
   const uint32_t min_valid_request_rt_interval;
   const bool has_steer_req_tolerance;
-
-  // angle cmd limits
-  const float angle_deg_to_can;
-  const struct lookup_t angle_rate_up_lookup;
-  const struct lookup_t angle_rate_down_lookup;
-  const int max_angle_error;             // used to limit error between meas and cmd while enabled
-  const float angle_error_min_speed;     // minimum speed to start limiting angle error
-
-  const bool enforce_angle_error;        // enables max_angle_error check
-  const bool inactive_angle_is_zero;     // if false, enforces angle near meas when disabled (default)
 } TorqueSteeringLimits;
 
 typedef struct {
-  // torque cmd limits
-  const int max_steer;
-  const int max_rate_up;
-  const int max_rate_down;
-  const int max_rt_delta;
-  const uint32_t max_rt_interval;
-
-  const SteeringControlType type;
-
-  // driver torque limits
-  const int driver_torque_allowance;
-  const int driver_torque_multiplier;
-
-  // motor torque limits
-  const int max_torque_error;
-
-  // safety around steer req bit
-  const int min_valid_request_frames;
-  const int max_invalid_request_frames;
-  const uint32_t min_valid_request_rt_interval;
-  const bool has_steer_req_tolerance;
-
   // angle cmd limits
   const float angle_deg_to_can;
   const struct lookup_t angle_rate_up_lookup;
