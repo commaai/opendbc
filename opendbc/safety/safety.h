@@ -729,6 +729,10 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
         highest_desired_angle = MIN(highest_desired_angle, highest_desired_angle_error);
         lowest_desired_angle = MAX(lowest_desired_angle, lowest_desired_angle_error);
       }
+
+      // don't enforce above the max steer
+      lowest_desired_angle = CLAMP(lowest_desired_angle, -limits.max_angle, limits.max_angle);
+      highest_desired_angle = CLAMP(highest_desired_angle, -limits.max_angle, limits.max_angle);
     }
 
     // check for violation;
