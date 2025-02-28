@@ -160,7 +160,7 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
   ANGLE_RATE_UP = [0.3, 0.15, 0.15]  # windup limit
   ANGLE_RATE_DOWN = [0.36, 0.26, 0.26]  # unwind limit
 
-  MAX_LTA_ANGLE = 94.9461  # PCS faults if commanding above this, deg
+  STEER_ANGLE_MAX = 94.9461  # PCS faults if commanding above this, deg
   MAX_MEAS_TORQUE = 1500  # max allowed measured EPS torque before wind down
   MAX_LTA_DRIVER_TORQUE = 150  # max allowed driver torque before wind down
 
@@ -233,10 +233,10 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
 
   def test_steering_angle_measurements(self, max_angle=None):
     # Measurement test tests max angle + 0.5 which will fail
-    super().test_steering_angle_measurements(max_angle=self.MAX_LTA_ANGLE - 0.5)
+    super().test_steering_angle_measurements(max_angle=self.STEER_ANGLE_MAX - 0.5)
 
   def test_angle_cmd_when_enabled(self, max_angle=None):
-    super().test_angle_cmd_when_enabled(max_angle=self.MAX_LTA_ANGLE)
+    super().test_angle_cmd_when_enabled(max_angle=self.STEER_ANGLE_MAX)
 
   def test_angle_measurements(self):
     """
@@ -244,14 +244,13 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
     * Tests rx hook correctly clips the angle measurement, since it is to be compared to LTA cmd when inactive
     """
     for steer_angle_initializing in (True, False):
-      for angle in np.arange(0, self.MAX_LTA_ANGLE * 2, 1):
+      for angle in np.arange(0, self.STEER_ANGLE_MAX * 2, 1):
         # If init flag is set, do not rx or parse any angle measurements
         for a in (angle, -angle, 0, 0, 0, 0):
           self.assertEqual(not steer_angle_initializing,
                            self._rx(self._angle_meas_msg(a, steer_angle_initializing)))
 
-        final_angle = (0 if steer_angle_initializing else
-                       round(min(angle, self.MAX_LTA_ANGLE) * self.DEG_TO_CAN))
+        final_angle = 0 if steer_angle_initializing else round(angle * self.DEG_TO_CAN)
         self.assertEqual(self.safety.get_angle_meas_min(), -final_angle)
         self.assertEqual(self.safety.get_angle_meas_max(), final_angle)
 
