@@ -88,7 +88,7 @@ class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
   FWD_BLACKLISTED_ADDRS = {2: [0x12A, 0x1E0]}
   FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
-  STEER_MSG = "ADAS_CMD_30_10ms"
+  STEER_MSG = "LFA"
   BUTTONS_TX_BUS = 2
   SAFETY_PARAM: int
 
@@ -212,7 +212,7 @@ class TestHyundaiCanfdLKASteeringLongEV(HyundaiLongitudinalBase, TestHyundaiCanf
   DISABLED_ECU_UDS_MSG = (0x730, 1)
   DISABLED_ECU_ACTUATION_MSG = (0x1a0, 1)
 
-  STEER_MSG = "ADAS_CMD_30_10ms"
+  STEER_MSG = "LFA"
   GAS_MSG = ("ACCELERATOR", "ACCELERATOR_PEDAL")
   STEER_BUS = 1
 
