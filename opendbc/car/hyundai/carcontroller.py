@@ -85,9 +85,9 @@ class CarController(CarControllerBase):
 
       # Similar to torque control driver torque override, we ramp up and down the max allowed torque,
       # but this is a single threshold in the opposite direction of angle for simplicity
-      if apply_angle > 0 and CS.out.steeringTorque < -self.params.ANGLE_DRIVER_TORQUE_THRESHOLD:
+      if apply_angle >= 0 and CS.out.steeringTorque < -self.params.ANGLE_DRIVER_TORQUE_ALLOWANCE:
         self.lkas_max_torque = max(self.lkas_max_torque - 1, self.params.ANGLE_MIN_TORQUE)
-      elif apply_angle < 0 and CS.out.steeringTorque > self.params.ANGLE_DRIVER_TORQUE_THRESHOLD:
+      elif apply_angle <= 0 and CS.out.steeringTorque > self.params.ANGLE_DRIVER_TORQUE_ALLOWANCE:
         self.lkas_max_torque = max(self.lkas_max_torque - 1, self.params.ANGLE_MIN_TORQUE)
       else:
         # ramp back up on engage as well

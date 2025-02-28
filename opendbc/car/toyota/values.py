@@ -43,6 +43,14 @@ class CarControllerParams:
       self.STEER_DELTA_DOWN = 25     # always lower than 45 otherwise the Rav4 faults (Prius seems ok with 50)
 
 
+# assuming camry hybrid tss2 lat accel
+print(CarControllerParams.STEER_MAX / 2.36)
+override_torque_as_accel = CarControllerParams.STEER_ERROR_MAX / (CarControllerParams.STEER_MAX / 2.36)
+print(override_torque_as_accel)
+
+print('override lat accel:', override_torque_as_accel * (100 / 2))
+
+
 class ToyotaSafetyFlags(IntFlag):
   # first byte is for EPS scaling factor
   ALT_BRAKE = (1 << 8)

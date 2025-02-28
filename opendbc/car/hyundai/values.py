@@ -19,13 +19,15 @@ class CarControllerParams:
   ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[5, 25], angle_v=[0.3, 0.15])
   ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[5, 25], angle_v=[0.36, 0.26])
 
-  # Stock LFA system is seen sending 250 max, but for LKAS events it's 175 max
+  # Stock LFA system is seen sending 250 max, but for LKAS events it's 175 max.
   # 250 can at least achieve 4 m/s^2
-  ANGLE_MAX_TORQUE = 150  # units unknown
+  # 100 corresponds to ~2 m/s^2
+  ANGLE_MAX_TORQUE = 100  # units unknown
   # start winding down max angle torque at this value
-  ANGLE_DRIVER_TORQUE_THRESHOLD = 100  # TODO: 150 might be better
+  ANGLE_DRIVER_TORQUE_ALLOWANCE = 100
   # minimum max angle torque
-  ANGLE_MIN_TORQUE = 50
+  # Toyota's torque error allows ~0.55 m/s^2 of torque while overriding
+  ANGLE_MIN_TORQUE = 30  # equivalent to ~0.6 m/s^2 of torque (based on ANGLE_MAX_TORQUE)
   # LKAS angle command is unlimited, but LFA is limited to 176.7 (but does not fault if requesting above)
   ANGLE_MAX = 180
 
