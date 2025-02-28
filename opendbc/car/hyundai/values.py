@@ -25,9 +25,7 @@ class CarControllerParams:
   ANGLE_MAX_TORQUE = 80  # units unknown
   # start winding down max angle torque at this value
   ANGLE_DRIVER_TORQUE_ALLOWANCE = 100
-  # minimum max angle torque
-  # Toyota's torque error allows ~0.55 m/s^2 of torque while overriding
-  ANGLE_MIN_TORQUE = 30  # equivalent to ~0.6 m/s^2 of torque (based on ANGLE_MAX_TORQUE)
+  ANGLE_MIN_TORQUE = 20  # equivalent to ~0.6 m/s^2 of torque (based on ANGLE_MAX_TORQUE)
   # LKAS angle command is unlimited, but LFA is limited to 176.7 (but does not fault if requesting above)
   STEER_ANGLE_MAX = 180
 

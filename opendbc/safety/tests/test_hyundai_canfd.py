@@ -111,9 +111,9 @@ class TestHyundaiCanfdAngleSteering(TestHyundaiCanfdBase, common.AngleSteeringSa
   # Angle control limits
   DEG_TO_CAN = 10
 
-  ANGLE_RATE_BP = [0., 5., 25.]
-  ANGLE_RATE_UP = [2.5, 1.5, 0.2]  # windup limit
-  ANGLE_RATE_DOWN = [5., 2.0, 0.3]  # unwind limit
+  ANGLE_RATE_BP = [5., 25., 25.]
+  ANGLE_RATE_UP = [0.3, 0.15, 0.15]  # windup limit
+  ANGLE_RATE_DOWN = [0.36, 0.26, 0.26]  # unwind limit
 
   @classmethod
   def setUpClass(cls):
