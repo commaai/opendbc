@@ -30,7 +30,7 @@ class CarControllerParams:
 
   # LTA limits
   # EPS ignores commands above this angle and causes PCS to fault
-  ANGLE_MAX = 94.9461  # deg
+  STEER_ANGLE_MAX = 94.9461  # deg
   MAX_LTA_DRIVER_TORQUE_ALLOWANCE = 150  # slightly above steering pressed allows some resistance when changing lanes
 
   def __init__(self, CP):

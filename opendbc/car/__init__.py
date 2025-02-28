@@ -148,13 +148,13 @@ def apply_std_steer_angle_limits(apply_angle, apply_angle_last, v_ego, steering_
 
   angle_rate_lim = np.interp(v_ego, rate_limits.speed_bp, rate_limits.angle_v)
   angle_rate_lim = angle_rate_lim
-
   new_apply_angle = np.clip(apply_angle, apply_angle_last - angle_rate_lim, apply_angle_last + angle_rate_lim)
+
+  # angle is current steering wheel angle when inactive on all angle cars
   if not lat_active:
     new_apply_angle = steering_angle
-  new_apply_angle = np.clip(new_apply_angle, -LIMITS.ANGLE_MAX, LIMITS.ANGLE_MAX)
 
-  return float(new_apply_angle)
+  return float(np.clip(new_apply_angle, -LIMITS.STEER_ANGLE_MAX, LIMITS.STEER_ANGLE_MAX))
 
 
 def common_fault_avoidance(fault_condition: bool, request: bool, above_limit_frames: int,
