@@ -73,7 +73,7 @@ def init_segment(safety, msgs, mode, param):
   steering_msgs = (can for msg in sendcan for can in msg.sendcan if is_steering_msg(mode, param, can.address))
 
   msg = next(steering_msgs, None)
-  if msg is None or True:
+  if msg is None:
     print("no steering msgs found!")
     return
 
