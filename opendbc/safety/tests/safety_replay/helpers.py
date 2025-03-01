@@ -68,13 +68,13 @@ def get_steer_value(mode, param, to_send):
 def package_can_msg(msg):
   return libsafety_py.make_CANPacket(msg.address, msg.src % 4, msg.dat)
 
-def init_segment(safety, lr, mode, param):
-  sendcan = (msg for msg in lr if msg.which() == 'sendcan')
+def init_segment(safety, msgs, mode, param):
+  sendcan = (msg for msg in msgs if msg.which() == 'sendcan')
   steering_msgs = (can for msg in sendcan for can in msg.sendcan if is_steering_msg(mode, param, can.address))
 
   msg = next(steering_msgs, None)
   if msg is None:
-    # no steering msgs
+    print("no steering msgs found!")
     return
 
   to_send = package_can_msg(msg)
