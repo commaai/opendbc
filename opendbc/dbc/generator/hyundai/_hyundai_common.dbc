@@ -44,9 +44,8 @@ BO_ 80 LKAS: 16 XXX
  SG_ LKA_WARNING : 32|1@1+ (1,0) [0|1] "" XXX
  SG_ LKA_ICON : 38|2@1+ (1,0) [0|255] "" XXX
  SG_ FCA_SYSWARN : 40|1@0+ (1,0) [0|1] "" XXX
- SG_ ADAS_StrTqReqVal : 41|11@1+ (1,-1024) [0|4095] "Nm"  GW_RGW,ICSC,MDPS,SFA
- SG_ ADAS_ActToiSta : 52|1@1+ (1,0) [0|1] ""  ESC,GW_RGW,ICSC,MDPS,RWS,SFA
- SG_ ADAS_ToiFltSta : 54|2@1+ (1,0) [0|1] ""  GW_RGW,MDPS,RWS,SFA
+ SG_ TORQUE_REQUEST : 41|11@1+ (1,-1024) [0|4095] "" XXX
+ SG_ STEER_REQ : 52|1@1+ (1,0) [0|1] "" XXX
  SG_ LFA_BUTTON : 56|1@1+ (1,0) [0|255] "" XXX
  SG_ LKA_ASSIST : 62|1@1+ (1,0) [0|1] "" XXX
  SG_ STEER_MODE : 65|3@1+ (1,0) [0|1] "" XXX
@@ -225,10 +224,6 @@ BO_ 702 CAM_0x2be: 32 CAMERA
 CM_ BO_ 676 "Contains signals with detailed lane line information. Used by ADAS ECU on HDA 2 vehicles to operate LFA.";
 
 CM_ SG_ 80 HAS_LANE_SAFETY "If 0, hides LKAS 'Lane Safety' menu from vehicle settings";
-CM_ SG_ 80 ADAS_StrTqReqVal "LKA_SteeringTorqueRequestValue ##2G##LDW_LKA - LKA11 - CR_LKA_StrToqReq";
-CM_ SG_ 80 ADAS_StrTqReqVal "FIXME: Factor and offsets are wrong";
-CM_ SG_ 80 ADAS_ActToiSta "ADAS_ActiveTorqueOverlayInterfaceStatus ##2G##LDW_LKA - LKA11 - CF_LKA_ActToi";
-CM_ SG_ 80 ADAS_ToiFltSta "ADAS_TorqueOverlayInterfaceFaultStatus ##2G##LDW_LKA - LKA11 - CF_LKA_ToiFlt";
 CM_ SG_ 676 LEFT_LANE_LINE "Left lane line confidence";
 CM_ SG_ 676 RIGHT_LANE_LINE "Right lane line confidence";
 VAL_ 80 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green" ;
