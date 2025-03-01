@@ -702,10 +702,20 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
     // TODO: openpilot should be cognizant of this and not send small floats
     int highest_desired_angle = desired_angle_last + ((desired_angle_last > 0) ? delta_angle_up : delta_angle_down);
     int lowest_desired_angle = desired_angle_last - ((desired_angle_last >= 0) ? delta_angle_down : delta_angle_up);
+    printf("lowest desired angle: %i, highest desired angle: %i\n", lowest_desired_angle, highest_desired_angle);
+//    for (int i = 0; i < MAX_SAMPLE_VALS; i++) {
+//      printf("vehicle speed: %f\n", vehicle_speed.values[i] / VEHICLE_SPEED_FACTOR);
+//    }
+//    for (int i = 0; i < MAX_SAMPLE_VALS; i++) {
+//      printf("angle meas: %i\n", angle_meas.values[i]);
+//    }
+//    printf("angle meas min: %i, angle meas max: %i\n", angle_meas.min, angle_meas.max);
+//    printf("vehicle speed min: %f, vehicle speed max: %f\n", vehicle_speed.min / VEHICLE_SPEED_FACTOR, vehicle_speed.max / VEHICLE_SPEED_FACTOR);
+//    printf("desired angle last: %i, desired angle: %i\n", desired_angle_last, desired_angle);
 
     // check that commanded angle value isn't too far from measured, used to limit torque for some safety modes
     // ensure we start moving in direction of meas while respecting relaxed rate limits if error is exceeded
-    if (limits.enforce_angle_error && ((vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR) > limits.angle_error_min_speed)) {
+    if (false){//limits.enforce_angle_error && ((vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR) > limits.angle_error_min_speed)) {
       // flipped fudge to avoid false positives
       const float fudged_speed_error = (vehicle_speed.max / VEHICLE_SPEED_FACTOR) + 1.;
       const int delta_angle_up_relaxed = (interpolate(limits.angle_rate_up_lookup, fudged_speed_error) * limits.angle_deg_to_can) - 1.;
@@ -735,39 +745,50 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
       lowest_desired_angle = CLAMP(lowest_desired_angle, -limits.max_angle, limits.max_angle);
       highest_desired_angle = CLAMP(highest_desired_angle, -limits.max_angle, limits.max_angle);
 
-      if (max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle)) {
-        printf("VIOLATION! vehicle speed: %f\n", vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR);
-        printf("delta_angle_up_relaxed: %i, delta_angle_down_relaxed: %i\n", delta_angle_up_relaxed, delta_angle_down_relaxed);
-        printf("highest_desired_angle_error: %i, lowest_desired_angle_error: %i\n", highest_desired_angle_error, lowest_desired_angle_error);
-        printf("prev desired angle: %i, current desired angle: %i\n", desired_angle_last, desired_angle);
-        printf("highest desired angle: %i, lowest desired angle: %i\n", highest_desired_angle, lowest_desired_angle);
-        printf("angle meas min: %i, angle meas max: %i\n", angle_meas.min, angle_meas.max);
-        printf("\n");
-      }
+//      if (max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle)) {
+//        printf("VIOLATION! vehicle speed: %f\n", vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR);
+//        printf("delta_angle_up_relaxed: %i, delta_angle_down_relaxed: %i\n", delta_angle_up_relaxed, delta_angle_down_relaxed);
+//        printf("highest_desired_angle_error: %i, lowest_desired_angle_error: %i\n", highest_desired_angle_error, lowest_desired_angle_error);
+//        printf("prev desired angle: %i, current desired angle: %i\n", desired_angle_last, desired_angle);
+//        printf("highest desired angle: %i, lowest desired angle: %i\n", highest_desired_angle, lowest_desired_angle);
+//        printf("angle meas min: %i, angle meas max: %i\n", angle_meas.min, angle_meas.max);
+//        printf("\n");
+//      }
     }
 
-    if (false) {
+    if (limits.angle_is_curvature) {
       // ISO 11270
-      static const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
+      static const float ISO_LATERAL_ACCEL = 2.99;  // m/s^2
 
       // Limit to average banked road since safety doesn't have the roll
       static const float EARTH_G = 9.81;
       static const float AVERAGE_ROAD_ROLL = 0.06;  // ~3.4 degrees, 6% superelevation
       static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (EARTH_G * AVERAGE_ROAD_ROLL);  // ~2.4 m/s^2
+//      printf("ISO 11270 lateral accel: %f\n", MAX_LATERAL_ACCEL);
 
-      const float speed = MAX(vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR, 1.0);
+      // Allow small tolerance by using minimum speed and rounding curvature up
+      const float speed = MAX(vehicle_speed.min / VEHICLE_SPEED_FACTOR, 1.0);
+//      printf("vehicle speed: %f, vehicle speed max: %f\n", speed, speed_max);
       const int max_curvature = (MAX_LATERAL_ACCEL / (speed * speed) * limits.angle_deg_to_can) + 1.;
+//      printf("max_curvature: %i, max_curvature_max_speed: %i\n", max_curvature, max_curvature_max_speed);
 
       // don't enforce above the max steer
       lowest_desired_angle = CLAMP(lowest_desired_angle, -max_curvature, max_curvature);
       highest_desired_angle = CLAMP(highest_desired_angle, -max_curvature, max_curvature);
 
       // check for above ISO 11270 lateral accel assuming worst case road roll
-      violation |= ABS(desired_angle) > max_curvature;
+//      violation |= ABS(desired_angle) > max_curvature;
+
+//      printf("\n");
     }
 
     // check for violation;
+    printf("desired angle: %i, highest desired angle: %i, lowest desired angle: %i\n", desired_angle, highest_desired_angle, lowest_desired_angle);
     violation |= max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
+    if (violation) {
+      printf("VIOLATION!\n");
+    }
+    printf("\n");
 
   }
   desired_angle_last = desired_angle;
