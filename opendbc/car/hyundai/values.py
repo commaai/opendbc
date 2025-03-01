@@ -22,11 +22,10 @@ class CarControllerParams:
   # Stock LFA system is seen sending 250 max, but for LKAS events it's 175 max.
   # 250 can at least achieve 4 m/s^2, 80 corresponds to ~2.5 m/s^2
   ANGLE_MAX_TORQUE = 80
-  # start winding down max angle torque at this driver torque value
-  ANGLE_DRIVER_TORQUE_ALLOWANCE = 100
-  ANGLE_MIN_TORQUE = 20  # equivalent to ~0.6 m/s^2 of torque (based on ANGLE_MAX_TORQUE) when overriding
+  ANGLE_MIN_TORQUE = 25  # equivalent to ~0.8 m/s^2 of torque (based on ANGLE_MAX_TORQUE) when overriding
   TORQUE_UP_RATE = 1
-  TORQUE_DOWN_RATE = 5
+  TORQUE_DOWN_RATE = 3
+
   # LKAS angle command is unlimited, but LFA is limited to 176.7 deg (but does not fault if requesting above)
   STEER_ANGLE_MAX = 180  # deg
 
