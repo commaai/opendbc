@@ -10,12 +10,12 @@ from opendbc.safety.tests.safety_replay.helpers import package_can_msg, init_seg
 # replay a drive to check for safety violations
 def replay_drive(msgs, safety_mode, param, alternative_experience):
   safety = libsafety_py.libsafety
+  msgs.sort(key=lambda m: m.logMonoTime)
 
   err = safety.set_safety_hooks(safety_mode, param)
   assert err == 0, "invalid safety mode: %d" % safety_mode
   safety.set_alternative_experience(alternative_experience)
 
-  msgs.sort(key=lambda m: m.logMonoTime)
   init_segment(safety, msgs, safety_mode, param)
 
   rx_tot, rx_invalid, tx_tot, tx_blocked, tx_controls, tx_controls_blocked = 0, 0, 0, 0, 0, 0
