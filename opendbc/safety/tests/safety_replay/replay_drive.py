@@ -16,7 +16,6 @@ def replay_drive(msgs, safety_mode, param, alternative_experience):
   safety.set_alternative_experience(alternative_experience)
 
   init_segment(safety, msgs, safety_mode, param)
-  lr.reset()
 
   rx_tot, rx_invalid, tx_tot, tx_blocked, tx_controls, tx_controls_blocked = 0, 0, 0, 0, 0, 0
   safety_tick_rx_invalid = False
