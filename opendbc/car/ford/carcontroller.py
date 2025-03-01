@@ -32,7 +32,7 @@ def apply_ford_curvature_limits(apply_curvature, apply_curvature_last, current_c
   if CP.flags & FordFlags.CANFD:
     # Limit curvature to conservative max lateral acceleration
     curvature_accel_limit = MAX_LATERAL_ACCEL / (max(v_ego_raw, 1) ** 2)
-    apply_curvature = np.clip(apply_curvature, -curvature_accel_limit, curvature_accel_limit)
+    apply_curvature = float(np.clip(apply_curvature, -curvature_accel_limit, curvature_accel_limit))
 
   return apply_curvature
 
