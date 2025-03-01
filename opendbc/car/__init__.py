@@ -25,24 +25,6 @@ class AngleSteeringLimits:
   ANGLE_RATE_LIMIT_DOWN: tuple[list[float], list[float]]
 
 
-
-"""
-typedef struct {
-  // angle cmd limits
-  const int max_angle;
-
-  const float angle_deg_to_can;
-  const struct lookup_t angle_rate_up_lookup;
-  const struct lookup_t angle_rate_down_lookup;
-  const int max_angle_error;             // used to limit error between meas and cmd while enabled
-  const float angle_error_min_speed;     // minimum speed to start limiting angle error
-
-  const bool enforce_angle_error;        // enables max_angle_error check
-  const bool inactive_angle_is_zero;     // if false, enforces angle near meas when disabled (default)
-} AngleSteeringLimits;
-"""
-
-
 def apply_hysteresis(val: float, val_steady: float, hyst_gap: float) -> float:
   if val > val_steady + hyst_gap:
     val_steady = val - hyst_gap
