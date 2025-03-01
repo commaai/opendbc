@@ -85,7 +85,7 @@ BO_ 272 LKAS_ALT: 32 XXX
  SG_ LKA_WARNING : 32|1@1+ (1,0) [0|1] "" XXX
  SG_ LKA_ICON : 38|2@1+ (1,0) [0|255] "" XXX
  SG_ FCA_SYSWARN : 40|1@0+ (1,0) [0|1] "" XXX
- SG_ ADAS_StrTqReqVal : 41|11@1+ (1,-1024) [0|4095] "Nm"  GW_RGW,ICSC,MDPS,SFA  # FIXME: Factor and offsets are wrong
+ SG_ ADAS_StrTqReqVal : 41|11@1+ (1,-1024) [0|4095] "Nm"  GW_RGW,ICSC,MDPS,SFA
  SG_ ADAS_ActToiSta : 52|1@1+ (1,0) [0|1] ""  ESC,GW_RGW,ICSC,MDPS,RWS,SFA
  SG_ ADAS_ToiFltSta : 54|2@1+ (1,0) [0|1] ""  GW_RGW,MDPS,RWS,SFA
  SG_ LFA_BUTTON : 56|1@1+ (1,0) [0|255] "" XXX
@@ -111,7 +111,7 @@ BO_ 298 LFA: 16 CGW_CCU
  SG_ NEW_SIGNAL_1 : 27|2@1+ (1,0) [0|255] "" XXX
  SG_ LKA_WARNING : 32|1@1+ (1,0) [0|1] "" XXX
  SG_ LKA_ICON : 38|2@1+ (1,0) [0|255] "" XXX
- SG_ ADAS_StrTqReqVal : 41|11@1+ (1,-1024) [0|4095] "Nm"  GW_RGW,ICSC,MDPS,SFA  # FIXME: Factor and offsets are wrong
+ SG_ ADAS_StrTqReqVal : 41|11@1+ (1,-1024) [0|4095] "Nm"  GW_RGW,ICSC,MDPS,SFA
  SG_ ADAS_ActToiSta : 52|1@1+ (1,0) [0|1] ""  ESC,GW_RGW,ICSC,MDPS,RWS,SFA
  SG_ ADAS_ToiFltSta : 54|2@1+ (1,0) [0|1] ""  GW_RGW,MDPS,RWS,SFA
  SG_ LFA_BUTTON : 56|1@1+ (1,0) [0|255] "" XXX
@@ -599,6 +599,7 @@ CM_ SG_ 203 FCA_ESA_ActvSta "FCA_ESA Active State";
 CM_ SG_ 203 FCA_ESA_TqBstGainVal "FCA_ESA Torque Boost Gain Value";
 CM_ BO_ 272 "Alternative LKAS message, used on cars such as 2023 Ioniq 6, 2nd gen Kona. Matches LKAS except size is 32 bytes";
 CM_ SG_ 272 ADAS_StrTqReqVal "LKA_SteeringTorqueRequestValue ##2G##LDW_LKA - LKA11 - CR_LKA_StrToqReq";
+CM_ SG_ 272 ADAS_StrTqReqVal "FIXME: Factor and offsets are wrong";
 CM_ SG_ 272 ADAS_ActToiSta "ADAS_ActiveTorqueOverlayInterfaceStatus ##2G##LDW_LKA - LKA11 - CF_LKA_ActToi";
 CM_ SG_ 272 ADAS_ToiFltSta "ADAS_TorqueOverlayInterfaceFaultStatus ##2G##LDW_LKA - LKA11 - CF_LKA_ToiFlt";
 CM_ SG_ 272 ADAS_ActvACILvl2Sta "ADAS Active AngleControlInterface Level 2 State";
@@ -606,6 +607,7 @@ CM_ SG_ 272 ADAS_StrAnglReqVal "ADAS Steering Angle Request Value";
 CM_ SG_ 272 ADAS_ACIAnglTqRedcGainVal "ADAS AngleControlInterface Angle Torque Reduction Gain Value";
 CM_ SG_ 298 NEW_SIGNAL_4 "todo: figure out why always set to 9";
 CM_ SG_ 298 ADAS_StrTqReqVal "LKA_SteeringTorqueRequestValue ##2G##LDW_LKA - LKA11 - CR_LKA_StrToqReq";
+CM_ SG_ 298 ADAS_StrTqReqVal "FIXME: Factor and offsets are wrong";
 CM_ SG_ 298 ADAS_ActToiSta "ADAS_ActiveTorqueOverlayInterfaceStatus ##2G##LDW_LKA - LKA11 - CF_LKA_ActToi";
 CM_ SG_ 298 ADAS_ToiFltSta "ADAS_TorqueOverlayInterfaceFaultStatus ##2G##LDW_LKA - LKA11 - CF_LKA_ToiFlt";
 CM_ SG_ 352 SET_ME_9 "has something to do with AEB settings";
