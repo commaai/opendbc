@@ -1,10 +1,10 @@
 from dataclasses import dataclass, field
-from enum import StrEnum
+from enum import StrEnum, IntFlag
 
 from opendbc.car.structs import CarParams, CarState
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
-from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
-from opendbc.car.fw_query_definitions import FwQueryConfig
+from opendbc.car import Bus, CarSpecs, PlatformConfig, Platforms
+from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts, Device
+from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
 
@@ -29,7 +29,7 @@ class ModelLine(StrEnum):
 @dataclass
 class RivianCarDocs(CarDocs):
   package: str = "All"
-  car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.rivian]))
+  car_parts: CarParts = field(default_factory=CarParts([Device.threex_angled_mount, CarHarness.rivian]))
 
 @dataclass
 class RivianPlatformConfig(PlatformConfig):
@@ -49,7 +49,7 @@ class CAR(Platforms):
       RivianCarDocs("Rivian R1T 2022-24"),
     ],
     CarSpecs(mass=3206., wheelbase=3.08, steerRatio=15.2),
-    {Bus.pt: 'rivian_can'},
+    {Bus.pt: 'rivian_can', Bus.radar: 'rivian_mando_front_radar_generated'}
     wmis={WMI.RIVIAN_TRUCK, WMI.RIVIAN_MPV},
     lines={ModelLine.R1T, ModelLine.R1T},
     years={ModelYear.N_2022, ModelYear.P_2023, ModelYear.R_2024},
@@ -86,19 +86,26 @@ GEAR_MAP = [
 
 
 class CarControllerParams:
-  STEER_MAX = 350
+  # The Rivian R1T we tested on achieves slightly more lateral acceleration going left vs. right
+  # and lateral acceleration rises as speed increases. This value is set conservatively to
+  # reach a maximum of 2.5-3.0 m/s^2 turning left at 80 mph, but is less at lower speeds
+  STEER_MAX = 250  # ~2.5 m/s^2
   STEER_STEP = 1
   STEER_DELTA_UP = 3  # torque increase per refresh
   STEER_DELTA_DOWN = 5  # torque decrease per refresh
-  STEER_DRIVER_ALLOWANCE = 15  # allowed driver torque before start limiting
-  STEER_DRIVER_MULTIPLIER = 1  # weight driver torque
-  STEER_DRIVER_FACTOR = 1
+  STEER_DRIVER_ALLOWANCE = 100  # allowed driver torque before start limiting
+  STEER_DRIVER_MULTIPLIER = 2  # weight driver torque
+  STEER_DRIVER_FACTOR = 100
 
-  ACCEL_MIN = -3.48  # m/s^2
+  ACCEL_MIN = -3.5  # m/s^2
   ACCEL_MAX = 2.0  # m/s^2
 
   def __init__(self, CP):
     pass
+
+
+class RivianSafetyFlags(IntFlag):
+  LONG_CONTROL = 1
 
 
 DBC = CAR.create_dbc_map()
