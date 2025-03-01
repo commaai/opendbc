@@ -51,7 +51,6 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.car_fingerprint = CP.carFingerprint
 
-
     self.accel_last = 0
     self.apply_torque_last = 0
     self.apply_angle_last = 0
@@ -81,15 +80,15 @@ class CarController(CarControllerBase):
     # angle control
     else:
       self.apply_angle_last = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw,
-                                                 CS.out.steeringAngleDeg, CC.latActive, self.params)
+                                                           CS.out.steeringAngleDeg, CC.latActive, self.params)
 
       # Similar to torque control driver torque override, we ramp up and down the max allowed torque,
       # but this is a single threshold in the opposite direction of angle for simplicity
       if self.apply_angle_last * CS.out.steeringTorque <= 0 and abs(CS.out.steeringTorque) > self.params.ANGLE_DRIVER_TORQUE_ALLOWANCE:
-        self.lkas_max_torque = max(self.lkas_max_torque - 1, self.params.ANGLE_MIN_TORQUE)
+        self.lkas_max_torque = max(self.lkas_max_torque - self.params.TORQUE_DOWN_RATE, self.params.ANGLE_MIN_TORQUE)
       else:
         # ramp back up on engage as well
-        self.lkas_max_torque = min(self.lkas_max_torque + 1, self.params.ANGLE_MAX_TORQUE)
+        self.lkas_max_torque = min(self.lkas_max_torque + self.params.TORQUE_UP_RATE, self.params.ANGLE_MAX_TORQUE)
 
     if not CC.latActive:
       apply_torque = 0

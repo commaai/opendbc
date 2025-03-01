@@ -20,15 +20,15 @@ class CarControllerParams:
   ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[5, 25], angle_v=[0.36, 0.26])
 
   # Stock LFA system is seen sending 250 max, but for LKAS events it's 175 max.
-  # 250 can at least achieve 4 m/s^2
-  # 80 corresponds to ~2.5 m/s^2
-  # TODO: update this with new units
-  ANGLE_MAX_TORQUE = 80  # units unknown
-  # start winding down max angle torque at this value
+  # 250 can at least achieve 4 m/s^2, 80 corresponds to ~2.5 m/s^2
+  ANGLE_MAX_TORQUE = 80
+  # start winding down max angle torque at this driver torque value
   ANGLE_DRIVER_TORQUE_ALLOWANCE = 100
-  ANGLE_MIN_TORQUE = 20  # equivalent to ~0.6 m/s^2 of torque (based on ANGLE_MAX_TORQUE)
-  # LKAS angle command is unlimited, but LFA is limited to 176.7 (but does not fault if requesting above)
-  STEER_ANGLE_MAX = 180
+  ANGLE_MIN_TORQUE = 20  # equivalent to ~0.6 m/s^2 of torque (based on ANGLE_MAX_TORQUE) when overriding
+  TORQUE_UP_RATE = 1
+  TORQUE_DOWN_RATE = 5
+  # LKAS angle command is unlimited, but LFA is limited to 176.7 deg (but does not fault if requesting above)
+  STEER_ANGLE_MAX = 180  # deg
 
   def __init__(self, CP):
     self.STEER_DELTA_UP = 3
