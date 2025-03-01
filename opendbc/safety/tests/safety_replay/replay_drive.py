@@ -7,16 +7,15 @@ from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.safety.tests.safety_replay.helpers import package_can_msg, init_segment
 
 # replay a drive to check for safety violations
-def replay_drive(lr, safety_mode, param, alternative_experience, segment=False):
+def replay_drive(lr, safety_mode, param, alternative_experience):
   safety = libsafety_py.libsafety
 
   err = safety.set_safety_hooks(safety_mode, param)
   assert err == 0, "invalid safety mode: %d" % safety_mode
   safety.set_alternative_experience(alternative_experience)
 
-  if segment:
-    init_segment(safety, lr, safety_mode, param)
-    lr.reset()
+  init_segment(safety, lr, safety_mode, param)
+  lr.reset()
 
   rx_tot, rx_invalid, tx_tot, tx_blocked, tx_controls, tx_controls_blocked = 0, 0, 0, 0, 0, 0
   safety_tick_rx_invalid = False
@@ -93,4 +92,4 @@ if __name__ == "__main__":
       args.alternative_experience = CP.alternativeExperience
 
   print(f"replaying {args.route_or_segment_name[0]} with safety mode {args.mode}, param {args.param}, alternative experience {args.alternative_experience}")
-  replay_drive(lr, args.mode, args.param, args.alternative_experience, segment=len(lr.logreader_identifiers) == 1)
+  replay_drive(lr, args.mode, args.param, args.alternative_experience)
