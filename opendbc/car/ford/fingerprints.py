@@ -105,7 +105,7 @@ FW_VERSIONS = {
       b'ML3T-14D049-AL\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
     ],
     (Ecu.eps, 0x730, None): [
-      b'RL38-14D003-AA\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+      b'RL38-14D003-AA\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
     ],
   },
   CAR.FORD_MUSTANG_MACH_E_MK1: {
