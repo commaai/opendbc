@@ -1,6 +1,5 @@
 from opendbc.car.ford.values import FordSafetyFlags
 from opendbc.car.toyota.values import ToyotaSafetyFlags
-from opendbc.car.ford.values import FordSafetyFlags
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 
