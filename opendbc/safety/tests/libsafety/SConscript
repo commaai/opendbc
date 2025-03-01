@@ -10,6 +10,8 @@ if system == 'Darwin':
 env = Environment(
   CC=CC,
   CFLAGS=[
+    '-Wall',
+    '-Werror',
     '-nostdlib',
     '-fno-builtin',
     '-std=gnu11',

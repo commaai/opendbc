@@ -62,8 +62,6 @@ static bool toyota_get_quality_flag_valid(const CANPacket_t *to_push) {
 }
 
 static void toyota_rx_hook(const CANPacket_t *to_push) {
-  const int TOYOTA_LTA_MAX_ANGLE = 1657;  // EPS only accepts up to 94.9461
-
   if (GET_BUS(to_push) == 0U) {
     int addr = GET_ADDR(to_push);
 
@@ -92,7 +90,7 @@ static void toyota_rx_hook(const CANPacket_t *to_push) {
       bool steer_angle_initializing = GET_BIT(to_push, 3U);
       if (!steer_angle_initializing) {
         int angle_meas_new = (GET_BYTE(to_push, 3) << 8U) | GET_BYTE(to_push, 4);
-        angle_meas_new = CLAMP(to_signed(angle_meas_new, 16), -TOYOTA_LTA_MAX_ANGLE, TOYOTA_LTA_MAX_ANGLE);
+        angle_meas_new = to_signed(angle_meas_new, 16);
         update_sample(&angle_meas, angle_meas_new);
       }
     }
@@ -148,7 +146,7 @@ static void toyota_rx_hook(const CANPacket_t *to_push) {
 }
 
 static bool toyota_tx_hook(const CANPacket_t *to_send) {
-  const SteeringLimits TOYOTA_STEERING_LIMITS = {
+  const TorqueSteeringLimits TOYOTA_TORQUE_STEERING_LIMITS = {
     .max_steer = 1500,
     .max_rate_up = 15,          // ramp up slow
     .max_rate_down = 25,        // ramp down fast
@@ -163,9 +161,12 @@ static bool toyota_tx_hook(const CANPacket_t *to_send) {
     .max_invalid_request_frames = 1,
     .min_valid_request_rt_interval = 170000,  // 170ms; a ~10% buffer on cutting every 19 frames
     .has_steer_req_tolerance = true,
+  };
 
+  static const AngleSteeringLimits TOYOTA_ANGLE_STEERING_LIMITS = {
     // LTA angle limits
     // factor for STEER_TORQUE_SENSOR->STEER_ANGLE and STEERING_LTA->STEER_ANGLE_CMD (1 / 0.0573)
+    .max_angle = 1657,  // EPS only accepts up to 94.9461
     .angle_deg_to_can = 17.452007,
     .angle_rate_up_lookup = {
       {5., 25., 25.},
@@ -242,7 +243,7 @@ static bool toyota_tx_hook(const CANPacket_t *to_send) {
         }
       } else {
         // check angle rate limits and inactive angle
-        if (steer_angle_cmd_checks(lta_angle, steer_control_enabled, TOYOTA_STEERING_LIMITS)) {
+        if (steer_angle_cmd_checks(lta_angle, steer_control_enabled, TOYOTA_ANGLE_STEERING_LIMITS)) {
           tx = false;
         }
 
@@ -294,7 +295,7 @@ static bool toyota_tx_hook(const CANPacket_t *to_send) {
       bool steer_req = GET_BIT(to_send, 0U);
       // When using LTA (angle control), assert no actuation on LKA message
       if (!toyota_lta) {
-        if (steer_torque_cmd_checks(desired_torque, steer_req, TOYOTA_STEERING_LIMITS)) {
+        if (steer_torque_cmd_checks(desired_torque, steer_req, TOYOTA_TORQUE_STEERING_LIMITS)) {
           tx = false;
         }
       } else {

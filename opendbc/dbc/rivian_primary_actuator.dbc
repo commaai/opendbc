@@ -226,10 +226,6 @@ BO_ 448 ESP_TorqueLimit_Rear: 8 ESP
  SG_ ESP_Torque_Rear_Max : 23|16@0+ (0.5,-16384) [-16384|16383] "Nm" VDM
  SG_ ESP_Torque_Rear_Min : 39|16@0+ (0.5,-16384) [-16384|16383] "Nm" VDM
 
-BO_ 496 NEW_MSG_1F0: 8 XXX
-
-BO_ 515 NEW_MSG_203: 8 XXX
-
 BO_ 516 RCM_ALR_Status: 8 RCM
  SG_ RCM_ALR_Status_Signal : 0|2@1+ (1,0) [0|3] "" OCS
 
@@ -339,8 +335,6 @@ BO_ 592 VDM_EcasStatus: 8 VDM
  SG_ VDM_EcasHeightFR : 15|8@0- (1,0) [-128|127] "mm" ACM
  SG_ VDM_EcasHeightRL : 23|8@0- (1,0) [-128|127] "mm" ACM
  SG_ VDM_EcasHeightRR : 31|8@0- (1,0) [-128|127] "mm" ACM
-
-BO_ 658 NEW_MSG_292: 8 XXX
 
 BO_ 789 BCM_Status: 8 VDM
  SG_ BCM_AmbientAirTemperature : 15|8@0- (1,0) [-60|100] "degC" ESP
@@ -522,9 +516,6 @@ BO_ 1330 Dummy_VDM_PrimaryActuatorCAN: 1 VDM
 
 BO_ 1535 DoorStatus: 8 XXX
  SG_ DoorOpen : 8|1@0+ (1,0) [0|1] "" XXX
-
-BO_ 1536 NEW_MSG_600: 3 XXX
- SG_ NEW_SIGNAL_1 : 15|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1545 XCP_Cmd_VDM: 8 TestTool
 
