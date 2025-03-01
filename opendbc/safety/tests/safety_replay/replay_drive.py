@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 from collections import Counter
+from tqdm import tqdm
 
 from opendbc.car.carlog import carlog
 from opendbc.safety.tests.libsafety import libsafety_py
@@ -25,7 +26,7 @@ def replay_drive(msgs, safety_mode, param, alternative_experience):
   can_msgs = [m for m in msgs if m.which() in ('can', 'sendcan')]
   start_t = can_msgs[0].logMonoTime
   end_t = can_msgs[-1].logMonoTime
-  for msg in can_msgs:
+  for msg in tqdm(can_msgs):
     safety.set_timer((msg.logMonoTime // 1000) % 0xFFFFFFFF)
 
     # skip start and end of route, warm up/down period
