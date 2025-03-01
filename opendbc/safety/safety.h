@@ -758,7 +758,7 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 
     if (limits.angle_is_curvature) {
       // ISO 11270
-      static const float ISO_LATERAL_ACCEL = 2.99;  // m/s^2
+      static const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
 
       // Limit to average banked road since safety doesn't have the roll
       static const float EARTH_G = 9.81;

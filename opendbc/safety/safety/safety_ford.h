@@ -180,6 +180,7 @@ static void ford_rx_hook(const CANPacket_t *to_push) {
       // Signal: CcStat_D_Actl
       unsigned int cruise_state = GET_BYTE(to_push, 1) & 0x07U;
       bool cruise_engaged = (cruise_state == 4U) || (cruise_state == 5U);
+//      printf("got cruise engaged: %d\n", cruise_engaged);
       pcm_cruise_check(cruise_engaged);
     }
 
@@ -251,6 +252,14 @@ static bool ford_tx_hook(const CANPacket_t *to_send) {
     bool violation = false;
 //    violation |= GET_BIT(to_send, 8U) && !cruise_engaged_prev;   // Signal: CcAslButtnCnclPress (cancel)
 //    violation |= GET_BIT(to_send, 25U) && !controls_allowed;     // Signal: CcAsllButtnResPress (resume)
+
+//    if (GET_BIT(to_send, 8U) && !cruise_engaged_prev) {
+//      print("cruise_engaged_prev VIOLATION!\n");
+//    }
+//
+//    if (GET_BIT(to_send, 25U) && !controls_allowed) {
+//      print("controls_allowed VIOLATION!\n");
+//    }
 
     if (violation) {
       tx = false;
