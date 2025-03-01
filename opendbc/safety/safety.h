@@ -243,8 +243,11 @@ bool safety_tx_hook(CANPacket_t *to_send) {
     whitelisted = true;
   }
 
-  const bool safety_allowed = current_hooks->tx(to_send);
-  return !relay_malfunction && whitelisted && safety_allowed;
+  bool safety_allowed = false;
+  if (whitelisted){
+    safety_allowed = current_hooks->tx(to_send);
+  }
+  return !relay_malfunction && whitelisted && safety_allowed;  
 }
 
 int safety_fwd_hook(int bus_num, int addr) {
