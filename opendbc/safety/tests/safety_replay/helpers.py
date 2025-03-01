@@ -1,4 +1,5 @@
 from opendbc.car.toyota.values import ToyotaSafetyFlags
+from opendbc.car.ford.values import FordSafetyFlags
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 
@@ -23,7 +24,7 @@ def is_steering_msg(mode, param, addr):
   elif mode == CarParams.SafetyModel.subaru:
     ret = addr == 0x122
   elif mode == CarParams.SafetyModel.ford:
-    ret = addr == 0x3d3
+    ret = addr == 0x3d6 if param & FordSafetyFlags.CANFD else addr == 0x3d3
   elif mode == CarParams.SafetyModel.nissan:
     ret = addr == 0x169
   elif mode == CarParams.SafetyModel.rivian:
@@ -53,7 +54,10 @@ def get_steer_value(mode, param, to_send):
     torque = ((to_send.data[3] & 0x1F) << 8) | to_send.data[2]
     torque = -to_signed(torque, 13)
   elif mode == CarParams.SafetyModel.ford:
-    angle = ((to_send.data[0] << 3) | (to_send.data[1] >> 5)) - 1000
+    if param & FordSafetyFlags.CANFD:
+      angle = ((to_send.data[2] << 3) | (to_send.data[3] >> 5)) - 1000
+    else:
+      angle = ((to_send.data[0] << 3) | (to_send.data[1] >> 5)) - 1000
   elif mode == CarParams.SafetyModel.nissan:
     angle = (to_send.data[0] << 10) | (to_send.data[1] << 2) | (to_send.data[2] >> 6)
     angle = -angle + (1310 * 100)
@@ -72,6 +76,15 @@ def init_segment(safety, lr, mode, param):
   if msg is None:
     # no steering msgs
     return
+
+  i = 0
+  for msg in lr:
+    if msg.which() == 'can':
+      i += 1
+      for can in msg.can:
+        safety.safety_rx_hook(package_can_msg(can))
+      if i > 100:
+        break
 
   to_send = package_can_msg(msg)
   torque, angle = get_steer_value(mode, param, to_send)
