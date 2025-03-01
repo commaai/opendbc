@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, AngleRateLimit
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, AngleSteeringLimits
 from opendbc.car.structs import CarParams, CarState
 from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
@@ -82,19 +82,21 @@ GEAR_MAP = {
 
 
 class CarControllerParams:
-  # Angle rate limits are set using the Tesla Model Y VehicleModel such that they maximally meet ISO 11270
-  # At 5 m/s, FSD has been seen hitting up to ~4 deg/frame with ~5 deg/frame at very low creeping speeds
-  # At 30 m/s, FSD has been seen hitting mostly 0.1 deg/frame, sometimes 0.2 deg/frame, and rarely 0.3 deg/frame
-  ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0., 5., 25.], angle_v=[2.5, 1.5, 0.2])
-  ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0., 5., 25.], angle_v=[5., 2.0, 0.3])
+  ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
+    # EPAS faults above this angle
+    360,  # deg
+    # Angle rate limits are set using the Tesla Model Y VehicleModel such that they maximally meet ISO 11270
+    # At 5 m/s, FSD has been seen hitting up to ~4 deg/frame with ~5 deg/frame at very low creeping speeds
+    # At 30 m/s, FSD has been seen hitting mostly 0.1 deg/frame, sometimes 0.2 deg/frame, and rarely 0.3 deg/frame
+    ([0., 5., 25.], [2.5, 1.5, 0.2]),
+    ([0., 5., 25.], [5., 2.0, 0.3]),
+  )
+
   STEER_STEP = 2  # Angle command is sent at 50 Hz
   ACCEL_MAX = 2.0    # m/s^2
   ACCEL_MIN = -3.48  # m/s^2
   JERK_LIMIT_MAX = 4.9  # m/s^3, ACC faults at 5.0
   JERK_LIMIT_MIN = -4.9  # m/s^3, ACC faults at 5.0
-
-  # EPAS faults above this angle
-  STEER_ANGLE_MAX = 360  # deg
 
 
 class TeslaSafetyFlags(IntFlag):

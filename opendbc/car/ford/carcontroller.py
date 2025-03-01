@@ -17,7 +17,7 @@ def apply_ford_curvature_limits(apply_curvature, apply_curvature_last, current_c
                               current_curvature + CarControllerParams.CURVATURE_ERROR)
 
   # Curvature rate limit after driver torque limit
-  return apply_std_steer_angle_limits(apply_curvature, apply_curvature_last, v_ego_raw, steering_angle, lat_active, CarControllerParams)
+  return apply_std_steer_angle_limits(apply_curvature, apply_curvature_last, v_ego_raw, steering_angle, lat_active, CarControllerParams.ANGLE_LIMITS)
 
 
 def apply_creep_compensation(accel: float, v_ego: float) -> float:
