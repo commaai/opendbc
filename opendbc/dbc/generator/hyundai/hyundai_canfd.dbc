@@ -56,7 +56,7 @@ BO_ 203 LFA_ALT: 24 ADRV
 BO_ 234 MDPS: 24 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
- SG_ LKA_ACTIVE : 48|1@0+ (1,0) [0|16777215] "" XXX
+ SG_ LKA_AVAILABLE : 48|1@0+ (1,0) [0|16777215] "" XXX
  SG_ LKA_FAULT : 54|1@0+ (1,0) [0|1] "" XXX
  SG_ STEERING_OUT_TORQUE : 64|12@1+ (0.1,-204.8) [0|65535] "" XXX
  SG_ STEERING_COL_TORQUE : 80|13@1+ (1,-4095) [0|4095] "" XXX
@@ -78,7 +78,7 @@ BO_ 272 LKAS_ALT: 32 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
  SG_ LKA_MODE : 24|3@1+ (1,0) [0|7] "" XXX
- SG_ LKA_ACTIVE : 27|2@1+ (1,0) [0|255] "" XXX
+ SG_ LKA_AVAILABLE : 27|2@1+ (1,0) [0|255] "" XXX
  SG_ LKA_WARNING : 32|1@1+ (1,0) [0|1] "" XXX
  SG_ LKA_ICON : 38|2@1+ (1,0) [0|255] "" XXX
  SG_ FCA_SYSWARN : 40|1@0+ (1,0) [0|1] "" XXX
@@ -595,6 +595,7 @@ BO_ 1264 LOCAL_TIME: 8 XXX
 CM_ SG_ 96 BRAKE_PRESSURE "User applied brake pedal pressure. Ramps from computer applied pressure on falling edge of cruise. Cruise cancels if !=0";
 CM_ SG_ 101 BRAKE_POSITION "User applied brake pedal position, max is ~700. Signed on some vehicles";
 CM_ BO_ 272 "Alternative LKAS message, used on cars such as 2023 Ioniq 6, 2nd gen Kona. Matches LKAS except size is 32 bytes";
+CM_ SG_ 272 LKA_AVAILABLE "Angle control cars: 3 when LKA is generally available, goes to 0 during changes with LFA";
 CM_ SG_ 272 LKAS_ANGLE_CMD "tracks MDPS->STEERING_ANGLE when not engaged, not STEERING_SENSORS->STEERING_ANGLE";
 CM_ SG_ 298 NEW_SIGNAL_4 "todo: figure out why always set to 9";
 CM_ SG_ 352 SET_ME_9 "has something to do with AEB settings";
