@@ -80,15 +80,15 @@ class CarController(CarControllerBase):
     # angle control
     else:
       self.apply_angle_last = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw,
-                                                           CS.out.steeringAngleDeg, CC.latActive, self.params)
+                                                           CS.out.steeringAngleDeg, CC.latActive, self.params.ANGLE_LIMITS)
 
       # Similar to torque control driver torque override, we ramp up and down the max allowed torque,
       # but this is a single threshold for simplicity. It also matches the stock system behavior.
       if abs(CS.out.steeringTorque) > self.params.STEER_THRESHOLD:
-        self.lkas_max_torque = max(self.lkas_max_torque - self.params.TORQUE_DOWN_RATE, self.params.ANGLE_MIN_TORQUE)
+        self.lkas_max_torque = max(self.lkas_max_torque - self.params.ANGLE_TORQUE_DOWN_RATE, self.params.ANGLE_MIN_TORQUE)
       else:
         # ramp back up on engage as well
-        self.lkas_max_torque = min(self.lkas_max_torque + self.params.TORQUE_UP_RATE, self.params.ANGLE_MAX_TORQUE)
+        self.lkas_max_torque = min(self.lkas_max_torque + self.params.ANGLE_TORQUE_UP_RATE, self.params.ANGLE_MAX_TORQUE)
 
     if not CC.latActive:
       apply_torque = 0

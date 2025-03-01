@@ -2,7 +2,7 @@ import re
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
-from opendbc.car import AngleRateLimit, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car import SteeringAngleLimits, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
@@ -15,19 +15,20 @@ class CarControllerParams:
   ACCEL_MIN = -3.5 # m/s
   ACCEL_MAX = 2.0 # m/s
 
-  # seen changing at 0.2 deg/frame down, 0.1 deg/frame up at 100Hz
-  ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[5, 25], angle_v=[0.3, 0.15])
-  ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[5, 25], angle_v=[0.36, 0.26])
+  ANGLE_LIMITS: SteeringAngleLimits = SteeringAngleLimits(
+    # LKAS angle command is unlimited, but LFA is limited to 176.7 deg (but does not fault if requesting above)
+    180,  # deg
+    # seen changing at 0.2 deg/frame down, 0.1 deg/frame up at 100Hz
+    ([5, 25], [0.3, 0.15]),
+    ([5, 25], [0.36, 0.26]),
+  )
 
   # Stock LFA system is seen sending 250 max, but for LKAS events it's 175 max.
   # 250 can at least achieve 4 m/s^2, 80 corresponds to ~2.5 m/s^2
   ANGLE_MAX_TORQUE = 80
   ANGLE_MIN_TORQUE = 25  # equivalent to ~0.8 m/s^2 of torque (based on ANGLE_MAX_TORQUE) when overriding
-  TORQUE_UP_RATE = 1
-  TORQUE_DOWN_RATE = 3
-
-  # LKAS angle command is unlimited, but LFA is limited to 176.7 deg (but does not fault if requesting above)
-  STEER_ANGLE_MAX = 180  # deg
+  ANGLE_TORQUE_UP_RATE = 1
+  ANGLE_TORQUE_DOWN_RATE = 3
 
   def __init__(self, CP):
     self.STEER_DELTA_UP = 3
