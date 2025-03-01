@@ -551,13 +551,6 @@ class CAR(Platforms):
     CarSpecs(mass=2087, wheelbase=3.09, steerRatio=14.23),
     flags=HyundaiFlags.RADAR_SCC,
   )
-  KIA_EV9 = HyundaiCanFDPlatformConfig(
-    [
-      HyundaiCarDocs("Kia EV9 2024", car_parts=CarParts.common([CarHarness.hyundai_r]))
-    ],
-    CarSpecs(mass=2625, wheelbase=3.1, steerRatio=17.2),
-    flags=HyundaiFlags.EV | HyundaiFlags.CANFD_ANGLE_STEERING,
-  )
 
   # Genesis
   GENESIS_GV60_EV_1ST_GEN = HyundaiCanFDPlatformConfig(
@@ -617,6 +610,14 @@ class CAR(Platforms):
     [HyundaiCarDocs("Genesis GV80 2023", "All", car_parts=CarParts.common([CarHarness.hyundai_m]))],
     CarSpecs(mass=2258, wheelbase=2.95, steerRatio=14.14),
     flags=HyundaiFlags.RADAR_SCC,
+  )
+  GENESIS_GV80_2025 = HyundaiCanFDPlatformConfig(
+    [
+      HyundaiCarDocs("Genesis GV80 (3.5T Prestige Trim, with HDA II) 2025", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_q])),
+      HyundaiCarDocs("Genesis GV80 Coupe (with HDA II) 2025", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_q])),
+    ],
+    CarSpecs(mass=2258, wheelbase=2.95, steerRatio=14.14),
+    flags=HyundaiFlags.CANFD_ANGLE_STEERING,
   )
 
 

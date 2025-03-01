@@ -1231,12 +1231,12 @@ FW_VERSIONS = {
       b'\xf1\x00T01G00BL  T01I00A1  DOS2T16X2XI00NS0\x8c`\xff\xe7',
     ],
   },
-  CAR.KIA_EV9: {
-    (Ecu.fwdRadar, 0x7d0, None): [
-      b'\xf1\x00MV__ RDR -----      1.00 1.02 99110-DO000         ',
-    ],
-    (Ecu.fwdCamera, 0x7c4, None): [
-      b'\xf1\x00MV  MFC  AT USA LHD 1.00 1.02 99211-DO000 230616',
-    ],
-  },
+  CAR.GENESIS_GV80_2025: {
+     (Ecu.fwdRadar, 0x7d0, None): [
+       b'\xf1\x00JX__ RDR -----      1.00 1.03 99110-T6500         ',
+     ],
+     (Ecu.fwdCamera, 0x7c4, None): [
+       b'\xf1\x00JX  MFC  AT USA LHD 1.00 1.03 99211-T6510 240124',
+     ],
+   },
 }
