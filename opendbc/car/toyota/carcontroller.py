@@ -122,7 +122,7 @@ class CarController(CarControllerBase):
         # Angular rate limit based on speed
         self.last_angle = apply_std_steer_angle_limits(apply_angle, self.last_angle, CS.out.vEgoRaw,
                                                        CS.out.steeringAngleDeg + CS.out.steeringAngleOffsetDeg,
-                                                       CC.latActive, self.params)
+                                                       CC.latActive, self.params.ANGLE_LIMITS)
 
     self.last_steer = apply_torque
 
