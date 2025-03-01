@@ -46,6 +46,7 @@ def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_torque)
     "STEER_REQ": 1 if lat_active else 0,
     "STEER_MODE": 0,
     "HAS_LANE_SAFETY": 0,  # hide LKAS settings
+    # TODO: we haven't found this for LFA_ALT, selectively remove once/if we send LFA
     "LKA_AVAILABLE": 0,
     "NEW_SIGNAL_2": 0,
   }
