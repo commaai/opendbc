@@ -81,8 +81,7 @@ typedef struct {
 } TorqueSteeringLimits;
 
 typedef struct {
-  // angle cmd limits
-  // curvature control uses these limits as well since it's just a scaling difference
+  // angle cmd limits (also used by curvature control cars)
   const int max_angle;
 
   const float angle_deg_to_can;
