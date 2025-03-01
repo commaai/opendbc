@@ -103,7 +103,7 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
 
   def get_canfd_curvature_limit(self, speed):
     # Round it in accordance with the safety
-    curvature_accel_limit = (MAX_LATERAL_ACCEL - 0.01) / (max(speed, 1) ** 2)
+    curvature_accel_limit = MAX_LATERAL_ACCEL / (max(speed, 1) ** 2)
     curvature_accel_limit = int(curvature_accel_limit * self.DEG_TO_CAN + 1) / self.DEG_TO_CAN
     return curvature_accel_limit
 
@@ -261,7 +261,7 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
 
   def test_max_lateral_acceleration(self):
     # Ford CAN FD can achieve a higher max lateral acceleration than CAN
-    for speed in np.arange(0, 40, 1):
+    for speed in np.arange(0, 40, 0.5):
       # Clip so we test it at low speed due to low max curvature
       curvature_accel_limit = self.get_canfd_curvature_limit(speed)
       curvature_accel_limit = np.clip(curvature_accel_limit, -self.MAX_CURVATURE, self.MAX_CURVATURE)

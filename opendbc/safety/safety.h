@@ -768,25 +768,30 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 
       // Allow small tolerance by using minimum speed and rounding curvature up
       const float speed = MAX(vehicle_speed.min / VEHICLE_SPEED_FACTOR, 1.0);
+//      printf("safety speed: %f\n", speed);
 //      printf("vehicle speed: %f, vehicle speed max: %f\n", speed, speed_max);
       const int max_curvature = (MAX_LATERAL_ACCEL / (speed * speed) * limits.angle_deg_to_can) + 1.;
+//      printf("safety max_curvature float: %f\n", (MAX_LATERAL_ACCEL / (speed * speed) * limits.angle_deg_to_can));
 //      printf("safety accel max_curvature: %i\n", max_curvature);
 //      printf("safety desired angle: %i\n", desired_angle);
 //      printf("safety speed: %f\n", speed);
 
       // don't enforce above the max steer
-      printf("max_curvature: %i\n", max_curvature);
-      printf("desired_angle: %i, desired_angle_last: %i\n", desired_angle, desired_angle_last);
-      printf("angle_meas.min: %i, angle_meas.max: %i\n", angle_meas.min, angle_meas.max);
-      printf("adjusting max angles from (min: %i, max: %i) ", lowest_desired_angle, highest_desired_angle);
+//      printf("max_curvature: %i\n", max_curvature);
+//      printf("desired_angle: %i, desired_angle_last: %i\n", desired_angle, desired_angle_last);
+//      printf("angle_meas.min: %i, angle_meas.max: %i\n", angle_meas.min, angle_meas.max);
+//      printf("adjusting max angles from (min: %i, max: %i) ", lowest_desired_angle, highest_desired_angle);
       lowest_desired_angle = CLAMP(lowest_desired_angle, -max_curvature, max_curvature);
       highest_desired_angle = CLAMP(highest_desired_angle, -max_curvature, max_curvature);
-      printf("to min: (%i, max: %i)\n", lowest_desired_angle, highest_desired_angle);
-      printf("\n");
+//      printf("to (min: %i, max: %i)\n", lowest_desired_angle, highest_desired_angle);
+//      printf("\n");
 
 
       // check for above ISO 11270 lateral accel assuming worst case road roll
       violation |= ABS(desired_angle) > max_curvature;
+      if (ABS(desired_angle) > max_curvature) {
+//        printf("VIOLATION! ISO 11270 lateral accel: %f\n", MAX_LATERAL_ACCEL);
+      }
 
 //      printf("\n");
     }
@@ -794,7 +799,7 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
     // check for violation;
 //    printf("desired angle: %i, highest desired angle: %i, lowest desired angle: %i\n", desired_angle, highest_desired_angle, lowest_desired_angle);
     violation |= max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
-    if (violation) {
+    if (max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle)) {
 //      printf("max_limit_check VIOLATION!\n");
     }
 //    printf("\n");
