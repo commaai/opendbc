@@ -32,7 +32,6 @@ class CarControllerParams:
     ([5, 25], [0.36, 0.26]),
   )
 
-  STEER_ANGLE_MAX = 94.9461  # deg
   MAX_LTA_DRIVER_TORQUE_ALLOWANCE = 150  # slightly above steering pressed allows some resistance when changing lanes
 
   def __init__(self, CP):
