@@ -49,9 +49,8 @@ def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_torque,
       "STEER_REQ": 0,  # always 0
       "STEER_MODE": 0,  # always 0
       "HAS_LANE_SAFETY": 0,  # hide LKAS settings TODO: never used
-      # TODO: this goes 0 when LFA lane changes, can we set to 3 to disable LFA and lane changes without sending MAX_TORQUE all the time?
-      # TODO: rename LKA_AVAILABLE or LKA_STATE
-      "LKA_ACTIVE": 3 if lat_active else 0,
+      # TODO: this goes 0 when LFA lane changes, 3 when LKA_ICON is >=green
+      "LKA_AVAILABLE": 3 if lat_active else 0,
       "NEW_SIGNAL_2": 0,  # always 0
       "LKAS_ANGLE_CMD": apply_angle,
       "LKAS_ANGLE_ACTIVE": 2 if lat_active else 1,
