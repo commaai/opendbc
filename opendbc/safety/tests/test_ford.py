@@ -293,6 +293,7 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
             for path_angle in path_angles:
               for curvature_rate in curvature_rates:
                 for curvature in curvatures:
+                  self.safety.set_controls_allowed(controls_allowed)
                   self._set_prev_desired_angle(curvature)
                   self._reset_curvature_measurement(curvature, speed)
 
