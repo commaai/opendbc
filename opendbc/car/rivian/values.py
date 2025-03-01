@@ -34,7 +34,7 @@ class RivianCarDocs(CarDocs):
 @dataclass
 class RivianPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {
-    Bus.pt: 'tesla_model3_party',
+    Bus.pt: 'rivian_primary_actuator',
     Bus.radar: 'rivian_mando_front_radar_generated'
   })
   wmis: set[WMI] = field(default_factory=set)
@@ -49,7 +49,6 @@ class CAR(Platforms):
       RivianCarDocs("Rivian R1T 2022-24"),
     ],
     CarSpecs(mass=3206., wheelbase=3.08, steerRatio=15.2),
-    {Bus.pt: 'rivian_can', Bus.radar: 'rivian_mando_front_radar_generated'}
     wmis={WMI.RIVIAN_TRUCK, WMI.RIVIAN_MPV},
     lines={ModelLine.R1T, ModelLine.R1T},
     years={ModelYear.N_2022, ModelYear.P_2023, ModelYear.R_2024},
