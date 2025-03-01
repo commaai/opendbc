@@ -1,3 +1,4 @@
+import copy
 import numpy as np
 from opendbc.car import CanBusBase
 from opendbc.car.hyundai.values import HyundaiFlags
