@@ -166,13 +166,6 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
     "LKA_ICON": 0,
   })
 
-  # LFAHDA_CLUSTER
-  # todo: do we need this?
-  lfahda_cluster = {
-    "NEW_SIGNAL_5": 1,
-    "LFA_ICON": 2 if enabled else 0,
-  }
-
   # OP LONG
   if CP.openpilotLongitudinalControl:
 
@@ -194,7 +187,6 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
       "LEAD_DISTANCE": 10,
     })
 
-  ret.append(packer.make_can_msg("LFAHDA_CLUSTER", CAN.ECAN, lfahda_cluster))
   ret.append(packer.make_can_msg("CCNC_0x161", CAN.ECAN, msg_161))
   ret.append(packer.make_can_msg("CCNC_0x162", CAN.ECAN, msg_162))
 
