@@ -46,11 +46,11 @@ def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_torque)
     "NEW_SIGNAL_2": 0,
   }
 
+  lkas_values = copy.copy(common_values)
+  lkas_values["LKA_AVAILABLE"] = 0
+
   lfa_values = copy.copy(common_values)
   lfa_values["NEW_SIGNAL_1"] = 0
-
-  lkas_values = copy.copy(lfa_values)
-  lkas_values["LKA_AVAILABLE"] = 0
 
   ret = []
   if CP.flags & HyundaiFlags.CANFD_LKA_STEERING:
