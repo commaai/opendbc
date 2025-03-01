@@ -231,5 +231,6 @@ CM_ SG_ 676 LEFT_LANE_LINE "Left lane line confidence";
 CM_ SG_ 676 RIGHT_LANE_LINE "Right lane line confidence";
 VAL_ 80 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green" ;
 VAL_ 80 LKA_MODE 1 "warning only" 2 "assist" 6 "off" ;
+VAL_ 80 LKAS_ANGLE_ACTIVE 0 "off" 1 "not active" 2 "active";
 VAL_ 676 LEFT_LANE_LINE 0 "Not Detected" 1 "Low Confidence" 2 "Medium Confidence" 3 "High Confidence";
 VAL_ 676 RIGHT_LANE_LINE 0 "Not Detected" 1 "Low Confidence" 2 "Medium Confidence" 3 "High Confidence";
