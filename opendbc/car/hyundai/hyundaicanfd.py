@@ -226,8 +226,8 @@ def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_ov
     values.update({
       "JerkLowerLimit": 1.5 if enabled else 0,
       "JerkUpperLimit": 0.5 if enabled else 0,
+      **{s: cruise_info[s] for s in ["ACC_ObjDist", "ACC_ObjRelSpd"]}
     })
-    values.update({s: cruise_info[s] for s in ["ACC_ObjDist", "ACC_ObjRelSpd"]})
 
   return packer.make_can_msg("SCC_CONTROL", CAN.ECAN, values)
 
