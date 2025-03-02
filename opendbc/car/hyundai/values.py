@@ -25,8 +25,8 @@ class CarControllerParams:
 
   # Stock LFA system is seen sending 250 max, but for LKAS events it's 175 max.
   # 250 can at least achieve 4 m/s^2, 80 corresponds to ~2.5 m/s^2
-  ANGLE_MAX_TORQUE = 80
-  ANGLE_MIN_TORQUE = 25  # equivalent to ~0.8 m/s^2 of torque (based on ANGLE_MAX_TORQUE) when overriding
+  ANGLE_MAX_TORQUE = 130
+  ANGLE_MIN_TORQUE = 75  # equivalent to ~0.8 m/s^2 of torque (based on ANGLE_MAX_TORQUE) when overriding
   ANGLE_TORQUE_UP_RATE = 1
   ANGLE_TORQUE_DOWN_RATE = 3
 
