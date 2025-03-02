@@ -222,7 +222,7 @@ static int hyundai_canfd_fwd_hook(int bus_num, int addr) {
   int bus_fwd = -1;
 
   if (bus_num == 0) {
-    if (!hyundai_ccnc || addr != 0xEA) {
+    if (!(hyundai_ccnc) || (addr != 0xEA)) {
       bus_fwd = 2;
     }
   }
