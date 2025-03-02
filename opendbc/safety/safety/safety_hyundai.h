@@ -29,7 +29,7 @@ const LongitudinalLimits HYUNDAI_LONG_LIMITS = {
 #define HYUNDAI_COMMON_TX_MSGS(scc_bus) \
   {0x340, 0,       8},  /* LKAS11 Bus 0                              */ \
   {0x4F1, scc_bus, 4},  /* CLU11 Bus 0 (radar-SCC) or 2 (camera-SCC) */ \
-  {0x485, 0,       4},  /* LFAHDA_MFC Bus 0                          */ \
+  {0x485, 0,       8},  /* LFAHDA_MFC Bus 0                          */ \
 
 #define HYUNDAI_LONG_COMMON_TX_MSGS(scc_bus) \
   HYUNDAI_COMMON_TX_MSGS(scc_bus)                                       \
