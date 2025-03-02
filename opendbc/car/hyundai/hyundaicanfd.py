@@ -201,47 +201,33 @@ def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_ov
     a_raw = accel
     a_val = np.clip(accel, accel_last - jn, accel_last + jn)
 
+  values = {
+    "ACCMode": 0 if not enabled else (2 if gas_override else 1),
+    "MainMode_ACC": 1,
+    "StopReq": 1 if stopping else 0,
+    "aReqValue": a_val,
+    "aReqRaw": a_raw,
+    "VSetDis": set_speed,
+    "ObjValid": 0,
+    "OBJ_STATUS": 2,
+    "SET_ME_2": 0x4,
+    "SET_ME_3": 0x3,
+    "SET_ME_TMP_64": 0x64,
+    "DISTANCE_SETTING": hud_control.leadDistanceBars,
+  }
+
   if cruise_info is None:
-    values = {
-      "ACCMode": 0 if not enabled else (2 if gas_override else 1),
-      "MainMode_ACC": 1,
-      "StopReq": 1 if stopping else 0,
-      "aReqValue": a_val,
-      "aReqRaw": a_raw,
-      "VSetDis": set_speed,
+    values.update({
       "JerkLowerLimit": jerk if enabled else 1,
       "JerkUpperLimit": 3.0,
-
       "ACC_ObjDist": 1,
-      "ObjValid": 0,
-      "OBJ_STATUS": 2,
-      "SET_ME_2": 0x4,
-      "SET_ME_3": 0x3,
-      "SET_ME_TMP_64": 0x64,
-      "DISTANCE_SETTING": hud_control.leadDistanceBars,
-    }
+    })
   else:
-    values = {s: cruise_info[s] for s in [
-      "ACC_ObjDist",
-      "ACC_ObjRelSpd",
-    ]}
     values.update({
-      "ACCMode": 0 if not enabled else (2 if gas_override else 1),
-      "MainMode_ACC": 1,
-      "StopReq": 1 if stopping else 0,
-      "aReqValue": a_val,
-      "aReqRaw": a_raw,
-      "VSetDis": set_speed,
       "JerkLowerLimit": 1.5 if enabled else 0,
       "JerkUpperLimit": 0.5 if enabled else 0,
-
-      "ObjValid": 0,
-      "OBJ_STATUS": 2,
-      "SET_ME_2": 0x4,
-      "SET_ME_3": 0x3,
-      "SET_ME_TMP_64": 0x64,
-      "DISTANCE_SETTING": hud_control.leadDistanceBars,
     })
+    values.update({s: cruise_info[s] for s in ["ACC_ObjDist", "ACC_ObjRelSpd"]})
 
   return packer.make_can_msg("SCC_CONTROL", CAN.ECAN, values)
 
