@@ -193,11 +193,8 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
   return ret
 
 def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_override, set_speed, hud_control, cruise_info=None):
-  if cruise_info is None:
-    jerk = 5
-    jn = jerk / 50
-  else:
-    jn = 0.1
+  jerk = 5
+  jn = jerk / 50
   if not enabled or gas_override:
     a_val, a_raw = 0, 0
   else:
