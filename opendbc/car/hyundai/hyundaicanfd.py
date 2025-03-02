@@ -159,8 +159,8 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
   # ICONS, LANELINES
   msg_161.update({
     "CENTERLINE": 1 if enabled else 0,
-    "LANELINE_LEFT": 2 if enabled else 0,
-    "LANELINE_RIGHT": 2 if enabled else 0,
+    "LANELINE_LEFT": 2 if enabled and hud.leftLaneVisible else 0,
+    "LANELINE_RIGHT": 2 if enabled and hud.rightLaneVisible else 0,
     "LFA_ICON": 2 if enabled else 0,
     "LKA_ICON": 0,
   })
