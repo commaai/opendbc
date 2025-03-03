@@ -96,7 +96,7 @@ static void gm_rx_hook(const CANPacket_t *to_push) {
 }
 
 static bool gm_tx_hook(const CANPacket_t *to_send) {
-  const SteeringLimits GM_STEERING_LIMITS = {
+  const TorqueSteeringLimits GM_STEERING_LIMITS = {
     .max_steer = 300,
     .max_rate_up = 10,
     .max_rate_down = 15,

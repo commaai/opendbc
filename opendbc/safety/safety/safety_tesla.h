@@ -65,7 +65,8 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
 
 
 static bool tesla_tx_hook(const CANPacket_t *to_send) {
-  const SteeringLimits TESLA_STEERING_LIMITS = {
+  const AngleSteeringLimits TESLA_STEERING_LIMITS = {
+    .max_angle = 3600,  // 360 deg, EPAS faults above this
     .angle_deg_to_can = 10,
     .angle_rate_up_lookup = {
       {0., 5., 25.},
