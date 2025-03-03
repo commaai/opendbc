@@ -27,9 +27,10 @@ EXTRA_PLATFORMS: dict[str, ExtraPlatform] = {str(platform): platform for brand i
 
 
 def get_params_for_docs(platform) -> CarParams:
-  CP: CarParams = interfaces[platform][0].get_params(platform, fingerprint=gen_empty_fingerprint(),
-                                                     car_fw=[CarParams.CarFw(ecu=CarParams.Ecu.unknown)],
-                                                     experimental_long=True, docs=True)
+  cp_platform = platform if platform in interfaces else MOCK.MOCK
+  CP: CarParams = interfaces[cp_platform][0].get_params(cp_platform, fingerprint=gen_empty_fingerprint(),
+                                                        car_fw=[CarParams.CarFw(ecu=CarParams.Ecu.unknown)],
+                                                        experimental_long=True, docs=True)
   return CP
 
 
