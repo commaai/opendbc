@@ -85,6 +85,15 @@ void hyundai_common_cruise_state_check(const bool cruise_engaged) {
       controls_allowed = false;
     }
     cruise_engaged_prev = cruise_engaged;
+  } else {
+    // enter controls on rising edge of ACC, exit controls on ACC off
+    if (cruise_engaged) {
+      controls_allowed = true;
+    }
+
+    if (!cruise_engaged) {
+      controls_allowed = false;
+    }
   }
 }
 
