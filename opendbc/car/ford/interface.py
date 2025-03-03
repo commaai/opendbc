@@ -1,5 +1,6 @@
 import numpy as np
 from opendbc.car import Bus, get_safety_config, structs
+from opendbc.car.carlog import carlog
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.ford.fordcan import CanBus
 from opendbc.car.ford.values import CarControllerParams, DBC, Ecu, FordFlags, RADAR, FordSafetyFlags
@@ -51,6 +52,7 @@ class CarInterface(CarInterfaceBase):
       # TRON (SecOC) platforms are not supported
       # LateralMotionControl2, ACCDATA are 16 bytes on these platforms
       if fingerprint[CAN.camera].get(0x3d6) != 8 or fingerprint[CAN.camera].get(0x186) != 8:
+        carlog.error('dashcamOnly: SecOC is unsupported')
         ret.dashcamOnly = True
     else:
       # Lock out if the car does not have needed lateral and longitudinal control APIs.
@@ -58,11 +60,13 @@ class CarInterface(CarInterfaceBase):
       pscm_config = next((fw for fw in car_fw if fw.ecu == Ecu.eps and b'\x22\xDE\x01' in fw.request), None)
       if pscm_config:
         if len(pscm_config.fwVersion) != 24:
+          carlog.error('dashcamOnly: Invalid EPS FW version')
           ret.dashcamOnly = True
         else:
           config_tja = pscm_config.fwVersion[7]  # Traffic Jam Assist
           config_lca = pscm_config.fwVersion[8]  # Lane Centering Assist
           if config_tja != 0xFF or config_lca != 0xFF:
+            carlog.error('dashcamOnly: Car lacks required lateral control APIs')
             ret.dashcamOnly = True
 
     # Auto Transmission: 0x732 ECU or Gear_Shift_by_Wire_FD1
