@@ -1,5 +1,6 @@
 import os
 import abc
+import time
 import unittest
 import importlib
 import numpy as np
@@ -716,6 +717,7 @@ class PandaSafetyTest(PandaSafetyTestBase):
 
   def test_fwd_hook(self):
     # some safety modes don't forward anything, while others blacklist msgs
+    time.sleep(2)
     for bus in range(3):
       for addr in self.SCANNED_ADDRS:
         # assume len 8
