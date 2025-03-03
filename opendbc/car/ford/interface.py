@@ -47,6 +47,11 @@ class CarInterface(CarInterfaceBase):
 
     if ret.flags & FordFlags.CANFD:
       ret.safetyConfigs[-1].safetyParam |= FordSafetyFlags.CANFD.value
+
+      # TRON (SecOC) platforms are not supported
+      # LateralMotionControl2, ACCDATA_3 are 16 bytes on these platforms
+      if fingerprint[CAN.main].get(0x3d6) != 8 or fingerprint[CAN.main].get(0x18a) != 8:
+        ret.dashcamOnly = True
     else:
       # Lock out if the car does not have needed lateral and longitudinal control APIs.
       # Note that we also check CAN for adaptive cruise, but no known signal for LCA exists
