@@ -229,7 +229,7 @@ static bool honda_tx_hook(const CANPacket_t *to_send) {
 
   // record time if sending 1A6 or 296
   if (((addr == 0x1A6) || (addr == 0x296)) && (bus == bus_pt)) {
-    honda_last_send_scm_button = microsecond_timer_get();
+    honda_last_send_scm_button = microsecond_timer_get() - 40000U;
   } 
 
   // ACC_HUD: safety check (nidec w/o pedal)
