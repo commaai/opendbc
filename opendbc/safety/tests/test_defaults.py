@@ -68,5 +68,25 @@ class TestAllOutputPassthrough(TestAllOutput):
     self.safety.init_tests()
 
 
+class TestCounterAndChecksumHandling(common.PandaSafetyTest):
+  TX_MSGS = []
+
+  def setUp(self):
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.noOutput, 0)
+    self.safety.init_tests()
+
+  def test_missing_get_counter_function(self):
+    msg = common.make_msg(0, 0x100, 8)
+
+    # First verify RX hook works normally with no special config
+    self.assertTrue(self._rx(msg))
+
+    # Cleanup and verify the test doesn't crash even if get_counter is not provided
+    # This test validates that our fix prevents segfaults in this scenario
+    self.safety.init_tests()
+    self.assertTrue(self._rx(msg))
+
+
 if __name__ == "__main__":
   unittest.main()

@@ -180,26 +180,44 @@ static bool rx_msg_safety_check(const CANPacket_t *to_push,
 
   if (index != -1) {
     // checksum check
-    if ((safety_hooks->get_checksum != NULL) && (safety_hooks->compute_checksum != NULL) && cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].check_checksum) {
-      uint32_t checksum = safety_hooks->get_checksum(to_push);
-      uint32_t checksum_comp = safety_hooks->compute_checksum(to_push);
-      cfg->rx_checks[index].status.valid_checksum = checksum_comp == checksum;
+    if (cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].check_checksum) {
+      if ((safety_hooks->get_checksum != NULL) && (safety_hooks->compute_checksum != NULL)) {
+        uint32_t checksum = safety_hooks->get_checksum(to_push);
+        uint32_t checksum_comp = safety_hooks->compute_checksum(to_push);
+        cfg->rx_checks[index].status.valid_checksum = checksum_comp == checksum;
+      } else {
+        // If checksum check is enabled but checksum functions are not available, assume valid
+        cfg->rx_checks[index].status.valid_checksum = true;
+      }
     } else {
+      // Skip checksum check
       cfg->rx_checks[index].status.valid_checksum = true;
     }
 
     // counter check (max_counter == 0 means skip check)
-    if ((safety_hooks->get_counter != NULL) && (cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].max_counter > 0U)) {
-      uint8_t counter = safety_hooks->get_counter(to_push);
-      update_counter(cfg->rx_checks, index, counter);
+    if (cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].max_counter > 0U) {
+      if (safety_hooks->get_counter != NULL) {
+        uint8_t counter = safety_hooks->get_counter(to_push);
+        update_counter(cfg->rx_checks, index, counter);
+      } else {
+        // If get_counter is NULL but max_counter > 0, keep wrong_counters at 0 to avoid segfault
+        cfg->rx_checks[index].status.wrong_counters = 0U;
+      }
     } else {
+      // Skip counter check if max_counter == 0
       cfg->rx_checks[index].status.wrong_counters = 0U;
     }
 
     // quality flag check
-    if ((safety_hooks->get_quality_flag_valid != NULL) && cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].quality_flag) {
-      cfg->rx_checks[index].status.valid_quality_flag = safety_hooks->get_quality_flag_valid(to_push);
+    if (cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].quality_flag) {
+      if (safety_hooks->get_quality_flag_valid != NULL) {
+        cfg->rx_checks[index].status.valid_quality_flag = safety_hooks->get_quality_flag_valid(to_push);
+      } else {
+        // If quality flag check is enabled but function not available, assume valid
+        cfg->rx_checks[index].status.valid_quality_flag = true;
+      }
     } else {
+      // Skip quality flag check
       cfg->rx_checks[index].status.valid_quality_flag = true;
     }
   }
