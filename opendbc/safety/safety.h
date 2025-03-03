@@ -210,8 +210,8 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
   bool controls_allowed_prev = controls_allowed;
 
   bool valid = rx_msg_safety_check(to_push, &current_safety_config, current_hooks);
-  int allowed = get_addr_check_index(to_push, current_safety_config.rx_checks, current_safety_config.rx_checks_len) != -1;
-  if (valid && allowed) {
+  int whitelisted = get_addr_check_index(to_push, current_safety_config.rx_checks, current_safety_config.rx_checks_len) != -1;
+  if (valid && whitelisted) {
     current_hooks->rx(to_push);
   }
 
@@ -228,28 +228,28 @@ static bool tx_msg_safety_check(const CANPacket_t *to_send, const CanMsg msg_lis
   int bus = GET_BUS(to_send);
   int length = GET_LEN(to_send);
 
-  bool allowed = false;
+  bool whitelisted = false;
   for (int i = 0; i < len; i++) {
     if ((addr == msg_list[i].addr) && (bus == msg_list[i].bus) && (length == msg_list[i].len)) {
-      allowed = true;
+      whitelisted = true;
       break;
     }
   }
-  return allowed;
+  return whitelisted;
 }
 
 bool safety_tx_hook(CANPacket_t *to_send) {
-  bool allowed = tx_msg_safety_check(to_send, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
+  bool whitelisted = tx_msg_safety_check(to_send, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
   if ((current_safety_mode == SAFETY_ALLOUTPUT) || (current_safety_mode == SAFETY_ELM327)) {
-    allowed = true;
+    whitelisted = true;
   }
 
   bool safety_allowed = false;
-  if (allowed) {
+  if (whitelisted) {
     safety_allowed = current_hooks->tx(to_send);
   }
 
-  return !relay_malfunction && allowed && safety_allowed;
+  return !relay_malfunction && safety_allowed;
 }
 
 int safety_fwd_hook(int bus_num, int addr) {
