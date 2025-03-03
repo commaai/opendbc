@@ -41,9 +41,10 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
 
 static void rivian_rx_relay_malfunction_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
-  int addr = GET_ADDR(to_push);
 
   if (bus == 0)  {
+    int addr = GET_ADDR(to_push);
+
     generic_rx_checks(addr == 0x120);  // ACM_lkaHbaCmd
     if (rivian_longitudinal) {
       generic_rx_checks(addr == 0x160);  // ACM_longitudinalRequest
