@@ -746,10 +746,10 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
       static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (EARTH_G * AVERAGE_ROAD_ROLL);  // ~2.4 m/s^2
 
       // Allow small tolerance by using minimum speed and rounding curvature up
-      const float speed_min = MAX(vehicle_speed.min / VEHICLE_SPEED_FACTOR, 1.0);
-      const float speed_max = MAX(vehicle_speed.max / VEHICLE_SPEED_FACTOR, 1.0);
-      const int max_curvature_upper = (MAX_LATERAL_ACCEL / (speed_min * speed_min) * limits.angle_deg_to_can) + 1.;
-      const int max_curvature_lower = (MAX_LATERAL_ACCEL / (speed_max * speed_max) * limits.angle_deg_to_can) - 1.;
+      const float speed_lower = MAX(vehicle_speed.min / VEHICLE_SPEED_FACTOR, 1.0);
+      const float speed_upper = MAX(vehicle_speed.max / VEHICLE_SPEED_FACTOR, 1.0);
+      const int max_curvature_upper = (MAX_LATERAL_ACCEL / (speed_lower * speed_lower) * limits.angle_deg_to_can) + 1.;
+      const int max_curvature_lower = (MAX_LATERAL_ACCEL / (speed_upper * speed_upper) * limits.angle_deg_to_can) - 1.;
 
       // don't enforce above the max steer
       if (desired_angle_last > 0) {
