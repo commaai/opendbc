@@ -17,15 +17,15 @@ fi
 # run safety tests and generate coverage data
 pytest -n8
 
+cd $DIR/..
 # generate and open report
 if [ "$1" == "--report" ]; then
   mkdir -p tests/coverage-out
   gcovr -r . --html-details tests/coverage-out/index.html
-  sensible-browser coverage-out/index.html
+  sensible-browser tests/coverage-out/index.html
 fi
 
 # test coverage
-cd ..
 GCOV="gcovr -r . --fail-under-line=100 -e ^board/ -e ^tests/libsafety/"
 if ! GCOV_OUTPUT="$($GCOV)"; then
   echo -e "FAILED:\n$GCOV_OUTPUT"
