@@ -121,7 +121,12 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *to_push) {
     }
 
     brake_pressed = volkswagen_mqb_brake_pedal_switch || volkswagen_mqb_brake_pressure_detected;
+  }
+}
 
+static void volkswagen_mqb_rx_relay_malfunction_hook(const CANPacket_t *to_push) {
+  if (GET_BUS(to_push) == 0U) {
+    int addr = GET_ADDR(to_push);
     generic_rx_checks((addr == MSG_HCA_01));
   }
 }
@@ -240,6 +245,7 @@ static int volkswagen_mqb_fwd_hook(int bus_num, int addr) {
 const safety_hooks volkswagen_mqb_hooks = {
   .init = volkswagen_mqb_init,
   .rx = volkswagen_mqb_rx_hook,
+  .rx_relay_malfunction = volkswagen_mqb_rx_relay_malfunction_hook,
   .tx = volkswagen_mqb_tx_hook,
   .fwd = volkswagen_mqb_fwd_hook,
   .get_counter = volkswagen_mqb_meb_get_counter,
