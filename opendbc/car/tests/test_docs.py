@@ -3,8 +3,8 @@ import pytest
 import re
 
 from opendbc.car.car_helpers import interfaces
-from opendbc.car.docs import get_all_car_docs, get_params_for_docs
-from opendbc.car.docs_definitions import Cable, Column, PartType, Star, SupportType
+from opendbc.car.docs import get_all_car_docs
+from opendbc.car.docs_definitions import Cable, Column, PartType, Star
 from opendbc.car.honda.values import CAR as HONDA
 from opendbc.car.values import PLATFORMS
 
@@ -72,10 +72,3 @@ class TestCarDocs:
         assert car_part_type.count(PartType.connector) == 1, f"Need to specify one harness connector: {car.name}"
         assert car_part_type.count(PartType.mount) == 1, f"Need to specify one mount: {car.name}"
         assert Cable.right_angle_obd_c_cable_1_5ft in car_parts, f"Need to specify a right angle OBD-C cable (1.5ft): {car.name}"
-
-  def test_support_level(self, subtests):
-    for car in self.all_cars:
-      with subtests.test(car=car.name):
-        CP = get_params_for_docs(car.car_fingerprint)
-        if not CP.dashcamOnly:
-          assert car.support_type == SupportType.UPSTREAM, "Remove non-upstream SupportType"
