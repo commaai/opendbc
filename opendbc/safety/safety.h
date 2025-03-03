@@ -736,6 +736,7 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
       highest_desired_angle = CLAMP(highest_desired_angle, -limits.max_angle, limits.max_angle);
     }
 
+    // check not above ISO 11270 lateral accel assuming worst case road roll
     if (limits.angle_is_curvature) {
       // ISO 11270
       static const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
@@ -759,9 +760,6 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
         lowest_desired_angle = CLAMP(lowest_desired_angle, -max_curvature_upper, max_curvature_upper);
         highest_desired_angle = CLAMP(highest_desired_angle, -max_curvature_lower, max_curvature_lower);
       }
-
-      // check not above ISO 11270 lateral accel assuming worst case road roll
-      violation |= ABS(desired_angle) > max_curvature_upper;
     }
 
     // check for violation;
