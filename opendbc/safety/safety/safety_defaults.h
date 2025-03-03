@@ -14,6 +14,7 @@ static safety_config nooutput_init(uint16_t param) {
 }
 
 // GCOV_EXCL_START
+// Unreachable by design (doesn't define any tx msgs)
 static bool nooutput_tx_hook(const CANPacket_t *to_send) {
   UNUSED(to_send);
   return false;
