@@ -41,7 +41,6 @@ static bool honda_bosch_scm_alt = false;
 typedef enum {HONDA_NIDEC, HONDA_BOSCH} HondaHw;
 static HondaHw honda_hw = HONDA_NIDEC;
 
-static uint32_t honda_last_send_scm_button = 0U;
 
 static int honda_get_pt_bus(void) {
   return ((honda_hw == HONDA_BOSCH) && !honda_bosch_radarless) ? 1 : 0;
@@ -227,10 +226,6 @@ static bool honda_tx_hook(const CANPacket_t *to_send) {
   int bus_pt = honda_get_pt_bus();
   int bus_buttons = (honda_bosch_radarless) ? 2 : bus_pt;  // the camera controls ACC on radarless Bosch cars
 
-  // record time if sending 1A6 or 296
-  if (((addr == 0x1A6) || (addr == 0x296)) && (bus == bus_pt)) {
-    honda_last_send_scm_button = microsecond_timer_get();
-  } 
 
   // ACC_HUD: safety check (nidec w/o pedal)
   if ((addr == 0x30C) && (bus == bus_pt)) {
@@ -333,7 +328,6 @@ static safety_config honda_nidec_init(uint16_t param) {
   honda_bosch_long = false;
   honda_bosch_radarless = false;
   honda_bosch_scm_alt = false;
-  honda_last_send_scm_button = 0U;
 
   safety_config ret;
 
@@ -385,7 +379,6 @@ static safety_config honda_bosch_init(uint16_t param) {
   // Checking for alternate brake override from safety parameter
   honda_alt_brake_msg = GET_FLAG(param, HONDA_PARAM_ALT_BRAKE);
   honda_bosch_scm_alt = false;
-  honda_last_send_scm_button = 0U;
 
   // radar disabled so allow gas/brakes
 #ifdef ALLOW_DEBUG
@@ -449,13 +442,6 @@ static int honda_bosch_fwd_hook(int bus_num, int addr) {
 
   if (bus_num == 0) {
     bus_fwd = 2;
-    // block forwarding 1A6 or 296 for 40ms when op send scm message
-    bool is_addr_valid = (addr == 0x1A6) || (addr == 0x296);
-    uint32_t elapsed_time = get_ts_elapsed(microsecond_timer_get(), honda_last_send_scm_button);
-    bool is_time_within_limit = (elapsed_time >= 1U);
-    if (is_addr_valid && is_time_within_limit) {
-       bus_fwd = -1;
-    }
   }
   if (bus_num == 2)  {
     bool is_lkas_msg = (addr == 0xE4) || (addr == 0xE5) || (addr == 0x33D) || (addr == 0x33DA) || (addr == 0x33DB);
