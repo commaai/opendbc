@@ -700,19 +700,8 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 
     // allow down limits at zero since small floats from openpilot will be rounded to 0
     // TODO: openpilot should be cognizant of this and not send small floats
-//    printf("delta_angle_up: %i, delta_angle_down: %i\n", delta_angle_up, delta_angle_down);
     int highest_desired_angle = desired_angle_last + ((desired_angle_last > 0) ? delta_angle_up : delta_angle_down);
     int lowest_desired_angle = desired_angle_last - ((desired_angle_last >= 0) ? delta_angle_down : delta_angle_up);
-//    printf("lowest desired angle: %i, highest desired angle: %i\n", lowest_desired_angle, highest_desired_angle);
-//    for (int i = 0; i < MAX_SAMPLE_VALS; i++) {
-//      printf("vehicle speed: %f\n", vehicle_speed.values[i] / VEHICLE_SPEED_FACTOR);
-//    }
-//    for (int i = 0; i < MAX_SAMPLE_VALS; i++) {
-//      printf("angle meas: %i\n", angle_meas.values[i]);
-//    }
-    printf("angle meas min: %i, angle meas max: %i\n", angle_meas.min, angle_meas.max);
-    printf("vehicle speed min: %f, vehicle speed max: %f\n", vehicle_speed.min / VEHICLE_SPEED_FACTOR, vehicle_speed.max / VEHICLE_SPEED_FACTOR);
-    printf("desired angle last: %i, desired angle: %i\n", desired_angle_last, desired_angle);
 
     // check that commanded angle value isn't too far from measured, used to limit torque for some safety modes
     // ensure we start moving in direction of meas while respecting relaxed rate limits if error is exceeded
@@ -725,8 +714,6 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
       // the minimum and maximum angle allowed based on the measured angle
       const int lowest_desired_angle_error = angle_meas.min - limits.max_angle_error - 1;
       const int highest_desired_angle_error = angle_meas.max + limits.max_angle_error + 1;
-
-      printf("enforce_angle_error: before lowest: %i, highest: %i\n", lowest_desired_angle, highest_desired_angle);
 
       // the MAX is to allow the desired angle to hit the edge of the bounds and not require going under it
       if (desired_angle_last > highest_desired_angle_error) {
@@ -742,23 +729,11 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
         highest_desired_angle = MIN(highest_desired_angle, highest_desired_angle_error);
         lowest_desired_angle = MAX(lowest_desired_angle, lowest_desired_angle_error);
       }
-      printf("enforce_angle_error: after lowest: %i, highest: %i\n", lowest_desired_angle, highest_desired_angle);
 
       // don't enforce above the max steer
       // TODO: this should always be done
       lowest_desired_angle = CLAMP(lowest_desired_angle, -limits.max_angle, limits.max_angle);
       highest_desired_angle = CLAMP(highest_desired_angle, -limits.max_angle, limits.max_angle);
-      printf("enforce_angle_error: final lowest: %i, highest: %i\n", lowest_desired_angle, highest_desired_angle);
-
-//      if (max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle)) {
-//        printf("VIOLATION! vehicle speed: %f\n", vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR);
-//        printf("delta_angle_up_relaxed: %i, delta_angle_down_relaxed: %i\n", delta_angle_up_relaxed, delta_angle_down_relaxed);
-//        printf("highest_desired_angle_error: %i, lowest_desired_angle_error: %i\n", highest_desired_angle_error, lowest_desired_angle_error);
-//        printf("prev desired angle: %i, current desired angle: %i\n", desired_angle_last, desired_angle);
-//        printf("highest desired angle: %i, lowest desired angle: %i\n", highest_desired_angle, lowest_desired_angle);
-//        printf("angle meas min: %i, angle meas max: %i\n", angle_meas.min, angle_meas.max);
-//        printf("\n");
-//      }
     }
 
     if (limits.angle_is_curvature) {
@@ -769,27 +744,14 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
       static const float EARTH_G = 9.81;
       static const float AVERAGE_ROAD_ROLL = 0.06;  // ~3.4 degrees, 6% superelevation
       static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (EARTH_G * AVERAGE_ROAD_ROLL);  // ~2.4 m/s^2
-//      printf("ISO 11270 lateral accel: %f\n", MAX_LATERAL_ACCEL);
 
       // Allow small tolerance by using minimum speed and rounding curvature up
-      const float speed = MAX(vehicle_speed.min / VEHICLE_SPEED_FACTOR, 1.0);
       const float speed_min = MAX(vehicle_speed.min / VEHICLE_SPEED_FACTOR, 1.0);
       const float speed_max = MAX(vehicle_speed.max / VEHICLE_SPEED_FACTOR, 1.0);
-//      printf("safety speed: %f\n", speed);
-//      printf("vehicle speed: %f, vehicle speed max: %f\n", speed, speed_max);
       const int max_curvature_upper = (MAX_LATERAL_ACCEL / (speed_min * speed_min) * limits.angle_deg_to_can) + 1.;
       const int max_curvature_lower = (MAX_LATERAL_ACCEL / (speed_max * speed_max) * limits.angle_deg_to_can) - 1.;
-      printf("safety max_curvature float: %f\n", (MAX_LATERAL_ACCEL / (speed * speed) * limits.angle_deg_to_can));
-      printf("safety accel max_curvature_upper: %i\n", max_curvature_upper);
-      printf("safety accel max_curvature_lower: %i\n", max_curvature_lower);
-      printf("safety speed: %f\n", speed);
 
       // don't enforce above the max steer
-//      printf("max_curvature: %i\n", max_curvature);
-//      printf("desired_angle: %i, desired_angle_last: %i\n", desired_angle, desired_angle_last);
-//      printf("angle_meas.min: %i, angle_meas.max: %i\n", angle_meas.min, angle_meas.max);
-
-      printf("adjusting max angles from (min: %i, max: %i) ", lowest_desired_angle, highest_desired_angle);
       if (desired_angle_last >= 0) {
         lowest_desired_angle = CLAMP(lowest_desired_angle, -max_curvature_lower, max_curvature_lower);
         highest_desired_angle = CLAMP(highest_desired_angle, -max_curvature_upper, max_curvature_upper);
@@ -797,27 +759,16 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
         lowest_desired_angle = CLAMP(lowest_desired_angle, -max_curvature_upper, max_curvature_upper);
         highest_desired_angle = CLAMP(highest_desired_angle, -max_curvature_lower, max_curvature_lower);
       }
-      printf("to (min: %i, max: %i)\n", lowest_desired_angle, highest_desired_angle);
-      printf("\n");
-//
-//
-//      // check for above ISO 11270 lateral accel assuming worst case road roll
+
+      // check for above ISO 11270 lateral accel assuming worst case road roll
       violation |= ABS(desired_angle) > max_curvature_upper;
       if (ABS(desired_angle) > max_curvature_upper) {
         printf("VIOLATION! ISO 11270 lateral accel: %f\n", MAX_LATERAL_ACCEL);
       }
-
-//      printf("\n");
     }
 
     // check for violation;
-//    printf("desired angle: %i, highest desired angle: %i, lowest desired angle: %i\n", desired_angle, highest_desired_angle, lowest_desired_angle);
     violation |= max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
-    if (max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle)) {
-      printf("max_limit_check VIOLATION!\n");
-    }
-    printf("\n");
-
   }
   desired_angle_last = desired_angle;
 
@@ -827,19 +778,11 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
     const int min_inactive_angle = CLAMP(angle_meas.min, -limits.max_angle, limits.max_angle) - 1;
     violation |= (limits.inactive_angle_is_zero ? (desired_angle != 0) :
                   max_limit_check(desired_angle, max_inactive_angle, min_inactive_angle));
-    if ((limits.inactive_angle_is_zero ? (desired_angle != 0) :
-                  max_limit_check(desired_angle, max_inactive_angle, min_inactive_angle))) {
-      printf("inactive angle VIOLATION!\n");
-    }
   }
 
 
   // No angle control allowed when controls are not allowed
-//  printf("tried to send enable: %i\n", steer_control_enabled);
-//  violation |= !controls_allowed && steer_control_enabled;
-//  if (!controls_allowed && steer_control_enabled) {
-////    printf("steer_control_enabled VIOLATION!\n");
-//  }
+  violation |= !controls_allowed && steer_control_enabled;
 
   return violation;
 }
