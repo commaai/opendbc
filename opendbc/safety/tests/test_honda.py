@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 import unittest
 import numpy as np
-import time
-
 from opendbc.car.honda.values import HondaSafetyFlags
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
@@ -293,8 +291,6 @@ class TestHondaNidecSafetyBase(HondaBase):
           self.assertEqual(send, self._tx(self._send_acc_hud_msg(pcm_gas, pcm_speed)))
 
   def test_fwd_hook(self):
-    # sleep 1s for send scm button case 40ms block
-    time.sleep(1)
     # normal operation, not forwarding AEB
     self.FWD_BLACKLISTED_ADDRS[2].append(0x1FA)
     self.safety.set_honda_fwd_brake(False)
