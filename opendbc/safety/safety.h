@@ -752,7 +752,8 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
       const int max_curvature_upper = (MAX_LATERAL_ACCEL / (speed_lower * speed_lower) * limits.angle_deg_to_can) + 1.;
       const int max_curvature_lower = (MAX_LATERAL_ACCEL / (speed_upper * speed_upper) * limits.angle_deg_to_can) - 1.;
 
-      // don't enforce above the max steer
+      // limit to the max curvature for acceleration and ensure that the curvature error
+      // doesn't try to enforce above this limit
       if (desired_angle_last > 0) {
         lowest_desired_angle = CLAMP(lowest_desired_angle, -max_curvature_lower, max_curvature_lower);
         highest_desired_angle = CLAMP(highest_desired_angle, -max_curvature_upper, max_curvature_upper);
