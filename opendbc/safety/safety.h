@@ -210,7 +210,8 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
   bool controls_allowed_prev = controls_allowed;
 
   bool valid = rx_msg_safety_check(to_push, &current_safety_config, current_hooks);
-  if (valid) {
+  int allowed = get_addr_check_index(to_push, current_safety_config.rx_checks, current_safety_config.rx_checks_len) != -1;
+  if (valid && allowed) {
     current_hooks->rx(to_push);
   }
 
