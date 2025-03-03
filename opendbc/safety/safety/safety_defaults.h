@@ -14,7 +14,6 @@ static safety_config nooutput_init(uint16_t param) {
 }
 
 // GCOV_EXCL_START
-// cppcheck-suppress misra-c2012-2.1; Unreachable by design (no msgs match).
 static bool nooutput_tx_hook(const CANPacket_t *to_send) {
   UNUSED(to_send);
   return false;
