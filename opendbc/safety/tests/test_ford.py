@@ -305,7 +305,7 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
 
                   # Only CAN FD has the max lateral acceleration limit
                   if self.STEER_MESSAGE == MSG_LateralMotionControl2:
-                    should_tx = should_tx and (abs(curvature) <= curvature_accel_limit_upper)
+                    should_tx = should_tx and abs(curvature) <= curvature_accel_limit_upper
 
                   with self.subTest(controls_allowed=controls_allowed, steer_control_enabled=steer_control_enabled,
                                     path_offset=path_offset, path_angle=path_angle, curvature_rate=curvature_rate,
