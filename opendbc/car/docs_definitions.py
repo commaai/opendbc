@@ -98,6 +98,7 @@ class CarHarness(EnumBase):
   nidec = BaseCarHarness("Honda Nidec connector")
   bosch_a = BaseCarHarness("Honda Bosch A connector")
   bosch_b = BaseCarHarness("Honda Bosch B connector")
+  bosch_c = BaseCarHarness("Honda Bosch C connector")
   toyota_a = BaseCarHarness("Toyota A connector")
   toyota_b = BaseCarHarness("Toyota B connector")
   subaru_a = BaseCarHarness("Subaru A connector")
