@@ -29,17 +29,24 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
     if (addr == 0x38f) {
       brake_pressed = GET_BIT(to_push, 23U);
     }
-
-    generic_rx_checks(addr == 0x120);  // ACM_lkaHbaCmd
-    if (rivian_longitudinal) {
-      generic_rx_checks(addr == 0x160);  // ACM_longitudinalRequest
-    }
   }
 
   if (bus == 2) {
     // Cruise state
     if (addr == 0x100) {
       pcm_cruise_check(GET_BIT(to_push, 21U));
+    }
+  }
+}
+
+static void rivian_rx_relay_malfunction_hook(const CANPacket_t *to_push) {
+  int bus = GET_BUS(to_push);
+  int addr = GET_ADDR(to_push);
+
+  if (bus == 0)  {
+    generic_rx_checks(addr == 0x120);  // ACM_lkaHbaCmd
+    if (rivian_longitudinal) {
+      generic_rx_checks(addr == 0x160);  // ACM_longitudinalRequest
     }
   }
 }
@@ -149,6 +156,7 @@ static safety_config rivian_init(uint16_t param) {
 const safety_hooks rivian_hooks = {
   .init = rivian_init,
   .rx = rivian_rx_hook,
+  .rx_relay_malfunction = rivian_rx_relay_malfunction_hook,
   .tx = rivian_tx_hook,
   .fwd = rivian_fwd_hook,
 };
