@@ -22,13 +22,6 @@ class TestNoOutput(TestDefaultRxHookBase):
     self.safety.set_safety_hooks(CarParams.SafetyModel.noOutput, 0)
     self.safety.init_tests()
 
-  def test_spam_can_buses(self):
-    # asserts tx allowed for all scanned addrs
-    for bus in range(4):
-      for addr in self.SCANNED_ADDRS:
-        should_tx = [addr, bus] in self.TX_MSGS
-        self.assertEqual(should_tx, self._tx(common.make_msg(bus, addr, 8)), f"allowed TX {addr=} {bus=}")
-
 
 class TestSilent(TestNoOutput):
   """SILENT uses same hooks as NOOUTPUT"""

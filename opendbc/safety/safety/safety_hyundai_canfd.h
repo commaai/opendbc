@@ -203,17 +203,12 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
       violation |= longitudinal_accel_checks(desired_accel_raw, HYUNDAI_LONG_LIMITS);
       violation |= longitudinal_accel_checks(desired_accel_val, HYUNDAI_LONG_LIMITS);
     } else {
+      // only used to cancel on here
       const int acc_mode = (GET_BYTE(to_send, 8) >> 4) & 0x7U;
-
-      printf("cruise_engaged_prev: %d\n", cruise_engaged_prev);
-      printf("acc_mode: %d\n", acc_mode);
-      printf("desired_accel_raw: %d\n", desired_accel_raw);
-
       if (acc_mode != 4) {
         violation = true;
       }
 
-      // only used to cancel on here
       if ((desired_accel_raw != 0) || (desired_accel_val != 0)) {
         violation = true;
       }
@@ -260,7 +255,7 @@ static safety_config hyundai_canfd_init(uint16_t param) {
 
   static const CanMsg HYUNDAI_CANFD_LKA_STEERING_TX_MSGS[] = {
     HYUNDAI_CANFD_LKA_STEERING_COMMON_TX_MSGS(0, 1)
-//    HYUNDAI_CANFD_SCC_CONTROL_COMMON_TX_MSGS(1)
+    HYUNDAI_CANFD_SCC_CONTROL_COMMON_TX_MSGS(1)
   };
 
   static const CanMsg HYUNDAI_CANFD_LKA_STEERING_ALT_TX_MSGS[] = {
@@ -314,15 +309,12 @@ static safety_config hyundai_canfd_init(uint16_t param) {
         HYUNDAI_CANFD_COMMON_RX_CHECKS(1)
       };
 
-      printf("HERE2!\n");
       ret = BUILD_SAFETY_CFG(hyundai_canfd_lka_steering_long_rx_checks, HYUNDAI_CANFD_LKA_STEERING_LONG_TX_MSGS);
     } else {
       // Longitudinal checks for LFA steering
       static RxCheck hyundai_canfd_long_rx_checks[] = {
         HYUNDAI_CANFD_COMMON_RX_CHECKS(0)
       };
-
-      printf("HERE!\n");
 
       ret = hyundai_camera_scc ? BUILD_SAFETY_CFG(hyundai_canfd_long_rx_checks, HYUNDAI_CANFD_LFA_STEERING_CAMERA_SCC_TX_MSGS) : \
                                  BUILD_SAFETY_CFG(hyundai_canfd_long_rx_checks, HYUNDAI_CANFD_LFA_STEERING_LONG_TX_MSGS);
@@ -340,7 +332,6 @@ static safety_config hyundai_canfd_init(uint16_t param) {
       ret = hyundai_canfd_lka_steering_alt ? BUILD_SAFETY_CFG(hyundai_canfd_lka_steering_rx_checks, HYUNDAI_CANFD_LKA_STEERING_ALT_TX_MSGS) : \
                                               BUILD_SAFETY_CFG(hyundai_canfd_lka_steering_rx_checks, HYUNDAI_CANFD_LKA_STEERING_TX_MSGS);
     } else if (!hyundai_camera_scc) {
-      printf("HERE4!\n");
       // Radar sends SCC messages on these cars instead of camera
       static RxCheck hyundai_canfd_radar_scc_rx_checks[] = {
         HYUNDAI_CANFD_COMMON_RX_CHECKS(0)
@@ -349,7 +340,6 @@ static safety_config hyundai_canfd_init(uint16_t param) {
 
       ret = BUILD_SAFETY_CFG(hyundai_canfd_radar_scc_rx_checks, HYUNDAI_CANFD_LFA_STEERING_TX_MSGS);
     } else {
-      printf("HERE5!\n");
       // *** LFA steering checks ***
       // Camera sends SCC messages on LFA steering cars.
       // Both button messages exist on some platforms, so we ensure we track the correct one using flag
