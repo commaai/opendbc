@@ -761,7 +761,7 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 //      }
     }
 
-    if (true) {  // limits.angle_is_curvature) {
+    if (limits.angle_is_curvature) {
       // ISO 11270
       static const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
 
@@ -806,10 +806,10 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 //
 //
 //      // check for above ISO 11270 lateral accel assuming worst case road roll
-//      violation |= ABS(desired_angle) > max_curvature;
-//      if (ABS(desired_angle) > max_curvature) {
-//        printf("VIOLATION! ISO 11270 lateral accel: %f\n", MAX_LATERAL_ACCEL);
-//      }
+      violation |= ABS(desired_angle) > max_curvature_max;
+      if (ABS(desired_angle) > max_curvature_max) {
+        printf("VIOLATION! ISO 11270 lateral accel: %f\n", MAX_LATERAL_ACCEL);
+      }
 
 //      printf("\n");
     }
@@ -840,7 +840,7 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 
   // No angle control allowed when controls are not allowed
 //  printf("tried to send enable: %i\n", steer_control_enabled);
-//  violation |= !controls_allowed && steer_control_enabled;
+  violation |= !controls_allowed && steer_control_enabled;
 //  if (!controls_allowed && steer_control_enabled) {
 ////    printf("steer_control_enabled VIOLATION!\n");
 //  }
