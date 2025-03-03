@@ -26,8 +26,7 @@ fi
 # test coverage
 GCOV="gcovr -r ../ --fail-under-line=100 -e '^libsafety|^../board'"
 if ! GCOV_OUTPUT="$($GCOV)"; then
-  echo "FAILED: Some files have less than 100% coverage:"
-  echo "$GCOV_OUTPUT"
+  echo -e "FAILED:\n$GCOV_OUTPUT"
   exit 1
 else
   echo "SUCCESS: All checked files have 100% coverage!"
