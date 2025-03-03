@@ -84,6 +84,12 @@ static void gm_rx_hook(const CANPacket_t *to_push) {
     if (addr == 0xBD) {
       regen_braking = (GET_BYTE(to_push, 0) >> 4) != 0U;
     }
+  }
+}
+
+static void gm_rx_relay_malfunction_hook(const CANPacket_t *to_push) {
+  if (GET_BUS(to_push) == 0U) {
+    int addr = GET_ADDR(to_push);
 
     bool stock_ecu_detected = (addr == 0x180);  // ASCMLKASteeringCmd
 
@@ -254,6 +260,7 @@ static safety_config gm_init(uint16_t param) {
 const safety_hooks gm_hooks = {
   .init = gm_init,
   .rx = gm_rx_hook,
+  .rx_relay_malfunction = gm_rx_relay_malfunction_hook,
   .tx = gm_tx_hook,
   .fwd = gm_fwd_hook,
 };
