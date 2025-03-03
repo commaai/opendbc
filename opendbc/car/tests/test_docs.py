@@ -3,8 +3,8 @@ import pytest
 import re
 
 from opendbc.car.car_helpers import interfaces
-from opendbc.car.docs import get_all_car_docs
-from opendbc.car.docs_definitions import Cable, Column, PartType, Star
+from opendbc.car.docs import get_all_car_docs, get_params_for_docs
+from opendbc.car.docs_definitions import Cable, Column, PartType, Star, SupportType
 from opendbc.car.honda.values import CAR as HONDA
 from opendbc.car.values import PLATFORMS
 
@@ -13,6 +13,13 @@ class TestCarDocs:
   @classmethod
   def setup_class(cls):
     cls.all_cars = get_all_car_docs()
+
+  def test_support_level(self, subtests):
+    for car in self.all_cars:
+      with subtests.test(car=car.name):
+        CP = get_params_for_docs(car.car_fingerprint)
+        if not CP.dashcamOnly:
+          assert car.support_type == SupportType.UPSTREAM
 
   def test_duplicate_years(self, subtests):
     make_model_years = defaultdict(list)
