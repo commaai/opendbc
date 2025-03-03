@@ -228,7 +228,7 @@ static bool honda_tx_hook(const CANPacket_t *to_send) {
   int bus_buttons = (honda_bosch_radarless) ? 2 : bus_pt;  // the camera controls ACC on radarless Bosch cars
 
   // record time if sending 1A6 or 296
-  if ((addr == 0x1A6) || (addr == 0x296)) {
+  if (((addr == 0x1A6) || (addr == 0x296)) && (bus == bus_pt)) {
     honda_last_send_scm_button = microsecond_timer_get();
   } 
 
@@ -452,7 +452,7 @@ static int honda_bosch_fwd_hook(int bus_num, int addr) {
     // block forwarding 1A6 or 296 for 40ms when op send scm message
     bool is_addr_valid = (addr == 0x1A6) || (addr == 0x296);
     uint32_t elapsed_time = get_ts_elapsed(microsecond_timer_get(), honda_last_send_scm_button);
-    bool is_time_within_limit = (elapsed_time <= 20000U);
+    bool is_time_within_limit = (elapsed_time <= 40000U);
     if (is_addr_valid && is_time_within_limit) {
        bus_fwd = -1;
     }
