@@ -215,6 +215,7 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
     current_hooks->rx(to_push);
   }
 
+  // the relay malfunction hook runs on all incoming rx messages
   if (current_hooks->rx_relay_malfunction != NULL) {
     current_hooks->rx_relay_malfunction(to_push);
   }

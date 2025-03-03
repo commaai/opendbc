@@ -176,7 +176,14 @@ static void hyundai_rx_hook(const CANPacket_t *to_push) {
     if (addr == 0x394) {
       brake_pressed = ((GET_BYTE(to_push, 5) >> 5U) & 0x3U) == 0x2U;
     }
+  }
+}
 
+static void hyundai_rx_relay_malfunction_hook(const CANPacket_t *to_push) {
+  int bus = GET_BUS(to_push);
+  int addr = GET_ADDR(to_push);
+
+  if (bus == 0) {
     bool stock_ecu_detected = (addr == 0x340);
 
     // If openpilot is controlling longitudinal we need to ensure the radar is turned off
@@ -351,6 +358,7 @@ static safety_config hyundai_legacy_init(uint16_t param) {
 const safety_hooks hyundai_hooks = {
   .init = hyundai_init,
   .rx = hyundai_rx_hook,
+  .rx_relay_malfunction = hyundai_rx_relay_malfunction_hook,
   .tx = hyundai_tx_hook,
   .fwd = hyundai_fwd_hook,
   .get_counter = hyundai_get_counter,
@@ -361,6 +369,7 @@ const safety_hooks hyundai_hooks = {
 const safety_hooks hyundai_legacy_hooks = {
   .init = hyundai_legacy_init,
   .rx = hyundai_rx_hook,
+  .rx_relay_malfunction = hyundai_rx_relay_malfunction_hook,
   .tx = hyundai_tx_hook,
   .fwd = hyundai_fwd_hook,
   .get_counter = hyundai_get_counter,
