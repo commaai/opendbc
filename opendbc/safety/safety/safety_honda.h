@@ -37,9 +37,11 @@ static bool honda_alt_brake_msg = false;
 static bool honda_fwd_brake = false;
 static bool honda_bosch_long = false;
 static bool honda_bosch_radarless = false;
+static bool honda_bosch_scm_alt = false;
 typedef enum {HONDA_NIDEC, HONDA_BOSCH} HondaHw;
 static HondaHw honda_hw = HONDA_NIDEC;
 
+static uint32_t honda_last_send_scm_button = 0U;
 
 static int honda_get_pt_bus(void) {
   return ((honda_hw == HONDA_BOSCH) && !honda_bosch_radarless) ? 1 : 0;
@@ -87,8 +89,18 @@ static void honda_rx_hook(const CANPacket_t *to_push) {
 
   // check ACC main state
   // 0x326 for all Bosch and some Nidec, 0x1A6 for some Nidec
-  if ((addr == 0x326) || (addr == 0x1A6)) {
-    acc_main_on = GET_BIT(to_push, ((addr == 0x326) ? 28U : 47U));
+  // Odyssey RC5 japanese type use 0x1a6 for scm_buttons and main_on signal
+  // But 0x326 also exist. So we need to ignore it.
+  if (addr == 0x1A6) {
+    honda_bosch_scm_alt = true;
+    acc_main_on = GET_BIT(to_push, 47U);
+    if (!acc_main_on) {
+      controls_allowed = false;
+    }
+  } 
+  
+  if ((addr == 0x326) && (!honda_bosch_scm_alt)) {
+    acc_main_on = GET_BIT(to_push, 28U);
     if (!acc_main_on) {
       controls_allowed = false;
     }
@@ -127,6 +139,7 @@ static void honda_rx_hook(const CANPacket_t *to_push) {
       controls_allowed = false;
     }
     cruise_button_prev = button;
+
   }
 
   // user brake signal on 0x17C reports applied brake from computer brake on accord
@@ -214,6 +227,11 @@ static bool honda_tx_hook(const CANPacket_t *to_send) {
   int bus_pt = honda_get_pt_bus();
   int bus_buttons = (honda_bosch_radarless) ? 2 : bus_pt;  // the camera controls ACC on radarless Bosch cars
 
+  // record time if sending 1A6 or 296
+  if ((addr == 0x1A6) || (addr == 0x296)) {
+    honda_last_send_scm_button = microsecond_timer_get();
+  } 
+
   // ACC_HUD: safety check (nidec w/o pedal)
   if ((addr == 0x30C) && (bus == bus_pt)) {
     int pcm_speed = (GET_BYTE(to_send, 0) << 8) | GET_BYTE(to_send, 1);
@@ -286,7 +304,7 @@ static bool honda_tx_hook(const CANPacket_t *to_send) {
   // FORCE CANCEL: safety check only relevant when spamming the cancel button in Bosch HW
   // ensuring that only the cancel button press is sent (VAL 2) when controls are off.
   // This avoids unintended engagements while still allowing resume spam
-  if ((addr == 0x296) && !controls_allowed && (bus == bus_buttons)) {
+  if (((addr == 0x296) || (addr == 0x1A6)) && !controls_allowed && (bus == bus_buttons)) {
     if (((GET_BYTE(to_send, 0) >> 5) & 0x7U) != 2U) {
       tx = false;
     }
@@ -314,6 +332,8 @@ static safety_config honda_nidec_init(uint16_t param) {
   honda_alt_brake_msg = false;
   honda_bosch_long = false;
   honda_bosch_radarless = false;
+  honda_bosch_scm_alt = false;
+  honda_last_send_scm_button = 0U;
 
   safety_config ret;
 
@@ -338,7 +358,7 @@ static safety_config honda_nidec_init(uint16_t param) {
 static safety_config honda_bosch_init(uint16_t param) {
   static CanMsg HONDA_BOSCH_TX_MSGS[] = {{0xE4, 0, 5}, {0xE5, 0, 8}, {0x296, 1, 4}, {0x33D, 0, 5}, {0x33DA, 0, 5}, {0x33DB, 0, 8}};  // Bosch
   static CanMsg HONDA_BOSCH_LONG_TX_MSGS[] = {{0xE4, 1, 5}, {0x1DF, 1, 8}, {0x1EF, 1, 8}, {0x1FA, 1, 8}, {0x30C, 1, 8}, {0x33D, 1, 5}, {0x33DA, 1, 5}, {0x33DB, 1, 8}, {0x39F, 1, 8}, {0x18DAB0F1, 1, 8}};  // Bosch w/ gas and brakes
-  static CanMsg HONDA_RADARLESS_TX_MSGS[] = {{0xE4, 0, 5}, {0x296, 2, 4}, {0x33D, 0, 8}};  // Bosch radarless
+  static CanMsg HONDA_RADARLESS_TX_MSGS[] = {{0xE4, 0, 5}, {0x296, 2, 4}, {0x1A6, 2, 8},{0x33D, 0, 8}};  // Bosch radarless
   static CanMsg HONDA_RADARLESS_LONG_TX_MSGS[] = {{0xE4, 0, 5}, {0x33D, 0, 8}, {0x1C8, 0, 8}, {0x30C, 0, 8}};  // Bosch radarless w/ gas and brakes
 
   const uint16_t HONDA_PARAM_ALT_BRAKE = 1;
@@ -364,6 +384,8 @@ static safety_config honda_bosch_init(uint16_t param) {
   honda_bosch_radarless = GET_FLAG(param, HONDA_PARAM_RADARLESS);
   // Checking for alternate brake override from safety parameter
   honda_alt_brake_msg = GET_FLAG(param, HONDA_PARAM_ALT_BRAKE);
+  honda_bosch_scm_alt = false;
+  honda_last_send_scm_button = 0U;
 
   // radar disabled so allow gas/brakes
 #ifdef ALLOW_DEBUG
@@ -427,6 +449,10 @@ static int honda_bosch_fwd_hook(int bus_num, int addr) {
 
   if (bus_num == 0) {
     bus_fwd = 2;
+    // block forwarding 1A6 or 296 for 40ms when op send scm message
+    if (((addr == 0x1A6) ||(addr == 0x296)) && ((get_ts_elapsed(microsecond_timer_get(), honda_last_send_scm_button)) <= 40000U)) {
+      bus_fwd = -1;
+    }
   }
   if (bus_num == 2)  {
     bool is_lkas_msg = (addr == 0xE4) || (addr == 0xE5) || (addr == 0x33D) || (addr == 0x33DA) || (addr == 0x33DB);

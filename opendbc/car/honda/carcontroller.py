@@ -199,10 +199,7 @@ class CarController(CarControllerBase):
       if pcm_cancel_cmd:
         can_sends.append(hondacan.spam_buttons_command(self.packer, self.CAN, CruiseButtons.CANCEL, self.CP.carFingerprint))
       elif CC.cruiseControl.resume:
-        # resume button only send once every 5s. because scm_button frequency 20ms/40ms so we should send frame in that
-        if (self.frame - self.last_button_frame) * DT_CTRL >= 5.0:
-          can_sends.append(hondacan.spam_buttons_command(self.packer, self.CAN, CruiseButtons.RES_ACCEL, self.CP.carFingerprint))
-          self.last_button_frame = self.frame
+        can_sends.append(hondacan.spam_buttons_command(self.packer, self.CAN, CruiseButtons.RES_ACCEL, self.CP.carFingerprint))
 
     else:
       # Send gas and brake commands.
