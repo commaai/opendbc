@@ -172,8 +172,8 @@ static void update_counter(RxCheck addr_list[], int index, uint8_t counter) {
 }
 
 static bool rx_msg_safety_check(const CANPacket_t *to_push,
-                         const safety_config *cfg,
-                         const safety_hooks *safety_hooks) {
+                                const safety_config *cfg,
+                                const safety_hooks *safety_hooks) {
 
   int index = get_addr_check_index(to_push, cfg->rx_checks, cfg->rx_checks_len);
   update_addr_timestamp(cfg->rx_checks, index);
