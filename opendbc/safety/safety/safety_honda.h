@@ -169,8 +169,15 @@ static void honda_rx_hook(const CANPacket_t *to_push) {
       }
     }
   }
+}
 
+static void honda_rx_relay_malfunction_hook(const CANPacket_t *to_push) {
   int bus_rdr_car = (honda_hw == HONDA_BOSCH) ? 0 : 2;  // radar bus, car side
+  int pt_bus = honda_get_pt_bus();
+
+  int addr = GET_ADDR(to_push);
+  int bus = GET_BUS(to_push);
+
   bool stock_ecu_detected = false;
 
   // If steering controls messages are received on the destination bus, it's an indication
@@ -187,7 +194,6 @@ static void honda_rx_hook(const CANPacket_t *to_push) {
   }
 
   generic_rx_checks(stock_ecu_detected);
-
 }
 
 static bool honda_tx_hook(const CANPacket_t *to_send) {
@@ -321,7 +327,7 @@ static safety_config honda_nidec_init(uint16_t param) {
 
   if (enable_nidec_alt) {
     // For Nidecs with main on signal on an alternate msg (missing 0x326)
-    static RxCheck honda_nidec_alt_rx_checks[] = { 
+    static RxCheck honda_nidec_alt_rx_checks[] = {
       HONDA_COMMON_NO_SCM_FEEDBACK_RX_CHECKS(0)
     };
 
@@ -443,6 +449,7 @@ static int honda_bosch_fwd_hook(int bus_num, int addr) {
 const safety_hooks honda_nidec_hooks = {
   .init = honda_nidec_init,
   .rx = honda_rx_hook,
+  .rx_relay_malfunction = honda_rx_relay_malfunction_hook,
   .tx = honda_tx_hook,
   .fwd = honda_nidec_fwd_hook,
   .get_counter = honda_get_counter,
@@ -453,6 +460,7 @@ const safety_hooks honda_nidec_hooks = {
 const safety_hooks honda_bosch_hooks = {
   .init = honda_bosch_init,
   .rx = honda_rx_hook,
+  .rx_relay_malfunction = honda_rx_relay_malfunction_hook,
   .tx = honda_tx_hook,
   .fwd = honda_bosch_fwd_hook,
   .get_counter = honda_get_counter,

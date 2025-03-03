@@ -214,7 +214,10 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
   if (valid && whitelisted) {
     current_hooks->rx(to_push);
   }
-  current_hooks->rx_relay_malfunction(to_push);
+
+  if (current_hooks->rx_relay_malfunction != NULL) {
+    current_hooks->rx_relay_malfunction(to_push);
+  }
 
   // reset mismatches on rising edge of controls_allowed to avoid rare race condition
   if (controls_allowed && !controls_allowed_prev) {
