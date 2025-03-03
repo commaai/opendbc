@@ -11,7 +11,7 @@ def checksum(data, poly, xor_output):
   return crc ^ xor_output
 
 
-def create_lka_steering(packer, acm_lka_hba_cmd, apply_steer, enabled):
+def create_lka_steering(packer, acm_lka_hba_cmd, apply_torque, enabled):
   values = {s: acm_lka_hba_cmd[s] for s in [
     "ACM_lkaHbaCmd_Counter",
     "ACM_lkaHbaCmd_Checksum",
@@ -40,7 +40,7 @@ def create_lka_steering(packer, acm_lka_hba_cmd, apply_steer, enabled):
     values["ACM_lkaActToi"] = 1
     values["ACM_lkaSymbolState"] = 3
     values["ACM_lkaLaneRecogState"] = 3
-    values["ACM_lkaStrToqReq"] = apply_steer
+    values["ACM_lkaStrToqReq"] = apply_torque
     values["ACM_unkown2"] = 1
     values["ACM_unkown3"] = 4
     values["ACM_unkown4"] = 160
@@ -70,14 +70,14 @@ def create_wheel_touch(packer, sccm_wheel_touch, enabled):
   return packer.make_can_msg("SCCM_WheelTouch", 2, values)
 
 
-def create_longitudinal(packer, frame, accel, enabled, stopping):
+def create_longitudinal(packer, frame, accel, enabled):
   values = {
     "ACM_longitudinalRequest_Counter": frame % 15,
     "ACM_AccelerationRequest": accel if enabled else 0,
     "ACM_VehicleHoldRequired": 0,
     "ACM_PrndRequired": 0,
     "ACM_longInterfaceEnable": 1 if enabled else 0,
-    "ACM_AccelerationRequestType": 1 if stopping else 0,
+    "ACM_AccelerationRequestType": 0,
   }
 
   data = packer.make_can_msg("ACM_longitudinalRequest", 0, values)[1]

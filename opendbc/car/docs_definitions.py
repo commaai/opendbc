@@ -135,7 +135,9 @@ class CarHarness(EnumBase):
   mazda = BaseCarHarness("Mazda connector")
   ford_q3 = BaseCarHarness("Ford Q3 connector")
   ford_q4 = BaseCarHarness("Ford Q4 connector", parts=[Accessory.harness_box, Accessory.comma_power_v2, Cable.long_obdc_cable, Cable.usbc_coupler])
-  rivian = BaseCarHarness("Rivian connector")
+  rivian = BaseCarHarness("Rivian A connector", parts=[Accessory.harness_box, Cable.long_obdc_cable, Cable.usbc_coupler])
+  tesla_a = BaseCarHarness("Tesla A connector", parts=[Accessory.harness_box, Cable.long_obdc_cable, Cable.usbc_coupler])
+  tesla_b = BaseCarHarness("Tesla B connector", parts=[Accessory.harness_box, Cable.long_obdc_cable, Cable.usbc_coupler])
 
 
 class Device(EnumBase):
@@ -193,7 +195,7 @@ CarFootnote = namedtuple("CarFootnote", ["text", "column", "docs_only", "shop_fo
 class CommonFootnote(Enum):
   EXP_LONG_AVAIL = CarFootnote(
     "openpilot Longitudinal Control (Alpha) is available behind a toggle; " +
-    "the toggle is only available in non-release branches such as `devel` or `master-ci`.",
+    "the toggle is only available in non-release branches such as `devel` or `nightly-dev`.",
     Column.LONGITUDINAL, docs_only=True)
   EXP_LONG_DSU = CarFootnote(
     "By default, this car will use the stock Adaptive Cruise Control (ACC) for longitudinal control. " +

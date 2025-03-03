@@ -1,8 +1,8 @@
-def create_steering_control(packer, bus, apply_steer, lkas_enabled):
+def create_steering_control(packer, bus, apply_torque, lkas_enabled):
   values = {
     "HCA_01_Status_HCA": 5 if lkas_enabled else 3,
-    "HCA_01_LM_Offset": abs(apply_steer),
-    "HCA_01_LM_OffSign": 1 if apply_steer < 0 else 0,
+    "HCA_01_LM_Offset": abs(apply_torque),
+    "HCA_01_LM_OffSign": 1 if apply_torque < 0 else 0,
     "HCA_01_Vib_Freq": 18,
     "HCA_01_Sendestatus": 1 if lkas_enabled else 0,
     "EA_ACC_Wunschgeschwindigkeit": 327.36,
