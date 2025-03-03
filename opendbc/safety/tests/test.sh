@@ -19,6 +19,7 @@ pytest -n8
 
 # generate and open report
 if [ "$1" == "--report" ]; then
+  mkdir -p coverage-out
   gcovr -r ../ --html-nested coverage-out/index.html
   sensible-browser coverage-out/index.html
 fi
