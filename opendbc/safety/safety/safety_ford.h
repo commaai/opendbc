@@ -398,26 +398,24 @@ static safety_config ford_init(uint16_t param) {
     {FORD_LateralMotionControl, 0, 8},
   };
 
-  UNUSED(param);
+  const uint16_t FORD_PARAM_CANFD = 2;
+  ford_canfd = GET_FLAG(param, FORD_PARAM_CANFD);
+
+  ford_longitudinal = false;
+
 #ifdef ALLOW_DEBUG
   const uint16_t FORD_PARAM_LONGITUDINAL = 1;
-  const uint16_t FORD_PARAM_CANFD = 2;
   ford_longitudinal = GET_FLAG(param, FORD_PARAM_LONGITUDINAL);
-  ford_canfd = GET_FLAG(param, FORD_PARAM_CANFD);
 #endif
 
   // Longitudinal is the default for CAN, and optional for CAN FD w/ ALLOW_DEBUG
   ford_longitudinal = !ford_canfd || ford_longitudinal;
 
   safety_config ret;
-  // FIXME: cppcheck thinks that ford_canfd is always false. This is not true
-  // if ALLOW_DEBUG is defined but cppcheck is run without ALLOW_DEBUG
-  // cppcheck-suppress knownConditionTrueFalse
   if (ford_canfd) {
     ret = ford_longitudinal ? BUILD_SAFETY_CFG(ford_rx_checks, FORD_CANFD_LONG_TX_MSGS) : \
                               BUILD_SAFETY_CFG(ford_rx_checks, FORD_CANFD_STOCK_TX_MSGS);
   } else {
-    // cppcheck-suppress knownConditionTrueFalse
     ret = ford_longitudinal ? BUILD_SAFETY_CFG(ford_rx_checks, FORD_LONG_TX_MSGS) : \
                               BUILD_SAFETY_CFG(ford_rx_checks, FORD_STOCK_TX_MSGS);
   }
