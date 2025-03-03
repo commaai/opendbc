@@ -162,6 +162,7 @@ static void ford_rx_hook(const CANPacket_t *to_push) {
     // Update vehicle yaw rate
     if (addr == FORD_Yaw_Data_FD1) {
       // Signal: VehYaw_W_Actl
+      // TODO: we should use the speed which results in the closest angle measurement to the desired angle
       float ford_yaw_rate = (((GET_BYTE(to_push, 2) << 8U) | GET_BYTE(to_push, 3)) * 0.0002) - 6.5;
       float current_curvature = ford_yaw_rate / MAX(vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR, 0.1);
 //      printf("got ford yaw rate: %f\n", ford_yaw_rate);

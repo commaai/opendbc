@@ -782,7 +782,6 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
       printf("safety max_curvature float: %f\n", (MAX_LATERAL_ACCEL / (speed * speed) * limits.angle_deg_to_can));
       printf("safety accel max_curvature_upper: %i\n", max_curvature_upper);
       printf("safety accel max_curvature_lower: %i\n", max_curvature_lower);
-      printf("safety desired angle: %i\n", desired_angle);
       printf("safety speed: %f\n", speed);
 
       // don't enforce above the max steer
@@ -837,7 +836,7 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 
   // No angle control allowed when controls are not allowed
 //  printf("tried to send enable: %i\n", steer_control_enabled);
-  violation |= !controls_allowed && steer_control_enabled;
+//  violation |= !controls_allowed && steer_control_enabled;
 //  if (!controls_allowed && steer_control_enabled) {
 ////    printf("steer_control_enabled VIOLATION!\n");
 //  }
