@@ -50,7 +50,7 @@ class CarInterface(CarInterfaceBase):
 
       # TRON (SecOC) platforms are not supported
       # LateralMotionControl2, ACCDATA are 16 bytes on these platforms
-      if fingerprint[CAN.main].get(0x3d6) != 8 or fingerprint[CAN.main].get(0x186) != 8:
+      if fingerprint[CAN.camera].get(0x3d6) != 8 or fingerprint[CAN.camera].get(0x186) != 8:
         ret.dashcamOnly = True
     else:
       # Lock out if the car does not have needed lateral and longitudinal control APIs.
