@@ -45,7 +45,12 @@ static void mazda_rx_hook(const CANPacket_t *to_push) {
     if (addr == MAZDA_PEDALS) {
       brake_pressed = (GET_BYTE(to_push, 0) & 0x10U);
     }
+  }
+}
 
+static void mazda_rx_relay_malfunction_hook(const CANPacket_t *to_push) {
+  if ((int)GET_BUS(to_push) == MAZDA_MAIN) {
+    int addr = GET_ADDR(to_push);
     generic_rx_checks((addr == MAZDA_LKAS));
   }
 }
@@ -126,6 +131,7 @@ static safety_config mazda_init(uint16_t param) {
 const safety_hooks mazda_hooks = {
   .init = mazda_init,
   .rx = mazda_rx_hook,
+  .rx_relay_malfunction = mazda_rx_relay_malfunction_hook,
   .tx = mazda_tx_hook,
   .fwd = mazda_fwd_hook,
 };
