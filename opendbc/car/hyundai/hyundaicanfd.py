@@ -208,6 +208,9 @@ def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_ov
     "aReqValue": a_val,
     "aReqRaw": a_raw,
     "VSetDis": set_speed,
+    "JerkLowerLimit": jerk if enabled else 1,
+    "JerkUpperLimit": 3.0,
+
     "ObjValid": 0,
     "OBJ_STATUS": 2,
     "SET_ME_2": 0x4,
@@ -216,16 +219,11 @@ def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_ov
     "DISTANCE_SETTING": hud_control.leadDistanceBars,
   }
 
+  # fixes auto regen stuck on max for hybrids
   if cruise_info is None:
-    values.update({
-      "JerkLowerLimit": jerk if enabled else 1,
-      "JerkUpperLimit": 3.0,
-      "ACC_ObjDist": 1,
-    })
+    values["ACC_ObjDist"] = 0
   else:
     values.update({
-      "JerkLowerLimit": 1.5 if enabled else 0,
-      "JerkUpperLimit": 0.5 if enabled else 0,
       **{s: cruise_info[s] for s in ["ACC_ObjDist", "ACC_ObjRelSpd"]}
     })
 
