@@ -452,9 +452,9 @@ static int honda_bosch_fwd_hook(int bus_num, int addr) {
     // block forwarding 1A6 or 296 for 40ms when op send scm message
     bool is_addr_valid = (addr == 0x1A6) || (addr == 0x296);
     uint32_t elapsed_time = get_ts_elapsed(microsecond_timer_get(), honda_last_send_scm_button);
-    bool is_time_within_limit = (elapsed_time <= 40000U);
+    bool is_time_within_limit = (elapsed_time <= 1U);
     if (is_addr_valid && is_time_within_limit) {
-       bus_fwd = 1;
+       bus_fwd = -1;
     }
   }
   if (bus_num == 2)  {
