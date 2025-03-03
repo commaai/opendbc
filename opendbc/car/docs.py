@@ -10,7 +10,7 @@ from natsort import natsorted
 from opendbc.car.common.basedir import BASEDIR
 from opendbc.car import gen_empty_fingerprint
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarDocs, Device, ExtraCarDocs, Column, ExtraCarsColumn, CommonFootnote, PartType
+from opendbc.car.docs_definitions import CarDocs, Device, Column, ExtraCarsColumn, CommonFootnote, PartType
 from opendbc.car.car_helpers import interfaces, get_interface_attr
 from opendbc.car.values import PLATFORMS
 from opendbc.car.mock.values import CAR as MOCK
@@ -35,7 +35,7 @@ def get_all_footnotes() -> dict[Enum, int]:
 
 
 def build_sorted_car_docs_list(platforms, footnotes=None, include_dashcam=False):
-  collected_car_docs: list[CarDocs | ExtraCarDocs] = []
+  collected_car_docs: list[CarDocs] = []
   for platform in platforms.values():
     car_docs = platform.config.car_docs
     CP = get_params_for_docs(platform)
@@ -62,7 +62,7 @@ def get_all_car_docs() -> list[CarDocs]:
   return sorted_list
 
 
-def get_car_docs_with_extras() -> list[CarDocs | ExtraCarDocs]:
+def get_car_docs_with_extras() -> list[CarDocs]:
   sorted_list: list[CarDocs] = build_sorted_car_docs_list(PLATFORMS, include_dashcam=True)
   return sorted_list
 
@@ -86,7 +86,7 @@ def generate_cars_md(all_car_docs: list[CarDocs], template_fn: str) -> str:
   return cars_md
 
 
-def generate_cars_md_with_extras(car_docs_with_extras: list[CarDocs | ExtraCarDocs], template_fn: str) -> str:
+def generate_cars_md_with_extras(car_docs_with_extras: list[CarDocs], template_fn: str) -> str:
   with open(template_fn) as f:
     template = jinja2.Template(f.read(), trim_blocks=True, lstrip_blocks=True)
 
