@@ -762,9 +762,6 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 
       // check not above ISO 11270 lateral accel assuming worst case road roll
       violation |= ABS(desired_angle) > max_curvature_upper;
-      if (ABS(desired_angle) > max_curvature_upper) {
-        printf("VIOLATION! ISO 11270 lateral accel: %f\n", MAX_LATERAL_ACCEL);
-      }
     }
 
     // check for violation;
