@@ -14,13 +14,6 @@ class TestCarDocs:
   def setup_class(cls):
     cls.all_cars = get_all_car_docs()
 
-  def test_support_level(self, subtests):
-    for car in self.all_cars:
-      with subtests.test(car=car.name):
-        CP = get_params_for_docs(car.car_fingerprint)
-        if not CP.dashcamOnly:
-          assert car.support_type == SupportType.UPSTREAM
-
   def test_duplicate_years(self, subtests):
     make_model_years = defaultdict(list)
     for car in self.all_cars:
@@ -79,3 +72,10 @@ class TestCarDocs:
         assert car_part_type.count(PartType.connector) == 1, f"Need to specify one harness connector: {car.name}"
         assert car_part_type.count(PartType.mount) == 1, f"Need to specify one mount: {car.name}"
         assert Cable.right_angle_obd_c_cable_1_5ft in car_parts, f"Need to specify a right angle OBD-C cable (1.5ft): {car.name}"
+
+  def test_support_level(self, subtests):
+    for car in self.all_cars:
+      with subtests.test(car=car.name):
+        CP = get_params_for_docs(car.car_fingerprint)
+        if not CP.dashcamOnly:
+          assert car.support_type == SupportType.UPSTREAM, "Remove non-upstream SupportType"
