@@ -736,6 +736,32 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
       highest_desired_angle = CLAMP(highest_desired_angle, -limits.max_angle, limits.max_angle);
     }
 
+    // check not above ISO 11270 lateral accel assuming worst case road roll
+    if (limits.angle_is_curvature) {
+      // ISO 11270
+      static const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
+
+      // Limit to average banked road since safety doesn't have the roll
+      static const float EARTH_G = 9.81;
+      static const float AVERAGE_ROAD_ROLL = 0.06;  // ~3.4 degrees, 6% superelevation
+      static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (EARTH_G * AVERAGE_ROAD_ROLL);  // ~2.4 m/s^2
+
+      // Allow small tolerance by using minimum speed and rounding curvature up
+      const float speed_lower = MAX(vehicle_speed.min / VEHICLE_SPEED_FACTOR, 1.0);
+      const float speed_upper = MAX(vehicle_speed.max / VEHICLE_SPEED_FACTOR, 1.0);
+      const int max_curvature_upper = (MAX_LATERAL_ACCEL / (speed_lower * speed_lower) * limits.angle_deg_to_can) + 1.;
+      const int max_curvature_lower = (MAX_LATERAL_ACCEL / (speed_upper * speed_upper) * limits.angle_deg_to_can) - 1.;
+
+      // ensure that the curvature error doesn't try to enforce above this limit
+      if (desired_angle_last > 0) {
+        lowest_desired_angle = CLAMP(lowest_desired_angle, -max_curvature_lower, max_curvature_lower);
+        highest_desired_angle = CLAMP(highest_desired_angle, -max_curvature_upper, max_curvature_upper);
+      } else {
+        lowest_desired_angle = CLAMP(lowest_desired_angle, -max_curvature_upper, max_curvature_upper);
+        highest_desired_angle = CLAMP(highest_desired_angle, -max_curvature_lower, max_curvature_lower);
+      }
+    }
+
     // check for violation;
     violation |= max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
   }
