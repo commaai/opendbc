@@ -12,7 +12,7 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 # ISO 11270
 ISO_LATERAL_ACCEL = 3.0  # m/s^2  # TODO: import from test lateral limits file?
 
-# Limit to worst case banked road since safety doesn't have the roll
+# Limit to average banked road since safety doesn't have the roll
 EARTH_G = 9.81
 AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation
 MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (EARTH_G * AVERAGE_ROAD_ROLL)  # ~2.4 m/s^2
