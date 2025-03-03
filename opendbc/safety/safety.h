@@ -760,7 +760,7 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
         highest_desired_angle = CLAMP(highest_desired_angle, -max_curvature_lower, max_curvature_lower);
       }
 
-      // check for above ISO 11270 lateral accel assuming worst case road roll
+      // check not above ISO 11270 lateral accel assuming worst case road roll
       violation |= ABS(desired_angle) > max_curvature_upper;
       if (ABS(desired_angle) > max_curvature_upper) {
         printf("VIOLATION! ISO 11270 lateral accel: %f\n", MAX_LATERAL_ACCEL);
@@ -779,7 +779,6 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
     violation |= (limits.inactive_angle_is_zero ? (desired_angle != 0) :
                   max_limit_check(desired_angle, max_inactive_angle, min_inactive_angle));
   }
-
 
   // No angle control allowed when controls are not allowed
   violation |= !controls_allowed && steer_control_enabled;
