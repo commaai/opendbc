@@ -307,11 +307,10 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
                   if self.STEER_MESSAGE == MSG_LateralMotionControl2:
                     should_tx = should_tx and (abs(curvature) <= curvature_accel_limit_max)
 
-                  # with self.subTest(controls_allowed=controls_allowed, steer_control_enabled=steer_control_enabled,
-                  #                   path_offset=path_offset, path_angle=path_angle, curvature_rate=curvature_rate,
-                  #                   curvature=curvature):
-                  self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(steer_control_enabled, path_offset, path_angle, curvature, curvature_rate)),
-                                   (steer_control_enabled, path_offset, path_angle, curvature_rate, curvature))
+                  with self.subTest(controls_allowed=controls_allowed, steer_control_enabled=steer_control_enabled,
+                                    path_offset=path_offset, path_angle=path_angle, curvature_rate=curvature_rate,
+                                    curvature=curvature):
+                    self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(steer_control_enabled, path_offset, path_angle, curvature, curvature_rate)))
 
   def test_curvature_rate_limits(self):
     """
@@ -356,10 +355,10 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
         (False, self.MAX_CURVATURE, self.MAX_CURVATURE - max_delta_down - small_curvature),
       ])
 
-      for sign in (1,):
+      for sign in (-1, 1):
         for angle_meas, cases in (up_cases, down_cases):
           self._reset_curvature_measurement(sign * angle_meas, speed)
-          for idx, (should_tx, initial_curvature, desired_curvature) in enumerate(cases):
+          for should_tx, initial_curvature, desired_curvature in cases:
 
             # Only CAN FD has the max lateral acceleration limit
             if self.STEER_MESSAGE == MSG_LateralMotionControl2:
@@ -374,8 +373,7 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
             # small curvature ensures we're using up limits. at 0, safety allows down limits to allow to account for rounding errors
             curvature_offset = small_curvature if initial_curvature == 0 else 0
             self._set_prev_desired_angle(sign * (curvature_offset + initial_curvature))
-            self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, sign * (curvature_offset + desired_curvature), 0)),
-                             (idx, sign, angle_meas, initial_curvature, desired_curvature, limit_command))
+            self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, sign * (curvature_offset + desired_curvature), 0)))
 
   def test_prevent_lkas_action(self):
     self.safety.set_controls_allowed(1)
