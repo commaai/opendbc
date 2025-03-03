@@ -36,8 +36,8 @@
 |Ford|Escape Plug-in Hybrid 2020-22|Co-Pilot360 Assist+|[Upstream](#upstream)|
 |Ford|Explorer 2020-24|Co-Pilot360 Assist+|[Upstream](#upstream)|
 |Ford|Explorer Hybrid 2020-24|Co-Pilot360 Assist+|[Upstream](#upstream)|
-|Ford|F-150 2021-23|Co-Pilot360 Assist 2.0|[Under review](#upstream)|
-|Ford|F-150 Hybrid 2021-23|Co-Pilot360 Assist 2.0|[Under review](#upstream)|
+|Ford|F-150 2021-23|Co-Pilot360 Assist 2.0|[Upstream](#upstream)|
+|Ford|F-150 Hybrid 2021-23|Co-Pilot360 Assist 2.0|[Upstream](#upstream)|
 |Ford|Focus 2018|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
 |Ford|Focus Hybrid 2018|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
 |Ford|Kuga 2020-22|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
@@ -47,8 +47,8 @@
 |Ford|Maverick 2023-24|Co-Pilot360 Assist|[Upstream](#upstream)|
 |Ford|Maverick Hybrid 2022|LARIAT Luxury|[Upstream](#upstream)|
 |Ford|Maverick Hybrid 2023-24|Co-Pilot360 Assist|[Upstream](#upstream)|
-|Ford|Mustang Mach-E 2021-23|All|[Under review](#upstream)|
-|Ford|Ranger 2024|Adaptive Cruise Control with Lane Centering|[Under review](#upstream)|
+|Ford|Mustang Mach-E 2021-23|All|[Upstream](#upstream)|
+|Ford|Ranger 2024|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
 |Genesis|G70 2018|All|[Upstream](#upstream)|
 |Genesis|G70 2019-21|All|[Upstream](#upstream)|
 |Genesis|G70 2022-23|All|[Upstream](#upstream)|
