@@ -165,6 +165,7 @@ typedef int (*fwd_hook)(int bus_num, int addr);
 typedef struct {
   safety_hook_init init;
   rx_hook rx;
+  rx_hook rx_relay_malfunction;
   tx_hook tx;
   fwd_hook fwd;
   get_checksum_t get_checksum;

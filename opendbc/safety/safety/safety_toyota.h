@@ -136,6 +136,12 @@ static void toyota_rx_hook(const CANPacket_t *to_push) {
 
       UPDATE_VEHICLE_SPEED(speed / 4.0 * 0.01 / 3.6);
     }
+  }
+}
+
+static void toyota_rx_relay_malfunction_hook(const CANPacket_t *to_push) {
+  if (GET_BUS(to_push) == 0U) {
+    int addr = GET_ADDR(to_push);
 
     bool stock_ecu_detected = addr == 0x2E4;  // STEERING_LKA
     if (!toyota_stock_longitudinal && (addr == 0x343)) {
@@ -406,6 +412,7 @@ static int toyota_fwd_hook(int bus_num, int addr) {
 const safety_hooks toyota_hooks = {
   .init = toyota_init,
   .rx = toyota_rx_hook,
+  .rx_relay_malfunction = toyota_rx_relay_malfunction_hook,
   .tx = toyota_tx_hook,
   .fwd = toyota_fwd_hook,
   .get_checksum = toyota_get_checksum,
