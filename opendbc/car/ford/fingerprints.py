@@ -81,6 +81,8 @@ FW_VERSIONS = {
     ],
     (Ecu.abs, 0x760, None): [
       b'PL34-2D053-CA\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+      b'PL34-2D053-CC\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+      b'PL3V-2D053-BB\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
     ],
     (Ecu.fwdRadar, 0x764, None): [
       b'ML3T-14D049-AL\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
@@ -88,6 +90,7 @@ FW_VERSIONS = {
     (Ecu.fwdCamera, 0x706, None): [
       b'ML3T-14H102-ABR\x00\x00\x00\x00\x00\x00\x00\x00\x00',
       b'PJ6T-14H102-ABJ\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+      b'RJ6T-14H102-ACJ\x00\x00\x00\x00\x00\x00\x00\x00\x00',
     ],
   },
   CAR.FORD_F_150_LIGHTNING_MK1: {
@@ -96,15 +99,20 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdCamera, 0x706, None): [
       b'ML3T-14H102-ABT\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+      b'RJ6T-14H102-BBC\x00\x00\x00\x00\x00\x00\x00\x00\x00',
     ],
     (Ecu.fwdRadar, 0x764, None): [
       b'ML3T-14D049-AL\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+    ],
+    (Ecu.eps, 0x730, None): [
+      b'RL38-14D003-AA\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
     ],
   },
   CAR.FORD_MUSTANG_MACH_E_MK1: {
     (Ecu.eps, 0x730, None): [
       b'LJ9C-14D003-AM\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
       b'LJ9C-14D003-CC\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+      b'LJ9C-14D003-GA\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
     ],
     (Ecu.abs, 0x760, None): [
       b'LK9C-2D053-CK\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
@@ -114,6 +122,7 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdCamera, 0x706, None): [
       b'ML3T-14H102-ABS\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+      b'RJ6T-14H102-BAE\x00\x00\x00\x00\x00\x00\x00\x00\x00',
     ],
   },
   CAR.FORD_FOCUS_MK4: {
@@ -153,15 +162,18 @@ FW_VERSIONS = {
   CAR.FORD_RANGER_MK2: {
     (Ecu.eps, 0x730, None): [
       b'NL14-14D003-AE\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+      b'RB3C-14D003-AA\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
     ],
     (Ecu.abs, 0x760, None): [
       b'PB3C-2D053-ZD\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+      b'PB3C-2D053-ZJ\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
     ],
     (Ecu.fwdRadar, 0x764, None): [
       b'ML3T-14D049-AL\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
     ],
     (Ecu.fwdCamera, 0x706, None): [
       b'PJ6T-14H102-ABJ\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+      b'RJ6T-14H102-BBB\x00\x00\x00\x00\x00\x00\x00\x00\x00',
     ],
   },
 }
