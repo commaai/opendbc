@@ -542,7 +542,7 @@ class TestHondaBoschRadarlessAltSCMSafety(HondaPcmEnableBase, TestHondaBoschRada
 
   def setUp(self):
     super().setUp()
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.RADARLESS | HondaSafetyFlags.FLAG_HONDA_NIDEC_ALT)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.RADARLESS | HondaSafetyFlags.NIDEC_ALT)
     self.safety.init_tests()
 
 class TestHondaBoschRadarlessAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschRadarlessSafetyBase, TestHondaBoschAltBrakeSafetyBase):
