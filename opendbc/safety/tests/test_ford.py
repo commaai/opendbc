@@ -104,8 +104,9 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
   def get_canfd_curvature_limit(self, speed):
     # Round it in accordance with the safety
     curvature_accel_limit = MAX_LATERAL_ACCEL / (max(speed, 1) ** 2)
-    curvature_accel_limit = int(curvature_accel_limit * self.DEG_TO_CAN + 1) / self.DEG_TO_CAN
-    return curvature_accel_limit
+    curvature_accel_limit_min = int(curvature_accel_limit * self.DEG_TO_CAN - 1) / self.DEG_TO_CAN
+    curvature_accel_limit_max = int(curvature_accel_limit * self.DEG_TO_CAN + 1) / self.DEG_TO_CAN
+    return curvature_accel_limit_min, curvature_accel_limit_max
 
   def _set_prev_desired_angle(self, t):
     t = round(t * self.DEG_TO_CAN)
@@ -321,6 +322,7 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
     small_curvature = 1 / self.DEG_TO_CAN  # significant small amount of curvature to cross boundary
 
     for speed in np.arange(0, 40, 0.5):
+      curvature_accel_limit_min, curvature_accel_limit_max = self.get_canfd_curvature_limit(speed)
       limit_command = speed > self.CURVATURE_ERROR_MIN_SPEED
       # ensure our limits match the safety's rounded limits
       max_delta_up = int(np.interp(speed - 1, self.ANGLE_RATE_BP, self.ANGLE_RATE_UP) * self.DEG_TO_CAN + 1) / self.DEG_TO_CAN
@@ -360,8 +362,13 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
 
             # Only CAN FD has the max lateral acceleration limit
             if self.STEER_MESSAGE == MSG_LateralMotionControl2:
-              curvature_accel_limit = self.get_canfd_curvature_limit(speed)
-              should_tx = should_tx and abs(desired_curvature) <= curvature_accel_limit
+              if should_tx:
+                # can not send if the curvature is above the max lateral acceleration
+                should_tx = should_tx and abs(desired_curvature) <= curvature_accel_limit_max
+              else:
+                # if desired curvature violates driver curvature error, it can only send if
+                # the curvature is being limited by max lateral acceleration
+                should_tx = should_tx or curvature_accel_limit_min <= abs(desired_curvature) <= curvature_accel_limit_max
 
             # small curvature ensures we're using up limits. at 0, safety allows down limits to allow to account for rounding errors
             curvature_offset = small_curvature if initial_curvature == 0 else 0
