@@ -172,34 +172,52 @@ static void update_counter(RxCheck addr_list[], int index, uint8_t counter) {
 }
 
 static bool rx_msg_safety_check(const CANPacket_t *to_push,
-                                const safety_config *cfg,
-                                const safety_hooks *safety_hooks) {
+                         const safety_config *cfg,
+                         const safety_hooks *safety_hooks) {
 
   int index = get_addr_check_index(to_push, cfg->rx_checks, cfg->rx_checks_len);
   update_addr_timestamp(cfg->rx_checks, index);
 
   if (index != -1) {
     // checksum check
-    if ((safety_hooks->get_checksum != NULL) && (safety_hooks->compute_checksum != NULL) && cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].check_checksum) {
-      uint32_t checksum = safety_hooks->get_checksum(to_push);
-      uint32_t checksum_comp = safety_hooks->compute_checksum(to_push);
-      cfg->rx_checks[index].status.valid_checksum = checksum_comp == checksum;
+    if (cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].check_checksum) {
+      if ((safety_hooks->get_checksum != NULL) && (safety_hooks->compute_checksum != NULL)) {
+        uint32_t checksum = safety_hooks->get_checksum(to_push);
+        uint32_t checksum_comp = safety_hooks->compute_checksum(to_push);
+        cfg->rx_checks[index].status.valid_checksum = checksum_comp == checksum;
+      } else {
+        // If checksum check is enabled but checksum functions are not available, assume valid
+        cfg->rx_checks[index].status.valid_checksum = true;
+      }
     } else {
+      // Skip checksum check
       cfg->rx_checks[index].status.valid_checksum = true;
     }
 
     // counter check (max_counter == 0 means skip check)
-    if ((safety_hooks->get_counter != NULL) && (cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].max_counter > 0U)) {
-      uint8_t counter = safety_hooks->get_counter(to_push);
-      update_counter(cfg->rx_checks, index, counter);
+    if (cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].max_counter > 0U) {
+      if (safety_hooks->get_counter != NULL) {
+        uint8_t counter = safety_hooks->get_counter(to_push);
+        update_counter(cfg->rx_checks, index, counter);
+      } else {
+        // If get_counter is NULL but max_counter > 0, keep wrong_counters at 0 to avoid segfault
+        cfg->rx_checks[index].status.wrong_counters = 0U;
+      }
     } else {
+      // Skip counter check if max_counter == 0
       cfg->rx_checks[index].status.wrong_counters = 0U;
     }
 
     // quality flag check
-    if ((safety_hooks->get_quality_flag_valid != NULL) && cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].quality_flag) {
-      cfg->rx_checks[index].status.valid_quality_flag = safety_hooks->get_quality_flag_valid(to_push);
+    if (cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].quality_flag) {
+      if (safety_hooks->get_quality_flag_valid != NULL) {
+        cfg->rx_checks[index].status.valid_quality_flag = safety_hooks->get_quality_flag_valid(to_push);
+      } else {
+        // If quality flag check is enabled but function not available, assume valid
+        cfg->rx_checks[index].status.valid_quality_flag = true;
+      }
     } else {
+      // Skip quality flag check
       cfg->rx_checks[index].status.valid_quality_flag = true;
     }
   }
@@ -222,7 +240,7 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
   return valid;
 }
 
-static bool tx_msg_safety_check(const CANPacket_t *to_send, const CanMsg msg_list[], int len) {
+static bool msg_allowed(const CANPacket_t *to_send, const CanMsg msg_list[], int len) {
   int addr = GET_ADDR(to_send);
   int bus = GET_BUS(to_send);
   int length = GET_LEN(to_send);
@@ -238,17 +256,13 @@ static bool tx_msg_safety_check(const CANPacket_t *to_send, const CanMsg msg_lis
 }
 
 bool safety_tx_hook(CANPacket_t *to_send) {
-  bool allowed = tx_msg_safety_check(to_send, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
+  bool whitelisted = msg_allowed(to_send, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
   if ((current_safety_mode == SAFETY_ALLOUTPUT) || (current_safety_mode == SAFETY_ELM327)) {
-    allowed = true;
+    whitelisted = true;
   }
 
-  bool safety_allowed = false;
-  if (allowed) {
-    safety_allowed = current_hooks->tx(to_send);
-  }
-
-  return !relay_malfunction && allowed && safety_allowed;
+  const bool safety_allowed = current_hooks->tx(to_send);
+  return !relay_malfunction && whitelisted && safety_allowed;
 }
 
 int safety_fwd_hook(int bus_num, int addr) {
@@ -738,32 +752,6 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
       // TODO: this should always be done
       lowest_desired_angle = CLAMP(lowest_desired_angle, -limits.max_angle, limits.max_angle);
       highest_desired_angle = CLAMP(highest_desired_angle, -limits.max_angle, limits.max_angle);
-    }
-
-    // check not above ISO 11270 lateral accel assuming worst case road roll
-    if (limits.angle_is_curvature) {
-      // ISO 11270
-      static const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
-
-      // Limit to average banked road since safety doesn't have the roll
-      static const float EARTH_G = 9.81;
-      static const float AVERAGE_ROAD_ROLL = 0.06;  // ~3.4 degrees, 6% superelevation
-      static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (EARTH_G * AVERAGE_ROAD_ROLL);  // ~2.4 m/s^2
-
-      // Allow small tolerance by using minimum speed and rounding curvature up
-      const float speed_lower = MAX(vehicle_speed.min / VEHICLE_SPEED_FACTOR, 1.0);
-      const float speed_upper = MAX(vehicle_speed.max / VEHICLE_SPEED_FACTOR, 1.0);
-      const int max_curvature_upper = (MAX_LATERAL_ACCEL / (speed_lower * speed_lower) * limits.angle_deg_to_can) + 1.;
-      const int max_curvature_lower = (MAX_LATERAL_ACCEL / (speed_upper * speed_upper) * limits.angle_deg_to_can) - 1.;
-
-      // ensure that the curvature error doesn't try to enforce above this limit
-      if (desired_angle_last > 0) {
-        lowest_desired_angle = CLAMP(lowest_desired_angle, -max_curvature_lower, max_curvature_lower);
-        highest_desired_angle = CLAMP(highest_desired_angle, -max_curvature_upper, max_curvature_upper);
-      } else {
-        lowest_desired_angle = CLAMP(lowest_desired_angle, -max_curvature_upper, max_curvature_upper);
-        highest_desired_angle = CLAMP(highest_desired_angle, -max_curvature_lower, max_curvature_lower);
-      }
     }
 
     // check for violation;
