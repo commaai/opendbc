@@ -127,10 +127,8 @@ def create_lfahda_cluster(packer, CAN, enabled):
 def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
   ret = []
 
-  msg_161 = CS.msg_161.copy()
-  msg_162 = CS.msg_162.copy()
-  enabled = CC.enabled
-  hud = CC.hudControl
+  msg_161, msg_162 = CS.msg_161.copy(), CS.msg_162.copy()
+  enabled, hud = CC.enabled, CC.hudControl
 
   # HIDE FAULTS
   for f in ("FAULT_LSS", "FAULT_HDA", "FAULT_DAS", "FAULT_LFA", "FAULT_DAW"):
