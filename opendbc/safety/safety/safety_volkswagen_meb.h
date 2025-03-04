@@ -37,11 +37,10 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *to_push) {
 
     // Update in-motion state by sampling wheel speeds
     if (addr == MSG_ESC_51) {
-      // TODO: GET_BYTES?
-      uint32_t fr = GET_BYTE(to_push, 10U) | GET_BYTE(to_push, 11U) << 8;
-      uint32_t rr = GET_BYTE(to_push, 14U) | GET_BYTE(to_push, 15U) << 8;
-      uint32_t rl = GET_BYTE(to_push, 12U) | GET_BYTE(to_push, 13U) << 8;
-      uint32_t fl = GET_BYTE(to_push, 8U) | GET_BYTE(to_push, 9U) << 8;
+      uint32_t fr = GET_BYTES(to_push, 10, 11);
+      uint32_t rr = GET_BYTES(to_push, 14, 15);
+      uint32_t rl = GET_BYTES(to_push, 12, 13);
+      uint32_t fl = GET_BYTES(to_push, 8, 9);
 
       vehicle_moving = (fr > 0U) || (rr > 0U) || (rl > 0U) || (fl > 0U);
 
@@ -52,7 +51,7 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *to_push) {
     // Signal: LH_EPS_03.EPS_Lenkmoment (absolute torque)
     // Signal: LH_EPS_03.EPS_VZ_Lenkmoment (direction)
     if (addr == MSG_LH_EPS_03) {
-      int torque_driver_new = GET_BYTE(to_push, 5) | ((GET_BYTE(to_push, 6) & 0x1FU) << 8);
+      int torque_driver_new = GET_BYTES(to_push, 5, 6) & 0x1FFFU;
       int sign = (GET_BYTE(to_push, 6) & 0x80U) >> 7;
       if (sign == 1) {
         torque_driver_new *= -1;
@@ -61,8 +60,7 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *to_push) {
     }
 
     if (addr == MSG_QFK_01) {
-      // TODO: GET_BYTES?
-      int current_curvature = (((GET_BYTE(to_push, 5U) & 0x7F) << 8) | GET_BYTE(to_push, 4U));
+      int current_curvature = GET_BYTES(to_push, 4, 5) & 0x7FFF;
 
       bool current_curvature_sign = GET_BIT(to_push, 55U);
       if (current_curvature_sign) {
@@ -76,7 +74,7 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *to_push) {
     if (addr == MSG_Motor_51) {
       // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
       // Always exit controls on main switch off
-      int acc_status = ((GET_BYTE(to_push, 11U) >> 0) & 0x07U);
+      int acc_status = (GET_BYTE(to_push, 11U) & 0x07U);
       bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
       acc_main_on = cruise_engaged || (acc_status == 2);
 
@@ -136,8 +134,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *to_send) {
 
   // Safety check for HCA_03 Heading Control Assist curvature
   if (addr == MSG_HCA_03) {
-    // TODO: GET_BYTES?
-    int steer_curvature = (GET_BYTE(to_send, 3U) | ((GET_BYTE(to_send, 4U) & 0x7FU) << 8));
+    int steer_curvature = GET_BYTES(to_send, 3, 4) & 0x7FFFU;
 
     bool sign = GET_BIT(to_send, 39U);
     if (!sign) {
