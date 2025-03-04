@@ -12,8 +12,7 @@ class Footnote(Enum):
   HW_TYPE = CarFootnote(
     "Some 2023 model years have HW4. To check which hardware type your vehicle has, look for " +
     "<b>Autopilot computer</b> under <b>Software -> Additional Vehicle Information</b> on your vehicle's touchscreen. </br></br>" +
-    "See <a href=\"https://www.notateslaapp.com/news/2173/how-to-check-if-your-tesla-has-hardware-4-ai4-or-hardware-3\" " +
-    "target=\"_blank\" class=\"highlight\">this page</a> for more information.",
+    "See <a href=\"https://www.notateslaapp.com/news/2173/how-to-check-if-your-tesla-has-hardware-4-ai4-or-hardware-3\">this page</a> for more information.",
     Column.MODEL)
 
 
