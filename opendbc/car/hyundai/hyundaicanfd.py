@@ -124,7 +124,7 @@ def create_lfahda_cluster(packer, CAN, enabled):
   }
   return packer.make_can_msg("LFAHDA_CLUSTER", CAN.ECAN, values)
 
-def create_ccnc(packer, CAN, frame, CP, CC, CS):
+def create_ccnc(packer, CAN, frame, CP, CC, CS, lat_active):
   ret = []
 
   msg_161 = CS.msg_161.copy()
@@ -158,10 +158,20 @@ def create_ccnc(packer, CAN, frame, CP, CC, CS):
 
   # ICONS, LANELINES
   msg_161.update({
-    "CENTERLINE": 1 if enabled else 0,
-    "LANELINE_LEFT": 2 if enabled and hud.leftLaneVisible else 0,
-    "LANELINE_RIGHT": 2 if enabled and hud.rightLaneVisible else 0,
-    "LFA_ICON": 2 if enabled else 0,
+    "CENTERLINE": 1 if lat_active else 0,
+    "LANELINE_LEFT": (
+      1 if not hud.leftLaneVisible else
+      4 if hud.leftLaneVisible and hud.leftLaneDepart else
+      0 if hud.leftLaneVisible and not lat_active else
+      2 if hud.leftLaneVisible and lat_active and (CS.out.leftBlindspot or CS.out.vEgo < 8.94) else 6
+    ),
+    "LANELINE_RIGHT": (
+      1 if not hud.rightLaneVisible else
+      4 if hud.rightLaneVisible and hud.rightLaneDepart else
+      0 if hud.rightLaneVisible and not lat_active else
+      2 if hud.rightLaneVisible and lat_active and (CS.out.rightBlindspot or CS.out.vEgo < 8.94) else 6
+    ),
+    "LFA_ICON": 2 if lat_active else 0,
     "LKA_ICON": 0,
   })
 
