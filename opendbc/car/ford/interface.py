@@ -51,9 +51,10 @@ class CarInterface(CarInterfaceBase):
 
       # TRON (SecOC) platforms are not supported
       # LateralMotionControl2, ACCDATA are 16 bytes on these platforms
-      if fingerprint[CAN.camera].get(0x3d6) != 8 or fingerprint[CAN.camera].get(0x186) != 8:
-        carlog.error('dashcamOnly: SecOC is unsupported')
-        ret.dashcamOnly = True
+      if len(fingerprint[CAN.camera]):
+        if fingerprint[CAN.camera].get(0x3d6) != 8 or fingerprint[CAN.camera].get(0x186) != 8:
+          carlog.error('dashcamOnly: SecOC is unsupported')
+          ret.dashcamOnly = True
     else:
       # Lock out if the car does not have needed lateral and longitudinal control APIs.
       # Note that we also check CAN for adaptive cruise, but no known signal for LCA exists
