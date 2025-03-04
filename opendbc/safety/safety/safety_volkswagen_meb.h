@@ -37,6 +37,7 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *to_push) {
 
     // Update in-motion state by sampling wheel speeds
     if (addr == MSG_ESC_51) {
+      // TODO: GET_BYTES?
       uint32_t fr = GET_BYTE(to_push, 10U) | GET_BYTE(to_push, 11U) << 8;
       uint32_t rr = GET_BYTE(to_push, 14U) | GET_BYTE(to_push, 15U) << 8;
       uint32_t rl = GET_BYTE(to_push, 12U) | GET_BYTE(to_push, 13U) << 8;
@@ -60,7 +61,8 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *to_push) {
     }
 
     if (addr == MSG_QFK_01) {
-      int current_curvature = ((GET_BYTE(to_push, 5U) & 0x7F) << 8 | GET_BYTE(to_push, 4U));
+      // TODO: GET_BYTES?
+      int current_curvature = (((GET_BYTE(to_push, 5U) & 0x7F) << 8) | GET_BYTE(to_push, 4U));
 
       bool current_curvature_sign = GET_BIT(to_push, 55U);
       if (current_curvature_sign) {
@@ -92,7 +94,7 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *to_push) {
 
     // update accel pedal
     if (addr == MSG_Motor_54) {
-      int accel_pedal_value = GET_BYTE(to_push, 21U) - 37;
+      int accel_pedal_value = GET_BYTE(to_push, 21U) - 37U;
       gas_pressed = accel_pedal_value != 0;
     }
 
@@ -107,7 +109,7 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *to_push) {
 #define DRIVER_INPUT_MAX 300
 #define STEER_POWER_STEP 2
 
-bool volkswagen_curvature_cmd_checks(int steer_power, int steer_curvature, int steer_req) {
+static bool volkswagen_curvature_cmd_checks(int steer_power, int steer_curvature, int steer_req) {
   bool violation = false;
 
   if (steer_req == 0) {
@@ -121,7 +123,7 @@ bool volkswagen_curvature_cmd_checks(int steer_power, int steer_curvature, int s
     } else {
       bool disengaging_power = steer_power == (volkswagen_steer_power_prev - STEER_POWER_STEP);
       violation |= volkswagen_steer_power_prev == 0;
-      violation |= steer_power > 0 && !disengaging_power;
+      violation |= (steer_power > 0) && !disengaging_power;
     }
   }
 
@@ -134,7 +136,8 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *to_send) {
 
   // Safety check for HCA_03 Heading Control Assist curvature
   if (addr == MSG_HCA_03) {
-    int steer_curvature = (GET_BYTE(to_send, 3U) | (GET_BYTE(to_send, 4U) & 0x7FU << 8));
+    // TODO: GET_BYTES?
+    int steer_curvature = (GET_BYTE(to_send, 3U) | ((GET_BYTE(to_send, 4U) & 0x7FU) << 8));
 
     bool sign = GET_BIT(to_send, 39U);
     if (!sign) {
