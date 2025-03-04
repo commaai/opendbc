@@ -181,7 +181,7 @@ static bool rx_msg_safety_check(const CANPacket_t *to_push,
   if (index != -1) {
     // checksum check
     cfg->rx_checks[index].status.valid_checksum = true;
-    if ((safety_hooks->get_checksum != NULL) && (safety_hooks->compute_checksum != NULL) && cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].check_checksum) {
+    if ((safety_hooks->get_checksum != NULL) && (safety_hooks->compute_checksum != NULL) && !cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_checksum) {
       cfg->rx_checks[index].status.valid_checksum = (safety_hooks->compute_checksum(to_push) == safety_hooks->get_checksum(to_push));
     } 
 
