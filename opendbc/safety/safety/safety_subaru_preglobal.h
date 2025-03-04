@@ -56,13 +56,13 @@ static void subaru_preglobal_rx_hook(const CANPacket_t *to_push) {
 }
 
 static bool subaru_preglobal_tx_hook(const CANPacket_t *to_send) {
-  const SteeringLimits SUBARU_PG_STEERING_LIMITS = {
+  const TorqueSteeringLimits SUBARU_PG_STEERING_LIMITS = {
     .max_steer = 2047,
     .max_rt_delta = 940,
     .max_rt_interval = 250000,
     .max_rate_up = 50,
     .max_rate_down = 70,
-    .driver_torque_factor = 10,
+    .driver_torque_multiplier = 10,
     .driver_torque_allowance = 75,
     .type = TorqueDriverLimited,
   };
