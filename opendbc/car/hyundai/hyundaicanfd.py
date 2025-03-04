@@ -124,7 +124,7 @@ def create_lfahda_cluster(packer, CAN, enabled):
   }
   return packer.make_can_msg("LFAHDA_CLUSTER", CAN.ECAN, values)
 
-def create_ccnc(packer, CAN, frame, CP, CC, CS, lat_active):
+def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
   ret = []
 
   msg_161 = CS.msg_161.copy()
