@@ -37,12 +37,12 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *to_push) {
 
     // Update in-motion state by sampling wheel speeds
     if (addr == MSG_ESC_51) {
-      uint32_t fr = GET_BYTES(to_push, 10, 11);
-      uint32_t rr = GET_BYTES(to_push, 14, 15);
-      uint32_t rl = GET_BYTES(to_push, 12, 13);
       uint32_t fl = GET_BYTES(to_push, 8, 9);
+      uint32_t fr = GET_BYTES(to_push, 10, 11);
+      uint32_t rl = GET_BYTES(to_push, 12, 13);
+      uint32_t rr = GET_BYTES(to_push, 14, 15);
 
-      vehicle_moving = (fr > 0U) || (rr > 0U) || (rl > 0U) || (fl > 0U);
+      vehicle_moving = (fl + fr + rl + rr) > 0U;
 
       UPDATE_VEHICLE_SPEED(((fr + rr + rl + fl) / 4.0 ) * 0.0075 / 3.6);
     }
