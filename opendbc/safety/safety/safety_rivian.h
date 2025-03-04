@@ -43,8 +43,9 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
       pcm_cruise_check(GET_BIT(to_push, 21U));
     }
 
+    // AEB status
     if (addr == 0x101) {
-      rivian_stock_aeb = GET_BIT(to_push, 47) == 1U;
+      rivian_stock_aeb = GET_BIT(to_push, 47) == 1U;  // ACM_EnableRequest
     }
   }
 }
