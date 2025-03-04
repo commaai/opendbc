@@ -31,6 +31,9 @@ class CarController(CarControllerBase):
     # Longitudinal control
     if self.CP.openpilotLongitudinalControl:
       can_sends.append(create_longitudinal(self.packer, self.frame % 15, actuators.accel, CC.enabled))
+    else:
+      if CC.cruiseControl.cancel:
+        can_sends.append(create_longitudinal(self.packer, (self.frame + 1) % 15, 0.0, False, True))
 
     new_actuators = actuators.as_builder()
     new_actuators.torque = apply_torque / CarControllerParams.STEER_MAX
