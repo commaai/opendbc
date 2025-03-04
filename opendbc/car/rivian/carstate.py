@@ -53,10 +53,11 @@ class CarState(CarStateBase):
     ret.cruiseState.available = True  # cp.vl["VDM_AdasSts"]["VDM_AdasInterfaceStatus"] == 1
     ret.cruiseState.standstill = cp.vl["VDM_AdasSts"]["VDM_AdasAccelRequestAcknowledged"] == 1
 
+    # VDM_AdasFaultStatus=Brk_Intv is the default for some reason
     # VDM_AdasFaultStatus=Imps_Cmd was seen when sending it rapidly changing ACC enable commands
     ret.accFaulted = (cp_cam.vl["ACM_Status"]["ACM_FaultStatus"] == 1 or
-                      # Brk_Intv, Cntr_Fault, Imps_Cmd
-                      cp.vl["VDM_AdasSts"]["VDM_AdasFaultStatus"] in (1, 2, 3))
+                      # Cntr_Fault, Imps_Cmd
+                      cp.vl["VDM_AdasSts"]["VDM_AdasFaultStatus"] in (2, 3))
 
     # Gear
     ret.gearShifter = GEAR_MAP[int(cp.vl["VDM_PropStatus"]["VDM_Prndl_Status"])]
