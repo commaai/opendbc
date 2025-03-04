@@ -191,11 +191,7 @@ def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
 def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_override, set_speed, hud_control, cruise_info=None):
   jerk = 5
   jn = jerk / 50
-  if not enabled or gas_override:
-    a_val, a_raw = 0, 0
-  else:
-    a_raw = accel
-    a_val = np.clip(accel, accel_last - jn, accel_last + jn)
+  a_raw, a_val = (0, 0) if not enabled or gas_override else (accel, np.clip(accel, accel_last - jn, accel_last + jn))
 
   values = {
     "ACCMode": 0 if not enabled else (2 if gas_override else 1),
