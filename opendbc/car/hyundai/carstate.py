@@ -55,7 +55,6 @@ class CarState(CarStateBase):
     self.buttons_counter = 0
 
     self.cruise_info = {}
-
     self.msg_161 = {}
     self.msg_162 = {}
 
