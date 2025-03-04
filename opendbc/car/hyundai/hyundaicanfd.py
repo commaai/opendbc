@@ -175,7 +175,7 @@ def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
     "LCA_RIGHT_ARROW": 2 if CC.rightBlinker else 0,
     "LANE_LEFT": 1 if CC.leftBlinker else 0,
     "LANE_RIGHT": 1 if CC.rightBlinker else 0,
-    "LANELINE_CURVATURE": curvature.get(max(-15, min(int(CS.out.steeringAngleDeg / 4), 15)), 14) if lat_active else 15,
+    "LANELINE_CURVATURE": curvature.get(max(-15, min(int(CS.out.steeringAngleDeg / 5), 15)), 14) if lat_active else 15,
     "LFA_ICON": 2 if lat_active else 1,
     "LKA_ICON": 0,
   })
