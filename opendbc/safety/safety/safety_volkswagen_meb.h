@@ -60,7 +60,7 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *to_push) {
     }
 
     if (addr == MSG_QFK_01) {
-      int current_curvature = GET_BYTES(to_push, 4, 5) & 0x7FFF;
+      int current_curvature = GET_BYTES(to_push, 4, 5) & 0x7FFFU;
 
       bool current_curvature_sign = GET_BIT(to_push, 55U);
       if (current_curvature_sign) {
