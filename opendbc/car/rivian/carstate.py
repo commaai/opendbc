@@ -52,7 +52,7 @@ class CarState(CarStateBase):
       ret.cruiseState.speed = 0
     ret.cruiseState.available = True  # cp.vl["VDM_AdasSts"]["VDM_AdasInterfaceStatus"] == 1
     ret.cruiseState.standstill = cp.vl["VDM_AdasSts"]["VDM_AdasAccelRequestAcknowledged"] == 1
-    ret.accFaulted = cp_cam.vl["ACM_Status"]["ACM_FaultStatus"] == 1
+    ret.accFaulted = cp_cam.vl["ACM_Status"]["ACM_FaultStatus"] == 1 or cp_cam.vl["ACM_Status"]["ACM_PermanentFaultStatus"] == 3
 
     # Gear
     ret.gearShifter = GEAR_MAP[int(cp.vl["VDM_PropStatus"]["VDM_Prndl_Status"])]

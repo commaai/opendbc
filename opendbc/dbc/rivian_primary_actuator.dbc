@@ -50,7 +50,7 @@ BO_ 256 ACM_Status: 8 ACM
  SG_ ACM_Unkown1 : 18|1@0+ (1,0) [0|1] "" XXX
  SG_ ACM_FeatureStatus : 23|3@0+ (1,0) [0|7] "" EPAS_P,VDM
  SG_ ACM_FaultStatus : 26|3@0+ (1,0) [0|7] "" EPAS_P,VDM
- SG_ ACM_Unkown2 : 41|2@0+ (1,0) [0|3] "" XXX
+ SG_ ACM_PermanentFaultStatus : 41|2@0+ (1,0) [0|3] "" XXX
 
 BO_ 257 ACM_AebRequest: 8 ACM
  SG_ ACM_AebRequest_Checksum : 7|8@0+ (1,0) [0|255] "" ESP,VDM
@@ -571,6 +571,7 @@ CM_ SG_ 256 ACM_Status_Checksum "Checksum signal for frame";
 CM_ SG_ 256 ACM_Status_Counter "Message counter signal for frame";
 CM_ SG_ 256 ACM_FeatureStatus "Current active ADAS feature";
 CM_ SG_ 256 ACM_FaultStatus "Reason for ACM fault";
+CM_ SG_ 256 ACM_PermanentFaultStatus "Not fully understood; can go high without ACM_FaultStatus. One trigger is sending ACM_longitudinalRequest over stock message with bad counters";
 CM_ SG_ 257 ACM_AebRequest_Checksum "J1850";
 CM_ SG_ 257 ACM_AebRequest_Counter "Message Counter";
 CM_ SG_ 257 ACM_StopRequest "AEB Stop Request subsequent to AEB event";
