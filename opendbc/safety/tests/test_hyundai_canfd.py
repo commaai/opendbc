@@ -152,6 +152,10 @@ class TestHyundaiCanfdLFASteeringAltButtons(TestHyundaiCanfdLFASteeringBase):
     }
     return self.packer.make_can_msg_panda("CRUISE_BUTTONS_ALT", self.PT_BUS, values)
 
+  def _acc_cancel_msg(self, cancel, accel=0):
+    values = {"ACCMode": 4 if cancel else 0, "aReqRaw": accel, "aReqValue": accel}
+    return self.packer.make_can_msg_panda("SCC_CONTROL", self.PT_BUS, values)
+
   def test_button_sends(self):
     """
       No button send allowed with alt buttons.
@@ -160,6 +164,14 @@ class TestHyundaiCanfdLFASteeringAltButtons(TestHyundaiCanfdLFASteeringBase):
       for btn in range(8):
         self.safety.set_controls_allowed(enabled)
         self.assertFalse(self._tx(self._button_msg(btn)))
+
+  def test_acc_cancel(self):
+    # FIXME: the CANFD_ALT_BUTTONS cars are the only ones that use SCC_CONTROL to cancel, why can't we use buttons?
+    for enabled in (True, False):
+      self.safety.set_controls_allowed(enabled)
+      self.assertTrue(self._tx(self._acc_cancel_msg(True)))
+      self.assertFalse(self._tx(self._acc_cancel_msg(True, accel=1)))
+      self.assertFalse(self._tx(self._acc_cancel_msg(False)))
 
 
 class TestHyundaiCanfdLKASteeringEV(TestHyundaiCanfdBase):
