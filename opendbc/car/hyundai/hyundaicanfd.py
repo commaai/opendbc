@@ -152,7 +152,7 @@ def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
   curvature = {i: (31 if i == -1 else 13 - abs(i + 15)) if i < 0 else 15 + i for i in range(-15, 16)}
   msg_161.update({
     "DAW_ICON": 0,
-    "CENTERLINE": 1 if lat_active else 0,
+    "CENTERLINE": 1 if lat_active or enabled else 0,
     "LANELINE_LEFT": (
       1 if not hud.leftLaneVisible else
       4 if hud.leftLaneDepart else
@@ -176,7 +176,7 @@ def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
     "LANE_LEFT": 1 if CC.leftBlinker else 0,
     "LANE_RIGHT": 1 if CC.rightBlinker else 0,
     "LANELINE_CURVATURE": curvature.get(max(-15, min(int(CS.out.steeringAngleDeg / 5), 15)), 14) if lat_active else 15,
-    "LFA_ICON": 2 if lat_active else 1,
+    "LFA_ICON": 2 if lat_active or enabled else 1,
     "LKA_ICON": 0,
   })
 
