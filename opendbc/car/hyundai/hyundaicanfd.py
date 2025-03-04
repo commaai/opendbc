@@ -126,15 +126,12 @@ def create_lfahda_cluster(packer, CAN, enabled):
 
 def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
   ret = []
-
   msg_161, msg_162 = CS.msg_161.copy(), CS.msg_162.copy()
   enabled, hud = CC.enabled, CC.hudControl
 
-  # HIDE FAULTS
   for f in ("FAULT_LSS", "FAULT_HDA", "FAULT_DAS", "FAULT_LFA", "FAULT_DAW"):
     msg_162[f] = 0
 
-  # HIDE ALERTS
   if msg_161.get("ALERTS_3") == 17:  # DRIVE_CAREFULLY
     msg_161["ALERTS_3"] = 0
 
@@ -149,12 +146,11 @@ def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
 
   if msg_161.get("ALERTS_2") == 5:  # CONSIDER_TAKING_A_BREAK
     msg_161.update({"ALERTS_2": 0, "SOUNDS_2": 0})
-  msg_161["DAW_ICON"] = 0 # ALWAYS HIDE NOW THAT WE BLOCK MDPS
+  msg_161["DAW_ICON"] = 0
 
   if msg_161.get("SOUNDS_4") == 2 and msg_161.get("LFA_ICON") in (3, 0,):  # LFA BEEPS
     msg_161["SOUNDS_4"] = 0
 
-  # ICONS, LANELINES
   msg_161.update({
     "CENTERLINE": 1 if lat_active else 0,
     "LANELINE_LEFT": (
@@ -173,10 +169,7 @@ def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
     "LKA_ICON": 0,
   })
 
-  # OP LONG
   if CP.openpilotLongitudinalControl:
-
-    # SETSPEED, DISTANCE
     msg_161.update({
       "SETSPEED": 3 if enabled else 1,
       "SETSPEED_HUD": 2 if enabled else 1,
@@ -189,7 +182,6 @@ def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
       "FCA_ICON": 1,
     })
 
-    # LEAD
     msg_162.update({
       "LEAD": 2 if enabled and hud.leadVisible else 1 if hud.leadVisible else 0,
       "LEAD_DISTANCE": 10,
@@ -197,7 +189,6 @@ def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
 
   ret.append(packer.make_can_msg("CCNC_0x161", CAN.ECAN, msg_161))
   ret.append(packer.make_can_msg("CCNC_0x162", CAN.ECAN, msg_162))
-
   return ret
 
 def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_override, set_speed, hud_control, cruise_info=None):
