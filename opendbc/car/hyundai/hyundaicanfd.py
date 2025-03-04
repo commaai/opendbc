@@ -230,12 +230,7 @@ def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_ov
   }
 
   # fixes auto regen stuck on max for hybrids
-  if cruise_info is None:
-    values["ACC_ObjDist"] = 1
-  else:
-    values.update({
-      **{s: cruise_info[s] for s in ["ACC_ObjDist", "ACC_ObjRelSpd"]}
-    })
+  values.update({"ACC_ObjDist": 1} if cruise_info is None else {s: cruise_info[s] for s in ["ACC_ObjDist", "ACC_ObjRelSpd"]})
 
   return packer.make_can_msg("SCC_CONTROL", CAN.ECAN, values)
 
