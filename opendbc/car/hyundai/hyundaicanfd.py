@@ -156,13 +156,13 @@ def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
     "LANELINE_LEFT": (
       1 if not hud.leftLaneVisible else
       4 if hud.leftLaneDepart else
-      0 if not lat_active else
+      0 if not (lat_active or enabled) else
       2 if CS.out.leftBlindspot or CS.out.vEgo < 8.94 else 6
     ),
     "LANELINE_RIGHT": (
       1 if not hud.rightLaneVisible else
       4 if hud.rightLaneDepart else
-      0 if not lat_active else
+      0 if not (lat_active or enabled) else
       2 if CS.out.rightBlindspot or CS.out.vEgo < 8.94 else 6
     ),
     "LCA_LEFT_ICON": (
