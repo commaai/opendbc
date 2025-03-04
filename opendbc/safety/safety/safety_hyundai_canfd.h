@@ -108,9 +108,15 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *to_push) {
 
     // vehicle moving
     if (addr == 0xa0) {
-      uint32_t front_left_speed = GET_BYTES(to_push, 8, 2);
-      uint32_t rear_right_speed = GET_BYTES(to_push, 14, 2);
-      vehicle_moving = (front_left_speed > HYUNDAI_STANDSTILL_THRSLD) || (rear_right_speed > HYUNDAI_STANDSTILL_THRSLD);
+      uint32_t fl = (GET_BYTES(to_push, 8, 2)) & 0x3FFFU;
+      uint32_t fr = (GET_BYTES(to_push, 10, 2)) & 0x3FFFU;
+      uint32_t rl = (GET_BYTES(to_push, 12, 2)) & 0x3FFFU;
+      uint32_t rr = (GET_BYTES(to_push, 14, 2)) & 0x3FFFU;
+      vehicle_moving = (fl > HYUNDAI_STANDSTILL_THRSLD) || (fr > HYUNDAI_STANDSTILL_THRSLD) ||
+                       (rl > HYUNDAI_STANDSTILL_THRSLD) || (rr > HYUNDAI_STANDSTILL_THRSLD);
+
+      // average of all 4 wheel speeds. Conversion: raw * 0.03125 / 3.6 = m/s
+      UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.03125 / 3.6);
     }
   }
 
@@ -135,7 +141,7 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *to_push) {
 }
 
 static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
-  const SteeringLimits HYUNDAI_CANFD_STEERING_LIMITS = {
+  const TorqueSteeringLimits HYUNDAI_CANFD_STEERING_LIMITS = {
     .max_steer = 270,
     .max_rt_delta = 112,
     .max_rt_interval = 250000,
@@ -198,6 +204,11 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
       violation |= longitudinal_accel_checks(desired_accel_val, HYUNDAI_LONG_LIMITS);
     } else {
       // only used to cancel on here
+      const int acc_mode = (GET_BYTE(to_send, 8) >> 4) & 0x7U;
+      if (acc_mode != 4) {
+        violation = true;
+      }
+
       if ((desired_accel_raw != 0) || (desired_accel_val != 0)) {
         violation = true;
       }
