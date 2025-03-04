@@ -70,9 +70,9 @@ def create_wheel_touch(packer, sccm_wheel_touch, enabled):
   return packer.make_can_msg("SCCM_WheelTouch", 2, values)
 
 
-def create_longitudinal(packer, frame, accel, enabled, cancel=False):
+def create_longitudinal(packer, counter, accel, enabled, cancel=False):
   values = {
-    "ACM_longitudinalRequest_Counter": frame % 15,
+    "ACM_longitudinalRequest_Counter": counter,
     "ACM_AccelerationRequest": accel if enabled else 0,
     "ACM_VehicleHoldRequired": 0,
     "ACM_PrndRequired": 0,
