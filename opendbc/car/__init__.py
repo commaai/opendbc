@@ -1,6 +1,5 @@
 # functions common among cars
 import numpy as np
-from collections import namedtuple
 from dataclasses import dataclass, field
 from enum import IntFlag, ReprEnum, StrEnum, EnumType, auto
 from dataclasses import replace
@@ -17,7 +16,13 @@ STD_CARGO_KG = 136.
 ACCELERATION_DUE_TO_GRAVITY = 9.81  # m/s^2
 
 ButtonType = structs.CarState.ButtonEvent.Type
-AngleRateLimit = namedtuple('AngleRateLimit', ['speed_bp', 'angle_v'])
+
+
+@dataclass
+class AngleSteeringLimits:
+  STEER_ANGLE_MAX: float
+  ANGLE_RATE_LIMIT_UP: tuple[list[float], list[float]]
+  ANGLE_RATE_LIMIT_DOWN: tuple[list[float], list[float]]
 
 
 def apply_hysteresis(val: float, val_steady: float, hyst_gap: float) -> float:
@@ -141,14 +146,20 @@ def apply_meas_steer_torque_limits(apply_torque, apply_torque_last, motor_torque
                                              LIMITS.STEER_ERROR_MAX, LIMITS.STEER_MAX)))
 
 
-def apply_std_steer_angle_limits(apply_angle, apply_angle_last, v_ego, LIMITS):
+def apply_std_steer_angle_limits(apply_angle: float, apply_angle_last: float, v_ego: float, steering_angle: float,
+                                 lat_active: bool, limits: AngleSteeringLimits) -> float:
   # pick angle rate limits based on wind up/down
   steer_up = apply_angle_last * apply_angle >= 0. and abs(apply_angle) > abs(apply_angle_last)
-  rate_limits = LIMITS.ANGLE_RATE_LIMIT_UP if steer_up else LIMITS.ANGLE_RATE_LIMIT_DOWN
+  rate_limits = limits.ANGLE_RATE_LIMIT_UP if steer_up else limits.ANGLE_RATE_LIMIT_DOWN
 
-  angle_rate_lim = np.interp(v_ego, rate_limits.speed_bp, rate_limits.angle_v)
-  angle_rate_lim = float(angle_rate_lim)
-  return float(np.clip(apply_angle, apply_angle_last - angle_rate_lim, apply_angle_last + angle_rate_lim))
+  angle_rate_lim = np.interp(v_ego, rate_limits[0], rate_limits[1])
+  new_apply_angle = np.clip(apply_angle, apply_angle_last - angle_rate_lim, apply_angle_last + angle_rate_lim)
+
+  # angle is current steering wheel angle when inactive on all angle cars
+  if not lat_active:
+    new_apply_angle = steering_angle
+
+  return float(np.clip(new_apply_angle, -limits.STEER_ANGLE_MAX, limits.STEER_ANGLE_MAX))
 
 
 def common_fault_avoidance(fault_condition: bool, request: bool, above_limit_frames: int,
