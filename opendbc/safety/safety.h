@@ -186,7 +186,7 @@ static bool rx_msg_safety_check(const CANPacket_t *to_push,
     } 
 
     // counter check
-    if (!cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].skip_counter) {
+    if (!cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_counter) {
       uint8_t counter = 0U;
       if (safety_hooks->get_counter != NULL) {
         counter = safety_hooks->get_counter(to_push);

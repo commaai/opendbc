@@ -223,7 +223,7 @@ static safety_config chrysler_init(uint16_t param) {
     {.msg = {{CHRYSLER_ADDRS.EPS_2, 0, 8, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
     {.msg = {{CHRYSLER_ADDRS.ESP_1, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
     //{.msg = {{ESP_8, 0, 8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}}},
-    {.msg = {{514, 0, 8, .ignore_checksum = true, .skip_counter = true, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{514, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},
     {.msg = {{CHRYSLER_ADDRS.ECM_5, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
     {.msg = {{CHRYSLER_ADDRS.DAS_3, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
   };
