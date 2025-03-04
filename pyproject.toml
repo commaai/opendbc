@@ -26,6 +26,7 @@ dependencies = [
 testing = [
   "cffi",
   "ruff",
+  "gcovr",
   "pytest",
   "pytest-coverage",
   "pytest-mock",
