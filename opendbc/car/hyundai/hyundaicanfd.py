@@ -186,10 +186,7 @@ def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
       "LEAD_DISTANCE": 10,
     })
 
-  ret = []
-  ret.append(packer.make_can_msg("CCNC_0x161", CAN.ECAN, msg_161))
-  ret.append(packer.make_can_msg("CCNC_0x162", CAN.ECAN, msg_162))
-  return ret
+  return [packer.make_can_msg(msg, CAN.ECAN, data) for msg, data in [("CCNC_0x161", msg_161), ("CCNC_0x162", msg_162)]]
 
 def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_override, set_speed, hud_control, cruise_info=None):
   jerk = 5
