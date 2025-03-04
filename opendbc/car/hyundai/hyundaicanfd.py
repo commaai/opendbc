@@ -125,7 +125,6 @@ def create_lfahda_cluster(packer, CAN, enabled):
   return packer.make_can_msg("LFAHDA_CLUSTER", CAN.ECAN, values)
 
 def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
-  ret = []
   msg_161, msg_162 = CS.msg_161.copy(), CS.msg_162.copy()
   enabled, hud = CC.enabled, CC.hudControl
 
@@ -187,6 +186,7 @@ def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
       "LEAD_DISTANCE": 10,
     })
 
+  ret = []
   ret.append(packer.make_can_msg("CCNC_0x161", CAN.ECAN, msg_161))
   ret.append(packer.make_can_msg("CCNC_0x162", CAN.ECAN, msg_162))
   return ret
