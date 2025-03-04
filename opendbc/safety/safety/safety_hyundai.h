@@ -41,8 +41,8 @@ const LongitudinalLimits HYUNDAI_LONG_LIMITS = {
 
 #define HYUNDAI_COMMON_RX_CHECKS(legacy)                                                                                      \
   {.msg = {{0x260, 0, 8, .max_counter = 3U, .frequency = 100U},                                       \
-           {0x371, 0, 8, .frequency = 100U},                                                                                  \
-           {0x91,  0, 8, .frequency = 100U}}},                                                                                \
+           {0x371, 0, 8, .ignore_checksum = true, .frequency = 100U},                                                                                  \
+           {0x91,  0, 8, .ignore_checksum = true, .frequency = 100U}}},                                                                                \
   {.msg = {{0x386, 0, 8, .ignore_checksum = !(legacy), .max_counter = (legacy) ? 0U : 15U, .frequency = 100U}, { 0 }, { 0 }}}, \
   {.msg = {{0x394, 0, 8, .ignore_checksum = !(legacy), .max_counter = (legacy) ? 0U : 7U, .frequency = 100U}, { 0 }, { 0 }}},  \
 
