@@ -275,6 +275,9 @@ class CarDocs:
     self.brand = CP.brand
     self.car_fingerprint = CP.carFingerprint
 
+    if self.support_type == SupportType.COMMUNITY:
+      self.support_link = "#community"
+
     if self.merged and CP.dashcamOnly:
       if self.support_type != SupportType.REVIEW:
         self.support_type = SupportType.DASHCAM

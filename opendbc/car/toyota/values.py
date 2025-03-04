@@ -6,7 +6,7 @@ from enum import Enum, IntFlag
 from opendbc.car import Bus, CarSpecs, PlatformConfig, Platforms, AngleSteeringLimits
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarFootnote, CarDocs, Column, CarParts, CarHarness
+from opendbc.car.docs_definitions import CarFootnote, CarDocs, Column, CarParts, CarHarness, SupportType
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
@@ -87,8 +87,17 @@ class ToyotaCarDocs(CarDocs):
   package: str = "All"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.toyota_a]))
 
+
+@dataclass
+class ToyotaSecurityCarDocs(ToyotaCarDocs):
+  def init_make(self, CP: CarParams):
+    self.support_type = SupportType.INCOMPATIBLE
+    self.support_link = "#can-bus-security"
+
+
 def dbc_dict(pt, radar):
   return {Bus.pt: pt, Bus.radar: radar}
+
 
 @dataclass
 class ToyotaTSS2PlatformConfig(PlatformConfig):
@@ -105,9 +114,6 @@ class ToyotaSecOCPlatformConfig(PlatformConfig):
   dbc_dict: dict = field(default_factory=lambda: dbc_dict('toyota_secoc_pt_generated', 'toyota_tss2_adas'))
 
   def init(self):
-    # don't expose car docs until SecOC cars can be suppressed from the comma website
-    self.car_docs = []
-
     self.flags |= ToyotaFlags.TSS2 | ToyotaFlags.NO_STOP_TIMER | ToyotaFlags.NO_DSU | ToyotaFlags.SECOC
 
     if self.flags & ToyotaFlags.RADAR_ACC:
@@ -278,7 +284,10 @@ class CAR(Platforms):
     flags=ToyotaFlags.RADAR_ACC | ToyotaFlags.ANGLE_CONTROL,
   )
   TOYOTA_RAV4_PRIME = ToyotaSecOCPlatformConfig(
-    [ToyotaCarDocs("Toyota RAV4 Prime 2021-23", min_enable_speed=MIN_ACC_SPEED)],
+    [
+      ToyotaCarDocs("Toyota RAV4 Prime 2021-23", min_enable_speed=MIN_ACC_SPEED, support_type=SupportType.COMMUNITY),
+      ToyotaSecurityCarDocs("Toyota RAV4 Prime 2024-25"),
+    ],
     CarSpecs(mass=4372. * CV.LB_TO_KG, wheelbase=2.68, steerRatio=16.88, tireStiffnessFactor=0.5533),
   )
   TOYOTA_MIRAI = ToyotaTSS2PlatformConfig( # TSS 2.5
@@ -292,7 +301,10 @@ class CAR(Platforms):
     flags=ToyotaFlags.NO_STOP_TIMER,
   )
   TOYOTA_SIENNA_4TH_GEN = ToyotaSecOCPlatformConfig(
-    [ToyotaCarDocs("Toyota Sienna 2021-23", min_enable_speed=MIN_ACC_SPEED)],
+    [
+      ToyotaCarDocs("Toyota Sienna 2021-23", min_enable_speed=MIN_ACC_SPEED, support_type=SupportType.COMMUNITY),
+      ToyotaSecurityCarDocs("Toyota Sienna 2024-25"),
+    ],
     CarSpecs(mass=4625. * CV.LB_TO_KG, wheelbase=3.06, steerRatio=17.8, tireStiffnessFactor=0.444),
   )
 
@@ -375,6 +387,13 @@ class CAR(Platforms):
     CarSpecs(mass=4034. * CV.LB_TO_KG, wheelbase=2.84988, steerRatio=13.3, tireStiffnessFactor=0.444),
     dbc_dict('toyota_new_mc_pt_generated', 'toyota_adas'),
     flags=ToyotaFlags.UNSUPPORTED_DSU,
+  )
+
+  # Non-upstream car docs
+  TOYOTA_SEQUOIA = ToyotaSecOCPlatformConfig(
+    [ToyotaSecurityCarDocs("Toyota Sequoia 2023-25")],
+    # TODO: set these values
+    CarSpecs(mass=4034. * CV.LB_TO_KG, wheelbase=2.84988, steerRatio=13.3, tireStiffnessFactor=0.444),
   )
 
 
