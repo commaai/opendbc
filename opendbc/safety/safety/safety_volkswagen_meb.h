@@ -37,10 +37,10 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *to_push) {
 
     // Update in-motion state by sampling wheel speeds
     if (addr == MSG_ESC_51) {
-      uint32_t fl = GET_BYTES(to_push, 8, 9);
-      uint32_t fr = GET_BYTES(to_push, 10, 11);
-      uint32_t rl = GET_BYTES(to_push, 12, 13);
-      uint32_t rr = GET_BYTES(to_push, 14, 15);
+      uint32_t fl = GET_BYTES(to_push, 8, 2);
+      uint32_t fr = GET_BYTES(to_push, 10, 2);
+      uint32_t rl = GET_BYTES(to_push, 12, 2);
+      uint32_t rr = GET_BYTES(to_push, 14, 2);
 
       vehicle_moving = (fl + fr + rl + rr) > 0U;
 
@@ -51,7 +51,7 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *to_push) {
     // Signal: LH_EPS_03.EPS_Lenkmoment (absolute torque)
     // Signal: LH_EPS_03.EPS_VZ_Lenkmoment (direction)
     if (addr == MSG_LH_EPS_03) {
-      int torque_driver_new = GET_BYTES(to_push, 5, 6) & 0x1FFFU;
+      int torque_driver_new = GET_BYTES(to_push, 5, 2) & 0x1FFFU;
       int sign = (GET_BYTE(to_push, 6) & 0x80U) >> 7;
       if (sign == 1) {
         torque_driver_new *= -1;
@@ -60,7 +60,7 @@ static void volkswagen_meb_rx_hook(const CANPacket_t *to_push) {
     }
 
     if (addr == MSG_QFK_01) {
-      int current_curvature = GET_BYTES(to_push, 4, 5) & 0x7FFFU;
+      int current_curvature = GET_BYTES(to_push, 4, 2) & 0x7FFFU;
 
       bool current_curvature_sign = GET_BIT(to_push, 55U);
       if (current_curvature_sign) {
@@ -134,7 +134,7 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *to_send) {
 
   // Safety check for HCA_03 Heading Control Assist curvature
   if (addr == MSG_HCA_03) {
-    int steer_curvature = GET_BYTES(to_send, 3, 4) & 0x7FFFU;
+    int steer_curvature = GET_BYTES(to_send, 3, 2) & 0x7FFFU;
 
     bool sign = GET_BIT(to_send, 39U);
     if (!sign) {
