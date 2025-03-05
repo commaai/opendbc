@@ -41,7 +41,7 @@ class CarController(CarControllerBase):
         #   can_sends.append(create_longitudinal(self.packer, counter, 0.0, False, True))
         #   self.last_cancel_frame = self.frame
 
-        if (self.frame - self.last_cancel_frame) * DT_CTRL > 0.02:
+        if (self.frame - self.last_cancel_frame) * DT_CTRL > 0.02 or True:
           # send the next expected counter
           for offset in range(15):
             counter = (CS.vdm_adas_status["VDM_AdasStatus_Counter"] + 1 + offset) % 15
