@@ -185,7 +185,7 @@ def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
       "DISTANCE_LEAD": 2 if enabled and hud.leadVisible else 1 if enabled else 0,
       "DISTANCE_CAR": 2 if enabled else 1,
     })
-    
+
     msg_162["LEAD"] = 0
 
   return [packer.make_can_msg(msg, CAN.ECAN, data) for msg, data in [("CCNC_0x161", msg_161), ("CCNC_0x162", msg_162)]]
