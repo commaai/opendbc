@@ -93,7 +93,10 @@ class FordPlatformConfig(PlatformConfig):
         name = f"{car_docs.make} {car_docs.model} Hybrid {car_docs.years}"
         self.car_docs.append(replace(copy.deepcopy(car_docs), name=name))
       if car_docs.plug_in_hybrid:
-        name = f"{car_docs.make} {car_docs.model} Plug-in Hybrid {car_docs.years}"
+        if "Hybrid" in car_docs.model:
+          name = f"{car_docs.make} {car_docs.model.replace("Hybrid", "Plug-in Hybrid")} {car_docs.years}"
+        else:
+          name = f"{car_docs.make} {car_docs.model} Plug-in Hybrid {car_docs.years}"
         self.car_docs.append(replace(copy.deepcopy(car_docs), name=name))
 
 

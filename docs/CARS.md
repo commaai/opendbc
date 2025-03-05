@@ -46,8 +46,8 @@
 |Ford|Kuga 2020-23|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
 |Ford|Kuga Hybrid 2020-23|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
 |Ford|Kuga Hybrid 2024|Adaptive Cruise Control with Lane Centering Assist|[Upstream](#upstream)|
-|Ford|Kuga Hybrid Plug-in Hybrid 2024|Adaptive Cruise Control with Lane Centering Assist|[Upstream](#upstream)|
 |Ford|Kuga Plug-in Hybrid 2020-23|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
+|Ford|Kuga Plug-in Hybrid 2024|Adaptive Cruise Control with Lane Centering Assist|[Upstream](#upstream)|
 |Ford|Maverick 2022|LARIAT Luxury|[Upstream](#upstream)|
 |Ford|Maverick 2023-24|Co-Pilot360 Assist|[Upstream](#upstream)|
 |Ford|Maverick Hybrid 2022|LARIAT Luxury|[Upstream](#upstream)|
