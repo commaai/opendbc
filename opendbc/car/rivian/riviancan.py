@@ -104,9 +104,9 @@ def create_adas_status(packer, counter, vdm_adas_status):
   # values["VDM_AdasVehicleHoldStatus"] = 1
   # values["VDM_AdasDriverAccelPriorityStatu"] = 0
   # values["VDM_AdasAccelLimit"] = 1
-  values["VDM_AdasDriverModeStatus"] = 0
+  # values["VDM_AdasDriverModeStatus"] = 0
   # values["VDM_AdasAccelRequest"] = 0
-  values["VDM_AdasAccelRequestAcknowledged"] = 0  # always zero anyway
+  # values["VDM_AdasAccelRequestAcknowledged"] = 0  # always zero anyway
   values["VDM_AdasStatus_Counter"] = counter
 
   data = packer.make_can_msg("VDM_AdasSts", 2, values)[1]
