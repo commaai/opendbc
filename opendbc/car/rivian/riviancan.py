@@ -85,8 +85,10 @@ def create_longitudinal(packer, counter, accel, enabled, cancel=False):
   return packer.make_can_msg("ACM_longitudinalRequest", 0, values)
 
 
-def create_adas_status(packer, counter, vdm_adas_status):
+def create_adas_status(packer, counter, vdm_adas_status, cancel):
   values = {s: vdm_adas_status[s] for s in (
+    "VDM_AdasStatus_Checksum",
+    "VDM_AdasStatus_Counter",
     "VDM_AdasDecelLimit",
     "VDM_AdasDriverAccelPriorityStatu",  # TODO: fix typo in DBC
     "VDM_AdasFaultStatus",
@@ -98,7 +100,7 @@ def create_adas_status(packer, counter, vdm_adas_status):
     "VDM_AdasVehicleHoldStatus",
   )}
 
-  values["VDM_AdasInterfaceStatus"] = 0  # VDM_AdasInterfaceStatus_Unavailable
+  # values["VDM_AdasInterfaceStatus"] = 0  # VDM_AdasInterfaceStatus_Unavailable
   # values["VDM_AdasInterfaceStatus"] = 3  # VDM_AdasInterfaceStatus_Faulted
   # values["VDM_AdasFaultStatus"] = 3  # implausible command
   # values["VDM_AdasVehicleHoldStatus"] = 1
@@ -107,7 +109,10 @@ def create_adas_status(packer, counter, vdm_adas_status):
   # values["VDM_AdasDriverModeStatus"] = 0
   # values["VDM_AdasAccelRequest"] = 0
   # values["VDM_AdasAccelRequestAcknowledged"] = 0  # always zero anyway
-  values["VDM_AdasStatus_Counter"] = counter
+  # values["VDM_AdasStatus_Counter"] = counter
+
+  if cancel:
+    values["VDM_AdasInterfaceStatus"] = 0  # VDM_AdasInterfaceStatus_Unavailable
 
   data = packer.make_can_msg("VDM_AdasSts", 2, values)[1]
   values["VDM_AdasStatus_Checksum"] = checksum(data[1:], 0x1D, 0xD1)
