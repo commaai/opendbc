@@ -43,10 +43,9 @@ class CarController(CarControllerBase):
 
         if (self.frame - self.last_cancel_frame) * DT_CTRL > 0.02:
           # send the next expected counter
-          offset = 0
-          # for offset in range(15):
-          counter = (CS.vdm_adas_status["VDM_AdasStatus_Counter"] + 1 + offset) % 15
-          can_sends.append(create_adas_status(self.packer, counter, CS.vdm_adas_status))
+          for offset in range(15):
+            counter = (CS.vdm_adas_status["VDM_AdasStatus_Counter"] + 1 + offset) % 15
+            can_sends.append(create_adas_status(self.packer, counter, CS.vdm_adas_status))
           self.last_cancel_frame = self.frame
 
     new_actuators = actuators.as_builder()
