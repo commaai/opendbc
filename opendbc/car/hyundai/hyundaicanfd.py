@@ -165,12 +165,6 @@ def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
       0 if not (lat_active or enabled) else
       2 if CS.out.rightBlindspot or CS.out.vEgo < 8.94 else 6
     ),
-    "LCA_LEFT_ICON": (
-      1 if not lat_active or CS.out.leftBlindspot or CS.out.vEgo < 8.94 else 2
-    ),
-    "LCA_RIGHT_ICON": (
-      1 if not lat_active or CS.out.rightBlindspot or CS.out.vEgo < 8.94 else 2
-    ),
     "LCA_LEFT_ARROW": 2 if CC.leftBlinker else 0,
     "LCA_RIGHT_ARROW": 2 if CC.rightBlinker else 0,
     "LANE_LEFT": 1 if CC.leftBlinker else 0,
