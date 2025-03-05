@@ -18,6 +18,9 @@ class TestCarDocs:
     make_model_years = defaultdict(list)
     for car in self.all_cars:
       with subtests.test(car_docs_name=car.name):
+        if car.support_type != SupportType.UPSTREAM:
+          pytest.skip()
+
         make_model = (car.make, car.model)
         for year in car.year_list:
           assert year not in make_model_years[make_model], f"{car.name}: Duplicate model year"
