@@ -93,10 +93,7 @@ class FordPlatformConfig(PlatformConfig):
         name = f"{car_docs.make} {car_docs.model} Hybrid {car_docs.years}"
         self.car_docs.append(replace(copy.deepcopy(car_docs), name=name))
       if car_docs.plug_in_hybrid:
-        if "Hybrid" in car_docs.model:
-          name = f"{car_docs.make} {car_docs.model.replace('Hybrid', 'Plug-in Hybrid')} {car_docs.years}"
-        else:
-          name = f"{car_docs.make} {car_docs.model} Plug-in Hybrid {car_docs.years}"
+        name = f"{car_docs.make} {car_docs.model} Plug-in Hybrid {car_docs.years}"
         self.car_docs.append(replace(copy.deepcopy(car_docs), name=name))
 
 
@@ -134,7 +131,8 @@ class CAR(Platforms):
   FORD_ESCAPE_MK4_5 = FordCANFDPlatformConfig(
     [
       FordCarDocs("Ford Escape 2023-24", hybrid=True, plug_in_hybrid=True),
-      FordCarDocs("Ford Kuga Hybrid 2024", "Adaptive Cruise Control with Lane Centering Assist", plug_in_hybrid=True),
+      FordCarDocs("Ford Kuga Hybrid 2024", "Adaptive Cruise Control with Lane Centering Assist"),
+      FordCarDocs("Ford Kuga Plug-in Hybrid 2024", "Adaptive Cruise Control with Lane Centering Assist"),
     ],
     CarSpecs(mass=1750, wheelbase=2.71, steerRatio=16.7),
   )
