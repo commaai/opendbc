@@ -19,6 +19,7 @@ from opendbc.car.body.values import CAR as COMMA
 # FIXME: add routes for these cars
 non_tested_cars = [
   MOCK.MOCK,
+  FORD.FORD_ESCAPE_MK4_5,
   FORD.FORD_F_150_MK14,
   GM.CADILLAC_ATS,
   GM.HOLDEN_ASTRA,
