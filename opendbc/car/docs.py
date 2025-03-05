@@ -11,7 +11,7 @@ from natsort import natsorted
 from opendbc.car.common.basedir import BASEDIR
 from opendbc.car import gen_empty_fingerprint
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarDocs, Device, ExtraCarDocs, Column, ExtraCarsColumn, CommonFootnote, PartType
+from opendbc.car.docs_definitions import BaseCarHarness, CarDocs, Device, ExtraCarDocs, Column, ExtraCarsColumn, CommonFootnote, PartType
 from opendbc.car.car_helpers import interfaces, get_interface_attr
 from opendbc.car.values import Platform, PLATFORMS
 from opendbc.car.mock.values import CAR as MOCK
@@ -26,11 +26,11 @@ EXTRA_BRANDS = get_args(ExtraPlatform)
 EXTRA_PLATFORMS: dict[str, ExtraPlatform] = {str(platform): platform for brand in EXTRA_BRANDS for platform in brand}
 
 
-def get_params_for_docs(model, platform) -> CarParams:
-  cp_model, cp_platform = (model, platform) if model in interfaces else ("MOCK", MOCK.MOCK)
-  CP: CarParams = interfaces[cp_model][0].get_params(cp_platform, fingerprint=gen_empty_fingerprint(),
-                                                     car_fw=[CarParams.CarFw(ecu=CarParams.Ecu.unknown)],
-                                                     experimental_long=True, docs=True)
+def get_params_for_docs(platform) -> CarParams:
+  cp_platform = platform if platform in interfaces else MOCK.MOCK
+  CP: CarParams = interfaces[cp_platform][0].get_params(cp_platform, fingerprint=gen_empty_fingerprint(),
+                                                        car_fw=[CarParams.CarFw(ecu=CarParams.Ecu.unknown)],
+                                                        experimental_long=True, docs=True)
   return CP
 
 
@@ -43,9 +43,9 @@ def get_all_footnotes() -> dict[Enum, int]:
 
 def build_sorted_car_docs_list(platforms, footnotes=None, include_dashcam=False):
   collected_car_docs: list[CarDocs | ExtraCarDocs] = []
-  for model, platform in platforms.items():
+  for platform in platforms.values():
     car_docs = platform.config.car_docs
-    CP = get_params_for_docs(model, platform)
+    CP = get_params_for_docs(platform)
 
     if (CP.dashcamOnly and not include_dashcam) or not len(car_docs):
       continue
@@ -89,7 +89,7 @@ def generate_cars_md(all_car_docs: list[CarDocs], template_fn: str) -> str:
   footnotes = [fn.value.text for fn in get_all_footnotes()]
   cars_md: str = template.render(all_car_docs=all_car_docs, PartType=PartType,
                                  group_by_make=group_by_make, footnotes=footnotes,
-                                 Device=Device, Column=Column)
+                                 Device=Device, Column=Column, BaseCarHarness=BaseCarHarness)
   return cars_md
 
 

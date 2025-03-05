@@ -154,6 +154,7 @@ class TestToyotaSafetyTorque(TestToyotaSafetyBase, common.MotorTorqueSteeringSaf
 class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest):
 
   # Angle control limits
+  STEER_ANGLE_MAX = 94.9461  # deg
   DEG_TO_CAN = 17.452007  # 1 / 0.0573 deg to can
 
   ANGLE_RATE_BP = [5., 25., 25.]
@@ -231,27 +232,19 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
             should_tx = not (req or req2) and torque_wind_down == 0
             self.assertEqual(should_tx, self._tx(self._lta_msg(req, req2, angle, torque_wind_down)))
 
-  def test_steering_angle_measurements(self, max_angle=None):
-    # Measurement test tests max angle + 0.5 which will fail
-    super().test_steering_angle_measurements(max_angle=self.MAX_LTA_ANGLE - 0.5)
-
-  def test_angle_cmd_when_enabled(self, max_angle=None):
-    super().test_angle_cmd_when_enabled(max_angle=self.MAX_LTA_ANGLE)
-
   def test_angle_measurements(self):
     """
     * Tests angle meas quality flag dictates whether angle measurement is parsed, and if rx is valid
     * Tests rx hook correctly clips the angle measurement, since it is to be compared to LTA cmd when inactive
     """
     for steer_angle_initializing in (True, False):
-      for angle in np.arange(0, self.MAX_LTA_ANGLE * 2, 1):
+      for angle in np.arange(0, self.STEER_ANGLE_MAX * 2, 1):
         # If init flag is set, do not rx or parse any angle measurements
         for a in (angle, -angle, 0, 0, 0, 0):
           self.assertEqual(not steer_angle_initializing,
                            self._rx(self._angle_meas_msg(a, steer_angle_initializing)))
 
-        final_angle = (0 if steer_angle_initializing else
-                       round(min(angle, self.MAX_LTA_ANGLE) * self.DEG_TO_CAN))
+        final_angle = 0 if steer_angle_initializing else round(angle * self.DEG_TO_CAN)
         self.assertEqual(self.safety.get_angle_meas_min(), -final_angle)
         self.assertEqual(self.safety.get_angle_meas_max(), final_angle)
 
@@ -288,14 +281,13 @@ class TestToyotaStockLongitudinalBase(TestToyotaSafetyBase):
   RELAY_MALFUNCTION_ADDRS = {0: (0x2E4,)}
   FWD_BLACKLISTED_ADDRS = {2: [0x2E4, 0x412, 0x191]}
 
+  LONGITUDINAL = False
+
   def test_diagnostics(self, stock_longitudinal: bool = True):
     super().test_diagnostics(stock_longitudinal=stock_longitudinal)
 
   def test_block_aeb(self, stock_longitudinal: bool = True):
     super().test_block_aeb(stock_longitudinal=stock_longitudinal)
-
-  def test_accel_actuation_limits(self, stock_longitudinal=True):
-    super().test_accel_actuation_limits(stock_longitudinal=stock_longitudinal)
 
   def test_acc_cancel(self):
     """

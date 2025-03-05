@@ -348,13 +348,14 @@ struct CarControl {
 
   orientationNED @13 :List(Float32);
   angularVelocity @14 :List(Float32);
+  currentCurvature @17 :Float32;  # From vehicle model
 
   cruiseControl @4 :CruiseControl;
   hudControl @5 :HUDControl;
 
   struct Actuators {
     # lateral commands, mutually exclusive
-    steer @2: Float32;  # [0.0, 1.0]
+    torque @2: Float32;  # [0.0, 1.0]
     steeringAngleDeg @3: Float32;
     curvature @7: Float32;
 
@@ -365,7 +366,7 @@ struct CarControl {
     # these are only for logging the actual values sent to the car over CAN
     gas @0: Float32;   # [0.0, 1.0]
     brake @1: Float32; # [0.0, 1.0]
-    steerOutputCan @8: Float32;   # value sent over can to the car
+    torqueOutputCan @8: Float32;   # value sent over can to the car
     speed @6: Float32;  # m/s
 
     enum LongControlState @0xe40f3a917d908282{
