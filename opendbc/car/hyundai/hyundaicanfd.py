@@ -183,7 +183,7 @@ def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
       "DISTANCE": hud.leadDistanceBars,
       "DISTANCE_SPACING": 1 if enabled else 3,
       "DISTANCE_LEAD": 2 if enabled and hud.leadVisible else 1 if enabled else 0,
-      "DISTANCE_CAR": 3 if enabled else 1,
+      "DISTANCE_CAR": 2 if enabled else 1,
     })
 
     msg_162["LEAD"] = 0
