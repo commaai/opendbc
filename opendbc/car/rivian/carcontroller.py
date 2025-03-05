@@ -41,7 +41,7 @@ class CarController(CarControllerBase):
         #   can_sends.append(create_longitudinal(self.packer, counter, 0.0, False, True))
         #   self.last_cancel_frame = self.frame
 
-        if (self.frame - self.last_cancel_frame) * DT_CTRL > 0.02:
+        if (self.frame - self.last_cancel_frame) * DT_CTRL > 0.02 or True:
           # send the next expected counter
           offset = 0
           # for offset in range(15):
