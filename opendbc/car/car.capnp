@@ -441,6 +441,7 @@ struct CarControl {
 struct CarOutput {
   # Any car specific rate limits or quirks applied by
   # the CarController are reflected in actuatorsOutput
+
   # and matches what is sent to the car
   actuatorsOutput @0 :CarControl.Actuators;
 }
@@ -627,6 +628,7 @@ struct CarParams {
     psa @31;
     fcaGiorgio @32;
     rivian @33;
+    byd @34;
   }
 
   enum SteerControlType {

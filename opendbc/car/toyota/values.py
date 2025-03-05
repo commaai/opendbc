@@ -113,6 +113,19 @@ class ToyotaSecOCPlatformConfig(PlatformConfig):
     if self.flags & ToyotaFlags.RADAR_ACC:
       self.dbc_dict = {Bus.pt: 'toyota_secoc_pt_generated'}
 
+@dataclass
+class ToyotaSecOCPlatformConfig(PlatformConfig):
+  dbc_dict: dict = field(default_factory=lambda: dbc_dict('toyota_secoc_pt_generated', 'toyota_tss2_adas'))
+
+  def init(self):
+    # don't expose car docs until SecOC cars can be suppressed from the comma website
+    self.car_docs = []
+
+    self.flags |= ToyotaFlags.TSS2 | ToyotaFlags.NO_STOP_TIMER | ToyotaFlags.NO_DSU | ToyotaFlags.SECOC
+
+    if self.flags & ToyotaFlags.RADAR_ACC:
+      self.dbc_dict = {Bus.pt: 'toyota_secoc_pt_generated'}
+
 
 class CAR(Platforms):
   # Toyota
@@ -291,6 +304,8 @@ class CAR(Platforms):
     dbc_dict('toyota_tnga_k_pt_generated', 'toyota_adas'),
     flags=ToyotaFlags.NO_STOP_TIMER,
   )
+  TOYOTA_SIENNA_4TH_GEN = ToyotaSecOCPlatformConfig(
+    [ToyotaCarDocs("Toyota Sienna 2021-23", min_enable_speed=MIN_ACC_SPEED)],
   TOYOTA_SIENNA_4TH_GEN = ToyotaSecOCPlatformConfig(
     [ToyotaCarDocs("Toyota Sienna 2021-23", min_enable_speed=MIN_ACC_SPEED)],
     CarSpecs(mass=4625. * CV.LB_TO_KG, wheelbase=3.06, steerRatio=17.8, tireStiffnessFactor=0.444),

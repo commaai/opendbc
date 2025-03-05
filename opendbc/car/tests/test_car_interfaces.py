@@ -1,11 +1,15 @@
-import os
+# Standard library imports
 import math
-import hypothesis.strategies as st
-from hypothesis import Phase, given, settings
-from parameterized import parameterized
+import os
 from collections.abc import Callable
 from typing import Any
 
+# Third party imports
+import hypothesis.strategies as st
+from hypothesis import Phase, given, settings
+from parameterized import parameterized
+
+# Local/app imports
 from opendbc.car import DT_CTRL, CanData, gen_empty_fingerprint, structs
 from opendbc.car.car_helpers import interfaces
 from opendbc.car.fingerprints import FW_VERSIONS
@@ -14,7 +18,7 @@ from opendbc.car.interfaces import get_interface_attr
 from opendbc.car.mock.values import CAR as MOCK
 from opendbc.car.values import PLATFORMS
 
-DrawType = Callable[[st.SearchStrategy], Any]
+DrawType = Callable[[st.SearchStrategy[Any]], Any]
 
 ALL_ECUS = {ecu for ecus in FW_VERSIONS.values() for ecu in ecus.keys()}
 ALL_ECUS |= {ecu for config in FW_QUERY_CONFIGS.values() for ecu in config.extra_ecus}
