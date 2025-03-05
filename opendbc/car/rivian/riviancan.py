@@ -100,7 +100,7 @@ def create_adas_status(packer, counter, vdm_adas_status):
 
   # values["VDM_AdasInterfaceStatus"] = 0  # VDM_AdasInterfaceStatus_Unavailable
   values["VDM_AdasInterfaceStatus"] = 3  # VDM_AdasInterfaceStatus_Faulted
-  # values["VDM_AdasFaultStatus"] = 0
+  values["VDM_AdasFaultStatus"] = 3  # implausible command
   # values["VDM_AdasVehicleHoldStatus"] = 1
   # values["VDM_AdasDriverAccelPriorityStatu"] = 0
   # values["VDM_AdasAccelLimit"] = 1
