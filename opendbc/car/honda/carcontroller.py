@@ -241,7 +241,7 @@ class CarController(CarControllerBase):
     new_actuators.accel = self.accel
     new_actuators.gas = self.gas
     new_actuators.brake = self.brake
-    new_actuators.torque = self.last_steer
+    new_actuators.torque = self.last_torque
     new_actuators.torqueOutputCan = apply_torque
 
     self.frame += 1
