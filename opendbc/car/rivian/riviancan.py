@@ -112,7 +112,7 @@ def create_adas_status(packer, counter, vdm_adas_status, cancel):
   # values["VDM_AdasStatus_Counter"] = counter
 
   if cancel:
-    values["VDM_AdasInterfaceStatus"] = 0  # VDM_AdasInterfaceStatus_Unavailable
+    values["VDM_AdasInterfaceStatus"] = 3  # VDM_AdasInterfaceStatus_Unavailable
     values["VDM_AdasDriverModeStatus"] = 0
     values["VDM_AdasAccelRequest"] = 0.12
 
