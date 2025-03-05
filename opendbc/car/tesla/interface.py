@@ -18,9 +18,9 @@ class CarInterface(CarInterfaceBase):
     ret.radarUnavailable = True
 
     ret.experimentalLongitudinalAvailable = True
-    if experimental_long:
-      ret.openpilotLongitudinalControl = True
-      ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.LONG_CONTROL.value
+    # if experimental_long:
+    ret.openpilotLongitudinalControl = True
+    ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.LONG_CONTROL.value
 
     ret.startAccel = 0.04
     ret.stopAccel = -0.52

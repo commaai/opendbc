@@ -1,5 +1,6 @@
 from opendbc.car.interfaces import V_CRUISE_MAX
 from opendbc.car.tesla.values import CANBUS, CarControllerParams
+from opendbc.car.common.conversions import Conversions as CV
 
 
 class TeslaCAN:
@@ -25,12 +26,12 @@ class TeslaCAN:
     values["DAS_steeringControlChecksum"] = self.checksum(0x488, data[:3])
     return self.packer.make_can_msg("DAS_steeringControl", CANBUS.party, values)
 
-  def create_longitudinal_command(self, acc_state, accel, cntr, active, override):
+  def create_longitudinal_command(self, acc_state, accel, cntr, active, override, vego):
     # ramp up jerk after a gas overwrite
     self.jerk = 0 if override else self.jerk + CarControllerParams.JERK_RATE_UP
 
     values = {
-      "DAS_setSpeed": 0 if (accel < 0 or not active) else V_CRUISE_MAX,
+      "DAS_setSpeed": int(vego * CV.MS_TO_KPH) if not active else (0 if accel < 0 else V_CRUISE_MAX),
       "DAS_accState": acc_state,
       "DAS_aebEvent": 0,
       "DAS_jerkMin": max(self.jerk * -1, CarControllerParams.JERK_LIMIT_MIN),
