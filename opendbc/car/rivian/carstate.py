@@ -14,6 +14,7 @@ class CarState(CarStateBase):
     self.acm_lka_hba_cmd = None
     self.acm_longitudinal_request = None
     self.sccm_wheel_touch = None
+    self.vdm_adas_status = None
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
@@ -82,6 +83,7 @@ class CarState(CarStateBase):
     self.acm_lka_hba_cmd = copy.copy(cp_cam.vl["ACM_lkaHbaCmd"])
     self.acm_longitudinal_request = copy.copy(cp_cam.vl["ACM_longitudinalRequest"])
     self.sccm_wheel_touch = copy.copy(cp.vl["SCCM_WheelTouch"])
+    self.vdm_adas_status = copy.copy(cp.vl["VDM_AdasSts"])
 
     return ret
 

@@ -83,3 +83,24 @@ def create_longitudinal(packer, counter, accel, enabled, cancel=False):
   data = packer.make_can_msg("ACM_longitudinalRequest", 0, values)[1]
   values["ACM_longitudinalRequest_Checksum"] = checksum(data[1:], 0x1D, 0x12)
   return packer.make_can_msg("ACM_longitudinalRequest", 0, values)
+
+
+def create_adas_status(packer, counter, vdm_adas_status):
+  values = {s: vdm_adas_status[s] for s in (
+    "VDM_AdasDecelLimit",
+    "VDM_AdasDriverAccelPriorityStatu",  # TODO: fix typo in DBC
+    "VDM_AdasFaultStatus",
+    "VDM_AdasAccelLimit",
+    "VDM_AdasDriverModeStatus",
+    "VDM_AdasAccelRequest",
+    "VDM_AdasInterfaceStatus",
+    "VDM_AdasAccelRequestAcknowledged",
+    "VDM_AdasVehicleHoldStatus",
+  )}
+
+  values["VDM_AdasInterfaceStatus"] = 0  # VDM_AdasInterfaceStatus_Unavailable
+  values["VDM_AdasStatus_Counter"] = counter
+
+  data = packer.make_can_msg("VDM_AdasSts", 2, values)[1]
+  values["VDM_AdasStatus_Checksum"] = checksum(data[1:], 0x1D, 0xD1)
+  return packer.make_can_msg("VDM_AdasSts", 2, values)
