@@ -328,7 +328,7 @@ class CAR(Platforms):
     [VWCarDocs("Volkswagen ID.4 2021-25", footnotes=[Footnote.VW_MEB])],
     VolkswagenCarSpecs(mass=2099, wheelbase=2.77),
     chassis_codes={"E2", "E8"},
-    wmis={WMI.VOLKSWAGEN_EUROPE_CAR, WMI.VOLKSWAGEN_USA_SUV},
+    wmis={WMI.VOLKSWAGEN_EUROPE_SUV, WMI.VOLKSWAGEN_USA_SUV},
   )
   VOLKSWAGEN_JETTA_MK6 = VolkswagenPQPlatformConfig(
     [VWCarDocs("Volkswagen Jetta 2015-18")],
