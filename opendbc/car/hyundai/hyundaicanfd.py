@@ -174,6 +174,9 @@ def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
     "LKA_ICON": 0,
   })
 
+  if hud.leftLaneDepart or hud.rightLaneDepart:
+    msg_162["VIBRATE"] = 1
+
   if CP.openpilotLongitudinalControl:
     msg_161.update({
       "SETSPEED": 3 if enabled else 1,
