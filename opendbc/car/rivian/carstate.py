@@ -52,7 +52,15 @@ class CarState(CarStateBase):
       ret.cruiseState.speed = 0
     ret.cruiseState.available = True  # cp.vl["VDM_AdasSts"]["VDM_AdasInterfaceStatus"] == 1
     ret.cruiseState.standstill = cp.vl["VDM_AdasSts"]["VDM_AdasAccelRequestAcknowledged"] == 1
-    ret.accFaulted = cp_cam.vl["ACM_Status"]["ACM_FaultStatus"] == 1 or cp_cam.vl["ACM_Status"]["ACM_PermanentFaultStatus"] == 3
+
+    # ACM_FaultStatus hasn't been seen yet
+    ret.accFaulted = (cp_cam.vl["ACM_Status"]["ACM_FaultStatus"] == 1 or
+                      # Unknown what the exact trigger is, but this goes to 3 when you can no longer enable ACC
+                      # after sending it messages similar to the VDM fault signal below
+                      cp_cam.vl["ACM_Status"]["ACM_PermanentFaultStatus"] == 3 or
+                      # VDM_AdasFaultStatus=Brk_Intv is the default for some reason
+                      # VDM_AdasFaultStatus=Imps_Cmd was seen when sending it rapidly changing ACC enable commands
+                      cp.vl["VDM_AdasSts"]["VDM_AdasFaultStatus"] in (2, 3))  # 2=Cntr_Fault, 3=Imps_Cmd
 
     # Gear
     ret.gearShifter = GEAR_MAP[int(cp.vl["VDM_PropStatus"]["VDM_Prndl_Status"])]
