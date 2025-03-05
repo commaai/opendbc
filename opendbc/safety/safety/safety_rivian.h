@@ -3,6 +3,8 @@
 #include "safety_declarations.h"
 
 static bool rivian_longitudinal = false;
+// If VDM_AdasSts is being sent to the ACM with the intention of canceling
+static bool rivian_openpilot_canceling = false;
 
 static void rivian_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
@@ -97,6 +99,17 @@ static bool rivian_tx_hook(const CANPacket_t *to_send) {
           tx = false;
         }
       }
+    }
+  }
+
+  if (bus == 2) {
+    if (addr == 0x162) {
+      // VDM_AdasInterfaceStatus
+      const int adas_interface_status = ((GET_BYTE(to_push, 6) >> 3U) & 0x3U;
+      if (adas_interface_status != 0) {
+        tx = false;
+      }
+      rivian_openpilot_canceling = GET_BIT(to_push, 0);
     }
   }
 
