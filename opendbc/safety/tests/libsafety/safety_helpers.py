@@ -15,9 +15,8 @@ def setup_safety_helpers(ffi):
   bool get_brake_pressed_prev(void);
   bool get_regen_braking_prev(void);
   bool get_acc_main_on(void);
-  int get_vehicle_speed_min(void);
-  int get_vehicle_speed_max(void);
-  int get_vehicle_speed_last(void);
+  float get_vehicle_speed_min(void);
+  float get_vehicle_speed_max(void);
   int get_current_safety_mode(void);
   int get_current_safety_param(void);
 
@@ -67,7 +66,6 @@ class PandaSafety(Protocol):
   def get_acc_main_on(self) -> bool: ...
   def get_vehicle_speed_min(self) -> int: ...
   def get_vehicle_speed_max(self) -> int: ...
-  def get_vehicle_speed_last(self) -> int: ...
   def get_current_safety_mode(self) -> int: ...
   def get_current_safety_param(self) -> int: ...
 

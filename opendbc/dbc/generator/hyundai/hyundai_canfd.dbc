@@ -41,10 +41,17 @@ BO_ 160 WHEEL_SPEEDS: 24 XXX
  SG_ MOVING_BACKWARD : 57|1@0+ (1,0) [0|1] "" XXX
  SG_ MOVING_FORWARD2 : 58|1@0+ (1,0) [0|1] "" XXX
  SG_ MOVING_BACKWARD2 : 59|1@0+ (1,0) [0|1] "" XXX
- SG_ WHEEL_SPEED_1 : 64|16@1+ (0.03125,0) [0|65535] "kph" XXX
- SG_ WHEEL_SPEED_2 : 80|16@1+ (0.03125,0) [0|65535] "kph" XXX
- SG_ WHEEL_SPEED_3 : 96|16@1+ (0.03125,0) [0|65535] "kph" XXX
- SG_ WHEEL_SPEED_4 : 112|16@1+ (0.03125,0) [0|65535] "kph" XXX
+ SG_ WHL_SpdFLVal : 64|14@1+ (0.03125,0) [0|0] "km^h" XXX
+ SG_ WHL_SpdFRVal : 80|14@1+ (0.03125,0) [0|0] "km^h" XXX
+ SG_ WHL_SpdRLVal : 96|14@1+ (0.03125,0) [0|0] "km^h" XXX
+ SG_ WHL_SpdRRVal : 112|14@1+ (0.03125,0) [0|0] "km^h" XXX
+
+BO_ 203 LFA_ALT: 24 ADRV
+ SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
+ SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ LKAS_ANGLE_ACTIVE : 29|2@0+ (1,0) [0|1] "" XXX
+ SG_ LKAS_ANGLE_CMD : 32|14@1- (0.1,0) [0|511] "" XXX
+ SG_ LKAS_ANGLE_MAX_TORQUE : 55|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 234 MDPS: 24 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
@@ -55,6 +62,8 @@ BO_ 234 MDPS: 24 XXX
  SG_ STEERING_COL_TORQUE : 80|13@1+ (1,-4095) [0|4095] "" XXX
  SG_ STEERING_ANGLE : 96|16@1- (0.1,0) [0|255] "deg" XXX
  SG_ STEERING_ANGLE_2 : 128|16@1- (0.1,0) [0|65535] "deg" XXX
+ SG_ LKA_ANGLE_ACTIVE : 145|2@0+ (1,0) [0|3] "" XXX
+ SG_ LKA_ANGLE_FAULT : 149|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 256 ACCELERATOR_BRAKE_ALT: 32 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
@@ -71,7 +80,7 @@ BO_ 272 LKAS_ALT: 32 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
  SG_ LKA_MODE : 24|3@1+ (1,0) [0|7] "" XXX
- SG_ NEW_SIGNAL_1 : 27|2@1+ (1,0) [0|255] "" XXX
+ SG_ LKA_AVAILABLE : 27|2@1+ (1,0) [0|255] "" XXX
  SG_ LKA_WARNING : 32|1@1+ (1,0) [0|1] "" XXX
  SG_ LKA_ICON : 38|2@1+ (1,0) [0|255] "" XXX
  SG_ FCA_SYSWARN : 40|1@0+ (1,0) [0|1] "" XXX
@@ -81,7 +90,10 @@ BO_ 272 LKAS_ALT: 32 XXX
  SG_ LKA_ASSIST : 62|1@1+ (1,0) [0|1] "" XXX
  SG_ STEER_MODE : 65|3@1+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_2 : 70|2@0+ (1,0) [0|3] "" XXX
+ SG_ LKAS_ANGLE_ACTIVE : 77|2@0+ (1,0) [0|3] "" XXX
  SG_ HAS_LANE_SAFETY : 80|1@0+ (1,0) [0|1] "" XXX
+ SG_ LKAS_ANGLE_CMD : 82|14@1- (0.1,0) [0|511] "" XXX
+ SG_ LKAS_ANGLE_MAX_TORQUE : 96|8@1+ (1,0) [0|255] "" XXX
  SG_ NEW_SIGNAL_3 : 111|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 293 STEERING_SENSORS: 16 XXX
@@ -577,6 +589,8 @@ BO_ 1264 LOCAL_TIME: 8 XXX
 CM_ SG_ 96 BRAKE_PRESSURE "User applied brake pedal pressure. Ramps from computer applied pressure on falling edge of cruise. Cruise cancels if !=0";
 CM_ SG_ 101 BRAKE_POSITION "User applied brake pedal position, max is ~700. Signed on some vehicles";
 CM_ BO_ 272 "Alternative LKAS message, used on cars such as 2023 Ioniq 6, 2nd gen Kona. Matches LKAS except size is 32 bytes";
+CM_ SG_ 272 LKA_AVAILABLE "Angle control cars: 3 when LKA is generally available, goes to 0 during changes with LFA";
+CM_ SG_ 272 LKAS_ANGLE_CMD "tracks MDPS->STEERING_ANGLE when not engaged, not STEERING_SENSORS->STEERING_ANGLE";
 CM_ SG_ 298 NEW_SIGNAL_4 "todo: figure out why always set to 9";
 CM_ SG_ 352 SET_ME_9 "has something to do with AEB settings";
 CM_ SG_ 373 ACCEnable "Likely a copy of CAN's TCS13->ACCEnable";
@@ -602,6 +616,7 @@ VAL_ 112 GEAR 0 "P" 5 "D" 6 "N" 7 "R";
 VAL_ 234 LKA_FAULT 0 "ok" 1 "lka fault";
 VAL_ 272 LKA_MODE 1 "warning only" 2 "assist" 6 "off";
 VAL_ 272 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green";
+VAL_ 272 LKAS_ANGLE_ACTIVE 0 "off" 1 "not active" 2 "active";
 VAL_ 298 LKA_MODE 1 "warning only" 2 "assist" 6 "off";
 VAL_ 298 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green";
 VAL_ 304 PARK_BUTTON 1 "Pressed" 2 "Not Pressed";

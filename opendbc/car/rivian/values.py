@@ -29,7 +29,7 @@ class CAR(Platforms):
       RivianCarDocs("Rivian R1T 2022-24"),
     ],
     CarSpecs(mass=3206., wheelbase=3.08, steerRatio=15.2),
-    {Bus.pt: 'rivian_can', Bus.radar: 'rivian_mando_front_radar_generated'}
+    {Bus.pt: 'rivian_primary_actuator', Bus.radar: 'rivian_mando_front_radar_generated'}
   )
 
 
