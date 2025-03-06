@@ -26,9 +26,12 @@ class TeslaCAN:
     values["DAS_steeringControlChecksum"] = self.checksum(0x488, data[:3])
     return self.packer.make_can_msg("DAS_steeringControl", CANBUS.party, values)
 
-  def create_longitudinal_command(self, acc_state, accel, cntr, v_ego, active):
+  def create_longitudinal_command(self, acc_state, accel, cntr, v_ego, a_ego, active):
     set_speed = v_ego * CV.MS_TO_KPH
-    accel_max, accel_min = 0, 0
+
+    accel_max = CarControllerParams.ACCEL_MAX if v_ego > 5 and a_ego >= 0 else 0
+    accel_min = 0  # (-1 if v_ego > 5 and a_ego < 0 else 0)
+
     if active:
       # TODO: does this just tell the ECU which accel limit to use?
       set_speed = 0 if accel < 0 else V_CRUISE_MAX
@@ -39,8 +42,9 @@ class TeslaCAN:
       # set_speed = v_ego + accel
 
       # TODO: reasonable cruise limits or max actuation?
-      accel_max = accel if accel >= 0 else CarControllerParams.ACCEL_MAX
-      accel_min = accel if accel <= 0 else CarControllerParams.ACCEL_MIN
+      # TODO: something near a stop faults the car
+      accel_max = accel if accel >= 0 else (CarControllerParams.ACCEL_MAX if v_ego > 5 else 0)
+      accel_min = accel if accel <= 0 else (-1 if v_ego > 5 else 0)
 
     values = {
       # TODO: this causes jerking after gas override when above set speed
