@@ -8,8 +8,9 @@ from opendbc.safety.tests.common import CANPackerPanda
 from opendbc.car.rivian.values import RivianSafetyFlags
 
 
-class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteeringSafetyTest, common.LongitudinalAccelSafetyTest):
+class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteeringSafetyTest):
 
+  TX_MSGS = [[0x120, 0], [0x321, 2], [0x162, 2]]
   STANDSTILL_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS = {0: (0x120,)}
   FWD_BLACKLISTED_ADDRS = {0: [0x321, 0x162], 2: [0x120]}
@@ -74,8 +75,6 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
 
 
 class TestRivianStockSafety(TestRivianSafetyBase):
-  TX_MSGS = [[0x120, 0], [0x321, 2], [0x162, 2]]
-  LONGITUDINAL = False
 
   def setUp(self):
     self.packer = CANPackerPanda("rivian_primary_actuator")
@@ -91,7 +90,8 @@ class TestRivianStockSafety(TestRivianSafetyBase):
         self.assertTrue(self._tx(self.packer.make_can_msg_panda("VDM_AdasSts", 2, values)))
 
 
-class TestRivianLongitudinalSafety(TestRivianSafetyBase):
+class TestRivianLongitudinalSafety(TestRivianSafetyBase, common.LongitudinalAccelSafetyTest):
+
   TX_MSGS = [[0x120, 0], [0x321, 2], [0x160, 0]]
   RELAY_MALFUNCTION_ADDRS = {0: (0x120, 0x160)}
   FWD_BLACKLISTED_ADDRS = {0: [0x321], 2: [0x120, 0x160]}
