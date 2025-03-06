@@ -84,6 +84,10 @@ class CarController(CarControllerBase):
     stopping = actuators.longControlState == LongCtrlState.stopping
     set_speed_in_units = hud_control.setSpeed * (CV.MS_TO_KPH if CS.is_metric else CV.MS_TO_MPH)
 
+    # HUD messages
+    sys_warning, sys_state, left_lane_warning, right_lane_warning = process_hud_alert(CC.enabled, self.car_fingerprint,
+                                                                                      hud_control)
+
     return apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units
 
 
@@ -96,9 +100,7 @@ class CarController(CarControllerBase):
 
     apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units = self.compute_common_controls(CC, CS)
 
-    # HUD messages
-    sys_warning, sys_state, left_lane_warning, right_lane_warning = process_hud_alert(CC.enabled, self.car_fingerprint,
-                                                                                      hud_control)
+
 
     can_sends = []
 
@@ -181,10 +183,6 @@ class CarController(CarControllerBase):
     hud_control = CC.hudControl
 
     apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units = self.compute_common_controls(CC, CS)
-
-    # HUD messages
-    sys_warning, sys_state, left_lane_warning, right_lane_warning = process_hud_alert(CC.enabled, self.car_fingerprint,
-                                                                                      hud_control)
 
     can_sends = []
 
