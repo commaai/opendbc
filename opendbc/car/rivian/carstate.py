@@ -5,6 +5,8 @@ from opendbc.car.interfaces import CarStateBase
 from opendbc.car.rivian.values import DBC, GEAR_MAP
 from opendbc.car.common.conversions import Conversions as CV
 
+GearShifter = structs.CarState.GearShifter
+
 
 class CarState(CarStateBase):
   def __init__(self, CP):
@@ -62,7 +64,7 @@ class CarState(CarStateBase):
                       cp.vl["VDM_AdasSts"]["VDM_AdasFaultStatus"] in (2, 3))  # 2=Cntr_Fault, 3=Imps_Cmd
 
     # Gear
-    ret.gearShifter = GEAR_MAP[int(cp.vl["VDM_PropStatus"]["VDM_Prndl_Status"])]
+    ret.gearShifter = GEAR_MAP.get(int(cp.vl["VDM_PropStatus"]["VDM_Prndl_Status"]), GearShifter.unknown)
 
     # Doors
     ret.doorOpen = (cp_adas.vl["IndicatorLights"]["RearDriverDoor"] != 2 or
