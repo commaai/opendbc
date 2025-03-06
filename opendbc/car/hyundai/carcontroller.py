@@ -202,7 +202,7 @@ class CarController(CarControllerBase):
 
 
 
-    # CANFD SPECIFIC START
+    # CAN SPECIFIC START
 
     can_sends.append(hyundaican.create_lkas11(self.packer, self.frame, self.CP, apply_torque, apply_steer_req,
                                               torque_fault, CS.lkas11, sys_warning, sys_state, CC.enabled,
@@ -232,7 +232,7 @@ class CarController(CarControllerBase):
     if self.frame % 50 == 0 and self.CP.openpilotLongitudinalControl:
       can_sends.append(hyundaican.create_frt_radar_opt(self.packer))
 
-    # CANFD SPECIFIC END
+    # CAN SPECIFIC END
 
 
 
