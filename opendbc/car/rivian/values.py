@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
 from enum import StrEnum, IntFlag
 
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.structs import CarParams, CarState
-from opendbc.car import Bus, CarSpecs, PlatformConfig, Platforms
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts, Device
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
@@ -70,6 +70,12 @@ def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str
 
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
+    Request(
+      [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.SUPPLIER_SOFTWARE_VERSION_REQUEST],
+      [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.SUPPLIER_SOFTWARE_VERSION_RESPONSE],
+      rx_offset=0x40,
+      bus=0,
+    )
   ],
   match_fw_to_car_fuzzy=match_fw_to_car_fuzzy,
 )
