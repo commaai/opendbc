@@ -95,7 +95,7 @@ static int rivian_fwd_hook(int bus, int addr) {
   bool block_msg = false;
 
   if (bus == 0) {
-    // SCCM_WheelTouch
+    // SCCM_WheelTouch: for hiding hold wheel alert
     if (addr == 0x321) {
       block_msg = true;
     }
@@ -106,12 +106,12 @@ static int rivian_fwd_hook(int bus, int addr) {
   }
 
   if (bus == 2) {
-    // ACM_lkaHbaCmd
+    // ACM_lkaHbaCmd: lateral control message
     if (addr == 0x120) {
       block_msg = true;
     }
 
-    // ACM_longitudinalRequest
+    // ACM_longitudinalRequest: longitudinal control message
     if (rivian_longitudinal && (addr == 0x160)) {
       block_msg = true;
     }
@@ -125,8 +125,9 @@ static int rivian_fwd_hook(int bus, int addr) {
 }
 
 static safety_config rivian_init(uint16_t param) {
-  // 0x120 = ACM_lkaHbaCmd, 0x160 = ACM_longitudinalRequest, 0x321 = SCCM_WheelTouch
+  // 0x120 = ACM_lkaHbaCmd, 0x321 = SCCM_WheelTouch
   static const CanMsg RIVIAN_TX_MSGS[] = {{0x120, 0, 8}, {0x321, 2, 7}};
+  // 0x160 = ACM_longitudinalRequest
   static const CanMsg RIVIAN_LONG_TX_MSGS[] = {{0x120, 0, 8}, {0x321, 2, 7}, {0x160, 0, 5}};
 
   static RxCheck rivian_rx_checks[] = {
