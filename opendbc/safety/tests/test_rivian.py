@@ -85,6 +85,8 @@ class TestRivianStockSafety(TestRivianSafetyBase):
 
 
 class TestRivianLongitudinalSafety(TestRivianSafetyBase, common.LongitudinalAccelSafetyTest):
+
+  TX_MSGS = [[0x120, 0], [0x321, 2], [0x160, 0]]
   RELAY_MALFUNCTION_ADDRS = {0: (0x120, 0x160)}
   FWD_BLACKLISTED_ADDRS = {0: [0x321], 2: [0x120, 0x160]}
 
