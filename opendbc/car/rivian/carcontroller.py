@@ -1,5 +1,5 @@
 from opendbc.can.packer import CANPacker
-from opendbc.car import Bus, DT_CTRL, apply_driver_steer_torque_limits
+from opendbc.car import Bus, apply_driver_steer_torque_limits
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.rivian.riviancan import create_lka_steering, create_longitudinal, create_wheel_touch, create_adas_status
 from opendbc.car.rivian.values import CarControllerParams
@@ -37,7 +37,7 @@ class CarController(CarControllerBase):
     if self.CP.openpilotLongitudinalControl:
       can_sends.append(create_longitudinal(self.packer, self.frame % 15, actuators.accel, CC.enabled))
       # TODO: don't send if longitudinal
-      can_sends.append(create_adas_status(self.packer, None, CS.vdm_adas_status, None))
+      can_sends.append(create_adas_status(self.packer, CS.vdm_adas_status, None))
     else:
       interface_status = None
       if CC.cruiseControl.cancel:
@@ -52,7 +52,7 @@ class CarController(CarControllerBase):
       #   self.last_cancel = False
 
       # TODO: send available for 1 frame only, then unavailable
-      can_sends.append(create_adas_status(self.packer, None, CS.vdm_adas_status, interface_status))
+      can_sends.append(create_adas_status(self.packer, CS.vdm_adas_status, interface_status))
 
       # if CC.cruiseControl.cancel:
       #   if (self.frame - self.last_cancel_frame) * DT_CTRL > 0.25:

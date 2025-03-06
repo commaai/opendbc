@@ -85,7 +85,7 @@ def create_longitudinal(packer, counter, accel, enabled, cancel=False):
   return packer.make_can_msg("ACM_longitudinalRequest", 0, values)
 
 
-def create_adas_status(packer, counter, vdm_adas_status, interface_status):
+def create_adas_status(packer, vdm_adas_status: dict, interface_status: int | None):
   values = {s: vdm_adas_status[s] for s in (
     "VDM_AdasStatus_Checksum",
     "VDM_AdasStatus_Counter",
