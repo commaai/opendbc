@@ -580,7 +580,7 @@ FW_VERSIONS = {
       b'54008-THR-A310\x00\x00',
     ],
     (Ecu.transmission, 0x18da1ef1, None): [
-      b'28102-5MX-A410\x00\x00', 
+      b'28102-5MX-A410\x00\x00',
     ],
     (Ecu.srs, 0x18da53f1, None): [
       b'77959-THR-A220\x00\x00',
