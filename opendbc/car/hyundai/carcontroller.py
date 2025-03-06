@@ -55,31 +55,46 @@ class CarController(CarControllerBase):
     self.car_fingerprint = CP.carFingerprint
     self.last_button_frame = 0
 
-  def update_canfd(self, CC, CS, now_nanos):
+
+
+
+
+  def compute_common_controls(self, CC, CS):
     actuators = CC.actuators
     hud_control = CC.hudControl
 
-    # steering torque
+    # Steering torque
     new_torque = int(round(actuators.torque * self.params.STEER_MAX))
     apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.params)
 
-    # >90 degree steering fault prevention
-    self.angle_limit_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringAngleDeg) >= MAX_ANGLE, CC.latActive,
-                                                                       self.angle_limit_counter, MAX_ANGLE_FRAMES,
-                                                                       MAX_ANGLE_CONSECUTIVE_FRAMES)
+    # Prevent EPS fault if angle > 85 degrees for too long
+    self.angle_limit_counter, apply_steer_req = common_fault_avoidance(
+      abs(CS.out.steeringAngleDeg) >= MAX_ANGLE, CC.latActive,
+      self.angle_limit_counter, MAX_ANGLE_FRAMES, MAX_ANGLE_CONSECUTIVE_FRAMES
+    )
 
     if not CC.latActive:
       apply_torque = 0
 
-    # Hold torque with induced temporary fault when cutting the actuation bit
     torque_fault = CC.latActive and not apply_steer_req
-
     self.apply_torque_last = apply_torque
 
-    # accel + longitudinal
+    # Acceleration control
     accel = float(np.clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
     stopping = actuators.longControlState == LongCtrlState.stopping
     set_speed_in_units = hud_control.setSpeed * (CV.MS_TO_KPH if CS.is_metric else CV.MS_TO_MPH)
+
+    return apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units
+
+
+
+
+
+  def update_canfd(self, CC, CS, now_nanos):
+    actuators = CC.actuators
+    hud_control = CC.hudControl
+
+    apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units = self.compute_common_controls(CC, CS)
 
     # HUD messages
     sys_warning, sys_state, left_lane_warning, right_lane_warning = process_hud_alert(CC.enabled, self.car_fingerprint,
@@ -100,6 +115,9 @@ class CarController(CarControllerBase):
       # for blinkers
       if self.CP.flags & HyundaiFlags.ENABLE_BLINKERS:
         can_sends.append(make_tester_present_msg(0x7b1, self.CAN.ECAN, suppress_response=True))
+
+
+
 
 
 
@@ -151,6 +169,10 @@ class CarController(CarControllerBase):
 
 
 
+
+
+
+
   def update(self, CC, CS, now_nanos):
     if self.CP.flags & HyundaiFlags.CANFD:
       return self.update_canfd(CC, CS, now_nanos)
@@ -158,27 +180,7 @@ class CarController(CarControllerBase):
     actuators = CC.actuators
     hud_control = CC.hudControl
 
-    # steering torque
-    new_torque = int(round(actuators.torque * self.params.STEER_MAX))
-    apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.params)
-
-    # >90 degree steering fault prevention
-    self.angle_limit_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringAngleDeg) >= MAX_ANGLE, CC.latActive,
-                                                                       self.angle_limit_counter, MAX_ANGLE_FRAMES,
-                                                                       MAX_ANGLE_CONSECUTIVE_FRAMES)
-
-    if not CC.latActive:
-      apply_torque = 0
-
-    # Hold torque with induced temporary fault when cutting the actuation bit
-    torque_fault = CC.latActive and not apply_steer_req
-
-    self.apply_torque_last = apply_torque
-
-    # accel + longitudinal
-    accel = float(np.clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
-    stopping = actuators.longControlState == LongCtrlState.stopping
-    set_speed_in_units = hud_control.setSpeed * (CV.MS_TO_KPH if CS.is_metric else CV.MS_TO_MPH)
+    apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units = self.compute_common_controls(CC, CS)
 
     # HUD messages
     sys_warning, sys_state, left_lane_warning, right_lane_warning = process_hud_alert(CC.enabled, self.car_fingerprint,
@@ -199,6 +201,9 @@ class CarController(CarControllerBase):
       # for blinkers
       if self.CP.flags & HyundaiFlags.ENABLE_BLINKERS:
         can_sends.append(make_tester_present_msg(0x7b1, self.CAN.ECAN, suppress_response=True))
+
+
+
 
 
 
