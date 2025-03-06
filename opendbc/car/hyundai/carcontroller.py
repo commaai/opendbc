@@ -88,7 +88,8 @@ class CarController(CarControllerBase):
     sys_warning, sys_state, left_lane_warning, right_lane_warning = process_hud_alert(CC.enabled, self.car_fingerprint,
                                                                                       hud_control)
 
-    return apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units
+    return apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning, right_lane_warning
+
 
 
 
@@ -98,7 +99,7 @@ class CarController(CarControllerBase):
     actuators = CC.actuators
     hud_control = CC.hudControl
 
-    apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units = self.compute_common_controls(CC, CS)
+    apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning, right_lane_warning = self.compute_common_controls(CC, CS)
 
 
 
@@ -182,7 +183,7 @@ class CarController(CarControllerBase):
     actuators = CC.actuators
     hud_control = CC.hudControl
 
-    apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units = self.compute_common_controls(CC, CS)
+    apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning, right_lane_warning = self.compute_common_controls(CC, CS)
 
     can_sends = []
 
