@@ -52,7 +52,7 @@ class CarState(CarStateBase):
     # TODO: find cruise set speed on CAN
     ret.cruiseState.speed = self.last_speed * CV.MPH_TO_MS  # detected speed limit
     if not self.CP.openpilotLongitudinalControl:
-      ret.cruiseState.speed = 0
+      ret.cruiseState.speed = -1
     ret.cruiseState.available = True  # cp.vl["VDM_AdasSts"]["VDM_AdasInterfaceStatus"] == 1
     ret.cruiseState.standstill = cp.vl["VDM_AdasSts"]["VDM_AdasAccelRequestAcknowledged"] == 1
 
