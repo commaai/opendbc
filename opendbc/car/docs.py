@@ -12,7 +12,8 @@ from opendbc.car.common.basedir import BASEDIR
 from opendbc.car import gen_empty_fingerprint
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import BaseCarHarness, CarDocs, Device, ExtraCarDocs, Column, ExtraCarsColumn, CommonFootnote, PartType, SupportType
-from opendbc.car.car_helpers import interfaces, get_interface_attr
+from opendbc.car.car_helpers import interfaces
+from opendbc.car.interfaces import get_interface_attr
 from opendbc.car.values import Platform
 from opendbc.car.mock.values import CAR as MOCK
 from opendbc.car.extra_cars import CAR as EXTRA
