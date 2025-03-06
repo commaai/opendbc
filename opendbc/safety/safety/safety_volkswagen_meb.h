@@ -141,11 +141,12 @@ static bool volkswagen_meb_tx_hook(const CANPacket_t *to_send) {
       steer_curvature *= -1;
     }
 
-    bool steer_req = GET_BIT(to_send, 14U);
+    bool steer_req = ((GET_BYTE(to_send, 1) >> 4) & 0x7U) == 4U;
     int steer_power = GET_BYTE(to_send, 2U) * 0.4;
 
     if (volkswagen_curvature_cmd_checks(steer_power, steer_curvature, steer_req)) {
-      tx = false;
+      // tx = false;
+      tx = true;
       volkswagen_steer_power_prev = 0;
     } else {
       volkswagen_steer_power_prev = steer_power;
