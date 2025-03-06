@@ -56,9 +56,6 @@ class CarController(CarControllerBase):
     self.last_button_frame = 0
 
 
-
-
-
   def compute_common_controls(self, CC, CS):
     actuators = CC.actuators
     hud_control = CC.hudControl
@@ -87,12 +84,7 @@ class CarController(CarControllerBase):
     # HUD messages
     sys_warning, sys_state, left_lane_warning, right_lane_warning = process_hud_alert(CC.enabled, self.car_fingerprint,
                                                                                       hud_control)
-
     return apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning, right_lane_warning
-
-
-
-
 
 
   def update_canfd(self, CC, CS, now_nanos):
@@ -100,8 +92,6 @@ class CarController(CarControllerBase):
     hud_control = CC.hudControl
 
     apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning, right_lane_warning = self.compute_common_controls(CC, CS)
-
-
 
     can_sends = []
 
@@ -119,13 +109,7 @@ class CarController(CarControllerBase):
       if self.CP.flags & HyundaiFlags.ENABLE_BLINKERS:
         can_sends.append(make_tester_present_msg(0x7b1, self.CAN.ECAN, suppress_response=True))
 
-
-
-
-
-
     # CANFD SPECIFIC START
-
     lka_steering = self.CP.flags & HyundaiFlags.CANFD_LKA_STEERING
     lka_steering_long = lka_steering and self.CP.openpilotLongitudinalControl
 
@@ -157,10 +141,7 @@ class CarController(CarControllerBase):
     else:
       # button presses
       can_sends.extend(self.create_button_messages(CC, CS, use_clu11=False))
-
     # CANFD SPECIFIC END
-
-
 
     new_actuators = actuators.as_builder()
     new_actuators.torque = apply_torque / self.params.STEER_MAX
@@ -169,11 +150,6 @@ class CarController(CarControllerBase):
 
     self.frame += 1
     return new_actuators, can_sends
-
-
-
-
-
 
 
   def update(self, CC, CS, now_nanos):
@@ -201,13 +177,7 @@ class CarController(CarControllerBase):
       if self.CP.flags & HyundaiFlags.ENABLE_BLINKERS:
         can_sends.append(make_tester_present_msg(0x7b1, self.CAN.ECAN, suppress_response=True))
 
-
-
-
-
-
     # CAN SPECIFIC START
-
     can_sends.append(hyundaican.create_lkas11(self.packer, self.frame, self.CP, apply_torque, apply_steer_req,
                                               torque_fault, CS.lkas11, sys_warning, sys_state, CC.enabled,
                                               hud_control.leftLaneVisible, hud_control.rightLaneVisible,
@@ -235,10 +205,7 @@ class CarController(CarControllerBase):
     # 2 Hz front radar options
     if self.frame % 50 == 0 and self.CP.openpilotLongitudinalControl:
       can_sends.append(hyundaican.create_frt_radar_opt(self.packer))
-
     # CAN SPECIFIC END
-
-
 
     new_actuators = actuators.as_builder()
     new_actuators.torque = apply_torque / self.params.STEER_MAX
@@ -247,7 +214,6 @@ class CarController(CarControllerBase):
 
     self.frame += 1
     return new_actuators, can_sends
-
 
 
   def create_button_messages(self, CC: structs.CarControl, CS: CarState, use_clu11: bool):
