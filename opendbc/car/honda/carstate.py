@@ -141,7 +141,7 @@ class CarState(CarStateBase):
       self.is_metric_cruise = self.is_metric
     else:
       self.is_metric_cruise = not acc_hud["IMPERIAL_UNIT"]
-    
+
     # ******************* parse out can *******************
     # STANDSTILL->WHEELS_MOVING bit can be noisy around zero, so use XMISSION_SPEED
     # panda checks if the signal is non-zero
@@ -234,7 +234,7 @@ class CarState(CarStateBase):
         ret.cruiseState.nonAdaptive = acc_hud["CRUISE_CONTROL_LABEL"] != 0
         ret.cruiseState.standstill = acc_hud["CRUISE_SPEED"] == 252.
 
-        conversion = CV.KPH_TO_MS if self.is_metric_cruise else CV.MPH_TO_MS 
+        conversion = CV.KPH_TO_MS if self.is_metric_cruise else CV.MPH_TO_MS
         # On set, cruise set speed pulses between 254~255 and the set speed prev is set to avoid this.
         ret.cruiseState.speed = self.v_cruise_pcm_prev if acc_hud["CRUISE_SPEED"] > 160.0 else acc_hud["CRUISE_SPEED"] * conversion
         self.v_cruise_pcm_prev = ret.cruiseState.speed
@@ -261,8 +261,8 @@ class CarState(CarStateBase):
     ret.cruiseState.available = bool(cp.vl[self.main_on_sig_msg]["MAIN_ON"])
 
     # Adds low speed warning as some models disable cruise at various speeds, ignore warning under 3mph
-    ret.low_speed_alert = ret.cruiseState.enabled and ret.vEgo >= 4 * CV.MPH_TO_MS and cp.vl["STEER_STATUS"]["STEER_CONTROL_ACTIVE"] == 0 
-    
+    ret.low_speed_alert = ret.cruiseState.enabled and ret.vEgo >= 4 * CV.MPH_TO_MS and cp.vl["STEER_STATUS"]["STEER_CONTROL_ACTIVE"] == 0
+
     # Gets rid of Pedal Grinding noise when brake is pressed at slow speeds for some models
     if self.CP.carFingerprint in (CAR.HONDA_PILOT, CAR.HONDA_RIDGELINE):
       if ret.brake > 0.1:
