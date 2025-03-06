@@ -158,7 +158,7 @@ class TestVolkswagenMebSafety(common.PandaCarSafetyTest):
 
       well_formed_inactive = not lat_active and power == 0 and curvature == 0
       well_formed_active = controls_allowed and lat_active and power_valid
-      well_formed_disengaging = lat_active and not controls_allowed and power == last_power - self.STEER_POWER_STEP
+      well_formed_disengaging = lat_active and not controls_allowed and power == max(0, last_power - self.STEER_POWER_STEP)
 
       should_allow = well_formed_active or well_formed_inactive or well_formed_disengaging
       self.safety.set_controls_allowed(controls_allowed)
