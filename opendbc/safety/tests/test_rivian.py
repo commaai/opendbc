@@ -64,6 +64,7 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
     return self.packer.make_can_msg_panda("ACM_longitudinalRequest", 0, values)
 
   def test_wheel_touch(self):
+    # For hiding hold wheel alert on engage
     for controls_allowed in (True, False):
       self.safety.set_controls_allowed(controls_allowed)
       values = {
@@ -84,7 +85,8 @@ class TestRivianStockSafety(TestRivianSafetyBase):
     self.safety.set_safety_hooks(CarParams.SafetyModel.rivian, 0)
     self.safety.init_tests()
 
-  def test_wheel_touch(self):
+  def test_adas_status(self):
+    # For canceling stock ACC
     for controls_allowed in (True, False):
       self.safety.set_controls_allowed(controls_allowed)
       for interface_status in range(4):
