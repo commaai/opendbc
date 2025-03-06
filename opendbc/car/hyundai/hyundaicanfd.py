@@ -1,4 +1,3 @@
-# test
 import copy
 import numpy as np
 from opendbc.car import CanBusBase
