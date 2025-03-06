@@ -12,7 +12,6 @@ class CarState(CarStateBase):
     self.last_speed = 30
 
     self.acm_lka_hba_cmd = None
-    self.acm_longitudinal_request = None
     self.sccm_wheel_touch = None
     self.vdm_adas_status = None
 
@@ -87,7 +86,6 @@ class CarState(CarStateBase):
 
     # Messages needed by carcontroller
     self.acm_lka_hba_cmd = copy.copy(cp_cam.vl["ACM_lkaHbaCmd"])
-    self.acm_longitudinal_request = copy.copy(cp_cam.vl["ACM_longitudinalRequest"])
     self.sccm_wheel_touch = copy.copy(cp.vl["SCCM_WheelTouch"])
     self.vdm_adas_status = copy.copy(cp.vl["VDM_AdasSts"])
 
