@@ -37,9 +37,12 @@ class CarController(CarControllerBase):
     if self.CP.openpilotLongitudinalControl:
       can_sends.append(create_longitudinal(self.packer, self.frame % 15, actuators.accel, CC.enabled))
       # TODO: don't send if longitudinal
-      can_sends.append(create_adas_status(self.packer, None, CS.vdm_adas_status, False))
+      can_sends.append(create_adas_status(self.packer, None, CS.vdm_adas_status, None))
     else:
+      interface_status = None
       if CC.cruiseControl.cancel:
+        # send available right away as the VDM takes a few frames to acknowledge
+        interface_status = 1 if self.cancel_delay == 0 else 0
         self.cancel_delay += 1
       else:
         self.cancel_delay = 0
@@ -49,7 +52,7 @@ class CarController(CarControllerBase):
       #   self.last_cancel = False
 
       # TODO: send available for 1 frame only, then unavailable
-      can_sends.append(create_adas_status(self.packer, None, CS.vdm_adas_status, self.cancel_delay > 5))
+      can_sends.append(create_adas_status(self.packer, None, CS.vdm_adas_status, interface_status))
 
       # if CC.cruiseControl.cancel:
       #   if (self.frame - self.last_cancel_frame) * DT_CTRL > 0.25:
