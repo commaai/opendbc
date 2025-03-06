@@ -151,6 +151,8 @@ def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
 
   msg_161.update({
     "DAW_ICON": 0,
+    "LKA_ICON": 0,
+    "LFA_ICON": 2 if lat_active or enabled else 1,
     "CENTERLINE": 1 if lat_active or enabled else 0,
     "LANELINE_LEFT": (
       1 if not hud.leftLaneVisible else
@@ -168,8 +170,6 @@ def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
     "LCA_RIGHT_ARROW": 2 if CC.rightBlinker else 0,
     "LANE_LEFT": 1 if CC.leftBlinker else 0,
     "LANE_RIGHT": 1 if CC.rightBlinker else 0,
-    "LFA_ICON": 2 if lat_active or enabled else 1,
-    "LKA_ICON": 0,
   })
 
   if hud.leftLaneDepart or hud.rightLaneDepart:
