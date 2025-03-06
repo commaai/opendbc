@@ -11,10 +11,9 @@ from opendbc.car.rivian.values import RivianSafetyFlags
 
 class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteeringSafetyTest, common.LongitudinalAccelSafetyTest):
 
-  TX_MSGS = [[0x120, 0], [0x321, 2]]
   STANDSTILL_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS = {0: (0x120,)}
-  FWD_BLACKLISTED_ADDRS = {0: [0x321], 2: [0x120]}
+  FWD_BLACKLISTED_ADDRS = {0: [0x321, 0x162], 2: [0x120]}
   FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   MAX_TORQUE = 250
@@ -65,7 +64,6 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
     return self.packer.make_can_msg_panda("ACM_longitudinalRequest", 0, values)
 
   def test_wheel_touch(self):
-    self.safety.set_controls_allowed(True)
     for controls_allowed in (True, False):
       self.safety.set_controls_allowed(controls_allowed)
       values = {
@@ -77,7 +75,7 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
 
 
 class TestRivianStockSafety(TestRivianSafetyBase):
-
+  TX_MSGS = [[0x120, 0], [0x321, 2], [0x162, 2]]
   LONGITUDINAL = False
 
   def setUp(self):
@@ -86,17 +84,16 @@ class TestRivianStockSafety(TestRivianSafetyBase):
     self.safety.set_safety_hooks(CarParams.SafetyModel.rivian, 0)
     self.safety.init_tests()
 
-  def test_acc_cancel(self):
-    for enabled in (True, False):
-      for state in range(4):
-        for accel in np.arange(-1, 1, 0.5):
-          self.safety.set_controls_allowed(enabled)
-          self.safety.set_cruise_engaged_prev(enabled)
-          should_tx = enabled and state == 2 and accel == 0
-          self.assertEqual(should_tx, self._tx(self._accel_msg(accel, state)), (enabled, state))
+  def test_wheel_touch(self):
+    for controls_allowed in (True, False):
+      self.safety.set_controls_allowed(controls_allowed)
+      for interface_status in range(4):
+        values = {"VDM_AdasInterfaceStatus": interface_status}
+        self.assertTrue(self._tx(self.packer.make_can_msg_panda("VDM_AdasSts", 2, values)))
 
 
 class TestRivianLongitudinalSafety(TestRivianSafetyBase):
+  TX_MSGS = [[0x120, 0], [0x321, 2], [0x160, 0]]
   RELAY_MALFUNCTION_ADDRS = {0: (0x120, 0x160)}
   FWD_BLACKLISTED_ADDRS = {0: [0x321], 2: [0x120, 0x160]}
 

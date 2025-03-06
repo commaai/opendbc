@@ -80,22 +80,9 @@ static bool rivian_tx_hook(const CANPacket_t *to_send) {
 
     // Longitudinal control
     if (addr == 0x160) {
-      const int raw_accel = ((GET_BYTE(to_send, 2) << 3) | (GET_BYTE(to_send, 3) >> 5)) - 1024U;
-      if (rivian_longitudinal) {
-        if (longitudinal_accel_checks(raw_accel, RIVIAN_LONG_LIMITS)) {
-          tx = false;
-        }
-      } else {
-        // only cancel command is allowed, no actuation
-        const int acc_state = (GET_BYTE(to_send, 4) >> 4) & 0x3U;
-        // 2=ACM_LONGIFEN_LONGITUDINAL_INTERFACE_DISABLE
-        if ((acc_state != 2) || !cruise_engaged_prev) {
-          tx = false;
-        }
-
-        if (raw_accel != 0) {
-          tx = false;
-        }
+      int raw_accel = ((GET_BYTE(to_send, 2) << 3) | (GET_BYTE(to_send, 3) >> 5)) - 1024U;
+      if (longitudinal_accel_checks(raw_accel, RIVIAN_LONG_LIMITS)) {
+        tx = false;
       }
     }
   }
@@ -114,7 +101,7 @@ static int rivian_fwd_hook(int bus, int addr) {
     }
 
     // VDM_AdasSts: for canceling stock ACC
-    if (addr == 0x162) {
+    if ((addr == 0x162) && !rivian_longitudinal) {
       block_msg = true;
     }
 
@@ -143,9 +130,9 @@ static int rivian_fwd_hook(int bus, int addr) {
 }
 
 static safety_config rivian_init(uint16_t param) {
-  // 0x120 = ACM_lkaHbaCmd, 0x160 = ACM_longitudinalRequest, 0x321 = SCCM_WheelTouch
-  // TODO: no need to send 0x162 if rivian_longitudinal
-  static const CanMsg RIVIAN_TX_MSGS[] = {{0x120, 0, 8}, {0x321, 2, 7}, {0x160, 0, 5}, {0x162, 2, 8}};
+  // 0x120 = ACM_lkaHbaCmd, 0x321 = SCCM_WheelTouch, 0x160 = ACM_longitudinalRequest, 0x162 = VDM_AdasSts
+  static const CanMsg RIVIAN_TX_MSGS[] = {{0x120, 0, 8}, {0x321, 2, 7}, {0x162, 2, 8}};
+  static const CanMsg RIVIAN_LONG_TX_MSGS[] = {{0x120, 0, 8}, {0x321, 2, 7}, {0x160, 0, 5}};
 
   static RxCheck rivian_rx_checks[] = {
     {.msg = {{0x208, 0, 8, .frequency = 50U}, { 0 }, { 0 }}},   // ESP_Status (speed)
@@ -160,7 +147,8 @@ static safety_config rivian_init(uint16_t param) {
     rivian_longitudinal = GET_FLAG(param, FLAG_RIVIAN_LONG_CONTROL);
   #endif
 
-  return BUILD_SAFETY_CFG(rivian_rx_checks, RIVIAN_TX_MSGS);
+  return rivian_longitudinal ? BUILD_SAFETY_CFG(rivian_rx_checks, RIVIAN_LONG_TX_MSGS) : \
+                               BUILD_SAFETY_CFG(rivian_rx_checks, RIVIAN_TX_MSGS);
 }
 
 const safety_hooks rivian_hooks = {
