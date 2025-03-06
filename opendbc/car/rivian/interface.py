@@ -16,6 +16,7 @@ class CarInterface(CarInterfaceBase):
 
     ret.steerControlType = structs.CarParams.SteerControlType.torque
     ret.radarUnavailable = True
+    ret.setSpeedUnavailable = True
 
     # TODO: pending finding/handling missing set speed and fixing up radar parser
     ret.experimentalLongitudinalAvailable = False
