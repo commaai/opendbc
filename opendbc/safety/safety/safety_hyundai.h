@@ -140,11 +140,23 @@ static void hyundai_rx_hook(const CANPacket_t *to_push) {
     }
   }
 
+  if (addr == 0x420) {
+    if (((bus == 0) && !hyundai_camera_scc) || ((bus == 2) && hyundai_camera_scc)) {
+      if (!hyundai_longitudinal) {
+        acc_main_on = GET_BIT(to_push, 0U);
+      }
+    }
+  }
+
   if (bus == 0) {
     if (addr == 0x251) {
       int torque_driver_new = (GET_BYTES(to_push, 0, 2) & 0x7ffU) - 1024U;
       // update array of samples
       update_sample(&torque_driver, torque_driver_new);
+    }
+
+    if (addr == 0x391) {
+      mads_button_press = GET_BIT(to_push, 4U) ? MADS_BUTTON_PRESSED : MADS_BUTTON_NOT_PRESSED;
     }
 
     // ACC steering wheel buttons
@@ -186,6 +198,8 @@ static void hyundai_rx_hook(const CANPacket_t *to_push) {
     }
     generic_rx_checks(stock_ecu_detected);
   }
+
+  hyundai_common_reset_acc_main_on_mismatches();
 }
 
 static bool hyundai_tx_hook(const CANPacket_t *to_send) {
@@ -207,6 +221,11 @@ static bool hyundai_tx_hook(const CANPacket_t *to_send) {
     }
   }
 
+  if (addr == 0x420) {
+    acc_main_on_tx = GET_BIT(to_send, 0U);
+    hyundai_common_acc_main_on_sync();
+  }
+
   // ACCEL: safety check
   if (addr == 0x421) {
     int desired_accel_raw = (((GET_BYTE(to_send, 4) & 0x7U) << 8) | GET_BYTE(to_send, 3)) - 1023U;
@@ -219,8 +238,10 @@ static bool hyundai_tx_hook(const CANPacket_t *to_send) {
 
     violation |= longitudinal_accel_checks(desired_accel_raw, HYUNDAI_LONG_LIMITS);
     violation |= longitudinal_accel_checks(desired_accel_val, HYUNDAI_LONG_LIMITS);
-    violation |= (aeb_decel_cmd != 0);
-    violation |= aeb_req;
+    if (!hyundai_escc) {
+      violation |= (aeb_decel_cmd != 0);
+      violation |= aeb_req;
+    }
 
     if (violation) {
       tx = false;
@@ -303,6 +324,10 @@ static safety_config hyundai_init(uint16_t param) {
     HYUNDAI_LONG_COMMON_TX_MSGS(2)
   };
 
+  static const CanMsg HYUNDAI_LONG_ESCC_TX_MSGS[] = {
+    HYUNDAI_LONG_COMMON_TX_MSGS(0)
+  };
+
   hyundai_common_init(param);
   hyundai_legacy = false;
 
@@ -314,8 +339,13 @@ static safety_config hyundai_init(uint16_t param) {
       {.msg = {{0x4F1, 0, 4, .check_checksum = false, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
     };
 
-    ret = hyundai_camera_scc ? BUILD_SAFETY_CFG(hyundai_long_rx_checks, HYUNDAI_CAMERA_SCC_LONG_TX_MSGS) : \
-                               BUILD_SAFETY_CFG(hyundai_long_rx_checks, HYUNDAI_LONG_TX_MSGS);
+    if (hyundai_escc)
+      ret = BUILD_SAFETY_CFG(hyundai_long_rx_checks, HYUNDAI_LONG_ESCC_TX_MSGS);
+    else if (hyundai_camera_scc)
+      ret = BUILD_SAFETY_CFG(hyundai_long_rx_checks, HYUNDAI_CAMERA_SCC_LONG_TX_MSGS);
+    else
+      ret = BUILD_SAFETY_CFG(hyundai_long_rx_checks, HYUNDAI_LONG_TX_MSGS);
+                         
   } else if (hyundai_camera_scc) {
     static RxCheck hyundai_cam_scc_rx_checks[] = {
       HYUNDAI_COMMON_RX_CHECKS(false)

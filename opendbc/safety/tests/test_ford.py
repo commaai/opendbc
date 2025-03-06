@@ -354,6 +354,19 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
       for bus in (0, 2):
         self.assertEqual(enabled, self._tx(self._acc_button_msg(Buttons.CANCEL, bus)))
 
+  def test_enable_control_allowed_from_acc_main_on(self):
+    try:
+      for enable_mads in (True, False):
+        with self.subTest("enable_mads", mads_enabled=enable_mads):
+          for main_button_msg_valid in (True, False):
+            with self.subTest("main_button_msg_valid", state_valid=main_button_msg_valid):
+              self._mads_states_cleanup()
+              self.safety.set_mads_params(enable_mads, False)
+              self._rx(self._pcm_status_msg(main_button_msg_valid))
+              self.assertEqual(enable_mads and main_button_msg_valid, self.safety.get_controls_allowed_lat())
+    finally:
+      self._mads_states_cleanup()
+
 
 class TestFordCANFDStockSafety(TestFordSafetyBase):
   STEER_MESSAGE = MSG_LateralMotionControl2

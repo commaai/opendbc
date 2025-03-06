@@ -106,10 +106,18 @@ static void subaru_rx_hook(const CANPacket_t *to_push) {
     update_sample(&angle_meas, angle_meas_new);
   }
 
+  if ((addr == MSG_SUBARU_ES_LKAS_State) && (bus == SUBARU_CAM_BUS)) {
+    int lkas_hud = (GET_BYTE(to_push, 2U) & 0x0CU) >> 2U;
+    if ((lkas_hud >= 1) && (lkas_hud <= 3)) {
+      mads_button_press = MADS_BUTTON_PRESSED;
+    }
+  }
+
   // enter controls on rising edge of ACC, exit controls on ACC off
   if ((addr == MSG_SUBARU_CruiseControl) && (bus == alt_main_bus)) {
     bool cruise_engaged = GET_BIT(to_push, 41U);
     pcm_cruise_check(cruise_engaged);
+    acc_main_on = GET_BIT(to_push, 40U);
   }
 
   // update vehicle moving with any non-zero wheel speed

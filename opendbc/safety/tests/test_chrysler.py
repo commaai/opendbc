@@ -9,10 +9,10 @@ from opendbc.safety.tests.common import CANPackerPanda
 
 
 class TestChryslerSafety(common.PandaCarSafetyTest, common.MotorTorqueSteeringSafetyTest):
-  TX_MSGS = [[0x23B, 0], [0x292, 0], [0x2A6, 0]]
+  TX_MSGS = [[0x23B, 0], [0x292, 0], [0x2A6, 0], [0x2D9, 0]]
   STANDSTILL_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS = {0: (0x292,)}
-  FWD_BLACKLISTED_ADDRS = {2: [0x292, 0x2A6]}
+  FWD_BLACKLISTED_ADDRS = {2: [0x292, 0x2A6, 0x2D9]}
   FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   MAX_RATE_UP = 3
@@ -74,6 +74,14 @@ class TestChryslerSafety(common.PandaCarSafetyTest, common.MotorTorqueSteeringSa
       self.assertFalse(self._tx(self._button_msg(cancel=True, resume=True)))
       self.assertFalse(self._tx(self._button_msg(cancel=False, resume=False)))
 
+  def _lkas_button_msg_center_stack(self, enabled, is_center_stack_1=True):
+    values = {"LKAS_Button": enabled}
+    return self.packer.make_can_msg_panda("Center_Stack_1" if is_center_stack_1 else "Center_Stack_2", 0, values)
+
+  def _lkas_button_msg(self, enabled):
+    values = {"TOGGLE_LKAS": enabled}
+    return self.packer.make_can_msg_panda("TRACTION_BUTTON", 0, values)
+
 
 class TestChryslerRamDTSafety(TestChryslerSafety):
   TX_MSGS = [[0xB1, 2], [0xA6, 0], [0xFA, 0]]
@@ -98,6 +106,10 @@ class TestChryslerRamDTSafety(TestChryslerSafety):
     values = {"Vehicle_Speed": speed}
     return self.packer.make_can_msg_panda("ESP_8", 0, values)
 
+  def _lkas_button_msg(self, enabled):
+    return self._lkas_button_msg_center_stack(enabled)
+
+
 class TestChryslerRamHDSafety(TestChryslerSafety):
   TX_MSGS = [[0x275, 0], [0x276, 0], [0x23A, 2]]
   RELAY_MALFUNCTION_ADDRS = {0: (0x276,)}
@@ -121,6 +133,9 @@ class TestChryslerRamHDSafety(TestChryslerSafety):
   def _speed_msg(self, speed):
     values = {"Vehicle_Speed": speed}
     return self.packer.make_can_msg_panda("ESP_8", 0, values)
+
+  def _lkas_button_msg(self, enabled):
+    return self._lkas_button_msg_center_stack(enabled, is_center_stack_1=False)
 
 
 if __name__ == "__main__":

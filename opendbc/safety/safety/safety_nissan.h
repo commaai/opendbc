@@ -3,6 +3,7 @@
 #include "safety_declarations.h"
 
 static bool nissan_alt_eps = false;
+static bool nissan_leaf = false;
 
 static void nissan_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
@@ -51,6 +52,14 @@ static void nissan_rx_hook(const CANPacket_t *to_push) {
   if ((addr == 0x30f) && (bus == (nissan_alt_eps ? 1 : 2))) {
     bool cruise_engaged = (GET_BYTE(to_push, 0) >> 3) & 1U;
     pcm_cruise_check(cruise_engaged);
+  }
+
+  if ((addr == 0x239) && (bus == 0) && nissan_leaf) {
+    acc_main_on = GET_BIT(to_push, 17U);
+  }
+
+  if ((addr == 0x1B6) && (bus == (nissan_alt_eps ? 2 : 1))) {
+    acc_main_on = GET_BIT(to_push, 36U);
   }
 
   generic_rx_checks((addr == 0x169) && (bus == 0));
@@ -151,8 +160,10 @@ static safety_config nissan_init(uint16_t param) {
 
   // EPS Location. false = V-CAN, true = C-CAN
   const int NISSAN_PARAM_ALT_EPS_BUS = 1;
+  const int NISSAN_PARAM_LEAF = 512;
 
   nissan_alt_eps = GET_FLAG(param, NISSAN_PARAM_ALT_EPS_BUS);
+  nissan_leaf = GET_FLAG(param, NISSAN_PARAM_LEAF);
   return BUILD_SAFETY_CFG(nissan_rx_checks, NISSAN_TX_MSGS);
 }
 

@@ -8,6 +8,7 @@ from collections.abc import Callable
 from opendbc.can.packer import CANPacker  # pylint: disable=import-error
 from opendbc.safety import ALTERNATIVE_EXPERIENCE
 from opendbc.safety.tests.libsafety import libsafety_py
+from opendbc.safety.tests.mads_common import MadsCommonBase
 
 MAX_WRONG_COUNTERS = 5
 MAX_SAMPLE_VALS = 6
@@ -615,7 +616,6 @@ class AngleSteeringSafetyTest(PandaSafetyTestBase):
       self._rx(self._speed_msg(speed))
 
   def test_vehicle_speed_measurements(self):
-    # TODO: lower tolerance on these tests
     self._common_measurement_test(self._speed_msg, 0, 80, 1, self.safety.get_vehicle_speed_min, self.safety.get_vehicle_speed_max)
 
   def test_steering_angle_measurements(self, max_angle=300):
@@ -794,6 +794,7 @@ class PandaSafetyTest(PandaSafetyTestBase):
               # exceptions for common msgs across different hondas
               tx = list(filter(lambda m: m[0] not in [0x1FA, 0x30C, 0x33D, 0x33DB], tx))
 
+            # TODO-SP: Temporary, should be fixed in panda firmware, safety_hyundai.h
             if attr.startswith('TestHyundaiLongitudinal'):
               # exceptions for common msgs across different Hyundai CAN platforms
               tx = list(filter(lambda m: m[0] not in [0x420, 0x50A, 0x389, 0x4A2], tx))
@@ -813,7 +814,7 @@ class PandaSafetyTest(PandaSafetyTestBase):
 
 
 @add_regen_tests
-class PandaCarSafetyTest(PandaSafetyTest):
+class PandaCarSafetyTest(PandaSafetyTest, MadsCommonBase):
   STANDSTILL_THRESHOLD: float | None = None
   GAS_PRESSED_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS: dict[int, tuple[int, ...]] | None = None
@@ -985,6 +986,8 @@ class PandaCarSafetyTest(PandaSafetyTest):
   def test_safety_tick(self):
     self.safety.set_timer(int(2e6))
     self.safety.set_controls_allowed(True)
+    self.safety.set_controls_allowed_lat(True)
     self.safety.safety_tick_current_safety_config()
     self.assertFalse(self.safety.get_controls_allowed())
+    self.assertFalse(self.safety.get_controls_allowed_lat())
     self.assertFalse(self.safety.safety_config_valid())

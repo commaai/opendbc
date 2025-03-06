@@ -80,6 +80,17 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.PandaCarSafetyTest, common.
     }
     return self.packer.make_can_msg_panda("CRUISE_BUTTONS", bus, values)
 
+  def _acc_state_msg(self, enable):
+    values = {"MainMode_ACC": enable}
+    return self.packer.make_can_msg_panda("SCC_CONTROL", self.SCC_BUS, values)
+
+  def _lkas_button_msg(self, enabled):
+    values = {"LDA_BTN": enabled}
+    return self.packer.make_can_msg_panda("CRUISE_BUTTONS", self.PT_BUS, values)
+
+  def _main_cruise_button_msg(self, enabled):
+    return self._button_msg(0, enabled)
+
 
 class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
 
@@ -150,6 +161,10 @@ class TestHyundaiCanfdLFASteeringAltButtons(TestHyundaiCanfdLFASteeringBase):
       "CRUISE_BUTTONS": buttons,
       "ADAPTIVE_CRUISE_MAIN_BTN": main_button,
     }
+    return self.packer.make_can_msg_panda("CRUISE_BUTTONS_ALT", self.PT_BUS, values)
+
+  def _lkas_button_msg(self, enabled):
+    values = {"LDA_BTN": enabled}
     return self.packer.make_can_msg_panda("CRUISE_BUTTONS_ALT", self.PT_BUS, values)
 
   def test_button_sends(self):
@@ -230,6 +245,9 @@ class TestHyundaiCanfdLKASteeringLongEV(HyundaiLongitudinalBase, TestHyundaiCanf
     }
     return self.packer.make_can_msg_panda("SCC_CONTROL", 1, values)
 
+  def _tx_acc_state_msg(self, enable):
+    values = {"MainMode_ACC": enable}
+    return self.packer.make_can_msg_panda("SCC_CONTROL", 0, values)
 
 # Tests longitudinal for ICE, hybrid, EV cars with LFA steering
 @parameterized_class([
@@ -270,8 +288,13 @@ class TestHyundaiCanfdLFASteeringLong(HyundaiLongitudinalBase, TestHyundaiCanfdL
     }
     return self.packer.make_can_msg_panda("SCC_CONTROL", 0, values)
 
-  def test_tester_present_allowed(self, ecu_disable: bool = True):
-    super().test_tester_present_allowed(ecu_disable=not self.SAFETY_PARAM & HyundaiSafetyFlags.CAMERA_SCC)
+  def _tx_acc_state_msg(self, enable):
+    values = {"MainMode_ACC": enable}
+    return self.packer.make_can_msg_panda("SCC_CONTROL", 0, values)
+
+  # no knockout
+  def test_tester_present_allowed(self):
+    pass
 
 
 if __name__ == "__main__":

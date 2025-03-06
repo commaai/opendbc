@@ -36,6 +36,7 @@ static void subaru_preglobal_rx_hook(const CANPacket_t *to_push) {
     if (addr == MSG_SUBARU_PG_CruiseControl) {
       bool cruise_engaged = GET_BIT(to_push, 49U);
       pcm_cruise_check(cruise_engaged);
+      acc_main_on = GET_BIT(to_push, 48U);
     }
 
     // update vehicle moving with any non-zero wheel speed

@@ -85,6 +85,10 @@ static void gm_rx_hook(const CANPacket_t *to_push) {
       regen_braking = (GET_BYTE(to_push, 0) >> 4) != 0U;
     }
 
+    if (addr == 0xC9) {
+      acc_main_on = GET_BIT(to_push, 29U);
+    }
+
     bool stock_ecu_detected = (addr == 0x180);  // ASCMLKASteeringCmd
 
     // Check ASCMGasRegenCmd only if we're blocking it

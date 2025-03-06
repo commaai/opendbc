@@ -137,6 +137,10 @@ static void toyota_rx_hook(const CANPacket_t *to_push) {
       UPDATE_VEHICLE_SPEED(speed / 4.0 * 0.01 / 3.6);
     }
 
+    if (addr == 0x1D3) {
+      acc_main_on = GET_BIT(to_push, 15U);
+    }
+
     bool stock_ecu_detected = addr == 0x2E4;  // STEERING_LKA
     if (!toyota_stock_longitudinal && (addr == 0x343)) {
       stock_ecu_detected = true;  // ACC_CONTROL

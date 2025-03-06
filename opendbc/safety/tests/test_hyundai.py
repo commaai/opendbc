@@ -114,6 +114,33 @@ class TestHyundaiSafety(HyundaiButtonBase, common.PandaCarSafetyTest, common.Dri
     values = {"CR_Lkas_StrToqReq": torque, "CF_Lkas_ActToi": steer_req}
     return self.packer.make_can_msg_panda("LKAS11", 0, values)
 
+  def _acc_state_msg(self, enable):
+    values = {"MainMode_ACC": enable, "AliveCounterACC": self.cnt_cruise % 16}
+    self.__class__.cnt_cruise += 1
+    return self.packer.make_can_msg_panda("SCC11", self.SCC_BUS, values)
+
+  def _lkas_button_msg(self, enabled):
+    values = {"LDA_BTN": enabled}
+    return self.packer.make_can_msg_panda("BCM_PO_11", 0, values)
+
+  def _main_cruise_button_msg(self, enabled):
+    return self._button_msg(0, enabled)
+
+  def test_pcm_main_cruise_state_availability(self):
+    """Test that ACC main state is correctly set when receiving 0x420 message, toggling HYUNDAI_LONG flag"""
+    prior_safety_mode = self.safety.get_current_safety_mode()
+    prior_safety_param = self.safety.get_current_safety_param()
+
+    for hyundai_longitudinal in (True, False):
+      with self.subTest("hyundai_longitudinal", hyundai_longitudinal=hyundai_longitudinal):
+        self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, 0 if hyundai_longitudinal else HyundaiSafetyFlags.LONG)
+        for should_turn_acc_main_on in (True, False):
+          with self.subTest("acc_main_on", should_turn_acc_main_on=should_turn_acc_main_on):
+            self._rx(self._acc_state_msg(should_turn_acc_main_on))  # Send the ACC state message
+            expected_acc_main = should_turn_acc_main_on and hyundai_longitudinal  # ACC main should only be set if hyundai_longitudinal is True
+            self.assertEqual(expected_acc_main, self.safety.get_acc_main_on())
+    self.safety.set_safety_hooks(prior_safety_mode, prior_safety_param)
+
 
 class TestHyundaiSafetyAltLimits(TestHyundaiSafety):
   MAX_RATE_UP = 2
@@ -149,6 +176,16 @@ class TestHyundaiSafetyCameraSCC(TestHyundaiSafety):
     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.CAMERA_SCC)
     self.safety.init_tests()
 
+  def test_pcm_main_cruise_state_availability(self):
+    """
+    Test that ACC main state is correctly set when receiving 0x420 message.
+    For camera SCC, ACC main should always be on when receiving 0x420 message
+    """
+
+    for should_turn_acc_main_on in (True, False):
+      with self.subTest("acc_main_on", should_turn_acc_main_on=should_turn_acc_main_on):
+        self._rx(self._acc_state_msg(should_turn_acc_main_on))
+        self.assertEqual(should_turn_acc_main_on, self.safety.get_acc_main_on())
 
 class TestHyundaiSafetyFCEV(TestHyundaiSafety):
   def setUp(self):
@@ -226,6 +263,10 @@ class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
     }
     return self.packer.make_can_msg_panda("FCA11", 0, values)
 
+  def _tx_acc_state_msg(self, enable):
+    values = {"MainMode_ACC": enable}
+    return self.packer.make_can_msg_panda("SCC11", 0, values)
+
   def test_no_aeb_fca11(self):
     self.assertTrue(self._tx(self._fca11_msg()))
     self.assertFalse(self._tx(self._fca11_msg(vsm_aeb_req=True)))
@@ -258,6 +299,10 @@ class TestHyundaiLongitudinalSafetyCameraSCC(HyundaiLongitudinalBase, TestHyunda
     }
     return self.packer.make_can_msg_panda("SCC12", self.SCC_BUS, values)
 
+  def _tx_acc_state_msg(self, enable):
+    values = {"MainMode_ACC": enable}
+    return self.packer.make_can_msg_panda("SCC11", self.SCC_BUS, values)
+
   def test_no_aeb_scc12(self):
     self.assertTrue(self._tx(self._accel_msg(0)))
     self.assertFalse(self._tx(self._accel_msg(0, aeb_req=True)))
@@ -269,6 +314,34 @@ class TestHyundaiLongitudinalSafetyCameraSCC(HyundaiLongitudinalBase, TestHyunda
   def test_disabled_ecu_alive(self):
     pass
 
+
+class TestHyundaiLongitudinalESCCSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
+  TX_MSGS = [[0x340, 0], [0x4F1, 0], [0x485, 0], [0x420, 0], [0x421, 0], [0x50A, 0], [0x389, 0]]
+
+  RELAY_MALFUNCTION_ADDRS = {0: (0x340, 0x421)}  # LKAS11, SCC12
+
+  def setUp(self):
+    self.packer = CANPackerPanda("hyundai_kia_generic")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.LONG | HyundaiSafetyFlags.FLAG_HYUNDAI_ESCC)
+    self.safety.init_tests()
+
+  def _accel_msg(self, accel, aeb_req=False, aeb_decel=0):
+    values = {
+      "aReqRaw": accel,
+      "aReqValue": accel,
+    }
+    return self.packer.make_can_msg_panda("SCC12", self.SCC_BUS, values)
+
+  def _tx_acc_state_msg(self, enable):
+    values = {"MainMode_ACC": enable}
+    return self.packer.make_can_msg_panda("SCC11", 0, values)
+
+  def test_tester_present_allowed(self):
+    pass
+
+  def test_disabled_ecu_alive(self):
+    pass
 
 if __name__ == "__main__":
   unittest.main()
