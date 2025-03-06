@@ -11,10 +11,7 @@ class CarController(CarControllerBase):
     self.apply_torque_last = 0
     self.packer = CANPacker(dbc_names[Bus.pt])
 
-    self.last_cancel = False
-    self.cancel_delay = 0
-
-    self.last_cancel_frame = 0
+    self.cancel_frames = 0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -36,38 +33,17 @@ class CarController(CarControllerBase):
     # Longitudinal control
     if self.CP.openpilotLongitudinalControl:
       can_sends.append(create_longitudinal(self.packer, self.frame % 15, actuators.accel, CC.enabled))
-      # TODO: don't send if longitudinal
-      can_sends.append(create_adas_status(self.packer, CS.vdm_adas_status, None))
     else:
       interface_status = None
       if CC.cruiseControl.cancel:
         # if there is a noEntry, we need to send a status of "available" before the ACM will accept "unavailable"
         # send "available" right away as the VDM itself takes a few frames to acknowledge
-        interface_status = 1 if self.cancel_delay < 5 else 0
-        self.cancel_delay += 1
+        interface_status = 1 if self.cancel_frames < 5 else 0
+        self.cancel_frames += 1
       else:
-        self.cancel_delay = 0
-      # if CC.cruiseControl.cancel:
-      #   self.last_cancel = not self.last_cancel
-      # else:
-      #   self.last_cancel = False
+        self.cancel_frames = 0
 
-      # TODO: send available for 1 frame only, then unavailable
       can_sends.append(create_adas_status(self.packer, CS.vdm_adas_status, interface_status))
-
-      # if CC.cruiseControl.cancel:
-      #   if (self.frame - self.last_cancel_frame) * DT_CTRL > 0.25:
-      #     # send the next expected counter
-      #     counter = (CS.acm_longitudinal_request["ACM_longitudinalRequest_Counter"] + 1) % 15
-      #     can_sends.append(create_longitudinal(self.packer, counter, 0.0, False, True))
-      #     self.last_cancel_frame = self.frame
-      #
-      #   if (self.frame - self.last_cancel_frame) * DT_CTRL > 0.02:
-      #     # send the next expected counter
-      #     for offset in range(15):
-      #       counter = (CS.vdm_adas_status["VDM_AdasStatus_Counter"] + 1 + offset) % 15
-      #       can_sends.append(create_adas_status(self.packer, counter, CS.vdm_adas_status))
-      #     self.last_cancel_frame = self.frame
 
     new_actuators = actuators.as_builder()
     new_actuators.torque = apply_torque / CarControllerParams.STEER_MAX
