@@ -41,9 +41,9 @@ class CarController(CarControllerBase):
     else:
       interface_status = None
       if CC.cruiseControl.cancel:
-        # the ACM needs to see the VDM enable cruise before it will accept a status of "unavailable"
-        # send "available" right away as the VDM takes a few frames to acknowledge
-        interface_status = 1 if self.cancel_delay < 3 else 0
+        # if there is a noEntry, we need to send a status of "available" before the ACM will accept "unavailable"
+        # send "available" right away as the VDM itself takes a few frames to acknowledge
+        interface_status = 1 if self.cancel_delay < 5 else 0
         self.cancel_delay += 1
       else:
         self.cancel_delay = 0
