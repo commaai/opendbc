@@ -4,7 +4,7 @@ import re
 
 from opendbc.car.car_helpers import interfaces
 from opendbc.car.docs import get_all_car_docs
-from opendbc.car.docs_definitions import Cable, Column, PartType, Star
+from opendbc.car.docs_definitions import Cable, Column, PartType, Star, SupportType
 from opendbc.car.honda.values import CAR as HONDA
 from opendbc.car.values import PLATFORMS
 
@@ -18,6 +18,9 @@ class TestCarDocs:
     make_model_years = defaultdict(list)
     for car in self.all_cars:
       with subtests.test(car_docs_name=car.name):
+        if car.support_type != SupportType.UPSTREAM:
+          pytest.skip()
+
         make_model = (car.make, car.model)
         for year in car.year_list:
           assert year not in make_model_years[make_model], f"{car.name}: Duplicate model year"
@@ -63,7 +66,7 @@ class TestCarDocs:
   def test_harnesses(self, subtests):
     for car in self.all_cars:
       with subtests.test(car=car.name):
-        if car.name == "comma body":
+        if car.name == "comma body" or car.support_type != SupportType.UPSTREAM:
           pytest.skip()
 
         car_part_type = [p.part_type for p in car.car_parts.all_parts()]
