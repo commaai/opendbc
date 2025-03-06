@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import numpy as np
 import unittest
 
 from opendbc.car.structs import CarParams
@@ -59,8 +58,8 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
     values = {"ESP_Vehicle_Speed": speed}
     return self.packer.make_can_msg_panda("ESP_Status", 0, values)
 
-  def _accel_msg(self, accel: float, state: int = 0):
-    values = {"ACM_AccelerationRequest": accel, "ACM_longInterfaceEnable": state}
+  def _accel_msg(self, accel: float):
+    values = {"ACM_AccelerationRequest": accel}
     return self.packer.make_can_msg_panda("ACM_longitudinalRequest", 0, values)
 
   def test_wheel_touch(self):
