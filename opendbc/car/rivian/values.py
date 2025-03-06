@@ -31,12 +31,14 @@ class RivianCarDocs(CarDocs):
   package: str = "All"
   car_parts: CarParts = field(default_factory=CarParts([Device.threex_angled_mount, CarHarness.rivian]))
 
+
 @dataclass
 class RivianPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'rivian_primary_actuator', Bus.radar: 'rivian_mando_front_radar_generated'})
   wmis: set[WMI] = field(default_factory=set)
   lines: set[ModelLine] = field(default_factory=set)
   years: set[ModelYear] = field(default_factory=set)
+
 
 class CAR(Platforms):
   RIVIAN_R1_GEN1 = RivianPlatformConfig(
@@ -60,7 +62,7 @@ def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str
   year = vin[9]
 
   for platform in CAR:
-    if wmi in platform.config.wmis and line in platform.config.lines and  year in platform.config.years:
+    if wmi in platform.config.wmis and line in platform.config.lines and year in platform.config.years:
       candidates.add(platform)
 
   return {str(c) for c in candidates}
@@ -69,7 +71,7 @@ def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
   ],
-  match_fw_to_car_fuzzy = match_fw_to_car_fuzzy,
+  match_fw_to_car_fuzzy=match_fw_to_car_fuzzy,
 )
 
 GEAR_MAP = {
