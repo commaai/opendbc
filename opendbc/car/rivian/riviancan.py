@@ -90,7 +90,7 @@ def create_adas_status(packer, vdm_adas_status, interface_status):
     "VDM_AdasStatus_Checksum",
     "VDM_AdasStatus_Counter",
     "VDM_AdasDecelLimit",
-    "VDM_AdasDriverAccelPriorityStatu",  # TODO: fix typo in DBC
+    "VDM_AdasDriverAccelPriorityStatus",
     "VDM_AdasFaultStatus",
     "VDM_AdasAccelLimit",
     "VDM_AdasDriverModeStatus",
@@ -100,21 +100,8 @@ def create_adas_status(packer, vdm_adas_status, interface_status):
     "VDM_AdasVehicleHoldStatus",
   )}
 
-  # values["VDM_AdasInterfaceStatus"] = 0  # VDM_AdasInterfaceStatus_Unavailable
-  # values["VDM_AdasInterfaceStatus"] = 3  # VDM_AdasInterfaceStatus_Faulted
-  # values["VDM_AdasFaultStatus"] = 3  # implausible command
-  # values["VDM_AdasVehicleHoldStatus"] = 1
-  # values["VDM_AdasDriverAccelPriorityStatu"] = 0
-  # values["VDM_AdasAccelLimit"] = 1
-  # values["VDM_AdasDriverModeStatus"] = 0
-  # values["VDM_AdasAccelRequest"] = 0
-  # values["VDM_AdasAccelRequestAcknowledged"] = 0  # always zero anyway
-  # values["VDM_AdasStatus_Counter"] = counter
-
   if interface_status is not None:
-    values["VDM_AdasInterfaceStatus"] = interface_status  # VDM_AdasInterfaceStatus_Unavailable
-    # values["VDM_AdasDriverModeStatus"] = 0
-    # values["VDM_AdasAccelRequest"] = 0.12
+    values["VDM_AdasInterfaceStatus"] = interface_status
 
   data = packer.make_can_msg("VDM_AdasSts", 2, values)[1]
   values["VDM_AdasStatus_Checksum"] = checksum(data[1:], 0x1D, 0xD1)
