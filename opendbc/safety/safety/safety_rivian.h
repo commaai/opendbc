@@ -39,7 +39,8 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
   if (bus == 2) {
     // Cruise state
     if (addr == 0x100) {
-      pcm_cruise_check(GET_BIT(to_push, 21U));
+      const int feature_status = GET_BYTE(to_push, 2) >> 5U;
+      pcm_cruise_check(feature_status == 1);
     }
   }
 }
