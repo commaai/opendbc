@@ -11,6 +11,8 @@ class CarController(CarControllerBase):
     self.apply_torque_last = 0
     self.packer = CANPacker(dbc_names[Bus.pt])
 
+    self.last_cancel = False
+
     self.last_cancel_frame = 0
 
   def update(self, CC, CS, now_nanos):
@@ -36,7 +38,12 @@ class CarController(CarControllerBase):
       # TODO: don't send if longitudinal
       can_sends.append(create_adas_status(self.packer, None, CS.vdm_adas_status, False))
     else:
-      can_sends.append(create_adas_status(self.packer, None, CS.vdm_adas_status, CC.cruiseControl.cancel))
+      if CC.cruiseControl.cancel:
+        self.last_cancel = not self.last_cancel
+      else:
+        self.last_cancel = False
+
+      can_sends.append(create_adas_status(self.packer, None, CS.vdm_adas_status, self.last_cancel))
 
       # if CC.cruiseControl.cancel:
       #   if (self.frame - self.last_cancel_frame) * DT_CTRL > 0.25:
