@@ -39,13 +39,14 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
   if (bus == 2) {
     // Cruise state
     if (addr == 0x100) {
-      pcm_cruise_check(GET_BIT(to_push, 21U));
+      const int feature_status = GET_BYTE(to_push, 2) >> 5U;
+      pcm_cruise_check(feature_status == 1);
     }
   }
 }
 
 static bool rivian_tx_hook(const CANPacket_t *to_send) {
-  const SteeringLimits RIVIAN_STEERING_LIMITS = {
+  const TorqueSteeringLimits RIVIAN_STEERING_LIMITS = {
     .max_steer = 250,
     .max_rate_up = 3,
     .max_rate_down = 5,
@@ -80,12 +81,8 @@ static bool rivian_tx_hook(const CANPacket_t *to_send) {
 
     // Longitudinal control
     if (addr == 0x160) {
-      if (rivian_longitudinal) {
-        int raw_accel = ((GET_BYTE(to_send, 2) << 3) | (GET_BYTE(to_send, 3) >> 5)) - 1024U;
-        if (longitudinal_accel_checks(raw_accel, RIVIAN_LONG_LIMITS)) {
-          tx = false;
-        }
-      } else {
+      int raw_accel = ((GET_BYTE(to_send, 2) << 3) | (GET_BYTE(to_send, 3) >> 5)) - 1024U;
+      if (longitudinal_accel_checks(raw_accel, RIVIAN_LONG_LIMITS)) {
         tx = false;
       }
     }
@@ -99,8 +96,13 @@ static int rivian_fwd_hook(int bus, int addr) {
   bool block_msg = false;
 
   if (bus == 0) {
-    // SCCM_WheelTouch
+    // SCCM_WheelTouch: for hiding hold wheel alert
     if (addr == 0x321) {
+      block_msg = true;
+    }
+
+    // VDM_AdasSts: for canceling stock ACC
+    if ((addr == 0x162) && !rivian_longitudinal) {
       block_msg = true;
     }
 
@@ -110,12 +112,12 @@ static int rivian_fwd_hook(int bus, int addr) {
   }
 
   if (bus == 2) {
-    // ACM_lkaHbaCmd
+    // ACM_lkaHbaCmd: lateral control message
     if (addr == 0x120) {
       block_msg = true;
     }
 
-    // ACM_longitudinalRequest
+    // ACM_longitudinalRequest: longitudinal control message
     if (rivian_longitudinal && (addr == 0x160)) {
       block_msg = true;
     }
@@ -129,8 +131,9 @@ static int rivian_fwd_hook(int bus, int addr) {
 }
 
 static safety_config rivian_init(uint16_t param) {
-  // 0x120 = ACM_lkaHbaCmd, 0x160 = ACM_longitudinalRequest, 0x321 = SCCM_WheelTouch
-  static const CanMsg RIVIAN_TX_MSGS[] = {{0x120, 0, 8}, {0x321, 2, 7}};
+  // 0x120 = ACM_lkaHbaCmd, 0x321 = SCCM_WheelTouch, 0x162 = VDM_AdasSts
+  static const CanMsg RIVIAN_TX_MSGS[] = {{0x120, 0, 8}, {0x321, 2, 7}, {0x162, 2, 8}};
+  // 0x160 = ACM_longitudinalRequest
   static const CanMsg RIVIAN_LONG_TX_MSGS[] = {{0x120, 0, 8}, {0x321, 2, 7}, {0x160, 0, 5}};
 
   static RxCheck rivian_rx_checks[] = {

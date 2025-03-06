@@ -33,10 +33,7 @@ class RivianCarDocs(CarDocs):
 
 @dataclass
 class RivianPlatformConfig(PlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: {
-    Bus.pt: 'rivian_primary_actuator',
-    Bus.radar: 'rivian_mando_front_radar_generated'
-  })
+  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'rivian_primary_actuator', Bus.radar: 'rivian_mando_front_radar_generated'})
   wmis: set[WMI] = field(default_factory=set)
   lines: set[ModelLine] = field(default_factory=set)
   years: set[ModelYear] = field(default_factory=set)
@@ -75,13 +72,13 @@ FW_QUERY_CONFIG = FwQueryConfig(
   match_fw_to_car_fuzzy = match_fw_to_car_fuzzy,
 )
 
-GEAR_MAP = [
-  CarState.GearShifter.unknown,
-  CarState.GearShifter.park,
-  CarState.GearShifter.reverse,
-  CarState.GearShifter.neutral,
-  CarState.GearShifter.drive,
-]
+GEAR_MAP = {
+  0: CarState.GearShifter.unknown,
+  1: CarState.GearShifter.park,
+  2: CarState.GearShifter.reverse,
+  3: CarState.GearShifter.neutral,
+  4: CarState.GearShifter.drive,
+}
 
 
 class CarControllerParams:
