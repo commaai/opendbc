@@ -213,6 +213,7 @@ class CarController(CarControllerBase):
             self.gas = float(np.interp(accel, self.params.BOSCH_1000_GAS_LOOKUP_BP, self.params.BOSCH_1000_GAS_LOOKUP_V))
           else:
             self.gas = float(np.interp(accel, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_GAS_LOOKUP_V))
+
           stopping = actuators.longControlState == LongCtrlState.stopping
           self.stopping_counter = self.stopping_counter + 1 if stopping else 0
           can_sends.extend(hondacan.create_acc_commands(self.packer, self.CAN, CC.enabled, CC.longActive, self.accel, self.gas,
