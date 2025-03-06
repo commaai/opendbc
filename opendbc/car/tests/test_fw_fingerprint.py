@@ -23,7 +23,8 @@ class TestFwFingerprint:
     assert len(candidates) == 1, f"got more than one candidate: {candidates}"
     assert candidates[0] == expected
 
-  @pytest.mark.parametrize("brand, car_model, ecus, test_non_essential", [(b, c, e[c], n) for b, e in VERSIONS.items() for c in e for n in (True, False)])
+  @pytest.mark.parametrize("brand, car_model, ecus, test_non_essential",
+                           [(b, c, e[c], n) for b, e in VERSIONS.items() for c in e for n in (True, False)])
   def test_exact_match(self, brand, car_model, ecus, test_non_essential):
     config = FW_QUERY_CONFIGS[brand]
     CP = CarParams()

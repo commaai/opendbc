@@ -5,7 +5,7 @@ from opendbc.car.fingerprints import _FINGERPRINTS as FINGERPRINTS
 
 
 class TestCanFingerprint:
-  @pytest.mark.parametrize("car_model, fingerprints", list(FINGERPRINTS.items()))
+  @pytest.mark.parametrize("car_model, fingerprints", FINGERPRINTS.items())
   def test_can_fingerprint(self, car_model, fingerprints):
     """Tests online fingerprinting function on offline fingerprints"""
 
