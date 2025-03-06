@@ -12,6 +12,7 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(dbc_names[Bus.pt])
 
     self.last_cancel = False
+    self.cancel_delay = 0
 
     self.last_cancel_frame = 0
 
@@ -39,11 +40,16 @@ class CarController(CarControllerBase):
       can_sends.append(create_adas_status(self.packer, None, CS.vdm_adas_status, False))
     else:
       if CC.cruiseControl.cancel:
-        self.last_cancel = not self.last_cancel
+        self.cancel_delay += 1
       else:
-        self.last_cancel = False
+        self.cancel_delay = 0
+      # if CC.cruiseControl.cancel:
+      #   self.last_cancel = not self.last_cancel
+      # else:
+      #   self.last_cancel = False
 
-      can_sends.append(create_adas_status(self.packer, None, CS.vdm_adas_status, self.last_cancel))
+      # TODO: send available for 1 frame only, then unavailable
+      can_sends.append(create_adas_status(self.packer, None, CS.vdm_adas_status, self.cancel_delay > 5))
 
       # if CC.cruiseControl.cancel:
       #   if (self.frame - self.last_cancel_frame) * DT_CTRL > 0.25:
