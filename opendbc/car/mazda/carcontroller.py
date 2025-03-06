@@ -23,7 +23,7 @@ class CarController(CarControllerBase):
       # calculate steer and also set limits due to driver torque
       new_torque = int(round(CC.actuators.torque * CarControllerParams.STEER_MAX))
       apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last,
-                                                     CS.out.steeringTorque, CarControllerParams)
+                                                      CS.out.steeringTorque, CarControllerParams)
 
     if CC.cruiseControl.cancel:
       # If brake is pressed, let us wait >70ms before trying to disable crz to avoid

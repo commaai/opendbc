@@ -52,7 +52,13 @@ class CarState(CarStateBase):
       ret.cruiseState.speed = 0
     ret.cruiseState.available = True  # cp.vl["VDM_AdasSts"]["VDM_AdasInterfaceStatus"] == 1
     ret.cruiseState.standstill = cp.vl["VDM_AdasSts"]["VDM_AdasAccelRequestAcknowledged"] == 1
-    ret.accFaulted = cp_cam.vl["ACM_Status"]["ACM_FaultStatus"] == 1
+
+    # TODO: log ACM_Unkown2=3 as a fault. need to filter it at the start and end of routes though
+    # ACM_FaultStatus hasn't been seen yet
+    ret.accFaulted = (cp_cam.vl["ACM_Status"]["ACM_FaultStatus"] == 1 or
+                      # VDM_AdasFaultStatus=Brk_Intv is the default for some reason
+                      # VDM_AdasFaultStatus=Imps_Cmd was seen when sending it rapidly changing ACC enable commands
+                      cp.vl["VDM_AdasSts"]["VDM_AdasFaultStatus"] in (2, 3))  # 2=Cntr_Fault, 3=Imps_Cmd
 
     # Gear
     ret.gearShifter = GEAR_MAP[int(cp.vl["VDM_PropStatus"]["VDM_Prndl_Status"])]

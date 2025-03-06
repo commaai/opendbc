@@ -114,7 +114,7 @@ class CarController(CarControllerBase):
     self.speed = 0.0
     self.gas = 0.0
     self.brake = 0.0
-    self.last_steer = 0.0
+    self.last_torque = 0.0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -131,9 +131,9 @@ class CarController(CarControllerBase):
       gas, brake = 0.0, 0.0
 
     # *** rate limit steer ***
-    limited_steer = rate_limit(actuators.torque, self.last_steer, -self.params.STEER_DELTA_DOWN * DT_CTRL,
-                               self.params.STEER_DELTA_UP * DT_CTRL)
-    self.last_steer = limited_steer
+    limited_torque = rate_limit(actuators.torque, self.last_torque, -self.params.STEER_DELTA_DOWN * DT_CTRL,
+                                self.params.STEER_DELTA_UP * DT_CTRL)
+    self.last_torque = limited_torque
 
     # *** apply brake hysteresis ***
     pre_limit_brake, self.braking, self.brake_steady = actuator_hysteresis(brake, self.braking, self.brake_steady,
@@ -148,8 +148,8 @@ class CarController(CarControllerBase):
     # **** process the car messages ****
 
     # steer torque is converted back to CAN reference (positive when steering right)
-    apply_torque = int(np.interp(-limited_steer * self.params.STEER_MAX,
-                             self.params.STEER_LOOKUP_BP, self.params.STEER_LOOKUP_V))
+    apply_torque = int(np.interp(-limited_torque * self.params.STEER_MAX,
+                                 self.params.STEER_LOOKUP_BP, self.params.STEER_LOOKUP_V))
 
     # Send CAN commands
     can_sends = []
@@ -241,7 +241,7 @@ class CarController(CarControllerBase):
     new_actuators.accel = self.accel
     new_actuators.gas = self.gas
     new_actuators.brake = self.brake
-    new_actuators.torque = self.last_steer
+    new_actuators.torque = self.last_torque
     new_actuators.torqueOutputCan = apply_torque
 
     self.frame += 1
