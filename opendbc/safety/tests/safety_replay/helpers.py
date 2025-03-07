@@ -20,7 +20,6 @@ def is_steering_msg(mode, param, addr):
   elif mode == CarParams.SafetyModel.hyundai:
     ret = addr == 832
   elif mode == CarParams.SafetyModel.hyundaiCanfd:
-    print('here!')
     # TODO: other params
     ret = addr == 0x50
   elif mode == CarParams.SafetyModel.chrysler:
