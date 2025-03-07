@@ -150,8 +150,8 @@ class CarController(CarControllerBase):
     # **** process the car messages ****
 
     if (CS.CP.carFingerprint in SERIAL_STEERING):
-      apply_torque = apply_driver_steer_torque_limits(apply_torque, self.last_torque, CS.out.steeringTorque, LKAS_LIMITS, ss=True)
-      self.last_torque = apply_torque
+      limited_torque = apply_driver_steer_torque_limits(limited_torque, self.last_torque, CS.out.steeringTorque, LKAS_LIMITS, ss=True)
+      self.last_torque = limited_torque
       self.apply_steer_over_max_counter = 0
 
     # steer torque is converted back to CAN reference (positive when steering right)
