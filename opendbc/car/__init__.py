@@ -98,7 +98,7 @@ class Bus(StrEnum):
   ap_party = auto()
 
 
-def apply_driver_steer_torque_limits(apply_torque, apply_torque_last, driver_torque, LIMITS):
+def apply_driver_steer_torque_limits(apply_torque, apply_torque_last, driver_torque, LIMITS, serialsteer=False):
 
   # limits due to driver torque
   driver_max_torque = LIMITS.STEER_MAX + (LIMITS.STEER_DRIVER_ALLOWANCE + driver_torque * LIMITS.STEER_DRIVER_FACTOR) * LIMITS.STEER_DRIVER_MULTIPLIER
@@ -107,6 +107,11 @@ def apply_driver_steer_torque_limits(apply_torque, apply_torque_last, driver_tor
   min_steer_allowed = min(max(-LIMITS.STEER_MAX, driver_min_torque), 0)
   apply_torque = np.clip(apply_torque, min_steer_allowed, max_steer_allowed)
 
+  if serialsteer:
+    min_torque = min(abs(max_steer_allowed), abs(min_steer_allowed))
+    max_steer_allowed = min_torque
+    min_steer_allowed = -min_torque
+      
   # slow rate if steer torque increases in magnitude
   if apply_torque_last > 0:
     apply_torque = np.clip(apply_torque, max(apply_torque_last - LIMITS.STEER_DELTA_DOWN, -LIMITS.STEER_DELTA_UP),
