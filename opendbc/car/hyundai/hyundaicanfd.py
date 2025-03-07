@@ -184,6 +184,7 @@ def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
       "DISTANCE_SPACING": 1 if enabled else 0,
       "DISTANCE_LEAD": 2 if enabled and hud.leadVisible else 1 if enabled else 0,
       "DISTANCE_CAR": 2 if enabled else 1,
+      "SLA_ICON": 0,
     })
 
     if msg_161.get("ALERTS_3") in (1 ,2, 3, 4, 7, 8, 9, 10):  # HIDE ISLA, DISTANCE MESSAGES
