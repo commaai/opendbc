@@ -221,7 +221,7 @@ class CarState(CarStateBase):
 
       # is_metric_cruise is used for cruise speed display
       self.is_metric_cruise = self.is_metric if acc_hud["CRUISE_SPEED"] >= 253 else not acc_hud["IMPERIAL_UNIT"]
-      
+
       # The PCM always manages its own cruise control state, but doesn't publish it
       if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
         ret.cruiseState.nonAdaptive = cp_cam.vl["ACC_HUD"]["CRUISE_CONTROL_LABEL"] != 0
@@ -235,10 +235,10 @@ class CarState(CarStateBase):
         ret.cruiseState.speed = self.v_cruise_pcm_prev if acc_hud["CRUISE_SPEED"] > 160.0 else acc_hud["CRUISE_SPEED"] * conversion
         self.v_cruise_pcm_prev = ret.cruiseState.speed
     else:
-      self.is_metric_cruise = self.is_metric  
+      self.is_metric_cruise = self.is_metric
       conversion = CV.KPH_TO_MS if self.is_metric_cruise else CV.MPH_TO_MS
       ret.cruiseState.speed = cp.vl["CRUISE"]["CRUISE_SPEED_PCM"] * conversion
-    
+
     if self.CP.flags & HondaFlags.BOSCH_ALT_BRAKE:
       ret.brakePressed = cp.vl["BRAKE_MODULE"]["BRAKE_PRESSED"] != 0
     else:
