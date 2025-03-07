@@ -225,7 +225,8 @@ class CarState(CarStateBase):
       self.is_metric_cruise = self.is_metric if cp.vl["ACC_HUD"]["CRUISE_SPEED"] >= 253 else not cp.vl["ACC_HUD"]["IMPERIAL_UNIT"]
     else:
       self.is_metric_cruise = self.is_metric
-
+    conversion = CV.KPH_TO_MS if self.is_metric_cruise else CV.MPH_TO_MS
+    
     if self.CP.carFingerprint in HONDA_BOSCH:
       # The PCM always manages its own cruise control state, but doesn't publish it
       if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
@@ -237,7 +238,6 @@ class CarState(CarStateBase):
         ret.cruiseState.nonAdaptive = acc_hud["CRUISE_CONTROL_LABEL"] != 0
         ret.cruiseState.standstill = acc_hud["CRUISE_SPEED"] == 252.
 
-        conversion = CV.KPH_TO_MS if self.is_metric_cruise else CV.MPH_TO_MS
         # On set, cruise set speed pulses between 254~255 and the set speed prev is set to avoid this.
         ret.cruiseState.speed = self.v_cruise_pcm_prev if acc_hud["CRUISE_SPEED"] > 160.0 else acc_hud["CRUISE_SPEED"] * conversion
         self.v_cruise_pcm_prev = ret.cruiseState.speed
