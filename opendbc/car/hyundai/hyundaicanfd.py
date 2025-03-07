@@ -181,7 +181,7 @@ def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
       "SETSPEED_HUD": 2 if enabled else 1,
       "SETSPEED_SPEED": 25 if (s := round(CS.out.vCruiseCluster * (1 if CS.is_metric else CV.KPH_TO_MPH))) > 100 else s,
       "DISTANCE": hud.leadDistanceBars,
-      "DISTANCE_SPACING": 1 if enabled else 3,
+      "DISTANCE_SPACING": 1 if enabled else 0,
       "DISTANCE_LEAD": 2 if enabled and hud.leadVisible else 1 if enabled else 0,
       "DISTANCE_CAR": 2 if enabled else 1,
     })
