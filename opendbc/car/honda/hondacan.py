@@ -112,15 +112,13 @@ def create_acc_commands(packer, CAN, enabled, active, accel, gas, stopping_count
   return commands
 
 
-def create_steering_control(packer, CAN, apply_torque, lkas_active):
+def create_steering_control(packer, CAN, apply_torque, lkas_active, car_fingerprint):
   values = {
     "STEER_TORQUE": apply_torque if lkas_active else 0,
     "STEER_TORQUE_REQUEST": lkas_active,
   }
-  return packer.make_can_msg("STEERING_CONTROL", CAN.lkas, values)
-
-
-  if CP.carFingerprint in SERIAL_STEERING:
+  
+  if car_Fingerprint in SERIAL_STEERING:
       values.update({
         "SEND_ALL_LIN_TO_CAN": 1,
         "SEND_LIN_WHOLE_DATA": 1,
