@@ -121,7 +121,7 @@ static void subaru_rx_hook(const CANPacket_t *to_push) {
 
     vehicle_moving = (fr > 0U) || (rr > 0U) || (rl > 0U) || (fl > 0U);
 
-    UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4U * 0.057);
+    UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.057 / 3.6);
   }
 
   if ((addr == MSG_SUBARU_Brake_Status) && (bus == alt_main_bus)) {
@@ -136,8 +136,8 @@ static void subaru_rx_hook(const CANPacket_t *to_push) {
 }
 
 static bool subaru_tx_hook(const CANPacket_t *to_send) {
-  const SteeringLimits SUBARU_STEERING_LIMITS      = SUBARU_STEERING_LIMITS_GENERATOR(2047, 50, 70);
-  const SteeringLimits SUBARU_GEN2_STEERING_LIMITS = SUBARU_STEERING_LIMITS_GENERATOR(1000, 40, 40);
+  const TorqueSteeringLimits SUBARU_STEERING_LIMITS      = SUBARU_STEERING_LIMITS_GENERATOR(2047, 50, 70);
+  const TorqueSteeringLimits SUBARU_GEN2_STEERING_LIMITS = SUBARU_STEERING_LIMITS_GENERATOR(1000, 40, 40);
 
   const LongitudinalLimits SUBARU_LONG_LIMITS = {
     .min_gas = 808,       // appears to be engine braking
@@ -160,7 +160,7 @@ static bool subaru_tx_hook(const CANPacket_t *to_send) {
 
     bool steer_req = GET_BIT(to_send, 29U);
 
-    const SteeringLimits limits = subaru_gen2 ? SUBARU_GEN2_STEERING_LIMITS : SUBARU_STEERING_LIMITS;
+    const TorqueSteeringLimits limits = subaru_gen2 ? SUBARU_GEN2_STEERING_LIMITS : SUBARU_STEERING_LIMITS;
     violation |= steer_torque_cmd_checks(desired_torque, steer_req, limits);
   }
 

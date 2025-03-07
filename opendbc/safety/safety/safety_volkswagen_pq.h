@@ -155,7 +155,7 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *to_push) {
 
 static bool volkswagen_pq_tx_hook(const CANPacket_t *to_send) {
   // lateral limits
-  const SteeringLimits VOLKSWAGEN_PQ_STEERING_LIMITS = {
+  const TorqueSteeringLimits VOLKSWAGEN_PQ_STEERING_LIMITS = {
     .max_steer = 300,                // 3.0 Nm (EPS side max of 3.0Nm with fault if violated)
     .max_rt_delta = 113,             // 6 max rate up * 50Hz send rate * 250000 RT interval / 1000000 = 75 ; 125 * 1.5 for safety pad = 113
     .max_rt_interval = 250000,       // 250ms between real time checks

@@ -50,7 +50,7 @@ class CarController(CarControllerBase):
           # Steering rate fault prevention
           self.steer_rate_counter, apply_steer_req = \
             common_fault_avoidance(abs(CS.out.steeringRateDeg) > MAX_STEER_RATE, apply_steer_req,
-                                  self.steer_rate_counter, MAX_STEER_RATE_FRAMES)
+                                   self.steer_rate_counter, MAX_STEER_RATE_FRAMES)
 
         can_sends.append(subarucan.create_steering_control(self.packer, apply_torque, apply_steer_req))
 
