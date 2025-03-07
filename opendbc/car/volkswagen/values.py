@@ -8,7 +8,7 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, \
                                                      Device
 from opendbc.car.fw_query_definitions import EcuAddrSubAddr, FwQueryConfig, Request, p16
-from opendbc.car.vin import parse_vin
+from opendbc.car.vin import Vin
 
 Ecu = structs.CarParams.Ecu
 NetworkLocation = structs.CarParams.NetworkLocation
@@ -454,8 +454,8 @@ def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str
 
   # Check the WMI and chassis code to determine the platform
   # https://www.clubvw.org.au/vwreference/vwvin
-  wmi, vds, _ = parse_vin(vin)
-  chassis_code = vds[3:5]
+  vin_obj = Vin(vin)
+  chassis_code = vin_obj.vds[3:5]
 
   for platform in CAR:
     valid_ecus = set()
@@ -475,7 +475,7 @@ def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str
     if valid_ecus != CHECK_FUZZY_ECUS:
       continue
 
-    if wmi in platform.config.wmis and chassis_code in platform.config.chassis_codes:
+    if vin_obj.wmi in platform.config.wmis and chassis_code in platform.config.chassis_codes:
       candidates.add(platform)
 
   return {str(c) for c in candidates}
