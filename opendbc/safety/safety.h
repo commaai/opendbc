@@ -194,7 +194,7 @@ static bool rx_msg_safety_check(const CANPacket_t *to_push,
       uint8_t counter = safety_hooks->get_counter(to_push);
       update_counter(cfg->rx_checks, index, counter);
     } else {
-      cfg->rx_checks[index].status.wrong_counters = 0U;
+      cfg->rx_checks[index].status.wrong_counters = cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_counter ? 0U : MAX_WRONG_COUNTERS;
     }
 
     // quality flag check
