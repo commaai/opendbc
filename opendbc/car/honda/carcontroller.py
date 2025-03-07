@@ -117,6 +117,7 @@ class CarController(CarControllerBase):
     self.gas = 0.0
     self.brake = 0.0
     self.last_torque = 0.0
+    self.apply_steer = 0.0
     self.apply_steer_last = 0.0
 
   def apply_driver_steer_torque_limits(apply_torque, apply_torque_last, driver_torque, LIMITS, ss=False):
