@@ -40,7 +40,7 @@ class CarController(CarControllerBase):
     hud_control = CC.hudControl
 
     apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning,
-     right_lane_warning, tester_present_msgs = self.compute_common_controls(CC, CS)
+      right_lane_warning, tester_present_msgs = self.compute_common_controls(CC, CS)
 
     can_sends = []
     can_sends.extend(tester_present_msgs)
@@ -89,7 +89,7 @@ class CarController(CarControllerBase):
     hud_control = CC.hudControl
 
     apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning,
-     right_lane_warning, tester_present_msgs = self.compute_common_controls(CC, CS)
+      right_lane_warning, tester_present_msgs = self.compute_common_controls(CC, CS)
 
     can_sends = []
     can_sends.extend(tester_present_msgs)
