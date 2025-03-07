@@ -4,7 +4,7 @@ from enum import StrEnum, IntFlag
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, structs
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts, Device
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
-from opendbc.car.vin import parse_vin
+from opendbc.car.vin import Vin
 
 
 class WMI(StrEnum):
@@ -54,13 +54,13 @@ class CAR(Platforms):
 
 def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str]:
   # Rivian VIN reference: https://www.rivianforums.com/forum/threads/rivian-vin-decoder.1546
-  wmi, vds, vis = parse_vin(vin)
-  line = vds[0]
-  year = vis[0]
+  vin_obj = Vin(vin)
+  line = vin_obj.vds[:1]
+  year = vin_obj.vis[:1]
 
   candidates = set()
   for platform in CAR:
-    if wmi in platform.config.wmis and line in platform.config.lines and year in platform.config.years:
+    if vin_obj.wmi in platform.config.wmis and line in platform.config.lines and year in platform.config.years:
       candidates.add(platform)
 
   return {str(c) for c in candidates}
