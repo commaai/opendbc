@@ -15,16 +15,16 @@ class WMI(StrEnum):
   RIVIAN_MPV = "7PD"
 
 
+class ModelLine(StrEnum):
+  R1T = "T"  # R1T 4-door Pickup Truck
+  R1S = "S"  # R1S 4-door MPV
+
+
 class ModelYear(StrEnum):
   N_2022 = "N"
   P_2023 = "P"
   R_2024 = "R"
   S_2025 = "S"
-
-
-class ModelLine(StrEnum):
-  R1T = "T"  # R1T 4-door Pickup Truck
-  R1S = "S"  # R1S 4-door MPV
 
 
 @dataclass
@@ -50,7 +50,7 @@ class CAR(Platforms):
     ],
     CarSpecs(mass=3206., wheelbase=3.08, steerRatio=15.2),
     wmis={WMI.RIVIAN_TRUCK, WMI.RIVIAN_MPV},
-    lines={ModelLine.R1T, ModelLine.R1T},
+    lines={ModelLine.R1T, ModelLine.R1S},
     years={ModelYear.N_2022, ModelYear.P_2023, ModelYear.R_2024},
   )
 
