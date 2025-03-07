@@ -186,7 +186,7 @@ def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
       "DISTANCE_CAR": 2 if enabled else 1,
     })
 
-    if msg_161.get("ALERTS_3") in (1 ,2, 3, 4, 7, 8, 9, 10):  # HIDE DISTANCE, ISLA MESSAGES
+    if msg_161.get("ALERTS_3") in (1 ,2, 3, 4, 7, 8, 9, 10):  # HIDE ISLA, DISTANCE MESSAGES
       msg_161["ALERTS_3"] = 0
 
     msg_162["LEAD"] = 0
