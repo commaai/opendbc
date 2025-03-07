@@ -141,11 +141,11 @@ class CarController(CarControllerBase):
     actuators = CC.actuators
     hud_control = CC.hudControl
 
-    # Steering torque
+    # steering torque
     new_torque = int(round(actuators.torque * self.params.STEER_MAX))
     apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.params)
 
-    # Prevent EPS fault if angle > 85 degrees for too long
+    # >90 degree steering fault prevention
     self.angle_limit_counter, apply_steer_req = common_fault_avoidance(
       abs(CS.out.steeringAngleDeg) >= MAX_ANGLE, CC.latActive,
       self.angle_limit_counter, MAX_ANGLE_FRAMES, MAX_ANGLE_CONSECUTIVE_FRAMES
@@ -154,10 +154,12 @@ class CarController(CarControllerBase):
     if not CC.latActive:
       apply_torque = 0
 
+    # Hold torque with induced temporary fault when cutting the actuation bit
     torque_fault = CC.latActive and not apply_steer_req
+
     self.apply_torque_last = apply_torque
 
-    # Acceleration control
+    # accel + longitudinal
     accel = float(np.clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
     stopping = actuators.longControlState == LongCtrlState.stopping
     set_speed_in_units = hud_control.setSpeed * (CV.MS_TO_KPH if CS.is_metric else CV.MS_TO_MPH)
