@@ -7,7 +7,6 @@ from opendbc.car.can_definitions import CanData
 from opendbc.car.car_helpers import interfaces
 from opendbc.car.structs import CarParams
 from opendbc.car.fingerprints import FW_VERSIONS
-from opendbc.car.fw_query_definitions import Vin
 from opendbc.car.fw_versions import FW_QUERY_CONFIGS, FUZZY_EXCLUDE_ECUS, VERSIONS, build_fw_dict, \
                                     match_fw_to_car, get_brand_ecu_matches, get_fw_versions, get_present_ecus
 from opendbc.car.vin import get_vin
@@ -65,7 +64,7 @@ class TestFwFingerprint:
                         address=addr, subAddress=0 if sub_addr is None else sub_addr))
       CP.carFw = fw
       _, matches = match_fw_to_car(CP.carFw, CP.carVin, allow_exact=False, log=False)
-      brand_matches = config.match_fw_to_car_fuzzy(build_fw_dict(CP.carFw), Vin(CP.carVin), VERSIONS[brand])
+      brand_matches = config.match_fw_to_car_fuzzy(build_fw_dict(CP.carFw), CP.carVin, VERSIONS[brand])
 
       # If both have matches, they must agree
       if len(matches) == 1 and len(brand_matches) == 1:
