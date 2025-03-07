@@ -80,6 +80,8 @@ routes = [
   CarTestRoute("36c62b5da6f08154/00000052--983c17c5b2", GM.GMC_YUKON),
 
   CarTestRoute("0e7a2ba168465df5|2020-10-18--14-14-22", HONDA.ACURA_RDX_3G),
+  #fake test, just seeing if CI finds more problems before new testdrive, then will replace
+  CarTestRoute("0e7a2ba168465df5|2020-10-18--14-14-22", HONDA.ACURA_RDX_3G_MMR),
   CarTestRoute("a74b011b32b51b56|2020-07-26--17-09-36", HONDA.HONDA_CIVIC),
   CarTestRoute("a859a044a447c2b0|2020-03-03--18-42-45", HONDA.HONDA_CRV_EU),
   CarTestRoute("68aac44ad69f838e|2021-05-18--20-40-52", HONDA.HONDA_CRV),
@@ -105,8 +107,6 @@ routes = [
   CarTestRoute("684e8f96bd491a0e|2021-11-03--11-08-42", HONDA.HONDA_PILOT),  # Passport
   CarTestRoute("0a78dfbacc8504ef|2020-03-04--13-29-55", HONDA.HONDA_CIVIC_BOSCH),
   CarTestRoute("f34a60d68d83b1e5|2020-10-06--14-35-55", HONDA.ACURA_RDX),
-  #fake test, just seeing if CI finds more problems before new testdrive, then will replace
-  CarTestRoute("f34a60d68d83b1e5|2020-10-06--14-35-55", HONDA.ACURA_RDX_MMR),
   CarTestRoute("54fd8451b3974762|2021-04-01--14-50-10", HONDA.HONDA_RIDGELINE),
   CarTestRoute("2d5808fae0b38ac6|2021-09-01--17-14-11", HONDA.HONDA_E),
   CarTestRoute("f44aa96ace22f34a|2021-12-22--06-22-31", HONDA.HONDA_CIVIC_2022),
