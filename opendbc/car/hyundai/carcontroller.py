@@ -45,7 +45,7 @@ class CarController(CarControllerBase):
       right_lane_warning, tester_present_msgs
     ) = self.compute_common_controls(CC, CS)
 
-    can_sends = tester_present_msgs[:]
+    can_sends = tester_present_msgs.copy()
 
     can_sends.append(hyundaican.create_lkas11(self.packer, self.frame, self.CP, apply_torque, apply_steer_req,
                                               torque_fault, CS.lkas11, sys_warning, sys_state, CC.enabled,
@@ -94,7 +94,7 @@ class CarController(CarControllerBase):
       right_lane_warning, tester_present_msgs
     ) = self.compute_common_controls(CC, CS)
 
-    can_sends = tester_present_msgs[:]
+    can_sends = tester_present_msgs.copy()
 
     lka_steering = self.CP.flags & HyundaiFlags.CANFD_LKA_STEERING
     lka_steering_long = lka_steering and self.CP.openpilotLongitudinalControl
