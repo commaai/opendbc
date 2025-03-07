@@ -121,6 +121,8 @@ typedef struct {
   const int addr;
   const int bus;
   const int len;
+  const bool ignore_checksum;         // checksum check is not performed when set to true
+  const bool ignore_counter;           // counter check is not performed when set to true
   const bool check_checksum;         // true is checksum check is performed
   const uint8_t max_counter;         // maximum value of the counter. 0 means that the counter check is skipped
   const bool quality_flag;           // true is quality flag check is performed
