@@ -43,13 +43,14 @@ def get_can_messages(CP, gearbox_msg):
       ("SCM_FEEDBACK", 10),
       ("SCM_BUTTONS", 25),
     ]
-  
+
   if CP.carFingerprint in SERIAL_STEERING:
       messages.append(("STEER_STATUS", 0))
   else:
       messages.append(("STEER_STATUS", 100))
-    
-  if CP.carFingerprint in (CAR.HONDA_CRV_HYBRID, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.ACURA_RDX_3G, CAR.HONDA_ODYSSEY_5G_MMR, CAR.HONDA_E, CAR.ACURA_MDX_3G, CAR.ACURA_MDX_3G_HYBRID):
+
+  if CP.carFingerprint in (CAR.HONDA_CRV_HYBRID, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.ACURA_RDX_3G, CAR.HONDA_ODYSSEY_5G_MMR, \
+                           CAR.HONDA_E, CAR.ACURA_MDX_3G, CAR.ACURA_MDX_3G_HYBRID):
     messages.append((gearbox_msg, 50))
   else:
     messages.append((gearbox_msg, 100))
@@ -225,7 +226,7 @@ class CarState(CarStateBase):
     else:
       ret.steeringTorque = cp.vl["STEER_STATUS"]['STEER_TORQUE_SENSOR']
       ret.steeringTorqueEps = cp.vl["STEER_MOTOR_TORQUE"]['MOTOR_TORQUE']
-    
+
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD.get(self.CP.carFingerprint, 1200)
 
     # is_metric_cruise is used for cruise speed display
@@ -274,8 +275,8 @@ class CarState(CarStateBase):
 
     ret.brake = cp.vl["VSA_STATUS"]["USER_BRAKE"]
     ret.cruiseState.enabled = cp.vl["POWERTRAIN_DATA"]["ACC_STATUS"] != 0
-    
-    if CP.carFingerprint in SERIAL_STEERING:
+
+    if self.CP.carFingerprint in SERIAL_STEERING:
       ret.cruiseState.available = True
     else:
       ret.cruiseState.available = bool(cp.vl[self.main_on_sig_msg]["MAIN_ON"])
