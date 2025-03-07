@@ -32,15 +32,6 @@ BO_ 891 STALK_STATUS_2: 8 XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
 
-BO_ 1029 DOORS_STATUS: 8 BDY
- SG_ DOOR_OPEN_FL : 37|1@0+ (1,0) [0|1] "" EON
- SG_ DOOR_OPEN_FR : 38|1@0+ (1,0) [0|1] "" EON
- SG_ DOOR_OPEN_RL : 39|1@0+ (1,0) [0|1] "" EON
- SG_ DOOR_OPEN_RR : 40|1@0+ (1,0) [0|1] "" EON
- SG_ TRUNK_OPEN : 41|1@0+ (1,0) [0|1] "" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
-
 CM_ SG_ 304 "Seems to be platform-agnostic";
 CM_ SG_ 316 "Should exist on Nidec";
 CM_ SG_ 420 BRAKE_HOLD_RELATED "On when Brake Hold engaged";
