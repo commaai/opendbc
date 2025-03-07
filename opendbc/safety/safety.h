@@ -134,9 +134,9 @@ static int get_addr_check_index(const CANPacket_t *to_push, RxCheck addr_list[],
   for (int i = 0; i < len; i++) {
     // if multiple msgs are allowed, determine which one is present on the bus
     if (!addr_list[i].status.msg_seen) {
-      for (uint8_t j = 0U; (j < MAX_ADDR_CHECK_MSGS) && (addr_list[i].msg[j].addr != 0); j++) {
-        if ((addr == addr_list[i].msg[j].addr) && (bus == addr_list[i].msg[j].bus) &&
-              (length == addr_list[i].msg[j].len)) {
+      for (uint8_t j = 0U; (j < MAX_ADDR_CHECK_MSGS) && (addr_list[i].msg[j].msg.addr != 0); j++) {
+        if ((addr == addr_list[i].msg[j].msg.addr) && (bus == addr_list[i].msg[j].msg.bus) &&
+              (length == addr_list[i].msg[j].msg.len)) {
           addr_list[i].status.index = j;
           addr_list[i].status.msg_seen = true;
           break;
@@ -146,8 +146,8 @@ static int get_addr_check_index(const CANPacket_t *to_push, RxCheck addr_list[],
 
     if (addr_list[i].status.msg_seen) {
       int idx = addr_list[i].status.index;
-      if ((addr == addr_list[i].msg[idx].addr) && (bus == addr_list[i].msg[idx].bus) &&
-          (length == addr_list[i].msg[idx].len)) {
+      if ((addr == addr_list[i].msg[idx].msg.addr) && (bus == addr_list[i].msg[idx].msg.bus) &&
+          (length == addr_list[i].msg[idx].msg.len)) {
         index = i;
         break;
       }

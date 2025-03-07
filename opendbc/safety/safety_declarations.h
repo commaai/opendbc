@@ -21,6 +21,12 @@
     (config).tx_msgs_len = sizeof((tx)) / sizeof((tx)[0]); \
   } while(0);
 
+#define SET_FWD_MSGS(fwd, config) \
+  do { \
+    (config).fwd_msgs = (fwd); \
+    (config).fwd_msgs_len = sizeof((fwd)) / sizeof((fwd)[0]); \
+  } while(0);
+
 #define UPDATE_VEHICLE_SPEED(val_ms) (update_sample(&vehicle_speed, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
 
 uint32_t GET_BYTES(const CANPacket_t *msg, int start, int len);
@@ -118,9 +124,7 @@ typedef struct {
 } LongitudinalLimits;
 
 typedef struct {
-  const int addr;
-  const int bus;
-  const int len;
+  const CanMsg msg;
   const bool ignore_checksum;        // checksum check is not performed when set to true
   const bool ignore_counter;         // counter check is not performed when set to true
   const uint8_t max_counter;         // maximum value of the counter. 0 means that the counter check is skipped
@@ -151,6 +155,8 @@ typedef struct {
   int rx_checks_len;
   const CanMsg *tx_msgs;
   int tx_msgs_len;
+  const CanMsg *fwd_msgs;
+  int fwd_msgs_len;
 } safety_config;
 
 typedef uint32_t (*get_checksum_t)(const CANPacket_t *to_push);
