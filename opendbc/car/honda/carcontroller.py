@@ -120,7 +120,7 @@ class CarController(CarControllerBase):
     self.apply_steer_last = 0.0
 
   def apply_driver_steer_torque_limits(apply_torque, apply_torque_last, driver_torque, LIMITS, ss=False):
-  
+
     # limits due to driver torque
     driver_max_torque = LIMITS.STEER_MAX + (LIMITS.STEER_DRIVER_ALLOWANCE + driver_torque * LIMITS.STEER_DRIVER_FACTOR) * LIMITS.STEER_DRIVER_MULTIPLIER
     driver_min_torque = -LIMITS.STEER_MAX + (-LIMITS.STEER_DRIVER_ALLOWANCE + driver_torque * LIMITS.STEER_DRIVER_FACTOR) * LIMITS.STEER_DRIVER_MULTIPLIER
@@ -132,14 +132,14 @@ class CarController(CarControllerBase):
       max_steer_allowed = min_torque
       min_steer_allowed = -min_torque
 
-    apply_torque = clip(apply_torque, min_steer_allowed, max_steer_allowed)
+    apply_torque = np.clip(apply_torque, min_steer_allowed, max_steer_allowed)
 
     # slow rate if steer torque increases in magnitude
     if apply_torque_last > 0:
-      apply_torque = clip(apply_torque, max(apply_torque_last - LIMITS.STEER_DELTA_DOWN, -LIMITS.STEER_DELTA_UP),
+      apply_torque = np.clip(apply_torque, max(apply_torque_last - LIMITS.STEER_DELTA_DOWN, -LIMITS.STEER_DELTA_UP),
                         apply_torque_last + LIMITS.STEER_DELTA_UP)
     else:
-      apply_torque = clip(apply_torque, apply_torque_last - LIMITS.STEER_DELTA_UP,
+      apply_torque = np.clip(apply_torque, apply_torque_last - LIMITS.STEER_DELTA_UP,
                         min(apply_torque_last + LIMITS.STEER_DELTA_DOWN, LIMITS.STEER_DELTA_UP))
 
     return int(round(float(apply_torque)))
@@ -178,7 +178,7 @@ class CarController(CarControllerBase):
     # steer torque is converted back to CAN reference (positive when steering right)
     apply_torque = int(np.interp(-limited_torque * self.params.STEER_MAX,
                                  self.params.STEER_LOOKUP_BP, self.params.STEER_LOOKUP_V))
-    
+
     if (CS.CP.carFingerprint in SERIAL_STEERING):
       apply_steer = apply_driver_steer_torque_limits(apply_steer, self.apply_steer_last, CS.out.steeringTorque, LKAS_LIMITS, ss=True)
       self.apply_steer_last = apply_steer
