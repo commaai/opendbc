@@ -215,18 +215,25 @@ class CarState(CarStateBase):
     ret.steeringTorqueEps = cp.vl["STEER_MOTOR_TORQUE"]["MOTOR_TORQUE"]
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD.get(self.CP.carFingerprint, 1200)
 
+    # is_metric_cruise is used for cruise speed display
+    if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS
+      if "ACC_HUD" in cp_cam.vl:
+        self.is_metric_cruise = self.is_metric if cp_cam.vl["ACC_HUD"]["CRUISE_SPEED"] >= 253 else not cp_cam.vl["ACC_HUD"]["IMPERIAL_UNIT"]
+      else:
+        self.is_metric_cruise = self.is_metric
+    elif "ACC_HUD" in cp.vl:
+      self.is_metric_cruise = self.is_metric if cp.vl["ACC_HUD"]["CRUISE_SPEED"] >= 253 else not cp.vl["ACC_HUD"]["IMPERIAL_UNIT"]
+    else:
+      self.is_metric_cruise = self.is_metric
+
     if self.CP.carFingerprint in HONDA_BOSCH:
-      # ACC_HUD is on camera bus on radarless cars
-      acc_hud = cp_cam.vl["ACC_HUD"] if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS else cp.vl["ACC_HUD"]
-
-      # is_metric_cruise is used for cruise speed display
-      self.is_metric_cruise = self.is_metric if acc_hud["CRUISE_SPEED"] >= 253 else not acc_hud["IMPERIAL_UNIT"]
-
       # The PCM always manages its own cruise control state, but doesn't publish it
       if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
         ret.cruiseState.nonAdaptive = cp_cam.vl["ACC_HUD"]["CRUISE_CONTROL_LABEL"] != 0
 
       if not self.CP.openpilotLongitudinalControl:
+        # ACC_HUD is on camera bus on radarless cars
+        acc_hud = cp_cam.vl["ACC_HUD"] if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS else cp.vl["ACC_HUD"]
         ret.cruiseState.nonAdaptive = acc_hud["CRUISE_CONTROL_LABEL"] != 0
         ret.cruiseState.standstill = acc_hud["CRUISE_SPEED"] == 252.
 
@@ -235,8 +242,6 @@ class CarState(CarStateBase):
         ret.cruiseState.speed = self.v_cruise_pcm_prev if acc_hud["CRUISE_SPEED"] > 160.0 else acc_hud["CRUISE_SPEED"] * conversion
         self.v_cruise_pcm_prev = ret.cruiseState.speed
     else:
-      self.is_metric_cruise = self.is_metric
-      conversion = CV.KPH_TO_MS if self.is_metric_cruise else CV.MPH_TO_MS
       ret.cruiseState.speed = cp.vl["CRUISE"]["CRUISE_SPEED_PCM"] * conversion
 
     if self.CP.flags & HondaFlags.BOSCH_ALT_BRAKE:
