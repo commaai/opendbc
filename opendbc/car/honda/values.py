@@ -197,13 +197,13 @@ class CAR(Platforms):
   )
   ACURA_MDX_3G = HondaNidecPlatformConfig(
     [HondaCarDocs("Acura MDX 2018-2020")],
-    CarSpecs(mass=4350 * CV.LB_TO_KG, wheelbase=2.82, centerToFrontRatio=0.428, steerRatio=15.66, tireStiffnessFactor=0.444),  # acura spec, stiffness from Pilot
+    CarSpecs(mass=4350 * CV.LB_TO_KG, wheelbase=2.82, centerToFrontRatio=0.428, steerRatio=15.66, tireStiffnessFactor=0.444),  # acura spec, stiff from Pilot
     radar_dbc_dict('acura_mdx_3G'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES
   )
   ACURA_MDX_3G_HYBRID = HondaNidecPlatformConfig(
     [HondaCarDocs("Acura MDX Hybrid 2018-2020")],
-    CarSpecs(mass=4486 * CV.LB_TO_KG, wheelbase=2.82, centerToFrontRatio=0.428, steerRatio=15.76, tireStiffnessFactor=0.444),  # acura spec, stiffness from Pilot
+    CarSpecs(mass=4486 * CV.LB_TO_KG, wheelbase=2.82, centerToFrontRatio=0.428, steerRatio=15.76, tireStiffnessFactor=0.444),  # acura spec, stiff from Pilot
     radar_dbc_dict('acura_mdx_3G'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES
   )
