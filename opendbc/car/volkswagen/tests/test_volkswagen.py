@@ -2,6 +2,7 @@ import random
 import re
 
 from opendbc.car.structs import CarParams
+from opendbc.car.fw_query_definitions import Vin
 from opendbc.car.volkswagen.values import CAR, FW_QUERY_CONFIG, WMI
 from opendbc.car.volkswagen.fingerprints import FW_VERSIONS
 
@@ -46,7 +47,7 @@ class TestVolkswagenPlatformConfigs:
             vin = ["0"] * 17
             vin[0:3] = wmi
             vin[6:8] = chassis_code
-            vin = "".join(vin)
+            vin = Vin("".join(vin))
 
             # Check a few FW cases - expected, unexpected
             for radar_fw in random.sample(all_radar_fw, 5) + [b'\xf1\x875Q0907572G \xf1\x890571', b'\xf1\x877H9907572AA\xf1\x890396']:

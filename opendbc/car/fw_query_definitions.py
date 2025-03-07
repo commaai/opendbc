@@ -28,6 +28,21 @@ def p16(val):
   return struct.pack("!H", val)
 
 
+@dataclass
+class Vin:
+  vin: str
+  wmi: str = field(init=False)
+  vds: str = field(init=False)
+  vis: str = field(init=False)
+
+  def __post_init__(self):
+    # parses VIN in accordance with North America standard >2000 vehicles:
+    # https://en.wikipedia.org/wiki/Vehicle_identification_number#Components
+    self.wmi = self.vin[:3]  # World Manufacturer Identifier
+    self.vds = self.vin[3:9]  # Vehicle Descriptor Section
+    self.vis = self.vin[9:17]  # Vehicle Identifier Section
+
+
 class StdQueries:
   # FW queries
   TESTER_PRESENT_REQUEST = bytes([uds.SERVICE_TYPE.TESTER_PRESENT, 0x0])
@@ -103,7 +118,7 @@ class FwQueryConfig:
   extra_ecus: list[tuple[Ecu, int, int | None]] = field(default_factory=list)
   # Function a brand can implement to provide better fuzzy matching. Takes in FW versions and VIN,
   # returns set of candidates. Only will match if one candidate is returned
-  match_fw_to_car_fuzzy: Callable[[LiveFwVersions, str, OfflineFwVersions], set[str]] | None = None
+  match_fw_to_car_fuzzy: Callable[[LiveFwVersions, Vin, OfflineFwVersions], set[str]] | None = None
 
   def __post_init__(self):
     # Asserts that a request exists if extra ecus are used
