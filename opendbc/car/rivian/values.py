@@ -1,13 +1,9 @@
 from dataclasses import dataclass, field
 from enum import StrEnum, IntFlag
 
-from opendbc.car.structs import CarParams
-from opendbc.car import Bus, structs
-from opendbc.car import CarSpecs, PlatformConfig, Platforms
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, structs
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts, Device
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
-
-Ecu = CarParams.Ecu
 
 
 class WMI(StrEnum):
@@ -21,15 +17,19 @@ class RivianCarDocs(CarDocs):
   car_parts: CarParts = field(default_factory=CarParts([Device.threex_angled_mount, CarHarness.rivian]))
 
 
+@dataclass
+class RivianPlatformConfig(PlatformConfig):
+  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'rivian_primary_actuator', Bus.radar: 'rivian_mando_front_radar_generated'})
+
+
 class CAR(Platforms):
-  RIVIAN_R1_GEN1 = PlatformConfig(
+  RIVIAN_R1_GEN1 = RivianPlatformConfig(
     # TODO: verify this
     [
       RivianCarDocs("Rivian R1S 2022-24"),
       RivianCarDocs("Rivian R1T 2022-24"),
     ],
     CarSpecs(mass=3206., wheelbase=3.08, steerRatio=15.2),
-    {Bus.pt: 'rivian_primary_actuator', Bus.radar: 'rivian_mando_front_radar_generated'}
   )
 
 
