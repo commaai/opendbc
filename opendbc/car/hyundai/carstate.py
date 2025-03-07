@@ -192,8 +192,6 @@ class CarState(CarStateBase, EsccCarStateBase, MadsCarState):
     if self.CP.flags & HyundaiFlags.HAS_LDA_BUTTON:
       self.lda_button = cp.vl["BCM_PO_11"]["LDA_BTN"]
 
-    MadsCarState.update_mads(self, ret, can_parsers)
-
     ret.buttonEvents = [*create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT),
                         *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise}),
                         *create_button_events(self.lda_button, prev_lda_button, {1: ButtonType.lkas})]
@@ -418,8 +416,6 @@ class CarState(CarStateBase, EsccCarStateBase, MadsCarState):
 
       if CP.flags & HyundaiFlags.USE_FCA.value:
         cam_messages.append(("FCA11", 50))
-
-    MadsCarState.get_parser(CP, CP_SP, pt_messages)
 
     return {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 0),
