@@ -8,6 +8,7 @@ from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, \
                                                      Device
 from opendbc.car.fw_query_definitions import FwQueryConfig, LiveFwVersions, OfflineFwVersions, Request, StdQueries, p16
+from opendbc.car.vin import Vin
 
 Ecu = CarParams.Ecu
 
@@ -189,7 +190,7 @@ def get_platform_codes(fw_versions: list[bytes] | set[bytes]) -> set[tuple[bytes
   return codes
 
 
-def match_fw_to_car_fuzzy(live_fw_versions: LiveFwVersions, vin: str, offline_fw_versions: OfflineFwVersions) -> set[str]:
+def match_fw_to_car_fuzzy(live_fw_versions: LiveFwVersions, vin: Vin, offline_fw_versions: OfflineFwVersions) -> set[str]:
   candidates: set[str] = set()
 
   for candidate, fws in offline_fw_versions.items():
