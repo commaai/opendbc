@@ -1,13 +1,10 @@
 from dataclasses import dataclass, field
 from enum import StrEnum, IntFlag
 
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, structs
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts, Device
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
-from opendbc.car.structs import CarParams, CarState
 from opendbc.car.vin import parse_vin
-
-Ecu = CarParams.Ecu
 
 
 class WMI(StrEnum):
@@ -82,11 +79,11 @@ FW_QUERY_CONFIG = FwQueryConfig(
 )
 
 GEAR_MAP = {
-  0: CarState.GearShifter.unknown,
-  1: CarState.GearShifter.park,
-  2: CarState.GearShifter.reverse,
-  3: CarState.GearShifter.neutral,
-  4: CarState.GearShifter.drive,
+  0: structs.CarState.GearShifter.unknown,
+  1: structs.CarState.GearShifter.park,
+  2: structs.CarState.GearShifter.reverse,
+  3: structs.CarState.GearShifter.neutral,
+  4: structs.CarState.GearShifter.drive,
 }
 
 
