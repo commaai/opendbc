@@ -134,13 +134,7 @@ def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
   if msg_161.get("ALERTS_3") == 17:  # DRIVE_CAREFULLY
     msg_161["ALERTS_3"] = 0
 
-  if msg_161.get("ALERTS_5") == 2:  # WATCH_FOR_SURROUNDING_VEHICLES
-    msg_161["ALERTS_5"] = 0
-
-  if msg_161.get("ALERTS_5") == 4:  # SMART_CRUISE_CONTROL_CONDITIONS_NOT_MET
-    msg_161["ALERTS_5"] = 0
-
-  if msg_161.get("ALERTS_5") == 5:  # USE_SWITCH_OR_PEDAL_TO_ACCELERATE
+  if msg_161.get("ALERTS_5") in {2, 4, 5}:  # WATCH_FOR_SURROUNDING_VEHICLES, SMART_CRUISE_CONTROL_CONDITIONS_NOT_MET, USE_SWITCH_OR_PEDAL_TO_ACCELERATE
     msg_161["ALERTS_5"] = 0
 
   if msg_161.get("ALERTS_2") == 5:  # CONSIDER_TAKING_A_BREAK
