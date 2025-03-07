@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 from collections import defaultdict
 import importlib
-from parameterized import parameterized_class
 import pytest
 import sys
 
 from opendbc.car import DT_CTRL
-from opendbc.car.car_helpers import interfaces
 from opendbc.car.interfaces import ISO_LATERAL_ACCEL, get_torque_params
 from opendbc.car.values import PLATFORMS
 
@@ -18,13 +16,14 @@ MAX_LAT_JERK_UP_TOLERANCE = 0.5  # m/s^3
 # jerk is measured over half a second
 JERK_MEAS_T = 0.5
 
+@pytest.fixture
+def car_params(request, interfaces):
+  return TestLateralLimits.setup(request.param, interfaces)
 
-@parameterized_class('car_model', [(c,) for c in sorted(PLATFORMS)])
 class TestLateralLimits:
-  car_model: str
-
   @classmethod
-  def setup_class(cls):
+  def setup(cls, car_model, interfaces):
+    cls.car_model = car_model
     CarInterface = interfaces[cls.car_model]
     CP = CarInterface.get_non_essential_params(cls.car_model)
 
@@ -41,6 +40,7 @@ class TestLateralLimits:
     CarControllerParams = importlib.import_module(f'opendbc.car.{CP.brand}.values').CarControllerParams
     cls.control_params = CarControllerParams(CP)
     cls.torque_params = get_torque_params()[cls.car_model]
+    return cls
 
   @staticmethod
   def calculate_0_5s_jerk(control_params, torque_params):
@@ -58,13 +58,15 @@ class TestLateralLimits:
     # Convert to m/s^3
     return accel_up_0_5_sec / JERK_MEAS_T, accel_down_0_5_sec / JERK_MEAS_T
 
-  def test_jerk_limits(self):
-    up_jerk, down_jerk = self.calculate_0_5s_jerk(self.control_params, self.torque_params)
-    assert up_jerk <= MAX_LAT_JERK_UP + MAX_LAT_JERK_UP_TOLERANCE
-    assert down_jerk <= MAX_LAT_JERK_DOWN
+@pytest.mark.parametrize('car_params', sorted(PLATFORMS), indirect=True)
+def test_jerk_limits(car_params):
+  up_jerk, down_jerk = TestLateralLimits.calculate_0_5s_jerk(car_params.control_params, car_params.torque_params)
+  assert up_jerk <= MAX_LAT_JERK_UP + MAX_LAT_JERK_UP_TOLERANCE
+  assert down_jerk <= MAX_LAT_JERK_DOWN
 
-  def test_max_lateral_accel(self):
-    assert self.torque_params["MAX_LAT_ACCEL_MEASURED"] <= ISO_LATERAL_ACCEL
+@pytest.mark.parametrize('car_params', sorted(PLATFORMS), indirect=True)
+def test_max_lateral_accel(car_params):
+  assert car_params.torque_params["MAX_LAT_ACCEL_MEASURED"] <= ISO_LATERAL_ACCEL
 
 
 class LatAccelReport:

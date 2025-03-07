@@ -2,7 +2,6 @@ from collections import defaultdict
 import pytest
 import re
 
-from opendbc.car.car_helpers import interfaces
 from opendbc.car.docs import get_all_car_docs
 from opendbc.car.docs_definitions import Cable, Column, PartType, Star, SupportType
 from opendbc.car.honda.values import CAR as HONDA
@@ -26,7 +25,7 @@ class TestCarDocs:
           assert year not in make_model_years[make_model], f"{car.name}: Duplicate model year"
           make_model_years[make_model].append(year)
 
-  def test_missing_car_docs(self, subtests):
+  def test_missing_car_docs(self, subtests, interfaces):
     all_car_docs_platforms = [name for name, config in PLATFORMS.items()]
     for platform in sorted(interfaces.keys()):
       with subtests.test(platform=platform):
