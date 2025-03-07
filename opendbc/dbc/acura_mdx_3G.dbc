@@ -77,15 +77,6 @@ CM_ "Imported file _steering_sensors_b.dbc starts here";
 
 CM_ "acura_ilx_2016_can.dbc starts here";
 
-BO_ 399 STEER_STATUS: 7 EPS
- SG_ STEER_TORQUE_SENSOR : 7|16@0- (-1,0) [-31000|31000] "tbd" EON
- SG_ STEER_ANGLE_RATE : 23|16@0- (-0.1,0) [-31000|31000] "deg/s" EON
- SG_ STEER_STATUS : 39|4@0+ (1,0) [0|15] "" EON
- SG_ STEER_CONTROL_ACTIVE : 35|1@0+ (1,0) [0|1] "" EON
- SG_ STEER_CONFIG_INDEX : 43|4@0+ (1,0) [0|15] "" EON
- SG_ COUNTER : 53|2@0+ (1,0) [0|3] "" EON
- SG_ CHECKSUM : 51|4@0+ (1,0) [0|3] "" EON
-
 BO_ 419 GEARBOX: 8 PCM
  SG_ GEAR : 7|8@0+ (1,0) [0|256] "" EON
  SG_ GEAR_SHIFTER : 35|4@0+ (1,0) [0|15] "" EON
