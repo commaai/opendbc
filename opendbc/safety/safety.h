@@ -502,6 +502,8 @@ static bool dist_to_meas_check(int val, int val_last, struct sample_t *val_meas,
   int highest_allowed = MIN(highest_allowed_rl, MAX(val_last - MAX_RATE_DOWN, MAX(val_meas->max, 0) + MAX_ERROR));
   int lowest_allowed = MAX(lowest_allowed_rl, MIN(val_last + MAX_RATE_DOWN, MIN(val_meas->min, 0) - MAX_ERROR));
 
+  printf("val: %d, val_last: %d, val_meas->max: %d, val_meas->min: %d, highest_allowed: %d, lowest_allowed: %d\n", val, val_last, val_meas->max, val_meas->min, highest_allowed, lowest_allowed);
+
   // check for violation
   return max_limit_check(val, highest_allowed, lowest_allowed);
 }
@@ -524,6 +526,8 @@ static bool driver_limit_check(int val, int val_last, const struct sample_t *val
                                              MAX(driver_max_limit, 0)));
   int lowest_allowed = MAX(lowest_allowed_rl, MIN(val_last + MAX_RATE_DOWN,
                                            MIN(driver_min_limit, 0)));
+
+  printf("val: %d, val_last: %d, val_driver->max: %d, val_driver->min: %d, highest_allowed: %d, lowest_allowed: %d\n", val, val_last, val_driver->max, val_driver->min, highest_allowed, lowest_allowed);
 
   // check for violation
   return max_limit_check(val, highest_allowed, lowest_allowed);
@@ -610,22 +614,28 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
   uint32_t ts = microsecond_timer_get();
 
   if (controls_allowed) {
+    printf("here\n");
     // *** global torque limit check ***
     violation |= max_limit_check(desired_torque, limits.max_steer, -limits.max_steer);
+    printf("viol: %d\n", violation);
 
     // *** torque rate limit check ***
     if (limits.type == TorqueDriverLimited) {
       violation |= driver_limit_check(desired_torque, desired_torque_last, &torque_driver,
                                       limits.max_steer, limits.max_rate_up, limits.max_rate_down,
                                       limits.driver_torque_allowance, limits.driver_torque_multiplier);
+      printf("viol1: %d\n", violation);
     } else {
       violation |= dist_to_meas_check(desired_torque, desired_torque_last, &torque_meas,
                                       limits.max_rate_up, limits.max_rate_down, limits.max_torque_error);
+    printf("viol2: %d\n", violation);
     }
     desired_torque_last = desired_torque;
 
     // *** torque real time rate limit check ***
     violation |= rt_rate_limit_check(desired_torque, rt_torque_last, limits.max_rt_delta);
+    printf("desired_torque: %d, rt_torque_last: %d, limits.max_rt_delta: %d\n", desired_torque, rt_torque_last, limits.max_rt_delta);
+    printf("viol3: %d\n", violation);
 
     // every RT_INTERVAL set the new limits
     uint32_t ts_elapsed = get_ts_elapsed(ts, ts_torque_check_last);
@@ -638,6 +648,7 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
   // no torque if controls is not allowed
   if (!controls_allowed && (desired_torque != 0)) {
     violation = true;
+    printf("viol4: %d\n", violation);
   }
 
   // certain safety modes set their steer request bit low for one or more frame at a
@@ -646,6 +657,7 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
   if (!limits.has_steer_req_tolerance) {
     if (steer_req_mismatch) {
       violation = true;
+    printf("viol5: %d\n", violation);
     }
 
   } else {
@@ -654,17 +666,20 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
         // disallow torque cut if not enough recent matching steer_req messages
         if (valid_steer_req_count < limits.min_valid_request_frames) {
           violation = true;
+    printf("viol6: %d\n", violation);
         }
 
         // or we've cut torque too recently in time
         uint32_t ts_elapsed = get_ts_elapsed(ts, ts_steer_req_mismatch_last);
         if (ts_elapsed < limits.min_valid_request_rt_interval) {
           violation = true;
+    printf("viol7: %d\n", violation);
         }
       } else {
         // or we're cutting more frames consecutively than allowed
         if (invalid_steer_req_count >= limits.max_invalid_request_frames) {
           violation = true;
+    printf("viol8: %d\n", violation);
         }
       }
 

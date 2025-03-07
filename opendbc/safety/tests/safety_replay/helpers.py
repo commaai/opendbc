@@ -69,6 +69,16 @@ def package_can_msg(msg):
   return libsafety_py.make_CANPacket(msg.address, msg.src % 4, msg.dat)
 
 def init_segment(safety, msgs, mode, param):
+  # # TODO: use the CarState to get the vehicle speed to explicitly set
+  # i = 0
+  # for msg in msgs:
+  #   if msg.which() == 'can':
+  #     i += 1
+  #     for can in msg.can:
+  #       safety.safety_rx_hook(package_can_msg(can))
+  #     if i > 100:
+  #       break
+
   sendcan = (msg for msg in msgs if msg.which() == 'sendcan')
   steering_msgs = (can for msg in sendcan for can in msg.sendcan if is_steering_msg(mode, param, can.address))
 
