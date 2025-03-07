@@ -215,7 +215,7 @@ class CarController(CarControllerBase):
     return can_sends
 
 
-  def process_hud_alert(enabled, fingerprint, hud_control):
+  def process_hud_alert(self, enabled, fingerprint, hud_control):
     sys_warning = (hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw))
 
     # initialize to no line visible
