@@ -10,7 +10,7 @@ VIN_RE = "[A-HJ-NPR-Z0-9]{17}"
 
 
 def parse_vin(vin: str) -> tuple[str, str, str]:
-  # parses VIN in accordance to North America standard >2000 vehicles:
+  # parses VIN in accordance with North America standard >2000 vehicles:
   # https://en.wikipedia.org/wiki/Vehicle_identification_number#Components
   wmi = vin[:3]  # World Manufacturer Identifier
   vds = vin[3:9]  # Vehicle Descriptor Section
