@@ -134,14 +134,6 @@ class CarState(CarStateBase):
     # used for car hud message
     self.is_metric = not cp.vl["CAR_SPEED"]["IMPERIAL_UNIT"]
 
-    # is_metric_cruise is used for cruise speed display
-    # ACC_HUD is on camera bus on radarless cars
-    acc_hud = cp_cam.vl["ACC_HUD"] if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS else cp.vl["ACC_HUD"]
-    if acc_hud["CRUISE_SPEED"] >= 253:
-      self.is_metric_cruise = self.is_metric
-    else:
-      self.is_metric_cruise = not acc_hud["IMPERIAL_UNIT"]
-
     # ******************* parse out can *******************
     # STANDSTILL->WHEELS_MOVING bit can be noisy around zero, so use XMISSION_SPEED
     # panda checks if the signal is non-zero
@@ -223,6 +215,14 @@ class CarState(CarStateBase):
     ret.steeringTorqueEps = cp.vl["STEER_MOTOR_TORQUE"]["MOTOR_TORQUE"]
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD.get(self.CP.carFingerprint, 1200)
 
+    # is_metric_cruise is used for cruise speed display
+    # ACC_HUD is on camera bus on radarless cars
+    acc_hud = cp_cam.vl["ACC_HUD"] if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS else cp.vl["ACC_HUD"]
+    if acc_hud["CRUISE_SPEED"] >= 253:
+      self.is_metric_cruise = self.is_metric
+    else:
+      self.is_metric_cruise = not acc_hud["IMPERIAL_UNIT"]
+    
     if self.CP.carFingerprint in HONDA_BOSCH:
       # The PCM always manages its own cruise control state, but doesn't publish it
       if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
