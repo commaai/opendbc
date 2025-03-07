@@ -76,11 +76,6 @@ BO_ 487 BRAKE_PRESSURE: 4 VSA
  SG_ CHECKSUM : 27|4@0+ (1,0) [0|15] "" EON
  SG_ COUNTER : 29|2@0+ (1,0) [0|3] "" EON
 
-BO_ 892 CRUISE_PARAMS: 8 PCM
- SG_ CRUISE_SPEED_OFFSET : 31|8@0- (0.1,0) [-128|127] "kph" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
-
 CM_ SG_ 506 AEB_REQ_1 "set for duration of suspected AEB event";
 CM_ SG_ 506 COMPUTER_BRAKE_ALT "Used by dual-can Nidec";
 CM_ SG_ 506 BRAKE_PUMP_REQUEST_ALT "Used by dual-can Nidec";
