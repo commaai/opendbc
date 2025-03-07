@@ -96,12 +96,12 @@ static void gm_rx_hook(const CANPacket_t *to_push) {
 }
 
 static bool gm_tx_hook(const CANPacket_t *to_send) {
-  const SteeringLimits GM_STEERING_LIMITS = {
+  const TorqueSteeringLimits GM_STEERING_LIMITS = {
     .max_steer = 300,
     .max_rate_up = 10,
     .max_rate_down = 15,
     .driver_torque_allowance = 65,
-    .driver_torque_factor = 4,
+    .driver_torque_multiplier = 4,
     .max_rt_delta = 128,
     .max_rt_interval = 250000,
     .type = TorqueDriverLimited,
@@ -213,14 +213,14 @@ static safety_config gm_init(uint16_t param) {
 
   // TODO: do checksum and counter checks. Add correct timestep, 0.1s for now.
   static RxCheck gm_rx_checks[] = {
-    {.msg = {{0x184, 0, 8, .frequency = 10U}, { 0 }, { 0 }}},
-    {.msg = {{0x34A, 0, 5, .frequency = 10U}, { 0 }, { 0 }}},
-    {.msg = {{0x1E1, 0, 7, .frequency = 10U}, { 0 }, { 0 }}},
-    {.msg = {{0xBE, 0, 6, .frequency = 10U},    // Volt, Silverado, Acadia Denali
-             {0xBE, 0, 7, .frequency = 10U},    // Bolt EUV
-             {0xBE, 0, 8, .frequency = 10U}}},  // Escalade
-    {.msg = {{0x1C4, 0, 8, .frequency = 10U}, { 0 }, { 0 }}},
-    {.msg = {{0xC9, 0, 8, .frequency = 10U}, { 0 }, { 0 }}},
+    {.msg = {{0x184, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},
+    {.msg = {{0x34A, 0, 5, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},
+    {.msg = {{0x1E1, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},
+    {.msg = {{0xBE, 0, 6, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},    // Volt, Silverado, Acadia Denali
+             {0xBE, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},    // Bolt EUV
+             {0xBE, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}}},  // Escalade
+    {.msg = {{0x1C4, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},
+    {.msg = {{0xC9, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},
   };
 
   static const CanMsg GM_CAM_TX_MSGS[] = {{0x180, 0, 4},  // pt bus

@@ -10,7 +10,7 @@
   .max_rt_delta = 112, \
   .max_rt_interval = 250000, \
   .driver_torque_allowance = 50, \
-  .driver_torque_factor = 2, \
+  .driver_torque_multiplier = 2, \
   .type = TorqueDriverLimited, \
    /* the EPS faults when the steering angle is above a certain threshold for too long. to prevent this, */ \
    /* we allow setting CF_Lkas_ActToi bit to 0 while maintaining the requested torque value for two consecutive frames */ \
@@ -39,15 +39,15 @@ const LongitudinalLimits HYUNDAI_LONG_LIMITS = {
   {0x389, 0,       8},  /* SCC14 Bus 0                               */ \
   {0x4A2, 0,       2},  /* FRT_RADAR11 Bus 0                         */ \
 
-#define HYUNDAI_COMMON_RX_CHECKS(legacy)                                                                                      \
-  {.msg = {{0x260, 0, 8, .check_checksum = true, .max_counter = 3U, .frequency = 100U},                                       \
-           {0x371, 0, 8, .frequency = 100U},                                                                                  \
-           {0x91,  0, 8, .frequency = 100U}}},                                                                                \
-  {.msg = {{0x386, 0, 8, .check_checksum = !(legacy), .max_counter = (legacy) ? 0U : 15U, .frequency = 100U}, { 0 }, { 0 }}}, \
-  {.msg = {{0x394, 0, 8, .check_checksum = !(legacy), .max_counter = (legacy) ? 0U : 7U, .frequency = 100U}, { 0 }, { 0 }}},  \
+#define HYUNDAI_COMMON_RX_CHECKS(legacy)                                                                                                                  \
+  {.msg = {{0x260, 0, 8, .max_counter = 3U, .frequency = 100U},                                                                                           \
+           {0x371, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U},                                                             \
+           {0x91,  0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}}},                                                           \
+  {.msg = {{0x386, 0, 8, .ignore_checksum = (legacy), .ignore_counter = (legacy), .max_counter = (legacy) ? 0U : 15U, .frequency = 100U}, { 0 }, { 0 }}}, \
+  {.msg = {{0x394, 0, 8, .ignore_checksum = (legacy), .ignore_counter = (legacy), .max_counter = (legacy) ? 0U : 7U, .frequency = 100U}, { 0 }, { 0 }}},  \
 
-#define HYUNDAI_SCC12_ADDR_CHECK(scc_bus)                                                                                     \
-  {.msg = {{0x421, (scc_bus), 8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},               \
+#define HYUNDAI_SCC12_ADDR_CHECK(scc_bus)                                               \
+  {.msg = {{0x421, (scc_bus), 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}}, \
 
 static const CanMsg HYUNDAI_TX_MSGS[] = {
   HYUNDAI_COMMON_TX_MSGS(0)
@@ -189,9 +189,9 @@ static void hyundai_rx_hook(const CANPacket_t *to_push) {
 }
 
 static bool hyundai_tx_hook(const CANPacket_t *to_send) {
-  const SteeringLimits HYUNDAI_STEERING_LIMITS = HYUNDAI_LIMITS(384, 3, 7);
-  const SteeringLimits HYUNDAI_STEERING_LIMITS_ALT = HYUNDAI_LIMITS(270, 2, 3);
-  const SteeringLimits HYUNDAI_STEERING_LIMITS_ALT_2 = HYUNDAI_LIMITS(170, 2, 3);
+  const TorqueSteeringLimits HYUNDAI_STEERING_LIMITS = HYUNDAI_LIMITS(384, 3, 7);
+  const TorqueSteeringLimits HYUNDAI_STEERING_LIMITS_ALT = HYUNDAI_LIMITS(270, 2, 3);
+  const TorqueSteeringLimits HYUNDAI_STEERING_LIMITS_ALT_2 = HYUNDAI_LIMITS(170, 2, 3);
 
   bool tx = true;
   int addr = GET_ADDR(to_send);
@@ -232,8 +232,8 @@ static bool hyundai_tx_hook(const CANPacket_t *to_send) {
     int desired_torque = ((GET_BYTES(to_send, 0, 4) >> 16) & 0x7ffU) - 1024U;
     bool steer_req = GET_BIT(to_send, 27U);
 
-    const SteeringLimits limits = hyundai_alt_limits_2 ? HYUNDAI_STEERING_LIMITS_ALT_2 :
-                                  hyundai_alt_limits ? HYUNDAI_STEERING_LIMITS_ALT : HYUNDAI_STEERING_LIMITS;
+    const TorqueSteeringLimits limits = hyundai_alt_limits_2 ? HYUNDAI_STEERING_LIMITS_ALT_2 :
+                                        hyundai_alt_limits ? HYUNDAI_STEERING_LIMITS_ALT : HYUNDAI_STEERING_LIMITS;
 
     if (steer_torque_cmd_checks(desired_torque, steer_req, limits)) {
       tx = false;
@@ -311,7 +311,7 @@ static safety_config hyundai_init(uint16_t param) {
     static RxCheck hyundai_long_rx_checks[] = {
       HYUNDAI_COMMON_RX_CHECKS(false)
       // Use CLU11 (buttons) to manage controls allowed instead of SCC cruise state
-      {.msg = {{0x4F1, 0, 4, .check_checksum = false, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
+      {.msg = {{0x4F1, 0, 4, .ignore_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
     };
 
     ret = hyundai_camera_scc ? BUILD_SAFETY_CFG(hyundai_long_rx_checks, HYUNDAI_CAMERA_SCC_LONG_TX_MSGS) : \

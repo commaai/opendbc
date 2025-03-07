@@ -56,13 +56,13 @@ static void subaru_preglobal_rx_hook(const CANPacket_t *to_push) {
 }
 
 static bool subaru_preglobal_tx_hook(const CANPacket_t *to_send) {
-  const SteeringLimits SUBARU_PG_STEERING_LIMITS = {
+  const TorqueSteeringLimits SUBARU_PG_STEERING_LIMITS = {
     .max_steer = 2047,
     .max_rt_delta = 940,
     .max_rt_interval = 250000,
     .max_rate_up = 50,
     .max_rate_down = 70,
-    .driver_torque_factor = 10,
+    .driver_torque_multiplier = 10,
     .driver_torque_allowance = 75,
     .type = TorqueDriverLimited,
   };
@@ -110,9 +110,9 @@ static safety_config subaru_preglobal_init(uint16_t param) {
 
   // TODO: do checksum and counter checks after adding the signals to the outback dbc file
   static RxCheck subaru_preglobal_rx_checks[] = {
-    {.msg = {{MSG_SUBARU_PG_Throttle,        SUBARU_PG_MAIN_BUS, 8, .frequency = 100U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_SUBARU_PG_Steering_Torque, SUBARU_PG_MAIN_BUS, 8, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_SUBARU_PG_CruiseControl,   SUBARU_PG_MAIN_BUS, 8, .frequency = 20U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_SUBARU_PG_Throttle,        SUBARU_PG_MAIN_BUS, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_SUBARU_PG_Steering_Torque, SUBARU_PG_MAIN_BUS, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_SUBARU_PG_CruiseControl,   SUBARU_PG_MAIN_BUS, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 20U}, { 0 }, { 0 }}},
   };
 
   const int SUBARU_PG_PARAM_REVERSED_DRIVER_TORQUE = 4;

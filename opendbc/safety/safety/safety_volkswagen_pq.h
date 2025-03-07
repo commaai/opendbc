@@ -59,12 +59,12 @@ static safety_config volkswagen_pq_init(uint16_t param) {
                                                 {MSG_ACC_SYSTEM, 0, 8}, {MSG_ACC_GRA_ANZEIGE, 0, 8}};
 
   static RxCheck volkswagen_pq_rx_checks[] = {
-    {.msg = {{MSG_LENKHILFE_3, 0, 6, .check_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_BREMSE_1, 0, 8, .check_checksum = false, .max_counter = 0U, .frequency = 100U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_MOTOR_2, 0, 8, .check_checksum = false, .max_counter = 0U, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_MOTOR_3, 0, 8, .check_checksum = false, .max_counter = 0U, .frequency = 100U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_MOTOR_5, 0, 8, .check_checksum = true, .max_counter = 0U, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_GRA_NEU, 0, 4, .check_checksum = true, .max_counter = 15U, .frequency = 30U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_LENKHILFE_3, 0, 6, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_BREMSE_1, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_MOTOR_2, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_MOTOR_3, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_MOTOR_5, 0, 8, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_GRA_NEU, 0, 4, .max_counter = 15U, .frequency = 30U}, { 0 }, { 0 }}},
   };
 
   UNUSED(param);
@@ -155,13 +155,13 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *to_push) {
 
 static bool volkswagen_pq_tx_hook(const CANPacket_t *to_send) {
   // lateral limits
-  const SteeringLimits VOLKSWAGEN_PQ_STEERING_LIMITS = {
+  const TorqueSteeringLimits VOLKSWAGEN_PQ_STEERING_LIMITS = {
     .max_steer = 300,                // 3.0 Nm (EPS side max of 3.0Nm with fault if violated)
     .max_rt_delta = 113,             // 6 max rate up * 50Hz send rate * 250000 RT interval / 1000000 = 75 ; 125 * 1.5 for safety pad = 113
     .max_rt_interval = 250000,       // 250ms between real time checks
     .max_rate_up = 6,                // 3.0 Nm/s RoC limit (EPS rack has own soft-limit of 5.0 Nm/s)
     .max_rate_down = 10,             // 5.0 Nm/s RoC limit (EPS rack has own soft-limit of 5.0 Nm/s)
-    .driver_torque_factor = 3,
+    .driver_torque_multiplier = 3,
     .driver_torque_allowance = 80,
     .type = TorqueDriverLimited,
   };

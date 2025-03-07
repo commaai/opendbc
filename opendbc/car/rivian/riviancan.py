@@ -11,7 +11,7 @@ def checksum(data, poly, xor_output):
   return crc ^ xor_output
 
 
-def create_lka_steering(packer, acm_lka_hba_cmd, apply_steer, enabled):
+def create_lka_steering(packer, acm_lka_hba_cmd, apply_torque, enabled):
   values = {s: acm_lka_hba_cmd[s] for s in [
     "ACM_lkaHbaCmd_Counter",
     "ACM_lkaHbaCmd_Checksum",
@@ -40,7 +40,7 @@ def create_lka_steering(packer, acm_lka_hba_cmd, apply_steer, enabled):
     values["ACM_lkaActToi"] = 1
     values["ACM_lkaSymbolState"] = 3
     values["ACM_lkaLaneRecogState"] = 3
-    values["ACM_lkaStrToqReq"] = apply_steer
+    values["ACM_lkaStrToqReq"] = apply_torque
     values["ACM_unkown2"] = 1
     values["ACM_unkown3"] = 4
     values["ACM_unkown4"] = 160
@@ -83,3 +83,26 @@ def create_longitudinal(packer, frame, accel, enabled):
   data = packer.make_can_msg("ACM_longitudinalRequest", 0, values)[1]
   values["ACM_longitudinalRequest_Checksum"] = checksum(data[1:], 0x1D, 0x12)
   return packer.make_can_msg("ACM_longitudinalRequest", 0, values)
+
+
+def create_adas_status(packer, vdm_adas_status, interface_status):
+  values = {s: vdm_adas_status[s] for s in (
+    "VDM_AdasStatus_Checksum",
+    "VDM_AdasStatus_Counter",
+    "VDM_AdasDecelLimit",
+    "VDM_AdasDriverAccelPriorityStatus",
+    "VDM_AdasFaultStatus",
+    "VDM_AdasAccelLimit",
+    "VDM_AdasDriverModeStatus",
+    "VDM_AdasAccelRequest",
+    "VDM_AdasInterfaceStatus",
+    "VDM_AdasAccelRequestAcknowledged",
+    "VDM_AdasVehicleHoldStatus",
+  )}
+
+  if interface_status is not None:
+    values["VDM_AdasInterfaceStatus"] = interface_status
+
+  data = packer.make_can_msg("VDM_AdasSts", 2, values)[1]
+  values["VDM_AdasStatus_Checksum"] = checksum(data[1:], 0x1D, 0xD1)
+  return packer.make_can_msg("VDM_AdasSts", 2, values)

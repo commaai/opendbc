@@ -9,7 +9,7 @@
     .max_rt_interval = 250000,                                                        \
     .max_rate_up = (rate_up),                                                         \
     .max_rate_down = (rate_down),                                                     \
-    .driver_torque_factor = 50,                                                       \
+    .driver_torque_multiplier = 50,                                                   \
     .driver_torque_allowance = 60,                                                    \
     .type = TorqueDriverLimited,                                                      \
     /* the EPS will temporary fault if the steering rate is too high, so we cut the   \
@@ -61,12 +61,12 @@
   {MSG_SUBARU_ES_STATIC_1,       SUBARU_MAIN_BUS, 8}, \
   {MSG_SUBARU_ES_STATIC_2,       SUBARU_MAIN_BUS, 8}, \
 
-#define SUBARU_COMMON_RX_CHECKS(alt_bus)                                                                                                            \
-  {.msg = {{MSG_SUBARU_Throttle,        SUBARU_MAIN_BUS, 8, .check_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}}, \
-  {.msg = {{MSG_SUBARU_Steering_Torque, SUBARU_MAIN_BUS, 8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}}, \
-  {.msg = {{MSG_SUBARU_Wheel_Speeds,    alt_bus,         8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}}, \
-  {.msg = {{MSG_SUBARU_Brake_Status,    alt_bus,         8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}}, \
-  {.msg = {{MSG_SUBARU_CruiseControl,   alt_bus,         8, .check_checksum = true, .max_counter = 15U, .frequency = 20U}, { 0 }, { 0 }}}, \
+#define SUBARU_COMMON_RX_CHECKS(alt_bus)                                                                            \
+  {.msg = {{MSG_SUBARU_Throttle,        SUBARU_MAIN_BUS, 8, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}}, \
+  {.msg = {{MSG_SUBARU_Steering_Torque, SUBARU_MAIN_BUS, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},  \
+  {.msg = {{MSG_SUBARU_Wheel_Speeds,    alt_bus,         8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},  \
+  {.msg = {{MSG_SUBARU_Brake_Status,    alt_bus,         8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},  \
+  {.msg = {{MSG_SUBARU_CruiseControl,   alt_bus,         8, .max_counter = 15U, .frequency = 20U}, { 0 }, { 0 }}},  \
 
 static bool subaru_gen2 = false;
 static bool subaru_longitudinal = false;
@@ -121,7 +121,7 @@ static void subaru_rx_hook(const CANPacket_t *to_push) {
 
     vehicle_moving = (fr > 0U) || (rr > 0U) || (rl > 0U) || (fl > 0U);
 
-    UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4U * 0.057);
+    UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.057 / 3.6);
   }
 
   if ((addr == MSG_SUBARU_Brake_Status) && (bus == alt_main_bus)) {
@@ -136,8 +136,8 @@ static void subaru_rx_hook(const CANPacket_t *to_push) {
 }
 
 static bool subaru_tx_hook(const CANPacket_t *to_send) {
-  const SteeringLimits SUBARU_STEERING_LIMITS      = SUBARU_STEERING_LIMITS_GENERATOR(2047, 50, 70);
-  const SteeringLimits SUBARU_GEN2_STEERING_LIMITS = SUBARU_STEERING_LIMITS_GENERATOR(1000, 40, 40);
+  const TorqueSteeringLimits SUBARU_STEERING_LIMITS      = SUBARU_STEERING_LIMITS_GENERATOR(2047, 50, 70);
+  const TorqueSteeringLimits SUBARU_GEN2_STEERING_LIMITS = SUBARU_STEERING_LIMITS_GENERATOR(1000, 40, 40);
 
   const LongitudinalLimits SUBARU_LONG_LIMITS = {
     .min_gas = 808,       // appears to be engine braking
@@ -160,7 +160,7 @@ static bool subaru_tx_hook(const CANPacket_t *to_send) {
 
     bool steer_req = GET_BIT(to_send, 29U);
 
-    const SteeringLimits limits = subaru_gen2 ? SUBARU_GEN2_STEERING_LIMITS : SUBARU_STEERING_LIMITS;
+    const TorqueSteeringLimits limits = subaru_gen2 ? SUBARU_GEN2_STEERING_LIMITS : SUBARU_STEERING_LIMITS;
     violation |= steer_torque_cmd_checks(desired_torque, steer_req, limits);
   }
 
