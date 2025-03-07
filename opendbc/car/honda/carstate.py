@@ -216,7 +216,7 @@ class CarState(CarStateBase):
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD.get(self.CP.carFingerprint, 1200)
 
     # is_metric_cruise is used for cruise speed display
-    if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS
+    if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
       if "ACC_HUD" in cp_cam.vl:
         self.is_metric_cruise = self.is_metric if cp_cam.vl["ACC_HUD"]["CRUISE_SPEED"] >= 253 else not cp_cam.vl["ACC_HUD"]["IMPERIAL_UNIT"]
       else:
