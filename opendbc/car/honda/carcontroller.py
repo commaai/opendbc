@@ -6,7 +6,7 @@ from opendbc.car import Bus, DT_CTRL, rate_limit, make_tester_present_msg, struc
 from opendbc.car.honda import hondacan
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.honda.values import CruiseButtons, VISUAL_HUD, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, HONDA_NIDEC_ALT_PCM_ACCEL, HONDA_BOSCH_1000, \
-  CarControllerParams
+  CarControllerParams, SERIAL_STEERING, LKAS_LIMITS
 from opendbc.car.interfaces import CarControllerBase
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
@@ -99,7 +99,7 @@ HUDData = namedtuple("HUDData",
 
 
 class CarController(CarControllerBase):
-  def __init__(self, dbc_names, CP):
+  def __init__(self, dbc_names, CP, VM):
     super().__init__(dbc_names, CP)
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.params = CarControllerParams(CP)
@@ -117,6 +117,32 @@ class CarController(CarControllerBase):
     self.gas = 0.0
     self.brake = 0.0
     self.last_torque = 0.0
+    self.apply_steer_last = 0.0
+
+  def apply_driver_steer_torque_limits(apply_torque, apply_torque_last, driver_torque, LIMITS, ss=False):
+  
+    # limits due to driver torque
+    driver_max_torque = LIMITS.STEER_MAX + (LIMITS.STEER_DRIVER_ALLOWANCE + driver_torque * LIMITS.STEER_DRIVER_FACTOR) * LIMITS.STEER_DRIVER_MULTIPLIER
+    driver_min_torque = -LIMITS.STEER_MAX + (-LIMITS.STEER_DRIVER_ALLOWANCE + driver_torque * LIMITS.STEER_DRIVER_FACTOR) * LIMITS.STEER_DRIVER_MULTIPLIER
+    max_steer_allowed = max(min(LIMITS.STEER_MAX, driver_max_torque), 0)
+    min_steer_allowed = min(max(-LIMITS.STEER_MAX, driver_min_torque), 0)
+
+    if ss:
+      min_torque = min(abs(max_steer_allowed), abs(min_steer_allowed))
+      max_steer_allowed = min_torque
+      min_steer_allowed = -min_torque
+
+    apply_torque = clip(apply_torque, min_steer_allowed, max_steer_allowed)
+
+    # slow rate if steer torque increases in magnitude
+    if apply_torque_last > 0:
+      apply_torque = clip(apply_torque, max(apply_torque_last - LIMITS.STEER_DELTA_DOWN, -LIMITS.STEER_DELTA_UP),
+                        apply_torque_last + LIMITS.STEER_DELTA_UP)
+    else:
+      apply_torque = clip(apply_torque, apply_torque_last - LIMITS.STEER_DELTA_UP,
+                        min(apply_torque_last + LIMITS.STEER_DELTA_DOWN, LIMITS.STEER_DELTA_UP))
+
+    return int(round(float(apply_torque)))
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -152,6 +178,34 @@ class CarController(CarControllerBase):
     # steer torque is converted back to CAN reference (positive when steering right)
     apply_torque = int(np.interp(-limited_torque * self.params.STEER_MAX,
                                  self.params.STEER_LOOKUP_BP, self.params.STEER_LOOKUP_V))
+    
+    if (CS.CP.carFingerprint in SERIAL_STEERING):
+      apply_steer = apply_driver_steer_torque_limits(apply_steer, self.apply_steer_last, CS.out.steeringTorque, LKAS_LIMITS, ss=True)
+      self.apply_steer_last = apply_steer
+      if apply_steer > 229 and False:
+        apply_steer_orig = apply_steer
+        apply_steer = (apply_steer - 229) * 2 + apply_steer
+        if apply_steer > 240:
+            self.apply_steer_over_max_counter += 1
+            if self.apply_steer_over_max_counter > 3:
+                apply_steer = apply_steer_orig
+                self.apply_steer_over_max_counter = 0
+            else:
+                self.apply_steer_over_max_counter = 0
+      elif apply_steer < -229 and False:
+        apply_steer_orig = apply_steer
+        apply_steer = (apply_steer + 229) * 2 + apply_steer
+        if apply_steer < -240:
+            self.apply_steer_over_max_counter+= 1
+            if self.apply_steer_over_max_counter > 3:
+                apply_steer = apply_steer_orig
+                self.apply_steer_over_max_counter = 0
+            else:
+                self.apply_steer_over_max_counter = 0
+      else:
+        self.apply_steer_over_max_counter = 0
+
+    self.apply_steer_last = apply_steer
 
     # Send CAN commands
     can_sends = []
