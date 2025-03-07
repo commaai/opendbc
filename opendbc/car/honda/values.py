@@ -197,16 +197,16 @@ class CAR(Platforms):
   )
   ACURA_MDX_3G = HondaNidecPlatformConfig(
     [HondaCarDocs("Acura MDX 2018-2020")],
-    CarSpecs(mass=4350 * CV.LB_TO_KG, wheelbase=2.82, centerToFrontRatio=0.428, steerRatio=15.66, tireStiffnessFactor=0.444),  # acura spec, except copied stiffness from Pilot
+    CarSpecs(mass=4350 * CV.LB_TO_KG, wheelbase=2.82, centerToFrontRatio=0.428, steerRatio=15.66, tireStiffnessFactor=0.444),  # acura spec, stiffness from Pilot
     radar_dbc_dict('acura_mdx_3G'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES
-  )  
+  )
   ACURA_MDX_3G_HYBRID = HondaNidecPlatformConfig(
     [HondaCarDocs("Acura MDX Hybrid 2018-2020")],
-    CarSpecs(mass=4486 * CV.LB_TO_KG, wheelbase=2.82, centerToFrontRatio=0.428, steerRatio=15.76, tireStiffnessFactor=0.444),  # acura spec, except copied stiffness from Pilot
+    CarSpecs(mass=4486 * CV.LB_TO_KG, wheelbase=2.82, centerToFrontRatio=0.428, steerRatio=15.76, tireStiffnessFactor=0.444),  # acura spec, stiffness from Pilot
     radar_dbc_dict('acura_mdx_3G'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES
-  )  
+  )
   ACURA_RDX_3G = HondaBoschPlatformConfig(
     [HondaCarDocs("Acura RDX 2019-21", "All", min_steer_speed=3. * CV.MPH_TO_MS)],
     CarSpecs(mass=4068 * CV.LB_TO_KG, wheelbase=2.75, steerRatio=11.95, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),  # as spec
