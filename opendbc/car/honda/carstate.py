@@ -222,7 +222,7 @@ class CarState(CarStateBase):
       self.is_metric_cruise = self.is_metric
     else:
       self.is_metric_cruise = not acc_hud["IMPERIAL_UNIT"]
-    
+
     if self.CP.carFingerprint in HONDA_BOSCH:
       # The PCM always manages its own cruise control state, but doesn't publish it
       if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
