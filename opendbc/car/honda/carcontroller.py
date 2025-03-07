@@ -210,7 +210,7 @@ class CarController(CarControllerBase):
         if self.CP.carFingerprint in HONDA_BOSCH:
           self.accel = float(np.clip(accel, self.params.BOSCH_ACCEL_MIN, self.params.BOSCH_ACCEL_MAX))
           if self.CP.carFingerprint in HONDA_BOSCH_1000:
-            self.gas = float(np.interp(accel, self.params.BOSCH_1000_GAS_LOOKUP_BP, self.params.BOSCH_1000_GAS_LOOKUP_V))
+            self.gas = float(np.interp(accel, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_1000_GAS_LOOKUP_V))
           else:
             self.gas = float(np.interp(accel, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_GAS_LOOKUP_V))
 
