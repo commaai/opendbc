@@ -44,13 +44,13 @@ FW_QUERY_CONFIG = FwQueryConfig(
   ]
 )
 
-GEAR_MAP = [
-  structs.CarState.GearShifter.unknown,
-  structs.CarState.GearShifter.park,
-  structs.CarState.GearShifter.reverse,
-  structs.CarState.GearShifter.neutral,
-  structs.CarState.GearShifter.drive,
-]
+GEAR_MAP = {
+  0: structs.CarState.GearShifter.unknown,
+  1: structs.CarState.GearShifter.park,
+  2: structs.CarState.GearShifter.reverse,
+  3: structs.CarState.GearShifter.neutral,
+  4: structs.CarState.GearShifter.drive,
+}
 
 
 class CarControllerParams:
