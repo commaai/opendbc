@@ -110,9 +110,9 @@ static safety_config subaru_preglobal_init(uint16_t param) {
 
   // TODO: do checksum and counter checks after adding the signals to the outback dbc file
   static RxCheck subaru_preglobal_rx_checks[] = {
-    {.msg = {{MSG_SUBARU_PG_Throttle,        SUBARU_PG_MAIN_BUS, 8, .frequency = 100U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_SUBARU_PG_Steering_Torque, SUBARU_PG_MAIN_BUS, 8, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_SUBARU_PG_CruiseControl,   SUBARU_PG_MAIN_BUS, 8, .frequency = 20U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_SUBARU_PG_Throttle,        SUBARU_PG_MAIN_BUS, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_SUBARU_PG_Steering_Torque, SUBARU_PG_MAIN_BUS, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_SUBARU_PG_CruiseControl,   SUBARU_PG_MAIN_BUS, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 20U}, { 0 }, { 0 }}},
   };
 
   const int SUBARU_PG_PARAM_REVERSED_DRIVER_TORQUE = 4;
