@@ -120,7 +120,7 @@ def create_steering_control(packer, CAN, apply_torque, lkas_active):
   return packer.make_can_msg("STEERING_CONTROL", CAN.lkas, values)
 
 
-  if car_fingerprint in SERIAL_STEERING:
+  if CP.carFingerprint in SERIAL_STEERING:
       values.update({
         "SEND_ALL_LIN_TO_CAN": 1,
         "SEND_LIN_WHOLE_DATA": 1,
