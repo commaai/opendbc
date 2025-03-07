@@ -182,7 +182,7 @@ class CAR(Platforms):
     flags=HondaFlags.BOSCH_RADARLESS,
   )
   HONDA_ODYSSEY_5G_MMR = HondaBoschPlatformConfig(
-    [HondaCarDocs("Honda Odyssey 2021-2025", "All", min_steer_speed=3. * CV.MPH_TO_MS)],
+    [HondaCarDocs("Honda Odyssey 2021-25", "All", min_steer_speed=3. * CV.MPH_TO_MS)],
     CarSpecs(mass=4590 * CV.LB_TO_KG, wheelbase=3.00, steerRatio=13.35, centerToFrontRatio=0.54, tireStiffnessFactor=1.02),  # as spec
     {Bus.pt: 'acura_rdx_2020_can_generated'},
     flags=HondaFlags.BOSCH_ALT_BRAKE,
