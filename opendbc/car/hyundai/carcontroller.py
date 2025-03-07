@@ -40,23 +40,10 @@ class CarController(CarControllerBase):
     hud_control = CC.hudControl
 
     apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning,
-     right_lane_warning = self.compute_common_controls(CC, CS)
+     right_lane_warning, tester_present_msgs = self.compute_common_controls(CC, CS)
 
     can_sends = []
-
-    # *** common hyundai stuff ***
-
-    # tester present - w/ no response (keeps relevant ECU disabled)
-    if self.frame % 100 == 0 and not (self.CP.flags & HyundaiFlags.CANFD_CAMERA_SCC) and self.CP.openpilotLongitudinalControl:
-      # for longitudinal control, either radar or ADAS driving ECU
-      addr, bus = 0x7d0, self.CAN.ECAN if self.CP.flags & HyundaiFlags.CANFD else 0
-      if self.CP.flags & HyundaiFlags.CANFD_LKA_STEERING.value:
-        addr, bus = 0x730, self.CAN.ECAN
-      can_sends.append(make_tester_present_msg(addr, bus, suppress_response=True))
-
-      # for blinkers
-      if self.CP.flags & HyundaiFlags.ENABLE_BLINKERS:
-        can_sends.append(make_tester_present_msg(0x7b1, self.CAN.ECAN, suppress_response=True))
+    can_sends.extend(tester_present_msgs)
 
     # CAN SPECIFIC START
     can_sends.append(hyundaican.create_lkas11(self.packer, self.frame, self.CP, apply_torque, apply_steer_req,
@@ -102,23 +89,10 @@ class CarController(CarControllerBase):
     hud_control = CC.hudControl
 
     apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning,
-     right_lane_warning = self.compute_common_controls(CC, CS)
+     right_lane_warning, tester_present_msgs = self.compute_common_controls(CC, CS)
 
     can_sends = []
-
-    # *** common hyundai stuff ***
-
-    # tester present - w/ no response (keeps relevant ECU disabled)
-    if self.frame % 100 == 0 and not (self.CP.flags & HyundaiFlags.CANFD_CAMERA_SCC) and self.CP.openpilotLongitudinalControl:
-      # for longitudinal control, either radar or ADAS driving ECU
-      addr, bus = 0x7d0, self.CAN.ECAN if self.CP.flags & HyundaiFlags.CANFD else 0
-      if self.CP.flags & HyundaiFlags.CANFD_LKA_STEERING.value:
-        addr, bus = 0x730, self.CAN.ECAN
-      can_sends.append(make_tester_present_msg(addr, bus, suppress_response=True))
-
-      # for blinkers
-      if self.CP.flags & HyundaiFlags.ENABLE_BLINKERS:
-        can_sends.append(make_tester_present_msg(0x7b1, self.CAN.ECAN, suppress_response=True))
+    can_sends.extend(tester_present_msgs)
 
     # CANFD SPECIFIC START
     lka_steering = self.CP.flags & HyundaiFlags.CANFD_LKA_STEERING
@@ -191,7 +165,22 @@ class CarController(CarControllerBase):
     # HUD messages
     sys_warning, sys_state, left_lane_warning, right_lane_warning = self.process_hud_alert(CC.enabled, self.car_fingerprint,
                                                                                       hud_control)
-    return apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning, right_lane_warning
+
+    tester_present_msgs = []
+    # tester present - w/ no response (keeps relevant ECU disabled)
+    if self.frame % 100 == 0 and not (self.CP.flags & HyundaiFlags.CANFD_CAMERA_SCC) and self.CP.openpilotLongitudinalControl:
+      # for longitudinal control, either radar or ADAS driving ECU
+      addr, bus = 0x7d0, self.CAN.ECAN if self.CP.flags & HyundaiFlags.CANFD else 0
+      if self.CP.flags & HyundaiFlags.CANFD_LKA_STEERING.value:
+        addr, bus = 0x730, self.CAN.ECAN
+      tester_present_msgs.append(make_tester_present_msg(addr, bus, suppress_response=True))
+
+      # for blinkers
+      if self.CP.flags & HyundaiFlags.ENABLE_BLINKERS:
+        tester_present_msgs.append(make_tester_present_msg(0x7b1, self.CAN.ECAN, suppress_response=True))
+
+    return (apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning,
+       right_lane_warning, tester_present_msgs)
 
 
   def create_button_messages(self, CC: structs.CarControl, CS: CarState, use_clu11: bool):
