@@ -179,14 +179,12 @@ def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
       "DISTANCE_LEAD": 2 if enabled and hud.leadVisible else 1 if enabled else 0,
       "DISTANCE_CAR": 2 if enabled else 1,
       "SLA_ICON": 0,
+      "NAV_ICON": 0,
       "TARGET": 0,
     })
 
     if msg_161["ALERTS_3"] in (1, 2, 3, 4, 7, 8, 9, 10):  # HIDE ISLA, DISTANCE MESSAGES
       msg_161["ALERTS_3"] = 0
-
-    if msg_161["NAV_ICON"] in (2, 4):  # DISABLE NAV IF AVAILABLE
-      msg_161["NAV_ICON"] = 1
 
     msg_162["LEAD"] = 0
 
