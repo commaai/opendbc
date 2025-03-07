@@ -131,14 +131,14 @@ def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
   for f in {"FAULT_LSS", "FAULT_HDA", "FAULT_DAS", "FAULT_LFA", "FAULT_DAW"}:
     msg_162[f] = 0
 
+  if msg_161.get("ALERTS_2") == 5:  # CONSIDER_TAKING_A_BREAK
+    msg_161.update({"ALERTS_2": 0, "SOUNDS_2": 0})
+
   if msg_161.get("ALERTS_3") == 17:  # DRIVE_CAREFULLY
     msg_161["ALERTS_3"] = 0
 
   if msg_161.get("ALERTS_5") in {2, 4, 5}:  # WATCH_FOR_SURROUNDING_VEHICLES, SMART_CRUISE_CONTROL_CONDITIONS_NOT_MET, USE_SWITCH_OR_PEDAL_TO_ACCELERATE
     msg_161["ALERTS_5"] = 0
-
-  if msg_161.get("ALERTS_2") == 5:  # CONSIDER_TAKING_A_BREAK
-    msg_161.update({"ALERTS_2": 0, "SOUNDS_2": 0})
 
   if msg_161.get("SOUNDS_4") == 2 and msg_161.get("LFA_ICON") in {3, 0,}:  # LFA BEEPS
     msg_161["SOUNDS_4"] = 0
