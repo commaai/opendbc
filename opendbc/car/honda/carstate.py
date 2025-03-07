@@ -226,7 +226,7 @@ class CarState(CarStateBase):
     else:
       self.is_metric_cruise = self.is_metric
     conversion = CV.KPH_TO_MS if self.is_metric_cruise else CV.MPH_TO_MS
-    
+
     if self.CP.carFingerprint in HONDA_BOSCH:
       # The PCM always manages its own cruise control state, but doesn't publish it
       if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
