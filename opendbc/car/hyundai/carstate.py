@@ -235,16 +235,20 @@ class CarState(CarStateBase):
     ret.steeringTorqueEps = cp.vl["MDPS"]["STEERING_OUT_TORQUE"]
     ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > self.params.STEER_THRESHOLD, 5)
     ret.steerFaultTemporary = cp.vl["MDPS"]["LKA_FAULT"] != 0
+    if self.CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
+      ret.steerFaultTemporary = ret.steerFaultTemporary or cp.vl["MDPS"]["LKA_ANGLE_FAULT"] != 0
 
     # TODO: alt signal usage may be described by cp.vl['BLINKERS']['USE_ALT_LAMP']
     left_blinker_sig, right_blinker_sig = "LEFT_LAMP", "RIGHT_LAMP"
-    if self.CP.carFingerprint == CAR.HYUNDAI_KONA_EV_2ND_GEN:
+    if self.CP.carFingerprint in (CAR.HYUNDAI_KONA_EV_2ND_GEN, ) or self.CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
       left_blinker_sig, right_blinker_sig = "LEFT_LAMP_ALT", "RIGHT_LAMP_ALT"
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_lamp(50, cp.vl["BLINKERS"][left_blinker_sig],
                                                                       cp.vl["BLINKERS"][right_blinker_sig])
     if self.CP.enableBsm:
-      ret.leftBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"]["FL_INDICATOR"] != 0
-      ret.rightBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"]["FR_INDICATOR"] != 0
+      left_bsm_sig = "FL_INDICATOR_ALT" if self.CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING else "FL_INDICATOR"
+      right_bsm_sig = "FR_INDICATOR_ALT" if self.CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING else "FR_INDICATOR"
+      ret.leftBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"][left_bsm_sig] != 0
+      ret.rightBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"][right_bsm_sig] != 0
 
     # cruise state
     # CAN FD cars enable on main button press, set available if no TCS faults preventing engagement
