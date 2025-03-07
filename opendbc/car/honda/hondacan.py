@@ -117,8 +117,8 @@ def create_steering_control(packer, CAN, apply_torque, lkas_active, car_fingerpr
     "STEER_TORQUE": apply_torque if lkas_active else 0,
     "STEER_TORQUE_REQUEST": lkas_active,
   }
-  
-  if car_Fingerprint in SERIAL_STEERING:
+
+  if car_fingerprint in SERIAL_STEERING:
       values.update({
         "SEND_ALL_LIN_TO_CAN": 1,
         "SEND_LIN_WHOLE_DATA": 1,
@@ -128,7 +128,7 @@ def create_steering_control(packer, CAN, apply_torque, lkas_active, car_fingerpr
   bus = 2 if car_fingerprint in SERIAL_STEERING else CAN.lkas
   return packer.make_can_msg("STEERING_CONTROL", bus, values)
 
-def create_bosch_supplemental_1(packer, CAN):
+def create_bosch_supplemental_1(packer, CAN, car_fingerprint):
   # non-active params
   values = {
     "SET_ME_X04": 0x04,
