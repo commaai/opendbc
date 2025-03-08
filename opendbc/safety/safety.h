@@ -238,7 +238,12 @@ static bool tx_msg_safety_check(const CANPacket_t *to_send, const CanMsg msg_lis
   return allowed;
 }
 
-int get_fwd_bus(int bus_num, const safety_config *cfg) {
+static int get_fwd_bus(int bus_num, const safety_config *cfg) {
+  static const FwdBus DEFAULT_FWD_BUS_LOOKUP[DEFAULT_FWD_BUS_LEN] = {
+    {0, 2},
+    {2, 0},
+  };
+
   const FwdBus *fwd_buses = (cfg->fwd_buses == NULL) ? DEFAULT_FWD_BUS_LOOKUP : cfg->fwd_buses;
   const int fwd_buses_len = (cfg->fwd_buses == NULL) ? DEFAULT_FWD_BUS_LEN : cfg->fwd_buses_len;
 

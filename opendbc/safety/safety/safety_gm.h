@@ -16,7 +16,6 @@ typedef enum {
   GM_CAM
 } GmHardware;
 static GmHardware gm_hw = GM_ASCM;
-static bool gm_cam_long = false;
 static bool gm_pcm_cruise = false;
 
 static void gm_rx_hook(const CANPacket_t *to_push) {
@@ -211,6 +210,7 @@ static safety_config gm_init(uint16_t param) {
   } else {
   }
 
+  bool gm_cam_long = false;
 #ifdef ALLOW_DEBUG
   const uint16_t GM_PARAM_HW_CAM_LONG = 2;
   gm_cam_long = GET_FLAG(param, GM_PARAM_HW_CAM_LONG);
@@ -227,7 +227,7 @@ static safety_config gm_init(uint16_t param) {
     ret = BUILD_SAFETY_CFG(gm_rx_checks, GM_ASCM_TX_MSGS);
 
     // TODO: just use a bool for this
-    static const FwdBus fwd_buses[] = {};
+    static const FwdBus fwd_buses[] = {0};
     ret.fwd_buses = fwd_buses;
     ret.fwd_buses_len = 0;
   }

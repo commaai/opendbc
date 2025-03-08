@@ -29,7 +29,7 @@ uint32_t GET_BYTES(const CANPacket_t *msg, int start, int len);
 
 extern const int MAX_WRONG_COUNTERS;
 #define MAX_ADDR_CHECK_MSGS 3U
-#define DEFAULT_FWD_BUS_LEN 2U
+#define DEFAULT_FWD_BUS_LEN 2
 #define MAX_SAMPLE_VALS 6
 // used to represent floating point vehicle speed in a sample_t
 #define VEHICLE_SPEED_FACTOR 1000.0
@@ -59,11 +59,6 @@ typedef struct {
   int source_bus;
   int destination_bus;
 } FwdBus;
-
-const FwdBus DEFAULT_FWD_BUS_LOOKUP[DEFAULT_FWD_BUS_LEN] = {
-  {0, 2},
-  {2, 0},
-};
 
 typedef enum {
   TorqueMotorLimited,   // torque steering command, limited by EPS output torque

@@ -46,7 +46,7 @@
 
 #define SUBARU_COMMON_TX_MSGS(alt_bus, lkas_msg, longitudinal)                                                   \
   {lkas_msg,                     SUBARU_MAIN_BUS, 8, .blocked = true},                                           \
-  {MSG_SUBARU_ES_Distance,       alt_bus,         8, .blocked = (alt_bus) == SUBARU_MAIN_BUS && (longitudinal)}, \
+  {MSG_SUBARU_ES_Distance,       alt_bus,         8, .blocked = ((alt_bus) == SUBARU_MAIN_BUS) && (longitudinal)}, \
   {MSG_SUBARU_ES_DashStatus,     SUBARU_MAIN_BUS, 8, .blocked = true},                                           \
   {MSG_SUBARU_ES_LKAS_State,     SUBARU_MAIN_BUS, 8, .blocked = true},                                           \
   {MSG_SUBARU_ES_Infotainment,   SUBARU_MAIN_BUS, 8, .blocked = true},                                           \
