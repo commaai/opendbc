@@ -57,7 +57,6 @@ def fwd_blacklisted_addr(lkas_msg=SubaruMsg.ES_LKAS):
 class TestSubaruSafetyBase(common.PandaCarSafetyTest):
   FLAGS = 0
   RELAY_MALFUNCTION_ADDRS = {SUBARU_MAIN_BUS: (SubaruMsg.ES_LKAS,)}
-  FWD_BUS_LOOKUP = {SUBARU_MAIN_BUS: SUBARU_CAM_BUS, SUBARU_CAM_BUS: SUBARU_MAIN_BUS}
   FWD_BLACKLISTED_ADDRS = fwd_blacklisted_addr()
 
   MAX_RT_DELTA = 940
