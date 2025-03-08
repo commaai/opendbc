@@ -2,8 +2,7 @@ import numpy as np
 from collections import namedtuple
 
 from opendbc.can.packer import CANPacker
-#from opendbc.car import Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
-from opendbc.car import Bus, DT_CTRL, rate_limit, structs
+from opendbc.car import Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
 from opendbc.car.honda import hondacan
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.honda.values import CruiseButtons, VISUAL_HUD, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, HONDA_NIDEC_ALT_PCM_ACCEL, HONDA_BOSCH_1000, \
@@ -105,7 +104,6 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.params = CarControllerParams(CP)
     self.CAN = hondacan.CanBus(CP)
-    self.frame = 0
 
     self.braking = False
     self.brake_steady = 0.
@@ -161,9 +159,8 @@ class CarController(CarControllerBase):
     # tester present - w/ no response (keeps radar disabled)
     if self.CP.carFingerprint in (HONDA_BOSCH - HONDA_BOSCH_RADARLESS) and self.CP.openpilotLongitudinalControl:
       if self.frame % 10 == 0:
-        # can_sends.append(make_tester_present_msg(0x18DAB0F1, 1, suppress_response=True))
-        can_sends.append((0x18DAB0F1, 0, b"\x02\x3E\x80\x00\x00\x00\x00\x00", 1))
-
+        can_sends.append(make_tester_present_msg(0x18DAB0F1, 1, suppress_response=True))
+    
     # Send steering command.
     can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, CC.latActive))
 
