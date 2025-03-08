@@ -172,7 +172,6 @@ class HondaBase(common.PandaCarSafetyTest):
   STEER_BUS: int | None = None  # must be set when inherited
   BUTTONS_BUS: int | None = None  # must be set when inherited, tx on this bus, rx on PT_BUS
 
-  STANDSTILL_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0x194)}  # STEERING_CONTROL
 
   cnt_speed = 0

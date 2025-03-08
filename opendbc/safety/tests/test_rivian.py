@@ -11,7 +11,6 @@ from opendbc.car.rivian.values import RivianSafetyFlags
 class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteeringSafetyTest, common.LongitudinalAccelSafetyTest):
 
   TX_MSGS = [[0x120, 0], [0x321, 2], [0x162, 2]]
-  STANDSTILL_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS = {0: (0x120,)}
   FWD_BLACKLISTED_ADDRS = {0: [0x321, 0x162], 2: [0x120]}
 

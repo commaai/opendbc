@@ -24,7 +24,6 @@ MSG_LDW_02 = 0x397      # TX by OP, Lane line recognition and text alerts
 
 
 class TestVolkswagenMqbSafety(common.PandaCarSafetyTest, common.DriverTorqueSteeringSafetyTest):
-  STANDSTILL_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_01,)}
 
   MAX_RATE_UP = 4

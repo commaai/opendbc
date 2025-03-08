@@ -10,7 +10,6 @@ from opendbc.safety.tests.common import CANPackerPanda
 
 class TestChryslerSafety(common.PandaCarSafetyTest, common.MotorTorqueSteeringSafetyTest):
   TX_MSGS = [[0x23B, 0], [0x292, 0], [0x2A6, 0]]
-  STANDSTILL_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS = {0: (0x292,)}
   FWD_BLACKLISTED_ADDRS = {2: [0x292, 0x2A6]}
 

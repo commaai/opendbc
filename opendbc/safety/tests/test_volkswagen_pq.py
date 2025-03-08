@@ -22,7 +22,6 @@ MSG_LDW_1 = 0x5BE             # TX by OP, Lane line recognition and text alerts
 class TestVolkswagenPqSafety(common.PandaCarSafetyTest, common.DriverTorqueSteeringSafetyTest):
   cruise_engaged = False
 
-  STANDSTILL_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_1,)}
 
   MAX_RATE_UP = 6
