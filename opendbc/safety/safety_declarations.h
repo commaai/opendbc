@@ -13,12 +13,14 @@
   do { \
     (config).rx_checks = (rx); \
     (config).rx_checks_len = sizeof((rx)) / sizeof((rx)[0]); \
+    (config).fwd_buses = NULL; \
   } while (0);
 
 #define SET_TX_MSGS(tx, config) \
   do { \
     (config).tx_msgs = (tx); \
     (config).tx_msgs_len = sizeof((tx)) / sizeof((tx)[0]); \
+    (config).fwd_buses = NULL; \
   } while(0);
 
 #define UPDATE_VEHICLE_SPEED(val_ms) (update_sample(&vehicle_speed, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
@@ -27,6 +29,7 @@ uint32_t GET_BYTES(const CANPacket_t *msg, int start, int len);
 
 extern const int MAX_WRONG_COUNTERS;
 #define MAX_ADDR_CHECK_MSGS 3U
+#define DEFAULT_FWD_BUS_LEN 2U
 #define MAX_SAMPLE_VALS 6
 // used to represent floating point vehicle speed in a sample_t
 #define VEHICLE_SPEED_FACTOR 1000.0
@@ -148,10 +151,22 @@ typedef struct {
 } RxCheck;
 
 typedef struct {
+  int source_bus;
+  int destination_bus;
+} FwdBus;
+
+const FwdBus DEFAULT_FWD_BUS_LOOKUP[DEFAULT_FWD_BUS_LEN] = {
+  {0, 2},
+  {2, 0},
+};
+
+typedef struct {
   RxCheck *rx_checks;
   int rx_checks_len;
   const CanMsg *tx_msgs;
   int tx_msgs_len;
+  const FwdBus *fwd_buses;
+  int fwd_buses_len;
 } safety_config;
 
 typedef uint32_t (*get_checksum_t)(const CANPacket_t *to_push);

@@ -399,27 +399,10 @@ static safety_config toyota_init(uint16_t param) {
   return ret;
 }
 
-// TODO: remove this
-static int toyota_fwd_hook(int bus_num, int addr) {
-
-  int bus_fwd = -1;
-
-  if (bus_num == 0) {
-    bus_fwd = 2;
-  }
-
-  if (bus_num == 2) {
-    bus_fwd = 0;
-  }
-
-  return bus_fwd;
-}
-
 const safety_hooks toyota_hooks = {
   .init = toyota_init,
   .rx = toyota_rx_hook,
   .tx = toyota_tx_hook,
-  .fwd = toyota_fwd_hook,
   .get_checksum = toyota_get_checksum,
   .compute_checksum = toyota_compute_checksum,
   .get_quality_flag_valid = toyota_get_quality_flag_valid,
