@@ -55,6 +55,16 @@ typedef struct {
   bool blocked;
 } CanMsg;
 
+typedef struct {
+  int source_bus;
+  int destination_bus;
+} FwdBus;
+
+const FwdBus DEFAULT_FWD_BUS_LOOKUP[DEFAULT_FWD_BUS_LEN] = {
+  {0, 2},
+  {2, 0},
+};
+
 typedef enum {
   TorqueMotorLimited,   // torque steering command, limited by EPS output torque
   TorqueDriverLimited,  // torque steering command, limited by driver's input torque
@@ -149,16 +159,6 @@ typedef struct {
   const CanMsgCheck msg[MAX_ADDR_CHECK_MSGS];  // check either messages (e.g. honda steer)
   RxStatus status;
 } RxCheck;
-
-typedef struct {
-  int source_bus;
-  int destination_bus;
-} FwdBus;
-
-const FwdBus DEFAULT_FWD_BUS_LOOKUP[DEFAULT_FWD_BUS_LEN] = {
-  {0, 2},
-  {2, 0},
-};
 
 typedef struct {
   RxCheck *rx_checks;
