@@ -77,11 +77,6 @@ CM_ "Imported file _steering_sensors_b.dbc starts here";
 
 CM_ "acura_ilx_2016_can.dbc starts here";
 
-BO_ 660 SCM_FEEDBACK: 8 SCM
- SG_ RIGHT_BLINKER : 6|1@0+ (1,0) [0|1] "" EON
- SG_ LEFT_BLINKER : 5|1@0+ (1,0) [0|1] "" EON
- SG_ WIPERS_SPEED : 4|2@0+ (1,0) [0|3] "" EON
-
 CM_ SG_ 419 GEAR "10 = reverse, 11 = transition";
 CM_ SG_ 780 CRUISE_SPEED "255 = no speed";
 
