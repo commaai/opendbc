@@ -207,33 +207,6 @@ static bool subaru_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static int subaru_fwd_hook(int bus_num, int addr) {
-  int bus_fwd = -1;
-
-  if (bus_num == SUBARU_MAIN_BUS) {
-    bus_fwd = SUBARU_CAM_BUS;  // to the eyesight camera
-  }
-
-  if (bus_num == SUBARU_CAM_BUS) {
-    // Global platform
-    bool block_lkas = ((addr == MSG_SUBARU_ES_LKAS) ||
-                       (addr == MSG_SUBARU_ES_DashStatus) ||
-                       (addr == MSG_SUBARU_ES_LKAS_State) ||
-                       (addr == MSG_SUBARU_ES_Infotainment));
-
-    bool block_long = ((addr == MSG_SUBARU_ES_Brake) ||
-                       (addr == MSG_SUBARU_ES_Distance) ||
-                       (addr == MSG_SUBARU_ES_Status));
-
-    bool block_msg = block_lkas || (subaru_longitudinal && block_long);
-    if (!block_msg) {
-      bus_fwd = SUBARU_MAIN_BUS;  // Main CAN
-    }
-  }
-
-  return bus_fwd;
-}
-
 static safety_config subaru_init(uint16_t param) {
   static const CanMsg SUBARU_TX_MSGS[] = {
     SUBARU_COMMON_TX_MSGS(SUBARU_MAIN_BUS, MSG_SUBARU_ES_LKAS, false)
@@ -286,7 +259,6 @@ const safety_hooks subaru_hooks = {
   .init = subaru_init,
   .rx = subaru_rx_hook,
   .tx = subaru_tx_hook,
-  .fwd = subaru_fwd_hook,
   .get_counter = subaru_get_counter,
   .get_checksum = subaru_get_checksum,
   .compute_checksum = subaru_compute_checksum,
