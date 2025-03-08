@@ -267,21 +267,19 @@ bool safety_tx_hook(CANPacket_t *to_send) {
 }
 
 int safety_fwd_hook(int bus_num, int addr) {
+  const int destination_bus = get_fwd_bus(bus_num, &current_safety_config);
+
   bool blocked = false;
   for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
     const CanMsg *m = &current_safety_config.tx_msgs[i];
-
-    // can we make this smaller? add a fwd bus lookup
     if ((m->addr == addr) && m->blocked) {
-      const int msg_source_bus = get_fwd_bus(m->bus, &current_safety_config);
-      if (msg_source_bus == bus_num) {
+      if (m->bus == destination_bus) {
         blocked = true;
         break;
       }
     }
   }
 
-  const int destination_bus = get_fwd_bus(bus_num, &current_safety_config);
   return (relay_malfunction || blocked) ? -1 : destination_bus;
 }
 
