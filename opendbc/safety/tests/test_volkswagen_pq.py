@@ -22,7 +22,6 @@ MSG_LDW_1 = 0x5BE             # TX by OP, Lane line recognition and text alerts
 class TestVolkswagenPqSafety(common.PandaCarSafetyTest, common.DriverTorqueSteeringSafetyTest):
   cruise_engaged = False
 
-  STANDSTILL_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_1,)}
 
   MAX_RATE_UP = 6
@@ -122,7 +121,6 @@ class TestVolkswagenPqStockSafety(TestVolkswagenPqSafety):
   # Transmit of GRA_Neu is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
   TX_MSGS = [[MSG_HCA_1, 0], [MSG_GRA_NEU, 0], [MSG_GRA_NEU, 2], [MSG_LDW_1, 0]]
   FWD_BLACKLISTED_ADDRS = {2: [MSG_HCA_1, MSG_LDW_1]}
-  FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   def setUp(self):
     self.packer = CANPackerPanda("vw_golf_mk4")
@@ -143,7 +141,6 @@ class TestVolkswagenPqStockSafety(TestVolkswagenPqSafety):
 class TestVolkswagenPqLongSafety(TestVolkswagenPqSafety, common.LongitudinalAccelSafetyTest):
   TX_MSGS = [[MSG_HCA_1, 0], [MSG_LDW_1, 0], [MSG_ACC_SYSTEM, 0], [MSG_ACC_GRA_ANZEIGE, 0]]
   FWD_BLACKLISTED_ADDRS = {2: [MSG_HCA_1, MSG_LDW_1, MSG_ACC_SYSTEM, MSG_ACC_GRA_ANZEIGE]}
-  FWD_BUS_LOOKUP = {0: 2, 2: 0}
   INACTIVE_ACCEL = 3.01
 
   def setUp(self):

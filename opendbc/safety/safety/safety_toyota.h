@@ -24,11 +24,18 @@
 #define TOYOTA_COMMON_RX_CHECKS(lta)                                                                          \
   {.msg = {{ 0xaa, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 83U}, { 0 }, { 0 }}},  \
   {.msg = {{0x260, 0, 8, .ignore_counter = true, .quality_flag = (lta), .frequency = 50U}, { 0 }, { 0 }}},    \
-  {.msg = {{0x1D2, 0, 8, .ignore_counter = true, .frequency = 33U},                                           \
-           {0x176, 0, 8, .ignore_counter = true, .frequency = 32U}, { 0 }}},                                  \
-  {.msg = {{0x101, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U},                  \
-           {0x224, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 40U},                  \
-           {0x226, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 40U}}},                \
+
+#define TOYOTA_RX_CHECKS(lta)                                                                          \
+  TOYOTA_COMMON_RX_CHECKS(lta)                                                                         \
+  {.msg = {{0x1D2, 0, 8, .ignore_counter = true, .frequency = 33U}, { 0 }, { 0 }}},                    \
+  {.msg = {{0x224, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 40U},           \
+           {0x226, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 40U}, { 0 }}},  \
+
+#define TOYOTA_SECOC_RX_CHECKS                                                                                \
+  TOYOTA_COMMON_RX_CHECKS(false)                                                                              \
+  {.msg = {{0x176, 0, 8, .ignore_counter = true, .frequency = 32U}, { 0 }, { 0 }}},                           \
+  {.msg = {{0x116, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 42U}, { 0 }, { 0 }}},  \
+  {.msg = {{0x101, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},  \
 
 static bool toyota_secoc = false;
 static bool toyota_alt_brake = false;
@@ -360,16 +367,22 @@ static safety_config toyota_init(uint16_t param) {
     SET_TX_MSGS(TOYOTA_LONG_TX_MSGS, ret);
   }
 
-  if (toyota_lta) {
+  if (toyota_secoc) {
+    static RxCheck toyota_secoc_rx_checks[] = {
+      TOYOTA_SECOC_RX_CHECKS
+    };
+
+    SET_RX_CHECKS(toyota_secoc_rx_checks, ret);
+  } else if (toyota_lta) {
     // Check the quality flag for angle measurement when using LTA, since it's not set on TSS-P cars
     static RxCheck toyota_lta_rx_checks[] = {
-      TOYOTA_COMMON_RX_CHECKS(true)
+      TOYOTA_RX_CHECKS(true)
     };
 
     SET_RX_CHECKS(toyota_lta_rx_checks, ret);
   } else {
     static RxCheck toyota_lka_rx_checks[] = {
-      TOYOTA_COMMON_RX_CHECKS(false)
+      TOYOTA_RX_CHECKS(false)
     };
 
     SET_RX_CHECKS(toyota_lka_rx_checks, ret);

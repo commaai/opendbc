@@ -50,7 +50,6 @@ class TestHyundaiSafety(HyundaiButtonBase, common.PandaCarSafetyTest, common.Dri
   STANDSTILL_THRESHOLD = 12  # 0.375 kph
   RELAY_MALFUNCTION_ADDRS = {0: (0x340,)}  # LKAS11
   FWD_BLACKLISTED_ADDRS = {2: [0x340, 0x485]}
-  FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   MAX_RATE_UP = 3
   MAX_RATE_DOWN = 7

@@ -696,7 +696,7 @@ class PandaSafetyTest(PandaSafetyTestBase):
                    *range(0x18DB00F1, 0x18DC00F1, 0x100),   # 29-bit UDS functional addressing
                    *range(0x3300, 0x3400)]                  # Honda
   FWD_BLACKLISTED_ADDRS: dict[int, list[int]] = {}  # {bus: [addr]}
-  FWD_BUS_LOOKUP: dict[int, int] = {}
+  FWD_BUS_LOOKUP: dict[int, int] = {0: 2, 2: 0}
 
   @classmethod
   def setUpClass(cls):
@@ -817,7 +817,7 @@ class PandaSafetyTest(PandaSafetyTestBase):
 
 @add_regen_tests
 class PandaCarSafetyTest(PandaSafetyTest):
-  STANDSTILL_THRESHOLD: float | None = None
+  STANDSTILL_THRESHOLD: float = 0.0
   GAS_PRESSED_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS: dict[int, tuple[int, ...]] | None = None
 
