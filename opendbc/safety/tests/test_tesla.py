@@ -20,7 +20,6 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
   STANDSTILL_THRESHOLD = 0.1
   GAS_PRESSED_THRESHOLD = 3
-  FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   # Angle control limits
   STEER_ANGLE_MAX = 360  # deg

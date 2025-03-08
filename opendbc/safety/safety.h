@@ -55,6 +55,7 @@
 #define SAFETY_BODY 27U
 #define SAFETY_HYUNDAI_CANFD 28U
 #define SAFETY_RIVIAN 33U
+#define SAFETY_VOLKSWAGEN_MEB 34U
 
 uint32_t GET_BYTES(const CANPacket_t *msg, int start, int len) {
   uint32_t ret = 0U;
@@ -180,20 +181,20 @@ static bool rx_msg_safety_check(const CANPacket_t *to_push,
 
   if (index != -1) {
     // checksum check
-    if ((safety_hooks->get_checksum != NULL) && (safety_hooks->compute_checksum != NULL) && cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].check_checksum) {
+    if ((safety_hooks->get_checksum != NULL) && (safety_hooks->compute_checksum != NULL) && !cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_checksum) {
       uint32_t checksum = safety_hooks->get_checksum(to_push);
       uint32_t checksum_comp = safety_hooks->compute_checksum(to_push);
       cfg->rx_checks[index].status.valid_checksum = checksum_comp == checksum;
     } else {
-      cfg->rx_checks[index].status.valid_checksum = true;
+      cfg->rx_checks[index].status.valid_checksum = cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_checksum;
     }
 
-    // counter check (max_counter == 0 means skip check)
+    // counter check
     if ((safety_hooks->get_counter != NULL) && (cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].max_counter > 0U)) {
       uint8_t counter = safety_hooks->get_counter(to_push);
       update_counter(cfg->rx_checks, index, counter);
     } else {
-      cfg->rx_checks[index].status.wrong_counters = 0U;
+      cfg->rx_checks[index].status.wrong_counters = cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_counter ? 0 : MAX_WRONG_COUNTERS;
     }
 
     // quality flag check
