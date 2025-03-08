@@ -128,11 +128,15 @@ def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
   msg_161, msg_162 = CS.msg_161, CS.msg_162
   enabled, hud = CC.enabled, CC.hudControl
 
-  for f in {"FAULT_LSS", "FAULT_HDA", "FAULT_DAS", "FAULT_LFA", "FAULT_DAW"}:
-    msg_162[f] = 0
+  msg_162["FAULT_LSS"] = 0
+  msg_162["FAULT_HDA"] = 0
+  msg_162["FAULT_DAS"] = 0
+  msg_162["FAULT_LFA"] = 0
+  msg_162["FAULT_DAW"] = 0
 
   if msg_161["ALERTS_2"] == 5:  # CONSIDER_TAKING_A_BREAK
-    msg_161.update({"ALERTS_2": 0, "SOUNDS_2": 0})
+    msg_161["ALERTS_2"] = 0
+    msg_161["SOUNDS_2"] = 0
 
   if msg_161["ALERTS_3"] == 17:  # DRIVE_CAREFULLY
     msg_161["ALERTS_3"] = 0
@@ -143,47 +147,43 @@ def create_ccnc(packer, CAN, CP, CC, CS, lat_active):
   if msg_161["SOUNDS_4"] == 2 and msg_161["LFA_ICON"] in (3, 0,):  # LFA BEEPS
     msg_161["SOUNDS_4"] = 0
 
-  msg_161.update({
-    "DAW_ICON": 0,
-    "LKA_ICON": 0,
-    "LFA_ICON": 2 if lat_active or enabled else 1,
-    "CENTERLINE": 1 if lat_active or enabled else 0,
-    "LANELINE_LEFT": (
-      1 if not hud.leftLaneVisible else
-      4 if hud.leftLaneDepart else
-      0 if not (lat_active or enabled) else
-      2 if CS.out.leftBlindspot or CS.out.vEgo < 8.94 else 6
-    ),
-    "LANELINE_RIGHT": (
-      1 if not hud.rightLaneVisible else
-      4 if hud.rightLaneDepart else
-      0 if not (lat_active or enabled) else
-      2 if CS.out.rightBlindspot or CS.out.vEgo < 8.94 else 6
-    ),
-    "LCA_LEFT_ARROW": 2 if CC.leftBlinker else 0,
-    "LCA_RIGHT_ARROW": 2 if CC.rightBlinker else 0,
-    "LANE_LEFT": 1 if CC.leftBlinker else 0,
-    "LANE_RIGHT": 1 if CC.rightBlinker else 0,
-  })
+  msg_161["DAW_ICON"] = 0
+  msg_161["LKA_ICON"] = 0
+  msg_161["LFA_ICON"] = 2 if lat_active or enabled else 1
+  msg_161["CENTERLINE"] = 1 if lat_active or enabled else 0
+  msg_161["LANELINE_LEFT"] = (
+    1 if not hud.leftLaneVisible else
+    4 if hud.leftLaneDepart else
+    0 if not (lat_active or enabled) else
+    2 if CS.out.leftBlindspot or CS.out.vEgo < 8.94 else 6
+  )
+  msg_161["LANELINE_RIGHT"] = (
+    1 if not hud.rightLaneVisible else
+    4 if hud.rightLaneDepart else
+    0 if not (lat_active or enabled) else
+    2 if CS.out.rightBlindspot or CS.out.vEgo < 8.94 else 6
+  )
+  msg_161["LCA_LEFT_ARROW"] = 2 if CC.leftBlinker else 0
+  msg_161["LCA_RIGHT_ARROW"] = 2 if CC.rightBlinker else 0
+  msg_161["LANE_LEFT"] = 1 if CC.leftBlinker else 0
+  msg_161["LANE_RIGHT"] = 1 if CC.rightBlinker else 0
 
   if hud.leftLaneDepart or hud.rightLaneDepart:
     msg_162["VIBRATE"] = 1
 
   if CP.openpilotLongitudinalControl:
-    msg_161.update({
-      "SETSPEED": 3 if enabled else 1,
-      "SETSPEED_HUD": 2 if enabled else 1,
-      "SETSPEED_SPEED": 25 if (s := round(CS.out.vCruiseCluster * (1 if CS.is_metric else CV.KPH_TO_MPH))) > 100 else s,
-      "DISTANCE": hud.leadDistanceBars,
-      "DISTANCE_SPACING": 1 if enabled else 0,
-      "DISTANCE_LEAD": 2 if enabled and hud.leadVisible else 1 if enabled else 0,
-      "DISTANCE_CAR": 2 if enabled else 1,
-      "SLA_ICON": 0,
-      "NAV_ICON": 0,
-      "TARGET": 0,
-    })
+    msg_161["SETSPEED"] = 3 if enabled else 1
+    msg_161["SETSPEED_HUD"] = 2 if enabled else 1
+    msg_161["SETSPEED_SPEED"] = 25 if (s := round(CS.out.vCruiseCluster * (1 if CS.is_metric else CV.KPH_TO_MPH))) > 100 else s
+    msg_161["DISTANCE"] = hud.leadDistanceBars
+    msg_161["DISTANCE_SPACING"] = 1 if enabled else 0
+    msg_161["DISTANCE_LEAD"] = 2 if enabled and hud.leadVisible else 1 if enabled else 0
+    msg_161["DISTANCE_CAR"] = 2 if enabled else 1
+    msg_161["SLA_ICON"] = 0
+    msg_161["NAV_ICON"] = 0
+    msg_161["TARGET"] = 0
 
-    if msg_161["ALERTS_3"] in (1, 2, 3, 4, 7, 8, 9, 10):  # HIDE ISLA, DISTANCE MESSAGES
+    if msg_161.get("ALERTS_3", 0) in (1, 2, 3, 4, 7, 8, 9, 10):  # HIDE ISLA, DISTANCE MESSAGES
       msg_161["ALERTS_3"] = 0
 
     msg_162["LEAD"] = 0
