@@ -285,7 +285,7 @@ int safety_fwd_hook(int bus_num, int addr) {
     }
   }
 
-  return (relay_malfunction || blocked) ? -1 : destination_bus;
+  return (relay_malfunction || blocked) ? -1 : ((current_hooks->fwd != NULL) ? current_hooks->fwd(bus_num, addr) : destination_bus);
 }
 
 bool get_longitudinal_allowed(void) {
