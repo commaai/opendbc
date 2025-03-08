@@ -10,6 +10,7 @@ from opendbc.safety.tests.common import CANPackerPanda
 class TestBody(common.PandaSafetyTest):
   TX_MSGS = [[0x250, 0], [0x251, 0], [0x350, 0], [0x351, 0],
              [0x1, 0], [0x1, 1], [0x1, 2], [0x1, 3]]
+  FWD_BUS_LOOKUP = {}
 
   def setUp(self):
     self.packer = CANPackerPanda("comma_body")
