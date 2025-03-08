@@ -13,7 +13,6 @@ class TestChryslerSafety(common.PandaCarSafetyTest, common.MotorTorqueSteeringSa
   STANDSTILL_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS = {0: (0x292,)}
   FWD_BLACKLISTED_ADDRS = {2: [0x292, 0x2A6]}
-  FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   MAX_RATE_UP = 3
   MAX_RATE_DOWN = 3

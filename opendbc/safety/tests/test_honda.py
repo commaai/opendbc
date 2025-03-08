@@ -174,7 +174,6 @@ class HondaBase(common.PandaCarSafetyTest):
 
   STANDSTILL_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0x194)}  # STEERING_CONTROL
-  FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   cnt_speed = 0
   cnt_button = 0

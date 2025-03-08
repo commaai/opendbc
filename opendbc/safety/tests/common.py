@@ -696,7 +696,7 @@ class PandaSafetyTest(PandaSafetyTestBase):
                    *range(0x18DB00F1, 0x18DC00F1, 0x100),   # 29-bit UDS functional addressing
                    *range(0x3300, 0x3400)]                  # Honda
   FWD_BLACKLISTED_ADDRS: dict[int, list[int]] = {}  # {bus: [addr]}
-  FWD_BUS_LOOKUP: dict[int, int] = {}
+  FWD_BUS_LOOKUP: dict[int, int] = {0: 2, 2: 0}
 
   @classmethod
   def setUpClass(cls):

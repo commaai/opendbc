@@ -72,7 +72,6 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
 
   FWD_BLACKLISTED_ADDRS = {2: [MSG_ACCDATA_3, MSG_Lane_Assist_Data1, MSG_LateralMotionControl,
                                MSG_LateralMotionControl2, MSG_IPMA_Data]}
-  FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   # Max allowed delta between car speeds
   MAX_SPEED_DELTA = 2.0  # m/s

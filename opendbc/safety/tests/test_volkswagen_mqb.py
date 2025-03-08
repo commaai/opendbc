@@ -139,7 +139,6 @@ class TestVolkswagenMqbSafety(common.PandaCarSafetyTest, common.DriverTorqueStee
 class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafety):
   TX_MSGS = [[MSG_HCA_01, 0], [MSG_LDW_02, 0], [MSG_LH_EPS_03, 2], [MSG_GRA_ACC_01, 0], [MSG_GRA_ACC_01, 2]]
   FWD_BLACKLISTED_ADDRS = {0: [MSG_LH_EPS_03], 2: [MSG_HCA_01, MSG_LDW_02]}
-  FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   def setUp(self):
     self.packer = CANPackerPanda("vw_mqb_2010")
@@ -160,7 +159,6 @@ class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafety):
 class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafety):
   TX_MSGS = [[MSG_HCA_01, 0], [MSG_LDW_02, 0], [MSG_LH_EPS_03, 2], [MSG_ACC_02, 0], [MSG_ACC_06, 0], [MSG_ACC_07, 0]]
   FWD_BLACKLISTED_ADDRS = {0: [MSG_LH_EPS_03], 2: [MSG_HCA_01, MSG_LDW_02, MSG_ACC_02, MSG_ACC_06, MSG_ACC_07]}
-  FWD_BUS_LOOKUP = {0: 2, 2: 0}
   INACTIVE_ACCEL = 3.01
 
   def setUp(self):

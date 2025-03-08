@@ -14,7 +14,6 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
   STANDSTILL_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS = {0: (0x120,)}
   FWD_BLACKLISTED_ADDRS = {0: [0x321, 0x162], 2: [0x120]}
-  FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   MAX_TORQUE = 250
   MAX_RATE_UP = 3
