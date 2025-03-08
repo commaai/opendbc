@@ -7,7 +7,6 @@ from collections.abc import Callable
 from typing import Any
 
 from opendbc.car import DT_CTRL, CanData, gen_empty_fingerprint, structs
-from opendbc.car.car_helpers import interfaces
 from opendbc.car.fingerprints import FW_VERSIONS
 from opendbc.car.fw_versions import FW_QUERY_CONFIGS
 from opendbc.car.interfaces import get_interface_attr
@@ -53,7 +52,7 @@ class TestCarInterfaces:
   @settings(max_examples=MAX_EXAMPLES, deadline=None,
             phases=(Phase.reuse, Phase.generate, Phase.shrink))
   @given(data=st.data())
-  def test_car_interfaces(self, car_name, data):
+  def test_car_interfaces(self, car_name, data, interfaces):
     CarInterface, CarController, CarState, RadarInterface = interfaces[car_name]
 
     args = get_fuzzy_car_interface_args(data.draw)
