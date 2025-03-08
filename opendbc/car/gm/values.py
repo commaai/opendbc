@@ -143,7 +143,7 @@ class CAR(Platforms):
     [GMCarDocs("Cadillac Escalade ESV 2016", "Adaptive Cruise Control (ACC) & LKAS")],
     GMCarSpecs(mass=2739, wheelbase=3.302, steerRatio=17.3, tireStiffnessFactor=1.0),
   )
-  CADILLAC_ESCALADE_ESV = GMASCMPlatformConfig(
+  CADILLAC_ESCALADE_ESV_Chris = GMASCMPlatformConfig(
     [GMCarDocs("Cadillac Escalade ESV Chris", "Adaptive Cruise Control (ACC) & LKAS")],
     GMCarSpecs(mass=2739, wheelbase=3.302, steerRatio=17.3, tireStiffnessFactor=1.0),
   )
