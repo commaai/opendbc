@@ -13,7 +13,6 @@
 
 // CAN bus numbers
 #define MAZDA_MAIN 0
-#define MAZDA_CAM  2
 
 // track msgs coming from OP so that we know what CAM msgs to drop and what to forward
 static void mazda_rx_hook(const CANPacket_t *to_push) {
@@ -91,25 +90,8 @@ static bool mazda_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static int mazda_fwd_hook(int bus, int addr) {
-  int bus_fwd = -1;
-
-  if (bus == MAZDA_MAIN) {
-    bus_fwd = MAZDA_CAM;
-  } else if (bus == MAZDA_CAM) {
-    bool block = (addr == MAZDA_LKAS) || (addr == MAZDA_LKAS_HUD);
-    if (!block) {
-      bus_fwd = MAZDA_MAIN;
-    }
-  } else {
-    // don't fwd
-  }
-
-  return bus_fwd;
-}
-
 static safety_config mazda_init(uint16_t param) {
-  static const CanMsg MAZDA_TX_MSGS[] = {{MAZDA_LKAS, 0, 8}, {MAZDA_CRZ_BTNS, 0, 8}, {MAZDA_LKAS_HUD, 0, 8}};
+  static const CanMsg MAZDA_TX_MSGS[] = {{MAZDA_LKAS, 0, 8, .blocked = true}, {MAZDA_CRZ_BTNS, 0, 8}, {MAZDA_LKAS_HUD, 0, 8, .blocked = true}};
 
   static RxCheck mazda_rx_checks[] = {
     {.msg = {{MAZDA_CRZ_CTRL,     0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
@@ -127,5 +109,4 @@ const safety_hooks mazda_hooks = {
   .init = mazda_init,
   .rx = mazda_rx_hook,
   .tx = mazda_tx_hook,
-  .fwd = mazda_fwd_hook,
 };
