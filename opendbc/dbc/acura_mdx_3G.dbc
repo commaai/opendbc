@@ -77,14 +77,6 @@ CM_ "Imported file _steering_sensors_b.dbc starts here";
 
 CM_ "acura_ilx_2016_can.dbc starts here";
 
-BO_ 422 SCM_BUTTONS: 8 SCM
- SG_ CRUISE_BUTTONS : 7|3@0+ (1,0) [0|7] "" EON
- SG_ LIGHTS_SETTING : 1|2@0+ (1,0) [0|3] "" EON
- SG_ MAIN_ON : 47|1@0+ (1,0) [0|1] "" EON
- SG_ CRUISE_SETTING : 43|2@0+ (1,0) [0|3] "" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
-
 BO_ 660 SCM_FEEDBACK: 8 SCM
  SG_ RIGHT_BLINKER : 6|1@0+ (1,0) [0|1] "" EON
  SG_ LEFT_BLINKER : 5|1@0+ (1,0) [0|1] "" EON
