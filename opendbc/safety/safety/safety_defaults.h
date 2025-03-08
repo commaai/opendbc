@@ -23,17 +23,10 @@ static bool nooutput_tx_hook(const CANPacket_t *to_send) {
 }
 // GCOV_EXCL_STOP
 
-static int default_fwd_hook(int bus_num, int addr) {
-  UNUSED(bus_num);
-  UNUSED(addr);
-  return -1;
-}
-
 const safety_hooks nooutput_hooks = {
   .init = nooutput_init,
   .rx = default_rx_hook,
   .tx = nooutput_tx_hook,
-  .fwd = default_fwd_hook,
 };
 
 // *** all output safety mode ***
