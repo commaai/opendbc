@@ -225,11 +225,7 @@ static safety_config gm_init(uint16_t param) {
     ret = gm_cam_long ? BUILD_SAFETY_CFG(gm_rx_checks, GM_CAM_LONG_TX_MSGS) : BUILD_SAFETY_CFG(gm_rx_checks, GM_CAM_TX_MSGS);
   } else {
     ret = BUILD_SAFETY_CFG(gm_rx_checks, GM_ASCM_TX_MSGS);
-
-    // TODO: just use a bool for this
-    static const FwdBus fwd_buses[] = {0};
-    ret.fwd_buses = fwd_buses;
-    ret.fwd_buses_len = 0;
+    ret.block_fwding = true;
   }
   return ret;
 }

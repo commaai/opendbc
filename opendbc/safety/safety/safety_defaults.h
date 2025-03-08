@@ -10,9 +10,7 @@ void default_rx_hook(const CANPacket_t *to_push) {
 
 static safety_config nooutput_init(uint16_t param) {
   UNUSED(param);
-  // TODO: just use a bool for this
-  static const FwdBus fwd_buses[] = {0};
-  return (safety_config){NULL, 0, NULL, 0, fwd_buses, 0};
+  return (safety_config){NULL, 0, NULL, 0, true};
 }
 
 // GCOV_EXCL_START
@@ -35,14 +33,7 @@ static safety_config alloutput_init(uint16_t param) {
   const uint16_t ALLOUTPUT_PARAM_PASSTHROUGH = 1;
   controls_allowed = true;
   bool alloutput_passthrough = GET_FLAG(param, ALLOUTPUT_PARAM_PASSTHROUGH);
-
-  safety_config ret = {NULL, 0, NULL, 0};
-  if (!alloutput_passthrough) {
-    // TODO: just use a bool for this
-    static const FwdBus fwd_buses[] = {0};
-    ret.fwd_buses = fwd_buses;
-    ret.fwd_buses_len = 0;
-  }
+  safety_config ret = {NULL, 0, NULL, 0, !alloutput_passthrough};
   return ret;
 }
 

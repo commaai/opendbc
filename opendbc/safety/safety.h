@@ -238,25 +238,6 @@ static bool tx_msg_safety_check(const CANPacket_t *to_send, const CanMsg msg_lis
   return allowed;
 }
 
-static int get_fwd_bus(int bus_num, const safety_config *cfg) {
-  static const FwdBus DEFAULT_FWD_BUS_LOOKUP[DEFAULT_FWD_BUS_LEN] = {
-    {0, 2},
-    {2, 0},
-  };
-
-  const FwdBus *fwd_buses = (cfg->fwd_buses == NULL) ? DEFAULT_FWD_BUS_LOOKUP : cfg->fwd_buses;
-  const int fwd_buses_len = (cfg->fwd_buses == NULL) ? DEFAULT_FWD_BUS_LEN : cfg->fwd_buses_len;
-
-  int destination_bus = -1;
-  for (int i = 0; i < fwd_buses_len; i++) {
-    if (fwd_buses[i].source_bus == bus_num) {
-      destination_bus = fwd_buses[i].destination_bus;
-      break;
-    }
-  }
-  return destination_bus;
-}
-
 bool safety_tx_hook(CANPacket_t *to_send) {
   bool allowed = tx_msg_safety_check(to_send, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
   if ((current_safety_mode == SAFETY_ALLOUTPUT) || (current_safety_mode == SAFETY_ELM327)) {
@@ -272,13 +253,15 @@ bool safety_tx_hook(CANPacket_t *to_send) {
 }
 
 int safety_fwd_hook(int bus_num, int addr) {
-  const int destination_bus = get_fwd_bus(bus_num, &current_safety_config);
+  const int destination_bus = bus_num == 0 ? 2 : (bus_num == 2 ? 0 : -1);
 
   bool blocked = false;
-  for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
-    const CanMsg *m = &current_safety_config.tx_msgs[i];
-    if ((m->addr == addr) && m->blocked) {
-      if (m->bus == destination_bus) {
+  if (current_safety_config.block_fwding) {
+    blocked = true;
+  } else {
+    for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
+      const CanMsg *m = &current_safety_config.tx_msgs[i];
+      if ((m->addr == addr) && (m->bus == destination_bus) && m->blocked) {
         blocked = true;
         break;
       }
@@ -463,8 +446,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   current_safety_config.rx_checks_len = 0;
   current_safety_config.tx_msgs = NULL;
   current_safety_config.tx_msgs_len = 0;
-  current_safety_config.fwd_buses = NULL;
-  current_safety_config.fwd_buses_len = 0;
+  current_safety_config.block_fwding = false;
 
   int set_status = -1;  // not set
   int hook_config_count = sizeof(safety_hook_registry) / sizeof(safety_hook_config);
@@ -482,8 +464,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
     current_safety_config.rx_checks_len = cfg.rx_checks_len;
     current_safety_config.tx_msgs = cfg.tx_msgs;
     current_safety_config.tx_msgs_len = cfg.tx_msgs_len;
-    current_safety_config.fwd_buses = cfg.fwd_buses;
-    current_safety_config.fwd_buses_len = cfg.fwd_buses_len;
+    current_safety_config.block_fwding = cfg.block_fwding;
     // reset all dynamic fields in addr struct
     for (int j = 0; j < current_safety_config.rx_checks_len; j++) {
       current_safety_config.rx_checks[j].status = (RxStatus){0};

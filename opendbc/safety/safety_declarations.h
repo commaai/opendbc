@@ -13,14 +13,14 @@
   do { \
     (config).rx_checks = (rx); \
     (config).rx_checks_len = sizeof((rx)) / sizeof((rx)[0]); \
-    (config).fwd_buses = NULL; \
+    (config).block_fwding = false; \
   } while (0);
 
 #define SET_TX_MSGS(tx, config) \
   do { \
     (config).tx_msgs = (tx); \
     (config).tx_msgs_len = sizeof((tx)) / sizeof((tx)[0]); \
-    (config).fwd_buses = NULL; \
+    (config).block_fwding = false; \
   } while(0);
 
 #define UPDATE_VEHICLE_SPEED(val_ms) (update_sample(&vehicle_speed, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
@@ -160,8 +160,7 @@ typedef struct {
   int rx_checks_len;
   const CanMsg *tx_msgs;
   int tx_msgs_len;
-  const FwdBus *fwd_buses;
-  int fwd_buses_len;
+  bool block_fwding;
 } safety_config;
 
 typedef uint32_t (*get_checksum_t)(const CANPacket_t *to_push);
@@ -178,6 +177,7 @@ typedef struct {
   safety_hook_init init;
   rx_hook rx;
   tx_hook tx;
+  // TODO: remove
   fwd_hook fwd;
   get_checksum_t get_checksum;
   compute_checksum_t compute_checksum;

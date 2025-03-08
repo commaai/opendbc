@@ -40,10 +40,7 @@ static safety_config body_init(uint16_t param) {
 
   UNUSED(param);
   safety_config ret = BUILD_SAFETY_CFG(body_rx_checks, BODY_TX_MSGS);
-  // TODO: just use a bool for this
-  static const FwdBus fwd_buses[] = {0};
-  ret.fwd_buses = fwd_buses;
-  ret.fwd_buses_len = 0;
+  ret.block_fwding = true;
   return ret;
 }
 
