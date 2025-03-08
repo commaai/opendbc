@@ -10,7 +10,9 @@ void default_rx_hook(const CANPacket_t *to_push) {
 
 static safety_config nooutput_init(uint16_t param) {
   UNUSED(param);
-  return (safety_config){NULL, 0, NULL, 0};
+  // TODO: just use a bool for this
+  static const FwdBus fwd_buses[] = {};
+  return (safety_config){NULL, 0, NULL, 0, fwd_buses, 0};
 }
 
 // GCOV_EXCL_START
@@ -44,7 +46,14 @@ static safety_config alloutput_init(uint16_t param) {
   const uint16_t ALLOUTPUT_PARAM_PASSTHROUGH = 1;
   controls_allowed = true;
   alloutput_passthrough = GET_FLAG(param, ALLOUTPUT_PARAM_PASSTHROUGH);
-  return (safety_config){NULL, 0, NULL, 0};
+  safety_config ret = {NULL, 0, NULL, 0};
+  if (!alloutput_passthrough) {
+    // TODO: just use a bool for this
+    static const FwdBus fwd_buses[] = {};
+    ret.fwd_buses = fwd_buses;
+    ret.fwd_buses_len = 0;
+  }
+  return ret;
 }
 
 static bool alloutput_tx_hook(const CANPacket_t *to_send) {
@@ -52,25 +61,8 @@ static bool alloutput_tx_hook(const CANPacket_t *to_send) {
   return true;
 }
 
-static int alloutput_fwd_hook(int bus_num, int addr) {
-  int bus_fwd = -1;
-  UNUSED(addr);
-
-  if (alloutput_passthrough) {
-    if (bus_num == 0) {
-      bus_fwd = 2;
-    }
-    if (bus_num == 2) {
-      bus_fwd = 0;
-    }
-  }
-
-  return bus_fwd;
-}
-
 const safety_hooks alloutput_hooks = {
   .init = alloutput_init,
   .rx = default_rx_hook,
   .tx = alloutput_tx_hook,
-  .fwd = alloutput_fwd_hook,
 };
