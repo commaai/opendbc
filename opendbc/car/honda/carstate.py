@@ -107,7 +107,11 @@ class CarState(CarStateBase):
 
     if CP.transmissionType != TransmissionType.manual:
       self.shifter_values = can_define.dv[self.gearbox_msg]["GEAR_SHIFTER"]
-    self.steer_status_values = defaultdict(lambda: "UNKNOWN", can_define.dv["STEER_STATUS"]["STEER_STATUS"])
+    
+    if self.CP.carFingerprint in SERIAL_STEERING:
+      self.steer_status_values = defaultdict(lambda: "UNKNOWN", can_define.dv["LIN_STEER_STATUS"]["STEER_STATUS"])
+    else
+      self.steer_status_values = defaultdict(lambda: "UNKNOWN", can_define.dv["STEER_STATUS"]["STEER_STATUS"])
 
     self.brake_switch_prev = False
     self.brake_switch_active = False
@@ -156,7 +160,7 @@ class CarState(CarStateBase):
     ret.seatbeltUnlatched = bool(cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LAMP"] or not cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LATCHED"])
 
     if self.CP.carFingerprint in SERIAL_STEERING:
-      steer_status = self.steer_status_values[cp_cam.vl["STEER_STATUS"]['STEER_STATUS']]
+      steer_status = self.steer_status_values[cp_cam.vl["LIN_STEER_STATUS"]['STEER_STATUS']]
     else:
       steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]["STEER_STATUS"]]
     ret.steerFaultPermanent = steer_status not in ("NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT")
