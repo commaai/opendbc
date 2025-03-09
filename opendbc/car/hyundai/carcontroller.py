@@ -37,17 +37,16 @@ class CarController(CarControllerBase):
     if self.CP.flags & HyundaiFlags.CANFD:
       return self.update_canfd(CC, CS, now_nanos)
 
-    (actuators, hud_control, apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning,
-     right_lane_warning, tester_present_msgs) = self.update_common(CC, CS)
+    cd = self.update_common(CC, CS)
 
-    can_sends = tester_present_msgs.copy()
-    can_sends.append(hyundaican.create_lkas11(self.packer, self.frame, self.CP, apply_torque, apply_steer_req, torque_fault, CS.lkas11, sys_warning,
-      sys_state, CC.enabled, hud_control.leftLaneVisible, hud_control.rightLaneVisible, left_lane_warning, right_lane_warning))
+    can_sends = cd.tester_present_msgs.copy()
+    can_sends.append(hyundaican.create_lkas11(self.packer, self.frame, self.CP, cd.apply_torque, cd.apply_steer_req, cd.torque_fault, CS.lkas11, cd.sys_warning,
+      cd.sys_state, CC.enabled, cd.hud_control.leftLaneVisible, cd.hud_control.rightLaneVisible, cd.left_lane_warning, cd.right_lane_warning))
 
     if self.CP.openpilotLongitudinalControl:
       if self.frame % 2 == 0:
-        jerk = 3.0 if actuators.longControlState == LongCtrlState.pid else 1.0  # TODO: unclear if this is needed
-        can_sends.extend(hyundaican.create_acc_commands(self.packer, CC.enabled, accel, jerk, int(self.frame / 2), hud_control, set_speed_in_units, stopping,
+        jerk = 3.0 if cd.actuators.longControlState == LongCtrlState.pid else 1.0  # TODO: unclear if this is needed
+        can_sends.extend(hyundaican.create_acc_commands(self.packer, CC.enabled, cd.accel, jerk, int(self.frame / 2), cd.hud_control, cd.set_speed_in_units, cd.stopping,
                                                           CC.cruiseControl.override, self.CP.flags & HyundaiFlags.USE_FCA.value, self.CP))
       if self.frame % 20 == 0:
         can_sends.extend(hyundaican.create_acc_opt(self.packer, self.CP))
@@ -65,15 +64,14 @@ class CarController(CarControllerBase):
     if self.frame % 5 == 0 and self.CP.flags & HyundaiFlags.SEND_LFA.value:
       can_sends.append(hyundaican.create_lfahda_mfc(self.packer, CC.enabled))
 
-    return self.update_actuators(actuators, apply_torque, accel, can_sends)
+    return self.update_actuators(cd.actuators, cd.apply_torque, cd.accel, can_sends)
 
 
   def update_canfd(self, CC, CS, now_nanos):
-    (actuators, hud_control, apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning,
-     right_lane_warning, tester_present_msgs) = self.update_common(CC, CS)
+    cd = self.update_common(CC, CS)
 
-    can_sends = tester_present_msgs.copy()
-    can_sends.extend(hyundaicanfd.create_steering_messages(self.packer, self.CP, self.CAN, CC.enabled, apply_steer_req, apply_torque))
+    can_sends = cd.tester_present_msgs.copy()
+    can_sends.extend(hyundaicanfd.create_steering_messages(self.packer, self.CP, self.CAN, CC.enabled, cd.apply_steer_req, cd.apply_torque))
 
     lka_steering = self.CP.flags & HyundaiFlags.CANFD_LKA_STEERING
 
@@ -92,9 +90,9 @@ class CarController(CarControllerBase):
       else:
         can_sends.extend(hyundaicanfd.create_fca_warning_light(self.packer, self.CAN, self.frame))
       if self.frame % 2 == 0:
-        can_sends.append(hyundaicanfd.create_acc_control(self.packer, self.CAN, CC.enabled, self.accel_last, accel, stopping, CC.cruiseControl.override,
-                                                         set_speed_in_units, hud_control))
-        self.accel_last = accel
+        can_sends.append(hyundaicanfd.create_acc_control(self.packer, self.CAN, CC.enabled, self.accel_last, cd.accel, cd.stopping, CC.cruiseControl.override,
+                                                         cd.set_speed_in_units, cd.hud_control))
+        self.accel_last = cd.accel
     else:
       if (self.frame - self.last_button_frame) * DT_CTRL > 0.25:
         if CC.cruiseControl.cancel:
@@ -106,7 +104,7 @@ class CarController(CarControllerBase):
             can_sends.extend([hyundaicanfd.create_buttons(self.packer, self.CP, self.CAN, CS.buttons_counter + 1, Buttons.RES_ACCEL) for _ in range(20)])
         self.last_button_frame = self.frame
 
-    return self.update_actuators(actuators, apply_torque, accel, can_sends)
+    return self.update_actuators(cd.actuators, cd.apply_torque, cd.accel, can_sends)
 
 
   def update_common(self, CC, CS):
