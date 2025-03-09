@@ -125,6 +125,7 @@ BO_ 717 HS2_DYN_UCF_2CD: 3 UC_FREIN
 BO_ 728 NEW_MSG_2D8: 7 XXX
  SG_ ESP_STATUS_RELATED : 28|1@0+ (1,0) [0|1] "" XXX
  SG_ ESP_STATUS_RELATED_INV : 29|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_ACTIVATION_RELATED : 43|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 757 STEERING: 7 XXX
  SG_ COUNTER : 3|4@0+ (1,0) [0|255] "" XXX
@@ -134,9 +135,29 @@ BO_ 757 STEERING: 7 XXX
  SG_ RATE : 47|12@0- (1,0) [0|4095] "" XXX
  SG_ NEW_SIGNAL_1 : 48|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 758 HS2_DYN_MDD_STATUS_2F6: 8 ARTIV
+ SG_ TARGET_DETECTED : 0|1@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
+ SG_ REQ_CONDITION_RESUME : 2|2@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
+ SG_ BLIND_SENSOR : 4|1@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
+ SG_ REQ_VISUAL_COLLISION_ALERT : 5|1@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
+ SG_ REQ_SOUND_COLLISION_ALERT : 6|1@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
+ SG_ REQ_HAPTIC_COLLISION_ALERT : 7|1@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
+ SG_ VEHICLE_INTER_DISTANCE : 15|10@0+ (0.25,0) [0|255.5] "m" BSI,CMM,UC_FREIN,CMF
+ SG_ COLLISION_ALERT_STATE : 19|4@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
+ SG_ BRAKING_IN_PROGRESS : 20|1@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
+ SG_ AEB_ENABLED : 21|1@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
+ SG_ DRV_AWAY_REQ : 33|1@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
+ SG_ DISPLAYED_INTER_VEHICLE_TIME : 39|6@0+ (0.1,0) [0|6.1] "s" BSI,CMM,UC_FREIN,CMF
+ SG_ REQ_UCF_DECEL_CONTROL : 42|1@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
+ SG_ BRAKE_STATE : 47|3@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
+ SG_ DYN_ACC2_FRAME_CHECKSUM : 51|4@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
+ SG_ PROCESS_COUNTER_4B_ACC2 : 55|4@0+ (1,0) [0|15] "" BSI,CMM,UC_FREIN,CMF
+ SG_ TARGET_POSITION : 63|3@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
+
 BO_ 760 NEW_MSG_2F8: 7 XXX
  SG_ ESP_STATUS_RELATED : 12|1@0+ (1,0) [0|1] "" XXX
  SG_ ESP_STATUS_RELATED_INV : 13|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_ACTIVATION_RELATED : 35|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 773 STEERING_ALT: 7 XXX
  SG_ ANGLE : 7|16@0- (0.1,0) [-3276.8|3276.7] "degrees" XXX
@@ -375,9 +396,17 @@ BO_ 1161 Dat_V2_BV: 8 BVA___Automatikgetriebe
  SG_ P285_Com_bPNDia : 20|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ P218_Com_stDrvIdx : 48|8@1+ (1,0) [0|255] "" Vector__XXX
 
-BO_ 1173 DAT_DIRA: 3 Vector__XXX
- SG_ P448_Com_bStrgWhlEngStopReqRaw : 21|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ P447_Com_bStrgWhlEngRstrtReqRaw : 23|1@1+ (1,0) [0|1] "" Vector__XXX
+BO_ 1173 IS_DAT_DIRA: 4 PSCM
+ SG_ EPS_TORQUE : 7|8@0- (0.25,0) [-32|31.5] "Nm" Tester
+ SG_ ETAT_DA_2004 : 9|2@0+ (1,0) [0|3] "" Tester
+ SG_ ETAT_DA_DYN : 13|2@0+ (1,0) [0|3] "" Tester
+ SG_ ETAT_DA_2010 : 15|2@0+ (1,0) [0|3] "" Tester
+ SG_ TRQ_LIMIT_STATE : 16|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ STEERWHL_HOLD_BY_DRV : 17|1@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ EPS_STATE_LKA : 20|3@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ AUTOR_ARRET_MOT_DA : 21|1@0+ (1,0) [0|1] "" Tester
+ SG_ STEERING_REBOOT_REQUEST : 23|1@0+ (1,0) [0|1] "" Tester
+ SG_ Reserved : 31|8@0+ (1,0) [0|255] "" Tester
 
 BO_ 1224 Etat_Crash: 3 BSI___Kombiinstrument
  SG_ Reserved_1 : 7|8@0+ (1,0) [0|0] "-" Vector__XXX
@@ -935,9 +964,31 @@ VAL_ 694 GEAR_TYPE 0 "Downshift" 1 "Upshift";
 VAL_ 694 PREFILL_REQUEST 0 "No prefill request" 1 "Prefill request";
 VAL_ 728 ESP_STATUS_RELATED 0 "DISABLED" 1 "ENABLED";
 VAL_ 728 ESP_STATUS_RELATED_INV 0 "ENABLED" 1 "DISABLED";
+VAL_ 758 TARGET_DETECTED 0 "initialization or no target detected" 1 "target detected";
+VAL_ 758 REQ_CONDITION_RESUME 0 "No request" 1 "Non-critical request" 2 "Critical request" 3 "Invalid";
+VAL_ 758 BLIND_SENSOR 0 "False" 1 "True";
+VAL_ 758 REQ_VISUAL_COLLISION_ALERT 0 "No visual alert request" 1 "Visual alert request";
+VAL_ 758 REQ_SOUND_COLLISION_ALERT 0 "No sound alert request" 1 "Sound alert request";
+VAL_ 758 REQ_HAPTIC_COLLISION_ALERT 0 "No haptic alert request" 1 "Haptic alert request";
+VAL_ 758 COLLISION_ALERT_STATE 0 "Unavailable" 1 "Value not used" 2 "Value not used" 3 "Initialization" 4 "Value not used" 5 "Value not used" 6 "Inhibited" 7 "Value not used" 8 "Value not used" 9 "Value not used" 10 "Waiting" 11 "Value not used" 12 "Active" 13 "Value not used" 14 "Value not used" 15 "Fault";
+VAL_ 758 BRAKING_IN_PROGRESS 0 "No braking in progress" 1 "Braking in progress";
+VAL_ 758 AEB_ENABLED 0 "FALSE" 1 "TRUE";
+VAL_ 758 DRV_AWAY_REQ 0 "No drive away required" 1 "Drive away required";
+VAL_ 758 REQ_UCF_DECEL_CONTROL 0 "No UCF control request" 1 "UCF control request";
+VAL_ 758 BRAKE_STATE 0 "Unavailable" 1 "Initialization" 2 "Value not used" 3 "Inhibited" 4 "Value not used" 5 "Waiting" 6 "Active" 7 "Fault";
+VAL_ 758 TARGET_POSITION 0 "POS1" 1 "POS2" 2 "POS3" 3 "POS4" 4 "POS5" 5 "POS6" 6 "POS7" 7 "Invalid";
 VAL_ 760 ESP_STATUS_RELATED 0 "DISABLED" 1 "ENABLED";
 VAL_ 760 ESP_STATUS_RELATED_INV 0 "ENABLED" 1 "DISABLED";
 VAL_ 840 P134_Com_stEng 7 "RESERVED" 6 "DegradedGO" 5 "GO" 4 "Stopped" 3 "Running" 2 "Starting" 1 "Cut" 0 "Locked";
 VAL_ 909 VITESSE_VEHICULE_ROUES 65535 "Invalid";
 VAL_ 1010 LANE_DEPARTURE 0 "NOT_DEPARTED" 1 "DEPARTED_RIGHT" 2 "DEPARTED_LEFT";
 VAL_ 1010 STATUS 0 "UNAVAILABLE" 1 "UNSELECTED" 2 "SELECTED" 3 "AUTHORIZED" 4 "ACTIVE" 5 "DEFECT" 6 "COLLISION" 7 "RESERVED";
+VAL_ 1173 EPS_TORQUE 127 "Invalid";
+VAL_ 1173 ETAT_DA_2004 3 "Reserved" 2 "Orange LED" 1 "Red LED" 0 "No Demand";
+VAL_ 1173 ETAT_DA_DYN 3 "Invalid" 2 "Adjustable Mode" 1 "Dynamic Mode" 0 "Normal Mode";
+VAL_ 1173 ETAT_DA_2010 3 "Reserved" 2 "Orange LED" 1 "Red LED" 0 "No Demand";
+VAL_ 1173 TRQ_LIMIT_STATE 1 "Saturation Effective" 0 "No Saturation";
+VAL_ 1173 STEERWHL_HOLD_BY_DRV 1 "Steer Activity From Drv Trq" 0 "No Steer Activity From Drv Trq";
+VAL_ 1173 EPS_STATE_LKA 4 "Defect" 3 "Active" 2 "Available" 1 "Authorised" 0 "Unauthorised";
+VAL_ 1173 AUTOR_ARRET_MOT_DA 1 "Permission to Stop" 0 "No Permission to Stop";
+VAL_ 1173 STEERING_REBOOT_REQUEST 1 "Request Reboot" 0 "No Reboot Required";

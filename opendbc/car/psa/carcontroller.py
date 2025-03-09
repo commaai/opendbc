@@ -1,25 +1,24 @@
-import numpy as np
-from opendbc.car import structs, apply_std_steer_angle_limits, Bus
+from opendbc.car import apply_std_steer_angle_limits, Bus
 from opendbc.can.packer import CANPacker
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.psa import psacan
 from opendbc.car.psa.values import CarControllerParams
 
 class CarController(CarControllerBase):
-  def __init__(self, dbc_names, CP, CP_SP):
+  def __init__(self, dbc_names, CP):
     self.CP = CP
     self.packer = CANPacker(dbc_names[Bus.cam])
     self.frame = 0
     self.apply_angle_last = 0
 
-  def update(self, CC, CC_SP, CS, now_nanos):
+  def update(self, CC, CS, now_nanos):
     can_sends = []
     actuators = CC.actuators
 
     ### lateral control ###
     if CC.latActive:
-      desired_angle = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, CarControllerParams)
-      apply_angle = float(np.clip(desired_angle, -CarControllerParams.STEER_MAX, CarControllerParams.STEER_MAX))
+      apply_angle = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw,
+                                                   CS.out.steeringAngleDeg, CC.latActive, CarControllerParams.ANGLE_LIMITS)
     else:
       apply_angle = 0
 
