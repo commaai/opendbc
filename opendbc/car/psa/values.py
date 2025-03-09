@@ -10,11 +10,12 @@ Ecu = CarParams.Ecu
 class CarControllerParams:
   STEER_STEP = 1  # spamming at 100 Hz works well, stock lkas is ~20 Hz
   STEER_MAX = 390.0  # EPS can actuate the full range of steering
-  ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[5., .8, .15])
-  ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[5., 3.5, 0.4])
-  STEER_DRIVER_ALLOWANCE = 10  # Driver intervention threshold, 1 Nm
-  EPS_MAX_TORQUE = 4 # TODO: tune   max torque of EPS in Nm
 
+  # Angle rate limits are set to meet ISO 11270
+  ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[2.5, 1.5, 0.2])
+  ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[5., 2.0, 0.3])
+  STEER_DRIVER_ALLOWANCE = 10  # Driver intervention threshold, 1 Nm
+  EPS_MAX_TORQUE = 4.5 # TODO: max EPS torque seen in Nm
   def __init__(self, CP):
     pass
 

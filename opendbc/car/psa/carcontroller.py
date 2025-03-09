@@ -21,7 +21,7 @@ class CarController(CarControllerBase):
       desired_angle = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, CarControllerParams)
       apply_angle = float(np.clip(desired_angle, -CarControllerParams.STEER_MAX, CarControllerParams.STEER_MAX))
     else:
-      apply_angle = CS.out.steeringAngleDeg
+      apply_angle = 0
 
     can_sends.append(psacan.create_lka_msg(self.packer, self.CP, self.frame, CC.latActive, apply_angle))
 
