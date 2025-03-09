@@ -72,7 +72,7 @@ class CarController(CarControllerBase):
     if self.frame % 5 == 0 and lka_steering:
       can_sends.append(hyundaicanfd.create_suppress_lfa(self.packer, self.CAN, CS.lfa_block_msg, self.CP.flags & HyundaiFlags.CANFD_LKA_STEERING_ALT))
 
-    if self.frame % 5 == 0 and (not lka_steering or (lka_steering and self.CP.openpilotLongitudinalControl)):
+    if self.frame % 5 == 0 and (not lka_steering or self.CP.openpilotLongitudinalControl):
       can_sends.append(hyundaicanfd.create_lfahda_cluster(self.packer, self.CAN, CC.enabled))
 
     if self.CP.flags & HyundaiFlags.ENABLE_BLINKERS and lka_steering:
