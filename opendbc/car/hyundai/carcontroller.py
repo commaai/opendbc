@@ -156,7 +156,6 @@ class CarController(CarControllerBase):
         addr, bus = 0x730, self.CAN.ECAN
       tester_present_msgs.append(make_tester_present_msg(addr, bus, suppress_response=True))
 
-      # for blinkers
       if self.CP.flags & HyundaiFlags.ENABLE_BLINKERS:
         tester_present_msgs.append(make_tester_present_msg(0x7b1, self.CAN.ECAN, suppress_response=True))
 
