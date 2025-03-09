@@ -35,7 +35,7 @@ class CarController(CarControllerBase):
       return self.update_canfd(CC, CS, now_nanos)
 
     (actuators, hud_control, apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning,
-     right_lane_warning, tester_present_msgs) = self.compute_common_controls(CC, CS)
+     right_lane_warning, tester_present_msgs) = self.update_common(CC, CS)
 
     can_sends = tester_present_msgs.copy()
     can_sends.append(hyundaican.create_lkas11(self.packer, self.frame, self.CP, apply_torque, apply_steer_req, torque_fault, CS.lkas11, sys_warning,
@@ -68,7 +68,7 @@ class CarController(CarControllerBase):
 
   def update_canfd(self, CC, CS, now_nanos):
     (actuators, hud_control, apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning,
-     right_lane_warning, tester_present_msgs) = self.compute_common_controls(CC, CS)
+     right_lane_warning, tester_present_msgs) = self.update_common(CC, CS)
 
     can_sends = tester_present_msgs.copy()
     can_sends.extend(hyundaicanfd.create_steering_messages(self.packer, self.CP, self.CAN, CC.enabled, apply_steer_req, apply_torque))
@@ -122,7 +122,7 @@ class CarController(CarControllerBase):
     return new_actuators, can_sends
 
 
-  def compute_common_controls(self, CC, CS):
+  def update_common(self, CC, CS):
     actuators, hud_control = CC.actuators, CC.hudControl
 
     new_torque = int(round(actuators.torque * self.params.STEER_MAX))
