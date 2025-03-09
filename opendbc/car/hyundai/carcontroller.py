@@ -127,8 +127,7 @@ class CarController(CarControllerBase):
 
 
   def compute_common_controls(self, CC, CS):
-    actuators = CC.actuators
-    hud_control = CC.hudControl
+    actuators, hud_control = CC.actuators, CC.hudControl
 
     # steering torque
     new_torque = int(round(actuators.torque * self.params.STEER_MAX))
