@@ -38,8 +38,8 @@ class CarController(CarControllerBase):
 
     actuators, hud_control = CC.actuators, CC.hudControl
 
-    apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning, right_lane_warning,
-     tester_present_msgs = self.compute_common_controls(CC, CS)
+    (apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning, right_lane_warning,
+     tester_present_msgs) = self.compute_common_controls(CC, CS)
 
     can_sends = tester_present_msgs.copy()
 
@@ -74,8 +74,8 @@ class CarController(CarControllerBase):
   def update_canfd(self, CC, CS, now_nanos):
     actuators, hud_control = CC.actuators, CC.hudControl
 
-    apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning, right_lane_warning,
-     tester_present_msgs = self.compute_common_controls(CC, CS)
+    (apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning, right_lane_warning,
+     tester_present_msgs) = self.compute_common_controls(CC, CS)
 
     can_sends = tester_present_msgs.copy()
 
