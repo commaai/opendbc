@@ -43,10 +43,8 @@ class CarController(CarControllerBase):
 
     can_sends = tester_present_msgs.copy()
 
-    can_sends.append(hyundaican.create_lkas11(self.packer, self.frame, self.CP, apply_torque, apply_steer_req,
-                                              torque_fault, CS.lkas11, sys_warning, sys_state, CC.enabled,
-                                              hud_control.leftLaneVisible, hud_control.rightLaneVisible,
-                                              left_lane_warning, right_lane_warning))
+    can_sends.append(hyundaican.create_lkas11(self.packer, self.frame, self.CP, apply_torque, apply_steer_req, torque_fault, CS.lkas11, sys_warning,
+      sys_state, CC.enabled, hud_control.leftLaneVisible, hud_control.rightLaneVisible, left_lane_warning, right_lane_warning))
 
     if not self.CP.openpilotLongitudinalControl:
       can_sends.extend(self.create_button_messages(CC, CS, use_clu11=True))
@@ -55,8 +53,7 @@ class CarController(CarControllerBase):
       # TODO: unclear if this is needed
       jerk = 3.0 if actuators.longControlState == LongCtrlState.pid else 1.0
       use_fca = self.CP.flags & HyundaiFlags.USE_FCA.value
-      can_sends.extend(hyundaican.create_acc_commands(self.packer, CC.enabled, accel, jerk, int(self.frame / 2),
-                                                      hud_control, set_speed_in_units, stopping,
+      can_sends.extend(hyundaican.create_acc_commands(self.packer, CC.enabled, accel, jerk, int(self.frame / 2), hud_control, set_speed_in_units, stopping,
                                                       CC.cruiseControl.override, use_fca, self.CP))
 
     # 20 Hz LFA MFA message
@@ -138,10 +135,8 @@ class CarController(CarControllerBase):
     apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.params)
 
     # >90 degree steering fault prevention
-    self.angle_limit_counter, apply_steer_req = common_fault_avoidance(
-      abs(CS.out.steeringAngleDeg) >= MAX_ANGLE, CC.latActive,
-      self.angle_limit_counter, MAX_ANGLE_FRAMES, MAX_ANGLE_CONSECUTIVE_FRAMES
-    )
+    self.angle_limit_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringAngleDeg) >= MAX_ANGLE, CC.latActive, self.angle_limit_counter,
+      MAX_ANGLE_FRAMES, MAX_ANGLE_CONSECUTIVE_FRAMES)
 
     if not CC.latActive:
       apply_torque = 0
