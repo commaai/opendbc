@@ -24,7 +24,6 @@ class CarController(CarControllerBase):
     self.params = CarControllerParams(CP)
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.angle_limit_counter = 0
-
     self.accel_last = 0
     self.apply_torque_last = 0
     self.car_fingerprint = CP.carFingerprint
