@@ -16,8 +16,20 @@ bool hyundai_camera_scc = false;
 extern bool hyundai_canfd_lka_steering;
 bool hyundai_canfd_lka_steering = false;
 
+extern bool hyundai_alt_limits;
+bool hyundai_alt_limits = false;
+
 extern bool hyundai_fcev_gas_signal;
 bool hyundai_fcev_gas_signal = false;
+
+extern bool hyundai_alt_limits_2;
+bool hyundai_alt_limits_2 = false;
+
+extern bool hyundai_canfd_alt_buttons;
+bool hyundai_canfd_alt_buttons = false;
+
+extern bool hyundai_canfd_lka_steering_alt;
+bool hyundai_canfd_lka_steering_alt = false;
 
 void hyundai_common_flags(uint16_t param) {
   const int HYUNDAI_PARAM_EV_GAS = 1;
@@ -38,4 +50,24 @@ void hyundai_common_flags(uint16_t param) {
 #else
   hyundai_longitudinal = false;
 #endif
+}
+
+void hyundai_flags(uint16_t param) {
+  hyundai_common_flags(param);
+
+  const int HYUNDAI_PARAM_ALT_LIMITS = 64;
+  const int HYUNDAI_PARAM_ALT_LIMITS_2 = 512;
+
+  hyundai_alt_limits = GET_FLAG(param, HYUNDAI_PARAM_ALT_LIMITS);
+  hyundai_alt_limits_2 = GET_FLAG(param, HYUNDAI_PARAM_ALT_LIMITS_2);
+}
+
+void hyundai_canfd_flags(uint16_t param) {
+  hyundai_common_flags(param);
+
+  const int HYUNDAI_PARAM_CANFD_LKA_STEERING_ALT = 128;
+  const int HYUNDAI_PARAM_CANFD_ALT_BUTTONS = 32;
+
+  hyundai_canfd_alt_buttons = GET_FLAG(param, HYUNDAI_PARAM_CANFD_ALT_BUTTONS);
+  hyundai_canfd_lka_steering_alt = GET_FLAG(param, HYUNDAI_PARAM_CANFD_LKA_STEERING_ALT);
 }

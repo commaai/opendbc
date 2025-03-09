@@ -39,9 +39,6 @@
 #define HYUNDAI_CANFD_SCC_ADDR_CHECK(scc_bus)                                               \
   {.msg = {{0x1a0, (scc_bus), 32, .max_counter = 0xffU, .frequency = 50U}, { 0 }, { 0 }}},  \
 
-static bool hyundai_canfd_alt_buttons = false;
-static bool hyundai_canfd_lka_steering_alt = false;
-
 static int hyundai_canfd_get_lka_addr(void) {
   return hyundai_canfd_lka_steering_alt ? 0x110 : 0x50;
 }
@@ -250,14 +247,8 @@ static int hyundai_canfd_fwd_hook(int bus_num, int addr) {
 }
 
 static safety_config hyundai_canfd_init(uint16_t param) {
-  const int HYUNDAI_PARAM_CANFD_LKA_STEERING_ALT = 128;
-  const int HYUNDAI_PARAM_CANFD_ALT_BUTTONS = 32;
-
+  hyundai_canfd_flags(param);
   gen_crc_lookup_table_16(0x1021, hyundai_canfd_crc_lut);
-  hyundai_canfd_alt_buttons = GET_FLAG(param, HYUNDAI_PARAM_CANFD_ALT_BUTTONS);
-  hyundai_canfd_lka_steering_alt = GET_FLAG(param, HYUNDAI_PARAM_CANFD_LKA_STEERING_ALT);
-
-  hyundai_common_init(param);
 
   static const CanMsg HYUNDAI_CANFD_LKA_STEERING_TX_MSGS[] = {
     HYUNDAI_CANFD_LKA_STEERING_COMMON_TX_MSGS(0, 1)

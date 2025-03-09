@@ -18,13 +18,8 @@ enum {
   HYUNDAI_BTN_CANCEL = 4,
 };
 
-static uint8_t hyundai_last_button_interaction;  // button messages since the user pressed an enable button
-
-void hyundai_common_init(uint16_t param) {
-  hyundai_common_flags(param);
-
-  hyundai_last_button_interaction = HYUNDAI_PREV_BUTTON_SAMPLES;
-}
+extern uint8_t hyundai_last_button_interaction;  // button messages since the user pressed an enable button
+uint8_t hyundai_last_button_interaction = HYUNDAI_PREV_BUTTON_SAMPLES;
 
 void hyundai_common_cruise_state_check(const bool cruise_engaged) {
   // some newer HKG models can re-enable after spamming cancel button,
