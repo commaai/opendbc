@@ -1,6 +1,6 @@
 #pragma once
 
-// common state
+// common flags
 extern bool hyundai_ev_gas_signal;
 bool hyundai_ev_gas_signal = false;
 
@@ -16,15 +16,17 @@ bool hyundai_camera_scc = false;
 extern bool hyundai_canfd_lka_steering;
 bool hyundai_canfd_lka_steering = false;
 
-extern bool hyundai_alt_limits;
-bool hyundai_alt_limits = false;
-
 extern bool hyundai_fcev_gas_signal;
 bool hyundai_fcev_gas_signal = false;
+
+// shared flags for non CAN FD cars
+extern bool hyundai_alt_limits;
+bool hyundai_alt_limits = false;
 
 extern bool hyundai_alt_limits_2;
 bool hyundai_alt_limits_2 = false;
 
+// shared flags for CAN FD cars
 extern bool hyundai_canfd_alt_buttons;
 bool hyundai_canfd_alt_buttons = false;
 
