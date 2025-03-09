@@ -32,6 +32,6 @@ class HyundaiFlagsSP(IntFlag):
     Flags for Hyundai specific quirks within sunnypilot.
   """
   ENHANCED_SCC = 1
-  HAS_LFA_BUTTON = 2
+  HAS_LFA_BUTTON = 2 # Deprecated in favor of HyundaiFlags.HAS_LDA_BUTTON
   LONGITUDINAL_MAIN_CRUISE_TOGGLEABLE = 2 ** 2
   ENABLE_RADAR_TRACKS = 2 ** 3

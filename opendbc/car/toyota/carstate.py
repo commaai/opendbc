@@ -84,10 +84,6 @@ class CarState(CarStateBase):
       if self.CP.carFingerprint != CAR.TOYOTA_MIRAI:
         ret.engineRpm = cp.vl["ENGINE_RPM"]["RPM"]
 
-      if self.CP.flags & ToyotaFlags.HYBRID:
-        ret.gas = cp.vl["GAS_PEDAL_HYBRID"]["GAS_PEDAL"]
-        ret.brake = cp.vl["BRAKE"]["BRAKE_AMOUNT"]
-
     ret.wheelSpeeds = self.get_wheel_speeds(
       cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FL"],
       cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FR"],
@@ -223,10 +219,6 @@ class CarState(CarStateBase):
       pt_messages.append(("VSC1S07", 20))
       if CP.carFingerprint not in [CAR.TOYOTA_MIRAI]:
         pt_messages.append(("ENGINE_RPM", 42))
-
-      if CP.flags & ToyotaFlags.HYBRID:
-        pt_messages.append(("BRAKE", 83))
-        pt_messages.append(("GAS_PEDAL_HYBRID", 33))
 
       pt_messages += [
         ("GEAR_PACKET", 1),

@@ -102,12 +102,10 @@ class MadsCarState(MadsCarStateBase):
   def __init__(self, CP: structs.CarParams, CP_SP: structs.CarParams):
     super().__init__(CP, CP_SP)
     self.main_cruise_enabled: bool = False
-    self.cruise_btns_msg_canfd = None
 
   @staticmethod
   def get_parser(CP, CP_SP, pt_messages) -> None:
-    if CP_SP.flags & HyundaiFlagsSP.HAS_LFA_BUTTON:
-      pt_messages.append(("BCM_PO_11", 50))
+    pass
 
   def get_main_cruise(self, ret: structs.CarState) -> bool:
     if self.CP_SP.flags & HyundaiFlagsSP.LONGITUDINAL_MAIN_CRUISE_TOGGLEABLE:
@@ -119,20 +117,12 @@ class MadsCarState(MadsCarStateBase):
     return self.main_cruise_enabled if ret.cruiseState.available else False
 
   def update_mads(self, ret: structs.CarState, can_parsers: dict[StrEnum, CANParser]) -> None:
-    cp = can_parsers[Bus.pt]
+    pass
 
-    self.prev_lkas_button = self.lkas_button
-    if self.CP_SP.flags & HyundaiFlagsSP.HAS_LFA_BUTTON:
-      self.lkas_button = cp.vl["BCM_PO_11"]["LFA_Pressed"]
-
-  def update_mads_canfd(self, ret, can_parsers) -> None:
+  def update_mads_canfd(self, ret: structs.CarState, can_parsers: dict[StrEnum, CANParser]) -> None:
     cp = can_parsers[Bus.pt]
     cp_cam = can_parsers[Bus.cam]
 
     if not self.CP.openpilotLongitudinalControl:
       cp_cruise_info = cp_cam if self.CP.flags & HyundaiFlags.CANFD_CAMERA_SCC else cp
       ret.cruiseState.available = cp_cruise_info.vl["SCC_CONTROL"]["MainMode_ACC"] == 1
-
-    self.prev_lkas_button = self.lkas_button
-    lfa_button = "LFA_BTN" if self.CP.flags & HyundaiFlags.CANFD_ALT_BUTTONS else "LKAS_BTN"
-    self.lkas_button = cp.vl[self.cruise_btns_msg_canfd][lfa_button]

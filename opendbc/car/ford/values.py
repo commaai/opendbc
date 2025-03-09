@@ -20,7 +20,7 @@ class CarControllerParams:
   ACC_UI_STEP = 20      # ACCDATA_3, 5Hz
   BUTTONS_STEP = 5      # Steering_Data_FD1, 10Hz, but send twice as fast
 
-  CURVATURE_MAX = 0.02  # Max curvature for steering command, m^-1
+  STEER_ANGLE_MAX = 0.02  # Max curvature for steering command, m^-1
   STEER_DRIVER_ALLOWANCE = 1.0  # Driver intervention threshold, Nm
 
   # Curvature rate limits
@@ -42,8 +42,8 @@ class CarControllerParams:
 
 
 class FordSafetyFlags(IntFlag):
-  FLAG_FORD_LONG_CONTROL = 1
-  FLAG_FORD_CANFD = 2
+  LONG_CONTROL = 1
+  CANFD = 2
 
 
 class FordFlags(IntFlag):
@@ -105,6 +105,14 @@ class FordCANFDPlatformConfig(FordPlatformConfig):
     super().init()
     self.flags |= FordFlags.CANFD
 
+@dataclass
+class FordF150LightningPlatform(FordCANFDPlatformConfig):
+  def init(self):
+    super().init()
+
+    # Don't show in docs until this issue is resolved. See https://github.com/commaai/openpilot/issues/30302
+    self.car_docs = []
+
 
 class CAR(Platforms):
   FORD_BRONCO_SPORT_MK1 = FordPlatformConfig(
@@ -126,10 +134,10 @@ class CAR(Platforms):
     CarSpecs(mass=2050, wheelbase=3.025, steerRatio=16.8),
   )
   FORD_F_150_MK14 = FordCANFDPlatformConfig(
-    [FordCarDocs("Ford F-150 2022-23", "Co-Pilot360 Assist 2.0", hybrid=True, support_type=SupportType.REVIEW)],
+    [FordCarDocs("Ford F-150 2021-23", "Co-Pilot360 Assist 2.0", hybrid=True, support_type=SupportType.REVIEW)],
     CarSpecs(mass=2000, wheelbase=3.69, steerRatio=17.0),
   )
-  FORD_F_150_LIGHTNING_MK1 = FordCANFDPlatformConfig(
+  FORD_F_150_LIGHTNING_MK1 = FordF150LightningPlatform(
     [FordCarDocs("Ford F-150 Lightning 2022-23", "Co-Pilot360 Assist 2.0", support_type=SupportType.REVIEW)],
     CarSpecs(mass=2948, wheelbase=3.70, steerRatio=16.9),
   )
