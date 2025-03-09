@@ -154,8 +154,8 @@ def create_ccnc(packer, CAN, CP, CC, CS):
       1 if not hud.rightLaneVisible else 4 if hud.rightLaneDepart else 0 if not latActive else 2 if CS.out.rightBlindspot or CS.out.vEgo < 8.94 else 6),
     "LCA_LEFT_ARROW": 2 if CC.leftBlinker else 0,
     "LCA_RIGHT_ARROW": 2 if CC.rightBlinker else 0,
-    "LANE_LEFT": 1 if CC.leftBlinker else 0,
-    "LANE_RIGHT": 1 if CC.rightBlinker else 0,
+    "LANE_LEFT": 1 if CC.leftBlinker or CS.leftBlinker else 0,
+    "LANE_RIGHT": 1 if CC.rightBlinker or CS.leftBlinker else 0,
   })
 
   if hud.leftLaneDepart or hud.rightLaneDepart:
