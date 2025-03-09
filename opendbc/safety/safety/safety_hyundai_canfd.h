@@ -25,19 +25,19 @@
 
 // *** Addresses checked in rx hook ***
 // EV, ICE, HYBRID: ACCELERATOR (0x35), ACCELERATOR_BRAKE_ALT (0x100), ACCELERATOR_ALT (0x105)
-#define HYUNDAI_CANFD_COMMON_RX_CHECKS(pt_bus)                                                                     \
-  {.msg = {{0x35, (pt_bus), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U},                  \
-           {0x100, (pt_bus), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U},                 \
-           {0x105, (pt_bus), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U}}},               \
-  {.msg = {{0x175, (pt_bus), 24, .check_checksum = true, .max_counter = 0xffU, .frequency = 50U}, { 0 }, { 0 }}},  \
-  {.msg = {{0xa0, (pt_bus), 24, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U}, { 0 }, { 0 }}},  \
-  {.msg = {{0xea, (pt_bus), 24, .check_checksum = true, .max_counter = 0xffU, .frequency = 100U}, { 0 }, { 0 }}},  \
-  {.msg = {{0x1cf, (pt_bus), 8, .check_checksum = false, .max_counter = 0xfU, .frequency = 50U},                   \
-           {0x1aa, (pt_bus), 16, .check_checksum = false, .max_counter = 0xffU, .frequency = 50U}, { 0 }}},        \
+#define HYUNDAI_CANFD_COMMON_RX_CHECKS(pt_bus)                                                               \
+  {.msg = {{0x35, (pt_bus), 32, .max_counter = 0xffU, .frequency = 100U},                                    \
+           {0x100, (pt_bus), 32, .max_counter = 0xffU, .frequency = 100U},                                   \
+           {0x105, (pt_bus), 32, .max_counter = 0xffU, .frequency = 100U}}},                                 \
+  {.msg = {{0x175, (pt_bus), 24, .max_counter = 0xffU, .frequency = 50U}, { 0 }, { 0 }}},                    \
+  {.msg = {{0xa0, (pt_bus), 24, .max_counter = 0xffU, .frequency = 100U}, { 0 }, { 0 }}},                    \
+  {.msg = {{0xea, (pt_bus), 24, .max_counter = 0xffU, .frequency = 100U}, { 0 }, { 0 }}},                    \
+  {.msg = {{0x1cf, (pt_bus), 8, .ignore_checksum = true, .max_counter = 0xfU, .frequency = 50U},             \
+           {0x1aa, (pt_bus), 16, .ignore_checksum = true, .max_counter = 0xffU, .frequency = 50U}, { 0 }}},  \
 
 // SCC_CONTROL (from ADAS unit or camera)
-#define HYUNDAI_CANFD_SCC_ADDR_CHECK(scc_bus)                                                                       \
-  {.msg = {{0x1a0, (scc_bus), 32, .check_checksum = true, .max_counter = 0xffU, .frequency = 50U}, { 0 }, { 0 }}},  \
+#define HYUNDAI_CANFD_SCC_ADDR_CHECK(scc_bus)                                               \
+  {.msg = {{0x1a0, (scc_bus), 32, .max_counter = 0xffU, .frequency = 50U}, { 0 }, { 0 }}},  \
 
 static bool hyundai_canfd_alt_buttons = false;
 static bool hyundai_canfd_lka_steering_alt = false;
@@ -110,9 +110,15 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *to_push) {
 
     // vehicle moving
     if (addr == 0xa0) {
-      uint32_t front_left_speed = GET_BYTES(to_push, 8, 2);
-      uint32_t rear_right_speed = GET_BYTES(to_push, 14, 2);
-      vehicle_moving = (front_left_speed > HYUNDAI_STANDSTILL_THRSLD) || (rear_right_speed > HYUNDAI_STANDSTILL_THRSLD);
+      uint32_t fl = (GET_BYTES(to_push, 8, 2)) & 0x3FFFU;
+      uint32_t fr = (GET_BYTES(to_push, 10, 2)) & 0x3FFFU;
+      uint32_t rl = (GET_BYTES(to_push, 12, 2)) & 0x3FFFU;
+      uint32_t rr = (GET_BYTES(to_push, 14, 2)) & 0x3FFFU;
+      vehicle_moving = (fl > HYUNDAI_STANDSTILL_THRSLD) || (fr > HYUNDAI_STANDSTILL_THRSLD) ||
+                       (rl > HYUNDAI_STANDSTILL_THRSLD) || (rr > HYUNDAI_STANDSTILL_THRSLD);
+
+      // average of all 4 wheel speeds. Conversion: raw * 0.03125 / 3.6 = m/s
+      UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.03125 / 3.6);
     }
   }
 
@@ -204,6 +210,11 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
       violation |= longitudinal_accel_checks(desired_accel_val, HYUNDAI_LONG_LIMITS);
     } else {
       // only used to cancel on here
+      const int acc_mode = (GET_BYTE(to_send, 8) >> 4) & 0x7U;
+      if (acc_mode != 4) {
+        violation = true;
+      }
+
       if ((desired_accel_raw != 0) || (desired_accel_val != 0)) {
         violation = true;
       }

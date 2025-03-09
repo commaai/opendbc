@@ -185,7 +185,7 @@ BO_ 354 VDM_AdasSts: 8 VDM
  SG_ VDM_AdasStatus_Checksum : 7|8@0+ (1,0) [0|0] "" ACM
  SG_ VDM_AdasStatus_Counter : 11|4@0+ (1,0) [0|0] "" ACM
  SG_ VDM_AdasDecelLimit : 17|10@0+ (0.01,0) [0|10.23] "m/s^2" ACM
- SG_ VDM_AdasDriverAccelPriorityStatu : 19|2@0+ (1,0) [0|3] "" ACM
+ SG_ VDM_AdasDriverAccelPriorityStatus : 19|2@0+ (1,0) [0|3] "" ACM
  SG_ VDM_AdasFaultStatus : 23|4@0+ (1,0) [0|15] "" ACM
  SG_ VDM_AdasAccelLimit : 33|10@0+ (0.01,0) [0|10.23] "m/s^2" ACM
  SG_ VDM_AdasDriverModeStatus : 36|3@0+ (1,0) [0|7] "" ACM
@@ -874,7 +874,7 @@ VAL_ 352 ACM_VehicleHoldRequired 0 "ACM_VEHICLEHOLDREQ_NO_REQUEST" 1 "ACM_VEHICL
 VAL_ 352 ACM_PrndRequired 0 "ACM_PRNDREQ_PARK" 1 "ACM_PRNDREQ_REVERSE" 2 "ACM_PRNDREQ_NEUTRAL" 3 "ACM_PRNDREQ_DRIVE" 4 "ACM_PRNDREQ_NOT_USED";
 VAL_ 352 ACM_longInterfaceEnable 0 "ACM_LONGIFEN_INIT" 1 "ACM_LONGIFEN_LONGITUDINAL_INTERFACE_ENABLE" 2 "ACM_LONGIFEN_LONGITUDINAL_INTERFACE_DISABLE" 3 "ACM_LONGIFEN_SNA";
 VAL_ 352 ACM_AccelerationRequestType 0 "ACM_ACCELREQTYPE_INIT" 1 "ACM_ACCELREQTYPE_ACCEL_NEGATIVE" 2 "ACM_ACCELREQTYPE_ACCEL_POSITIVE" 3 "ACM_ACCELREQTYPE_SNA";
-VAL_ 354 VDM_AdasDriverAccelPriorityStatu 0 "VDM_AdasDriverAccelPriorityStatus_Driver" 1 "VDM_AdasDriverAccelPriorityStatus_Adas";
+VAL_ 354 VDM_AdasDriverAccelPriorityStatus 0 "VDM_AdasDriverAccelPriorityStatus_Driver" 1 "VDM_AdasDriverAccelPriorityStatus_Adas";
 VAL_ 354 VDM_AdasFaultStatus 0 "VDM_AdasFlaultStatus_No_Fault" 1 "VDM_AdasFaultStatus_Brk_Intv" 2 "VDM_AdasFlaultStatus_Cntr_Fault" 3 "VDM_AdasFlaultStatus_Imps_Cmd" 15 "VDM_AdasFlaultStatus_Sna";
 VAL_ 354 VDM_AdasDriverModeStatus 0 "VDM_AdasDriverModeStatus_Human" 1 "VDM_AdasDriverModeStatus_Adas" 2 "VDM_AdasDriverModeStatus_Reserved" 3 "VDM_AdasDriverModeStatus_Sna";
 VAL_ 354 VDM_AdasInterfaceStatus 0 "VDM_AdasInterfaceStatus_Unavailable" 1 "VDM_AdasInterfaceStatus_Available" 2 "VDM_AdasInterfaceStatus_Enabled" 3 "VDM_AdasInterfaceStatus_Faulted";

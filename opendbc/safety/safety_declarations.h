@@ -81,7 +81,7 @@ typedef struct {
 } TorqueSteeringLimits;
 
 typedef struct {
-  // angle cmd limits
+  // angle cmd limits (also used by curvature control cars)
   const int max_angle;
 
   const float angle_deg_to_can;
@@ -90,6 +90,7 @@ typedef struct {
   const int max_angle_error;             // used to limit error between meas and cmd while enabled
   const float angle_error_min_speed;     // minimum speed to start limiting angle error
 
+  const bool angle_is_curvature;         // if true, we can apply max lateral acceleration limits
   const bool enforce_angle_error;        // enables max_angle_error check
   const bool inactive_angle_is_zero;     // if false, enforces angle near meas when disabled (default)
 } AngleSteeringLimits;
@@ -120,10 +121,11 @@ typedef struct {
   const int addr;
   const int bus;
   const int len;
-  const bool check_checksum;         // true is checksum check is performed
+  const bool ignore_checksum;        // checksum check is not performed when set to true
+  const bool ignore_counter;         // counter check is not performed when set to true
   const uint8_t max_counter;         // maximum value of the counter. 0 means that the counter check is skipped
   const bool quality_flag;           // true is quality flag check is performed
-  const uint32_t frequency;      // expected frequency of the message [Hz]
+  const uint32_t frequency;          // expected frequency of the message [Hz]
 } CanMsgCheck;
 
 typedef struct {

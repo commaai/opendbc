@@ -19,6 +19,29 @@ class MadsCommonBase(unittest.TestCase):
     self.safety.set_mads_params(False, False)
     self.safety.set_heartbeat_engaged_mads(True)
 
+  def test_heartbeat_engaged_mads_check(self):
+    """Test MADS heartbeat engaged check behavior"""
+    for boolean in (True, False):
+      # If boolean is True, the heartbeat is engaged and should remain engaged, otherwise it should disengage.
+      with self.subTest(heartbeat_engaged=boolean, should_remain_engaged=boolean):
+        # Setup initial conditions
+        self._mads_states_cleanup()
+        self.safety.set_mads_params(True, False)  # Enable MADS
+        self.safety.set_controls_allowed_lat(True)
+        self.assertTrue(self.safety.get_controls_allowed_lat())
+
+        # Set heartbeat engaged state based on test case
+        self.safety.set_heartbeat_engaged_mads(boolean)
+
+        # Call the heartbeat check function multiple times
+        # We know from the implementation that it takes 3 mismatches to disengage
+        for _ in range(4):  # More than 3 times to ensure we pass the threshold
+          self.safety.mads_heartbeat_engaged_check()
+
+        # Verify engagement state matches expectation
+        self.assertEqual(self.safety.get_controls_allowed_lat(), boolean,
+                         f"Expected controls_allowed_lat to be [{boolean}] but got [{self.safety.get_controls_allowed_lat()}]")
+
   def test_enable_control_allowed_with_mads_button(self):
     """Toggle MADS with MADS button"""
     try:

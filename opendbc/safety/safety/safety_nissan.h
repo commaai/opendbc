@@ -68,7 +68,7 @@ static void nissan_rx_hook(const CANPacket_t *to_push) {
 
 static bool nissan_tx_hook(const CANPacket_t *to_send) {
   const AngleSteeringLimits NISSAN_STEERING_LIMITS = {
-    .max_angle = 131000,  // 1310 deg, max CAN signal value
+    .max_angle = 60000,  // 600 deg, reasonable limit
     .angle_deg_to_can = 100,
     .angle_rate_up_lookup = {
       {0., 5., 15.},
@@ -144,18 +144,18 @@ static safety_config nissan_init(uint16_t param) {
 
   // Signals duplicated below due to the fact that these messages can come in on either CAN bus, depending on car model.
   static RxCheck nissan_rx_checks[] = {
-    {.msg = {{0x2, 0, 5, .frequency = 100U},
-             {0x2, 1, 5, .frequency = 100U}, { 0 }}},  // STEER_ANGLE_SENSOR
-    {.msg = {{0x285, 0, 8, .frequency = 50U},
-             {0x285, 1, 8, .frequency = 50U}, { 0 }}}, // WHEEL_SPEEDS_REAR
-    {.msg = {{0x30f, 2, 3, .frequency = 10U},
-             {0x30f, 1, 3, .frequency = 10U}, { 0 }}}, // CRUISE_STATE
-    {.msg = {{0x15c, 0, 8, .frequency = 50U},
-             {0x15c, 1, 8, .frequency = 50U},
-             {0x239, 0, 8, .frequency = 50U}}}, // GAS_PEDAL
-    {.msg = {{0x454, 0, 8, .frequency = 10U},
-             {0x454, 1, 8, .frequency = 10U},
-             {0x1cc, 0, 4, .frequency = 100U}}}, // DOORS_LIGHTS / BRAKE
+    {.msg = {{0x2, 0, 5, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U},
+             {0x2, 1, 5, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }}},  // STEER_ANGLE_SENSOR
+    {.msg = {{0x285, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U},
+             {0x285, 1, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }}}, // WHEEL_SPEEDS_REAR
+    {.msg = {{0x30f, 2, 3, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},
+             {0x30f, 1, 3, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }}}, // CRUISE_STATE
+    {.msg = {{0x15c, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U},
+             {0x15c, 1, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U},
+             {0x239, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}}}, // GAS_PEDAL
+    {.msg = {{0x454, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},
+             {0x454, 1, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},
+             {0x1cc, 0, 4, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}}}, // DOORS_LIGHTS / BRAKE
   };
 
   // EPS Location. false = V-CAN, true = C-CAN

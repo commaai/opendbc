@@ -111,6 +111,9 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
   def _acc_state_msg(self, enable):
     raise NotImplementedError
 
+  def _tx_acc_state_msg(self, enable):
+    raise NotImplementedError
+
   def test_pcm_main_cruise_state_availability(self):
     pass
 
