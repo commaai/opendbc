@@ -131,6 +131,11 @@ static void subaru_rx_hook(const CANPacket_t *to_push) {
   if ((addr == MSG_SUBARU_Throttle) && (bus == SUBARU_MAIN_BUS)) {
     gas_pressed = GET_BYTE(to_push, 4) != 0U;
   }
+}
+
+static void subaru_rx_relay_malfunction_hook(const CANPacket_t *to_push) {
+  const int bus = GET_BUS(to_push);
+  int addr = GET_ADDR(to_push);
 
   generic_rx_checks((addr == MSG_SUBARU_ES_LKAS) && (bus == SUBARU_MAIN_BUS));
 }
@@ -285,6 +290,7 @@ static safety_config subaru_init(uint16_t param) {
 const safety_hooks subaru_hooks = {
   .init = subaru_init,
   .rx = subaru_rx_hook,
+  .rx_relay_malfunction = subaru_rx_relay_malfunction_hook,
   .tx = subaru_tx_hook,
   .fwd = subaru_fwd_hook,
   .get_counter = subaru_get_counter,

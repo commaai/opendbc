@@ -54,6 +54,11 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
       tesla_stock_aeb = (GET_BYTE(to_push, 2) & 0x03U) == 1U;
     }
   }
+}
+
+static void tesla_rx_relay_malfunction_hook(const CANPacket_t *to_push) {
+  int bus = GET_BUS(to_push);
+  int addr = GET_ADDR(to_push);
 
   generic_rx_checks((addr == 0x488) && (bus == 0));  // DAS_steeringControl
   generic_rx_checks((addr == 0x27d) && (bus == 0));  // APS_eacMonitor
@@ -62,7 +67,6 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
     generic_rx_checks((addr == 0x2b9) && (bus == 0));
   }
 }
-
 
 static bool tesla_tx_hook(const CANPacket_t *to_send) {
   const AngleSteeringLimits TESLA_STEERING_LIMITS = {
@@ -209,6 +213,7 @@ static safety_config tesla_init(uint16_t param) {
 const safety_hooks tesla_hooks = {
   .init = tesla_init,
   .rx = tesla_rx_hook,
+  .rx_relay_malfunction = tesla_rx_relay_malfunction_hook,
   .tx = tesla_tx_hook,
   .fwd = tesla_fwd_hook,
 };

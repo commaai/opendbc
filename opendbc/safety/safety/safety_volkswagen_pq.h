@@ -148,7 +148,12 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *to_push) {
     if (addr == MSG_MOTOR_2) {
       brake_pressed = (GET_BYTE(to_push, 2) & 0x1U);
     }
+  }
+}
 
+static void volkswagen_pq_rx_relay_malfunction_hook(const CANPacket_t *to_push) {
+  if (GET_BUS(to_push) == 0U) {
+    int addr = GET_ADDR(to_push);
     generic_rx_checks((addr == MSG_HCA_1));
   }
 }
@@ -251,6 +256,7 @@ static int volkswagen_pq_fwd_hook(int bus_num, int addr) {
 const safety_hooks volkswagen_pq_hooks = {
   .init = volkswagen_pq_init,
   .rx = volkswagen_pq_rx_hook,
+  .rx_relay_malfunction = volkswagen_pq_rx_relay_malfunction_hook,
   .tx = volkswagen_pq_tx_hook,
   .fwd = volkswagen_pq_fwd_hook,
   .get_counter = volkswagen_pq_get_counter,

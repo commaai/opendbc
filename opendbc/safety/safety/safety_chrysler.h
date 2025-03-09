@@ -100,6 +100,11 @@ static void chrysler_rx_hook(const CANPacket_t *to_push) {
   if ((bus == 0) && (addr == chrysler_addrs->ESP_1)) {
     brake_pressed = ((GET_BYTE(to_push, 0U) & 0xFU) >> 2U) == 1U;
   }
+}
+
+static void chrysler_rx_relay_malfunction_hook(const CANPacket_t *to_push) {
+  const int bus = GET_BUS(to_push);
+  const int addr = GET_ADDR(to_push);
 
   generic_rx_checks((bus == 0) && (addr == chrysler_addrs->LKAS_COMMAND));
 }
@@ -296,6 +301,7 @@ static safety_config chrysler_init(uint16_t param) {
 const safety_hooks chrysler_hooks = {
   .init = chrysler_init,
   .rx = chrysler_rx_hook,
+  .rx_relay_malfunction = chrysler_rx_relay_malfunction_hook,
   .tx = chrysler_tx_hook,
   .fwd = chrysler_fwd_hook,
   .get_counter = chrysler_get_counter,

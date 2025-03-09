@@ -185,6 +185,12 @@ static void ford_rx_hook(const CANPacket_t *to_push) {
       bool cruise_engaged = (cruise_state == 4U) || (cruise_state == 5U);
       pcm_cruise_check(cruise_engaged);
     }
+  }
+}
+
+static void ford_rx_relay_malfunction_hook(const CANPacket_t *to_push) {
+  if (GET_BUS(to_push) == FORD_MAIN_BUS) {
+    int addr = GET_ADDR(to_push);
 
     // If steering controls messages are received on the destination bus, it's an indication
     // that the relay might be malfunctioning.
@@ -194,7 +200,6 @@ static void ford_rx_hook(const CANPacket_t *to_push) {
     }
     generic_rx_checks(stock_ecu_detected);
   }
-
 }
 
 static bool ford_tx_hook(const CANPacket_t *to_send) {
@@ -425,6 +430,7 @@ static safety_config ford_init(uint16_t param) {
 const safety_hooks ford_hooks = {
   .init = ford_init,
   .rx = ford_rx_hook,
+  .rx_relay_malfunction = ford_rx_relay_malfunction_hook,
   .tx = ford_tx_hook,
   .fwd = ford_fwd_hook,
   .get_counter = ford_get_counter,

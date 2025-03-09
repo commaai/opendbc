@@ -129,8 +129,15 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *to_push) {
       hyundai_common_cruise_state_check(cruise_engaged);
     }
   }
+}
 
+static void hyundai_canfd_rx_relay_malfunction_hook(const CANPacket_t *to_push) {
+  int bus = GET_BUS(to_push);
+  int addr = GET_ADDR(to_push);
+
+  const int pt_bus = hyundai_canfd_lka_steering ? 1 : 0;
   const int steer_addr = hyundai_canfd_lka_steering ? hyundai_canfd_get_lka_addr() : 0x12a;
+
   bool stock_ecu_detected = (addr == steer_addr) && (bus == 0);
   if (hyundai_longitudinal) {
     // on LKA steering cars, ensure ADRV ECU is still knocked out
@@ -357,6 +364,7 @@ static safety_config hyundai_canfd_init(uint16_t param) {
 const safety_hooks hyundai_canfd_hooks = {
   .init = hyundai_canfd_init,
   .rx = hyundai_canfd_rx_hook,
+  .rx_relay_malfunction = hyundai_canfd_rx_relay_malfunction_hook,
   .tx = hyundai_canfd_tx_hook,
   .fwd = hyundai_canfd_fwd_hook,
   .get_counter = hyundai_canfd_get_counter,
