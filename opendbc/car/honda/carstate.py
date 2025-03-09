@@ -107,7 +107,7 @@ class CarState(CarStateBase):
 
     if CP.transmissionType != TransmissionType.manual:
       self.shifter_values = can_define.dv[self.gearbox_msg]["GEAR_SHIFTER"]
-    
+
     if self.CP.carFingerprint in SERIAL_STEERING:
       self.steer_status_values = defaultdict(lambda: "UNKNOWN", can_define.dv["LIN_STEER_STATUS"]["STEER_STATUS"])
     else
