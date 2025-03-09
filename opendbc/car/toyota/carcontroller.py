@@ -90,6 +90,7 @@ class CarController(CarControllerBase):
 
     # *** handle secoc reset counter increase ***
     if self.CP.flags & ToyotaFlags.SECOC.value:
+      raise Exception
       if CS.secoc_synchronization['RESET_CNT'] != self.secoc_prev_reset_counter:
         self.secoc_lka_message_counter = 0
         self.secoc_lta_message_counter = 0
