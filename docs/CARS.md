@@ -6,6 +6,7 @@
 |---|---|---|:---:|
 |Acura|ILX 2016-19|AcuraWatch Plus|[Upstream](#upstream)|
 |Acura|Integra 2024|All|[Community](#community)|
+|Acura|MDX 2020|Sport Hybrid|[Custom](#custom)|
 |Acura|RDX 2016-18|AcuraWatch Plus|[Upstream](#upstream)|
 |Acura|RDX 2019-21|All|[Upstream](#upstream)|
 |Audi|A3 2014-19|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
@@ -87,7 +88,6 @@
 |Honda|Insight 2019-22|All|[Upstream](#upstream)|
 |Honda|Inspire 2018|All|[Upstream](#upstream)|
 |Honda|Odyssey 2018-20|Honda Sensing|[Upstream](#upstream)|
-|Honda|Odyssey 2021-25|All|[Upstream](#upstream)|
 |Honda|Passport 2019-23|All|[Upstream](#upstream)|
 |Honda|Pilot 2016-22|Honda Sensing|[Upstream](#upstream)|
 |Honda|Pilot 2023-24|All|[Community](#community)|
