@@ -13,6 +13,8 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(dbc_names[Bus.party])
     self.tesla_can = TeslaCAN(self.packer)
 
+    self.active_frames = 0
+
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     can_sends = []
@@ -36,8 +38,16 @@ class CarController(CarControllerBase):
     # Longitudinal control
     if self.CP.openpilotLongitudinalControl:
       if self.frame % 4 == 0:
+        # Stock Tesla ACC ramps down request after overriding to not violate accelMax, this period is even longer with FSD
+        accel = actuators.accel
+        if CC.longActive:
+          accel = np.interp(self.active_frames, [0, 50], [CS.out.aEgo, accel])
+          self.active_frames += 1
+        else:
+          self.active_frames = 0
+
         state = 13 if cruise_cancel else 4  # 4=ACC_ON, 13=ACC_CANCEL_GENERIC_SILENT
-        accel = float(np.clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
+        accel = float(np.clip(accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
         cntr = (self.frame // 4) % 8
         can_sends.append(self.tesla_can.create_longitudinal_command(state, accel, cntr, CS.out.vEgo, CC.longActive))
 
