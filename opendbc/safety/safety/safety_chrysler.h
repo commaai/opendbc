@@ -212,20 +212,20 @@ static safety_config chrysler_init(uint16_t param) {
   };
 
   static RxCheck chrysler_ram_dt_rx_checks[] = {
-    {.msg = {{CHRYSLER_RAM_DT_ADDRS.EPS_2, 0, 8, .check_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
-    {.msg = {{CHRYSLER_RAM_DT_ADDRS.ESP_1, 0, 8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{CHRYSLER_RAM_DT_ADDRS.ESP_8, 0, 8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{CHRYSLER_RAM_DT_ADDRS.ECM_5, 0, 8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{CHRYSLER_RAM_DT_ADDRS.DAS_3, 2, 8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_RAM_DT_ADDRS.EPS_2, 0, 8, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_RAM_DT_ADDRS.ESP_1, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_RAM_DT_ADDRS.ESP_8, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_RAM_DT_ADDRS.ECM_5, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_RAM_DT_ADDRS.DAS_3, 2, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
   };
 
   static RxCheck chrysler_rx_checks[] = {
-    {.msg = {{CHRYSLER_ADDRS.EPS_2, 0, 8, .check_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
-    {.msg = {{CHRYSLER_ADDRS.ESP_1, 0, 8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
-    //{.msg = {{ESP_8, 0, 8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}}},
-    {.msg = {{514, 0, 8, .check_checksum = false, .max_counter = 0U, .frequency = 100U}, { 0 }, { 0 }}},
-    {.msg = {{CHRYSLER_ADDRS.ECM_5, 0, 8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{CHRYSLER_ADDRS.DAS_3, 0, 8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_ADDRS.EPS_2, 0, 8, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_ADDRS.ESP_1, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
+    //{.msg = {{ESP_8, 0, 8, .max_counter = 15U, .frequency = 50U}}},
+    {.msg = {{514, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_ADDRS.ECM_5, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_ADDRS.DAS_3, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
   };
 
   static const CanMsg CHRYSLER_TX_MSGS[] = {
@@ -254,11 +254,11 @@ static safety_config chrysler_init(uint16_t param) {
   };
 
   static RxCheck chrysler_ram_hd_rx_checks[] = {
-    {.msg = {{CHRYSLER_RAM_HD_ADDRS.EPS_2, 0, 8, .check_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
-    {.msg = {{CHRYSLER_RAM_HD_ADDRS.ESP_1, 0, 8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{CHRYSLER_RAM_HD_ADDRS.ESP_8, 0, 8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{CHRYSLER_RAM_HD_ADDRS.ECM_5, 0, 8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{CHRYSLER_RAM_HD_ADDRS.DAS_3, 2, 8, .check_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_RAM_HD_ADDRS.EPS_2, 0, 8, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_RAM_HD_ADDRS.ESP_1, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_RAM_HD_ADDRS.ESP_8, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_RAM_HD_ADDRS.ECM_5, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_RAM_HD_ADDRS.DAS_3, 2, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
   };
 
   static const CanMsg CHRYSLER_RAM_HD_TX_MSGS[] = {

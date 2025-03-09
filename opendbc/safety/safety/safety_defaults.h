@@ -13,10 +13,13 @@ static safety_config nooutput_init(uint16_t param) {
   return (safety_config){NULL, 0, NULL, 0};
 }
 
+// GCOV_EXCL_START
+// Unreachable by design (doesn't define any tx msgs)
 static bool nooutput_tx_hook(const CANPacket_t *to_send) {
   UNUSED(to_send);
   return false;
 }
+// GCOV_EXCL_STOP
 
 static int default_fwd_hook(int bus_num, int addr) {
   UNUSED(bus_num);

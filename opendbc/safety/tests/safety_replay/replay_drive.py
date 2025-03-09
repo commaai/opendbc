@@ -1,32 +1,32 @@
 #!/usr/bin/env python3
 import argparse
 from collections import Counter
+from tqdm import tqdm
 
 from opendbc.car.carlog import carlog
 from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.safety.tests.safety_replay.helpers import package_can_msg, init_segment
 
 # replay a drive to check for safety violations
-def replay_drive(lr, safety_mode, param, alternative_experience, segment=False):
+def replay_drive(msgs, safety_mode, param, alternative_experience):
   safety = libsafety_py.libsafety
+  msgs.sort(key=lambda m: m.logMonoTime)
 
   err = safety.set_safety_hooks(safety_mode, param)
   assert err == 0, "invalid safety mode: %d" % safety_mode
   safety.set_alternative_experience(alternative_experience)
 
-  if segment:
-    init_segment(safety, lr, safety_mode, param)
-    lr.reset()
+  init_segment(safety, msgs, safety_mode, param)
 
   rx_tot, rx_invalid, tx_tot, tx_blocked, tx_controls, tx_controls_blocked = 0, 0, 0, 0, 0, 0
   safety_tick_rx_invalid = False
   blocked_addrs = Counter()
   invalid_addrs = set()
 
-  can_msgs = [m for m in lr if m.which() in ('can', 'sendcan')]
+  can_msgs = [m for m in msgs if m.which() in ('can', 'sendcan')]
   start_t = can_msgs[0].logMonoTime
   end_t = can_msgs[-1].logMonoTime
-  for msg in can_msgs:
+  for msg in tqdm(can_msgs):
     safety.set_timer((msg.logMonoTime // 1000) % 0xFFFFFFFF)
 
     # skip start and end of route, warm up/down period
@@ -81,7 +81,7 @@ if __name__ == "__main__":
   parser.add_argument("--alternative-experience", type=int, help="Override the alternative experience from the log")
   args = parser.parse_args()
 
-  lr = LogReader(args.route_or_segment_name[0], sort_by_time=True)
+  lr = LogReader(args.route_or_segment_name[0])
 
   if None in (args.mode, args.param, args.alternative_experience):
     CP = lr.first('carParams')
@@ -93,4 +93,4 @@ if __name__ == "__main__":
       args.alternative_experience = CP.alternativeExperience
 
   print(f"replaying {args.route_or_segment_name[0]} with safety mode {args.mode}, param {args.param}, alternative experience {args.alternative_experience}")
-  replay_drive(lr, args.mode, args.param, args.alternative_experience, segment=len(lr.logreader_identifiers) == 1)
+  replay_drive(list(lr), args.mode, args.param, args.alternative_experience)
