@@ -63,7 +63,7 @@ class CarController(CarControllerBase):
     if self.frame % 5 == 0 and self.CP.flags & HyundaiFlags.SEND_LFA.value:
       can_sends.append(hyundaican.create_lfahda_mfc(self.packer, CC.enabled))
 
-    return self.build_actuators(actuators, apply_torque, accel, can_sends)
+    return self.update_actuators(actuators, apply_torque, accel, can_sends)
 
 
   def update_canfd(self, CC, CS, now_nanos):
@@ -112,10 +112,10 @@ class CarController(CarControllerBase):
               can_sends.append(hyundaicanfd.create_buttons(self.packer, self.CP, self.CAN, CS.buttons_counter + 1, Buttons.RES_ACCEL))
             self.last_button_frame = self.frame
 
-    return self.build_actuators(actuators, apply_torque, accel, can_sends)
+    return self.update_actuators(actuators, apply_torque, accel, can_sends)
 
 
-  def build_actuators(self, actuators, apply_torque, accel, can_sends):
+  def update_actuators(self, actuators, apply_torque, accel, can_sends):
     new_actuators = actuators.as_builder()
     new_actuators.torque, new_actuators.torqueOutputCan, new_actuators.accel = apply_torque / self.params.STEER_MAX, apply_torque, accel
     self.frame += 1
