@@ -41,23 +41,20 @@ class CarController(CarControllerBase):
     can_sends.append(hyundaican.create_lkas11(self.packer, self.frame, self.CP, apply_torque, apply_steer_req, torque_fault, CS.lkas11, sys_warning,
       sys_state, CC.enabled, hud_control.leftLaneVisible, hud_control.rightLaneVisible, left_lane_warning, right_lane_warning))
 
-    if not self.CP.openpilotLongitudinalControl:
+    if self.CP.openpilotLongitudinalControl:
+      if self.frame % 2 == 0:
+        jerk = 3.0 if actuators.longControlState == LongCtrlState.pid else 1.0  # TODO: unclear if this is needed
+        can_sends.extend(hyundaican.create_acc_commands(self.packer, CC.enabled, accel, jerk, int(self.frame / 2), hud_control, set_speed_in_units, stopping,
+                                                          CC.cruiseControl.override, self.CP.flags & HyundaiFlags.USE_FCA.value, self.CP))
+      if self.frame % 20 == 0:
+        can_sends.extend(hyundaican.create_acc_opt(self.packer, self.CP))
+      if self.frame % 50 == 0:
+        can_sends.append(hyundaican.create_frt_radar_opt(self.packer))
+    else:
       can_sends.extend(self.create_button_messages(CC, CS, use_clu11=True))
-
-    if self.frame % 2 == 0 and self.CP.openpilotLongitudinalControl:
-      # TODO: unclear if this is needed
-      jerk = 3.0 if actuators.longControlState == LongCtrlState.pid else 1.0
-      can_sends.extend(hyundaican.create_acc_commands(self.packer, CC.enabled, accel, jerk, int(self.frame / 2), hud_control, set_speed_in_units, stopping,
-                                                      CC.cruiseControl.override, self.CP.flags & HyundaiFlags.USE_FCA.value, self.CP))
 
     if self.frame % 5 == 0 and self.CP.flags & HyundaiFlags.SEND_LFA.value:
       can_sends.append(hyundaican.create_lfahda_mfc(self.packer, CC.enabled))
-
-    if self.frame % 20 == 0 and self.CP.openpilotLongitudinalControl:
-      can_sends.extend(hyundaican.create_acc_opt(self.packer, self.CP))
-
-    if self.frame % 50 == 0 and self.CP.openpilotLongitudinalControl:
-      can_sends.append(hyundaican.create_frt_radar_opt(self.packer))
 
     return self.build_actuators(actuators, apply_torque, accel, can_sends)
 
