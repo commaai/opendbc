@@ -49,9 +49,8 @@ class CarController(CarControllerBase):
     if self.frame % 2 == 0 and self.CP.openpilotLongitudinalControl:
       # TODO: unclear if this is needed
       jerk = 3.0 if actuators.longControlState == LongCtrlState.pid else 1.0
-      use_fca = self.CP.flags & HyundaiFlags.USE_FCA.value
       can_sends.extend(hyundaican.create_acc_commands(self.packer, CC.enabled, accel, jerk, int(self.frame / 2), hud_control, set_speed_in_units, stopping,
-                                                      CC.cruiseControl.override, use_fca, self.CP))
+                                                      CC.cruiseControl.override, self.CP.flags & HyundaiFlags.USE_FCA.value, self.CP))
 
     if self.frame % 5 == 0 and self.CP.flags & HyundaiFlags.SEND_LFA.value:
       can_sends.append(hyundaican.create_lfahda_mfc(self.packer, CC.enabled))
