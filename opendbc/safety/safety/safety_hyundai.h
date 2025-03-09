@@ -53,8 +53,6 @@ static const CanMsg HYUNDAI_TX_MSGS[] = {
   HYUNDAI_COMMON_TX_MSGS(0)
 };
 
-static bool hyundai_legacy = false;
-
 static uint8_t hyundai_get_counter(const CANPacket_t *to_push) {
   int addr = GET_ADDR(to_push);
 
@@ -304,7 +302,6 @@ static safety_config hyundai_init(uint16_t param) {
   };
 
   hyundai_common_init(param);
-  hyundai_legacy = false;
 
   safety_config ret;
   if (hyundai_longitudinal) {
@@ -342,7 +339,6 @@ static safety_config hyundai_legacy_init(uint16_t param) {
   };
 
   hyundai_common_init(param);
-  hyundai_legacy = true;
   hyundai_longitudinal = false;
   hyundai_camera_scc = false;
   return BUILD_SAFETY_CFG(hyundai_legacy_rx_checks, HYUNDAI_TX_MSGS);
