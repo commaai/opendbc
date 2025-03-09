@@ -130,7 +130,20 @@ class CarController(CarControllerBase):
     stopping = actuators.longControlState == LongCtrlState.stopping
     set_speed_in_units = hud_control.setSpeed * (CV.MS_TO_KPH if CS.is_metric else CV.MS_TO_MPH)
 
-    sys_warning, sys_state, left_lane_warning, right_lane_warning = self.process_hud_alert(CC.enabled, self.car_fingerprint, hud_control)
+    sys_warning = (hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw))
+
+    # initialize to no line visible, TODO: this is not accurate for all cars
+    sys_state = 1
+    if hud_control.leftLaneVisible and hud_control.rightLaneVisible or sys_warning:  # HUD alert only display when LKAS status is active
+      sys_state = 3 if enabled or sys_warning else 4
+    elif hud_control.leftLaneVisible:
+      sys_state = 5
+    elif hud_control.rightLaneVisible:
+      sys_state = 6
+
+    # initialize to no warnings
+    left_lane_warning = (1 if fingerprint in (CAR.GENESIS_G90, CAR.GENESIS_G80) else 2) if hud_control.leftLaneDepart else 0
+    right_lane_warning = (1 if fingerprint in (CAR.GENESIS_G90, CAR.GENESIS_G80) else 2) if hud_control.rightLaneDepart else 0
 
     # tester present - w/ no response (keeps relevant ECU disabled)
     tester_present_msgs = []
@@ -179,22 +192,3 @@ class CarController(CarControllerBase):
             self.last_button_frame = self.frame
 
     return can_sends
-
-
-  def process_hud_alert(self, enabled, fingerprint, hud_control):
-    sys_warning = (hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw))
-
-    # initialize to no line visible, TODO: this is not accurate for all cars
-    sys_state = 1
-    if hud_control.leftLaneVisible and hud_control.rightLaneVisible or sys_warning:  # HUD alert only display when LKAS status is active
-      sys_state = 3 if enabled or sys_warning else 4
-    elif hud_control.leftLaneVisible:
-      sys_state = 5
-    elif hud_control.rightLaneVisible:
-      sys_state = 6
-
-    # initialize to no warnings
-    left_lane_warning = (1 if fingerprint in (CAR.GENESIS_G90, CAR.GENESIS_G80) else 2) if hud_control.leftLaneDepart else 0
-    right_lane_warning = (1 if fingerprint in (CAR.GENESIS_G90, CAR.GENESIS_G80) else 2) if hud_control.rightLaneDepart else 0
-
-    return sys_warning, sys_state, left_lane_warning, right_lane_warning
