@@ -53,6 +53,9 @@ static const CanMsg HYUNDAI_TX_MSGS[] = {
   HYUNDAI_COMMON_TX_MSGS(0)
 };
 
+static bool hyundai_alt_limits = false;
+static bool hyundai_alt_limits_2 = false;
+
 static uint8_t hyundai_get_counter(const CANPacket_t *to_push) {
   int addr = GET_ADDR(to_push);
 
@@ -286,6 +289,14 @@ static int hyundai_fwd_hook(int bus_num, int addr) {
 }
 
 static safety_config hyundai_init(uint16_t param) {
+  const int HYUNDAI_PARAM_ALT_LIMITS = 64;
+  const int HYUNDAI_PARAM_ALT_LIMITS_2 = 512;
+
+  hyundai_alt_limits = GET_FLAG(param, HYUNDAI_PARAM_ALT_LIMITS);
+  hyundai_alt_limits_2 = GET_FLAG(param, HYUNDAI_PARAM_ALT_LIMITS_2);
+
+  hyundai_common_init(param);
+
   static const CanMsg HYUNDAI_LONG_TX_MSGS[] = {
     HYUNDAI_LONG_COMMON_TX_MSGS(0)
     {0x38D, 0, 8}, // FCA11 Bus 0
@@ -300,8 +311,6 @@ static safety_config hyundai_init(uint16_t param) {
   static const CanMsg HYUNDAI_CAMERA_SCC_LONG_TX_MSGS[] = {
     HYUNDAI_LONG_COMMON_TX_MSGS(2)
   };
-
-  hyundai_common_init(param);
 
   safety_config ret;
   if (hyundai_longitudinal) {
@@ -341,6 +350,8 @@ static safety_config hyundai_legacy_init(uint16_t param) {
   hyundai_common_init(param);
   hyundai_longitudinal = false;
   hyundai_camera_scc = false;
+  hyundai_alt_limits = false;
+  hyundai_alt_limits_2 = false;
   return BUILD_SAFETY_CFG(hyundai_legacy_rx_checks, HYUNDAI_TX_MSGS);
 }
 
