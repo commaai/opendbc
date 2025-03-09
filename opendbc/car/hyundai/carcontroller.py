@@ -34,8 +34,8 @@ class CarController(CarControllerBase):
     if self.CP.flags & HyundaiFlags.CANFD:
       return self.update_canfd(CC, CS, now_nanos)
 
-    (actuators, hud_control, apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning, right_lane_warning,
-     tester_present_msgs) = self.compute_common_controls(CC, CS)
+    (actuators, hud_control, apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning,
+     right_lane_warning, tester_present_msgs) = self.compute_common_controls(CC, CS)
 
     can_sends = tester_present_msgs.copy()
     can_sends.append(hyundaican.create_lkas11(self.packer, self.frame, self.CP, apply_torque, apply_steer_req, torque_fault, CS.lkas11, sys_warning,
@@ -60,8 +60,8 @@ class CarController(CarControllerBase):
 
 
   def update_canfd(self, CC, CS, now_nanos):
-    (actuators, hud_control, apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning, right_lane_warning,
-     tester_present_msgs) = self.compute_common_controls(CC, CS)
+    (actuators, hud_control, apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning,
+     right_lane_warning, tester_present_msgs) = self.compute_common_controls(CC, CS)
 
     can_sends = tester_present_msgs.copy()
     can_sends.extend(hyundaicanfd.create_steering_messages(self.packer, self.CP, self.CAN, CC.enabled, apply_steer_req, apply_torque))
