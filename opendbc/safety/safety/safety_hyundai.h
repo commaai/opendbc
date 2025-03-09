@@ -340,10 +340,6 @@ static safety_config hyundai_legacy_init(uint16_t param) {
     HYUNDAI_SCC12_ADDR_CHECK(0)
   };
 
-  hyundai_longitudinal = false;
-  hyundai_camera_scc = false;
-  hyundai_alt_limits = false;
-  hyundai_alt_limits_2 = false;
   return BUILD_SAFETY_CFG(hyundai_legacy_rx_checks, HYUNDAI_TX_MSGS);
 }
 
