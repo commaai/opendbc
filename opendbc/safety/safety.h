@@ -114,6 +114,18 @@ uint16_t current_safety_param = 0;
 static const safety_hooks *current_hooks = &nooutput_hooks;
 safety_config current_safety_config;
 
+//static int get_fwd_bus(int bus_num) {
+//  int destination_bus;
+//  if (bus_num == 0) {
+//    destination_bus = 2;
+//  } else if (bus_num == 2) {
+//    destination_bus = 0;
+//  } else {
+//    destination_bus = -1;
+//  }
+//  return destination_bus;
+//}
+
 static bool is_msg_valid(RxCheck addr_list[], int index) {
   bool valid = true;
   if (index != -1) {
@@ -212,6 +224,19 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
 
   bool valid = rx_msg_safety_check(to_push, &current_safety_config, current_hooks);
   if (valid) {
+    const int bus = GET_BUS(to_push);
+//    const int destination_bus = get_fwd_bus(GET_BUS(to_push));
+    // if rx addr in tx msgs and we're checking for relay malfunctions, check its opposite bus
+
+    // check all tx msgs for liveness check on opposite bus if specified
+    for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
+      const CanMsg *m = &current_safety_config.tx_msgs[i];
+      if (m->check_relay) {
+        generic_rx_checks((m->addr == GET_ADDR(to_push)) && (m->bus == bus));
+      }
+    }
+
+
     current_hooks->rx(to_push);
   }
 

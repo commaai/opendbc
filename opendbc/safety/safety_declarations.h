@@ -49,6 +49,7 @@ typedef struct {
   int addr;
   int bus;
   int len;
+  bool check_relay;  // todo horrible name
 } CanMsg;
 
 typedef enum {
