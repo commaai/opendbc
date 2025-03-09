@@ -224,20 +224,17 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
 
   bool valid = rx_msg_safety_check(to_push, &current_safety_config, current_hooks);
   if (valid) {
-    const int bus = GET_BUS(to_push);
-//    const int destination_bus = get_fwd_bus(GET_BUS(to_push));
-    // if rx addr in tx msgs and we're checking for relay malfunctions, check its opposite bus
+    current_hooks->rx(to_push);
 
-    // check all tx msgs for liveness check on opposite bus if specified
+    const int bus = GET_BUS(to_push);
+    // check all tx msgs for liveness on opposite bus if specified.
+    // could be to detect a relay malfunction for control messages from disabled ECUs (radar)
     for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
       const CanMsg *m = &current_safety_config.tx_msgs[i];
       if (m->check_relay) {
         generic_rx_checks((m->addr == GET_ADDR(to_push)) && (m->bus == bus));
       }
     }
-
-
-    current_hooks->rx(to_push);
   }
 
   // reset mismatches on rising edge of controls_allowed to avoid rare race condition
