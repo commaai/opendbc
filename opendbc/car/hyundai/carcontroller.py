@@ -214,11 +214,7 @@ class CarController(CarControllerBase):
       sys_state = 6
 
     # initialize to no warnings
-    left_lane_warning = 0
-    right_lane_warning = 0
-    if hud_control.leftLaneDepart:
-      left_lane_warning = 1 if fingerprint in (CAR.GENESIS_G90, CAR.GENESIS_G80) else 2
-    if hud_control.rightLaneDepart:
-      right_lane_warning = 1 if fingerprint in (CAR.GENESIS_G90, CAR.GENESIS_G80) else 2
+    left_lane_warning = (1 if fingerprint in (CAR.GENESIS_G90, CAR.GENESIS_G80) else 2) if hud_control.leftLaneDepart else 0
+    right_lane_warning = (1 if fingerprint in (CAR.GENESIS_G90, CAR.GENESIS_G80) else 2) if hud_control.rightLaneDepart else 0
 
     return sys_warning, sys_state, left_lane_warning, right_lane_warning
