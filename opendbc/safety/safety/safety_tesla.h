@@ -69,12 +69,12 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
     .max_angle = 3600,  // 360 deg, EPAS faults above this
     .angle_deg_to_can = 10,
     .angle_rate_up_lookup = {
-      {0., 5., 25.},
-      {2.5, 1.5, 0.2}
+      {0., 5., 10., 25.},
+      {4, 3, 0.5, 0.2}
     },
     .angle_rate_down_lookup = {
-      {0., 5., 25.},
-      {5., 2.0, 0.3}
+      {0., 5., 10., 25.},
+      {8, 4, 1, 0.3}
     },
   };
 

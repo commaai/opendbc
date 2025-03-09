@@ -62,12 +62,12 @@ static bool nissan_tx_hook(const CANPacket_t *to_send) {
     .max_angle = 60000,  // 600 deg, reasonable limit
     .angle_deg_to_can = 100,
     .angle_rate_up_lookup = {
-      {0., 5., 15.},
-      {5., .8, .15}
+      {0., 5., 15., 15.},
+      {5., .8, .15, .15}
     },
     .angle_rate_down_lookup = {
-      {0., 5., 15.},
-      {5., 3.5, .4}
+      {0., 5., 15., 15.},
+      {5., 3.5, .4, .4}
     },
   };
 
