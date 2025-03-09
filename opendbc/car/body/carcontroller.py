@@ -20,8 +20,8 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(dbc_names[Bus.main])
 
     # PIDs
-    self.turn_pid = PIDController(110, k_i=11.5, rate=1/DT_CTRL)
-    self.wheeled_speed_pid = PIDController(110, k_i=11.5, rate=1/DT_CTRL)
+    self.turn_pid = PIDController(110, k_i=11.5, rate=1 / DT_CTRL)
+    self.wheeled_speed_pid = PIDController(110, k_i=11.5, rate=1 / DT_CTRL)
 
     self.torque_r_filtered = 0.
     self.torque_l_filtered = 0.

@@ -1,3 +1,4 @@
+from opendbc.car.ford.values import FordSafetyFlags
 from opendbc.car.toyota.values import ToyotaSafetyFlags
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
@@ -18,12 +19,15 @@ def is_steering_msg(mode, param, addr):
     ret = addr == 384
   elif mode == CarParams.SafetyModel.hyundai:
     ret = addr == 832
+  elif mode == CarParams.SafetyModel.hyundaiCanfd:
+    # TODO: other params
+    ret = addr == 0x50
   elif mode == CarParams.SafetyModel.chrysler:
     ret = addr == 0x292
   elif mode == CarParams.SafetyModel.subaru:
     ret = addr == 0x122
   elif mode == CarParams.SafetyModel.ford:
-    ret = addr == 0x3d3
+    ret = addr == 0x3d6 if param & FordSafetyFlags.CANFD else addr == 0x3d3
   elif mode == CarParams.SafetyModel.nissan:
     ret = addr == 0x169
   elif mode == CarParams.SafetyModel.rivian:
@@ -31,6 +35,7 @@ def is_steering_msg(mode, param, addr):
   return ret
 
 def get_steer_value(mode, param, to_send):
+  # TODO: use CANParser
   torque, angle = 0, 0
   if mode in (CarParams.SafetyModel.hondaNidec, CarParams.SafetyModel.hondaBosch):
     torque = (to_send.data[0] << 8) | to_send.data[1]
@@ -47,13 +52,18 @@ def get_steer_value(mode, param, to_send):
     torque = to_signed(torque, 11)
   elif mode == CarParams.SafetyModel.hyundai:
     torque = (((to_send.data[3] & 0x7) << 8) | to_send.data[2]) - 1024
+  elif mode == CarParams.SafetyModel.hyundaiCanfd:
+    torque = ((to_send.data[5] >> 1) | (to_send.data[6] & 0xF) << 7) - 1024
   elif mode == CarParams.SafetyModel.chrysler:
     torque = (((to_send.data[0] & 0x7) << 8) | to_send.data[1]) - 1024
   elif mode == CarParams.SafetyModel.subaru:
     torque = ((to_send.data[3] & 0x1F) << 8) | to_send.data[2]
     torque = -to_signed(torque, 13)
   elif mode == CarParams.SafetyModel.ford:
-    angle = ((to_send.data[0] << 3) | (to_send.data[1] >> 5)) - 1000
+    if param & FordSafetyFlags.CANFD:
+      angle = ((to_send.data[2] << 3) | (to_send.data[3] >> 5)) - 1000
+    else:
+      angle = ((to_send.data[0] << 3) | (to_send.data[1] >> 5)) - 1000
   elif mode == CarParams.SafetyModel.nissan:
     angle = (to_send.data[0] << 10) | (to_send.data[1] << 2) | (to_send.data[2] >> 6)
     angle = -angle + (1310 * 100)
@@ -64,13 +74,13 @@ def get_steer_value(mode, param, to_send):
 def package_can_msg(msg):
   return libsafety_py.make_CANPacket(msg.address, msg.src % 4, msg.dat)
 
-def init_segment(safety, lr, mode, param):
-  sendcan = (msg for msg in lr if msg.which() == 'sendcan')
+def init_segment(safety, msgs, mode, param):
+  sendcan = (msg for msg in msgs if msg.which() == 'sendcan')
   steering_msgs = (can for msg in sendcan for can in msg.sendcan if is_steering_msg(mode, param, can.address))
 
   msg = next(steering_msgs, None)
   if msg is None:
-    # no steering msgs
+    print("no steering msgs found!")
     return
 
   to_send = package_can_msg(msg)
@@ -78,6 +88,9 @@ def init_segment(safety, lr, mode, param):
   if torque != 0:
     safety.set_controls_allowed(1)
     safety.set_desired_torque_last(torque)
+    safety.set_rt_torque_last(torque)
+    safety.set_torque_meas(torque, torque)
+    safety.set_torque_driver(torque, torque)
   elif angle != 0:
     safety.set_controls_allowed(1)
     safety.set_desired_angle_last(angle)

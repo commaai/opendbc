@@ -1,8 +1,8 @@
 import os
 import math
 import hypothesis.strategies as st
+import pytest
 from hypothesis import Phase, given, settings
-from parameterized import parameterized
 from collections.abc import Callable
 from typing import Any
 
@@ -49,7 +49,7 @@ def get_fuzzy_car_interface_args(draw: DrawType) -> dict:
 class TestCarInterfaces:
   # FIXME: Due to the lists used in carParams, Phase.target is very slow and will cause
   #  many generated examples to overrun when max_examples > ~20, don't use it
-  @parameterized.expand([(car,) for car in sorted(PLATFORMS)] + [MOCK.MOCK])
+  @pytest.mark.parametrize("car_name", sorted(PLATFORMS))
   @settings(max_examples=MAX_EXAMPLES, deadline=None,
             phases=(Phase.reuse, Phase.generate, Phase.shrink))
   @given(data=st.data())
