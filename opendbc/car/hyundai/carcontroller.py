@@ -36,8 +36,7 @@ class CarController(CarControllerBase):
     if self.CP.flags & HyundaiFlags.CANFD:
       return self.update_canfd(CC, CS, now_nanos)
 
-    actuators = CC.actuators
-    hud_control = CC.hudControl
+    actuators, hud_control = CC.actuators, CC.hudControl
 
     apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning, right_lane_warning,
      tester_present_msgs = self.compute_common_controls(CC, CS)
@@ -82,8 +81,7 @@ class CarController(CarControllerBase):
 
 
   def update_canfd(self, CC, CS, now_nanos):
-    actuators = CC.actuators
-    hud_control = CC.hudControl
+    actuators, hud_control = CC.actuators, CC.hudControl
 
     apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning, right_lane_warning,
      tester_present_msgs = self.compute_common_controls(CC, CS)
