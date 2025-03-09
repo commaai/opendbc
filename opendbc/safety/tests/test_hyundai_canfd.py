@@ -251,11 +251,11 @@ class TestHyundaiCanfdLKASteeringLongEV(HyundaiLongitudinalBase, TestHyundaiCanf
       "aReqRaw": accel,
       "aReqValue": accel,
     }
-    return self.packer.make_can_msg_panda("SCC_CONTROL", 1, values)
+    return self.packer.make_can_msg_panda("SCC_CONTROL", self.PT_BUS, values)
 
   def _tx_acc_state_msg(self, enable):
     values = {"MainMode_ACC": enable}
-    return self.packer.make_can_msg_panda("SCC_CONTROL", 0, values)
+    return self.packer.make_can_msg_panda("SCC_CONTROL", self.PT_BUS, values)
 
 # Tests longitudinal for ICE, hybrid, EV cars with LFA steering
 @parameterized_class([
@@ -294,11 +294,11 @@ class TestHyundaiCanfdLFASteeringLong(HyundaiLongitudinalBase, TestHyundaiCanfdL
       "aReqRaw": accel,
       "aReqValue": accel,
     }
-    return self.packer.make_can_msg_panda("SCC_CONTROL", 0, values)
+    return self.packer.make_can_msg_panda("SCC_CONTROL", self.PT_BUS, values)
 
   def _tx_acc_state_msg(self, enable):
     values = {"MainMode_ACC": enable}
-    return self.packer.make_can_msg_panda("SCC_CONTROL", 0, values)
+    return self.packer.make_can_msg_panda("SCC_CONTROL", self.PT_BUS, values)
 
   # no knockout
   def test_tester_present_allowed(self):
