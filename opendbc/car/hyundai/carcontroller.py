@@ -1,4 +1,5 @@
 import numpy as np
+from collections import namedtuple
 from opendbc.can.packer import CANPacker
 from opendbc.car import Bus, DT_CTRL, apply_driver_steer_torque_limits, common_fault_avoidance, make_tester_present_msg, structs
 from opendbc.car.common.conversions import Conversions as CV
@@ -14,6 +15,9 @@ LongCtrlState = structs.CarControl.Actuators.LongControlState
 MAX_ANGLE = 85
 MAX_ANGLE_FRAMES = 89
 MAX_ANGLE_CONSECUTIVE_FRAMES = 2
+
+CommonData = namedtuple("CommonData", ["actuators", "hud_control", "apply_torque", "apply_steer_req", "torque_fault", "accel", "stopping",
+ "set_speed_in_units", "sys_warning", "sys_state", "left_lane_warning", "right_lane_warning", "tester_present_msgs",])
 
 
 class CarController(CarControllerBase):
@@ -145,7 +149,7 @@ class CarController(CarControllerBase):
       if self.CP.flags & HyundaiFlags.ENABLE_BLINKERS:
         tester_present_msgs.append(make_tester_present_msg(0x7b1, self.CAN.ECAN, suppress_response=True))
 
-    return (actuators, hud_control, apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning,
+    return CommonData(actuators, hud_control, apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning,
        right_lane_warning, tester_present_msgs)
 
 
