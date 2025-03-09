@@ -46,8 +46,8 @@ class CarController(CarControllerBase):
     if self.CP.openpilotLongitudinalControl:
       if self.frame % 2 == 0:
         jerk = 3.0 if cd.actuators.longControlState == LongCtrlState.pid else 1.0  # TODO: unclear if this is needed
-        can_sends.extend(hyundaican.create_acc_commands(self.packer, CC.enabled, cd.accel, jerk, int(self.frame / 2), cd.hud_control, cd.set_speed_in_units, cd.stopping,
-                                                          CC.cruiseControl.override, self.CP.flags & HyundaiFlags.USE_FCA.value, self.CP))
+        can_sends.extend(hyundaican.create_acc_commands(self.packer, CC.enabled, cd.accel, jerk, int(self.frame / 2), cd.hud_control, cd.set_speed_in_units,
+                                                          cd.stopping, CC.cruiseControl.override, self.CP.flags & HyundaiFlags.USE_FCA.value, self.CP))
       if self.frame % 20 == 0:
         can_sends.extend(hyundaican.create_acc_opt(self.packer, self.CP))
       if self.frame % 50 == 0:
@@ -101,7 +101,7 @@ class CarController(CarControllerBase):
           else:
             can_sends.extend([hyundaicanfd.create_buttons(self.packer, self.CP, self.CAN, CS.buttons_counter + 1, Buttons.CANCEL) for _ in range(20)])
         elif CC.cruiseControl.resume and not (self.CP.flags & HyundaiFlags.CANFD_ALT_BUTTONS):  # TODO: resume for alt button cars
-            can_sends.extend([hyundaicanfd.create_buttons(self.packer, self.CP, self.CAN, CS.buttons_counter + 1, Buttons.RES_ACCEL) for _ in range(20)])
+          can_sends.extend([hyundaicanfd.create_buttons(self.packer, self.CP, self.CAN, CS.buttons_counter + 1, Buttons.RES_ACCEL) for _ in range(20)])
         self.last_button_frame = self.frame
 
     return self.update_actuators(cd.actuators, cd.apply_torque, cd.accel, can_sends)
@@ -147,8 +147,8 @@ class CarController(CarControllerBase):
       if self.CP.flags & HyundaiFlags.ENABLE_BLINKERS:
         tester_present_msgs.append(make_tester_present_msg(0x7b1, self.CAN.ECAN, suppress_response=True))
 
-    return CommonData(actuators, hud_control, apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning,
-       right_lane_warning, tester_present_msgs)
+    return CommonData(actuators, hud_control, apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state,
+      left_lane_warning, right_lane_warning, tester_present_msgs)
 
 
   def update_actuators(self, actuators, apply_torque, accel, can_sends):
