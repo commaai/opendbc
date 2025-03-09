@@ -80,6 +80,8 @@ routes = [
   CarTestRoute("36c62b5da6f08154/00000052--983c17c5b2", GM.GMC_YUKON),
 
   CarTestRoute("0e7a2ba168465df5|2020-10-18--14-14-22", HONDA.ACURA_RDX_3G),
+  #fake test, just seeing if CI finds more problems before new testdrive, then will replace
+  CarTestRoute("0e7a2ba168465df5|2020-10-18--14-14-22", HONDA.ACURA_RDX_3G_MMR),
   CarTestRoute("a74b011b32b51b56|2020-07-26--17-09-36", HONDA.HONDA_CIVIC),
   CarTestRoute("a859a044a447c2b0|2020-03-03--18-42-45", HONDA.HONDA_CRV_EU),
   CarTestRoute("68aac44ad69f838e|2021-05-18--20-40-52", HONDA.HONDA_CRV),
@@ -97,6 +99,8 @@ routes = [
   CarTestRoute("f29e2b57a55e7ad5|2021-03-24--20-52-38", HONDA.HONDA_ACCORD),  # hybrid, 2021 with new style HUD msgs
   CarTestRoute("1ad763dd22ef1a0e|2020-02-29--18-37-03", HONDA.HONDA_CRV_5G),
   CarTestRoute("0a96f86fcfe35964|2020-02-05--07-25-51", HONDA.HONDA_ODYSSEY),
+  #test below was on older code, just seeing if CI finds more problems before new testdrive, then will replace
+  CarTestRoute("558ac87ada6a88cd/00000034--54b3407485", HONDA.HONDA_ODYSSEY_5G_MMR),
   CarTestRoute("d83f36766f8012a5|2020-02-05--18-42-21", HONDA.HONDA_CIVIC_BOSCH_DIESEL),
   CarTestRoute("f0890d16a07a236b|2021-05-25--17-27-22", HONDA.HONDA_INSIGHT),
   CarTestRoute("07d37d27996096b6|2020-03-04--21-57-27", HONDA.HONDA_PILOT),
