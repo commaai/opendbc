@@ -114,13 +114,6 @@ class CarController(CarControllerBase):
     return self.update_actuators(actuators, apply_torque, accel, can_sends)
 
 
-  def update_actuators(self, actuators, apply_torque, accel, can_sends):
-    new_actuators = actuators.as_builder()
-    new_actuators.torque, new_actuators.torqueOutputCan, new_actuators.accel = apply_torque / self.params.STEER_MAX, apply_torque, accel
-    self.frame += 1
-    return new_actuators, can_sends
-
-
   def update_common(self, CC, CS):
     actuators, hud_control = CC.actuators, CC.hudControl
 
@@ -163,3 +156,10 @@ class CarController(CarControllerBase):
 
     return (actuators, hud_control, apply_torque, apply_steer_req, torque_fault, accel, stopping, set_speed_in_units, sys_warning, sys_state, left_lane_warning,
        right_lane_warning, tester_present_msgs)
+
+
+  def update_actuators(self, actuators, apply_torque, accel, can_sends):
+    new_actuators = actuators.as_builder()
+    new_actuators.torque, new_actuators.torqueOutputCan, new_actuators.accel = apply_torque / self.params.STEER_MAX, apply_torque, accel
+    self.frame += 1
+    return new_actuators, can_sends
