@@ -110,7 +110,7 @@ class CarState(CarStateBase):
 
     if self.CP.carFingerprint in SERIAL_STEERING:
       self.steer_status_values = defaultdict(lambda: "UNKNOWN", can_define.dv["LIN_STEER_STATUS"]["STEER_STATUS"])
-    else
+    else:
       self.steer_status_values = defaultdict(lambda: "UNKNOWN", can_define.dv["STEER_STATUS"]["STEER_STATUS"])
 
     self.brake_switch_prev = False
