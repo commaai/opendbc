@@ -50,20 +50,14 @@ class CAR(Platforms):
     ),
   )
 
-PSA_RX_OFFSET = -20
+# TODO: fix FW query
+PSA_RX_OFFSET = -0x20
 
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
     Request(
       [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.MANUFACTURER_SOFTWARE_VERSION_REQUEST],
       [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.MANUFACTURER_SOFTWARE_VERSION_RESPONSE],
-      bus=0,
-      logging=True,
-    ),
-    Request(
-      [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.MANUFACTURER_SOFTWARE_VERSION_REQUEST],
-      [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.MANUFACTURER_SOFTWARE_VERSION_RESPONSE],
-      rx_offset=PSA_RX_OFFSET,
       bus=0,
       logging=True,
     ),
