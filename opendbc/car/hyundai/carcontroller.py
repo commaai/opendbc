@@ -131,14 +131,14 @@ class CarController(CarControllerBase):
     # TODO: this is not accurate for all cars
     sys_state = 1
     if hud_control.leftLaneVisible and hud_control.rightLaneVisible or sys_warning:  # HUD alert only display when LKAS status is active
-      sys_state = 3 if enabled or sys_warning else 4
+      sys_state = 3 if CC.enabled or sys_warning else 4
     elif hud_control.leftLaneVisible:
       sys_state = 5
     elif hud_control.rightLaneVisible:
       sys_state = 6
 
-    left_lane_warning = (1 if fingerprint in (CAR.GENESIS_G90, CAR.GENESIS_G80) else 2) if hud_control.leftLaneDepart else 0
-    right_lane_warning = (1 if fingerprint in (CAR.GENESIS_G90, CAR.GENESIS_G80) else 2) if hud_control.rightLaneDepart else 0
+    left_lane_warning = (1 if self.car_fingerprint in (CAR.GENESIS_G90, CAR.GENESIS_G80) else 2) if hud_control.leftLaneDepart else 0
+    right_lane_warning = (1 if self.car_fingerprint in (CAR.GENESIS_G90, CAR.GENESIS_G80) else 2) if hud_control.rightLaneDepart else 0
 
     # tester present - w/ no response (keeps relevant ECU disabled)
     tester_present_msgs = []
