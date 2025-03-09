@@ -203,8 +203,7 @@ class CarController(CarControllerBase):
   def process_hud_alert(self, enabled, fingerprint, hud_control):
     sys_warning = (hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw))
 
-    # initialize to no line visible
-    # TODO: this is not accurate for all cars
+    # initialize to no line visible, TODO: this is not accurate for all cars
     sys_state = 1
     if hud_control.leftLaneVisible and hud_control.rightLaneVisible or sys_warning:  # HUD alert only display when LKAS status is active
       sys_state = 3 if enabled or sys_warning else 4
