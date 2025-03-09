@@ -33,6 +33,7 @@ class CarControllerParams:
 
   BOSCH_GAS_LOOKUP_BP = [-0.2, 2.0]  # 2m/s^2
   BOSCH_GAS_LOOKUP_V = [0, 1600]
+  BOSCH_1000_GAS_LOOKUP_V = [0, 2000]
 
   STEER_STEP = 1  # 100 Hz
   STEER_DELTA_UP = 3  # min/max in 0.33s for all Honda
@@ -46,6 +47,14 @@ class CarControllerParams:
     self.STEER_LOOKUP_BP = [v * -1 for v in CP.lateralParams.torqueBP][1:][::-1] + list(CP.lateralParams.torqueBP)
     self.STEER_LOOKUP_V = [v * -1 for v in CP.lateralParams.torqueV][1:][::-1] + list(CP.lateralParams.torqueV)
 
+class LKAS_LIMITS:
+  STEER_MAX = 240
+  STEER_THRESHOLD = 15
+  STEER_DELTA_UP = 5
+  STEER_DELTA_DOWN = 9
+  STEER_DRIVER_ALLOWANCE = 25
+  STEER_DRIVER_MULTIPLIER = 18
+  STEER_DRIVER_FACTOR = 1
 
 class HondaSafetyFlags(IntFlag):
   ALT_BRAKE = 1
@@ -179,6 +188,24 @@ class CAR(Platforms):
     CarSpecs(mass=3125 * CV.LB_TO_KG, wheelbase=2.61, steerRatio=15.2, centerToFrontRatio=0.41, tireStiffnessFactor=0.5),
     {Bus.pt: 'honda_civic_ex_2022_can_generated'},
     flags=HondaFlags.BOSCH_RADARLESS,
+  )
+  ACURA_MDX_3G = HondaNidecPlatformConfig(
+    [HondaCarDocs("Acura MDX 2018-20")],
+    CarSpecs(mass=4350 * CV.LB_TO_KG, wheelbase=2.82, centerToFrontRatio=0.428, steerRatio=15.66, tireStiffnessFactor=0.444),  # acura spec, stiff from Pilot
+    radar_dbc_dict('acura_mdx_3G_ice'),
+    flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES
+  )
+  ACURA_MDX_3G_HYBRID = HondaNidecPlatformConfig(
+    [HondaCarDocs("Acura MDX Hybrid 2018-20")],
+    CarSpecs(mass=4486 * CV.LB_TO_KG, wheelbase=2.82, centerToFrontRatio=0.428, steerRatio=15.76, tireStiffnessFactor=0.444),  # acura spec, stiff from Pilot
+    radar_dbc_dict('acura_mdx_3G_hybrid'),
+    flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES
+  )
+  HONDA_ODYSSEY_5G_MMR = HondaBoschPlatformConfig(
+    [HondaCarDocs("Honda Odyssey 2021-25", "All", min_steer_speed=3. * CV.MPH_TO_MS)],
+    CarSpecs(mass=4590 * CV.LB_TO_KG, wheelbase=3.00, steerRatio=13.35, centerToFrontRatio=0.54, tireStiffnessFactor=1.02),  # as spec
+    {Bus.pt: 'acura_rdx_2020_can_generated'},
+    flags=HondaFlags.BOSCH_ALT_BRAKE,
   )
   ACURA_RDX_3G = HondaBoschPlatformConfig(
     [HondaCarDocs("Acura RDX 2019-21", "All", min_steer_speed=3. * CV.MPH_TO_MS)],
@@ -314,9 +341,9 @@ FW_QUERY_CONFIG = FwQueryConfig(
   # Note that we still attempt to match with them when they are present
   # This is or'd with (ALL_ECUS - ESSENTIAL_ECUS) from fw_versions.py
   non_essential_ecus={
-    Ecu.eps: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_CIVIC_2022, CAR.HONDA_E, CAR.HONDA_HRV_3G],
+    Ecu.eps: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_CIVIC_2022, CAR.HONDA_E, CAR.HONDA_HRV_3G, CAR.HONDA_ODYSSEY_5G_MMR],
     Ecu.vsa: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_CIVIC, CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_2022, CAR.HONDA_CRV_5G, CAR.HONDA_CRV_HYBRID,
-              CAR.HONDA_E, CAR.HONDA_HRV_3G, CAR.HONDA_INSIGHT],
+              CAR.HONDA_E, CAR.HONDA_HRV_3G, CAR.HONDA_INSIGHT, CAR.HONDA_ODYSSEY_5G_MMR],
   },
   extra_ecus=[
     (Ecu.combinationMeter, 0x18da60f1, None),
@@ -333,12 +360,20 @@ STEER_THRESHOLD = {
   # default is 1200, overrides go here
   CAR.ACURA_RDX: 400,
   CAR.HONDA_CRV_EU: 400,
+  CAR.ACURA_MDX_3G: 25,
+  CAR.ACURA_MDX_3G_HYBRID: 25,
 }
 
 HONDA_NIDEC_ALT_PCM_ACCEL = CAR.with_flags(HondaFlags.NIDEC_ALT_PCM_ACCEL)
 HONDA_NIDEC_ALT_SCM_MESSAGES = CAR.with_flags(HondaFlags.NIDEC_ALT_SCM_MESSAGES)
 HONDA_BOSCH = CAR.with_flags(HondaFlags.BOSCH)
 HONDA_BOSCH_RADARLESS = CAR.with_flags(HondaFlags.BOSCH_RADARLESS)
+HONDA_BOSCH_1000 = {CAR.HONDA_ODYSSEY_5G_MMR} # overrides for 1000 gas units per m/s accel
+SERIAL_STEERING =  {CAR.ACURA_MDX_3G, CAR.ACURA_MDX_3G_HYBRID}
 
 
 DBC = CAR.create_dbc_map()
+
+
+# diag message that in some Nidec cars only appear with 1s freq if VIN query is performed
+DIAG_MSGS = {1600: 5, 1601: 8}

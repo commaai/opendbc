@@ -303,7 +303,7 @@ static bool honda_tx_hook(const CANPacket_t *to_send) {
 }
 
 static safety_config honda_nidec_init(uint16_t param) {
-  static CanMsg HONDA_N_TX_MSGS[] = {{0xE4, 0, 5}, {0x194, 0, 4}, {0x1FA, 0, 8}, {0x30C, 0, 8}, {0x33D, 0, 5}};
+  static CanMsg HONDA_N_TX_MSGS[] = {{0xE4, 0, 5}, {0x194, 0, 4}, {0x1FA, 0, 8}, {0x200, 0, 6}, {0x30C, 0, 8}, {0x33D, 0, 5}, {0xE4, 2, 5}};
 
   const uint16_t HONDA_PARAM_NIDEC_ALT = 4;
 
