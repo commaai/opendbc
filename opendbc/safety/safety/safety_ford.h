@@ -188,6 +188,7 @@ static void ford_rx_hook(const CANPacket_t *to_push) {
 
     // If steering controls messages are received on the destination bus, it's an indication
     // that the relay might be malfunctioning.
+    // TODO: replace with blocked messages!
     bool stock_ecu_detected = ford_lkas_msg_check(addr);
     if (ford_longitudinal) {
       stock_ecu_detected = stock_ecu_detected || (addr == FORD_ACCDATA);
@@ -319,38 +320,6 @@ static bool ford_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static int ford_fwd_hook(int bus_num, int addr) {
-  int bus_fwd = -1;
-
-  switch (bus_num) {
-    case FORD_MAIN_BUS: {
-      // Forward all traffic from bus 0 onward
-      bus_fwd = FORD_CAM_BUS;
-      break;
-    }
-    case FORD_CAM_BUS: {
-      if (ford_lkas_msg_check(addr)) {
-        // Block stock LKAS and UI messages
-        bus_fwd = -1;
-      } else if (ford_longitudinal && (addr == FORD_ACCDATA)) {
-        // Block stock ACC message
-        bus_fwd = -1;
-      } else {
-        // Forward remaining traffic
-        bus_fwd = FORD_MAIN_BUS;
-      }
-      break;
-    }
-    default: {
-      // No other buses should be in use; fallback to do-not-forward
-      bus_fwd = -1;
-      break;
-    }
-  }
-
-  return bus_fwd;
-}
-
 static safety_config ford_init(uint16_t param) {
   bool ford_canfd = false;
 
@@ -369,33 +338,33 @@ static safety_config ford_init(uint16_t param) {
     {.msg = {{FORD_DesiredTorqBrk, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
   };
 
-  #define FORD_COMMON_TX_MSGS       \
-    {FORD_Steering_Data_FD1, 0, 8}, \
-    {FORD_Steering_Data_FD1, 2, 8}, \
-    {FORD_ACCDATA_3, 0, 8},         \
-    {FORD_Lane_Assist_Data1, 0, 8}, \
-    {FORD_IPMA_Data, 0, 8},         \
+  #define FORD_COMMON_TX_MSGS                        \
+    {FORD_Steering_Data_FD1, 0, 8},                  \
+    {FORD_Steering_Data_FD1, 2, 8},                  \
+    {FORD_ACCDATA_3, 0, 8, .blocked = true},         \
+    {FORD_Lane_Assist_Data1, 0, 8, .blocked = true}, \
+    {FORD_IPMA_Data, 0, 8, .blocked = true},         \
 
   static const CanMsg FORD_CANFD_LONG_TX_MSGS[] = {
     FORD_COMMON_TX_MSGS
-    {FORD_ACCDATA, 0, 8},
-    {FORD_LateralMotionControl2, 0, 8},
+    {FORD_ACCDATA, 0, 8, .blocked = true},
+    {FORD_LateralMotionControl2, 0, 8, .blocked = true},
   };
 
   static const CanMsg FORD_CANFD_STOCK_TX_MSGS[] = {
     FORD_COMMON_TX_MSGS
-    {FORD_LateralMotionControl2, 0, 8},
+    {FORD_LateralMotionControl2, 0, 8, .blocked = true},
   };
 
   static const CanMsg FORD_STOCK_TX_MSGS[] = {
     FORD_COMMON_TX_MSGS
-    {FORD_LateralMotionControl, 0, 8},
+    {FORD_LateralMotionControl, 0, 8, .blocked = true},
   };
 
   static const CanMsg FORD_LONG_TX_MSGS[] = {
     FORD_COMMON_TX_MSGS
-    {FORD_ACCDATA, 0, 8},
-    {FORD_LateralMotionControl, 0, 8},
+    {FORD_ACCDATA, 0, 8, .blocked = true},
+    {FORD_LateralMotionControl, 0, 8, .blocked = true},
   };
 
   const uint16_t FORD_PARAM_CANFD = 2;
@@ -426,7 +395,6 @@ const safety_hooks ford_hooks = {
   .init = ford_init,
   .rx = ford_rx_hook,
   .tx = ford_tx_hook,
-  .fwd = ford_fwd_hook,
   .get_counter = ford_get_counter,
   .get_checksum = ford_get_checksum,
   .compute_checksum = ford_compute_checksum,

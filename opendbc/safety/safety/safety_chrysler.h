@@ -166,23 +166,6 @@ static bool chrysler_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static int chrysler_fwd_hook(int bus_num, int addr) {
-  int bus_fwd = -1;
-
-  // forward to camera
-  if (bus_num == 0) {
-    bus_fwd = 2;
-  }
-
-  // forward all messages from camera except LKAS messages
-  const bool is_lkas = ((addr == chrysler_addrs->LKAS_COMMAND) || (addr == chrysler_addrs->DAS_6));
-  if ((bus_num == 2) && !is_lkas){
-    bus_fwd = 0;
-  }
-
-  return bus_fwd;
-}
-
 static safety_config chrysler_init(uint16_t param) {
 
   const uint32_t CHRYSLER_PARAM_RAM_DT = 1U;  // set for Ram DT platform
@@ -230,14 +213,14 @@ static safety_config chrysler_init(uint16_t param) {
 
   static const CanMsg CHRYSLER_TX_MSGS[] = {
     {CHRYSLER_ADDRS.CRUISE_BUTTONS, 0, 3},
-    {CHRYSLER_ADDRS.LKAS_COMMAND, 0, 6},
-    {CHRYSLER_ADDRS.DAS_6, 0, 8},
+    {CHRYSLER_ADDRS.LKAS_COMMAND, 0, 6, .blocked = true},
+    {CHRYSLER_ADDRS.DAS_6, 0, 8, .blocked = true},
   };
 
   static const CanMsg CHRYSLER_RAM_DT_TX_MSGS[] = {
     {CHRYSLER_RAM_DT_ADDRS.CRUISE_BUTTONS, 2, 3},
-    {CHRYSLER_RAM_DT_ADDRS.LKAS_COMMAND, 0, 8},
-    {CHRYSLER_RAM_DT_ADDRS.DAS_6, 0, 8},
+    {CHRYSLER_RAM_DT_ADDRS.LKAS_COMMAND, 0, 8, .blocked = true},
+    {CHRYSLER_RAM_DT_ADDRS.DAS_6, 0, 8, .blocked = true},
   };
 
 #ifdef ALLOW_DEBUG
@@ -263,8 +246,8 @@ static safety_config chrysler_init(uint16_t param) {
 
   static const CanMsg CHRYSLER_RAM_HD_TX_MSGS[] = {
     {CHRYSLER_RAM_HD_ADDRS.CRUISE_BUTTONS, 2, 3},
-    {CHRYSLER_RAM_HD_ADDRS.LKAS_COMMAND, 0, 8},
-    {CHRYSLER_RAM_HD_ADDRS.DAS_6, 0, 8},
+    {CHRYSLER_RAM_HD_ADDRS.LKAS_COMMAND, 0, 8, .blocked = true},
+    {CHRYSLER_RAM_HD_ADDRS.DAS_6, 0, 8, .blocked = true},
   };
 
   const uint32_t CHRYSLER_PARAM_RAM_HD = 2U;  // set for Ram HD platform
@@ -297,7 +280,6 @@ const safety_hooks chrysler_hooks = {
   .init = chrysler_init,
   .rx = chrysler_rx_hook,
   .tx = chrysler_tx_hook,
-  .fwd = chrysler_fwd_hook,
   .get_counter = chrysler_get_counter,
   .get_checksum = chrysler_get_checksum,
   .compute_checksum = chrysler_compute_checksum,

@@ -27,16 +27,16 @@ const LongitudinalLimits HYUNDAI_LONG_LIMITS = {
 };
 
 #define HYUNDAI_COMMON_TX_MSGS(scc_bus) \
-  {0x340, 0,       8},  /* LKAS11 Bus 0                              */ \
+  {0x340, 0,       8, .blocked = true},  /* LKAS11 Bus 0                              */ \
   {0x4F1, scc_bus, 4},  /* CLU11 Bus 0 (radar-SCC) or 2 (camera-SCC) */ \
-  {0x485, 0,       4},  /* LFAHDA_MFC Bus 0                          */ \
+  {0x485, 0,       4, .blocked = true},  /* LFAHDA_MFC Bus 0                          */ \
 
 #define HYUNDAI_LONG_COMMON_TX_MSGS(scc_bus) \
   HYUNDAI_COMMON_TX_MSGS(scc_bus)                                       \
-  {0x420, 0,       8},  /* SCC11 Bus 0                               */ \
-  {0x421, 0,       8},  /* SCC12 Bus 0                               */ \
-  {0x50A, 0,       8},  /* SCC13 Bus 0                               */ \
-  {0x389, 0,       8},  /* SCC14 Bus 0                               */ \
+  {0x420, 0,       8, .blocked = (scc_bus) == 2},  /* SCC11 Bus 0                               */ \
+  {0x421, 0,       8, .blocked = (scc_bus) == 2},  /* SCC12 Bus 0                               */ \
+  {0x50A, 0,       8, .blocked = (scc_bus) == 2},  /* SCC13 Bus 0                               */ \
+  {0x389, 0,       8, .blocked = (scc_bus) == 2},  /* SCC14 Bus 0                               */ \
   {0x4A2, 0,       2},  /* FRT_RADAR11 Bus 0                         */ \
 
 #define HYUNDAI_COMMON_RX_CHECKS(legacy)                                                                                                                  \
@@ -261,32 +261,6 @@ static bool hyundai_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static int hyundai_fwd_hook(int bus_num, int addr) {
-
-  int bus_fwd = -1;
-
-  // forward cam to ccan and viceversa, except lkas cmd
-  if (bus_num == 0) {
-    bus_fwd = 2;
-  }
-
-  if (bus_num == 2) {
-    // Stock LKAS11 messages
-    bool is_lkas_11 = (addr == 0x340);
-    // LFA and HDA cluster icons
-    bool is_lfahda_mfc = (addr == 0x485);
-    // Stock SCC messages, blocking when doing openpilot longitudinal on camera SCC cars
-    bool is_scc_msg = (addr == 0x420) || (addr == 0x421) || (addr == 0x50A) || (addr == 0x389);
-
-    bool block_msg = is_lkas_11 || is_lfahda_mfc || (is_scc_msg && hyundai_longitudinal && hyundai_camera_scc);
-    if (!block_msg) {
-      bus_fwd = 0;
-    }
-  }
-
-  return bus_fwd;
-}
-
 static safety_config hyundai_init(uint16_t param) {
   static const CanMsg HYUNDAI_LONG_TX_MSGS[] = {
     HYUNDAI_LONG_COMMON_TX_MSGS(0)
@@ -352,7 +326,6 @@ const safety_hooks hyundai_hooks = {
   .init = hyundai_init,
   .rx = hyundai_rx_hook,
   .tx = hyundai_tx_hook,
-  .fwd = hyundai_fwd_hook,
   .get_counter = hyundai_get_counter,
   .get_checksum = hyundai_get_checksum,
   .compute_checksum = hyundai_compute_checksum,
@@ -362,7 +335,6 @@ const safety_hooks hyundai_legacy_hooks = {
   .init = hyundai_legacy_init,
   .rx = hyundai_rx_hook,
   .tx = hyundai_tx_hook,
-  .fwd = hyundai_fwd_hook,
   .get_counter = hyundai_get_counter,
   .get_checksum = hyundai_get_checksum,
   .compute_checksum = hyundai_compute_checksum,

@@ -253,7 +253,22 @@ bool safety_tx_hook(CANPacket_t *to_send) {
 }
 
 int safety_fwd_hook(int bus_num, int addr) {
-  return (relay_malfunction ? -1 : current_hooks->fwd(bus_num, addr));
+  const int destination_bus = bus_num == 0 ? 2 : (bus_num == 2 ? 0 : -1);
+
+  bool blocked = false;
+  if (current_safety_config.block_fwding) {
+    blocked = true;
+  } else {
+    for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
+      const CanMsg *m = &current_safety_config.tx_msgs[i];
+      if ((m->addr == addr) && (m->bus == destination_bus) && m->blocked) {
+        blocked = true;
+        break;
+      }
+    }
+  }
+
+  return (relay_malfunction || blocked) ? -1 : ((current_hooks->fwd != NULL) ? current_hooks->fwd(bus_num, addr) : destination_bus);
 }
 
 bool get_longitudinal_allowed(void) {
@@ -431,6 +446,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   current_safety_config.rx_checks_len = 0;
   current_safety_config.tx_msgs = NULL;
   current_safety_config.tx_msgs_len = 0;
+  current_safety_config.block_fwding = false;
 
   int set_status = -1;  // not set
   int hook_config_count = sizeof(safety_hook_registry) / sizeof(safety_hook_config);
@@ -448,6 +464,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
     current_safety_config.rx_checks_len = cfg.rx_checks_len;
     current_safety_config.tx_msgs = cfg.tx_msgs;
     current_safety_config.tx_msgs_len = cfg.tx_msgs_len;
+    current_safety_config.block_fwding = cfg.block_fwding;
     // reset all dynamic fields in addr struct
     for (int j = 0; j < current_safety_config.rx_checks_len; j++) {
       current_safety_config.rx_checks[j].status = (RxStatus){0};
