@@ -84,10 +84,6 @@ class CarState(CarStateBase):
       if self.CP.carFingerprint != CAR.TOYOTA_MIRAI:
         ret.engineRpm = cp.vl["ENGINE_RPM"]["RPM"]
 
-      if self.CP.flags & ToyotaFlags.HYBRID:
-        ret.gas = cp.vl["GAS_PEDAL_HYBRID"]["GAS_PEDAL"]
-        ret.brake = cp.vl["BRAKE"]["BRAKE_AMOUNT"]
-
     ret.wheelSpeeds = self.get_wheel_speeds(
       cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FL"],
       cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FR"],
@@ -165,7 +161,8 @@ class CarState(CarStateBase):
     # send your own ACC_CONTROL msg on startup with ACC_TYPE set to 1
     if (self.CP.carFingerprint not in TSS2_CAR and self.CP.carFingerprint not in UNSUPPORTED_DSU_CAR) or \
        (self.CP.carFingerprint in TSS2_CAR and self.acc_type == 1):
-      ret.accFaulted = ret.accFaulted or cp.vl["PCM_CRUISE_2"]["LOW_SPEED_LOCKOUT"] == 2
+      if self.CP.openpilotLongitudinalControl:
+        ret.accFaulted = ret.accFaulted or cp.vl["PCM_CRUISE_2"]["LOW_SPEED_LOCKOUT"] == 2
 
     self.pcm_acc_status = cp.vl["PCM_CRUISE"]["CRUISE_STATE"]
     if self.CP.carFingerprint not in (NO_STOP_TIMER_CAR - TSS2_CAR):
@@ -223,10 +220,6 @@ class CarState(CarStateBase):
       pt_messages.append(("VSC1S07", 20))
       if CP.carFingerprint not in [CAR.TOYOTA_MIRAI]:
         pt_messages.append(("ENGINE_RPM", 42))
-
-      if CP.flags & ToyotaFlags.HYBRID:
-        pt_messages.append(("BRAKE", 83))
-        pt_messages.append(("GAS_PEDAL_HYBRID", 33))
 
       pt_messages += [
         ("GEAR_PACKET", 1),
