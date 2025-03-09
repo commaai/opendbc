@@ -132,7 +132,7 @@ class CarController(CarControllerBase):
 
     sys_warning = (hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw))
 
-    # initialize to no line visible, TODO: this is not accurate for all cars
+    # TODO: this is not accurate for all cars
     sys_state = 1
     if hud_control.leftLaneVisible and hud_control.rightLaneVisible or sys_warning:  # HUD alert only display when LKAS status is active
       sys_state = 3 if enabled or sys_warning else 4
@@ -141,7 +141,6 @@ class CarController(CarControllerBase):
     elif hud_control.rightLaneVisible:
       sys_state = 6
 
-    # initialize to no warnings
     left_lane_warning = (1 if fingerprint in (CAR.GENESIS_G90, CAR.GENESIS_G80) else 2) if hud_control.leftLaneDepart else 0
     right_lane_warning = (1 if fingerprint in (CAR.GENESIS_G90, CAR.GENESIS_G80) else 2) if hud_control.rightLaneDepart else 0
 
