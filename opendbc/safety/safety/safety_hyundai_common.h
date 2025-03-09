@@ -1,12 +1,13 @@
 #pragma once
 
 #include "safety_declarations.h"
+#include "safety_hyundai_flags.h"
 
 extern uint16_t hyundai_canfd_crc_lut[256];
 uint16_t hyundai_canfd_crc_lut[256];
 
 static const uint8_t HYUNDAI_PREV_BUTTON_SAMPLES = 8;  // roughly 160 ms
-                                                       //
+
 extern const uint32_t HYUNDAI_STANDSTILL_THRSLD;
 const uint32_t HYUNDAI_STANDSTILL_THRSLD = 12;  // 0.375 kph
 
@@ -17,59 +18,8 @@ enum {
   HYUNDAI_BTN_CANCEL = 4,
 };
 
-// common state
-extern bool hyundai_ev_gas_signal;
-bool hyundai_ev_gas_signal = false;
-
-extern bool hyundai_hybrid_gas_signal;
-bool hyundai_hybrid_gas_signal = false;
-
-extern bool hyundai_longitudinal;
-bool hyundai_longitudinal = false;
-
-extern bool hyundai_camera_scc;
-bool hyundai_camera_scc = false;
-
-extern bool hyundai_canfd_lka_steering;
-bool hyundai_canfd_lka_steering = false;
-
-extern bool hyundai_alt_limits;
-bool hyundai_alt_limits = false;
-
-extern bool hyundai_fcev_gas_signal;
-bool hyundai_fcev_gas_signal = false;
-
-extern bool hyundai_alt_limits_2;
-bool hyundai_alt_limits_2 = false;
-
-static uint8_t hyundai_last_button_interaction;  // button messages since the user pressed an enable button
-
-void hyundai_common_init(uint16_t param) {
-  const int HYUNDAI_PARAM_EV_GAS = 1;
-  const int HYUNDAI_PARAM_HYBRID_GAS = 2;
-  const int HYUNDAI_PARAM_CAMERA_SCC = 8;
-  const int HYUNDAI_PARAM_CANFD_LKA_STEERING = 16;
-  const int HYUNDAI_PARAM_ALT_LIMITS = 64; // TODO: shift this down with the rest of the common flags
-  const int HYUNDAI_PARAM_FCEV_GAS = 256;
-  const int HYUNDAI_PARAM_ALT_LIMITS_2 = 512;
-
-  hyundai_ev_gas_signal = GET_FLAG(param, HYUNDAI_PARAM_EV_GAS);
-  hyundai_hybrid_gas_signal = !hyundai_ev_gas_signal && GET_FLAG(param, HYUNDAI_PARAM_HYBRID_GAS);
-  hyundai_camera_scc = GET_FLAG(param, HYUNDAI_PARAM_CAMERA_SCC);
-  hyundai_canfd_lka_steering = GET_FLAG(param, HYUNDAI_PARAM_CANFD_LKA_STEERING);
-  hyundai_alt_limits = GET_FLAG(param, HYUNDAI_PARAM_ALT_LIMITS);
-  hyundai_fcev_gas_signal = GET_FLAG(param, HYUNDAI_PARAM_FCEV_GAS);
-  hyundai_alt_limits_2 = GET_FLAG(param, HYUNDAI_PARAM_ALT_LIMITS_2);
-
-  hyundai_last_button_interaction = HYUNDAI_PREV_BUTTON_SAMPLES;
-
-#ifdef ALLOW_DEBUG
-  const int HYUNDAI_PARAM_LONGITUDINAL = 4;
-  hyundai_longitudinal = GET_FLAG(param, HYUNDAI_PARAM_LONGITUDINAL);
-#else
-  hyundai_longitudinal = false;
-#endif
-}
+extern uint8_t hyundai_last_button_interaction;  // button messages since the user pressed an enable button
+uint8_t hyundai_last_button_interaction = HYUNDAI_PREV_BUTTON_SAMPLES;
 
 void hyundai_common_cruise_state_check(const bool cruise_engaged) {
   // some newer HKG models can re-enable after spamming cancel button,
