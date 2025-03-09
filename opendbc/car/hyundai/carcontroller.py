@@ -119,20 +119,16 @@ class CarController(CarControllerBase):
     set_speed_in_units = hud_control.setSpeed * (CV.MS_TO_KPH if CS.is_metric else CV.MS_TO_MPH)
 
     sys_warning = (hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw))
-
-    # TODO: this is not accurate for all cars
-    sys_state = 1
+    sys_state = 1  # TODO: this is not accurate for all cars
     if hud_control.leftLaneVisible and hud_control.rightLaneVisible or sys_warning:  # HUD alert only display when LKAS status is active
       sys_state = 3 if CC.enabled or sys_warning else 4
     elif hud_control.leftLaneVisible:
       sys_state = 5
     elif hud_control.rightLaneVisible:
       sys_state = 6
-
     left_lane_warning = (1 if self.car_fingerprint in (CAR.GENESIS_G90, CAR.GENESIS_G80) else 2) if hud_control.leftLaneDepart else 0
     right_lane_warning = (1 if self.car_fingerprint in (CAR.GENESIS_G90, CAR.GENESIS_G80) else 2) if hud_control.rightLaneDepart else 0
 
-    # tester present - w/ no response (keeps relevant ECU disabled)
     tester_present_msgs = []
     if self.frame % 100 == 0 and not (self.CP.flags & HyundaiFlags.CANFD_CAMERA_SCC) and self.CP.openpilotLongitudinalControl:
       # for longitudinal control, either radar or ADAS driving ECU
