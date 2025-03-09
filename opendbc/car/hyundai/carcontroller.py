@@ -62,7 +62,7 @@ class CarController(CarControllerBase):
     if self.frame % 50 == 0 and self.CP.openpilotLongitudinalControl:
       can_sends.append(hyundaican.create_frt_radar_opt(self.packer))
 
-    return self._build_actuators(actuators, apply_torque, accel, can_sends)
+    return self.build_actuators(actuators, apply_torque, accel, can_sends)
 
 
   def update_canfd(self, CC, CS, now_nanos):
@@ -99,10 +99,10 @@ class CarController(CarControllerBase):
     else:
       can_sends.extend(self.create_button_messages(CC, CS, use_clu11=False))
 
-    return self._build_actuators(actuators, apply_torque, accel, can_sends)
+    return self.build_actuators(actuators, apply_torque, accel, can_sends)
 
 
-  def _build_actuators(self, actuators, apply_torque, accel, can_sends):
+  def build_actuators(self, actuators, apply_torque, accel, can_sends):
     new_actuators = actuators.as_builder()
     new_actuators.torque, new_actuators.torqueOutputCan, new_actuators.accel = apply_torque / self.params.STEER_MAX, apply_torque, accel
     self.frame += 1
