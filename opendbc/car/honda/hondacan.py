@@ -1,6 +1,6 @@
 from opendbc.car import CanBusBase
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.honda.values import HondaFlags, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, CAR, CarControllerParams
+from opendbc.car.honda.values import HondaFlags, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, CAR, CarControllerParams, SERIAL_STEERING
 
 # CAN bus layout with relay
 # 0 = ACC-CAN - radar side
@@ -42,11 +42,6 @@ class CanBus(CanBusBase):
   @property
   def body(self) -> int:
     return self.offset
-
-
-def get_cruise_speed_conversion(car_fingerprint: str, is_metric: bool) -> float:
-  # on certain cars, CRUISE_SPEED changes to imperial with car's unit setting
-  return CV.MPH_TO_MS if car_fingerprint in HONDA_BOSCH_RADARLESS and not is_metric else CV.KPH_TO_MS
 
 
 def create_brake_command(packer, CAN, apply_brake, pump_on, pcm_override, pcm_cancel_cmd, fcw, car_fingerprint, stock_brake):
@@ -117,22 +112,31 @@ def create_acc_commands(packer, CAN, enabled, active, accel, gas, stopping_count
   return commands
 
 
-def create_steering_control(packer, CAN, apply_torque, lkas_active):
+def create_steering_control(packer, CAN, apply_torque, lkas_active, car_fingerprint):
   values = {
     "STEER_TORQUE": apply_torque if lkas_active else 0,
     "STEER_TORQUE_REQUEST": lkas_active,
   }
-  return packer.make_can_msg("STEERING_CONTROL", CAN.lkas, values)
 
+  if car_fingerprint in SERIAL_STEERING:
+      values.update({
+        "SEND_ALL_LIN_TO_CAN": 1,
+        "SEND_LIN_WHOLE_DATA": 1,
+        "SEND_MOTOR_TORQUE_TO_CAN": 1,
+        "SEND_STEER_STATUS_TO_CAN": 1,
+      })
+  bus = 2 if car_fingerprint in SERIAL_STEERING else CAN.lkas
+  return packer.make_can_msg("STEERING_CONTROL", bus, values)
 
-def create_bosch_supplemental_1(packer, CAN):
+def create_bosch_supplemental_1(packer, CAN, car_fingerprint):
   # non-active params
   values = {
     "SET_ME_X04": 0x04,
     "SET_ME_X80": 0x80,
     "SET_ME_X10": 0x10,
   }
-  return packer.make_can_msg("BOSCH_SUPPLEMENTAL_1", CAN.lkas, values)
+  bus = 2 if car_fingerprint in SERIAL_STEERING else CAN.lkas
+  return packer.make_can_msg("BOSCH_SUPPLEMENTAL_1", bus, values)
 
 
 def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_hud, lkas_hud):
