@@ -97,7 +97,7 @@ class CarInterface(CarInterfaceBase):
       ret.networkLocation = NetworkLocation.fwdCamera
       ret.radarUnavailable = True  # no radar
       ret.pcmCruise = True
-      ret.safetyConfigs[0].safetyParam |= GMSafetyFlags.FLAG_GM_HW_CAM.value
+      ret.safetyConfigs[0].safetyParam |= GMSafetyFlags.HW_CAM.value
       ret.minEnableSpeed = -1 if candidate in SDGM_CAR else 5 * CV.KPH_TO_MS
       ret.minSteerSpeed = 10 * CV.KPH_TO_MS
 
@@ -110,7 +110,7 @@ class CarInterface(CarInterfaceBase):
       if experimental_long:
         ret.pcmCruise = False
         ret.openpilotLongitudinalControl = True
-        ret.safetyConfigs[0].safetyParam |= GMSafetyFlags.FLAG_GM_HW_CAM_LONG.value
+        ret.safetyConfigs[0].safetyParam |= GMSafetyFlags.HW_CAM_LONG.value
 
       if candidate in ALT_ACCS:
         ret.experimentalLongitudinalAvailable = False

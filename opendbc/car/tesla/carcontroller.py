@@ -24,17 +24,11 @@ class CarController(CarControllerBase):
     lat_active = CC.latActive and not hands_on_fault
 
     if self.frame % 2 == 0:
-      if lat_active:
-        # Angular rate limit based on speed
-        apply_angle = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgo, CarControllerParams)
+      # Angular rate limit based on speed
+      self.apply_angle_last = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgo,
+                                                           CS.out.steeringAngleDeg, CC.latActive, CarControllerParams.ANGLE_LIMITS)
 
-        # To not fault the EPS
-        apply_angle = float(np.clip(apply_angle, CS.out.steeringAngleDeg - 20, CS.out.steeringAngleDeg + 20))
-      else:
-        apply_angle = CS.out.steeringAngleDeg
-
-      self.apply_angle_last = apply_angle
-      can_sends.append(self.tesla_can.create_steering_control(apply_angle, lat_active, (self.frame // 2) % 16))
+      can_sends.append(self.tesla_can.create_steering_control(self.apply_angle_last, lat_active, (self.frame // 2) % 16))
 
     if self.frame % 10 == 0:
       can_sends.append(self.tesla_can.create_steering_allowed((self.frame // 10) % 16))
@@ -45,13 +39,13 @@ class CarController(CarControllerBase):
         state = 13 if cruise_cancel else 4  # 4=ACC_ON, 13=ACC_CANCEL_GENERIC_SILENT
         accel = float(np.clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
         cntr = (self.frame // 4) % 8
-        can_sends.append(self.tesla_can.create_longitudinal_command(state, accel, cntr, CC.longActive))
+        can_sends.append(self.tesla_can.create_longitudinal_command(state, accel, cntr, CS.out.vEgo, CC.longActive))
 
     else:
       # Increment counter so cancel is prioritized even without openpilot longitudinal
       if cruise_cancel:
         cntr = (CS.das_control["DAS_controlCounter"] + 1) % 8
-        can_sends.append(self.tesla_can.create_longitudinal_command(13, 0, cntr, False))
+        can_sends.append(self.tesla_can.create_longitudinal_command(13, 0, cntr, CS.out.vEgo, False))
 
     # TODO: HUD control
     new_actuators = actuators.as_builder()
