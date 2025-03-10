@@ -49,7 +49,7 @@ class TestHyundaiFingerprint:
     for lka_steering in (True, False):
       fingerprint = gen_empty_fingerprint()
       if lka_steering:
-        cam_can = CanBus(None, fingerprint).CAM
+        cam_can = CanBus(None, fingerprint).CAMERA
         fingerprint[cam_can] = [0x50, 0x110]  # LKA steering messages
       CP = CarInterface.get_params(CAR.KIA_EV6, fingerprint, [], False, False)
       assert bool(CP.flags & HyundaiFlags.CANFD_LKA_STEERING) == lka_steering
