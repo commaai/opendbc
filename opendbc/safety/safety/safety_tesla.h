@@ -55,9 +55,6 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
     }
   }
 
-  generic_rx_checks((addr == 0x488) && (bus == 0));  // DAS_steeringControl
-  generic_rx_checks((addr == 0x27d) && (bus == 0));  // APS_eacMonitor
-
   if (tesla_longitudinal) {
     generic_rx_checks((addr == 0x2b9) && (bus == 0));
   }
@@ -170,9 +167,9 @@ static bool tesla_fwd_hook(int bus_num, int addr) {
 static safety_config tesla_init(uint16_t param) {
 
   static const CanMsg TESLA_M3_Y_TX_MSGS[] = {
-    {0x488, 0, 4},  // DAS_steeringControl
-    {0x2b9, 0, 8},  // DAS_control
-    {0x27D, 0, 3},  // APS_eacMonitor
+    {0x488, 0, 4, true},  // DAS_steeringControl
+    {0x2b9, 0, 8},        // DAS_control
+    {0x27D, 0, 3, true},  // APS_eacMonitor
   };
 
   UNUSED(param);
