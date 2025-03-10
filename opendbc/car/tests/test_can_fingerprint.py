@@ -1,11 +1,12 @@
-import pytest
+from parameterized import parameterized
+
 from opendbc.car.can_definitions import CanData
 from opendbc.car.car_helpers import FRAME_FINGERPRINT, can_fingerprint
 from opendbc.car.fingerprints import _FINGERPRINTS as FINGERPRINTS
 
 
 class TestCanFingerprint:
-  @pytest.mark.parametrize("car_model, fingerprints", FINGERPRINTS.items())
+  @parameterized.expand(list(FINGERPRINTS.items()))
   def test_can_fingerprint(self, car_model, fingerprints):
     """Tests online fingerprinting function on offline fingerprints"""
 

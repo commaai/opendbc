@@ -1,10 +1,10 @@
-import pytest
+from parameterized import parameterized
 
 from opendbc.car.values import PLATFORMS
 from opendbc.car.tests.routes import non_tested_cars, routes
 
 
-@pytest.mark.parametrize("platform", PLATFORMS.keys())
+@parameterized.expand(PLATFORMS.keys())
 def test_test_route_present(platform):
   tested_platforms = [r.car_model for r in routes]
   assert platform in set(tested_platforms) | set(non_tested_cars), \

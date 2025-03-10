@@ -1,5 +1,4 @@
 import re
-from dataclasses import dataclass, field
 
 from opendbc.car import uds
 from opendbc.car.carlog import carlog
@@ -8,21 +7,6 @@ from opendbc.car.fw_query_definitions import STANDARD_VIN_ADDRS, StdQueries
 
 VIN_UNKNOWN = "0" * 17
 VIN_RE = "[A-HJ-NPR-Z0-9]{17}"
-
-
-@dataclass
-class Vin:
-  vin: str
-  wmi: str = field(init=False)
-  vds: str = field(init=False)
-  vis: str = field(init=False)
-
-  def __post_init__(self):
-    # parses VIN in accordance with North America standard >2000 vehicles:
-    # https://en.wikipedia.org/wiki/Vehicle_identification_number#Components
-    self.wmi = self.vin[:3]  # World Manufacturer Identifier
-    self.vds = self.vin[3:9]  # Vehicle Descriptor Section
-    self.vis = self.vin[9:17]  # Vehicle Identifier Section
 
 
 def is_valid_vin(vin: str):

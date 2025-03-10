@@ -238,7 +238,7 @@ def get_fw_versions_ordered(can_recv: CanRecvCallable, can_send: CanSendCallable
   # This allows brands with only one ECU to be queried first (e.g. Tesla)
   for brand in sorted(brand_matches, key=lambda b: (brand_matches[b].count(True), brand_matches[b].count(True) / len(brand_matches[b])), reverse=True):
     # Skip this brand if there are no matching present ECUs
-    if True not in brand_matches[brand]:
+    if not len(brand_matches[brand]):
       continue
 
     car_fw = get_fw_versions(can_recv, can_send, set_obd_multiplexing, query_brand=brand, timeout=timeout, num_pandas=num_pandas, progress=progress)

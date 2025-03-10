@@ -4,7 +4,7 @@
 from libcpp.pair cimport pair
 from libcpp.string cimport string
 from libcpp.vector cimport vector
-from libc.stdint cimport uint32_t, int
+from libc.stdint cimport uint32_t
 
 from .common cimport CANParser as cpp_CANParser
 from .common cimport dbc_lookup, Msg, DBC, CanData
@@ -61,19 +61,11 @@ cdef class CANParser:
       self.ts_nanos[address] = {name: 0.0 for name in signal_names}
       self.ts_nanos[name] = self.ts_nanos[address]
 
-    cdef string cpp_dbc_name
-    if isinstance(dbc_name, str):
-      cpp_dbc_name = (<str>dbc_name).encode('utf-8')
-    else:
-      cpp_dbc_name = dbc_name  # Assume bytes
-    cdef int cpp_bus = bus
-    with nogil:
-      self.can = new cpp_CANParser(cpp_bus, cpp_dbc_name, message_v)
+    self.can = new cpp_CANParser(bus, dbc_name, message_v)
 
   def __dealloc__(self):
     if self.can:
-      with nogil:
-        del self.can
+      del self.can
 
   def update_strings(self, strings, sendcan=False):
     # input format:
@@ -103,16 +95,13 @@ cdef class CANParser:
     except TypeError:
       raise RuntimeError("invalid parameter")
 
-    with nogil:
-      updated_addrs = self.can.update(can_data_array)
-
+    updated_addrs = self.can.update(can_data_array)
     for addr in updated_addrs:
       vl = self.vl[addr]
       vl_all = self.vl_all[addr]
       ts_nanos = self.ts_nanos[addr]
 
-      with nogil:
-        state = self.can.getMessageState(addr)
+      state = self.can.getMessageState(addr)
       for i in range(state.parse_sigs.size()):
         name = <unicode>state.parse_sigs[i].name
         vl[name] = state.vals[i]
@@ -123,17 +112,11 @@ cdef class CANParser:
 
   @property
   def can_valid(self):
-    cdef bint valid
-    with nogil:
-      valid = self.can.can_valid
-    return valid
+    return self.can.can_valid
 
   @property
   def bus_timeout(self):
-    cdef bint timeout
-    with nogil:
-      timeout = self.can.bus_timeout
-    return timeout
+    return self.can.bus_timeout
 
 
 cdef class CANDefine():

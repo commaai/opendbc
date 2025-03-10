@@ -9,6 +9,9 @@ class CarInterface(CarInterfaceBase):
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
     ret.brand = "tesla"
 
+    # Needs safety validation and final testing before pulling out of dashcam
+    ret.dashcamOnly = True
+
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.tesla)]
 
     ret.steerLimitTimer = 1.0
@@ -20,10 +23,6 @@ class CarInterface(CarInterfaceBase):
     ret.experimentalLongitudinalAvailable = True
     if experimental_long:
       ret.openpilotLongitudinalControl = True
-      ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.LONG_CONTROL.value
-
-      ret.vEgoStopping = 0.1
-      ret.vEgoStarting = 0.1
-      ret.stoppingDecelRate = 0.3
+      ret.safetyConfigs[0].safetyParam |= TeslaSafetyFlags.FLAG_TESLA_LONG_CONTROL.value
 
     return ret

@@ -7,8 +7,10 @@ import sys
 
 from opendbc.car import DT_CTRL
 from opendbc.car.car_helpers import interfaces
+from opendbc.car.fingerprints import all_known_cars
 from opendbc.car.interfaces import get_torque_params
-from opendbc.car.values import PLATFORMS
+
+CAR_MODELS = all_known_cars()
 
 # ISO 11270 - allowed up jerk is strictly lower than recommended limits
 MAX_LAT_ACCEL = 3.0              # m/s^2
@@ -20,7 +22,7 @@ MAX_LAT_JERK_UP_TOLERANCE = 0.5  # m/s^3
 JERK_MEAS_T = 0.5
 
 
-@parameterized_class('car_model', [(c,) for c in sorted(PLATFORMS)])
+@parameterized_class('car_model', [(c,) for c in sorted(CAR_MODELS)])
 class TestLateralLimits:
   car_model: str
 
@@ -29,8 +31,8 @@ class TestLateralLimits:
     CarInterface, _, _, _ = interfaces[cls.car_model]
     CP = CarInterface.get_non_essential_params(cls.car_model)
 
-    if cls.car_model == 'MOCK':
-      pytest.skip('Mock car')
+    if CP.dashcamOnly:
+      pytest.skip("Platform is behind dashcamOnly")
 
     # TODO: test all platforms
     if CP.steerControlType != 'torque':
@@ -72,7 +74,7 @@ class LatAccelReport:
   car_model_jerks: defaultdict[str, dict[str, float]] = defaultdict(dict)
 
   def pytest_sessionfinish(self):
-    print(f"\n\n---- Lateral limit report ({len(PLATFORMS)} cars) ----\n")
+    print(f"\n\n---- Lateral limit report ({len(CAR_MODELS)} cars) ----\n")
 
     max_car_model_len = max([len(car_model) for car_model in self.car_model_jerks])
     for car_model, _jerks in sorted(self.car_model_jerks.items(), key=lambda i: i[1]['up_jerk'], reverse=True):

@@ -54,9 +54,9 @@ class CarControllerParams:
 
 
 class SubaruSafetyFlags(IntFlag):
-  GEN2 = 1
-  LONG = 2
-  PREGLOBAL_REVERSED_DRIVER_TORQUE = 4
+  FLAG_SUBARU_GEN2 = 1
+  FLAG_SUBARU_LONG = 2
+  FLAG_SUBARU_PREGLOBAL_REVERSED_DRIVER_TORQUE = 4
 
 
 class SubaruFlags(IntFlag):
