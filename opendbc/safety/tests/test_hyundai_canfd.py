@@ -35,7 +35,6 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.PandaCarSafetyTest, common.
   SCC_BUS = 2
   STEER_BUS = 0
   STEER_MSG = ""
-  GAS_MSG = ("", "")
   BUTTONS_TX_BUS = 1
 
   @classmethod
@@ -63,8 +62,8 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.PandaCarSafetyTest, common.
     return self.packer.make_can_msg_panda("TCS", self.PT_BUS, values)
 
   def _user_gas_msg(self, gas):
-    values = {self.GAS_MSG[1]: gas}
-    return self.packer.make_can_msg_panda(self.GAS_MSG[0], self.PT_BUS, values)
+    values = {"ESC_DrvOvrdSta": gas}
+    return self.packer.make_can_msg_panda("TCS", self.PT_BUS, values)
 
   def _pcm_status_msg(self, enable):
     values = {"ACCMode": 1 if enable else 0}
@@ -107,14 +106,14 @@ class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
 
 @parameterized_class([
   # Radar SCC
-  {"GAS_MSG": ("ACCELERATOR_BRAKE_ALT", "ACCELERATOR_PEDAL_PRESSED"), "SCC_BUS": 0, "SAFETY_PARAM": 0},
-  {"GAS_MSG": ("ACCELERATOR", "ACCELERATOR_PEDAL"), "SCC_BUS": 0, "SAFETY_PARAM": HyundaiSafetyFlags.EV_GAS},
-  {"GAS_MSG": ("ACCELERATOR_ALT", "ACCELERATOR_PEDAL"), "SCC_BUS": 0, "SAFETY_PARAM": HyundaiSafetyFlags.HYBRID_GAS},
+  {"SCC_BUS": 0, "SAFETY_PARAM": 0},
+  {"SCC_BUS": 0, "SAFETY_PARAM": HyundaiSafetyFlags.EV_GAS},
+  {"SCC_BUS": 0, "SAFETY_PARAM": HyundaiSafetyFlags.HYBRID_GAS},
   # Camera SCC
-  {"GAS_MSG": ("ACCELERATOR_BRAKE_ALT", "ACCELERATOR_PEDAL_PRESSED"), "SCC_BUS": 2, "SAFETY_PARAM": HyundaiSafetyFlags.CAMERA_SCC},
-  {"GAS_MSG": ("ACCELERATOR", "ACCELERATOR_PEDAL"), "SCC_BUS": 2, "SAFETY_PARAM": HyundaiSafetyFlags.EV_GAS |
+  {"SCC_BUS": 2, "SAFETY_PARAM": HyundaiSafetyFlags.CAMERA_SCC},
+  {"SCC_BUS": 2, "SAFETY_PARAM": HyundaiSafetyFlags.EV_GAS |
                                                                                   HyundaiSafetyFlags.CAMERA_SCC},
-  {"GAS_MSG": ("ACCELERATOR_ALT", "ACCELERATOR_PEDAL"), "SCC_BUS": 2, "SAFETY_PARAM": HyundaiSafetyFlags.HYBRID_GAS |
+  {"SCC_BUS": 2, "SAFETY_PARAM": HyundaiSafetyFlags.HYBRID_GAS |
                                                                                       HyundaiSafetyFlags.CAMERA_SCC},
 ])
 class TestHyundaiCanfdLFASteering(TestHyundaiCanfdLFASteeringBase):
@@ -123,14 +122,14 @@ class TestHyundaiCanfdLFASteering(TestHyundaiCanfdLFASteeringBase):
 
 @parameterized_class([
   # Radar SCC
-  {"GAS_MSG": ("ACCELERATOR_BRAKE_ALT", "ACCELERATOR_PEDAL_PRESSED"), "SCC_BUS": 0, "SAFETY_PARAM": 0},
-  {"GAS_MSG": ("ACCELERATOR", "ACCELERATOR_PEDAL"), "SCC_BUS": 0, "SAFETY_PARAM": HyundaiSafetyFlags.EV_GAS},
-  {"GAS_MSG": ("ACCELERATOR_ALT", "ACCELERATOR_PEDAL"), "SCC_BUS": 0, "SAFETY_PARAM": HyundaiSafetyFlags.HYBRID_GAS},
+  {"SCC_BUS": 0, "SAFETY_PARAM": 0},
+  {"SCC_BUS": 0, "SAFETY_PARAM": HyundaiSafetyFlags.EV_GAS},
+  {"SCC_BUS": 0, "SAFETY_PARAM": HyundaiSafetyFlags.HYBRID_GAS},
   # Camera SCC
-  {"GAS_MSG": ("ACCELERATOR_BRAKE_ALT", "ACCELERATOR_PEDAL_PRESSED"), "SCC_BUS": 2, "SAFETY_PARAM": HyundaiSafetyFlags.CAMERA_SCC},
-  {"GAS_MSG": ("ACCELERATOR", "ACCELERATOR_PEDAL"), "SCC_BUS": 2, "SAFETY_PARAM": HyundaiSafetyFlags.EV_GAS |
+  {"SCC_BUS": 2, "SAFETY_PARAM": HyundaiSafetyFlags.CAMERA_SCC},
+  {"SCC_BUS": 2, "SAFETY_PARAM": HyundaiSafetyFlags.EV_GAS |
                                                                                   HyundaiSafetyFlags.CAMERA_SCC},
-  {"GAS_MSG": ("ACCELERATOR_ALT", "ACCELERATOR_PEDAL"), "SCC_BUS": 2, "SAFETY_PARAM": HyundaiSafetyFlags.HYBRID_GAS |
+  {"SCC_BUS": 2, "SAFETY_PARAM": HyundaiSafetyFlags.HYBRID_GAS |
                                                                                       HyundaiSafetyFlags.CAMERA_SCC},
 ])
 class TestHyundaiCanfdLFASteeringAltButtons(TestHyundaiCanfdLFASteeringBase):
@@ -181,7 +180,6 @@ class TestHyundaiCanfdLKASteeringEV(TestHyundaiCanfdBase):
   PT_BUS = 1
   SCC_BUS = 1
   STEER_MSG = "LKAS"
-  GAS_MSG = ("ACCELERATOR", "ACCELERATOR_PEDAL")
 
   def setUp(self):
     self.packer = CANPackerPanda("hyundai_canfd_generated")
@@ -200,7 +198,6 @@ class TestHyundaiCanfdLKASteeringAltEV(TestHyundaiCanfdBase):
   PT_BUS = 1
   SCC_BUS = 1
   STEER_MSG = "LKAS_ALT"
-  GAS_MSG = ("ACCELERATOR", "ACCELERATOR_PEDAL")
 
   def setUp(self):
     self.packer = CANPackerPanda("hyundai_canfd_generated")
@@ -221,7 +218,6 @@ class TestHyundaiCanfdLKASteeringLongEV(HyundaiLongitudinalBase, TestHyundaiCanf
   DISABLED_ECU_ACTUATION_MSG = (0x1a0, 1)
 
   STEER_MSG = "LFA"
-  GAS_MSG = ("ACCELERATOR", "ACCELERATOR_PEDAL")
   STEER_BUS = 1
 
   def setUp(self):
@@ -242,13 +238,13 @@ class TestHyundaiCanfdLKASteeringLongEV(HyundaiLongitudinalBase, TestHyundaiCanf
 # Tests longitudinal for ICE, hybrid, EV cars with LFA steering
 @parameterized_class([
   # Radar SCC
-  {"GAS_MSG": ("ACCELERATOR_BRAKE_ALT", "ACCELERATOR_PEDAL_PRESSED"), "SCC_BUS": 0, "SAFETY_PARAM": 0},
-  {"GAS_MSG": ("ACCELERATOR", "ACCELERATOR_PEDAL"), "SCC_BUS": 0, "SAFETY_PARAM": HyundaiSafetyFlags.EV_GAS},
-  {"GAS_MSG": ("ACCELERATOR_ALT", "ACCELERATOR_PEDAL"), "SCC_BUS": 0, "SAFETY_PARAM": HyundaiSafetyFlags.HYBRID_GAS},
+  {"SCC_BUS": 0, "SAFETY_PARAM": 0},
+  {"SCC_BUS": 0, "SAFETY_PARAM": HyundaiSafetyFlags.EV_GAS},
+  {"SCC_BUS": 0, "SAFETY_PARAM": HyundaiSafetyFlags.HYBRID_GAS},
   # Camera SCC
-  {"GAS_MSG": ("ACCELERATOR_BRAKE_ALT", "ACCELERATOR_PEDAL_PRESSED"), "SCC_BUS": 2, "SAFETY_PARAM": HyundaiSafetyFlags.CAMERA_SCC},
-  {"GAS_MSG": ("ACCELERATOR", "ACCELERATOR_PEDAL"), "SCC_BUS": 2, "SAFETY_PARAM": HyundaiSafetyFlags.EV_GAS | HyundaiSafetyFlags.CAMERA_SCC},
-  {"GAS_MSG": ("ACCELERATOR_ALT", "ACCELERATOR_PEDAL"), "SCC_BUS": 2, "SAFETY_PARAM": HyundaiSafetyFlags.HYBRID_GAS | HyundaiSafetyFlags.CAMERA_SCC},
+  {"SCC_BUS": 2, "SAFETY_PARAM": HyundaiSafetyFlags.CAMERA_SCC},
+  {"SCC_BUS": 2, "SAFETY_PARAM": HyundaiSafetyFlags.EV_GAS | HyundaiSafetyFlags.CAMERA_SCC},
+  {"SCC_BUS": 2, "SAFETY_PARAM": HyundaiSafetyFlags.HYBRID_GAS | HyundaiSafetyFlags.CAMERA_SCC},
 ])
 class TestHyundaiCanfdLFASteeringLong(HyundaiLongitudinalBase, TestHyundaiCanfdLFASteeringBase):
 

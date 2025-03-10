@@ -24,11 +24,7 @@
   {0x1A0, e_can, 32},  /* SCC_CONTROL */                \
 
 // *** Addresses checked in rx hook ***
-// EV, ICE, HYBRID: ACCELERATOR (0x35), ACCELERATOR_BRAKE_ALT (0x100), ACCELERATOR_ALT (0x105)
 #define HYUNDAI_CANFD_COMMON_RX_CHECKS(pt_bus)                                                               \
-  {.msg = {{0x35, (pt_bus), 32, .max_counter = 0xffU, .frequency = 100U},                                    \
-           {0x100, (pt_bus), 32, .max_counter = 0xffU, .frequency = 100U},                                   \
-           {0x105, (pt_bus), 32, .max_counter = 0xffU, .frequency = 100U}}},                                 \
   {.msg = {{0x175, (pt_bus), 24, .max_counter = 0xffU, .frequency = 50U}, { 0 }, { 0 }}},                    \
   {.msg = {{0xa0, (pt_bus), 24, .max_counter = 0xffU, .frequency = 100U}, { 0 }, { 0 }}},                    \
   {.msg = {{0xea, (pt_bus), 24, .max_counter = 0xffU, .frequency = 100U}, { 0 }, { 0 }}},                    \
@@ -91,18 +87,9 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *to_push) {
       hyundai_common_cruise_buttons_check(cruise_button, main_button);
     }
 
-    // gas press, different for EV, hybrid, and ICE models
-    if ((addr == 0x35) && hyundai_ev_gas_signal) {
-      gas_pressed = GET_BYTE(to_push, 5) != 0U;
-    } else if ((addr == 0x105) && hyundai_hybrid_gas_signal) {
-      gas_pressed = GET_BIT(to_push, 103U) || (GET_BYTE(to_push, 13) != 0U) || GET_BIT(to_push, 112U);
-    } else if ((addr == 0x100) && !hyundai_ev_gas_signal && !hyundai_hybrid_gas_signal) {
-      gas_pressed = GET_BIT(to_push, 176U);
-    } else {
-    }
-
-    // brake press
+    // gas press and brake press
     if (addr == 0x175) {
+      gas_pressed = GET_BIT(to_push, 80U);
       brake_pressed = GET_BIT(to_push, 81U);
     }
 

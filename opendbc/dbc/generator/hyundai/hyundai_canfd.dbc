@@ -268,7 +268,7 @@ BO_ 373 TCS: 24 XXX
  SG_ NEW_SIGNAL_5 : 72|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_2 : 74|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_3 : 76|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_1 : 80|1@0+ (1,0) [0|1] "" XXX
+ SG_ ESC_DrvOvrdSta : 80|1@0+ (1,0) [0|1] "" XXX
  SG_ DriverBraking : 81|1@0+ (1,0) [0|1] "" XXX
  SG_ DriverBrakingLowSens : 84|1@1+ (1,0) [0|1] "" XXX
  SG_ AEB_EQUIP_MAYBE : 96|1@0+ (1,0) [0|1] "" XXX

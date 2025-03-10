@@ -46,9 +46,6 @@ class CarState(CarStateBase):
     else:
       self.shifter_values = can_define.dv["LVR12"]["CF_Lvr_Gear"]
 
-    self.accelerator_msg_canfd = "ACCELERATOR" if CP.flags & HyundaiFlags.EV else \
-                                 "ACCELERATOR_ALT" if CP.flags & HyundaiFlags.HYBRID else \
-                                 "ACCELERATOR_BRAKE_ALT"
     self.cruise_btns_msg_canfd = "CRUISE_BUTTONS_ALT" if CP.flags & HyundaiFlags.CANFD_ALT_BUTTONS else \
                                  "CRUISE_BUTTONS"
     self.is_metric = False
@@ -202,13 +199,7 @@ class CarState(CarStateBase):
     self.is_metric = cp.vl["CRUISE_BUTTONS_ALT"]["DISTANCE_UNIT"] != 1
     speed_factor = CV.KPH_TO_MS if self.is_metric else CV.MPH_TO_MS
 
-    if self.CP.flags & (HyundaiFlags.EV | HyundaiFlags.HYBRID):
-      offset = 255. if self.CP.flags & HyundaiFlags.EV else 1023.
-      ret.gas = cp.vl[self.accelerator_msg_canfd]["ACCELERATOR_PEDAL"] / offset
-      ret.gasPressed = ret.gas > 1e-5
-    else:
-      ret.gasPressed = bool(cp.vl[self.accelerator_msg_canfd]["ACCELERATOR_PEDAL_PRESSED"])
-
+    ret.gasPressed = cp.vl["TCS"]["ESC_DrvOvrdSta"] == 1
     ret.brakePressed = cp.vl["TCS"]["DriverBraking"] == 1
 
     ret.doorOpen = cp.vl["DOORS_SEATBELTS"]["DRIVER_DOOR"] == 1
@@ -305,7 +296,6 @@ class CarState(CarStateBase):
     else:
       pt_messages += [
         (self.gear_msg_canfd, 100),
-        (self.accelerator_msg_canfd, 100),
       ]
 
     if not (CP.flags & HyundaiFlags.CANFD_ALT_BUTTONS):
