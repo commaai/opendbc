@@ -7,6 +7,8 @@ from opendbc.safety.tests.libsafety import libsafety_py
 
 
 class TestDefaultRxHookBase(common.PandaSafetyTest):
+  FWD_BUS_LOOKUP = {}
+
   def test_rx_hook(self):
     # default rx hook allows all msgs
     for bus in range(4):

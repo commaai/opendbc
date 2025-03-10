@@ -15,7 +15,6 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.PandaCarSafetyTest, common.
   TX_MSGS = [[0x50, 0], [0x1CF, 1], [0x2A4, 0]]
   STANDSTILL_THRESHOLD = 12  # 0.375 kph
   FWD_BLACKLISTED_ADDRS = {2: [0x50, 0x2a4]}
-  FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   MAX_RATE_UP = 2
   MAX_RATE_DOWN = 3
@@ -86,7 +85,6 @@ class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
   TX_MSGS = [[0x12A, 0], [0x1A0, 1], [0x1CF, 0], [0x1E0, 0]]
   RELAY_MALFUNCTION_ADDRS = {0: (0x12A,)}  # LFA
   FWD_BLACKLISTED_ADDRS = {2: [0x12A, 0x1E0]}
-  FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   STEER_MSG = "LFA"
   BUTTONS_TX_BUS = 2
@@ -179,7 +177,6 @@ class TestHyundaiCanfdLKASteeringEV(TestHyundaiCanfdBase):
   TX_MSGS = [[0x50, 0], [0x1CF, 1], [0x2A4, 0]]
   RELAY_MALFUNCTION_ADDRS = {0: (0x50,)}  # LKAS
   FWD_BLACKLISTED_ADDRS = {2: [0x50, 0x2a4]}
-  FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   PT_BUS = 1
   SCC_BUS = 1
@@ -199,7 +196,6 @@ class TestHyundaiCanfdLKASteeringAltEV(TestHyundaiCanfdBase):
   TX_MSGS = [[0x110, 0], [0x1CF, 1], [0x362, 0]]
   RELAY_MALFUNCTION_ADDRS = {0: (0x110,)}  # LKAS_ALT
   FWD_BLACKLISTED_ADDRS = {2: [0x110, 0x362]}
-  FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   PT_BUS = 1
   SCC_BUS = 1
