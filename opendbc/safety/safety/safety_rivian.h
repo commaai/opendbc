@@ -91,8 +91,7 @@ static bool rivian_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static int rivian_fwd_hook(int bus, int addr) {
-  int bus_fwd = -1;
+static bool rivian_fwd_hook(int bus, int addr) {
   bool block_msg = false;
 
   if (bus == 0) {
@@ -104,10 +103,6 @@ static int rivian_fwd_hook(int bus, int addr) {
     // VDM_AdasSts: for canceling stock ACC
     if ((addr == 0x162) && !rivian_longitudinal) {
       block_msg = true;
-    }
-
-    if (!block_msg) {
-      bus_fwd = 2;
     }
   }
 
@@ -121,13 +116,9 @@ static int rivian_fwd_hook(int bus, int addr) {
     if (rivian_longitudinal && (addr == 0x160)) {
       block_msg = true;
     }
-
-    if (!block_msg) {
-      bus_fwd = 0;
-    }
   }
 
-  return bus_fwd;
+  return block_msg;
 }
 
 static safety_config rivian_init(uint16_t param) {

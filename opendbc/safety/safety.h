@@ -252,8 +252,21 @@ bool safety_tx_hook(CANPacket_t *to_send) {
   return !relay_malfunction && allowed && safety_allowed;
 }
 
+static int get_fwd_bus(int bus_num) {
+  int destination_bus;
+  if (bus_num == 0) {
+    destination_bus = 2;
+  } else if (bus_num == 2) {
+    destination_bus = 0;
+  } else {
+    destination_bus = -1;
+  }
+  return destination_bus;
+}
+
 int safety_fwd_hook(int bus_num, int addr) {
-  return (relay_malfunction ? -1 : current_hooks->fwd(bus_num, addr));
+  const bool blocked = relay_malfunction || current_hooks->fwd(bus_num, addr);
+  return blocked ? -1 : get_fwd_bus(bus_num);
 }
 
 bool get_longitudinal_allowed(void) {
