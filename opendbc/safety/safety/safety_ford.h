@@ -88,6 +88,7 @@ static bool ford_get_quality_flag_valid(const CANPacket_t *to_push) {
   return valid;
 }
 
+static bool ford_canfd = false;
 static bool ford_longitudinal = false;
 
 #define FORD_INACTIVE_CURVATURE 1000U
@@ -102,8 +103,8 @@ static bool ford_longitudinal = false;
 static bool ford_lkas_msg_check(int addr) {
   return (addr == FORD_ACCDATA_3)
       || (addr == FORD_Lane_Assist_Data1)
-      || (addr == FORD_LateralMotionControl)
-      || (addr == FORD_LateralMotionControl2)
+      || ((addr == FORD_LateralMotionControl) && !ford_canfd)
+      || ((addr == FORD_LateralMotionControl2) && ford_canfd)
       || (addr == FORD_IPMA_Data);
 }
 
@@ -343,8 +344,6 @@ static bool ford_fwd_hook(int bus_num, int addr) {
 }
 
 static safety_config ford_init(uint16_t param) {
-  bool ford_canfd = false;
-
   // warning: quality flags are not yet checked in openpilot's CAN parser,
   // this may be the cause of blocked messages
   static RxCheck ford_rx_checks[] = {
