@@ -267,7 +267,7 @@ static int get_fwd_bus(int bus_num) {
 int safety_fwd_hook(int bus_num, int addr) {
   const int destination_bus = get_fwd_bus(bus_num);
 
-  bool blocked = relay_malfunction || current_safety_config.disable_forwarding || current_hooks->fwd(bus_num, addr);
+  bool blocked = relay_malfunction || current_safety_config.disable_forwarding;
   if (!blocked) {
     for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
       const CanMsg *m = &current_safety_config.tx_msgs[i];
@@ -276,6 +276,10 @@ int safety_fwd_hook(int bus_num, int addr) {
         break;
       }
     }
+  }
+
+  if (!blocked && (current_hooks->fwd != NULL)) {
+    blocked = current_hooks->fwd(bus_num, addr);
   }
 
   return blocked ? -1 : destination_bus;
