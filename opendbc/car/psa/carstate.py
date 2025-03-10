@@ -51,10 +51,10 @@ class CarState(CarStateBase):
 
     # cruise
     # note: this is just for ACC car not CC right now
-    ret.cruiseState.speed = cp_adas.vl['HS2_DAT_MDD_CMD_452']['CONS_LIM_VITESSE_VEH'] * CV.KPH_TO_MS # HS2, set to 255 when ACC is off, -2 kph offset from dashboard speed
-    ret.cruiseState.enabled = cp_adas.vl['HS2_DAT_MDD_CMD_452']['DDE_ACTIVATION_RVV_ACC'] == 1 # HS2
+    ret.cruiseState.speed = cp_adas.vl['HS2_DAT_MDD_CMD_452']['VEHICLE_SPEED_LIMIT_SETPOINT'] * CV.KPH_TO_MS # HS2, set to 255 when ACC is off, -2 kph offset from dashboard speed
+    ret.cruiseState.enabled = cp_adas.vl['HS2_DAT_MDD_CMD_452']['RVV_ACC_ACTIVATION_REQ'] == 1 # HS2
     ret.cruiseState.available = cp_adas.vl['HS2_DYN1_MDD_ETAT_2B6']['ACC_STATUS'] > 2 # HS2
-    ret.cruiseState.nonAdaptive = cp_adas.vl['HS2_DAT_MDD_CMD_452']['TYPE_REGUL_LONGI'] != 3 # HS2, 0: None, 1: CC, 2: Limiter, 3: ACC
+    ret.cruiseState.nonAdaptive = cp_adas.vl['HS2_DAT_MDD_CMD_452']['LONGITUDINAL_REGULATION_TYPE'] != 3 # HS2, 0: None, 1: CC, 2: Limiter, 3: ACC
     ret.cruiseState.standstill = bool(cp_adas.vl['HS2_DYN_UCF_MDD_32D']['VEHICLE_STANDSTILL'])
     ret.accFaulted = cp_adas.vl['HS2_DYN_UCF_MDD_32D']['ACC_ETAT_DECEL_OR_ESP_STATUS'] == 3 # TODO: test # HS2 0: Inhibited, 1: Waiting, 2: Active, 3: Fault
 
