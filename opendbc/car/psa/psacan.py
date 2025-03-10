@@ -1,27 +1,10 @@
-from opendbc.car import CanBusBase
-
-class CanBus(CanBusBase):
-  def __init__(self, CP=None, fingerprint=None) -> None:
-    super().__init__(CP, fingerprint)
-
-  @property
-  def main(self) -> int:
-    return self.offset + 2
-
-  @property
-  def adas(self) -> int:
-    return self.offset + 1
-
-  @property
-  def camera(self) -> int:
-    return self.offset
-
 def calculate_checksum(dat: bytearray) -> int:
   checksum = sum((b >> 4) + (b & 0xF) for b in dat)
   # CHK_INI = 0xB
   return (0xB - checksum) & 0xF
 
-def create_lka_msg(packer, CP, frame: int, lat_active: bool, apply_angle: float):
+
+def create_lka_steering(packer, frame: int, lat_active: bool, apply_angle: float):
   values = {
     'DRIVE': 1,
     'COUNTER': (frame // 5) % 0x10,
@@ -35,32 +18,73 @@ def create_lka_msg(packer, CP, frame: int, lat_active: bool, apply_angle: float)
   msg = packer.make_can_msg('LANE_KEEP_ASSIST', 0, values)[1]
   values['CHECKSUM'] = calculate_checksum(msg)
 
-  return packer.make_can_msg('LANE_KEEP_ASSIST', CanBus(CP).camera, values)
+  return packer.make_can_msg('LANE_KEEP_ASSIST', 0, values)
 
 
-def create_cancel_request(packer, CP, frame: int, set_speed: int):
-  values = {
-    'LONGITUDINAL_REGULATION_TYPE': 3,
-    'TURN_SIGNAL_STATUS': 0,
-    'FRONT_WIPER_STATUS': 0,
-    'SPEED_SETPOINT': set_speed,
-    'CHECKSUM_CONS_RVV_LVV2': (((set_speed >> 4) & 1) << 1) | (set_speed & 1),
-    'BRAKE_ONLY_CMD_BSI': 0,
-    'LVV_ACTIVATION_REQ': 0,
-    'RVV_ACC_ACTIVATION_REQ': 0,
-    'ARC_HABIT_SENSITIVITY': 2, # TODO: check
-    'ARC_HABIT_ACTIVATION_REQ': 0,
-    'FRAME_COUNTER_BSI2': (frame // 5) % 0x10,
-    'FRONT_WASH_STATUS': 0,
-    'FORCE_ACTIVATION_HAB_CMD': 1, # TODO: check
-    'INTER_VEHICLE_TIME_SETPOINT': 6.2, # TODO: check
-    'CHECKSUM_SPEED_SETPOINT': 0,
-    'COCKPIT_GO_ACC_REQUEST': 0,
-    'ACC_PROGRAM_MODE': 0,
-  }
+def create_longitudinal(packer, frame: int, accel: float, enabled: bool):
+  # TODO
+  pass
 
+
+def create_acc_status(packer, acc_status_msg, frame: int, cancel: bool):
+  values = {s: acc_status_msg[s] for s in [
+    'LONGITUDINAL_REGULATION_TYPE',
+    'TURN_SIGNAL_STATUS',
+    'FRONT_WIPER_STATUS',
+    'SPEED_SETPOINT',
+    'CHECKSUM_CONS_RVV_LVV2',
+    'BRAKE_ONLY_CMD_BSI',
+    'LVV_ACTIVATION_REQ',
+    'RVV_ACC_ACTIVATION_REQ',
+    'ARC_HABIT_SENSITIVITY',
+    'ARC_HABIT_ACTIVATION_REQ',
+    'FRAME_COUNTER_BSI2',
+    'FRONT_WASH_STATUS',
+    'FORCE_ACTIVATION_HAB_CMD',
+    'INTER_VEHICLE_TIME_SETPOINT',
+    'CHECKSUM_SPEED_SETPOINT',
+    'COCKPIT_GO_ACC_REQUEST',
+    'ACC_PROGRAM_MODE',
+  ]}
+
+  if cancel:
+    values['RVV_ACC_ACTIVATION_REQ'] = 0
+
+  return packer.make_can_msg('HS2_DAT_MDD_CMD_452', 1, values)
+  # TODO: for reference
   # checksum covers only SPEED_SETPOINT and FRAME_COUNTER_BSI2
-  data = bytearray([set_speed & 0xFF, values['FRAME_COUNTER_BSI2'] & 0xFF])
-  values['CHECKSUM_SPEED_SETPOINT'] = calculate_checksum(data)
+  # 'CHECKSUM_CONS_RVV_LVV2': (((set_speed >> 4) & 1) << 1) | (set_speed & 1),
+  # data = bytearray([set_speed & 0xFF, values['FRAME_COUNTER_BSI2'] & 0xFF])
+  # values['CHECKSUM_SPEED_SETPOINT'] = calculate_checksum(data)
 
-  return packer.make_can_msg('HS2_DAT_MDD_CMD_452', CanBus(CP).adas, values)
+
+
+def create_adas_status(packer, adas_status_msg, frame: int, resume: bool):
+  values = {s: adas_status_msg[s] for s in [
+    'TARGET_DETECTED',
+    'REQ_CONDITION_RESUME',
+    'BLIND_SENSOR',
+    'REQ_VISUAL_COLLISION_ALERT',
+    'REQ_SOUND_COLLISION_ALERT',
+    'REQ_HAPTIC_COLLISION_ALERT',
+    'VEHICLE_INTER_DISTANCE',
+    'COLLISION_ALERT_STATE',
+    'BRAKING_IN_PROGRESS',
+    'AEB_ENABLED',
+    'DRV_AWAY_REQ',
+    'DISPLAYED_INTER_VEHICLE_TIME',
+    'REQ_UCF_DECEL_CONTROL',
+    'BRAKE_STATE',
+    'DYN_ACC2_FRAME_CHECKSUM',
+    'PROCESS_COUNTER_4B_ACC2',
+    'TARGET_POSITION'
+  ]}
+
+  if resume:
+    values['REQ_CONDITION_RESUME'] = 1
+
+  values['DYN_ACC2_FRAME_CHECKSUM'] = 0
+  msg = packer.make_can_msg('HS2_DYN_MDD_STATUS_2F6', 1, values)[1]
+  values['DYN_ACC2_FRAME_CHECKSUM'] = calculate_checksum(msg)
+
+  return packer.make_can_msg('HS2_DYN_MDD_STATUS_2F6', 1, values)

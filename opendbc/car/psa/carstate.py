@@ -82,6 +82,7 @@ class CarState(CarStateBase):
 
     # messages needed by carcontroller
     self.acc_status_msg = copy.copy(cp_adas.vl["HS2_DAT_MDD_CMD_452"])
+    self.adas_status_msg = copy.copy(cp_adas.vl["HS2_DYN_MDD_STATUS_2F6"])
 
     return ret
 

@@ -2,6 +2,7 @@ from opendbc.car import apply_std_steer_angle_limits, Bus
 from opendbc.can.packer import CANPacker
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.psa import psacan
+from opendbc.car.psa.psacan import create_lka_steering, create_longitudinal, create_acc_status, create_adas_status
 from opendbc.car.psa.values import CarControllerParams
 
 class CarController(CarControllerBase):
@@ -22,9 +23,20 @@ class CarController(CarControllerBase):
     else:
       apply_angle = 0
 
-    can_sends.append(psacan.create_lka_msg(self.packer, self.CP, self.frame, CC.latActive, apply_angle))
+    can_sends.append(psacan.create_lka_steering(self.packer, self.frame, CC.latActive, apply_angle))
 
     self.apply_angle_last = apply_angle
+
+
+    ### longitudinal control ###
+    # if self.CP.openpilotLongitudinalControl:
+    #   can_sends.append(create_longitudinal(self.packer, self.frame, actuators.accel, self.CP.openpilotLongitudinalControl))
+
+    # if CC.cruiseControl.cancel:
+    #   can_sends.append(create_acc_status(self.packer, self.frame, CS.acc_status_msg, CC.cruiseControl.cancel))
+
+    # if CC.cruiseControl.resume:
+    #   can_sends.append(create_adas_status(self.packer, self.frame, CS.adas_status_msg, CC.cruiseControl.resume))
 
     ### cruise buttons ###
     # TODO: find cruise buttons msg
