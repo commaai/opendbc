@@ -238,7 +238,6 @@ static bool hyundai_canfd_fwd_hook(int bus_num, int addr) {
     bool is_scc_msg = (((addr == 0x1a0) || (addr == 0x160)) && hyundai_longitudinal && !hyundai_canfd_lka_steering);
 
     block_msg = is_lka_msg || is_lfa_msg || is_lfahda_msg || is_scc_msg;
-
   }
 
   return block_msg;
