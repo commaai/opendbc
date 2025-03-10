@@ -44,7 +44,7 @@ def create_cancel_request(packer, CP, frame: int, set_speed: int):
     'LONGITUDINAL_REGULATION_TYPE': 3,
     'TURN_SIGNAL_STATUS': 0,
     'FRONT_WIPER_STATUS': 0,
-    'VEHICLE_SPEED_LIMIT_SETPOINT': set_speed,
+    'SPEED_SETPOINT': set_speed,
     'CHECKSUM_CONS_RVV_LVV2': (((set_speed >> 4) & 1) << 1) | (set_speed & 1),
     'BRAKE_ONLY_CMD_BSI': 0,
     'LVV_ACTIVATION_REQ': 0,
@@ -55,15 +55,13 @@ def create_cancel_request(packer, CP, frame: int, set_speed: int):
     'FRONT_WASH_STATUS': 0,
     'FORCE_ACTIVATION_HAB_CMD': 1, # TODO: check
     'INTER_VEHICLE_TIME_SETPOINT': 6.2, # TODO: check
-    'CHECKSUM_FRAME_4B_452': 0,
+    'CHECKSUM_SPEED_SETPOINT': 0,
     'COCKPIT_GO_ACC_REQUEST': 0,
     'ACC_PROGRAM_MODE': 0,
   }
 
-  msg = packer.make_can_msg('HS2_DAT_MDD_CMD_452', 0, values)[1]
-  if isinstance(msg, int):
-    msg = msg.to_bytes(1, 'big')
-
-  values['CHECKSUM_FRAME_4B_452'] = calculate_checksum(msg)
+  # Calculate checksum using only SPEED_SETPOINT and FRAME_COUNTER_BSI2
+  data = bytearray([set_speed & 0xFF, values['FRAME_COUNTER_BSI2'] & 0xFF])
+  values['CHECKSUM_SPEED_SETPOINT'] = calculate_checksum(data)
 
   return packer.make_can_msg('HS2_DAT_MDD_CMD_452', CanBus(CP).adas, values)

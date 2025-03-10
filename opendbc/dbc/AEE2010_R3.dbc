@@ -342,7 +342,7 @@ BO_ 1106 HS2_DAT_MDD_CMD_452: 6 BSI
  SG_ LONGITUDINAL_REGULATION_TYPE : 1|2@0+ (1,0) [0|3] "" CMF,ARTIV,CMM,UC_FREIN
  SG_ TURN_SIGNAL_STATUS : 5|2@0+ (1,0) [0|3] "" CMF,ARTIV,CMM,UC_FREIN
  SG_ FRONT_WIPER_STATUS : 7|2@0+ (1,0) [0|3] "" CMF,ARTIV,CMM,UC_FREIN
- SG_ VEHICLE_SPEED_LIMIT_SETPOINT : 15|8@0+ (1,0) [0|255] "km/h" CMF,ARTIV,CMM,UC_FREIN
+ SG_ SPEED_SETPOINT : 15|8@0+ (1,0) [0|255] "km/h" CMF,ARTIV,CMM,UC_FREIN
  SG_ CHECKSUM_CONS_RVV_LVV2 : 17|2@0+ (1,0) [0|3] "" CMF,ARTIV,CMM,UC_FREIN
  SG_ BRAKE_ONLY_CMD_BSI : 18|1@0+ (1,0) [0|1] "" CMF,ARTIV,CMM,UC_FREIN
  SG_ LVV_ACTIVATION_REQ : 22|1@0+ (1,0) [0|1] "" CMF,ARTIV,CMM,UC_FREIN
@@ -353,7 +353,7 @@ BO_ 1106 HS2_DAT_MDD_CMD_452: 6 BSI
  SG_ FRONT_WASH_STATUS : 32|1@0+ (1,0) [0|1] "" CMF,ARTIV,CMM,UC_FREIN
  SG_ FORCE_ACTIVATION_HAB_CMD : 33|1@0+ (1,0) [0|1] "" CMF,ARTIV,CMM,UC_FREIN
  SG_ INTER_VEHICLE_TIME_SETPOINT : 39|6@0+ (0.1,0) [0|6.1] "s" CMF,ARTIV,CMM,UC_FREIN
- SG_ CHECKSUM_FRAME_4B_452 : 43|4@0+ (1,0) [0|15] "" CMF,ARTIV,CMM,UC_FREIN
+ SG_ CHECKSUM_SPEED_SETPOINT : 43|4@0+ (1,0) [0|15] "" CMF,ARTIV,CMM,UC_FREIN
  SG_ COCKPIT_GO_ACC_REQUEST : 45|1@0+ (1,0) [0|1] "" CMF,ARTIV,CMM,UC_FREIN
  SG_ ACC_PROGRAM_MODE : 47|2@0+ (1,0) [0|3] "" CMF,ARTIV,CMM,UC_FREIN
 
@@ -865,9 +865,9 @@ CM_ SG_ 1101 P330_VehV_vWhlRrL "P010  vehicle speed of ABS. This signal is loade
 CM_ SG_ 1101 P331_VehV_vWhlRrR "P010  vehicle speed of ABS. This signal is loaded into VSSCD_v";
 CM_ SG_ 1106 LONGITUDINAL_REGULATION_TYPE "Defines if the system is in RVV (Vehicle Speed Governor) or LVV (Vehicle Speed Limiter) or ACC (Adaptive Cruise Control) or without regulation.";
 CM_ SG_ 1106 FRONT_WIPER_STATUS "Emitted when the rain sensor is active.";
-CM_ SG_ 1106 VEHICLE_SPEED_LIMIT_SETPOINT "Setpoint or limit: based on the value of the 'requested speed type' bit.";
-CM_ SG_ 1106 CHECKSUM_CONS_RVV_LVV2 "Used to secure the RVV or LVV setpoint sent via the CAN network (signal VEHICLE_SPEED_LIMIT_SETPOINT).";
-CM_ SG_ 1106 CHECKSUM_FRAME_4B_452 "CHK_INI = 0xB";
+CM_ SG_ 1106 SPEED_SETPOINT "Setpoint or limit: based on the value of the 'requested speed type' bit.";
+CM_ SG_ 1106 CHECKSUM_CONS_RVV_LVV2 "Used to secure the RVV or LVV setpoint sent via the CAN network (signal SPEED_SETPOINT).";
+CM_ SG_ 1106 CHECKSUM_SPEED_SETPOINT "CHK_INI = 0xB";
 CM_ SG_ 1128 P247_Com_stStaFunc "CMM DAMP function state";
 CM_ SG_ 1128 P246_Com_bStaPrt "Starter protection";
 CM_ SG_ 1128 P245_Com_stRedBrkPlaus "Uncertain redendant brake contact";
@@ -991,7 +991,7 @@ VAL_ 1010 STATUS 0 "UNAVAILABLE" 1 "UNSELECTED" 2 "SELECTED" 3 "AUTHORIZED" 4 "A
 VAL_ 1106 LONGITUDINAL_REGULATION_TYPE 0 "None" 1 "RVV: Vehicle Speed Governor" 2 "LVV: Vehicle Speed Limiter" 3 "ACC: Adaptive Cruise Control";
 VAL_ 1106 TURN_SIGNAL_STATUS 0 "Turn signal inactive" 1 "Right turn signal active" 2 "Left turn signal active" 3 "Both turn signals active";
 VAL_ 1106 FRONT_WIPER_STATUS 0 "Off" 1 "Front wiper confirmed" 2 "Low speed" 3 "High speed";
-VAL_ 1106 CHECKSUM_CONS_RVV_LVV2 0 "Most significant nibble of VEHICLE_SPEED_LIMIT_SETPOINT is even AND least significant nibble of VEHICLE_SPEED_LIMIT_SETPOINT is even" 1 "Most significant nibble of VEHICLE_SPEED_LIMIT_SETPOINT is even AND least significant nibble of VEHICLE_SPEED_LIMIT_SETPOINT is odd" 2 "Most significant nibble of VEHICLE_SPEED_LIMIT_SETPOINT is odd AND least significant nibble of VEHICLE_SPEED_LIMIT_SETPOINT is even" 3 "Most significant nibble of VEHICLE_SPEED_LIMIT_SETPOINT is odd AND least significant nibble of VEHICLE_SPEED_LIMIT_SETPOINT is odd";
+VAL_ 1106 CHECKSUM_CONS_RVV_LVV2 0 "Most significant nibble of SPEED_SETPOINT is even AND least significant nibble of SPEED_SETPOINT is even" 1 "Most significant nibble of SPEED_SETPOINT is even AND least significant nibble of SPEED_SETPOINT is odd" 2 "Most significant nibble of SPEED_SETPOINT is odd AND least significant nibble of SPEED_SETPOINT is even" 3 "Most significant nibble of SPEED_SETPOINT is odd AND least significant nibble of SPEED_SETPOINT is odd";
 VAL_ 1106 BRAKE_ONLY_CMD_BSI 0 "No brake-only command requested by BSI" 1 "Brake-only command requested by BSI";
 VAL_ 1106 LVV_ACTIVATION_REQ 0 "No LVV activation request" 1 "LVV activation requested";
 VAL_ 1106 RVV_ACC_ACTIVATION_REQ 0 "No RVV/ACC activation request" 1 "RVV/ACC activation requested";
@@ -1010,6 +1010,3 @@ VAL_ 1173 STEERWHL_HOLD_BY_DRV 1 "Steer Activity From Drv Trq" 0 "No Steer Activ
 VAL_ 1173 EPS_STATE_LKA 4 "Defect" 3 "Active" 2 "Available" 1 "Authorised" 0 "Unauthorised";
 VAL_ 1173 AUTOR_ARRET_MOT_DA 1 "Permission to Stop" 0 "No Permission to Stop";
 VAL_ 1173 STEERING_REBOOT_REQUEST 1 "Request Reboot" 0 "No Reboot Required";
-
-BA_ "Period" BO_ 1106 50;
-BA_ "TransmissionMode" BO_ 1106 0;
