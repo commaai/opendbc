@@ -15,6 +15,7 @@ class TestElm327(TestDefaultRxHookBase):
                                       *range(0x18DA00F1, 0x18DB00F1, 0x100),  # 29-bit UDS physical addressing
                                       *[0x18DB33F1],  # 29-bit UDS functional address
                                       ] for bus in range(4)]
+  FWD_BUS_LOOKUP = {}
 
   def setUp(self):
     self.safety = libsafety_py.libsafety
