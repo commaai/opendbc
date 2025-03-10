@@ -160,8 +160,8 @@ typedef bool (*get_quality_flag_valid_t)(const CANPacket_t *to_push);
 
 typedef safety_config (*safety_hook_init)(uint16_t param);
 typedef void (*rx_hook)(const CANPacket_t *to_push);
-typedef bool (*tx_hook)(const CANPacket_t *to_send);
-typedef int (*fwd_hook)(int bus_num, int addr);
+typedef bool (*tx_hook)(const CANPacket_t *to_send);  // returns true if the message is allowed
+typedef bool (*fwd_hook)(int bus_num, int addr);      // returns true if the message should be blocked from forwarding
 
 typedef struct {
   safety_hook_init init;

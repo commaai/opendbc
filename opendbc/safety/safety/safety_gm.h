@@ -159,15 +159,15 @@ static bool gm_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static int gm_fwd_hook(int bus_num, int addr) {
-  int bus_fwd = -1;
+static bool gm_fwd_hook(int bus_num, int addr) {
+  bool block_msg = false;
 
   if (gm_hw == GM_CAM) {
     if (bus_num == 0) {
       // block PSCMStatus; forwarded through openpilot to hide an alert from the camera
       bool is_pscm_msg = (addr == 0x184);
-      if (!is_pscm_msg) {
-        bus_fwd = 2;
+      if (is_pscm_msg) {
+        block_msg = true;
       }
     }
 
@@ -175,14 +175,13 @@ static int gm_fwd_hook(int bus_num, int addr) {
       // block lkas message and acc messages if gm_cam_long, forward all others
       bool is_lkas_msg = (addr == 0x180);
       bool is_acc_msg = (addr == 0x315) || (addr == 0x2CB) || (addr == 0x370);
-      bool block_msg = is_lkas_msg || (is_acc_msg && gm_cam_long);
-      if (!block_msg) {
-        bus_fwd = 0;
-      }
+      block_msg = is_lkas_msg || (is_acc_msg && gm_cam_long);
     }
+  } else {
+    block_msg = true;
   }
 
-  return bus_fwd;
+  return block_msg;
 }
 
 static safety_config gm_init(uint16_t param) {

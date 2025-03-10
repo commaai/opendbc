@@ -261,14 +261,8 @@ static bool hyundai_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static int hyundai_fwd_hook(int bus_num, int addr) {
-
-  int bus_fwd = -1;
-
-  // forward cam to ccan and viceversa, except lkas cmd
-  if (bus_num == 0) {
-    bus_fwd = 2;
-  }
+static bool hyundai_fwd_hook(int bus_num, int addr) {
+  bool block_msg = false;
 
   if (bus_num == 2) {
     // Stock LKAS11 messages
@@ -278,13 +272,10 @@ static int hyundai_fwd_hook(int bus_num, int addr) {
     // Stock SCC messages, blocking when doing openpilot longitudinal on camera SCC cars
     bool is_scc_msg = (addr == 0x420) || (addr == 0x421) || (addr == 0x50A) || (addr == 0x389);
 
-    bool block_msg = is_lkas_11 || is_lfahda_mfc || (is_scc_msg && hyundai_longitudinal && hyundai_camera_scc);
-    if (!block_msg) {
-      bus_fwd = 0;
-    }
+    block_msg = is_lkas_11 || is_lfahda_mfc || (is_scc_msg && hyundai_longitudinal && hyundai_camera_scc);
   }
 
-  return bus_fwd;
+  return block_msg;
 }
 
 static safety_config hyundai_init(uint16_t param) {
