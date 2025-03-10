@@ -1,3 +1,4 @@
+import copy
 from opendbc.car import structs, Bus
 from opendbc.can.parser import CANParser
 from opendbc.car.common.conversions import Conversions as CV
@@ -79,6 +80,9 @@ class CarState(CarStateBase):
     ret.doorOpen = any([cp_main.vl['Dat_BSI']['DRIVER_DOOR'], cp_main.vl['Dat_BSI']['PASSENGER_DOOR']]) # HS1
     ret.seatbeltUnlatched = cp_main.vl['RESTRAINTS']['DRIVER_SEATBELT'] != 2
 
+    # messages needed by carcontroller
+    self.acc_status_msg = copy.copy(cp_adas.vl["HS2_DAT_MDD_CMD_452"])
+
     return ret
 
   @staticmethod
@@ -107,7 +111,7 @@ class CarState(CarStateBase):
       ('HS2_DAT7_BSI_612', 10),
     ]
     return {
-      Bus.main: CANParser(DBC[CP.carFingerprint][Bus.main], main_messages, 2),
-      Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.adas], adas_messages, 1),
-      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.cam], cam_messages, 0),
+      Bus.main: CANParser(DBC[CP.carFingerprint][Bus.pt], main_messages, 2),
+      Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.pt], adas_messages, 1),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, 0),
     }
