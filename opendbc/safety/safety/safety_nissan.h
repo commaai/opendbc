@@ -102,25 +102,19 @@ static bool nissan_tx_hook(const CANPacket_t *to_send) {
 }
 
 
-static int nissan_fwd_hook(int bus_num, int addr) {
-  int bus_fwd = -1;
+static bool nissan_fwd_hook(int bus_num, int addr) {
+  bool block_msg = false;
 
   if (bus_num == 0) {
-    bool block_msg = (addr == 0x280); // CANCEL_MSG
-    if (!block_msg) {
-      bus_fwd = 2;  // ADAS
-    }
+    block_msg = (addr == 0x280); // CANCEL_MSG
   }
 
   if (bus_num == 2) {
     // 0x169 is LKAS, 0x2b1 LKAS_HUD, 0x4cc LKAS_HUD_INFO_MSG
-    bool block_msg = ((addr == 0x169) || (addr == 0x2b1) || (addr == 0x4cc));
-    if (!block_msg) {
-      bus_fwd = 0;  // V-CAN
-    }
+    block_msg = ((addr == 0x169) || (addr == 0x2b1) || (addr == 0x4cc));
   }
 
-  return bus_fwd;
+  return block_msg;
 }
 
 static safety_config nissan_init(uint16_t param) {

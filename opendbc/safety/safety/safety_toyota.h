@@ -391,14 +391,8 @@ static safety_config toyota_init(uint16_t param) {
   return ret;
 }
 
-static int toyota_fwd_hook(int bus_num, int addr) {
-
-  int bus_fwd = -1;
-
-  if (bus_num == 0) {
-    bus_fwd = 2;
-  }
-
+static bool toyota_fwd_hook(int bus_num, int addr) {
+  bool block_msg = false;
   if (bus_num == 2) {
     // block stock lkas messages and stock acc messages (if OP is doing ACC)
     // in TSS2, 0x191 is LTA which we need to block to avoid controls collision
@@ -407,13 +401,10 @@ static int toyota_fwd_hook(int bus_num, int addr) {
     is_lkas_msg |= toyota_secoc && (addr == 0x131);
     // in TSS2 the camera does ACC as well, so filter 0x343
     bool is_acc_msg = (addr == 0x343);
-    bool block_msg = is_lkas_msg || (is_acc_msg && !toyota_stock_longitudinal);
-    if (!block_msg) {
-      bus_fwd = 0;
-    }
+    block_msg = is_lkas_msg || (is_acc_msg && !toyota_stock_longitudinal);
   }
 
-  return bus_fwd;
+  return block_msg;
 }
 
 const safety_hooks toyota_hooks = {
