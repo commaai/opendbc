@@ -4,17 +4,15 @@
 
 // Stock longitudinal
 #define TOYOTA_BASE_TX_MSGS \
-  {0x191, 0, 8}, {0x412, 0, 8}, {0x1D2, 0, 8},  /* LKAS + LTA + PCM cancel cmds */  \
+  {0x191, 0, 8}, {0x412, 0, 8}, {0x343, 0, 8}, {0x1D2, 0, 8},  /* LKAS + LTA + ACC & PCM cancel cmds */  \
 
 #define TOYOTA_COMMON_TX_MSGS \
   TOYOTA_BASE_TX_MSGS \
-  {0x2E4, 0, 5, .check_relay = true}, \
-  {0x343, 0, 8},  /* ACC cancel cmd */ \
+  {0x2E4, 0, 5}, \
 
 #define TOYOTA_COMMON_SECOC_TX_MSGS \
   TOYOTA_BASE_TX_MSGS \
-  {0x2E4, 0, 8, .check_relay = true}, {0x131, 0, 8}, \
-  {0x343, 0, 8},  /* ACC cancel cmd */ \
+  {0x2E4, 0, 8}, {0x131, 0, 8}, \
 
 #define TOYOTA_COMMON_LONG_TX_MSGS                                                                                                          \
   TOYOTA_COMMON_TX_MSGS                                                                                                                     \
@@ -22,7 +20,6 @@
   {0x128, 1, 6}, {0x141, 1, 4}, {0x160, 1, 8}, {0x161, 1, 7}, {0x470, 1, 4},  /* DSU bus 1 */                                               \
   {0x411, 0, 8},  /* PCS_HUD */                                                                                                             \
   {0x750, 0, 8},  /* radar diagnostic address */                                                                                            \
-  {0x343, 0, 8, .check_relay = true},  /* ACC_CONTROL */                                                                                    \
 
 #define TOYOTA_COMMON_RX_CHECKS(lta)                                                                          \
   {.msg = {{ 0xaa, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 83U}, { 0 }, { 0 }}},  \
@@ -146,6 +143,12 @@ static void toyota_rx_hook(const CANPacket_t *to_push) {
 
       UPDATE_VEHICLE_SPEED(speed / 4.0 * 0.01 / 3.6);
     }
+
+    bool stock_ecu_detected = addr == 0x2E4;  // STEERING_LKA
+    if (!toyota_stock_longitudinal && (addr == 0x343)) {
+      stock_ecu_detected = true;  // ACC_CONTROL
+    }
+    generic_rx_checks(stock_ecu_detected);
   }
 }
 
