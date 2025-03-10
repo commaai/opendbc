@@ -166,21 +166,16 @@ static bool chrysler_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static int chrysler_fwd_hook(int bus_num, int addr) {
-  int bus_fwd = -1;
-
-  // forward to camera
-  if (bus_num == 0) {
-    bus_fwd = 2;
-  }
+static bool chrysler_fwd_hook(int bus_num, int addr) {
+  bool block_msg = false;
 
   // forward all messages from camera except LKAS messages
   const bool is_lkas = ((addr == chrysler_addrs->LKAS_COMMAND) || (addr == chrysler_addrs->DAS_6));
-  if ((bus_num == 2) && !is_lkas){
-    bus_fwd = 0;
+  if ((bus_num == 2) && is_lkas){
+    block_msg = true;
   }
 
-  return bus_fwd;
+  return block_msg;
 }
 
 static safety_config chrysler_init(uint16_t param) {
