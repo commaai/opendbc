@@ -149,16 +149,10 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static int tesla_fwd_hook(int bus_num, int addr) {
-  int bus_fwd = -1;
-
-  if (bus_num == 0) {
-    // Party to autopilot
-    bus_fwd = 2;
-  }
+static bool tesla_fwd_hook(int bus_num, int addr) {
+  bool block_msg = false;
 
   if (bus_num == 2) {
-    bool block_msg = false;
     // DAS_steeringControl, APS_eacMonitor
     if ((addr == 0x488) || (addr == 0x27d)) {
       block_msg = true;
@@ -168,13 +162,9 @@ static int tesla_fwd_hook(int bus_num, int addr) {
     if (tesla_longitudinal && (addr == 0x2b9) && !tesla_stock_aeb) {
       block_msg = true;
     }
-
-    if (!block_msg) {
-      bus_fwd = 0;
-    }
   }
 
-  return bus_fwd;
+  return block_msg;
 }
 
 static safety_config tesla_init(uint16_t param) {
