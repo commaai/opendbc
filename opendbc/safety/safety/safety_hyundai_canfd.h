@@ -318,23 +318,20 @@ static safety_config hyundai_canfd_init(uint16_t param) {
   safety_config ret;
   if (hyundai_longitudinal) {
     if (hyundai_canfd_lka_steering) {
+      /* LKA steering checks */
       ret = BUILD_SAFETY_CFG(hyundai_canfd_lka_steering_long_rx_checks, HYUNDAI_CANFD_LKA_STEERING_LONG_TX_MSGS);
     } else {
-      // Longitudinal checks for LFA steering
+      /* LFA steering checks */
       ret = hyundai_camera_scc ? BUILD_SAFETY_CFG(hyundai_canfd_long_rx_checks, HYUNDAI_CANFD_LFA_STEERING_CAMERA_SCC_TX_MSGS) : \
                                  BUILD_SAFETY_CFG(hyundai_canfd_long_rx_checks, HYUNDAI_CANFD_LFA_STEERING_LONG_TX_MSGS);
     }
   } else {
     if (hyundai_canfd_lka_steering) {
-      // *** LKA steering checks ***
-      // E-CAN is on bus 1, SCC messages are sent on cars with ADRV ECU.
-      // Does not use the alt buttons message
+      /* LKA steering checks */
       ret = hyundai_canfd_lka_steering_alt ? BUILD_SAFETY_CFG(hyundai_canfd_lka_steering_rx_checks, HYUNDAI_CANFD_LKA_STEERING_ALT_TX_MSGS) : \
                                              BUILD_SAFETY_CFG(hyundai_canfd_lka_steering_rx_checks, HYUNDAI_CANFD_LKA_STEERING_TX_MSGS);
     } else {
-      // *** LFA steering checks ***
-      // Radar sends SCC messages on these cars instead of camera
-      // Camera sends SCC messages on LFA steering cars.
+      /* LFA steering checks */
       // Both button messages exist on some platforms, so we ensure we track the correct one using flag
       ret = hyundai_camera_scc ? BUILD_SAFETY_CFG(hyundai_canfd_rx_checks, HYUNDAI_CANFD_LFA_STEERING_CAMERA_SCC_TX_MSGS) :
                                  BUILD_SAFETY_CFG(hyundai_canfd_radar_scc_rx_checks, HYUNDAI_CANFD_LFA_STEERING_TX_MSGS);
