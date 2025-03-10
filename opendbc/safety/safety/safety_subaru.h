@@ -209,6 +209,7 @@ static bool subaru_tx_hook(const CANPacket_t *to_send) {
 
 static bool subaru_fwd_hook(int bus_num, int addr) {
   bool block_msg = false;
+
   if (bus_num == SUBARU_CAM_BUS) {
     // Global platform
     bool block_lkas = ((addr == MSG_SUBARU_ES_LKAS) ||

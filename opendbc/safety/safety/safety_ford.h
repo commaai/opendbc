@@ -321,6 +321,7 @@ static bool ford_tx_hook(const CANPacket_t *to_send) {
 
 static bool ford_fwd_hook(int bus_num, int addr) {
   bool block_msg = false;
+
   switch (bus_num) {
     case FORD_CAM_BUS: {
       if (ford_lkas_msg_check(addr)) {

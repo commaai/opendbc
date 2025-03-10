@@ -161,6 +161,7 @@ static bool gm_tx_hook(const CANPacket_t *to_send) {
 
 static bool gm_fwd_hook(int bus_num, int addr) {
   bool block_msg = false;
+
   if (gm_hw == GM_CAM) {
     if (bus_num == 0) {
       // block PSCMStatus; forwarded through openpilot to hide an alert from the camera

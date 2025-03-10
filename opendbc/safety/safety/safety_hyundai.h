@@ -263,6 +263,7 @@ static bool hyundai_tx_hook(const CANPacket_t *to_send) {
 
 static bool hyundai_fwd_hook(int bus_num, int addr) {
   bool block_msg = false;
+
   if (bus_num == 2) {
     // Stock LKAS11 messages
     bool is_lkas_11 = (addr == 0x340);

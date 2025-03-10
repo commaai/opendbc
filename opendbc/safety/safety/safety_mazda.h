@@ -93,6 +93,7 @@ static bool mazda_tx_hook(const CANPacket_t *to_send) {
 
 static bool mazda_fwd_hook(int bus, int addr) {
   bool block_msg = false;
+
   if (bus == MAZDA_CAM) {
     block_msg = (addr == MAZDA_LKAS) || (addr == MAZDA_LKAS_HUD);
   }

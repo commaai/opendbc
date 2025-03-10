@@ -93,6 +93,7 @@ static bool rivian_tx_hook(const CANPacket_t *to_send) {
 
 static bool rivian_fwd_hook(int bus, int addr) {
   bool block_msg = false;
+
   if (bus == 0) {
     // SCCM_WheelTouch: for hiding hold wheel alert
     if (addr == 0x321) {

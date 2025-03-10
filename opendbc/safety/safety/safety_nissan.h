@@ -104,6 +104,7 @@ static bool nissan_tx_hook(const CANPacket_t *to_send) {
 
 static bool nissan_fwd_hook(int bus_num, int addr) {
   bool block_msg = false;
+
   if (bus_num == 0) {
     block_msg = (addr == 0x280); // CANCEL_MSG
   }
