@@ -84,14 +84,6 @@ static void gm_rx_hook(const CANPacket_t *to_push) {
     if (addr == 0xBD) {
       regen_braking = (GET_BYTE(to_push, 0) >> 4) != 0U;
     }
-
-    bool stock_ecu_detected = (addr == 0x180);  // ASCMLKASteeringCmd
-
-    // Check ASCMGasRegenCmd only if we're blocking it
-    if (!gm_pcm_cruise && (addr == 0x2CB)) {
-      stock_ecu_detected = true;
-    }
-    generic_rx_checks(stock_ecu_detected);
   }
 }
 
@@ -194,7 +186,7 @@ static safety_config gm_init(uint16_t param) {
     .max_brake = 400,
   };
 
-  static const CanMsg GM_ASCM_TX_MSGS[] = {{0x180, 0, 4}, {0x409, 0, 7}, {0x40A, 0, 7}, {0x2CB, 0, 8}, {0x370, 0, 6},  // pt bus
+  static const CanMsg GM_ASCM_TX_MSGS[] = {{0x180, 0, 4, true}, {0x409, 0, 7}, {0x40A, 0, 7}, {0x2CB, 0, 8, true}, {0x370, 0, 6},  // pt bus
                                            {0xA1, 1, 7}, {0x306, 1, 8}, {0x308, 1, 7}, {0x310, 1, 2},   // obs bus
                                            {0x315, 2, 5}};  // ch bus
 
@@ -206,7 +198,7 @@ static safety_config gm_init(uint16_t param) {
     .max_brake = 400,
   };
 
-  static const CanMsg GM_CAM_LONG_TX_MSGS[] = {{0x180, 0, 4}, {0x315, 0, 5}, {0x2CB, 0, 8}, {0x370, 0, 6},  // pt bus
+  static const CanMsg GM_CAM_LONG_TX_MSGS[] = {{0x180, 0, 4, true}, {0x315, 0, 5}, {0x2CB, 0, 8, true}, {0x370, 0, 6},  // pt bus
                                                {0x184, 2, 8}};  // camera bus
 
 
@@ -222,7 +214,7 @@ static safety_config gm_init(uint16_t param) {
     {.msg = {{0xC9, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},
   };
 
-  static const CanMsg GM_CAM_TX_MSGS[] = {{0x180, 0, 4},  // pt bus
+  static const CanMsg GM_CAM_TX_MSGS[] = {{0x180, 0, 4, true},  // pt bus
                                           {0x1E1, 2, 7}, {0x184, 2, 8}};  // camera bus
 
   gm_hw = GET_FLAG(param, GM_PARAM_HW_CAM) ? GM_CAM : GM_ASCM;
