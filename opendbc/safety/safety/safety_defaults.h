@@ -53,6 +53,8 @@ static bool alloutput_tx_hook(const CANPacket_t *to_send) {
 }
 
 static bool alloutput_fwd_hook(int bus_num, int addr) {
+  UNUSED(bus_num);
+  UNUSED(addr);
   return !alloutput_passthrough;
 }
 

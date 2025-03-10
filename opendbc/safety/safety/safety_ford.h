@@ -329,6 +329,7 @@ static bool ford_fwd_hook(int bus_num, int addr) {
       } else if (ford_longitudinal && (addr == FORD_ACCDATA)) {
         // Block stock ACC message
         block_msg = true;
+      } else {
       }
       break;
     }
