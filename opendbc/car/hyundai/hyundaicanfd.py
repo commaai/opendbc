@@ -126,7 +126,7 @@ def create_lfahda_cluster(packer, CAN, enabled):
 
 def create_ccnc(packer, CAN, CP, CC, CS):
   msg_161, msg_162 = CS.msg_161, CS.msg_162
-  enabled, hud, latActive = CC.enabled, CC.hudControl, CC.latActive
+  enabled, hud, latactive = CC.enabled, CC.hudControl, CC.latActive
 
   for f in {"FAULT_LSS", "FAULT_HDA", "FAULT_DAS", "FAULT_LFA", "FAULT_DAW"}:
     msg_162[f] = 0
@@ -146,12 +146,12 @@ def create_ccnc(packer, CAN, CP, CC, CS):
   msg_161.update({
     "DAW_ICON": 0,
     "LKA_ICON": 0,
-    "LFA_ICON": 2 if latActive else 1,
-    "CENTERLINE": 1 if latActive else 0,
+    "LFA_ICON": 2 if latactive else 1,
+    "CENTERLINE": 1 if latactive else 0,
     "LANELINE_LEFT": (
-      1 if not hud.leftLaneVisible else 4 if hud.leftLaneDepart else 0 if not latActive else 2 if CS.out.leftBlindspot or CS.out.vEgo < 8.94 else 6),
+      1 if not hud.leftLaneVisible else 4 if hud.leftLaneDepart else 0 if not latactive else 2 if CS.out.leftBlindspot or CS.out.vEgo < 8.94 else 6),
     "LANELINE_RIGHT": (
-      1 if not hud.rightLaneVisible else 4 if hud.rightLaneDepart else 0 if not latActive else 2 if CS.out.rightBlindspot or CS.out.vEgo < 8.94 else 6),
+      1 if not hud.rightLaneVisible else 4 if hud.rightLaneDepart else 0 if not latactive else 2 if CS.out.rightBlindspot or CS.out.vEgo < 8.94 else 6),
     "LCA_LEFT_ARROW": 2 if CC.leftBlinker else 0,
     "LCA_RIGHT_ARROW": 2 if CC.rightBlinker else 0,
     "LANE_LEFT": 1 if CC.leftBlinker else 0,
