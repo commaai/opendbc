@@ -266,13 +266,7 @@ static int get_fwd_bus(int bus_num) {
 
 int safety_fwd_hook(int bus_num, int addr) {
   const bool blocked = relay_malfunction || current_hooks->fwd(bus_num, addr);
-
-  int destination_bus = -1;
-  if (!blocked) {
-    destination_bus = get_fwd_bus(bus_num);
-  }
-
-  return destination_bus;
+  return blocked ? -1 : get_fwd_bus(bus_num);
 }
 
 bool get_longitudinal_allowed(void) {
