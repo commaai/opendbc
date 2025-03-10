@@ -319,7 +319,7 @@ static bool ford_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static int ford_fwd_hook(int bus_num, int addr) {
+static bool ford_fwd_hook(int bus_num, int addr) {
   bool block_msg = false;
   switch (bus_num) {
     case FORD_CAM_BUS: {

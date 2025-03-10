@@ -391,7 +391,7 @@ static safety_config toyota_init(uint16_t param) {
   return ret;
 }
 
-static int toyota_fwd_hook(int bus_num, int addr) {
+static bool toyota_fwd_hook(int bus_num, int addr) {
   bool block_msg = false;
   if (bus_num == 2) {
     // block stock lkas messages and stock acc messages (if OP is doing ACC)

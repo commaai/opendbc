@@ -21,7 +21,7 @@ static bool nooutput_tx_hook(const CANPacket_t *to_send) {
 }
 // GCOV_EXCL_STOP
 
-static int default_fwd_hook(int bus_num, int addr) {
+static bool default_fwd_hook(int bus_num, int addr) {
   UNUSED(bus_num);
   UNUSED(addr);
   return true;
@@ -52,7 +52,7 @@ static bool alloutput_tx_hook(const CANPacket_t *to_send) {
   return true;
 }
 
-static int alloutput_fwd_hook(int bus_num, int addr) {
+static bool alloutput_fwd_hook(int bus_num, int addr) {
   return !alloutput_passthrough;
 }
 

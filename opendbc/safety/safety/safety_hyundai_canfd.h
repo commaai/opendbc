@@ -222,7 +222,7 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static int hyundai_canfd_fwd_hook(int bus_num, int addr) {
+static bool hyundai_canfd_fwd_hook(int bus_num, int addr) {
   bool block_msg = false;
 
   if (bus_num == 2) {

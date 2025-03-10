@@ -85,7 +85,7 @@ static bool subaru_preglobal_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static int subaru_preglobal_fwd_hook(int bus_num, int addr) {
+static bool subaru_preglobal_fwd_hook(int bus_num, int addr) {
   int block_msg = false;
 
   if (bus_num == SUBARU_PG_CAM_BUS) {
