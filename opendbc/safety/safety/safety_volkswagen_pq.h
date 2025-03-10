@@ -232,8 +232,6 @@ static bool volkswagen_pq_fwd_hook(int bus_num, int addr) {
         // openpilot takes over acceleration/braking control and related HUD messages from the stock ACC radar
         block_msg = true;
       } else {
-        // Forward all remaining traffic from Extended CAN devices to J533 gateway
-        block_msg = false;
       }
       break;
     default:

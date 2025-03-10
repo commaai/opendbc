@@ -211,9 +211,6 @@ static bool volkswagen_mqb_fwd_hook(int bus_num, int addr) {
       if (addr == MSG_LH_EPS_03) {
         // openpilot needs to replace apparent driver steering input torque to pacify VW Emergency Assist
         block_msg = true;
-      } else {
-        // Forward all remaining traffic from Extended CAN onward
-        block_msg = false;
       }
       break;
     case 2:
@@ -224,8 +221,6 @@ static bool volkswagen_mqb_fwd_hook(int bus_num, int addr) {
         // openpilot takes over acceleration/braking control and related HUD messages from the stock ACC radar
         block_msg = true;
       } else {
-        // Forward all remaining traffic from Extended CAN devices to J533 gateway
-        block_msg = false;
       }
       break;
     default:
