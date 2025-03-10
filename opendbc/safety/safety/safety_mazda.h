@@ -92,20 +92,12 @@ static bool mazda_tx_hook(const CANPacket_t *to_send) {
 }
 
 static int mazda_fwd_hook(int bus, int addr) {
-  int bus_fwd = -1;
-
-  if (bus == MAZDA_MAIN) {
-    bus_fwd = MAZDA_CAM;
-  } else if (bus == MAZDA_CAM) {
-    bool block = (addr == MAZDA_LKAS) || (addr == MAZDA_LKAS_HUD);
-    if (!block) {
-      bus_fwd = MAZDA_MAIN;
-    }
-  } else {
-    // don't fwd
+  bool block_msg = false;
+  if (bus == MAZDA_CAM) {
+    block_msg = (addr == MAZDA_LKAS) || (addr == MAZDA_LKAS_HUD);
   }
 
-  return bus_fwd;
+  return block_msg;
 }
 
 static safety_config mazda_init(uint16_t param) {

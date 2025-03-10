@@ -208,12 +208,7 @@ static bool subaru_tx_hook(const CANPacket_t *to_send) {
 }
 
 static int subaru_fwd_hook(int bus_num, int addr) {
-  int bus_fwd = -1;
-
-  if (bus_num == SUBARU_MAIN_BUS) {
-    bus_fwd = SUBARU_CAM_BUS;  // to the eyesight camera
-  }
-
+  bool block_msg = false;
   if (bus_num == SUBARU_CAM_BUS) {
     // Global platform
     bool block_lkas = ((addr == MSG_SUBARU_ES_LKAS) ||
@@ -225,13 +220,10 @@ static int subaru_fwd_hook(int bus_num, int addr) {
                        (addr == MSG_SUBARU_ES_Distance) ||
                        (addr == MSG_SUBARU_ES_Status));
 
-    bool block_msg = block_lkas || (subaru_longitudinal && block_long);
-    if (!block_msg) {
-      bus_fwd = SUBARU_MAIN_BUS;  // Main CAN
-    }
+    block_msg = block_lkas || (subaru_longitudinal && block_long);
   }
 
-  return bus_fwd;
+  return block_msg;
 }
 
 static safety_config subaru_init(uint16_t param) {

@@ -114,6 +114,18 @@ uint16_t current_safety_param = 0;
 static const safety_hooks *current_hooks = &nooutput_hooks;
 safety_config current_safety_config;
 
+static int get_fwd_bus(int bus_num) {
+  int destination_bus;
+  if (bus_num == 0) {
+    destination_bus = 2;
+  } else if (bus_num == 2) {
+    destination_bus = 0;
+  } else {
+    destination_bus = -1;
+  }
+  return destination_bus;
+}
+
 static bool is_msg_valid(RxCheck addr_list[], int index) {
   bool valid = true;
   if (index != -1) {
@@ -253,7 +265,12 @@ bool safety_tx_hook(CANPacket_t *to_send) {
 }
 
 int safety_fwd_hook(int bus_num, int addr) {
-  return (relay_malfunction ? -1 : current_hooks->fwd(bus_num, addr));
+  const bool blocked = relay_malfunction || current_hooks->fwd(bus_num, addr);
+  int destination_bus = -1;
+  if (!blocked) {
+    destination_bus = get_fwd_bus(bus_num);
+  }
+  return destination_bus;
 }
 
 bool get_longitudinal_allowed(void) {
