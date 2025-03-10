@@ -120,7 +120,7 @@ class CarController(CarControllerBase):
 
       # blinkers
       if lka_steering and self.CP.flags & HyundaiFlags.ENABLE_BLINKERS:
-        can_sends.extend(hyundaicanfd.create_spas_messages(self.packer, self.CAN, self.frame, CC.leftBlinker, CC.rightBlinker))
+        can_sends.extend(hyundaicanfd.create_spas_messages(self.packer, self.CAN, CC.leftBlinker, CC.rightBlinker))
 
       if self.CP.openpilotLongitudinalControl:
         if lka_steering:
