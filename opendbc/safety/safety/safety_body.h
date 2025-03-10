@@ -40,7 +40,7 @@ static safety_config body_init(uint16_t param) {
 
   UNUSED(param);
   safety_config ret = BUILD_SAFETY_CFG(body_rx_checks, BODY_TX_MSGS);
-  ret.block_fwding = true;
+  ret.disable_forwarding = true;
   return ret;
 }
 
