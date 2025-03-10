@@ -44,12 +44,12 @@
 #define SUBARU_ALT_BUS  1
 #define SUBARU_CAM_BUS  2
 
-#define SUBARU_COMMON_TX_MSGS(alt_bus, lkas_msg)      \
-  {lkas_msg,                     SUBARU_MAIN_BUS, 8}, \
-  {MSG_SUBARU_ES_Distance,       alt_bus,         8}, \
-  {MSG_SUBARU_ES_DashStatus,     SUBARU_MAIN_BUS, 8}, \
-  {MSG_SUBARU_ES_LKAS_State,     SUBARU_MAIN_BUS, 8}, \
-  {MSG_SUBARU_ES_Infotainment,   SUBARU_MAIN_BUS, 8}, \
+#define SUBARU_COMMON_TX_MSGS(alt_bus, lkas_msg)            \
+  {lkas_msg,                     SUBARU_MAIN_BUS, 8, true}, \
+  {MSG_SUBARU_ES_Distance,       alt_bus,         8},       \
+  {MSG_SUBARU_ES_DashStatus,     SUBARU_MAIN_BUS, 8},       \
+  {MSG_SUBARU_ES_LKAS_State,     SUBARU_MAIN_BUS, 8},       \
+  {MSG_SUBARU_ES_Infotainment,   SUBARU_MAIN_BUS, 8},       \
 
 #define SUBARU_COMMON_LONG_TX_MSGS(alt_bus)           \
   {MSG_SUBARU_ES_Brake,          alt_bus,         8}, \
@@ -131,8 +131,6 @@ static void subaru_rx_hook(const CANPacket_t *to_push) {
   if ((addr == MSG_SUBARU_Throttle) && (bus == SUBARU_MAIN_BUS)) {
     gas_pressed = GET_BYTE(to_push, 4) != 0U;
   }
-
-  generic_rx_checks((addr == MSG_SUBARU_ES_LKAS) && (bus == SUBARU_MAIN_BUS));
 }
 
 static bool subaru_tx_hook(const CANPacket_t *to_send) {
