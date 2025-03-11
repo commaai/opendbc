@@ -17,18 +17,6 @@
 #define HONDA_ALT_BRAKE_ADDR_CHECK(pt_bus)                                                                 \
   {.msg = {{0x1BE, (pt_bus), 3, .max_counter = 3U, .frequency = 50U}, { 0 }, { 0 }}},  /* BRAKE_MODULE */  \
 
-
-// Nidec and bosch radarless has the powertrain bus on bus 0
-static RxCheck honda_common_rx_checks[] = {
-  HONDA_COMMON_RX_CHECKS(0)
-};
-
-// Nidec includes BRAKE_COMMAND
-static RxCheck honda_nidec_common_rx_checks[] = {
-  HONDA_COMMON_RX_CHECKS(0)
-  {.msg = {{0x1FA, 2, 8, .max_counter = 3U, .frequency = 50U}, { 0 }, { 0 }}},  // BRAKE_COMMAND
-};
-
 enum {
   HONDA_BTN_NONE = 0,
   HONDA_BTN_MAIN = 1,
@@ -315,6 +303,12 @@ static safety_config honda_nidec_init(uint16_t param) {
 
     SET_RX_CHECKS(honda_nidec_alt_rx_checks, ret);
   } else {
+    // Nidec includes BRAKE_COMMAND
+    static RxCheck honda_nidec_common_rx_checks[] = {
+      HONDA_COMMON_RX_CHECKS(0)
+      {.msg = {{0x1FA, 2, 8, .max_counter = 3U, .frequency = 50U}, { 0 }, { 0 }}},  // BRAKE_COMMAND
+    };
+
     SET_RX_CHECKS(honda_nidec_common_rx_checks, ret);
   }
 
@@ -363,6 +357,11 @@ static safety_config honda_bosch_init(uint16_t param) {
   if (honda_bosch_radarless && honda_alt_brake_msg) {
     SET_RX_CHECKS(honda_common_alt_brake_rx_checks, ret);
   } else if (honda_bosch_radarless) {
+    // Nidec and bosch radarless has the powertrain bus on bus 0
+    static RxCheck honda_common_rx_checks[] = {
+      HONDA_COMMON_RX_CHECKS(0)
+    };
+
     SET_RX_CHECKS(honda_common_rx_checks, ret);
   } else if (honda_alt_brake_msg) {
     SET_RX_CHECKS(honda_bosch_alt_brake_rx_checks, ret);
