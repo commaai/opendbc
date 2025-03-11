@@ -50,8 +50,6 @@ static void subaru_preglobal_rx_hook(const CANPacket_t *to_push) {
     if (addr == MSG_SUBARU_PG_Throttle) {
       gas_pressed = GET_BYTE(to_push, 0) != 0U;
     }
-
-    generic_rx_checks((addr == MSG_SUBARU_PG_ES_LKAS));
   }
 }
 
@@ -97,8 +95,8 @@ static bool subaru_preglobal_fwd_hook(int bus_num, int addr) {
 
 static safety_config subaru_preglobal_init(uint16_t param) {
   static const CanMsg SUBARU_PG_TX_MSGS[] = {
-    {MSG_SUBARU_PG_ES_Distance, SUBARU_PG_MAIN_BUS, 8},
-    {MSG_SUBARU_PG_ES_LKAS,     SUBARU_PG_MAIN_BUS, 8}
+    {MSG_SUBARU_PG_ES_Distance, SUBARU_PG_MAIN_BUS, 8, false},
+    {MSG_SUBARU_PG_ES_LKAS,     SUBARU_PG_MAIN_BUS, 8, true}
   };
 
   // TODO: do checksum and counter checks after adding the signals to the outback dbc file
