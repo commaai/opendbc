@@ -48,13 +48,6 @@ static void mazda_rx_hook(const CANPacket_t *to_push) {
   }
 }
 
-static void mazda_rx_relay_malfunction_hook(const CANPacket_t *to_push) {
-  if ((int)GET_BUS(to_push) == MAZDA_MAIN) {
-    int addr = GET_ADDR(to_push);
-    generic_rx_checks((addr == MAZDA_LKAS));
-  }
-}
-
 static bool mazda_tx_hook(const CANPacket_t *to_send) {
   const TorqueSteeringLimits MAZDA_STEERING_LIMITS = {
     .max_steer = 800,
@@ -96,25 +89,18 @@ static bool mazda_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static int mazda_fwd_hook(int bus, int addr) {
-  int bus_fwd = -1;
+static bool mazda_fwd_hook(int bus, int addr) {
+  bool block_msg = false;
 
-  if (bus == MAZDA_MAIN) {
-    bus_fwd = MAZDA_CAM;
-  } else if (bus == MAZDA_CAM) {
-    bool block = (addr == MAZDA_LKAS) || (addr == MAZDA_LKAS_HUD);
-    if (!block) {
-      bus_fwd = MAZDA_MAIN;
-    }
-  } else {
-    // don't fwd
+  if (bus == MAZDA_CAM) {
+    block_msg = (addr == MAZDA_LKAS) || (addr == MAZDA_LKAS_HUD);
   }
 
-  return bus_fwd;
+  return block_msg;
 }
 
 static safety_config mazda_init(uint16_t param) {
-  static const CanMsg MAZDA_TX_MSGS[] = {{MAZDA_LKAS, 0, 8}, {MAZDA_CRZ_BTNS, 0, 8}, {MAZDA_LKAS_HUD, 0, 8}};
+  static const CanMsg MAZDA_TX_MSGS[] = {{MAZDA_LKAS, 0, 8, true}, {MAZDA_CRZ_BTNS, 0, 8, false}, {MAZDA_LKAS_HUD, 0, 8, false}};
 
   static RxCheck mazda_rx_checks[] = {
     {.msg = {{MAZDA_CRZ_CTRL,     0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
