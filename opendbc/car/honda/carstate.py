@@ -234,15 +234,7 @@ class CarState(CarStateBase):
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD.get(self.CP.carFingerprint, 1200)
 
     # is_metric_cruise is used for cruise speed display
-    if self.CP.carFingerprint in (HONDA_BOSCH_RADARLESS, SERIAL_STEERING):
-      if "ACC_HUD" in cp_cam.vl:
-        self.is_metric_cruise = self.is_metric if cp_cam.vl["ACC_HUD"]["CRUISE_SPEED"] >= 253 else not cp_cam.vl["ACC_HUD"]["IMPERIAL_UNIT"]
-      else:
-        self.is_metric_cruise = self.is_metric
-    elif "ACC_HUD" in cp.vl:
-      self.is_metric_cruise = self.is_metric if cp.vl["ACC_HUD"]["CRUISE_SPEED"] >= 253 else not cp.vl["ACC_HUD"]["IMPERIAL_UNIT"]
-    else:
-      self.is_metric_cruise = self.is_metric
+    self.is_metric_cruise = self.is_metric
     conversion = CV.KPH_TO_MS if self.is_metric_cruise else CV.MPH_TO_MS
 
     if self.CP.carFingerprint in HONDA_BOSCH:
@@ -252,7 +244,7 @@ class CarState(CarStateBase):
 
       if not self.CP.openpilotLongitudinalControl:
         # ACC_HUD is on camera bus on radarless cars
-        acc_hud = cp_cam.vl["ACC_HUD"] if self.CP.carFingerprint in (HONDA_BOSCH_RADARLESS, SERIAL_STEERING) else cp.vl["ACC_HUD"]
+        acc_hud = cp_cam.vl["ACC_HUD"] if self.CP.carFingerprint in {HONDA_BOSCH_RADARLESS, SERIAL_STEERING} else cp.vl["ACC_HUD"]
         ret.cruiseState.nonAdaptive = acc_hud["CRUISE_CONTROL_LABEL"] != 0
         ret.cruiseState.standstill = acc_hud["CRUISE_SPEED"] == 252.
 
