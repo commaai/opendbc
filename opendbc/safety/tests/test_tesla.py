@@ -145,6 +145,7 @@ class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
     aeb_msg_cam = self._long_control_msg(10, aeb_event=1, bus=2)
     self.assertEqual(1, self._rx(aeb_msg_cam))
     self.assertEqual(0, self.safety.safety_fwd_hook(2, aeb_msg_cam.addr))
+    no_aeb_msg = self._long_control_msg(10, aeb_event=0)
     self.assertFalse(self._tx(no_aeb_msg))
 
   def test_prevent_reverse(self):
