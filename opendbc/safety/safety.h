@@ -213,6 +213,18 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
   bool valid = rx_msg_safety_check(to_push, &current_safety_config, current_hooks);
   if (valid) {
     current_hooks->rx(to_push);
+
+    const int bus = GET_BUS(to_push);
+    const int addr = GET_ADDR(to_push);
+
+    // check all tx msgs for liveness on sending bus if specified.
+    // used to detect a relay malfunction or control messages from disabled ECUs like the radar
+    for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
+      const CanMsg *m = &current_safety_config.tx_msgs[i];
+      if (m->check_relay) {
+        generic_rx_checks((m->addr == addr) && (m->bus == bus));
+      }
+    }
   }
 
   // reset mismatches on rising edge of controls_allowed to avoid rare race condition
@@ -337,7 +349,7 @@ static void relay_malfunction_set(void) {
   fault_occurred(FAULT_RELAY_MALFUNCTION);
 }
 
-void generic_rx_checks(bool stock_ecu_detected) {
+static void generic_rx_checks(bool stock_ecu_detected) {
   // allow 1s of transition timeout after relay changes state before assessing malfunctioning
   const uint32_t RELAY_TRNS_TIMEOUT = 1U;
 

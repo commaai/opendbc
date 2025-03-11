@@ -49,6 +49,7 @@ typedef struct {
   int addr;
   int bus;
   int len;
+  bool check_relay;
 } CanMsg;
 
 typedef enum {
@@ -185,7 +186,7 @@ void gen_crc_lookup_table_8(uint8_t poly, uint8_t crc_lut[]);
 #ifdef CANFD
 void gen_crc_lookup_table_16(uint16_t poly, uint16_t crc_lut[]);
 #endif
-void generic_rx_checks(bool stock_ecu_detected);
+static void generic_rx_checks(bool stock_ecu_detected);
 bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueSteeringLimits limits);
 bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits);
 bool longitudinal_accel_checks(int desired_accel, const LongitudinalLimits limits);
