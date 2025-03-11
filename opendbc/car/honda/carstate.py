@@ -244,7 +244,7 @@ class CarState(CarStateBase):
 
       if not self.CP.openpilotLongitudinalControl:
         # ACC_HUD is on camera bus on radarless cars
-        acc_hud = cp_cam.vl["ACC_HUD"] if (self.CP.carFingerprint in HONDA_BOSCH_RADARLESS) or (self.CP.carFingerprint in SERIAL_STEERING} else cp.vl["ACC_HUD"]
+        acc_hud = cp_cam.vl["ACC_HUD"] if (self.CP.carFingerprint in HONDA_BOSCH_RADARLESS) or (self.CP.carFingerprint in SERIAL_STEERING) else cp.vl["ACC_HUD"]
         ret.cruiseState.nonAdaptive = acc_hud["CRUISE_CONTROL_LABEL"] != 0
         ret.cruiseState.standstill = acc_hud["CRUISE_SPEED"] == 252.
 
