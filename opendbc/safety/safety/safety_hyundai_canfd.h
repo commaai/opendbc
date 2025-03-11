@@ -235,6 +235,8 @@ static bool hyundai_canfd_fwd_hook(int bus_num, int addr) {
     bool is_ccnc_msg = (addr == 0x161) || (addr == 0x162);
 
     block_msg = is_lka_msg || is_lfa_msg || is_lfahda_msg || is_scc_msg || is_ccnc_msg;
+  } else {
+    block_msg = false;
   }
 
   return block_msg;
