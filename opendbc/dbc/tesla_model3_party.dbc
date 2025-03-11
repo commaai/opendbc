@@ -208,7 +208,7 @@ BO_ 297 SCCM_steeringAngleSensor: 8 PARTY
  SG_ SCCM_steeringAngleCounter : 8|4@1+ (1,0) [0|15] ""  epas3s
  SG_ SCCM_steeringAngleCrc : 0|8@1+ (1,0) [0|255] ""  epas3s
 
-BO_ 646 DI_state: 7 ETH
+BO_ 646 DI_state: 8 ETH
  SG_ DI_summonInPanic : 48|1@1+ (1,0) [0|0] ""  X
  SG_ DI_rollPreventionState : 45|3@1+ (1,0) [0|0] ""  X
  SG_ DI_vehicleHoldState : 42|3@1+ (1,0) [0|0] ""  X
