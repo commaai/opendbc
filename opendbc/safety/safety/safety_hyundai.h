@@ -294,9 +294,8 @@ static safety_config hyundai_init(uint16_t param) {
   safety_config ret;
   if (hyundai_longitudinal) {
     static RxCheck hyundai_long_rx_checks[] = {
+      // We use CLU11 (buttons) to manage controls allowed instead of SCC cruise state
       HYUNDAI_COMMON_RX_CHECKS(false)
-      // Use CLU11 (buttons) to manage controls allowed instead of SCC cruise state
-      {.msg = {{0x4F1, 0, 4, .ignore_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
     };
 
     ret = hyundai_camera_scc ? BUILD_SAFETY_CFG(hyundai_long_rx_checks, HYUNDAI_CAMERA_SCC_LONG_TX_MSGS) : \
