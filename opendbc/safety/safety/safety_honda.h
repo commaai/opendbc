@@ -23,6 +23,12 @@ static RxCheck honda_common_rx_checks[] = {
   HONDA_COMMON_RX_CHECKS(0)
 };
 
+// Nidec includes BRAKE_COMMAND
+static RxCheck honda_nidec_common_rx_checks[] = {
+  HONDA_COMMON_RX_CHECKS(0)
+  {.msg = {{0x1FA, 2, 8, .max_counter = 3U, .frequency = 50U}, { 0 }, { 0 }}},  // BRAKE_COMMAND
+};
+
 enum {
   HONDA_BTN_NONE = 0,
   HONDA_BTN_MAIN = 1,
@@ -304,11 +310,12 @@ static safety_config honda_nidec_init(uint16_t param) {
     // For Nidecs with main on signal on an alternate msg (missing 0x326)
     static RxCheck honda_nidec_alt_rx_checks[] = {
       HONDA_COMMON_NO_SCM_FEEDBACK_RX_CHECKS(0)
+      {.msg = {{0x1FA, 2, 8, .max_counter = 3U, .frequency = 50U}, { 0 }, { 0 }}},  // BRAKE_COMMAND
     };
 
     SET_RX_CHECKS(honda_nidec_alt_rx_checks, ret);
   } else {
-    SET_RX_CHECKS(honda_common_rx_checks, ret);
+    SET_RX_CHECKS(honda_nidec_common_rx_checks, ret);
   }
 
   SET_TX_MSGS(HONDA_N_TX_MSGS, ret);
