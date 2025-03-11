@@ -46,7 +46,7 @@ BO_ 208 G_Sensor: 8 XXX
  SG_ Lateral : 16|16@1- (-0.0035,1) [-255|255] "" XXX
  SG_ Longitudinal : 48|16@1- (-0.00035,0) [-255|255] "" XXX
 
-BO_ 209 Brake_Pedal: 8 XXX
+BO_ 209 Brake_Pedal: 4 XXX
  SG_ Speed : 0|16@1+ (0.05625,0) [0|255] "KPH" XXX
  SG_ Brake_Pedal : 16|8@1+ (1,0) [0|255] "" XXX
 
