@@ -12,6 +12,7 @@
 #include "safety/safety_ford.h"
 #include "safety/safety_hyundai.h"
 #include "safety/safety_chrysler.h"
+#include "safety/safety_rivian.h"
 #include "safety/safety_subaru.h"
 #include "safety/safety_subaru_preglobal.h"
 #include "safety/safety_mazda.h"
@@ -53,6 +54,8 @@
 #define SAFETY_FAW 26U
 #define SAFETY_BODY 27U
 #define SAFETY_HYUNDAI_CANFD 28U
+#define SAFETY_RIVIAN 33U
+#define SAFETY_VOLKSWAGEN_MEB 34U
 
 uint32_t GET_BYTES(const CANPacket_t *msg, int start, int len) {
   uint32_t ret = 0U;
@@ -170,28 +173,28 @@ static void update_counter(RxCheck addr_list[], int index, uint8_t counter) {
 }
 
 static bool rx_msg_safety_check(const CANPacket_t *to_push,
-                         const safety_config *cfg,
-                         const safety_hooks *safety_hooks) {
+                                const safety_config *cfg,
+                                const safety_hooks *safety_hooks) {
 
   int index = get_addr_check_index(to_push, cfg->rx_checks, cfg->rx_checks_len);
   update_addr_timestamp(cfg->rx_checks, index);
 
   if (index != -1) {
     // checksum check
-    if ((safety_hooks->get_checksum != NULL) && (safety_hooks->compute_checksum != NULL) && cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].check_checksum) {
+    if ((safety_hooks->get_checksum != NULL) && (safety_hooks->compute_checksum != NULL) && !cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_checksum) {
       uint32_t checksum = safety_hooks->get_checksum(to_push);
       uint32_t checksum_comp = safety_hooks->compute_checksum(to_push);
       cfg->rx_checks[index].status.valid_checksum = checksum_comp == checksum;
     } else {
-      cfg->rx_checks[index].status.valid_checksum = true;
+      cfg->rx_checks[index].status.valid_checksum = cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_checksum;
     }
 
-    // counter check (max_counter == 0 means skip check)
+    // counter check
     if ((safety_hooks->get_counter != NULL) && (cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].max_counter > 0U)) {
       uint8_t counter = safety_hooks->get_counter(to_push);
       update_counter(cfg->rx_checks, index, counter);
     } else {
-      cfg->rx_checks[index].status.wrong_counters = 0U;
+      cfg->rx_checks[index].status.wrong_counters = cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_counter ? 0 : MAX_WRONG_COUNTERS;
     }
 
     // quality flag check
@@ -210,6 +213,18 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
   bool valid = rx_msg_safety_check(to_push, &current_safety_config, current_hooks);
   if (valid) {
     current_hooks->rx(to_push);
+
+    const int bus = GET_BUS(to_push);
+    const int addr = GET_ADDR(to_push);
+
+    // check all tx msgs for liveness on sending bus if specified.
+    // used to detect a relay malfunction or control messages from disabled ECUs like the radar
+    for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
+      const CanMsg *m = &current_safety_config.tx_msgs[i];
+      if (m->check_relay) {
+        generic_rx_checks((m->addr == addr) && (m->bus == bus));
+      }
+    }
   }
 
   // reset mismatches on rising edge of controls_allowed to avoid rare race condition
@@ -220,7 +235,7 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
   return valid;
 }
 
-static bool msg_allowed(const CANPacket_t *to_send, const CanMsg msg_list[], int len) {
+static bool tx_msg_safety_check(const CANPacket_t *to_send, const CanMsg msg_list[], int len) {
   int addr = GET_ADDR(to_send);
   int bus = GET_BUS(to_send);
   int length = GET_LEN(to_send);
@@ -236,17 +251,34 @@ static bool msg_allowed(const CANPacket_t *to_send, const CanMsg msg_list[], int
 }
 
 bool safety_tx_hook(CANPacket_t *to_send) {
-  bool whitelisted = msg_allowed(to_send, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
+  bool allowed = tx_msg_safety_check(to_send, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
   if ((current_safety_mode == SAFETY_ALLOUTPUT) || (current_safety_mode == SAFETY_ELM327)) {
-    whitelisted = true;
+    allowed = true;
   }
 
-  const bool safety_allowed = current_hooks->tx(to_send);
-  return !relay_malfunction && whitelisted && safety_allowed;
+  bool safety_allowed = false;
+  if (allowed) {
+    safety_allowed = current_hooks->tx(to_send);
+  }
+
+  return !relay_malfunction && allowed && safety_allowed;
+}
+
+static int get_fwd_bus(int bus_num) {
+  int destination_bus;
+  if (bus_num == 0) {
+    destination_bus = 2;
+  } else if (bus_num == 2) {
+    destination_bus = 0;
+  } else {
+    destination_bus = -1;
+  }
+  return destination_bus;
 }
 
 int safety_fwd_hook(int bus_num, int addr) {
-  return (relay_malfunction ? -1 : current_hooks->fwd(bus_num, addr));
+  const bool blocked = relay_malfunction || current_hooks->fwd(bus_num, addr);
+  return blocked ? -1 : get_fwd_bus(bus_num);
 }
 
 bool get_longitudinal_allowed(void) {
@@ -317,7 +349,7 @@ static void relay_malfunction_set(void) {
   fault_occurred(FAULT_RELAY_MALFUNCTION);
 }
 
-void generic_rx_checks(bool stock_ecu_detected) {
+static void generic_rx_checks(bool stock_ecu_detected) {
   // allow 1s of transition timeout after relay changes state before assessing malfunctioning
   const uint32_t RELAY_TRNS_TIMEOUT = 1U;
 
@@ -376,6 +408,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
     {SAFETY_MAZDA, &mazda_hooks},
     {SAFETY_BODY, &body_hooks},
     {SAFETY_FORD, &ford_hooks},
+    {SAFETY_RIVIAN, &rivian_hooks},
 #ifdef CANFD
     {SAFETY_HYUNDAI_CANFD, &hyundai_canfd_hooks},
 #endif
@@ -597,7 +630,7 @@ bool longitudinal_brake_checks(int desired_brake, const LongitudinalLimits limit
 }
 
 // Safety checks for torque-based steering commands
-bool steer_torque_cmd_checks(int desired_torque, int steer_req, const SteeringLimits limits) {
+bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueSteeringLimits limits) {
   bool violation = false;
   uint32_t ts = microsecond_timer_get();
 
@@ -609,7 +642,7 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const SteeringLi
     if (limits.type == TorqueDriverLimited) {
       violation |= driver_limit_check(desired_torque, desired_torque_last, &torque_driver,
                                       limits.max_steer, limits.max_rate_up, limits.max_rate_down,
-                                      limits.driver_torque_allowance, limits.driver_torque_factor);
+                                      limits.driver_torque_allowance, limits.driver_torque_multiplier);
     } else {
       violation |= dist_to_meas_check(desired_torque, desired_torque_last, &torque_meas,
                                       limits.max_rate_up, limits.max_rate_down, limits.max_torque_error);
@@ -683,7 +716,7 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const SteeringLi
 }
 
 // Safety checks for angle-based steering commands
-bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const SteeringLimits limits) {
+bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits) {
   bool violation = false;
 
   if (controls_allowed && steer_control_enabled) {
@@ -691,30 +724,72 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
     // add 1 to not false trigger the violation. also fudge the speed by 1 m/s so rate limits are
     // always slightly above openpilot's in case we read an updated speed in between angle commands
     // TODO: this speed fudge can be much lower, look at data to determine the lowest reasonable offset
-    int delta_angle_up = (interpolate(limits.angle_rate_up_lookup, (vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.) * limits.angle_deg_to_can) + 1.;
-    int delta_angle_down = (interpolate(limits.angle_rate_down_lookup, (vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.) * limits.angle_deg_to_can) + 1.;
+    const float fudged_speed = (vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.;
+    int delta_angle_up = (interpolate(limits.angle_rate_up_lookup, fudged_speed) * limits.angle_deg_to_can) + 1.;
+    int delta_angle_down = (interpolate(limits.angle_rate_down_lookup, fudged_speed) * limits.angle_deg_to_can) + 1.;
 
-    // allow down limits at zero since small floats will be rounded to 0
+    // allow down limits at zero since small floats from openpilot will be rounded to 0
+    // TODO: openpilot should be cognizant of this and not send small floats
     int highest_desired_angle = desired_angle_last + ((desired_angle_last > 0) ? delta_angle_up : delta_angle_down);
     int lowest_desired_angle = desired_angle_last - ((desired_angle_last >= 0) ? delta_angle_down : delta_angle_up);
 
     // check that commanded angle value isn't too far from measured, used to limit torque for some safety modes
-    // ensure we start moving in direction of meas while respecting rate limits if error is exceeded
+    // ensure we start moving in direction of meas while respecting relaxed rate limits if error is exceeded
     if (limits.enforce_angle_error && ((vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR) > limits.angle_error_min_speed)) {
-      // the rate limits above are liberally above openpilot's to avoid false positives.
-      // likewise, allow a lower rate for moving towards meas when error is exceeded
-      int delta_angle_up_lower = interpolate(limits.angle_rate_up_lookup, (vehicle_speed.max / VEHICLE_SPEED_FACTOR) + 1.) * limits.angle_deg_to_can;
-      int delta_angle_down_lower = interpolate(limits.angle_rate_down_lookup, (vehicle_speed.max / VEHICLE_SPEED_FACTOR) + 1.) * limits.angle_deg_to_can;
+      // flipped fudge to avoid false positives
+      const float fudged_speed_error = (vehicle_speed.max / VEHICLE_SPEED_FACTOR) + 1.;
+      const int delta_angle_up_relaxed = (interpolate(limits.angle_rate_up_lookup, fudged_speed_error) * limits.angle_deg_to_can) - 1.;
+      const int delta_angle_down_relaxed = (interpolate(limits.angle_rate_down_lookup, fudged_speed_error) * limits.angle_deg_to_can) - 1.;
 
-      int highest_desired_angle_lower = desired_angle_last + ((desired_angle_last > 0) ? delta_angle_up_lower : delta_angle_down_lower);
-      int lowest_desired_angle_lower = desired_angle_last - ((desired_angle_last >= 0) ? delta_angle_down_lower : delta_angle_up_lower);
+      // the minimum and maximum angle allowed based on the measured angle
+      const int lowest_desired_angle_error = angle_meas.min - limits.max_angle_error - 1;
+      const int highest_desired_angle_error = angle_meas.max + limits.max_angle_error + 1;
 
-      lowest_desired_angle = MIN(MAX(lowest_desired_angle, angle_meas.min - limits.max_angle_error - 1), highest_desired_angle_lower);
-      highest_desired_angle = MAX(MIN(highest_desired_angle, angle_meas.max + limits.max_angle_error + 1), lowest_desired_angle_lower);
+      // the MAX is to allow the desired angle to hit the edge of the bounds and not require going under it
+      if (desired_angle_last > highest_desired_angle_error) {
+        const int delta = (desired_angle_last >= 0) ? delta_angle_down_relaxed : delta_angle_up_relaxed;
+        highest_desired_angle = MAX(desired_angle_last - delta, highest_desired_angle_error);
+
+      } else if (desired_angle_last < lowest_desired_angle_error) {
+        const int delta = (desired_angle_last <= 0) ? delta_angle_down_relaxed : delta_angle_up_relaxed;
+        lowest_desired_angle = MIN(desired_angle_last + delta, lowest_desired_angle_error);
+
+      } else {
+        // already inside error boundary, don't allow commanding outside it
+        highest_desired_angle = MIN(highest_desired_angle, highest_desired_angle_error);
+        lowest_desired_angle = MAX(lowest_desired_angle, lowest_desired_angle_error);
+      }
 
       // don't enforce above the max steer
-      lowest_desired_angle = CLAMP(lowest_desired_angle, -limits.max_steer, limits.max_steer);
-      highest_desired_angle = CLAMP(highest_desired_angle, -limits.max_steer, limits.max_steer);
+      // TODO: this should always be done
+      lowest_desired_angle = CLAMP(lowest_desired_angle, -limits.max_angle, limits.max_angle);
+      highest_desired_angle = CLAMP(highest_desired_angle, -limits.max_angle, limits.max_angle);
+    }
+
+    // check not above ISO 11270 lateral accel assuming worst case road roll
+    if (limits.angle_is_curvature) {
+      // ISO 11270
+      static const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
+
+      // Limit to average banked road since safety doesn't have the roll
+      static const float EARTH_G = 9.81;
+      static const float AVERAGE_ROAD_ROLL = 0.06;  // ~3.4 degrees, 6% superelevation
+      static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (EARTH_G * AVERAGE_ROAD_ROLL);  // ~2.4 m/s^2
+
+      // Allow small tolerance by using minimum speed and rounding curvature up
+      const float speed_lower = MAX(vehicle_speed.min / VEHICLE_SPEED_FACTOR, 1.0);
+      const float speed_upper = MAX(vehicle_speed.max / VEHICLE_SPEED_FACTOR, 1.0);
+      const int max_curvature_upper = (MAX_LATERAL_ACCEL / (speed_lower * speed_lower) * limits.angle_deg_to_can) + 1.;
+      const int max_curvature_lower = (MAX_LATERAL_ACCEL / (speed_upper * speed_upper) * limits.angle_deg_to_can) - 1.;
+
+      // ensure that the curvature error doesn't try to enforce above this limit
+      if (desired_angle_last > 0) {
+        lowest_desired_angle = CLAMP(lowest_desired_angle, -max_curvature_lower, max_curvature_lower);
+        highest_desired_angle = CLAMP(highest_desired_angle, -max_curvature_upper, max_curvature_upper);
+      } else {
+        lowest_desired_angle = CLAMP(lowest_desired_angle, -max_curvature_upper, max_curvature_upper);
+        highest_desired_angle = CLAMP(highest_desired_angle, -max_curvature_lower, max_curvature_lower);
+      }
     }
 
     // check for violation;
@@ -724,8 +799,10 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 
   // Angle should either be 0 or same as current angle while not steering
   if (!steer_control_enabled) {
+    const int max_inactive_angle = CLAMP(angle_meas.max, -limits.max_angle, limits.max_angle) + 1;
+    const int min_inactive_angle = CLAMP(angle_meas.min, -limits.max_angle, limits.max_angle) - 1;
     violation |= (limits.inactive_angle_is_zero ? (desired_angle != 0) :
-                  max_limit_check(desired_angle, angle_meas.max + 1, angle_meas.min - 1));
+                  max_limit_check(desired_angle, max_inactive_angle, min_inactive_angle));
   }
 
   // No angle control allowed when controls are not allowed

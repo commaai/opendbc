@@ -2,13 +2,13 @@ from collections import defaultdict, namedtuple
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag, StrEnum
 
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, structs, uds
 from opendbc.can.can_define import CANDefine
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car import structs
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, \
                                                      Device
 from opendbc.car.fw_query_definitions import EcuAddrSubAddr, FwQueryConfig, Request, p16
+from opendbc.car.vin import Vin
 
 Ecu = structs.CarParams.Ecu
 NetworkLocation = structs.CarParams.NetworkLocation
@@ -80,7 +80,7 @@ class CarControllerParams:
       self.STEER_DELTA_DOWN = 10          # Min HCA reached in 0.60s (STEER_MAX / (50Hz * 0.60))
 
       if CP.transmissionType == TransmissionType.automatic:
-        self.shifter_values = can_define.dv["Getriebe_11"]["GE_Fahrstufe"]
+        self.shifter_values = can_define.dv["Gateway_73"]["GE_Fahrstufe"]
       elif CP.transmissionType == TransmissionType.direct:
         self.shifter_values = can_define.dv["Motor_EV_01"]["MO_Waehlpos"]
       self.hca_status_values = can_define.dv["LH_EPS_03"]["EPS_HCA_Status"]
@@ -453,8 +453,9 @@ def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str
       all_ecu_versions[ecu] |= set(versions)
 
   # Check the WMI and chassis code to determine the platform
-  wmi = vin[:3]
-  chassis_code = vin[6:8]
+  # https://www.clubvw.org.au/vwreference/vwvin
+  vin_obj = Vin(vin)
+  chassis_code = vin_obj.vds[3:5]
 
   for platform in CAR:
     valid_ecus = set()
@@ -474,7 +475,7 @@ def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str
     if valid_ecus != CHECK_FUZZY_ECUS:
       continue
 
-    if wmi in platform.config.wmis and chassis_code in platform.config.chassis_codes:
+    if vin_obj.wmi in platform.config.wmis and chassis_code in platform.config.chassis_codes:
       candidates.add(platform)
 
   return {str(c) for c in candidates}
