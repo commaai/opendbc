@@ -100,7 +100,7 @@ static bool mazda_fwd_hook(int bus, int addr) {
 }
 
 static safety_config mazda_init(uint16_t param) {
-  static const CanMsg MAZDA_TX_MSGS[] = {{MAZDA_LKAS, 0, 8, true}, {MAZDA_CRZ_BTNS, 0, 8}, {MAZDA_LKAS_HUD, 0, 8}};
+  static const CanMsg MAZDA_TX_MSGS[] = {{MAZDA_LKAS, 0, 8, true}, {MAZDA_CRZ_BTNS, 0, 8, false}, {MAZDA_LKAS_HUD, 0, 8, false}};
 
   static RxCheck mazda_rx_checks[] = {
     {.msg = {{MAZDA_CRZ_CTRL,     0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},

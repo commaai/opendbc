@@ -120,9 +120,9 @@ static bool rivian_fwd_hook(int bus, int addr) {
 
 static safety_config rivian_init(uint16_t param) {
   // 0x120 = ACM_lkaHbaCmd, 0x321 = SCCM_WheelTouch, 0x162 = VDM_AdasSts
-  static const CanMsg RIVIAN_TX_MSGS[] = {{0x120, 0, 8, true}, {0x321, 2, 7}, {0x162, 2, 8}};
+  static const CanMsg RIVIAN_TX_MSGS[] = {{0x120, 0, 8, true}, {0x321, 2, 7, false}, {0x162, 2, 8, false}};
   // 0x160 = ACM_longitudinalRequest
-  static const CanMsg RIVIAN_LONG_TX_MSGS[] = {{0x120, 0, 8, true}, {0x321, 2, 7}, {0x160, 0, 5, true}};
+  static const CanMsg RIVIAN_LONG_TX_MSGS[] = {{0x120, 0, 8, true}, {0x321, 2, 7, false}, {0x160, 0, 5, true}};
 
   static RxCheck rivian_rx_checks[] = {
     {.msg = {{0x208, 0, 8, .frequency = 50U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   // ESP_Status (speed)
