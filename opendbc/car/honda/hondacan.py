@@ -24,7 +24,7 @@ class CanBus(CanBusBase):
 
   @property
   def pt(self) -> int:
-    return self._pt
+    return self._radar
 
   @property
   def radar(self) -> int:
