@@ -50,7 +50,6 @@ void hyundai_common_init(uint16_t param) {
   const int HYUNDAI_PARAM_CAMERA_SCC = 8;
   const int HYUNDAI_PARAM_CANFD_LKA_STEERING = 16;
   const int HYUNDAI_PARAM_ALT_LIMITS = 64; // TODO: shift this down with the rest of the common flags
-  const int HYUNDAI_PARAM_FCEV_GAS = 256;
   const int HYUNDAI_PARAM_ALT_LIMITS_2 = 512;
 
   hyundai_ev_gas_signal = GET_FLAG(param, HYUNDAI_PARAM_EV_GAS);
@@ -65,6 +64,7 @@ void hyundai_common_init(uint16_t param) {
 #ifdef ALLOW_DEBUG
   const int HYUNDAI_PARAM_LONGITUDINAL = 4;
   hyundai_longitudinal = GET_FLAG(param, HYUNDAI_PARAM_LONGITUDINAL);
+  const int HYUNDAI_PARAM_FCEV_GAS = 256;
   hyundai_fcev_gas_signal = GET_FLAG(param, HYUNDAI_PARAM_FCEV_GAS);
 #else
   hyundai_longitudinal = false;
