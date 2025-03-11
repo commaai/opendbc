@@ -157,7 +157,8 @@ class CarState(CarStateBase):
     ret.seatbeltUnlatched = bool(cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LAMP"] or not cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LATCHED"])
 
     if self.CP.carFingerprint in SERIAL_STEERING:
-      steer_status = self.steer_status_values[cp_cam.vl["STEER_STATUS"]['STEER_STATUS']]
+      # steer_status = self.steer_status_values[cp_cam.vl["STEER_STATUS"]['STEER_STATUS']] switches on hybrid
+      steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]['STEER_STATUS']]
     else:
       steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]["STEER_STATUS"]]
     ret.steerFaultPermanent = steer_status not in ("NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT")
@@ -222,8 +223,10 @@ class CarState(CarStateBase):
     ret.gasPressed = ret.gas > 1e-5
 
     if self.CP.carFingerprint in SERIAL_STEERING:
-      ret.steeringTorque = cp_cam.vl["STEER_STATUS"]['STEER_TORQUE_SENSOR']
-      ret.steeringTorqueEps = cp_cam.vl["STEER_MOTOR_TORQUE"]['MOTOR_TORQUE']
+      # ret.steeringTorque = cp_cam.vl["STEER_STATUS"]['STEER_TORQUE_SENSOR']
+      # ret.steeringTorqueEps = cp_cam.vl["STEER_MOTOR_TORQUE"]['MOTOR_TORQUE']
+      ret.steeringTorque = cp.vl["STEER_STATUS"]['STEER_TORQUE_SENSOR']
+      ret.steeringTorqueEps = cp.vl["STEER_MOTOR_TORQUE"]['MOTOR_TORQUE']
     else:
       ret.steeringTorque = cp.vl["STEER_STATUS"]['STEER_TORQUE_SENSOR']
       ret.steeringTorqueEps = cp.vl["STEER_MOTOR_TORQUE"]['MOTOR_TORQUE']
@@ -231,7 +234,7 @@ class CarState(CarStateBase):
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD.get(self.CP.carFingerprint, 1200)
 
     # is_metric_cruise is used for cruise speed display
-    if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
+    if self.CP.carFingerprint in (HONDA_BOSCH_RADARLESS, SERIAL_STEERING):
       if "ACC_HUD" in cp_cam.vl:
         self.is_metric_cruise = self.is_metric if cp_cam.vl["ACC_HUD"]["CRUISE_SPEED"] >= 253 else not cp_cam.vl["ACC_HUD"]["IMPERIAL_UNIT"]
       else:
@@ -249,7 +252,7 @@ class CarState(CarStateBase):
 
       if not self.CP.openpilotLongitudinalControl:
         # ACC_HUD is on camera bus on radarless cars
-        acc_hud = cp_cam.vl["ACC_HUD"] if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS else cp.vl["ACC_HUD"]
+        acc_hud = cp_cam.vl["ACC_HUD"] if self.CP.carFingerprint in (HONDA_BOSCH_RADARLESS, SERIAL_STEERING) else cp.vl["ACC_HUD"]
         ret.cruiseState.nonAdaptive = acc_hud["CRUISE_CONTROL_LABEL"] != 0
         ret.cruiseState.standstill = acc_hud["CRUISE_SPEED"] == 252.
 
@@ -283,7 +286,7 @@ class CarState(CarStateBase):
       ret.cruiseState.available = bool(cp.vl[self.main_on_sig_msg]["MAIN_ON"])
 
     # Adds low speed warning as some models disable cruise at various speeds, ignore warning under 3mph
-    ret.lowSpeedAlert = ret.cruiseState.enabled and ret.vEgo >= 4 * CV.MPH_TO_MS and cp.vl["STEER_STATUS"]["STEER_CONTROL_ACTIVE"] == 0
+    ret.lowSpeedAlert = ret.cruiseState.enabled and ret.vEgo >= 4 * CV.MPH_TO_MS and cp.vl["STEER_STATUS"]["STEER_CONTROL_ACTIVE"] == 0 # fix for flip cars
 
     # Gets rid of Pedal Grinding noise when brake is pressed at slow speeds for some models
     if self.CP.carFingerprint in (CAR.HONDA_PILOT, CAR.HONDA_RIDGELINE):
