@@ -54,12 +54,6 @@ static void nissan_rx_hook(const CANPacket_t *to_push) {
   }
 }
 
-static void nissan_rx_relay_malfunction_hook(const CANPacket_t *to_push) {
-  int bus = GET_BUS(to_push);
-  int addr = GET_ADDR(to_push);
-
-  generic_rx_checks((addr == 0x169) && (bus == 0));
-}
 
 static bool nissan_tx_hook(const CANPacket_t *to_send) {
   const AngleSteeringLimits NISSAN_STEERING_LIMITS = {
@@ -157,7 +151,6 @@ static safety_config nissan_init(uint16_t param) {
 const safety_hooks nissan_hooks = {
   .init = nissan_init,
   .rx = nissan_rx_hook,
-  .rx_relay_malfunction = nissan_rx_relay_malfunction_hook,
   .tx = nissan_tx_hook,
   .fwd = nissan_fwd_hook,
 };

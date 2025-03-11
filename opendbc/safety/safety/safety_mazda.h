@@ -117,7 +117,6 @@ static safety_config mazda_init(uint16_t param) {
 const safety_hooks mazda_hooks = {
   .init = mazda_init,
   .rx = mazda_rx_hook,
-  .rx_relay_malfunction = mazda_rx_relay_malfunction_hook,
   .tx = mazda_tx_hook,
   .fwd = mazda_fwd_hook,
 };
