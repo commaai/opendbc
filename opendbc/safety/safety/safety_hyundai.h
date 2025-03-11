@@ -159,8 +159,9 @@ static void hyundai_rx_hook(const CANPacket_t *to_push) {
       gas_pressed = (((GET_BYTE(to_push, 4) & 0x7FU) << 1) | GET_BYTE(to_push, 3) >> 7) != 0U;
     } else if ((addr == 0x371) && hyundai_hybrid_gas_signal) {
       gas_pressed = GET_BYTE(to_push, 7) != 0U;
-    } else if ((addr == 0x91) && hyundai_fcev_gas_signal) {
-      gas_pressed = GET_BYTE(to_push, 6) != 0U;
+    // FIXME: fix missing rx check
+//    } else if ((addr == 0x91) && hyundai_fcev_gas_signal) {
+//      gas_pressed = GET_BYTE(to_push, 6) != 0U;
     } else if ((addr == 0x260) && !hyundai_ev_gas_signal && !hyundai_hybrid_gas_signal) {
       gas_pressed = (GET_BYTE(to_push, 7) >> 6) != 0U;
     } else {
