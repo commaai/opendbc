@@ -203,38 +203,31 @@ static bool volkswagen_mqb_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static int volkswagen_mqb_fwd_hook(int bus_num, int addr) {
-  int bus_fwd = -1;
+static bool volkswagen_mqb_fwd_hook(int bus_num, int addr) {
+  bool block_msg = false;
 
   switch (bus_num) {
     case 0:
       if (addr == MSG_LH_EPS_03) {
         // openpilot needs to replace apparent driver steering input torque to pacify VW Emergency Assist
-        bus_fwd = -1;
-      } else {
-        // Forward all remaining traffic from Extended CAN onward
-        bus_fwd = 2;
+        block_msg = true;
       }
       break;
     case 2:
       if ((addr == MSG_HCA_01) || (addr == MSG_LDW_02)) {
         // openpilot takes over LKAS steering control and related HUD messages from the camera
-        bus_fwd = -1;
+        block_msg = true;
       } else if (volkswagen_longitudinal && ((addr == MSG_ACC_02) || (addr == MSG_ACC_06) || (addr == MSG_ACC_07))) {
         // openpilot takes over acceleration/braking control and related HUD messages from the stock ACC radar
-        bus_fwd = -1;
+        block_msg = true;
       } else {
-        // Forward all remaining traffic from Extended CAN devices to J533 gateway
-        bus_fwd = 0;
       }
       break;
     default:
-      // No other buses should be in use; fallback to do-not-forward
-      bus_fwd = -1;
       break;
   }
 
-  return bus_fwd;
+  return block_msg;
 }
 
 const safety_hooks volkswagen_mqb_hooks = {

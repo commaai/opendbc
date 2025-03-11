@@ -88,6 +88,7 @@ static bool ford_get_quality_flag_valid(const CANPacket_t *to_push) {
   return valid;
 }
 
+static bool ford_canfd = false;
 static bool ford_longitudinal = false;
 
 #define FORD_INACTIVE_CURVATURE 1000U
@@ -102,8 +103,8 @@ static bool ford_longitudinal = false;
 static bool ford_lkas_msg_check(int addr) {
   return (addr == FORD_ACCDATA_3)
       || (addr == FORD_Lane_Assist_Data1)
-      || (addr == FORD_LateralMotionControl)
-      || (addr == FORD_LateralMotionControl2)
+      || ((addr == FORD_LateralMotionControl) && !ford_canfd)
+      || ((addr == FORD_LateralMotionControl2) && ford_canfd)
       || (addr == FORD_IPMA_Data);
 }
 
@@ -319,41 +320,30 @@ static bool ford_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static int ford_fwd_hook(int bus_num, int addr) {
-  int bus_fwd = -1;
+static bool ford_fwd_hook(int bus_num, int addr) {
+  bool block_msg = false;
 
   switch (bus_num) {
-    case FORD_MAIN_BUS: {
-      // Forward all traffic from bus 0 onward
-      bus_fwd = FORD_CAM_BUS;
-      break;
-    }
     case FORD_CAM_BUS: {
       if (ford_lkas_msg_check(addr)) {
         // Block stock LKAS and UI messages
-        bus_fwd = -1;
+        block_msg = true;
       } else if (ford_longitudinal && (addr == FORD_ACCDATA)) {
         // Block stock ACC message
-        bus_fwd = -1;
+        block_msg = true;
       } else {
-        // Forward remaining traffic
-        bus_fwd = FORD_MAIN_BUS;
       }
       break;
     }
     default: {
-      // No other buses should be in use; fallback to do-not-forward
-      bus_fwd = -1;
       break;
     }
   }
 
-  return bus_fwd;
+  return block_msg;
 }
 
 static safety_config ford_init(uint16_t param) {
-  bool ford_canfd = false;
-
   // warning: quality flags are not yet checked in openpilot's CAN parser,
   // this may be the cause of blocked messages
   static RxCheck ford_rx_checks[] = {
