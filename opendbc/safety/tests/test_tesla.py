@@ -133,16 +133,16 @@ class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
       self.assertEqual(self._tx(self._long_control_msg(10, aeb_event=aeb_event)), aeb_event == 0)
 
   def test_stock_aeb_passthrough(self):
-    no_aeb_msg = self._long_control_msg(10, aeb_event=0)
-    no_aeb_msg_cam = self._long_control_msg(10, aeb_event=0, bus=2)
-    aeb_msg_cam = self._long_control_msg(10, aeb_event=1, bus=2)
 
     # stock system sends no AEB -> no forwarding, and OP is allowed to TX
+    no_aeb_msg_cam = self._long_control_msg(10, aeb_event=0, bus=2)
     self.assertEqual(1, self._rx(no_aeb_msg_cam))
     self.assertEqual(-1, self.safety.safety_fwd_hook(2, no_aeb_msg_cam.addr))
+    no_aeb_msg = self._long_control_msg(10, aeb_event=0)
     self.assertTrue(self._tx(no_aeb_msg))
 
     # stock system sends AEB -> forwarding, and OP is not allowed to TX
+    aeb_msg_cam = self._long_control_msg(10, aeb_event=1, bus=2)
     self.assertEqual(1, self._rx(aeb_msg_cam))
     self.assertEqual(0, self.safety.safety_fwd_hook(2, aeb_msg_cam.addr))
     self.assertFalse(self._tx(no_aeb_msg))
