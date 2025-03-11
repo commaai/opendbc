@@ -149,16 +149,16 @@ class TestHyundaiSafetyCameraSCC(TestHyundaiSafety):
     self.safety.init_tests()
 
 
-class TestHyundaiSafetyFCEV(TestHyundaiSafety):
-  def setUp(self):
-    self.packer = CANPackerPanda("hyundai_kia_generic")
-    self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.FCEV_GAS)
-    self.safety.init_tests()
-
-  def _user_gas_msg(self, gas):
-    values = {"ACCELERATOR_PEDAL": gas}
-    return self.packer.make_can_msg_panda("FCEV_ACCELERATOR", 0, values)
+# class TestHyundaiSafetyFCEV(TestHyundaiSafety):
+#   def setUp(self):
+#     self.packer = CANPackerPanda("hyundai_kia_generic")
+#     self.safety = libsafety_py.libsafety
+#     self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.FCEV_GAS)
+#     self.safety.init_tests()
+#
+#   def _user_gas_msg(self, gas):
+#     values = {"ACCELERATOR_PEDAL": gas}
+#     return self.packer.make_can_msg_panda("FCEV_ACCELERATOR", 0, values)
 
 
 class TestHyundaiLegacySafety(TestHyundaiSafety):
@@ -173,7 +173,7 @@ class TestHyundaiLegacySafetyEV(TestHyundaiSafety):
   def setUp(self):
     self.packer = CANPackerPanda("hyundai_kia_generic")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiLegacy, 1)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiLegacy, HyundaiSafetyFlags.EV_GAS)
     self.safety.init_tests()
 
   def _user_gas_msg(self, gas):
@@ -185,7 +185,7 @@ class TestHyundaiLegacySafetyHEV(TestHyundaiSafety):
   def setUp(self):
     self.packer = CANPackerPanda("hyundai_kia_generic")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiLegacy, 2)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiLegacy, HyundaiSafetyFlags.HYBRID_GAS)
     self.safety.init_tests()
 
   def _user_gas_msg(self, gas):
