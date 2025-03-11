@@ -121,8 +121,8 @@ class CarState(CarStateBase):
     self.dash_speed_seen = False
 
   def update(self, can_parsers) -> structs.CarState:
-    cp = can_parsers[Bus.pt]
-    cp_cam = can_parsers[Bus.cam]
+    cp = can_parsers[0]
+    cp_cam = can_parsers[2]
     if self.CP.enableBsm:
       cp_body = can_parsers[Bus.body]
 
