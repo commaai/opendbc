@@ -22,9 +22,6 @@ class TestBody(common.PandaSafetyTest):
     values = {"SPEED_L": speed_l, "SPEED_R": speed_r}
     return self.packer.make_can_msg_panda("MOTORS_DATA", 0, values)
 
-  def _body_data_msg(self):
-    return self.packer.make_can_msg_panda("BODY_DATA", 0, {})
-
   def _torque_cmd_msg(self, torque_l, torque_r):
     values = {"TORQUE_L": torque_l, "TORQUE_R": torque_r}
     return self.packer.make_can_msg_panda("TORQUE_CMD", 0, values)
@@ -42,7 +39,7 @@ class TestBody(common.PandaSafetyTest):
     self.assertFalse(self.safety.get_vehicle_moving())
 
     # controls allowed when we get MOTORS_DATA message
-    self.assertTrue(self._rx(self._body_data_msg()))
+    self.assertTrue(self._rx(self._torque_cmd_msg(0, 0)))
     self.assertTrue(self.safety.get_vehicle_moving())  # always moving
     self.assertFalse(self.safety.get_controls_allowed())
 
