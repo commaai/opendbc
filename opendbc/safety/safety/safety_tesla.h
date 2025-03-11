@@ -192,11 +192,13 @@ static safety_config tesla_init(uint16_t param) {
     {.msg = {{0x311, 0, 7, .ignore_checksum = true, .ignore_counter = true,.frequency = 10U}, { 0 }, { 0 }}},   // UI_warning (blinkers, buckle switch & doors)
   };
 
+  safety_config ret;
   if (tesla_longitudinal) {
-    return BUILD_SAFETY_CFG(tesla_model3_y_rx_checks, TESLA_M3_Y_LONG_TX_MSGS);
+    ret = BUILD_SAFETY_CFG(tesla_model3_y_rx_checks, TESLA_M3_Y_LONG_TX_MSGS);
   } else {
-    return BUILD_SAFETY_CFG(tesla_model3_y_rx_checks, TESLA_M3_Y_TX_MSGS);
+    ret = BUILD_SAFETY_CFG(tesla_model3_y_rx_checks, TESLA_M3_Y_TX_MSGS);
   }
+  return ret;
 }
 
 const safety_hooks tesla_hooks = {

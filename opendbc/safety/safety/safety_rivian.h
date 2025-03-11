@@ -96,6 +96,7 @@ static bool rivian_fwd_hook(int bus, int addr) {
     }
 
     // VDM_AdasSts: for canceling stock ACC
+    // cppcheck-suppress knownConditionTrueFalse
     if ((addr == 0x162) && !rivian_longitudinal) {
       block_msg = true;
     }
@@ -108,6 +109,7 @@ static bool rivian_fwd_hook(int bus, int addr) {
     }
 
     // ACM_longitudinalRequest: longitudinal control message
+    // cppcheck-suppress knownConditionTrueFalse
     if (rivian_longitudinal && (addr == 0x160)) {
       block_msg = true;
     }
@@ -136,6 +138,9 @@ static safety_config rivian_init(uint16_t param) {
     rivian_longitudinal = GET_FLAG(param, FLAG_RIVIAN_LONG_CONTROL);
   #endif
 
+  // FIXME: cppcheck thinks that rivian_longitudinal is always false. This is not true
+  // if ALLOW_DEBUG is defined but cppcheck is run without ALLOW_DEBUG
+  // cppcheck-suppress knownConditionTrueFalse
   return rivian_longitudinal ? BUILD_SAFETY_CFG(rivian_rx_checks, RIVIAN_LONG_TX_MSGS) : \
                                BUILD_SAFETY_CFG(rivian_rx_checks, RIVIAN_TX_MSGS);
 }

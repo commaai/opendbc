@@ -215,12 +215,13 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
     current_hooks->rx(to_push);
 
     const int bus = GET_BUS(to_push);
+    const int addr = GET_ADDR(to_push);
     // check all tx msgs for liveness on opposite bus if specified.
     // used to detect a relay malfunction or control messages from disabled ECUs (radar)
     for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
       const CanMsg *m = &current_safety_config.tx_msgs[i];
       if (m->check_relay) {
-        generic_rx_checks((m->addr == GET_ADDR(to_push)) && (m->bus == bus));
+        generic_rx_checks((m->addr == addr) && (m->bus == bus));
       }
     }
   }
