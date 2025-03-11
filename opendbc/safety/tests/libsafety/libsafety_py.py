@@ -67,6 +67,7 @@ ret = ffi.new('CANPacket_t *')
 
 
 def make_CANPacket(addr: int, bus: int, dat: bytes) -> CANPacket:
+  global ret
   ret[0].extended = 1 if addr >= 0x800 else 0
   ret[0].addr = addr
   ret[0].data_len_code = LEN_TO_DLC[len(dat)]
