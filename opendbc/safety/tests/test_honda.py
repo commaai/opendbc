@@ -381,6 +381,7 @@ class TestHondaBoschSafetyBase(HondaBase):
 
   TX_MSGS = [[0xE4, 0], [0xE5, 0], [0x296, 1], [0x33D, 0], [0x33DA, 0], [0x33DB, 0]]
   FWD_BLACKLISTED_ADDRS = {2: [0xE4, 0xE5, 0x33D, 0x33DA, 0x33DB]}
+  RELAY_MALFUNCTION_ADDRS = {0: (0xE4,)}  # STEERING_CONTROL
 
   def setUp(self):
     self.packer = CANPackerPanda("honda_accord_2018_can_generated")
@@ -466,7 +467,7 @@ class TestHondaBoschLongSafety(HondaButtonEnableBase, TestHondaBoschSafetyBase):
   TX_MSGS = [[0xE4, 1], [0x1DF, 1], [0x1EF, 1], [0x1FA, 1], [0x30C, 1], [0x33D, 1], [0x33DA, 1], [0x33DB, 1], [0x39F, 1], [0x18DAB0F1, 1]]
   FWD_BLACKLISTED_ADDRS = {2: [0xE4, 0xE5, 0x33D, 0x33DA, 0x33DB]}
   # 0x1DF is to test that radar is disabled
-  RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0x194), 1: (0x1DF,)}  # STEERING_CONTROL, ACC_CONTROL
+  RELAY_MALFUNCTION_ADDRS = {1: (0xE4, 0x1DF)}  # STEERING_CONTROL, ACC_CONTROL
 
   def setUp(self):
     super().setUp()
