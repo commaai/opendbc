@@ -341,6 +341,11 @@ static safety_config honda_bosch_init(uint16_t param) {
     HONDA_COMMON_RX_CHECKS(1)
   };
 
+  // Nidec and bosch radarless has the powertrain bus on bus 0
+  static RxCheck honda_bosch_radarless_rx_checks[] = {
+    HONDA_COMMON_RX_CHECKS(0)
+  };
+
   honda_hw = HONDA_BOSCH;
   honda_brake_switch_prev = false;
   honda_bosch_radarless = GET_FLAG(param, HONDA_PARAM_RADARLESS);
@@ -357,12 +362,7 @@ static safety_config honda_bosch_init(uint16_t param) {
   if (honda_bosch_radarless && honda_alt_brake_msg) {
     SET_RX_CHECKS(honda_common_alt_brake_rx_checks, ret);
   } else if (honda_bosch_radarless) {
-    // Nidec and bosch radarless has the powertrain bus on bus 0
-    static RxCheck honda_common_rx_checks[] = {
-      HONDA_COMMON_RX_CHECKS(0)
-    };
-
-    SET_RX_CHECKS(honda_common_rx_checks, ret);
+    SET_RX_CHECKS(honda_bosch_radarless_rx_checks, ret);
   } else if (honda_alt_brake_msg) {
     SET_RX_CHECKS(honda_bosch_alt_brake_rx_checks, ret);
   } else {
