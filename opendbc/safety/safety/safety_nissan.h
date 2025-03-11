@@ -52,8 +52,6 @@ static void nissan_rx_hook(const CANPacket_t *to_push) {
     bool cruise_engaged = (GET_BYTE(to_push, 0) >> 3) & 1U;
     pcm_cruise_check(cruise_engaged);
   }
-
-  generic_rx_checks((addr == 0x169) && (bus == 0));
 }
 
 
@@ -102,35 +100,29 @@ static bool nissan_tx_hook(const CANPacket_t *to_send) {
 }
 
 
-static int nissan_fwd_hook(int bus_num, int addr) {
-  int bus_fwd = -1;
+static bool nissan_fwd_hook(int bus_num, int addr) {
+  bool block_msg = false;
 
   if (bus_num == 0) {
-    bool block_msg = (addr == 0x280); // CANCEL_MSG
-    if (!block_msg) {
-      bus_fwd = 2;  // ADAS
-    }
+    block_msg = (addr == 0x280); // CANCEL_MSG
   }
 
   if (bus_num == 2) {
     // 0x169 is LKAS, 0x2b1 LKAS_HUD, 0x4cc LKAS_HUD_INFO_MSG
-    bool block_msg = ((addr == 0x169) || (addr == 0x2b1) || (addr == 0x4cc));
-    if (!block_msg) {
-      bus_fwd = 0;  // V-CAN
-    }
+    block_msg = ((addr == 0x169) || (addr == 0x2b1) || (addr == 0x4cc));
   }
 
-  return bus_fwd;
+  return block_msg;
 }
 
 static safety_config nissan_init(uint16_t param) {
   static const CanMsg NISSAN_TX_MSGS[] = {
-    {0x169, 0, 8},  // LKAS
-    {0x2b1, 0, 8},  // PROPILOT_HUD
-    {0x4cc, 0, 8},  // PROPILOT_HUD_INFO_MSG
-    {0x20b, 2, 6},  // CRUISE_THROTTLE (X-Trail)
-    {0x20b, 1, 6},  // CRUISE_THROTTLE (Altima)
-    {0x280, 2, 8}   // CANCEL_MSG (Leaf)
+    {0x169, 0, 8, true},   // LKAS
+    {0x2b1, 0, 8, false},  // PROPILOT_HUD
+    {0x4cc, 0, 8, false},  // PROPILOT_HUD_INFO_MSG
+    {0x20b, 2, 6, false},  // CRUISE_THROTTLE (X-Trail)
+    {0x20b, 1, 6, false},  // CRUISE_THROTTLE (Altima)
+    {0x280, 2, 8, false}   // CANCEL_MSG (Leaf)
   };
 
   // Signals duplicated below due to the fact that these messages can come in on either CAN bus, depending on car model.

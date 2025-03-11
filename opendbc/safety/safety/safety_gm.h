@@ -84,14 +84,6 @@ static void gm_rx_hook(const CANPacket_t *to_push) {
     if (addr == 0xBD) {
       regen_braking = (GET_BYTE(to_push, 0) >> 4) != 0U;
     }
-
-    bool stock_ecu_detected = (addr == 0x180);  // ASCMLKASteeringCmd
-
-    // Check ASCMGasRegenCmd only if we're blocking it
-    if (!gm_pcm_cruise && (addr == 0x2CB)) {
-      stock_ecu_detected = true;
-    }
-    generic_rx_checks(stock_ecu_detected);
   }
 }
 
@@ -159,15 +151,15 @@ static bool gm_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static int gm_fwd_hook(int bus_num, int addr) {
-  int bus_fwd = -1;
+static bool gm_fwd_hook(int bus_num, int addr) {
+  bool block_msg = false;
 
   if (gm_hw == GM_CAM) {
     if (bus_num == 0) {
       // block PSCMStatus; forwarded through openpilot to hide an alert from the camera
       bool is_pscm_msg = (addr == 0x184);
-      if (!is_pscm_msg) {
-        bus_fwd = 2;
+      if (is_pscm_msg) {
+        block_msg = true;
       }
     }
 
@@ -175,14 +167,13 @@ static int gm_fwd_hook(int bus_num, int addr) {
       // block lkas message and acc messages if gm_cam_long, forward all others
       bool is_lkas_msg = (addr == 0x180);
       bool is_acc_msg = (addr == 0x315) || (addr == 0x2CB) || (addr == 0x370);
-      bool block_msg = is_lkas_msg || (is_acc_msg && gm_cam_long);
-      if (!block_msg) {
-        bus_fwd = 0;
-      }
+      block_msg = is_lkas_msg || (is_acc_msg && gm_cam_long);
     }
+  } else {
+    block_msg = true;
   }
 
-  return bus_fwd;
+  return block_msg;
 }
 
 static safety_config gm_init(uint16_t param) {
@@ -195,9 +186,9 @@ static safety_config gm_init(uint16_t param) {
     .max_brake = 400,
   };
 
-  static const CanMsg GM_ASCM_TX_MSGS[] = {{0x180, 0, 4}, {0x409, 0, 7}, {0x40A, 0, 7}, {0x2CB, 0, 8}, {0x370, 0, 6},  // pt bus
-                                           {0xA1, 1, 7}, {0x306, 1, 8}, {0x308, 1, 7}, {0x310, 1, 2},   // obs bus
-                                           {0x315, 2, 5}};  // ch bus
+  static const CanMsg GM_ASCM_TX_MSGS[] = {{0x180, 0, 4, true}, {0x409, 0, 7, false}, {0x40A, 0, 7, false}, {0x2CB, 0, 8, true}, {0x370, 0, 6, false},  // pt bus
+                                           {0xA1, 1, 7, false}, {0x306, 1, 8, false}, {0x308, 1, 7, false}, {0x310, 1, 2, false},   // obs bus
+                                           {0x315, 2, 5, false}};  // ch bus
 
 
   static const LongitudinalLimits GM_CAM_LONG_LIMITS = {
@@ -207,8 +198,8 @@ static safety_config gm_init(uint16_t param) {
     .max_brake = 400,
   };
 
-  static const CanMsg GM_CAM_LONG_TX_MSGS[] = {{0x180, 0, 4}, {0x315, 0, 5}, {0x2CB, 0, 8}, {0x370, 0, 6},  // pt bus
-                                               {0x184, 2, 8}};  // camera bus
+  static const CanMsg GM_CAM_LONG_TX_MSGS[] = {{0x180, 0, 4, true}, {0x315, 0, 5, false}, {0x2CB, 0, 8, true}, {0x370, 0, 6, false},  // pt bus
+                                               {0x184, 2, 8, false}};  // camera bus
 
 
   // TODO: do checksum and counter checks. Add correct timestep, 0.1s for now.
@@ -223,8 +214,8 @@ static safety_config gm_init(uint16_t param) {
     {.msg = {{0xC9, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},
   };
 
-  static const CanMsg GM_CAM_TX_MSGS[] = {{0x180, 0, 4},  // pt bus
-                                          {0x1E1, 2, 7}, {0x184, 2, 8}};  // camera bus
+  static const CanMsg GM_CAM_TX_MSGS[] = {{0x180, 0, 4, true},  // pt bus
+                                          {0x1E1, 2, 7, false}, {0x184, 2, 8, false}};  // camera bus
 
   gm_hw = GET_FLAG(param, GM_PARAM_HW_CAM) ? GM_CAM : GM_ASCM;
 
