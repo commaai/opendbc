@@ -46,7 +46,7 @@ const LongitudinalLimits HYUNDAI_LONG_LIMITS = {
   {.msg = {{0x386, 0, 8, .ignore_checksum = (legacy), .ignore_counter = (legacy), .max_counter = (legacy) ? 0U : 15U, .frequency = 100U}, { 0 }, { 0 }}}, \
   {.msg = {{0x394, 0, 8, .ignore_checksum = (legacy), .ignore_counter = (legacy), .max_counter = (legacy) ? 0U : 7U, .frequency = 100U}, { 0 }, { 0 }}},  \
   {.msg = {{0x251, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},                                              \
-  {.msg = {{0x4F1, 0, 4, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},                                              \
+  {.msg = {{0x4F1, 0, 4, .ignore_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},                                              \
 
 #define HYUNDAI_SCC12_ADDR_CHECK(scc_bus)                                               \
   {.msg = {{0x421, (scc_bus), 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}}, \
