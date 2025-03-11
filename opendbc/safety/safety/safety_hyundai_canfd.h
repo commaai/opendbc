@@ -219,9 +219,7 @@ static bool hyundai_canfd_fwd_hook(int bus_num, int addr) {
 
   if (bus_num == 0) {
     block_msg = (hyundai_ccnc && (addr == 0xEA));
-  }
-
-  if (bus_num == 2) {
+  } else if (bus_num == 2) {
     // LKAS for cars with LKAS and LFA messages, LFA for cars with no LKAS messages
     int lfa_block_addr = hyundai_canfd_lka_steering_alt ? 0x362 : 0x2a4;
     bool is_lka_msg = ((addr == hyundai_canfd_get_lka_addr()) || (addr == lfa_block_addr)) && hyundai_canfd_lka_steering;
