@@ -180,13 +180,6 @@ class HondaBase(common.PandaCarSafetyTest):
   cnt_powertrain_data = 0
   cnt_acc_state = 0
 
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__.endswith("Base"):
-      cls.packer = None
-      cls.safety = None
-      raise unittest.SkipTest
-
   def _powertrain_data_msg(self, cruise_on=None, brake_pressed=None, gas_pressed=None):
     # preserve the state
     if cruise_on is None:

@@ -88,13 +88,6 @@ class TestGmSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteeringSaf
 
   PCM_CRUISE = True  # openpilot is tied to the PCM state if not longitudinal
 
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "TestGmSafetyBase":
-      cls.packer = None
-      cls.safety = None
-      raise unittest.SkipTest
-
   def setUp(self):
     self.packer = CANPackerPanda("gm_global_a_powertrain_generated")
     self.packer_chassis = CANPackerPanda("gm_global_a_chassis")
@@ -164,15 +157,6 @@ class TestGmAscmSafety(GmLongitudinalBase, TestGmSafetyBase):
 
 
 class TestGmCameraSafetyBase(TestGmSafetyBase):
-
-
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "TestGmCameraSafetyBase":
-      cls.packer = None
-      cls.safety = None
-      raise unittest.SkipTest
-
   def _user_brake_msg(self, brake):
     values = {"BrakePressed": brake}
     return self.packer.make_can_msg_panda("ECMEngineStatus", 0, values)
