@@ -6,7 +6,7 @@ from opendbc.car import Bus, DT_CTRL, rate_limit, make_tester_present_msg, struc
 from opendbc.car.honda import hondacan
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.honda.values import CruiseButtons, VISUAL_HUD, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, HONDA_NIDEC_ALT_PCM_ACCEL, HONDA_BOSCH_1000, \
-  CarControllerParams, SERIAL_STEERING, LKAS_LIMITS
+  CarControllerParams, SERIAL_STEERING, LKAS_LIMITS, NIDEC_ACCEL_MIN, NIDEC_ACCEL_MAX
 from opendbc.car.interfaces import CarControllerBase
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
