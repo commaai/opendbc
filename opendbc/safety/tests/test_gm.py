@@ -88,6 +88,8 @@ class TestGmSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteeringSaf
 
   PCM_CRUISE = True  # openpilot is tied to the PCM state if not longitudinal
 
+  EXTRA_SAFETY_PARAM = 0
+
   def setUp(self):
     self.packer = CANPackerPanda("gm_global_a_powertrain_generated")
     self.packer_chassis = CANPackerPanda("gm_global_a_chassis")
@@ -111,10 +113,6 @@ class TestGmSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteeringSaf
     values = {"BrakePedalPos": 8 if brake else 0}
     return self.packer.make_can_msg_panda("ECMAcceleratorPos", 0, values)
 
-  def _user_regen_msg(self, regen):
-    values = {"RegenPaddle": 2 if regen else 0}
-    return self.packer.make_can_msg_panda("EBCMRegenPaddle", 0, values)
-
   def _user_gas_msg(self, gas):
     values = {"AcceleratorPedal2": 1 if gas else 0}
     if self.PCM_CRUISE:
@@ -136,6 +134,15 @@ class TestGmSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteeringSaf
     return self.packer.make_can_msg_panda("ASCMSteeringButton", self.BUTTONS_BUS, values)
 
 
+class TestGmEVSafetyBase(TestGmSafetyBase):
+  EXTRA_SAFETY_PARAM = GMSafetyFlags.EV
+
+  # existence of _user_regen_msg adds regen tests
+  def _user_regen_msg(self, regen):
+    values = {"RegenPaddle": 2 if regen else 0}
+    return self.packer.make_can_msg_panda("EBCMRegenPaddle", 0, values)
+
+
 class TestGmAscmSafety(GmLongitudinalBase, TestGmSafetyBase):
   TX_MSGS = [[0x180, 0], [0x409, 0], [0x40A, 0], [0x2CB, 0], [0x370, 0],  # pt bus
              [0xA1, 1], [0x306, 1], [0x308, 1], [0x310, 1],  # obs bus
@@ -152,8 +159,12 @@ class TestGmAscmSafety(GmLongitudinalBase, TestGmSafetyBase):
     self.packer = CANPackerPanda("gm_global_a_powertrain_generated")
     self.packer_chassis = CANPackerPanda("gm_global_a_chassis")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.gm, 0)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.gm, self.EXTRA_SAFETY_PARAM)
     self.safety.init_tests()
+
+
+class TestGmAscmEVSafety(TestGmAscmSafety, TestGmEVSafetyBase):
+  pass
 
 
 class TestGmCameraSafetyBase(TestGmSafetyBase):
@@ -172,7 +183,7 @@ class TestGmCameraSafety(TestGmCameraSafetyBase):
     self.packer = CANPackerPanda("gm_global_a_powertrain_generated")
     self.packer_chassis = CANPackerPanda("gm_global_a_chassis")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.gm, GMSafetyFlags.HW_CAM)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.gm, GMSafetyFlags.HW_CAM | self.EXTRA_SAFETY_PARAM)
     self.safety.init_tests()
 
   def test_buttons(self):
@@ -190,6 +201,10 @@ class TestGmCameraSafety(TestGmCameraSafetyBase):
       self.assertEqual(enabled, self._tx(self._button_msg(Buttons.CANCEL)))
 
 
+class TestGmCameraEVSafety(TestGmCameraSafety, TestGmEVSafetyBase):
+  pass
+
+
 class TestGmCameraLongitudinalSafety(GmLongitudinalBase, TestGmCameraSafetyBase):
   TX_MSGS = [[0x180, 0], [0x315, 0], [0x2CB, 0], [0x370, 0],  # pt bus
              [0x184, 2]]  # camera bus
@@ -204,8 +219,12 @@ class TestGmCameraLongitudinalSafety(GmLongitudinalBase, TestGmCameraSafetyBase)
     self.packer = CANPackerPanda("gm_global_a_powertrain_generated")
     self.packer_chassis = CANPackerPanda("gm_global_a_chassis")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.gm, GMSafetyFlags.HW_CAM | GMSafetyFlags.HW_CAM_LONG)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.gm, GMSafetyFlags.HW_CAM | GMSafetyFlags.HW_CAM_LONG | self.EXTRA_SAFETY_PARAM)
     self.safety.init_tests()
+
+
+class TestGmCameraLongitudinalEVSafety(TestGmCameraLongitudinalSafety, TestGmEVSafetyBase):
+  pass
 
 
 if __name__ == "__main__":
