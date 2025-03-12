@@ -19,7 +19,7 @@ def compute_gb_honda_bosch(accel, speed):
 
 
 def compute_gb_honda_nidec(accel, speed): # longitudinal tuner by MVL
-  gb = np.interp ( float(accel), [-3.5, 0, 2.0 ] , [-900, 0, 198 ]  )
+  gb = np.interp ( float(accel), [-3.5, 0, 2.0 ] , [-225, 0, 198 ]  )
   return np.maximum ( 0.0, gb ) , np.minimum ( gb, 0 )
 
 def compute_gas_brake(accel, speed, fingerprint):
@@ -225,7 +225,7 @@ class CarController(CarControllerBase):
           pcm_override = True
 
           stopping = actuators.longControlState == LongCtrlState.stopping
-          brake = np.clip (-brake, 0, NIDEC_BRAKE_MAX )
+          brake = np.clip (-brake, 0.0, 256.0 ) # NIDEC_BRAKE_MAX
           can_sends.append(hondacan.create_brake_command(self.packer, self.CAN, brake, stopping,
                                                          pcm_override, pcm_cancel_cmd, fcw_display,
                                                          self.CP.carFingerprint, CS.stock_brake))
@@ -240,7 +240,7 @@ class CarController(CarControllerBase):
     # Send dashboard UI commands.
     # On Nidec, this controls longitudinal positive acceleration
     if self.frame % 10 == 0:
-      gas = np.clip ( gas, 0, NIDEC_GAS_MAX )
+      gas = np.clip ( gas, 0.0, 196.0 ) # NIDEC_GAS_MAX
       hud = HUDData(int(gas), int(round(hud_v_cruise)), hud_control.leadVisible,
       hud_control.lanesVisible, fcw_display, acc_alert, steer_required, hud_control.leadDistanceBars)
       #      hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
