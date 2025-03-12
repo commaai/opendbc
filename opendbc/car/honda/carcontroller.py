@@ -6,7 +6,7 @@ from opendbc.car import Bus, DT_CTRL, rate_limit, make_tester_present_msg, struc
 from opendbc.car.honda import hondacan
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.honda.values import CruiseButtons, VISUAL_HUD, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, HONDA_NIDEC_ALT_PCM_ACCEL, HONDA_BOSCH_1000, \
-  CarControllerParams, SERIAL_STEERING, LKAS_LIMITS, NIDEC_ACCEL_MIN, NIDEC_ACCEL_MAX
+  CarControllerParams, SERIAL_STEERING, LKAS_LIMITS
 from opendbc.car.interfaces import CarControllerBase
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
@@ -19,7 +19,7 @@ def compute_gb_honda_bosch(accel, speed):
 
 
 def compute_gb_honda_nidec(accel, speed): # longitudinal tuner by MVL
-  gb = np.interp ( float(accel), [-3.5, 0, 2.0 ] , [-3.5, 0, 2.0 ]  ) 
+  gb = np.interp ( float(accel), [-3.5, 0, 2.0 ] , [-3.5, 0, 2.0 ]  )
   return np.maximum ( 0.0, gb ) , np.minimum ( gb, 0 )
 
 def compute_gas_brake(accel, speed, fingerprint):
@@ -162,7 +162,7 @@ class CarController(CarControllerBase):
 
     # Send steering command.
     can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, CC.latActive, self.CP.carFingerprint))
-    
+
     # wind brake from air resistance decel at high speed
     wind_brake = np.interp(CS.out.vEgo, [0.0, 2.3, 35.0], [0.001, 0.002, 0.15])
     # all of this is only relevant for HONDA NIDEC
@@ -218,7 +218,7 @@ class CarController(CarControllerBase):
           can_sends.extend(hondacan.create_acc_commands(self.packer, self.CAN, CC.enabled, CC.longActive, self.accel, self.gas,
                                                         self.stopping_counter, self.CP.carFingerprint))
         else:
-          apply_brake = np.clip(self.brake_last - wind_brake + creep_accel, 0.0, 1.0)
+          apply_brake = np.clip(self.brake_last - wind_brake, 0.0, 1.0)
           apply_brake = int(np.clip(apply_brake * self.params.NIDEC_BRAKE_MAX, 0, self.params.NIDEC_BRAKE_MAX - 1))
           pump_on, self.last_pump_ts = brake_pump_hysteresis(apply_brake, self.apply_brake_last, self.last_pump_ts, ts)
 
