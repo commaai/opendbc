@@ -189,18 +189,6 @@ class CAR(Platforms):
     {Bus.pt: 'honda_civic_ex_2022_can_generated'},
     flags=HondaFlags.BOSCH_RADARLESS,
   )
-  ACURA_MDX_3G = HondaNidecPlatformConfig(
-    [HondaCarDocs("Acura MDX 2018-20")],
-    CarSpecs(mass=4350 * CV.LB_TO_KG, wheelbase=2.82, centerToFrontRatio=0.428, steerRatio=15.66, tireStiffnessFactor=0.444),  # acura spec, stiff from Pilot
-    radar_dbc_dict('acura_mdx_3G_ice'),
-    flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES
-  )
-  ACURA_MDX_3G_HYBRID = HondaNidecPlatformConfig(
-    [HondaCarDocs("Acura MDX Hybrid 2018-20")],
-    CarSpecs(mass=4486 * CV.LB_TO_KG, wheelbase=2.82, centerToFrontRatio=0.428, steerRatio=15.76, tireStiffnessFactor=0.444),  # acura spec, stiff from Pilot
-    radar_dbc_dict('acura_mdx_3G_hybrid'),
-    flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES
-  )
   HONDA_ODYSSEY_5G_MMR = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda Odyssey 2021-25", "All", min_steer_speed=3. * CV.MPH_TO_MS)],
     CarSpecs(mass=4590 * CV.LB_TO_KG, wheelbase=3.00, steerRatio=13.35, centerToFrontRatio=0.54, tireStiffnessFactor=1.02),  # as spec
@@ -260,6 +248,18 @@ class CAR(Platforms):
     HONDA_HRV_3G.specs,
     radar_dbc_dict('honda_fit_ex_2018_can_generated'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES,
+  )
+  ACURA_MDX_3G = HondaNidecPlatformConfig(
+    [HondaCarDocs("Acura MDX 2018-20")],
+    CarSpecs(mass=4350 * CV.LB_TO_KG, wheelbase=2.82, centerToFrontRatio=0.428, steerRatio=15.66, tireStiffnessFactor=0.444),  # acura spec, stiff from Pilot
+    radar_dbc_dict('acura_mdx_3G_ice'),
+    flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES
+  )
+  ACURA_MDX_3G_HYBRID = HondaNidecPlatformConfig(
+    [HondaCarDocs("Acura MDX Hybrid 2018-20")],
+    CarSpecs(mass=4486 * CV.LB_TO_KG, wheelbase=2.82, centerToFrontRatio=0.428, steerRatio=15.76, tireStiffnessFactor=0.444),  # acura spec, stiff from Pilot
+    radar_dbc_dict('acura_mdx_3G_hybrid'),
+    flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES
   )
   HONDA_ODYSSEY = HondaNidecPlatformConfig(
     [HondaCarDocs("Honda Odyssey 2018-20")],
