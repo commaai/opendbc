@@ -122,7 +122,10 @@ class CarState(CarStateBase):
     self.dash_speed_seen = False
 
   def update(self, can_parsers) -> structs.CarState:
-    cp = can_parsers[Bus.radar]
+    if CP.carFingerprint in SERIAL_STEERING:
+      cp = can_parsers[Bus.radar]
+    else:
+      cp = can_parsers[Bus.pt]
     cp_cam = can_parsers[Bus.cam]
     if self.CP.enableBsm:
       cp_body = can_parsers[Bus.body]
