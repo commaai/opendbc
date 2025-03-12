@@ -137,13 +137,6 @@ class TestGmSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteeringSaf
 class TestGmEVSafetyBase(TestGmSafetyBase):
   EXTRA_SAFETY_PARAM = GMSafetyFlags.EV
 
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "TestGmEVSafetyBase":
-      cls.packer = None
-      cls.safety = None
-      raise unittest.SkipTest
-
   # existence of _user_regen_msg adds regen tests
   def _user_regen_msg(self, regen):
     values = {"RegenPaddle": 2 if regen else 0}
