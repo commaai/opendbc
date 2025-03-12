@@ -30,7 +30,7 @@ def get_can_messages(CP, gearbox_msg):
     ("CAR_SPEED", 10),
     ("VSA_STATUS", 50),
     #("STEER_STATUS", 100), - moved below for serial steering
-    ("STEER_MOTOR_TORQUE", 0),  # TODO: not on every car
+    ("STEER_MOTOR_TORQUE", 100),  # TODO: not on every car
   ]
 
   if (CP.carFingerprint == CAR.HONDA_ODYSSEY_CHN) or (CP.carFingerprint in SERIAL_STEERING):
@@ -44,7 +44,7 @@ def get_can_messages(CP, gearbox_msg):
       ("SCM_BUTTONS", 25),
     ]
 
-  if CP.carFingerprint in SERIAL_STEERING:
+  if CP.carFingerprint in SERIAL_STEERING and False:
       messages.append(("STEER_STATUS", 0))
   else:
       messages.append(("STEER_STATUS", 100))
@@ -81,7 +81,8 @@ def get_can_messages(CP, gearbox_msg):
   elif CP.carFingerprint in (CAR.HONDA_ODYSSEY_CHN, CAR.HONDA_FREED, CAR.HONDA_HRV):
     pass
   else:
-    messages.append(("DOORS_STATUS", 3))
+    pass
+    # messages.append(("DOORS_STATUS", 3))
 
   if CP.carFingerprint in HONDA_BOSCH_RADARLESS:
     messages.append(("CRUISE_FAULT_STATUS", 50))
@@ -152,8 +153,9 @@ class CarState(CarStateBase):
     elif self.CP.carFingerprint in (CAR.HONDA_ODYSSEY_CHN, CAR.HONDA_FREED, CAR.HONDA_HRV):
       ret.doorOpen = bool(cp.vl["SCM_BUTTONS"]["DRIVERS_DOOR_OPEN"])
     else:
-      ret.doorOpen = any([cp.vl["DOORS_STATUS"]["DOOR_OPEN_FL"], cp.vl["DOORS_STATUS"]["DOOR_OPEN_FR"],
-                          cp.vl["DOORS_STATUS"]["DOOR_OPEN_RL"], cp.vl["DOORS_STATUS"]["DOOR_OPEN_RR"]])
+      ret.doorOpen = False
+    #  ret.doorOpen = any([cp.vl["DOORS_STATUS"]["DOOR_OPEN_FL"], cp.vl["DOORS_STATUS"]["DOOR_OPEN_FR"],
+    #                      cp.vl["DOORS_STATUS"]["DOOR_OPEN_RL"], cp.vl["DOORS_STATUS"]["DOOR_OPEN_RR"]])
     ret.seatbeltUnlatched = bool(cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LAMP"] or not cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LATCHED"])
 
     if self.CP.carFingerprint in SERIAL_STEERING:
@@ -317,14 +319,14 @@ class CarState(CarStateBase):
   def get_can_parsers(self, CP):
     pt_messages = get_can_messages(CP, self.gearbox_msg)
 
-    if CP.carFingerprint in SERIAL_STEERING:
+    if CP.carFingerprint in SERIAL_STEERING and False:
       cam_messages = [
         ("STEER_MOTOR_TORQUE", 100),
         ("STEER_STATUS", 100)
       ]
     else:
       cam_messages = [
-        ("STEERING_CONTROL", 100),
+      #  ("STEERING_CONTROL", 100),
       ]
 
     if CP.carFingerprint in HONDA_BOSCH_RADARLESS:
