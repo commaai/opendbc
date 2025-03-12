@@ -2,6 +2,17 @@
 
 #include "safety_declarations.h"
 
+// TODO: do checksum and counter checks. Add correct timestep, 0.1s for now.
+#define GM_COMMON_RX_CHECKS \
+    {.msg = {{0x184, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}}, \
+    {.msg = {{0x34A, 0, 5, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}}, \
+    {.msg = {{0x1E1, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}}, \
+    {.msg = {{0xBE, 0, 6, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},    /* Volt, Silverado, Acadia Denali */ \
+             {0xBE, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},    /* Bolt EUV */ \
+             {0xBE, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}}},  /* Escalade */ \
+    {.msg = {{0x1C4, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}}, \
+    {.msg = {{0xC9, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}}, \
+
 static const LongitudinalLimits *gm_long_limits;
 
 enum {
@@ -22,8 +33,6 @@ static bool gm_pcm_cruise = false;
 static void gm_rx_hook(const CANPacket_t *to_push) {
 
   const int GM_STANDSTILL_THRSLD = 10;  // 0.311kph
-
-
 
   if (GET_BUS(to_push) == 0U) {
     int addr = GET_ADDR(to_push);
@@ -178,6 +187,7 @@ static bool gm_fwd_hook(int bus_num, int addr) {
 
 static safety_config gm_init(uint16_t param) {
   const uint16_t GM_PARAM_HW_CAM = 1;
+  const uint16_t GM_PARAM_EV = 4;
 
   static const LongitudinalLimits GM_ASCM_LONG_LIMITS = {
     .max_gas = 3072,
@@ -202,16 +212,13 @@ static safety_config gm_init(uint16_t param) {
                                                {0x184, 2, 8, false}};  // camera bus
 
 
-  // TODO: do checksum and counter checks. Add correct timestep, 0.1s for now.
   static RxCheck gm_rx_checks[] = {
-    {.msg = {{0x184, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},
-    {.msg = {{0x34A, 0, 5, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},
-    {.msg = {{0x1E1, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},
-    {.msg = {{0xBE, 0, 6, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},    // Volt, Silverado, Acadia Denali
-             {0xBE, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},    // Bolt EUV
-             {0xBE, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}}},  // Escalade
-    {.msg = {{0x1C4, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},
-    {.msg = {{0xC9, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},
+    GM_COMMON_RX_CHECKS
+  };
+
+  static RxCheck gm_ev_rx_checks[] = {
+    GM_COMMON_RX_CHECKS
+    {.msg = {{0xBD, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 40U}, { 0 }, { 0 }}},
   };
 
   static const CanMsg GM_CAM_TX_MSGS[] = {{0x180, 0, 4, true},  // pt bus
@@ -232,12 +239,19 @@ static safety_config gm_init(uint16_t param) {
 #endif
   gm_pcm_cruise = (gm_hw == GM_CAM) && !gm_cam_long;
 
-  safety_config ret = BUILD_SAFETY_CFG(gm_rx_checks, GM_ASCM_TX_MSGS);
+  safety_config ret;
   if (gm_hw == GM_CAM) {
     // FIXME: cppcheck thinks that gm_cam_long is always false. This is not true
     // if ALLOW_DEBUG is defined but cppcheck is run without ALLOW_DEBUG
     // cppcheck-suppress knownConditionTrueFalse
     ret = gm_cam_long ? BUILD_SAFETY_CFG(gm_rx_checks, GM_CAM_LONG_TX_MSGS) : BUILD_SAFETY_CFG(gm_rx_checks, GM_CAM_TX_MSGS);
+  } else {
+    ret = BUILD_SAFETY_CFG(gm_rx_checks, GM_ASCM_TX_MSGS);
+  }
+
+  const bool gm_ev = GET_FLAG(param, GM_PARAM_EV);
+  if (gm_ev) {
+    SET_RX_CHECKS(gm_ev_rx_checks, ret);
   }
   return ret;
 }
