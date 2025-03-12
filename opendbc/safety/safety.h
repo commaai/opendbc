@@ -262,7 +262,7 @@ bool safety_tx_hook(CANPacket_t *to_send) {
     safety_allowed = current_hooks->tx(to_send);
   }
 
-  return !relay_malfunction && safety_allowed;
+  return !relay_malfunction && whitelisted && safety_allowed;
 }
 
 static int get_fwd_bus(int bus_num) {
