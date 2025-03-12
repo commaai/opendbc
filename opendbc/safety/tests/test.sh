@@ -19,14 +19,13 @@ pytest -n8
 
 # generate and open report
 if [ "$1" == "--report" ]; then
-  mkdir -p tests/coverage-out
-  gcovr -r . --html-details tests/coverage-out/index.html
+  mkdir -p coverage-out
+  gcovr -r ../ --html-nested coverage-out/index.html
   sensible-browser coverage-out/index.html
 fi
 
 # test coverage
-cd ..
-GCOV="gcovr -r . --fail-under-line=100 -e ^board/ -e ^tests/libsafety/"
+GCOV="gcovr -r ../ --fail-under-line=100 -e ^libsafety -e ^../board"
 if ! GCOV_OUTPUT="$($GCOV)"; then
   echo -e "FAILED:\n$GCOV_OUTPUT"
   exit 1

@@ -98,6 +98,7 @@ class CarHarness(EnumBase):
   nidec = BaseCarHarness("Honda Nidec connector")
   bosch_a = BaseCarHarness("Honda Bosch A connector")
   bosch_b = BaseCarHarness("Honda Bosch B connector")
+  bosch_c = BaseCarHarness("Honda Bosch C connector")
   toyota_a = BaseCarHarness("Toyota A connector")
   toyota_b = BaseCarHarness("Toyota B connector")
   subaru_a = BaseCarHarness("Subaru A connector")
@@ -380,7 +381,7 @@ class CarDocs:
         sentence_builder += " This car may not be able to take tight turns on its own."
 
       # experimental mode
-      exp_link = "<a href='https://blog.comma.ai/090release/#experimental-mode' target='_blank' class='link-light-new-regular-text'>Experimental mode</a>"
+      exp_link = "<a href='https://blog.comma.ai/090release/#experimental-mode' target='_blank' class='highlight'>Experimental mode</a>"
       if CP.openpilotLongitudinalControl and not CP.experimentalLongitudinalAvailable:
         sentence_builder += f" Traffic light and stop sign handling is also available in {exp_link}."
 
@@ -388,7 +389,7 @@ class CarDocs:
 
     else:
       if CP.carFingerprint == "COMMA_BODY":
-        return "The body is a robotics dev kit that can run openpilot. <a href='https://www.commabody.com'>Learn more.</a>"
+        return "The body is a robotics dev kit that can run openpilot. <a href='https://www.commabody.com' target='_blank' class='highlight'>Learn more.</a>"
       else:
         raise Exception(f"This notCar does not have a detail sentence: {CP.carFingerprint}")
 
