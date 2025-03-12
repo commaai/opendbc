@@ -155,11 +155,7 @@ class TestHyundaiCanfdLFASteeringAltButtonsBase(TestHyundaiCanfdLFASteeringBase)
 
 @parameterized_class(ALL_GAS_EV_HYBRID_COMBOS)
 class TestHyundaiCanfdLFASteeringAltButtons(TestHyundaiCanfdLFASteeringAltButtonsBase):
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "TestHyundaiCanfdLFASteeringAltButtons":
-      cls.safety = None
-      raise unittest.SkipTest
+  pass
 
 
 class TestHyundaiCanfdLKASteeringEV(TestHyundaiCanfdBase):
