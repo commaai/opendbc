@@ -14,15 +14,25 @@ FINGERPRINTS = {
 # TODO: ECU names are wrong
 FW_VERSIONS = {
   CAR.PSA_OPEL_CORSA_F: {
-      (Ecu.engine, 0x6B5, None): [
-          b'\x01\t\x06\x0f\x0f\x0f\x0f\x0f\x0f\x08\x00\x02\x01'
-      ],
-      (Ecu.adas, 0x6A6, None): [
-          b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
-      ],
-      (Ecu.abs, 0x6B4, None): [
-          b'S90C059201026'
-      ]
+    (Ecu.fwdRadar, 0x6B6, None): [
+        b'0000000000000' # TODO
+    ],
+    (Ecu.engine, 0x6B5, None): [
+        b'\x01\t\x06\x0f\x0f\x0f\x0f\x0f\x0f\x08\x00\x02\x01'
+    ],
+    (Ecu.adas, 0x6A6, None): [
+        b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+    ],
+    (Ecu.abs, 0x6B4, None): [
+        b'S90C059201026'
+    ],
+    (Ecu.eps, 0x6A2, None): [
+        b'0000000000000' # TODO
+    ],
+    (Ecu.transmission, 0x6AD, None): [
+        b'0000000000000' # TODO
+    ],
   }
 }
+
 

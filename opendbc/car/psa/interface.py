@@ -30,9 +30,9 @@ class CarInterface(CarInterfaceBase):
 
     return ret
 
-  # TODO: find radar ECU address to disable it, check sub_addr with panda script
+  # TODO: disable radar ECU
   @staticmethod
   def init(CP, can_recv, can_send):
-    # ARTIV	ARTIV, RADAR_AV_4, LIDAR, ARTIV_UDS	>6B6:696
-    communication_control = bytes([uds.SERVICE_TYPE.COMMUNICATION_CONTROL, uds.CONTROL_TYPE.ENABLE_RX_DISABLE_TX, uds.MESSAGE_TYPE.NORMAL])
-    disable_ecu(can_recv, can_send, bus=1, addr=0x6B6, sub_addr=0x0, com_cont_req=communication_control)
+    # ECU name: ARTIV	ARTIV, RADAR_AV_4, LIDAR, ARTIV_UDS	>6B6:696
+    tester_present = bytes([0x3E,0x00])
+    disable_ecu(can_recv, can_send, bus=1, addr=0x6B6, com_cont_req=tester_present)

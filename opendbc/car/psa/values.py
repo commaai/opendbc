@@ -48,18 +48,57 @@ class CAR(Platforms):
     ),
   )
 
-# TODO: fix FW query
+# Same as StdQueries.DEFAULT_DIAGNOSTIC_REQUEST
+PSA_DIAGNOSTIC_REQUEST  = bytes([uds.SERVICE_TYPE.DIAGNOSTIC_SESSION_CONTROL, 0x01])
+# The Diagnostic response includes the ECU rx/tx timings
+PSA_DIAGNOSTIC_RESPONSE = bytes([uds.SERVICE_TYPE.DIAGNOSTIC_SESSION_CONTROL + 0x40, 0x01])
+
+
+PSA_VERSION_REQUEST  = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER, 0xF0, 0xFE])
+
+# TODO: Placeholder or info for uds module - The actual response is multi-frame TP
+PSA_VERSION_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40, 0xF0, 0xFE])
+
 PSA_RX_OFFSET = -0x20
 
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
     Request(
-      [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.MANUFACTURER_SOFTWARE_VERSION_REQUEST],
-      [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.MANUFACTURER_SOFTWARE_VERSION_RESPONSE],
-      bus=0,
-      logging=True,
+        [PSA_DIAGNOSTIC_REQUEST],
+        [PSA_DIAGNOSTIC_RESPONSE],
+        rx_offset=PSA_RX_OFFSET,
+        bus=1,
+        logging=True,
+    ),
+    Request(
+        [PSA_VERSION_REQUEST],
+        [PSA_VERSION_RESPONSE],
+        rx_offset=PSA_RX_OFFSET,
+        bus=1,
+        logging=True,
     ),
   ],
 )
+
+# TODO: multi-bus requests
+# FW_QUERY_CONFIG = FwQueryConfig(
+#   requests= [request for bus in (0, 1, 2) for request in [
+#       Request(
+#           [PSA_DIAGNOSTIC_REQUEST],
+#           [PSA_DIAGNOSTIC_RESPONSE],
+#           rx_offset=PSA_RX_OFFSET,
+#           bus=bus,
+#           logging=True,
+#       ),
+#       Request(
+#           [PSA_VERSION_REQUEST],
+#           [PSA_VERSION_RESPONSE],
+#           rx_offset=PSA_RX_OFFSET,
+#           bus=bus,
+#           logging=True,
+#       ),
+#     ]
+#   ]
+# )
 
 DBC = CAR.create_dbc_map()
