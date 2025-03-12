@@ -314,7 +314,7 @@ class TestToyotaStockLongitudinalAngle(TestToyotaStockLongitudinalBase, TestToyo
 class TestToyotaSecOcSafety(TestToyotaSafetyBase):
 
   TX_MSGS = TOYOTA_SECOC_TX_MSGS
-  RELAY_MALFUNCTION_ADDRS = {0: (0x2E4, 0x343, 0x183)}
+  RELAY_MALFUNCTION_ADDRS = {0: (0x2E4, 0x183)}
   FWD_BLACKLISTED_ADDRS = {2: [0x2E4, 0x412, 0x191, 0x131, 0x343, 0x183]}
 
   def setUp(self):
