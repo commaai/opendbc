@@ -126,8 +126,17 @@ class CarController(CarControllerBase):
                                               hud_control.leftLaneVisible, hud_control.rightLaneVisible,
                                               left_lane_warning, right_lane_warning))
 
+    # Button messages
     if not self.CP.openpilotLongitudinalControl:
-      can_sends.extend(self.create_button_messages(CC, CS, use_clu11=True))
+      if CC.cruiseControl.cancel:
+        can_sends.append(hyundaican.create_clu11(self.packer, self.frame, CS.clu11, Buttons.CANCEL, self.CP))
+      elif CC.cruiseControl.resume:
+        # send resume at a max freq of 10Hz
+        if (self.frame - self.last_button_frame) * DT_CTRL > 0.1:
+          # send 25 messages at a time to increases the likelihood of resume being accepted
+          can_sends.extend([hyundaican.create_clu11(self.packer, self.frame, CS.clu11, Buttons.RES_ACCEL, self.CP)] * 25)
+          if (self.frame - self.last_button_frame) * DT_CTRL >= 0.15:
+            self.last_button_frame = self.frame
 
     if self.frame % 2 == 0 and self.CP.openpilotLongitudinalControl:
       # TODO: unclear if this is needed
@@ -184,23 +193,6 @@ class CarController(CarControllerBase):
         self.accel_last = accel
     else:
       # button presses
-      can_sends.extend(self.create_button_messages(CC, CS, use_clu11=False))
-
-    return can_sends
-
-  def create_button_messages(self, CC: structs.CarControl, CS: CarState, use_clu11: bool):
-    can_sends = []
-    if use_clu11:
-      if CC.cruiseControl.cancel:
-        can_sends.append(hyundaican.create_clu11(self.packer, self.frame, CS.clu11, Buttons.CANCEL, self.CP))
-      elif CC.cruiseControl.resume:
-        # send resume at a max freq of 10Hz
-        if (self.frame - self.last_button_frame) * DT_CTRL > 0.1:
-          # send 25 messages at a time to increases the likelihood of resume being accepted
-          can_sends.extend([hyundaican.create_clu11(self.packer, self.frame, CS.clu11, Buttons.RES_ACCEL, self.CP)] * 25)
-          if (self.frame - self.last_button_frame) * DT_CTRL >= 0.15:
-            self.last_button_frame = self.frame
-    else:
       if (self.frame - self.last_button_frame) * DT_CTRL > 0.25:
         # cruise cancel
         if CC.cruiseControl.cancel:
