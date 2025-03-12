@@ -180,13 +180,6 @@ class HondaBase(common.PandaCarSafetyTest):
   cnt_powertrain_data = 0
   cnt_acc_state = 0
 
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__.endswith("Base"):
-      cls.packer = None
-      cls.safety = None
-      raise unittest.SkipTest
-
   def _powertrain_data_msg(self, cruise_on=None, brake_pressed=None, gas_pressed=None):
     # preserve the state
     if cruise_on is None:
@@ -395,17 +388,6 @@ class TestHondaBoschSafetyBase(HondaBase):
   def _send_brake_msg(self, brake):
     pass
 
-  def test_alt_disengage_on_brake(self):
-    self.safety.set_honda_alt_brake_msg(1)
-    self.safety.set_controls_allowed(1)
-    self._rx(self._alt_brake_msg(1))
-    self.assertFalse(self.safety.get_controls_allowed())
-
-    self.safety.set_honda_alt_brake_msg(0)
-    self.safety.set_controls_allowed(1)
-    self._rx(self._alt_brake_msg(1))
-    self.assertTrue(self.safety.get_controls_allowed())
-
   def test_spam_cancel_safety_check(self):
     self.safety.set_controls_allowed(0)
     self.assertTrue(self._tx(self._button_msg(Btn.CANCEL, bus=self.BUTTONS_BUS)))
@@ -436,6 +418,17 @@ class TestHondaBoschAltBrakeSafetyBase(TestHondaBoschSafetyBase):
     to_push[0].data[2] = to_push[0].data[2] & 0xF0  # invalidate checksum
     self.assertFalse(self._rx(to_push))
     self.assertFalse(self.safety.get_controls_allowed())
+
+  def test_alt_disengage_on_brake(self):
+    self.safety.set_honda_alt_brake_msg(1)
+    self.safety.set_controls_allowed(1)
+    self._rx(self._alt_brake_msg(1))
+    self.assertFalse(self.safety.get_controls_allowed())
+
+    self.safety.set_honda_alt_brake_msg(0)
+    self.safety.set_controls_allowed(1)
+    self._rx(self._alt_brake_msg(1))
+    self.assertTrue(self.safety.get_controls_allowed())
 
 
 class TestHondaBoschSafety(HondaPcmEnableBase, TestHondaBoschSafetyBase):

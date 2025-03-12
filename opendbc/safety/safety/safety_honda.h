@@ -17,12 +17,6 @@
 #define HONDA_ALT_BRAKE_ADDR_CHECK(pt_bus)                                                                 \
   {.msg = {{0x1BE, (pt_bus), 3, .max_counter = 3U, .frequency = 50U}, { 0 }, { 0 }}},  /* BRAKE_MODULE */  \
 
-
-// Nidec and bosch radarless has the powertrain bus on bus 0
-static RxCheck honda_common_rx_checks[] = {
-  HONDA_COMMON_RX_CHECKS(0)
-};
-
 enum {
   HONDA_BTN_NONE = 0,
   HONDA_BTN_MAIN = 1,
@@ -304,11 +298,18 @@ static safety_config honda_nidec_init(uint16_t param) {
     // For Nidecs with main on signal on an alternate msg (missing 0x326)
     static RxCheck honda_nidec_alt_rx_checks[] = {
       HONDA_COMMON_NO_SCM_FEEDBACK_RX_CHECKS(0)
+      {.msg = {{0x1FA, 2, 8, .max_counter = 3U, .frequency = 50U}, { 0 }, { 0 }}},  // BRAKE_COMMAND
     };
 
     SET_RX_CHECKS(honda_nidec_alt_rx_checks, ret);
   } else {
-    SET_RX_CHECKS(honda_common_rx_checks, ret);
+    // Nidec includes BRAKE_COMMAND
+    static RxCheck honda_nidec_common_rx_checks[] = {
+      HONDA_COMMON_RX_CHECKS(0)
+      {.msg = {{0x1FA, 2, 8, .max_counter = 3U, .frequency = 50U}, { 0 }, { 0 }}},  // BRAKE_COMMAND
+    };
+
+    SET_RX_CHECKS(honda_nidec_common_rx_checks, ret);
   }
 
   SET_TX_MSGS(HONDA_N_TX_MSGS, ret);
@@ -340,6 +341,11 @@ static safety_config honda_bosch_init(uint16_t param) {
     HONDA_COMMON_RX_CHECKS(1)
   };
 
+  // Nidec and bosch radarless has the powertrain bus on bus 0
+  static RxCheck honda_bosch_radarless_rx_checks[] = {
+    HONDA_COMMON_RX_CHECKS(0)
+  };
+
   honda_hw = HONDA_BOSCH;
   honda_brake_switch_prev = false;
   honda_bosch_radarless = GET_FLAG(param, HONDA_PARAM_RADARLESS);
@@ -356,7 +362,7 @@ static safety_config honda_bosch_init(uint16_t param) {
   if (honda_bosch_radarless && honda_alt_brake_msg) {
     SET_RX_CHECKS(honda_common_alt_brake_rx_checks, ret);
   } else if (honda_bosch_radarless) {
-    SET_RX_CHECKS(honda_common_rx_checks, ret);
+    SET_RX_CHECKS(honda_bosch_radarless_rx_checks, ret);
   } else if (honda_alt_brake_msg) {
     SET_RX_CHECKS(honda_bosch_alt_brake_rx_checks, ret);
   } else {
