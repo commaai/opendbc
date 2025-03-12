@@ -295,7 +295,6 @@ static safety_config hyundai_init(uint16_t param) {
   if (hyundai_longitudinal) {
     // Use CLU11 (buttons) to manage controls allowed instead of SCC cruise state
     static RxCheck hyundai_long_rx_checks[] = {
-      // We use CLU11 (buttons) to manage controls allowed instead of SCC cruise state
       HYUNDAI_COMMON_RX_CHECKS(false)
     };
 
