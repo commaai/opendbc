@@ -21,7 +21,6 @@
 #include "safety/safety_volkswagen_pq.h"
 #include "safety/safety_elm327.h"
 #include "safety/safety_body.h"
-#include <stdio.h>
 
 // CAN-FD only safety modes
 #ifdef CANFD
@@ -334,7 +333,6 @@ void safety_tick(const safety_config *cfg) {
       bool lagging = elapsed_time > MAX(timestep * MAX_MISSED_MSGS, 1e6);
       cfg->rx_checks[i].status.lagging = lagging;
       if (lagging) {
-        print("lagging! "); puth(cfg->rx_checks[i].msg[cfg->rx_checks[i].status.index].addr); print("\n");
         controls_allowed = false;
       }
 
