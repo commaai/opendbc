@@ -25,8 +25,7 @@ def compute_gb_honda_nidec(accel, speed):
   if speed < creep_speed:
     creep_brake = (creep_speed - speed) / creep_speed * creep_brake_value
   gb = np.clip ( float(accel), NIDEC_ACCEL_MIN, NIDEC_ACCEL_MAX ) - creep_brake
-  return gb
-
+  return np.maximum ( 0.0, gb ) , np.minimum ( gb, 0 )
 
 def compute_gas_brake(accel, speed, fingerprint):
   if fingerprint in HONDA_BOSCH:
@@ -168,7 +167,7 @@ class CarController(CarControllerBase):
 
     # Send steering command.
     can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, CC.latActive, self.CP.carFingerprint))
-
+    
     # wind brake from air resistance decel at high speed
     wind_brake = np.interp(CS.out.vEgo, [0.0, 2.3, 35.0], [0.001, 0.002, 0.15])
     # all of this is only relevant for HONDA NIDEC
@@ -224,7 +223,7 @@ class CarController(CarControllerBase):
           can_sends.extend(hondacan.create_acc_commands(self.packer, self.CAN, CC.enabled, CC.longActive, self.accel, self.gas,
                                                         self.stopping_counter, self.CP.carFingerprint))
         else:
-          apply_brake = np.clip(self.brake_last - wind_brake, 0.0, 1.0)
+          apply_brake = np.clip(self.brake_last - wind_brake + creep_accel, 0.0, 1.0)
           apply_brake = int(np.clip(apply_brake * self.params.NIDEC_BRAKE_MAX, 0, self.params.NIDEC_BRAKE_MAX - 1))
           pump_on, self.last_pump_ts = brake_pump_hysteresis(apply_brake, self.apply_brake_last, self.last_pump_ts, ts)
 
