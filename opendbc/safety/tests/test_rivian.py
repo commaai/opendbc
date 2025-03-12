@@ -24,11 +24,6 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
   DRIVER_TORQUE_ALLOWANCE = 100
   DRIVER_TORQUE_FACTOR = 2
 
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "TestRivianSafetyBase":
-      raise unittest.SkipTest
-
   def _torque_driver_msg(self, torque):
     values = {"EPAS_TorsionBarTorque": torque / 100.0}
     return self.packer.make_can_msg_panda("EPAS_SystemStatus", 0, values)

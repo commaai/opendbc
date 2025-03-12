@@ -11,7 +11,7 @@ enum {
   HYUNDAI_PARAM_CANFD_ALT_BUTTONS = 32,
   HYUNDAI_PARAM_ALT_LIMITS = 64,
   HYUNDAI_PARAM_CANFD_LKA_STEERING_ALT = 128,
-  HYUNDAI_PARAM_FCEV_GAS = 256,
+//  HYUNDAI_PARAM_FCEV_GAS = 256,
   HYUNDAI_PARAM_ALT_LIMITS_2 = 512,
 };
 
@@ -31,8 +31,8 @@ bool hyundai_camera_scc = false;
 extern bool hyundai_canfd_lka_steering;
 bool hyundai_canfd_lka_steering = false;
 
-extern bool hyundai_fcev_gas_signal;
-bool hyundai_fcev_gas_signal = false;
+//extern bool hyundai_fcev_gas_signal;
+//bool hyundai_fcev_gas_signal = false;
 
 // shared flags for non CAN FD cars
 extern bool hyundai_alt_limits;
@@ -53,7 +53,7 @@ void hyundai_common_flags(uint16_t param) {
   hyundai_hybrid_gas_signal = GET_FLAG(param, HYUNDAI_PARAM_HYBRID_GAS);
   hyundai_camera_scc = GET_FLAG(param, HYUNDAI_PARAM_CAMERA_SCC);
   hyundai_canfd_lka_steering = GET_FLAG(param, HYUNDAI_PARAM_CANFD_LKA_STEERING);
-  hyundai_fcev_gas_signal = GET_FLAG(param, HYUNDAI_PARAM_FCEV_GAS);
+//  hyundai_fcev_gas_signal = GET_FLAG(param, HYUNDAI_PARAM_FCEV_GAS);
 
 #ifdef ALLOW_DEBUG
   hyundai_longitudinal = GET_FLAG(param, HYUNDAI_PARAM_LONGITUDINAL);

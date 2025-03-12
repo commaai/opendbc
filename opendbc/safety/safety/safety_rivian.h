@@ -29,11 +29,6 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
     if (addr == 0x38f) {
       brake_pressed = GET_BIT(to_push, 23U);
     }
-
-    generic_rx_checks(addr == 0x120);  // ACM_lkaHbaCmd
-    if (rivian_longitudinal) {
-      generic_rx_checks(addr == 0x160);  // ACM_longitudinalRequest
-    }
   }
 
   if (bus == 2) {
@@ -101,6 +96,7 @@ static bool rivian_fwd_hook(int bus, int addr) {
     }
 
     // VDM_AdasSts: for canceling stock ACC
+    // cppcheck-suppress knownConditionTrueFalse
     if ((addr == 0x162) && !rivian_longitudinal) {
       block_msg = true;
     }
@@ -113,6 +109,7 @@ static bool rivian_fwd_hook(int bus, int addr) {
     }
 
     // ACM_longitudinalRequest: longitudinal control message
+    // cppcheck-suppress knownConditionTrueFalse
     if (rivian_longitudinal && (addr == 0x160)) {
       block_msg = true;
     }
@@ -123,9 +120,9 @@ static bool rivian_fwd_hook(int bus, int addr) {
 
 static safety_config rivian_init(uint16_t param) {
   // 0x120 = ACM_lkaHbaCmd, 0x321 = SCCM_WheelTouch, 0x162 = VDM_AdasSts
-  static const CanMsg RIVIAN_TX_MSGS[] = {{0x120, 0, 8}, {0x321, 2, 7}, {0x162, 2, 8}};
+  static const CanMsg RIVIAN_TX_MSGS[] = {{0x120, 0, 8, true}, {0x321, 2, 7, false}, {0x162, 2, 8, false}};
   // 0x160 = ACM_longitudinalRequest
-  static const CanMsg RIVIAN_LONG_TX_MSGS[] = {{0x120, 0, 8}, {0x321, 2, 7}, {0x160, 0, 5}};
+  static const CanMsg RIVIAN_LONG_TX_MSGS[] = {{0x120, 0, 8, true}, {0x321, 2, 7, false}, {0x160, 0, 5, true}};
 
   static RxCheck rivian_rx_checks[] = {
     {.msg = {{0x208, 0, 8, .frequency = 50U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   // ESP_Status (speed)
@@ -141,6 +138,9 @@ static safety_config rivian_init(uint16_t param) {
     rivian_longitudinal = GET_FLAG(param, FLAG_RIVIAN_LONG_CONTROL);
   #endif
 
+  // FIXME: cppcheck thinks that rivian_longitudinal is always false. This is not true
+  // if ALLOW_DEBUG is defined but cppcheck is run without ALLOW_DEBUG
+  // cppcheck-suppress knownConditionTrueFalse
   return rivian_longitudinal ? BUILD_SAFETY_CFG(rivian_rx_checks, RIVIAN_LONG_TX_MSGS) : \
                                BUILD_SAFETY_CFG(rivian_rx_checks, RIVIAN_TX_MSGS);
 }
