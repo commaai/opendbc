@@ -211,19 +211,20 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
   bool controls_allowed_prev = controls_allowed;
 
   bool valid = rx_msg_safety_check(to_push, &current_safety_config, current_hooks);
-  if (valid) {
+  bool whitelisted = get_addr_check_index(to_push, current_safety_config.rx_checks, current_safety_config.rx_checks_len) != -1;
+  if (valid && whitelisted) {
     current_hooks->rx(to_push);
+  }
 
-    const int bus = GET_BUS(to_push);
-    const int addr = GET_ADDR(to_push);
-
-    // check all tx msgs for liveness on sending bus if specified.
-    // used to detect a relay malfunction or control messages from disabled ECUs like the radar
-    for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
-      const CanMsg *m = &current_safety_config.tx_msgs[i];
-      if (m->check_relay) {
-        generic_rx_checks((m->addr == addr) && (m->bus == bus));
-      }
+  // the relay malfunction hook runs on all incoming rx messages.
+  // check all tx msgs for liveness on sending bus if specified.
+  // used to detect a relay malfunction or control messages from disabled ECUs like the radar
+  const int bus = GET_BUS(to_push);
+  const int addr = GET_ADDR(to_push);
+  for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
+    const CanMsg *m = &current_safety_config.tx_msgs[i];
+    if (m->check_relay) {
+      generic_rx_checks((m->addr == addr) && (m->bus == bus));
     }
   }
 
