@@ -28,11 +28,15 @@
   {.msg = {{ 0xaa, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 83U}, { 0 }, { 0 }}},  \
   {.msg = {{0x260, 0, 8, .ignore_counter = true, .quality_flag = (lta), .frequency = 50U}, { 0 }, { 0 }}},    \
 
-#define TOYOTA_RX_CHECKS(lta)                                                                          \
-  TOYOTA_COMMON_RX_CHECKS(lta)                                                                         \
-  {.msg = {{0x1D2, 0, 8, .ignore_counter = true, .frequency = 33U}, { 0 }, { 0 }}},                    \
-  {.msg = {{0x224, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 40U},           \
-           {0x226, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 40U}, { 0 }}},  \
+#define TOYOTA_RX_CHECKS(lta)                                                                                  \
+  TOYOTA_COMMON_RX_CHECKS(lta)                                                                                 \
+  {.msg = {{0x1D2, 0, 8, .ignore_counter = true, .frequency = 33U}, { 0 }, { 0 }}},                            \
+  {.msg = {{0x226, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 40U},  { 0 }, { 0 }}},  \
+
+#define TOYOTA_ALT_BRAKE_RX_CHECKS(lta)                                                                       \
+  TOYOTA_COMMON_RX_CHECKS(lta)                                                                                \
+  {.msg = {{0x1D2, 0, 8, .ignore_counter = true, .frequency = 33U}, { 0 }, { 0 }}},                           \
+  {.msg = {{0x224, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 40U}, { 0 }, { 0 }}},  \
 
 #define TOYOTA_SECOC_RX_CHECKS                                                                                \
   TOYOTA_COMMON_RX_CHECKS(false)                                                                              \
@@ -381,8 +385,15 @@ static safety_config toyota_init(uint16_t param) {
     static RxCheck toyota_lka_rx_checks[] = {
       TOYOTA_RX_CHECKS(false)
     };
+    static RxCheck toyota_lka_alt_brake_rx_checks[] = {
+      TOYOTA_ALT_BRAKE_RX_CHECKS(false)
+    };
 
-    SET_RX_CHECKS(toyota_lka_rx_checks, ret);
+    if (!toyota_alt_brake) {
+      SET_RX_CHECKS(toyota_lka_rx_checks, ret);
+    } else {
+      SET_RX_CHECKS(toyota_lka_alt_brake_rx_checks, ret);
+    }
   }
 
   return ret;
