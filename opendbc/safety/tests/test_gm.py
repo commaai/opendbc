@@ -163,7 +163,7 @@ class TestGmAscmSafety(GmLongitudinalBase, TestGmSafetyBase):
     self.safety.init_tests()
 
 
-class TestGmEVAscmSafety(TestGmAscmSafety, TestGmEVSafetyBase):
+class TestGmAscmEVSafety(TestGmAscmSafety, TestGmEVSafetyBase):
   pass
 
 
@@ -201,7 +201,7 @@ class TestGmCameraSafety(TestGmCameraSafetyBase):
       self.assertEqual(enabled, self._tx(self._button_msg(Buttons.CANCEL)))
 
 
-class TestGmEVCameraSafety(TestGmCameraSafety, TestGmEVSafetyBase):
+class TestGmCameraEVSafety(TestGmCameraSafety, TestGmEVSafetyBase):
   pass
 
 
@@ -223,7 +223,7 @@ class TestGmCameraLongitudinalSafety(GmLongitudinalBase, TestGmCameraSafetyBase)
     self.safety.init_tests()
 
 
-class TestGmEVCameraLongitudinalSafety(TestGmCameraLongitudinalSafety, TestGmEVSafetyBase):
+class TestGmCameraLongitudinalEVSafety(TestGmCameraLongitudinalSafety, TestGmEVSafetyBase):
   pass
 
 
