@@ -19,7 +19,7 @@ def compute_gb_honda_bosch(accel, speed):
 
 
 def compute_gb_honda_nidec(accel, speed): # longitudinal tuner by MVL
-  gb = np.interp ( float(accel), [-3.5, 0, 2.0 ] , [-3.5, 0, 2.0 ]  )
+  gb = np.interp ( float(accel), [-3.5, 0, 2.0 ] , [-900, 0, 198 ]  )
   return np.maximum ( 0.0, gb ) , np.minimum ( gb, 0 )
 
 def compute_gas_brake(accel, speed, fingerprint):
