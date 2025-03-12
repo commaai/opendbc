@@ -293,6 +293,7 @@ static safety_config hyundai_canfd_init(uint16_t param) {
       };
 
       ret = BUILD_SAFETY_CFG(hyundai_canfd_lka_steering_long_rx_checks, HYUNDAI_CANFD_LKA_STEERING_LONG_TX_MSGS);
+
     } else {
       // Longitudinal checks for LFA steering
       static RxCheck hyundai_canfd_long_rx_checks[] = {
@@ -303,9 +304,14 @@ static safety_config hyundai_canfd_init(uint16_t param) {
         HYUNDAI_CANFD_LFA_STEERING_CAMERA_SCC_TX_MSGS(true)
       };
 
-      ret = hyundai_camera_scc ? BUILD_SAFETY_CFG(hyundai_canfd_long_rx_checks, hyundai_canfd_lfa_steering_camera_scc_tx_msgs) : \
-                                 BUILD_SAFETY_CFG(hyundai_canfd_long_rx_checks, HYUNDAI_CANFD_LFA_STEERING_LONG_TX_MSGS);
+      SET_RX_CHECKS(hyundai_canfd_long_rx_checks, ret);
+      if (hyundai_camera_scc) {
+        SET_TX_MSGS(hyundai_canfd_lfa_steering_camera_scc_tx_msgs, ret);
+      } else {
+        SET_TX_MSGS(HYUNDAI_CANFD_LFA_STEERING_LONG_TX_MSGS, ret);
+      }
     }
+
   } else {
     if (hyundai_canfd_lka_steering) {
       // *** LKA steering checks ***
@@ -316,8 +322,13 @@ static safety_config hyundai_canfd_init(uint16_t param) {
         HYUNDAI_CANFD_SCC_ADDR_CHECK(1)
       };
 
-      ret = hyundai_canfd_lka_steering_alt ? BUILD_SAFETY_CFG(hyundai_canfd_lka_steering_rx_checks, HYUNDAI_CANFD_LKA_STEERING_ALT_TX_MSGS) : \
-                                              BUILD_SAFETY_CFG(hyundai_canfd_lka_steering_rx_checks, HYUNDAI_CANFD_LKA_STEERING_TX_MSGS);
+      SET_RX_CHECKS(hyundai_canfd_lka_steering_rx_checks, ret);
+      if (hyundai_canfd_lka_steering_alt) {
+        SET_TX_MSGS(HYUNDAI_CANFD_LKA_STEERING_ALT_TX_MSGS, ret);
+      } else {
+        SET_TX_MSGS(HYUNDAI_CANFD_LKA_STEERING_TX_MSGS, ret);
+      }
+
     } else if (!hyundai_camera_scc) {
       // Radar sends SCC messages on these cars instead of camera
       static RxCheck hyundai_canfd_radar_scc_rx_checks[] = {
@@ -326,6 +337,7 @@ static safety_config hyundai_canfd_init(uint16_t param) {
       };
 
       ret = BUILD_SAFETY_CFG(hyundai_canfd_radar_scc_rx_checks, HYUNDAI_CANFD_LFA_STEERING_TX_MSGS);
+
     } else {
       // *** LFA steering checks ***
       // Camera sends SCC messages on LFA steering cars.
