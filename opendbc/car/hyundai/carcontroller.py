@@ -100,11 +100,11 @@ class CarController(CarControllerBase):
 
     # CAN-FD platforms
     if self.CP.flags & HyundaiFlags.CANFD:
-      can_sends.extend(self.create_canfd_can_sends(apply_steer_req, apply_torque, set_speed_in_units, accel,
-                                                   stopping, hud_control, CS, CC))
+      can_sends.extend(self.create_canfd_msgs(apply_steer_req, apply_torque, set_speed_in_units, accel,
+                                              stopping, hud_control, CS, CC))
     else:
-      can_sends.extend(self.create_can_sends(apply_steer_req, apply_torque, torque_fault, set_speed_in_units, accel,
-                                             stopping, hud_control, actuators, CS, CC))
+      can_sends.extend(self.create_can_msgs(apply_steer_req, apply_torque, torque_fault, set_speed_in_units, accel,
+                                            stopping, hud_control, actuators, CS, CC))
 
     new_actuators = actuators.as_builder()
     new_actuators.torque = apply_torque / self.params.STEER_MAX
@@ -114,7 +114,7 @@ class CarController(CarControllerBase):
     self.frame += 1
     return new_actuators, can_sends
 
-  def create_can_sends(self, apply_steer_req, apply_torque, torque_fault, set_speed_in_units, accel, stopping, hud_control, actuators, CS, CC):
+  def create_can_msgs(self, apply_steer_req, apply_torque, torque_fault, set_speed_in_units, accel, stopping, hud_control, actuators, CS, CC):
     can_sends = []
 
     # HUD messages
@@ -160,7 +160,7 @@ class CarController(CarControllerBase):
 
     return can_sends
 
-  def create_canfd_can_sends(self, apply_steer_req, apply_torque, set_speed_in_units, accel, stopping, hud_control, CS, CC):
+  def create_canfd_msgs(self, apply_steer_req, apply_torque, set_speed_in_units, accel, stopping, hud_control, CS, CC):
     can_sends = []
 
     lka_steering = self.CP.flags & HyundaiFlags.CANFD_LKA_STEERING
