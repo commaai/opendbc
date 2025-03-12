@@ -49,6 +49,7 @@ typedef struct {
   int addr;
   int bus;
   int len;
+  bool check_relay;
 } CanMsg;
 
 typedef enum {
@@ -121,10 +122,11 @@ typedef struct {
   const int addr;
   const int bus;
   const int len;
-  const bool check_checksum;         // true is checksum check is performed
+  const bool ignore_checksum;        // checksum check is not performed when set to true
+  const bool ignore_counter;         // counter check is not performed when set to true
   const uint8_t max_counter;         // maximum value of the counter. 0 means that the counter check is skipped
   const bool quality_flag;           // true is quality flag check is performed
-  const uint32_t frequency;      // expected frequency of the message [Hz]
+  const uint32_t frequency;          // expected frequency of the message [Hz]
 } CanMsgCheck;
 
 typedef struct {
@@ -159,8 +161,8 @@ typedef bool (*get_quality_flag_valid_t)(const CANPacket_t *to_push);
 
 typedef safety_config (*safety_hook_init)(uint16_t param);
 typedef void (*rx_hook)(const CANPacket_t *to_push);
-typedef bool (*tx_hook)(const CANPacket_t *to_send);
-typedef int (*fwd_hook)(int bus_num, int addr);
+typedef bool (*tx_hook)(const CANPacket_t *to_send);  // returns true if the message is allowed
+typedef bool (*fwd_hook)(int bus_num, int addr);      // returns true if the message should be blocked from forwarding
 
 typedef struct {
   safety_hook_init init;
@@ -184,7 +186,7 @@ void gen_crc_lookup_table_8(uint8_t poly, uint8_t crc_lut[]);
 #ifdef CANFD
 void gen_crc_lookup_table_16(uint16_t poly, uint16_t crc_lut[]);
 #endif
-void generic_rx_checks(bool stock_ecu_detected);
+static void generic_rx_checks(bool stock_ecu_detected);
 bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueSteeringLimits limits);
 bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits);
 bool longitudinal_accel_checks(int desired_accel, const LongitudinalLimits limits);

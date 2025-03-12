@@ -11,10 +11,8 @@ from opendbc.car.rivian.values import RivianSafetyFlags
 class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteeringSafetyTest, common.LongitudinalAccelSafetyTest):
 
   TX_MSGS = [[0x120, 0], [0x321, 2], [0x162, 2]]
-  STANDSTILL_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS = {0: (0x120,)}
   FWD_BLACKLISTED_ADDRS = {0: [0x321, 0x162], 2: [0x120]}
-  FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   MAX_TORQUE = 250
   MAX_RATE_UP = 3
@@ -25,11 +23,6 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
 
   DRIVER_TORQUE_ALLOWANCE = 100
   DRIVER_TORQUE_FACTOR = 2
-
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "TestRivianSafetyBase":
-      raise unittest.SkipTest
 
   def _torque_driver_msg(self, torque):
     values = {"EPAS_TorsionBarTorque": torque / 100.0}

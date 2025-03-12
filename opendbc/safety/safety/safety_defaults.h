@@ -2,9 +2,12 @@
 
 #include "safety_declarations.h"
 
+// GCOV_EXCL_START
+// Unreachable by design (doesn't define any rx msgs)
 void default_rx_hook(const CANPacket_t *to_push) {
   UNUSED(to_push);
 }
+// GCOV_EXCL_STOP
 
 // *** no output safety mode ***
 
@@ -21,10 +24,10 @@ static bool nooutput_tx_hook(const CANPacket_t *to_send) {
 }
 // GCOV_EXCL_STOP
 
-static int default_fwd_hook(int bus_num, int addr) {
+static bool default_fwd_hook(int bus_num, int addr) {
   UNUSED(bus_num);
   UNUSED(addr);
-  return -1;
+  return true;
 }
 
 const safety_hooks nooutput_hooks = {
@@ -52,20 +55,10 @@ static bool alloutput_tx_hook(const CANPacket_t *to_send) {
   return true;
 }
 
-static int alloutput_fwd_hook(int bus_num, int addr) {
-  int bus_fwd = -1;
+static bool alloutput_fwd_hook(int bus_num, int addr) {
+  UNUSED(bus_num);
   UNUSED(addr);
-
-  if (alloutput_passthrough) {
-    if (bus_num == 0) {
-      bus_fwd = 2;
-    }
-    if (bus_num == 2) {
-      bus_fwd = 0;
-    }
-  }
-
-  return bus_fwd;
+  return !alloutput_passthrough;
 }
 
 const safety_hooks alloutput_hooks = {

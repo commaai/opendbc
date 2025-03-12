@@ -172,22 +172,13 @@ class HondaBase(common.PandaCarSafetyTest):
   STEER_BUS: int | None = None  # must be set when inherited
   BUTTONS_BUS: int | None = None  # must be set when inherited, tx on this bus, rx on PT_BUS
 
-  STANDSTILL_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0x194)}  # STEERING_CONTROL
-  FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   cnt_speed = 0
   cnt_button = 0
   cnt_brake = 0
   cnt_powertrain_data = 0
   cnt_acc_state = 0
-
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__.endswith("Base"):
-      cls.packer = None
-      cls.safety = None
-      raise unittest.SkipTest
 
   def _powertrain_data_msg(self, cruise_on=None, brake_pressed=None, gas_pressed=None):
     # preserve the state
@@ -383,6 +374,7 @@ class TestHondaBoschSafetyBase(HondaBase):
 
   TX_MSGS = [[0xE4, 0], [0xE5, 0], [0x296, 1], [0x33D, 0], [0x33DA, 0], [0x33DB, 0]]
   FWD_BLACKLISTED_ADDRS = {2: [0xE4, 0xE5, 0x33D, 0x33DA, 0x33DB]}
+  RELAY_MALFUNCTION_ADDRS = {0: (0xE4,)}  # STEERING_CONTROL
 
   def setUp(self):
     self.packer = CANPackerPanda("honda_accord_2018_can_generated")
@@ -395,17 +387,6 @@ class TestHondaBoschSafetyBase(HondaBase):
 
   def _send_brake_msg(self, brake):
     pass
-
-  def test_alt_disengage_on_brake(self):
-    self.safety.set_honda_alt_brake_msg(1)
-    self.safety.set_controls_allowed(1)
-    self._rx(self._alt_brake_msg(1))
-    self.assertFalse(self.safety.get_controls_allowed())
-
-    self.safety.set_honda_alt_brake_msg(0)
-    self.safety.set_controls_allowed(1)
-    self._rx(self._alt_brake_msg(1))
-    self.assertTrue(self.safety.get_controls_allowed())
 
   def test_spam_cancel_safety_check(self):
     self.safety.set_controls_allowed(0)
@@ -438,6 +419,17 @@ class TestHondaBoschAltBrakeSafetyBase(TestHondaBoschSafetyBase):
     self.assertFalse(self._rx(to_push))
     self.assertFalse(self.safety.get_controls_allowed())
 
+  def test_alt_disengage_on_brake(self):
+    self.safety.set_honda_alt_brake_msg(1)
+    self.safety.set_controls_allowed(1)
+    self._rx(self._alt_brake_msg(1))
+    self.assertFalse(self.safety.get_controls_allowed())
+
+    self.safety.set_honda_alt_brake_msg(0)
+    self.safety.set_controls_allowed(1)
+    self._rx(self._alt_brake_msg(1))
+    self.assertTrue(self.safety.get_controls_allowed())
+
 
 class TestHondaBoschSafety(HondaPcmEnableBase, TestHondaBoschSafetyBase):
   """
@@ -468,7 +460,7 @@ class TestHondaBoschLongSafety(HondaButtonEnableBase, TestHondaBoschSafetyBase):
   TX_MSGS = [[0xE4, 1], [0x1DF, 1], [0x1EF, 1], [0x1FA, 1], [0x30C, 1], [0x33D, 1], [0x33DA, 1], [0x33DB, 1], [0x39F, 1], [0x18DAB0F1, 1]]
   FWD_BLACKLISTED_ADDRS = {2: [0xE4, 0xE5, 0x33D, 0x33DA, 0x33DB]}
   # 0x1DF is to test that radar is disabled
-  RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0x194), 1: (0x1DF,)}  # STEERING_CONTROL, ACC_CONTROL
+  RELAY_MALFUNCTION_ADDRS = {1: (0xE4, 0x1DF)}  # STEERING_CONTROL, ACC_CONTROL
 
   def setUp(self):
     super().setUp()
