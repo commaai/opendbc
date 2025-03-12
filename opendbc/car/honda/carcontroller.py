@@ -233,8 +233,7 @@ class CarController(CarControllerBase):
           # can_sends.append(hondacan.create_brake_command(self.packer, self.CAN, apply_brake, pump_on,
            #                                              pcm_override, pcm_cancel_cmd, fcw_display,
             #                                              self.CP.carFingerprint, CS.stock_brake))
-          
-          
+
           self.apply_brake_last = apply_brake
           self.brake = apply_brake / self.params.NIDEC_BRAKE_MAX
 
@@ -243,7 +242,7 @@ class CarController(CarControllerBase):
     if self.frame % 10 == 0:
       gas = np.clip ( gas, 0, NIDEC_GAS_MAX )
             hud = HUDData(int(gas), int(round(hud_v_cruise)), hud_control.leadVisible,
-                    hud_control.lanesVisible, fcw_display, acc_alert, steer_required, hud_control.leadDistanceBars)
+            hud_control.lanesVisible, fcw_display, acc_alert, steer_required, hud_control.leadDistanceBars)
       #      hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
        #             hud_control.lanesVisible, fcw_display, acc_alert, steer_required, hud_control.leadDistanceBars)
       
