@@ -4,7 +4,7 @@ from opendbc.car.honda.values import HondaFlags, HONDA_BOSCH, HONDA_BOSCH_RADARL
 
 # CAN bus layout with relay
 # 0 = ACC-CAN - radar side
-# 1 = F-CAN B - powertrain
+# 1 = F-CAN B - powertrain (seems like 130 for Hybrid)
 # 2 = ACC-CAN - camera side
 # 3 = F-CAN A - OBDII port
 
@@ -24,7 +24,7 @@ class CanBus(CanBusBase):
 
   @property
   def pt(self) -> int:
-    return self._radar
+    return self._pt
 
   @property
   def radar(self) -> int:
