@@ -153,7 +153,7 @@ class TestHyundaiCanfdLFASteeringAltButtonsBase(TestHyundaiCanfdLFASteeringBase)
       self.assertFalse(self._tx(self._acc_cancel_msg(False)))
 
 
-@parameterized_class(RADAR_CAMERA_SCC_GAS_EV_HYBRID_COMBOS)
+@parameterized_class(ALL_GAS_EV_HYBRID_COMBOS)
 class TestHyundaiCanfdLFASteeringAltButtons(TestHyundaiCanfdLFASteeringAltButtonsBase):
   @classmethod
   def setUpClass(cls):
