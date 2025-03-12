@@ -95,11 +95,6 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
   packer: CANPackerPanda
   safety: libsafety_py.Panda
 
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "TestFordSafetyBase":
-      raise unittest.SkipTest
-
   def get_canfd_curvature_limits(self, speed):
     # Round it in accordance with the safety
     curvature_accel_limit = MAX_LATERAL_ACCEL / (max(speed, 1) ** 2)
@@ -427,11 +422,6 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
   MAX_GAS = 2.0
   MIN_GAS = -0.5
   INACTIVE_GAS = -5.0
-
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "TestFordLongitudinalSafetyBase":
-      raise unittest.SkipTest
 
   # ACC command
   def _acc_command_msg(self, gas: float, brake: float, brake_actuation: bool, cmbb_deny: bool = False):
