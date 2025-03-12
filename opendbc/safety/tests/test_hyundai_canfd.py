@@ -10,7 +10,7 @@ from opendbc.safety.tests.common import CANPackerPanda
 from opendbc.safety.tests.hyundai_common import HyundaiButtonBase, HyundaiLongitudinalBase
 
 # All combinations of radar/camera-SCC and gas/hybrid/EV cars
-RADAR_CAMERA_SCC_GAS_EV_HYBRID_COMBOS = [
+ALL_GAS_EV_HYBRID_COMBOS = [
   # Radar SCC
   {"GAS_MSG": ("ACCELERATOR_BRAKE_ALT", "ACCELERATOR_PEDAL_PRESSED"), "SCC_BUS": 0, "SAFETY_PARAM": 0},
   {"GAS_MSG": ("ACCELERATOR", "ACCELERATOR_PEDAL"), "SCC_BUS": 0, "SAFETY_PARAM": HyundaiSafetyFlags.EV_GAS},
@@ -109,7 +109,7 @@ class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
     self.safety.init_tests()
 
 
-@parameterized_class(RADAR_CAMERA_SCC_GAS_EV_HYBRID_COMBOS)
+@parameterized_class(ALL_GAS_EV_HYBRID_COMBOS)
 class TestHyundaiCanfdLFASteering(TestHyundaiCanfdLFASteeringBase):
   pass
 
@@ -262,7 +262,7 @@ class TestHyundaiCanfdLFASteeringLongBase(HyundaiLongitudinalBase, TestHyundaiCa
     super().test_tester_present_allowed(ecu_disable=not self.SAFETY_PARAM & HyundaiSafetyFlags.CAMERA_SCC)
 
 
-@parameterized_class(RADAR_CAMERA_SCC_GAS_EV_HYBRID_COMBOS)
+@parameterized_class(ALL_GAS_EV_HYBRID_COMBOS)
 class TestHyundaiCanfdLFASteeringLong(TestHyundaiCanfdLFASteeringLongBase):
   @classmethod
   def setUpClass(cls):
@@ -271,7 +271,7 @@ class TestHyundaiCanfdLFASteeringLong(TestHyundaiCanfdLFASteeringLongBase):
       raise unittest.SkipTest
 
 
-@parameterized_class(RADAR_CAMERA_SCC_GAS_EV_HYBRID_COMBOS)
+@parameterized_class(ALL_GAS_EV_HYBRID_COMBOS)
 class TestHyundaiCanfdLFASteeringLongAltButtons(TestHyundaiCanfdLFASteeringLongBase, TestHyundaiCanfdLFASteeringAltButtonsBase):
   @classmethod
   def setUpClass(cls):
