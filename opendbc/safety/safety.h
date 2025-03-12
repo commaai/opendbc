@@ -216,7 +216,7 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
     current_hooks->rx(to_push);
   }
 
-  // the relay malfunction hook runs on all incoming rx messages
+  // the relay malfunction hook runs on all incoming rx messages.
   // check all tx msgs for liveness on sending bus if specified.
   // used to detect a relay malfunction or control messages from disabled ECUs like the radar
   const int bus = GET_BUS(to_push);
