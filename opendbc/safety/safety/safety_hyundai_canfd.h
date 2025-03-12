@@ -5,8 +5,9 @@
 
 #define HYUNDAI_CANFD_CRUISE_BUTTON_TX_MSGS(bus) \
   {0x1CF, bus, 8, false},  /* CRUISE_BUTTONS */   \
-  {0x1aa, bus, 16, false},  /* CRUISE_BUTTONS_ALT */   \
   {0x1aa, 0, 16, false},  /* CRUISE_BUTTONS_ALT */   \
+  {0x1aa, 1, 16, false},  /* CRUISE_BUTTONS_ALT */   \
+  {0x1aa, 2, 16, false},  /* CRUISE_BUTTONS_ALT */   \
 
 #define HYUNDAI_CANFD_LKA_STEERING_COMMON_TX_MSGS(a_can, e_can) \
   HYUNDAI_CANFD_CRUISE_BUTTON_TX_MSGS(e_can)                    \
