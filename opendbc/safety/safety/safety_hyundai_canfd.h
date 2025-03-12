@@ -325,7 +325,6 @@ static safety_config hyundai_canfd_init(uint16_t param) {
       } else {
         SET_TX_MSGS(HYUNDAI_CANFD_LFA_STEERING_LONG_TX_MSGS, ret);
       }
-
     }
 
   } else {
