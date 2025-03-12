@@ -229,7 +229,7 @@ class CarController(CarControllerBase):
           can_sends.append(hondacan.create_brake_command(self.packer, self.CAN, brake, stopping,
                                                          pcm_override, pcm_cancel_cmd, fcw_display,
                                                          self.CP.carFingerprint, CS.stock_brake))
-          
+
           # can_sends.append(hondacan.create_brake_command(self.packer, self.CAN, apply_brake, pump_on,
            #                                              pcm_override, pcm_cancel_cmd, fcw_display,
             #                                              self.CP.carFingerprint, CS.stock_brake))
@@ -245,7 +245,7 @@ class CarController(CarControllerBase):
             hud_control.lanesVisible, fcw_display, acc_alert, steer_required, hud_control.leadDistanceBars)
       #      hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
        #             hud_control.lanesVisible, fcw_display, acc_alert, steer_required, hud_control.leadDistanceBars)
-      
+
       can_sends.extend(hondacan.create_ui_commands(self.packer, self.CAN, self.CP, CC.enabled, pcm_speed, hud, CS.is_metric, CS.acc_hud, CS.lkas_hud))
 
       if self.CP.openpilotLongitudinalControl and self.CP.carFingerprint not in HONDA_BOSCH:
