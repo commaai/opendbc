@@ -84,7 +84,7 @@ def create_buttons(packer, CP, CAN, cnt, btn):
   }
 
   bus = CAN.ECAN if CP.flags & HyundaiFlags.CANFD_LKA_STEERING else CAN.CAM
-  return [packer.make_can_msg("CRUISE_BUTTONS", 0, values), packer.make_can_msg("CRUISE_BUTTONS", 1, values), packer.make_can_msg("CRUISE_BUTTONS", CAN.CAM, values)]
+  return [packer.make_can_msg("CRUISE_BUTTONS_ALT", 0, values), packer.make_can_msg("CRUISE_BUTTONS_ALT", 1, values), packer.make_can_msg("CRUISE_BUTTONS_ALT", CAN.CAM, values)]
 
 def create_acc_cancel(packer, CP, CAN, cruise_info_copy):
   # TODO: why do we copy different values here?
