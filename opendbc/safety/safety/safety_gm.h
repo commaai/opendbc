@@ -29,7 +29,6 @@ typedef enum {
 static GmHardware gm_hw = GM_ASCM;
 static bool gm_cam_long = false;
 static bool gm_pcm_cruise = false;
-static bool gm_ev = false;
 
 static void gm_rx_hook(const CANPacket_t *to_push) {
 
@@ -226,7 +225,6 @@ static safety_config gm_init(uint16_t param) {
                                           {0x1E1, 2, 7, false}, {0x184, 2, 8, false}};  // camera bus
 
   gm_hw = GET_FLAG(param, GM_PARAM_HW_CAM) ? GM_CAM : GM_ASCM;
-  gm_ev = GET_FLAG(param, GM_PARAM_EV);
 
   if (gm_hw == GM_ASCM) {
     gm_long_limits = &GM_ASCM_LONG_LIMITS;
@@ -251,6 +249,7 @@ static safety_config gm_init(uint16_t param) {
     ret = BUILD_SAFETY_CFG(gm_rx_checks, GM_ASCM_TX_MSGS);
   }
 
+  const bool gm_ev = GET_FLAG(param, GM_PARAM_EV);
   if (gm_ev) {
     SET_RX_CHECKS(gm_ev_rx_checks, ret);
   }
