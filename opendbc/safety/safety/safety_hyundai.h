@@ -304,9 +304,17 @@ static safety_config hyundai_init(uint16_t param) {
       HYUNDAI_FCEV_GAS_ADDR_CHECK
     };
 
-    ret = hyundai_camera_scc      ? BUILD_SAFETY_CFG(hyundai_long_rx_checks, HYUNDAI_CAMERA_SCC_LONG_TX_MSGS) :
-          hyundai_fcev_gas_signal ? BUILD_SAFETY_CFG(hyundai_fcev_long_rx_checks, HYUNDAI_LONG_TX_MSGS) :
-                                    BUILD_SAFETY_CFG(hyundai_long_rx_checks, HYUNDAI_LONG_TX_MSGS);
+    if (hyundai_fcev_gas_signal) {
+      SET_RX_CHECKS(hyundai_fcev_long_rx_checks, ret);
+    } else {
+      SET_RX_CHECKS(hyundai_long_rx_checks, ret);
+    }
+
+    if (hyundai_camera_scc) {
+      SET_TX_MSGS(HYUNDAI_CAMERA_SCC_LONG_TX_MSGS, ret);
+    } else {
+      SET_TX_MSGS(HYUNDAI_LONG_TX_MSGS, ret);
+    }
   } else if (hyundai_camera_scc) {
     static RxCheck hyundai_cam_scc_rx_checks[] = {
       HYUNDAI_COMMON_RX_CHECKS(false)
