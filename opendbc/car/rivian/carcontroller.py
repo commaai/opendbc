@@ -5,7 +5,7 @@ from opendbc.car.rivian.riviancan import create_lka_steering, create_longitudina
 from opendbc.car.rivian.values import CarControllerParams
 
 MAX_STEER_RATE = 90  # deg/s
-MAX_STEER_RATE_FRAMES = 10  # tx control frames needed before torque can be cut
+MAX_STEER_RATE_FRAMES = 4  # tx control frames needed before torque can be cut
 
 
 class CarController(CarControllerBase):
@@ -24,6 +24,7 @@ class CarController(CarControllerBase):
     # >100 degree/sec steering fault prevention
     self.steer_rate_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringRateDeg) >= MAX_STEER_RATE, CC.latActive,
                                                                       self.steer_rate_counter, MAX_STEER_RATE_FRAMES)
+    torque_fault = CC.latActive and not apply_steer_req
 
     apply_torque = 0
     if CC.latActive:
@@ -33,7 +34,7 @@ class CarController(CarControllerBase):
 
     # send steering command
     self.apply_torque_last = apply_torque
-    can_sends.append(create_lka_steering(self.packer, CS.acm_lka_hba_cmd, apply_torque, apply_steer_req))
+    can_sends.append(create_lka_steering(self.packer, CS.acm_lka_hba_cmd, apply_torque, CC.enabled, apply_steer_req, torque_fault))
 
     if self.frame % 5 == 0:
       can_sends.append(create_wheel_touch(self.packer, CS.sccm_wheel_touch, CC.enabled))

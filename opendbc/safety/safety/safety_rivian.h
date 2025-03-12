@@ -53,9 +53,9 @@ static bool rivian_tx_hook(const CANPacket_t *to_send) {
 
     // the EPS faults when the steering angle rate is above a certain threshold for too long. to prevent this,
     // we allow setting STEER_REQUEST bit to 0 while maintaining the requested torque value for a single frame
-    .min_valid_request_frames = 10,
+    .min_valid_request_frames = 4,
     .max_invalid_request_frames = 1,
-    .min_valid_request_rt_interval = 90000,  // 170ms; a ~10% buffer on cutting every 19 frames
+    .min_valid_request_rt_interval = 36000,  // 170ms; a ~10% buffer on cutting every 19 frames
     .has_steer_req_tolerance = true,
   };
 
