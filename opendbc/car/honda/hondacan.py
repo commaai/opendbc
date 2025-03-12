@@ -15,7 +15,7 @@ class CanBus(CanBusBase):
     super().__init__(CP if fingerprint is None else None, fingerprint)
 
     if CP.carFingerprint in (HONDA_BOSCH - HONDA_BOSCH_RADARLESS):
-      self._pt, self._radar = self.offset + 0, self.offset
+      self._pt, self._radar = self.offset + 0, self.offset + 1
       # normally steering commands are sent to radar, which forwards them to powertrain bus
       # when radar is disabled, steering commands are sent directly to powertrain bus
       self._lkas = self._pt if CP.openpilotLongitudinalControl else self._radar
