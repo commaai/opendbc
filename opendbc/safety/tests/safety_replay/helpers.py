@@ -1,4 +1,5 @@
 from opendbc.car.ford.values import FordSafetyFlags
+from opendbc.car.hyundai.values import HyundaiSafetyFlags
 from opendbc.car.toyota.values import ToyotaSafetyFlags
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
@@ -20,8 +21,9 @@ def is_steering_msg(mode, param, addr):
   elif mode == CarParams.SafetyModel.hyundai:
     ret = addr == 832
   elif mode == CarParams.SafetyModel.hyundaiCanfd:
-    # TODO: other params
-    ret = addr == 0x50
+    ret = addr == (0x110 if param & HyundaiSafetyFlags.CANFD_LKA_STEERING_ALT else
+                   0x50 if param & HyundaiSafetyFlags.CANFD_LKA_STEERING else
+                   0x12A)
   elif mode == CarParams.SafetyModel.chrysler:
     ret = addr == 0x292
   elif mode == CarParams.SafetyModel.subaru:
