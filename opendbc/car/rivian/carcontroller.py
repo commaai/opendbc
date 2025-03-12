@@ -1,7 +1,7 @@
 from opendbc.can.packer import CANPacker
-from opendbc.car import Bus, apply_driver_steer_torque_limits
+from opendbc.car import Bus, apply_driver_steer_torque_limits, common_fault_avoidance
 from opendbc.car.interfaces import CarControllerBase
-from opendbc.car.rivian.riviancan import create_lka_steering, create_longitudinal, create_wheel_touch, create_adas_status, common_fault_avoidance
+from opendbc.car.rivian.riviancan import create_lka_steering, create_longitudinal, create_wheel_touch, create_adas_status
 from opendbc.car.rivian.values import CarControllerParams
 
 MAX_STEER_RATE = 90  # deg/s
