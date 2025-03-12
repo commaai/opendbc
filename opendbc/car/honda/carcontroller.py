@@ -18,13 +18,8 @@ def compute_gb_honda_bosch(accel, speed):
   return 0.0, 0.0
 
 
-def compute_gb_honda_nidec(accel, speed):
-  creep_brake = 0.0
-  creep_speed = 2.3
-  creep_brake_value = 0.15
-  if speed < creep_speed:
-    creep_brake = (creep_speed - speed) / creep_speed * creep_brake_value
-  gb = np.interp ( float(accel), [-3.5, 0, 2.0 ] , [-3.5, 0, 2.0 ]  ) - creep_brake
+def compute_gb_honda_nidec(accel, speed): # longitudinal tuner by MVL
+  gb = np.interp ( float(accel), [-3.5, 0, 2.0 ] , [-3.5, 0, 2.0 ]  ) 
   return np.maximum ( 0.0, gb ) , np.minimum ( gb, 0 )
 
 def compute_gas_brake(accel, speed, fingerprint):
