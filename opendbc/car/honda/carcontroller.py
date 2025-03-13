@@ -19,7 +19,7 @@ def compute_gb_honda_bosch(accel, speed):
 
 
 def compute_gb_honda_nidec(accel, speed): # longitudinal tuner by MVL
-  gb = np.interp ( float(accel), [-3.5, 0, 2.0 ] , [-225, 0, 198 ]  )
+  gb = np.interp ( float(accel), [-3.5, 0, 2.0 ] , [-896.0, 0.0, 198.0 ]  )
   return np.maximum ( 0.0, gb ) , np.minimum ( gb, 0 )
 
 def compute_gas_brake(accel, speed, fingerprint):
@@ -164,7 +164,8 @@ class CarController(CarControllerBase):
     can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, CC.latActive, self.CP.carFingerprint))
 
     # wind brake from air resistance decel at high speed
-    wind_brake = np.interp(CS.out.vEgo, [0.0, 2.3, 35.0], [0.001, 0.002, 0.15])
+    # wind_brake = np.interp(CS.out.vEgo, [0.0, 2.3, 35.0], [0.001, 0.002, 0.15])
+    wind_brake = 0.0
     # all of this is only relevant for HONDA NIDEC
     max_accel = np.interp(CS.out.vEgo, self.params.NIDEC_MAX_ACCEL_BP, self.params.NIDEC_MAX_ACCEL_V)
     # TODO this 1.44 is just to maintain previous behavior
@@ -218,29 +219,25 @@ class CarController(CarControllerBase):
           can_sends.extend(hondacan.create_acc_commands(self.packer, self.CAN, CC.enabled, CC.longActive, self.accel, self.gas,
                                                         self.stopping_counter, self.CP.carFingerprint))
         else:
-          apply_brake = np.clip(self.brake_last - wind_brake, 0.0, 1.0)
-          apply_brake = int(np.clip(apply_brake * self.params.NIDEC_BRAKE_MAX, 0, self.params.NIDEC_BRAKE_MAX - 1))
+          # apply_brake = np.clip(self.brake_last - wind_brake, 0.0, 1.0)
+          # apply_brake = int(np.clip(apply_brake * self.params.NIDEC_BRAKE_MAX, 0, self.params.NIDEC_BRAKE_MAX - 1))
+          
+          apply_brake = int ( np.clip (-float(brake), 0.0, 255.0 ) ) # NIDEC_BRAKE_MAX
           pump_on, self.last_pump_ts = brake_pump_hysteresis(apply_brake, self.apply_brake_last, self.last_pump_ts, ts)
 
           pcm_override = True
 
-          stopping = actuators.longControlState == LongCtrlState.stopping
-          brake = np.clip (-brake, 0.0, 256.0 ) # NIDEC_BRAKE_MAX
-          can_sends.append(hondacan.create_brake_command(self.packer, self.CAN, brake, stopping,
+          can_sends.append(hondacan.create_brake_command(self.packer, self.CAN, apply_brake, pump_on,
                                                          pcm_override, pcm_cancel_cmd, fcw_display,
                                                          self.CP.carFingerprint, CS.stock_brake))
 
-          # can_sends.append(hondacan.create_brake_command(self.packer, self.CAN, apply_brake, pump_on,
-           #                                              pcm_override, pcm_cancel_cmd, fcw_display,
-            #                                              self.CP.carFingerprint, CS.stock_brake))
-
           self.apply_brake_last = apply_brake
-          self.brake = apply_brake / self.params.NIDEC_BRAKE_MAX
+          self.brake = apply_brake #  / self.params.NIDEC_BRAKE_MAX
 
     # Send dashboard UI commands.
     # On Nidec, this controls longitudinal positive acceleration
     if self.frame % 10 == 0:
-      gas = np.clip ( gas, 0.0, 196.0 ) # NIDEC_GAS_MAX
+      gas = np.clip ( float ( gas ), 0.0, 196.0 ) # NIDEC_GAS_MAX
       hud = HUDData(int(gas), int(round(hud_v_cruise)), hud_control.leadVisible,
       hud_control.lanesVisible, fcw_display, acc_alert, steer_required, hud_control.leadDistanceBars)
       #      hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
@@ -250,8 +247,8 @@ class CarController(CarControllerBase):
 
       if self.CP.openpilotLongitudinalControl and self.CP.carFingerprint not in HONDA_BOSCH:
         self.speed = pcm_speed
-        self.gas = gas
-        self.brake = brake
+        self.gas = float (gas)
+        self.brake = float (apply_brake)
         # self.speed = pcm_speed
         # self.gas = pcm_accel / self.params.NIDEC_GAS_MAX
 
