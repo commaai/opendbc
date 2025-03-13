@@ -86,7 +86,6 @@ class MadsCarState(MadsCarStateBase):
   def get_parser(CP, pt_messages, cam_messages) -> None:
     if CP.carFingerprint in RAM_CARS:
       pt_messages += [
-        ("Center_Stack_1", 1),
         ("Center_Stack_2", 1),
       ]
     else:
@@ -95,7 +94,7 @@ class MadsCarState(MadsCarStateBase):
 
   def get_lkas_button(self, cp, cp_cam):
     if self.CP.carFingerprint in RAM_CARS:
-      lkas_button = cp.vl["Center_Stack_1"]["LKAS_Button"] or cp.vl["Center_Stack_2"]["LKAS_Button"]
+      lkas_button = cp.vl["Center_Stack_2"]["LKAS_Button"]
     else:
       lkas_button = cp.vl["TRACTION_BUTTON"]["TOGGLE_LKAS"]
       self.lkas_heartbit = cp_cam.vl["LKAS_HEARTBIT"]
