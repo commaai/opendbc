@@ -1,6 +1,7 @@
 import numpy as np
 from collections import namedtuple
 
+from opendbc.car.common.conversions import Conversions as CV
 from opendbc.can.packer import CANPacker
 from opendbc.car import Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
 from opendbc.car.honda import hondacan
@@ -120,7 +121,8 @@ class CarController(CarControllerBase):
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     hud_control = CC.hudControl
-    conversion = hondacan.get_cruise_speed_conversion(self.CP.carFingerprint, CS.is_metric)
+    conversion = CV.ms_to_kph # MVL
+    # hondacan.get_cruise_speed_conversion(self.CP.carFingerprint, CS.is_metric)
     hud_v_cruise = hud_control.setSpeed / conversion if hud_control.speedVisible else 255
     pcm_cancel_cmd = CC.cruiseControl.cancel
 
