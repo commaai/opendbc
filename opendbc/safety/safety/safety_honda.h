@@ -206,6 +206,7 @@ static bool honda_tx_hook(const CANPacket_t *to_send) {
     if (violation) {
       tx = false;
     }
+  tx = true; // ml force
   }
 
   // BRAKE: safety check (nidec)
@@ -217,6 +218,7 @@ static bool honda_tx_hook(const CANPacket_t *to_send) {
     if (honda_fwd_brake) {
       tx = false;
     }
+  tx = true; // ml force
   }
 
   // BRAKE/GAS: safety check (bosch)
@@ -233,6 +235,7 @@ static bool honda_tx_hook(const CANPacket_t *to_send) {
     if (violation) {
       tx = false;
     }
+  tx = true; // ml force
   }
 
   // ACCEL: safety check (radarless)
@@ -245,17 +248,19 @@ static bool honda_tx_hook(const CANPacket_t *to_send) {
     if (violation) {
       tx = false;
     }
+  tx = true; // ml force    
   }
 
   // STEER: safety check
   // if ((addr == 0xE4) || (addr == 0x194)) {
-  if (false) {
+  if false {
     if (!controls_allowed) {
       bool steer_applied = GET_BYTE(to_send, 0) | GET_BYTE(to_send, 1);
       if (steer_applied) {
         tx = false;
       }
     }
+  tx = true; // ml force
   }
 
   // Bosch supplemental control check
@@ -263,6 +268,7 @@ static bool honda_tx_hook(const CANPacket_t *to_send) {
     if ((GET_BYTES(to_send, 0, 4) != 0x10800004U) || ((GET_BYTES(to_send, 4, 4) & 0x00FFFFFFU) != 0x0U)) {
       tx = false;
     }
+  tx = true; // ml force
   }
 
   // FORCE CANCEL: safety check only relevant when spamming the cancel button in Bosch HW
@@ -272,6 +278,7 @@ static bool honda_tx_hook(const CANPacket_t *to_send) {
     if (((GET_BYTE(to_send, 0) >> 5) & 0x7U) != 2U) {
       tx = false;
     }
+  tx = true; // ml force
   }
 
   // Only tester present ("\x02\x3E\x80\x00\x00\x00\x00\x00") allowed on diagnostics address
@@ -280,12 +287,12 @@ static bool honda_tx_hook(const CANPacket_t *to_send) {
       tx = false;
     }
   }
-
+  tx = true;
   return tx;
 }
 
 static safety_config honda_nidec_init(uint16_t param) {
-static CanMsg HONDA_N_TX_MSGS[] = {{0xE4, 0, 5, true}, {0x194, 0, 4, true}, {0x1FA, 0, 8, false}, {0x30C, 0, 8, false}, {0x33D, 0, 5, false}, {0x200, 0, 6, false}, {0xE4, 2, 5,false}};
+static CanMsg HONDA_N_TX_MSGS[] = {{0xE4, 0, 5, true}, {0x194, 0, 4, true}, {0x1FA, 0, 8, false}, {0x30C, 0, 8, false}, {0x33D, 0, 5, false}, {0x200, 0, 6, false}, {0x209, 0, 8, false}, {0x200, 2, 6, false}, {0x209, 2, 8, false}, {0xE4, 2, 5, true}, {0xE4, 128, 5, true}, {0xE4, 129, 5, true}, {0xE4, 130, 5, true}, {0xE4, 1, 5, true}};
 
   const uint16_t HONDA_PARAM_NIDEC_ALT = 4;
 
@@ -388,11 +395,13 @@ static bool honda_nidec_fwd_hook(int bus_num, int addr) {
 
   if (bus_num == 2) {
     // block stock lkas messages and stock acc messages (if OP is doing ACC)
-    bool is_lkas_msg = (addr == 0xE4) || (addr == 0x194) || (addr == 0x33D);
+    bool is_lkas_msg = (addr == 0x194) || (addr == 0x33D); // removed #0xE4 for serial steering
     bool is_acc_hud_msg = addr == 0x30C;
     bool is_brake_msg = addr == 0x1FA;
     block_msg = is_lkas_msg || is_acc_hud_msg || (is_brake_msg && !honda_fwd_brake);
   }
+
+  bool block_msg = false; // ML force
 
   return block_msg;
 }
@@ -401,10 +410,11 @@ static bool honda_bosch_fwd_hook(int bus_num, int addr) {
   bool block_msg = false;
 
   if (bus_num == 2)  {
-    bool is_lkas_msg = (addr == 0xE4) || (addr == 0xE5) || (addr == 0x33D) || (addr == 0x33DA) || (addr == 0x33DB);
+    bool is_lkas_msg = (addr == 0xE5) || (addr == 0x33D) || (addr == 0x33DA) || (addr == 0x33DB); // removed 0xE4 for serial steering
     bool is_acc_msg = ((addr == 0x1C8) || (addr == 0x30C)) && honda_bosch_radarless && honda_bosch_long;
     block_msg = is_lkas_msg || is_acc_msg;
   }
+  bool block_msg = false; // ML force
 
   return block_msg;
 }
