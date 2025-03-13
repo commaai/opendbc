@@ -67,6 +67,7 @@
   {.msg = {{MSG_SUBARU_Wheel_Speeds,    alt_bus,         8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},  \
   {.msg = {{MSG_SUBARU_Brake_Status,    alt_bus,         8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},  \
   {.msg = {{MSG_SUBARU_CruiseControl,   alt_bus,         8, .max_counter = 15U, .frequency = 20U}, { 0 }, { 0 }}},  \
+  {.msg = {{MSG_SUBARU_ES_LKAS_State,   SUBARU_CAM_BUS,  8, .max_counter = 15U, .frequency = 10U}, { 0 }, { 0 }}},  \
 
 static bool subaru_gen2 = false;
 static bool subaru_longitudinal = false;
