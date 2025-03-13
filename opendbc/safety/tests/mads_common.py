@@ -1,13 +1,17 @@
+import abc
 import unittest
-from abc import abstractmethod
+
+from opendbc.safety.tests.libsafety import libsafety_py
 
 
-class MadsCommonBase(unittest.TestCase):
-  @abstractmethod
+class MadsSafetyTestBase(unittest.TestCase):
+  safety: libsafety_py.Panda
+
+  @abc.abstractmethod
   def _lkas_button_msg(self, enabled):
     raise NotImplementedError
 
-  @abstractmethod
+  @abc.abstractmethod
   def _acc_state_msg(self, enabled):
     raise NotImplementedError
 
@@ -412,3 +416,5 @@ class MadsCommonBase(unittest.TestCase):
 
     finally:
       self._mads_states_cleanup()
+
+  # TODO-SP: controls_allowed and controls_allowed_lat check for steering safety tests

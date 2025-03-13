@@ -789,7 +789,7 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
   }
 
   // No angle control allowed when controls are not allowed
-  violation |= !controls_allowed && steer_control_enabled;
+  violation |= !is_lat_active() && steer_control_enabled;
 
   return violation;
 }

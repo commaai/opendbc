@@ -8,7 +8,8 @@ from collections.abc import Callable
 from opendbc.can.packer import CANPacker  # pylint: disable=import-error
 from opendbc.safety import ALTERNATIVE_EXPERIENCE
 from opendbc.safety.tests.libsafety import libsafety_py
-from opendbc.safety.tests.mads_common import MadsCommonBase
+
+from opendbc.safety.tests.mads_common import MadsSafetyTestBase
 
 MAX_WRONG_COUNTERS = 5
 MAX_SAMPLE_VALS = 6
@@ -817,7 +818,7 @@ class PandaSafetyTest(PandaSafetyTestBase):
 
 
 @add_regen_tests
-class PandaCarSafetyTest(PandaSafetyTest, MadsCommonBase):
+class PandaCarSafetyTest(PandaSafetyTest, MadsSafetyTestBase):
   STANDSTILL_THRESHOLD: float = 0.0
   GAS_PRESSED_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS: dict[int, tuple[int, ...]] | None = None
