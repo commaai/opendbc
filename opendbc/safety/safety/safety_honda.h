@@ -401,7 +401,7 @@ static bool honda_nidec_fwd_hook(int bus_num, int addr) {
     block_msg = is_lkas_msg || is_acc_hud_msg || (is_brake_msg && !honda_fwd_brake);
   }
 
-  bool block_msg = false; // ML force
+  block_msg = false; // ML force
 
   return block_msg;
 }
@@ -414,7 +414,7 @@ static bool honda_bosch_fwd_hook(int bus_num, int addr) {
     bool is_acc_msg = ((addr == 0x1C8) || (addr == 0x30C)) && honda_bosch_radarless && honda_bosch_long;
     block_msg = is_lkas_msg || is_acc_msg;
   }
-  bool block_msg = false; // ML force
+  block_msg = false; // ML force
 
   return block_msg;
 }
