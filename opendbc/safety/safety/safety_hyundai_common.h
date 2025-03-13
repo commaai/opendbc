@@ -49,6 +49,9 @@ bool hyundai_escc = false;
 extern bool hyundai_longitudinal_main_cruise_toggleable;
 bool hyundai_longitudinal_main_cruise_toggleable = false;
 
+extern bool hyundai_has_lda_button;
+bool hyundai_has_lda_button = false;
+
 static uint8_t hyundai_last_button_interaction;  // button messages since the user pressed an enable button
 
 static bool main_button_prev;
@@ -66,6 +69,7 @@ void hyundai_common_init(uint16_t param) {
   const int HYUNDAI_PARAM_ALT_LIMITS_2 = 512;
   const int HYUNDAI_PARAM_ESCC = 8192;
   const int HYUNDAI_PARAM_LONGITUDINAL_MAIN_CRUISE_TOGGLEABLE = 16384;
+  const int HYUNDAI_PARAM_HAS_LDA_BUTTON = 32768;
 
   hyundai_ev_gas_signal = GET_FLAG(param, HYUNDAI_PARAM_EV_GAS);
   hyundai_hybrid_gas_signal = !hyundai_ev_gas_signal && GET_FLAG(param, HYUNDAI_PARAM_HYBRID_GAS);
@@ -76,6 +80,7 @@ void hyundai_common_init(uint16_t param) {
   hyundai_alt_limits_2 = GET_FLAG(param, HYUNDAI_PARAM_ALT_LIMITS_2);
   hyundai_escc = GET_FLAG(param, HYUNDAI_PARAM_ESCC);
   hyundai_longitudinal_main_cruise_toggleable = GET_FLAG(param, HYUNDAI_PARAM_LONGITUDINAL_MAIN_CRUISE_TOGGLEABLE);
+  hyundai_has_lda_button = GET_FLAG(param, HYUNDAI_PARAM_HAS_LDA_BUTTON);
 
   hyundai_last_button_interaction = HYUNDAI_PREV_BUTTON_SAMPLES;
 

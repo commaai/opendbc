@@ -68,6 +68,7 @@ class HyundaiSafetyFlags(IntFlag):
   ALT_LIMITS_2 = 512
   FLAG_HYUNDAI_ESCC = 8192
   FLAG_HYUNDAI_LONG_MAIN_CRUISE_TOGGLEABLE = 16384
+  HAS_LDA_BUTTON = 32768
 
 
 class HyundaiFlags(IntFlag):

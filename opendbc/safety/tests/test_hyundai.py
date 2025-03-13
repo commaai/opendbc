@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from parameterized import parameterized_class
 import random
 import unittest
 
@@ -8,6 +9,12 @@ from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerPanda
 from opendbc.safety.tests.hyundai_common import HyundaiButtonBase, HyundaiLongitudinalBase
+
+# LDA button availability
+LDA_BUTTON = [
+  {"SAFETY_PARAM": 0},
+  {"SAFETY_PARAM": HyundaiSafetyFlags.HAS_LDA_BUTTON},
+]
 
 
 # 4 bit checkusm used in some hyundai messages
@@ -45,6 +52,7 @@ def checksum(msg):
   return addr, ret, bus
 
 
+@parameterized_class(LDA_BUTTON)
 class TestHyundaiSafety(HyundaiButtonBase, common.PandaCarSafetyTest, common.DriverTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
   TX_MSGS = [[0x340, 0], [0x4F1, 0], [0x485, 0]]
   STANDSTILL_THRESHOLD = 12  # 0.375 kph
@@ -70,10 +78,18 @@ class TestHyundaiSafety(HyundaiButtonBase, common.PandaCarSafetyTest, common.Dri
   cnt_cruise = 0
   cnt_button = 0
 
+  SAFETY_PARAM: int = 0
+
+  @classmethod
+  def setUpClass(cls):
+    if cls.__name__ == "TestHyundaiSafety":
+      cls.safety = None
+      raise unittest.SkipTest
+
   def setUp(self):
     self.packer = CANPackerPanda("hyundai_kia_generic")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, 0)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, self.SAFETY_PARAM)
     self.safety.init_tests()
 
   def _button_msg(self, buttons, main_button=0, bus=0):
@@ -114,13 +130,15 @@ class TestHyundaiSafety(HyundaiButtonBase, common.PandaCarSafetyTest, common.Dri
     return self.packer.make_can_msg_panda("LKAS11", 0, values)
 
   def _acc_state_msg(self, enable):
-    values = {"MainMode_ACC": enable, "AliveCounterACC": self.cnt_cruise % 16}
-    self.__class__.cnt_cruise += 1
+    values = {"MainMode_ACC": enable}
     return self.packer.make_can_msg_panda("SCC11", self.SCC_BUS, values)
 
   def _lkas_button_msg(self, enabled):
-    values = {"LDA_BTN": enabled}
-    return self.packer.make_can_msg_panda("BCM_PO_11", 0, values)
+    if self.safety.get_current_safety_param() & HyundaiSafetyFlags.HAS_LDA_BUTTON:
+      values = {"LDA_BTN": enabled}
+      return self.packer.make_can_msg_panda("BCM_PO_11", 0, values)
+    else:
+      raise NotImplementedError
 
   def _main_cruise_button_msg(self, enabled):
     return self._button_msg(0, enabled)
@@ -141,6 +159,7 @@ class TestHyundaiSafety(HyundaiButtonBase, common.PandaCarSafetyTest, common.Dri
     self.safety.set_safety_hooks(prior_safety_mode, prior_safety_param)
 
 
+@parameterized_class(LDA_BUTTON)
 class TestHyundaiSafetyAltLimits(TestHyundaiSafety):
   MAX_RATE_UP = 2
   MAX_RATE_DOWN = 3
@@ -149,10 +168,11 @@ class TestHyundaiSafetyAltLimits(TestHyundaiSafety):
   def setUp(self):
     self.packer = CANPackerPanda("hyundai_kia_generic")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.ALT_LIMITS)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.ALT_LIMITS | self.SAFETY_PARAM)
     self.safety.init_tests()
 
 
+@parameterized_class(LDA_BUTTON)
 class TestHyundaiSafetyAltLimits2(TestHyundaiSafety):
   MAX_RATE_UP = 2
   MAX_RATE_DOWN = 3
@@ -161,10 +181,11 @@ class TestHyundaiSafetyAltLimits2(TestHyundaiSafety):
   def setUp(self):
     self.packer = CANPackerPanda("hyundai_kia_generic")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.ALT_LIMITS_2)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.ALT_LIMITS_2 | self.SAFETY_PARAM)
     self.safety.init_tests()
 
 
+@parameterized_class(LDA_BUTTON)
 class TestHyundaiSafetyCameraSCC(TestHyundaiSafety):
   BUTTONS_TX_BUS = 2  # tx on 2, rx on 0
   SCC_BUS = 2  # rx on 2
@@ -172,7 +193,7 @@ class TestHyundaiSafetyCameraSCC(TestHyundaiSafety):
   def setUp(self):
     self.packer = CANPackerPanda("hyundai_kia_generic")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.CAMERA_SCC)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.CAMERA_SCC | self.SAFETY_PARAM)
     self.safety.init_tests()
 
   def test_pcm_main_cruise_state_availability(self):
@@ -186,11 +207,13 @@ class TestHyundaiSafetyCameraSCC(TestHyundaiSafety):
         self._rx(self._acc_state_msg(should_turn_acc_main_on))
         self.assertEqual(should_turn_acc_main_on, self.safety.get_acc_main_on())
 
+
+@parameterized_class(LDA_BUTTON)
 class TestHyundaiSafetyFCEV(TestHyundaiSafety):
   def setUp(self):
     self.packer = CANPackerPanda("hyundai_kia_generic")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.FCEV_GAS)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.FCEV_GAS | self.SAFETY_PARAM)
     self.safety.init_tests()
 
   def _user_gas_msg(self, gas):
@@ -202,7 +225,7 @@ class TestHyundaiLegacySafety(TestHyundaiSafety):
   def setUp(self):
     self.packer = CANPackerPanda("hyundai_kia_generic")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiLegacy, 0)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiLegacy, self.SAFETY_PARAM)
     self.safety.init_tests()
 
 
@@ -210,7 +233,7 @@ class TestHyundaiLegacySafetyEV(TestHyundaiSafety):
   def setUp(self):
     self.packer = CANPackerPanda("hyundai_kia_generic")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiLegacy, HyundaiSafetyFlags.EV_GAS)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiLegacy, HyundaiSafetyFlags.EV_GAS | self.SAFETY_PARAM)
     self.safety.init_tests()
 
   def _user_gas_msg(self, gas):
@@ -222,13 +245,15 @@ class TestHyundaiLegacySafetyHEV(TestHyundaiSafety):
   def setUp(self):
     self.packer = CANPackerPanda("hyundai_kia_generic")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiLegacy, HyundaiSafetyFlags.HYBRID_GAS)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundaiLegacy, HyundaiSafetyFlags.HYBRID_GAS | self.SAFETY_PARAM)
     self.safety.init_tests()
 
   def _user_gas_msg(self, gas):
     values = {"CR_Vcu_AccPedDep_Pos": gas}
     return self.packer.make_can_msg_panda("E_EMS11", 0, values, fix_checksum=checksum)
 
+
+@parameterized_class(LDA_BUTTON)
 class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
   TX_MSGS = [[0x340, 0], [0x4F1, 0], [0x485, 0], [0x420, 0], [0x421, 0], [0x50A, 0], [0x389, 0], [0x4A2, 0], [0x38D, 0], [0x483, 0], [0x7D0, 0]]
 
@@ -240,7 +265,7 @@ class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
   def setUp(self):
     self.packer = CANPackerPanda("hyundai_kia_generic")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.LONG)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.LONG | self.SAFETY_PARAM)
     self.safety.init_tests()
 
   def _accel_msg(self, accel, aeb_req=False, aeb_decel=0):
@@ -286,7 +311,7 @@ class TestHyundaiLongitudinalSafetyCameraSCC(HyundaiLongitudinalBase, TestHyunda
   def setUp(self):
     self.packer = CANPackerPanda("hyundai_kia_generic")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.LONG | HyundaiSafetyFlags.CAMERA_SCC)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.LONG | HyundaiSafetyFlags.CAMERA_SCC | self.SAFETY_PARAM)
     self.safety.init_tests()
 
   def _accel_msg(self, accel, aeb_req=False, aeb_decel=0):
@@ -314,11 +339,12 @@ class TestHyundaiLongitudinalSafetyCameraSCC(HyundaiLongitudinalBase, TestHyunda
     pass
 
 
+@parameterized_class(LDA_BUTTON)
 class TestHyundaiSafetyFCEVLong(TestHyundaiLongitudinalSafety, TestHyundaiSafetyFCEV):
   def setUp(self):
     self.packer = CANPackerPanda("hyundai_kia_generic")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.FCEV_GAS | HyundaiSafetyFlags.LONG)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.FCEV_GAS | HyundaiSafetyFlags.LONG | self.SAFETY_PARAM)
     self.safety.init_tests()
 
 
@@ -330,7 +356,7 @@ class TestHyundaiLongitudinalESCCSafety(HyundaiLongitudinalBase, TestHyundaiSafe
   def setUp(self):
     self.packer = CANPackerPanda("hyundai_kia_generic")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.LONG | HyundaiSafetyFlags.FLAG_HYUNDAI_ESCC)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, HyundaiSafetyFlags.LONG | HyundaiSafetyFlags.FLAG_HYUNDAI_ESCC | self.SAFETY_PARAM)
     self.safety.init_tests()
 
   def _accel_msg(self, accel, aeb_req=False, aeb_decel=0):
