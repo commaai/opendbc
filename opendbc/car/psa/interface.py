@@ -14,7 +14,7 @@ class CarInterface(CarInterfaceBase):
 
     ret.radarUnavailable = True
     ret.steerControlType = structs.CarParams.SteerControlType.angle
-    ret.steerActuatorDelay = 0.2
+    ret.steerActuatorDelay = 0.3
     ret.steerLimitTimer = 1.0
 
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.psa)]
