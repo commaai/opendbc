@@ -19,7 +19,7 @@ def compute_gb_honda_bosch(accel, speed):
 
 
 def compute_gb_honda_nidec(accel, speed):
-  np.newaccel = interp ( accel, [-3.5, 0, 2 ] , [-14, 0, 8 ] )
+  newaccel = np.interp ( accel, [-3.5, 0, 2 ] , [-14, 0, 8 ] )
   creep_brake = 0.0
   creep_speed = 2.3
   creep_brake_value = 0.15
