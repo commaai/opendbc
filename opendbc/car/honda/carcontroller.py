@@ -1,11 +1,12 @@
 import numpy as np
 from collections import namedtuple
 
-from opendbc.car.common.conversions import Conversions as CV
 from opendbc.can.packer import CANPacker
-from opendbc.car import Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
+from opendbc.car import Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs, apply_driver_steer_torque_limits
 from opendbc.car.honda import hondacan
-from opendbc.car.honda.values import CruiseButtons, VISUAL_HUD, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, HONDA_NIDEC_ALT_PCM_ACCEL, CarControllerParams
+from opendbc.car.common.conversions import Conversions as CV
+from opendbc.car.honda.values import CruiseButtons, VISUAL_HUD, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, HONDA_NIDEC_ALT_PCM_ACCEL, HONDA_BOSCH_1000, \
+  CarControllerParams, SERIAL_STEERING, LKAS_LIMITS
 from opendbc.car.interfaces import CarControllerBase
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
@@ -18,7 +19,7 @@ def compute_gb_honda_bosch(accel, speed):
 
 
 def compute_gb_honda_nidec(accel, speed):
-  newaccel = np.interp ( accel, [-3.5, 0, 2], [-14, 0, 8 ] )
+  newaccel = interp ( accel, [-3.5, 0, 2 ] , [-14, 0, 8 ] )
   creep_brake = 0.0
   creep_speed = 2.3
   creep_brake_value = 0.15
@@ -121,8 +122,7 @@ class CarController(CarControllerBase):
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     hud_control = CC.hudControl
-    conversion = CV.KPH_TO_MS # MVL
-    # hondacan.get_cruise_speed_conversion(self.CP.carFingerprint, CS.is_metric)
+    conversion = CV.KPH_TO_MS if CS.is_metric_cruise else CV.MPH_TO_MS
     hud_v_cruise = hud_control.setSpeed / conversion if hud_control.speedVisible else 255
     pcm_cancel_cmd = CC.cruiseControl.cancel
 
@@ -150,6 +150,11 @@ class CarController(CarControllerBase):
 
     # **** process the car messages ****
 
+    if (CS.CP.carFingerprint in SERIAL_STEERING):
+      limited_torque = apply_driver_steer_torque_limits(limited_torque, self.last_torque, CS.out.steeringTorque, LKAS_LIMITS)
+      self.last_torque = limited_torque
+      self.apply_steer_over_max_counter = 0
+
     # steer torque is converted back to CAN reference (positive when steering right)
     apply_torque = int(np.interp(-limited_torque * self.params.STEER_MAX,
                                  self.params.STEER_LOOKUP_BP, self.params.STEER_LOOKUP_V))
@@ -163,7 +168,7 @@ class CarController(CarControllerBase):
         can_sends.append(make_tester_present_msg(0x18DAB0F1, 1, suppress_response=True))
 
     # Send steering command.
-    can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, CC.latActive, self.CP.carfingerprint))
+    can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, CC.latActive, self.CP.carFingerprint))
 
     # wind brake from air resistance decel at high speed
     wind_brake = np.interp(CS.out.vEgo, [0.0, 2.3, 35.0], [0.001, 0.002, 0.15])
@@ -196,7 +201,7 @@ class CarController(CarControllerBase):
 
     if not self.CP.openpilotLongitudinalControl:
       if self.frame % 2 == 0 and self.CP.carFingerprint not in HONDA_BOSCH_RADARLESS:  # radarless cars don't have supplemental message
-        can_sends.append(hondacan.create_bosch_supplemental_1(self.packer, self.CAN))
+        can_sends.append(hondacan.create_bosch_supplemental_1(self.packer, self.CAN, self.CP.carFingerprint))
       # If using stock ACC, spam cancel command to kill gas when OP disengages.
       if pcm_cancel_cmd:
         can_sends.append(hondacan.spam_buttons_command(self.packer, self.CAN, CruiseButtons.CANCEL, self.CP.carFingerprint))
@@ -210,7 +215,10 @@ class CarController(CarControllerBase):
 
         if self.CP.carFingerprint in HONDA_BOSCH:
           self.accel = float(np.clip(accel, self.params.BOSCH_ACCEL_MIN, self.params.BOSCH_ACCEL_MAX))
-          self.gas = float(np.interp(accel, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_GAS_LOOKUP_V))
+          if self.CP.carFingerprint in HONDA_BOSCH_1000:
+            self.gas = float(np.interp(accel, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_1000_GAS_LOOKUP_V))
+          else:
+            self.gas = float(np.interp(accel, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_GAS_LOOKUP_V))
 
           stopping = actuators.longControlState == LongCtrlState.stopping
           self.stopping_counter = self.stopping_counter + 1 if stopping else 0
