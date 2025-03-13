@@ -36,7 +36,8 @@ class CarInterface(CarInterfaceBase):
 
       ret.enableBsm = 0x1e5 in fingerprint[CAN.ECAN]
 
-      if 0x105 in fingerprint[CAN.ECAN]:
+      # Check if the car is hybrid. Only HEV/PHEV cars have 0xFA on E-CAN.
+      if 0xFA in fingerprint[CAN.ECAN]:
         ret.flags |= HyundaiFlags.HYBRID.value
 
       if lka_steering:

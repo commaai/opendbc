@@ -118,8 +118,6 @@ static void chrysler_rx_hook(const CANPacket_t *to_push) {
       mads_button_press = GET_BIT(to_push, 57U) ? MADS_BUTTON_PRESSED : MADS_BUTTON_NOT_PRESSED;
     }
   }
-
-  generic_rx_checks((bus == 0) && (addr == chrysler_addrs->LKAS_COMMAND));
 }
 
 static bool chrysler_tx_hook(const CANPacket_t *to_send) {
@@ -184,22 +182,17 @@ static bool chrysler_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static int chrysler_fwd_hook(int bus_num, int addr) {
-  int bus_fwd = -1;
-
-  // forward to camera
-  if (bus_num == 0) {
-    bus_fwd = 2;
-  }
+static bool chrysler_fwd_hook(int bus_num, int addr) {
+  bool block_msg = false;
 
   // forward all messages from camera except LKAS messages
   const bool is_lkas_heartbit = (addr == chrysler_addrs->LKAS_HEARTBIT) && (chrysler_platform == CHRYSLER_PACIFICA);
   const bool is_lkas = ((addr == chrysler_addrs->LKAS_COMMAND) || (addr == chrysler_addrs->DAS_6) || is_lkas_heartbit);
-  if ((bus_num == 2) && !is_lkas){
-    bus_fwd = 0;
+  if ((bus_num == 2) && is_lkas){
+    block_msg = true;
   }
 
-  return bus_fwd;
+  return block_msg;
 }
 
 static safety_config chrysler_init(uint16_t param) {
@@ -252,16 +245,16 @@ static safety_config chrysler_init(uint16_t param) {
   };
 
   static const CanMsg CHRYSLER_TX_MSGS[] = {
-    {CHRYSLER_ADDRS.CRUISE_BUTTONS, 0, 3},
-    {CHRYSLER_ADDRS.LKAS_COMMAND, 0, 6},
-    {CHRYSLER_ADDRS.DAS_6, 0, 8},
-    {CHRYSLER_ADDRS.LKAS_HEARTBIT, 0, 5},
+    {CHRYSLER_ADDRS.CRUISE_BUTTONS, 0, 3, false},
+    {CHRYSLER_ADDRS.LKAS_COMMAND, 0, 6, true},
+    {CHRYSLER_ADDRS.DAS_6, 0, 8, false},
+    {CHRYSLER_ADDRS.LKAS_HEARTBIT, 0, 5, false},
   };
 
   static const CanMsg CHRYSLER_RAM_DT_TX_MSGS[] = {
-    {CHRYSLER_RAM_DT_ADDRS.CRUISE_BUTTONS, 2, 3},
-    {CHRYSLER_RAM_DT_ADDRS.LKAS_COMMAND, 0, 8},
-    {CHRYSLER_RAM_DT_ADDRS.DAS_6, 0, 8},
+    {CHRYSLER_RAM_DT_ADDRS.CRUISE_BUTTONS, 2, 3, false},
+    {CHRYSLER_RAM_DT_ADDRS.LKAS_COMMAND, 0, 8, true},
+    {CHRYSLER_RAM_DT_ADDRS.DAS_6, 0, 8, false},
   };
 
 #ifdef ALLOW_DEBUG
@@ -288,9 +281,9 @@ static safety_config chrysler_init(uint16_t param) {
   };
 
   static const CanMsg CHRYSLER_RAM_HD_TX_MSGS[] = {
-    {CHRYSLER_RAM_HD_ADDRS.CRUISE_BUTTONS, 2, 3},
-    {CHRYSLER_RAM_HD_ADDRS.LKAS_COMMAND, 0, 8},
-    {CHRYSLER_RAM_HD_ADDRS.DAS_6, 0, 8},
+    {CHRYSLER_RAM_HD_ADDRS.CRUISE_BUTTONS, 2, 3, false},
+    {CHRYSLER_RAM_HD_ADDRS.LKAS_COMMAND, 0, 8, true},
+    {CHRYSLER_RAM_HD_ADDRS.DAS_6, 0, 8, false},
   };
 
   const uint32_t CHRYSLER_PARAM_RAM_HD = 2U;  // set for Ram HD platform
