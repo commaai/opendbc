@@ -229,7 +229,7 @@ static bool hyundai_canfd_fwd_hook(int bus_num, int addr) {
     bool is_lfahda_msg = ((addr == 0x1e0) && !hyundai_canfd_lka_steering);
 
     // SCC_CONTROL and ADRV_0x160 for camera SCC cars, we send our own longitudinal commands and to show FCA light
-    bool is_scc_msg = (((addr == 0x1a0) || (addr == 0x160)) && hyundai_longitudinal && !hyundai_canfd_lka_steering);
+    bool is_scc_msg = ((hyundai_ccnc ? (addr == 0x1a0):((addr == 0x1a0) || (addr == 0x160))) && hyundai_longitudinal && !hyundai_canfd_lka_steering);
 
     // CCNC messages
     bool is_ccnc_msg = (addr == 0x161) || (addr == 0x162);
