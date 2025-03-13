@@ -12,6 +12,11 @@ from opendbc.car.interfaces import CarControllerBase
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 
+GAS_TUNE_FACTOR = 4.0
+BRAKE_TUNE_FACTOR = 4.0
+GAS_MAX_FACTOR = 1.5
+BRAKE_MAX_FACTOR = 1.5
+
 def compute_gb_honda_bosch(accel, speed):
   # TODO returns 0s, is unused
   return 0.0, 0.0
@@ -120,11 +125,6 @@ class CarController(CarControllerBase):
 
   def update(self, CC, CS, now_nanos):
 
-    GAS_TUNE_FACTOR = 4.0
-    BRAKE_TUNE_FACTOR = 4.0
-    GAS_MAX_FACTOR = 1.5
-    BRAKE_MAX_FACTOR = 1.5
-    
     actuators = CC.actuators
     hud_control = CC.hudControl
     conversion = CV.KPH_TO_MS if CS.is_metric_cruise else CV.MPH_TO_MS
