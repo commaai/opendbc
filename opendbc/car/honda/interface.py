@@ -51,8 +51,8 @@ class CarInterface(CarInterfaceBase):
     if any(0x33DA in f for f in fingerprint.values()):
       ret.flags |= HondaFlags.BOSCH_EXT_HUD.value
 
-    # Accord ICE 1.5T CVT has different gearbox message
-    if candidate == CAR.HONDA_ACCORD and 0x191 in fingerprint[CAN.pt]:
+    # N-Box and Accord ICE 1.5T CVT has different gearbox message
+    if candidate in (CAR.HONDA_ACCORD, CAR.HONDA_NBOX) and 0x191 in fingerprint[CAN.pt]:
       ret.transmissionType = TransmissionType.cvt
     # New Civics can have manual transmission
     elif candidate == CAR.HONDA_CIVIC_2022 and 0x191 not in fingerprint[CAN.pt]:
