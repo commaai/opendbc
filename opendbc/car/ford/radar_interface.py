@@ -173,7 +173,7 @@ class RadarInterface(RadarInterfaceBase):
     headerScanIndex = int(self.rcp.vl["MRR_Header_InformationDetections"]['CAN_SCAN_INDEX']) & 0b11
 
     # Use points with Doppler coverage of +-60 m/s, reduces similar points
-    if headerScanIndex in (0, 1):
+    if headerScanIndex not in (2, 3):
       return False, []
 
     errors = []
@@ -213,7 +213,7 @@ class RadarInterface(RadarInterfaceBase):
 
         self.points.append([dRel, yRel * 2, distRate * 2])
 
-    # Update once we've cycled through all 4 scan modes
+    # Cluster and publish once we've cycled through all 4 scan modes
     if headerScanIndex != 3:
       return False, []
 
