@@ -100,7 +100,7 @@ class RadarInterface(RadarInterfaceBase):
     self.track_id = 0
     self.radar = DBC[CP.carFingerprint].get(Bus.radar)
     self.scan_index_invalid_cnt = 0
-    self.no_radar_updates_cnt = 0
+    self.radar_unavailable_cnt = 0
     self.prev_headerScanIndex = 0
     if CP.radarUnavailable:
       self.rcp = None
@@ -136,6 +136,7 @@ class RadarInterface(RadarInterfaceBase):
       errors.extend(_errors)
       if not _update:
         return None
+      print('sending')
 
     ret = structs.RadarData()
     ret.points = list(self.pts.values())
@@ -177,17 +178,17 @@ class RadarInterface(RadarInterfaceBase):
     headerScanIndex = int(self.rcp.vl["MRR_Header_InformationDetections"]['CAN_SCAN_INDEX']) & 0b11
 
     # In reverse, the radar continually sends the last messages. Mark this as invalid
-    if (headerScanIndex + 1) % 4 != self.prev_headerScanIndex:
-      self.no_radar_updates_cnt += 1
+    if (self.prev_headerScanIndex + 1) % 4 != headerScanIndex:
+      self.radar_unavailable_cnt += 1
     else:
-      self.no_radar_updates_cnt = 0
+      self.radar_unavailable_cnt = 0
     self.prev_headerScanIndex = headerScanIndex
 
-    if self.no_radar_updates_cnt >= 5:
+    if self.radar_unavailable_cnt >= 5:
       self.pts.clear()
       self.points.clear()
       self.clusters.clear()
-      errors.append("noRadarUpdates")
+      errors.append("unavailableTemporary")
       return True, errors
 
     # Use points with Doppler coverage of +-60 m/s, reduces similar points
