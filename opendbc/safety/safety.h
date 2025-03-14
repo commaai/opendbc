@@ -279,6 +279,7 @@ static int get_fwd_bus(int bus_num) {
 
 int safety_fwd_hook(int bus_num, int addr) {
   bool blocked = relay_malfunction || current_safety_config.disable_forwarding;
+
   if (!blocked && (current_hooks->fwd != NULL)) {
     blocked = current_hooks->fwd(bus_num, addr);
   }
