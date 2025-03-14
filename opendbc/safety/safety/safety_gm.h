@@ -183,8 +183,8 @@ static safety_config gm_init(uint16_t param) {
   };
 
   // block PSCMStatus; forwarded through openpilot to hide an alert from the camera
-  static const CanMsg GM_CAM_LONG_TX_MSGS[] = {{0x180, 0, 4, .blocked = true}, {0x315, 0, 5, .blocked = true}, {0x2CB, 0, 8, .blocked = true}, {0x370, 0, 6, .blocked = true},  // pt bus
-                                               {0x184, 2, 8, .blocked = true}};  // camera bus
+  static const CanMsg GM_CAM_LONG_TX_MSGS[] = {{0x180, 0, 4, true}, {0x315, 0, 5, true}, {0x2CB, 0, 8, true}, {0x370, 0, 6, true},  // pt bus
+                                               {0x184, 2, 8, true}};  // camera bus
 
 
   static RxCheck gm_rx_checks[] = {
@@ -192,8 +192,8 @@ static safety_config gm_init(uint16_t param) {
   };
 
   // block PSCMStatus; forwarded through openpilot to hide an alert from the camera
-  static const CanMsg GM_CAM_TX_MSGS[] = {{0x180, 0, 4, .blocked = true},  // pt bus
-                                          {0x1E1, 2, 7}, {0x184, 2, 8, .blocked = true}};  // camera bus
+  static const CanMsg GM_CAM_TX_MSGS[] = {{0x180, 0, 4, true},  // pt bus
+                                          {0x1E1, 2, 7}, {0x184, 2, 8, true}};  // camera bus
 
   gm_hw = GET_FLAG(param, GM_PARAM_HW_CAM) ? GM_CAM : GM_ASCM;
 

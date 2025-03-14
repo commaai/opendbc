@@ -11,12 +11,12 @@ static safety_config volkswagen_mqb_init(uint16_t param) {
   // Transmit of GRA_ACC_01 is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
   // openpilot takes over LKAS steering control and related HUD messages from the camera
   // openpilot needs to replace apparent driver steering input torque to pacify VW Emergency Assist
-  static const CanMsg VOLKSWAGEN_MQB_STOCK_TX_MSGS[] = {{MSG_HCA_01, 0, 8, .blocked = true}, {MSG_GRA_ACC_01, 0, 8}, {MSG_GRA_ACC_01, 2, 8},
-                                                        {MSG_LDW_02, 0, 8, .blocked = true}, {MSG_LH_EPS_03, 2, 8, .blocked = true}};
+  static const CanMsg VOLKSWAGEN_MQB_STOCK_TX_MSGS[] = {{MSG_HCA_01, 0, 8, true}, {MSG_GRA_ACC_01, 0, 8}, {MSG_GRA_ACC_01, 2, 8},
+                                                        {MSG_LDW_02, 0, 8, true}, {MSG_LH_EPS_03, 2, 8, true}};
 
   // openpilot takes over acceleration/braking control and related HUD messages from the stock ACC radar
-  static const CanMsg VOLKSWAGEN_MQB_LONG_TX_MSGS[] = {{MSG_HCA_01, 0, 8, .blocked = true}, {MSG_LDW_02, 0, 8, .blocked = true}, {MSG_LH_EPS_03, 2, 8, .blocked = true},
-                                                       {MSG_ACC_02, 0, 8, .blocked = true}, {MSG_ACC_06, 0, 8, .blocked = true}, {MSG_ACC_07, 0, 8, .blocked = true}};
+  static const CanMsg VOLKSWAGEN_MQB_LONG_TX_MSGS[] = {{MSG_HCA_01, 0, 8, true}, {MSG_LDW_02, 0, 8, true}, {MSG_LH_EPS_03, 2, 8, true},
+                                                       {MSG_ACC_02, 0, 8, true}, {MSG_ACC_06, 0, 8, true}, {MSG_ACC_07, 0, 8, true}};
 
   static RxCheck volkswagen_mqb_rx_checks[] = {
     {.msg = {{MSG_ESP_19, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},

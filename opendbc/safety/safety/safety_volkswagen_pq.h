@@ -53,12 +53,12 @@ static uint32_t volkswagen_pq_compute_checksum(const CANPacket_t *to_push) {
 static safety_config volkswagen_pq_init(uint16_t param) {
   // Transmit of GRA_Neu is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
   // openpilot takes over LKAS steering control and related HUD messages from the camera
-  static const CanMsg VOLKSWAGEN_PQ_STOCK_TX_MSGS[] = {{MSG_HCA_1, 0, 5, .blocked = true}, {MSG_LDW_1, 0, 8, .blocked = true},
+  static const CanMsg VOLKSWAGEN_PQ_STOCK_TX_MSGS[] = {{MSG_HCA_1, 0, 5, true}, {MSG_LDW_1, 0, 8, true},
                                                 {MSG_GRA_NEU, 0, 4}, {MSG_GRA_NEU, 2, 4}};
 
   // openpilot takes over acceleration/braking control and related HUD messages from the stock ACC radar
-  static const CanMsg VOLKSWAGEN_PQ_LONG_TX_MSGS[] =  {{MSG_HCA_1, 0, 5, .blocked = true}, {MSG_LDW_1, 0, 8, .blocked = true},
-                                                {MSG_ACC_SYSTEM, 0, 8, .blocked = true}, {MSG_ACC_GRA_ANZEIGE, 0, 8, .blocked = true}};
+  static const CanMsg VOLKSWAGEN_PQ_LONG_TX_MSGS[] =  {{MSG_HCA_1, 0, 5, true}, {MSG_LDW_1, 0, 8, true},
+                                                {MSG_ACC_SYSTEM, 0, 8, true}, {MSG_ACC_GRA_ANZEIGE, 0, 8, true}};
 
   static RxCheck volkswagen_pq_rx_checks[] = {
     {.msg = {{MSG_LENKHILFE_3, 0, 6, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},

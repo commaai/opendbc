@@ -45,15 +45,15 @@
 #define SUBARU_CAM_BUS  2
 
 #define SUBARU_COMMON_TX_MSGS(alt_bus, lkas_msg, longitudinal)                                                   \
-  {lkas_msg,                     SUBARU_MAIN_BUS, 8, .blocked = true},                                           \
-  {MSG_SUBARU_ES_Distance,       alt_bus,         8, .blocked = ((alt_bus) == SUBARU_MAIN_BUS) && (longitudinal)}, \
-  {MSG_SUBARU_ES_DashStatus,     SUBARU_MAIN_BUS, 8, .blocked = true},                                           \
-  {MSG_SUBARU_ES_LKAS_State,     SUBARU_MAIN_BUS, 8, .blocked = true},                                           \
-  {MSG_SUBARU_ES_Infotainment,   SUBARU_MAIN_BUS, 8, .blocked = true},                                           \
+  {lkas_msg,                     SUBARU_MAIN_BUS, 8, true},                                           \
+  {MSG_SUBARU_ES_Distance,       alt_bus,         8, ((alt_bus) == SUBARU_MAIN_BUS) && (longitudinal)}, \
+  {MSG_SUBARU_ES_DashStatus,     SUBARU_MAIN_BUS, 8, true},                                           \
+  {MSG_SUBARU_ES_LKAS_State,     SUBARU_MAIN_BUS, 8, true},                                           \
+  {MSG_SUBARU_ES_Infotainment,   SUBARU_MAIN_BUS, 8, true},                                           \
 
 #define SUBARU_COMMON_LONG_TX_MSGS(alt_bus)                                                    \
-  {MSG_SUBARU_ES_Brake,          alt_bus,         8, .blocked = (alt_bus) == SUBARU_MAIN_BUS}, \
-  {MSG_SUBARU_ES_Status,         alt_bus,         8, .blocked = (alt_bus) == SUBARU_MAIN_BUS}, \
+  {MSG_SUBARU_ES_Brake,          alt_bus,         8, (alt_bus) == SUBARU_MAIN_BUS}, \
+  {MSG_SUBARU_ES_Status,         alt_bus,         8, (alt_bus) == SUBARU_MAIN_BUS}, \
 
 #define SUBARU_GEN2_LONG_ADDITIONAL_TX_MSGS()                \
   {MSG_SUBARU_ES_UDS_Request,    SUBARU_CAM_BUS,  8, false}, \

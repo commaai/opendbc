@@ -27,16 +27,16 @@ const LongitudinalLimits HYUNDAI_LONG_LIMITS = {
 };
 
 #define HYUNDAI_COMMON_TX_MSGS(scc_bus) \
-  {0x340, 0,       8, .blocked = true},  /* LKAS11 Bus 0                              */ \
+  {0x340, 0,       8, true},  /* LKAS11 Bus 0                              */ \
   {0x4F1, scc_bus, 4},  /* CLU11 Bus 0 (radar-SCC) or 2 (camera-SCC) */ \
-  {0x485, 0,       4, .blocked = true},  /* LFAHDA_MFC Bus 0                          */ \
+  {0x485, 0,       4, true},  /* LFAHDA_MFC Bus 0                          */ \
 
 #define HYUNDAI_LONG_COMMON_TX_MSGS(scc_bus) \
   HYUNDAI_COMMON_TX_MSGS(scc_bus)                                       \
-  {0x420, 0,       8, .blocked = (scc_bus) == 2},  /* SCC11 Bus 0                               */ \
-  {0x421, 0,       8, .blocked = (scc_bus) == 2},  /* SCC12 Bus 0                               */ \
-  {0x50A, 0,       8, .blocked = (scc_bus) == 2},  /* SCC13 Bus 0                               */ \
-  {0x389, 0,       8, .blocked = (scc_bus) == 2},  /* SCC14 Bus 0                               */ \
+  {0x420, 0,       8, (scc_bus) == 2},  /* SCC11 Bus 0                               */ \
+  {0x421, 0,       8, (scc_bus) == 2},  /* SCC12 Bus 0                               */ \
+  {0x50A, 0,       8, (scc_bus) == 2},  /* SCC13 Bus 0                               */ \
+  {0x389, 0,       8, (scc_bus) == 2},  /* SCC14 Bus 0                               */ \
   {0x4A2, 0,       2},  /* FRT_RADAR11 Bus 0                         */ \
 
 #define HYUNDAI_COMMON_RX_CHECKS(legacy)                                                                                                                  \
