@@ -136,7 +136,6 @@ class RadarInterface(RadarInterfaceBase):
       errors.extend(_errors)
       if not _update:
         return None
-      print('sending')
 
     ret = structs.RadarData()
     ret.points = list(self.pts.values())
