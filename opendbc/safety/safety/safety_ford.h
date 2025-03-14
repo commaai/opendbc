@@ -100,14 +100,6 @@ static bool ford_longitudinal = false;
 
 #define FORD_MAX_SPEED_DELTA 2.0  // m/s
 
-//static bool ford_lkas_msg_check(int addr) {
-//  return (addr == FORD_ACCDATA_3)
-//      || (addr == FORD_Lane_Assist_Data1)
-//      || ((addr == FORD_LateralMotionControl) && !ford_canfd)
-//      || ((addr == FORD_LateralMotionControl2) && ford_canfd)
-//      || (addr == FORD_IPMA_Data);
-//}
-
 // Curvature rate limits
 #define FORD_LIMITS(limit_lateral_acceleration) {                                               \
   .max_angle = 1000,          /* 0.02 curvature */                                              \
