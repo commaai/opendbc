@@ -191,42 +191,44 @@ class RadarInterface(RadarInterfaceBase):
       return True, errors
 
     # Use points with Doppler coverage of +-60 m/s, reduces similar points
-    if headerScanIndex in (2, 3):
-      if DELPHI_MRR_RADAR_RANGE_COVERAGE[headerScanIndex] != int(self.rcp.vl["MRR_Header_SensorCoverage"]["CAN_RANGE_COVERAGE"]):
-        self.scan_index_invalid_cnt += 1
-      else:
-        self.scan_index_invalid_cnt = 0
+    if headerScanIndex not in (2, 3):
+      return False, []
 
-      # Rarely MRR_Header_InformationDetections can fail to send a message. The scan index is skipped in this case
-      if self.scan_index_invalid_cnt >= 5:
-        errors.append("wrongConfig")
+    if DELPHI_MRR_RADAR_RANGE_COVERAGE[headerScanIndex] != int(self.rcp.vl["MRR_Header_SensorCoverage"]["CAN_RANGE_COVERAGE"]):
+      self.scan_index_invalid_cnt += 1
+    else:
+      self.scan_index_invalid_cnt = 0
 
-      for ii in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
-        msg = self.rcp.vl[f"MRR_Detection_{ii:03d}"]
+    # Rarely MRR_Header_InformationDetections can fail to send a message. The scan index is skipped in this case
+    if self.scan_index_invalid_cnt >= 5:
+      errors.append("wrongConfig")
 
-        # SCAN_INDEX rotates through 0..3 on each message for different measurement modes
-        # Indexes 0 and 2 have a max range of ~40m, 1 and 3 are ~170m (MRR_Header_SensorCoverage->CAN_RANGE_COVERAGE)
-        # Indexes 0 and 1 have a Doppler coverage of +-71 m/s, 2 and 3 have +-60 m/s
-        scanIndex = msg[f"CAN_SCAN_INDEX_2LSB_{ii:02d}"]
+    for ii in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
+      msg = self.rcp.vl[f"MRR_Detection_{ii:03d}"]
 
-        # Throw out old measurements. Very unlikely to happen, but is proper behavior
-        if scanIndex != headerScanIndex:
-          continue
+      # SCAN_INDEX rotates through 0..3 on each message for different measurement modes
+      # Indexes 0 and 2 have a max range of ~40m, 1 and 3 are ~170m (MRR_Header_SensorCoverage->CAN_RANGE_COVERAGE)
+      # Indexes 0 and 1 have a Doppler coverage of +-71 m/s, 2 and 3 have +-60 m/s
+      scanIndex = msg[f"CAN_SCAN_INDEX_2LSB_{ii:02d}"]
 
-        valid = bool(msg[f"CAN_DET_VALID_LEVEL_{ii:02d}"])
+      # Throw out old measurements. Very unlikely to happen, but is proper behavior
+      if scanIndex != headerScanIndex:
+        continue
 
-        # Long range measurement mode is more sensitive and can detect the road surface
-        dist = msg[f"CAN_DET_RANGE_{ii:02d}"]  # m [0|255.984]
-        if scanIndex in (1, 3) and dist < DELPHI_MRR_MIN_LONG_RANGE_DIST:
-          valid = False
+      valid = bool(msg[f"CAN_DET_VALID_LEVEL_{ii:02d}"])
 
-        if valid:
-          azimuth = msg[f"CAN_DET_AZIMUTH_{ii:02d}"]              # rad [-3.1416|3.13964]
-          distRate = msg[f"CAN_DET_RANGE_RATE_{ii:02d}"]          # m/s [-128|127.984]
-          dRel = cos(azimuth) * dist                              # m from front of car
-          yRel = -sin(azimuth) * dist                             # in car frame's y axis, left is positive
+      # Long range measurement mode is more sensitive and can detect the road surface
+      dist = msg[f"CAN_DET_RANGE_{ii:02d}"]  # m [0|255.984]
+      if scanIndex in (1, 3) and dist < DELPHI_MRR_MIN_LONG_RANGE_DIST:
+        valid = False
 
-          self.points.append([dRel, yRel * 2, distRate * 2])
+      if valid:
+        azimuth = msg[f"CAN_DET_AZIMUTH_{ii:02d}"]              # rad [-3.1416|3.13964]
+        distRate = msg[f"CAN_DET_RANGE_RATE_{ii:02d}"]          # m/s [-128|127.984]
+        dRel = cos(azimuth) * dist                              # m from front of car
+        yRel = -sin(azimuth) * dist                             # in car frame's y axis, left is positive
+
+        self.points.append([dRel, yRel * 2, distRate * 2])
 
     # Update with stored points once we've cycled through all 4 scan modes
     if headerScanIndex != 3:
