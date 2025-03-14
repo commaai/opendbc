@@ -278,7 +278,12 @@ static int get_fwd_bus(int bus_num) {
 }
 
 int safety_fwd_hook(int bus_num, int addr) {
-  const bool blocked = relay_malfunction || current_hooks->fwd(bus_num, addr);
+  bool blocked = relay_malfunction || current_safety_config.disable_forwarding;
+
+  if (!blocked && (current_hooks->fwd != NULL)) {
+    blocked = current_hooks->fwd(bus_num, addr);
+  }
+
   return blocked ? -1 : get_fwd_bus(bus_num);
 }
 
@@ -457,6 +462,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   current_safety_config.rx_checks_len = 0;
   current_safety_config.tx_msgs = NULL;
   current_safety_config.tx_msgs_len = 0;
+  current_safety_config.disable_forwarding = false;
 
   int set_status = -1;  // not set
   int hook_config_count = sizeof(safety_hook_registry) / sizeof(safety_hook_config);
@@ -474,6 +480,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
     current_safety_config.rx_checks_len = cfg.rx_checks_len;
     current_safety_config.tx_msgs = cfg.tx_msgs;
     current_safety_config.tx_msgs_len = cfg.tx_msgs_len;
+    current_safety_config.disable_forwarding = cfg.disable_forwarding;
     // reset all dynamic fields in addr struct
     for (int j = 0; j < current_safety_config.rx_checks_len; j++) {
       current_safety_config.rx_checks[j].status = (RxStatus){0};
