@@ -243,15 +243,9 @@ static safety_config chrysler_init(uint16_t param) {
   };
 
   static const CanMsg CHRYSLER_RAM_HD_TX_MSGS[] = {
-<<<<<<< HEAD
     {CHRYSLER_RAM_HD_ADDRS.CRUISE_BUTTONS, 2, 3},
     {CHRYSLER_RAM_HD_ADDRS.LKAS_COMMAND, 0, 8, true},
     {CHRYSLER_RAM_HD_ADDRS.DAS_6, 0, 8, true},
-=======
-    {CHRYSLER_RAM_HD_ADDRS.CRUISE_BUTTONS, 2, 3, false},
-    {CHRYSLER_RAM_HD_ADDRS.LKAS_COMMAND, 0, 8, true},
-    {CHRYSLER_RAM_HD_ADDRS.DAS_6, 0, 8, false},
->>>>>>> upstream/master
   };
 
   const uint32_t CHRYSLER_PARAM_RAM_HD = 2U;  // set for Ram HD platform

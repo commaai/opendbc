@@ -191,9 +191,14 @@ static safety_config gm_init(uint16_t param) {
     GM_COMMON_RX_CHECKS
   };
 
+  static RxCheck gm_ev_rx_checks[] = {
+    GM_COMMON_RX_CHECKS
+    {.msg = {{0xBD, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 40U}, { 0 }, { 0 }}},
+  };
+
   // block PSCMStatus; forwarded through openpilot to hide an alert from the camera
   static const CanMsg GM_CAM_TX_MSGS[] = {{0x180, 0, 4, true},  // pt bus
-                                          {0x1E1, 2, 7}, {0x184, 2, 8, true}};  // camera bus
+                                          {0x1E1, 2, 7, false}, {0x184, 2, 8, true}};  // camera bus
 
   gm_hw = GET_FLAG(param, GM_PARAM_HW_CAM) ? GM_CAM : GM_ASCM;
 
@@ -220,6 +225,11 @@ static safety_config gm_init(uint16_t param) {
   } else {
     ret = BUILD_SAFETY_CFG(gm_rx_checks, GM_ASCM_TX_MSGS);
     ret.disable_forwarding = true;
+  }
+
+  const bool gm_ev = GET_FLAG(param, GM_PARAM_EV);
+  if (gm_ev) {
+    SET_RX_CHECKS(gm_ev_rx_checks, ret);
   }
   return ret;
 }
