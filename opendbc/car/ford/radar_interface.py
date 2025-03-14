@@ -230,7 +230,7 @@ class RadarInterface(RadarInterfaceBase):
 
         self.points.append([dRel, yRel * 2, distRate * 2])
 
-    # Update with stored points once we've cycled through all 4 scan modes
+    # Cluster and publish using stored points once we've cycled through all 4 scan modes
     if headerScanIndex != 3:
       return False, []
 
