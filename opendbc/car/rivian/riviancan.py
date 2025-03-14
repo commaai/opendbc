@@ -38,7 +38,7 @@ def create_lka_steering(packer, acm_lka_hba_cmd, apply_torque, enabled, apply_st
 
   values["ACM_lkaStrToqReq"] = apply_torque
   values["ACM_lkaActToi"] = apply_steer_req
-  values["ACM_lkaToiFlt"] = torque_fault
+  values["ACM_lkaToiFlt"] = 0  # torque_fault
 
   if enabled:
     values["ACM_lkaSymbolState"] = 3
