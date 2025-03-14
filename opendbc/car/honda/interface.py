@@ -53,7 +53,9 @@ class CarInterface(CarInterfaceBase):
 
     # N-Box and Accord ICE 1.5T CVT has different gearbox message
     print(candidate)
+    print(fingerprint)
     print(fingerprint[CAN.pt])
+    print()
     if candidate in (CAR.HONDA_ACCORD, CAR.HONDA_NBOX) and 0x191 in fingerprint[CAN.pt]:
       ret.transmissionType = TransmissionType.cvt
     # New Civics can have manual transmission
