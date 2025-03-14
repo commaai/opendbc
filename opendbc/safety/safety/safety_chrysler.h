@@ -210,13 +210,13 @@ static safety_config chrysler_init(uint16_t param) {
   };
 
   static const CanMsg CHRYSLER_TX_MSGS[] = {
-    {CHRYSLER_ADDRS.CRUISE_BUTTONS, 0, 3},
+    {CHRYSLER_ADDRS.CRUISE_BUTTONS, 0, 3, false},
     {CHRYSLER_ADDRS.LKAS_COMMAND, 0, 6, true},
     {CHRYSLER_ADDRS.DAS_6, 0, 8, true},
   };
 
   static const CanMsg CHRYSLER_RAM_DT_TX_MSGS[] = {
-    {CHRYSLER_RAM_DT_ADDRS.CRUISE_BUTTONS, 2, 3},
+    {CHRYSLER_RAM_DT_ADDRS.CRUISE_BUTTONS, 2, 3, false},
     {CHRYSLER_RAM_DT_ADDRS.LKAS_COMMAND, 0, 8, true},
     {CHRYSLER_RAM_DT_ADDRS.DAS_6, 0, 8, true},
   };
@@ -243,7 +243,7 @@ static safety_config chrysler_init(uint16_t param) {
   };
 
   static const CanMsg CHRYSLER_RAM_HD_TX_MSGS[] = {
-    {CHRYSLER_RAM_HD_ADDRS.CRUISE_BUTTONS, 2, 3},
+    {CHRYSLER_RAM_HD_ADDRS.CRUISE_BUTTONS, 2, 3, false},
     {CHRYSLER_RAM_HD_ADDRS.LKAS_COMMAND, 0, 8, true},
     {CHRYSLER_RAM_HD_ADDRS.DAS_6, 0, 8, true},
   };

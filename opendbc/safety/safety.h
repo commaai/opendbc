@@ -223,7 +223,7 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
   const int addr = GET_ADDR(to_push);
   for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
     const CanMsg *m = &current_safety_config.tx_msgs[i];
-    if (m->check_relay) {
+    if (m->blocked) {
       generic_rx_checks((m->addr == addr) && (m->bus == bus));
     }
   }

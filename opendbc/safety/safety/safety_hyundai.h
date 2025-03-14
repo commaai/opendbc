@@ -27,9 +27,9 @@ const LongitudinalLimits HYUNDAI_LONG_LIMITS = {
 };
 
 #define HYUNDAI_COMMON_TX_MSGS(scc_bus) \
-  {0x340, 0,       8, true},  /* LKAS11 Bus 0                              */ \
-  {0x4F1, scc_bus, 4},  /* CLU11 Bus 0 (radar-SCC) or 2 (camera-SCC) */ \
-  {0x485, 0,       4, true},  /* LFAHDA_MFC Bus 0                          */ \
+  {0x340, 0,       8, true},   /* LKAS11 Bus 0                              */ \
+  {0x4F1, scc_bus, 4, false},  /* CLU11 Bus 0 (radar-SCC) or 2 (camera-SCC) */ \
+  {0x485, 0,       4, true},   /* LFAHDA_MFC Bus 0                          */ \
 
 #define HYUNDAI_LONG_COMMON_TX_MSGS(scc_bus) \
   HYUNDAI_COMMON_TX_MSGS(scc_bus)                                       \
@@ -37,7 +37,7 @@ const LongitudinalLimits HYUNDAI_LONG_LIMITS = {
   {0x421, 0,       8, (scc_bus) == 2},  /* SCC12 Bus 0                               */ \
   {0x50A, 0,       8, (scc_bus) == 2},  /* SCC13 Bus 0                               */ \
   {0x389, 0,       8, (scc_bus) == 2},  /* SCC14 Bus 0                               */ \
-  {0x4A2, 0,       2},  /* FRT_RADAR11 Bus 0                         */ \
+  {0x4A2, 0,       2, false},           /* FRT_RADAR11 Bus 0                         */ \
 
 #define HYUNDAI_COMMON_RX_CHECKS(legacy)                                                                                                                  \
   {.msg = {{0x260, 0, 8, .max_counter = 3U, .frequency = 100U},                                                                                           \

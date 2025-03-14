@@ -100,13 +100,13 @@ static bool ford_longitudinal = false;
 
 #define FORD_MAX_SPEED_DELTA 2.0  // m/s
 
-static bool ford_lkas_msg_check(int addr) {
-  return (addr == FORD_ACCDATA_3)
-      || (addr == FORD_Lane_Assist_Data1)
-      || ((addr == FORD_LateralMotionControl) && !ford_canfd)
-      || ((addr == FORD_LateralMotionControl2) && ford_canfd)
-      || (addr == FORD_IPMA_Data);
-}
+//static bool ford_lkas_msg_check(int addr) {
+//  return (addr == FORD_ACCDATA_3)
+//      || (addr == FORD_Lane_Assist_Data1)
+//      || ((addr == FORD_LateralMotionControl) && !ford_canfd)
+//      || ((addr == FORD_LateralMotionControl2) && ford_canfd)
+//      || (addr == FORD_IPMA_Data);
+//}
 
 // Curvature rate limits
 #define FORD_LIMITS(limit_lateral_acceleration) {                                               \
@@ -327,12 +327,12 @@ static safety_config ford_init(uint16_t param) {
     {.msg = {{FORD_DesiredTorqBrk, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
   };
 
-  #define FORD_COMMON_TX_MSGS                        \
-    {FORD_Steering_Data_FD1, 0, 8},                  \
-    {FORD_Steering_Data_FD1, 2, 8},                  \
-    {FORD_ACCDATA_3, 0, 8, true},         \
-    {FORD_Lane_Assist_Data1, 0, 8, true}, \
-    {FORD_IPMA_Data, 0, 8, true},         \
+  #define FORD_COMMON_TX_MSGS              \
+    {FORD_Steering_Data_FD1, 0, 8, false}, \
+    {FORD_Steering_Data_FD1, 2, 8, false}, \
+    {FORD_ACCDATA_3, 0, 8, true},          \
+    {FORD_Lane_Assist_Data1, 0, 8, true},  \
+    {FORD_IPMA_Data, 0, 8, true},          \
 
   static const CanMsg FORD_CANFD_LONG_TX_MSGS[] = {
     FORD_COMMON_TX_MSGS

@@ -11,7 +11,7 @@ static safety_config volkswagen_mqb_init(uint16_t param) {
   // Transmit of GRA_ACC_01 is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
   // openpilot takes over LKAS steering control and related HUD messages from the camera
   // openpilot needs to replace apparent driver steering input torque to pacify VW Emergency Assist
-  static const CanMsg VOLKSWAGEN_MQB_STOCK_TX_MSGS[] = {{MSG_HCA_01, 0, 8, true}, {MSG_GRA_ACC_01, 0, 8}, {MSG_GRA_ACC_01, 2, 8},
+  static const CanMsg VOLKSWAGEN_MQB_STOCK_TX_MSGS[] = {{MSG_HCA_01, 0, 8, true}, {MSG_GRA_ACC_01, 0, 8, false}, {MSG_GRA_ACC_01, 2, 8, false},
                                                         {MSG_LDW_02, 0, 8, true}, {MSG_LH_EPS_03, 2, 8, true}};
 
   // openpilot takes over acceleration/braking control and related HUD messages from the stock ACC radar
