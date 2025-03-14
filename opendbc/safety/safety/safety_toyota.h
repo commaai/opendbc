@@ -16,14 +16,14 @@
 // on SecOC cars 0x131 is also LTA
 #define TOYOTA_COMMON_SECOC_TX_MSGS \
   TOYOTA_BASE_TX_MSGS \
-  {0x2E4, 0, 8, true}, {0x131, 0, 8, true}, \
+  {0x2E4, 0, 8, true}, {0x131, 0, 8, true},  /* LKAS + LTA */  \
   {0x343, 0, 8, false},  /* ACC cancel cmd */  \
 
 // in TSS2 the camera does ACC as well, so filter 0x343
 #define TOYOTA_COMMON_LONG_TX_MSGS                                                                                                                                                                  \
   TOYOTA_BASE_TX_MSGS                                                                                                                                                                               \
-  {0x343, 0, 8, true},  /* ACC */                                                                                                                                                        \
   {0x2E4, 0, 5, true},  /* LKAS */                                                                                                                                                                  \
+  {0x343, 0, 8, true},  /* ACC */                                                                                                                                                        \
   {0x283, 0, 7, false}, {0x2E6, 0, 8, false}, {0x2E7, 0, 8, false}, {0x33E, 0, 7, false}, {0x344, 0, 8, false}, {0x365, 0, 7, false}, {0x366, 0, 7, false}, {0x4CB, 0, 8, false},  /* DSU bus 0 */  \
   {0x128, 1, 6, false}, {0x141, 1, 4, false}, {0x160, 1, 8, false}, {0x161, 1, 7, false}, {0x470, 1, 4, false},  /* DSU bus 1 */                                                                    \
   {0x411, 0, 8, false},  /* PCS_HUD */                                                                                                                                                              \
