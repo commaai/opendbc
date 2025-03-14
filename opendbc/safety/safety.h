@@ -279,12 +279,23 @@ static int get_fwd_bus(int bus_num) {
 
 int safety_fwd_hook(int bus_num, int addr) {
   bool blocked = relay_malfunction || current_safety_config.disable_forwarding;
+  const int destination_bus = get_fwd_bus(bus_num);
+
+  if (!blocked) {
+    for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
+      const CanMsg *m = &current_safety_config.tx_msgs[i];
+      if (m->blocked && (m->addr == addr) && (m->bus == destination_bus)) {
+        blocked = true;
+        break;
+      }
+    }
+  }
 
   if (!blocked && (current_hooks->fwd != NULL)) {
     blocked = current_hooks->fwd(bus_num, addr);
   }
 
-  return blocked ? -1 : get_fwd_bus(bus_num);
+  return blocked ? -1 : destination_bus;
 }
 
 bool get_longitudinal_allowed(void) {
