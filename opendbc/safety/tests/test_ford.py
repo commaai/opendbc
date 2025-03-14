@@ -71,7 +71,7 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
                                  MSG_LateralMotionControl2, MSG_IPMA_Data)}
 
   FWD_BLACKLISTED_ADDRS = {2: [MSG_ACCDATA_3, MSG_Lane_Assist_Data1, MSG_LateralMotionControl,
-                               MSG_LateralMotionControl2, MSG_IPMA_Data]}
+                               MSG_IPMA_Data]}
 
   # Max allowed delta between car speeds
   MAX_SPEED_DELTA = 2.0  # m/s
@@ -401,9 +401,6 @@ class TestFordCANFDStockSafety(TestFordSafetyBase):
     [MSG_Steering_Data_FD1, 0], [MSG_Steering_Data_FD1, 2], [MSG_ACCDATA_3, 0], [MSG_Lane_Assist_Data1, 0],
     [MSG_LateralMotionControl2, 0], [MSG_IPMA_Data, 0],
   ]
-  RELAY_MALFUNCTION_ADDRS = {0: (MSG_ACCDATA_3, MSG_Lane_Assist_Data1, MSG_LateralMotionControl2,
-                                 MSG_IPMA_Data)}
-
   FWD_BLACKLISTED_ADDRS = {2: [MSG_ACCDATA_3, MSG_Lane_Assist_Data1, MSG_LateralMotionControl2,
                                MSG_IPMA_Data]}
 
@@ -496,9 +493,6 @@ class TestFordCANFDLongitudinalSafety(TestFordLongitudinalSafetyBase):
     [MSG_Steering_Data_FD1, 0], [MSG_Steering_Data_FD1, 2], [MSG_ACCDATA, 0], [MSG_ACCDATA_3, 0], [MSG_Lane_Assist_Data1, 0],
     [MSG_LateralMotionControl2, 0], [MSG_IPMA_Data, 0],
   ]
-  RELAY_MALFUNCTION_ADDRS = {0: (MSG_ACCDATA, MSG_ACCDATA_3, MSG_Lane_Assist_Data1, MSG_LateralMotionControl2,
-                                 MSG_IPMA_Data)}
-
   FWD_BLACKLISTED_ADDRS = {2: [MSG_ACCDATA, MSG_ACCDATA_3, MSG_Lane_Assist_Data1, MSG_LateralMotionControl2,
                                MSG_IPMA_Data]}
 

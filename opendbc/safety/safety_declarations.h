@@ -8,17 +8,20 @@
 #define GET_FLAG(value, mask) (((__typeof__(mask))(value) & (mask)) == (mask)) // cppcheck-suppress misra-c2012-1.2; allow __typeof__
 
 #define BUILD_SAFETY_CFG(rx, tx) ((safety_config){(rx), (sizeof((rx)) / sizeof((rx)[0])), \
-                                                  (tx), (sizeof((tx)) / sizeof((tx)[0]))})
+                                                  (tx), (sizeof((tx)) / sizeof((tx)[0])), \
+                                                  false})
 #define SET_RX_CHECKS(rx, config) \
   do { \
     (config).rx_checks = (rx); \
     (config).rx_checks_len = sizeof((rx)) / sizeof((rx)[0]); \
+    (config).disable_forwarding = false; \
   } while (0);
 
 #define SET_TX_MSGS(tx, config) \
   do { \
     (config).tx_msgs = (tx); \
     (config).tx_msgs_len = sizeof((tx)) / sizeof((tx)[0]); \
+    (config).disable_forwarding = false; \
   } while(0);
 
 #define UPDATE_VEHICLE_SPEED(val_ms) (update_sample(&vehicle_speed, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
@@ -27,6 +30,7 @@ uint32_t GET_BYTES(const CANPacket_t *msg, int start, int len);
 
 extern const int MAX_WRONG_COUNTERS;
 #define MAX_ADDR_CHECK_MSGS 3U
+#define DEFAULT_FWD_BUS_LEN 2
 #define MAX_SAMPLE_VALS 6
 // used to represent floating point vehicle speed in a sample_t
 #define VEHICLE_SPEED_FACTOR 1000.0
@@ -49,8 +53,13 @@ typedef struct {
   int addr;
   int bus;
   int len;
-  bool check_relay;
+  bool blocked;
 } CanMsg;
+
+typedef struct {
+  int source_bus;
+  int destination_bus;
+} FwdBus;
 
 typedef enum {
   TorqueMotorLimited,   // torque steering command, limited by EPS output torque
@@ -152,6 +161,7 @@ typedef struct {
   int rx_checks_len;
   const CanMsg *tx_msgs;
   int tx_msgs_len;
+  bool disable_forwarding;
 } safety_config;
 
 typedef uint32_t (*get_checksum_t)(const CANPacket_t *to_push);
@@ -168,6 +178,7 @@ typedef struct {
   safety_hook_init init;
   rx_hook rx;
   tx_hook tx;
+  // TODO: remove
   fwd_hook fwd;
   get_checksum_t get_checksum;
   compute_checksum_t compute_checksum;

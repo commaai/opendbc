@@ -194,6 +194,8 @@ class TestSubaruGen1LongitudinalSafety(TestSubaruLongitudinalSafetyBase, TestSub
 class TestSubaruGen2LongitudinalSafety(TestSubaruLongitudinalSafetyBase, TestSubaruGen2TorqueSafetyBase):
   FLAGS = SubaruSafetyFlags.LONG | SubaruSafetyFlags.GEN2
   TX_MSGS = lkas_tx_msgs(SUBARU_ALT_BUS) + long_tx_msgs(SUBARU_ALT_BUS) + gen2_long_additional_tx_msgs()
+  FWD_BLACKLISTED_ADDRS = {2: [SubaruMsg.ES_LKAS, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State,
+                               SubaruMsg.ES_Infotainment]}
 
   def _rdbi_msg(self, did: int):
     return b'\x03\x22' + did.to_bytes(2) + b'\x00\x00\x00\x00'
