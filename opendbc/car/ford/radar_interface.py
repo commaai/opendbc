@@ -105,7 +105,7 @@ class RadarInterface(RadarInterfaceBase):
     elif self.radar == RADAR.DELPHI_ESR:
       self.rcp = _create_delphi_esr_radar_can_parser(CP)
       self.trigger_msg = DELPHI_ESR_RADAR_MSGS[-1]
-      self.valid_cnt = {key: 0 for key in DELPHI_ESR_RADAR_MSGS}
+      self.valid_cnt = dict.fromkeys(DELPHI_ESR_RADAR_MSGS, 0)
     elif self.radar == RADAR.DELPHI_MRR:
       self.rcp = _create_delphi_mrr_radar_can_parser(CP)
       self.trigger_msg = DELPHI_MRR_RADAR_HEADER_ADDR

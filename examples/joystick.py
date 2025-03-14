@@ -26,7 +26,7 @@ class Keyboard:
     print(key)
     self.cancel = False
     if key == 'r':
-      self.axes_values = {ax: 0. for ax in self.axes_values}
+      self.axes_values = dict.fromkeys(self.axes_values, 0.0)
     elif key == 'c':
       self.cancel = True
     elif key in self.axes_map:

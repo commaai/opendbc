@@ -87,7 +87,7 @@ class TestSubaruSafetyBase(common.PandaCarSafetyTest):
     return self.packer.make_can_msg_panda("Steering_Torque", 0, values)
 
   def _speed_msg(self, speed):
-    values = {s: speed for s in ["FR", "FL", "RR", "RL"]}
+    values = dict.fromkeys(["FR", "FL", "RR", "RL"], speed)
     return self.packer.make_can_msg_panda("Wheel_Speeds", self.ALT_MAIN_BUS, values)
 
   def _angle_meas_msg(self, angle):
