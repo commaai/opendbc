@@ -130,8 +130,6 @@ class CarInterface(CarInterfaceBase):
       ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.EV_GAS.value
     elif ret.flags & HyundaiFlags.FCEV:
       ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.FCEV_GAS.value
-      # The safety is not properly implemented
-      ret.dashcamOnly = True
 
     # Car specific configuration overrides
 
