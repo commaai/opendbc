@@ -6,18 +6,18 @@
 // block stock lkas messages and stock acc messages (if OP is doing ACC)
 // in TSS2, 0x191 is LTA which we need to block to avoid controls collision
 #define TOYOTA_BASE_TX_MSGS \
-  {0x191, 0, 8, true}, {0x412, 0, 8, true}, {0x1D2, 0, 8, false},  /* LKAS + LTA + PCM cancel cmds */  \
+  {0x191, 0, 8, true}, {0x412, 0, 8, true}, {0x1D2, 0, 8, false},  /* LKAS + LTA + PCM cancel cmd */  \
 
 #define TOYOTA_COMMON_TX_MSGS \
   TOYOTA_BASE_TX_MSGS \
-  {0x343, 0, 8, false},  /* ACC cancel cmd */ \
   {0x2E4, 0, 5, true},  /* LKAS */ \
+  {0x343, 0, 8, false},  /* ACC cancel cmd */  \
 
 // on SecOC cars 0x131 is also LTA
 #define TOYOTA_COMMON_SECOC_TX_MSGS \
   TOYOTA_BASE_TX_MSGS \
-  {0x343, 0, 8, false}, /* ACC cancel cmd */ \
   {0x2E4, 0, 8, true}, {0x131, 0, 8, true}, \
+  {0x343, 0, 8, false},  /* ACC cancel cmd */  \
 
 // in TSS2 the camera does ACC as well, so filter 0x343
 #define TOYOTA_COMMON_LONG_TX_MSGS                                                                                                          \
