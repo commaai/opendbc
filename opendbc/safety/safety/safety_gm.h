@@ -224,12 +224,15 @@ static safety_config gm_init(uint16_t param) {
     ret = gm_cam_long ? BUILD_SAFETY_CFG(gm_rx_checks, GM_CAM_LONG_TX_MSGS) : BUILD_SAFETY_CFG(gm_rx_checks, GM_CAM_TX_MSGS);
   } else {
     ret = BUILD_SAFETY_CFG(gm_rx_checks, GM_ASCM_TX_MSGS);
-    ret.disable_forwarding = true;
   }
 
   const bool gm_ev = GET_FLAG(param, GM_PARAM_EV);
   if (gm_ev) {
     SET_RX_CHECKS(gm_ev_rx_checks, ret);
+  }
+
+  if (gm_hw == GM_ASCM) {
+    ret.disable_forwarding = true;
   }
   return ret;
 }
