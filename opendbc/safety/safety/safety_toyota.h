@@ -20,14 +20,14 @@
   {0x343, 0, 8, false},  /* ACC cancel cmd */  \
 
 // in TSS2 the camera does ACC as well, so filter 0x343
-#define TOYOTA_COMMON_LONG_TX_MSGS                                                                                                          \
-  TOYOTA_BASE_TX_MSGS                                                                                                                       \
-  {0x343, 0, 8, true},  /* ACC cancel cmd */                                                                                     \
-  {0x2E4, 0, 5, true},  /* LKAS */                                                                                               \
+#define TOYOTA_COMMON_LONG_TX_MSGS                                                                                                                                                                  \
+  TOYOTA_BASE_TX_MSGS                                                                                                                                                                               \
+  {0x343, 0, 8, true},  /* ACC */                                                                                                                                                        \
+  {0x2E4, 0, 5, true},  /* LKAS */                                                                                                                                                                  \
   {0x283, 0, 7, false}, {0x2E6, 0, 8, false}, {0x2E7, 0, 8, false}, {0x33E, 0, 7, false}, {0x344, 0, 8, false}, {0x365, 0, 7, false}, {0x366, 0, 7, false}, {0x4CB, 0, 8, false},  /* DSU bus 0 */  \
-  {0x128, 1, 6, false}, {0x141, 1, 4, false}, {0x160, 1, 8, false}, {0x161, 1, 7, false}, {0x470, 1, 4, false},  /* DSU bus 1 */                                               \
-  {0x411, 0, 8, false},  /* PCS_HUD */                                                                                                             \
-  {0x750, 0, 8, false},  /* radar diagnostic address */                                                                                            \
+  {0x128, 1, 6, false}, {0x141, 1, 4, false}, {0x160, 1, 8, false}, {0x161, 1, 7, false}, {0x470, 1, 4, false},  /* DSU bus 1 */                                                                    \
+  {0x411, 0, 8, false},  /* PCS_HUD */                                                                                                                                                              \
+  {0x750, 0, 8, false},  /* radar diagnostic address */                                                                                                                                             \
 
 #define TOYOTA_COMMON_RX_CHECKS(lta)                                                                          \
   {.msg = {{ 0xaa, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 83U}, { 0 }, { 0 }}},  \
