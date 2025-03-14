@@ -159,7 +159,7 @@ static safety_config tesla_init(uint16_t param) {
 
   static const CanMsg TESLA_M3_Y_TX_MSGS[] = {
     {0x488, 0, 4, true},   // DAS_steeringControl
-    {0x2b9, 0, 8, false},  // DAS_control
+    {0x2b9, 0, 8, false},  // DAS_control (for cancel)  // TODO this is dynamic, fix
     {0x27D, 0, 3, true},   // APS_eacMonitor
   };
 
