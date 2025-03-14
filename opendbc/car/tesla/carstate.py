@@ -20,7 +20,6 @@ class CarState(CarStateBase):
       **self.can_define_pt.dv,
       **self.can_define_chassis.dv,
     }
-    self.shifter_values = self.can_define.dv["DI_systemStatus"]["DI_gear"]
 
     if self.CP.carFingerprint not in PLATFORM_3Y:
       # TODO: this should be swapped on the harnesses
@@ -94,7 +93,10 @@ class CarState(CarStateBase):
     ret.accFaulted = cruise_state == "FAULT"
 
     # Gear
-    GEAR_MAP[self.can_defines["DI_systemStatus"]["DI_gear"].get(int(cp_party.vl["DI_systemStatus"]["DI_gear"]), "DI_GEAR_INVALID")]
+    if is_3Y:
+      ret.gearShifter = GEAR_MAP[self.can_defines["DI_systemStatus"]["DI_gear"].get(int(cp_party.vl["DI_systemStatus"]["DI_gear"]), "DI_GEAR_INVALID")]
+    else:
+      ret.gearShifter = GEAR_MAP[self.can_defines["DI_torque2"]["DI_gear"].get(int(cp_pt.vl["DI_torque2"]["DI_gear"]), "DI_GEAR_INVALID")]
 
     if is_3Y:
       ret.doorOpen = cp_party.vl["UI_warning"]["anyDoorOpen"] == 1
