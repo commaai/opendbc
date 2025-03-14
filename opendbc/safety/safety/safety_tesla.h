@@ -176,7 +176,7 @@ static safety_config tesla_init(uint16_t param) {
   static const CanMsg TESLA_M3_Y_LONG_TX_MSGS[] = {
     {0x488, 0, 4, true},  // DAS_steeringControl
     // TODO: we should block, but we need to conditionally forward during AEB events
-    {0x2b9, 0, 8, false},  // DAS_control
+    {0x2b9, 0, 8, true},  // DAS_control
     {0x27D, 0, 3, true},  // APS_eacMonitor
   };
 
