@@ -32,7 +32,7 @@ class RadarInterface(RadarInterfaceBase):
       self.RADAR_A_MSGS = list(range(0x210, 0x220))
       self.RADAR_B_MSGS = list(range(0x220, 0x230))
 
-    self.valid_cnt = dict.fromkeys(self.RADAR_A_MSGS, 0)
+    self.valid_cnt = {key: 0 for key in self.RADAR_A_MSGS}
 
     self.rcp = None if CP.radarUnavailable else _create_radar_can_parser(CP.carFingerprint)
     self.trigger_msg = self.RADAR_B_MSGS[-1]
