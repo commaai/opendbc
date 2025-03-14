@@ -100,8 +100,6 @@ static void chrysler_rx_hook(const CANPacket_t *to_push) {
   if ((bus == 0) && (addr == chrysler_addrs->ESP_1)) {
     brake_pressed = ((GET_BYTE(to_push, 0U) & 0xFU) >> 2U) == 1U;
   }
-
-  generic_rx_checks((bus == 0) && (addr == chrysler_addrs->LKAS_COMMAND));
 }
 
 static bool chrysler_tx_hook(const CANPacket_t *to_send) {
@@ -245,9 +243,15 @@ static safety_config chrysler_init(uint16_t param) {
   };
 
   static const CanMsg CHRYSLER_RAM_HD_TX_MSGS[] = {
+<<<<<<< HEAD
     {CHRYSLER_RAM_HD_ADDRS.CRUISE_BUTTONS, 2, 3},
     {CHRYSLER_RAM_HD_ADDRS.LKAS_COMMAND, 0, 8, .blocked = true},
     {CHRYSLER_RAM_HD_ADDRS.DAS_6, 0, 8, .blocked = true},
+=======
+    {CHRYSLER_RAM_HD_ADDRS.CRUISE_BUTTONS, 2, 3, false},
+    {CHRYSLER_RAM_HD_ADDRS.LKAS_COMMAND, 0, 8, true},
+    {CHRYSLER_RAM_HD_ADDRS.DAS_6, 0, 8, false},
+>>>>>>> upstream/master
   };
 
   const uint32_t CHRYSLER_PARAM_RAM_HD = 2U;  // set for Ram HD platform

@@ -124,8 +124,6 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *to_push) {
     }
 
     brake_pressed = volkswagen_mqb_brake_pedal_switch || volkswagen_mqb_brake_pressure_detected;
-
-    generic_rx_checks((addr == MSG_HCA_01));
   }
 }
 

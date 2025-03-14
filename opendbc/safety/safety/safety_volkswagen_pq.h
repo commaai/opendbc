@@ -150,8 +150,6 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *to_push) {
     if (addr == MSG_MOTOR_2) {
       brake_pressed = (GET_BYTE(to_push, 2) & 0x1U);
     }
-
-    generic_rx_checks((addr == MSG_HCA_1));
   }
 }
 

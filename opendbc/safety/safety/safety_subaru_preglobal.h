@@ -50,8 +50,6 @@ static void subaru_preglobal_rx_hook(const CANPacket_t *to_push) {
     if (addr == MSG_SUBARU_PG_Throttle) {
       gas_pressed = GET_BYTE(to_push, 0) != 0U;
     }
-
-    generic_rx_checks((addr == MSG_SUBARU_PG_ES_LKAS));
   }
 }
 
@@ -95,7 +93,9 @@ static safety_config subaru_preglobal_init(uint16_t param) {
   static RxCheck subaru_preglobal_rx_checks[] = {
     {.msg = {{MSG_SUBARU_PG_Throttle,        SUBARU_PG_MAIN_BUS, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},
     {.msg = {{MSG_SUBARU_PG_Steering_Torque, SUBARU_PG_MAIN_BUS, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_SUBARU_PG_CruiseControl,   SUBARU_PG_MAIN_BUS, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 20U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_SUBARU_PG_CruiseControl,   SUBARU_PG_MAIN_BUS, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_SUBARU_PG_Wheel_Speeds,    SUBARU_PG_MAIN_BUS, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_SUBARU_PG_Brake_Pedal,     SUBARU_PG_MAIN_BUS, 4, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
   };
 
   const int SUBARU_PG_PARAM_REVERSED_DRIVER_TORQUE = 4;

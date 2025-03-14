@@ -88,6 +88,7 @@ static bool ford_get_quality_flag_valid(const CANPacket_t *to_push) {
   return valid;
 }
 
+static bool ford_canfd = false;
 static bool ford_longitudinal = false;
 
 #define FORD_INACTIVE_CURVATURE 1000U
@@ -102,8 +103,8 @@ static bool ford_longitudinal = false;
 static bool ford_lkas_msg_check(int addr) {
   return (addr == FORD_ACCDATA_3)
       || (addr == FORD_Lane_Assist_Data1)
-      || (addr == FORD_LateralMotionControl)
-      || (addr == FORD_LateralMotionControl2)
+      || ((addr == FORD_LateralMotionControl) && !ford_canfd)
+      || ((addr == FORD_LateralMotionControl2) && ford_canfd)
       || (addr == FORD_IPMA_Data);
 }
 
@@ -185,17 +186,7 @@ static void ford_rx_hook(const CANPacket_t *to_push) {
       bool cruise_engaged = (cruise_state == 4U) || (cruise_state == 5U);
       pcm_cruise_check(cruise_engaged);
     }
-
-    // If steering controls messages are received on the destination bus, it's an indication
-    // that the relay might be malfunctioning.
-    // TODO: replace with blocked messages!
-    bool stock_ecu_detected = ford_lkas_msg_check(addr);
-    if (ford_longitudinal) {
-      stock_ecu_detected = stock_ecu_detected || (addr == FORD_ACCDATA);
-    }
-    generic_rx_checks(stock_ecu_detected);
   }
-
 }
 
 static bool ford_tx_hook(const CANPacket_t *to_send) {
@@ -321,8 +312,6 @@ static bool ford_tx_hook(const CANPacket_t *to_send) {
 }
 
 static safety_config ford_init(uint16_t param) {
-  bool ford_canfd = false;
-
   // warning: quality flags are not yet checked in openpilot's CAN parser,
   // this may be the cause of blocked messages
   static RxCheck ford_rx_checks[] = {
@@ -338,6 +327,7 @@ static safety_config ford_init(uint16_t param) {
     {.msg = {{FORD_DesiredTorqBrk, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
   };
 
+<<<<<<< HEAD
   #define FORD_COMMON_TX_MSGS                        \
     {FORD_Steering_Data_FD1, 0, 8},                  \
     {FORD_Steering_Data_FD1, 2, 8},                  \
@@ -349,22 +339,48 @@ static safety_config ford_init(uint16_t param) {
     FORD_COMMON_TX_MSGS
     {FORD_ACCDATA, 0, 8, .blocked = true},
     {FORD_LateralMotionControl2, 0, 8, .blocked = true},
+=======
+  #define FORD_COMMON_TX_MSGS              \
+    {FORD_Steering_Data_FD1, 0, 8, false}, \
+    {FORD_Steering_Data_FD1, 2, 8, false}, \
+    {FORD_ACCDATA_3, 0, 8, true},          \
+    {FORD_Lane_Assist_Data1, 0, 8, true},  \
+    {FORD_IPMA_Data, 0, 8, true},          \
+
+  static const CanMsg FORD_CANFD_LONG_TX_MSGS[] = {
+    FORD_COMMON_TX_MSGS
+    {FORD_ACCDATA, 0, 8, true},
+    {FORD_LateralMotionControl2, 0, 8, true},
+>>>>>>> upstream/master
   };
 
   static const CanMsg FORD_CANFD_STOCK_TX_MSGS[] = {
     FORD_COMMON_TX_MSGS
+<<<<<<< HEAD
     {FORD_LateralMotionControl2, 0, 8, .blocked = true},
+=======
+    {FORD_LateralMotionControl2, 0, 8, true},
+>>>>>>> upstream/master
   };
 
   static const CanMsg FORD_STOCK_TX_MSGS[] = {
     FORD_COMMON_TX_MSGS
+<<<<<<< HEAD
     {FORD_LateralMotionControl, 0, 8, .blocked = true},
+=======
+    {FORD_LateralMotionControl, 0, 8, true},
+>>>>>>> upstream/master
   };
 
   static const CanMsg FORD_LONG_TX_MSGS[] = {
     FORD_COMMON_TX_MSGS
+<<<<<<< HEAD
     {FORD_ACCDATA, 0, 8, .blocked = true},
     {FORD_LateralMotionControl, 0, 8, .blocked = true},
+=======
+    {FORD_ACCDATA, 0, 8, true},
+    {FORD_LateralMotionControl, 0, 8, true},
+>>>>>>> upstream/master
   };
 
   const uint16_t FORD_PARAM_CANFD = 2;

@@ -52,8 +52,6 @@ static void nissan_rx_hook(const CANPacket_t *to_push) {
     bool cruise_engaged = (GET_BYTE(to_push, 0) >> 3) & 1U;
     pcm_cruise_check(cruise_engaged);
   }
-
-  generic_rx_checks((addr == 0x169) && (bus == 0));
 }
 
 

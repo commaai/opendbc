@@ -29,11 +29,6 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
     if (addr == 0x38f) {
       brake_pressed = GET_BIT(to_push, 23U);
     }
-
-    generic_rx_checks(addr == 0x120);  // ACM_lkaHbaCmd
-    if (rivian_longitudinal) {
-      generic_rx_checks(addr == 0x160);  // ACM_longitudinalRequest
-    }
   }
 
   if (bus == 2) {
@@ -113,6 +108,9 @@ static safety_config rivian_init(uint16_t param) {
     rivian_longitudinal = GET_FLAG(param, FLAG_RIVIAN_LONG_CONTROL);
   #endif
 
+  // FIXME: cppcheck thinks that rivian_longitudinal is always false. This is not true
+  // if ALLOW_DEBUG is defined but cppcheck is run without ALLOW_DEBUG
+  // cppcheck-suppress knownConditionTrueFalse
   return rivian_longitudinal ? BUILD_SAFETY_CFG(rivian_rx_checks, RIVIAN_LONG_TX_MSGS) : \
                                BUILD_SAFETY_CFG(rivian_rx_checks, RIVIAN_TX_MSGS);
 }

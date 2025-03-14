@@ -44,8 +44,6 @@ static void mazda_rx_hook(const CANPacket_t *to_push) {
     if (addr == MAZDA_PEDALS) {
       brake_pressed = (GET_BYTE(to_push, 0) & 0x10U);
     }
-
-    generic_rx_checks((addr == MAZDA_LKAS));
   }
 }
 

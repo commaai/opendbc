@@ -2,9 +2,12 @@
 
 #include "safety_declarations.h"
 
+// GCOV_EXCL_START
+// Unreachable by design (doesn't define any rx msgs)
 void default_rx_hook(const CANPacket_t *to_push) {
   UNUSED(to_push);
 }
+// GCOV_EXCL_STOP
 
 // *** no output safety mode ***
 
