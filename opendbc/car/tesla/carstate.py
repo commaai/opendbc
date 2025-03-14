@@ -94,7 +94,7 @@ class CarState(CarStateBase):
     ret.accFaulted = cruise_state == "FAULT"
 
     # Gear
-    GEAR_MAP[self.can_define.dv["DI_systemStatus"]["DI_gear"].get(int(cp_party.vl["DI_systemStatus"]["DI_gear"]), "DI_GEAR_INVALID")]
+    GEAR_MAP[self.can_defines["DI_systemStatus"]["DI_gear"].get(int(cp_party.vl["DI_systemStatus"]["DI_gear"]), "DI_GEAR_INVALID")]
 
     if is_3Y:
       ret.doorOpen = cp_party.vl["UI_warning"]["anyDoorOpen"] == 1
