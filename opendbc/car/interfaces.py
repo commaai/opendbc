@@ -104,17 +104,17 @@ class CarInterfaceBase(ABC):
   CarController: 'CarControllerBase'
   RadarInterface: 'RadarInterfaceBase' = RadarInterfaceBase
 
-  def __init__(self, CP: structs.CarParams, CarController, CarState):
+  def __init__(self, CP: structs.CarParams):
     self.CP = CP
 
     self.frame = 0
     self.v_ego_cluster_seen = False
 
-    self.CS: CarStateBase = CarState(CP)
+    self.CS: CarStateBase = self.CarState(CP)
     self.can_parsers: dict[StrEnum, CANParser] = self.CS.get_can_parsers(CP)
 
     dbc_names = {bus: cp.dbc_name for bus, cp in self.can_parsers.items()}
-    self.CC: CarControllerBase = CarController(dbc_names, CP)
+    self.CC: CarControllerBase = self.CarController(dbc_names, CP)
 
   def apply(self, c: structs.CarControl, now_nanos: int | None = None) -> tuple[structs.CarControl.Actuators, list[CanData]]:
     if now_nanos is None:

@@ -20,11 +20,8 @@ def load_interfaces(brand_names):
   for brand_name in brand_names:
     path = f'opendbc.car.{brand_name}'
     CarInterface = __import__(path + '.interface', fromlist=['CarInterface']).CarInterface
-    CarState = CarInterface.CarState
-    CarController = CarInterface.CarController
-    RadarInterface = CarInterface.RadarInterface
     for model_name in brand_names[brand_name]:
-      ret[model_name] = (CarInterface, CarController, CarState, RadarInterface)
+      ret[model_name] = CarInterface
   return ret
 
 
@@ -156,13 +153,13 @@ def fingerprint(can_recv: CanRecvCallable, can_send: CanSendCallable, set_obd_mu
 
 
 def get_car_interface(CP: CarParams):
-  CarInterface, CarController, CarState, _ = interfaces[CP.carFingerprint]
-  return CarInterface(CP, CarController, CarState)
+  CarInterface = interfaces[CP.carFingerprint]
+  return CarInterface(CP)
 
 
 def get_radar_interface(CP: CarParams):
-  _, _, _, RadarInterface = interfaces[CP.carFingerprint]
-  return RadarInterface(CP)
+  CarInterface = interfaces[CP.carFingerprint]
+  return CarInterface.RadarInterface(CP)
 
 
 def get_car(can_recv: CanRecvCallable, can_send: CanSendCallable, set_obd_multiplexing: ObdCallback, experimental_long_allowed: bool,
