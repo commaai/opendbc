@@ -34,5 +34,5 @@ class CarInterface(CarInterfaceBase):
   @staticmethod
   def init(CP, can_recv, can_send):
     # ECU name: ARTIV	ARTIV, RADAR_AV_4, LIDAR, ARTIV_UDS	>6B6:696
-    tester_present = bytes([0x3E,0x00])
-    disable_ecu(can_recv, can_send, bus=1, addr=0x6B6, com_cont_req=tester_present)
+    # tester_present = bytes([0x3E,0x00])
+    disable_ecu(can_recv, can_send, bus=1, addr=0x6B6)

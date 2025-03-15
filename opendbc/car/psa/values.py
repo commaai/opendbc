@@ -53,9 +53,12 @@ PSA_DIAGNOSTIC_REQUEST  = bytes([uds.SERVICE_TYPE.DIAGNOSTIC_SESSION_CONTROL, 0x
 # The Diagnostic response includes the ECU rx/tx timings
 PSA_DIAGNOSTIC_RESPONSE = bytes([uds.SERVICE_TYPE.DIAGNOSTIC_SESSION_CONTROL + 0x40, 0x01])
 
+PSA_SERIAL_REQUEST = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER]) + \
+  uds.p16(uds.DATA_IDENTIFIER_TYPE.ECU_SERIAL_NUMBER)
+PSA_SERIAL_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER] + 0x40) + \
+  uds.p16(uds.DATA_IDENTIFIER_TYPE.ECU_SERIAL_NUMBER)
 
 PSA_VERSION_REQUEST  = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER, 0xF0, 0xFE])
-
 # TODO: Placeholder or info for uds module - The actual response is multi-frame TP
 PSA_VERSION_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40, 0xF0, 0xFE])
 
@@ -69,6 +72,15 @@ FW_QUERY_CONFIG = FwQueryConfig(
         rx_offset=PSA_RX_OFFSET,
         bus=1,
         logging=True,
+        obd_multiplexing=False,
+    ),
+    Request(
+        [PSA_SERIAL_REQUEST],
+        [PSA_SERIAL_RESPONSE],
+        rx_offset=PSA_RX_OFFSET,
+        bus=1,
+        logging=True,
+        obd_multiplexing=False,
     ),
     Request(
         [PSA_VERSION_REQUEST],
@@ -76,6 +88,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
         rx_offset=PSA_RX_OFFSET,
         bus=1,
         logging=True,
+        obd_multiplexing=False,
     ),
   ],
 )
