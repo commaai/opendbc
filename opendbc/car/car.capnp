@@ -300,8 +300,8 @@ struct CarState {
 # ******* radar state @ 20hz *******
 
 struct RadarData @0x888ad6581cf0aacb {
-  points @1 :List(RadarPoint);
   errors @3 :Error;
+  points @1 :List(RadarPoint);
 
   struct Error {
     canError @0 :Bool;
