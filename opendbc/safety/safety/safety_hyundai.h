@@ -47,8 +47,8 @@ const LongitudinalLimits HYUNDAI_LONG_LIMITS = {
   {.msg = {{0x251, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},                                              \
   {.msg = {{0x4F1, 0, 4, .ignore_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},                                                  \
 
-#define HYUNDAI_SCC12_ADDR_CHECK(scc_bus)                                               \
-  {.msg = {{0x421, (scc_bus), 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}}, \
+#define HYUNDAI_SCC12_ADDR_CHECK(scc_bus, legacy)                                                                                                                \
+  {.msg = {{0x421, (scc_bus), 8, .ignore_checksum = (legacy), .ignore_counter = (legacy), .max_counter = (legacy) ? 0U : 15U, .frequency = 50U}, { 0 }, { 0 }}}, \
 
 #define HYUNDAI_FCEV_GAS_ADDR_CHECK \
   {.msg = {{0x91,  0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}}, \
@@ -318,14 +318,14 @@ static safety_config hyundai_init(uint16_t param) {
   } else if (hyundai_camera_scc) {
     static RxCheck hyundai_cam_scc_rx_checks[] = {
       HYUNDAI_COMMON_RX_CHECKS(false)
-      HYUNDAI_SCC12_ADDR_CHECK(2)
+      HYUNDAI_SCC12_ADDR_CHECK(2, false)
     };
 
     ret = BUILD_SAFETY_CFG(hyundai_cam_scc_rx_checks, HYUNDAI_CAMERA_SCC_TX_MSGS);
   } else {
     static RxCheck hyundai_rx_checks[] = {
        HYUNDAI_COMMON_RX_CHECKS(false)
-       HYUNDAI_SCC12_ADDR_CHECK(0)
+       HYUNDAI_SCC12_ADDR_CHECK(0, false)
     };
 
     static RxCheck hyundai_fcev_rx_checks[] = {
@@ -348,7 +348,7 @@ static safety_config hyundai_legacy_init(uint16_t param) {
   // older hyundai models have less checks due to missing counters and checksums
   static RxCheck hyundai_legacy_rx_checks[] = {
     HYUNDAI_COMMON_RX_CHECKS(true)
-    HYUNDAI_SCC12_ADDR_CHECK(0)
+    HYUNDAI_SCC12_ADDR_CHECK(0, true)
   };
 
   hyundai_common_init(param);
