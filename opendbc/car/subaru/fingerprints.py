@@ -54,6 +54,7 @@ FW_VERSIONS = {
     (Ecu.abs, 0x7b0, None): [
       b'\xa1  \x02\x01',
       b'\xa1  \x02\x02',
+      b'\xa1  \x03\x02',
       b'\xa1  \x03\x03',
       b'\xa1  \x04\x01',
     ],
@@ -64,9 +65,11 @@ FW_VERSIONS = {
     (Ecu.fwdCamera, 0x787, None): [
       b'\x00\x00e\x80\x00\x1f@ \x19\x00',
       b'\x00\x00e\x9a\x00\x00\x00\x00\x00\x00',
+      b'\xd3\x13\x0e',
     ],
     (Ecu.engine, 0x7e0, None): [
       b'\xde"a0\x07',
+      b'\xe2"a0\x07',
       b'\xde,\xa0@\x07',
       b'\xe2"aq\x07',
       b'\xe2,\xa0@\x07',
