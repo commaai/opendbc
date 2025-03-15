@@ -303,7 +303,6 @@ struct RadarData @0x888ad6581cf0aacb {
   points @1 :List(RadarPoint);
   errors @3 :Error;
 
-  # TODO: not struct? need to forward through radarState, so that's 2x fields
   struct Error {
     canError @0 :Bool;
     fault @1 :Bool;
