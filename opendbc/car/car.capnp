@@ -307,7 +307,7 @@ struct RadarData @0x888ad6581cf0aacb {
     canError @0 :Bool;
     fault @1 :Bool;
     wrongConfig @2 :Bool;
-    unavailableTemporary @3;  # radar data is temporarily unavailable due to conditions the car sets
+    unavailableTemporary @3 :Bool;  # radar data is temporarily unavailable due to conditions the car sets
   }
 
   # similar to LiveTracks
