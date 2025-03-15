@@ -51,11 +51,8 @@ class RadarInterface(RadarInterfaceBase):
     if self.rcp is None:
       return ret
 
-    errors = []
-
     if not self.rcp.can_valid:
-      errors.append("canError")
-    ret.errors = errors
+      ret.errors.canError = True
 
     for addr in range(self.RADAR_START_ADDR, self.RADAR_START_ADDR + RADAR_MSG_COUNT):
       msg = self.rcp.vl[f"RADAR_TRACK_{addr:x}"]
