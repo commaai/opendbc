@@ -943,8 +943,10 @@ FW_VERSIONS = {
     ],
     (Ecu.eps, 0x7d4, None): [
       b'\xf1\x00CN7 MDPS C 1.00 1.00 56300BY670\x00 4CSHC100',
+      b'\xf1\x00CN7 MDPS C 1.00 1.00 56300BY680\x00 4CSHC100',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00CN7HMFC  AT AUS RHD 1.00 1.02 99210-AA500 230420',
       b'\xf1\x00CN7HMFC  AT CAN LHD 1.00 1.05 99210-AA510 240509',
       b'\xf1\x00CN7HMFC  AT USA LHD 1.00 1.03 99210-AA500 230918',
     ],
