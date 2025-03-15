@@ -125,7 +125,7 @@ class RadarInterface(RadarInterfaceBase):
 
     ret = structs.RadarData()
     if not self.rcp.can_valid:
-      ret.canError = True
+      ret.errors.canError = True
 
     if self.radar == RADAR.DELPHI_ESR:
       self._update_delphi_esr()
@@ -180,7 +180,7 @@ class RadarInterface(RadarInterfaceBase):
 
     # Rarely MRR_Header_InformationDetections can fail to send a message. The scan index is skipped in this case
     if self.invalid_cnt >= 5:
-      ret.wrongConfig = True
+      ret.errors.wrongConfig = True
 
     for ii in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
       msg = self.rcp.vl[f"MRR_Detection_{ii:03d}"]

@@ -70,7 +70,7 @@ class RadarInterface(RadarInterfaceBase):
     if not self.rcp.can_valid:
       ret.errors.canError = True
     if self.radar_fault:
-      ret.errors.radarFault = True
+      ret.errors.fault = True
     if self.radar_wrong_config:
       ret.errors.wrongConfig = True
 
