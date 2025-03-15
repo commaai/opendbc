@@ -99,7 +99,9 @@ class RadarInterface(RadarInterfaceBase):
     self.updated_messages = set()
     self.track_id = 0
     self.radar = DBC[CP.carFingerprint].get(Bus.radar)
-    self.invalid_cnt = 0
+    self.scan_index_invalid_cnt = 0
+    self.radar_unavailable_cnt = 0
+    self.prev_headerScanIndex = 0
     if CP.radarUnavailable:
       self.rcp = None
     elif self.radar == RADAR.DELPHI_ESR:
@@ -169,17 +171,31 @@ class RadarInterface(RadarInterfaceBase):
   def _update_delphi_mrr(self, ret: structs.RadarData):
     headerScanIndex = int(self.rcp.vl["MRR_Header_InformationDetections"]['CAN_SCAN_INDEX']) & 0b11
 
+    # In reverse, the radar continually sends the last messages. Mark this as invalid
+    if (self.prev_headerScanIndex + 1) % 4 != headerScanIndex:
+      self.radar_unavailable_cnt += 1
+    else:
+      self.radar_unavailable_cnt = 0
+    self.prev_headerScanIndex = headerScanIndex
+
+    if self.radar_unavailable_cnt >= 5:
+      self.pts.clear()
+      self.points.clear()
+      self.clusters.clear()
+      ret.errors.radarUnavailableTemporary = True
+      return True
+
     # Use points with Doppler coverage of +-60 m/s, reduces similar points
-    if headerScanIndex in (0, 1):
+    if headerScanIndex not in (2, 3):
       return False
 
     if DELPHI_MRR_RADAR_RANGE_COVERAGE[headerScanIndex] != int(self.rcp.vl["MRR_Header_SensorCoverage"]["CAN_RANGE_COVERAGE"]):
-      self.invalid_cnt += 1
+      self.scan_index_invalid_cnt += 1
     else:
-      self.invalid_cnt = 0
+      self.scan_index_invalid_cnt = 0
 
     # Rarely MRR_Header_InformationDetections can fail to send a message. The scan index is skipped in this case
-    if self.invalid_cnt >= 5:
+    if self.scan_index_invalid_cnt >= 5:
       ret.errors.wrongConfig = True
 
     for ii in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
@@ -209,7 +225,7 @@ class RadarInterface(RadarInterfaceBase):
 
         self.points.append([dRel, yRel * 2, distRate * 2])
 
-    # Update once we've cycled through all 4 scan modes
+    # Cluster and publish using stored points once we've cycled through all 4 scan modes
     if headerScanIndex != 3:
       return False
 
