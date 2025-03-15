@@ -10,7 +10,6 @@ from opendbc.car.fw_versions import ObdCallback, get_fw_versions_ordered, get_pr
 from opendbc.car.mock.values import CAR as MOCK
 from opendbc.car.values import BRANDS
 from opendbc.car.vin import get_vin, is_valid_vin, VIN_UNKNOWN
-from opendbc.car.toyota.interface import CarInterface as ToyotaCarInterface
 
 FRAME_FINGERPRINT = 100  # 1s
 
@@ -38,9 +37,6 @@ def _get_interface_names() -> dict[str, list[str]]:
 # imports from directory opendbc/car/<name>/
 interface_names = _get_interface_names()
 interfaces = load_interfaces(interface_names)
-INTERFACES = {
-  "toyota": (ToyotaCarInterface, ToyotaCarInterface.CarController, ToyotaCarInterface.CarState, ToyotaCarInterface.RadarInterface)
-}
 
 
 def can_fingerprint(can_recv: CanRecvCallable) -> tuple[str | None, dict[int, dict]]:
