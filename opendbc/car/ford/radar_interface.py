@@ -123,21 +123,18 @@ class RadarInterface(RadarInterfaceBase):
       return None
     self.updated_messages.clear()
 
-    errors = []
+    ret = structs.RadarData()
     if not self.rcp.can_valid:
-      errors.append("canError")
+      ret.errors.canError = True
 
     if self.radar == RADAR.DELPHI_ESR:
       self._update_delphi_esr()
     elif self.radar == RADAR.DELPHI_MRR:
-      _update, _errors = self._update_delphi_mrr()
-      errors.extend(_errors)
+      _update = self._update_delphi_mrr(ret)
       if not _update:
         return None
 
-    ret = structs.RadarData()
     ret.points = list(self.pts.values())
-    ret.errors = errors
     return ret
 
   def _update_delphi_esr(self):
@@ -169,14 +166,13 @@ class RadarInterface(RadarInterfaceBase):
         if ii in self.pts:
           del self.pts[ii]
 
-  def _update_delphi_mrr(self):
+  def _update_delphi_mrr(self, ret: structs.RadarData):
     headerScanIndex = int(self.rcp.vl["MRR_Header_InformationDetections"]['CAN_SCAN_INDEX']) & 0b11
 
     # Use points with Doppler coverage of +-60 m/s, reduces similar points
     if headerScanIndex in (0, 1):
-      return False, []
+      return False
 
-    errors = []
     if DELPHI_MRR_RADAR_RANGE_COVERAGE[headerScanIndex] != int(self.rcp.vl["MRR_Header_SensorCoverage"]["CAN_RANGE_COVERAGE"]):
       self.invalid_cnt += 1
     else:
@@ -184,7 +180,7 @@ class RadarInterface(RadarInterfaceBase):
 
     # Rarely MRR_Header_InformationDetections can fail to send a message. The scan index is skipped in this case
     if self.invalid_cnt >= 5:
-      errors.append("wrongConfig")
+      ret.errors.wrongConfig = True
 
     for ii in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
       msg = self.rcp.vl[f"MRR_Detection_{ii:03d}"]
@@ -215,7 +211,7 @@ class RadarInterface(RadarInterfaceBase):
 
     # Update once we've cycled through all 4 scan modes
     if headerScanIndex != 3:
-      return False, []
+      return False
 
     # Cluster points from this cycle against the centroids from the previous cycle
     prev_keys = [[p.dRel, p.yRel * 2, p.vRel * 2] for p in self.clusters]
@@ -257,4 +253,4 @@ class RadarInterface(RadarInterfaceBase):
 
     self.points = []
 
-    return True, errors
+    return True
