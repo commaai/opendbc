@@ -8,6 +8,18 @@ BO_ 545 EPS_3: 8 XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
+BO_ 571 CRUISE_BUTTONS_ALT: 3 XXX
+ SG_ ACC_Cancel : 0|1@1+ (1,0) [0|0] "" XXX
+ SG_ ACC_Distance_Dec : 1|1@1+ (1,0) [0|0] "" XXX
+ SG_ ACC_Accel : 2|1@1+ (1,0) [0|0] "" XXX
+ SG_ ACC_Decel : 3|1@1+ (1,0) [0|0] "" XXX
+ SG_ ACC_Resume : 4|1@0+ (1,0) [0|1] "" XXX
+ SG_ Cruise_OnOff : 6|1@1+ (1,0) [0|0] "" XXX
+ SG_ ACC_OnOff : 7|1@1+ (1,0) [0|0] "" XXX
+ SG_ ACC_Distance_Inc : 8|1@1+ (1,0) [0|0] "" XXX
+ SG_ COUNTER : 15|4@0+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 23|8@0+ (1,0) [0|255] "" XXX
+
 BO_ 630 LKAS_COMMAND: 8 XXX
  SG_ STEERING_TORQUE : 10|11@0+ (1,-1024) [0|1] "" XXX
  SG_ LKAS_CONTROL_BIT : 24|3@1+ (1,0) [0|1] "" XXX
