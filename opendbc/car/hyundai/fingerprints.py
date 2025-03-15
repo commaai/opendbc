@@ -481,7 +481,9 @@ FW_VERSIONS = {
       b'\xf1\x00IK  MDPS R 1.00 1.07 57700-G9420 4I4VL107',
       b'\xf1\x00IK  MDPS R 1.00 1.08 57700-G9200 4I2CL108',
       b'\xf1\x00IK  MDPS R 1.00 1.08 57700-G9420 4I4VL108',
+      b'\xf1\x00IK  MDPS R 1.00 5.09 57700-G9500 4I4CL509',
       b'\xf1\x00IK  MDPS R 1.00 5.09 57700-G9520 4I4VL509',
+      b'\xf1\x8b #\x08                                   ',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00IK__ SCC F-CUP      1.00 1.01 96400-G9100         ',
@@ -489,11 +491,14 @@ FW_VERSIONS = {
       b'\xf1\x00IK__ SCC F-CUP      1.00 1.02 96400-G9100         \xf1\xa01.02',
       b'\xf1\x00IK__ SCC FHCUP      1.00 1.00 99110-G9300         ',
       b'\xf1\x00IK__ SCC FHCUP      1.00 1.02 96400-G9000         ',
+      b'\xf1\x10\x17\xdf\x01\x00                                  ',
+      b'\xf1\x8b #\x08\x14                                        ',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00IK  MFC  AT KOR LHD 1.00 1.01 95740-G9000 170920',
       b'\xf1\x00IK  MFC  AT USA LHD 1.00 1.01 95740-G9000 170920',
       b'\xf1\x00IK  MFC  AT USA LHD 1.00 1.04 99211-G9000 220401',
+      b'\xf1\x8b #\t\x11                                        ',
     ],
   },
   CAR.GENESIS_G80: {
