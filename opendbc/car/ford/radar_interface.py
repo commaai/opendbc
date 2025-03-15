@@ -182,8 +182,8 @@ class RadarInterface(RadarInterfaceBase):
       self.pts.clear()
       self.points.clear()
       self.clusters.clear()
-      errors.append("unavailableTemporary")
-      return True, errors
+      ret.errors.unavailableTemporary = True
+      return True
 
     # Use points with Doppler coverage of +-60 m/s, reduces similar points
     if headerScanIndex not in (2, 3):
