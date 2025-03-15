@@ -108,6 +108,7 @@ ignore = [
   "B024",
   "UP031",
   "NPY002",  # new numpy random syntax is worse
+  "C420",
 ]
 flake8-implicit-str-concat.allow-multiline=false
 

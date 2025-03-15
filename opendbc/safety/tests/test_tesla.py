@@ -36,11 +36,6 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
   packer: CANPackerPanda
 
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "TestTeslaSafetyBase":
-      raise unittest.SkipTest
-
   def setUp(self):
     self.packer = CANPackerPanda("tesla_model3_party")
     self.define = CANDefine("tesla_model3_party")

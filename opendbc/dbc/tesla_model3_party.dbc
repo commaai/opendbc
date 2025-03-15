@@ -208,7 +208,7 @@ BO_ 297 SCCM_steeringAngleSensor: 8 PARTY
  SG_ SCCM_steeringAngleCounter : 8|4@1+ (1,0) [0|15] ""  epas3s
  SG_ SCCM_steeringAngleCrc : 0|8@1+ (1,0) [0|255] ""  epas3s
 
-BO_ 646 DI_state: 7 ETH
+BO_ 646 DI_state: 8 ETH
  SG_ DI_summonInPanic : 48|1@1+ (1,0) [0|0] ""  X
  SG_ DI_rollPreventionState : 45|3@1+ (1,0) [0|0] ""  X
  SG_ DI_vehicleHoldState : 42|3@1+ (1,0) [0|0] ""  X
@@ -223,11 +223,19 @@ BO_ 646 DI_state: 7 ETH
  SG_ DI_locStatusCounter : 8|4@1+ (1,0) [0|0] ""  X
  SG_ DI_locStatusChecksum : 0|8@1+ (1,0) [0|0] ""  X
 
+BO_ 659 DAS_settings: 8 XXX
+ SG_ DAS_autopilotEnabled : 38|1@0+ (1,0) [0|1] "" XXX
+ SG_ DAS_settingCounter : 52|4@1+ (1,0) [0|15] "" XXX
+ SG_ DAS_settingChecksum : 63|8@0+ (1,0) [0|255] "" XXX
+
 BO_ 785 UI_warning: 7 XXX
  SG_ buckleStatus : 13|1@0+ (1,0) [0|1] "" XXX
+ SG_ scrollWheelRightTilt : 21|1@0+ (1,0) [0|1] "" XXX
  SG_ leftBlinkerOn : 22|1@0+ (1,0) [0|1] "" XXX
  SG_ rightBlinkerOn : 23|1@0+ (1,0) [0|1] "" XXX
  SG_ anyDoorOpen : 28|1@0+ (1,0) [0|1] "" XXX
+ SG_ wiperSettings : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ highBeam : 50|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 923 DAS_status: 8 PARTY
  SG_ DAS_statusChecksum : 56|8@1+ (1,0) [0|255] ""  aps
