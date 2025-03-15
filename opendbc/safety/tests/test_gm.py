@@ -23,7 +23,8 @@ class GmLongitudinalBase(common.PandaCarSafetyTest, common.LongitudinalGasBrakeS
   MAX_POSSIBLE_BRAKE = 2 ** 12
   MAX_BRAKE = 400
 
-  MAX_POSSIBLE_GAS = 2 ** 12
+  MIN_POSSIBLE_GAS = -22534
+  MAX_POSSIBLE_GAS = 43001.875  # (2^19 - 1) / 8 - 22534
 
   PCM_CRUISE = False  # openpilot can control the PCM state if longitudinal
 
@@ -151,9 +152,9 @@ class TestGmAscmSafety(GmLongitudinalBase, TestGmSafetyBase):
   FWD_BUS_LOOKUP: dict[int, int] = {}
   BRAKE_BUS = 2
 
-  MAX_GAS = 3072
-  MIN_GAS = 1404 # maximum regen
-  INACTIVE_GAS = 1404
+  MAX_GAS = 1018
+  MIN_GAS = -650  # maximum regen
+  INACTIVE_GAS = -650
 
   def setUp(self):
     self.packer = CANPackerPanda("gm_global_a_powertrain_generated")
@@ -211,9 +212,9 @@ class TestGmCameraLongitudinalSafety(GmLongitudinalBase, TestGmCameraSafetyBase)
   FWD_BLACKLISTED_ADDRS = {2: [0x180, 0x2CB, 0x370, 0x315], 0: [0x184]}  # block LKAS, ACC messages and PSCMStatus
   BUTTONS_BUS = 0  # rx only
 
-  MAX_GAS = 3400
-  MIN_GAS = 1514 # maximum regen
-  INACTIVE_GAS = 1554
+  MAX_GAS = 1346
+  MIN_GAS = -540  # maximum regen
+  INACTIVE_GAS = -500
 
   def setUp(self):
     self.packer = CANPackerPanda("gm_global_a_powertrain_generated")
