@@ -59,7 +59,7 @@ class RadarInterface(RadarInterfaceBase):
     if not self.rcp.can_valid:
       ret.errors.canError = True
     if fault:
-      ret.errors.fault = True
+      ret.errors.radarFault = True
 
     currentTargets = set()
     num_targets = header['FLRRNumValidTargets']
