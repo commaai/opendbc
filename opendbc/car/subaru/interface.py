@@ -1,10 +1,14 @@
 from opendbc.car import get_safety_config, structs
 from opendbc.car.disable_ecu import disable_ecu
 from opendbc.car.interfaces import CarInterfaceBase
+from opendbc.car.subaru.carcontroller import CarController
+from opendbc.car.subaru.carstate import CarState
 from opendbc.car.subaru.values import CAR, GLOBAL_ES_ADDR, SubaruFlags, SubaruSafetyFlags
 
 
 class CarInterface(CarInterfaceBase):
+  CarState = CarState
+  CarController = CarController
 
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate: CAR, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
