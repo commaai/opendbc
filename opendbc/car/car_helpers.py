@@ -20,15 +20,9 @@ def load_interfaces(brand_names):
   for brand_name in brand_names:
     path = f'opendbc.car.{brand_name}'
     CarInterface = __import__(path + '.interface', fromlist=['CarInterface']).CarInterface
-    try:
-      CarState = CarInterface.CarState
-    except:
-      CarState = __import__(path + '.carstate', fromlist=['CarState']).CarState
+    CarState = CarInterface.CarState
     CarController = CarInterface.CarController
-    try:
-      RadarInterface = CarInterface.RadarInterface
-    except:
-      RadarInterface = __import__(path + '.radar_interface', fromlist=['RadarInterface']).RadarInterface
+    RadarInterface = CarInterface.RadarInterface
     for model_name in brand_names[brand_name]:
       ret[model_name] = (CarInterface, CarController, CarState, RadarInterface)
   return ret
