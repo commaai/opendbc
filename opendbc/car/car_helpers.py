@@ -10,18 +10,52 @@ from opendbc.car.fw_versions import ObdCallback, get_fw_versions_ordered, get_pr
 from opendbc.car.mock.values import CAR as MOCK
 from opendbc.car.values import BRANDS
 from opendbc.car.vin import get_vin, is_valid_vin, VIN_UNKNOWN
+
+from opendbc.car.body.interface import CarInterface as BodyCarInterface
+from opendbc.car.chrysler.interface import CarInterface as ChryslerCarInterface
+from opendbc.car.ford.interface import CarInterface as FordCarInterface
+from opendbc.car.gm.interface import CarInterface as GmCarInterface
+from opendbc.car.honda.interface import CarInterface as HondaCarInterface
+from opendbc.car.hyundai.interface import CarInterface as HyundaiCarInterface
+from opendbc.car.mazda.interface import CarInterface as MazdaCarInterface
+from opendbc.car.mock.interface import CarInterface as MockCarInterface
+from opendbc.car.nissan.interface import CarInterface as NissanCarInterface
+from opendbc.car.rivian.interface import CarInterface as RivianCarInterface
+from opendbc.car.subaru.interface import CarInterface as SubaruCarInterface
+from opendbc.car.tesla.interface import CarInterface as TeslaCarInterface
 from opendbc.car.toyota.interface import CarInterface as ToyotaCarInterface
+from opendbc.car.volkswagen.interface import CarInterface as VolkswagenCarInterface
 
 FRAME_FINGERPRINT = 100  # 1s
 
 
 def load_interfaces(brand_names):
   ret = {}
-  for brand_name in brand_names:
-    path = f'opendbc.car.{brand_name}'
-    CarInterface = __import__(path + '.interface', fromlist=['CarInterface']).CarInterface
-    for model_name in brand_names[brand_name]:
-      ret[model_name] = CarInterface
+  # for brand_name in brand_names:
+  #   path = f'opendbc.car.{brand_name}'
+  #   CarInterface = __import__(path + '.interface', fromlist=['CarInterface']).CarInterface
+  #   for model_name in brand_names[brand_name]:
+  #     ret[model_name] = CarInterface
+  for interface in (
+    BodyCarInterface,
+    ChryslerCarInterface,
+    FordCarInterface,
+    GmCarInterface,
+    HondaCarInterface,
+    HyundaiCarInterface,
+    MazdaCarInterface,
+    MockCarInterface,
+    NissanCarInterface,
+    RivianCarInterface,
+    SubaruCarInterface,
+    TeslaCarInterface,
+    ToyotaCarInterface,
+    VolkswagenCarInterface,
+  ):
+    brand_name = interface.__module__.split('.')[-2]
+    models = brand_names[brand_name]
+    for model_name in models:
+      ret[model_name] = interface
   return ret
 
 
@@ -36,11 +70,11 @@ def _get_interface_names() -> dict[str, list[str]]:
 
 
 # imports from directory opendbc/car/<name>/
-interface_names = _get_interface_names()
+interface_names = _get_interface_names()  # TODO: INTERFACE_NAMES
 interfaces = load_interfaces(interface_names)
-INTERFACES = {
-  "toyota": (ToyotaCarInterface, ToyotaCarInterface.CarController, ToyotaCarInterface.CarState, ToyotaCarInterface.RadarInterface)
-}
+# INTERFACES = {
+#   model: interface for brand in BRANDS for model, interface in brand.__module__.split('.')[-2].items()
+# }
 
 
 def can_fingerprint(can_recv: CanRecvCallable) -> tuple[str | None, dict[int, dict]]:
