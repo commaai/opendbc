@@ -15,7 +15,7 @@ class CarInterface(CarInterfaceBase):
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
     ret.brand = "chrysler"
-    ret.dashcamOnly = candidate in RAM_HD
+    ret.dashcamOnly = False  # candidate in RAM_HD  TODO: Remove after testing
 
     # radar parsing needs some work, see https://github.com/commaai/openpilot/issues/26842
     ret.radarUnavailable = True # Bus.radar not in DBC[candidate][Bus.radar]
@@ -65,6 +65,11 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.RAM_HD_5TH_GEN:
       ret.steerActuatorDelay = 0.2
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning, 1.0, False)
+
+      # Some RAM HD use Chrysler button address (0x23A CRUISE_BUTTONS_ALT)
+      if 0x23A not in fingerprint[0]:
+        ret.flags |= ChryslerFlags.RAM_HD_ALT_BUTTONS.value
+        ret.safetyConfigs[0].safetyParam |= ChryslerSafetyFlags.RAM_HD_ALT_BUTTONS.value
 
     else:
       raise ValueError(f"Unsupported car: {candidate}")
