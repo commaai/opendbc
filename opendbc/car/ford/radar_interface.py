@@ -182,7 +182,7 @@ class RadarInterface(RadarInterfaceBase):
       self.pts.clear()
       self.points.clear()
       self.clusters.clear()
-      ret.errors.unavailableTemporary = True
+      ret.errors.radarUnavailableTemporary = True
       return True
 
     # Use points with Doppler coverage of +-60 m/s, reduces similar points
