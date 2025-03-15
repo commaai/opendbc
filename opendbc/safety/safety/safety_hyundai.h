@@ -330,7 +330,7 @@ static safety_config hyundai_init(uint16_t param) {
 
     static RxCheck hyundai_fcev_rx_checks[] = {
       HYUNDAI_COMMON_RX_CHECKS(false)
-      HYUNDAI_SCC12_ADDR_CHECK(0)
+      HYUNDAI_SCC12_ADDR_CHECK(0, false)
       HYUNDAI_FCEV_GAS_ADDR_CHECK
     };
 
