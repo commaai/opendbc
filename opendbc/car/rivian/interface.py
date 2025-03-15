@@ -1,8 +1,12 @@
 from opendbc.car import get_safety_config, structs
 from opendbc.car.interfaces import CarInterfaceBase
+from opendbc.car.rivian.carcontroller import CarController
+from opendbc.car.rivian.carstate import CarState
 
 
 class CarInterface(CarInterfaceBase):
+  CarState = CarState
+  CarController = CarController
 
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:

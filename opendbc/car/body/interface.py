@@ -1,10 +1,15 @@
 import math
 from opendbc.car import get_safety_config, structs
-from opendbc.car.interfaces import CarInterfaceBase
+from opendbc.car.body.carcontroller import CarController
+from opendbc.car.body.carstate import CarState
 from opendbc.car.body.values import SPEED_FROM_RPM
+from opendbc.car.interfaces import CarInterfaceBase
 
 
 class CarInterface(CarInterfaceBase):
+  CarState = CarState
+  CarController = CarController
+
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
     ret.notCar = True

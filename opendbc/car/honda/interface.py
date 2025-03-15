@@ -7,11 +7,16 @@ from opendbc.car.honda.values import CarControllerParams, HondaFlags, CAR, HONDA
                                                  HONDA_NIDEC_ALT_SCM_MESSAGES, HONDA_BOSCH_RADARLESS, HondaSafetyFlags
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.disable_ecu import disable_ecu
+from opendbc.car.honda.carcontroller import CarController
+from opendbc.car.honda.carstate import CarState
 
 TransmissionType = structs.CarParams.TransmissionType
 
 
 class CarInterface(CarInterfaceBase):
+  CarState = CarState
+  CarController = CarController
+
   @staticmethod
   def get_pid_accel_limits(CP, current_speed, cruise_speed):
     if CP.carFingerprint in HONDA_BOSCH:
