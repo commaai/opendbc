@@ -1,6 +1,7 @@
 from opendbc.car import get_safety_config, structs
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.nissan.values import CAR, NissanSafetyFlags
+from opendbc.sunnypilot.car.nissan.values import NissanSafetyFlagsSP
 
 
 class CarInterface(CarInterfaceBase):
@@ -22,8 +23,12 @@ class CarInterface(CarInterfaceBase):
       # Altima has EPS on C-CAN unlike the others that have it on V-CAN
       ret.safetyConfigs[0].safetyParam |= NissanSafetyFlags.ALT_EPS_BUS.value
 
-    # Used for panda safety and tests
+    return ret
+
+  @staticmethod
+  def _get_params_sp(stock_cp: structs.CarParams, ret: structs.CarParamsSP, candidate, fingerprint: dict[int, dict[int, int]],
+                     car_fw: list[structs.CarParams.CarFw], experimental_long: bool, docs: bool) -> structs.CarParamsSP:
     if candidate in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC):
-      ret.safetyConfigs[-1].safetyParam |= NissanSafetyFlags.FLAG_NISSAN_LEAF.value
+      ret.safetyParam |= NissanSafetyFlagsSP.LEAF
 
     return ret

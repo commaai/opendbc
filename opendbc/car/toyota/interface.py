@@ -4,6 +4,7 @@ from opendbc.car.toyota.values import Ecu, CAR, DBC, ToyotaFlags, CarControllerP
                                                   ToyotaSafetyFlags
 from opendbc.car.disable_ecu import disable_ecu
 from opendbc.car.interfaces import CarInterfaceBase
+from opendbc.sunnypilot.car.toyota.values import ToyotaSafetyFlagsSP
 
 SteerControlType = structs.CarParams.SteerControlType
 
@@ -142,6 +143,14 @@ class CarInterface(CarInterfaceBase):
       # Hybrids have much quicker longitudinal actuator response
       if ret.flags & ToyotaFlags.HYBRID.value:
         ret.longitudinalActuatorDelay = 0.05
+
+    return ret
+
+  @staticmethod
+  def _get_params_sp(stock_cp: structs.CarParams, ret: structs.CarParamsSP, candidate, fingerprint: dict[int, dict[int, int]],
+                     car_fw: list[structs.CarParams.CarFw], experimental_long: bool, docs: bool) -> structs.CarParamsSP:
+    if candidate in UNSUPPORTED_DSU_CAR:
+      ret.safetyParam |= ToyotaSafetyFlagsSP.UNSUPPORTED_DSU
 
     return ret
 

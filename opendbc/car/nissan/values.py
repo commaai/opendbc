@@ -27,7 +27,6 @@ class CarControllerParams:
 
 class NissanSafetyFlags(IntFlag):
   ALT_EPS_BUS = 1
-  FLAG_NISSAN_LEAF = 512
 
 
 @dataclass

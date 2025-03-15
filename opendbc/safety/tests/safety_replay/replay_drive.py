@@ -22,10 +22,11 @@ DEBUG_VARS = {
 
 
 # replay a drive to check for safety violations
-def replay_drive(msgs, safety_mode, param, alternative_experience):
+def replay_drive(msgs, safety_mode, param, alternative_experience, param_sp):
   safety = libsafety_py.libsafety
   msgs.sort(key=lambda m: m.logMonoTime)
 
+  safety.set_current_safety_param_sp(param_sp)
   err = safety.set_safety_hooks(safety_mode, param)
   assert err == 0, "invalid safety mode: %d" % safety_mode
   safety.set_alternative_experience(alternative_experience)
@@ -142,18 +143,24 @@ if __name__ == "__main__":
   parser.add_argument("--mode", type=int, help="Override the safety mode from the log")
   parser.add_argument("--param", type=int, help="Override the safety param from the log")
   parser.add_argument("--alternative-experience", type=int, help="Override the alternative experience from the log")
+  parser.add_argument("--param-sp", type=int, help="Override the sunnypilot safety param from the log")
   args = parser.parse_args()
 
   lr = LogReader(args.route_or_segment_name[0])
 
-  if None in (args.mode, args.param, args.alternative_experience):
+  if None in (args.mode, args.param, args.alternative_experience, args.param_sp):
     CP = lr.first('carParams')
+    CP_SP = lr.first('carParamsSP')
     if args.mode is None:
       args.mode = CP.safetyConfigs[-1].safetyModel.raw
     if args.param is None:
       args.param = CP.safetyConfigs[-1].safetyParam
     if args.alternative_experience is None:
       args.alternative_experience = CP.alternativeExperience
+    if args.param_sp is None:
+      _param_sp = CP_SP.safetyParam if hasattr(CP_SP, 'safetyParam') else 0
+      args.param_sp = _param_sp
 
-  print(f"replaying {args.route_or_segment_name[0]} with safety mode {args.mode}, param {args.param}, alternative experience {args.alternative_experience}")
-  replay_drive(list(lr), args.mode, args.param, args.alternative_experience)
+  print(f"replaying {args.route_or_segment_name[0]} with safety mode {args.mode}, param {args.param}, alternative experience {args.alternative_experience}, " +
+        f"param_sp {args.param_sp}")
+  replay_drive(list(lr), args.mode, args.param, args.alternative_experience, args.param_sp)

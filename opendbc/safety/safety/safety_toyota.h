@@ -27,7 +27,6 @@
 #define TOYOTA_COMMON_RX_CHECKS(lta)                                                                          \
   {.msg = {{ 0xaa, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 83U}, { 0 }, { 0 }}},  \
   {.msg = {{0x260, 0, 8, .ignore_counter = true, .quality_flag = (lta), .frequency = 50U}, { 0 }, { 0 }}},    \
-  {.msg = {{0x1D3, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 33U}, { 0 }, { 0 }}},    \
 
 #define TOYOTA_RX_CHECKS(lta)                                                                                  \
   TOYOTA_COMMON_RX_CHECKS(lta)                                                                                 \
@@ -44,6 +43,12 @@
   {.msg = {{0x176, 0, 8, .ignore_counter = true, .frequency = 32U}, { 0 }, { 0 }}},                           \
   {.msg = {{0x116, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 42U}, { 0 }, { 0 }}},  \
   {.msg = {{0x101, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},  \
+
+#define TOYOTA_PCM_CRUISE_2_ADDR_CHECK                                                                        \
+  {.msg = {{0x1D3, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 33U}, { 0 }, { 0 }}},  \
+
+#define TOYOTA_DSU_CRUISE_ADDR_CHECK                                                                         \
+  {.msg = {{0x365, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 5U}, { 0 }, { 0 }}},  \
 
 static bool toyota_secoc = false;
 static bool toyota_alt_brake = false;
@@ -154,6 +159,10 @@ static void toyota_rx_hook(const CANPacket_t *to_push) {
 
     if (addr == 0x1D3) {
       acc_main_on = GET_BIT(to_push, 15U);
+    }
+
+    if (addr == 0x365) {
+      acc_main_on = GET_BIT(to_push, 0U);
     }
   }
 }
@@ -352,6 +361,8 @@ static safety_config toyota_init(uint16_t param) {
   const uint32_t TOYOTA_PARAM_STOCK_LONGITUDINAL = 2UL << TOYOTA_PARAM_OFFSET;
   const uint32_t TOYOTA_PARAM_LTA = 4UL << TOYOTA_PARAM_OFFSET;
 
+  const int TOYOTA_PARAM_SP_UNSUPPORTED_DSU = 1;
+
 #ifdef ALLOW_DEBUG
   const uint32_t TOYOTA_PARAM_SECOC = 8UL << TOYOTA_PARAM_OFFSET;
   toyota_secoc = GET_FLAG(param, TOYOTA_PARAM_SECOC);
@@ -361,6 +372,8 @@ static safety_config toyota_init(uint16_t param) {
   toyota_stock_longitudinal = GET_FLAG(param, TOYOTA_PARAM_STOCK_LONGITUDINAL);
   toyota_lta = GET_FLAG(param, TOYOTA_PARAM_LTA);
   toyota_dbc_eps_torque_factor = param & TOYOTA_EPS_FACTOR;
+
+  const bool toyota_unsupported_dsu = GET_FLAG(current_safety_param_sp, TOYOTA_PARAM_SP_UNSUPPORTED_DSU);
 
   safety_config ret;
   if (toyota_stock_longitudinal) {
@@ -376,6 +389,7 @@ static safety_config toyota_init(uint16_t param) {
   if (toyota_secoc) {
     static RxCheck toyota_secoc_rx_checks[] = {
       TOYOTA_SECOC_RX_CHECKS
+      TOYOTA_PCM_CRUISE_2_ADDR_CHECK
     };
 
     SET_RX_CHECKS(toyota_secoc_rx_checks, ret);
@@ -383,21 +397,40 @@ static safety_config toyota_init(uint16_t param) {
     // Check the quality flag for angle measurement when using LTA, since it's not set on TSS-P cars
     static RxCheck toyota_lta_rx_checks[] = {
       TOYOTA_RX_CHECKS(true)
+      TOYOTA_PCM_CRUISE_2_ADDR_CHECK
     };
 
     SET_RX_CHECKS(toyota_lta_rx_checks, ret);
   } else {
     static RxCheck toyota_lka_rx_checks[] = {
       TOYOTA_RX_CHECKS(false)
+      TOYOTA_PCM_CRUISE_2_ADDR_CHECK
     };
     static RxCheck toyota_lka_alt_brake_rx_checks[] = {
       TOYOTA_ALT_BRAKE_RX_CHECKS(false)
+      TOYOTA_PCM_CRUISE_2_ADDR_CHECK
+    };
+    static RxCheck toyota_lka_unsupported_dsu_rx_checks[] = {
+      TOYOTA_RX_CHECKS(false)
+      TOYOTA_DSU_CRUISE_ADDR_CHECK
+    };
+    static RxCheck toyota_lka_alt_brake_unsupported_dsu_rx_checks[] = {
+      TOYOTA_ALT_BRAKE_RX_CHECKS(false)
+      TOYOTA_DSU_CRUISE_ADDR_CHECK
     };
 
     if (!toyota_alt_brake) {
-      SET_RX_CHECKS(toyota_lka_rx_checks, ret);
+      if (toyota_unsupported_dsu) {
+        SET_RX_CHECKS(toyota_lka_unsupported_dsu_rx_checks, ret);
+      } else {
+        SET_RX_CHECKS(toyota_lka_rx_checks, ret);
+      }
     } else {
-      SET_RX_CHECKS(toyota_lka_alt_brake_rx_checks, ret);
+      if (toyota_unsupported_dsu) {
+        SET_RX_CHECKS(toyota_lka_alt_brake_unsupported_dsu_rx_checks, ret);
+      } else {
+        SET_RX_CHECKS(toyota_lka_alt_brake_rx_checks, ret);
+      }
     }
   }
 

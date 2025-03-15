@@ -167,21 +167,20 @@ static safety_config nissan_init(uint16_t param) {
 
   // EPS Location. false = V-CAN, true = C-CAN
   const int NISSAN_PARAM_ALT_EPS_BUS = 1;
-  const int NISSAN_PARAM_LEAF = 512;
+
+  const int NISSAN_PARAM_SP_LEAF = 1;
 
   nissan_alt_eps = GET_FLAG(param, NISSAN_PARAM_ALT_EPS_BUS);
-  bool nissan_leaf = GET_FLAG(param, NISSAN_PARAM_LEAF);
+  const bool nissan_leaf = GET_FLAG(current_safety_param_sp, NISSAN_PARAM_SP_LEAF);
 
   safety_config ret;
   SET_TX_MSGS(NISSAN_TX_MSGS, ret);
   if (nissan_leaf) {
     SET_RX_CHECKS(nissan_leaf_rx_checks, ret);
+  } else if (nissan_alt_eps) {
+    SET_RX_CHECKS(nissan_alt_eps_rx_checks, ret);
   } else {
-    if (nissan_alt_eps) {
-      SET_RX_CHECKS(nissan_alt_eps_rx_checks, ret);
-    } else {
-      SET_RX_CHECKS(nissan_rx_checks, ret);
-    }
+    SET_RX_CHECKS(nissan_rx_checks, ret);
   }
 
   return ret;

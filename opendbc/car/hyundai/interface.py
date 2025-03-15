@@ -9,7 +9,7 @@ from opendbc.car.disable_ecu import disable_ecu
 
 from opendbc.sunnypilot.car.hyundai.enable_radar_tracks import enable_radar_tracks
 from opendbc.sunnypilot.car.hyundai.escc import ESCC_MSG
-from opendbc.sunnypilot.car.hyundai.values import HyundaiFlagsSP
+from opendbc.sunnypilot.car.hyundai.values import HyundaiFlagsSP, HyundaiSafetyFlagsSP
 
 ButtonType = structs.CarState.ButtonEvent.Type
 Ecu = structs.CarParams.Ecu
@@ -155,8 +155,11 @@ class CarInterface(CarInterfaceBase):
         ret.flags |= HyundaiFlagsSP.ENHANCED_SCC.value
 
     if ret.flags & HyundaiFlagsSP.ENHANCED_SCC:
-      stock_cp.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.FLAG_HYUNDAI_ESCC.value
+      ret.safetyParam |= HyundaiSafetyFlagsSP.ESCC
       stock_cp.radarUnavailable = False
+
+    if stock_cp.flags & HyundaiFlags.HAS_LDA_BUTTON:
+      ret.safetyParam |= HyundaiSafetyFlagsSP.HAS_LDA_BUTTON
 
     return ret
 

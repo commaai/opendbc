@@ -120,6 +120,14 @@ int get_current_safety_param(void){
   return current_safety_param;
 }
 
+void set_current_safety_param_sp(int param){
+  current_safety_param_sp = param;
+}
+
+int get_current_safety_param_sp(void){
+  return current_safety_param_sp;
+}
+
 void set_timer(uint32_t t){
   timer.CNT = t;
 }
@@ -253,6 +261,7 @@ void set_heartbeat_engaged_mads(bool c){
 void init_tests(void){
   safety_mode_cnt = 2U;  // avoid ignoring relay_malfunction logic
   alternative_experience = 0;
+  current_safety_param_sp = 0;
   set_timer(0);
   ts_steer_req_mismatch_last = 0;
   valid_steer_req_count = 0;

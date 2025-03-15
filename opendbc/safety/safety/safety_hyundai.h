@@ -372,17 +372,10 @@ static safety_config hyundai_init(uint16_t param) {
       HYUNDAI_COMMON_RX_CHECKS(false)
       HYUNDAI_SCC12_ADDR_CHECK(2)
       HYUNDAI_SCC11_ADDR_CHECK(2)
-    };
-
-    static RxCheck hyundai_cam_scc_lda_button_rx_checks[] = {
-      HYUNDAI_COMMON_RX_CHECKS(false)
-      HYUNDAI_SCC12_ADDR_CHECK(2)
-      HYUNDAI_SCC11_ADDR_CHECK(2)
       HYUNDAI_LDA_BUTTON_ADDR_CHECK
     };
 
-    ret = hyundai_has_lda_button ? BUILD_SAFETY_CFG(hyundai_cam_scc_lda_button_rx_checks, HYUNDAI_CAMERA_SCC_TX_MSGS) :
-                                   BUILD_SAFETY_CFG(hyundai_cam_scc_rx_checks, HYUNDAI_CAMERA_SCC_TX_MSGS);
+    ret = BUILD_SAFETY_CFG(hyundai_cam_scc_rx_checks, HYUNDAI_CAMERA_SCC_TX_MSGS);
   } else {
     static RxCheck hyundai_rx_checks[] = {
        HYUNDAI_COMMON_RX_CHECKS(false)

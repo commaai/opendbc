@@ -1,6 +1,6 @@
 import unittest
 
-from opendbc.car.hyundai.values import HyundaiSafetyFlags
+from opendbc.sunnypilot.car.hyundai.values import HyundaiSafetyFlagsSP
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.safety.tests.common import make_msg
@@ -146,13 +146,15 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
     """Test that main cruise button correctly toggles acc_main_on state"""
     default_safety_mode = self.safety.get_current_safety_mode()
     default_safety_param = self.safety.get_current_safety_param()
+    default_safety_param_sp = self.safety.get_current_safety_param_sp()
 
     for enable_mads in (True, False):
       with self.subTest("enable_mads", mads_enabled=enable_mads):
         for main_cruise_toggleable in (True, False):
           with self.subTest("main_cruise_toggleable", main_cruise_toggleable=main_cruise_toggleable):
-            main_cruise_toggleable_flag = HyundaiSafetyFlags.FLAG_HYUNDAI_LONG_MAIN_CRUISE_TOGGLEABLE if main_cruise_toggleable else 0
-            self.safety.set_safety_hooks(default_safety_mode, default_safety_param | main_cruise_toggleable_flag)
+            main_cruise_toggleable_flag = HyundaiSafetyFlagsSP.LONG_MAIN_CRUISE_TOGGLEABLE if main_cruise_toggleable else 0
+            self.safety.set_current_safety_param_sp(default_safety_param_sp | main_cruise_toggleable_flag)
+            self.safety.set_safety_hooks(default_safety_mode, default_safety_param)
 
             # Test initial state
             self._mads_states_cleanup()
@@ -174,17 +176,19 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
               self._rx(self._main_cruise_button_msg(1))
               self.assertFalse(self.safety.get_controls_allowed_lat())
     self._mads_states_cleanup()
-    self.safety.set_safety_hooks(default_safety_mode, default_safety_param)
+    self.safety.set_current_safety_param_sp(default_safety_param_sp)
 
   def test_acc_main_sync_mismatches_reset(self):
     """Test that acc_main_on_mismatches resets properly on rising edge of main button"""
     default_safety_mode = self.safety.get_current_safety_mode()
     default_safety_param = self.safety.get_current_safety_param()
+    default_safety_param_sp = self.safety.get_current_safety_param_sp()
 
     for enable_mads in (True, False):
       with self.subTest("enable_mads", mads_enabled=enable_mads):
-        main_cruise_toggleable_flag = HyundaiSafetyFlags.FLAG_HYUNDAI_LONG_MAIN_CRUISE_TOGGLEABLE
-        self.safety.set_safety_hooks(default_safety_mode, default_safety_param | main_cruise_toggleable_flag)
+        main_cruise_toggleable_flag = HyundaiSafetyFlagsSP.LONG_MAIN_CRUISE_TOGGLEABLE
+        self.safety.set_current_safety_param_sp(default_safety_param_sp | main_cruise_toggleable_flag)
+        self.safety.set_safety_hooks(default_safety_mode, default_safety_param)
 
         self._mads_states_cleanup()
         self.safety.set_mads_params(enable_mads, False)
@@ -207,17 +211,19 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
         self.assertFalse(self.safety.get_acc_main_on())
         self.assertEqual(0, self.safety.get_acc_main_on_mismatches())
     self._mads_states_cleanup()
-    self.safety.set_safety_hooks(default_safety_mode, default_safety_param)
+    self.safety.set_current_safety_param_sp(default_safety_param_sp)
 
   def test_acc_main_sync_mismatch_counter(self):
     """Test mismatch counter behavior and disengagement"""
     default_safety_mode = self.safety.get_current_safety_mode()
     default_safety_param = self.safety.get_current_safety_param()
+    default_safety_param_sp = self.safety.get_current_safety_param_sp()
 
     for enable_mads in (True, False):
       with self.subTest("enable_mads", mads_enabled=enable_mads):
-        main_cruise_toggleable_flag = HyundaiSafetyFlags.FLAG_HYUNDAI_LONG_MAIN_CRUISE_TOGGLEABLE
-        self.safety.set_safety_hooks(default_safety_mode, default_safety_param | main_cruise_toggleable_flag)
+        main_cruise_toggleable_flag = HyundaiSafetyFlagsSP.LONG_MAIN_CRUISE_TOGGLEABLE
+        self.safety.set_current_safety_param_sp(default_safety_param_sp | main_cruise_toggleable_flag)
+        self.safety.set_safety_hooks(default_safety_mode, default_safety_param)
 
         self._mads_states_cleanup()
         self.safety.set_mads_params(enable_mads, False)
@@ -248,17 +254,19 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
         self._tx(self._tx_acc_state_msg(False))
         self.assertEqual(0, self.safety.get_acc_main_on_mismatches())
     self._mads_states_cleanup()
-    self.safety.set_safety_hooks(default_safety_mode, default_safety_param)
+    self.safety.set_current_safety_param_sp(default_safety_param_sp)
 
   def test_acc_main_sync_mismatch_recovery(self):
     default_safety_mode = self.safety.get_current_safety_mode()
     default_safety_param = self.safety.get_current_safety_param()
+    default_safety_param_sp = self.safety.get_current_safety_param_sp()
 
     """Test that mismatch counter resets when states resync"""
     for enable_mads in (True, False):
       with self.subTest("enable_mads", mads_enabled=enable_mads):
-        main_cruise_toggleable_flag = HyundaiSafetyFlags.FLAG_HYUNDAI_LONG_MAIN_CRUISE_TOGGLEABLE
-        self.safety.set_safety_hooks(default_safety_mode, default_safety_param | main_cruise_toggleable_flag)
+        main_cruise_toggleable_flag = HyundaiSafetyFlagsSP.LONG_MAIN_CRUISE_TOGGLEABLE
+        self.safety.set_current_safety_param_sp(default_safety_param_sp | main_cruise_toggleable_flag)
+        self.safety.set_safety_hooks(default_safety_mode, default_safety_param)
 
         self._mads_states_cleanup()
         self.safety.set_mads_params(enable_mads, False)
@@ -273,7 +281,7 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
         self._tx(self._tx_acc_state_msg(True))  # Match acc_main_on_tx to acc_main_on
         self.assertEqual(0, self.safety.get_acc_main_on_mismatches())
     self._mads_states_cleanup()
-    self.safety.set_safety_hooks(default_safety_mode, default_safety_param)
+    self.safety.set_current_safety_param_sp(default_safety_param_sp)
 
   def test_tester_present_allowed(self, ecu_disable: bool = True):
     """

@@ -263,6 +263,7 @@ typedef struct {
 
 extern uint16_t current_safety_mode;
 extern uint16_t current_safety_param;
+extern int current_safety_param_sp;
 extern safety_config current_safety_config;
 
 int safety_fwd_hook(int bus_num, int addr);
