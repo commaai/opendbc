@@ -300,14 +300,11 @@ struct CarState {
 # ******* radar state @ 20hz *******
 
 struct RadarData @0x888ad6581cf0aacb {
-  errors @3 :Error;
   points @1 :List(RadarPoint);
 
-  struct Error {
-    canError @0 :Bool;
-    fault @1 :Bool;
-    wrongConfig @2 :Bool;
-  }
+  canError @3 :Bool;
+  radarFault @4 :Bool;
+  wrongConfig @5 :Bool;
 
   # similar to LiveTracks
   # is one timestamp valid for all? I think so
