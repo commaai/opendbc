@@ -2,8 +2,24 @@
 
 #include "safety_declarations.h"
 
+#define NISSAN_COMMON_RX_CHECKS                                                                                                  \
+  {.msg = {{0x2, 0, 5, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U},                                      \
+           {0x2, 1, 5, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }}},  /* STEER_ANGLE_SENSOR */   \
+  {.msg = {{0x285, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U},                                     \
+           {0x285, 1, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }}}, /* WHEEL_SPEEDS_REAR */    \
+  {.msg = {{0x30f, 2, 3, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},                                     \
+           {0x30f, 1, 3, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }}}, /* CRUISE_STATE */         \
+  {.msg = {{0x15c, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U},                                     \
+           {0x15c, 1, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U},                                     \
+           {0x239, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}}},        /* GAS_PEDAL */            \
+  {.msg = {{0x454, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},                                     \
+           {0x454, 1, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},                                     \
+           {0x1cc, 0, 4, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}}},       /* DOORS_LIGHTS / BRAKE */ \
+
+#define NISSAN_PRO_PILOT_RX_CHECKS(alt_eps_bus)                                                                         \
+  {.msg = {{0x1B6, alt_eps_bus, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},  \
+
 static bool nissan_alt_eps = false;
-static bool nissan_leaf = false;
 
 static void nissan_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
@@ -54,15 +70,13 @@ static void nissan_rx_hook(const CANPacket_t *to_push) {
     pcm_cruise_check(cruise_engaged);
   }
 
-  if ((addr == 0x239) && (bus == 0) && nissan_leaf) {
+  if ((addr == 0x239) && (bus == 0)) {
     acc_main_on = GET_BIT(to_push, 17U);
   }
 
   if ((addr == 0x1B6) && (bus == (nissan_alt_eps ? 2 : 1))) {
     acc_main_on = GET_BIT(to_push, 36U);
   }
-
-  generic_rx_checks((addr == 0x169) && (bus == 0));
 }
 
 
@@ -111,60 +125,65 @@ static bool nissan_tx_hook(const CANPacket_t *to_send) {
 }
 
 
-static int nissan_fwd_hook(int bus_num, int addr) {
-  int bus_fwd = -1;
+static bool nissan_fwd_hook(int bus_num, int addr) {
+  bool block_msg = false;
 
   if (bus_num == 0) {
-    bool block_msg = (addr == 0x280); // CANCEL_MSG
-    if (!block_msg) {
-      bus_fwd = 2;  // ADAS
-    }
+    block_msg = (addr == 0x280); // CANCEL_MSG
   }
 
   if (bus_num == 2) {
     // 0x169 is LKAS, 0x2b1 LKAS_HUD, 0x4cc LKAS_HUD_INFO_MSG
-    bool block_msg = ((addr == 0x169) || (addr == 0x2b1) || (addr == 0x4cc));
-    if (!block_msg) {
-      bus_fwd = 0;  // V-CAN
-    }
+    block_msg = ((addr == 0x169) || (addr == 0x2b1) || (addr == 0x4cc));
   }
 
-  return bus_fwd;
+  return block_msg;
 }
 
 static safety_config nissan_init(uint16_t param) {
   static const CanMsg NISSAN_TX_MSGS[] = {
-    {0x169, 0, 8},  // LKAS
-    {0x2b1, 0, 8},  // PROPILOT_HUD
-    {0x4cc, 0, 8},  // PROPILOT_HUD_INFO_MSG
-    {0x20b, 2, 6},  // CRUISE_THROTTLE (X-Trail)
-    {0x20b, 1, 6},  // CRUISE_THROTTLE (Altima)
-    {0x280, 2, 8}   // CANCEL_MSG (Leaf)
+    {0x169, 0, 8, true},   // LKAS
+    {0x2b1, 0, 8, false},  // PROPILOT_HUD
+    {0x4cc, 0, 8, false},  // PROPILOT_HUD_INFO_MSG
+    {0x20b, 2, 6, false},  // CRUISE_THROTTLE (X-Trail)
+    {0x20b, 1, 6, false},  // CRUISE_THROTTLE (Altima)
+    {0x280, 2, 8, false}   // CANCEL_MSG (Leaf)
   };
 
   // Signals duplicated below due to the fact that these messages can come in on either CAN bus, depending on car model.
   static RxCheck nissan_rx_checks[] = {
-    {.msg = {{0x2, 0, 5, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U},
-             {0x2, 1, 5, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }}},  // STEER_ANGLE_SENSOR
-    {.msg = {{0x285, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U},
-             {0x285, 1, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }}}, // WHEEL_SPEEDS_REAR
-    {.msg = {{0x30f, 2, 3, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},
-             {0x30f, 1, 3, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }}}, // CRUISE_STATE
-    {.msg = {{0x15c, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U},
-             {0x15c, 1, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U},
-             {0x239, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}}}, // GAS_PEDAL
-    {.msg = {{0x454, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},
-             {0x454, 1, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},
-             {0x1cc, 0, 4, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}}}, // DOORS_LIGHTS / BRAKE
+    NISSAN_COMMON_RX_CHECKS
+    NISSAN_PRO_PILOT_RX_CHECKS(1)
+  };
+
+  static RxCheck nissan_alt_eps_rx_checks[] = {
+    NISSAN_COMMON_RX_CHECKS
+    NISSAN_PRO_PILOT_RX_CHECKS(2)
+  };
+
+  static RxCheck nissan_leaf_rx_checks[] = {
+    NISSAN_COMMON_RX_CHECKS
   };
 
   // EPS Location. false = V-CAN, true = C-CAN
   const int NISSAN_PARAM_ALT_EPS_BUS = 1;
-  const int NISSAN_PARAM_LEAF = 512;
+
+  const int NISSAN_PARAM_SP_LEAF = 1;
 
   nissan_alt_eps = GET_FLAG(param, NISSAN_PARAM_ALT_EPS_BUS);
-  nissan_leaf = GET_FLAG(param, NISSAN_PARAM_LEAF);
-  return BUILD_SAFETY_CFG(nissan_rx_checks, NISSAN_TX_MSGS);
+  const bool nissan_leaf = GET_FLAG(current_safety_param_sp, NISSAN_PARAM_SP_LEAF);
+
+  safety_config ret;
+  SET_TX_MSGS(NISSAN_TX_MSGS, ret);
+  if (nissan_leaf) {
+    SET_RX_CHECKS(nissan_leaf_rx_checks, ret);
+  } else if (nissan_alt_eps) {
+    SET_RX_CHECKS(nissan_alt_eps_rx_checks, ret);
+  } else {
+    SET_RX_CHECKS(nissan_rx_checks, ret);
+  }
+
+  return ret;
 }
 
 const safety_hooks nissan_hooks = {

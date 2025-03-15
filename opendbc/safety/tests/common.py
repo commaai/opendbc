@@ -769,12 +769,21 @@ class PandaSafetyTest(PandaSafetyTestBase):
               continue
             if {attr, current_test}.issubset({'TestVolkswagenPqSafety', 'TestVolkswagenPqStockSafety', 'TestVolkswagenPqLongSafety'}):
               continue
-            if {attr, current_test}.issubset({'TestGmCameraSafety', 'TestGmCameraLongitudinalSafety'}):
+            if {attr, current_test}.issubset({'TestGmCameraSafety', 'TestGmCameraLongitudinalSafety', 'TestGmAscmSafety',
+                                              'TestGmCameraEVSafety', 'TestGmCameraLongitudinalEVSafety', 'TestGmAscmEVSafety'}):
               continue
             if attr.startswith('TestFord') and current_test.startswith('TestFord'):
               continue
             if attr.startswith('TestHyundaiCanfd') and current_test.startswith('TestHyundaiCanfd'):
               continue
+            if {attr, current_test}.issubset({'TestHyundaiLongitudinalSafety', 'TestHyundaiLongitudinalSafetyCameraSCC', 'TestHyundaiSafetyFCEVLong'}):
+              continue
+
+            base_tests = {'TestHyundaiLongitudinalSafety', 'TestHyundaiLongitudinalSafetyCameraSCC', 'TestHyundaiSafetyFCEVLong',
+                          'TestHyundaiLongitudinalESCCSafety'}
+            if any(attr.startswith(test) for test in base_tests) and any(current_test.startswith(test) for test in base_tests):
+              continue
+
             if {attr, current_test}.issubset({'TestVolkswagenMqbSafety', 'TestVolkswagenMqbStockSafety', 'TestVolkswagenMqbLongSafety'}):
               continue
 
@@ -864,7 +873,7 @@ class PandaCarSafetyTest(PandaSafetyTest, MadsSafetyTestBase):
         self.safety.set_relay_malfunction(False)
         self._rx(make_msg(bus, addr, 8))
         should_relay_malfunction = addr in self.RELAY_MALFUNCTION_ADDRS.get(bus, ())
-        self.assertEqual(should_relay_malfunction, self.safety.get_relay_malfunction(), (bus, addr))
+        self.assertEqual(should_relay_malfunction, self.safety.get_relay_malfunction(), (bus, hex(addr)))
 
     # test relay malfunction protection logic
     self.safety.set_relay_malfunction(True)

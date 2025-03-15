@@ -4,31 +4,51 @@
 
 // Stock longitudinal
 #define TOYOTA_BASE_TX_MSGS \
-  {0x191, 0, 8}, {0x412, 0, 8}, {0x343, 0, 8}, {0x1D2, 0, 8},  /* LKAS + LTA + ACC & PCM cancel cmds */  \
+  {0x191, 0, 8, false}, {0x412, 0, 8, false}, {0x1D2, 0, 8, false},  /* LKAS + LTA + PCM cancel cmd */  \
 
 #define TOYOTA_COMMON_TX_MSGS \
   TOYOTA_BASE_TX_MSGS \
-  {0x2E4, 0, 5}, \
+  {0x2E4, 0, 5, true}, \
+  {0x343, 0, 8, false},  /* ACC cancel cmd */  \
 
 #define TOYOTA_COMMON_SECOC_TX_MSGS \
   TOYOTA_BASE_TX_MSGS \
-  {0x2E4, 0, 8}, {0x131, 0, 8}, \
+  {0x2E4, 0, 8, true}, {0x131, 0, 8, false}, \
+  {0x343, 0, 8, false},  /* ACC cancel cmd */  \
 
-#define TOYOTA_COMMON_LONG_TX_MSGS                                                                                                          \
-  TOYOTA_COMMON_TX_MSGS                                                                                                                     \
-  {0x283, 0, 7}, {0x2E6, 0, 8}, {0x2E7, 0, 8}, {0x33E, 0, 7}, {0x344, 0, 8}, {0x365, 0, 7}, {0x366, 0, 7}, {0x4CB, 0, 8},  /* DSU bus 0 */  \
-  {0x128, 1, 6}, {0x141, 1, 4}, {0x160, 1, 8}, {0x161, 1, 7}, {0x470, 1, 4},  /* DSU bus 1 */                                               \
-  {0x411, 0, 8},  /* PCS_HUD */                                                                                                             \
-  {0x750, 0, 8},  /* radar diagnostic address */                                                                                            \
+#define TOYOTA_COMMON_LONG_TX_MSGS                                                                                                                                                                  \
+  TOYOTA_COMMON_TX_MSGS                                                                                                                                                                             \
+  {0x283, 0, 7, false}, {0x2E6, 0, 8, false}, {0x2E7, 0, 8, false}, {0x33E, 0, 7, false}, {0x344, 0, 8, false}, {0x365, 0, 7, false}, {0x366, 0, 7, false}, {0x4CB, 0, 8, false},  /* DSU bus 0 */  \
+  {0x128, 1, 6, false}, {0x141, 1, 4, false}, {0x160, 1, 8, false}, {0x161, 1, 7, false}, {0x470, 1, 4, false},  /* DSU bus 1 */                                                                    \
+  {0x411, 0, 8, false},  /* PCS_HUD */                                                                                                                                                              \
+  {0x750, 0, 8, false},  /* radar diagnostic address */                                                                                                                                             \
+  {0x343, 0, 8, true},  /* ACC */                                                                                                                                                                   \
 
 #define TOYOTA_COMMON_RX_CHECKS(lta)                                                                          \
   {.msg = {{ 0xaa, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 83U}, { 0 }, { 0 }}},  \
   {.msg = {{0x260, 0, 8, .ignore_counter = true, .quality_flag = (lta), .frequency = 50U}, { 0 }, { 0 }}},    \
-  {.msg = {{0x1D2, 0, 8, .ignore_counter = true, .frequency = 33U},                                           \
-           {0x176, 0, 8, .ignore_counter = true, .frequency = 32U}, { 0 }}},                                  \
-  {.msg = {{0x101, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U},                  \
-           {0x224, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 40U},                  \
-           {0x226, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 40U}}},                \
+
+#define TOYOTA_RX_CHECKS(lta)                                                                                  \
+  TOYOTA_COMMON_RX_CHECKS(lta)                                                                                 \
+  {.msg = {{0x1D2, 0, 8, .ignore_counter = true, .frequency = 33U}, { 0 }, { 0 }}},                            \
+  {.msg = {{0x226, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 40U},  { 0 }, { 0 }}},  \
+
+#define TOYOTA_ALT_BRAKE_RX_CHECKS(lta)                                                                       \
+  TOYOTA_COMMON_RX_CHECKS(lta)                                                                                \
+  {.msg = {{0x1D2, 0, 8, .ignore_counter = true, .frequency = 33U}, { 0 }, { 0 }}},                           \
+  {.msg = {{0x224, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 40U}, { 0 }, { 0 }}},  \
+
+#define TOYOTA_SECOC_RX_CHECKS                                                                                \
+  TOYOTA_COMMON_RX_CHECKS(false)                                                                              \
+  {.msg = {{0x176, 0, 8, .ignore_counter = true, .frequency = 32U}, { 0 }, { 0 }}},                           \
+  {.msg = {{0x116, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 42U}, { 0 }, { 0 }}},  \
+  {.msg = {{0x101, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},  \
+
+#define TOYOTA_PCM_CRUISE_2_ADDR_CHECK                                                                        \
+  {.msg = {{0x1D3, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 33U}, { 0 }, { 0 }}},  \
+
+#define TOYOTA_DSU_CRUISE_ADDR_CHECK                                                                         \
+  {.msg = {{0x365, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 5U}, { 0 }, { 0 }}},  \
 
 static bool toyota_secoc = false;
 static bool toyota_alt_brake = false;
@@ -141,11 +161,9 @@ static void toyota_rx_hook(const CANPacket_t *to_push) {
       acc_main_on = GET_BIT(to_push, 15U);
     }
 
-    bool stock_ecu_detected = addr == 0x2E4;  // STEERING_LKA
-    if (!toyota_stock_longitudinal && (addr == 0x343)) {
-      stock_ecu_detected = true;  // ACC_CONTROL
+    if (addr == 0x365) {
+      acc_main_on = GET_BIT(to_push, 0U);
     }
-    generic_rx_checks(stock_ecu_detected);
   }
 }
 
@@ -343,6 +361,8 @@ static safety_config toyota_init(uint16_t param) {
   const uint32_t TOYOTA_PARAM_STOCK_LONGITUDINAL = 2UL << TOYOTA_PARAM_OFFSET;
   const uint32_t TOYOTA_PARAM_LTA = 4UL << TOYOTA_PARAM_OFFSET;
 
+  const int TOYOTA_PARAM_SP_UNSUPPORTED_DSU = 1;
+
 #ifdef ALLOW_DEBUG
   const uint32_t TOYOTA_PARAM_SECOC = 8UL << TOYOTA_PARAM_OFFSET;
   toyota_secoc = GET_FLAG(param, TOYOTA_PARAM_SECOC);
@@ -352,6 +372,8 @@ static safety_config toyota_init(uint16_t param) {
   toyota_stock_longitudinal = GET_FLAG(param, TOYOTA_PARAM_STOCK_LONGITUDINAL);
   toyota_lta = GET_FLAG(param, TOYOTA_PARAM_LTA);
   toyota_dbc_eps_torque_factor = param & TOYOTA_EPS_FACTOR;
+
+  const bool toyota_unsupported_dsu = GET_FLAG(current_safety_param_sp, TOYOTA_PARAM_SP_UNSUPPORTED_DSU);
 
   safety_config ret;
   if (toyota_stock_longitudinal) {
@@ -364,32 +386,59 @@ static safety_config toyota_init(uint16_t param) {
     SET_TX_MSGS(TOYOTA_LONG_TX_MSGS, ret);
   }
 
-  if (toyota_lta) {
+  if (toyota_secoc) {
+    static RxCheck toyota_secoc_rx_checks[] = {
+      TOYOTA_SECOC_RX_CHECKS
+      TOYOTA_PCM_CRUISE_2_ADDR_CHECK
+    };
+
+    SET_RX_CHECKS(toyota_secoc_rx_checks, ret);
+  } else if (toyota_lta) {
     // Check the quality flag for angle measurement when using LTA, since it's not set on TSS-P cars
     static RxCheck toyota_lta_rx_checks[] = {
-      TOYOTA_COMMON_RX_CHECKS(true)
+      TOYOTA_RX_CHECKS(true)
+      TOYOTA_PCM_CRUISE_2_ADDR_CHECK
     };
 
     SET_RX_CHECKS(toyota_lta_rx_checks, ret);
   } else {
     static RxCheck toyota_lka_rx_checks[] = {
-      TOYOTA_COMMON_RX_CHECKS(false)
+      TOYOTA_RX_CHECKS(false)
+      TOYOTA_PCM_CRUISE_2_ADDR_CHECK
+    };
+    static RxCheck toyota_lka_alt_brake_rx_checks[] = {
+      TOYOTA_ALT_BRAKE_RX_CHECKS(false)
+      TOYOTA_PCM_CRUISE_2_ADDR_CHECK
+    };
+    static RxCheck toyota_lka_unsupported_dsu_rx_checks[] = {
+      TOYOTA_RX_CHECKS(false)
+      TOYOTA_DSU_CRUISE_ADDR_CHECK
+    };
+    static RxCheck toyota_lka_alt_brake_unsupported_dsu_rx_checks[] = {
+      TOYOTA_ALT_BRAKE_RX_CHECKS(false)
+      TOYOTA_DSU_CRUISE_ADDR_CHECK
     };
 
-    SET_RX_CHECKS(toyota_lka_rx_checks, ret);
+    if (!toyota_alt_brake) {
+      if (toyota_unsupported_dsu) {
+        SET_RX_CHECKS(toyota_lka_unsupported_dsu_rx_checks, ret);
+      } else {
+        SET_RX_CHECKS(toyota_lka_rx_checks, ret);
+      }
+    } else {
+      if (toyota_unsupported_dsu) {
+        SET_RX_CHECKS(toyota_lka_alt_brake_unsupported_dsu_rx_checks, ret);
+      } else {
+        SET_RX_CHECKS(toyota_lka_alt_brake_rx_checks, ret);
+      }
+    }
   }
 
   return ret;
 }
 
-static int toyota_fwd_hook(int bus_num, int addr) {
-
-  int bus_fwd = -1;
-
-  if (bus_num == 0) {
-    bus_fwd = 2;
-  }
-
+static bool toyota_fwd_hook(int bus_num, int addr) {
+  bool block_msg = false;
   if (bus_num == 2) {
     // block stock lkas messages and stock acc messages (if OP is doing ACC)
     // in TSS2, 0x191 is LTA which we need to block to avoid controls collision
@@ -398,13 +447,10 @@ static int toyota_fwd_hook(int bus_num, int addr) {
     is_lkas_msg |= toyota_secoc && (addr == 0x131);
     // in TSS2 the camera does ACC as well, so filter 0x343
     bool is_acc_msg = (addr == 0x343);
-    bool block_msg = is_lkas_msg || (is_acc_msg && !toyota_stock_longitudinal);
-    if (!block_msg) {
-      bus_fwd = 0;
-    }
+    block_msg = is_lkas_msg || (is_acc_msg && !toyota_stock_longitudinal);
   }
 
-  return bus_fwd;
+  return block_msg;
 }
 
 const safety_hooks toyota_hooks = {

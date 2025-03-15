@@ -66,8 +66,6 @@ class HyundaiSafetyFlags(IntFlag):
   CANFD_LKA_STEERING_ALT = 128
   FCEV_GAS = 256
   ALT_LIMITS_2 = 512
-  FLAG_HYUNDAI_ESCC = 8192
-  FLAG_HYUNDAI_LONG_MAIN_CRUISE_TOGGLEABLE = 16384
 
 
 class HyundaiFlags(IntFlag):

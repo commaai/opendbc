@@ -24,21 +24,7 @@ THE SOFTWARE.
 Last updated: July 29, 2024
 """
 
-from enum import IntFlag
 
-
-class HyundaiSafetyFlagsSP:
+class NissanSafetyFlagsSP:
   DEFAULT = 0
-  ESCC = 1
-  LONG_MAIN_CRUISE_TOGGLEABLE = 2
-  HAS_LDA_BUTTON = 4
-
-
-class HyundaiFlagsSP(IntFlag):
-  """
-    Flags for Hyundai specific quirks within sunnypilot.
-  """
-  ENHANCED_SCC = 1
-  HAS_LFA_BUTTON = 2 # Deprecated in favor of HyundaiFlags.HAS_LDA_BUTTON
-  LONGITUDINAL_MAIN_CRUISE_TOGGLEABLE = 2 ** 2
-  ENABLE_RADAR_TRACKS = 2 ** 3
+  LEAF = 1

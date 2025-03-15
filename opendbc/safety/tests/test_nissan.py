@@ -2,6 +2,7 @@
 import unittest
 
 from opendbc.car.nissan.values import NissanSafetyFlags
+from opendbc.sunnypilot.car.nissan.values import NissanSafetyFlagsSP
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
@@ -98,17 +99,14 @@ class TestNissanSafetyAltEpsBus(TestNissanSafety):
     self.safety.set_safety_hooks(CarParams.SafetyModel.nissan, NissanSafetyFlags.ALT_EPS_BUS)
     self.safety.init_tests()
 
-  def _acc_state_msg(self, main_on):
-    values = {"CRUISE_ON": main_on}
-    return self.packer.make_can_msg_panda("PRO_PILOT", self.ACC_MAIN_BUS, values)
-
 
 class TestNissanLeafSafety(TestNissanSafety):
 
   def setUp(self):
     self.packer = CANPackerPanda("nissan_leaf_2018_generated")
     self.safety = libsafety_py.libsafety
-    self.safety.set_safety_hooks(CarParams.SafetyModel.nissan, NissanSafetyFlags.FLAG_NISSAN_LEAF)
+    self.safety.set_current_safety_param_sp(NissanSafetyFlagsSP.LEAF)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.nissan, 0)
     self.safety.init_tests()
 
   def _user_brake_msg(self, brake):

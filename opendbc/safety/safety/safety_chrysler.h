@@ -12,7 +12,6 @@ typedef struct {
   const int LKAS_COMMAND;
   const int CRUISE_BUTTONS;
   const int LKAS_HEARTBIT;
-  const int Center_Stack_1;
   const int Center_Stack_2;
   const int TRACTION_BUTTON;
 } ChryslerAddrs;
@@ -111,15 +110,10 @@ static void chrysler_rx_hook(const CANPacket_t *to_push) {
   }
 
   if ((chrysler_platform != CHRYSLER_PACIFICA) && (bus == 0)) {
-    if (addr == chrysler_addrs->Center_Stack_1) {
-      mads_button_press = GET_BIT(to_push, 53U) ? MADS_BUTTON_PRESSED : MADS_BUTTON_NOT_PRESSED;
-    }
     if (addr == chrysler_addrs->Center_Stack_2) {
       mads_button_press = GET_BIT(to_push, 57U) ? MADS_BUTTON_PRESSED : MADS_BUTTON_NOT_PRESSED;
     }
   }
-
-  generic_rx_checks((bus == 0) && (addr == chrysler_addrs->LKAS_COMMAND));
 }
 
 static bool chrysler_tx_hook(const CANPacket_t *to_send) {
@@ -184,22 +178,17 @@ static bool chrysler_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static int chrysler_fwd_hook(int bus_num, int addr) {
-  int bus_fwd = -1;
-
-  // forward to camera
-  if (bus_num == 0) {
-    bus_fwd = 2;
-  }
+static bool chrysler_fwd_hook(int bus_num, int addr) {
+  bool block_msg = false;
 
   // forward all messages from camera except LKAS messages
   const bool is_lkas_heartbit = (addr == chrysler_addrs->LKAS_HEARTBIT) && (chrysler_platform == CHRYSLER_PACIFICA);
   const bool is_lkas = ((addr == chrysler_addrs->LKAS_COMMAND) || (addr == chrysler_addrs->DAS_6) || is_lkas_heartbit);
-  if ((bus_num == 2) && !is_lkas){
-    bus_fwd = 0;
+  if ((bus_num == 2) && is_lkas){
+    block_msg = true;
   }
 
-  return bus_fwd;
+  return block_msg;
 }
 
 static safety_config chrysler_init(uint16_t param) {
@@ -230,7 +219,6 @@ static safety_config chrysler_init(uint16_t param) {
     .DAS_6            = 0xFA,   // LKAS HUD and auto headlight control from DASM
     .LKAS_COMMAND     = 0xA6,   // LKAS controls from DASM
     .CRUISE_BUTTONS   = 0xB1,   // Cruise control buttons
-    .Center_Stack_1   = 0xDD,   // Center stack buttons1
     .Center_Stack_2   = 0x28A,  // Center stack buttons2
   };
 
@@ -240,6 +228,7 @@ static safety_config chrysler_init(uint16_t param) {
     {.msg = {{CHRYSLER_RAM_DT_ADDRS.ESP_8, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
     {.msg = {{CHRYSLER_RAM_DT_ADDRS.ECM_5, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
     {.msg = {{CHRYSLER_RAM_DT_ADDRS.DAS_3, 2, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_RAM_DT_ADDRS.Center_Stack_2, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 1U}, { 0 }, { 0 }}},
   };
 
   static RxCheck chrysler_rx_checks[] = {
@@ -249,19 +238,20 @@ static safety_config chrysler_init(uint16_t param) {
     {.msg = {{514, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},
     {.msg = {{CHRYSLER_ADDRS.ECM_5, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
     {.msg = {{CHRYSLER_ADDRS.DAS_3, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_ADDRS.TRACTION_BUTTON, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 1U}, { 0 }, { 0 }}},
   };
 
   static const CanMsg CHRYSLER_TX_MSGS[] = {
-    {CHRYSLER_ADDRS.CRUISE_BUTTONS, 0, 3},
-    {CHRYSLER_ADDRS.LKAS_COMMAND, 0, 6},
-    {CHRYSLER_ADDRS.DAS_6, 0, 8},
-    {CHRYSLER_ADDRS.LKAS_HEARTBIT, 0, 5},
+    {CHRYSLER_ADDRS.CRUISE_BUTTONS, 0, 3, false},
+    {CHRYSLER_ADDRS.LKAS_COMMAND, 0, 6, true},
+    {CHRYSLER_ADDRS.DAS_6, 0, 8, false},
+    {CHRYSLER_ADDRS.LKAS_HEARTBIT, 0, 5, false},
   };
 
   static const CanMsg CHRYSLER_RAM_DT_TX_MSGS[] = {
-    {CHRYSLER_RAM_DT_ADDRS.CRUISE_BUTTONS, 2, 3},
-    {CHRYSLER_RAM_DT_ADDRS.LKAS_COMMAND, 0, 8},
-    {CHRYSLER_RAM_DT_ADDRS.DAS_6, 0, 8},
+    {CHRYSLER_RAM_DT_ADDRS.CRUISE_BUTTONS, 2, 3, false},
+    {CHRYSLER_RAM_DT_ADDRS.LKAS_COMMAND, 0, 8, true},
+    {CHRYSLER_RAM_DT_ADDRS.DAS_6, 0, 8, false},
   };
 
 #ifdef ALLOW_DEBUG
@@ -275,7 +265,6 @@ static safety_config chrysler_init(uint16_t param) {
     .DAS_6            = 0x275,  // LKAS HUD and auto headlight control from DASM
     .LKAS_COMMAND     = 0x276,  // LKAS controls from DASM
     .CRUISE_BUTTONS   = 0x23A,  // Cruise control buttons
-    .Center_Stack_1   = 0x330,  // Center stack buttons1
     .Center_Stack_2   = 0x28A,  // Center stack buttons2
   };
 
@@ -285,12 +274,13 @@ static safety_config chrysler_init(uint16_t param) {
     {.msg = {{CHRYSLER_RAM_HD_ADDRS.ESP_8, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
     {.msg = {{CHRYSLER_RAM_HD_ADDRS.ECM_5, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
     {.msg = {{CHRYSLER_RAM_HD_ADDRS.DAS_3, 2, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{CHRYSLER_RAM_HD_ADDRS.Center_Stack_2, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 1U}, { 0 }, { 0 }}},
   };
 
   static const CanMsg CHRYSLER_RAM_HD_TX_MSGS[] = {
-    {CHRYSLER_RAM_HD_ADDRS.CRUISE_BUTTONS, 2, 3},
-    {CHRYSLER_RAM_HD_ADDRS.LKAS_COMMAND, 0, 8},
-    {CHRYSLER_RAM_HD_ADDRS.DAS_6, 0, 8},
+    {CHRYSLER_RAM_HD_ADDRS.CRUISE_BUTTONS, 2, 3, false},
+    {CHRYSLER_RAM_HD_ADDRS.LKAS_COMMAND, 0, 8, true},
+    {CHRYSLER_RAM_HD_ADDRS.DAS_6, 0, 8, false},
   };
 
   const uint32_t CHRYSLER_PARAM_RAM_HD = 2U;  // set for Ram HD platform

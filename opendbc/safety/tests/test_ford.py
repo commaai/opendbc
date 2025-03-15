@@ -95,11 +95,6 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
   packer: CANPackerPanda
   safety: libsafety_py.Panda
 
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "TestFordSafetyBase":
-      raise unittest.SkipTest
-
   def get_canfd_curvature_limits(self, speed):
     # Round it in accordance with the safety
     curvature_accel_limit = MAX_LATERAL_ACCEL / (max(speed, 1) ** 2)
@@ -419,6 +414,11 @@ class TestFordCANFDStockSafety(TestFordSafetyBase):
     [MSG_Steering_Data_FD1, 0], [MSG_Steering_Data_FD1, 2], [MSG_ACCDATA_3, 0], [MSG_Lane_Assist_Data1, 0],
     [MSG_LateralMotionControl2, 0], [MSG_IPMA_Data, 0],
   ]
+  RELAY_MALFUNCTION_ADDRS = {0: (MSG_ACCDATA_3, MSG_Lane_Assist_Data1, MSG_LateralMotionControl2,
+                                 MSG_IPMA_Data)}
+
+  FWD_BLACKLISTED_ADDRS = {2: [MSG_ACCDATA_3, MSG_Lane_Assist_Data1, MSG_LateralMotionControl2,
+                               MSG_IPMA_Data]}
 
   def setUp(self):
     self.packer = CANPackerPanda("ford_lincoln_base_pt")
@@ -428,12 +428,6 @@ class TestFordCANFDStockSafety(TestFordSafetyBase):
 
 
 class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
-  RELAY_MALFUNCTION_ADDRS = {0: (MSG_ACCDATA, MSG_ACCDATA_3, MSG_Lane_Assist_Data1, MSG_LateralMotionControl,
-                                 MSG_LateralMotionControl2, MSG_IPMA_Data)}
-
-  FWD_BLACKLISTED_ADDRS = {2: [MSG_ACCDATA, MSG_ACCDATA_3, MSG_Lane_Assist_Data1, MSG_LateralMotionControl,
-                               MSG_LateralMotionControl2, MSG_IPMA_Data]}
-
   MAX_ACCEL = 2.0  # accel is used for brakes, but openpilot can set positive values
   MIN_ACCEL = -3.5
   INACTIVE_ACCEL = 0.0
@@ -441,11 +435,6 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
   MAX_GAS = 2.0
   MIN_GAS = -0.5
   INACTIVE_GAS = -5.0
-
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "TestFordLongitudinalSafetyBase":
-      raise unittest.SkipTest
 
   # ACC command
   def _acc_command_msg(self, gas: float, brake: float, brake_actuation: bool, cmbb_deny: bool = False):
@@ -495,6 +484,11 @@ class TestFordLongitudinalSafety(TestFordLongitudinalSafetyBase):
     [MSG_Steering_Data_FD1, 0], [MSG_Steering_Data_FD1, 2], [MSG_ACCDATA, 0], [MSG_ACCDATA_3, 0], [MSG_Lane_Assist_Data1, 0],
     [MSG_LateralMotionControl, 0], [MSG_IPMA_Data, 0],
   ]
+  RELAY_MALFUNCTION_ADDRS = {0: (MSG_ACCDATA, MSG_ACCDATA_3, MSG_Lane_Assist_Data1, MSG_LateralMotionControl,
+                                 MSG_IPMA_Data)}
+
+  FWD_BLACKLISTED_ADDRS = {2: [MSG_ACCDATA, MSG_ACCDATA_3, MSG_Lane_Assist_Data1, MSG_LateralMotionControl,
+                               MSG_IPMA_Data]}
 
   def setUp(self):
     self.packer = CANPackerPanda("ford_lincoln_base_pt")
@@ -515,6 +509,11 @@ class TestFordCANFDLongitudinalSafety(TestFordLongitudinalSafetyBase):
     [MSG_Steering_Data_FD1, 0], [MSG_Steering_Data_FD1, 2], [MSG_ACCDATA, 0], [MSG_ACCDATA_3, 0], [MSG_Lane_Assist_Data1, 0],
     [MSG_LateralMotionControl2, 0], [MSG_IPMA_Data, 0],
   ]
+  RELAY_MALFUNCTION_ADDRS = {0: (MSG_ACCDATA, MSG_ACCDATA_3, MSG_Lane_Assist_Data1, MSG_LateralMotionControl2,
+                                 MSG_IPMA_Data)}
+
+  FWD_BLACKLISTED_ADDRS = {2: [MSG_ACCDATA, MSG_ACCDATA_3, MSG_Lane_Assist_Data1, MSG_LateralMotionControl2,
+                               MSG_IPMA_Data]}
 
   def setUp(self):
     self.packer = CANPackerPanda("ford_lincoln_base_pt")
