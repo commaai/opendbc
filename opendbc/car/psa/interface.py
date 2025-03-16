@@ -30,12 +30,13 @@ class CarInterface(CarInterfaceBase):
     # longitudinal
     ret.radarUnavailable = True
     ret.experimentalLongitudinalAvailable = True
-    if experimental_long:
-      ret.openpilotLongitudinalControl = True
 
-      ret.vEgoStopping = 0.1
-      ret.vEgoStarting = 0.1
-      ret.stoppingDecelRate = 0.3
+    # TODO: check where experimental_long is set
+    # if experimental_long:
+    ret.openpilotLongitudinalControl = True
+    ret.vEgoStopping = 0.1
+    ret.vEgoStarting = 0.1
+    ret.stoppingDecelRate = 0.3
 
     return ret
 

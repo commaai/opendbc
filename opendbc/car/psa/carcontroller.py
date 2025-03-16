@@ -43,12 +43,12 @@ class CarController(CarControllerBase):
     ### longitudinal control ###
     # TODO: try to use disable_ecu method, and find other method for self.frame>10
     # disable radar
-    if self.radar_disabled == 0 and self.frame>10000: # TODO set to 10
+    if self.radar_disabled == 0:
       can_sends.append(create_disable_radar())
       self.radar_disabled = 1
 
 
-    if self.frame % 100 == 0 and self.frame>10000: # TODO: remove 10000
+    if self.frame % 100 == 0:
       can_sends.append(make_tester_present_msg(0x6b6, 1, suppress_response=False))
 
     # ECU Signals that are disabled when ARTIV (radar) is inactive
@@ -57,14 +57,14 @@ class CarController(CarControllerBase):
     # HS2_DYN1_MDD_ETAT_2B6 (ARTIV, 50 Hz, bus 1)
     # HS2_DYN_MDD_ETAT_2F6 (ARTIV, 50 Hz, bus 1)
 
-    # if self.CP.openpilotLongitudinalControl:
-    #   if self.frame % 2: # 50 Hz
-    #     can_sends.append(create_HS2_DYN1_MDD_ETAT_2B6(self.packer, self.frame // 2, actuators.accel, self.CP.openpilotLongitudinalControl))
-    #     can_sends.append(create_HS2_DYN_MDD_ETAT_2F6(self.packer, self.frame // 2, actuators.accel, self.CP.openpilotLongitudinalControl))
-    #   if self.frame % 10: # 10 Hz
-    #     can_sends.append(create_HS2_DAT_ARTIV_V2_4F6(self.packer, self.frame, actuators.accel, self.CP.openpilotLongitudinalControl))
-    #   if self.frame % 100: # 1 Hz
-    #     can_sends.append(create_HS2_SUPV_ARTIV_796(self.packer, self.frame, actuators.accel, self.CP.openpilotLongitudinalControl))
+    if self.CP.openpilotLongitudinalControl:
+      if self.frame % 2: # 50 Hz
+        can_sends.append(create_HS2_DYN1_MDD_ETAT_2B6(self.packer, self.frame // 2, actuators.accel, self.CP.openpilotLongitudinalControl))
+        can_sends.append(create_HS2_DYN_MDD_ETAT_2F6(self.packer, self.frame // 2, actuators.accel, self.CP.openpilotLongitudinalControl))
+      if self.frame % 10: # 10 Hz
+        can_sends.append(create_HS2_DAT_ARTIV_V2_4F6(self.packer, self.frame, actuators.accel, self.CP.openpilotLongitudinalControl))
+      if self.frame % 100: # 1 Hz
+        can_sends.append(create_HS2_SUPV_ARTIV_796(self.packer, self.frame, actuators.accel, self.CP.openpilotLongitudinalControl))
 
 
     # if CC.cruiseControl.cancel:
