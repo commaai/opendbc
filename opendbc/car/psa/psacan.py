@@ -27,14 +27,14 @@ def create_HS2_DYN1_MDD_ETAT_2B6(packer, frame: int, accel: float, enabled: bool
     'MDD_DESIRED_DECELERATION': accel if enabled else 2.05, # m/s²
     'POTENTIAL_WHEEL_TORQUE_REQUEST': accel if enabled else 0,
     'MIN_TIME_FOR_DESIRED_GEAR': 0 if enabled else 6.2,
-    'GMP_POTENTIAL_WHEEL_TORQUE': 100 if enabled else 0,
+    'GMP_POTENTIAL_WHEEL_TORQUE': 100 if enabled else -4000,
     'ACC_STATUS': 4 if enabled else 3,
-    'GMP_WHEEL_TORQUE': 100 if enabled else 0, # TODO
+    'GMP_WHEEL_TORQUE': 100 if enabled else -4000, # TODO
     'WHEEL_TORQUE_REQUEST': 1 if enabled else 0,
     'AUTO_BRAKING_STATUS': 6,
     'MDD_DECEL_TYPE': 1 if accel < 0 else 0,
     'MDD_DECEL_CONTROL_REQ': 1 if accel < 0 else 0,
-    'GEAR_TYPE': frame % 1, #0,1,0,1...
+    'GEAR_TYPE': frame % 2, #0,1,0,1...
     'PREFILL_REQUEST': 0,
     'DYN_ACC_CHECKSUM': 0,
     'DYN_ACC_PROCESS_COUNTER': frame % 0x10,
@@ -56,11 +56,11 @@ def create_HS2_DYN_MDD_ETAT_2F6(packer, frame: int, accel: float, enabled: bool)
     'REQ_AUDIO_COLL_ALERT_ARC': 0,
     'REQ_HAPTIC_COLL_ALERT_ARC': 0,
     'INTER_VEHICLE_DISTANCE': 100 if enabled else 255.5, # TODO
-    'ARC_STATUS': 12 if enabled else 6,
+    'ARC_STATUS': 12 if enabled else 11,
     'AUTO_BRAKING_IN_PROGRESS': 0,
     'AEB_ENABLED': 0,
     'DRIVE_AWAY_REQUEST': 0, # TODO: potential RESUME request?
-    'DISPLAY_INTERVEHICLE_TIME': 3.0, # TODO
+    'DISPLAY_INTERVEHICLE_TIME': 3.0 if enabled else 6.2, # TODO
     'MDD_DECEL_CONTROL_REQ': 1 if accel < 0 else 0,
     'AUTO_BRAKING_STATUS': 6 if enabled else 3,
     'CHECKSUM_TRANSM_DYN_ACC2': 0,
@@ -77,12 +77,12 @@ def create_HS2_DYN_MDD_ETAT_2F6(packer, frame: int, accel: float, enabled: bool)
 # Radar, 10 Hz
 def create_HS2_DAT_ARTIV_V2_4F6(packer, frame: int, accel: float, enabled: bool):
   values = {
-    'TIME_GAP': 3.0, # TODO sync with 2F6
-    'DISTANCE_GAP': 100, # TODO sync with 2F6
-    'RELATIVE_SPEED': 0.0,
+    'TIME_GAP': 3.0 if enabled else 25.5, # TODO sync with 2F6
+    'DISTANCE_GAP': 100 if enabled else 254, # TODO sync with 2F6
+    'RELATIVE_SPEED': 0.0 if enabled else 93.8,
     'ARTIV_SENSOR_STATE': 2,
     'TARGET_DETECTED': 1 if enabled else 0,
-    'ARTIV_TARGET_CHANGE_INFO': 0,
+    'ARTIV_TARGET_CHANGE_INFO': 0 if enabled else 1,
     'TRAFFIC_DIRECTION': 0, # Right hand traffic
   }
   return packer.make_can_msg('HS2_DAT_ARTIV_V2_4F6', 1, values)

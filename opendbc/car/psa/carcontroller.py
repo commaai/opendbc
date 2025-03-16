@@ -43,7 +43,7 @@ class CarController(CarControllerBase):
     ### longitudinal control ###
     # TODO: try to use disable_ecu method, and find other method for self.frame>10
     # disable radar
-    if self.radar_disabled == 0:
+    if self.radar_disabled == 0 and self.frame>10:
       can_sends.append(create_disable_radar())
       self.radar_disabled = 1
 
@@ -58,14 +58,16 @@ class CarController(CarControllerBase):
     # HS2_DYN_MDD_ETAT_2F6 (ARTIV, 50 Hz, bus 1)
 
     #TODO: integrate self.CP.openpilotLongitudinalControl
-    if CC.longActive:
-      if self.frame % 2: # 50 Hz
-        can_sends.append(create_HS2_DYN1_MDD_ETAT_2B6(self.packer, self.frame // 2, actuators.accel, CC.longActive))
-        can_sends.append(create_HS2_DYN_MDD_ETAT_2F6(self.packer, self.frame // 2, actuators.accel, CC.longActive))
-      if self.frame % 10: # 10 Hz
-        can_sends.append(create_HS2_DAT_ARTIV_V2_4F6(self.packer, self.frame, actuators.accel, CC.longActive))
-      if self.frame % 100: # 1 Hz
-        can_sends.append(create_HS2_SUPV_ARTIV_796(self.packer, self.frame, actuators.accel, CC.longActive))
+    # if CC.longActive:
+    if self.frame % 2 == 0: # 50 Hz
+      can_sends.append(create_HS2_DYN1_MDD_ETAT_2B6(self.packer, self.frame // 2, actuators.accel, CC.longActive))
+      can_sends.append(create_HS2_DYN_MDD_ETAT_2F6(self.packer, self.frame // 2, actuators.accel, CC.longActive))
+
+    if self.frame % 10 == 0: # 10 Hz
+      can_sends.append(create_HS2_DAT_ARTIV_V2_4F6(self.packer, self.frame, actuators.accel, CC.longActive))
+
+    if self.frame % 100 == 0: # 1 Hz
+      can_sends.append(create_HS2_SUPV_ARTIV_796(self.packer, self.frame, actuators.accel, CC.longActive))
 
 
     # if CC.cruiseControl.cancel:
