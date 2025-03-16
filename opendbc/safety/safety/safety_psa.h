@@ -3,6 +3,8 @@
 #define PSA_HS2_DYN_ABR_38D      909  // RX from CAN1, UC_FREIN, speed
 #define PSA_HS2_DAT_MDD_CMD_452  1106 // RX from CAN1, BSI, cruise state
 #define PSA_LANE_KEEP_ASSIST     1010 // TX from OP, EPS
+#define PSA_RADAR_DIAGNOSIS      1718 // TX from OP, radar diagnostics
+//TODO: Radar BUS 1
 
 // CAN bus numbers
 #define PSA_MAIN_BUS 2U
@@ -11,6 +13,7 @@
 
 const CanMsg PSA_TX_MSGS[] = {
   {PSA_LANE_KEEP_ASSIST, PSA_CAM_BUS, 8},
+  {PSA_RADAR_DIAGNOSIS, PSA_ADAS_BUS, 8},
 };
 
 RxCheck psa_rx_checks[] = {

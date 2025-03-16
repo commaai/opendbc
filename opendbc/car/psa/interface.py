@@ -8,7 +8,7 @@ TransmissionType = structs.CarParams.TransmissionType
 
 class CarInterface(CarInterfaceBase):
   @staticmethod
-  def _get_params(ret: structs.CarParams, candidate: CAR, fingerprint, car_fw, experimental_long, docs):
+  def _get_params(ret: structs.CarParams, candidate: CAR, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
     ret.brand = 'psa'
     ret.dashcamOnly = False
 
@@ -34,5 +34,5 @@ class CarInterface(CarInterfaceBase):
   @staticmethod
   def init(CP, can_recv, can_send):
     # ECU name: ARTIV	ARTIV, RADAR_AV_4, LIDAR, ARTIV_UDS	>6B6:696
-    # tester_present = bytes([0x3E,0x00])
-    disable_ecu(can_recv, can_send, bus=1, addr=0x6B6)
+    communication_control = bytes([uds.SERVICE_TYPE.DIAGNOSTIC_SESSION_CONTROL, uds.SESSION_TYPE.PROGRAMMING])
+    disable_ecu(can_recv, can_send, bus=1, addr=0x6b6, com_cont_req=communication_control)
