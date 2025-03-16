@@ -66,10 +66,10 @@ class CarController(CarControllerBase):
         can_sends.append(create_HS2_SUPV_ARTIV_796(self.packer, self.frame, actuators.accel, self.CP.openpilotLongitudinalControl))
 
     # if CC.cruiseControl.cancel:
-    #   can_sends.append(create_acc_status(self.packer, self.frame, CS.acc_status_msg, CC.cruiseControl.cancel))
+    #   can_sends.append(create_cancel_acc(self.packer, self.frame, CS.acc_status_msg, CC.cruiseControl.cancel))
 
     # if CC.cruiseControl.resume:
-    #   can_sends.append(create_adas_status(self.packer, self.frame, CS.adas_status_msg, CC.cruiseControl.resume))
+    #   can_sends.append(create_resume_acc(self.packer, self.frame, CS.adas_status_msg, CC.cruiseControl.resume))
 
     ### cruise buttons ###
     # TODO: find cruise buttons msg

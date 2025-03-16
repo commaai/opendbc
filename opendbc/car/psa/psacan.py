@@ -42,7 +42,7 @@ def create_HS2_SUPV_ARTIV_796(packer, frame: int, accel: float, enabled: bool):
   pass
 
 
-def create_acc_status(packer, acc_status_msg, frame: int, cancel: bool):
+def create_cancel_acc(packer, acc_status_msg, frame: int, cancel: bool):
   values = {s: acc_status_msg[s] for s in [
     'LONGITUDINAL_REGULATION_TYPE',
     'TURN_SIGNAL_STATUS',
@@ -75,7 +75,7 @@ def create_acc_status(packer, acc_status_msg, frame: int, cancel: bool):
 
 
 # TODO: find another message "REQUEST TAKEOVER" is likely not for "resume"
-def create_adas_status(packer, adas_status_msg, frame: int, resume: bool):
+def create_resume_acc(packer, adas_status_msg, frame: int, resume: bool):
   values = {s: adas_status_msg[s] for s in [
     'TARGET_DETECTED',
     'REQUEST_TAKEOVER',
