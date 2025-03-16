@@ -102,17 +102,17 @@ BO_ 552 Dyn5_CMM: 5 CMM___Motor_SG
  SG_ P388_Com_rClthPedPos : 39|8@0+ (0.5,0) [0|100] "" Vector__XXX
 
 BO_ 694 HS2_DYN1_MDD_ETAT_2B6: 8 ARTIV
- SG_ MDD_DESIRED_DECELERATION : 7|8@0+ (0.05,-10.65) [-10.65|2] "m/s2" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
- SG_ POTENTIAL_TORQUE_WHEEL_REQUEST : 9|2@0+ (1,0) [0|0] "" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
  SG_ MIN_TIME_FOR_DESIRED_GEAR : 15|6@0+ (0.1,0) [0|6.2] "s" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
  SG_ MIN_TIME_FOR_MONITORED_GEAR : 15|6@0+ (0.1,0) [0|6.2] "s" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
+ SG_ MDD_DESIRED_DECELERATION : 7|8@0+ (0.05,-10.65) [-10.65|2] "m/s2" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
+ SG_ POTENTIAL_WHEEL_TORQUE_REQUEST : 9|2@0+ (1,0) [0|0] "" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
  SG_ GMP_POTENTIAL_WHEEL_TORQUE : 23|12@0+ (4,-4000) [-4000|11000] "N.m" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
  SG_ ACC_STATUS : 27|4@0+ (1,0) [0|0] "" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
  SG_ GMP_WHEEL_TORQUE : 39|14@0+ (1,-4000) [-4000|11000] "N.m" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
  SG_ WHEEL_TORQUE_REQUEST : 41|2@0+ (1,0) [0|0] "" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
- SG_ FA_SYSTEM_STATE : 50|3@0+ (1,0) [0|0] "" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
+ SG_ AUTO_BRAKING_STATUS : 50|3@0+ (1,0) [0|0] "" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
  SG_ MDD_DECEL_TYPE : 52|2@0+ (1,0) [0|0] "" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
- SG_ MDD_PLT_DECEL_REQUEST : 53|1@0+ (1,0) [0|0] "" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
+ SG_ MDD_DECEL_CONTROL_REQ : 53|1@0+ (1,0) [0|0] "" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
  SG_ GEAR_TYPE : 54|1@0+ (1,0) [0|0] "" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
  SG_ PREFILL_REQUEST : 55|1@0+ (1,0) [0|0] "" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
  SG_ DYN_ACC_CHECKSUM : 59|4@0+ (1,0) [0|0] "" CMM,UC_FREIN,BSI,PASS_HCU2,CMF
@@ -135,22 +135,22 @@ BO_ 757 STEERING: 7 XXX
  SG_ RATE : 47|12@0- (1,0) [0|4095] "" XXX
  SG_ NEW_SIGNAL_1 : 48|1@0+ (1,0) [0|1] "" XXX
 
-BO_ 758 HS2_DYN_MDD_STATUS_2F6: 8 ARTIV
+BO_ 758 HS2_DYN_MDD_ETAT_2F6: 8 ARTIV
  SG_ TARGET_DETECTED : 0|1@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
- SG_ REQ_CONDITION_RESUME : 2|2@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
+ SG_ REQUEST_TAKEOVER : 2|2@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
  SG_ BLIND_SENSOR : 4|1@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
- SG_ REQ_VISUAL_COLLISION_ALERT : 5|1@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
- SG_ REQ_SOUND_COLLISION_ALERT : 6|1@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
- SG_ REQ_HAPTIC_COLLISION_ALERT : 7|1@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
- SG_ VEHICLE_INTER_DISTANCE : 15|10@0+ (0.25,0) [0|255.5] "m" BSI,CMM,UC_FREIN,CMF
- SG_ COLLISION_ALERT_STATE : 19|4@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
- SG_ BRAKING_IN_PROGRESS : 20|1@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
+ SG_ REQ_VISUAL_COLL_ALERT_ARC : 5|1@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
+ SG_ REQ_AUDIO_COLL_ALERT_ARC : 6|1@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
+ SG_ REQ_HAPTIC_COLL_ALERT_ARC : 7|1@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
+ SG_ INTER_VEHICLE_DISTANCE : 15|10@0+ (0.25,0) [0|255.5] "m" BSI,CMM,UC_FREIN,CMF
+ SG_ ARC_STATUS : 19|4@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
+ SG_ AUTO_BRAKING_IN_PROGRESS : 20|1@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
  SG_ AEB_ENABLED : 21|1@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
- SG_ DRV_AWAY_REQ : 33|1@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
- SG_ DISPLAYED_INTER_VEHICLE_TIME : 39|6@0+ (0.1,0) [0|6.1] "s" BSI,CMM,UC_FREIN,CMF
- SG_ REQ_UCF_DECEL_CONTROL : 42|1@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
- SG_ BRAKE_STATE : 47|3@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
- SG_ DYN_ACC2_FRAME_CHECKSUM : 51|4@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
+ SG_ DRIVE_AWAY_REQUEST : 33|1@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
+ SG_ DISPLAY_INTERVEHICLE_TIME : 39|6@0+ (0.1,0) [0|6.1] "s" BSI,CMM,UC_FREIN,CMF
+ SG_ MDD_DECEL_CONTROL_REQ : 42|1@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
+ SG_ AUTO_BRAKING_STATUS : 47|3@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
+ SG_ CHECKSUM_TRANSM_DYN_ACC2 : 51|4@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
  SG_ PROCESS_COUNTER_4B_ACC2 : 55|4@0+ (1,0) [0|15] "" BSI,CMM,UC_FREIN,CMF
  SG_ TARGET_POSITION : 63|3@0+ (1,0) [0|0] "" BSI,CMM,UC_FREIN,CMF
 
@@ -425,6 +425,15 @@ BO_ 1266 Dat3_BSI: 8 Vector__XXX
  SG_ P491_Com_uVoltCtlProdMax : 55|6@0+ (1,0) [0|0] "" Vector__XXX
  SG_ P492_Com_uVarProdMax : 63|7@0+ (1,0) [0|0] "" Vector__XXX
 
+BO_ 1270 HS2_DAT_ARTIV_V2_4F6: 5 ARTIV
+ SG_ TIME_GAP : 7|8@0+ (0.1,0) [0|25.4] "s" RITCS,BSI,CMF
+ SG_ DISTANCE_GAP : 15|8@0+ (1,0) [0|253] "m" RITCS,BSI,CMF
+ SG_ RELATIVE_SPEED : 20|13@0+ (0.02,-70) [-70|70] "m/s" RITCS,BSI,CMF
+ SG_ ARTIV_SENSOR_STATE : 23|3@0+ (1,0) [0|0] "" RITCS,BSI,CMF
+ SG_ TARGET_DETECTED : 36|1@0+ (1,0) [0|0] "" RITCS,BSI,CMF
+ SG_ ARTIV_TARGET_CHANGE_INFO : 37|1@0+ (1,0) [0|0] "" RITCS,BSI,CMF
+ SG_ TRAFFIC_DIRECTION : 39|2@0+ (1,0) [0|0] "" RITCS,BSI,CMF
+
 BO_ 1293 Dat_ABR: 7 ABS___Antiblockiersystem
  SG_ P351_Com_bABSIntvActv : 5|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ P415_Com_stABSSTTReqRaw : 52|2@1+ (1,0) [0|3] "" Vector__XXX
@@ -646,7 +655,11 @@ BO_ 1928 Supv_CMM: 8 CMM___Motor_SG
  SG_ P284_T15CD_stPart : 43|12@0+ (1,0) [0|4095] "" Vector__XXX
  SG_ P242_T15CD_stElec : 44|4@1+ (1,0) [0|15] "" Vector__XXX
 
-BO_ 1942 Req_Diag_DIRECTN_M: 8 XXX
+BO_ 1942 HS2_SUPV_ARTIV_796: 8 ARTIV
+ SG_ FAULT_CODE : 7|8@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ STATUS_NO_CONFIG : 15|32@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ STATUS_PARTIAL_WAKEUP_GMP : 43|16@0+ (1,0) [0|0] "" Vector__XXX
+ SG_ UCE_ELECTR_STATE : 47|4@0+ (1,0) [0|0] "" Vector__XXX
 
 BO_ 1953 Rep_Diag_BMF_CAN_MMC_2: 8 XXX
 
@@ -803,10 +816,12 @@ CM_ SG_ 520 P042_Inm_bCanMon "P042  CAN-Fehlerbehandlung im Startfall mit Hilfe 
           Startendekennung unterdrücken";
 CM_ SG_ 520 P127_EGT_st_Bit30 "P127: Regeneration aid by electric consumers (engine load increase).";
 CM_ SG_ 520 P198_ActMod_trqClthTraIntv "P084  Vorweggenommenes Drehmoment";
-CM_ SG_ 694 ACC_STATUS "Indicates the operating state of the Adaptive Cruise Control (ACC) system.";
+CM_ SG_ 694 ACC_STATUS "Indicates the operational state of the ACC system.";
 CM_ SG_ 694 DYN_ACC_CHECKSUM "CHK_INI = 0x3";
 CM_ SG_ 694 DYN_ACC_PROCESS_COUNTER "This counter increments from 0 to 15 at each activation of the calculation process.";
 CM_ SG_ 757 ANGLE "asymmetric, could be init";
+CM_ SG_ 758 CHECKSUM_TRANSM_DYN_ACC2 "CHK_INI = 0x7";
+CM_ SG_ 758 PROCESS_COUNTER_4B_ACC2 "This counter increments from 0 to 15 at each activation of the calculation process.";
 CM_ SG_ 773 ANGLE "-565 to 560, seems like estimate and not init";
 CM_ SG_ 773 RATE_SIGN "1=moving clockwise, 0=moving anticlockwise";
 CM_ BO_ 840 "ID 348:  Engine Dynamic Frame 2 (Period time 20 ms)";
@@ -959,28 +974,28 @@ CM_ SG_ 3221225472 P284_T15CD_stPart_byte8 "ECU electronic state";
 CM_ SG_ 3221225472 Reserved_1 "P074  Number of BusOff in driving cycle";
 VAL_ 461 ESP_STATUS 0 "DISABLED" 1 "ENABLED";
 VAL_ 461 ESP_STATUS_INV 0 "ENABLED" 1 "DISABLED";
-VAL_ 694 POTENTIAL_TORQUE_WHEEL_REQUEST 0 "Not requested" 1 "Requested in GMP mode" 2 "Requested in Brake mode" 3 "Not used";
-VAL_ 694 ACC_STATUS 0 "Initialization" 1 "OFF" 2 "Inhibited" 3 "Waiting" 4 "Active" 5 "Suspended" 6 "Brake only" 7 "Waiting ramp" 8 "Reserved" 9 "Reserved" 10 "Reserved" 11 "Reserved" 12 "Reserved" 13 "Reserved" 14 "Reserved" 15 "Fault";
+VAL_ 694 POTENTIAL_WHEEL_TORQUE_REQUEST 0 "Not requested" 1 "Requested in GMP mode" 2 "Requested in Brake mode" 3 "Not used";
+VAL_ 694 ACC_STATUS 0 "Initialization" 1 "OFF" 2 "Inhibited" 3 "Waiting" 4 "Active" 5 "Suspended" 6 "Brake only" 7 "Wait ramp" 8 "Reserved" 9 "Reserved" 10 "Reserved" 11 "Reserved" 12 "Reserved" 13 "Reserved" 14 "Reserved" 15 "Fault";
 VAL_ 694 WHEEL_TORQUE_REQUEST 0 "Not requested" 1 "High range requested" 2 "Low range requested" 3 "Not used";
-VAL_ 694 FA_SYSTEM_STATE 0 "Unavailable" 1 "Initialization" 2 "Not used" 3 "Inhibited" 4 "Not used" 5 "Waiting" 6 "Active" 7 "Fault";
+VAL_ 694 AUTO_BRAKING_STATUS 0 "Unavailable" 1 "Initialization" 2 "Not used" 3 "Inhibited" 4 "Not used" 5 "Waiting" 6 "Active" 7 "Fault";
 VAL_ 694 MDD_DECEL_TYPE 0 "No braking" 1 "ACC" 2 "FA_HV (high-speed automatic braking) / AFUi braking" 3 "FA_BV (low-speed automatic braking) / FARC2 braking";
-VAL_ 694 MDD_PLT_DECEL_REQUEST 0 "No pilot request UCF" 1 "Pilot request UCF";
+VAL_ 694 MDD_DECEL_CONTROL_REQ 0 "No UCF control request" 1 "UCF control request";
 VAL_ 694 GEAR_TYPE 0 "Downshift" 1 "Upshift";
 VAL_ 694 PREFILL_REQUEST 0 "No prefill request" 1 "Prefill request";
 VAL_ 728 ESP_STATUS_RELATED 0 "DISABLED" 1 "ENABLED";
 VAL_ 728 ESP_STATUS_RELATED_INV 0 "ENABLED" 1 "DISABLED";
 VAL_ 758 TARGET_DETECTED 0 "initialization or no target detected" 1 "target detected";
-VAL_ 758 REQ_CONDITION_RESUME 0 "No request" 1 "Non-critical request" 2 "Critical request" 3 "Invalid";
+VAL_ 758 REQUEST_TAKEOVER 0 "No request" 1 "Non-critical request" 2 "Critical request" 3 "Invalid";
 VAL_ 758 BLIND_SENSOR 0 "False" 1 "True";
-VAL_ 758 REQ_VISUAL_COLLISION_ALERT 0 "No visual alert request" 1 "Visual alert request";
-VAL_ 758 REQ_SOUND_COLLISION_ALERT 0 "No sound alert request" 1 "Sound alert request";
-VAL_ 758 REQ_HAPTIC_COLLISION_ALERT 0 "No haptic alert request" 1 "Haptic alert request";
-VAL_ 758 COLLISION_ALERT_STATE 0 "Unavailable" 1 "Value not used" 2 "Value not used" 3 "Initialization" 4 "Value not used" 5 "Value not used" 6 "Inhibited" 7 "Value not used" 8 "Value not used" 9 "Value not used" 10 "Waiting" 11 "Value not used" 12 "Active" 13 "Value not used" 14 "Value not used" 15 "Fault";
-VAL_ 758 BRAKING_IN_PROGRESS 0 "No braking in progress" 1 "Braking in progress";
+VAL_ 758 REQ_VISUAL_COLL_ALERT_ARC 0 "no visual alert request" 1 "visual alert request";
+VAL_ 758 REQ_AUDIO_COLL_ALERT_ARC 0 "no audio alert request" 1 "audio alert request";
+VAL_ 758 REQ_HAPTIC_COLL_ALERT_ARC 0 "no haptic alert request" 1 "haptic alert request";
+VAL_ 758 ARC_STATUS 0 "unavailable" 1 "not used" 2 "not used" 3 "initialization" 4 "not used" 5 "not used" 6 "inhibited" 7 "not used" 8 "not used" 9 "not used" 10 "waiting" 11 "not used" 12 "active" 13 "not used" 14 "not used" 15 "fault";
+VAL_ 758 AUTO_BRAKING_IN_PROGRESS 0 "no braking in progress" 1 "braking in progress";
 VAL_ 758 AEB_ENABLED 0 "FALSE" 1 "TRUE";
-VAL_ 758 DRV_AWAY_REQ 0 "No drive away required" 1 "Drive away required";
-VAL_ 758 REQ_UCF_DECEL_CONTROL 0 "No UCF control request" 1 "UCF control request";
-VAL_ 758 BRAKE_STATE 0 "Unavailable" 1 "Initialization" 2 "Value not used" 3 "Inhibited" 4 "Value not used" 5 "Waiting" 6 "Active" 7 "Fault";
+VAL_ 758 DRIVE_AWAY_REQUEST 0 "No drive away required" 1 "Drive away required";
+VAL_ 758 MDD_DECEL_CONTROL_REQ 0 "no UCF control request" 1 "UCF control request";
+VAL_ 758 AUTO_BRAKING_STATUS 0 "unavailable" 1 "initialization" 2 "not used" 3 "inhibited" 4 "not used" 5 "waiting" 6 "active" 7 "fault";
 VAL_ 758 TARGET_POSITION 0 "POS1" 1 "POS2" 2 "POS3" 3 "POS4" 4 "POS5" 5 "POS6" 6 "POS7" 7 "Invalid";
 VAL_ 760 ESP_STATUS_RELATED 0 "DISABLED" 1 "ENABLED";
 VAL_ 760 ESP_STATUS_RELATED_INV 0 "ENABLED" 1 "DISABLED";
@@ -1010,3 +1025,7 @@ VAL_ 1173 STEERWHL_HOLD_BY_DRV 1 "Steer Activity From Drv Trq" 0 "No Steer Activ
 VAL_ 1173 EPS_STATE_LKA 4 "Defect" 3 "Active" 2 "Available" 1 "Authorised" 0 "Unauthorised";
 VAL_ 1173 AUTOR_ARRET_MOT_DA 1 "Permission to Stop" 0 "No Permission to Stop";
 VAL_ 1173 STEERING_REBOOT_REQUEST 1 "Request Reboot" 0 "No Reboot Required";
+VAL_ 1270 ARTIV_SENSOR_STATE 0 "Initialization" 1 "Inactive" 2 "Active" 3 "Reduced visibility" 4 "Simulation" 5 "Learning" 6 "Free" 7 "Fault";
+VAL_ 1270 TARGET_DETECTED 0 "initialization or no target detected" 1 "target detected";
+VAL_ 1270 ARTIV_TARGET_CHANGE_INFO 0 "VALUE_1" 1 "VALUE_2";
+VAL_ 1270 TRAFFIC_DIRECTION 0 "right" 1 "left" 2 "reserved" 3 "undetermined";

@@ -21,7 +21,23 @@ def create_lka_steering(packer, frame: int, lat_active: bool, apply_angle: float
   return packer.make_can_msg('LANE_KEEP_ASSIST', 0, values)
 
 
-def create_longitudinal(packer, frame: int, accel: float, enabled: bool):
+# 50 Hz
+def create_HS2_DYN1_MDD_ETAT_2B6(packer, frame: int, accel: float, enabled: bool):
+  # TODO
+  pass
+
+# 50 Hz
+def create_HS2_DYN_MDD_ETAT_2F6(packer, frame: int, accel: float, enabled: bool):
+  # TODO
+  pass
+
+# 10 Hz
+def create_HS2_DAT_ARTIV_V2_4F6(packer, frame: int, accel: float, enabled: bool):
+  # TODO
+  pass
+
+# 1 Hz
+def create_HS2_SUPV_ARTIV_796(packer, frame: int, accel: float, enabled: bool):
   # TODO
   pass
 
@@ -58,18 +74,18 @@ def create_acc_status(packer, acc_status_msg, frame: int, cancel: bool):
   # values['CHECKSUM_SPEED_SETPOINT'] = calculate_checksum(data)
 
 
-
+# TODO: find another message "REQUEST TAKEOVER" is likely not for "resume"
 def create_adas_status(packer, adas_status_msg, frame: int, resume: bool):
   values = {s: adas_status_msg[s] for s in [
     'TARGET_DETECTED',
-    'REQ_CONDITION_RESUME',
+    'REQUEST_TAKEOVER',
     'BLIND_SENSOR',
     'REQ_VISUAL_COLLISION_ALERT',
     'REQ_SOUND_COLLISION_ALERT',
     'REQ_HAPTIC_COLLISION_ALERT',
     'VEHICLE_INTER_DISTANCE',
     'COLLISION_ALERT_STATE',
-    'BRAKING_IN_PROGRESS',
+    'AUTO_BRAKING_IN_PROGRESS',
     'AEB_ENABLED',
     'DRV_AWAY_REQ',
     'DISPLAYED_INTER_VEHICLE_TIME',
@@ -81,10 +97,10 @@ def create_adas_status(packer, adas_status_msg, frame: int, resume: bool):
   ]}
 
   if resume:
-    values['REQ_CONDITION_RESUME'] = 1
+    values['REQUEST_TAKEOVER'] = 1
 
   values['DYN_ACC2_FRAME_CHECKSUM'] = 0
-  msg = packer.make_can_msg('HS2_DYN_MDD_STATUS_2F6', 1, values)[1]
+  msg = packer.make_can_msg('HS2_DYN_MDD_ETAT_2F6', 1, values)[1]
   values['DYN_ACC2_FRAME_CHECKSUM'] = calculate_checksum(msg)
 
-  return packer.make_can_msg('HS2_DYN_MDD_STATUS_2F6', 1, values)
+  return packer.make_can_msg('HS2_DYN_MDD_ETAT_2F6', 1, values)

@@ -2,7 +2,7 @@ from opendbc.car import apply_std_steer_angle_limits, make_tester_present_msg, B
 from opendbc.can.packer import CANPacker
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.psa import psacan
-from opendbc.car.psa.psacan import create_lka_steering, create_longitudinal, create_acc_status, create_adas_status
+from opendbc.car.psa.psacan import *
 from opendbc.car.psa.values import CarControllerParams
 from opendbc.car.can_definitions import CanData
 
@@ -47,11 +47,23 @@ class CarController(CarControllerBase):
       can_sends.append(create_disable_radar())
       self.radar_disabled = 1
 
+    # ECU Signals that are disabled when ARTIV (radar) is inactive
+    # HS2_SUPV_ARTIV_796 (ARTIV, 1 Hz, bus 1)
+    # HS2_DAT_ARTIV_V2_4F6 (ARTIV, 8-10 Hz, bus 1)
+    # HS2_DYN1_MDD_ETAT_2B6 (ARTIV, 50 Hz, bus 1)
+    # HS2_DYN_MDD_ETAT_2F6 (ARTIV, 50 Hz, bus 1)
+
     if self.frame % 100 == 0:
       can_sends.append(make_tester_present_msg(0x6b6, 1, suppress_response=False))
 
-    # if self.CP.openpilotLongitudinalControl:
-    #   can_sends.append(create_longitudinal(self.packer, self.frame, actuators.accel, self.CP.openpilotLongitudinalControl))
+    if self.CP.openpilotLongitudinalControl:
+      if self.frame % 2: # 50 Hz
+        can_sends.append(create_HS2_DYN1_MDD_ETAT_2B6(self.packer, self.frame, actuators.accel, self.CP.openpilotLongitudinalControl))
+        can_sends.append(create_HS2_DYN_MDD_ETAT_2F6(self.packer, self.frame, actuators.accel, self.CP.openpilotLongitudinalControl))
+      if self.frame % 10: # 10 Hz
+        can_sends.append(create_HS2_DAT_ARTIV_V2_4F6(self.packer, self.frame, actuators.accel, self.CP.openpilotLongitudinalControl))
+      if self.frame % 100: # 1 Hz
+        can_sends.append(create_HS2_SUPV_ARTIV_796(self.packer, self.frame, actuators.accel, self.CP.openpilotLongitudinalControl))
 
     # if CC.cruiseControl.cancel:
     #   can_sends.append(create_acc_status(self.packer, self.frame, CS.acc_status_msg, CC.cruiseControl.cancel))

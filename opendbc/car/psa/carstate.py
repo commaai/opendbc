@@ -68,8 +68,8 @@ class CarState(CarStateBase):
       ret.gearShifter = GearShifter.drive
 
     # TODO: safety
-    ret.stockFcw = cp_adas.vl['HS2_DYN_MDD_STATUS_2F6']['REQ_CONDITION_RESUME'] == 2 # 0: no error, 1: non-critical request, 2: critical request
-    ret.stockAeb = bool(cp_adas.vl['HS2_DYN_MDD_STATUS_2F6']['BRAKING_IN_PROGRESS']) # TODO: test
+    ret.stockFcw = cp_adas.vl['HS2_DYN_MDD_ETAT_2F6']['REQUEST_TAKEOVER'] == 2 # 0: no error, 1: non-critical request, 2: critical request
+    ret.stockAeb = bool(cp_adas.vl['HS2_DYN_MDD_ETAT_2F6']['AUTO_BRAKING_IN_PROGRESS']) # TODO: test
 
     # button presses
     blinker = cp_main.vl['HS2_DAT7_BSI_612']['CDE_CLG_ET_HDC'] # HS1
@@ -82,7 +82,7 @@ class CarState(CarStateBase):
 
     # messages needed by carcontroller
     self.acc_status_msg = copy.copy(cp_adas.vl["HS2_DAT_MDD_CMD_452"])
-    self.adas_status_msg = copy.copy(cp_adas.vl["HS2_DYN_MDD_STATUS_2F6"])
+    self.adas_status_msg = copy.copy(cp_adas.vl["HS2_DYN_MDD_ETAT_2F6"])
 
     return ret
 
@@ -103,7 +103,7 @@ class CarState(CarStateBase):
       ('HS2_DYN_UCF_MDD_32D', 50),
       ('HS2_DAT_MDD_CMD_452', 20),
       ('HS2_DYN1_MDD_ETAT_2B6', 50),
-      ('HS2_DYN_MDD_STATUS_2F6', 50),
+      ('HS2_DYN_MDD_ETAT_2F6', 50),
     ]
     main_messages = [
       ('Dat_BSI', 20),
