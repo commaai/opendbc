@@ -41,8 +41,9 @@ class CarController(CarControllerBase):
 
 
     ### longitudinal control ###
+    # TODO: try to use disable_ecu method, and find other method for self.frame>10
     # disable radar
-    if self.radar_disabled == 0:
+    if self.radar_disabled == 0 and self.frame>10:
       can_sends.append(create_disable_radar())
       self.radar_disabled = 1
 

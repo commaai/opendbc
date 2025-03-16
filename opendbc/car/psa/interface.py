@@ -12,7 +12,6 @@ class CarInterface(CarInterfaceBase):
     ret.brand = 'psa'
     ret.dashcamOnly = False
 
-    ret.radarUnavailable = True
     ret.steerControlType = structs.CarParams.SteerControlType.angle
     ret.steerActuatorDelay = 0.3
     ret.steerLimitTimer = 1.0
@@ -27,6 +26,16 @@ class CarInterface(CarInterfaceBase):
     ret.autoResumeSng = ret.minEnableSpeed == -1
     ret.centerToFront = ret.wheelbase * 0.44
     ret.wheelSpeedFactor = 1.04
+
+    # longitudinal
+    ret.radarUnavailable = True
+    ret.experimentalLongitudinalAvailable = True
+    if experimental_long:
+      ret.openpilotLongitudinalControl = True
+
+      ret.vEgoStopping = 0.1
+      ret.vEgoStarting = 0.1
+      ret.stoppingDecelRate = 0.3
 
     return ret
 

@@ -100,6 +100,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
 #           rx_offset=PSA_RX_OFFSET,
 #           bus=bus,
 #           logging=True,
+#           obd_multiplexing=False,
 #       ),
 #       Request(
 #           [PSA_VERSION_REQUEST],
@@ -107,6 +108,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
 #           rx_offset=PSA_RX_OFFSET,
 #           bus=bus,
 #           logging=True,
+#           obd_multiplexing=False,
 #       ),
 #     ]
 #   ]
