@@ -52,19 +52,19 @@ static uint32_t volkswagen_pq_compute_checksum(const CANPacket_t *to_push) {
 
 static safety_config volkswagen_pq_init(uint16_t param) {
   // Transmit of GRA_Neu is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
-  static const CanMsg VOLKSWAGEN_PQ_STOCK_TX_MSGS[] = {{MSG_HCA_1, 0, 5}, {MSG_LDW_1, 0, 8},
-                                                {MSG_GRA_NEU, 0, 4}, {MSG_GRA_NEU, 2, 4}};
+  static const CanMsg VOLKSWAGEN_PQ_STOCK_TX_MSGS[] = {{MSG_HCA_1, 0, 5, true}, {MSG_LDW_1, 0, 8, false},
+                                                {MSG_GRA_NEU, 0, 4, false}, {MSG_GRA_NEU, 2, 4, false}};
 
-  static const CanMsg VOLKSWAGEN_PQ_LONG_TX_MSGS[] =  {{MSG_HCA_1, 0, 5}, {MSG_LDW_1, 0, 8},
-                                                {MSG_ACC_SYSTEM, 0, 8}, {MSG_ACC_GRA_ANZEIGE, 0, 8}};
+  static const CanMsg VOLKSWAGEN_PQ_LONG_TX_MSGS[] =  {{MSG_HCA_1, 0, 5, true}, {MSG_LDW_1, 0, 8, false},
+                                                {MSG_ACC_SYSTEM, 0, 8, false}, {MSG_ACC_GRA_ANZEIGE, 0, 8, false}};
 
   static RxCheck volkswagen_pq_rx_checks[] = {
-    {.msg = {{MSG_LENKHILFE_3, 0, 6, .check_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_BREMSE_1, 0, 8, .check_checksum = false, .max_counter = 0U, .frequency = 100U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_MOTOR_2, 0, 8, .check_checksum = false, .max_counter = 0U, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_MOTOR_3, 0, 8, .check_checksum = false, .max_counter = 0U, .frequency = 100U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_MOTOR_5, 0, 8, .check_checksum = true, .max_counter = 0U, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_GRA_NEU, 0, 4, .check_checksum = true, .max_counter = 15U, .frequency = 30U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_LENKHILFE_3, 0, 6, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_BREMSE_1, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_MOTOR_2, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_MOTOR_3, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_MOTOR_5, 0, 8, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_GRA_NEU, 0, 4, .max_counter = 15U, .frequency = 30U}, { 0 }, { 0 }}},
   };
 
   UNUSED(param);
@@ -148,8 +148,6 @@ static void volkswagen_pq_rx_hook(const CANPacket_t *to_push) {
     if (addr == MSG_MOTOR_2) {
       brake_pressed = (GET_BYTE(to_push, 2) & 0x1U);
     }
-
-    generic_rx_checks((addr == MSG_HCA_1));
   }
 }
 
@@ -220,32 +218,25 @@ static bool volkswagen_pq_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static int volkswagen_pq_fwd_hook(int bus_num, int addr) {
-  int bus_fwd = -1;
+static bool volkswagen_pq_fwd_hook(int bus_num, int addr) {
+  bool block_msg = false;
 
   switch (bus_num) {
-    case 0:
-      // Forward all traffic from the Extended CAN onward
-      bus_fwd = 2;
-      break;
     case 2:
       if ((addr == MSG_HCA_1) || (addr == MSG_LDW_1)) {
         // openpilot takes over LKAS steering control and related HUD messages from the camera
-        bus_fwd = -1;
+        block_msg = true;
       } else if (volkswagen_longitudinal && ((addr == MSG_ACC_SYSTEM) || (addr == MSG_ACC_GRA_ANZEIGE))) {
         // openpilot takes over acceleration/braking control and related HUD messages from the stock ACC radar
+        block_msg = true;
       } else {
-        // Forward all remaining traffic from Extended CAN devices to J533 gateway
-        bus_fwd = 0;
       }
       break;
     default:
-      // No other buses should be in use; fallback to do-not-forward
-      bus_fwd = -1;
       break;
   }
 
-  return bus_fwd;
+  return block_msg;
 }
 
 const safety_hooks volkswagen_pq_hooks = {

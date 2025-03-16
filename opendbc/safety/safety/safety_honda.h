@@ -3,25 +3,19 @@
 #include "safety_declarations.h"
 
 // All common address checks except SCM_BUTTONS which isn't on one Nidec safety configuration
-#define HONDA_COMMON_NO_SCM_FEEDBACK_RX_CHECKS(pt_bus)                                                                                           \
-  {.msg = {{0x1A6, (pt_bus), 8, .check_checksum = true, .max_counter = 3U, .frequency = 25U},                  /* SCM_BUTTONS */      \
-           {0x296, (pt_bus), 4, .check_checksum = true, .max_counter = 3U, .frequency = 25U}, { 0 }}},                                \
-  {.msg = {{0x158, (pt_bus), 8, .check_checksum = true, .max_counter = 3U, .frequency = 100U}, { 0 }, { 0 }}},  /* ENGINE_DATA */      \
-  {.msg = {{0x17C, (pt_bus), 8, .check_checksum = true, .max_counter = 3U, .frequency = 100U}, { 0 }, { 0 }}},  /* POWERTRAIN_DATA */  \
+#define HONDA_COMMON_NO_SCM_FEEDBACK_RX_CHECKS(pt_bus)                                                         \
+  {.msg = {{0x1A6, (pt_bus), 8, .max_counter = 3U, .frequency = 25U},                  /* SCM_BUTTONS */       \
+           {0x296, (pt_bus), 4, .max_counter = 3U, .frequency = 25U}, { 0 }}},                                 \
+  {.msg = {{0x158, (pt_bus), 8, .max_counter = 3U, .frequency = 100U}, { 0 }, { 0 }}},  /* ENGINE_DATA */      \
+  {.msg = {{0x17C, (pt_bus), 8, .max_counter = 3U, .frequency = 100U}, { 0 }, { 0 }}},  /* POWERTRAIN_DATA */  \
 
-#define HONDA_COMMON_RX_CHECKS(pt_bus)                                                                                                         \
-  HONDA_COMMON_NO_SCM_FEEDBACK_RX_CHECKS(pt_bus)                                                                                               \
-  {.msg = {{0x326, (pt_bus), 8, .check_checksum = true, .max_counter = 3U, .frequency = 10U}, { 0 }, { 0 }}},  /* SCM_FEEDBACK */  \
+#define HONDA_COMMON_RX_CHECKS(pt_bus)                                                                     \
+  HONDA_COMMON_NO_SCM_FEEDBACK_RX_CHECKS(pt_bus)                                                           \
+  {.msg = {{0x326, (pt_bus), 8, .max_counter = 3U, .frequency = 10U}, { 0 }, { 0 }}},  /* SCM_FEEDBACK */  \
 
 // Alternate brake message is used on some Honda Bosch, and Honda Bosch radarless (where PT bus is 0)
-#define HONDA_ALT_BRAKE_ADDR_CHECK(pt_bus)                                                                                                    \
-  {.msg = {{0x1BE, (pt_bus), 3, .check_checksum = true, .max_counter = 3U, .frequency = 50U}, { 0 }, { 0 }}},  /* BRAKE_MODULE */  \
-
-
-// Nidec and bosch radarless has the powertrain bus on bus 0
-static RxCheck honda_common_rx_checks[] = {
-  HONDA_COMMON_RX_CHECKS(0)
-};
+#define HONDA_ALT_BRAKE_ADDR_CHECK(pt_bus)                                                                 \
+  {.msg = {{0x1BE, (pt_bus), 3, .max_counter = 3U, .frequency = 50U}, { 0 }, { 0 }}},  /* BRAKE_MODULE */  \
 
 enum {
   HONDA_BTN_NONE = 0,
@@ -169,25 +163,6 @@ static void honda_rx_hook(const CANPacket_t *to_push) {
       }
     }
   }
-
-  int bus_rdr_car = (honda_hw == HONDA_BOSCH) ? 0 : 2;  // radar bus, car side
-  bool stock_ecu_detected = false;
-
-  // If steering controls messages are received on the destination bus, it's an indication
-  // that the relay might be malfunctioning
-  if ((addr == 0xE4) || (addr == 0x194)) {
-    if (((honda_hw != HONDA_NIDEC) && (bus == bus_rdr_car)) || ((honda_hw == HONDA_NIDEC) && (bus == 0))) {
-      stock_ecu_detected = true;
-    }
-  }
-  // If Honda Bosch longitudinal mode is selected we need to ensure the radar is turned off
-  // Verify this by ensuring ACC_CONTROL (0x1DF) is not received on the PT bus
-  if (honda_bosch_long && !honda_bosch_radarless && (bus == pt_bus) && (addr == 0x1DF)) {
-    stock_ecu_detected = true;
-  }
-
-  generic_rx_checks(stock_ecu_detected);
-
 }
 
 static bool honda_tx_hook(const CANPacket_t *to_send) {
@@ -303,7 +278,7 @@ static bool honda_tx_hook(const CANPacket_t *to_send) {
 }
 
 static safety_config honda_nidec_init(uint16_t param) {
-  static CanMsg HONDA_N_TX_MSGS[] = {{0xE4, 0, 5}, {0x194, 0, 4}, {0x1FA, 0, 8}, {0x30C, 0, 8}, {0x33D, 0, 5}};
+  static CanMsg HONDA_N_TX_MSGS[] = {{0xE4, 0, 5, true}, {0x194, 0, 4, true}, {0x1FA, 0, 8, false}, {0x30C, 0, 8, false}, {0x33D, 0, 5, false}};
 
   const uint16_t HONDA_PARAM_NIDEC_ALT = 4;
 
@@ -321,13 +296,20 @@ static safety_config honda_nidec_init(uint16_t param) {
 
   if (enable_nidec_alt) {
     // For Nidecs with main on signal on an alternate msg (missing 0x326)
-    static RxCheck honda_nidec_alt_rx_checks[] = { 
+    static RxCheck honda_nidec_alt_rx_checks[] = {
       HONDA_COMMON_NO_SCM_FEEDBACK_RX_CHECKS(0)
+      {.msg = {{0x1FA, 2, 8, .max_counter = 3U, .frequency = 50U}, { 0 }, { 0 }}},  // BRAKE_COMMAND
     };
 
     SET_RX_CHECKS(honda_nidec_alt_rx_checks, ret);
   } else {
-    SET_RX_CHECKS(honda_common_rx_checks, ret);
+    // Nidec includes BRAKE_COMMAND
+    static RxCheck honda_nidec_common_rx_checks[] = {
+      HONDA_COMMON_RX_CHECKS(0)
+      {.msg = {{0x1FA, 2, 8, .max_counter = 3U, .frequency = 50U}, { 0 }, { 0 }}},  // BRAKE_COMMAND
+    };
+
+    SET_RX_CHECKS(honda_nidec_common_rx_checks, ret);
   }
 
   SET_TX_MSGS(HONDA_N_TX_MSGS, ret);
@@ -336,10 +318,10 @@ static safety_config honda_nidec_init(uint16_t param) {
 }
 
 static safety_config honda_bosch_init(uint16_t param) {
-  static CanMsg HONDA_BOSCH_TX_MSGS[] = {{0xE4, 0, 5}, {0xE5, 0, 8}, {0x296, 1, 4}, {0x33D, 0, 5}, {0x33DA, 0, 5}, {0x33DB, 0, 8}};  // Bosch
-  static CanMsg HONDA_BOSCH_LONG_TX_MSGS[] = {{0xE4, 1, 5}, {0x1DF, 1, 8}, {0x1EF, 1, 8}, {0x1FA, 1, 8}, {0x30C, 1, 8}, {0x33D, 1, 5}, {0x33DA, 1, 5}, {0x33DB, 1, 8}, {0x39F, 1, 8}, {0x18DAB0F1, 1, 8}};  // Bosch w/ gas and brakes
-  static CanMsg HONDA_RADARLESS_TX_MSGS[] = {{0xE4, 0, 5}, {0x296, 2, 4}, {0x33D, 0, 8}};  // Bosch radarless
-  static CanMsg HONDA_RADARLESS_LONG_TX_MSGS[] = {{0xE4, 0, 5}, {0x33D, 0, 8}, {0x1C8, 0, 8}, {0x30C, 0, 8}};  // Bosch radarless w/ gas and brakes
+  static CanMsg HONDA_BOSCH_TX_MSGS[] = {{0xE4, 0, 5, true}, {0xE5, 0, 8, false}, {0x296, 1, 4, false}, {0x33D, 0, 5, false}, {0x33DA, 0, 5, false}, {0x33DB, 0, 8, false}};  // Bosch
+  static CanMsg HONDA_BOSCH_LONG_TX_MSGS[] = {{0xE4, 1, 5, true}, {0x1DF, 1, 8, true}, {0x1EF, 1, 8, false}, {0x1FA, 1, 8, false}, {0x30C, 1, 8, false}, {0x33D, 1, 5, false}, {0x33DA, 1, 5, false}, {0x33DB, 1, 8, false}, {0x39F, 1, 8, false}, {0x18DAB0F1, 1, 8, false}};  // Bosch w/ gas and brakes
+  static CanMsg HONDA_RADARLESS_TX_MSGS[] = {{0xE4, 0, 5, true}, {0x296, 2, 4, false}, {0x33D, 0, 8, false}};  // Bosch radarless
+  static CanMsg HONDA_RADARLESS_LONG_TX_MSGS[] = {{0xE4, 0, 5, true}, {0x33D, 0, 8, false}, {0x1C8, 0, 8, false}, {0x30C, 0, 8, false}};  // Bosch radarless w/ gas and brakes
 
   const uint16_t HONDA_PARAM_ALT_BRAKE = 1;
   const uint16_t HONDA_PARAM_RADARLESS = 8;
@@ -359,6 +341,11 @@ static safety_config honda_bosch_init(uint16_t param) {
     HONDA_COMMON_RX_CHECKS(1)
   };
 
+  // Nidec and bosch radarless has the powertrain bus on bus 0
+  static RxCheck honda_bosch_radarless_rx_checks[] = {
+    HONDA_COMMON_RX_CHECKS(0)
+  };
+
   honda_hw = HONDA_BOSCH;
   honda_brake_switch_prev = false;
   honda_bosch_radarless = GET_FLAG(param, HONDA_PARAM_RADARLESS);
@@ -375,7 +362,7 @@ static safety_config honda_bosch_init(uint16_t param) {
   if (honda_bosch_radarless && honda_alt_brake_msg) {
     SET_RX_CHECKS(honda_common_alt_brake_rx_checks, ret);
   } else if (honda_bosch_radarless) {
-    SET_RX_CHECKS(honda_common_rx_checks, ret);
+    SET_RX_CHECKS(honda_bosch_radarless_rx_checks, ret);
   } else if (honda_alt_brake_msg) {
     SET_RX_CHECKS(honda_bosch_alt_brake_rx_checks, ret);
   } else {
@@ -398,46 +385,33 @@ static safety_config honda_bosch_init(uint16_t param) {
   return ret;
 }
 
-static int honda_nidec_fwd_hook(int bus_num, int addr) {
+static bool honda_nidec_fwd_hook(int bus_num, int addr) {
   // fwd from car to camera. also fwd certain msgs from camera to car
   // 0xE4 is steering on all cars except CRV and RDX, 0x194 for CRV and RDX,
   // 0x1FA is brake control, 0x30C is acc hud, 0x33D is lkas hud
-  int bus_fwd = -1;
-
-  if (bus_num == 0) {
-    bus_fwd = 2;
-  }
+  bool block_msg = false;
 
   if (bus_num == 2) {
     // block stock lkas messages and stock acc messages (if OP is doing ACC)
     bool is_lkas_msg = (addr == 0xE4) || (addr == 0x194) || (addr == 0x33D);
     bool is_acc_hud_msg = addr == 0x30C;
     bool is_brake_msg = addr == 0x1FA;
-    bool block_fwd = is_lkas_msg || is_acc_hud_msg || (is_brake_msg && !honda_fwd_brake);
-    if (!block_fwd) {
-      bus_fwd = 0;
-    }
+    block_msg = is_lkas_msg || is_acc_hud_msg || (is_brake_msg && !honda_fwd_brake);
   }
 
-  return bus_fwd;
+  return block_msg;
 }
 
-static int honda_bosch_fwd_hook(int bus_num, int addr) {
-  int bus_fwd = -1;
+static bool honda_bosch_fwd_hook(int bus_num, int addr) {
+  bool block_msg = false;
 
-  if (bus_num == 0) {
-    bus_fwd = 2;
-  }
   if (bus_num == 2)  {
     bool is_lkas_msg = (addr == 0xE4) || (addr == 0xE5) || (addr == 0x33D) || (addr == 0x33DA) || (addr == 0x33DB);
     bool is_acc_msg = ((addr == 0x1C8) || (addr == 0x30C)) && honda_bosch_radarless && honda_bosch_long;
-    bool block_msg = is_lkas_msg || is_acc_msg;
-    if (!block_msg) {
-      bus_fwd = 0;
-    }
+    block_msg = is_lkas_msg || is_acc_msg;
   }
 
-  return bus_fwd;
+  return block_msg;
 }
 
 const safety_hooks honda_nidec_hooks = {
