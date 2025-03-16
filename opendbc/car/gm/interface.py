@@ -5,7 +5,9 @@ from math import fabs, exp
 from opendbc.car import get_safety_config, get_friction, structs
 from opendbc.car.common.basedir import BASEDIR
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.gm.radar_interface import RADAR_HEADER_MSG
+from opendbc.car.gm.carcontroller import CarController
+from opendbc.car.gm.carstate import CarState
+from opendbc.car.gm.radar_interface import RadarInterface, RADAR_HEADER_MSG
 from opendbc.car.gm.values import CAR, CarControllerParams, EV_CAR, CAMERA_ACC_CAR, SDGM_CAR, ALT_ACCS, CanBus, GMSafetyFlags
 from opendbc.car.interfaces import CarInterfaceBase, TorqueFromLateralAccelCallbackType, FRICTION_THRESHOLD, LatControlInputs, NanoFFModel
 
@@ -22,6 +24,10 @@ NEURAL_PARAMS_PATH = os.path.join(BASEDIR, 'torque_data/neural_ff_weights.json')
 
 
 class CarInterface(CarInterfaceBase):
+  CarState = CarState
+  CarController = CarController
+  RadarInterface = RadarInterface
+
   @staticmethod
   def get_pid_accel_limits(CP, current_speed, cruise_speed):
     return CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX
@@ -87,6 +93,7 @@ class CarInterface(CarInterfaceBase):
 
     if candidate in EV_CAR:
       ret.transmissionType = TransmissionType.direct
+      ret.safetyConfigs[0].safetyParam |= GMSafetyFlags.EV.value
     else:
       ret.transmissionType = TransmissionType.automatic
 

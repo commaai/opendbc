@@ -8,17 +8,20 @@
 #define GET_FLAG(value, mask) (((__typeof__(mask))(value) & (mask)) == (mask)) // cppcheck-suppress misra-c2012-1.2; allow __typeof__
 
 #define BUILD_SAFETY_CFG(rx, tx) ((safety_config){(rx), (sizeof((rx)) / sizeof((rx)[0])), \
-                                                  (tx), (sizeof((tx)) / sizeof((tx)[0]))})
+                                                  (tx), (sizeof((tx)) / sizeof((tx)[0])), \
+                                                  false})
 #define SET_RX_CHECKS(rx, config) \
   do { \
     (config).rx_checks = (rx); \
     (config).rx_checks_len = sizeof((rx)) / sizeof((rx)[0]); \
+    (config).disable_forwarding = false; \
   } while (0);
 
 #define SET_TX_MSGS(tx, config) \
   do { \
     (config).tx_msgs = (tx); \
     (config).tx_msgs_len = sizeof((tx)) / sizeof((tx)[0]); \
+    (config).disable_forwarding = false; \
   } while(0);
 
 #define UPDATE_VEHICLE_SPEED(val_ms) (update_sample(&vehicle_speed, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
@@ -29,7 +32,7 @@ extern const int MAX_WRONG_COUNTERS;
 #define MAX_ADDR_CHECK_MSGS 3U
 #define MAX_SAMPLE_VALS 6
 // used to represent floating point vehicle speed in a sample_t
-#define VEHICLE_SPEED_FACTOR 100.0
+#define VEHICLE_SPEED_FACTOR 1000.0
 
 
 // sample struct that keeps 6 samples in memory
@@ -49,6 +52,7 @@ typedef struct {
   int addr;
   int bus;
   int len;
+  bool check_relay;
 } CanMsg;
 
 typedef enum {
@@ -78,17 +82,22 @@ typedef struct {
   const int max_invalid_request_frames;
   const uint32_t min_valid_request_rt_interval;
   const bool has_steer_req_tolerance;
+} TorqueSteeringLimits;
 
-  // angle cmd limits
+typedef struct {
+  // angle cmd limits (also used by curvature control cars)
+  const int max_angle;
+
   const float angle_deg_to_can;
   const struct lookup_t angle_rate_up_lookup;
   const struct lookup_t angle_rate_down_lookup;
   const int max_angle_error;             // used to limit error between meas and cmd while enabled
   const float angle_error_min_speed;     // minimum speed to start limiting angle error
 
+  const bool angle_is_curvature;         // if true, we can apply max lateral acceleration limits
   const bool enforce_angle_error;        // enables max_angle_error check
   const bool inactive_angle_is_zero;     // if false, enforces angle near meas when disabled (default)
-} SteeringLimits;
+} AngleSteeringLimits;
 
 typedef struct {
   // acceleration cmd limits
@@ -116,10 +125,11 @@ typedef struct {
   const int addr;
   const int bus;
   const int len;
-  const bool check_checksum;         // true is checksum check is performed
+  const bool ignore_checksum;        // checksum check is not performed when set to true
+  const bool ignore_counter;         // counter check is not performed when set to true
   const uint8_t max_counter;         // maximum value of the counter. 0 means that the counter check is skipped
   const bool quality_flag;           // true is quality flag check is performed
-  const uint32_t frequency;      // expected frequency of the message [Hz]
+  const uint32_t frequency;          // expected frequency of the message [Hz]
 } CanMsgCheck;
 
 typedef struct {
@@ -145,6 +155,7 @@ typedef struct {
   int rx_checks_len;
   const CanMsg *tx_msgs;
   int tx_msgs_len;
+  bool disable_forwarding;
 } safety_config;
 
 typedef uint32_t (*get_checksum_t)(const CANPacket_t *to_push);
@@ -154,8 +165,8 @@ typedef bool (*get_quality_flag_valid_t)(const CANPacket_t *to_push);
 
 typedef safety_config (*safety_hook_init)(uint16_t param);
 typedef void (*rx_hook)(const CANPacket_t *to_push);
-typedef bool (*tx_hook)(const CANPacket_t *to_send);
-typedef int (*fwd_hook)(int bus_num, int addr);
+typedef bool (*tx_hook)(const CANPacket_t *to_send);  // returns true if the message is allowed
+typedef bool (*fwd_hook)(int bus_num, int addr);      // returns true if the message should be blocked from forwarding
 
 typedef struct {
   safety_hook_init init;
@@ -179,9 +190,9 @@ void gen_crc_lookup_table_8(uint8_t poly, uint8_t crc_lut[]);
 #ifdef CANFD
 void gen_crc_lookup_table_16(uint16_t poly, uint16_t crc_lut[]);
 #endif
-void generic_rx_checks(bool stock_ecu_detected);
-bool steer_torque_cmd_checks(int desired_torque, int steer_req, const SteeringLimits limits);
-bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const SteeringLimits limits);
+static void generic_rx_checks(bool stock_ecu_detected);
+bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueSteeringLimits limits);
+bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits);
 bool longitudinal_accel_checks(int desired_accel, const LongitudinalLimits limits);
 bool longitudinal_speed_checks(int desired_speed, const LongitudinalLimits limits);
 bool longitudinal_gas_checks(int desired_gas, const LongitudinalLimits limits);
