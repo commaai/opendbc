@@ -7,7 +7,7 @@ def calculate_checksum(dat: bytearray) -> int:
 def create_lka_steering(packer, frame: int, lat_active: bool, apply_angle: float):
   values = {
     'DRIVE': 1,
-    'COUNTER': (frame // 5) % 0x10,
+    'COUNTER': frame % 0x10,
     'CHECKSUM': 0,
     'STATUS': (frame % 3) + 2 if lat_active else 2, # Cycle status 2->3->4->2.. this keeps control active 2: READY, 3: AUTHORIZED, 4: ACTIVE
     'LXA_ACTIVATION': 1,
@@ -21,25 +21,82 @@ def create_lka_steering(packer, frame: int, lat_active: bool, apply_angle: float
   return packer.make_can_msg('LANE_KEEP_ASSIST', 0, values)
 
 
-# 50 Hz
+# Radar, 50 Hz
 def create_HS2_DYN1_MDD_ETAT_2B6(packer, frame: int, accel: float, enabled: bool):
-  # TODO
-  pass
+  values = {
+    'MDD_DESIRED_DECELERATION': 2.05, # m/s²
+    'POTENTIAL_WHEEL_TORQUE_REQUEST': 1, # TODO
+    'MIN_TIME_FOR_DESIRED_GEAR': 6.2,
+    'GMP_POTENTIAL_WHEEL_TORQUE': 0, # TODO
+    'ACC_STATUS': 1, # TODO
+    'GMP_WHEEL_TORQUE': 0, # TODO
+    'WHEEL_TORQUE_REQUEST': 0,
+    'AUTO_BRAKING_STATUS': 6,
+    'MDD_DECEL_TYPE': 0,
+    'MDD_DECEL_CONTROL_REQ': 0,
+    'GEAR_TYPE': frame % 1, #0,1,0,1...
+    'PREFILL_REQUEST': 0,
+    'DYN_ACC_CHECKSUM': 0,
+    'DYN_ACC_PROCESS_COUNTER': frame % 0x10,
+  }
 
-# 50 Hz
+  msg = packer.make_can_msg('HS2_DYN1_MDD_ETAT_2B6', 0, values)[1]
+  values['DYN_ACC_CHECKSUM'] = calculate_checksum(msg)
+
+  return packer.make_can_msg('HS2_DYN1_MDD_ETAT_2B6', 0, values)
+
+
+# Radar, 50 Hz
 def create_HS2_DYN_MDD_ETAT_2F6(packer, frame: int, accel: float, enabled: bool):
-  # TODO
-  pass
+  values = {
+    'TARGET_DETECTED': 1,
+    'REQUEST_TAKEOVER': 0,
+    'BLIND_SENSOR': 0,
+    'REQ_VISUAL_COLL_ALERT_ARC': 0,
+    'REQ_AUDIO_COLL_ALERT_ARC': 0,
+    'REQ_HAPTIC_COLL_ALERT_ARC': 0,
+    'INTER_VEHICLE_DISTANCE': 100, # TODO
+    'ARC_STATUS': 12,
+    'AUTO_BRAKING_IN_PROGRESS': 0,
+    'AEB_ENABLED': 0,
+    'DRIVE_AWAY_REQUEST': 0, # TODO: potential RESUME request?
+    'DISPLAY_INTERVEHICLE_TIME': 3.0, # TODO
+    'MDD_DECEL_CONTROL_REQ': 0,
+    'AUTO_BRAKING_STATUS': 1,
+    'CHECKSUM_TRANSM_DYN_ACC2': 0,
+    'PROCESS_COUNTER_4B_ACC2': frame % 0x10,
+    'TARGET_POSITION': 3,
+  }
 
-# 10 Hz
+  msg = packer.make_can_msg('HS2_DYN_MDD_ETAT_2F6', 0, values)[1]
+  values['CHECKSUM_TRANSM_DYN_ACC2'] = calculate_checksum(msg)
+
+  return packer.make_can_msg('HS2_DYN_MDD_ETAT_2F6', 0, values)
+
+
+# Radar, 10 Hz
 def create_HS2_DAT_ARTIV_V2_4F6(packer, frame: int, accel: float, enabled: bool):
-  # TODO
-  pass
+  values = {
+    'TIME_GAP': 3.0, # TODO sync with 2F6
+    'DISTANCE_GAP': 100, # TODO sync with 2F6
+    'RELATIVE_SPEED': 0.0,
+    'ARTIV_SENSOR_STATE': 2,
+    'TARGET_DETECTED': 1,
+    'ARTIV_TARGET_CHANGE_INFO': 1, # TODO
+    'TRAFFIC_DIRECTION': 0, # Right hand traffic
+  }
+  return packer.make_can_msg('HS2_DAT_ARTIV_V2_4F6', 0, values)
 
-# 1 Hz
+
+# Radar, 1 Hz
 def create_HS2_SUPV_ARTIV_796(packer, frame: int, accel: float, enabled: bool):
-  # TODO
-  pass
+  values = {
+    'FAULT_CODE': 0,
+    'STATUS_NO_CONFIG': 0,
+    'STATUS_PARTIAL_WAKEUP_GMP': 0,
+    'UCE_ELECTR_STATE': 0,
+  }
+  return packer.make_can_msg('HS2_SUPV_ARTIV_796', 0, values)
 
 
 def create_cancel_acc(packer, acc_status_msg, frame: int, cancel: bool):
