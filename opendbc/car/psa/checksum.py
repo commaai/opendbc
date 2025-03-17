@@ -2,52 +2,47 @@ import pandas as pd
 from opendbc.can.packer import CANPacker
 from opendbc.car.psa.psacan import calculate_checksum
 
-# PSA DBC name for your dataset
+# DBC and message settings for 3F2
 DBC_NAME = 'AEE2010_R3'
-MSG_NAME = 'HS2_DYN1_MDD_ETAT_2B6'
-CHECKSUM_FIELD = 'DYN_ACC_CHECKSUM'
-CHECKSUM_INIT = 0xC
-BUS = 1
+MSG_NAME = 'LANE_KEEP_ASSIST'
+CHECKSUM_FIELD = 'CHECKSUM'
+CHECKSUM_INIT = 0xB
+BUS = 2
 
 
 def recalculate_and_compare_checksums(csv_file: str, save_file: str = None):
     # Load the CSV data
     df = pd.read_csv(csv_file)
 
-    # Init CANPacker for PSA ADAS (or your specific DBC)
+    # Init CANPacker for PSA LKA (AEE2010_R3)
     packer = CANPacker(DBC_NAME)
 
-    # Statistics
+    # Statistics counters
     matches = 0
     mismatches = 0
 
     for idx, row in df.iterrows():
         # Build the dictionary of DBC values from the row
         values = {
-            'MDD_DESIRED_DECELERATION': row['MDD_DESIRED_DECELERATION'],
-            'POTENTIAL_WHEEL_TORQUE_REQUEST': row['POTENTIAL_WHEEL_TORQUE_REQUEST'],
-            'MIN_TIME_FOR_DESIRED_GEAR': row['MIN_TIME_FOR_DESIRED_GEAR'],
-            'GMP_POTENTIAL_WHEEL_TORQUE': row['GMP_POTENTIAL_WHEEL_TORQUE'],
-            'ACC_STATUS': row['ACC_STATUS'],
-            'GMP_WHEEL_TORQUE': row['GMP_WHEEL_TORQUE'],
-            'WHEEL_TORQUE_REQUEST': row['WHEEL_TORQUE_REQUEST'],
-            'AUTO_BRAKING_STATUS': row['AUTO_BRAKING_STATUS'],
-            'MDD_DECEL_TYPE': row['MDD_DECEL_TYPE'],
-            'MDD_DECEL_CONTROL_REQ': row['MDD_DECEL_CONTROL_REQ'],
-            'GEAR_TYPE': row['GEAR_TYPE'],
-            'PREFILL_REQUEST': row['PREFILL_REQUEST'],
-            'DYN_ACC_PROCESS_COUNTER': row['DYN_ACC_PROCESS_COUNTER'],
-            # Important: zero out checksum before packing
-            CHECKSUM_FIELD: 0,
+            'DRIVE': row['DRIVE'],
+            'COUNTER': row['COUNTER'],
+            CHECKSUM_FIELD: 0,  # Zero checksum for calculation
+            'STATUS': row['STATUS'],
+            'LXA_ACTIVATION': row['LXA_ACTIVATION'],
+            'TORQUE_FACTOR': row['TORQUE_FACTOR'],
+            'SET_ANGLE': row['SET_ANGLE'],
+            # Optional unknown fields if mapped in DBC
+            'unknown2': row['unknown2'],
+            'unknown4': row['unknown4'],
         }
 
-        # Pack the message to get raw bytes
+        # Pack the message to get raw bytes for checksum calculation
         msg_bytes = packer.make_can_msg(MSG_NAME, BUS, values)[1]
 
-        # Calculate the checksum
+        # Calculate checksum
         calculated_checksum = calculate_checksum(msg_bytes, CHECKSUM_INIT)
 
-        # Compare with the recorded checksum from CSV
+        # Compare recalculated checksum with recorded one
         recorded_checksum = row[CHECKSUM_FIELD]
 
         if calculated_checksum == recorded_checksum:
@@ -57,10 +52,10 @@ def recalculate_and_compare_checksums(csv_file: str, save_file: str = None):
             result = f"MISMATCH (Recorded: {recorded_checksum}, Calc: {calculated_checksum})"
             mismatches += 1
 
-        # Print result for each row
+        # Debug output
         print(f"Row {idx}: {result}")
 
-        # Optional: store the recalculated checksum in the DataFrame (for further analysis or saving)
+        # Store recalculated values in the dataframe
         df.at[idx, 'RECALCULATED_CHECKSUM'] = calculated_checksum
         df.at[idx, 'MATCH'] = (calculated_checksum == recorded_checksum)
 
@@ -79,4 +74,4 @@ def recalculate_and_compare_checksums(csv_file: str, save_file: str = None):
 
 if __name__ == "__main__":
     # Example usage
-    updated_df = recalculate_and_compare_checksums("2b6.csv", save_file="2b6_compared.csv")
+    updated_df = recalculate_and_compare_checksums("3f2.csv", save_file="3f2_compared.csv")
