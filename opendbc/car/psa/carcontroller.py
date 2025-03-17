@@ -30,31 +30,17 @@ class CarController(CarControllerBase):
 
 
     ### longitudinal control ###
-    # TODO: try to use disable_ecu method, and find other method for self.frame>550
-    # disable radar
-    if self.radar_disabled == 0 and self.frame>150:
+    # TODO: disable_ecu not working - UDS communication control not supported by radar ECU.
+    # disable radar ECU by setting to programming mode
+    if self.radar_disabled == 0:
       can_sends.append(create_disable_radar())
       self.radar_disabled = 1
 
-
+    # keep radar ECU disabled by sending tester present
     if self.frame % 100 == 0:
       can_sends.append(make_tester_present_msg(0x6b6, 1, suppress_response=False))
 
-    # ECU Signals that are disabled when ARTIV (radar) is inactive
-    # HS2_SUPV_ARTIV_796 (ARTIV, 1 Hz, bus 1)
-    # HS2_DAT_ARTIV_V2_4F6 (ARTIV, 8-10 Hz, bus 1)
-    # HS2_DYN1_MDD_ETAT_2B6 (ARTIV, 50 Hz, bus 1)
-    # HS2_DYN_MDD_ETAT_2F6 (ARTIV, 50 Hz, bus 1)
-
-    # Check ACC-related Signals:
-    # HS2_DAT_MDD_CMD_452
-    # HS2_DYN_UCF_MDD_32D
-    # HS2_DAT_CLIM_50E # potential ACC request?
-    # HS2_DYN_CMM_318
-    # HS2_DYN_HCU1_2D8
-
     #TODO: integrate self.CP.openpilotLongitudinalControl
-    # if CC.longActive:
     if self.frame % 2 == 0: # 50 Hz
       can_sends.append(create_HS2_DYN1_MDD_ETAT_2B6(self.packer, self.frame // 2, actuators.accel, CC.longActive))
       can_sends.append(create_HS2_DYN_MDD_ETAT_2F6(self.packer, self.frame // 2, actuators.accel, CC.longActive))
@@ -65,10 +51,11 @@ class CarController(CarControllerBase):
     if self.frame % 100 == 0: # 1 Hz
       can_sends.append(create_HS2_SUPV_ARTIV_796(self.packer, self.frame, actuators.accel, CC.longActive))
 
-
+    # TODO test
     # if CC.cruiseControl.cancel:
     #   can_sends.append(create_cancel_acc(self.packer, self.frame, CS.acc_status_msg, CC.cruiseControl.cancel))
 
+    # TODO test
     # if CC.cruiseControl.resume:
     #   can_sends.append(create_resume_acc(self.packer, self.frame, CS.adas_status_msg, CC.cruiseControl.resume))
 
