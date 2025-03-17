@@ -2,11 +2,11 @@ import pandas as pd
 from opendbc.can.packer import CANPacker
 from opendbc.car.psa.psacan import calculate_checksum
 
-# PSA DBC for the radar messages on bus 1
+# PSA DBC name for your dataset
 DBC_NAME = 'AEE2010_R3'
-MSG_NAME = 'HS2_DYN_MDD_ETAT_2F6'
-CHECKSUM_FIELD = 'CHECKSUM_TRANSM_DYN_ACC2'
-CHECKSUM_INIT = 0x8
+MSG_NAME = 'HS2_DYN1_MDD_ETAT_2B6'
+CHECKSUM_FIELD = 'DYN_ACC_CHECKSUM'
+CHECKSUM_INIT = 0xC
 BUS = 1
 
 
@@ -14,7 +14,7 @@ def recalculate_and_compare_checksums(csv_file: str, save_file: str = None):
     # Load the CSV data
     df = pd.read_csv(csv_file)
 
-    # Init CANPacker for PSA ADAS
+    # Init CANPacker for PSA ADAS (or your specific DBC)
     packer = CANPacker(DBC_NAME)
 
     # Statistics
@@ -24,22 +24,19 @@ def recalculate_and_compare_checksums(csv_file: str, save_file: str = None):
     for idx, row in df.iterrows():
         # Build the dictionary of DBC values from the row
         values = {
-            'TARGET_DETECTED': row['TARGET_DETECTED'],
-            'REQUEST_TAKEOVER': row['REQUEST_TAKEOVER'],
-            'BLIND_SENSOR': row['BLIND_SENSOR'],
-            'REQ_VISUAL_COLL_ALERT_ARC': row['REQ_VISUAL_COLL_ALERT_ARC'],
-            'REQ_AUDIO_COLL_ALERT_ARC': row['REQ_AUDIO_COLL_ALERT_ARC'],
-            'REQ_HAPTIC_COLL_ALERT_ARC': row['REQ_HAPTIC_COLL_ALERT_ARC'],
-            'INTER_VEHICLE_DISTANCE': row['INTER_VEHICLE_DISTANCE'],
-            'ARC_STATUS': row['ARC_STATUS'],
-            'AUTO_BRAKING_IN_PROGRESS': row['AUTO_BRAKING_IN_PROGRESS'],
-            'AEB_ENABLED': row['AEB_ENABLED'],
-            'DRIVE_AWAY_REQUEST': row['DRIVE_AWAY_REQUEST'],
-            'DISPLAY_INTERVEHICLE_TIME': row['DISPLAY_INTERVEHICLE_TIME'],
-            'MDD_DECEL_CONTROL_REQ': row['MDD_DECEL_CONTROL_REQ'],
+            'MDD_DESIRED_DECELERATION': row['MDD_DESIRED_DECELERATION'],
+            'POTENTIAL_WHEEL_TORQUE_REQUEST': row['POTENTIAL_WHEEL_TORQUE_REQUEST'],
+            'MIN_TIME_FOR_DESIRED_GEAR': row['MIN_TIME_FOR_DESIRED_GEAR'],
+            'GMP_POTENTIAL_WHEEL_TORQUE': row['GMP_POTENTIAL_WHEEL_TORQUE'],
+            'ACC_STATUS': row['ACC_STATUS'],
+            'GMP_WHEEL_TORQUE': row['GMP_WHEEL_TORQUE'],
+            'WHEEL_TORQUE_REQUEST': row['WHEEL_TORQUE_REQUEST'],
             'AUTO_BRAKING_STATUS': row['AUTO_BRAKING_STATUS'],
-            'PROCESS_COUNTER_4B_ACC2': row['PROCESS_COUNTER_4B_ACC2'],
-            'TARGET_POSITION': row['TARGET_POSITION'],
+            'MDD_DECEL_TYPE': row['MDD_DECEL_TYPE'],
+            'MDD_DECEL_CONTROL_REQ': row['MDD_DECEL_CONTROL_REQ'],
+            'GEAR_TYPE': row['GEAR_TYPE'],
+            'PREFILL_REQUEST': row['PREFILL_REQUEST'],
+            'DYN_ACC_PROCESS_COUNTER': row['DYN_ACC_PROCESS_COUNTER'],
             # Important: zero out checksum before packing
             CHECKSUM_FIELD: 0,
         }
@@ -82,4 +79,4 @@ def recalculate_and_compare_checksums(csv_file: str, save_file: str = None):
 
 if __name__ == "__main__":
     # Example usage
-    updated_df = recalculate_and_compare_checksums("2f6.csv", save_file="2f6_compared.csv")
+    updated_df = recalculate_and_compare_checksums("2b6.csv", save_file="2b6_compared.csv")
