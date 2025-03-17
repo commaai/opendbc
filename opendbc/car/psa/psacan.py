@@ -23,7 +23,7 @@ def create_HS2_DYN1_MDD_ETAT_2B6(packer, frame: int, accel: float, enabled: bool
   }
 
   msg = packer.make_can_msg('HS2_DYN1_MDD_ETAT_2B6', 1, values)[1]
-  values['DYN_ACC_CHECKSUM'] = calculate_checksum(msg, 0x3)
+  values['DYN_ACC_CHECKSUM'] = calculate_checksum(msg, 0xC)
 
   return packer.make_can_msg('HS2_DYN1_MDD_ETAT_2B6', 1, values)
 
@@ -100,7 +100,7 @@ def create_lka_steering(packer, frame: int, lat_active: bool, apply_angle: float
 #   }
 
 #   msg = packer.make_can_msg('HS2_DYN1_MDD_ETAT_2B6', 1, values)[1]
-#   values['DYN_ACC_CHECKSUM'] = calculate_checksum(msg, 0x3)
+#   values['DYN_ACC_CHECKSUM'] = calculate_checksum(msg, 0xC)
 
 #   return packer.make_can_msg('HS2_DYN1_MDD_ETAT_2B6', 1, values)
 
