@@ -1,7 +1,6 @@
-def calculate_checksum(dat: bytearray) -> int:
+def calculate_checksum(dat: bytearray, chk_ini: int) -> int:
   checksum = sum((b >> 4) + (b & 0xF) for b in dat)
-  # CHK_INI = 0xB
-  return (0xB - checksum) & 0xF
+  return (chk_ini - checksum) & 0xF
 
 
 # Radar, 50 Hz
@@ -24,7 +23,7 @@ def create_HS2_DYN1_MDD_ETAT_2B6(packer, frame: int, accel: float, enabled: bool
   }
 
   msg = packer.make_can_msg('HS2_DYN1_MDD_ETAT_2B6', 1, values)[1]
-  values['DYN_ACC_CHECKSUM'] = calculate_checksum(msg)
+  values['DYN_ACC_CHECKSUM'] = calculate_checksum(msg, 0x3)
 
   return packer.make_can_msg('HS2_DYN1_MDD_ETAT_2B6', 1, values)
 
@@ -52,7 +51,7 @@ def create_HS2_DYN_MDD_ETAT_2F6(packer, frame: int, accel: float, enabled: bool)
   }
 
   msg = packer.make_can_msg('HS2_DYN_MDD_ETAT_2F6', 1, values)[1]
-  values['CHECKSUM_TRANSM_DYN_ACC2'] = calculate_checksum(msg)
+  values['CHECKSUM_TRANSM_DYN_ACC2'] = calculate_checksum(msg, 0x7)
 
   return packer.make_can_msg('HS2_DYN_MDD_ETAT_2F6', 1, values)
 
@@ -76,7 +75,7 @@ def create_lka_steering(packer, frame: int, lat_active: bool, apply_angle: float
   }
 
   msg = packer.make_can_msg('LANE_KEEP_ASSIST', 0, values)[1]
-  values['CHECKSUM'] = calculate_checksum(msg)
+  values['CHECKSUM'] = calculate_checksum(msg, 0xB)
 
   return packer.make_can_msg('LANE_KEEP_ASSIST', 0, values)
 
@@ -101,7 +100,7 @@ def create_lka_steering(packer, frame: int, lat_active: bool, apply_angle: float
 #   }
 
 #   msg = packer.make_can_msg('HS2_DYN1_MDD_ETAT_2B6', 1, values)[1]
-#   values['DYN_ACC_CHECKSUM'] = calculate_checksum(msg)
+#   values['DYN_ACC_CHECKSUM'] = calculate_checksum(msg, 0x3)
 
 #   return packer.make_can_msg('HS2_DYN1_MDD_ETAT_2B6', 1, values)
 
@@ -129,7 +128,7 @@ def create_lka_steering(packer, frame: int, lat_active: bool, apply_angle: float
 #   }
 
 #   msg = packer.make_can_msg('HS2_DYN_MDD_ETAT_2F6', 1, values)[1]
-#   values['CHECKSUM_TRANSM_DYN_ACC2'] = calculate_checksum(msg)
+#     values['CHECKSUM_TRANSM_DYN_ACC2'] = calculate_checksum(msg, 0x7)
 
 #   return packer.make_can_msg('HS2_DYN_MDD_ETAT_2F6', 1, values)
 
@@ -218,6 +217,6 @@ def create_resume_acc(packer, adas_status_msg, frame: int, resume: bool):
 
   values['DYN_ACC2_FRAME_CHECKSUM'] = 0
   msg = packer.make_can_msg('HS2_DYN_MDD_ETAT_2F6', 1, values)[1]
-  values['DYN_ACC2_FRAME_CHECKSUM'] = calculate_checksum(msg)
+  values['CHECKSUM_TRANSM_DYN_ACC2'] = calculate_checksum(msg, 0x7)
 
   return packer.make_can_msg('HS2_DYN_MDD_ETAT_2F6', 1, values)
