@@ -56,12 +56,10 @@ class RadarInterface(RadarInterfaceBase):
     fault = header['FLRRSnsrBlckd'] or header['FLRRSnstvFltPrsntInt'] or \
       header['FLRRYawRtPlsblityFlt'] or header['FLRRHWFltPrsntInt'] or \
       header['FLRRAntTngFltPrsnt'] or header['FLRRAlgnFltPrsnt']
-    errors = []
     if not self.rcp.can_valid:
-      errors.append("canError")
+      ret.errors.canError = True
     if fault:
-      errors.append("fault")
-    ret.errors = errors
+      ret.errors.radarFault = True
 
     currentTargets = set()
     num_targets = header['FLRRNumValidTargets']
