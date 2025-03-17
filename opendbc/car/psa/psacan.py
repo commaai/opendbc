@@ -4,6 +4,66 @@ def calculate_checksum(dat: bytearray) -> int:
   return (0xB - checksum) & 0xF
 
 
+# Radar, 50 Hz
+def create_HS2_DYN1_MDD_ETAT_2B6(packer, frame: int, accel: float, enabled: bool):
+  values = {
+    'MDD_DESIRED_DECELERATION': -10.65,
+    'POTENTIAL_WHEEL_TORQUE_REQUEST': 2,
+    'MIN_TIME_FOR_DESIRED_GEAR': 0.0,
+    'GMP_POTENTIAL_WHEEL_TORQUE': -4000,
+    'ACC_STATUS': 4,
+    'GMP_WHEEL_TORQUE': -4000,
+    'WHEEL_TORQUE_REQUEST': 0,
+    'AUTO_BRAKING_STATUS': 3,
+    'MDD_DECEL_TYPE': 1,
+    'MDD_DECEL_CONTROL_REQ': 1,
+    'GEAR_TYPE': 0,
+    'PREFILL_REQUEST': 0,
+    'DYN_ACC_CHECKSUM': 0,
+    'DYN_ACC_PROCESS_COUNTER': frame % 0x10,
+  }
+
+  msg = packer.make_can_msg('HS2_DYN1_MDD_ETAT_2B6', 1, values)[1]
+  values['DYN_ACC_CHECKSUM'] = calculate_checksum(msg)
+
+  return packer.make_can_msg('HS2_DYN1_MDD_ETAT_2B6', 1, values)
+
+
+# Radar, 50 Hz
+def create_HS2_DYN_MDD_ETAT_2F6(packer, frame: int, accel: float, enabled: bool):
+  values = {
+    'TARGET_DETECTED': 1,
+    'REQUEST_TAKEOVER': 0, # TODO potential signal for HUD message from OP
+    'BLIND_SENSOR': 0,
+    'REQ_VISUAL_COLL_ALERT_ARC': 0,
+    'REQ_AUDIO_COLL_ALERT_ARC': 0,
+    'REQ_HAPTIC_COLL_ALERT_ARC': 0,
+    'INTER_VEHICLE_DISTANCE': 3.5,
+    'ARC_STATUS': 6,
+    'AUTO_BRAKING_IN_PROGRESS': 0,
+    'AEB_ENABLED': 0,
+    'DRIVE_AWAY_REQUEST': 0,
+    'DISPLAY_INTERVEHICLE_TIME': 6.1,
+    'MDD_DECEL_CONTROL_REQ': 1,
+    'AUTO_BRAKING_STATUS': 3,
+    'CHECKSUM_TRANSM_DYN_ACC2': 0,
+    'PROCESS_COUNTER_4B_ACC2': frame % 0x10,
+    'TARGET_POSITION': 2,
+  }
+
+  msg = packer.make_can_msg('HS2_DYN_MDD_ETAT_2F6', 1, values)[1]
+  values['CHECKSUM_TRANSM_DYN_ACC2'] = calculate_checksum(msg)
+
+  return packer.make_can_msg('HS2_DYN_MDD_ETAT_2F6', 1, values)
+
+
+
+
+
+
+
+
+
 def create_lka_steering(packer, frame: int, lat_active: bool, apply_angle: float):
   values = {
     'DRIVE': 1,
@@ -21,57 +81,57 @@ def create_lka_steering(packer, frame: int, lat_active: bool, apply_angle: float
   return packer.make_can_msg('LANE_KEEP_ASSIST', 0, values)
 
 
-# Radar, 50 Hz
-def create_HS2_DYN1_MDD_ETAT_2B6(packer, frame: int, accel: float, enabled: bool):
-  values = {
-    'MDD_DESIRED_DECELERATION': accel if enabled else 2.05, # m/s²
-    'POTENTIAL_WHEEL_TORQUE_REQUEST': accel if enabled else 0,
-    'MIN_TIME_FOR_DESIRED_GEAR': 0 if enabled else 6.2,
-    'GMP_POTENTIAL_WHEEL_TORQUE': 100 if enabled else -4000,
-    'ACC_STATUS': 4 if enabled else 3,
-    'GMP_WHEEL_TORQUE': 100 if enabled else -4000, # TODO
-    'WHEEL_TORQUE_REQUEST': 1 if enabled else 0,
-    'AUTO_BRAKING_STATUS': 6,
-    'MDD_DECEL_TYPE': 1 if accel < 0 else 0,
-    'MDD_DECEL_CONTROL_REQ': 1 if accel < 0 else 0,
-    'GEAR_TYPE': frame % 2, #0,1,0,1...
-    'PREFILL_REQUEST': 0,
-    'DYN_ACC_CHECKSUM': 0,
-    'DYN_ACC_PROCESS_COUNTER': frame % 0x10,
-  }
+# # Radar, 50 Hz
+# def create_HS2_DYN1_MDD_ETAT_2B6(packer, frame: int, accel: float, enabled: bool):
+#   values = {
+#     'MDD_DESIRED_DECELERATION': accel if enabled else 2.05, # m/s²
+#     'POTENTIAL_WHEEL_TORQUE_REQUEST': accel if enabled else 0,
+#     'MIN_TIME_FOR_DESIRED_GEAR': 0.0 if enabled else 6.2,
+#     'GMP_POTENTIAL_WHEEL_TORQUE': 100 if enabled else -4000,
+#     'ACC_STATUS': 4 if enabled else 3,
+#     'GMP_WHEEL_TORQUE': 100 if enabled else -4000, # TODO
+#     'WHEEL_TORQUE_REQUEST': 1 if enabled else 0,
+#     'AUTO_BRAKING_STATUS': 6,
+#     'MDD_DECEL_TYPE': 1 if accel < 0 else 0,
+#     'MDD_DECEL_CONTROL_REQ': 1 if accel < 0 else 0,
+#     'GEAR_TYPE': frame % 2, #0,1,0,1...
+#     'PREFILL_REQUEST': 0,
+#     'DYN_ACC_CHECKSUM': 0,
+#     'DYN_ACC_PROCESS_COUNTER': frame % 0x10,
+#   }
 
-  msg = packer.make_can_msg('HS2_DYN1_MDD_ETAT_2B6', 1, values)[1]
-  values['DYN_ACC_CHECKSUM'] = calculate_checksum(msg)
+#   msg = packer.make_can_msg('HS2_DYN1_MDD_ETAT_2B6', 1, values)[1]
+#   values['DYN_ACC_CHECKSUM'] = calculate_checksum(msg)
 
-  return packer.make_can_msg('HS2_DYN1_MDD_ETAT_2B6', 1, values)
+#   return packer.make_can_msg('HS2_DYN1_MDD_ETAT_2B6', 1, values)
 
 
-# Radar, 50 Hz
-def create_HS2_DYN_MDD_ETAT_2F6(packer, frame: int, accel: float, enabled: bool):
-  values = {
-    'TARGET_DETECTED': 1 if enabled else 0,
-    'REQUEST_TAKEOVER': 0, # TODO potential signal for HUD message from OP
-    'BLIND_SENSOR': 0,
-    'REQ_VISUAL_COLL_ALERT_ARC': 0,
-    'REQ_AUDIO_COLL_ALERT_ARC': 0,
-    'REQ_HAPTIC_COLL_ALERT_ARC': 0,
-    'INTER_VEHICLE_DISTANCE': 100 if enabled else 255.5, # TODO
-    'ARC_STATUS': 12 if enabled else 11,
-    'AUTO_BRAKING_IN_PROGRESS': 0,
-    'AEB_ENABLED': 0,
-    'DRIVE_AWAY_REQUEST': 0, # TODO: potential RESUME request?
-    'DISPLAY_INTERVEHICLE_TIME': 3.0 if enabled else 6.2, # TODO
-    'MDD_DECEL_CONTROL_REQ': 1 if accel < 0 else 0,
-    'AUTO_BRAKING_STATUS': 6 if enabled else 3,
-    'CHECKSUM_TRANSM_DYN_ACC2': 0,
-    'PROCESS_COUNTER_4B_ACC2': frame % 0x10,
-    'TARGET_POSITION': 4,
-  }
+# # Radar, 50 Hz
+# def create_HS2_DYN_MDD_ETAT_2F6(packer, frame: int, accel: float, enabled: bool):
+#   values = {
+#     'TARGET_DETECTED': 1 if enabled else 0,
+#     'REQUEST_TAKEOVER': 0, # TODO potential signal for HUD message from OP
+#     'BLIND_SENSOR': 0,
+#     'REQ_VISUAL_COLL_ALERT_ARC': 0,
+#     'REQ_AUDIO_COLL_ALERT_ARC': 0,
+#     'REQ_HAPTIC_COLL_ALERT_ARC': 0,
+#     'INTER_VEHICLE_DISTANCE': 100 if enabled else 255.5, # TODO
+#     'ARC_STATUS': 12 if enabled else 11,
+#     'AUTO_BRAKING_IN_PROGRESS': 0,
+#     'AEB_ENABLED': 0,
+#     'DRIVE_AWAY_REQUEST': 0, # TODO: potential RESUME request?
+#     'DISPLAY_INTERVEHICLE_TIME': 3.0 if enabled else 6.2, # TODO
+#     'MDD_DECEL_CONTROL_REQ': 1 if accel < 0 else 0,
+#     'AUTO_BRAKING_STATUS': 6 if enabled else 3,
+#     'CHECKSUM_TRANSM_DYN_ACC2': 0,
+#     'PROCESS_COUNTER_4B_ACC2': frame % 0x10,
+#     'TARGET_POSITION': 4,
+#   }
 
-  msg = packer.make_can_msg('HS2_DYN_MDD_ETAT_2F6', 1, values)[1]
-  values['CHECKSUM_TRANSM_DYN_ACC2'] = calculate_checksum(msg)
+#   msg = packer.make_can_msg('HS2_DYN_MDD_ETAT_2F6', 1, values)[1]
+#   values['CHECKSUM_TRANSM_DYN_ACC2'] = calculate_checksum(msg)
 
-  return packer.make_can_msg('HS2_DYN_MDD_ETAT_2F6', 1, values)
+#   return packer.make_can_msg('HS2_DYN_MDD_ETAT_2F6', 1, values)
 
 
 # Radar, 10 Hz
