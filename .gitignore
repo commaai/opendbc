@@ -25,3 +25,6 @@ opendbc/can/parser_pyx.cpp
 opendbc/can/packer_pyx.html
 opendbc/can/parser_pyx.html
 opendbc/dbc/*_generated.dbc
+
+cppcheck-addon-ctu-file-list
+opendbc/safety/tests/coverage-out

@@ -11,6 +11,7 @@ env = Environment(
   CC=CC,
   CFLAGS=[
     '-Wall',
+    "-Wextra",
     '-Werror',
     '-nostdlib',
     '-fno-builtin',
