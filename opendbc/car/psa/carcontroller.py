@@ -4,17 +4,6 @@ from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.psa import psacan
 from opendbc.car.psa.psacan import *
 from opendbc.car.psa.values import CarControllerParams
-from opendbc.car.can_definitions import CanData
-
-# TODO: do this in interface.py init()
-# Disable radar ECU by setting it to programming mode
-def create_disable_radar():
-  addr = 0x6B6
-  bus = 1
-  dat = [0x02, 0x10, 0x02, 0x80]
-  dat.extend([0x0] * (8 - len(dat)))
-
-  return CanData(addr, bytes(dat), bus)
 
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
