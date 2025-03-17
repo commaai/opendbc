@@ -27,7 +27,7 @@ def create_HS2_DYN1_MDD_ETAT_2B6(packer, frame: int, accel: float, enabled: bool
   # TODO: if gas pressed, ACC_STATUS is set to suspended and decel can be set negative (about -300 Nm / -0.6m/s²) with brake mode inactive
   # TODO: tune torque multiplier
   # TODO: check difference between GMP_POTENTIAL_WHEEL_TORQUE and GMP_WHEEL_TORQUE
-  mult = 10
+  mult = 500
 
   values = {
     'MDD_DESIRED_DECELERATION': accel if accel < 0 and enabled else 2.05, # m/s²
