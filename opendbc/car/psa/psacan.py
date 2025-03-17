@@ -6,17 +6,17 @@ def calculate_checksum(dat: bytearray, chk_ini: int) -> int:
 # Radar, 50 Hz
 def create_HS2_DYN1_MDD_ETAT_2B6(packer, frame: int, accel: float, enabled: bool):
   values = {
-    'MDD_DESIRED_DECELERATION': -10.65,
-    'POTENTIAL_WHEEL_TORQUE_REQUEST': 2,
+    'MDD_DESIRED_DECELERATION': 2.05,
+    'POTENTIAL_WHEEL_TORQUE_REQUEST': 0,
     'MIN_TIME_FOR_DESIRED_GEAR': 0.0,
     'GMP_POTENTIAL_WHEEL_TORQUE': -4000,
-    'ACC_STATUS': 4,
+    'ACC_STATUS': 3,
     'GMP_WHEEL_TORQUE': -4000,
     'WHEEL_TORQUE_REQUEST': 0,
     'AUTO_BRAKING_STATUS': 3,
-    'MDD_DECEL_TYPE': 1,
-    'MDD_DECEL_CONTROL_REQ': 1,
-    'GEAR_TYPE': 0,
+    'MDD_DECEL_TYPE': 0,
+    'MDD_DECEL_CONTROL_REQ': 0,
+    'GEAR_TYPE': frame % 2,
     'PREFILL_REQUEST': 0,
     'DYN_ACC_CHECKSUM': 0,
     'DYN_ACC_PROCESS_COUNTER': frame % 0x10,
@@ -31,23 +31,23 @@ def create_HS2_DYN1_MDD_ETAT_2B6(packer, frame: int, accel: float, enabled: bool
 # Radar, 50 Hz
 def create_HS2_DYN_MDD_ETAT_2F6(packer, frame: int, accel: float, enabled: bool):
   values = {
-    'TARGET_DETECTED': 1,
-    'REQUEST_TAKEOVER': 0, # TODO potential signal for HUD message from OP
+    'TARGET_DETECTED': 0,
+    'REQUEST_TAKEOVER': 0,
     'BLIND_SENSOR': 0,
     'REQ_VISUAL_COLL_ALERT_ARC': 0,
     'REQ_AUDIO_COLL_ALERT_ARC': 0,
     'REQ_HAPTIC_COLL_ALERT_ARC': 0,
-    'INTER_VEHICLE_DISTANCE': 3.5,
+    'INTER_VEHICLE_DISTANCE': 255.5,
     'ARC_STATUS': 6,
     'AUTO_BRAKING_IN_PROGRESS': 0,
     'AEB_ENABLED': 0,
     'DRIVE_AWAY_REQUEST': 0,
-    'DISPLAY_INTERVEHICLE_TIME': 6.1,
-    'MDD_DECEL_CONTROL_REQ': 1,
+    'DISPLAY_INTERVEHICLE_TIME': 6.2,
+    'MDD_DECEL_CONTROL_REQ': 0,
     'AUTO_BRAKING_STATUS': 3,
     'CHECKSUM_TRANSM_DYN_ACC2': 0,
     'PROCESS_COUNTER_4B_ACC2': frame % 0x10,
-    'TARGET_POSITION': 2,
+    'TARGET_POSITION': 4,
   }
 
   msg = packer.make_can_msg('HS2_DYN_MDD_ETAT_2F6', 1, values)[1]
