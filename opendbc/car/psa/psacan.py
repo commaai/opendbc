@@ -82,7 +82,7 @@ def create_HS2_DAT_ARTIV_V2_4F6(packer, frame: int, accel: float, enabled: bool)
     'RELATIVE_SPEED': 0.0 if enabled else 93.8,
     'ARTIV_SENSOR_STATE': 2,
     'TARGET_DETECTED': 1 if enabled else 0,
-    'ARTIV_TARGET_CHANGE_INFO': 0 if enabled else 1,
+    'ARTIV_TARGET_CHANGE_INFO': 0,
     'TRAFFIC_DIRECTION': 0, # Right hand traffic
   }
   return packer.make_can_msg('HS2_DAT_ARTIV_V2_4F6', 1, values)

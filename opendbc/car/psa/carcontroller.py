@@ -57,6 +57,13 @@ class CarController(CarControllerBase):
     # HS2_DYN1_MDD_ETAT_2B6 (ARTIV, 50 Hz, bus 1)
     # HS2_DYN_MDD_ETAT_2F6 (ARTIV, 50 Hz, bus 1)
 
+    # Check ACC-related Signals:
+    # HS2_DAT_MDD_CMD_452
+    # HS2_DYN_UCF_MDD_32D
+    # HS2_DAT_CLIM_50E # potential ACC request?
+    # HS2_DYN_CMM_318
+    # HS2_DYN_HCU1_2D8
+
     #TODO: integrate self.CP.openpilotLongitudinalControl
     # if CC.longActive:
     if self.frame % 2 == 0: # 50 Hz
