@@ -24,13 +24,18 @@ def create_lka_steering(packer, frame: int, lat_active: bool, apply_angle: float
 
 # Radar, 50 Hz
 def create_HS2_DYN1_MDD_ETAT_2B6(packer, frame: int, accel: float, enabled: bool):
+  # TODO: if gas pressed, ACC_STATUS is set to suspended and decel can be set negative (about -300 Nm / -0.6m/s²) with brake mode inactive
+  # TODO: tune torque multiplier
+  # TODO: check difference between GMP_POTENTIAL_WHEEL_TORQUE and GMP_WHEEL_TORQUE
+  mult = 10
+
   values = {
-    'MDD_DESIRED_DECELERATION': accel if enabled else 2.05, # m/s²
-    'POTENTIAL_WHEEL_TORQUE_REQUEST': accel if enabled else 0,
-    'MIN_TIME_FOR_DESIRED_GEAR': 0.0,
-    'GMP_POTENTIAL_WHEEL_TORQUE': 100 if enabled else -4000,
+    'MDD_DESIRED_DECELERATION': accel if accel < 0 and enabled else 2.05, # m/s²
+    'POTENTIAL_WHEEL_TORQUE_REQUEST': (2 if accel < 0 else 1) if enabled else 0,
+    'MIN_TIME_FOR_DESIRED_GEAR': 0.0 if not enabled or accel < 0 else 6.2,
+    'GMP_POTENTIAL_WHEEL_TORQUE': accel*mult if accel >= 0 and enabled else -4000,
     'ACC_STATUS': 4 if enabled else 3,
-    'GMP_WHEEL_TORQUE': 100 if enabled else -4000,
+    'GMP_WHEEL_TORQUE': accel*mult if accel >= 0 and enabled else -4000,
     'WHEEL_TORQUE_REQUEST': 1 if enabled else 0,
     'AUTO_BRAKING_STATUS': 6 if enabled else 3,
     'MDD_DECEL_TYPE': 1 if accel < 0 else 0,
@@ -56,7 +61,7 @@ def create_HS2_DYN_MDD_ETAT_2F6(packer, frame: int, accel: float, enabled: bool)
     'REQ_VISUAL_COLL_ALERT_ARC': 0,
     'REQ_AUDIO_COLL_ALERT_ARC': 0,
     'REQ_HAPTIC_COLL_ALERT_ARC': 0,
-    'INTER_VEHICLE_DISTANCE': 100 if enabled else 255.5,
+    'INTER_VEHICLE_DISTANCE': 50 if enabled else 255.5,
     'ARC_STATUS': 12 if enabled else 6,
     'AUTO_BRAKING_IN_PROGRESS': 0,
     'AEB_ENABLED': 0,
