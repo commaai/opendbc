@@ -61,7 +61,7 @@ def create_HS2_DYN_MDD_ETAT_2F6(packer, frame: int, enabled: bool, braking: bool
     'REQ_AUDIO_COLL_ALERT_ARC': 0,
     'REQ_HAPTIC_COLL_ALERT_ARC': 0,
     'INTER_VEHICLE_DISTANCE': 255.5, # TODO: <distance> if enabled else 255.5,
-    'ARC_STATUS': 12 if enabled else 6,
+    'ARC_STATUS': 12 if enabled else 6, # TODO: check for standstill value (6)
     'AUTO_BRAKING_IN_PROGRESS': 0,
     'AEB_ENABLED': 0,
     'DRIVE_AWAY_REQUEST': 0, # TODO: potential RESUME request?

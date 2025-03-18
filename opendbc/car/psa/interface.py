@@ -36,9 +36,10 @@ class CarInterface(CarInterfaceBase):
     # TODO: check where experimental_long is set
     # if experimental_long:
     ret.openpilotLongitudinalControl = True
+    ret.autoResumeSng = True
     # TODO: tune
     ret.startAccel = 1.0
-    ret.stopAccel = -1.0
+    ret.stopAccel = -10.65
     ret.vEgoStopping = 0.1
     ret.vEgoStarting = 0.1
     ret.stoppingDecelRate = 2.0
