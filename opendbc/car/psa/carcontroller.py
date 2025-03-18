@@ -44,13 +44,14 @@ class CarController(CarControllerBase):
     # TODO: tune torque multiplier
     # TODO: tune braking threshold
     torque = actuators.accel * 500
-    braking = torque < -200 and not CS.out.gasPressed # breaking threshold ~-200 Nm
+    braking = torque < -300 and not CS.out.gasPressed # breaking threshold ~-200 Nm
 
     if self.frame % 2 == 0: # 50 Hz
       can_sends.append(create_HS2_DYN1_MDD_ETAT_2B6(self.packer, self.frame // 2, actuators.accel, CC.longActive, CS.out.gasPressed, braking, torque))
       can_sends.append(create_HS2_DYN_MDD_ETAT_2F6(self.packer, self.frame // 2, CC.longActive, braking))
 
     if self.frame % 10 == 0: # 10 Hz
+      print(f"braking: {braking}, gasPressed: {CS.out.gasPressed}, torque: {torque}")
       can_sends.append(create_HS2_DAT_ARTIV_V2_4F6(self.packer, CC.longActive))
 
     if self.frame % 100 == 0: # 1 Hz
