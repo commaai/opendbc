@@ -51,7 +51,6 @@ class CarController(CarControllerBase):
       can_sends.append(create_HS2_DYN_MDD_ETAT_2F6(self.packer, self.frame // 2, CC.longActive, braking))
 
     if self.frame % 10 == 0: # 10 Hz
-      print(f"braking: {braking}, gasPressed: {CS.out.gasPressed}, torque: {torque}")
       can_sends.append(create_HS2_DAT_ARTIV_V2_4F6(self.packer, CC.longActive))
 
     if self.frame % 100 == 0: # 1 Hz
