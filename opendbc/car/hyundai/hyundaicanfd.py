@@ -137,7 +137,7 @@ def create_ccnc(packer, CAN, CP, CC, CS):
   if msg_161["ALERTS_3"] == 17:  # DRIVE_CAREFULLY
     msg_161["ALERTS_3"] = 0
 
-  if msg_161["ALERTS_5"] in (2, 4, 5):  # WATCH_FOR_SURROUNDING_VEHICLES, SMART_CRUISE_CONTROL_CONDITIONS_NOT_MET, USE_SWITCH_OR_PEDAL_TO_ACCELERATE
+  if msg_161["ALERTS_5"] in (2, 5):  # WATCH_FOR_SURROUNDING_VEHICLES, USE_SWITCH_OR_PEDAL_TO_ACCELERATE
     msg_161["ALERTS_5"] = 0
 
   if msg_161["SOUNDS_4"] == 2 and msg_161["LFA_ICON"] in (3, 0,):  # LFA BEEPS
@@ -162,6 +162,12 @@ def create_ccnc(packer, CAN, CP, CC, CS):
     msg_162["VIBRATE"] = 1
 
   if CP.openpilotLongitudinalControl:
+    if msg_161["ALERTS_3"] in (1, 2, 3, 4, 7, 8, 9, 10):  # HIDE ISLA, DISTANCE MESSAGES
+      msg_161["ALERTS_3"] = 0
+
+    if msg_161["ALERTS_5"] == 4:  # SMART_CRUISE_CONTROL_CONDITIONS_NOT_MET
+      msg_161["ALERTS_5"] = 0
+
     msg_161.update({
       "SETSPEED": 3 if enabled else 1,
       "SETSPEED_HUD": 2 if enabled else 1,
@@ -174,9 +180,6 @@ def create_ccnc(packer, CAN, CP, CC, CS):
       "NAV_ICON": 0,
       "TARGET": 0,
     })
-
-    if msg_161["ALERTS_3"] in (1, 2, 3, 4, 7, 8, 9, 10):  # HIDE ISLA, DISTANCE MESSAGES
-      msg_161["ALERTS_3"] = 0
 
     msg_162["LEAD"] = 0
 
