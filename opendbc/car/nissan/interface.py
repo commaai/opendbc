@@ -1,10 +1,14 @@
 from opendbc.car import get_safety_config, structs
 from opendbc.car.interfaces import CarInterfaceBase
+from opendbc.car.nissan.carcontroller import CarController
+from opendbc.car.nissan.carstate import CarState
 from opendbc.car.nissan.values import CAR, NissanSafetyFlags
 from opendbc.sunnypilot.car.nissan.values import NissanSafetyFlagsSP
 
 
 class CarInterface(CarInterfaceBase):
+  CarState = CarState
+  CarController = CarController
 
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:

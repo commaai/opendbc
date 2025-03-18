@@ -57,11 +57,8 @@ class RadarInterface(RadarInterfaceBase, EsccRadarInterfaceBase):
     if self.rcp is None:
       return ret
 
-    errors = []
-
     if not self.rcp.can_valid:
-      errors.append("canError")
-    ret.errors = errors
+      ret.errors.canError = True
 
     if self.use_escc:
       return self.update_escc(ret)

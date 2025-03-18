@@ -54,7 +54,7 @@ class TestCarInterfaces:
             phases=(Phase.reuse, Phase.generate, Phase.shrink))
   @given(data=st.data())
   def test_car_interfaces(self, car_name, data):
-    CarInterface, CarController, CarState, RadarInterface = interfaces[car_name]
+    CarInterface = interfaces[car_name]
 
     args = get_fuzzy_car_interface_args(data.draw)
 
@@ -62,7 +62,7 @@ class TestCarInterfaces:
                                          experimental_long=args['experimental_long'], docs=False)
     car_params_sp = CarInterface.get_params_sp(car_params, car_name, args['fingerprints'], args['car_fw'],
                                                            experimental_long=args['experimental_long'], docs=False)
-    car_interface = CarInterface(car_params, car_params_sp, CarController, CarState)
+    car_interface = CarInterface(car_params, car_params_sp)
     assert car_params
     assert car_params_sp
     assert car_interface
@@ -111,7 +111,7 @@ class TestCarInterfaces:
       now_nanos += DT_CTRL * 1e9  # 10ms
 
     # Test radar interface
-    radar_interface = RadarInterface(car_params, car_params_sp)
+    radar_interface = CarInterface.RadarInterface(car_params, car_params_sp)
     assert radar_interface
 
     # Run radar interface once
