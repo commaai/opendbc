@@ -278,8 +278,6 @@ static safety_config hyundai_canfd_init(uint16_t param) {
     HYUNDAI_CANFD_CRUISE_BUTTON_TX_MSGS(2)
     HYUNDAI_CANFD_LFA_STEERING_COMMON_TX_MSGS(0)
     HYUNDAI_CANFD_SCC_CONTROL_COMMON_TX_MSGS(0, false)
-    {0x161, 0, 32, false}, // CCNC_0x161
-    {0x162, 0, 32, false}, // CCNC_0x162
   };
 
   static const CanMsg HYUNDAI_CANFD_LFA_STEERING_LONG_TX_MSGS[] = {
@@ -288,8 +286,6 @@ static safety_config hyundai_canfd_init(uint16_t param) {
     HYUNDAI_CANFD_SCC_CONTROL_COMMON_TX_MSGS(0, true)
     {0x160, 0, 16, false}, // ADRV_0x160
     {0x7D0, 0, 8, false},  // tester present for radar ECU disable
-    {0x161, 0, 32, false}, // CCNC_0x161
-    {0x162, 0, 32, false}, // CCNC_0x162
   };
 
 #define HYUNDAI_CANFD_LFA_STEERING_CAMERA_SCC_TX_MSGS(longitudinal) \
