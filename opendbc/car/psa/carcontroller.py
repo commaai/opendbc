@@ -33,29 +33,30 @@ class CarController(CarControllerBase):
     # TODO: only enable section if self.CP.openpilotLongitudinalControl
     # TODO: disable_ecu not working - UDS communication control not supported by radar ECU.
     # disable radar ECU by setting to programming mode
-    if self.radar_disabled == 0 and self.frame>10:
-      can_sends.append(create_disable_radar())
-      self.radar_disabled = 1
+    if self.frame > 1000:
+      if self.radar_disabled == 0 and self.frame>10:
+        can_sends.append(create_disable_radar())
+        self.radar_disabled = 1
 
-    # keep radar ECU disabled by sending tester present
-    if self.frame % 100 == 0:
-      can_sends.append(make_tester_present_msg(0x6b6, 1, suppress_response=False))
+      # keep radar ECU disabled by sending tester present
+      if self.frame % 100 == 0:
+        can_sends.append(make_tester_present_msg(0x6b6, 1, suppress_response=False))
 
-    # TODO: tune torque multiplier
-    # TODO: tune braking threshold
-    # TODO: check if disengage on accelerator is already in CC.longActive
-    torque = actuators.accel * 500
-    braking = torque < -300 and not CS.out.gasPressed # breaking threshold ~-30 Nm (can torque / 10)
+      # TODO: tune torque multiplier
+      # TODO: tune braking threshold
+      # TODO: check if disengage on accelerator is already in CC.longActive
+      torque = actuators.accel * 500
+      braking = torque < -300 and not CS.out.gasPressed # breaking threshold ~-30 Nm (can torque / 10)
 
-    if self.frame % 2 == 0: # 50 Hz
-      can_sends.append(create_HS2_DYN1_MDD_ETAT_2B6(self.packer, self.frame // 2, actuators.accel, CC.longActive, CS.out.gasPressed, braking, torque))
-      can_sends.append(create_HS2_DYN_MDD_ETAT_2F6(self.packer, self.frame // 2, CC.longActive, braking))
+      if self.frame % 2 == 0: # 50 Hz
+        can_sends.append(create_HS2_DYN1_MDD_ETAT_2B6(self.packer, self.frame // 2, actuators.accel, CC.longActive, CS.out.gasPressed, braking, torque))
+        can_sends.append(create_HS2_DYN_MDD_ETAT_2F6(self.packer, self.frame // 2, CC.longActive, braking))
 
-    if self.frame % 10 == 0: # 10 Hz
-      can_sends.append(create_HS2_DAT_ARTIV_V2_4F6(self.packer, CC.longActive))
+      if self.frame % 10 == 0: # 10 Hz
+        can_sends.append(create_HS2_DAT_ARTIV_V2_4F6(self.packer, CC.longActive))
 
-    if self.frame % 100 == 0: # 1 Hz
-      can_sends.append(create_HS2_SUPV_ARTIV_796(self.packer))
+      if self.frame % 100 == 0: # 1 Hz
+        can_sends.append(create_HS2_SUPV_ARTIV_796(self.packer))
 
     # TODO test
     # if CC.cruiseControl.cancel:
