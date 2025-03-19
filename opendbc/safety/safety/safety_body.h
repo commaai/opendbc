@@ -39,12 +39,13 @@ static safety_config body_init(uint16_t param) {
                                         {0x1, 0, 8, false}}; // CAN flasher
 
   UNUSED(param);
-  return BUILD_SAFETY_CFG(body_rx_checks, BODY_TX_MSGS);
+  safety_config ret = BUILD_SAFETY_CFG(body_rx_checks, BODY_TX_MSGS);
+  ret.disable_forwarding = true;
+  return ret;
 }
 
 const safety_hooks body_hooks = {
   .init = body_init,
   .rx = body_rx_hook,
   .tx = body_tx_hook,
-  .fwd = default_fwd_hook,
 };
