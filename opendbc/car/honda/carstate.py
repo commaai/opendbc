@@ -308,6 +308,8 @@ class CarState(CarStateBase):
       ("STEERING_CONTROL", 100),
       ]
 
+    cam_messages = [],
+
     if CP.carFingerprint in HONDA_BOSCH_RADARLESS:
       cam_messages += [
         ("ACC_HUD", 10),
