@@ -28,18 +28,14 @@ def create_lka_steering(packer, frame, acm_lka_hba_cmd, apply_torque, enabled, a
     "ACM_lkaLaneRecogState": 3 if enabled else 0,
     "ACM_lkaSymbolState": 3 if enabled else 0,
 
-    # 1=applying torque right, 2=applying torque left
-    # why do we need two actuation signals? can we safety not send this one?
-    "ACM_lkaElkRequest": 0,  # 1 if apply_torque > 0 else 2 if apply_torque < 0 else 0,
-
     # static values
-    "ACM_ldwlkaOnOffState": 2,  # 3=all off, 1=LDW on, 2=LKAS+LDW on
-    "ACM_elkOnOffState": 1,  # 2=LKAS off, 1=LKAS on
+    "ACM_lkaElkRequest": 0,
+    "ACM_ldwlkaOnOffState": 2,  # 2=LKAS+LDW on
+    "ACM_elkOnOffState": 1,  # 1=LKAS on
     # TODO: what are these used for?
     "ACM_ldwWarnTypeState": 2,  # always 2
     "ACM_ldwWarnTimingState": 1,  # always 1
     #"ACM_lkaHandsoffDisplayWarning": 1,  # TODO: we can send this when openpilot wants you to pay attention
-
   }
 
   data = packer.make_can_msg("ACM_lkaHbaCmd", 0, values)[1]
