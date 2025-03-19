@@ -391,7 +391,7 @@ static bool honda_nidec_fwd_hook(int bus_num, int addr) {
   // 0x1FA is brake control, 0x30C is acc hud, 0x33D is lkas hud
   bool block_msg = false;
 
-  if (bus_num == 2)  
+  if (bus_num == 2) {
     // block stock lkas messages and stock acc messages (if OP is doing ACC)
     bool is_lkas_msg = (addr == 0xE4) || (addr == 0x194) || (addr == 0x33D);
     bool is_acc_hud_msg = addr == 0x30C;
