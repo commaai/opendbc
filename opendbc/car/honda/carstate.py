@@ -107,7 +107,7 @@ class CarState(CarStateBase):
     self.brake_switch_active = False
     self.cruise_setting = 0
     self.v_cruise_pcm_prev = 0
-    
+
     # When available we use cp.vl["CAR_SPEED"]["ROUGH_CAR_SPEED_2"] to populate vEgoCluster
     # However, on cars without a digital speedometer this is not always present (HRV, FIT, CRV 2016, ILX and RDX)
     self.dash_speed_seen = False
@@ -132,7 +132,7 @@ class CarState(CarStateBase):
 
     # used for car hud message
     self.is_metric = not cp.vl["CAR_SPEED"]["IMPERIAL_UNIT"]
-    
+
     # ******************* parse out can *******************
     # STANDSTILL->WHEELS_MOVING bit can be noisy around zero, so use XMISSION_SPEED
     # panda checks if the signal is non-zero
@@ -151,10 +151,10 @@ class CarState(CarStateBase):
     ret.seatbeltUnlatched = bool(cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LAMP"] or not cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LATCHED"])
 
     if self.CP.carFingerprint in (CAR.ACURA_MDX_3G_HYBRID):
-      steer_status = self.steer_status_values[cp_cam.vl["STEER_STATUS"]['STEER_STATUS']] switches on hybrid
+      steer_status = self.steer_status_values[cp_cam.vl["STEER_STATUS"]['STEER_STATUS']] # switches on hybrid
     else
       steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]['STEER_STATUS']] 
-    
+
     ret.steerFaultPermanent = steer_status not in ("NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT")
     # LOW_SPEED_LOCKOUT is not worth a warning
     # NO_TORQUE_ALERT_2 can be caused by bump or steering nudge from driver
@@ -218,7 +218,7 @@ class CarState(CarStateBase):
 
     ret.steeringTorque = cp_cam.vl["STEER_STATUS"]['STEER_TORQUE_SENSOR']
     ret.steeringTorqueEps = cp_cam.vl["STEER_MOTOR_TORQUE"]['MOTOR_TORQUE']
-    
+
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD.get(self.CP.carFingerprint, 1200)
 
     if self.CP.carFingerprint in HONDA_BOSCH:
@@ -260,7 +260,7 @@ class CarState(CarStateBase):
     #if self.CP.carFingerprint in SERIAL_STEERING:
     #  ret.cruiseState.available = True
     #else:
-    
+
     ret.cruiseState.available = bool(cp.vl[self.main_on_sig_msg]["MAIN_ON"])
 
     # Adds low speed warning as some models disable cruise at various speeds, ignore warning under 3mph
