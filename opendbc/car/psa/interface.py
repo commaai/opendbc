@@ -23,27 +23,25 @@ class CarInterface(CarInterfaceBase):
       ret.minEnableSpeed = 0
     ret.minSteerSpeed = 0.
 
-    ret.autoResumeSng = ret.minEnableSpeed == -1
     ret.centerToFront = ret.wheelbase * 0.44
     ret.wheelSpeedFactor = 1.04
 
     # longitudinal
     ret.radarUnavailable = True
-    ret.experimentalLongitudinalAvailable = True
-    # TODO: tune
-    ret.longitudinalActuatorDelay = 0.5
 
     # TODO: check where experimental_long is set
     # if experimental_long:
+    # TODO DELETE
+    print(f"*************experimental long: {experimental_long}******************")
     ret.openpilotLongitudinalControl = True
-    ret.autoResumeSng = True
+    ret.experimentalLongitudinalAvailable = True
+    # ret.longitudinalActuatorDelay = 0.5
     # TODO: tune
-    ret.startAccel = 1.0
-    ret.stopAccel = -10.65
-    ret.vEgoStopping = 0.1
-    ret.vEgoStarting = 0.1
-    ret.stoppingDecelRate = 2.0
-
+    # ret.stopAccel = -10.65
+    # ret.startAccel = 1.0
+    # ret.vEgoStopping = 0.1
+    # ret.vEgoStarting = 0.1
+    # ret.stoppingDecelRate = 2.0
     return ret
 
   # # TODO: disable radar ECU here instead of carcontroller

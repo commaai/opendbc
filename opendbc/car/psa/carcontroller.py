@@ -43,8 +43,9 @@ class CarController(CarControllerBase):
 
     # TODO: tune torque multiplier
     # TODO: tune braking threshold
+    # TODO: check if disengage on accelerator is already in CC.longActive
     torque = actuators.accel * 500
-    braking = torque < -300 and not CS.out.gasPressed # breaking threshold ~-200 Nm
+    braking = torque < -300 and not CS.out.gasPressed # breaking threshold ~-30 Nm (can torque / 10)
 
     if self.frame % 2 == 0: # 50 Hz
       can_sends.append(create_HS2_DYN1_MDD_ETAT_2B6(self.packer, self.frame // 2, actuators.accel, CC.longActive, CS.out.gasPressed, braking, torque))
