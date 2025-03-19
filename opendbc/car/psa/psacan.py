@@ -67,7 +67,7 @@ def create_HS2_DYN_MDD_ETAT_2F6(packer, frame: int, enabled: bool, braking: bool
     'DRIVE_AWAY_REQUEST': 0, # TODO: potential RESUME request?
     'DISPLAY_INTERVEHICLE_TIME': 6.2, # TODO: <time to vehicle> if enabled else 6.2,
     'MDD_DECEL_CONTROL_REQ': int(braking),
-    'AUTO_BRAKING_STATUS': 6 if enabled else 3, # maybe disabled on too high steering angle
+    'AUTO_BRAKING_STATUS': 6, # TODO: testing ALWAYS ENABLED to resolve DTC errors if enabled else 3, # maybe disabled on too high steering angle
     'CHECKSUM_TRANSM_DYN_ACC2': 0,
     'PROCESS_COUNTER_4B_ACC2': frame % 0x10,
     'TARGET_POSITION': 4, # distance to lead car, far - 4, 3, 2, 1 - near
