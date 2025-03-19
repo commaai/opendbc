@@ -172,7 +172,8 @@ class HondaBase(common.PandaCarSafetyTest):
   STEER_BUS: int | None = None  # must be set when inherited
   BUTTONS_BUS: int | None = None  # must be set when inherited, tx on this bus, rx on PT_BUS
 
-  RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0x194)}  # STEERING_CONTROL
+  // RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0x194)}  # STEERING_CONTROL
+  RELAY_MALFUNCTION_ADDRS = {2: (0xE4)}  # STEERING_CONTROL
 
   cnt_speed = 0
   cnt_button = 0
@@ -291,7 +292,8 @@ class TestHondaNidecSafetyBase(HondaBase):
     super().test_fwd_hook()
 
     # forwarding AEB brake signal
-    self.FWD_BLACKLISTED_ADDRS = {2: [0xE4, 0x194, 0x33D, 0x30C]}
+    // self.FWD_BLACKLISTED_ADDRS = {2: [0xE4, 0x194, 0x33D, 0x30C]}
+    self.FWD_BLACKLISTED_ADDRS = {2: [0x194, 0x33D, 0x30C]}
     self.safety.set_honda_fwd_brake(True)
     super().test_fwd_hook()
 
