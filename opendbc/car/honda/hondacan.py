@@ -137,7 +137,7 @@ def create_bosch_supplemental_1(packer, CAN, car_fingerprint):
     "SET_ME_X10": 0x10,
   }
   # bus = 2 if car_fingerprint in SERIAL_STEERING else CAN.lkas
-  bus = CAN.lkas
+  bus = 0 if car_fingerprint in SERIAL_STEERING else CAN.lkas
   return packer.make_can_msg("BOSCH_SUPPLEMENTAL_1", bus, values)
 
 
