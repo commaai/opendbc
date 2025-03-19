@@ -116,7 +116,7 @@ class TestSubaruSafetyBase(common.PandaCarSafetyTest):
         for mads_button_press in range(4):
           with self.subTest("mads_button_press", button_state=mads_button_press):
             self._mads_states_cleanup()
-            self.safety.set_mads_params(enable_mads, False)
+            self.safety.set_mads_params(enable_mads, False, False)
 
             self._rx(self._lkas_button_msg(False, mads_button_press))
             self.assertEqual(enable_mads and mads_button_press in range(1, 4),
