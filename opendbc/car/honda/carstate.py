@@ -300,7 +300,8 @@ class CarState(CarStateBase):
     #    ("LKAS_HUD", 10),
     #  ]
 
-    elif CP.carFingerprint not in HONDA_BOSCH:
+    # elif CP.carFingerprint not in HONDA_BOSCH:
+    if CP.carFingerprint not in HONDA_BOSCH:
       # cam_messages += [
       cam_messages = [
         ("ACC_HUD", 10),
