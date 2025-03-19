@@ -29,7 +29,7 @@ def get_can_messages(CP, gearbox_msg):
     ("POWERTRAIN_DATA", 100),
     ("CAR_SPEED", 10),
     ("VSA_STATUS", 50),
-    ("STEER_STATUS", 100),
+#    ("STEER_STATUS", 0),
     ("STEER_MOTOR_TORQUE", 0),  # TODO: not on every car
   ]
 
@@ -72,7 +72,7 @@ def get_can_messages(CP, gearbox_msg):
   if CP.carFingerprint in (CAR.HONDA_ACCORD, CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.HONDA_CRV_HYBRID, CAR.HONDA_INSIGHT,
                            CAR.ACURA_RDX_3G, CAR.HONDA_E, CAR.HONDA_CIVIC_2022, CAR.HONDA_HRV_3G):
     pass
-  elif CP.carFingerprint in (CAR.HONDA_ODYSSEY_CHN, CAR.HONDA_FREED, CAR.HONDA_HRV):
+  elif CP.carFingerprint in (CAR.HONDA_ODYSSEY_CHN, CAR.HONDA_FREED, CAR.HONDA_HRV, CAR.ACURA_MDX_3G_HYBRID):
     pass
   else:
     messages.append(("DOORS_STATUS", 3))
@@ -306,6 +306,7 @@ class CarState(CarStateBase):
       cam_messages = [
         ("ACC_HUD", 10),
         ("LKAS_HUD", 10),
+        ("STEER_STATUS", 0),
         ("BRAKE_COMMAND", 50),
       ]
 
