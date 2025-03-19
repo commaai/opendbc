@@ -91,7 +91,7 @@ class CarControllerParams:
   # The Rivian R1T we tested on achieves slightly more lateral acceleration going left vs. right
   # and lateral acceleration rises as speed increases. This value is set conservatively to
   # reach a maximum of 2.5-3.0 m/s^2 turning left at 80 mph, but is less at lower speeds
-  STEER_MAX = 250  # ~2.5 m/s^2
+  STEER_MAX = 250  # ~1.8 m/s^2
   STEER_STEP = 1
   STEER_DELTA_UP = 3  # torque increase per refresh
   STEER_DELTA_DOWN = 5  # torque decrease per refresh
