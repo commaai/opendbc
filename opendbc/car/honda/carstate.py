@@ -213,8 +213,8 @@ class CarState(CarStateBase):
     ret.gas = cp.vl["POWERTRAIN_DATA"]["PEDAL_GAS"]
     ret.gasPressed = ret.gas > 1e-5
 
-    ret.steeringTorque = cp_cam.vl["STEER_STATUS"]['STEER_TORQUE_SENSOR']
-    ret.steeringTorqueEps = cp_cam.vl["STEER_MOTOR_TORQUE"]['MOTOR_TORQUE']
+    ret.steeringTorque = cp_cam.vl["STEER_STATUS"]["STEER_TORQUE_SENSOR"]
+    ret.steeringTorqueEps = cp_cam.vl["STEER_MOTOR_TORQUE"]["MOTOR_TORQUE"]
 
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD.get(self.CP.carFingerprint, 1200)
 
@@ -225,7 +225,7 @@ class CarState(CarStateBase):
 
       if not self.CP.openpilotLongitudinalControl:
         # ACC_HUD is on camera bus on radarless cars
-        acc_hud = cp_cam.vl["ACC_HUD"] if self.CP.carFingerprint in {HONDA_BOSCH_RADARLESS, SERIAL_STEERING} else cp.vl["ACC_HUD"]
+        acc_hud = cp_cam.vl["ACC_HUD"] if self.CP.carFingerprint in (HONDA_BOSCH_RADARLESS, SERIAL_STEERING) else cp.vl["ACC_HUD"]
         ret.cruiseState.nonAdaptive = acc_hud["CRUISE_CONTROL_LABEL"] != 0
         ret.cruiseState.standstill = acc_hud["CRUISE_SPEED"] == 252.
 
