@@ -288,7 +288,7 @@ class CarState(CarStateBase):
   def get_can_parsers(self, CP):
     pt_messages = get_can_messages(CP, self.gearbox_msg)
 
-    cam_messages = [
+    pt_messages += [
       ("STEERING_CONTROL", 100),
     ]
 
@@ -299,7 +299,8 @@ class CarState(CarStateBase):
       ]
 
     elif CP.carFingerprint not in HONDA_BOSCH:
-      cam_messages += [
+      # cam_messages += [
+      cam_messages = [
         ("ACC_HUD", 10),
         ("LKAS_HUD", 10),
         ("BRAKE_COMMAND", 50),
