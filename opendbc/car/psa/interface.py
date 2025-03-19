@@ -1,14 +1,20 @@
-from opendbc.car import structs, uds
-from opendbc.car import get_safety_config
+from opendbc.car import structs, get_safety_config
 from opendbc.car.interfaces import CarInterfaceBase
-from opendbc.car.psa.values import CAR
+from opendbc.car.psa.carcontroller import CarController
+from opendbc.car.psa.carstate import CarState
+from opendbc.car.psa.radar_interface import RadarInterface
 from opendbc.car.disable_ecu import disable_ecu
 
 TransmissionType = structs.CarParams.TransmissionType
 
+
 class CarInterface(CarInterfaceBase):
+  CarState = CarState
+  CarController = CarController
+  RadarInterface = RadarInterface
+
   @staticmethod
-  def _get_params(ret: structs.CarParams, candidate: CAR, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
+  def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
     ret.brand = 'psa'
     ret.dashcamOnly = False
 
