@@ -38,8 +38,7 @@ typedef enum __attribute__((packed)) {
 // ===============================
 
 #define ALT_EXP_ENABLE_MADS 1024
-#define ALT_EXP_MADS_DISENGAGE_LATERAL_ON_BRAKE 2048
-#define ALT_EXP_MADS_PAUSE_LATERAL_ON_BRAKE 4096
+#define ALT_EXP_DISENGAGE_LATERAL_ON_BRAKE 2048
 
 #define MISMATCH_DEFAULT_THRESHOLD 25
 
@@ -76,7 +75,6 @@ typedef struct {
 
   bool system_enabled : 1;
   bool disengage_lateral_on_brake : 1;
-  bool pause_lateral_on_brake : 1;
   bool controls_requested_lat : 1;
   bool controls_allowed_lat : 1;
 } MADSState;
@@ -96,7 +94,7 @@ extern uint32_t heartbeat_engaged_mads_mismatches;
 // External Function Declarations (kept as needed)
 // ===============================
 
-extern void mads_set_system_state(bool enabled, bool disengage_lateral_on_brake, bool pause_lateral_on_brake);
+extern void mads_set_system_state(bool enabled, bool disengage_lateral_on_brake);
 extern void mads_set_alternative_experience(const int *mode);
 extern void mads_state_update(bool op_vehicle_moving, bool op_acc_main, bool op_allowed, bool is_braking);
 extern void mads_exit_controls(DisengageReason reason);
