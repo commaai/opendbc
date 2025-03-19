@@ -89,12 +89,14 @@ def init_segment(safety, msgs, mode, param):
   torque, angle = get_steer_value(mode, param, to_send)
   if torque != 0:
     safety.set_controls_allowed(1)
+    safety.set_controls_allowed_lat(1)
     safety.set_desired_torque_last(torque)
     safety.set_rt_torque_last(torque)
     safety.set_torque_meas(torque, torque)
     safety.set_torque_driver(torque, torque)
   elif angle != 0:
     safety.set_controls_allowed(1)
+    safety.set_controls_allowed_lat(1)
     safety.set_desired_angle_last(angle)
     safety.set_angle_meas(angle, angle)
   assert safety.safety_tx_hook(to_send), "failed to initialize panda safety for segment"
