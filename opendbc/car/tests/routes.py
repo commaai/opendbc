@@ -24,7 +24,6 @@ non_tested_cars = [
   GM.CHEVROLET_MALIBU,
   HYUNDAI.GENESIS_G90,
   #Seeing if CI finds more problems before real testdrive, and awaiting steering board in the mail, then will replace
-  HONDA.ACURA_MDX_3G,
   HONDA.ACURA_MDX_3G_HYBRID,
   HONDA.HONDA_ODYSSEY_CHN,
   VOLKSWAGEN.VOLKSWAGEN_CRAFTER_MK2,  # need a route from an ACC-equipped Crafter
@@ -100,8 +99,6 @@ routes = [
   CarTestRoute("f29e2b57a55e7ad5|2021-03-24--20-52-38", HONDA.HONDA_ACCORD),  # hybrid, 2021 with new style HUD msgs
   CarTestRoute("1ad763dd22ef1a0e|2020-02-29--18-37-03", HONDA.HONDA_CRV_5G),
   CarTestRoute("0a96f86fcfe35964|2020-02-05--07-25-51", HONDA.HONDA_ODYSSEY),
-  #test below was on older code, just seeing if CI finds more problems before new testdrive, then will replace
-  CarTestRoute("558ac87ada6a88cd/00000034--54b3407485", HONDA.HONDA_ODYSSEY_5G_MMR),
   CarTestRoute("d83f36766f8012a5|2020-02-05--18-42-21", HONDA.HONDA_CIVIC_BOSCH_DIESEL),
   CarTestRoute("f0890d16a07a236b|2021-05-25--17-27-22", HONDA.HONDA_INSIGHT),
   CarTestRoute("07d37d27996096b6|2020-03-04--21-57-27", HONDA.HONDA_PILOT),
@@ -110,6 +107,7 @@ routes = [
   CarTestRoute("f34a60d68d83b1e5|2020-10-06--14-35-55", HONDA.ACURA_RDX),
   CarTestRoute("54fd8451b3974762|2021-04-01--14-50-10", HONDA.HONDA_RIDGELINE),
   CarTestRoute("2d5808fae0b38ac6|2021-09-01--17-14-11", HONDA.HONDA_E),
+
   CarTestRoute("f44aa96ace22f34a|2021-12-22--06-22-31", HONDA.HONDA_CIVIC_2022),
   CarTestRoute("1f032f5173c8ad99/00000006--573b3fcaf5", HONDA.HONDA_CIVIC_2022), # Civic Type R with manual transmission
   CarTestRoute("87d7f06ade479c2e|2023-09-11--23-30-11", HYUNDAI.HYUNDAI_AZERA_6TH_GEN),
