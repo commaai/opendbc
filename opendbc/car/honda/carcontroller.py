@@ -2,11 +2,11 @@ import numpy as np
 from collections import namedtuple
 
 from opendbc.can.packer import CANPacker
-from opendbc.car import Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs, apply_driver_steer_torque_limits
+from opendbc.car import Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
 from opendbc.car.honda import hondacan
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.honda.values import CruiseButtons, VISUAL_HUD, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, HONDA_NIDEC_ALT_PCM_ACCEL, HONDA_BOSCH_1000, \
-  CarControllerParams, SERIAL_STEERING, LKAS_LIMITS
+from opendbc.car.honda.values import CruiseButtons, VISUAL_HUD, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, HONDA_NIDEC_ALT_PCM_ACCEL, CarControllerParams,\
+  SERIAL_STEERING, LKAS_LIMITS
 from opendbc.car.interfaces import CarControllerBase
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
@@ -124,7 +124,6 @@ class CarController(CarControllerBase):
     self.last_torque = 0.0
 
   def update(self, CC, CS, now_nanos):
-
     actuators = CC.actuators
     hud_control = CC.hudControl
     conversion = CV.KPH_TO_MS # force
@@ -155,10 +154,10 @@ class CarController(CarControllerBase):
 
     # **** process the car messages ****
 
-    if (CS.CP.carFingerprint in SERIAL_STEERING):
-      limited_torque = apply_driver_steer_torque_limits(limited_torque, self.last_torque, CS.out.steeringTorque, LKAS_LIMITS)
-      self.last_torque = limited_torque
-      self.apply_steer_over_max_counter = 0
+    # if (CS.CP.carFingerprint in SERIAL_STEERING):
+    #  limited_torque = apply_driver_steer_torque_limits(limited_torque, self.last_torque, CS.out.steeringTorque, LKAS_LIMITS)
+    #  self.last_torque = limited_torque
+    #  self.apply_steer_over_max_counter = 0
 
     # steer torque is converted back to CAN reference (positive when steering right)
     apply_torque = int(np.interp(-limited_torque * self.params.STEER_MAX,
@@ -220,11 +219,8 @@ class CarController(CarControllerBase):
 
         if self.CP.carFingerprint in HONDA_BOSCH:
           self.accel = float(np.clip(accel, self.params.BOSCH_ACCEL_MIN, self.params.BOSCH_ACCEL_MAX))
-          if self.CP.carFingerprint in HONDA_BOSCH_1000:
-            self.gas = float(np.interp(accel, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_1000_GAS_LOOKUP_V))
-          else:
-            self.gas = float(np.interp(accel, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_GAS_LOOKUP_V))
-
+          self.gas = float(np.interp(accel, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_GAS_LOOKUP_V))
+          
           stopping = actuators.longControlState == LongCtrlState.stopping
           self.stopping_counter = self.stopping_counter + 1 if stopping else 0
           can_sends.extend(hondacan.create_acc_commands(self.packer, self.CAN, CC.enabled, CC.longActive, self.accel, self.gas,
