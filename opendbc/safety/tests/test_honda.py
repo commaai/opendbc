@@ -252,7 +252,6 @@ class TestHondaNidecSafetyBase(HondaBase):
 
   PT_BUS = 0
   STEER_BUS = 0
-  // version that allowed bus 2: STEER_BUS = 2
   BUTTONS_BUS = 0
 
   MAX_GAS = 198
