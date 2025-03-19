@@ -78,10 +78,9 @@ class CarInterface(CarInterfaceBase):
       if candidate in HONDA_BOSCH_RADARLESS:
         ret.stopAccel = CarControllerParams.BOSCH_ACCEL_MIN  # stock uses -4.0 m/s^2 once stopped but limited by safety model
     else:
-      pass
       # default longitudinal tuning for all hondas
-      # ret.longitudinalTuning.kiBP = [0., 5., 35.] - let tuner figure this out
-      # ret.longitudinalTuning.kiV = [1.2, 0.8, 0.5] - let tuner figure this out
+      ret.longitudinalTuning.kiBP = [0., 5., 35.] - let tuner figure this out
+      ret.longitudinalTuning.kiV = [1.2, 0.8, 0.5] - let tuner figure this out
 
     eps_modified = False
     for fw in car_fw:
@@ -156,11 +155,6 @@ class CarInterface(CarInterfaceBase):
       else:
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.8], [0.24]]  # TODO: can probably use some tuning
 
-    elif candidate == CAR.ACURA_MDX_3G:
-      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 239], [0, 239]]  # TODO: determine if there is a dead zone at the top end
-      ret.lateralTuning.pid.kf = 0.000035
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.115], [0.052]]
-
     elif candidate == CAR.ACURA_MDX_3G_HYBRID:
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 239], [0, 239]]  # TODO: determine if there is a dead zone at the top end
       ret.lateralTuning.pid.kf = 0.000035
@@ -180,14 +174,6 @@ class CarInterface(CarInterfaceBase):
         ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 32767], [0, 32767]]  # TODO: determine if there is a dead zone at the top end
       else:
         ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]  # TODO: determine if there is a dead zone at the top end
-
-    elif candidate == CAR.HONDA_ODYSSEY_5G_MMR:
-      if not ret.openpilotLongitudinalControl:
-        ret.minSteerSpeed = 60.0 * CV.KPH_TO_MS # min is 70kph to activate but 60kph to deactive.  Used 60kph to ensure steering is attempted
-        ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 3840], [0, 3840]]  # clipped by radar
-      else:
-        ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]  # TODO: determine if there is a dead zone at the top end
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2], [0.06]]
 
     elif candidate == CAR.HONDA_PILOT:
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]  # TODO: determine if there is a dead zone at the top end
@@ -232,7 +218,7 @@ class CarInterface(CarInterfaceBase):
     ret.autoResumeSng = candidate in (HONDA_BOSCH | {CAR.HONDA_CIVIC, CAR.ACURA_MDX_3G, CAR.ACURA_MDX_3G_HYBRID})
     ret.minEnableSpeed = -1. if ret.autoResumeSng else 25.51 * CV.MPH_TO_MS
 
-    ret.steerActuatorDelay = 0.3 if candidate in (CAR.HONDA_ODYSSEY_5G_MMR, CAR.ACURA_MDX_3G, CAR.ACURA_MDX_3G_HYBRID) else 0.1
+    ret.steerActuatorDelay = 0.3 if candidate = CAR.ACURA_MDX_3G_HYBRID else 0.1
     ret.steerLimitTimer = 0.8
     ret.radarDelay = 0.1
 
