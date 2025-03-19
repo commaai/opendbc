@@ -150,10 +150,7 @@ class CarState(CarStateBase):
                           cp.vl["DOORS_STATUS"]["DOOR_OPEN_RL"], cp.vl["DOORS_STATUS"]["DOOR_OPEN_RR"]])
     ret.seatbeltUnlatched = bool(cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LAMP"] or not cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LATCHED"])
 
-    if self.CP.carFingerprint in (CAR.ACURA_MDX_3G_HYBRID):
-      steer_status = self.steer_status_values[cp_cam.vl["STEER_STATUS"]['STEER_STATUS']] # switches on hybrid
-    else:
-      steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]['STEER_STATUS']]
+    steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]['STEER_STATUS']]
 
     ret.steerFaultPermanent = steer_status not in ("NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT")
     # LOW_SPEED_LOCKOUT is not worth a warning
