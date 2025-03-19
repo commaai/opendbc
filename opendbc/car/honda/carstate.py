@@ -30,7 +30,7 @@ def get_can_messages(CP, gearbox_msg):
     ("CAR_SPEED", 10),
     ("VSA_STATUS", 50),
     ("STEER_STATUS", 100),
-    ("STEER_MOTOR_TORQUE", 100),  # TODO: not on every car
+    ("STEER_MOTOR_TORQUE", 0),  # TODO: not on every car
   ]
 
   if (CP.carFingerprint == CAR.HONDA_ODYSSEY_CHN) or (CP.carFingerprint in SERIAL_STEERING):
@@ -131,9 +131,8 @@ class CarState(CarStateBase):
     self.cruise_buttons = cp.vl["SCM_BUTTONS"]["CRUISE_BUTTONS"]
 
     # used for car hud message
-    # self.is_metric = not cp.vl["CAR_SPEED"]["IMPERIAL_UNIT"]
-    self.is_metric = True # forced for MDX hybrid
-
+    self.is_metric = not cp.vl["CAR_SPEED"]["IMPERIAL_UNIT"]
+    
     # ******************* parse out can *******************
     # STANDSTILL->WHEELS_MOVING bit can be noisy around zero, so use XMISSION_SPEED
     # panda checks if the signal is non-zero
@@ -151,7 +150,11 @@ class CarState(CarStateBase):
                           cp.vl["DOORS_STATUS"]["DOOR_OPEN_RL"], cp.vl["DOORS_STATUS"]["DOOR_OPEN_RR"]])
     ret.seatbeltUnlatched = bool(cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LAMP"] or not cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LATCHED"])
 
-    steer_status = self.steer_status_values[cp_cam.vl["STEER_STATUS"]['STEER_STATUS']] switches on hybrid
+    if self.CP.carFingerprint in (CAR.ACURA_MDX_3G_HYBRID):
+      steer_status = self.steer_status_values[cp_cam.vl["STEER_STATUS"]['STEER_STATUS']] switches on hybrid
+    else
+      steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]['STEER_STATUS']] 
+    
     ret.steerFaultPermanent = steer_status not in ("NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT")
     # LOW_SPEED_LOCKOUT is not worth a warning
     # NO_TORQUE_ALERT_2 can be caused by bump or steering nudge from driver
