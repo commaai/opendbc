@@ -16,12 +16,12 @@
 #define PSA_CAM_BUS  0U
 
 const CanMsg PSA_TX_MSGS[] = {
-  {PSA_LANE_KEEP_ASSIST, PSA_CAM_BUS, 8},
-  {PSA_Req_Diag_ARTIV, PSA_ADAS_BUS, 8}, // TODO: check if reduce to 3 is ok
-  {PSA_HS2_SUPV_ARTIV_796, PSA_ADAS_BUS, 8},
-  {PSA_HS2_DAT_ARTIV_V2_4F6, PSA_ADAS_BUS, 5},
-  {PSA_HS2_DYN1_MDD_ETAT_2B6, PSA_ADAS_BUS, 8},
-  {PSA_HS2_DYN_MDD_ETAT_2F6, PSA_ADAS_BUS, 8},
+  {PSA_LANE_KEEP_ASSIST, PSA_CAM_BUS, 8, true},
+  {PSA_Req_Diag_ARTIV, PSA_ADAS_BUS, 8, false}, // TODO: check if reduce to 3 is ok
+  {PSA_HS2_SUPV_ARTIV_796, PSA_ADAS_BUS, 8, false},
+  {PSA_HS2_DAT_ARTIV_V2_4F6, PSA_ADAS_BUS, 5, false},
+  {PSA_HS2_DYN1_MDD_ETAT_2B6, PSA_ADAS_BUS, 8, false},
+  {PSA_HS2_DYN_MDD_ETAT_2F6, PSA_ADAS_BUS, 8, false},
 };
 
 RxCheck psa_rx_checks[] = {
@@ -98,20 +98,15 @@ static bool psa_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static int psa_fwd_hook(int bus_num, int addr) {
-    if (bus_num == PSA_MAIN_BUS) {
-        if (psa_lkas_msg_check(addr)) {
-            return -1;
-        }
-        return PSA_CAM_BUS;
-    }
-    if (bus_num == PSA_CAM_BUS) {
-        return PSA_MAIN_BUS;
-    }
-    // Fallback for unsupported buses
-    return -1;
-}
+static bool psa_fwd_hook(int bus_num, int addr) {
+  bool block_msg = false;
 
+  if (bus_num == PSA_MAIN_BUS) {
+    block_msg = psa_lkas_msg_check(addr);
+  }
+
+  return block_msg;
+}
 
 static safety_config psa_init(uint16_t param) {
   UNUSED(param);
