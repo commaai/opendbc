@@ -304,11 +304,9 @@ class CarState(CarStateBase):
   def get_can_parsers(self, CP):
     pt_messages = get_can_messages(CP, self.gearbox_msg)
 
-    pt_messages += [
+    cam_messages += [
       ("STEERING_CONTROL", 100),
       ]
-
-    cam_messages = [],
 
     if CP.carFingerprint in HONDA_BOSCH_RADARLESS:
       cam_messages += [
