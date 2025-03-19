@@ -304,7 +304,7 @@ class CarState(CarStateBase):
   def get_can_parsers(self, CP):
     pt_messages = get_can_messages(CP, self.gearbox_msg)
 
-    cam_messages += [
+    cam_messages = [
       ("STEERING_CONTROL", 100),
       ]
 
