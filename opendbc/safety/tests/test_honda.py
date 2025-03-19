@@ -8,7 +8,7 @@ import opendbc.safety.tests.common as common
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.common import CANPackerPanda, MAX_WRONG_COUNTERS
 
-HONDA_N_COMMON_TX_MSGS = [[0xE4, 0], [0x194, 0], [0x1FA, 0], [0x30C, 0], [0x33D, 0]]
+HONDA_N_COMMON_TX_MSGS = [[0xE4, 0], [0xE4, 2], [0x194, 0], [0x1FA, 0], [0x30C, 0], [0x33D, 0]]
 
 class Btn:
   NONE = 0
@@ -248,10 +248,12 @@ class HondaBase(common.PandaCarSafetyTest):
 
 class TestHondaNidecSafetyBase(HondaBase):
   TX_MSGS = HONDA_N_COMMON_TX_MSGS
-  FWD_BLACKLISTED_ADDRS = {2: [0xE4, 0x194, 0x33D, 0x30C]}
+  // FWD_BLACKLISTED_ADDRS = {2: [0xE4, 0x194, 0x33D, 0x30C]}
+  FWD_BLACKLISTED_ADDRS = {2: [0x194, 0x33D, 0x30C]}
 
   PT_BUS = 0
-  STEER_BUS = 0
+  // STEER_BUS = 0
+  STEER_BUS = 2
   BUTTONS_BUS = 0
 
   MAX_GAS = 198
