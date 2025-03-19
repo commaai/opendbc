@@ -11,20 +11,36 @@ def checksum(data, poly, xor_output):
   return crc ^ xor_output
 
 
-def create_lka_steering(packer, frame, apply_torque, active):
-  values = {
+def create_lka_steering(packer, frame, acm_lka_hba_cmd, apply_torque, enabled, active):
+  # forward auto high beam and speed limit status and nothing else
+  values = {s: acm_lka_hba_cmd[s] for s in (
+    "ACM_hbaSysState",
+    "ACM_hbaLamp",
+    "ACM_hbaOnOffState",
+    "ACM_slifOnOffState",
+  )}
+
+  values |= {
     "ACM_lkaHbaCmd_Counter": frame % 15,
     "ACM_lkaStrToqReq": apply_torque,
     "ACM_lkaActToi": active,
-  }
 
-  if active:
-    values["ACM_lkaSymbolState"] = 3
-    values["ACM_lkaLaneRecogState"] = 3
-    values["ACM_unkown2"] = 1
-    values["ACM_unkown3"] = 4
-    values["ACM_unkown4"] = 160
-    values["ACM_unkown6"] = 1
+    "ACM_lkaLaneRecogState": 3 if enabled else 0,
+    "ACM_lkaSymbolState": 3 if enabled else 0,
+
+    # 1=applying torque right, 2=applying torque left
+    # why do we need two actuation signals? can we safety not send this one?
+    "ACM_lkaElkRequest": 0,  # 1 if apply_torque > 0 else 2 if apply_torque < 0 else 0,
+
+    # static values
+    "ACM_ldwlkaOnOffState": 2,  # 3=all off, 1=LDW on, 2=LKAS+LDW on
+    "ACM_elkOnOffState": 1,  # 2=LKAS off, 1=LKAS on
+    # TODO: what are these used for?
+    "ACM_ldwWarnTypeState": 2,  # always 2
+    "ACM_ldwWarnTimingState": 1,  # always 1
+    #"ACM_lkaHandsoffDisplayWarning": 1,  # TODO: we can send this when openpilot wants you to pay attention
+
+  }
 
   data = packer.make_can_msg("ACM_lkaHbaCmd", 0, values)[1]
   values["ACM_lkaHbaCmd_Checksum"] = checksum(data[1:], 0x1D, 0x63)

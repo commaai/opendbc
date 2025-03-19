@@ -25,7 +25,7 @@ class CarController(CarControllerBase):
 
     # send steering command
     self.apply_torque_last = apply_torque
-    can_sends.append(create_lka_steering(self.packer, self.frame, apply_torque, CC.latActive))
+    can_sends.append(create_lka_steering(self.packer, self.frame, CS.acm_lka_hba_cmd, apply_torque, CC.enabled, CC.latActive))
 
     if self.frame % 5 == 0:
       can_sends.append(create_wheel_touch(self.packer, CS.sccm_wheel_touch, CC.enabled))
