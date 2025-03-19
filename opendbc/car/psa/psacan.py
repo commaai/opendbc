@@ -36,7 +36,7 @@ def create_HS2_DYN1_MDD_ETAT_2B6(packer, frame: int, accel: float, enabled: bool
     'ACC_STATUS': (5 if gasPressed else 4) if enabled else 3,
     'GMP_WHEEL_TORQUE': torque if not braking and enabled else -4000,
     'WHEEL_TORQUE_REQUEST': 1 if enabled else 0, # TODO: test 1: high torque range 2: low torque range
-    'AUTO_BRAKING_STATUS': 6 if enabled else 3, # maybe disabled on too high steering angle
+    'AUTO_BRAKING_STATUS': 3 if frame < 1500 else 6, # TODO: testing ALWAYS ENABLED to resolve DTC errors if enabled else 3, # maybe disabled on too high steering angle
     'MDD_DECEL_TYPE': int(braking),
     'MDD_DECEL_CONTROL_REQ': int(braking),
     'GEAR_TYPE': frame % 2, # 0,1,0,1...
@@ -67,7 +67,7 @@ def create_HS2_DYN_MDD_ETAT_2F6(packer, frame: int, enabled: bool, braking: bool
     'DRIVE_AWAY_REQUEST': 0, # TODO: potential RESUME request?
     'DISPLAY_INTERVEHICLE_TIME': 6.2, # TODO: <time to vehicle> if enabled else 6.2,
     'MDD_DECEL_CONTROL_REQ': int(braking),
-    'AUTO_BRAKING_STATUS': 3 if frame < 100 else 6, # TODO: testing ALWAYS ENABLED to resolve DTC errors if enabled else 3, # maybe disabled on too high steering angle
+    'AUTO_BRAKING_STATUS': 3 if frame < 1500 else 6, # TODO: testing ALWAYS ENABLED to resolve DTC errors if enabled else 3, # maybe disabled on too high steering angle
     'CHECKSUM_TRANSM_DYN_ACC2': 0,
     'PROCESS_COUNTER_4B_ACC2': frame % 0x10,
     'TARGET_POSITION': 4, # distance to lead car, far - 4, 3, 2, 1 - near
