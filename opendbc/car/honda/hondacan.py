@@ -114,8 +114,10 @@ def create_acc_commands(packer, CAN, enabled, active, accel, gas, stopping_count
 
 def create_steering_control(packer, CAN, apply_torque, lkas_active, car_fingerprint):
   values = {
-    "STEER_TORQUE": apply_torque if lkas_active else 0,
-    "STEER_TORQUE_REQUEST": lkas_active,
+    # "STEER_TORQUE": apply_torque if lkas_active else 0,
+    # "STEER_TORQUE_REQUEST": lkas_active,
+    "STEER_TORQUE": apply_torque,
+    "STEER_TORQUE_REQUEST": True,
   }
 
   if car_fingerprint in SERIAL_STEERING:
