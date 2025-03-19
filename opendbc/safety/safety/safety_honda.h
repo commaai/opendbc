@@ -278,7 +278,7 @@ static bool honda_tx_hook(const CANPacket_t *to_send) {
 }
 
 static safety_config honda_nidec_init(uint16_t param) {
-  static CanMsg HONDA_N_TX_MSGS[] = {{0xE4, 0, 5, true}, {0xE4, 1, 5, true}, {0xE4, 2, 5, true}, {0x194, 0, 4, true}, {0x1FA, 0, 8, false}, {0x30C, 0, 8, false}, {0x33D, 0, 5, false}};
+  static CanMsg HONDA_N_TX_MSGS[] = {{0xE4, 0, 5, true}, {0x194, 0, 4, true}, {0x1FA, 0, 8, false}, {0x30C, 0, 8, false}, {0x33D, 0, 5, false}};
 
   const uint16_t HONDA_PARAM_NIDEC_ALT = 4;
 
@@ -391,8 +391,7 @@ static bool honda_nidec_fwd_hook(int bus_num, int addr) {
   // 0x1FA is brake control, 0x30C is acc hud, 0x33D is lkas hud
   bool block_msg = false;
 
-  //if (bus_num == 2) ---- temp flip
-  if (bus_num == 0) {
+  if (bus_num == 2)
   
   // block stock lkas messages and stock acc messages (if OP is doing ACC)
     bool is_lkas_msg = (addr == 0xE4) || (addr == 0x194) || (addr == 0x33D);
