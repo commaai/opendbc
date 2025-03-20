@@ -56,9 +56,9 @@ def create_brake_command(packer, CAN, apply_brake, pump_on, pcm_override, pcm_ca
   pcm_fault_cmd = False
 
   values = {
-    "COMPUTER_BRAKE": apply_brake,
-    "BRAKE_PUMP_REQUEST": pump_on,
-    "CRUISE_OVERRIDE": pcm_override,
+    "COMPUTER_BRAKE": 0, # apply_brake,
+    "BRAKE_PUMP_REQUEST": 0, # pump_on,
+    "CRUISE_OVERRIDE": 0 if brake_req else pcm_override,
     "CRUISE_FAULT_CMD": pcm_fault_cmd,
     "CRUISE_CANCEL_CMD": pcm_cancel_cmd,
     "COMPUTER_BRAKE_REQUEST": brake_rq,
@@ -69,6 +69,8 @@ def create_brake_command(packer, CAN, apply_brake, pump_on, pcm_override, pcm_ca
     "AEB_REQ_1": 0,
     "AEB_REQ_2": 0,
     "AEB_STATUS": 0,
+    "SET_ME_X00": 4 if brake_rq else 0,
+    "SET_ME_X00_5: apply_brake if brake_rq else 0,
   }
   return packer.make_can_msg("BRAKE_COMMAND", CAN.pt, values)
 
