@@ -236,9 +236,6 @@ class CarState(CarStateBase):
       self.cluster_speed = cp.vl["CRUISE_BUTTONS_ALT"]["CLUSTER_SPEED_KPH"]
       self.cluster_speed_counter = 0
 
-      if not self.is_metric and self.CP.carFingerprint not in (CAR.KIA_SORENTO,):
-        self.cluster_speed = math.floor(self.cluster_speed * CV.KPH_TO_MPH + CV.KPH_TO_MPH)
-
     ret.vEgoCluster = self.cluster_speed * speed_conv
 
     ret.steeringRateDeg = cp.vl["STEERING_SENSORS"]["STEERING_RATE"]
