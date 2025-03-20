@@ -119,19 +119,17 @@ def create_acc_commands(packer, CAN, enabled, active, accel, gas, stopping_count
 
 def create_steering_control(packer, CAN, apply_torque, lkas_active, car_fingerprint):
   values = {
-    # "STEER_TORQUE": apply_torque if lkas_active else 0,
-    # "STEER_TORQUE_REQUEST": lkas_active,
-    "STEER_TORQUE": apply_torque,
-    "STEER_TORQUE_REQUEST": True,
+    "STEER_TORQUE": apply_torque if lkas_active else 0,
+    "STEER_TORQUE_REQUEST": lkas_active,
   }
 
-  if car_fingerprint in SERIAL_STEERING:
-      values.update({
-        "SEND_ALL_LIN_TO_CAN": 1,
-        "SEND_LIN_WHOLE_DATA": 1,
-        "SEND_MOTOR_TORQUE_TO_CAN": 1,
-        "SEND_STEER_STATUS_TO_CAN": 1,
-      })
+#  if car_fingerprint in SERIAL_STEERING:
+ #     values.update({
+ #       "SEND_ALL_LIN_TO_CAN": 1,
+ #       "SEND_LIN_WHOLE_DATA": 1,
+ #       "SEND_MOTOR_TORQUE_TO_CAN": 1,
+ #       "SEND_STEER_STATUS_TO_CAN": 1,
+ #     })
   return packer.make_can_msg("STEERING_CONTROL", CAN.lkas, values)
 
 def create_bosch_supplemental_1(packer, CAN, car_fingerprint):
