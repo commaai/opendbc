@@ -291,7 +291,7 @@ class CarState(CarStateBase):
     pt_messages = get_can_messages(CP, self.gearbox_msg)
 
     pt_messages += [
-      ("STEERING_CONTROL", 100),
+      ("STEERING_CONTROL", 0), # no timing rush?
     ]
 
     # if CP.carFingerprint in HONDA_BOSCH_RADARLESS:
