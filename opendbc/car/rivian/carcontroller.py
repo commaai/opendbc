@@ -24,7 +24,7 @@ class CarController(CarControllerBase):
       new_torque = int(round(CC.actuators.torque * dynamic_steer_max))
       # new_torque = np.clip(new_torque, -dynamic_steer_max, dynamic_steer_max)
       apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last,
-                                                      CS.out.steeringTorque, CarControllerParams, dynamic_steer_max, dynamic_steer_max)
+                                                      CS.out.steeringTorque, CarControllerParams, dynamic_steer_max)
 
     # send steering command
     self.apply_torque_last = apply_torque
