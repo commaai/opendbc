@@ -1,3 +1,4 @@
+import numpy as np
 from opendbc.car import apply_std_steer_angle_limits, make_tester_present_msg, apply_hysteresis, Bus
 from opendbc.can.packer import CANPacker
 from opendbc.car.interfaces import CarControllerBase
@@ -30,6 +31,14 @@ class CarController(CarControllerBase):
 
 
     ### longitudinal control ###
+    # TUNING
+    speeds = [0.0, 30.0]
+    multipliers = [600.0, 300.0]
+    mult = np.interp(CS.out.vEgoRaw, speeds, multipliers)
+    torque = actuators.accel * mult
+    # TODO: try hysteresis:  braking = torque < (0 if braking else -248) and not CS.out.gasPressed
+    braking = torque < -248 and not CS.out.gasPressed # breaking threshold ~-28 Nm (can torque / 10)
+
     # TODO: only enable section if self.CP.openpilotLongitudinalControl
     # TODO: disable_ecu not working - UDS communication control not supported by radar ECU.
     # disable radar ECU by setting to programming mode
@@ -48,8 +57,6 @@ class CarController(CarControllerBase):
       # Highest torque seen without gas input: ~1000
       # Lowest torque seen without break mode: -560 (but only when transitioning from brake to accel mode, else -248)
       # Lowest brake mode accel seen: -4.85m/s²
-      torque = actuators.accel * 500
-      braking = torque < -248 and not CS.out.gasPressed # breaking threshold ~-28 Nm (can torque / 10)
 
       if self.frame % 2 == 0: # 50 Hz
         can_sends.append(create_HS2_DYN1_MDD_ETAT_2B6(self.packer, self.frame // 2, actuators.accel, CC.longActive, CS.out.gasPressed, braking, torque))
@@ -73,5 +80,9 @@ class CarController(CarControllerBase):
     # TODO: find cruise buttons msg
     new_actuators = actuators.as_builder()
     new_actuators.steeringAngleDeg = self.apply_angle_last
+    # TODO: logging the internal parameters for DEBUG
+    new_actuators.gas = mult
+    new_actuators.brake = braking
+    new_actuators.torqueOutputCan = torque
     self.frame += 1
     return new_actuators, can_sends
