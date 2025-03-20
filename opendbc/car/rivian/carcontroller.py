@@ -1,3 +1,4 @@
+import numpy as np
 from opendbc.can.packer import CANPacker
 from opendbc.car import Bus, apply_driver_steer_torque_limits
 from opendbc.car.interfaces import CarControllerBase
@@ -20,6 +21,8 @@ class CarController(CarControllerBase):
     apply_torque = 0
     if CC.latActive:
       new_torque = int(round(CC.actuators.torque * CarControllerParams.STEER_MAX))
+      dynamic_steer_max = np.interp(CS.out.vEgoRaw, CarControllerParams.STEER_MAXES[0], CarControllerParams.STEER_MAXES[1])
+      new_torque = np.clip(new_torque, -dynamic_steer_max, dynamic_steer_max)
       apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last,
                                                       CS.out.steeringTorque, CarControllerParams)
 
