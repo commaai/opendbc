@@ -29,15 +29,14 @@ class CarController(CarControllerBase):
 
     self.apply_angle_last = apply_angle
 
-
     ### longitudinal control ###
     # TUNING
     speeds = [0.0, 30.0]
-    multipliers = [600.0, 300.0]
-    mult = np.interp(CS.out.vEgoRaw, speeds, multipliers)
+    multipliers = [800.0, 300.0]
+    mult = float(np.interp(CS.out.vEgoRaw, speeds, multipliers))
     torque = actuators.accel * mult
     # TODO: try hysteresis:  braking = torque < (0 if braking else -248) and not CS.out.gasPressed
-    braking = torque < -248 and not CS.out.gasPressed # breaking threshold ~-28 Nm (can torque / 10)
+    braking = torque < -248 and not CS.out.gasPressed # breaking threshold ~-25 Nm (can torque / 10)
 
     # TODO: only enable section if self.CP.openpilotLongitudinalControl
     # TODO: disable_ecu not working - UDS communication control not supported by radar ECU.
@@ -81,8 +80,8 @@ class CarController(CarControllerBase):
     new_actuators = actuators.as_builder()
     new_actuators.steeringAngleDeg = self.apply_angle_last
     # TODO: logging the internal parameters for DEBUG
-    new_actuators.gas = mult
-    new_actuators.brake = braking
-    new_actuators.torqueOutputCan = torque
+    new_actuators.gas = torque/1000
+    new_actuators.brake = float(braking)
+    new_actuators.accel = torque
     self.frame += 1
     return new_actuators, can_sends
