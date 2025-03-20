@@ -20,7 +20,7 @@ class CarInterface(CarInterfaceBase):
 
     ret.steerControlType = structs.CarParams.SteerControlType.angle
     ret.steerActuatorDelay = 0.3
-    ret.steerLimitTimer = 1.0
+    ret.steerLimitTimer = 0.4
 
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.psa)]
 
@@ -39,8 +39,6 @@ class CarInterface(CarInterfaceBase):
     # if experimental_long:
     # TODO DELETE
     print(f"*************experimental long: {experimental_long}******************")
-    ret.longitudinalTuning.kiBP = [0., 35.]
-    ret.longitudinalTuning.kiV = [1.5, 0.8]
     # TODO DELETE
 
     ret.openpilotLongitudinalControl = True

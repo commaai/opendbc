@@ -1,4 +1,4 @@
-from opendbc.car import apply_std_steer_angle_limits, make_tester_present_msg, Bus
+from opendbc.car import apply_std_steer_angle_limits, make_tester_present_msg, apply_hysteresis, Bus
 from opendbc.can.packer import CANPacker
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.psa import psacan
@@ -33,7 +33,7 @@ class CarController(CarControllerBase):
     # TODO: only enable section if self.CP.openpilotLongitudinalControl
     # TODO: disable_ecu not working - UDS communication control not supported by radar ECU.
     # disable radar ECU by setting to programming mode
-    if self.frame > 100:
+    if self.frame > 1000:
       if self.radar_disabled == 0:
         can_sends.append(create_disable_radar())
         self.radar_disabled = 1
@@ -45,8 +45,11 @@ class CarController(CarControllerBase):
       # TODO: tune torque multiplier
       # TODO: tune braking threshold
       # TODO: check if disengage on accelerator is already in CC.longActive
-      torque = actuators.accel * 1000 #(500 if actuators.accel >= 0 else 100)
-      braking = torque < -300 and not CS.out.gasPressed # breaking threshold ~-30 Nm (can torque / 10)
+      # Highest torque seen without gas input: ~1000
+      # Lowest torque seen without break mode: -560 (but only when transitioning from brake to accel mode, else -248)
+      # Lowest brake mode accel seen: -4.85m/s²
+      torque = actuators.accel * 500
+      braking = torque < -248 and not CS.out.gasPressed # breaking threshold ~-28 Nm (can torque / 10)
 
       if self.frame % 2 == 0: # 50 Hz
         can_sends.append(create_HS2_DYN1_MDD_ETAT_2B6(self.packer, self.frame // 2, actuators.accel, CC.longActive, CS.out.gasPressed, braking, torque))
