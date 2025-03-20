@@ -233,7 +233,7 @@ class CarState(CarStateBase):
 
     self.cluster_speed_counter += 1
     if self.cluster_speed_counter > CLUSTER_SAMPLE_RATE:
-      self.cluster_speed = cp.vl["CRUISE_BUTTONS_ALT"]["CLUSTER_SPEED_KPH"]
+      self.cluster_speed = cp.vl["CRUISE_BUTTONS_ALT"]["CLUSTER_SPEED_MPH"]
       self.cluster_speed_counter = 0
 
     ret.vEgoCluster = self.cluster_speed * speed_factor
