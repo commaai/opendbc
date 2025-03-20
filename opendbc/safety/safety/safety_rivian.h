@@ -70,7 +70,7 @@ static bool rivian_tx_hook(const CANPacket_t *to_send) {
       bool steer_req = GET_BIT(to_send, 28U);
 
       if (steer_torque_cmd_checks(desired_torque, steer_req, RIVIAN_STEERING_LIMITS)) {
-        tx = false;
+//        tx = false;
       }
     }
 
