@@ -70,7 +70,7 @@ def create_brake_command(packer, CAN, apply_brake, pump_on, pcm_override, pcm_ca
     "AEB_REQ_2": 0,
     "AEB_STATUS": 0,
     "SET_ME_X00": 4 if brake_rq else 0,
-    "SET_ME_X00_5: apply_brake if brake_rq else 0,
+    "SET_ME_X00_5": apply_brake if brake_rq else 0,
   }
   return packer.make_can_msg("BRAKE_COMMAND", CAN.pt, values)
 
