@@ -31,7 +31,7 @@ class CarController(CarControllerBase):
 
     ### longitudinal control ###
     # TUNING
-    mult = 60 # accel in m/s^2 to torque
+    mult = 80 # accel in m/s^2 to torque
     brake_accel = -0.5 # below this accel, go into brake mode
     torque = 10*mult*actuators.accel if actuators.accel>brake_accel else -4000
     braking = actuators.accel<brake_accel and not CS.out.gasPressed
