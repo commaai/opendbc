@@ -219,7 +219,8 @@ class CarController(CarControllerBase):
           pump_on, self.last_pump_ts = brake_pump_hysteresis(apply_brake, self.apply_brake_last, self.last_pump_ts, ts)
 
           pcm_override = True
-          can_sends.append(hondacan.create_brake_command(self.packer, self.CAN, apply_brake, pump_on,
+          pump send = ( apply_brake > 0 ) if self.CP.carFingerprint in HONDA_NIDEC_HYBRID else pump_on
+          can_sends.append(hondacan.create_brake_command(self.packer, self.CAN, apply_brake, pump_send,
                                                          pcm_override, pcm_cancel_cmd, fcw_display,
                                                          self.CP.carFingerprint, CS.stock_brake))
           self.apply_brake_last = apply_brake
