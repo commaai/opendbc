@@ -31,9 +31,9 @@ class CarController(CarControllerBase):
 
     ### longitudinal control ###
     # TUNING
-    mult = 80 # accel in m/s^2 to torque
     brake_accel = -0.5 # below this accel, go into brake mode
-    torque = 10*mult*actuators.accel if actuators.accel>brake_accel else -4000
+    torque_raw = actuators.accel * 10 * 80 # accel in m/s^2 to torque in Nm * 10 for CAN
+    torque = max(-300, min(torque_raw, 2000)) # apply torque CAN Nm limits
     braking = actuators.accel<brake_accel and not CS.out.gasPressed
 
     # TODO: only enable section if self.CP.openpilotLongitudinalControl
