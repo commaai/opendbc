@@ -4,7 +4,7 @@ import re
 
 from opendbc.car.car_helpers import interfaces
 from opendbc.car.docs import get_all_car_docs
-from opendbc.car.docs_definitions import Cable, Column, PartType, Star
+from opendbc.car.docs_definitions import Cable, Column, PartType, Star, SupportType
 from opendbc.car.honda.values import CAR as HONDA
 from opendbc.car.values import PLATFORMS
 
@@ -18,6 +18,9 @@ class TestCarDocs:
     make_model_years = defaultdict(list)
     for car in self.all_cars:
       with subtests.test(car_docs_name=car.name):
+        if car.support_type != SupportType.UPSTREAM:
+          pytest.skip()
+
         make_model = (car.make, car.model)
         for year in car.year_list:
           assert year not in make_model_years[make_model], f"{car.name}: Duplicate model year"
@@ -34,14 +37,14 @@ class TestCarDocs:
     for car in self.all_cars:
       with subtests.test(car=car.name):
         tokens = car.model.lower().split(" ")
-        if car.car_name == "hyundai":
+        if car.brand == "hyundai":
           assert "phev" not in tokens, "Use `Plug-in Hybrid`"
           assert "hev" not in tokens, "Use `Hybrid`"
           if "plug-in hybrid" in car.model.lower():
             assert "Plug-in Hybrid" in car.model, "Use correct capitalization"
           if car.make != "Kia":
             assert "ev" not in tokens, "Use `Electric`"
-        elif car.car_name == "toyota":
+        elif car.brand == "toyota":
           if "rav4" in tokens:
             assert "RAV4" in car.model, "Use correct capitalization"
 
@@ -52,7 +55,7 @@ class TestCarDocs:
         # honda sanity check, it's the definition of a no torque star
         if car.car_fingerprint in (HONDA.HONDA_ACCORD, HONDA.HONDA_CIVIC, HONDA.HONDA_CRV, HONDA.HONDA_ODYSSEY, HONDA.HONDA_PILOT):
           assert car.row[Column.STEERING_TORQUE] == Star.EMPTY, f"{car.name} has full torque star"
-        elif car.car_name in ("toyota", "hyundai"):
+        elif car.brand in ("toyota", "hyundai"):
           assert car.row[Column.STEERING_TORQUE] != Star.EMPTY, f"{car.name} has no torque star"
 
   def test_year_format(self, subtests):
@@ -63,7 +66,7 @@ class TestCarDocs:
   def test_harnesses(self, subtests):
     for car in self.all_cars:
       with subtests.test(car=car.name):
-        if car.name == "comma body":
+        if car.name == "comma body" or car.support_type != SupportType.UPSTREAM:
           pytest.skip()
 
         car_part_type = [p.part_type for p in car.car_parts.all_parts()]

@@ -352,13 +352,16 @@ FW_VERSIONS = {
   CAR.VOLKSWAGEN_JETTA_MK6: {
     (Ecu.srs, 0x715, None): [
       b'\xf1\x875C0959655M \xf1\x890726\xf1\x82\t00NB1108--------24',
+      b'\xf1\x875K0959655H \xf1\x890724\xf1\x82\t00131108--------02',
     ],
     (Ecu.fwdRadar, 0x757, None): [
       b'\xf1\x877N0907572C \xf1\x890211\xf1\x82\x0151',
+      b'\xf1\x877N0907572C \xf1\x890211\xf1\x82\x0152',
     ],
   },
   CAR.VOLKSWAGEN_JETTA_MK7: {
     (Ecu.engine, 0x7e0, None): [
+      b'\xf1\x8704E906024AF\xf1\x899970',
       b'\xf1\x8704E906024AK\xf1\x899937',
       b'\xf1\x8704E906024AS\xf1\x899912',
       b'\xf1\x8704E906024B \xf1\x895594',

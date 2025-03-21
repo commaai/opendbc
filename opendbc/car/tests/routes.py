@@ -8,6 +8,7 @@ from opendbc.car.hyundai.values import CAR as HYUNDAI
 from opendbc.car.nissan.values import CAR as NISSAN
 from opendbc.car.mazda.values import CAR as MAZDA
 from opendbc.car.mock.values import CAR as MOCK
+from opendbc.car.rivian.values import CAR as RIVIAN
 from opendbc.car.subaru.values import CAR as SUBARU
 from opendbc.car.tesla.values import CAR as TESLA
 from opendbc.car.toyota.values import CAR as TOYOTA
@@ -18,7 +19,6 @@ from opendbc.car.body.values import CAR as COMMA
 # FIXME: add routes for these cars
 non_tested_cars = [
   MOCK.MOCK,
-  FORD.FORD_F_150_MK14,
   GM.CADILLAC_ATS,
   GM.HOLDEN_ASTRA,
   GM.CHEVROLET_MALIBU,
@@ -57,6 +57,7 @@ routes = [
   CarTestRoute("e886087f430e7fe7|2023-06-16--23-06-36", FORD.FORD_FOCUS_MK4),
   CarTestRoute("bd37e43731e5964b|2023-04-30--10-42-26", FORD.FORD_MAVERICK_MK1),
   CarTestRoute("112e4d6e0cad05e1|2023-11-14--08-21-43", FORD.FORD_F_150_LIGHTNING_MK1),
+  CarTestRoute("e36b272d5679115f/00000369--a3e8499a85", FORD.FORD_F_150_MK14),
   CarTestRoute("83a4e056c7072678|2023-11-13--16-51-33", FORD.FORD_MUSTANG_MACH_E_MK1),
   CarTestRoute("37998aa0fade36ab/00000000--48f927c4f5", FORD.FORD_RANGER_MK2),
   #TestRoute("f1b4c567731f4a1b|2018-04-30--10-15-35", FORD.FUSION),
@@ -105,6 +106,7 @@ routes = [
   CarTestRoute("54fd8451b3974762|2021-04-01--14-50-10", HONDA.HONDA_RIDGELINE),
   CarTestRoute("2d5808fae0b38ac6|2021-09-01--17-14-11", HONDA.HONDA_E),
   CarTestRoute("f44aa96ace22f34a|2021-12-22--06-22-31", HONDA.HONDA_CIVIC_2022),
+  CarTestRoute("1f032f5173c8ad99/00000006--573b3fcaf5", HONDA.HONDA_CIVIC_2022), # Civic Type R with manual transmission
 
   CarTestRoute("87d7f06ade479c2e|2023-09-11--23-30-11", HYUNDAI.HYUNDAI_AZERA_6TH_GEN),
   CarTestRoute("66189dd8ec7b50e6|2023-09-20--07-02-12", HYUNDAI.HYUNDAI_AZERA_HEV_6TH_GEN),
@@ -115,7 +117,7 @@ routes = [
   CarTestRoute("afe09b9f5d3f3548/00000011--15fefe1c50", HYUNDAI.GENESIS_GV70_ELECTRIFIED_1ST_GEN),
   CarTestRoute("afe09b9f5d3f3548/0000001b--a1129a4a15", HYUNDAI.GENESIS_GV70_ELECTRIFIED_1ST_GEN),  # openpilot longitudinal enabled
   CarTestRoute("6b301bf83f10aa90|2020-11-22--16-45-07", HYUNDAI.GENESIS_G80),
-  CarTestRoute("66eaa6c3b6b2afc6/00000009--3a5199aabe", HYUNDAI.GENESIS_G80_2ND_GEN_FL),  # HDA2
+  CarTestRoute("66eaa6c3b6b2afc6/00000009--3a5199aabe", HYUNDAI.GENESIS_G80_2ND_GEN_FL),  # LKA steering
   CarTestRoute("0bbe367c98fa1538|2023-09-16--00-16-49", HYUNDAI.HYUNDAI_CUSTIN_1ST_GEN),
   CarTestRoute("f0709d2bc6ca451f|2022-10-15--08-13-54", HYUNDAI.HYUNDAI_SANTA_CRUZ_1ST_GEN),
   CarTestRoute("4dbd55df87507948|2022-03-01--09-45-38", HYUNDAI.HYUNDAI_SANTA_FE),
@@ -141,8 +143,8 @@ routes = [
   CarTestRoute("fc19648042eb6896|2023-08-16--11-43-27", HYUNDAI.KIA_SORENTO_HEV_4TH_GEN, segment=14),
   CarTestRoute("628935d7d3e5f4f7|2022-11-30--01-12-46", HYUNDAI.KIA_SORENTO_HEV_4TH_GEN),  # plug-in hybrid
   CarTestRoute("9c917ba0d42ffe78|2020-04-17--12-43-19", HYUNDAI.HYUNDAI_PALISADE),
-  CarTestRoute("05a8f0197fdac372|2022-10-19--14-14-09", HYUNDAI.HYUNDAI_IONIQ_5),  # HDA2
-  CarTestRoute("eb4eae1476647463|2023-08-26--18-07-04", HYUNDAI.HYUNDAI_IONIQ_6, segment=6),  # HDA2
+  CarTestRoute("05a8f0197fdac372|2022-10-19--14-14-09", HYUNDAI.HYUNDAI_IONIQ_5),  # LKA steering
+  CarTestRoute("eb4eae1476647463|2023-08-26--18-07-04", HYUNDAI.HYUNDAI_IONIQ_6, segment=6),  # LKA steering
   CarTestRoute("3f29334d6134fcd4|2022-03-30--22-00-50", HYUNDAI.HYUNDAI_IONIQ_PHEV_2019),
   CarTestRoute("fa8db5869167f821|2021-06-10--22-50-10", HYUNDAI.HYUNDAI_IONIQ_PHEV),
   CarTestRoute("e1107f9d04dfb1e2|2023-09-05--22-32-12", HYUNDAI.HYUNDAI_IONIQ_PHEV),  # openpilot longitudinal enabled
@@ -152,16 +154,19 @@ routes = [
   CarTestRoute("012c95f06918eca4|2023-01-15--11-19-36", HYUNDAI.HYUNDAI_IONIQ),  # openpilot longitudinal enabled
   CarTestRoute("ab59fe909f626921|2021-10-18--18-34-28", HYUNDAI.HYUNDAI_IONIQ_HEV_2022),
   CarTestRoute("22d955b2cd499c22|2020-08-10--19-58-21", HYUNDAI.HYUNDAI_KONA),
+  CarTestRoute("0099bdb24d82951b/00000005--c38d940b04", HYUNDAI.HYUNDAI_KONA_2022),
   CarTestRoute("efc48acf44b1e64d|2021-05-28--21-05-04", HYUNDAI.HYUNDAI_KONA_EV),
   CarTestRoute("f90d3cd06caeb6fa|2023-09-06--17-15-47", HYUNDAI.HYUNDAI_KONA_EV),  # openpilot longitudinal enabled
   CarTestRoute("ff973b941a69366f|2022-07-28--22-01-19", HYUNDAI.HYUNDAI_KONA_EV_2022, segment=11),
   CarTestRoute("1618132d68afc876|2023-08-27--09-32-14", HYUNDAI.HYUNDAI_KONA_EV_2ND_GEN, segment=13),
   CarTestRoute("49f3c13141b6bc87|2021-07-28--08-05-13", HYUNDAI.HYUNDAI_KONA_HEV),
+  CarTestRoute("a74afe0cf708748f/0000000e--a2885a9a71", HYUNDAI.HYUNDAI_NEXO_1ST_GEN),
+  CarTestRoute("a74afe0cf708748f/0000000c--b476a8fd00", HYUNDAI.HYUNDAI_NEXO_1ST_GEN),  # openpilot longitudinal enabled
   CarTestRoute("5dddcbca6eb66c62|2020-07-26--13-24-19", HYUNDAI.KIA_STINGER),
   CarTestRoute("5b50b883a4259afb|2022-11-09--15-00-42", HYUNDAI.KIA_STINGER_2022),
   CarTestRoute("d624b3d19adce635|2020-08-01--14-59-12", HYUNDAI.HYUNDAI_VELOSTER),
-  CarTestRoute("d545129f3ca90f28|2022-10-19--09-22-54", HYUNDAI.KIA_EV6),  # HDA2
-  CarTestRoute("68d6a96e703c00c9|2022-09-10--16-09-39", HYUNDAI.KIA_EV6),  # HDA1
+  CarTestRoute("d545129f3ca90f28|2022-10-19--09-22-54", HYUNDAI.KIA_EV6),  # LKA steering
+  CarTestRoute("68d6a96e703c00c9|2022-09-10--16-09-39", HYUNDAI.KIA_EV6),  # LFA steering
   CarTestRoute("9b25e8c1484a1b67|2023-04-13--10-41-45", HYUNDAI.KIA_EV6),
   CarTestRoute("007d5e4ad9f86d13|2021-09-30--15-09-23", HYUNDAI.KIA_K5_2021),
   CarTestRoute("c58dfc9fc16590e0|2023-01-14--13-51-48", HYUNDAI.KIA_K5_HEV_2020),
@@ -301,6 +306,8 @@ routes = [
   CarTestRoute("fb53c640f499b73d|2021-06-01--04-17-56", MAZDA.MAZDA_6),
   CarTestRoute("f6d5b1a9d7a1c92e|2021-07-08--06-56-59", MAZDA.MAZDA_CX9_2021),
   CarTestRoute("a4af1602d8e668ac|2022-02-03--12-17-07", MAZDA.MAZDA_CX5_2022),
+
+  CarTestRoute("bc095dc92e101734/000000db--ee9fe46e57", RIVIAN.RIVIAN_R1_GEN1),
 
   #CarTestRoute("46cdc864ec865f4b/00000007--42f94db730", TESLA.TESLA_MODEL_Y),
 

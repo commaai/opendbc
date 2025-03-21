@@ -1,7 +1,7 @@
 VERSION ""
 
 
-NS_ : 
+NS_ :
 	NS_DESC_
 	CM_
 	BA_DEF_
@@ -149,6 +149,39 @@ BO_ 637 APS_eacMonitor: 3 PARTY
  SG_ APS_eacMonitorChecksum : 16|8@1+ (1,0) [0|0] "" X
  SG_ APS_eacMonitorCounter : 8|4@1+ (1,0) [0|0] "" X
 
+BO_ 545 VCFRONT_LVPowerState: 8 CH
+ SG_ VCFRONT_LVPowerStateChecksum : 56|8@1+ (1,0) [0|255] ""  ibst
+ SG_ VCFRONT_LVPowerStateCounter : 52|4@1+ (1,0) [0|15] ""  ibst
+ SG_ VCFRONT_uiAudioLVState m0 : 50|2@1+ (1,0) [0|3] ""  X
+ SG_ VCFRONT_uiHiCurrentLVState m0 : 48|2@1+ (1,0) [0|3] ""  X
+ SG_ VCFRONT_vcrightHiCurrentLVState m0 : 46|2@1+ (1,0) [0|3] ""  X
+ SG_ VCFRONT_vcleftHiCurrentLVState m0 : 44|2@1+ (1,0) [0|3] ""  X
+ SG_ VCFRONT_ocsLVRequest m0 : 42|2@1+ (1,0) [0|3] ""  X
+ SG_ VCFRONT_oilPumpRearLVRequest m0 : 40|2@1+ (1,0) [0|3] ""  X
+ SG_ VCFRONT_oilPumpFrontLVState m0 : 38|2@1+ (1,0) [0|3] ""  X
+ SG_ VCFRONT_disLVState m0 : 36|2@1+ (1,0) [0|3] ""  X
+ SG_ VCFRONT_diLVRequest m0 : 34|2@1+ (1,0) [0|3] ""  X
+ SG_ VCFRONT_das2HighCurrentLVState m0 : 32|2@1+ (1,0) [0|3] ""  das
+ SG_ VCFRONT_das1HighCurrentLVState m0 : 30|2@1+ (1,0) [0|3] ""  das
+ SG_ VCFRONT_amplifierLVRequest m0 : 28|2@1+ (1,0) [0|3] ""  X
+ SG_ VCFRONT_tunerLVRequest m0 : 26|2@1+ (1,0) [0|3] ""  X
+ SG_ VCFRONT_iBoosterLVState m0 : 24|2@1+ (1,0) [0|3] ""  ibst
+ SG_ VCFRONT_rcmLVRequest m0 : 22|2@1+ (1,0) [0|3] ""  rcm
+ SG_ VCFRONT_tpmsLVRequest m0 : 20|2@1+ (1,0) [0|3] ""  tpms
+ SG_ VCFRONT_sccmLVRequest m0 : 18|2@1+ (1,0) [0|3] ""  X
+ SG_ VCFRONT_pcsLVState m1 : 16|2@1+ (1,0) [0|3] ""  X
+ SG_ VCFRONT_ptcLVRequest m0 : 16|2@1+ (1,0) [0|3] ""  X
+ SG_ VCFRONT_hvacCompLVState m0 : 14|2@1+ (1,0) [0|3] ""  X
+ SG_ VCFRONT_tasLVState m1 : 14|2@1+ (1,0) [0|3] ""  X
+ SG_ VCFRONT_hvcLVRequest m1 : 12|2@1+ (1,0) [0|3] ""  X
+ SG_ VCFRONT_radcLVState m0 : 12|2@1+ (1,0) [0|3] ""  X
+ SG_ VCFRONT_epasLVState m1 : 10|2@1+ (1,0) [0|3] ""  epas3s
+ SG_ VCFRONT_espLVState m0 : 10|2@1+ (1,0) [0|3] ""  ibst
+ SG_ VCFRONT_parkLVState m0 : 8|2@1+ (1,0) [0|3] ""  X
+ SG_ VCFRONT_cpLVRequest m1 : 8|2@1+ (1,0) [0|3] ""  X
+ SG_ VCFRONT_vehiclePowerState : 5|2@1+ (1,0) [0|3] ""  park
+ SG_ VCFRONT_LVPowerStateIndex M : 0|5@1+ (1,0) [0|1] ""  epas3s
+
 BO_ 599 DI_speed: 8 PARTY
  SG_ DI_uiSpeedUnits : 32|1@1+ (1,0) [0|1] ""  das
  SG_ DI_uiSpeed : 24|8@1+ (1,0) [0|254] ""  das
@@ -175,7 +208,7 @@ BO_ 297 SCCM_steeringAngleSensor: 8 PARTY
  SG_ SCCM_steeringAngleCounter : 8|4@1+ (1,0) [0|15] ""  epas3s
  SG_ SCCM_steeringAngleCrc : 0|8@1+ (1,0) [0|255] ""  epas3s
 
-BO_ 646 DI_state: 7 ETH
+BO_ 646 DI_state: 8 ETH
  SG_ DI_summonInPanic : 48|1@1+ (1,0) [0|0] ""  X
  SG_ DI_rollPreventionState : 45|3@1+ (1,0) [0|0] ""  X
  SG_ DI_vehicleHoldState : 42|3@1+ (1,0) [0|0] ""  X
@@ -190,11 +223,19 @@ BO_ 646 DI_state: 7 ETH
  SG_ DI_locStatusCounter : 8|4@1+ (1,0) [0|0] ""  X
  SG_ DI_locStatusChecksum : 0|8@1+ (1,0) [0|0] ""  X
 
+BO_ 659 DAS_settings: 8 XXX
+ SG_ DAS_autopilotEnabled : 38|1@0+ (1,0) [0|1] "" XXX
+ SG_ DAS_settingCounter : 52|4@1+ (1,0) [0|15] "" XXX
+ SG_ DAS_settingChecksum : 63|8@0+ (1,0) [0|255] "" XXX
+
 BO_ 785 UI_warning: 7 XXX
  SG_ buckleStatus : 13|1@0+ (1,0) [0|1] "" XXX
+ SG_ scrollWheelRightTilt : 21|1@0+ (1,0) [0|1] "" XXX
  SG_ leftBlinkerOn : 22|1@0+ (1,0) [0|1] "" XXX
  SG_ rightBlinkerOn : 23|1@0+ (1,0) [0|1] "" XXX
  SG_ anyDoorOpen : 28|1@0+ (1,0) [0|1] "" XXX
+ SG_ wiperSettings : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ highBeam : 50|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 923 DAS_status: 8 PARTY
  SG_ DAS_statusChecksum : 56|8@1+ (1,0) [0|255] ""  aps
@@ -231,6 +272,35 @@ BO_ 923 DAS_status: 8 PARTY
 
 
 
+VAL_ 545 VCFRONT_uiAudioLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_uiHiCurrentLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_vcrightHiCurrentLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_vcleftHiCurrentLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_ocsLVRequest 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_oilPumpRearLVRequest 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_oilPumpFrontLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_disLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_diLVRequest 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_das2HighCurrentLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_das1HighCurrentLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_amplifierLVRequest 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_tunerLVRequest 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_iBoosterLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_rcmLVRequest 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_tpmsLVRequest 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_sccmLVRequest 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_pcsLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_ptcLVRequest 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_hvacCompLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_tasLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_hvcLVRequest 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_radcLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_epasLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_espLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_parkLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_cpLVRequest 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
+VAL_ 545 VCFRONT_vehiclePowerState 3 "VEHICLE_POWER_STATE_DRIVE" 1 "VEHICLE_POWER_STATE_CONDITIONING" 2 "VEHICLE_POWER_STATE_ACCESSORY" 0 "VEHICLE_POWER_STATE_OFF" ;
+VAL_ 545 VCFRONT_LVPowerStateIndex 0 "Mux0" 1 "Mux1" ;
 VAL_ 905 DAS_longCollisionWarning 7 "FCM_LONG_COLLISION_WARNING_VEHICLE_CUTIN" 0 "FCM_LONG_COLLISION_WARNING_NONE" 4 "FCM_LONG_COLLISION_WARNING_STOPSIGN_STOPLINE" 9 "FCM_LONG_COLLISION_WARNING_VEHICLE_MCVL2" 15 "FCM_LONG_COLLISION_WARNING_SNA" 8 "FCM_LONG_COLLISION_WARNING_VEHICLE_MCVL" 5 "FCM_LONG_COLLISION_WARNING_TFL_STOPLINE" 2 "FCM_LONG_COLLISION_WARNING_PEDESTRIAN" 12 "FCM_LONG_COLLISION_WARNING_VEHICLE_CIPV2" 6 "FCM_LONG_COLLISION_WARNING_VEHICLE_CIPV" 10 "FCM_LONG_COLLISION_WARNING_VEHICLE_MCVR" 3 "FCM_LONG_COLLISION_WARNING_IPSO" 1 "FCM_LONG_COLLISION_WARNING_VEHICLE_UNKNOWN" 11 "FCM_LONG_COLLISION_WARNING_VEHICLE_MCVR2" ;
 VAL_ 905 DAS_ppOffsetDesiredRamp 128 "PP_NO_OFFSET" ;
 VAL_ 905 DAS_driverInteractionLevel 0 "DRIVER_INTERACTING" 1 "DRIVER_NOT_INTERACTING" 2 "CONTINUED_DRIVER_NOT_INTERACTING" ;

@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from enum import IntFlag
 
 from opendbc.car import Bus, PlatformConfig, DbcDict, Platforms, CarSpecs
 from opendbc.car.structs import CarParams
@@ -57,6 +58,12 @@ class CarControllerParams:
 
     self.BRAKE_LOOKUP_BP = [self.ACCEL_MIN, max_regen_acceleration]
     self.BRAKE_LOOKUP_V = [self.MAX_BRAKE, 0.]
+
+
+class GMSafetyFlags(IntFlag):
+  HW_CAM = 1
+  HW_CAM_LONG = 2
+  EV = 4
 
 
 @dataclass
