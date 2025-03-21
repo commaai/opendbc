@@ -46,6 +46,7 @@ class CarControllerParams:
     self.STEER_LOOKUP_BP = [v * -1 for v in CP.lateralParams.torqueBP][1:][::-1] + list(CP.lateralParams.torqueBP)
     self.STEER_LOOKUP_V = [v * -1 for v in CP.lateralParams.torqueV][1:][::-1] + list(CP.lateralParams.torqueV)
 
+
 class HondaSafetyFlags(IntFlag):
   ALT_BRAKE = 1
   BOSCH_LONG = 2
@@ -348,6 +349,7 @@ HONDA_NIDEC_HYBRID = CAR.with_flags(HondaFlags.NIDEC_HYBRID)
 HONDA_BOSCH = CAR.with_flags(HondaFlags.BOSCH)
 HONDA_BOSCH_RADARLESS = CAR.with_flags(HondaFlags.BOSCH_RADARLESS)
 SERIAL_STEERING = {CAR.ACURA_MDX_3G_HYBRID}
+
 
 DBC = CAR.create_dbc_map()
 
