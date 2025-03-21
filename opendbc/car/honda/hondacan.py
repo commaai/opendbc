@@ -124,6 +124,7 @@ def create_steering_control(packer, CAN, apply_torque, lkas_active):
   }
   return packer.make_can_msg("STEERING_CONTROL", CAN.lkas, values)
 
+
 def create_bosch_supplemental_1(packer, CAN):
   # non-active params
   values = {
