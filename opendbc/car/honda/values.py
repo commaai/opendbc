@@ -75,6 +75,7 @@ class HondaFlags(IntFlag):
   NIDEC = 16
   NIDEC_ALT_PCM_ACCEL = 32
   NIDEC_ALT_SCM_MESSAGES = 64
+  NIDEC_HYBRID = 128
 
 
 # Car button codes
@@ -246,7 +247,7 @@ class CAR(Platforms):
     [HondaCarDocs("Acura MDX Hybrid 2018-20")],
     CarSpecs(mass=4486 * CV.LB_TO_KG, wheelbase=2.82, centerToFrontRatio=0.428, steerRatio=15.76, tireStiffnessFactor=0.444),  # acura spec, stiff from Pilot
     radar_dbc_dict('acura_mdx_3G_hybrid'),
-    flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES
+    flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES, HondaFlags.NIDEC_HYBRID,
   )
   HONDA_ODYSSEY = HondaNidecPlatformConfig(
     [HondaCarDocs("Honda Odyssey 2018-20")],
@@ -352,10 +353,10 @@ STEER_THRESHOLD = {
 
 HONDA_NIDEC_ALT_PCM_ACCEL = CAR.with_flags(HondaFlags.NIDEC_ALT_PCM_ACCEL)
 HONDA_NIDEC_ALT_SCM_MESSAGES = CAR.with_flags(HondaFlags.NIDEC_ALT_SCM_MESSAGES)
+HONDA_NIDEC_HYBRID = CAR.with_flags(HondaFlags.NIDEC_HYBRID)
 HONDA_BOSCH = CAR.with_flags(HondaFlags.BOSCH)
 HONDA_BOSCH_RADARLESS = CAR.with_flags(HondaFlags.BOSCH_RADARLESS)
 SERIAL_STEERING = {CAR.ACURA_MDX_3G_HYBRID}
-HONDA_NIDEC_HYBRID = {CAR.ACURA_MDX_3G_HYBRID}
 
 DBC = CAR.create_dbc_map()
 
