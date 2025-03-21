@@ -151,7 +151,7 @@ static void honda_rx_hook(const CANPacket_t *to_push) {
   if (!(alternative_experience & ALT_EXP_DISABLE_STOCK_AEB)) {
     if ((bus == 2) && (addr == 0x1FA)) {
       bool honda_stock_aeb = GET_BIT(to_push, 29U);
-      int offset = 0
+      int offset = 0;
       if (honda_nidec_hybrid) {
         offset = 6;
       }
