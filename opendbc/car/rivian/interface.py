@@ -4,7 +4,7 @@ from opendbc.car.interfaces import CarInterfaceBase, TorqueFromLateralAccelCallb
 from opendbc.car.rivian.carcontroller import CarController
 from opendbc.car.rivian.carstate import CarState
 from opendbc.car.rivian.radar_interface import RadarInterface
-from opendbc.car.rivian.values import CarControllerParams
+from opendbc.car.rivian.values import CarControllerParams, RivianSafetyFlags
 
 
 class CarInterface(CarInterfaceBase):
@@ -41,7 +41,7 @@ class CarInterface(CarInterfaceBase):
     ret.experimentalLongitudinalAvailable = False
     if experimental_long:
       ret.openpilotLongitudinalControl = True
-      #ret.safetyConfigs[0].safetyParam |= Panda.FLAG_RIVIAN_LONG_CONTROL
+      ret.safetyConfigs[0].safetyParam |= RivianSafetyFlags.LONG_CONTROL.value
 
     ret.longitudinalActuatorDelay = 0.35
     ret.vEgoStopping = 0.25
