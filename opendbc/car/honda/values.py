@@ -247,7 +247,7 @@ class CAR(Platforms):
     [HondaCarDocs("Acura MDX Hybrid 2018-20")],
     CarSpecs(mass=4486 * CV.LB_TO_KG, wheelbase=2.82, centerToFrontRatio=0.428, steerRatio=15.76, tireStiffnessFactor=0.444),  # acura spec, stiff from Pilot
     radar_dbc_dict('acura_mdx_3G_hybrid'),
-    flags={HondaFlags.NIDEC_ALT_SCM_MESSAGES, HondaFlags.NIDEC_HYBRID,}
+    flags={HondaFlags.NIDEC_ALT_SCM_MESSAGES | HondaFlags.NIDEC_HYBRID,}
   )
   HONDA_ODYSSEY = HondaNidecPlatformConfig(
     [HondaCarDocs("Honda Odyssey 2018-20")],
