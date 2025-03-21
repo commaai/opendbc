@@ -88,9 +88,10 @@ GEAR_MAP = {
 
 
 class CarControllerParams:
-  # The Rivian R1T we tested on achieves slightly more lateral acceleration going left vs. right
-  # and lateral acceleration rises as speed increases. This value is set conservatively to
-  # reach a maximum of 2.5-3.0 m/s^2 turning left at 80 mph, but is less at lower speeds
+  # The R1T 2023 and R1S 2023 we tested on achieves slightly more lateral acceleration going left vs. right
+  # and lateral acceleration falls linearly as speed decreases from ~40 mph to 20 mph. This value is set
+  # conservatively to reach a maximum of 3.0 m/s^2 turning left at 80 mph
+  # TODO: figure out why some users' cars are seeing almost half lateral accelerations at all speeds.
 
   # these refer to turning left (R1T and R1S both seen with more torque left vs. right)
   # 250 is ~2.8 m/s^2 above 20 m/s, then linearly ramps to ~1.6 m/s^2 from 20 m/s to 10 m/s (TODO: and maybe lower under 10 m/s, need to check)
