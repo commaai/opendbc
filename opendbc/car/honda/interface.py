@@ -156,7 +156,8 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.8], [0.24]]  # TODO: can probably use some tuning
 
     elif candidate == CAR.ACURA_MDX_3G_HYBRID:
-      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 239], [0, 239]]  # TODO: determine if there is a dead zone at the top end
+      # ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 239], [0, 239]]  # TODO: determine if there is a dead zone at the top end
+      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 300], [0, 300]]  # TODO: determine if there is a dead zone at the top end
       ret.lateralTuning.pid.kf = 0.000035
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.115], [0.052]]
 
