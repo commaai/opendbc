@@ -55,7 +55,7 @@ def get_can_messages(CP, gearbox_msg):
   if CP.carFingerprint in (HONDA_BOSCH | {CAR.HONDA_CIVIC, CAR.HONDA_ODYSSEY, CAR.HONDA_ODYSSEY_CHN}):
     messages.append(("EPB_STATUS", 50))
 
-  if CP.carFingerprint == CAR.ACURA_MDX_3G_HYBRID:
+  if CP.carFingerprint in HONDA_NIDEC_HYBRID:
     messages += [
       ("HYBRID_STATUS", 100),
     ]
@@ -165,7 +165,7 @@ class CarState(CarStateBase):
       # On some cars, these two signals are always 1, this flag is masking a bug in release
       # FIXME: find and set the ACC faulted signals on more platforms
       if self.CP.openpilotLongitudinalControl:
-        if self.CP.carFingerprint == CAR.ACURA_MDX_3G_HYBRID:
+        if self.CP.carFingerprint in HONDA_NIDEC_HYBRID:
           ret.accFaulted = bool(cp.vl["HYBRID_STATUS"]["BRAKE_ERROR_1"] or cp.vl["HYBRID_STATUS"]["BRAKE_ERROR_2"])
         else:
           ret.accFaulted = bool(cp.vl["STANDSTILL"]["BRAKE_ERROR_1"] or cp.vl["STANDSTILL"]["BRAKE_ERROR_2"])
