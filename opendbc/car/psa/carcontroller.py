@@ -31,12 +31,10 @@ class CarController(CarControllerBase):
 
     ### longitudinal control ###
     # TUNING
-    speeds = [0.0, 30.0]
-    multipliers = [800.0, 300.0]
-    mult = float(np.interp(CS.out.vEgoRaw, speeds, multipliers))
-    torque = actuators.accel * mult
-    # TODO: try hysteresis:  braking = torque < (0 if braking else -248) and not CS.out.gasPressed
-    braking = torque < -248 and not CS.out.gasPressed # breaking threshold ~-25 Nm (can torque / 10)
+    mult = 60 # accel in m/s^2 to torque
+    brake_accel = -0.5 # below this accel, go into brake mode
+    torque = 10*mult*actuators.accel if actuators.accel>brake_accel else -4000
+    braking = actuators.accel<brake_accel and not CS.out.gasPressed
 
     # TODO: only enable section if self.CP.openpilotLongitudinalControl
     # TODO: disable_ecu not working - UDS communication control not supported by radar ECU.
