@@ -59,7 +59,7 @@ def get_can_messages(CP, gearbox_msg):
     messages += [
       ("HYBRID_STATUS", 100),
     ]
-  
+
   if CP.carFingerprint in HONDA_BOSCH:
     # these messages are on camera bus on radarless cars
     if not CP.openpilotLongitudinalControl and CP.carFingerprint not in HONDA_BOSCH_RADARLESS:
@@ -165,7 +165,7 @@ class CarState(CarStateBase):
       # On some cars, these two signals are always 1, this flag is masking a bug in release
       # FIXME: find and set the ACC faulted signals on more platforms
       if self.CP.openpilotLongitudinalControl:
-        if CP.carFingerprint == CAR.ACURA_MDX_3G_HYBRID:
+        if self.CP.carFingerprint == CAR.ACURA_MDX_3G_HYBRID:
           ret.accFaulted = bool(cp.vl["HYBRID_STATUS"]["BRAKE_ERROR_1"] or cp.vl["HYBRID_STATUS"]["BRAKE_ERROR_2"])
         else:
           ret.accFaulted = bool(cp.vl["STANDSTILL"]["BRAKE_ERROR_1"] or cp.vl["STANDSTILL"]["BRAKE_ERROR_2"])
@@ -297,7 +297,7 @@ class CarState(CarStateBase):
     pt_messages = get_can_messages(CP, self.gearbox_msg)
 
     cam_messages = []
-    
+
     if  CP.carFingerprint in (CAR.ACURA_MDX_3G_HYBRID):
       pt_messages += [
         ("STEERING_CONTROL", 0), # no timing rush?
