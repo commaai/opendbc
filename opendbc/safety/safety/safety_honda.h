@@ -156,7 +156,7 @@ static void honda_rx_hook(const CANPacket_t *to_push) {
         offset = 6;
       }
       else {
-        offet = 0;
+        offset = 0;
       }
       int honda_stock_brake = (GET_BYTE(to_push, 0 + offset) << 2) | (GET_BYTE(to_push, 1 + offset) >> 6);
       
