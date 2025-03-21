@@ -236,7 +236,7 @@ class CarState(CarStateBase):
       self.cluster_speed = cp.vl["CRUISE_BUTTONS_ALT"]["CLUSTER_SPEED_MPH"]
       self.cluster_speed_counter = 0
 
-    ret.vEgoCluster = self.cluster_speed * speed_factor
+    ret.vEgoCluster = self.cluster_speed * speed_factor + 0.5
 
     ret.steeringRateDeg = cp.vl["STEERING_SENSORS"]["STEERING_RATE"]
     ret.steeringAngleDeg = cp.vl["STEERING_SENSORS"]["STEERING_ANGLE"]
