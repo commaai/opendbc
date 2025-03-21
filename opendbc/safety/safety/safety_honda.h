@@ -292,7 +292,7 @@ static safety_config honda_nidec_init(uint16_t param) {
   static CanMsg HONDA_N_TX_MSGS[] = {{0xE4, 0, 5, true}, {0x194, 0, 4, true}, {0x1FA, 0, 8, false}, {0x30C, 0, 8, false}, {0x33D, 0, 5, false}};
 
   const uint16_t HONDA_PARAM_NIDEC_ALT = 4;
-  const uint16_t HONDA_NIDEC_HYBRID = 128;
+  const uint16_t HONDA_PARAM_NIDEC_HYBRID = 128;
 
   honda_hw = HONDA_NIDEC;
   honda_brake = 0;
@@ -306,7 +306,7 @@ static safety_config honda_nidec_init(uint16_t param) {
   safety_config ret;
 
   bool enable_nidec_alt = GET_FLAG(param, HONDA_PARAM_NIDEC_ALT);
-  honda_nidec_hybrid = GET_FLAG(param, HONDA_NIDEC_HYBRID);
+  honda_nidec_hybrid = GET_FLAG(param, HONDA_PARAM_NIDEC_HYBRID);
   
   if (enable_nidec_alt) {
     // For Nidecs with main on signal on an alternate msg (missing 0x326)
