@@ -16,8 +16,8 @@ class CarControllerParams:
   # to apply some more braking if we're on a downhill slope.
   # Our controller should still keep the 2 second average above
   # -3.5 m/s^2 as per planner limits
-  NIDEC_ACCEL_MIN = -3.5  # m/s^2 - was -4.0
-  NIDEC_ACCEL_MAX = 2.0  # m/s^2, - was +1.6, lower than 2.0 m/s^2 for tuning reasons
+  NIDEC_ACCEL_MIN = -4.0  # m/s^2
+  NIDEC_ACCEL_MAX = 1.6  # m/s^2, lower than 2.0 m/s^2 for tuning reasons
 
   NIDEC_ACCEL_LOOKUP_BP = [-1., 0., .6]
   NIDEC_ACCEL_LOOKUP_V = [-4.8, 0., 2.0]
@@ -26,7 +26,7 @@ class CarControllerParams:
   NIDEC_MAX_ACCEL_BP = [0.0, 4.0, 10., 20.]
 
   NIDEC_GAS_MAX = 198  # 0xc6
-  NIDEC_BRAKE_MAX = 20 # was 1024 // 4
+  NIDEC_BRAKE_MAX = 1024 // 4
 
   BOSCH_ACCEL_MIN = -3.5  # m/s^2
   BOSCH_ACCEL_MAX = 2.0  # m/s^2
@@ -45,15 +45,6 @@ class CarControllerParams:
     assert(CP.lateralParams.torqueBP[0] == 0)
     self.STEER_LOOKUP_BP = [v * -1 for v in CP.lateralParams.torqueBP][1:][::-1] + list(CP.lateralParams.torqueBP)
     self.STEER_LOOKUP_V = [v * -1 for v in CP.lateralParams.torqueV][1:][::-1] + list(CP.lateralParams.torqueV)
-
-class LKAS_LIMITS:
-  STEER_MAX = 240
-  STEER_THRESHOLD = 15
-  STEER_DELTA_UP = 5
-  STEER_DELTA_DOWN = 9
-  STEER_DRIVER_ALLOWANCE = 25
-  STEER_DRIVER_MULTIPLIER = 18
-  STEER_DRIVER_FACTOR = 1
 
 class HondaSafetyFlags(IntFlag):
   ALT_BRAKE = 1
