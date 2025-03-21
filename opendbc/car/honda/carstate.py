@@ -296,20 +296,24 @@ class CarState(CarStateBase):
   def get_can_parsers(self, CP):
     pt_messages = get_can_messages(CP, self.gearbox_msg)
 
-    pt_messages += [
-      ("STEERING_CONTROL", 0), # no timing rush?
-    ]
+    cam_messages = []
+    
+    if  CP.carFingerprint in (CAR.ACURA_MDX_3G_HYBRID):
+      pt_messages += [
+        ("STEERING_CONTROL", 0), # no timing rush?
+      ]
+    else:
+      cam_messages += [
+        ("STEERING_CONTROL", 100),
+      ]
 
-    # if CP.carFingerprint in HONDA_BOSCH_RADARLESS:
-    #  cam_messages += [
-    #    ("ACC_HUD", 10),
-    #    ("LKAS_HUD", 10),
-    #  ]
-
-    # elif CP.carFingerprint not in HONDA_BOSCH:
-    if CP.carFingerprint not in HONDA_BOSCH:
-      # cam_messages += [
-      cam_messages = [
+    if CP.carFingerprint in HONDA_BOSCH_RADARLESS:
+      cam_messages += [
+        ("ACC_HUD", 10),
+        ("LKAS_HUD", 10),
+      ]
+    elif CP.carFingerprint not in HONDA_BOSCH:
+      cam_messages += [
         ("ACC_HUD", 10),
         ("LKAS_HUD", 10),
         ("BRAKE_COMMAND", 50),
