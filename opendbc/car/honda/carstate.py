@@ -29,10 +29,18 @@ def get_can_messages(CP, gearbox_msg):
     ("POWERTRAIN_DATA", 100),
     ("CAR_SPEED", 10),
     ("VSA_STATUS", 50),
-    ("STEER_STATUS", 0), # in case of delay
     ("STEER_MOTOR_TORQUE", 0),  # TODO: not on every car
   ]
 
+  if  CP.carFingerprint in SERIAL_STEERING:
+    messages += [
+      ("STEER_STATUS", 0), # initially slow to transmit
+    ]
+  else:
+    messages +=[
+      ("STEER_STATUS", 100),   
+    ]
+  
   if CP.carFingerprint == CAR.HONDA_ODYSSEY_CHN:
     messages += [
       ("SCM_FEEDBACK", 25),
@@ -298,9 +306,9 @@ class CarState(CarStateBase):
 
     cam_messages = []
 
-    if  CP.carFingerprint in (CAR.ACURA_MDX_3G_HYBRID):
+    if  CP.carFingerprint in SERIAL_STEERING:
       pt_messages += [
-        ("STEERING_CONTROL", 0), # no timing rush?
+        ("STEERING_CONTROL", 0), # initially slow, prevent timing errors
       ]
     else:
       cam_messages += [
@@ -312,7 +320,7 @@ class CarState(CarStateBase):
         ("ACC_HUD", 10),
         ("LKAS_HUD", 10),
       ]
-    
+
     elif CP.carFingerprint not in HONDA_BOSCH:
       cam_messages += [
         ("ACC_HUD", 10),
