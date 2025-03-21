@@ -1,5 +1,5 @@
 import numpy as np
-from opendbc.car import apply_std_steer_angle_limits, make_tester_present_msg, apply_hysteresis, Bus
+from opendbc.car import apply_std_steer_angle_limits, make_tester_present_msg, Bus
 from opendbc.can.packer import CANPacker
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.psa import psacan
@@ -78,8 +78,6 @@ class CarController(CarControllerBase):
     new_actuators = actuators.as_builder()
     new_actuators.steeringAngleDeg = self.apply_angle_last
     # TODO: logging the internal parameters for DEBUG
-    new_actuators.gas = torque/1000
-    new_actuators.brake = float(braking)
-    new_actuators.accel = torque
+    new_actuators.gas = torque
     self.frame += 1
     return new_actuators, can_sends
