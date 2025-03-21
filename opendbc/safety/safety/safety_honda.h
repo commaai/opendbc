@@ -153,10 +153,10 @@ static void honda_rx_hook(const CANPacket_t *to_push) {
       bool honda_stock_aeb = GET_BIT(to_push, 29U);
       int honda_stock_brake = 0;
       if (honda_nidec_hybrid) {
-        int honda_stock_brake = (GET_BYTE(to_push, 6) << 2) | (GET_BYTE(to_push, 7) >> 6);
+        honda_stock_brake = (GET_BYTE(to_push, 6) << 2) | (GET_BYTE(to_push, 7) >> 6);
       }
       else {
-        int honda_stock_brake = (GET_BYTE(to_push, 6) << 0) | (GET_BYTE(to_push, 1) >> 6);
+        honda_stock_brake = (GET_BYTE(to_push, 6) << 0) | (GET_BYTE(to_push, 1) >> 6);
       }
       
       // Forward AEB when stock braking is higher than openpilot braking
