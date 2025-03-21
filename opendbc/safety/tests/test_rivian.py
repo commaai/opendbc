@@ -8,8 +8,8 @@ from opendbc.safety.tests.common import CANPackerPanda
 from opendbc.car.rivian.values import RivianSafetyFlags
 
 
-class TestRivianSafetyBase(common.PandaCarSafetyTest, common.VehicleSpeedSafetyTest,
-                           common.DriverTorqueSteeringSafetyTest, common.LongitudinalAccelSafetyTest):
+class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteeringSafetyTest, common.LongitudinalAccelSafetyTest,
+                           common.VehicleSpeedSafetyTest):
 
   TX_MSGS = [[0x120, 0], [0x321, 2], [0x162, 2]]
   RELAY_MALFUNCTION_ADDRS = {0: (0x120,)}
