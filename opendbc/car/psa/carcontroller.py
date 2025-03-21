@@ -32,7 +32,7 @@ class CarController(CarControllerBase):
     ### longitudinal control ###
     # TUNING
     brake_accel = -0.5 # below this accel, go into brake mode
-    torque_raw = actuators.accel * 10 * 80 # accel in m/s^2 to torque in Nm * 10 for CAN
+    torque_raw = actuators.accel * 10 * 70 # accel in m/s^2 to torque in Nm * 10 for CAN
     torque = max(-300, min(torque_raw, 2000)) # apply torque CAN Nm limits
     braking = actuators.accel<brake_accel and not CS.out.gasPressed
 
