@@ -658,7 +658,7 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
     desired_torque_last = desired_torque;
 
     // *** torque real time rate limit check ***
-    violation |= rt_rate_limit_check(desired_torque, rt_torque_last, MAX_TORQUE_RT_INTERVAL);
+    violation |= rt_rate_limit_check(desired_torque, rt_torque_last, limits.max_rt_delta);
 
     // every RT_INTERVAL set the new limits
     uint32_t ts_elapsed = get_ts_elapsed(ts, ts_torque_check_last);
