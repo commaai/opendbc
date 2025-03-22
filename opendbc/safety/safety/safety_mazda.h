@@ -50,7 +50,7 @@ static void mazda_rx_hook(const CANPacket_t *to_push) {
 
 static bool mazda_tx_hook(const CANPacket_t *to_send) {
   const TorqueSteeringLimits MAZDA_STEERING_LIMITS = {
-    .max_steer = 800,
+    .max_torque = 800,
     .max_rate_up = 10,
     .max_rate_down = 25,
     .max_rt_delta = 300,
