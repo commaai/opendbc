@@ -92,7 +92,11 @@ class CarControllerParams:
   # and lateral acceleration falls linearly as speed decreases from ~40 mph to 20 mph. This value is set
   # conservatively to reach a maximum of 3.0 m/s^2 turning left at 80 mph
   # TODO: figure out why some users' cars are seeing almost half lateral accelerations at all speeds.
-  STEER_MAX = 250  # ~2.8 m/s^2
+
+  # these refer to turning left (R1T and R1S both seen with more torque left vs. right)
+  # 250 is ~2.8 m/s^2 above 17 m/s, then linearly ramps to ~1.6 m/s^2 from 17 m/s to 10 m/s
+  STEER_MAX = 350
+  STEER_MAX_LOOKUP = [9, 17], [350, 250]
   STEER_STEP = 1
   STEER_DELTA_UP = 3  # torque increase per refresh
   STEER_DELTA_DOWN = 5  # torque decrease per refresh
