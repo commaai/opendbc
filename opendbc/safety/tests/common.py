@@ -270,6 +270,7 @@ class SteerRequestCutSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
 
   @property
   def MIN_VALID_STEERING_RT_INTERVAL(self):
+    # a ~10% buffer
     return int((self.MIN_VALID_STEERING_FRAMES + 1) * self.STEER_STEP * 10000 * 0.9)
 
   def test_steer_req_bit_frames(self):
