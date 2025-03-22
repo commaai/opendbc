@@ -644,20 +644,22 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
 
 //  int max_torque = limits.max_torque;
 
-  struct lookup_t xy = {{9, 17, 17}, {350, 250, 250}};
-
-  const float fudged_speed = (vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.;
-  const int max_torque = interpolate(xy, fudged_speed) + 1;
+  int max_torque = limits.max_torque;
+  // Some safety models support variable torque limit based on vehicle speed
+  if (limits.max_torque == -1) {
+    const float fudged_speed = (vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.;
+    max_torque = interpolate(limits.max_torque_lookup, fudged_speed) + 1;
+  }
 
   if (controls_allowed) {
     // *** global torque limit check ***
     violation |= max_limit_check(desired_torque, max_torque, -max_torque);
-    if (violation) {
-      printf("fudged_speed: %f\n", fudged_speed);
-      printf("max_torque: %d\n", max_torque);
-      printf("desired_torque: %d\n", desired_torque);
-      printf("violation: %d\n", violation);
-    }
+//    if (violation) {
+//      printf("fudged_speed: %f\n", fudged_speed);
+//      printf("max_torque: %d\n", max_torque);
+//      printf("desired_torque: %d\n", desired_torque);
+//      printf("violation: %d\n", violation);
+//    }
 
     // *** torque rate limit check ***
     if (limits.type == TorqueDriverLimited) {
