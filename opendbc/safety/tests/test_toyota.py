@@ -132,7 +132,6 @@ class TestToyotaSafetyTorque(TestToyotaSafetyBase, common.MotorTorqueSteeringSaf
   # Safety around steering req bit
   MIN_VALID_STEERING_FRAMES = 18
   MAX_INVALID_STEERING_FRAMES = 1
-  MIN_VALID_STEERING_RT_INTERVAL = 170000  # a ~10% buffer, can send steer up to 110Hz
 
   def setUp(self):
     self.packer = CANPackerPanda("toyota_nodsu_pt_generated")
