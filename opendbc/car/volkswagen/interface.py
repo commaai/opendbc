@@ -37,6 +37,18 @@ class CarInterface(CarInterfaceBase):
       # Panda ALLOW_DEBUG firmware required.
       ret.dashcamOnly = True
 
+    elif ret.flags & VolkswagenFlags.MEB:
+      # Set global MEB parameters
+      ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.volkswagenMeb)]
+      ret.enableBsm = 0x24C in fingerprint[0]  # MEB_Side_Assist_01
+      ret.steerControlType = structs.CarParams.SteerControlType.angle
+      ret.transmissionType = TransmissionType.automatic
+
+      if any(msg in fingerprint[1] for msg in (0x520, 0x86, 0xFD, 0x13D)):  # Airbag_02, LWI_01, ESP_21, QFK_01
+        ret.networkLocation = NetworkLocation.gateway
+      else:
+        ret.networkLocation = NetworkLocation.fwdCamera
+
     else:
       # Set global MQB parameters
       ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.volkswagen)]
@@ -63,6 +75,8 @@ class CarInterface(CarInterfaceBase):
     if ret.flags & VolkswagenFlags.PQ:
       ret.steerActuatorDelay = 0.2
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
+    elif ret.flags & VolkswagenFlags.MEB:
+      ret.steerActuatorDelay = 0.2
     else:
       ret.steerActuatorDelay = 0.1
       ret.lateralTuning.pid.kpBP = [0.]
@@ -73,7 +87,7 @@ class CarInterface(CarInterfaceBase):
 
     # Global longitudinal tuning defaults, can be overridden per-vehicle
 
-    ret.experimentalLongitudinalAvailable = ret.networkLocation == NetworkLocation.gateway or docs
+    ret.experimentalLongitudinalAvailable = not ret.flags & VolkswagenFlags.MEB and (ret.networkLocation == NetworkLocation.gateway or docs)
     if experimental_long:
       # Proof-of-concept, prep for E2E only. No radar points available. Panda ALLOW_DEBUG firmware required.
       ret.openpilotLongitudinalControl = True
