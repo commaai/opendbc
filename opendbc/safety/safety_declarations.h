@@ -62,7 +62,7 @@ typedef enum {
 
 typedef struct {
   // torque cmd limits
-  const int max_steer;
+  const int max_torque;
   const int max_rate_up;
   const int max_rate_down;
   const int max_rt_delta;
