@@ -37,6 +37,9 @@ class CarInterface(CarInterfaceBase):
     # if experimental_long:
     # TODO DELETE
     print(f"*************experimental long: {experimental_long}******************")
+    ret.longitudinalTuning.kiBP = [0., 35.]
+    ret.longitudinalTuning.kiV = [1.2, 0.5]
+
     # TODO DELETE
 
     ret.openpilotLongitudinalControl = True
