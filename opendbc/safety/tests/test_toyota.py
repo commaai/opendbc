@@ -126,7 +126,6 @@ class TestToyotaSafetyTorque(TestToyotaSafetyBase, common.MotorTorqueSteeringSaf
   MAX_RATE_DOWN = 25
   MAX_TORQUE = 1500
   MAX_RT_DELTA = 450
-  RT_INTERVAL = 250000
   MAX_TORQUE_ERROR = 350
   TORQUE_MEAS_TOLERANCE = 1  # toyota safety adds one to be conservative for rounding
 

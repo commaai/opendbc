@@ -19,7 +19,6 @@ class TestMazdaSafety(common.PandaCarSafetyTest, common.DriverTorqueSteeringSafe
   MAX_TORQUE = 800
 
   MAX_RT_DELTA = 300
-  RT_INTERVAL = 250000
 
   DRIVER_TORQUE_ALLOWANCE = 15
   DRIVER_TORQUE_FACTOR = 1

@@ -30,7 +30,6 @@ class TestVolkswagenMqbSafetyBase(common.PandaCarSafetyTest, common.DriverTorque
   MAX_RATE_DOWN = 10
   MAX_TORQUE = 300
   MAX_RT_DELTA = 75
-  RT_INTERVAL = 250000
 
   DRIVER_TORQUE_ALLOWANCE = 80
   DRIVER_TORQUE_FACTOR = 3

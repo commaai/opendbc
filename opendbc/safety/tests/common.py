@@ -196,7 +196,7 @@ class TorqueSteeringSafetyTestBase(PandaSafetyTestBase, abc.ABC):
   MAX_RATE_DOWN = 0
   MAX_TORQUE = 0
   MAX_RT_DELTA = 0
-  RT_INTERVAL = 0
+  RT_INTERVAL = 250000
 
   NO_STEER_REQ_BIT = False
 
