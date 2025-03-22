@@ -33,7 +33,7 @@ extern const int MAX_WRONG_COUNTERS;
 #define MAX_SAMPLE_VALS 6
 // used to represent floating point vehicle speed in a sample_t
 #define VEHICLE_SPEED_FACTOR 1000.0
-#define MAX_TORQUE_RT_INTERVAL 250000
+#define MAX_TORQUE_RT_INTERVAL 250000U
 
 
 // sample struct that keeps 6 samples in memory
