@@ -210,7 +210,7 @@ class TorqueSteeringSafetyTestBase(PandaSafetyTestBase, abc.ABC):
   MAX_RATE_DOWN = 0
   MAX_TORQUE = 0
   MAX_RT_DELTA = 0
-  RT_INTERVAL = 0
+  RT_INTERVAL = 250000
 
   NO_STEER_REQ_BIT = False
 
@@ -280,7 +280,12 @@ class SteerRequestCutSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
   # Safety around steering request bit mismatch tolerance
   MIN_VALID_STEERING_FRAMES: int
   MAX_INVALID_STEERING_FRAMES: int
-  MIN_VALID_STEERING_RT_INTERVAL: int
+  STEER_STEP: int = 1
+
+  @property
+  def MIN_VALID_STEERING_RT_INTERVAL(self):
+    # a ~10% buffer
+    return int((self.MIN_VALID_STEERING_FRAMES + 1) * self.STEER_STEP * 10000 * 0.9)
 
   def test_steer_req_bit_frames(self):
     """
