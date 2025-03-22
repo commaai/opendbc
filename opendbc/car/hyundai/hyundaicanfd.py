@@ -143,7 +143,7 @@ def create_ccnc(packer, CAN, openpilotLongitudinalControl, enabled, hud, latacti
   msg_161.update({
     "DAW_ICON": 0,
     "LKA_ICON": 0,
-    "LFA_ICON": 2 if latactive else 3 if enabled else 1,
+    "LFA_ICON": 2 if enabled else 0,
     "CENTERLINE": 1 if enabled else 0,
     "LANELINE_LEFT": (
       1 if not hud.leftLaneVisible else 4 if hud.leftLaneDepart else 0 if not enabled else 2 if out.leftBlindspot or out.vEgo < 8.94 else 6),
