@@ -33,6 +33,7 @@ extern const int MAX_WRONG_COUNTERS;
 #define MAX_SAMPLE_VALS 6
 // used to represent floating point vehicle speed in a sample_t
 #define VEHICLE_SPEED_FACTOR 1000.0
+const uint32_t MAX_TORQUE_RT_INTERVAL = 250000;
 
 
 // sample struct that keeps 6 samples in memory
@@ -65,8 +66,7 @@ typedef struct {
   const int max_torque;
   const int max_rate_up;
   const int max_rate_down;
-  const int max_rt_delta;
-  const uint32_t max_rt_interval;
+  const int max_rt_delta;  // max change in torque per 250ms intervals (MAX_TORQUE_RT_INTERVAL)
 
   const SteeringControlType type;
 

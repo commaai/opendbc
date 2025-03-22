@@ -60,7 +60,6 @@ class TestSubaruSafetyBase(common.PandaCarSafetyTest):
   FWD_BLACKLISTED_ADDRS = fwd_blacklisted_addr()
 
   MAX_RT_DELTA = 940
-  RT_INTERVAL = 250000
 
   DRIVER_TORQUE_ALLOWANCE = 60
   DRIVER_TORQUE_FACTOR = 50

@@ -20,7 +20,6 @@ class TestSubaruPreglobalSafety(common.PandaCarSafetyTest, common.DriverTorqueSt
   MAX_TORQUE = 2047
 
   MAX_RT_DELTA = 940
-  RT_INTERVAL = 250000
 
   DRIVER_TORQUE_ALLOWANCE = 75
   DRIVER_TORQUE_FACTOR = 10
