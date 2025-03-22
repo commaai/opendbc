@@ -11,7 +11,9 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
   if (bus == 0)  {
     // Vehicle speed
     if (addr == 0x208) {
-      vehicle_moving = GET_BYTE(to_push, 6) | GET_BYTE(to_push, 7);
+      float speed = ((GET_BYTE(to_push, 6) << 8) | GET_BYTE(to_push, 7)) * 0.01;
+      vehicle_moving = speed > 0.0;
+      UPDATE_VEHICLE_SPEED(speed / 3.6);
     }
 
     // Driver torque
