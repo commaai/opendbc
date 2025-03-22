@@ -94,9 +94,9 @@ class CarControllerParams:
   # TODO: figure out why some users' cars are seeing almost half lateral accelerations at all speeds.
 
   # these refer to turning left (R1T and R1S both seen with more torque left vs. right)
-  # 250 is ~2.8 m/s^2 above 20 m/s, then linearly ramps to ~1.6 m/s^2 from 20 m/s to 10 m/s (TODO: and maybe lower under 10 m/s, need to check)
+  # 250 is ~2.8 m/s^2 above 17 m/s, then linearly ramps to ~1.6 m/s^2 from 17 m/s to 10 m/s
   STEER_MAX = 350
-  STEER_MAXES = [9, 17], [350, 250]  # ideally 2.8-3.0 m/s^2 max at all speeds, TODO: check
+  STEER_MAX_LOOKUP = [9, 17], [350, 250]
   STEER_STEP = 1
   STEER_DELTA_UP = 3  # torque increase per refresh
   STEER_DELTA_DOWN = 5  # torque decrease per refresh

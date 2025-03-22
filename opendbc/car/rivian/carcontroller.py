@@ -19,10 +19,10 @@ class CarController(CarControllerBase):
     can_sends = []
 
     apply_torque = 0
-    dynamic_steer_max = round(np.interp(CS.out.vEgoRaw, CarControllerParams.STEER_MAXES[0], CarControllerParams.STEER_MAXES[1]))
+    dynamic_steer_max = round(float(np.interp(CS.out.vEgoRaw, CarControllerParams.STEER_MAX_LOOKUP[0],
+                                              CarControllerParams.STEER_MAX_LOOKUP[1])))
     if CC.latActive:
       new_torque = int(round(CC.actuators.torque * dynamic_steer_max))
-      # new_torque = np.clip(new_torque, -dynamic_steer_max, dynamic_steer_max)
       apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last,
                                                       CS.out.steeringTorque, CarControllerParams, dynamic_steer_max)
 
