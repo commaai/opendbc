@@ -642,19 +642,19 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
   bool violation = false;
   uint32_t ts = microsecond_timer_get();
 
-//  int max_steer = limits.max_steer;
+//  int max_torque = limits.max_torque;
 
   struct lookup_t xy = {{9, 17, 17}, {350, 250, 250}};
 
   const float fudged_speed = (vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.;
-  const int max_steer = interpolate(xy, fudged_speed) + 1;
+  const int max_torque = interpolate(xy, fudged_speed) + 1;
 
   if (controls_allowed) {
     // *** global torque limit check ***
-    violation |= max_limit_check(desired_torque, max_steer, -max_steer);
+    violation |= max_limit_check(desired_torque, max_torque, -max_torque);
     if (violation) {
       printf("fudged_speed: %f\n", fudged_speed);
-      printf("max_steer: %d\n", max_steer);
+      printf("max_torque: %d\n", max_torque);
       printf("desired_torque: %d\n", desired_torque);
       printf("violation: %d\n", violation);
     }
@@ -663,11 +663,11 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
     if (limits.type == TorqueDriverLimited) {
 //      driver_limit_check(desired_torque, desired_torque_last, &torque_driver,
       violation |= driver_limit_check(desired_torque, desired_torque_last, &torque_driver,
-                                      max_steer, limits.max_rate_up, limits.max_rate_down,
+                                      max_torque, limits.max_rate_up, limits.max_rate_down,
                                       limits.driver_torque_allowance, limits.driver_torque_multiplier);
       if (violation) {
         printf("driver_limit_check violation\n");
-        printf("desired_torque: %d, max_steer: %d, driver_torque: %d\n", desired_torque, max_steer, torque_driver.max);
+        printf("desired_torque: %d, max_torque: %d, driver_torque: %d\n", desired_torque, max_torque, torque_driver.max);
       }
     } else {
       violation |= dist_to_meas_check(desired_torque, desired_torque_last, &torque_meas,
@@ -683,7 +683,7 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
 
     // every RT_INTERVAL set the new limits
     uint32_t ts_elapsed = get_ts_elapsed(ts, ts_torque_check_last);
-    if (ts_elapsed > limits.max_rt_interval) {
+    if (ts_elapsed > MAX_TORQUE_RT_INTERVAL) {
       rt_torque_last = desired_torque;
       ts_torque_check_last = ts;
     }

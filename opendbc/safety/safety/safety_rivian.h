@@ -44,11 +44,10 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
 
 static bool rivian_tx_hook(const CANPacket_t *to_send) {
   const TorqueSteeringLimits RIVIAN_STEERING_LIMITS = {
-    .max_steer = 250,
+    .max_torque = 250,
     .max_rate_up = 3,
     .max_rate_down = 5,
     .max_rt_delta = 125,
-    .max_rt_interval = 250000,
     .driver_torque_multiplier = 2,
     .driver_torque_allowance = 100,
     .type = TorqueDriverLimited,
