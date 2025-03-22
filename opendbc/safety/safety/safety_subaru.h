@@ -6,7 +6,6 @@
   {                                                                                   \
     .max_torque = (steer_max),                                                        \
     .max_rt_delta = 940,                                                              \
-    .max_rt_interval = 250000,                                                        \
     .max_rate_up = (rate_up),                                                         \
     .max_rate_down = (rate_down),                                                     \
     .driver_torque_multiplier = 50,                                                   \

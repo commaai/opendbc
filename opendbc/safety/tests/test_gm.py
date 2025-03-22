@@ -82,7 +82,6 @@ class TestGmSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteeringSaf
   MAX_RATE_DOWN = 15
   MAX_TORQUE = 300
   MAX_RT_DELTA = 128
-  RT_INTERVAL = 250000
   DRIVER_TORQUE_ALLOWANCE = 65
   DRIVER_TORQUE_FACTOR = 4
 

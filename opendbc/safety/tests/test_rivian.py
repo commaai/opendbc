@@ -20,7 +20,6 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
   MAX_RATE_DOWN = 5
 
   MAX_RT_DELTA = 125
-  RT_INTERVAL = 250000
 
   DRIVER_TORQUE_ALLOWANCE = 100
   DRIVER_TORQUE_FACTOR = 2

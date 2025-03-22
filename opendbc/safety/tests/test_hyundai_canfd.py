@@ -33,7 +33,6 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.PandaCarSafetyTest, common.
   MAX_TORQUE = 270
 
   MAX_RT_DELTA = 112
-  RT_INTERVAL = 250000
 
   DRIVER_TORQUE_ALLOWANCE = 250
   DRIVER_TORQUE_FACTOR = 2
