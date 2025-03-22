@@ -642,8 +642,6 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
   bool violation = false;
   uint32_t ts = microsecond_timer_get();
 
-//  int max_torque = limits.max_torque;
-
   int max_torque = limits.max_torque;
   // Some safety models support variable torque limit based on vehicle speed
   if (limits.max_torque == -1) {
