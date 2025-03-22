@@ -66,7 +66,7 @@ typedef struct {
   const int max_torque;
   const int max_rate_up;
   const int max_rate_down;
-  const int max_rt_delta;  // max change in torque per 250ms intervals (MAX_TORQUE_RT_INTERVAL)
+  const int max_rt_delta;  // max change in torque per 250ms interval (MAX_TORQUE_RT_INTERVAL)
 
   const SteeringControlType type;
 
