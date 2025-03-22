@@ -31,10 +31,14 @@ class CarController(CarControllerBase):
 
     ### longitudinal control ###
     # TUNING
-    brake_accel = -0.5 # below this accel, go into brake mode
-    torque_raw = actuators.accel * 10 * 70 # accel in m/s^2 to torque in Nm * 10 for CAN
-    torque = max(-300, min(torque_raw, 2000)) # apply torque CAN Nm limits
-    braking = actuators.accel<brake_accel and not CS.out.gasPressed
+    # brake_accel = -0.5 # below this accel, go into brake mode
+    # torque_raw = actuators.accel * 10 * 70 # accel in m/s^2 to torque in Nm * 10 for CAN
+    # torque = max(-300, min(torque_raw, 2000)) # apply torque CAN Nm limits
+    # braking = actuators.accel<brake_accel and not CS.out.gasPressed
+
+    # twitchy on gas/accel transition but good car following and braking
+    torque = actuators.accel * 1000
+    braking = torque < -300 and not CS.out.gasPressed
 
     # TODO: only enable section if self.CP.openpilotLongitudinalControl
     # TODO: disable_ecu not working - UDS communication control not supported by radar ECU.
