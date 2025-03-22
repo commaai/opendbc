@@ -159,7 +159,7 @@ class TestSubaruTorqueSafetyBase(TestSubaruSafetyBase, common.DriverTorqueSteeri
   # Safety around steering req bit
   MIN_VALID_STEERING_FRAMES = 7
   MAX_INVALID_STEERING_FRAMES = 1
-  MIN_VALID_STEERING_RT_INTERVAL = 144000
+  STEER_STEP = 2
 
   def _torque_cmd_msg(self, torque, steer_req=1):
     values = {"LKAS_Output": torque, "LKAS_Request": steer_req}
