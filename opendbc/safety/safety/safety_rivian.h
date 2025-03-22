@@ -72,7 +72,7 @@ static bool rivian_tx_hook(const CANPacket_t *to_send) {
       bool steer_req = GET_BIT(to_send, 28U);
 
       if (steer_torque_cmd_checks(desired_torque, steer_req, RIVIAN_STEERING_LIMITS)) {
-//        tx = false;
+        tx = false;
       }
     }
 
@@ -80,7 +80,7 @@ static bool rivian_tx_hook(const CANPacket_t *to_send) {
     if (addr == 0x160) {
       int raw_accel = ((GET_BYTE(to_send, 2) << 3) | (GET_BYTE(to_send, 3) >> 5)) - 1024U;
       if (longitudinal_accel_checks(raw_accel, RIVIAN_LONG_LIMITS)) {
-        tx = false;
+//        tx = false;
       }
     }
   }
