@@ -80,7 +80,7 @@ static bool rivian_tx_hook(const CANPacket_t *to_send) {
     if (addr == 0x160) {
       int raw_accel = ((GET_BYTE(to_send, 2) << 3) | (GET_BYTE(to_send, 3) >> 5)) - 1024U;
       if (longitudinal_accel_checks(raw_accel, RIVIAN_LONG_LIMITS)) {
-//        tx = false;
+        tx = false;
       }
     }
   }
