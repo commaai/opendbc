@@ -691,12 +691,7 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
 
         // or we've cut torque too recently in time
         uint32_t ts_elapsed = get_ts_elapsed(ts, ts_steer_req_mismatch_last);
-        // TODO: move to limits
-        // TODO: just check rate and we can remove rt delta and custom rt steer bit nonsense
-        const int steer_step = 1;
-        // allow a ~10% buffer on cutting every n frames
-        const uint32_t min_valid_request_rt_interval = (limits.min_valid_request_frames + 1) * steer_step * 10000 * 0.9;
-        if (ts_elapsed < min_valid_request_rt_interval) {
+        if (ts_elapsed < limits.min_valid_request_rt_interval) {
           violation = true;
         }
       } else {
