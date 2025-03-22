@@ -577,7 +577,23 @@ class MotorTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
     self.assertEqual(self.safety.get_torque_meas_max(), 0)
 
 
-class AngleSteeringSafetyTest(PandaSafetyTestBase):
+class VehicleSpeedSafetyTest(PandaSafetyTestBase):
+  @classmethod
+  def setUpClass(cls):
+    if cls.__name__ == "VehicleSpeedSafetyTest":
+      cls.safety = None
+      raise unittest.SkipTest
+
+  @abc.abstractmethod
+  def _speed_msg(self, speed):
+    pass
+
+  def test_vehicle_speed_measurements(self):
+    # TODO: lower tolerance on these tests
+    self._common_measurement_test(self._speed_msg, 0, 80, 1, self.safety.get_vehicle_speed_min, self.safety.get_vehicle_speed_max)
+
+
+class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
 
   STEER_ANGLE_MAX: float = 300
   DEG_TO_CAN: float
@@ -590,10 +606,6 @@ class AngleSteeringSafetyTest(PandaSafetyTestBase):
     if cls.__name__ == "AngleSteeringSafetyTest":
       cls.safety = None
       raise unittest.SkipTest
-
-  @abc.abstractmethod
-  def _speed_msg(self, speed):
-    pass
 
   @abc.abstractmethod
   def _angle_cmd_msg(self, angle: float, enabled: bool):
@@ -614,10 +626,6 @@ class AngleSteeringSafetyTest(PandaSafetyTestBase):
   def _reset_speed_measurement(self, speed):
     for _ in range(MAX_SAMPLE_VALS):
       self._rx(self._speed_msg(speed))
-
-  def test_vehicle_speed_measurements(self):
-    # TODO: lower tolerance on these tests
-    self._common_measurement_test(self._speed_msg, 0, 80, 1, self.safety.get_vehicle_speed_min, self.safety.get_vehicle_speed_max)
 
   def test_steering_angle_measurements(self):
     self._common_measurement_test(self._angle_meas_msg, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX, self.DEG_TO_CAN,
