@@ -340,7 +340,7 @@ STEER_THRESHOLD = {
   # default is 1200, overrides go here
   CAR.ACURA_RDX: 400,
   CAR.HONDA_CRV_EU: 400,
-  CAR.ACURA_MDX_3G_HYBRID: 25,
+  CAR.ACURA_MDX_3G_HYBRID: 30, # try higher number
 }
 
 HONDA_NIDEC_ALT_PCM_ACCEL = CAR.with_flags(HondaFlags.NIDEC_ALT_PCM_ACCEL)
