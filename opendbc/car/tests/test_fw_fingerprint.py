@@ -126,7 +126,7 @@ class TestFwFingerprint:
     blacklisted_addrs = (0x7c4, 0x7d0)  # includes A/C ecu and an unknown ecu
     for car_model, ecus in FW_VERSIONS.items():
       with subtests.test(car_model=car_model.value):
-        CP = interfaces[car_model][0].get_non_essential_params(car_model)
+        CP = interfaces[car_model].get_non_essential_params(car_model)
         if CP.brand == 'subaru':
           for ecu in ecus.keys():
             assert ecu[1] not in blacklisted_addrs, f'{car_model}: Blacklisted ecu: (Ecu.{ecu[0]}, {hex(ecu[1])})'

@@ -2,7 +2,10 @@ import numpy as np
 from opendbc.car import Bus, get_safety_config, structs
 from opendbc.car.carlog import carlog
 from opendbc.car.common.conversions import Conversions as CV
+from opendbc.car.ford.carcontroller import CarController
+from opendbc.car.ford.carstate import CarState
 from opendbc.car.ford.fordcan import CanBus
+from opendbc.car.ford.radar_interface import RadarInterface
 from opendbc.car.ford.values import CarControllerParams, DBC, Ecu, FordFlags, RADAR, FordSafetyFlags
 from opendbc.car.interfaces import CarInterfaceBase
 
@@ -10,6 +13,10 @@ TransmissionType = structs.CarParams.TransmissionType
 
 
 class CarInterface(CarInterfaceBase):
+  CarState = CarState
+  CarController = CarController
+  RadarInterface = RadarInterface
+
   @staticmethod
   def get_pid_accel_limits(CP, current_speed, cruise_speed):
     # PCM doesn't allow acceleration near cruise_speed,

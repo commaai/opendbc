@@ -8,7 +8,8 @@ from opendbc.safety.tests.common import CANPackerPanda
 from opendbc.car.rivian.values import RivianSafetyFlags
 
 
-class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteeringSafetyTest, common.LongitudinalAccelSafetyTest):
+class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteeringSafetyTest, common.LongitudinalAccelSafetyTest,
+                           common.VehicleSpeedSafetyTest):
 
   TX_MSGS = [[0x120, 0], [0x321, 2], [0x162, 2]]
   RELAY_MALFUNCTION_ADDRS = {0: (0x120,)}
@@ -19,7 +20,6 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
   MAX_RATE_DOWN = 5
 
   MAX_RT_DELTA = 125
-  RT_INTERVAL = 250000
 
   DRIVER_TORQUE_ALLOWANCE = 100
   DRIVER_TORQUE_FACTOR = 2
@@ -33,8 +33,8 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
     return self.packer.make_can_msg_panda("ACM_lkaHbaCmd", 0, values)
 
   def _speed_msg(self, speed):
-    values = {"ESP_Status": speed * 3.6}
-    return self.packer.make_can_msg_panda("ESP_Vehicle_Speed", 0, values)
+    values = {"ESP_Vehicle_Speed": speed * 3.6}
+    return self.packer.make_can_msg_panda("ESP_Status", 0, values)
 
   def _user_brake_msg(self, brake):
     values = {"iBESP2_BrakePedalApplied": brake}
@@ -47,10 +47,6 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
   def _pcm_status_msg(self, enable):
     values = {"ACM_FeatureStatus": enable, "ACM_Unkown1": 1}
     return self.packer.make_can_msg_panda("ACM_Status", 2, values)
-
-  def _vehicle_moving_msg(self, speed: float):
-    values = {"ESP_Vehicle_Speed": speed}
-    return self.packer.make_can_msg_panda("ESP_Status", 0, values)
 
   def _accel_msg(self, accel: float):
     values = {"ACM_AccelerationRequest": accel}
