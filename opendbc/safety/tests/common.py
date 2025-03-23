@@ -196,7 +196,7 @@ class TorqueSteeringSafetyTestBase(PandaSafetyTestBase, abc.ABC):
   MAX_RATE_DOWN = 0
   MAX_TORQUE = 0
   MAX_RT_DELTA = 0
-  RT_INTERVAL = 0
+  RT_INTERVAL = 250000
 
   NO_STEER_REQ_BIT = False
 
@@ -266,7 +266,12 @@ class SteerRequestCutSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
   # Safety around steering request bit mismatch tolerance
   MIN_VALID_STEERING_FRAMES: int
   MAX_INVALID_STEERING_FRAMES: int
-  MIN_VALID_STEERING_RT_INTERVAL: int
+  STEER_STEP: int = 1
+
+  @property
+  def MIN_VALID_STEERING_RT_INTERVAL(self):
+    # a ~10% buffer
+    return int((self.MIN_VALID_STEERING_FRAMES + 1) * self.STEER_STEP * 10000 * 0.9)
 
   def test_steer_req_bit_frames(self):
     """
@@ -577,7 +582,23 @@ class MotorTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
     self.assertEqual(self.safety.get_torque_meas_max(), 0)
 
 
-class AngleSteeringSafetyTest(PandaSafetyTestBase):
+class VehicleSpeedSafetyTest(PandaSafetyTestBase):
+  @classmethod
+  def setUpClass(cls):
+    if cls.__name__ == "VehicleSpeedSafetyTest":
+      cls.safety = None
+      raise unittest.SkipTest
+
+  @abc.abstractmethod
+  def _speed_msg(self, speed):
+    pass
+
+  def test_vehicle_speed_measurements(self):
+    # TODO: lower tolerance on these tests
+    self._common_measurement_test(self._speed_msg, 0, 80, 1, self.safety.get_vehicle_speed_min, self.safety.get_vehicle_speed_max)
+
+
+class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
 
   STEER_ANGLE_MAX: float = 300
   DEG_TO_CAN: float
@@ -590,10 +611,6 @@ class AngleSteeringSafetyTest(PandaSafetyTestBase):
     if cls.__name__ == "AngleSteeringSafetyTest":
       cls.safety = None
       raise unittest.SkipTest
-
-  @abc.abstractmethod
-  def _speed_msg(self, speed):
-    pass
 
   @abc.abstractmethod
   def _angle_cmd_msg(self, angle: float, enabled: bool):
@@ -614,10 +631,6 @@ class AngleSteeringSafetyTest(PandaSafetyTestBase):
   def _reset_speed_measurement(self, speed):
     for _ in range(MAX_SAMPLE_VALS):
       self._rx(self._speed_msg(speed))
-
-  def test_vehicle_speed_measurements(self):
-    # TODO: lower tolerance on these tests
-    self._common_measurement_test(self._speed_msg, 0, 80, 1, self.safety.get_vehicle_speed_min, self.safety.get_vehicle_speed_max)
 
   def test_steering_angle_measurements(self):
     self._common_measurement_test(self._angle_meas_msg, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX, self.DEG_TO_CAN,
@@ -696,7 +709,7 @@ class PandaSafetyTest(PandaSafetyTestBase):
                    *range(0x18DB00F1, 0x18DC00F1, 0x100),   # 29-bit UDS functional addressing
                    *range(0x3300, 0x3400)]                  # Honda
   FWD_BLACKLISTED_ADDRS: dict[int, list[int]] = {}  # {bus: [addr]}
-  FWD_BUS_LOOKUP: dict[int, int] = {}
+  FWD_BUS_LOOKUP: dict[int, int] = {0: 2, 2: 0}
 
   @classmethod
   def setUpClass(cls):
@@ -767,11 +780,14 @@ class PandaSafetyTest(PandaSafetyTestBase):
               continue
             if {attr, current_test}.issubset({'TestVolkswagenPqSafety', 'TestVolkswagenPqStockSafety', 'TestVolkswagenPqLongSafety'}):
               continue
-            if {attr, current_test}.issubset({'TestGmCameraSafety', 'TestGmCameraLongitudinalSafety'}):
+            if {attr, current_test}.issubset({'TestGmCameraSafety', 'TestGmCameraLongitudinalSafety', 'TestGmAscmSafety',
+                                              'TestGmCameraEVSafety', 'TestGmCameraLongitudinalEVSafety', 'TestGmAscmEVSafety'}):
               continue
             if attr.startswith('TestFord') and current_test.startswith('TestFord'):
               continue
             if attr.startswith('TestHyundaiCanfd') and current_test.startswith('TestHyundaiCanfd'):
+              continue
+            if {attr, current_test}.issubset({'TestHyundaiLongitudinalSafety', 'TestHyundaiLongitudinalSafetyCameraSCC', 'TestHyundaiSafetyFCEVLong'}):
               continue
             if {attr, current_test}.issubset({'TestVolkswagenMqbSafety', 'TestVolkswagenMqbStockSafety', 'TestVolkswagenMqbLongSafety'}):
               continue
@@ -817,7 +833,7 @@ class PandaSafetyTest(PandaSafetyTestBase):
 
 @add_regen_tests
 class PandaCarSafetyTest(PandaSafetyTest):
-  STANDSTILL_THRESHOLD: float | None = None
+  STANDSTILL_THRESHOLD: float = 0.0
   GAS_PRESSED_THRESHOLD = 0
   RELAY_MALFUNCTION_ADDRS: dict[int, tuple[int, ...]] | None = None
 
@@ -862,7 +878,7 @@ class PandaCarSafetyTest(PandaSafetyTest):
         self.safety.set_relay_malfunction(False)
         self._rx(make_msg(bus, addr, 8))
         should_relay_malfunction = addr in self.RELAY_MALFUNCTION_ADDRS.get(bus, ())
-        self.assertEqual(should_relay_malfunction, self.safety.get_relay_malfunction(), (bus, addr))
+        self.assertEqual(should_relay_malfunction, self.safety.get_relay_malfunction(), (bus, hex(addr)))
 
     # test relay malfunction protection logic
     self.safety.set_relay_malfunction(True)

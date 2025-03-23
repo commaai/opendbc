@@ -99,7 +99,9 @@ class RadarInterface(RadarInterfaceBase):
     self.updated_messages = set()
     self.track_id = 0
     self.radar = DBC[CP.carFingerprint].get(Bus.radar)
-    self.invalid_cnt = 0
+    self.scan_index_invalid_cnt = 0
+    self.radar_unavailable_cnt = 0
+    self.prev_headerScanIndex = 0
     if CP.radarUnavailable:
       self.rcp = None
     elif self.radar == RADAR.DELPHI_ESR:
@@ -123,21 +125,18 @@ class RadarInterface(RadarInterfaceBase):
       return None
     self.updated_messages.clear()
 
-    errors = []
+    ret = structs.RadarData()
     if not self.rcp.can_valid:
-      errors.append("canError")
+      ret.errors.canError = True
 
     if self.radar == RADAR.DELPHI_ESR:
       self._update_delphi_esr()
     elif self.radar == RADAR.DELPHI_MRR:
-      _update, _errors = self._update_delphi_mrr()
-      errors.extend(_errors)
+      _update = self._update_delphi_mrr(ret)
       if not _update:
         return None
 
-    ret = structs.RadarData()
     ret.points = list(self.pts.values())
-    ret.errors = errors
     return ret
 
   def _update_delphi_esr(self):
@@ -169,22 +168,35 @@ class RadarInterface(RadarInterfaceBase):
         if ii in self.pts:
           del self.pts[ii]
 
-  def _update_delphi_mrr(self):
+  def _update_delphi_mrr(self, ret: structs.RadarData):
     headerScanIndex = int(self.rcp.vl["MRR_Header_InformationDetections"]['CAN_SCAN_INDEX']) & 0b11
 
-    # Use points with Doppler coverage of +-60 m/s, reduces similar points
-    if headerScanIndex in (0, 1):
-      return False, []
-
-    errors = []
-    if DELPHI_MRR_RADAR_RANGE_COVERAGE[headerScanIndex] != int(self.rcp.vl["MRR_Header_SensorCoverage"]["CAN_RANGE_COVERAGE"]):
-      self.invalid_cnt += 1
+    # In reverse, the radar continually sends the last messages. Mark this as invalid
+    if (self.prev_headerScanIndex + 1) % 4 != headerScanIndex:
+      self.radar_unavailable_cnt += 1
     else:
-      self.invalid_cnt = 0
+      self.radar_unavailable_cnt = 0
+    self.prev_headerScanIndex = headerScanIndex
+
+    if self.radar_unavailable_cnt >= 5:
+      self.pts.clear()
+      self.points.clear()
+      self.clusters.clear()
+      ret.errors.radarUnavailableTemporary = True
+      return True
+
+    # Use points with Doppler coverage of +-60 m/s, reduces similar points
+    if headerScanIndex not in (2, 3):
+      return False
+
+    if DELPHI_MRR_RADAR_RANGE_COVERAGE[headerScanIndex] != int(self.rcp.vl["MRR_Header_SensorCoverage"]["CAN_RANGE_COVERAGE"]):
+      self.scan_index_invalid_cnt += 1
+    else:
+      self.scan_index_invalid_cnt = 0
 
     # Rarely MRR_Header_InformationDetections can fail to send a message. The scan index is skipped in this case
-    if self.invalid_cnt >= 5:
-      errors.append("wrongConfig")
+    if self.scan_index_invalid_cnt >= 5:
+      ret.errors.wrongConfig = True
 
     for ii in range(1, DELPHI_MRR_RADAR_MSG_COUNT + 1):
       msg = self.rcp.vl[f"MRR_Detection_{ii:03d}"]
@@ -213,9 +225,9 @@ class RadarInterface(RadarInterfaceBase):
 
         self.points.append([dRel, yRel * 2, distRate * 2])
 
-    # Update once we've cycled through all 4 scan modes
+    # Cluster and publish using stored points once we've cycled through all 4 scan modes
     if headerScanIndex != 3:
-      return False, []
+      return False
 
     # Cluster points from this cycle against the centroids from the previous cycle
     prev_keys = [[p.dRel, p.yRel * 2, p.vRel * 2] for p in self.clusters]
@@ -257,4 +269,4 @@ class RadarInterface(RadarInterfaceBase):
 
     self.points = []
 
-    return True, errors
+    return True

@@ -55,6 +55,7 @@
 #define SAFETY_BODY 27U
 #define SAFETY_HYUNDAI_CANFD 28U
 #define SAFETY_RIVIAN 33U
+#define SAFETY_VOLKSWAGEN_MEB 34U
 
 uint32_t GET_BYTES(const CANPacket_t *msg, int start, int len) {
   uint32_t ret = 0U;
@@ -180,20 +181,20 @@ static bool rx_msg_safety_check(const CANPacket_t *to_push,
 
   if (index != -1) {
     // checksum check
-    if ((safety_hooks->get_checksum != NULL) && (safety_hooks->compute_checksum != NULL) && cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].check_checksum) {
+    if ((safety_hooks->get_checksum != NULL) && (safety_hooks->compute_checksum != NULL) && !cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_checksum) {
       uint32_t checksum = safety_hooks->get_checksum(to_push);
       uint32_t checksum_comp = safety_hooks->compute_checksum(to_push);
       cfg->rx_checks[index].status.valid_checksum = checksum_comp == checksum;
     } else {
-      cfg->rx_checks[index].status.valid_checksum = true;
+      cfg->rx_checks[index].status.valid_checksum = cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_checksum;
     }
 
-    // counter check (max_counter == 0 means skip check)
+    // counter check
     if ((safety_hooks->get_counter != NULL) && (cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].max_counter > 0U)) {
       uint8_t counter = safety_hooks->get_counter(to_push);
       update_counter(cfg->rx_checks, index, counter);
     } else {
-      cfg->rx_checks[index].status.wrong_counters = 0U;
+      cfg->rx_checks[index].status.wrong_counters = cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_counter ? 0 : MAX_WRONG_COUNTERS;
     }
 
     // quality flag check
@@ -210,8 +211,21 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
   bool controls_allowed_prev = controls_allowed;
 
   bool valid = rx_msg_safety_check(to_push, &current_safety_config, current_hooks);
-  if (valid) {
+  bool whitelisted = get_addr_check_index(to_push, current_safety_config.rx_checks, current_safety_config.rx_checks_len) != -1;
+  if (valid && whitelisted) {
     current_hooks->rx(to_push);
+  }
+
+  // the relay malfunction hook runs on all incoming rx messages.
+  // check all tx msgs for liveness on sending bus if specified.
+  // used to detect a relay malfunction or control messages from disabled ECUs like the radar
+  const int bus = GET_BUS(to_push);
+  const int addr = GET_ADDR(to_push);
+  for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
+    const CanMsg *m = &current_safety_config.tx_msgs[i];
+    if (m->check_relay) {
+      generic_rx_checks((m->addr == addr) && (m->bus == bus));
+    }
   }
 
   // reset mismatches on rising edge of controls_allowed to avoid rare race condition
@@ -227,32 +241,50 @@ static bool tx_msg_safety_check(const CANPacket_t *to_send, const CanMsg msg_lis
   int bus = GET_BUS(to_send);
   int length = GET_LEN(to_send);
 
-  bool allowed = false;
+  bool whitelisted = false;
   for (int i = 0; i < len; i++) {
     if ((addr == msg_list[i].addr) && (bus == msg_list[i].bus) && (length == msg_list[i].len)) {
-      allowed = true;
+      whitelisted = true;
       break;
     }
   }
-  return allowed;
+  return whitelisted;
 }
 
 bool safety_tx_hook(CANPacket_t *to_send) {
-  bool allowed = tx_msg_safety_check(to_send, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
+  bool whitelisted = tx_msg_safety_check(to_send, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
   if ((current_safety_mode == SAFETY_ALLOUTPUT) || (current_safety_mode == SAFETY_ELM327)) {
-    allowed = true;
+    whitelisted = true;
   }
 
   bool safety_allowed = false;
-  if (allowed) {
+  if (whitelisted) {
     safety_allowed = current_hooks->tx(to_send);
   }
 
-  return !relay_malfunction && allowed && safety_allowed;
+  return !relay_malfunction && whitelisted && safety_allowed;
+}
+
+static int get_fwd_bus(int bus_num) {
+  int destination_bus;
+  if (bus_num == 0) {
+    destination_bus = 2;
+  } else if (bus_num == 2) {
+    destination_bus = 0;
+  } else {
+    destination_bus = -1;
+  }
+  return destination_bus;
 }
 
 int safety_fwd_hook(int bus_num, int addr) {
-  return (relay_malfunction ? -1 : current_hooks->fwd(bus_num, addr));
+  bool blocked = relay_malfunction || current_safety_config.disable_forwarding;
+
+  if (!blocked && (current_hooks->fwd != NULL)) {
+    blocked = current_hooks->fwd(bus_num, addr);
+  }
+
+  return blocked ? -1 : get_fwd_bus(bus_num);
 }
 
 bool get_longitudinal_allowed(void) {
@@ -323,7 +355,7 @@ static void relay_malfunction_set(void) {
   fault_occurred(FAULT_RELAY_MALFUNCTION);
 }
 
-void generic_rx_checks(bool stock_ecu_detected) {
+static void generic_rx_checks(bool stock_ecu_detected) {
   // allow 1s of transition timeout after relay changes state before assessing malfunctioning
   const uint32_t RELAY_TRNS_TIMEOUT = 1U;
 
@@ -430,6 +462,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   current_safety_config.rx_checks_len = 0;
   current_safety_config.tx_msgs = NULL;
   current_safety_config.tx_msgs_len = 0;
+  current_safety_config.disable_forwarding = false;
 
   int set_status = -1;  // not set
   int hook_config_count = sizeof(safety_hook_registry) / sizeof(safety_hook_config);
@@ -447,6 +480,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
     current_safety_config.rx_checks_len = cfg.rx_checks_len;
     current_safety_config.tx_msgs = cfg.tx_msgs;
     current_safety_config.tx_msgs_len = cfg.tx_msgs_len;
+    current_safety_config.disable_forwarding = cfg.disable_forwarding;
     // reset all dynamic fields in addr struct
     for (int j = 0; j < current_safety_config.rx_checks_len; j++) {
       current_safety_config.rx_checks[j].status = (RxStatus){0};
@@ -610,12 +644,12 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
 
   if (controls_allowed) {
     // *** global torque limit check ***
-    violation |= max_limit_check(desired_torque, limits.max_steer, -limits.max_steer);
+    violation |= max_limit_check(desired_torque, limits.max_torque, -limits.max_torque);
 
     // *** torque rate limit check ***
     if (limits.type == TorqueDriverLimited) {
       violation |= driver_limit_check(desired_torque, desired_torque_last, &torque_driver,
-                                      limits.max_steer, limits.max_rate_up, limits.max_rate_down,
+                                      limits.max_torque, limits.max_rate_up, limits.max_rate_down,
                                       limits.driver_torque_allowance, limits.driver_torque_multiplier);
     } else {
       violation |= dist_to_meas_check(desired_torque, desired_torque_last, &torque_meas,
@@ -628,7 +662,7 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
 
     // every RT_INTERVAL set the new limits
     uint32_t ts_elapsed = get_ts_elapsed(ts, ts_torque_check_last);
-    if (ts_elapsed > limits.max_rt_interval) {
+    if (ts_elapsed > MAX_TORQUE_RT_INTERVAL) {
       rt_torque_last = desired_torque;
       ts_torque_check_last = ts;
     }
