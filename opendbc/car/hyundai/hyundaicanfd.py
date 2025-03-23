@@ -182,7 +182,7 @@ def create_ccnc(packer, CAN, openpilotLongitudinalControl, enabled, hud, latacti
 
   return [packer.make_can_msg(msg, CAN.ECAN, data) for msg, data in [("CCNC_0x161", msg_161), ("CCNC_0x162", msg_162)]]
 
-def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_override, set_speed, hud_control, cruise_info=None, main_cruise_enabled):
+def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_override, set_speed, hud_control, main_cruise_enabled, cruise_info=None):
   jerk = 5
   jn = jerk / 50
   a_raw, a_val = (0, 0) if not enabled or gas_override else (accel, np.clip(accel, accel_last - jn, accel_last + jn))
