@@ -3,7 +3,7 @@ from opendbc.car.hyundai.hyundaicanfd import CanBus
 from opendbc.car.hyundai.values import HyundaiFlags, CAR, DBC, \
                                                    CANFD_UNSUPPORTED_LONGITUDINAL_CAR, \
                                                    UNSUPPORTED_LONGITUDINAL_CAR, HyundaiSafetyFlags
-from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
+from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR_CAN, RADAR_START_ADDR_CANFD
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.disable_ecu import disable_ecu
 from opendbc.car.hyundai.carcontroller import CarController
@@ -80,6 +80,8 @@ class CarInterface(CarInterfaceBase):
         ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CANFD_ALT_BUTTONS.value
       if ret.flags & HyundaiFlags.CANFD_CAMERA_SCC:
         ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CAMERA_SCC.value
+      if ret.flags & HyundaiFlags.CCNC:
+        ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CCNC.value
 
     else:
       # Shared configuration for non CAN-FD cars
@@ -125,6 +127,7 @@ class CarInterface(CarInterfaceBase):
 
     # Common longitudinal control setup
 
+    RADAR_START_ADDR = RADAR_START_ADDR_CANFD if ret.flags & HyundaiFlags.CANFD else RADAR_START_ADDR_CAN
     ret.radarUnavailable = RADAR_START_ADDR not in fingerprint[1] or Bus.radar not in DBC[ret.carFingerprint]
     ret.openpilotLongitudinalControl = experimental_long and ret.experimentalLongitudinalAvailable
     ret.pcmCruise = not ret.openpilotLongitudinalControl
