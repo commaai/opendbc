@@ -355,4 +355,4 @@ DBC = CAR.create_dbc_map()
 
 
 # diag message that in some Nidec cars only appear with 1s freq if VIN query is performed
-DIAG_MSGS = {1600: 5, 1601: 8}
+# DIAG_MSGS = {1600: 5, 1601: 8} - temporarily remove - not sure what this does
