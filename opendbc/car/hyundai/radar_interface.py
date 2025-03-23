@@ -3,16 +3,17 @@ import math
 from opendbc.can.parser import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.interfaces import RadarInterfaceBase
-from opendbc.car.hyundai.values import DBC
+from opendbc.car.hyundai.values import DBC, HyundaiFlags
 
 from opendbc.sunnypilot.car.hyundai.escc import EsccRadarInterfaceBase
 
-RADAR_START_ADDR = 0x500
+RADAR_START_ADDR_CAN = 0x500
+RADAR_START_ADDR_CANFD = 0x3A5
 RADAR_MSG_COUNT = 32
 
 # POC for parsing corner radars: https://github.com/commaai/openpilot/pull/24221/
 
-def get_radar_can_parser(CP):
+def get_radar_can_parser(CP, RADAR_START_ADDR):
   if Bus.radar not in DBC[CP.carFingerprint]:
     return None
 
@@ -24,12 +25,14 @@ class RadarInterface(RadarInterfaceBase, EsccRadarInterfaceBase):
   def __init__(self, CP, CP_SP):
     RadarInterfaceBase.__init__(self, CP, CP_SP)
     EsccRadarInterfaceBase.__init__(self, CP, CP_SP)
+    self.CP_flags = CP.flags
+    self.RADAR_START_ADDR = RADAR_START_ADDR_CANFD if self.CP_flags & HyundaiFlags.CANFD else RADAR_START_ADDR_CAN
     self.updated_messages = set()
-    self.trigger_msg = RADAR_START_ADDR + RADAR_MSG_COUNT - 1
+    self.trigger_msg = self.RADAR_START_ADDR + RADAR_MSG_COUNT - 1
     self.track_id = 0
 
     self.radar_off_can = CP.radarUnavailable
-    self.rcp = get_radar_can_parser(CP)
+    self.rcp = get_radar_can_parser(CP, self.RADAR_START_ADDR)
 
     # If radar tracks are not available and ESCC is enabled, override radar parser with the ESCC parser and trigger message
     if self.rcp is None and self.ESCC.enabled:
@@ -63,7 +66,7 @@ class RadarInterface(RadarInterfaceBase, EsccRadarInterfaceBase):
     if self.use_escc:
       return self.update_escc(ret)
 
-    for addr in range(RADAR_START_ADDR, RADAR_START_ADDR + RADAR_MSG_COUNT):
+    for addr in range(self.RADAR_START_ADDR, self.RADAR_START_ADDR + RADAR_MSG_COUNT):
       msg = self.rcp.vl[f"RADAR_TRACK_{addr:x}"]
 
       if addr not in self.pts:
@@ -73,10 +76,14 @@ class RadarInterface(RadarInterfaceBase, EsccRadarInterfaceBase):
 
       valid = msg['STATE'] in (3, 4)
       if valid:
-        azimuth = math.radians(msg['AZIMUTH'])
+        if self.CP.flags & HyundaiFlags.CANFD:
+          self.pts[addr].dRel = msg['LONG_DIST']
+          self.pts[addr].yRel = msg['LAT_DIST']
+        else:
+          azimuth = math.radians(msg['AZIMUTH'])
+          self.pts[addr].dRel = math.cos(azimuth) * msg['LONG_DIST']
+          self.pts[addr].yRel = 0.5 * -math.sin(azimuth) * msg['LONG_DIST']
         self.pts[addr].measured = True
-        self.pts[addr].dRel = math.cos(azimuth) * msg['LONG_DIST']
-        self.pts[addr].yRel = 0.5 * -math.sin(azimuth) * msg['LONG_DIST']
         self.pts[addr].vRel = msg['REL_SPEED']
         self.pts[addr].aRel = msg['REL_ACCEL']
         self.pts[addr].yvRel = float('nan')
