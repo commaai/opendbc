@@ -122,6 +122,7 @@ BO_ 717 HS2_DYN_UCF_2CD: 3 UC_FREIN
  SG_ VITESSE_LACET : 15|16@0- (0.1,0) [-100|100] "Degré/s" BV,BVN
 
 BO_ 728 NEW_MSG_2D8: 7 XXX
+ SG_ ACC_RELATED : 17|1@0+ (1,0) [0|1] "" XXX
  SG_ ESP_STATUS_RELATED : 28|1@0+ (1,0) [0|1] "" XXX
  SG_ ESP_STATUS_RELATED_INV : 29|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_ACTIVATION_RELATED : 43|1@0+ (1,0) [0|1] "" XXX
@@ -158,6 +159,9 @@ BO_ 760 NEW_MSG_2F8: 7 XXX
  SG_ ESP_STATUS_RELATED_INV : 13|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_ACTIVATION_RELATED : 35|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 770 NEW_MSG_302: 7 XXX
+ SG_ ACC_RELATED : 46|1@0+ (1,0) [0|1] "" XXX
+
 BO_ 773 STEERING_ALT: 7 XXX
  SG_ ANGLE : 7|16@0- (0.1,0) [-3276.8|3276.7] "degrees" XXX
  SG_ RATE : 23|8@0+ (1,0) [0|255] "" XXX
@@ -171,6 +175,11 @@ BO_ 781 Dyn4_FRE: 8 CDS___Fahrdynamikregelung
  SG_ P264_VehV_VPsvValWhlFrtR : 23|16@0+ (0.01,0) [0|655.35] "km/h" Vector__XXX
  SG_ P265_VehV_VPsvValWhlBckL : 39|16@0+ (0.01,0) [0|655.35] "km/h" Vector__XXX
  SG_ P266_VehV_VPsvValWhlBckR : 55|16@0+ (0.01,0) [0|655.35] "km/h" Vector__XXX
+
+BO_ 792 NEW_MSG_318: 5 XXX
+ SG_ ACC_RELATED : 14|13@0+ (1,0) [0|8191] "" XXX
+ SG_ ACC_RELATED_2 : 30|13@0+ (1,0) [0|8191] "" XXX
+ SG_ ACC_GO_RELATED : 32|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 809 Dyn_STT_BV: 4 BVA___Automatikgetriebe
  SG_ P230_Com_ctGbxCnt3 : 3|4@0+ (1,0) [0|15] "" Vector__XXX
@@ -315,6 +324,11 @@ BO_ 1042 Dat_BSI: 8 BSI___Kombiinstrument
  SG_ P104_Dspl_stAOHt : 30|2@1+ (1,0) [0|3] "-" CMM___Motor_SG
  SG_ DRIVER_DOOR : 51|1@0+ (1,0) [0|1] "" Vector__XXX
  SG_ PASSENGER_DOOR : 52|1@0+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 1069 NEW_MSG_42D: 4 XXX
+ SG_ COUNTER : 16|4@1+ (1,0) [0|15] "" XXX
+ SG_ CHECKSUM : 20|4@1+ (1,0) [0|15] "" XXX
+ SG_ ACC_RELATED : 31|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 1074 Dat_BSI1: 8 BSI___Kombiinstrument
  SG_ P249_Com_stEngStopReq : 0|2@1+ (1,0) [0|3] "" Vector__XXX
