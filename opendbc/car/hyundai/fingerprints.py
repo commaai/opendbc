@@ -202,6 +202,15 @@ FW_VERSIONS = {
       b'\xf1\x00DN8 MFC  AT USA LHD 1.00 1.07 99211-L1000 211223',
     ],
   },
+  CAR.HYUNDAI_SONATA_2024: {
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00DN8 MFC  AT KOR LHD 1.00 1.01 99211-L1800 230512',
+      b'\xf1\x00DN8 MFC  AT USA LHD 1.00 1.01 99211-L1800 230512',
+    ],
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00DN8_ RDR -----      1.00 1.00 99110-L1800         ',
+    ],
+  },
   CAR.HYUNDAI_SONATA_LF: {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00LF__ SCC F-CUP      1.00 1.00 96401-C2200         ',
@@ -544,6 +553,16 @@ FW_VERSIONS = {
       b'\xf1\x00OS9 LKAS AT USA LHD 1.00 1.00 95740-J9300 g21',
     ],
   },
+  CAR.HYUNDAI_KONA_2ND_GEN: {
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00SX2 MFC  AT USA LHD 1.00 1.03 99211-BE000 230517',
+      b'\xf1\x00SX2 MFC  AT USA LHD 1.00 1.07 99211-BE000 240611',
+    ],
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00SX2_ RDR -----      1.00 1.02 99110-BE000         ',
+      b'\xf1\x00SX2_ RDR -----      1.00 1.02 99110-BE500         ',
+    ],
+  },
   CAR.KIA_CEED: {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00CD__ SCC F-CUP      1.00 1.00 99110-J7500         ',
@@ -609,6 +628,14 @@ FW_VERSIONS = {
       b'\xf1\x00DL ESC \t 100 \x06\x02 58910-L3800',
       b'\xf1\x00DL ESC \t 101 \x07\x02 58910-L3800',
       b'\xf1\x00DL ESC \t 102"\x08\x10 58910-L3800',
+    ],
+  },
+  CAR.KIA_K5_2025: {
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00DL3 MFC  AT USA LHD 1.00 1.04 99210-L2500 240117',
+    ],
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00DL3_ RDR -----      1.00 1.01 99110-L2500         ',
     ],
   },
   CAR.KIA_K5_HEV_2020: {
@@ -689,11 +716,12 @@ FW_VERSIONS = {
     ],
   },
   CAR.HYUNDAI_KONA_EV_2ND_GEN: {
-    (Ecu.fwdRadar, 0x7d0, None): [
-      b'\xf1\x00SXev RDR -----      1.00 1.00 99110-BF000         ',
-    ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00SX2EMFC  AT KOR LHD 1.00 1.00 99211-BF000 230410',
+      b'\xf1\x00SX2EMFC  AT USA LHD 1.00 1.02 99211-BF000 230823',
+    ],
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00SXev RDR -----      1.00 1.00 99110-BF000         ',
     ],
   },
   CAR.KIA_NIRO_EV: {
@@ -962,6 +990,15 @@ FW_VERSIONS = {
       b'\xf1\x00DN8HMFC  AT USA LHD 1.00 1.07 99211-L1000 211223',
     ],
   },
+  CAR.HYUNDAI_SONATA_HEV_2024: {
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00DN8HMFC  AT KOR LHD 1.00 1.01 99211-L1800 230512',
+      b'\xf1\x00DN8HMFC  AT USA LHD 1.00 1.01 99211-L1800 230512',
+    ],
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00DN8_ RDR -----      1.00 1.00 99110-L1800         ',
+    ],
+  },
   CAR.KIA_SORENTO: {
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00UMP LKAS AT KOR LHD 1.00 1.00 95740-C5550 S30',
@@ -1060,6 +1097,22 @@ FW_VERSIONS = {
       b'\xf1\x00NX4__               1.01 1.00 99110-N9100         ',
     ],
   },
+  CAR.HYUNDAI_TUCSON_2025: {
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00NX4 FR_CMR AT USA LHD 1.00 1.00 99211-N7030 C55',
+    ],
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00NX4__               1.00 1.02 99110N7100          ',
+    ],
+  },
+  CAR.HYUNDAI_TUCSON_HEV_2025: {
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00NX4 FR_CMR AT EUR LHD 1.00 1.00 99211-N7030 C55',
+    ],
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00NX4__               1.00 1.02 99110N7000          ',
+    ],
+  },
   CAR.HYUNDAI_SANTA_CRUZ_1ST_GEN: {
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00NX4 FR_CMR AT USA LHD 1.00 1.00 99211-CW000 14M',
@@ -1136,6 +1189,14 @@ FW_VERSIONS = {
       b'\xf1\x00MQ4_ SCC FHCUP      1.00 1.00 99110-R5000         ',
       b'\xf1\x00MQ4_ SCC FHCUP      1.00 1.06 99110-P2000         ',
       b'\xf1\x00MQ4_ SCC FHCUP      1.00 1.08 99110-P2000         ',
+    ],
+  },
+  CAR.KIA_SORENTO_2024: {
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00MQ4 MFC  AT AUS RHD 1.01 1.04 99210-P2550 231127',
+    ],
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00MQ4_ RDR -----      1.00 1.01 99110-P2500         ',
     ],
   },
   CAR.KIA_SORENTO_HEV_4TH_GEN: {
