@@ -230,15 +230,27 @@ class CarController(CarControllerBase):
     # Send dashboard UI commands.
     # On Nidec, this controls longitudinal positive acceleration
     if self.frame % 10 == 0:
+      
+      # ----------------- new test logic start ---------------------
+
+      ms_to_kph = 3.6
+      pcm_speed = ( CS.out.vEgo + 2.0 * accel ) * ms_to_kph
+      pcm_accel = np.clip ( 54 + accel * 110, 0, self.params.NIDEC_GAS_MAX )
+
+      # ----------------- new test logic end ---------------------
+      
       hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
                     hud_control.lanesVisible, fcw_display, acc_alert, steer_required, hud_control.leadDistanceBars)
+      
       pcm_speed_send = 0.0 if (self.brake_last > wind_brake ) and ( self.CP.carFingerprint in HONDA_NIDEC_HYBRID ) else pcm_speed
       can_sends.extend(hondacan.create_ui_commands(self.packer, self.CAN, self.CP, CC.enabled, pcm_speed_send, hud, CS.is_metric, CS.acc_hud, CS.lkas_hud))
 
       if self.CP.openpilotLongitudinalControl and self.CP.carFingerprint not in HONDA_BOSCH:
         self.speed = pcm_speed
-        self.gas = pcm_accel / self.params.NIDEC_GAS_MAX
+        # self.gas = pcm_accel / self.params.NIDEC_GAS_MAX
+        self.gas = pcm_accel 
 
+    
     new_actuators = actuators.as_builder()
     new_actuators.speed = self.speed
     new_actuators.accel = self.accel
