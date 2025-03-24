@@ -1,3 +1,4 @@
+import numpy as np
 from opendbc.can.packer import CANPacker
 from opendbc.car import Bus, apply_driver_steer_torque_limits
 from opendbc.car.interfaces import CarControllerBase
@@ -25,14 +26,15 @@ class CarController(CarControllerBase):
 
     # send steering command
     self.apply_torque_last = apply_torque
-    can_sends.append(create_lka_steering(self.packer, CS.acm_lka_hba_cmd, apply_torque, CC.latActive))
+    can_sends.append(create_lka_steering(self.packer, self.frame, CS.acm_lka_hba_cmd, apply_torque, CC.enabled, CC.latActive))
 
     if self.frame % 5 == 0:
       can_sends.append(create_wheel_touch(self.packer, CS.sccm_wheel_touch, CC.enabled))
 
     # Longitudinal control
     if self.CP.openpilotLongitudinalControl:
-      can_sends.append(create_longitudinal(self.packer, self.frame % 15, actuators.accel, CC.enabled))
+      accel = float(np.clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
+      can_sends.append(create_longitudinal(self.packer, self.frame, accel, CC.enabled))
     else:
       interface_status = None
       if CC.cruiseControl.cancel:
