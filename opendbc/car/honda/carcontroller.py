@@ -234,7 +234,7 @@ class CarController(CarControllerBase):
       # ----------------- new test logic start ---------------------
 
       ms_to_kph = 3.6
-      pcm_speed = ( CS.out.vEgo + 2.0 * accel ) * ms_to_kph
+      pcm_speed = np.clip ( ( CS.out.vEgo + 2.0 * accel ) * ms_to_kph, 0.0, 200.0 )
       pcm_accel = np.clip ( 54 + accel * 110, 0, self.params.NIDEC_GAS_MAX )
 
       # ----------------- new test logic end ---------------------
