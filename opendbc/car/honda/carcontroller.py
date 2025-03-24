@@ -232,7 +232,7 @@ class CarController(CarControllerBase):
     if self.frame % 10 == 0:
       hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
                     hud_control.lanesVisible, fcw_display, acc_alert, steer_required, hud_control.leadDistanceBars)
-      pcm_speed_send = 0.0 if (apply_brake > 0 ) and ( self.CP.carFingerprint in HONDA_NIDEC_HYBRID ) else pcm_speed
+      pcm_speed_send = 0.0 if (self.brake_last > wind_brake ) and ( self.CP.carFingerprint in HONDA_NIDEC_HYBRID ) else pcm_speed
       can_sends.extend(hondacan.create_ui_commands(self.packer, self.CAN, self.CP, CC.enabled, pcm_speed_send, hud, CS.is_metric, CS.acc_hud, CS.lkas_hud))
 
       if self.CP.openpilotLongitudinalControl and self.CP.carFingerprint not in HONDA_BOSCH:
