@@ -648,12 +648,12 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
 
   if (controls_allowed) {
     // *** global torque limit check ***
-    violation |= max_limit_check(desired_torque, limits.max_steer, -limits.max_steer);
+    violation |= max_limit_check(desired_torque, limits.max_torque, -limits.max_torque);
 
     // *** torque rate limit check ***
     if (limits.type == TorqueDriverLimited) {
       violation |= driver_limit_check(desired_torque, desired_torque_last, &torque_driver,
-                                      limits.max_steer, limits.max_rate_up, limits.max_rate_down,
+                                      limits.max_torque, limits.max_rate_up, limits.max_rate_down,
                                       limits.driver_torque_allowance, limits.driver_torque_multiplier);
     } else {
       violation |= dist_to_meas_check(desired_torque, desired_torque_last, &torque_meas,
@@ -666,7 +666,7 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
 
     // every RT_INTERVAL set the new limits
     uint32_t ts_elapsed = get_ts_elapsed(ts, ts_torque_check_last);
-    if (ts_elapsed > limits.max_rt_interval) {
+    if (ts_elapsed > MAX_TORQUE_RT_INTERVAL) {
       rt_torque_last = desired_torque;
       ts_torque_check_last = ts;
     }

@@ -11,7 +11,9 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
   if (bus == 0)  {
     // Vehicle speed
     if (addr == 0x208) {
-      vehicle_moving = GET_BYTE(to_push, 6) | GET_BYTE(to_push, 7);
+      float speed = ((GET_BYTE(to_push, 6) << 8) | GET_BYTE(to_push, 7)) * 0.01;
+      vehicle_moving = speed > 0.0;
+      UPDATE_VEHICLE_SPEED(speed / 3.6);
     }
 
     // Driver torque
@@ -42,11 +44,10 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
 
 static bool rivian_tx_hook(const CANPacket_t *to_send) {
   const TorqueSteeringLimits RIVIAN_STEERING_LIMITS = {
-    .max_steer = 250,
+    .max_torque = 250,
     .max_rate_up = 3,
     .max_rate_down = 5,
     .max_rt_delta = 125,
-    .max_rt_interval = 250000,
     .driver_torque_multiplier = 2,
     .driver_torque_allowance = 100,
     .type = TorqueDriverLimited,
