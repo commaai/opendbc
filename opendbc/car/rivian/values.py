@@ -73,7 +73,14 @@ FW_QUERY_CONFIG = FwQueryConfig(
       [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.SUPPLIER_SOFTWARE_VERSION_RESPONSE],
       rx_offset=0x40,
       bus=0,
-    )
+    ),
+    Request(
+      [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.MANUFACTURER_ECU_HARDWARE_NUMBER_REQUEST],
+      [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.MANUFACTURER_ECU_HARDWARE_NUMBER_RESPONSE],
+      rx_offset=0x40,
+      bus=0,
+      logging=True,
+    ),
   ],
   match_fw_to_car_fuzzy=match_fw_to_car_fuzzy,
 )
