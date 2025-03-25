@@ -81,7 +81,13 @@ class CarInterface(CarInterfaceBase):
       # default longitudinal tuning for all hondas
       # ret.longitudinalTuning.kiBP = [0., 5., 35.]
       # ret.longitudinalTuning.kiV = [1.2, 0.8, 0.5]
-      ret.longitudinalTuning.kiV = [0.0]
+      # override for actuator tuning
+      ret.longitudinalTuning.kpBP = [0.]
+      ret.longitudinalTuning.kpV = [0.]
+      ret.longitudinalTuning.kiBP = [0.]
+      ret.longitudinalTuning.kiV = [0.]
+      ret.longitudinalActuatorDelay = 0.0
+
 
     eps_modified = False
     for fw in car_fw:
