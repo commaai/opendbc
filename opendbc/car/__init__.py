@@ -98,7 +98,9 @@ class Bus(StrEnum):
   ap_party = auto()
 
 
-def apply_driver_steer_torque_limits(apply_torque, apply_torque_last, driver_torque, LIMITS, steer_max):
+def apply_driver_steer_torque_limits(apply_torque: int, apply_torque_last: int, driver_torque: float, LIMITS, steer_max: int = None):
+  if steer_max is None:
+    steer_max = LIMITS.STEER_MAX
 
   # limits due to driver torque
   driver_max_torque = steer_max + (LIMITS.STEER_DRIVER_ALLOWANCE + driver_torque * LIMITS.STEER_DRIVER_FACTOR) * LIMITS.STEER_DRIVER_MULTIPLIER
