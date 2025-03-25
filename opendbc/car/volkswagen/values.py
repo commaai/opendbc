@@ -156,7 +156,7 @@ class VolkswagenMQBPlatformConfig(PlatformConfig):
 
 @dataclass
 class VolkswagenPQPlatformConfig(VolkswagenMQBPlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'vw_golf_mk4'})
+  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'vw_pq'})
 
   def init(self):
     self.flags |= VolkswagenFlags.PQ
