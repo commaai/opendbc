@@ -233,13 +233,17 @@ class CarController(CarControllerBase):
 
       # ----------------- new test logic start ---------------------
 
-      # standstill disengage
-      if CC.longActive and ( accel >= 0.01 ) and (CS.out.vEgo < 1.0 ):
-        pcm_speed = 25.0
+      if CC.longActive:
+        ms_to_kph = 3.6
+        pcm_speed = float ( np.clip ( ( CS.out.vEgo + 2.0 * accel ) * ms_to_kph, 0.0, 150.0 ) )
 
-      # prefer EV mode under 30mph and slower accel
-      if CC.longActive and ( accel <= 0.5 ) and ( CS.out.vEgo > 0.0 ) and ( CS.out.vEgo > 0 ) and ( CS.out.vEgo < 30.0 / 2.237 ):
-        pcm_accel = 54.0
+        # standstill disengage
+        if and ( accel >= 0.01 ) and (CS.out.vEgo < 1.0 ) and ( pcm_speed < 25.0) :
+          pcm_speed = 25.0
+
+        # prefer EV mode under 30mph and slower accel
+        if ( accel <= 0.5 ) and ( CS.out.vEgo > 0.0 ) and ( CS.out.vEgo < 30.0 / 2.237 ):
+          pcm_accel = 54.0
 
       # ----------------- new test logic end ---------------------
 
