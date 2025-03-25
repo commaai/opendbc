@@ -64,6 +64,7 @@ typedef enum {
 typedef struct {
   // torque cmd limits
   const int max_torque;
+  const bool dynamic_max_torque;  // uses max_torque_lookup instead if set
   const struct lookup_t max_torque_lookup;
   const int max_rate_up;
   const int max_rate_down;

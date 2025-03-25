@@ -107,10 +107,10 @@ GEAR_MAP = {
 
 class CarControllerParams:
   # The R1T 2023 and R1S 2023 we tested on achieves slightly more lateral acceleration going left vs. right
-  # and lateral acceleration falls linearly as speed decreases from ~40 mph to 20 mph. these values are set
+  # and lateral acceleration falls linearly as speed decreases from ~40 mph to 20 mph. These values are set
   # conservatively to reach a maximum of 3.0 m/s^2 turning left at 80 mph
 
-  # these refer to turning left (R1T and R1S both seen with more torque left vs. right)
+  # These refer to turning left (R1T and R1S both seen with more torque left vs. right)
   # 250 is ~2.8 m/s^2 above 17 m/s, then linearly ramps to ~1.6 m/s^2 from 17 m/s to 10 m/s
   # TODO: it is theorized older models have different steering racks and achieve down to half the
   #  lateral acceleration referenced here at all speeds. detect this and ship a torque increase for those models

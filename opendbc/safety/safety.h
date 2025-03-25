@@ -644,7 +644,7 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
 
   int max_torque = limits.max_torque;
   // Some safety models support variable torque limit based on vehicle speed
-  if (limits.max_torque == -1) {
+  if (limits.dynamic_max_torque) {
     const float fudged_speed = (vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.;
     max_torque = interpolate(limits.max_torque_lookup, fudged_speed) + 1;
   }
