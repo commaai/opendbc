@@ -3,7 +3,7 @@ from enum import Enum, IntFlag
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, AngleSteeringLimits
 from opendbc.car.structs import CarParams, CarState
 from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column
-from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
+from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, LiveFwVersions, OfflineFwVersions
 
 Ecu = CarParams.Ecu
 
@@ -34,6 +34,36 @@ class TeslaCarDocsHW4(CarDocs):
 class TeslaPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {Bus.party: 'tesla_model3_party'})
 
+def match_fw_to_car_fuzzy(live_fw_versions: LiveFwVersions, vin: str, offline_fw_versions: OfflineFwVersions) -> set[str]:
+  candidates: set[str] = set()
+  for candidate, fws in offline_fw_versions.items():
+    for ecu, expected_versions in fws.items():
+      addr = ecu[1:]
+
+      current_model = decode_tesla_fingerprint_model(expected_versions[0])
+      if current_model is None:
+        continue
+
+      live_current_fw = live_fw_versions.get(addr, set())
+      if not live_current_fw:
+        continue
+      live_current_fw = list(live_current_fw)[0]
+
+      live_model = decode_tesla_fingerprint_model(live_current_fw)
+      if live_model is None:
+        continue
+      if live_model == current_model:
+        candidates.add(candidate)
+  return candidates
+
+def decode_tesla_fingerprint_model(fingerprint: bytes) -> tuple:
+  if not fingerprint.startswith(b'TeM'): # Not a tesla
+    return None
+  model_split = fingerprint.split(b'),')
+  if len(model_split) != 2:
+    return None
+  model = model_split[1][0]
+  return chr(model)
 
 class CAR(Platforms):
   TESLA_MODEL_3 = TeslaPlatformConfig(
@@ -61,7 +91,8 @@ FW_QUERY_CONFIG = FwQueryConfig(
       [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.SUPPLIER_SOFTWARE_VERSION_RESPONSE],
       bus=0,
     )
-  ]
+  ],
+  match_fw_to_car_fuzzy=match_fw_to_car_fuzzy,
 )
 
 
