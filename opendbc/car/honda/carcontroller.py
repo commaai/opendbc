@@ -234,14 +234,13 @@ class CarController(CarControllerBase):
       # ----------------- new test logic start ---------------------
 
       if CC.longActive:
-        # ms_to_kph = 3.6
-        # pcm_speed = float ( np.clip ( ( CS.out.vEgo + 2.0 * accel ) * ms_to_kph, 0.0, 150.0 ) )
+        pcm_speed = float ( np.clip ( ( CS.out.vEgo + 2.0 * accel ) , 0.0, 100.0 ) ) # convert m/s to kph done in hondacan
 
         # standstill disengage
         if ( accel >= 0.01 ) and (CS.out.vEgo < 1.0 ) and ( pcm_speed < 25.0) :
-          pcm_speed = 25.0
+          pcm_speed = 25.0 / 3.6
 
-        # prefer EV mode under 30mph and slower accel
+        prefer EV mode under 30mph and slower accel
         # if ( accel <= 0.5 ) and ( CS.out.vEgo > 0.0 ) and ( CS.out.vEgo < 30.0 / 2.237 ):
           # pcm_accel = 54.0
 
@@ -250,11 +249,11 @@ class CarController(CarControllerBase):
       hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
                     hud_control.lanesVisible, fcw_display, acc_alert, steer_required, hud_control.leadDistanceBars)
 
-      pcm_speed_send = 0.0 if (self.brake_last > wind_brake ) and ( self.CP.carFingerprint in HONDA_NIDEC_HYBRID ) else pcm_speed
+      pcm_speed_send = 0.0 if (self.brake_last > wind_brake ) and ( self.CP.carFingerprint in HONDA_NIDEC_HYBRID ) else int ( pcm_speed )
       can_sends.extend(hondacan.create_ui_commands(self.packer, self.CAN, self.CP, CC.enabled, pcm_speed_send, hud, CS.is_metric, CS.acc_hud, CS.lkas_hud))
 
       if self.CP.openpilotLongitudinalControl and self.CP.carFingerprint not in HONDA_BOSCH:
-        self.speed = pcm_speed
+        self.speed = pcm_speed * 3.6 # conversion done in hondacan
         # self.gas = pcm_accel / self.params.NIDEC_GAS_MAX
         self.gas = pcm_accel
 
