@@ -75,7 +75,7 @@ class Mount(EnumBase):
 
 
 class Cable(EnumBase):
-  long_obdc_cable = BasePart("long OBD-C cable")
+  long_obdc_cable = BasePart("long OBD-C cable (9.5 ft)")
   usb_a_2_a_cable = BasePart("USB A-A cable")
   usbc_otg_cable = BasePart("USB C OTG cable")
   usbc_coupler = BasePart("USB-C coupler")
