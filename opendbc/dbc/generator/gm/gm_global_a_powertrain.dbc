@@ -195,9 +195,8 @@ BO_ 711 BECMBatteryVoltageCurrent: 6 K17_EBCM
 
 BO_ 715 ASCMGasRegenCmd: 8 K124_ASCM
  SG_ GasRegenAlwaysOne2 : 9|1@0+ (1,0) [0|1] ""  NEO
- SG_ GasRegenAlwaysOne : 14|1@0+ (1,0) [0|1] ""  NEO
- SG_ GasRegenChecksum : 47|24@0+ (1,0) [0|0] ""  NEO
- SG_ GasRegenCmdActiveInv : 32|1@0+ (1,0) [0|0] ""  NEO
+ SG_ GasRegenAccType : 15|2@0+ (1,0) [0|3] ""  NEO
+ SG_ GasRegenChecksum : 32|25@0+ (1,0) [0|0] ""  NEO
  SG_ GasRegenFullStopActive : 13|1@0+ (1,0) [0|0] ""  NEO
  SG_ GasRegenCmdActive : 0|1@0+ (1,0) [0|0] ""  NEO
  SG_ RollingCounter : 7|2@0+ (1,0) [0|0] ""  NEO
