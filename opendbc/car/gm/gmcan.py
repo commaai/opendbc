@@ -52,6 +52,38 @@ def create_adas_keepalive(bus):
   return [CanData(0x409, dat, bus), CanData(0x40a, dat, bus)]
 
 
+def old_cs(dat, idx, enabled):
+  return (((0xff - dat[1]) & 0xff) << 16) | \
+    (((0xff - dat[2]) & 0xff) << 8) | \
+    ((0x100 - dat[3] - idx) & 0xff)
+
+
+def new_cs(dat, idx, enabled):
+  return ((1 - enabled) << 24) | \
+    (((0xff - dat[1]) & 0xff) << 16) | \
+    (((0xff - dat[2]) & 0xff) << 8) | \
+    ((0x100 - dat[3] - idx) & 0xff)
+
+
+if __name__ == '__main__':
+  from tools.lib.logreader import LogReader
+  lr = LogReader('f08912a233c1584f|2022-08-11--18-02-41/r')
+
+  for msg in lr.filter('can'):
+    for can in msg:
+      if can.address == 0x2cb and can.src == 2:
+        dat = can.dat
+        idx = dat[0] >> 6
+        enabled = dat[0] & 0x1
+        old = old_cs(dat, idx, enabled)
+        new = new_cs(dat, idx, enabled)
+        if old != (new & 0xffffff):
+          print(f'idx: {idx}, enabled: {enabled}, old: {old}, new: {new}')
+        if (1 - enabled) != (new >> 24):
+          print(f'idx: {idx}, enabled: {enabled}, old: {old}, new: {new}')
+        break
+
+
 def create_gas_regen_command(packer, bus, throttle, idx, enabled, at_full_stop):
   values = {
     "GasRegenCmdActive": enabled,
