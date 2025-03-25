@@ -151,9 +151,9 @@ class TestGmAscmSafety(GmLongitudinalBase, TestGmSafetyBase):
   FWD_BUS_LOOKUP: dict[int, int] = {}
   BRAKE_BUS = 2
 
-  MAX_GAS = 1018.0
-  MIN_GAS = -650.0  # maximum regen
-  INACTIVE_GAS = -650.0
+  MAX_GAS = 1018
+  MIN_GAS = -650  # maximum regen
+  INACTIVE_GAS = -650
 
   def setUp(self):
     self.packer = CANPackerPanda("gm_global_a_powertrain_generated")
@@ -211,9 +211,9 @@ class TestGmCameraLongitudinalSafety(GmLongitudinalBase, TestGmCameraSafetyBase)
   FWD_BLACKLISTED_ADDRS = {2: [0x180, 0x2CB, 0x370, 0x315], 0: [0x184]}  # block LKAS, ACC messages and PSCMStatus
   BUTTONS_BUS = 0  # rx only
 
-  MAX_GAS = 1346.0
-  MIN_GAS = -540.0  # maximum regen
-  INACTIVE_GAS = -500.0
+  MAX_GAS = 1346
+  MIN_GAS = -540  # maximum regen
+  INACTIVE_GAS = -500
 
   def setUp(self):
     self.packer = CANPackerPanda("gm_global_a_powertrain_generated")
