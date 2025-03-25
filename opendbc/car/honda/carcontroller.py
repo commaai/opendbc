@@ -235,7 +235,7 @@ class CarController(CarControllerBase):
 
       # standstill disengage
       if CC.longActive and ( accel >= 0.01 ) and (CS.out.vEgo < 1.0 ):
-        pcm_speed = 40.0
+        pcm_speed = 25.0
 
       # prefer EV mode under 30mph and slower accel
       if CC.longActive and ( accel <= 0.5 ) and ( CS.out.vEgo > 0.0 ) and ( CS.out.vEgo > 0 ) and ( CS.out.vEgo < 30.0 / 2.237 ):
