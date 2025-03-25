@@ -132,7 +132,7 @@ class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafetyBase):
   FWD_BLACKLISTED_ADDRS = {0: [MSG_LH_EPS_03], 2: [MSG_HCA_01, MSG_LDW_02]}
 
   def setUp(self):
-    self.packer = CANPackerPanda("vw_mqb_2010")
+    self.packer = CANPackerPanda("vw_mqb")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagen, 0)
     self.safety.init_tests()
@@ -153,7 +153,7 @@ class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):
   INACTIVE_ACCEL = 3.01
 
   def setUp(self):
-    self.packer = CANPackerPanda("vw_mqb_2010")
+    self.packer = CANPackerPanda("vw_mqb")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagen, VolkswagenSafetyFlags.LONG_CONTROL)
     self.safety.init_tests()
