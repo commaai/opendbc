@@ -240,7 +240,7 @@ class CarController(CarControllerBase):
       # prefer EV mode under 30mph and slower accel
       if CC.longActive and ( accel <= 0.5 ) and ( CS.out.vEgo > 0.0 ) and ( CS.out.vEgo > 0 ) and ( CS.out.vEgo < 30.0 / 2.237 ):
         pcm_accel = 54.0
-      
+
       # ----------------- new test logic end ---------------------
 
       hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
