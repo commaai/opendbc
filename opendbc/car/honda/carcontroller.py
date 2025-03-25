@@ -234,7 +234,7 @@ class CarController(CarControllerBase):
       # ----------------- new test logic start ---------------------
 
       if CC.longActive:
-        pcm_speed = float ( np.clip ( ( CS.out.vEgo + 2.0 * accel ) , 0.0, 100.0 ) ) # convert m/s to kph done in hondacan
+        pcm_speed = float ( np.clip ( ( CS.out.vEgo + 6.0 * accel + wind brake ) , 0.0, 100.0 ) ) # convert m/s to kph done in hondacan
 
         # standstill disengage
         if ( accel >= 0.01 ) and (CS.out.vEgo < 1.0 ) and ( pcm_speed < 25.0):
