@@ -45,7 +45,7 @@ class CarControllerParams:
       max_regen_acceleration = 0.
 
     else:
-      self.MAX_GAS = 1018.0  # Safety limit, not ACC max. Stock ACC >4096 from standstill.
+      self.MAX_GAS = 1018.0  # Safety limit, not ACC max. Stock ACC >2042 from standstill.
       self.MAX_ACC_REGEN = -650.0  # Max ACC regen is slightly less than max paddle regen
       self.INACTIVE_REGEN = -650.0
       # ICE has much less engine braking force compared to regen in EVs,
