@@ -15,7 +15,7 @@ class TestChryslerSafety(common.PandaCarSafetyTest, common.MotorTorqueSteeringSa
 
   MAX_RATE_UP = 3
   MAX_RATE_DOWN = 3
-  MAX_TORQUE = 261
+  MAX_TORQUE = [0], [261]
   MAX_RT_DELTA = 112
   MAX_TORQUE_ERROR = 80
 
