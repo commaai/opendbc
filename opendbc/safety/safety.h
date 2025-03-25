@@ -647,7 +647,10 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
   if (limits.dynamic_max_torque) {
     const float fudged_speed = (vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.;
     max_torque = interpolate(limits.max_torque_lookup, fudged_speed) + 1;
+    max_torque = CLAMP(max_torque, -limits.max_torque, limits.max_torque);
   }
+  printf("safety max torque: %d\n", max_torque);
+  printf("got desired torque: %d\n", desired_torque);
 
   if (controls_allowed) {
     // *** global torque limit check ***
@@ -691,8 +694,8 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
 
   // no torque if controls is not allowed
   if (!controls_allowed && (desired_torque != 0)) {
-//    violation = true;
-//    printf("controls_allowed: %d\n", controls_allowed);
+    violation = true;
+    printf("controls_allowed: %d\n", controls_allowed);
   }
 
   // certain safety modes set their steer request bit low for one or more frame at a
