@@ -213,13 +213,13 @@ class TorqueSteeringSafetyTestBase(PandaSafetyTestBase, abc.ABC):
 
   @property
   def torque_speed_range(self):
-    if self.DYNAMIC_MAX_TORQUE:
+    if not self.DYNAMIC_MAX_TORQUE:
+      return [0]
+    else:
       # test with more precision inside breakpoint range
       min_speed = min(self.MAX_TORQUE[0])
       max_speed = max(self.MAX_TORQUE[0])
       return np.concatenate([np.arange(0, min_speed, 5), np.arange(min_speed, max_speed, 0.5), np.arange(max_speed, 40, 5)])
-    else:
-      return [0]
 
   def get_max_torque(self, speed):
     # matches safety fudge
