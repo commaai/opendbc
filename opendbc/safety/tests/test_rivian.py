@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import unittest
-import numpy as np
 
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
@@ -25,9 +24,6 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
 
   DRIVER_TORQUE_ALLOWANCE = 100
   DRIVER_TORQUE_FACTOR = 2
-
-  # def max_torque_lookup(self, speed):
-  #   return np.interp(speed, [9, 17], [350, 250])
 
   def _torque_driver_msg(self, torque):
     values = {"EPAS_TorsionBarTorque": torque / 100.0}
