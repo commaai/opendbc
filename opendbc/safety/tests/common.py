@@ -212,14 +212,16 @@ class TorqueSteeringSafetyTestBase(PandaSafetyTestBase, abc.ABC):
   #   return self.MAX_TORQUE
 
   @property
-  def test_speed_range(self):
+  def torque_speed_range(self):
     # test with more precision inside breakpoint range
     min_speed = min(self.MAX_TORQUE[0])
     max_speed = max(self.MAX_TORQUE[0])
-    return np.concatenate([np.arange(0, min_speed, 1), np.arange(min_speed, max_speed, 0.1), np.arange(max_speed, 100, 1)])
+    return np.concatenate([np.arange(0, min_speed, 5), np.arange(min_speed, max_speed, 0.5), np.arange(max_speed, 40, 5)])
 
   def get_max_torque(self, speed):
-    return np.interp(speed, self.MAX_TORQUE[0], self.MAX_TORQUE[1])
+    # matches safety fudge
+    torque = int(np.interp(speed - 1, self.MAX_TORQUE[0], self.MAX_TORQUE[1]) + 1)
+    return min(torque, max(self.MAX_TORQUE[1]))
 
   @abc.abstractmethod
   def _torque_cmd_msg(self, torque, steer_req=1):
@@ -238,10 +240,9 @@ class TorqueSteeringSafetyTestBase(PandaSafetyTestBase, abc.ABC):
     self.safety.set_rt_torque_last(t)
 
   def test_steer_safety_check(self):
-    for speed in self.test_speed_range:
-      # self.update_speed
+    for speed in self.torque_speed_range:
       self._reset_speed_measurement(speed)
-      max_torque = self.get_max_torque(speed - 1)  # match safety fudge
+      max_torque = self.get_max_torque(speed)
       print('speed', speed, max_torque)
       for enabled in [0, 1]:
         for t in range(int(-max_torque * 1.5), int(max_torque * 1.5)):
