@@ -166,6 +166,7 @@ class LongitudinalGasBrakeSafetyTest(PandaSafetyTestBase, abc.ABC):
   MIN_GAS: int = 0
   MAX_GAS: int | None = None
   INACTIVE_GAS = 0
+  MIN_POSSIBLE_GAS: int = 0.
   MAX_POSSIBLE_GAS: int | None = None
 
   def test_gas_brake_limits_correct(self):
@@ -187,7 +188,7 @@ class LongitudinalGasBrakeSafetyTest(PandaSafetyTestBase, abc.ABC):
     self._generic_limit_safety_check(self._send_brake_msg, self.MIN_BRAKE, self.MAX_BRAKE, 0, self.MAX_POSSIBLE_BRAKE, 1)
 
   def test_gas_safety_check(self):
-    self._generic_limit_safety_check(self._send_gas_msg, self.MIN_GAS, self.MAX_GAS, 0, self.MAX_POSSIBLE_GAS, 1, self.INACTIVE_GAS)
+    self._generic_limit_safety_check(self._send_gas_msg, self.MIN_GAS, self.MAX_GAS, self.MIN_POSSIBLE_GAS, self.MAX_POSSIBLE_GAS, 1, self.INACTIVE_GAS)
 
 
 class TorqueSteeringSafetyTestBase(PandaSafetyTestBase, abc.ABC):
