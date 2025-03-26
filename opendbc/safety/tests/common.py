@@ -426,40 +426,44 @@ class DriverTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
     # Tests down limits and driver torque blending
     self.safety.set_controls_allowed(True)
 
-    # Cannot stay at MAX_TORQUE if above DRIVER_TORQUE_ALLOWANCE
-    for sign in [-1, 1]:
-      for driver_torque in np.arange(0, self.DRIVER_TORQUE_ALLOWANCE * 2, 1):
-        self._reset_torque_driver_measurement(-driver_torque * sign)
-        self._set_prev_torque(self.MAX_TORQUE * sign)
-        should_tx = abs(driver_torque) <= self.DRIVER_TORQUE_ALLOWANCE
-        self.assertEqual(should_tx, self._tx(self._torque_cmd_msg(self.MAX_TORQUE * sign)))
+    for speed in self._torque_speed_range:
+      self._reset_speed_measurement(speed)
+      max_torque = self._get_max_torque(speed)
 
-    # arbitrary high driver torque to ensure max steer torque is allowed
-    max_driver_torque = int(self.MAX_TORQUE / self.DRIVER_TORQUE_FACTOR + self.DRIVER_TORQUE_ALLOWANCE + 1)
+      # Cannot stay at MAX_TORQUE if above DRIVER_TORQUE_ALLOWANCE
+      for sign in [-1, 1]:
+        for driver_torque in np.arange(0, self.DRIVER_TORQUE_ALLOWANCE * 2, 1):
+          self._reset_torque_driver_measurement(-driver_torque * sign)
+          self._set_prev_torque(max_torque * sign)
+          should_tx = abs(driver_torque) <= self.DRIVER_TORQUE_ALLOWANCE
+          self.assertEqual(should_tx, self._tx(self._torque_cmd_msg(max_torque * sign)))
 
-    # spot check some individual cases
-    for sign in [-1, 1]:
-      # Ensure we wind down factor units for every unit above allowance
-      driver_torque = (self.DRIVER_TORQUE_ALLOWANCE + 10) * sign
-      torque_desired = (self.MAX_TORQUE - 10 * self.DRIVER_TORQUE_FACTOR) * sign
-      delta = 1 * sign
-      self._set_prev_torque(torque_desired)
-      self._reset_torque_driver_measurement(-driver_torque)
-      self.assertTrue(self._tx(self._torque_cmd_msg(torque_desired)))
-      self._set_prev_torque(torque_desired + delta)
-      self._reset_torque_driver_measurement(-driver_torque)
-      self.assertFalse(self._tx(self._torque_cmd_msg(torque_desired + delta)))
+      # arbitrary high driver torque to ensure max steer torque is allowed
+      max_driver_torque = int(max_torque / self.DRIVER_TORQUE_FACTOR + self.DRIVER_TORQUE_ALLOWANCE + 1)
 
-      # If we're well past the allowance, minimum wind down is MAX_RATE_DOWN
-      self._set_prev_torque(self.MAX_TORQUE * sign)
-      self._reset_torque_driver_measurement(-max_driver_torque * sign)
-      self.assertTrue(self._tx(self._torque_cmd_msg((self.MAX_TORQUE - self.MAX_RATE_DOWN) * sign)))
-      self._set_prev_torque(self.MAX_TORQUE * sign)
-      self._reset_torque_driver_measurement(-max_driver_torque * sign)
-      self.assertTrue(self._tx(self._torque_cmd_msg(0)))
-      self._set_prev_torque(self.MAX_TORQUE * sign)
-      self._reset_torque_driver_measurement(-max_driver_torque * sign)
-      self.assertFalse(self._tx(self._torque_cmd_msg((self.MAX_TORQUE - self.MAX_RATE_DOWN + 1) * sign)))
+      # spot check some individual cases
+      for sign in [-1, 1]:
+        # Ensure we wind down factor units for every unit above allowance
+        driver_torque = (self.DRIVER_TORQUE_ALLOWANCE + 10) * sign
+        torque_desired = (max_torque - 10 * self.DRIVER_TORQUE_FACTOR) * sign
+        delta = 1 * sign
+        self._set_prev_torque(torque_desired)
+        self._reset_torque_driver_measurement(-driver_torque)
+        self.assertTrue(self._tx(self._torque_cmd_msg(torque_desired)))
+        self._set_prev_torque(torque_desired + delta)
+        self._reset_torque_driver_measurement(-driver_torque)
+        self.assertFalse(self._tx(self._torque_cmd_msg(torque_desired + delta)))
+
+        # If we're well past the allowance, minimum wind down is MAX_RATE_DOWN
+        self._set_prev_torque(max_torque * sign)
+        self._reset_torque_driver_measurement(-max_driver_torque * sign)
+        self.assertTrue(self._tx(self._torque_cmd_msg((max_torque - self.MAX_RATE_DOWN) * sign)))
+        self._set_prev_torque(max_torque * sign)
+        self._reset_torque_driver_measurement(-max_driver_torque * sign)
+        self.assertTrue(self._tx(self._torque_cmd_msg(0)))
+        self._set_prev_torque(max_torque * sign)
+        self._reset_torque_driver_measurement(-max_driver_torque * sign)
+        self.assertFalse(self._tx(self._torque_cmd_msg((max_torque - self.MAX_RATE_DOWN + 1) * sign)))
 
   def test_realtime_limits(self):
     self.safety.set_controls_allowed(True)
@@ -536,17 +540,21 @@ class MotorTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
   def test_non_realtime_limit_down(self):
     self.safety.set_controls_allowed(True)
 
-    torque_meas = self.MAX_TORQUE - self.MAX_TORQUE_ERROR - 50
+    for speed in self._torque_speed_range:
+      self._reset_speed_measurement(speed)
+      max_torque = self._get_max_torque(speed)
 
-    self.safety.set_rt_torque_last(self.MAX_TORQUE)
-    self.safety.set_torque_meas(torque_meas, torque_meas)
-    self.safety.set_desired_torque_last(self.MAX_TORQUE)
-    self.assertTrue(self._tx(self._torque_cmd_msg(self.MAX_TORQUE - self.MAX_RATE_DOWN)))
+      torque_meas = max_torque - self.MAX_TORQUE_ERROR - 50
 
-    self.safety.set_rt_torque_last(self.MAX_TORQUE)
-    self.safety.set_torque_meas(torque_meas, torque_meas)
-    self.safety.set_desired_torque_last(self.MAX_TORQUE)
-    self.assertFalse(self._tx(self._torque_cmd_msg(self.MAX_TORQUE - self.MAX_RATE_DOWN + 1)))
+      self.safety.set_rt_torque_last(max_torque)
+      self.safety.set_torque_meas(torque_meas, torque_meas)
+      self.safety.set_desired_torque_last(max_torque)
+      self.assertTrue(self._tx(self._torque_cmd_msg(max_torque - self.MAX_RATE_DOWN)))
+
+      self.safety.set_rt_torque_last(max_torque)
+      self.safety.set_torque_meas(torque_meas, torque_meas)
+      self.safety.set_desired_torque_last(max_torque)
+      self.assertFalse(self._tx(self._torque_cmd_msg(max_torque - self.MAX_RATE_DOWN + 1)))
 
   def test_exceed_torque_sensor(self):
     self.safety.set_controls_allowed(True)
