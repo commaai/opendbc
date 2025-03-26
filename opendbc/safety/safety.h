@@ -642,36 +642,23 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
   bool violation = false;
   uint32_t ts = microsecond_timer_get();
 
-  int max_torque = limits.max_torque;
   // Some safety models support variable torque limit based on vehicle speed
+  int max_torque = limits.max_torque;
   if (limits.dynamic_max_torque) {
     const float fudged_speed = (vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.;
     max_torque = interpolate(limits.max_torque_lookup, fudged_speed) + 1;
     max_torque = CLAMP(max_torque, -limits.max_torque, limits.max_torque);
   }
-  printf("safety max torque: %d\n", max_torque);
-  printf("got desired torque: %d\n", desired_torque);
 
   if (controls_allowed) {
     // *** global torque limit check ***
     violation |= max_limit_check(desired_torque, max_torque, -max_torque);
-//    if (violation) {
-//      printf("fudged_speed: %f\n", fudged_speed);
-//      printf("max_torque: %d\n", max_torque);
-//      printf("desired_torque: %d\n", desired_torque);
-//      printf("violation: %d\n", violation);
-//    }
 
     // *** torque rate limit check ***
     if (limits.type == TorqueDriverLimited) {
-//      driver_limit_check(desired_torque, desired_torque_last, &torque_driver,
       violation |= driver_limit_check(desired_torque, desired_torque_last, &torque_driver,
                                       max_torque, limits.max_rate_up, limits.max_rate_down,
                                       limits.driver_torque_allowance, limits.driver_torque_multiplier);
-      if (violation) {
-        printf("driver_limit_check violation\n");
-        printf("desired_torque: %d, max_torque: %d, driver_torque: %d\n", desired_torque, max_torque, torque_driver.max);
-      }
     } else {
       violation |= dist_to_meas_check(desired_torque, desired_torque_last, &torque_meas,
                                       limits.max_rate_up, limits.max_rate_down, limits.max_torque_error);
@@ -680,9 +667,6 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
 
     // *** torque real time rate limit check ***
     violation |= rt_rate_limit_check(desired_torque, rt_torque_last, limits.max_rt_delta);
-    if (violation) {
-      printf("rt_rate_limit_check violation\n");
-    }
 
     // every RT_INTERVAL set the new limits
     uint32_t ts_elapsed = get_ts_elapsed(ts, ts_torque_check_last);
@@ -695,7 +679,6 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
   // no torque if controls is not allowed
   if (!controls_allowed && (desired_torque != 0)) {
     violation = true;
-    printf("controls_allowed: %d\n", controls_allowed);
   }
 
   // certain safety modes set their steer request bit low for one or more frame at a
