@@ -1,5 +1,5 @@
 from opendbc.car.tesla.fingerprints import FW_VERSIONS
-from opendbc.car.tesla.values import CAR, FW_QUERY_CONFIG, PLATFORM_CODE_MAP,AP_VERSIONS
+from opendbc.car.tesla.values import CAR, FW_QUERY_CONFIG, PLATFORM_CODE_MAP, AP_VERSIONS, VIN_YEAR_OFFSET
 from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
 from random import randint
@@ -21,7 +21,7 @@ class TestTesla:
     return '.'.join(version_parts)
 
   def generate_vin_year(self, year=2019):
-    return f'5YJAAAAAA{chr(year - 1943)}F000000'  # Crazy Tesla VIN year math
+    return f'5YJAAAAAA{chr(year - VIN_YEAR_OFFSET)}F000000'  # Tesla VIN year math
 
   def test_custom_fuzzy_fingerprinting(self, subtests):
     for platform in CAR:
