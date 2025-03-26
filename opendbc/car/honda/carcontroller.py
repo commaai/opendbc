@@ -260,6 +260,9 @@ class CarController(CarControllerBase):
                                                                       0, 100.0 ) )
         self.blend_pcm_speed =  self.blend_pcm_speed * PERCENT_BLEND + pcm_speed * ( 1 - PERCENT_BLEND )
 
+        # reduce speed if above steering max 
+        pcm_speed = float ( np.clip ( pcm_speed, 0, 100 if actuators.torque = 0 else self.params.STEER_MAX / actuators.torque * CS.out.vEgo ) )
+
       # ----------------- new test logic end ---------------------
 
       hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
