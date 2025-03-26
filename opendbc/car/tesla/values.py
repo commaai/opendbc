@@ -40,7 +40,7 @@ def match_fw_to_car_fuzzy(live_fw_versions: LiveFwVersions, vin: str, offline_fw
 
   # Check year is greater than 2018, but only if VIN is valid
   if vin:
-    if ord(vin[9]) < (2018 - VIN_YEAR_OFFSET) and vin != '00000000000000000':
+    if ord(vin[9]) < (2018 - VIN_YEAR_OFFSET) and vin != EMPTY_VIN:
       return candidates
 
   for candidate, fws in offline_fw_versions.items():
@@ -169,4 +169,6 @@ PLATFORM_CODE_MAP = {
   'TESLA_MODEL_X': 'X',
 }
 
-VIN_YEAR_OFFSET = 1943
+VIN_YEAR_OFFSET = 1943  # Year - offset = char code in VIN
+
+EMPTY_VIN = '00000000000000000'
