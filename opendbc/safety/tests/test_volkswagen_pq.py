@@ -26,7 +26,7 @@ class TestVolkswagenPqSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueS
 
   MAX_RATE_UP = 6
   MAX_RATE_DOWN = 10
-  MAX_TORQUE = 300
+  MAX_TORQUE_LOOKUP = [0], [300]
   MAX_RT_DELTA = 113
 
   DRIVER_TORQUE_ALLOWANCE = 80
