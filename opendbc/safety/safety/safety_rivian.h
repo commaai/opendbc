@@ -123,11 +123,11 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
 static bool rivian_tx_hook(const CANPacket_t *to_send) {
   // Rivian utilizes more torque at low speed to maintain the same lateral accel
   const TorqueSteeringLimits RIVIAN_STEERING_LIMITS = {
-    .max_torque = 250,  // TODO: allow 350 at low speeds
+    .max_torque = 350,
     .dynamic_max_torque = true,
     .max_torque_lookup = {
       {9., 17., 17.},
-      {250, 250, 250},
+      {350, 250, 250},
     },
     .max_rate_up = 3,
     .max_rate_down = 5,
