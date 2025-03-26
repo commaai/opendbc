@@ -101,7 +101,7 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
           if msg == "speed":
             to_push = self._speed_msg(0, quality_flag=quality_flag)
           elif msg == "speed_2":
-            to_push = self._user_gas_msg(0, quality_flag=quality_flag)
+            to_push = self._speed_msg_2(0, quality_flag=quality_flag)
 
           self.assertEqual(quality_flag, self._rx(to_push))
           self.assertEqual(quality_flag, self.safety.get_controls_allowed())
