@@ -108,7 +108,7 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
           self.assertEqual(quality_flag, self.safety.get_controls_allowed())
 
         # Mess with checksum to make it fail
-        to_push[0].data[0] = 0
+        to_push[0].data[0] = 0xff
         self.assertFalse(self._rx(to_push))
         self.assertFalse(self.safety.get_controls_allowed())
 
