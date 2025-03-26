@@ -2,14 +2,16 @@
 
 #include "safety_declarations.h"
 
+#define RIVIAN_MAX_SPEED_DELTA 2.0  // m/s
+
 static bool rivian_longitudinal = false;
 
 static uint8_t rivian_get_counter(const CANPacket_t *to_push) {
   int addr = GET_ADDR(to_push);
 
   uint8_t cnt = 0;
-  if (addr == 0x208) {
-    // Signal: ESP_Status_Counter
+  if ((addr == 0x208) || (addr == 0x150)) {
+    // Signal: ESP_Status_Counter, VDM_PropStatus_Counter
     cnt = GET_BYTE(to_push, 1) & 0xFU;
   } else {
   }
@@ -20,8 +22,8 @@ static uint32_t rivian_get_checksum(const CANPacket_t *to_push) {
   int addr = GET_ADDR(to_push);
 
   uint8_t chksum = 0;
-  if (addr == 0x208) {
-    // Signal: ESP_Status_Checksum
+  if ((addr == 0x208) || (addr == 0x150)) {
+    // Signal: ESP_Status_Checksum, VDM_PropStatus_Checksum
     chksum = GET_BYTE(to_push, 0);
   } else {
   }
@@ -52,6 +54,8 @@ static uint32_t rivian_compute_checksum(const CANPacket_t *to_push) {
   uint8_t chksum = 0;
   if (addr == 0x208) {
     chksum = _rivian_compute_checksum(to_push, 0x1D, 0xB1);
+  } else if (addr == 0x150) {
+    chksum = _rivian_compute_checksum(to_push, 0x1D, 0x9A);
   } else {
   }
   return chksum;
@@ -63,6 +67,8 @@ static bool rivian_get_quality_flag_valid(const CANPacket_t *to_push) {
   bool valid = false;
   if (addr == 0x208) {
     valid = ((GET_BYTE(to_push, 3) >> 3) & 0x3U) == 0x1U;  // ESP_Vehicle_Speed_Q
+  } else if (addr == 0x150) {
+    valid = (GET_BYTE(to_push, 1) >> 6) == 0x1U;  // VDM_VehicleSpeedQ
   } else {
   }
   return valid;
@@ -80,15 +86,23 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
       UPDATE_VEHICLE_SPEED(speed / 3.6);
     }
 
+    // Gas pressed and second speed source for variable torque limit
+    if (addr == 0x150) {
+      gas_pressed = GET_BYTE(to_push, 3) | (GET_BYTE(to_push, 4) & 0xC0U);
+
+      // Disable controls if speeds from VDM and ESP ECUs are too far apart.
+      float vdm_speed = ((GET_BYTE(to_push, 5) << 8) | GET_BYTE(to_push, 6)) * 0.01 / 3.6;
+      bool is_invalid_speed = ABS(vdm_speed - ((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR)) > RIVIAN_MAX_SPEED_DELTA;
+      // TODO: this should generically cause rx valid to fall until re-enable
+      if (is_invalid_speed) {
+        controls_allowed = false;
+      }
+    }
+
     // Driver torque
     if (addr == 0x380) {
       int torque_driver_new = (((GET_BYTE(to_push, 2) << 4) | (GET_BYTE(to_push, 3) >> 4))) - 2050U;
       update_sample(&torque_driver, torque_driver_new);
-    }
-
-    // Gas pressed
-    if (addr == 0x150) {
-      gas_pressed = GET_BYTE(to_push, 3) | (GET_BYTE(to_push, 4) & 0xC0U);
     }
 
     // Brake pressed
@@ -197,8 +211,8 @@ static safety_config rivian_init(uint16_t param) {
 
   static RxCheck rivian_rx_checks[] = {
     {.msg = {{0x208, 0, 8, .frequency = 50U, .max_counter = 14U, .quality_flag = true}, { 0 }, { 0 }}},          // ESP_Status (speed)
+    {.msg = {{0x150, 0, 7, .frequency = 50U, .max_counter = 14U, .quality_flag = true}, { 0 }, { 0 }}},          // VDM_PropStatus (gas pedal & 2nd speed)
     {.msg = {{0x380, 0, 5, .frequency = 100U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},  // EPAS_SystemStatus (driver torque)
-    {.msg = {{0x150, 0, 7, .frequency = 50U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   // VDM_PropStatus (gas pedal)
     {.msg = {{0x38f, 0, 6, .frequency = 50U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   // iBESP2 (brakes)
     {.msg = {{0x100, 2, 8, .frequency = 100U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},  // ACM_Status (cruise state)
   };
