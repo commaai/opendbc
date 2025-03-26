@@ -25,6 +25,8 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
   DRIVER_TORQUE_ALLOWANCE = 100
   DRIVER_TORQUE_FACTOR = 2
 
+  cnt_speed = 0
+
   def _torque_driver_msg(self, torque):
     values = {"EPAS_TorsionBarTorque": torque / 100.0}
     return self.packer.make_can_msg_panda("EPAS_SystemStatus", 0, values)
@@ -34,7 +36,8 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
     return self.packer.make_can_msg_panda("ACM_lkaHbaCmd", 0, values)
 
   def _speed_msg(self, speed):
-    values = {"ESP_Vehicle_Speed": speed * 3.6}
+    values = {"ESP_Vehicle_Speed": speed * 3.6, "ESP_Status_Counter": self.cnt_speed % 15}
+    self.__class__.cnt_speed += 1
     return self.packer.make_can_msg_panda("ESP_Status", 0, values)
 
   def _user_brake_msg(self, brake):
