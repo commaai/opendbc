@@ -16,6 +16,8 @@ def checksum(msg):
   # ESP_Status
   if addr == 0x208:
     ret[0] = _checksum(ret[1:], 0x1D, 0xB1)
+  elif addr == 0x150:
+    ret[0] = _checksum(ret[1:], 0x1D, 0x9A)
 
   return addr, ret, bus
 
@@ -37,6 +39,7 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
   DRIVER_TORQUE_FACTOR = 2
 
   cnt_speed = 0
+  cnt_speed_2 = 0
 
   def _torque_driver_msg(self, torque):
     values = {"EPAS_TorsionBarTorque": torque / 100.0}
@@ -56,9 +59,11 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
     values = {"iBESP2_BrakePedalApplied": brake}
     return self.packer.make_can_msg_panda("iBESP2", 0, values)
 
-  def _user_gas_msg(self, gas):
-    values = {"VDM_AcceleratorPedalPosition": gas}
-    return self.packer.make_can_msg_panda("VDM_PropStatus", 0, values)
+  def _user_gas_msg(self, gas, quality_flag=True):
+    values = {"VDM_AcceleratorPedalPosition": gas, "VDM_PropStatus_Counter": self.cnt_speed_2 % 15,
+              "VDM_VehicleSpeedQ": 1 if quality_flag else 0}
+    self.__class__.cnt_speed_2 += 1
+    return self.packer.make_can_msg_panda("VDM_PropStatus", 0, values, fix_checksum=checksum)
 
   def _pcm_status_msg(self, enable):
     values = {"ACM_FeatureStatus": enable, "ACM_Unkown1": 1}
@@ -81,13 +86,15 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
 
   def test_rx_hook(self):
     # checksum, counter, and quality flag checks
-    for quality_flag in [True, False]:
-      for msg in ("speed",):
+    for quality_flag in (True, False):
+      for msg in ("speed", "speed_2"):
         self.safety.set_controls_allowed(True)
         # send multiple times to verify counter checks
         for _ in range(10):
           if msg == "speed":
             to_push = self._speed_msg(0, quality_flag=quality_flag)
+          elif msg == "speed_2":
+            to_push = self._user_gas_msg(0, quality_flag=quality_flag)
 
           self.assertEqual(quality_flag, self._rx(to_push))
           self.assertEqual(quality_flag, self.safety.get_controls_allowed())
