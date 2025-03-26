@@ -1,5 +1,5 @@
 from opendbc.car.tesla.fingerprints import FW_VERSIONS
-from opendbc.car.tesla.values import CAR, FW_QUERY_CONFIG, PLATFORM_CODE_MAP, AP_VERSIONS, VIN_YEAR_OFFSET
+from opendbc.car.tesla.values import CAR, FW_QUERY_CONFIG, PLATFORM_CODE_MAP, AP_VARIANT, VIN_YEAR_OFFSET
 from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
 from random import randint
@@ -26,7 +26,7 @@ class TestTesla:
   def test_custom_fuzzy_fingerprinting(self, subtests):
     for platform in CAR:
       with subtests.test(platform=platform.name):
-        for version in AP_VERSIONS.values():
+        for version in AP_VARIANT:
           for variant in VARIANT_VERSIONS:
             fwv = f'TeM{version}_{variant} ({randint(1,100)}),{PLATFORM_CODE_MAP[platform]}{self.generate_random_version()}'
             CP = CarParams(

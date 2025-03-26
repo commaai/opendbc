@@ -73,7 +73,7 @@ def match_fw_to_car_fuzzy(live_fw_versions: LiveFwVersions, vin: str, offline_fw
 def decode_tesla_fw_model(fingerprint: bytes) -> re.Match[str]:
   if not fingerprint.startswith(b'TeM'):  # Not a tesla
     return None
-  # Model (AP), Variant (ECU), Version(ECU), Model (Car), Version(AP)
+  # Variant (AP), Variant (ECU), Version(ECU), Model (Car), Version(AP)
   matches = re.match(r"TeM(.*?)_(.*?\()(\d*)\),(\w)(.*)", fingerprint.decode())
   if not matches:
     return None
@@ -160,7 +160,7 @@ DBC = CAR.create_dbc_map()
 
 STEER_THRESHOLD = 0.5
 
-AP_VERSIONS = {'HW3':'3', 'HW4':'YG4'}
+AP_VARIANT = {'3', 'YG4'}
 
 PLATFORM_CODE_MAP = {
   'TESLA_MODEL_3': 'E',
