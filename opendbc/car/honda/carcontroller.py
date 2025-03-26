@@ -237,7 +237,7 @@ class CarController(CarControllerBase):
         pcm_speed = float ( np.clip ( ( CS.out.vEgo + 633.0 * ( accel ) - 14.0 ) , 0.0, 100.0 ) ) # convert m/s to kph done in hondacan
 
         # standstill disengage
-        if ( accel >= 0.01 ) and (CS.out.vEgo < 4.0 ) and ( pcm_speed < 25.0):
+        if ( accel >= 0.01 ) and (CS.out.vEgo < 4.0 ) and ( pcm_speed < 25.0 / 3.6):
           pcm_speed = 25.0 / 3.6
 
         # prefer EV mode under 30mph and slower accel
