@@ -36,7 +36,7 @@ static uint8_t _rivian_compute_checksum(const CANPacket_t *to_push, uint8_t poly
   for (int i = 1; i < len; i++) {
     crc ^= GET_BYTE(to_push, i);
     for (int j = 0; j < 8; j++) {
-      if (crc & 0x80) {
+      if ((crc & 0x80U) != 0U) {
         crc = (crc << 1) ^ poly;
       } else {
         crc <<= 1;
