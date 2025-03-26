@@ -54,7 +54,6 @@ static uint32_t rivian_compute_checksum(const CANPacket_t *to_push) {
     chksum = checksum(to_push, 0x1D, 0xB1);
   } else {
   }
-
   return chksum;
 }
 
