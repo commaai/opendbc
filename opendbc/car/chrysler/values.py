@@ -12,11 +12,13 @@ Ecu = CarParams.Ecu
 class ChryslerSafetyFlags(IntFlag):
   RAM_DT = 1
   RAM_HD = 2
+  RAM_HD_ALT_BUTTONS = 4
 
 
 class ChryslerFlags(IntFlag):
   # Detected flags
   HIGHER_MIN_STEERING_SPEED = 1
+  RAM_HD_ALT_BUTTONS = 2
 
 @dataclass
 class ChryslerCarDocs(CarDocs):
