@@ -234,15 +234,18 @@ class CarController(CarControllerBase):
       # ----------------- new test logic start ---------------------
 
       if CC.longActive:
-        pcm_speed = float ( np.clip ( ( CS.out.vEgo + 633.0 * ( accel ) - 14.0 ) , 0.0, 100.0 ) ) # convert m/s to kph done in hondacan
+        # pcm_speed = float ( np.clip ( ( CS.out.vEgo + 633.0 * ( accel ) - 14.0 ) , 0.0, 100.0 ) ) # convert m/s to kph done in hondacan
 
+        pcm_speed = float ( np.clip ( CS.out.vEgo + ( 8.0 if accel > 0 elif -8.0 if accel < 0 else 0.0 ) , 0.0, 100.0 ) )
+        pcm_accel = float ( np.clip ( 600.0 * ( accel + 0.2 ) , 0.0, self.params.NIDEC_GAS_MAX )
+        
         # standstill disengage
-        if ( accel >= 0.01 ) and (CS.out.vEgo < 4.0 ) and ( pcm_speed < 25.0 / 3.6):
-          pcm_speed = 25.0 / 3.6
+        #if ( accel >= 0.01 ) and (CS.out.vEgo < 4.0 ) and ( pcm_speed < 25.0 / 3.6):
+        #  pcm_speed = 25.0 / 3.6
 
         # prefer EV mode under 30mph and slower accel
-        if ( accel <= 0.5 ) and ( CS.out.vEgo > 0.0 ) and ( CS.out.vEgo < 30.0 / 2.237 ):
-          pcm_accel = 54.0
+        #if ( accel <= 0.5 ) and ( CS.out.vEgo > 0.0 ) and ( CS.out.vEgo < 30.0 / 2.237 ):
+        #  pcm_accel = 54.0
 
       # ----------------- new test logic end ---------------------
 
