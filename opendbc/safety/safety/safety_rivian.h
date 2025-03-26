@@ -22,13 +22,13 @@ static uint32_t rivian_get_checksum(const CANPacket_t *to_push) {
   uint8_t chksum = 0;
   if (addr == 0x208) {
     // Signal: ESP_Status_Checksum
-    chksum = GET_BYTE(to_push, 0);  // 0xb1
+    chksum = GET_BYTE(to_push, 0);
   } else {
   }
   return chksum;
 }
 
-static uint8_t checksum(const CANPacket_t *to_push, uint8_t poly, uint8_t xor_output) {
+static uint8_t _rivian_compute_checksum(const CANPacket_t *to_push, uint8_t poly, uint8_t xor_output) {
   int len = GET_LEN(to_push);
 
   uint8_t crc = 0;
@@ -36,7 +36,7 @@ static uint8_t checksum(const CANPacket_t *to_push, uint8_t poly, uint8_t xor_ou
   for (int i = 1; i < len; i++) {
     crc ^= GET_BYTE(to_push, i);
     for (int j = 0; j < 8; j++) {
-      if (crc & 0x80) {
+      if ((crc & 0x80U) != 0U) {
         crc = (crc << 1) ^ poly;
       } else {
         crc <<= 1;
@@ -51,10 +51,9 @@ static uint32_t rivian_compute_checksum(const CANPacket_t *to_push) {
 
   uint8_t chksum = 0;
   if (addr == 0x208) {
-    chksum = checksum(to_push, 0x1D, 0xB1);
+    chksum = _rivian_compute_checksum(to_push, 0x1D, 0xB1);
   } else {
   }
-
   return chksum;
 }
 
@@ -197,7 +196,7 @@ static safety_config rivian_init(uint16_t param) {
   static const CanMsg RIVIAN_LONG_TX_MSGS[] = {{0x120, 0, 8, true}, {0x321, 2, 7, false}, {0x160, 0, 5, true}};
 
   static RxCheck rivian_rx_checks[] = {
-    {.msg = {{0x208, 0, 8, .frequency = 50U, .max_counter = 14U, .quality_flag = true}, { 0 }, { 0 }}},   // ESP_Status (speed)
+    {.msg = {{0x208, 0, 8, .frequency = 50U, .max_counter = 14U, .quality_flag = true}, { 0 }, { 0 }}},          // ESP_Status (speed)
     {.msg = {{0x380, 0, 5, .frequency = 100U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},  // EPAS_SystemStatus (driver torque)
     {.msg = {{0x150, 0, 7, .frequency = 50U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   // VDM_PropStatus (gas pedal)
     {.msg = {{0x38f, 0, 6, .frequency = 50U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   // iBESP2 (brakes)
