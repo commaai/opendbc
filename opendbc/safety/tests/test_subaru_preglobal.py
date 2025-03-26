@@ -17,7 +17,7 @@ class TestSubaruPreglobalSafety(common.PandaCarSafetyTest, common.DriverTorqueSt
 
   MAX_RATE_UP = 50
   MAX_RATE_DOWN = 70
-  MAX_TORQUE = 2047
+  MAX_TORQUE_LOOKUP = [0], [2047]
 
   MAX_RT_DELTA = 940
 
