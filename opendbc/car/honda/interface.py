@@ -88,7 +88,6 @@ class CarInterface(CarInterfaceBase):
       # ret.longitudinalTuning.kiBP = [0.]
       # ret.longitudinalTuning.kiV = [0.]
       # ret.longitudinalActuatorDelay = 0.0 # s
-      
 
     eps_modified = False
     for fw in car_fw:
