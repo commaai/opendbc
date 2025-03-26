@@ -643,13 +643,21 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
   uint32_t ts = microsecond_timer_get();
 
   if (controls_allowed) {
+    // Some safety models support variable torque limit based on vehicle speed
+    int max_torque = limits.max_torque;
+    if (limits.dynamic_max_torque) {
+      const float fudged_speed = (vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.;
+      max_torque = interpolate(limits.max_torque_lookup, fudged_speed) + 1;
+      max_torque = CLAMP(max_torque, -limits.max_torque, limits.max_torque);
+    }
+
     // *** global torque limit check ***
-    violation |= max_limit_check(desired_torque, limits.max_torque, -limits.max_torque);
+    violation |= max_limit_check(desired_torque, max_torque, -max_torque);
 
     // *** torque rate limit check ***
     if (limits.type == TorqueDriverLimited) {
       violation |= driver_limit_check(desired_torque, desired_torque_last, &torque_driver,
-                                      limits.max_torque, limits.max_rate_up, limits.max_rate_down,
+                                      max_torque, limits.max_rate_up, limits.max_rate_down,
                                       limits.driver_torque_allowance, limits.driver_torque_multiplier);
     } else {
       violation |= dist_to_meas_check(desired_torque, desired_torque_last, &torque_meas,
