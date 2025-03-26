@@ -4,6 +4,70 @@
 
 static bool rivian_longitudinal = false;
 
+static uint8_t rivian_get_counter(const CANPacket_t *to_push) {
+  int addr = GET_ADDR(to_push);
+
+  uint8_t cnt = 0;
+  if (addr == 0x208) {
+    // Signal: ESP_Status_Counter
+    cnt = GET_BYTE(to_push, 1) & 0xFU;
+  } else {
+  }
+  return cnt;
+}
+
+static uint32_t rivian_get_checksum(const CANPacket_t *to_push) {
+  int addr = GET_ADDR(to_push);
+
+  uint8_t chksum = 0;
+  if (addr == 0x208) {
+    // Signal: ESP_Status_Checksum
+    chksum = GET_BYTE(to_push, 0);
+  } else {
+  }
+  return chksum;
+}
+
+static uint8_t _rivian_compute_checksum(const CANPacket_t *to_push, uint8_t poly, uint8_t xor_output) {
+  int len = GET_LEN(to_push);
+
+  uint8_t crc = 0;
+  // Skip the checksum byte
+  for (int i = 1; i < len; i++) {
+    crc ^= GET_BYTE(to_push, i);
+    for (int j = 0; j < 8; j++) {
+      if ((crc & 0x80U) != 0U) {
+        crc = (crc << 1) ^ poly;
+      } else {
+        crc <<= 1;
+      }
+    }
+  }
+  return crc ^ xor_output;
+}
+
+static uint32_t rivian_compute_checksum(const CANPacket_t *to_push) {
+  int addr = GET_ADDR(to_push);
+
+  uint8_t chksum = 0;
+  if (addr == 0x208) {
+    chksum = _rivian_compute_checksum(to_push, 0x1D, 0xB1);
+  } else {
+  }
+  return chksum;
+}
+
+static bool rivian_get_quality_flag_valid(const CANPacket_t *to_push) {
+  int addr = GET_ADDR(to_push);
+
+  bool valid = false;
+  if (addr == 0x208) {
+    valid = ((GET_BYTE(to_push, 3) >> 3) & 0x3U) == 0x1U;  // ESP_Vehicle_Speed_Q
+  } else {
+  }
+  return valid;
+}
+
 static void rivian_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
   int addr = GET_ADDR(to_push);
@@ -132,7 +196,7 @@ static safety_config rivian_init(uint16_t param) {
   static const CanMsg RIVIAN_LONG_TX_MSGS[] = {{0x120, 0, 8, true}, {0x321, 2, 7, false}, {0x160, 0, 5, true}};
 
   static RxCheck rivian_rx_checks[] = {
-    {.msg = {{0x208, 0, 8, .frequency = 50U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   // ESP_Status (speed)
+    {.msg = {{0x208, 0, 8, .frequency = 50U, .max_counter = 14U, .quality_flag = true}, { 0 }, { 0 }}},          // ESP_Status (speed)
     {.msg = {{0x380, 0, 5, .frequency = 100U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},  // EPAS_SystemStatus (driver torque)
     {.msg = {{0x150, 0, 7, .frequency = 50U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   // VDM_PropStatus (gas pedal)
     {.msg = {{0x38f, 0, 6, .frequency = 50U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   // iBESP2 (brakes)
@@ -157,4 +221,8 @@ const safety_hooks rivian_hooks = {
   .rx = rivian_rx_hook,
   .tx = rivian_tx_hook,
   .fwd = rivian_fwd_hook,
+  .get_counter = rivian_get_counter,
+  .get_checksum = rivian_get_checksum,
+  .compute_checksum = rivian_compute_checksum,
+  .get_quality_flag_valid = rivian_get_quality_flag_valid,
 };
