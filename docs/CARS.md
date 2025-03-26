@@ -299,7 +299,7 @@
 |Toyota|RAV4 2017-18|All|[Upstream](#upstream)|
 |Toyota|RAV4 2019-21|All|[Upstream](#upstream)|
 |Toyota|RAV4 2022|All|[Upstream](#upstream)|
-|Toyota|RAV4 2023-24|All|[Upstream](#upstream)|
+|Toyota|RAV4 2023-25|All|[Upstream](#upstream)|
 |Toyota|RAV4 Hybrid 2016|Toyota Safety Sense P|[Upstream](#upstream)|
 |Toyota|RAV4 Hybrid 2017-18|All|[Upstream](#upstream)|
 |Toyota|RAV4 Hybrid 2019-21|All|[Upstream](#upstream)|

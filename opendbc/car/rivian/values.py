@@ -1,9 +1,9 @@
 from dataclasses import dataclass, field
 from enum import StrEnum, IntFlag
 
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, structs
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, structs, uds
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts, Device
-from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
+from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
 from opendbc.car.vin import Vin
 
 
@@ -66,6 +66,10 @@ def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str
   return {str(c) for c in candidates}
 
 
+RIVIAN_VERSION_REQUEST = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER]) + \
+  p16(0xf1a0)
+RIVIAN_VERSION_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40])
+
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
     Request(
@@ -73,7 +77,21 @@ FW_QUERY_CONFIG = FwQueryConfig(
       [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.SUPPLIER_SOFTWARE_VERSION_RESPONSE],
       rx_offset=0x40,
       bus=0,
-    )
+    ),
+    Request(
+      [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.MANUFACTURER_ECU_HARDWARE_NUMBER_REQUEST],
+      [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.MANUFACTURER_ECU_HARDWARE_NUMBER_RESPONSE],
+      rx_offset=0x40,
+      bus=0,
+      logging=True,
+    ),
+    Request(
+      [StdQueries.TESTER_PRESENT_REQUEST, RIVIAN_VERSION_REQUEST],
+      [StdQueries.TESTER_PRESENT_RESPONSE, RIVIAN_VERSION_RESPONSE],
+      rx_offset=0x40,
+      bus=0,
+      logging=True,
+    ),
   ],
   match_fw_to_car_fuzzy=match_fw_to_car_fuzzy,
 )
