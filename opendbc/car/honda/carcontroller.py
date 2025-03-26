@@ -252,10 +252,10 @@ class CarController(CarControllerBase):
         # blending logic to fastforward, assume engine uses 95% of prior logic each frame
         PERCENT_BLEND = 0.95
 
-        pcm_accel = float (np.clip ( ( pcm_accel - self.blend_pcm_accel * PERCENT_BLEND ) / ( 1 - PERCENT_BLEND ), 0, self.params.NIDEC_GAS_MAX ) )
+        pcm_accel = pcm_accel if self.accel <= 0 else float (np.clip ( ( pcm_accel - self.blend_pcm_accel * PERCENT_BLEND ) / ( 1 - PERCENT_BLEND ), 0, self.params.NIDEC_GAS_MAX ) )
         self.blend_pcm_accel =  self.blend_pcm_accel * PERCENT_BLEND + pcm_accel * ( 1 - PERCENT_BLEND )
 
-        pcm_speed = float (np.clip ( ( pcm_speed - self.blend_pcm_speed * PERCENT_BLEND ) / ( 1 - PERCENT_BLEND ), 0, 100.0 ) )
+        pcm_speed = pcm_speed if self.accel <= 0 else float (np.clip ( ( pcm_speed - self.blend_pcm_speed * PERCENT_BLEND ) / ( 1 - PERCENT_BLEND ), 0, 100.0 ) )
         self.blend_pcm_speed =  self.blend_pcm_speed * PERCENT_BLEND + pcm_speed * ( 1 - PERCENT_BLEND )
 
       # ----------------- new test logic end ---------------------
