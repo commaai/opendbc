@@ -116,6 +116,8 @@ class CarController(CarControllerBase):
     self.gas = 0.0
     self.brake = 0.0
     self.last_torque = 0.0
+    self.blend_pcm_accel = 0.0
+    self.blend_pcm_speed = 0.0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -236,9 +238,9 @@ class CarController(CarControllerBase):
       if CC.longActive:
         # pcm_speed = float ( np.clip ( ( CS.out.vEgo + 633.0 * ( accel ) - 14.0 ) , 0.0, 100.0 ) ) # convert m/s to kph done in hondacan
 
-        pcm_speed = float ( np.clip ( CS.out.vEgo + ( 8.0 if accel > 0 elif -8.0 if accel < 0 else 0.0 ) , 0.0, 100.0 ) )
-        pcm_accel = float ( np.clip ( 600.0 * ( accel + 0.2 ) , 0.0, self.params.NIDEC_GAS_MAX )
-        
+        # pcm_speed = float ( np.clip ( CS.out.vEgo + ( 8.0 if accel > 0 elif -8.0 if accel < 0 else 0.0 ) , 0.0, 100.0 ) )
+        # pcm_accel = float ( np.clip ( 600.0 * ( accel + 0.2 ) , 0.0, self.params.NIDEC_GAS_MAX )
+
         # standstill disengage
         #if ( accel >= 0.01 ) and (CS.out.vEgo < 4.0 ) and ( pcm_speed < 25.0 / 3.6):
         #  pcm_speed = 25.0 / 3.6
@@ -246,6 +248,15 @@ class CarController(CarControllerBase):
         # prefer EV mode under 30mph and slower accel
         #if ( accel <= 0.5 ) and ( CS.out.vEgo > 0.0 ) and ( CS.out.vEgo < 30.0 / 2.237 ):
         #  pcm_accel = 54.0
+
+        # blending logic to fastforward, assume engine uses 95% of prior logic each frame 
+        PERCENT_BLEND = 0.95
+
+        pcm_accel = float (np.clip ( ( pcm_accel - self.blend_pcm_accel * PERCENT_BLEND ) / ( 1 - PERCENT_BLEND ), 0, self.params.NIDEC_GAS_MAX ) )
+        self.blend_pcm_accel =  self.blend_pcm_accel * PERCENT_BLEND + pcm_accel * ( 1 - PERCENT_BLEND )
+
+        pcm_speed = float (np.clip ( ( pcm_speed - self.blend_pcm_speed * PERCENT_BLEND ) / ( 1 - PERCENT_BLEND )
+        self.blend_pcm_speed =  self.blend_pcm_speed * PERCENT_BLEND + pcm_speed * ( 1 - PERCENT_BLEND ), 0, 100.0 ) )
 
       # ----------------- new test logic end ---------------------
 
