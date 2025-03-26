@@ -69,7 +69,6 @@ static uint32_t ford_compute_checksum(const CANPacket_t *to_push) {
     chksum = 0xFFU - chksum;
   } else {
   }
-
   return chksum;
 }
 
