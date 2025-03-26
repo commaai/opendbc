@@ -53,7 +53,7 @@ typedef struct {
   int addr;
   int bus;
   int len;
-  bool check_relay;
+  bool blocked;
 } CanMsg;
 
 typedef enum {
