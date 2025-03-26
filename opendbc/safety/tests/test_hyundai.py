@@ -53,7 +53,7 @@ class TestHyundaiSafety(HyundaiButtonBase, common.PandaCarSafetyTest, common.Dri
 
   MAX_RATE_UP = 3
   MAX_RATE_DOWN = 7
-  MAX_TORQUE = [0], [384]
+  MAX_TORQUE_LOOKUP = [0], [384]
   MAX_RT_DELTA = 112
   DRIVER_TORQUE_ALLOWANCE = 50
   DRIVER_TORQUE_FACTOR = 2
@@ -115,7 +115,11 @@ class TestHyundaiSafety(HyundaiButtonBase, common.PandaCarSafetyTest, common.Dri
 class TestHyundaiSafetyAltLimits(TestHyundaiSafety):
   MAX_RATE_UP = 2
   MAX_RATE_DOWN = 3
+<<<<<<< HEAD
   MAX_TORQUE = [0], [270]
+=======
+  MAX_TORQUE_LOOKUP = [0], [270]
+>>>>>>> upstream/master
 
   def setUp(self):
     self.packer = CANPackerPanda("hyundai_kia_generic")
@@ -127,7 +131,11 @@ class TestHyundaiSafetyAltLimits(TestHyundaiSafety):
 class TestHyundaiSafetyAltLimits2(TestHyundaiSafety):
   MAX_RATE_UP = 2
   MAX_RATE_DOWN = 3
+<<<<<<< HEAD
   MAX_TORQUE = [0], [170]
+=======
+  MAX_TORQUE_LOOKUP = [0], [170]
+>>>>>>> upstream/master
 
   def setUp(self):
     self.packer = CANPackerPanda("hyundai_kia_generic")
