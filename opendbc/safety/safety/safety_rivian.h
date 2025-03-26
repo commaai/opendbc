@@ -28,7 +28,7 @@ static uint32_t rivian_get_checksum(const CANPacket_t *to_push) {
   return chksum;
 }
 
-static uint8_t checksum(const CANPacket_t *to_push, uint8_t poly, uint8_t xor_output) {
+static uint8_t _rivian_compute_checksum(const CANPacket_t *to_push, uint8_t poly, uint8_t xor_output) {
   int len = GET_LEN(to_push);
 
   uint8_t crc = 0;
@@ -51,7 +51,7 @@ static uint32_t rivian_compute_checksum(const CANPacket_t *to_push) {
 
   uint8_t chksum = 0;
   if (addr == 0x208) {
-    chksum = checksum(to_push, 0x1D, 0xB1);
+    chksum = _rivian_compute_checksum(to_push, 0x1D, 0xB1);
   } else {
   }
   return chksum;
