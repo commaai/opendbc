@@ -91,8 +91,8 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
       gas_pressed = GET_BYTE(to_push, 3) | (GET_BYTE(to_push, 4) & 0xC0U);
 
       // Disable controls if speeds from VDM and ESP ECUs are too far apart.
-      float raw_vdm_speed = ((GET_BYTE(to_push, 5) << 8) | GET_BYTE(to_push, 6)) * 0.01 / 3.6;
-      bool is_invalid_speed = ABS(raw_vdm_speed - ((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR)) > RIVIAN_MAX_SPEED_DELTA;
+      float vdm_speed = ((GET_BYTE(to_push, 5) << 8) | GET_BYTE(to_push, 6)) * 0.01 / 3.6;
+      bool is_invalid_speed = ABS(vdm_speed - ((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR)) > RIVIAN_MAX_SPEED_DELTA;
       // TODO: this should generically cause rx valid to fall until re-enable
       if (is_invalid_speed) {
         controls_allowed = false;
