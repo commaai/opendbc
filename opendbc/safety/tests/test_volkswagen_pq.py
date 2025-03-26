@@ -115,7 +115,7 @@ class TestVolkswagenPqStockSafety(TestVolkswagenPqSafetyBase):
   FWD_BLACKLISTED_ADDRS = {2: [MSG_HCA_1, MSG_LDW_1]}
 
   def setUp(self):
-    self.packer = CANPackerPanda("vw_golf_mk4")
+    self.packer = CANPackerPanda("vw_pq")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenPq, 0)
     self.safety.init_tests()
@@ -136,7 +136,7 @@ class TestVolkswagenPqLongSafety(TestVolkswagenPqSafetyBase, common.Longitudinal
   INACTIVE_ACCEL = 3.01
 
   def setUp(self):
-    self.packer = CANPackerPanda("vw_golf_mk4")
+    self.packer = CANPackerPanda("vw_pq")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.volkswagenPq, VolkswagenSafetyFlags.LONG_CONTROL)
     self.safety.init_tests()
