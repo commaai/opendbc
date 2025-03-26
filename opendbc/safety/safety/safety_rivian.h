@@ -22,7 +22,7 @@ static uint32_t rivian_get_checksum(const CANPacket_t *to_push) {
   uint8_t chksum = 0;
   if (addr == 0x208) {
     // Signal: ESP_Status_Checksum
-    chksum = GET_BYTE(to_push, 0);  // 0xb1
+    chksum = GET_BYTE(to_push, 0);
   } else {
   }
   return chksum;
