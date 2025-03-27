@@ -19,10 +19,12 @@ class CarController(CarControllerBase):
     can_sends = []
 
     apply_torque = 0
+    steer_max = round(float(np.interp(CS.out.vEgoRaw, CarControllerParams.STEER_MAX_LOOKUP[0],
+                                      CarControllerParams.STEER_MAX_LOOKUP[1])))
     if CC.latActive:
-      new_torque = int(round(CC.actuators.torque * CarControllerParams.STEER_MAX))
+      new_torque = int(round(CC.actuators.torque * steer_max))
       apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last,
-                                                      CS.out.steeringTorque, CarControllerParams)
+                                                      CS.out.steeringTorque, CarControllerParams, steer_max)
 
     # send steering command
     self.apply_torque_last = apply_torque
@@ -48,7 +50,7 @@ class CarController(CarControllerBase):
       can_sends.append(create_adas_status(self.packer, CS.vdm_adas_status, interface_status))
 
     new_actuators = actuators.as_builder()
-    new_actuators.torque = apply_torque / CarControllerParams.STEER_MAX
+    new_actuators.torque = apply_torque / steer_max
     new_actuators.torqueOutputCan = apply_torque
 
     self.frame += 1
