@@ -189,11 +189,7 @@ BO_ 599 DI_speed: 8 PARTY
  SG_ DI_speedCounter : 8|4@1+ (1,0) [0|15] ""  park
  SG_ DI_speedChecksum : 0|8@1+ (1,0) [0|255] ""  park
 
-BO_ 605 SomethingAboutLong: 6 XXX
- SG_ TrafficLightandStopSignControl : 0|8@1+ (1,0) [0|255] "" XXX
- SG_ ButSoAreTheseQuestionMark : 31|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_2 : 32|8@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_1 : 47|8@0+ (1,0) [0|255] "" XXX
+BO_ 605 LongitudinalRelated: 6 XXX
 
 BO_ 1160 DAS_steeringControl: 4 PARTY
  SG_ DAS_steeringControlChecksum : 31|8@0+ (1,0) [0|255] ""  aps
@@ -230,33 +226,18 @@ BO_ 646 DI_state: 8 ETH
  SG_ DI_locStatusChecksum : 0|8@1+ (1,0) [0|0] ""  X
 
 BO_ 659 DAS_settings: 8 XXX
- SG_ SteeringWeight : 1|2@0+ (1,0) [0|255] "" XXX
- SG_ SlipStart : 2|1@0+ (1,0) [0|1] "" XXX
- SG_ OffRoadAssist : 3|2@1+ (1,0) [0|63] "" XXX
- SG_ NEW_SIGNAL_3 : 5|3@1+ (1,0) [0|7] "" XXX
- SG_ NEW_SIGNAL_2 : 12|5@0+ (1,0) [0|31] "" XXX
- SG_ DistanceUnits : 13|1@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_4 : 14|2@1+ (1,0) [0|3] "" XXX
- SG_ NEW_SIGNAL_12 : 17|2@0+ (1,0) [0|3] "" XXX
- SG_ AEB_Enabled : 18|1@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_5 : 21|3@0+ (1,0) [0|7] "" XXX
- SG_ AdaptiveHeadlights : 22|1@1+ (1,0) [0|31] "" XXX
- SG_ NEW_SIGNAL_14 : 23|1@0+ (1,0) [0|1] "" XXX
+ SG_ DAS_steeringWeight : 1|2@0+ (1,0) [0|255] "" XXX
+ SG_ DAS_slipStart : 2|1@0+ (1,0) [0|1] "" XXX
+ SG_ DAS_offRoadAssist : 3|2@1+ (1,0) [0|63] "" XXX
+ SG_ DAS_distanceUnits : 13|1@1+ (1,0) [0|255] "" XXX
+ SG_ DAS_aebEnabled : 18|1@0+ (1,0) [0|255] "" XXX
+ SG_ DAS_adaptiveHeadlights : 22|1@1+ (1,0) [0|31] "" XXX
  SG_ DAS_autosteerEnabled2 : 24|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_6 : 25|7@1+ (1,0) [0|127] "" XXX
- SG_ NEW_SIGNAL_7 : 32|2@1+ (1,0) [0|3] "" XXX
- SG_ FCW_Enabled : 34|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_8 : 35|1@0+ (1,0) [0|1] "" XXX
- SG_ FCW_Sensitivity : 37|2@0+ (1,0) [0|63] "" XXX
+ SG_ DAS_fcwEnabled : 34|1@0+ (1,0) [0|1] "" XXX
+ SG_ DAS_fcwSensitivity : 37|2@0+ (1,0) [0|63] "" XXX
  SG_ DAS_autosteerEnabled : 38|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_15 : 39|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_11 : 40|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_10 : 41|1@0+ (1,0) [0|1] "" XXX
- SG_ ObstacleAwareAcceleration : 42|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_13 : 43|1@0+ (1,0) [0|1] "" XXX
- SG_ DriverAccelerationMode : 44|1@1+ (1,0) [0|127] "" XXX
- SG_ NEW_SIGNAL_1 : 45|3@1+ (1,0) [0|7] "" XXX
- SG_ NEW_SIGNAL_9 : 51|4@0+ (1,0) [0|15] "" XXX
+ SG_ DAS_obstacleAwareAcceleration : 42|1@0+ (1,0) [0|1] "" XXX
+ SG_ DAS_driverAccelerationMode : 44|1@1+ (1,0) [0|127] "" XXX
  SG_ DAS_settingCounter : 52|4@1+ (1,0) [0|15] "" XXX
  SG_ DAS_settingChecksum : 63|8@0+ (1,0) [0|255] "" XXX
 
@@ -308,11 +289,9 @@ BO_ 923 DAS_status: 8 PARTY
  SG_ DAS_autopilotState : 0|4@1+ (1,0) [0|15] ""  aps
 
 
+CM_ BO_ 605 "Bytes change when toggling between FSD and AP, as well as Traffic Light and Stop Sign Control in TACC";
 
-
-
-
-
+CM_ SG_ 659 DAS_autosteerEnabled "1 if Autosteer or FSD is enabled, 0 otherwise";
 
 VAL_ 545 VCFRONT_uiAudioLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
 VAL_ 545 VCFRONT_uiHiCurrentLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
@@ -427,11 +406,11 @@ VAL_ 646 DI_parkBrakeState 0 "UNAVAILABLE" 1 "RELEASED" 2 "REQUESTED" 3 "APPLIED
 VAL_ 646 DI_autoparkState 0 "UNAVAILABLE" 1 "STANDBY" 2 "STARTED" 3 "ACTIVE" 4 "COMPLETE" 5 "PAUSED" 6 "ABORTED" 7 "RESUMED" 8 "UNPARK_COMPLETE" 9 "SELFPARK_STARTED" 15 "SNA" ;
 VAL_ 646 DI_speedUnits 0 "MPH" 1 "KPH" ;
 VAL_ 646 DI_cruiseState 0 "UNAVAILABLE" 1 "STANDBY" 2 "ENABLED" 3 "STANDSTILL" 4 "OVERRIDE" 5 "FAULT" 6 "PRE_FAULT" 7 "PRE_CANCEL" ;
-VAL_ 659 SteeringWeight 0 "light" 1 "standard" 2 "heavy";
-VAL_ 659 OffRoadAssist 0 "disabled" 3 "enabled";
-VAL_ 659 DistanceUnits 1 "miles" 0 "kilometers";
-VAL_ 659 FCW_Sensitivity 0 "early" 1 "medium" 2 "late" 3 "off";
-VAL_ 659 DriverAccelerationMode 0 "chill" 1 "standard";
+VAL_ 659 DAS_steeringWeight 0 "light" 1 "standard" 2 "heavy";
+VAL_ 659 DAS_offRoadAssist 0 "disabled" 3 "enabled";
+VAL_ 659 DAS_distanceUnits 1 "miles" 0 "kilometers";
+VAL_ 659 DAS_fcwSensitivity 0 "early" 1 "medium" 2 "late" 3 "off";
+VAL_ 659 DAS_driverAccelerationMode 0 "chill" 1 "standard";
 VAL_ 785 buckleStatus 1 "LATCHED" 0 "UNLATCHED" ;
 VAL_ 785 anyDoorOpen 1 "OPEN" 0 "CLOSED" ;
 VAL_ 785 LeftBlinkerBlinking 0 "off" 1 "blinking, off" 2 "blinking, on";
@@ -453,6 +432,3 @@ VAL_ 923 DAS_fusedSpeedLimit 31 "NONE" 0 "UNKNOWN_SNA" ;
 VAL_ 923 DAS_blindSpotRearRight 3 "SNA" 0 "NO_WARNING" 1 "WARNING_LEVEL_1" 2 "WARNING_LEVEL_2" ;
 VAL_ 923 DAS_blindSpotRearLeft 3 "SNA" 0 "NO_WARNING" 1 "WARNING_LEVEL_1" 2 "WARNING_LEVEL_2" ;
 VAL_ 923 DAS_autopilotState 15 "SNA" 8 "ABORTING" 3 "ACTIVE_NOMINAL" 0 "DISABLED" 4 "ACTIVE_RESTRICTED" 5 "ACTIVE_NAV" 14 "FAULT" 1 "UNAVAILABLE" 9 "ABORTED" 2 "AVAILABLE" ;
-
-
-
