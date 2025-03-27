@@ -223,10 +223,34 @@ BO_ 646 DI_state: 8 ETH
  SG_ DI_locStatusCounter : 8|4@1+ (1,0) [0|0] ""  X
  SG_ DI_locStatusChecksum : 0|8@1+ (1,0) [0|0] ""  X
 
-BO_ 659 DAS_settings: 8 XXX
- SG_ DAS_autopilotEnabled : 38|1@0+ (1,0) [0|1] "" XXX
- SG_ DAS_settingCounter : 52|4@1+ (1,0) [0|15] "" XXX
- SG_ DAS_settingChecksum : 63|8@0+ (1,0) [0|255] "" XXX
+BO_ 659 UI_chassisControl: 8 CH
+ SG_ UI_chassisControlChecksum : 56|8@1+ (1,0) [0|255] ""  epas3s
+ SG_ UI_chassisControlCounter : 52|4@1+ (1,0) [0|15] ""  epas3s
+ SG_ UI_selfParkTune : 48|4@1+ (1,0) [0|15] ""  das
+ SG_ UI_redLightStopSignEnable : 46|2@1+ (1,0) [0|3] ""  das
+ SG_ UI_pedalSafetyEnable : 44|2@1+ (1,0) [0|3] ""  das
+ SG_ UI_ldwEnable : 42|2@1+ (1,0) [0|3] ""  das
+ SG_ UI_latControlEnable : 40|2@1+ (1,0) [0|3] ""  das
+ SG_ UI_fcwSensitivity : 38|2@1+ (1,0) [0|3] ""  das
+ SG_ UI_fcwEnable : 36|2@1+ (1,0) [0|3] ""  das
+ SG_ UI_bsdEnable : 34|2@1+ (1,0) [0|3] ""  das
+ SG_ UI_autoLaneChangeEnable : 32|2@1+ (1,0) [0|3] ""  das
+ SG_ UI_autoParkRequest : 28|4@1+ (1,0) [0|15] ""  das
+ SG_ UI_rebootAutopilot : 27|1@1+ (1,0) [0|1] ""  aps
+ SG_ UI_ahlbEnable : 24|2@1+ (1,0) [0|3] ""  das
+ SG_ UI_aesEnable : 22|2@1+ (1,0) [0|3] ""  das
+ SG_ UI_aebEnable : 20|2@1+ (1,0) [0|3] ""  das
+ SG_ UI_accOvertakeEnable : 18|2@1+ (1,0) [0|3] ""  das
+ SG_ UI_dasDebugEnable : 17|1@1+ (1,0) [0|1] ""  das
+ SG_ UI_distanceUnits : 16|1@1+ (1,0) [0|1] ""  X
+ SG_ UI_suspensionLevelRequest : 13|3@1+ (1,0) [0|7] ""  tas
+ SG_ UI_trailerMode : 12|1@1+ (1,0) [0|1] ""  das
+ SG_ UI_zeroSpeedConfirmed : 10|2@1+ (1,0) [0|3] ""  X
+ SG_ UI_winchModeRequest : 8|2@1+ (1,0) [0|2] ""  X
+ SG_ UI_narrowGarages : 7|1@1+ (1,0) [0|1] ""  das
+ SG_ UI_parkBrakeRequest : 5|2@1+ (1,0) [0|3] ""  X
+ SG_ UI_tractionControlMode : 2|3@1+ (1,0) [0|5] ""  X
+ SG_ UI_steeringTuneRequest : 0|2@1+ (1,0) [0|2] ""  epas3s
 
 BO_ 785 UI_warning: 7 XXX
  SG_ buckleStatus : 13|1@0+ (1,0) [0|1] "" XXX
@@ -301,6 +325,28 @@ VAL_ 545 VCFRONT_parkLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF"
 VAL_ 545 VCFRONT_cpLVRequest 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
 VAL_ 545 VCFRONT_vehiclePowerState 3 "VEHICLE_POWER_STATE_DRIVE" 1 "VEHICLE_POWER_STATE_CONDITIONING" 2 "VEHICLE_POWER_STATE_ACCESSORY" 0 "VEHICLE_POWER_STATE_OFF" ;
 VAL_ 545 VCFRONT_LVPowerStateIndex 0 "Mux0" 1 "Mux1" ;
+VAL_ 659 UI_selfParkTune 15 "SNA" ;
+VAL_ 659 UI_redLightStopSignEnable 3 "SNA" 1 "RLSSW_ON" 0 "RLSSW_OFF" ;
+VAL_ 659 UI_pedalSafetyEnable 3 "SNA" 0 "PEDAL_SAFETY_OFF" 1 "PEDAL_SAFETY_ON" ;
+VAL_ 659 UI_ldwEnable 3 "SNA" 1 "LDW_TRIGGERS_HAPTIC" 0 "NO_HAPTIC" ;
+VAL_ 659 UI_latControlEnable 3 "LATERAL_CONTROL_SNA" 2 "LATERAL_CONTROL_UNAVAILABLE" 1 "LATERAL_CONTROL_ON" 0 "LATERAL_CONTROL_OFF" ;
+VAL_ 659 UI_fcwSensitivity 3 "SNA" 2 "AEB_SENSITIVITY_LATE" 1 "AEB_SENSITIVITY_AVERAGE" 0 "AEB_SENSITIVITY_EARLY" ;
+VAL_ 659 UI_fcwEnable 3 "SNA" 1 "FCW_ON" 0 "FCW_OFF" ;
+VAL_ 659 UI_bsdEnable 3 "SNA" 0 "BSD_OFF" 1 "BSD_ON" ;
+VAL_ 659 UI_autoLaneChangeEnable 3 "SNA" 0 "OFF" 1 "ON" ;
+VAL_ 659 UI_autoParkRequest 15 "SNA" 7 "ABORT" 0 "NONE" 2 "PARK_LEFT_CROSS" 1 "PARK_LEFT_PARALLEL" 5 "PARALLEL_PULL_OUT_TO_LEFT" 6 "PARALLEL_PULL_OUT_TO_RIGHT" 10 "PAUSE" 3 "PARK_RIGHT_PARALLEL" 9 "SEARCH" 4 "PARK_RIGHT_CROSS" 8 "COMPLETE" 11 "RESUME" ;
+VAL_ 659 UI_ahlbEnable 3 "SNA" 0 "AHLB_OFF" 1 "AHLB_ON" ;
+VAL_ 659 UI_aesEnable 3 "SNA" 0 "AES_OFF" 1 "AES_ON" ;
+VAL_ 659 UI_aebEnable 3 "SNA" 1 "AEB_ON" 0 "AEB_OFF" ;
+VAL_ 659 UI_accOvertakeEnable 3 "SNA" 1 "ACC_OVERTAKE_ON" 0 "ACC_OVERTAKE_OFF" ;
+VAL_ 659 UI_distanceUnits 0 "DISTANCEUNITS_KM" 1 "DISTANCEUNITS_MILES" ;
+VAL_ 659 UI_suspensionLevelRequest 7 "REQUEST_VERY_LOW_LEVEL" 5 "TOGGLE_JACK_MODE" 4 "REQUEST_VERY_HIGH_LEVEL" 2 "REQUEST_NORMAL_LEVEL" 6 "SWITCH_DEFECT" 0 "NO_CHANGE_SNA" 1 "REQUEST_LOW_LEVEL" 3 "REQUEST_HIGH_LEVEL" ;
+VAL_ 659 UI_trailerMode 1 "TRAILER_MODE_ON" 0 "TRAILER_MODE_OFF" ;
+VAL_ 659 UI_zeroSpeedConfirmed 0 "ZERO_SPEED_CANCELED" 1 "ZERO_SPEED_CONFIRMED" 3 "ZERO_SPEED_SNA" 2 "ZERO_SPEED_UNUSED" ;
+VAL_ 659 UI_winchModeRequest 0 "WINCH_MODE_IDLE" 2 "WINCH_MODE_EXIT" 1 "WINCH_MODE_ENTER" ;
+VAL_ 659 UI_parkBrakeRequest 1 "PARK_BRAKE_REQUEST_PRESSED" 3 "PARK_BRAKE_REQUEST_SNA" 0 "PARK_BRAKE_REQUEST_IDLE" ;
+VAL_ 659 UI_tractionControlMode 4 "TC_ROLLS_MODE_SELECTED" 1 "TC_SLIP_START_SELECTED" 0 "TC_NORMAL_SELECTED" 3 "TC_DEV_MODE_2_SELECTED" 2 "TC_DEV_MODE_1_SELECTED" 5 "TC_DYNO_MODE_SELECTED" ;
+VAL_ 659 UI_steeringTuneRequest 1 "STEERING_TUNE_STANDARD" 2 "STEERING_TUNE_SPORT" 0 "STEERING_TUNE_COMFORT" ;
 VAL_ 905 DAS_longCollisionWarning 7 "FCM_LONG_COLLISION_WARNING_VEHICLE_CUTIN" 0 "FCM_LONG_COLLISION_WARNING_NONE" 4 "FCM_LONG_COLLISION_WARNING_STOPSIGN_STOPLINE" 9 "FCM_LONG_COLLISION_WARNING_VEHICLE_MCVL2" 15 "FCM_LONG_COLLISION_WARNING_SNA" 8 "FCM_LONG_COLLISION_WARNING_VEHICLE_MCVL" 5 "FCM_LONG_COLLISION_WARNING_TFL_STOPLINE" 2 "FCM_LONG_COLLISION_WARNING_PEDESTRIAN" 12 "FCM_LONG_COLLISION_WARNING_VEHICLE_CIPV2" 6 "FCM_LONG_COLLISION_WARNING_VEHICLE_CIPV" 10 "FCM_LONG_COLLISION_WARNING_VEHICLE_MCVR" 3 "FCM_LONG_COLLISION_WARNING_IPSO" 1 "FCM_LONG_COLLISION_WARNING_VEHICLE_UNKNOWN" 11 "FCM_LONG_COLLISION_WARNING_VEHICLE_MCVR2" ;
 VAL_ 905 DAS_ppOffsetDesiredRamp 128 "PP_NO_OFFSET" ;
 VAL_ 905 DAS_driverInteractionLevel 0 "DRIVER_INTERACTING" 1 "DRIVER_NOT_INTERACTING" 2 "CONTINUED_DRIVER_NOT_INTERACTING" ;
