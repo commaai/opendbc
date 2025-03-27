@@ -18,12 +18,23 @@ def compute_gb_honda_bosch(accel, speed):
 
 
 def compute_gb_honda_nidec(accel, speed):
+
+  # ------------------ new scaling start-----------------------#
+
+  if accel > 0:
+    scale_factor = float ( np.interp ( speed, [0.0, 20.0, 90.0], [30.0, 1.0, 1.0] )
+    scaled_accel = accel * scale_factor
+  else:
+    scaled_accel = accel
+
+  # ------------------ new scaling end -----------------------#
+
   creep_brake = 0.0
   creep_speed = 2.3
   creep_brake_value = 0.15
   if speed < creep_speed:
     creep_brake = (creep_speed - speed) / creep_speed * creep_brake_value
-  gb = float(accel) / 4.8 - creep_brake
+  gb = float(scaled:accel) / 4.8 - creep_brake
   return np.clip(gb, 0.0, 1.0), np.clip(-gb, 0.0, 1.0)
 
 
