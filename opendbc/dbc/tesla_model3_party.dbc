@@ -226,7 +226,7 @@ BO_ 646 DI_state: 8 ETH
  SG_ DI_locStatusChecksum : 0|8@1+ (1,0) [0|0] ""  X
 
 BO_ 659 DAS_settings: 8 XXX
- SG_ DAS_steeringWeight : 1|2@0+ (1,0) [0|255] "" XXX
+ SG_ DAS_driverSteeringWeight : 1|2@0+ (1,0) [0|255] "" XXX
  SG_ DAS_slipStart : 2|1@0+ (1,0) [0|1] "" XXX
  SG_ DAS_offRoadAssist : 3|2@1+ (1,0) [0|63] "" XXX
  SG_ DAS_distanceUnits : 13|1@1+ (1,0) [0|255] "" XXX
@@ -400,7 +400,7 @@ VAL_ 646 DI_parkBrakeState 0 "UNAVAILABLE" 1 "RELEASED" 2 "REQUESTED" 3 "APPLIED
 VAL_ 646 DI_autoparkState 0 "UNAVAILABLE" 1 "STANDBY" 2 "STARTED" 3 "ACTIVE" 4 "COMPLETE" 5 "PAUSED" 6 "ABORTED" 7 "RESUMED" 8 "UNPARK_COMPLETE" 9 "SELFPARK_STARTED" 15 "SNA" ;
 VAL_ 646 DI_speedUnits 0 "MPH" 1 "KPH" ;
 VAL_ 646 DI_cruiseState 0 "UNAVAILABLE" 1 "STANDBY" 2 "ENABLED" 3 "STANDSTILL" 4 "OVERRIDE" 5 "FAULT" 6 "PRE_FAULT" 7 "PRE_CANCEL" ;
-VAL_ 659 DAS_steeringWeight 0 "light" 1 "standard" 2 "heavy";
+VAL_ 659 DAS_driverSteeringWeight 0 "light" 1 "standard" 2 "heavy";
 VAL_ 659 DAS_offRoadAssist 0 "disabled" 3 "enabled";
 VAL_ 659 DAS_distanceUnits 1 "miles" 0 "kilometers";
 VAL_ 659 DAS_fcwSensitivity 0 "early" 1 "medium" 2 "late" 3 "off";
