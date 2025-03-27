@@ -244,10 +244,10 @@ BO_ 659 DAS_settings: 8 XXX
 BO_ 785 UI_warning: 7 XXX
  SG_ buckleStatus : 13|1@0+ (1,0) [0|1] "" XXX
  SG_ scrollWheelRightTilt : 21|1@0+ (1,0) [0|1] "" XXX
- SG_ leftBlinkerLatchedOn : 22|1@0+ (1,0) [0|1] "" XXX
- SG_ rightBlinkerLatchedHeldOn : 23|1@0+ (1,0) [0|1] "" XXX
- SG_ LeftBlinkerBlinking : 25|2@0+ (1,0) [0|3] "" XXX
- SG_ RightBlinkerBlinking : 26|2@1+ (1,0) [0|15] "" XXX
+ SG_ leftBlinkerOn : 22|1@0+ (1,0) [0|1] "" XXX
+ SG_ rightBlinkerOn : 23|1@0+ (1,0) [0|1] "" XXX
+ SG_ leftBlinkerBlinking : 25|2@0+ (1,0) [0|3] "" XXX
+ SG_ rightBlinkerBlinking : 26|2@1+ (1,0) [0|15] "" XXX
  SG_ anyDoorOpen : 28|1@0+ (1,0) [0|1] "" XXX
  SG_ wiperSettings : 39|8@0+ (1,0) [0|255] "" XXX
  SG_ highBeam : 50|1@0+ (1,0) [0|1] "" XXX
@@ -284,6 +284,8 @@ BO_ 923 DAS_status: 8 PARTY
 CM_ BO_ 605 "Bytes change when toggling between FSD and AP, as well as Traffic Light and Stop Sign Control in TACC";
 
 CM_ SG_ 659 DAS_autosteerEnabled "1 if Autosteer or FSD is enabled, 0 otherwise";
+CM_ SG_ 785 leftBlinkerOn "only describes stalk position if half pressed without auto-cancel blinkers. otherwise acts as expected";
+CM_ SG_ 785 rightBlinkerOn "only describes stalk position if half pressed without auto-cancel blinkers. otherwise acts as expected";
 
 VAL_ 545 VCFRONT_uiAudioLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
 VAL_ 545 VCFRONT_uiHiCurrentLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
@@ -405,8 +407,8 @@ VAL_ 659 DAS_fcwSensitivity 0 "early" 1 "medium" 2 "late" 3 "off";
 VAL_ 659 DAS_driverAccelerationMode 0 "chill" 1 "standard";
 VAL_ 785 buckleStatus 1 "LATCHED" 0 "UNLATCHED" ;
 VAL_ 785 anyDoorOpen 1 "OPEN" 0 "CLOSED" ;
-VAL_ 785 LeftBlinkerBlinking 0 "off" 1 "blinking, off" 2 "blinking, on";
-VAL_ 785 RightBlinkerBlinking 0 "same";
+VAL_ 785 leftBlinkerBlinking 0 "off" 1 "blinking, off" 2 "blinking, on";
+VAL_ 785 rightBlinkerBlinking 0 "off" 1 "blinking, off" 2 "blinking, on";
 VAL_ 923 DAS_autoLaneChangeState 5 "ALC_UNAVAILABLE_VEHICLE_SPEED" 17 "ALC_ABORT_POOR_VIEW_RANGE" 23 "ALC_BLOCKED_VEH_TTC_AND_USS_L" 0 "ALC_UNAVAILABLE_DISABLED" 26 "ALC_BLOCKED_LANE_TYPE_L" 29 "ALC_ABORT_TIMEOUT" 9 "ALC_IN_PROGRESS_L" 4 "ALC_UNAVAILABLE_EXITING_HIGHWAY" 22 "ALC_BLOCKED_VEH_TTC_L" 12 "ALC_WAITING_FOR_SIDE_OBST_TO_PASS_R" 18 "ALC_ABORT_LC_HEALTH_BAD" 28 "ALC_WAITING_HANDS_ON" 8 "ALC_AVAILABLE_BOTH" 11 "ALC_WAITING_FOR_SIDE_OBST_TO_PASS_L" 3 "ALC_UNAVAILABLE_TP_FOLLOW" 2 "ALC_UNAVAILABLE_SONICS_INVALID" 21 "ALC_UNAVAILABLE_SOLID_LANE_LINE" 24 "ALC_BLOCKED_VEH_TTC_R" 1 "ALC_UNAVAILABLE_NO_LANES" 25 "ALC_BLOCKED_VEH_TTC_AND_USS_R" 30 "ALC_ABORT_MISSION_PLAN_INVALID" 27 "ALC_BLOCKED_LANE_TYPE_R" 19 "ALC_ABORT_BLINKER_TURNED_OFF" 31 "ALC_SNA" 13 "ALC_WAITING_FOR_FWD_OBST_TO_PASS_L" 16 "ALC_ABORT_SIDE_OBSTACLE_PRESENT_R" 6 "ALC_AVAILABLE_ONLY_L" 20 "ALC_ABORT_OTHER_REASON" 15 "ALC_ABORT_SIDE_OBSTACLE_PRESENT_L" 7 "ALC_AVAILABLE_ONLY_R" 14 "ALC_WAITING_FOR_FWD_OBST_TO_PASS_R" 10 "ALC_IN_PROGRESS_R" ;
 VAL_ 923 DAS_autopilotHandsOnState 8 "LC_HANDS_ON_SUSPENDED" 15 "LC_HANDS_ON_SNA" 7 "LC_HANDS_ON_REQD_STRUCK_OUT" 3 "LC_HANDS_ON_REQD_VISUAL" 4 "LC_HANDS_ON_REQD_CHIME_1" 6 "LC_HANDS_ON_REQD_SLOWING" 1 "LC_HANDS_ON_REQD_DETECTED" 2 "LC_HANDS_ON_REQD_NOT_DETECTED" 5 "LC_HANDS_ON_REQD_CHIME_2" 0 "LC_HANDS_ON_NOT_REQD" ;
 VAL_ 923 DAS_fleetSpeedState 0 "FLEETSPEED_UNAVAILABLE" 1 "FLEETSPEED_AVAILABLE" 2 "FLEETSPEED_ACTIVE" 3 "FLEETSPEED_HOLD" ;
