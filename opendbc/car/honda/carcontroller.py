@@ -252,11 +252,7 @@ class CarController(CarControllerBase):
         # pcm_speed = float ( np.clip ( CS.out.vEgo + ( 8.0 if accel > 0 elif -8.0 if accel < 0 else 0.0 ), 0.0, 100.0 ) )
         # pcm_accel = float ( np.clip ( 600.0 * ( accel + 0.2 ) , 0.0, self.params.NIDEC_GAS_MAX )
 
-        # standstill disengage
-        #if ( accel >= 0.01 ) and (CS.out.vEgo < 4.0 ) and ( pcm_speed < 25.0 / 3.6):
-        #  pcm_speed = 25.0 / 3.6
-
-        prefer EV mode under 30mph and slower accel
+        # prefer EV mode under 30mph and slower accel
         if ( accel <= 0.5 ) and ( CS.out.vEgo > 0.0 ) and ( CS.out.vEgo < 30.0 / 2.237 ):
           pcm_accel = 54.0
 
@@ -277,6 +273,10 @@ class CarController(CarControllerBase):
 
         self.blend_pcm_speed =  self.blend_pcm_speed * PERCENT_BLEND + pcm_speed * ( 1 - PERCENT_BLEND )
 
+        # standstill disengage
+        if ( accel >= 0.01 ) and (CS.out.vEgo < 4.0 ) and ( pcm_speed < 25.0 / 3.6):
+          pcm_speed = 25.0 / 3.6
+      
       # ----------------- new test logic end ---------------------
 
       hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
