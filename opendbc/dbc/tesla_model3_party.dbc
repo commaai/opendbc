@@ -189,7 +189,7 @@ BO_ 599 DI_speed: 8 PARTY
  SG_ DI_speedCounter : 8|4@1+ (1,0) [0|15] ""  park
  SG_ DI_speedChecksum : 0|8@1+ (1,0) [0|255] ""  park
 
-BO_ 605 LongitudinalRelated: 6 XXX
+BO_ 605 XXX_longitudinalRelated: 6 XXX
 
 BO_ 1160 DAS_steeringControl: 4 PARTY
  SG_ DAS_steeringControlChecksum : 31|8@0+ (1,0) [0|255] ""  aps
