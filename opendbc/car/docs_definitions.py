@@ -85,12 +85,12 @@ class Cable(EnumBase):
 
 class Accessory(EnumBase):
   harness_box = BasePart("harness box")
-  comma_power_v2 = BasePart("comma power v2")
+  comma_power = BasePart("comma power v3")
 
 
 @dataclass
 class BaseCarHarness(BasePart):
-  parts: list[Enum] = field(default_factory=lambda: [Accessory.harness_box, Accessory.comma_power_v2])
+  parts: list[Enum] = field(default_factory=lambda: [Accessory.harness_box, Accessory.comma_power])
   has_connector: bool = True  # without are hidden on the harness connector page
 
 
@@ -130,15 +130,15 @@ class CarHarness(EnumBase):
   custom = BaseCarHarness("Developer connector")
   obd_ii = BaseCarHarness("OBD-II connector", parts=[Cable.long_obdc_cable, Cable.usbc_coupler], has_connector=False)
   gm = BaseCarHarness("GM connector", parts=[Accessory.harness_box])
-  gmsdgm = BaseCarHarness("GM SDGM connector", parts=[Accessory.harness_box, Cable.long_obdc_cable, Cable.usbc_coupler, Accessory.comma_power_v2])
-  nissan_a = BaseCarHarness("Nissan A connector", parts=[Accessory.harness_box, Accessory.comma_power_v2, Cable.long_obdc_cable, Cable.usbc_coupler])
-  nissan_b = BaseCarHarness("Nissan B connector", parts=[Accessory.harness_box, Accessory.comma_power_v2, Cable.long_obdc_cable, Cable.usbc_coupler])
+  gmsdgm = BaseCarHarness("GM SDGM connector", parts=[Accessory.harness_box, Accessory.comma_power, Cable.long_obdc_cable, Cable.usbc_coupler])
+  nissan_a = BaseCarHarness("Nissan A connector", parts=[Accessory.harness_box, Accessory.comma_power, Cable.long_obdc_cable, Cable.usbc_coupler])
+  nissan_b = BaseCarHarness("Nissan B connector", parts=[Accessory.harness_box, Accessory.comma_power, Cable.long_obdc_cable, Cable.usbc_coupler])
   mazda = BaseCarHarness("Mazda connector")
   ford_q3 = BaseCarHarness("Ford Q3 connector")
-  ford_q4 = BaseCarHarness("Ford Q4 connector", parts=[Accessory.harness_box, Accessory.comma_power_v2, Cable.long_obdc_cable, Cable.usbc_coupler])
-  rivian = BaseCarHarness("Rivian A connector", parts=[Accessory.harness_box, Accessory.comma_power_v2, Cable.long_obdc_cable, Cable.usbc_coupler])
-  tesla_a = BaseCarHarness("Tesla A connector", parts=[Accessory.harness_box, Accessory.comma_power_v2, Cable.long_obdc_cable, Cable.usbc_coupler])
-  tesla_b = BaseCarHarness("Tesla B connector", parts=[Accessory.harness_box, Accessory.comma_power_v2, Cable.long_obdc_cable, Cable.usbc_coupler])
+  ford_q4 = BaseCarHarness("Ford Q4 connector", parts=[Accessory.harness_box, Accessory.comma_power, Cable.long_obdc_cable, Cable.usbc_coupler])
+  rivian = BaseCarHarness("Rivian A connector", parts=[Accessory.harness_box, Accessory.comma_power, Cable.long_obdc_cable, Cable.usbc_coupler])
+  tesla_a = BaseCarHarness("Tesla A connector", parts=[Accessory.harness_box, Accessory.comma_power, Cable.long_obdc_cable, Cable.usbc_coupler])
+  tesla_b = BaseCarHarness("Tesla B connector", parts=[Accessory.harness_box, Accessory.comma_power, Cable.long_obdc_cable, Cable.usbc_coupler])
 
 
 class Device(EnumBase):
