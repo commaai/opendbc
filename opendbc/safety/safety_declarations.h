@@ -276,6 +276,7 @@ int safety_fwd_hook(int bus_num, int addr);
 int set_safety_hooks(uint16_t mode, uint16_t param);
 
 extern const safety_hooks body_hooks;
+extern const safety_hooks byd_hooks;
 extern const safety_hooks chrysler_hooks;
 extern const safety_hooks elm327_hooks;
 extern const safety_hooks nooutput_hooks;

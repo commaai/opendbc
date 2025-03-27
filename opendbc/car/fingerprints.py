@@ -1,5 +1,6 @@
 from opendbc.car.interfaces import get_interface_attr
 from opendbc.car.body.values import CAR as BODY
+from opendbc.car.byd.values import CAR as BYD
 from opendbc.car.chrysler.values import CAR as CHRYSLER
 from opendbc.car.ford.values import CAR as FORD
 from opendbc.car.gm.values import CAR as GM
@@ -59,6 +60,8 @@ MIGRATION = {
   "ACURA RDX 2018 ACURAWATCH PLUS": HONDA.ACURA_RDX,
   "ACURA RDX 2020 TECH": HONDA.ACURA_RDX_3G,
   "AUDI A3": VW.AUDI_A3_MK3,
+  "BYD HAN DM 20": BYD.BYD_HAN_DM_20,
+  "BYD HAN EV 20": BYD.BYD_HAN_EV_20,
   "HONDA ACCORD 2018 HYBRID TOURING": HONDA.HONDA_ACCORD,
   "HONDA ACCORD 1.5T 2018": HONDA.HONDA_ACCORD,
   "HONDA ACCORD 2018 LX 1.5T": HONDA.HONDA_ACCORD,
