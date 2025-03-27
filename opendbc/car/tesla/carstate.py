@@ -84,6 +84,9 @@ class CarState(CarStateBase):
     # AEB
     ret.stockAeb = cp_ap_party.vl["DAS_control"]["DAS_aebEvent"] == 1
 
+    # Stock Autosteer should be off (includes FSD)
+    ret.invalidLkasSetting = cp_ap_party.vl["DAS_settings"]["DAS_autosteerEnabled"] != 0
+
     # Buttons # ToDo: add Gap adjust button
 
     # Messages needed by carcontroller
@@ -106,6 +109,7 @@ class CarState(CarStateBase):
     ap_party_messages = [
       ("DAS_control", 25),
       ("DAS_status", 2),
+      ("DAS_settings", 2),
       ("SCCM_steeringAngleSensor", 100),
     ]
 
