@@ -1,11 +1,16 @@
+from opendbc.car import Bus
 from opendbc.car.common.conversions import Conversions as CV
+from opendbc.can.packer import CANPacker
 from opendbc.car.interfaces import V_CRUISE_MAX
 from opendbc.car.tesla.values import CANBUS, CarControllerParams
 
 
 class TeslaCAN:
-  def __init__(self, packer):
-    self.packer = packer
+  def __init__(self, dbc_names, is_3Y):
+    self.is_3Y = is_3Y
+    self.packers = {CANBUS.party: CANPacker(dbc_names[Bus.party])}
+    if not self.is_3Y:
+      self.packers[CANBUS.powertrain] = CANPacker(dbc_names[Bus.pt])
 
   @staticmethod
   def checksum(msg_id, dat):
@@ -21,9 +26,9 @@ class TeslaCAN:
       "DAS_steeringControlCounter": counter,
     }
 
-    data = self.packer.make_can_msg("DAS_steeringControl", CANBUS.party, values)[1]
+    data = self.packers[CANBUS.party].make_can_msg("DAS_steeringControl", CANBUS.party, values)[1]
     values["DAS_steeringControlChecksum"] = self.checksum(0x488, data[:3])
-    return self.packer.make_can_msg("DAS_steeringControl", CANBUS.party, values)
+    return self.packers[CANBUS.party].make_can_msg("DAS_steeringControl", CANBUS.party, values)
 
   def create_longitudinal_command(self, acc_state, accel, cntr, v_ego, active):
     set_speed = max(v_ego * CV.MS_TO_KPH, 0)
@@ -42,9 +47,11 @@ class TeslaCAN:
       "DAS_controlCounter": cntr,
       "DAS_controlChecksum": 0,
     }
-    data = self.packer.make_can_msg("DAS_control", CANBUS.party, values)[1]
+
+    bus = CANBUS.party if self.is_3Y else CANBUS.powertrain
+    data = self.packers[bus].make_can_msg("DAS_control", bus, values)[1]
     values["DAS_controlChecksum"] = self.checksum(0x2b9, data[:7])
-    return self.packer.make_can_msg("DAS_control", CANBUS.party, values)
+    return self.packers[bus].make_can_msg("DAS_control", bus, values)
 
   def create_steering_allowed(self, counter):
     values = {
@@ -52,6 +59,6 @@ class TeslaCAN:
       "APS_eacMonitorCounter": counter,
     }
 
-    data = self.packer.make_can_msg("APS_eacMonitor", CANBUS.party, values)[1]
+    data = self.packers[CANBUS.party].make_can_msg("APS_eacMonitor", CANBUS.party, values)[1]
     values["APS_eacMonitorChecksum"] = self.checksum(0x27d, data[:2])
-    return self.packer.make_can_msg("APS_eacMonitor", CANBUS.party, values)
+    return self.packers[CANBUS.party].make_can_msg("APS_eacMonitor", CANBUS.party, values)
