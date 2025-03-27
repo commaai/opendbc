@@ -34,4 +34,9 @@ FW_VERSIONS = {
       b'TeMYG4_SingleECU_0.0.0 (33),Y4S002.26',
     ],
   },
+  CAR.TESLA_MODEL_S_RAVEN: {
+    (Ecu.eps, 0x730, None): [
+      b'SX_0.0.0 (99),SR013.7',
+    ],
+  }
 }
