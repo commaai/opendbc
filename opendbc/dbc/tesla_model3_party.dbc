@@ -243,7 +243,7 @@ BO_ 659 DAS_settings: 8 XXX
 
 BO_ 785 UI_warning: 7 XXX
  SG_ buckleStatus : 13|1@0+ (1,0) [0|1] "" XXX
- SG_ scrollWheelRightTilt : 21|1@0+ (1,0) [0|1] "" XXX
+ SG_ scrollWheelPressed : 21|1@0+ (1,0) [0|1] "" XXX
  SG_ leftBlinkerOn : 22|1@0+ (1,0) [0|1] "" XXX
  SG_ rightBlinkerOn : 23|1@0+ (1,0) [0|1] "" XXX
  SG_ leftBlinkerBlinking : 25|2@0+ (1,0) [0|3] "" XXX
@@ -286,6 +286,7 @@ CM_ BO_ 605 "Bytes change when toggling between FSD and AP, as well as Traffic L
 CM_ SG_ 659 DAS_autosteerEnabled "1 if Autosteer or FSD is enabled, 0 otherwise";
 CM_ SG_ 785 leftBlinkerOn "only describes stalk position if half pressed without auto-cancel blinkers. otherwise acts as expected";
 CM_ SG_ 785 rightBlinkerOn "only describes stalk position if half pressed without auto-cancel blinkers. otherwise acts as expected";
+CM_ SG_ 785 scrollWheelPressed "captures either scroll wheel left, right or down press";
 
 VAL_ 545 VCFRONT_uiAudioLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
 VAL_ 545 VCFRONT_uiHiCurrentLVState 1 "LV_ON" 2 "LV_GOING_DOWN" 3 "LV_FAULT" 0 "LV_OFF" ;
