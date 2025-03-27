@@ -242,23 +242,15 @@ BO_ 659 DAS_settings: 8 XXX
  SG_ DAS_settingChecksum : 63|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 785 UI_warning: 7 XXX
- SG_ NEW_SIGNAL_8 : 12|1@0+ (1,0) [0|1] "" XXX
  SG_ buckleStatus : 13|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_9 : 14|2@1+ (1,0) [0|3] "" XXX
- SG_ NEW_SIGNAL_7 : 20|5@0+ (1,0) [0|15] "" XXX
  SG_ scrollWheelRightTilt : 21|1@0+ (1,0) [0|1] "" XXX
  SG_ leftBlinkerLatchedOn : 22|1@0+ (1,0) [0|1] "" XXX
  SG_ rightBlinkerLatchedHeldOn : 23|1@0+ (1,0) [0|1] "" XXX
  SG_ LeftBlinkerBlinking : 25|2@0+ (1,0) [0|3] "" XXX
  SG_ RightBlinkerBlinking : 26|2@1+ (1,0) [0|15] "" XXX
  SG_ anyDoorOpen : 28|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_6 : 29|3@1+ (1,0) [0|7] "" XXX
  SG_ wiperSettings : 39|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_1 : 47|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_2 : 48|2@1+ (1,0) [0|3] "" XXX
  SG_ highBeam : 50|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_4 : 51|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_3 : 52|4@1+ (1,0) [0|15] "" XXX
 
 BO_ 923 DAS_status: 8 PARTY
  SG_ DAS_statusChecksum : 56|8@1+ (1,0) [0|255] ""  aps
