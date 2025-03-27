@@ -249,8 +249,8 @@ class CarController(CarControllerBase):
         #if ( accel <= 0.5 ) and ( CS.out.vEgo > 0.0 ) and ( CS.out.vEgo < 30.0 / 2.237 ):
         #  pcm_accel = 54.0
 
-        # blending logic to fastforward, assume engine uses 95% of prior logic each frame
-        PERCENT_BLEND = 0.95
+        # blending logic to fastforward, assume engine uses 98% of prior logic each frame
+        PERCENT_BLEND = 0.98
 
         pcm_accel = pcm_accel if self.accel <= 0 else float (np.clip ( ( pcm_accel - self.blend_pcm_accel * PERCENT_BLEND ) / ( 1 - PERCENT_BLEND ), \
                                                                       0, self.params.NIDEC_GAS_MAX ) )
