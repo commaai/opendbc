@@ -163,11 +163,9 @@ static safety_config byd_init(uint16_t param) {
   };
 
   static RxCheck byd_yuanplus_atto3_rx_checks[] = {
-    {.msg = {{BYD_CANADDR_PCM_BUTTONS,      BYD_CANBUS_ESC, 8, .frequency = 20U}, { 0 }, { 0 }}},
-    {.msg = {{BYD_CANADDR_ACC_EPS_STATE,    BYD_CANBUS_ESC, 8, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{BYD_CANADDR_CARSPEED,         BYD_CANBUS_ESC, 8, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{BYD_CANADDR_IPB,              BYD_CANBUS_ESC, 8, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{BYD_CANADDR_DRIVE_STATE,      BYD_CANBUS_ESC, 8, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{BYD_CANADDR_ACC_EPS_STATE,    BYD_CANBUS_ESC, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{BYD_CANADDR_IPB,              BYD_CANBUS_ESC, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{BYD_CANADDR_DRIVE_STATE,      BYD_CANBUS_ESC, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
   };
 
   safety_config ret;
