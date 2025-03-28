@@ -4,7 +4,8 @@ from collections import namedtuple
 from opendbc.can.packer import CANPacker
 from opendbc.car import Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
 from opendbc.car.honda import hondacan
-from opendbc.car.honda.values import CruiseButtons, VISUAL_HUD, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, HONDA_NIDEC_ALT_PCM_ACCEL, CarControllerParams
+from opendbc.car.honda.values import CruiseButtons, VISUAL_HUD, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, HONDA_NIDEC_ALT_PCM_ACCEL, HONDA_NIDEC_HYBRID, \
+                                     CarControllerParams
 from opendbc.car.interfaces import CarControllerBase
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
@@ -17,12 +18,23 @@ def compute_gb_honda_bosch(accel, speed):
 
 
 def compute_gb_honda_nidec(accel, speed):
+
+  # ------------------ new scaling start-----------------------#
+
+  if accel > 0:
+    scale_factor = float ( np.interp ( speed, [0.0, 1.0, 15.0, 90.0], [10000.0, 250.0, 2.0, 1.0] ) )
+    scaled_accel = accel * scale_factor
+  else:
+    scaled_accel = accel
+
+  # ------------------ new scaling end -----------------------#
+
   creep_brake = 0.0
   creep_speed = 2.3
   creep_brake_value = 0.15
   if speed < creep_speed:
     creep_brake = (creep_speed - speed) / creep_speed * creep_brake_value
-  gb = float(accel) / 4.8 - creep_brake
+  gb = float(scaled_accel) / 4.8 - creep_brake
   return np.clip(gb, 0.0, 1.0), np.clip(-gb, 0.0, 1.0)
 
 
@@ -115,6 +127,8 @@ class CarController(CarControllerBase):
     self.gas = 0.0
     self.brake = 0.0
     self.last_torque = 0.0
+    self.blend_pcm_accel = 0.0
+    self.blend_pcm_speed = 0.0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -219,7 +233,8 @@ class CarController(CarControllerBase):
           pump_on, self.last_pump_ts = brake_pump_hysteresis(apply_brake, self.apply_brake_last, self.last_pump_ts, ts)
 
           pcm_override = True
-          can_sends.append(hondacan.create_brake_command(self.packer, self.CAN, apply_brake, pump_on,
+          pump_send = ( apply_brake > 0 ) if self.CP.carFingerprint in HONDA_NIDEC_HYBRID else pump_on
+          can_sends.append(hondacan.create_brake_command(self.packer, self.CAN, apply_brake, pump_send,
                                                          pcm_override, pcm_cancel_cmd, fcw_display,
                                                          self.CP.carFingerprint, CS.stock_brake))
           self.apply_brake_last = apply_brake
@@ -228,13 +243,52 @@ class CarController(CarControllerBase):
     # Send dashboard UI commands.
     # On Nidec, this controls longitudinal positive acceleration
     if self.frame % 10 == 0:
+
+      # ----------------- new test logic start ---------------------
+
+      if CC.longActive:
+        # pcm_speed = float ( np.clip ( ( CS.out.vEgo + 633.0 * ( accel ) - 14.0 ) , 0.0, 100.0 ) ) # convert m/s to kph done in hondacan
+
+        # pcm_speed = float ( np.clip ( CS.out.vEgo + ( 8.0 if accel > 0 elif -8.0 if accel < 0 else 0.0 ), 0.0, 100.0 ) )
+        # pcm_accel = float ( np.clip ( 600.0 * ( accel + 0.2 ) , 0.0, self.params.NIDEC_GAS_MAX )
+
+        # prefer EV mode under 30mph and slower accel
+        if ( accel <= 0.5 ) and ( CS.out.vEgo > 0.0 ) and ( CS.out.vEgo < 30.0 / 2.237 ):
+          pcm_accel = 54.0
+
+        # blending logic to fastforward, assume engine uses 98% of prior logic each frame
+        PERCENT_BLEND = 0.98
+
+        # pcm_accel = pcm_accel if self.accel <= 0 else float (np.clip ( ( pcm_accel - self.blend_pcm_accel * PERCENT_BLEND ) / ( 1 - PERCENT_BLEND ), \
+        #                                                               0, self.params.NIDEC_GAS_MAX ) )
+
+        self.blend_pcm_accel =  self.blend_pcm_accel * PERCENT_BLEND + pcm_accel * ( 1 - PERCENT_BLEND )
+
+        pcm_speed = pcm_speed if self.accel <= 0 else float (np.clip ( ( pcm_speed - self.blend_pcm_speed * PERCENT_BLEND ) / ( 1 - PERCENT_BLEND ), \
+                                                                      0, 100.0 ) )
+
+        # reduce speed if above 50% steering max
+        pcm_speed = float ( np.clip ( pcm_speed, 0, 100 if actuators.torque == 0 or (CS.out.vEgo < 4.0 ) else \
+                                     abs ( self.params.STEER_MAX / max ( abs(actuators.torque), abs(apply_torque) ) ) * 0.50 * CS.out.vEgo ) )
+
+        self.blend_pcm_speed =  self.blend_pcm_speed * PERCENT_BLEND + pcm_speed * ( 1 - PERCENT_BLEND )
+
+        # standstill disengage
+        if ( accel >= 0.01 ) and (CS.out.vEgo < 4.0 ) and ( pcm_speed < 25.0 / 3.6):
+          pcm_speed = 25.0 / 3.6
+
+      # ----------------- new test logic end ---------------------
+
       hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
                     hud_control.lanesVisible, fcw_display, acc_alert, steer_required, hud_control.leadDistanceBars)
-      can_sends.extend(hondacan.create_ui_commands(self.packer, self.CAN, self.CP, CC.enabled, pcm_speed, hud, CS.is_metric, CS.acc_hud, CS.lkas_hud))
+
+      pcm_speed_send = 0.0 if (self.brake_last > wind_brake ) and ( self.CP.carFingerprint in HONDA_NIDEC_HYBRID ) else int ( pcm_speed )
+      can_sends.extend(hondacan.create_ui_commands(self.packer, self.CAN, self.CP, CC.enabled, pcm_speed_send, hud, CS.is_metric, CS.acc_hud, CS.lkas_hud))
 
       if self.CP.openpilotLongitudinalControl and self.CP.carFingerprint not in HONDA_BOSCH:
-        self.speed = pcm_speed
-        self.gas = pcm_accel / self.params.NIDEC_GAS_MAX
+        self.speed = pcm_speed * 3.6 # conversion done in hondacan
+        # self.gas = pcm_accel / self.params.NIDEC_GAS_MAX
+        self.gas = pcm_accel
 
     new_actuators = actuators.as_builder()
     new_actuators.speed = self.speed
