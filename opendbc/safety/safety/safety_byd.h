@@ -44,12 +44,18 @@ static void byd_rx_hook(const CANPacket_t *to_push) {
         torque_motor -= 4096;
       update_sample(&torque_meas, torque_motor);
     }
+    else {
+      //empty
+    }
   } else if (bus == BYD_CANBUS_MPC) {
     if (addr == BYD_CANADDR_ACC_HUD_ADAS) {
       unsigned int accstate = ((GET_BYTE(to_push, 2) >> 3) & 0x07U);
       bool cruise_engaged = (accstate == 3U) || (accstate == 5U); // 3=acc_active, 5=user force accel
       pcm_cruise_check(cruise_engaged);
     }
+  }
+  else {
+    //empty
   }
 }
 
@@ -162,11 +168,11 @@ static safety_config byd_init(uint16_t param) {
     {.msg = {{BYD_CANADDR_ACC_HUD_ADAS,     BYD_CANBUS_MPC, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
   };
 
-  static RxCheck byd_yuanplus_atto3_rx_checks[] = {
-    {.msg = {{BYD_CANADDR_ACC_EPS_STATE,    BYD_CANBUS_ESC, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{BYD_CANADDR_IPB,              BYD_CANBUS_ESC, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{BYD_CANADDR_DRIVE_STATE,      BYD_CANBUS_ESC, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
-  };
+  // static RxCheck byd_yuanplus_atto3_rx_checks[] = {
+  //   {.msg = {{BYD_CANADDR_ACC_EPS_STATE,    BYD_CANBUS_ESC, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
+  //   {.msg = {{BYD_CANADDR_IPB,              BYD_CANBUS_ESC, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
+  //   {.msg = {{BYD_CANADDR_DRIVE_STATE,      BYD_CANBUS_ESC, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
+  // };
 
   safety_config ret;
 
@@ -184,6 +190,11 @@ static safety_config byd_init(uint16_t param) {
     ret = BUILD_SAFETY_CFG(byd_han_dmev_rx_checks, BYD_HAN_DMEV_TX_MSGS);
   } else if (use_yuan) {
     byd_platform = YUAN_PLUS_DMI_ATTO3;
+    static RxCheck byd_yuanplus_atto3_rx_checks[] = {
+      {.msg = {{BYD_CANADDR_ACC_EPS_STATE,    BYD_CANBUS_ESC, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
+      {.msg = {{BYD_CANADDR_IPB,              BYD_CANBUS_ESC, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
+      {.msg = {{BYD_CANADDR_DRIVE_STATE,      BYD_CANBUS_ESC, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
+    }; //why should I write such an ugly code just to comply with misra?
     ret = BUILD_SAFETY_CFG(byd_yuanplus_atto3_rx_checks, BYD_YUANPLUS_ATTO3_TX_MSGS);
   } else {
     //should not reach here
