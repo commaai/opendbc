@@ -3,14 +3,15 @@ import math
 from opendbc.can.parser import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.interfaces import RadarInterfaceBase
-from opendbc.car.hyundai.values import DBC
+from opendbc.car.hyundai.values import DBC, HyundaiFlags
 
-RADAR_START_ADDR = 0x500
+RADAR_START_ADDR_CAN = 0x500
+RADAR_START_ADDR_CANFD = 0x3A5
 RADAR_MSG_COUNT = 32
 
 # POC for parsing corner radars: https://github.com/commaai/openpilot/pull/24221/
 
-def get_radar_can_parser(CP):
+def get_radar_can_parser(CP, RADAR_START_ADDR):
   if Bus.radar not in DBC[CP.carFingerprint]:
     return None
 
@@ -21,12 +22,14 @@ def get_radar_can_parser(CP):
 class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
     super().__init__(CP)
+    self.CP_flags = CP.flags
+    self.RADAR_START_ADDR = RADAR_START_ADDR_CANFD if self.CP_flags & HyundaiFlags.CANFD else RADAR_START_ADDR_CAN
     self.updated_messages = set()
-    self.trigger_msg = RADAR_START_ADDR + RADAR_MSG_COUNT - 1
+    self.trigger_msg = self.RADAR_START_ADDR + RADAR_MSG_COUNT - 1
     self.track_id = 0
 
     self.radar_off_can = CP.radarUnavailable
-    self.rcp = get_radar_can_parser(CP)
+    self.rcp = get_radar_can_parser(CP, self.RADAR_START_ADDR)
 
   def update(self, can_strings):
     if self.radar_off_can or (self.rcp is None):
@@ -51,7 +54,7 @@ class RadarInterface(RadarInterfaceBase):
     if not self.rcp.can_valid:
       ret.errors.canError = True
 
-    for addr in range(RADAR_START_ADDR, RADAR_START_ADDR + RADAR_MSG_COUNT):
+    for addr in range(self.RADAR_START_ADDR, self.RADAR_START_ADDR + RADAR_MSG_COUNT):
       msg = self.rcp.vl[f"RADAR_TRACK_{addr:x}"]
 
       if addr not in self.pts:
@@ -61,10 +64,14 @@ class RadarInterface(RadarInterfaceBase):
 
       valid = msg['STATE'] in (3, 4)
       if valid:
-        azimuth = math.radians(msg['AZIMUTH'])
+        if self.CP.flags & HyundaiFlags.CANFD:
+          self.pts[addr].dRel = msg['LONG_DIST']
+          self.pts[addr].yRel = msg['LAT_DIST']
+        else:
+          azimuth = math.radians(msg['AZIMUTH'])
+          self.pts[addr].dRel = math.cos(azimuth) * msg['LONG_DIST']
+          self.pts[addr].yRel = 0.5 * -math.sin(azimuth) * msg['LONG_DIST']
         self.pts[addr].measured = True
-        self.pts[addr].dRel = math.cos(azimuth) * msg['LONG_DIST']
-        self.pts[addr].yRel = 0.5 * -math.sin(azimuth) * msg['LONG_DIST']
         self.pts[addr].vRel = msg['REL_SPEED']
         self.pts[addr].aRel = msg['REL_ACCEL']
         self.pts[addr].yvRel = float('nan')
