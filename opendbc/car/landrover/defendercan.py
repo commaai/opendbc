@@ -22,7 +22,7 @@ def create_lkas_command_defender(packer, enable, latActive, apply_angle, cnt, le
   values = {
     "Lkas_checksum" : 0,
     "counter"       : cnt,
-    "ReqAngleTorque": apply_angle * 1.3,  # todo check
+    "ReqAngleTorque": apply_angle,  # todo check
     "EnAngle"       : latActive,
     "lane_left"     : left_lane,
     "lane_right"    : right_lane,
