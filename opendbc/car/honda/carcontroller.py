@@ -276,7 +276,7 @@ class CarController(CarControllerBase):
         # standstill disengage
         if ( accel >= 0.01 ) and (CS.out.vEgo < 4.0 ) and ( pcm_speed < 25.0 / 3.6):
           pcm_speed = 25.0 / 3.6
-      
+
       # ----------------- new test logic end ---------------------
 
       hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
