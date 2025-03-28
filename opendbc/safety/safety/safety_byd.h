@@ -47,7 +47,7 @@ static void byd_rx_hook(const CANPacket_t *to_push) {
   } else if (bus == BYD_CANBUS_MPC) {
     if (addr == BYD_CANADDR_ACC_HUD_ADAS) {
       unsigned int accstate = ((GET_BYTE(to_push, 2) >> 3) & 0x07U);
-      bool cruise_engaged = ((accstate == 3) || (accstate == 5)); // 3=acc_active, 5=user force accel
+      bool cruise_engaged = (accstate == 3U) || (accstate == 5U); // 3=acc_active, 5=user force accel
       pcm_cruise_check(cruise_engaged);
     }
   }
