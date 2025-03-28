@@ -1,0 +1,173 @@
+VERSION ""
+
+NS_ :
+    NS_DESC_
+    CM_
+    BA_DEF_
+    BA_
+    VAL_
+    CAT_DEF_
+    CAT_
+    FILTER
+    BA_DEF_DEF_
+    EV_DATA_
+    ENVVAR_DATA_
+    SGTYPE_
+    SGTYPE_VAL_
+    BA_DEF_SGTYPE_
+    BA_SGTYPE_
+    SIG_TYPE_REF_
+    VAL_TABLE_
+    SIG_GROUP_
+    SIG_VALTYPE_
+    SIGTYPE_VALTYPE_
+    BO_TX_BU_
+    BA_DEF_REL_
+    BA_REL_
+    BA_DEF_DEF_REL_
+    BU_SG_REL_
+    BU_EV_REL_
+    BU_BO_REL_
+    SG_MUL_VAL_
+
+BS_:
+
+BO_ 1 CruiseInfo: 8 pt
+ SG_ CheckSum : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ Counter : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_1 : 29|2@0+ (1,0) [0|3] "" XXX
+ SG_ BrakePedal : 30|1@0+ (1,0) [0|7] "" XXX
+ SG_ CRuiseOn01 : 32|1@0+ (1,0) [0|1] "" XXX
+ SG_ BrakePedal02 : 36|1@0+ (1,0) [0|1] "" XXX
+ SG_ CruiseOn02 : 43|1@0+ (1,0) [0|1] "" XXX
+ SG_ CruiseOn : 54|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 17 Info02: 8 pt
+ SG_ CheckSum : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ Counter : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ BrakePedalPos : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ WheelSpeed : 37|14@0+ (0.01,0) [0|16383] "" XXX
+
+
+BO_ 36 LKAS_BTN: 8 XXX
+ SG_ LKAS_Btn_on : 61|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 46 SWM_Torque: 4 pt
+ SG_ checksum : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ counter : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_2 : 14|1@0+ (1,0) [0|1] "" XXX
+ SG_ TorqueDriver : 31|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 50 PSCM_Out: 8 pt
+ SG_ CheckSum : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ Counter : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ AngleTorque : 21|14@0+ (0.075,-675) [0|16383] "" XXX
+
+BO_ 54 GasPedal: 8 pt
+ SG_ CheckSum : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ Counter : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ GasPedalPos : 22|7@0+ (1,0) [0|63] "" XXX
+
+BO_ 58 PSCM_Out2: 8 pt
+ SG_ AngleTorque : 21|14@0+ (0.075,-675) [0|63] "" XXX
+
+BO_ 62 SWM_Torque02: 8 pt
+ SG_ checksum : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ counter : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_2 : 14|1@0+ (1,0) [0|1] "" XXX
+ SG_ TorqueDriver : 21|14@0+ (0.1,0) [0|32767] "" XXX
+
+BO_ 74 Eps01: 8 pt
+ SG_ checksum : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ SteerTorque : 39|16@0+ (0.1,-3276) [0|65535] "" XXX
+ SG_ SteerTorqueEPS : 55|16@0+ (0.3,-9830) [0|65535] "" XXX
+
+BO_ 86 SWM_Angle: 8 pt
+ SG_ checksum : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ counter : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_1 : 18|1@0+ (1,0) [0|1] "" XXX
+ SG_ SteerAngle : 29|14@0+ (0.1,-780) [0|16383] "Deg" XXX
+ SG_ SteerRate : 47|8@0+ (4,0) [0|255] "deg/s" XXX
+
+BO_ 132 StopAndGo: 8 pt
+ SG_ checksum : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ counter : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ Move00 : 13|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_4 : 14|1@0+ (1,0) [0|1] "" XXX
+ SG_ Move01 : 15|1@0+ (1,0) [0|1] "" XXX
+ SG_ Status : 17|2@0+ (1,0) [0|3] "" XXX
+ SG_ NEW_SIGNAL_3 : 19|2@0+ (1,0) [0|3] "" XXX
+ SG_ BrakeLed : 22|1@0+ (1,0) [0|1] "" XXX
+ SG_ RPM : 27|12@0+ (1,0) [0|4095] "" XXX
+
+BO_ 191 SeatBelt: 8 pt
+ SG_ NEW_SIGNAL_1 : 3|4@0+ (1,0) [0|15] "" XXX
+ SG_ seatbelt_01 : 5|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_4 : 7|1@0+ (1,0) [0|1] "" XXX
+ SG_ COUNTER : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_2 : 27|12@0+ (1,0) [0|4095] "" XXX
+ SG_ SeatBelt_00 : 31|1@0+ (1,0) [0|1] "" XXX
+ SG_ SeatBelt_Driver : 54|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 230 HandleSignal: 8 pt
+ SG_ TurnRight00 : 32|1@0+ (1,0) [0|1] "" XXX
+ SG_ HandleR_BTN : 33|1@0+ (1,0) [0|1] "" XXX
+ SG_ TurnLeft01 : 47|1@0+ (1,0) [0|1] "" XXX
+ SG_ TurnLR : 49|2@0+ (1,0) [0|3] "" XXX
+ SG_ IGN_ON : 53|1@0+ (1,0) [0|1] "" XXX
+ SG_ BrakeLed : 56|1@0+ (1,0) [0|1] "" XXX
+ SG_ TurnRight01 : 57|1@0+ (1,0) [0|1] "" XXX
+ SG_ TurnLeft00 : 58|1@0+ (1,0) [0|1] "" XXX
+ SG_ TurnLeft02 : 59|1@0+ (1,0) [0|3] "" XXX
+ SG_ TurnRight02 : 60|1@0+ (1,0) [0|1] "" XXX
+ SG_ TurnLeft : 62|1@0+ (1,0) [0|1] "" XXX
+ SG_ TurnRight : 63|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 237 WheelSpeedFront: 8 XXX
+ SG_ checksum : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ SpeedLeft : 21|14@0+ (0.01,0) [0|8191] "" XXX
+ SG_ SpeedRight : 37|14@0+ (0.01,0) [0|8191] "" XXX
+
+BO_ 240 WheelSpeedRear: 8 XXX
+ SG_ checksum : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ SpeedLeft : 21|14@0+ (0.01,0) [0|8191] "" XXX
+ SG_ SpeedRight : 37|14@0+ (0.01,0) [0|8191] "" XXX
+
+BO_ 264 GearPRND: 8 pt
+ SG_ PRND_POS : 26|3@0+ (1,0) [0|7] "" XXX
+ SG_ PRND : 41|2@0+ (1,0) [0|3] "" XXX
+
+BO_ 399 BlindSpot: 8 pt
+ SG_ RightBS : 50|3@0+ (1,0) [0|7] "" XXX
+ SG_ LeftBS : 58|3@0+ (1,0) [0|7] "" XXX
+
+BO_ 496 LKAS_OP_TO_FLEXRAY: 8 comma
+ SG_ Lkas_checksum : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ counter : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ ReqAngleTorque : 29|14@0+ (0.075,-675) [0|2047] "" XXX
+ SG_ EnAngle : 31|1@0+ (1,0) [0|1] "" XXX
+ SG_ lane_left : 50|3@0+ (1,0) [0|7] "" XXX
+ SG_ lane_right : 51|3@1+ (1,0) [0|7] "" XXX
+ SG_ Engaged : 55|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 515 ADAS: 8 pt
+ SG_ NEW_SIGNAL_1 : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ ADAS_BTN : 13|1@0+ (1,0) [0|1] "" XXX
+ SG_ CRUISE_LIMIT : 45|2@0+ (1,0) [0|3] "" XXX
+
+BO_ 655 DoorStatus: 8 pt
+ SG_ FrontLeftDoor : 26|1@0+ (1,0) [0|1] "" XXX
+ SG_ FrontRightDoor : 27|1@0+ (1,0) [0|1] "" XXX
+ SG_ RearLeftDoor : 28|1@0+ (1,0) [0|1] "" XXX
+ SG_ RearRightDoor : 29|1@0+ (1,0) [0|1] "" XXX
+
+VAL_ 132 Status 1 "Go" 2 "Stop" 3 "Start Go";
+VAL_ 264 PRND_POS 0 "Parking" 1 "Reverse" 2 "Neutral" 4 "Drive";
+VAL_ 264 PRND 0 "PARK" 1 "REVERSE" 2 "NEUTRAL" 3 "DRIVE";
+VAL_ 399 RightBS 4 "detect Right BS" 3 "Normal Standby" 2 "Normal";
+VAL_ 399 LeftBS 4 "Detect LeftBS" 3 "Normal Standby" 2 "Normal";
+VAL_ 655 FrontLeftDoor_Driver 0 "opened" 1 "closed";

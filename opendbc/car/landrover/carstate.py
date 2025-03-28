@@ -1,0 +1,123 @@
+import copy
+from opendbc.can.can_define import CANDefine
+from opendbc.can.parser import CANParser
+from opendbc.car import Bus, structs
+from opendbc.car.common.conversions import Conversions as CV
+from opendbc.car.interfaces import CarStateBase
+from opendbc.car.landrover.values import LandroverFlags, CAR, DBC, CANFD_CAR, Buttons
+
+ButtonType = structs.CarState.ButtonEvent.Type
+
+
+class CarState(CarStateBase):
+  def __init__(self, CP):
+    super().__init__(CP)
+    self.can_define = CANDefine(DBC[CP.carFingerprint]["pt"])
+
+    if CP.carFingerprint in (CAR.LANDROVER_DEFENDER_2023):
+      self.shifter_values = can_define.dv["GearPRND"]["PRND"]
+
+    self.is_metric = True
+
+
+  def update(self, can_parsers) -> structs.CarState:
+    if self.CP.carFingerprint in (CAR.LANDROVER_DEFENDER_2023):
+      return self.update_can_defender(can_parsers)
+
+  def update_can_defender(self, can_parsers) -> structs.CarState:
+    cp = can_parsers[Bus.pt]
+
+    ret = structs.CarState()
+
+    self.is_metric = True
+
+    speed_factor = CV.KPH_TO_MS if self.is_metric else CV.MPH_TO_MS
+
+    ret.seatbeltUnlatched = (cp.vl["SeatBelt"]["SeatBelt_Driver"]  == 0)
+    ret.doorOpen = not any([cp.vl["DoorStatus"]["FrontLeftDoor"], cp.vl["DoorStatus"]["FrontRightDoor"], cp.vl["DoorStatus"]["RearLeftDoor"], cp.vl["DoorStatus"]["RearRightDoor"]])
+
+
+    ret.wheelSpeeds = self.get_wheel_speeds(
+      cp.vl["WheelSpeedFront"]["SpeedLeft"],
+      cp.vl["WheelSpeedFront"]["SpeedRight"],
+      cp.vl["WheelSpeedRear"]["SpeedLeft"],
+      cp.vl["WheelSpeedRear"]["SpeedRight"],
+    )
+
+    #Speed = cp.vl["Info02"]["WheelSpeed"]
+    ret.vEgoRaw = (ret.wheelSpeeds.fl + ret.wheelSpeeds.fr + ret.wheelSpeeds.rl + ret.wheelSpeeds.rr) / 4.
+    ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
+    ret.standstill = ret.vEgoRaw < 0.01
+
+    ret.vCluRatio = (ret.vEgo / ret.vEgoCluster) if (ret.vEgoCluster > 3. and ret.vEgo > 3.) else 1.0
+
+
+    ret.steeringAngleDeg = cp.vl["SWM_Angle"]["SteerAngle"]
+    ret.steeringRateDeg = cp.vl["SWM_Angle"]["SteerRate"]  # TODO
+    ret.yawRate = 0.
+
+    # TODO torq TorqEPS Pressed
+    ret.steeringTorque = cp.vl["SWM_Torque"]["Torque"]
+    ret.steeringTorqueEps = cp.vl["PSCM_Out"]["AngleTorque"]
+    ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > self.params.STEER_THRESHOLD, 5)
+
+    ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_lamp(50, cp.vl["HandleSignal"]['TurnLeft'],cp.vl["HandleSignal"]['TurnRight'])
+
+
+    gear = cp.vl["GearPRND"]["PRND"]
+    ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(gear))
+
+    ret.brake = cp.vl["Info02"]["BrakePedalPos"]
+    ret.brakePressed = cp.vl["CruiseInfo"]["BrakePedal"] == 1
+
+    ret.gas = cp.vl["GasPedal"]["GasPedalPos"]
+    ret.gasPressed =  ret.gas >= 1
+
+
+    if self.CP.enableBsm:
+      ret.leftBlindspot  = cp.vl["BlindSpot"]["LeftBS"] == 4
+      ret.rightBlindspot = cp.vl["BlindSpot"]["RightBS"] == 4
+
+    ret.stockAeb = False
+
+    ret.cruiseState.available = cp.vl["CruiseInfo"]["CruiseOn"] == 1
+    ret.cruiseState.enabled =  cp.vl["CruiseInfo"]["CruiseOn"] == 1
+    ret.cruiseState.speed = ret.vEgoRaw * speed_factor
+    ret.cruiseState.standstill = False
+
+
+    return ret
+
+  def get_can_parser(self, CP):
+     return self.get_can_parser_defender(CP)
+
+
+  def get_can_parser_defender(self, CP):
+    pt_messages = [
+      # sig_name, freq
+      ("SWM_Angle", 100),
+      ("SWM_Torque", 50),
+      ("PSCM_Out", 50),
+      ("WheelSpeedFront", 25),
+      ("WheelSpeedRear", 25),
+      ("BlindSpot", 6),
+      ("GearPRND", 10),
+      ("HandleSignal", 100),
+      ("SeatBelt", 100),
+      ("LKAS_BTN", 16),
+      ("CruiseInfo", 25),
+      ("GasPedal", 50),
+      ("Info02", 25),
+      ("DoorStatus", 4),
+    ]
+
+    c2f_messages = [
+      ("LKAS_OP_TO_FLEXRAY", 50),
+    ]
+
+    return {
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).UNDERBODY)
+      Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.pt], c2f_messages, CanBus(CP).CAN2FLEXRAY)
+
+    }
+

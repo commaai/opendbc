@@ -15,6 +15,7 @@ from opendbc.car.toyota.values import CAR as TOYOTA
 from opendbc.car.values import Platform
 from opendbc.car.volkswagen.values import CAR as VOLKSWAGEN
 from opendbc.car.body.values import CAR as COMMA
+from opendbc.car.landrover.values import CAR as LANDROVER
 
 # FIXME: add routes for these cars
 non_tested_cars = [
@@ -28,6 +29,7 @@ non_tested_cars = [
   SUBARU.SUBARU_FORESTER_HYBRID,
   TESLA.TESLA_MODEL_3,
   TESLA.TESLA_MODEL_Y,
+  LANDROVER.LANDROVER_DEFENDER_2023,
 ]
 
 
@@ -314,4 +316,5 @@ routes = [
   # Segments that test specific issues
   # Controls mismatch due to standstill threshold
   CarTestRoute("bec2dcfde6a64235|2022-04-08--14-21-32", HONDA.HONDA_CRV_HYBRID, segment=22),
+  #CarTestRoute("46cdc864ec865f4b/00000007--42f94db730", LANDROVER.LANDROVER_DEFENDER_2023),
 ]
