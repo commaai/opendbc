@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-from math import fabs, exp
+from math import exp
 
 from opendbc.car import get_safety_config, get_friction, structs
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.interfaces import CarInterfaceBase, TorqueFromLateralAccelCallbackType, FRICTION_THRESHOLD, LatControlInputs, NanoFFModel
-from opendbc.car.byd.values import CAR, CanBus, BydSafetyFlags, MPC_ACC_CAR, PT_RADAR_CAR, TORQUE_LAT_CAR,EXP_LONG_CAR,PLATFORM_HANTANG_DMEV,PLATFORM_TANG_DMI,PLATFORM_SONG_PLUS_DMI,PLATFORM_QIN_PLUS_DMI,PLATFORM_YUAN_PLUS_DMI_ATTO3
+from opendbc.car.interfaces import CarInterfaceBase, TorqueFromLateralAccelCallbackType, FRICTION_THRESHOLD, LatControlInputs
+from opendbc.car.byd.values import CAR, CanBus, BydSafetyFlags, MPC_ACC_CAR, TORQUE_LAT_CAR, EXP_LONG_CAR, \
+                                PLATFORM_HANTANG_DMEV, PLATFORM_TANG_DMI, PLATFORM_SONG_PLUS_DMI, PLATFORM_QIN_PLUS_DMI, PLATFORM_YUAN_PLUS_DMI_ATTO3
 from opendbc.car.byd.carcontroller import CarController
 from opendbc.car.byd.carstate import CarState
 from opendbc.car.byd.radar_interface import RadarInterface
@@ -25,7 +26,7 @@ class CarInterface(CarInterfaceBase):
     RadarInterface = RadarInterface
 
     def torque_from_lateral_accel_siglin(self, latcontrol_inputs: LatControlInputs, torque_params: structs.CarParams.LateralTorqueTuning,
-                                        lateral_accel_error: float, lateral_accel_deadzone: float, friction_compensation: bool, gravity_adjusted: bool) -> float:
+                                    lateral_accel_error: float, lateral_accel_deadzone: float, friction_compensation: bool, gravity_adjusted: bool) -> float:
         friction = get_friction(lateral_accel_error, lateral_accel_deadzone, FRICTION_THRESHOLD, torque_params, friction_compensation)
 
         def sig(val):

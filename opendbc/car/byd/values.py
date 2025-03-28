@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from enum import IntFlag
-from opendbc.car import Bus, DbcDict, PlatformConfig, Platforms, CarSpecs, structs
+from opendbc.car import Bus, DbcDict, PlatformConfig, Platforms, CarSpecs
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
@@ -9,13 +9,18 @@ Ecu = CarParams.Ecu
 
 class CarControllerParams:
   STEER_MAX = 300
-  STEER_DELTA_UP = 17
-  STEER_DELTA_DOWN = 17
+  STEER_DELTA_UP = 7
+  STEER_DELTA_DOWN = 10
 
   STEER_DRIVER_ALLOWANCE = 68
   STEER_DRIVER_MULTIPLIER = 3
   STEER_DRIVER_FACTOR = 1
   STEER_ERROR_MAX = 50
+
+  STEER_STEP = 2  #100/2=50hz
+  STEER_SOFTSTART_STEP = 6 # 20ms(50Hz) * 300 / 6 = 1000ms. This means the clip ceiling will be increased to 300 in 1000ms
+
+  ACC_STEP = 2    #50hz
 
   ACCEL_MAX = 2.0
   ACCEL_MIN = -3.5
@@ -86,11 +91,6 @@ class CAR(Platforms):
     CarSpecs(mass=1785., wheelbase=2.765, steerRatio=15.0, centerToFrontRatio=0.44, tireStiffnessFactor=1.0),
   )
 
-  BYD_SONG_PLUS_5G_DMI_22 = BydPlatformConfig(
-    [BydCarDocs("BYD SONG PLUS 5G DMI 22")],
-    CarSpecs(mass=1785., wheelbase=2.765, steerRatio=15.0, centerToFrontRatio=0.44, tireStiffnessFactor=1.0),
-  )
-
   BYD_SONG_PLUS_DMI_23 = BydPlatformConfig(
     [BydCarDocs("BYD SONG PLUS DMI 23")],
     CarSpecs(mass=1785., wheelbase=2.765, steerRatio=15.0, centerToFrontRatio=0.44, tireStiffnessFactor=1.0),
@@ -128,14 +128,14 @@ FW_QUERY_CONFIG = FwQueryConfig(
     Request(
       [StdQueries.MANUFACTURER_SOFTWARE_VERSION_REQUEST],
       [StdQueries.MANUFACTURER_SOFTWARE_VERSION_RESPONSE],
-      bus=0,
+      bus=CanBus.ESC,
     ),
   ],
 )
 
 PLATFORM_HANTANG_DMEV = {CAR.BYD_HAN_DM_20, CAR.BYD_HAN_EV_20, CAR.BYD_TANG_DM}
 PLATFORM_TANG_DMI = {CAR.BYD_TANG_DMI_21}
-PLATFORM_SONG_PLUS_DMI = {CAR.BYD_SONG_PLUS_DMI_21, CAR.BYD_SONG_PLUS_DMI_22, CAR.BYD_SONG_PLUS_5G_DMI_22, CAR.BYD_SONG_PLUS_DMI_23, CAR.BYD_SONG_PRO_DMI_22}
+PLATFORM_SONG_PLUS_DMI = {CAR.BYD_SONG_PLUS_DMI_21, CAR.BYD_SONG_PLUS_DMI_22, CAR.BYD_SONG_PLUS_DMI_23, CAR.BYD_SONG_PRO_DMI_22}
 PLATFORM_QIN_PLUS_DMI = {CAR.BYD_QIN_PLUS_DMI_23}
 PLATFORM_YUAN_PLUS_DMI_ATTO3 = {CAR.BYD_YUAN_PLUS_DMI_22}
 

@@ -30,30 +30,24 @@ static BydPlatform byd_platform;
 static void byd_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
   int addr = GET_ADDR(to_push);
-
   if (bus == BYD_CANBUS_ESC) {
     if (addr == BYD_CANADDR_PEDAL) {
       gas_pressed = (GET_BYTE(to_push, 0) != 0U);
       brake_pressed = (GET_BYTE(to_push, 1) != 0U);
-
     } else if (addr == BYD_CANADDR_CARSPEED) {
       int speed_raw = (((GET_BYTE(to_push, 1) & 0x0FU) << 8) | GET_BYTE(to_push, 0));
       vehicle_moving = (speed_raw != 0);
-
     } else if (addr == BYD_CANADDR_ACC_EPS_STATE) {
       byd_eps_cruiseactivated = GET_BIT(to_push, 1U) != 0U; // CruiseActivated
-
       int torque_motor = (((GET_BYTE(to_push, 2) & 0x0FU) << 8) | GET_BYTE(to_push, 1)); // MainTorque
       if ( torque_motor >= 2048 )
         torque_motor -= 4096;
-
       update_sample(&torque_meas, torque_motor);
     }
-
   } else if (bus == BYD_CANBUS_MPC) {
     if (addr == BYD_CANADDR_ACC_HUD_ADAS) {
       unsigned int accstate = ((GET_BYTE(to_push, 2) >> 3) & 0x07U);
-      bool cruise_engaged = (accstate == 0x3) || (accstate == 0x5); // 3=acc_active, 5=user force accel
+      bool cruise_engaged = ((accstate == 3) || (accstate == 5)); // 3=acc_active, 5=user force accel
       pcm_cruise_check(cruise_engaged);
     }
   }
@@ -107,14 +101,11 @@ static bool byd_tx_hook(const CANPacket_t *to_send) {
 
   if (bus == BYD_CANBUS_ESC) {
     int addr = GET_ADDR(to_send);
-
     if (addr == BYD_CANADDR_ACC_MPC_STATE) {
       int desired_torque = ((GET_BYTE(to_send, 3) & 0x07U) << 8U) | GET_BYTE(to_send, 2);
       bool steer_req = GET_BIT(to_send, 28U) && byd_eps_cruiseactivated; //LKAS_Active
-
       if ( desired_torque >= 1024 )
         desired_torque -= 2048;
-
       const TorqueSteeringLimits limits = (byd_platform == HAN_TANG_DMEV) ? HAN_DMEV_STEERING_LIMITS :
                                           (byd_platform == TANG_DMI) ? TANG_DMI_STEERING_LIMITS :
                                           (byd_platform == SONG_PLUS_DMI) ? SONG_STEERING_LIMITS :
