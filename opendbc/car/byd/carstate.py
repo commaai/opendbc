@@ -1,9 +1,11 @@
 import copy
 import numpy as np
-from datetime import datetime, timedelta
-import subprocess
-from openpilot.common.time_helpers import system_time_valid
-from openpilot.common.swaglog import cloudlog
+
+#-----disabled for pytests-----
+#from datetime import datetime, timedelta
+#import subprocess
+#from openpilot.common.time_helpers import system_time_valid
+#from openpilot.common.swaglog import cloudlog
 
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
@@ -12,7 +14,7 @@ from opendbc.car.common.conversions import Conversions as CV
 #from opendbc.car.common.numpy_fast import mean
 from opendbc.car import Bus, create_button_events, structs
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.byd.values import  DBC, CanBus, LKASConfig, CarControllerParams
+from opendbc.car.byd.values import DBC, CanBus, LKASConfig, CarControllerParams
 
 ButtonType = structs.CarState.ButtonEvent.Type
 
@@ -191,24 +193,24 @@ class CarState(CarStateBase):
 
         ret.steerFaultPermanent = bool(cp.vl["ACC_EPS_STATE"]["TorqueFailed"]) #EPS give up all inputs until restart
 
-        if self.setTimeDelay == 0:
-            if not system_time_valid():
-                yyyy = int(cp.vl["DATETIME"]["YY"] + 2000)
-                MM = int(cp.vl["DATETIME"]["MM"])
-                DD = int(cp.vl["DATETIME"]["DD"])
-                hh = int(cp.vl["DATETIME"]["hh"])
-                mm = int(cp.vl["DATETIME"]["mm"])
-                ss = int(cp.vl["DATETIME"]["ss"])
-                china_time = datetime(yyyy,MM,DD,hh,mm,ss)
-                china_utc_offset = timedelta(hours=8)
-                utc_time = china_time - china_utc_offset
-                cloudlog.debug(f"Setting time to {utc_time}")
-                try:
-                    subprocess.run(f"TZ=UTC date -s '{utc_time}'", shell=True, check=True)
-                except subprocess.CalledProcessError:
-                    cloudlog.exception("timed.failed_setting_time")
-        else:
-            self.setTimeDelay = self.setTimeDelay - 1
+        # if self.setTimeDelay == 0:
+        #     if not system_time_valid():
+        #         yyyy = int(cp.vl["DATETIME"]["YY"] + 2000)
+        #         MM = int(cp.vl["DATETIME"]["MM"])
+        #         DD = int(cp.vl["DATETIME"]["DD"])
+        #         hh = int(cp.vl["DATETIME"]["hh"])
+        #         mm = int(cp.vl["DATETIME"]["mm"])
+        #         ss = int(cp.vl["DATETIME"]["ss"])
+        #         china_time = datetime(yyyy,MM,DD,hh,mm,ss)
+        #         china_utc_offset = timedelta(hours=8)
+        #         utc_time = china_time - china_utc_offset
+        #         cloudlog.debug(f"Setting time to {utc_time}")
+        #         try:
+        #             subprocess.run(f"TZ=UTC date -s '{utc_time}'", shell=True, check=True)
+        #         except subprocess.CalledProcessError:
+        #             cloudlog.exception("timed.failed_setting_time")
+        # else:
+        #     self.setTimeDelay = self.setTimeDelay - 1
 
         ret.buttonEvents = [
             *create_button_events(self.btn_acc_cancel, prev_btn_acc_cancel, {1: ButtonType.cancel}),

@@ -9,11 +9,6 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 ButtonType = structs.CarState.ButtonEvent.Type
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 
-STEER_STEP = 2  #100/2=50hz
-ACC_STEP = 2    #50hz
-
-STEER_SOFTSTART_STEP = 6 # 20ms(50Hz) * 300 / 6 = 1000ms. This means the clip ceiling will be increased to 300 in 1000ms
-
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
@@ -48,8 +43,7 @@ class CarController(CarControllerBase):
   def update(self, CC, CS, now_nanos):
     can_sends = []
 
-
-    if (self.frame - self.last_steer_frame) >= STEER_STEP:
+    if (self.frame - self.last_steer_frame) >= CarControllerParams.STEER_STEP:
 
       #Resolve counter mismatch problem
       if self.first_start:
@@ -95,7 +89,7 @@ class CarController(CarControllerBase):
           new_steer = int(round(new_steer_pu * CarControllerParams.STEER_MAX))
 
           if self.steer_softstart_limit < CarControllerParams.STEER_MAX :
-            self.steer_softstart_limit = self.steer_softstart_limit + STEER_SOFTSTART_STEP
+            self.steer_softstart_limit = self.steer_softstart_limit + CarControllerParams.STEER_SOFTSTART_STEP
             new_steer = np.clip(new_steer, -self.steer_softstart_limit, self.steer_softstart_limit)
 
           apply_torque = apply_driver_steer_torque_limits(new_steer, self.apply_torque_last,
@@ -141,7 +135,7 @@ class CarController(CarControllerBase):
                                               CS.mpc_laks_output, CS.mpc_laks_reqprepare, CS.mpc_laks_active,
                                               True, self.eps_fake318_counter))
 
-    if (self.frame + 1 - self.last_acc_frame) >= ACC_STEP:
+    if (self.frame + 1 - self.last_acc_frame) >= CarControllerParams.ACC_STEP:
       accel = np.clip(CC.actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
 
       if CC.longActive :
