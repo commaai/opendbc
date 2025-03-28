@@ -22,7 +22,7 @@ def compute_gb_honda_nidec(accel, speed):
   # ------------------ new scaling start-----------------------#
 
   if accel > 0:
-    scale_factor = float ( np.interp ( speed, [0.0, 1.0, 15.0, 90.0], [10000.0, 250.0, 2.0, 1.0] )
+    scale_factor = float ( np.interp ( speed, [0.0, 1.0, 15.0, 90.0], [10000.0, 250.0, 2.0, 1.0] ) )
     scaled_accel = accel * scale_factor
   else:
     scaled_accel = accel
