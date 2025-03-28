@@ -2,7 +2,6 @@ import re
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
-from panda import uds
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, AngleSteeringLimits
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.structs import CarParams
@@ -53,11 +52,11 @@ class Footnote(Enum):
     "flexray <a href=\"https://en.wikipedia.org/wiki/FlexRay\" target=\"_blank\">FexRay car</a>.",
     Column.MODEL, shop_footnote=False)
 
-
+@dataclass
 class LandroverCarDocsDefender(CarDocs):
   package: str = "All"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.landrover_a]))
-  footnotes: list[Enum] = field(default_factory=lambda: [Footnote.HW_TYPE])
+  footnotes: list[Enum] = field(default_factory=lambda: [Footnote.FLEXRAY])
 
 
 
@@ -69,10 +68,9 @@ class LandroverPlatformConfig(PlatformConfig):
 class CAR(Platforms):
   LANDROVER_DEFENDER_2023 = LandroverPlatformConfig(
     [
-      LandroverCarDocsDefender("Landrover Defender 2023")
+      LandroverCarDocsDefender("Landrover Defender 2023"),
     ],
     CarSpecs(mass=2550, wheelbase=3.0, steerRatio=19.0, minSteerSpeed=50*CV.KPH_TO_MS),
-    dbc_dict("landrover_defender_2023", None)
   )
 
 

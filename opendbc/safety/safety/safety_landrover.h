@@ -18,20 +18,20 @@ static void landrover_rx_hook(const CANPacket_t *to_push) {
 
     // Vehicle speed (info02)
     if (addr == 0x11) {
-      float speed  =  (((GET_BYTE(to_push, 4) & 0x3f) << 8) |  GET_BYTE(to_push, 5)) * 0.01 / 3.6
+      float speed  =  (((GET_BYTE(to_push, 4) & 0x3f) << 8) |  GET_BYTE(to_push, 5)) * 0.01 / 3.6;
       vehicle_moving = GET_BIT(to_push, 13U);
       UPDATE_VEHICLE_SPEED(speed);
     }
 
     // Driver torque
     if (addr == 0x2e) {
-      int torque_driver_new = (GET_BYTE(to_push, 3) ;
+      int torque_driver_new = GET_BYTE(to_push, 3) ;
       update_sample(&torque_driver, torque_driver_new);
     }
 
     // Gas pressed
     if (addr == 0x189) {
-      gas_pressed = GET_BYTE(to_push, 58U);
+      gas_pressed = GET_BIT(to_push, 58U);
     }
 
     // Brake pressed
@@ -48,7 +48,7 @@ static void landrover_rx_hook(const CANPacket_t *to_push) {
 }
 
 static bool landrover_tx_hook(const CANPacket_t *to_send) {
-  const AngleSteeringLimits LRDEFENDER_STEERING_LIMITS = {
+  const AngleSteeringLimits LANDROVER_STEERING_LIMITS = {
     .max_angle = 3600,  // 360 deg, EPAS faults above this
     .angle_deg_to_can = 10,
     .angle_rate_up_lookup = {
@@ -63,11 +63,13 @@ static bool landrover_tx_hook(const CANPacket_t *to_send) {
 
 
   // TODO find long params
-  const LongitudinalLimits LRDEFENDER_LONG_LIMITS = {
+  const LongitudinalLimits LANDROVER_LONG_LIMITS = {
     .max_accel = 425,       // 2 m/s^2
     .min_accel = 288,       // -3.48 m/s^2
     .inactive_accel = 375,  // 0. m/s^2
   };
+
+  UNUSED(LANDROVER_LONG_LIMITS);
 
 
   bool tx = true;
@@ -104,6 +106,9 @@ static bool landrover_tx_hook(const CANPacket_t *to_send) {
 
 static bool landrover_fwd_hook(int bus, int addr) {
   bool block_msg = false;
+
+  UNUSED(bus);
+  UNUSED(addr);
 
   //
   // Change data in flexray car harness
