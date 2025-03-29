@@ -22,7 +22,7 @@ def compute_gb_honda_nidec(accel, speed):
   # ------------------ new scaling start-----------------------#
 
   if accel > 0:
-    scale_factor = float ( np.interp ( speed, [0.0, 1.0, 15.0, 90.0], [10000.0, 250.0, 2.0, 1.0] ) )
+    scale_factor = float ( np.interp ( speed, [0.0, 10.0, 20.0, 90.0], [10000.0, 25.0, 2.0, 1.0] ) )
     scaled_accel = accel * scale_factor
   else:
     scaled_accel = accel
@@ -257,7 +257,7 @@ class CarController(CarControllerBase):
           pcm_accel = 54.0
 
         # blending logic to fastforward, assume engine uses 98% of prior logic each frame
-        PERCENT_BLEND = 0.98
+        PERCENT_BLEND = 0.99
 
         # pcm_accel = pcm_accel if self.accel <= 0 else float (np.clip ( ( pcm_accel - self.blend_pcm_accel * PERCENT_BLEND ) / ( 1 - PERCENT_BLEND ), \
         #                                                               0, self.params.NIDEC_GAS_MAX ) )
