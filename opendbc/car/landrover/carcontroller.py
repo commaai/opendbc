@@ -1,4 +1,3 @@
-import numpy as np
 from opendbc.can.packer import CANPacker
 from opendbc.car import Bus, apply_std_steer_angle_limits
 from opendbc.car.interfaces import CarControllerBase
@@ -6,7 +5,7 @@ from opendbc.car.landrover.defendercan import create_lkas_command_defender
 from opendbc.car.landrover.values import CarControllerParams
 
 
-def process_hud_alert(enabled, active, leftBs, rightBs, hud_control):
+def process_hud(enabled, active, leftBs, rightBs, hud_control):
   # 0: off, 1:green, 2:red, 3:white
   left_lane_warning = 0
   right_lane_warning = 0
@@ -43,7 +42,8 @@ class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
     self.apply_angle_last = 0
-    self.packer = CANPacker(dbc_names[Bus.party])
+
+    self.packer = CANPacker(dbc_names[Bus.pt])
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -51,9 +51,6 @@ class CarController(CarControllerBase):
 
 
     can_sends = []
-
-    cruise_cancel = CC.cruiseControl.cancel or hands_on_fault
-    lat_active = CC.latActive and not hands_on_fault
 
     if self.frame % 2 == 0:
       # Angular rate limit based on speed
@@ -66,11 +63,11 @@ class CarController(CarControllerBase):
       # LKAS msg
       can_sends.append(
         create_lkas_command_defender(
-             sefl.packer,
+             self.packer,
              CC.enabled, CC.latActive,
              self.apply_angle_last,
              self.frame % 255,
-             left_lane, right_lane)
+             left_lane, right_lane))
 
 
     new_actuators = actuators.as_builder()

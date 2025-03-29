@@ -1,10 +1,9 @@
-import copy
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.landrover.values import LandroverFlags, CAR, DBC, CANFD_CAR, Buttons
+from opendbc.car.landrover.values import CAR, DBC, CanBus, CarControllerParams
 
 ButtonType = structs.CarState.ButtonEvent.Type
 
@@ -15,9 +14,10 @@ class CarState(CarStateBase):
     self.can_define = CANDefine(DBC[CP.carFingerprint]["pt"])
 
     if CP.carFingerprint in (CAR.LANDROVER_DEFENDER_2023):
-      self.shifter_values = can_define.dv["GearPRND"]["PRND"]
+      self.shifter_values = self.can_define.dv["GearPRND"]["PRND"]
 
     self.is_metric = True
+    self.params = CarControllerParams(CP)
 
 
   def update(self, can_parsers) -> structs.CarState:
@@ -34,7 +34,10 @@ class CarState(CarStateBase):
     speed_factor = CV.KPH_TO_MS if self.is_metric else CV.MPH_TO_MS
 
     ret.seatbeltUnlatched = (cp.vl["SeatBelt"]["SeatBelt_Driver"]  == 0)
-    ret.doorOpen = not any([cp.vl["DoorStatus"]["FrontLeftDoor"], cp.vl["DoorStatus"]["FrontRightDoor"], cp.vl["DoorStatus"]["RearLeftDoor"], cp.vl["DoorStatus"]["RearRightDoor"]])
+    ret.doorOpen = not any([cp.vl["DoorStatus"]["FrontLeftDoor"], \
+         cp.vl["DoorStatus"]["FrontRightDoor"], \
+         cp.vl["DoorStatus"]["RearLeftDoor"], \
+         cp.vl["DoorStatus"]["RearRightDoor"]])
 
 
     ret.wheelSpeeds = self.get_wheel_speeds(
@@ -49,15 +52,13 @@ class CarState(CarStateBase):
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.standstill = ret.vEgoRaw < 0.01
 
-    ret.vCluRatio = (ret.vEgo / ret.vEgoCluster) if (ret.vEgoCluster > 3. and ret.vEgo > 3.) else 1.0
-
 
     ret.steeringAngleDeg = cp.vl["SWM_Angle"]["SteerAngle"]
     ret.steeringRateDeg = cp.vl["SWM_Angle"]["SteerRate"]  # TODO
     ret.yawRate = 0.
 
     # TODO torq TorqEPS Pressed
-    ret.steeringTorque = cp.vl["SWM_Torque"]["Torque"]
+    ret.steeringTorque = cp.vl["SWM_Torque"]["TorqueDriver"]
     ret.steeringTorqueEps = cp.vl["PSCM_Out"]["AngleTorque"]
     ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > self.params.STEER_THRESHOLD, 5)
 
@@ -88,7 +89,7 @@ class CarState(CarStateBase):
 
     return ret
 
-  def get_can_parser(self, CP):
+  def get_can_parsers(self, CP):
      return self.get_can_parser_defender(CP)
 
 
@@ -116,8 +117,8 @@ class CarState(CarStateBase):
     ]
 
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).UNDERBODY)
-      Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.pt], c2f_messages, CanBus(CP).CAN2FLEXRAY)
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus.UNDERBODY),
+      Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.pt], c2f_messages, CanBus.CAN2FLEXRAY)
 
     }
 

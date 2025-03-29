@@ -1,8 +1,7 @@
 from opendbc.car import get_safety_config, structs
 from opendbc.car.interfaces import CarInterfaceBase
-from opendbc.car.tesla.carcontroller import CarController
-from opendbc.car.tesla.carstate import CarState
-from opendbc.car.landrover.values import LandroverFlags, CAR, DBC
+from opendbc.car.landrover.carcontroller import CarController
+from opendbc.car.landrover.carstate import CarState
 
 
 class CarInterface(CarInterfaceBase):
@@ -15,8 +14,8 @@ class CarInterface(CarInterfaceBase):
 
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.landrover, 0)]
 
-    ret.steerLimitTimer = 1.0
-    ret.steerActuatorDelay = 0.12  # Default delay
+    ret.steerLimitTimer = 0.4
+    ret.steerActuatorDelay = 0.15  # Default delay
 
     #CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
     ret.steerControlType = structs.CarParams.SteerControlType.angle

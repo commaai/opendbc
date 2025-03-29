@@ -6,7 +6,7 @@ def defender_crc(data):
 
    for byte in data:
       crc = crc ^ byte
-      for i in range(0, 8):
+      for _i in range(8):
           if crc & 0x80:
               crc = (crc << 1) ^ poly
           else:
@@ -29,8 +29,8 @@ def create_lkas_command_defender(packer, enable, latActive, apply_angle, cnt, le
     "Engaged"       : enable,
   }
 
-  dat = paccker.make_can_msg("LKAS_OP_TO_FLEXRAY", 1, values)[1]
+  dat = packer.make_can_msg("LKAS_OP_TO_FLEXRAY", 1, values)[1]
   values["Lkas_checksum"] =  defender_crc(dat[1:5])
 
-  return paccker.make_can_msg("LKAS_OP_TO_FLEXRAY", 1, values)
+  return packer.make_can_msg("LKAS_OP_TO_FLEXRAY", 1, values)
 

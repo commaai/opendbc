@@ -101,6 +101,7 @@ BO_ 132 StopAndGo: 8 pt
  SG_ BrakeLed : 22|1@0+ (1,0) [0|1] "" XXX
  SG_ RPM : 27|12@0+ (1,0) [0|4095] "" XXX
 
+
 BO_ 191 SeatBelt: 8 pt
  SG_ NEW_SIGNAL_1 : 3|4@0+ (1,0) [0|15] "" XXX
  SG_ seatbelt_01 : 5|1@0+ (1,0) [0|1] "" XXX
@@ -139,6 +140,11 @@ BO_ 240 WheelSpeedRear: 8 XXX
 BO_ 264 GearPRND: 8 pt
  SG_ PRND_POS : 26|3@0+ (1,0) [0|7] "" XXX
  SG_ PRND : 41|2@0+ (1,0) [0|3] "" XXX
+
+BO_ 393 GasPedal_ON: 8 pt
+ SG_ NEW_SIGNAL_2 : 56|1@0+ (1,0) [0|1] "" XXX
+ SG_ GasPedal_On : 58|1@0+ (1,0) [0|3] "" XXX
+
 
 BO_ 399 BlindSpot: 8 pt
  SG_ RightBS : 50|3@0+ (1,0) [0|7] "" XXX

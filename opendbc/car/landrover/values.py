@@ -1,12 +1,10 @@
-import re
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
-
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, AngleSteeringLimits
-from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.structs import CarParams
+from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
-from opendbc.car.fw_query_definitions import FwQueryConfig, Request, p16
+from opendbc.car.fw_query_definitions import FwQueryConfig
 
 Ecu = CarParams.Ecu
 
@@ -48,7 +46,8 @@ class LandroverFlags(IntFlag):
 
 class Footnote(Enum):
   FLEXRAY = CarFootnote(
-    "Requires a <a href=\"https://blog.comma.ai/hacking-an-audi-performing-a-man-in-the-middle-attack-on-flexray/\" target=\"_blank\">FlexRay Car Harness</a> " +
+    "Requires a " +
+    "<a href=\"https://blog.comma.ai/hacking-an-audi-performing-a-man-in-the-middle-attack-on-flexray/\" target=\"_blank\">FlexRay Car Harness</a> " +
     "flexray <a href=\"https://en.wikipedia.org/wiki/FlexRay\" target=\"_blank\">FexRay car</a>.",
     Column.MODEL, shop_footnote=False)
 
@@ -62,15 +61,17 @@ class LandroverCarDocsDefender(CarDocs):
 
 @dataclass
 class LandroverPlatformConfig(PlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: "landrover_defender_2023"})
+  dbc_dict: DbcDict = field(default_factory=lambda: {
+    Bus.pt: "landrover_defender_2023" }
+  )
 
 
 class CAR(Platforms):
   LANDROVER_DEFENDER_2023 = LandroverPlatformConfig(
     [
-      LandroverCarDocsDefender("Landrover Defender 2023"),
+      LandroverCarDocsDefender("LANDROVER DEFENDER 2023"),
     ],
-    CarSpecs(mass=2550, wheelbase=3.0, steerRatio=19.0, minSteerSpeed=50*CV.KPH_TO_MS),
+    CarSpecs(mass=2550, wheelbase=3.0, steerRatio=19.0, minSteerSpeed=51*CV.KPH_TO_MS),
   )
 
 
@@ -82,11 +83,11 @@ class Buttons:
   GAP_DIST = 3
   CANCEL = 4  # on newer models, this is a pause/resume button
 
+
+
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
   ],
-  # We lose these ECUs without the comma power on these cars.
-  # Note that we still attempt to match with them when they are present
 )
 
 

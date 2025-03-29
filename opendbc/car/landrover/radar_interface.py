@@ -1,7 +1,3 @@
-import math
-
-from cereal import car
-from opendbc.can.parser import CANParser
 from opendbc.car.interfaces import RadarInterfaceBase
 
 
