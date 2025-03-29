@@ -137,17 +137,23 @@ class CarController(CarControllerBase):
     hud_v_cruise = hud_control.setSpeed / conversion if hud_control.speedVisible else 255
     pcm_cancel_cmd = CC.cruiseControl.cancel
 
-    if CC.longActive:
-      accel = actuators.accel
-      gas, brake = compute_gas_brake(actuators.accel, CS.out.vEgo, self.CP.carFingerprint)
-    else:
-      accel = 0.0
-      gas, brake = 0.0, 0.0
-
     # *** rate limit steer ***
     limited_torque = rate_limit(actuators.torque, self.last_torque, -self.params.STEER_DELTA_DOWN * DT_CTRL,
                                 self.params.STEER_DELTA_UP * DT_CTRL)
     self.last_torque = limited_torque
+
+    # steer torque is converted back to CAN reference (positive when steering right)
+    apply_torque = int(np.interp(-limited_torque * self.params.STEER_MAX,
+                                 self.params.STEER_LOOKUP_BP, self.params.STEER_LOOKUP_V))
+
+    steerfactor = 200 if actuators.torque == 0 else abs ( self.params.STEER_MAX / max ( abs(actuators.torque), abs(apply_torque) ) )
+
+    if CC.longActive:
+      accel = float (np.clip ( actuators.accel, 0, 3.5 * 2* (0.5 - steerfactor) ) )
+      gas, brake = compute_gas_brake(actuators.accel, CS.out.vEgo, self.CP.carFingerprint)
+    else:
+      accel = 0.0
+      gas, brake = 0.0, 0.0
 
     # *** apply brake hysteresis ***
     pre_limit_brake, self.braking, self.brake_steady = actuator_hysteresis(brake, self.braking, self.brake_steady,
@@ -160,10 +166,6 @@ class CarController(CarControllerBase):
     fcw_display, steer_required, acc_alert = process_hud_alert(hud_control.visualAlert)
 
     # **** process the car messages ****
-
-    # steer torque is converted back to CAN reference (positive when steering right)
-    apply_torque = int(np.interp(-limited_torque * self.params.STEER_MAX,
-                                 self.params.STEER_LOOKUP_BP, self.params.STEER_LOOKUP_V))
 
     # Send CAN commands
     can_sends = []
@@ -268,8 +270,7 @@ class CarController(CarControllerBase):
                                                                       0, 100.0 ) )
 
         # reduce speed if above 50% steering max
-        pcm_speed = float ( np.clip ( pcm_speed, 0, 100 if actuators.torque == 0 or (CS.out.vEgo < 4.0 ) else \
-                                     abs ( self.params.STEER_MAX / max ( abs(actuators.torque), abs(apply_torque) ) ) * 0.50 * CS.out.vEgo ) )
+        pcm_speed = float ( np.clip ( pcm_speed, 0, 100 if CS.out.vEgo < 10.0 else steerfactor * 0.50 * CS.out.vEgo ) )
 
         self.blend_pcm_speed =  self.blend_pcm_speed * PERCENT_BLEND + pcm_speed * ( 1 - PERCENT_BLEND )
 
