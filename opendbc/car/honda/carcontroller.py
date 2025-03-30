@@ -128,6 +128,7 @@ class CarController(CarControllerBase):
     self.last_torque = 0.0
     self.blend_pcm_accel = 0.0
     self.blend_pcm_speed = 0.0
+    self.speed_addon = 0.0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -180,8 +181,9 @@ class CarController(CarControllerBase):
           pcm_speed = 10.0
           brake = 0.0
         else:
-          pcm_accel = max ( 1, int ( accel * 200 ) )
-          pcm_speed = CS.out.vEgo + accel * 3.0
+          pcm_accel = 54 if accel <= 0.2 else 198
+          speed_addon = float ( np.clip ( speed_addon + ( accel - CS.out.aEgo ) * 20, -5, 5 ) )
+          pcm_speed = float ( np.clip ( CS.out.vEgo + speed_addon , 0, 100) )
           brake = 0.0
       else:
         if CS.out.vEgo < 0.02: # standstill
@@ -193,7 +195,7 @@ class CarController(CarControllerBase):
           pcm_speed = 0.0
           brake = max ( 1, int (accel * 40.0) )
 
-      pcm_accel = float ( np.clip ( pcm_accel, 0, self.params.NIDEC_GAS_MAX - 1) )
+      pcm_accel = float ( np.clip ( pcm_accel, 0, self.params.NIDEC_GAS_MAX) )
       pcm_speed = float ( np.clip ( pcm_speed, 0, 100 ) )
       brake = float ( np.clip ( pcm_speed, 0, self.params.NIDEC_BRAKE_MAX ) )
 
