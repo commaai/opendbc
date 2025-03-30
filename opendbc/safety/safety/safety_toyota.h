@@ -176,12 +176,12 @@ static bool toyota_tx_hook(const CANPacket_t *to_send) {
     .max_angle = 1657,  // EPS only accepts up to 94.9461
     .angle_deg_to_can = 17.452007,
     .angle_rate_up_lookup = {
-      {5., 25., 25.},
-      {0.3, 0.15, 0.15}
+      {5., 25., 25., 25.},
+      {0.3, 0.15, 0.15, 0.15}
     },
     .angle_rate_down_lookup = {
-      {5., 25., 25.},
-      {0.36, 0.26, 0.26}
+      {5., 25., 25., 25.},
+      {0.36, 0.26, 0.26, 0.26}
     },
   };
 
