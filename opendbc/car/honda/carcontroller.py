@@ -181,7 +181,7 @@ class CarController(CarControllerBase):
           brake = 0.0
         else:
           pcm_accel = 198.0 # max ( 1, int ( accel * 200 ) )
-          pcm_speed = CS.out.vEgo + accel * 20.0
+          pcm_speed = CS.out.vEgo + accel * 4.0
           brake = 0.0
       else:
         if CS.out.vEgo < 0.02: # standstill
