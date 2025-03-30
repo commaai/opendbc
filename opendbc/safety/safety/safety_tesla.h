@@ -4,6 +4,7 @@
 
 static bool tesla_longitudinal = false;
 static bool tesla_stock_aeb = false;
+static bool tesla_autopark = false;
 
 static void tesla_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
@@ -34,14 +35,38 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
       brake_pressed = (GET_BYTE(to_push, 2) & 0x03U) == 2U;
     }
 
-    // Cruise state
+    // Cruise and Autopark/Summon state
     if (addr == 0x286) {
+
+      // Autopark state
+      int autopark_state = (GET_BYTE(to_push, 3) >> 1) & 0x0FU;  // DI_autoparkState
+      // TODO: doing summon first, only seen these states
+      bool tesla_autopark_now = (autopark_state == 2) ||  // STARTED (TODO: not seen)
+                                (autopark_state == 3) ||  // ACTIVE
+                                (autopark_state == 4) ||  // COMPLETE
+                                (autopark_state == 5) ||  // PAUSED (TODO: not seen)
+                                (autopark_state == 6) ||  // ABORTED
+                                (autopark_state == 7) ||  // RESUMED (TODO: not seen)
+                                (autopark_state == 8) ||  // UNPARK_COMPLETE (TODO: not seen)
+                                (autopark_state == 9);    // SELFPARK_STARTED
+
+      static bool tesla_autopark_prev = false;
+      if (tesla_autopark_now && !tesla_autopark_prev && !controls_allowed) {
+        tesla_autopark = true;
+      }
+      if (!tesla_autopark_now) {
+        tesla_autopark = false;
+      }
+      tesla_autopark_prev = tesla_autopark_now;
+
+      // Cruise state
       int cruise_state = (GET_BYTE(to_push, 1) >> 4) & 0x07U;
       bool cruise_engaged = (cruise_state == 2) ||  // ENABLED
                             (cruise_state == 3) ||  // STANDSTILL
                             (cruise_state == 4) ||  // OVERRIDE
                             (cruise_state == 6) ||  // PRE_FAULT
                             (cruise_state == 7);    // PRE_CANCEL
+      cruise_engaged = cruise_engaged && !tesla_autopark;
 
       vehicle_moving = cruise_state != 3; // STANDSTILL
       pcm_cruise_check(cruise_engaged);
@@ -49,7 +74,7 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
   }
 
   if (bus == 2) {
-    if (tesla_longitudinal && (addr == 0x2b9)) {
+    if (tesla_longitudinal && (addr == 0x2b9)) {  // TODO: always set
       // "AEB_ACTIVE"
       tesla_stock_aeb = (GET_BYTE(to_push, 2) & 0x03U) == 1U;
     }
@@ -80,6 +105,11 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
   bool tx = true;
   int addr = GET_ADDR(to_send);
   bool violation = false;
+
+  // Don't send messages when Autopark is active
+  if (tesla_autopark) {
+    violation = true;
+  }
 
   // Steering control: (0.1 * val) - 1638.35 in deg.
   if (addr == 0x488) {
@@ -147,13 +177,15 @@ static bool tesla_fwd_hook(int bus_num, int addr) {
 
   if (bus_num == 2) {
     // DAS_steeringControl, APS_eacMonitor
-    if ((addr == 0x488) || (addr == 0x27d)) {
-      block_msg = true;
-    }
+    if (!tesla_autopark) {
+      if ((addr == 0x488) || (addr == 0x27d)) {
+        block_msg = true;
+      }
 
-    // DAS_control
-    if (tesla_longitudinal && (addr == 0x2b9) && !tesla_stock_aeb) {
-      block_msg = true;
+      // DAS_control
+      if (tesla_longitudinal && (addr == 0x2b9) && !tesla_stock_aeb) {
+        block_msg = true;
+      }
     }
   }
 
