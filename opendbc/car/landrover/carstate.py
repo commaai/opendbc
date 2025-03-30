@@ -112,13 +112,16 @@ class CarState(CarStateBase):
       ("DoorStatus", 4),
     ]
 
+    """
     c2f_messages = [
       ("LKAS_OP_TO_FLEXRAY", 50),
     ]
+    """
 
     return {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus.UNDERBODY),
-      Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.pt], c2f_messages, CanBus.CAN2FLEXRAY)
+
+      #Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.pt], c2f_messages, CanBus.CAN2FLEXRAY)
 
     }
 

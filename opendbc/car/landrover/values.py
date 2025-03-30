@@ -4,7 +4,7 @@ from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, Angle
 from opendbc.car.structs import CarParams
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
-from opendbc.car.fw_query_definitions import FwQueryConfig
+from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
 
@@ -91,6 +91,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
       [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.SUPPLIER_SOFTWARE_VERSION_REQUEST],
       [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.SUPPLIER_SOFTWARE_VERSION_RESPONSE],
       bus=0,
+      obd_multiplexing=True,
     )
   ]
 )

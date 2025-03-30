@@ -28,6 +28,7 @@ class CarInterface(CarInterfaceBase):
 
 
     ret.pcmCruise = True # managed by cruise state manager
+    ret.centerToFront = 1.35
 
     if ret.centerToFront == 0:
       ret.centerToFront = ret.wheelbase * 0.4
