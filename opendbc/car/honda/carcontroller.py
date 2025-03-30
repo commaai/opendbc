@@ -149,7 +149,7 @@ class CarController(CarControllerBase):
     steerfactor = 200 if actuators.torque == 0 else abs ( self.params.STEER_MAX / max ( abs(actuators.torque), abs(apply_torque) ) )
 
     if CC.longActive:
-      accel = float (np.clip ( actuators.accel, -3.5, np.interp (steerfactor, [ 0.0, 1.0], [-3.5, 3.5]) ) )
+      accel = float (np.clip ( actuators.accel, -100.0, np.interp (steerfactor, [ 0.0, 1.0], [-3.5, 3.5]) ) )
       gas, brake = compute_gas_brake(actuators.accel, CS.out.vEgo, self.CP.carFingerprint)
     else:
       accel = 0.0
