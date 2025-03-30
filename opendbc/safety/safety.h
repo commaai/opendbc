@@ -223,7 +223,7 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
   const int addr = GET_ADDR(to_push);
   for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
     const CanMsg *m = &current_safety_config.tx_msgs[i];
-    if (m->check_relay) {
+    if (m->blocked) {
       generic_rx_checks((m->addr == addr) && (m->bus == bus));
     }
   }
@@ -279,12 +279,32 @@ static int get_fwd_bus(int bus_num) {
 
 int safety_fwd_hook(int bus_num, int addr) {
   bool blocked = relay_malfunction || current_safety_config.disable_forwarding;
+  const int destination_bus = get_fwd_bus(bus_num);
+
+  bool safety_blocked = false;
+  if (current_hooks->fwd != NULL) {
+    safety_blocked = current_hooks->fwd(bus_num, addr);
+  }
+
+  if (!blocked) {
+    for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
+      const CanMsg *m = &current_safety_config.tx_msgs[i];
+      if ((m->addr == addr) && (m->bus == destination_bus)) {
+        if (!safety_blocked && m->blocked) {
+          blocked = false;
+        } else {
+          blocked = true;
+        }
+        break;
+      }
+    }
+  }
 
   if (!blocked && (current_hooks->fwd != NULL)) {
     blocked = current_hooks->fwd(bus_num, addr);
   }
 
-  return blocked ? -1 : get_fwd_bus(bus_num);
+  return blocked ? -1 : destination_bus;
 }
 
 bool get_longitudinal_allowed(void) {
