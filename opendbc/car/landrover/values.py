@@ -54,7 +54,7 @@ class Footnote(Enum):
 @dataclass
 class LandroverCarDocsDefender(CarDocs):
   package: str = "All"
-  car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.landrover_a]))
+  car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.custom]))
   footnotes: list[Enum] = field(default_factory=lambda: [Footnote.FLEXRAY])
 
 
