@@ -1,5 +1,5 @@
 from opendbc.car.tesla.fingerprints import FW_VERSIONS
-from opendbc.car.tesla.values import CAR, FW_QUERY_CONFIG, PLATFORM_CODE_MAP, AP_VARIANT, VIN_YEAR_OFFSET
+from opendbc.car.tesla.values import CAR, FW_QUERY_CONFIG, PLATFORM_CODE_MAP, AP_VARIANT
 from opendbc.car.structs import CarParams
 from opendbc.car.fw_versions import build_fw_dict
 from random import randint
@@ -20,9 +20,6 @@ class TestTesla:
         version_parts.append(''.join(str(randint(1,10))))
     return '.'.join(version_parts)
 
-  def generate_vin_year(self, year=2019):
-    return f'5YJAAAAAA{chr(year - VIN_YEAR_OFFSET)}F000000'  # Tesla VIN year math
-
   def test_custom_fuzzy_fingerprinting(self, subtests):
     for platform in CAR:
       with subtests.test(platform=platform.name):
@@ -38,6 +35,5 @@ class TestTesla:
                   subAddress=0
                 ),
               ])
-            vin = self.generate_vin_year(2019 + randint(0, 4))
-            matches = FW_QUERY_CONFIG.match_fw_to_car_fuzzy(build_fw_dict(CP.carFw), vin, FW_VERSIONS)
+            matches = FW_QUERY_CONFIG.match_fw_to_car_fuzzy(build_fw_dict(CP.carFw), None, FW_VERSIONS)
             assert matches == {platform}
