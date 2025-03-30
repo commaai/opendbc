@@ -87,7 +87,12 @@ class Buttons:
 
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
-  ],
+    Request(
+      [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.SUPPLIER_SOFTWARE_VERSION_REQUEST],
+      [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.SUPPLIER_SOFTWARE_VERSION_RESPONSE],
+      bus=0,
+    )
+  ]
 )
 
 
