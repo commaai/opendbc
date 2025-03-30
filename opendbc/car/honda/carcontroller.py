@@ -192,7 +192,7 @@ class CarController(CarControllerBase):
           pcm_speed = 0
           brake = int (accel * 40.0)
 
-      pcm_accel = float ( np.clip ( pcm_accel, 0, self.params.NIDEC_GAS_MAX ) )
+      pcm_accel = float ( np.clip ( pcm_accel, 0, self.params.NIDEC_GAS_MAX - 1 ) )
       pcm_speed = float ( np.clip ( pcm_speed, 0, 100 ) )
       brake = float ( np.clip ( pcm_speed, 0, self.params.NIDEC_BRAKE_MAX ) )
 
