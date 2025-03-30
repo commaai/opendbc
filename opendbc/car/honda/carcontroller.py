@@ -225,7 +225,7 @@ class CarController(CarControllerBase):
           can_sends.append(hondacan.create_brake_command(self.packer, self.CAN, brake, pump_on,
                                                          pcm_override, pcm_cancel_cmd, fcw_display,
                                                          self.CP.carFingerprint, CS.stock_brake))
-          
+
           self.brake = brake
 
     # Send dashboard UI commands.
@@ -234,7 +234,7 @@ class CarController(CarControllerBase):
 
       # ----------------- new test logic start ---------------------
 
-      if CC.longActive:
+#      if CC.longActive:
 
         # blending logic to fastforward, assume engine uses 98% of prior logic each frame
 #        PERCENT_BLEND = 0.99
