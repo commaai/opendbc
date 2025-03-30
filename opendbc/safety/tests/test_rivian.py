@@ -30,7 +30,8 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
   RELAY_MALFUNCTION_ADDRS = {0: (0x120,)}
   FWD_BLACKLISTED_ADDRS = {0: [0x321, 0x162], 2: [0x120]}
 
-  MAX_TORQUE_LOOKUP = [0], [250]
+  MAX_TORQUE_LOOKUP = [9, 17], [350, 250]
+  DYNAMIC_MAX_TORQUE = True
   MAX_RATE_UP = 3
   MAX_RATE_DOWN = 5
 
@@ -107,7 +108,7 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
           self.assertEqual(quality_flag, self.safety.get_controls_allowed())
 
         # Mess with checksum to make it fail
-        to_push[0].data[0] = 0
+        to_push[0].data[0] = 0xff
         self.assertFalse(self._rx(to_push))
         self.assertFalse(self.safety.get_controls_allowed())
 
