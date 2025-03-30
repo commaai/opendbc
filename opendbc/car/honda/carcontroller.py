@@ -174,23 +174,23 @@ class CarController(CarControllerBase):
       pcm_accel = int(0.0)
     else:
       if accel > 0:
-        if CS.out.vEgo == 0: # disengage standstill
+        if CS.out.vEgo < 2: # disengage standstill
           pcm_accel = 192
-          pcm_speed = 30
+          pcm_speed = 10
           brake = 0
         else:
-          pcm_accel = int ( accel * 200 )
-          pcm_speed = int ( CS.out.vEgo ) + 20
+          pcm_accel = max ( 1, int ( accel * 200 ) )
+          pcm_speed = CS.out.vEgo + 20
           brake = 0
       else:
-        if CS.out.vEgo == 0: # standstill
+        if CS.out.vEgo < 2: # standstill
           pcm_accel = 0
           pcm_speed = 0
           brake = 140
         else:
           pcm_accel = 0
           pcm_speed = 0
-          brake = int (accel * 40.0)
+          brake = max ( 1, int (accel * 40.0) )
 
       pcm_accel = float ( np.clip ( pcm_accel, 0, self.params.NIDEC_GAS_MAX - 1 ) )
       pcm_speed = float ( np.clip ( pcm_speed, 0, 100 ) )
