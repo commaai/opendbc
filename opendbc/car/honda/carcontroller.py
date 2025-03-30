@@ -154,7 +154,6 @@ class CarController(CarControllerBase):
       accel = 0.0
       gas, brake = 0.0, 0.0
 
-    
     # vehicle hud display, wait for one update from 10Hz 0x304 msg
     fcw_display, steer_required, acc_alert = process_hud_alert(hud_control.visualAlert)
 
@@ -194,10 +193,10 @@ class CarController(CarControllerBase):
           pcm_speed = 0
           brake = int (accel * 40.0)
 
-      pcm_accel = float ( np.clip ( pcm_accel, 0, self.params.NIDEC_GAS_MAX )
-      pcm_speed = float ( np.clip ( pcm_speed, 0, 100 )
-      brake = float ( np.clip ( pcm_speed, 0, self.params.NIDEC_BRAKE_MAX )
-      
+      pcm_accel = float ( np.clip ( pcm_accel, 0, self.params.NIDEC_GAS_MAX ) )
+      pcm_speed = float ( np.clip ( pcm_speed, 0, 100 ) )
+      brake = float ( np.clip ( pcm_speed, 0, self.params.NIDEC_BRAKE_MAX ) )
+
     if not self.CP.openpilotLongitudinalControl:
       if self.frame % 2 == 0 and self.CP.carFingerprint not in HONDA_BOSCH_RADARLESS:  # radarless cars don't have supplemental message
         can_sends.append(hondacan.create_bosch_supplemental_1(self.packer, self.CAN))
