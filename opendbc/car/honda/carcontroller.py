@@ -255,7 +255,7 @@ class CarController(CarControllerBase):
         # pcm_accel = float ( np.clip ( 600.0 * ( accel + 0.2 ) , 0.0, self.params.NIDEC_GAS_MAX )
 
         # prefer EV mode under 30mph and slower accel
-        if ( accel <= 0.5 ) and ( CS.out.vEgo > 0.0 ) and ( CS.out.vEgo < 30.0 / 2.237 ):
+        if ( accel <= 0.2 ) and ( CS.out.vEgo > 0.0 ) and ( CS.out.vEgo < 30.0 / 2.237 ):
           pcm_accel = 54.0
 
         # blending logic to fastforward, assume engine uses 98% of prior logic each frame
