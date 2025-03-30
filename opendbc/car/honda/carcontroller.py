@@ -153,7 +153,7 @@ class CarController(CarControllerBase):
       accel = 0.0
       # gas, brake = 0.0, 0.0
       brake = 0.0
-    
+
     # vehicle hud display, wait for one update from 10Hz 0x304 msg
     fcw_display, steer_required, acc_alert = process_hud_alert(hud_control.visualAlert)
 
