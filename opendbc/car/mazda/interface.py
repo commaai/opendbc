@@ -29,4 +29,6 @@ class CarInterface(CarInterfaceBase):
 
     ret.centerToFront = ret.wheelbase * 0.41
 
+    ret.enableBsm = True
+
     return ret
