@@ -152,7 +152,7 @@ class CarController(CarControllerBase):
       accel = float (np.clip ( actuators.accel, -100.0, np.interp (steerfactor, [ 0.0, 1.0], [-3.5, 3.5]) ) )
     else:
       accel = 0.0
-      gas, brake = 0.0, 0.0
+      # gas, brake = 0.0, 0.0
 
     # vehicle hud display, wait for one update from 10Hz 0x304 msg
     fcw_display, steer_required, acc_alert = process_hud_alert(hud_control.visualAlert)
@@ -209,7 +209,7 @@ class CarController(CarControllerBase):
     else:
       # Send gas and brake commands.
       if self.frame % 2 == 0:
-        ts = self.frame * DT_CTRL
+        # ts = self.frame * DT_CTRL
 
         if self.CP.carFingerprint in HONDA_BOSCH:
           self.accel = float(np.clip(accel, self.params.BOSCH_ACCEL_MIN, self.params.BOSCH_ACCEL_MAX))
