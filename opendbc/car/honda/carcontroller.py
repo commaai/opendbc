@@ -23,10 +23,7 @@ def compute_gb_honda_nidec(accel, speed):
 
   if accel > 0:
     scale_factor = float ( np.interp ( speed, [0.0, 10.0, 20.0, 90.0], [10000.0, 25.0, 8.0, 1.0] ) )
-    if accel > CS.out.vEgo:
-      scaled_accel = 10000.0
-    else:
-      scaled_accel = accel * scale_factor
+    scaled_accel = accel * scale_factor
   else:
     scaled_accel = accel
 
@@ -153,7 +150,9 @@ class CarController(CarControllerBase):
 
     if CC.longActive:
       accel = float (np.clip ( actuators.accel, -100.0, np.interp (steerfactor, [ 0.0, 1.0], [-3.5, 3.5]) ) )
-      gas, brake = compute_gas_brake(actuators.accel, CS.out.vEgo, self.CP.carFingerprint)
+      if accel > CS.out.vEgo:
+        accel = 10000.0
+      gas, brake = compute_gas_brake(accel, CS.out.vEgo, self.CP.carFingerprint)
     else:
       accel = 0.0
       gas, brake = 0.0, 0.0
