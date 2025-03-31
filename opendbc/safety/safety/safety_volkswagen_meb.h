@@ -15,11 +15,11 @@ static safety_config volkswagen_meb_init(uint16_t param) {
   static RxCheck volkswagen_meb_rx_checks[] = {
     {.msg = {{MSG_LH_EPS_03, 0, 8, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
     {.msg = {{MSG_MOTOR_14, 0, 8, .max_counter = 15U, .frequency = 10U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_Motor_51, 0, 32, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_Motor_51, 0, 32, .ignore_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
     {.msg = {{MSG_GRA_ACC_01, 0, 8, .max_counter = 15U, .frequency = 33U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_QFK_01, 0, 32, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_ESC_51, 0, 48, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_Motor_54, 0, 32, .max_counter = 15U, .frequency = 10U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_QFK_01, 0, 32, .ignore_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_ESC_51, 0, 48, .ignore_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_Motor_54, 0, 32, .ignore_checksum = true, .max_counter = 15U, .frequency = 10U}, { 0 }, { 0 }}},
   };
 
   volkswagen_set_button_prev = false;
