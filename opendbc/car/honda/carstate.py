@@ -40,7 +40,7 @@ def get_can_messages(CP, gearbox_msg):
     messages += [
       ("GEARBOX_ALT_2", 50),
     ]
-    
+
   if CP.carFingerprint == CAR.HONDA_ODYSSEY_CHN:
     messages += [
       ("SCM_FEEDBACK", 25),
