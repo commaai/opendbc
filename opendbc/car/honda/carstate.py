@@ -32,9 +32,9 @@ def get_can_messages(CP, gearbox_msg):
     ("STEER_MOTOR_TORQUE", 0),  # TODO: not on every car
   ]
 
-  if CP.carFingerprint != CAR.ACURA_INTEGRA:
+  if CP.carFingerprint == CAR.ACURA_INTEGRA:
     messages += [
-      ("ENGINE_DATA", 100), # Not found on Integra, but still want to check all others
+      ("GEARBOX_ALT_2", 50),
     ]
 
   if CP.carFingerprint == CAR.HONDA_ODYSSEY_CHN:
@@ -141,7 +141,7 @@ class CarState(CarStateBase):
     # STANDSTILL->WHEELS_MOVING bit can be noisy around zero, so use XMISSION_SPEED
     # panda checks if the signal is non-zero
     if self.CP.carFingerprint == CAR.ACURA_INTEGRA:
-        ret.standstill = cp.vl["CAR_SPEED"]["CAR_SPEED"] < 1e-5
+        ret.standstill = cp.vl["GEARBOX_ALT_2"]["WHEELS_MOVING_BOH"] == 2989
     else:
         ret.standstill = cp.vl["ENGINE_DATA"]["XMISSION_SPEED"] < 1e-5
     # TODO: find a common signal across all cars
