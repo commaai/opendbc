@@ -94,7 +94,7 @@ class HondaButtonEnableBase(common.PandaCarSafetyTest):
 
     # TODO: move this test to common
     # checksum checks
-    for msg in ["btn", "gas", "speed"]:
+    for msg in ["btn", "gas", "speed", "speed_alt"]:
       self.safety.set_controls_allowed(1)
       if msg == "btn":
         to_push = self._button_msg(Btn.SET)
@@ -102,6 +102,8 @@ class HondaButtonEnableBase(common.PandaCarSafetyTest):
         to_push = self._user_gas_msg(0)
       if msg == "speed":
         to_push = self._speed_msg(0)
+      if msg == "speed_alt":
+        to_push = self._speed_msg_alt(0)
       self.assertTrue(self._rx(to_push))
       if msg != "btn":
         to_push[0].data[4] = 0  # invalidate checksum
@@ -121,10 +123,12 @@ class HondaButtonEnableBase(common.PandaCarSafetyTest):
         self.safety.set_controls_allowed(1)
         self._rx(self._button_msg(Btn.SET))
         self._rx(self._speed_msg(0))
+        self._rx(self._speed_msg_alt(0))
         self._rx(self._user_gas_msg(0))
       else:
         self.assertFalse(self._rx(self._button_msg(Btn.SET)))
         self.assertFalse(self._rx(self._speed_msg(0)))
+        self.assertFalse(self._rx(self._speed_msg_alt(0)))
         self.assertFalse(self._rx(self._user_gas_msg(0)))
         self.assertFalse(self.safety.get_controls_allowed())
 
@@ -133,6 +137,7 @@ class HondaButtonEnableBase(common.PandaCarSafetyTest):
       self.safety.set_controls_allowed(1)
       self._rx(self._button_msg(Btn.SET, main_on=True))
       self._rx(self._speed_msg(0))
+      self._rx(self._speed_msg_alt(0))
       self._rx(self._user_gas_msg(0))
     self._rx(self._button_msg(Btn.SET, main_on=True))
     self.assertTrue(self.safety.get_controls_allowed())
@@ -213,6 +218,11 @@ class HondaBase(common.PandaCarSafetyTest):
     values = {"XMISSION_SPEED": speed, "COUNTER": self.cnt_speed % 4}
     self.__class__.cnt_speed += 1
     return self.packer.make_can_msg_panda("ENGINE_DATA", self.PT_BUS, values)
+
+  def _speed_msg_alt(self, speed):
+    values = {"WHEELS_MOVING_BOH": speed, "COUNTER": self.cnt_speed % 4}
+    self.__class__.cnt_speed += 1
+    return self.packer.make_can_msg_panda("GEARBOX_ALT_2", self.PT_BUS, values)
 
   def _acc_state_msg(self, main_on):
     values = {"MAIN_ON": main_on, "COUNTER": self.cnt_acc_state % 4}
