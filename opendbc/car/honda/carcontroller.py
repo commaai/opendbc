@@ -182,8 +182,8 @@ class CarController(CarControllerBase):
           brake = 0.0
         else:
           pcm_accel = 54 if accel <= 0.2 else 198
-          self.speed_addon = max ( 0, self.speed_addon + float ( np.clip ( ( accel - CS.out.aEgo ) * 2, -0.5, 0.5 ) ) )
-          pcm_speed = float ( np.clip ( CS.out.vEgo + self.speed_addon , 0, 50) )
+          self.speed_addon = max ( 0, self.speed_addon + float ( np.clip ( ( accel - CS.out.aEgo ) * 2, -0.1, 0.1 ) ) )
+          pcm_speed = float ( np.clip ( CS.out.vEgo + self.speed_addon , 0, 5) )
           brake = 0.0
       else:
         if CS.out.vEgo < 0.02: # standstill
