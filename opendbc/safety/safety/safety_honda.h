@@ -89,7 +89,7 @@ static void honda_rx_hook(const CANPacket_t *to_push) {
     }
     else {
       // 12 bits in byte 2 and 3
-      vehicle_moving = (GET_BYTE(to_push, 2) & 0xF0) << 8 | GET_BYTE(to_push, 3);
+      vehicle_moving = (GET_BYTE(to_push, 2) & 0xF0) << 8U | GET_BYTE(to_push, 3);
     }
   }
 
