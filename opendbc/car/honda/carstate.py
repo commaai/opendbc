@@ -31,12 +31,16 @@ def get_can_messages(CP, gearbox_msg):
     ("STEER_STATUS", 100),
     ("STEER_MOTOR_TORQUE", 0),  # TODO: not on every car
   ]
+  if CP.carFingerprint != CAR.ACURA_INTEGRA:
+    messages += [
+      ("ENGINE_DATA", 100), # Not found on Integra, but still want to check all others
+    ]
 
   if CP.carFingerprint == CAR.ACURA_INTEGRA:
     messages += [
       ("GEARBOX_ALT_2", 50),
     ]
-
+    
   if CP.carFingerprint == CAR.HONDA_ODYSSEY_CHN:
     messages += [
       ("SCM_FEEDBACK", 25),
