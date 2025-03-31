@@ -40,8 +40,8 @@
 |Ford|Escape Plug-in Hybrid 2020-22|Co-Pilot360 Assist+|[Upstream](#upstream)|
 |Ford|Explorer 2020-24|Co-Pilot360 Assist+|[Upstream](#upstream)|
 |Ford|Explorer Hybrid 2020-24|Co-Pilot360 Assist+|[Upstream](#upstream)|
-|Ford|F-150 2021-23|Co-Pilot360 Assist 2.0|[Under review](#upstream)|
-|Ford|F-150 Hybrid 2021-23|Co-Pilot360 Assist 2.0|[Under review](#upstream)|
+|Ford|F-150 2021-23|Co-Pilot360 Assist 2.0|[Upstream](#upstream)|
+|Ford|F-150 Hybrid 2021-23|Co-Pilot360 Assist 2.0|[Upstream](#upstream)|
 |Ford|Focus 2018|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
 |Ford|Focus Hybrid 2018|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
 |Ford|Kuga 2020-22|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
@@ -51,8 +51,8 @@
 |Ford|Maverick 2023-24|Co-Pilot360 Assist|[Upstream](#upstream)|
 |Ford|Maverick Hybrid 2022|LARIAT Luxury|[Upstream](#upstream)|
 |Ford|Maverick Hybrid 2023-24|Co-Pilot360 Assist|[Upstream](#upstream)|
-|Ford|Mustang Mach-E 2021-23|All|[Under review](#upstream)|
-|Ford|Ranger 2024|Adaptive Cruise Control with Lane Centering|[Under review](#upstream)|
+|Ford|Mustang Mach-E 2021-23|All|[Upstream](#upstream)|
+|Ford|Ranger 2024|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
 |Genesis|G70 2018|All|[Upstream](#upstream)|
 |Genesis|G70 2019-21|All|[Upstream](#upstream)|
 |Genesis|G70 2022-23|All|[Upstream](#upstream)|
@@ -92,8 +92,7 @@
 |Honda|Inspire 2018|All|[Upstream](#upstream)|
 |Honda|Odyssey 2018-20|Honda Sensing|[Upstream](#upstream)|
 |Honda|Odyssey 2021-25|All|[Community](#community)|
-|Honda|Odyssey RC5 for JPN|All|[Upstream](#upstream)|
-|Honda|Passport 2019-23|All|[Upstream](#upstream)|
+|Honda|Passport 2019-25|All|[Upstream](#upstream)|
 |Honda|Pilot 2016-22|Honda Sensing|[Upstream](#upstream)|
 |Honda|Pilot 2023-24|All|[Community](#community)|
 |Honda|Ridgeline 2017-25|Honda Sensing|[Upstream](#upstream)|
@@ -160,7 +159,7 @@
 |Kia|Niro EV 2020|All|[Upstream](#upstream)|
 |Kia|Niro EV 2021|All|[Upstream](#upstream)|
 |Kia|Niro EV 2022|All|[Upstream](#upstream)|
-|Kia|Niro EV 2023|All|[Upstream](#upstream)|
+|Kia|Niro EV 2023-24|All|[Upstream](#upstream)|
 |Kia|Niro Hybrid 2018|All|[Upstream](#upstream)|
 |Kia|Niro Hybrid 2021|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Kia|Niro Hybrid 2022|Smart Cruise Control (SCC)|[Upstream](#upstream)|
@@ -304,7 +303,7 @@
 |Toyota|RAV4 2017-18|All|[Upstream](#upstream)|
 |Toyota|RAV4 2019-21|All|[Upstream](#upstream)|
 |Toyota|RAV4 2022|All|[Upstream](#upstream)|
-|Toyota|RAV4 2023-24|All|[Upstream](#upstream)|
+|Toyota|RAV4 2023-25|All|[Upstream](#upstream)|
 |Toyota|RAV4 Hybrid 2016|Toyota Safety Sense P|[Upstream](#upstream)|
 |Toyota|RAV4 Hybrid 2017-18|All|[Upstream](#upstream)|
 |Toyota|RAV4 Hybrid 2019-21|All|[Upstream](#upstream)|

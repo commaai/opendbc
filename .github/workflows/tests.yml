@@ -15,7 +15,7 @@ jobs:
       matrix:
         include:
           - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-24.04' }}
-          - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-macos-8x14' || 'macos-latest' }}
+          - os: macos-latest
     steps:
     - uses: commaai/timeout@v1
     - uses: actions/checkout@v4
@@ -93,6 +93,8 @@ jobs:
     name: Safety mutation tests
     runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
     timeout-minutes: 20
+    env:
+      GIT_REF: ${{ github.event_name == 'push' && github.ref == 'refs/heads/${{ github.event.repository.default_branch }}' && github.event.before || 'origin/${{ github.event.repository.default_branch }}' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -102,4 +104,4 @@ jobs:
         run: |
           source setup.sh
           scons -j8
-          GIT_REF=${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && github.event.before || 'origin/master' }} cd opendbc/safety/tests && ./mutation.sh
+          cd opendbc/safety/tests && ./mutation.sh

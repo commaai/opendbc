@@ -5,6 +5,8 @@ from opendbc.car.interfaces import CarStateBase
 from opendbc.car.rivian.values import DBC, GEAR_MAP
 from opendbc.car.common.conversions import Conversions as CV
 
+GearShifter = structs.CarState.GearShifter
+
 
 class CarState(CarStateBase):
   def __init__(self, CP):
@@ -13,6 +15,7 @@ class CarState(CarStateBase):
 
     self.acm_lka_hba_cmd = None
     self.sccm_wheel_touch = None
+    self.vdm_adas_status = None
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
@@ -49,13 +52,20 @@ class CarState(CarStateBase):
     # TODO: find cruise set speed on CAN
     ret.cruiseState.speed = self.last_speed * CV.MPH_TO_MS  # detected speed limit
     if not self.CP.openpilotLongitudinalControl:
-      ret.cruiseState.speed = 0
+      ret.cruiseState.speed = -1
     ret.cruiseState.available = True  # cp.vl["VDM_AdasSts"]["VDM_AdasInterfaceStatus"] == 1
     ret.cruiseState.standstill = cp.vl["VDM_AdasSts"]["VDM_AdasAccelRequestAcknowledged"] == 1
-    ret.accFaulted = cp_cam.vl["ACM_Status"]["ACM_FaultStatus"] == 1
+
+    # TODO: log ACM_Unkown2=3 as a fault. need to filter it at the start and end of routes though
+    # ACM_FaultStatus hasn't been seen yet
+    ret.accFaulted = (cp_cam.vl["ACM_Status"]["ACM_FaultStatus"] == 1 or
+                      # VDM_AdasFaultStatus=Brk_Intv is the default for some reason
+                      # VDM_AdasFaultStatus=Imps_Cmd was seen when sending it rapidly changing ACC enable commands
+                      # VDM_AdasFaultStatus=Cntr_Fault isn't fully understood, but we've seen it in the wild
+                      cp.vl["VDM_AdasSts"]["VDM_AdasFaultStatus"] in (3,))  # 3=Imps_Cmd
 
     # Gear
-    ret.gearShifter = GEAR_MAP[int(cp.vl["VDM_PropStatus"]["VDM_Prndl_Status"])]
+    ret.gearShifter = GEAR_MAP.get(int(cp.vl["VDM_PropStatus"]["VDM_Prndl_Status"]), GearShifter.unknown)
 
     # Doors
     ret.doorOpen = (cp_adas.vl["IndicatorLights"]["RearDriverDoor"] != 2 or
@@ -80,6 +90,7 @@ class CarState(CarStateBase):
     # Messages needed by carcontroller
     self.acm_lka_hba_cmd = copy.copy(cp_cam.vl["ACM_lkaHbaCmd"])
     self.sccm_wheel_touch = copy.copy(cp.vl["SCCM_WheelTouch"])
+    self.vdm_adas_status = copy.copy(cp.vl["VDM_AdasSts"])
 
     return ret
 
