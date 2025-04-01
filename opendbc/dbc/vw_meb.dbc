@@ -169,7 +169,7 @@ BO_ 192 EM1_01: 32 XXX
  SG_ Schubbetrieb : 79|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 219 AWV_03: 48 XXX
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ XCHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ FCW_Active : 64|1@0+ (1,0) [0|1] "" XXX
  SG_ Pre_Brake_Fill : 76|1@0+ (1,0) [0|1] "" XXX
@@ -180,8 +180,8 @@ BO_ 247 MEB_HVEM_02: 8 XXX
  SG_ NEW_SIGNAL_3 : 44|10@1+ (1,0) [0|7] "" XXX
  SG_ NEW_SIGNAL_2 : 54|7@1+ (1,0) [0|3] "" XXX
 
-BO_ 252 ESC_51: 48 XXX
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+BO_ 252 ESC_51: 64 XXX
+ SG_ XCHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ AEB_Breaking_01 : 24|8@1+ (1,0) [0|255] "" XXX
  SG_ AEB_Breaking_02 : 32|8@1+ (1,0) [0|255] "" XXX
@@ -223,7 +223,7 @@ BO_ 253 ESP_21: 8 Gateway
  SG_ ESC_Neutralschaltung : 63|1@1+ (1,0) [0|1] "" Vector__XXX
 
 BO_ 258 ESC_50: 48 XXX
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ XCHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Lateral_Accel : 16|8@1+ (0.15,-18.9) [0|255] "Unit_MeterPerSquareSecond" XXX
  SG_ Longitudinal_Accel : 24|10@1+ (0.03125,-16) [0|255] "Unit_MeterPerSquareSecond" XXX
@@ -242,8 +242,8 @@ BO_ 261 VMM_01: 8 XXX
  SG_ NEW_SIGNAL_1 : 40|2@1+ (1,0) [0|3] "" XXX
  SG_ Brake : 53|7@1+ (1,0) [0|3] "" XXX
 
-BO_ 267 Motor_51: 32 XXX
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+BO_ 267 Motor_51: 48 XXX
+ SG_ XCHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Accel_Pedal_Pressure : 12|9@1+ (0.4,0) [0|255] "" XXX
  SG_ Accel_Low_Pressed_Support : 21|1@1+ (1,0) [0|7] "" XXX
@@ -319,7 +319,7 @@ BO_ 299 GRA_ACC_01: 8 Gateway
 BO_ 312 IPA_01: 32 XXX
 
 BO_ 313 VMM_02: 32 XXX
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ XCHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ Brake_Pressed_1 : 16|1@0+ (1,0) [0|1] "" XXX
  SG_ Brake_Pressed_2 : 27|1@0+ (1,0) [0|1] "" XXX
@@ -330,7 +330,7 @@ BO_ 313 VMM_02: 32 XXX
  SG_ Brake_Pressure : 76|11@1+ (1,0) [0|100] "" XXX
 
 BO_ 317 QFK_01: 32 XXX
- SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ XCHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_5 : 12|1@0+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_9 : 14|1@0+ (1,0) [0|1] "" XXX
