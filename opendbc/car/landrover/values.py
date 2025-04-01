@@ -1,12 +1,20 @@
 from dataclasses import dataclass, field
-from enum import Enum, IntFlag
+from enum import Enum, StrEnum, IntFlag
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, AngleSteeringLimits
 from opendbc.car.structs import CarParams
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
-from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
+from opendbc.car.fw_query_definitions import FwQueryConfig , Request, StdQueries
+from opendbc.car.vin import Vin
 
 Ecu = CarParams.Ecu
+
+class Buttons:
+  NONE = 0
+  RES_ACCEL = 1
+  SET_DECEL = 2
+  GAP_DIST = 3
+  CANCEL = 4  # on newer models, this is a pause/resume button
 
 
 class CarControllerParams:
@@ -59,11 +67,51 @@ class LandroverCarDocsDefender(CarDocs):
 
 
 
+
+
+"""
+ LANDROVER VIN Code
+
+ 01234567890123456
+ SALEA7AX8L2XXXXXX  : L663 2020 Defender 110
+ SALEA8BW6P2XXXXXX  : L663 2023 Defender 130
+
+ 0~2 : WMI
+ 3~8 : VDS
+ 9~16: VIS
+
+ https://twinwoods4x4.co.uk/how-to-decode-your-land-rover-vin-vehicle-identification-number/?srsltid=AfmBOoozLKVg5YTwYBJStW9m-2yq5J6CSmVEQGH4GPi5uNvPZf--ZdSE
+
+ 0~2 SEA: Land Rover   , Word Manufactureer Identifier
+ 3~4 LE : Defneder L663, Model Type
+ 5   7  : 110          , Wheelbase
+     8  : 130
+ 6~8    : ??
+ 9   L  : 2020         , Year
+     P  : 2023
+ 10  2  : Solihull     , Factory
+ 11~16  : Serial Number
+"""
+
+class WMI(StrEnum):
+  LANDROVER = "SEA"
+
+
+class ModelLine(StrEnum):
+  L663 = "LE"  # Defender L663
+
+
+class ModelYear(StrEnum):
+  L_2020 = "L"
+  P_2023 = "P"
+
 @dataclass
 class LandroverPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {
-    Bus.pt: "landrover_defender_2023" }
-  )
+    Bus.pt: "landrover_defender_2023" })
+  wmis: set[WMI] = field(default_factory=set)
+  lines: set[ModelLine] = field(default_factory=set)
+  years: set[ModelYear] = field(default_factory=set)
 
 
 class CAR(Platforms):
@@ -72,17 +120,25 @@ class CAR(Platforms):
       LandroverCarDocsDefender("LANDROVER DEFENDER 2023"),
     ],
     CarSpecs(mass=2550, wheelbase=3.0, steerRatio=19.0, minSteerSpeed=51*CV.KPH_TO_MS),
+    wmis=(WMI.LANDROVER),
+    lines={ModelLine.L663},
+    years={ModelYear.L_2020, ModelYear.P_2023},
   )
 
+def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str]:
+  vin_obj = Vin(vin)
+  line = vin_obj.vds[:2]
+  year = vin_obj.vis[:1]
 
+  #print("LANDROVER match_fw_to_car_fuzzy")
+  #print("line={s} year={s}".format(line, year))
 
-class Buttons:
-  NONE = 0
-  RES_ACCEL = 1
-  SET_DECEL = 2
-  GAP_DIST = 3
-  CANCEL = 4  # on newer models, this is a pause/resume button
+  candidates = set()
+  for platform in CAR:
+    if vin_obj.wmi in platform.config.wmis and line in platform.config.lines and year in platform.config.years:
+      candidates.add(platform)
 
+  return {str(c) for c in candidates}
 
 
 FW_QUERY_CONFIG = FwQueryConfig(
@@ -90,10 +146,10 @@ FW_QUERY_CONFIG = FwQueryConfig(
     Request(
       [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.SUPPLIER_SOFTWARE_VERSION_REQUEST],
       [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.SUPPLIER_SOFTWARE_VERSION_RESPONSE],
-      bus=0,
       obd_multiplexing=True,
-    )
-  ]
+    ),
+  ],
+  match_fw_to_car_fuzzy=match_fw_to_car_fuzzy,
 )
 
 

@@ -86,7 +86,7 @@ static bool landrover_tx_hook(const CANPacket_t *to_send) {
       bool steer_control_enabled = GET_BIT(to_send, 31U);
 
       if (steer_angle_cmd_checks(desired_angle, steer_control_enabled, LANDROVER_STEERING_LIMITS)) {
-        tx = false;
+        //tx = false;
       }
     }
 
@@ -132,8 +132,8 @@ static safety_config landrover_init(uint16_t param) {
 
   UNUSED(param);
   #ifdef ALLOW_DEBUG
-    const int FLAG_LANDROVER_LONG_CONTROL = 1;
-    landrover_longitudinal = GET_FLAG(param, FLAG_LANDROVER_LONG_CONTROL);
+    //const int FLAG_LANDROVER_LONG_CONTROL = 1;
+    //landrover_longitudinal = GET_FLAG(param, FLAG_LANDROVER_LONG_CONTROL);
   #endif
 
   // FIXME: cppcheck thinks that landrover_longitudinal is always false. This is not true

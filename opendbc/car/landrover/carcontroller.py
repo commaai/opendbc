@@ -68,6 +68,7 @@ class CarController(CarControllerBase):
              self.apply_angle_last,
              self.frame % 255,
              left_lane, right_lane))
+      print(can_sends)
 
 
     new_actuators = actuators.as_builder()
