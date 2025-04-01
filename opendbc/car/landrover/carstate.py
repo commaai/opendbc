@@ -72,7 +72,7 @@ class CarState(CarStateBase):
     ret.brakePressed = cp.vl["CruiseInfo"]["BrakePedal"] == 1
 
     ret.gas = cp.vl["GasPedal"]["GasPedalPos"]
-    ret.gasPressed =  ret.gas >= 1
+    ret.gasPressed = cp.vl["GasPedal_ON"]["GasPedalDriver"] == 1
 
 
     if self.CP.enableBsm:

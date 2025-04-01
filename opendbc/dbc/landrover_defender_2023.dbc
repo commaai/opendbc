@@ -36,9 +36,9 @@ BO_ 1 CruiseInfo: 8 pt
  SG_ CheckSum : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ Counter : 11|4@0+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_1 : 29|2@0+ (1,0) [0|3] "" XXX
- SG_ BrakePedal : 30|1@0+ (1,0) [0|7] "" XXX
+ SG_ BrakeDriver : 30|1@0+ (1,0) [0|7] "" XXX
  SG_ CRuiseOn01 : 32|1@0+ (1,0) [0|1] "" XXX
- SG_ BrakePedal02 : 36|1@0+ (1,0) [0|1] "" XXX
+ SG_ BrakeDriver02 : 36|1@0+ (1,0) [0|1] "" XXX
  SG_ CruiseOn02 : 43|1@0+ (1,0) [0|1] "" XXX
  SG_ CruiseOn : 54|1@0+ (1,0) [0|1] "" XXX
 
@@ -98,7 +98,7 @@ BO_ 132 StopAndGo: 8 pt
  SG_ Move01 : 15|1@0+ (1,0) [0|1] "" XXX
  SG_ Status : 17|2@0+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_3 : 19|2@0+ (1,0) [0|3] "" XXX
- SG_ BrakeLed : 22|1@0+ (1,0) [0|1] "" XXX
+ SG_ BrakeDriver : 22|1@0+ (1,0) [0|1] "" XXX
  SG_ RPM : 27|12@0+ (1,0) [0|4095] "" XXX
 
 
@@ -142,8 +142,7 @@ BO_ 264 GearPRND: 8 pt
  SG_ PRND : 41|2@0+ (1,0) [0|3] "" XXX
 
 BO_ 393 GasPedal_ON: 8 pt
- SG_ NEW_SIGNAL_2 : 56|1@0+ (1,0) [0|1] "" XXX
- SG_ GasPedal_On : 58|1@0+ (1,0) [0|3] "" XXX
+ SG_ GasPedalDriver : 58|1@0+ (1,0) [0|3] "" XXX
 
 
 BO_ 399 BlindSpot: 8 pt
