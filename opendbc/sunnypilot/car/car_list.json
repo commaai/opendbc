@@ -969,7 +969,7 @@
     ],
     "package": "Honda Sensing"
   },
-  "Honda Passport 2019-23": {
+  "Honda Passport 2019-25": {
     "platform": "HONDA_PILOT",
     "make": "Honda",
     "brand": "honda",
@@ -979,7 +979,9 @@
       "2020",
       "2021",
       "2022",
-      "2023"
+      "2023",
+      "2024",
+      "2025"
     ],
     "package": "All"
   },
@@ -1707,13 +1709,14 @@
     ],
     "package": "All"
   },
-  "Kia Niro EV 2023": {
+  "Kia Niro EV 2023-24": {
     "platform": "KIA_NIRO_EV_2ND_GEN",
     "make": "Kia",
     "brand": "hyundai",
     "model": "Niro EV",
     "year": [
-      "2023"
+      "2023",
+      "2024"
     ],
     "package": "All"
   },
@@ -3125,14 +3128,15 @@
     ],
     "package": "All"
   },
-  "Toyota RAV4 2023-24": {
+  "Toyota RAV4 2023-25": {
     "platform": "TOYOTA_RAV4_TSS2_2023",
     "make": "Toyota",
     "brand": "toyota",
     "model": "RAV4",
     "year": [
       "2023",
-      "2024"
+      "2024",
+      "2025"
     ],
     "package": "All"
   },
@@ -3225,6 +3229,14 @@
       "2022",
       "2023"
     ],
+    "package": "All"
+  },
+  "Toyota Yaris 2023 (Non-US only)": {
+    "platform": "TOYOTA_YARIS",
+    "make": "Toyota",
+    "brand": "toyota",
+    "model": "Yaris 2023 (Non-US only)",
+    "year": [],
     "package": "All"
   },
   "Volkswagen Arteon 2018-23": {

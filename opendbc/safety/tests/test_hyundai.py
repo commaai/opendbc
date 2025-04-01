@@ -63,16 +63,14 @@ class TestHyundaiSafety(HyundaiButtonBase, common.PandaCarSafetyTest, common.Dri
 
   MAX_RATE_UP = 3
   MAX_RATE_DOWN = 7
-  MAX_TORQUE = 384
+  MAX_TORQUE_LOOKUP = [0], [384]
   MAX_RT_DELTA = 112
-  RT_INTERVAL = 250000
   DRIVER_TORQUE_ALLOWANCE = 50
   DRIVER_TORQUE_FACTOR = 2
 
   # Safety around steering req bit
   MIN_VALID_STEERING_FRAMES = 89
   MAX_INVALID_STEERING_FRAMES = 2
-  MIN_VALID_STEERING_RT_INTERVAL = 810000  # a ~10% buffer, can send steer up to 110Hz
 
   cnt_gas = 0
   cnt_speed = 0
@@ -198,7 +196,7 @@ class TestHyundaiSafety(HyundaiButtonBase, common.PandaCarSafetyTest, common.Dri
 class TestHyundaiSafetyAltLimits(TestHyundaiSafety):
   MAX_RATE_UP = 2
   MAX_RATE_DOWN = 3
-  MAX_TORQUE = 270
+  MAX_TORQUE_LOOKUP = [0], [270]
 
   @classmethod
   def setUpClass(cls):
@@ -218,7 +216,7 @@ class TestHyundaiSafetyAltLimits(TestHyundaiSafety):
 class TestHyundaiSafetyAltLimits2(TestHyundaiSafety):
   MAX_RATE_UP = 2
   MAX_RATE_DOWN = 3
-  MAX_TORQUE = 170
+  MAX_TORQUE_LOOKUP = [0], [170]
 
   @classmethod
   def setUpClass(cls):
