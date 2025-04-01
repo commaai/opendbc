@@ -82,8 +82,8 @@ class LandroverCarDocsDefender(CarDocs):
 
  https://twinwoods4x4.co.uk/how-to-decode-your-land-rover-vin-vehicle-identification-number/?srsltid=AfmBOoozLKVg5YTwYBJStW9m-2yq5J6CSmVEQGH4GPi5uNvPZf--ZdSE
 
- 0~2 SEA: Land Rover   , Word Manufactureer Identifier
- 3~4 LE : Defneder L663, Model Type
+ 0~2 SAL: Land Rover   , Word Manufactureer Identifier
+ 3~4 EA : Defneder L663, Model Type
  5   7  : 110          , Wheelbase
      8  : 130
  6~8    : ??
@@ -94,11 +94,11 @@ class LandroverCarDocsDefender(CarDocs):
 """
 
 class WMI(StrEnum):
-  LANDROVER = "SEA"
+  LANDROVER = "SAL"
 
 
 class ModelLine(StrEnum):
-  L663 = "LE"  # Defender L663
+  L663 = "EA"  # Defender L663
 
 
 class ModelYear(StrEnum):
@@ -129,9 +129,6 @@ def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str
   vin_obj = Vin(vin)
   line = vin_obj.vds[:2]
   year = vin_obj.vis[:1]
-
-  #print("LANDROVER match_fw_to_car_fuzzy")
-  #print("line={s} year={s}".format(line, year))
 
   candidates = set()
   for platform in CAR:
