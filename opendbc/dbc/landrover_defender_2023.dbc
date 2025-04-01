@@ -37,7 +37,7 @@ BO_ 1 CruiseInfo: 8 pt
  SG_ Counter : 11|4@0+ (1,0) [0|15] "" XXX
  SG_ NEW_SIGNAL_1 : 29|2@0+ (1,0) [0|3] "" XXX
  SG_ BrakeDriver : 30|1@0+ (1,0) [0|7] "" XXX
- SG_ CRuiseOn01 : 32|1@0+ (1,0) [0|1] "" XXX
+ SG_ CruiseOn01 : 32|1@0+ (1,0) [0|1] "" XXX
  SG_ BrakeDriver02 : 36|1@0+ (1,0) [0|1] "" XXX
  SG_ CruiseOn02 : 43|1@0+ (1,0) [0|1] "" XXX
  SG_ CruiseOn : 54|1@0+ (1,0) [0|1] "" XXX

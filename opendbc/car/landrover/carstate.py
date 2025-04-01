@@ -69,7 +69,7 @@ class CarState(CarStateBase):
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(gear))
 
     ret.brake = cp.vl["Info02"]["BrakePedalPos"]
-    ret.brakePressed = cp.vl["CruiseInfo"]["BrakePedal"] == 1
+    ret.brakePressed = cp.vl["CruiseInfo"]["BrakeDriver"] == 1
 
     ret.gas = cp.vl["GasPedal"]["GasPedalPos"]
     ret.gasPressed = cp.vl["GasPedal_ON"]["GasPedalDriver"] == 1
@@ -108,6 +108,7 @@ class CarState(CarStateBase):
       ("LKAS_BTN", 16),
       ("CruiseInfo", 25),
       ("GasPedal", 50),
+      ("GasPedal_ON", 10),
       ("Info02", 25),
       ("DoorStatus", 4),
     ]

@@ -1,3 +1,4 @@
+from opendbc.car.landrover.values import CanBus
 
 # crc8 poly=0x1d, xor=0xcc , 32bit
 def defender_crc(data):
@@ -29,8 +30,8 @@ def create_lkas_command_defender(packer, enable, latActive, apply_angle, cnt, le
     "Engaged"       : enable,
   }
 
-  dat = packer.make_can_msg("LKAS_OP_TO_FLEXRAY", 1, values)[1]
+  dat = packer.make_can_msg("LKAS_OP_TO_FLEXRAY", CanBus.CAN2FLEXRAY, values)[1]
   values["Lkas_checksum"] =  defender_crc(dat[1:5])
 
-  return packer.make_can_msg("LKAS_OP_TO_FLEXRAY", 1, values)
+  return packer.make_can_msg("LKAS_OP_TO_FLEXRAY", CanBus.CAN2FLEXRAY, values)
 

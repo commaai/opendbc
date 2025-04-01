@@ -86,7 +86,7 @@ static bool landrover_tx_hook(const CANPacket_t *to_send) {
       bool steer_control_enabled = GET_BIT(to_send, 31U);
 
       if (steer_angle_cmd_checks(desired_angle, steer_control_enabled, LANDROVER_STEERING_LIMITS)) {
-        //tx = false;
+        tx = false;
       }
     }
 
@@ -119,15 +119,16 @@ static bool landrover_fwd_hook(int bus, int addr) {
 }
 
 static safety_config landrover_init(uint16_t param) {
-  // 0x1f0 = LkasCmd, 0x1f1 = SCC
-  static const CanMsg LANDROVER_TX_MSGS[] = {{0x1f0, 0, 8, true} };
-  static const CanMsg LANDROVER_LONG_TX_MSGS[] = {{0x1f0, 0, 8, true}, {0x1f1, 0, 8, true}};
+  // 0x1F0 = LkasCmd, 0x1F1 = SCC
+  static const CanMsg LANDROVER_TX_MSGS[] = {{0x1F0, 0, 8, false} };
+  static const CanMsg LANDROVER_LONG_TX_MSGS[] = {{0x1F0, 0, 8, false}, {0x1F1, 0, 8, false}};
 
   static RxCheck landrover_rx_checks[] = {
     {.msg = {{0x56, 0, 8, .frequency = 100U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   // SWM_Angle (steer angle)
     {.msg = {{0x2e, 0, 4, .frequency = 50U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   //  SWM_Torque (driver torque)
     {.msg = {{0x189, 0, 8, .frequency = 10U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   //  GasPedal (gas pedal)
     {.msg = {{0x1, 0, 8, .frequency = 25U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   // CruiseInfo (brakes, cruise state)
+    {.msg = {{0x1BE, 2, 8, .frequency = 12U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   // CAM msg
   };
 
   UNUSED(param);
