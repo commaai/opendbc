@@ -236,7 +236,8 @@ def get_fw_versions_ordered(can_recv: CanRecvCallable, can_send: CanSendCallable
 
   # Sort brands by number of matching ECUs first, then percentage of matching ECUs in the database
   # This allows brands with only one ECU to be queried first (e.g. Tesla)
-  for brand in sorted(brand_matches, key=lambda b: (brand_matches[b].count(True), brand_matches[b].count(True) / len(brand_matches[b])), reverse=True):
+  for brand in sorted(brand_matches, key=lambda b: (brand_matches[b].count(True), \
+                                                    brand_matches[b].count(True) / (len(brand_matches[b]) if len(brand_matches[b]) > 0 else 1)), reverse=True):
     # Skip this brand if there are no matching present ECUs
     if True not in brand_matches[brand]:
       continue
