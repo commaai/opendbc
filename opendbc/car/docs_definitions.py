@@ -190,7 +190,7 @@ class CarParts:
     return self.parts + parts
 
 
-CarFootnote = namedtuple("CarFootnote", ["text", "column", "docs_only", "shop_footnote"], defaults=(False, False))
+CarFootnote = namedtuple("CarFootnote", ["text", "column", "docs_only", "setup_note"], defaults=(False, False))
 
 
 class CommonFootnote(Enum):
