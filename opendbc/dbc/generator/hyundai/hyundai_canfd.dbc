@@ -329,9 +329,9 @@ BO_ 426 CRUISE_BUTTONS_ALT: 16 XXX
  SG_ NEW_SIGNAL_5 : 42|2@1+ (1,0) [0|3] "" XXX
  SG_ SET_ME_2 : 44|3@1+ (1,0) [0|7] "" XXX
  SG_ NEW_SIGNAL_6 : 47|1@1+ (1,0) [0|1] "" XXX
- SG_ BYTE6 : 48|8@1+ (1,0) [0|255] "" XXX
+ SG_ CLUSTER_SPEED_MPH : 48|8@1+ (0.5,0) [0|255] "mph" XXX
  SG_ BYTE7 : 56|8@1+ (1,0) [0|255] "" XXX
- SG_ BYTE8 : 64|8@1+ (1,0) [0|255] "" XXX
+ SG_ CLUSTER_SPEED_KPH : 64|8@1+ (1,0) [0|255] "kph" XXX
  SG_ BYTE9 : 72|8@1+ (1,0) [0|255] "" XXX
  SG_ BYTE10 : 80|8@1+ (1,0) [0|255] "" XXX
  SG_ BYTE11 : 88|8@1+ (1,0) [0|255] "" XXX
