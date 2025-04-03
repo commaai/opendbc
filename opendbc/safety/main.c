@@ -1,4 +1,5 @@
 #include "safety.h"
+#include "board/utils.h"
 
 // this file is checked by cppcheck
 
