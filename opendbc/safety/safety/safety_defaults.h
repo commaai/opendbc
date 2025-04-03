@@ -1,6 +1,7 @@
 #pragma once
 
 #include "safety_declarations.h"
+#include <stddef.h>
 
 // GCOV_EXCL_START
 // Unreachable by design (doesn't define any rx msgs)
