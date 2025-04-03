@@ -1,6 +1,7 @@
 import copy
 import numpy as np
 from opendbc.car import CanBusBase
+from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.hyundai.values import HyundaiFlags
 
 
@@ -123,15 +124,68 @@ def create_lfahda_cluster(packer, CAN, enabled):
   }
   return packer.make_can_msg("LFAHDA_CLUSTER", CAN.ECAN, values)
 
+def create_ccnc(packer, CAN, CP, CC, CS):
+  msg_161, msg_162 = CS.msg_161, CS.msg_162
+  enabled, hud, latactive = CC.enabled, CC.hudControl, CC.latActive
 
-def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_override, set_speed, hud_control):
+  for f in {"FAULT_LSS", "FAULT_HDA", "FAULT_DAS", "FAULT_LFA", "FAULT_DAW"}:
+    msg_162[f] = 0
+
+  if msg_161["ALERTS_2"] == 5:  # CONSIDER_TAKING_A_BREAK
+    msg_161.update({"ALERTS_2": 0, "SOUNDS_2": 0})
+
+  if msg_161["ALERTS_3"] == 17:  # DRIVE_CAREFULLY
+    msg_161["ALERTS_3"] = 0
+
+  if msg_161["ALERTS_5"] in (2, 4, 5):  # WATCH_FOR_SURROUNDING_VEHICLES, SMART_CRUISE_CONTROL_CONDITIONS_NOT_MET, USE_SWITCH_OR_PEDAL_TO_ACCELERATE
+    msg_161["ALERTS_5"] = 0
+
+  if msg_161["SOUNDS_4"] == 2 and msg_161["LFA_ICON"] in (3, 0,):  # LFA BEEPS
+    msg_161["SOUNDS_4"] = 0
+
+  msg_161.update({
+    "DAW_ICON": 0,
+    "LKA_ICON": 0,
+    "LFA_ICON": 2 if latactive else 1,
+    "CENTERLINE": 1 if latactive else 0,
+    "LANELINE_LEFT": (
+      1 if not hud.leftLaneVisible else 4 if hud.leftLaneDepart else 0 if not latactive else 2 if CS.out.leftBlindspot or CS.out.vEgo < 8.94 else 6),
+    "LANELINE_RIGHT": (
+      1 if not hud.rightLaneVisible else 4 if hud.rightLaneDepart else 0 if not latactive else 2 if CS.out.rightBlindspot or CS.out.vEgo < 8.94 else 6),
+    "LCA_LEFT_ARROW": 2 if CC.leftBlinker else 0,
+    "LCA_RIGHT_ARROW": 2 if CC.rightBlinker else 0,
+    "LANE_LEFT": 1 if CC.leftBlinker else 0,
+    "LANE_RIGHT": 1 if CC.rightBlinker else 0,
+  })
+
+  if hud.leftLaneDepart or hud.rightLaneDepart:
+    msg_162["VIBRATE"] = 1
+
+  if CP.openpilotLongitudinalControl:
+    msg_161.update({
+      "SETSPEED": 3 if enabled else 1,
+      "SETSPEED_HUD": 2 if enabled else 1,
+      "SETSPEED_SPEED": 25 if (s := round(CS.out.vCruiseCluster * (1 if CS.is_metric else CV.KPH_TO_MPH))) > 100 else s,
+      "DISTANCE": hud.leadDistanceBars,
+      "DISTANCE_SPACING": 1 if enabled else 0,
+      "DISTANCE_LEAD": 2 if enabled and hud.leadVisible else 1 if enabled else 0,
+      "DISTANCE_CAR": 2 if enabled else 1,
+      "SLA_ICON": 0,
+      "NAV_ICON": 0,
+      "TARGET": 0,
+    })
+
+    if msg_161["ALERTS_3"] in (1, 2, 3, 4, 7, 8, 9, 10):  # HIDE ISLA, DISTANCE MESSAGES
+      msg_161["ALERTS_3"] = 0
+
+    msg_162["LEAD"] = 0
+
+  return [packer.make_can_msg(msg, CAN.ECAN, data) for msg, data in [("CCNC_0x161", msg_161), ("CCNC_0x162", msg_162)]]
+
+def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_override, set_speed, hud_control, cruise_info=None):
   jerk = 5
   jn = jerk / 50
-  if not enabled or gas_override:
-    a_val, a_raw = 0, 0
-  else:
-    a_raw = accel
-    a_val = np.clip(accel, accel_last - jn, accel_last + jn)
+  a_raw, a_val = (0, 0) if not enabled or gas_override else (accel, np.clip(accel, accel_last - jn, accel_last + jn))
 
   values = {
     "ACCMode": 0 if not enabled else (2 if gas_override else 1),
@@ -142,8 +196,6 @@ def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_ov
     "VSetDis": set_speed,
     "JerkLowerLimit": jerk if enabled else 1,
     "JerkUpperLimit": 3.0,
-
-    "ACC_ObjDist": 1,
     "ObjValid": 0,
     "OBJ_STATUS": 2,
     "SET_ME_2": 0x4,
@@ -151,6 +203,9 @@ def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_ov
     "SET_ME_TMP_64": 0x64,
     "DISTANCE_SETTING": hud_control.leadDistanceBars,
   }
+
+  # fixes auto regen stuck on max for hybrids, should probably apply to all cars
+  values.update({"ACC_ObjDist": 1} if cruise_info is None else {s: cruise_info[s] for s in ["ACC_ObjDist", "ACC_ObjRelSpd"]})
 
   return packer.make_can_msg("SCC_CONTROL", CAN.ECAN, values)
 
