@@ -88,7 +88,7 @@ static bool landrover_tx_hook(const CANPacket_t *to_send) {
       bool steer_control_enabled = GET_BIT(to_send, 31U);
 
       if (steer_angle_cmd_checks(desired_angle, steer_control_enabled, LANDROVER_STEERING_LIMITS)) {
-        tx = false;
+        //tx = false;
         print(" 0x1F0  tx false\n");
       }
     }
