@@ -131,8 +131,8 @@ static safety_config landrover_init(uint16_t param) {
   };
   static const CanMsg LANDROVER_LONG_TX_MSGS[] = {
      {0x1F0, 1, 8, false}, 
-     {0x1F1, 1, 8, false}
-     {0x1F9, 1, 8, false} ,
+     {0x1F1, 1, 8, false},
+     {0x1F9, 1, 8, false},
   };
 
   landrover_longitudinal = false;

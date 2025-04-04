@@ -43,8 +43,8 @@ def create_hud_command_defender(packer, enable, latActive, cnt, left_lane, right
     "Engaged"       : enable,
   }
 
-  dat = packer.make_can_msg("LKAS_OP_TO_FLEXRAY", CanBus.CAN2FLEXRAY, values)[1]
+  dat = packer.make_can_msg("HUD_OP_TO_FLEXRAY", CanBus.CAN2FLEXRAY, values)[1]
   values["Lkas_checksum"] =  defender_crc(dat[1:5])
 
-  return packer.make_can_msg("LKAS_OP_TO_FLEXRAY", CanBus.CAN2FLEXRAY, values)
+  return packer.make_can_msg("HUD_OP_TO_FLEXRAY", CanBus.CAN2FLEXRAY, values)
 
