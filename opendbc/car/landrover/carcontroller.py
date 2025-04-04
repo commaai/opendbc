@@ -1,7 +1,7 @@
 from opendbc.can.packer import CANPacker
 from opendbc.car import Bus, apply_std_steer_angle_limits
 from opendbc.car.interfaces import CarControllerBase
-from opendbc.car.landrover.defendercan import create_lkas_command_defender
+from opendbc.car.landrover.defendercan import create_lkas_command_defender, create_hud_command_defender
 from opendbc.car.landrover.values import CarControllerParams
 
 
@@ -52,13 +52,11 @@ class CarController(CarControllerBase):
 
     can_sends = []
 
+
     if self.frame % 2 == 0:
       # Angular rate limit based on speed
       self.apply_angle_last = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgo,
                                                            CS.out.steeringAngleDeg, CC.latActive, CarControllerParams.ANGLE_LIMITS)
-
-      # HUD control
-      left_lane, right_lane = process_hud(CC.enabled, CC.latActive, CS.out.leftBlindspot, CS.out.rightBlindspot, hud_control)
 
       # LKAS msg
       can_sends.append(
@@ -66,6 +64,17 @@ class CarController(CarControllerBase):
              self.packer,
              CC.enabled, CC.latActive,
              self.apply_angle_last,
+             self.frame % 255,
+             ))
+
+    if self.frame % 4 == 0:
+      # HUD control
+      left_lane, right_lane = process_hud(CC.enabled, CC.latActive, CS.out.leftBlindspot, CS.out.rightBlindspot, hud_control)
+      # HUD msg
+      can_sends.append(
+        create_hud_command_defender(
+             self.packer,
+             CC.enabled, CC.latActive,
              self.frame % 255,
              left_lane, right_lane))
 

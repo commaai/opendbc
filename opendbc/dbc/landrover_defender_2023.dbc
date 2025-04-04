@@ -154,6 +154,12 @@ BO_ 496 LKAS_OP_TO_FLEXRAY: 8 comma
  SG_ counter : 15|8@0+ (1,0) [0|255] "" XXX
  SG_ ReqAngleTorque : 29|14@0+ (0.075,-675) [0|2047] "" XXX
  SG_ EnAngle : 31|1@0+ (1,0) [0|1] "" XXX
+ SG_ Engaged : 55|1@0+ (1,0) [0|1] "" XXX
+
+BO_ 505 HUD_OP_TO_FLEXRAY: 8 comma
+ SG_ Lkas_checksum : 7|8@0+ (1,0) [0|255] "" XXX
+ SG_ counter : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ EnAngle : 31|1@0+ (1,0) [0|1] "" XXX
  SG_ lane_left : 50|3@0+ (1,0) [0|7] "" XXX
  SG_ lane_right : 51|3@1+ (1,0) [0|7] "" XXX
  SG_ Engaged : 55|1@0+ (1,0) [0|1] "" XXX

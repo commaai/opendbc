@@ -75,7 +75,6 @@ static bool landrover_tx_hook(const CANPacket_t *to_send) {
   bool tx = true;
   int bus = GET_BUS(to_send);
 
-  print("landrover tx\n");
   if (bus == 1) {
 
     int addr = GET_ADDR(to_send);
@@ -88,10 +87,13 @@ static bool landrover_tx_hook(const CANPacket_t *to_send) {
       bool steer_control_enabled = GET_BIT(to_send, 31U);
 
       if (steer_angle_cmd_checks(desired_angle, steer_control_enabled, LANDROVER_STEERING_LIMITS)) {
-        //tx = false;
-        print(" 0x1F0  tx false\n");
+        tx = false;
       }
+    } else if (addr == 0x1f9) {
+        // HUD msg
+        tx = true; 
     }
+
 
     // Longitudinal control
     /* TODO
@@ -124,10 +126,13 @@ static bool landrover_fwd_hook(int bus, int addr) {
 static safety_config landrover_init(uint16_t param) {
   // 0x1F0 = LkasCmd, 0x1F1 = SCC
   static const CanMsg LANDROVER_TX_MSGS[] = {
-     {0x1F0, 1, 8, false}
+     {0x1F0, 1, 8, false} ,
+     {0x1F9, 1, 8, false} ,
   };
   static const CanMsg LANDROVER_LONG_TX_MSGS[] = {
-     {0x1F0, 1, 8, false}, {0x1F1, 1, 8, false}
+     {0x1F0, 1, 8, false}, 
+     {0x1F1, 1, 8, false}
+     {0x1F9, 1, 8, false} ,
   };
 
   landrover_longitudinal = false;
