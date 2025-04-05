@@ -11,7 +11,7 @@ import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerPanda
 
 TOYOTA_COMMON_TX_MSGS = [[0x2E4, 0], [0x191, 0], [0x412, 0], [0x343, 0], [0x1D2, 0]]  # LKAS + LTA + ACC & PCM cancel cmds
-TOYOTA_SECOC_TX_MSGS = [[0x131, 0], [0x183, 0], [0x750, 0]] + TOYOTA_COMMON_TX_MSGS
+TOYOTA_SECOC_TX_MSGS = [[0x131, 0], [0x183, 0]] + TOYOTA_COMMON_TX_MSGS
 TOYOTA_COMMON_LONG_TX_MSGS = [[0x283, 0], [0x2E6, 0], [0x2E7, 0], [0x33E, 0], [0x344, 0], [0x365, 0], [0x366, 0], [0x4CB, 0],  # DSU bus 0
                               [0x128, 1], [0x141, 1], [0x160, 1], [0x161, 1], [0x470, 1],  # DSU bus 1
                               [0x411, 0],  # PCS_HUD
@@ -73,12 +73,12 @@ class TestToyotaSafetyBase(common.PandaCarSafetyTest, common.LongitudinalAccelSa
     values = {"CRUISE_ACTIVE": enable}
     return self.packer.make_can_msg_panda("PCM_CRUISE", 0, values)
 
-  def test_diagnostics(self, stock_longitudinal: bool = False):
+  def test_diagnostics(self, stock_longitudinal: bool = False, ecu_disabled: bool = True):
     for should_tx, msg in ((False, b"\x6D\x02\x3E\x00\x00\x00\x00\x00"),  # fwdCamera tester present
                            (False, b"\x0F\x03\xAA\xAA\x00\x00\x00\x00"),  # non-tester present
                            (True, b"\x0F\x02\x3E\x00\x00\x00\x00\x00")):
       tester_present = libsafety_py.make_CANPacket(0x750, 0, msg)
-      self.assertEqual(should_tx and not stock_longitudinal, self._tx(tester_present))
+      self.assertEqual(should_tx and ecu_disabled and not stock_longitudinal, self._tx(tester_present))
 
   def test_block_aeb(self, stock_longitudinal: bool = False):
     for controls_allowed in (True, False):
@@ -320,6 +320,9 @@ class TestToyotaSecOcSafety(TestToyotaSafetyBase):
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE | ToyotaSafetyFlags.SECOC)
     self.safety.init_tests()
+
+  def test_diagnostics(self, ecu_disabled: bool = False):
+    super().test_diagnostics(ecu_disabled=ecu_disabled)
 
   @unittest.skip("test not applicable for cars without a DSU")
   def test_block_aeb(self, stock_longitudinal: bool = False):

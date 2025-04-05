@@ -16,7 +16,6 @@
   {0x2E4, 0, 8, true}, {0x131, 0, 8, false}, \
   {0x343, 0, 8, false},  /* ACC cancel cmd */  \
   {0x183, 0, 8, true},  /* ACC_CONTROL_2 */  \
-  {0x750, 0, 8, false},  /* radar diagnostic address */  \
 
 #define TOYOTA_COMMON_LONG_TX_MSGS                                                                                                                                                                  \
   TOYOTA_COMMON_TX_MSGS                                                                                                                                                                             \
