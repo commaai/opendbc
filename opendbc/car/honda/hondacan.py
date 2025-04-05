@@ -10,7 +10,9 @@ from opendbc.car.honda.values import HondaFlags, HONDA_BOSCH, HONDA_BOSCH_RADARL
 
 
 class CanBus(CanBusBase):
+
   def __init__(self, CP=None, fingerprint=None) -> None:
+
     # use fingerprint if specified
     super().__init__(CP if fingerprint is None else None, fingerprint)
 
@@ -73,7 +75,7 @@ def create_brake_command(packer, CAN, apply_brake, pump_on, pcm_override, pcm_ca
   return packer.make_can_msg("BRAKE_COMMAND", CAN.pt, values)
 
 
-def create_acc_commands(packer, CAN, enabled, active, accel, gas, stopping_counter, car_fingerprint):
+def create_acc_commands(packer, CAN, enabled, active, accel, gas, stopping_counter, car_fingerprint, speed_passthrough):
   commands = []
   min_gas_accel = CarControllerParams.BOSCH_GAS_LOOKUP_BP[0]
 
@@ -114,8 +116,16 @@ def create_acc_commands(packer, CAN, enabled, active, accel, gas, stopping_count
     commands.append(packer.make_can_msg("ACC_CONTROL_ON", CAN.pt, acc_control_on_values))
 
   commands.append(packer.make_can_msg("ACC_CONTROL", CAN.pt, acc_control_values))
-  return commands
 
+  if enabled and car_fingerprint in HONDA_BOSCH_RADARLESS:
+    speed_control_values = {
+      'CURRENT_SPEED': 401 if braking else -1,
+      'TARGET_SPEED': 0 if braking else -1,
+      'SPEED_CONTROL_ON': 1,
+      'PASSTHROUGH': speed_passthrough,
+    }
+    commands.append(packer.make_can_msg("SPEED_CONTROL", CAN.pt, speed_control_values))
+  return commands
 
 def create_steering_control(packer, CAN, apply_torque, lkas_active):
   values = {
@@ -135,7 +145,7 @@ def create_bosch_supplemental_1(packer, CAN):
   return packer.make_can_msg("BOSCH_SUPPLEMENTAL_1", CAN.lkas, values)
 
 
-def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_hud, lkas_hud):
+def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_hud, lkas_hud, speed_control):
   commands = []
   radar_disabled = CP.carFingerprint in (HONDA_BOSCH - HONDA_BOSCH_RADARLESS) and CP.openpilotLongitudinalControl
 
@@ -178,6 +188,13 @@ def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_
     lkas_hud_values['DASHED_LANES'] = hud.lanes_visible
     # car likely needs to see LKAS_PROBLEM fall within a specific time frame, so forward from camera
     lkas_hud_values['LKAS_PROBLEM'] = lkas_hud['LKAS_PROBLEM']
+    if not enabled:
+      speed_control_values = {}
+      speed_control_values['CURRENT_SPEED'] = speed_control['CURRENT_SPEED']
+      speed_control_values['TARGET_SPEED'] = speed_control['TARGET_SPEED']
+      speed_control_values['SPEED_CONTROL_ON'] = speed_control['SPEED_CONTROL_ON']
+      speed_control_values['PASSTHROUGH'] = speed_control['PASSTHROUGH']
+      commands.append(packer.make_can_msg("SPEED_CONTROL", CAN.lkas, speed_control_values))
 
   if not (CP.flags & HondaFlags.BOSCH_EXT_HUD):
     lkas_hud_values['SET_ME_X48'] = 0x48
