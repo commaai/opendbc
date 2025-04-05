@@ -253,7 +253,7 @@ class HondaBase(common.PandaCarSafetyTest):
       for enable_mads in (True, False):
         with self.subTest("enable_mads", mads_enabled=enable_mads):
           self._mads_states_cleanup()
-          self.safety.set_mads_params(enable_mads, False, False)
+          self.safety.set_mads_params(enable_mads, False)
 
           # Verify initial state
           self._rx(self._lkas_button_msg(False, 0))
