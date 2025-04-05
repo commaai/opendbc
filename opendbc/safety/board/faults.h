@@ -1,3 +1,4 @@
+#pragma once
 #include "faults_declarations.h"
 
 uint8_t fault_status = FAULT_STATUS_NONE;
