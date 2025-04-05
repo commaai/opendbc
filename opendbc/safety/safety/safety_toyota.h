@@ -210,10 +210,8 @@ static bool toyota_tx_hook(const CANPacket_t *to_send) {
       bool violation = false;
       if (toyota_secoc) {
         // SecOC cars move accel to 0x183. Only allow inactive accel on 0x343 to match stock behavior
-        if (desired_accel != TOYOTA_LONG_LIMITS.inactive_accel) {
-          violation = true;
-        }
-      }
+        violation = desired_accel != TOYOTA_LONG_LIMITS.inactive_accel;     
+     }
       violation |= longitudinal_accel_checks(desired_accel, TOYOTA_LONG_LIMITS);
 
       // only ACC messages that cancel are allowed when openpilot is not controlling longitudinal
@@ -236,7 +234,7 @@ static bool toyota_tx_hook(const CANPacket_t *to_send) {
       int desired_accel = (GET_BYTE(to_send, 0) << 8) | GET_BYTE(to_send, 1);
       desired_accel = to_signed(desired_accel, 16);
 
-      tx = longitudinal_accel_checks(desired_accel, TOYOTA_LONG_LIMITS);
+      tx = !longitudinal_accel_checks(desired_accel, TOYOTA_LONG_LIMITS);
     }
 
     // AEB: block all actuation. only used when DSU is unplugged
