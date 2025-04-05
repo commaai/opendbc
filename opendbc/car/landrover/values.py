@@ -119,7 +119,7 @@ class CAR(Platforms):
     [
       LandroverCarDocsDefender("LANDROVER DEFENDER 2023"),
     ],
-    CarSpecs(mass=2550, wheelbase=3.0, steerRatio=19.0, minSteerSpeed=51*CV.KPH_TO_MS),
+    CarSpecs(mass=2550, wheelbase=3.0, steerRatio=19.0, minSteerSpeed=50*CV.KPH_TO_MS),
     wmis=(WMI.LANDROVER),
     lines={ModelLine.L663},
     years={ModelYear.L_2020, ModelYear.P_2023},

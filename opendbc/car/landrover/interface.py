@@ -16,7 +16,7 @@ class CarInterface(CarInterfaceBase):
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.landrover)]
 
     ret.steerLimitTimer = 0.4
-    ret.steerActuatorDelay = 0.15  # Default delay
+    ret.steerActuatorDelay = 0.1  # Default delay
 
     #CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
     ret.steerControlType = structs.CarParams.SteerControlType.angle
