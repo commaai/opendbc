@@ -2654,13 +2654,14 @@
     ],
     "package": "All"
   },
-  "Tesla Model 3 (with HW4) 2024": {
+  "Tesla Model 3 (with HW4) 2024-25": {
     "platform": "TESLA_MODEL_3",
     "make": "Tesla",
     "brand": "tesla",
     "model": "Model 3 (with HW4)",
     "year": [
-      "2024"
+      "2024",
+      "2025"
     ],
     "package": "All"
   },
