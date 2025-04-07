@@ -42,8 +42,8 @@ class CAR(Platforms):
   RIVIAN_R1_GEN1 = RivianPlatformConfig(
     # TODO: verify this
     [
-      RivianCarDocs("Rivian R1S 2022-24"),
-      RivianCarDocs("Rivian R1T 2022-24"),
+      RivianCarDocs("Rivian R1S 2022-24", setup_video_link="https://youtu.be/SKxizuv2Mk0"),
+      RivianCarDocs("Rivian R1T 2022-24", setup_video_link="https://youtu.be/SKxizuv2Mk0"),
     ],
     CarSpecs(mass=3206., wheelbase=3.08, steerRatio=15.2),
     wmis={WMI.RIVIAN_TRUCK, WMI.RIVIAN_MPV},
