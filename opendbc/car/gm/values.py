@@ -74,9 +74,9 @@ class Footnote(Enum):
 @dataclass
 class GMCarDocs(CarDocs):
   package: str = "Adaptive Cruise Control (ACC)"
+  footnotes: list[Enum] = field(default_factory=lambda: [Footnote.SETUP])
 
   def init_make(self, CP: CarParams):
-    self.footnotes.insert(0, Footnote.SETUP)
     if CP.networkLocation == CarParams.NetworkLocation.fwdCamera:
       if CP.carFingerprint in SDGM_CAR:
         self.car_parts = CarParts.common([CarHarness.gmsdgm])

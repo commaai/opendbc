@@ -39,9 +39,7 @@ class Footnote(Enum):
 class NissanCarDocs(CarDocs):
   package: str = "ProPILOT Assist"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.nissan_a]))
-
-  def init_make(self, CP: CarParams):
-    self.footnotes.insert(0, Footnote.SETUP)
+  footnotes: list[Enum] = field(default_factory=lambda: [Footnote.SETUP])
 
 
 @dataclass(frozen=True)
