@@ -664,6 +664,7 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
     pass
 
   def _set_prev_desired_angle(self, t):
+    print("prev_desired_angle=%f, %f" % (t, t*self.DEG_TO_CAN))
     t = round(t * self.DEG_TO_CAN)
     self.safety.set_desired_angle_last(t)
 
@@ -680,6 +681,7 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
                                   self.safety.get_angle_meas_min, self.safety.get_angle_meas_max)
 
   def test_angle_cmd_when_enabled(self):
+    print("---test_angle_cmd_when_enabled");
     # when controls are allowed, angle cmd rate limit is enforced
     speeds = [0., 1., 5., 10., 15., 50.]
     angles = np.concatenate((np.arange(-self.STEER_ANGLE_MAX * 2, self.STEER_ANGLE_MAX * 2, 5), [0]))
@@ -742,6 +744,7 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
 
             # controls_allowed is checked if actuation bit is 1, else the angle must be close to meas (inactive)
             should_tx = controls_allowed if steer_control_enabled else angle_cmd == angle_meas
+            print("stx=%d sen=%d acmd=%d ameas=%d" % (should_tx, steer_control_enabled, angle_cmd, angle_meas))
             self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(angle_cmd, steer_control_enabled)))
 
 

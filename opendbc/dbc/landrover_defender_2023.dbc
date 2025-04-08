@@ -45,8 +45,9 @@ BO_ 1 CruiseInfo: 8 pt
 BO_ 17 Info02: 8 pt
  SG_ CheckSum : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ Counter : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ move : 13|1@0+ (1,0) [0|1] "" XXX
  SG_ BrakePedalPos : 31|8@0+ (1,0) [0|255] "" XXX
- SG_ WheelSpeed : 37|14@0+ (0.01,0) [0|16383] "" XXX
+ SG_ WheelSpeed : 38|15@0+ (0.01,0) [0|16383] "" XXX
 
 
 BO_ 36 LKAS_BTN: 8 XXX
@@ -128,14 +129,14 @@ BO_ 230 HandleSignal: 8 pt
 BO_ 237 WheelSpeedFront: 8 XXX
  SG_ checksum : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 11|4@0+ (1,0) [0|15] "" XXX
- SG_ SpeedLeft : 21|14@0+ (0.01,0) [0|8191] "" XXX
- SG_ SpeedRight : 37|14@0+ (0.01,0) [0|8191] "" XXX
+ SG_ SpeedLeft : 22|15@0+ (0.01,0) [0|8191] "" XXX
+ SG_ SpeedRight : 38|15@0+ (0.01,0) [0|8191] "" XXX
 
 BO_ 240 WheelSpeedRear: 8 XXX
  SG_ checksum : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 11|4@0+ (1,0) [0|15] "" XXX
- SG_ SpeedLeft : 21|14@0+ (0.01,0) [0|8191] "" XXX
- SG_ SpeedRight : 37|14@0+ (0.01,0) [0|8191] "" XXX
+ SG_ SpeedLeft : 22|15@0+ (0.01,0) [0|8191] "" XXX
+ SG_ SpeedRight : 38|15@0+ (0.01,0) [0|8191] "" XXX
 
 BO_ 264 GearPRND: 8 pt
  SG_ PRND_POS : 26|3@0+ (1,0) [0|7] "" XXX
@@ -152,7 +153,7 @@ BO_ 399 BlindSpot: 8 pt
 BO_ 496 LKAS_OP_TO_FLEXRAY: 8 comma
  SG_ Lkas_checksum : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ counter : 15|8@0+ (1,0) [0|255] "" XXX
- SG_ ReqAngleTorque : 29|14@0+ (0.07,-630) [0|2047] "" XXX
+ SG_ ReqAngleTorque : 29|14@0+ (0.075,-675) [0|2047] "" XXX
  SG_ EnAngle : 31|1@0+ (1,0) [0|1] "" XXX
  SG_ Engaged : 55|1@0+ (1,0) [0|1] "" XXX
 

@@ -1,7 +1,6 @@
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
 from opendbc.car import Bus, structs
-from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.landrover.values import CAR, DBC, CanBus, CarControllerParams
 
@@ -30,8 +29,6 @@ class CarState(CarStateBase):
     ret = structs.CarState()
 
     self.is_metric = True
-
-    speed_factor = CV.KPH_TO_MS if self.is_metric else CV.MPH_TO_MS
 
     ret.seatbeltUnlatched = (cp.vl["SeatBelt"]["SeatBelt_Driver"]  == 0)
     ret.doorOpen = not any([cp.vl["DoorStatus"]["FrontLeftDoor"], \
@@ -69,7 +66,7 @@ class CarState(CarStateBase):
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(gear))
 
     ret.brake = cp.vl["Info02"]["BrakePedalPos"]
-    ret.brakePressed = cp.vl["CruiseInfo"]["BrakeDriver"] == 1
+    ret.brakePressed = cp.vl["StopAndGo"]["BrakeDriver"] == 1
 
     ret.gas = cp.vl["GasPedal"]["GasPedalPos"]
     ret.gasPressed = cp.vl["GasPedal_ON"]["GasPedalDriver"] == 1
@@ -83,9 +80,7 @@ class CarState(CarStateBase):
 
     ret.cruiseState.available = cp.vl["CruiseInfo"]["CruiseOn"] == 1
     ret.cruiseState.enabled =  cp.vl["CruiseInfo"]["CruiseOn"] == 1
-    #ret.cruiseState.available = cp.vl["LKAS_BTN"]["LKAS_Btn_on"] == 1
-    #ret.cruiseState.enabled =  ret.cruiseState.available
-    ret.cruiseState.speed = ret.vEgoRaw * speed_factor
+    ret.cruiseState.speed = ret.vEgoRaw
     ret.cruiseState.standstill = False
 
 
@@ -109,6 +104,7 @@ class CarState(CarStateBase):
       ("SeatBelt", 100),
       ("LKAS_BTN", 16),
       ("CruiseInfo", 25),
+      ("StopAndGo", 50),
       ("GasPedal", 50),
       ("GasPedal_ON", 10),
       ("Info02", 25),

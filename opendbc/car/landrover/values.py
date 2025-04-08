@@ -21,7 +21,7 @@ class CarControllerParams:
   ACCEL_MAX = 2.0 # m/s
   ACCEL_MIN = -3.5 # m/s
   ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
-    360,  # deg
+    90,  # deg
     ([0., 5., 25.], [2.5, 1.5, 0.2]),
     ([0., 5., 25.], [5., 2.0, 0.3]),
   )

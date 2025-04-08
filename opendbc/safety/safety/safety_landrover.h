@@ -18,8 +18,9 @@ static void landrover_rx_hook(const CANPacket_t *to_push) {
 
     // Vehicle speed (info02)
     if (addr == 0x11) {
-      float speed  =  (((GET_BYTE(to_push, 4) & 0x3f) << 8) |  GET_BYTE(to_push, 5)) * 0.01 / 3.6;
-      vehicle_moving = GET_BIT(to_push, 13U);
+      // Vehicle speed: (val * 0.01) / MS_TO_KPH
+      float speed  =  (((GET_BYTE(to_push, 4) & 0x7f) << 8) |  GET_BYTE(to_push, 5)) * 0.01 / 3.6;
+      vehicle_moving = speed > 0.0;
       UPDATE_VEHICLE_SPEED(speed);
     }
 
@@ -31,26 +32,26 @@ static void landrover_rx_hook(const CANPacket_t *to_push) {
 
     // Gas pressed
     if (addr == 0x189) {
-      gas_pressed = GET_BIT(to_push, 58U);
+      gas_pressed = (GET_BIT(to_push, 58U) == 1);
     }
 
     // Brake pressed
-    if (addr == 0x1) {
-      brake_pressed = GET_BIT(to_push, 30U);
+    if (addr == 0x84) {
+      brake_pressed = (GET_BIT(to_push, 22U) == 1);
     }
 
     // Cruise state
     if (addr == 0x1) {
-      pcm_cruise_check(GET_BIT(to_push, 54U));
+      pcm_cruise_check((GET_BIT(to_push, 54U) == 1));
     }
   }
-
 }
+
 
 static bool landrover_tx_hook(const CANPacket_t *to_send) {
   const AngleSteeringLimits LANDROVER_STEERING_LIMITS = {
-    .max_angle = 3600,  // 360 deg, EPAS faults above this
-    .angle_deg_to_can = 10,
+    .max_angle = 1200,  // 90 deg, but LKAS about 30 deg
+    .angle_deg_to_can = 13.33,
     .angle_rate_up_lookup = {
       {0., 5., 25.},
       {2.5, 1.5, 0.2}
@@ -71,7 +72,6 @@ static bool landrover_tx_hook(const CANPacket_t *to_send) {
 
   UNUSED(LANDROVER_LONG_LIMITS);
 
-
   bool tx = true;
   int bus = GET_BUS(to_send);
 
@@ -79,35 +79,28 @@ static bool landrover_tx_hook(const CANPacket_t *to_send) {
 
     int addr = GET_ADDR(to_send);
 
-    // Steering control
+    // Steering control 
+    // (0.075 * val) - 675 in deg.
     if (addr == 0x1F0) {
       // We use 1/10 deg as a unit here
       int raw_angle_can = ((GET_BYTE(to_send, 3) & 0x3FU) << 8) | GET_BYTE(to_send, 4);
-      int desired_angle = (raw_angle_can - 9000) * 0.075;
+      int desired_angle = raw_angle_can - 9000U;
+
       bool steer_control_enabled = GET_BIT(to_send, 31U);
 
       if (steer_angle_cmd_checks(desired_angle, steer_control_enabled, LANDROVER_STEERING_LIMITS)) {
         tx = false;
       }
-    } else if (addr == 0x1f9) {
+
+    } else if (addr == 0x1F9) {
         // HUD msg
-        tx = true; 
+        tx = true;
     }
-
-
-    // Longitudinal control
-    /* TODO
-    if (addr == 0x160) {
-      int raw_accel = ((GET_BYTE(to_send, 2) << 3) | (GET_BYTE(to_send, 3) >> 5)) - 1024U;
-      if (longitudinal_accel_checks(raw_accel, LANDROVER_LONG_LIMITS)) {
-        tx = false;
-      }
-    }
-    */
   }
 
   return tx;
 }
+
 
 static bool landrover_fwd_hook(int bus, int addr) {
   bool block_msg = false;
@@ -124,15 +117,16 @@ static bool landrover_fwd_hook(int bus, int addr) {
 }
 
 static safety_config landrover_init(uint16_t param) {
-  // 0x1F0 = LkasCmd, 0x1F1 = SCC
+  // 0x1F0 = LkasCmd, 0x1F1 = ACC
   static const CanMsg LANDROVER_TX_MSGS[] = {
      {0x1F0, 1, 8, false} ,
      {0x1F9, 1, 8, false} ,
+     {0x1BE, 0, 8, true} , // check for relay
   };
   static const CanMsg LANDROVER_LONG_TX_MSGS[] = {
-     {0x1F0, 1, 8, false}, 
-     {0x1F1, 1, 8, false},
+     {0x1F0, 1, 8, false},
      {0x1F9, 1, 8, false},
+     {0x1BE, 0, 8, true},  // check for relay
   };
 
   landrover_longitudinal = false;
@@ -140,27 +134,22 @@ static safety_config landrover_init(uint16_t param) {
   static RxCheck landrover_rx_checks[] = {
     {.msg = {{0x56, 0, 8, .frequency = 100U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   // SWM_Angle (steer angle)
     {.msg = {{0x11, 0, 8, .frequency = 25U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},    // Speed Info02 
-    {.msg = {{0x2e, 0, 4, .frequency = 50U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   //  SWM_Torque (driver torque)
-    {.msg = {{0x189, 0, 8, .frequency = 10U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   //  GasPedal (gas pedal)
-    {.msg = {{0x1, 0, 8, .frequency = 25U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},     // CruiseInfo (brakes, cruise state)
+    {.msg = {{0x2e, 0, 4, .frequency = 50U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},    // SWM_Torque (driver torque)
+    {.msg = {{0x189, 0, 8, .frequency = 10U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   // GasPedal (gas pedal)
+    {.msg = {{0x84, 0, 8, .frequency = 50U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},    // StopAndGo (brakes)
+    {.msg = {{0x1, 0, 8, .frequency = 25U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},     // CruiseInfo (cruise state)
     {.msg = {{0x1BE, 2, 8, .frequency = 13U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   // CAM msg
   };
 
-  UNUSED(param);
+
   #ifdef ALLOW_DEBUG
     //const int FLAG_LANDROVER_LONG_CONTROL = 1;
     //landrover_longitudinal = GET_FLAG(param, FLAG_LANDROVER_LONG_CONTROL);
   #endif
 
-  // FIXME: cppcheck thinks that landrover_longitudinal is always false. This is not true
-  // if ALLOW_DEBUG is defined but cppcheck is run without ALLOW_DEBUG
-  // cppcheck-suppress knownConditionTrueFalse
-  /*
-
-  return landrover_longitudinal ? BUILD_SAFETY_CFG(landrover_rx_checks, LANDROVER_LONG_TX_MSGS) : \
-                               BUILD_SAFETY_CFG(landrover_rx_checks, LANDROVER_TX_MSGS);
-                               */
+  UNUSED(param);
   UNUSED(LANDROVER_LONG_TX_MSGS);
+
   return BUILD_SAFETY_CFG(landrover_rx_checks, LANDROVER_TX_MSGS);
 }
 
