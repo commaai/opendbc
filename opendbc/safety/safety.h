@@ -1,9 +1,6 @@
 #pragma once
 
 #include "safety_declarations.h"
-#include "board/can.h"
-#include "board/faults_declarations.h"
-#include "board/utils.h"
 
 // include the safety policies.
 #include "safety/safety_defaults.h"
@@ -29,6 +26,7 @@
 #include "safety/safety_hyundai_canfd.h"
 #endif
 
+#include "faults.h"
 
 extern uint32_t microsecond_timer_get(void);
 

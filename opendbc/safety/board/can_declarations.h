@@ -1,6 +1,8 @@
 #ifndef CAN_DEFINITION_H
 #define CAN_DEFINITION_H
 
+extern const unsigned char dlc_to_len[];
+
 #define CANPACKET_HEAD_SIZE 6U
 
 // TODO: this is always CANFD
@@ -24,6 +26,7 @@ typedef struct {
 } __attribute__((packed, aligned(4))) CANPacket_t;
 
 #define GET_BUS(msg) ((msg)->bus)
+#define GET_LEN(msg) (dlc_to_len[(msg)->data_len_code])
 #define GET_ADDR(msg) ((msg)->addr)
 
 #endif // CAN_DEFINITION_H

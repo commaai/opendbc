@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "board/can_declarations.h"
+#include "can.h"
 #include "board/utils.h"
 
 
