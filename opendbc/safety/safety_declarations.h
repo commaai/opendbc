@@ -3,10 +3,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#ifndef CAN_DEFINITION_H
 #include "board/can_declarations.h"
 #include "board/utils.h"
-#endif
 
 
 // from cereal.car.CarParams.SafetyModel

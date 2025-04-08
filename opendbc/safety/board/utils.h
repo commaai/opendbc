@@ -1,3 +1,5 @@
+#ifndef UTILS_DEFINITION_H
+#define UTILS_DEFINITION_H
 #pragma once
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
 #define MIN(a, b) ({ \
@@ -48,3 +50,5 @@
 static inline uint32_t get_ts_elapsed(uint32_t ts, uint32_t ts_last) {
   return ts - ts_last;
 }
+
+#endif // UTILS_DEFINITION_H

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CAN_DEFINITION_H
+#define CAN_DEFINITION_H
 
 #define CANPACKET_HEAD_SIZE 6U
 
@@ -24,3 +25,6 @@ typedef struct {
 
 #define GET_BUS(msg) ((msg)->bus)
 #define GET_ADDR(msg) ((msg)->addr)
+
+#endif // CAN_DEFINITION_H
+
