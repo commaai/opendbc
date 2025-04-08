@@ -1,7 +1,7 @@
 #ifndef CAN_DEFINITION_H
 #define CAN_DEFINITION_H
 
-extern const unsigned char dlc_to_len[];
+extern const unsigned char dlc_to_len[16];
 
 #define CANPACKET_HEAD_SIZE 6U
 
