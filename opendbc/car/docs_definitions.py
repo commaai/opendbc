@@ -334,7 +334,7 @@ class CarDocs:
       Column.STEERING_TORQUE: Star.EMPTY,
       Column.AUTO_RESUME: Star.FULL if self.auto_resume else Star.EMPTY,
       Column.HARDWARE: hardware_col,
-      Column.VIDEO: list(filter(bool, [self.video_link, self.setup_video_link])),  # replaced with an image and link from template in get_column
+      Column.VIDEO: self.video_link if self.video_link is not None else "",  # replaced with an image and link from template in get_column
     }
 
     if self.support_link is not None:
@@ -401,7 +401,7 @@ class CarDocs:
     elif column == Column.MODEL and len(self.years):
       item += f" {self.years}"
     elif column == Column.VIDEO and len(item) > 0:
-      item = item.map(lambda video: video_icon.format(video)).join("")
+      item = video_icon.format(item)
 
     footnotes = get_footnotes(self.footnotes, column)
     if len(footnotes):
