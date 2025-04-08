@@ -40,8 +40,6 @@
 #define UNUSED(x) ((void)(x))
 #endif
 
-#define UNUSED_FUNC __attribute__((unused))
-
 #define COMPILE_TIME_ASSERT(pred) ((void)sizeof(char[1 - (2 * (!(pred) ? 1 : 0))]))
 
 // compute the time elapsed (in microseconds) from 2 counter samples
