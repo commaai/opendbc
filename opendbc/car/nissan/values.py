@@ -31,7 +31,7 @@ class NissanSafetyFlags(IntFlag):
 
 class Footnote(Enum):
   SETUP = CarFootnote(
-    "See more setup details for <a href=\"https://github.com/commaai/openpilot/wiki/nissan\">Nissan</a>.",
+    "See more setup details for <a href=\"https://github.com/commaai/openpilot/wiki/nissan\" target=\"_blank\">Nissan</a>.",
     Column.MAKE, setup_note=True)
 
 
