@@ -67,7 +67,7 @@ class GMSafetyFlags(IntFlag):
 
 class Footnote(Enum):
   SETUP = CarFootnote(
-    "See more setup details for <a href=\"https://github.com/commaai/openpilot/wiki/gm\">GM</a>.",
+    "See more setup details for <a href=\"https://github.com/commaai/openpilot/wiki/gm\" target=\"_blank\">GM</a>.",
     Column.MAKE, setup_note=True)
 
 
