@@ -1,3 +1,4 @@
+import math
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
 from opendbc.car import Bus, structs
@@ -17,6 +18,7 @@ class CarState(CarStateBase):
 
     self.is_metric = True
     self.params = CarControllerParams(CP)
+    self.wheelbase = CP.wheelbase
 
 
   def update(self, can_parsers) -> structs.CarState:
@@ -52,7 +54,11 @@ class CarState(CarStateBase):
 
     ret.steeringAngleDeg = cp.vl["SWM_Angle"]["SteerAngle"]
     ret.steeringRateDeg = cp.vl["SWM_Angle"]["SteerRate"]  # TODO
-    ret.yawRate = 0.
+
+    steer_rad = math.radians(ret.steeringAngleDeg)
+    yawrate_rad_s = math.tan(steer_rad) * ret.vEgo / self.wheelbase
+
+    ret.yawRate = math.degrees(yawrate_rad_s)
 
     # TODO torq TorqEPS Pressed
     ret.steeringTorque = cp.vl["SWM_Torque"]["TorqueDriver"]
