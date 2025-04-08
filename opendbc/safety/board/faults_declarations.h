@@ -1,5 +1,4 @@
 #pragma once
-#include <stdint.h>
 
 #define FAULT_STATUS_NONE 0U
 #define FAULT_STATUS_TEMPORARY 1U
