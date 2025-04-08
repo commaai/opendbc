@@ -77,7 +77,7 @@ static bool mazda_tx_hook(const CANPacket_t *to_send) {
     // cruise buttons check
     if (addr == MAZDA_CRZ_BTNS) {
       // allow resume spamming while controls allowed, but
-      // only allow cancel while contrls not allowed
+      // only allow cancel while controls not allowed
       bool cancel_cmd = (GET_BYTE(to_send, 0) == 0x1U);
       if (!controls_allowed && !cancel_cmd) {
         tx = false;
