@@ -21,7 +21,7 @@
   {0x1E0, e_can, 16, .check_relay = false},         /* LFAHDA_CLUSTER */ \
 
 #define HYUNDAI_CANFD_SCC_CONTROL_COMMON_TX_MSGS(e_can, longitudinal) \
-  {0x1A0, e_can, 32, (longitudinal)},  /* SCC_CONTROL */              \
+  {0x1A0, e_can, 32, .check_relay = (longitudinal)},  /* SCC_CONTROL */ \
 
 // *** Addresses checked in rx hook ***
 // EV, ICE, HYBRID: ACCELERATOR (0x35), ACCELERATOR_BRAKE_ALT (0x100), ACCELERATOR_ALT (0x105)
