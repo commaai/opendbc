@@ -67,14 +67,12 @@ class RadarInterface(RadarInterfaceBase):
         if ii in self.pts:
           del self.pts[ii]
 
-    errors = []
     if not self.rcp.can_valid:
-      errors.append("canError")
+      ret.errors.canError = True
     if self.radar_fault:
-      errors.append("fault")
+      ret.errors.radarFault = True
     if self.radar_wrong_config:
-      errors.append("wrongConfig")
-    ret.errors = errors
+      ret.errors.wrongConfig = True
 
     ret.points = list(self.pts.values())
 
