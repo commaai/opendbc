@@ -224,9 +224,10 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
   for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
     const CanMsg *m = &current_safety_config.tx_msgs[i];
     if (m->check_relay) {
-      generic_rx_checks((m->addr == addr) && (m->bus == bus));
+      stock_ecu_check((m->addr == addr) && (m->bus == bus));
     }
   }
+  generic_rx_checks();
 
   // reset mismatches on rising edge of controls_allowed to avoid rare race condition
   if (controls_allowed && !controls_allowed_prev) {
@@ -355,10 +356,7 @@ static void relay_malfunction_set(void) {
   fault_occurred(FAULT_RELAY_MALFUNCTION);
 }
 
-static void generic_rx_checks(bool stock_ecu_detected) {
-  // allow 1s of transition timeout after relay changes state before assessing malfunctioning
-  const uint32_t RELAY_TRNS_TIMEOUT = 1U;
-
+static void generic_rx_checks() {
   // exit controls on rising edge of gas press
   if (gas_pressed && !gas_pressed_prev && !(alternative_experience & ALT_EXP_DISABLE_DISENGAGE_ON_GAS)) {
     controls_allowed = false;
@@ -376,6 +374,11 @@ static void generic_rx_checks(bool stock_ecu_detected) {
     controls_allowed = false;
   }
   regen_braking_prev = regen_braking;
+}
+
+static void stock_ecu_check(bool stock_ecu_detected) {
+  // allow 1s of transition timeout after relay changes state before assessing malfunctioning
+  const uint32_t RELAY_TRNS_TIMEOUT = 1U;
 
   // check if stock ECU is on bus broken by car harness
   if ((safety_mode_cnt > RELAY_TRNS_TIMEOUT) && stock_ecu_detected) {
