@@ -281,20 +281,11 @@ int safety_fwd_hook(int bus_num, int addr) {
   bool blocked = relay_malfunction || current_safety_config.disable_forwarding;
   const int destination_bus = get_fwd_bus(bus_num);
 
-  bool safety_blocked = false;
-  if (current_hooks->fwd != NULL) {
-    safety_blocked = current_hooks->fwd(bus_num, addr);
-  }
-
   if (!blocked) {
     for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
       const CanMsg *m = &current_safety_config.tx_msgs[i];
-      if ((m->addr == addr) && (m->bus == destination_bus)) {
-        if (!safety_blocked && m->blocked) {
-          blocked = false;
-        } else {
-          blocked = true;
-        }
+      if (m->blocked && (m->addr == addr) && (m->bus == destination_bus)) {
+        blocked = true;
         break;
       }
     }
