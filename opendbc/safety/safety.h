@@ -275,7 +275,7 @@ int safety_fwd_hook(int bus_num, int addr) {
   for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
     const CanMsg *m = &current_safety_config.tx_msgs[i];
     if (m->check_relay) {
-      generic_rx_checks((m->addr == addr) && (m->bus == bus_num));
+      stock_ecu_check((m->addr == addr) && (m->bus == bus_num));
     }
   }
 
