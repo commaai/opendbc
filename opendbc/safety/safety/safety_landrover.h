@@ -34,12 +34,6 @@ static void landrover_rx_hook(const CANPacket_t *to_push) {
       UPDATE_VEHICLE_SPEED(speed);
     }
 
-    // Driver torque
-    if (addr == 0x2e) {
-      int torque_driver_new = GET_BYTE(to_push, 3) ;
-      update_sample(&torque_driver, torque_driver_new);
-    }
-
     // Gas pressed
     if (addr == 0x189) {
       gas_pressed = (GET_BIT(to_push, 58U) == 1);

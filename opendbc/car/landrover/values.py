@@ -57,7 +57,7 @@ class Footnote(Enum):
     "Requires a " +
     "<a href=\"https://blog.comma.ai/hacking-an-audi-performing-a-man-in-the-middle-attack-on-flexray/\" target=\"_blank\">FlexRay Car Harness</a> " +
     "flexray <a href=\"https://en.wikipedia.org/wiki/FlexRay\" target=\"_blank\">FexRay car</a>.",
-    Column.MODEL, shop_footnote=False)
+    Column.MODEL)
 
 @dataclass
 class LandroverCarDocsDefender(CarDocs):
