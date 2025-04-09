@@ -2,6 +2,7 @@ import unittest
 
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.libsafety import libsafety_py
+from opendbc.safety.tests.common import make_msg
 
 
 class Buttons:
@@ -150,5 +151,5 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
 
     addr, bus = self.DISABLED_ECU_ACTUATION_MSG
     self.assertFalse(self.safety.get_relay_malfunction())
-    self.safety.safety_fwd_hook(bus, addr)
+    self._rx(make_msg(bus, addr, 8))
     self.assertTrue(self.safety.get_relay_malfunction())
