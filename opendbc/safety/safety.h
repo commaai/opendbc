@@ -269,7 +269,6 @@ static int get_fwd_bus(int bus_num) {
 }
 
 int safety_fwd_hook(int bus_num, int addr) {
-  // TODO: Note this is a divergence of previous behavior which allowed messages through one message after detecting relay malfunction
   // the relay malfunction hook runs on all incoming rx messages.
   // check all tx msgs for liveness on sending bus if specified.
   // used to detect a relay malfunction or control messages from disabled ECUs like the radar
@@ -280,7 +279,6 @@ int safety_fwd_hook(int bus_num, int addr) {
     }
   }
 
-  // check for blocked messages
   bool blocked = relay_malfunction || current_safety_config.disable_forwarding;
 
   if (!blocked && (current_hooks->fwd != NULL)) {
