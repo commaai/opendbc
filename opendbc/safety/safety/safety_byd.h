@@ -109,7 +109,7 @@ static bool byd_tx_hook(const CANPacket_t *to_send) {
     int addr = GET_ADDR(to_send);
     if (addr == BYD_CANADDR_ACC_MPC_STATE) {
       int desired_torque = ((GET_BYTE(to_send, 3) & 0x07U) << 8U) | GET_BYTE(to_send, 2);
-      bool steer_req = GET_BIT(to_send, 28U) && byd_eps_cruiseactivated; //LKAS_Active
+      bool steer_req = GET_BIT(to_send, 28U) || byd_eps_cruiseactivated; //LKAS_Active
       if ( desired_torque >= 1024 )
         desired_torque -= 2048;
       const TorqueSteeringLimits limits = (byd_platform == HAN_TANG_DMEV) ? HAN_DMEV_STEERING_LIMITS :
