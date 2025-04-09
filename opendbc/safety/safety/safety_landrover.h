@@ -2,13 +2,14 @@
 
 #include "safety_declarations.h"
 
-static bool landrover_longitudinal = false;
+static bool landrover_longitudinal;
 
 static void landrover_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
-  int addr = GET_ADDR(to_push);
 
   if (bus == 0)  {
+    int addr = GET_ADDR(to_push);
+
     /**
     // Steering angle: (0.1 * val) - 780 in deg.
     if (addr == 0x56) {
@@ -21,15 +22,15 @@ static void landrover_rx_hook(const CANPacket_t *to_push) {
     // PSCM_Out Steering angleTorque: (0.07687 * val) - 691.89 in deg.
     if (addr == 0x32) {
       // Store it 1/10 deg to match steering request
-      int angle_meas_new = (((GET_BYTE(to_push, 2) & 0x3FU) << 8) | GET_BYTE(to_push, 3)) - 9000U;
-      angle_meas_new = angle_meas_new ;
+      int angle_meas_new = (((GET_BYTE(to_push, 2) & 0x3FU) << 8) | GET_BYTE(to_push, 3)) - 9000;
       update_sample(&angle_meas, angle_meas_new);
     }
 
     // Vehicle speed (info02)
     if (addr == 0x11) {
       // Vehicle speed: (val * 0.01) / MS_TO_KPH
-      float speed  =  (((GET_BYTE(to_push, 4) & 0x7f) << 8) |  GET_BYTE(to_push, 5)) * 0.01 / 3.6;
+      float speed  = (float)((((GET_BYTE(to_push, 4) & 0x7F) << 8) | GET_BYTE(to_push, 5))) * 0.01f / 3.6f;
+
       vehicle_moving = speed > 0.0;
       UPDATE_VEHICLE_SPEED(speed);
     }
@@ -88,7 +89,7 @@ static bool landrover_tx_hook(const CANPacket_t *to_send) {
     if (addr == 0x1F0) {
       // We use 1/12.8485 deg as a unit here
       int raw_angle_can = ((GET_BYTE(to_send, 3) & 0x3FU) << 8) | GET_BYTE(to_send, 4);
-      int desired_angle = raw_angle_can - 9000U;
+      int desired_angle = raw_angle_can - 9000;
 
       bool steer_control_enabled = GET_BIT(to_send, 31U);
 
@@ -96,9 +97,6 @@ static bool landrover_tx_hook(const CANPacket_t *to_send) {
         tx = false;
       }
 
-    } else if (addr == 0x1F9) {
-        // HUD msg
-        tx = true;
     }
   }
 
