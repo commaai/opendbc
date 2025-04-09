@@ -751,7 +751,6 @@ class PandaSafetyTest(PandaSafetyTestBase):
                    *range(0x18DA00F1, 0x18DB00F1, 0x100),   # 29-bit UDS physical addressing
                    *range(0x18DB00F1, 0x18DC00F1, 0x100),   # 29-bit UDS functional addressing
                    *range(0x3300, 0x3400)]                  # Honda
-  RELAY_MALFUNCTION_ADDRS: dict[int, tuple[int, ...]] | None = {}
   FWD_BLACKLISTED_ADDRS: dict[int, list[int]] = {}  # {bus: [addr]}
   FWD_BUS_LOOKUP: dict[int, int] = {0: 2, 2: 0}
 
@@ -775,12 +774,9 @@ class PandaSafetyTest(PandaSafetyTestBase):
     # some safety modes don't forward anything, while others blacklist msgs
     for bus in range(3):
       for addr in self.SCANNED_ADDRS:
-        self.safety.set_relay_malfunction(False)
         # assume len 8
         fwd_bus = self.FWD_BUS_LOOKUP.get(bus, -1)
         if bus in self.FWD_BLACKLISTED_ADDRS and addr in self.FWD_BLACKLISTED_ADDRS[bus]:
-          fwd_bus = -1
-        if bus in self.RELAY_MALFUNCTION_ADDRS and addr in self.RELAY_MALFUNCTION_ADDRS[bus]:
           fwd_bus = -1
         self.assertEqual(fwd_bus, self.safety.safety_fwd_hook(bus, addr), f"{addr=:#x} from {bus=} to {fwd_bus=}")
 
@@ -882,6 +878,7 @@ class PandaSafetyTest(PandaSafetyTestBase):
 class PandaCarSafetyTest(PandaSafetyTest):
   STANDSTILL_THRESHOLD: float = 0.0
   GAS_PRESSED_THRESHOLD = 0
+  RELAY_MALFUNCTION_ADDRS: dict[int, tuple[int, ...]] | None = None
 
   @classmethod
   def setUpClass(cls):
@@ -922,7 +919,7 @@ class PandaCarSafetyTest(PandaSafetyTest):
     for bus in range(3):
       for addr in self.SCANNED_ADDRS:
         self.safety.set_relay_malfunction(False)
-        self.safety.safety_fwd_hook(bus, addr)
+        self._rx(make_msg(bus, addr, 8))
         should_relay_malfunction = addr in self.RELAY_MALFUNCTION_ADDRS.get(bus, ())
         self.assertEqual(should_relay_malfunction, self.safety.get_relay_malfunction(), (bus, hex(addr)))
 
