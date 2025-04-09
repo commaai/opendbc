@@ -190,7 +190,7 @@ class CarParts:
     return self.parts + parts
 
 
-CarFootnote = namedtuple("CarFootnote", ["text", "column", "docs_only", "shop_footnote"], defaults=(False, False))
+CarFootnote = namedtuple("CarFootnote", ["text", "column", "docs_only", "setup_note"], defaults=(False, False))
 
 
 class CommonFootnote(Enum):
@@ -255,6 +255,7 @@ class CarDocs:
   requirements: str | None = None
 
   video_link: str | None = None
+  setup_video_link: str | None = None
   footnotes: list[Enum] = field(default_factory=list)
   min_steer_speed: float | None = None
   min_enable_speed: float | None = None
