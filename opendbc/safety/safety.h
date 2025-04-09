@@ -216,6 +216,9 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
     current_hooks->rx(to_push);
   }
 
+  // Handles gas, brake, and regen paddle
+  generic_rx_checks();
+
   // the relay malfunction hook runs on all incoming rx messages.
   // check all tx msgs for liveness on sending bus if specified.
   // used to detect a relay malfunction or control messages from disabled ECUs like the radar
@@ -227,7 +230,6 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
       stock_ecu_check((m->addr == addr) && (m->bus == bus));
     }
   }
-  generic_rx_checks();
 
   // reset mismatches on rising edge of controls_allowed to avoid rare race condition
   if (controls_allowed && !controls_allowed_prev) {
