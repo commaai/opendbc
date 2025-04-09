@@ -22,14 +22,14 @@
 
 static bool byd_eps_cruiseactivated = false;
 
-typedef enum {
-  HAN_TANG_DMEV,
-  TANG_DMI,
-  SONG_PLUS_DMI,
-  QIN_PLUS_DMI,
-  YUAN_PLUS_DMI_ATTO3
-} BydPlatform;
-static BydPlatform byd_platform;
+// typedef enum {
+//   HAN_TANG_DMEV,
+//   TANG_DMI,
+//   SONG_PLUS_DMI,
+//   QIN_PLUS_DMI,
+//   YUAN_PLUS_DMI_ATTO3
+// } BydPlatform;
+// static BydPlatform byd_platform;
 
 static void byd_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
@@ -195,7 +195,7 @@ static safety_config byd_init(uint16_t param) {
 
   //   ret = BUILD_SAFETY_CFG(byd_yuanplus_atto3_rx_checks, BYD_YUANPLUS_ATTO3_TX_MSGS);
   // } else {
-    byd_platform = HAN_TANG_DMEV;
+    // byd_platform = HAN_TANG_DMEV;
     ret = BUILD_SAFETY_CFG(byd_han_dmev_rx_checks, BYD_HAN_DMEV_TX_MSGS);
   // }
 
