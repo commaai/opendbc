@@ -88,8 +88,8 @@ static bool landrover_tx_hook(const CANPacket_t *to_send) {
     // (0.07783 * val) - 729.63 in deg.
     if (addr == 0x1F0) {
       // We use 1/12.8485 deg as a unit here
-      int raw_angle_can = ((GET_BYTE(to_send, 3) & 0x3FU) << 8) | GET_BYTE(to_send, 4);
-      int desired_angle = raw_angle_can - 9000;
+      unsigned int raw_angle_can = ((GET_BYTE(to_send, 3) & 0x3FU) << 8) | GET_BYTE(to_send, 4);
+      int desired_angle = (int)raw_angle_can - 9000;
 
       bool steer_control_enabled = GET_BIT(to_send, 31U);
 
@@ -146,10 +146,11 @@ static safety_config landrover_init(uint16_t param) {
 
 
   #ifdef ALLOW_DEBUG
-    //const int FLAG_LANDROVER_LONG_CONTROL = 1;
-    //landrover_longitudinal = GET_FLAG(param, FLAG_LANDROVER_LONG_CONTROL);
+    const int FLAG_LANDROVER_LONG_CONTROL = 1;
+    landrover_longitudinal = GET_FLAG(param, FLAG_LANDROVER_LONG_CONTROL);
   #endif
 
+  UNUSED(landrover_longitudinal);
   UNUSED(param);
   UNUSED(LANDROVER_LONG_TX_MSGS);
 
