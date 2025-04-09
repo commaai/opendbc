@@ -350,7 +350,7 @@ static safety_config ford_init(uint16_t param) {
     {.msg = {{FORD_DesiredTorqBrk, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
   };
 
-  #define FORD_COMMON_TX_MSGS              \
+  #define FORD_COMMON_TX_MSGS \
     {FORD_Steering_Data_FD1, 0, 8, .check_relay = false}, \
     {FORD_Steering_Data_FD1, 2, 8, .check_relay = false}, \
     {FORD_ACCDATA_3, 0, 8, .check_relay = true},          \
