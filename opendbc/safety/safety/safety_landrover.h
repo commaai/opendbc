@@ -2,8 +2,6 @@
 
 #include "safety_declarations.h"
 
-static bool landrover_longitudinal = false;
-
 static void landrover_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
 
@@ -132,8 +130,6 @@ static safety_config landrover_init(uint16_t param) {
      {0x1BE, 0, 8, true},  // check for relay
   };
 
-  landrover_longitudinal = false;
-
   static RxCheck landrover_rx_checks[] = {
     {.msg = {{0x56, 0, 8, .frequency = 100U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   // SWM_Angle (steer angle)
     {.msg = {{0x32, 0, 8, .frequency = 50U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   // PSCM_Out (angleTorque)
@@ -146,12 +142,6 @@ static safety_config landrover_init(uint16_t param) {
   };
 
 
-  #ifdef ALLOW_DEBUG
-    const int FLAG_LANDROVER_LONG_CONTROL = 1;
-    landrover_longitudinal = GET_FLAG(param, FLAG_LANDROVER_LONG_CONTROL);
-  #endif
-
-  UNUSED(landrover_longitudinal);
   UNUSED(param);
   UNUSED(LANDROVER_LONG_TX_MSGS);
 
