@@ -28,7 +28,13 @@ static void landrover_rx_hook(const CANPacket_t *to_push) {
     // Vehicle speed (info02)
     if (addr == 0x11) {
       // Vehicle speed: (val * 0.01) / MS_TO_KPH
-      float speed = ((((float)(GET_BYTE(to_push, 4) & 0x7F) * 256.0f) + (float)GET_BYTE(to_push, 5)) * 0.01f) / 3.6f;
+      uint8_t high_byte = GET_BYTE(to_push, 4) & 0x7F;
+      uint8_t low_byte = GET_BYTE(to_push, 5);
+
+      float high = (float)high_byte;
+      float low = (float)low_byte;
+
+      float speed = ((high * 256.0f + low) * 0.01f) / 3.6f;
 
       vehicle_moving = speed > 0.0;
       UPDATE_VEHICLE_SPEED(speed);
