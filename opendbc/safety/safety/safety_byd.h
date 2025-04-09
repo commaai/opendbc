@@ -43,8 +43,8 @@ static void byd_rx_hook(const CANPacket_t *to_push) {
       vehicle_moving = (speed_raw != 0);
     } else if (addr == BYD_CANADDR_ACC_EPS_STATE) {
       byd_eps_cruiseactivated = GET_BIT(to_push, 1U) != 0U; // CruiseActivated
-      int torque_motor = (((GET_BYTE(to_push, 2) & 0x0FU) << 8) | GET_BYTE(to_push, 1)); // MainTorque
-      if ( torque_motor >= 2048 )
+      int torque_motor = ((GET_BYTE(to_push, 2) & 0xFU) << 8) | GET_BYTE(to_push, 1); // MainTorque
+      if ( torque_motor > 2047 )
         torque_motor -= 4096;
       update_sample(&torque_meas, torque_motor);
     }
@@ -114,7 +114,7 @@ static bool byd_tx_hook(const CANPacket_t *to_send) {
     if (addr == BYD_CANADDR_ACC_MPC_STATE) {
       int desired_torque = ((GET_BYTE(to_send, 3) & 0x07U) << 8U) | GET_BYTE(to_send, 2);
       bool steer_req = GET_BIT(to_send, 28U) || byd_eps_cruiseactivated; //LKAS_Active
-      if ( desired_torque >= 1024 )
+      if ( desired_torque > 1023 )
         desired_torque -= 2048;
       // const TorqueSteeringLimits limits = (byd_platform == HAN_TANG_DMEV) ? HAN_DMEV_STEERING_LIMITS :
       //                                     (byd_platform == TANG_DMI) ? TANG_DMI_STEERING_LIMITS :
