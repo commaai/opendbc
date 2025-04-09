@@ -2,7 +2,7 @@
 
 #include "safety_declarations.h"
 
-static bool landrover_longitudinal;
+static bool landrover_longitudinal = false;
 
 static void landrover_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
@@ -22,14 +22,15 @@ static void landrover_rx_hook(const CANPacket_t *to_push) {
     // PSCM_Out Steering angleTorque: (0.07687 * val) - 691.89 in deg.
     if (addr == 0x32) {
       // Store it 1/10 deg to match steering request
-      int angle_meas_new = (((GET_BYTE(to_push, 2) & 0x3FU) << 8) | GET_BYTE(to_push, 3)) - 9000;
+      unsigned int raw_val = (((GET_BYTE(to_push, 2) & 0x3FU) << 8) | GET_BYTE(to_push, 3));
+      int angle_meas_new = (int)raw_val - 9000;
       update_sample(&angle_meas, angle_meas_new);
     }
 
     // Vehicle speed (info02)
     if (addr == 0x11) {
       // Vehicle speed: (val * 0.01) / MS_TO_KPH
-      float speed  = (float)((((GET_BYTE(to_push, 4) & 0x7F) << 8) | GET_BYTE(to_push, 5))) * 0.01f / 3.6f;
+      float speed = ((((float)(GET_BYTE(to_push, 4) & 0x7F) * 256.0f) + (float)GET_BYTE(to_push, 5)) * 0.01f) / 3.6f;
 
       vehicle_moving = speed > 0.0;
       UPDATE_VEHICLE_SPEED(speed);
