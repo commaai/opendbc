@@ -742,7 +742,6 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
 
             # controls_allowed is checked if actuation bit is 1, else the angle must be close to meas (inactive)
             should_tx = controls_allowed if steer_control_enabled else angle_cmd == angle_meas
-            print("stx=%d sen=%d acmd=%d ameas=%d" % (should_tx, steer_control_enabled, angle_cmd, angle_meas))
             self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(angle_cmd, steer_control_enabled)))
 
 

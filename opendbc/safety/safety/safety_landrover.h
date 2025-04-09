@@ -9,10 +9,20 @@ static void landrover_rx_hook(const CANPacket_t *to_push) {
   int addr = GET_ADDR(to_push);
 
   if (bus == 0)  {
+    /**
     // Steering angle: (0.1 * val) - 780 in deg.
     if (addr == 0x56) {
       // Store it 1/10 deg to match steering request
       int angle_meas_new = (((GET_BYTE(to_push, 3) & 0x3FU) << 8) | GET_BYTE(to_push, 4)) - 7800U;
+      update_sample(&angle_meas, angle_meas_new);
+    }
+    **/
+
+    // PSCM_Out Steering angleTorque: (0.07687 * val) - 691.89 in deg.
+    if (addr == 0x32) {
+      // Store it 1/10 deg to match steering request
+      int angle_meas_new = (((GET_BYTE(to_push, 2) & 0x3FU) << 8) | GET_BYTE(to_push, 3)) - 9000U;
+      angle_meas_new = angle_meas_new ;
       update_sample(&angle_meas, angle_meas_new);
     }
 
@@ -50,8 +60,8 @@ static void landrover_rx_hook(const CANPacket_t *to_push) {
 
 static bool landrover_tx_hook(const CANPacket_t *to_send) {
   const AngleSteeringLimits LANDROVER_STEERING_LIMITS = {
-    .max_angle = 1200,  // 90 deg, but LKAS about 30 deg
-    .angle_deg_to_can = 13.33,
+    .max_angle = 1171,  // 90 deg, but LKAS about 30 deg
+    .angle_deg_to_can = 13.009,
     .angle_rate_up_lookup = {
       {0., 5., 25.},
       {2.5, 1.5, 0.2}
@@ -80,9 +90,9 @@ static bool landrover_tx_hook(const CANPacket_t *to_send) {
     int addr = GET_ADDR(to_send);
 
     // Steering control 
-    // (0.075 * val) - 675 in deg.
+    // (0.07783 * val) - 729.63 in deg.
     if (addr == 0x1F0) {
-      // We use 1/10 deg as a unit here
+      // We use 1/12.8485 deg as a unit here
       int raw_angle_can = ((GET_BYTE(to_send, 3) & 0x3FU) << 8) | GET_BYTE(to_send, 4);
       int desired_angle = raw_angle_can - 9000U;
 
@@ -133,6 +143,7 @@ static safety_config landrover_init(uint16_t param) {
 
   static RxCheck landrover_rx_checks[] = {
     {.msg = {{0x56, 0, 8, .frequency = 100U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   // SWM_Angle (steer angle)
+    {.msg = {{0x32, 0, 8, .frequency = 50U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   // PSCM_Out (angleTorque)
     {.msg = {{0x11, 0, 8, .frequency = 25U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},    // Speed Info02 
     {.msg = {{0x2e, 0, 4, .frequency = 50U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},    // SWM_Torque (driver torque)
     {.msg = {{0x189, 0, 8, .frequency = 10U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   // GasPedal (gas pedal)
