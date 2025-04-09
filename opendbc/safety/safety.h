@@ -219,18 +219,6 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
   // Handles gas, brake, and regen paddle
   generic_rx_checks();
 
-  // the relay malfunction hook runs on all incoming rx messages.
-  // check all tx msgs for liveness on sending bus if specified.
-  // used to detect a relay malfunction or control messages from disabled ECUs like the radar
-  const int bus = GET_BUS(to_push);
-  const int addr = GET_ADDR(to_push);
-  for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
-    const CanMsg *m = &current_safety_config.tx_msgs[i];
-    if (m->check_relay) {
-      stock_ecu_check((m->addr == addr) && (m->bus == bus));
-    }
-  }
-
   // reset mismatches on rising edge of controls_allowed to avoid rare race condition
   if (controls_allowed && !controls_allowed_prev) {
     heartbeat_engaged_mismatches = 0;
@@ -281,6 +269,16 @@ static int get_fwd_bus(int bus_num) {
 }
 
 int safety_fwd_hook(int bus_num, int addr) {
+  // the relay malfunction hook runs on all incoming rx messages.
+  // check all tx msgs for liveness on sending bus if specified.
+  // used to detect a relay malfunction or control messages from disabled ECUs like the radar
+  for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
+    const CanMsg *m = &current_safety_config.tx_msgs[i];
+    if (m->check_relay) {
+      stock_ecu_check((m->addr == addr) && (m->bus == bus_num));
+    }
+  }
+
   bool blocked = relay_malfunction || current_safety_config.disable_forwarding;
 
   if (!blocked && (current_hooks->fwd != NULL)) {
