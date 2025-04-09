@@ -216,17 +216,17 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
     current_hooks->rx(to_push);
   }
 
-  // the relay malfunction hook runs on all incoming rx messages.
-  // check all tx msgs for liveness on sending bus if specified.
-  // used to detect a relay malfunction or control messages from disabled ECUs like the radar
-  const int bus = GET_BUS(to_push);
-  const int addr = GET_ADDR(to_push);
-  for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
-    const CanMsg *m = &current_safety_config.tx_msgs[i];
-    if (m->check_relay) {
-      generic_rx_checks((m->addr == addr) && (m->bus == bus));
-    }
-  }
+//  // the relay malfunction hook runs on all incoming rx messages.
+//  // check all tx msgs for liveness on sending bus if specified.
+//  // used to detect a relay malfunction or control messages from disabled ECUs like the radar
+//  const int bus = GET_BUS(to_push);
+//  const int addr = GET_ADDR(to_push);
+//  for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
+//    const CanMsg *m = &current_safety_config.tx_msgs[i];
+//    if (m->blocked) {
+//      generic_rx_checks((m->addr == addr) && (m->bus == bus));
+//    }
+//  }
 
   // reset mismatches on rising edge of controls_allowed to avoid rare race condition
   if (controls_allowed && !controls_allowed_prev) {
@@ -279,12 +279,41 @@ static int get_fwd_bus(int bus_num) {
 
 int safety_fwd_hook(int bus_num, int addr) {
   bool blocked = relay_malfunction || current_safety_config.disable_forwarding;
+  const int destination_bus = get_fwd_bus(bus_num);
 
-  if (!blocked && (current_hooks->fwd != NULL)) {
-    blocked = current_hooks->fwd(bus_num, addr);
+  // the relay malfunction hook runs on all incoming rx messages.
+  // check all tx msgs for liveness on sending bus if specified.
+  // used to detect a relay malfunction or control messages from disabled ECUs like the radar
+//  const int bus = GET_BUS(to_push);
+//  const int addr = GET_ADDR(to_push);
+  for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
+    const CanMsg *m = &current_safety_config.tx_msgs[i];
+    if (m->blocked) {
+      generic_rx_checks((m->addr == addr) && (m->bus == bus_num));
+    }
   }
 
-  return blocked ? -1 : get_fwd_bus(bus_num);
+  printf("fwd_hook: bus_num %d, addr 0x%03X, destination_bus %d\n", bus_num, addr, destination_bus);
+  // Block messages with where destination would be the same bus as openpilot is sending this message to
+  if (!blocked) {
+    for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
+      const CanMsg *m = &current_safety_config.tx_msgs[i];
+      if (m->blocked && (m->addr == addr) && (m->bus == destination_bus)) {
+        blocked = true;
+        break;
+      }
+    }
+  }
+  printf("blocked: %d\n", blocked);
+
+  // Or if dynamic safety mode function says so
+//  if (!blocked && (current_hooks->fwd != NULL)) {
+  if ((current_hooks->fwd != NULL)) {
+    blocked = current_hooks->fwd(bus_num, addr) || blocked;
+  }
+  printf("blocked2: %d\n", blocked);
+
+  return blocked ? -1 : destination_bus;
 }
 
 bool get_longitudinal_allowed(void) {

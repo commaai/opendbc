@@ -919,7 +919,8 @@ class PandaCarSafetyTest(PandaSafetyTest):
     for bus in range(3):
       for addr in self.SCANNED_ADDRS:
         self.safety.set_relay_malfunction(False)
-        self._rx(make_msg(bus, addr, 8))
+        # self._rx(make_msg(bus, addr, 8))
+        self.safety.safety_fwd_hook(bus, addr)
         should_relay_malfunction = addr in self.RELAY_MALFUNCTION_ADDRS.get(bus, ())
         self.assertEqual(should_relay_malfunction, self.safety.get_relay_malfunction(), (bus, hex(addr)))
 
