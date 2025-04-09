@@ -351,32 +351,32 @@ static safety_config ford_init(uint16_t param) {
   };
 
   #define FORD_COMMON_TX_MSGS              \
-    {FORD_Steering_Data_FD1, 0, 8, false}, \
-    {FORD_Steering_Data_FD1, 2, 8, false}, \
-    {FORD_ACCDATA_3, 0, 8, true},          \
-    {FORD_Lane_Assist_Data1, 0, 8, true},  \
-    {FORD_IPMA_Data, 0, 8, true},          \
+    {FORD_Steering_Data_FD1, 0, 8, false, false}, \
+    {FORD_Steering_Data_FD1, 2, 8, false, false}, \
+    {FORD_ACCDATA_3, 0, 8, true, false},          \
+    {FORD_Lane_Assist_Data1, 0, 8, true, false},  \
+    {FORD_IPMA_Data, 0, 8, true, false},          \
 
   static const CanMsg FORD_CANFD_LONG_TX_MSGS[] = {
     FORD_COMMON_TX_MSGS
-    {FORD_ACCDATA, 0, 8, true},
-    {FORD_LateralMotionControl2, 0, 8, true},
+    {FORD_ACCDATA, 0, 8, true, false},
+    {FORD_LateralMotionControl2, 0, 8, true, false},
   };
 
   static const CanMsg FORD_CANFD_STOCK_TX_MSGS[] = {
     FORD_COMMON_TX_MSGS
-    {FORD_LateralMotionControl2, 0, 8, true},
+    {FORD_LateralMotionControl2, 0, 8, true, false},
   };
 
   static const CanMsg FORD_STOCK_TX_MSGS[] = {
     FORD_COMMON_TX_MSGS
-    {FORD_LateralMotionControl, 0, 8, true},
+    {FORD_LateralMotionControl, 0, 8, true, false},
   };
 
   static const CanMsg FORD_LONG_TX_MSGS[] = {
     FORD_COMMON_TX_MSGS
-    {FORD_ACCDATA, 0, 8, true},
-    {FORD_LateralMotionControl, 0, 8, true},
+    {FORD_ACCDATA, 0, 8, true, false},
+    {FORD_LateralMotionControl, 0, 8, true, false},
   };
 
   const uint16_t FORD_PARAM_CANFD = 2;

@@ -54,6 +54,7 @@ typedef struct {
   int bus;
   int len;
   bool check_relay;
+  bool disable_forwarding;
 } CanMsg;
 
 typedef enum {
