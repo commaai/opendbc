@@ -151,5 +151,5 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
 
     addr, bus = self.DISABLED_ECU_ACTUATION_MSG
     self.assertFalse(self.safety.get_relay_malfunction())
-    self._rx(make_msg(bus, addr, 8))
+    self.safety.safety_fwd_hook(bus, addr)
     self.assertTrue(self.safety.get_relay_malfunction())
