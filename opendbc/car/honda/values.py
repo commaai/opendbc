@@ -161,7 +161,8 @@ class CAR(Platforms):
       HondaCarDocs("Honda Civic Hatchback Hybrid 2025", "All"),
     ],
     HONDA_CIVIC_BOSCH.specs,
-    {Bus.pt: 'honda_civic_ex_2022_can_generated'},
+    # {Bus.pt: 'honda_civic_ex_2022_can_generated'},
+    {Bus.pt: 'honda_civic_MVL_custom'},
     flags=HondaFlags.BOSCH_RADARLESS,
   )
   HONDA_CRV_5G = HondaBoschPlatformConfig(
@@ -180,7 +181,8 @@ class CAR(Platforms):
   HONDA_HRV_3G = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda HR-V 2023", "All")],
     CarSpecs(mass=3125 * CV.LB_TO_KG, wheelbase=2.61, steerRatio=15.2, centerToFrontRatio=0.41, tireStiffnessFactor=0.5),
-    {Bus.pt: 'honda_civic_ex_2022_can_generated'},
+    # {Bus.pt: 'honda_civic_ex_2022_can_generated'},
+    {Bus.pt: 'honda_civic_MVL_custom'},
     flags=HondaFlags.BOSCH_RADARLESS,
   )
   ACURA_RDX_3G = HondaBoschPlatformConfig(
@@ -345,3 +347,5 @@ HONDA_BOSCH_RADARLESS = CAR.with_flags(HondaFlags.BOSCH_RADARLESS)
 
 
 DBC = CAR.create_dbc_map()
+
+# temp change to force PR tests to run again.   Previously timed out.
