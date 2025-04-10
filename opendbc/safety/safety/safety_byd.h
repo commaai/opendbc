@@ -39,11 +39,12 @@ static void byd_rx_hook(const CANPacket_t *to_push) {
       gas_pressed = (GET_BYTE(to_push, 0) != 0U);
       brake_pressed = (GET_BYTE(to_push, 1) != 0U);
     } else if (addr == BYD_CANADDR_CARSPEED) {
-      unsigned int speed_raw = ((GET_BYTE(to_push, 1) & 0x0FU) << 8) + GET_BYTE(to_push, 0);
-      vehicle_moving = (speed_raw > 0U);
+      unsigned int speed_dash_LSB = GET_BYTE(to_push, 0);
+      unsigned int speed_dash_MSB = GET_BYTE(to_push, 1) & 0xFU;
+      vehicle_moving = (speed_dash_LSB > 0U) || (speed_dash_MSB > 0U);
     } else if (addr == BYD_CANADDR_ACC_EPS_STATE) {
       byd_eps_cruiseactivated = GET_BIT(to_push, 1U); // CruiseActivated
-      int torque_motor = ((GET_BYTE(to_push, 2) & 0x0FU) << 8) + GET_BYTE(to_push, 1); // MainTorque
+      int torque_motor = ((GET_BYTE(to_push, 2) & 0xFU) << 8) | GET_BYTE(to_push, 1); // MainTorque
       torque_motor = to_signed(torque_motor, 12);
       update_sample(&torque_meas, torque_motor);
     }
