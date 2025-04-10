@@ -4,8 +4,6 @@
 
 #define RIVIAN_MAX_SPEED_DELTA 2.0  // m/s
 
-static bool rivian_longitudinal = false;
-
 static uint8_t rivian_get_counter(const CANPacket_t *to_push) {
   int addr = GET_ADDR(to_push);
 
@@ -184,6 +182,8 @@ static safety_config rivian_init(uint16_t param) {
     {.msg = {{0x38f, 0, 6, .frequency = 50U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   // iBESP2 (brakes)
     {.msg = {{0x100, 2, 8, .frequency = 100U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},  // ACM_Status (cruise state)
   };
+
+  bool rivian_longitudinal = false;
 
   UNUSED(param);
   #ifdef ALLOW_DEBUG

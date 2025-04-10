@@ -27,7 +27,6 @@ typedef enum {
   GM_CAM
 } GmHardware;
 static GmHardware gm_hw = GM_ASCM;
-static bool gm_cam_long = false;
 static bool gm_pcm_cruise = false;
 
 static void gm_rx_hook(const CANPacket_t *to_push) {
@@ -210,6 +209,8 @@ static safety_config gm_init(uint16_t param) {
     gm_long_limits = &GM_CAM_LONG_LIMITS;
   } else {
   }
+
+  bool gm_cam_long = false;
 
 #ifdef ALLOW_DEBUG
   const uint16_t GM_PARAM_HW_CAM_LONG = 2;
