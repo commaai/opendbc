@@ -332,8 +332,8 @@ static safety_config honda_bosch_init(uint16_t param) {
 
   static CanMsg HONDA_RADARLESS_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0x296, 2, 4, .check_relay = false}, {0x33D, 0, 8, .check_relay = false}};  // Bosch radarless
 
-  static CanMsg HONDA_RADARLESS_LONG_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0x33D, 0, 8, .check_relay = false}, {0x1C8, 0, 8, .check_relay = false},
-                                                  {0x30C, 0, 8, .check_relay = false}};  // Bosch radarless w/ gas and brakes
+  static CanMsg HONDA_RADARLESS_LONG_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0x33D, 0, 8, .check_relay = false}, {0x1C8, 0, 8, .check_relay = true},
+                                                  {0x30C, 0, 8, .check_relay = true}};  // Bosch radarless w/ gas and brakes
 
   const uint16_t HONDA_PARAM_ALT_BRAKE = 1;
   const uint16_t HONDA_PARAM_RADARLESS = 8;
@@ -414,8 +414,7 @@ static bool honda_bosch_fwd_hook(int bus_num, int addr) {
 
   if (bus_num == 2)  {
     bool is_lkas_msg = (addr == 0xE4) || (addr == 0xE5) || (addr == 0x33D) || (addr == 0x33DA) || (addr == 0x33DB);
-    bool is_acc_msg = ((addr == 0x1C8) || (addr == 0x30C)) && honda_bosch_radarless && honda_bosch_long;
-    block_msg = is_lkas_msg || is_acc_msg;
+    block_msg = is_lkas_msg;
   }
 
   return block_msg;
