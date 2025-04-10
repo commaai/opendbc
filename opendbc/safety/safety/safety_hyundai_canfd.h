@@ -6,10 +6,10 @@
 #define HYUNDAI_CANFD_CRUISE_BUTTON_TX_MSGS(bus) \
   {0x1CF, bus, 8, .check_relay = false},  /* CRUISE_BUTTON */   \
 
-#define HYUNDAI_CANFD_LKA_STEERING_COMMON_TX_MSGS \
-  HYUNDAI_CANFD_CRUISE_BUTTON_TX_MSGS(1)                    \
-  {0x50,  0, 16, .check_relay = true},          /* LKAS */      \
-  {0x2A4, 0, 24, .check_relay = false},         /* CAM_0x2A4 */ \
+#define HYUNDAI_CANFD_LKA_STEERING_COMMON_TX_MSGS(a_can, e_can) \
+  HYUNDAI_CANFD_CRUISE_BUTTON_TX_MSGS(e_can)                        \
+  {0x50,  a_can, 16, .check_relay = (a_can) == 0},  /* LKAS */      \
+  {0x2A4, a_can, 24, .check_relay = false},         /* CAM_0x2A4 */ \
 
 #define HYUNDAI_CANFD_LKA_STEERING_ALT_COMMON_TX_MSGS(a_can, e_can) \
   HYUNDAI_CANFD_CRUISE_BUTTON_TX_MSGS(e_can)                        \
@@ -244,7 +244,7 @@ static safety_config hyundai_canfd_init(uint16_t param) {
   const int HYUNDAI_PARAM_CANFD_ALT_BUTTONS = 32;
 
   static const CanMsg HYUNDAI_CANFD_LKA_STEERING_TX_MSGS[] = {
-    HYUNDAI_CANFD_LKA_STEERING_COMMON_TX_MSGS(1)
+    HYUNDAI_CANFD_LKA_STEERING_COMMON_TX_MSGS(0, 1)
   };
 
   static const CanMsg HYUNDAI_CANFD_LKA_STEERING_ALT_TX_MSGS[] = {
@@ -252,7 +252,7 @@ static safety_config hyundai_canfd_init(uint16_t param) {
   };
 
   static const CanMsg HYUNDAI_CANFD_LKA_STEERING_LONG_TX_MSGS[] = {
-    HYUNDAI_CANFD_LKA_STEERING_COMMON_TX_MSGS(1)
+    HYUNDAI_CANFD_LKA_STEERING_COMMON_TX_MSGS(0, 1)
     HYUNDAI_CANFD_LFA_STEERING_COMMON_TX_MSGS(1)
     HYUNDAI_CANFD_SCC_CONTROL_COMMON_TX_MSGS(1, true)
     {0x51,  0, 32, .check_relay = false},  // ADRV_0x51
