@@ -26,8 +26,6 @@
 #include "safety/safety_hyundai_canfd.h"
 #endif
 
-#include "faults.h"
-
 extern uint32_t microsecond_timer_get(void);
 
 uint32_t GET_BYTES(const CANPacket_t *msg, int start, int len) {
