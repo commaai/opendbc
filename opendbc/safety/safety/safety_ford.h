@@ -99,14 +99,6 @@ static bool ford_longitudinal = false;
 
 #define FORD_MAX_SPEED_DELTA 2.0  // m/s
 
-static bool ford_lkas_msg_check(int addr) {
-  return (addr == FORD_ACCDATA_3)
-      || (addr == FORD_Lane_Assist_Data1)
-      || ((addr == FORD_LateralMotionControl) && !ford_canfd)
-      || ((addr == FORD_LateralMotionControl2) && ford_canfd)
-      || (addr == FORD_IPMA_Data);
-}
-
 // Curvature rate limits
 #define FORD_LIMITS(limit_lateral_acceleration) {                                               \
   .max_angle = 1000,          /* 0.02 curvature */                                              \
@@ -311,29 +303,6 @@ static bool ford_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static bool ford_fwd_hook(int bus_num, int addr) {
-  bool block_msg = false;
-
-  switch (bus_num) {
-    case FORD_CAM_BUS: {
-      if (ford_lkas_msg_check(addr)) {
-        // Block stock LKAS and UI messages
-        block_msg = true;
-      } else if (ford_longitudinal && (addr == FORD_ACCDATA)) {
-        // Block stock ACC message
-        block_msg = true;
-      } else {
-      }
-      break;
-    }
-    default: {
-      break;
-    }
-  }
-
-  return block_msg;
-}
-
 static safety_config ford_init(uint16_t param) {
   // warning: quality flags are not yet checked in openpilot's CAN parser,
   // this may be the cause of blocked messages
@@ -407,7 +376,6 @@ const safety_hooks ford_hooks = {
   .init = ford_init,
   .rx = ford_rx_hook,
   .tx = ford_tx_hook,
-  .fwd = ford_fwd_hook,
   .get_counter = ford_get_counter,
   .get_checksum = ford_get_checksum,
   .compute_checksum = ford_compute_checksum,
