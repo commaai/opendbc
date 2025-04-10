@@ -193,6 +193,8 @@ class TestHyundaiLegacySafetyHEV(TestHyundaiSafety):
 class TestHyundaiLongitudinalSafety(HyundaiLongitudinalBase, TestHyundaiSafety):
   TX_MSGS = [[0x340, 0], [0x4F1, 0], [0x485, 0], [0x420, 0], [0x421, 0], [0x50A, 0], [0x389, 0], [0x4A2, 0], [0x38D, 0], [0x483, 0], [0x7D0, 0]]
 
+  FWD_BLACKLISTED_ADDRS = {2: [0x340, 0x485, 0x421]}
+
   RELAY_MALFUNCTION_ADDRS = {0: (0x340, 0x421)}  # LKAS11, SCC12
 
   DISABLED_ECU_UDS_MSG = (0x7D0, 0)
