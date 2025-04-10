@@ -167,6 +167,7 @@ class TestGmAscmSafety(GmLongitudinalBase, TestGmSafetyBase):
 class TestGmAscmEVSafety(TestGmAscmSafety, TestGmEVSafetyBase):
   pass
 
+
 class TestGmCameraSafetyBase(TestGmSafetyBase):
   def _user_brake_msg(self, brake):
     values = {"BrakePressed": brake}
