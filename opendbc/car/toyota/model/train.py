@@ -36,6 +36,8 @@ plt.ion()
 
 lrs = [
   (True, LogReader('d9b97c1d3b8c39b2/000000b9--1ff97b1087', sort_by_time=True)),
+  (True, LogReader('d9b97c1d3b8c39b2/000000bf--4bc0673df6', sort_by_time=True)),
+  (True, LogReader('d9b97c1d3b8c39b2/000000bd--1878ccda58', sort_by_time=True)),
 ]
 
 # Corolla w/ new tune maneuvers
@@ -144,7 +146,7 @@ for stock_route, lr in tqdm(lrs):
       cp.update_strings(lst)
       cp2.update_strings(lst)
       # cp128.update_strings(lst)
-      print(cp.can_valid, cp2.can_valid, cp128.can_valid)
+      # print(cp.can_valid, cp2.can_valid, cp128.can_valid)
 
       if not cp.can_valid or not cp2.can_valid:# or not cp128.can_valid:
         continue
@@ -152,7 +154,7 @@ for stock_route, lr in tqdm(lrs):
       if CC is None or CS is None or not len(CC.orientationNED):
         continue
 
-      if CS.gasPressed or CS.brakePressed or not CS.cruiseState.enabled:
+      if CS.gasPressed or CS.brakePressed or CS.cruiseState.standstill or not CS.cruiseState.enabled:
         if len(X_sections[-1]):
           # print('new section!')
           # print(X_sections[-1])
@@ -171,9 +173,9 @@ for stock_route, lr in tqdm(lrs):
 
       X_sections[-1].append([CS.vEgo, CS.aEgo, pitch, mini_car])
       Y_sections[-1].append([stock_camera_accel, stock_camera_permit_braking])
-      print(X_sections[-1][-1])
-      print(Y_sections[-1][-1])
-      print()
+      # print(X_sections[-1][-1])
+      # print(Y_sections[-1][-1])
+      # print()
 
 
 # keep track of sections because data is not continuous
@@ -298,9 +300,14 @@ plot_data_stats2()
 
 # the model
 inputs = keras.layers.Input(shape=X.shape[1:])
-shared = keras.layers.Dense(32, kernel_regularizer=keras.regularizers.l2(0.01))(inputs)
+shared = keras.layers.Dense(32, kernel_regularizer=keras.regularizers.l2(0.001))(inputs)
+# shared = keras.layers.BatchNormalization()(shared)
 shared = keras.layers.LeakyReLU()(shared)
-shared = keras.layers.Dropout(0.2)(shared)
+# shared = keras.layers.Dropout(0.2)(shared)
+
+shared = keras.layers.Dense(16, kernel_regularizer=keras.regularizers.l2(0.001))(shared)
+shared = keras.layers.LeakyReLU()(shared)
+# shared = keras.layers.Dropout(0.2)(shared)
 
 # two outputs
 accel_output = keras.layers.Dense(1, name='accel_output')(shared)
@@ -353,16 +360,16 @@ def plot_model_prediction():
     ax.set_xlim(-5, 5)
     ax.set_ylim(-5, 5)
     ax.legend()
-    print(y)
   plt.show()
 
 
 plot_model_prediction()
 
-raise Exception
+# raise Exception
 
 # save model
 # model.output_names=['output']
+print("Saving model")
 spec = (tf.TensorSpec((None, *model.input_shape[1:]), tf.float32, name="input"),)
 onnx_model, _ = tf2onnx.convert.from_keras(model, input_signature=spec)
 onnx.save(onnx_model, BASEDIR + '/toyota/camera.onnx')
@@ -377,9 +384,9 @@ predicted_camera_accel_loaded = loaded_model.run(None, {'input': X.astype(np.flo
 
 # plot prediction
 fig, ax = plt.subplots(3, 1, sharex=True)
-ax[0].plot([x[1] for x in X], label='aEgo (input)')
 ax[0].plot([y[0] for y in Y], label='accel cmd (output)')
 ax[0].plot(predicted_camera_accel, label='predicted accel cmd (output)')
+ax[0].plot([x[1] for x in X], label='aEgo (input)')
 
 # ax[0].plot(X_accels, label='actuatorsOutput.accel')
 # ax[0].plot(y_aegos, label='aEgo (ground)')
@@ -391,9 +398,9 @@ ax[0].plot(predicted_camera_accel, label='predicted accel cmd (output)')
 ax[0].legend()
 
 # permit braking (output) and mini car (input)
-ax[1].plot([x[3] for x in X], label='mini car (input)')
 ax[1].plot([y[1] for y in Y], label='permit braking (output)')
 ax[1].plot(predicted_permit_braking, label='predicted permit braking (output)')
+ax[1].plot([x[3] for x in X], label='mini car (input)')
 ax[1].legend()
 
 ax[2].plot([x[0] for x in X], label='vEgo')
