@@ -87,9 +87,6 @@ static bool ford_get_quality_flag_valid(const CANPacket_t *to_push) {
   return valid;
 }
 
-static bool ford_canfd = false;
-static bool ford_longitudinal = false;
-
 #define FORD_INACTIVE_CURVATURE 1000U
 #define FORD_INACTIVE_CURVATURE_RATE 4096U
 #define FORD_INACTIVE_PATH_OFFSET 512U
@@ -349,9 +346,9 @@ static safety_config ford_init(uint16_t param) {
   };
 
   const uint16_t FORD_PARAM_CANFD = 2;
-  ford_canfd = GET_FLAG(param, FORD_PARAM_CANFD);
+  const bool ford_canfd = GET_FLAG(param, FORD_PARAM_CANFD);
 
-  ford_longitudinal = false;
+  bool ford_longitudinal = false;
 
 #ifdef ALLOW_DEBUG
   const uint16_t FORD_PARAM_LONGITUDINAL = 1;
