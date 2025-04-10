@@ -171,30 +171,11 @@ static bool rivian_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static bool rivian_fwd_hook(int bus, int addr) {
-  bool block_msg = false;
-
-  if (bus == 0) {
-    // SCCM_WheelTouch: for hiding hold wheel alert
-    if (addr == 0x321) {
-      block_msg = true;
-    }
-
-    // VDM_AdasSts: for canceling stock ACC
-    // cppcheck-suppress knownConditionTrueFalse
-    if ((addr == 0x162) && !rivian_longitudinal) {
-      block_msg = true;
-    }
-  }
-
-  return block_msg;
-}
-
 static safety_config rivian_init(uint16_t param) {
   // 0x120 = ACM_lkaHbaCmd, 0x321 = SCCM_WheelTouch, 0x162 = VDM_AdasSts
-  static const CanMsg RIVIAN_TX_MSGS[] = {{0x120, 0, 8, .check_relay = true}, {0x321, 2, 7, .check_relay = false}, {0x162, 2, 8, .check_relay = false}};
+  static const CanMsg RIVIAN_TX_MSGS[] = {{0x120, 0, 8, .check_relay = true}, {0x321, 2, 7, .check_relay = true}, {0x162, 2, 8, .check_relay = true}};
   // 0x160 = ACM_longitudinalRequest
-  static const CanMsg RIVIAN_LONG_TX_MSGS[] = {{0x120, 0, 8, .check_relay = true}, {0x321, 2, 7, .check_relay = false}, {0x160, 0, 5, .check_relay = true}};
+  static const CanMsg RIVIAN_LONG_TX_MSGS[] = {{0x120, 0, 8, .check_relay = true}, {0x321, 2, 7, .check_relay = true}, {0x160, 0, 5, .check_relay = true}};
 
   static RxCheck rivian_rx_checks[] = {
     {.msg = {{0x208, 0, 8, .frequency = 50U, .max_counter = 14U, .quality_flag = true}, { 0 }, { 0 }}},          // ESP_Status (speed)
@@ -221,7 +202,6 @@ const safety_hooks rivian_hooks = {
   .init = rivian_init,
   .rx = rivian_rx_hook,
   .tx = rivian_tx_hook,
-  .fwd = rivian_fwd_hook,
   .get_counter = rivian_get_counter,
   .get_checksum = rivian_get_checksum,
   .compute_checksum = rivian_compute_checksum,
