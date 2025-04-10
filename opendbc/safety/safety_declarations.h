@@ -53,7 +53,8 @@ typedef struct {
   int addr;
   int bus;
   int len;
-  bool check_relay;
+  bool check_relay;              // if true, trigger relay malfunction if existence on destination bus and block forwarding to destination bus
+  bool disable_static_blocking;  // if true, static blocking is disabled so safety mode can dynamically handle it (e.g. selective AEB pass-through)
 } CanMsg;
 
 typedef enum {
