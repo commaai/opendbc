@@ -4,7 +4,7 @@
 
 // Stock longitudinal
 #define TOYOTA_BASE_TX_MSGS \
-  {0x191, 0, 8, .check_relay = false}, {0x412, 0, 8, .check_relay = false}, {0x1D2, 0, 8, .check_relay = false},  /* LKAS + LTA + PCM cancel cmd */  \
+  {0x191, 0, 8, .check_relay = true}, {0x412, 0, 8, .check_relay = true}, {0x1D2, 0, 8, .check_relay = false},  /* LKAS + LTA + PCM cancel cmd */  \
 
 #define TOYOTA_COMMON_TX_MSGS \
   TOYOTA_BASE_TX_MSGS \
@@ -13,8 +13,8 @@
 
 #define TOYOTA_COMMON_SECOC_TX_MSGS \
   TOYOTA_BASE_TX_MSGS \
-  {0x2E4, 0, 8, .check_relay = true}, {0x131, 0, 8, .check_relay = false}, \
-  {0x343, 0, 8, .check_relay = false},  /* ACC cancel cmd */  \
+  {0x2E4, 0, 8, .check_relay = true}, {0x131, 0, 8, .check_relay = true}, \
+  {0x343, 0, 8, .check_relay = true},  /* ACC cancel cmd */  \
   {0x183, 0, 8, .check_relay = true},  /* ACC_CONTROL_2 */  \
 
 #define TOYOTA_COMMON_LONG_TX_MSGS \
@@ -216,7 +216,7 @@ static bool toyota_tx_hook(const CANPacket_t *to_send) {
       bool violation = false;
       if (toyota_secoc) {
         // SecOC cars move accel to 0x183. Only allow inactive accel on 0x343 to match stock behavior
-        violation = desired_accel != TOYOTA_LONG_LIMITS.inactive_accel;     
+        violation = desired_accel != TOYOTA_LONG_LIMITS.inactive_accel;
      }
       violation |= longitudinal_accel_checks(desired_accel, TOYOTA_LONG_LIMITS);
 
@@ -415,29 +415,10 @@ static safety_config toyota_init(uint16_t param) {
   return ret;
 }
 
-static bool toyota_fwd_hook(int bus_num, int addr) {
-  bool block_msg = false;
-  if (bus_num == 2) {
-    // block stock lkas messages and stock acc messages (if OP is doing ACC)
-    // in TSS2, 0x191 is LTA which we need to block to avoid controls collision
-    bool is_lkas_msg = ((addr == 0x2E4) || (addr == 0x412) || (addr == 0x191));
-    // in TSS2 the camera does ACC as well, so filter 0x343
-    bool is_acc_msg = (addr == 0x343);
-
-    // SecOC cars use additional (not alternate) messages for lateral and longitudinal actuation
-    is_lkas_msg |= toyota_secoc && (addr == 0x131);
-    is_acc_msg |= toyota_secoc && (addr == 0x183);
-    block_msg = is_lkas_msg || (is_acc_msg && !toyota_stock_longitudinal);
-  }
-
-  return block_msg;
-}
-
 const safety_hooks toyota_hooks = {
   .init = toyota_init,
   .rx = toyota_rx_hook,
   .tx = toyota_tx_hook,
-  .fwd = toyota_fwd_hook,
   .get_checksum = toyota_get_checksum,
   .compute_checksum = toyota_compute_checksum,
   .get_quality_flag_valid = toyota_get_quality_flag_valid,
