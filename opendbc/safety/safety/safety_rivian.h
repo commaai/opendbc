@@ -187,19 +187,6 @@ static bool rivian_fwd_hook(int bus, int addr) {
     }
   }
 
-  if (bus == 2) {
-    // ACM_lkaHbaCmd: lateral control message
-    if (addr == 0x120) {
-      block_msg = true;
-    }
-
-    // ACM_longitudinalRequest: longitudinal control message
-    // cppcheck-suppress knownConditionTrueFalse
-    if (rivian_longitudinal && (addr == 0x160)) {
-      block_msg = true;
-    }
-  }
-
   return block_msg;
 }
 
