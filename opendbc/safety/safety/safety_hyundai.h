@@ -33,7 +33,7 @@ const LongitudinalLimits HYUNDAI_LONG_LIMITS = {
 #define HYUNDAI_LONG_COMMON_TX_MSGS(scc_bus) \
   HYUNDAI_COMMON_TX_MSGS(scc_bus)                                                            \
   {0x420, 0,       8, .check_relay = false},           /* SCC11 Bus 0                     */ \
-  {0x421, 0,       8, .check_relay = (scc_bus) == 0},  /* SCC12 Bus 0                     */ \
+  {0x421, 0,       8, .check_relay = true},            /* SCC12 Bus 0                     */ \
   {0x50A, 0,       8, .check_relay = false},           /* SCC13 Bus 0                     */ \
   {0x389, 0,       8, .check_relay = false},           /* SCC14 Bus 0                     */ \
   {0x4A2, 0,       2, .check_relay = false},           /* FRT_RADAR11 Bus 0               */ \
