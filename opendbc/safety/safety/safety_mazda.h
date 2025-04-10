@@ -77,7 +77,7 @@ static bool mazda_tx_hook(const CANPacket_t *to_send) {
     // cruise buttons check
     if (addr == MAZDA_CRZ_BTNS) {
       // allow resume spamming while controls allowed, but
-      // only allow cancel while contrls not allowed
+      // only allow cancel while controls not allowed
       bool cancel_cmd = (GET_BYTE(to_send, 0) == 0x1U);
       if (!controls_allowed && !cancel_cmd) {
         tx = false;
@@ -99,7 +99,7 @@ static bool mazda_fwd_hook(int bus, int addr) {
 }
 
 static safety_config mazda_init(uint16_t param) {
-  static const CanMsg MAZDA_TX_MSGS[] = {{MAZDA_LKAS, 0, 8, true}, {MAZDA_CRZ_BTNS, 0, 8, false}, {MAZDA_LKAS_HUD, 0, 8, false}};
+  static const CanMsg MAZDA_TX_MSGS[] = {{MAZDA_LKAS, 0, 8, .check_relay = true}, {MAZDA_CRZ_BTNS, 0, 8, .check_relay = false}, {MAZDA_LKAS_HUD, 0, 8, .check_relay = false}};
 
   static RxCheck mazda_rx_checks[] = {
     {.msg = {{MAZDA_CRZ_CTRL,     0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
