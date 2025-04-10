@@ -53,7 +53,6 @@ typedef struct {
   int addr;
   int bus;
   int len;
-  // TODO: rename check_relay to what it mostly does. for example, is the blocking or relay malfunction checking more important?
   bool check_relay;               // if true, relay malfunction if existence on tx bus and blocked from forwarding to tx bus
   bool disable_static_forwarding; // if true, forwarding logic is disabled so safety mode can dynamically handle it (e.g. selective AEB pass-through)
 } CanMsg;
