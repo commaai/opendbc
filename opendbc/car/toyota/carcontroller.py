@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import onnxruntime as ort
 from opendbc.car import Bus, apply_meas_steer_torque_limits, apply_std_steer_angle_limits, common_fault_avoidance, \
                         make_tester_present_msg, rate_limit, structs, ACCELERATION_DUE_TO_GRAVITY, DT_CTRL
 from opendbc.car.can_definitions import CanData
@@ -13,6 +14,7 @@ from opendbc.car.toyota.values import CAR, STATIC_DSU_MSGS, NO_STOP_TIMER_CAR, T
                                         CarControllerParams, ToyotaFlags, \
                                         UNSUPPORTED_DSU_CAR
 from opendbc.can.packer import CANPacker
+from opendbc.car.common.basedir import BASEDIR
 
 Ecu = structs.CarParams.Ecu
 LongCtrlState = structs.CarControl.Actuators.LongControlState
@@ -59,6 +61,8 @@ class CarController(CarControllerBase):
     self.permit_braking = True
     self.steer_rate_counter = 0
     self.distance_button = 0
+
+    self.model = ort.InferenceSession(BASEDIR + '/toyota/camera.onnx')
 
     # *** start long control state ***
     self.long_pid = get_long_tune(self.CP, self.params)
@@ -195,45 +199,57 @@ class CarController(CarControllerBase):
           pcm_accel_cmd = rate_limit(pcm_accel_cmd, self.prev_accel, ACCEL_WINDDOWN_LIMIT, ACCEL_WINDUP_LIMIT)
         self.prev_accel = pcm_accel_cmd
 
-        # calculate amount of acceleration PCM should apply to reach target, given pitch.
-        # clipped to only include downhill angles, avoids erroneously unsetting PERMIT_BRAKING when stopping on uphills
-        accel_due_to_pitch = math.sin(min(self.pitch.x, 0.0)) * ACCELERATION_DUE_TO_GRAVITY
-        # TODO: on uphills this sometimes sets PERMIT_BRAKING low not considering the creep force
-        net_acceleration_request = pcm_accel_cmd + accel_due_to_pitch
-
-        # GVC does not overshoot ego acceleration when starting from stop, but still has a similar delay
-        if not self.CP.flags & ToyotaFlags.SECOC.value:
-          a_ego_blended = float(np.interp(CS.out.vEgo, [1.0, 2.0], [CS.gvc, CS.out.aEgo]))
-        else:
-          a_ego_blended = CS.out.aEgo
-
-        # wind down integral when approaching target for step changes and smooth ramps to reduce overshoot
-        prev_aego = self.aego.x
-        self.aego.update(a_ego_blended)
-        j_ego = (self.aego.x - prev_aego) / (DT_CTRL * 3)
-
-        future_t = float(np.interp(CS.out.vEgo, [2., 5.], [0.25, 0.5]))
-        a_ego_future = a_ego_blended + j_ego * future_t
+        # # calculate amount of acceleration PCM should apply to reach target, given pitch.
+        # # clipped to only include downhill angles, avoids erroneously unsetting PERMIT_BRAKING when stopping on uphills
+        # accel_due_to_pitch = math.sin(min(self.pitch.x, 0.0)) * ACCELERATION_DUE_TO_GRAVITY
+        # # TODO: on uphills this sometimes sets PERMIT_BRAKING low not considering the creep force
+        # net_acceleration_request = pcm_accel_cmd + accel_due_to_pitch
+        #
+        # # GVC does not overshoot ego acceleration when starting from stop, but still has a similar delay
+        # if not self.CP.flags & ToyotaFlags.SECOC.value:
+        #   a_ego_blended = float(np.interp(CS.out.vEgo, [1.0, 2.0], [CS.gvc, CS.out.aEgo]))
+        # else:
+        #   a_ego_blended = CS.out.aEgo
+        #
+        # # wind down integral when approaching target for step changes and smooth ramps to reduce overshoot
+        # prev_aego = self.aego.x
+        # self.aego.update(a_ego_blended)
+        # j_ego = (self.aego.x - prev_aego) / (DT_CTRL * 3)
+        #
+        # future_t = float(np.interp(CS.out.vEgo, [2., 5.], [0.25, 0.5]))
+        # a_ego_future = a_ego_blended + j_ego * future_t
+        #
+        # if CC.longActive:
+        #   # constantly slowly unwind integral to recover from large temporary errors
+        #   self.long_pid.i -= ACCEL_PID_UNWIND * float(np.sign(self.long_pid.i))
+        #
+        #   error_future = pcm_accel_cmd - a_ego_future
+        #   pcm_accel_cmd = self.long_pid.update(error_future,
+        #                                        speed=CS.out.vEgo,
+        #                                        feedforward=pcm_accel_cmd,
+        #                                        freeze_integrator=actuators.longControlState != LongCtrlState.pid)
+        # else:
+        #   self.long_pid.reset()
+        #
+        # # Along with rate limiting positive jerk above, this greatly improves gas response time
+        # # Consider the net acceleration request that the PCM should be applying (pitch included)
+        # net_acceleration_request_min = min(actuators.accel + accel_due_to_pitch, net_acceleration_request)
+        # if net_acceleration_request_min < 0.2 or stopping or not CC.longActive:
+        #   self.permit_braking = True
+        # elif net_acceleration_request_min > 0.3:
+        #   self.permit_braking = False
 
         if CC.longActive:
-          # constantly slowly unwind integral to recover from large temporary errors
-          self.long_pid.i -= ACCEL_PID_UNWIND * float(np.sign(self.long_pid.i))
+          inp = np.array([[CS.out.vEgo,
+                           pcm_accel_cmd,
+                           CC.orientationNED[1],
+                           CC.hudControl.leadVisible,  # not really sure what to set it to, so let's just go with actual value
+                           ]]).astype(np.float32)
+          predicted_accel, predicted_permit_braking = self.model.run(None, {'input': inp})
+          pcm_accel_cmd = float(predicted_accel[0][0])
+          self.permit_braking = bool(round(predicted_permit_braking[0][0]))
 
-          error_future = pcm_accel_cmd - a_ego_future
-          pcm_accel_cmd = self.long_pid.update(error_future,
-                                               speed=CS.out.vEgo,
-                                               feedforward=pcm_accel_cmd,
-                                               freeze_integrator=actuators.longControlState != LongCtrlState.pid)
-        else:
-          self.long_pid.reset()
-
-        # Along with rate limiting positive jerk above, this greatly improves gas response time
-        # Consider the net acceleration request that the PCM should be applying (pitch included)
-        net_acceleration_request_min = min(actuators.accel + accel_due_to_pitch, net_acceleration_request)
-        if net_acceleration_request_min < 0.2 or stopping or not CC.longActive:
-          self.permit_braking = True
-        elif net_acceleration_request_min > 0.3:
-          self.permit_braking = False
+          # print("predicted_accel", predicted_accel, "predicted_permit_braking", predicted_permit_braking)
 
         pcm_accel_cmd = float(np.clip(pcm_accel_cmd, self.params.ACCEL_MIN, self.params.ACCEL_MAX))
 
