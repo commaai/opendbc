@@ -43,11 +43,14 @@
 #define SUBARU_ALT_BUS  1
 #define SUBARU_CAM_BUS  2
 
-#define SUBARU_COMMON_TX_MSGS(alt_bus, lkas_msg) \
+#define SUBARU_BASE_TX_MSGS(alt_bus, lkas_msg) \
   {lkas_msg,                     SUBARU_MAIN_BUS, 8, .check_relay = true},  \
   {MSG_SUBARU_ES_DashStatus,     SUBARU_MAIN_BUS, 8, .check_relay = true},  \
   {MSG_SUBARU_ES_LKAS_State,     SUBARU_MAIN_BUS, 8, .check_relay = true},  \
   {MSG_SUBARU_ES_Infotainment,   SUBARU_MAIN_BUS, 8, .check_relay = true},  \
+
+#define SUBARU_COMMON_TX_MSGS(alt_bus) \
+  {MSG_SUBARU_ES_Distance, alt_bus, 8, .check_relay = false}, \
 
 #define SUBARU_COMMON_LONG_TX_MSGS(alt_bus) \
   {MSG_SUBARU_ES_Distance,       alt_bus,         8, .check_relay = true}, \
@@ -206,22 +209,22 @@ static bool subaru_tx_hook(const CANPacket_t *to_send) {
 
 static safety_config subaru_init(uint16_t param) {
   static const CanMsg SUBARU_TX_MSGS[] = {
-    SUBARU_COMMON_TX_MSGS(SUBARU_MAIN_BUS, MSG_SUBARU_ES_LKAS)
-    {MSG_SUBARU_ES_Distance, SUBARU_MAIN_BUS, 8, .check_relay = false},
+    SUBARU_BASE_TX_MSGS(SUBARU_MAIN_BUS, MSG_SUBARU_ES_LKAS)
+    SUBARU_COMMON_TX_MSGS(SUBARU_MAIN_BUS)
   };
 
   static const CanMsg SUBARU_LONG_TX_MSGS[] = {
-    SUBARU_COMMON_TX_MSGS(SUBARU_MAIN_BUS, MSG_SUBARU_ES_LKAS)
+    SUBARU_BASE_TX_MSGS(SUBARU_MAIN_BUS, MSG_SUBARU_ES_LKAS)
     SUBARU_COMMON_LONG_TX_MSGS(SUBARU_MAIN_BUS)
   };
 
   static const CanMsg SUBARU_GEN2_TX_MSGS[] = {
-    SUBARU_COMMON_TX_MSGS(SUBARU_ALT_BUS, MSG_SUBARU_ES_LKAS)
-    {MSG_SUBARU_ES_Distance, SUBARU_ALT_BUS, 8, .check_relay = false},
+    SUBARU_BASE_TX_MSGS(SUBARU_ALT_BUS, MSG_SUBARU_ES_LKAS)
+    SUBARU_COMMON_TX_MSGS(SUBARU_ALT_BUS)
   };
 
   static const CanMsg SUBARU_GEN2_LONG_TX_MSGS[] = {
-    SUBARU_COMMON_TX_MSGS(SUBARU_ALT_BUS, MSG_SUBARU_ES_LKAS)
+    SUBARU_BASE_TX_MSGS(SUBARU_ALT_BUS, MSG_SUBARU_ES_LKAS)
     SUBARU_COMMON_LONG_TX_MSGS(SUBARU_ALT_BUS)
     SUBARU_GEN2_LONG_ADDITIONAL_TX_MSGS()
   };
