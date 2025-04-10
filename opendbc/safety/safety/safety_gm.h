@@ -178,8 +178,6 @@ static bool gm_fwd_hook(int bus_num, int addr) {
       bool is_acc_msg = (addr == 0x315) || (addr == 0x2CB) || (addr == 0x370);
       block_msg = is_lkas_msg || (is_acc_msg && gm_cam_long);
     }
-  } else {
-    block_msg = true;
   }
 
   return block_msg;
@@ -255,6 +253,11 @@ static safety_config gm_init(uint16_t param) {
   const bool gm_ev = GET_FLAG(param, GM_PARAM_EV);
   if (gm_ev) {
     SET_RX_CHECKS(gm_ev_rx_checks, ret);
+  }
+
+  // ASCM does not forward any messages
+  if (gm_hw == GM_ASCM) {
+    ret.disable_forwarding = true;
   }
   return ret;
 }
