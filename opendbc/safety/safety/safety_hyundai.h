@@ -31,12 +31,12 @@ const LongitudinalLimits HYUNDAI_LONG_LIMITS = {
   {0x485, 0,       4, .check_relay = true},   /* LFAHDA_MFC Bus 0                          */ \
 
 #define HYUNDAI_LONG_COMMON_TX_MSGS(scc_bus) \
-  HYUNDAI_COMMON_TX_MSGS(scc_bus)                                                            \
-  {0x420, 0,       8, .check_relay = true},           /* SCC11 Bus 0                     */ \
-  {0x421, 0,       8, .check_relay = true},            /* SCC12 Bus 0                     */ \
-  {0x50A, 0,       8, .check_relay = true},           /* SCC13 Bus 0                     */ \
-  {0x389, 0,       8, .check_relay = true},           /* SCC14 Bus 0                     */ \
-  {0x4A2, 0,       2, .check_relay = false},           /* FRT_RADAR11 Bus 0               */ \
+  HYUNDAI_COMMON_TX_MSGS(scc_bus) \
+  {0x420, 0,       8, .check_relay = true},   /* SCC11 Bus 0       */ \
+  {0x421, 0,       8, .check_relay = true},   /* SCC12 Bus 0       */ \
+  {0x50A, 0,       8, .check_relay = true},   /* SCC13 Bus 0       */ \
+  {0x389, 0,       8, .check_relay = true},   /* SCC14 Bus 0       */ \
+  {0x4A2, 0,       2, .check_relay = false},  /* FRT_RADAR11 Bus 0 */ \
 
 #define HYUNDAI_COMMON_RX_CHECKS(legacy)                                                                                                                  \
   {.msg = {{0x260, 0, 8, .max_counter = 3U, .frequency = 100U},                                                                                           \
