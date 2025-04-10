@@ -46,9 +46,9 @@
 #define SUBARU_COMMON_TX_MSGS(alt_bus, lkas_msg) \
   {lkas_msg,                     SUBARU_MAIN_BUS, 8, .check_relay = true},  \
   {MSG_SUBARU_ES_Distance,       alt_bus,         8, .check_relay = false}, \
-  {MSG_SUBARU_ES_DashStatus,     SUBARU_MAIN_BUS, 8, .check_relay = false}, \
-  {MSG_SUBARU_ES_LKAS_State,     SUBARU_MAIN_BUS, 8, .check_relay = false}, \
-  {MSG_SUBARU_ES_Infotainment,   SUBARU_MAIN_BUS, 8, .check_relay = false}, \
+  {MSG_SUBARU_ES_DashStatus,     SUBARU_MAIN_BUS, 8, .check_relay = true}, \
+  {MSG_SUBARU_ES_LKAS_State,     SUBARU_MAIN_BUS, 8, .check_relay = true}, \
+  {MSG_SUBARU_ES_Infotainment,   SUBARU_MAIN_BUS, 8, .check_relay = true}, \
 
 #define SUBARU_COMMON_LONG_TX_MSGS(alt_bus) \
   {MSG_SUBARU_ES_Brake,          alt_bus,         8, .check_relay = false}, \
@@ -209,16 +209,11 @@ static bool subaru_fwd_hook(int bus_num, int addr) {
 
   if (bus_num == SUBARU_CAM_BUS) {
     // Global platform
-    bool block_lkas = ((addr == MSG_SUBARU_ES_LKAS) ||
-                       (addr == MSG_SUBARU_ES_DashStatus) ||
-                       (addr == MSG_SUBARU_ES_LKAS_State) ||
-                       (addr == MSG_SUBARU_ES_Infotainment));
-
     bool block_long = ((addr == MSG_SUBARU_ES_Brake) ||
                        (addr == MSG_SUBARU_ES_Distance) ||
                        (addr == MSG_SUBARU_ES_Status));
 
-    block_msg = block_lkas || (subaru_longitudinal && block_long);
+    block_msg = subaru_longitudinal && block_long;
   }
 
   return block_msg;
