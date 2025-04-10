@@ -240,10 +240,13 @@ class CarController(CarControllerBase):
         #   self.permit_braking = False
 
         if CC.longActive:
+          # TODO: we request a lot more brake than camera, so we need to use permit braking to get a good start.
+          #  try telling model there's no lead under a certain speed
+          lead_visible = hud_control.leadVisible #and CS.out.vEgo > 1
           inp = np.array([[CS.out.vEgo,
                            pcm_accel_cmd,
                            CC.orientationNED[1],
-                           CC.hudControl.leadVisible,  # not really sure what to set it to, so let's just go with actual value
+                           lead_visible,  # not really sure what to set it to, so let's just go with actual value
                            ]]).astype(np.float32)
           predicted_accel, predicted_permit_braking = self.model.run(None, {'input': inp})
           pcm_accel_cmd = float(predicted_accel[0][0])
