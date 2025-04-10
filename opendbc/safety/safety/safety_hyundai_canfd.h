@@ -23,12 +23,7 @@ static const int  MSG_HYUNDAI_CANFD_TCS = 0x175;
 static const int  MSG_HYUNDAI_CANFD_WHEEL_SPEEDS = 0xA0;
 static const int  MSG_HYUNDAI_CANFD_MDPS = 0xEA;
 
-static const int  MSG_HYUNDAI_CANFD_ADRV_0x51 = 0x51;
 static const int  MSG_HYUNDAI_CANFD_ADRV_0x160 = 0x160;
-static const int  MSG_HYUNDAI_CANFD_ADRV_0x1ea = 0x1EA;
-static const int  MSG_HYUNDAI_CANFD_ADRV_0x200 = 0x200;
-static const int  MSG_HYUNDAI_CANFD_ADRV_0x345 = 0x345;
-static const int  MSG_HYUNDAI_CANFD_ADRV_0x1da = 0x1DA;
 
 #define HYUNDAI_CANFD_CRUISE_BUTTON_TX_MSGS(bus) \
   {MSG_HYUNDAI_CANFD_CRUISE_BUTTON, bus, 8, .check_relay = false}, \
@@ -282,13 +277,13 @@ static safety_config hyundai_canfd_init(uint16_t param) {
     HYUNDAI_CANFD_LKA_STEERING_COMMON_TX_MSGS(0, 1)
     HYUNDAI_CANFD_LFA_STEERING_COMMON_TX_MSGS(1)
     HYUNDAI_CANFD_SCC_CONTROL_COMMON_TX_MSGS(1, true)
-    {MSG_HYUNDAI_CANFD_ADRV_0x51,  0, 32, .check_relay = false},  // ADRV_0x51
+    {0x51,  0, 32, .check_relay = false},  // ADRV_0x51
     {0x730, 1,  8, .check_relay = false},  // tester present for ADAS ECU disable
-    {MSG_HYUNDAI_CANFD_ADRV_0x160, 1, 16, .check_relay = false},  // ADRV_0x160
-    {MSG_HYUNDAI_CANFD_ADRV_0x1ea, 1, 32, .check_relay = false},  // ADRV_0x1ea
-    {MSG_HYUNDAI_CANFD_ADRV_0x200, 1,  8, .check_relay = false},  // ADRV_0x200
-    {MSG_HYUNDAI_CANFD_ADRV_0x345, 1,  8, .check_relay = false},  // ADRV_0x345
-    {MSG_HYUNDAI_CANFD_ADRV_0x1da, 1, 32, .check_relay = false},  // ADRV_0x1da
+    {MSG_HYUNDAI_CANFD_ADRV_0x160, 1, 16, .check_relay = false},
+    {0x1EA, 1, 32, .check_relay = false},  // ADRV_0x1ea
+    {0x200, 1,  8, .check_relay = false},  // ADRV_0x200
+    {0x345, 1,  8, .check_relay = false},  // ADRV_0x345
+    {0x1DA, 1, 32, .check_relay = false},  // ADRV_0x1da
   };
 
   static const CanMsg HYUNDAI_CANFD_LFA_STEERING_TX_MSGS[] = {
