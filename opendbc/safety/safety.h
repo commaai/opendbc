@@ -220,7 +220,7 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
   generic_rx_checks();
 
   // the relay malfunction hook runs on all incoming rx messages.
-  // check all tx msgs for liveness on sending bus if specified.
+  // check all applicable tx msgs for liveness on sending bus.
   // used to detect a relay malfunction or control messages from disabled ECUs like the radar
   const int bus = GET_BUS(to_push);
   const int addr = GET_ADDR(to_push);
@@ -283,11 +283,24 @@ static int get_fwd_bus(int bus_num) {
 int safety_fwd_hook(int bus_num, int addr) {
   bool blocked = relay_malfunction || current_safety_config.disable_forwarding;
 
+  // Block messages that are being checked for relay malfunctions. Safety modes can opt out of this
+  // in the case of selective AEB forwarding
+  const int destination_bus = get_fwd_bus(bus_num);
+  if (!blocked) {
+    for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
+      const CanMsg *m = &current_safety_config.tx_msgs[i];
+      if (m->check_relay && !m->disable_static_blocking && (m->addr == addr) && (m->bus == destination_bus)) {
+        blocked = true;
+        break;
+      }
+    }
+  }
+
   if (!blocked && (current_hooks->fwd != NULL)) {
     blocked = current_hooks->fwd(bus_num, addr);
   }
 
-  return blocked ? -1 : get_fwd_bus(bus_num);
+  return blocked ? -1 : destination_bus;
 }
 
 bool get_longitudinal_allowed(void) {

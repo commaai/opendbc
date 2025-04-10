@@ -146,11 +146,6 @@ static bool tesla_fwd_hook(int bus_num, int addr) {
   bool block_msg = false;
 
   if (bus_num == 2) {
-    // DAS_steeringControl, APS_eacMonitor
-    if ((addr == 0x488) || (addr == 0x27d)) {
-      block_msg = true;
-    }
-
     // DAS_control
     if (tesla_longitudinal && (addr == 0x2b9) && !tesla_stock_aeb) {
       block_msg = true;
@@ -169,9 +164,9 @@ static safety_config tesla_init(uint16_t param) {
   };
 
   static const CanMsg TESLA_M3_Y_LONG_TX_MSGS[] = {
-    {0x488, 0, 4, .check_relay = true},  // DAS_steeringControl
-    {0x2b9, 0, 8, .check_relay = true},  // DAS_control
-    {0x27D, 0, 3, .check_relay = true},  // APS_eacMonitor
+    {0x488, 0, 4, .check_relay = true},                                   // DAS_steeringControl
+    {0x2b9, 0, 8, .check_relay = true, .disable_static_blocking = true},  // DAS_control
+    {0x27D, 0, 3, .check_relay = true},                                   // APS_eacMonitor
   };
 
   UNUSED(param);
