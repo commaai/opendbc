@@ -27,7 +27,6 @@ typedef enum {
   GM_CAM
 } GmHardware;
 static GmHardware gm_hw = GM_ASCM;
-static bool gm_cam_long = false;
 static bool gm_pcm_cruise = false;
 
 static void gm_rx_hook(const CANPacket_t *to_push) {
@@ -160,29 +159,6 @@ static bool gm_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static bool gm_fwd_hook(int bus_num, int addr) {
-  bool block_msg = false;
-
-  if (gm_hw == GM_CAM) {
-    if (bus_num == 0) {
-      // block PSCMStatus; forwarded through openpilot to hide an alert from the camera
-      bool is_pscm_msg = (addr == 0x184);
-      if (is_pscm_msg) {
-        block_msg = true;
-      }
-    }
-
-    if (bus_num == 2) {
-      // block lkas message and acc messages if gm_cam_long, forward all others
-      bool is_lkas_msg = (addr == 0x180);
-      bool is_acc_msg = (addr == 0x315) || (addr == 0x2CB) || (addr == 0x370);
-      block_msg = is_lkas_msg || (is_acc_msg && gm_cam_long);
-    }
-  }
-
-  return block_msg;
-}
-
 static safety_config gm_init(uint16_t param) {
   const uint16_t GM_PARAM_HW_CAM = 1;
   const uint16_t GM_PARAM_EV = 4;
@@ -209,8 +185,9 @@ static safety_config gm_init(uint16_t param) {
     .max_brake = 400,
   };
 
-  static const CanMsg GM_CAM_LONG_TX_MSGS[] = {{0x180, 0, 4, .check_relay = true}, {0x315, 0, 5, .check_relay = false}, {0x2CB, 0, 8, .check_relay = true}, {0x370, 0, 6, .check_relay = false},  // pt bus
-                                               {0x184, 2, 8, .check_relay = false}};  // camera bus
+  // block PSCMStatus (0x184); forwarded through openpilot to hide an alert from the camera
+  static const CanMsg GM_CAM_LONG_TX_MSGS[] = {{0x180, 0, 4, .check_relay = true}, {0x315, 0, 5, .check_relay = true}, {0x2CB, 0, 8, .check_relay = true}, {0x370, 0, 6, .check_relay = true},  // pt bus
+                                               {0x184, 2, 8, .check_relay = true}};  // camera bus
 
 
   static RxCheck gm_rx_checks[] = {
@@ -223,7 +200,7 @@ static safety_config gm_init(uint16_t param) {
   };
 
   static const CanMsg GM_CAM_TX_MSGS[] = {{0x180, 0, 4, .check_relay = true},  // pt bus
-                                          {0x1E1, 2, 7, .check_relay = false}, {0x184, 2, 8, .check_relay = false}};  // camera bus
+                                          {0x1E1, 2, 7, .check_relay = false}, {0x184, 2, 8, .check_relay = true}};  // camera bus
 
   gm_hw = GET_FLAG(param, GM_PARAM_HW_CAM) ? GM_CAM : GM_ASCM;
 
@@ -233,6 +210,8 @@ static safety_config gm_init(uint16_t param) {
     gm_long_limits = &GM_CAM_LONG_LIMITS;
   } else {
   }
+
+  bool gm_cam_long = false;
 
 #ifdef ALLOW_DEBUG
   const uint16_t GM_PARAM_HW_CAM_LONG = 2;
@@ -266,5 +245,4 @@ const safety_hooks gm_hooks = {
   .init = gm_init,
   .rx = gm_rx_hook,
   .tx = gm_tx_hook,
-  .fwd = gm_fwd_hook,
 };
