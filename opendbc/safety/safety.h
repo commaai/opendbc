@@ -114,6 +114,9 @@ uint16_t current_safety_param = 0;
 static const safety_hooks *current_hooks = &nooutput_hooks;
 safety_config current_safety_config;
 
+static void generic_rx_checks(void);
+static void stock_ecu_check(bool stock_ecu_detected);
+
 static bool is_msg_valid(RxCheck addr_list[], int index) {
   bool valid = true;
   if (index != -1) {
