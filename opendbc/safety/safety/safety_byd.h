@@ -154,15 +154,15 @@ static safety_config byd_init(uint16_t param) {
   // const uint32_t FLAG_YUAN_PLUS_DMI_ATTO3 = 0x10U;
 
   static const CanMsg BYD_HAN_DMEV_TX_MSGS[] = {
-    {BYD_CANADDR_ACC_CMD,         BYD_CANBUS_ESC, 8, false},
-    {BYD_CANADDR_ACC_MPC_STATE,   BYD_CANBUS_ESC, 8, true},
-    {BYD_CANADDR_ACC_EPS_STATE,   BYD_CANBUS_MPC, 8, false},
+    {BYD_CANADDR_ACC_CMD,         BYD_CANBUS_ESC, 8, .check_relay = false},
+    {BYD_CANADDR_ACC_MPC_STATE,   BYD_CANBUS_ESC, 8, .check_relay = true},
+    {BYD_CANADDR_ACC_EPS_STATE,   BYD_CANBUS_MPC, 8, .check_relay = false},
   };
 
   // static const CanMsg BYD_YUANPLUS_ATTO3_TX_MSGS[] = {
-  //   {BYD_CANADDR_ACC_CMD,         BYD_CANBUS_ESC, 8, false},
-  //   {BYD_CANADDR_ACC_MPC_STATE,   BYD_CANBUS_ESC, 8, true},
-  //   {BYD_CANADDR_ACC_EPS_STATE,   BYD_CANBUS_MPC, 8, false},
+  //   {BYD_CANADDR_ACC_CMD,         BYD_CANBUS_ESC, 8, .check_relay = false},
+  //   {BYD_CANADDR_ACC_MPC_STATE,   BYD_CANBUS_ESC, 8, .check_relay = true},
+  //   {BYD_CANADDR_ACC_EPS_STATE,   BYD_CANBUS_MPC, 8, .check_relay = false},
   // };
 
   static RxCheck byd_han_dmev_rx_checks[] = {
