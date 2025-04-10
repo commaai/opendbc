@@ -45,14 +45,14 @@
 
 #define SUBARU_COMMON_TX_MSGS(alt_bus, lkas_msg) \
   {lkas_msg,                     SUBARU_MAIN_BUS, 8, .check_relay = true},  \
-  {MSG_SUBARU_ES_Distance,       alt_bus,         8, .check_relay = false}, \
   {MSG_SUBARU_ES_DashStatus,     SUBARU_MAIN_BUS, 8, .check_relay = true},  \
   {MSG_SUBARU_ES_LKAS_State,     SUBARU_MAIN_BUS, 8, .check_relay = true},  \
   {MSG_SUBARU_ES_Infotainment,   SUBARU_MAIN_BUS, 8, .check_relay = true},  \
 
 #define SUBARU_COMMON_LONG_TX_MSGS(alt_bus) \
-  {MSG_SUBARU_ES_Brake,          alt_bus,         8, .check_relay = false}, \
-  {MSG_SUBARU_ES_Status,         alt_bus,         8, .check_relay = false}, \
+  {MSG_SUBARU_ES_Distance,       alt_bus,         8, .check_relay = true}, \
+  {MSG_SUBARU_ES_Brake,          alt_bus,         8, .check_relay = true},  \
+  {MSG_SUBARU_ES_Status,         alt_bus,         8, .check_relay = true}, \
 
 #define SUBARU_GEN2_LONG_ADDITIONAL_TX_MSGS() \
   {MSG_SUBARU_ES_UDS_Request,    SUBARU_CAM_BUS,  8, .check_relay = false}, \
@@ -204,24 +204,10 @@ static bool subaru_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static bool subaru_fwd_hook(int bus_num, int addr) {
-  bool block_msg = false;
-
-  if (bus_num == SUBARU_CAM_BUS) {
-    // Global platform
-    bool block_long = ((addr == MSG_SUBARU_ES_Brake) ||
-                       (addr == MSG_SUBARU_ES_Distance) ||
-                       (addr == MSG_SUBARU_ES_Status));
-
-    block_msg = subaru_longitudinal && block_long;
-  }
-
-  return block_msg;
-}
-
 static safety_config subaru_init(uint16_t param) {
   static const CanMsg SUBARU_TX_MSGS[] = {
     SUBARU_COMMON_TX_MSGS(SUBARU_MAIN_BUS, MSG_SUBARU_ES_LKAS)
+    {MSG_SUBARU_ES_Distance, SUBARU_MAIN_BUS, 8, .check_relay = false},
   };
 
   static const CanMsg SUBARU_LONG_TX_MSGS[] = {
@@ -231,6 +217,7 @@ static safety_config subaru_init(uint16_t param) {
 
   static const CanMsg SUBARU_GEN2_TX_MSGS[] = {
     SUBARU_COMMON_TX_MSGS(SUBARU_ALT_BUS, MSG_SUBARU_ES_LKAS)
+    {MSG_SUBARU_ES_Distance, SUBARU_ALT_BUS, 8, .check_relay = false},
   };
 
   static const CanMsg SUBARU_GEN2_LONG_TX_MSGS[] = {
@@ -271,7 +258,6 @@ const safety_hooks subaru_hooks = {
   .init = subaru_init,
   .rx = subaru_rx_hook,
   .tx = subaru_tx_hook,
-  .fwd = subaru_fwd_hook,
   .get_counter = subaru_get_counter,
   .get_checksum = subaru_get_checksum,
   .compute_checksum = subaru_compute_checksum,
