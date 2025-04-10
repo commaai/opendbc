@@ -170,6 +170,8 @@ static bool rivian_tx_hook(const CANPacket_t *to_send) {
 }
 
 static safety_config rivian_init(uint16_t param) {
+  // SCCM_WheelTouch: for hiding hold wheel alert
+  // VDM_AdasSts: for canceling stock ACC
   // 0x120 = ACM_lkaHbaCmd, 0x321 = SCCM_WheelTouch, 0x162 = VDM_AdasSts
   static const CanMsg RIVIAN_TX_MSGS[] = {{0x120, 0, 8, .check_relay = true}, {0x321, 2, 7, .check_relay = true}, {0x162, 2, 8, .check_relay = true}};
   // 0x160 = ACM_longitudinalRequest

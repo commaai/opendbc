@@ -185,6 +185,7 @@ static safety_config gm_init(uint16_t param) {
     .max_brake = 400,
   };
 
+  // block PSCMStatus (0x184); forwarded through openpilot to hide an alert from the camera
   static const CanMsg GM_CAM_LONG_TX_MSGS[] = {{0x180, 0, 4, .check_relay = true}, {0x315, 0, 5, .check_relay = true}, {0x2CB, 0, 8, .check_relay = true}, {0x370, 0, 6, .check_relay = true},  // pt bus
                                                {0x184, 2, 8, .check_relay = true}};  // camera bus
 
