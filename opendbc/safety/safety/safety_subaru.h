@@ -51,7 +51,7 @@
 
 #define SUBARU_COMMON_LONG_TX_MSGS(alt_bus) \
   {MSG_SUBARU_ES_Distance,       alt_bus,         8, .check_relay = true}, \
-  {MSG_SUBARU_ES_Brake,          alt_bus,         8, .check_relay = true},  \
+  {MSG_SUBARU_ES_Brake,          alt_bus,         8, .check_relay = true}, \
   {MSG_SUBARU_ES_Status,         alt_bus,         8, .check_relay = true}, \
 
 #define SUBARU_GEN2_LONG_ADDITIONAL_TX_MSGS() \
