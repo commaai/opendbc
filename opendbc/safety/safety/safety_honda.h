@@ -278,8 +278,11 @@ static bool honda_tx_hook(const CANPacket_t *to_send) {
 }
 
 static safety_config honda_nidec_init(uint16_t param) {
+  // 0x1FA is dynamically forwarded based on stock AEB
+  // 0xE4 is steering on all cars except CRV and RDX, 0x194 for CRV and RDX,
+  // 0x1FA is brake control, 0x30C is acc hud, 0x33D is lkas hud
   static CanMsg HONDA_N_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0x194, 0, 4, .check_relay = true}, {0x1FA, 0, 8, .check_relay = false},
-                                     {0x30C, 0, 8, .check_relay = false}, {0x33D, 0, 5, .check_relay = false}};
+                                     {0x30C, 0, 8, .check_relay = true}, {0x33D, 0, 5, .check_relay = true}};
 
   const uint16_t HONDA_PARAM_NIDEC_ALT = 4;
 
@@ -395,17 +398,12 @@ static safety_config honda_bosch_init(uint16_t param) {
 }
 
 static bool honda_nidec_fwd_hook(int bus_num, int addr) {
-  // fwd from car to camera. also fwd certain msgs from camera to car
-  // 0xE4 is steering on all cars except CRV and RDX, 0x194 for CRV and RDX,
-  // 0x1FA is brake control, 0x30C is acc hud, 0x33D is lkas hud
   bool block_msg = false;
 
   if (bus_num == 2) {
-    // block stock lkas messages and stock acc messages (if OP is doing ACC)
-    bool is_lkas_msg = (addr == 0xE4) || (addr == 0x194) || (addr == 0x33D);
-    bool is_acc_hud_msg = addr == 0x30C;
+    // forwarded if stock AEB is active
     bool is_brake_msg = addr == 0x1FA;
-    block_msg = is_lkas_msg || is_acc_hud_msg || (is_brake_msg && !honda_fwd_brake);
+    block_msg = is_brake_msg && !honda_fwd_brake;
   }
 
   return block_msg;

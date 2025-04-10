@@ -249,6 +249,7 @@ class HondaBase(common.PandaCarSafetyTest):
 class TestHondaNidecSafetyBase(HondaBase):
   TX_MSGS = HONDA_N_COMMON_TX_MSGS
   FWD_BLACKLISTED_ADDRS = {2: [0xE4, 0x194, 0x33D, 0x30C]}
+  RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0x194, 0x33D, 0x30C)}
 
   PT_BUS = 0
   STEER_BUS = 0
