@@ -165,7 +165,7 @@ static safety_config tesla_init(uint16_t param) {
 
   static const CanMsg TESLA_M3_Y_LONG_TX_MSGS[] = {
     {0x488, 0, 4, .check_relay = true},  // DAS_steeringControl
-    {0x2b9, 0, 8, .check_relay = true, .disable_static_forwarding = true},  // DAS_control
+    {0x2b9, 0, 8, .check_relay = true, .disable_static_blocking = true},  // DAS_control
     {0x27D, 0, 3, .check_relay = true},  // APS_eacMonitor
   };
 

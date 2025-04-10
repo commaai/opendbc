@@ -287,7 +287,7 @@ int safety_fwd_hook(int bus_num, int addr) {
   if (!blocked) {
     for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
       const CanMsg *m = &current_safety_config.tx_msgs[i];
-      if (m->check_relay && !m->disable_static_forwarding && (m->addr == addr) && (m->bus == destination_bus)) {
+      if (m->check_relay && !m->disable_static_blocking && (m->addr == addr) && (m->bus == destination_bus)) {
         blocked = true;
         break;
       }
