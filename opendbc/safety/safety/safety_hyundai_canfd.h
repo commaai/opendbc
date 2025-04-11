@@ -4,17 +4,17 @@
 #include "safety_hyundai_common.h"
 
 #define HYUNDAI_CANFD_CRUISE_BUTTON_TX_MSGS(bus) \
-  {0x1CF, bus, 8, .check_relay = false},  /* CRUISE_BUTTON */   \
+  {0x1CF, bus, 8, .check_relay = false},  /* CRUISE_BUTTON */  \
 
 #define HYUNDAI_CANFD_LKA_STEERING_COMMON_TX_MSGS \
-  HYUNDAI_CANFD_CRUISE_BUTTON_TX_MSGS(1)                        \
+  HYUNDAI_CANFD_CRUISE_BUTTON_TX_MSGS(1)                \
   {0x50,  0, 16, .check_relay = true},  /* LKAS */      \
-  {0x2A4, 0, 24, .check_relay = false},         /* CAM_0x2A4 */ \
+  {0x2A4, 0, 24, .check_relay = false}, /* CAM_0x2A4 */ \
 
 #define HYUNDAI_CANFD_LKA_STEERING_ALT_COMMON_TX_MSGS \
-  HYUNDAI_CANFD_CRUISE_BUTTON_TX_MSGS(1)                        \
-  {0x110, 0, 32, .check_relay = true},  /* LKAS_ALT */  \
-  {0x362, 0, 32, .check_relay = false},         /* CAM_0x362 */ \
+  HYUNDAI_CANFD_CRUISE_BUTTON_TX_MSGS(1)                 \
+  {0x110, 0, 32, .check_relay = true},   /* LKAS_ALT */  \
+  {0x362, 0, 32, .check_relay = false},  /* CAM_0x362 */ \
 
 #define HYUNDAI_CANFD_LFA_STEERING_COMMON_TX_MSGS(e_can)  \
   {0x12A, e_can, 16, .check_relay = (e_can) == 0},  /* LFA */            \
