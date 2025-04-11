@@ -228,7 +228,7 @@ class TestHyundaiCanfdLFASteeringLongBase(HyundaiLongitudinalBase, TestHyundaiCa
 
   FWD_BLACKLISTED_ADDRS = {2: [0x12a, 0x1e0, 0x1a0, 0x160]}
 
-  RELAY_MALFUNCTION_ADDRS = {0: (0x12A, 0x1a0)}  # LFA, SCC_CONTROL
+  RELAY_MALFUNCTION_ADDRS = {0: (0x12A, 0x1a0, 0x160)}  # LFA, SCC_CONTROL, ADRV_0x160
 
   DISABLED_ECU_UDS_MSG = (0x7D0, 0)
   DISABLED_ECU_ACTUATION_MSG = (0x1a0, 0)

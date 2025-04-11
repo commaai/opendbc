@@ -228,10 +228,7 @@ static bool hyundai_canfd_fwd_hook(int bus_num, int addr) {
     // HUD icons
     bool is_lfahda_msg = ((addr == 0x1e0) && !hyundai_canfd_lka_steering);
 
-    // SCC_CONTROL and ADRV_0x160 for camera SCC cars, we send our own longitudinal commands and to show FCA light
-    bool is_scc_msg = (((addr == 0x1a0) || (addr == 0x160)) && hyundai_longitudinal && !hyundai_canfd_lka_steering);
-
-    block_msg = is_lka_msg || is_lfahda_msg || is_scc_msg;
+    block_msg = is_lka_msg || is_lfahda_msg;
   }
 
   return block_msg;
@@ -268,19 +265,21 @@ static safety_config hyundai_canfd_init(uint16_t param) {
     HYUNDAI_CANFD_SCC_CONTROL_COMMON_TX_MSGS(0, false)
   };
 
-  static const CanMsg HYUNDAI_CANFD_LFA_STEERING_LONG_TX_MSGS[] = {
+  // ADRV_0x160 is checked for radar liveness
+  static const CanMsg HYUNDAI_CANFD_LFA_STEERING_RADAR_LONG_TX_MSGS[] = {
     HYUNDAI_CANFD_CRUISE_BUTTON_TX_MSGS(2)
     HYUNDAI_CANFD_LFA_STEERING_COMMON_TX_MSGS(0)
     HYUNDAI_CANFD_SCC_CONTROL_COMMON_TX_MSGS(0, true)
-    {0x160, 0, 16, .check_relay = false}, // ADRV_0x160
+    {0x160, 0, 16, .check_relay = true}, // ADRV_0x160
     {0x7D0, 0, 8, .check_relay = false},  // tester present for radar ECU disable
   };
 
+  // ADRV_0x160 is checked for relay malfunction
 #define HYUNDAI_CANFD_LFA_STEERING_CAMERA_SCC_TX_MSGS(longitudinal) \
     HYUNDAI_CANFD_CRUISE_BUTTON_TX_MSGS(2) \
     HYUNDAI_CANFD_LFA_STEERING_COMMON_TX_MSGS(0) \
     HYUNDAI_CANFD_SCC_CONTROL_COMMON_TX_MSGS(0, (longitudinal)) \
-    {0x160, 0, 16, .check_relay = false}, /* ADRV_0x160 */ \
+    {0x160, 0, 16, .check_relay = (longitudinal)}, /* ADRV_0x160 */ \
 
   hyundai_common_init(param);
 
@@ -320,7 +319,7 @@ static safety_config hyundai_canfd_init(uint16_t param) {
       if (hyundai_camera_scc) {
         SET_TX_MSGS(hyundai_canfd_lfa_steering_camera_scc_tx_msgs, ret);
       } else {
-        SET_TX_MSGS(HYUNDAI_CANFD_LFA_STEERING_LONG_TX_MSGS, ret);
+        SET_TX_MSGS(HYUNDAI_CANFD_LFA_STEERING_RADAR_LONG_TX_MSGS, ret);
       }
     }
 
