@@ -224,7 +224,6 @@ static bool hyundai_canfd_fwd_hook(int bus_num, int addr) {
   if (bus_num == 2) {
     // LKAS for cars with LKAS and LFA messages, LFA for cars with no LKAS messages
     bool is_lka_msg = (addr == hyundai_canfd_get_lka_addr()) && hyundai_canfd_lka_steering;
-    bool is_lfa_msg = ((addr == 0x12a) && !hyundai_canfd_lka_steering);
 
     // HUD icons
     bool is_lfahda_msg = ((addr == 0x1e0) && !hyundai_canfd_lka_steering);
@@ -232,7 +231,7 @@ static bool hyundai_canfd_fwd_hook(int bus_num, int addr) {
     // SCC_CONTROL and ADRV_0x160 for camera SCC cars, we send our own longitudinal commands and to show FCA light
     bool is_scc_msg = (((addr == 0x1a0) || (addr == 0x160)) && hyundai_longitudinal && !hyundai_canfd_lka_steering);
 
-    block_msg = is_lka_msg || is_lfa_msg || is_lfahda_msg || is_scc_msg;
+    block_msg = is_lka_msg || is_lfahda_msg || is_scc_msg;
   }
 
   return block_msg;
