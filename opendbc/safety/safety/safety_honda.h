@@ -322,7 +322,7 @@ static safety_config honda_nidec_init(uint16_t param) {
 }
 
 static safety_config honda_bosch_init(uint16_t param) {
-  static CanMsg HONDA_BOSCH_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0xE5, 0, 8, .check_relay = false}, {0x296, 1, 4, .check_relay = false},
+  static CanMsg HONDA_BOSCH_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0xE5, 0, 8, .check_relay = true}, {0x296, 1, 4, .check_relay = false},
                                          {0x33D, 0, 5, .check_relay = false}, {0x33DA, 0, 5, .check_relay = false}, {0x33DB, 0, 8, .check_relay = false}};  // Bosch
 
   static CanMsg HONDA_BOSCH_LONG_TX_MSGS[] = {{0xE4, 1, 5, .check_relay = true}, {0x1DF, 1, 8, .check_relay = true}, {0x1EF, 1, 8, .check_relay = false},
@@ -413,7 +413,7 @@ static bool honda_bosch_fwd_hook(int bus_num, int addr) {
   bool block_msg = false;
 
   if (bus_num == 2)  {
-    bool is_lkas_msg = (addr == 0xE5) || (addr == 0x33D) || (addr == 0x33DA) || (addr == 0x33DB);
+    bool is_lkas_msg = (addr == 0x33D) || (addr == 0x33DA) || (addr == 0x33DB);
     block_msg = is_lkas_msg;
   }
 
