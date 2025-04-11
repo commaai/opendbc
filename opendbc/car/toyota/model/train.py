@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import math
 import numpy as np
 from tqdm import tqdm
 import tensorflow as tf
@@ -64,7 +65,11 @@ y_aegos = []
 predicted_aegos = []
 
 for stock_route, lr in tqdm(lrs):
-  cp = CANParser("toyota_nodsu_pt_generated", [("PCM_CRUISE", 33)], 0)
+  cp = CANParser("toyota_nodsu_pt_generated", [
+    ("PCM_CRUISE", 33),
+    ("CLUTCH", 15),
+    ("VSC1S07", 20),
+  ], 0)
   cp2 = CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 33)], 2)
   cp128 = CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 33)], 128)
 
@@ -164,6 +169,10 @@ for stock_route, lr in tqdm(lrs):
           Y_sections.append([])
         continue
 
+      car_pitch = math.radians(cp.vl['VSC1S07']['ASLP'])
+      pcm_accel_net = cp.vl['PCM_CRUISE']['ACCEL_NET']
+      clutch_accel_net = cp.vl['CLUTCH']['ACCEL_NET']
+
       pitch = CC.orientationNED[1]
       stock_camera_accel = cp2.vl['ACC_CONTROL']['ACCEL_CMD']
       stock_camera_permit_braking = cp2.vl['ACC_CONTROL']['PERMIT_BRAKING']
@@ -171,7 +180,11 @@ for stock_route, lr in tqdm(lrs):
       # by camera when setting permit braking
       mini_car = cp2.vl['ACC_CONTROL']['MINI_CAR']
 
-      X_sections[-1].append([CS.vEgo, CS.aEgo, pitch, mini_car])
+      # GVC does not overshoot ego acceleration when starting from stop, but still has a similar delay
+      gvc = cp.vl["VSC1S07"]["GVC"]
+      a_ego = np.interp(CS.vEgo, [1.0, 2.0], [gvc, CS.aEgo])
+
+      X_sections[-1].append([CS.vEgo, a_ego, pitch, mini_car, car_pitch, pcm_accel_net, clutch_accel_net])
       Y_sections[-1].append([stock_camera_accel, stock_camera_permit_braking])
       # print(X_sections[-1][-1])
       # print(Y_sections[-1][-1])
@@ -300,7 +313,8 @@ plot_data_stats2()
 
 # the model
 inputs = keras.layers.Input(shape=X.shape[1:])
-shared = keras.layers.Dense(32, kernel_regularizer=keras.regularizers.l2(0.001))(inputs)
+shared = keras.layers.BatchNormalization()(inputs)  # too lazy to scale
+shared = keras.layers.Dense(32, kernel_regularizer=keras.regularizers.l2(0.001))(shared)
 # shared = keras.layers.BatchNormalization()(shared)
 shared = keras.layers.LeakyReLU()(shared)
 # shared = keras.layers.Dropout(0.2)(shared)
@@ -363,7 +377,7 @@ def plot_model_prediction():
   plt.show()
 
 
-plot_model_prediction()
+# plot_model_prediction()
 
 # raise Exception
 

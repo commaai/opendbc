@@ -57,6 +57,10 @@ class CarState(CarStateBase):
     cp = can_parsers[Bus.pt]
     cp_cam = can_parsers[Bus.cam]
 
+    self.clutch = copy.copy(cp.vl["CLUTCH"])
+    self.pcm_cruise = copy.copy(cp.vl["PCM_CRUISE"])
+    self.vsc = copy.copy(cp.vl["VSC1S07"])
+
     ret = structs.CarState()
     cp_acc = cp_cam if self.CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR) else cp
 
@@ -208,6 +212,8 @@ class CarState(CarStateBase):
       ("PCM_CRUISE", 33),
       ("PCM_CRUISE_SM", 1),
       ("STEER_TORQUE_SENSOR", 50),
+      ("CLUTCH", 15),
+      ("VSC1S07", 20),
     ]
 
     if CP.flags & ToyotaFlags.SECOC.value:

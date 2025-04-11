@@ -219,17 +219,18 @@ class CarController(CarControllerBase):
         # future_t = float(np.interp(CS.out.vEgo, [2., 5.], [0.25, 0.5]))
         # a_ego_future = a_ego_blended + j_ego * future_t
         #
-        # if CC.longActive:
-        #   # constantly slowly unwind integral to recover from large temporary errors
-        #   self.long_pid.i -= ACCEL_PID_UNWIND * float(np.sign(self.long_pid.i))
-        #
-        #   error_future = pcm_accel_cmd - a_ego_future
-        #   pcm_accel_cmd = self.long_pid.update(error_future,
-        #                                        speed=CS.out.vEgo,
-        #                                        feedforward=pcm_accel_cmd,
-        #                                        freeze_integrator=actuators.longControlState != LongCtrlState.pid)
-        # else:
-        #   self.long_pid.reset()
+        if CC.longActive and False:
+          # constantly slowly unwind integral to recover from large temporary errors
+          self.long_pid.i -= ACCEL_PID_UNWIND * float(np.sign(self.long_pid.i))
+
+          # error_future = pcm_accel_cmd - a_ego_future
+          error = pcm_accel_cmd - CS.out.aEgo
+          pcm_accel_cmd = self.long_pid.update(error,
+                                               speed=CS.out.vEgo,
+                                               feedforward=pcm_accel_cmd,
+                                               freeze_integrator=actuators.longControlState != LongCtrlState.pid)
+        else:
+          self.long_pid.reset()
         #
         # # Along with rate limiting positive jerk above, this greatly improves gas response time
         # # Consider the net acceleration request that the PCM should be applying (pitch included)
@@ -247,6 +248,9 @@ class CarController(CarControllerBase):
                            pcm_accel_cmd,
                            CC.orientationNED[1],
                            lead_visible,  # not really sure what to set it to, so let's just go with actual value
+                           math.radians(CS.vsc['ASLP']),
+                           CS.pcm_cruise['ACCEL_NET'],
+                           CS.clutch['ACCEL_NET'],
                            ]]).astype(np.float32)
           predicted_accel, predicted_permit_braking = self.model.run(None, {'input': inp})
           pcm_accel_cmd = float(predicted_accel[0][0])
