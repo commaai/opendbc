@@ -76,11 +76,6 @@ BO_ 927 RADAR_HUD: 8 ADAS
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" BDY
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" BDY
 
-BO_ 1302 ODOMETER: 8 XXX
- SG_ ODOMETER : 7|24@0+ (1,0) [0|16777215] "km" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
-
 CM_ SG_ 401 GEAR "10 = reverse, 11 = transition";
 CM_ SG_ 806 REVERSE_LIGHT "Might be reverse gear selected and not the lights";
 
