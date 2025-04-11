@@ -2,56 +2,61 @@
 
 #include "safety_declarations.h"
 
+// TODO merge with non-Raven
+
 static bool tesla_longitudinal = false;
+static bool tesla_powertrain = false;  // Are we the second panda intercepting the powertrain bus?
+static bool tesla_raven = false;
 static bool tesla_stock_aeb = false;
 
 static void tesla_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
   int addr = GET_ADDR(to_push);
 
-  if (bus == 0) {
-    // Steering angle: (0.1 * val) - 819.2 in deg.
-    if (addr == 0x370) {
+  if (!tesla_powertrain) {
+    if((addr == 0x370) && (bus == 0)) {
+      // Steering angle: (0.1 * val) - 819.2 in deg.
       // Store it 1/10 deg to match steering request
       int angle_meas_new = (((GET_BYTE(to_push, 4) & 0x3FU) << 8) | GET_BYTE(to_push, 5)) - 8192U;
       update_sample(&angle_meas, angle_meas_new);
     }
+  }
 
-    // Vehicle speed
-    if (addr == 0x257) {
-      // Vehicle speed: ((val * 0.08) - 40) / MS_TO_KPH
-      float speed = ((((GET_BYTE(to_push, 2) << 4) | (GET_BYTE(to_push, 1) >> 4)) * 0.08) - 40) / 3.6;
-      UPDATE_VEHICLE_SPEED(speed);
-    }
+  if ((tesla_powertrain && (bus == 0) && (addr == 0x116)) ||
+     (!tesla_powertrain && (bus == 1) && (addr == 0x118))) {
+    // DI_torque2: DI_vehicleSpeed
+    // Vehicle speed: ((0.05 * val) - 25) * MPH_TO_MPS
+    float speed = (((((GET_BYTE(to_push, 3) & 0x0FU) << 8) | (GET_BYTE(to_push, 2))) * 0.05) - 25) * 0.447;
+    vehicle_moving = ABS(speed) > 0.1;
+    UPDATE_VEHICLE_SPEED(speed);
+  }
 
-    // Gas pressed
-    if (addr == 0x118) {
-      gas_pressed = (GET_BYTE(to_push, 4) != 0U);
-    }
+  if ((tesla_powertrain && (bus == 0) && (addr == 0x106)) ||
+     (!tesla_powertrain && (bus == 1) && (addr == 0x108))) {
+    gas_pressed = (GET_BYTE(to_push, 6) != 0U);
+  }
 
-    // Brake pressed
-    if (addr == 0x39d) {
-      brake_pressed = (GET_BYTE(to_push, 2) & 0x03U) == 2U;
-    }
+  if ((tesla_powertrain && (bus == 0) && (addr == 0x1f8)) ||
+     (!tesla_powertrain && (bus == 1) && (addr == 0x20a))) {
+    brake_pressed = (((GET_BYTE(to_push, 0) & 0x0CU) >> 2) != 1U);
+  }
 
+  if ((tesla_powertrain && (bus == 0) && (addr == 0x256)) ||
+     (!tesla_powertrain && (bus == 1) && (addr == 0x368))) {
     // Cruise state
-    if (addr == 0x286) {
-      int cruise_state = (GET_BYTE(to_push, 1) >> 4) & 0x07U;
-      bool cruise_engaged = (cruise_state == 2) ||  // ENABLED
-                            (cruise_state == 3) ||  // STANDSTILL
-                            (cruise_state == 4) ||  // OVERRIDE
-                            (cruise_state == 6) ||  // PRE_FAULT
-                            (cruise_state == 7);    // PRE_CANCEL
-
-      vehicle_moving = cruise_state != 3; // STANDSTILL
-      pcm_cruise_check(cruise_engaged);
-    }
+    int cruise_state = (GET_BYTE(to_push, 1) >> 4);
+    bool cruise_engaged = (cruise_state == 2) ||  // ENABLED
+                          (cruise_state == 3) ||  // STANDSTILL
+                          (cruise_state == 4) ||  // OVERRIDE
+                          (cruise_state == 6) ||  // PRE_FAULT
+                          (cruise_state == 7);    // PRE_CANCEL
+    pcm_cruise_check(cruise_engaged);
   }
 
   if (bus == 2) {
-    if (tesla_longitudinal && (addr == 0x2b9)) {
+    if (tesla_powertrain && tesla_longitudinal && (addr == 0x2bf)) {
       // "AEB_ACTIVE"
-      tesla_stock_aeb = (GET_BYTE(to_push, 2) & 0x03U) == 1U;
+      tesla_stock_aeb = ((GET_BYTE(to_push, 2) & 0x03U) == 1U);
     }
   }
 }
@@ -82,7 +87,7 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
   bool violation = false;
 
   // Steering control: (0.1 * val) - 1638.35 in deg.
-  if (addr == 0x488) {
+  if (!tesla_powertrain && (addr == 0x488)) {
     // We use 1/10 deg as a unit here
     int raw_angle_can = ((GET_BYTE(to_send, 0) & 0x7FU) << 8) | GET_BYTE(to_send, 1);
     int desired_angle = raw_angle_can - 16384;
@@ -96,7 +101,7 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
   }
 
   // DAS_control: longitudinal control message
-  if (addr == 0x2b9) {
+  if (tesla_powertrain && (addr == 0x2bf)) {
     // No AEB events may be sent by openpilot
     int aeb_event = GET_BYTE(to_send, 2) & 0x03U;
     if (aeb_event != 0) {
@@ -147,7 +152,7 @@ static bool tesla_fwd_hook(int bus_num, int addr) {
 
   if (bus_num == 2) {
     // DAS_control
-    if (tesla_longitudinal && (addr == 0x2b9) && !tesla_stock_aeb) {
+    if (tesla_powertrain && tesla_longitudinal && (addr == 0x2bf) && !tesla_stock_aeb) {
       block_msg = true;
     }
   }
@@ -157,41 +162,45 @@ static bool tesla_fwd_hook(int bus_num, int addr) {
 
 static safety_config tesla_init(uint16_t param) {
 
-  static const CanMsg TESLA_M3_Y_TX_MSGS[] = {
-    {0x488, 0, 4, .check_relay = true},   // DAS_steeringControl
-    {0x2b9, 0, 8, .check_relay = false},  // DAS_control (for cancel)
-    {0x27D, 0, 3, .check_relay = true},   // APS_eacMonitor
+  static const CanMsg TESLA_TX_MSGS[] = {
+    {0x488, 0, 4, .check_relay = true},  // DAS_steeringControl
+    {0x27D, 0, 3, .check_relay = true},  // APS_eacMonitor
   };
 
-  static const CanMsg TESLA_M3_Y_LONG_TX_MSGS[] = {
-    {0x488, 0, 4, .check_relay = true},                                   // DAS_steeringControl
-    {0x2b9, 0, 8, .check_relay = true, .disable_static_blocking = true},  // DAS_control
-    {0x27D, 0, 3, .check_relay = true},                                   // APS_eacMonitor
+  static const CanMsg TESLA_PT_TX_MSGS[] = {
+    {0x2bf, 0, 8, .check_relay = true, .disable_static_blocking = true},  // DAS_control
   };
 
-  UNUSED(param);
-#ifdef ALLOW_DEBUG
   const int TESLA_FLAG_LONGITUDINAL_CONTROL = 1;
+  const int TESLA_FLAG_POWERTRAIN = 2;
+  const int TESLA_FLAG_RAVEN = 4;
   tesla_longitudinal = GET_FLAG(param, TESLA_FLAG_LONGITUDINAL_CONTROL);
-#endif
+  tesla_powertrain = GET_FLAG(param, TESLA_FLAG_POWERTRAIN);
+  tesla_raven = GET_FLAG(param, TESLA_FLAG_RAVEN);
 
   tesla_stock_aeb = false;
 
-  static RxCheck tesla_model3_y_rx_checks[] = {
-    {.msg = {{0x2b9, 2, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 25U}, { 0 }, { 0 }}},   // DAS_control
-    {.msg = {{0x257, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},   // DI_speed (speed in kph)
-    {.msg = {{0x370, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},  // EPAS3S_internalSAS (steering angle)
-    {.msg = {{0x118, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},  // DI_systemStatus (gas pedal)
-    {.msg = {{0x39d, 0, 5, .ignore_checksum = true, .ignore_counter = true, .frequency = 25U}, { 0 }, { 0 }}},   // IBST_status (brakes)
-    {.msg = {{0x286, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},   // DI_state (acc state)
-    {.msg = {{0x311, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},   // UI_warning (blinkers, buckle switch & doors)
-  };
-
   safety_config ret;
-  if (tesla_longitudinal) {
-    ret = BUILD_SAFETY_CFG(tesla_model3_y_rx_checks, TESLA_M3_Y_LONG_TX_MSGS);
+  if (tesla_powertrain) {
+    static RxCheck tesla_pt_rx_checks[] = {
+      {.msg = {{0x106, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},  // DI_torque1
+      {.msg = {{0x116, 0, 6, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},  // DI_torque2
+      {.msg = {{0x1f8, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},   // BrakeMessage
+      {.msg = {{0x2bf, 2, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 25U}, { 0 }, { 0 }}},   // DAS_control
+      {.msg = {{0x256, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},   // DI_state
+    };
+
+    ret = BUILD_SAFETY_CFG(tesla_pt_rx_checks, TESLA_PT_TX_MSGS);
   } else {
-    ret = BUILD_SAFETY_CFG(tesla_model3_y_rx_checks, TESLA_M3_Y_TX_MSGS);
+    static RxCheck tesla_raven_rx_checks[] = {
+      {.msg = {{0x370, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},  // EPAS3P_sysStatus
+      {.msg = {{0x108, 1, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},  // DI_torque1
+      {.msg = {{0x118, 1, 6, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},  // DI_torque2
+      {.msg = {{0x20a, 1, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},   // BrakeMessage
+      {.msg = {{0x368, 1, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},   // DI_state
+    };
+
+    ret = BUILD_SAFETY_CFG(tesla_raven_rx_checks, TESLA_TX_MSGS);
   }
   return ret;
 }
