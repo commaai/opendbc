@@ -3,6 +3,36 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+// from cereal.car.CarParams.SafetyModel
+#define SAFETY_SILENT 0U
+#define SAFETY_HONDA_NIDEC 1U
+#define SAFETY_TOYOTA 2U
+#define SAFETY_ELM327 3U
+#define SAFETY_GM 4U
+#define SAFETY_HONDA_BOSCH_GIRAFFE 5U
+#define SAFETY_FORD 6U
+#define SAFETY_HYUNDAI 8U
+#define SAFETY_CHRYSLER 9U
+#define SAFETY_TESLA 10U
+#define SAFETY_SUBARU 11U
+#define SAFETY_MAZDA 13U
+#define SAFETY_NISSAN 14U
+#define SAFETY_VOLKSWAGEN_MQB 15U
+#define SAFETY_ALLOUTPUT 17U
+#define SAFETY_GM_ASCM 18U
+#define SAFETY_NOOUTPUT 19U
+#define SAFETY_HONDA_BOSCH 20U
+#define SAFETY_VOLKSWAGEN_PQ 21U
+#define SAFETY_SUBARU_PREGLOBAL 22U
+#define SAFETY_HYUNDAI_LEGACY 23U
+#define SAFETY_HYUNDAI_COMMUNITY 24U
+#define SAFETY_STELLANTIS 25U
+#define SAFETY_FAW 26U
+#define SAFETY_BODY 27U
+#define SAFETY_HYUNDAI_CANFD 28U
+#define SAFETY_RIVIAN 33U
+#define SAFETY_VOLKSWAGEN_MEB 34U
+
 #define GET_BIT(msg, b) ((bool)!!(((msg)->data[((b) / 8U)] >> ((b) % 8U)) & 0x1U))
 #define GET_BYTE(msg, b) ((msg)->data[(b)])
 #define GET_FLAG(value, mask) (((__typeof__(mask))(value) & (mask)) == (mask)) // cppcheck-suppress misra-c2012-1.2; allow __typeof__
@@ -185,7 +215,6 @@ typedef struct {
 
 bool safety_rx_hook(const CANPacket_t *to_push);
 bool safety_tx_hook(CANPacket_t *to_send);
-uint32_t get_ts_elapsed(uint32_t ts, uint32_t ts_last);
 int to_signed(int d, int bits);
 void update_sample(struct sample_t *sample, int sample_new);
 bool get_longitudinal_allowed(void);
@@ -194,8 +223,6 @@ void gen_crc_lookup_table_8(uint8_t poly, uint8_t crc_lut[]);
 #ifdef CANFD
 void gen_crc_lookup_table_16(uint16_t poly, uint16_t crc_lut[]);
 #endif
-static void generic_rx_checks(void);
-static void stock_ecu_check(bool stock_ecu_detected);
 bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueSteeringLimits limits);
 bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits);
 bool longitudinal_accel_checks(int desired_accel, const LongitudinalLimits limits);
