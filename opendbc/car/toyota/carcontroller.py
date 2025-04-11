@@ -201,9 +201,9 @@ class CarController(CarControllerBase):
 
         # # calculate amount of acceleration PCM should apply to reach target, given pitch.
         # # clipped to only include downhill angles, avoids erroneously unsetting PERMIT_BRAKING when stopping on uphills
-        # accel_due_to_pitch = math.sin(min(self.pitch.x, 0.0)) * ACCELERATION_DUE_TO_GRAVITY
+        accel_due_to_pitch = math.sin(self.pitch.x) * ACCELERATION_DUE_TO_GRAVITY
         # # TODO: on uphills this sometimes sets PERMIT_BRAKING low not considering the creep force
-        # net_acceleration_request = pcm_accel_cmd + accel_due_to_pitch
+        net_acceleration_request = pcm_accel_cmd + accel_due_to_pitch
         #
         # # GVC does not overshoot ego acceleration when starting from stop, but still has a similar delay
         # if not self.CP.flags & ToyotaFlags.SECOC.value:
@@ -243,7 +243,9 @@ class CarController(CarControllerBase):
         if CC.longActive:
           # TODO: we request a lot more brake than camera, so we need to use permit braking to get a good start.
           #  try telling model there's no lead under a certain speed
-          lead_visible = hud_control.leadVisible #and CS.out.vEgo > 1
+
+          lead_visible = hud_control.leadVisible and net_acceleration_request < 0.2
+
           inp = np.array([[CS.out.vEgo,
                            pcm_accel_cmd,
                            CC.orientationNED[1],

@@ -213,7 +213,6 @@ class CarState(CarStateBase):
       ("PCM_CRUISE_SM", 1),
       ("STEER_TORQUE_SENSOR", 50),
       ("CLUTCH", 15),
-      ("VSC1S07", 20),
     ]
 
     if CP.flags & ToyotaFlags.SECOC.value:
