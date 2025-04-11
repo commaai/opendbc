@@ -16,7 +16,6 @@ class TestCADNDefine:
                              4: 'NO_TORQUE_ALERT_2',
                              3: 'LOW_SPEED_LOCKOUT',
                              2: 'NO_TORQUE_ALERT_1',
-                             1: 'TBD', #TODO - Seems car still accepts steering commands in this state
                              0: 'NORMAL'}
                             }
 
