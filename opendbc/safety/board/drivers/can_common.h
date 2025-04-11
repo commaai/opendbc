@@ -1,6 +1,6 @@
-#include "can_common_declarations.h"
+#pragma once
 
-uint8_t calculate_checksum(const uint8_t *dat, uint32_t len) {
+static inline uint8_t calculate_checksum(const uint8_t *dat, uint32_t len) {
   uint8_t checksum = 0U;
   for (uint32_t i = 0U; i < len; i++) {
     checksum ^= dat[i];
@@ -8,11 +8,11 @@ uint8_t calculate_checksum(const uint8_t *dat, uint32_t len) {
   return checksum;
 }
 
-void can_set_checksum(CANPacket_t *packet) {
+static inline void can_set_checksum(CANPacket_t *packet) {
   packet->checksum = 0U;
   packet->checksum = calculate_checksum((uint8_t *) packet, CANPACKET_HEAD_SIZE + GET_LEN(packet));
 }
 
-bool can_check_checksum(CANPacket_t *packet) {
+static inline bool can_check_checksum(CANPacket_t *packet) {
   return (calculate_checksum((uint8_t *) packet, CANPACKET_HEAD_SIZE + GET_LEN(packet)) == 0U);
 }

@@ -1,4 +1,7 @@
-#pragma once
+#ifndef CAN_DEFINITION_H
+#define CAN_DEFINITION_H
+
+extern const unsigned char dlc_to_len[16];
 
 #define CANPACKET_HEAD_SIZE 6U
 
@@ -25,3 +28,6 @@ typedef struct {
 #define GET_BUS(msg) ((msg)->bus)
 #define GET_LEN(msg) (dlc_to_len[(msg)->data_len_code])
 #define GET_ADDR(msg) ((msg)->addr)
+
+#endif // CAN_DEFINITION_H
+

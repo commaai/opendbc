@@ -1,4 +1,8 @@
+#pragma once
 #include "faults_declarations.h"
+
+void print(const char *a);
+void puth(unsigned int i);
 
 uint8_t fault_status = FAULT_STATUS_NONE;
 uint32_t faults = 0U;
