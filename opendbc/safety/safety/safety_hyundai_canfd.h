@@ -266,7 +266,7 @@ static safety_config hyundai_canfd_init(uint16_t param) {
   };
 
   // ADRV_0x160 is checked for radar liveness
-  static const CanMsg HYUNDAI_CANFD_LFA_STEERING_RADAR_LONG_TX_MSGS[] = {
+  static const CanMsg HYUNDAI_CANFD_LFA_STEERING_LONG_TX_MSGS[] = {
     HYUNDAI_CANFD_CRUISE_BUTTON_TX_MSGS(2)
     HYUNDAI_CANFD_LFA_STEERING_COMMON_TX_MSGS(0)
     HYUNDAI_CANFD_SCC_CONTROL_COMMON_TX_MSGS(0, true)
@@ -319,7 +319,7 @@ static safety_config hyundai_canfd_init(uint16_t param) {
       if (hyundai_camera_scc) {
         SET_TX_MSGS(hyundai_canfd_lfa_steering_camera_scc_tx_msgs, ret);
       } else {
-        SET_TX_MSGS(HYUNDAI_CANFD_LFA_STEERING_RADAR_LONG_TX_MSGS, ret);
+        SET_TX_MSGS(HYUNDAI_CANFD_LFA_STEERING_LONG_TX_MSGS, ret);
       }
     }
 
