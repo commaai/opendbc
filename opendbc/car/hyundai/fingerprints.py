@@ -174,6 +174,7 @@ FW_VERSIONS = {
       b'\xf1\x00DN ESC \x07 106 \x07\x01 58910-L0100',
       b'\xf1\x00DN ESC \x07 107"\x08\x07 58910-L0100',
       b'\xf1\x00DN ESC \x08 103\x19\x06\x01 58910-L1300',
+      b'\xf1\x00TM ESC \x1b 102 \x08\x08 58910-S1DA0',
     ],
     (Ecu.eps, 0x7d4, None): [
       b'\xf1\x00DN8 MDPS C 1,00 1,01 56310L0010\x00 4DNAC101',
@@ -191,6 +192,7 @@ FW_VERSIONS = {
       b'\xf1\x00DN8 MDPS R 1.00 1.00 57700-L0000 4DNAP100',
       b'\xf1\x00DN8 MDPS R 1.00 1.00 57700-L0000 4DNAP101',
       b'\xf1\x00DN8 MDPS R 1.00 1.02 57700-L1000 4DNDP105',
+      b'\xf1\x00TM  MDPS R 1.00 1.05 57700-S1500 4TSDP105',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00DN8 MFC  AT KOR LHD 1.00 1.02 99211-L1000 190422',
