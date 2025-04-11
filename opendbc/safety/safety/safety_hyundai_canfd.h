@@ -18,7 +18,7 @@
 
 #define HYUNDAI_CANFD_LFA_STEERING_COMMON_TX_MSGS(e_can)  \
   {0x12A, e_can, 16, .check_relay = (e_can) == 0},  /* LFA */            \
-  {0x1E0, e_can, 16, .check_relay = false},         /* LFAHDA_CLUSTER */ \
+  {0x1E0, e_can, 16, .check_relay = (e_can) == 0},  /* LFAHDA_CLUSTER */ \
 
 #define HYUNDAI_CANFD_SCC_CONTROL_COMMON_TX_MSGS(e_can, longitudinal) \
   {0x1A0, e_can, 32, .check_relay = (longitudinal)},  /* SCC_CONTROL */ \
@@ -225,10 +225,7 @@ static bool hyundai_canfd_fwd_hook(int bus_num, int addr) {
     // LKAS for cars with LKAS and LFA messages, LFA for cars with no LKAS messages
     bool is_lka_msg = (addr == hyundai_canfd_get_lka_addr()) && hyundai_canfd_lka_steering;
 
-    // HUD icons
-    bool is_lfahda_msg = ((addr == 0x1e0) && !hyundai_canfd_lka_steering);
-
-    block_msg = is_lka_msg || is_lfahda_msg;
+    block_msg = is_lka_msg;
   }
 
   return block_msg;

@@ -85,7 +85,7 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.PandaCarSafetyTest, common.
 class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdBase):
 
   TX_MSGS = [[0x12A, 0], [0x1A0, 1], [0x1CF, 0], [0x1E0, 0]]
-  RELAY_MALFUNCTION_ADDRS = {0: (0x12A,)}  # LFA
+  RELAY_MALFUNCTION_ADDRS = {0: (0x12A, 0x1E0)}  # LFA, LFAHDA_CLUSTER
   FWD_BLACKLISTED_ADDRS = {2: [0x12A, 0x1E0]}
 
   STEER_MSG = "LFA"
@@ -228,7 +228,7 @@ class TestHyundaiCanfdLFASteeringLongBase(HyundaiLongitudinalBase, TestHyundaiCa
 
   FWD_BLACKLISTED_ADDRS = {2: [0x12a, 0x1e0, 0x1a0, 0x160]}
 
-  RELAY_MALFUNCTION_ADDRS = {0: (0x12A, 0x1a0, 0x160)}  # LFA, SCC_CONTROL, ADRV_0x160
+  RELAY_MALFUNCTION_ADDRS = {0: (0x12A, 0x1E0, 0x1a0, 0x160)}  # LFA, LFAHDA_CLUSTER, SCC_CONTROL, ADRV_0x160
 
   DISABLED_ECU_UDS_MSG = (0x7D0, 0)
   DISABLED_ECU_ACTUATION_MSG = (0x1a0, 0)
