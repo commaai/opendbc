@@ -413,7 +413,7 @@ static bool honda_bosch_fwd_hook(int bus_num, int addr) {
   bool block_msg = false;
 
   if (bus_num == 2)  {
-    bool is_lkas_msg = (addr == 0xE4) || (addr == 0xE5) || (addr == 0x33D) || (addr == 0x33DA) || (addr == 0x33DB);
+    bool is_lkas_msg = (addr == 0xE5) || (addr == 0x33D) || (addr == 0x33DA) || (addr == 0x33DB);
     block_msg = is_lkas_msg;
   }
 
