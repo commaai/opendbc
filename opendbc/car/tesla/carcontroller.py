@@ -12,7 +12,7 @@ ISO_LATERAL_JERK = 5.0  # m/s^3
 
 
 def apply_tesla_steer_angle_limits(apply_angle: float, apply_angle_last: float, v_ego_raw: float, steering_angle: float,
-                                 lat_active: bool, CP, limits: AngleSteeringLimits) -> float:
+                                   lat_active: bool, CP, limits: AngleSteeringLimits) -> float:
   # pick angle rate limits based on wind up/down
   # TODO: use ISO_LATERAL_JERK here instead of 3 breakpoint list
   steer_up = apply_angle_last * apply_angle >= 0. and abs(apply_angle) > abs(apply_angle_last)
@@ -54,7 +54,7 @@ class CarController(CarControllerBase):
     if self.frame % 2 == 0:
       # Angular rate limit based on speed
       self.apply_angle_last = apply_tesla_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw,
-                                                             CS.out.steeringAngleDeg, CC.latActive, CarControllerParams.ANGLE_LIMITS)
+                                                             CS.out.steeringAngleDeg, CC.latActive, self.CP, CarControllerParams.ANGLE_LIMITS)
 
       can_sends.append(self.tesla_can.create_steering_control(self.apply_angle_last, lat_active, (self.frame // 2) % 16))
 
