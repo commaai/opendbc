@@ -6,18 +6,26 @@ from opendbc.car.tesla.teslacan import TeslaCAN
 from opendbc.car.tesla.values import CarControllerParams
 
 # Note that Tesla safety supports up to ISO 11270 limits, but is comfort limited in openpilot (TODO: planner, controls?)
+# TODO: copy ford's std assumed roll compensation
 ISO_LATERAL_ACCEL = 3.0  # m/s^2  # TODO: import from test lateral limits file?
 ISO_LATERAL_JERK = 5.0  # m/s^3
 
 
-def apply_tesla_steer_angle_limits(apply_angle: float, apply_angle_last: float, v_ego: float, steering_angle: float,
-                                 lat_active: bool, limits: AngleSteeringLimits) -> float:
+def apply_tesla_steer_angle_limits(apply_angle: float, apply_angle_last: float, v_ego_raw: float, steering_angle: float,
+                                 lat_active: bool, CP, limits: AngleSteeringLimits) -> float:
   # pick angle rate limits based on wind up/down
+  # TODO: use ISO_LATERAL_JERK here instead of 3 breakpoint list
   steer_up = apply_angle_last * apply_angle >= 0. and abs(apply_angle) > abs(apply_angle_last)
   rate_limits = limits.ANGLE_RATE_LIMIT_UP if steer_up else limits.ANGLE_RATE_LIMIT_DOWN
 
-  angle_rate_lim = np.interp(v_ego, rate_limits[0], rate_limits[1])
+  angle_rate_lim = np.interp(v_ego_raw, rate_limits[0], rate_limits[1])
   new_apply_angle = np.clip(apply_angle, apply_angle_last - angle_rate_lim, apply_angle_last + angle_rate_lim)
+
+  # limit max angle from max lateral accel
+  # TODO: add curvature factor from VM. the lack of it loses us 60% of torque at 70 m/s (1.8 m/s^2 instead of 3 m/s^2)
+  curvature_accel_limit = ISO_LATERAL_ACCEL / (max(v_ego_raw, 1) ** 2)
+  angle_accel_limit = curvature_accel_limit * CP.steerRatio * CP.wheelbase
+  new_apply_angle = float(np.clip(new_apply_angle, -angle_accel_limit, angle_accel_limit))
 
   # angle is current steering wheel angle when inactive on all angle cars
   if not lat_active:
@@ -45,7 +53,7 @@ class CarController(CarControllerBase):
 
     if self.frame % 2 == 0:
       # Angular rate limit based on speed
-      self.apply_angle_last = apply_tesla_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgo,
+      self.apply_angle_last = apply_tesla_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw,
                                                              CS.out.steeringAngleDeg, CC.latActive, CarControllerParams.ANGLE_LIMITS)
 
       can_sends.append(self.tesla_can.create_steering_control(self.apply_angle_last, lat_active, (self.frame // 2) % 16))
