@@ -9,11 +9,12 @@ static bool volkswagen_mqb_brake_pressure_detected = false;
 
 static safety_config volkswagen_mqb_init(uint16_t param) {
   // Transmit of GRA_ACC_01 is allowed on bus 0 and 2 to keep compatibility with gateway and camera integration
-  static const CanMsg VOLKSWAGEN_MQB_STOCK_TX_MSGS[] = {{MSG_HCA_01, 0, 8, true}, {MSG_GRA_ACC_01, 0, 8, false}, {MSG_GRA_ACC_01, 2, 8, false},
-                                                        {MSG_LDW_02, 0, 8, false}, {MSG_LH_EPS_03, 2, 8, false}};
+  // MSG_LH_EPS_03: openpilot needs to replace apparent driver steering input torque to pacify VW Emergency Assist
+  static const CanMsg VOLKSWAGEN_MQB_STOCK_TX_MSGS[] = {{MSG_HCA_01, 0, 8, .check_relay = true}, {MSG_GRA_ACC_01, 0, 8, .check_relay = false}, {MSG_GRA_ACC_01, 2, 8, .check_relay = false},
+                                                        {MSG_LDW_02, 0, 8, .check_relay = true}, {MSG_LH_EPS_03, 2, 8, .check_relay = true}};
 
-  static const CanMsg VOLKSWAGEN_MQB_LONG_TX_MSGS[] = {{MSG_HCA_01, 0, 8, true}, {MSG_LDW_02, 0, 8, false}, {MSG_LH_EPS_03, 2, 8, false},
-                                                       {MSG_ACC_02, 0, 8, false}, {MSG_ACC_06, 0, 8, false}, {MSG_ACC_07, 0, 8, false}};
+  static const CanMsg VOLKSWAGEN_MQB_LONG_TX_MSGS[] = {{MSG_HCA_01, 0, 8, .check_relay = true}, {MSG_LDW_02, 0, 8, .check_relay = true}, {MSG_LH_EPS_03, 2, 8, .check_relay = true},
+                                                       {MSG_ACC_02, 0, 8, .check_relay = true}, {MSG_ACC_06, 0, 8, .check_relay = true}, {MSG_ACC_07, 0, 8, .check_relay = true}};
 
   static RxCheck volkswagen_mqb_rx_checks[] = {
     {.msg = {{MSG_ESP_19, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},
@@ -200,38 +201,10 @@ static bool volkswagen_mqb_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static bool volkswagen_mqb_fwd_hook(int bus_num, int addr) {
-  bool block_msg = false;
-
-  switch (bus_num) {
-    case 0:
-      if (addr == MSG_LH_EPS_03) {
-        // openpilot needs to replace apparent driver steering input torque to pacify VW Emergency Assist
-        block_msg = true;
-      }
-      break;
-    case 2:
-      if ((addr == MSG_HCA_01) || (addr == MSG_LDW_02)) {
-        // openpilot takes over LKAS steering control and related HUD messages from the camera
-        block_msg = true;
-      } else if (volkswagen_longitudinal && ((addr == MSG_ACC_02) || (addr == MSG_ACC_06) || (addr == MSG_ACC_07))) {
-        // openpilot takes over acceleration/braking control and related HUD messages from the stock ACC radar
-        block_msg = true;
-      } else {
-      }
-      break;
-    default:
-      break;
-  }
-
-  return block_msg;
-}
-
 const safety_hooks volkswagen_mqb_hooks = {
   .init = volkswagen_mqb_init,
   .rx = volkswagen_mqb_rx_hook,
   .tx = volkswagen_mqb_tx_hook,
-  .fwd = volkswagen_mqb_fwd_hook,
   .get_counter = volkswagen_mqb_meb_get_counter,
   .get_checksum = volkswagen_mqb_meb_get_checksum,
   .compute_checksum = volkswagen_mqb_meb_compute_crc,
