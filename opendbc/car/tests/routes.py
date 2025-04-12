@@ -15,6 +15,7 @@ from opendbc.car.toyota.values import CAR as TOYOTA
 from opendbc.car.values import Platform
 from opendbc.car.volkswagen.values import CAR as VOLKSWAGEN
 from opendbc.car.body.values import CAR as COMMA
+from opendbc.car.byd.values import CAR as BYD
 
 # FIXME: add routes for these cars
 non_tested_cars = [
@@ -28,6 +29,16 @@ non_tested_cars = [
   SUBARU.SUBARU_FORESTER_HYBRID,
   TESLA.TESLA_MODEL_3,
   TESLA.TESLA_MODEL_Y,
+  BYD.BYD_HAN_DM_20, #byd routes to be added later with official device
+  BYD.BYD_HAN_EV_20,
+  BYD.BYD_QIN_PLUS_DMI_23,
+  BYD.BYD_SONG_PLUS_DMI_21,
+  BYD.BYD_SONG_PLUS_DMI_22,
+  BYD.BYD_SONG_PLUS_DMI_23,
+  BYD.BYD_SONG_PRO_DMI_22,
+  BYD.BYD_TANG_DM,
+  BYD.BYD_TANG_DMI_21,
+  BYD.BYD_YUAN_PLUS_DMI_22
 ]
 
 
