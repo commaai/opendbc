@@ -68,6 +68,7 @@ class HondaFlags(IntFlag):
   NIDEC_ALT_PCM_ACCEL = 32
   NIDEC_ALT_SCM_MESSAGES = 64
 
+  CANFD_CAR = 128
 
 # Car button codes
 class CruiseButtons:
@@ -138,6 +139,12 @@ class CAR(Platforms):
     CarSpecs(mass=3279 * CV.LB_TO_KG, wheelbase=2.83, steerRatio=16.33, centerToFrontRatio=0.39, tireStiffnessFactor=0.8467),
     {Bus.pt: 'honda_accord_2018_can_generated'},
   )
+  HONDA_ACCORD_11G = HondaBoschPlatformConfig(
+    [HondaCarDocs("Honda Accord 2023", "All")],
+    CarSpecs(mass=3279 * CV.LB_TO_KG, wheelbase=2.83, steerRatio=16.33, centerToFrontRatio=0.39, tireStiffnessFactor=0.8467),
+    {Bus.pt: 'honda_pilot_2023_can_generated'},
+    flags=HondaFlags.CANFD_CAR,
+  )
   HONDA_CIVIC_BOSCH = HondaBoschPlatformConfig(
     [
       HondaCarDocs("Honda Civic 2019-21", "All", video_link="https://www.youtube.com/watch?v=4Iz1Mz5LGF8",
@@ -176,6 +183,13 @@ class CAR(Platforms):
     # mass: mean of 4 models in kg, steerRatio: 12.3 is spec end-to-end
     CarSpecs(mass=1667, wheelbase=2.66, steerRatio=16, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),
     {Bus.pt: 'honda_accord_2018_can_generated'},
+  )
+  HONDA_CRV_HYBRID_6G = HondaBoschPlatformConfig(
+    [HondaCarDocs("Honda CR-V Hybrid 2024", "All")],
+    # mass: mean of 4 models in kg, steerRatio: 12.3 is spec end-to-end
+    CarSpecs(mass=1667, wheelbase=2.66, steerRatio=16, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),
+    {Bus.pt: 'honda_pilot_2023_can_generated'},
+    flags=HondaFlags.CANFD_CAR,
   )
   HONDA_HRV_3G = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda HR-V 2023", "All")],
@@ -317,9 +331,9 @@ FW_QUERY_CONFIG = FwQueryConfig(
   # Note that we still attempt to match with them when they are present
   # This is or'd with (ALL_ECUS - ESSENTIAL_ECUS) from fw_versions.py
   non_essential_ecus={
-    Ecu.eps: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_CIVIC_2022, CAR.HONDA_E, CAR.HONDA_HRV_3G],
+    Ecu.eps: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_CIVIC_2022, CAR.HONDA_E, CAR.HONDA_HRV_3G, CAR.HONDA_CRV_HYBRID_6G],
     Ecu.vsa: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_CIVIC, CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_2022, CAR.HONDA_CRV_5G, CAR.HONDA_CRV_HYBRID,
-              CAR.HONDA_E, CAR.HONDA_HRV_3G, CAR.HONDA_INSIGHT],
+              CAR.HONDA_E, CAR.HONDA_HRV_3G, CAR.HONDA_INSIGHT, CAR.HONDA_CRV_HYBRID_6G],
   },
   extra_ecus=[
     (Ecu.combinationMeter, 0x18da60f1, None),
@@ -342,6 +356,7 @@ HONDA_NIDEC_ALT_PCM_ACCEL = CAR.with_flags(HondaFlags.NIDEC_ALT_PCM_ACCEL)
 HONDA_NIDEC_ALT_SCM_MESSAGES = CAR.with_flags(HondaFlags.NIDEC_ALT_SCM_MESSAGES)
 HONDA_BOSCH = CAR.with_flags(HondaFlags.BOSCH)
 HONDA_BOSCH_RADARLESS = CAR.with_flags(HondaFlags.BOSCH_RADARLESS)
+HONDA_CANFD_CAR = CAR.with_flags(HondaFlags.CANFD_CAR)
 
 
 DBC = CAR.create_dbc_map()
