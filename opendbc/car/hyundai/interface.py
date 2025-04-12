@@ -168,6 +168,9 @@ class CarInterface(CarInterfaceBase):
     if stock_cp.flags & HyundaiFlags.HAS_LDA_BUTTON:
       ret.safetyParam |= HyundaiSafetyFlagsSP.HAS_LDA_BUTTON
 
+    if stock_cp.flags & (HyundaiFlags.CANFD_CAMERA_SCC | HyundaiFlags.CAMERA_SCC):
+      stock_cp.radarUnavailable = False
+
     return ret
 
   @staticmethod
