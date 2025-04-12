@@ -1,6 +1,4 @@
-from opendbc.can.parser import CANParser
 from opendbc.car import structs
-from opendbc.car.hyundai.values import DBC
 
 from opendbc.sunnypilot.car.hyundai.values import HyundaiFlagsSP
 
@@ -47,12 +45,6 @@ class EnhancedSmartCruiseControl:
     #  This indicates that SCC12 likely displays it on the dashboard, and another FCA message may also cause it to appear.
     values["AEB_Status"] = 2  # AEB enabled
 
-  def get_radar_can_parser(self):
-    lead_src, bus = "ESCC", 0
-    messages = [(lead_src, 50)]
-    return CANParser(DBC[self.CP.carFingerprint]['pt'], messages, bus)
-
-
 class EsccCarStateBase:
   def __init__(self):
     self.escc_aeb_warning = 0
@@ -70,35 +62,6 @@ class EsccCarController:
 
 
 class EsccRadarInterfaceBase:
-  rcp: CANParser
-  pts: dict[int, structs.RadarData.RadarPoint]
-
   def __init__(self, CP: structs.CarParams, CP_SP: structs.CarParamsSP):
     self.ESCC = EnhancedSmartCruiseControl(CP, CP_SP)
-    self.track_id = 0
     self.use_escc = False
-
-  def update_escc(self, ret):
-    for ii in range(1):
-      msg_src = "ESCC"
-      msg = self.rcp.vl[msg_src]
-
-      if ii not in self.pts:
-        self.pts[ii] = structs.RadarData.RadarPoint()
-        self.pts[ii].trackId = self.track_id
-        self.track_id += 1
-
-      valid = msg['ACC_ObjStatus']
-      if valid:
-        self.pts[ii].measured = True
-        self.pts[ii].dRel = msg['ACC_ObjDist']
-        self.pts[ii].yRel = -msg['ACC_ObjLatPos']
-        self.pts[ii].vRel = msg['ACC_ObjRelSpd']
-        self.pts[ii].aRel = float('nan')  # TODO-SP: calculate from ACC_ObjRelSpd and with timestep 50Hz (needs to modify in interfaces.py)
-        self.pts[ii].yvRel = float('nan')
-
-      else:
-        del self.pts[ii]
-
-    ret.points = list(self.pts.values())
-    return ret
