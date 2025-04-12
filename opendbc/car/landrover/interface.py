@@ -9,7 +9,7 @@ class CarInterface(CarInterfaceBase):
   CarController = CarController
 
   @staticmethod
-  def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
+  def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, docs) -> structs.CarParams:
     ret.brand = "landrover"
 
     #ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.allOutput)]
@@ -23,7 +23,10 @@ class CarInterface(CarInterfaceBase):
     ret.radarUnavailable = True
 
 
-    ret.experimentalLongitudinalAvailable = False
+    ret.alphaLongitudinalAvailable = False
+    if alpha_long:
+      ret.openpilotLongitudinalControl = True
+
 
     ret.enableBsm = True
 

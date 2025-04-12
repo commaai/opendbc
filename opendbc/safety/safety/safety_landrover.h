@@ -127,14 +127,14 @@ static bool landrover_fwd_hook(int bus, int addr) {
 static safety_config landrover_init(uint16_t param) {
   // 0x1F0 = LkasCmd, 0x1F1 = ACC
   static const CanMsg LANDROVER_TX_MSGS[] = {
-     {0x1F0, 1, 8, false} ,
-     {0x1F9, 1, 8, false} ,
-     {0x1BE, 0, 8, true} , // check for relay
+     {0x1F0, 1, 8, .check_relay = false},
+     {0x1F9, 1, 8, .check_relay = false},
+     {0x1BE, 0, 8, .check_relay = true, .disable_static_blocking = true}, // check for relay
   };
   static const CanMsg LANDROVER_LONG_TX_MSGS[] = {
-     {0x1F0, 1, 8, false},
-     {0x1F9, 1, 8, false},
-     {0x1BE, 0, 8, true},  // check for relay
+     {0x1F0, 1, 8, .check_relay = false},
+     {0x1F9, 1, 8, .check_relay = false},
+     {0x1BE, 0, 8, .check_relay = true, .disable_static_blocking = true},  // check for relay
   };
 
   static RxCheck landrover_rx_checks[] = {
