@@ -20,18 +20,18 @@ CONFIG_DATA_ID = bytes([0x01, 0x42])
 RADAR_TRACKS_CONFIG = bytes([0x00, 0x00, 0x00, 0x01, 0x00, 0x01])
 
 
-def enable_radar_tracks(logcan, sendcan, bus=0, addr=0x7d0, timeout=0.1, retry=2, debug=False):
+def enable_radar_tracks(logcan, sendcan, bus=0, addr=0x7d0, timeout=0.1, retry=2):
   carlog.warning("radar_tracks: enabling ...")
 
   for i in range(retry):
     try:
-      query = IsoTpParallelQuery(sendcan, logcan, bus, [addr], [CUSTOM_DIAGNOSTIC_REQUEST], [CUSTOM_DIAGNOSTIC_RESPONSE], debug=debug)
+      query = IsoTpParallelQuery(sendcan, logcan, bus, [addr], [CUSTOM_DIAGNOSTIC_REQUEST], [CUSTOM_DIAGNOSTIC_RESPONSE])
 
       for _, _ in query.get_data(timeout).items():
         carlog.warning("radar_tracks: reconfigure radar to output radar points ...")
 
         request = WRITE_DATA_REQUEST + CONFIG_DATA_ID + RADAR_TRACKS_CONFIG
-        query = IsoTpParallelQuery(sendcan, logcan, bus, [addr], [request], [WRITE_DATA_RESPONSE], debug=debug)
+        query = IsoTpParallelQuery(sendcan, logcan, bus, [addr], [request], [WRITE_DATA_RESPONSE])
         query.get_data(0)
 
         carlog.warning("radar_tracks: successfully enabled")
@@ -52,5 +52,5 @@ if __name__ == "__main__":
   logcan = messaging.sub_sock('can')
   time.sleep(1)
 
-  enabled = enable_radar_tracks(logcan, sendcan, bus=0, addr=0x7d0, timeout=0.1, debug=False)
+  enabled = enable_radar_tracks(logcan, sendcan, bus=0, addr=0x7d0, timeout=0.1)
   print(f"enabled: {enabled}")
