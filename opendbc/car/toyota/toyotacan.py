@@ -1,4 +1,5 @@
 from opendbc.car.structs import CarParams
+from opendbc.sunnypilot.car.toyota.secoc_long import SecOCLong
 
 SteerControlType = CarParams.SteerControlType
 
@@ -40,7 +41,7 @@ def create_lta_steer_command_2(packer, frame):
   return packer.make_can_msg("STEERING_LTA_2", 0, values)
 
 
-def create_accel_command(packer, accel, pcm_cancel, permit_braking, standstill_req, lead, acc_type, fcw_alert, distance):
+def create_accel_command(packer, accel, pcm_cancel, permit_braking, standstill_req, lead, acc_type, fcw_alert, distance, SECOC_LONG: SecOCLong = None):
   # TODO: find the exact canceling bit that does not create a chime
   values = {
     "ACCEL_CMD": accel,
@@ -53,6 +54,9 @@ def create_accel_command(packer, accel, pcm_cancel, permit_braking, standstill_r
     "ALLOW_LONG_PRESS": 1,
     "ACC_CUT_IN": fcw_alert,  # only shown when ACC enabled
   }
+
+  SECOC_LONG.update_accel_command(packer, values)
+
   return packer.make_can_msg("ACC_CONTROL", 0, values)
 
 
