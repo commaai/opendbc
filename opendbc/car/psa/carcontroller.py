@@ -81,5 +81,6 @@ class CarController(CarControllerBase):
     new_actuators.steeringAngleDeg = self.apply_angle_last
     # TODO: logging the internal parameters for DEBUG
     new_actuators.gas = torque
+    new_actuators.brake = CS.steeringSaturated
     self.frame += 1
     return new_actuators, can_sends

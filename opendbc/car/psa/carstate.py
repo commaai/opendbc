@@ -86,7 +86,7 @@ class CarState(CarStateBase):
     # TODO: not available when using longitudinal
     # self.acc_status_msg = copy.copy(cp_adas.vl["HS2_DAT_MDD_CMD_452"])
     # self.adas_status_msg = copy.copy(cp_adas.vl["HS2_DYN_MDD_ETAT_2F6"])
-
+    self.steeringSaturated = cp.vl['IS_DAT_DIRA']['TRQ_LIMIT_STATE'] # TODO: debug to find steering saturation
     return ret
 
   @staticmethod
