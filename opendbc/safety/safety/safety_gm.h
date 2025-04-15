@@ -255,6 +255,6 @@ static safety_config gm_init(uint16_t param) {
 const safety_hooks gm_hooks = {
   .init = gm_init,
   .rx = gm_rx_hook,
-  .ignition_can = gm_ignition_can_hook,
+  .ignition_can_hook = gm_ignition_can_hook,
   .tx = gm_tx_hook,
 };

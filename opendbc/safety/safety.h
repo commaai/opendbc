@@ -212,8 +212,8 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
     heartbeat_engaged_mismatches = 0;
   }
 
-  if (current_hooks->ignition_can != NULL && GET_BUS(to_push) == 0) {
-    current_hooks->ignition_can(to_push);
+  if ((current_hooks->ignition_can_hook != NULL) && ((int)GET_BUS(to_push) == 0)) {
+    current_hooks->ignition_can_hook(to_push);
   }
 
   return valid;

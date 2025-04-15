@@ -206,7 +206,7 @@ typedef bool (*fwd_hook)(int bus_num, int addr);      // returns true if the mes
 typedef struct {
   safety_hook_init init;
   rx_hook rx;
-  ignition_can_hook ignition_can;
+  ignition_can_hook ignition_can_hook;
   tx_hook tx;
   fwd_hook fwd;
   get_checksum_t get_checksum;
@@ -296,7 +296,7 @@ extern uint32_t safety_mode_cnt;
 
 // Ignition detected from CAN meessages
 extern bool ignition_can;
-// time since ignition was enabled mode has been changed
+// Time since CAN ignition was disabled
 extern uint32_t ignition_can_cnt;
 
 typedef struct {

@@ -221,7 +221,7 @@ static safety_config rivian_init(uint16_t param) {
 const safety_hooks rivian_hooks = {
   .init = rivian_init,
   .rx = rivian_rx_hook,
-  .ignition_can = rivian_ignition_can_hook,
+  .ignition_can_hook = rivian_ignition_can_hook,
   .tx = rivian_tx_hook,
   .get_counter = rivian_get_counter,
   .get_checksum = rivian_get_checksum,
