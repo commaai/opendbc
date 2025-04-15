@@ -204,7 +204,7 @@ class CAR(Platforms):
     [HondaCarDocs("Honda Pilot 2023", "All")],
     CarSpecs(mass=4278 * CV.LB_TO_KG, wheelbase=2.86, centerToFrontRatio=0.428, steerRatio=16.0, tireStiffnessFactor=0.444),  # as spec
     {Bus.pt: 'honda_pilot_2023_can_generated'},
-    flags=HondaFlags.CANFD_CAR | HondaFlags.BOSCH_ALT_BRAKE,
+    flags=HondaFlags.CANFD | HondaFlags.BOSCH_ALT_BRAKE,
   )
 
   # Nidec Cars
@@ -349,7 +349,7 @@ HONDA_NIDEC_ALT_PCM_ACCEL = CAR.with_flags(HondaFlags.NIDEC_ALT_PCM_ACCEL)
 HONDA_NIDEC_ALT_SCM_MESSAGES = CAR.with_flags(HondaFlags.NIDEC_ALT_SCM_MESSAGES)
 HONDA_BOSCH = CAR.with_flags(HondaFlags.BOSCH)
 HONDA_BOSCH_RADARLESS = CAR.with_flags(HondaFlags.BOSCH_RADARLESS)
-HONDA_CANFD_CAR = CAR.with_flags(HondaFlags.CANFD_CAR)
+HONDA_CANFD_CAR = CAR.with_flags(HondaFlags.CANFD)
 
 
 DBC = CAR.create_dbc_map()
