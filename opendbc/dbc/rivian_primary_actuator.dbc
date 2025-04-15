@@ -327,6 +327,7 @@ BO_ 565 IndicatorLights: 8 XXX
  SG_ DriverDoor : 28|2@0+ (1,0) [0|3] "" XXX
  SG_ RearPassengerDoor : 38|2@0+ (1,0) [0|3] "" XXX
  SG_ TurnLightLeft : 40|2@0+ (1,0) [0|3] "" XXX
+ SG_ IgnitionOn : 48|1@0+ (1,0) [0|1] "" XXX
  SG_ TurnLightRight : 54|2@0+ (1,0) [0|3] "" XXX
 
 BO_ 592 VDM_EcasStatus: 8 VDM
