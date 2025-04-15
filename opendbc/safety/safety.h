@@ -180,7 +180,75 @@ static bool rx_msg_safety_check(const CANPacket_t *to_push,
   return is_msg_valid(cfg->rx_checks, index);
 }
 
+bool ignition_can = false;
+uint32_t ignition_can_cnt = 0U;
+
+void ignition_can_hook(const CANPacket_t *to_push) {
+
+  int bus = GET_BUS(to_push);
+  if (bus == 0) {
+    int addr = GET_ADDR(to_push);
+    int len = GET_LEN(to_push);
+
+    // Check counter position on cars with overlap
+
+    // GM exception
+    if ((addr == 0x1F1) && (len == 8)) {
+      // SystemPowerMode (2=Run, 3=Crank Request)
+      ignition_can = (GET_BYTE(to_push, 0) & 0x2U) != 0U;
+      printf("in GM setting ignition_can: %d\n", ignition_can);
+      ignition_can_cnt = 0U;
+    }
+
+    // Rivian R1S/T GEN1 exception
+    if ((addr == 0x152) && (len == 8)) {
+      // 0x152 overlaps with Subaru pre-global which has this bit as the high beam
+    static int prev_counter = -1;
+      int counter = GET_BYTE(to_push, 1) & 0xFU;  // max is only 14
+
+      if ((counter == ((prev_counter + 1) % 15)) && (prev_counter != -1)) {
+        // VDM_OutputSignals->VDM_EpasPowerMode
+        ignition_can = ((GET_BYTE(to_push, 7) >> 4U) & 0x3U) == 1U;  // VDM_EpasPowerMode_Drive_On=1
+        printf("in Rivian setting ignition_can: %d\n", ignition_can);
+        ignition_can_cnt = 0U;
+      }
+      printf("prev_counter rivian: %d\n", prev_counter);
+      prev_counter = counter;
+    }
+
+    // Tesla Model 3/Y exception
+    if ((addr == 0x221) && (len == 8)) {
+      // 0x221 overlaps with Rivian which has random data on byte 0
+    static int prev_counter = -1;
+      int counter = GET_BYTE(to_push, 6) >> 4;
+
+      printf("in tesla got counter: %d\n", counter);
+      if ((counter == ((prev_counter + 1) % 16)) && (prev_counter != -1)) {
+        // VCFRONT_LVPowerState->VCFRONT_vehiclePowerState
+        int power_state = (GET_BYTE(to_push, 0) >> 5U) & 0x3U;
+        ignition_can = power_state == 0x3;  // VEHICLE_POWER_STATE_DRIVE=3
+        printf("in Tesla setting ignition_can: %d\n", ignition_can);
+        ignition_can_cnt = 0U;
+      }
+      printf("prev_counter tesla: %d\n", prev_counter);
+      prev_counter = counter;
+    }
+
+    // Mazda exception
+    if ((addr == 0x9E) && (len == 8)) {
+      ignition_can = (GET_BYTE(to_push, 0) >> 5) == 0x6U;
+      printf("in Mazda setting ignition_can: %d\n", ignition_can);
+      ignition_can_cnt = 0U;
+    }
+
+  }
+
+//  printf("ignition_can: %d\n", ignition_can);
+}
+
 bool safety_rx_hook(const CANPacket_t *to_push) {
+  ignition_can_hook(to_push);
+
   bool controls_allowed_prev = controls_allowed;
 
   bool valid = rx_msg_safety_check(to_push, &current_safety_config, current_hooks);
