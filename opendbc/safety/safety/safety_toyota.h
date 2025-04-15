@@ -14,7 +14,7 @@
 #define TOYOTA_COMMON_SECOC_TX_MSGS \
   TOYOTA_BASE_TX_MSGS \
   {0x2E4, 0, 8, .check_relay = true}, {0x131, 0, 8, .check_relay = true}, \
-  {0x343, 0, 8, .check_relay = false},  /* ACC cancel cmd */  \
+  {0x343, 0, 8, .check_relay = false},  /* ACC cancel cmd */ \
 
 #define TOYOTA_COMMON_LONG_TX_MSGS \
   TOYOTA_COMMON_TX_MSGS \
@@ -33,7 +33,8 @@
 
 #define TOYOTA_COMMON_SECOC_LONG_TX_MSGS \
   TOYOTA_COMMON_SECOC_TX_MSGS \
-  {0x183, 0, 8, .check_relay = true},  /* ACC_CONTROL_2 */  \
+  {0x343, 0, 8, .check_relay = true}, \
+  {0x183, 0, 8, .check_relay = true},  /* ACC_CONTROL_2 */ \
 
 #define TOYOTA_COMMON_RX_CHECKS(lta)                                                                          \
   {.msg = {{ 0xaa, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 83U}, { 0 }, { 0 }}},  \
