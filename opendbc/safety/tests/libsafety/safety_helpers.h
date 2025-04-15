@@ -35,6 +35,14 @@ bool get_controls_allowed(void){
   return controls_allowed;
 }
 
+bool get_ignition_can(void){
+  return ignition_can;
+}
+
+void set_ignition_can(bool i){
+  ignition_can = i;
+}
+
 int get_alternative_experience(void){
   return alternative_experience;
 }

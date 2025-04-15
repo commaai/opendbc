@@ -48,6 +48,15 @@ static void mazda_rx_hook(const CANPacket_t *to_push) {
   }
 }
 
+static void mazda_ignition_can_hook(const CANPacket_t *to_push) {
+    int addr = GET_ADDR(to_push);
+    int len = GET_LEN(to_push);
+    if ((addr == 0x9E) && (len == 8)) {
+      ignition_can = (GET_BYTE(to_push, 0) >> 5) == 0x6U;
+      ignition_can_cnt = 0U;
+    }
+}
+
 static bool mazda_tx_hook(const CANPacket_t *to_send) {
   const TorqueSteeringLimits MAZDA_STEERING_LIMITS = {
     .max_torque = 800,
@@ -106,5 +115,6 @@ static safety_config mazda_init(uint16_t param) {
 const safety_hooks mazda_hooks = {
   .init = mazda_init,
   .rx = mazda_rx_hook,
+  .ignition_can = mazda_ignition_can_hook,
   .tx = mazda_tx_hook,
 };

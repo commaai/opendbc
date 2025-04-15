@@ -118,6 +118,24 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
   }
 }
 
+static void rivian_ignition_can_hook(const CANPacket_t *to_push) {
+    // Rivian R1S/T GEN1 ignition hook.
+    int addr = GET_ADDR(to_push);
+    int len = GET_LEN(to_push);
+    if ((addr == 0x152) && (len == 8)) {
+      // 0x152 overlaps with Subaru pre-global which has this bit as the high beam
+      int counter = GET_BYTE(to_push, 1) & 0xFU;  // max is only 14
+
+      static int prev_counter = -1;
+      if ((counter == ((prev_counter + 1) % 15)) && (prev_counter != -1)) {
+        // VDM_OutputSignals->VDM_EpasPowerMode
+        ignition_can = ((GET_BYTE(to_push, 7) >> 4U) & 0x3U) == 1U;  // VDM_EpasPowerMode_Drive_On=1
+        ignition_can_cnt = 0U;
+      }
+      prev_counter = counter;
+    }
+}
+
 static bool rivian_tx_hook(const CANPacket_t *to_send) {
   // Rivian utilizes more torque at low speed to maintain the same lateral accel
   const TorqueSteeringLimits RIVIAN_STEERING_LIMITS = {
@@ -203,6 +221,7 @@ static safety_config rivian_init(uint16_t param) {
 const safety_hooks rivian_hooks = {
   .init = rivian_init,
   .rx = rivian_rx_hook,
+  .ignition_can = rivian_ignition_can_hook,
   .tx = rivian_tx_hook,
   .get_counter = rivian_get_counter,
   .get_checksum = rivian_get_checksum,

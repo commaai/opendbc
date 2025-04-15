@@ -84,6 +84,9 @@ uint16_t current_safety_param = 0;
 static const safety_hooks *current_hooks = &nooutput_hooks;
 safety_config current_safety_config;
 
+bool ignition_can = false;
+uint32_t ignition_can_cnt = 0U;
+
 static void generic_rx_checks(void);
 static void stock_ecu_check(bool stock_ecu_detected);
 
@@ -207,6 +210,10 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
   // reset mismatches on rising edge of controls_allowed to avoid rare race condition
   if (controls_allowed && !controls_allowed_prev) {
     heartbeat_engaged_mismatches = 0;
+  }
+
+  if (current_hooks->ignition_can != NULL && GET_BUS(to_push) == 0) {
+    current_hooks->ignition_can(to_push);
   }
 
   return valid;
