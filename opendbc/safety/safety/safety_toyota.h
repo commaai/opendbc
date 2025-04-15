@@ -22,7 +22,12 @@
   {0x128, 1, 6, false}, {0x141, 1, 4, false}, {0x160, 1, 8, false}, {0x161, 1, 7, false}, {0x470, 1, 4, false},  /* DSU bus 1 */                                                                    \
   {0x411, 0, 8, false},  /* PCS_HUD */                                                                                                                                                              \
   {0x750, 0, 8, false},  /* radar diagnostic address */                                                                                                                                             \
-  {0x343, 0, 8, true},  /* ACC */                                                                                                                                                                   \
+  {0x343, 0, 8, true},  /* ACC */
+
+#define TOYOTA_COMMON_SECOC_LONG_TX_MSGS \
+  TOYOTA_COMMON_SECOC_TX_MSGS \
+  {0x343, 0, 8, true},  /* ACC */ \
+  {0x183, 0, 8, true},  /* ACC_CONTROL_2 */  \
 
 #define TOYOTA_COMMON_RX_CHECKS(lta)                                                                          \
   {.msg = {{ 0xaa, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 83U}, { 0 }, { 0 }}},  \
@@ -79,6 +84,13 @@ static bool toyota_get_quality_flag_valid(const CANPacket_t *to_push) {
     valid = !GET_BIT(to_push, 3U);  // STEER_ANGLE_INITIALIZING
   }
   return valid;
+}
+
+static int toyota_get_longitudinal_desired_accel_tx(const CANPacket_t *to_send) {
+  int desired_accel = (GET_BYTE(to_send, 0) << 8) | GET_BYTE(to_send, 1);
+  desired_accel = to_signed(desired_accel, 16);
+
+  return desired_accel;
 }
 
 static void toyota_rx_hook(const CANPacket_t *to_push) {
@@ -216,8 +228,7 @@ static bool toyota_tx_hook(const CANPacket_t *to_send) {
   if (bus == 0) {
     // ACCEL: safety check on byte 1-2
     if (addr == 0x343) {
-      int desired_accel = (GET_BYTE(to_send, 0) << 8) | GET_BYTE(to_send, 1);
-      desired_accel = to_signed(desired_accel, 16);
+      int desired_accel = toyota_get_longitudinal_desired_accel_tx(to_send);
 
       bool violation = false;
       violation |= longitudinal_accel_checks(desired_accel, TOYOTA_LONG_LIMITS);
@@ -228,10 +239,26 @@ static bool toyota_tx_hook(const CANPacket_t *to_send) {
         if (!cancel_req) {
           violation = true;
         }
+      }
+
+      // block ACC messages when openpilot is not controlling longitudinal or is a SecOC car
+      if (toyota_stock_longitudinal || toyota_secoc) {
         if (desired_accel != TOYOTA_LONG_LIMITS.inactive_accel) {
           violation = true;
         }
       }
+
+      if (violation) {
+        tx = false;
+      }
+    }
+
+    // ACCEL: safety check on byte 1-2 for SecOC car
+    if (addr == 0x183) {
+      int desired_accel = toyota_get_longitudinal_desired_accel_tx(to_send);
+
+      bool violation = false;
+      violation |= longitudinal_accel_checks(desired_accel, TOYOTA_LONG_LIMITS);
 
       if (violation) {
         tx = false;
@@ -352,6 +379,10 @@ static safety_config toyota_init(uint16_t param) {
     TOYOTA_COMMON_LONG_TX_MSGS
   };
 
+  static const CanMsg TOYOTA_SECOC_LONG_TX_MSGS[] = {
+    TOYOTA_COMMON_SECOC_LONG_TX_MSGS
+  };
+
   // safety param flags
   // first byte is for EPS factor, second is for flags
   const uint32_t TOYOTA_PARAM_OFFSET = 8U;
@@ -375,14 +406,18 @@ static safety_config toyota_init(uint16_t param) {
   const bool toyota_unsupported_dsu = GET_FLAG(current_safety_param_sp, TOYOTA_PARAM_SP_UNSUPPORTED_DSU);
 
   safety_config ret;
-  if (toyota_stock_longitudinal) {
-    if (toyota_secoc) {
+  if (toyota_secoc) {
+    if (toyota_stock_longitudinal) {
       SET_TX_MSGS(TOYOTA_SECOC_TX_MSGS, ret);
     } else {
-      SET_TX_MSGS(TOYOTA_TX_MSGS, ret);
+      SET_TX_MSGS(TOYOTA_SECOC_LONG_TX_MSGS, ret);
     }
   } else {
-    SET_TX_MSGS(TOYOTA_LONG_TX_MSGS, ret);
+    if (toyota_stock_longitudinal) {
+      SET_TX_MSGS(TOYOTA_TX_MSGS, ret);
+    } else {
+      SET_TX_MSGS(TOYOTA_LONG_TX_MSGS, ret);
+    }
   }
 
   if (toyota_secoc) {
@@ -442,10 +477,12 @@ static bool toyota_fwd_hook(int bus_num, int addr) {
     // block stock lkas messages and stock acc messages (if OP is doing ACC)
     // in TSS2, 0x191 is LTA which we need to block to avoid controls collision
     bool is_lkas_msg = ((addr == 0x2E4) || (addr == 0x412) || (addr == 0x191));
-    // on SecOC cars 0x131 is also LTA
-    is_lkas_msg |= toyota_secoc && (addr == 0x131);
     // in TSS2 the camera does ACC as well, so filter 0x343
     bool is_acc_msg = (addr == 0x343);
+
+    // SecOC cars use additional (not alternate) messages for lateral and longitudinal actuation
+    is_lkas_msg |= toyota_secoc && (addr == 0x131);
+    is_acc_msg |= toyota_secoc && (addr == 0x183);
     block_msg = is_lkas_msg || (is_acc_msg && !toyota_stock_longitudinal);
   }
 
