@@ -15,7 +15,6 @@
   TOYOTA_BASE_TX_MSGS \
   {0x2E4, 0, 8, .check_relay = true}, {0x131, 0, 8, .check_relay = true}, \
   {0x343, 0, 8, .check_relay = true},  /* ACC cancel cmd */  \
-  {0x183, 0, 8, .check_relay = true},  /* ACC_CONTROL_2 */  \
 
 #define TOYOTA_COMMON_LONG_TX_MSGS \
   TOYOTA_COMMON_TX_MSGS \
@@ -31,6 +30,10 @@
   {0x750, 0, 8, .check_relay = false}, \
   /* ACC */                            \
   {0x343, 0, 8, .check_relay = true},  \
+
+#define TOYOTA_COMMON_SECOC_LONG_TX_MSGS \
+  TOYOTA_COMMON_SECOC_TX_MSGS \
+  {0x183, 0, 8, .check_relay = true},  /* ACC_CONTROL_2 */  \
 
 #define TOYOTA_COMMON_RX_CHECKS(lta)                                                                          \
   {.msg = {{ 0xaa, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 83U}, { 0 }, { 0 }}},  \
@@ -357,6 +360,10 @@ static safety_config toyota_init(uint16_t param) {
     TOYOTA_COMMON_LONG_TX_MSGS
   };
 
+  static const CanMsg TOYOTA_SECOC_LONG_TX_MSGS[] = {
+    TOYOTA_COMMON_SECOC_LONG_TX_MSGS
+  };
+
   // safety param flags
   // first byte is for EPS factor, second is for flags
   const uint32_t TOYOTA_PARAM_OFFSET = 8U;
@@ -377,11 +384,17 @@ static safety_config toyota_init(uint16_t param) {
 
   safety_config ret;
   if (toyota_secoc) {
-    SET_TX_MSGS(TOYOTA_SECOC_TX_MSGS, ret);
-  } else if (toyota_stock_longitudinal) {
-    SET_TX_MSGS(TOYOTA_TX_MSGS, ret);
+    if (toyota_stock_longitudinal) {
+      SET_TX_MSGS(TOYOTA_SECOC_TX_MSGS, ret);
+    } else {
+      SET_TX_MSGS(TOYOTA_SECOC_LONG_TX_MSGS, ret);
+    }
   } else {
-    SET_TX_MSGS(TOYOTA_LONG_TX_MSGS, ret);
+    if (toyota_stock_longitudinal) {
+      SET_TX_MSGS(TOYOTA_TX_MSGS, ret);
+    } else {
+      SET_TX_MSGS(TOYOTA_LONG_TX_MSGS, ret);
+    }
   }
 
   if (toyota_secoc) {
