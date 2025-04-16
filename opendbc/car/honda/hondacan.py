@@ -177,8 +177,10 @@ def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_
   if CP.carFingerprint in (HONDA_BOSCH_RADARLESS | HONDA_BOSCH_CANFD):
     lkas_hud_values['LANE_LINES'] = 3
     lkas_hud_values['DASHED_LANES'] = hud.lanes_visible
+
+    # car likely needs to see LKAS_PROBLEM fall within a specific time frame, so forward from camera
+    # TODO: needed for Bosch CAN FD?
     if CP.carFingerprint in HONDA_BOSCH_RADARLESS:
-      # car likely needs to see LKAS_PROBLEM fall within a specific time frame, so forward from camera
       lkas_hud_values['LKAS_PROBLEM'] = lkas_hud['LKAS_PROBLEM']
 
   if not (CP.flags & HondaFlags.BOSCH_EXT_HUD):
