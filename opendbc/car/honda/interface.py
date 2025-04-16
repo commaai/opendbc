@@ -36,23 +36,18 @@ class CarInterface(CarInterfaceBase):
 
     CAN = CanBus(ret, fingerprint)
 
-    if candidate in HONDA_BOSCH_CANFD:
+    if candidate in HONDA_BOSCH:
       cfgs = [get_safety_config(structs.CarParams.SafetyModel.hondaBosch)]
-      if CAN.pt >= 4:
+      if candidate in HONDA_BOSCH_CANFD and CAN.pt >= 4:
         cfgs.insert(0, get_safety_config(structs.CarParams.SafetyModel.noOutput))
       ret.safetyConfigs = cfgs
-      ret.radarUnavailable = True  # TODO: get this working
-      # Disable the radar and let openpilot control longitudinal
-      # WARNING: THIS DISABLES AEB!
-      ret.alphaLongitudinalAvailable = False  # TODO: get this working
-      ret.openpilotLongitudinalControl = False  # TODO: get this working
-    elif candidate in HONDA_BOSCH:
-      ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.hondaBosch)]
+
       ret.radarUnavailable = True
       # Disable the radar and let openpilot control longitudinal
       # WARNING: THIS DISABLES AEB!
       # If Bosch radarless, this blocks ACC messages from the camera
-      ret.alphaLongitudinalAvailable = True
+      # TODO: get radar disable working on Bosch CANFD
+      ret.alphaLongitudinalAvailable = candidate not in HONDA_BOSCH_CANFD
       ret.openpilotLongitudinalControl = alpha_long
       ret.pcmCruise = not ret.openpilotLongitudinalControl
     else:
