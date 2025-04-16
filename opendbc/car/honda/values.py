@@ -68,7 +68,7 @@ class HondaFlags(IntFlag):
   NIDEC_ALT_PCM_ACCEL = 32
   NIDEC_ALT_SCM_MESSAGES = 64
 
-  CANFD = 128
+  BOSCH_CANFD = 128
 
 # Car button codes
 class CruiseButtons:
@@ -104,7 +104,7 @@ class HondaCarDocs(CarDocs):
     if CP.flags & HondaFlags.BOSCH:
       if CP.flags & HondaFlags.BOSCH_RADARLESS:
         self.car_parts = CarParts.common([CarHarness.bosch_b])
-      elif CP.flags & HondaFlags.CANFD:
+      elif CP.flags & HondaFlags.BOSCH_CANFD:
         self.car_parts = CarParts.common([CarHarness.bosch_c])
       else:
         self.car_parts = CarParts.common([CarHarness.bosch_a])
@@ -209,7 +209,7 @@ class CAR(Platforms):
     [HondaCarDocs("Honda Pilot 2023", "All")],
     CarSpecs(mass=4278 * CV.LB_TO_KG, wheelbase=2.86, centerToFrontRatio=0.428, steerRatio=16.0, tireStiffnessFactor=0.444),  # as spec
     {Bus.pt: 'honda_pilot_2023_can_generated'},
-    flags=HondaFlags.CANFD | HondaFlags.BOSCH_ALT_BRAKE,
+    flags=HondaFlags.BOSCH_CANFD | HondaFlags.BOSCH_ALT_BRAKE,
   )
 
   # Nidec Cars
@@ -354,7 +354,7 @@ HONDA_NIDEC_ALT_PCM_ACCEL = CAR.with_flags(HondaFlags.NIDEC_ALT_PCM_ACCEL)
 HONDA_NIDEC_ALT_SCM_MESSAGES = CAR.with_flags(HondaFlags.NIDEC_ALT_SCM_MESSAGES)
 HONDA_BOSCH = CAR.with_flags(HondaFlags.BOSCH)
 HONDA_BOSCH_RADARLESS = CAR.with_flags(HondaFlags.BOSCH_RADARLESS)
-HONDA_CANFD_CAR = CAR.with_flags(HondaFlags.CANFD)
+HONDA_BOSCH_CANFD_CAR = CAR.with_flags(HondaFlags.BOSCH_CANFD)
 
 
 DBC = CAR.create_dbc_map()
