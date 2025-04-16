@@ -14,6 +14,7 @@ class CanBus(CanBusBase):
     # use fingerprint if specified
     super().__init__(CP if fingerprint is None else None, fingerprint)
 
+    # powertrain bus is split instead of radar on radarless and CAN FD Bosch
     if CP.carFingerprint in (HONDA_BOSCH - HONDA_BOSCH_RADARLESS - HONDA_BOSCH_CANFD):
       self._pt, self._radar = self.offset + 1, self.offset
       # normally steering commands are sent to radar, which forwards them to powertrain bus
