@@ -111,7 +111,7 @@ class HondaCarDocs(CarDocs):
     else:
       harness = CarHarness.nidec
 
-    if CP.carFingeprint in (CAR.HONDA_PILOT_4G,):
+    if CP.carFingerprint in (CAR.HONDA_PILOT_4G,):
       self.car_parts = CarParts([Device.threex_angled_mount, harness])
     else:
       self.car_parts = CarParts.common([harness])
