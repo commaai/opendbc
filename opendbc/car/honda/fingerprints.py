@@ -494,6 +494,7 @@ FW_VERSIONS = {
       b'36161-TDK-J530\x00\x00',
     ],
   },
+  # mid-model refresh
   CAR.ACURA_MDX_4G_MMR: {
     (Ecu.fwdCamera, 0x18dab5f1, None): [
       b'8S102-TYA-A020\x00\x00',
