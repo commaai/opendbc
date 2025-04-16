@@ -208,6 +208,6 @@ def spam_buttons_command(packer, CAN, button_val, car_fingerprint):
     'CRUISE_BUTTONS': button_val,
     'CRUISE_SETTING': 0,
   }
-  # send buttons to camera on radarless cars
-  bus = CAN.camera if car_fingerprint in (HONDA_BOSCH_RADARLESS | HONDA_BOSCH_CANFD) else CAN.pt
+  # send buttons to camera on radarless (camera does ACC) cars
+  bus = CAN.camera if car_fingerprint in HONDA_BOSCH_RADARLESS else CAN.pt
   return packer.make_can_msg("SCM_BUTTONS", bus, values)
