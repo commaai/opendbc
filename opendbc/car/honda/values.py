@@ -3,7 +3,7 @@ from enum import Enum, IntFlag
 
 from opendbc.car import Bus, CarSpecs, PlatformConfig, Platforms, structs, uds
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
+from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, Device
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
 
 Ecu = structs.CarParams.Ecu
@@ -103,13 +103,18 @@ class HondaCarDocs(CarDocs):
   def init_make(self, CP: structs.CarParams):
     if CP.flags & HondaFlags.BOSCH:
       if CP.flags & HondaFlags.BOSCH_RADARLESS:
-        self.car_parts = CarParts.common([CarHarness.bosch_b])
+        harness = CarHarness.bosch_b
       elif CP.flags & HondaFlags.BOSCH_CANFD:
-        self.car_parts = CarParts.common([CarHarness.bosch_c])
+        harness = CarHarness.bosch_c
       else:
-        self.car_parts = CarParts.common([CarHarness.bosch_a])
+        harness = CarHarness.bosch_a
     else:
-      self.car_parts = CarParts.common([CarHarness.nidec])
+      harness = CarHarness.nidec
+
+    if CP.carFingeprint in (CAR.HONDA_PILOT_4G,):
+      self.car_parts = CarParts([Device.threex_angled_mount, harness])
+    else:
+      self.car_parts = CarParts.common([harness])
 
 
 class Footnote(Enum):
