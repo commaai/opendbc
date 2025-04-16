@@ -102,10 +102,10 @@ class HondaCarDocs(CarDocs):
 
   def init_make(self, CP: structs.CarParams):
     if CP.flags & HondaFlags.BOSCH:
-      if CP.flags & HondaFlags.BOSCH_RADARLESS:
-        harness = CarHarness.bosch_b
-      elif CP.flags & HondaFlags.BOSCH_CANFD:
+      if CP.flags & HondaFlags.BOSCH_CANFD:
         harness = CarHarness.bosch_c
+      elif CP.flags & HondaFlags.BOSCH_RADARLESS:
+        harness = CarHarness.bosch_b
       else:
         harness = CarHarness.bosch_a
     else:
