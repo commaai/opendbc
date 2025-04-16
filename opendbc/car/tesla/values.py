@@ -47,6 +47,7 @@ class CAR(Platforms):
       TeslaCarDocsHW4("Tesla Model 3 (with HW4) 2024-25"),
     ],
     CarSpecs(mass=1899., wheelbase=2.875, steerRatio=12.0),
+    {Bus.party: 'tesla_model3_party'},
   )
   TESLA_MODEL_Y = TeslaPlatformConfig(
     [
@@ -54,8 +55,20 @@ class CAR(Platforms):
       TeslaCarDocsHW4("Tesla Model Y (with HW4) 2024"),
      ],
     CarSpecs(mass=2072., wheelbase=2.890, steerRatio=12.0),
+    {Bus.party: 'tesla_model3_party'},
+  )
+  TESLA_MODEL_S_RAVEN = PlatformConfig(
+    [CarDocs("Tesla Model S Raven", "All")],
+    CarSpecs(mass=2100., wheelbase=2.959, steerRatio=15.0),
+    {
+      Bus.chassis: 'tesla_can',
+      Bus.party: 'tesla_raven_party',
+      Bus.pt: 'tesla_powertrain',
+      Bus.radar: 'tesla_radar_continental_generated',
+    },
   )
 
+PLATFORM_3Y = (CAR.TESLA_MODEL_3, CAR.TESLA_MODEL_Y)
 
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
@@ -63,16 +76,36 @@ FW_QUERY_CONFIG = FwQueryConfig(
       [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.SUPPLIER_SOFTWARE_VERSION_REQUEST],
       [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.SUPPLIER_SOFTWARE_VERSION_RESPONSE],
       bus=0,
-    )
+    ),
+    Request(
+      [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.UDS_VERSION_REQUEST],
+      [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.UDS_VERSION_REQUEST],
+      whitelist_ecus=[Ecu.eps],
+      rx_offset=0x08,
+      bus=0,
+    ),
+    Request(
+      [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.UDS_VERSION_REQUEST],
+      [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.UDS_VERSION_RESPONSE],
+      whitelist_ecus=[Ecu.adas, Ecu.electricBrakeBooster, Ecu.fwdRadar],
+      rx_offset=0x10,
+      bus=0,
+    ),
   ]
 )
 
 
 class CANBUS:
   party = 0
-  vehicle = 1
+  radar = 1
   autopilot_party = 2
 
+  # only needed on raven
+  powertrain = 4
+  chassis = 5
+  autopilot_powertrain = 6
+
+DOORS = ["DOOR_STATE_FL", "DOOR_STATE_FR", "DOOR_STATE_RL", "DOOR_STATE_RR", "DOOR_STATE_FrontTrunk", "BOOT_STATE"]
 
 GEAR_MAP = {
   "DI_GEAR_INVALID": CarState.GearShifter.unknown,
@@ -104,6 +137,8 @@ class CarControllerParams:
 
 class TeslaSafetyFlags(IntFlag):
   LONG_CONTROL = 1
+  POWERTRAIN = 2
+  RAVEN = 4
 
 
 class TeslaFlags(IntFlag):
