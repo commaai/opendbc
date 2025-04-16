@@ -36,6 +36,9 @@ class CarInterface(CarInterfaceBase):
 
     CAN = CanBus(ret, fingerprint)
 
+    # Recent test route is needed to undashcam these cars
+    ret.dashcamOnly = candidate in HONDA_BOSCH_CANFD
+
     if candidate in HONDA_BOSCH:
       cfgs = [get_safety_config(structs.CarParams.SafetyModel.hondaBosch)]
       if candidate in HONDA_BOSCH_CANFD and CAN.pt >= 4:
@@ -182,7 +185,7 @@ class CarInterface(CarInterfaceBase):
       else:
         ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]  # TODO: determine if there is a dead zone at the top end
 
-    elif candidate == CAR.HONDA_PILOT:
+    elif candidate in (CAR.HONDA_PILOT, CAR.HONDA_PILOT_4G):
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]  # TODO: determine if there is a dead zone at the top end
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.38], [0.11]]
 

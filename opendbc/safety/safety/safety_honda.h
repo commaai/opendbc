@@ -322,6 +322,7 @@ static safety_config honda_nidec_init(uint16_t param) {
 }
 
 static safety_config honda_bosch_init(uint16_t param) {
+  // HONDA_BOSCH_TX_MSGS is used by Bosch and Bosch CAN FD
   static CanMsg HONDA_BOSCH_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0xE5, 0, 8, .check_relay = true},
                                          // Send buttons on powertrain bus: 0 for Bosch CAN FD, 1 for CAN
                                          {0x296, 0, 4, .check_relay = false}, {0x296, 1, 4, .check_relay = false},
