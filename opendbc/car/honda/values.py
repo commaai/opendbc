@@ -68,7 +68,7 @@ class HondaFlags(IntFlag):
   NIDEC_ALT_PCM_ACCEL = 32
   NIDEC_ALT_SCM_MESSAGES = 64
 
-  CANFD_CAR = 128
+  BOSCH_CANFD = 128
 
 # Car button codes
 class CruiseButtons:
@@ -102,7 +102,12 @@ class HondaCarDocs(CarDocs):
 
   def init_make(self, CP: structs.CarParams):
     if CP.flags & HondaFlags.BOSCH:
-      self.car_parts = CarParts.common([CarHarness.bosch_b]) if CP.flags & HondaFlags.BOSCH_RADARLESS else CarParts.common([CarHarness.bosch_a])
+      if CP.flags & HondaFlags.BOSCH_RADARLESS:
+        self.car_parts = CarParts.common([CarHarness.bosch_b])
+      elif CP.flags & HondaFlags.BOSCH_CANFD:
+        self.car_parts = CarParts.common([CarHarness.bosch_c])
+      else:
+        self.car_parts = CarParts.common([CarHarness.bosch_a])
     else:
       self.car_parts = CarParts.common([CarHarness.nidec])
 
@@ -183,7 +188,7 @@ class CAR(Platforms):
     # mass: mean of 4 models in kg, steerRatio: 12.3 is spec end-to-end
     CarSpecs(mass=1667, wheelbase=2.66, steerRatio=16, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),
     {Bus.pt: 'honda_pilot_2023_can_generated'},
-    flags=HondaFlags.CANFD_CAR,
+    flags=HondaFlags.BOSCH_CANFD,
   )
   HONDA_HRV_3G = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda HR-V 2023", "All")],
@@ -325,9 +330,9 @@ FW_QUERY_CONFIG = FwQueryConfig(
   # Note that we still attempt to match with them when they are present
   # This is or'd with (ALL_ECUS - ESSENTIAL_ECUS) from fw_versions.py
   non_essential_ecus={
-    Ecu.eps: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_CIVIC_2022, CAR.HONDA_E, CAR.HONDA_HRV_3G, CAR.HONDA_CRV_HYBRID_6G],
+    Ecu.eps: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_CIVIC_2022, CAR.HONDA_E, CAR.HONDA_HRV_3G],
     Ecu.vsa: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_CIVIC, CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_2022, CAR.HONDA_CRV_5G, CAR.HONDA_CRV_HYBRID,
-              CAR.HONDA_E, CAR.HONDA_HRV_3G, CAR.HONDA_INSIGHT, CAR.HONDA_CRV_HYBRID_6G],
+              CAR.HONDA_E, CAR.HONDA_HRV_3G, CAR.HONDA_INSIGHT],
   },
   extra_ecus=[
     (Ecu.combinationMeter, 0x18da60f1, None),
@@ -350,7 +355,7 @@ HONDA_NIDEC_ALT_PCM_ACCEL = CAR.with_flags(HondaFlags.NIDEC_ALT_PCM_ACCEL)
 HONDA_NIDEC_ALT_SCM_MESSAGES = CAR.with_flags(HondaFlags.NIDEC_ALT_SCM_MESSAGES)
 HONDA_BOSCH = CAR.with_flags(HondaFlags.BOSCH)
 HONDA_BOSCH_RADARLESS = CAR.with_flags(HondaFlags.BOSCH_RADARLESS)
-HONDA_CANFD_CAR = CAR.with_flags(HondaFlags.CANFD_CAR)
+HONDA_BOSCH_CANFD = CAR.with_flags(HondaFlags.BOSCH_CANFD)
 
 
 DBC = CAR.create_dbc_map()
