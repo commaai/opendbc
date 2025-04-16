@@ -103,14 +103,13 @@ class HondaCarDocs(CarDocs):
   def init_make(self, CP: structs.CarParams):
     if CP.flags & HondaFlags.BOSCH:
       if CP.flags & HondaFlags.BOSCH_RADARLESS:
-        harness = CarHarness.bosch_b
+        self.car_parts = CarHarness.bosch_b
       elif CP.flags & HondaFlags.BOSCH_CANFD:
-        harness = CarHarness.bosch_c
+        self.car_parts = CarHarness.bosch_c
       else:
-        harness = CarHarness.bosch_a
+        self.car_parts = CarHarness.bosch_a
     else:
-      harness = CarHarness.nidec
-
+      self.car_parts = CarHarness.nidec
 
 class Footnote(Enum):
   CIVIC_DIESEL = CarFootnote(
@@ -148,7 +147,7 @@ class CAR(Platforms):
     [HondaCarDocs("Honda Accord 2023", "All")],
     CarSpecs(mass=3279 * CV.LB_TO_KG, wheelbase=2.83, steerRatio=16.33, centerToFrontRatio=0.39, tireStiffnessFactor=0.8467),
     {Bus.pt: 'honda_pilot_2023_can_generated'},
-    flags=HondaFlags.CANFD_CAR,
+    flags=HondaFlags.BOSCH_CANFD,
   )
   HONDA_CIVIC_BOSCH = HondaBoschPlatformConfig(
     [
