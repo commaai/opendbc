@@ -4,7 +4,7 @@ from opendbc.car import get_safety_config, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.disable_ecu import disable_ecu
 from opendbc.car.honda.hondacan import CanBus
-from opendbc.car.honda.values import CarControllerParams, HondaFlags, CAR, HONDA_BOSCH, \
+from opendbc.car.honda.values import CarControllerParams, HondaFlags, CAR, HONDA_BOSCH, HONDA_BOSCH_CANFD, \
                                                  HONDA_NIDEC_ALT_SCM_MESSAGES, HONDA_BOSCH_RADARLESS, HondaSafetyFlags
 from opendbc.car.honda.carcontroller import CarController
 from opendbc.car.honda.carstate import CarState
@@ -36,13 +36,21 @@ class CarInterface(CarInterfaceBase):
 
     CAN = CanBus(ret, fingerprint)
 
+    # Recent test route is needed to undashcam these cars
+    ret.dashcamOnly = candidate in HONDA_BOSCH_CANFD
+
     if candidate in HONDA_BOSCH:
-      ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.hondaBosch)]
+      cfgs = [get_safety_config(structs.CarParams.SafetyModel.hondaBosch)]
+      if candidate in HONDA_BOSCH_CANFD and CAN.pt >= 4:
+        cfgs.insert(0, get_safety_config(structs.CarParams.SafetyModel.noOutput))
+      ret.safetyConfigs = cfgs
+
       ret.radarUnavailable = True
       # Disable the radar and let openpilot control longitudinal
       # WARNING: THIS DISABLES AEB!
       # If Bosch radarless, this blocks ACC messages from the camera
-      ret.alphaLongitudinalAvailable = True
+      # TODO: get radar disable working on Bosch CANFD
+      ret.alphaLongitudinalAvailable = candidate not in HONDA_BOSCH_CANFD
       ret.openpilotLongitudinalControl = alpha_long
       ret.pcmCruise = not ret.openpilotLongitudinalControl
     else:
@@ -173,7 +181,7 @@ class CarInterface(CarInterfaceBase):
       else:
         ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]  # TODO: determine if there is a dead zone at the top end
 
-    elif candidate == CAR.HONDA_PILOT:
+    elif candidate in (CAR.HONDA_PILOT, CAR.HONDA_PILOT_4G):
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]  # TODO: determine if there is a dead zone at the top end
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.38], [0.11]]
 
