@@ -3,7 +3,7 @@ from enum import Enum, IntFlag
 
 from opendbc.car import Bus, CarSpecs, PlatformConfig, Platforms, structs, uds
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, Device
+from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
 
 Ecu = structs.CarParams.Ecu
@@ -103,13 +103,13 @@ class HondaCarDocs(CarDocs):
   def init_make(self, CP: structs.CarParams):
     if CP.flags & HondaFlags.BOSCH:
       if CP.flags & HondaFlags.BOSCH_RADARLESS:
-        self.car_parts = CarHarness.bosch_b
+        self.car_parts = CarParts.common([CarHarness.bosch_b])
       elif CP.flags & HondaFlags.BOSCH_CANFD:
-        self.car_parts = CarHarness.bosch_c
+        self.car_parts = CarParts.common([CarHarness.bosch_c])
       else:
-        self.car_parts = CarHarness.bosch_a
+        self.car_parts = CarParts.common([CarHarness.bosch_a])
     else:
-      self.car_parts = CarHarness.nidec
+      self.car_parts = CarParts.common([CarHarness.nidec])
 
 class Footnote(Enum):
   CIVIC_DIESEL = CarFootnote(
