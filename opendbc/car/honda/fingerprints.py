@@ -941,5 +941,5 @@ FW_VERSIONS = {
     (Ecu.fwdCamera, 0x18dab5f1, None): [
       b'8S102-3A0-A090\x00\x00',
     ],
-  },  
+  },
 }
