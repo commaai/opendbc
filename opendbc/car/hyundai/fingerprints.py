@@ -1047,6 +1047,7 @@ FW_VERSIONS = {
   },
   CAR.HYUNDAI_TUCSON_4TH_GEN: {
     (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00NX4 FR_CMR AT EUR LHD 1.00 1.00 99211-N9250 14W',
       b'\xf1\x00NX4 FR_CMR AT CAN LHD 1.00 1.00 99211-N9260 14Y',
       b'\xf1\x00NX4 FR_CMR AT CAN LHD 1.00 1.01 99211-N9100 14A',
       b'\xf1\x00NX4 FR_CMR AT CAN LHD 1.00 1.00 99211-N9220 14K',
@@ -1061,6 +1062,7 @@ FW_VERSIONS = {
       b'\xf1\x00NX4 FR_CMR AT USA LHD 1.00 1.01 99211-N9240 14T',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00NX4__               1.01 1.02 99110-N9000         ',
       b'\xf1\x00NX4__               1.00 1.00 99110-N9100         ',
       b'\xf1\x00NX4__               1.00 1.01 99110-N9000         ',
       b'\xf1\x00NX4__               1.00 1.02 99110-N9000         ',
