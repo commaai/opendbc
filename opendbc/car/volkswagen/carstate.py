@@ -3,7 +3,7 @@ from opendbc.can.parser import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.volkswagen.values import DBC, CANBUS, NetworkLocation, TransmissionType, GearShifter, \
+from opendbc.car.volkswagen.values import DBC, CanBus, NetworkLocation, TransmissionType, GearShifter, \
                                                       CarControllerParams, VolkswagenFlags
 
 ButtonType = structs.CarState.ButtonEvent.Type
@@ -332,7 +332,7 @@ class CarState(CarStateBase):
       pt_messages.append(("Motor_EV_01", 10))  # From J??? unknown EV control module
 
     if CP.networkLocation == NetworkLocation.fwdCamera:
-      # Radars are here on CANBUS.pt
+      # Radars are here on CanBus.main
       pt_messages += MqbExtraSignals.fwd_radar_messages
       if CP.enableBsm:
         pt_messages += MqbExtraSignals.bsm_radar_messages
@@ -349,14 +349,14 @@ class CarState(CarStateBase):
         ("LDW_02", 10)      # From R242 Driver assistance camera
       ]
     else:
-      # Radars are here on CANBUS.cam
+      # Radars are here on CanBus.camera
       cam_messages += MqbExtraSignals.fwd_radar_messages
       if CP.enableBsm:
         cam_messages += MqbExtraSignals.bsm_radar_messages
 
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CANBUS.pt),
-      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CANBUS.cam),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).main),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).camera),
     }
 
   @staticmethod
@@ -384,7 +384,7 @@ class CarState(CarStateBase):
       pt_messages += [("Motor_1", 100)]  # From J623 Engine control module
 
     if CP.networkLocation == NetworkLocation.fwdCamera:
-      # Extended CAN devices other than the camera are here on CANBUS.pt
+      # Extended CAN devices other than the camera are here on CanBus.main
       pt_messages += PqExtraSignals.fwd_radar_messages
       if CP.enableBsm:
         pt_messages += PqExtraSignals.bsm_radar_messages
@@ -397,14 +397,14 @@ class CarState(CarStateBase):
       ]
 
     if CP.networkLocation == NetworkLocation.gateway:
-      # Radars are here on CANBUS.cam
+      # Radars are here on CanBus.camera
       cam_messages += PqExtraSignals.fwd_radar_messages
       if CP.enableBsm:
         cam_messages += PqExtraSignals.bsm_radar_messages
 
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CANBUS.pt),
-      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CANBUS.cam),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).main),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).camera),
     }
 
   @staticmethod
@@ -430,7 +430,7 @@ class CarState(CarStateBase):
     ]
 
     if CP.networkLocation == NetworkLocation.fwdCamera:
-      # Radars are here on CANBUS.pt
+      # Radars are here on CanBus.main
       pt_messages += MebExtraSignals.fwd_radar_messages
       if CP.enableBsm:
         pt_messages += MebExtraSignals.bsm_radar_messages
@@ -442,14 +442,14 @@ class CarState(CarStateBase):
     ]
 
     if CP.networkLocation == NetworkLocation.gateway:
-      # Radars are here on CANBUS.cam
+      # Radars are here on CanBus.camera
       cam_messages += MebExtraSignals.fwd_radar_messages
       if CP.enableBsm:
         cam_messages += MebExtraSignals.bsm_radar_messages
 
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CANBUS.pt),
-      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CANBUS.cam),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).main),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).camera),
     }
 
 
