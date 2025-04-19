@@ -137,6 +137,9 @@ class CarController(CarControllerBase):
           if (self.frame - self.last_button_frame) * DT_CTRL >= 0.15:
             self.last_button_frame = self.frame
 
+      if self.frame % 7 and self.CP.flags & HyundaiFlags.CAMERA_SCC:
+        can_sends.append(hyundaican.create_hda11_mfc(self.packer, self.frame, CS.hda11_mfc))
+
     if self.frame % 2 == 0 and self.CP.openpilotLongitudinalControl:
       # TODO: unclear if this is needed
       jerk = 3.0 if actuators.longControlState == LongCtrlState.pid else 1.0
