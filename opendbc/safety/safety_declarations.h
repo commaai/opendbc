@@ -199,12 +199,14 @@ typedef bool (*get_quality_flag_valid_t)(const CANPacket_t *to_push);
 
 typedef safety_config (*safety_hook_init)(uint16_t param);
 typedef void (*rx_hook)(const CANPacket_t *to_push);
+typedef void (*ignition_can_hook)(const CANPacket_t *to_push);
 typedef bool (*tx_hook)(const CANPacket_t *to_send);  // returns true if the message is allowed
 typedef bool (*fwd_hook)(int bus_num, int addr);      // returns true if the message should be blocked from forwarding
 
 typedef struct {
   safety_hook_init init;
   rx_hook rx;
+  ignition_can_hook ignition_can_hook;
   tx_hook tx;
   fwd_hook fwd;
   get_checksum_t get_checksum;
@@ -291,6 +293,11 @@ extern int alternative_experience;
 
 // time since safety mode has been changed
 extern uint32_t safety_mode_cnt;
+
+// Ignition detected from CAN meessages
+extern bool ignition_can;
+// Time since CAN ignition was disabled
+extern uint32_t ignition_can_cnt;
 
 typedef struct {
   uint16_t id;

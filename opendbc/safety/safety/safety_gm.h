@@ -159,6 +159,17 @@ static bool gm_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
+static void gm_ignition_can_hook(const CANPacket_t *to_push) {
+    int addr = GET_ADDR(to_push);
+    int len = GET_LEN(to_push);
+    if ((addr == 0x1F1) && (len == 8)) {
+      // SystemPowerMode (2=Run, 3=Crank Request)
+      ignition_can = (GET_BYTE(to_push, 0) & 0x2U) != 0U;
+      ignition_can_cnt = 0U;
+    }
+}
+
+
 static safety_config gm_init(uint16_t param) {
   const uint16_t GM_PARAM_HW_CAM = 1;
   const uint16_t GM_PARAM_EV = 4;
@@ -244,5 +255,6 @@ static safety_config gm_init(uint16_t param) {
 const safety_hooks gm_hooks = {
   .init = gm_init,
   .rx = gm_rx_hook,
+  .ignition_can_hook = gm_ignition_can_hook,
   .tx = gm_tx_hook,
 };

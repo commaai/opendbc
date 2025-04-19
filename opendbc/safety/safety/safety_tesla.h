@@ -56,6 +56,25 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
   }
 }
 
+static void tesla_ignition_can_hook(const CANPacket_t *to_push) {
+    // Tesla Model 3/Y
+    int addr = GET_ADDR(to_push);
+    int len = GET_LEN(to_push);
+    if ((addr == 0x221) && (len == 8)) {
+      // 0x221 overlaps with Rivian which has random data on byte 0
+      int counter = GET_BYTE(to_push, 6) >> 4;
+
+      static int prev_counter = -1;
+      if ((counter == ((prev_counter + 1) % 16)) && (prev_counter != -1)) {
+        // VCFRONT_LVPowerState->VCFRONT_vehiclePowerState
+        int power_state = (GET_BYTE(to_push, 0) >> 5U) & 0x3U;
+        ignition_can = power_state == 0x3;  // VEHICLE_POWER_STATE_DRIVE=3
+        ignition_can_cnt = 0U;
+      }
+      prev_counter = counter;
+    }
+}
+
 
 static bool tesla_tx_hook(const CANPacket_t *to_send) {
   const AngleSteeringLimits TESLA_STEERING_LIMITS = {
@@ -199,6 +218,7 @@ static safety_config tesla_init(uint16_t param) {
 const safety_hooks tesla_hooks = {
   .init = tesla_init,
   .rx = tesla_rx_hook,
+  .ignition_can_hook = tesla_ignition_can_hook,
   .tx = tesla_tx_hook,
   .fwd = tesla_fwd_hook,
 };
