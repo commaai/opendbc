@@ -16,12 +16,12 @@
 #define PSA_CAM_BUS  0U
 
 const CanMsg PSA_TX_MSGS[] = {
-  {PSA_LANE_KEEP_ASSIST, PSA_CAM_BUS, 8, true},
-  {PSA_Req_Diag_ARTIV, PSA_ADAS_BUS, 8, false}, // TODO: check if reduce to 3 is ok
-  {PSA_HS2_SUPV_ARTIV_796, PSA_ADAS_BUS, 8, false},
-  {PSA_HS2_DAT_ARTIV_V2_4F6, PSA_ADAS_BUS, 5, false},
-  {PSA_HS2_DYN1_MDD_ETAT_2B6, PSA_ADAS_BUS, 8, false},
-  {PSA_HS2_DYN_MDD_ETAT_2F6, PSA_ADAS_BUS, 8, false},
+  {PSA_LANE_KEEP_ASSIST, PSA_CAM_BUS, 8, .check_relay = true},
+  {PSA_Req_Diag_ARTIV, PSA_ADAS_BUS, 8, .check_relay = false}, // TODO: check if reduce to 3 is ok
+  {PSA_HS2_SUPV_ARTIV_796, PSA_ADAS_BUS, 8, .check_relay = false},
+  {PSA_HS2_DAT_ARTIV_V2_4F6, PSA_ADAS_BUS, 5, .check_relay = false},
+  {PSA_HS2_DYN1_MDD_ETAT_2B6, PSA_ADAS_BUS, 8, .check_relay = false},
+  {PSA_HS2_DYN_MDD_ETAT_2F6, PSA_ADAS_BUS, 8, .check_relay = false},
 };
 
 RxCheck psa_rx_checks[] = {
@@ -61,8 +61,8 @@ static void psa_rx_hook(const CANPacket_t *to_push) {
     if (addr == PSA_DRIVER) {
       gas_pressed = GET_BYTE(to_push, 3) > 0U; // GAS_PEDAL
     }
-    bool stock_ecu_detected = psa_lkas_msg_check(addr);
-    generic_rx_checks(stock_ecu_detected);
+    // bool stock_ecu_detected = psa_lkas_msg_check(addr); // TODO: was removed in April 2025, check impact
+    // generic_rx_checks(stock_ecu_detected);
   }
   if (bus == PSA_ADAS_BUS) {
     if (addr == PSA_HS2_DYN_ABR_38D) {
