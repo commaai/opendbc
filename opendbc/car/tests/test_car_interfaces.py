@@ -36,7 +36,7 @@ def get_fuzzy_car_interface_args(draw: DrawType) -> dict:
   params_strategy = st.fixed_dictionaries({
     'fingerprints': fingerprint_strategy,
     'car_fw': car_fw_strategy,
-    'experimental_long': st.booleans(),
+    'alpha_long': st.booleans(),
   })
 
   params: dict = draw(params_strategy)
@@ -59,9 +59,9 @@ class TestCarInterfaces:
     args = get_fuzzy_car_interface_args(data.draw)
 
     car_params = CarInterface.get_params(car_name, args['fingerprints'], args['car_fw'],
-                                         experimental_long=args['experimental_long'], docs=False)
+                                         alpha_long=args['alpha_long'], docs=False)
     car_params_sp = CarInterface.get_params_sp(car_params, car_name, args['fingerprints'], args['car_fw'],
-                                                           experimental_long=args['experimental_long'], docs=False)
+                                               alpha_long=args['alpha_long'], docs=False)
     car_interface = CarInterface(car_params, car_params_sp)
     assert car_params
     assert car_params_sp
