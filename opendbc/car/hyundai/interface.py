@@ -27,7 +27,7 @@ class CarInterface(CarInterfaceBase):
   RadarInterface = RadarInterface
 
   @staticmethod
-  def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
+  def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, docs) -> structs.CarParams:
     ret.brand = "hyundai"
 
     cam_can = CanBus(None, fingerprint).CAM
@@ -36,10 +36,10 @@ class CarInterface(CarInterfaceBase):
 
     if ret.flags & HyundaiFlags.CANFD:
       # Shared configuration for CAN-FD cars
-      ret.experimentalLongitudinalAvailable = candidate not in CANFD_UNSUPPORTED_LONGITUDINAL_CAR
+      ret.alphaLongitudinalAvailable = candidate not in CANFD_UNSUPPORTED_LONGITUDINAL_CAR
       if lka_steering and Ecu.adas not in [fw.ecu for fw in car_fw]:
         # this needs to be figured out for cars without an ADAS ECU
-        ret.experimentalLongitudinalAvailable = False
+        ret.alphaLongitudinalAvailable = False
 
       ret.enableBsm = 0x1e5 in fingerprint[CAN.ECAN]
 
@@ -83,7 +83,7 @@ class CarInterface(CarInterfaceBase):
 
     else:
       # Shared configuration for non CAN-FD cars
-      ret.experimentalLongitudinalAvailable = candidate not in UNSUPPORTED_LONGITUDINAL_CAR
+      ret.alphaLongitudinalAvailable = candidate not in UNSUPPORTED_LONGITUDINAL_CAR
       ret.enableBsm = 0x58b in fingerprint[0]
 
       # Send LFA message on cars with HDA
@@ -126,7 +126,7 @@ class CarInterface(CarInterfaceBase):
     # Common longitudinal control setup
 
     ret.radarUnavailable = RADAR_START_ADDR not in fingerprint[1] or Bus.radar not in DBC[ret.carFingerprint]
-    ret.openpilotLongitudinalControl = experimental_long and ret.experimentalLongitudinalAvailable
+    ret.openpilotLongitudinalControl = alpha_long and ret.alphaLongitudinalAvailable
     ret.pcmCruise = not ret.openpilotLongitudinalControl
     ret.startingState = True
     ret.vEgoStarting = 0.1
@@ -155,7 +155,7 @@ class CarInterface(CarInterfaceBase):
 
   @staticmethod
   def _get_params_sp(stock_cp: structs.CarParams, ret: structs.CarParamsSP, candidate, fingerprint: dict[int, dict[int, int]],
-                     car_fw: list[structs.CarParams.CarFw], experimental_long: bool, docs: bool) -> structs.CarParamsSP:
+                     car_fw: list[structs.CarParams.CarFw], alpha_long: bool, docs: bool) -> structs.CarParamsSP:
     if not stock_cp.flags & HyundaiFlags.CANFD:
       # TODO-SP: add route with ESCC message for process replay
       if ESCC_MSG in fingerprint[0]:

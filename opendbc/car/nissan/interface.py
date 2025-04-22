@@ -11,7 +11,7 @@ class CarInterface(CarInterfaceBase):
   CarController = CarController
 
   @staticmethod
-  def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
+  def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, docs) -> structs.CarParams:
     ret.brand = "nissan"
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.nissan)]
     ret.autoResumeSng = False
@@ -31,7 +31,7 @@ class CarInterface(CarInterfaceBase):
 
   @staticmethod
   def _get_params_sp(stock_cp: structs.CarParams, ret: structs.CarParamsSP, candidate, fingerprint: dict[int, dict[int, int]],
-                     car_fw: list[structs.CarParams.CarFw], experimental_long: bool, docs: bool) -> structs.CarParamsSP:
+                     car_fw: list[structs.CarParams.CarFw], alpha_long: bool, docs: bool) -> structs.CarParamsSP:
     if candidate in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC):
       ret.safetyParam |= NissanSafetyFlagsSP.LEAF
 

@@ -12,7 +12,7 @@ class CarInterface(CarInterfaceBase):
   RadarInterface = RadarInterface
 
   @staticmethod
-  def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
+  def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, docs) -> structs.CarParams:
     ret.brand = "rivian"
 
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.rivian)]
@@ -25,8 +25,8 @@ class CarInterface(CarInterfaceBase):
     ret.radarUnavailable = True
 
     # TODO: pending finding/handling missing set speed and fixing up radar parser
-    ret.experimentalLongitudinalAvailable = False
-    if experimental_long:
+    ret.alphaLongitudinalAvailable = False
+    if alpha_long:
       ret.openpilotLongitudinalControl = True
       ret.safetyConfigs[0].safetyParam |= RivianSafetyFlags.LONG_CONTROL.value
 
