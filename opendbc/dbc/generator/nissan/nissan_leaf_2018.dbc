@@ -67,6 +67,21 @@ BO_ 856 LIGHTS: 8 XXX
  SG_ LEFT_BLINKER : 17|1@0+ (1,0) [0|1] "" XXX
  SG_ RIGHT_BLINKER : 18|1@0+ (1,0) [0|1] "" XXX
 
+BO_ 976 NEW_MSG_3D0: 6 XXX
+ SG_ unsure4 : 0|1@0+ (1,0) [0|1] "" XXX
+ SG_ RIGHT_BLINKER_STATUS : 3|3@0+ (1,0) [0|7] "" XXX
+ SG_ unsure3 : 4|1@0+ (1,0) [0|1] "" XXX
+ SG_ LEFT_BLINKER_STATUS : 5|3@1+ (1,0) [0|7] "" XXX
+ SG_ GEAR_SHIFTER : 9|3@1+ (1,0) [0|7] "" XXX
+ SG_ unsure5 : 14|1@0+ (1,0) [0|1] "" XXX
+ SG_ unsure2 : 15|1@0+ (1,0) [0|1] "" XXX
+ SG_ unsure6 : 17|1@0+ (1,0) [0|1] "" XXX
+ SG_ unsure1 : 22|1@0+ (1,0) [0|1] "" XXX
+ SG_ STEER_ANGLE : 24|16@1- (-0.1,0) [0|65535] "deg" XXX
+ SG_ CHECKSUM : 43|4@0+ (1,0) [0|15] "" XXX
+ SG_ COUNTER : 44|2@1+ (1,0) [0|3] "" XXX
+
+
 BO_ 1057 GEARBOX: 3 XXX
  SG_ GEAR_SHIFTER : 5|3@0+ (1,0) [0|255] "" XXX
 
@@ -91,4 +106,8 @@ BO_ 1549 DOORS_LIGHTS: 8 XXX
  SG_ LEFT_BLINKER_PULSE : 13|1@0+ (1,0) [0|1] "" XXX
  SG_ RIGHT_BLINKER_PULSE : 14|1@0+ (1,0) [0|1] "" XXX
 
+VAL_ 976 RIGHT_BLINKER_STATUS 3 "Off" 1 "On";
+VAL_ 976 LEFT_BLINKER_STATUS 3 "Off" 1 "On";
+VAL_ 976 GEAR_SHIFTER 7 "B" 4 "D" 3 "N" 2 "R" 1 "P";
 VAL_ 1057 GEAR_SHIFTER 7 "B" 4 "D" 3 "N" 2 "R" 1 "P" ;
+
