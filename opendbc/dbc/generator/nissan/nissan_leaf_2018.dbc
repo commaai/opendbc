@@ -1,11 +1,12 @@
 CM_ "IMPORT _nissan_common.dbc";
 
 BO_ 42 SEATBELT: 8 XXX
- SG_ SEATBELT_DRIVER_LATCHED : 27|1@1+ (1,0) [0|3] "" XXX
- SG_ SEATBELT_DRIVER_UNLATCHED : 26|1@0+ (1,0) [0|1] "" XXX
- SG_ unknown2 : 31|4@0+ (1,0) [0|15] "" XXX
- SG_ unknown3 : 24|2@1+ (1,0) [0|3] "" XXX
  SG_ unknown1 : 7|24@0+ (1,0) [0|16777215] "" XXX
+ SG_ SEATBELT_PASSENGER_UNLATCHED : 24|1@0+ (1,0) [0|1] "" XXX
+ SG_ SEATBELT_PASSENGER_LATCHED : 25|1@0+ (1,0) [0|1] "" XXX
+ SG_ SEATBELT_DRIVER_UNLATCHED : 26|1@0+ (1,0) [0|1] "" XXX
+ SG_ SEATBELT_DRIVER_LATCHED : 27|1@1+ (1,0) [0|3] "" XXX
+ SG_ unknown2 : 31|4@0+ (1,0) [0|15] "" XXX
  SG_ unknown4 : 39|16@0+ (1,0) [0|65535] "" XXX
 
 BO_ 634 NEW_MSG_27A: 7 XXX
