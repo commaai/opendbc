@@ -285,14 +285,18 @@ class CarState(CarStateBase):
       ("STEERING_CONTROL", 100),
     ]
 
-    if CP.carFingerprint in HONDA_BOSCH_RADARLESS or CP.carFingerprint not in HONDA_BOSCH:
+    if CP.carFingerprint in HONDA_BOSCH_RADARLESS:
       cam_messages += [
         ("ACC_HUD", 10),
         ("LKAS_HUD", 10),
       ]
 
-      if CP.carFingerprint not in HONDA_BOSCH:
-        cam_messages.append(("BRAKE_COMMAND", 50))
+    elif CP.carFingerprint not in HONDA_BOSCH:
+      cam_messages += [
+        ("ACC_HUD", 10),
+        ("LKAS_HUD", 10),
+        ("BRAKE_COMMAND", 50),
+      ]
 
     body_messages = [
       ("BSM_STATUS_LEFT", 3),
