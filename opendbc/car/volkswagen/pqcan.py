@@ -1,8 +1,8 @@
-def create_steering_control(packer, bus, apply_steer, lkas_enabled):
+def create_steering_control(packer, bus, apply_torque, lkas_enabled):
   values = {
-    "LM_Offset": abs(apply_steer),
-    "LM_OffSign": 1 if apply_steer < 0 else 0,
-    "HCA_Status": 5 if (lkas_enabled and apply_steer != 0) else 3,
+    "LM_Offset": abs(apply_torque),
+    "LM_OffSign": 1 if apply_torque < 0 else 0,
+    "HCA_Status": 5 if (lkas_enabled and apply_torque != 0) else 3,
     "Vib_Freq": 16,
   }
 

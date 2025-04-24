@@ -1496,7 +1496,7 @@ BO_ 1157 LFAHDA_MFC: 4 XXX
 BO_ 913 BCM_PO_11: 8 Vector__XXX
  SG_ BCM_Door_Dri_Status : 5|1@0+ (1,0) [0|1] "" PT_ESC_ABS
  SG_ BCM_Shift_R_MT_SW_Status : 39|2@0+ (1,0) [0|3] "" PT_ESC_ABS
- SG_ LFA_Pressed : 4|1@0+ (1,0) [0|1] "" XXX
+ SG_ LDA_BTN : 4|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1426 LABEL11: 8 XXX
  SG_ CC_React : 34|1@1+ (1,0) [0|1] "" XXX

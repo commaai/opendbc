@@ -10,8 +10,8 @@ Ecu = CarParams.Ecu
 
 
 class ChryslerSafetyFlags(IntFlag):
-  FLAG_CHRYSLER_RAM_DT = 1
-  FLAG_CHRYSLER_RAM_HD = 2
+  RAM_DT = 1
+  RAM_HD = 2
 
 
 class ChryslerFlags(IntFlag):
@@ -134,7 +134,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
     Request(
       [CHRYSLER_VERSION_REQUEST],
       [CHRYSLER_VERSION_RESPONSE],
-      whitelist_ecus=[Ecu.abs, Ecu.eps, Ecu.srs, Ecu.fwdRadar, Ecu.fwdCamera, Ecu.combinationMeter],
+      whitelist_ecus=[Ecu.abs, Ecu.eps, Ecu.srs, Ecu.fwdRadar, Ecu.combinationMeter],
       rx_offset=CHRYSLER_RX_OFFSET,
       bus=0,
     ),

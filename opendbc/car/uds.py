@@ -305,13 +305,14 @@ def get_dtc_status_names(status):
 
 class CanClient:
   def __init__(self, can_send: Callable[[int, bytes, int], None], can_recv: Callable[[], list[tuple[int, bytes, int]]],
-               tx_addr: int, rx_addr: int, bus: int, sub_addr: int | None = None):
+               tx_addr: int, rx_addr: int, bus: int, sub_addr: int | None = None, rx_sub_addr: int | None = None):
     self.tx = can_send
     self.rx = can_recv
     self.tx_addr = tx_addr
     self.rx_addr = rx_addr
     self.rx_buff: deque[bytes] = deque()
     self.sub_addr = sub_addr
+    self.rx_sub_addr = rx_sub_addr if rx_sub_addr is not None else sub_addr
     self.bus = bus
 
   def _recv_filter(self, bus: int, addr: int) -> bool:
@@ -345,9 +346,9 @@ class CanClient:
             carlog.debug(f"CAN-RX: {hex(rx_addr)} - 0x{bytes.hex(rx_data)}")
 
             # Cut off sub addr in first byte
-            if self.sub_addr is not None:
-              if rx_data[0] != self.sub_addr:
-                raise InvalidSubAddressError(f"isotp - rx: invalid sub-address: {rx_data[0]}, expected: {self.sub_addr}")
+            if self.rx_sub_addr is not None:
+              if rx_data[0] != self.rx_sub_addr:
+                raise InvalidSubAddressError(f"isotp - rx: invalid sub-address: {rx_data[0]}, expected: {self.rx_sub_addr}")
               rx_data = rx_data[1:]
 
             self.rx_buff.append(rx_data)
@@ -576,15 +577,15 @@ def get_rx_addr_for_tx_addr(tx_addr, rx_offset=0x8):
 
 
 class UdsClient:
-  def __init__(self, panda, tx_addr: int, rx_addr: int | None = None, bus: int = 0, sub_addr: int | None = None, timeout: float = 1,
-               tx_timeout: float = 1, response_pending_timeout: float = 10):
+  def __init__(self, panda, tx_addr: int, rx_addr: int | None = None, bus: int = 0, sub_addr: int | None = None, rx_sub_addr: int | None = None,
+               timeout: float = 1, tx_timeout: float = 1, response_pending_timeout: float = 10):
     self.bus = bus
     self.tx_addr = tx_addr
     self.rx_addr = rx_addr if rx_addr is not None else get_rx_addr_for_tx_addr(tx_addr)
     self.sub_addr = sub_addr
     self.timeout = timeout
     can_send_with_timeout = partial(panda.can_send, timeout=int(tx_timeout*1000))
-    self._can_client = CanClient(can_send_with_timeout, panda.can_recv, self.tx_addr, self.rx_addr, self.bus, self.sub_addr)
+    self._can_client = CanClient(can_send_with_timeout, panda.can_recv, self.tx_addr, self.rx_addr, self.bus, self.sub_addr, rx_sub_addr)
     self.response_pending_timeout = response_pending_timeout
 
   # generic uds request

@@ -1491,6 +1491,10 @@ BO_ 1123 PSD_05: 8 XXX
 BO_ 1124 PSD_06: 8 XXX
 
 BO_ 988 Gateway_73: 8 XXX
+ SG_ UNKNOWN_1 : 15|2@0+ (1,0) [0|3] "" XXX
+ SG_ GE_Fahrstufe : 40|4@1+ (1,0) [0|15] "" XXX
+ SG_ EPB_Status : 53|3@1+ (1,0) [0|7] "" XXX
+ SG_ UNKNOWN_2 : 58|3@0+ (1,0) [0|7] "" XXX
 
 BO_ 792 Kamera_Status: 8 XXX
 
@@ -1757,6 +1761,8 @@ VAL_ 681 AWV_Warnlevel 0 "keine_Gefaehrdung" 63 "max_Gefaehrdung" ;
 VAL_ 391 MO_Waehlpos 2 "P" 3 "R" 4 "N" 5 "D" 6 "D" ;
 VAL_ 391 EV_Rekuperationsstufe 0 "default" 1 "B1" 2 "B2" 3 "B3" ;
 VAL_ 870 Fast_Send_Rate_Active 0 "1 Hz" 1 "50 Hz" ;
+VAL_ 988 EPB_Status 0 "offen" 1 "geschlossen_Parken" 2 "teilgespannt_Halten" 3 "im_Lauf_oeffnen" 4 "im_Lauf_schliessen" 5 "tbd" 6 "Init" 7 "unbekannt";
+VAL_ 988 GE_Fahrstufe 0 "Zwischenstellung" 1 "Init" 5 "P" 6 "R" 7 "N" 8 "D" 9 "D" 10 "E" 13 "T" 14 "T" 15 "Fehler";
 VAL_ 1720 KBI_Variante_USA 0 "keine USA-Variante" 1 "USA-Variante" ;
 VAL_ 1720 KBI_Variante 0 "Zeiger Kombiinstrument" 1 "Volldisplay Kombiinstrument" ;
 VAL_ 1720 KBI_BCmE_aktiv 0 "Anzeige_nicht_aktiv" 1 "Anzeige_aktiv" ;

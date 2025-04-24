@@ -7,7 +7,7 @@ generator = File("generator/generator.py")
 source_files = [
   File(str(f))
   for f in Path("generator").rglob("*")
-  if f.is_file() and f.suffix in {".py", ".dbc"} and not (f.suffix == ".dbc" and f.name.startswith("_"))
+  if f.is_file() and f.suffix in {".py", ".dbc"}
 ]
 
 output_files = [

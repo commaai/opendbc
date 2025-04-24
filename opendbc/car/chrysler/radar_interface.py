@@ -53,10 +53,8 @@ class RadarInterface(RadarInterfaceBase):
       return None
 
     ret = structs.RadarData()
-    errors = []
     if not self.rcp.can_valid:
-      errors.append("canError")
-    ret.errors = errors
+      ret.errors.canError = True
 
     for ii in self.updated_messages:  # ii should be the message ID as a number
       cpt = self.rcp.vl[ii]

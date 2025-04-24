@@ -85,18 +85,37 @@ def get_torque_params():
 
 # generic car and radar interfaces
 
+
+class RadarInterfaceBase(ABC):
+  def __init__(self, CP: structs.CarParams):
+    self.CP = CP
+    self.rcp = None
+    self.pts: dict[int, structs.RadarData.RadarPoint] = {}
+    self.frame = 0
+
+  def update(self, can_packets: list[tuple[int, list[CanData]]]) -> structs.RadarDataT | None:
+    self.frame += 1
+    if (self.frame % 5) == 0:  # 20 Hz is very standard
+      return structs.RadarData()
+    return None
+
+
 class CarInterfaceBase(ABC):
-  def __init__(self, CP: structs.CarParams, CarController, CarState):
+  CarState: 'CarStateBase'
+  CarController: 'CarControllerBase'
+  RadarInterface: 'RadarInterfaceBase' = RadarInterfaceBase
+
+  def __init__(self, CP: structs.CarParams):
     self.CP = CP
 
     self.frame = 0
     self.v_ego_cluster_seen = False
 
-    self.CS: CarStateBase = CarState(CP)
+    self.CS: CarStateBase = self.CarState(CP)
     self.can_parsers: dict[StrEnum, CANParser] = self.CS.get_can_parsers(CP)
 
     dbc_names = {bus: cp.dbc_name for bus, cp in self.can_parsers.items()}
-    self.CC: CarControllerBase = CarController(dbc_names, CP)
+    self.CC: CarControllerBase = self.CarController(dbc_names, CP)
 
   def apply(self, c: structs.CarControl, now_nanos: int | None = None) -> tuple[structs.CarControl.Actuators, list[CanData]]:
     if now_nanos is None:
@@ -116,7 +135,7 @@ class CarInterfaceBase(ABC):
 
   @classmethod
   def get_params(cls, candidate: str, fingerprint: dict[int, dict[int, int]], car_fw: list[structs.CarParams.CarFw],
-                 experimental_long: bool, docs: bool) -> structs.CarParams:
+                 alpha_long: bool, docs: bool) -> structs.CarParams:
     ret = CarInterfaceBase.get_std_params(candidate)
 
     platform = PLATFORMS[candidate]
@@ -129,7 +148,7 @@ class CarInterfaceBase(ABC):
     ret.tireStiffnessFactor = platform.config.specs.tireStiffnessFactor
     ret.flags |= int(platform.config.flags)
 
-    ret = cls._get_params(ret, candidate, fingerprint, car_fw, experimental_long, docs)
+    ret = cls._get_params(ret, candidate, fingerprint, car_fw, alpha_long, docs)
 
     # Vehicle mass is published curb weight plus assumed payload such as a human driver; notCars have no assumed payload
     if not ret.notCar:
@@ -144,7 +163,7 @@ class CarInterfaceBase(ABC):
   @staticmethod
   @abstractmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint: dict[int, dict[int, int]],
-                  car_fw: list[structs.CarParams.CarFw], experimental_long: bool, docs: bool) -> structs.CarParams:
+                  car_fw: list[structs.CarParams.CarFw], alpha_long: bool, docs: bool) -> structs.CarParams:
     raise NotImplementedError
 
   @staticmethod
@@ -252,20 +271,6 @@ class CarInterfaceBase(ABC):
     return ret
 
 
-class RadarInterfaceBase(ABC):
-  def __init__(self, CP: structs.CarParams):
-    self.CP = CP
-    self.rcp = None
-    self.pts: dict[int, structs.RadarData.RadarPoint] = {}
-    self.frame = 0
-
-  def update(self, can_packets: list[tuple[int, list[CanData]]]) -> structs.RadarDataT | None:
-    self.frame += 1
-    if (self.frame % 5) == 0:  # 20 Hz is very standard
-      return structs.RadarData()
-    return None
-
-
 class CarStateBase(ABC):
   def __init__(self, CP: structs.CarParams):
     self.CP = CP
@@ -321,8 +326,8 @@ class CarStateBase(ABC):
 
   def update_steering_pressed(self, steering_pressed, steering_pressed_min_count):
     """Applies filtering on steering pressed for noisy driver torque signals."""
-    self.steering_pressed_cnt += 1 if steering_pressed else -1
-    self.steering_pressed_cnt = float(np.clip(self.steering_pressed_cnt, 0, steering_pressed_min_count * 2))
+    self.steering_pressed_cnt = self.steering_pressed_cnt + 1 if steering_pressed else 0
+    self.steering_pressed_cnt = min(self.steering_pressed_cnt, steering_pressed_min_count + 1)
     return self.steering_pressed_cnt > steering_pressed_min_count
 
   def update_blinker_from_stalk(self, blinker_time: int, left_blinker_stalk: bool, right_blinker_stalk: bool):
