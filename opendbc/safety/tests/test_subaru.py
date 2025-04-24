@@ -56,7 +56,8 @@ def fwd_blacklisted_addr(lkas_msg=SubaruMsg.ES_LKAS):
 
 class TestSubaruSafetyBase(common.PandaCarSafetyTest):
   FLAGS = 0
-  RELAY_MALFUNCTION_ADDRS = {SUBARU_MAIN_BUS: (SubaruMsg.ES_LKAS,)}
+  RELAY_MALFUNCTION_ADDRS = {SUBARU_MAIN_BUS: (SubaruMsg.ES_LKAS, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State,
+                                               SubaruMsg.ES_Infotainment)}
   FWD_BLACKLISTED_ADDRS = fwd_blacklisted_addr()
 
   MAX_RT_DELTA = 940
@@ -188,11 +189,19 @@ class TestSubaruGen2TorqueStockLongitudinalSafety(TestSubaruStockLongitudinalSaf
 class TestSubaruGen1LongitudinalSafety(TestSubaruLongitudinalSafetyBase, TestSubaruTorqueSafetyBase):
   FLAGS = SubaruSafetyFlags.LONG
   TX_MSGS = lkas_tx_msgs(SUBARU_MAIN_BUS) + long_tx_msgs(SUBARU_MAIN_BUS)
+  RELAY_MALFUNCTION_ADDRS = {SUBARU_MAIN_BUS: (SubaruMsg.ES_LKAS, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State,
+                                               SubaruMsg.ES_Infotainment, SubaruMsg.ES_Brake, SubaruMsg.ES_Status,
+                                               SubaruMsg.ES_Distance)}
 
 
 class TestSubaruGen2LongitudinalSafety(TestSubaruLongitudinalSafetyBase, TestSubaruGen2TorqueSafetyBase):
   FLAGS = SubaruSafetyFlags.LONG | SubaruSafetyFlags.GEN2
   TX_MSGS = lkas_tx_msgs(SUBARU_ALT_BUS) + long_tx_msgs(SUBARU_ALT_BUS) + gen2_long_additional_tx_msgs()
+  FWD_BLACKLISTED_ADDRS = {2: [SubaruMsg.ES_LKAS, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State,
+                               SubaruMsg.ES_Infotainment]}
+  RELAY_MALFUNCTION_ADDRS = {SUBARU_MAIN_BUS: (SubaruMsg.ES_LKAS, SubaruMsg.ES_DashStatus, SubaruMsg.ES_LKAS_State,
+                                               SubaruMsg.ES_Infotainment),
+                             SUBARU_ALT_BUS: (SubaruMsg.ES_Brake, SubaruMsg.ES_Status, SubaruMsg.ES_Distance)}
 
   def _rdbi_msg(self, did: int):
     return b'\x03\x22' + did.to_bytes(2) + b'\x00\x00\x00\x00'
