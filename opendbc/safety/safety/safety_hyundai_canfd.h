@@ -275,7 +275,6 @@ static safety_config hyundai_canfd_init(uint16_t param) {
     HYUNDAI_CANFD_CRUISE_BUTTON_TX_MSGS(2) \
     HYUNDAI_CANFD_LFA_STEERING_COMMON_TX_MSGS(0) \
     HYUNDAI_CANFD_SCC_CONTROL_COMMON_TX_MSGS(0, (longitudinal)) \
-    {0x160, 0, 16, .check_relay = (longitudinal)}, /* ADRV_0x160 */ \
     {0x161, 0, 32, .check_relay = true}, /* CCNC_0x161 */ \
     {0x162, 0, 32, .check_relay = true}, /* CCNC_0x162 */ \
     {0x7C4, 2, 8, .check_relay = true}, /* 0x7C4 */ \
