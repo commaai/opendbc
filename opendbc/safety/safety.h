@@ -183,7 +183,7 @@ static bool rx_msg_safety_check(const CANPacket_t *to_push,
   return is_msg_valid(cfg->rx_checks, index);
 }
 
-void ignition_can_hook(const CANPacket_t *to_push) {
+static void ignition_can_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
   if (bus == 0) {
     int addr = GET_ADDR(to_push);
