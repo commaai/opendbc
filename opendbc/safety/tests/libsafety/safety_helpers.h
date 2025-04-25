@@ -35,6 +35,14 @@ bool get_controls_allowed(void){
   return controls_allowed;
 }
 
+bool get_ignition_can(void){
+  return ignition_can;
+}
+
+void set_ignition_can(bool i){
+  ignition_can = i;
+}
+
 int get_alternative_experience(void){
   return alternative_experience;
 }
@@ -175,6 +183,7 @@ bool get_honda_fwd_brake(void){
 
 void init_tests(void){
   safety_mode_cnt = 2U;  // avoid ignoring relay_malfunction logic
+  ignition_can = false;
   alternative_experience = 0;
   set_timer(0);
   ts_steer_req_mismatch_last = 0;
