@@ -183,7 +183,7 @@ static bool rx_msg_safety_check(const CANPacket_t *to_push,
   return is_msg_valid(cfg->rx_checks, index);
 }
 
-static void ignition_can_hook(const CANPacket_t *to_push) {
+static void ignition_can_hook_fn(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
   if (bus == 0) {
     int addr = GET_ADDR(to_push);
@@ -265,7 +265,7 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
 
   // always check for CAN ignition, since we need to know about ignition before safety
   // mode is set.
-  ignition_can_hook(to_push);
+  ignition_can_hook_fn(to_push);
 
   return valid;
 }
