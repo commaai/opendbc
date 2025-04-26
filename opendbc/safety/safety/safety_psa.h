@@ -1,8 +1,9 @@
+#define PSA_STEERING              757  // RX from XXX, driver torque
 #define PSA_STEERING_ALT          773  // RX from EPS, steering angle
 #define PSA_DRIVER                1390 // RX from BSI, gas pedal
 #define PSA_DAT_BSI               1042 // RX from BSI, doors
-#define PSA_HS2_DYN_ABR_38D       909  // RX from CAN1, UC_FREIN, speed
-#define PSA_HS2_DAT_MDD_CMD_452   1106 // RX from CAN1, BSI, cruise state
+#define PSA_HS2_DYN_ABR_38D       909  // RX from UC_FREIN, speed
+#define PSA_HS2_DAT_MDD_CMD_452   1106 // RX from BSI, cruise state
 #define PSA_LANE_KEEP_ASSIST      1010 // TX from OP, EPS
 // RADAR
 #define PSA_Req_Diag_ARTIV        1718 // TX from OP, radar diagnostics
@@ -11,27 +12,28 @@
 #define PSA_HS2_DYN1_MDD_ETAT_2B6 694  // TX from OP, radar emulation
 #define PSA_HS2_DYN_MDD_ETAT_2F6  758  // TX from OP, radar emulation
 
-// CAN bus numbers
+// CAN bus
 #define PSA_MAIN_BUS 2U
 #define PSA_ADAS_BUS 1U
 #define PSA_CAM_BUS  0U
 
 const CanMsg PSA_TX_MSGS[] = {
-  {PSA_LANE_KEEP_ASSIST, PSA_CAM_BUS, 8, .check_relay = true},
-  {PSA_Req_Diag_ARTIV, PSA_ADAS_BUS, 8, .check_relay = false}, // TODO: check if reduce to 3 is ok
-  {PSA_HS2_SUPV_ARTIV_796, PSA_ADAS_BUS, 8, .check_relay = false},
-  {PSA_HS2_DAT_ARTIV_V2_4F6, PSA_ADAS_BUS, 5, .check_relay = false},
-  {PSA_HS2_DYN1_MDD_ETAT_2B6, PSA_ADAS_BUS, 8, .check_relay = false},
-  {PSA_HS2_DYN_MDD_ETAT_2F6, PSA_ADAS_BUS, 8, .check_relay = false},
+  {PSA_LANE_KEEP_ASSIST, PSA_CAM_BUS, 8, .check_relay = true},        // EPS steering
+  {PSA_Req_Diag_ARTIV, PSA_ADAS_BUS, 3, .check_relay = false},        // radar diagnostics TODO: check if reduce to 3 is ok
+  {PSA_HS2_SUPV_ARTIV_796, PSA_ADAS_BUS, 8, .check_relay = false},    // radar emulation
+  {PSA_HS2_DAT_ARTIV_V2_4F6, PSA_ADAS_BUS, 5, .check_relay = false},  // radar emulation
+  {PSA_HS2_DYN1_MDD_ETAT_2B6, PSA_ADAS_BUS, 8, .check_relay = false}, // radar emulation
+  {PSA_HS2_DYN_MDD_ETAT_2F6, PSA_ADAS_BUS, 8, .check_relay = false},  // radar emulation
 };
 
 RxCheck psa_rx_checks[] = {
   // TODO: counters and checksums
-  {.msg = {{PSA_STEERING_ALT, PSA_CAM_BUS, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}}, // no counter
-  {.msg = {{PSA_DRIVER, PSA_MAIN_BUS, 6, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}}, // no counter
-  {.msg = {{PSA_DAT_BSI, PSA_MAIN_BUS, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 20U}, { 0 }, { 0 }}}, // no counter
-  {.msg = {{PSA_HS2_DYN_ABR_38D, PSA_ADAS_BUS, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 25U}, { 0 }, { 0 }}},
-  {.msg = {{PSA_HS2_DAT_MDD_CMD_452, PSA_ADAS_BUS, 6, .ignore_checksum = true, .ignore_counter = true, .frequency = 20U}, { 0 }, { 0 }}},
+  {.msg = {{PSA_STEERING, PSA_CAM_BUS, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},            // driver torque
+  {.msg = {{PSA_STEERING_ALT, PSA_CAM_BUS, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},        // steering angle
+  {.msg = {{PSA_DRIVER, PSA_MAIN_BUS, 6, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},              // gas pedal
+  {.msg = {{PSA_DAT_BSI, PSA_MAIN_BUS, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 20U}, { 0 }, { 0 }}},             // doors
+  {.msg = {{PSA_HS2_DYN_ABR_38D, PSA_ADAS_BUS, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 25U}, { 0 }, { 0 }}},     // speed
+  {.msg = {{PSA_HS2_DAT_MDD_CMD_452, PSA_ADAS_BUS, 6, .ignore_checksum = true, .ignore_counter = true, .frequency = 20U}, { 0 }, { 0 }}}, // cruise state
 };
 
 static bool psa_lkas_msg_check(int addr) {
@@ -63,13 +65,14 @@ static void psa_rx_hook(const CANPacket_t *to_push) {
     if (addr == PSA_DRIVER) {
       gas_pressed = GET_BYTE(to_push, 3) > 0U; // GAS_PEDAL
     }
+    if (addr == PSA_STEERING) {
+      int torque_driver_new = GET_BYTE(to_push, 1); // TODO: check
+      update_sample(&torque_driver, torque_driver_new);
+    }
     if (addr == PSA_STEERING_ALT) {
-      int angle_meas_new = (GET_BYTE(to_push, 0) << 8) | GET_BYTE(to_push, 1);
-      angle_meas_new = to_signed(angle_meas_new, 16);
+      int angle_meas_new = to_signed((GET_BYTE(to_push, 0) << 8) | GET_BYTE(to_push, 1), 16);
       update_sample(&angle_meas, angle_meas_new);
     }
-    // bool stock_ecu_detected = psa_lkas_msg_check(addr); // TODO: was removed in April 2025, check impact
-    // generic_rx_checks(stock_ecu_detected);
   }
   if (bus == PSA_ADAS_BUS) {
     if (addr == PSA_HS2_DYN_ABR_38D) {
@@ -93,9 +96,9 @@ static bool psa_tx_hook(const CANPacket_t *to_send) {
 
   // Safety check for LKA
   if (addr == PSA_LANE_KEEP_ASSIST) {
-    // Signal: ANGLE
+    // SET_ANGLE
     int desired_angle = to_signed((GET_BYTE(to_send, 6) << 6) | ((GET_BYTE(to_send, 7) & 0xFCU) >> 2), 14);
-    // Signal: TORQUE_FACTOR
+    // TORQUE_FACTOR
     bool lka_active = ((GET_BYTE(to_send, 5) & 0xFEU) >> 1) == 100U;
 
     if (steer_angle_cmd_checks(desired_angle, lka_active, PSA_STEERING_LIMITS)) {
