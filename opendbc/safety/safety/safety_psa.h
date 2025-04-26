@@ -1,3 +1,4 @@
+#define PSA_STEERING_ALT          773  // RX from EPS, steering angle
 #define PSA_DRIVER                1390 // RX from BSI, gas pedal
 #define PSA_DAT_BSI               1042 // RX from BSI, doors
 #define PSA_HS2_DYN_ABR_38D       909  // RX from CAN1, UC_FREIN, speed
@@ -26,6 +27,7 @@ const CanMsg PSA_TX_MSGS[] = {
 
 RxCheck psa_rx_checks[] = {
   // TODO: counters and checksums
+  {.msg = {{PSA_STEERING_ALT, PSA_CAM_BUS, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}}, // no counter
   {.msg = {{PSA_DRIVER, PSA_MAIN_BUS, 6, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}}, // no counter
   {.msg = {{PSA_DAT_BSI, PSA_MAIN_BUS, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 20U}, { 0 }, { 0 }}}, // no counter
   {.msg = {{PSA_HS2_DYN_ABR_38D, PSA_ADAS_BUS, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 25U}, { 0 }, { 0 }}},
@@ -60,6 +62,11 @@ static void psa_rx_hook(const CANPacket_t *to_push) {
     }
     if (addr == PSA_DRIVER) {
       gas_pressed = GET_BYTE(to_push, 3) > 0U; // GAS_PEDAL
+    }
+    if (addr == PSA_STEERING_ALT) {
+      int angle_meas_new = (GET_BYTE(to_push, 0) << 8) | GET_BYTE(to_push, 1);
+      angle_meas_new = to_signed(angle_meas_new, 16);
+      update_sample(&angle_meas, angle_meas_new);
     }
     // bool stock_ecu_detected = psa_lkas_msg_check(addr); // TODO: was removed in April 2025, check impact
     // generic_rx_checks(stock_ecu_detected);
