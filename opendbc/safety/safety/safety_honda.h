@@ -37,7 +37,7 @@ static HondaHw honda_hw = HONDA_NIDEC;
 
 
 static int honda_get_pt_bus(void) {
-  return ((honda_hw == HONDA_BOSCH) && (!honda_bosch_radarless || !honda_bosch_canfd)) ? 1 : 0;
+  return ((honda_hw == HONDA_BOSCH) && !honda_bosch_radarless && !honda_bosch_canfd) ? 1 : 0;
 }
 
 static uint32_t honda_get_checksum(const CANPacket_t *to_push) {
