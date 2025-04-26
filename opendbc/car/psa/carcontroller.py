@@ -23,7 +23,7 @@ class CarController(CarControllerBase):
       apply_angle = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw,
                                                    CS.out.steeringAngleDeg, CC.latActive, CarControllerParams.ANGLE_LIMITS)
     else:
-      apply_angle = 0 # TODO: this likely nudges the steering wheel to center when deactivating lateral
+      apply_angle = 0
     # TODO: check if it works without self.frame // 5
     can_sends.append(psacan.create_lka_steering(self.packer, self.frame // 5, CC.latActive, apply_angle))
 
