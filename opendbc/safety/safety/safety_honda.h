@@ -342,7 +342,7 @@ static safety_config honda_bosch_init(uint16_t param) {
 
   const uint16_t HONDA_PARAM_ALT_BRAKE = 1;
   const uint16_t HONDA_PARAM_RADARLESS = 8;
-  const uint16_t HONDA_PARAM_BOSCH_CANFD = 16
+  const uint16_t HONDA_PARAM_BOSCH_CANFD = 16;
 
   static RxCheck honda_common_alt_brake_rx_checks[] = {
     HONDA_COMMON_RX_CHECKS(0)
