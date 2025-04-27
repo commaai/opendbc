@@ -591,7 +591,7 @@ class TestHondaBoschCANFDSafety(HondaPcmEnableBase, TestHondaBoschRadarlessSafet
     self.safety.init_tests()
 
 
-class TestHondaBoschRadarlessAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschRadarlessSafetyBase, TestHondaBoschAltBrakeSafetyBase):
+class TestHondaBoschCANFDAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschCANFDSafetyBase, TestHondaBoschAltBrakeSafetyBase):
   """
     Covers the Honda Bosch CANFD safety mode with stock longitudinal and an alternate brake message
   """
