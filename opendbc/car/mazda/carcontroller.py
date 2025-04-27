@@ -10,20 +10,20 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
-    self.apply_steer_last = 0
+    self.apply_torque_last = 0
     self.packer = CANPacker(dbc_names[Bus.pt])
     self.brake_counter = 0
 
   def update(self, CC, CS, now_nanos):
     can_sends = []
 
-    apply_steer = 0
+    apply_torque = 0
 
     if CC.latActive:
       # calculate steer and also set limits due to driver torque
-      new_steer = int(round(CC.actuators.steer * CarControllerParams.STEER_MAX))
-      apply_steer = apply_driver_steer_torque_limits(new_steer, self.apply_steer_last,
-                                                     CS.out.steeringTorque, CarControllerParams)
+      new_torque = int(round(CC.actuators.torque * CarControllerParams.STEER_MAX))
+      apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last,
+                                                      CS.out.steeringTorque, CarControllerParams)
 
     if CC.cruiseControl.cancel:
       # If brake is pressed, let us wait >70ms before trying to disable crz to avoid
@@ -42,7 +42,7 @@ class CarController(CarControllerBase):
         # Send Resume button when planner wants car to move
         can_sends.append(mazdacan.create_button_cmd(self.packer, self.CP, CS.crz_btns_counter, Buttons.RESUME))
 
-    self.apply_steer_last = apply_steer
+    self.apply_torque_last = apply_torque
 
     # send HUD alerts
     if self.frame % 50 == 0:
@@ -54,11 +54,11 @@ class CarController(CarControllerBase):
 
     # send steering command
     can_sends.append(mazdacan.create_steering_control(self.packer, self.CP,
-                                                      self.frame, apply_steer, CS.cam_lkas))
+                                                      self.frame, apply_torque, CS.cam_lkas))
 
     new_actuators = CC.actuators.as_builder()
-    new_actuators.steer = apply_steer / CarControllerParams.STEER_MAX
-    new_actuators.steerOutputCan = apply_steer
+    new_actuators.torque = apply_torque / CarControllerParams.STEER_MAX
+    new_actuators.torqueOutputCan = apply_torque
 
     self.frame += 1
     return new_actuators, can_sends

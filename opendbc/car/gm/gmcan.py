@@ -36,12 +36,12 @@ def create_pscm_status(packer, bus, pscm_status):
   return packer.make_can_msg("PSCMStatus", bus, values)
 
 
-def create_steering_control(packer, bus, apply_steer, idx, lkas_active):
+def create_steering_control(packer, bus, apply_torque, idx, lkas_active):
   values = {
     "LKASteeringCmdActive": lkas_active,
-    "LKASteeringCmd": apply_steer,
+    "LKASteeringCmd": apply_torque,
     "RollingCounter": idx,
-    "LKASteeringCmdChecksum": 0x1000 - (lkas_active << 11) - (apply_steer & 0x7ff) - idx
+    "LKASteeringCmdChecksum": 0x1000 - (lkas_active << 11) - (apply_torque & 0x7ff) - idx
   }
 
   return packer.make_can_msg("ASCMLKASteeringCmd", bus, values)
@@ -56,16 +56,14 @@ def create_gas_regen_command(packer, bus, throttle, idx, enabled, at_full_stop):
   values = {
     "GasRegenCmdActive": enabled,
     "RollingCounter": idx,
-    "GasRegenCmdActiveInv": 1 - enabled,
     "GasRegenCmd": throttle,
     "GasRegenFullStopActive": at_full_stop,
-    "GasRegenAlwaysOne": 1,
-    "GasRegenAlwaysOne2": 1,
-    "GasRegenAlwaysOne3": 1,
+    "GasRegenAccType": 1,
   }
 
   dat = packer.make_can_msg("ASCMGasRegenCmd", bus, values)[1]
-  values["GasRegenChecksum"] = (((0xff - dat[1]) & 0xff) << 16) | \
+  values["GasRegenChecksum"] = ((1 - enabled) << 24) | \
+                               (((0xff - dat[1]) & 0xff) << 16) | \
                                (((0xff - dat[2]) & 0xff) << 8) | \
                                ((0x100 - dat[3] - idx) & 0xff)
 

@@ -54,9 +54,9 @@ class CarControllerParams:
 
 
 class SubaruSafetyFlags(IntFlag):
-  FLAG_SUBARU_GEN2 = 1
-  FLAG_SUBARU_LONG = 2
-  FLAG_SUBARU_PREGLOBAL_REVERSED_DRIVER_TORQUE = 4
+  GEN2 = 1
+  LONG = 2
+  PREGLOBAL_REVERSED_DRIVER_TORQUE = 4
 
 
 class SubaruFlags(IntFlag):
@@ -103,7 +103,7 @@ class SubaruCarDocs(CarDocs):
   def init_make(self, CP: CarParams):
     self.car_parts.parts.extend([Tool.socket_8mm_deep, Tool.pry_tool])
 
-    if CP.experimentalLongitudinalAvailable:
+    if CP.alphaLongitudinalAvailable:
       self.footnotes.append(Footnote.EXP_LONG)
 
 
