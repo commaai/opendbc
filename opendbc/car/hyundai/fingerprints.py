@@ -1,5 +1,6 @@
 from opendbc.car.structs import CarParams
 from opendbc.car.hyundai.values import CAR
+from opendbc.sunnypilot.car.fw_versions_ext import merge_fw_versions
 
 Ecu = CarParams.Ecu
 
@@ -1239,3 +1240,5 @@ FW_VERSIONS = {
     ],
   },
 }
+
+merge_fw_versions(FW_VERSIONS)
