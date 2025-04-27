@@ -572,8 +572,8 @@ class TestHondaBoschCANFDSafetyBase(TestHondaBoschSafetyBase):
   BUTTONS_BUS = 0
 
   TX_MSGS = [[0xE4, 0], [0x296, 0], [0x33D, 0], [0x33DA, 0], [0x33DB, 0]]
-  FWD_BLACKLISTED_ADDRS = {2: [0xE4, 0xE5, 0x33D, 0x33DA]}
-  RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0xE5, 0x33D, 0x33DA)}  # STEERING_CONTROL
+  FWD_BLACKLISTED_ADDRS = {2: [0xE4, 0xE5, 0x33D, 0x33DA, 0x33DB]}
+  RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0xE5, 0x33D, 0x33DA, 0x33DB)}  # STEERING_CONTROL
 
   def setUp(self):
     self.packer = CANPackerPanda("honda_pilot_2023_can_generated")
