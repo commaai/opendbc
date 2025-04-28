@@ -55,8 +55,9 @@ def get_can_messages(CP, gearbox_msg):
   if CP.carFingerprint in (HONDA_BOSCH | {CAR.HONDA_CIVIC, CAR.HONDA_ODYSSEY, CAR.HONDA_ODYSSEY_CHN}):
     messages.append(("EPB_STATUS", 50))
 
-  if CP.carFingerprint in HONDA_BOSCH_CANFD and False: # find a signal
-    messages.append(("BRAKE_ERROR", 100))
+  if CP.carFingerprint in HONDA_BOSCH_CANFD:
+    messages.append(("BRAKE_ERROR", 0))
+    # messages.append(("BRAKE_ERROR", 100)) - find a signal for MDX
 
   if CP.carFingerprint in HONDA_BOSCH:
     # these messages are on camera bus on radarless cars
