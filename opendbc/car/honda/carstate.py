@@ -165,7 +165,7 @@ class CarState(CarStateBase):
 
       if self.CP.openpilotLongitudinalControl and self.CP.carFingerprint in HONDA_BOSCH_CANFD:
         if self.CP.flags & HondaFlags.BOSCH_ALT_BRAKE:
-          ret.carFaultedNonCritical = cp_cam.vl["LKAS_HUD"]["LKAS_PROBLEM"] // add Acc_hud later when time to figure out key_error problem
+          ret.carFaultedNonCritical = cp_cam.vl["LKAS_HUD"]["LKAS_PROBLEM"] # add Acc_hud later when time to figure out key_error problem
         else:
           ret.accFaulted = bool(cp.vl["BRAKE_ERROR"]["BRAKE_ERROR_1"] or cp.vl["BRAKE_ERROR"]["BRAKE_ERROR_2"])
       elif self.CP.openpilotLongitudinalControl:
