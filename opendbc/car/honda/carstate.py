@@ -165,7 +165,6 @@ class CarState(CarStateBase):
         ret.accFaulted = bool(cp.vl["BRAKE_ERROR"]["BRAKE_ERROR_1"] or cp.vl["BRAKE_ERROR"]["BRAKE_ERROR_2"])
       elif self.CP.openpilotLongitudinalControl:
         ret.accFaulted = bool(cp.vl["STANDSTILL"]["BRAKE_ERROR_1"] or cp.vl["STANDSTILL"]["BRAKE_ERROR_2"])
-      ret.accFaulted = False # temp until find MDX signal
 
       # Log non-critical stock ACC/LKAS faults if Nidec (camera)
       if self.CP.carFingerprint not in HONDA_BOSCH:
