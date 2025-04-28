@@ -341,9 +341,7 @@ static safety_config honda_bosch_init(uint16_t param) {
                                                   {0x30C, 0, 8, .check_relay = true}};  // Bosch radarless w/ gas and brakes
 
   static CanMsg HONDA_BOSCH_CANFD_LONG_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0x1DF, 0, 8, .check_relay = true}, {0x1EF, 0, 8, .check_relay = false},
-                                                    {0x1FA, 0, 8, .check_relay = false}, {0x30C, 0, 8, .check_relay = false}, {0x33D, 0, 5, .check_relay = true},
-                                                    {0x33DA, 0, 5, .check_relay = true}, {0x33DB, 0, 8, .check_relay = true}, {0x39F, 0, 8, .check_relay = false},
-                                                    {0x18DAB0F1, 0, 8, .check_relay = false}}; // Bosch CANFD w/ gas and brakes
+                                                    {0x30C, 0, 8, .check_relay = false}, {0x33D, 0, 8, .check_relay = true}, {0x18DAB0F1, 0, 8, .check_relay = false}}; // Bosch CANFD w/ gas and brakes
 
   const uint16_t HONDA_PARAM_ALT_BRAKE = 1;
   const uint16_t HONDA_PARAM_RADARLESS = 8;
