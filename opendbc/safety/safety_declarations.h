@@ -75,8 +75,8 @@ struct sample_t {
 
 // safety code requires floats
 struct lookup_t {
-  float x[3];
-  float y[3];
+  float x[4];
+  float y[4];
 };
 
 typedef struct {
