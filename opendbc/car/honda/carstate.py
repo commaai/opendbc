@@ -156,8 +156,7 @@ class CarState(CarStateBase):
     ret.steerFaultTemporary = steer_status not in ("NORMAL", "LOW_SPEED_LOCKOUT", "NO_TORQUE_ALERT_2")
 
     # Log non-critical stock ACC/LKAS faults if Nidec (camera) or longitudinal CANFD alt-brake
-    if self.CP.carFingerprint not in HONDA_BOSCH or \
-         (self.CP.openpilotLongitudinalControl and self.CP.carFingerprint in HONDA_BOSCH_CANFD and (self.CP.flags & HondaFlags.BOSCH_ALT_BRAKE)):
+    if self.CP.carFingerprint not in HONDA_BOSCH:
         ret.carFaultedNonCritical = bool(cp_cam.vl["ACC_HUD"]["ACC_PROBLEM"] or cp_cam.vl["LKAS_HUD"]["LKAS_PROBLEM"])
 
     elif self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
@@ -165,7 +164,10 @@ class CarState(CarStateBase):
     else:
 
       if self.CP.openpilotLongitudinalControl and self.CP.carFingerprint in HONDA_BOSCH_CANFD:
-        ret.accFaulted = bool(cp.vl["BRAKE_ERROR"]["BRAKE_ERROR_1"] or cp.vl["BRAKE_ERROR"]["BRAKE_ERROR_2"])
+        if self.CP.flags & HondaFlags.BOSCH_ALT_BRAKE:
+          ret.carFaultedNonCritical = cp_cam.vl["LKAS_HUD"]["LKAS_PROBLEM"])
+        else:
+          ret.accFaulted = bool(cp.vl["BRAKE_ERROR"]["BRAKE_ERROR_1"] or cp.vl["BRAKE_ERROR"]["BRAKE_ERROR_2"])
       elif self.CP.openpilotLongitudinalControl:
         ret.accFaulted = bool(cp.vl["STANDSTILL"]["BRAKE_ERROR_1"] or cp.vl["STANDSTILL"]["BRAKE_ERROR_2"])
 
