@@ -159,7 +159,7 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint not in HONDA_BOSCH or \
          (self.CP.openpilotLongitudinalControl and self.CP.carFingerprint in HONDA_BOSCH_CANFD and (self.CP.flags & HondaFlags.BOSCH_ALT_BRAKE)):
         ret.carFaultedNonCritical = bool(cp_cam.vl["ACC_HUD"]["ACC_PROBLEM"] or cp_cam.vl["LKAS_HUD"]["LKAS_PROBLEM"])
-    
+
     elif self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
       ret.accFaulted = bool(cp.vl["CRUISE_FAULT_STATUS"]["CRUISE_FAULT"])
     else:
