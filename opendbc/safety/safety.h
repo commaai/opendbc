@@ -27,36 +27,6 @@
 #include "safety/safety_hyundai_canfd.h"
 #endif
 
-// from cereal.car.CarParams.SafetyModel
-#define SAFETY_SILENT 0U
-#define SAFETY_HONDA_NIDEC 1U
-#define SAFETY_TOYOTA 2U
-#define SAFETY_ELM327 3U
-#define SAFETY_GM 4U
-#define SAFETY_HONDA_BOSCH_GIRAFFE 5U
-#define SAFETY_FORD 6U
-#define SAFETY_HYUNDAI 8U
-#define SAFETY_CHRYSLER 9U
-#define SAFETY_TESLA 10U
-#define SAFETY_SUBARU 11U
-#define SAFETY_MAZDA 13U
-#define SAFETY_NISSAN 14U
-#define SAFETY_VOLKSWAGEN_MQB 15U
-#define SAFETY_ALLOUTPUT 17U
-#define SAFETY_GM_ASCM 18U
-#define SAFETY_NOOUTPUT 19U
-#define SAFETY_HONDA_BOSCH 20U
-#define SAFETY_VOLKSWAGEN_PQ 21U
-#define SAFETY_SUBARU_PREGLOBAL 22U
-#define SAFETY_HYUNDAI_LEGACY 23U
-#define SAFETY_HYUNDAI_COMMUNITY 24U
-#define SAFETY_STELLANTIS 25U
-#define SAFETY_FAW 26U
-#define SAFETY_BODY 27U
-#define SAFETY_HYUNDAI_CANFD 28U
-#define SAFETY_RIVIAN 33U
-#define SAFETY_VOLKSWAGEN_MEB 34U
-
 uint32_t GET_BYTES(const CANPacket_t *msg, int start, int len) {
   uint32_t ret = 0U;
   for (int i = 0; i < len; i++) {
@@ -113,6 +83,9 @@ uint16_t current_safety_mode = SAFETY_SILENT;
 uint16_t current_safety_param = 0;
 static const safety_hooks *current_hooks = &nooutput_hooks;
 safety_config current_safety_config;
+
+static void generic_rx_checks(void);
+static void stock_ecu_check(bool stock_ecu_detected);
 
 static bool is_msg_valid(RxCheck addr_list[], int index) {
   bool valid = true;
