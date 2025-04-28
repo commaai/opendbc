@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from opendbc.car.vehicle_model import VehicleModel
+from opendbc.car.vehicle_model import VehicleModel, calc_slip_factor
 from opendbc.car.car_helpers import interfaces
 plt.ion()
 
@@ -21,7 +21,7 @@ Y_accel_man = []
 
 for spd in X:
   calc_curvature_from_accel = ISO_LATERAL_ACCEL / spd ** 2
-  calc_angle = calc_curvature_from_accel * CP.steerRatio * CP.wheelbase
+  calc_angle = calc_curvature_from_accel * CP.steerRatio * CP.wheelbase / VM.curvature_factor(spd)
 
   # a = np.radians(10)
   curvature = VM.calc_curvature(calc_angle, spd, 0)

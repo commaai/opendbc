@@ -32,9 +32,9 @@ def apply_tesla_steer_angle_limits(apply_angle: float, apply_angle_last: float, 
 
   # *** ISO lateral accel limit ***
   # TODO: add curvature factor from VM. the lack of it loses us 60% of torque at 70 m/s (1.8 m/s^2 instead of 3 m/s^2)
-  curvature_accel_limit = ISO_LATERAL_ACCEL / (max(v_ego_raw, 1) ** 2)
-  angle_accel_limit = math.degrees(curvature_accel_limit * CP.steerRatio * CP.wheelbase)
-  new_apply_angle = float(np.clip(new_apply_angle, -angle_accel_limit, angle_accel_limit))
+  curvature_limit = ISO_LATERAL_ACCEL / (max(v_ego_raw, 1) ** 2)  # 1/m
+  angle_limit = math.degrees(curvature_limit * CP.steerRatio * CP.wheelbase)  # deg
+  new_apply_angle = float(np.clip(new_apply_angle, -angle_limit, angle_limit))
 
   # angle is current steering wheel angle when inactive on all angle cars
   # TODO: should this before max lat accel limit?
