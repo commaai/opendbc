@@ -5,15 +5,20 @@
 static bool tesla_longitudinal = false;
 static bool tesla_stock_aeb = false;
 
+static const float RAD_TO_DEG = 57.29577951308232;
+
 typedef struct {
   const float slip_factor;  // calc_slip_factor(VM)
+  const float sR;  // steerRatio
   const float chi;  // steerRatioRear
   const float l;  // wheelbase
 } VehicleSteeringParams;
 
+// NOTE: based off TESLA_MODEL_Y to match openpilot
 const VehicleSteeringParams TESLA_VEHICLE_STEERING_PARAMS = {
   .slip_factor = -0.000580374383851451,  // TODO: add calc function?
-  .chi = 0.0,  // TODO: always zero
+  .sR = 12.,
+  .chi = 0.0,  // TODO: always zero, rm?
   .l = 2.890000104904175,  // TODO: how precise do we need to be?
 };
 
@@ -22,7 +27,13 @@ static float tesla_curvature_factor(const float speed, const VehicleSteeringPara
   return (1. - params.chi) / (1. - params.slip_factor * (speed * speed)) / params.l;
 }
 
-static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits) {
+// Note that Tesla safety supports up to ISO 11270 limits, but is comfort limited in openpilot (TODO: planner, controls?)
+// TODO: copy ford's std assumed roll compensation
+static const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2  // TODO: import from test lateral limits file?
+static const float ISO_LATERAL_JERK = 5.0;  // m/s^3
+
+static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits,
+                                         const VehicleSteeringParams params) {
   // TODO: shouldn't be here
   bool max_limit_check(int val, const int MAX_VAL, const int MIN_VAL) {
     return (val > MAX_VAL) || (val < MIN_VAL);
@@ -34,9 +45,39 @@ static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_e
   UNUSED(limits);
   const float curvature_factor = tesla_curvature_factor(fudged_speed, TESLA_VEHICLE_STEERING_PARAMS);
   UNUSED(curvature_factor);
-  printf("speed: %f, curvature_factor: %f\n", fudged_speed, curvature_factor);
+//  printf("speed: %f, curvature_factor: %f\n", fudged_speed, curvature_factor);
 
   if (controls_allowed && steer_control_enabled) {
+    // calculate maximum angle rate per second
+    // TODO: use curvature factor here
+    const float speed = MAX(fudged_speed, 1.0);
+    const float max_curvature_rate_sec = ISO_LATERAL_JERK / (speed * speed);
+    const float max_angle_rate_sec = max_curvature_rate_sec * params.sR * params.l * RAD_TO_DEG;
+
+    // finally get max angle delta per frame
+    float max_angle_delta = max_angle_rate_sec * (0.01 * 2);
+
+    // limit angle delta to 5 degrees per 20ms frame to avoid faulting EPS at lower speeds
+    // TODO: check stock FSD data to find the max
+    max_angle_delta = MIN(max_angle_delta, 5.0);
+
+    // NOTE: symmetric up and down limits
+    // TODO: now implement max lat accel check
+    int highest_desired_angle = desired_angle_last + ((max_angle_delta * limits.angle_deg_to_can) + 1.);
+    int lowest_desired_angle = desired_angle_last - ((max_angle_delta * limits.angle_deg_to_can) + 1.);
+
+    printf("speed: %f, desired_angle_last: %d, desired_angle: %d\n", speed, desired_angle_last, desired_angle);
+    printf("max_angle_delta: %f, highest_desired_angle: %d, lowest_desired_angle: %d\n", max_angle_delta,
+           highest_desired_angle, lowest_desired_angle);
+    printf("\n");
+
+    violation |= max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
+    if (violation) {
+      printf("violation: %d\n", violation);
+    }
+
+
+
 //    // convert floating point angle rate limits to integers in the scale of the desired angle on CAN,
 //    // add 1 to not false trigger the violation. also fudge the speed by 1 m/s so rate limits are
 //    // always slightly above openpilot's in case we read an updated speed in between angle commands
@@ -172,7 +213,8 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
     bool steer_control_enabled = (steer_control_type != 0) &&  // NONE
                                  (steer_control_type != 3);    // DISABLED
 
-    if (tesla_steer_angle_cmd_checks(desired_angle, steer_control_enabled, TESLA_STEERING_LIMITS)) {
+    if (tesla_steer_angle_cmd_checks(desired_angle, steer_control_enabled, TESLA_STEERING_LIMITS,
+                                     TESLA_VEHICLE_STEERING_PARAMS)) {
       violation = true;
     }
   }
