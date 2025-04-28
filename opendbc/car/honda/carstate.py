@@ -55,7 +55,7 @@ def get_can_messages(CP, gearbox_msg):
   if CP.carFingerprint in (HONDA_BOSCH | {CAR.HONDA_CIVIC, CAR.HONDA_ODYSSEY, CAR.HONDA_ODYSSEY_CHN}):
     messages.append(("EPB_STATUS", 50))
 
-  if CP.carFingerprint in HONDA_BOSCH_CANFD:
+  if CP.carFingerprint in HONDA_BOSCH_CANFD and not (CP.flags & HondaFlags.BOSCH_ALT_BRAKE):
     messages.append(("BRAKE_ERROR", 100))
 
   if CP.carFingerprint in HONDA_BOSCH:
@@ -158,9 +158,10 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
       ret.accFaulted = bool(cp.vl["CRUISE_FAULT_STATUS"]["CRUISE_FAULT"])
     else:
-      # On some cars, these two signals are always 1, this flag is masking a bug in release
-      # FIXME: find and set the ACC faulted signals on more platforms
-      if self.CP.openpilotLongitudinalControl and self.CP.carFingerprint in HONDA_BOSCH_CANFD:
+      if self.CP.openpilotLongitudinalControl and self.CP.carFingerprint in HONDA_BOSCH_CANFD and (self.CP.flags & HondaFlags.BOSCH_ALT_BRAKE)
+        pass # On these cars, BRAKE_ERROR is missing and STANDSTILL signals are always 1, this flag is masking a bug in release,
+             # FIXME: find and set the ACC faulted signals on this platform
+      elif self.CP.openpilotLongitudinalControl and self.CP.carFingerprint in HONDA_BOSCH_CANFD:
         ret.accFaulted = bool(cp.vl["BRAKE_ERROR"]["BRAKE_ERROR_1"] or cp.vl["BRAKE_ERROR"]["BRAKE_ERROR_2"])
       elif self.CP.openpilotLongitudinalControl:
         ret.accFaulted = bool(cp.vl["STANDSTILL"]["BRAKE_ERROR_1"] or cp.vl["STANDSTILL"]["BRAKE_ERROR_2"])
