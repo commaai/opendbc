@@ -66,14 +66,14 @@ static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_e
     int highest_desired_angle = desired_angle_last + ((max_angle_delta * limits.angle_deg_to_can) + 1.);
     int lowest_desired_angle = desired_angle_last - ((max_angle_delta * limits.angle_deg_to_can) + 1.);
 
-//    printf("speed: %f, desired_angle_last: %d, desired_angle: %d\n", speed, desired_angle_last, desired_angle);
-//    printf("max_angle_delta: %f, highest_desired_angle: %d, lowest_desired_angle: %d\n", max_angle_delta,
-//           highest_desired_angle, lowest_desired_angle);
-//    printf("\n");
+    printf("speed: %f, desired_angle_last: %d, desired_angle: %d\n", speed, desired_angle_last, desired_angle);
+    printf("max_angle_delta: %f, highest_desired_angle: %d, lowest_desired_angle: %d\n", max_angle_delta,
+           highest_desired_angle, lowest_desired_angle);
+    printf("\n");
 
     violation |= max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
     if (violation) {
-//      printf("violation: %d\n", violation);
+      printf("violation: %d\n", violation);
     }
 
 
