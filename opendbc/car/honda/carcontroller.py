@@ -74,12 +74,14 @@ def brake_pump_hysteresis(apply_brake, apply_brake_last, last_pump_ts, ts):
   return pump_on, last_pump_ts
 
 
-def process_hud_alert(CS, hud_alert):
+def process_hud_alert(CS, hud_control):
   # initialize to no alert
   fcw_display = 0
   steer_required = 0
   acc_alert = 0
 
+  hud_alert = hud_control.visualAlert
+  
   # priority is: FCW, steer required, all others
   if hud_alert == VisualAlert.fcw:
     fcw_display = VISUAL_HUD[hud_alert.raw]
@@ -149,7 +151,7 @@ class CarController(CarControllerBase):
     self.brake_last = rate_limit(pre_limit_brake, self.brake_last, -2., DT_CTRL)
 
     # vehicle hud display, wait for one update from 10Hz 0x304 msg
-    fcw_display, steer_required, acc_alert = process_hud_alert(CS, hud_control.visualAlert)
+    fcw_display, steer_required, acc_alert = process_hud_alert(CS, hud_control)
 
     # **** process the car messages ****
 
