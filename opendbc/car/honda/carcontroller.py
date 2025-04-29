@@ -83,10 +83,12 @@ def process_hud_alert(CS, hud_alert):
   # priority is: FCW, steer required, all others
   if hud_alert == VisualAlert.fcw:
     fcw_display = VISUAL_HUD[hud_alert.raw]
-  elif hud_alert in (VisualAlert.steerRequired, VisualAlert.ldw):
+  elif hud_alert == VisualAlert.steerRequired:
+    steer_required = VISUAL_HUD[hud_alert.raw]
+  elif hud_alert == VisualAlert.ldw:
     if CS.out.steeringPressed and (hudControl.leftLaneDepart or hudControl.rightLaneDepart) and True:
     # todo - find cars using bosch 2018 adas generator and replace True above
-      pass # LaneDeprt is passed through in hondacan
+      pass # Lane departure side is passed through to hondacan
     else:
       steer_required = VISUAL_HUD[hud_alert.raw]
   else:
