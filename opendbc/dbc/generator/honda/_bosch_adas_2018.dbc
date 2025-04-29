@@ -34,9 +34,10 @@ BO_ 829 LKAS_HUD: 5 ADAS
  SG_ LKAS_PROBLEM : 12|1@0+ (1,0) [0|1] "" BDY
  SG_ LKAS_OFF : 11|1@0+ (1,0) [0|1] "" BDY
  SG_ SOLID_LANES : 10|1@0+ (1,0) [0|1] "" BDY
- SG_ LANE_DEPARTURE_ALERT : 9|1@0+ (1,0) [0|1] "" BDY
+ SG_ LDW_LEFT : 23|1@0+ (1,0) [0|1] "" BDY
+ SG_ LDW_RIGHT : 9|1@0+ (1,0) [0|1] "" BDY
  SG_ STEERING_REQUIRED : 8|1@0+ (1,0) [0|1] "" BDY
- SG_ LDW_ICON : 22|1@0+ (1,0) [0|1] "" BDY
+ SG_ BOH_2 : 22|1@0+ (1,0) [0|1] "" BDY
  SG_ LDW_PROBLEM : 21|1@0+ (1,0) [0|1] "" BDY
  SG_ BEEP : 18|3@0+ (1,0) [0|7] "" BDY
  SG_ LDW_ON : 28|1@0+ (1,0) [0|1] "" BDY
