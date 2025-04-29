@@ -88,9 +88,9 @@ def process_hud_alert(CS, hud_control):
   elif hud_alert == VisualAlert.steerRequired:
     steer_required = VISUAL_HUD[hud_alert.raw]
   elif hud_alert == VisualAlert.ldw:
-    if CS.out.steeringPressed and (hud_control.leftLaneDepart or hud_control.rightLaneDepart) and True:
-    # todo - find cars using bosch 2018 adas generator and replace "True" above
-      pass # Lane departure side is passed through to hondacan
+    if CS.out.steeringPressed and (hud_control.leftLaneDepart or hud_control.rightLaneDepart) and \
+      ((CP.carFingerprint in HONDA_BOSCH) and not (CP.flags & HondaFlags.BOSCH_EXT_HUD)):
+      pass # Lane departure side is already passed through to hondacan
     else:
       steer_required = VISUAL_HUD[hud_alert.raw]
   else:
