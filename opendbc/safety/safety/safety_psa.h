@@ -19,7 +19,7 @@
 
 const CanMsg PSA_TX_MSGS[] = {
   {PSA_LANE_KEEP_ASSIST, PSA_CAM_BUS, 8, .check_relay = true},        // EPS steering
-  {PSA_Req_Diag_ARTIV, PSA_ADAS_BUS, 3, .check_relay = false},        // radar diagnostics TODO: check if reduce to 3 is ok
+  {PSA_Req_Diag_ARTIV, PSA_ADAS_BUS, 8, .check_relay = false},        // radar diagnostics TODO: check if reduce to 3 is ok
   {PSA_HS2_SUPV_ARTIV_796, PSA_ADAS_BUS, 8, .check_relay = false},    // radar emulation
   {PSA_HS2_DAT_ARTIV_V2_4F6, PSA_ADAS_BUS, 5, .check_relay = false},  // radar emulation
   {PSA_HS2_DYN1_MDD_ETAT_2B6, PSA_ADAS_BUS, 8, .check_relay = false}, // radar emulation
