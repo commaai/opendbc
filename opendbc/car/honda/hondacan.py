@@ -177,7 +177,7 @@ def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_
   if True: # todo find cars based on Bosch 2018
     lkas_hud_values['LDW_LEFT'] = hud.ldw_left
     lkas_hud_values['LDW_RIGHT'] = hud.ldw_right
-  
+
   if CP.carFingerprint in (HONDA_BOSCH_RADARLESS | HONDA_BOSCH_CANFD):
     lkas_hud_values['LANE_LINES'] = 3
     lkas_hud_values['DASHED_LANES'] = hud.lanes_visible
