@@ -95,7 +95,7 @@ def process_hud_alert(CS, hud_alert):
       elif hud_alert == VisualAlert.ldw_right:
         ldw_right = VISUAL_HUD[hud_alert.raw]
       else:
-        steer_required = VISUAL_HUD[hud_alert.raw]  
+        steer_required = VISUAL_HUD[hud_alert.raw]
     else:
       steer_required = VISUAL_HUD[hud_alert.raw]
   else:
