@@ -81,7 +81,7 @@ def process_hud_alert(CS, hud_control):
   acc_alert = 0
 
   hud_alert = hud_control.visualAlert
-  
+
   # priority is: FCW, steer required, all others
   if hud_alert == VisualAlert.fcw:
     fcw_display = VISUAL_HUD[hud_alert.raw]
