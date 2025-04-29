@@ -151,7 +151,7 @@ class CarController(CarControllerBase):
     self.brake_last = rate_limit(pre_limit_brake, self.brake_last, -2., DT_CTRL)
 
     # vehicle hud display, wait for one update from 10Hz 0x304 msg
-    fcw_display, steer_required, acc_alert = process_hud_alert(CS, CP, hud_control)
+    fcw_display, steer_required, acc_alert = process_hud_alert(CS, self.CP, hud_control)
 
     # **** process the car messages ****
 
