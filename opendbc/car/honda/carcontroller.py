@@ -79,29 +79,20 @@ def process_hud_alert(CS, hud_alert):
   fcw_display = 0
   steer_required = 0
   acc_alert = 0
-  ldw_left = 0
-  ldw_right = 0
 
   # priority is: FCW, steer required, all others
   if hud_alert == VisualAlert.fcw:
     fcw_display = VISUAL_HUD[hud_alert.raw]
-  elif hud_alert == VisualAlert.steerRequired:
-    steer_required = VISUAL_HUD[hud_alert.raw]
-  elif hud_alert in (VisualAlert.ldw, VisualAlert.ldw_left, VisualAlert.ldw_right):
-    if CS.out.steeringPressed and True: # display direction if driver steers out of lane
-      # todo: find cars using bosch 2018 generator and replace True above
-      if hud_alert == VisualAlert.ldw_left:
-        ldw_left = VISUAL_HUD[hud_alert.raw]
-      elif hud_alert == VisualAlert.ldw_right:
-        ldw_right = VISUAL_HUD[hud_alert.raw]
-      else:
-        steer_required = VISUAL_HUD[hud_alert.raw]
+  elif hud_alert == in (VisualAlert.steerRequired, VisualAlert.ldw):
+    if CS.out.steeringPressed and (hudControl.leftLaneDepart or hudControl.rightLaneDepart) and True:
+    # todo - find cars using bosch 2018 adas generator and replace True above
+      pass # LaneDeprt is passed through in hondacan
     else:
       steer_required = VISUAL_HUD[hud_alert.raw]
   else:
     acc_alert = VISUAL_HUD[hud_alert.raw]
 
-  return fcw_display, steer_required, acc_alert, ldw_left, ldw_right
+  return fcw_display, steer_required, acc_alert
 
 
 HUDData = namedtuple("HUDData",
@@ -242,7 +233,7 @@ class CarController(CarControllerBase):
     # On Nidec, this controls longitudinal positive acceleration
     if self.frame % 10 == 0:
       hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
-                    hud_control.lanesVisible, fcw_display, acc_alert, steer_required, ldw_left, ldw_right, hud_control.leadDistanceBars)
+                    hud_control.lanesVisible, fcw_display, acc_alert, steer_required, hudControl.leftLaneDepart, hudControl.rightLaneDepart, hud_control.leadDistanceBars)
       can_sends.extend(hondacan.create_ui_commands(self.packer, self.CAN, self.CP, CC.enabled, pcm_speed, hud, CS.is_metric, CS.acc_hud, CS.lkas_hud))
 
       if self.CP.openpilotLongitudinalControl and self.CP.carFingerprint not in HONDA_BOSCH:
