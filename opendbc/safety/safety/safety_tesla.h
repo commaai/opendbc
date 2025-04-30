@@ -17,7 +17,7 @@ typedef struct {
 const VehicleSteeringParams TESLA_VEHICLE_STEERING_PARAMS = {
   .slip_factor = -0.000580374383851451,  // TODO: add calc function?
   .steer_ratio = 12.,
-  .wheelbase = 2.890000104904175,  // TODO: how precise do we need to be?
+  .wheelbase = 2.89,
 };
 
 // TODO: make these two functions generic

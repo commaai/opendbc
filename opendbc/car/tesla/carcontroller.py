@@ -38,8 +38,8 @@ def apply_tesla_steer_angle_limits(apply_angle: float, apply_angle_last: float, 
 
 
 def get_safety_CP():
+  # We use the TESLA_MODEL_Y platform for lateral limiting to match safety
   from opendbc.car.tesla.interface import CarInterface
-  # We use TESLA_MODEL_Y platform for lateral limiting to match safety
   return CarInterface.get_non_essential_params("TESLA_MODEL_Y")
 
 
