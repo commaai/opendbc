@@ -13,9 +13,8 @@ VisualAlert = structs.CarControl.HUDControl.VisualAlert
 ISO_LATERAL_ACCEL = 3.0  # m/s^2  # TODO: import from test lateral limits file?
 
 # Limit to average banked road since safety doesn't have the roll
-EARTH_G = 9.81
 AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation
-MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (EARTH_G * AVERAGE_ROAD_ROLL)  # ~2.4 m/s^2
+MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~2.4 m/s^2
 
 
 def apply_ford_curvature_limits(apply_curvature, apply_curvature_last, current_curvature, v_ego_raw, steering_angle, lat_active, CP):
