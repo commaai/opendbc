@@ -51,7 +51,7 @@ class CarController(CarControllerBase):
     self.tesla_can = TeslaCAN(self.packer)
 
     # Vehicle model used for lateral limiting
-    self.VM = VehicleModel(get_safety_CP)
+    self.VM = VehicleModel(get_safety_CP())
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
