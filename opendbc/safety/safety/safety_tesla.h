@@ -25,9 +25,7 @@ static float tesla_curvature_factor(const float speed, const VehicleSteeringPara
   return 1. / (1. - params.slip_factor * (speed * speed)) / params.wheelbase;
 }
 
-// Note that Tesla safety supports up to ISO 11270 limits, but is comfort limited in openpilot (TODO: planner, controls?)
-// TODO: copy ford's std assumed roll compensation
-static const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2  // TODO: import from test lateral limits file?
+static const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
 static const float ISO_LATERAL_JERK = 5.0;  // m/s^3
 
 static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits,
