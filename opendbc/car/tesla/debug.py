@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from opendbc.car.vehicle_model import VehicleModel, calc_slip_factor
 from opendbc.car.car_helpers import interfaces
+import math
 plt.ion()
 
 ISO_LATERAL_ACCEL = 3.0  # m/s^2

@@ -15,6 +15,7 @@ def apply_tesla_steer_angle_limits(apply_angle: float, apply_angle_last: float, 
   max_angle_rate_sec = math.degrees(VM.get_steer_from_curvature(max_curvature_rate_sec, v_ego_raw, 0))
   max_angle_delta = max_angle_rate_sec * (DT_CTRL * CarControllerParams.STEER_STEP)
 
+  # TODO this is actually quite slow at like 10 mph, need to increase this w/o faulting
   # limit angle delta to 5 degrees per 20ms frame to avoid faulting EPS at lower speeds
   max_angle_delta = min(max_angle_delta, 5.0)
   new_apply_angle = np.clip(apply_angle, apply_angle_last - max_angle_delta, apply_angle_last + max_angle_delta)
