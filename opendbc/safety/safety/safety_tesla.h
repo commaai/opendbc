@@ -8,14 +8,14 @@ static bool tesla_stock_aeb = false;
 static const float RAD_TO_DEG = 57.29577951308232;
 
 typedef struct {
-  const float slip_factor;  // calc_slip_factor(VM)
+  const float slip_factor;
   const float steer_ratio;
   const float wheelbase;
 } VehicleSteeringParams;
 
 // NOTE: based off TESLA_MODEL_Y to match openpilot
-const VehicleSteeringParams TESLA_VEHICLE_STEERING_PARAMS = {
-  .slip_factor = -0.000580374383851451,  // TODO: add calc function?
+static const VehicleSteeringParams TESLA_VEHICLE_STEERING_PARAMS = {
+  .slip_factor = -0.000580374383851451,  // calc_slip_factor(VM)
   .steer_ratio = 12.,
   .wheelbase = 2.89,
 };
