@@ -15,13 +15,6 @@ STD_CARGO_KG = 136.
 
 ACCELERATION_DUE_TO_GRAVITY = 9.81  # m/s^2
 
-# ISO 11270
-ISO_LATERAL_ACCEL = 3.0  # m/s^2  # TODO: import from test lateral limits file?
-
-# Limit to average banked road since safety doesn't have the roll
-AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation
-MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~2.4 m/s^2
-
 ButtonType = structs.CarState.ButtonEvent.Type
 
 
