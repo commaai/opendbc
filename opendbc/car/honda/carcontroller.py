@@ -118,7 +118,6 @@ class CarController(CarControllerBase):
     self.gas = 0.0
     self.brake = 0.0
     self.last_torque = 0.0
-
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
 
   def update(self, CC, CS, now_nanos):
