@@ -21,7 +21,7 @@ def apply_tesla_steer_angle_limits(apply_angle: float, apply_angle_last: float, 
 
   # *** ISO lateral jerk limit ***
   max_curvature_rate_sec = ISO_LATERAL_JERK / (max(v_ego_raw, 1) ** 2)
-  max_angle_rate_sec = math.degrees(max_curvature_rate_sec * CP.steerRatio * CP.wheelbase)
+  max_angle_rate_sec = math.degrees(max_curvature_rate_sec * CP.steerRatio * CP.wheelbase)  # TODO: this is wrong for model 3
   max_angle_delta = max_angle_rate_sec * (DT_CTRL * CarControllerParams.STEER_STEP)
 
   # limit angle delta to 5 degrees per 20ms frame to avoid faulting EPS at lower speeds
