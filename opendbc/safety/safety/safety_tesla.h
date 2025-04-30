@@ -22,7 +22,7 @@ static const VehicleSteeringParams TESLA_VEHICLE_STEERING_PARAMS = {
 
 // TODO: make these two functions generic
 static float tesla_curvature_factor(const float speed, const VehicleSteeringParams params) {
-  return 1. / (1. - params.slip_factor * (speed * speed)) / params.wheelbase;
+  return 1. / (1. - (params.slip_factor * (speed * speed)) / params.wheelbase;
 }
 
 // TODO: copy ford's std assumed roll compensation
