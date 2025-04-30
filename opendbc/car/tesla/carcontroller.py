@@ -10,10 +10,6 @@ from opendbc.car.vehicle_model import VehicleModel
 
 def apply_tesla_steer_angle_limits(apply_angle: float, apply_angle_last: float, v_ego_raw: float, steering_angle: float,
                                    lat_active: bool, limits: AngleSteeringLimits, VM: VehicleModel) -> float:
-
-  # this function applies ISO jerk and acceleration limits to the steering angle using a
-  # simplistic vehicle model distilled from opendbc/car/vehicle_model.py
-
   # *** ISO lateral jerk limit ***
   max_curvature_rate_sec = ISO_LATERAL_JERK / (max(v_ego_raw, 1) ** 2)  # 1/m/s
   max_angle_rate_sec = math.degrees(VM.get_steer_from_curvature(max_curvature_rate_sec, v_ego_raw, 0))
