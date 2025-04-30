@@ -14,28 +14,26 @@ ISO_LATERAL_JERK = 5.0  # m/s^3
 
 
 def apply_tesla_steer_angle_limits(apply_angle: float, apply_angle_last: float, v_ego_raw: float, steering_angle: float,
-                                   lat_active: bool, CP, limits: AngleSteeringLimits, VM: VehicleModel) -> float:
+                                   lat_active: bool, limits: AngleSteeringLimits, VM: VehicleModel) -> float:
 
   # this function applies ISO jerk and acceleration limits to the steering angle using a
   # simplistic vehicle model distilled from opendbc/car/vehicle_model.py
-  # TODO I wonder if we could use the vehicle model without too much extra complexity in safety
 
   # *** ISO lateral jerk limit ***
-  max_curvature_rate_sec = ISO_LATERAL_JERK / (max(v_ego_raw, 1) ** 2)
-  max_angle_rate_sec = math.degrees(max_curvature_rate_sec * CP.steerRatio * CP.wheelbase)  # TODO: this is wrong for model 3
+  # TODO: i say max then limit, pick one!
+  max_curvature_rate_sec = ISO_LATERAL_JERK / (max(v_ego_raw, 1) ** 2)  # 1/m/s
+  max_angle_rate_sec = math.degrees(VM.get_steer_from_curvature(max_curvature_rate_sec, v_ego_raw, 0))
   max_angle_delta = max_angle_rate_sec * (DT_CTRL * CarControllerParams.STEER_STEP)
 
   # limit angle delta to 5 degrees per 20ms frame to avoid faulting EPS at lower speeds
   # TODO: check stock FSD data to find the max
   max_angle_delta = min(max_angle_delta, 5.0)
-
   new_apply_angle = np.clip(apply_angle, apply_angle_last - max_angle_delta, apply_angle_last + max_angle_delta)
 
   # *** ISO lateral accel limit ***
-  # TODO: add curvature factor from VM. the lack of it loses us 60% of torque at 70 m/s (1.8 m/s^2 instead of 3 m/s^2)
-  curvature_limit = ISO_LATERAL_ACCEL / (max(v_ego_raw, 1) ** 2)  # 1/m
-  angle_limit = math.degrees(curvature_limit * CP.steerRatio * CP.wheelbase)  # deg
-  new_apply_angle = float(np.clip(new_apply_angle, -angle_limit, angle_limit))
+  max_curvature = ISO_LATERAL_ACCEL / (max(v_ego_raw, 1) ** 2)  # 1/m
+  max_angle = math.degrees(VM.get_steer_from_curvature(max_curvature, v_ego_raw, 0))  # deg
+  new_apply_angle = float(np.clip(new_apply_angle, -max_angle, max_angle))
 
   # angle is current steering wheel angle when inactive on all angle cars
   # TODO: should this before max lat accel limit?
@@ -74,7 +72,7 @@ class CarController(CarControllerBase):
     if self.frame % 2 == 0:
       # Angular rate limit based on speed
       self.apply_angle_last = apply_tesla_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw,
-                                                             CS.out.steeringAngleDeg, CC.latActive, self.CP,
+                                                             CS.out.steeringAngleDeg, CC.latActive,
                                                              CarControllerParams.ANGLE_LIMITS, self.VM)
 
       can_sends.append(self.tesla_can.create_steering_control(self.apply_angle_last, lat_active, (self.frame // 2) % 16))
