@@ -74,7 +74,7 @@ def get_steer_value(mode, param, to_send):
   elif mode == CarParams.SafetyModel.rivian:
     torque = ((to_send.data[2] << 3) | (to_send.data[3] >> 5)) - 1024
   elif mode == CarParams.SafetyModel.tesla:
-    angle = (((to_send.data[0] & 0x7F) << 8) | (to_send.data[1])) - 16384  # ceil(-1638.35/0.1)
+    angle = (((to_send.data[0] & 0x7F) << 8) | (to_send.data[1])) - 16384  # ceil(1638.35/0.1)
   return torque, angle
 
 def package_can_msg(msg):
