@@ -687,13 +687,13 @@ FW_VERSIONS = {
       b'28102-5YL-A711\x00\x00',
     ],
     (Ecu.srs, 0x18da53f1, None): [
-      b'77959-TJB-A040\x00\x00',      
+      b'77959-TJB-A040\x00\x00',
       b'77959-TJB-A210\x00\x00',
     ],
     (Ecu.electricBrakeBooster, 0x18da2bf1, None): [
       b'46114-TJB-A040\x00\x00',
       b'46114-TJB-A050\x00\x00',
-      b'46114-TJB-A060\x00\x00',      
+      b'46114-TJB-A060\x00\x00',
     ],
     (Ecu.gateway, 0x18daeff1, None): [
       b'38897-TJB-A040\x00\x00',
