@@ -9,22 +9,20 @@ static const float RAD_TO_DEG = 57.29577951308232;
 
 typedef struct {
   const float slip_factor;  // calc_slip_factor(VM)
-  const float sR;  // steerRatio
-  const float chi;  // steerRatioRear
-  const float l;  // wheelbase
+  const float steer_ratio;
+  const float wheelbase;
 } VehicleSteeringParams;
 
 // NOTE: based off TESLA_MODEL_Y to match openpilot
 const VehicleSteeringParams TESLA_VEHICLE_STEERING_PARAMS = {
   .slip_factor = -0.000580374383851451,  // TODO: add calc function?
-  .sR = 12.,
-  .chi = 0.0,  // TODO: always zero, rm?
-  .l = 2.890000104904175,  // TODO: how precise do we need to be?
+  .steer_ratio = 12.,
+  .wheelbase = 2.890000104904175,  // TODO: how precise do we need to be?
 };
 
 // TODO: make these two functions generic
 static float tesla_curvature_factor(const float speed, const VehicleSteeringParams params) {
-  return (1. - params.chi) / (1. - params.slip_factor * (speed * speed)) / params.l;
+  return 1. / (1. - params.slip_factor * (speed * speed)) / params.wheelbase;
 }
 
 // Note that Tesla safety supports up to ISO 11270 limits, but is comfort limited in openpilot (TODO: planner, controls?)
@@ -52,7 +50,7 @@ static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_e
     // TODO: use curvature factor here
     const float speed = MAX(fudged_speed, 1.0);
     const float max_curvature_rate_sec = ISO_LATERAL_JERK / (speed * speed);
-    const float max_angle_rate_sec = max_curvature_rate_sec * params.sR * params.l * RAD_TO_DEG;
+    const float max_angle_rate_sec = max_curvature_rate_sec * params.steer_ratio * params.wheelbase * RAD_TO_DEG;
 
     // finally get max angle delta per frame
     float max_angle_delta = max_angle_rate_sec * (0.01 * 2);
