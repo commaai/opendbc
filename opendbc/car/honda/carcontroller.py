@@ -164,7 +164,7 @@ class CarController(CarControllerBase):
 
     # Send steering command.
     can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, CC.latActive))
- 
+
     # wind brake from air resistance decel at high speed
     wind_brake = np.interp(CS.out.vEgo, [0.0, 2.3, 35.0], [0.001, 0.002, 0.15])
     hill_brake = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY
