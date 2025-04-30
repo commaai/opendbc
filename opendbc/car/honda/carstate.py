@@ -68,7 +68,7 @@ def get_can_messages(CP, gearbox_msg):
     else:
       messages.append(("CRUISE_PARAMS", 50))
 
-  if CP.carFingerprint == HONDA_CRV_5G or CP.carFingerprint not in (CAR.HONDA_ODYSSEY_CHN, CAR.HONDA_FREED, CAR.HONDA_HRV, *HONDA_BOSCH):
+  if CP.carFingerprint == CAR.HONDA_CRV_5G or CP.carFingerprint not in (CAR.HONDA_ODYSSEY_CHN, CAR.HONDA_FREED, CAR.HONDA_HRV, *HONDA_BOSCH):
     messages.append(("DOORS_STATUS", 3))
 
   if CP.carFingerprint in HONDA_BOSCH_RADARLESS:
@@ -134,7 +134,7 @@ class CarState(CarStateBase):
     # panda checks if the signal is non-zero
     ret.standstill = cp.vl["ENGINE_DATA"]["XMISSION_SPEED"] < 1e-5
     # TODO: find a common signal across all cars
-    if (self.CP.carFingerprint in HONDA_BOSCH) and (self.CP.carFingerprint != HONDA_CRV_5G):
+    if (self.CP.carFingerprint in HONDA_BOSCH) and not (self.CP.carFingerprint == CAR.HONDA_CRV_5G):
       ret.doorOpen = bool(cp.vl["SCM_FEEDBACK"]["DRIVERS_DOOR_OPEN"])
     elif self.CP.carFingerprint in (CAR.HONDA_ODYSSEY_CHN, CAR.HONDA_FREED, CAR.HONDA_HRV):
       ret.doorOpen = bool(cp.vl["SCM_BUTTONS"]["DRIVERS_DOOR_OPEN"])
