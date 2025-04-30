@@ -68,7 +68,6 @@ def get_can_messages(CP, gearbox_msg):
       messages.append(("CRUISE_PARAMS", 50))
 
   if CP.carFingerprint == CAR.HONDA_CRV_5G or CP.carFingerprint not in (CAR.HONDA_ODYSSEY_CHN, CAR.HONDA_FREED, CAR.HONDA_HRV, *HONDA_BOSCH):
-
     messages.append(("DOORS_STATUS", 3))
 
   if CP.carFingerprint in HONDA_BOSCH_RADARLESS:
