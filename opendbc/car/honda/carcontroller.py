@@ -7,7 +7,6 @@ from opendbc.car.honda import hondacan
 from opendbc.car.honda.values import CruiseButtons, VISUAL_HUD, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, HONDA_NIDEC_ALT_PCM_ACCEL, HONDA_BOSCH_CANFD, \
                                                  CarControllerParams
 from opendbc.car.interfaces import CarControllerBase
-from openpilot.selfdrive.controls import Controls
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
