@@ -42,7 +42,6 @@ static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_e
   bool violation = false;
   UNUSED(limits);
   const float curvature_factor = tesla_curvature_factor(fudged_speed, TESLA_VEHICLE_STEERING_PARAMS);
-  UNUSED(curvature_factor);
 //  printf("speed: %f, curvature_factor: %f\n", fudged_speed, curvature_factor);
 
   if (controls_allowed && steer_control_enabled) {
@@ -51,7 +50,7 @@ static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_e
     // TODO: use curvature factor here
     const float speed = MAX(fudged_speed, 1.0);
     const float max_curvature_rate_sec = ISO_LATERAL_JERK / (speed * speed);
-    const float max_angle_rate_sec = max_curvature_rate_sec * params.steer_ratio * params.wheelbase * RAD_TO_DEG;
+    const float max_angle_rate_sec = max_curvature_rate_sec * params.steer_ratio / curvature_factor * RAD_TO_DEG;
 
     // finally get max angle delta per frame
     float max_angle_delta = max_angle_rate_sec * (0.01 * 2);
