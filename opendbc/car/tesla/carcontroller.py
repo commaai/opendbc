@@ -2,15 +2,10 @@ import numpy as np
 import math
 from opendbc.can.packer import CANPacker
 from opendbc.car import Bus, AngleSteeringLimits, DT_CTRL
-from opendbc.car.interfaces import CarControllerBase
+from opendbc.car.interfaces import CarControllerBase, ISO_LATERAL_ACCEL, ISO_LATERAL_JERK
 from opendbc.car.tesla.teslacan import TeslaCAN
 from opendbc.car.tesla.values import CarControllerParams
 from opendbc.car.vehicle_model import VehicleModel
-
-# Note that Tesla safety supports up to ISO 11270 limits, but is comfort limited in openpilot (TODO: planner, controls?)
-# TODO: copy ford's std assumed roll compensation
-ISO_LATERAL_ACCEL = 3.0  # m/s^2  # TODO: import from test lateral limits file?
-ISO_LATERAL_JERK = 5.0  # m/s^3
 
 
 def apply_tesla_steer_angle_limits(apply_angle: float, apply_angle_last: float, v_ego_raw: float, steering_angle: float,
