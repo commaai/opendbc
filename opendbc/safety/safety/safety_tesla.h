@@ -46,6 +46,7 @@ static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_e
 //  printf("speed: %f, curvature_factor: %f\n", fudged_speed, curvature_factor);
 
   if (controls_allowed && steer_control_enabled) {
+    // *** ISO lateral jerk limit ***
     // calculate maximum angle rate per second
     // TODO: use curvature factor here
     const float speed = MAX(fudged_speed, 1.0);
@@ -57,6 +58,7 @@ static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_e
 
     // limit angle delta to 5 degrees per 20ms frame to avoid faulting EPS at lower speeds
     // TODO: check stock FSD data to find the max
+    // TODO: we don't care about fault limits, only ISO safety. remove this
     max_angle_delta = MIN(max_angle_delta, 5.0);
 
     // NOTE: symmetric up and down limits
@@ -74,7 +76,11 @@ static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_e
       printf("violation: %d\n", violation);
     }
 
-
+    // *** ISO lateral accel limit ***
+    const float max_curvature = ISO_LATERAL_ACCEL / (speed * speed); // * curvature_factor;
+    const float max_angle = max_curvature * params.steer_ratio / curvature_factor * RAD_TO_DEG;
+    const int max_angle_can = (max_angle * limits.angle_deg_to_can) + 1.;
+    violation |= max_limit_check(desired_angle, max_angle_can, -max_angle_can);
 
 //    // convert floating point angle rate limits to integers in the scale of the desired angle on CAN,
 //    // add 1 to not false trigger the violation. also fudge the speed by 1 m/s so rate limits are
