@@ -51,10 +51,11 @@ static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_e
 
     // finally get max angle delta per frame
     const float max_angle_delta = max_angle_rate_sec * (0.01 * 2);
+    const int max_angle_delta_can = (max_angle_delta * limits.angle_deg_to_can) + 1.;
 
     // NOTE: symmetric up and down limits
-    int highest_desired_angle = desired_angle_last + ((max_angle_delta * limits.angle_deg_to_can) + 1.);
-    int lowest_desired_angle = desired_angle_last - ((max_angle_delta * limits.angle_deg_to_can) + 1.);
+    const int highest_desired_angle = desired_angle_last + max_angle_delta_can;
+    const int lowest_desired_angle = desired_angle_last - max_angle_delta_can;
 
     printf("speed: %f, desired_angle_last: %d, desired_angle: %d\n", speed, desired_angle_last, desired_angle);
     printf("max_angle_delta: %f, highest_desired_angle: %d, lowest_desired_angle: %d\n", max_angle_delta,
