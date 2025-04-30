@@ -17,7 +17,7 @@ MAX_LAT_JERK_UP_TOLERANCE = 0.5  # m/s^3
 JERK_MEAS_T = 0.5
 
 @pytest.fixture
-def car_params(request, interfaces):
+def test_params(request, interfaces):
   return TestLateralLimits.setup(request.param, interfaces)
 
 class TestLateralLimits:
@@ -58,15 +58,15 @@ class TestLateralLimits:
     # Convert to m/s^3
     return accel_up_0_5_sec / JERK_MEAS_T, accel_down_0_5_sec / JERK_MEAS_T
 
-@pytest.mark.parametrize('car_params', sorted(PLATFORMS), indirect=True)
-def test_jerk_limits(car_params):
-  up_jerk, down_jerk = TestLateralLimits.calculate_0_5s_jerk(car_params.control_params, car_params.torque_params)
+@pytest.mark.parametrize('test_params', sorted(PLATFORMS), indirect=True)
+def test_jerk_limits(test_params):
+  up_jerk, down_jerk = TestLateralLimits.calculate_0_5s_jerk(test_params.control_params, test_params.torque_params)
   assert up_jerk <= MAX_LAT_JERK_UP + MAX_LAT_JERK_UP_TOLERANCE
   assert down_jerk <= MAX_LAT_JERK_DOWN
 
-@pytest.mark.parametrize('car_params', sorted(PLATFORMS), indirect=True)
-def test_max_lateral_accel(car_params):
-  assert car_params.torque_params["MAX_LAT_ACCEL_MEASURED"] <= ISO_LATERAL_ACCEL
+@pytest.mark.parametrize('test_params', sorted(PLATFORMS), indirect=True)
+def test_max_lateral_accel(test_params):
+  assert test_params.torque_params["MAX_LAT_ACCEL_MEASURED"] <= ISO_LATERAL_ACCEL
 
 
 class LatAccelReport:
