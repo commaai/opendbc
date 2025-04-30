@@ -664,24 +664,24 @@ FW_VERSIONS = {
   CAR.ACURA_RDX_3G: {
     (Ecu.vsa, 0x18da28f1, None): [
       b'57114-TJB-A030\x00\x00',
-      b'57114-TJB-A040\x00\x00',      
+      b'57114-TJB-A040\x00\x00',
     ],
     (Ecu.fwdRadar, 0x18dab0f1, None): [
       b'36802-TJB-A040\x00\x00',
-      b'36802-TJB-A050\x00\x00',      
+      b'36802-TJB-A050\x00\x00',
     ],
     (Ecu.fwdCamera, 0x18dab5f1, None): [
-      b'36161-TJB-A040\x00\x00',      
+      b'36161-TJB-A040\x00\x00',
     ],
     (Ecu.shiftByWire, 0x18da0bf1, None): [
-      b'54008-TJB-A520\x00\x00',      
+      b'54008-TJB-A520\x00\x00',
     ],
     (Ecu.transmission, 0x18da1ef1, None): [
       b'28102-5YK-A610\x00\x00',
       b'28102-5YK-A620\x00\x00',
       b'28102-5YK-A630\x00\x00',
       b'28102-5YK-A700\x00\x00',
-      b'28102-5YK-A711\x00\x00',      
+      b'28102-5YK-A711\x00\x00',
       b'28102-5YL-A620\x00\x00',
       b'28102-5YL-A700\x00\x00',
       b'28102-5YL-A711\x00\x00',
