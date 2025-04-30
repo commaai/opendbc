@@ -171,7 +171,7 @@ class CarController(CarControllerBase):
 
     # wind brake from air resistance decel at high speed
     wind_brake = np.interp(CS.out.vEgo, [0.0, 2.3, 35.0], [0.001, 0.002, 0.15])
-    hill_brake = math.sin(self.pitch.x) * ACCELERATION_DUE_TO_GRAVITY
+    hill_brake = math.sin(self.pitch) * ACCELERATION_DUE_TO_GRAVITY
     # all of this is only relevant for HONDA NIDEC
     max_accel = np.interp(CS.out.vEgo, self.params.NIDEC_MAX_ACCEL_BP, self.params.NIDEC_MAX_ACCEL_V)
     # TODO this 1.44 is just to maintain previous behavior
