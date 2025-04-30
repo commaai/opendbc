@@ -40,28 +40,20 @@ static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_e
   const float fudged_speed = (vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.;
 
   bool violation = false;
-  UNUSED(limits);
   const float curvature_factor = tesla_curvature_factor(fudged_speed, TESLA_VEHICLE_STEERING_PARAMS);
 //  printf("speed: %f, curvature_factor: %f\n", fudged_speed, curvature_factor);
 
   if (controls_allowed && steer_control_enabled) {
     // *** ISO lateral jerk limit ***
     // calculate maximum angle rate per second
-    // TODO: use curvature factor here
     const float speed = MAX(fudged_speed, 1.0);
     const float max_curvature_rate_sec = ISO_LATERAL_JERK / (speed * speed);
     const float max_angle_rate_sec = max_curvature_rate_sec * params.steer_ratio / curvature_factor * RAD_TO_DEG;
 
     // finally get max angle delta per frame
-    float max_angle_delta = max_angle_rate_sec * (0.01 * 2);
-
-    // limit angle delta to 5 degrees per 20ms frame to avoid faulting EPS at lower speeds
-    // TODO: check stock FSD data to find the max
-    // TODO: we don't care about fault limits, only ISO safety. remove this
-    max_angle_delta = MIN(max_angle_delta, 5.0);
+    const float max_angle_delta = max_angle_rate_sec * (0.01 * 2);
 
     // NOTE: symmetric up and down limits
-    // TODO: now implement max lat accel check
     int highest_desired_angle = desired_angle_last + ((max_angle_delta * limits.angle_deg_to_can) + 1.);
     int lowest_desired_angle = desired_angle_last - ((max_angle_delta * limits.angle_deg_to_can) + 1.);
 
@@ -76,56 +68,18 @@ static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_e
     }
 
     // *** ISO lateral accel limit ***
-    const float max_curvature = ISO_LATERAL_ACCEL / (speed * speed); // * curvature_factor;
+    const float max_curvature = ISO_LATERAL_ACCEL / (speed * speed);
     const float max_angle = max_curvature * params.steer_ratio / curvature_factor * RAD_TO_DEG;
     const int max_angle_can = (max_angle * limits.angle_deg_to_can) + 1.;
-    violation |= max_limit_check(desired_angle, max_angle_can, -max_angle_can);
 
-//    // convert floating point angle rate limits to integers in the scale of the desired angle on CAN,
-//    // add 1 to not false trigger the violation. also fudge the speed by 1 m/s so rate limits are
-//    // always slightly above openpilot's in case we read an updated speed in between angle commands
-//    // TODO: this speed fudge can be much lower, look at data to determine the lowest reasonable offset
-//    const float fudged_speed = (vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.;
-//    int delta_angle_up = (interpolate(limits.angle_rate_up_lookup, fudged_speed) * limits.angle_deg_to_can) + 1.;
-//    int delta_angle_down = (interpolate(limits.angle_rate_down_lookup, fudged_speed) * limits.angle_deg_to_can) + 1.;
-//
-//    // allow down limits at zero since small floats from openpilot will be rounded to 0
-//    // TODO: openpilot should be cognizant of this and not send small floats
-//    int highest_desired_angle = desired_angle_last + ((desired_angle_last > 0) ? delta_angle_up : delta_angle_down);
-//    int lowest_desired_angle = desired_angle_last - ((desired_angle_last >= 0) ? delta_angle_down : delta_angle_up);
-//
-//    // check not above ISO 11270 lateral accel assuming worst case road roll
-//    if (limits.angle_is_curvature) {
-//      // ISO 11270
-//      static const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
-//
-//      // Limit to average banked road since safety doesn't have the roll
-//      static const float EARTH_G = 9.81;
-//      static const float AVERAGE_ROAD_ROLL = 0.06;  // ~3.4 degrees, 6% superelevation
-//      static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (EARTH_G * AVERAGE_ROAD_ROLL);  // ~2.4 m/s^2
-//
-//      // Allow small tolerance by using minimum speed and rounding curvature up
-//      const float speed_lower = MAX(vehicle_speed.min / VEHICLE_SPEED_FACTOR, 1.0);
-//      const float speed_upper = MAX(vehicle_speed.max / VEHICLE_SPEED_FACTOR, 1.0);
-//      const int max_curvature_upper = (MAX_LATERAL_ACCEL / (speed_lower * speed_lower) * limits.angle_deg_to_can) + 1.;
-//      const int max_curvature_lower = (MAX_LATERAL_ACCEL / (speed_upper * speed_upper) * limits.angle_deg_to_can) - 1.;
-//
-//      // ensure that the curvature error doesn't try to enforce above this limit
-//      if (desired_angle_last > 0) {
-//        lowest_desired_angle = CLAMP(lowest_desired_angle, -max_curvature_lower, max_curvature_lower);
-//        highest_desired_angle = CLAMP(highest_desired_angle, -max_curvature_upper, max_curvature_upper);
-//      } else {
-//        lowest_desired_angle = CLAMP(lowest_desired_angle, -max_curvature_upper, max_curvature_upper);
-//        highest_desired_angle = CLAMP(highest_desired_angle, -max_curvature_lower, max_curvature_lower);
-//      }
-//    }
-//
-//    // check for violation;
-//    violation |= max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
+    violation |= max_limit_check(desired_angle, max_angle_can, -max_angle_can);
+    printf("max_curvature: %.10f, max_angle: %.10f, max_angle_can: %d\n", max_curvature, max_angle,
+           max_angle_can);
   }
   desired_angle_last = desired_angle;
 
   // Angle should either be 0 or same as current angle while not steering
+  // TODO: no, it should be limited to max lat accel
   if (!steer_control_enabled) {
     const int max_inactive_angle = CLAMP(angle_meas.max, -limits.max_angle, limits.max_angle) + 1;
     const int min_inactive_angle = CLAMP(angle_meas.min, -limits.max_angle, limits.max_angle) - 1;
