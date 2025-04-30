@@ -16,7 +16,6 @@ def apply_tesla_steer_angle_limits(apply_angle: float, apply_angle_last: float, 
   max_angle_delta = max_angle_rate_sec * (DT_CTRL * CarControllerParams.STEER_STEP)
 
   # limit angle delta to 5 degrees per 20ms frame to avoid faulting EPS at lower speeds
-  # TODO: check stock FSD data to find the max
   max_angle_delta = min(max_angle_delta, 5.0)
   new_apply_angle = np.clip(apply_angle, apply_angle_last - max_angle_delta, apply_angle_last + max_angle_delta)
 
