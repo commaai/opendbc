@@ -1,8 +1,9 @@
 import numpy as np
 from collections import namedtuple
+import math
 
 from opendbc.can.packer import CANPacker
-from opendbc.car import Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
+from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
 from opendbc.car.honda import hondacan
 from opendbc.car.honda.values import CruiseButtons, VISUAL_HUD, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, HONDA_NIDEC_ALT_PCM_ACCEL, HONDA_BOSCH_CANFD, \
                                                  CarControllerParams
@@ -116,6 +117,7 @@ class CarController(CarControllerBase):
     self.gas = 0.0
     self.brake = 0.0
     self.last_torque = 0.0
+    self.pitch = 0.0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -123,6 +125,9 @@ class CarController(CarControllerBase):
     conversion = hondacan.get_cruise_speed_conversion(self.CP.carFingerprint, CS.is_metric)
     hud_v_cruise = hud_control.setSpeed / conversion if hud_control.speedVisible else 255
     pcm_cancel_cmd = CC.cruiseControl.cancel
+
+    if len(CC.orientationNED) == 3:
+      self.pitch.update(CC.orientationNED[1])
 
     if CC.longActive:
       accel = actuators.accel
@@ -166,6 +171,7 @@ class CarController(CarControllerBase):
 
     # wind brake from air resistance decel at high speed
     wind_brake = np.interp(CS.out.vEgo, [0.0, 2.3, 35.0], [0.001, 0.002, 0.15])
+    hill_brake = math.sin(self.pitch) * ACCELERATION_DUE_TO_GRAVITY
     # all of this is only relevant for HONDA NIDEC
     max_accel = np.interp(CS.out.vEgo, self.params.NIDEC_MAX_ACCEL_BP, self.params.NIDEC_MAX_ACCEL_V)
     # TODO this 1.44 is just to maintain previous behavior
@@ -209,7 +215,7 @@ class CarController(CarControllerBase):
 
         if self.CP.carFingerprint in HONDA_BOSCH:
           self.accel = float(np.clip(accel, self.params.BOSCH_ACCEL_MIN, self.params.BOSCH_ACCEL_MAX))
-          self.gas = float(np.interp(accel + wind_brake, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_GAS_LOOKUP_V))
+          self.gas = float(np.interp(accel + wind_brake + hill_brake, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_GAS_LOOKUP_V))
 
           stopping = actuators.longControlState == LongCtrlState.stopping
           self.stopping_counter = self.stopping_counter + 1 if stopping else 0
