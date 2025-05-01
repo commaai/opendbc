@@ -127,7 +127,7 @@ class CarController(CarControllerBase):
     pcm_cancel_cmd = CC.cruiseControl.cancel
 
     if len(CC.orientationNED) == 3:
-      self.pitch.update(CC.orientationNED[1])
+      self.pitch = CC.orientationNED[1]
 
     if CC.longActive:
       accel = actuators.accel
