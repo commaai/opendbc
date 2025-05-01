@@ -5,6 +5,10 @@ from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.tesla.teslacan import TeslaCAN
 from opendbc.car.tesla.values import CarControllerParams
 
+# Autopilot enables ACC for a few frames before it sets Autopark state
+# This is only needed for Autopark as Summon sets the state immediately
+AUTOPILOT_CANCEL_DELAY_FRAMES = 10
+
 
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
@@ -13,6 +17,8 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(dbc_names[Bus.party])
     self.tesla_can = TeslaCAN(self.packer)
 
+    self.cancel_counter = 0
+
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     can_sends = []
@@ -20,8 +26,10 @@ class CarController(CarControllerBase):
     # Disengage and allow for user override on high torque inputs
     # TODO: move this to a generic disengageRequested carState field and set CC.cruiseControl.cancel based on it
     hands_on_fault = CS.hands_on_level >= 3
-    cruise_cancel = CC.cruiseControl.cancel or hands_on_fault
     lat_active = CC.latActive and not hands_on_fault
+
+    self.cancel_counter = self.cancel_counter + 1 if (CC.cruiseControl.cancel or hands_on_fault) else 0
+    cruise_cancel = self.cancel_counter > AUTOPILOT_CANCEL_DELAY_FRAMES
 
     if self.frame % 2 == 0:
       # Angular rate limit based on speed
