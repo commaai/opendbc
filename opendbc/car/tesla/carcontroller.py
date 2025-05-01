@@ -7,6 +7,9 @@ from opendbc.car.tesla.teslacan import TeslaCAN
 from opendbc.car.tesla.values import CarControllerParams
 from opendbc.car.vehicle_model import VehicleModel
 
+# EPS faults at 12 deg/20ms frame at a standstill
+MAX_ANGLE_RATE = 10  # deg/20ms frame
+
 
 def apply_tesla_steer_angle_limits(apply_angle: float, apply_angle_last: float, v_ego_raw: float, steering_angle: float,
                                    lat_active: bool, limits: AngleSteeringLimits, VM: VehicleModel) -> float:
@@ -15,9 +18,8 @@ def apply_tesla_steer_angle_limits(apply_angle: float, apply_angle_last: float, 
   max_angle_rate_sec = math.degrees(VM.get_steer_from_curvature(max_curvature_rate_sec, v_ego_raw, 0))
   max_angle_delta = max_angle_rate_sec * (DT_CTRL * CarControllerParams.STEER_STEP)
 
-  # TODO this is actually quite slow at like 10 mph, need to increase this w/o faulting
-  # limit angle delta to 5 degrees per 20ms frame to avoid faulting EPS at lower speeds
-  max_angle_delta = min(max_angle_delta, 5.0)
+  # prevent fault
+  max_angle_delta = min(max_angle_delta, MAX_ANGLE_RATE)
   new_apply_angle = np.clip(apply_angle, apply_angle_last - max_angle_delta, apply_angle_last + max_angle_delta)
 
   # *** ISO lateral accel limit ***
