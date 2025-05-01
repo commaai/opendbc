@@ -110,6 +110,11 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
     if (steer_angle_cmd_checks(desired_angle, steer_control_enabled, TESLA_STEERING_LIMITS)) {
       violation = true;
     }
+
+    // Don't send messages when the stock Autopark/Summon system is active
+    if (tesla_stock_autopark) {
+      violation = true;
+    }
   }
 
   // DAS_control: longitudinal control message
@@ -127,6 +132,11 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
     if (tesla_longitudinal) {
       // Don't send messages when the stock AEB system is active
       if (tesla_stock_aeb) {
+        violation = true;
+      }
+
+      // Don't send messages when the stock Autopark/Summon system is active
+      if (tesla_stock_autopark) {
         violation = true;
       }
 
@@ -164,8 +174,20 @@ static bool tesla_fwd_hook(int bus_num, int addr) {
 
   if (bus_num == 2) {
     // DAS_control
-    if (tesla_longitudinal && (addr == 0x2b9) && !tesla_stock_aeb) {
-      block_msg = true;
+    bool block_msg = tesla_longitudinal && (addr == 0x2b9) && !tesla_stock_aeb;
+    if (addr == 0x2b9) {
+      if (tesla_longitudinal && (addr == 0x2b9) && !tesla_stock_aeb)) {
+        block_msg = true;
+      }
+      if (tesla_stock_autopark) {
+        block_msg = true;
+      }
+    }
+
+    if (addr == 0x2b9) {
+      if (tesla_stock_autopark && ((addr == 0x2b9) || (addr == 0x488))) {
+        block_msg = true;
+      }
     }
   }
 
