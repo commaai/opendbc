@@ -4,6 +4,7 @@
 
 static bool tesla_longitudinal = false;
 static bool tesla_stock_aeb = false;
+static bool tesla_stock_autopark = false;
 
 static void tesla_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
@@ -52,6 +53,22 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
     if (tesla_longitudinal && (addr == 0x2b9)) {
       // "AEB_ACTIVE"
       tesla_stock_aeb = (GET_BYTE(to_push, 2) & 0x03U) == 1U;
+    }
+  }
+
+  if (bus == 2) {
+    if (addr == 0x286) {
+      // DI_autoparkState
+      const int autopark_state = ((GET_BYTE(to_push, 2) >> 1) & 0xFU);
+      // TODO: validate these values
+      tesla_stock_autopark = (autopark_state == 2) ||  // STARTED
+                             (autopark_state == 3) ||  // ACTIVE
+                             (autopark_state == 4) ||  // COMPLETE
+                             (autopark_state == 5) ||  // PAUSED
+                             (autopark_state == 7) ||  // RESUMED
+                             (autopark_state == 8) ||  // UNPARK_COMPLETE
+                             (autopark_state == 9);    // SELFPARK_STARTED
+
     }
   }
 }
