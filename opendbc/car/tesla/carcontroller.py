@@ -2,19 +2,19 @@ import numpy as np
 import math
 from opendbc.can.packer import CANPacker
 from opendbc.car import Bus, AngleSteeringLimits, DT_CTRL
-from opendbc.car.interfaces import CarControllerBase, ISO_LATERAL_ACCEL, ISO_LATERAL_JERK
+from opendbc.car.interfaces import CarControllerBase, ISO_LATERAL_ACCEL
 from opendbc.car.tesla.teslacan import TeslaCAN
 from opendbc.car.tesla.values import CarControllerParams
 from opendbc.car.vehicle_model import VehicleModel
 
-# EPS faults at 12 deg/20ms frame at a standstill
-MAX_ANGLE_RATE = 10  # deg/20ms frame
+MAX_ANGLE_RATE = 10  # deg/20ms frame, EPS faults at 12 deg/20ms frame at a standstill
+MAX_LATERAL_JERK = 2.5  # m/s^3, lower than ISO limit of 5 m/s^3
 
 
 def apply_tesla_steer_angle_limits(apply_angle: float, apply_angle_last: float, v_ego_raw: float, steering_angle: float,
                                    lat_active: bool, limits: AngleSteeringLimits, VM: VehicleModel) -> float:
   # *** ISO lateral jerk limit ***
-  max_curvature_rate_sec = ISO_LATERAL_JERK / (max(v_ego_raw, 1) ** 2)  # 1/m/s
+  max_curvature_rate_sec = MAX_LATERAL_JERK / (max(v_ego_raw, 1) ** 2)  # 1/m/s
   max_angle_rate_sec = math.degrees(VM.get_steer_from_curvature(max_curvature_rate_sec, v_ego_raw, 0))
   max_angle_delta = max_angle_rate_sec * (DT_CTRL * CarControllerParams.STEER_STEP)
 
