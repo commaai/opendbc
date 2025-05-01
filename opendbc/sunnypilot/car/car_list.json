@@ -942,13 +942,15 @@
     ],
     "package": "Honda Sensing"
   },
-  "Honda HR-V 2023": {
+  "Honda HR-V 2023-25": {
     "platform": "HONDA_HRV_3G",
     "make": "Honda",
     "brand": "honda",
     "model": "HR-V",
     "year": [
-      "2023"
+      "2023",
+      "2024",
+      "2025"
     ],
     "package": "All"
   },
