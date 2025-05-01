@@ -78,7 +78,6 @@ static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_e
   desired_angle_last = desired_angle;
 
   // Angle should either be 0 or same as current angle while not steering
-  // TODO: no, it should be limited to max lat accel
   if (!steer_control_enabled) {
     const int max_inactive_angle = CLAMP(angle_meas.max, -limits.max_angle, limits.max_angle) + 1;
     const int min_inactive_angle = CLAMP(angle_meas.min, -limits.max_angle, limits.max_angle) - 1;

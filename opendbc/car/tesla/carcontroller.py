@@ -28,7 +28,6 @@ def apply_tesla_steer_angle_limits(apply_angle: float, apply_angle_last: float, 
   new_apply_angle = float(np.clip(new_apply_angle, -max_angle, max_angle))
 
   # angle is current angle when inactive
-  # TODO: should this before max lat accel limit?
   if not lat_active:
     new_apply_angle = steering_angle
 
