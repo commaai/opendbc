@@ -1,8 +1,7 @@
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
-from panda import uds
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, AngleRateLimit
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Tool, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
@@ -57,6 +56,12 @@ class CarControllerParams:
   ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0.], angle_v=[1.])
 
 
+class SubaruSafetyFlags(IntFlag):
+  GEN2 = 1
+  LONG = 2
+  PREGLOBAL_REVERSED_DRIVER_TORQUE = 4
+
+
 class SubaruFlags(IntFlag):
   # Detected flags
   SEND_INFOTAINMENT = 1
@@ -101,7 +106,7 @@ class SubaruCarDocs(CarDocs):
   def init_make(self, CP: CarParams):
     self.car_parts.parts.extend([Tool.socket_8mm_deep, Tool.pry_tool])
 
-    if CP.experimentalLongitudinalAvailable:
+    if CP.alphaLongitudinalAvailable:
       self.footnotes.append(Footnote.EXP_LONG)
 
 

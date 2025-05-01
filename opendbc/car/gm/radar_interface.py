@@ -6,7 +6,8 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.gm.values import DBC, CanBus
 from opendbc.car.interfaces import RadarInterfaceBase
 
-RADAR_HEADER_MSG = 1120
+RADAR_HEADER_MSG = 1120  # F_LRR_Obj_Header
+CAMERA_DATA_HEADER_MSG = 1056  # F_Vision_Obj_Header
 SLOT_1_MSG = RADAR_HEADER_MSG + 1
 NUM_SLOTS = 20
 
@@ -56,12 +57,10 @@ class RadarInterface(RadarInterfaceBase):
     fault = header['FLRRSnsrBlckd'] or header['FLRRSnstvFltPrsntInt'] or \
       header['FLRRYawRtPlsblityFlt'] or header['FLRRHWFltPrsntInt'] or \
       header['FLRRAntTngFltPrsnt'] or header['FLRRAlgnFltPrsnt']
-    errors = []
     if not self.rcp.can_valid:
-      errors.append("canError")
+      ret.errors.canError = True
     if fault:
-      errors.append("fault")
-    ret.errors = errors
+      ret.errors.radarFault = True
 
     currentTargets = set()
     num_targets = header['FLRRNumValidTargets']
