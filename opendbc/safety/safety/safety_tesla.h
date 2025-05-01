@@ -37,7 +37,6 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
 
     // Cruise and Autopark/Summon state
     if (addr == 0x286) {
-
       // Autopark state
       int autopark_state = (GET_BYTE(to_push, 3) >> 1) & 0x0FU;  // DI_autoparkState
       // TODO: doing summon first, only seen these states
@@ -195,15 +194,15 @@ static bool tesla_fwd_hook(int bus_num, int addr) {
 static safety_config tesla_init(uint16_t param) {
 
   static const CanMsg TESLA_M3_Y_TX_MSGS[] = {
-    {0x488, 0, 4, .check_relay = true},   // DAS_steeringControl
-    {0x2b9, 0, 8, .check_relay = false},  // DAS_control (for cancel)
-    {0x27D, 0, 3, .check_relay = true},   // APS_eacMonitor
+    {0x488, 0, 4, .check_relay = true, .disable_static_blocking = true},   // DAS_steeringControl
+    {0x2b9, 0, 8, .check_relay = false},                                   // DAS_control (for cancel)
+    {0x27D, 0, 3, .check_relay = true, .disable_static_blocking = true},   // APS_eacMonitor
   };
 
   static const CanMsg TESLA_M3_Y_LONG_TX_MSGS[] = {
-    {0x488, 0, 4, .check_relay = true},                                   // DAS_steeringControl
+    {0x488, 0, 4, .check_relay = true, .disable_static_blocking = true},  // DAS_steeringControl
     {0x2b9, 0, 8, .check_relay = true, .disable_static_blocking = true},  // DAS_control
-    {0x27D, 0, 3, .check_relay = true},                                   // APS_eacMonitor
+    {0x27D, 0, 3, .check_relay = true, .disable_static_blocking = true},  // APS_eacMonitor
   };
 
   UNUSED(param);
