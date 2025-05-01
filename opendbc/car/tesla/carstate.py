@@ -56,9 +56,9 @@ class CarState(CarStateBase):
 
     ret.cruiseState.enabled = cruise_state in ("ENABLED", "STANDSTILL", "OVERRIDE", "PRE_FAULT", "PRE_CANCEL")
     if speed_units == "KPH":
-      ret.cruiseState.speed = cp_party.vl["DI_state"]["DI_digitalSpeed"] * CV.KPH_TO_MS
+      ret.cruiseState.speed = max(cp_party.vl["DI_state"]["DI_digitalSpeed"] * CV.KPH_TO_MS, 1e-3)
     elif speed_units == "MPH":
-      ret.cruiseState.speed = cp_party.vl["DI_state"]["DI_digitalSpeed"] * CV.MPH_TO_MS
+      ret.cruiseState.speed = max(cp_party.vl["DI_state"]["DI_digitalSpeed"] * CV.MPH_TO_MS, 1e-3)
     ret.cruiseState.available = cruise_state == "STANDBY" or ret.cruiseState.enabled
     ret.cruiseState.standstill = False  # This needs to be false, since we can resume from stop without sending anything special
     ret.standstill = cruise_state == "STANDSTILL"
@@ -71,8 +71,8 @@ class CarState(CarStateBase):
     ret.doorOpen = cp_party.vl["UI_warning"]["anyDoorOpen"] == 1
 
     # Blinkers
-    ret.leftBlinker = cp_party.vl["UI_warning"]["leftBlinkerOn"] != 0
-    ret.rightBlinker = cp_party.vl["UI_warning"]["rightBlinkerOn"] != 0
+    ret.leftBlinker = cp_party.vl["UI_warning"]["leftBlinkerBlinking"] in (1, 2)
+    ret.rightBlinker = cp_party.vl["UI_warning"]["rightBlinkerBlinking"] in (1, 2)
 
     # Seatbelt
     ret.seatbeltUnlatched = cp_party.vl["UI_warning"]["buckleStatus"] != 1
@@ -83,6 +83,9 @@ class CarState(CarStateBase):
 
     # AEB
     ret.stockAeb = cp_ap_party.vl["DAS_control"]["DAS_aebEvent"] == 1
+
+    # Stock Autosteer should be off (includes FSD)
+    ret.invalidLkasSetting = cp_ap_party.vl["DAS_settings"]["DAS_autosteerEnabled"] != 0
 
     # Buttons # ToDo: add Gap adjust button
 
@@ -106,6 +109,7 @@ class CarState(CarStateBase):
     ap_party_messages = [
       ("DAS_control", 25),
       ("DAS_status", 2),
+      ("DAS_settings", 2),
       ("SCCM_steeringAngleSensor", 100),
     ]
 

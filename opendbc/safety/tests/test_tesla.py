@@ -20,7 +20,6 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
   STANDSTILL_THRESHOLD = 0.1
   GAS_PRESSED_THRESHOLD = 3
-  FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   # Angle control limits
   STEER_ANGLE_MAX = 360  # deg
@@ -36,11 +35,6 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
   INACTIVE_ACCEL = 0.0
 
   packer: CANPackerPanda
-
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "TestTeslaSafetyBase":
-      raise unittest.SkipTest
 
   def setUp(self):
     self.packer = CANPackerPanda("tesla_model3_party")

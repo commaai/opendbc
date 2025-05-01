@@ -69,7 +69,6 @@ static uint32_t ford_compute_checksum(const CANPacket_t *to_push) {
     chksum = 0xFFU - chksum;
   } else {
   }
-
   return chksum;
 }
 
@@ -88,8 +87,6 @@ static bool ford_get_quality_flag_valid(const CANPacket_t *to_push) {
   return valid;
 }
 
-static bool ford_longitudinal = false;
-
 #define FORD_INACTIVE_CURVATURE 1000U
 #define FORD_INACTIVE_CURVATURE_RATE 4096U
 #define FORD_INACTIVE_PATH_OFFSET 512U
@@ -98,14 +95,6 @@ static bool ford_longitudinal = false;
 #define FORD_CANFD_INACTIVE_CURVATURE_RATE 1024U
 
 #define FORD_MAX_SPEED_DELTA 2.0  // m/s
-
-static bool ford_lkas_msg_check(int addr) {
-  return (addr == FORD_ACCDATA_3)
-      || (addr == FORD_Lane_Assist_Data1)
-      || (addr == FORD_LateralMotionControl)
-      || (addr == FORD_LateralMotionControl2)
-      || (addr == FORD_IPMA_Data);
-}
 
 // Curvature rate limits
 #define FORD_LIMITS(limit_lateral_acceleration) {                                               \
@@ -153,6 +142,7 @@ static void ford_rx_hook(const CANPacket_t *to_push) {
       // Signal: Veh_V_ActlEng
       float filtered_pcm_speed = ((GET_BYTE(to_push, 6) << 8) | GET_BYTE(to_push, 7)) * 0.01 / 3.6;
       bool is_invalid_speed = ABS(filtered_pcm_speed - ((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR)) > FORD_MAX_SPEED_DELTA;
+      // TODO: this should generically cause rx valid to fall until re-enable
       if (is_invalid_speed) {
         controls_allowed = false;
       }
@@ -185,16 +175,7 @@ static void ford_rx_hook(const CANPacket_t *to_push) {
       bool cruise_engaged = (cruise_state == 4U) || (cruise_state == 5U);
       pcm_cruise_check(cruise_engaged);
     }
-
-    // If steering controls messages are received on the destination bus, it's an indication
-    // that the relay might be malfunctioning.
-    bool stock_ecu_detected = ford_lkas_msg_check(addr);
-    if (ford_longitudinal) {
-      stock_ecu_detected = stock_ecu_detected || (addr == FORD_ACCDATA);
-    }
-    generic_rx_checks(stock_ecu_detected);
   }
-
 }
 
 static bool ford_tx_hook(const CANPacket_t *to_send) {
@@ -319,89 +300,55 @@ static bool ford_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static int ford_fwd_hook(int bus_num, int addr) {
-  int bus_fwd = -1;
-
-  switch (bus_num) {
-    case FORD_MAIN_BUS: {
-      // Forward all traffic from bus 0 onward
-      bus_fwd = FORD_CAM_BUS;
-      break;
-    }
-    case FORD_CAM_BUS: {
-      if (ford_lkas_msg_check(addr)) {
-        // Block stock LKAS and UI messages
-        bus_fwd = -1;
-      } else if (ford_longitudinal && (addr == FORD_ACCDATA)) {
-        // Block stock ACC message
-        bus_fwd = -1;
-      } else {
-        // Forward remaining traffic
-        bus_fwd = FORD_MAIN_BUS;
-      }
-      break;
-    }
-    default: {
-      // No other buses should be in use; fallback to do-not-forward
-      bus_fwd = -1;
-      break;
-    }
-  }
-
-  return bus_fwd;
-}
-
 static safety_config ford_init(uint16_t param) {
-  bool ford_canfd = false;
-
   // warning: quality flags are not yet checked in openpilot's CAN parser,
   // this may be the cause of blocked messages
   static RxCheck ford_rx_checks[] = {
-    {.msg = {{FORD_BrakeSysFeatures, 0, 8, .check_checksum = true, .max_counter = 15U, .quality_flag=true, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{FORD_BrakeSysFeatures, 0, 8, .max_counter = 15U, .quality_flag=true, .frequency = 50U}, { 0 }, { 0 }}},
     // FORD_EngVehicleSpThrottle2 has a counter that either randomly skips or by 2, likely ECU bug
     // Some hybrid models also experience a bug where this checksum mismatches for one or two frames under heavy acceleration with ACC
     // It has been confirmed that the Bronco Sport's camera only disallows ACC for bad quality flags, not counters or checksums, so we match that
-    {.msg = {{FORD_EngVehicleSpThrottle2, 0, 8, .check_checksum = false, .quality_flag=true, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{FORD_Yaw_Data_FD1, 0, 8, .check_checksum = true, .max_counter = 255U, .quality_flag=true, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{FORD_EngVehicleSpThrottle2, 0, 8, .ignore_checksum = true, .ignore_counter = true, .quality_flag=true, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{FORD_Yaw_Data_FD1, 0, 8, .max_counter = 255U, .quality_flag=true, .frequency = 100U}, { 0 }, { 0 }}},
     // These messages have no counter or checksum
-    {.msg = {{FORD_EngBrakeData, 0, 8, .frequency = 10U}, { 0 }, { 0 }}},
-    {.msg = {{FORD_EngVehicleSpThrottle, 0, 8, .frequency = 100U}, { 0 }, { 0 }}},
-    {.msg = {{FORD_DesiredTorqBrk, 0, 8, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{FORD_EngBrakeData, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},
+    {.msg = {{FORD_EngVehicleSpThrottle, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{FORD_DesiredTorqBrk, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
   };
 
-  #define FORD_COMMON_TX_MSGS       \
-    {FORD_Steering_Data_FD1, 0, 8}, \
-    {FORD_Steering_Data_FD1, 2, 8}, \
-    {FORD_ACCDATA_3, 0, 8},         \
-    {FORD_Lane_Assist_Data1, 0, 8}, \
-    {FORD_IPMA_Data, 0, 8},         \
+  #define FORD_COMMON_TX_MSGS \
+    {FORD_Steering_Data_FD1, 0, 8, .check_relay = false}, \
+    {FORD_Steering_Data_FD1, 2, 8, .check_relay = false}, \
+    {FORD_ACCDATA_3, 0, 8, .check_relay = true},          \
+    {FORD_Lane_Assist_Data1, 0, 8, .check_relay = true},  \
+    {FORD_IPMA_Data, 0, 8, .check_relay = true},          \
 
   static const CanMsg FORD_CANFD_LONG_TX_MSGS[] = {
     FORD_COMMON_TX_MSGS
-    {FORD_ACCDATA, 0, 8},
-    {FORD_LateralMotionControl2, 0, 8},
+    {FORD_ACCDATA, 0, 8, .check_relay = true},
+    {FORD_LateralMotionControl2, 0, 8, .check_relay = true},
   };
 
   static const CanMsg FORD_CANFD_STOCK_TX_MSGS[] = {
     FORD_COMMON_TX_MSGS
-    {FORD_LateralMotionControl2, 0, 8},
+    {FORD_LateralMotionControl2, 0, 8, .check_relay = true},
   };
 
   static const CanMsg FORD_STOCK_TX_MSGS[] = {
     FORD_COMMON_TX_MSGS
-    {FORD_LateralMotionControl, 0, 8},
+    {FORD_LateralMotionControl, 0, 8, .check_relay = true},
   };
 
   static const CanMsg FORD_LONG_TX_MSGS[] = {
     FORD_COMMON_TX_MSGS
-    {FORD_ACCDATA, 0, 8},
-    {FORD_LateralMotionControl, 0, 8},
+    {FORD_ACCDATA, 0, 8, .check_relay = true},
+    {FORD_LateralMotionControl, 0, 8, .check_relay = true},
   };
 
   const uint16_t FORD_PARAM_CANFD = 2;
-  ford_canfd = GET_FLAG(param, FORD_PARAM_CANFD);
+  const bool ford_canfd = GET_FLAG(param, FORD_PARAM_CANFD);
 
-  ford_longitudinal = false;
+  bool ford_longitudinal = false;
 
 #ifdef ALLOW_DEBUG
   const uint16_t FORD_PARAM_LONGITUDINAL = 1;
@@ -426,7 +373,6 @@ const safety_hooks ford_hooks = {
   .init = ford_init,
   .rx = ford_rx_hook,
   .tx = ford_tx_hook,
-  .fwd = ford_fwd_hook,
   .get_counter = ford_get_counter,
   .get_checksum = ford_get_checksum,
   .compute_checksum = ford_compute_checksum,
