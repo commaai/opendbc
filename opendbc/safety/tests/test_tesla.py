@@ -107,10 +107,12 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
           self.assertTrue(self._rx(self._angle_meas_msg(0, hands_on_level=hands_on_level, eac_status=eac_status,
                                                         eac_error_code=eac_error_code)))
           self.assertNotEqual(should_disengage, self.safety.get_controls_allowed())
+          self.assertEqual(should_disengage, self.safety.get_steering_disengage_prev())
 
           # Should not recover
           self.assertTrue(self._rx(self._angle_meas_msg(0, hands_on_level=0, eac_status=1, eac_error_code=0)))
           self.assertNotEqual(should_disengage, self.safety.get_controls_allowed())
+          self.assertFalse(self.safety.get_steering_disengage_prev())
 
 
 class TestTeslaStockSafety(TestTeslaSafetyBase):
