@@ -244,13 +244,13 @@ static safety_config chrysler_init(uint16_t param) {
     {.msg = {{CHRYSLER_RAM_HD_ADDRS.DAS_3, 2, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
   };
 
-#define CHRYSLER_RAM_HD_COMMON_TX_MSGS                  \
-  {CHRYSLER_RAM_HD_ADDRS.CRUISE_BUTTONS, 2, 3, false},  \
-  {CHRYSLER_RAM_HD_ADDRS.LKAS_COMMAND, 0, 8, true},     \
-  {CHRYSLER_RAM_HD_ADDRS.DAS_6, 0, 8, true},            \
+#define CHRYSLER_RAM_HD_COMMON_TX_MSGS                                 \
+  {CHRYSLER_RAM_HD_ADDRS.CRUISE_BUTTONS, 2, 3, .check_relay = false},  \
+  {CHRYSLER_RAM_HD_ADDRS.LKAS_COMMAND, 0, 8, .check_relay = true},     \
+  {CHRYSLER_RAM_HD_ADDRS.DAS_6, 0, 8, .check_relay = true},            \
 
-#define CHRYSLER_RAM_HD_ALT_BUTTONS_TX_MSGS                 \
-  {CHRYSLER_RAM_HD_ADDRS.CRUISE_BUTTONS_ALT, 2, 3, false},  \
+#define CHRYSLER_RAM_HD_ALT_BUTTONS_TX_MSGS                                \
+  {CHRYSLER_RAM_HD_ADDRS.CRUISE_BUTTONS_ALT, 2, 3, .check_relay = false},  \
 
   const uint32_t CHRYSLER_PARAM_RAM_HD = 2U;  // set for Ram HD platform
   bool enable_ram_hd = GET_FLAG(param, CHRYSLER_PARAM_RAM_HD);
