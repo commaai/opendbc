@@ -45,8 +45,9 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     values = {"DAS_steeringAngleRequest": angle, "DAS_steeringControlType": 1 if enabled else 0}
     return self.packer.make_can_msg_panda("DAS_steeringControl", 0, values)
 
-  def _angle_meas_msg(self, angle: float):
-    values = {"EPAS3S_internalSAS": angle}
+  def _angle_meas_msg(self, angle: float, hands_on_level: int = 0, eac_status: int = 1, eac_error_code: int = 0):
+    values = {"EPAS3S_internalSAS": angle, "EPAS3S_handsOnLevel": hands_on_level,
+              "EPAS3S_eacStatus": eac_status, "EPAS3S_eacErrorCode": eac_error_code}
     return self.packer.make_can_msg_panda("EPAS3S_sysStatus", 0, values)
 
   def _user_brake_msg(self, brake):
@@ -89,6 +90,32 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     # OVERRIDDEN: 79.1667 is the max speed in m/s
     self._common_measurement_test(self._speed_msg, 0, 285 / 3.6, 1,
                                   self.safety.get_vehicle_speed_min, self.safety.get_vehicle_speed_max)
+
+  def test_steering_wheel_disengage(self):
+    # Tesla disengages when the user forcibly overrides the locked-in angle steering control
+    # Either when the hands on level is high, or there is a high angle rate fault
+
+    self.safety.set_controls_allowed(True)
+    # No fault
+    self.assertTrue(self._rx(self._angle_meas_msg(0, eac_status=1, eac_error_code=0)))
+    self.assertTrue(self.safety.get_controls_allowed())
+
+    # EAC_INHIBITED, no error code
+    self.assertTrue(self._rx(self._angle_meas_msg(0, eac_status=0, eac_error_code=0)))
+    self.assertTrue(self.safety.get_controls_allowed())
+
+    # EAC_INHIBITED, angle rate error code
+    self.assertTrue(self._rx(self._angle_meas_msg(0, eac_status=0, eac_error_code=9)))
+    self.assertFalse(self.safety.get_controls_allowed())
+
+    # Should not recover
+    self.assertTrue(self._rx(self._angle_meas_msg(0, eac_status=1, eac_error_code=0)))
+    self.assertFalse(self.safety.get_controls_allowed())
+
+    self.safety.set_controls_allowed(True)
+    # Hands on level
+    self.assertTrue(self._rx(self._angle_meas_msg(0, hands_on_level=3, eac_status=1, eac_error_code=0)))
+    self.assertFalse(self.safety.get_controls_allowed())
 
 
 class TestTeslaStockSafety(TestTeslaSafetyBase):
