@@ -219,6 +219,8 @@ static safety_config tesla_init(uint16_t param) {
 #endif
 
   tesla_stock_aeb = false;
+  // forward stock messages on startup so that we don't fault if starting while Summon is active.
+  // updated once we get DI_state to confirm Summon state, which is slow at 10Hz
   tesla_autopark = true;
   tesla_autopark_prev = false;
 
