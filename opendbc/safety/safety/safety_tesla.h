@@ -4,6 +4,7 @@
 
 static bool tesla_longitudinal = false;
 static bool tesla_stock_aeb = false;
+// At the moment, only Summon is supported
 static bool tesla_autopark = false;
 static bool tesla_autopark_prev = false;
 
@@ -47,16 +48,11 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
     if (addr == 0x286) {
       // Autopark state
       int autopark_state = (GET_BYTE(to_push, 3) >> 1) & 0x0FU;  // DI_autoparkState
-      // TODO: doing summon first, only seen these states
-      bool tesla_autopark_now = (autopark_state == 2) ||  // STARTED (TODO: not seen)
-                                (autopark_state == 3) ||  // ACTIVE
+      bool tesla_autopark_now = (autopark_state == 3) ||  // ACTIVE
                                 (autopark_state == 4) ||  // COMPLETE
-                                (autopark_state == 5) ||  // PAUSED (TODO: not seen)
-                                (autopark_state == 6) ||  // ABORTED
-                                (autopark_state == 7) ||  // RESUMED (TODO: not seen)
-                                (autopark_state == 8) ||  // UNPARK_COMPLETE (TODO: not seen)
                                 (autopark_state == 9);    // SELFPARK_STARTED
 
+      // Only consider rising edges while controls are not allowed
       if (tesla_autopark_now && !tesla_autopark_prev && !controls_allowed) {
         tesla_autopark = true;
       }
