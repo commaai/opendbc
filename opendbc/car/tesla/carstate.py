@@ -15,7 +15,6 @@ class CarState(CarStateBase):
     self.can_define = CANDefine(DBC[CP.carFingerprint][Bus.party])
     self.shifter_values = self.can_define.dv["DI_systemStatus"]["DI_gear"]
 
-    self.hands_on_level = 0
     self.das_control = None
 
   def update(self, can_parsers) -> structs.CarState:
@@ -38,7 +37,7 @@ class CarState(CarStateBase):
 
     # Steering wheel
     epas_status = cp_party.vl["EPAS3S_sysStatus"]
-    self.hands_on_level = epas_status["EPAS3S_handsOnLevel"]
+    ret.steeringDisengage = epas_status["EPAS3S_handsOnLevel"] >= 3
     ret.steeringAngleDeg = -epas_status["EPAS3S_internalSAS"]
     ret.steeringRateDeg = -cp_ap_party.vl["SCCM_steeringAngleSensor"]["SCCM_steeringAngleSpeed"]
     ret.steeringTorque = -epas_status["EPAS3S_torsionBarTorque"]
