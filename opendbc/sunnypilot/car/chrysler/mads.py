@@ -22,7 +22,6 @@ ButtonType = structs.CarState.ButtonEvent.Type
 
 class MadsCarController:
   def __init__(self):
-    super().__init__()
     self.mads = MadsDataSP(False, False, False)
 
   @staticmethod
