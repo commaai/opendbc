@@ -111,7 +111,6 @@ class CarController(CarControllerBase):
     self.stopping_counter = 0
 
     self.accel = 0.0
-    self.aTarget = 0.0
     self.speed = 0.0
     self.gas = 0.0
     self.brake = 0.0
