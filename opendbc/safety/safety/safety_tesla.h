@@ -5,6 +5,7 @@
 static bool tesla_longitudinal = false;
 static bool tesla_stock_aeb = false;
 static bool tesla_autopark = false;
+static bool tesla_autopark_prev = false;
 
 static void tesla_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
@@ -56,7 +57,6 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
                                 (autopark_state == 8) ||  // UNPARK_COMPLETE (TODO: not seen)
                                 (autopark_state == 9);    // SELFPARK_STARTED
 
-      static bool tesla_autopark_prev = false;
       if (tesla_autopark_now && !tesla_autopark_prev && !controls_allowed) {
         tesla_autopark = true;
       }
@@ -219,6 +219,8 @@ static safety_config tesla_init(uint16_t param) {
 #endif
 
   tesla_stock_aeb = false;
+  tesla_autopark = false;
+  tesla_autopark_prev = false;
 
   static RxCheck tesla_model3_y_rx_checks[] = {
     {.msg = {{0x2b9, 2, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 25U}, { 0 }, { 0 }}},   // DAS_control
