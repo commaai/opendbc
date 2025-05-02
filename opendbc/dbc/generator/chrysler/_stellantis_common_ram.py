@@ -42,12 +42,22 @@ if __name__ == "__main__":
       wrote_addrs = set()
       cur_msg = []
       for line in in_f.readlines():
-        cur_msg.append(line)
+        if line.startswith('VAL_'):
+          val_sl = line.split(' ')
+          val_addr = int(val_sl[1])
+          val_new_addrs = addr_lookup.get(val_addr, (val_addr,))
+          if not isinstance(val_new_addrs, tuple):
+            val_new_addrs = (val_new_addrs,)
+          for val_new_addr in val_new_addrs:
+            val_sl[1] = str(val_new_addr)
+            cur_msg.append(' '.join(val_sl))
+        else:
+          cur_msg.append(line)
         if line.strip() == '':
           if not len(cur_msg):
             continue
 
-          if not cur_msg[0].startswith(('BO_', 'VAL_')):
+          if not cur_msg[0].startswith('BO_'):
             out_f.write(''.join(cur_msg))
             cur_msg = []
             continue
@@ -69,6 +79,9 @@ if __name__ == "__main__":
 
           wrote_addrs.add(addr)
           cur_msg = []
+
+      if cur_msg:
+        out_f.write(''.join(cur_msg))
 
       missing_addrs = set(addr_lookup.keys()) - wrote_addrs
       assert len(missing_addrs) == 0, f"Missing addrs from {src}: {missing_addrs}"
