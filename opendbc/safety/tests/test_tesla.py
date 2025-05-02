@@ -94,8 +94,8 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
   def test_steering_wheel_disengage(self):
     # Tesla disengages when the user forcibly overrides the locked-in angle steering control
     # Either when the hands on level is high, or there is a high angle rate fault
-
     self.safety.set_controls_allowed(True)
+
     # No fault
     self.assertTrue(self._rx(self._angle_meas_msg(0, eac_status=1, eac_error_code=0)))
     self.assertTrue(self.safety.get_controls_allowed())
@@ -113,6 +113,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     self.assertFalse(self.safety.get_controls_allowed())
 
     self.safety.set_controls_allowed(True)
+
     # Hands on level
     self.assertTrue(self._rx(self._angle_meas_msg(0, hands_on_level=3, eac_status=1, eac_error_code=0)))
     self.assertFalse(self.safety.get_controls_allowed())
