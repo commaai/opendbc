@@ -37,7 +37,7 @@ class CarState(CarStateBase):
 
     # Steering wheel
     epas_status = cp_party.vl["EPAS3S_sysStatus"]
-    ret.steeringDisengage = epas_status["EPAS3S_handsOnLevel"] >= 3
+    ret.steeringDisengage = epas_status["EPAS3S_handsOnLevel"] >= 3 or (epas_status["EPAS3S_eacStatus"] == 0 and epas_status["EPAS3S_eacErrorCode"] == 9)
     ret.steeringAngleDeg = -epas_status["EPAS3S_internalSAS"]
     ret.steeringRateDeg = -cp_ap_party.vl["SCCM_steeringAngleSensor"]["SCCM_steeringAngleSpeed"]
     ret.steeringTorque = -epas_status["EPAS3S_torsionBarTorque"]
