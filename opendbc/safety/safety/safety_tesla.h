@@ -219,7 +219,7 @@ static safety_config tesla_init(uint16_t param) {
 #endif
 
   tesla_stock_aeb = false;
-  tesla_autopark = false;
+  tesla_autopark = true;
   tesla_autopark_prev = false;
 
   static RxCheck tesla_model3_y_rx_checks[] = {
