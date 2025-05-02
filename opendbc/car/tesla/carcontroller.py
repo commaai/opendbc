@@ -30,7 +30,7 @@ class CarController(CarControllerBase):
     # Longitudinal control
     if self.CP.openpilotLongitudinalControl:
       if self.frame % 4 == 0:
-        state = 13 if CC.cruiseControl.cancel else 4  # 4=ACC_ON, 13=ACC_CANCEL_GENERIC_SILENT
+        state = 4 if CC.enabled else 13  # 4=ACC_ON, 13=ACC_CANCEL_GENERIC_SILENT
         accel = float(np.clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
         cntr = (self.frame // 4) % 8
         can_sends.append(self.tesla_can.create_longitudinal_command(state, accel, cntr, CS.out.vEgo, CC.longActive))
