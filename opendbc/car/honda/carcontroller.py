@@ -129,6 +129,7 @@ class CarController(CarControllerBase):
       gas, brake = compute_gas_brake(actuators.accel, CS.out.vEgo, self.CP.carFingerprint)
     else:
       accel = 0.0
+      aTarget = 0.0
       gas, brake = 0.0, 0.0
 
     # *** rate limit steer ***
