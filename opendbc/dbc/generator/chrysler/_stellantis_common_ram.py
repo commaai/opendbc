@@ -48,6 +48,8 @@ if __name__ == "__main__":
             continue
 
           if not cur_msg[0].startswith(('BO_', 'VAL_')):
+            out_f.write(''.join(cur_msg))
+            cur_msg = []
             continue
 
           # msg done
@@ -59,7 +61,7 @@ if __name__ == "__main__":
             new_addrs = (new_addrs,)
 
           for idx, new_addr in enumerate(new_addrs):
-            if idx > 0:
+            if idx > 0 and cur_msg[0].startswith('BO_'):
               sl[2] = sl[2][:-1] + '_ALT:'
             sl[1] = str(new_addr)
             cur_msg[0] = ' '.join(sl)
@@ -67,8 +69,6 @@ if __name__ == "__main__":
 
           wrote_addrs.add(addr)
           cur_msg = []
-
-          out_f.write(''.join(cur_msg))
 
       missing_addrs = set(addr_lookup.keys()) - wrote_addrs
       assert len(missing_addrs) == 0, f"Missing addrs from {src}: {missing_addrs}"
