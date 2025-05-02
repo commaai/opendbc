@@ -49,8 +49,6 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
                                 (autopark_state == 8) ||  // UNPARK_COMPLETE (TODO: not seen)
                                 (autopark_state == 9);    // SELFPARK_STARTED
 
-//      printf("tesla_autopark_now: %d\n", tesla_autopark_now);
-
       static bool tesla_autopark_prev = false;
       if (tesla_autopark_now && !tesla_autopark_prev && !controls_allowed) {
         tesla_autopark = true;
@@ -58,7 +56,6 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
       if (!tesla_autopark_now) {
         tesla_autopark = false;
       }
-      printf("tesla_autopark: %d, tesla_autopark_now: %d\n", tesla_autopark, tesla_autopark_now);
       tesla_autopark_prev = tesla_autopark_now;
 
       // Cruise state
@@ -170,7 +167,6 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
   if (violation) {
     tx = false;
   }
-  printf("sending msgs now: %d, tx: %d\n", addr, tx);
 
   return tx;
 }
@@ -191,8 +187,6 @@ static bool tesla_fwd_hook(int bus_num, int addr) {
       }
     }
   }
-
-  printf("block_msg: %d, addr: %d\n", block_msg, addr);
 
   return block_msg;
 }
