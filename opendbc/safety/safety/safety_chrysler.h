@@ -220,9 +220,6 @@ static safety_config chrysler_init(uint16_t param) {
   };
 
 #ifdef ALLOW_DEBUG
-  const uint32_t CHRYSLER_PARAM_RAM_HD_ALT_BUTTONS = 4U;
-  const bool chrysler_ram_hd_alt_buttons = GET_FLAG(param, CHRYSLER_PARAM_RAM_HD_ALT_BUTTONS);
-
   // CAN messages for the 5th gen RAM HD platform
   static const ChryslerAddrs CHRYSLER_RAM_HD_ADDRS = {
     .EPS_2              = 0x220,  // EPS driver input torque
@@ -253,7 +250,9 @@ static safety_config chrysler_init(uint16_t param) {
   {CHRYSLER_RAM_HD_ADDRS.CRUISE_BUTTONS_ALT, 2, 3, .check_relay = false},  \
 
   const uint32_t CHRYSLER_PARAM_RAM_HD = 2U;  // set for Ram HD platform
+  const uint32_t CHRYSLER_PARAM_RAM_HD_ALT_BUTTONS = 4U;
   bool enable_ram_hd = GET_FLAG(param, CHRYSLER_PARAM_RAM_HD);
+  bool chrysler_ram_hd_alt_buttons = GET_FLAG(param, CHRYSLER_PARAM_RAM_HD_ALT_BUTTONS);
 #endif
 
   safety_config ret;
