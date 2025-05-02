@@ -365,7 +365,7 @@ static void generic_rx_checks(void) {
   }
   regen_braking_prev = regen_braking;
 
-  // exit controls on rising
+  // exit controls on rising edge of steering override/disengage
   if (steering_disengage && !steering_disengage_prev) {
     controls_allowed = false;
   }
