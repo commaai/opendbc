@@ -34,6 +34,8 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
   MIN_ACCEL = -3.48
   INACTIVE_ACCEL = 0.0
 
+  cnt_epas = 0
+
   packer: CANPackerPanda
 
   def setUp(self):
@@ -45,8 +47,11 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     values = {"DAS_steeringAngleRequest": angle, "DAS_steeringControlType": 1 if enabled else 0}
     return self.packer.make_can_msg_panda("DAS_steeringControl", 0, values)
 
-  def _angle_meas_msg(self, angle: float):
-    values = {"EPAS3S_internalSAS": angle}
+  def _angle_meas_msg(self, angle: float, hands_on_level: int = 0, eac_status: int = 1, eac_error_code: int = 0):
+    values = {"EPAS3S_internalSAS": angle, "EPAS3S_handsOnLevel": hands_on_level,
+              "EPAS3S_eacStatus": eac_status, "EPAS3S_eacErrorCode": eac_error_code,
+              "EPAS3S_sysStatusCounter": self.cnt_epas % 16}
+    self.__class__.cnt_epas += 1
     return self.packer.make_can_msg_panda("EPAS3S_sysStatus", 0, values)
 
   def _user_brake_msg(self, brake):
@@ -89,6 +94,25 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     # OVERRIDDEN: 79.1667 is the max speed in m/s
     self._common_measurement_test(self._speed_msg, 0, 285 / 3.6, 1,
                                   self.safety.get_vehicle_speed_min, self.safety.get_vehicle_speed_max)
+
+  def test_steering_wheel_disengage(self):
+    # Tesla disengages when the user forcibly overrides the locked-in angle steering control
+    # Either when the hands on level is high, or if there is a high angle rate fault
+    for hands_on_level in range(4):
+      for eac_status in range(8):
+        for eac_error_code in range(16):
+          self.safety.set_controls_allowed(True)
+
+          should_disengage = hands_on_level >= 3 or (eac_status == 0 and eac_error_code == 9)
+          self.assertTrue(self._rx(self._angle_meas_msg(0, hands_on_level=hands_on_level, eac_status=eac_status,
+                                                        eac_error_code=eac_error_code)))
+          self.assertNotEqual(should_disengage, self.safety.get_controls_allowed())
+          self.assertEqual(should_disengage, self.safety.get_steering_disengage_prev())
+
+          # Should not recover
+          self.assertTrue(self._rx(self._angle_meas_msg(0, hands_on_level=0, eac_status=1, eac_error_code=0)))
+          self.assertNotEqual(should_disengage, self.safety.get_controls_allowed())
+          self.assertFalse(self.safety.get_steering_disengage_prev())
 
 
 class TestTeslaStockSafety(TestTeslaSafetyBase):
