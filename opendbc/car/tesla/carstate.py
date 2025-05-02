@@ -49,7 +49,7 @@ class CarState(CarStateBase):
     eac_status = self.can_define.dv["EPAS3S_sysStatus"]["EPAS3S_eacStatus"].get(int(epas_status["EPAS3S_eacStatus"]), None)
     ret.steerFaultPermanent = eac_status == "EAC_FAULT"
     # Don't count steering overrides as faults
-    ret.steerFaultTemporary = eac_status == "EAC_INHIBITED" and not self.hands_on_level < 3
+    ret.steerFaultTemporary = eac_status == "EAC_INHIBITED" and self.hands_on_level < 3
 
     # Cruise state
     cruise_state = self.can_define.dv["DI_state"]["DI_cruiseState"].get(int(cp_party.vl["DI_state"]["DI_cruiseState"]), None)
