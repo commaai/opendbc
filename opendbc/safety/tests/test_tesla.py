@@ -93,7 +93,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
   def test_steering_wheel_disengage(self):
     # Tesla disengages when the user forcibly overrides the locked-in angle steering control
-    # Either when the hands on level is high, or there is a high angle rate fault
+        # Either when the hands on level is high, or if there is a high angle rate fault
     self.safety.set_controls_allowed(True)
 
     # No fault
