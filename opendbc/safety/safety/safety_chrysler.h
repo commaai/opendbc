@@ -105,9 +105,8 @@ static void chrysler_rx_hook(const CANPacket_t *to_push) {
 
 static bool chrysler_tx_hook(const CANPacket_t *to_send) {
   const TorqueSteeringLimits CHRYSLER_STEERING_LIMITS = {
-    .max_steer = 261,
+    .max_torque = 261,
     .max_rt_delta = 112,
-    .max_rt_interval = 250000,
     .max_rate_up = 3,
     .max_rate_down = 3,
     .max_torque_error = 80,
@@ -115,9 +114,8 @@ static bool chrysler_tx_hook(const CANPacket_t *to_send) {
   };
 
   const TorqueSteeringLimits CHRYSLER_RAM_DT_STEERING_LIMITS = {
-    .max_steer = 350,
+    .max_torque = 350,
     .max_rt_delta = 112,
-    .max_rt_interval = 250000,
     .max_rate_up = 6,
     .max_rate_down = 6,
     .max_torque_error = 80,
@@ -125,9 +123,8 @@ static bool chrysler_tx_hook(const CANPacket_t *to_send) {
   };
 
   const TorqueSteeringLimits CHRYSLER_RAM_HD_STEERING_LIMITS = {
-    .max_steer = 361,
+    .max_torque = 361,
     .max_rt_delta = 182,
-    .max_rt_interval = 250000,
     .max_rate_up = 14,
     .max_rate_down = 14,
     .max_torque_error = 80,
@@ -163,18 +160,6 @@ static bool chrysler_tx_hook(const CANPacket_t *to_send) {
   }
 
   return tx;
-}
-
-static bool chrysler_fwd_hook(int bus_num, int addr) {
-  bool block_msg = false;
-
-  // forward all messages from camera except LKAS messages
-  const bool is_lkas = ((addr == chrysler_addrs->LKAS_COMMAND) || (addr == chrysler_addrs->DAS_6));
-  if ((bus_num == 2) && is_lkas){
-    block_msg = true;
-  }
-
-  return block_msg;
 }
 
 static safety_config chrysler_init(uint16_t param) {
@@ -223,15 +208,15 @@ static safety_config chrysler_init(uint16_t param) {
   };
 
   static const CanMsg CHRYSLER_TX_MSGS[] = {
-    {CHRYSLER_ADDRS.CRUISE_BUTTONS, 0, 3, false},
-    {CHRYSLER_ADDRS.LKAS_COMMAND, 0, 6, true},
-    {CHRYSLER_ADDRS.DAS_6, 0, 8, false},
+    {CHRYSLER_ADDRS.CRUISE_BUTTONS, 0, 3, .check_relay = false},
+    {CHRYSLER_ADDRS.LKAS_COMMAND, 0, 6, .check_relay = true},
+    {CHRYSLER_ADDRS.DAS_6, 0, 8, .check_relay = true},
   };
 
   static const CanMsg CHRYSLER_RAM_DT_TX_MSGS[] = {
-    {CHRYSLER_RAM_DT_ADDRS.CRUISE_BUTTONS, 2, 3, false},
-    {CHRYSLER_RAM_DT_ADDRS.LKAS_COMMAND, 0, 8, true},
-    {CHRYSLER_RAM_DT_ADDRS.DAS_6, 0, 8, false},
+    {CHRYSLER_RAM_DT_ADDRS.CRUISE_BUTTONS, 2, 3, .check_relay = false},
+    {CHRYSLER_RAM_DT_ADDRS.LKAS_COMMAND, 0, 8, .check_relay = true},
+    {CHRYSLER_RAM_DT_ADDRS.DAS_6, 0, 8, .check_relay = true},
   };
 
 #ifdef ALLOW_DEBUG
@@ -262,7 +247,7 @@ static safety_config chrysler_init(uint16_t param) {
 #define CHRYSLER_RAM_HD_COMMON_TX_MSGS                  \
   {CHRYSLER_RAM_HD_ADDRS.CRUISE_BUTTONS, 2, 3, false},  \
   {CHRYSLER_RAM_HD_ADDRS.LKAS_COMMAND, 0, 8, true},     \
-  {CHRYSLER_RAM_HD_ADDRS.DAS_6, 0, 8, false},           \
+  {CHRYSLER_RAM_HD_ADDRS.DAS_6, 0, 8, true},            \
 
 #define CHRYSLER_RAM_HD_ALT_BUTTONS_TX_MSGS                 \
   {CHRYSLER_RAM_HD_ADDRS.CRUISE_BUTTONS_ALT, 2, 3, false},  \
@@ -311,7 +296,6 @@ const safety_hooks chrysler_hooks = {
   .init = chrysler_init,
   .rx = chrysler_rx_hook,
   .tx = chrysler_tx_hook,
-  .fwd = chrysler_fwd_hook,
   .get_counter = chrysler_get_counter,
   .get_checksum = chrysler_get_checksum,
   .compute_checksum = chrysler_compute_checksum,
