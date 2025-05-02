@@ -93,30 +93,21 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
   def test_steering_wheel_disengage(self):
     # Tesla disengages when the user forcibly overrides the locked-in angle steering control
-        # Either when the hands on level is high, or if there is a high angle rate fault
-    self.safety.set_controls_allowed(True)
+    # Either when the hands on level is high, or if there is a high angle rate fault
 
-    # No fault
-    self.assertTrue(self._rx(self._angle_meas_msg(0, eac_status=1, eac_error_code=0)))
-    self.assertTrue(self.safety.get_controls_allowed())
+    for hands_on_level in range(4):
+      for eac_status in range(8):
+        for eac_error_code in range(16):
+          self.safety.set_controls_allowed(True)
 
-    # EAC_INHIBITED, no error code
-    self.assertTrue(self._rx(self._angle_meas_msg(0, eac_status=0, eac_error_code=0)))
-    self.assertTrue(self.safety.get_controls_allowed())
+          should_disengage = hands_on_level >= 3 or (eac_status == 0 and eac_error_code == 9)
+          self.assertTrue(self._rx(self._angle_meas_msg(0, hands_on_level=hands_on_level, eac_status=eac_status,
+                                                        eac_error_code=eac_error_code)))
+          self.assertNotEqual(should_disengage, self.safety.get_controls_allowed())
 
-    # EAC_INHIBITED, angle rate error code
-    self.assertTrue(self._rx(self._angle_meas_msg(0, eac_status=0, eac_error_code=9)))
-    self.assertFalse(self.safety.get_controls_allowed())
-
-    # Should not recover
-    self.assertTrue(self._rx(self._angle_meas_msg(0, eac_status=1, eac_error_code=0)))
-    self.assertFalse(self.safety.get_controls_allowed())
-
-    self.safety.set_controls_allowed(True)
-
-    # Hands on level
-    self.assertTrue(self._rx(self._angle_meas_msg(0, hands_on_level=3, eac_status=1, eac_error_code=0)))
-    self.assertFalse(self.safety.get_controls_allowed())
+          # Should not recover
+          self.assertTrue(self._rx(self._angle_meas_msg(0, hands_on_level=0, eac_status=1, eac_error_code=0)))
+          self.assertNotEqual(should_disengage, self.safety.get_controls_allowed())
 
 
 class TestTeslaStockSafety(TestTeslaSafetyBase):
