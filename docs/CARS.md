@@ -85,7 +85,7 @@
 |Honda|Fit 2018-20|Honda Sensing|[Upstream](#upstream)|
 |Honda|Freed 2020|Honda Sensing|[Upstream](#upstream)|
 |Honda|HR-V 2019-22|Honda Sensing|[Upstream](#upstream)|
-|Honda|HR-V 2023|All|[Upstream](#upstream)|
+|Honda|HR-V 2023-25|All|[Upstream](#upstream)|
 |Honda|Insight 2019-22|All|[Upstream](#upstream)|
 |Honda|Inspire 2018|All|[Upstream](#upstream)|
 |Honda|Odyssey 2018-20|Honda Sensing|[Upstream](#upstream)|
