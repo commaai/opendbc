@@ -111,6 +111,7 @@ class CarController(CarControllerBase):
     self.stopping_counter = 0
 
     self.accel = 0.0
+    self.aTarget = 0.0
     self.speed = 0.0
     self.gas = 0.0
     self.brake = 0.0
@@ -125,6 +126,7 @@ class CarController(CarControllerBase):
 
     if CC.longActive:
       accel = actuators.accel
+      aTarget = actuators.aTarget
       gas, brake = compute_gas_brake(actuators.accel, CS.out.vEgo, self.CP.carFingerprint)
     else:
       accel = 0.0
@@ -206,7 +208,7 @@ class CarController(CarControllerBase):
         ts = self.frame * DT_CTRL
 
         if self.CP.carFingerprint in HONDA_BOSCH:
-          self.accel = float(np.clip(accel, self.params.BOSCH_ACCEL_MIN, self.params.BOSCH_ACCEL_MAX))
+          self.accel = float(np.clip(aTarget, self.params.BOSCH_ACCEL_MIN, self.params.BOSCH_ACCEL_MAX))
           self.gas = float(np.interp(accel, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_GAS_LOOKUP_V))
 
           stopping = actuators.longControlState == LongCtrlState.stopping
