@@ -174,8 +174,8 @@ static bool tesla_fwd_hook(int bus_num, int addr) {
   bool block_msg = false;
 
   if (bus_num == 2) {
-    // DAS_steeringControl, APS_eacMonitor
     if (!tesla_autopark) {
+      // DAS_steeringControl, APS_eacMonitor
       if ((addr == 0x488) || (addr == 0x27d)) {
         block_msg = true;
       }
@@ -211,8 +211,8 @@ static safety_config tesla_init(uint16_t param) {
 #endif
 
   tesla_stock_aeb = false;
-  // forward stock messages on startup so that we don't fault if starting while Summon is active.
-  // updated once we get DI_state to confirm Summon state, which is slow at 10Hz
+  // we need to assume Autopark/Summon on safety init since DI_state is a low freq msg.
+  // this is so that we don't fault if starting while Autopark/Summon is active
   tesla_autopark = true;
   tesla_autopark_prev = false;
 
