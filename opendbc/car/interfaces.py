@@ -21,6 +21,7 @@ from opendbc.can.parser import CANParser
 GearShifter = structs.CarState.GearShifter
 ButtonType = structs.CarState.ButtonEvent.Type
 
+
 V_CRUISE_MAX = 145
 MAX_CTRL_SPEED = (V_CRUISE_MAX + 4) * CV.KPH_TO_MS
 ACCEL_MAX = 2.0
@@ -46,7 +47,6 @@ GEAR_SHIFTER_MAP: dict[str, structs.CarState.GearShifter] = {
   'L': GearShifter.low, 'LOW': GearShifter.low,
   'B': GearShifter.brake, 'BRAKE': GearShifter.brake,
 }
-
 
 class LatControlInputs(NamedTuple):
   lateral_acceleration: float

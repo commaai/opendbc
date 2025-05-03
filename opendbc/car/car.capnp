@@ -636,6 +636,7 @@ struct CarParams {
     chryslerCusw @30;
     psa @31;
     fcaGiorgio @32;
+    perodua @35;
     rivian @33;
     volkswagenMeb @34;
   }
