@@ -44,6 +44,8 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     self.acc_states = {d: v for v, d in self.define.dv["DAS_control"]["DAS_accState"].items()}
     self.autopark_states = {d: v for v, d in self.define.dv["DI_state"]["DI_autoparkState"].items()}
 
+    self.active_autopark_states = [self.autopark_states[s] for s in ('ACTIVE', 'COMPLETE', 'SELFPARK_STARTED')]
+
   def _angle_cmd_msg(self, angle: float, enabled: bool):
     values = {"DAS_steeringAngleRequest": angle, "DAS_steeringControlType": 1 if enabled else 0}
     return self.packer.make_can_msg_panda("DAS_steeringControl", 0, values)
@@ -122,11 +124,9 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     # We should not respect Autopark that activates while controls are allowed
     self.safety.set_controls_allowed(True)
 
-    # TODO: add MSG_APS_eacMonitor
-
     self._rx(self._pcm_status_msg(True, self.autopark_states["SELFPARK_STARTED"]))
     self.assertTrue(self.safety.get_controls_allowed())
-    self.assertTrue(self._tx(self._angle_cmd_msg(0, False)))
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
     self.assertTrue(self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
 
     # We should still not respect Autopark if we disengage cruise
@@ -137,16 +137,15 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
   def test_autopark_summon_behavior(self):
     for autopark_state in range(16):
-      self.safety.set_controls_allowed(False)
+      self._rx(self._pcm_status_msg(False, 0))
 
       # We shouldn't allow controls if Autopark is an active state
-      autopark_active = autopark_state in range(2, 10)
-      self._rx(self._pcm_status_msg(False, 0))
+      autopark_active = autopark_state in self.active_autopark_states
       self._rx(self._pcm_status_msg(False, autopark_state))
       self._rx(self._pcm_status_msg(True, autopark_state))
       self.assertNotEqual(autopark_active, self.safety.get_controls_allowed())
 
-      # We should also start blocking all inactive/active openpilot controls
+      # We should also start blocking all inactive/active openpilot msgs
       self.assertNotEqual(autopark_active, self._tx(self._angle_cmd_msg(0, False)))
       self.assertNotEqual(autopark_active, self._tx(self._angle_cmd_msg(0, True)))
       self.assertNotEqual(autopark_active, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
