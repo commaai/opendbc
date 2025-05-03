@@ -108,11 +108,6 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
   int addr = GET_ADDR(to_send);
   bool violation = false;
 
-  // Don't send messages when Autopark is active
-  if (tesla_autopark) {
-    violation = true;
-  }
-
   // Steering control: (0.1 * val) - 1638.35 in deg.
   if (addr == 0x488) {
     // We use 1/10 deg as a unit here
@@ -167,7 +162,8 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
     }
   }
 
-  if (violation) {
+  // Don't send any messages when Autopark is active
+  if (violation || tesla_autopark) {
     tx = false;
   }
 
