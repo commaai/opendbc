@@ -194,6 +194,7 @@ struct CarState {
   steeringTorque @8 :Float32;      # TODO: standardize units
   steeringTorqueEps @27 :Float32;  # TODO: standardize units
   steeringPressed @9 :Bool;        # if the user is using the steering wheel
+  steeringDisengage @58 :Bool;     # more force than steeringPressed, disengages for applicable brands
   steerFaultTemporary @35 :Bool;   # temporary EPS fault
   steerFaultPermanent @36 :Bool;   # permanent EPS fault
   invalidLkasSetting @55 :Bool;    # stock LKAS is incorrectly configured (i.e. on or off)
@@ -369,6 +370,7 @@ struct CarControl {
 
     # longitudinal commands
     accel @4: Float32;  # m/s^2
+    aTarget @9: Float32;  # m/s^2, acceleration target before integral
     longControlState @5: LongControlState;
 
     # these are only for logging the actual values sent to the car over CAN

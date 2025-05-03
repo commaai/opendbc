@@ -13,8 +13,15 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
     // Steering angle: (0.1 * val) - 819.2 in deg.
     if (addr == 0x370) {
       // Store it 1/10 deg to match steering request
-      int angle_meas_new = (((GET_BYTE(to_push, 4) & 0x3FU) << 8) | GET_BYTE(to_push, 5)) - 8192U;
+      const int angle_meas_new = (((GET_BYTE(to_push, 4) & 0x3FU) << 8) | GET_BYTE(to_push, 5)) - 8192U;
       update_sample(&angle_meas, angle_meas_new);
+
+      const int hands_on_level = GET_BYTE(to_push, 4) >> 6;  // EPAS3S_handsOnLevel
+      const int eac_status = GET_BYTE(to_push, 6) >> 5;  // EPAS3S_eacStatus
+      const int eac_error_code = GET_BYTE(to_push, 2) >> 4;  // EPAS3S_eacErrorCode
+
+      // Disengage on normal user override, or if high angle rate fault from user overriding extremely quickly
+      steering_disengage = (hands_on_level >= 3) || ((eac_status == 0) && (eac_error_code == 9));
     }
 
     // Vehicle speed
@@ -180,7 +187,7 @@ static safety_config tesla_init(uint16_t param) {
   static RxCheck tesla_model3_y_rx_checks[] = {
     {.msg = {{0x2b9, 2, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 25U}, { 0 }, { 0 }}},   // DAS_control
     {.msg = {{0x257, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},   // DI_speed (speed in kph)
-    {.msg = {{0x370, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},  // EPAS3S_internalSAS (steering angle)
+    {.msg = {{0x370, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},  // EPAS3S_sysStatus (steering angle)
     {.msg = {{0x118, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},  // DI_systemStatus (gas pedal)
     {.msg = {{0x39d, 0, 5, .ignore_checksum = true, .ignore_counter = true, .frequency = 25U}, { 0 }, { 0 }}},   // IBST_status (brakes)
     {.msg = {{0x286, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},   // DI_state (acc state)
