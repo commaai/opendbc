@@ -85,7 +85,7 @@ def fingerprint(can_recv: CanRecvCallable, can_send: CanSendCallable, set_obd_mu
                 cached_params: CarParamsT | None) -> tuple[str | None, dict, str, list[CarParams.CarFw], CarParams.FingerprintSource, bool]:
   fixed_fingerprint = os.environ.get('FINGERPRINT', "")
   skip_fw_query = os.environ.get('SKIP_FW_QUERY', False)
-  disable_fw_cache = True  # os.environ.get('DISABLE_FW_CACHE', False)
+  disable_fw_cache = os.environ.get('DISABLE_FW_CACHE', False)
   ecu_rx_addrs = set()
 
   start_time = time.monotonic()
