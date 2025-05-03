@@ -47,8 +47,10 @@ class CanBus(CanBusBase):
 
 def get_cruise_speed_conversion(car_fingerprint: str, is_metric: bool) -> float:
   # on certain cars, CRUISE_SPEED changes to imperial with car's unit setting
-  return CV.MPH_TO_MS if car_fingerprint in (HONDA_BOSCH_RADARLESS | HONDA_BOSCH_CANFD) and not is_metric else CV.KPH_TO_MS
-
+  if (car_fingerprint in (HONDA_BOSCH_RADARLESS | HONDA_BOSCH_CANFD | {CAR.ACURA_RDX_3G_MMR, CAR.HONDA_ODYSSEY_5G_MMR}) and not is_metric):
+    return CV.MPH_TO_MS
+  else:
+    return CV.KPH_TO_MS
 
 def create_brake_command(packer, CAN, apply_brake, pump_on, pcm_override, pcm_cancel_cmd, fcw, car_fingerprint, stock_brake):
   # TODO: do we loose pressure if we keep pump off for long?
@@ -122,6 +124,7 @@ def create_steering_control(packer, CAN, apply_torque, lkas_active):
   values = {
     "STEER_TORQUE": apply_torque if lkas_active else 0,
     "STEER_TORQUE_REQUEST": lkas_active,
+    "STEER_DOWN_TO_ZERO": 1,
   }
   return packer.make_can_msg("STEERING_CONTROL", CAN.lkas, values)
 
