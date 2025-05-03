@@ -75,9 +75,15 @@ class FordCarDocs(CarDocs):
   def init_make(self, CP: CarParams):
     harness = CarHarness.ford_q4 if CP.flags & FordFlags.CANFD else CarHarness.ford_q3
     if CP.carFingerprint in (CAR.FORD_BRONCO_SPORT_MK1, CAR.FORD_MAVERICK_MK1, CAR.FORD_F_150_MK14, CAR.FORD_F_150_LIGHTNING_MK1):
-      self.car_parts = CarParts([Device.threex_angled_mount, harness])
+      if harness == CarHarness.ford_q4:                                              
+          self.car_parts = CarParts([Device.threex_angled_mount, harness, long_obdc_cable])
+      else:
+          self.car_parts = CarParts([Device.threex_angled_mount])
     else:
-      self.car_parts = CarParts([Device.threex, harness])
+      if harness == CarHarness.ford_q4
+          self.car_parts = CarParts([Device.threex, harness, long odbc_cable])
+      else:
+          self.car_parts = CarParts([Device.threex, harness])
 
 
 @dataclass
