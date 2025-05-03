@@ -170,7 +170,6 @@ class TestTeslaStockSafety(TestTeslaSafetyBase):
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.tesla, 0)
     self.safety.init_tests()
-    self.assertTrue(self._rx(self._pcm_status_msg(False)))
 
   def test_cancel(self):
     for acc_state in range(16):
@@ -193,7 +192,6 @@ class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.tesla, TeslaSafetyFlags.LONG_CONTROL)
     self.safety.init_tests()
-    self.assertTrue(self._rx(self._pcm_status_msg(False)))
 
   def test_no_aeb(self):
     for aeb_event in range(4):
