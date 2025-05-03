@@ -108,6 +108,11 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
   int addr = GET_ADDR(to_send);
   bool violation = false;
 
+  // Don't send any messages when Autopark is active
+  if (tesla_autopark) {
+    violation = true;
+  }
+
   // Steering control: (0.1 * val) - 1638.35 in deg.
   if (addr == 0x488) {
     // We use 1/10 deg as a unit here
@@ -162,8 +167,7 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
     }
   }
 
-  // Don't send any messages when Autopark is active
-  if (violation || tesla_autopark) {
+  if (violation) {
     tx = false;
   }
 
@@ -211,8 +215,8 @@ static safety_config tesla_init(uint16_t param) {
 #endif
 
   tesla_stock_aeb = false;
-  // we need to assume Autopark/Summon on safety init since DI_state is a low freq msg.
-  // this is so that we don't fault if starting while Autopark/Summon is active
+  // we need to assume Autopark/Summon on startup since DI_state is a low freq msg.
+  // this is so that we don't fault if starting while these systems are active
   tesla_autopark = true;
   tesla_autopark_prev = false;
 
