@@ -42,6 +42,9 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     self.packer = CANPackerPanda("tesla_model3_party")
     self.define = CANDefine("tesla_model3_party")
     self.acc_states = {d: v for v, d in self.define.dv["DAS_control"]["DAS_accState"].items()}
+    self.autopark_states = {d: v for v, d in self.define.dv["DI_state"]["DI_autoparkState"].items()}
+
+    self.active_autopark_states = [self.autopark_states[s] for s in ('ACTIVE', 'COMPLETE', 'SELFPARK_STARTED')]
 
   def _angle_cmd_msg(self, angle: float, enabled: bool):
     values = {"DAS_steeringAngleRequest": angle, "DAS_steeringControlType": 1 if enabled else 0}
@@ -70,8 +73,11 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     values = {"DI_accelPedalPos": gas}
     return self.packer.make_can_msg_panda("DI_systemStatus", 0, values)
 
-  def _pcm_status_msg(self, enable):
-    values = {"DI_cruiseState": 2 if enable else 0}
+  def _pcm_status_msg(self, enable, autopark_state=0):
+    values = {
+      "DI_cruiseState": 2 if enable else 0,
+      "DI_autoparkState": autopark_state,
+    }
     return self.packer.make_can_msg_panda("DI_state", 0, values)
 
   def _long_control_msg(self, set_speed, acc_state=0, jerk_limits=(0, 0), accel_limits=(0, 0), aeb_event=0, bus=0):
@@ -113,6 +119,45 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
           self.assertTrue(self._rx(self._angle_meas_msg(0, hands_on_level=0, eac_status=1, eac_error_code=0)))
           self.assertNotEqual(should_disengage, self.safety.get_controls_allowed())
           self.assertFalse(self.safety.get_steering_disengage_prev())
+
+  def test_autopark_summon_while_enabled(self):
+    # We should not respect Autopark that activates while controls are allowed
+    self.safety.set_controls_allowed(True)
+
+    self._rx(self._pcm_status_msg(True, self.autopark_states["SELFPARK_STARTED"]))
+    self.assertTrue(self.safety.get_controls_allowed())
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+    self.assertTrue(self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
+
+    # We should still not respect Autopark if we disengage cruise
+    self._rx(self._pcm_status_msg(False, self.autopark_states["SELFPARK_STARTED"]))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, False)))
+    self.assertTrue(self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
+
+  def test_autopark_summon_behavior(self):
+    for autopark_state in range(16):
+      self._rx(self._pcm_status_msg(False, 0))
+
+      # We shouldn't allow controls if Autopark is an active state
+      autopark_active = autopark_state in self.active_autopark_states
+      self._rx(self._pcm_status_msg(False, autopark_state))
+      self._rx(self._pcm_status_msg(True, autopark_state))
+      self.assertNotEqual(autopark_active, self.safety.get_controls_allowed())
+
+      # We should also start blocking all inactive/active openpilot msgs
+      self.assertNotEqual(autopark_active, self._tx(self._angle_cmd_msg(0, False)))
+      self.assertNotEqual(autopark_active, self._tx(self._angle_cmd_msg(0, True)))
+      self.assertNotEqual(autopark_active, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
+      self.assertNotEqual(autopark_active or not self.LONGITUDINAL, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_ON"])))
+
+      # Regain controls when Autopark disables
+      self._rx(self._pcm_status_msg(True, 0))
+      self.assertTrue(self.safety.get_controls_allowed())
+      self.assertTrue(self._tx(self._angle_cmd_msg(0, False)))
+      self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+      self.assertTrue(self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
+      self.assertEqual(self.LONGITUDINAL, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_ON"])))
 
 
 class TestTeslaStockSafety(TestTeslaSafetyBase):
