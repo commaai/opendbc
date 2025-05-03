@@ -4,7 +4,7 @@
 
 static bool tesla_longitudinal = false;
 static bool tesla_stock_aeb = false;
-// At the moment, only Summon is supported
+// Only Summon is currently supported due to Autopark not setting Autopark state properly
 static bool tesla_autopark = false;
 static bool tesla_autopark_prev = false;
 
@@ -76,7 +76,7 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
   }
 
   if (bus == 2) {
-    if (tesla_longitudinal && (addr == 0x2b9)) {  // TODO: always set
+    if (tesla_longitudinal && (addr == 0x2b9)) {
       // "AEB_ACTIVE"
       tesla_stock_aeb = (GET_BYTE(to_push, 2) & 0x03U) == 1U;
     }
