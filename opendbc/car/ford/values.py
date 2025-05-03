@@ -85,6 +85,9 @@ class FordCarDocs(CarDocs):
       else:
           self.car_parts = CarParts([Device.threex, harness])
 
+    if harness == CarHarness.ford_q4
+        setup_video_link: str = "https://www.youtube.com/watch?v=uUGkH6C_EQU"
+
 
 @dataclass
 class FordPlatformConfig(PlatformConfig):
