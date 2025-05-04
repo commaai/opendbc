@@ -222,7 +222,8 @@ class CarController(CarControllerBase):
           stopping = actuators.longControlState == LongCtrlState.stopping
           self.stopping_counter = self.stopping_counter + 1 if stopping else 0
 
-          self.accel = float(np.clip(aTarget - self.stopping_counter * self.CP.stoppingDecelRate, self.params.BOSCH_ACCEL_MIN, self.params.BOSCH_ACCEL_MAX))
+          stoppingDecelAmount = self.stopping_counter * self.CP.stoppingDecelRate / 20 # cc frame rate 20x speed of longplanner
+          self.accel = float(np.clip(aTarget - stoppingDecelAmount, self.params.BOSCH_ACCEL_MIN, self.params.BOSCH_ACCEL_MAX))
           self.gas = float(np.interp(accel + wind_brake_ms2 + hill_brake, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_GAS_LOOKUP_V))
 
           can_sends.extend(hondacan.create_acc_commands(self.packer, self.CAN, CC.enabled, CC.longActive, self.accel, self.gas,
