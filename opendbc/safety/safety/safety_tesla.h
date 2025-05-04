@@ -4,6 +4,9 @@
 
 static bool tesla_longitudinal = false;
 static bool tesla_stock_aeb = false;
+// Only Summon is currently supported due to Autopark not setting Autopark state properly
+static bool tesla_autopark = false;
+static bool tesla_autopark_prev = false;
 
 static void tesla_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
@@ -41,14 +44,31 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
       brake_pressed = (GET_BYTE(to_push, 2) & 0x03U) == 2U;
     }
 
-    // Cruise state
+    // Cruise and Autopark/Summon state
     if (addr == 0x286) {
+      // Autopark state
+      int autopark_state = (GET_BYTE(to_push, 3) >> 1) & 0x0FU;  // DI_autoparkState
+      bool tesla_autopark_now = (autopark_state == 3) ||  // ACTIVE
+                                (autopark_state == 4) ||  // COMPLETE
+                                (autopark_state == 9);    // SELFPARK_STARTED
+
+      // Only consider rising edges while controls are not allowed
+      if (tesla_autopark_now && !tesla_autopark_prev && !controls_allowed) {
+        tesla_autopark = true;
+      }
+      if (!tesla_autopark_now) {
+        tesla_autopark = false;
+      }
+      tesla_autopark_prev = tesla_autopark_now;
+
+      // Cruise state
       int cruise_state = (GET_BYTE(to_push, 1) >> 4) & 0x07U;
       bool cruise_engaged = (cruise_state == 2) ||  // ENABLED
                             (cruise_state == 3) ||  // STANDSTILL
                             (cruise_state == 4) ||  // OVERRIDE
                             (cruise_state == 6) ||  // PRE_FAULT
                             (cruise_state == 7);    // PRE_CANCEL
+      cruise_engaged = cruise_engaged && !tesla_autopark;
 
       vehicle_moving = cruise_state != 3; // STANDSTILL
       pcm_cruise_check(cruise_engaged);
@@ -87,6 +107,11 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
   bool tx = true;
   int addr = GET_ADDR(to_send);
   bool violation = false;
+
+  // Don't send any messages when Autopark is active
+  if (tesla_autopark) {
+    violation = true;
+  }
 
   // Steering control: (0.1 * val) - 1638.35 in deg.
   if (addr == 0x488) {
@@ -153,9 +178,16 @@ static bool tesla_fwd_hook(int bus_num, int addr) {
   bool block_msg = false;
 
   if (bus_num == 2) {
-    // DAS_control
-    if (tesla_longitudinal && (addr == 0x2b9) && !tesla_stock_aeb) {
-      block_msg = true;
+    if (!tesla_autopark) {
+      // DAS_steeringControl, APS_eacMonitor
+      if ((addr == 0x488) || (addr == 0x27d)) {
+        block_msg = true;
+      }
+
+      // DAS_control
+      if (tesla_longitudinal && (addr == 0x2b9) && !tesla_stock_aeb) {
+        block_msg = true;
+      }
     }
   }
 
@@ -165,15 +197,15 @@ static bool tesla_fwd_hook(int bus_num, int addr) {
 static safety_config tesla_init(uint16_t param) {
 
   static const CanMsg TESLA_M3_Y_TX_MSGS[] = {
-    {0x488, 0, 4, .check_relay = true},   // DAS_steeringControl
-    {0x2b9, 0, 8, .check_relay = false},  // DAS_control (for cancel)
-    {0x27D, 0, 3, .check_relay = true},   // APS_eacMonitor
+    {0x488, 0, 4, .check_relay = true, .disable_static_blocking = true},   // DAS_steeringControl
+    {0x2b9, 0, 8, .check_relay = false},                                   // DAS_control (for cancel)
+    {0x27D, 0, 3, .check_relay = true, .disable_static_blocking = true},   // APS_eacMonitor
   };
 
   static const CanMsg TESLA_M3_Y_LONG_TX_MSGS[] = {
-    {0x488, 0, 4, .check_relay = true},                                   // DAS_steeringControl
+    {0x488, 0, 4, .check_relay = true, .disable_static_blocking = true},  // DAS_steeringControl
     {0x2b9, 0, 8, .check_relay = true, .disable_static_blocking = true},  // DAS_control
-    {0x27D, 0, 3, .check_relay = true},                                   // APS_eacMonitor
+    {0x27D, 0, 3, .check_relay = true, .disable_static_blocking = true},  // APS_eacMonitor
   };
 
   UNUSED(param);
@@ -183,6 +215,10 @@ static safety_config tesla_init(uint16_t param) {
 #endif
 
   tesla_stock_aeb = false;
+  // we need to assume Autopark/Summon on startup since DI_state is a low freq msg.
+  // this is so that we don't fault if starting while these systems are active
+  tesla_autopark = true;
+  tesla_autopark_prev = false;
 
   static RxCheck tesla_model3_y_rx_checks[] = {
     {.msg = {{0x2b9, 2, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 25U}, { 0 }, { 0 }}},   // DAS_control
