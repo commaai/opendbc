@@ -43,8 +43,8 @@ class CarInterface(CarInterfaceBase):
 
     # TODO DELETE
 
-    ret.openpilotLongitudinalControl = True
-    ret.alphaLongitudinalAvailable = True
+    ret.openpilotLongitudinalControl = False
+    ret.alphaLongitudinalAvailable = False
     # ret.longitudinalActuatorDelay = 0.5
     # TODO: tune
     # ret.stopAccel = -10.65
