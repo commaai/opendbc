@@ -28,8 +28,8 @@ static float tesla_curvature_factor(const float speed, const VehicleSteeringPara
   return 1. / (1. - (params.slip_factor * (speed * speed))) / params.wheelbase;
 }
 
-static const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
-static const float ISO_LATERAL_JERK = 2.5;  // m/s^3
+static const float ISO_LATERAL_ACCEL = 3.5;  // m/s^2
+static const float ISO_LATERAL_JERK = 3.0;  // m/s^3
 
 static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits,
                                          const VehicleSteeringParams params) {
