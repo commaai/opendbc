@@ -28,8 +28,11 @@ static float tesla_curvature_factor(const float speed, const VehicleSteeringPara
   return 1. / (1. - (params.slip_factor * (speed * speed))) / params.wheelbase;
 }
 
-static const float ISO_LATERAL_ACCEL = 3.5;  // m/s^2
-static const float ISO_LATERAL_JERK = 3.0;  // m/s^3
+static const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
+
+// Highway curves are rolled in the direction of the turn, add tolerance to compensate
+static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (0.06 * 9.81);
+static const float MAX_LATERAL_JERK = 3.0;  // m/s^3
 
 static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits,
                                          const VehicleSteeringParams params) {
@@ -48,7 +51,7 @@ static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_e
     // *** ISO lateral jerk limit ***
     // calculate maximum angle rate per second
     const float speed = MAX(fudged_speed, 1.0);
-    const float max_curvature_rate_sec = ISO_LATERAL_JERK / (speed * speed);
+    const float max_curvature_rate_sec = MAX_LATERAL_JERK / (speed * speed);
     const float max_angle_rate_sec = max_curvature_rate_sec * params.steer_ratio / curvature_factor * RAD_TO_DEG;
 
     // finally get max angle delta per frame
@@ -70,7 +73,7 @@ static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_e
     }
 
     // *** ISO lateral accel limit ***
-    const float max_curvature = ISO_LATERAL_ACCEL / (speed * speed);
+    const float max_curvature = MAX_LATERAL_ACCEL / (speed * speed);
     const float max_angle = max_curvature * params.steer_ratio / curvature_factor * RAD_TO_DEG;
     const int max_angle_can = (max_angle * limits.angle_deg_to_can) + 1.;
 
