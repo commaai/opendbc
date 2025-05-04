@@ -1,5 +1,14 @@
+import platform
+
+CC = 'gcc'
+system = platform.system()
+if system == 'Darwin':
+  # gcc installed by homebrew has version suffix (e.g. gcc-12) in order to be
+  # distinguishable from system one - which acts as a symlink to clang
+  CC += '-13'
+
 env = Environment(
-  CC='gcc',
+  CC=CC,
   CFLAGS=[
     '-Wall',
     "-Wextra",
@@ -12,6 +21,8 @@ env = Environment(
   ],
   CPPPATH=[".", "../../board/", "../../"],
 )
+if system == "Darwin":
+  env.PrependENVPath('PATH', '/opt/homebrew/bin')
 
 if GetOption('mutation'):
   env['CC'] = 'clang-17'
