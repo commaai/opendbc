@@ -179,7 +179,9 @@ class TestTeslaStockSafety(TestTeslaSafetyBase):
 
   def test_no_aeb(self):
     for aeb_event in range(4):
-      self.assertEqual(self._tx(self._long_control_msg(10, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"], aeb_event=aeb_event)), aeb_event == 0)
+      should_tx = aeb_event == 0
+      ret = self._tx(self._long_control_msg(10, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"], aeb_event=aeb_event))
+      self.assertEqual(ret, should_tx)
 
 
 class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
