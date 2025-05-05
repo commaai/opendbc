@@ -199,7 +199,7 @@ class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
       self.assertEqual(self._tx(self._long_control_msg(10, aeb_event=aeb_event)), aeb_event == 0)
 
   def test_stock_aeb_passthrough(self):
-    no_aeb_msg = self._long_control_msg(10, aeb_event=0)
+    no_aeb_msg = self._long_control_msg(10, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"], aeb_event=0)
     no_aeb_msg_cam = self._long_control_msg(10, aeb_event=0, bus=2)
     aeb_msg_cam = self._long_control_msg(10, aeb_event=1, bus=2)
 
