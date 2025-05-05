@@ -104,7 +104,7 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC):
       ret.leftBlindspot = cp.vl["LEFT_BSW"]["WARNING_STATUS"] != 0
       ret.rightBlindspot = cp.vl["RIGHT_BSW"]["WARNING_STATUS"] != 0
-      
+    
     ret.leftBlinker = bool(cp.vl["LIGHTS"]["LEFT_BLINKER"])
     ret.rightBlinker = bool(cp.vl["LIGHTS"]["RIGHT_BLINKER"])
 
