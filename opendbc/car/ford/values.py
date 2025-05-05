@@ -81,7 +81,7 @@ class FordCarDocs(CarDocs):
           self.car_parts = CarParts([Device.threex_angled_mount])
     else:
       if harness == CarHarness.ford_q4
-          self.car_parts = CarParts([Device.threex, harness, long odbc_cable])
+          self.car_parts = CarParts([Device.threex, harness, long_odbc_cable])
       else:
           self.car_parts = CarParts([Device.threex, harness])
 
