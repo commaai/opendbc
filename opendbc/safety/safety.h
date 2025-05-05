@@ -27,36 +27,6 @@
 #include "safety/safety_hyundai_canfd.h"
 #endif
 
-// from cereal.car.CarParams.SafetyModel
-#define SAFETY_SILENT 0U
-#define SAFETY_HONDA_NIDEC 1U
-#define SAFETY_TOYOTA 2U
-#define SAFETY_ELM327 3U
-#define SAFETY_GM 4U
-#define SAFETY_HONDA_BOSCH_GIRAFFE 5U
-#define SAFETY_FORD 6U
-#define SAFETY_HYUNDAI 8U
-#define SAFETY_CHRYSLER 9U
-#define SAFETY_TESLA 10U
-#define SAFETY_SUBARU 11U
-#define SAFETY_MAZDA 13U
-#define SAFETY_NISSAN 14U
-#define SAFETY_VOLKSWAGEN_MQB 15U
-#define SAFETY_ALLOUTPUT 17U
-#define SAFETY_GM_ASCM 18U
-#define SAFETY_NOOUTPUT 19U
-#define SAFETY_HONDA_BOSCH 20U
-#define SAFETY_VOLKSWAGEN_PQ 21U
-#define SAFETY_SUBARU_PREGLOBAL 22U
-#define SAFETY_HYUNDAI_LEGACY 23U
-#define SAFETY_HYUNDAI_COMMUNITY 24U
-#define SAFETY_STELLANTIS 25U
-#define SAFETY_FAW 26U
-#define SAFETY_BODY 27U
-#define SAFETY_HYUNDAI_CANFD 28U
-#define SAFETY_RIVIAN 33U
-#define SAFETY_VOLKSWAGEN_MEB 34U
-
 uint32_t GET_BYTES(const CANPacket_t *msg, int start, int len) {
   uint32_t ret = 0U;
   for (int i = 0; i < len; i++) {
@@ -77,6 +47,8 @@ bool brake_pressed = false;
 bool brake_pressed_prev = false;
 bool regen_braking = false;
 bool regen_braking_prev = false;
+bool steering_disengage;
+bool steering_disengage_prev;
 bool cruise_engaged_prev = false;
 struct sample_t vehicle_speed;
 bool vehicle_moving = false;
@@ -113,6 +85,9 @@ uint16_t current_safety_mode = SAFETY_SILENT;
 uint16_t current_safety_param = 0;
 static const safety_hooks *current_hooks = &nooutput_hooks;
 safety_config current_safety_config;
+
+static void generic_rx_checks(void);
+static void stock_ecu_check(bool stock_ecu_detected);
 
 static bool is_msg_valid(RxCheck addr_list[], int index) {
   bool valid = true;
@@ -211,19 +186,23 @@ bool safety_rx_hook(const CANPacket_t *to_push) {
   bool controls_allowed_prev = controls_allowed;
 
   bool valid = rx_msg_safety_check(to_push, &current_safety_config, current_hooks);
-  if (valid) {
+  bool whitelisted = get_addr_check_index(to_push, current_safety_config.rx_checks, current_safety_config.rx_checks_len) != -1;
+  if (valid && whitelisted) {
     current_hooks->rx(to_push);
+  }
 
-    const int bus = GET_BUS(to_push);
-    const int addr = GET_ADDR(to_push);
+  // Handles gas, brake, and regen paddle
+  generic_rx_checks();
 
-    // check all tx msgs for liveness on sending bus if specified.
-    // used to detect a relay malfunction or control messages from disabled ECUs like the radar
-    for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
-      const CanMsg *m = &current_safety_config.tx_msgs[i];
-      if (m->check_relay) {
-        generic_rx_checks((m->addr == addr) && (m->bus == bus));
-      }
+  // the relay malfunction hook runs on all incoming rx messages.
+  // check all applicable tx msgs for liveness on sending bus.
+  // used to detect a relay malfunction or control messages from disabled ECUs like the radar
+  const int bus = GET_BUS(to_push);
+  const int addr = GET_ADDR(to_push);
+  for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
+    const CanMsg *m = &current_safety_config.tx_msgs[i];
+    if (m->check_relay) {
+      stock_ecu_check((m->addr == addr) && (m->bus == bus));
     }
   }
 
@@ -240,28 +219,28 @@ static bool tx_msg_safety_check(const CANPacket_t *to_send, const CanMsg msg_lis
   int bus = GET_BUS(to_send);
   int length = GET_LEN(to_send);
 
-  bool allowed = false;
+  bool whitelisted = false;
   for (int i = 0; i < len; i++) {
     if ((addr == msg_list[i].addr) && (bus == msg_list[i].bus) && (length == msg_list[i].len)) {
-      allowed = true;
+      whitelisted = true;
       break;
     }
   }
-  return allowed;
+  return whitelisted;
 }
 
 bool safety_tx_hook(CANPacket_t *to_send) {
-  bool allowed = tx_msg_safety_check(to_send, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
+  bool whitelisted = tx_msg_safety_check(to_send, current_safety_config.tx_msgs, current_safety_config.tx_msgs_len);
   if ((current_safety_mode == SAFETY_ALLOUTPUT) || (current_safety_mode == SAFETY_ELM327)) {
-    allowed = true;
+    whitelisted = true;
   }
 
   bool safety_allowed = false;
-  if (allowed) {
+  if (whitelisted) {
     safety_allowed = current_hooks->tx(to_send);
   }
 
-  return !relay_malfunction && allowed && safety_allowed;
+  return !relay_malfunction && whitelisted && safety_allowed;
 }
 
 static int get_fwd_bus(int bus_num) {
@@ -277,8 +256,26 @@ static int get_fwd_bus(int bus_num) {
 }
 
 int safety_fwd_hook(int bus_num, int addr) {
-  const bool blocked = relay_malfunction || current_hooks->fwd(bus_num, addr);
-  return blocked ? -1 : get_fwd_bus(bus_num);
+  bool blocked = relay_malfunction || current_safety_config.disable_forwarding;
+
+  // Block messages that are being checked for relay malfunctions. Safety modes can opt out of this
+  // in the case of selective AEB forwarding
+  const int destination_bus = get_fwd_bus(bus_num);
+  if (!blocked) {
+    for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
+      const CanMsg *m = &current_safety_config.tx_msgs[i];
+      if (m->check_relay && !m->disable_static_blocking && (m->addr == addr) && (m->bus == destination_bus)) {
+        blocked = true;
+        break;
+      }
+    }
+  }
+
+  if (!blocked && (current_hooks->fwd != NULL)) {
+    blocked = current_hooks->fwd(bus_num, addr);
+  }
+
+  return blocked ? -1 : destination_bus;
 }
 
 bool get_longitudinal_allowed(void) {
@@ -349,10 +346,7 @@ static void relay_malfunction_set(void) {
   fault_occurred(FAULT_RELAY_MALFUNCTION);
 }
 
-static void generic_rx_checks(bool stock_ecu_detected) {
-  // allow 1s of transition timeout after relay changes state before assessing malfunctioning
-  const uint32_t RELAY_TRNS_TIMEOUT = 1U;
-
+static void generic_rx_checks(void) {
   // exit controls on rising edge of gas press
   if (gas_pressed && !gas_pressed_prev && !(alternative_experience & ALT_EXP_DISABLE_DISENGAGE_ON_GAS)) {
     controls_allowed = false;
@@ -370,6 +364,17 @@ static void generic_rx_checks(bool stock_ecu_detected) {
     controls_allowed = false;
   }
   regen_braking_prev = regen_braking;
+
+  // exit controls on rising edge of steering override/disengage
+  if (steering_disengage && !steering_disengage_prev) {
+    controls_allowed = false;
+  }
+  steering_disengage_prev = steering_disengage;
+}
+
+static void stock_ecu_check(bool stock_ecu_detected) {
+  // allow 1s of transition timeout after relay changes state before assessing malfunctioning
+  const uint32_t RELAY_TRNS_TIMEOUT = 1U;
 
   // check if stock ECU is on bus broken by car harness
   if ((safety_mode_cnt > RELAY_TRNS_TIMEOUT) && stock_ecu_detected) {
@@ -429,6 +434,8 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   brake_pressed_prev = false;
   regen_braking = false;
   regen_braking_prev = false;
+  steering_disengage = false;
+  steering_disengage_prev = false;
   cruise_engaged_prev = false;
   vehicle_moving = false;
   acc_main_on = false;
@@ -456,6 +463,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   current_safety_config.rx_checks_len = 0;
   current_safety_config.tx_msgs = NULL;
   current_safety_config.tx_msgs_len = 0;
+  current_safety_config.disable_forwarding = false;
 
   int set_status = -1;  // not set
   int hook_config_count = sizeof(safety_hook_registry) / sizeof(safety_hook_config);
@@ -473,6 +481,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
     current_safety_config.rx_checks_len = cfg.rx_checks_len;
     current_safety_config.tx_msgs = cfg.tx_msgs;
     current_safety_config.tx_msgs_len = cfg.tx_msgs_len;
+    current_safety_config.disable_forwarding = cfg.disable_forwarding;
     // reset all dynamic fields in addr struct
     for (int j = 0; j < current_safety_config.rx_checks_len; j++) {
       current_safety_config.rx_checks[j].status = (RxStatus){0};
@@ -635,13 +644,21 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
   uint32_t ts = microsecond_timer_get();
 
   if (controls_allowed) {
+    // Some safety models support variable torque limit based on vehicle speed
+    int max_torque = limits.max_torque;
+    if (limits.dynamic_max_torque) {
+      const float fudged_speed = (vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.;
+      max_torque = interpolate(limits.max_torque_lookup, fudged_speed) + 1;
+      max_torque = CLAMP(max_torque, -limits.max_torque, limits.max_torque);
+    }
+
     // *** global torque limit check ***
-    violation |= max_limit_check(desired_torque, limits.max_steer, -limits.max_steer);
+    violation |= max_limit_check(desired_torque, max_torque, -max_torque);
 
     // *** torque rate limit check ***
     if (limits.type == TorqueDriverLimited) {
       violation |= driver_limit_check(desired_torque, desired_torque_last, &torque_driver,
-                                      limits.max_steer, limits.max_rate_up, limits.max_rate_down,
+                                      max_torque, limits.max_rate_up, limits.max_rate_down,
                                       limits.driver_torque_allowance, limits.driver_torque_multiplier);
     } else {
       violation |= dist_to_meas_check(desired_torque, desired_torque_last, &torque_meas,
@@ -654,7 +671,7 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
 
     // every RT_INTERVAL set the new limits
     uint32_t ts_elapsed = get_ts_elapsed(ts, ts_torque_check_last);
-    if (ts_elapsed > limits.max_rt_interval) {
+    if (ts_elapsed > MAX_TORQUE_RT_INTERVAL) {
       rt_torque_last = desired_torque;
       ts_torque_check_last = ts;
     }
