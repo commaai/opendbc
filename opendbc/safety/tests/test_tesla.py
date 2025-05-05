@@ -179,7 +179,26 @@ class TestTeslaStockSafety(TestTeslaSafetyBase):
 
   def test_no_aeb(self):
     for aeb_event in range(4):
-      self.assertEqual(self._tx(self._long_control_msg(10, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"], aeb_event=aeb_event)), aeb_event == 0)
+      should_tx = aeb_event == 0
+      ret = self._tx(self._long_control_msg(10, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"], aeb_event=aeb_event))
+      self.assertEqual(ret, should_tx)
+
+  def test_stock_aeb_no_cancel(self):
+    # No passthrough logic since we always forward DAS_control,
+    # but ensure we can't send cancel cmd while stock AEB is active
+    no_aeb_msg = self._long_control_msg(10, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"], aeb_event=0)
+    no_aeb_msg_cam = self._long_control_msg(10, aeb_event=0, bus=2)
+    aeb_msg_cam = self._long_control_msg(10, aeb_event=1, bus=2)
+
+    # stock system sends no AEB -> no forwarding, and OP is allowed to TX
+    self.assertEqual(1, self._rx(no_aeb_msg_cam))
+    self.assertEqual(0, self.safety.safety_fwd_hook(2, no_aeb_msg_cam.addr))
+    self.assertTrue(self._tx(no_aeb_msg))
+
+    # stock system sends AEB -> forwarding, and OP is not allowed to TX
+    self.assertEqual(1, self._rx(aeb_msg_cam))
+    self.assertEqual(0, self.safety.safety_fwd_hook(2, aeb_msg_cam.addr))
+    self.assertFalse(self._tx(no_aeb_msg))
 
 
 class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
