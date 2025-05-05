@@ -136,7 +136,6 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
     }
 
     // Don't send long/cancel messages when the stock AEB system is active
-    // TODO test stock long no cancel msgs
     if (tesla_stock_aeb) {
       violation = true;
     }
