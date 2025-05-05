@@ -244,6 +244,8 @@ extern bool brake_pressed;
 extern bool brake_pressed_prev;
 extern bool regen_braking;
 extern bool regen_braking_prev;
+extern bool steering_disengage;
+extern bool steering_disengage_prev;
 extern bool cruise_engaged_prev;
 extern struct sample_t vehicle_speed;
 extern bool vehicle_moving;
