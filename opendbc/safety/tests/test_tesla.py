@@ -3,6 +3,7 @@ import unittest
 
 from opendbc.car.tesla.values import TeslaSafetyFlags
 from opendbc.car.structs import CarParams
+from opendbc.can.can_define import CANDefine
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerPanda
@@ -19,9 +20,9 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
   STANDSTILL_THRESHOLD = 0.1
   GAS_PRESSED_THRESHOLD = 3
-  FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   # Angle control limits
+  STEER_ANGLE_MAX = 360  # deg
   DEG_TO_CAN = 10
 
   ANGLE_RATE_BP = [0., 5., 25.]
@@ -33,19 +34,27 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
   MIN_ACCEL = -3.48
   INACTIVE_ACCEL = 0.0
 
+  cnt_epas = 0
+
   packer: CANPackerPanda
 
-  @classmethod
-  def setUpClass(cls):
-    if cls.__name__ == "TestTeslaSafetyBase":
-      raise unittest.SkipTest
+  def setUp(self):
+    self.packer = CANPackerPanda("tesla_model3_party")
+    self.define = CANDefine("tesla_model3_party")
+    self.acc_states = {d: v for v, d in self.define.dv["DAS_control"]["DAS_accState"].items()}
+    self.autopark_states = {d: v for v, d in self.define.dv["DI_state"]["DI_autoparkState"].items()}
+
+    self.active_autopark_states = [self.autopark_states[s] for s in ('ACTIVE', 'COMPLETE', 'SELFPARK_STARTED')]
 
   def _angle_cmd_msg(self, angle: float, enabled: bool):
     values = {"DAS_steeringAngleRequest": angle, "DAS_steeringControlType": 1 if enabled else 0}
     return self.packer.make_can_msg_panda("DAS_steeringControl", 0, values)
 
-  def _angle_meas_msg(self, angle: float):
-    values = {"EPAS3S_internalSAS": angle}
+  def _angle_meas_msg(self, angle: float, hands_on_level: int = 0, eac_status: int = 1, eac_error_code: int = 0):
+    values = {"EPAS3S_internalSAS": angle, "EPAS3S_handsOnLevel": hands_on_level,
+              "EPAS3S_eacStatus": eac_status, "EPAS3S_eacErrorCode": eac_error_code,
+              "EPAS3S_sysStatusCounter": self.cnt_epas % 16}
+    self.__class__.cnt_epas += 1
     return self.packer.make_can_msg_panda("EPAS3S_sysStatus", 0, values)
 
   def _user_brake_msg(self, brake):
@@ -64,14 +73,17 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     values = {"DI_accelPedalPos": gas}
     return self.packer.make_can_msg_panda("DI_systemStatus", 0, values)
 
-  def _pcm_status_msg(self, enable):
-    values = {"DI_cruiseState": 2 if enable else 0}
+  def _pcm_status_msg(self, enable, autopark_state=0):
+    values = {
+      "DI_cruiseState": 2 if enable else 0,
+      "DI_autoparkState": autopark_state,
+    }
     return self.packer.make_can_msg_panda("DI_state", 0, values)
 
-  def _long_control_msg(self, set_speed, acc_val=0, jerk_limits=(0, 0), accel_limits=(0, 0), aeb_event=0, bus=0):
+  def _long_control_msg(self, set_speed, acc_state=0, jerk_limits=(0, 0), accel_limits=(0, 0), aeb_event=0, bus=0):
     values = {
       "DAS_setSpeed": set_speed,
-      "DAS_accState": acc_val,
+      "DAS_accState": acc_state,
       "DAS_aebEvent": aeb_event,
       "DAS_jerkMin": jerk_limits[0],
       "DAS_jerkMax": jerk_limits[1],
@@ -86,31 +98,88 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
   def test_vehicle_speed_measurements(self):
     # OVERRIDDEN: 79.1667 is the max speed in m/s
-    self._common_measurement_test(self._speed_msg, 0, 285 / 3.6, common.VEHICLE_SPEED_FACTOR,
+    self._common_measurement_test(self._speed_msg, 0, 285 / 3.6, 1,
                                   self.safety.get_vehicle_speed_min, self.safety.get_vehicle_speed_max)
+
+  def test_steering_wheel_disengage(self):
+    # Tesla disengages when the user forcibly overrides the locked-in angle steering control
+    # Either when the hands on level is high, or if there is a high angle rate fault
+    for hands_on_level in range(4):
+      for eac_status in range(8):
+        for eac_error_code in range(16):
+          self.safety.set_controls_allowed(True)
+
+          should_disengage = hands_on_level >= 3 or (eac_status == 0 and eac_error_code == 9)
+          self.assertTrue(self._rx(self._angle_meas_msg(0, hands_on_level=hands_on_level, eac_status=eac_status,
+                                                        eac_error_code=eac_error_code)))
+          self.assertNotEqual(should_disengage, self.safety.get_controls_allowed())
+          self.assertEqual(should_disengage, self.safety.get_steering_disengage_prev())
+
+          # Should not recover
+          self.assertTrue(self._rx(self._angle_meas_msg(0, hands_on_level=0, eac_status=1, eac_error_code=0)))
+          self.assertNotEqual(should_disengage, self.safety.get_controls_allowed())
+          self.assertFalse(self.safety.get_steering_disengage_prev())
+
+  def test_autopark_summon_while_enabled(self):
+    # We should not respect Autopark that activates while controls are allowed
+    self.safety.set_controls_allowed(True)
+
+    self._rx(self._pcm_status_msg(True, self.autopark_states["SELFPARK_STARTED"]))
+    self.assertTrue(self.safety.get_controls_allowed())
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+    self.assertTrue(self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
+
+    # We should still not respect Autopark if we disengage cruise
+    self._rx(self._pcm_status_msg(False, self.autopark_states["SELFPARK_STARTED"]))
+    self.assertFalse(self.safety.get_controls_allowed())
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, False)))
+    self.assertTrue(self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
+
+  def test_autopark_summon_behavior(self):
+    for autopark_state in range(16):
+      self._rx(self._pcm_status_msg(False, 0))
+
+      # We shouldn't allow controls if Autopark is an active state
+      autopark_active = autopark_state in self.active_autopark_states
+      self._rx(self._pcm_status_msg(False, autopark_state))
+      self._rx(self._pcm_status_msg(True, autopark_state))
+      self.assertNotEqual(autopark_active, self.safety.get_controls_allowed())
+
+      # We should also start blocking all inactive/active openpilot msgs
+      self.assertNotEqual(autopark_active, self._tx(self._angle_cmd_msg(0, False)))
+      self.assertNotEqual(autopark_active, self._tx(self._angle_cmd_msg(0, True)))
+      self.assertNotEqual(autopark_active, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
+      self.assertNotEqual(autopark_active or not self.LONGITUDINAL, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_ON"])))
+
+      # Regain controls when Autopark disables
+      self._rx(self._pcm_status_msg(True, 0))
+      self.assertTrue(self.safety.get_controls_allowed())
+      self.assertTrue(self._tx(self._angle_cmd_msg(0, False)))
+      self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+      self.assertTrue(self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
+      self.assertEqual(self.LONGITUDINAL, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_ON"])))
 
 
 class TestTeslaStockSafety(TestTeslaSafetyBase):
 
+  LONGITUDINAL = False
+
   def setUp(self):
-    self.packer = CANPackerPanda("tesla_model3_party")
+    super().setUp()
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.tesla, 0)
     self.safety.init_tests()
 
-  def test_accel_actuation_limits(self, stock_longitudinal=True):
-    super().test_accel_actuation_limits(stock_longitudinal)
-
   def test_cancel(self):
-    for accval in range(16):
+    for acc_state in range(16):
       self.safety.set_controls_allowed(True)
-      should_tx = accval == 13  # ACC_CANCEL_GENERIC_SILENT
-      self.assertFalse(self._tx(self._long_control_msg(0, acc_val=accval, accel_limits=(self.MIN_ACCEL, self.MAX_ACCEL))))
-      self.assertEqual(should_tx, self._tx(self._long_control_msg(0, acc_val=accval)))
+      should_tx = acc_state == self.acc_states["ACC_CANCEL_GENERIC_SILENT"]
+      self.assertFalse(self._tx(self._long_control_msg(0, acc_state=acc_state, accel_limits=(self.MIN_ACCEL, self.MAX_ACCEL))))
+      self.assertEqual(should_tx, self._tx(self._long_control_msg(0, acc_state=acc_state)))
 
   def test_no_aeb(self):
     for aeb_event in range(4):
-      self.assertEqual(self._tx(self._long_control_msg(10, acc_val=13, aeb_event=aeb_event)), aeb_event == 0)
+      self.assertEqual(self._tx(self._long_control_msg(10, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"], aeb_event=aeb_event)), aeb_event == 0)
 
 
 class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
@@ -118,7 +187,7 @@ class TestTeslaLongitudinalSafety(TestTeslaSafetyBase):
   FWD_BLACKLISTED_ADDRS = {2: [MSG_DAS_steeringControl, MSG_APS_eacMonitor, MSG_DAS_Control]}
 
   def setUp(self):
-    self.packer = CANPackerPanda("tesla_model3_party")
+    super().setUp()
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.tesla, TeslaSafetyFlags.LONG_CONTROL)
     self.safety.init_tests()
