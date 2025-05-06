@@ -91,7 +91,7 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
     // DAS_steeringControl
     if (addr == 0x488) {
       const int steering_control_type = GET_BYTE(to_push, 2) >> 6;
-      const tesla_stock_lkas_now = steering_control_type == 2;  // "LANE_KEEP_ASSIST"
+      const int tesla_stock_lkas_now = steering_control_type == 2;  // "LANE_KEEP_ASSIST"
 
       // Only consider rising edges while controls are not allowed
       if (tesla_stock_lkas_now && !tesla_stock_lkas_prev && !controls_allowed) {
