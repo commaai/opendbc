@@ -80,10 +80,10 @@ cdef extern from "common.h":
   cdef cppclass CANParser:
     bool can_valid
     bool bus_timeout
-    CANParser(int, string, vector[pair[uint32_t, int]]) except +
-    set[uint32_t] update(vector[CanData]&) except +
-    MessageState *getMessageState(uint32_t address)
+    CANParser(int, string, vector[pair[uint32_t, int]]) except + nogil
+    set[uint32_t] update(vector[CanData]&) except + nogil
+    MessageState *getMessageState(uint32_t address) nogil
 
   cdef cppclass CANPacker:
-   CANPacker(string)
-   vector[uint8_t] pack(uint32_t, vector[SignalPackValue]&)
+   CANPacker(string) nogil
+   vector[uint8_t] pack(uint32_t, vector[SignalPackValue]&) nogil
