@@ -190,7 +190,7 @@ class CAR(Platforms):
     {Bus.pt: 'honda_accord_2018_can_generated'},
   )
   HONDA_HRV_3G = HondaBoschPlatformConfig(
-    [HondaCarDocs("Honda HR-V 2023", "All")],
+    [HondaCarDocs("Honda HR-V 2023-25", "All")],
     CarSpecs(mass=3125 * CV.LB_TO_KG, wheelbase=2.61, steerRatio=15.2, centerToFrontRatio=0.41, tireStiffnessFactor=0.5),
     {Bus.pt: 'honda_civic_ex_2022_can_generated'},
     flags=HondaFlags.BOSCH_RADARLESS,
@@ -220,7 +220,10 @@ class CAR(Platforms):
 
   # Nidec Cars
   ACURA_ILX = HondaNidecPlatformConfig(
-    [HondaCarDocs("Acura ILX 2016-19", "AcuraWatch Plus", min_steer_speed=25. * CV.MPH_TO_MS)],
+    [
+      HondaCarDocs("Acura ILX 2016-18", "Technology Plus Package or AcuraWatch Plus", min_steer_speed=25. * CV.MPH_TO_MS),
+      HondaCarDocs("Acura ILX 2019", "All", min_steer_speed=25. * CV.MPH_TO_MS),
+    ],
     CarSpecs(mass=3095 * CV.LB_TO_KG, wheelbase=2.67, steerRatio=18.61, centerToFrontRatio=0.37, tireStiffnessFactor=0.72),  # 15.3 is spec end-to-end
     radar_dbc_dict('acura_ilx_2016_can_generated'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES,
