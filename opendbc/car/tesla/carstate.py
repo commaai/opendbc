@@ -16,6 +16,7 @@ class CarState(CarStateBase):
     self.shifter_values = self.can_define.dv["DI_systemStatus"]["DI_gear"]
 
     self.das_control = None
+    self.steering_disengage_prev = False
 
   def update(self, can_parsers) -> structs.CarState:
     cp_party = can_parsers[Bus.party]
@@ -51,8 +52,10 @@ class CarState(CarStateBase):
     # FSD disengages using union of handsOnLevel (slow overrides) and high angle rate faults (fast overrides, high speed)
     # TODO: implement in safety
     eac_error_code = self.can_define.dv["EPAS3S_sysStatus"]["EPAS3S_eacErrorCode"].get(int(epas_status["EPAS3S_eacErrorCode"]), None)
-    ret.steeringDisengage = epas_status["EPAS3S_handsOnLevel"] >= 3 or (eac_status == "EAC_INHIBITED" and
+    steering_disengage = epas_status["EPAS3S_handsOnLevel"] >= 3 or (eac_status == "EAC_INHIBITED" and
                                                                         eac_error_code == "EAC_ERROR_HIGH_ANGLE_RATE_SAFETY")
+    ret.steeringDisengage = steering_disengage and not self.steering_disengage_prev
+    self.steering_disengage_prev = steering_disengage
 
     # Cruise state
     cruise_state = self.can_define.dv["DI_state"]["DI_cruiseState"].get(int(cp_party.vl["DI_state"]["DI_cruiseState"]), None)
