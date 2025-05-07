@@ -15,8 +15,8 @@ class CarState(CarStateBase):
     self.can_define = CANDefine(DBC[CP.carFingerprint][Bus.party])
     self.shifter_values = self.can_define.dv["DI_systemStatus"]["DI_gear"]
 
+    self.hands_on_level = 0
     self.das_control = None
-    self.steering_disengage_prev = False
 
   def update(self, can_parsers) -> structs.CarState:
     cp_party = can_parsers[Bus.party]
@@ -38,6 +38,7 @@ class CarState(CarStateBase):
 
     # Steering wheel
     epas_status = cp_party.vl["EPAS3S_sysStatus"]
+    self.hands_on_level = epas_status["EPAS3S_handsOnLevel"]
     ret.steeringAngleDeg = -epas_status["EPAS3S_internalSAS"]
     ret.steeringRateDeg = -cp_ap_party.vl["SCCM_steeringAngleSensor"]["SCCM_steeringAngleSpeed"]
     ret.steeringTorque = -epas_status["EPAS3S_torsionBarTorque"]
@@ -52,10 +53,8 @@ class CarState(CarStateBase):
     # FSD disengages using union of handsOnLevel (slow overrides) and high angle rate faults (fast overrides, high speed)
     # TODO: implement in safety
     eac_error_code = self.can_define.dv["EPAS3S_sysStatus"]["EPAS3S_eacErrorCode"].get(int(epas_status["EPAS3S_eacErrorCode"]), None)
-    steering_disengage = epas_status["EPAS3S_handsOnLevel"] >= 3 or (eac_status == "EAC_INHIBITED" and
-                                                                        eac_error_code == "EAC_ERROR_HIGH_ANGLE_RATE_SAFETY")
-    ret.steeringDisengage = steering_disengage and not self.steering_disengage_prev
-    self.steering_disengage_prev = steering_disengage
+    ret.steeringDisengage = self.hands_on_level >= 3 or (eac_status == "EAC_INHIBITED" and
+                                                         eac_error_code == "EAC_ERROR_HIGH_ANGLE_RATE_SAFETY")
 
     # Cruise state
     cruise_state = self.can_define.dv["DI_state"]["DI_cruiseState"].get(int(cp_party.vl["DI_state"]["DI_cruiseState"]), None)
