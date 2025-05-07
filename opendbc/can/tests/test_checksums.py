@@ -72,6 +72,7 @@ class TestCanChecksums:
     values = {
       'ENABLED': 1,
       'SET_ME_X20': 0x20,
+      'STEERING_REQUIRED': 1,
       'SOLID_LANES': 1,
       'BEEP': 0,
     }
