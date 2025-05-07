@@ -213,3 +213,15 @@ def spam_buttons_command(packer, CAN, button_val, car_fingerprint):
   # send buttons to camera on radarless (camera does ACC) cars
   bus = CAN.camera if car_fingerprint in HONDA_BOSCH_RADARLESS else CAN.pt
   return packer.make_can_msg("SCM_BUTTONS", bus, values)
+  return commands
+
+
+def lkas_button_command(packer, CAN, button_val, stock_scm_buttons, car_fingerprint):
+  values = {
+    'CRUISE_SETTING': button_val,
+    'BOH_1': stock_scm_buttons['BOH_1'],
+    'BOH_2': stock_scm_buttons['BOH_2'],
+  }
+  # send buttons to camera on radarless (camera does ACC) cars
+  bus = CAN.camera if car_fingerprint in HONDA_BOSCH_RADARLESS else CAN.pt
+  return packer.make_can_msg("SCM_BUTTONS", bus, values)
