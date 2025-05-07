@@ -39,7 +39,7 @@ BO_ 794 WheelButtons: 7 XXX
  SG_ LeftButton_ScrollClick : 19|2@0+ (1,0) [0|3] "" XXX
  SG_ LeftButton_RightClick : 21|2@0+ (1,0) [0|3] "" XXX
  SG_ LeftButton_LeftClick : 22|2@1+ (1,0) [0|3] "" XXX
- SG_ LeftBUtton_Scroll : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ LeftButton_Scroll : 31|8@0+ (1,0) [0|255] "" XXX
  SG_ RightButton_ScrollClick : 35|2@0+ (1,0) [0|3] "" XXX
  SG_ RightButton_RightClick : 37|2@0+ (1,0) [0|3] "" XXX
  SG_ RightButton_LeftClick : 38|2@1+ (1,0) [0|3] "" XXX
@@ -48,5 +48,8 @@ BO_ 794 WheelButtons: 7 XXX
 BO_ 848 BSM_BlindSpotIndicator: 4 XXX
  SG_ BSM_BlindSpotIndicator_Checksum : 0|8@1+ (1,0) [0|255] "" XXX
  SG_ BSM_BlindSpotIndicator_Counter : 11|4@0+ (1,0) [0|15] "" XXX
- SG_ BSM_BlindSpotIndicator_Left : 28|1@0+ (1,0) [0|1] "" XXX
- SG_ BSM_BlindSpotIndicator_Right : 30|1@0+ (1,0) [0|1] "" XXX
+ SG_ BSM_BlindSpotIndicator_Left : 29|2@0+ (1,0) [0|3] "" XXX
+ SG_ BSM_BlindSpotIndicator_Right : 30|2@1+ (1,0) [0|3] "" XXX
+
+VAL_ 848 BSM_BlindSpotIndicator_Left 0 "OFF" 1 "OBJECT_DETECTED" 2 "ACTIVE_WARNING" ;
+VAL_ 848 BSM_BlindSpotIndicator_Right 0 "OFF" 1 "OBJECT_DETECTED" 2 "ACTIVE_WARNING" ;
