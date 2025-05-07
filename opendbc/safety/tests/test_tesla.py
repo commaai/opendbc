@@ -47,7 +47,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
     self.steer_control_types = {d: v for v, d in self.define.dv["DAS_steeringControl"]["DAS_steeringControlType"].items()}
 
-  def _angle_cmd_msg(self, angle: float, state: int | bool, bus: int = 0):
+  def _angle_cmd_msg(self, angle: float, state: bool | int, bus: int = 0):
     values = {"DAS_steeringAngleRequest": angle, "DAS_steeringControlType": state}
     return self.packer.make_can_msg_panda("DAS_steeringControl", bus, values)
 
@@ -159,6 +159,14 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
       self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
       self.assertTrue(self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
       self.assertEqual(self.LONGITUDINAL, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_ON"])))
+
+  def test_steering_control_type(self):
+    # Only angle control is allowed (no LANE_KEEP_ASSIST or EMERGENCY_LANE_KEEP)
+    self.safety.set_controls_allowed(True)
+    for steer_control_type in range(4):
+      should_tx = steer_control_type in (self.steer_control_types["NONE"],
+                                         self.steer_control_types["ANGLE_CONTROL"])
+      self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(0, state=steer_control_type)))
 
   def test_stock_lkas_passthrough(self):
     # TODO: make these generic passthrough tests
