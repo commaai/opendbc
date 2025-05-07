@@ -6,7 +6,7 @@ from enum import Enum, IntFlag
 from opendbc.car import AngleSteeringLimits, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, \
-                                                     Device
+                                                     Device, Cable
 from opendbc.car.fw_query_definitions import FwQueryConfig, LiveFwVersions, OfflineFwVersions, Request, StdQueries, p16
 
 Ecu = CarParams.Ecu
@@ -73,14 +73,18 @@ class FordCarDocs(CarDocs):
   plug_in_hybrid: bool = False
 
   def init_make(self, CP: CarParams):
-    harness = CarHarness.ford_q4 if CP.flags & FordFlags.CANFD else CarHarness.ford_q3
+    car_parts = []
     if CP.carFingerprint in (CAR.FORD_BRONCO_SPORT_MK1, CAR.FORD_MAVERICK_MK1, CAR.FORD_F_150_MK14, CAR.FORD_F_150_LIGHTNING_MK1):
-      self.car_parts = CarParts([Device.threex_angled_mount, harness])
+      car_parts.append(Device.threex_angled_mount)
     else:
-      self.car_parts = CarParts([Device.threex, harness])
+      car_parts.append(Device.threex)
 
-    if harness == CarHarness.ford_q4:
+    if CP.flags & FordFlags.CANFD:
       self.setup_video_link = "https://www.youtube.com/watch?v=uUGkH6C_EQU"
+      car_parts.extend([CarHarness.ford_q4, Cable.long_obdc_cable])
+    else:
+      car_parts.append(CarHarness.ford_q3)
+    self.car_parts = CarParts(car_parts)
 
 
 @dataclass
