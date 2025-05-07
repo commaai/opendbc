@@ -141,14 +141,14 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
     int raw_angle_can = ((GET_BYTE(to_send, 0) & 0x7FU) << 8) | GET_BYTE(to_send, 1);
     int desired_angle = raw_angle_can - 16384;
     int steer_control_type = GET_BYTE(to_send, 2) >> 6;
-    bool steer_control_enabled = (steer_control_type == 1);  // ANGLE_CONTROL
+    bool steer_control_enabled = steer_control_type == 1;  // ANGLE_CONTROL
 
     if (steer_angle_cmd_checks(desired_angle, steer_control_enabled, TESLA_STEERING_LIMITS)) {
       violation = true;
     }
 
     bool valid_steer_control_type = (steer_control_type == 0) ||  // NONE
-                                    (steer_control_type == 3);    // DISABLED
+                                    (steer_control_type == 1);    // ANGLE_CONTROL
     if (!valid_steer_control_type) {
       violation = true;
     }
