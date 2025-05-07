@@ -175,10 +175,9 @@ BO_ 352 ACM_longitudinalRequest: 5 ACM
  SG_ ACM_longitudinalRequest_Checksum : 7|8@0+ (1,0) [0|255] "-" VDM
  SG_ ACM_longitudinalRequest_Counter : 11|4@0+ (1,0) [0|15] "-" VDM
  SG_ ACM_AccelerationRequest : 23|11@0+ (0.01,-10.24) [-10.24|10.23] "m/s^2" VDM
- SG_ ACM_VehicleHoldRequired : 24|1@0+ (1,0) [0|1] "" VDM
- SG_ ACM_PrndRequired : 27|3@0+ (1,0) [0|7] "" VDM
+ SG_ ACM_PrndRequest : 27|4@0+ (1,0) [0|7] "" VDM
  SG_ ACM_longInterfaceEnable : 37|2@0+ (1,0) [0|3] "" VDM
- SG_ ACM_AccelerationRequestType : 39|2@0+ (1,0) [0|3] "" VDM
+ SG_ ACM_VehicleHoldRequest : 39|2@0+ (1,0) [0|3] "" VDM
 
 BO_ 354 VDM_AdasSts: 8 VDM
  SG_ VDM_AdasStatus_Checksum : 7|8@0+ (1,0) [0|0] "" ACM
@@ -609,9 +608,9 @@ CM_ SG_ 352 ACM_longitudinalRequest_Checksum "Checksum signal for frame";
 CM_ SG_ 352 ACM_longitudinalRequest_Counter "Message counter signal for frame";
 CM_ SG_ 352 ACM_AccelerationRequest "Acceleration Request command from the ACM";
 CM_ SG_ 352 ACM_VehicleHoldRequired "Vehicle hold request flag";
-CM_ SG_ 352 ACM_PrndRequired "Drive state Request command from the ACM";
+CM_ SG_ 352 ACM_PrndRequest "Gear state Request command from the ACM";
 CM_ SG_ 352 ACM_longInterfaceEnable "Acceleration Interface Enable Request from the ACM";
-CM_ SG_ 352 ACM_AccelerationRequestType "Acceleration Request type(positive/negative) from the ACM";
+CM_ SG_ 352 ACM_VehicleHoldRequest "Vehicle hold request from ACM";
 CM_ SG_ 354 VDM_AdasStatus_Checksum "VDM_AdasSts message j1850 checksum.";
 CM_ SG_ 354 VDM_AdasStatus_Counter "VDM_AdasSts message counter.";
 CM_ SG_ 354 VDM_AdasFaultStatus "Fault status of ADAS requests from VDM.";
@@ -872,9 +871,9 @@ VAL_ 338 VDM_EspPartialModeRequest 0 "VDM_EspPartialModeRequest_Normal" 1 "VDM_E
 VAL_ 338 VDM_SteeringModeRequest 0 "VDM_SteeringModeRequest_Default" 1 "VDM_SteeringModeRequest_Normal" 2 "VDM_SteeringModeRequest_Sport" 3 "VDM_SteeringModeRequest_Comfort";
 VAL_ 338 VDM_EpasPowerMode 0 "VDM_EpasPowerMode_Drive_Off" 1 "VDM_EpasPowerMode_Drive_On" 2 "VDM_EpasPowerMode_Shutdown";
 VAL_ 352 ACM_VehicleHoldRequired 0 "ACM_VEHICLEHOLDREQ_NO_REQUEST" 1 "ACM_VEHICLEHOLDREQ_VEHICLE_HOLD_REQUEST";
-VAL_ 352 ACM_PrndRequired 0 "ACM_PRNDREQ_PARK" 1 "ACM_PRNDREQ_REVERSE" 2 "ACM_PRNDREQ_NEUTRAL" 3 "ACM_PRNDREQ_DRIVE" 4 "ACM_PRNDREQ_NOT_USED";
+VAL_ 352 ACM_PrndRequest 0 "ACM_PRNDREQ_NO_REQUEST" 1 "ACM_PRNDREQ_PARK" 2 "ACM_PRNDREQ_REVERSE" 3 "ACM_PRNDREQ_NEUTRAL" 4 "ACM_PRNDREQ_DRIVE";
 VAL_ 352 ACM_longInterfaceEnable 0 "ACM_LONGIFEN_INIT" 1 "ACM_LONGIFEN_LONGITUDINAL_INTERFACE_ENABLE" 2 "ACM_LONGIFEN_LONGITUDINAL_INTERFACE_DISABLE" 3 "ACM_LONGIFEN_SNA";
-VAL_ 352 ACM_AccelerationRequestType 0 "ACM_ACCELREQTYPE_INIT" 1 "ACM_ACCELREQTYPE_ACCEL_NEGATIVE" 2 "ACM_ACCELREQTYPE_ACCEL_POSITIVE" 3 "ACM_ACCELREQTYPE_SNA";
+VAL_ 352 ACM_VehicleHoldRequest 0 "NO_REQUEST" 1 "HOLD_REQUEST";
 VAL_ 354 VDM_AdasDriverAccelPriorityStatus 0 "VDM_AdasDriverAccelPriorityStatus_Driver" 1 "VDM_AdasDriverAccelPriorityStatus_Adas";
 VAL_ 354 VDM_AdasFaultStatus 0 "VDM_AdasFlaultStatus_No_Fault" 1 "VDM_AdasFaultStatus_Brk_Intv" 2 "VDM_AdasFlaultStatus_Cntr_Fault" 3 "VDM_AdasFlaultStatus_Imps_Cmd" 15 "VDM_AdasFlaultStatus_Sna";
 VAL_ 354 VDM_AdasDriverModeStatus 0 "VDM_AdasDriverModeStatus_Human" 1 "VDM_AdasDriverModeStatus_Adas" 2 "VDM_AdasDriverModeStatus_Reserved" 3 "VDM_AdasDriverModeStatus_Sna";
