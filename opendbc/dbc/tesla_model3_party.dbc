@@ -189,7 +189,9 @@ BO_ 599 DI_speed: 8 PARTY
  SG_ DI_speedCounter : 8|4@1+ (1,0) [0|15] ""  park
  SG_ DI_speedChecksum : 0|8@1+ (1,0) [0|255] ""  park
 
-BO_ 605 XXX_longitudinalRelated: 6 XXX
+BO_ 605 DAS_road: 6 XXX
+ SG_ DAS_stopLineDist : 16|8@1+ (0.5,0) [0|127.5] "m" XXX
+ SG_ DAS_trafficLightColor : 26|3@0+ (1,0) [0|7] "" XXX
 
 BO_ 1160 DAS_steeringControl: 4 PARTY
  SG_ DAS_steeringControlChecksum : 31|8@0+ (1,0) [0|255] ""  aps
@@ -347,6 +349,7 @@ VAL_ 280 DI_immobilizerState 2 "DI_IMM_STATE_AUTHENTICATING" 0 "DI_IMM_STATE_INI
 VAL_ 280 DI_gear 1 "DI_GEAR_P" 0 "DI_GEAR_INVALID" 7 "DI_GEAR_SNA" 2 "DI_GEAR_R" 3 "DI_GEAR_N" 4 "DI_GEAR_D" ;
 VAL_ 280 DI_brakePedalState 2 "INVALID" 0 "OFF" 1 "ON" ;
 VAL_ 280 DI_systemState 5 "DI_SYS_ENABLE" 1 "DI_SYS_IDLE" 2 "DI_SYS_STANDBY" 0 "DI_SYS_UNAVAILABLE" 3 "DI_SYS_FAULT" 4 "DI_SYS_ABORT" ;
+VAL_ 605 DAS_trafficLightColor 0 "NONE" 1 "RED" 2 "GREEN" 3 "YELLOW" ;
 VAL_ 697 DAS_accelMax 511 "SNA" ;
 VAL_ 697 DAS_accelMin 511 "SNA" ;
 VAL_ 697 DAS_jerkMax 255 "SNA" ;

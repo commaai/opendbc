@@ -1,9 +1,9 @@
 from dataclasses import dataclass, field
-from enum import IntFlag
+from enum import Enum, IntFlag
 
 from opendbc.car import Bus, PlatformConfig, DbcDict, Platforms, CarSpecs
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
+from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
@@ -65,6 +65,12 @@ class GMSafetyFlags(IntFlag):
   EV = 4
 
 
+class Footnote(Enum):
+  SETUP = CarFootnote(
+    "See more setup details for <a href=\"https://github.com/commaai/openpilot/wiki/gm\" target=\"_blank\">GM</a>.",
+    Column.MAKE, setup_note=True)
+
+
 @dataclass
 class GMCarDocs(CarDocs):
   package: str = "Adaptive Cruise Control (ACC)"
@@ -76,6 +82,7 @@ class GMCarDocs(CarDocs):
       else:
         self.car_parts = CarParts.common([CarHarness.gm])
     else:
+      self.footnotes.insert(0, Footnote.SETUP)
       self.car_parts = CarParts.common([CarHarness.obd_ii])
 
 

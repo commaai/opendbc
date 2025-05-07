@@ -357,6 +357,12 @@ class CAR(Platforms):
     dbc_dict('toyota_tnga_k_pt_generated', 'toyota_adas'),
     flags=ToyotaFlags.UNSUPPORTED_DSU,
   )
+  LEXUS_RC_TSS2 = ToyotaTSS2PlatformConfig(
+    [
+      ToyotaCarDocs("Lexus RC 2023"),
+    ],
+    CarSpecs(mass=3986. * CV.LB_TO_KG, wheelbase=2.73, steerRatio=13.9, tireStiffnessFactor=0.444),
+  )
   LEXUS_RX = PlatformConfig(
     [
       ToyotaCarDocs("Lexus RX 2016", "Lexus Safety System+"),
