@@ -101,8 +101,8 @@ def create_acc_commands(packer, CAN, enabled, active, accel, gas, stopping_count
       # spoof lead car to allow hybrid ACC to brake stronger than -0.5 m/s2
       standstill_diff = 4.0 # stock target stopping distance
       new_diff = ( ( CS.voacc_last_target_diff - standstill_diff ) / CS.voacc_last_target_accel * accel ) + standstill_diff
-      if RadarHud.LeadOne.vDel is not None:
-        new_observed = RadarHud.LeadOne.vDel
+      if CS.RadarHud.LeadOne.vDel is not None:
+        new_observed = CS.RadarHud.LeadOne.vDel
         new_target = new_observed + new_diff
       else:
         new_target = ( ( CS.voacc_last_target_distance - standstill_diff ) / CS.voacc_last_vEgospeed * CS.vEgo ) + standstill_diff
