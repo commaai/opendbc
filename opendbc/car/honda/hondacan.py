@@ -98,7 +98,7 @@ def create_acc_commands(packer, CAN, enabled, active, accel, gas, stopping_count
     })
 
     if enabled and braking and accel < 0.4:
-      # spoof lead car to allow hybrid ACC to brake stronger than -0.5 m/s2  
+      # spoof lead car to allow hybrid ACC to brake stronger than -0.5 m/s2
       standstill_diff = 4.0 # stock target stopping distance
       new_diff = ( ( CS.voacc_last_target_diff - standstill_diff ) / CS.voacc_last_target_accel * accel ) + standstill_diff
       if RadarHud.LeadOne.vDel is not None:
@@ -108,24 +108,24 @@ def create_acc_commands(packer, CAN, enabled, active, accel, gas, stopping_count
         new_target = ( ( CS.voacc_last_target_distance - standstill_diff ) / CS.voacc_last_vEgospeed * CS.vEgo ) + standstill_diff
         new_observed = new_target - new_diff
 
-      stock_observed = CS.voacc_camera.['LEAD_DISTANCE_OBSERVED']
-      stock_target = CS.voacc_camera.['LEAD_DISTANCE_TARGET']
-      
+      stock_observed = CS.voacc_camera['LEAD_DISTANCE_OBSERVED']
+      stock_target = CS.voacc_camera['LEAD_DISTANCE_TARGET']
+
       voacc_camera_values = {
         'LEAD_DISTANCE_OBSERVED': new_observed if (stock_observed == -1) else min ( stock_observed, new_observed ),
         'LEAD_DISTANCE_TARGET': max ( stock_target, new_target ),
-        'SET_ME_X01' = 1,
-        'SET_ME_X01_2' = 1,
-        'BOH' = CS.voacc_camera['BOH'],
-        'BOH_2' = CS.voacc_camera['BOH_2'],
-        'BOH_3' = CS.voacc_camera['BOH_3'],
-        'BOH_4' = CS.voacc_camera['BOH_4'],
+        'SET_ME_X01': 1,
+        'SET_ME_X01_2': 1,
+        'BOH': CS.voacc_camera['BOH'],
+        'BOH_2': CS.voacc_camera['BOH_2'],
+        'BOH_3': CS.voacc_camera['BOH_3'],
+        'BOH_4': CS.voacc_camera['BOH_4'],
       }
     else:
       voacc_camera_values = CS.voacc_camera
     commands.append(packer.make_can_msg("SPEED_CONTROL", CAN.pt, voacc_camera_values))
-  
-  
+
+
   else:
     acc_control_values.update({
       # setting CONTROL_ON causes car to set POWERTRAIN_DATA->ACC_STATUS = 1
