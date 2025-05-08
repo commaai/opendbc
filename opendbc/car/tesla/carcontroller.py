@@ -1,9 +1,48 @@
 import numpy as np
+import math
 from opendbc.can.packer import CANPacker
-from opendbc.car import Bus, apply_std_steer_angle_limits
-from opendbc.car.interfaces import CarControllerBase
+from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, AngleSteeringLimits, DT_CTRL
+from opendbc.car.interfaces import CarControllerBase, ISO_LATERAL_ACCEL
 from opendbc.car.tesla.teslacan import TeslaCAN
 from opendbc.car.tesla.values import CarControllerParams
+from opendbc.car.vehicle_model import VehicleModel
+
+MAX_ANGLE_RATE = 10  # deg/20ms frame, EPS faults at 12 deg/20ms frame at a standstill
+
+# Add tolerance of average banked road since safety doesn't have the roll
+AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation. heavy banks can be up to 0.12 which reduce lat accel even further
+MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~3.6 m/s^2
+MAX_LATERAL_JERK = 3.0 + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # m/s^3, lower than ISO limit of 5 m/s^3
+
+
+def apply_tesla_steer_angle_limits(apply_angle: float, apply_angle_last: float, v_ego_raw: float, steering_angle: float,
+                                   lat_active: bool, limits: AngleSteeringLimits, VM: VehicleModel) -> float:
+  # *** ISO lateral jerk limit ***
+  max_curvature_rate_sec = MAX_LATERAL_JERK / (max(v_ego_raw, 1) ** 2)  # 1/m/s
+  max_angle_rate_sec = math.degrees(VM.get_steer_from_curvature(max_curvature_rate_sec, v_ego_raw, 0))
+  max_angle_delta = max_angle_rate_sec * (DT_CTRL * CarControllerParams.STEER_STEP)
+
+  # prevent fault
+  max_angle_delta = min(max_angle_delta, MAX_ANGLE_RATE)
+  new_apply_angle = np.clip(apply_angle, apply_angle_last - max_angle_delta, apply_angle_last + max_angle_delta)
+
+  # *** ISO lateral accel limit ***
+  max_curvature = MAX_LATERAL_ACCEL / (max(v_ego_raw, 1) ** 2)  # 1/m
+  # print(f"python max_curvature: {max_curvature}")
+  max_angle = math.degrees(VM.get_steer_from_curvature(max_curvature, v_ego_raw, 0))  # deg
+  new_apply_angle = float(np.clip(new_apply_angle, -max_angle, max_angle))
+
+  # angle is current angle when inactive
+  if not lat_active:
+    new_apply_angle = steering_angle
+
+  return float(np.clip(new_apply_angle, -limits.STEER_ANGLE_MAX, limits.STEER_ANGLE_MAX))
+
+
+def get_safety_CP():
+  # We use the TESLA_MODEL_Y platform for lateral limiting to match safety
+  from opendbc.car.tesla.interface import CarInterface
+  return CarInterface.get_non_essential_params("TESLA_MODEL_Y")
 
 
 class CarController(CarControllerBase):
@@ -12,6 +51,9 @@ class CarController(CarControllerBase):
     self.apply_angle_last = 0
     self.packer = CANPacker(dbc_names[Bus.party])
     self.tesla_can = TeslaCAN(self.packer)
+
+    # Vehicle model used for lateral limiting
+    self.VM = VehicleModel(get_safety_CP())
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -24,8 +66,9 @@ class CarController(CarControllerBase):
 
     if self.frame % 2 == 0:
       # Angular rate limit based on speed
-      self.apply_angle_last = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgo,
-                                                           CS.out.steeringAngleDeg, lat_active, CarControllerParams.ANGLE_LIMITS)
+      self.apply_angle_last = apply_tesla_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw,
+                                                             CS.out.steeringAngleDeg, lat_active,
+                                                             CarControllerParams.ANGLE_LIMITS, self.VM)
 
       can_sends.append(self.tesla_can.create_steering_control(self.apply_angle_last, lat_active, (self.frame // 2) % 16))
 
