@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 import unittest
+import numpy as np
 
-from opendbc.car.tesla.values import TeslaSafetyFlags
+from opendbc.car.tesla.values import CarControllerParams, TeslaSafetyFlags
+from opendbc.car.tesla.carcontroller import apply_tesla_steer_angle_limits, get_safety_CP
 from opendbc.car.structs import CarParams
+from opendbc.car.vehicle_model import VehicleModel
 from opendbc.can.can_define import CANDefine
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
@@ -183,6 +186,28 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     self.assertEqual(1, self._rx(lkas_msg_cam))
     self.assertEqual(0, self.safety.safety_fwd_hook(2, lkas_msg_cam.addr))
     self.assertFalse(self._tx(no_lkas_msg))
+
+  def test_lateral_limit_up(self):
+    VM = VehicleModel(get_safety_CP())
+
+    for speed in np.linspace(0, 35, 100):
+      # if speed > 5:
+      #   continue
+      print()
+      print('speed', speed)
+      self.safety.set_controls_allowed(True)
+      for _ in range(6):
+        self._rx(self._speed_msg(speed + 1))
+      self.safety.set_desired_angle_last(0)
+
+      self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+      apply_angle_last = 0
+      for _ in range(100):  # jerk is full torque/sec, so only need 50, but want extra tolerance to hit limit
+        apply_angle = apply_tesla_steer_angle_limits(360, apply_angle_last, speed, 0, True,
+                                                     CarControllerParams.ANGLE_LIMITS, VM)
+        print(apply_angle)
+        apply_angle_last = apply_angle
+        self.assertTrue(self._tx(self._angle_cmd_msg(apply_angle, True)))
 
 
 class TestTeslaStockSafety(TestTeslaSafetyBase):
