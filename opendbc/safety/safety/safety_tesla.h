@@ -2,6 +2,8 @@
 
 #include "safety_declarations.h"
 
+#define TESLA_MAX_SPEED_DELTA 2.0  // m/s
+
 static bool tesla_longitudinal = false;
 static bool tesla_stock_aeb = false;
 
@@ -33,11 +35,22 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
       steering_disengage = (hands_on_level >= 3) || ((eac_status == 0) && (eac_error_code == 9));
     }
 
-    // Vehicle speed
+    // Vehicle speed (DI_speed)
     if (addr == 0x257) {
       // Vehicle speed: ((val * 0.08) - 40) / MS_TO_KPH
       float speed = ((((GET_BYTE(to_push, 2) << 4) | (GET_BYTE(to_push, 1) >> 4)) * 0.08) - 40) / 3.6;
       UPDATE_VEHICLE_SPEED(speed);
+    }
+
+    // 2nd vehicle speed (ESP_B)
+    if (addr == 0x155) {
+      // Disable controls if speeds from DI (Drive Inverter) and ESP wheel speed sensors are too far apart.
+      float esp_speed = (((GET_BYTE(to_push, 6) & 0x0FU) << 6) || GET_BYTE(to_push, 5) >> 2) * 0.5 / 3.6;
+      bool is_invalid_speed = ABS(esp_speed - ((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR)) > TESLA_MAX_SPEED_DELTA;
+      // TODO: this should generically cause rx valid to fall until re-enable
+      if (is_invalid_speed) {
+        controls_allowed = false;
+      }
     }
 
     // Gas pressed
@@ -262,6 +275,7 @@ static safety_config tesla_init(uint16_t param) {
     {.msg = {{0x2b9, 2, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 25U}, { 0 }, { 0 }}},   // DAS_control
     {.msg = {{0x488, 2, 4, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},   // DAS_steeringControl
     {.msg = {{0x257, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},   // DI_speed (speed in kph)
+    {.msg = {{0x155, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},   // ESP_B (2nd speed in kph)
     {.msg = {{0x370, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},  // EPAS3S_sysStatus (steering angle)
     {.msg = {{0x118, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},  // DI_systemStatus (gas pedal)
     {.msg = {{0x39d, 0, 5, .ignore_checksum = true, .ignore_counter = true, .frequency = 25U}, { 0 }, { 0 }}},   // IBST_status (brakes)
