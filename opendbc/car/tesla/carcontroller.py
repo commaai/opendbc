@@ -28,6 +28,7 @@ def apply_tesla_steer_angle_limits(apply_angle: float, apply_angle_last: float, 
 
   # *** ISO lateral accel limit ***
   max_curvature = MAX_LATERAL_ACCEL / (max(v_ego_raw, 1) ** 2)  # 1/m
+  # print(f"python max_curvature: {max_curvature}")
   max_angle = math.degrees(VM.get_steer_from_curvature(max_curvature, v_ego_raw, 0))  # deg
   new_apply_angle = float(np.clip(new_apply_angle, -max_angle, max_angle))
 

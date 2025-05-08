@@ -81,7 +81,9 @@ static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_e
     // *** ISO lateral accel limit ***
     const float max_curvature = MAX_LATERAL_ACCEL / (speed * speed);
     const float max_angle = max_curvature * params.steer_ratio / curvature_factor * RAD_TO_DEG;
-    //printf("safety max angle: %f,\n", max_angle);
+//    printf("safety speed: %f, max_curvature: %f, max_angle: %f\n", speed, max_curvature, max_angle);
+//    printf("safety max_curvature: %f,\n", max_curvature);
+//    printf("safety max angle: %f,\n", max_angle);
     const int max_angle_can = (max_angle * limits.angle_deg_to_can) + 1.;
 
     violation |= max_limit_check(desired_angle, max_angle_can, -max_angle_can);
