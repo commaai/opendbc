@@ -168,7 +168,8 @@ def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_
     commands.append(packer.make_can_msg("ACC_HUD", CAN.pt, acc_hud_values))
 
   lkas_hud_values = {
-    'SET_ME_X41': 0x41,
+    'ENABLED': 1,
+    'SET_ME_X20': 0x20,
     'STEERING_REQUIRED': hud.steer_required,
     'SOLID_LANES': hud.lanes_visible,
     'BEEP': 0,
@@ -209,6 +210,17 @@ def spam_buttons_command(packer, CAN, button_val, car_fingerprint):
   values = {
     'CRUISE_BUTTONS': button_val,
     'CRUISE_SETTING': 0,
+  }
+  # send buttons to camera on radarless (camera does ACC) cars
+  bus = CAN.camera if car_fingerprint in HONDA_BOSCH_RADARLESS else CAN.pt
+  return packer.make_can_msg("SCM_BUTTONS", bus, values)
+
+
+def lkas_button_command(packer, CAN, button_val, stock_scm_buttons, car_fingerprint):
+  values = {
+    'CRUISE_SETTING': button_val,
+    'BOH_1': stock_scm_buttons['BOH_1'],
+    'BOH_2': stock_scm_buttons['BOH_2'],
   }
   # send buttons to camera on radarless (camera does ACC) cars
   bus = CAN.camera if car_fingerprint in HONDA_BOSCH_RADARLESS else CAN.pt

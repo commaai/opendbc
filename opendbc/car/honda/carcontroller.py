@@ -199,6 +199,10 @@ class CarController(CarControllerBase):
         can_sends.append(hondacan.spam_buttons_command(self.packer, self.CAN, CruiseButtons.CANCEL, self.CP.carFingerprint))
       elif CC.cruiseControl.resume:
         can_sends.append(hondacan.spam_buttons_command(self.packer, self.CAN, CruiseButtons.RES_ACCEL, self.CP.carFingerprint))
+      # disable radarless LKAS if it is unexpectedly enabled, to prevent no-steering lockout, only if conflicting buttons are not already pressed
+      elif self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
+        if CS.lkas_hud['ENABLED'] and CC.enabled and self.frame % 100 < 25:
+          can_sends.append(hondacan.lkas_button_command(self.packer, self.CAN, CruiseButtons.LKAS, CS.scm_buttons, self.CP.carFingerprint))
 
     else:
       # Send gas and brake commands.
