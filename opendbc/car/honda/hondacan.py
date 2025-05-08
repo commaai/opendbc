@@ -76,7 +76,7 @@ def create_brake_command(packer, CAN, apply_brake, pump_on, pcm_override, pcm_ca
   return packer.make_can_msg("BRAKE_COMMAND", CAN.pt, values)
 
 
-def create_acc_commands(packer, CAN, enabled, active, accel, gas, stopping_counter, car_fingerprint, speed_passthrough):
+def create_acc_commands(packer, CAN, enabled, active, accel, gas, stopping_counter, car_fingerprint, CS):
   commands = []
   min_gas_accel = CarControllerParams.BOSCH_GAS_LOOKUP_BP[0]
 
@@ -98,6 +98,36 @@ def create_acc_commands(packer, CAN, enabled, active, accel, gas, stopping_count
       "CONTROL_ON": enabled,
       "IDLESTOP_ALLOW": stopping_counter > 200,  # allow idle stop after 4 seconds (50 Hz)
     })
+
+    if enabled and braking and accel < 0.4:
+      # spoof lead car to allow hybrid ACC to brake stronger than -0.5 m/s2  
+      standstill_diff = 4.0 # stock target stopping distance
+      new_diff = ( ( CS.voacc_last_target_diff - standstill_diff ) / CS.voacc_last_target_accel * accel ) + standstill_diff
+      if RadarHud.LeadOne.vDel is not None:
+        new_observed = RadarHud.LeadOne.vDel
+        new_target = new_observed + new_diff
+      else:
+        new_target = ( ( CS.voacc_last_target_distance - standstill_diff ) / CS.voacc_last_vEgospeed * CS.vEgo ) + standstill_diff
+        new_observed = new_target - new_diff
+
+      stock_observed = CS.voacc_camera.['LEAD_DISTANCE_OBSERVED']
+      stock_target = CS.voacc_camera.['LEAD_DISTANCE_TARGET']
+      
+      voacc_camera_values = {
+        'LEAD_DISTANCE_OBSERVED': new_observed if (stock_observed == -1) else min ( stock_observed, new_observed ),
+        'LEAD_DISTANCE_TARGET': max ( stock_target, new_target ),
+        'SET_ME_X01' = 1,
+        'SET_ME_X01_2' = 1,
+        'BOH' = CS.voacc_camera['BOH'],
+        'BOH_2' = CS.voacc_camera['BOH_2'],
+        'BOH_3' = CS.voacc_camera['BOH_3'],
+        'BOH_4' = CS.voacc_camera['BOH_4'],
+      }
+    else:
+      voacc_camera_values = CS.voacc_camera
+    commands.append(packer.make_can_msg("SPEED_CONTROL", CAN.pt, voacc_camera_values))
+  
+  
   else:
     acc_control_values.update({
       # setting CONTROL_ON causes car to set POWERTRAIN_DATA->ACC_STATUS = 1
@@ -117,16 +147,7 @@ def create_acc_commands(packer, CAN, enabled, active, accel, gas, stopping_count
     commands.append(packer.make_can_msg("ACC_CONTROL_ON", CAN.pt, acc_control_on_values))
 
   commands.append(packer.make_can_msg("ACC_CONTROL", CAN.pt, acc_control_values))
-
-  if enabled and car_fingerprint in HONDA_BOSCH_RADARLESS:
-    speed_control_values = {
-      'CURRENT_SPEED': 401 if braking else -1,
-      'TARGET_SPEED': 0 if braking else -1,
-      'SPEED_CONTROL_ON': 1,
-      'PASSTHROUGH': speed_passthrough,
-    }
-    commands.append(packer.make_can_msg("SPEED_CONTROL", CAN.pt, speed_control_values))
-  return commands
+return commands
 
 def create_steering_control(packer, CAN, apply_torque, lkas_active):
   values = {
