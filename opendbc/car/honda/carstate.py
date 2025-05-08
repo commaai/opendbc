@@ -33,11 +33,6 @@ def get_can_messages(CP, gearbox_msg):
     ("STEER_MOTOR_TORQUE", 0),  # TODO: not on every car
   ]
 
-  if CP.carFingerprint in HONDA_BOSCH_RADARLESS:
-     messages += [
-      ("SPEED_CONTROL", 0), # receive speed control frames
-    ]
-
   if CP.carFingerprint == CAR.HONDA_ODYSSEY_CHN:
     messages += [
       ("SCM_FEEDBACK", 25),
@@ -269,16 +264,15 @@ class CarState(CarStateBase):
 
     self.acc_hud = False
     self.lkas_hud = False
-    self.speed_control = False
-    self.speed_control_passthrough = 0
+    self.voacc_camera = False
+
     if self.CP.carFingerprint not in HONDA_BOSCH:
       ret.stockFcw = cp_cam.vl["BRAKE_COMMAND"]["FCW"] != 0
       self.acc_hud = cp_cam.vl["ACC_HUD"]
       self.stock_brake = cp_cam.vl["BRAKE_COMMAND"]
     if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
       self.lkas_hud = cp_cam.vl["LKAS_HUD"]
-      self.speed_control = cp_cam.vl["SPEED_CONTROL"]
-      self.speed_control_passthrough = cp_cam.vl["SPEED_CONTROL"]["PASSTHROUGH"]
+      self.voacc_camera = cp_cam.vl["VOACC_CAMERA"]
 
     if self.CP.enableBsm:
       # BSM messages are on B-CAN, requires a panda forwarding B-CAN messages to CAN 0
@@ -304,6 +298,7 @@ class CarState(CarStateBase):
       cam_messages += [
         ("ACC_HUD", 10),
         ("LKAS_HUD", 10),
+        ("VOACC_CAMERA", 50),
       ]
 
     elif CP.carFingerprint not in HONDA_BOSCH:
