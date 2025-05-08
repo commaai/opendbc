@@ -37,8 +37,8 @@ static float tesla_curvature_factor(const float speed, const VehicleSteeringPara
 static const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
 
 // Highway curves are rolled in the direction of the turn, add tolerance to compensate
-static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (0.06 * 9.81);
-static const float MAX_LATERAL_JERK = 3.0;  // m/s^3
+static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (0.06 * 9.81);  // ~3.6 m/s^2
+static const float MAX_LATERAL_JERK = 3.0 + (0.06 * 9.81);  // m/s^3
 
 static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits,
                                          const VehicleSteeringParams params) {
