@@ -211,14 +211,6 @@ def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_
     # car likely needs to see LKAS_PROBLEM fall within a specific time frame, so forward from camera
     if CP.carFingerprint in HONDA_BOSCH_RADARLESS:
       lkas_hud_values['LKAS_PROBLEM'] = lkas_hud['LKAS_PROBLEM']
-  
-      if not enabled:
-        speed_control_values = {}
-        speed_control_values['CURRENT_SPEED'] = speed_control['CURRENT_SPEED']
-        speed_control_values['TARGET_SPEED'] = speed_control['TARGET_SPEED']
-        speed_control_values['SPEED_CONTROL_ON'] = speed_control['SPEED_CONTROL_ON']
-        speed_control_values['PASSTHROUGH'] = speed_control['PASSTHROUGH']
-        commands.append(packer.make_can_msg("SPEED_CONTROL", CAN.lkas, speed_control_values))
 
   if not (CP.flags & HondaFlags.BOSCH_EXT_HUD):
     lkas_hud_values['SET_ME_X48'] = 0x48
