@@ -111,7 +111,7 @@ class CarState(CarStateBase):
     self.voacc_last_vEgospeed = 10.0
     self.voacc_last_target_diff = -6.0
     self.voacc_last_target_accel = -0.3
-    
+
     # When available we use cp.vl["CAR_SPEED"]["ROUGH_CAR_SPEED_2"] to populate vEgoCluster
     # However, on cars without a digital speedometer this is not always present (HRV, FIT, CRV 2016, ILX and RDX)
     self.dash_speed_seen = False
@@ -284,7 +284,7 @@ class CarState(CarStateBase):
         if ret.vEgo >= 10:
           self.voacc_last_target_distance = voacc_camera["LEAD_DISTANCE_TARGET"]
           self.voacc_last_vEgospeed = ret.vEgo
-        if ret.aEgo <= -0.25
+        if ret.aEgo <= -0.25:
           self.voacc_last_target_diff = voacc_camera["LEAD_DISTANCE_OBSERVED"] - voacc_camera["LEAD_DISTANCE_TARGET"]
           self.voacc_last_target_accel = ret.aEgo
 
