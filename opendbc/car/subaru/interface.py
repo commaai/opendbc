@@ -52,7 +52,7 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.0025, 0.1], [0.00025, 0.01]]
 
     elif candidate == CAR.SUBARU_IMPREZA:
-      ret.steerActuatorDelay = 0.2  # end-to-end angle controller
+      ret.steerActuatorDelay = 0.1  # end-to-end angle controller
       ret.lateralTuning.init('pid')
       ret.lateralTuning.pid.kf = 0.00003
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0., 20.], [0., 20.]]
