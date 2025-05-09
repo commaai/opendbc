@@ -26,11 +26,11 @@ static uint8_t tesla_get_counter(const CANPacket_t *to_push) {
   } else if (addr == 0x488) {
     // Signal: DAS_steeringControlCounter
     cnt = GET_BYTE(to_push, 2) & 0x0FU;
-  } else if ((addr == 0x257) || (addr == 0x118) || (addr == 0x39d) || (addr == 0x286) || (addr == 0x311) || ((addr == 0x129))) {
-    // Signal: DI_speedCounter, DI_systemStatusCounter, IBST_statusCounter, DI_locStatusCounter, UI_warningCounter, SCCM_steeringAngleCounter
+  } else if ((addr == 0x257) || (addr == 0x118) || (addr == 0x39d) || (addr == 0x286) || (addr == 0x311)) {
+    // Signal: DI_speedCounter, DI_systemStatusCounter, IBST_statusCounter, DI_locStatusCounter, UI_warningCounter
     cnt = GET_BYTE(to_push, 1) & 0x0FU;
-  } else if ((addr == 0x155) || (addr == 0x39b) || (addr == 0x293)) {
-    // Signal: ESP_wheelRotationCounter, DAS_statusCounter, DAS_settingCounter
+  } else if ((addr == 0x155)) {
+    // Signal: ESP_wheelRotationCounter
     cnt = GET_BYTE(to_push, 6) >> 4;
   } else if (addr == 0x370) {
     // Signal: EPAS3S_sysStatusCounter
