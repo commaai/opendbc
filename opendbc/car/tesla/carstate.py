@@ -17,6 +17,7 @@ class CarState(CarStateBase):
 
     self.autopark = False
     self.autopark_prev = False
+    self.cruise_enabled_prev = False
 
     self.hands_on_level = 0
     self.das_control = None
@@ -67,11 +68,12 @@ class CarState(CarStateBase):
     autopark_now = autopark_state in ("ACTIVE", "COMPLETE", "SELFPARK_STARTED")
 
     cruise_enabled = cruise_state in ("ENABLED", "STANDSTILL", "OVERRIDE", "PRE_FAULT", "PRE_CANCEL")
-    if autopark_now and not self.autopark_prev and not cruise_enabled:
+    if autopark_now and not self.autopark_prev and not self.cruise_enabled_prev:
       self.autopark = True
     if not autopark_now:
       self.autopark = False
     self.autopark_prev = autopark_now
+    self.cruise_enabled_prev = cruise_enabled
     print('opnplt cruise_enabled:', int(cruise_enabled), 'autopark_now:', int(autopark_now), 'autopark', int(self.autopark))
 
     # Match panda safety cruise engaged logic
