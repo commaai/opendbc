@@ -257,3 +257,24 @@ unsigned int fca_giorgio_checksum(uint32_t address, const Signal &sig, const std
   }
 
 }
+
+unsigned int tesla_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
+  // TODO: implement
+//  unsigned int s = d.size();
+//  while (address) { s += address & 0xFF; address >>= 8; }
+//  for (int i = 0; i < d.size() - 1; i++) { s += d[i]; }
+//
+//  return s & 0xFF;
+  return 0;
+}
+
+// TODO: use endswith in dbc.cc
+inline bool ends_with(const std::string &s, const std::string &suffix) {
+  return s.size() >= suffix.size() && s.compare(s.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
+bool tesla_is_counter(const Signal &sig) {
+  printf("tesla_is_counter: %s\n", sig.name.c_str());
+  printf("ends_with: %d\n", ends_with(sig.name, "Counter"));
+  return ends_with(sig.name, "Counter");
+}

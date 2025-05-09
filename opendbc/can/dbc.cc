@@ -69,13 +69,18 @@ ChecksumState* get_checksum(const std::string& dbc_name) {
     s = new ChecksumState({8, -1, 7, -1, false, FCA_GIORGIO_CHECKSUM, &fca_giorgio_checksum});
   } else if (startswith(dbc_name, "comma_body")) {
     s = new ChecksumState({8, 4, 7, 3, false, PEDAL_CHECKSUM, &pedal_checksum});
+  } else if (startswith(dbc_name, "tesla_model3_party")) {
+    s = new ChecksumState({-1, -1, -1, -1, true, TESLA_CHECKSUM, &tesla_checksum, &tesla_is_counter});
   }
+  printf("dbc_name: %s\n", dbc_name.c_str());
   return s;
 }
 
 void set_signal_type(Signal& s, ChecksumState* chk, const std::string& dbc_name, int line_num) {
   s.calc_checksum = nullptr;
+  printf("SIGNAL: %s\n", s.name.c_str());
   if (chk) {
+    printf("here\n");
     if (s.name == "CHECKSUM") {
       DBC_ASSERT(chk->checksum_size == -1 || s.size == chk->checksum_size, "CHECKSUM is not " << chk->checksum_size << " bits long");
       DBC_ASSERT(chk->checksum_start_bit == -1 || (s.start_bit % 8) == chk->checksum_start_bit, " CHECKSUM starts at wrong bit");
@@ -83,13 +88,16 @@ void set_signal_type(Signal& s, ChecksumState* chk, const std::string& dbc_name,
       DBC_ASSERT(chk->calc_checksum != nullptr, "CHECKSUM calculate function not supplied");
       s.type = chk->checksum_type;
       s.calc_checksum = chk->calc_checksum;
-    } else if (s.name == "COUNTER") {
+    } else if ((s.name == "COUNTER") || (chk->is_counter && chk->is_counter(s))) {
+      printf("COUNTER: %s\n", s.name.c_str());
       DBC_ASSERT(chk->counter_size == -1 || s.size == chk->counter_size, "COUNTER is not " << chk->counter_size << " bits long");
       DBC_ASSERT(chk->counter_start_bit == -1 || (s.start_bit % 8) == chk->counter_start_bit, "COUNTER starts at wrong bit");
       DBC_ASSERT(chk->little_endian == s.is_little_endian, "COUNTER has wrong endianness");
       s.type = COUNTER;
     }
   }
+  printf("Signal type: %d\n", s.type);
+  printf("is_counter: %d\n", (bool)chk->is_counter);
 
   // TODO: CAN packer/parser shouldn't know anything about interceptors or pedals
   if (s.name == "CHECKSUM_PEDAL") {
