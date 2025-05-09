@@ -1,5 +1,5 @@
 {
-  "Acura ILX 2016-19": {
+  "Acura ILX 2016-18": {
     "platform": "ACURA_ILX",
     "make": "Acura",
     "brand": "honda",
@@ -7,10 +7,19 @@
     "year": [
       "2016",
       "2017",
-      "2018",
+      "2018"
+    ],
+    "package": "Technology Plus Package or AcuraWatch Plus"
+  },
+  "Acura ILX 2019": {
+    "platform": "ACURA_ILX",
+    "make": "Acura",
+    "brand": "honda",
+    "model": "ILX",
+    "year": [
       "2019"
     ],
-    "package": "AcuraWatch Plus"
+    "package": "All"
   },
   "Acura RDX 2016-18": {
     "platform": "ACURA_RDX",
@@ -22,7 +31,7 @@
       "2017",
       "2018"
     ],
-    "package": "AcuraWatch Plus"
+    "package": "AcuraWatch Plus or Advance Package"
   },
   "Acura RDX 2019-21": {
     "platform": "ACURA_RDX_3G",
@@ -368,6 +377,17 @@
     ],
     "package": "Co-Pilot360 Assist+"
   },
+  "Ford Escape 2023-24": {
+    "platform": "FORD_ESCAPE_MK4_5",
+    "make": "Ford",
+    "brand": "ford",
+    "model": "Escape",
+    "year": [
+      "2023",
+      "2024"
+    ],
+    "package": "Co-Pilot360 Assist+"
+  },
   "Ford Escape Hybrid 2020-22": {
     "platform": "FORD_ESCAPE_MK4",
     "make": "Ford",
@@ -380,6 +400,17 @@
     ],
     "package": "Co-Pilot360 Assist+"
   },
+  "Ford Escape Hybrid 2023-24": {
+    "platform": "FORD_ESCAPE_MK4_5",
+    "make": "Ford",
+    "brand": "ford",
+    "model": "Escape Hybrid",
+    "year": [
+      "2023",
+      "2024"
+    ],
+    "package": "Co-Pilot360 Assist+"
+  },
   "Ford Escape Plug-in Hybrid 2020-22": {
     "platform": "FORD_ESCAPE_MK4",
     "make": "Ford",
@@ -389,6 +420,17 @@
       "2020",
       "2021",
       "2022"
+    ],
+    "package": "Co-Pilot360 Assist+"
+  },
+  "Ford Escape Plug-in Hybrid 2023-24": {
+    "platform": "FORD_ESCAPE_MK4_5",
+    "make": "Ford",
+    "brand": "ford",
+    "model": "Escape Plug-in Hybrid",
+    "year": [
+      "2023",
+      "2024"
     ],
     "package": "Co-Pilot360 Assist+"
   },
@@ -475,7 +517,7 @@
     ],
     "package": "Adaptive Cruise Control with Lane Centering"
   },
-  "Ford Kuga 2020-22": {
+  "Ford Kuga 2020-23": {
     "platform": "FORD_ESCAPE_MK4",
     "make": "Ford",
     "brand": "ford",
@@ -483,11 +525,12 @@
     "year": [
       "2020",
       "2021",
-      "2022"
+      "2022",
+      "2023"
     ],
     "package": "Adaptive Cruise Control with Lane Centering"
   },
-  "Ford Kuga Hybrid 2020-22": {
+  "Ford Kuga Hybrid 2020-23": {
     "platform": "FORD_ESCAPE_MK4",
     "make": "Ford",
     "brand": "ford",
@@ -495,11 +538,22 @@
     "year": [
       "2020",
       "2021",
-      "2022"
+      "2022",
+      "2023"
     ],
     "package": "Adaptive Cruise Control with Lane Centering"
   },
-  "Ford Kuga Plug-in Hybrid 2020-22": {
+  "Ford Kuga Hybrid 2024": {
+    "platform": "FORD_ESCAPE_MK4_5",
+    "make": "Ford",
+    "brand": "ford",
+    "model": "Kuga Hybrid",
+    "year": [
+      "2024"
+    ],
+    "package": "All"
+  },
+  "Ford Kuga Plug-in Hybrid 2020-23": {
     "platform": "FORD_ESCAPE_MK4",
     "make": "Ford",
     "brand": "ford",
@@ -507,9 +561,20 @@
     "year": [
       "2020",
       "2021",
-      "2022"
+      "2022",
+      "2023"
     ],
     "package": "Adaptive Cruise Control with Lane Centering"
+  },
+  "Ford Kuga Plug-in Hybrid 2024": {
+    "platform": "FORD_ESCAPE_MK4_5",
+    "make": "Ford",
+    "brand": "ford",
+    "model": "Kuga Plug-in Hybrid",
+    "year": [
+      "2024"
+    ],
+    "package": "All"
   },
   "Ford Maverick 2022": {
     "platform": "FORD_MAVERICK_MK1",
@@ -2133,6 +2198,16 @@
       "2018",
       "2019",
       "2020"
+    ],
+    "package": "All"
+  },
+  "Lexus RC 2023": {
+    "platform": "LEXUS_RC_TSS2",
+    "make": "Lexus",
+    "brand": "toyota",
+    "model": "RC",
+    "year": [
+      "2023"
     ],
     "package": "All"
   },
