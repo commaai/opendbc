@@ -123,10 +123,9 @@ class CarState(CarStateBase):
 
     ret = structs.CarState()
 
-# testing whether removing below helps stop signs
-#    # car params
-#    v_weight_v = [0., 1.]  # don't trust smooth speed at low values to avoid premature zero snapping
-#    v_weight_bp = [1., 6.]   # smooth blending, below ~0.6m/s the smooth speed snaps to zero
+    # car params
+    v_weight_v = [0., 1.]  # don't trust smooth speed at low values to avoid premature zero snapping
+    v_weight_bp = [1., 6.]   # smooth blending, below ~0.6m/s the smooth speed snaps to zero
 
     # update prevs, update must run once per loop
     prev_cruise_buttons = self.cruise_buttons
