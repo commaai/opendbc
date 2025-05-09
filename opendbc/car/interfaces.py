@@ -190,6 +190,16 @@ class CarInterfaceBase(ABC):
     carlog.warning(f"Car {candidate} does not have a _get_params_sp method, using defaults")
     return ret
 
+  @classmethod
+  def get_longitudinal_tuning_sp(cls, stock_cp: structs.CarParams, ret: structs.CarParamsSP) -> structs.CarParamsSP:
+    return cls._get_longitudinal_tuning_sp(stock_cp, ret)
+
+  @staticmethod
+  def _get_longitudinal_tuning_sp(stock_cp: structs.CarParams, ret: structs.CarParamsSP) -> structs.CarParamsSP:
+    """Apply longitudinal tuning specific to the car's brand. """
+    carlog.warning(f"Car {stock_cp.carFingerprint} does not have a _get_longitudinal_tuning_sp method, using defaults")
+    return ret
+
   @staticmethod
   def init(CP: structs.CarParams, CP_SP: structs.CarParamsSP, can_recv: CanRecvCallable, can_send: CanSendCallable):
     pass

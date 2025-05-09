@@ -127,7 +127,7 @@ def create_lfahda_mfc(packer, enabled, lfa_icon):
   return packer.make_can_msg("LFAHDA_MFC", 0, values)
 
 def create_acc_commands(packer, enabled, accel, upper_jerk, idx, hud_control, set_speed, stopping, long_override, use_fca, CP,
-                        main_cruise_enabled, ESCC: EnhancedSmartCruiseControl = None):
+                        main_cruise_enabled, tuning, ESCC: EnhancedSmartCruiseControl = None):
   commands = []
 
   def get_scc11_values():
@@ -146,9 +146,9 @@ def create_acc_commands(packer, enabled, accel, upper_jerk, idx, hud_control, se
   def get_scc12_values():
     scc12_values = {
       "ACCMode": 2 if enabled and long_override else 1 if enabled else 0,
-      "StopReq": 1 if stopping else 0,
-      "aReqRaw": accel,
-      "aReqValue": accel,  # stock ramps up and down respecting jerk limit until it reaches aReqRaw
+      "StopReq": 1 if tuning.stopping else 0,
+      "aReqRaw": tuning.desired_accel,
+      "aReqValue": tuning.actual_accel,  # stock ramps up and down respecting jerk limit until it reaches aReqRaw
       "CR_VSM_Alive": idx % 0xF,
     }
 
@@ -171,10 +171,10 @@ def create_acc_commands(packer, enabled, accel, upper_jerk, idx, hud_control, se
 
   def get_scc14_values():
     return {
-      "ComfortBandUpper": 0.0, # stock usually is 0 but sometimes uses higher values
-      "ComfortBandLower": 0.0, # stock usually is 0 but sometimes uses higher values
-      "JerkUpperLimit": upper_jerk, # stock usually is 1.0 but sometimes uses higher values
-      "JerkLowerLimit": 5.0, # stock usually is 0.5 but sometimes uses higher values
+      "ComfortBandUpper": tuning.comfort_band_upper, # stock usually is 0 but sometimes uses higher values
+      "ComfortBandLower": tuning.comfort_band_lower, # stock usually is 0 but sometimes uses higher values
+      "JerkUpperLimit": tuning.jerk_upper, # stock usually is 1.0 but sometimes uses higher values
+      "JerkLowerLimit": tuning.jerk_lower, # stock usually is 0.5 but sometimes uses higher values
       "ACCMode": 2 if enabled and long_override else 1 if enabled else 4, # stock will always be 4 instead of 0 after first disengage
       "ObjGap": 2 if hud_control.leadVisible else 0, # 5: >30, m, 4: 25-30 m, 3: 20-25 m, 2: < 20 m, 0: no lead
     }
@@ -191,8 +191,6 @@ def create_acc_commands(packer, enabled, accel, upper_jerk, idx, hud_control, se
     fca11_dat = packer.make_can_msg("FCA11", 0, values)[1]
     values["CR_FCA_ChkSum"] = hyundai_checksum(fca11_dat[:7])
     return values
-
-  commands = []
 
   scc11_values = get_scc11_values()
   commands.append(packer.make_can_msg("SCC11", 0, scc11_values))

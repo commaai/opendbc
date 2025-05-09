@@ -10,6 +10,7 @@ from opendbc.car.hyundai.hyundaicanfd import CanBus
 from opendbc.car.hyundai.values import HyundaiFlags, CAR, DBC, Buttons, CarControllerParams
 from opendbc.car.interfaces import CarStateBase
 
+from opendbc.sunnypilot.car.hyundai.carstate_ext import CarStateExt
 from opendbc.sunnypilot.car.hyundai.escc import EsccCarStateBase
 from opendbc.sunnypilot.car.hyundai.mads import MadsCarState
 
@@ -23,11 +24,12 @@ BUTTONS_DICT = {Buttons.RES_ACCEL: ButtonType.accelCruise, Buttons.SET_DECEL: Bu
                 Buttons.GAP_DIST: ButtonType.gapAdjustCruise, Buttons.CANCEL: ButtonType.cancel}
 
 
-class CarState(CarStateBase, EsccCarStateBase, MadsCarState):
+class CarState(CarStateBase, EsccCarStateBase, MadsCarState, CarStateExt):
   def __init__(self, CP, CP_SP):
     CarStateBase.__init__(self, CP, CP_SP)
     EsccCarStateBase.__init__(self)
     MadsCarState.__init__(self, CP, CP_SP)
+    CarStateExt.__init__(self)
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
 
     self.cruise_buttons: deque = deque([Buttons.NONE] * PREV_BUTTON_SAMPLES, maxlen=PREV_BUTTON_SAMPLES)
@@ -199,6 +201,8 @@ class CarState(CarStateBase, EsccCarStateBase, MadsCarState):
     if self.CP.openpilotLongitudinalControl:
       ret.cruiseState.available = self.get_main_cruise(ret)
 
+    CarStateExt.update(self, ret, can_parsers)
+
     return ret
 
   def update_canfd(self, can_parsers) -> structs.CarState:
@@ -296,6 +300,8 @@ class CarState(CarStateBase, EsccCarStateBase, MadsCarState):
 
     if self.CP.openpilotLongitudinalControl:
       ret.cruiseState.available = self.get_main_cruise(ret)
+
+    CarStateExt.update_canfd_ext(self, ret, can_parsers)
 
     return ret
 
