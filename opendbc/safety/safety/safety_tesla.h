@@ -111,7 +111,6 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
                             (cruise_state == 4) ||  // OVERRIDE
                             (cruise_state == 6) ||  // PRE_FAULT
                             (cruise_state == 7);    // PRE_CANCEL
-      printf("safety cruise_engaged: %d, autopark_now: %d, autopark: %d\n", cruise_engaged, tesla_autopark_now, tesla_autopark);
       cruise_engaged = cruise_engaged && !tesla_autopark;
 
       vehicle_moving = cruise_state != 3; // STANDSTILL
