@@ -26,7 +26,7 @@ inline bool endswith(const std::string& str, const char* suffix) {
 
 // Car specific functions
 void pedal_setup_signal(Signal &sig, const std::string& dbc_name, int line_num);
-bool tesla_is_counter(const Signal &sig);
+void tesla_setup_signal(Signal &sig, const std::string& dbc_name, int line_num);
 
 unsigned int honda_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int toyota_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);

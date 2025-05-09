@@ -57,7 +57,7 @@ ChecksumState* get_checksum(const std::string& dbc_name) {
   } else if (startswith(dbc_name, "comma_body")) {
     s = new ChecksumState({8, 4, 7, 3, false, PEDAL_CHECKSUM, &pedal_checksum});
   } else if (startswith(dbc_name, "tesla_model3_party")) {
-    s = new ChecksumState({-1, -1, -1, -1, true, TESLA_CHECKSUM, nullptr, &tesla_is_counter});
+    s = new ChecksumState({-1, -1, -1, -1, true, TESLA_CHECKSUM, nullptr, &tesla_setup_signal});
   }
   return s;
 }
