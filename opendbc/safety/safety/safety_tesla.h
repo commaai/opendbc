@@ -1,4 +1,5 @@
 #pragma once
+#include <stdio.h>
 
 #include "safety_declarations.h"
 
@@ -15,6 +16,21 @@ static bool tesla_stock_lkas_prev = false;
 // Only Summon is currently supported due to Autopark not setting Autopark state properly
 static bool tesla_autopark = false;
 static bool tesla_autopark_prev = false;
+
+static uint8_t tesla_get_counter(const CANPacket_t *to_push) {
+  int addr = GET_ADDR(to_push);
+
+  uint8_t cnt = 0;
+  if ((addr == 0x2b9)) {
+    // Signal: DAS_controlCounter
+    cnt = GET_BYTE(to_push, 6) >> 5;
+    printf("cnt\n", cnt);
+  } else if () {
+
+  } else {
+  }
+  return cnt;
+}
 
 static void tesla_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
@@ -272,7 +288,7 @@ static safety_config tesla_init(uint16_t param) {
   tesla_autopark_prev = false;
 
   static RxCheck tesla_model3_y_rx_checks[] = {
-    {.msg = {{0x2b9, 2, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 25U}, { 0 }, { 0 }}},   // DAS_control
+    {.msg = {{0x2b9, 2, 8, .ignore_checksum = true, .max_counter = 7U, .frequency = 25U}, { 0 }, { 0 }}},   // DAS_control
     {.msg = {{0x488, 2, 4, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},   // DAS_steeringControl
     {.msg = {{0x257, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},   // DI_speed (speed in kph)
     {.msg = {{0x155, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},   // ESP_B (2nd speed in kph)
@@ -296,5 +312,6 @@ const safety_hooks tesla_hooks = {
   .init = tesla_init,
   .rx = tesla_rx_hook,
   .tx = tesla_tx_hook,
+  .get_counter = tesla_get_counter,
   .fwd = tesla_fwd_hook,
 };
