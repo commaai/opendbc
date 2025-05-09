@@ -118,7 +118,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
       # Python does banker's rounding which mismatches with C++ CANParser, hence the floor(x + 0.5)
       speed = math.floor(speed / 0.08 * 3.6 + 0.5) * 0.08 / 3.6
       for speed_delta in np.arange(-5, 5, 0.1):
-        speed_2 = round(max(speed + speed_delta, 0), 1)
+        speed_2 = max(speed + speed_delta, 0)
         speed_2 = math.floor(speed_2 * 2 * 3.6 + 0.5) / 2 / 3.6
         # Set controls allowed in between rx since first message can reset it
         self._rx(self._speed_msg(speed))
