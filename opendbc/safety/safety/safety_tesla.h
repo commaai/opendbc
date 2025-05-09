@@ -21,12 +21,38 @@ static uint8_t tesla_get_counter(const CANPacket_t *to_push) {
   int addr = GET_ADDR(to_push);
 
   uint8_t cnt = 0;
-  if ((addr == 0x2b9)) {
+  if (addr == 0x2b9) {
     // Signal: DAS_controlCounter
     cnt = GET_BYTE(to_push, 6) >> 5;
-    printf("cnt\n", cnt);
-  } else if () {
-
+//    printf("cnt\n", cnt);
+  } else if (addr == 0x488) {
+    // Signal: DAS_steeringControlCounter
+    cnt = GET_BYTE(to_push, 2) & 0x0FU;
+//    printf("cnt\n", cnt);
+  } else if (addr == 0x257) {
+    // Signal: DI_speedCounter
+    cnt = GET_BYTE(to_push, 1) & 0x0FU;
+//    printf("cnt\n", cnt);
+  } else if (addr == 0x155) {
+    // Signal: ESP_wheelRotationCounter
+    cnt = GET_BYTE(to_push, 6) >> 4;
+//    printf("cnt\n", cnt);
+  } else if (addr == 0x370) {
+    // Signal: EPAS3S_sysStatusCounter
+    cnt = GET_BYTE(to_push, 6) & 0x0FU;
+//    printf("cnt\n", cnt);
+  } else if (addr == 0x118) {
+    // Signal: DI_systemStatusCounter
+    cnt = GET_BYTE(to_push, 1) & 0x0FU;
+//    printf("cnt\n", cnt);
+  } else if (addr == 0x39d) {
+    // Signal: IBST_statusCounter
+    cnt = GET_BYTE(to_push, 1) & 0x0FU;
+//    printf("cnt\n", cnt);
+  } else if (addr == 0x286) {
+    // Signal: DI_locStatusCounter
+    cnt = GET_BYTE(to_push, 1) & 0x0FU;
+//    printf("cnt\n", cnt);
   } else {
   }
   return cnt;
@@ -289,13 +315,13 @@ static safety_config tesla_init(uint16_t param) {
 
   static RxCheck tesla_model3_y_rx_checks[] = {
     {.msg = {{0x2b9, 2, 8, .ignore_checksum = true, .max_counter = 7U, .frequency = 25U}, { 0 }, { 0 }}},   // DAS_control
-    {.msg = {{0x488, 2, 4, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},   // DAS_steeringControl
-    {.msg = {{0x257, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},   // DI_speed (speed in kph)
-    {.msg = {{0x155, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},   // ESP_B (2nd speed in kph)
-    {.msg = {{0x370, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},  // EPAS3S_sysStatus (steering angle)
-    {.msg = {{0x118, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},  // DI_systemStatus (gas pedal)
-    {.msg = {{0x39d, 0, 5, .ignore_checksum = true, .ignore_counter = true, .frequency = 25U}, { 0 }, { 0 }}},   // IBST_status (brakes)
-    {.msg = {{0x286, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},   // DI_state (acc state)
+    {.msg = {{0x488, 2, 4, .ignore_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},   // DAS_steeringControl
+    {.msg = {{0x257, 0, 8, .ignore_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},   // DI_speed (speed in kph)
+    {.msg = {{0x155, 0, 8, .ignore_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},   // ESP_B (2nd speed in kph)
+    {.msg = {{0x370, 0, 8, .ignore_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},  // EPAS3S_sysStatus (steering angle)
+    {.msg = {{0x118, 0, 8, .ignore_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},  // DI_systemStatus (gas pedal)
+    {.msg = {{0x39d, 0, 5, .ignore_checksum = true, .max_counter = 15U, .frequency = 25U}, { 0 }, { 0 }}},   // IBST_status (brakes)
+    {.msg = {{0x286, 0, 8, .ignore_checksum = true, .max_counter = 15U, .frequency = 10U}, { 0 }, { 0 }}},   // DI_state (acc state)
     {.msg = {{0x311, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},   // UI_warning (blinkers, buckle switch & doors)
   };
 
