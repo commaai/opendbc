@@ -43,9 +43,9 @@ inline std::string& trim(std::string& s, const char* t = " \t\n\r\f\v") {
 ChecksumState* get_checksum(const std::string& dbc_name) {
   ChecksumState* s = nullptr;
   if (startswith(dbc_name, {"honda_", "acura_"})) {
-    s = new ChecksumState({4, 2, 3, 5, false, HONDA_CHECKSUM, &honda_checksum, &pedal_setup_signal});
+    s = new ChecksumState({4, 2, 3, 5, false, HONDA_CHECKSUM, &honda_checksum});
   } else if (startswith(dbc_name, {"toyota_", "lexus_"})) {
-    s = new ChecksumState({8, -1, 7, -1, false, TOYOTA_CHECKSUM, &toyota_checksum, &pedal_setup_signal});
+    s = new ChecksumState({8, -1, 7, -1, false, TOYOTA_CHECKSUM, &toyota_checksum});
   } else if (startswith(dbc_name, "hyundai_canfd_generated")) {
     s = new ChecksumState({16, -1, 0, -1, true, HKG_CAN_FD_CHECKSUM, &hkg_can_fd_checksum});
   } else if (startswith(dbc_name, {"vw_mqb", "vw_mqbevo", "vw_meb"})) {
@@ -60,6 +60,8 @@ ChecksumState* get_checksum(const std::string& dbc_name) {
     s = new ChecksumState({8, -1, 7, -1, false, FCA_GIORGIO_CHECKSUM, &fca_giorgio_checksum});
   } else if (startswith(dbc_name, "comma_body")) {
     s = new ChecksumState({8, 4, 7, 3, false, PEDAL_CHECKSUM, &pedal_checksum});
+  } else if (startswith(dbc_name, "gm_global")) {
+    s = new ChecksumState({-1, -1, -1, -1, false, GM_CHECKSUM, nullptr});
   }
   return s;
 }
@@ -74,22 +76,22 @@ void set_signal_type(Signal& s, ChecksumState* chk, const std::string& dbc_name,
     // TODO: create ChecksumState for GM
     pedal_setup_signal(s, dbc_name, line_num);
 
-    if (s.name == "COUNTER") {
-      s.type = COUNTER;
-    } else if (s.name == "CHECKSUM") {
+    if (s.name == "CHECKSUM") {
       s.type = chk->checksum_type;
       s.calc_checksum = chk->calc_checksum;
+    } else if (s.name == "COUNTER") {
+      s.type = COUNTER;
     }
 
-    if (s.type == COUNTER) {
-      DBC_ASSERT(chk->counter_size == -1 || s.size == chk->counter_size, s.name << " is not " << chk->counter_size << " bits long");
-      DBC_ASSERT(chk->counter_start_bit == -1 || (s.start_bit % 8) == chk->counter_start_bit, s.name << " starts at wrong bit");
-      DBC_ASSERT(chk->little_endian == s.is_little_endian, s.name << " has wrong endianness");
-    } else if (s.type > COUNTER) {
+    if (s.type > COUNTER) {
       DBC_ASSERT(chk->checksum_size == -1 || s.size == chk->checksum_size, s.name << " is not " << chk->checksum_size << " bits long");
       DBC_ASSERT(chk->checksum_start_bit == -1 || (s.start_bit % 8) == chk->checksum_start_bit, s.name << " starts at wrong bit");
       DBC_ASSERT(s.is_little_endian == chk->little_endian, s.name << " has wrong endianness");
       DBC_ASSERT(chk->calc_checksum != nullptr, "Checksum calculate function not supplied for " << s.name);
+    }  else if (s.type == COUNTER) {
+      DBC_ASSERT(chk->counter_size == -1 || s.size == chk->counter_size, s.name << " is not " << chk->counter_size << " bits long");
+      DBC_ASSERT(chk->counter_start_bit == -1 || (s.start_bit % 8) == chk->counter_start_bit, s.name << " starts at wrong bit");
+      DBC_ASSERT(chk->little_endian == s.is_little_endian, s.name << " has wrong endianness");
     }
   }
 }
