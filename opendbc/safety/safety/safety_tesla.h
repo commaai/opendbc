@@ -73,7 +73,7 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
       bool is_invalid_speed = ABS(esp_speed - ((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR)) > TESLA_MAX_SPEED_DELTA;
       // TODO: this should generically cause rx valid to fall until re-enable
       if (is_invalid_speed) {
-//        controls_allowed = false;
+        controls_allowed = false;
       }
     }
 
@@ -299,10 +299,6 @@ static safety_config tesla_init(uint16_t param) {
   static RxCheck tesla_model3_y_rx_checks[] = {
     {.msg = {{0x2b9, 2, 8, .ignore_checksum = true, .max_counter = 7U, .frequency = 25U}, { 0 }, { 0 }}},    // DAS_control
     {.msg = {{0x488, 2, 4, .ignore_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},   // DAS_steeringControl
-
-    {.msg = {{0x39b, 2, 8, .ignore_checksum = true, .max_counter = 15U, .frequency = 2U}, { 0 }, { 0 }}},    // DAS_status
-    {.msg = {{0x293, 2, 8, .ignore_checksum = true, .max_counter = 15U, .frequency = 2U}, { 0 }, { 0 }}},    // DAS_settings
-    {.msg = {{0x129, 2, 8, .ignore_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},  // SCCM_steeringAngleSensor
 
     {.msg = {{0x257, 0, 8, .ignore_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},   // DI_speed (speed in kph)
     {.msg = {{0x155, 0, 8, .ignore_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},   // ESP_B (2nd speed in kph)
