@@ -16,6 +16,7 @@ jobs:
         include:
           - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-24.04' }}
           - os: macos-latest
+          - os: macos-15
     steps:
     - uses: commaai/timeout@v1
     - uses: actions/checkout@v4
