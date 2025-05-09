@@ -123,7 +123,7 @@ def create_acc_commands(packer, CAN, enabled, active, accel, gas, stopping_count
       }
     else:
       voacc_camera_values = CS.voacc_camera
-    commands.append(packer.make_can_msg("SPEED_CONTROL", CAN.pt, voacc_camera_values))
+    commands.append(packer.make_can_msg("VOACC_CAMERA", CAN.pt, voacc_camera_values))
 
 
   else:
