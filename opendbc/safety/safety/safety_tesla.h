@@ -24,35 +24,27 @@ static uint8_t tesla_get_counter(const CANPacket_t *to_push) {
   if (addr == 0x2b9) {
     // Signal: DAS_controlCounter
     cnt = GET_BYTE(to_push, 6) >> 5;
-//    printf("cnt\n", cnt);
   } else if (addr == 0x488) {
     // Signal: DAS_steeringControlCounter
     cnt = GET_BYTE(to_push, 2) & 0x0FU;
-//    printf("cnt\n", cnt);
   } else if (addr == 0x257) {
     // Signal: DI_speedCounter
     cnt = GET_BYTE(to_push, 1) & 0x0FU;
-//    printf("cnt\n", cnt);
   } else if (addr == 0x155) {
     // Signal: ESP_wheelRotationCounter
     cnt = GET_BYTE(to_push, 6) >> 4;
-//    printf("cnt\n", cnt);
   } else if (addr == 0x370) {
     // Signal: EPAS3S_sysStatusCounter
     cnt = GET_BYTE(to_push, 6) & 0x0FU;
-//    printf("cnt\n", cnt);
   } else if (addr == 0x118) {
     // Signal: DI_systemStatusCounter
     cnt = GET_BYTE(to_push, 1) & 0x0FU;
-//    printf("cnt\n", cnt);
   } else if (addr == 0x39d) {
     // Signal: IBST_statusCounter
     cnt = GET_BYTE(to_push, 1) & 0x0FU;
-//    printf("cnt\n", cnt);
   } else if (addr == 0x286) {
     // Signal: DI_locStatusCounter
     cnt = GET_BYTE(to_push, 1) & 0x0FU;
-//    printf("cnt\n", cnt);
   } else {
   }
   return cnt;
