@@ -82,6 +82,9 @@ class FordCarDocs(CarDocs):
     if harness == CarHarness.ford_q4:
       self.setup_video_link = "https://www.youtube.com/watch?v=uUGkH6C_EQU"
 
+    if CP.carFingerprint in (CAR.FORD_MUSTANG_MACH_E_MK1):
+      self.setup_video_link = "https://www.youtube.com/watch?v=AR4_eTF3b_A" 
+
 
 @dataclass
 class FordPlatformConfig(PlatformConfig):
