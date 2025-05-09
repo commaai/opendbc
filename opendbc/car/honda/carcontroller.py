@@ -219,7 +219,8 @@ class CarController(CarControllerBase):
 
         if self.CP.carFingerprint in HONDA_BOSCH:
 
-          stopping = (actuators.longControlState == LongCtrlState.stopping) or (aTarget < 0.1 and CS.out.vEgo < 5.0 and self.stopping_counter >=1)
+          # stopsign workaround since longcontrol releases stop command too early.
+          stopping = (actuators.longControlState == LongCtrlState.stopping) or (CS.out.vEgo < 4.0 and CS.out.vEgo > 0.01 and self.stopping_counter >=1)
           self.stopping_counter = self.stopping_counter + 1 if stopping else 0
 
           stoppingDecelAmount = max ( self.CP.stopAccel, self.stopping_counter * -self.CP.stoppingDecelRate / 50 ) # CC frame rate 50x speed of longplanner
