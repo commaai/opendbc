@@ -120,6 +120,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
       for speed_delta in np.arange(-5, 5, 0.1):
         speed_2 = max(speed + speed_delta, 0)
         speed_2 = math.floor(speed_2 * 2 * 3.6 + 0.5) / 2 / 3.6
+
         # Set controls allowed in between rx since first message can reset it
         self._rx(self._speed_msg(speed))
         self.safety.set_controls_allowed(True)
