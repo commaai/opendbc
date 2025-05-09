@@ -83,7 +83,7 @@ class FordCarDocs(CarDocs):
       self.setup_video_link = "https://www.youtube.com/watch?v=uUGkH6C_EQU"
 
     if CP.carFingerprint in (CAR.FORD_RANGER_MK2):
-      self.setup_video_link = "https://www.youtube.com/watch?v=2oJlXCKYOy0" 
+      self.setup_video_link = "https://www.youtube.com/watch?v=2oJlXCKYOy0"
 
 
 @dataclass
