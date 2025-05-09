@@ -20,6 +20,8 @@
 #define CAN_INVALID_CNT 5
 
 // Car specific functions
+void pedal_setup_signal(Signal &sig, const std::string& dbc_name, int line_num);
+
 unsigned int honda_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int toyota_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int subaru_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
