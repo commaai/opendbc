@@ -60,8 +60,6 @@ ChecksumState* get_checksum(const std::string& dbc_name) {
     s = new ChecksumState({8, -1, 7, -1, false, FCA_GIORGIO_CHECKSUM, &fca_giorgio_checksum});
   } else if (startswith(dbc_name, "comma_body")) {
     s = new ChecksumState({8, 4, 7, 3, false, PEDAL_CHECKSUM, &pedal_checksum});
-  } else if (startswith(dbc_name, "gm_global")) {
-    s = new ChecksumState({-1, -1, -1, -1, false, GM_CHECKSUM, nullptr});
   }
   return s;
 }
