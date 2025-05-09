@@ -115,6 +115,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     # TODO: this can be a common test w/ Ford
     # Tesla relies on speed for lateral limits close to ISO 11270, so it checks two sources
     for speed in np.arange(0, 40, 0.5):
+      # match signal rounding on CAN
       # Python does banker's rounding which mismatches with C++ CANParser, hence the floor(x + 0.5)
       speed = math.floor(speed / 0.08 * 3.6 + 0.5) * 0.08 / 3.6
       for speed_delta in np.arange(-5, 5, 0.1):
