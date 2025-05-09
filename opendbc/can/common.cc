@@ -258,11 +258,6 @@ unsigned int fca_giorgio_checksum(uint32_t address, const Signal &sig, const std
 
 }
 
-unsigned int tesla_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
-  // TODO: implement
-  return 0U;
-}
-
 bool tesla_is_counter(const Signal &sig) {
   return endswith(sig.name, "Counter");
 }

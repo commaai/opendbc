@@ -33,7 +33,6 @@ unsigned int xor_checksum(uint32_t address, const Signal &sig, const std::vector
 unsigned int hkg_can_fd_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int fca_giorgio_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int pedal_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
-unsigned int tesla_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 
 bool tesla_is_counter(const Signal &sig);
 
