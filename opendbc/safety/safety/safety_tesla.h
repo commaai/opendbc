@@ -26,11 +26,11 @@ static uint8_t tesla_get_counter(const CANPacket_t *to_push) {
   } else if (addr == 0x488) {
     // Signal: DAS_steeringControlCounter
     cnt = GET_BYTE(to_push, 2) & 0x0FU;
-  } else if ((addr == 0x257) || (addr == 0x118) || (addr == 0x39d) || (addr == 0x286) || (addr == 0x311)) {
-    // Signal: DI_speedCounter, DI_systemStatusCounter, IBST_statusCounter, DI_locStatusCounter, UI_warningCounter
+  } else if ((addr == 0x257) || (addr == 0x118) || (addr == 0x39d) || (addr == 0x286) || (addr == 0x311) || ((addr == 0x129))) {
+    // Signal: DI_speedCounter, DI_systemStatusCounter, IBST_statusCounter, DI_locStatusCounter, UI_warningCounter, SCCM_steeringAngleCounter
     cnt = GET_BYTE(to_push, 1) & 0x0FU;
-  } else if (addr == 0x155) {
-    // Signal: ESP_wheelRotationCounter
+  } else if ((addr == 0x155) || (addr == 0x39b) || (addr == 0x293)) {
+    // Signal: ESP_wheelRotationCounter, DAS_statusCounter, DAS_settingCounter
     cnt = GET_BYTE(to_push, 6) >> 4;
   } else if (addr == 0x370) {
     // Signal: EPAS3S_sysStatusCounter
@@ -73,7 +73,7 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
       bool is_invalid_speed = ABS(esp_speed - ((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR)) > TESLA_MAX_SPEED_DELTA;
       // TODO: this should generically cause rx valid to fall until re-enable
       if (is_invalid_speed) {
-        controls_allowed = false;
+//        controls_allowed = false;
       }
     }
 
@@ -96,7 +96,7 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
                                 (autopark_state == 9);    // SELFPARK_STARTED
 
       // Only consider rising edges while controls are not allowed
-      if (tesla_autopark_now && !tesla_autopark_prev && !controls_allowed) {
+      if (tesla_autopark_now && !tesla_autopark_prev && !cruise_engaged_prev) {
         tesla_autopark = true;
       }
       if (!tesla_autopark_now) {
@@ -111,6 +111,7 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
                             (cruise_state == 4) ||  // OVERRIDE
                             (cruise_state == 6) ||  // PRE_FAULT
                             (cruise_state == 7);    // PRE_CANCEL
+      printf("safety cruise_engaged: %d, autopark_now: %d, autopark: %d\n", cruise_engaged, tesla_autopark_now, tesla_autopark);
       cruise_engaged = cruise_engaged && !tesla_autopark;
 
       vehicle_moving = cruise_state != 3; // STANDSTILL
@@ -298,6 +299,11 @@ static safety_config tesla_init(uint16_t param) {
   static RxCheck tesla_model3_y_rx_checks[] = {
     {.msg = {{0x2b9, 2, 8, .ignore_checksum = true, .max_counter = 7U, .frequency = 25U}, { 0 }, { 0 }}},    // DAS_control
     {.msg = {{0x488, 2, 4, .ignore_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},   // DAS_steeringControl
+
+    {.msg = {{0x39b, 2, 8, .ignore_checksum = true, .max_counter = 15U, .frequency = 2U}, { 0 }, { 0 }}},    // DAS_status
+    {.msg = {{0x293, 2, 8, .ignore_checksum = true, .max_counter = 15U, .frequency = 2U}, { 0 }, { 0 }}},    // DAS_settings
+    {.msg = {{0x129, 2, 8, .ignore_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},  // SCCM_steeringAngleSensor
+
     {.msg = {{0x257, 0, 8, .ignore_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},   // DI_speed (speed in kph)
     {.msg = {{0x155, 0, 8, .ignore_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},   // ESP_B (2nd speed in kph)
     {.msg = {{0x370, 0, 8, .ignore_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},  // EPAS3S_sysStatus (steering angle)

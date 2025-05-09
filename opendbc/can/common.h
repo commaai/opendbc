@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstring>
 #include <map>
 #include <set>
 #include <string>
@@ -9,6 +10,10 @@
 
 #include "opendbc/can/logger.h"
 #include "opendbc/can/common_dbc.h"
+
+inline bool endswith(const std::string& str, const char* suffix) {
+  return str.find(suffix, 0) == (str.length() - strlen(suffix));
+}
 
 #define INFO printf
 #define WARN printf

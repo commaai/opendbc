@@ -40,10 +40,6 @@ inline bool startswith(const std::string& str, std::initializer_list<const char*
   return false;
 }
 
-inline bool endswith(const std::string& str, const char* suffix) {
-  return str.find(suffix, 0) == (str.length() - strlen(suffix));
-}
-
 inline std::string& trim(std::string& s, const char* t = " \t\n\r\f\v") {
   s.erase(s.find_last_not_of(t) + 1);
   return s.erase(0, s.find_first_not_of(t));
@@ -89,7 +85,6 @@ void set_signal_type(Signal& s, ChecksumState* chk, const std::string& dbc_name,
       s.type = chk->checksum_type;
       s.calc_checksum = chk->calc_checksum;
     } else if ((s.name == "COUNTER") || (chk->is_counter && chk->is_counter(s))) {
-      printf("COUNTER: %s\n", s.name.c_str());
       DBC_ASSERT(chk->counter_size == -1 || s.size == chk->counter_size, "COUNTER is not " << chk->counter_size << " bits long");
       DBC_ASSERT(chk->counter_start_bit == -1 || (s.start_bit % 8) == chk->counter_start_bit, "COUNTER starts at wrong bit");
       DBC_ASSERT(chk->little_endian == s.is_little_endian, "COUNTER has wrong endianness");
