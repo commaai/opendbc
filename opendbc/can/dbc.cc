@@ -73,7 +73,6 @@ void set_signal_type(Signal& s, ChecksumState* chk, const std::string& dbc_name,
       chk->setup_signal(s, dbc_name, line_num);
     }
 
-    // TODO: create ChecksumState for GM
     pedal_setup_signal(s, dbc_name, line_num);
 
     if (s.name == "CHECKSUM") {
