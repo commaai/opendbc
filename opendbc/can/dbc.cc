@@ -59,7 +59,7 @@ ChecksumState* get_checksum(const std::string& dbc_name) {
   } else if (startswith(dbc_name, "fca_giorgio")) {
     s = new ChecksumState({8, -1, 7, -1, false, FCA_GIORGIO_CHECKSUM, &fca_giorgio_checksum});
   } else if (startswith(dbc_name, "comma_body")) {
-    s = new ChecksumState({8, 4, 7, 3, true, PEDAL_CHECKSUM, &pedal_checksum});
+    s = new ChecksumState({8, 4, 7, 3, false, PEDAL_CHECKSUM, &pedal_checksum});
   }
   return s;
 }
@@ -74,11 +74,11 @@ void set_signal_type(Signal& s, ChecksumState* chk, const std::string& dbc_name,
     // TODO: create ChecksumState for GM
     pedal_setup_signal(s, dbc_name, line_num);
 
-    if (s.name == "CHECKSUM") {
+    if (s.name == "COUNTER") {
+      s.type = COUNTER;
+    } else if (s.name == "CHECKSUM") {
       s.type = chk->checksum_type;
       s.calc_checksum = chk->calc_checksum;
-    } else if (s.name == "COUNTER") {
-      s.type = COUNTER;
     }
 
     if (s.type == COUNTER) {
