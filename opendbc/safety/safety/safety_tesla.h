@@ -49,7 +49,7 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
       bool is_invalid_speed = ABS(esp_speed - ((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR)) > TESLA_MAX_SPEED_DELTA;
       // TODO: this should generically cause rx valid to fall until re-enable
       if (is_invalid_speed) {
-        controls_allowed = false;
+//        controls_allowed = false;
       }
     }
 
@@ -72,7 +72,7 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
                                 (autopark_state == 9);    // SELFPARK_STARTED
 
       // Only consider rising edges while controls are not allowed
-      if (tesla_autopark_now && !tesla_autopark_prev && !controls_allowed) {
+      if (tesla_autopark_now && !tesla_autopark_prev && !cruise_engaged_prev) {
         tesla_autopark = true;
       }
       if (!tesla_autopark_now) {
@@ -87,6 +87,7 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
                             (cruise_state == 4) ||  // OVERRIDE
                             (cruise_state == 6) ||  // PRE_FAULT
                             (cruise_state == 7);    // PRE_CANCEL
+      printf("safety cruise_engaged: %d, autopark_now: %d, autopark: %d\n", cruise_engaged, tesla_autopark_now, tesla_autopark);
       cruise_engaged = cruise_engaged && !tesla_autopark;
 
       vehicle_moving = cruise_state != 3; // STANDSTILL
