@@ -151,7 +151,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
   def test_autopark_summon_while_enabled(self):
     # We should not respect Autopark that activates while controls are allowed
-    self.safety.set_controls_allowed(True)
+    self._rx(self._pcm_status_msg(True, 0))
 
     self._rx(self._pcm_status_msg(True, self.autopark_states["SELFPARK_STARTED"]))
     self.assertTrue(self.safety.get_controls_allowed())
