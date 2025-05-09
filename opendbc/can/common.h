@@ -3,6 +3,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <sstream>
 #include <utility>
 #include <unordered_map>
 #include <vector>
@@ -19,6 +20,8 @@
 #define CAN_INVALID_CNT 5
 
 // Car specific functions
+void pedal_setup_signal(Signal &sig, const std::string& dbc_name, int line_num);
+
 unsigned int honda_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int toyota_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int subaru_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
@@ -28,6 +31,15 @@ unsigned int xor_checksum(uint32_t address, const Signal &sig, const std::vector
 unsigned int hkg_can_fd_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int fca_giorgio_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int pedal_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
+
+#define DBC_ASSERT(condition, message)                             \
+  do {                                                             \
+    if (!(condition)) {                                            \
+      std::stringstream is;                                        \
+      is << "[" << dbc_name << ":" << line_num << "] " << message; \
+      throw std::runtime_error(is.str());                          \
+    }                                                              \
+  } while (false)
 
 struct CanFrame {
   long src;
