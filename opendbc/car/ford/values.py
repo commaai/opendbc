@@ -127,7 +127,15 @@ class CAR(Platforms):
   FORD_ESCAPE_MK4 = FordPlatformConfig(
     [
       FordCarDocs("Ford Escape 2020-22", hybrid=True, plug_in_hybrid=True),
-      FordCarDocs("Ford Kuga 2020-22", "Adaptive Cruise Control with Lane Centering", hybrid=True, plug_in_hybrid=True),
+      FordCarDocs("Ford Kuga 2020-23", "Adaptive Cruise Control with Lane Centering", hybrid=True, plug_in_hybrid=True),
+    ],
+    CarSpecs(mass=1750, wheelbase=2.71, steerRatio=16.7),
+  )
+  FORD_ESCAPE_MK4_5 = FordCANFDPlatformConfig(
+    [
+      FordCarDocs("Ford Escape 2023-24", hybrid=True, plug_in_hybrid=True),
+      FordCarDocs("Ford Kuga Hybrid 2024", "All"),
+      FordCarDocs("Ford Kuga Plug-in Hybrid 2024", "All"),
     ],
     CarSpecs(mass=1750, wheelbase=2.71, steerRatio=16.7),
   )
