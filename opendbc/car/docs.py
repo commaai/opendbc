@@ -10,7 +10,7 @@ from natsort import natsorted
 
 from opendbc.car.common.basedir import BASEDIR
 from opendbc.car import gen_empty_fingerprint
-from opendbc.car.structs import CarParams
+from opendbc.car.structs import CarParams, CarParamsSP
 from opendbc.car.docs_definitions import BaseCarHarness, CarDocs, Device, ExtraCarDocs, Column, ExtraCarsColumn, CommonFootnote, PartType, SupportType
 from opendbc.car.car_helpers import interfaces
 from opendbc.car.interfaces import get_interface_attr
@@ -28,12 +28,16 @@ EXTRA_BRANDS = get_args(ExtraPlatform)
 EXTRA_PLATFORMS: dict[str, ExtraPlatform] = {str(platform): platform for brand in EXTRA_BRANDS for platform in brand}
 
 
-def get_params_for_docs(platform) -> CarParams:
+def get_params_for_docs(platform) -> tuple[CarParams, CarParamsSP]:
   cp_platform = platform if platform in interfaces else MOCK.MOCK
   CP: CarParams = interfaces[cp_platform].get_params(cp_platform, fingerprint=gen_empty_fingerprint(),
                                                      car_fw=[CarParams.CarFw(ecu=CarParams.Ecu.unknown)],
                                                      alpha_long=True, docs=True)
-  return CP
+
+  CP_SP: CarParamsSP = interfaces[cp_platform].get_params_sp(CP, cp_platform, fingerprint=gen_empty_fingerprint(),
+                                                             car_fw=[CarParams.CarFw(ecu=CarParams.Ecu.unknown)],
+                                                             alpha_long=True, docs=True)
+  return CP, CP_SP
 
 
 def get_all_footnotes() -> dict[Enum, int]:
@@ -47,7 +51,7 @@ def build_sorted_car_docs_list(platforms, footnotes=None):
   collected_car_docs: list[CarDocs | ExtraCarDocs] = []
   for platform in platforms.values():
     car_docs = platform.config.car_docs
-    CP = get_params_for_docs(platform)
+    CP, CP_SP = get_params_for_docs(platform)
 
     if not len(car_docs):
       continue
