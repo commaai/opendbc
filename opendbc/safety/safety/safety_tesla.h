@@ -49,7 +49,7 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
       bool is_invalid_speed = ABS(esp_speed - ((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR)) > TESLA_MAX_SPEED_DELTA;
       // TODO: this should generically cause rx valid to fall until re-enable
       if (is_invalid_speed) {
-//        controls_allowed = false;
+        controls_allowed = false;
       }
     }
 
@@ -65,21 +65,6 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
 
     // Cruise and Autopark/Summon state
     if (addr == 0x286) {
-      // Autopark state
-      int autopark_state = (GET_BYTE(to_push, 3) >> 1) & 0x0FU;  // DI_autoparkState
-      bool tesla_autopark_now = (autopark_state == 3) ||  // ACTIVE
-                                (autopark_state == 4) ||  // COMPLETE
-                                (autopark_state == 9);    // SELFPARK_STARTED
-
-      // Only consider rising edges while controls are not allowed
-      if (tesla_autopark_now && !tesla_autopark_prev && !cruise_engaged_prev) {
-        tesla_autopark = true;
-      }
-      if (!tesla_autopark_now) {
-        tesla_autopark = false;
-      }
-      tesla_autopark_prev = tesla_autopark_now;
-
       // Cruise state
       int cruise_state = (GET_BYTE(to_push, 1) >> 4) & 0x07U;
       bool cruise_engaged = (cruise_state == 2) ||  // ENABLED
@@ -87,11 +72,24 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
                             (cruise_state == 4) ||  // OVERRIDE
                             (cruise_state == 6) ||  // PRE_FAULT
                             (cruise_state == 7);    // PRE_CANCEL
-      printf("safety cruise_engaged: %d, autopark_now: %d, autopark: %d\n", cruise_engaged, tesla_autopark_now, tesla_autopark);
-      cruise_engaged = cruise_engaged && !tesla_autopark;
-
       vehicle_moving = cruise_state != 3; // STANDSTILL
-      pcm_cruise_check(cruise_engaged);
+
+      // Autopark state
+      int autopark_state = (GET_BYTE(to_push, 3) >> 1) & 0x0FU;  // DI_autoparkState
+      bool tesla_autopark_now = (autopark_state == 3) ||  // ACTIVE
+                                (autopark_state == 4) ||  // COMPLETE
+                                (autopark_state == 9);    // SELFPARK_STARTED
+
+      // Only consider rising edges while controls are not allowed
+      if (tesla_autopark_now && !tesla_autopark_prev && !cruise_engaged) {
+        tesla_autopark = true;
+      }
+      if (!tesla_autopark_now) {
+        tesla_autopark = false;
+      }
+      tesla_autopark_prev = tesla_autopark_now;
+
+      pcm_cruise_check(cruise_engaged && !tesla_autopark);
     }
   }
 
