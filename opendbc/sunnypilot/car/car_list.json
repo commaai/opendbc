@@ -2534,6 +2534,17 @@
     ],
     "package": "EyeSight Driver Assistance"
   },
+  "Subaru Forester 2017-18": {
+    "platform": "SUBARU_FORESTER_PREGLOBAL",
+    "make": "Subaru",
+    "brand": "subaru",
+    "model": "Forester",
+    "year": [
+      "2017",
+      "2018"
+    ],
+    "package": "EyeSight Driver Assistance"
+  },
   "Subaru Forester 2019-21": {
     "platform": "SUBARU_FORESTER",
     "make": "Subaru",
@@ -2570,6 +2581,19 @@
     ],
     "package": "EyeSight Driver Assistance"
   },
+  "Subaru Legacy 2015-18": {
+    "platform": "SUBARU_LEGACY_PREGLOBAL",
+    "make": "Subaru",
+    "brand": "subaru",
+    "model": "Legacy",
+    "year": [
+      "2015",
+      "2016",
+      "2017",
+      "2018"
+    ],
+    "package": "EyeSight Driver Assistance"
+  },
   "Subaru Legacy 2020-22": {
     "platform": "SUBARU_LEGACY",
     "make": "Subaru",
@@ -2581,6 +2605,29 @@
       "2022"
     ],
     "package": "All"
+  },
+  "Subaru Outback 2015-17": {
+    "platform": "SUBARU_OUTBACK_PREGLOBAL",
+    "make": "Subaru",
+    "brand": "subaru",
+    "model": "Outback",
+    "year": [
+      "2015",
+      "2016",
+      "2017"
+    ],
+    "package": "EyeSight Driver Assistance"
+  },
+  "Subaru Outback 2018-19": {
+    "platform": "SUBARU_OUTBACK_PREGLOBAL_2018",
+    "make": "Subaru",
+    "brand": "subaru",
+    "model": "Outback",
+    "year": [
+      "2018",
+      "2019"
+    ],
+    "package": "EyeSight Driver Assistance"
   },
   "Subaru Outback 2020-22": {
     "platform": "SUBARU_OUTBACK",
