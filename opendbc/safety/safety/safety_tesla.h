@@ -72,7 +72,7 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
                                 (autopark_state == 9);    // SELFPARK_STARTED
 
       // Only consider rising edges while controls are not allowed
-      if (tesla_autopark_now && !tesla_autopark_prev && !controls_allowed) {
+      if (tesla_autopark_now && !tesla_autopark_prev && !cruise_engaged_prev) {
         tesla_autopark = true;
       }
       if (!tesla_autopark_now) {
