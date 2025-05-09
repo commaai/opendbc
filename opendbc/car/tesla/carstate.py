@@ -22,6 +22,15 @@ class CarState(CarStateBase):
     self.hands_on_level = 0
     self.das_control = None
 
+  def update_autopark_state(self, autopark_state: str, cruise_enabled: bool):
+    autopark_now = autopark_state in ("ACTIVE", "COMPLETE", "SELFPARK_STARTED")
+    if autopark_now and not self.autopark_prev and not self.cruise_enabled_prev:
+      self.autopark = True
+    if not autopark_now:
+      self.autopark = False
+    self.autopark_prev = autopark_now
+    self.cruise_enabled_prev = cruise_enabled
+
   def update(self, can_parsers) -> structs.CarState:
     cp_party = can_parsers[Bus.party]
     cp_ap_party = can_parsers[Bus.ap_party]
@@ -63,18 +72,10 @@ class CarState(CarStateBase):
     # Cruise state
     cruise_state = self.can_define.dv["DI_state"]["DI_cruiseState"].get(int(cp_party.vl["DI_state"]["DI_cruiseState"]), None)
     speed_units = self.can_define.dv["DI_state"]["DI_speedUnits"].get(int(cp_party.vl["DI_state"]["DI_speedUnits"]), None)
+
     autopark_state = self.can_define.dv["DI_state"]["DI_autoparkState"].get(int(cp_party.vl["DI_state"]["DI_autoparkState"]), None)
-
-    autopark_now = autopark_state in ("ACTIVE", "COMPLETE", "SELFPARK_STARTED")
-
     cruise_enabled = cruise_state in ("ENABLED", "STANDSTILL", "OVERRIDE", "PRE_FAULT", "PRE_CANCEL")
-    if autopark_now and not self.autopark_prev and not self.cruise_enabled_prev:
-      self.autopark = True
-    if not autopark_now:
-      self.autopark = False
-    self.autopark_prev = autopark_now
-    self.cruise_enabled_prev = cruise_enabled
-    print('opnplt cruise_enabled:', int(cruise_enabled), 'autopark_now:', int(autopark_now), 'autopark', int(self.autopark))
+    self.update_autopark_state(autopark_state, cruise_enabled)
 
     # Match panda safety cruise engaged logic
     ret.cruiseState.enabled = cruise_enabled and not self.autopark
