@@ -12,10 +12,6 @@
 #include "opendbc/can/logger.h"
 #include "opendbc/can/common_dbc.h"
 
-inline bool endswith(const std::string& str, const char* suffix) {
-  return str.find(suffix, 0) == (str.length() - strlen(suffix));
-}
-
 #define INFO printf
 #define WARN printf
 #define DEBUG(...)
@@ -46,6 +42,10 @@ unsigned int pedal_checksum(uint32_t address, const Signal &sig, const std::vect
       throw std::runtime_error(is.str());                          \
     }                                                              \
   } while (false)
+
+inline bool endswith(const std::string& str, const char* suffix) {
+  return str.find(suffix, 0) == (str.length() - strlen(suffix));
+}
 
 struct CanFrame {
   long src;
