@@ -83,8 +83,8 @@ class FordCarDocs(CarDocs):
       self.setup_video_link = "https://www.youtube.com/watch?v=uUGkH6C_EQU"
       
     if CP.carFingerprint in (CAR.FORD_F_150_MK14, CAR.FORD_F_150_LIGHTNING_MK1):
-      self.setup_video_link = "https://www.youtube.com/watch?v=MewJc9LYp9M"    
-
+      self.setup_video_link = "https://www.youtube.com/watch?v=MewJc9LYp9M"
+      
 @dataclass
 class FordPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {
