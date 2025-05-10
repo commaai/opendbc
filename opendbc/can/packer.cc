@@ -46,9 +46,6 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
     return {};
   }
 
-  printf("name: %s, address: %d, size: %d\n",
-         msg_it->second->name.c_str(), address, msg_it->second->size);
-
   std::vector<uint8_t> ret(msg_it->second->size, 0);
 
   // set all values for all given signal/value pairs
@@ -61,8 +58,6 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
       continue;
     }
     const auto &sig = sig_it->second;
-    printf("sig name: %s, value: %f, type: %d\n",
-           sig.name.c_str(), sigval.value, sig.type);
 
     int64_t ival = (int64_t)(round((sigval.value - sig.offset) / sig.factor));
     if (ival < 0) {
