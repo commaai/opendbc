@@ -120,5 +120,17 @@ class TestChryslerRamHDSafety(TestChryslerSafety):
     return self.packer.make_can_msg_panda("ESP_8", 0, values)
 
 
+class TestChryslerRamHDAltButtonSafety(TestChryslerRamHDSafety):
+  def setUp(self):
+    self.packer = CANPackerPanda("chrysler_ram_hd_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.chrysler, ChryslerSafetyFlags.RAM_HD | ChryslerSafetyFlags.RAM_HD_ALT_BUTTONS)
+    self.safety.init_tests()
+
+  def _button_msg(self, cancel=False, resume=False):
+    values = {"ACC_Cancel": cancel, "ACC_Resume": resume}
+    return self.packer.make_can_msg_panda("CRUISE_BUTTONS_ALT", self.DAS_BUS, values)
+
+
 if __name__ == "__main__":
   unittest.main()
