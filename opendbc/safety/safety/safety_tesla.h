@@ -22,10 +22,10 @@ static uint8_t tesla_get_counter(const CANPacket_t *to_push) {
   uint8_t cnt = 0;
   if (addr == 0x2b9) {
     // Signal: DAS_controlCounter
-    cnt = GET_BYTE(to_push, 6) >> 5;
+    cnt = GET_BYTE(to_push, 6) >> 5;  // fails mutation
   } else if (addr == 0x488) {
     // Signal: DAS_steeringControlCounter
-    cnt = GET_BYTE(to_push, 2) & 0x0FU;
+    cnt = GET_BYTE(to_push, 2) & 0x0FU;  // fails mutation
   } else if ((addr == 0x257) || (addr == 0x118) || (addr == 0x39d) || (addr == 0x286) || (addr == 0x311)) {
     // Signal: DI_speedCounter, DI_systemStatusCounter, IBST_statusCounter, DI_locStatusCounter, UI_warningCounter
     cnt = GET_BYTE(to_push, 1) & 0x0FU;
