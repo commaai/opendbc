@@ -108,7 +108,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     return self._long_control_msg(10, accel_limits=(accel, max(accel, 0)))
 
   def test_rx_hook(self):
-    # checksum, counter, and quality flag checks
+    # counter check
     for msg in ("angle", "long", "speed", "speed_2"):
       self.safety.set_controls_allowed(True)
       # send multiple times to verify counter checks
