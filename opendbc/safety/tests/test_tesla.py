@@ -8,6 +8,7 @@ from opendbc.car.structs import CarParams
 from opendbc.can.can_define import CANDefine
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
+from opendbc.safety.tests.common import MAX_WRONG_COUNTERS
 from opendbc.safety.tests.common import CANPackerPanda
 
 MSG_DAS_steeringControl = 0x488
@@ -105,6 +106,30 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
   def _accel_msg(self, accel: float):
     # For common.LongitudinalAccelSafetyTest
     return self._long_control_msg(10, accel_limits=(accel, max(accel, 0)))
+
+  def test_rx_hook(self):
+    # counter check
+    for msg in ("angle", "long", "speed", "speed_2"):
+      self.safety.set_controls_allowed(True)
+      # send multiple times to verify counter checks
+      for _ in range(10):
+        if msg == "angle":
+          to_push = self._angle_cmd_msg(0, True, bus=2)
+        elif msg == "long":
+          to_push = self._long_control_msg(0, bus=2)
+        elif msg == "speed":
+          to_push = self._speed_msg(0)
+        elif msg == "speed_2":
+          to_push = self._speed_msg_2(0)
+
+        self.assertTrue(self._rx(to_push))
+        self.assertTrue(self.safety.get_controls_allowed())
+
+      # Send static counters
+      for i in range(MAX_WRONG_COUNTERS + 1):
+        should_rx = i + 1 < MAX_WRONG_COUNTERS
+        self.assertEqual(should_rx, self._rx(to_push))
+        self.assertEqual(should_rx, self.safety.get_controls_allowed())
 
   def test_vehicle_speed_measurements(self):
     # OVERRIDDEN: 79.1667 is the max speed in m/s
