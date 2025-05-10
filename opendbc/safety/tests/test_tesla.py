@@ -125,7 +125,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         self.assertTrue(self._rx(to_push))
         self.assertTrue(self.safety.get_controls_allowed())
 
-      # Test wrong counter threshold
+      # Send static counters
       for i in range(MAX_WRONG_COUNTERS + 1):
         should_rx = i + 1 < MAX_WRONG_COUNTERS
         self.assertEqual(should_rx, self._rx(to_push))
