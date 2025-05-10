@@ -66,7 +66,6 @@ typedef struct ChecksumState {
   SignalType checksum_type;
   unsigned int (*calc_checksum)(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
   void (*setup_signal)(Signal &sig, const std::string& dbc_name, int line_num);
-  bool (*is_counter)(const Signal &sig);
 } ChecksumState;
 
 DBC* dbc_parse(const std::string& dbc_path);
