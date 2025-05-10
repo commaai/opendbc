@@ -298,7 +298,6 @@ static safety_config tesla_init(uint16_t param) {
   static RxCheck tesla_model3_y_rx_checks[] = {
     {.msg = {{0x2b9, 2, 8, .ignore_checksum = true, .max_counter = 7U, .frequency = 25U}, { 0 }, { 0 }}},    // DAS_control
     {.msg = {{0x488, 2, 4, .ignore_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},   // DAS_steeringControl
-
     {.msg = {{0x257, 0, 8, .ignore_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},   // DI_speed (speed in kph)
     {.msg = {{0x155, 0, 8, .ignore_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},   // ESP_B (2nd speed in kph)
     {.msg = {{0x370, 0, 8, .ignore_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},  // EPAS3S_sysStatus (steering angle)
