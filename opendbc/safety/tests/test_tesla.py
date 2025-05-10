@@ -125,16 +125,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         self.assertTrue(self._rx(to_push))
         self.assertTrue(self.safety.get_controls_allowed())
 
-      # Set counters to 0
-      if msg == "angle":
-        to_push[0].data[2] &= 0xF0
-      elif msg == "long":
-        to_push[0].data[6] &= 0x1F
-      elif msg == "speed":
-        to_push[0].data[1] &= 0xF0
-      elif msg == "speed_2":
-        to_push[0].data[6] &= 0xF0
-
+      # Test wrong counter threshold
       for i in range(MAX_WRONG_COUNTERS + 1):
         should_rx = i + 1 < MAX_WRONG_COUNTERS
         self.assertEqual(should_rx, self._rx(to_push))
