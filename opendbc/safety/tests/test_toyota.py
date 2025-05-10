@@ -11,7 +11,7 @@ import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerPanda
 
 TOYOTA_COMMON_TX_MSGS = [[0x2E4, 0], [0x191, 0], [0x412, 0], [0x343, 0], [0x1D2, 0]]  # LKAS + LTA + ACC & PCM cancel cmds
-TOYOTA_SECOC_TX_MSGS = [[0x131, 0]] + TOYOTA_COMMON_TX_MSGS
+TOYOTA_SECOC_TX_MSGS = [[0x131, 0], [0x183, 0]] + TOYOTA_COMMON_TX_MSGS
 TOYOTA_COMMON_LONG_TX_MSGS = [[0x283, 0], [0x2E6, 0], [0x2E7, 0], [0x33E, 0], [0x344, 0], [0x365, 0], [0x366, 0], [0x4CB, 0],  # DSU bus 0
                               [0x128, 1], [0x141, 1], [0x160, 1], [0x161, 1], [0x470, 1],  # DSU bus 1
                               [0x411, 0],  # PCS_HUD
@@ -73,12 +73,12 @@ class TestToyotaSafetyBase(common.PandaCarSafetyTest, common.LongitudinalAccelSa
     values = {"CRUISE_ACTIVE": enable}
     return self.packer.make_can_msg_panda("PCM_CRUISE", 0, values)
 
-  def test_diagnostics(self, stock_longitudinal: bool = False):
+  def test_diagnostics(self, stock_longitudinal: bool = False, ecu_disabled: bool = True):
     for should_tx, msg in ((False, b"\x6D\x02\x3E\x00\x00\x00\x00\x00"),  # fwdCamera tester present
                            (False, b"\x0F\x03\xAA\xAA\x00\x00\x00\x00"),  # non-tester present
                            (True, b"\x0F\x02\x3E\x00\x00\x00\x00\x00")):
       tester_present = libsafety_py.make_CANPacket(0x750, 0, msg)
-      self.assertEqual(should_tx and not stock_longitudinal, self._tx(tester_present))
+      self.assertEqual(should_tx and ecu_disabled and not stock_longitudinal, self._tx(tester_present))
 
   def test_block_aeb(self, stock_longitudinal: bool = False):
     for controls_allowed in (True, False):
@@ -272,8 +272,8 @@ class TestToyotaStockLongitudinalBase(TestToyotaSafetyBase):
 
   LONGITUDINAL = False
 
-  def test_diagnostics(self, stock_longitudinal: bool = True):
-    super().test_diagnostics(stock_longitudinal=stock_longitudinal)
+  def test_diagnostics(self, stock_longitudinal: bool = True, ecu_disabled: bool = True):
+    super().test_diagnostics(stock_longitudinal=stock_longitudinal, ecu_disabled=ecu_disabled)
 
   def test_block_aeb(self, stock_longitudinal: bool = True):
     super().test_block_aeb(stock_longitudinal=stock_longitudinal)
@@ -308,8 +308,7 @@ class TestToyotaStockLongitudinalAngle(TestToyotaStockLongitudinalBase, TestToyo
                                  self.EPS_SCALE | ToyotaSafetyFlags.STOCK_LONGITUDINAL | ToyotaSafetyFlags.LTA)
     self.safety.init_tests()
 
-
-class TestToyotaSecOcSafety(TestToyotaStockLongitudinalBase):
+class TestToyotaSecOcSafetyBase(TestToyotaSafetyBase):
 
   TX_MSGS = TOYOTA_SECOC_TX_MSGS
   RELAY_MALFUNCTION_ADDRS = {0: (0x2E4, 0x191, 0x412, 0x131)}
@@ -319,8 +318,11 @@ class TestToyotaSecOcSafety(TestToyotaStockLongitudinalBase):
     self.packer = CANPackerPanda("toyota_secoc_pt_generated")
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.toyota,
-                                 self.EPS_SCALE | ToyotaSafetyFlags.STOCK_LONGITUDINAL | ToyotaSafetyFlags.SECOC)
+                                 self.EPS_SCALE | ToyotaSafetyFlags.SECOC)
     self.safety.init_tests()
+
+  def test_diagnostics(self, ecu_disabled: bool = False):
+    super().test_diagnostics(ecu_disabled=ecu_disabled)
 
   # This platform also has alternate brake and PCM messages, but same naming in the DBC, so same packers work
 
@@ -341,6 +343,42 @@ class TestToyotaSecOcSafety(TestToyotaStockLongitudinalBase):
 
       should_tx = not req and not req2 and angle == 0
       self.assertEqual(should_tx, self._tx(self._lta_2_msg(req, req2, angle)), f"{req=} {req2=} {angle=}")
+
+class TestToyotaSecOcSafetyStockLongitudinal(TestToyotaSecOcSafetyBase, TestToyotaStockLongitudinalBase):
+
+  def setUp(self):
+    self.packer = CANPackerPanda("toyota_secoc_pt_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.toyota,
+                                 self.EPS_SCALE | ToyotaSafetyFlags.STOCK_LONGITUDINAL | ToyotaSafetyFlags.SECOC)
+    self.safety.init_tests()
+
+class TestToyotaSecOcSafety(TestToyotaSecOcSafetyBase):
+
+  RELAY_MALFUNCTION_ADDRS = {0: (0x2E4, 0x191, 0x412, 0x131, 0x343, 0x183)}
+  FWD_BLACKLISTED_ADDRS = {2: [0x2E4, 0x191, 0x412, 0x131, 0x343, 0x183]}
+
+  def setUp(self):
+    self.packer = CANPackerPanda("toyota_secoc_pt_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE | ToyotaSafetyFlags.SECOC)
+    self.safety.init_tests()
+
+  @unittest.skip("test not applicable for cars without a DSU")
+  def test_block_aeb(self, stock_longitudinal: bool = False):
+    pass
+
+  def _accel_msg_2(self, accel):
+    values = {"ACCEL_CMD": accel}
+    return self.packer.make_can_msg_panda("ACC_CONTROL_2", 0, values)
+
+  # On a SecOC vehicle, we still transmit ACC_CONTROL but the accel value moves to ACC_CONTROL_2
+  # Verify that all non-idle accel values in ACC_CONTROL are rejected, verify ACC_CONTROL_2 accel normally
+  def _should_tx_1(self, controls_allowed: bool, accel: float, min_accel: float, max_accel: float):
+    return accel == self.INACTIVE_ACCEL
+
+  def _should_tx_2(self, controls_allowed: bool, accel: float, min_accel: float, max_accel: float):
+    return (controls_allowed and min_accel <= accel <= max_accel) or accel == self.INACTIVE_ACCEL
 
 
 if __name__ == "__main__":
