@@ -64,6 +64,7 @@ ChecksumState* get_checksum(const std::string& dbc_name) {
 
 void set_signal_type(Signal& s, ChecksumState* chk, const std::string& dbc_name, int line_num) {
   s.calc_checksum = nullptr;
+  // FIXME: always assign COUNTER type without explicit ChecksumState
   if (chk) {
     if (chk->setup_signal) {
       chk->setup_signal(s, dbc_name, line_num);
