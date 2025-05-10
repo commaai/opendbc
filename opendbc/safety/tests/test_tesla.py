@@ -109,12 +109,14 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
   def test_rx_hook(self):
     # checksum, counter, and quality flag checks
-    for msg in ("angle", ):#"speed", "speed_2"):
+    for msg in ("angle", "long"):#"speed", "speed_2"):
       self.safety.set_controls_allowed(True)
       # send multiple times to verify counter checks
       for _ in range(10):
         if msg == "angle":
           to_push = self._angle_cmd_msg(0, True, bus=2)
+        elif msg == "long":
+          to_push = self._long_control_msg(0, bus=2)
         elif msg == "speed":
           to_push = self._speed_msg(0, quality_flag=quality_flag)
         elif msg == "speed_2":
@@ -123,8 +125,12 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         self.assertTrue(self._rx(to_push))
         self.assertTrue(self.safety.get_controls_allowed())
 
-      # Set counter to 0
-      to_push[0].data[2] &= 0xF0
+      # Set counters to 0
+      if msg == "angle":
+        to_push[0].data[2] &= 0xF0
+      elif msg == "long":
+        to_push[0].data[6] &= 0x1F
+
       for i in range(MAX_WRONG_COUNTERS + 1):
         should_rx = i + 1 < MAX_WRONG_COUNTERS
         self.assertEqual(should_rx, self._rx(to_push))
