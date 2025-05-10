@@ -73,7 +73,7 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
 
   // set message counter
   auto sig_it_counter = std::find_if(signal_lookup.begin(), signal_lookup.end(), [&address](const auto& pair) {
-    return pair.first.first == address && pair.second.type == COUNTER;
+    return pair.first.first == address && (pair.second.type == COUNTER || pair.second.name == "COUNTER");
   });
   if (!counter_set && sig_it_counter != signal_lookup.end()) {
     const auto& sig = sig_it_counter->second;
