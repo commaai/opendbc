@@ -140,7 +140,7 @@ BO_ 925 IBST_status: 5 PARTY
 
 BO_ 880 EPAS3S_sysStatus: 8 PARTY
  SG_ EPAS3S_sysStatusChecksum : 63|8@0+ (1,0) [0|255] ""  park
- SG_ EPAS3S_sysStatusCounter : 48|4@1+ (1,0) [0|15] "" gtw
+ SG_ EPAS3S_sysStatusCounter : 48|4@1+ (1,0) [0|15] ""  gtw
  SG_ EPAS3S_eacStatus : 55|3@0+ (1,0) [0|7] ""  das
  SG_ EPAS3S_internalSAS : 37|14@0+ (0.1,-819.2) [-819.2|819] "deg"  das
  SG_ EPAS3S_handsOnLevel : 39|2@0+ (1,0) [0|3] ""  das
@@ -203,7 +203,7 @@ BO_ 605 DAS_road: 6 XXX
 
 BO_ 1160 DAS_steeringControl: 4 PARTY
  SG_ DAS_steeringControlChecksum : 31|8@0+ (1,0) [0|255] ""  aps
- SG_ DAS_steeringControlCounter : 16|4@1+ (1,0) [0|15] "" aps
+ SG_ DAS_steeringControlCounter : 16|4@1+ (1,0) [0|15] ""  aps
  SG_ DAS_steeringControlType : 23|2@0+ (1,0) [0|3] ""  aps
  SG_ DAS_steeringAngleRequest : 6|15@0+ (0.1,-1638.35) [-1638.35|1638.35] "deg"  aps
  SG_ DAS_steeringHapticRequest : 7|1@0+ (1,0) [0|1] ""  aps
