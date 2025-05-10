@@ -839,6 +839,10 @@ class PandaSafetyTest(PandaSafetyTestBase):
             if attr == 'TestHyundaiCanfdLKASteeringLongEV' and current_test.startswith('TestToyota'):
               tx = list(filter(lambda m: m[0] not in [0x160, ], tx))
 
+            # Rivian message overlaps with Subaru LKAS Angle ES_DashStatus message
+            if attr.startswith('TestRivian') and current_test.startswith('TestSubaruGen2Angle'):
+              tx = list(filter(lambda m: m[0] not in [0x321, ], tx))
+
             # Volkswagen MQB longitudinal actuating message overlaps with the Subaru lateral actuating message
             if attr == 'TestVolkswagenMqbLongSafety' and current_test.startswith('TestSubaru'):
               tx = list(filter(lambda m: m[0] not in [0x122, ], tx))
