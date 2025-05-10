@@ -925,7 +925,6 @@ FW_VERSIONS = {
       b'57114-T60-AA20\x00\x00',
       b'57114-T61-AJ30\x00\x00',
       b'57114-T50-JC20\x00\x00',
-      b'57114-T50-JC20\x00\x00',
     ],
     (Ecu.transmission, 0x18da1ef1, None): [
       b'28101-65D-A020\x00\x00',
@@ -933,9 +932,6 @@ FW_VERSIONS = {
       b'28101-65H-A020\x00\x00',
       b'28101-65H-A120\x00\x00',
       b'28101-65J-N010\x00\x00',
-    ],
-    (Ecu.shiftByWire, 0x18da0bf1, None): [
-      b'54008-3T2-J820\x00\x00',
     ],
   },
   CAR.HONDA_PILOT_4G: {
