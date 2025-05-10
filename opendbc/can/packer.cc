@@ -65,7 +65,7 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
     }
     set_value(ret, sig, ival);
 
-    // Type is only assigned if DBC has a ChecksumState
+    // FIXME: Type is only assigned if DBC has a ChecksumState
     if (sig.type == COUNTER || sig.name == "COUNTER") {
       counters[address] = sigval.value;
       counter_set = true;
