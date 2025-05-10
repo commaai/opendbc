@@ -185,6 +185,13 @@ class TestSubaruGen2TorqueStockLongitudinalSafety(TestSubaruStockLongitudinalSaf
   FLAGS = SubaruSafetyFlags.GEN2
   TX_MSGS = lkas_tx_msgs(SUBARU_ALT_BUS)
 
+class TestSubaruImpreza2018TorqueStockLongitudinalSafety(TestSubaruStockLongitudinalSafetyBase, TestSubaruTorqueSafetyBase):
+  MAX_RATE_UP = 60
+  MAX_RATE_DOWN = 60
+  MAX_TORQUE_LOOKUP = [0], [3071]
+  FLAGS = SubaruSafetyFlags.IMPREZA_2018
+  TX_MSGS = lkas_tx_msgs(SUBARU_MAIN_BUS)
+
 
 class TestSubaruGen1LongitudinalSafety(TestSubaruLongitudinalSafetyBase, TestSubaruTorqueSafetyBase):
   FLAGS = SubaruSafetyFlags.LONG

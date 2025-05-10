@@ -33,6 +33,8 @@ class CarInterface(CarInterfaceBase):
       ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.subaru)]
       if ret.flags & SubaruFlags.GLOBAL_GEN2:
         ret.safetyConfigs[0].safetyParam |= SubaruSafetyFlags.GEN2.value
+      elif ret.flags & (SubaruFlags.IMPREZA_2018 | SubaruFlags.HYBRID) :
+        ret.safetyConfigs[0].safetyParam |= SubaruSafetyFlags.IMPREZA_2018.value
 
     ret.steerLimitTimer = 0.4
     ret.steerActuatorDelay = 0.1
@@ -50,11 +52,11 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.0025, 0.1], [0.00025, 0.01]]
 
     elif candidate == CAR.SUBARU_IMPREZA:
-      ret.steerActuatorDelay = 0.4  # end-to-end angle controller
+      ret.steerActuatorDelay = 0.1  # end-to-end angle controller
       ret.lateralTuning.init('pid')
-      ret.lateralTuning.pid.kf = 0.00005
+      ret.lateralTuning.pid.kf = 0.00003
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0., 20.], [0., 20.]]
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2, 0.3], [0.02, 0.03]]
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.12, 0.18], [0.012, 0.018]]
 
     elif candidate == CAR.SUBARU_IMPREZA_2020:
       ret.lateralTuning.init('pid')
