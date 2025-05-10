@@ -31,10 +31,6 @@ inline bool startswith(const std::string& str, std::initializer_list<const char*
   return false;
 }
 
-inline bool endswith(const std::string& str, const char* suffix) {
-  return str.find(suffix, 0) == (str.length() - strlen(suffix));
-}
-
 inline std::string& trim(std::string& s, const char* t = " \t\n\r\f\v") {
   s.erase(s.find_last_not_of(t) + 1);
   return s.erase(0, s.find_first_not_of(t));
@@ -60,6 +56,8 @@ ChecksumState* get_checksum(const std::string& dbc_name) {
     s = new ChecksumState({8, -1, 7, -1, false, FCA_GIORGIO_CHECKSUM, &fca_giorgio_checksum});
   } else if (startswith(dbc_name, "comma_body")) {
     s = new ChecksumState({8, 4, 7, 3, false, PEDAL_CHECKSUM, &pedal_checksum});
+  } else if (startswith(dbc_name, "tesla_model3_party")) {
+    s = new ChecksumState({-1, -1, -1, -1, true, TESLA_CHECKSUM, nullptr, &tesla_setup_signal});
   }
   return s;
 }
