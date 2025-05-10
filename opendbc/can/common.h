@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstring>
 #include <map>
 #include <set>
 #include <string>
@@ -21,6 +22,7 @@
 
 // Car specific functions
 void pedal_setup_signal(Signal &sig, const std::string& dbc_name, int line_num);
+void tesla_setup_signal(Signal &sig, const std::string& dbc_name, int line_num);
 
 unsigned int honda_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int toyota_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
@@ -40,6 +42,10 @@ unsigned int pedal_checksum(uint32_t address, const Signal &sig, const std::vect
       throw std::runtime_error(is.str());                          \
     }                                                              \
   } while (false)
+
+inline bool endswith(const std::string& str, const char* suffix) {
+  return str.find(suffix, 0) == (str.length() - strlen(suffix));
+}
 
 struct CanFrame {
   long src;
