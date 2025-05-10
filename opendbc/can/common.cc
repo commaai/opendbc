@@ -3,6 +3,22 @@
 
 #include "opendbc/can/common.h"
 
+void pedal_setup_signal(Signal &sig, const std::string& dbc_name, int line_num) {
+  if (sig.name == "CHECKSUM_PEDAL") {
+    DBC_ASSERT(sig.size == 8, "INTERCEPTOR CHECKSUM is not 8 bits long");
+    sig.type = PEDAL_CHECKSUM;
+  } else if (sig.name == "COUNTER_PEDAL") {
+    DBC_ASSERT(sig.size == 4, "INTERCEPTOR COUNTER is not 4 bits long");
+    sig.type = COUNTER;
+  }
+}
+
+void tesla_setup_signal(Signal &sig, const std::string& dbc_name, int line_num) {
+  if (endswith(sig.name, "Counter")) {
+    sig.type = COUNTER;
+  }
+}
+
 unsigned int honda_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
   int s = 0;
   bool extended = address > 0x7FF;
