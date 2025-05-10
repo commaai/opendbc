@@ -7,7 +7,7 @@
   {.msg = {{0x1A6, (pt_bus), 8, .max_counter = 3U, .frequency = 25U},                  /* SCM_BUTTONS */       \
            {0x296, (pt_bus), 4, .max_counter = 3U, .frequency = 25U}, { 0 }}},                                 \
   {.msg = {{0x158, (pt_bus), 8, .max_counter = 3U, .frequency = 100U},          /* ENGINE_DATA */   \
-           {0x1DD, (pt_bus), 8, .max_counter = 3U, .frequency = 50U}, { 0 }}},  /* GEARBOX_ALT_2 */      \
+           {0x309, (pt_bus), 8, .max_counter = 3U, .frequency = 10U}, { 0 }}},  /* CAR_SPEED */      \
   {.msg = {{0x17C, (pt_bus), 8, .max_counter = 3U, .frequency = 100U}, { 0 }, { 0 }}},  /* POWERTRAIN_DATA */  \
 
 #define HONDA_COMMON_RX_CHECKS(pt_bus)                                                                     \
@@ -74,17 +74,10 @@ static void honda_rx_hook(const CANPacket_t *to_push) {
   int addr = GET_ADDR(to_push);
   int bus = GET_BUS(to_push);
 
-  // sample speed
-  // 0x158 used for all suported Hondas except Integra (use 0x1DD wheels_moving_boh message)
-  if ((addr == 0x158) || (addr == 0x1DD)){
-    if (addr == 0x158){
-      // first 2 bytes
-      vehicle_moving = GET_BYTE(to_push, 0) | GET_BYTE(to_push, 1);
-    }
-    else {
-      // 12 bits in byte 2 and 3
-      vehicle_moving = (((GET_BYTE(to_push, 2) & 0xF0U) << 8) | (GET_BYTE(to_push, 3)));
-    }
+  // 0x158 used for all suported Hondas except Integra (use 0x309 car_speed message)
+  if ((addr == 0x158) || (addr == 0x309)){
+    // first 2 bytes
+    vehicle_moving = GET_BYTE(to_push, 0) | GET_BYTE(to_push, 1);
   }
 
   // check ACC main state
