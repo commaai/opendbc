@@ -1,6 +1,6 @@
 import copy
 from collections import deque
-from opendbc.can.can_define import CANDefine
+from opendbc.can.can_define import get_can_define
 from opendbc.can.parser import CANParser
 from opendbc.car import Bus, create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
@@ -15,7 +15,7 @@ TORQUE_SAMPLES = 12
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
+    can_define = get_can_define(DBC[CP.carFingerprint][Bus.pt])
 
     self.lkas_hud_msg = {}
     self.lkas_hud_info_msg = {}

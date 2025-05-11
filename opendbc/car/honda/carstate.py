@@ -1,7 +1,7 @@
 import numpy as np
 from collections import defaultdict
 
-from opendbc.can.can_define import CANDefine
+from opendbc.can.can_define import get_can_define
 from opendbc.can.parser import CANParser
 from opendbc.car import Bus, create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
@@ -84,7 +84,7 @@ def get_can_messages(CP, gearbox_msg):
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
+    can_define = get_can_define(DBC[CP.carFingerprint][Bus.pt])
     self.gearbox_msg = "GEARBOX"
     if CP.carFingerprint == CAR.HONDA_ACCORD and CP.transmissionType == TransmissionType.cvt:
       self.gearbox_msg = "GEARBOX_15T"

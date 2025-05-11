@@ -1,5 +1,5 @@
+from opendbc.can.can_define import get_can_define
 from opendbc.can.parser import CANParser
-from opendbc.can.can_define import CANDefine
 from opendbc.car import Bus, create_button_events, structs
 from opendbc.car.chrysler.values import DBC, STEER_THRESHOLD, RAM_CARS
 from opendbc.car.common.conversions import Conversions as CV
@@ -12,7 +12,7 @@ class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
     self.CP = CP
-    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
+    can_define = get_can_define(DBC[CP.carFingerprint][Bus.pt])
 
     self.auto_high_beam = 0
     self.button_counter = 0
