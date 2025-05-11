@@ -275,6 +275,13 @@ class CarInterfaceBase(ABC):
     return ret
 
 
+_Q = [[0.0, 0.0], [0.0, 100.0]]
+_R = 0.3
+_A = [[1.0, DT_CTRL], [0.0, 1.0]]
+_C = [[1.0, 0.0]]
+_x0=[[0.0], [0.0]]
+_K = get_kalman_gain(DT_CTRL, np.array(_A), np.array(_C), np.array(_Q), _R)
+
 class CarStateBase(ABC):
   def __init__(self, CP: structs.CarParams):
     self.CP = CP
@@ -291,13 +298,7 @@ class CarStateBase(ABC):
     self.cluster_min_speed = 0.0  # min speed before dropping to 0
     self.secoc_key: bytes = b"00" * 16
 
-    Q = [[0.0, 0.0], [0.0, 100.0]]
-    R = 0.3
-    A = [[1.0, DT_CTRL], [0.0, 1.0]]
-    C = [[1.0, 0.0]]
-    x0=[[0.0], [0.0]]
-    K = get_kalman_gain(DT_CTRL, np.array(A), np.array(C), np.array(Q), R)
-    self.v_ego_kf = KF1D(x0=x0, A=A, C=C[0], K=K)
+    self.v_ego_kf = KF1D(x0=_x0, A=_A, C=_C[0], K=_K)
 
   @abstractmethod
   def update(self, can_parsers) -> structs.CarState:
