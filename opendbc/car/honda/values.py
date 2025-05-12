@@ -189,7 +189,7 @@ class CAR(Platforms):
     {Bus.pt: 'honda_accord_2018_can_generated'},
   )
   HONDA_CRV_HYBRID_6G = HondaBoschPlatformConfig(
-    [HondaCarDocs("Honda CR-V Hybrid 2024", "All")],
+    [HondaCarDocs("Honda CR-V Hybrid 2024-25", "All")],
     # mass: mean of 4 models in kg, steerRatio: 12.3 is spec end-to-end
     CarSpecs(mass=1667, wheelbase=2.66, steerRatio=16, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),
     {Bus.pt: 'honda_pilot_2023_can_generated'},
