@@ -140,7 +140,7 @@ BO_ 925 IBST_status: 5 PARTY
 
 BO_ 880 EPAS3S_sysStatus: 8 PARTY
  SG_ EPAS3S_sysStatusChecksum : 63|8@1+ (1,0) [0|255] ""  park
- SG_ EPAS3S_sysStatusCounter : 48|4@1+ (1,0) [0|15] ""  gtw
+ SG_ EPAS3S_sysStatusCounter : 51|4@1+ (1,0) [0|15] ""  gtw
  SG_ EPAS3S_eacStatus : 55|3@0+ (1,0) [0|7] ""  das
  SG_ EPAS3S_internalSAS : 37|14@0+ (0.1,-819.2) [-819.2|819] "deg"  das
  SG_ EPAS3S_handsOnLevel : 39|2@0+ (1,0) [0|3] ""  das
