@@ -7,17 +7,16 @@ class TeslaCAN:
   def __init__(self, packer):
     self.packer = packer
 
-  def create_steering_control(self, angle, enabled, counter):
+  def create_steering_control(self, angle, enabled):
     values = {
       "DAS_steeringAngleRequest": -angle,
       "DAS_steeringHapticRequest": 0,
       "DAS_steeringControlType": 1 if enabled else 0,
-      "DAS_steeringControlCounter": counter,
     }
 
     return self.packer.make_can_msg("DAS_steeringControl", CANBUS.party, values)
 
-  def create_longitudinal_command(self, acc_state, accel, cntr, v_ego, active):
+  def create_longitudinal_command(self, acc_state, accel, counter, v_ego, active):
     set_speed = max(v_ego * CV.MS_TO_KPH, 0)
     if active:
       # TODO: this causes jerking after gas override when above set speed
@@ -31,14 +30,13 @@ class TeslaCAN:
       "DAS_jerkMax": CarControllerParams.JERK_LIMIT_MAX,
       "DAS_accelMin": accel,
       "DAS_accelMax": max(accel, 0),
-      "DAS_controlCounter": cntr,
+      "DAS_controlCounter": counter,
     }
     return self.packer.make_can_msg("DAS_control", CANBUS.party, values)
 
-  def create_steering_allowed(self, counter):
+  def create_steering_allowed(self):
     values = {
       "APS_eacAllow": 1,
-      "APS_eacMonitorCounter": counter,
     }
 
     return self.packer.make_can_msg("APS_eacMonitor", CANBUS.party, values)
