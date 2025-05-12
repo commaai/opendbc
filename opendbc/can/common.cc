@@ -14,12 +14,12 @@ void pedal_setup_signal(Signal &sig, const std::string& dbc_name, int line_num) 
 }
 
 void tesla_setup_signal(Signal &sig, const std::string& dbc_name, int line_num) {
-  printf("sig.name: %s, endswith: %d\n", sig.name.c_str(), endswith(sig.name, "Checksum"));
   if (endswith(sig.name, "Counter")) {
-    printf("is counter\n");
     sig.type = COUNTER;
-  } else if (endswith(sig.name, "Checksum")) {
-    printf("is checksum\n");
+  } else if (sig.name == "DAS_steeringControlChecksum" ||
+             sig.name == "DAS_controlChecksum" ||
+             sig.name == "APS_eacMonitorChecksum") {
+    // TODO: some checksums are not the last byte, support those and remove exception list
     sig.type = TESLA_CHECKSUM;
     sig.calc_checksum = &tesla_checksum;
   }
@@ -281,5 +281,10 @@ unsigned int fca_giorgio_checksum(uint32_t address, const Signal &sig, const std
 }
 
 unsigned int tesla_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
-  return 0xff;
+  uint8_t checksum = (address & 0xFF) + ((address >> 8) & 0xFF);
+
+  for (int i = 0; i < d.size() - 1; i++) {
+    checksum += d[i];
+  }
+  return checksum;
 }
