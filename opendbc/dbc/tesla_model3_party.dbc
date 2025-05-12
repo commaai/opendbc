@@ -139,7 +139,7 @@ BO_ 925 IBST_status: 5 PARTY
  SG_ IBST_statusChecksum : 0|8@1+ (1,0) [0|255] ""  X
 
 BO_ 880 EPAS3S_sysStatus: 8 PARTY
- SG_ EPAS3S_sysStatusChecksum : 63|8@0+ (1,0) [0|255] ""  park
+ SG_ EPAS3S_sysStatusChecksum : 56|8@1+ (1,0) [0|255] ""  park
  SG_ EPAS3S_sysStatusCounter : 48|4@1+ (1,0) [0|15] ""  gtw
  SG_ EPAS3S_eacStatus : 55|3@0+ (1,0) [0|7] ""  das
  SG_ EPAS3S_internalSAS : 37|14@0+ (0.1,-819.2) [-819.2|819] "deg"  das
@@ -202,7 +202,7 @@ BO_ 605 DAS_road: 6 XXX
  SG_ DAS_trafficLightColor : 26|3@0+ (1,0) [0|7] "" XXX
 
 BO_ 1160 DAS_steeringControl: 4 PARTY
- SG_ DAS_steeringControlChecksum : 31|8@0+ (1,0) [0|255] ""  aps
+ SG_ DAS_steeringControlChecksum : 24|8@1+ (1,0) [0|255] ""  aps
  SG_ DAS_steeringControlCounter : 16|4@1+ (1,0) [0|15] ""  aps
  SG_ DAS_steeringControlType : 23|2@0+ (1,0) [0|3] ""  aps
  SG_ DAS_steeringAngleRequest : 6|15@0+ (0.1,-1638.35) [-1638.35|1638.35] "deg"  aps
@@ -249,7 +249,7 @@ BO_ 659 DAS_settings: 8 XXX
  SG_ DAS_obstacleAwareAcceleration : 42|1@0+ (1,0) [0|1] "" XXX
  SG_ DAS_driverAccelerationMode : 44|1@1+ (1,0) [0|127] "" XXX
  SG_ DAS_settingCounter : 52|4@1+ (1,0) [0|15] "" XXX
- SG_ DAS_settingChecksum : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ DAS_settingChecksum : 56|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 785 UI_warning: 7 XXX
  SG_ buckleStatus : 13|1@0+ (1,0) [0|1] "" XXX
