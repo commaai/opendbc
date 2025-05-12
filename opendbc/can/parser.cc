@@ -43,7 +43,13 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
     //DEBUG("parse 0x%X %s -> %ld\n", address, sig.name, tmp);
 
     if (!ignore_checksum) {
+      if (sig.calc_checksum != nullptr) {
+//        printf("calcing checksum for %s\n", sig.name.c_str());
+//        printf("tmp: %ld, sig: %s\n", tmp, sig.name.c_str());
+      }
       if (sig.calc_checksum != nullptr && sig.calc_checksum(address, sig, dat) != tmp) {
+        printf("invalid checksum for %s\n", sig.name.c_str());
+        printf("actual: %ld, expected: %d\n", tmp, sig.calc_checksum(address, sig, dat));
         checksum_failed = true;
       }
     }
