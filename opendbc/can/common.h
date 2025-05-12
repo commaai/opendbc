@@ -33,6 +33,7 @@ unsigned int xor_checksum(uint32_t address, const Signal &sig, const std::vector
 unsigned int hkg_can_fd_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int fca_giorgio_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int pedal_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
+unsigned int tesla_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 
 #define DBC_ASSERT(condition, message)                             \
   do {                                                             \
@@ -44,7 +45,11 @@ unsigned int pedal_checksum(uint32_t address, const Signal &sig, const std::vect
   } while (false)
 
 inline bool endswith(const std::string& str, const char* suffix) {
-  return str.find(suffix, 0) == (str.length() - strlen(suffix));
+  printf("comparing str: %s, suffix: %s\n", str.c_str(), suffix);
+  printf("str length: %ld, suffix length: %ld\n", str.length(), strlen(suffix));
+  printf("str.find(suffix, 0): %ld, (str.length() - strlen(suffix)): %ld\n", str.find(suffix, 0), (str.length() - strlen(suffix)));
+  std::size_t found = str.find(suffix, 0);
+  return found != std::string::npos && found == (str.length() - strlen(suffix));
 }
 
 struct CanFrame {
