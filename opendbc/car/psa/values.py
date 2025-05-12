@@ -17,7 +17,7 @@ class CarControllerParams:
     ([0., 5., 25.], [2.5, 1.5, 0.2]),
     ([0., 5., 25.], [5., 2.0, 0.3]),
   )
-  STEER_DRIVER_ALLOWANCE = 15  # Driver intervention threshold, 1.5 Nm
+  STEER_DRIVER_ALLOWANCE = 10  # Driver intervention threshold, 1.0 Nm
   EPS_MAX_TORQUE = 4.5 # TODO: max EPS torque seen in Nm
   def __init__(self, CP):
     pass
