@@ -44,7 +44,7 @@ unsigned int pedal_checksum(uint32_t address, const Signal &sig, const std::vect
   } while (false)
 
 inline bool endswith(const std::string& str, const char* suffix) {
-  return str.find(suffix, 0) == (str.length() - strlen(suffix));
+  return str.find(suffix, str.length() - strlen(suffix)) != std::string::npos;
 }
 
 struct CanFrame {
