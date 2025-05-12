@@ -30,6 +30,7 @@ class TeslaCAN:
       "DAS_jerkMax": CarControllerParams.JERK_LIMIT_MAX,
       "DAS_accelMin": accel,
       "DAS_accelMax": max(accel, 0),
+      "DAS_controlCounter": counter,
     }
     return self.packer.make_can_msg("DAS_control", CANBUS.party, values)
 
