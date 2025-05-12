@@ -14,8 +14,14 @@ void pedal_setup_signal(Signal &sig, const std::string& dbc_name, int line_num) 
 }
 
 void tesla_setup_signal(Signal &sig, const std::string& dbc_name, int line_num) {
+  printf("sig.name: %s, endswith: %d\n", sig.name.c_str(), endswith(sig.name, "Checksum"));
   if (endswith(sig.name, "Counter")) {
+    printf("is counter\n");
     sig.type = COUNTER;
+  } else if (endswith(sig.name, "Checksum")) {
+    printf("is checksum\n");
+    sig.type = TESLA_CHECKSUM;
+    sig.calc_checksum = &tesla_checksum;
   }
 }
 
@@ -272,4 +278,8 @@ unsigned int fca_giorgio_checksum(uint32_t address, const Signal &sig, const std
     return crc ^ 0xA;
   }
 
+}
+
+unsigned int tesla_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d) {
+  return 0xff;
 }
