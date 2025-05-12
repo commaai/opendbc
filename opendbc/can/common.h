@@ -48,8 +48,7 @@ inline bool endswith(const std::string& str, const char* suffix) {
   printf("comparing str: %s, suffix: %s\n", str.c_str(), suffix);
   printf("str length: %ld, suffix length: %ld\n", str.length(), strlen(suffix));
   printf("str.find(suffix, 0): %ld, (str.length() - strlen(suffix)): %ld\n", str.find(suffix, 0), (str.length() - strlen(suffix)));
-  std::size_t found = str.find(suffix, 0);
-  return found != std::string::npos && found == (str.length() - strlen(suffix));
+  return str.find(suffix, str.length() - strlen(suffix)) != std::string::npos;
 }
 
 struct CanFrame {
