@@ -261,7 +261,8 @@ BO_ 785 UI_warning: 7 XXX
  SG_ anyDoorOpen : 28|1@0+ (1,0) [0|1] "" XXX
  SG_ wiperSettings : 39|8@0+ (1,0) [0|255] "" XXX
  SG_ highBeam : 50|1@0+ (1,0) [0|1] "" XXX
- SG_ UI_warningCounter : 8|4@1+ (1,0) [0|0] "" XXX
+ SG_ UI_warningCounter : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ UI_warningChecksum : 0|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 923 DAS_status: 8 PARTY
  SG_ DAS_statusChecksum : 56|8@1+ (1,0) [0|255] ""  aps
