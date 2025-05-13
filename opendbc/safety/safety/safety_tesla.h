@@ -40,9 +40,7 @@ static uint8_t tesla_get_counter(const CANPacket_t *to_push) {
   return cnt;
 }
 
-static int _tesla_get_checksum_byte(const CANPacket_t *to_push) {
-  int addr = GET_ADDR(to_push);
-
+static int _tesla_get_checksum_byte(const int addr) {
   int checksum_byte = -1;
   if ((addr == 0x370) || (addr == 0x2b9) || (addr == 0x155)) {
     // Signal: EPAS3S_sysStatusChecksum, DAS_controlChecksum, ESP_wheelRotationChecksum
@@ -60,7 +58,7 @@ static int _tesla_get_checksum_byte(const CANPacket_t *to_push) {
 
 static uint32_t tesla_get_checksum(const CANPacket_t *to_push) {
   uint8_t chksum = 0;
-  int checksum_byte = _tesla_get_checksum_byte(to_push);
+  int checksum_byte = _tesla_get_checksum_byte(GET_ADDR(to_push));
   if (checksum_byte != -1) {
     chksum = GET_BYTE(to_push, checksum_byte);
   }
@@ -71,7 +69,7 @@ static uint32_t tesla_compute_checksum(const CANPacket_t *to_push) {
   int addr = GET_ADDR(to_push);
 
   uint8_t chksum = 0;
-  int checksum_byte = _tesla_get_checksum_byte(to_push);
+  int checksum_byte = _tesla_get_checksum_byte(addr);
 
   if (checksum_byte != -1) {
     chksum = (addr & 0xFF) + ((addr >> 8) & 0xFF);
