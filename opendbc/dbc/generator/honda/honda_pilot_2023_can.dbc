@@ -11,6 +11,7 @@ BO_ 419 GEARBOX: 8 XXX
  SG_ REGEN_STRENGTH : 14|3@0+ (1,0) [0|6] "" XXX
  SG_ GEAR_SHIFTER : 24|8@1+ (1,0) [0|255] "" XXX
  SG_ GEAR : 32|8@1+ (1,0) [0|255] "" XXX
+ SG_ REGEN_PADDLE : 50|2@0+ (1,0) [0|3] "" XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
