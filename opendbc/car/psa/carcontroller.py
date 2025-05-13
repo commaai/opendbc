@@ -1,5 +1,4 @@
-import numpy as np
-from opendbc.car import apply_std_steer_angle_limits, make_tester_present_msg, Bus
+from opendbc.car import apply_std_steer_angle_limits, Bus
 from opendbc.can.packer import CANPacker
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.psa import psacan
@@ -8,11 +7,9 @@ from opendbc.car.psa.values import CarControllerParams
 
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
-    self.CP = CP
+    super().__init__(dbc_names, CP)
     self.packer = CANPacker(dbc_names[Bus.cam])
-    self.frame = 0
     self.apply_angle_last = 0
-    self.radar_disabled = 0
 
   def update(self, CC, CS, now_nanos):
     can_sends = []
@@ -24,49 +21,10 @@ class CarController(CarControllerBase):
                                                    CS.out.steeringAngleDeg, CC.latActive, CarControllerParams.ANGLE_LIMITS)
     else:
       apply_angle = 0
-    # TODO: check if it works without self.frame // 5
+
     can_sends.append(psacan.create_lka_steering(self.packer, self.frame // 5, CC.latActive, apply_angle))
 
     self.apply_angle_last = apply_angle
-
-    ### longitudinal control ###
-    # TUNING
-    brake_accel = -0.5 # below this accel, go into brake mode
-    torque_raw = actuators.accel * 10 * 70 # accel in m/s^2 to torque in Nm * 10 for CAN
-    torque = max(-300, min(torque_raw, 2000)) # apply torque CAN Nm limits
-    braking = actuators.accel<brake_accel and not CS.out.gasPressed
-
-    # # twitchy on gas/accel transition but ok car following and braking
-    # torque = actuators.accel * 1000
-    # braking = torque < -300 and not CS.out.gasPressed
-    if self.CP.openpilotLongitudinalControl:
-      # TODO: disable_ecu not working - UDS communication control not supported by radar ECU.
-      # disable radar ECU by setting to programming mode
-      # if self.frame > 1000:
-      if self.radar_disabled == 0:
-        can_sends.append(create_disable_radar())
-        self.radar_disabled = 1
-
-      # keep radar ECU disabled by sending tester present
-      if self.frame % 100 == 0 and self.frame>0: # TODO check if disable_radar is sent 100 frames before
-        can_sends.append(make_tester_present_msg(0x6b6, 1, suppress_response=False))
-
-      # TODO: tune torque multiplier
-      # TODO: tune braking threshold
-      # TODO: check if disengage on accelerator is already in CC.longActive
-      # Highest torque seen without gas input: ~1000
-      # Lowest torque seen without break mode: -560 (but only when transitioning from brake to accel mode, else -248)
-      # Lowest brake mode accel seen: -4.85m/s²
-
-      if self.frame % 2 == 0: # 50 Hz
-        can_sends.append(create_HS2_DYN1_MDD_ETAT_2B6(self.packer, self.frame // 2, actuators.accel, CC.longActive, CS.out.gasPressed, braking, torque))
-        can_sends.append(create_HS2_DYN_MDD_ETAT_2F6(self.packer, self.frame // 2, CC.longActive, braking))
-
-      if self.frame % 10 == 0: # 10 Hz
-        can_sends.append(create_HS2_DAT_ARTIV_V2_4F6(self.packer, CC.longActive))
-
-      if self.frame % 100 == 0: # 1 Hz
-        can_sends.append(create_HS2_SUPV_ARTIV_796(self.packer))
 
     ### CANCEL/RESUME buttons ###
     # TODO test
@@ -79,8 +37,5 @@ class CarController(CarControllerBase):
 
     new_actuators = actuators.as_builder()
     new_actuators.steeringAngleDeg = self.apply_angle_last
-    # TODO: logging the internal parameters for DEBUG
-    new_actuators.gas = torque
-    new_actuators.brake = CS.steeringSaturated
     self.frame += 1
     return new_actuators, can_sends

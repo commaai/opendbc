@@ -4,26 +4,15 @@
 #define PSA_DAT_BSI               1042 // RX from BSI, doors
 #define PSA_HS2_DYN_ABR_38D       909  // RX from UC_FREIN, speed
 #define PSA_HS2_DAT_MDD_CMD_452   1106 // RX from BSI, cruise state
-#define PSA_LANE_KEEP_ASSIST      1010 // TX from OP, EPS
-// RADAR
-#define PSA_Req_Diag_ARTIV        1718 // TX from OP, radar diagnostics
-#define PSA_HS2_SUPV_ARTIV_796    1942 // TX from OP, radar emulation
-#define PSA_HS2_DAT_ARTIV_V2_4F6  1270 // TX from OP, radar emulation
-#define PSA_HS2_DYN1_MDD_ETAT_2B6 694  // TX from OP, radar emulation
-#define PSA_HS2_DYN_MDD_ETAT_2F6  758  // TX from OP, radar emulation
+#define PSA_LANE_KEEP_ASSIST      1010 // TX from OP,  EPS
 
 // CAN bus
-#define PSA_MAIN_BUS 2U
-#define PSA_ADAS_BUS 1U
 #define PSA_CAM_BUS  0U
+#define PSA_ADAS_BUS 1U
+#define PSA_MAIN_BUS 2U
 
 const CanMsg PSA_TX_MSGS[] = {
-  {PSA_LANE_KEEP_ASSIST, PSA_CAM_BUS, 8, .check_relay = true},        // EPS steering
-  {PSA_Req_Diag_ARTIV, PSA_ADAS_BUS, 8, .check_relay = false},        // radar diagnostics TODO: check if reduce to 3 is ok
-  {PSA_HS2_SUPV_ARTIV_796, PSA_ADAS_BUS, 8, .check_relay = false},    // radar emulation
-  {PSA_HS2_DAT_ARTIV_V2_4F6, PSA_ADAS_BUS, 5, .check_relay = false},  // radar emulation
-  {PSA_HS2_DYN1_MDD_ETAT_2B6, PSA_ADAS_BUS, 8, .check_relay = false}, // radar emulation
-  {PSA_HS2_DYN_MDD_ETAT_2F6, PSA_ADAS_BUS, 8, .check_relay = false},  // radar emulation
+  {PSA_LANE_KEEP_ASSIST, PSA_CAM_BUS, 8, .check_relay = true}, // EPS steering
 };
 
 RxCheck psa_rx_checks[] = {
