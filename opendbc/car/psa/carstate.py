@@ -64,8 +64,6 @@ class CarState(CarStateBase):
     else:
       ret.gearShifter = GearShifter.drive
 
-    # TODO: safety
-    # TODO: Not available if using longitudinal
     ret.stockFcw = cp_adas.vl['HS2_DYN_MDD_ETAT_2F6']['REQUEST_TAKEOVER'] == 2 # 0: no error, 1: non-critical request, 2: critical request
     ret.stockAeb = bool(cp_adas.vl['HS2_DYN_MDD_ETAT_2F6']['AUTO_BRAKING_IN_PROGRESS'])
 
