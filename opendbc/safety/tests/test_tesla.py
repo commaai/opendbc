@@ -72,8 +72,8 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     values = {"DI_vehicleSpeed": speed * 3.6}
     return self.packer.make_can_msg_panda("DI_speed", 0, values)
 
-  def _speed_msg_2(self, speed):
-    values = {"ESP_vehicleSpeed": speed * 3.6}
+  def _speed_msg_2(self, speed, quality_flag=True):
+    values = {"ESP_vehicleSpeed": speed * 3.6, "ESP_wheelSpeedsQF": quality_flag}
     return self.packer.make_can_msg_panda("ESP_B", 0, values)
 
   def _vehicle_moving_msg(self, speed: float):
@@ -110,9 +110,8 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
   def test_rx_hook(self):
     # counter check
     for msg in ("angle", "long", "speed", "speed_2"):
-      self.safety.set_controls_allowed(True)
       # send multiple times to verify counter checks
-      for _ in range(10):
+      for i in range(10):
         if msg == "angle":
           to_push = self._angle_cmd_msg(0, True, bus=2)
         elif msg == "long":
@@ -122,8 +121,21 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         elif msg == "speed_2":
           to_push = self._speed_msg_2(0)
 
-        self.assertTrue(self._rx(to_push))
-        self.assertTrue(self.safety.get_controls_allowed())
+        should_rx = i >= 5
+        if not should_rx:
+          # mess with checksums
+          if msg == "angle":
+            to_push[0].data[3] = 0
+          elif msg == "long":
+            to_push[0].data[7] = 0
+          elif msg == "speed":
+            to_push[0].data[0] = 0
+          elif msg == "speed_2":
+            to_push[0].data[7] = 0
+
+        self.safety.set_controls_allowed(True)
+        self.assertEqual(should_rx, self._rx(to_push))
+        self.assertEqual(should_rx, self.safety.get_controls_allowed())
 
       # Send static counters
       for i in range(MAX_WRONG_COUNTERS + 1):
@@ -148,12 +160,19 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         speed_2 = math.floor(speed_2 * 2 * 3.6 + 0.5) / 2 / 3.6
 
         # Set controls allowed in between rx since first message can reset it
-        self._rx(self._speed_msg(speed))
+        self.assertTrue(self._rx(self._speed_msg(speed)))
         self.safety.set_controls_allowed(True)
-        self._rx(self._speed_msg_2(speed_2))
+        self.assertTrue(self._rx(self._speed_msg_2(speed_2)))
 
         within_delta = abs(speed - speed_2) <= self.MAX_SPEED_DELTA
         self.assertEqual(self.safety.get_controls_allowed(), within_delta)
+
+    # Test ESP_B quality flag
+    for quality_flag in (True, False):
+      self.safety.set_controls_allowed(True)
+      self.assertTrue(self._rx(self._speed_msg(0)))
+      self.assertEqual(quality_flag, self._rx(self._speed_msg_2(0, quality_flag=quality_flag)))
+      self.assertEqual(quality_flag, self.safety.get_controls_allowed())
 
   def test_steering_wheel_disengage(self):
     # Tesla disengages when the user forcibly overrides the locked-in angle steering control

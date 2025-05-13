@@ -57,7 +57,7 @@ ChecksumState* get_checksum(const std::string& dbc_name) {
   } else if (startswith(dbc_name, "comma_body")) {
     s = new ChecksumState({8, 4, 7, 3, false, PEDAL_CHECKSUM, &pedal_checksum});
   } else if (startswith(dbc_name, "tesla_model3_party")) {
-    s = new ChecksumState({-1, -1, -1, -1, true, TESLA_CHECKSUM, nullptr, &tesla_setup_signal});
+    s = new ChecksumState({8, -1, 0, -1, true, TESLA_CHECKSUM, &tesla_checksum, &tesla_setup_signal});
   }
   return s;
 }
@@ -82,7 +82,7 @@ void set_signal_type(Signal& s, ChecksumState* chk, const std::string& dbc_name,
     if (s.type > COUNTER) {
       DBC_ASSERT(chk->checksum_size == -1 || s.size == chk->checksum_size, s.name << " is not " << chk->checksum_size << " bits long");
       DBC_ASSERT(chk->checksum_start_bit == -1 || (s.start_bit % 8) == chk->checksum_start_bit, s.name << " starts at wrong bit");
-      DBC_ASSERT(s.is_little_endian == chk->little_endian, s.name << " has wrong endianness");
+      DBC_ASSERT(chk->little_endian == s.is_little_endian, s.name << " has wrong endianness");
       DBC_ASSERT(chk->calc_checksum != nullptr, "Checksum calculate function not supplied for " << s.name);
     }  else if (s.type == COUNTER) {
       DBC_ASSERT(chk->counter_size == -1 || s.size == chk->counter_size, s.name << " is not " << chk->counter_size << " bits long");

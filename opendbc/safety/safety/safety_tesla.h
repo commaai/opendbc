@@ -40,6 +40,60 @@ static uint8_t tesla_get_counter(const CANPacket_t *to_push) {
   return cnt;
 }
 
+static int _tesla_get_checksum_byte(const int addr) {
+  int checksum_byte = -1;
+  if ((addr == 0x370) || (addr == 0x2b9) || (addr == 0x155)) {
+    // Signal: EPAS3S_sysStatusChecksum, DAS_controlChecksum, ESP_wheelRotationChecksum
+    checksum_byte = 7;
+  } else if (addr == 0x488) {
+    // Signal: DAS_steeringControlChecksum
+    checksum_byte = 3;
+  } else if ((addr == 0x257) || (addr == 0x118) || (addr == 0x39d) || (addr == 0x286) || (addr == 0x311)) {
+    // Signal: DI_speedChecksum, DI_systemStatusChecksum, IBST_statusChecksum, DI_locStatusChecksum, UI_warningChecksum
+    checksum_byte = 0;
+  } else {
+  }
+  return checksum_byte;
+}
+
+static uint32_t tesla_get_checksum(const CANPacket_t *to_push) {
+  uint8_t chksum = 0;
+  int checksum_byte = _tesla_get_checksum_byte(GET_ADDR(to_push));
+  if (checksum_byte != -1) {
+    chksum = GET_BYTE(to_push, checksum_byte);
+  }
+  return chksum;
+}
+
+static uint32_t tesla_compute_checksum(const CANPacket_t *to_push) {
+  unsigned int addr = GET_ADDR(to_push);
+
+  uint8_t chksum = 0;
+  int checksum_byte = _tesla_get_checksum_byte(addr);
+
+  if (checksum_byte != -1) {
+    chksum = (uint8_t)((addr & 0xFFU) + ((addr >> 8) & 0xFFU));
+    int len = GET_LEN(to_push);
+    for (int i = 0; i < len; i++) {
+      if (i != checksum_byte) {
+        chksum += GET_BYTE(to_push, i);
+      }
+    }
+  }
+  return chksum;
+}
+
+static bool tesla_get_quality_flag_valid(const CANPacket_t *to_push) {
+  int addr = GET_ADDR(to_push);
+
+  bool valid = false;
+  if (addr == 0x155) {
+    valid = (GET_BYTE(to_push, 5) & 0x1U) == 0x1U;  // ESP_wheelSpeedsQF
+  } else {
+  }
+  return valid;
+}
+
 static void tesla_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
   int addr = GET_ADDR(to_push);
@@ -296,15 +350,15 @@ static safety_config tesla_init(uint16_t param) {
   tesla_autopark_prev = false;
 
   static RxCheck tesla_model3_y_rx_checks[] = {
-    {.msg = {{0x2b9, 2, 8, .ignore_checksum = true, .max_counter = 7U, .frequency = 25U}, { 0 }, { 0 }}},    // DAS_control
-    {.msg = {{0x488, 2, 4, .ignore_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},   // DAS_steeringControl
-    {.msg = {{0x257, 0, 8, .ignore_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},   // DI_speed (speed in kph)
-    {.msg = {{0x155, 0, 8, .ignore_checksum = true, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},   // ESP_B (2nd speed in kph)
-    {.msg = {{0x370, 0, 8, .ignore_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},  // EPAS3S_sysStatus (steering angle)
-    {.msg = {{0x118, 0, 8, .ignore_checksum = true, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},  // DI_systemStatus (gas pedal)
-    {.msg = {{0x39d, 0, 5, .ignore_checksum = true, .max_counter = 15U, .frequency = 25U}, { 0 }, { 0 }}},   // IBST_status (brakes)
-    {.msg = {{0x286, 0, 8, .ignore_checksum = true, .max_counter = 15U, .frequency = 10U}, { 0 }, { 0 }}},   // DI_state (acc state)
-    {.msg = {{0x311, 0, 7, .ignore_checksum = true, .max_counter = 15U, .frequency = 10U}, { 0 }, { 0 }}},   // UI_warning (blinkers, buckle switch & doors)
+    {.msg = {{0x2b9, 2, 8, .max_counter = 7U, .frequency = 25U}, { 0 }, { 0 }}},                         // DAS_control
+    {.msg = {{0x488, 2, 4, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},                        // DAS_steeringControl
+    {.msg = {{0x257, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},                        // DI_speed (speed in kph)
+    {.msg = {{0x155, 0, 8, .max_counter = 15U, .quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},  // ESP_B (2nd speed in kph)
+    {.msg = {{0x370, 0, 8, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},                       // EPAS3S_sysStatus (steering angle)
+    {.msg = {{0x118, 0, 8, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},                       // DI_systemStatus (gas pedal)
+    {.msg = {{0x39d, 0, 5, .max_counter = 15U, .frequency = 25U}, { 0 }, { 0 }}},                        // IBST_status (brakes)
+    {.msg = {{0x286, 0, 8, .max_counter = 15U, .frequency = 10U}, { 0 }, { 0 }}},                        // DI_state (acc state)
+    {.msg = {{0x311, 0, 7, .max_counter = 15U, .frequency = 10U}, { 0 }, { 0 }}},                        // UI_warning (blinkers, buckle switch & doors)
   };
 
   safety_config ret;
@@ -320,6 +374,9 @@ const safety_hooks tesla_hooks = {
   .init = tesla_init,
   .rx = tesla_rx_hook,
   .tx = tesla_tx_hook,
-  .get_counter = tesla_get_counter,
   .fwd = tesla_fwd_hook,
+  .get_counter = tesla_get_counter,
+  .get_checksum = tesla_get_checksum,
+  .compute_checksum = tesla_compute_checksum,
+  .get_quality_flag_valid = tesla_get_quality_flag_valid,
 };
