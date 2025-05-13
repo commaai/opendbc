@@ -70,10 +70,10 @@ class CarController(CarControllerBase):
                                                              CS.out.steeringAngleDeg, lat_active,
                                                              CarControllerParams.ANGLE_LIMITS, self.VM)
 
-      can_sends.append(self.tesla_can.create_steering_control(self.apply_angle_last, lat_active, (self.frame // 2) % 16))
+      can_sends.append(self.tesla_can.create_steering_control(self.apply_angle_last, lat_active))
 
     if self.frame % 10 == 0:
-      can_sends.append(self.tesla_can.create_steering_allowed((self.frame // 10) % 16))
+      can_sends.append(self.tesla_can.create_steering_allowed())
 
     # Longitudinal control
     if self.CP.openpilotLongitudinalControl:
