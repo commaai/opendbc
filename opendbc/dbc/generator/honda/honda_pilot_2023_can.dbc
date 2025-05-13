@@ -8,8 +8,10 @@ BO_ 401 GEARBOX_15T: 8 PCM
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
 
 BO_ 419 GEARBOX: 8 XXX
+ SG_ REGEN_STRENGTH : 14|3@0+ (1,0) [0|6] "" XXX
  SG_ GEAR_SHIFTER : 24|8@1+ (1,0) [0|255] "" XXX
  SG_ GEAR : 32|8@1+ (1,0) [0|255] "" XXX
+ SG_ REGEN_PADDLE : 50|2@0+ (1,0) [0|3] "" XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
@@ -78,6 +80,7 @@ BO_ 1302 ODOMETER: 8 XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
 
+CM_ SG_ 419 REGEN_STRENGTH "strength of regen, shows as arrows on dashboard";
 CM_ SG_ 479 CONTROL_ON "Set to 5 when car is being controlled";
 CM_ SG_ 479 AEB_STATUS "set for the duration of AEB event";
 CM_ SG_ 479 AEB_BRAKING "set when braking is commanded during AEB event";
@@ -86,6 +89,7 @@ CM_ SG_ 829 BEEP "beeps are pleasant, chimes are for warnings etc...";
 CM_ SG_ 829 LANE_LINES "related to lane lines on cluster, left/right white/green";
 
 VAL_ 401 GEAR_SHIFTER 32 "L" 16 "S" 8 "D" 4 "N" 2 "R" 1 "P";
+VAL_ 419 REGEN_STRENGTH 0 "none" 1 "one arrow" 2 "two arrows" 3 "three arrows";
 VAL_ 419 GEAR_SHIFTER 2 "S" 32 "D" 16 "N" 8 "R" 4 "P";
 VAL_ 419 GEAR 26 "S" 20 "D" 19 "N" 18 "R" 17 "P";
 VAL_ 829 BEEP 3 "single_beep" 2 "triple_beep" 1 "repeated_beep" 0 "no_beep";
