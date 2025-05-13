@@ -40,7 +40,6 @@ static uint8_t tesla_get_counter(const CANPacket_t *to_push) {
   return cnt;
 }
 
-// get checksum byte index:
 static int _tesla_get_checksum_byte(const CANPacket_t *to_push) {
   int addr = GET_ADDR(to_push);
 
