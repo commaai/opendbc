@@ -50,8 +50,8 @@ static int _tesla_get_checksum_byte(const CANPacket_t *to_push) {
   } else if (addr == 0x488) {
     // Signal: DAS_steeringControlChecksum
     checksum_byte = 3;
-  } else if ((addr == 0x257) || (addr == 0x118) || (addr == 0x39d) || (addr == 0x286)) {
-    // Signal: DI_speedChecksum, DI_systemStatusChecksum, IBST_statusChecksum, DI_locStatusChecksum
+  } else if ((addr == 0x257) || (addr == 0x118) || (addr == 0x39d) || (addr == 0x286) || (addr == 0x311)) {
+    // Signal: DI_speedChecksum, DI_systemStatusChecksum, IBST_statusChecksum, DI_locStatusChecksum, UI_warningChecksum
     checksum_byte = 0;
   } else {
   }
@@ -340,15 +340,15 @@ static safety_config tesla_init(uint16_t param) {
   tesla_autopark_prev = false;
 
   static RxCheck tesla_model3_y_rx_checks[] = {
-    {.msg = {{0x2b9, 2, 8, .max_counter = 7U, .frequency = 25U}, { 0 }, { 0 }}},                             // DAS_control
-    {.msg = {{0x488, 2, 4, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},                            // DAS_steeringControl
-    {.msg = {{0x257, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},                            // DI_speed (speed in kph)
-    {.msg = {{0x155, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},                            // ESP_B (2nd speed in kph)
-    {.msg = {{0x370, 0, 8, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},                           // EPAS3S_sysStatus (steering angle)
-    {.msg = {{0x118, 0, 8, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},                           // DI_systemStatus (gas pedal)
-    {.msg = {{0x39d, 0, 5, .max_counter = 15U, .frequency = 25U}, { 0 }, { 0 }}},                            // IBST_status (brakes)
-    {.msg = {{0x286, 0, 8, .max_counter = 15U, .frequency = 10U}, { 0 }, { 0 }}},                            // DI_state (acc state)
-    {.msg = {{0x311, 0, 7, .ignore_checksum = true, .max_counter = 15U, .frequency = 10U}, { 0 }, { 0 }}},   // UI_warning (blinkers, buckle switch & doors)
+    {.msg = {{0x2b9, 2, 8, .max_counter = 7U, .frequency = 25U}, { 0 }, { 0 }}},    // DAS_control
+    {.msg = {{0x488, 2, 4, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},   // DAS_steeringControl
+    {.msg = {{0x257, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},   // DI_speed (speed in kph)
+    {.msg = {{0x155, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},   // ESP_B (2nd speed in kph)
+    {.msg = {{0x370, 0, 8, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},  // EPAS3S_sysStatus (steering angle)
+    {.msg = {{0x118, 0, 8, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},  // DI_systemStatus (gas pedal)
+    {.msg = {{0x39d, 0, 5, .max_counter = 15U, .frequency = 25U}, { 0 }, { 0 }}},   // IBST_status (brakes)
+    {.msg = {{0x286, 0, 8, .max_counter = 15U, .frequency = 10U}, { 0 }, { 0 }}},   // DI_state (acc state)
+    {.msg = {{0x311, 0, 7, .max_counter = 15U, .frequency = 10U}, { 0 }, { 0 }}},   // UI_warning (blinkers, buckle switch & doors)
   };
 
   safety_config ret;
