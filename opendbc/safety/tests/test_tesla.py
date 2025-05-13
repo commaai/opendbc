@@ -72,8 +72,8 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     values = {"DI_vehicleSpeed": speed * 3.6}
     return self.packer.make_can_msg_panda("DI_speed", 0, values)
 
-  def _speed_msg_2(self, speed):
-    values = {"ESP_vehicleSpeed": speed * 3.6}
+  def _speed_msg_2(self, speed, quality_flag=True):
+    values = {"ESP_vehicleSpeed": speed * 3.6, "ESP_wheelSpeedsQF": quality_flag}
     return self.packer.make_can_msg_panda("ESP_B", 0, values)
 
   def _vehicle_moving_msg(self, speed: float):
@@ -160,12 +160,19 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         speed_2 = math.floor(speed_2 * 2 * 3.6 + 0.5) / 2 / 3.6
 
         # Set controls allowed in between rx since first message can reset it
-        self._rx(self._speed_msg(speed))
+        self.assertTrue(self._rx(self._speed_msg(speed)))
         self.safety.set_controls_allowed(True)
-        self._rx(self._speed_msg_2(speed_2))
+        self.assertTrue(self._rx(self._speed_msg_2(speed_2)))
 
         within_delta = abs(speed - speed_2) <= self.MAX_SPEED_DELTA
         self.assertEqual(self.safety.get_controls_allowed(), within_delta)
+
+    # Test ESP_B quality flag
+    for quality_flag in (True, False):
+      self.safety.set_controls_allowed(True)
+      self.assertTrue(self._rx(self._speed_msg(0)))
+      self.assertEqual(quality_flag, self._rx(self._speed_msg_2(0, quality_flag=quality_flag)))
+      self.assertEqual(quality_flag, self.safety.get_controls_allowed())
 
   def test_steering_wheel_disengage(self):
     # Tesla disengages when the user forcibly overrides the locked-in angle steering control
