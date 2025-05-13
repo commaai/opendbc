@@ -66,14 +66,15 @@ static uint32_t tesla_get_checksum(const CANPacket_t *to_push) {
 }
 
 static uint32_t tesla_compute_checksum(const CANPacket_t *to_push) {
-  int addr = GET_ADDR(to_push);
+  unsigned int addr = GET_ADDR(to_push);
 
   uint8_t chksum = 0;
   int checksum_byte = _tesla_get_checksum_byte(addr);
 
   if (checksum_byte != -1) {
-    chksum = (addr & 0xFF) + ((addr >> 8) & 0xFF);
-    for (int i = 0; i < GET_LEN(to_push); i++) {
+    chksum = (uint8_t)((addr & 0xFFU) + ((addr >> 8) & 0xFFU));
+    int len = GET_LEN(to_push);
+    for (int i = 0; i < len; i++) {
       if (i != checksum_byte) {
         chksum += GET_BYTE(to_push, i);
       }
