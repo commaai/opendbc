@@ -80,10 +80,10 @@ class FordCarDocs(CarDocs):
       self.car_parts = CarParts([Device.threex, harness])
 
     if harness == CarHarness.ford_q4:
-      self.setup_video_link = "https://www.youtube.com/watch?v=uUGkH6C_EQU"
+      self.setup_video = "https://www.youtube.com/watch?v=uUGkH6C_EQU"
 
     if CP.carFingerprint in (CAR.FORD_RANGER_MK2):
-      self.setup_video_link = "https://www.youtube.com/watch?v=2oJlXCKYOy0"
+      self.setup_video = "https://www.youtube.com/watch?v=2oJlXCKYOy0"
 
 
 @dataclass

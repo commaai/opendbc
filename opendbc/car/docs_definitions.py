@@ -255,7 +255,7 @@ class CarDocs:
   requirements: str | None = None
 
   video_link: str | None = None
-  setup_video_link: str | None = None
+  setup_video: str | None = None
   footnotes: list[Enum] = field(default_factory=list)
   min_steer_speed: float | None = None
   min_enable_speed: float | None = None
