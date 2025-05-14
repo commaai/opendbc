@@ -5,6 +5,8 @@ import importlib
 import numpy as np
 from collections.abc import Callable
 
+from opendbc.car.structs import CarParams
+
 from opendbc.can.packer import CANPacker  # pylint: disable=import-error
 from opendbc.safety import ALTERNATIVE_EXPERIENCE
 from opendbc.safety.tests.libsafety import libsafety_py
@@ -929,6 +931,44 @@ class PandaCarSafetyTest(PandaSafetyTest):
       for addr in self.SCANNED_ADDRS:
         self.assertFalse(self._tx(make_msg(bus, addr, 8)))
         self.assertEqual(-1, self.safety.safety_fwd_hook(bus, addr))
+
+  def test_ignition_can(self):
+    """Test that ignition CAN trigger for expected sequences. We currently do not restrict"""
+
+    # TODO: Fuzz these messages.
+    # List of messages to play in sequence to trigger ignition detection for each car type
+    IGNITION_CAN_MSGS = {
+      CarParams.SafetyModel.gm: [
+        libsafety_py.make_CANPacket(0x1F1, 0, bytes([0x02, 0, 0, 0, 0, 0, 0, 0]))
+      ],
+      CarParams.SafetyModel.mazda: [
+        libsafety_py.make_CANPacket(0x9E, 0, bytes([0xC0, 0, 0, 0, 0, 0, 0, 0]))
+      ],
+      CarParams.SafetyModel.tesla: [
+        # First message establishes counter
+        libsafety_py.make_CANPacket(0x221, 0, bytes([0x60, 0, 0, 0, 0, 0, 0x00, 0])),
+        # Second message with incremented counter should trigger
+        libsafety_py.make_CANPacket(0x221, 0, bytes([0x60, 0, 0, 0, 0, 0, 0x10, 0]))
+      ],
+      CarParams.SafetyModel.rivian: [
+        # First message establishes counter
+        libsafety_py.make_CANPacket(0x152, 0, bytes([0, 0, 0, 0, 0, 0, 0, 0x10])),
+        # Second message with incremented counter should trigger
+        libsafety_py.make_CANPacket(0x152, 0, bytes([0, 1, 0, 0, 0, 0, 0, 0x10]))
+      ]
+    }
+
+    for safety_mode, msgs in IGNITION_CAN_MSGS.items():
+      # Reset ignition state
+      self.safety.set_ignition_can(False)
+      uses_counter = len(msgs) > 1
+      # Play the sequence of messages
+      for i, msg in enumerate(msgs):
+        self._rx(msg)
+        is_first_msg = (i == 0)
+        if uses_counter and is_first_msg:
+          self.assertFalse(self.safety.get_ignition_can(), f"ignition_can triggered too early in sequence for {safety_mode}...")
+      self.assertTrue(self.safety.get_ignition_can())
 
   def test_prev_gas(self):
     self.assertFalse(self.safety.get_gas_pressed_prev())
