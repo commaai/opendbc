@@ -217,6 +217,7 @@ bool safety_rx_hook(const CANPacket_t *to_push);
 bool safety_tx_hook(CANPacket_t *to_send);
 int to_signed(int d, int bits);
 void update_sample(struct sample_t *sample, int sample_new);
+bool max_limit_check(int val, const int MAX_VAL, const int MIN_VAL);
 bool get_longitudinal_allowed(void);
 int ROUND(float val);
 void gen_crc_lookup_table_8(uint8_t poly, uint8_t crc_lut[]);
