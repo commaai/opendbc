@@ -2,6 +2,8 @@
 
 #include "safety_declarations.h"
 
+#define TESLA_MAX_SPEED_DELTA 2.0  // m/s
+
 static bool tesla_longitudinal = false;
 static bool tesla_stock_aeb = false;
 
@@ -13,6 +15,84 @@ static bool tesla_stock_lkas_prev = false;
 // Only Summon is currently supported due to Autopark not setting Autopark state properly
 static bool tesla_autopark = false;
 static bool tesla_autopark_prev = false;
+
+static uint8_t tesla_get_counter(const CANPacket_t *to_push) {
+  int addr = GET_ADDR(to_push);
+
+  uint8_t cnt = 0;
+  if (addr == 0x2b9) {
+    // Signal: DAS_controlCounter
+    cnt = GET_BYTE(to_push, 6) >> 5;
+  } else if (addr == 0x488) {
+    // Signal: DAS_steeringControlCounter
+    cnt = GET_BYTE(to_push, 2) & 0x0FU;
+  } else if ((addr == 0x257) || (addr == 0x118) || (addr == 0x39d) || (addr == 0x286) || (addr == 0x311)) {
+    // Signal: DI_speedCounter, DI_systemStatusCounter, IBST_statusCounter, DI_locStatusCounter, UI_warningCounter
+    cnt = GET_BYTE(to_push, 1) & 0x0FU;
+  } else if (addr == 0x155) {
+    // Signal: ESP_wheelRotationCounter
+    cnt = GET_BYTE(to_push, 6) >> 4;
+  } else if (addr == 0x370) {
+    // Signal: EPAS3S_sysStatusCounter
+    cnt = GET_BYTE(to_push, 6) & 0x0FU;
+  } else {
+  }
+  return cnt;
+}
+
+static int _tesla_get_checksum_byte(const int addr) {
+  int checksum_byte = -1;
+  if ((addr == 0x370) || (addr == 0x2b9) || (addr == 0x155)) {
+    // Signal: EPAS3S_sysStatusChecksum, DAS_controlChecksum, ESP_wheelRotationChecksum
+    checksum_byte = 7;
+  } else if (addr == 0x488) {
+    // Signal: DAS_steeringControlChecksum
+    checksum_byte = 3;
+  } else if ((addr == 0x257) || (addr == 0x118) || (addr == 0x39d) || (addr == 0x286) || (addr == 0x311)) {
+    // Signal: DI_speedChecksum, DI_systemStatusChecksum, IBST_statusChecksum, DI_locStatusChecksum, UI_warningChecksum
+    checksum_byte = 0;
+  } else {
+  }
+  return checksum_byte;
+}
+
+static uint32_t tesla_get_checksum(const CANPacket_t *to_push) {
+  uint8_t chksum = 0;
+  int checksum_byte = _tesla_get_checksum_byte(GET_ADDR(to_push));
+  if (checksum_byte != -1) {
+    chksum = GET_BYTE(to_push, checksum_byte);
+  }
+  return chksum;
+}
+
+static uint32_t tesla_compute_checksum(const CANPacket_t *to_push) {
+  unsigned int addr = GET_ADDR(to_push);
+
+  uint8_t chksum = 0;
+  int checksum_byte = _tesla_get_checksum_byte(addr);
+
+  if (checksum_byte != -1) {
+    chksum = (uint8_t)((addr & 0xFFU) + ((addr >> 8) & 0xFFU));
+    int len = GET_LEN(to_push);
+    for (int i = 0; i < len; i++) {
+      if (i != checksum_byte) {
+        chksum += GET_BYTE(to_push, i);
+      }
+    }
+  }
+  return chksum;
+}
+
+static bool tesla_get_quality_flag_valid(const CANPacket_t *to_push) {
+  int addr = GET_ADDR(to_push);
+
+  bool valid = false;
+  if (addr == 0x155) {
+    valid = (GET_BYTE(to_push, 5) & 0x1U) == 0x1U;  // ESP_wheelSpeedsQF
+  } else {
+  }
+  return valid;
+}
 
 static void tesla_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
@@ -33,11 +113,22 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
       steering_disengage = (hands_on_level >= 3) || ((eac_status == 0) && (eac_error_code == 9));
     }
 
-    // Vehicle speed
+    // Vehicle speed (DI_speed)
     if (addr == 0x257) {
       // Vehicle speed: ((val * 0.08) - 40) / MS_TO_KPH
-      float speed = ((((GET_BYTE(to_push, 2) << 4) | (GET_BYTE(to_push, 1) >> 4)) * 0.08) - 40) / 3.6;
+      float speed = ((((GET_BYTE(to_push, 2) << 4) | (GET_BYTE(to_push, 1) >> 4)) * 0.08) - 40.) / 3.6;
       UPDATE_VEHICLE_SPEED(speed);
+    }
+
+    // 2nd vehicle speed (ESP_B)
+    if (addr == 0x155) {
+      // Disable controls if speeds from DI (Drive Inverter) and ESP ECUs are too far apart.
+      float esp_speed = (((GET_BYTE(to_push, 6) & 0x0FU) << 6) | GET_BYTE(to_push, 5) >> 2) * 0.5 / 3.6;
+      bool is_invalid_speed = ABS(esp_speed - ((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR)) > TESLA_MAX_SPEED_DELTA;
+      // TODO: this should generically cause rx valid to fall until re-enable
+      if (is_invalid_speed) {
+        controls_allowed = false;
+      }
     }
 
     // Gas pressed
@@ -59,7 +150,7 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
                                 (autopark_state == 9);    // SELFPARK_STARTED
 
       // Only consider rising edges while controls are not allowed
-      if (tesla_autopark_now && !tesla_autopark_prev && !controls_allowed) {
+      if (tesla_autopark_now && !tesla_autopark_prev && !cruise_engaged_prev) {
         tesla_autopark = true;
       }
       if (!tesla_autopark_now) {
@@ -259,14 +350,15 @@ static safety_config tesla_init(uint16_t param) {
   tesla_autopark_prev = false;
 
   static RxCheck tesla_model3_y_rx_checks[] = {
-    {.msg = {{0x2b9, 2, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 25U}, { 0 }, { 0 }}},   // DAS_control
-    {.msg = {{0x488, 2, 4, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},   // DAS_steeringControl
-    {.msg = {{0x257, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},   // DI_speed (speed in kph)
-    {.msg = {{0x370, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},  // EPAS3S_sysStatus (steering angle)
-    {.msg = {{0x118, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},  // DI_systemStatus (gas pedal)
-    {.msg = {{0x39d, 0, 5, .ignore_checksum = true, .ignore_counter = true, .frequency = 25U}, { 0 }, { 0 }}},   // IBST_status (brakes)
-    {.msg = {{0x286, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},   // DI_state (acc state)
-    {.msg = {{0x311, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},   // UI_warning (blinkers, buckle switch & doors)
+    {.msg = {{0x2b9, 2, 8, .max_counter = 7U, .frequency = 25U}, { 0 }, { 0 }}},                         // DAS_control
+    {.msg = {{0x488, 2, 4, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},                        // DAS_steeringControl
+    {.msg = {{0x257, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},                        // DI_speed (speed in kph)
+    {.msg = {{0x155, 0, 8, .max_counter = 15U, .quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},  // ESP_B (2nd speed in kph)
+    {.msg = {{0x370, 0, 8, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},                       // EPAS3S_sysStatus (steering angle)
+    {.msg = {{0x118, 0, 8, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},                       // DI_systemStatus (gas pedal)
+    {.msg = {{0x39d, 0, 5, .max_counter = 15U, .frequency = 25U}, { 0 }, { 0 }}},                        // IBST_status (brakes)
+    {.msg = {{0x286, 0, 8, .max_counter = 15U, .frequency = 10U}, { 0 }, { 0 }}},                        // DI_state (acc state)
+    {.msg = {{0x311, 0, 7, .max_counter = 15U, .frequency = 10U}, { 0 }, { 0 }}},                        // UI_warning (blinkers, buckle switch & doors)
   };
 
   safety_config ret;
@@ -283,4 +375,8 @@ const safety_hooks tesla_hooks = {
   .rx = tesla_rx_hook,
   .tx = tesla_tx_hook,
   .fwd = tesla_fwd_hook,
+  .get_counter = tesla_get_counter,
+  .get_checksum = tesla_get_checksum,
+  .compute_checksum = tesla_compute_checksum,
+  .get_quality_flag_valid = tesla_get_quality_flag_valid,
 };
