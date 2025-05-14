@@ -148,8 +148,7 @@ class RadarInterface(RadarInterfaceBase):
       if not _update:
         return None
     elif self.radar == RADAR.DELPHI_MRR_64:
-      _update, _errors = self._update_delphi_mrr_64()
-      errors.extend(_errors)
+      _update = self._update_delphi_mrr_64(ret)
       if not _update:
         return None
 
@@ -246,18 +245,31 @@ class RadarInterface(RadarInterfaceBase):
     if headerScanIndex != 3:
       return False
 
-    return self.do_clustering(errors)
+    return self.do_clustering()
 
-  def _update_delphi_mrr_64(self):
+  def _update_delphi_mrr_64(self, ret: structs.RadarData):
     # There is not discovered MRR_Header_InformationDetections message in CANFD
     # headerScanIndex = int(self.rcp.vl["MRR_Header_InformationDetections"]['CAN_SCAN_INDEX']) & 0b11
     headerScanIndex = int(self.rcp.vl["MRR_Detection_001"]['CAN_SCAN_INDEX_2LSB_01_01'])
+
+    # In reverse, the radar continually sends the last messages. Mark this as invalid
+    if (self.prev_headerScanIndex + 1) % 4 != headerScanIndex:
+      self.radar_unavailable_cnt += 1
+    else:
+      self.radar_unavailable_cnt = 0
+    self.prev_headerScanIndex = headerScanIndex
+
+    if self.radar_unavailable_cnt >= 5:
+      self.pts.clear()
+      self.points.clear()
+      self.clusters.clear()
+      ret.errors.radarUnavailableTemporary = True
+      return True
 
     # Use points with Doppler coverage of +-60 m/s, reduces similar points
     if headerScanIndex in (0, 1):
       return False, []
 
-    errors = []
     # There is not discovered MRR_Header_SensorCoverage message in CANFD
     # if DELPHI_MRR_RADAR_RANGE_COVERAGE[headerScanIndex] != int(self.rcp.vl["MRR_Header_SensorCoverage"]["CAN_RANGE_COVERAGE"]):
     #   self.invalid_cnt += 1
@@ -302,10 +314,10 @@ class RadarInterface(RadarInterfaceBase):
     if headerScanIndex != 3:
       return True, [] # MRR_Detection_* messages in CANFD are at 20Hz, services.py expects liveTracks to be at 20Hz - we'll send messages to meet the 20Hz
 
-    return self.do_clustering(errors)
+    return self.do_clustering()
 
   # Do the common work for CAN and CANFD clustering and prepare the points to be used for liveTracks
-  def do_clustering(self, errors):
+  def do_clustering(self):
     # Cluster points from this cycle against the centroids from the previous cycle
     prev_keys = [[p.dRel, p.yRel * 2, p.vRel * 2] for p in self.clusters]
     labels = cluster_points(prev_keys, self.points, DELPHI_MRR_CLUSTER_THRESHOLD)
