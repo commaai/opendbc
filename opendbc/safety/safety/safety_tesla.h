@@ -84,6 +84,7 @@ static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_e
     printf("max_curvature: %.10f, max_angle: %.10f, max_angle_can: %d\n", max_curvature, max_angle,
            max_angle_can);
   }
+  desired_angle_last = desired_angle;
 
   // Angle should either be 0 or same as current angle while not steering
   if (!steer_control_enabled) {
@@ -96,11 +97,11 @@ static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_e
   // No angle control allowed when controls are not allowed
   violation |= !controls_allowed && steer_control_enabled;
 
-  if (violation) {
-    desired_angle_last = angle_meas.values[0];
-  } else {
-    desired_angle_last = desired_angle;
-  }
+//  if (violation) {
+//    desired_angle_last = angle_meas.values[0];
+//  } else {
+//    desired_angle_last = desired_angle;
+//  }
 
   printf("\n");
   return violation;
