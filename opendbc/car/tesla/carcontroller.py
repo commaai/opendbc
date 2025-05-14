@@ -1,7 +1,7 @@
 import numpy as np
 import math
 from opendbc.can.packer import CANPacker
-from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, AngleSteeringLimits, DT_CTRL
+from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, AngleSteeringLimits, DT_CTRL, rate_limit
 from opendbc.car.interfaces import CarControllerBase, ISO_LATERAL_ACCEL
 from opendbc.car.tesla.teslacan import TeslaCAN
 from opendbc.car.tesla.values import CarControllerParams
@@ -17,18 +17,17 @@ MAX_LATERAL_JERK = 3.0 + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~3
 
 def apply_tesla_steer_angle_limits(apply_angle: float, apply_angle_last: float, v_ego_raw: float, steering_angle: float,
                                    lat_active: bool, limits: AngleSteeringLimits, VM: VehicleModel) -> float:
-  # *** ISO lateral jerk limit ***
-  max_curvature_rate_sec = MAX_LATERAL_JERK / (max(v_ego_raw, 1) ** 2)  # 1/m/s
-  max_angle_rate_sec = math.degrees(VM.get_steer_from_curvature(max_curvature_rate_sec, v_ego_raw, 0))
+  # *** max lateral jerk limit ***
+  max_curvature_rate_sec = MAX_LATERAL_JERK / (max(v_ego_raw, 1) ** 2)  # (1/m)/s
+  max_angle_rate_sec = math.degrees(VM.get_steer_from_curvature(max_curvature_rate_sec, v_ego_raw, 0))  # deg/s
   max_angle_delta = max_angle_rate_sec * (DT_CTRL * CarControllerParams.STEER_STEP)
 
   # prevent fault
   max_angle_delta = min(max_angle_delta, MAX_ANGLE_RATE)
-  new_apply_angle = np.clip(apply_angle, apply_angle_last - max_angle_delta, apply_angle_last + max_angle_delta)
+  new_apply_angle = rate_limit(apply_angle, apply_angle_last, -max_angle_delta, max_angle_delta)
 
-  # *** ISO lateral accel limit ***
+  # *** max lateral accel limit ***
   max_curvature = MAX_LATERAL_ACCEL / (max(v_ego_raw, 1) ** 2)  # 1/m
-  # print(f"python max_curvature: {max_curvature}")
   max_angle = math.degrees(VM.get_steer_from_curvature(max_curvature, v_ego_raw, 0))  # deg
   new_apply_angle = float(np.clip(new_apply_angle, -max_angle, max_angle))
 
@@ -36,6 +35,7 @@ def apply_tesla_steer_angle_limits(apply_angle: float, apply_angle_last: float, 
   if not lat_active:
     new_apply_angle = steering_angle
 
+  # prevent fault
   return float(np.clip(new_apply_angle, -limits.STEER_ANGLE_MAX, limits.STEER_ANGLE_MAX))
 
 
