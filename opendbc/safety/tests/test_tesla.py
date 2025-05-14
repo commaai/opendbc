@@ -12,8 +12,7 @@ from opendbc.car.vehicle_model import VehicleModel
 from opendbc.can.can_define import CANDefine
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import MAX_WRONG_COUNTERS
-from opendbc.safety.tests.common import CANPackerPanda
+from opendbc.safety.tests.common import CANPackerPanda, MAX_WRONG_COUNTERS, sign_of
 
 MSG_DAS_steeringControl = 0x488
 MSG_APS_eacMonitor = 0x27d
@@ -264,9 +263,59 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     self.assertEqual(0, self.safety.safety_fwd_hook(2, lkas_msg_cam.addr))
     self.assertFalse(self._tx(no_lkas_msg))
 
+  # def test_angle_cmd_when_enabled(self):
+  #   # Test by custom test_lateral_limit_up with proper lateral acceleration and jerk
+  #   pass
+
   def test_angle_cmd_when_enabled(self):
-    # Test by custom test_lateral_limit_up with proper lateral acceleration and jerk
-    pass
+    VM = VehicleModel(get_safety_CP())
+    # when controls are allowed, angle cmd rate limit is enforced
+    speeds = [0., 1., 5., 10., 15., 50.]
+    angles = np.concatenate((np.arange(-self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX, 5), [0]))
+    for a in angles:
+      for s in speeds:
+        max_delta_up = get_max_angle_delta(s, VM) #np.interp(s, self.ANGLE_RATE_BP, self.ANGLE_RATE_UP)
+        max_delta_down = max_delta_up  # np.interp(s, self.ANGLE_RATE_BP, self.ANGLE_RATE_DOWN)
+
+        # first test against false positives
+        self._reset_angle_measurement(a)
+        self._reset_speed_measurement(s)
+
+        self._set_prev_desired_angle(a)
+        self.safety.set_controls_allowed(1)
+
+        # Stay within limits
+        # Up
+        print(a, sign_of(a), max_delta_up)
+        self.assertTrue(self._tx(self._angle_cmd_msg(a + sign_of(a) * max_delta_up, True)))
+        self.assertTrue(self.safety.get_controls_allowed())
+
+        # Don't change
+        self.assertTrue(self._tx(self._angle_cmd_msg(a, True)))
+        self.assertTrue(self.safety.get_controls_allowed())
+
+        # # Down
+        # self.assertTrue(self._tx(self._angle_cmd_msg(a - sign_of(a) * max_delta_down, True)))
+        # self.assertTrue(self.safety.get_controls_allowed())
+        #
+        # # Inject too high rates
+        # # Up
+        # self.assertFalse(self._tx(self._angle_cmd_msg(a + sign_of(a) * (max_delta_up + 1.1), True)))
+        #
+        # # Don't change
+        # self.safety.set_controls_allowed(1)
+        # self._set_prev_desired_angle(a)
+        # self.assertTrue(self.safety.get_controls_allowed())
+        # self.assertTrue(self._tx(self._angle_cmd_msg(a, True)))
+        # self.assertTrue(self.safety.get_controls_allowed())
+        #
+        # # Down
+        # self.assertFalse(self._tx(self._angle_cmd_msg(a - sign_of(a) * (max_delta_down + 1.1), True)))
+        #
+        # # Check desired steer should be the same as steer angle when controls are off
+        # self.safety.set_controls_allowed(0)
+        # should_tx = abs(a) <= abs(self.STEER_ANGLE_MAX)
+        # self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(a, False)))
 
   def test_lateral_limit_up(self):
     VM = VehicleModel(get_safety_CP())
