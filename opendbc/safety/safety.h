@@ -47,6 +47,8 @@ bool brake_pressed = false;
 bool brake_pressed_prev = false;
 bool regen_braking = false;
 bool regen_braking_prev = false;
+bool steering_disengage;
+bool steering_disengage_prev;
 bool cruise_engaged_prev = false;
 struct sample_t vehicle_speed;
 bool vehicle_moving = false;
@@ -345,10 +347,6 @@ static void relay_malfunction_set(void) {
 }
 
 static void generic_rx_checks(void) {
-  // exit controls on rising edge of gas press
-  if (gas_pressed && !gas_pressed_prev && !(alternative_experience & ALT_EXP_DISABLE_DISENGAGE_ON_GAS)) {
-    controls_allowed = false;
-  }
   gas_pressed_prev = gas_pressed;
 
   // exit controls on rising edge of brake press
@@ -362,6 +360,12 @@ static void generic_rx_checks(void) {
     controls_allowed = false;
   }
   regen_braking_prev = regen_braking;
+
+  // exit controls on rising edge of steering override/disengage
+  if (steering_disengage && !steering_disengage_prev) {
+    controls_allowed = false;
+  }
+  steering_disengage_prev = steering_disengage;
 }
 
 static void stock_ecu_check(bool stock_ecu_detected) {
@@ -426,6 +430,8 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   brake_pressed_prev = false;
   regen_braking = false;
   regen_braking_prev = false;
+  steering_disengage = false;
+  steering_disengage_prev = false;
   cruise_engaged_prev = false;
   vehicle_moving = false;
   acc_main_on = false;

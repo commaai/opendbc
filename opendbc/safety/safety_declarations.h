@@ -243,6 +243,8 @@ extern bool brake_pressed;
 extern bool brake_pressed_prev;
 extern bool regen_braking;
 extern bool regen_braking_prev;
+extern bool steering_disengage;
+extern bool steering_disengage_prev;
 extern bool cruise_engaged_prev;
 extern struct sample_t vehicle_speed;
 extern bool vehicle_moving;
@@ -269,11 +271,11 @@ extern uint32_t ts_angle_last;
 extern int desired_angle_last;
 extern struct sample_t angle_meas;         // last 6 steer angles/curvatures
 
-// This can be set with a USB command
+// Alt experiences can be set with a USB command
 // It enables features that allow alternative experiences, like not disengaging on gas press
 // It is only either 0 or 1 on mainline comma.ai openpilot
 
-#define ALT_EXP_DISABLE_DISENGAGE_ON_GAS 1
+//#define ALT_EXP_DISABLE_DISENGAGE_ON_GAS 1  // not used anymore, but reserved
 
 // If using this flag, make sure to communicate to your users that a stock safety feature is now disabled.
 #define ALT_EXP_DISABLE_STOCK_AEB 2
