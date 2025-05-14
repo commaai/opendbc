@@ -55,6 +55,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
   packer: CANPackerPanda
 
   def setUp(self):
+    self.VM = VehicleModel(get_safety_CP())
     self.packer = CANPackerPanda("tesla_model3_party")
     self.define = CANDefine("tesla_model3_party")
     self.acc_states = {d: v for v, d in self.define.dv["DAS_control"]["DAS_accState"].items()}
@@ -270,13 +271,12 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     pass
 
   # def test_angle_cmd_when_enabled(self):
-  #   VM = VehicleModel(get_safety_CP())
   #   # when controls are allowed, angle cmd rate limit is enforced
   #   speeds = [0., 1., 5., 10., 15., 50.]
   #   angles = np.concatenate((np.arange(-self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX, 5), [0]))
   #   for a in angles:
   #     for s in speeds:
-  #       max_delta_up = get_max_angle_delta(s, VM) #np.interp(s, self.ANGLE_RATE_BP, self.ANGLE_RATE_UP)
+  #       max_delta_up = get_max_angle_delta(s, self.VM) #np.interp(s, self.ANGLE_RATE_BP, self.ANGLE_RATE_UP)
   #       max_delta_down = max_delta_up  # np.interp(s, self.ANGLE_RATE_BP, self.ANGLE_RATE_DOWN)
   #
   #       # first test against false positives
@@ -320,8 +320,6 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
   #       # self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(a, False)))
 
   def test_lateral_accel_limit(self):
-    VM = VehicleModel(get_safety_CP())  # make this self.
-
     # carcontroller.MAX_LATERAL_ACCEL = MAX_LATERAL_ACCEL
     for speed in np.linspace(0, 35, 100):
       # match DI_vehicleSpeed rounding on CAN
@@ -338,7 +336,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         #  we can account for this properly
 
         # under limit -1
-        max_angle_raw = uround_angle(get_max_angle(speed, VM))
+        max_angle_raw = uround_angle(get_max_angle(speed, self.VM))
         max_angle = np.clip(max_angle_raw, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
         print('test sending max_angle', max_angle)
         # self._tx(self._angle_cmd_msg(max_angle, True))  #TODO: set prev dewsired angle
@@ -348,7 +346,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle, True)))
 
         # at limit
-        max_angle_raw = uround_angle(get_max_angle(speed, VM), 1)
+        max_angle_raw = uround_angle(get_max_angle(speed, self.VM), 1)
         max_angle = np.clip(max_angle_raw, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
         print('test sending max_angle', max_angle)
         # self._tx(self._angle_cmd_msg(max_angle, True))  #TODO: set prev dewsired angle
@@ -358,7 +356,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle, True)))
 
         # above limit +1
-        max_angle_raw = uround_angle(get_max_angle(speed, VM), 2)
+        max_angle_raw = uround_angle(get_max_angle(speed, self.VM), 2)
         max_angle = np.clip(max_angle_raw, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
         print('test sending max_angle', max_angle)
         # self._tx(self._angle_cmd_msg(max_angle, True))  #TODO: set prev dewsired angle
@@ -370,8 +368,6 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(max_angle, True)))
 
   # def test_lateral_accel_limit(self):
-  #   VM = VehicleModel(get_safety_CP())
-  #
   #   # carcontroller.MAX_LATERAL_ACCEL = MAX_LATERAL_ACCEL
   #   for speed in [9.200000]:#np.linspace(0, 35, 100):
   #     # match DI_vehicleSpeed rounding on CAN
@@ -391,8 +387,8 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
   #
   #       # Stay within limits
   #       # Up
-  #       max_angle_delta = uround_angle(get_max_angle_delta(speed, VM))
-  #       max_angle = uround_angle(get_max_angle(speed, VM))
+  #       max_angle_delta = uround_angle(get_max_angle_delta(speed, self.VM))
+  #       max_angle = uround_angle(get_max_angle(speed, self.VM))
   #       print('max_angle_delta', max_angle_delta, 'max_angle', max_angle)
   #
   #       # max_angle_delta = uround_angle(max_angle_delta, 1)
@@ -415,8 +411,6 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
 
   # def test_lateral_limit_up(self):
-  #   VM = VehicleModel(get_safety_CP())
-  #
   #   with (patch.object(carcontroller, 'MAX_LATERAL_ACCEL', new=MAX_LATERAL_ACCEL),  # TODO: don't need new if we set before
   #         patch.object(carcontroller, 'MAX_LATERAL_JERK', new=MAX_LATERAL_JERK)):
   #     # carcontroller.MAX_LATERAL_ACCEL = MAX_LATERAL_ACCEL
@@ -441,7 +435,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
   #         apply_angle_last = 0
   #         for _ in range(100):
   #           apply_angle = apply_tesla_steer_angle_limits(360, apply_angle_last, speed, 0, True,
-  #                                                        CarControllerParams.ANGLE_LIMITS, VM)
+  #                                                        CarControllerParams.ANGLE_LIMITS, self.VM)
   #           print('apply_angle', apply_angle, 'apply_angle_last', apply_angle_last)
   #           apply_angle_can = (apply_angle + 1638.35) / 0.1 + 1e-5 + 2  # safety does +1 for tolerance, +2 to violate
   #           apply_angle = uround(apply_angle_can + 1e-5) * 0.1 - 1638.35  # match rounding on CAN
@@ -457,7 +451,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
   #         # for _ in range(100):  # jerk is full torque/sec, so only need 50, but want extra tolerance to hit limit
   #         #   print('--- test ---')
   #         #   apply_angle = apply_tesla_steer_angle_limits(360, apply_angle_last, speed, 0, True,
-  #         #                                                CarControllerParams.ANGLE_LIMITS, VM)
+  #         #                                                CarControllerParams.ANGLE_LIMITS, self.VM)
   #         #   print('apply_angle', apply_angle, 'apply_angle_last', apply_angle_last)
   #         #   apply_angle_last = apply_angle
   #         #   apply_angle = uround(apply_angle * self.DEG_TO_CAN + 3) / self.DEG_TO_CAN
