@@ -312,7 +312,6 @@ class CAR(Platforms):
   HYUNDAI_SONATA_LF = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Sonata 2018-19", car_parts=CarParts.common([CarHarness.hyundai_e]))],
     CarSpecs(mass=1536, wheelbase=2.804, steerRatio=13.27 * 1.15),  # 15% higher at the center seems reasonable
-
     flags=HyundaiFlags.UNSUPPORTED_LONGITUDINAL | HyundaiFlags.TCU_GEARS,
   )
   HYUNDAI_STARIA_4TH_GEN = HyundaiCanFDPlatformConfig(
@@ -413,7 +412,10 @@ class CAR(Platforms):
     flags=HyundaiFlags.MANDO_RADAR | HyundaiFlags.EV,
   )
   KIA_NIRO_EV_2ND_GEN = HyundaiCanFDPlatformConfig(
-    [HyundaiCarDocs("Kia Niro EV 2023-24", "All", car_parts=CarParts.common([CarHarness.hyundai_a]))],
+    [
+      HyundaiCarDocs("Kia Niro EV (without HDA II) 2023-25", "All", car_parts=CarParts.common([CarHarness.hyundai_a])),
+      HyundaiCarDocs("Kia Niro EV (with HDA II) 2025", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_r])),
+    ],
     KIA_NIRO_EV.specs,
     flags=HyundaiFlags.EV,
   )
