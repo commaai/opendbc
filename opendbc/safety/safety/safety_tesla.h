@@ -1,6 +1,6 @@
 #pragma once
 
-#include "safety_declarations.h"
+#include "safety/safety_declarations.h"
 
 #define TESLA_MAX_SPEED_DELTA 2.0  // m/s
 

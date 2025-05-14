@@ -2,8 +2,12 @@
 #include <cassert>
 #include <cstring>
 #include <limits>
+#include <set>
 #include <stdexcept>
 #include <sstream>
+#include <string>
+#include <vector>
+
 #include "opendbc/can/common.h"
 
 int64_t get_raw_value(const std::vector<uint8_t> &msg, const Signal &sig) {
