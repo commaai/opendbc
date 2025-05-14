@@ -368,34 +368,6 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         # at low speeds, max angle is above max allowed angle, so we should tx in this case
         should_tx = abs(max_angle_raw) >= self.STEER_ANGLE_MAX
         self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(max_angle, True)))
-        return
-
-        # self.safety.set_desired_angle_last(0)
-        # self._tx(self._angle_cmd_msg(0, True))
-
-        # Stay within limits
-        # Up
-        max_angle_delta = uround_angle(get_max_angle_delta(speed, VM))
-        max_angle = uround_angle(get_max_angle(speed, VM))
-        print('max_angle_delta', max_angle_delta, 'max_angle', max_angle)
-
-        # max_angle_delta = uround_angle(max_angle_delta, 1)
-        max_angle = uround_angle(max_angle, 1)
-        print('new max_angle_delta', max_angle_delta, 'new max_angle', max_angle)
-
-        apply_angle_last = 0
-        # jerk is full torque/sec, reaches max in 50
-        for _ in range(100):
-          apply_angle = apply_angle_last + max_angle_delta * sign
-          apply_angle = np.clip(apply_angle, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
-          apply_angle = uround_angle(apply_angle)
-          # apply_angle = np.clip(apply_angle, -max_angle, max_angle)
-          apply_angle_last = apply_angle
-          print('test apply_angle', apply_angle)
-          ret = self._tx(self._angle_cmd_msg(apply_angle, True))
-          should_tx = abs(apply_angle) <= abs(max_angle)
-          self.assertEqual(ret, should_tx)
-          print('tx', ret)
 
   # def test_lateral_accel_limit(self):
   #   VM = VehicleModel(get_safety_CP())
