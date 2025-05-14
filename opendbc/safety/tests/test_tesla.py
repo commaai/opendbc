@@ -322,7 +322,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     VM = VehicleModel(get_safety_CP())
 
     # carcontroller.MAX_LATERAL_ACCEL = MAX_LATERAL_ACCEL
-    for speed in [20]:#np.linspace(0, 35, 100):
+    for speed in np.linspace(0, 35, 100):
       # match DI_vehicleSpeed rounding on CAN
       speed = round_speed(uround(speed / 0.08 * 3.6) * 0.08 / 3.6)
       # if speed > 4.6:
@@ -348,8 +348,9 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
       print('new max_angle_delta', max_angle_delta, 'new max_angle', max_angle)
 
       apply_angle_last = 0
-      for _ in range(1000):
-        apply_angle = apply_angle_last + 0.05  # max_angle_delta
+      # jerk is full torque/sec, reaches max in 50
+      for _ in range(100):
+        apply_angle = apply_angle_last + max_angle_delta
         apply_angle = np.clip(apply_angle, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
         apply_angle = uround_angle(apply_angle)
         # apply_angle = np.clip(apply_angle, -max_angle, max_angle)
