@@ -328,15 +328,19 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
       #   continue
       print('\n--- test ---')
       print('speed', speed)
-      for sign in (1,):
+      for sign in (-1, 1):
         self.safety.set_controls_allowed(True)
         # self._rx(self._angle_meas_msg(0, 0))  # TODO don't need?
         self._reset_speed_measurement(speed + 1)  # safety fudges the speed
         # TODO: would like to send 0, but it's interpreted as -1 on CAN (as specified by DBC)
         #  we can account for this properly
 
+        # angle signal can't represent 0, so it biases one unit down
+        angle_unit_offset = -1 if sign == -1 else 0
+
         # under limit -1
-        max_angle_raw = uround_angle(get_max_angle(speed, self.VM))
+        print('under limit -1')
+        max_angle_raw = uround_angle(get_max_angle(speed, self.VM), angle_unit_offset) * sign
         max_angle = np.clip(max_angle_raw, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
         print('test sending max_angle', max_angle)
         # self._tx(self._angle_cmd_msg(max_angle, True))  #TODO: set prev dewsired angle
@@ -346,7 +350,8 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle, True)))
 
         # at limit
-        max_angle_raw = uround_angle(get_max_angle(speed, self.VM), 1)
+        print('at limit')
+        max_angle_raw = uround_angle(get_max_angle(speed, self.VM), angle_unit_offset + 1) * sign
         max_angle = np.clip(max_angle_raw, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
         print('test sending max_angle', max_angle)
         # self._tx(self._angle_cmd_msg(max_angle, True))  #TODO: set prev dewsired angle
@@ -356,7 +361,8 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle, True)))
 
         # above limit +1
-        max_angle_raw = uround_angle(get_max_angle(speed, self.VM), 2)
+        print('above limit +1')
+        max_angle_raw = uround_angle(get_max_angle(speed, self.VM), angle_unit_offset + 2) * sign
         max_angle = np.clip(max_angle_raw, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
         print('test sending max_angle', max_angle)
         # self._tx(self._angle_cmd_msg(max_angle, True))  #TODO: set prev dewsired angle
