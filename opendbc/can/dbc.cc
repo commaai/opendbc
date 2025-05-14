@@ -2,9 +2,11 @@
 #include <filesystem>
 #include <fstream>
 #include <map>
+#include <memory>
 #include <regex>
 #include <set>
 #include <sstream>
+#include <string>
 #include <vector>
 #include <mutex>
 #include <iterator>
