@@ -27,6 +27,7 @@ BO_ 399 STEER_STATUS: 7 EPS
 
 BO_ 419 GEARBOX: 8 PCM
  SG_ GEAR : 7|8@0+ (1,0) [0|256] "" EON
+ SG_ REGEN_STRENGTH : 14|3@0+ (1,0) [0|6] "" EON
  SG_ GEAR_SHIFTER : 35|4@0+ (1,0) [0|15] "" EON
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
@@ -100,10 +101,12 @@ BO_ 1302 XXX_27: 8 XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
 
+CM_ SG_ 419 REGEN_STRENGTH "strength of regen, shows as arrows on dashboard";
 CM_ SG_ 419 GEAR "10 = reverse, 11 = transition";
 CM_ SG_ 806 REVERSE_LIGHT "Might be reverse gear selected and not the lights";
 
 VAL_ 399 STEER_STATUS 5 "tmp_fault" 4 "no_torque_alert_2" 2 "no_torque_alert_1" 0 "normal" ;
+VAL_ 419 REGEN_STRENGTH 0 "none" 1 "one arrow" 2 "two arrows" 3 "three arrows";
 VAL_ 419 GEAR_SHIFTER 10 "S" 4 "D" 3 "N" 2 "R" 1 "P" ;
 VAL_ 450 EPB_STATE 3 "engaged" 2 "disengaging" 1 "engaging" 0 "disengaged" ;
 VAL_ 545 ECON_ON_2 0 "off" 3 "on" ;

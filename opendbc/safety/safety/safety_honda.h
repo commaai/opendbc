@@ -166,7 +166,7 @@ static void honda_rx_hook(const CANPacket_t *to_push) {
 
   // Regen paddle check
   if (addr == 0x1A3) {
-  regen_braking = ((GET_BYTE(to_push, 6) >> 1) & 0x03U) != 0U;
+  regen_braking = ((GET_BYTE(to_push, 1) >> 4) & 0x07U) != 0U;
   }
 }
 
