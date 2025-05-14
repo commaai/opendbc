@@ -22,6 +22,7 @@ class Column(Enum):
   AUTO_RESUME = "Resume from stop"
   HARDWARE = "Hardware Needed"
   VIDEO = "Video"
+  SETUP_VIDEO = "Setup Video"
 
 
 class ExtraCarsColumn(Enum):
@@ -334,7 +335,8 @@ class CarDocs:
       Column.STEERING_TORQUE: Star.EMPTY,
       Column.AUTO_RESUME: Star.FULL if self.auto_resume else Star.EMPTY,
       Column.HARDWARE: hardware_col,
-      Column.VIDEO: self.video if self.video is not None else "",  # replaced with an image and link from template in get_column
+      Column.VIDEO: self.video or "",  # replaced with an image and link from template in get_column
+      Column.SETUP_VIDEO: self.setup_video or "",  # replaced with an image and link from template in get_column
     }
 
     if self.support_link is not None:
