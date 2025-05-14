@@ -14,6 +14,9 @@ scons -j8
 #pre-commit run --all-files
 ruff check .
 
+# too many false positives atm :(
+#ty check .
+
 # *** test ***
 pytest -n8 --ignore opendbc/safety
 
