@@ -30,6 +30,7 @@ static float tesla_curvature_factor(const float speed, const AngleSteeringParams
 
 static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits,
                                          const AngleSteeringParams params) {
+  printf("--- safety ---\n");
 
   static const float RAD_TO_DEG = 57.29577951308232;
 
@@ -44,6 +45,8 @@ static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_e
   bool violation = false;
   const float curvature_factor = tesla_curvature_factor(fudged_speed, params);
 //  printf("speed: %f, curvature_factor: %f\n", fudged_speed, curvature_factor);
+
+//  printf("safety desired_angle: %d, desired_angle_last: %d\n", desired_angle, desired_angle_last);
 
   if (controls_allowed && steer_control_enabled) {
     // *** ISO lateral jerk limit ***
@@ -60,14 +63,13 @@ static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_e
     const int highest_desired_angle = desired_angle_last + max_angle_delta_can;
     const int lowest_desired_angle = desired_angle_last - max_angle_delta_can;
 
-//    printf("speed: %f, desired_angle_last: %d, desired_angle: %d\n", speed, desired_angle_last, desired_angle);
-//    printf("max_angle_delta: %f, highest_desired_angle: %d, lowest_desired_angle: %d\n", max_angle_delta,
-//           highest_desired_angle, lowest_desired_angle);
-//    printf("\n");
+    printf("speed: %f, max_angle_delta_can: %d, desired_angle_last: %d, desired_angle: %d\n", speed, max_angle_delta_can, desired_angle_last, desired_angle);
+    printf("max_angle_delta: %f, highest_desired_angle: %d, lowest_desired_angle: %d\n", max_angle_delta,
+           highest_desired_angle, lowest_desired_angle);
 
     violation |= max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
     if (violation) {
-//      printf("violation: %d\n", violation);
+      printf("violation: %d\n", violation);
     }
 
     // *** ISO lateral accel limit ***
@@ -79,10 +81,9 @@ static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_e
     const int max_angle_can = (max_angle * limits.angle_deg_to_can) + 1.;
 
     violation |= max_limit_check(desired_angle, max_angle_can, -max_angle_can);
-//    printf("max_curvature: %.10f, max_angle: %.10f, max_angle_can: %d\n", max_curvature, max_angle,
-//           max_angle_can);
+    printf("max_curvature: %.10f, max_angle: %.10f, max_angle_can: %d\n", max_curvature, max_angle,
+           max_angle_can);
   }
-  desired_angle_last = desired_angle;
 
   // Angle should either be 0 or same as current angle while not steering
   if (!steer_control_enabled) {
@@ -95,6 +96,13 @@ static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_e
   // No angle control allowed when controls are not allowed
   violation |= !controls_allowed && steer_control_enabled;
 
+  if (violation) {
+    desired_angle_last = angle_meas.values[0];
+  } else {
+    desired_angle_last = desired_angle;
+  }
+
+  printf("\n");
   return violation;
 }
 
