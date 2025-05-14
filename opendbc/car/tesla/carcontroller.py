@@ -9,10 +9,10 @@ from opendbc.car.vehicle_model import VehicleModel
 
 MAX_ANGLE_RATE = 10  # deg/20ms frame, EPS faults at 12 deg/20ms frame at a standstill
 
-# Add tolerance of average banked road since safety doesn't have the roll
-AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation. heavy banks can be up to 0.12 which reduce lat accel even further
+# Add extra tolerance for average banked road since safety doesn't have the roll
+AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation. higher realized roll lowers lateral acceleration
 MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~3.6 m/s^2
-MAX_LATERAL_JERK = 3.0 + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # m/s^3, lower than ISO limit of 5 m/s^3
+MAX_LATERAL_JERK = 3.0 + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~3.6 m/s^3
 
 
 def apply_tesla_steer_angle_limits(apply_angle: float, apply_angle_last: float, v_ego_raw: float, steering_angle: float,
