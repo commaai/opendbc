@@ -142,8 +142,8 @@ class CAR(Platforms):
   SUBARU_IMPREZA = SubaruPlatformConfig(
     [
       SubaruCarDocs("Subaru Impreza 2017-19"),
-      SubaruCarDocs("Subaru Crosstrek 2018-19", video_link="https://youtu.be/Agww7oE1k-s?t=26"),
-      SubaruCarDocs("Subaru XV 2018-19", video_link="https://youtu.be/Agww7oE1k-s?t=26"),
+      SubaruCarDocs("Subaru Crosstrek 2018-19", video="https://youtu.be/Agww7oE1k-s?t=26"),
+      SubaruCarDocs("Subaru XV 2018-19", video="https://youtu.be/Agww7oE1k-s?t=26"),
     ],
     CarSpecs(mass=1568, wheelbase=2.67, steerRatio=15),
   )

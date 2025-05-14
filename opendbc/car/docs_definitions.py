@@ -254,8 +254,8 @@ class CarDocs:
   # of market. can be a package, trim, or list of features
   requirements: str | None = None
 
-  video_link: str | None = None
-  setup_video_link: str | None = None
+  video: str | None = None
+  setup_video: str | None = None
   footnotes: list[Enum] = field(default_factory=list)
   min_steer_speed: float | None = None
   min_enable_speed: float | None = None
@@ -334,7 +334,7 @@ class CarDocs:
       Column.STEERING_TORQUE: Star.EMPTY,
       Column.AUTO_RESUME: Star.FULL if self.auto_resume else Star.EMPTY,
       Column.HARDWARE: hardware_col,
-      Column.VIDEO: self.video_link if self.video_link is not None else "",  # replaced with an image and link from template in get_column
+      Column.VIDEO: self.video if self.video is not None else "",  # replaced with an image and link from template in get_column
     }
 
     if self.support_link is not None:
