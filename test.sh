@@ -11,8 +11,7 @@ scons -j8
 
 # *** lint ***
 # TODO: pre-commit is slow; replace it with openpilot's "op lint"
-#pre-commit run --all-files
-ruff check .
+pre-commit run --all-files
 
 # too many false positives atm :(
 #ty check .
