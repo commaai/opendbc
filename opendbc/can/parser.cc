@@ -4,7 +4,6 @@
 #include <limits>
 #include <stdexcept>
 #include <sstream>
-
 #include "opendbc/can/common.h"
 
 int64_t get_raw_value(const std::vector<uint8_t> &msg, const Signal &sig) {
