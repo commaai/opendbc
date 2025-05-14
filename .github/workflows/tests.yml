@@ -20,6 +20,10 @@ jobs:
     steps:
     - uses: commaai/timeout@v1
     - uses: actions/checkout@v4
+    - uses: actions/cache@v4
+      with:
+        path: ~/.cache/pre-commit/
+        key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}-${{ matrix.os }}
     - run: ./test.sh
 
   safety_tests:
