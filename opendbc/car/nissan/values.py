@@ -1,23 +1,25 @@
 from dataclasses import dataclass, field
-from enum import IntFlag
+from enum import Enum, IntFlag
 
-from opendbc.car import AngleRateLimit, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car import AngleSteeringLimits, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.structs import CarParams
-from opendbc.car.docs_definitions import CarDocs, CarHarness, CarParts
+from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
 
 
 class CarControllerParams:
-  ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[5., .8, .15])
-  ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[5., 3.5, 0.4])
+  ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
+    # When output steering Angle not within range -1311 and 1310,
+    #   CANPacker packs wrong angle output to be decoded by panda
+    600,  # deg, reasonable limit
+    ([0., 5., 15.], [5., .8, .15]),
+    ([0., 5., 15.], [5., 3.5, 0.4]),
+  )
+
   LKAS_MAX_TORQUE = 1               # A value of 1 is easy to overpower
   STEER_THRESHOLD = 1.0
-
-  # When output steering Angle not within range -1311 and 1310,
-  #   CANPacker packs wrong angle output to be decoded by panda
-  MAX_STEER_ANGLE = 1310
 
   def __init__(self, CP):
     pass
@@ -27,10 +29,17 @@ class NissanSafetyFlags(IntFlag):
   ALT_EPS_BUS = 1
 
 
+class Footnote(Enum):
+  SETUP = CarFootnote(
+    "See more setup details for <a href=\"https://github.com/commaai/openpilot/wiki/nissan\" target=\"_blank\">Nissan</a>.",
+    Column.MAKE, setup_note=True)
+
+
 @dataclass
 class NissanCarDocs(CarDocs):
   package: str = "ProPILOT Assist"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.nissan_a]))
+  footnotes: list[Enum] = field(default_factory=lambda: [Footnote.SETUP])
 
 
 @dataclass(frozen=True)

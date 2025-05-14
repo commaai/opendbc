@@ -53,11 +53,13 @@ FW_VERSIONS = {
       b'\xf1\x00AE  MDPS C 1.00 1.05 56310/G2501 4AEHC105',
       b'\xf1\x00AE  MDPS C 1.00 1.07 56310/G2301 4AEHC107',
       b'\xf1\x00AE  MDPS C 1.00 1.07 56310/G2501 4AEHC107',
+      b'\xf1\x00AE  MDPS C 1.00 1.07 56310/G2551 4AEHC107',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00AEH MFC  AT EUR LHD 1.00 1.00 95740-G2400 180222',
       b'\xf1\x00AEH MFC  AT EUR LHD 1.00 1.00 95740-G7200 160418',
       b'\xf1\x00AEH MFC  AT USA LHD 1.00 1.00 95740-G2400 180222',
+      b'\xf1\x00AEH MFC  AT EUR RHD 1.00 1.00 95740-G2400 180222',
     ],
   },
   CAR.HYUNDAI_IONIQ_PHEV_2019: {
@@ -141,6 +143,7 @@ FW_VERSIONS = {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00AEhe SCC F-CUP      1.00 1.00 99110-G2600         ',
       b'\xf1\x00AEhe SCC FHCUP      1.00 1.00 99110-G2600         ',
+      b'\xf1\x00AEhe SCC FHCUP      1.00 1.02 99110-G2100         ',
     ],
     (Ecu.eps, 0x7d4, None): [
       b'\xf1\x00AE  MDPS C 1.00 1.01 56310/G2510 4APHC101',
@@ -148,6 +151,7 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00AEH MFC  AT USA LHD 1.00 1.00 95740-G2700 201027',
+      b'\xf1\x00AEH MFC  AT USA LHD 1.00 1.01 95740-G2600 190819',
     ],
   },
   CAR.HYUNDAI_SONATA: {
@@ -275,12 +279,14 @@ FW_VERSIONS = {
       b'\xf1\x00TM ESC \x04 102!\x04\x05 58910-S2GA0',
       b'\xf1\x00TM ESC \x04 103"\x07\x08 58910-S2GA0',
       b'\xf1\x00TM ESC \x1e 102 \x08\x08 58910-S1DA0',
+      b'\xf1\x00TM ESC \x1b 102 \x08\x08 58910-S1DA0',
       b'\xf1\x00TM ESC   103!\x030 58910-S1MA0',
     ],
     (Ecu.eps, 0x7d4, None): [
       b'\xf1\x00TM  MDPS C 1.00 1.01 56310-S1AB0 4TSDC101',
       b'\xf1\x00TM  MDPS C 1.00 1.01 56310-S1EB0 4TSDC101',
       b'\xf1\x00TM  MDPS C 1.00 1.02 56370-S2AA0 0B19',
+      b'\xf1\x00TM  MDPS R 1.00 1.05 57700-S1500 4TSDP105',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00TM  MFC  AT EUR LHD 1.00 1.03 99211-S1500 210224',
@@ -726,11 +732,14 @@ FW_VERSIONS = {
   },
   CAR.KIA_NIRO_EV_2ND_GEN: {
     (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00SG__ RDR -----      1.00 1.00 99110-AT200         ',
       b'\xf1\x00SG2_ RDR -----      1.00 1.01 99110-AT000         ',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00SG2EMFC  AT EUR LHD 1.00 1.00 99211-AT200 240315',
       b'\xf1\x00SG2EMFC  AT EUR LHD 1.01 1.09 99211-AT000 220801',
       b'\xf1\x00SG2EMFC  AT USA LHD 1.01 1.09 99211-AT000 220801',
+      b'\xf1\x00SG2EMFC  AT USA LHD 1.00 1.00 99211-AT200 240401',
     ],
   },
   CAR.KIA_NIRO_PHEV: {
@@ -1009,6 +1018,7 @@ FW_VERSIONS = {
       b'\xf1\x00NE1 MFC  AT EUR LHD 1.00 1.06 99211-GI000 210813',
       b'\xf1\x00NE1 MFC  AT EUR LHD 1.00 1.06 99211-GI010 230110',
       b'\xf1\x00NE1 MFC  AT EUR RHD 1.00 1.01 99211-GI010 211007',
+      b'\xf1\x00NE1 MFC  AT EUR RHD 1.00 1.01 99211-GI100 240110',
       b'\xf1\x00NE1 MFC  AT EUR RHD 1.00 1.02 99211-GI010 211206',
       b'\xf1\x00NE1 MFC  AT IND RHD 1.00 1.07 99211-GI010 230620',
       b'\xf1\x00NE1 MFC  AT KOR LHD 1.00 1.00 99211-GI020 230719',
@@ -1021,7 +1031,6 @@ FW_VERSIONS = {
       b'\xf1\x00NE1 MFC  AT USA LHD 1.00 1.03 99211-GI010 220401',
       b'\xf1\x00NE1 MFC  AT USA LHD 1.00 1.05 99211-GI010 220614',
       b'\xf1\x00NE1 MFC  AT USA LHD 1.00 1.06 99211-GI010 230110',
-      b'\xf1\x00NE1 MFC  AT EUR RHD 1.00 1.01 99211-GI100 240110',
     ],
   },
   CAR.HYUNDAI_IONIQ_6: {
@@ -1041,6 +1050,7 @@ FW_VERSIONS = {
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00NX4 FR_CMR AT CAN LHD 1.00 1.00 99211-N9260 14Y',
       b'\xf1\x00NX4 FR_CMR AT CAN LHD 1.00 1.01 99211-N9100 14A',
+      b'\xf1\x00NX4 FR_CMR AT CAN LHD 1.00 1.00 99211-N9220 14K',
       b'\xf1\x00NX4 FR_CMR AT EUR LHD 1.00 1.00 99211-N9220 14K',
       b'\xf1\x00NX4 FR_CMR AT EUR LHD 1.00 2.02 99211-N9000 14E',
       b'\xf1\x00NX4 FR_CMR AT USA LHD 1.00 1.00 99211-N9210 14G',
@@ -1089,16 +1099,16 @@ FW_VERSIONS = {
   },
   CAR.GENESIS_GV70_1ST_GEN: {
     (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00JK1 MFC  AT CAN LHD 1.00 1.02 99211-IY000 230627',
       b'\xf1\x00JK1 MFC  AT USA LHD 1.00 1.01 99211-AR200 220125',
       b'\xf1\x00JK1 MFC  AT USA LHD 1.00 1.01 99211-AR300 220125',
       b'\xf1\x00JK1 MFC  AT USA LHD 1.00 1.04 99211-AR000 210204',
-      b'\xf1\x00JK1 MFC  AT CAN LHD 1.00 1.02 99211-IY000 230627',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00JK1_ SCC FHCUP      1.00 1.00 99110-AR200         ',
       b'\xf1\x00JK1_ SCC FHCUP      1.00 1.00 99110-AR300         ',
-      b'\xf1\x00JK1_ SCC FHCUP      1.00 1.02 99110-AR000         ',
       b'\xf1\x00JK1_ SCC FHCUP      1.00 1.00 99110-IY000         ',
+      b'\xf1\x00JK1_ SCC FHCUP      1.00 1.02 99110-AR000         ',
     ],
   },
   CAR.GENESIS_GV70_ELECTRIFIED_1ST_GEN: {
@@ -1203,32 +1213,32 @@ FW_VERSIONS = {
     ],
   },
   CAR.HYUNDAI_NEXO_1ST_GEN: {
-    (Ecu.abs, 0x7D1, None): [
+    (Ecu.abs, 0x7d1, None): [
       b'\xf1\x00FE IEB \x01 312 \x11\x13 58520-M5000',
     ],
-    (Ecu.fwdCamera, 0x7C4, None): [
+    (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00FE  MFC  AT KOR LHD 1.00 1.00 99211-M5100 201218',
     ],
-    (Ecu.eps, 0x7D4, None): [
+    (Ecu.eps, 0x7d4, None): [
       b'\xf1\x00FE  MDPS C 1.00 1.05 56340-M5000 9903',
     ],
-    (Ecu.fwdRadar, 0x7D0, None): [
+    (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00FE__ SCC FHCUP      1.00 1.05 99110-M5000         ',
     ],
   },
   CAR.HYUNDAI_KONA_2022: {
-    (Ecu.fwdCamera, 0x7C4, None): [
+    (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00OSP LKA  AT USA LHD 1.00 1.04 99211-J9200 904',
     ],
-    (Ecu.eps, 0x7D4, None): [
+    (Ecu.eps, 0x7d4, None): [
       b'\xf1\x00OSP MDPS C 1.00 1.04 56310/J9291 4OPCC104',
     ],
-    (Ecu.fwdRadar, 0x7D0, None): [
+    (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00YB__ FCA -----      1.00 1.01 99110-J9000      \x00\x00\x00',
     ],
     (Ecu.transmission, 0x7e1, None): [
-      b'\xf1\x00T01G00BL  T01I00A1  DOS2T16X4XI00NS0\x99L\xeeq',
       b'\xf1\x00T01G00BL  T01I00A1  DOS2T16X2XI00NS0\x8c`\xff\xe7',
+      b'\xf1\x00T01G00BL  T01I00A1  DOS2T16X4XI00NS0\x99L\xeeq',
     ],
   },
 }

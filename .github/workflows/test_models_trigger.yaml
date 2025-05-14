@@ -37,6 +37,7 @@ jobs:
         submodules: 'true'
 
     - name: bump opendbc
+      if: steps.check_comment.outputs.result == 'true'
       run: |
         cd opendbc_repo
         git fetch origin pull/${{ github.event.issue.number }}/head

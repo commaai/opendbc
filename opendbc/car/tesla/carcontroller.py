@@ -5,9 +5,6 @@ from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.tesla.teslacan import TeslaCAN
 from opendbc.car.tesla.values import CarControllerParams
 
-# EPAS faults above this angle
-MAX_ANGLE = 360  # deg
-
 
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
@@ -20,39 +17,34 @@ class CarController(CarControllerBase):
     actuators = CC.actuators
     can_sends = []
 
-    # Disengage and allow for user override on high torque inputs
-    # TODO: move this to a generic disengageRequested carState field and set CC.cruiseControl.cancel based on it
-    hands_on_fault = CS.hands_on_level >= 3
-    cruise_cancel = CC.cruiseControl.cancel or hands_on_fault
-    lat_active = CC.latActive and not hands_on_fault
+    # Tesla EPS enforces disabling steering on heavy lateral override force.
+    # When enabling in a tight curve, we wait until user reduces steering force to start steering.
+    # Canceling is done on rising edge and is handled generically with CC.cruiseControl.cancel
+    lat_active = CC.latActive and CS.hands_on_level < 3
 
     if self.frame % 2 == 0:
-      if lat_active:
-        # Angular rate limit based on speed
-        apply_angle = apply_std_steer_angle_limits(float(np.clip(actuators.steeringAngleDeg, -MAX_ANGLE, MAX_ANGLE)),
-                                                   self.apply_angle_last, CS.out.vEgo, CarControllerParams)
-      else:
-        apply_angle = CS.out.steeringAngleDeg
+      # Angular rate limit based on speed
+      self.apply_angle_last = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgo,
+                                                           CS.out.steeringAngleDeg, lat_active, CarControllerParams.ANGLE_LIMITS)
 
-      self.apply_angle_last = apply_angle
-      can_sends.append(self.tesla_can.create_steering_control(apply_angle, lat_active, (self.frame // 2) % 16))
+      can_sends.append(self.tesla_can.create_steering_control(self.apply_angle_last, lat_active))
 
     if self.frame % 10 == 0:
-      can_sends.append(self.tesla_can.create_steering_allowed((self.frame // 10) % 16))
+      can_sends.append(self.tesla_can.create_steering_allowed())
 
     # Longitudinal control
     if self.CP.openpilotLongitudinalControl:
       if self.frame % 4 == 0:
-        state = 13 if cruise_cancel else 4  # 4=ACC_ON, 13=ACC_CANCEL_GENERIC_SILENT
+        state = 13 if CC.cruiseControl.cancel else 4  # 4=ACC_ON, 13=ACC_CANCEL_GENERIC_SILENT
         accel = float(np.clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
         cntr = (self.frame // 4) % 8
-        can_sends.append(self.tesla_can.create_longitudinal_command(state, accel, cntr, CC.longActive))
+        can_sends.append(self.tesla_can.create_longitudinal_command(state, accel, cntr, CS.out.vEgo, CC.longActive))
 
     else:
       # Increment counter so cancel is prioritized even without openpilot longitudinal
-      if cruise_cancel:
+      if CC.cruiseControl.cancel:
         cntr = (CS.das_control["DAS_controlCounter"] + 1) % 8
-        can_sends.append(self.tesla_can.create_longitudinal_command(13, 0, cntr, False))
+        can_sends.append(self.tesla_can.create_longitudinal_command(13, 0, cntr, CS.out.vEgo, False))
 
     # TODO: HUD control
     new_actuators = actuators.as_builder()

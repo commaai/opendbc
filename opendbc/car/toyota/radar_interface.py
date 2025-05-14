@@ -55,10 +55,8 @@ class RadarInterface(RadarInterfaceBase):
 
   def _update(self, updated_messages):
     ret = RadarData()
-    errors = []
     if not self.rcp.can_valid:
-      errors.append("canError")
-    ret.errors = errors
+      ret.errors.canError = True
 
     for ii in sorted(updated_messages):
       if ii in self.RADAR_A_MSGS:

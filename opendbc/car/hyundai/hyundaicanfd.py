@@ -1,3 +1,4 @@
+import copy
 import numpy as np
 from opendbc.car import CanBusBase
 from opendbc.car.hyundai.values import HyundaiFlags
@@ -34,29 +35,32 @@ class CanBus(CanBusBase):
     return self._cam
 
 
-def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_steer):
-
-  ret = []
-
-  values = {
+def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_torque):
+  common_values = {
     "LKA_MODE": 2,
     "LKA_ICON": 2 if enabled else 1,
-    "TORQUE_REQUEST": apply_steer,
+    "TORQUE_REQUEST": apply_torque,
     "LKA_ASSIST": 0,
     "STEER_REQ": 1 if lat_active else 0,
     "STEER_MODE": 0,
     "HAS_LANE_SAFETY": 0,  # hide LKAS settings
-    "NEW_SIGNAL_1": 0,
     "NEW_SIGNAL_2": 0,
   }
 
+  lkas_values = copy.copy(common_values)
+  lkas_values["LKA_AVAILABLE"] = 0
+
+  lfa_values = copy.copy(common_values)
+  lfa_values["NEW_SIGNAL_1"] = 0
+
+  ret = []
   if CP.flags & HyundaiFlags.CANFD_LKA_STEERING:
     lkas_msg = "LKAS_ALT" if CP.flags & HyundaiFlags.CANFD_LKA_STEERING_ALT else "LKAS"
     if CP.openpilotLongitudinalControl:
-      ret.append(packer.make_can_msg("LFA", CAN.ECAN, values))
-    ret.append(packer.make_can_msg(lkas_msg, CAN.ACAN, values))
+      ret.append(packer.make_can_msg("LFA", CAN.ECAN, lfa_values))
+    ret.append(packer.make_can_msg(lkas_msg, CAN.ACAN, lkas_values))
   else:
-    ret.append(packer.make_can_msg("LFA", CAN.ECAN, values))
+    ret.append(packer.make_can_msg("LFA", CAN.ECAN, lfa_values))
 
   return ret
 
@@ -151,7 +155,7 @@ def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_ov
   return packer.make_can_msg("SCC_CONTROL", CAN.ECAN, values)
 
 
-def create_spas_messages(packer, CAN, frame, left_blink, right_blink):
+def create_spas_messages(packer, CAN, left_blink, right_blink):
   ret = []
 
   values = {
@@ -171,15 +175,8 @@ def create_spas_messages(packer, CAN, frame, left_blink, right_blink):
   return ret
 
 
-def create_adrv_messages(packer, CAN, frame):
-  # messages needed to car happy after disabling
-  # the ADAS Driving ECU to do longitudinal control
-
+def create_fca_warning_light(packer, CAN, frame):
   ret = []
-
-  values = {
-  }
-  ret.append(packer.make_can_msg("ADRV_0x51", CAN.ACAN, values))
 
   if frame % 2 == 0:
     values = {
@@ -190,6 +187,20 @@ def create_adrv_messages(packer, CAN, frame):
       'SET_ME_9': 0x9,
     }
     ret.append(packer.make_can_msg("ADRV_0x160", CAN.ECAN, values))
+  return ret
+
+
+def create_adrv_messages(packer, CAN, frame):
+  # messages needed to car happy after disabling
+  # the ADAS Driving ECU to do longitudinal control
+
+  ret = []
+
+  values = {
+  }
+  ret.append(packer.make_can_msg("ADRV_0x51", CAN.ACAN, values))
+
+  ret.extend(create_fca_warning_light(packer, CAN, frame))
 
   if frame % 5 == 0:
     values = {

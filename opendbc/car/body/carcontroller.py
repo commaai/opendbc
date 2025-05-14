@@ -20,8 +20,8 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(dbc_names[Bus.main])
 
     # PIDs
-    self.turn_pid = PIDController(110, k_i=11.5, rate=1/DT_CTRL)
-    self.wheeled_speed_pid = PIDController(110, k_i=11.5, rate=1/DT_CTRL)
+    self.turn_pid = PIDController(110, k_i=11.5, rate=1 / DT_CTRL)
+    self.wheeled_speed_pid = PIDController(110, k_i=11.5, rate=1 / DT_CTRL)
 
     self.torque_r_filtered = 0.
     self.torque_l_filtered = 0.
@@ -43,7 +43,7 @@ class CarController(CarControllerBase):
       # Read these from the joystick
       # TODO: this isn't acceleration, okay?
       speed_desired = CC.actuators.accel / 5.
-      speed_diff_desired = -CC.actuators.steer / 2.
+      speed_diff_desired = -CC.actuators.torque / 2.
 
       speed_measured = SPEED_FROM_RPM * (CS.out.wheelSpeeds.fl + CS.out.wheelSpeeds.fr) / 2.
       speed_error = speed_desired - speed_measured
@@ -75,8 +75,8 @@ class CarController(CarControllerBase):
 
     new_actuators = CC.actuators.as_builder()
     new_actuators.accel = torque_l
-    new_actuators.steer = torque_r
-    new_actuators.steerOutputCan = torque_r
+    new_actuators.torque = torque_r
+    new_actuators.torqueOutputCan = torque_r
 
     self.frame += 1
     return new_actuators, can_sends

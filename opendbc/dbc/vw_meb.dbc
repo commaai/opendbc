@@ -651,16 +651,13 @@ BO_ 768 MEB_ACC_01: 48 XXX
  SG_ Zeitluecke_5 : 374|9@1+ (0.171,0) [0|100] "Unit_Meter" XXX
 
 BO_ 771 HCA_03: 24 XXX
- SG_ Standby : 13|1@1+ (1,0) [0|1] "" XXX
- SG_ Request : 14|1@1+ (1,0) [0|1] "" XXX
- SG_ Unknown_02 : 15|1@1+ (1,0) [0|1] "" XXX
- SG_ Power : 16|7@1+ (1,0) [0|125] "" XXX
- SG_ Power_Boost : 23|1@1+ (1,0) [0|1] "" XXX
+ SG_ RequestStatus : 12|4@1+ (1,0) [0|15] "" XXX
+ SG_ Power : 16|8@1+ (0.4,0) [0.0|100.0] "percent" XXX
  SG_ Curvature : 24|15@1+ (6.7e-06,0) [0|0.219] "Unit_rad/m" XXX
- SG_ VZ : 39|1@1+ (1,0) [0|1] "" XXX
+ SG_ Curvature_VZ : 39|1@1+ (1,0) [0|1] "" XXX
  SG_ Unknown_01 : 53|1@0+ (1,0) [0|1] "" XXX
  SG_ Vibration : 56|1@0+ (1,0) [0|1] "" XXX
- SG_ Active : 66|1@1+ (1,0) [0|1] "" XXX
+ SG_ HighSendRate : 66|1@1+ (1,0) [0|1] "" XXX
 
 BO_ 792 MEB_Camera_03: 8 XXX
 

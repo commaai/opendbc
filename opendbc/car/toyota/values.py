@@ -3,7 +3,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
-from opendbc.car import Bus, CarSpecs, PlatformConfig, Platforms, AngleRateLimit
+from opendbc.car import Bus, CarSpecs, PlatformConfig, Platforms, AngleSteeringLimits
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarDocs, Column, CarParts, CarHarness
@@ -20,13 +20,19 @@ class CarControllerParams:
   STEER_ERROR_MAX = 350     # max delta between torque cmd and torque motor
 
   # Lane Tracing Assist (LTA) control limits
-  # Assuming a steering ratio of 13.7:
-  # Limit to ~2.0 m/s^3 up (7.5 deg/s), ~3.5 m/s^3 down (13 deg/s) at 75 mph
-  # Worst case, the low speed limits will allow ~4.0 m/s^3 up (15 deg/s) and ~4.9 m/s^3 down (18 deg/s) at 75 mph,
-  # however the EPS has its own internal limits at all speeds which are less than that:
-  # Observed internal torque rate limit on TSS 2.5 Camry and RAV4 is ~1500 units/sec up and down when using LTA
-  ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[5, 25], angle_v=[0.3, 0.15])
-  ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[5, 25], angle_v=[0.36, 0.26])
+  ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
+    # EPS ignores commands above this angle and causes PCS to fault
+    94.9461,  # deg
+    # Assuming a steering ratio of 13.7:
+    # Limit to ~2.0 m/s^3 up (7.5 deg/s), ~3.5 m/s^3 down (13 deg/s) at 75 mph
+    # Worst case, the low speed limits will allow ~4.0 m/s^3 up (15 deg/s) and ~4.9 m/s^3 down (18 deg/s) at 75 mph,
+    # however the EPS has its own internal limits at all speeds which are less than that:
+    # Observed internal torque rate limit on TSS 2.5 Camry and RAV4 is ~1500 units/sec up and down when using LTA
+    ([5, 25], [0.3, 0.15]),
+    ([5, 25], [0.36, 0.26]),
+  )
+
+  MAX_LTA_DRIVER_TORQUE_ALLOWANCE = 150  # slightly above steering pressed allows some resistance when changing lanes
 
   def __init__(self, CP):
     if CP.flags & ToyotaFlags.RAISED_ACCEL_LIMIT:
@@ -265,7 +271,7 @@ class CAR(Platforms):
   )
   TOYOTA_RAV4_TSS2_2023 = ToyotaTSS2PlatformConfig(
     [
-      ToyotaCarDocs("Toyota RAV4 2023-24"),
+      ToyotaCarDocs("Toyota RAV4 2023-25"),
       ToyotaCarDocs("Toyota RAV4 Hybrid 2023-25", video_link="https://youtu.be/4eIsEq4L4Ng"),
     ],
     TOYOTA_RAV4_TSS2.specs,
@@ -274,6 +280,11 @@ class CAR(Platforms):
   TOYOTA_RAV4_PRIME = ToyotaSecOCPlatformConfig(
     [ToyotaCarDocs("Toyota RAV4 Prime 2021-23", min_enable_speed=MIN_ACC_SPEED)],
     CarSpecs(mass=4372. * CV.LB_TO_KG, wheelbase=2.68, steerRatio=16.88, tireStiffnessFactor=0.5533),
+  )
+  TOYOTA_YARIS = ToyotaSecOCPlatformConfig(
+    [ToyotaCarDocs("Toyota Yaris 2023 (Non-US only)", min_enable_speed=MIN_ACC_SPEED)],
+    CarSpecs(mass=1170, wheelbase=2.55, steerRatio=14.80, tireStiffnessFactor=0.5533),
+    flags=ToyotaFlags.RADAR_ACC,
   )
   TOYOTA_MIRAI = ToyotaTSS2PlatformConfig( # TSS 2.5
     [ToyotaCarDocs("Toyota Mirai 2021")],
@@ -345,6 +356,12 @@ class CAR(Platforms):
     LEXUS_IS.specs,
     dbc_dict('toyota_tnga_k_pt_generated', 'toyota_adas'),
     flags=ToyotaFlags.UNSUPPORTED_DSU,
+  )
+  LEXUS_RC_TSS2 = ToyotaTSS2PlatformConfig(
+    [
+      ToyotaCarDocs("Lexus RC 2023"),
+    ],
+    CarSpecs(mass=3986. * CV.LB_TO_KG, wheelbase=2.73, steerRatio=13.9, tireStiffnessFactor=0.444),
   )
   LEXUS_RX = PlatformConfig(
     [

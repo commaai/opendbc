@@ -132,18 +132,17 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
     self._rx(self._button_msg(Buttons.CANCEL))
     self.assertFalse(self.safety.get_controls_allowed())
 
-  def test_tester_present_allowed(self):
+  def test_tester_present_allowed(self, ecu_disable: bool = True):
     """
       Ensure tester present diagnostic message is allowed to keep ECU knocked out
       for longitudinal control.
     """
 
     addr, bus = self.DISABLED_ECU_UDS_MSG
-    tester_present = libsafety_py.make_CANPacket(addr, bus, b"\x02\x3E\x80\x00\x00\x00\x00\x00")
-    self.assertTrue(self._tx(tester_present))
-
-    not_tester_present = libsafety_py.make_CANPacket(addr, bus, b"\x03\xAA\xAA\x00\x00\x00\x00\x00")
-    self.assertFalse(self._tx(not_tester_present))
+    for should_tx, msg in ((True, b"\x02\x3E\x80\x00\x00\x00\x00\x00"),
+                           (False, b"\x03\xAA\xAA\x00\x00\x00\x00\x00")):
+      tester_present = libsafety_py.make_CANPacket(addr, bus, msg)
+      self.assertEqual(should_tx and ecu_disable, self._tx(tester_present))
 
   def test_disabled_ecu_alive(self):
     """
@@ -154,4 +153,3 @@ class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
     self.assertFalse(self.safety.get_relay_malfunction())
     self._rx(make_msg(bus, addr, 8))
     self.assertTrue(self.safety.get_relay_malfunction())
-

@@ -59,6 +59,10 @@ bool get_regen_braking_prev(void){
   return regen_braking_prev;
 }
 
+bool get_steering_disengage_prev(void){
+  return steering_disengage_prev;
+}
+
 bool get_cruise_engaged_prev(void){
   return cruise_engaged_prev;
 }
@@ -75,16 +79,12 @@ bool get_acc_main_on(void){
   return acc_main_on;
 }
 
-int get_vehicle_speed_min(void){
-  return vehicle_speed.min;
+float get_vehicle_speed_min(void){
+  return vehicle_speed.min / VEHICLE_SPEED_FACTOR;
 }
 
-int get_vehicle_speed_max(void){
-  return vehicle_speed.max;
-}
-
-int get_vehicle_speed_last(void){
-  return vehicle_speed.values[0];
+float get_vehicle_speed_max(void){
+  return vehicle_speed.max / VEHICLE_SPEED_FACTOR;
 }
 
 int get_current_safety_mode(void){
@@ -184,4 +184,7 @@ void init_tests(void){
   ts_steer_req_mismatch_last = 0;
   valid_steer_req_count = 0;
   invalid_steer_req_count = 0;
+
+  // assumes autopark on safety mode init to avoid a fault. get rid of that for testing
+  tesla_autopark = false;
 }
