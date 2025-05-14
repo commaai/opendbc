@@ -89,7 +89,6 @@ BO_ 927 RADAR_HUD: 8 ADAS
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" BDY
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" BDY
 
-CM_ SG_ 419 REGEN_STRENGTH "strength of regen, shows as arrows on dashboard";
 CM_ SG_ 419 GEAR "10 = reverse, 11 = transition";
 CM_ SG_ 806 REVERSE_LIGHT "Might be reverse gear selected and not the lights";
 
