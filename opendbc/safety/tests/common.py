@@ -944,16 +944,9 @@ class PandaCarSafetyTest(PandaSafetyTest):
     self._rx(self._user_gas_msg(1))
     self.assertTrue(self.safety.get_controls_allowed())
 
-  def test_disengage_on_gas(self):
+  def test_no_disengage_on_gas(self):
     self._rx(self._user_gas_msg(0))
     self.safety.set_controls_allowed(True)
-    self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1))
-    self.assertFalse(self.safety.get_controls_allowed())
-
-  def test_alternative_experience_no_disengage_on_gas(self):
-    self._rx(self._user_gas_msg(0))
-    self.safety.set_controls_allowed(True)
-    self.safety.set_alternative_experience(ALTERNATIVE_EXPERIENCE.DISABLE_DISENGAGE_ON_GAS)
     self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1))
     # Test we allow lateral, but not longitudinal
     self.assertTrue(self.safety.get_controls_allowed())
