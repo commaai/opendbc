@@ -41,6 +41,7 @@ def apply_tesla_steer_angle_limits(apply_angle: float, apply_angle_last: float, 
 
 def get_safety_CP():
   # We use the TESLA_MODEL_Y platform for lateral limiting to match safety
+  # A Model 3 at 40 m/s using the Model Y limits sees a <0.3% difference in max angle (from curvature factor)
   from opendbc.car.tesla.interface import CarInterface
   return CarInterface.get_non_essential_params("TESLA_MODEL_Y")
 
