@@ -6,7 +6,7 @@ import math
 
 from opendbc.car.tesla.values import CarControllerParams, TeslaSafetyFlags
 from opendbc.car.tesla import carcontroller
-from opendbc.car.tesla.carcontroller import MAX_LATERAL_ACCEL, MAX_LATERAL_JERK, apply_tesla_steer_angle_limits, get_safety_CP
+from opendbc.car.tesla.carcontroller import MAX_LATERAL_ACCEL, MAX_LATERAL_JERK, apply_tesla_steer_angle_limits, get_max_angle_delta, get_max_angle, get_safety_CP
 from opendbc.car.structs import CarParams
 from opendbc.car.vehicle_model import VehicleModel
 from opendbc.can.can_define import CANDefine
@@ -276,37 +276,54 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
       # carcontroller.MAX_LATERAL_ACCEL = MAX_LATERAL_ACCEL
       print(MAX_LATERAL_ACCEL, carcontroller.MAX_LATERAL_ACCEL)
       for max_lateral_jerk in (
-          MAX_LATERAL_JERK - 0.1,
+          # MAX_LATERAL_JERK - 0.1,
           MAX_LATERAL_JERK,
-          MAX_LATERAL_JERK + 0.1,
+          # MAX_LATERAL_JERK + 0.2,
       ):
         carcontroller.MAX_LATERAL_JERK = max_lateral_jerk
-        for speed in [5]:  # np.linspace(0, 35, 100):
+        for speed in [35]: #np.linspace(5, 35, 100):
           # match signal rounding on CAN
           speed = uround(speed / 0.08 * 3.6) * 0.08 / 3.6
           # if speed > 4.6:
           #   continue
-          print()
           print('speed', speed)
           self.safety.set_controls_allowed(True)
           self._rx(self._angle_meas_msg(0, 0))
           self._reset_speed_measurement(speed + 1)
           self.safety.set_desired_angle_last(0)
-          self.safety.set_controls_allowed(True)
 
-          self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
           apply_angle_last = 0
-          for _ in range(100):  # jerk is full torque/sec, so only need 50, but want extra tolerance to hit limit
+          for _ in range(100):
             apply_angle = apply_tesla_steer_angle_limits(360, apply_angle_last, speed, 0, True,
                                                          CarControllerParams.ANGLE_LIMITS, VM)
             print('apply_angle', apply_angle, 'apply_angle_last', apply_angle_last)
+            apply_angle_can = (apply_angle + 1638.35) / 0.1 + 1e-5 + 2  # safety does +1 for tolerance, +2 to violate
+            apply_angle = uround(apply_angle_can + 1e-5) * 0.1 - 1638.35  # match rounding on CAN
+
             apply_angle_last = apply_angle
+            print('apply_angle new', apply_angle)
             ret = self._tx(self._angle_cmd_msg(apply_angle, True))
-            should_tx = max_lateral_jerk <= MAX_LATERAL_JERK
-            print('should_tx', should_tx, max_lateral_jerk)
-            if not ret:
-              print('VIOLATION!')
-            self.assertEqual(ret, should_tx)
+            self.assertFalse(ret)
+            print('tx', ret)
+
+          # # self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+          # apply_angle_last = 0
+          # for _ in range(100):  # jerk is full torque/sec, so only need 50, but want extra tolerance to hit limit
+          #   print('--- test ---')
+          #   apply_angle = apply_tesla_steer_angle_limits(360, apply_angle_last, speed, 0, True,
+          #                                                CarControllerParams.ANGLE_LIMITS, VM)
+          #   print('apply_angle', apply_angle, 'apply_angle_last', apply_angle_last)
+          #   apply_angle_last = apply_angle
+          #   apply_angle = uround(apply_angle * self.DEG_TO_CAN + 3) / self.DEG_TO_CAN
+          #   print('new apply_angle', apply_angle)
+          #   ret = self._tx(self._angle_cmd_msg(apply_angle, True))
+          #   self._set_prev_desired_angle(apply_angle_last)  # reset desired angle to real angle
+          #   should_tx = False  # max_lateral_jerk <= MAX_LATERAL_JERK
+          #   print('should_tx', should_tx, max_lateral_jerk)
+          #   if not ret:
+          #     print('VIOLATION!')
+          #   self.assertEqual(ret, should_tx)
+          #   print()
     print('restored', MAX_LATERAL_JERK, carcontroller.MAX_LATERAL_ACCEL)
 
 
