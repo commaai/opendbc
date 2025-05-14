@@ -23,7 +23,7 @@ def sign_of(a):
 
 def uround(x):
   # unsigned non-banker's rounding
-  return math.floor(x + 0.5)
+  return math.floor(x + 0.5) if x >= 0 else math.ceil(x - 0.5)
 
 
 def round_speed(v):
