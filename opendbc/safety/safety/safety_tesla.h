@@ -23,7 +23,6 @@ static bool tesla_stock_lkas_prev = false;
 static bool tesla_autopark = false;
 static bool tesla_autopark_prev = false;
 
-// TODO: make these two functions generic
 static float tesla_curvature_factor(const float speed, const AngleSteeringParams params) {
   return 1. / (1. - (params.slip_factor * (speed * speed))) / params.wheelbase;
 }
