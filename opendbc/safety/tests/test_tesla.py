@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
 import unittest
-from unittest.mock import patch
 import numpy as np
-import math
 
-from opendbc.car.tesla.values import CarControllerParams, TeslaSafetyFlags
-from opendbc.car.tesla import carcontroller
-from opendbc.car.tesla.carcontroller import MAX_LATERAL_ACCEL, MAX_LATERAL_JERK, apply_tesla_steer_angle_limits, get_max_angle_delta, get_max_angle, get_safety_CP
+from opendbc.car.tesla.values import TeslaSafetyFlags
+from opendbc.car.tesla.carcontroller import get_max_angle_delta, get_max_angle, get_safety_CP
 from opendbc.car.structs import CarParams
 from opendbc.car.vehicle_model import VehicleModel
 from opendbc.can.can_define import CANDefine
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerPanda, MAX_WRONG_COUNTERS, sign_of, uround, round_speed
+from opendbc.safety.tests.common import CANPackerPanda, MAX_WRONG_COUNTERS, uround, round_speed
 
 MSG_DAS_steeringControl = 0x488
 MSG_APS_eacMonitor = 0x27d
@@ -267,57 +264,8 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     self.assertFalse(self._tx(no_lkas_msg))
 
   def test_angle_cmd_when_enabled(self):
-    # Test by custom test_lateral_limit_up with proper lateral acceleration and jerk
+    # We properly test lateral acceleration and jerk below
     pass
-
-  # def test_angle_cmd_when_enabled(self):
-  #   # when controls are allowed, angle cmd rate limit is enforced
-  #   speeds = [0., 1., 5., 10., 15., 50.]
-  #   angles = np.concatenate((np.arange(-self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX, 5), [0]))
-  #   for a in angles:
-  #     for s in speeds:
-  #       max_delta_up = get_max_angle_delta(s, self.VM) #np.interp(s, self.ANGLE_RATE_BP, self.ANGLE_RATE_UP)
-  #       max_delta_down = max_delta_up  # np.interp(s, self.ANGLE_RATE_BP, self.ANGLE_RATE_DOWN)
-  #
-  #       # first test against false positives
-  #       self._reset_angle_measurement(a)
-  #       self._reset_speed_measurement(s)
-  #
-  #       self._set_prev_desired_angle(a)
-  #       self.safety.set_controls_allowed(1)
-  #
-  #       # Stay within limits
-  #       # Up
-  #       print(a, sign_of(a), max_delta_up)
-  #       self.assertTrue(self._tx(self._angle_cmd_msg(a + sign_of(a) * max_delta_up, True)))
-  #       self.assertTrue(self.safety.get_controls_allowed())
-  #
-  #       # Don't change
-  #       self.assertTrue(self._tx(self._angle_cmd_msg(a, True)))
-  #       self.assertTrue(self.safety.get_controls_allowed())
-  #
-  #       # # Down
-  #       # self.assertTrue(self._tx(self._angle_cmd_msg(a - sign_of(a) * max_delta_down, True)))
-  #       # self.assertTrue(self.safety.get_controls_allowed())
-  #       #
-  #       # # Inject too high rates
-  #       # # Up
-  #       # self.assertFalse(self._tx(self._angle_cmd_msg(a + sign_of(a) * (max_delta_up + 1.1), True)))
-  #       #
-  #       # # Don't change
-  #       # self.safety.set_controls_allowed(1)
-  #       # self._set_prev_desired_angle(a)
-  #       # self.assertTrue(self.safety.get_controls_allowed())
-  #       # self.assertTrue(self._tx(self._angle_cmd_msg(a, True)))
-  #       # self.assertTrue(self.safety.get_controls_allowed())
-  #       #
-  #       # # Down
-  #       # self.assertFalse(self._tx(self._angle_cmd_msg(a - sign_of(a) * (max_delta_down + 1.1), True)))
-  #       #
-  #       # # Check desired steer should be the same as steer angle when controls are off
-  #       # self.safety.set_controls_allowed(0)
-  #       # should_tx = abs(a) <= abs(self.STEER_ANGLE_MAX)
-  #       # self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(a, False)))
 
   def test_lateral_accel_limit(self):
     # carcontroller.MAX_LATERAL_ACCEL = MAX_LATERAL_ACCEL
@@ -432,133 +380,6 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         # Down
         print('down')
         self.assertFalse(self._tx(self._angle_cmd_msg(0, True)))
-
-
-        continue
-
-        # at limit
-        print('at limit')
-        max_angle_raw = uround_angle(get_max_angle(speed, self.VM), angle_unit_offset + 1) * sign
-        max_angle = np.clip(max_angle_raw, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
-        print('test sending max_angle', max_angle)
-        # self._tx(self._angle_cmd_msg(max_angle, True))  #TODO: set prev dewsired angle
-        # self.safety.set_desired_angle_last(round(max_angle * self.DEG_TO_CAN))
-        self._set_prev_desired_angle(max_angle)
-
-        self.assertTrue(self._tx(self._angle_cmd_msg(max_angle, True)))
-
-        # above limit +1
-        print('above limit +1')
-        max_angle_raw = uround_angle(get_max_angle(speed, self.VM), angle_unit_offset + 2) * sign
-        max_angle = np.clip(max_angle_raw, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
-        print('test sending max_angle', max_angle)
-        # self._tx(self._angle_cmd_msg(max_angle, True))  #TODO: set prev dewsired angle
-        # self.safety.set_desired_angle_last(round(max_angle * self.DEG_TO_CAN))
-        self._set_prev_desired_angle(max_angle)
-
-        # at low speeds, max angle is above max allowed angle, so we should tx in this case
-        should_tx = abs(max_angle_raw) >= self.STEER_ANGLE_MAX
-        self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(max_angle, True)))
-
-
-  # def test_lateral_accel_limit(self):
-  #   # carcontroller.MAX_LATERAL_ACCEL = MAX_LATERAL_ACCEL
-  #   for speed in [9.200000]:#np.linspace(0, 35, 100):
-  #     # match DI_vehicleSpeed rounding on CAN
-  #     speed = round_speed(uround(speed / 0.08 * 3.6) * 0.08 / 3.6)
-  #     # if speed > 4.6:
-  #     #   continue
-  #     print('\n--- test ---')
-  #     print('speed', speed)
-  #     for sign in (-1,):
-  #       self.safety.set_controls_allowed(True)
-  #       self._rx(self._angle_meas_msg(0, 0))
-  #       self._reset_speed_measurement(speed + 1)  # safety fudges the speed
-  #       # TODO: would like to send 0, but it's interpreted as -1 on CAN (as specified by DBC)
-  #       #  we can account for this properly
-  #       self.safety.set_desired_angle_last(0)
-  #       # self._tx(self._angle_cmd_msg(0, True))
-  #
-  #       # Stay within limits
-  #       # Up
-  #       max_angle_delta = uround_angle(get_max_angle_delta(speed, self.VM))
-  #       max_angle = uround_angle(get_max_angle(speed, self.VM))
-  #       print('max_angle_delta', max_angle_delta, 'max_angle', max_angle)
-  #
-  #       # max_angle_delta = uround_angle(max_angle_delta, 1)
-  #       max_angle = uround_angle(max_angle, 1)
-  #       print('new max_angle_delta', max_angle_delta, 'new max_angle', max_angle)
-  #
-  #       apply_angle_last = 0
-  #       # jerk is full torque/sec, reaches max in 50
-  #       for _ in range(100):
-  #         apply_angle = apply_angle_last + max_angle_delta * sign
-  #         apply_angle = np.clip(apply_angle, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
-  #         apply_angle = uround_angle(apply_angle)
-  #         # apply_angle = np.clip(apply_angle, -max_angle, max_angle)
-  #         apply_angle_last = apply_angle
-  #         print('test apply_angle', apply_angle)
-  #         ret = self._tx(self._angle_cmd_msg(apply_angle, True))
-  #         should_tx = abs(apply_angle) <= abs(max_angle)
-  #         self.assertEqual(ret, should_tx)
-  #         print('tx', ret)
-
-
-  # def test_lateral_limit_up(self):
-  #   with (patch.object(carcontroller, 'MAX_LATERAL_ACCEL', new=MAX_LATERAL_ACCEL),  # TODO: don't need new if we set before
-  #         patch.object(carcontroller, 'MAX_LATERAL_JERK', new=MAX_LATERAL_JERK)):
-  #     # carcontroller.MAX_LATERAL_ACCEL = MAX_LATERAL_ACCEL
-  #     print(MAX_LATERAL_ACCEL, carcontroller.MAX_LATERAL_ACCEL)
-  #     for max_lateral_jerk in (
-  #         # MAX_LATERAL_JERK - 0.1,
-  #         MAX_LATERAL_JERK,
-  #         # MAX_LATERAL_JERK + 0.2,
-  #     ):
-  #       carcontroller.MAX_LATERAL_JERK = max_lateral_jerk
-  #       for speed in [35]: #np.linspace(5, 35, 100):
-  #         # match signal rounding on CAN
-  #         speed = uround(speed / 0.08 * 3.6) * 0.08 / 3.6
-  #         # if speed > 4.6:
-  #         #   continue
-  #         print('speed', speed)
-  #         self.safety.set_controls_allowed(True)
-  #         self._rx(self._angle_meas_msg(0, 0))
-  #         self._reset_speed_measurement(speed + 1)
-  #         self.safety.set_desired_angle_last(0)
-  #
-  #         apply_angle_last = 0
-  #         for _ in range(100):
-  #           apply_angle = apply_tesla_steer_angle_limits(360, apply_angle_last, speed, 0, True,
-  #                                                        CarControllerParams.ANGLE_LIMITS, self.VM)
-  #           print('apply_angle', apply_angle, 'apply_angle_last', apply_angle_last)
-  #           apply_angle_can = (apply_angle + 1638.35) / 0.1 + 1e-5 + 2  # safety does +1 for tolerance, +2 to violate
-  #           apply_angle = uround(apply_angle_can + 1e-5) * 0.1 - 1638.35  # match rounding on CAN
-  #
-  #           apply_angle_last = apply_angle
-  #           print('apply_angle new', apply_angle)
-  #           ret = self._tx(self._angle_cmd_msg(apply_angle, True))
-  #           self.assertFalse(ret)
-  #           print('tx', ret)
-  #
-  #         # # self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
-  #         # apply_angle_last = 0
-  #         # for _ in range(100):  # jerk is full torque/sec, so only need 50, but want extra tolerance to hit limit
-  #         #   print('--- test ---')
-  #         #   apply_angle = apply_tesla_steer_angle_limits(360, apply_angle_last, speed, 0, True,
-  #         #                                                CarControllerParams.ANGLE_LIMITS, self.VM)
-  #         #   print('apply_angle', apply_angle, 'apply_angle_last', apply_angle_last)
-  #         #   apply_angle_last = apply_angle
-  #         #   apply_angle = uround(apply_angle * self.DEG_TO_CAN + 3) / self.DEG_TO_CAN
-  #         #   print('new apply_angle', apply_angle)
-  #         #   ret = self._tx(self._angle_cmd_msg(apply_angle, True))
-  #         #   self._set_prev_desired_angle(apply_angle_last)  # reset desired angle to real angle
-  #         #   should_tx = False  # max_lateral_jerk <= MAX_LATERAL_JERK
-  #         #   print('should_tx', should_tx, max_lateral_jerk)
-  #         #   if not ret:
-  #         #     print('VIOLATION!')
-  #         #   self.assertEqual(ret, should_tx)
-  #         #   print()
-  #   print('restored', MAX_LATERAL_JERK, carcontroller.MAX_LATERAL_ACCEL)
 
 
 class TestTeslaStockSafety(TestTeslaSafetyBase):
