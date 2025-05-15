@@ -1,8 +1,5 @@
 #include <array>
-#include <cstdio>
-#include <string>
 #include <unordered_map>
-#include <vector>
 
 #include "opendbc/can/common.h"
 

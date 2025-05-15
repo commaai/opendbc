@@ -1,6 +1,6 @@
 #pragma once
 
-#include "safety/safety_declarations.h"
+#include "safety_declarations.h"
 
 #define RIVIAN_MAX_SPEED_DELTA 2.0  // m/s
 
