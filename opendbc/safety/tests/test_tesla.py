@@ -280,16 +280,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         # angle signal can't represent 0, so it biases one unit down
         angle_unit_offset = -1 if sign == -1 else 0
 
-        # under limit -1
-        print('under limit -1')
-        max_angle = round_angle(get_max_angle(speed, self.VM), angle_unit_offset) * sign
-        max_angle = np.clip(max_angle, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
-        print('test sending max_angle', max_angle)
-        self._tx(self._angle_cmd_msg(max_angle, True))
-
-        self.assertTrue(self._tx(self._angle_cmd_msg(max_angle, True)))
-
-        # at limit
+        # at limit (safety tolerance adds 1)
         print('at limit')
         max_angle = round_angle(get_max_angle(speed, self.VM), angle_unit_offset + 1) * sign
         max_angle = np.clip(max_angle, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
@@ -298,14 +289,14 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle, True)))
 
-        # above limit +1
+        # 1 unit above limit
         print('above limit +1')
         max_angle_raw = round_angle(get_max_angle(speed, self.VM), angle_unit_offset + 2) * sign
         max_angle = np.clip(max_angle_raw, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
         print('test sending max_angle', max_angle)
         self._tx(self._angle_cmd_msg(max_angle, True))
 
-        # at low speeds, max angle is above max allowed angle, so we should tx in this case
+        # at low speeds max angle is above 360, so adding 1 has no effect
         should_tx = abs(max_angle_raw) >= self.STEER_ANGLE_MAX
         self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(max_angle, True)))
 
@@ -319,42 +310,31 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         print('sign', sign)
         self.safety.set_controls_allowed(True)
         self._reset_speed_measurement(speed + 1)  # safety fudges the speed
-        # TODO: would like to send 0, but it's interpreted as -1 on CAN (as specified by DBC)
-        #  we can account for this properly
+        self._tx(self._angle_cmd_msg(0, True))
 
         # angle signal can't represent 0, so it biases one unit down
         angle_unit_offset = 1 if sign == -1 else 0
 
         # Stay within limits
         # Up
-        self._tx(self._angle_cmd_msg(0, True))
-
         max_angle_delta = round_angle(get_max_angle_delta(speed, self.VM), angle_unit_offset) * sign
-        print('test sending max_angle_delta', max_angle_delta)
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
 
         # Don't change
-        print('stay there')
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
 
         # Down
-        print('down')
         self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
 
         # Inject too high rates
         # Up
-        print('violate rate limits')
-        print('Up')
         max_angle_delta = round_angle(get_max_angle_delta(speed, self.VM), angle_unit_offset + 1) * sign
-        print('test sending max_angle_delta', max_angle_delta)
         self.assertFalse(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
 
         # Don't change
-        print('stay there')
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
 
         # Down
-        print('down')
         self.assertFalse(self._tx(self._angle_cmd_msg(0, True)))
 
         # Recover
