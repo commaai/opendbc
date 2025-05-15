@@ -9,18 +9,18 @@ from opendbc.car.vehicle_model import VehicleModel
 from opendbc.can.can_define import CANDefine
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerPanda, MAX_WRONG_COUNTERS, uround, round_speed
+from opendbc.safety.tests.common import CANPackerPanda, MAX_WRONG_COUNTERS, away_round, round_speed
 
 MSG_DAS_steeringControl = 0x488
 MSG_APS_eacMonitor = 0x27d
 MSG_DAS_Control = 0x2b9
 
 
-def uround_angle(apply_angle, can_offset=0):
+def round_angle(apply_angle, can_offset=0):
   # 0.49999_ == 0.5
   rnd_offset = 1e-5 if apply_angle >= 0 else -1e-5
   apply_angle_can = (apply_angle + 1638.35) / 0.1 + can_offset
-  return uround(apply_angle_can + rnd_offset) * 0.1 - 1638.35
+  return away_round(apply_angle_can + rnd_offset) * 0.1 - 1638.35
 
 
 class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest, common.LongitudinalAccelSafetyTest):
@@ -161,10 +161,10 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     # Tesla relies on speed for lateral limits close to ISO 11270, so it checks two sources
     for speed in np.arange(0, 40, 0.5):
       # match signal rounding on CAN
-      speed = uround(speed / 0.08 * 3.6) * 0.08 / 3.6
+      speed = away_round(speed / 0.08 * 3.6) * 0.08 / 3.6
       for speed_delta in np.arange(-5, 5, 0.1):
         speed_2 = max(speed + speed_delta, 0)
-        speed_2 = uround(speed_2 * 2 * 3.6) / 2 / 3.6
+        speed_2 = away_round(speed_2 * 2 * 3.6) / 2 / 3.6
 
         # Set controls allowed in between rx since first message can reset it
         self.assertTrue(self._rx(self._speed_msg(speed)))
@@ -271,7 +271,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     # carcontroller.MAX_LATERAL_ACCEL = MAX_LATERAL_ACCEL
     for speed in np.linspace(0, 35, 100):
       # match DI_vehicleSpeed rounding on CAN
-      speed = round_speed(uround(speed / 0.08 * 3.6) * 0.08 / 3.6)
+      speed = round_speed(away_round(speed / 0.08 * 3.6) * 0.08 / 3.6)
       # if speed > 4.6:
       #   continue
       print('\n--- test ---')
@@ -288,7 +288,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
         # under limit -1
         print('under limit -1')
-        max_angle = uround_angle(get_max_angle(speed, self.VM), angle_unit_offset) * sign
+        max_angle = round_angle(get_max_angle(speed, self.VM), angle_unit_offset) * sign
         max_angle = np.clip(max_angle, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
         print('test sending max_angle', max_angle)
         # self._tx(self._angle_cmd_msg(max_angle, True))  #TODO: set prev dewsired angle
@@ -299,7 +299,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
         # at limit
         print('at limit')
-        max_angle = uround_angle(get_max_angle(speed, self.VM), angle_unit_offset + 1) * sign
+        max_angle = round_angle(get_max_angle(speed, self.VM), angle_unit_offset + 1) * sign
         max_angle = np.clip(max_angle, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
         print('test sending max_angle', max_angle)
         # self._tx(self._angle_cmd_msg(max_angle, True))  #TODO: set prev dewsired angle
@@ -310,7 +310,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
         # above limit +1
         print('above limit +1')
-        max_angle_raw = uround_angle(get_max_angle(speed, self.VM), angle_unit_offset + 2) * sign
+        max_angle_raw = round_angle(get_max_angle(speed, self.VM), angle_unit_offset + 2) * sign
         max_angle = np.clip(max_angle_raw, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
         print('test sending max_angle', max_angle)
         # self._tx(self._angle_cmd_msg(max_angle, True))  #TODO: set prev dewsired angle
@@ -324,7 +324,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
   def test_lateral_jerk_limit(self):
     for speed in np.linspace(0, 35, 100):
       # match DI_vehicleSpeed rounding on CAN
-      speed = round_speed(uround(speed / 0.08 * 3.6) * 0.08 / 3.6)
+      speed = round_speed(away_round(speed / 0.08 * 3.6) * 0.08 / 3.6)
       # if speed > 4.6:
       #   continue
       print('\n--- test ---')
@@ -344,9 +344,9 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         # Up
         # under limit -1
         print('under limit -1')
-        max_angle_raw = uround_angle(get_max_angle(speed, self.VM), angle_unit_offset) * sign
+        max_angle_raw = round_angle(get_max_angle(speed, self.VM), angle_unit_offset) * sign
         max_angle = np.clip(max_angle_raw, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
-        max_angle_delta = uround_angle(get_max_angle_delta(speed, self.VM), angle_unit_offset) * sign
+        max_angle_delta = round_angle(get_max_angle_delta(speed, self.VM), angle_unit_offset) * sign
         # max_angle_delta = np.clip(max_angle_delta, -max_angle, max_angle)
         # print('test sending max_angle', max_angle)
         print('test sending max_angle_delta', max_angle_delta)
@@ -369,7 +369,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         # self._set_prev_desired_angle(0)
         print('violate rate limits')
         print('Up')
-        max_angle_delta = uround_angle(get_max_angle_delta(speed, self.VM), angle_unit_offset + 1) * sign
+        max_angle_delta = round_angle(get_max_angle_delta(speed, self.VM), angle_unit_offset + 1) * sign
         print('test sending max_angle_delta', max_angle_delta)
         self.assertFalse(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
 

@@ -21,8 +21,8 @@ def sign_of(a):
   return 1 if a > 0 else -1
 
 
-def uround(x):
-  # unsigned non-banker's rounding
+def away_round(x):
+  # non-banker's/away from zero rounding
   return math.floor(x + 0.5) if x >= 0 else math.ceil(x - 0.5)
 
 
