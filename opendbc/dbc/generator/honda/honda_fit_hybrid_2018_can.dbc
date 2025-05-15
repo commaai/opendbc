@@ -51,19 +51,6 @@ BO_ 862 HIGHBEAM_CONTROL: 8 ADAS
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
-BO_ 927 RADAR_HUD: 8 ADAS
- SG_ ZEROS_BOH : 7|17@0+ (1,0) [0|127] "" BDY
- SG_ APPLY_BRAKES_FOR_CANC : 23|1@0+ (1,0) [0|15] "" BDY
- SG_ ZEROS_BOH2 : 31|8@0+ (1,0) [0|127] "" BDY
- SG_ RESUME_INSTRUCTION : 21|1@0+ (1,0) [0|15] "" BDY
- SG_ ACC_ALERTS : 20|5@0+ (1,0) [0|15] "" BDY
- SG_ LEAD_SPEED : 39|9@0+ (1,0) [0|127] "" BDY
- SG_ LEAD_STATE : 46|3@0+ (1,0) [0|127] "" BDY
- SG_ LEAD_DISTANCE : 43|5@0+ (1,0) [0|31] "" BDY
- SG_ ZEROS_BOH3 : 54|7@0+ (1,0) [0|127] "" BDY
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" BDY
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" BDY
-
 CM_ SG_ 419 GEAR "10 = reverse, 11 = transition";
 
 VAL_ 399 STEER_STATUS 6 "tmp_fault" 5 "fault_1" 4 "no_torque_alert_2" 3 "low_speed_lockout" 2 "no_torque_alert_1" 0 "normal" ;
