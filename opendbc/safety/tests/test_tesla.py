@@ -35,9 +35,11 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
   STEER_ANGLE_MAX = 360  # deg
   DEG_TO_CAN = 10
 
-  ANGLE_RATE_BP = [0., 5., 25.]
-  ANGLE_RATE_UP = [2.5, 1.5, 0.2]  # windup limit
-  ANGLE_RATE_DOWN = [5., 2.0, 0.3]  # unwind limit
+  # Tesla uses get_max_angle_delta and get_max_angle for real lateral accel and jerk limits
+  # TODO: integrate this into AngleSteeringSafetyTest
+  ANGLE_RATE_BP = None
+  ANGLE_RATE_UP = None
+  ANGLE_RATE_DOWN = None
 
   # Long control limits
   MAX_ACCEL = 2.0
