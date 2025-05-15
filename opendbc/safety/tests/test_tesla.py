@@ -340,14 +340,101 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
         # under limit -1
         print('under limit -1')
-        max_angle_raw = uround_angle(get_max_angle(speed, self.VM), angle_unit_offset) * sign
-        max_angle = np.clip(max_angle_raw, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
+        max_angle = uround_angle(get_max_angle(speed, self.VM), angle_unit_offset) * sign
+        max_angle = np.clip(max_angle, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
         print('test sending max_angle', max_angle)
         # self._tx(self._angle_cmd_msg(max_angle, True))  #TODO: set prev dewsired angle
         # self.safety.set_desired_angle_last(round(max_angle * self.DEG_TO_CAN))
         self._set_prev_desired_angle(max_angle)
 
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle, True)))
+
+        # at limit
+        print('at limit')
+        max_angle = uround_angle(get_max_angle(speed, self.VM), angle_unit_offset + 1) * sign
+        max_angle = np.clip(max_angle, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
+        print('test sending max_angle', max_angle)
+        # self._tx(self._angle_cmd_msg(max_angle, True))  #TODO: set prev dewsired angle
+        # self.safety.set_desired_angle_last(round(max_angle * self.DEG_TO_CAN))
+        self._set_prev_desired_angle(max_angle)
+
+        self.assertTrue(self._tx(self._angle_cmd_msg(max_angle, True)))
+
+        # above limit +1
+        print('above limit +1')
+        max_angle_raw = uround_angle(get_max_angle(speed, self.VM), angle_unit_offset + 2) * sign
+        max_angle = np.clip(max_angle_raw, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
+        print('test sending max_angle', max_angle)
+        # self._tx(self._angle_cmd_msg(max_angle, True))  #TODO: set prev dewsired angle
+        # self.safety.set_desired_angle_last(round(max_angle * self.DEG_TO_CAN))
+        self._set_prev_desired_angle(max_angle)
+
+        # at low speeds, max angle is above max allowed angle, so we should tx in this case
+        should_tx = abs(max_angle_raw) >= self.STEER_ANGLE_MAX
+        self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(max_angle, True)))
+
+  def test_lateral_jerk_limit(self):
+    for speed in np.linspace(0, 35, 100):
+      # match DI_vehicleSpeed rounding on CAN
+      speed = round_speed(uround(speed / 0.08 * 3.6) * 0.08 / 3.6)
+      # if speed > 4.6:
+      #   continue
+      print('\n--- test ---')
+      print('speed', speed)
+      for sign in (-1, 1):  # (-1, 1):
+        print('sign', sign)
+        self.safety.set_controls_allowed(True)
+        # self._rx(self._angle_meas_msg(0, 0))  # TODO don't need?
+        self._reset_speed_measurement(speed + 1)  # safety fudges the speed
+        # TODO: would like to send 0, but it's interpreted as -1 on CAN (as specified by DBC)
+        #  we can account for this properly
+
+        # angle signal can't represent 0, so it biases one unit down
+        angle_unit_offset = 1 if sign == -1 else 0
+
+        # Below limit
+        # Up
+        # under limit -1
+        print('under limit -1')
+        max_angle_raw = uround_angle(get_max_angle(speed, self.VM), angle_unit_offset) * sign
+        max_angle = np.clip(max_angle_raw, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
+        max_angle_delta = uround_angle(get_max_angle_delta(speed, self.VM), angle_unit_offset) * sign
+        # max_angle_delta = np.clip(max_angle_delta, -max_angle, max_angle)
+        # print('test sending max_angle', max_angle)
+        print('test sending max_angle_delta', max_angle_delta)
+        # self._tx(self._angle_cmd_msg(max_angle, True))  #TODO: set prev dewsired angle
+        # self.safety.set_desired_angle_last(round(max_angle * self.DEG_TO_CAN))
+        self._tx(self._angle_cmd_msg(0, True))
+
+        self.assertTrue(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
+
+        # Stay there
+        print('stay there')
+        self.assertTrue(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
+
+        # Down
+        print('down')
+        self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+
+        # Violate rate limits
+        # Up
+        # self._set_prev_desired_angle(0)
+        print('violate rate limits')
+        print('Up')
+        max_angle_delta = uround_angle(get_max_angle_delta(speed, self.VM), angle_unit_offset + 1) * sign
+        print('test sending max_angle_delta', max_angle_delta)
+        self.assertFalse(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
+
+        # Stay there
+        print('stay there')
+        self.assertTrue(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
+
+        # Down
+        print('down')
+        self.assertFalse(self._tx(self._angle_cmd_msg(0, True)))
+
+
+        continue
 
         # at limit
         print('at limit')
@@ -372,6 +459,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         # at low speeds, max angle is above max allowed angle, so we should tx in this case
         should_tx = abs(max_angle_raw) >= self.STEER_ANGLE_MAX
         self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(max_angle, True)))
+
 
   # def test_lateral_accel_limit(self):
   #   # carcontroller.MAX_LATERAL_ACCEL = MAX_LATERAL_ACCEL
