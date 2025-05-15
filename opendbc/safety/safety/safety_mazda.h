@@ -1,6 +1,6 @@
 #pragma once
 
-#include "safety/safety_declarations.h"
+#include "safety_declarations.h"
 
 // CAN msgs we care about
 #define MAZDA_LKAS          0x243

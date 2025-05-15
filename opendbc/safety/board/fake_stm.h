@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "safety/board/utils.h"
+#include "utils.h"
 
 #define ALLOW_DEBUG
 #define PANDA

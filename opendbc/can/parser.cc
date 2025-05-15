@@ -2,11 +2,8 @@
 #include <cassert>
 #include <cstring>
 #include <limits>
-#include <set>
 #include <stdexcept>
 #include <sstream>
-#include <string>
-#include <vector>
 
 #include "opendbc/can/common.h"
 

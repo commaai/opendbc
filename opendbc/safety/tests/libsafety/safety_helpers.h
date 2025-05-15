@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 void safety_tick_current_safety_config() {
   safety_tick(&current_safety_config);
 }

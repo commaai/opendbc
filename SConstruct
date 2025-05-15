@@ -11,7 +11,6 @@ if platform.system() == "Darwin":
 python_path = sysconfig.get_paths()['include']
 cpppath = [
   '#',
-  '#opendbc',
   '/usr/lib/include',
   python_path
 ]
