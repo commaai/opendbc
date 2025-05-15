@@ -22,7 +22,7 @@ def sign_of(a):
 
 
 def away_round(x):
-  # non-banker's/away from zero rounding
+  # non-banker's/away from zero rounding, C++ CANParser uses this style
   return math.floor(x + 0.5) if x >= 0 else math.ceil(x - 0.5)
 
 
