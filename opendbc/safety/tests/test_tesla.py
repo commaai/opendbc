@@ -17,9 +17,9 @@ MSG_DAS_Control = 0x2b9
 
 
 def round_angle(apply_angle, can_offset=0):
+  apply_angle_can = (apply_angle + 1638.35) / 0.1 + can_offset
   # 0.49999_ == 0.5
   rnd_offset = 1e-5 if apply_angle >= 0 else -1e-5
-  apply_angle_can = (apply_angle + 1638.35) / 0.1 + can_offset
   return away_round(apply_angle_can + rnd_offset) * 0.1 - 1638.35
 
 
