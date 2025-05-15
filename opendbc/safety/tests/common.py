@@ -1,5 +1,6 @@
 import os
 import abc
+import math
 import unittest
 import importlib
 import numpy as np
@@ -14,8 +15,14 @@ MAX_SAMPLE_VALS = 6
 
 MessageFunction = Callable[[float], libsafety_py.CANPacket]
 
+
 def sign_of(a):
   return 1 if a > 0 else -1
+
+
+def away_round(x):
+  # non-banker's/away from zero rounding, C++ CANParser uses this style
+  return math.floor(x + 0.5) if x >= 0 else math.ceil(x - 0.5)
 
 
 def make_msg(bus, addr, length=8, dat=None):
