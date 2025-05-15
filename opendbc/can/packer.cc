@@ -3,9 +3,7 @@
 #include <cmath>
 #include <map>
 #include <stdexcept>
-#include <string>
 #include <utility>
-#include <vector>
 
 #include "opendbc/can/common.h"
 

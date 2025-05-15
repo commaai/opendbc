@@ -1,4 +1,4 @@
-#include "safety/safety.h"
+#include "safety.h"
 
 // this file is checked by cppcheck
 

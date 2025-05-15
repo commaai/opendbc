@@ -1,6 +1,6 @@
 #pragma once
 
-#include "safety/safety_declarations.h"
+#include "safety_declarations.h"
 
 typedef struct {
   const int EPS_2;
