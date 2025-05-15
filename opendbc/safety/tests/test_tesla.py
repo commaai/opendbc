@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
 import unittest
 import numpy as np
-import math
 
 from opendbc.car.tesla.values import TeslaSafetyFlags
 from opendbc.car.structs import CarParams
 from opendbc.can.can_define import CANDefine
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import MAX_WRONG_COUNTERS
-from opendbc.safety.tests.common import CANPackerPanda
+from opendbc.safety.tests.common import CANPackerPanda, MAX_WRONG_COUNTERS, away_round
 
 MSG_DAS_steeringControl = 0x488
 MSG_APS_eacMonitor = 0x27d
@@ -153,11 +151,10 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     # Tesla relies on speed for lateral limits close to ISO 11270, so it checks two sources
     for speed in np.arange(0, 40, 0.5):
       # match signal rounding on CAN
-      # Python does banker's rounding which mismatches with C++ CANParser, hence the floor(x + 0.5)
-      speed = math.floor(speed / 0.08 * 3.6 + 0.5) * 0.08 / 3.6
+      speed = away_round(speed / 0.08 * 3.6) * 0.08 / 3.6
       for speed_delta in np.arange(-5, 5, 0.1):
         speed_2 = max(speed + speed_delta, 0)
-        speed_2 = math.floor(speed_2 * 2 * 3.6 + 0.5) / 2 / 3.6
+        speed_2 = away_round(speed_2 * 2 * 3.6) / 2 / 3.6
 
         # Set controls allowed in between rx since first message can reset it
         self.assertTrue(self._rx(self._speed_msg(speed)))
