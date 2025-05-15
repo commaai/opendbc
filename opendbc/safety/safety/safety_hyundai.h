@@ -1,7 +1,7 @@
 #pragma once
 
-#include "safety_declarations.h"
-#include "safety_hyundai_common.h"
+#include "safety/safety_declarations.h"
+#include "safety/safety_hyundai_common.h"
 
 #define HYUNDAI_LIMITS(steer, rate_up, rate_down) { \
   .max_torque = (steer), \

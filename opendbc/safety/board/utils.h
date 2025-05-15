@@ -1,14 +1,14 @@
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
 #define MIN(a, b) ({ \
-  __typeof__ (a) _a = (a); \
-  __typeof__ (b) _b = (b); \
+  __typeof__(a) _a = (a); \
+  __typeof__(b) _b = (b); \
   (_a < _b) ? _a : _b; \
 })
 
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
 #define MAX(a, b) ({ \
-  __typeof__ (a) _a = (a); \
-  __typeof__ (b) _b = (b); \
+  __typeof__(a) _a = (a); \
+  __typeof__(b) _b = (b); \
   (_a > _b) ? _a : _b; \
 })
 
@@ -22,7 +22,7 @@
 
 // cppcheck-suppress-macro misra-c2012-1.2; allow __typeof__ extension
 #define ABS(a) ({ \
-  __typeof__ (a) _a = (a); \
+  __typeof__(a) _a = (a); \
   (_a > 0) ? _a : (-_a); \
 })
 
