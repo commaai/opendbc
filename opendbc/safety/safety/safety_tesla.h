@@ -41,9 +41,9 @@ static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_e
   static const float MAX_LATERAL_JERK = 3.0 + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^3
 
   const float fudged_speed = (vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.;
+  const float curvature_factor = tesla_curvature_factor(fudged_speed, params);
 
   bool violation = false;
-  const float curvature_factor = tesla_curvature_factor(fudged_speed, params);
 
   if (controls_allowed && steer_control_enabled) {
     // *** ISO lateral jerk limit ***
