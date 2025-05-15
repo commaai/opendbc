@@ -1,7 +1,7 @@
 #pragma once
 
 #include "safety_declarations.h"
-#include "can.h"
+#include "can_declarations.h"
 
 // include the safety policies.
 #include "safety/safety_defaults.h"
