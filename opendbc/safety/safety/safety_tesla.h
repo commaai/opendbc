@@ -2,7 +2,7 @@
 
 #include "safety_declarations.h"
 
-// parameters for lateral accel/jerk angle steering limiting using a simple vehicle model
+// parameters for lateral accel/jerk angle limiting using a simple vehicle model
 typedef struct {
   const float slip_factor;
   const float steer_ratio;
@@ -34,8 +34,11 @@ static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_e
   static const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
 
   // Highway curves are rolled in the direction of the turn, add tolerance to compensate
-  static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (0.06 * 9.81);  // ~3.6 m/s^2
-  static const float MAX_LATERAL_JERK = 3.0 + (0.06 * 9.81);  // ~3.6 m/s^3
+  static const float EARTH_G = 9.81;
+  static const float AVERAGE_ROAD_ROLL = 0.06;  // ~3.4 degrees, 6% superelevation
+
+  static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^2
+  static const float MAX_LATERAL_JERK = 3.0 + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^3
 
   const float fudged_speed = (vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.;
 
