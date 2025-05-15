@@ -1,5 +1,4 @@
 #pragma once
-#include "board/can_declarations.h"
 
 #include <stdint.h>
 #include <stdbool.h>
