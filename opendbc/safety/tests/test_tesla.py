@@ -340,10 +340,8 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         # angle signal can't represent 0, so it biases one unit down
         angle_unit_offset = 1 if sign == -1 else 0
 
-        # Below limit
+        # Stay within limits
         # Up
-        # under limit -1
-        print('under limit -1')
         max_angle_raw = round_angle(get_max_angle(speed, self.VM), angle_unit_offset) * sign
         max_angle = np.clip(max_angle_raw, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
         max_angle_delta = round_angle(get_max_angle_delta(speed, self.VM), angle_unit_offset) * sign
@@ -356,7 +354,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
 
-        # Stay there
+        # Don't change
         print('stay there')
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
 
@@ -364,7 +362,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         print('down')
         self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
 
-        # Violate rate limits
+        # Inject too high rates
         # Up
         # self._set_prev_desired_angle(0)
         print('violate rate limits')
@@ -373,13 +371,16 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         print('test sending max_angle_delta', max_angle_delta)
         self.assertFalse(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
 
-        # Stay there
+        # Don't change
         print('stay there')
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
 
         # Down
         print('down')
         self.assertFalse(self._tx(self._angle_cmd_msg(0, True)))
+
+        # Recover
+        self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
 
 
 class TestTeslaStockSafety(TestTeslaSafetyBase):
