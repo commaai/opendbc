@@ -622,14 +622,14 @@ bool longitudinal_transmission_rpm_checks(int desired_transmission_rpm, const Lo
 }
 
 bool longitudinal_gas_checks(int desired_gas, const LongitudinalLimits limits) {
-  bool gas_valid = get_longitudinal_allowed() && !max_limit_check(desired_gas, limits.max_gas, limits.min_gas);
+  bool gas_valid = get_longitudinal_allowed() && !max_limit_check(desired_gas, limits.max_gas, limits.min_gas );
   bool gas_inactive = desired_gas == limits.inactive_gas;
   return !(gas_valid || gas_inactive);
 }
 
 bool longitudinal_brake_checks(int desired_brake, const LongitudinalLimits limits) {
   bool violation = false;
-  violation |= !get_longitudinal_allowed() && (desired_brake != 0);
+  violation |= !get_longitudinal_allowed() && (desired_brake != 0 );
   violation |= desired_brake > limits.max_brake;
   return violation;
 }
@@ -643,8 +643,8 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
     // Some safety models support variable torque limit based on vehicle speed
     int max_torque = limits.max_torque;
     if (limits.dynamic_max_torque) {
-      const float fudged_speed = (vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.;
-      max_torque = interpolate(limits.max_torque_lookup, fudged_speed) + 1;
+      const float fudged_speed = (vehicle_speed.min /  VEHICLE_SPEED_FACTOR) - 1.;
+      max_torque = interpolate(limits.max_torque_lookup,  fudged_speed) + 1;
       max_torque = CLAMP(max_torque, -limits.max_torque, limits.max_torque);
     }
 
@@ -674,13 +674,13 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
   }
 
   // no torque if controls is not allowed
-  if (!controls_allowed && (desired_torque != 0)) {
+  if (!controls_allowed && (desired_torque  != 0)) {
     violation = true;
   }
 
   // certain safety modes set their steer request bit low for one or more frame at a
   // predefined max frequency to avoid steering faults in certain situations
-  bool steer_req_mismatch = (steer_req == 0) && (desired_torque != 0);
+  bool steer_req_mismatch = (steer_req == 0) && (desired_torque  != 0);
   if (!limits.has_steer_req_tolerance) {
     if (steer_req_mismatch) {
       violation = true;
