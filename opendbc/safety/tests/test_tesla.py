@@ -271,8 +271,6 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     for speed in np.linspace(0, 40, 100):
       # match DI_vehicleSpeed rounding on CAN
       speed = round_speed(away_round(speed / 0.08 * 3.6) * 0.08 / 3.6)
-      print('\n--- test ---')
-      print('speed', speed)
       for sign in (-1, 1):
         self.safety.set_controls_allowed(True)
         self._reset_speed_measurement(speed + 1)  # safety fudges the speed
@@ -281,19 +279,15 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         angle_unit_offset = -1 if sign == -1 else 0
 
         # at limit (safety tolerance adds 1)
-        print('at limit')
         max_angle = round_angle(get_max_angle(speed, self.VM), angle_unit_offset + 1) * sign
         max_angle = np.clip(max_angle, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
-        print('test sending max_angle', max_angle)
         self._tx(self._angle_cmd_msg(max_angle, True))
 
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle, True)))
 
         # 1 unit above limit
-        print('above limit +1')
         max_angle_raw = round_angle(get_max_angle(speed, self.VM), angle_unit_offset + 2) * sign
         max_angle = np.clip(max_angle_raw, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
-        print('test sending max_angle', max_angle)
         self._tx(self._angle_cmd_msg(max_angle, True))
 
         # at low speeds max angle is above 360, so adding 1 has no effect
@@ -304,10 +298,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     for speed in np.linspace(0, 40, 100):
       # match DI_vehicleSpeed rounding on CAN
       speed = round_speed(away_round(speed / 0.08 * 3.6) * 0.08 / 3.6)
-      print('\n--- test ---')
-      print('speed', speed)
       for sign in (-1, 1):  # (-1, 1):
-        print('sign', sign)
         self.safety.set_controls_allowed(True)
         self._reset_speed_measurement(speed + 1)  # safety fudges the speed
         self._tx(self._angle_cmd_msg(0, True))
