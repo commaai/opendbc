@@ -268,12 +268,9 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     pass
 
   def test_lateral_accel_limit(self):
-    # carcontroller.MAX_LATERAL_ACCEL = MAX_LATERAL_ACCEL
     for speed in np.linspace(0, 35, 100):
       # match DI_vehicleSpeed rounding on CAN
       speed = round_speed(away_round(speed / 0.08 * 3.6) * 0.08 / 3.6)
-      # if speed > 4.6:
-      #   continue
       print('\n--- test ---')
       print('speed', speed)
       for sign in (-1, 1):

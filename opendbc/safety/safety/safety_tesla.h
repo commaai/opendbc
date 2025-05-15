@@ -97,12 +97,6 @@ static bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_e
   // No angle control allowed when controls are not allowed
   violation |= !controls_allowed && steer_control_enabled;
 
-//  if (violation) {
-//    desired_angle_last = angle_meas.values[0];
-//  } else {
-//    desired_angle_last = desired_angle;
-//  }
-
   printf("\n");
   return violation;
 }
