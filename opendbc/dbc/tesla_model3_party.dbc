@@ -111,6 +111,14 @@ BO_ 341 ESP_B: 8 PARTY
  SG_ ESP_wheelPulseCountFrR : 8|8@1+ (1,0) [0|254] "1"  app
  SG_ ESP_wheelPulseCountFrL : 0|8@1+ (1,0) [0|254] "1"  app
 
+BO_ 373 ESP_wheelSpeeds: 8 CH
+ SG_ ESP_wheelSpeedsChecksum : 56|8@1+ (1,0) [0|255] ""  das
+ SG_ ESP_wheelSpeedsCounter : 52|4@1+ (1,0) [0|15] ""  das
+ SG_ ESP_wheelSpeedReR : 39|13@1+ (0.04,0) [0|327.64] "km/h"  das
+ SG_ ESP_wheelSpeedReL : 26|13@1+ (0.04,0) [0|327.64] "km/h"  das
+ SG_ ESP_wheelSpeedFrR : 13|13@1+ (0.04,0) [0|327.64] "km/h"  das
+ SG_ ESP_wheelSpeedFrL : 0|13@1+ (0.04,0) [0|327.64] "km/h"  das
+
 BO_ 969 APS_status: 4 PARTY
  SG_ APS_statusCounter : 22|4@1+ (1,0) [0|15] ""  X
  SG_ APS_apbGpioState : 20|2@1+ (1,0) [0|3] ""  gtw
@@ -131,8 +139,8 @@ BO_ 925 IBST_status: 5 PARTY
  SG_ IBST_statusChecksum : 0|8@1+ (1,0) [0|255] ""  X
 
 BO_ 880 EPAS3S_sysStatus: 8 PARTY
- SG_ EPAS3S_sysStatusChecksum : 63|8@0+ (1,0) [0|255] ""  park
- SG_ EPAS3S_sysStatusCounter : 51|4@0+ (1,0) [0|15] ""  gtw
+ SG_ EPAS3S_sysStatusChecksum : 56|8@1+ (1,0) [0|255] ""  park
+ SG_ EPAS3S_sysStatusCounter : 48|4@1+ (1,0) [0|15] ""  gtw
  SG_ EPAS3S_eacStatus : 55|3@0+ (1,0) [0|7] ""  das
  SG_ EPAS3S_internalSAS : 37|14@0+ (0.1,-819.2) [-819.2|819] "deg"  das
  SG_ EPAS3S_handsOnLevel : 39|2@0+ (1,0) [0|3] ""  das
@@ -194,8 +202,8 @@ BO_ 605 DAS_road: 6 XXX
  SG_ DAS_trafficLightColor : 26|3@0+ (1,0) [0|7] "" XXX
 
 BO_ 1160 DAS_steeringControl: 4 PARTY
- SG_ DAS_steeringControlChecksum : 31|8@0+ (1,0) [0|255] ""  aps
- SG_ DAS_steeringControlCounter : 19|4@0+ (1,0) [0|15] ""  aps
+ SG_ DAS_steeringControlChecksum : 24|8@1+ (1,0) [0|255] ""  aps
+ SG_ DAS_steeringControlCounter : 16|4@1+ (1,0) [0|15] ""  aps
  SG_ DAS_steeringControlType : 23|2@0+ (1,0) [0|3] ""  aps
  SG_ DAS_steeringAngleRequest : 6|15@0+ (0.1,-1638.35) [-1638.35|1638.35] "deg"  aps
  SG_ DAS_steeringHapticRequest : 7|1@0+ (1,0) [0|1] ""  aps
@@ -241,7 +249,7 @@ BO_ 659 DAS_settings: 8 XXX
  SG_ DAS_obstacleAwareAcceleration : 42|1@0+ (1,0) [0|1] "" XXX
  SG_ DAS_driverAccelerationMode : 44|1@1+ (1,0) [0|127] "" XXX
  SG_ DAS_settingCounter : 52|4@1+ (1,0) [0|15] "" XXX
- SG_ DAS_settingChecksum : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ DAS_settingChecksum : 56|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 785 UI_warning: 7 XXX
  SG_ buckleStatus : 13|1@0+ (1,0) [0|1] "" XXX
@@ -253,6 +261,8 @@ BO_ 785 UI_warning: 7 XXX
  SG_ anyDoorOpen : 28|1@0+ (1,0) [0|1] "" XXX
  SG_ wiperSettings : 39|8@0+ (1,0) [0|255] "" XXX
  SG_ highBeam : 50|1@0+ (1,0) [0|1] "" XXX
+ SG_ UI_warningCounter : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ UI_warningChecksum : 0|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 923 DAS_status: 8 PARTY
  SG_ DAS_statusChecksum : 56|8@1+ (1,0) [0|255] ""  aps

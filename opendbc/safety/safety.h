@@ -1,7 +1,7 @@
 #pragma once
 
-#include "safety_declarations.h"
-#include "can.h"
+#include "safety/safety_declarations.h"
+#include "safety/board/can.h"
 
 // include the safety policies.
 #include "safety/safety_defaults.h"
@@ -347,10 +347,6 @@ static void relay_malfunction_set(void) {
 }
 
 static void generic_rx_checks(void) {
-  // exit controls on rising edge of gas press
-  if (gas_pressed && !gas_pressed_prev && !(alternative_experience & ALT_EXP_DISABLE_DISENGAGE_ON_GAS)) {
-    controls_allowed = false;
-  }
   gas_pressed_prev = gas_pressed;
 
   // exit controls on rising edge of brake press

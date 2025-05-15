@@ -52,7 +52,7 @@
     (config).tx_msgs = (tx); \
     (config).tx_msgs_len = sizeof((tx)) / sizeof((tx)[0]); \
     (config).disable_forwarding = false; \
-  } while(0);
+  } while (0);
 
 #define UPDATE_VEHICLE_SPEED(val_ms) (update_sample(&vehicle_speed, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
 
@@ -271,11 +271,11 @@ extern uint32_t ts_angle_last;
 extern int desired_angle_last;
 extern struct sample_t angle_meas;         // last 6 steer angles/curvatures
 
-// This can be set with a USB command
+// Alt experiences can be set with a USB command
 // It enables features that allow alternative experiences, like not disengaging on gas press
 // It is only either 0 or 1 on mainline comma.ai openpilot
 
-#define ALT_EXP_DISABLE_DISENGAGE_ON_GAS 1
+//#define ALT_EXP_DISABLE_DISENGAGE_ON_GAS 1  // not used anymore, but reserved
 
 // If using this flag, make sure to communicate to your users that a stock safety feature is now disabled.
 #define ALT_EXP_DISABLE_STOCK_AEB 2
