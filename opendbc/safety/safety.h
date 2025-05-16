@@ -347,10 +347,6 @@ static void relay_malfunction_set(void) {
 }
 
 static void generic_rx_checks(void) {
-  // exit controls on rising edge of gas press
-  if (gas_pressed && !gas_pressed_prev && !(alternative_experience & ALT_EXP_DISABLE_DISENGAGE_ON_GAS)) {
-    controls_allowed = false;
-  }
   gas_pressed_prev = gas_pressed;
 
   // exit controls on rising edge of brake press
@@ -520,7 +516,7 @@ void update_sample(struct sample_t *sample, int sample_new) {
   }
 }
 
-static bool max_limit_check(int val, const int MAX_VAL, const int MIN_VAL) {
+bool max_limit_check(int val, const int MAX_VAL, const int MIN_VAL) {
   return (val > MAX_VAL) || (val < MIN_VAL);
 }
 
