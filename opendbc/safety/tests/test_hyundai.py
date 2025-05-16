@@ -179,7 +179,7 @@ class TestHyundaiSafety(HyundaiButtonBase, common.PandaCarSafetyTest, common.Dri
               self.safety.set_safety_hooks(default_safety_mode, default_safety_param)
 
               self._mads_states_cleanup()
-              self.safety.set_mads_params(enable_mads, False)
+              self.safety.set_mads_params(enable_mads, False, False)
               self.assertEqual(enable_mads, self.safety.get_enable_mads())
 
               self._rx(self._lkas_button_msg(True))

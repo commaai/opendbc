@@ -60,6 +60,10 @@ bool get_disengage_lateral_on_brake(void){
   return get_mads_state()->disengage_lateral_on_brake;
 }
 
+bool get_pause_lateral_on_brake(void){
+  return get_mads_state()->pause_lateral_on_brake;
+}
+
 int get_alternative_experience(void){
   return alternative_experience;
 }
@@ -242,13 +246,17 @@ void set_controls_requested_lat(bool c){
   m_mads_state.controls_requested_lat = c;
 }
 
-void set_mads_params(bool enable_mads, bool disengage_lateral_on_brake){
+void set_mads_params(bool enable_mads, bool disengage_lateral_on_brake, bool pause_lateral_on_brake){
   alternative_experience = 0;
   if (enable_mads) {
     alternative_experience |= ALT_EXP_ENABLE_MADS;
 
-    if (disengage_lateral_on_brake)
-      alternative_experience |= ALT_EXP_DISENGAGE_LATERAL_ON_BRAKE;
+    if (disengage_lateral_on_brake) {
+      alternative_experience |= ALT_EXP_MADS_DISENGAGE_LATERAL_ON_BRAKE;
+    } else if (pause_lateral_on_brake) {
+      alternative_experience |= ALT_EXP_MADS_PAUSE_LATERAL_ON_BRAKE;
+    } else {
+    }
   }
 
   mads_set_alternative_experience(&alternative_experience);

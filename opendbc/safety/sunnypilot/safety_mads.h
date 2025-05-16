@@ -45,6 +45,7 @@ inline void m_mads_state_init(void) {
 
   m_mads_state.system_enabled = false;
   m_mads_state.disengage_lateral_on_brake = false;
+  m_mads_state.pause_lateral_on_brake = false;
 
   m_mads_state.acc_main.previous = false;
   m_mads_state.acc_main.transition = MADS_EDGE_NO_CHANGE;
@@ -102,8 +103,13 @@ inline void m_update_control_state(void) {
     allowed = false;  // No matter what, no further control processing on this cycle
   }
 
+  if (m_mads_state.disengage_lateral_on_brake && (m_mads_state.braking.transition == MADS_EDGE_RISING)) {
+    mads_exit_controls(MADS_DISENGAGE_REASON_BRAKE);
+    allowed = false;
+  }
+
   // Secondary control conditions - only checked if primary conditions don't block further control processing
-  if (allowed && m_mads_state.disengage_lateral_on_brake) {
+  if (allowed && m_mads_state.pause_lateral_on_brake) {
     // Brake rising edge immediately blocks controls
     // Brake release might request controls if brake was the ONLY reason for disengagement
     if (m_mads_state.braking.transition == MADS_EDGE_RISING) {
@@ -145,15 +151,17 @@ inline void mads_heartbeat_engaged_check(void) {
 
 inline void mads_set_alternative_experience(const int *mode) {
   const bool mads_enabled = (*mode & ALT_EXP_ENABLE_MADS) != 0;
-  const bool disengage_lateral_on_brake = (*mode & ALT_EXP_DISENGAGE_LATERAL_ON_BRAKE) != 0;
+  const bool disengage_lateral_on_brake = (*mode & ALT_EXP_MADS_DISENGAGE_LATERAL_ON_BRAKE) != 0;
+  const bool pause_lateral_on_brake = (*mode & ALT_EXP_MADS_PAUSE_LATERAL_ON_BRAKE) != 0;
 
-  mads_set_system_state(mads_enabled, disengage_lateral_on_brake);
+  mads_set_system_state(mads_enabled, disengage_lateral_on_brake, pause_lateral_on_brake);
 }
 
-extern inline void mads_set_system_state(const bool enabled, const bool disengage_lateral_on_brake) {
+extern inline void mads_set_system_state(const bool enabled, const bool disengage_lateral_on_brake, const bool pause_lateral_on_brake) {
   m_mads_state_init();
   m_mads_state.system_enabled = enabled;
   m_mads_state.disengage_lateral_on_brake = disengage_lateral_on_brake;
+  m_mads_state.pause_lateral_on_brake = pause_lateral_on_brake;
 }
 
 inline void mads_exit_controls(const DisengageReason reason) {

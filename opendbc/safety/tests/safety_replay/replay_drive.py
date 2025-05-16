@@ -32,11 +32,13 @@ def replay_drive(msgs, safety_mode, param, alternative_experience, param_sp):
   safety.set_alternative_experience(alternative_experience)
 
   _enable_mads = bool(alternative_experience & ALTERNATIVE_EXPERIENCE.ENABLE_MADS)
-  _disengage_lateral_on_brake = bool(alternative_experience & ALTERNATIVE_EXPERIENCE.DISENGAGE_LATERAL_ON_BRAKE)
-  safety.set_mads_params(_enable_mads, _disengage_lateral_on_brake)
+  _disengage_lateral_on_brake = bool(alternative_experience & ALTERNATIVE_EXPERIENCE.MADS_DISENGAGE_LATERAL_ON_BRAKE)
+  _pause_lateral_on_brake = bool(alternative_experience & ALTERNATIVE_EXPERIENCE.MADS_PAUSE_LATERAL_ON_BRAKE)
+  safety.set_mads_params(_enable_mads, _disengage_lateral_on_brake, _pause_lateral_on_brake)
   print("alternative experience:")
   print(f"  enable mads: {_enable_mads}")
   print(f"  disengage lateral on brake: {_disengage_lateral_on_brake}")
+  print(f"  pause lateral on brake: {_pause_lateral_on_brake}")
 
   init_segment(safety, msgs, safety_mode, param)
 
