@@ -99,9 +99,13 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
 
   // set message checksum
 //  auto sig_it_checksum = signal_lookup.find(std::make_pair(address, "CHECKSUM"));
-  auto sig_it_checksum = std::find_if(signal_lookup.begin(), signal_lookup.end(), [&address](const auto& pair) {
-//    return pair.first.first == address && pair.first.second == "CHECKSUM";
-    return pair.first.first == address && pair.second.type > COUNTER;
+//  auto sig_it_checksum = std::find_if(signal_lookup.begin(), signal_lookup.end(), [&address](const auto& pair) {
+////    return pair.first.first == address && pair.first.second == "CHECKSUM";
+//    return pair.first.first == address && pair.second.type > COUNTER;
+//  });
+
+  auto sig_it_checksum4 = std::find_if(signal_lookup4[address].begin(), signal_lookup4[address].end(), [](const Signal &s) {
+    return s.type > COUNTER;
   });
 
 //  auto addr_it = signal_lookup2.find(address);
@@ -127,8 +131,8 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
 //    .find_if([](const auto& pair) {
 //      return pair.second.type > COUNTER;
 //    });
-  if (sig_it_checksum != signal_lookup.end()) {
-    const auto &sig = sig_it_checksum->second;
+  if (sig_it_checksum4 != signal_lookup4[address].end()) {
+    const auto &sig = *sig_it_checksum4;
     if (sig.calc_checksum != nullptr) {
       unsigned int checksum = sig.calc_checksum(address, sig, ret);
       set_value(ret, sig, checksum);
