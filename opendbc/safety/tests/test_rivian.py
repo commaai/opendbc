@@ -27,7 +27,7 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
                            common.VehicleSpeedSafetyTest):
 
   TX_MSGS = [[0x120, 0], [0x321, 2], [0x162, 2]]
-  RELAY_MALFUNCTION_ADDRS = {0: (0x120,)}
+  RELAY_MALFUNCTION_ADDRS = {0: (0x120,), 2: (0x321, 0x162)}
   FWD_BLACKLISTED_ADDRS = {0: [0x321, 0x162], 2: [0x120]}
 
   MAX_TORQUE_LOOKUP = [9, 17], [350, 250]
@@ -149,7 +149,7 @@ class TestRivianStockSafety(TestRivianSafetyBase):
 class TestRivianLongitudinalSafety(TestRivianSafetyBase):
 
   TX_MSGS = [[0x120, 0], [0x321, 2], [0x160, 0]]
-  RELAY_MALFUNCTION_ADDRS = {0: (0x120, 0x160)}
+  RELAY_MALFUNCTION_ADDRS = {0: (0x120, 0x160), 2: (0x321,)}
   FWD_BLACKLISTED_ADDRS = {0: [0x321], 2: [0x120, 0x160]}
 
   def setUp(self):

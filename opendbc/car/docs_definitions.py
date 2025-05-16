@@ -190,7 +190,7 @@ class CarParts:
     return self.parts + parts
 
 
-CarFootnote = namedtuple("CarFootnote", ["text", "column", "docs_only", "shop_footnote"], defaults=(False, False))
+CarFootnote = namedtuple("CarFootnote", ["text", "column", "docs_only", "setup_note"], defaults=(False, False))
 
 
 class CommonFootnote(Enum):
@@ -255,6 +255,7 @@ class CarDocs:
   requirements: str | None = None
 
   video_link: str | None = None
+  setup_video_link: str | None = None
   footnotes: list[Enum] = field(default_factory=list)
   min_steer_speed: float | None = None
   min_enable_speed: float | None = None
@@ -284,7 +285,7 @@ class CarDocs:
 
     # longitudinal column
     op_long = "Stock"
-    if CP.experimentalLongitudinalAvailable or CP.enableDsu:
+    if CP.alphaLongitudinalAvailable or CP.enableDsu:
       op_long = "openpilot available"
       if CP.enableDsu:
         self.footnotes.append(CommonFootnote.EXP_LONG_DSU)
@@ -382,7 +383,7 @@ class CarDocs:
 
       # experimental mode
       exp_link = "<a href='https://blog.comma.ai/090release/#experimental-mode' target='_blank' class='highlight'>Experimental mode</a>"
-      if CP.openpilotLongitudinalControl and not CP.experimentalLongitudinalAvailable:
+      if CP.openpilotLongitudinalControl and not CP.alphaLongitudinalAvailable:
         sentence_builder += f" Traffic light and stop sign handling is also available in {exp_link}."
 
       return sentence_builder.format(car_model=f"{self.make} {self.model}", alc=alc, acc=acc)

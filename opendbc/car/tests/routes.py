@@ -29,7 +29,6 @@ non_tested_cars = [
   VOLKSWAGEN.VOLKSWAGEN_CRAFTER_MK2,  # need a route from an ACC-equipped Crafter
   SUBARU.SUBARU_FORESTER_HYBRID,
   TESLA.TESLA_MODEL_3,
-  TESLA.TESLA_MODEL_Y,
 ]
 
 
@@ -55,6 +54,7 @@ routes = [
 
   CarTestRoute("54827bf84c38b14f|2023-01-25--14-14-11", FORD.FORD_BRONCO_SPORT_MK1),
   CarTestRoute("f8eaaccd2a90aef8|2023-05-04--15-10-09", FORD.FORD_ESCAPE_MK4),
+  CarTestRoute("56574443e0c3783c/00000002--c00bd0fe69", FORD.FORD_ESCAPE_MK4_5),
   CarTestRoute("62241b0c7fea4589|2022-09-01--15-32-49", FORD.FORD_EXPLORER_MK6),
   CarTestRoute("e886087f430e7fe7|2023-06-16--23-06-36", FORD.FORD_FOCUS_MK4),
   CarTestRoute("bd37e43731e5964b|2023-04-30--10-42-26", FORD.FORD_MAVERICK_MK1),
@@ -107,9 +107,11 @@ routes = [
   CarTestRoute("f34a60d68d83b1e5|2020-10-06--14-35-55", HONDA.ACURA_RDX),
   CarTestRoute("54fd8451b3974762|2021-04-01--14-50-10", HONDA.HONDA_RIDGELINE),
   CarTestRoute("2d5808fae0b38ac6|2021-09-01--17-14-11", HONDA.HONDA_E),
-
   CarTestRoute("f44aa96ace22f34a|2021-12-22--06-22-31", HONDA.HONDA_CIVIC_2022),
-  CarTestRoute("1f032f5173c8ad99/00000006--573b3fcaf5", HONDA.HONDA_CIVIC_2022), # Civic Type R with manual transmission
+  CarTestRoute("1f032f5173c8ad99/00000006--573b3fcaf5", HONDA.HONDA_CIVIC_2022),  # Civic Type R with manual transmission
+  CarTestRoute("b1c832ad56b6bc9d/00000010--debfcf5867", HONDA.HONDA_CIVIC_2022),  # 2025 Civic Hatch Hybrid with new eCVT transmission
+  CarTestRoute("f9c43864cf057d05|2024-01-15--23-01-20", HONDA.HONDA_PILOT_4G),  # TODO: Replace with a newer route
+
   CarTestRoute("87d7f06ade479c2e|2023-09-11--23-30-11", HYUNDAI.HYUNDAI_AZERA_6TH_GEN),
   CarTestRoute("66189dd8ec7b50e6|2023-09-20--07-02-12", HYUNDAI.HYUNDAI_AZERA_HEV_6TH_GEN),
   CarTestRoute("6fe86b4e410e4c37|2020-07-22--16-27-13", HYUNDAI.HYUNDAI_GENESIS),
@@ -223,6 +225,7 @@ routes = [
   CarTestRoute("f49e8041283f2939|2019-05-30--11-51-51", TOYOTA.LEXUS_ES_TSS2),  # hybrid
   CarTestRoute("da23c367491f53e2|2021-05-21--09-09-11", TOYOTA.LEXUS_CTH, segment=3),
   CarTestRoute("32696cea52831b02|2021-11-19--18-13-30", TOYOTA.LEXUS_RC),
+  CarTestRoute("7f8f479cfa6f392a/00000001--9a84b69c9d", TOYOTA.LEXUS_RC_TSS2),
   CarTestRoute("ab9b64a5e5960cba|2023-10-24--17-32-08", TOYOTA.LEXUS_GS_F),
   CarTestRoute("886fcd8408d570e9|2020-01-29--02-18-55", TOYOTA.LEXUS_RX),
   CarTestRoute("d27ad752e9b08d4f|2021-05-26--19-39-51", TOYOTA.LEXUS_RX),  # hybrid
@@ -312,7 +315,8 @@ routes = [
 
   CarTestRoute("bc095dc92e101734/000000db--ee9fe46e57", RIVIAN.RIVIAN_R1_GEN1),
 
-  #CarTestRoute("46cdc864ec865f4b/00000007--42f94db730", TESLA.TESLA_MODEL_Y),
+  CarTestRoute("46cdc864ec865f4b/00000007--42f94db730", TESLA.TESLA_MODEL_Y),
+  CarTestRoute("2c912ca5de3b1ee9/0000025d--6eb6bcbca4", TESLA.TESLA_MODEL_Y, segment=4),
 
   # Segments that test specific issues
   # Controls mismatch due to standstill threshold

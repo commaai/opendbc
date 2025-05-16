@@ -22,7 +22,7 @@ MSG_LDW_1 = 0x5BE             # TX by OP, Lane line recognition and text alerts
 class TestVolkswagenPqSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteeringSafetyTest):
   cruise_engaged = False
 
-  RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_1,)}
+  RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_1, MSG_LDW_1)}
 
   MAX_RATE_UP = 6
   MAX_RATE_DOWN = 10
@@ -133,6 +133,7 @@ class TestVolkswagenPqStockSafety(TestVolkswagenPqSafetyBase):
 class TestVolkswagenPqLongSafety(TestVolkswagenPqSafetyBase, common.LongitudinalAccelSafetyTest):
   TX_MSGS = [[MSG_HCA_1, 0], [MSG_LDW_1, 0], [MSG_ACC_SYSTEM, 0], [MSG_ACC_GRA_ANZEIGE, 0]]
   FWD_BLACKLISTED_ADDRS = {2: [MSG_HCA_1, MSG_LDW_1, MSG_ACC_SYSTEM, MSG_ACC_GRA_ANZEIGE]}
+  RELAY_MALFUNCTION_ADDRS = {0: (MSG_HCA_1, MSG_LDW_1, MSG_ACC_SYSTEM, MSG_ACC_GRA_ANZEIGE)}
   INACTIVE_ACCEL = 3.01
 
   def setUp(self):

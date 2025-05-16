@@ -18,7 +18,7 @@ class Buttons:
 class GmLongitudinalBase(common.PandaCarSafetyTest, common.LongitudinalGasBrakeSafetyTest):
   # pylint: disable=no-member,abstract-method
 
-  RELAY_MALFUNCTION_ADDRS = {0: (0x180, 0x2CB)}  # ASCMLKASteeringCmd, ASCMGasRegenCmd
+  RELAY_MALFUNCTION_ADDRS = {0: (0x180, 0x2CB), 2: (0x184,)}  # ASCMLKASteeringCmd, ASCMGasRegenCmd, PSCMStatus
 
   MAX_POSSIBLE_BRAKE = 2 ** 12
   MAX_BRAKE = 400
@@ -75,7 +75,7 @@ class GmLongitudinalBase(common.PandaCarSafetyTest, common.LongitudinalGasBrakeS
 class TestGmSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteeringSafetyTest):
   STANDSTILL_THRESHOLD = 10 * 0.0311
   # Ensures ASCM is off on ASCM cars, and relay is not malfunctioning for camera-ACC cars
-  RELAY_MALFUNCTION_ADDRS = {0: (0x180,)}  # ASCMLKASteeringCmd
+  RELAY_MALFUNCTION_ADDRS = {0: (0x180,), 2: (0x184,)}  # ASCMLKASteeringCmd, PSCMStatus
   BUTTONS_BUS = 0  # rx or tx
   BRAKE_BUS = 0  # tx only
 
@@ -148,6 +148,7 @@ class TestGmAscmSafety(GmLongitudinalBase, TestGmSafetyBase):
              [0xA1, 1], [0x306, 1], [0x308, 1], [0x310, 1],  # obs bus
              [0x315, 2]]  # ch bus
   FWD_BLACKLISTED_ADDRS: dict[int, list[int]] = {}
+  RELAY_MALFUNCTION_ADDRS = {0: (0x180, 0x2CB)}  # ASCMLKASteeringCmd, ASCMGasRegenCmd
   FWD_BUS_LOOKUP: dict[int, int] = {}
   BRAKE_BUS = 2
 
@@ -209,6 +210,7 @@ class TestGmCameraLongitudinalSafety(GmLongitudinalBase, TestGmCameraSafetyBase)
   TX_MSGS = [[0x180, 0], [0x315, 0], [0x2CB, 0], [0x370, 0],  # pt bus
              [0x184, 2]]  # camera bus
   FWD_BLACKLISTED_ADDRS = {2: [0x180, 0x2CB, 0x370, 0x315], 0: [0x184]}  # block LKAS, ACC messages and PSCMStatus
+  RELAY_MALFUNCTION_ADDRS = {0: (0x180, 0x2CB, 0x370, 0x315), 2: (0x184,)}
   BUTTONS_BUS = 0  # rx only
 
   MAX_GAS = 1346

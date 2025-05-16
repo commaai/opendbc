@@ -12,7 +12,7 @@ class TestSubaruPreglobalSafety(common.PandaCarSafetyTest, common.DriverTorqueSt
   FLAGS = 0
   DBC = "subaru_outback_2015_generated"
   TX_MSGS = [[0x161, 0], [0x164, 0]]
-  RELAY_MALFUNCTION_ADDRS = {0: (0x164,)}
+  RELAY_MALFUNCTION_ADDRS = {0: (0x164, 0x161)}
   FWD_BLACKLISTED_ADDRS = {2: [0x161, 0x164]}
 
   MAX_RATE_UP = 50

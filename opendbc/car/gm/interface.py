@@ -85,7 +85,7 @@ class CarInterface(CarInterfaceBase):
       return self.torque_from_lateral_accel_linear
 
   @staticmethod
-  def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
+  def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, docs) -> structs.CarParams:
     ret.brand = "gm"
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.gm)]
     ret.autoResumeSng = False
@@ -100,7 +100,7 @@ class CarInterface(CarInterfaceBase):
     ret.longitudinalTuning.kiBP = [5., 35.]
 
     if candidate in (CAMERA_ACC_CAR | SDGM_CAR):
-      ret.experimentalLongitudinalAvailable = candidate not in SDGM_CAR
+      ret.alphaLongitudinalAvailable = candidate not in SDGM_CAR
       ret.networkLocation = NetworkLocation.fwdCamera
       ret.radarUnavailable = True  # no radar
       ret.pcmCruise = True
@@ -114,13 +114,13 @@ class CarInterface(CarInterfaceBase):
       ret.vEgoStopping = 0.25
       ret.vEgoStarting = 0.25
 
-      if experimental_long:
+      if alpha_long:
         ret.pcmCruise = False
         ret.openpilotLongitudinalControl = True
         ret.safetyConfigs[0].safetyParam |= GMSafetyFlags.HW_CAM_LONG.value
 
       if candidate in ALT_ACCS:
-        ret.experimentalLongitudinalAvailable = False
+        ret.alphaLongitudinalAvailable = False
         ret.openpilotLongitudinalControl = False
         ret.minEnableSpeed = -1.  # engage speed is decided by PCM
 
