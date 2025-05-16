@@ -565,6 +565,15 @@ class TestHondaBoschRadarlessLongSafety(common.LongitudinalAccelSafetyTest, Hond
   def test_spam_cancel_safety_check(self):
     pass
 
+# ********************* Honda Regen **********************
+
+
+class TestHondaRegenSafetyBase(HondaBase):
+
+  # existence of _user_regen_msg adds regen tests
+  def _user_regen_msg(self, regen):
+    values = {"REGEN_STRENGTH": 4 if regen else 0}
+    return self.packer.make_can_msg_panda("GEARBOX", 0, values)
 
 if __name__ == "__main__":
   unittest.main()
