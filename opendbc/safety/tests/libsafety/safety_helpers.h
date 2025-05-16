@@ -258,6 +258,10 @@ void set_heartbeat_engaged_mads(bool c){
   heartbeat_engaged_mads = c;
 }
 
+void set_steering_disengage(bool c){
+  steering_disengage = c;
+}
+
 //int get_temp_debug(void){
 //  return temp_debug;
 //}

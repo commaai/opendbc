@@ -417,4 +417,20 @@ class MadsSafetyTestBase(unittest.TestCase):
     finally:
       self._mads_states_cleanup()
 
+  def test_steering_disengage_with_control_request(self):
+    try:
+      self._mads_states_cleanup()
+      self.safety.set_mads_params(True, False)
+
+      self.safety.set_controls_requested_lat(True)
+      self._rx(self._speed_msg(0))
+      self.assertTrue(self.safety.get_controls_allowed_lat())
+
+      self.safety.set_steering_disengage(True)
+      self._rx(self._speed_msg(0))
+      self.assertFalse(self.safety.get_controls_allowed_lat())
+
+    finally:
+      self._mads_states_cleanup()
+
   # TODO-SP: controls_allowed and controls_allowed_lat check for steering safety tests
