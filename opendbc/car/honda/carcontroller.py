@@ -146,7 +146,7 @@ class CarController(CarControllerBase):
     apply_torque = int(np.interp(-limited_torque * self.params.STEER_MAX,
                                  self.params.STEER_LOOKUP_BP, self.params.STEER_LOOKUP_V))
 
-    steerfactor = 400 if actuators.torque == 0 else abs ( self.params.STEER_MAX / max ( abs(actuators.torque), abs(apply_torque) ) )
+    # steerfactor = 400 if actuators.torque == 0 else abs ( self.params.STEER_MAX / max ( abs(actuators.torque), abs(apply_torque) ) )
 
     if CC.longActive:
       # accel = float (np.clip ( actuators.accel, -100.0, np.interp (steerfactor, [ 1.0, 4.0 ], [-3.5, 3.5]) ) )
