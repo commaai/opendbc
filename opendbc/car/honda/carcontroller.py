@@ -149,7 +149,8 @@ class CarController(CarControllerBase):
     steerfactor = 400 if actuators.torque == 0 else abs ( self.params.STEER_MAX / max ( abs(actuators.torque), abs(apply_torque) ) )
 
     if CC.longActive:
-      accel = float (np.clip ( actuators.accel, -100.0, np.interp (steerfactor, [ 1.0, 4.0 ], [-3.5, 3.5]) ) )
+      # accel = float (np.clip ( actuators.accel, -100.0, np.interp (steerfactor, [ 1.0, 4.0 ], [-3.5, 3.5]) ) )
+      accel = float (np.clip ( actuators.accel, -3.5, 2)
       if accel > max ( 0, CS.out.aEgo):
         accel = 10000.0
       gas, brake = compute_gas_brake(accel, CS.out.vEgo, self.CP.carFingerprint)
@@ -272,7 +273,7 @@ class CarController(CarControllerBase):
         #                                                              0, 100.0 ) )
 
         # reduce speed if above 50% steering max
-        pcm_speed = float ( np.clip ( pcm_speed, 0, 100 if CS.out.vEgo < 10.0 else steerfactor * 0.50 * CS.out.vEgo ) )
+        # pcm_speed = float ( np.clip ( pcm_speed, 0, 100 if CS.out.vEgo < 10.0 else steerfactor * 0.50 * CS.out.vEgo ) )
 
         self.blend_pcm_speed =  self.blend_pcm_speed * PERCENT_BLEND + pcm_speed * ( 1 - PERCENT_BLEND )
 
