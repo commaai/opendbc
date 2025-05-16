@@ -5,7 +5,7 @@ from opendbc.can.parser import CANParser
 from opendbc.can.packer import CANPacker
 
 
-# @pytest.mark.skip("TODO: varies too much between machines")
+@pytest.mark.skip("TODO: varies too much between machines")
 class TestParser:
   def _benchmark(self, checks, thresholds, n):
     parser = CANParser('toyota_new_mc_pt_generated', checks, 0)
