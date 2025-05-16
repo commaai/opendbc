@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import time
 import numpy as np
 import random
 import unittest
@@ -256,6 +257,7 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
 
   def test_max_lateral_acceleration(self):
     # Ford CAN FD can achieve a higher max lateral acceleration than CAN so we limit curvature based on speed
+    t = time.perf_counter()
     for speed in np.arange(0, 40, 0.5):
       # Clip so we test curvature limiting at low speed due to low max curvature
       _, curvature_accel_limit_upper = self.get_canfd_curvature_limits(speed)
