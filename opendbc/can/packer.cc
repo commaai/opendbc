@@ -90,30 +90,6 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
   auto sig_it_checksum = std::find_if(signal_lookup[address].begin(), signal_lookup[address].end(), [](const auto &pair) {
     return pair.second.type > COUNTER;
   });
-
-//  auto addr_it = signal_lookup.find(address);
-//  if (addr_it != signal_lookup.end()) {
-//    auto &inner = addr_it->second;
-//    auto sig_it_checksum = std::find_if(
-//      inner.begin(), inner.end(),
-//      [](auto const &pair) {
-//        return pair.second.type > COUNTER;
-//      }
-//    );
-//
-//    if (sig_it_checksum != inner.end()) {
-//      const auto &sig = sig_it_checksum->second;
-//      if (sig.calc_checksum != nullptr) {
-//        unsigned int checksum = sig.calc_checksum(address, sig, ret);
-//        set_value(ret, sig, checksum);
-//      }
-//    }
-//  }
-
-//  auto sig_it_checksum = signal_lookup.find(address)
-//    .find_if([](const auto& pair) {
-//      return pair.second.type > COUNTER;
-//    });
   if (sig_it_checksum != signal_lookup[address].end()) {
     const auto &sig = sig_it_checksum->second;
     if (sig.calc_checksum != nullptr) {
