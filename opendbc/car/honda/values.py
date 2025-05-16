@@ -67,8 +67,9 @@ class HondaFlags(IntFlag):
   NIDEC = 16
   NIDEC_ALT_PCM_ACCEL = 32
   NIDEC_ALT_SCM_MESSAGES = 64
-
   BOSCH_CANFD = 128
+  NIDEC_HYBRID = 256
+
 
 # Car button codes
 class CruiseButtons:
@@ -257,6 +258,12 @@ class CAR(Platforms):
     radar_dbc_dict('honda_fit_ex_2018_can_generated'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES,
   )
+  ACURA_MDX_3G_HYBRID = HondaNidecPlatformConfig(
+    [HondaCarDocs("Acura MDX Hybrid 2018-20")],
+    CarSpecs(mass=4486 * CV.LB_TO_KG, wheelbase=2.82, centerToFrontRatio=0.428, steerRatio=15.76, tireStiffnessFactor=0.444),  # acura spec, stiff from Pilot
+    radar_dbc_dict('acura_mdx_3G_hybrid'),
+    flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES | HondaFlags.NIDEC_HYBRID | HondaFlags.NIDEC_ALT_PCM_ACCEL,
+  )
   HONDA_ODYSSEY = HondaNidecPlatformConfig(
     [HondaCarDocs("Honda Odyssey 2018-20")],
     CarSpecs(mass=1900, wheelbase=3.0, steerRatio=14.35, centerToFrontRatio=0.41, tireStiffnessFactor=0.82),
@@ -356,13 +363,20 @@ STEER_THRESHOLD = {
   # default is 1200, overrides go here
   CAR.ACURA_RDX: 400,
   CAR.HONDA_CRV_EU: 400,
+  CAR.ACURA_MDX_3G_HYBRID: 30, # try higher number
 }
 
 HONDA_NIDEC_ALT_PCM_ACCEL = CAR.with_flags(HondaFlags.NIDEC_ALT_PCM_ACCEL)
 HONDA_NIDEC_ALT_SCM_MESSAGES = CAR.with_flags(HondaFlags.NIDEC_ALT_SCM_MESSAGES)
+HONDA_NIDEC_HYBRID = CAR.with_flags(HondaFlags.NIDEC_HYBRID)
 HONDA_BOSCH = CAR.with_flags(HondaFlags.BOSCH)
 HONDA_BOSCH_RADARLESS = CAR.with_flags(HondaFlags.BOSCH_RADARLESS)
 HONDA_BOSCH_CANFD = CAR.with_flags(HondaFlags.BOSCH_CANFD)
+SERIAL_STEERING = {CAR.ACURA_MDX_3G_HYBRID}
 
 
 DBC = CAR.create_dbc_map()
+
+
+# diag message that in some Nidec cars only appear with 1s freq if VIN query is performed
+# DIAG_MSGS = {1600: 5, 1601: 8} - temporarily remove - not sure what this does

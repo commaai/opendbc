@@ -494,6 +494,32 @@ FW_VERSIONS = {
       b'36161-TDK-J530\x00\x00',
     ],
   },
+  CAR.ACURA_MDX_3G_HYBRID: {
+ #   (Ecu.programmedFuelInjection, 0x18da10f1, None): [
+ #     b'37805-5BN-A521\x00\x00',
+ #   ],
+    (Ecu.vsa, 0x18da28f1, None): [
+      b'57114-TRX-H130\x00\x00',
+    ],
+    (Ecu.fwdRadar, 0x18dab0f1, None): [
+      b'36161-TYT-A220\x00\x00',
+    ],
+ #   (Ecu.shiftByWire, 0x18da0bf1, None): [
+ #     b'54008-TZ5-A911\x00\x00',
+ #   ],
+ #   (Ecu.transmission, 0x18da1ef1, None): [
+ #     b'28101-5DH-A401\x00\x00',
+ #   ],
+#    (Ecu.combinationMeter, 0x18da60f1, None): [
+#      b'78109-TYS-A611\x00\x00',
+#    ],
+    (Ecu.srs, 0x18da53f1, None): [
+      b'77959-TRX-A011\x00\x00',
+    ],
+#     (Ecu.gateway, 0x18daeff1, None): [
+#      b'38897-TYR-A011\x00\x00',
+#    ],
+  },
   CAR.HONDA_ODYSSEY: {
     (Ecu.gateway, 0x18daeff1, None): [
       b'38897-THR-A010\x00\x00',

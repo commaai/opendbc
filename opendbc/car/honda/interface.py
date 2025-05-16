@@ -93,6 +93,13 @@ class CarInterface(CarInterfaceBase):
       ret.longitudinalTuning.kiBP = [0., 5., 35.]
       ret.longitudinalTuning.kiV = [1.2, 0.8, 0.5]
 
+      # override for actuator tuning
+      # ret.longitudinalTuning.kpBP = [0.]
+      # ret.longitudinalTuning.kpV = [0.]
+      # ret.longitudinalTuning.kiBP = [0.]
+      # ret.longitudinalTuning.kiV = [0.]
+      # ret.longitudinalActuatorDelay = 0.0 # s
+
     eps_modified = False
     for fw in car_fw:
       if fw.ecu == "eps" and b"," in fw.fwVersion:
@@ -166,6 +173,12 @@ class CarInterface(CarInterfaceBase):
       else:
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.8], [0.24]]  # TODO: can probably use some tuning
 
+    elif candidate == CAR.ACURA_MDX_3G_HYBRID:
+      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 239], [0, 239]]
+      ret.lateralTuning.pid.kf = 0.000035
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.115], [0.052]]
+   #   ret.longitudinalActuatorDelay = 1.0 # s
+
     elif candidate == CAR.ACURA_RDX:
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 1000], [0, 1000]]  # TODO: determine if there is a dead zone at the top end
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.8], [0.24]]
@@ -221,10 +234,10 @@ class CarInterface(CarInterfaceBase):
     # min speed to enable ACC. if car can do stop and go, then set enabling speed
     # to a negative value, so it won't matter. Otherwise, add 0.5 mph margin to not
     # conflict with PCM acc
-    ret.autoResumeSng = candidate in (HONDA_BOSCH | {CAR.HONDA_CIVIC})
+    ret.autoResumeSng = candidate in (HONDA_BOSCH | {CAR.HONDA_CIVIC, CAR.ACURA_MDX_3G_HYBRID})
     ret.minEnableSpeed = -1. if ret.autoResumeSng else 25.51 * CV.MPH_TO_MS
 
-    ret.steerActuatorDelay = 0.1
+    ret.steerActuatorDelay = 0.3 if candidate == CAR.ACURA_MDX_3G_HYBRID else 0.1
     ret.steerLimitTimer = 0.8
     ret.radarDelay = 0.1
 
