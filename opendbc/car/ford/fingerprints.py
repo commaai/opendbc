@@ -116,6 +116,7 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdCamera, 0x706, None): [
       b'ML3T-14H102-ABT\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+      b'RJ6T-14H102-ACJ\x00\x00\x00\x00\x00\x00\x00\x00\x00',
       b'RJ6T-14H102-BBC\x00\x00\x00\x00\x00\x00\x00\x00\x00',
     ],
     (Ecu.fwdRadar, 0x764, None): [
