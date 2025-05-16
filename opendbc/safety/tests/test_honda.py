@@ -238,6 +238,7 @@ class HondaBase(common.PandaCarSafetyTest):
     self.assertFalse(self.safety.get_controls_allowed())
 
   def test_steer_safety_check(self):
+    self._mads_states_cleanup()
     self.safety.set_controls_allowed(0)
     self.assertTrue(self._tx(self._send_steer_msg(0x0000)))
     self.assertFalse(self._tx(self._send_steer_msg(0x1000)))
