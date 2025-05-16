@@ -73,8 +73,8 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
   }
 
   // set message counter
-  auto sig_it_counter = std::find_if(signal_lookup[address].begin(), signal_lookup[address].end(), [](const auto &pair) {
-    return pair.first == "COUNTER" || pair.second.type == COUNTER;
+  auto sig_it_counter = std::find_if(signal_lookup[address].begin(), signal_lookup[address].end(), [](const auto& pair) {
+    return pair.second.type == COUNTER || pair.first == "COUNTER";
   });
   if (!counter_set && sig_it_counter != signal_lookup[address].end()) {
     const auto& sig = sig_it_counter->second;
@@ -87,7 +87,7 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
   }
 
   // set message checksum
-  auto sig_it_checksum = std::find_if(signal_lookup[address].begin(), signal_lookup[address].end(), [](const auto &pair) {
+  auto sig_it_checksum = std::find_if(signal_lookup[address].begin(), signal_lookup[address].end(), [](const auto& pair) {
     return pair.second.type > COUNTER;
   });
   if (sig_it_checksum != signal_lookup[address].end()) {
