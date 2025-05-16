@@ -48,45 +48,53 @@ class CAR(Platforms):
   )
 
 # Same as StdQueries.DEFAULT_DIAGNOSTIC_REQUEST
-PSA_DIAGNOSTIC_REQUEST  = bytes([uds.SERVICE_TYPE.DIAGNOSTIC_SESSION_CONTROL, 0x01])
+PSA_DIAG_REQ  = bytes([uds.SERVICE_TYPE.DIAGNOSTIC_SESSION_CONTROL, 0x01])
 # The Diagnostic response includes the ECU rx/tx timings
-PSA_DIAGNOSTIC_RESPONSE = bytes([uds.SERVICE_TYPE.DIAGNOSTIC_SESSION_CONTROL + 0x40, 0x01])
+PSA_DIAG_RESP = bytes([uds.SERVICE_TYPE.DIAGNOSTIC_SESSION_CONTROL + 0x40, 0x01])
 
-PSA_SERIAL_REQUEST = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER,  0xF1, 0x8C])
-PSA_SERIAL_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40, 0xF1, 0x8C])
+PSA_SERIAL_REQ = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER,  0xF1, 0x8C])
+PSA_SERIAL_RESP = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40, 0xF1, 0x8C])
 
-PSA_VERSION_REQUEST  = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER, 0xF0, 0xFE])
+PSA_SW_REQ  = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER, 0xF0, 0xFE])
 # TODO: Placeholder or info for uds module - The actual response is multi-frame TP
-PSA_VERSION_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40, 0xF0, 0xFE])
+PSA_SW_RESP = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40, 0xF0, 0xFE])
 
 PSA_RX_OFFSET = -0x20
 
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
-    Request(
-        [PSA_DIAGNOSTIC_REQUEST],
-        [PSA_DIAGNOSTIC_RESPONSE],
-        rx_offset=PSA_RX_OFFSET,
-        bus=1,
-        logging=True,
-        obd_multiplexing=False,
+    Request(  # serial number
+      [PSA_DIAG_REQ, PSA_SERIAL_REQ],
+      [PSA_DIAG_RESP, PSA_SERIAL_RESP],
+      rx_offset=PSA_RX_OFFSET,
+      bus=1,
+      obd_multiplexing=False,
+      logging=True,
+      whitelist_ecus=[Ecu.fwdRadar],
     ),
-    Request(
-        [PSA_SERIAL_REQUEST],
-        [PSA_SERIAL_RESPONSE],
-        rx_offset=PSA_RX_OFFSET,
-        bus=1,
-        logging=True,
-        obd_multiplexing=False,
+    Request(  # software version
+      [PSA_DIAG_REQ, PSA_SW_REQ],
+      [PSA_DIAG_RESP, PSA_SW_RESP],
+      rx_offset=PSA_RX_OFFSET,
+      bus=1,
+      obd_multiplexing=False,
+      logging=True,
+      whitelist_ecus=[Ecu.fwdRadar],
     ),
-    Request(
-        [PSA_VERSION_REQUEST],
-        [PSA_VERSION_RESPONSE],
-        rx_offset=PSA_RX_OFFSET,
-        bus=1,
-        logging=True,
-        obd_multiplexing=False,
+    Request(  # fallback VIN via functional broadcast
+      [StdQueries.OBD_VIN_REQUEST],
+      [StdQueries.OBD_VIN_RESPONSE],
+      bus=1,
+      obd_multiplexing=True,
     ),
+  ],
+  extra_ecus=[
+    (Ecu.fwdRadar, 0x6B6, None),
+    (Ecu.engine, 0x6B5, None),
+    (Ecu.adas, 0x6A6, None),
+    (Ecu.abs, 0x6B4, None),
+    (Ecu.eps, 0x6A2, None),
+    (Ecu.transmission, 0x6AD, None),
   ],
 )
 
