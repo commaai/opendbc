@@ -110,7 +110,7 @@ protected:
 class CANPacker {
 private:
   const DBC *dbc = NULL;
-  std::map<std::pair<uint32_t, std::string>, Signal> signal_lookup;
+//  std::map<std::pair<uint32_t, std::string>, Signal> signal_lookup;
   std::map<uint32_t, std::map<std::string, Signal>> signal_lookup2;
   std::multimap<uint32_t, Signal> signal_lookup3;
   std::unordered_map<uint32_t, std::vector<Signal>> signal_lookup4;
