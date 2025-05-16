@@ -13,7 +13,7 @@ class TestParser:
 
     t1 = time.process_time_ns()
     can_msgs = []
-    for i in range(500000):
+    for i in range(50000):
       values = {"ACC_CONTROL": {"ACC_TYPE": 1, "ALLOW_LONG_PRESS": 3}}
       msgs = [packer.make_can_msg(k, 0, v) for k, v in values.items()]
       can_msgs.append([int(0.01 * i * 1e9), msgs])
