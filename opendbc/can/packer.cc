@@ -37,6 +37,7 @@ CANPacker::CANPacker(const std::string& dbc_name) {
       signal_lookup[std::make_pair(msg.address, sig.name)] = sig;
 //      signal_lookup2[msg.address] = {sig.name, sig};
       signal_lookup3.emplace(msg.address, sig);
+      signal_lookup4[msg.address].push_back(sig);
     }
   }
 }
@@ -53,13 +54,17 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
   // set all values for all given signal/value pairs
   bool counter_set = false;
   for (const auto& sigval : signals) {
-    auto sig_it = signal_lookup3.find(std::make_pair(address, sigval.name));
-    if (sig_it == signal_lookup3.end()) {
+//    auto sig_it = signal_lookup.find(std::make_pair(address, sigval.name));
+    auto sig_it4 = std::find_if(signal_lookup4[address].begin(), signal_lookup4[address].end(), [&sigval](const Signal &s) {
+      return s.name == sigval.name;
+    });
+//    if (sig_it == signal_lookup.end()) {
+    if (sig_it4 == signal_lookup4[address].end()) {
       // TODO: do something more here. invalid flag like CANParser?
       LOGE("undefined signal %s - %d\n", sigval.name.c_str(), address);
       continue;
     }
-    const auto &sig = sig_it->second;
+    const auto &sig = *sig_it4;
 
     int64_t ival = (int64_t)(round((sigval.value - sig.offset) / sig.factor));
     if (ival < 0) {
@@ -75,12 +80,15 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
   }
 
   // set message counter
-  auto sig_it_counter = signal_lookup.find(std::make_pair(address, "COUNTER"));
+//  auto sig_it_counter = signal_lookup.find(std::make_pair(address, "COUNTER"));
+  auto sig_it_counter4 = std::find_if(signal_lookup4[address].begin(), signal_lookup4[address].end(), [](const Signal &s) {
+    return s.name == "COUNTER" || s.type == COUNTER;
+  });
 //  auto sig_it_counter = std::find_if(signal_lookup.begin(), signal_lookup.end(), [&address](const auto& pair) {
 //    return pair.first.first == address && (pair.second.type == COUNTER || pair.second.name == "COUNTER");
 //  });
-  if (!counter_set && sig_it_counter != signal_lookup.end()) {
-    const auto& sig = sig_it_counter->second;
+  if (!counter_set && sig_it_counter4 != signal_lookup4[address].end()) {
+    const auto& sig = *sig_it_counter4;
 
     if (counters.find(address) == counters.end()) {
       counters[address] = 0;
@@ -91,41 +99,41 @@ std::vector<uint8_t> CANPacker::pack(uint32_t address, const std::vector<SignalP
 
   // set message checksum
 //  auto sig_it_checksum = signal_lookup.find(std::make_pair(address, "CHECKSUM"));
-//  auto sig_it_checksum = std::find_if(signal_lookup.begin(), signal_lookup.end(), [&address](const auto& pair) {
+  auto sig_it_checksum = std::find_if(signal_lookup.begin(), signal_lookup.end(), [&address](const auto& pair) {
 //    return pair.first.first == address && pair.first.second == "CHECKSUM";
-////    return pair.first.first == address && pair.second.type > COUNTER;
-//  });
+    return pair.first.first == address && pair.second.type > COUNTER;
+  });
 
-  auto addr_it = signal_lookup2.find(address);
-  if (addr_it != signal_lookup2.end()) {
-    auto &inner = addr_it->second;
-    auto sig_it_checksum = std::find_if(
-      inner.begin(), inner.end(),
-      [](auto const &pair) {
-        return pair.second.type > COUNTER;
-      }
-    );
-
-    if (sig_it_checksum != inner.end()) {
-      const auto &sig = sig_it_checksum->second;
-      if (sig.calc_checksum != nullptr) {
-        unsigned int checksum = sig.calc_checksum(address, sig, ret);
-        set_value(ret, sig, checksum);
-      }
-    }
-  }
+//  auto addr_it = signal_lookup2.find(address);
+//  if (addr_it != signal_lookup2.end()) {
+//    auto &inner = addr_it->second;
+//    auto sig_it_checksum = std::find_if(
+//      inner.begin(), inner.end(),
+//      [](auto const &pair) {
+//        return pair.second.type > COUNTER;
+//      }
+//    );
+//
+//    if (sig_it_checksum != inner.end()) {
+//      const auto &sig = sig_it_checksum->second;
+//      if (sig.calc_checksum != nullptr) {
+//        unsigned int checksum = sig.calc_checksum(address, sig, ret);
+//        set_value(ret, sig, checksum);
+//      }
+//    }
+//  }
 
 //  auto sig_it_checksum = signal_lookup2.find(address)
 //    .find_if([](const auto& pair) {
 //      return pair.second.type > COUNTER;
 //    });
-//  if (sig_it_checksum != signal_lookup.end()) {
-//    const auto &sig = sig_it_checksum->second;
-//    if (sig.calc_checksum != nullptr) {
-//      unsigned int checksum = sig.calc_checksum(address, sig, ret);
-//      set_value(ret, sig, checksum);
-//    }
-//  }
+  if (sig_it_checksum != signal_lookup.end()) {
+    const auto &sig = sig_it_checksum->second;
+    if (sig.calc_checksum != nullptr) {
+      unsigned int checksum = sig.calc_checksum(address, sig, ret);
+      set_value(ret, sig, checksum);
+    }
+  }
 
   return ret;
 }
