@@ -2,6 +2,8 @@
 
 #define CANPACKET_HEAD_SIZE 6U
 
+extern const unsigned char dlc_to_len[16];
+
 // TODO: this is always CANFD
 #if !defined(STM32F4)
   #define CANFD
