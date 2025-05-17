@@ -30,6 +30,7 @@ class ExtraCarsColumn(Enum):
   MODEL = "Model"
   PACKAGE = "Package"
   SUPPORT = "Support Level"
+  SETUP_VIDEO = "Setup Video"
 
 
 class SupportType(Enum):
@@ -349,6 +350,7 @@ class CarDocs:
       ExtraCarsColumn.MODEL: self.model,
       ExtraCarsColumn.PACKAGE: self.package,
       ExtraCarsColumn.SUPPORT: support_info,
+      ExtraCarsColumn.SETUP_VIDEO: self.setup_video or "",
     }
 
     # Set steering torque star from max lateral acceleration
