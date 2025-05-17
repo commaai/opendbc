@@ -8,7 +8,8 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.toyota.values import ToyotaFlags, CAR, DBC, STEER_THRESHOLD, NO_STOP_TIMER_CAR, \
-                                                  TSS2_CAR, RADAR_ACC_CAR, EPS_SCALE, UNSUPPORTED_DSU_CAR
+                                                  TSS2_CAR, RADAR_ACC_CAR, EPS_SCALE, UNSUPPORTED_DSU_CAR, \
+                                                  SECOC_CAR
 
 ButtonType = structs.CarState.ButtonEvent.Type
 SteerControlType = structs.CarParams.SteerControlType
@@ -184,7 +185,7 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint not in UNSUPPORTED_DSU_CAR:
       self.pcm_follow_distance = cp.vl["PCM_CRUISE_2"]["PCM_FOLLOW_DISTANCE"]
 
-    if self.CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR):
+    if self.CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR - SECOC_CAR):
       # distance button is wired to the ACC module (camera or radar)
       prev_distance_button = self.distance_button
       self.distance_button = cp_acc.vl["ACC_CONTROL"]["DISTANCE"]
