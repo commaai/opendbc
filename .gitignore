@@ -17,6 +17,7 @@
 *.gcno
 
 uv.lock
+/dist/
 
 opendbc/can/build/
 opendbc/can/obj/
