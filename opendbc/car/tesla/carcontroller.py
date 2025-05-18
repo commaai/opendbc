@@ -62,7 +62,7 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(dbc_names[Bus.party])
     self.tesla_can = TeslaCAN(self.packer)
 
-    self.driver_torque = FirstOrderFilter(0.0, 0.05, DT_CTRL)
+    self.driver_torque = FirstOrderFilter(0.0, 0.03, DT_CTRL)
     # self.accel_modifier = 0.0
     self.angle_modifier = 0.0
 
@@ -79,8 +79,11 @@ class CarController(CarControllerBase):
     lat_active = CC.latActive and CS.hands_on_level < 3
 
     # negative is right, etc.
-    driver_torque = np.clip(CS.out.steeringTorque, -3.0, 3.0)
-    driver_torque = self.driver_torque.update(driver_torque if abs(driver_torque) > 0.5 else 0.0)  # TODO tweak the 0.5
+    driver_torque = 0.0
+    if abs(CS.out.steeringTorque) >= 0.5:
+      driver_torque = CS.out.steeringTorque - 0.5 * np.sign(CS.out.steeringTorque)
+    driver_torque = np.clip(driver_torque, -3.0, 3.0)
+    driver_torque = self.driver_torque.update(driver_torque)
 
     if self.frame % 2 == 0:
       # Angular rate limit based on speed
@@ -88,7 +91,7 @@ class CarController(CarControllerBase):
         # let's say that 1 nm = 1 m/s^2 of lateral acceleration
         curvature_from_torque = driver_torque / (max(CS.out.vEgoRaw, 1) ** 2)
         angle_from_torque = math.degrees(self.VM.get_steer_from_curvature(curvature_from_torque, CS.out.vEgoRaw, 0))
-        self.angle_modifier = angle_from_torque
+        self.angle_modifier = np.clip(angle_from_torque, self.angle_modifier - 5, self.angle_modifier + 5)
         # self.angle_modifier += angle_from_torque * (DT_CTRL * 0.5)  # ramp over 0.5s
       else:
         self.angle_modifier = 0.0
