@@ -17,7 +17,7 @@ class CarInterface(CarInterfaceBase):
 
     ret.steerControlType = structs.CarParams.SteerControlType.angle
     ret.steerActuatorDelay = 0.3
-    ret.steerLimitTimer = 0.4
+    ret.steerLimitTimer = 0.1
 
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.psa)]
 
