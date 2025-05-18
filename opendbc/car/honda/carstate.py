@@ -162,7 +162,8 @@ class CarState(CarStateBase):
     ret.seatbeltUnlatched = bool(cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LAMP"] or not cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LATCHED"])
 
     steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]["STEER_STATUS"]]
-    ret.steerFaultPermanent = steer_status not in ("NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT")
+    # removing perm faults ret.steerFaultPermanent = steer_status not in ("NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT")
+    ret.steerFaultTemporary = steer_status not in ("NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT")
     # LOW_SPEED_LOCKOUT is not worth a warning
     # NO_TORQUE_ALERT_2 can be caused by bump or steering nudge from driver
     ret.steerFaultTemporary = steer_status not in ("NORMAL", "LOW_SPEED_LOCKOUT", "NO_TORQUE_ALERT_2")
@@ -174,7 +175,8 @@ class CarState(CarStateBase):
       # FIXME: find and set the ACC faulted signals on more platforms
       if self.CP.openpilotLongitudinalControl:
         if self.CP.carFingerprint in HONDA_NIDEC_HYBRID:
-          ret.accFaulted = bool(cp.vl["HYBRID_STATUS"]["BRAKE_ERROR_1"] or cp.vl["HYBRID_STATUS"]["BRAKE_ERROR_2"])
+          ret.carFaultedNonCritical = bool(cp.vl["HYBRID_STATUS"]["BRAKE_ERROR_1"] or cp.vl["HYBRID_STATUS"]["BRAKE_ERROR_2"])
+          # remove per faults ret.accFaulted = bool(cp.vl["HYBRID_STATUS"]["BRAKE_ERROR_1"] or cp.vl["HYBRID_STATUS"]["BRAKE_ERROR_2"])
         else:
           ret.accFaulted = bool(cp.vl["STANDSTILL"]["BRAKE_ERROR_1"] or cp.vl["STANDSTILL"]["BRAKE_ERROR_2"])
 
