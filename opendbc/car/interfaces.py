@@ -239,9 +239,6 @@ class CarInterfaceBase(ABC):
     tune.torque.latAccelOffset = 0.0
     tune.torque.steeringAngleDeadzoneDeg = steering_angle_deadzone_deg
 
-  def _update(self) -> structs.CarState:
-    return self.CS.update(self.can_parsers)
-
   def update(self, can_packets: list[tuple[int, list[CanData]]]) -> structs.CarState:
     # parse can
     for cp in self.can_parsers.values():
@@ -249,7 +246,9 @@ class CarInterfaceBase(ABC):
         cp.update_strings(can_packets)
 
     # get CarState
-    ret = self._update()
+    ret = structs.CarState()
+    ret.allowPcmEnable = True
+    self.CS.update(ret, self.can_parsers)
 
     ret.canValid = all(cp.can_valid for cp in self.can_parsers.values())
     ret.canTimeout = any(cp.bus_timeout for cp in self.can_parsers.values())
@@ -300,7 +299,7 @@ class CarStateBase(ABC):
     self.v_ego_kf = KF1D(x0=x0, A=A, C=C[0], K=K)
 
   @abstractmethod
-  def update(self, can_parsers) -> structs.CarState:
+  def update(self, ret: structs.CarState, can_parsers: dict) -> structs.CarState:
     pass
 
   def update_speed_kf(self, v_ego_raw):
