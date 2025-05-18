@@ -84,7 +84,11 @@ def generate_cars_md(all_car_docs: list[CarDocs], template_fn: str, **kwargs) ->
     template = jinja2.Template(f.read(), trim_blocks=True, lstrip_blocks=True)
 
   footnotes = [fn.value.text for fn in get_all_footnotes()]
-  cars_md: str = template.render(all_car_docs=all_car_docs, PartType=PartType,
+  upstream_docs = [c for c in all_car_docs if c.support_type == SupportType.UPSTREAM]
+  other_docs = [c for c in all_car_docs if c.support_type != SupportType.UPSTREAM]
+
+  cars_md: str = template.render(all_car_docs=all_car_docs, upstream_docs=upstream_docs,
+                                 other_docs=other_docs, PartType=PartType,
                                  group_by_make=group_by_make, footnotes=footnotes,
                                  Device=Device, Column=Column, ExtraCarsColumn=ExtraCarsColumn,
                                  BaseCarHarness=BaseCarHarness, SupportType=SupportType,

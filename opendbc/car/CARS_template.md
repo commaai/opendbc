@@ -2,9 +2,20 @@
 
 # Support Information for {{all_car_docs | length}} Known Cars
 
+# Upstream Cars
+
 |{{ExtraCarsColumn | map(attribute='value') | join('|') | replace(hardware_col_name, wide_hardware_col_name)}}|
 |---|---|---|{% for _ in range((ExtraCarsColumn | length) - 3) %}{{':---:|'}}{% endfor +%}
-{% for car_docs in all_car_docs %}
+{% for car_docs in upstream_docs %}
+|{% for column in ExtraCarsColumn %}{{car_docs.get_extra_cars_column(column)}}|{% endfor %}
+
+{% endfor %}
+
+# All Other Cars
+
+|{{ExtraCarsColumn | map(attribute='value') | join('|') | replace(hardware_col_name, wide_hardware_col_name)}}|
+|---|---|---|{% for _ in range((ExtraCarsColumn | length) - 3) %}{{':---:|'}}{% endfor +%}
+{% for car_docs in other_docs %}
 |{% for column in ExtraCarsColumn %}{{car_docs.get_extra_cars_column(column)}}|{% endfor %}
 
 {% endfor %}
