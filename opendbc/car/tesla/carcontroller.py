@@ -62,7 +62,7 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(dbc_names[Bus.party])
     self.tesla_can = TeslaCAN(self.packer)
 
-    self.driver_torque = FirstOrderFilter(0.0, 0.03, DT_CTRL)
+    self.driver_torque = FirstOrderFilter(0.0, 0.003, DT_CTRL)
     # self.accel_modifier = 0.0
     self.angle_modifier = 0.0
 
