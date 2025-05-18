@@ -199,6 +199,13 @@ class CarState(CarStateBase):
     # Main button also can trigger an engagement on these cars
     ret.blockPcmEnable = not (any(btn in ENABLE_BUTTONS for btn in self.cruise_buttons) or any(self.main_buttons))
 
+    # low speed steer alert hysteresis logic (only for cars with steer cut off above 10 m/s)
+    if ret.vEgo < (self.CP.minSteerSpeed + 2.) and self.CP.minSteerSpeed > 10.:
+      self.low_speed_alert = True
+    if ret.vEgo > (self.CP.minSteerSpeed + 4.):
+      self.low_speed_alert = False
+    ret.lowSpeedAlert = self.low_speed_alert
+
     return ret
 
   def update_canfd(self, can_parsers) -> structs.CarState:
@@ -291,13 +298,6 @@ class CarState(CarStateBase):
     ret.buttonEvents = [*create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT),
                         *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise}),
                         *create_button_events(self.lda_button, prev_lda_button, {1: ButtonType.lkas})]
-
-    # low speed steer alert hysteresis logic (only for cars with steer cut off above 10 m/s)
-    if ret.vEgo < (self.CP.minSteerSpeed + 2.) and self.CP.minSteerSpeed > 10.:
-      self.low_speed_alert = True
-    if ret.vEgo > (self.CP.minSteerSpeed + 4.):
-      self.low_speed_alert = False
-    ret.lowSpeedAlert = self.low_speed_alert
 
     return ret
 
