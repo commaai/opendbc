@@ -1,5 +1,6 @@
 import os
 import abc
+import math
 import unittest
 import importlib
 import numpy as np
@@ -11,11 +12,22 @@ from opendbc.safety.tests.libsafety import libsafety_py
 
 MAX_WRONG_COUNTERS = 5
 MAX_SAMPLE_VALS = 6
+VEHICLE_SPEED_FACTOR = 1000
 
 MessageFunction = Callable[[float], libsafety_py.CANPacket]
 
+
 def sign_of(a):
   return 1 if a > 0 else -1
+
+
+def away_round(x):
+  # non-banker's/away from zero rounding, C++ CANParser uses this style
+  return math.floor(x + 0.5) if x >= 0 else math.ceil(x - 0.5)
+
+
+def round_speed(v):
+  return round(v * VEHICLE_SPEED_FACTOR) / VEHICLE_SPEED_FACTOR
 
 
 def make_msg(bus, addr, length=8, dat=None):
