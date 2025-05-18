@@ -1,7 +1,7 @@
 #pragma once
 
 #include "opendbc/safety/safety_declarations.h"
-#include "opendbc/safety/safety/safety_volkswagen_common.h"
+#include "opendbc/safety/modes/volkswagen_common.h"
 
 #define MSG_LENKHILFE_3         0x0D0   // RX from EPS, for steering angle and driver steering torque
 #define MSG_HCA_1               0x0D2   // TX by OP, Heading Control Assist steering torque
