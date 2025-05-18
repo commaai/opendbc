@@ -55,67 +55,31 @@ PSA_DIAG_RESP = bytes([uds.SERVICE_TYPE.DIAGNOSTIC_SESSION_CONTROL + 0x40, 0x01]
 PSA_SERIAL_REQ = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER,  0xF1, 0x8C])
 PSA_SERIAL_RESP = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40, 0xF1, 0x8C])
 
-PSA_SW_REQ  = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER, 0xF0, 0xFE])
+PSA_VERSION_REQ  = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER, 0xF0, 0xFE])
 # TODO: Placeholder or info for uds module - The actual response is multi-frame TP
-PSA_SW_RESP = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40, 0xF0, 0xFE])
+PSA_VERSION_RESP = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40, 0xF0, 0xFE])
 
 PSA_RX_OFFSET = -0x20
 
 FW_QUERY_CONFIG = FwQueryConfig(
-  requests=[
-    Request(  # bus 1
+  requests=[request for bus in (0, 1, 2) for request in [
+    Request(
       [PSA_DIAG_REQ, PSA_SERIAL_REQ],
       [PSA_DIAG_RESP, PSA_SERIAL_RESP],
       rx_offset=PSA_RX_OFFSET,
-      bus=1,
+      bus=bus,
       obd_multiplexing=False,
-      logging=True,
-      whitelist_ecus=[Ecu.fwdRadar],
+      whitelist_ecus=[Ecu.fwdRadar] if bus == 1 else None,
     ),
     Request(
-      [PSA_DIAG_REQ, PSA_SW_REQ],
-      [PSA_DIAG_RESP, PSA_SW_RESP],
+      [PSA_DIAG_REQ, PSA_VERSION_REQ],
+      [PSA_DIAG_RESP, PSA_VERSION_RESP],
       rx_offset=PSA_RX_OFFSET,
-      bus=1,
+      bus=bus,
       obd_multiplexing=False,
-      logging=True,
-      whitelist_ecus=[Ecu.fwdRadar],
+      whitelist_ecus=[Ecu.fwdRadar] if bus == 1 else None,
     ),
-    Request(  # bus 0
-      [PSA_DIAG_REQ, PSA_SERIAL_REQ],
-      [PSA_DIAG_RESP, PSA_SERIAL_RESP],
-      rx_offset=PSA_RX_OFFSET,
-      bus=0,
-      obd_multiplexing=False,
-      logging=True,
-    ),
-    Request(
-      [PSA_DIAG_REQ, PSA_SW_REQ],
-      [PSA_DIAG_RESP, PSA_SW_RESP],
-      rx_offset=PSA_RX_OFFSET,
-      bus=0,
-      obd_multiplexing=False,
-      logging=True,
-    ),
-    Request(  # bus 0
-      [PSA_DIAG_REQ, PSA_SERIAL_REQ],
-      [PSA_DIAG_RESP, PSA_SERIAL_RESP],
-      rx_offset=0x08,
-      bus=0,
-      obd_multiplexing=False,
-      logging=True,
-      whitelist_ecus=[Ecu.hud],
-    ),
-    Request(
-      [PSA_DIAG_REQ, PSA_SW_REQ],
-      [PSA_DIAG_RESP, PSA_SW_RESP],
-      rx_offset=0x08,
-      bus=0,
-      obd_multiplexing=False,
-      logging=True,
-      whitelist_ecus=[Ecu.hud],
-    ),
-  ],
+  ]]
 )
 
 DBC = CAR.create_dbc_map()
