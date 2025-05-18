@@ -31,7 +31,6 @@ No   CheckBool::checkComparisonOfFuncReturningBool             require:style,c++
 Yes  CheckBool::checkIncrementBoolean
 Yes  CheckBool::pointerArithBool
 Yes  CheckBool::returnValueOfFunctionReturningBool
-No   CheckBoost::checkBoostForeachModification
 Yes  CheckBufferOverrun::analyseWholeProgram
 Yes  CheckBufferOverrun::argumentSize
 Yes  CheckBufferOverrun::arrayIndex
@@ -192,6 +191,7 @@ Yes  CheckType::checkIntegerOverflow
 Yes  CheckType::checkLongCast
 Yes  CheckType::checkSignConversion
 Yes  CheckType::checkTooBigBitwiseShift
+Yes  CheckUninitVar::analyseWholeProgram
 Yes  CheckUninitVar::check
 Yes  CheckUninitVar::valueFlowUninit
 No   CheckUnusedFunctions::check                               require:unusedFunction
@@ -486,7 +486,6 @@ No   CheckBool::checkComparisonOfFuncReturningBool             require:style,c++
 Yes  CheckBool::checkIncrementBoolean
 Yes  CheckBool::pointerArithBool
 Yes  CheckBool::returnValueOfFunctionReturningBool
-No   CheckBoost::checkBoostForeachModification
 Yes  CheckBufferOverrun::analyseWholeProgram
 Yes  CheckBufferOverrun::argumentSize
 Yes  CheckBufferOverrun::arrayIndex
@@ -647,6 +646,7 @@ Yes  CheckType::checkIntegerOverflow
 Yes  CheckType::checkLongCast
 Yes  CheckType::checkSignConversion
 Yes  CheckType::checkTooBigBitwiseShift
+Yes  CheckUninitVar::analyseWholeProgram
 Yes  CheckUninitVar::check
 Yes  CheckUninitVar::valueFlowUninit
 No   CheckUnusedFunctions::check                               require:unusedFunction
