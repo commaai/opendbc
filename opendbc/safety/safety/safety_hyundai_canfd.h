@@ -1,7 +1,7 @@
 #pragma once
 
-#include "safety_declarations.h"
-#include "safety_hyundai_common.h"
+#include "opendbc/safety/safety_declarations.h"
+#include "opendbc/safety/safety/safety_hyundai_common.h"
 
 #define HYUNDAI_CANFD_CRUISE_BUTTON_TX_MSGS(bus) \
   {0x1CF, bus, 8, .check_relay = false},  /* CRUISE_BUTTON */   \
