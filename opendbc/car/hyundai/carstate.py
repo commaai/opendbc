@@ -196,7 +196,7 @@ class CarState(CarStateBase):
     # On some newer model years, the CANCEL button acts as a pause/resume button based on the PCM state
     # To avoid re-engaging when openpilot cancels, check user engagement intention via buttons
     # Main button also can trigger an engagement on these cars
-    ret.allowPcmEnable = any(btn in ENABLE_BUTTONS for btn in self.cruise_buttons) or any(self.main_buttons)
+    ret.blockPcmEnable = not (any(btn in ENABLE_BUTTONS for btn in self.cruise_buttons) or any(self.main_buttons))
 
     return ret
 
