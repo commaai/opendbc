@@ -78,21 +78,21 @@ class CarController(CarControllerBase):
     # Canceling is done on rising edge and is handled generically with CC.cruiseControl.cancel
     lat_active = CC.latActive and CS.hands_on_level < 3
 
+    # negative is right, etc.
+    driver_torque = np.clip(CS.out.steeringTorque, -3.0, 3.0)
+    driver_torque = self.driver_torque.update(driver_torque if abs(driver_torque) > 0.5 else 0.0)  # TODO tweak the 0.5
+
     if self.frame % 2 == 0:
       # Angular rate limit based on speed
-      apply_angle = actuators.steeringAngleDeg
       if CC.latActive:
-        # negative is right, etc.
         # let's say that 1 nm = 1 m/s^2 of lateral acceleration
-        driver_torque = self.driver_torque.update(np.clip(CS.out.steeringTorque, -3.0, 3.0))
-        driver_torque = driver_torque if abs(driver_torque) > 0.5 else 0.0  # TODO tweak the 0.5
         curvature_from_torque = driver_torque / (max(CS.out.vEgoRaw, 1) ** 2)
         angle_from_torque = math.degrees(self.VM.get_steer_from_curvature(curvature_from_torque, CS.out.vEgoRaw, 0))
         self.angle_modifier = angle_from_torque
         # self.angle_modifier += angle_from_torque * (DT_CTRL * 0.5)  # ramp over 0.5s
       else:
         self.angle_modifier = 0.0
-      apply_angle += self.angle_modifier
+      apply_angle = actuators.steeringAngleDeg + self.angle_modifier
 
       self.apply_angle_last = apply_tesla_steer_angle_limits(apply_angle, self.apply_angle_last, CS.out.vEgoRaw,
                                                              CS.out.steeringAngleDeg, lat_active,
