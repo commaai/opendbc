@@ -125,4 +125,4 @@ flake8-implicit-str-concat.allow-multiline=false
 include-package-data = true
 
 [tool.setuptools.package-data]
-"opendbc.safety" = ["*.h", "board/*.h", "board/drivers/*.h", "safety/*.h"]
+"opendbc.safety" = ["*.h", "board/*.h", "board/drivers/*.h", "modes/*.h"]
