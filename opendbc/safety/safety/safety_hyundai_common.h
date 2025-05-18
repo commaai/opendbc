@@ -1,6 +1,6 @@
 #pragma once
 
-#include "safety_declarations.h"
+#include "opendbc/safety/safety_declarations.h"
 
 extern uint16_t hyundai_canfd_crc_lut[256];
 uint16_t hyundai_canfd_crc_lut[256];

@@ -29,13 +29,12 @@ repos:
     hooks:
     -   id: cython-lint
     -   id: double-quote-cython-strings
-# TODO: enable this and fix all the errors
-#-   repo: https://github.com/cpplint/cpplint
-#    rev: 2.0.2
-#    hooks:
-#    -   id: cpplint
-#        args:
-#        - --quiet
-#        - --counting=detailed
-#        - --linelength=240
-#        - --filter=-build,-legal,-readability,-runtime,-whitespace,+build/include_subdir,+build/forward_decl,+build/include_what_you_use,+build/deprecated,+whitespace/comma,+whitespace/line_length,+whitespace/empty_if_body,+whitespace/empty_loop_body,+whitespace/empty_conditional_body,+whitespace/forcolon,+whitespace/parens,+whitespace/semicolon,+whitespace/tab,+readability/braces
+-   repo: https://github.com/cpplint/cpplint
+    rev: 2.0.2
+    hooks:
+    -   id: cpplint
+        args:
+        - --quiet
+        - --counting=detailed
+        - --linelength=240
+        - --filter=-build,-legal,-readability,-runtime,-whitespace,+build/include_subdir,+build/forward_decl,+build/include_what_you_use,+build/deprecated,+whitespace/comma,+whitespace/line_length,+whitespace/empty_if_body,+whitespace/empty_loop_body,+whitespace/empty_conditional_body,+whitespace/forcolon,+whitespace/parens,+whitespace/semicolon,+whitespace/tab,+readability/braces
