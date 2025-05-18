@@ -63,7 +63,7 @@ PSA_RX_OFFSET = -0x20
 
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
-    Request(  # serial number
+    Request(  # bus 1
       [PSA_DIAG_REQ, PSA_SERIAL_REQ],
       [PSA_DIAG_RESP, PSA_SERIAL_RESP],
       rx_offset=PSA_RX_OFFSET,
@@ -72,7 +72,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
       logging=True,
       whitelist_ecus=[Ecu.fwdRadar],
     ),
-    Request(  # software version
+    Request(
       [PSA_DIAG_REQ, PSA_SW_REQ],
       [PSA_DIAG_RESP, PSA_SW_RESP],
       rx_offset=PSA_RX_OFFSET,
@@ -81,11 +81,21 @@ FW_QUERY_CONFIG = FwQueryConfig(
       logging=True,
       whitelist_ecus=[Ecu.fwdRadar],
     ),
-    Request(  # fallback VIN via functional broadcast
-      [StdQueries.OBD_VIN_REQUEST],
-      [StdQueries.OBD_VIN_RESPONSE],
-      bus=1,
-      obd_multiplexing=True,
+    Request(  # bus 0
+      [PSA_DIAG_REQ, PSA_SERIAL_REQ],
+      [PSA_DIAG_RESP, PSA_SERIAL_RESP],
+      rx_offset=PSA_RX_OFFSET,
+      bus=0,
+      obd_multiplexing=False,
+      logging=True,
+    ),
+    Request(
+      [PSA_DIAG_REQ, PSA_SW_REQ],
+      [PSA_DIAG_RESP, PSA_SW_RESP],
+      rx_offset=PSA_RX_OFFSET,
+      bus=0,
+      obd_multiplexing=False,
+      logging=True,
     ),
   ],
   extra_ecus=[
