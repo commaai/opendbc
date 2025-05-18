@@ -2,6 +2,7 @@ import numpy as np
 import math
 from opendbc.can.packer import CANPacker
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, AngleSteeringLimits, DT_CTRL, rate_limit
+from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.interfaces import CarControllerBase, ISO_LATERAL_ACCEL
 from opendbc.car.tesla.teslacan import TeslaCAN
 from opendbc.car.tesla.values import CarControllerParams
@@ -61,6 +62,8 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(dbc_names[Bus.party])
     self.tesla_can = TeslaCAN(self.packer)
 
+    self.driver_torque = FirstOrderFilter(0.0, 0.05, DT_CTRL)
+    # self.accel_modifier = 0.0
     self.angle_modifier = 0.0
 
     # Vehicle model used for lateral limiting
@@ -81,10 +84,12 @@ class CarController(CarControllerBase):
       if CC.latActive:
         # negative is right, etc.
         # let's say that 1 nm = 1 m/s^2 of lateral acceleration
-        driver_torque = CS.out.steeringTorque if abs(CS.out.steeringTorque) > 0.5 else 0.0
+        driver_torque = self.driver_torque.update(np.clip(CS.out.steeringTorque, -3.0, 3.0))
+        driver_torque = driver_torque if abs(driver_torque) > 0.5 else 0.0  # TODO tweak the 0.5
         curvature_from_torque = driver_torque / (max(CS.out.vEgoRaw, 1) ** 2)
         angle_from_torque = math.degrees(self.VM.get_steer_from_curvature(curvature_from_torque, CS.out.vEgoRaw, 0))
-        self.angle_modifier += angle_from_torque * (DT_CTRL * 0.5)  # ramp over 0.5s
+        self.angle_modifier = angle_from_torque
+        # self.angle_modifier += angle_from_torque * (DT_CTRL * 0.5)  # ramp over 0.5s
       else:
         self.angle_modifier = 0.0
       apply_angle += self.angle_modifier
