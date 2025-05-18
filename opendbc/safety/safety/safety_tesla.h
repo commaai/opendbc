@@ -1,6 +1,6 @@
 #pragma once
 
-#include "safety_declarations.h"
+#include "opendbc/safety/safety_declarations.h"
 
 // parameters for lateral accel/jerk angle limiting using a simple vehicle model
 typedef struct {

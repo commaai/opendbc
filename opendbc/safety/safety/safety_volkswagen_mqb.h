@@ -1,7 +1,7 @@
 #pragma once
 
-#include "safety_declarations.h"
-#include "safety_volkswagen_common.h"
+#include "opendbc/safety/safety_declarations.h"
+#include "opendbc/safety/safety/safety_volkswagen_common.h"
 
 static bool volkswagen_mqb_brake_pedal_switch = false;
 static bool volkswagen_mqb_brake_pressure_detected = false;
