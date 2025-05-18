@@ -76,7 +76,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: opendbc/safety/tests/misra/cppcheck/
-          key: cppcheck-cache-${{ runner.os }}-${{ github.ref }}
+          key: cppcheck-cache-${{ runner.os }}-${{ github.ref }}-${{ hashFiles('opendbc/safety/tests/misra/install.sh') }}
           restore-keys: |
             cppcheck-cache-${{ runner.os }}-${{ github.ref }}
             cppcheck-cache-${{ runner.os }}-
@@ -92,7 +92,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: opendbc/safety/tests/misra/cppcheck/
-          key: cppcheck-cache-${{ runner.os }}-${{ github.ref }}
+          key: cppcheck-cache-${{ runner.os }}-${{ github.ref }}-${{ hashFiles('opendbc/safety/tests/misra/install.sh') }}
 
   mutation:
     name: Safety mutation tests
