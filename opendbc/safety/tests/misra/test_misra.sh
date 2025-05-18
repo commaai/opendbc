@@ -45,8 +45,7 @@ cppcheck() {
   echo -e "\n\n\n\n\nTEST variant options:" >> $CHECKLIST
   echo -e ""${@//$BASEDIR/}"\n\n" >> $CHECKLIST # (absolute path removed)
 
-  $CPPCHECK_DIR/cppcheck --inline-suppr -I $BASEDIR/opendbc/safety/ \
-          -I $BASEDIR/opendbc/safety/safety/ -I $BASEDIR/opendbc/safety/board/ \
+  $CPPCHECK_DIR/cppcheck --inline-suppr -I $BASEDIR \
           -I "$(arm-none-eabi-gcc -print-file-name=include)" \
           --suppressions-list=$DIR/suppressions.txt --suppress=*:*inc/* \
           --suppress=*:*include/* --error-exitcode=2 --check-level=exhaustive --safety \
