@@ -61,6 +61,8 @@ class CarController(CarControllerBase):
     self.packer = CANPacker(dbc_names[Bus.party])
     self.tesla_can = TeslaCAN(self.packer)
 
+    self.angle_modifier = 0.0
+
     # Vehicle model used for lateral limiting
     self.VM = VehicleModel(get_safety_CP())
 
@@ -75,7 +77,19 @@ class CarController(CarControllerBase):
 
     if self.frame % 2 == 0:
       # Angular rate limit based on speed
-      self.apply_angle_last = apply_tesla_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw,
+      apply_angle = actuators.steeringAngleDeg
+      if CC.latActive:
+        # negative is right, etc.
+        # let's say that 1 nm = 1 m/s^2 of lateral acceleration
+        driver_torque = CS.out.steeringTorque if abs(CS.out.steeringTorque) > 0.5 else 0.0
+        curvature_from_torque = driver_torque / (max(CS.out.vEgoRaw, 1) ** 2)
+        angle_from_torque = math.degrees(self.VM.get_steer_from_curvature(curvature_from_torque, CS.out.vEgoRaw, 0))
+        self.angle_modifier += angle_from_torque * (DT_CTRL * 0.5)  # ramp over 0.5s
+      else:
+        self.angle_modifier = 0.0
+      apply_angle += self.angle_modifier
+
+      self.apply_angle_last = apply_tesla_steer_angle_limits(apply_angle, self.apply_angle_last, CS.out.vEgoRaw,
                                                              CS.out.steeringAngleDeg, lat_active,
                                                              CarControllerParams.ANGLE_LIMITS, self.VM)
 
