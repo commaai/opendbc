@@ -16,6 +16,8 @@ PREV_BUTTON_SAMPLES = 8
 CLUSTER_SAMPLE_RATE = 20  # frames
 STANDSTILL_THRESHOLD = 12 * 0.03125 * CV.KPH_TO_MS
 
+# Cancel button can sometimes be ACC pause/resume button, main button can also enable on some cars
+ENABLE_BUTTONS = (ButtonType.accelCruise, ButtonType.decelCruise, ButtonType.cancel, ButtonType.mainCruise)
 BUTTONS_DICT = {Buttons.RES_ACCEL: ButtonType.accelCruise, Buttons.SET_DECEL: ButtonType.decelCruise,
                 Buttons.GAP_DIST: ButtonType.gapAdjustCruise, Buttons.CANCEL: ButtonType.cancel}
 
@@ -190,6 +192,11 @@ class CarState(CarStateBase):
     ret.buttonEvents = [*create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT),
                         *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise}),
                         *create_button_events(self.lda_button, prev_lda_button, {1: ButtonType.lkas})]
+
+    # On some newer model years, the CANCEL button acts as a pause/resume button based on the PCM state
+    # To avoid re-engaging when openpilot cancels, check user engagement intention via buttons
+    # Main button also can trigger an engagement on these cars
+    ret.allowEnable = any(btn in ENABLE_BUTTONS for btn in self.cruise_buttons) or any(self.main_buttons)
 
     return ret
 
