@@ -97,6 +97,24 @@ FW_QUERY_CONFIG = FwQueryConfig(
       obd_multiplexing=False,
       logging=True,
     ),
+    Request(  # bus 0
+      [PSA_DIAG_REQ, PSA_SERIAL_REQ],
+      [PSA_DIAG_RESP, PSA_SERIAL_RESP],
+      rx_offset=0x08,
+      bus=0,
+      obd_multiplexing=False,
+      logging=True,
+      whitelist_ecus=[Ecu.hud],
+    ),
+    Request(
+      [PSA_DIAG_REQ, PSA_SW_REQ],
+      [PSA_DIAG_RESP, PSA_SW_RESP],
+      rx_offset=0x08,
+      bus=0,
+      obd_multiplexing=False,
+      logging=True,
+      whitelist_ecus=[Ecu.hud],
+    ),
   ],
   extra_ecus=[
     (Ecu.fwdRadar, 0x6B6, None),
@@ -105,30 +123,8 @@ FW_QUERY_CONFIG = FwQueryConfig(
     (Ecu.abs, 0x6B4, None),
     (Ecu.eps, 0x6A2, None),
     (Ecu.transmission, 0x6AD, None),
+    (Ecu.hud, 0x7E0, None),
   ],
 )
-
-# TODO: multi-bus requests
-# FW_QUERY_CONFIG = FwQueryConfig(
-#   requests= [request for bus in (0, 1, 2) for request in [
-#       Request(
-#           [PSA_DIAGNOSTIC_REQUEST],
-#           [PSA_DIAGNOSTIC_RESPONSE],
-#           rx_offset=PSA_RX_OFFSET,
-#           bus=bus,
-#           logging=True,
-#           obd_multiplexing=False,
-#       ),
-#       Request(
-#           [PSA_VERSION_REQUEST],
-#           [PSA_VERSION_RESPONSE],
-#           rx_offset=PSA_RX_OFFSET,
-#           bus=bus,
-#           logging=True,
-#           obd_multiplexing=False,
-#       ),
-#     ]
-#   ]
-# )
 
 DBC = CAR.create_dbc_map()

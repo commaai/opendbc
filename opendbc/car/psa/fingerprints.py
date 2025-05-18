@@ -32,6 +32,9 @@ FW_VERSIONS = {
     (Ecu.transmission, 0x6AD, None): [
         b'0000000000000' # TODO
     ],
+    (Ecu.hud, 0x7E0, None): [
+        b'0000000000000' # TODO
+    ],
   }
 }
 
