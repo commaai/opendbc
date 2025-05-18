@@ -116,15 +116,6 @@ FW_QUERY_CONFIG = FwQueryConfig(
       whitelist_ecus=[Ecu.hud],
     ),
   ],
-  extra_ecus=[
-    (Ecu.fwdRadar, 0x6B6, None),
-    (Ecu.engine, 0x6B5, None),
-    (Ecu.adas, 0x6A6, None),
-    (Ecu.abs, 0x6B4, None),
-    (Ecu.eps, 0x6A2, None),
-    (Ecu.transmission, 0x6AD, None),
-    (Ecu.hud, 0x7E0, None),
-  ],
 )
 
 DBC = CAR.create_dbc_map()
