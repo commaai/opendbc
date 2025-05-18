@@ -65,6 +65,12 @@ class CarState(CarStateBase):
 
     self.params = CarControllerParams(CP)
 
+  def block_pcm_enable(self) -> bool:
+    # On some newer model years, the CANCEL button acts as a pause/resume button based on the PCM state
+    # To avoid re-engaging when openpilot cancels, check user engagement intention via buttons
+    # Main button also can trigger an engagement on these cars
+    return not (any(btn in ENABLE_BUTTONS for btn in self.cruise_buttons) or any(self.main_buttons))
+
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
     cp_cam = can_parsers[Bus.cam]
@@ -194,10 +200,7 @@ class CarState(CarStateBase):
                         *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise}),
                         *create_button_events(self.lda_button, prev_lda_button, {1: ButtonType.lkas})]
 
-    # On some newer model years, the CANCEL button acts as a pause/resume button based on the PCM state
-    # To avoid re-engaging when openpilot cancels, check user engagement intention via buttons
-    # Main button also can trigger an engagement on these cars
-    ret.blockPcmEnable = not (any(btn in ENABLE_BUTTONS for btn in self.cruise_buttons) or any(self.main_buttons))
+    ret.blockPcmEnable = self.block_pcm_enable()
 
     # low speed steer alert hysteresis logic (only for cars with steer cut off above 10 m/s)
     if ret.vEgo < (self.CP.minSteerSpeed + 2.) and self.CP.minSteerSpeed > 10.:
@@ -298,6 +301,8 @@ class CarState(CarStateBase):
     ret.buttonEvents = [*create_button_events(self.cruise_buttons[-1], prev_cruise_buttons, BUTTONS_DICT),
                         *create_button_events(self.main_buttons[-1], prev_main_buttons, {1: ButtonType.mainCruise}),
                         *create_button_events(self.lda_button, prev_lda_button, {1: ButtonType.lkas})]
+
+    ret.blockPcmEnable = self.block_pcm_enable()
 
     return ret
 
