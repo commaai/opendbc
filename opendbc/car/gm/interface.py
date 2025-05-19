@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import os
-from math import fabs, exp
+from math import fabs
 
 from opendbc.car import get_safety_config, get_friction, structs
 from opendbc.car.common.basedir import BASEDIR

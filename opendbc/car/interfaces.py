@@ -4,6 +4,7 @@ import numpy as np
 import time
 import tomllib
 from abc import abstractmethod, ABC
+from math import exp
 from enum import StrEnum
 from typing import Any, NamedTuple
 from collections.abc import Callable
