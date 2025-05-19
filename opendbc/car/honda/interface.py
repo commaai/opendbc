@@ -177,7 +177,7 @@ class CarInterface(CarInterfaceBase):
 
     elif candidate in (CAR.ACURA_RDX_3G, CAR.ACURA_RDX_3G_MMR):
       if (not ret.openpilotLongitudinalControl) and (candidate == CAR.ACURA_RDX_3G_MMR):
-        ret.minSteerSpeed = 70.0 * CV.KPH_TO_MS # min is 70kph to activate but 60kph to deactive.  Used 70kph to clarify for warning message
+        ret.minSteerSpeed = 70.0 * CV.KPH_TO_MS # min is 70kph to activate but 60kph to deactivate.  Used 70kph to clarify for warning message
         ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 3840], [0, 3840]]  # clipped by radar
       else:
         ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]  # TODO: determine if there is a dead zone at the top end
