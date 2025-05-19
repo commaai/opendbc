@@ -10,13 +10,17 @@ class CommunityCarDocs(ExtraCarDocs):
     self.support_type = SupportType.COMMUNITY
     self.support_link = "#community"
 
-
 @dataclass
 class ToyotaSecurityCarDocs(ExtraCarDocs):
   def init_make(self, CP: structs.CarParams):
     self.support_type = SupportType.INCOMPATIBLE
     self.support_link = "#can-bus-security"
 
+@dataclass
+class GMSecurityCarDocs(ExtraCarDocs):
+  def init_make(self, CP: structs.CarParams):
+    self.support_type = SupportType.INCOMPATIBLE
+    self.support_link = "#can-bus-security"
 
 @dataclass
 class FlexRayCarDocs(ExtraCarDocs):
@@ -31,12 +35,21 @@ class CAR(Platforms):
   EXTRA_HONDA = ExtraPlatformConfig(
     [
       CommunityCarDocs("Acura Integra 2024", "All"),
+      CommunityCarDocs("Acura MDX 2015-16", "Advance Package"),
+      CommunityCarDocs("Acura MDX 2017-20", "All"),
+      CommunityCarDocs("Acura MDX 2025", "All"),
+      CommunityCarDocs("Acura RDX 2022", "All"),
+      CommunityCarDocs("Acura RLX 2017", "Advance Package or Technology Package"),
+      CommunityCarDocs("Acura TLX 2015-17", "Advance Package"),
+      CommunityCarDocs("Acura TLX 2018-20", "All"),
+      GMSecurityCarDocs("Acura ZDX 2024", "All"),
       CommunityCarDocs("Honda Accord 2023-24", "All"),
       CommunityCarDocs("Honda Clarity 2018-21", "All"),
       CommunityCarDocs("Honda CR-V 2024", "All"),
-      CommunityCarDocs("Honda CR-V Hybrid 2024", "All"),
+      CommunityCarDocs("Honda CR-V Hybrid 2023-25", "All"),
       CommunityCarDocs("Honda Odyssey 2021-25", "All"),
-      CommunityCarDocs("Honda Pilot 2023-24", "All"),
+      CommunityCarDocs("Honda Pilot 2023-25", "All"),
+      GMSecurityCarDocs("Honda Prologue 2024-25", "All"),
     ],
   )
 
