@@ -224,6 +224,11 @@ class HondaBase(common.PandaCarSafetyTest):
   def _user_gas_msg(self, gas):
     return self._powertrain_data_msg(gas_pressed=gas)
 
+  # existence of _user_regen_msg adds regen tests
+  def _user_regen_msg(self, regen):
+    values = {"REGEN_STRENGTH": 4 if regen else 0}
+    return self.packer.make_can_msg_panda("GEARBOX", 0, values)
+
   def _send_steer_msg(self, steer):
     values = {"STEER_TORQUE": steer}
     return self.packer.make_can_msg_panda("STEERING_CONTROL", self.STEER_BUS, values)
@@ -565,15 +570,6 @@ class TestHondaBoschRadarlessLongSafety(common.LongitudinalAccelSafetyTest, Hond
   def test_spam_cancel_safety_check(self):
     pass
 
-# ********************* Honda Regen **********************
-
-
-class TestHondaRegenSafetyBase(HondaBase):
-
-  # existence of _user_regen_msg adds regen tests
-  def _user_regen_msg(self, regen):
-    values = {"REGEN_STRENGTH": 4 if regen else 0}
-    return self.packer.make_can_msg_panda("GEARBOX", 0, values)
 
 if __name__ == "__main__":
   unittest.main()
