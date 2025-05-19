@@ -69,7 +69,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
       rx_offset=PSA_RX_OFFSET,
       bus=bus,
       obd_multiplexing=False,
-      whitelist_ecus=[Ecu.fwdRadar] if bus == 1 else None,
+      whitelist_ecus=[Ecu.fwdRadar] if bus == 1 else [],
     ),
     Request(
       [PSA_DIAG_REQ, PSA_VERSION_REQ],
@@ -77,7 +77,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
       rx_offset=PSA_RX_OFFSET,
       bus=bus,
       obd_multiplexing=False,
-      whitelist_ecus=[Ecu.fwdRadar] if bus == 1 else None,
+      whitelist_ecus=[Ecu.fwdRadar] if bus == 1 else [],
     ),
   ]]
 )
