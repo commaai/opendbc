@@ -1,6 +1,6 @@
 #pragma once
 
-#include "safety_declarations.h"
+#include "opendbc/safety/safety_declarations.h"
 
 static void body_rx_hook(const CANPacket_t *to_push) {
   // body is never at standstill
