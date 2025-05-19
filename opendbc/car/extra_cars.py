@@ -10,17 +10,20 @@ class CommunityCarDocs(ExtraCarDocs):
     self.support_type = SupportType.COMMUNITY
     self.support_link = "#community"
 
+
 @dataclass
 class ToyotaSecurityCarDocs(ExtraCarDocs):
   def init_make(self, CP: structs.CarParams):
     self.support_type = SupportType.INCOMPATIBLE
     self.support_link = "#can-bus-security"
 
+
 @dataclass
 class GMSecurityCarDocs(ExtraCarDocs):
   def init_make(self, CP: structs.CarParams):
     self.support_type = SupportType.INCOMPATIBLE
     self.support_link = "#can-bus-security"
+
 
 @dataclass
 class FlexRayCarDocs(ExtraCarDocs):
