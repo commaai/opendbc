@@ -62,7 +62,7 @@ PSA_VERSION_RESP = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40, 0xF0,
 PSA_RX_OFFSET = -0x20
 
 FW_QUERY_CONFIG = FwQueryConfig(
-  requests=[request for bus in (0, 1, 2) for request in [
+  requests=[request for bus in (0, 1) for request in [
     Request(
       [PSA_DIAG_REQ, PSA_SERIAL_REQ],
       [PSA_DIAG_RESP, PSA_SERIAL_RESP],
