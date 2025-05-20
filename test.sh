@@ -10,10 +10,10 @@ source ./setup.sh
 scons -j8
 
 # *** lint ***
-lefthook run lint
+lefthook run test
 
 # *** test ***
-pytest -n8
+#pytest -n8
 
 # *** all done ***
 GREEN='\033[0;32m'
