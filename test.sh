@@ -9,13 +9,8 @@ source ./setup.sh
 # *** build ***
 scons -j8
 
-# *** lint ***
-# TODO: pre-commit is slow; replace it with openpilot's "op lint"
-pre-commit run --all-files
-opendbc/safety/tests/misra/test_misra.sh
-
-# *** test ***
-pytest -n8
+# *** lint + test ***
+lefthook run test
 
 # *** all done ***
 GREEN='\033[0;32m'
