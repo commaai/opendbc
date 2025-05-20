@@ -37,7 +37,7 @@ echo "Cppcheck checkers list from test_misra.sh:" > $CHECKLIST
 
 cppcheck() {
   # get all gcc defines: arm-none-eabi-gcc -dM -E - < /dev/null
-  COMMON_DEFINES="-D__GNUC__=9 -UCMSIS_NVIC_VIRTUAL -UCMSIS_VECTAB_VIRTUAL"
+  COMMON_DEFINES="-D__GNUC__=9"
 
   # note that cppcheck build cache results in inconsistent results as of v2.13.0
   OUTPUT=$DIR/.output.log
@@ -62,20 +62,15 @@ cppcheck() {
   fi
 }
 
-PANDA_OPTS="--enable=all --disable=unusedFunction -DPANDA --addon=misra"
+PANDA_OPTS=" --enable=all --enable=unusedFunction --addon=misra"
 
-printf "\n${GREEN}** PANDA F4 CODE **${NC}\n"
-cppcheck $PANDA_OPTS -DSTM32F4 -DSTM32F413xx $BASEDIR/opendbc/safety/main.c
+printf "\n${GREEN}** Safety **${NC}\n"
+cppcheck $PANDA_OPTS -UCANFD $BASEDIR/opendbc/safety/main.c
 
-printf "\n${GREEN}** PANDA H7 CODE **${NC}\n"
-cppcheck $PANDA_OPTS -DSTM32H7 -DSTM32H725xx $BASEDIR/opendbc/safety/main.c
-
-# unused needs to run globally
-#printf "\n${GREEN}** UNUSED ALL CODE **${NC}\n"
-#cppcheck --enable=unusedFunction --quiet $BASEDIR/opendbc/safety/board/
+printf "\n${GREEN}** Safety with CANFD **${NC}\n"
+cppcheck $PANDA_OPTS -DCANFD $BASEDIR/opendbc/safety/main.c
 
 printf "\n${GREEN}Success!${NC} took $SECONDS seconds\n"
-
 
 # ensure list of checkers is up to date
 cd $DIR
