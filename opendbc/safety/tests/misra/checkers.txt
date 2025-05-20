@@ -5,7 +5,7 @@ Cppcheck checkers list from test_misra.sh:
 
 
 TEST variant options:
---enable=all --disable=unusedFunction -DPANDA --addon=misra -DSTM32F4 -DSTM32F413xx /opendbc/safety/main.c
+--enable=all --enable=unusedFunction --addon=misra -UCANFD /opendbc/safety/main.c
 
 
 Critical errors
@@ -194,7 +194,7 @@ Yes  CheckType::checkTooBigBitwiseShift
 Yes  CheckUninitVar::analyseWholeProgram
 Yes  CheckUninitVar::check
 Yes  CheckUninitVar::valueFlowUninit
-No   CheckUnusedFunctions::check                               require:unusedFunction
+Yes  CheckUnusedFunctions::check
 Yes  CheckUnusedVar::checkFunctionVariableUsage
 Yes  CheckUnusedVar::checkStructMemberUsage
 Yes  CheckVaarg::va_list_usage
@@ -460,7 +460,7 @@ Not available, Cppcheck Premium is not used
 
 
 TEST variant options:
---enable=all --disable=unusedFunction -DPANDA --addon=misra -DSTM32H7 -DSTM32H725xx /opendbc/safety/main.c
+--enable=all --enable=unusedFunction --addon=misra -DCANFD /opendbc/safety/main.c
 
 
 Critical errors
@@ -649,7 +649,7 @@ Yes  CheckType::checkTooBigBitwiseShift
 Yes  CheckUninitVar::analyseWholeProgram
 Yes  CheckUninitVar::check
 Yes  CheckUninitVar::valueFlowUninit
-No   CheckUnusedFunctions::check                               require:unusedFunction
+Yes  CheckUnusedFunctions::check
 Yes  CheckUnusedVar::checkFunctionVariableUsage
 Yes  CheckUnusedVar::checkStructMemberUsage
 Yes  CheckVaarg::va_list_usage
