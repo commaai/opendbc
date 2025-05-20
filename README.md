@@ -47,7 +47,7 @@ cd opendbc
 pip3 install -e .[testing,docs]  # install dependencies
 scons -j8                        # build with 8 cores
 pytest .                         # run the tests
-pre-commit run --all-files       # run the linter
+lefthook run lint                # run the linter
 ```
 
 [`examples/`](examples/) contains small example programs that can read state from the car and control the steering, gas, and brakes.

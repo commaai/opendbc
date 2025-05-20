@@ -10,9 +10,7 @@ source ./setup.sh
 scons -j8
 
 # *** lint ***
-# TODO: pre-commit is slow; replace it with openpilot's "op lint"
-pre-commit run --all-files
-opendbc/safety/tests/misra/test_misra.sh
+lefthook run lint
 
 # *** test ***
 pytest -n8
