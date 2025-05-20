@@ -42,13 +42,17 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdCamera, 0x787, None): [
       b'\x05!\x08\x1dK\x05!\x08\x01/',
+      b'\x05!\x08\x1dK\x00\x00\x00\x00\x00',
     ],
-    (Ecu.engine, 0x7a2, None): [
-      b'\xe5,\xa0P\x07',
-    ],
-    (Ecu.transmission, 0x7a3, None): [
-      b'\x04\xfe\xf3\x00\x00',
-    ],
+    # XXX: No longer showing up?!
+    #(Ecu.engine, 0x7a2, None): [
+    #  b'\xe5,\xa0P\x07',
+    #  b'\xe5,\xa0p\x07',
+    #],
+    #(Ecu.transmission, 0x7a3, None): [
+    #  b'\x04\xfe\xf3\x00\x00',
+    #  b'\x04\xfe\xf6\x00\x00',
+    #],
   },
   CAR.SUBARU_LEGACY: {
     (Ecu.abs, 0x7b0, None): [
