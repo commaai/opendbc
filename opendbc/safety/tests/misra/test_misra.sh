@@ -62,13 +62,13 @@ cppcheck() {
   fi
 }
 
-PANDA_OPTS="--enable=all --disable=unusedFunction -DPANDA --addon=misra"
+PANDA_OPTS="--enable=all --disable=unusedFunction --addon=misra"
 
 printf "\n${GREEN}** PANDA F4 CODE **${NC}\n"
-cppcheck $PANDA_OPTS -DSTM32F4 -DSTM32F413xx $BASEDIR/opendbc/safety/main.c
+cppcheck $PANDA_OPTS $BASEDIR/opendbc/safety/main.c
 
 printf "\n${GREEN}** PANDA H7 CODE **${NC}\n"
-cppcheck $PANDA_OPTS -DSTM32H7 -DSTM32H725xx $BASEDIR/opendbc/safety/main.c
+cppcheck $PANDA_OPTS -DCANFD $BASEDIR/opendbc/safety/main.c
 
 # unused needs to run globally
 #printf "\n${GREEN}** UNUSED ALL CODE **${NC}\n"
