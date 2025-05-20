@@ -68,8 +68,7 @@ class CarState(CarStateBase):
     ret.gearShifter = GEAR_MAP.get(int(cp.vl["VDM_PropStatus"]["VDM_Prndl_Status"]), GearShifter.unknown)
 
     # Doors
-    doors = ["RearDriverDoor", "FrontPassengerDoor", "DriverDoor", "RearPassengerDoor"]
-    ret.doorOpen = any(cp_adas.vl["IndicatorLights"][door] != 2 for door in doors)
+    ret.doorOpen = any(cp_adas.vl["IndicatorLights"][door] != 2 for door in ("RearDriverDoor", "FrontPassengerDoor", "DriverDoor", "RearPassengerDoor"))
 
     # Blinkers
     ret.leftBlinker = cp_adas.vl["IndicatorLights"]["TurnLightLeft"] in (1, 2)
