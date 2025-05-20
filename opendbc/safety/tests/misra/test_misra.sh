@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
+set -x
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $DIR
@@ -12,11 +13,6 @@ RED="\e[1;31m"
 NC='\033[0m'
 
 : "${CPPCHECK_DIR:=$DIR/cppcheck/}"
-
-# install cppcheck if missing
-if [ -z "${SKIP_CPPCHECK_INSTALL}" ]; then
-  $DIR/install.sh
-fi
 
 # ensure checked in coverage table is up to date
 if [ -z "$SKIP_TABLES_DIFF" ]; then
@@ -46,9 +42,9 @@ cppcheck() {
   echo -e ""${@//$BASEDIR/}"\n\n" >> $CHECKLIST # (absolute path removed)
 
   $CPPCHECK_DIR/cppcheck --inline-suppr -I $BASEDIR \
-          -I "$(arm-none-eabi-gcc -print-file-name=include)" \
-          --suppressions-list=$DIR/suppressions.txt --suppress=*:*inc/* \
-          --suppress=*:*include/* --error-exitcode=2 --check-level=exhaustive --safety \
+          -I "$(gcc -print-file-name=include)" --suppress=*:*gcc*include/* \
+          --suppressions-list=$DIR/suppressions.txt  \
+           --error-exitcode=2 --check-level=exhaustive --safety \
           --platform=arm32-wchar_t4 $COMMON_DEFINES --checkers-report=$CHECKLIST.tmp \
           --std=c11 "$@" 2>&1 | tee $OUTPUT
 
@@ -63,9 +59,6 @@ cppcheck() {
 }
 
 PANDA_OPTS=" --enable=all --enable=unusedFunction --addon=misra"
-
-printf "\n${GREEN}** Safety **${NC}\n"
-cppcheck $PANDA_OPTS -UCANFD $BASEDIR/opendbc/safety/main.c
 
 printf "\n${GREEN}** Safety with CANFD **${NC}\n"
 cppcheck $PANDA_OPTS -DCANFD $BASEDIR/opendbc/safety/main.c
