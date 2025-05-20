@@ -165,7 +165,8 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     self.safety.set_controls_allowed(True)
     for steer_control_type in range(4):
       should_tx = steer_control_type in (self.steer_control_types["NONE"],
-                                         self.steer_control_types["ANGLE_CONTROL"])
+                                         self.steer_control_types["ANGLE_CONTROL"],
+                                         self.steer_control_types["LANE_KEEP_ASSIST"])
       self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(0, state=steer_control_type)))
 
   def test_stock_lkas_passthrough(self):
@@ -174,15 +175,18 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     no_lkas_msg_cam = self._angle_cmd_msg(0, state=True, bus=2)
     lkas_msg_cam = self._angle_cmd_msg(0, state=self.steer_control_types['LANE_KEEP_ASSIST'], bus=2)
 
-    # stock system sends no LKAS -> no forwarding, and OP is allowed to TX
-    self.assertEqual(1, self._rx(no_lkas_msg_cam))
-    self.assertEqual(-1, self.safety.safety_fwd_hook(2, no_lkas_msg_cam.addr))
-    self.assertTrue(self._tx(no_lkas_msg))
+    for enable_mads in (True, False):
+      self._mads_states_cleanup()
+      self.safety.set_mads_params(enable_mads, True, False)
+      # stock system sends no LKAS -> no forwarding, and OP is allowed to TX
+      self.assertEqual(1, self._rx(no_lkas_msg_cam))
+      self.assertEqual(-1, self.safety.safety_fwd_hook(2, no_lkas_msg_cam.addr))
+      self.assertTrue(self._tx(no_lkas_msg))
 
-    # stock system sends LKAS -> forwarding, and OP is not allowed to TX
-    self.assertEqual(1, self._rx(lkas_msg_cam))
-    self.assertEqual(0, self.safety.safety_fwd_hook(2, lkas_msg_cam.addr))
-    self.assertFalse(self._tx(no_lkas_msg))
+      # stock system sends LKAS -> forwarding, and OP is not allowed to TX
+      self.assertEqual(1, self._rx(lkas_msg_cam))
+      self.assertEqual(-1 if enable_mads else 0, self.safety.safety_fwd_hook(2, lkas_msg_cam.addr))
+      self.assertEqual(enable_mads, self._tx(no_lkas_msg))
 
 
 class TestTeslaStockSafety(TestTeslaSafetyBase):
