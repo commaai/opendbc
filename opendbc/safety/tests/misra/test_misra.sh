@@ -42,7 +42,7 @@ cppcheck() {
   echo -e ""${@//$BASEDIR/}"\n\n" >> $CHECKLIST # (absolute path removed)
 
   $CPPCHECK_DIR/cppcheck --inline-suppr -I $BASEDIR \
-          -I "$(gcc -print-file-name=include)" --suppress=*:*gcc*include/* \
+          -I "$(gcc -print-file-name=include)" --suppress=*:*gcc*include/* --suppress=*:*clang*include/* \
           --suppressions-list=$DIR/suppressions.txt  \
            --error-exitcode=2 --check-level=exhaustive --safety \
           --platform=arm32-wchar_t4 $COMMON_DEFINES --checkers-report=$CHECKLIST.tmp \
