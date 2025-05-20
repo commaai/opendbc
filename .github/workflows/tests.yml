@@ -15,8 +15,7 @@ jobs:
       matrix:
         include:
           - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-24.04' }}
-          - os: macos-latest
-          - os: macos-15
+          - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-macos-8x14' || 'macos-latest' }}
     steps:
     - uses: commaai/timeout@v1
     - uses: actions/checkout@v4
@@ -32,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        flags: ['', '--ubsan']
+        flags: ['--ubsan']
     steps:
     - uses: commaai/timeout@v1
     - uses: actions/checkout@v4

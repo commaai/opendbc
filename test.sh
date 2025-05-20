@@ -17,7 +17,7 @@ pre-commit run --all-files
 #ty check .
 
 # *** test ***
-pytest -n8 --ignore opendbc/safety
+pytest -n8
 
 # *** all done ***
 GREEN='\033[0;32m'
