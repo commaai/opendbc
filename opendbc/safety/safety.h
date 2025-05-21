@@ -279,7 +279,13 @@ int safety_fwd_hook(int bus_num, int addr) {
 }
 
 bool get_longitudinal_allowed(void) {
+  // No longitudinal control when overriding with gas
   return controls_allowed && !gas_pressed_prev;
+}
+
+bool get_gas_allowed(void) {
+  // No gas or positive accel while pre-enabled at a stop with brake
+  return get_longitudinal_allowed() && !brake_pressed_prev && !regen_braking_prev;
 }
 
 // Given a CRC-8 poly, generate a static lookup table to use with a fast CRC-8
@@ -606,7 +612,9 @@ int ROUND(float val) {
 
 // Safety checks for longitudinal actuation
 bool longitudinal_accel_checks(int desired_accel, const LongitudinalLimits limits) {
-  bool accel_valid = get_longitudinal_allowed() && !max_limit_check(desired_accel, limits.max_accel, limits.min_accel);
+  // accel is restricted to < 0 m/s^2 if we are pre-enabling at a stop
+  int max_accel = get_gas_allowed() ? limits.max_accel : limits.zero_accel;
+  bool accel_valid = get_longitudinal_allowed() && !max_limit_check(desired_accel, max_accel, limits.min_accel);
   bool accel_inactive = desired_accel == limits.inactive_accel;
   return !(accel_valid || accel_inactive);
 }
@@ -616,13 +624,13 @@ bool longitudinal_speed_checks(int desired_speed, const LongitudinalLimits limit
 }
 
 bool longitudinal_transmission_rpm_checks(int desired_transmission_rpm, const LongitudinalLimits limits) {
-  bool transmission_rpm_valid = get_longitudinal_allowed() && !max_limit_check(desired_transmission_rpm, limits.max_transmission_rpm, limits.min_transmission_rpm);
+  bool transmission_rpm_valid = get_gas_allowed() && !max_limit_check(desired_transmission_rpm, limits.max_transmission_rpm, limits.min_transmission_rpm);
   bool transmission_rpm_inactive = desired_transmission_rpm == limits.inactive_transmission_rpm;
   return !(transmission_rpm_valid || transmission_rpm_inactive);
 }
 
 bool longitudinal_gas_checks(int desired_gas, const LongitudinalLimits limits) {
-  bool gas_valid = get_longitudinal_allowed() && !max_limit_check(desired_gas, limits.max_gas, limits.min_gas);
+  bool gas_valid = get_gas_allowed() && !max_limit_check(desired_gas, limits.max_gas, limits.min_gas);
   bool gas_inactive = desired_gas == limits.inactive_gas;
   return !(gas_valid || gas_inactive);
 }
