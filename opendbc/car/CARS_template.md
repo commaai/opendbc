@@ -51,8 +51,8 @@ Some notable works-in-progress:
   * 2025 Acura MDX (CAN-FD), commaai/opendbc#2129
   * 2022 Acura RDX, commaai/opendbc#1967
   * 2023-24 Honda Accord (CAN-FD), commaai/opendbc#2120
-  * 2024 Honda CR-V (CAN-FD), commaai/opendbc#2117
-  * 2024-25 Honda CR-V Hybrid (CAN-FD), commaai/opendbc#2119
+  * 2023-25 Honda CR-V (CAN-FD), commaai/opendbc#2117
+  * 2023-25 Honda CR-V Hybrid (CAN-FD), commaai/opendbc#2119
   * 2021-25 Honda Odyssey, commaai/opendbc#2170
   * 2023-25 Honda Pilot (CAN-FD), commaai/opendbc#2141
   * Camera ACC stability improvements, commaai/opendbc#2192
