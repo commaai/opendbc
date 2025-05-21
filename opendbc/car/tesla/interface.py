@@ -15,7 +15,7 @@ class CarInterface(CarInterfaceBase):
 
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.tesla)]
 
-    ret.steerLimitTimer = 1.0
+    ret.steerLimitTimer = 0.4
     ret.steerActuatorDelay = 0.1
     ret.steerAtStandstill = True
 

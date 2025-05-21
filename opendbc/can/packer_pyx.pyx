@@ -21,7 +21,7 @@ cdef class CANPacker:
 
     cdef string cpp_dbc_name
     if isinstance(dbc_name, str):
-      cpp_dbc_name = dbc_name.encode('utf-8')
+      cpp_dbc_name = dbc_name.encode("utf-8")
     else:
       cpp_dbc_name = dbc_name
     with nogil:
