@@ -49,7 +49,7 @@ Some notable works-in-progress:
 * Honda
   * 2024 Acura Integra, commaai/opendbc#1722
   * 2025 Acura MDX (CAN-FD), commaai/opendbc#2129
-  * 2022 Acura RDX, commaai/opendbc#1967
+  * 2022-25 Acura RDX, commaai/opendbc#1967
   * 2023-24 Honda Accord (CAN-FD), commaai/opendbc#2120
   * 2023-25 Honda CR-V (CAN-FD), commaai/opendbc#2117
   * 2023-25 Honda CR-V Hybrid (CAN-FD), commaai/opendbc#2119
