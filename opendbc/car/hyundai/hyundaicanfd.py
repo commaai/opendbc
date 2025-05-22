@@ -140,15 +140,17 @@ def create_ccnc(packer, CAN, openpilotLongitudinalControl, enabled, hud, leftBli
   if msg_161["SOUNDS_4"] == 2 and msg_161["LFA_ICON"] in (3, 0,):  # LFA BEEPS
     msg_161["SOUNDS_4"] = 0
 
+  LANE_CHANGE_SPEED_MIN = 8.9408  # 20 * 0.44704
+
   msg_161.update({
     "DAW_ICON": 0,
     "LKA_ICON": 0,
     "LFA_ICON": 2 if enabled else 0,
     "CENTERLINE": 1 if enabled else 0,
-    "LANELINE_LEFT": (
-      1 if not hud.leftLaneVisible else 4 if hud.leftLaneDepart else 0 if not enabled else 2 if out.leftBlindspot or out.vEgo < 8.94 else 6),
-    "LANELINE_RIGHT": (
-      1 if not hud.rightLaneVisible else 4 if hud.rightLaneDepart else 0 if not enabled else 2 if out.rightBlindspot or out.vEgo < 8.94 else 6),
+    "LANELINE_LEFT": (1 if not hud.leftLaneVisible else 4 if hud.leftLaneDepart else 0 if not enabled else
+                      2 if out.leftBlindspot or out.vEgo < LANE_CHANGE_SPEED_MIN else 6),
+    "LANELINE_RIGHT": (1 if not hud.rightLaneVisible else 4 if hud.rightLaneDepart else 0 if not enabled else
+                       2 if out.rightBlindspot or out.vEgo < LANE_CHANGE_SPEED_MIN else 6),
     "LCA_LEFT_ARROW": 2 if leftBlinker else 0,
     "LCA_RIGHT_ARROW": 2 if rightBlinker else 0,
     "LANE_LEFT": 1 if leftBlinker else 0,
