@@ -74,7 +74,7 @@ static void honda_rx_hook(const CANPacket_t *to_push) {
   int addr = GET_ADDR(to_push);
   int bus = GET_BUS(to_push);
 
-  // 0x158 used for all suported Hondas except Integra (use 0x309 car_speed message)
+  // 0x158 used for all supported Hondas except Integra (use 0x309 car_speed message)
   if ((addr == 0x158) || (addr == 0x309)){
     // first 2 bytes
     vehicle_moving = GET_BYTE(to_push, 0) | GET_BYTE(to_push, 1);
