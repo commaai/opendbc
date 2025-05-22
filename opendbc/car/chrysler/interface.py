@@ -86,4 +86,7 @@ class CarInterface(CarInterfaceBase):
       stock_cp.minSteerSpeed = 0.5
       stock_cp.minEnableSpeed = 14.5
 
+    if candidate == CAR.RAM_HD_5TH_GEN:
+      stock_cp.dashcamOnly = False
+
     return ret

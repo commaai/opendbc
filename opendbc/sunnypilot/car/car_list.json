@@ -2441,6 +2441,33 @@
     ],
     "package": "Adaptive Cruise Control (ACC)"
   },
+  "Ram 2500 2020-24": {
+    "platform": "RAM_HD_5TH_GEN",
+    "make": "Ram",
+    "brand": "chrysler",
+    "model": "2500",
+    "year": [
+      "2020",
+      "2021",
+      "2022",
+      "2023",
+      "2024"
+    ],
+    "package": "Adaptive Cruise Control (ACC)"
+  },
+  "Ram 3500 2019-22": {
+    "platform": "RAM_HD_5TH_GEN",
+    "make": "Ram",
+    "brand": "chrysler",
+    "model": "3500",
+    "year": [
+      "2019",
+      "2020",
+      "2021",
+      "2022"
+    ],
+    "package": "Adaptive Cruise Control (ACC)"
+  },
   "Rivian R1S 2022-24": {
     "platform": "RIVIAN_R1_GEN1",
     "make": "Rivian",
