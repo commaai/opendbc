@@ -142,7 +142,6 @@ class CarState(CarStateBase):
 
     ret.buttonEvents = self.create_button_events(pt_cp, self.CCP.BUTTONS)
 
-    # Low speed steer alert hysteresis logic
     ret.lowSpeedAlert = self.update_low_speed_alert(ret.vEgo)
 
     self.frame += 1
@@ -244,13 +243,13 @@ class CarState(CarStateBase):
     # Additional safety checks performed in CarInterface.
     ret.espDisabled = bool(pt_cp.vl["Bremse_1"]["ESP_Passiv_getastet"])
 
-    # Low speed steer alert hysteresis logic
     ret.lowSpeedAlert = self.update_low_speed_alert(ret.vEgo)
 
     self.frame += 1
     return ret
 
   def update_low_speed_alert(self, v_ego: float) -> bool:
+    # Low speed steer alert hysteresis logic
     if (self.CP.minSteerSpeed - 1e-3) > CarControllerParams.DEFAULT_MIN_STEER_SPEED and v_ego < (self.CP.minSteerSpeed + 1.):
       self.low_speed_alert = True
     elif v_ego > (self.CP.minSteerSpeed + 2.):
