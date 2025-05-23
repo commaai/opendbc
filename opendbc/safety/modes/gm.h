@@ -7,9 +7,9 @@
     {.msg = {{0x184, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}}, \
     {.msg = {{0x34A, 0, 5, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}}, \
     {.msg = {{0x1E1, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}}, \
-    {.msg = {{0xBE, 0, 6, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},    /* Volt, Silverado, Acadia Denali */ \
-             {0xBE, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},    /* Bolt EUV */ \
-             {0xBE, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}}},  /* Escalade */ \
+    {.msg = {{0xF1, 0, 6, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},    /* Volt, Silverado, Acadia Denali */ \
+             {0xF1, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},    /* Bolt EUV */ \
+             {0xF1, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}}},  /* Escalade */ \
     {.msg = {{0x1C4, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}}, \
     {.msg = {{0xC9, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}}, \
 
@@ -68,13 +68,14 @@ static void gm_rx_hook(const CANPacket_t *to_push) {
 
       cruise_button_prev = button;
     }
-
     // Reference for brake pressed signals:
     // https://github.com/commaai/openpilot/blob/master/selfdrive/car/gm/carstate.py
-    if ((addr == 0xBE) && (gm_hw == GM_ASCM)) {
-      brake_pressed = GET_BYTE(to_push, 1) >= 8U;
+    //if ((addr == 0xBE) && (gm_hw == GM_ASCM)) {
+    //  brake_pressed = GET_BYTE(to_push, 1) >= 8U;
+    //}
+    if ((addr == 0xF1) && (gm_hw == GM_ASCM)) {
+      brake_pressed = GET_BIT(to_push, 1U);;
     }
-
     if ((addr == 0xC9) && (gm_hw == GM_CAM)) {
       brake_pressed = GET_BIT(to_push, 40U);
     }
@@ -203,7 +204,6 @@ static safety_config gm_init(uint16_t param) {
                                           {0x1E1, 2, 7, .check_relay = false}, {0x184, 2, 8, .check_relay = true}};  // camera bus
 
   gm_hw = GET_FLAG(param, GM_PARAM_HW_CAM) ? GM_CAM : GM_ASCM;
-
   if (gm_hw == GM_ASCM) {
     gm_long_limits = &GM_ASCM_LONG_LIMITS;
   } else if (gm_hw == GM_CAM) {
