@@ -167,6 +167,9 @@ def create_ccnc(packer, CAN, openpilotLongitudinalControl, enabled, hud, leftBli
     if msg_161["ALERTS_5"] == 4:  # SMART_CRUISE_CONTROL_CONDITIONS_NOT_MET
       msg_161["ALERTS_5"] = 0
 
+    if msg_161["SOUNDS_3"] == 5:  # DISABLE ISLA SOUND
+      msg_161["SOUNDS_3"] = 0
+
     msg_161.update({
       "SETSPEED": 3 if enabled else 1,
       "SETSPEED_HUD": 2 if enabled else 1,
