@@ -2,6 +2,7 @@
 
 #include "opendbc/safety/safety_declarations.h"
 
+
 // parameters for lateral accel/jerk angle limiting using a simple vehicle model
 typedef struct {
   const float slip_factor;
