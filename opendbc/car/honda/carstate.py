@@ -205,6 +205,10 @@ class CarState(CarStateBase):
       gear = int(cp.vl[self.gearbox_msg]["GEAR_SHIFTER"])
       ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(gear, None))
 
+    # Regen braking is braking
+    if self.CP.carFingerprint == CAR.HONDA_INSIGHT:
+      ret.regenBraking = cp.vl["GEARBOX"]["REGEN_STRENGTH"] != 0
+
     ret.gas = cp.vl["POWERTRAIN_DATA"]["PEDAL_GAS"]
     ret.gasPressed = ret.gas > 1e-5
 
