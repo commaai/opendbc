@@ -143,11 +143,7 @@ class CarState(CarStateBase):
     ret.buttonEvents = self.create_button_events(pt_cp, self.CCP.BUTTONS)
 
     # Low speed steer alert hysteresis logic
-    if (self.CP.minSteerSpeed - 1e-3) > CarControllerParams.DEFAULT_MIN_STEER_SPEED and ret.vEgo < (self.CP.minSteerSpeed + 1.):
-      self.low_speed_alert = True
-    elif ret.vEgo > (self.CP.minSteerSpeed + 2.):
-      self.low_speed_alert = False
-    ret.lowSpeedAlert = self.low_speed_alert
+    ret.lowSpeedAlert = self.update_low_speed_alert(ret)
 
     self.frame += 1
     return ret
@@ -249,14 +245,17 @@ class CarState(CarStateBase):
     ret.espDisabled = bool(pt_cp.vl["Bremse_1"]["ESP_Passiv_getastet"])
 
     # Low speed steer alert hysteresis logic
+    ret.lowSpeedAlert = self.update_low_speed_alert(ret)
+
+    self.frame += 1
+    return ret
+
+  def update_low_speed_alert(self, ret):
     if (self.CP.minSteerSpeed - 1e-3) > CarControllerParams.DEFAULT_MIN_STEER_SPEED and ret.vEgo < (self.CP.minSteerSpeed + 1.):
       self.low_speed_alert = True
     elif ret.vEgo > (self.CP.minSteerSpeed + 2.):
       self.low_speed_alert = False
-    ret.lowSpeedAlert = self.low_speed_alert
-
-    self.frame += 1
-    return ret
+    return self.low_speed_alert
 
   def update_hca_state(self, hca_status, drive_mode=True):
     # Treat FAULT as temporary for worst likely EPS recovery time, for cars without factory Lane Assist
