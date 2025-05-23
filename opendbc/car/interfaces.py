@@ -284,6 +284,7 @@ class CarStateBase(ABC):
     self.steering_pressed_cnt = 0
     self.left_blinker_prev = False
     self.right_blinker_prev = False
+    self.low_speed_alert = False
     self.cluster_speed_hyst_gap = 0.0
     self.cluster_min_speed = 0.0  # min speed before dropping to 0
     self.secoc_key: bytes = b"00" * 16
@@ -327,8 +328,8 @@ class CarStateBase(ABC):
 
   def update_steering_pressed(self, steering_pressed, steering_pressed_min_count):
     """Applies filtering on steering pressed for noisy driver torque signals."""
-    self.steering_pressed_cnt = self.steering_pressed_cnt + 1 if steering_pressed else 0
-    self.steering_pressed_cnt = min(self.steering_pressed_cnt, steering_pressed_min_count + 1)
+    self.steering_pressed_cnt += 1 if steering_pressed else -1
+    self.steering_pressed_cnt = int(np.clip(self.steering_pressed_cnt, 0, steering_pressed_min_count * 2 + 1))
     return self.steering_pressed_cnt > steering_pressed_min_count
 
   def update_blinker_from_stalk(self, blinker_time: int, left_blinker_stalk: bool, right_blinker_stalk: bool):

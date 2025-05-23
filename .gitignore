@@ -15,7 +15,7 @@
 *.html
 *.gcda
 *.gcno
-
+*.dump
 uv.lock
 /dist/
 
