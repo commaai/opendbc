@@ -54,7 +54,7 @@ class CarState(CarStateBase):
     if not self.CP.openpilotLongitudinalControl:
       ret.cruiseState.speed = -1
     ret.cruiseState.available = True  # cp.vl["VDM_AdasSts"]["VDM_AdasInterfaceStatus"] == 1
-    ret.cruiseState.standstill = cp.vl["VDM_AdasSts"]["VDM_AdasAccelRequestAcknowledged"] == 1
+    ret.cruiseState.standstill = cp.vl["VDM_AdasSts"]["VDM_AdasVehicleHoldStatus"] == 1
 
     # TODO: log ACM_Unkown2=3 as a fault. need to filter it at the start and end of routes though
     # ACM_FaultStatus hasn't been seen yet

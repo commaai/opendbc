@@ -85,10 +85,10 @@ def create_adas_status(packer, vdm_adas_status, interface_status):
     "VDM_AdasFaultStatus",
     "VDM_AdasAccelLimit",
     "VDM_AdasDriverModeStatus",
-    "VDM_AdasAccelRequest",
+    "VDM_AdasUnkown1",
     "VDM_AdasInterfaceStatus",
-    "VDM_AdasAccelRequestAcknowledged",
     "VDM_AdasVehicleHoldStatus",
+    "VDM_UserAdasRequest",
   )}
 
   if interface_status is not None:
