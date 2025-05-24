@@ -229,7 +229,7 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
     int steer_control_type = GET_BYTE(to_send, 2) >> 6;
     bool steer_control_enabled = steer_control_type == 1;  // ANGLE_CONTROL
 
-    if (tesla_steer_angle_cmd_checks(desired_angle, steer_control_enabled, TESLA_STEERING_LIMITS, TESLA_STEERING_PARAMS)) {
+    if (steer_angle_cmd_checks_vm(desired_angle, steer_control_enabled, TESLA_STEERING_LIMITS, TESLA_STEERING_PARAMS)) {
       violation = true;
     }
 

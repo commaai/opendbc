@@ -824,12 +824,14 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
   return violation;
 }
 
-static float tesla_curvature_factor(const float speed, const AngleSteeringParams params) {
+static float get_curvature_factor(const float speed, const AngleSteeringParams params) {
   return 1. / (1. - (params.slip_factor * (speed * speed))) / params.wheelbase;
 }
 
-bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits,
-                                         const AngleSteeringParams params) {
+bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits,
+                               const AngleSteeringParams params) {
+  // This check uses a simple vehicle model to allow for true lateral acceleration and jerk limits.
+  // TODO: remove the inaccurate breakpoint angle limiting function above and always use this one
 
   static const float RAD_TO_DEG = 57.29577951308232;
   static const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
@@ -842,7 +844,7 @@ bool tesla_steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled,
   static const float MAX_LATERAL_JERK = 3.0 + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^3
 
   const float fudged_speed = (vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.;
-  const float curvature_factor = tesla_curvature_factor(fudged_speed, params);
+  const float curvature_factor = get_curvature_factor(fudged_speed, params);
 
   bool violation = false;
 
