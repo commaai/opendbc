@@ -6,6 +6,12 @@ on:
       - master
   pull_request:
 
+x-cache-cppcheck: &cache-cppcheck
+  uses: actions/cache@v4
+  with:
+    path: opendbc/safety/tests/misra/cppcheck/
+    key: cppcheck-cache-${{ runner.os }}-${{ hashFiles('opendbc/safety/tests/misra/install.sh') }}
+
 jobs:
   tests:
     name: ./test.sh
@@ -19,11 +25,8 @@ jobs:
     steps:
     - uses: commaai/timeout@v1
     - uses: actions/checkout@v4
-    - name: Restore cached cppcheck
-      uses: actions/cache@v4
-      with:
-        path: opendbc/safety/tests/misra/cppcheck/
-        key: cppcheck-cache-${{ runner.os }}-${{ hashFiles('opendbc/safety/tests/misra/install.sh') }}
+    - name: Cache cppcheck
+      <<: *cache-cppcheck
     - run: ./test.sh
 
   safety_tests:
