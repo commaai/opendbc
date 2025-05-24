@@ -2,8 +2,6 @@
 
 #include "opendbc/safety/safety_declarations.h"
 
-#define RIVIAN_MAX_SPEED_DELTA 2.0  // m/s
-
 static uint8_t rivian_get_counter(const CANPacket_t *to_push) {
   int addr = GET_ADDR(to_push);
 
@@ -90,11 +88,7 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
 
       // Disable controls if speeds from VDM and ESP ECUs are too far apart.
       float vdm_speed = ((GET_BYTE(to_push, 5) << 8) | GET_BYTE(to_push, 6)) * 0.01 / 3.6;
-      bool is_invalid_speed = ABS(vdm_speed - ((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR)) > RIVIAN_MAX_SPEED_DELTA;
-      // TODO: this should generically cause rx valid to fall until re-enable
-      if (is_invalid_speed) {
-        controls_allowed = false;
-      }
+      speed_mismatch_check(vdm_speed);
     }
 
     // Driver torque
