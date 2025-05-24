@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 import unittest
-import numpy as np
 
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerPanda, MAX_SPEED_DELTA
+from opendbc.safety.tests.common import CANPackerPanda
 from opendbc.car.rivian.values import RivianSafetyFlags
 from opendbc.car.rivian.riviancan import checksum as _checksum
 

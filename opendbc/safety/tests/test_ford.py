@@ -8,7 +8,7 @@ from opendbc.car.ford.carcontroller import MAX_LATERAL_ACCEL
 from opendbc.car.ford.values import FordSafetyFlags
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
-from opendbc.safety.tests.common import CANPackerPanda, MAX_SPEED_DELTA
+from opendbc.safety.tests.common import CANPackerPanda
 
 MSG_EngBrakeData = 0x165           # RX from PCM, for driver brake pedal and cruise state
 MSG_EngVehicleSpThrottle = 0x204   # RX from PCM, for driver throttle input
