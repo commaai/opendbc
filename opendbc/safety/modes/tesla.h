@@ -2,13 +2,6 @@
 
 #include "opendbc/safety/safety_declarations.h"
 
-// parameters for lateral accel/jerk angle limiting using a simple vehicle model
-typedef struct {
-  const float slip_factor;
-  const float steer_ratio;
-  const float wheelbase;
-} AngleSteeringParams;
-
 static bool tesla_longitudinal = false;
 static bool tesla_stock_aeb = false;
 
