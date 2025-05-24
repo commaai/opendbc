@@ -278,6 +278,12 @@ FW_VERSIONS = {
       b'38897-TBA-A110\x00\x00',
       b'38897-TGH-A010\x00\x00',
     ],
+    (Ecu.engine, 0x18da10f1, None): [
+      b'37805-5AG-Q830\x00\x00',
+    ],
+    (Ecu.combinationMeter, 0x18da60f1, None): [
+      b'78109-TGK-Q630\x00\x00',
+    ],
     (Ecu.electricBrakeBooster, 0x18da2bf1, None): [
       b'39494-TGL-G030\x00\x00',
     ],
