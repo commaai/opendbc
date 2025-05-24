@@ -58,7 +58,6 @@
 
 uint32_t GET_BYTES(const CANPacket_t *msg, int start, int len);
 
-// Global constants
 extern const int MAX_WRONG_COUNTERS;
 #define MAX_ADDR_CHECK_MSGS 3U
 #define MAX_SAMPLE_VALS 6
