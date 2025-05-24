@@ -14,6 +14,9 @@ MAX_WRONG_COUNTERS = 5
 MAX_SAMPLE_VALS = 6
 VEHICLE_SPEED_FACTOR = 1000
 
+# Max allowed delta between car speeds
+MAX_SPEED_DELTA = 2.0  # m/s
+
 MessageFunction = Callable[[float], libsafety_py.CANPacket]
 
 
