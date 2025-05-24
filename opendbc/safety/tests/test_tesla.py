@@ -132,8 +132,6 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
           to_push = self._speed_msg(0)
         elif msg == "speed_2":
           to_push = self._speed_msg_2(0)
-        elif msg == "brake":
-          to_push = self._user_brake_msg(True)
 
         should_rx = i >= 5
         if not should_rx:
@@ -146,8 +144,6 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
             to_push[0].data[0] = 0
           elif msg == "speed_2":
             to_push[0].data[7] = 0
-          elif msg == "brake":
-            to_push[0].data[0] = 0
 
         self.safety.set_controls_allowed(True)
         self.assertEqual(should_rx, self._rx(to_push))
