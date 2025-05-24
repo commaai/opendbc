@@ -65,6 +65,9 @@ extern const int MAX_WRONG_COUNTERS;
 #define VEHICLE_SPEED_FACTOR 1000.0
 #define MAX_TORQUE_RT_INTERVAL 250000U
 
+static float kph_to_ms(float kph) {
+  return kph / 3.6;
+}
 
 // sample struct that keeps 6 samples in memory
 struct sample_t {
