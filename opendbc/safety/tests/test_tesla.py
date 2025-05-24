@@ -185,7 +185,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
       self.assertEqual(quality_flag, self._rx(self._speed_msg_2(0, quality_flag=quality_flag)))
       self.assertEqual(quality_flag, self.safety.get_controls_allowed())
 
-  def test_brake_quality_flag(self):
+  def test_user_brake_quality_flag(self):
     for quality_flag in (True, False):
       to_push = self._user_brake_msg(True, quality_flag=quality_flag)
       self.assertEqual(quality_flag, self._rx(to_push))
