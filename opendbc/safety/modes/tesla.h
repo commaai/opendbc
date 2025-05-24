@@ -158,7 +158,7 @@ static bool tesla_get_quality_flag_valid(const CANPacket_t *to_push) {
   bool valid = false;
   if (addr == 0x155) {
     valid = (GET_BYTE(to_push, 5) & 0x1U) == 0x1U;  // ESP_wheelSpeedsQF
-  else if (addr == 0x39d) {
+  } else if (addr == 0x39d) {
     valid = ((GET_BYTE(to_push, 1) >> 4) & 0x7U) != 2U; // IBST_iBoosterStatus (IBOOSTER_FAILURE)
   } else {
   }
