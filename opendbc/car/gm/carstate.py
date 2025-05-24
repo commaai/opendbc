@@ -182,7 +182,6 @@ class CarState(CarStateBase):
       ("ASCMSteeringButton", 33),
       ("ECMEngineStatus", 100),
       ("PSCMSteeringAngle", 100),
-      ("ECMAcceleratorPos", 80),
     ]
 
     if CP.transmissionType == TransmissionType.direct:
@@ -191,8 +190,9 @@ class CarState(CarStateBase):
     if CP.carFingerprint in F1_CAN_BRAKE:
       pt_messages.append(("EBCMBrakePedalPosition", 80))
     else:
+      print("ecma added", CP.carFingerprint)
       pt_messages.append(("ECMAcceleratorPos", 80))
-
+    print("carFingerprint", CP.carFingerprint)
     if CP.enableBsm:
       pt_messages.append(("BCMBlindSpotMonitor", 10))
 

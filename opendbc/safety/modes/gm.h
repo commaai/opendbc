@@ -202,11 +202,11 @@ static safety_config gm_init(uint16_t param) {
 
   static RxCheck gm_rx_checks[] = {
     GM_COMMON_RX_CHECKS
-
+#if 0
 	{.msg = {{0xBE, 0, 6, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},    /* Volt, Silverado, Acadia Denali */ \
             {0xBE, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},    /* Bolt EUV */ \
 	        {0xBE, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}}},  /* Escalade */
-
+#endif
   };
 
   static RxCheck gm_ev_rx_checks[] = {
