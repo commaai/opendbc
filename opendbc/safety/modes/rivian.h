@@ -81,7 +81,7 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
     if (addr == 0x208) {
       float speed = ((GET_BYTE(to_push, 6) << 8) | GET_BYTE(to_push, 7)) * 0.01;
       vehicle_moving = speed > 0.0;
-      UPDATE_VEHICLE_SPEED(speed / 3.6);
+      UPDATE_VEHICLE_SPEED(KPH_TO_MS(speed));
     }
 
     // Gas pressed and second speed source for variable torque limit
