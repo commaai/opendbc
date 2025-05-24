@@ -930,21 +930,6 @@ class PandaCarSafetyTest(PandaSafetyTest):
 
   # ***** standard tests for all car-specific safety modes *****
 
-  def test_rx_hook_speed_mismatch(self):
-    if self._speed_msg_2(0) is None:
-      raise unittest.SkipTest("No second speed message for this safety mode")
-
-    for speed in np.arange(0, 40, 0.5):
-      for speed_delta in np.arange(-5, 5, 0.1):
-        speed_2 = round(max(speed + speed_delta, 0), 1)
-        # Set controls allowed in between rx since first message can reset it
-        self._rx(self._speed_msg(speed))
-        self.safety.set_controls_allowed(True)
-        self._rx(self._speed_msg_2(speed_2))
-
-        within_delta = abs(speed - speed_2) <= MAX_SPEED_DELTA
-        self.assertEqual(self.safety.get_controls_allowed(), within_delta)
-
   def test_relay_malfunction(self):
     # each car has an addr that is used to detect relay malfunction
     # if that addr is seen on specified bus, triggers the relay malfunction
@@ -1070,6 +1055,21 @@ class PandaCarSafetyTest(PandaSafetyTest):
     # past threshold
     self._rx(self._vehicle_moving_msg(self.STANDSTILL_THRESHOLD + 1))
     self.assertTrue(self.safety.get_vehicle_moving())
+
+  def test_rx_hook_speed_mismatch(self):
+    if self._speed_msg_2(0) is None:
+      raise unittest.SkipTest("No second speed message for this safety mode")
+
+    for speed in np.arange(0, 40, 0.5):
+      for speed_delta in np.arange(-5, 5, 0.1):
+        speed_2 = round(max(speed + speed_delta, 0), 1)
+        # Set controls allowed in between rx since first message can reset it
+        self._rx(self._speed_msg(speed))
+        self.safety.set_controls_allowed(True)
+        self._rx(self._speed_msg_2(speed_2))
+
+        within_delta = abs(speed - speed_2) <= MAX_SPEED_DELTA
+        self.assertEqual(self.safety.get_controls_allowed(), within_delta)
 
   def test_safety_tick(self):
     self.safety.set_timer(int(2e6))
