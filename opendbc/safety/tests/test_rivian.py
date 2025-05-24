@@ -109,20 +109,6 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
         self.assertFalse(self._rx(to_push))
         self.assertFalse(self.safety.get_controls_allowed())
 
-  def test_rx_hook_speed_mismatch(self):
-    # TODO: this can be a common test w/ Ford
-    # Rivian has a dynamic max torque limit based on speed, so it checks two sources
-    for speed in np.arange(0, 40, 0.5):
-      for speed_delta in np.arange(-5, 5, 0.1):
-        speed_2 = round(max(speed + speed_delta, 0), 1)
-        # Set controls allowed in between rx since first message can reset it
-        self._rx(self._speed_msg(speed))
-        self.safety.set_controls_allowed(True)
-        self._rx(self._speed_msg_2(speed_2))
-
-        within_delta = abs(speed - speed_2) <= MAX_SPEED_DELTA
-        self.assertEqual(self.safety.get_controls_allowed(), within_delta)
-
 
 class TestRivianStockSafety(TestRivianSafetyBase):
 

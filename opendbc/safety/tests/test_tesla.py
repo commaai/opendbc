@@ -158,7 +158,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
                                   self.safety.get_vehicle_speed_min, self.safety.get_vehicle_speed_max)
 
   def test_rx_hook_speed_mismatch(self):
-    # TODO: this can be a common test w/ Ford
+    # TODO: overridden because of custom rounding
     # Tesla relies on speed for lateral limits close to ISO 11270, so it checks two sources
     for speed in np.arange(0, 40, 0.5):
       # match signal rounding on CAN

@@ -219,19 +219,6 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
         self.assertEqual(should_rx, self._rx(to_push))
         self.assertEqual(should_rx, self.safety.get_controls_allowed())
 
-  def test_rx_hook_speed_mismatch(self):
-    # Ford relies on speed for driver curvature limiting, so it checks two sources
-    for speed in np.arange(0, 40, 0.5):
-      for speed_delta in np.arange(-5, 5, 0.1):
-        speed_2 = round(max(speed + speed_delta, 0), 1)
-        # Set controls allowed in between rx since first message can reset it
-        self._rx(self._speed_msg(speed))
-        self.safety.set_controls_allowed(True)
-        self._rx(self._speed_msg_2(speed_2))
-
-        within_delta = abs(speed - speed_2) <= MAX_SPEED_DELTA
-        self.assertEqual(self.safety.get_controls_allowed(), within_delta)
-
   def test_angle_measurements(self):
     """Tests rx hook correctly parses the curvature measurement from the vehicle speed and yaw rate"""
     for speed in np.arange(0.5, 40, 0.5):
