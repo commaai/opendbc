@@ -81,7 +81,7 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
     if (addr == 0x208) {
       float speed = ((GET_BYTE(to_push, 6) << 8) | GET_BYTE(to_push, 7)) * 0.01;
       vehicle_moving = speed > 0.0;
-      UPDATE_VEHICLE_SPEED(KPH_TO_MS(speed));
+      UPDATE_VEHICLE_SPEED(kph_to_ms(speed));
     }
 
     // Gas pressed and second speed source for variable torque limit
@@ -89,7 +89,7 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
       gas_pressed = GET_BYTE(to_push, 3) | (GET_BYTE(to_push, 4) & 0xC0U);
 
       // Disable controls if speeds from VDM and ESP ECUs are too far apart.
-      float vdm_speed = ((GET_BYTE(to_push, 5) << 8) | GET_BYTE(to_push, 6)) * 0.01 / 3.6;
+      float vdm_speed = kph_to_ms(((GET_BYTE(to_push, 5) << 8) | GET_BYTE(to_push, 6)) * 0.01);
       bool is_invalid_speed = ABS(vdm_speed - ((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR)) > RIVIAN_MAX_SPEED_DELTA;
       // TODO: this should generically cause rx valid to fall until re-enable
       if (is_invalid_speed) {
