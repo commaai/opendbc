@@ -41,11 +41,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Restore cached cppcheck
-        uses: actions/cache@v4
-        with:
-          path: opendbc/safety/tests/misra/cppcheck/
-          key: cppcheck-cache-${{ runner.os }}-${{ hashFiles('opendbc/safety/tests/misra/install.sh') }}
+      - uses: ./.github/workflows/cache-cppcheck
       - name: MISRA mutation tests
         timeout-minutes: 1
         run: |
