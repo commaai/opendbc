@@ -55,6 +55,9 @@
   } while (0);
 
 #define UPDATE_VEHICLE_SPEED(val_ms) (update_sample(&vehicle_speed, ROUND((val_ms) * VEHICLE_SPEED_FACTOR)))
+static void update_vehicle_speed(int val_ms) {
+  update_sample(&vehicle_speed, ROUND((val_ms) * VEHICLE_SPEED_FACTOR));
+}
 
 uint32_t GET_BYTES(const CANPacket_t *msg, int start, int len);
 
