@@ -65,6 +65,12 @@ extern const int MAX_WRONG_COUNTERS;
 #define VEHICLE_SPEED_FACTOR 1000.0
 #define MAX_TORQUE_RT_INTERVAL 250000U
 
+// Lateral constants
+// ISO 11270
+static const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
+
+static const float EARTH_G = 9.81;
+static const float AVERAGE_ROAD_ROLL = 0.06;  // ~3.4 degrees, 6% superelevation
 
 // sample struct that keeps 6 samples in memory
 struct sample_t {
