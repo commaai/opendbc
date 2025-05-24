@@ -58,6 +58,7 @@
 
 uint32_t GET_BYTES(const CANPacket_t *msg, int start, int len);
 
+// Global constants
 extern const int MAX_WRONG_COUNTERS;
 #define MAX_ADDR_CHECK_MSGS 3U
 #define MAX_SAMPLE_VALS 6
@@ -67,10 +68,10 @@ extern const int MAX_WRONG_COUNTERS;
 
 // Lateral constants
 // ISO 11270
-const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
+static const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
 
-const float EARTH_G = 9.81;
-const float AVERAGE_ROAD_ROLL = 0.06;  // ~3.4 degrees, 6% superelevation
+static const float EARTH_G = 9.81;
+static const float AVERAGE_ROAD_ROLL = 0.06;  // ~3.4 degrees, 6% superelevation
 
 // sample struct that keeps 6 samples in memory
 struct sample_t {
