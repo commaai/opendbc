@@ -49,7 +49,6 @@ jobs:
           source setup.sh
           scons -j8
           cd opendbc/safety/tests/misra
-          ./install.sh  # cppcheck
           pytest -s -n8 --randomly-seed $RANDOM test_mutation.py
 
   mutation:
