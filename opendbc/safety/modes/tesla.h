@@ -9,8 +9,6 @@ typedef struct {
   const float wheelbase;
 } AngleSteeringParams;
 
-#define TESLA_MAX_SPEED_DELTA 2.0  // m/s
-
 static bool tesla_longitudinal = false;
 static bool tesla_stock_aeb = false;
 
@@ -195,11 +193,7 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
     if (addr == 0x155) {
       // Disable controls if speeds from DI (Drive Inverter) and ESP ECUs are too far apart.
       float esp_speed = (((GET_BYTE(to_push, 6) & 0x0FU) << 6) | GET_BYTE(to_push, 5) >> 2) * 0.5 / 3.6;
-      bool is_invalid_speed = ABS(esp_speed - ((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR)) > TESLA_MAX_SPEED_DELTA;
-      // TODO: this should generically cause rx valid to fall until re-enable
-      if (is_invalid_speed) {
-        controls_allowed = false;
-      }
+      speed_mismatch_check(esp_speed);
     }
 
     // Gas pressed

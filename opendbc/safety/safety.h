@@ -834,3 +834,13 @@ void pcm_cruise_check(bool cruise_engaged) {
   }
   cruise_engaged_prev = cruise_engaged;
 }
+
+void speed_mismatch_check(const float speed_2) {
+  // Disable controls if speeds from two sources are too far apart.
+  // For safety modes that use speed to adjust torque or angle limits
+  const float MAX_SPEED_DELTA = 2.0;  // m/s
+  bool is_invalid_speed = ABS(speed_2 - ((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR)) > MAX_SPEED_DELTA;
+  if (is_invalid_speed) {
+    controls_allowed = false;
+  }
+}
