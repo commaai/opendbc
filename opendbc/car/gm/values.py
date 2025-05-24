@@ -192,7 +192,10 @@ class CAR(Platforms):
     [GMCarDocs("GMC Yukon 2019-20", "Adaptive Cruise Control (ACC) & LKAS")],
     GMCarSpecs(mass=2490, wheelbase=2.94, steerRatio=17.3, centerToFrontRatio=0.5, tireStiffnessFactor=1.0),
   )
-
+  GMC_YUKON_XL_2017 = GMPlatformConfig(
+    [GMCarDocs("GMC Yukon 2019-20", "Adaptive Cruise Control (ACC) & LKAS")],
+    GMCarSpecs(mass=2739, wheelbase=3.302, steerRatio=17.3, tireStiffnessFactor=1.0, centerToFrontRatio=0.5),
+  )
 
 class CruiseButtons:
   INIT = 0
