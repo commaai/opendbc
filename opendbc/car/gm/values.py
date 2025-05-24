@@ -63,6 +63,7 @@ class GMSafetyFlags(IntFlag):
   HW_CAM = 1
   HW_CAM_LONG = 2
   EV = 4
+  F1_CAN_BRAKE = 8
 
 
 class Footnote(Enum):
@@ -193,8 +194,8 @@ class CAR(Platforms):
     GMCarSpecs(mass=2490, wheelbase=2.94, steerRatio=17.3, centerToFrontRatio=0.5, tireStiffnessFactor=1.0),
   )
   GMC_YUKON_XL_2017 = GMPlatformConfig(
-    [GMCarDocs("GMC Yukon 2019-20", "Adaptive Cruise Control (ACC) & LKAS")],
-    GMCarSpecs(mass=2739, wheelbase=3.302, steerRatio=17.3, tireStiffnessFactor=1.0, centerToFrontRatio=0.5),
+    [GMCarDocs("GMC Yukon XL 2017", "Adaptive Cruise Control (ACC) & LKAS")],
+    GMCarSpecs(mass=2739, wheelbase=3.302, steerRatio=24, tireStiffnessFactor=1.0, centerToFrontRatio=0.5),
   )
 
 class CruiseButtons:
@@ -273,10 +274,12 @@ FW_QUERY_CONFIG = FwQueryConfig(
 EV_CAR = {CAR.CHEVROLET_VOLT, CAR.CHEVROLET_VOLT_2019, CAR.CHEVROLET_BOLT_EUV}
 
 # We're integrated at the camera with VOACC on these cars (instead of ASCM w/ OBD-II harness)
-CAMERA_ACC_CAR = {CAR.CHEVROLET_BOLT_EUV, CAR.CHEVROLET_SILVERADO, CAR.CHEVROLET_EQUINOX, CAR.CHEVROLET_TRAILBLAZER, CAR.GMC_YUKON, GMC_YUKON_XL_2017}
+CAMERA_ACC_CAR = {CAR.CHEVROLET_BOLT_EUV, CAR.CHEVROLET_SILVERADO, CAR.CHEVROLET_EQUINOX, CAR.CHEVROLET_TRAILBLAZER, CAR.GMC_YUKON, CAR.GMC_YUKON_XL_2017}
 
 # Alt ASCMActiveCruiseControlStatus
-ALT_ACCS = {CAR.GMC_YUKON, GMC_YUKON_XL_2017}
+ALT_ACCS = {CAR.GMC_YUKON, CAR.GMC_YUKON_XL_2017}
+
+F1_CAN_BRAKE = {CAR.GMC_YUKON_XL_2017}
 
 # We're integrated at the Safety Data Gateway Module on these cars
 SDGM_CAR = {CAR.CADILLAC_XT4, CAR.CHEVROLET_VOLT_2019, CAR.CHEVROLET_TRAVERSE}

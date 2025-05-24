@@ -5,7 +5,7 @@ from opendbc.can.parser import CANParser
 from opendbc.car import Bus, create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.gm.values import DBC, AccState, CruiseButtons, STEER_THRESHOLD, SDGM_CAR, ALT_ACCS
+from opendbc.car.gm.values import DBC, AccState, CruiseButtons, STEER_THRESHOLD, SDGM_CAR, ALT_ACCS, F1_CAN_BRAKE
 
 ButtonType = structs.CarState.ButtonEvent.Type
 TransmissionType = structs.CarParams.TransmissionType
@@ -84,7 +84,10 @@ class CarState(CarStateBase):
     else:
       ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(pt_cp.vl["ECMPRDNL2"]["PRNDL2"], None))
 
-    ret.brake = pt_cp.vl["EBCMBrakePedalPosition"]["BrakePedalPosition"]
+    if self.CP.carFingerprint in F1_CAN_BRAKE:
+      ret.brake = pt_cp.vl["EBCMBrakePedalPosition"]["BrakePedalPosition"]
+    else:
+      ret.brake = pt_cp.vl["ECMAcceleratorPos"]["BrakePedalPos"]
     if self.CP.networkLocation == NetworkLocation.fwdCamera:
       ret.brakePressed = pt_cp.vl["ECMEngineStatus"]["BrakePressed"] != 0
     else:
@@ -158,6 +161,9 @@ class CarState(CarStateBase):
                               {1: ButtonType.gapAdjustCruise})
       ]
 
+    if ret.vEgo < self.CP.minSteerSpeed:
+      ret.lowSpeedAlert = True
+
     return ret
 
   @staticmethod
@@ -176,23 +182,24 @@ class CarState(CarStateBase):
       ("ASCMSteeringButton", 33),
       ("ECMEngineStatus", 100),
       ("PSCMSteeringAngle", 100),
-      ("EBCMBrakePedalPosition", 80),
+      ("ECMAcceleratorPos", 80),
     ]
 
     if CP.transmissionType == TransmissionType.direct:
       pt_messages.append(("EBCMRegenPaddle", 50))
+
+    if CP.carFingerprint in F1_CAN_BRAKE:
+      pt_messages.append(("EBCMBrakePedalPosition", 80))
+    else:
+      pt_messages.append(("ECMAcceleratorPos", 80))
 
     if CP.enableBsm:
       pt_messages.append(("BCMBlindSpotMonitor", 10))
 
     cam_messages = []
     if CP.networkLocation == NetworkLocation.fwdCamera:
-      pt_messages += [
-        ("ASCMLKASteeringCmd", 0),
-      ]
-      cam_messages += [
-        ("ASCMLKASteeringCmd", 10),
-      ]
+      pt_messages.append(("ASCMLKASteeringCmd", 0))
+      cam_messages.append(("ASCMLKASteeringCmd", 10))
 
       if CP.carFingerprint in ALT_ACCS:
         pt_messages.append(("ECMCruiseControl", 10))
@@ -200,9 +207,7 @@ class CarState(CarStateBase):
         cam_messages.append(("ASCMActiveCruiseControlStatus", 25))
 
       if CP.carFingerprint not in SDGM_CAR:
-        cam_messages += [
-          ("AEBCmd", 10),
-        ]
+        cam_messages.append(("AEBCmd", 10))
 
     loopback_messages = [
       ("ASCMLKASteeringCmd", 0),
@@ -213,4 +218,3 @@ class CarState(CarStateBase):
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, 2),
       Bus.loopback: CANParser(DBC[CP.carFingerprint][Bus.pt], loopback_messages, 128),
     }
-
