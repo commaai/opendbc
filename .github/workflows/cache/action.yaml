@@ -1,4 +1,4 @@
-name: 'Restore cached cppcheck'
+name: 'Restore cache'
 runs:
   using: "composite"
   steps:

@@ -19,7 +19,7 @@ jobs:
     steps:
     - uses: commaai/timeout@v1
     - uses: actions/checkout@v4
-    - uses: ./.github/workflows/cache-cppcheck
+    - uses: ./.github/workflows/cache
     - run: ./test.sh
 
   safety_tests:
@@ -32,7 +32,7 @@ jobs:
     steps:
     - uses: commaai/timeout@v1
     - uses: actions/checkout@v4
-    - uses: ./.github/workflows/cache-cppcheck
+    - uses: ./.github/workflows/cache
     - name: Run safety tests
       run: ./opendbc/safety/tests/test.sh ${{ matrix.flags }}
 
@@ -42,7 +42,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/workflows/cache-cppcheck
+      - uses: ./.github/workflows/cache
       - name: MISRA mutation tests
         timeout-minutes: 1
         run: |
@@ -62,7 +62,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # need master to get diff
-      - uses: ./.github/workflows/cache-cppcheck
+      - uses: ./.github/workflows/cache
       - name: Run mutation tests
         timeout-minutes: 5
         run: |
