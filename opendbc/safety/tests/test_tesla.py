@@ -74,8 +74,10 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     self.__class__.cnt_epas += 1
     return self.packer.make_can_msg_panda("EPAS3S_sysStatus", 0, values)
 
-  def _user_brake_msg(self, brake):
+  def _user_brake_msg(self, brake, quality_flag: bool = True):
     values = {"IBST_driverBrakeApply": 2 if brake else 1}
+    if not quality_flag:
+      values["IBST_driverBrakeApply"] = 3  # FAULT
     return self.packer.make_can_msg_panda("IBST_status", 0, values)
 
   def _speed_msg(self, speed):
@@ -182,6 +184,11 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
       self.assertTrue(self._rx(self._speed_msg(0)))
       self.assertEqual(quality_flag, self._rx(self._speed_msg_2(0, quality_flag=quality_flag)))
       self.assertEqual(quality_flag, self.safety.get_controls_allowed())
+
+  def test_user_brake_quality_flag(self):
+    for quality_flag in (True, False):
+      to_push = self._user_brake_msg(True, quality_flag=quality_flag)
+      self.assertEqual(quality_flag, self._rx(to_push))
 
   def test_steering_wheel_disengage(self):
     # Tesla disengages when the user forcibly overrides the locked-in angle steering control

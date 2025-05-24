@@ -158,6 +158,8 @@ static bool tesla_get_quality_flag_valid(const CANPacket_t *to_push) {
   bool valid = false;
   if (addr == 0x155) {
     valid = (GET_BYTE(to_push, 5) & 0x1U) == 0x1U;  // ESP_wheelSpeedsQF
+  } else if (addr == 0x39d) {
+    valid = (GET_BYTE(to_push, 2) & 0x03U) != 3U;  // IBST_driverBrakeApply=FAULT
   } else {
   }
   return valid;
@@ -424,7 +426,7 @@ static safety_config tesla_init(uint16_t param) {
     {.msg = {{0x155, 0, 8, .max_counter = 15U, .quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},  // ESP_B (2nd speed in kph)
     {.msg = {{0x370, 0, 8, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},                       // EPAS3S_sysStatus (steering angle)
     {.msg = {{0x118, 0, 8, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},                       // DI_systemStatus (gas pedal)
-    {.msg = {{0x39d, 0, 5, .max_counter = 15U, .frequency = 25U}, { 0 }, { 0 }}},                        // IBST_status (brakes)
+    {.msg = {{0x39d, 0, 5, .max_counter = 15U, .quality_flag = true, .frequency = 25U}, { 0 }, { 0 }}},  // IBST_status (brakes)
     {.msg = {{0x286, 0, 8, .max_counter = 15U, .frequency = 10U}, { 0 }, { 0 }}},                        // DI_state (acc state)
     {.msg = {{0x311, 0, 7, .max_counter = 15U, .frequency = 10U}, { 0 }, { 0 }}},                        // UI_warning (blinkers, buckle switch & doors)
   };
