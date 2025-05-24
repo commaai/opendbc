@@ -127,6 +127,7 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
 
   # PCM vehicle speed
   def _speed_msg_2(self, speed: float, quality_flag=True):
+    # Ford relies on speed for driver curvature limiting, so it checks two sources
     values = {"Veh_V_ActlEng": speed * 3.6, "VehVActlEng_D_Qf": 3 if quality_flag else 0, "VehVActlEng_No_Cnt": self.cnt_speed_2 % 16}
     self.__class__.cnt_speed_2 += 1
     return self.packer.make_can_msg_panda("EngVehicleSpThrottle2", 0, values, fix_checksum=checksum)

@@ -57,6 +57,7 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
     return self.packer.make_can_msg_panda("ESP_Status", 0, values, fix_checksum=checksum)
 
   def _speed_msg_2(self, speed, quality_flag=True):
+    # Rivian has a dynamic max torque limit based on speed, so it checks two sources
     return self._user_gas_msg(0, speed, quality_flag)
 
   def _user_brake_msg(self, brake):
