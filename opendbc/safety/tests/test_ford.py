@@ -8,7 +8,7 @@ from opendbc.car.ford.carcontroller import MAX_LATERAL_ACCEL
 from opendbc.car.ford.values import FordSafetyFlags
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
-from opendbc.safety.tests.common import CANPackerPanda
+from opendbc.safety.tests.common import CANPackerPanda, MAX_SPEED_DELTA
 
 MSG_EngBrakeData = 0x165           # RX from PCM, for driver brake pedal and cruise state
 MSG_EngVehicleSpThrottle = 0x204   # RX from PCM, for driver throttle input
@@ -72,9 +72,6 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
 
   FWD_BLACKLISTED_ADDRS = {2: [MSG_ACCDATA_3, MSG_Lane_Assist_Data1, MSG_LateralMotionControl,
                                MSG_LateralMotionControl2, MSG_IPMA_Data]}
-
-  # Max allowed delta between car speeds
-  MAX_SPEED_DELTA = 2.0  # m/s
 
   STEER_MESSAGE = 0
 
@@ -232,7 +229,7 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
         self.safety.set_controls_allowed(True)
         self._rx(self._speed_msg_2(speed_2))
 
-        within_delta = abs(speed - speed_2) <= self.MAX_SPEED_DELTA
+        within_delta = abs(speed - speed_2) <= MAX_SPEED_DELTA
         self.assertEqual(self.safety.get_controls_allowed(), within_delta)
 
   def test_angle_measurements(self):

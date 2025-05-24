@@ -9,7 +9,7 @@ from opendbc.car.vehicle_model import VehicleModel
 from opendbc.can.can_define import CANDefine
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
-from opendbc.safety.tests.common import CANPackerPanda, MAX_WRONG_COUNTERS, away_round, round_speed
+from opendbc.safety.tests.common import CANPackerPanda, MAX_SPEED_DELTA, MAX_WRONG_COUNTERS, away_round, round_speed
 
 MSG_DAS_steeringControl = 0x488
 MSG_APS_eacMonitor = 0x27d
@@ -45,9 +45,6 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
   MAX_ACCEL = 2.0
   MIN_ACCEL = -3.48
   INACTIVE_ACCEL = 0.0
-
-  # Max allowed delta between car speeds
-  MAX_SPEED_DELTA = 2.0  # m/s
 
   cnt_epas = 0
 
@@ -175,7 +172,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         self.safety.set_controls_allowed(True)
         self.assertTrue(self._rx(self._speed_msg_2(speed_2)))
 
-        within_delta = abs(speed - speed_2) <= self.MAX_SPEED_DELTA
+        within_delta = abs(speed - speed_2) <= MAX_SPEED_DELTA
         self.assertEqual(self.safety.get_controls_allowed(), within_delta)
 
     # Test ESP_B quality flag
