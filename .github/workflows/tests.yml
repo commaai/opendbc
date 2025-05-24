@@ -48,8 +48,7 @@ jobs:
         run: |
           source setup.sh
           scons -j8
-          cd opendbc/safety/tests/misra
-          pytest -s -n8 --randomly-seed $RANDOM test_mutation.py
+          pytest -s -n8 --randomly-seed $RANDOM opendbc/safety/tests/misra/test_mutation.py
 
   mutation:
     name: Safety mutation tests
