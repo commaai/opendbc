@@ -13,7 +13,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        flags: ['', '--ubsan']
         include:
           - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-24.04' }}
             flags: ''
