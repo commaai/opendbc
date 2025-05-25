@@ -35,7 +35,7 @@ cppcheck() {
   echo -e "\n\n\n\n\nTEST variant options:" >> $CHECKLIST
   echo -e ""${@//$BASEDIR/}"\n\n" >> $CHECKLIST # (absolute path removed)
 
-  OPENDBC_ROOT=${OPENDBC_ROOT:-../../../../}
+  OPENDBC_ROOT=${OPENDBC_ROOT:-$BASEDIR}
   $CPPCHECK_DIR/cppcheck --inline-suppr -I $OPENDBC_ROOT \
           -I "$(gcc -print-file-name=include)" --suppress=*:*gcc*include/* --suppress=*:*clang*include/* \
           --suppressions-list=$DIR/suppressions.txt  \

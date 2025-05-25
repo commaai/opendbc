@@ -41,7 +41,7 @@ assert len(files) > 20, files
 for p in patterns:
   mutations.append((random.choice(files), *p, True))
 
-#mutations = random.sample(mutations, 1)
+mutations = random.sample(mutations, 2)  # can remove this once cppcheck is faster
 
 @pytest.mark.parametrize("fn, rule, transform, should_fail", mutations)
 def test_misra_mutation(fn, rule, transform, should_fail):
