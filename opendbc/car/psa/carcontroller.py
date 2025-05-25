@@ -1,8 +1,7 @@
 from opendbc.car import apply_std_steer_angle_limits, Bus
 from opendbc.can.packer import CANPacker
 from opendbc.car.interfaces import CarControllerBase
-from opendbc.car.psa import psacan
-from opendbc.car.psa.psacan import *
+from opendbc.car.psa.psacan import create_lka_steering
 from opendbc.car.psa.values import CarControllerParams
 
 class CarController(CarControllerBase):
@@ -22,7 +21,7 @@ class CarController(CarControllerBase):
     else:
       apply_angle = 0
 
-    can_sends.append(psacan.create_lka_steering(self.packer, self.frame // 5, CC.latActive, apply_angle))
+    can_sends.append(create_lka_steering(self.packer, self.frame // 5, CC.latActive, apply_angle))
 
     self.apply_angle_last = apply_angle
 

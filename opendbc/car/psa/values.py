@@ -76,6 +76,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
       rx_offset=0x08,
       bus=bus,
       obd_multiplexing=False,
+      whitelist_ecus=[Ecu.eps, Ecu.hybrid, Ecu.electricBrakeBooster, Ecu.engine, Ecu.abs],
     ),
     Request(
       [PSA_DIAG_REQ, PSA_SERIAL_REQ],
