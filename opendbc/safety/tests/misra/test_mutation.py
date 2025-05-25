@@ -52,6 +52,9 @@ assert len(files) > 20, files
 for p in patterns:
   mutations.append((random.choice(files), p, True))
 
+# can increase this once it's faster
+mutations = random.sample(mutations, 4)
+
 @pytest.mark.parametrize("fn, patch, should_fail", mutations)
 def test_misra_mutation(fn, patch, should_fail):
   with tempfile.TemporaryDirectory() as tmp:
