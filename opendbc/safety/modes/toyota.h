@@ -33,7 +33,7 @@
 
 #define TOYOTA_COMMON_RX_CHECKS(lta)                                                                          \
   {.msg = {{ 0xaa, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 83U}, { 0 }, { 0 }}},  \
-  {.msg = {{0x260, 0, 8, .ignore_counter = true, .ignore_quality_flag=(!lta), .frequency = 50U}, { 0 }, { 0 }}},    \
+  {.msg = {{0x260, 0, 8, .ignore_counter = true, .ignore_quality_flag=!(lta), .frequency = 50U}, { 0 }, { 0 }}},    \
 
 #define TOYOTA_RX_CHECKS(lta)                                                                                  \
   TOYOTA_COMMON_RX_CHECKS(lta)                                                                                 \
