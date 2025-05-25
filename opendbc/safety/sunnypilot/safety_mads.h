@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "sunnypilot/safety_mads_declarations.h"
+#include "opendbc/safety/sunnypilot/safety_mads_declarations.h"
 
 // ===============================
 // Global Variables
@@ -63,11 +63,7 @@ inline void m_mads_state_init(void) {
 
 inline void m_update_button_state(ButtonStateTracking *button_state) {
   if (button_state->current != MADS_BUTTON_UNAVAILABLE) {
-    button_state->transition = m_get_edge_transition(
-      button_state->current == MADS_BUTTON_PRESSED,
-      button_state->last == MADS_BUTTON_PRESSED
-    );
-
+    button_state->transition = m_get_edge_transition(button_state->current == MADS_BUTTON_PRESSED, button_state->last == MADS_BUTTON_PRESSED);
     button_state->last = button_state->current;
   }
 }

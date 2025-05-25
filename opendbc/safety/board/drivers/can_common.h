@@ -1,5 +1,5 @@
 #pragma once
-#include "can_common_declarations.h"
+#include "opendbc/safety/board/drivers/can_common_declarations.h"
 
 uint8_t calculate_checksum(const uint8_t *dat, uint32_t len) {
   uint8_t checksum = 0U;
