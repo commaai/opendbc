@@ -16,33 +16,21 @@ IGNORED_PATHS = (
 )
 
 mutations = [
-  # default
-  (None, None, False),
-  # general safety
-  ("opendbc/safety/modes/toyota.h", "s/if (addr == 0x260) {/if (addr == 1 || addr == 2) {/g", True),
+  # no mutation, should pass
+  (None, None, lambda s: s, False),
 ]
 
 patterns = [
-  # misra-c2012-13.3
-  "$a void test(int tmp) { int tmp2 = tmp++ + 2; if (tmp2) {;}}",
-  # misra-c2012-13.4
-  "$a int test(int x, int y) { return (x=2) && (y=2); }",
-  # misra-c2012-13.5
-  "$a void test(int tmp) { if (true && tmp++) {;} }",
-  # misra-c2012-13.6
-  "$a void test(int tmp) { if (sizeof(tmp++)) {;} }",
-  # misra-c2012-14.1
-  "$a void test(float len) { for (float j = 0; j < len; j++) {;} }",
-  # misra-c2012-14.4
-  "$a void test(int len) { if (len - 8) {;} }",
-  # misra-c2012-16.4
-  r"$a void test(int temp) {switch (temp) { case 1: ; }}\n",
-  # misra-c2012-17.8
-  "$a void test(int cnt) { for (cnt=0;;cnt++) {;} }",
-  # misra-c2012-20.4
-  r"$a #define auto 1\n",
-  # misra-c2012-20.5
-  r"$a #define TEST 1\n#undef TEST\n",
+  ("misra-c2012-10.3", lambda s: s + "\nvoid test(float len) { for (float j = 0; j < len; j++) {;} }\n"),
+  ("misra-c2012-13.3", lambda s: s + "\nvoid test(int tmp) { int tmp2 = tmp++ + 2; if (tmp2) {;}}\n"),
+  ("misra-c2012-13.4", lambda s: s + "\nint test(int x, int y) { return (x=2) && (y=2); }\n"),
+  ("misra-c2012-13.5", lambda s: s + "\nvoid test(int tmp) { if (true && tmp++) {;} }\n"),
+  ("misra-c2012-13.6", lambda s: s + "\nvoid test(int tmp) { if (sizeof(tmp++)) {;} }\n"),
+  ("misra-c2012-14.2", lambda s: s + "\nvoid test(int cnt) { for (cnt=0;;cnt++) {;} }\n"),
+  ("misra-c2012-14.4", lambda s: s + "\nvoid test(int len) { if (len - 8) {;} }\n"),
+  ("misra-c2012-16.4", lambda s: s + "\nvoid test(int temp) {switch (temp) { case 1: ; }}\n"),
+  ("misra-c2012-20.4", lambda s: s + "\n#define auto 1\n"),
+  ("misra-c2012-20.5", lambda s: s + "\n#define TEST 1\n#undef TEST\n"),
 ]
 
 all_files = glob.glob('opendbc/safety/**', root_dir=ROOT, recursive=True)
@@ -50,23 +38,28 @@ files = [f for f in all_files if f.endswith(('.c', '.h')) and not f.startswith(I
 assert len(files) > 20, files
 
 for p in patterns:
-  mutations.append((random.choice(files), p, True))
+  mutations.append((random.choice(files), *p, True))
 
-# can increase this once it's faster
-mutations = random.sample(mutations, 4)
+#mutations = random.sample(mutations, 1)
 
-@pytest.mark.parametrize("fn, patch, should_fail", mutations)
-def test_misra_mutation(fn, patch, should_fail):
+@pytest.mark.parametrize("fn, rule, transform, should_fail", mutations)
+def test_misra_mutation(fn, rule, transform, should_fail):
   with tempfile.TemporaryDirectory() as tmp:
     shutil.copytree(ROOT, tmp, dirs_exist_ok=True)
     shutil.rmtree(os.path.join(tmp, '.venv'), ignore_errors=True)
 
     # apply patch
     if fn is not None:
-      r = os.system(f"cd {tmp} && sed -i '{patch}' {fn}")
-      assert r == 0
+      with open(os.path.join(tmp, fn), 'r+') as f:
+        content = f.read()
+        f.seek(0)
+        f.write(transform(content))
 
     # run test
-    r = subprocess.run("SKIP_TABLES_DIFF=1 SKIP_BUILD=1 opendbc/safety/tests/misra/test_misra.sh", cwd=tmp, shell=True)
+    r = subprocess.run("SKIP_TABLES_DIFF=1 SKIP_BUILD=1 opendbc/safety/tests/misra/test_misra.sh",
+                       stdout=subprocess.PIPE, cwd=tmp, shell=True, encoding='utf8')
+    print(r.stdout) # helpful for debugging failures
     failed = r.returncode != 0
     assert failed == should_fail
+    if should_fail:
+      assert rule in r.stdout
