@@ -26,7 +26,8 @@ static void psa_rx_hook(const CANPacket_t *to_push) {
 
   if (bus == PSA_CAM_BUS) {
     if (addr == PSA_DAT_BSI) {
-      brake_pressed = (GET_BIT(to_push, 5) != 0U); // P013_MainBrake
+      //TODO: check GET_BIT(to_push, 5);
+      brake_pressed = (GET_BYTE(to_push, 0U) >> 5U) & 1U; // P013_MainBrake
     }
     if (addr == PSA_DRIVER) {
       gas_pressed = GET_BYTE(to_push, 3) > 0U; // GAS_PEDAL
@@ -47,7 +48,8 @@ static void psa_rx_hook(const CANPacket_t *to_push) {
       UPDATE_VEHICLE_SPEED(speed * 0.01); // VITESSE_VEHICULE_ROUES
     }
     if (addr == PSA_HS2_DAT_MDD_CMD_452) {
-      pcm_cruise_check((GET_BIT(to_push, 23) != 0U)); // DDE_ACTIVATION_RVV_ACC
+      // TODO: check pcm_cruise_check(GET_BIT(to_push, 3) & 0x40);
+      pcm_cruise_check(((GET_BYTE(to_push, 2U) >> 7U) & 1U)); // DDE_ACTIVATION_RVV_ACC
     }
   }
 }
