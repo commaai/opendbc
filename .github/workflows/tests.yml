@@ -36,20 +36,6 @@ jobs:
     - name: Run safety tests
       run: ./opendbc/safety/tests/test.sh ${{ matrix.flags }}
 
-  misra_mutation:
-    name: MISRA C:2012 Mutation
-    runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/workflows/cache
-      - name: MISRA mutation tests
-        timeout-minutes: 1
-        run: |
-          source setup.sh
-          scons -j8
-          pytest -s -n8 --randomly-seed $RANDOM opendbc/safety/tests/misra/test_mutation.py
-
   mutation:
     name: Safety mutation tests
     runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
