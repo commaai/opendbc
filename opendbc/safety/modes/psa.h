@@ -1,3 +1,8 @@
+
+#pragma once
+
+#include "opendbc/safety/safety_declarations.h"
+
 #define PSA_STEERING              757  // RX from XXX, driver torque
 #define PSA_STEERING_ALT          773  // RX from EPS, steering angle
 #define PSA_DRIVER                1390 // RX from BSI, gas pedal
