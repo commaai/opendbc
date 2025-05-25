@@ -11,6 +11,7 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 ROOT = os.path.join(HERE, "../../../../")
 
 IGNORED_PATHS = (
+  'opendbc/safety/main.c',
   'opendbc/safety/tests/',
   'opendbc/safety/board/',
 )
@@ -45,8 +46,8 @@ for p in patterns:
 @pytest.mark.parametrize("fn, rule, transform, should_fail", mutations)
 def test_misra_mutation(fn, rule, transform, should_fail):
   with tempfile.TemporaryDirectory() as tmp:
-    shutil.copytree(ROOT, tmp, dirs_exist_ok=True)
-    shutil.rmtree(os.path.join(tmp, '.venv'), ignore_errors=True)
+    shutil.copytree(ROOT, tmp, dirs_exist_ok=True,
+                    ignore=shutil.ignore_patterns('.venv', 'cppcheck', '.git', '*.ctu-info'))
 
     # apply patch
     if fn is not None:
@@ -56,10 +57,10 @@ def test_misra_mutation(fn, rule, transform, should_fail):
         f.write(transform(content))
 
     # run test
-    r = subprocess.run("opendbc/safety/tests/misra/test_misra.sh",
-                       stdout=subprocess.PIPE, cwd=tmp, shell=True, encoding='utf8')
+    r = subprocess.run(f"OPENDBC_ROOT={tmp} opendbc/safety/tests/misra/test_misra.sh",
+                       stdout=subprocess.PIPE, cwd=ROOT, shell=True, encoding='utf8')
     print(r.stdout) # helpful for debugging failures
     failed = r.returncode != 0
     assert failed == should_fail
     if should_fail:
-      assert rule in r.stdout
+      assert rule in r.stdout, "MISRA test failed but not for the correct violation"

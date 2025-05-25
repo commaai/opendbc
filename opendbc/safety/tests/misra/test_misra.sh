@@ -22,7 +22,7 @@ fi
 
 cd $BASEDIR
 
-CHECKLIST=$DIR/checkers.txt
+CHECKLIST=$(mktemp)
 echo "Cppcheck checkers list from test_misra.sh:" > $CHECKLIST
 
 cppcheck() {
@@ -30,12 +30,13 @@ cppcheck() {
   COMMON_DEFINES="-D__GNUC__=9"
 
   # note that cppcheck build cache results in inconsistent results as of v2.13.0
-  OUTPUT=$DIR/.output.log
+  OUTPUT=$(mktemp)
 
   echo -e "\n\n\n\n\nTEST variant options:" >> $CHECKLIST
   echo -e ""${@//$BASEDIR/}"\n\n" >> $CHECKLIST # (absolute path removed)
 
-  $CPPCHECK_DIR/cppcheck --inline-suppr -I $BASEDIR \
+  OPENDBC_ROOT=${OPENDBC_ROOT:-../../../../}
+  $CPPCHECK_DIR/cppcheck --inline-suppr -I $OPENDBC_ROOT \
           -I "$(gcc -print-file-name=include)" --suppress=*:*gcc*include/* --suppress=*:*clang*include/* \
           --suppressions-list=$DIR/suppressions.txt  \
            --error-exitcode=2 --check-level=exhaustive --safety \
@@ -60,8 +61,11 @@ cppcheck $PANDA_OPTS -DCANFD $BASEDIR/opendbc/safety/main.c
 printf "\n${GREEN}Success!${NC} took $SECONDS seconds\n"
 
 # ensure list of checkers is up to date
-cd $DIR
-if [ -z "$SKIP_TABLES_DIFF" ] && ! git diff --quiet $CHECKLIST; then
-  echo -e "\n${YELLOW}WARNING: Cppcheck checkers.txt report has changed. Review and commit...${NC}"
-  exit 4
+if [ -z "$OPENDBC_ROOT" ]; then
+  cd $DIR
+  if ! git diff --quiet $CHECKLIST; then
+    echo -e "\n${YELLOW}WARNING: Cppcheck checkers.txt report has changed. Review and commit...${NC}"
+    mv $CHECKLIST $DIR/checkers.txt
+    exit 4
+  fi
 fi
