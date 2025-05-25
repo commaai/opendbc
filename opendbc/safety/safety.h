@@ -1,31 +1,31 @@
 #pragma once
 
-#include "safety_declarations.h"
-#include "can.h"
+#include "opendbc/safety/safety_declarations.h"
+#include "opendbc/safety/board/can.h"
 
 // include the safety policies.
-#include "safety/safety_defaults.h"
-#include "safety/safety_honda.h"
-#include "safety/safety_toyota.h"
-#include "safety/safety_tesla.h"
-#include "safety/safety_gm.h"
-#include "safety/safety_ford.h"
-#include "safety/safety_hyundai.h"
-#include "safety/safety_chrysler.h"
-#include "safety/safety_rivian.h"
-#include "safety/safety_subaru.h"
-#include "safety/safety_subaru_preglobal.h"
-#include "safety/safety_mazda.h"
-#include "safety/safety_nissan.h"
-#include "safety/safety_volkswagen_mqb.h"
-#include "safety/safety_volkswagen_pq.h"
-#include "safety/safety_elm327.h"
-#include "safety/safety_body.h"
-#include "safety/safety_psa.h"
+#include "opendbc/safety/modes/defaults.h"
+#include "opendbc/safety/modes/honda.h"
+#include "opendbc/safety/modes/toyota.h"
+#include "opendbc/safety/modes/tesla.h"
+#include "opendbc/safety/modes/gm.h"
+#include "opendbc/safety/modes/ford.h"
+#include "opendbc/safety/modes/hyundai.h"
+#include "opendbc/safety/modes/chrysler.h"
+#include "opendbc/safety/modes/rivian.h"
+#include "opendbc/safety/modes/subaru.h"
+#include "opendbc/safety/modes/subaru_preglobal.h"
+#include "opendbc/safety/modes/mazda.h"
+#include "opendbc/safety/modes/nissan.h"
+#include "opendbc/safety/modes/volkswagen_mqb.h"
+#include "opendbc/safety/modes/volkswagen_pq.h"
+#include "opendbc/safety/modes/elm327.h"
+#include "opendbc/safety/modes/body.h"
+#include "opendbc/safety/modes/psa.h"
 
 // CAN-FD only safety modes
 #ifdef CANFD
-#include "safety/safety_hyundai_canfd.h"
+#include "opendbc/safety/modes/hyundai_canfd.h"
 #endif
 
 uint32_t GET_BYTES(const CANPacket_t *msg, int start, int len) {
@@ -174,10 +174,10 @@ static bool rx_msg_safety_check(const CANPacket_t *to_push,
     }
 
     // quality flag check
-    if ((safety_hooks->get_quality_flag_valid != NULL) && cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].quality_flag) {
+    if ((safety_hooks->get_quality_flag_valid != NULL) && !cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_quality_flag) {
       cfg->rx_checks[index].status.valid_quality_flag = safety_hooks->get_quality_flag_valid(to_push);
     } else {
-      cfg->rx_checks[index].status.valid_quality_flag = true;
+      cfg->rx_checks[index].status.valid_quality_flag = cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_quality_flag;
     }
   }
   return is_msg_valid(cfg->rx_checks, index);
@@ -348,10 +348,6 @@ static void relay_malfunction_set(void) {
 }
 
 static void generic_rx_checks(void) {
-  // exit controls on rising edge of gas press
-  if (gas_pressed && !gas_pressed_prev && !(alternative_experience & ALT_EXP_DISABLE_DISENGAGE_ON_GAS)) {
-    controls_allowed = false;
-  }
   gas_pressed_prev = gas_pressed;
 
   // exit controls on rising edge of brake press
@@ -787,12 +783,8 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 
     // check not above ISO 11270 lateral accel assuming worst case road roll
     if (limits.angle_is_curvature) {
-      // ISO 11270
-      static const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
 
       // Limit to average banked road since safety doesn't have the roll
-      static const float EARTH_G = 9.81;
-      static const float AVERAGE_ROAD_ROLL = 0.06;  // ~3.4 degrees, 6% superelevation
       static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (EARTH_G * AVERAGE_ROAD_ROLL);  // ~2.4 m/s^2
 
       // Allow small tolerance by using minimum speed and rounding curvature up
@@ -830,6 +822,67 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
   return violation;
 }
 
+static float get_curvature_factor(const float speed, const AngleSteeringParams params) {
+  return 1. / (1. - (params.slip_factor * (speed * speed))) / params.wheelbase;
+}
+
+bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits,
+                               const AngleSteeringParams params) {
+  // This check uses a simple vehicle model to allow for true lateral acceleration and jerk limits.
+  // TODO: remove the inaccurate breakpoint angle limiting function above and always use this one
+
+  static const float RAD_TO_DEG = 57.29577951308232;
+
+  // Highway curves are rolled in the direction of the turn, add tolerance to compensate
+  static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^2
+  // Lower than ISO 11270 lateral jerk limit, which is 5.0 m/s^3
+  static const float MAX_LATERAL_JERK = 3.0 + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^3
+
+  const float fudged_speed = (vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.;
+  const float curvature_factor = get_curvature_factor(fudged_speed, params);
+
+  bool violation = false;
+
+  if (controls_allowed && steer_control_enabled) {
+    // *** ISO lateral jerk limit ***
+    // calculate maximum angle rate per second
+    const float speed = MAX(fudged_speed, 1.0);
+    const float max_curvature_rate_sec = MAX_LATERAL_JERK / (speed * speed);
+    const float max_angle_rate_sec = max_curvature_rate_sec * params.steer_ratio / curvature_factor * RAD_TO_DEG;
+
+    // finally get max angle delta per frame
+    const float max_angle_delta = max_angle_rate_sec * (0.01f * 2.0f);  // 50 Hz
+    const int max_angle_delta_can = (max_angle_delta * limits.angle_deg_to_can) + 1.;
+
+    // NOTE: symmetric up and down limits
+    const int highest_desired_angle = desired_angle_last + max_angle_delta_can;
+    const int lowest_desired_angle = desired_angle_last - max_angle_delta_can;
+
+    violation |= max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
+
+    // *** ISO lateral accel limit ***
+    const float max_curvature = MAX_LATERAL_ACCEL / (speed * speed);
+    const float max_angle = max_curvature * params.steer_ratio / curvature_factor * RAD_TO_DEG;
+    const int max_angle_can = (max_angle * limits.angle_deg_to_can) + 1.;
+
+    violation |= max_limit_check(desired_angle, max_angle_can, -max_angle_can);
+  }
+  desired_angle_last = desired_angle;
+
+  // Angle should either be 0 or same as current angle while not steering
+  if (!steer_control_enabled) {
+    const int max_inactive_angle = CLAMP(angle_meas.max, -limits.max_angle, limits.max_angle) + 1;
+    const int min_inactive_angle = CLAMP(angle_meas.min, -limits.max_angle, limits.max_angle) - 1;
+    violation |= (limits.inactive_angle_is_zero ? (desired_angle != 0) :
+                  max_limit_check(desired_angle, max_inactive_angle, min_inactive_angle));
+  }
+
+  // No angle control allowed when controls are not allowed
+  violation |= !controls_allowed && steer_control_enabled;
+
+  return violation;
+}
+
 void pcm_cruise_check(bool cruise_engaged) {
   // Enter controls on rising edge of stock ACC, exit controls if stock ACC disengages
   if (!cruise_engaged) {
@@ -839,4 +892,14 @@ void pcm_cruise_check(bool cruise_engaged) {
     controls_allowed = true;
   }
   cruise_engaged_prev = cruise_engaged;
+}
+
+void speed_mismatch_check(const float speed_2) {
+  // Disable controls if speeds from two sources are too far apart.
+  // For safety modes that use speed to adjust torque or angle limits
+  const float MAX_SPEED_DELTA = 2.0;  // m/s
+  bool is_invalid_speed = ABS(speed_2 - ((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR)) > MAX_SPEED_DELTA;
+  if (is_invalid_speed) {
+    controls_allowed = false;
+  }
 }
