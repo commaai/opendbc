@@ -14,18 +14,13 @@ NC='\033[0m'
 : "${CPPCHECK_DIR:=$DIR/cppcheck/}"
 
 # ensure checked in coverage table is up to date
-if [ -z "$SKIP_TABLES_DIFF" ]; then
-  python3 $CPPCHECK_DIR/addons/misra.py -generate-table > coverage_table
-  if ! git diff --quiet coverage_table; then
-    echo -e "${YELLOW}MISRA coverage table doesn't match. Update and commit:${NC}"
-    exit 3
-  fi
+python3 $CPPCHECK_DIR/addons/misra.py -generate-table > coverage_table
+if ! git diff --quiet coverage_table; then
+  echo -e "${YELLOW}MISRA coverage table doesn't match. Update and commit:${NC}"
+  exit 3
 fi
 
 cd $BASEDIR
-if [ -z "${SKIP_BUILD}" ]; then
-  scons -j8
-fi
 
 CHECKLIST=$DIR/checkers.txt
 echo "Cppcheck checkers list from test_misra.sh:" > $CHECKLIST

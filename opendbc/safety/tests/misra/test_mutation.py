@@ -56,7 +56,7 @@ def test_misra_mutation(fn, rule, transform, should_fail):
         f.write(transform(content))
 
     # run test
-    r = subprocess.run("SKIP_TABLES_DIFF=1 SKIP_BUILD=1 opendbc/safety/tests/misra/test_misra.sh",
+    r = subprocess.run("opendbc/safety/tests/misra/test_misra.sh",
                        stdout=subprocess.PIPE, cwd=tmp, shell=True, encoding='utf8')
     print(r.stdout) # helpful for debugging failures
     failed = r.returncode != 0
