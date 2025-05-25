@@ -173,7 +173,7 @@ static bool rx_msg_safety_check(const CANPacket_t *to_push,
     }
 
     // quality flag check
-    if ((safety_hooks->get_quality_flag_valid != NULL) && cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].quality_flag) {
+    if ((safety_hooks->get_quality_flag_valid != NULL) && !cfg->rx_checks[index].msg[cfg->rx_checks[index].status.index].ignore_quality_flag) {
       cfg->rx_checks[index].status.valid_quality_flag = safety_hooks->get_quality_flag_valid(to_push);
     } else {
       cfg->rx_checks[index].status.valid_quality_flag = true;
