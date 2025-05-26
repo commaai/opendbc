@@ -224,8 +224,8 @@ class CAR(Platforms):
     dbc_dict('toyota_nodsu_pt_generated', 'toyota_adas'),
   )
   TOYOTA_PRIUS_V = PlatformConfig(
-    [ToyotaCarDocs("Toyota Prius v 2017", "Toyota Safety Sense P", min_enable_speed=MIN_ACC_SPEED)],
-    CarSpecs(mass=3340. * CV.LB_TO_KG, wheelbase=2.78, steerRatio=17.4, tireStiffnessFactor=0.5533),
+    [ToyotaCarDocs("Toyota Prius v 2017", "Toyota Safety Sense P")],
+    CarSpecs(mass=3340. * CV.LB_TO_KG, wheelbase=2.78, steerRatio=17.4, tireStiffnessFactor=0.5533, minEnableSpeed=MIN_ACC_SPEED),
     dbc_dict('toyota_new_mc_pt_generated', 'toyota_adas'),
     flags=ToyotaFlags.NO_STOP_TIMER | ToyotaFlags.SNG_WITHOUT_DSU,
   )
@@ -278,12 +278,12 @@ class CAR(Platforms):
     flags=ToyotaFlags.RADAR_ACC | ToyotaFlags.ANGLE_CONTROL,
   )
   TOYOTA_RAV4_PRIME = ToyotaSecOCPlatformConfig(
-    [ToyotaCarDocs("Toyota RAV4 Prime 2021-23", min_enable_speed=MIN_ACC_SPEED)],
-    CarSpecs(mass=4372. * CV.LB_TO_KG, wheelbase=2.68, steerRatio=16.88, tireStiffnessFactor=0.5533),
+    [ToyotaCarDocs("Toyota RAV4 Prime 2021-23")],
+    CarSpecs(mass=4372. * CV.LB_TO_KG, wheelbase=2.68, steerRatio=16.88, tireStiffnessFactor=0.5533, minEnableSpeed=MIN_ACC_SPEED),
   )
   TOYOTA_YARIS = ToyotaSecOCPlatformConfig(
-    [ToyotaCarDocs("Toyota Yaris 2023 (Non-US only)", min_enable_speed=MIN_ACC_SPEED)],
-    CarSpecs(mass=1170, wheelbase=2.55, steerRatio=14.80, tireStiffnessFactor=0.5533),
+    [ToyotaCarDocs("Toyota Yaris 2023 (Non-US only)")],
+    CarSpecs(mass=1170, wheelbase=2.55, steerRatio=14.80, tireStiffnessFactor=0.5533, minEnableSpeed=MIN_ACC_SPEED),
     flags=ToyotaFlags.RADAR_ACC,
   )
   TOYOTA_MIRAI = ToyotaTSS2PlatformConfig( # TSS 2.5
@@ -291,14 +291,14 @@ class CAR(Platforms):
     CarSpecs(mass=4300. * CV.LB_TO_KG, wheelbase=2.91, steerRatio=14.8, tireStiffnessFactor=0.8),
   )
   TOYOTA_SIENNA = PlatformConfig(
-    [ToyotaCarDocs("Toyota Sienna 2018-20", video="https://www.youtube.com/watch?v=q1UPOo4Sh68", min_enable_speed=MIN_ACC_SPEED)],
-    CarSpecs(mass=4590. * CV.LB_TO_KG, wheelbase=3.03, steerRatio=15.5, tireStiffnessFactor=0.444),
+    [ToyotaCarDocs("Toyota Sienna 2018-20", video="https://www.youtube.com/watch?v=q1UPOo4Sh68")],
+    CarSpecs(mass=4590. * CV.LB_TO_KG, wheelbase=3.03, steerRatio=15.5, tireStiffnessFactor=0.444, minEnableSpeed=MIN_ACC_SPEED),
     dbc_dict('toyota_tnga_k_pt_generated', 'toyota_adas'),
     flags=ToyotaFlags.NO_STOP_TIMER,
   )
   TOYOTA_SIENNA_4TH_GEN = ToyotaSecOCPlatformConfig(
-    [ToyotaCarDocs("Toyota Sienna 2021-23", min_enable_speed=MIN_ACC_SPEED)],
-    CarSpecs(mass=4625. * CV.LB_TO_KG, wheelbase=3.06, steerRatio=17.8, tireStiffnessFactor=0.444),
+    [ToyotaCarDocs("Toyota Sienna 2021-23")],
+    CarSpecs(mass=4625. * CV.LB_TO_KG, wheelbase=3.06, steerRatio=17.8, tireStiffnessFactor=0.444, minEnableSpeed=MIN_ACC_SPEED),
   )
 
   # Lexus
