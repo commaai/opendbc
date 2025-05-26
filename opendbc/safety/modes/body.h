@@ -31,7 +31,7 @@ static bool body_tx_hook(const CANPacket_t *to_send) {
 
 static safety_config body_init(uint16_t param) {
   static RxCheck body_rx_checks[] = {
-    {.msg = {{0x201, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{0x201, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 100U}, { 0 }, { 0 }}},
   };
 
   static const CanMsg BODY_TX_MSGS[] = {{0x250, 0, 8, .check_relay = false}, {0x250, 0, 6, .check_relay = false}, {0x251, 0, 5, .check_relay = false},  // body

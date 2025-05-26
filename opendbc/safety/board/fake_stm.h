@@ -6,7 +6,6 @@
 #include "opendbc/safety/board/utils.h"
 
 #define ALLOW_DEBUG
-#define PANDA
 
 void print(const char *a) {
   printf("%s", a);
