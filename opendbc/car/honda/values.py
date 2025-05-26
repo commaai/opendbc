@@ -253,8 +253,8 @@ class CAR(Platforms):
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES,
   )
   HONDA_HRV = HondaNidecPlatformConfig(
-    [HondaCarDocs("Honda HR-V 2019-22", min_steer_speed=12. * CV.MPH_TO_MS)],
-    HONDA_HRV_3G.specs,
+    [HondaCarDocs("Honda HR-V 2019-22")],
+    HONDA_HRV_3G.specs.override(minSteerSpeed=12. * CV.MPH_TO_MS),
     radar_dbc_dict('honda_fit_ex_2018_can_generated'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES,
   )
@@ -278,10 +278,10 @@ class CAR(Platforms):
   )
   HONDA_PILOT = HondaNidecPlatformConfig(
     [
-      HondaCarDocs("Honda Pilot 2016-22", min_steer_speed=12. * CV.MPH_TO_MS),
-      HondaCarDocs("Honda Passport 2019-25", "All", min_steer_speed=12. * CV.MPH_TO_MS),
+      HondaCarDocs("Honda Pilot 2016-22"),
+      HondaCarDocs("Honda Passport 2019-25", "All"),
     ],
-    HONDA_PILOT_4G.specs,
+    HONDA_PILOT_4G.specs.override(minSteerSpeed=12. * CV.MPH_TO_MS),
     radar_dbc_dict('acura_ilx_2016_can_generated'),
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES,
   )
