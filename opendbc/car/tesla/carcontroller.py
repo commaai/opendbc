@@ -7,7 +7,8 @@ from opendbc.car.tesla.teslacan import TeslaCAN
 from opendbc.car.tesla.values import CarControllerParams
 from opendbc.car.vehicle_model import VehicleModel
 
-MAX_ANGLE_RATE = 10  # deg/20ms frame, EPS faults at 12 at a standstill
+# limit angle rate to both prevent a fault and for low speed comfort (~12 mph rate down to 0 mph)
+MAX_ANGLE_RATE = 5  # deg/20ms frame, EPS faults at 12 at a standstill
 
 # Add extra tolerance for average banked road since safety doesn't have the roll
 AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation. higher actual roll lowers lateral acceleration
