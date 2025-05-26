@@ -118,8 +118,6 @@ class HyundaiFlags(IntFlag):
   CLUSTER_GEARS = 2 ** 21
   TCU_GEARS = 2 ** 22
 
-  MIN_STEER_32_MPH = 2 ** 23
-
   HAS_LDA_BUTTON = 2 ** 24
 
   FCEV = 2 ** 25
@@ -151,9 +149,6 @@ class HyundaiPlatformConfig(PlatformConfig):
     if self.flags & HyundaiFlags.MANDO_RADAR:
       self.dbc_dict = {Bus.pt: "hyundai_kia_generic", Bus.radar: 'hyundai_kia_mando_front_radar_generated'}
 
-    if self.flags & HyundaiFlags.MIN_STEER_32_MPH:
-      self.specs = self.specs.override(minSteerSpeed=32 * CV.MPH_TO_MS)
-
 
 @dataclass
 class HyundaiCanFDPlatformConfig(PlatformConfig):
@@ -184,8 +179,8 @@ class CAR(Platforms):
       HyundaiCarDocs("Hyundai Elantra 2019", car_parts=CarParts.common([CarHarness.hyundai_g])),
     ],
     # steerRatio: 14 is Stock | Settled Params Learner values are steerRatio: 15.401566348670535, stiffnessFactor settled on 1.0081302973865127
-    CarSpecs(mass=1275, wheelbase=2.7, steerRatio=15.4, tireStiffnessFactor=0.385, minEnableSpeed=19 * CV.MPH_TO_MS),
-    flags=HyundaiFlags.LEGACY | HyundaiFlags.CLUSTER_GEARS | HyundaiFlags.MIN_STEER_32_MPH,
+    CarSpecs(mass=1275, wheelbase=2.7, steerRatio=15.4, tireStiffnessFactor=0.385, minEnableSpeed=19 * CV.MPH_TO_MS, minSteerSpeed=32 * CV.MPH_TO_MS),
+    flags=HyundaiFlags.LEGACY | HyundaiFlags.CLUSTER_GEARS,
   )
   HYUNDAI_ELANTRA_GT_I30 = HyundaiPlatformConfig(
     [
@@ -193,7 +188,7 @@ class CAR(Platforms):
       HyundaiCarDocs("Hyundai i30 2017-19", car_parts=CarParts.common([CarHarness.hyundai_e])),
     ],
     HYUNDAI_ELANTRA.specs,
-    flags=HyundaiFlags.LEGACY | HyundaiFlags.CLUSTER_GEARS | HyundaiFlags.MIN_STEER_32_MPH,
+    flags=HyundaiFlags.LEGACY | HyundaiFlags.CLUSTER_GEARS,
   )
   HYUNDAI_ELANTRA_2021 = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Elantra 2021-23", video="https://youtu.be/_EdYQtV52-c", car_parts=CarParts.common([CarHarness.hyundai_k]))],
@@ -217,8 +212,8 @@ class CAR(Platforms):
   )
   HYUNDAI_IONIQ = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Ioniq Hybrid 2017-19", car_parts=CarParts.common([CarHarness.hyundai_c]))],
-    CarSpecs(mass=1490, wheelbase=2.7, steerRatio=13.73, tireStiffnessFactor=0.385),
-    flags=HyundaiFlags.HYBRID | HyundaiFlags.MIN_STEER_32_MPH,
+    CarSpecs(mass=1490, wheelbase=2.7, steerRatio=13.73, tireStiffnessFactor=0.385, minSteerSpeed=32 * CV.MPH_TO_MS),
+    flags=HyundaiFlags.HYBRID,
   )
   HYUNDAI_IONIQ_HEV_2022 = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Ioniq Hybrid 2020-22", car_parts=CarParts.common([CarHarness.hyundai_h]))],
@@ -227,8 +222,8 @@ class CAR(Platforms):
   )
   HYUNDAI_IONIQ_EV_LTD = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Ioniq Electric 2019", car_parts=CarParts.common([CarHarness.hyundai_c]))],
-    CarSpecs(mass=1490, wheelbase=2.7, steerRatio=13.73, tireStiffnessFactor=0.385),
-    flags=HyundaiFlags.MANDO_RADAR | HyundaiFlags.EV | HyundaiFlags.LEGACY | HyundaiFlags.MIN_STEER_32_MPH,
+    CarSpecs(mass=1490, wheelbase=2.7, steerRatio=13.73, tireStiffnessFactor=0.385, minSteerSpeed=32 * CV.MPH_TO_MS),
+    flags=HyundaiFlags.MANDO_RADAR | HyundaiFlags.EV | HyundaiFlags.LEGACY,
   )
   HYUNDAI_IONIQ_EV_2020 = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Ioniq Electric 2020", "All", car_parts=CarParts.common([CarHarness.hyundai_h]))],
@@ -237,8 +232,8 @@ class CAR(Platforms):
   )
   HYUNDAI_IONIQ_PHEV_2019 = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Ioniq Plug-in Hybrid 2019", car_parts=CarParts.common([CarHarness.hyundai_c]))],
-    CarSpecs(mass=1490, wheelbase=2.7, steerRatio=13.73, tireStiffnessFactor=0.385),
-    flags=HyundaiFlags.HYBRID | HyundaiFlags.MIN_STEER_32_MPH,
+    CarSpecs(mass=1490, wheelbase=2.7, steerRatio=13.73, tireStiffnessFactor=0.385, minSteerSpeed=32 * CV.MPH_TO_MS),
+    flags=HyundaiFlags.HYBRID,
   )
   HYUNDAI_IONIQ_PHEV = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Ioniq Plug-in Hybrid 2020-22", "All", car_parts=CarParts.common([CarHarness.hyundai_h]))],
@@ -425,8 +420,8 @@ class CAR(Platforms):
       HyundaiCarDocs("Kia Niro Plug-in Hybrid 2018-19", "All", car_parts=CarParts.common([CarHarness.hyundai_c])),
       HyundaiCarDocs("Kia Niro Plug-in Hybrid 2020", car_parts=CarParts.common([CarHarness.hyundai_d])),
     ],
-    KIA_NIRO_EV.specs.override(minEnableSpeed=10. * CV.MPH_TO_MS),
-    flags=HyundaiFlags.MANDO_RADAR | HyundaiFlags.HYBRID | HyundaiFlags.UNSUPPORTED_LONGITUDINAL | HyundaiFlags.MIN_STEER_32_MPH,
+    KIA_NIRO_EV.specs.override(minEnableSpeed=10. * CV.MPH_TO_MS, minSteerSpeed=32 * CV.MPH_TO_MS),
+    flags=HyundaiFlags.MANDO_RADAR | HyundaiFlags.HYBRID | HyundaiFlags.UNSUPPORTED_LONGITUDINAL,
   )
   KIA_NIRO_PHEV_2022 = HyundaiPlatformConfig(
     [
@@ -451,8 +446,8 @@ class CAR(Platforms):
   KIA_OPTIMA_G4 = HyundaiPlatformConfig(
     [HyundaiCarDocs("Kia Optima 2017", "Advanced Smart Cruise Control",
                     car_parts=CarParts.common([CarHarness.hyundai_b]))],  # TODO: may support 2016, 2018
-    CarSpecs(mass=3558 * CV.LB_TO_KG, wheelbase=2.8, steerRatio=13.75, tireStiffnessFactor=0.5),
-    flags=HyundaiFlags.LEGACY | HyundaiFlags.TCU_GEARS | HyundaiFlags.MIN_STEER_32_MPH,
+    CarSpecs(mass=3558 * CV.LB_TO_KG, wheelbase=2.8, steerRatio=13.75, tireStiffnessFactor=0.5, minSteerSpeed=32 * CV.MPH_TO_MS),
+    flags=HyundaiFlags.LEGACY | HyundaiFlags.TCU_GEARS,
   )
   KIA_OPTIMA_G4_FL = HyundaiPlatformConfig(
     [HyundaiCarDocs("Kia Optima 2019-20", car_parts=CarParts.common([CarHarness.hyundai_g]))],
