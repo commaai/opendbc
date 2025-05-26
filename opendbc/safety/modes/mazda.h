@@ -92,11 +92,11 @@ static safety_config mazda_init(uint16_t param) {
   static const CanMsg MAZDA_TX_MSGS[] = {{MAZDA_LKAS, 0, 8, .check_relay = true}, {MAZDA_CRZ_BTNS, 0, 8, .check_relay = false}, {MAZDA_LKAS_HUD, 0, 8, .check_relay = true}};
 
   static RxCheck mazda_rx_checks[] = {
-    {.msg = {{MAZDA_CRZ_CTRL,     0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{MAZDA_CRZ_BTNS,     0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},
-    {.msg = {{MAZDA_STEER_TORQUE, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 83U}, { 0 }, { 0 }}},
-    {.msg = {{MAZDA_ENGINE_DATA,  0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},
-    {.msg = {{MAZDA_PEDALS,       0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{MAZDA_CRZ_CTRL,     0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{MAZDA_CRZ_BTNS,     0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 10U}, { 0 }, { 0 }}},
+    {.msg = {{MAZDA_STEER_TORQUE, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 83U}, { 0 }, { 0 }}},
+    {.msg = {{MAZDA_ENGINE_DATA,  0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{MAZDA_PEDALS,       0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},
   };
 
   UNUSED(param);

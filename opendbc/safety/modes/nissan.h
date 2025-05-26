@@ -112,18 +112,18 @@ static safety_config nissan_init(uint16_t param) {
 
   // Signals duplicated below due to the fact that these messages can come in on either CAN bus, depending on car model.
   static RxCheck nissan_rx_checks[] = {
-    {.msg = {{0x2, 0, 5, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U},
-             {0x2, 1, 5, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }}},  // STEER_ANGLE_SENSOR
-    {.msg = {{0x285, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U},
-             {0x285, 1, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }}}, // WHEEL_SPEEDS_REAR
-    {.msg = {{0x30f, 2, 3, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},
-             {0x30f, 1, 3, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }}}, // CRUISE_STATE
-    {.msg = {{0x15c, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U},
-             {0x15c, 1, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U},
-             {0x239, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}}}, // GAS_PEDAL
-    {.msg = {{0x454, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},
-             {0x454, 1, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},
-             {0x1cc, 0, 4, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}}}, // DOORS_LIGHTS / BRAKE
+    {.msg = {{0x2, 0, 5, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 100U},
+             {0x2, 1, 5, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 100U}, { 0 }}},  // STEER_ANGLE_SENSOR
+    {.msg = {{0x285, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 50U},
+             {0x285, 1, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 50U}, { 0 }}}, // WHEEL_SPEEDS_REAR
+    {.msg = {{0x30f, 2, 3, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 10U},
+             {0x30f, 1, 3, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 10U}, { 0 }}}, // CRUISE_STATE
+    {.msg = {{0x15c, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 50U},
+             {0x15c, 1, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 50U},
+             {0x239, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 50U}}}, // GAS_PEDAL
+    {.msg = {{0x454, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 10U},
+             {0x454, 1, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 10U},
+             {0x1cc, 0, 4, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 100U}}}, // DOORS_LIGHTS / BRAKE
   };
 
   // EPS Location. false = V-CAN, true = C-CAN
