@@ -258,8 +258,6 @@ class CarDocs:
   video: str | None = None
   setup_video: str | None = None
   footnotes: list[Enum] = field(default_factory=list)
-  min_steer_speed: float | None = None
-  min_enable_speed: float | None = None
   auto_resume: bool | None = None
 
   # all the parts needed for the supported car
@@ -295,19 +293,8 @@ class CarDocs:
     elif CP.openpilotLongitudinalControl and not CP.enableDsu:
       op_long = "openpilot"
 
-    # min steer & enable speed columns
-    # TODO: set all the min steer speeds in carParams and remove this
-    if self.min_steer_speed is not None:
-      assert CP.minSteerSpeed < 0.5, f"{CP.carFingerprint}: Minimum steer speed set in both CarDocs and CarParams"
-    else:
-      self.min_steer_speed = CP.minSteerSpeed
-
-    # TODO: set all the min enable speeds in carParams correctly and remove this
-    if self.min_enable_speed is None:
-      self.min_enable_speed = CP.minEnableSpeed
-
     if self.auto_resume is None:
-      self.auto_resume = CP.autoResumeSng and self.min_enable_speed <= 0
+      self.auto_resume = CP.autoResumeSng and CP.minEnableSpeed <= 0
 
     # hardware column
     hardware_col = "None"
@@ -330,8 +317,8 @@ class CarDocs:
       Column.MODEL: self.model,
       Column.PACKAGE: self.package,
       Column.LONGITUDINAL: op_long,
-      Column.FSR_LONGITUDINAL: f"{max(self.min_enable_speed * CV.MS_TO_MPH, 0):.0f} mph",
-      Column.FSR_STEERING: f"{max(self.min_steer_speed * CV.MS_TO_MPH, 0):.0f} mph",
+      Column.FSR_LONGITUDINAL: f"{max(CP.minEnableSpeed * CV.MS_TO_MPH, 0):.0f} mph",
+      Column.FSR_STEERING: f"{max(CP.minSteerSpeed * CV.MS_TO_MPH, 0):.0f} mph",
       Column.STEERING_TORQUE: Star.EMPTY,
       Column.AUTO_RESUME: Star.FULL if self.auto_resume else Star.EMPTY,
       Column.HARDWARE: hardware_col,
@@ -368,15 +355,15 @@ class CarDocs:
     if not CP.notCar:
       sentence_builder = "openpilot upgrades your <strong>{car_model}</strong> with automated lane centering{alc} and adaptive cruise control{acc}."
 
-      if self.min_steer_speed > self.min_enable_speed:
-        alc = f" <strong>above {self.min_steer_speed * CV.MS_TO_MPH:.0f} mph</strong>," if self.min_steer_speed > 0 else " <strong>at all speeds</strong>,"
+      if CP.minSteerSpeed > CP.minEnableSpeed:
+        alc = f" <strong>above {CP.minSteerSpeed * CV.MS_TO_MPH:.0f} mph</strong>," if CP.minSteerSpeed > 0 else " <strong>at all speeds</strong>,"
       else:
         alc = ""
 
       # Exception for cars which do not auto-resume yet
       acc = ""
-      if self.min_enable_speed > 0:
-        acc = f" <strong>while driving above {self.min_enable_speed * CV.MS_TO_MPH:.0f} mph</strong>"
+      if CP.minEnableSpeed > 0:
+        acc = f" <strong>while driving above {CP.minEnableSpeed * CV.MS_TO_MPH:.0f} mph</strong>"
       elif self.auto_resume:
         acc = " <strong>that automatically resumes from a stop</strong>"
 
