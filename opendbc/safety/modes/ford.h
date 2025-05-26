@@ -94,8 +94,6 @@ static bool ford_get_quality_flag_valid(const CANPacket_t *to_push) {
 
 #define FORD_CANFD_INACTIVE_CURVATURE_RATE 1024U
 
-#define FORD_MAX_SPEED_DELTA 2.0  // m/s
-
 // Curvature rate limits
 #define FORD_LIMITS(limit_lateral_acceleration) {                                               \
   .max_angle = 1000,          /* 0.02 curvature */                                              \
@@ -141,11 +139,7 @@ static void ford_rx_hook(const CANPacket_t *to_push) {
       // Disable controls if speeds from ABS and PCM ECUs are too far apart.
       // Signal: Veh_V_ActlEng
       float filtered_pcm_speed = ((GET_BYTE(to_push, 6) << 8) | GET_BYTE(to_push, 7)) * 0.01 / 3.6;
-      bool is_invalid_speed = ABS(filtered_pcm_speed - ((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR)) > FORD_MAX_SPEED_DELTA;
-      // TODO: this should generically cause rx valid to fall until re-enable
-      if (is_invalid_speed) {
-        controls_allowed = false;
-      }
+      speed_mismatch_check(filtered_pcm_speed);
     }
 
     // Update vehicle yaw rate
@@ -304,16 +298,16 @@ static safety_config ford_init(uint16_t param) {
   // warning: quality flags are not yet checked in openpilot's CAN parser,
   // this may be the cause of blocked messages
   static RxCheck ford_rx_checks[] = {
-    {.msg = {{FORD_BrakeSysFeatures, 0, 8, .max_counter = 15U, .quality_flag=true, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{FORD_BrakeSysFeatures, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
     // FORD_EngVehicleSpThrottle2 has a counter that either randomly skips or by 2, likely ECU bug
     // Some hybrid models also experience a bug where this checksum mismatches for one or two frames under heavy acceleration with ACC
     // It has been confirmed that the Bronco Sport's camera only disallows ACC for bad quality flags, not counters or checksums, so we match that
-    {.msg = {{FORD_EngVehicleSpThrottle2, 0, 8, .ignore_checksum = true, .ignore_counter = true, .quality_flag=true, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{FORD_Yaw_Data_FD1, 0, 8, .max_counter = 255U, .quality_flag=true, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{FORD_EngVehicleSpThrottle2, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{FORD_Yaw_Data_FD1, 0, 8, .max_counter = 255U, .frequency = 100U}, { 0 }, { 0 }}},
     // These messages have no counter or checksum
-    {.msg = {{FORD_EngBrakeData, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},
-    {.msg = {{FORD_EngVehicleSpThrottle, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},
-    {.msg = {{FORD_DesiredTorqBrk, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{FORD_EngBrakeData, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 10U}, { 0 }, { 0 }}},
+    {.msg = {{FORD_EngVehicleSpThrottle, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{FORD_DesiredTorqBrk, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},
   };
 
   #define FORD_COMMON_TX_MSGS \
