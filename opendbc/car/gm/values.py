@@ -6,8 +6,6 @@ from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
-Ecu = CarParams.Ecu
-
 
 class CarControllerParams:
   STEER_MAX = 300  # GM limit is 3Nm. Used by carcontroller to generate LKA output
@@ -195,7 +193,7 @@ class CAR(Platforms):
   )
   GMC_YUKON_XL_2017 = GMPlatformConfig(
     [GMCarDocs("GMC Yukon XL 2017", "Adaptive Cruise Control (ACC) & LKAS")],
-    GMCarSpecs(mass=2739, wheelbase=3.302, steerRatio=24, tireStiffnessFactor=1.0, centerToFrontRatio=0.5),
+    GMCarSpecs(mass=2739, wheelbase=3.302, steerRatio=20,  centerToFrontRatio=0.5, tireStiffnessFactor=1.0),
   )
 
 class CruiseButtons:
