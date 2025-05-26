@@ -15,59 +15,16 @@ jobs:
       matrix:
         include:
           - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-24.04' }}
+            flags: ''
+          - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-24.04' }}
+            flags: '--ubsan'
           - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-macos-8x14' || 'macos-latest' }}
+            flags: ''
     steps:
     - uses: commaai/timeout@v1
     - uses: actions/checkout@v4
-    - name: Restore cached cppcheck
-      uses: actions/cache@v4
-      with:
-        path: opendbc/safety/tests/misra/cppcheck/
-        key: cppcheck-cache-${{ runner.os }}-${{ hashFiles('opendbc/safety/tests/misra/install.sh') }}
-    - run: ./test.sh
-    - name: Save cppcheck cache
-      uses: actions/cache@v4
-      with:
-        path: opendbc/safety/tests/misra/cppcheck/
-        key: cppcheck-cache-${{ runner.os }}-${{ hashFiles('opendbc/safety/tests/misra/install.sh') }}
-
-  safety_tests:
-    name: safety
-    runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
-    strategy:
-      fail-fast: false
-      matrix:
-        flags: ['--ubsan']
-    steps:
-    - uses: commaai/timeout@v1
-    - uses: actions/checkout@v4
-    - name: Run safety tests
-      run: ./opendbc/safety/tests/test.sh ${{ matrix.flags }}
-
-  misra_mutation:
-    name: MISRA C:2012 Mutation
-    runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - name: Restore cached cppcheck
-        uses: actions/cache@v4
-        with:
-          path: opendbc/safety/tests/misra/cppcheck/
-          key: cppcheck-cache-${{ runner.os }}-${{ hashFiles('opendbc/safety/tests/misra/install.sh') }}
-      - name: MISRA mutation tests
-        timeout-minutes: 1
-        run: |
-          source setup.sh
-          scons -j8
-          cd opendbc/safety/tests/misra
-          ./install.sh  # cppcheck
-          pytest -s -n8 --randomly-seed $RANDOM test_mutation.py
-      - name: Save cppcheck cache
-        uses: actions/cache@v4
-        with:
-          path: opendbc/safety/tests/misra/cppcheck/
-          key: cppcheck-cache-${{ runner.os }}-${{ hashFiles('opendbc/safety/tests/misra/install.sh') }}
+    - uses: ./.github/workflows/cache
+    - run: ./test.sh ${{ matrix.flags }}
 
   mutation:
     name: Safety mutation tests
@@ -79,6 +36,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # need master to get diff
+      - uses: ./.github/workflows/cache
       - name: Run mutation tests
         timeout-minutes: 5
         run: |
