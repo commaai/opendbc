@@ -1,8 +1,6 @@
 #pragma once
 
-#include "safety_declarations.h"
-
-#define TESLA_MAX_SPEED_DELTA 2.0  // m/s
+#include "opendbc/safety/safety_declarations.h"
 
 static bool tesla_longitudinal = false;
 static bool tesla_stock_aeb = false;
@@ -89,6 +87,8 @@ static bool tesla_get_quality_flag_valid(const CANPacket_t *to_push) {
   bool valid = false;
   if (addr == 0x155) {
     valid = (GET_BYTE(to_push, 5) & 0x1U) == 0x1U;  // ESP_wheelSpeedsQF
+  } else if (addr == 0x39d) {
+    valid = (GET_BYTE(to_push, 2) & 0x03U) != 3U;  // IBST_driverBrakeApply=FAULT
   } else {
   }
   return valid;
@@ -124,11 +124,7 @@ static void tesla_rx_hook(const CANPacket_t *to_push) {
     if (addr == 0x155) {
       // Disable controls if speeds from DI (Drive Inverter) and ESP ECUs are too far apart.
       float esp_speed = (((GET_BYTE(to_push, 6) & 0x0FU) << 6) | GET_BYTE(to_push, 5) >> 2) * 0.5 / 3.6;
-      bool is_invalid_speed = ABS(esp_speed - ((float)vehicle_speed.values[0] / VEHICLE_SPEED_FACTOR)) > TESLA_MAX_SPEED_DELTA;
-      // TODO: this should generically cause rx valid to fall until re-enable
-      if (is_invalid_speed) {
-        controls_allowed = false;
-      }
+      speed_mismatch_check(esp_speed);
     }
 
     // Gas pressed
@@ -201,14 +197,13 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
   const AngleSteeringLimits TESLA_STEERING_LIMITS = {
     .max_angle = 3600,  // 360 deg, EPAS faults above this
     .angle_deg_to_can = 10,
-    .angle_rate_up_lookup = {
-      {0., 5., 25.},
-      {2.5, 1.5, 0.2}
-    },
-    .angle_rate_down_lookup = {
-      {0., 5., 25.},
-      {5., 2.0, 0.3}
-    },
+  };
+
+  // NOTE: based off TESLA_MODEL_Y to match openpilot
+  const AngleSteeringParams TESLA_STEERING_PARAMS = {
+    .slip_factor = -0.000580374383851451,  // calc_slip_factor(VM)
+    .steer_ratio = 12.,
+    .wheelbase = 2.89,
   };
 
   const LongitudinalLimits TESLA_LONG_LIMITS = {
@@ -234,7 +229,7 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
     int steer_control_type = GET_BYTE(to_send, 2) >> 6;
     bool steer_control_enabled = steer_control_type == 1;  // ANGLE_CONTROL
 
-    if (steer_angle_cmd_checks(desired_angle, steer_control_enabled, TESLA_STEERING_LIMITS)) {
+    if (steer_angle_cmd_checks_vm(desired_angle, steer_control_enabled, TESLA_STEERING_LIMITS, TESLA_STEERING_PARAMS)) {
       violation = true;
     }
 
@@ -350,15 +345,15 @@ static safety_config tesla_init(uint16_t param) {
   tesla_autopark_prev = false;
 
   static RxCheck tesla_model3_y_rx_checks[] = {
-    {.msg = {{0x2b9, 2, 8, .max_counter = 7U, .frequency = 25U}, { 0 }, { 0 }}},                         // DAS_control
-    {.msg = {{0x488, 2, 4, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},                        // DAS_steeringControl
-    {.msg = {{0x257, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},                        // DI_speed (speed in kph)
-    {.msg = {{0x155, 0, 8, .max_counter = 15U, .quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},  // ESP_B (2nd speed in kph)
-    {.msg = {{0x370, 0, 8, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},                       // EPAS3S_sysStatus (steering angle)
-    {.msg = {{0x118, 0, 8, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},                       // DI_systemStatus (gas pedal)
-    {.msg = {{0x39d, 0, 5, .max_counter = 15U, .frequency = 25U}, { 0 }, { 0 }}},                        // IBST_status (brakes)
-    {.msg = {{0x286, 0, 8, .max_counter = 15U, .frequency = 10U}, { 0 }, { 0 }}},                        // DI_state (acc state)
-    {.msg = {{0x311, 0, 7, .max_counter = 15U, .frequency = 10U}, { 0 }, { 0 }}},                        // UI_warning (blinkers, buckle switch & doors)
+    {.msg = {{0x2b9, 2, 8, .max_counter = 7U, .ignore_quality_flag = true, .frequency = 25U}, { 0 }, { 0 }}},    // DAS_control
+    {.msg = {{0x488, 2, 4, .max_counter = 15U, .ignore_quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},   // DAS_steeringControl
+    {.msg = {{0x257, 0, 8, .max_counter = 15U, .ignore_quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},   // DI_speed (speed in kph)
+    {.msg = {{0x155, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},                                // ESP_B (2nd speed in kph)
+    {.msg = {{0x370, 0, 8, .max_counter = 15U, .ignore_quality_flag = true, .frequency = 100U}, { 0 }, { 0 }}},  // EPAS3S_sysStatus (steering angle)
+    {.msg = {{0x118, 0, 8, .max_counter = 15U, .ignore_quality_flag = true, .frequency = 100U}, { 0 }, { 0 }}},  // DI_systemStatus (gas pedal)
+    {.msg = {{0x39d, 0, 5, .max_counter = 15U, .frequency = 25U}, { 0 }, { 0 }}},                                // IBST_status (brakes)
+    {.msg = {{0x286, 0, 8, .max_counter = 15U, .ignore_quality_flag = true, .frequency = 10U}, { 0 }, { 0 }}},   // DI_state (acc state)
+    {.msg = {{0x311, 0, 7, .max_counter = 15U, .ignore_quality_flag = true, .frequency = 10U}, { 0 }, { 0 }}},   // UI_warning (blinkers, buckle switch & doors)
   };
 
   safety_config ret;

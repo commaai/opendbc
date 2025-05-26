@@ -22,8 +22,9 @@ env = Environment(
     '-std=gnu11',
     '-Wfatal-errors',
     '-Wno-pointer-to-int-cast',
+    '-DCANFD',
   ],
-  CPPPATH=[".", "../../board/", "../../"],
+  CPPPATH=["#", "../../board/"],
 )
 if system == "Darwin":
   env.PrependENVPath('PATH', '/opt/homebrew/bin')
