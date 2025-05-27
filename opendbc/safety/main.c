@@ -1,4 +1,4 @@
-#include "safety.h"
+#include "opendbc/safety/safety.h"
 
 // this file is checked by cppcheck
 
@@ -12,3 +12,4 @@ UNUSED(safety_tick);
 UNUSED(set_safety_hooks);
 UNUSED(mads_heartbeat_engaged_check);
 UNUSED(mads_set_alternative_experience);
+UNUSED(get_acc_main_on_mismatches);

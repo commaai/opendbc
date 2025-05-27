@@ -1,32 +1,32 @@
 #pragma once
 
-#include "sunnypilot/safety_mads.h"
+#include "opendbc/safety/sunnypilot/safety_mads.h"
 
-#include "safety_declarations.h"
-#include "can.h"
+#include "opendbc/safety/safety_declarations.h"
+#include "opendbc/safety/board/can.h"
 
 // include the safety policies.
-#include "safety/safety_defaults.h"
-#include "safety/safety_honda.h"
-#include "safety/safety_toyota.h"
-#include "safety/safety_tesla.h"
-#include "safety/safety_gm.h"
-#include "safety/safety_ford.h"
-#include "safety/safety_hyundai.h"
-#include "safety/safety_chrysler.h"
-#include "safety/safety_rivian.h"
-#include "safety/safety_subaru.h"
-#include "safety/safety_subaru_preglobal.h"
-#include "safety/safety_mazda.h"
-#include "safety/safety_nissan.h"
-#include "safety/safety_volkswagen_mqb.h"
-#include "safety/safety_volkswagen_pq.h"
-#include "safety/safety_elm327.h"
-#include "safety/safety_body.h"
+#include "opendbc/safety/modes/defaults.h"
+#include "opendbc/safety/modes/honda.h"
+#include "opendbc/safety/modes/toyota.h"
+#include "opendbc/safety/modes/tesla.h"
+#include "opendbc/safety/modes/gm.h"
+#include "opendbc/safety/modes/ford.h"
+#include "opendbc/safety/modes/hyundai.h"
+#include "opendbc/safety/modes/chrysler.h"
+#include "opendbc/safety/modes/rivian.h"
+#include "opendbc/safety/modes/subaru.h"
+#include "opendbc/safety/modes/subaru_preglobal.h"
+#include "opendbc/safety/modes/mazda.h"
+#include "opendbc/safety/modes/nissan.h"
+#include "opendbc/safety/modes/volkswagen_mqb.h"
+#include "opendbc/safety/modes/volkswagen_pq.h"
+#include "opendbc/safety/modes/elm327.h"
+#include "opendbc/safety/modes/body.h"
 
 // CAN-FD only safety modes
 #ifdef CANFD
-#include "safety/safety_hyundai_canfd.h"
+#include "opendbc/safety/modes/hyundai_canfd.h"
 #endif
 
 uint32_t GET_BYTES(const CANPacket_t *msg, int start, int len) {
@@ -355,10 +355,6 @@ static void relay_malfunction_set(void) {
 }
 
 static void generic_rx_checks(void) {
-  // exit controls on rising edge of gas press
-  if (gas_pressed && !gas_pressed_prev && !(alternative_experience & ALT_EXP_DISABLE_DISENGAGE_ON_GAS)) {
-    controls_allowed = false;
-  }
   gas_pressed_prev = gas_pressed;
 
   // exit controls on rising edge of brake press
@@ -529,7 +525,7 @@ void update_sample(struct sample_t *sample, int sample_new) {
   }
 }
 
-static bool max_limit_check(int val, const int MAX_VAL, const int MIN_VAL) {
+bool max_limit_check(int val, const int MAX_VAL, const int MIN_VAL) {
   return (val > MAX_VAL) || (val < MIN_VAL);
 }
 

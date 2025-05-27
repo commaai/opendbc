@@ -1,6 +1,6 @@
 #pragma once
 
-#include "safety_declarations.h"
+#include "opendbc/safety/safety_declarations.h"
 
 // Stock longitudinal
 #define TOYOTA_BASE_TX_MSGS \
