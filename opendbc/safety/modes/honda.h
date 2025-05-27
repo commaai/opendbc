@@ -152,7 +152,8 @@ static void honda_rx_hook(const CANPacket_t *to_push) {
     if ((bus == 2) && (addr == 0x1FA)) {
       bool honda_stock_aeb = GET_BIT(to_push, 29U);
       int honda_stock_brake = 0;
-      if (honda_nidec_hybrid) {
+//      if (honda_nidec_hybrid) {
+      if (true) {
         honda_stock_brake = (GET_BYTE(to_push, 6) << 2) | (GET_BYTE(to_push, 7) >> 6);
       }
       else {
@@ -211,7 +212,8 @@ static bool honda_tx_hook(const CANPacket_t *to_send) {
 
   // BRAKE: safety check (nidec)
   if ((addr == 0x1FA) && (bus == bus_pt)) {
-    if ( honda_nidec_hybrid ) {
+//    if ( honda_nidec_hybrid ) {
+    if ( true ) {
       honda_brake = (GET_BYTE(to_send, 6) << 2) + ((GET_BYTE(to_send, 7) >> 6) & 0x3U);
     } else {
       honda_brake = (GET_BYTE(to_send, 0) << 2) + ((GET_BYTE(to_send, 1) >> 6) & 0x3U);
