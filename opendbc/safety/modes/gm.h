@@ -10,6 +10,12 @@
     {.msg = {{0x1C4, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}}, \
     {.msg = {{0xC9, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}}, \
 
+#define GM_0xBE_RX_CHECK \
+	{.msg = {{0xBE, 0, 6, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},    /* Volt, Silverado, Acadia Denali */ \
+            {0xBE, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},    /* Bolt EUV */ \
+	        {0xBE, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}}},  /* Escalade */ \
+
+
 static const LongitudinalLimits *gm_long_limits;
 
 enum {
@@ -116,7 +122,9 @@ static bool gm_tx_hook(const CANPacket_t *to_send) {
   if (addr == 0x315) {
     int brake = ((GET_BYTE(to_send, 0) & 0xFU) << 8) + GET_BYTE(to_send, 1);
     brake = (0x1000 - brake) & 0xFFF;
+	//printf("Brake Safety gm.h 119: %d",to_send);
     if (longitudinal_brake_checks(brake, *gm_long_limits)) {
+			printf("Brake Safety gm.h 119: %d",to_send);
       tx = false;
     }
   }
@@ -202,16 +210,14 @@ static safety_config gm_init(uint16_t param) {
 
   static RxCheck gm_rx_checks[] = {
     GM_COMMON_RX_CHECKS
-#if 0
-	{.msg = {{0xBE, 0, 6, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},    /* Volt, Silverado, Acadia Denali */ \
-            {0xBE, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},    /* Bolt EUV */ \
-	        {0xBE, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}}},  /* Escalade */
-#endif
+    GM_0xBE_RX_CHECK
   };
 
   static RxCheck gm_ev_rx_checks[] = {
     GM_COMMON_RX_CHECKS
+	GM_0xBE_RX_CHECK
     {.msg = {{0xBD, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 40U}, { 0 }, { 0 }}},
+
   };
 
   static RxCheck gm_f1_can_brake_rx_checks[] = {
@@ -258,6 +264,7 @@ static safety_config gm_init(uint16_t param) {
     }
 	if (F1_CAN_BRAKE){
 //	  printf("F1_CAN_BRAKE RX CHECK");	
+
 	  SET_RX_CHECKS(gm_f1_can_brake_rx_checks, ret);
 	}
 	
