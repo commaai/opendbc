@@ -182,15 +182,15 @@ BO_ 352 ACM_longitudinalRequest: 5 ACM
 BO_ 354 VDM_AdasSts: 8 VDM
  SG_ VDM_AdasStatus_Checksum : 7|8@0+ (1,0) [0|0] "" ACM
  SG_ VDM_AdasStatus_Counter : 11|4@0+ (1,0) [0|0] "" ACM
- SG_ VDM_AdasDecelLimit : 17|10@0+ (0.01,0) [0|10.23] "m/s^2" ACM
+ SG_ VDM_AdasDecelLimit : 17|10@0+ (0.01,0) [0|-10.23] "m/s^2" ACM
  SG_ VDM_AdasDriverAccelPriorityStatus : 19|2@0+ (1,0) [0|3] "" ACM
  SG_ VDM_AdasFaultStatus : 23|4@0+ (1,0) [0|15] "" ACM
  SG_ VDM_AdasAccelLimit : 33|10@0+ (0.01,0) [0|10.23] "m/s^2" ACM
  SG_ VDM_AdasDriverModeStatus : 36|3@0+ (1,0) [0|7] "" ACM
- SG_ VDM_AdasAccelRequest : 50|11@0+ (0.01,-10.24) [-10.24|10.23] "m/s^2" ACM
+ SG_ VDM_AdasUnkown1 : 50|8@0+ (1,0) [0|255] "" XXX
  SG_ VDM_AdasInterfaceStatus : 52|2@0+ (1,0) [0|3] "" ACM
- SG_ VDM_AdasAccelRequestAcknowledged : 54|2@0+ (1,0) [0|3] "" ACM
- SG_ VDM_AdasVehicleHoldStatus : 55|1@0+ (1,0) [0|1] "" ACM
+ SG_ VDM_AdasVehicleHoldStatus : 55|3@0+ (1,0) [0|7] "" ACM
+ SG_ VDM_UserAdasRequest : 58|3@0+ (1,0) [0|7] "" ACM
 
 BO_ 357 VDM_AdasStalk: 4 VDM
  SG_ VDM_AdasStalk_Checksum : 7|8@0+ (1,0) [0|255] "Unitless" ACM
@@ -615,7 +615,6 @@ CM_ SG_ 354 VDM_AdasStatus_Checksum "VDM_AdasSts message j1850 checksum.";
 CM_ SG_ 354 VDM_AdasStatus_Counter "VDM_AdasSts message counter.";
 CM_ SG_ 354 VDM_AdasFaultStatus "Fault status of ADAS requests from VDM.";
 CM_ SG_ 354 VDM_AdasDriverModeStatus "Signal which describes who is commanding the torque - Human or ADAS";
-CM_ SG_ 354 VDM_AdasAccelRequestAcknowledged "An acknowleddge signal to the ADAS system to show that TQM is honoring their request";
 CM_ SG_ 432 ESP_Torque_Front_MinQ "Indication of whether signal with corresponding name is valid";
 CM_ SG_ 432 ESP_Torque_Front_MaxQ "Indication of whether signal with corresponding name is valid";
 CM_ SG_ 432 ESP_Torque_Front_Max "ESP intervention, ESP tractive torque limit per axle.";
@@ -878,7 +877,6 @@ VAL_ 354 VDM_AdasDriverAccelPriorityStatus 0 "VDM_AdasDriverAccelPriorityStatus_
 VAL_ 354 VDM_AdasFaultStatus 0 "VDM_AdasFlaultStatus_No_Fault" 1 "VDM_AdasFaultStatus_Brk_Intv" 2 "VDM_AdasFlaultStatus_Cntr_Fault" 3 "VDM_AdasFlaultStatus_Imps_Cmd" 15 "VDM_AdasFlaultStatus_Sna";
 VAL_ 354 VDM_AdasDriverModeStatus 0 "VDM_AdasDriverModeStatus_Human" 1 "VDM_AdasDriverModeStatus_Adas" 2 "VDM_AdasDriverModeStatus_Reserved" 3 "VDM_AdasDriverModeStatus_Sna";
 VAL_ 354 VDM_AdasInterfaceStatus 0 "VDM_AdasInterfaceStatus_Unavailable" 1 "VDM_AdasInterfaceStatus_Available" 2 "VDM_AdasInterfaceStatus_Enabled" 3 "VDM_AdasInterfaceStatus_Faulted";
-VAL_ 354 VDM_AdasAccelRequestAcknowledged 0 "VDM_AdasAccelRequestAcknowledged_Not_Acknowledged" 1 "VDM_AdasAccelRequestAcknowledged_Acknowledged" 2 "VDM_AdasAccelRequestAcknowledged_Fault_Ignored" 3 "VDM_AdasAccelRequestAcknowledged_Sna";
 VAL_ 354 VDM_AdasVehicleHoldStatus 0 "VDM_AdasVehicleHoldStatus_NotHold" 1 "VDM_AdasVehicleHoldStatus_Hold";
 VAL_ 357 VDM_AdasStalkGapAdjust 0 "VDM_AdasStalkGapAdjust_No_Required" 1 "VDM_AdasStalkGapAdjust_GapDecrement" 2 "VDM_AdasStalkGapAdjust_GapIncrement";
 VAL_ 357 VDM_AdasStalkAccCancelRes 0 "VDM_AdasStalkAccCancelRes_NoRequired" 1 "VDM_AdasStalkAccCancelRes_Cancel" 2 "VDM_AdasStalkAccCancelRes_Resume";
