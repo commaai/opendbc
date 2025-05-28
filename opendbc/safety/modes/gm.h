@@ -122,9 +122,7 @@ static bool gm_tx_hook(const CANPacket_t *to_send) {
   if (addr == 0x315) {
     int brake = ((GET_BYTE(to_send, 0) & 0xFU) << 8) + GET_BYTE(to_send, 1);
     brake = (0x1000 - brake) & 0xFFF;
-	//printf("Brake Safety gm.h 119: %d",to_send);
     if (longitudinal_brake_checks(brake, *gm_long_limits)) {
-			printf("Brake Safety gm.h 119: %d",to_send);
       tx = false;
     }
   }
