@@ -65,7 +65,7 @@ extern const int MAX_WRONG_COUNTERS;
 #define VEHICLE_SPEED_FACTOR 1000.0
 #define MAX_TORQUE_RT_INTERVAL 250000U
 //#define MS_TO_KPH 3.6
-#define KPH_TO_MS(kph) ((kph) / 3.6)
+#define KPH_TO_MS (1.0 / 3.6)
 
 // Lateral constants
 // ISO 11270
