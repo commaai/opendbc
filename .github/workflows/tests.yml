@@ -38,6 +38,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # need master to get diff
+      - uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: mull-17
       - uses: ./.github/workflows/cache
       - name: Run mutation tests
         timeout-minutes: 5
