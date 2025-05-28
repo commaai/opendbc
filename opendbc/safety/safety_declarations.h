@@ -65,6 +65,12 @@ extern const int MAX_WRONG_COUNTERS;
 #define VEHICLE_SPEED_FACTOR 1000.0
 #define MAX_TORQUE_RT_INTERVAL 250000U
 
+// Lateral constants
+// ISO 11270
+static const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
+
+static const float EARTH_G = 9.81;
+static const float AVERAGE_ROAD_ROLL = 0.06;  // ~3.4 degrees, 6% superelevation
 
 // sample struct that keeps 6 samples in memory
 struct sample_t {
@@ -133,6 +139,13 @@ typedef struct {
   const bool inactive_angle_is_zero;     // if false, enforces angle near meas when disabled (default)
 } AngleSteeringLimits;
 
+// parameters for lateral accel/jerk angle limiting using a simple vehicle model
+typedef struct {
+  const float slip_factor;
+  const float steer_ratio;
+  const float wheelbase;
+} AngleSteeringParams;
+
 typedef struct {
   // acceleration cmd limits
   const int max_accel;
@@ -162,7 +175,7 @@ typedef struct {
   const bool ignore_checksum;        // checksum check is not performed when set to true
   const bool ignore_counter;         // counter check is not performed when set to true
   const uint8_t max_counter;         // maximum value of the counter. 0 means that the counter check is skipped
-  const bool quality_flag;           // true is quality flag check is performed
+  const bool ignore_quality_flag;    // true if quality flag check is skipped
   const uint32_t frequency;          // expected frequency of the message [Hz]
 } CanMsgCheck;
 
@@ -217,7 +230,6 @@ bool safety_rx_hook(const CANPacket_t *to_push);
 bool safety_tx_hook(CANPacket_t *to_send);
 int to_signed(int d, int bits);
 void update_sample(struct sample_t *sample, int sample_new);
-bool max_limit_check(int val, const int MAX_VAL, const int MIN_VAL);
 bool get_longitudinal_allowed(void);
 int ROUND(float val);
 void gen_crc_lookup_table_8(uint8_t poly, uint8_t crc_lut[]);
@@ -226,12 +238,15 @@ void gen_crc_lookup_table_16(uint16_t poly, uint16_t crc_lut[]);
 #endif
 bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueSteeringLimits limits);
 bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits);
+bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits,
+                               const AngleSteeringParams params);
 bool longitudinal_accel_checks(int desired_accel, const LongitudinalLimits limits);
 bool longitudinal_speed_checks(int desired_speed, const LongitudinalLimits limits);
 bool longitudinal_gas_checks(int desired_gas, const LongitudinalLimits limits);
 bool longitudinal_transmission_rpm_checks(int desired_transmission_rpm, const LongitudinalLimits limits);
 bool longitudinal_brake_checks(int desired_brake, const LongitudinalLimits limits);
 void pcm_cruise_check(bool cruise_engaged);
+void speed_mismatch_check(const float speed_2);
 
 void safety_tick(const safety_config *safety_config);
 
