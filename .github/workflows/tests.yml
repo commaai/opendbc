@@ -40,7 +40,6 @@ jobs:
           fetch-depth: 0  # need master to get diff
       - name: Set up mull repo
         run: |
-          sudo apt-get update && sudo apt-get install -y curl clang-17
           curl -1sLf 'https://dl.cloudsmith.io/public/mull-project/mull-stable/setup.deb.sh' | sudo -E bash
       - uses: awalsh128/cache-apt-pkgs-action@latest
         with:
