@@ -92,7 +92,7 @@ safety_config current_safety_config;
 static void generic_rx_checks(void);
 static void stock_ecu_check(bool stock_ecu_detected);
 
-static bool is_lat_active(void) {
+bool is_lat_active(void) {
   return controls_allowed || mads_is_lateral_control_allowed_by_mads();
 }
 
