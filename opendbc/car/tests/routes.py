@@ -23,6 +23,8 @@ non_tested_cars = [
   GM.HOLDEN_ASTRA,
   GM.CHEVROLET_MALIBU,
   HYUNDAI.GENESIS_G90,
+  #Seeing if CI finds more problems before real testdrive, and awaiting steering board in the mail, then will replace
+  HONDA.ACURA_MDX_3G_HYBRID,
   HONDA.HONDA_ODYSSEY_CHN,
   VOLKSWAGEN.VOLKSWAGEN_CRAFTER_MK2,  # need a route from an ACC-equipped Crafter
   SUBARU.SUBARU_FORESTER_HYBRID,
@@ -109,6 +111,8 @@ routes = [
   CarTestRoute("1f032f5173c8ad99/00000006--573b3fcaf5", HONDA.HONDA_CIVIC_2022),  # Civic Type R with manual transmission
   CarTestRoute("b1c832ad56b6bc9d/00000010--debfcf5867", HONDA.HONDA_CIVIC_2022),  # 2025 Civic Hatch Hybrid with new eCVT transmission
   CarTestRoute("f9c43864cf057d05|2024-01-15--23-01-20", HONDA.HONDA_PILOT_4G),  # TODO: Replace with a newer route
+  CarTestRoute("a5cd616a92467aed/00000009--9b342eaba5", HONDA.ACURA_RLX_HYBRID), # Car won't steer without more hardware
+
 
   CarTestRoute("87d7f06ade479c2e|2023-09-11--23-30-11", HYUNDAI.HYUNDAI_AZERA_6TH_GEN),
   CarTestRoute("66189dd8ec7b50e6|2023-09-20--07-02-12", HYUNDAI.HYUNDAI_AZERA_HEV_6TH_GEN),

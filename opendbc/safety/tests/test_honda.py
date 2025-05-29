@@ -284,13 +284,16 @@ class TestHondaNidecSafetyBase(HondaBase):
           self.assertEqual(send, self._tx(self._send_acc_hud_msg(pcm_gas, pcm_speed)))
 
   def test_fwd_hook(self):
+
+    blacklist_old = self.FWD_BLACKLISTED_ADDRS
+
     # normal operation, not forwarding AEB
     self.FWD_BLACKLISTED_ADDRS[2].append(0x1FA)
     self.safety.set_honda_fwd_brake(False)
     super().test_fwd_hook()
 
     # forwarding AEB brake signal
-    self.FWD_BLACKLISTED_ADDRS = {2: [0xE4, 0x194, 0x33D, 0x30C]}
+    self.FWD_BLACKLISTED_ADDRS = blacklist_old
     self.safety.set_honda_fwd_brake(True)
     super().test_fwd_hook()
 
@@ -363,6 +366,28 @@ class TestHondaNidecPcmAltSafety(TestHondaNidecPcmSafety):
     values = {"CRUISE_BUTTONS": buttons, "MAIN_ON": main_on, "COUNTER": self.cnt_button % 4}
     self.__class__.cnt_button += 1
     return self.packer.make_can_msg_panda("SCM_BUTTONS", bus, values)
+
+
+class TestHondaNidecRlxSafety(TestHondaNidecPcmAltSafety):
+  """
+    Covers the Honda Nidec safety mode with RLX steering bus and hybrid brake signal
+  """
+  TX_MSGS = [[0xE4, 0], [0x30C, 0], [0x194, 5], [0x1FA, 0], [0x33D, 5]] # move LKAS & STEERING_CONTROL to bus 5, relay to 4
+  FWD_BLACKLISTED_ADDRS = {2: [0x30C, 0xE4], 4: [0x194, 0x33D]}
+  RELAY_MALFUNCTION_ADDRS = {0: (0x30C, 0xE4), 5: (0x194, 0x33D)}
+
+  STEER_BUS = 5
+
+  def setUp(self):
+    self.packer = CANPackerPanda("acura_rlx")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaNidec, HondaSafetyFlags.NIDEC_HYBRID | HondaSafetyFlags.RLX_STEER)
+    self.safety.init_tests()
+
+  def test_steer_safety_check(self): # see if repeating as inherited fixes the test
+    self.safety.set_controls_allowed(0)
+    self.assertTrue(self._tx(self._send_steer_msg(0x0000)))
+    self.assertFalse(self._tx(self._send_steer_msg(0x1000)))
 
 
 # ********************* Honda Bosch **********************

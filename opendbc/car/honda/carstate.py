@@ -8,7 +8,8 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.honda.hondacan import CanBus, get_cruise_speed_conversion
 from opendbc.car.honda.values import CAR, DBC, STEER_THRESHOLD, HONDA_BOSCH, HONDA_BOSCH_CANFD, \
                                                  HONDA_NIDEC_ALT_SCM_MESSAGES, HONDA_BOSCH_RADARLESS, \
-                                                 HondaFlags, CruiseButtons, CruiseSettings, GearShifter
+                                                 HondaFlags, CruiseButtons, CruiseSettings, GearShifter, \
+                                                 SERIAL_STEERING, HONDA_NIDEC_HYBRID, HONDA_RLX_STEER
 from opendbc.car.interfaces import CarStateBase
 
 TransmissionType = structs.CarParams.TransmissionType
@@ -27,13 +28,21 @@ def get_can_messages(CP, gearbox_msg):
     ("SEATBELT_STATUS", 10),
     ("CRUISE", 10),
     ("POWERTRAIN_DATA", 100),
-    ("CAR_SPEED", 10),
+    ("CAR_SPEED", 0), # missing on RLX
     ("VSA_STATUS", 50),
-    ("STEER_STATUS", 100),
     ("STEER_MOTOR_TORQUE", 0),  # TODO: not on every car
   ]
 
-  if CP.carFingerprint == CAR.HONDA_ODYSSEY_CHN:
+  if  CP.carFingerprint in SERIAL_STEERING:
+    messages += [
+      ("STEER_STATUS", 0), # initially slow to transmit
+    ]
+  elif CP.carFingerprint not in HONDA_RLX_STEER:
+    messages +=[
+      ("STEER_STATUS", 100),
+    ]
+
+  if CP.carFingerprint in (CAR.HONDA_ODYSSEY_CHN, CAR.ACURA_RLX_HYBRID):
     messages += [
       ("SCM_FEEDBACK", 25),
       ("SCM_BUTTONS", 50),
@@ -44,7 +53,7 @@ def get_can_messages(CP, gearbox_msg):
       ("SCM_BUTTONS", 25),
     ]
 
-  if CP.carFingerprint in (CAR.HONDA_CRV_HYBRID, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.ACURA_RDX_3G, CAR.HONDA_E):
+  if CP.carFingerprint in (CAR.HONDA_CRV_HYBRID, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.ACURA_RDX_3G, CAR.HONDA_E, CAR.ACURA_RLX_HYBRID):
     messages.append((gearbox_msg, 50))
   else:
     messages.append((gearbox_msg, 100))
@@ -55,6 +64,11 @@ def get_can_messages(CP, gearbox_msg):
   if CP.carFingerprint in (HONDA_BOSCH | {CAR.HONDA_CIVIC, CAR.HONDA_ODYSSEY, CAR.HONDA_ODYSSEY_CHN}):
     messages.append(("EPB_STATUS", 50))
 
+  if CP.carFingerprint in HONDA_NIDEC_HYBRID:
+    messages += [
+      ("HYBRID_STATUS", 100),
+    ]
+
   if CP.carFingerprint in HONDA_BOSCH:
     # these messages are on camera bus on radarless cars
     if not CP.openpilotLongitudinalControl and CP.carFingerprint not in HONDA_BOSCH_RADARLESS:
@@ -63,7 +77,7 @@ def get_can_messages(CP, gearbox_msg):
         ("ACC_CONTROL", 50),
       ]
   else:  # Nidec signals
-    if CP.carFingerprint == CAR.HONDA_ODYSSEY_CHN:
+    if CP.carFingerprint == (CAR.HONDA_ODYSSEY_CHN, CAR.ACURA_RLX_HYBRID):
       messages.append(("CRUISE_PARAMS", 10))
     else:
       messages.append(("CRUISE_PARAMS", 50))
@@ -113,6 +127,13 @@ class CarState(CarStateBase):
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
     cp_cam = can_parsers[Bus.cam]
+    if self.CP.carFingerprint in HONDA_RLX_STEER:
+      cp_rlx = can_parsers[Bus.adas]
+      cp_steerstatus = cp_rlx
+      cp_lkas = cp_rlx
+    else:
+      cp_steerstatus = cp
+      cp_lkas = cp_cam
     if self.CP.enableBsm:
       cp_body = can_parsers[Bus.body]
 
@@ -139,14 +160,14 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint in (CAR.HONDA_ACCORD, CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.HONDA_CRV_HYBRID, CAR.HONDA_INSIGHT,
                                   CAR.ACURA_RDX_3G, CAR.HONDA_E, *HONDA_BOSCH_RADARLESS, *HONDA_BOSCH_CANFD):
       ret.doorOpen = bool(cp.vl["SCM_FEEDBACK"]["DRIVERS_DOOR_OPEN"])
-    elif self.CP.carFingerprint in (CAR.HONDA_ODYSSEY_CHN, CAR.HONDA_FREED, CAR.HONDA_HRV):
+    elif self.CP.carFingerprint in (CAR.HONDA_ODYSSEY_CHN, CAR.HONDA_FREED, CAR.HONDA_HRV,CAR. ACURA_MDX_3G_HYBRID):
       ret.doorOpen = bool(cp.vl["SCM_BUTTONS"]["DRIVERS_DOOR_OPEN"])
     else:
       ret.doorOpen = any([cp.vl["DOORS_STATUS"]["DOOR_OPEN_FL"], cp.vl["DOORS_STATUS"]["DOOR_OPEN_FR"],
                           cp.vl["DOORS_STATUS"]["DOOR_OPEN_RL"], cp.vl["DOORS_STATUS"]["DOOR_OPEN_RR"]])
     ret.seatbeltUnlatched = bool(cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LAMP"] or not cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LATCHED"])
 
-    steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]["STEER_STATUS"]]
+    steer_status = self.steer_status_values[cp_steerstatus.vl["STEER_STATUS"]["STEER_STATUS"]]
     ret.steerFaultPermanent = steer_status not in ("NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT")
     # LOW_SPEED_LOCKOUT is not worth a warning
     # NO_TORQUE_ALERT_2 can be caused by bump or steering nudge from driver
@@ -158,11 +179,14 @@ class CarState(CarStateBase):
       # On some cars, these two signals are always 1, this flag is masking a bug in release
       # FIXME: find and set the ACC faulted signals on more platforms
       if self.CP.openpilotLongitudinalControl:
-        ret.accFaulted = bool(cp.vl["STANDSTILL"]["BRAKE_ERROR_1"] or cp.vl["STANDSTILL"]["BRAKE_ERROR_2"])
+        if self.CP.carFingerprint in HONDA_NIDEC_HYBRID:
+          ret.accFaulted = bool(cp.vl["HYBRID_STATUS"]["BRAKE_ERROR_1"] or cp.vl["HYBRID_STATUS"]["BRAKE_ERROR_2"])
+        else:
+          ret.accFaulted = bool(cp.vl["STANDSTILL"]["BRAKE_ERROR_1"] or cp.vl["STANDSTILL"]["BRAKE_ERROR_2"])
 
       # Log non-critical stock ACC/LKAS faults if Nidec (camera)
       if self.CP.carFingerprint not in HONDA_BOSCH:
-        ret.carFaultedNonCritical = bool(cp_cam.vl["ACC_HUD"]["ACC_PROBLEM"] or cp_cam.vl["LKAS_HUD"]["LKAS_PROBLEM"])
+        ret.carFaultedNonCritical = bool(cp_cam.vl["ACC_HUD"]["ACC_PROBLEM"] or cp_lkas.vl["LKAS_HUD"]["LKAS_PROBLEM"])
 
     ret.espDisabled = cp.vl["VSA_STATUS"]["ESP_DISABLED"] != 0
 
@@ -208,7 +232,7 @@ class CarState(CarStateBase):
     ret.gas = cp.vl["POWERTRAIN_DATA"]["PEDAL_GAS"]
     ret.gasPressed = ret.gas > 1e-5
 
-    ret.steeringTorque = cp.vl["STEER_STATUS"]["STEER_TORQUE_SENSOR"]
+    ret.steeringTorque = cp_steerstatus.vl["STEER_STATUS"]["STEER_TORQUE_SENSOR"]
     ret.steeringTorqueEps = cp.vl["STEER_MOTOR_TORQUE"]["MOTOR_TORQUE"]
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD.get(self.CP.carFingerprint, 1200)
 
@@ -268,7 +292,7 @@ class CarState(CarStateBase):
       self.acc_hud = cp_cam.vl["ACC_HUD"]
       self.stock_brake = cp_cam.vl["BRAKE_COMMAND"]
     if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
-      self.lkas_hud = cp_cam.vl["LKAS_HUD"]
+      self.lkas_hud = cp_lkas.vl["LKAS_HUD"]
 
     if self.CP.enableBsm:
       # BSM messages are on B-CAN, requires a panda forwarding B-CAN messages to CAN 0
@@ -286,9 +310,16 @@ class CarState(CarStateBase):
   def get_can_parsers(self, CP):
     pt_messages = get_can_messages(CP, self.gearbox_msg)
 
-    cam_messages = [
-      ("STEERING_CONTROL", 100),
-    ]
+    cam_messages = []
+
+    if  CP.carFingerprint in SERIAL_STEERING:
+      pt_messages += [
+        ("STEERING_CONTROL", 0), # initially slow, prevent timing errors
+      ]
+    elif CP.carFingerprint not in HONDA_RLX_STEER:
+      cam_messages += [
+        ("STEERING_CONTROL", 100),
+      ]
 
     if CP.carFingerprint in HONDA_BOSCH_RADARLESS:
       cam_messages += [
@@ -296,22 +327,43 @@ class CarState(CarStateBase):
         ("LKAS_HUD", 10),
       ]
 
+    elif CP.carFingerprint == CAR.ACURA_RLX_HYBRID:
+      cam_messages += [
+        ("ACC_HUD", 10),
+        ("BRAKE_COMMAND", 50),
+      ]
+
     elif CP.carFingerprint not in HONDA_BOSCH:
       cam_messages += [
         ("ACC_HUD", 10),
-        ("LKAS_HUD", 10),
         ("BRAKE_COMMAND", 50),
       ]
+      if CP.carFingerprint not in HONDA_RLX_STEER:
+        cam_messages += [
+          ("LKAS_HUD", 10),
+        ]
 
     body_messages = [
       ("BSM_STATUS_LEFT", 3),
       ("BSM_STATUS_RIGHT", 3),
     ]
 
+    if CP.carFingerprint in HONDA_RLX_STEER:
+      lkas_messages = [
+        ("LKAS_HUD", 10),
+        ("STEER_STATUS", 100),
+        ("STEERING_CONTROL", 100),
+      ]
+
+
     parsers = {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).pt),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).camera),
     }
+
+    if CP.carFingerprint in HONDA_RLX_STEER:
+      parsers[Bus.adas] = CANParser(DBC[CP.carFingerprint][Bus.pt], lkas_messages, 4)
+
     if CP.enableBsm:
       parsers[Bus.body] = CANParser(DBC[CP.carFingerprint][Bus.body], body_messages, CanBus(CP).radar)
 
