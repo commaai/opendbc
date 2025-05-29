@@ -26,7 +26,6 @@ env = Environment(
     # GCC coverage flags
     '-fprofile-arcs',
     '-ftest-coverage',
-    '-fprofile-abs-path',
   ],
   CPPPATH=["#", "../../board/"],
   LIBS=["gcov"],
