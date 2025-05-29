@@ -2,20 +2,18 @@
 
 # Support Information for 361 Known Cars
 
+# Upstream Cars
+
 |Make|Model|Package|Support Level|
 |---|---|---|:---:|
 |Acura|ILX 2016-18|Technology Plus Package or AcuraWatch Plus|[Upstream](#upstream)|
 |Acura|ILX 2019|All|[Upstream](#upstream)|
-|Acura|Integra 2024|All|[Community](#community)|
 |Acura|RDX 2016-18|AcuraWatch Plus or Advance Package|[Upstream](#upstream)|
 |Acura|RDX 2019-21|All|[Upstream](#upstream)|
 |Audi|A3 2014-19|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Audi|A3 Sportback e-tron 2017-18|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
-|Audi|A4 2016-24|All|[Not compatible](#flexray)|
-|Audi|A5 2016-24|All|[Not compatible](#flexray)|
 |Audi|Q2 2018|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Audi|Q3 2019-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
-|Audi|Q5 2017-24|All|[Not compatible](#flexray)|
 |Audi|RS3 2018|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Audi|S3 2015-17|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Chevrolet|Bolt EUV 2022-23|Premier or Premier Redline Trim without Super Cruise Package|[Upstream](#upstream)|
@@ -70,9 +68,7 @@
 |Genesis|GV70 Electrified (with HDA II) 2023-24|Highway Driving Assist II|[Upstream](#upstream)|
 |Genesis|GV80 2023|All|[Upstream](#upstream)|
 |GMC|Sierra 1500 2020-21|Driver Alert Package II|[Upstream](#upstream)|
-|GMC|Yukon 2019-20|Adaptive Cruise Control (ACC) & LKAS|[Dashcam mode](#dashcam)|
 |Honda|Accord 2018-22|All|[Upstream](#upstream)|
-|Honda|Accord 2023-24|All|[Community](#community)|
 |Honda|Accord Hybrid 2018-22|All|[Upstream](#upstream)|
 |Honda|Civic 2016-18|Honda Sensing|[Upstream](#upstream)|
 |Honda|Civic 2019-21|All|[Upstream](#upstream)|
@@ -81,12 +77,9 @@
 |Honda|Civic Hatchback 2022-24|All|[Upstream](#upstream)|
 |Honda|Civic Hatchback Hybrid 2023 (Europe only)|All|[Upstream](#upstream)|
 |Honda|Civic Hatchback Hybrid 2025|All|[Upstream](#upstream)|
-|Honda|Clarity 2018-21|All|[Community](#community)|
 |Honda|CR-V 2015-16|Touring Trim|[Upstream](#upstream)|
 |Honda|CR-V 2017-22|Honda Sensing|[Upstream](#upstream)|
-|Honda|CR-V 2024|All|[Community](#community)|
 |Honda|CR-V Hybrid 2017-22|Honda Sensing|[Upstream](#upstream)|
-|Honda|CR-V Hybrid 2024|All|[Community](#community)|
 |Honda|e 2020|All|[Upstream](#upstream)|
 |Honda|Fit 2018-20|Honda Sensing|[Upstream](#upstream)|
 |Honda|Freed 2020|Honda Sensing|[Upstream](#upstream)|
@@ -95,11 +88,8 @@
 |Honda|Insight 2019-22|All|[Upstream](#upstream)|
 |Honda|Inspire 2018|All|[Upstream](#upstream)|
 |Honda|Odyssey 2018-20|Honda Sensing|[Upstream](#upstream)|
-|Honda|Odyssey 2021-25|All|[Community](#community)|
 |Honda|Passport 2019-25|All|[Upstream](#upstream)|
 |Honda|Pilot 2016-22|Honda Sensing|[Upstream](#upstream)|
-|Honda|Pilot 2023|All|[Dashcam mode](#dashcam)|
-|Honda|Pilot 2023-24|All|[Community](#community)|
 |Honda|Ridgeline 2017-25|Honda Sensing|[Upstream](#upstream)|
 |Hyundai|Azera 2022|All|[Upstream](#upstream)|
 |Hyundai|Azera Hybrid 2019|All|[Upstream](#upstream)|
@@ -130,7 +120,6 @@
 |Hyundai|Kona Hybrid 2020|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|Nexo 2021|All|[Upstream](#upstream)|
 |Hyundai|Palisade 2020-22|All|[Upstream](#upstream)|
-|Hyundai|Palisade 2023-24|HDA2|[Community](#community)|
 |Hyundai|Santa Cruz 2022-24|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|Santa Fe 2019-20|All|[Upstream](#upstream)|
 |Hyundai|Santa Fe 2021-23|All|[Upstream](#upstream)|
@@ -176,7 +165,6 @@
 |Kia|Niro Plug-in Hybrid 2022|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Kia|Optima 2017|Advanced Smart Cruise Control|[Upstream](#upstream)|
 |Kia|Optima 2019-20|Smart Cruise Control (SCC)|[Upstream](#upstream)|
-|Kia|Optima Hybrid 2017|Advanced Smart Cruise Control|[Dashcam mode](#dashcam)|
 |Kia|Optima Hybrid 2019|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Kia|Seltos 2021|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Kia|Sorento 2018|Advanced Smart Cruise Control & LKAS|[Upstream](#upstream)|
@@ -189,7 +177,6 @@
 |Kia|Stinger 2018-20|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Kia|Stinger 2022-23|All|[Upstream](#upstream)|
 |Kia|Telluride 2020-22|All|[Upstream](#upstream)|
-|Kia|Telluride 2023-24|HDA2|[Community](#community)|
 |Lexus|CT Hybrid 2017-18|Lexus Safety System+|[Upstream](#upstream)|
 |Lexus|ES 2017-18|All|[Upstream](#upstream)|
 |Lexus|ES 2019-24|All|[Upstream](#upstream)|
@@ -199,7 +186,6 @@
 |Lexus|IS 2017-19|All|[Upstream](#upstream)|
 |Lexus|IS 2022-23|All|[Upstream](#upstream)|
 |Lexus|LC 2024|All|[Upstream](#upstream)|
-|Lexus|NS 2022-25|Any|[Not compatible](#can-bus-security)|
 |Lexus|NX 2018-19|All|[Upstream](#upstream)|
 |Lexus|NX 2020-21|All|[Upstream](#upstream)|
 |Lexus|NX Hybrid 2018-19|All|[Upstream](#upstream)|
@@ -217,42 +203,25 @@
 |Lincoln|Aviator Plug-in Hybrid 2020-24|Co-Pilot360 Plus|[Upstream](#upstream)|
 |MAN|eTGE 2020-24|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |MAN|TGE 2017-24|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
-|Mazda|3 2017-18|All|[Dashcam mode](#dashcam)|
-|Mazda|6 2017-20|All|[Dashcam mode](#dashcam)|
-|Mazda|CX-5 2017-21|All|[Dashcam mode](#dashcam)|
 |Mazda|CX-5 2022-25|All|[Upstream](#upstream)|
-|Mazda|CX-9 2016-20|All|[Dashcam mode](#dashcam)|
 |Mazda|CX-9 2021-23|All|[Upstream](#upstream)|
 |Nissan|Altima 2019-20|ProPILOT Assist|[Upstream](#upstream)|
 |Nissan|Leaf 2018-23|ProPILOT Assist|[Upstream](#upstream)|
 |Nissan|Rogue 2018-20|ProPILOT Assist|[Upstream](#upstream)|
 |Nissan|X-Trail 2017|ProPILOT Assist|[Upstream](#upstream)|
 |Ram|1500 2019-24|Adaptive Cruise Control (ACC)|[Upstream](#upstream)|
-|Ram|2500 2020-24|Adaptive Cruise Control (ACC)|[Dashcam mode](#dashcam)|
-|Ram|3500 2019-22|Adaptive Cruise Control (ACC)|[Dashcam mode](#dashcam)|
 |Rivian|R1S 2022-24|All|[Upstream](#upstream)|
 |Rivian|R1T 2022-24|All|[Upstream](#upstream)|
-|SEAT|Alhambra 2018-20|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
 |SEAT|Ateca 2016-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |SEAT|Leon 2014-20|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Subaru|Ascent 2019-21|All|[Upstream](#upstream)|
-|Subaru|Ascent 2023|All|[Dashcam mode](#dashcam)|
 |Subaru|Crosstrek 2018-19|EyeSight Driver Assistance|[Upstream](#upstream)|
 |Subaru|Crosstrek 2020-23|EyeSight Driver Assistance|[Upstream](#upstream)|
-|Subaru|Crosstrek Hybrid 2020|EyeSight Driver Assistance|[Dashcam mode](#dashcam)|
-|Subaru|Forester 2017-18|EyeSight Driver Assistance|[Dashcam mode](#dashcam)|
 |Subaru|Forester 2019-21|All|[Upstream](#upstream)|
-|Subaru|Forester 2022-24|All|[Dashcam mode](#dashcam)|
-|Subaru|Forester Hybrid 2020|EyeSight Driver Assistance|[Dashcam mode](#dashcam)|
 |Subaru|Impreza 2017-19|EyeSight Driver Assistance|[Upstream](#upstream)|
 |Subaru|Impreza 2020-22|EyeSight Driver Assistance|[Upstream](#upstream)|
-|Subaru|Legacy 2015-18|EyeSight Driver Assistance|[Dashcam mode](#dashcam)|
 |Subaru|Legacy 2020-22|All|[Upstream](#upstream)|
-|Subaru|Outback 2015-17|EyeSight Driver Assistance|[Dashcam mode](#dashcam)|
-|Subaru|Outback 2018-19|EyeSight Driver Assistance|[Dashcam mode](#dashcam)|
 |Subaru|Outback 2020-22|All|[Upstream](#upstream)|
-|Subaru|Outback 2023|All|[Dashcam mode](#dashcam)|
-|Subaru|Solterra 2023-25|Any|[Not compatible](#can-bus-security)|
 |Subaru|XV 2018-19|EyeSight Driver Assistance|[Upstream](#upstream)|
 |Subaru|XV 2020-21|EyeSight Driver Assistance|[Upstream](#upstream)|
 |Škoda|Fabia 2022-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
@@ -276,19 +245,16 @@
 |Toyota|Avalon 2022|All|[Upstream](#upstream)|
 |Toyota|Avalon Hybrid 2019-21|All|[Upstream](#upstream)|
 |Toyota|Avalon Hybrid 2022|All|[Upstream](#upstream)|
-|Toyota|bZ4x 2023-25|Any|[Not compatible](#can-bus-security)|
 |Toyota|C-HR 2017-20|All|[Upstream](#upstream)|
 |Toyota|C-HR 2021|All|[Upstream](#upstream)|
 |Toyota|C-HR Hybrid 2017-20|All|[Upstream](#upstream)|
 |Toyota|C-HR Hybrid 2021-22|All|[Upstream](#upstream)|
 |Toyota|Camry 2018-20|All|[Upstream](#upstream)|
 |Toyota|Camry 2021-24|All|[Upstream](#upstream)|
-|Toyota|Camry 2025|Any|[Not compatible](#can-bus-security)|
 |Toyota|Camry Hybrid 2018-20|All|[Upstream](#upstream)|
 |Toyota|Camry Hybrid 2021-24|All|[Upstream](#upstream)|
 |Toyota|Corolla 2017-19|All|[Upstream](#upstream)|
 |Toyota|Corolla 2020-22|All|[Upstream](#upstream)|
-|Toyota|Corolla Cross 2022-25|Any|[Not compatible](#can-bus-security)|
 |Toyota|Corolla Cross (Non-US only) 2020-23|All|[Upstream](#upstream)|
 |Toyota|Corolla Cross Hybrid (Non-US only) 2020-22|All|[Upstream](#upstream)|
 |Toyota|Corolla Hatchback 2019-22|All|[Upstream](#upstream)|
@@ -296,7 +262,6 @@
 |Toyota|Corolla Hybrid (South America only) 2020-23|All|[Upstream](#upstream)|
 |Toyota|Highlander 2017-19|All|[Upstream](#upstream)|
 |Toyota|Highlander 2020-23|All|[Upstream](#upstream)|
-|Toyota|Highlander 2025|Any|[Not compatible](#can-bus-security)|
 |Toyota|Highlander Hybrid 2017-19|All|[Upstream](#upstream)|
 |Toyota|Highlander Hybrid 2020-23|All|[Upstream](#upstream)|
 |Toyota|Mirai 2021|All|[Upstream](#upstream)|
@@ -316,22 +281,13 @@
 |Toyota|RAV4 Hybrid 2019-21|All|[Upstream](#upstream)|
 |Toyota|RAV4 Hybrid 2022|All|[Upstream](#upstream)|
 |Toyota|RAV4 Hybrid 2023-25|All|[Upstream](#upstream)|
-|Toyota|RAV4 Prime 2021-23|Any|[Community](#community)|
-|Toyota|RAV4 Prime 2024-25|Any|[Not compatible](#can-bus-security)|
-|Toyota|Sequoia 2023-25|Any|[Not compatible](#can-bus-security)|
 |Toyota|Sienna 2018-20|All|[Upstream](#upstream)|
-|Toyota|Sienna 2021-23|Any|[Community](#community)|
-|Toyota|Sienna 2024-25|Any|[Not compatible](#can-bus-security)|
-|Toyota|Tundra 2022-25|Any|[Not compatible](#can-bus-security)|
-|Toyota|Venza 2021-25|Any|[Not compatible](#can-bus-security)|
 |Volkswagen|Arteon 2018-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Arteon eHybrid 2020-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Arteon R 2020-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Arteon Shooting Brake 2020-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Atlas 2018-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Atlas Cross Sport 2020-22|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
-|Volkswagen|Caddy 2019|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
-|Volkswagen|Caddy Maxi 2019|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
 |Volkswagen|California 2021-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Caravelle 2020|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|CC 2018-22|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
@@ -346,16 +302,13 @@
 |Volkswagen|Golf R 2015-19|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Golf SportsVan 2015-20|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Grand California 2019-24|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
-|Volkswagen|Jetta 2015-18|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
 |Volkswagen|Jetta 2018-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Jetta GLI 2021-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Passat 2015-22|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Passat Alltrack 2015-22|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Passat GTE 2015-22|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
-|Volkswagen|Passat NMS 2017-22|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
 |Volkswagen|Polo 2018-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Polo GTI 2018-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
-|Volkswagen|Sharan 2018-22|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
 |Volkswagen|T-Cross 2021|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|T-Roc 2018-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Taos 2022-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
@@ -365,6 +318,60 @@
 |Volkswagen|Tiguan 2018-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Tiguan eHybrid 2021-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Touran 2016-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
+
+# All Other Cars
+
+|Make|Model|Package|Support Level|
+|---|---|---|:---:|
+|Acura|Integra 2024|All|[Community](#community)|
+|Audi|A4 2016-24|All|[Not compatible](#flexray)|
+|Audi|A5 2016-24|All|[Not compatible](#flexray)|
+|Audi|Q5 2017-24|All|[Not compatible](#flexray)|
+|GMC|Yukon 2019-20|Adaptive Cruise Control (ACC) & LKAS|[Dashcam mode](#dashcam)|
+|Honda|Accord 2023-24|All|[Community](#community)|
+|Honda|Clarity 2018-21|All|[Community](#community)|
+|Honda|CR-V 2024|All|[Community](#community)|
+|Honda|CR-V Hybrid 2024|All|[Community](#community)|
+|Honda|Odyssey 2021-25|All|[Community](#community)|
+|Honda|Pilot 2023|All|[Dashcam mode](#dashcam)|
+|Honda|Pilot 2023-24|All|[Community](#community)|
+|Hyundai|Palisade 2023-24|HDA2|[Community](#community)|
+|Kia|Optima Hybrid 2017|Advanced Smart Cruise Control|[Dashcam mode](#dashcam)|
+|Kia|Telluride 2023-24|HDA2|[Community](#community)|
+|Lexus|NS 2022-25|Any|[Not compatible](#can-bus-security)|
+|Mazda|3 2017-18|All|[Dashcam mode](#dashcam)|
+|Mazda|6 2017-20|All|[Dashcam mode](#dashcam)|
+|Mazda|CX-5 2017-21|All|[Dashcam mode](#dashcam)|
+|Mazda|CX-9 2016-20|All|[Dashcam mode](#dashcam)|
+|Ram|2500 2020-24|Adaptive Cruise Control (ACC)|[Dashcam mode](#dashcam)|
+|Ram|3500 2019-22|Adaptive Cruise Control (ACC)|[Dashcam mode](#dashcam)|
+|SEAT|Alhambra 2018-20|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
+|Subaru|Ascent 2023|All|[Dashcam mode](#dashcam)|
+|Subaru|Crosstrek Hybrid 2020|EyeSight Driver Assistance|[Dashcam mode](#dashcam)|
+|Subaru|Forester 2017-18|EyeSight Driver Assistance|[Dashcam mode](#dashcam)|
+|Subaru|Forester 2022-24|All|[Dashcam mode](#dashcam)|
+|Subaru|Forester Hybrid 2020|EyeSight Driver Assistance|[Dashcam mode](#dashcam)|
+|Subaru|Legacy 2015-18|EyeSight Driver Assistance|[Dashcam mode](#dashcam)|
+|Subaru|Outback 2015-17|EyeSight Driver Assistance|[Dashcam mode](#dashcam)|
+|Subaru|Outback 2018-19|EyeSight Driver Assistance|[Dashcam mode](#dashcam)|
+|Subaru|Outback 2023|All|[Dashcam mode](#dashcam)|
+|Subaru|Solterra 2023-25|Any|[Not compatible](#can-bus-security)|
+|Toyota|bZ4x 2023-25|Any|[Not compatible](#can-bus-security)|
+|Toyota|Camry 2025|Any|[Not compatible](#can-bus-security)|
+|Toyota|Corolla Cross 2022-25|Any|[Not compatible](#can-bus-security)|
+|Toyota|Highlander 2025|Any|[Not compatible](#can-bus-security)|
+|Toyota|RAV4 Prime 2021-23|Any|[Community](#community)|
+|Toyota|RAV4 Prime 2024-25|Any|[Not compatible](#can-bus-security)|
+|Toyota|Sequoia 2023-25|Any|[Not compatible](#can-bus-security)|
+|Toyota|Sienna 2021-23|Any|[Community](#community)|
+|Toyota|Sienna 2024-25|Any|[Not compatible](#can-bus-security)|
+|Toyota|Tundra 2022-25|Any|[Not compatible](#can-bus-security)|
+|Toyota|Venza 2021-25|Any|[Not compatible](#can-bus-security)|
+|Volkswagen|Caddy 2019|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
+|Volkswagen|Caddy Maxi 2019|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
+|Volkswagen|Jetta 2015-18|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
+|Volkswagen|Passat NMS 2017-22|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
+|Volkswagen|Sharan 2018-22|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
 
 # Types of Support
 
