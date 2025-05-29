@@ -810,8 +810,11 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
   if (!steer_control_enabled) {
     const int max_inactive_angle = CLAMP(angle_meas.max, -limits.max_angle, limits.max_angle) + 1;
     const int min_inactive_angle = CLAMP(angle_meas.min, -limits.max_angle, limits.max_angle) - 1;
-    violation |= (limits.inactive_angle_is_zero ? (desired_angle != 0) :
-                  max_limit_check(desired_angle, max_inactive_angle, min_inactive_angle));
+    if (limits.inactive_angle_is_zero) {
+      violation |= desired_angle != 0;
+    } else {
+      violation |= max_limit_check(desired_angle, max_inactive_angle, min_inactive_angle);
+    }
   }
 
   // No angle control allowed when controls are not allowed
@@ -871,8 +874,11 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
   if (!steer_control_enabled) {
     const int max_inactive_angle = CLAMP(angle_meas.max, -limits.max_angle, limits.max_angle) + 1;
     const int min_inactive_angle = CLAMP(angle_meas.min, -limits.max_angle, limits.max_angle) - 1;
-    violation |= (limits.inactive_angle_is_zero ? (desired_angle != 0) :
-                  max_limit_check(desired_angle, max_inactive_angle, min_inactive_angle));
+    if (limits.inactive_angle_is_zero) {
+      violation |= desired_angle != 0;
+    } else {
+      violation |= max_limit_check(desired_angle, max_inactive_angle, min_inactive_angle);
+    }
   }
 
   // No angle control allowed when controls are not allowed
