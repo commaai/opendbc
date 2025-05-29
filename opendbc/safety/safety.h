@@ -829,7 +829,7 @@ static float get_curvature_factor(const float speed, const AngleSteeringParams p
 
 bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits,
                                const AngleSteeringParams params) {
-  // This check uses a simple vehicle model to allow for true lateral acceleration and jerk limits.
+  // This check uses a simple vehicle model to allow for constant lateral acceleration and jerk limits across all speeds.
   // TODO: remove the inaccurate breakpoint angle limiting function above and always use this one
 
   static const float RAD_TO_DEG = 57.29577951308232;
