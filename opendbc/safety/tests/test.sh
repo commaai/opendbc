@@ -9,9 +9,9 @@ source ../../../setup.sh
 # reset coverage data and generate gcc note file
 rm -f ./libsafety/*.gcda
 if [ "$1" == "--ubsan" ]; then
-  scons -j$(nproc) -D --coverage --ubsan
+  scons -j$(nproc) -D --ubsan
 else
-  scons -j$(nproc) -D --coverage
+  scons -j$(nproc) -D
 fi
 
 # run safety tests and generate coverage data
