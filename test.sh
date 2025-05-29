@@ -6,11 +6,30 @@ cd $DIR
 
 source ./setup.sh
 
+# reset safety coverage data and generate gcc note file
+rm -f ./libsafety/*.gcda
+
 # *** build ***
-scons -j8 "$@"
+scons -j8 --coverage "$@"
 
 # *** lint + test ***
 lefthook run test
+
+# generate and open report
+if [ "$1" == "--report" ]; then
+  mkdir -p coverage-out
+  gcovr -r ../ --html-nested coverage-out/index.html
+  sensible-browser coverage-out/index.html
+fi
+
+# test coverage
+GCOV="gcovr -r ../ --fail-under-line=100 -e ^libsafety -e ^../board"
+if ! GCOV_OUTPUT="$($GCOV)"; then
+  echo -e "FAILED:\n$GCOV_OUTPUT"
+  exit 1
+else
+  echo "SUCCESS: All checked files have 100% coverage!"
+fi
 
 # *** all done ***
 GREEN='\033[0;32m'
