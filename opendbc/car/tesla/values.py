@@ -88,9 +88,7 @@ class CarControllerParams:
   ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
     # EPAS faults above this angle
     360,  # deg
-    # Angle rate limits are set using the Tesla Model Y VehicleModel such that they maximally meet ISO 11270
-    # At 5 m/s, FSD has been seen hitting up to ~4 deg/frame with ~5 deg/frame at very low creeping speeds
-    # At 30 m/s, FSD has been seen hitting mostly 0.1 deg/frame, sometimes 0.2 deg/frame, and rarely 0.3 deg/frame
+    # Tesla uses a vehicle model instead, check carcontroller.py for details
     ([], []),
     ([], []),
   )
