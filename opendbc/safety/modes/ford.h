@@ -131,14 +131,14 @@ static void ford_rx_hook(const CANPacket_t *to_push) {
     // Update vehicle speed
     if (addr == FORD_BrakeSysFeatures) {
       // Signal: Veh_V_ActlBrk
-      UPDATE_VEHICLE_SPEED(((GET_BYTE(to_push, 0) << 8) | GET_BYTE(to_push, 1)) * 0.01 / 3.6);
+      UPDATE_VEHICLE_SPEED(((GET_BYTE(to_push, 0) << 8) | GET_BYTE(to_push, 1)) * 0.01 * KPH_TO_MS);
     }
 
     // Check vehicle speed against a second source
     if (addr == FORD_EngVehicleSpThrottle2) {
       // Disable controls if speeds from ABS and PCM ECUs are too far apart.
       // Signal: Veh_V_ActlEng
-      float filtered_pcm_speed = ((GET_BYTE(to_push, 6) << 8) | GET_BYTE(to_push, 7)) * 0.01 / 3.6;
+      float filtered_pcm_speed = ((GET_BYTE(to_push, 6) << 8) | GET_BYTE(to_push, 7)) * 0.01 * KPH_TO_MS;
       speed_mismatch_check(filtered_pcm_speed);
     }
 
