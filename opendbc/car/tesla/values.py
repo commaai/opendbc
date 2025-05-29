@@ -91,8 +91,8 @@ class CarControllerParams:
     # Angle rate limits are set using the Tesla Model Y VehicleModel such that they maximally meet ISO 11270
     # At 5 m/s, FSD has been seen hitting up to ~4 deg/frame with ~5 deg/frame at very low creeping speeds
     # At 30 m/s, FSD has been seen hitting mostly 0.1 deg/frame, sometimes 0.2 deg/frame, and rarely 0.3 deg/frame
-    ([0., 5., 25.], [2.5, 1.5, 0.2]),
-    ([0., 5., 25.], [5., 2.0, 0.3]),
+    ([], []),
+    ([], []),
   )
 
   STEER_STEP = 2  # Angle command is sent at 50 Hz
