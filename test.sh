@@ -7,7 +7,9 @@ cd $DIR
 source ./setup.sh
 
 # reset safety coverage data and generate gcc note file
-rm -f ./libsafety/*.gcda
+rm -f ./opendbc/safety/libsafety/*.gcda
+
+echo "hi $@"
 
 # *** build ***
 scons -j8 --coverage "$@"
