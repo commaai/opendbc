@@ -866,6 +866,16 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
     const int max_angle_can = (max_angle * limits.angle_deg_to_can) + 1.;
 
     violation |= max_limit_check(desired_angle, max_angle_can, -max_angle_can);
+
+    // *** torque real time rate limit check ***
+    violation |= rt_rate_limit_check(desired_torque, rt_torque_last, limits.max_rt_delta);
+
+    // every RT_INTERVAL set the new limits
+    uint32_t ts_elapsed = get_ts_elapsed(ts, ts_torque_check_last);
+    if (ts_elapsed > MAX_TORQUE_RT_INTERVAL) {
+      rt_torque_last = desired_torque;
+      ts_torque_check_last = ts;
+    }
   }
   desired_angle_last = desired_angle;
 
