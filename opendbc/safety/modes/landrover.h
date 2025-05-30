@@ -1,6 +1,6 @@
 #pragma once
 
-#include "safety_declarations.h"
+#include "opendbc/safety/safety_declarations.h"
 
 static void landrover_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);

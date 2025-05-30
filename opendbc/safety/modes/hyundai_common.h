@@ -1,6 +1,6 @@
 #pragma once
 
-#include "safety_declarations.h"
+#include "opendbc/safety/safety_declarations.h"
 
 extern uint16_t hyundai_canfd_crc_lut[256];
 uint16_t hyundai_canfd_crc_lut[256];
@@ -112,6 +112,7 @@ void hyundai_common_cruise_buttons_check(const int cruise_button, const bool mai
   }
 }
 
+#ifdef CANFD
 uint32_t hyundai_common_canfd_compute_checksum(const CANPacket_t *to_push) {
   int len = GET_LEN(to_push);
   uint32_t address = GET_ADDR(to_push);
@@ -136,3 +137,4 @@ uint32_t hyundai_common_canfd_compute_checksum(const CANPacket_t *to_push) {
 
   return crc;
 }
+#endif
