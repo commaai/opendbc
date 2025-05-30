@@ -240,18 +240,20 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 }
 
 static float get_curvature_factor(const float speed, const AngleSteeringParams params) {
+  // Matches VehicleModel.curvature_factor()
   return 1. / (1. - (params.slip_factor * (speed * speed))) / params.wheelbase;
 }
 
 static float get_angle_from_curvature(const float curvature, const float curvature_factor, const AngleSteeringParams params) {
+  // Matches VehicleModel.get_steer_from_curvature()
   static const float RAD_TO_DEG = 57.29577951308232;
   return curvature * params.steer_ratio / curvature_factor * RAD_TO_DEG;
 }
 
-// TODO: validate this
 static float get_curvature_from_angle(const float angle, const float curvature_factor, const AngleSteeringParams params) {
-  static const float DEG_TO_RAD = 0.017453292519943295;
-  return angle * curvature_factor / params.steer_ratio * DEG_TO_RAD;
+  // Matches VehicleModel.calc_curvature()
+  static const float RAD_TO_DEG = 57.29577951308232;
+  return angle * curvature_factor / params.steer_ratio / RAD_TO_DEG;
 }
 
 bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits,
