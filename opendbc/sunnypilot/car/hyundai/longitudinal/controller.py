@@ -105,7 +105,7 @@ class LongitudinalController:
       upper_limit = 0.5  # Default for non-PID states
 
     # Lower jerk limit varies based on speed
-    lower_limit = float(np.interp(velocity, [0.0, 5.0, 20.0], [5.0, 5.0, 2.5]))
+    lower_limit = float(np.interp(velocity, [0.0, 5.0, 20.0], [5.0, 4.0, 2.5]))
 
     return upper_limit, lower_limit
 
