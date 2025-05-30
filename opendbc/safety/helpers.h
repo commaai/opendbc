@@ -29,14 +29,3 @@ static float interpolate(struct lookup_t xy, float x) {
   }
   return ret;
 }
-
-// real time check, mainly used for steer torque rate limiter
-static bool rt_rate_limit_check(int val, int val_last, const int MAX_RT_DELTA) {
-
-  // *** torque real time rate limit check ***
-  int highest_val = MAX(val_last, 0) + MAX_RT_DELTA;
-  int lowest_val = MIN(val_last, 0) - MAX_RT_DELTA;
-
-  // check for violation
-  return max_limit_check(val, highest_val, lowest_val);
-}

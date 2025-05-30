@@ -1,3 +1,7 @@
+bool get_longitudinal_allowed(void) {
+  return controls_allowed && !gas_pressed_prev;
+}
+
 // Safety checks for longitudinal actuation
 bool longitudinal_accel_checks(int desired_accel, const LongitudinalLimits limits) {
   bool accel_valid = get_longitudinal_allowed() && !max_limit_check(desired_accel, limits.max_accel, limits.min_accel);
@@ -26,8 +30,4 @@ bool longitudinal_brake_checks(int desired_brake, const LongitudinalLimits limit
   violation |= !get_longitudinal_allowed() && (desired_brake != 0);
   violation |= desired_brake > limits.max_brake;
   return violation;
-}
-
-bool get_longitudinal_allowed(void) {
-  return controls_allowed && !gas_pressed_prev;
 }
