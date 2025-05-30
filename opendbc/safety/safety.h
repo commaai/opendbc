@@ -808,10 +808,13 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 
   // Angle should either be 0 or same as current angle while not steering
   if (!steer_control_enabled) {
-    const int max_inactive_angle = CLAMP(angle_meas.max, -limits.max_angle, limits.max_angle) + 1;
-    const int min_inactive_angle = CLAMP(angle_meas.min, -limits.max_angle, limits.max_angle) - 1;
-    violation |= (limits.inactive_angle_is_zero ? (desired_angle != 0) :
-                  max_limit_check(desired_angle, max_inactive_angle, min_inactive_angle));
+    if (limits.inactive_angle_is_zero) {
+      violation |= desired_angle != 0;
+    } else {
+      const int max_inactive_angle = CLAMP(angle_meas.max, -limits.max_angle, limits.max_angle) + 1;
+      const int min_inactive_angle = CLAMP(angle_meas.min, -limits.max_angle, limits.max_angle) - 1;
+      violation |= max_limit_check(desired_angle, max_inactive_angle, min_inactive_angle);
+    }
   }
 
   // No angle control allowed when controls are not allowed
@@ -826,7 +829,7 @@ static float get_curvature_factor(const float speed, const AngleSteeringParams p
 
 bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits,
                                const AngleSteeringParams params) {
-  // This check uses a simple vehicle model to allow for true lateral acceleration and jerk limits.
+  // This check uses a simple vehicle model to allow for constant lateral acceleration and jerk limits across all speeds.
   // TODO: remove the inaccurate breakpoint angle limiting function above and always use this one
 
   static const float RAD_TO_DEG = 57.29577951308232;
@@ -836,7 +839,7 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
   // Lower than ISO 11270 lateral jerk limit, which is 5.0 m/s^3
   static const float MAX_LATERAL_JERK = 3.0 + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^3
 
-  const float fudged_speed = (vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.;
+  const float fudged_speed = MAX((vehicle_speed.min / VEHICLE_SPEED_FACTOR) - 1.0, 1.0);
   const float curvature_factor = get_curvature_factor(fudged_speed, params);
 
   bool violation = false;
@@ -844,8 +847,7 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
   if (controls_allowed && steer_control_enabled) {
     // *** ISO lateral jerk limit ***
     // calculate maximum angle rate per second
-    const float speed = MAX(fudged_speed, 1.0);
-    const float max_curvature_rate_sec = MAX_LATERAL_JERK / (speed * speed);
+    const float max_curvature_rate_sec = MAX_LATERAL_JERK / (fudged_speed * fudged_speed);
     const float max_angle_rate_sec = max_curvature_rate_sec * params.steer_ratio / curvature_factor * RAD_TO_DEG;
 
     // finally get max angle delta per frame
@@ -859,7 +861,7 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
     violation |= max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
 
     // *** ISO lateral accel limit ***
-    const float max_curvature = MAX_LATERAL_ACCEL / (speed * speed);
+    const float max_curvature = MAX_LATERAL_ACCEL / (fudged_speed * fudged_speed);
     const float max_angle = max_curvature * params.steer_ratio / curvature_factor * RAD_TO_DEG;
     const int max_angle_can = (max_angle * limits.angle_deg_to_can) + 1.;
 
@@ -871,8 +873,7 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
   if (!steer_control_enabled) {
     const int max_inactive_angle = CLAMP(angle_meas.max, -limits.max_angle, limits.max_angle) + 1;
     const int min_inactive_angle = CLAMP(angle_meas.min, -limits.max_angle, limits.max_angle) - 1;
-    violation |= (limits.inactive_angle_is_zero ? (desired_angle != 0) :
-                  max_limit_check(desired_angle, max_inactive_angle, min_inactive_angle));
+    violation |= max_limit_check(desired_angle, max_inactive_angle, min_inactive_angle);
   }
 
   // No angle control allowed when controls are not allowed
