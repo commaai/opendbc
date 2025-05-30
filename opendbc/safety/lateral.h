@@ -243,12 +243,15 @@ static float get_curvature_factor(const float speed, const AngleSteeringParams p
   return 1. / (1. - (params.slip_factor * (speed * speed))) / params.wheelbase;
 }
 
+static float get_angle_from_curvature(const float curvature, const float curvature_factor, const AngleSteeringParams params) {
+  static const float RAD_TO_DEG = 57.29577951308232;
+  return curvature * params.steer_ratio / curvature_factor * RAD_TO_DEG;
+}
+
 bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits,
                                const AngleSteeringParams params) {
   // This check uses a simple vehicle model to allow for constant lateral acceleration and jerk limits across all speeds.
   // TODO: remove the inaccurate breakpoint angle limiting function above and always use this one
-
-  static const float RAD_TO_DEG = 57.29577951308232;
 
   // Highway curves are rolled in the direction of the turn, add tolerance to compensate
   static const float MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (EARTH_G * AVERAGE_ROAD_ROLL);  // ~3.6 m/s^2
@@ -264,7 +267,7 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
     // *** ISO lateral jerk limit ***
     // calculate maximum angle rate per second
     const float max_curvature_rate_sec = MAX_LATERAL_JERK / (fudged_speed * fudged_speed);
-    const float max_angle_rate_sec = max_curvature_rate_sec * params.steer_ratio / curvature_factor * RAD_TO_DEG;
+    const float max_angle_rate_sec = get_angle_from_curvature(max_curvature_rate_sec, curvature_factor, params);
 
     // finally get max angle delta per frame
     const float max_angle_delta = max_angle_rate_sec / (float)limits.frequency;
@@ -278,7 +281,7 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
 
     // *** ISO lateral accel limit ***
     const float max_curvature = MAX_LATERAL_ACCEL / (fudged_speed * fudged_speed);
-    const float max_angle = max_curvature * params.steer_ratio / curvature_factor * RAD_TO_DEG;
+    const float max_angle = get_angle_from_curvature(max_curvature, curvature_factor, params);
     const int max_angle_can = (max_angle * limits.angle_deg_to_can) + 1.;
 
     violation |= max_limit_check(desired_angle, max_angle_can, -max_angle_can);
