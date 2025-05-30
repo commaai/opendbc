@@ -138,14 +138,14 @@ static safety_config landrover_init(uint16_t param) {
   };
 
   static RxCheck landrover_rx_checks[] = {
-    {.msg = {{0x56, 0, 8, .frequency = 100U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   // SWM_Angle (steer angle)
-    {.msg = {{0x32, 0, 8, .frequency = 50U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   // PSCM_Out (angleTorque)
-    {.msg = {{0x11, 0, 8, .frequency = 25U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},    // Speed Info02 
-    {.msg = {{0x2e, 0, 4, .frequency = 50U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},    // SWM_Torque (driver torque)
-    {.msg = {{0x189, 0, 8, .frequency = 10U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   // GasPedal (gas pedal)
-    {.msg = {{0x84, 0, 8, .frequency = 50U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},    // StopAndGo (brakes)
-    {.msg = {{0x1, 0, 8, .frequency = 25U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},     // CruiseInfo (cruise state)
-    {.msg = {{0x1BE, 2, 8, .frequency = 13U, .ignore_checksum = true, .ignore_counter = true}, { 0 }, { 0 }}},   // CAM msg
+    {.msg = {{0x56, 0, 8, .frequency = 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // SWM_Angle (steer angle)
+    {.msg = {{0x32, 0, 8, .frequency = 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // PSCM_Out (angleTorque)
+    {.msg = {{0x11, 0, 8, .frequency = 25U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},    // Speed Info02 
+    {.msg = {{0x2e, 0, 4, .frequency = 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},    // SWM_Torque (driver torque)
+    {.msg = {{0x189, 0, 8, .frequency = 10U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // GasPedal (gas pedal)
+    {.msg = {{0x84, 0, 8, .frequency = 50U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},    // StopAndGo (brakes)
+    {.msg = {{0x1, 0, 8, .frequency = 25U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},     // CruiseInfo (cruise state)
+    {.msg = {{0x1BE, 2, 8, .frequency = 13U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},   // CAM msg
   };
 
 
