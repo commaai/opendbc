@@ -827,12 +827,13 @@ static float get_curvature_factor(const float speed, const AngleSteeringParams p
   return 1. / (1. - (params.slip_factor * (speed * speed))) / params.wheelbase;
 }
 
-
-bool frequency_check() {
+bool frequency_check(uint32_t max_frequency, uint32_t ts_last) {
   uint32_t ts = microsecond_timer_get();
+  uint32_t ts_elapsed = get_ts_elapsed(ts, ts_last);
 
-  bool violation = false;
-
+  // minimum time between messages in microseconds, allow a 20% margin
+  uint32_t min_ts = 1000000U / max_frequency * 0.8;
+  bool violation = ts_elapsed > min_ts;
   return violation;
 }
 
