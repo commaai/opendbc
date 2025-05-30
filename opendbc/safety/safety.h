@@ -75,6 +75,7 @@ uint32_t rt_angle_last = 0;
 int desired_angle_last = 0;
 struct sample_t angle_meas;         // last 6 steer angles/curvatures
 
+uint32_t ts_angle_check_last = 0;
 
 int alternative_experience = 0;
 
@@ -444,6 +445,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   ts_steer_req_mismatch_last = 0;
   valid_steer_req_count = 0;
   invalid_steer_req_count = 0;
+  ts_angle_check_last = 0;
 
   // reset samples
   reset_sample(&vehicle_speed);
@@ -483,6 +485,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
       current_safety_config.rx_checks[j].status = (RxStatus){0};
     }
   }
+  rt_speed_last = 0.0F;
   return set_status;
 }
 
@@ -867,15 +870,42 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
 
     violation |= max_limit_check(desired_angle, max_angle_can, -max_angle_can);
 
-//    // *** angle real time rate limit check ***
-//    violation |= rt_rate_limit_check(desired_angle, rt_angle_last, limits.max_rt_delta);
-//
-//    // every RT_INTERVAL set the new limits
-//    uint32_t ts_elapsed = get_ts_elapsed(ts, ts_angle_check_last);
-//    if (ts_elapsed > MAX_ANGLE_RT_INTERVAL) {
-//      rt_angle_last = desired_angle;
-//      ts_angle_check_last = ts;
-//    }
+    // *** angle real time jerk limit check (integrate varying speed) ***
+    {
+      uint32_t ts_now = microsecond_timer_get();
+      uint32_t ts_elapsed_us = get_ts_elapsed(ts_now, ts_angle_check_last);
+
+      // Only perform RT check after the first reference has been set
+      if (ts_angle_check_last != 0U) {
+        const float dt_sec = ((float)ts_elapsed_us) / 1000000.0f;
+
+        // Compute max angle rate at the beginning and end of the RT window
+        const float speed_start = MAX(rt_speed_last, 1.0f);
+        const float curvature_factor_start = get_curvature_factor(speed_start, params);
+        const float max_curvature_rate_start = MAX_LATERAL_JERK / (speed_start * speed_start);
+        const float max_angle_rate_start = max_curvature_rate_start * params.steer_ratio / curvature_factor_start * RAD_TO_DEG;
+
+        const float speed_now = MAX(fudged_speed, 1.0f);
+        const float curvature_factor_now = curvature_factor;
+        const float max_curvature_rate_now = MAX_LATERAL_JERK / (speed_now * speed_now);
+        const float max_angle_rate_now = max_curvature_rate_now * params.steer_ratio / curvature_factor_now * RAD_TO_DEG;
+
+        // Trapezoidal integration to get max allowed angle delta over dt
+        const float max_angle_rt_delta = 0.5f * (max_angle_rate_start + max_angle_rate_now) * dt_sec;
+        const int max_angle_rt_delta_can = (max_angle_rt_delta * limits.angle_deg_to_can) + 1.;
+
+        violation |= max_limit_check(desired_angle,
+                                     rt_angle_last + max_angle_rt_delta_can,
+                                     rt_angle_last - max_angle_rt_delta_can);
+      }
+
+      // Reset the RT reference every MAX_ANGLE_RT_INTERVAL
+      if (ts_elapsed_us > MAX_ANGLE_RT_INTERVAL) {
+        rt_angle_last = desired_angle;
+        rt_speed_last = MAX(fudged_speed, 1.0f);
+        ts_angle_check_last = ts_now;
+      }
+    }
   }
   desired_angle_last = desired_angle;
 
@@ -912,3 +942,5 @@ void speed_mismatch_check(const float speed_2) {
     controls_allowed = false;
   }
 }
+
+float rt_speed_last = 0.0F;

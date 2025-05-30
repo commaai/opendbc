@@ -64,6 +64,7 @@ extern const int MAX_WRONG_COUNTERS;
 // used to represent floating point vehicle speed in a sample_t
 #define VEHICLE_SPEED_FACTOR 1000.0
 #define MAX_TORQUE_RT_INTERVAL 250000U
+#define MAX_ANGLE_RT_INTERVAL 250000U
 
 // Conversions
 #define KPH_TO_MS (1.0 / 3.6)
@@ -347,3 +348,6 @@ extern const safety_hooks toyota_hooks;
 extern const safety_hooks volkswagen_mqb_hooks;
 extern const safety_hooks volkswagen_pq_hooks;
 extern const safety_hooks rivian_hooks;
+
+extern uint32_t ts_angle_check_last;
+extern float rt_speed_last;
