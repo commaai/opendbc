@@ -76,7 +76,7 @@ def create_brake_command(packer, CAN, apply_brake, pump_on, pcm_override, pcm_ca
 
 def create_acc_commands(packer, CAN, enabled, active, aTarget, gas, stopping_counter, car_fingerprint, gas_force, vEgo):
   commands = []
-  min_gas_accel = float (np.interp(vEgo, [3.0, 6.0], [0.01, CarControllerParams.BOSCH_GAS_LOOKUP_BP[0]])
+  min_gas_accel = float (np.interp(vEgo, [3.0, 6.0], [0.01, CarControllerParams.BOSCH_GAS_LOOKUP_BP[0]]))
 
   control_on = 5 if enabled else 0
   gas_command = gas if active and gas_force > min_gas_accel else -30000
