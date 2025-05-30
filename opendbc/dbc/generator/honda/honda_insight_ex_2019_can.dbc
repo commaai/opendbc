@@ -5,6 +5,7 @@ CM_ "IMPORT _steering_sensors_a.dbc";
 
 BO_ 419 GEARBOX: 8 PCM
  SG_ GEAR : 7|8@0+ (1,0) [0|255] "" EON
+ SG_ REGEN_STRENGTH : 14|3@0+ (1,0) [0|6] "" EON
  SG_ GEAR_SHIFTER : 29|6@0+ (1,0) [0|63] "" EON
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
@@ -15,5 +16,8 @@ BO_ 432 STANDSTILL: 7 VSA
  SG_ COUNTER : 53|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 51|4@0+ (1,0) [0|15] "" EON
 
+CM_ SG_ 419 REGEN_STRENGTH "strength of regen, shows as arrows on dashboard";
+
+VAL_ 419 REGEN_STRENGTH 0 "none" 1 "one arrow" 2 "two arrows" 3 "three arrows";
 VAL_ 419 GEAR  10 "R" 1 "D" 0 "P";
 VAL_ 419 GEAR_SHIFTER  32 "D" 16 "N" 8 "R" 4 "P";
