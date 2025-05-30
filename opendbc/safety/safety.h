@@ -71,7 +71,7 @@ bool heartbeat_engaged = false;             // openpilot enabled, passed in hear
 uint32_t heartbeat_engaged_mismatches = 0;  // count of mismatches between heartbeat_engaged and controls_allowed
 
 // for safety modes with angle steering control
-uint32_t ts_angle_last = 0;
+uint32_t rt_angle_last = 0;
 int desired_angle_last = 0;
 struct sample_t angle_meas;         // last 6 steer angles/curvatures
 
@@ -438,7 +438,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   cruise_button_prev = 0;
   desired_torque_last = 0;
   rt_torque_last = 0;
-  ts_angle_last = 0;
+  rt_angle_last = 0;
   desired_angle_last = 0;
   ts_torque_check_last = 0;
   ts_steer_req_mismatch_last = 0;
@@ -851,7 +851,7 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
     const float max_angle_rate_sec = max_curvature_rate_sec * params.steer_ratio / curvature_factor * RAD_TO_DEG;
 
     // finally get max angle delta per frame
-    const float max_angle_delta = max_angle_rate_sec * (0.01f * 2.0f);  // 50 Hz
+    const float max_angle_delta = max_angle_rate_sec / limits.frequency;
     const int max_angle_delta_can = (max_angle_delta * limits.angle_deg_to_can) + 1.;
 
     // NOTE: symmetric up and down limits
@@ -867,15 +867,15 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
 
     violation |= max_limit_check(desired_angle, max_angle_can, -max_angle_can);
 
-    // *** angle real time rate limit check ***
-    violation |= rt_rate_limit_check(desired_angle, rt_angle_last, limits.max_rt_delta);
-
-    // every RT_INTERVAL set the new limits
-    uint32_t ts_elapsed = get_ts_elapsed(ts, ts_angle_check_last);
-    if (ts_elapsed > MAX_ANGLE_RT_INTERVAL) {
-      rt_angle_last = desired_angle;
-      ts_angle_check_last = ts;
-    }
+//    // *** angle real time rate limit check ***
+//    violation |= rt_rate_limit_check(desired_angle, rt_angle_last, limits.max_rt_delta);
+//
+//    // every RT_INTERVAL set the new limits
+//    uint32_t ts_elapsed = get_ts_elapsed(ts, ts_angle_check_last);
+//    if (ts_elapsed > MAX_ANGLE_RT_INTERVAL) {
+//      rt_angle_last = desired_angle;
+//      ts_angle_check_last = ts;
+//    }
   }
   desired_angle_last = desired_angle;
 
