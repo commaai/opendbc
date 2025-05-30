@@ -1,9 +1,9 @@
 #pragma once
 
-#include "opendbc/safety/safety_declarations.h"
 #include "opendbc/safety/helpers.h"
 #include "opendbc/safety/lateral.h"
 #include "opendbc/safety/longitudinal.h"
+#include "opendbc/safety/safety_declarations.h"
 #include "opendbc/safety/board/can.h"
 
 // include the safety policies.

@@ -1,3 +1,5 @@
+#include "opendbc/safety/safety_declarations.h"
+
 static bool max_limit_check(int val, const int MAX_VAL, const int MIN_VAL) {
   return (val > MAX_VAL) || (val < MIN_VAL);
 }
