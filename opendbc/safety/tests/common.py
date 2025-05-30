@@ -759,6 +759,51 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
             should_tx = controls_allowed if steer_control_enabled else angle_cmd == angle_meas
             self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(angle_cmd, steer_control_enabled)))
 
+  def test_realtime_limits(self):
+    self.safety.set_controls_allowed(True)
+
+    for sign in [-1, 1]:
+      self.safety.init_tests()
+      self._set_prev_torque(0)
+      self._reset_torque_driver_measurement(0)
+      for t in np.arange(0, self.MAX_RT_DELTA, 1):
+        t *= sign
+        self.assertTrue(self._tx(self._torque_cmd_msg(t)))
+      self.assertFalse(self._tx(self._torque_cmd_msg(sign * (self.MAX_RT_DELTA + 1))))
+
+      self._set_prev_torque(0)
+      for t in np.arange(0, self.MAX_RT_DELTA, 1):
+        t *= sign
+        self.assertTrue(self._tx(self._torque_cmd_msg(t)))
+
+      # Increase timer to update rt_torque_last
+      self.safety.set_timer(self.RT_INTERVAL + 1)
+      self.assertTrue(self._tx(self._torque_cmd_msg(sign * (self.MAX_RT_DELTA - 1))))
+      self.assertTrue(self._tx(self._torque_cmd_msg(sign * (self.MAX_RT_DELTA + 1))))
+
+  def test_realtime_limit_up(self):
+    self.safety.set_controls_allowed(True)
+
+    for sign in [-1, 1]:
+      self.safety.init_tests()
+      self._set_prev_torque(0)
+      for t in np.arange(0, self.MAX_RT_DELTA + 1, 1):
+        t *= sign
+        self.safety.set_torque_meas(t, t)
+        self.assertTrue(self._tx(self._torque_cmd_msg(t)))
+      self.assertFalse(self._tx(self._torque_cmd_msg(sign * (self.MAX_RT_DELTA + 1))))
+
+      self._set_prev_torque(0)
+      for t in np.arange(0, self.MAX_RT_DELTA + 1, 1):
+        t *= sign
+        self.safety.set_torque_meas(t, t)
+        self.assertTrue(self._tx(self._torque_cmd_msg(t)))
+
+      # Increase timer to update rt_torque_last
+      self.safety.set_timer(self.RT_INTERVAL + 1)
+      self.assertTrue(self._tx(self._torque_cmd_msg(sign * self.MAX_RT_DELTA)))
+      self.assertTrue(self._tx(self._torque_cmd_msg(sign * (self.MAX_RT_DELTA + 1))))
+
 
 class PandaSafetyTest(PandaSafetyTestBase):
   TX_MSGS: list[list[int]] | None = None
