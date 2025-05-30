@@ -63,7 +63,9 @@ extern const int MAX_WRONG_COUNTERS;
 #define MAX_SAMPLE_VALS 6
 // used to represent floating point vehicle speed in a sample_t
 #define VEHICLE_SPEED_FACTOR 1000.0
+// TODO: one conmstant
 #define MAX_TORQUE_RT_INTERVAL 250000U
+#define MAX_ANGLE_RT_INTERVAL 250000U
 
 // Conversions
 #define KPH_TO_MS (1.0 / 3.6)
@@ -287,7 +289,8 @@ extern bool heartbeat_engaged;             // openpilot enabled, passed in heart
 extern uint32_t heartbeat_engaged_mismatches;  // count of mismatches between heartbeat_engaged and controls_allowed
 
 // for safety modes with angle steering control
-extern uint32_t ts_angle_last;
+extern uint32_t rt_angle_last;
+extern uint32_t ts_angle_check_last;
 extern int desired_angle_last;
 extern struct sample_t angle_meas;         // last 6 steer angles/curvatures
 
