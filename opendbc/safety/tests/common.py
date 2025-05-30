@@ -759,6 +759,23 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
             should_tx = controls_allowed if steer_control_enabled else angle_cmd == angle_meas
             self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(angle_cmd, steer_control_enabled)))
 
+  def test_realtime_limits_angle(self):
+    self.safety.set_controls_allowed(True)
+    print()
+
+    s = 15  # todo: loop
+    for sign in (1,):
+      self.safety.init_tests()
+
+      self._set_prev_desired_angle(0)
+      self._reset_angle_measurement(0)
+      self._reset_speed_measurement(s)
+
+      max_delta_up = np.interp(s, self.ANGLE_RATE_BP, self.ANGLE_RATE_UP)
+      max_delta_down = np.interp(s, self.ANGLE_RATE_BP, self.ANGLE_RATE_DOWN)
+      print(s, max_delta_up, max_delta_down)
+
+
   # TODO: only one is needed, copied from motor and driver torque tests
   # Driver torque
   def test_realtime_limits(self):
