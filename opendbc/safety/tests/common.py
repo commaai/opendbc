@@ -759,6 +759,8 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
             should_tx = controls_allowed if steer_control_enabled else angle_cmd == angle_meas
             self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(angle_cmd, steer_control_enabled)))
 
+  # TODO: only one is needed, copied from motor and driver torque tests
+  # Driver torque
   def test_realtime_limits(self):
     self.safety.set_controls_allowed(True)
 
@@ -781,6 +783,7 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
       self.assertTrue(self._tx(self._torque_cmd_msg(sign * (self.MAX_RT_DELTA - 1))))
       self.assertTrue(self._tx(self._torque_cmd_msg(sign * (self.MAX_RT_DELTA + 1))))
 
+  # Motor torque
   def test_realtime_limit_up(self):
     self.safety.set_controls_allowed(True)
 
