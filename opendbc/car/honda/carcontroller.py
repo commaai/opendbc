@@ -228,7 +228,7 @@ class CarController(CarControllerBase):
           self.gas = float(np.interp(accel + wind_brake_ms2 + hill_brake, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_GAS_LOOKUP_V))
 
           can_sends.extend(hondacan.create_acc_commands(self.packer, self.CAN, CC.enabled, CC.longActive, self.accel, self.gas,
-                                                        self.stopping_counter, self.CP.carFingerprint, accel + wind_brake_ms2 + hill_brake))
+                                                        self.stopping_counter, self.CP.carFingerprint, accel + wind_brake_ms2 + hill_brake, CS.out.vEgo))
         else:
           apply_brake = np.clip(self.brake_last - wind_brake, 0.0, 1.0)
           apply_brake = int(np.clip(apply_brake * self.params.NIDEC_BRAKE_MAX, 0, self.params.NIDEC_BRAKE_MAX - 1))
