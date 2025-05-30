@@ -197,6 +197,7 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
   const AngleSteeringLimits TESLA_STEERING_LIMITS = {
     .max_angle = 3600,  // 360 deg, EPAS faults above this
     .angle_deg_to_can = 10,
+    .frequency = 50,  // 50 Hz
   };
 
   // NOTE: based off TESLA_MODEL_Y to match openpilot
