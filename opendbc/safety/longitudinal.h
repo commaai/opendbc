@@ -1,3 +1,5 @@
+#include "opendbc/safety/safety_declarations.h"
+
 bool get_longitudinal_allowed(void) {
   return controls_allowed && !gas_pressed_prev;
 }
