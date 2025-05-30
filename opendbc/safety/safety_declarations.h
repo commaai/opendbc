@@ -195,6 +195,11 @@ typedef struct {
   bool lagging;                      // true if and only if the time between updates is excessive
 } RxStatus;
 
+typedef struct {
+  // dynamic flags, reset on safety mode init
+  uint32_t last_timestamp;  // micro-s
+} TxStatus;
+
 // params and flags about checksum, counter and frequency checks for each monitored address
 typedef struct {
   const CanMsgCheck msg[MAX_ADDR_CHECK_MSGS];  // check either messages (e.g. honda steer)
@@ -202,9 +207,14 @@ typedef struct {
 } RxCheck;
 
 typedef struct {
+  const CanMsg msg;
+  TxStatus status;
+} TxCheck;
+
+typedef struct {
   RxCheck *rx_checks;
   int rx_checks_len;
-  const CanMsg *tx_msgs;
+  TxCheck *tx_msgs;
   int tx_msgs_len;
   bool disable_forwarding;
 } safety_config;

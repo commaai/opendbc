@@ -482,6 +482,9 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
     for (int j = 0; j < current_safety_config.rx_checks_len; j++) {
       current_safety_config.rx_checks[j].status = (RxStatus){0};
     }
+    for (int j = 0; j < current_safety_config.tx_msgs_len; j++) {
+      current_safety_config.tx_msgs[j].status = (TxStatus){0};
+    }
   }
   return set_status;
 }

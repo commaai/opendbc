@@ -19,20 +19,20 @@
 #define TOYOTA_COMMON_LONG_TX_MSGS \
   TOYOTA_COMMON_TX_MSGS \
   /* DSU bus 0 */ \
-  {0x283, 0, 7, .check_relay = false}, {0x2E6, 0, 8, .check_relay = false}, {0x2E7, 0, 8, .check_relay = false}, {0x33E, 0, 7, .check_relay = false}, \
-  {0x344, 0, 8, .check_relay = false}, {0x365, 0, 7, .check_relay = false}, {0x366, 0, 7, .check_relay = false}, {0x4CB, 0, 8, .check_relay = false}, \
+  {.msg = {0x283, 0, 7, .check_relay = false}}, {.msg = {0x2E6, 0, 8, .check_relay = false}}, {.msg = {0x2E7, 0, 8, .check_relay = false}}, {.msg = {0x33E, 0, 7, .check_relay = false}}, \
+  {.msg = {0x344, 0, 8, .check_relay = false}}, {.msg = {0x365, 0, 7, .check_relay = false}}, {.msg = {0x366, 0, 7, .check_relay = false}}, {.msg = {0x4CB, 0, 8, .check_relay = false}}, \
   /* DSU bus 1 */ \
-  {0x128, 1, 6, .check_relay = false}, {0x141, 1, 4, .check_relay = false}, {0x160, 1, 8, .check_relay = false}, {0x161, 1, 7, .check_relay = false}, \
-  {0x470, 1, 4, .check_relay = false}, \
+  {.msg = {0x128, 1, 6, .check_relay = false}}, {.msg = {0x141, 1, 4, .check_relay = false}}, {.msg = {0x160, 1, 8, .check_relay = false}}, {.msg = {0x161, 1, 7, .check_relay = false}}, \
+  {.msg = {0x470, 1, 4, .check_relay = false}}, \
   /* PCS_HUD */                        \
-  {0x411, 0, 8, .check_relay = false}, \
+  {.msg = {0x411, 0, 8, .check_relay = false}}, \
   /* radar diagnostic address */       \
-  {0x750, 0, 8, .check_relay = false}, \
+  {.msg = {0x750, 0, 8, .check_relay = false}}, \
   /* ACC */                            \
-  {0x343, 0, 8, .check_relay = true},  \
+  {.msg = {0x343, 0, 8, .check_relay = true}},  \
 
 #define TOYOTA_COMMON_RX_CHECKS(lta)                                                                                                       \
-  {.msg = {{ 0xaa, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 83U}, { 0 }, { 0 }}},  \
+  {.msg = {{ 0xaa, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 83U`}`, { 0 }, { 0 }}},  \
   {.msg = {{0x260, 0, 8, .ignore_counter = true, .ignore_quality_flag=!(lta), .frequency = 50U}, { 0 }, { 0 }}},                           \
 
 #define TOYOTA_RX_CHECKS(lta)                                                                                                               \
