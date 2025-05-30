@@ -827,6 +827,15 @@ static float get_curvature_factor(const float speed, const AngleSteeringParams p
   return 1. / (1. - (params.slip_factor * (speed * speed))) / params.wheelbase;
 }
 
+
+bool frequency_check() {
+  uint32_t ts = microsecond_timer_get();
+
+  bool violation = false;
+
+  return violation;
+}
+
 bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits,
                                const AngleSteeringParams params) {
   // This check uses a simple vehicle model to allow for constant lateral acceleration and jerk limits across all speeds.
