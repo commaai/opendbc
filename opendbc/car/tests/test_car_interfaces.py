@@ -59,7 +59,7 @@ class TestCarInterfaces:
     args = get_fuzzy_car_interface_args(data.draw)
 
     car_params = CarInterface.get_params(car_name, args['fingerprints'], args['car_fw'],
-                                         alpha_long=args['alpha_long'], docs=False)
+                                         alpha_long=args['alpha_long'], is_release=False, docs=False)
     car_params_sp = CarInterface.get_params_sp(car_params, car_name, args['fingerprints'], args['car_fw'],
                                                alpha_long=args['alpha_long'], docs=False)
     car_interface = CarInterface(car_params, car_params_sp)
