@@ -498,6 +498,7 @@ class DriverTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
         self.assertTrue(self._tx(self._torque_cmd_msg(t)))
 
       # Increase timer to update rt_torque_last
+      # TODO: test RT_INTERVAL doesn't reset it for mutation test
       self.safety.set_timer(self.RT_INTERVAL + 1)
       self.assertTrue(self._tx(self._torque_cmd_msg(sign * (self.MAX_RT_DELTA - 1))))
       self.assertTrue(self._tx(self._torque_cmd_msg(sign * (self.MAX_RT_DELTA + 1))))
