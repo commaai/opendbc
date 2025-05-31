@@ -89,7 +89,7 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
 
     // every RT_INTERVAL set the new limits
     uint32_t ts_elapsed = get_ts_elapsed(ts, ts_torque_check_last);
-    if (ts_elapsed > MAX_TORQUE_RT_INTERVAL) {
+    if (ts_elapsed > MAX_RT_INTERVAL) {
       rt_torque_last = desired_torque;
       ts_torque_check_last = ts;
     }
@@ -153,6 +153,7 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
 // Safety checks for angle-based steering commands
 bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits) {
   bool violation = false;
+  uint32_t ts = microsecond_timer_get();
 
   if (controls_allowed && steer_control_enabled) {
     // convert floating point angle rate limits to integers in the scale of the desired angle on CAN,
@@ -225,6 +226,31 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 
     // check for violation;
     violation |= max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
+
+    {
+      // *** angle real time rate limit check ***
+      // only a certain amount of messages are allowed to be sent in a given time window
+//      violation |= rt_rate_limit_check(desired_angle, rt_angle_last, limits.max_rt_delta);
+
+      float max_msgs = limits.frequency * MAX_RT_INTERVAL / 1000000.0 * 1.2;  // 20% buffer + round up
+      printf("RT angle msgs: %d, max msgs: %f\n", rt_angle_msgs, max_msgs);
+      if (rt_angle_msgs >= max_msgs) {
+        // if we have too many messages, we have a violation
+        violation = true;
+      }
+
+      // TODO: MIN it to be safe?
+      rt_angle_msgs += 1U;
+
+      // every RT_INTERVAL set the new limits
+      uint32_t ts_elapsed = get_ts_elapsed(ts, ts_angle_check_last);
+      if (ts_elapsed > MAX_RT_INTERVAL) {
+//        rt_angle_last = desired_angle;
+        ts_angle_check_last = ts;
+//        rt_max_angle_msgs = max_msgs - rt_angle_msgs;
+        rt_angle_msgs = 0U;
+      }
+    }
   }
   desired_angle_last = desired_angle;
 

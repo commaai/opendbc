@@ -63,7 +63,7 @@ extern const int MAX_WRONG_COUNTERS;
 #define MAX_SAMPLE_VALS 6
 // used to represent floating point vehicle speed in a sample_t
 #define VEHICLE_SPEED_FACTOR 1000.0
-#define MAX_TORQUE_RT_INTERVAL 250000U
+#define MAX_RT_INTERVAL 250000U
 
 // Conversions
 #define KPH_TO_MS (1.0 / 3.6)
@@ -129,7 +129,7 @@ typedef struct {
   const struct lookup_t angle_rate_down_lookup;
   const int max_angle_error;             // used to limit error between meas and cmd while enabled
   const float angle_error_min_speed;     // minimum speed to start limiting angle error
-  const int frequency;                   // Hz
+  const uint32_t frequency;              // Hz
 
   const bool angle_is_curvature;         // if true, we can apply max lateral acceleration limits
   const bool enforce_angle_error;        // enables max_angle_error check
@@ -281,6 +281,8 @@ extern uint32_t heartbeat_engaged_mismatches;  // count of mismatches between he
 
 // for safety modes with angle steering control
 extern uint32_t ts_angle_last;
+extern uint32_t ts_angle_check_last;
+extern uint32_t rt_angle_msgs;
 extern int desired_angle_last;
 extern struct sample_t angle_meas;         // last 6 steer angles/curvatures
 
