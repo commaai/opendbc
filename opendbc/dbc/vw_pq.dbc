@@ -1151,6 +1151,16 @@ BO_ 978 Lenkhilfe_2: 7 XXX
  SG_ LH2_PLA_Err : 48|4@1+ (1,0) [0|15] "" XXX
  SG_ LH2_PLA_Abbr : 52|4@1+ (1,0) [0|15] "" XXX
 
+BO_ 980 PLA_1: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
+ SG_ PL1_Status_EPS : 12|4@1+ (1,0) [0|15] "" XXX
+ SG_ PL1_ArcAngleReq : 16|15@1+ (0.04375,0) [0|1433.55625] "Unit_DegreeOfArc" XXX
+ SG_ PL1_AngleReqSign : 31|1@1+ (1,0) [0|1] "" XXX
+ SG_ PL1_Stat_PLA_ESP : 32|4@1+ (1,0) [0|10] "" Vector__XXX
+ SG_ PL1_Bremsmoment : 40|13@1+ (4,0) [0|32760] "Unit_NewtoMeter" Vector__XXX
+ SG_ PL1_void : 53|11@1+ (1,0) [0|2047] "" XXX
+
 BO_ 210 HCA_1: 5 XXX
  SG_ CHECKSUM : 0|8@1+ (1,0) [0|15] "" XXX
  SG_ COUNTER : 8|4@1+ (1,0) [0|15] "" XXX
