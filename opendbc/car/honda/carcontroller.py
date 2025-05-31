@@ -19,15 +19,7 @@ def compute_gb_honda_bosch(accel, speed):
 
 def compute_gb_honda_nidec(accel, speed):
 
-  # ------------------ new scaling start-----------------------#
-
-  if accel > 0:
-    scale_factor = float ( np.interp ( speed, [0.0, 10.0, 20.0, 90.0], [10000.0, 25.0, 8.0, 1.0] ) )
-    scaled_accel = accel * scale_factor
-  else:
-    scaled_accel = accel
-
-  # ------------------ new scaling end -----------------------#
+  scaled_accel = accel
 
   creep_brake = 0.0
   creep_speed = 2.3
@@ -195,7 +187,7 @@ class CarController(CarControllerBase):
     if not CC.longActive:
       pcm_speed = 0.0
       pcm_accel = int(0.0)
-    elif self.CP.carFingerprint in HONDA_NIDEC_ALT_PCM_ACCEL:
+    elif False: # self.CP.carFingerprint in HONDA_NIDEC_ALT_PCM_ACCEL:
       pcm_speed_V = [0.0,
                      np.clip(CS.out.vEgo - 3.0, 0.0, 100.0),
                      np.clip(CS.out.vEgo + 0.0, 0.0, 100.0),
