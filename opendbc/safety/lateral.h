@@ -228,6 +228,7 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
     violation |= max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
 
     {
+      // TODO: this should estimate exact number of messages per window, add diff to next window, and then 1.2x tolerance after (so it doesn't build)
       // *** angle real time rate limit check ***
       // only a certain amount of messages are allowed to be sent in a given time window
 //      violation |= rt_rate_limit_check(desired_angle, rt_angle_last, limits.max_rt_delta);
