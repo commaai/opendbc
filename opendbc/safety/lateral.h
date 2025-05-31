@@ -327,5 +327,12 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
   // No angle control allowed when controls are not allowed
   violation |= !controls_allowed && steer_control_enabled;
 
+  if (!steer_control_enabled || !controls_allowed) {  // TODO: || violation
+    // reset angle last if not steering
+    desired_angle_last = angle_meas.values[0];  // reset to last measured angle
+    ts_angle_check_last = ts;
+    rt_angle_msgs = 0;
+  }
+
   return violation;
 }
