@@ -40,9 +40,10 @@ class CarControllerParams:
 
   def __init__(self, CP):
     self.STEER_MAX = CP.lateralParams.torqueBP[-1]
-    # mirror of list (assuming first item is zero) for interp of signed request values
-    assert(CP.lateralParams.torqueBP[0] == 0)
-    assert(CP.lateralParams.torqueBP[0] == 0)
+    # mirror of list (assuming first item is zero) for interp of signed request
+    # values and verify that both arrays begin at zero
+    assert CP.lateralParams.torqueBP[0] == 0
+    assert CP.lateralParams.torqueV[0] == 0
     self.STEER_LOOKUP_BP = [v * -1 for v in CP.lateralParams.torqueBP][1:][::-1] + list(CP.lateralParams.torqueBP)
     self.STEER_LOOKUP_V = [v * -1 for v in CP.lateralParams.torqueV][1:][::-1] + list(CP.lateralParams.torqueV)
 
@@ -141,7 +142,7 @@ class CAR(Platforms):
   # Bosch Cars
   HONDA_ACCORD = HondaBoschPlatformConfig(
     [
-      HondaCarDocs("Honda Accord 2018-22", "All", video_link="https://www.youtube.com/watch?v=mrUwlj3Mi58", min_steer_speed=3. * CV.MPH_TO_MS),
+      HondaCarDocs("Honda Accord 2018-22", "All", video="https://www.youtube.com/watch?v=mrUwlj3Mi58", min_steer_speed=3. * CV.MPH_TO_MS),
       HondaCarDocs("Honda Inspire 2018", "All", min_steer_speed=3. * CV.MPH_TO_MS),
       HondaCarDocs("Honda Accord Hybrid 2018-22", "All", min_steer_speed=3. * CV.MPH_TO_MS),
     ],
@@ -151,7 +152,7 @@ class CAR(Platforms):
   )
   HONDA_CIVIC_BOSCH = HondaBoschPlatformConfig(
     [
-      HondaCarDocs("Honda Civic 2019-21", "All", video_link="https://www.youtube.com/watch?v=4Iz1Mz5LGF8",
+      HondaCarDocs("Honda Civic 2019-21", "All", video="https://www.youtube.com/watch?v=4Iz1Mz5LGF8",
                    footnotes=[Footnote.CIVIC_DIESEL], min_steer_speed=2. * CV.MPH_TO_MS),
       HondaCarDocs("Honda Civic Hatchback 2017-21", min_steer_speed=12. * CV.MPH_TO_MS),
     ],
@@ -165,8 +166,8 @@ class CAR(Platforms):
   )
   HONDA_CIVIC_2022 = HondaBoschPlatformConfig(
     [
-      HondaCarDocs("Honda Civic 2022-24", "All", video_link="https://youtu.be/ytiOT5lcp6Q"),
-      HondaCarDocs("Honda Civic Hatchback 2022-24", "All", video_link="https://youtu.be/ytiOT5lcp6Q"),
+      HondaCarDocs("Honda Civic 2022-24", "All", video="https://youtu.be/ytiOT5lcp6Q"),
+      HondaCarDocs("Honda Civic Hatchback 2022-24", "All", video="https://youtu.be/ytiOT5lcp6Q"),
       HondaCarDocs("Honda Civic Hatchback Hybrid 2023 (Europe only)", "All"),
       # TODO: Confirm 2024
       HondaCarDocs("Honda Civic Hatchback Hybrid 2025", "All"),
@@ -291,7 +292,7 @@ class CAR(Platforms):
     flags=HondaFlags.NIDEC_ALT_SCM_MESSAGES,
   )
   HONDA_CIVIC = HondaNidecPlatformConfig(
-    [HondaCarDocs("Honda Civic 2016-18", min_steer_speed=12. * CV.MPH_TO_MS, video_link="https://youtu.be/-IkImTe1NYE")],
+    [HondaCarDocs("Honda Civic 2016-18", min_steer_speed=12. * CV.MPH_TO_MS, video="https://youtu.be/-IkImTe1NYE")],
     CarSpecs(mass=1326, wheelbase=2.70, centerToFrontRatio=0.4, steerRatio=15.38),  # 10.93 is end-to-end spec
     radar_dbc_dict('honda_civic_touring_2016_can_generated'),
   )

@@ -83,9 +83,8 @@ class FordCarDocs(CarDocs):
     if harness == CarHarness.ford_q4:
       self.setup_video = "https://www.youtube.com/watch?v=uUGkH6C_EQU"
 
-    if CP.carFingerprint in (CAR.FORD_RANGER_MK2):
-      self.setup_video = "https://www.youtube.com/watch?v=2oJlXCKYOy0"
-
+    if CP.carFingerprint in (CAR.FORD_F_150_MK14, CAR.FORD_F_150_LIGHTNING_MK1):
+      self.setup_video = "https://www.youtube.com/watch?v=MewJc9LYp9M"
 
 @dataclass
 class FordPlatformConfig(PlatformConfig):
@@ -171,11 +170,11 @@ class CAR(Platforms):
     CarSpecs(mass=1650, wheelbase=3.076, steerRatio=17.0),
   )
   FORD_MUSTANG_MACH_E_MK1 = FordCANFDPlatformConfig(
-    [FordCarDocs("Ford Mustang Mach-E 2021-23", "All")],
+    [FordCarDocs("Ford Mustang Mach-E 2021-23", "All", setup_video="https://www.youtube.com/watch?v=AR4_eTF3b_A")],
     CarSpecs(mass=2200, wheelbase=2.984, steerRatio=17.0),  # TODO: check steer ratio
   )
   FORD_RANGER_MK2 = FordCANFDPlatformConfig(
-    [FordCarDocs("Ford Ranger 2024", "Adaptive Cruise Control with Lane Centering")],
+    [FordCarDocs("Ford Ranger 2024", "Adaptive Cruise Control with Lane Centering", setup_video="https://www.youtube.com/watch?v=2oJlXCKYOy0")],
     CarSpecs(mass=2000, wheelbase=3.27, steerRatio=17.0),
   )
 
