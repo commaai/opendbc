@@ -225,6 +225,18 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 
     // check for violation;
     violation |= max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
+
+//    {
+//      // *** torque real time rate limit check ***
+//      violation |= rt_rate_limit_check(desired_torque, rt_torque_last, limits.max_rt_delta);
+//
+//      // every RT_INTERVAL set the new limits
+//      uint32_t ts_elapsed = get_ts_elapsed(ts, ts_torque_check_last);
+//      if (ts_elapsed > MAX_TORQUE_RT_INTERVAL) {
+//        rt_torque_last = desired_torque;
+//        ts_torque_check_last = ts;
+//      }
+//    }
   }
   desired_angle_last = desired_angle;
 
@@ -270,6 +282,7 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
   const float curvature_factor = get_curvature_factor(fudged_speed, params);
 
   bool violation = false;
+  uint32_t ts = microsecond_timer_get();
 
   if (controls_allowed && steer_control_enabled) {
     // *** ISO lateral jerk limit ***
@@ -293,6 +306,23 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
     const int max_angle_can = (max_angle * limits.angle_deg_to_can) + 1.;
 
     violation |= max_limit_check(desired_angle, max_angle_can, -max_angle_can);
+
+    {
+      if (rt_angle_tokens == -1) {
+        // initialize
+        rt_angle_tokens = ROUND(limits.frequency * 0.2);  // 20% tolerance on frequency
+      }
+//      // *** torque real time rate limit check ***
+//      violation |= rt_rate_limit_check(desired_torque, rt_torque_last, limits.max_rt_delta);
+
+      // every RT_INTERVAL set the new limits
+      uint32_t ts_elapsed = get_ts_elapsed(ts, ts_torque_check_last);
+      rt_angle_tokens += ROUND(ts_elapsed / (1000000 / limits.frequency));
+//      if (ts_elapsed > MAX_TORQUE_RT_INTERVAL) {
+//        rt_torque_last = desired_torque;
+//        ts_torque_check_last = ts;
+//      }
+    }
   }
   desired_angle_last = desired_angle;
 
