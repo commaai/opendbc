@@ -36,31 +36,31 @@
   {0x343, 0, 8, .check_relay = true},  /* ACC */            \
   {0x183, 0, 8, .check_relay = true},  /* ACC_CONTROL_2 */  \
 
-#define TOYOTA_COMMON_RX_CHECKS(lta)                                                                          \
-  {.msg = {{ 0xaa, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 83U}, { 0 }, { 0 }}},  \
-  {.msg = {{0x260, 0, 8, .ignore_counter = true, .quality_flag = (lta), .frequency = 50U}, { 0 }, { 0 }}},    \
+#define TOYOTA_COMMON_RX_CHECKS(lta)                                                                                                       \
+  {.msg = {{ 0xaa, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 83U}, { 0 }, { 0 }}},  \
+  {.msg = {{0x260, 0, 8, .ignore_counter = true, .ignore_quality_flag=!(lta), .frequency = 50U}, { 0 }, { 0 }}},                           \
 
-#define TOYOTA_RX_CHECKS(lta)                                                                                  \
-  TOYOTA_COMMON_RX_CHECKS(lta)                                                                                 \
-  {.msg = {{0x1D2, 0, 8, .ignore_counter = true, .frequency = 33U}, { 0 }, { 0 }}},                            \
-  {.msg = {{0x226, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 40U},  { 0 }, { 0 }}},  \
+#define TOYOTA_RX_CHECKS(lta)                                                                                                               \
+  TOYOTA_COMMON_RX_CHECKS(lta)                                                                                                              \
+  {.msg = {{0x1D2, 0, 8, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 33U}, { 0 }, { 0 }}},                            \
+  {.msg = {{0x226, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 40U},  { 0 }, { 0 }}},  \
 
-#define TOYOTA_ALT_BRAKE_RX_CHECKS(lta)                                                                       \
-  TOYOTA_COMMON_RX_CHECKS(lta)                                                                                \
-  {.msg = {{0x1D2, 0, 8, .ignore_counter = true, .frequency = 33U}, { 0 }, { 0 }}},                           \
-  {.msg = {{0x224, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 40U}, { 0 }, { 0 }}},  \
+#define TOYOTA_ALT_BRAKE_RX_CHECKS(lta)                                                                                                    \
+  TOYOTA_COMMON_RX_CHECKS(lta)                                                                                                             \
+  {.msg = {{0x1D2, 0, 8, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 33U}, { 0 }, { 0 }}},                           \
+  {.msg = {{0x224, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 40U}, { 0 }, { 0 }}},  \
 
-#define TOYOTA_SECOC_RX_CHECKS                                                                                \
-  TOYOTA_COMMON_RX_CHECKS(false)                                                                              \
-  {.msg = {{0x176, 0, 8, .ignore_counter = true, .frequency = 32U}, { 0 }, { 0 }}},                           \
-  {.msg = {{0x116, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 42U}, { 0 }, { 0 }}},  \
-  {.msg = {{0x101, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},  \
+#define TOYOTA_SECOC_RX_CHECKS                                                                                                             \
+  TOYOTA_COMMON_RX_CHECKS(false)                                                                                                           \
+  {.msg = {{0x176, 0, 8, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 32U}, { 0 }, { 0 }}},                           \
+  {.msg = {{0x116, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 42U}, { 0 }, { 0 }}},  \
+  {.msg = {{0x101, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},  \
 
-#define TOYOTA_PCM_CRUISE_2_ADDR_CHECK                                                                        \
-  {.msg = {{0x1D3, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 33U}, { 0 }, { 0 }}},  \
+#define TOYOTA_PCM_CRUISE_2_ADDR_CHECK                                                                                                     \
+  {.msg = {{0x1D3, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 33U}, { 0 }, { 0 }}},  \
 
-#define TOYOTA_DSU_CRUISE_ADDR_CHECK                                                                         \
-  {.msg = {{0x365, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 5U}, { 0 }, { 0 }}},  \
+#define TOYOTA_DSU_CRUISE_ADDR_CHECK                                                                                                      \
+  {.msg = {{0x365, 0, 7, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 5U}, { 0 }, { 0 }}},  \
 
 static bool toyota_secoc = false;
 static bool toyota_alt_brake = false;
@@ -173,7 +173,7 @@ static void toyota_rx_hook(const CANPacket_t *to_push) {
       // check that all wheel speeds are at zero value
       vehicle_moving = speed != 0;
 
-      UPDATE_VEHICLE_SPEED(speed / 4.0 * 0.01 / 3.6);
+      UPDATE_VEHICLE_SPEED(speed / 4.0 * 0.01 * KPH_TO_MS);
     }
 
     if (addr == 0x1D3) {

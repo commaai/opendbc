@@ -115,4 +115,4 @@ extern void m_update_button_state(ButtonStateTracking *button_state);
 extern void m_update_binary_state(BinaryStateTracking *state);
 extern void m_update_control_state(void);
 
-bool is_lat_active(void);
+extern bool is_lat_active(void);
