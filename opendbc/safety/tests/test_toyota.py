@@ -196,6 +196,9 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
         if controls_allowed:
           # Test the two steer request bits and TORQUE_WIND_DOWN torque wind down signal
           for req, req2, torque_wind_down in itertools.product([0, 1], [0, 1], [0, 50, 100]):
+            cnt += 1
+            self.safety.set_timer(20000 * cnt)
+
             mismatch = not (req or req2) and torque_wind_down != 0
             should_tx = req == req2 and (torque_wind_down in (0, 100)) and not mismatch
             self.assertEqual(should_tx, self._tx(self._lta_msg(req, req2, angle, torque_wind_down)))
@@ -212,7 +215,7 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
                 self._rx(self._torque_meas_msg(sign * eps_torque, sign * driver_torque))
 
               cnt += 1
-              self.safety.set_timer(100000 * cnt)
+              self.safety.set_timer(20000 * cnt)
 
               # Toyota adds 1 to EPS torque since it is rounded after EPS factor
               should_tx = (eps_torque - 1) <= self.MAX_MEAS_TORQUE and driver_torque <= self.MAX_LTA_DRIVER_TORQUE
@@ -221,6 +224,8 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
 
         else:
           # Controls not allowed
+          cnt += 1
+          self.safety.set_timer(20000 * cnt)
           for req, req2, torque_wind_down in itertools.product([0, 1], [0, 1], [0, 50, 100]):
             should_tx = not (req or req2) and torque_wind_down == 0
             self.assertEqual(should_tx, self._tx(self._lta_msg(req, req2, angle, torque_wind_down)))

@@ -234,11 +234,11 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 //      violation |= rt_rate_limit_check(desired_angle, rt_angle_last, limits.max_rt_delta);
 
 //      float max_msgs = limits.frequency * MAX_RT_INTERVAL / 1000000.0 * 1.2;  // 20% buffer + round up
-      float max_msgs = limits.frequency + rt_angle_delta_expected_msgs;
+      float max_msgs = CLAMP(((int)limits.frequency + (int)rt_angle_delta_expected_msgs) * 1.2, 0, limits.frequency * 1.2);
       printf("RT angle msgs: %d, max msgs: %f\n", rt_angle_msgs, max_msgs);
       if (rt_angle_msgs > max_msgs) {
         // if we have too many messages, we have a violation
-//        violation = true;
+        violation = true;
       }
 
       // TODO: MIN it to be safe?
