@@ -1,5 +1,11 @@
 #include "opendbc/safety/safety_declarations.h"
 
+// ISO 11270
+static const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
+
+static const float EARTH_G = 9.81;
+static const float AVERAGE_ROAD_ROLL = 0.06;  // ~3.4 degrees, 6% superelevation
+
 // check that commanded torque value isn't too far from measured
 static bool dist_to_meas_check(int val, int val_last, struct sample_t *val_meas,
                         const int MAX_RATE_UP, const int MAX_RATE_DOWN, const int MAX_ERROR) {
