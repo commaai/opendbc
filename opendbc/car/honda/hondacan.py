@@ -160,7 +160,7 @@ def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_
       acc_hud_values['ACC_ON'] = int(enabled)
       acc_hud_values['PCM_SPEED'] = pcm_speed * CV.MS_TO_KPH
       acc_hud_values['PCM_GAS'] = hud.pcm_accel
-      acc_hud_values['SET_ME_X01'] = 0 if ( hud.pcm_accel < 0 ) else 1 # see if faults stop by matching stock ACC
+      acc_hud_values['SET_ME_X01'] = 0 if ( hud.pcm_accel != 54) else 1 # see if faults stop by matching stock ACC
       acc_hud_values['FCM_OFF'] = acc_hud['FCM_OFF']
       acc_hud_values['FCM_OFF_2'] = acc_hud['FCM_OFF_2']
       acc_hud_values['FCM_PROBLEM'] = acc_hud['FCM_PROBLEM']
