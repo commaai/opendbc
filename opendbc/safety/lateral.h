@@ -225,6 +225,28 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 
     // check for violation;
     violation |= max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
+
+    {
+      // TODO: don't redefine from another, rename above and use it
+      int rt_delta_angle_up = delta_angle_up;
+      int rt_delta_angle_down = delta_angle_down;
+
+      int highest_desired_angle_delta = rt_angle_last + ((rt_angle_last > 0) ? delta_angle_up : delta_angle_down);
+      int lowest_desired_angle_delta = rt_angle_last - ((rt_angle_last >= 0) ? delta_angle_down : delta_angle_up);
+
+      // *** angle real time rate limit check ***
+      violation |= rt_rate_limit_check(desired_angle, rt_angle_last, limits.max_rt_delta);
+
+      // every RT_INTERVAL set the new limits
+      uint32_t ts_elapsed = get_ts_elapsed(ts, ts_angle_check_last);
+      if (ts_elapsed > MAX_RT_INTERVAL) {
+        rt_angle_last = desired_angle;
+        rt_speed_last = fudged_speed;
+        ts_angle_check_last = ts;
+      }
+      // track lowest speed this 250ms window to avoid false positives when braking
+      rt_speed_last = MIN(rt_speed_last, fudged_speed);
+    }
   }
   desired_angle_last = desired_angle;
 

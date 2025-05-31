@@ -75,6 +75,7 @@ uint32_t heartbeat_engaged_mismatches = 0;  // count of mismatches between heart
 
 // for safety modes with angle steering control
 int rt_angle_last = 0;
+float rt_speed_last = 0;
 uint32_t ts_angle_check_last = 0;
 int desired_angle_last = 0;
 struct sample_t angle_meas;         // last 6 steer angles/curvatures
@@ -439,6 +440,7 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   desired_torque_last = 0;
   rt_torque_last = 0;
   rt_angle_last = 0;
+  rt_speed_last = 0.0;
   desired_angle_last = 0;
   ts_torque_check_last = 0;
   ts_angle_check_last = 0;
