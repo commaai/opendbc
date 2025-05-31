@@ -256,6 +256,12 @@ static float get_angle_from_curvature(const float curvature, const float curvatu
   return curvature * params.steer_ratio / curvature_factor * RAD_TO_DEG;
 }
 
+static float get_curvature_from_angle(const float angle, const float curvature_factor, const AngleSteeringParams params) {
+  // Matches VehicleModel.calc_curvature()
+  static const float RAD_TO_DEG = 57.29577951308232;
+  return angle * curvature_factor / params.steer_ratio / RAD_TO_DEG;
+}
+
 bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, const AngleSteeringLimits limits,
                                const AngleSteeringParams params) {
   // This check uses a simple vehicle model to allow for constant lateral acceleration and jerk limits across all speeds.
@@ -270,6 +276,7 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
   const float curvature_factor = get_curvature_factor(fudged_speed, params);
 
   bool violation = false;
+  uint32_t ts = microsecond_timer_get();
 
   if (controls_allowed && steer_control_enabled) {
     // *** ISO lateral jerk limit ***
@@ -293,6 +300,45 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
     const int max_angle_can = (max_angle * limits.angle_deg_to_can) + 1.;
 
     violation |= max_limit_check(desired_angle, max_angle_can, -max_angle_can);
+
+    // *** angle real time rate limit check ***
+    {
+      float desired_angle_float = (float)desired_angle / limits.angle_deg_to_can;
+      // TODO: we can either store the previous angle and speed
+      //  or store the previous lateral jerk UPDATE: i think the last accel is best so we don't have to re-calculate everything
+      // TODO: move curvature_factor into get_curvature_from_angle?
+      const float rt_last_curvature_factor = get_curvature_factor(rt_speed_last, params);
+      // TODO: store the last angle in float, not int
+      const float rt_last_accel = get_curvature_from_angle(rt_angle_last / limits.angle_deg_to_can, rt_last_curvature_factor, params) * (rt_speed_last * rt_speed_last);
+      // TODO: rewrite check above to calculate accel from desired angle instead of angle from max accel, and check against it.
+      //  then we can use it here for rt_desired_accel
+      const float rt_desired_accel = get_curvature_from_angle(desired_angle_float, curvature_factor, params) * (fudged_speed * fudged_speed);
+
+      const float rt_accel_max_delta = MAX_LATERAL_JERK * 0.25 * 1.2;  // add 20% rt tolerance TODO: use 250ms const global
+      printf("desired_angle: %d, desired_angle_float: %.2f, speed: %.2f\n", desired_angle, desired_angle_float, fudged_speed);
+      printf("rt_desired_accel: %.2f, rt_last_accel: %.2f, delta: %.2f, rt_accel_max_delta: %.2f\n", rt_desired_accel, rt_last_accel, ABS(rt_desired_accel - rt_last_accel), rt_accel_max_delta);
+      if (ABS(rt_desired_accel - rt_last_accel) > rt_accel_max_delta) {
+        // block attempts at violating the lateral jerk limit via sending faster than expected
+        violation = true;
+        printf("violation!\n");
+      }
+
+//      const float rt_max_curvature = MAX_LATERAL_JERK / (fudged_speed * fudged_speed) * 0.25;
+//      const float max_rt_angle_delta = get_angle_from_curvature(rt_max_curvature, curvature_factor, params);
+//      const int max_rt_angle_delta_can = (max_rt_angle_delta * limits.angle_deg_to_can) + 1.;
+//
+//      violation |= rt_rate_limit_check(desired_angle, rt_angle_last, limits.max_rt_delta);
+  //
+      // every RT_INTERVAL set the new limits
+      uint32_t ts_elapsed = get_ts_elapsed(ts, ts_angle_check_last);
+      printf("ts: %u, ts_elapsed: %u\n", ts, ts_elapsed);
+      if (ts_elapsed > MAX_ANGLE_RT_INTERVAL) {
+        printf("  resetting rt_last\n\n");
+        rt_angle_last = desired_angle;
+        rt_speed_last = fudged_speed;
+        ts_angle_check_last = ts;
+      }
+    }
   }
   desired_angle_last = desired_angle;
 
@@ -301,6 +347,8 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
     const int max_inactive_angle = CLAMP(angle_meas.max, -limits.max_angle, limits.max_angle) + 1;
     const int min_inactive_angle = CLAMP(angle_meas.min, -limits.max_angle, limits.max_angle) - 1;
     violation |= max_limit_check(desired_angle, max_inactive_angle, min_inactive_angle);
+
+    rt_angle_last = 0;
   }
 
   // No angle control allowed when controls are not allowed

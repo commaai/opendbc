@@ -84,6 +84,15 @@ def init_segment(safety, msgs, mode, param):
   sendcan = (msg for msg in msgs if msg.which() == 'sendcan')
   steering_msgs = (can for msg in sendcan for can in msg.sendcan if is_steering_msg(mode, param, can.address))
 
+  cnt = 0
+  for msg in msgs:
+    if msg.which() == 'can':
+      cnt += 1
+      if cnt > 100:
+        break
+      for can in msg.can:
+        safety.safety_rx_hook(package_can_msg(can))
+
   msg = next(steering_msgs, None)
   if msg is None:
     print("no steering msgs found!")
