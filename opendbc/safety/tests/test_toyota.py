@@ -185,6 +185,7 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
     not controls_allowed:
     * STEER_REQUEST, STEER_REQUEST_2, and TORQUE_WIND_DOWN are all 0
     """
+    cnt = 0
     for controls_allowed in (True, False):
       for angle in np.arange(-90, 90, 1):
         self.safety.set_controls_allowed(controls_allowed)
@@ -209,6 +210,9 @@ class TestToyotaSafetyAngle(TestToyotaSafetyBase, common.AngleSteeringSafetyTest
             for sign in (-1, 1):
               for _ in range(6):
                 self._rx(self._torque_meas_msg(sign * eps_torque, sign * driver_torque))
+
+              cnt += 1
+              self.safety.set_timer(100000 * cnt)
 
               # Toyota adds 1 to EPS torque since it is rounded after EPS factor
               should_tx = (eps_torque - 1) <= self.MAX_MEAS_TORQUE and driver_torque <= self.MAX_LTA_DRIVER_TORQUE

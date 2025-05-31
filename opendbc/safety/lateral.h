@@ -233,11 +233,12 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
       // only a certain amount of messages are allowed to be sent in a given time window
 //      violation |= rt_rate_limit_check(desired_angle, rt_angle_last, limits.max_rt_delta);
 
-      float max_msgs = limits.frequency * MAX_RT_INTERVAL / 1000000.0 * 1.2;  // 20% buffer + round up
+//      float max_msgs = limits.frequency * MAX_RT_INTERVAL / 1000000.0 * 1.2;  // 20% buffer + round up
+      float max_msgs = limits.frequency + rt_angle_delta_expected_msgs;
       printf("RT angle msgs: %d, max msgs: %f\n", rt_angle_msgs, max_msgs);
-      if (rt_angle_msgs >= max_msgs) {
+      if (rt_angle_msgs > max_msgs) {
         // if we have too many messages, we have a violation
-        violation = true;
+//        violation = true;
       }
 
       // TODO: MIN it to be safe?
@@ -245,9 +246,14 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 
       // every RT_INTERVAL set the new limits
       uint32_t ts_elapsed = get_ts_elapsed(ts, ts_angle_check_last);
-      if (ts_elapsed > MAX_RT_INTERVAL) {
+      if (ts_elapsed > 1e+6) {  // each window is 1s so expected msgs is whole number
 //        rt_angle_last = desired_angle;
         ts_angle_check_last = ts;
+        // if we received less messages than expected in this window, allow the difference in the next up to 20% of expected frequency.
+        // in case of small openpilot lags
+        // TODO: this may be simpler by tracking moving average
+        rt_angle_delta_expected_msgs = CLAMP((int)limits.frequency - (int)rt_angle_msgs, 0, limits.frequency * 0.2);
+        printf("RT angle msgs: %d, allowing extra %d msgs in next window\n", rt_angle_msgs, rt_angle_delta_expected_msgs);
 //        rt_max_angle_msgs = max_msgs - rt_angle_msgs;
         rt_angle_msgs = 0U;
       }

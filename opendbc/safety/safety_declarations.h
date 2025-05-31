@@ -282,6 +282,7 @@ extern uint32_t heartbeat_engaged_mismatches;  // count of mismatches between he
 // for safety modes with angle steering control
 extern uint32_t ts_angle_last;
 extern uint32_t ts_angle_check_last;
+extern uint32_t rt_angle_delta_expected_msgs;
 extern uint32_t rt_angle_msgs;
 extern int desired_angle_last;
 extern struct sample_t angle_meas;         // last 6 steer angles/curvatures
