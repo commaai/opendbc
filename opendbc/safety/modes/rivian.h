@@ -79,7 +79,7 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
     if (addr == 0x208) {
       float speed = ((GET_BYTE(to_push, 6) << 8) | GET_BYTE(to_push, 7)) * 0.01;
       vehicle_moving = speed > 0.0;
-      UPDATE_VEHICLE_SPEED(speed / 3.6);
+      UPDATE_VEHICLE_SPEED(speed * KPH_TO_MS);
     }
 
     // Gas pressed and second speed source for variable torque limit
@@ -87,7 +87,7 @@ static void rivian_rx_hook(const CANPacket_t *to_push) {
       gas_pressed = GET_BYTE(to_push, 3) | (GET_BYTE(to_push, 4) & 0xC0U);
 
       // Disable controls if speeds from VDM and ESP ECUs are too far apart.
-      float vdm_speed = ((GET_BYTE(to_push, 5) << 8) | GET_BYTE(to_push, 6)) * 0.01 / 3.6;
+      float vdm_speed = ((GET_BYTE(to_push, 5) << 8) | GET_BYTE(to_push, 6)) * 0.01 * KPH_TO_MS;
       speed_mismatch_check(vdm_speed);
     }
 
