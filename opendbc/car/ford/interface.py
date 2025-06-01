@@ -37,14 +37,13 @@ class CarInterface(CarInterfaceBase):
     ret.longitudinalTuning.kiBP = [0.]
     ret.longitudinalTuning.kiV = [0.5]
 
-    ret.radarUnavailable = Bus.radar not in DBC[candidate] or \
-                            Bus.radar == RADAR.DELPHI_MRR_64  # TODO: this needs final verification before we can ship it
+    # TODO: verify MRR_64 before it's used for longitudinal control
+    ret.radarUnavailable = Bus.radar not in DBC[candidate]
     ret.radarDelay = {
       # average of 33.3 Hz radar timestep / 4 scan modes = 60 ms
       # MRR_Header_Timestamps->CAN_DET_TIME_SINCE_MEAS reports 61.3 ms
       RADAR.DELPHI_MRR: 0.06,
 
-      # TODO: verify this
       # average of 20 Hz radar timestep / 4 scan modes = 100 ms
       RADAR.DELPHI_MRR_64:  0.1
     }.get(Bus.radar, 0.1)
