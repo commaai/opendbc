@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 import math
 from opendbc.can.parser import CANParser
-from opendbc.car import structs
+from opendbc.car import Bus, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.gm.values import DBC, CanBus
 from opendbc.car.interfaces import RadarInterfaceBase
 
-RADAR_HEADER_MSG = 1120
+RADAR_HEADER_MSG = 1120  # F_LRR_Obj_Header
+CAMERA_DATA_HEADER_MSG = 1056  # F_Vision_Obj_Header
 SLOT_1_MSG = RADAR_HEADER_MSG + 1
 NUM_SLOTS = 20
 
@@ -29,7 +30,7 @@ def create_radar_can_parser(car_fingerprint):
 
   messages = list({(s[1], 14) for s in signals})
 
-  return CANParser(DBC[car_fingerprint]['radar'], messages, CanBus.OBSTACLE)
+  return CANParser(DBC[car_fingerprint][Bus.radar], messages, CanBus.OBSTACLE)
 
 
 class RadarInterface(RadarInterfaceBase):
@@ -40,7 +41,6 @@ class RadarInterface(RadarInterfaceBase):
 
     self.trigger_msg = LAST_RADAR_MSG
     self.updated_messages = set()
-    self.radar_ts = CP.radarTimeStep
 
   def update(self, can_strings):
     if self.rcp is None:
@@ -57,12 +57,10 @@ class RadarInterface(RadarInterfaceBase):
     fault = header['FLRRSnsrBlckd'] or header['FLRRSnstvFltPrsntInt'] or \
       header['FLRRYawRtPlsblityFlt'] or header['FLRRHWFltPrsntInt'] or \
       header['FLRRAntTngFltPrsnt'] or header['FLRRAlgnFltPrsnt']
-    errors = []
     if not self.rcp.can_valid:
-      errors.append("canError")
+      ret.errors.canError = True
     if fault:
-      errors.append("fault")
-    ret.errors = errors
+      ret.errors.radarFault = True
 
     currentTargets = set()
     num_targets = header['FLRRNumValidTargets']

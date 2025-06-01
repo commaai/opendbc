@@ -1,6 +1,6 @@
 from opendbc.car import CanBusBase
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.honda.values import HondaFlags, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, CAR, CarControllerParams
+from opendbc.car.honda.values import HondaFlags, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, HONDA_BOSCH_CANFD, CAR, CarControllerParams
 
 # CAN bus layout with relay
 # 0 = ACC-CAN - radar side
@@ -14,10 +14,14 @@ class CanBus(CanBusBase):
     # use fingerprint if specified
     super().__init__(CP if fingerprint is None else None, fingerprint)
 
-    if CP.carFingerprint in (HONDA_BOSCH - HONDA_BOSCH_RADARLESS):
+    # powertrain bus is split instead of radar on radarless and CAN FD Bosch
+    if CP.carFingerprint in (HONDA_BOSCH - HONDA_BOSCH_RADARLESS - HONDA_BOSCH_CANFD):
       self._pt, self._radar = self.offset + 1, self.offset
+      # normally steering commands are sent to radar, which forwards them to powertrain bus
+      # when radar is disabled, steering commands are sent directly to powertrain bus
+      self._lkas = self._pt if CP.openpilotLongitudinalControl else self._radar
     else:
-      self._pt, self._radar = self.offset, self.offset + 1
+      self._pt, self._radar, self._lkas = self.offset, self.offset + 1, self.offset
 
   @property
   def pt(self) -> int:
@@ -31,19 +35,19 @@ class CanBus(CanBusBase):
   def camera(self) -> int:
     return self.offset + 2
 
+  @property
+  def lkas(self) -> int:
+    return self._lkas
 
-def get_lkas_cmd_bus(CAN, car_fingerprint, radar_disabled=False):
-  no_radar = car_fingerprint in HONDA_BOSCH_RADARLESS
-  if radar_disabled or no_radar:
-    # when radar is disabled, steering commands are sent directly to powertrain bus
-    return CAN.pt
-  # normally steering commands are sent to radar, which forwards them to powertrain bus
-  return 0
+  # B-CAN is forwarded to ACC-CAN radar side (CAN 0 on fake ethernet port)
+  @property
+  def body(self) -> int:
+    return self.offset
 
 
 def get_cruise_speed_conversion(car_fingerprint: str, is_metric: bool) -> float:
   # on certain cars, CRUISE_SPEED changes to imperial with car's unit setting
-  return CV.MPH_TO_MS if car_fingerprint in HONDA_BOSCH_RADARLESS and not is_metric else CV.KPH_TO_MS
+  return CV.MPH_TO_MS if car_fingerprint in (HONDA_BOSCH_RADARLESS | HONDA_BOSCH_CANFD) and not is_metric else CV.KPH_TO_MS
 
 
 def create_brake_command(packer, CAN, apply_brake, pump_on, pcm_override, pcm_cancel_cmd, fcw, car_fingerprint, stock_brake):
@@ -114,30 +118,27 @@ def create_acc_commands(packer, CAN, enabled, active, accel, gas, stopping_count
   return commands
 
 
-def create_steering_control(packer, CAN, apply_steer, lkas_active, car_fingerprint, radar_disabled):
+def create_steering_control(packer, CAN, apply_torque, lkas_active):
   values = {
-    "STEER_TORQUE": apply_steer if lkas_active else 0,
+    "STEER_TORQUE": apply_torque if lkas_active else 0,
     "STEER_TORQUE_REQUEST": lkas_active,
   }
-  bus = get_lkas_cmd_bus(CAN, car_fingerprint, radar_disabled)
-  return packer.make_can_msg("STEERING_CONTROL", bus, values)
+  return packer.make_can_msg("STEERING_CONTROL", CAN.lkas, values)
 
 
-def create_bosch_supplemental_1(packer, CAN, car_fingerprint):
+def create_bosch_supplemental_1(packer, CAN):
   # non-active params
   values = {
     "SET_ME_X04": 0x04,
     "SET_ME_X80": 0x80,
     "SET_ME_X10": 0x10,
   }
-  bus = get_lkas_cmd_bus(CAN, car_fingerprint)
-  return packer.make_can_msg("BOSCH_SUPPLEMENTAL_1", bus, values)
+  return packer.make_can_msg("BOSCH_SUPPLEMENTAL_1", CAN.lkas, values)
 
 
 def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_hud, lkas_hud):
   commands = []
   radar_disabled = CP.carFingerprint in (HONDA_BOSCH - HONDA_BOSCH_RADARLESS) and CP.openpilotLongitudinalControl
-  bus_lkas = get_lkas_cmd_bus(CAN, CP.carFingerprint, radar_disabled)
 
   if CP.openpilotLongitudinalControl:
     acc_hud_values = {
@@ -173,20 +174,23 @@ def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_
     'BEEP': 0,
   }
 
-  if CP.carFingerprint in HONDA_BOSCH_RADARLESS:
+  if CP.carFingerprint in (HONDA_BOSCH_RADARLESS | HONDA_BOSCH_CANFD):
     lkas_hud_values['LANE_LINES'] = 3
     lkas_hud_values['DASHED_LANES'] = hud.lanes_visible
+
     # car likely needs to see LKAS_PROBLEM fall within a specific time frame, so forward from camera
-    lkas_hud_values['LKAS_PROBLEM'] = lkas_hud['LKAS_PROBLEM']
+    # TODO: needed for Bosch CAN FD?
+    if CP.carFingerprint in HONDA_BOSCH_RADARLESS:
+      lkas_hud_values['LKAS_PROBLEM'] = lkas_hud['LKAS_PROBLEM']
 
   if not (CP.flags & HondaFlags.BOSCH_EXT_HUD):
     lkas_hud_values['SET_ME_X48'] = 0x48
 
   if CP.flags & HondaFlags.BOSCH_EXT_HUD and not CP.openpilotLongitudinalControl:
-    commands.append(packer.make_can_msg('LKAS_HUD_A', bus_lkas, lkas_hud_values))
-    commands.append(packer.make_can_msg('LKAS_HUD_B', bus_lkas, lkas_hud_values))
+    commands.append(packer.make_can_msg('LKAS_HUD_A', CAN.lkas, lkas_hud_values))
+    commands.append(packer.make_can_msg('LKAS_HUD_B', CAN.lkas, lkas_hud_values))
   else:
-    commands.append(packer.make_can_msg('LKAS_HUD', bus_lkas, lkas_hud_values))
+    commands.append(packer.make_can_msg('LKAS_HUD', CAN.lkas, lkas_hud_values))
 
   if radar_disabled:
     radar_hud_values = {
@@ -206,6 +210,6 @@ def spam_buttons_command(packer, CAN, button_val, car_fingerprint):
     'CRUISE_BUTTONS': button_val,
     'CRUISE_SETTING': 0,
   }
-  # send buttons to camera on radarless cars
+  # send buttons to camera on radarless (camera does ACC) cars
   bus = CAN.camera if car_fingerprint in HONDA_BOSCH_RADARLESS else CAN.pt
   return packer.make_can_msg("SCM_BUTTONS", bus, values)

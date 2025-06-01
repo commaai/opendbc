@@ -4,18 +4,18 @@ from opendbc.car.subaru.values import CanBus
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 
 
-def create_steering_control(packer, apply_steer, steer_req):
+def create_steering_control(packer, apply_torque, steer_req):
   values = {
-    "LKAS_Output": apply_steer,
+    "LKAS_Output": apply_torque,
     "LKAS_Request": steer_req,
     "SET_1": 1
   }
   return packer.make_can_msg("ES_LKAS", 0, values)
 
 
-def create_steering_control_angle(packer, apply_steer, steer_req):
+def create_steering_control_angle(packer, apply_torque, steer_req):
   values = {
-    "LKAS_Output": apply_steer,
+    "LKAS_Output": apply_torque,
     "LKAS_Request": steer_req,
     "SET_3": 3
   }
@@ -283,10 +283,10 @@ def subaru_preglobal_checksum(packer, values, addr, checksum_byte=7):
   return (sum(dat[:checksum_byte]) + sum(dat[checksum_byte+1:])) % 256
 
 
-def create_preglobal_steering_control(packer, frame, apply_steer, steer_req):
+def create_preglobal_steering_control(packer, frame, apply_torque, steer_req):
   values = {
     "COUNTER": frame % 0x08,
-    "LKAS_Command": apply_steer,
+    "LKAS_Command": apply_torque,
     "LKAS_Active": steer_req,
   }
   values["Checksum"] = subaru_preglobal_checksum(packer, values, "ES_LKAS")

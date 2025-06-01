@@ -49,11 +49,6 @@ def eliminate_incompatible_cars(msg, candidate_cars):
   return compatible_cars
 
 
-def all_known_cars():
-  """Returns a list of all known car strings."""
-  return list({*FW_VERSIONS.keys(), *_FINGERPRINTS.keys()})
-
-
 def all_legacy_fingerprint_cars():
   """Returns a list of all known car strings, FPv1 only."""
   return list(_FINGERPRINTS.keys())
@@ -315,6 +310,7 @@ MIGRATION = {
   "VOLKSWAGEN CADDY 3RD GEN": VW.VOLKSWAGEN_CADDY_MK3,
   "VOLKSWAGEN CRAFTER 2ND GEN": VW.VOLKSWAGEN_CRAFTER_MK2,
   "VOLKSWAGEN GOLF 7TH GEN": VW.VOLKSWAGEN_GOLF_MK7,
+  "VOLKSWAGEN JETTA 6TH GEN": VW.VOLKSWAGEN_JETTA_MK6,
   "VOLKSWAGEN JETTA 7TH GEN": VW.VOLKSWAGEN_JETTA_MK7,
   "VOLKSWAGEN PASSAT 8TH GEN": VW.VOLKSWAGEN_PASSAT_MK8,
   "VOLKSWAGEN PASSAT NMS": VW.VOLKSWAGEN_PASSAT_NMS,

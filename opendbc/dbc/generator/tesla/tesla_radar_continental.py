@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import os
-from opendbc.dbc.generator.tesla.radar_common import get_radar_point_definition, get_val_definition
+from opendbc.dbc.generator.tesla._radar_common import get_radar_point_definition, get_val_definition
 
 if __name__ == "__main__":
   dbc_name = os.path.basename(__file__).replace(".py", ".dbc")

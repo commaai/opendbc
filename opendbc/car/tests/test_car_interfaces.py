@@ -1,18 +1,18 @@
 import os
 import math
 import hypothesis.strategies as st
+import pytest
 from hypothesis import Phase, given, settings
-import importlib
-from parameterized import parameterized
 from collections.abc import Callable
 from typing import Any
 
 from opendbc.car import DT_CTRL, CanData, gen_empty_fingerprint, structs
 from opendbc.car.car_helpers import interfaces
-from opendbc.car.fingerprints import all_known_cars
-from opendbc.car.fw_versions import FW_VERSIONS, FW_QUERY_CONFIGS
+from opendbc.car.fingerprints import FW_VERSIONS
+from opendbc.car.fw_versions import FW_QUERY_CONFIGS
 from opendbc.car.interfaces import get_interface_attr
 from opendbc.car.mock.values import CAR as MOCK
+from opendbc.car.values import PLATFORMS
 
 DrawType = Callable[[st.SearchStrategy], Any]
 
@@ -21,7 +21,7 @@ ALL_ECUS |= {ecu for config in FW_QUERY_CONFIGS.values() for ecu in config.extra
 
 ALL_REQUESTS = {tuple(r.request) for config in FW_QUERY_CONFIGS.values() for r in config.requests}
 
-MAX_EXAMPLES = int(os.environ.get('MAX_EXAMPLES', '5'))
+MAX_EXAMPLES = int(os.environ.get('MAX_EXAMPLES', '15'))
 
 
 def get_fuzzy_car_interface_args(draw: DrawType) -> dict:
@@ -36,7 +36,7 @@ def get_fuzzy_car_interface_args(draw: DrawType) -> dict:
   params_strategy = st.fixed_dictionaries({
     'fingerprints': fingerprint_strategy,
     'car_fw': car_fw_strategy,
-    'experimental_long': st.booleans(),
+    'alpha_long': st.booleans(),
   })
 
   params: dict = draw(params_strategy)
@@ -49,18 +49,18 @@ def get_fuzzy_car_interface_args(draw: DrawType) -> dict:
 class TestCarInterfaces:
   # FIXME: Due to the lists used in carParams, Phase.target is very slow and will cause
   #  many generated examples to overrun when max_examples > ~20, don't use it
-  @parameterized.expand([(car,) for car in sorted(all_known_cars())] + [MOCK.MOCK])
+  @pytest.mark.parametrize("car_name", sorted(PLATFORMS))
   @settings(max_examples=MAX_EXAMPLES, deadline=None,
             phases=(Phase.reuse, Phase.generate, Phase.shrink))
   @given(data=st.data())
   def test_car_interfaces(self, car_name, data):
-    CarInterface, CarController, CarState = interfaces[car_name]
+    CarInterface = interfaces[car_name]
 
     args = get_fuzzy_car_interface_args(data.draw)
 
     car_params = CarInterface.get_params(car_name, args['fingerprints'], args['car_fw'],
-                                         experimental_long=args['experimental_long'], docs=False)
-    car_interface = CarInterface(car_params, CarController, CarState)
+                                         alpha_long=args['alpha_long'], is_release=False, docs=False)
+    car_interface = CarInterface(car_params)
     assert car_params
     assert car_interface
 
@@ -90,7 +90,7 @@ class TestCarInterfaces:
     # Run car interface
     # TODO: use hypothesis to generate random messages
     now_nanos = 0
-    CC = structs.CarControl()
+    CC = structs.CarControl().as_reader()
     for _ in range(10):
       car_interface.update([])
       car_interface.apply(CC, now_nanos)
@@ -98,14 +98,16 @@ class TestCarInterfaces:
 
     CC = structs.CarControl()
     CC.enabled = True
+    CC.latActive = True
+    CC.longActive = True
+    CC = CC.as_reader()
     for _ in range(10):
       car_interface.update([])
       car_interface.apply(CC, now_nanos)
       now_nanos += DT_CTRL * 1e9  # 10ms
 
     # Test radar interface
-    RadarInterface = importlib.import_module(f'opendbc.car.{car_params.carName}.radar_interface').RadarInterface
-    radar_interface = RadarInterface(car_params)
+    radar_interface = CarInterface.RadarInterface(car_params)
     assert radar_interface
 
     # Run radar interface once

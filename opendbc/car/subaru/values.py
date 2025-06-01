@@ -1,8 +1,7 @@
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
-from panda import uds
-from opendbc.car import CarSpecs, DbcDict, PlatformConfig, Platforms, dbc_dict
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Tool, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
@@ -20,10 +19,12 @@ class CarControllerParams:
     self.STEER_DRIVER_FACTOR = 1       # from dbc
 
     if CP.flags & SubaruFlags.GLOBAL_GEN2:
+      # TODO: lower rate limits, this reaches min/max in 0.5s which negatively affects tuning
       self.STEER_MAX = 1000
       self.STEER_DELTA_UP = 40
       self.STEER_DELTA_DOWN = 40
     elif CP.carFingerprint == CAR.SUBARU_IMPREZA_2020:
+      self.STEER_DELTA_UP = 35
       self.STEER_MAX = 1439
     else:
       self.STEER_MAX = 2047
@@ -50,6 +51,12 @@ class CarControllerParams:
 
   BRAKE_LOOKUP_BP = [-3.5, 0]
   BRAKE_LOOKUP_V = [BRAKE_MAX, BRAKE_MIN]
+
+
+class SubaruSafetyFlags(IntFlag):
+  GEN2 = 1
+  LONG = 2
+  PREGLOBAL_REVERSED_DRIVER_TORQUE = 4
 
 
 class SubaruFlags(IntFlag):
@@ -96,17 +103,17 @@ class SubaruCarDocs(CarDocs):
   def init_make(self, CP: CarParams):
     self.car_parts.parts.extend([Tool.socket_8mm_deep, Tool.pry_tool])
 
-    if CP.experimentalLongitudinalAvailable:
+    if CP.alphaLongitudinalAvailable:
       self.footnotes.append(Footnote.EXP_LONG)
 
 
 @dataclass
 class SubaruPlatformConfig(PlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: dbc_dict('subaru_global_2017_generated', None))
+  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'subaru_global_2017_generated'})
 
   def init(self):
     if self.flags & SubaruFlags.HYBRID:
-      self.dbc_dict = dbc_dict('subaru_global_2020_hybrid_generated', None)
+      self.dbc_dict = {Bus.pt: 'subaru_global_2020_hybrid_generated'}
 
 
 @dataclass
@@ -135,8 +142,8 @@ class CAR(Platforms):
   SUBARU_IMPREZA = SubaruPlatformConfig(
     [
       SubaruCarDocs("Subaru Impreza 2017-19"),
-      SubaruCarDocs("Subaru Crosstrek 2018-19", video_link="https://youtu.be/Agww7oE1k-s?t=26"),
-      SubaruCarDocs("Subaru XV 2018-19", video_link="https://youtu.be/Agww7oE1k-s?t=26"),
+      SubaruCarDocs("Subaru Crosstrek 2018-19", video="https://youtu.be/Agww7oE1k-s?t=26"),
+      SubaruCarDocs("Subaru XV 2018-19", video="https://youtu.be/Agww7oE1k-s?t=26"),
     ],
     CarSpecs(mass=1568, wheelbase=2.67, steerRatio=15),
   )
@@ -169,25 +176,25 @@ class CAR(Platforms):
   SUBARU_FORESTER_PREGLOBAL = SubaruPlatformConfig(
     [SubaruCarDocs("Subaru Forester 2017-18")],
     CarSpecs(mass=1568, wheelbase=2.67, steerRatio=20),
-    dbc_dict('subaru_forester_2017_generated', None),
+    {Bus.pt: 'subaru_forester_2017_generated'},
     flags=SubaruFlags.PREGLOBAL,
   )
   SUBARU_LEGACY_PREGLOBAL = SubaruPlatformConfig(
     [SubaruCarDocs("Subaru Legacy 2015-18")],
     CarSpecs(mass=1568, wheelbase=2.67, steerRatio=12.5),
-    dbc_dict('subaru_outback_2015_generated', None),
+    {Bus.pt: 'subaru_outback_2015_generated'},
     flags=SubaruFlags.PREGLOBAL,
   )
   SUBARU_OUTBACK_PREGLOBAL = SubaruPlatformConfig(
     [SubaruCarDocs("Subaru Outback 2015-17")],
     SUBARU_FORESTER_PREGLOBAL.specs,
-    dbc_dict('subaru_outback_2015_generated', None),
+    {Bus.pt: 'subaru_outback_2015_generated'},
     flags=SubaruFlags.PREGLOBAL,
   )
   SUBARU_OUTBACK_PREGLOBAL_2018 = SubaruPlatformConfig(
     [SubaruCarDocs("Subaru Outback 2018-19")],
     SUBARU_FORESTER_PREGLOBAL.specs,
-    dbc_dict('subaru_outback_2019_generated', None),
+    {Bus.pt: 'subaru_outback_2019_generated'},
     flags=SubaruFlags.PREGLOBAL,
   )
   # Angle LKAS

@@ -6,47 +6,42 @@ on:
       - master
   pull_request:
 
-# TODO: enable this
-#env:
-#  PYTHONWARNINGS: error,default::DeprecationWarning
-
 jobs:
-  unit-tests:
-    name: unit tests
-    runs-on: ubuntu-24.04
-    timeout-minutes: 1
-    #strategy:
-    #  fail-fast: false
-    #  matrix:
-    #    run: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+  tests:
+    name: ./test.sh
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-24.04' }}
+            flags: ''
+          - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-24.04' }}
+            flags: '--ubsan'
+          - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-macos-8x14' || 'macos-latest' }}
+            flags: ''
     steps:
-    - uses: actions/checkout@v4
-    - name: setup python
-      run: |
-        curl -LsSf https://astral.sh/uv/install.sh | sh
-        uv venv
-        # TODO: remove setuptools once https://github.com/cython/cython/issues/5751 is fixed
-        uv pip install -e .[testing,docs] setuptools
-    - run: uv run scons -j$(nproc)
-    - run: uv run pytest .
-
-  static-analysis:
-    name: static analysis
-    runs-on: ubuntu-24.04
-    timeout-minutes: 1
-    steps:
-    - uses: actions/checkout@v4
-    - run: sudo apt install --no-install-recommends -y cppcheck
-    - name: setup python
-      run: |
-        curl -LsSf https://astral.sh/uv/install.sh | sh
-        uv venv
-        uv pip install -e . pre-commit
-    - name: cache pre-commit environments
-      uses: actions/cache@v4
+    - uses: commaai/timeout@v1
       with:
-        path: ~/.cache/pre-commit
-        key: ${{ runner.os }}-pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-pre-commit-
-    - run: uv run pre-commit run --all
+        timeout: ${{ github.repository == 'commaai/opendbc' && '60' || '999' }}
+    - uses: actions/checkout@v4
+    - uses: ./.github/workflows/cache
+    - run: ./test.sh ${{ matrix.flags }}
+
+  mutation:
+    name: Safety mutation tests
+    runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
+    timeout-minutes: 20
+    env:
+      GIT_REF: ${{ github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.before || format('origin/{0}', github.event.repository.default_branch) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # need master to get diff
+      - uses: ./.github/workflows/cache
+      - name: Run mutation tests
+        timeout-minutes: 5
+        run: |
+          source setup.sh
+          scons -j8
+          cd opendbc/safety/tests && ./mutation.sh

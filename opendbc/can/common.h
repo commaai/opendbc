@@ -1,7 +1,10 @@
 #pragma once
 
+#include <cstring>
 #include <map>
+#include <set>
 #include <string>
+#include <sstream>
 #include <utility>
 #include <unordered_map>
 #include <vector>
@@ -18,14 +21,32 @@
 #define CAN_INVALID_CNT 5
 
 // Car specific functions
+void pedal_setup_signal(Signal &sig, const std::string& dbc_name, int line_num);
+void tesla_setup_signal(Signal &sig, const std::string& dbc_name, int line_num);
+
 unsigned int honda_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int toyota_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int subaru_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int chrysler_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
-unsigned int volkswagen_mqb_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
+unsigned int volkswagen_mqb_meb_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int xor_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int hkg_can_fd_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
+unsigned int fca_giorgio_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int pedal_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
+unsigned int tesla_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
+
+#define DBC_ASSERT(condition, message)                             \
+  do {                                                             \
+    if (!(condition)) {                                            \
+      std::stringstream is;                                        \
+      is << "[" << dbc_name << ":" << line_num << "] " << message; \
+      throw std::runtime_error(is.str());                          \
+    }                                                              \
+  } while (false)
+
+inline bool endswith(const std::string& str, const char* suffix) {
+  return str.find(suffix, str.length() - strlen(suffix)) != std::string::npos;
+}
 
 struct CanFrame {
   long src;
@@ -71,7 +92,6 @@ public:
   bool can_valid = false;
   bool bus_timeout = false;
   uint64_t first_nanos = 0;
-  uint64_t last_nanos = 0;
   uint64_t last_nonempty_nanos = 0;
   uint64_t bus_timeout_threshold = 0;
   uint64_t can_invalid_cnt = CAN_INVALID_CNT;
@@ -79,18 +99,18 @@ public:
   CANParser(int abus, const std::string& dbc_name,
             const std::vector<std::pair<uint32_t, int>> &messages);
   CANParser(int abus, const std::string& dbc_name, bool ignore_checksum, bool ignore_counter);
-  void update(const std::vector<CanData> &can_data, std::vector<SignalValue> &vals);
-  void query_latest(std::vector<SignalValue> &vals, uint64_t last_ts = 0);
+  std::set<uint32_t> update(const std::vector<CanData> &can_data);
+  MessageState *getMessageState(uint32_t address) { return &message_states.at(address); }
 
 protected:
-  void UpdateCans(const CanData &can);
+  void UpdateCans(const CanData &can, std::set<uint32_t> &updated_addresses);
   void UpdateValid(uint64_t nanos);
 };
 
 class CANPacker {
 private:
   const DBC *dbc = NULL;
-  std::map<std::pair<uint32_t, std::string>, Signal> signal_lookup;
+  std::unordered_map<uint32_t, std::unordered_map<std::string, Signal>> signal_lookup;
   std::map<uint32_t, uint32_t> counters;
 
 public:

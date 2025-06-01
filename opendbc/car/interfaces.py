@@ -15,10 +15,11 @@ from opendbc.car.can_definitions import CanData, CanRecvCallable, CanSendCallabl
 from opendbc.car.common.basedir import BASEDIR
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.simple_kalman import KF1D, get_kalman_gain
-from opendbc.car.common.numpy_fast import clip
 from opendbc.car.values import PLATFORMS
+from opendbc.can.parser import CANParser
 
 GearShifter = structs.CarState.GearShifter
+ButtonType = structs.CarState.ButtonEvent.Type
 
 V_CRUISE_MAX = 145
 MAX_CTRL_SPEED = (V_CRUISE_MAX + 4) * CV.KPH_TO_MS
@@ -26,11 +27,15 @@ ACCEL_MAX = 2.0
 ACCEL_MIN = -3.5
 FRICTION_THRESHOLD = 0.3
 
+# ISO 11270
+ISO_LATERAL_ACCEL = 3.0  # m/s^2
+ISO_LATERAL_JERK = 5.0  # m/s^3
+
 TORQUE_PARAMS_PATH = os.path.join(BASEDIR, 'torque_data/params.toml')
 TORQUE_OVERRIDE_PATH = os.path.join(BASEDIR, 'torque_data/override.toml')
 TORQUE_SUBSTITUTE_PATH = os.path.join(BASEDIR, 'torque_data/substitute.toml')
 
-GEAR_SHIFTER_MAP: dict[str, GearShifter] = {
+GEAR_SHIFTER_MAP: dict[str, structs.CarState.GearShifter] = {
   'P': GearShifter.park, 'PARK': GearShifter.park,
   'R': GearShifter.reverse, 'REVERSE': GearShifter.reverse,
   'N': GearShifter.neutral, 'NEUTRAL': GearShifter.neutral,
@@ -84,23 +89,37 @@ def get_torque_params():
 
 # generic car and radar interfaces
 
+
+class RadarInterfaceBase(ABC):
+  def __init__(self, CP: structs.CarParams):
+    self.CP = CP
+    self.rcp = None
+    self.pts: dict[int, structs.RadarData.RadarPoint] = {}
+    self.frame = 0
+
+  def update(self, can_packets: list[tuple[int, list[CanData]]]) -> structs.RadarDataT | None:
+    self.frame += 1
+    if (self.frame % 5) == 0:  # 20 Hz is very standard
+      return structs.RadarData()
+    return None
+
+
 class CarInterfaceBase(ABC):
-  def __init__(self, CP: structs.CarParams, CarController, CarState):
+  CarState: 'CarStateBase'
+  CarController: 'CarControllerBase'
+  RadarInterface: 'RadarInterfaceBase' = RadarInterfaceBase
+
+  def __init__(self, CP: structs.CarParams):
     self.CP = CP
 
     self.frame = 0
     self.v_ego_cluster_seen = False
 
-    self.CS: CarStateBase = CarState(CP)
-    self.cp = self.CS.get_can_parser(CP)
-    self.cp_cam = self.CS.get_cam_can_parser(CP)
-    self.cp_adas = self.CS.get_adas_can_parser(CP)
-    self.cp_body = self.CS.get_body_can_parser(CP)
-    self.cp_loopback = self.CS.get_loopback_can_parser(CP)
-    self.can_parsers = (self.cp, self.cp_cam, self.cp_adas, self.cp_body, self.cp_loopback)
+    self.CS: CarStateBase = self.CarState(CP)
+    self.can_parsers: dict[StrEnum, CANParser] = self.CS.get_can_parsers(CP)
 
-    dbc_name = "" if self.cp is None else self.cp.dbc_name
-    self.CC: CarControllerBase = CarController(dbc_name, CP)
+    dbc_names = {bus: cp.dbc_name for bus, cp in self.can_parsers.items()}
+    self.CC: CarControllerBase = self.CarController(dbc_names, CP)
 
   def apply(self, c: structs.CarControl, now_nanos: int | None = None) -> tuple[structs.CarControl.Actuators, list[CanData]]:
     if now_nanos is None:
@@ -116,11 +135,11 @@ class CarInterfaceBase(ABC):
     """
     Parameters essential to controlling the car may be incomplete or wrong without FW versions or fingerprints.
     """
-    return cls.get_params(candidate, gen_empty_fingerprint(), list(), False, False)
+    return cls.get_params(candidate, gen_empty_fingerprint(), list(), False, False, False)
 
   @classmethod
   def get_params(cls, candidate: str, fingerprint: dict[int, dict[int, int]], car_fw: list[structs.CarParams.CarFw],
-                 experimental_long: bool, docs: bool) -> structs.CarParams:
+                 alpha_long: bool, is_release: bool, docs: bool) -> structs.CarParams:
     ret = CarInterfaceBase.get_std_params(candidate)
 
     platform = PLATFORMS[candidate]
@@ -133,7 +152,7 @@ class CarInterfaceBase(ABC):
     ret.tireStiffnessFactor = platform.config.specs.tireStiffnessFactor
     ret.flags |= int(platform.config.flags)
 
-    ret = cls._get_params(ret, candidate, fingerprint, car_fw, experimental_long, docs)
+    ret = cls._get_params(ret, candidate, fingerprint, car_fw, alpha_long, is_release, docs)
 
     # Vehicle mass is published curb weight plus assumed payload such as a human driver; notCars have no assumed payload
     if not ret.notCar:
@@ -148,7 +167,7 @@ class CarInterfaceBase(ABC):
   @staticmethod
   @abstractmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint: dict[int, dict[int, int]],
-                  car_fw: list[structs.CarParams.CarFw], experimental_long: bool, docs: bool) -> structs.CarParams:
+                  car_fw: list[structs.CarParams.CarFw], alpha_long: bool, is_release: bool, docs: bool) -> structs.CarParams:
     raise NotImplementedError
 
   @staticmethod
@@ -196,7 +215,6 @@ class CarInterfaceBase(ABC):
     ret.stoppingDecelRate = 0.8 # brake_travel/s while trying to stop
     ret.vEgoStopping = 0.5
     ret.vEgoStarting = 0.5
-    ret.stoppingControl = True
     ret.longitudinalTuning.kf = 1.
     ret.longitudinalTuning.kpBP = [0.]
     ret.longitudinalTuning.kpV = [0.]
@@ -221,20 +239,17 @@ class CarInterfaceBase(ABC):
     tune.torque.latAccelOffset = 0.0
     tune.torque.steeringAngleDeadzoneDeg = steering_angle_deadzone_deg
 
-  def _update(self) -> structs.CarState:
-    return self.CS.update(*self.can_parsers)
-
   def update(self, can_packets: list[tuple[int, list[CanData]]]) -> structs.CarState:
     # parse can
-    for cp in self.can_parsers:
+    for cp in self.can_parsers.values():
       if cp is not None:
         cp.update_strings(can_packets)
 
     # get CarState
-    ret = self._update()
+    ret = self.CS.update(self.can_parsers)
 
-    ret.canValid = all(cp.can_valid for cp in self.can_parsers if cp is not None)
-    ret.canTimeout = any(cp.bus_timeout for cp in self.can_parsers if cp is not None)
+    ret.canValid = all(cp.can_valid for cp in self.can_parsers.values())
+    ret.canTimeout = any(cp.bus_timeout for cp in self.can_parsers.values())
 
     if ret.vEgoCluster == 0.0 and not self.v_ego_cluster_seen:
       ret.vEgoCluster = ret.vEgo
@@ -249,26 +264,12 @@ class CarInterfaceBase(ABC):
     if ret.cruiseState.speedCluster == 0:
       ret.cruiseState.speedCluster = ret.cruiseState.speed
 
+    ret.buttonEnable = self.CS.update_button_enable(ret.buttonEvents)
+
     # save for next iteration
     self.CS.out = ret
 
     return ret
-
-
-class RadarInterfaceBase(ABC):
-  def __init__(self, CP: structs.CarParams):
-    self.CP = CP
-    self.rcp = None
-    self.pts: dict[int, structs.RadarData.RadarPoint] = {}
-    self.delay = 0
-    self.radar_ts = CP.radarTimeStep
-    self.frame = 0
-
-  def update(self, can_packets: list[tuple[int, list[CanData]]]) -> structs.RadarData | None:
-    self.frame += 1
-    if (self.frame % int(100 * self.radar_ts)) == 0:
-      return structs.RadarData()
-    return None
 
 
 class CarStateBase(ABC):
@@ -283,8 +284,10 @@ class CarStateBase(ABC):
     self.steering_pressed_cnt = 0
     self.left_blinker_prev = False
     self.right_blinker_prev = False
+    self.low_speed_alert = False
     self.cluster_speed_hyst_gap = 0.0
     self.cluster_min_speed = 0.0  # min speed before dropping to 0
+    self.secoc_key: bytes = b"00" * 16
 
     Q = [[0.0, 0.0], [0.0, 100.0]]
     R = 0.3
@@ -295,7 +298,7 @@ class CarStateBase(ABC):
     self.v_ego_kf = KF1D(x0=x0, A=A, C=C[0], K=K)
 
   @abstractmethod
-  def update(self, cp, cp_cam, cp_adas, cp_body, cp_loopback) -> structs.CarState:
+  def update(self, can_parsers) -> structs.CarState:
     pass
 
   def update_speed_kf(self, v_ego_raw):
@@ -326,7 +329,7 @@ class CarStateBase(ABC):
   def update_steering_pressed(self, steering_pressed, steering_pressed_min_count):
     """Applies filtering on steering pressed for noisy driver torque signals."""
     self.steering_pressed_cnt += 1 if steering_pressed else -1
-    self.steering_pressed_cnt = clip(self.steering_pressed_cnt, 0, steering_pressed_min_count * 2)
+    self.steering_pressed_cnt = int(np.clip(self.steering_pressed_cnt, 0, steering_pressed_min_count * 2 + 1))
     return self.steering_pressed_cnt > steering_pressed_min_count
 
   def update_blinker_from_stalk(self, blinker_time: int, left_blinker_stalk: bool, right_blinker_stalk: bool):
@@ -352,37 +355,30 @@ class CarStateBase(ABC):
 
     return bool(left_blinker_stalk or self.left_blinker_cnt > 0), bool(right_blinker_stalk or self.right_blinker_cnt > 0)
 
+  def update_button_enable(self, buttonEvents: list[structs.CarState.ButtonEvent]):
+    if not self.CP.pcmCruise:
+      for b in buttonEvents:
+        # Enable OP long on falling edge of enable buttons
+        if b.type in (ButtonType.accelCruise, ButtonType.decelCruise) and not b.pressed:
+          return True
+    return False
+
   @staticmethod
-  def parse_gear_shifter(gear: str | None) -> GearShifter:
+  def parse_gear_shifter(gear: str | None) -> structs.CarState.GearShifter:
     if gear is None:
       return GearShifter.unknown
     return GEAR_SHIFTER_MAP.get(gear.upper(), GearShifter.unknown)
 
   @staticmethod
-  def get_can_parser(CP):
-    return None
-
-  @staticmethod
-  def get_cam_can_parser(CP):
-    return None
-
-  @staticmethod
-  def get_adas_can_parser(CP):
-    return None
-
-  @staticmethod
-  def get_body_can_parser(CP):
-    return None
-
-  @staticmethod
-  def get_loopback_can_parser(CP):
-    return None
+  def get_can_parsers(CP) -> dict[StrEnum, CANParser]:
+    return {}
 
 
 class CarControllerBase(ABC):
-  def __init__(self, dbc_name: str, CP: structs.CarParams):
+  def __init__(self, dbc_names: dict[StrEnum, str], CP: structs.CarParams):
     self.CP = CP
     self.frame = 0
+    self.secoc_key: bytes = b"00" * 16
 
   @abstractmethod
   def update(self, CC: structs.CarControl, CS: CarStateBase, now_nanos: int) -> tuple[structs.CarControl.Actuators, list[CanData]]:

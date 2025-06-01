@@ -17,6 +17,7 @@ jobs:
     - uses: actions/labeler@v5.0.0
       with:
         dot: true
+        sync-labels: true
         configuration-path: .github/labeler.yaml
 
     # Check PR target branch
