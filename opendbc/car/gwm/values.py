@@ -1,9 +1,8 @@
 from collections import namedtuple
 from dataclasses import dataclass, field
 
-from opendbc.car import dbc_dict, CarSpecs, DbcDict, PlatformConfig, Platforms, structs
+from opendbc.car import CarSpecs, DbcDict, PlatformConfig, Platforms, structs
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts
-from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Button = namedtuple('Button', ['event_type', 'can_addr', 'can_msg', 'values'])
 
@@ -26,7 +25,7 @@ class CANBUS:
 
 @dataclass
 class GwmPlatformConfig(PlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: dbc_dict('gwm_haval_h6_mk3_generated', None))
+  dbc_dict: DbcDict = field(default_factory=lambda: {CANBUS.pt: 'gwm_haval_h6_mk3_generated'})
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -52,6 +51,7 @@ class CAR(Platforms):
   )
 
 
+"""
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
     # TODO:
@@ -62,6 +62,6 @@ FW_QUERY_CONFIG = FwQueryConfig(
     ),
   ],
 )
-
+"""
 
 DBC = CAR.create_dbc_map()

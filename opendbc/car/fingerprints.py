@@ -3,7 +3,6 @@ from opendbc.car.body.values import CAR as BODY
 from opendbc.car.chrysler.values import CAR as CHRYSLER
 from opendbc.car.ford.values import CAR as FORD
 from opendbc.car.gm.values import CAR as GM
-from opendbc.car.gwm.values import CAR as GWM
 from opendbc.car.honda.values import CAR as HONDA
 from opendbc.car.hyundai.values import CAR as HYUNDAI
 from opendbc.car.mazda.values import CAR as MAZDA
@@ -337,6 +336,5 @@ MIGRATION = {
   "SKODA_SCALA_MK1": VW.SKODA_KAMIQ_MK1,
   "SKODA SUPERB 3RD GEN": VW.SKODA_SUPERB_MK3,
 
-  "GWM HAVAL H6 PHEV 3RD GEN": GWM.GWM_HAVAL_H6_PHEV_3RD_GEN,
   "mock": MOCK.MOCK,
 }
