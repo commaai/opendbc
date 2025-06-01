@@ -1,54 +1,47 @@
 name: tests
 
-on: [push, pull_request]
-
-env:
-  RUN: docker run -v $GITHUB_WORKSPACE:/project/opendbc -w /project/opendbc -e PYTHONWARNINGS="error,default::DeprecationWarning" --shm-size 1G --rm opendbc /bin/bash -c
-  BUILD: docker buildx build --pull --load --cache-to type=inline --cache-from type=registry,ref=ghcr.io/commaai/opendbc:latest -t opendbc -f Dockerfile .
-  PYTHONWARNINGS: error
+on:
+  push:
+    branches:
+      - master
+  pull_request:
 
 jobs:
-  unit-tests:
-    name: unit tests
-    runs-on: ubuntu-latest
-    #strategy:
-    #  fail-fast: false
-    #  matrix:
-    #    run: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+  tests:
+    name: ./test.sh
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-24.04' }}
+            flags: ''
+          - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-24.04' }}
+            flags: '--ubsan'
+          - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-macos-8x14' || 'macos-latest' }}
+            flags: ''
     steps:
+    - uses: commaai/timeout@v1
+      with:
+        timeout: ${{ github.repository == 'commaai/opendbc' && '60' || '999' }}
     - uses: actions/checkout@v4
-    - name: Build Docker image
-      run: eval "$BUILD"
-    - name: Build opendbc
-      run: ${{ env.RUN }} "cd ../ && scons -j$(nproc) --minimal"
-    - name: Unit tests
-      run: ${{ env.RUN }} "python -m unittest discover ."
+    - uses: ./.github/workflows/cache
+    - run: ./test.sh ${{ matrix.flags }}
 
-  static-analysis:
-    name: static analysis
-    runs-on: ubuntu-latest
+  mutation:
+    name: Safety mutation tests
+    runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
+    timeout-minutes: 20
+    env:
+      GIT_REF: ${{ github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.before || format('origin/{0}', github.event.repository.default_branch) }}
     steps:
-    - uses: actions/checkout@v4
-    - name: Build Docker image
-      run: eval "$BUILD"
-    - name: Build opendbc
-      run: ${{ env.RUN }} "cd ../ && scons -j$(nproc) --minimal"
-    - name: pre-commit
-      # TODO: a package pre-commit installs has a warning, remove the unset once that's fixed
-      run: ${{ env.RUN }} "unset PYTHONWARNINGS && pre-commit run --all"
-    - name: Generator test
-      run: ${{ env.RUN }} "generator/test_generator.py"
-
-  docker-push:
-    name: docker push
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request' && github.repository == 'commaai/opendbc'
-    steps:
-    - uses: actions/checkout@v4
-    - name: Build Docker image
-      run: eval "$BUILD"
-    - name: Push to dockerhub
-      run: |
-        docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
-        docker tag opendbc ghcr.io/commaai/opendbc:latest
-        docker push ghcr.io/commaai/opendbc:latest
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # need master to get diff
+      - uses: ./.github/workflows/cache
+      - name: Run mutation tests
+        timeout-minutes: 5
+        run: |
+          source setup.sh
+          scons -j8
+          cd opendbc/safety/tests && ./mutation.sh

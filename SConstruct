@@ -1,12 +1,12 @@
 import os
 import subprocess
 import sysconfig
+import platform
 import numpy as np
 
-zmq = 'zmq'
 arch = subprocess.check_output(["uname", "-m"], encoding='utf8').rstrip()
-
-cereal_dir = Dir('.')
+if platform.system() == "Darwin":
+  arch = "Darwin"
 
 python_path = sysconfig.get_paths()['include']
 cpppath = [
@@ -25,13 +25,22 @@ AddOption('--asan',
           action='store_true',
           help='turn on ASAN')
 
+# safety options
+AddOption('--ubsan',
+          action='store_true',
+          help='turn on UBSan')
+
+AddOption('--mutation',
+          action='store_true',
+          help='generate mutation-ready code')
+
 ccflags_asan = ["-fsanitize=address", "-fno-omit-frame-pointer"] if GetOption('asan') else []
 ldflags_asan = ["-fsanitize=address"] if GetOption('asan') else []
 
 env = Environment(
   ENV=os.environ,
-  CC='clang',
-  CXX='clang++',
+  CC='gcc',
+  CXX='g++',
   CCFLAGS=[
     "-g",
     "-fPIC",
@@ -40,6 +49,7 @@ env = Environment(
     "-Werror",
     "-Wshadow",
     "-Wno-vla-cxx-extension",
+    "-Wno-unknown-warning-option",  # for compatibility across compiler versions
   ] + ccflags_asan,
   LDFLAGS=ldflags_asan,
   LINKFLAGS=ldflags_asan,
@@ -54,12 +64,7 @@ env = Environment(
 )
 
 common = ''
-Export('env', 'zmq', 'arch', 'common')
-
-cereal = [File('#cereal/libcereal.a')]
-messaging = [File('#cereal/libmessaging.a')]
-Export('cereal', 'messaging')
-
+Export('env', 'arch', 'common')
 
 envCython = env.Clone()
 envCython["CPPPATH"] += [np.get_include()]
@@ -80,6 +85,4 @@ envCython["LIBS"] = python_libs
 
 Export('envCython')
 
-
-SConscript(['cereal/SConscript'])
-SConscript(['opendbc/can/SConscript'])
+SConscript(['SConscript'])
