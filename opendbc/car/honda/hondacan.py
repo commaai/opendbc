@@ -159,8 +159,8 @@ def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_
       # Shows the distance bars, TODO: stock camera shows updates temporarily while disabled
       acc_hud_values['ACC_ON'] = int(enabled)
       acc_hud_values['PCM_SPEED'] = pcm_speed * CV.MS_TO_KPH
-      acc_hud_values['PCM_GAS'] = 54 if hud.pcm_accel = 0 else hud.pcm_accel
-      acc_hud_values['SET_ME_X01'] = 1 if hud.pcm_accel = 0 else 0 # see if faults stop by matching stock ACC
+      acc_hud_values['PCM_GAS'] = 54 if hud.pcm_accel == 0 else hud.pcm_accel
+      acc_hud_values['SET_ME_X01'] = 1 if hud.pcm_accel == 0 else 0 # see if faults stop by matching stock ACC
       acc_hud_values['FCM_OFF'] = acc_hud['FCM_OFF']
       acc_hud_values['FCM_OFF_2'] = acc_hud['FCM_OFF_2']
       acc_hud_values['FCM_PROBLEM'] = acc_hud['FCM_PROBLEM']
