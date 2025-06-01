@@ -1,8 +1,9 @@
 import numpy as np
 from collections import namedtuple
+import math
 
 from opendbc.can.packer import CANPacker
-from opendbc.car import Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
+from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
 from opendbc.car.honda import hondacan
 from opendbc.car.honda.values import CruiseButtons, VISUAL_HUD, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, HONDA_NIDEC_ALT_PCM_ACCEL, HONDA_NIDEC_HYBRID, \
                                      CarControllerParams
@@ -121,6 +122,7 @@ class CarController(CarControllerBase):
     self.last_torque = 0.0
     self.blend_pcm_accel = 0.0
     self.blend_pcm_speed = 0.0
+    self.pitch = 0.0
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -140,9 +142,13 @@ class CarController(CarControllerBase):
 
     # steerfactor = 400 if actuators.torque == 0 else abs ( self.params.STEER_MAX / max ( abs(actuators.torque), abs(apply_torque) ) )
 
+    if len(CC.orientationNED) == 3:
+      self.pitch = CC.orientationNED[1]
+
     if CC.longActive:
       # accel = float (np.clip ( actuators.accel, -100.0, np.interp (steerfactor, [ 1.0, 4.0 ], [-3.5, 3.5]) ) )
-      accel = float (np.clip ( actuators.accel, -3.5, 2) )
+      hill_brake = math.sin(self.pitch) * ACCELERATION_DUE_TO_GRAVITY
+      accel = float (np.clip ( actuators.accel + hill_brake, -3.5, 2) )
       if accel > max ( 0, CS.out.aEgo) + 0.1:
         accel = 10000.0
       gas, brake = compute_gas_brake(accel, CS.out.vEgo, self.CP.carFingerprint)
