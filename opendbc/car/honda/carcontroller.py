@@ -119,6 +119,7 @@ class CarController(CarControllerBase):
     self.brake = 0.0
     self.last_torque = 0.0
     self.pitch = 0.0
+    self.gas_pedal_force = 0.0
     self.gasonly_pid = PIDController (k_p=([0,], [0,]),
                                       k_i=(GasOnlyTuning.kiBP, GasOnlyTuning.kiV),
                                       k_f=1, rate=2 / DT_CTRL )
@@ -262,7 +263,7 @@ class CarController(CarControllerBase):
 
     new_actuators = actuators.as_builder()
     new_actuators.speed = self.speed
-    new_actuators.accel = self.accel
+    new_actuators.accel = self.gas_pedal_force
     new_actuators.gas = self.gas
     new_actuators.brake = self.brake
     new_actuators.torque = self.last_torque
