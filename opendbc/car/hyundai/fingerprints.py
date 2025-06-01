@@ -153,7 +153,6 @@ FW_VERSIONS = {
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00AEH MFC  AT USA LHD 1.00 1.01 95740-G2600 190819',
       b'\xf1\x00AEH MFC  AT USA LHD 1.00 1.00 95740-G2700 201027',
-      b'\xf1\x00AEH MFC  AT USA LHD 1.00 1.01 95740-G2600 190819',
     ],
   },
   CAR.HYUNDAI_SONATA: {
