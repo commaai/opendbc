@@ -1,7 +1,6 @@
 from typing import NamedTuple
 
 from opendbc.car.chrysler.values import CAR as CHRYSLER
-from opendbc.car.gwm.values import CAR as GWM
 from opendbc.car.gm.values import CAR as GM
 from opendbc.car.ford.values import CAR as FORD
 from opendbc.car.honda.values import CAR as HONDA
@@ -62,8 +61,6 @@ routes = [
   CarTestRoute("83a4e056c7072678|2023-11-13--16-51-33", FORD.FORD_MUSTANG_MACH_E_MK1),
   CarTestRoute("37998aa0fade36ab/00000000--48f927c4f5", FORD.FORD_RANGER_MK2),
   #TestRoute("f1b4c567731f4a1b|2018-04-30--10-15-35", FORD.FUSION),
-
-  CarTestRoute("5046371b6e9f0f3e/0000006f--fed43edbf9", GWM.GWM_HAVAL_H6_PHEV_3RD_GEN),
 
   CarTestRoute("7cc2a8365b4dd8a9|2018-12-02--12-10-44", GM.GMC_ACADIA),
   CarTestRoute("aa20e335f61ba898|2019-02-05--16-59-04", GM.BUICK_REGAL),
