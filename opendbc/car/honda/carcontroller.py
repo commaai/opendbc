@@ -136,11 +136,9 @@ class CarController(CarControllerBase):
 
     if CC.longActive:
       accel = actuators.accel
-      aTarget = actuators.aTarget
       gas, brake = compute_gas_brake(actuators.accel, CS.out.vEgo, self.CP.carFingerprint)
     else:
       accel = 0.0
-      aTarget = 0.0
       gas, brake = 0.0, 0.0
 
     # *** rate limit steer ***
@@ -234,12 +232,10 @@ class CarController(CarControllerBase):
           stopping = (actuators.longControlState == LongCtrlState.stopping)
           self.stopping_counter = self.stopping_counter + 1 if stopping else 0
 
-          stoppingDecelAmount = max ( self.CP.stopAccel, self.stopping_counter * -self.CP.stoppingDecelRate / 50 ) # CC frame rate 50x speed of longplanner
-          self.accel = float(np.clip(aTarget + stoppingDecelAmount, self.params.BOSCH_ACCEL_MIN, self.params.BOSCH_ACCEL_MAX))
           self.gas = float(np.interp(accel + wind_brake_ms2 + hill_brake, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_GAS_LOOKUP_V))
 
           can_sends.extend(hondacan.create_acc_commands(self.packer, self.CAN, CC.enabled, CC.longActive, self.accel, self.gas,
-                                                        self.stopping_counter, self.CP.carFingerprint, gas_pedal_force))
+                                                        self.stopping_counter, self.CP.carFingerprint, gas_pedal_force, cs.out.vEgo))
 
         else:
           apply_brake = np.clip(self.brake_last - wind_brake, 0.0, 1.0)
