@@ -29,7 +29,8 @@ class CarInterface(CarInterfaceBase):
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
     ret.brand = "ford"
 
-    ret.radarUnavailable = Bus.radar not in DBC[candidate]
+    ret.radarUnavailable = Bus.radar not in DBC[candidate] or \
+                            Bus.radar == RADAR.DELPHI_MRR_64  # TODO: this needs final verification before we can ship it
     ret.steerControlType = structs.CarParams.SteerControlType.angle
     ret.steerActuatorDelay = 0.2
     ret.steerLimitTimer = 1.0
@@ -43,6 +44,7 @@ class CarInterface(CarInterfaceBase):
       # MRR_Header_Timestamps->CAN_DET_TIME_SINCE_MEAS reports 61.3 ms
       ret.radarDelay = 0.06
 
+    # TODO: verify this
     if not ret.radarUnavailable and DBC[candidate][Bus.radar] == RADAR.DELPHI_MRR_64:
       # average of 20 Hz radar timestep / 4 scan modes = 100 ms
       ret.radarDelay = 0.1
