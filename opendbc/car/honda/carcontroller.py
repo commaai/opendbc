@@ -239,7 +239,7 @@ class CarController(CarControllerBase):
           pump_send = ( apply_brake > 0 ) if self.CP.carFingerprint in HONDA_NIDEC_HYBRID else pump_on
           can_sends.append(hondacan.create_brake_command(self.packer, self.CAN, apply_brake, pump_send,
                                                          pcm_override, pcm_cancel_cmd, fcw_display,
-                                                         self.CP.carFingerprint, CS.stock_brake, CS.out.vEgo))
+                                                         self.CP.carFingerprint, CS.stock_brake))
           self.apply_brake_last = apply_brake
           self.brake = apply_brake / self.params.NIDEC_BRAKE_MAX
 
@@ -284,8 +284,8 @@ class CarController(CarControllerBase):
       hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
                     hud_control.lanesVisible, fcw_display, acc_alert, steer_required, hud_control.leadDistanceBars)
 
-      pcm_speed_send = 0.0 if (self.brake_last > wind_brake ) and ( self.CP.carFingerprint in HONDA_NIDEC_HYBRID ) else int ( pcm_speed )
-      can_sends.extend(hondacan.create_ui_commands(self.packer, self.CAN, self.CP, CC.enabled, pcm_speed_send, hud, CS.is_metric, CS.acc_hud, CS.lkas_hud))
+      # pcm_speed_send = 0.0 if (self.brake_last > wind_brake ) and ( self.CP.carFingerprint in HONDA_NIDEC_HYBRID ) else int ( pcm_speed )
+      can_sends.extend(hondacan.create_ui_commands(self.packer, self.CAN, self.CP, CC.enabled, pcm_speed, hud, CS.is_metric, CS.acc_hud, CS.lkas_hud, CS.out.vEgo))
 
       if self.CP.openpilotLongitudinalControl and self.CP.carFingerprint not in HONDA_BOSCH:
         self.speed = pcm_speed * 3.6 # conversion done in hondacan
