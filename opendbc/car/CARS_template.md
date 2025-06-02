@@ -54,9 +54,10 @@ Some notable works-in-progress:
   * 2023-25 Honda CR-V (CAN-FD), commaai/opendbc#2117
   * 2023-25 Honda CR-V Hybrid (CAN-FD), commaai/opendbc#2119
   * 2021-25 Honda Odyssey, commaai/opendbc#2170
+  * 2026 Honda Passport (CAN-FD), commaai/opendbc#2349
   * 2023-25 Honda Pilot (CAN-FD), commaai/opendbc#2141
   * Camera ACC stability improvements, commaai/opendbc#2192
-  * Alpha longitudinal stability improvements, commaai/opendbc#2179 and commaai/opendbc#2165
+  * Alpha longitudinal stability improvements, commaai/opendbc#2347 and commaai/opendbc#2165
 
 ## Incompatible
 
