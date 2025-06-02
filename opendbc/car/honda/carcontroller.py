@@ -219,7 +219,8 @@ class CarController(CarControllerBase):
           if self.last_gas > 0:
             gas_pedal_force = self.gasonly_pid.update(gas_error, speed=CS.out.vEgo, feedforward=self.accel)
           else:
-            gas_pedal_force = self.accelself.gas = float(np.interp(gas_pedal_force, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_GAS_LOOKUP_V))
+            gas_pedal_force = self.accel
+          self.gas = float(np.interp(gas_pedal_force, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_GAS_LOOKUP_V))
           self.last_gas = self.gas
 
           stopping = actuators.longControlState == LongCtrlState.stopping
