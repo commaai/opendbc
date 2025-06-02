@@ -89,7 +89,7 @@ static bool tesla_get_quality_flag_valid(const CANPacket_t *to_push) {
     valid = (GET_BYTE(to_push, 5) & 0x1U) == 0x1U;  // ESP_wheelSpeedsQF
   } else if (addr == 0x39d) {
     int user_brake_status = GET_BYTE(to_push, 2) & 0x03U;
-    valid = user_brake_status != 0 && user_brake_status != 3;  // IBST_driverBrakeApply=NOT_INIT_OR_OFF, FAULT
+    valid = (user_brake_status != 0) && (user_brake_status != 3);  // IBST_driverBrakeApply=NOT_INIT_OR_OFF, FAULT
   } else {
   }
   return valid;
