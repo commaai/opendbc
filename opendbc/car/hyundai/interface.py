@@ -149,7 +149,8 @@ class CarInterface(CarInterfaceBase):
 
     # Dashcam cars are missing a test route, or otherwise need validation
     # TODO: Optima Hybrid 2017 uses a different SCC12 checksum
-    ret.dashcamOnly = candidate in {CAR.KIA_OPTIMA_H, }
+    if candidate in (CAR.KIA_OPTIMA_H,):
+      ret.dashcamOnly = True
 
     return ret
 
