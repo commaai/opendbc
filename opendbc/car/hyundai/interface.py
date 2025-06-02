@@ -33,6 +33,10 @@ class CarInterface(CarInterfaceBase):
     cam_can = CanBus(None, fingerprint).CAM
     lka_steering = 0x50 in fingerprint[cam_can] or 0x110 in fingerprint[cam_can]
     CAN = CanBus(None, fingerprint, lka_steering)
+    print(cam_can, lka_steering, CAN)
+
+    # assert 0x50 not in fingerprint[CAN.ACAN] and 0x110 not in fingerprint[CAN.ACAN]
+    # assert 0x50 not in fingerprint[CAN.ECAN] and 0x110 not in fingerprint[CAN.ECAN]
 
     if ret.flags & HyundaiFlags.CANFD:
       # Shared configuration for CAN-FD cars
@@ -58,6 +62,8 @@ class CarInterface(CarInterfaceBase):
           ret.flags |= HyundaiFlags.CANFD_ALT_BUTTONS.value
         if not ret.flags & HyundaiFlags.RADAR_SCC:
           ret.flags |= HyundaiFlags.CANFD_CAMERA_SCC.value
+          # sanity check SCC_CONTROL isn't on E-CAN (powertrain bus)
+          ret.dashcamOnly = 0x1a0 in fingerprint[CAN.ECAN]
 
       # Some LKA steering cars have alternative messages for gear checks
       # ICE cars do not have 0x130; GEARS message on 0x40 or 0x70 instead
@@ -151,6 +157,8 @@ class CarInterface(CarInterfaceBase):
     # TODO: Optima Hybrid 2017 uses a different SCC12 checksum
     ret.dashcamOnly = candidate in {CAR.KIA_OPTIMA_H, }
 
+    print('ret.flags:', ret.flags)
+    # raise Exception
     return ret
 
   @staticmethod
