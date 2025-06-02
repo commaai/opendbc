@@ -6,7 +6,7 @@ import importlib
 import numpy as np
 from collections.abc import Callable
 
-from opendbc.can.packer import CANPacker  # pylint: disable=import-error
+from opendbc.can.packer import CANPacker
 from opendbc.safety import ALTERNATIVE_EXPERIENCE
 from opendbc.safety.tests.libsafety import libsafety_py
 

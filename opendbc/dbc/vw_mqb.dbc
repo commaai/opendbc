@@ -79,6 +79,21 @@ BO_ 279 ACC_10: 8 XXX
  SG_ AWV_AWA_Anf_Lenkmomoffset : 47|9@1+ (0.01,0) [0.00|5.11] "Unit_NewtoMeter"  XXX
  SG_ PCF_Time_to_collision : 56|8@1+ (0.01,0) [0|2.5] "Unit_Secon"  XXX
 
+BO_ 304 PLA_01: 8 XXX
+ SG_ CHECKSUM : 0|8@1+ (1,0) [0|255] ""  XXX
+ SG_ COUNTER : 8|4@1+ (1,0) [0|15] ""  XXX
+ SG_ PLA_Status_PLA_ESP : 12|4@1+ (1.0,0.0) [0.0|15] ""  XXX
+ SG_ PLA_LW_Soll : 16|13@1+ (0.1,0) [0.0|819.1] "Unit_DegreOfArc"  XXX
+ SG_ PLA_VZ_LW_Soll : 31|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ PLA_Status_PLA_EPS : 32|4@1+ (1.0,0.0) [0.0|15] ""  XXX
+ SG_ PLA_Bremsmoment : 36|13@1+ (4,0) [0|32760] "Unit_NewtoMeter"  XXX
+ SG_ PLA_Bremsverzoegerung : 36|7@1+ (0.1,0) [0.0|12.0] "Unit_MeterPerSeconSquar"  XXX
+ SG_ PLA_Anf_Bremsverzoegerung : 43|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ PLA_BremsMom_Verzoeg : 50|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ PLA_Anhalten : 51|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+ SG_ PLA_Anhalteweg : 52|11@1+ (0.01,0) [0.01|20.45] "Unit_Meter"  XXX
+ SG_ PLA_01_Signal_red_cyclic : 63|1@1+ (1.0,0.0) [0.0|1] ""  XXX
+
 BO_ 679 ACC_13: 8 XXX
  SG_ ACC_Regelgeschw : 12|10@1+ (0.32,0) [0|327.04] "Unit_KiloMeterPerHour"  XXX
  SG_ ACC_Einheit_maxSetzgeschw : 22|1@1+ (1,0) [0|1] ""  XXX
