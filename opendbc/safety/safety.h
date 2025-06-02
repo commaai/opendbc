@@ -438,10 +438,10 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   cruise_button_prev = 0;
   desired_torque_last = 0;
   rt_torque_last = 0;
+  rt_angle_msgs = 0;
   ts_angle_check_last = 0;
   desired_angle_last = 0;
   ts_torque_check_last = 0;
-  rt_angle_msgs = 0;
   ts_steer_req_mismatch_last = 0;
   valid_steer_req_count = 0;
   invalid_steer_req_count = 0;
