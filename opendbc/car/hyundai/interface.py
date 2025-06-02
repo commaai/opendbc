@@ -1,4 +1,5 @@
 from opendbc.car import Bus, get_safety_config, structs
+from opendbc.car.carlog import carlog
 from opendbc.car.hyundai.hyundaicanfd import CanBus
 from opendbc.car.hyundai.values import HyundaiFlags, CAR, DBC, \
                                                    CANFD_UNSUPPORTED_LONGITUDINAL_CAR, \
@@ -58,6 +59,10 @@ class CarInterface(CarInterfaceBase):
           ret.flags |= HyundaiFlags.CANFD_ALT_BUTTONS.value
         if not ret.flags & HyundaiFlags.RADAR_SCC:
           ret.flags |= HyundaiFlags.CANFD_CAMERA_SCC.value
+
+          # sanity check SCC_CONTROL isn't on E-CAN (powertrain bus)
+          carlog.error('dashcamOnly: invalid CAN topology. Incorrect harness?')
+          ret.dashcamOnly = 0x1a0 in fingerprint[CAN.ECAN]
 
       # Some LKA steering cars have alternative messages for gear checks
       # ICE cars do not have 0x130; GEARS message on 0x40 or 0x70 instead
