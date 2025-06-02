@@ -41,6 +41,10 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
   ANGLE_RATE_UP = None
   ANGLE_RATE_DOWN = None
 
+  # Real time limits
+  RT_INTERVAL = 250000
+  LATERAL_FREQUENCY = 50  # Hz
+
   # Long control limits
   MAX_ACCEL = 2.0
   MIN_ACCEL = -3.48
@@ -338,6 +342,23 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
         # Recover
         self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+
+  def test_rt_limits(self):
+    self.safety.set_timer(0)
+    self.safety.set_controls_allowed(True)
+    max_rt_msgs = int(self.LATERAL_FREQUENCY * self.RT_INTERVAL / 1e6 * 1.2)  # 1.2x buffer
+    for i in range(max_rt_msgs * 2):
+      should_tx = i <= max_rt_msgs
+      self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(0, True)))
+
+    # Test recovery after sending too many messages
+    for rt_ts in np.arange(0, self.RT_INTERVAL * 2, 10000):
+      should_tx = rt_ts > self.RT_INTERVAL
+      self.safety.set_timer(rt_ts)
+      self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(0, True)))
+      if should_tx:
+        # Break before we block again
+        break
 
 
 class TestTeslaStockSafety(TestTeslaSafetyBase):

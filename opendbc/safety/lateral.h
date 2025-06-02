@@ -310,7 +310,7 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
 
       // every RT_INTERVAL set the new limits
       uint32_t ts_elapsed = get_ts_elapsed(ts, ts_angle_check_last);
-      if (ts_elapsed > MAX_RT_INTERVAL) {
+      if (ts_elapsed >= MAX_RT_INTERVAL) {
         ts_angle_check_last = ts;
         rt_angle_msgs = 0;
       }
