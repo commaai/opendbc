@@ -280,8 +280,8 @@ extern bool heartbeat_engaged;             // openpilot enabled, passed in heart
 extern uint32_t heartbeat_engaged_mismatches;  // count of mismatches between heartbeat_engaged and controls_allowed
 
 // for safety modes with angle steering control
-extern uint32_t ts_angle_check_last;
 extern uint32_t rt_angle_msgs;
+extern uint32_t ts_angle_check_last;
 extern int desired_angle_last;
 extern struct sample_t angle_meas;         // last 6 steer angles/curvatures
 

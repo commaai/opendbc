@@ -309,20 +309,18 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
     {
       // *** angle real time rate limit check ***
       int max_rt_msgs = (float)limits.frequency * MAX_RT_INTERVAL / 1e6 * 1.2;  // 1.2x buffer
-//      printf("RT msgs: %d, max: %d\n", rt_angle_msgs, max_rt_msgs);
       if ((int)rt_angle_msgs > max_rt_msgs) {
-//        printf("violation!\n");
         violation = true;
         desired_angle_last = angle_meas.values[0];  // reset to last measured angle
       }
 
       rt_angle_msgs += 1;
 
-      // every RT_INTERVAL set the new limits
+      // every RT_INTERVAL reset message counter
       uint32_t ts_elapsed = get_ts_elapsed(ts, ts_angle_check_last);
       if (ts_elapsed >= MAX_RT_INTERVAL) {
-        ts_angle_check_last = ts;
         rt_angle_msgs = 0;
+        ts_angle_check_last = ts;
       }
     }
   }

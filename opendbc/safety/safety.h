@@ -74,8 +74,8 @@ bool heartbeat_engaged = false;             // openpilot enabled, passed in hear
 uint32_t heartbeat_engaged_mismatches = 0;  // count of mismatches between heartbeat_engaged and controls_allowed
 
 // for safety modes with angle steering control
-uint32_t ts_angle_check_last = 0;
 uint32_t rt_angle_msgs = 0;
+uint32_t ts_angle_check_last = 0;
 int desired_angle_last = 0;
 struct sample_t angle_meas;         // last 6 steer angles/curvatures
 
