@@ -124,7 +124,19 @@ def create_lfahda_cluster(packer, CAN, enabled):
   }
   return packer.make_can_msg("LFAHDA_CLUSTER", CAN.ECAN, values)
 
-def create_ccnc(packer, CAN, openpilotLongitudinalControl, enabled, hud, leftBlinker, rightBlinker, msg_161, msg_162, is_metric, out):
+def meters_to_ui_units(meters: float, nominal_m: float = 1.7, center_ui: int = 15, scale_per_m: float = 15/1.7) -> int:
+  value = abs(int(round(center_ui + (meters - nominal_m) * scale_per_m)))
+  return value
+
+def normalize_lane_lines(left_ui: float, right_ui: float, total_ui: int = 30) -> tuple[int, int]:
+  total_input = left_ui + right_ui
+  if total_input == 0:
+    return total_ui // 2, total_ui // 2
+  left_scaled = round((left_ui / total_input) * total_ui)
+  right_scaled = total_ui - left_scaled
+  return left_scaled, right_scaled
+
+def create_ccnc(packer, CAN, openpilotLongitudinalControl, enabled, hud, leftBlinker, rightBlinker, msg_161, msg_162, msg_1b5, is_metric, out):
   for f in {"FAULT_LSS", "FAULT_HDA", "FAULT_DAS", "FAULT_LFA", "FAULT_DAW"}:
     msg_162[f] = 0
 
@@ -147,15 +159,44 @@ def create_ccnc(packer, CAN, openpilotLongitudinalControl, enabled, hud, leftBli
     "LKA_ICON": 0,
     "LFA_ICON": 2 if enabled else 0,
     "CENTERLINE": 1 if enabled else 0,
-    "LANELINE_LEFT": (1 if not hud.leftLaneVisible else 4 if hud.leftLaneDepart else 0 if not enabled else
-                      2 if out.leftBlindspot or out.vEgo < LANE_CHANGE_SPEED_MIN else 6),
-    "LANELINE_RIGHT": (1 if not hud.rightLaneVisible else 4 if hud.rightLaneDepart else 0 if not enabled else
-                       2 if out.rightBlindspot or out.vEgo < LANE_CHANGE_SPEED_MIN else 6),
+    "LANELINE_LEFT": (0 if not enabled else 1 if not hud.leftLaneVisible else 4 if hud.leftLaneDepart else 6 if leftBlinker or rightBlinker else 2),
+    "LANELINE_RIGHT": (0 if not enabled else 1 if not hud.rightLaneVisible else 4 if hud.rightLaneDepart else 6 if leftBlinker or rightBlinker else 2),
+    "LCA_LEFT_ICON": (0 if not enabled or out.vEgo < LANE_CHANGE_SPEED_MIN else 1 if out.leftBlindspot else 2 if leftBlinker or rightBlinker else 4),
+    "LCA_RIGHT_ICON": (0 if not enabled or out.vEgo < LANE_CHANGE_SPEED_MIN else 1 if out.rightBlindspot else 2 if leftBlinker or rightBlinker else 4),
     "LCA_LEFT_ARROW": 2 if leftBlinker else 0,
     "LCA_RIGHT_ARROW": 2 if rightBlinker else 0,
-    "LANE_LEFT": 1 if leftBlinker else 0,
-    "LANE_RIGHT": 1 if rightBlinker else 0,
   })
+
+  if enabled and (leftBlinker or rightBlinker):
+    leftlanequal = msg_1b5["LEFT_QUAL"]
+    rightlanequal = msg_1b5["RIGHT_QUAL"]
+    leftlaneraw = msg_1b5["LEFT_POSITION"]
+    rightlaneraw = msg_1b5["RIGHT_POSITION"]
+    leftlane = meters_to_ui_units(leftlaneraw)
+    rightlane = meters_to_ui_units(rightlaneraw)
+
+    if leftlanequal not in (2, 3):
+      leftlane = 0
+    if rightlanequal not in (2, 3):
+      rightlane = 0
+
+    if leftlaneraw == -2.0248375:
+      leftlane = 30 - rightlane
+    if rightlaneraw == 2.0248375:
+      rightlane = 30 - leftlane
+
+    if leftlaneraw == rightlaneraw == 0:
+      leftlane = 15
+      rightlane = 15
+    elif leftlaneraw == 0:
+      leftlane = 30 - rightlane
+    elif rightlaneraw == 0:
+      rightlane = 30 - leftlane
+
+    leftlane, rightlane = normalize_lane_lines(leftlane, rightlane)
+
+    msg_161["LANELINE_LEFT_POSITION"] = leftlane
+    msg_161["LANELINE_RIGHT_POSITION"] = rightlane
 
   if hud.leftLaneDepart or hud.rightLaneDepart:
     msg_162["VIBRATE"] = 1
@@ -170,20 +211,26 @@ def create_ccnc(packer, CAN, openpilotLongitudinalControl, enabled, hud, leftBli
     if msg_161["SOUNDS_3"] == 5:  # DISABLE ISLA SOUND
       msg_161["SOUNDS_3"] = 0
 
+    main_cruise_enabled = out.cruiseState.available
+
     msg_161.update({
       "SETSPEED": 3 if enabled else 1,
-      "SETSPEED_HUD": 2 if enabled else 1,
-      "SETSPEED_SPEED": 25 if (s := round(out.vCruiseCluster * (1 if is_metric else CV.KPH_TO_MPH))) > 100 else s,
+      "SETSPEED_HUD": 0 if not main_cruise_enabled else 2 if enabled else 1,
+      "SETSPEED_SPEED": (
+        255 if not main_cruise_enabled else
+        (40 if is_metric else 25) if (s := round(out.vCruiseCluster * (1 if is_metric else CV.KPH_TO_MPH))) > (145 if is_metric else 90) else s
+      ),
       "DISTANCE": hud.leadDistanceBars,
-      "DISTANCE_SPACING": 1 if enabled else 0,
-      "DISTANCE_LEAD": 2 if enabled and hud.leadVisible else 1 if enabled else 0,
-      "DISTANCE_CAR": 2 if enabled else 1,
+      "DISTANCE_SPACING": 0 if not main_cruise_enabled else 1 if enabled else 3,
+      "DISTANCE_LEAD": 0 if not main_cruise_enabled else 2 if enabled and hud.leadVisible else 1 if hud.leadVisible else 0,
+      "DISTANCE_CAR": 0 if not main_cruise_enabled else 2 if enabled else 1,
       "SLA_ICON": 0,
       "NAV_ICON": 0,
       "TARGET": 0,
     })
 
-    msg_162["LEAD"] = 0
+    msg_162["LEAD"] = 0 if not main_cruise_enabled else 2 if enabled else 1
+    msg_162["LEAD_DISTANCE"] = msg_1b5["LEAD_DISTANCE"]
 
   return [packer.make_can_msg(msg, CAN.ECAN, data) for msg, data in [("CCNC_0x161", msg_161), ("CCNC_0x162", msg_162)]]
 
