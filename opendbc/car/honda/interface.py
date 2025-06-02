@@ -36,6 +36,9 @@ class CarInterface(CarInterfaceBase):
 
     CAN = CanBus(ret, fingerprint)
 
+    # Recent test route is needed to undashcam these cars
+    ret.dashcamOnly = candidate in HONDA_BOSCH_CANFD and candidate != CAR.ACURA_MDX_4G_MMR
+
     if candidate in HONDA_BOSCH:
       cfgs = [get_safety_config(structs.CarParams.SafetyModel.hondaBosch)]
       if candidate in HONDA_BOSCH_CANFD and CAN.pt >= 4:
