@@ -329,9 +329,6 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
     const int max_angle_can = (max_angle * limits.angle_deg_to_can) + 1.;
 
     violation |= max_limit_check(desired_angle, max_angle_can, -max_angle_can);
-
-    // *** angle real time rate limit check ***
-    violation |= rt_angle_rate_limit_check(limits);
   }
   desired_angle_last = desired_angle;
 
