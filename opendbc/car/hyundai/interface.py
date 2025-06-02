@@ -157,8 +157,6 @@ class CarInterface(CarInterfaceBase):
     if candidate in (CAR.KIA_OPTIMA_H,):
       ret.dashcamOnly = True
 
-    print('ret.flags:', ret.flags)
-    # raise Exception
     return ret
 
   @staticmethod
