@@ -46,7 +46,7 @@ static bool driver_limit_check(int val, int val_last, const struct sample_t *val
 }
 
 // real time check, mainly used for steer torque rate limiter
-static bool rt_rate_limit_check(int val, int val_last, const int MAX_RT_DELTA) {
+static bool rt_torque_rate_limit_check(int val, int val_last, const int MAX_RT_DELTA) {
 
   // *** torque real time rate limit check ***
   int highest_val = MAX(val_last, 0) + MAX_RT_DELTA;
@@ -85,7 +85,7 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
     desired_torque_last = desired_torque;
 
     // *** torque real time rate limit check ***
-    violation |= rt_rate_limit_check(desired_torque, rt_torque_last, limits.max_rt_delta);
+    violation |= rt_torque_rate_limit_check(desired_torque, rt_torque_last, limits.max_rt_delta);
 
     // every RT_INTERVAL set the new limits
     uint32_t ts_elapsed = get_ts_elapsed(ts, ts_torque_check_last);
@@ -145,6 +145,28 @@ bool steer_torque_cmd_checks(int desired_torque, int steer_req, const TorqueStee
     rt_torque_last = 0;
     ts_torque_check_last = ts;
     ts_steer_req_mismatch_last = ts;
+  }
+
+  return violation;
+}
+
+static bool rt_angle_rate_limit_check(AngleSteeringLimits limits) {
+  bool violation = false;
+  uint32_t ts = microsecond_timer_get();
+
+  // *** angle real time rate limit check ***
+  int max_rt_msgs = (float)limits.frequency * MAX_RT_INTERVAL / 1e6 * 1.2;  // 1.2x buffer
+  if ((int)rt_angle_msgs > max_rt_msgs) {
+    violation = true;
+  }
+
+  rt_angle_msgs += 1;
+
+  // every RT_INTERVAL reset message counter
+  uint32_t ts_elapsed = get_ts_elapsed(ts, ts_angle_check_last);
+  if (ts_elapsed >= MAX_RT_INTERVAL) {
+    rt_angle_msgs = 0;
+    ts_angle_check_last = ts;
   }
 
   return violation;
@@ -225,6 +247,9 @@ bool steer_angle_cmd_checks(int desired_angle, bool steer_control_enabled, const
 
     // check for violation;
     violation |= max_limit_check(desired_angle, highest_desired_angle, lowest_desired_angle);
+
+    // *** angle real time rate limit check ***
+    violation |= rt_angle_rate_limit_check(limits);
   }
   desired_angle_last = desired_angle;
 
@@ -281,7 +306,6 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
   const float curvature_factor = get_curvature_factor(fudged_speed, params);
 
   bool violation = false;
-  uint32_t ts = microsecond_timer_get();
 
   if (controls_allowed && steer_control_enabled) {
     // *** ISO lateral jerk limit ***
@@ -306,22 +330,8 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
 
     violation |= max_limit_check(desired_angle, max_angle_can, -max_angle_can);
 
-    {
-      // *** angle real time rate limit check ***
-      int max_rt_msgs = (float)limits.frequency * MAX_RT_INTERVAL / 1e6 * 1.2;  // 1.2x buffer
-      if ((int)rt_angle_msgs > max_rt_msgs) {
-        violation = true;
-      }
-
-      rt_angle_msgs += 1;
-
-      // every RT_INTERVAL reset message counter
-      uint32_t ts_elapsed = get_ts_elapsed(ts, ts_angle_check_last);
-      if (ts_elapsed >= MAX_RT_INTERVAL) {
-        rt_angle_msgs = 0;
-        ts_angle_check_last = ts;
-      }
-    }
+    // *** angle real time rate limit check ***
+    violation |= rt_angle_rate_limit_check(limits);
   }
   desired_angle_last = desired_angle;
 
