@@ -295,7 +295,6 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
 
     violation |= max_limit_check(desired_angle, max_angle_can, -max_angle_can);
 
-    desired_angle_last = desired_angle;
     {
       // *** angle real time rate limit check ***
       int max_rt_msgs = (float)limits.frequency * MAX_RT_INTERVAL / 1e6 * 1.2;  // 1.2x buffer
@@ -316,6 +315,7 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
       }
     }
   }
+  desired_angle_last = desired_angle;
 
   // Angle should either be 0 or same as current angle while not steering
   if (!steer_control_enabled) {
