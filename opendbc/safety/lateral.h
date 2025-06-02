@@ -154,13 +154,13 @@ static bool rt_angle_rate_limit_check(AngleSteeringLimits limits) {
   bool violation = false;
   uint32_t ts = microsecond_timer_get();
 
-  rt_angle_msgs += 1;
-
   // *** angle real time rate limit check ***
   int max_rt_msgs = (float)limits.frequency * MAX_RT_INTERVAL / 1e6 * 1.2 + 1;  // 1.2x buffer
   if ((int)rt_angle_msgs > max_rt_msgs) {
     violation = true;
   }
+
+  rt_angle_msgs += 1;
 
   // every RT_INTERVAL reset message counter
   uint32_t ts_elapsed = get_ts_elapsed(ts, ts_angle_check_last);

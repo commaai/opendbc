@@ -348,7 +348,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     self.safety.set_timer(0)
     self.safety.set_controls_allowed(True)
     max_rt_msgs = int(self.LATERAL_FREQUENCY * self.RT_INTERVAL / 1e6 * 1.2 + 1)  # 1.2x buffer
-    for i in range(1, max_rt_msgs * 2):
+    for i in range(max_rt_msgs * 2):
       should_tx = i <= max_rt_msgs
       self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(0, True)))
 
