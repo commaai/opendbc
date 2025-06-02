@@ -17,11 +17,12 @@ class CarState(CarStateBase):
     self.sccm_wheel_touch = None
     self.vdm_adas_status = None
 
-  def update(self, can_parsers) -> structs.CarState:
+  def update(self, can_parsers) -> tuple[structs.CarState, structs.CarStateSP]:
     cp = can_parsers[Bus.pt]
     cp_cam = can_parsers[Bus.cam]
     cp_adas = can_parsers[Bus.adas]
     ret = structs.CarState()
+    ret_sp = structs.CarStateSP()
 
     # Vehicle speed
     ret.vEgoRaw = cp.vl["ESP_Status"]["ESP_Vehicle_Speed"] * CV.KPH_TO_MS
@@ -89,7 +90,7 @@ class CarState(CarStateBase):
     self.sccm_wheel_touch = copy.copy(cp.vl["SCCM_WheelTouch"])
     self.vdm_adas_status = copy.copy(cp.vl["VDM_AdasSts"])
 
-    return ret
+    return ret, ret_sp
 
   @staticmethod
   def get_can_parsers(CP, CP_SP):

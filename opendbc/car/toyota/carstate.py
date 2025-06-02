@@ -53,11 +53,12 @@ class CarState(CarStateBase):
     self.gvc = 0.0
     self.secoc_synchronization = None
 
-  def update(self, can_parsers) -> structs.CarState:
+  def update(self, can_parsers) -> tuple[structs.CarState, structs.CarStateSP]:
     cp = can_parsers[Bus.pt]
     cp_cam = can_parsers[Bus.cam]
 
     ret = structs.CarState()
+    ret_sp = structs.CarStateSP()
     cp_acc = cp_cam if self.CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR) else cp
 
     if not self.CP.flags & ToyotaFlags.SECOC.value:
@@ -192,7 +193,7 @@ class CarState(CarStateBase):
 
       ret.buttonEvents = create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise})
 
-    return ret
+    return ret, ret_sp
 
   @staticmethod
   def get_can_parsers(CP, CP_SP):

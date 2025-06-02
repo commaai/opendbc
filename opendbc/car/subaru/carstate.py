@@ -19,11 +19,12 @@ class CarState(CarStateBase, MadsCarState):
 
     self.angle_rate_calulator = CanSignalRateCalculator(50)
 
-  def update(self, can_parsers) -> structs.CarState:
+  def update(self, can_parsers) -> tuple[structs.CarState, structs.CarStateSP]:
     cp = can_parsers[Bus.pt]
     cp_cam = can_parsers[Bus.cam]
     cp_alt = can_parsers[Bus.alt]
     ret = structs.CarState()
+    ret_sp = structs.CarStateSP()
 
     throttle_msg = cp.vl["Throttle"] if not (self.CP.flags & SubaruFlags.HYBRID) else cp_alt.vl["Throttle_Hybrid"]
     ret.gas = throttle_msg["Throttle_Pedal"] / 255.
@@ -133,7 +134,7 @@ class CarState(CarStateBase, MadsCarState):
 
     MadsCarState.update_mads(self, ret, can_parsers)
 
-    return ret
+    return ret, ret_sp
 
   @staticmethod
   def get_common_global_body_messages(CP):

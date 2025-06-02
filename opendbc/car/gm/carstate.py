@@ -42,12 +42,13 @@ class CarState(CarStateBase):
           return True
     return False
 
-  def update(self, can_parsers) -> structs.CarState:
+  def update(self, can_parsers) -> tuple[structs.CarState, structs.CarStateSP]:
     pt_cp = can_parsers[Bus.pt]
     cam_cp = can_parsers[Bus.cam]
     loopback_cp = can_parsers[Bus.loopback]
 
     ret = structs.CarState()
+    ret_sp = structs.CarStateSP()
 
     prev_cruise_buttons = self.cruise_buttons
     prev_distance_button = self.distance_button
@@ -161,7 +162,7 @@ class CarState(CarStateBase):
     if ret.vEgo < self.CP.minSteerSpeed:
       ret.lowSpeedAlert = True
 
-    return ret
+    return ret, ret_sp
 
   @staticmethod
   def get_can_parsers(CP, CP_SP):
