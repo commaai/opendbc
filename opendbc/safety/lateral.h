@@ -311,7 +311,6 @@ bool steer_angle_cmd_checks_vm(int desired_angle, bool steer_control_enabled, co
       int max_rt_msgs = (float)limits.frequency * MAX_RT_INTERVAL / 1e6 * 1.2;  // 1.2x buffer
       if ((int)rt_angle_msgs > max_rt_msgs) {
         violation = true;
-        desired_angle_last = angle_meas.values[0];  // reset to last measured angle
       }
 
       rt_angle_msgs += 1;
