@@ -190,6 +190,7 @@ static bool toyota_tx_hook(const CANPacket_t *to_send) {
       {5., 25., 25.},
       {0.36, 0.26, 0.26}
     },
+    .frequency = 100U,  // Hz
   };
 
   const int TOYOTA_LTA_MAX_MEAS_TORQUE = 1500;
