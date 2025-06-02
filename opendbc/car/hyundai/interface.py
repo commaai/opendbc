@@ -26,6 +26,10 @@ class CarInterface(CarInterfaceBase):
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
     ret.brand = "hyundai"
 
+    # "LKA steering" if LKAS or LKAS_ALT messages are seen coming from the camera.
+    # Generally means our LKAS message is forwarded to another ECU (commonly ADAS ECU)
+    # that finally retransmits our steering command in LFA or LFA_ALT to the MDPS.
+    # "LFA steering" if camera directly sends LFA to the MDPS
     cam_can = CanBus(None, fingerprint).CAM
     lka_steering = 0x50 in fingerprint[cam_can] or 0x110 in fingerprint[cam_can]
     CAN = CanBus(None, fingerprint, lka_steering)
