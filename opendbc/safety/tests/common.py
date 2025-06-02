@@ -678,7 +678,7 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
   def _angle_meas_msg(self, angle: float):
     pass
 
-  def _get_steer_angle_max(self, speed):
+  def _get_steer_cmd_angle_max(self, speed):
     return self.STEER_ANGLE_MAX
 
   def _set_prev_desired_angle(self, t):
@@ -763,17 +763,15 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
             self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(angle_cmd, steer_control_enabled)))
 
   def test_angle_violation(self):
-    """Checks that if violation occurs, angle cmd is blocked until reset to 0"""
+    # If violation occurs, angle cmd is blocked until reset to 0. Matches behavior of torque safety modes
     self.safety.set_controls_allowed(True)
 
     for speed in (0., 1., 5., 10., 15., 50.):
       self._tx(self._angle_cmd_msg(0, True))
       self._reset_speed_measurement(speed)
-      # self._reset_angle_measurement(0)
 
-      print('speed', speed)
       for _ in range(20):
-        self.assertFalse(self._tx(self._angle_cmd_msg(self._get_steer_angle_max(speed), True)))
+        self.assertFalse(self._tx(self._angle_cmd_msg(self._get_steer_cmd_angle_max(speed), True)))
       self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
 
 

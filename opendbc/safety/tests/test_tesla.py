@@ -50,7 +50,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
   packer: CANPackerPanda
 
-  def _get_steer_angle_max(self, speed):
+  def _get_steer_cmd_angle_max(self, speed):
     return get_max_angle(max(speed, 1), self.VM)
 
   def setUp(self):
