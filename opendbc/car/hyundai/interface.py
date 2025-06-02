@@ -61,8 +61,10 @@ class CarInterface(CarInterfaceBase):
           ret.flags |= HyundaiFlags.CANFD_CAMERA_SCC.value
 
           # sanity check SCC_CONTROL isn't on E-CAN (powertrain bus)
-          carlog.error('dashcamOnly: invalid CAN topology. Incorrect harness?')
-          ret.dashcamOnly = 0x1a0 in fingerprint[CAN.ECAN]
+          if 0x1a0 in fingerprint[CAN.ECAN]:
+            carlog.error('dashcamOnly: invalid CAN topology. Incorrect harness?')
+            ret.dashcamReason = 'Possibly incorrect harness variant'
+            ret.dashcamOnly = True
 
       # Some LKA steering cars have alternative messages for gear checks
       # ICE cars do not have 0x130; GEARS message on 0x40 or 0x70 instead
