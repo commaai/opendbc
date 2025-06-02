@@ -228,8 +228,9 @@ class CarController(CarControllerBase):
           # perform a gas-only pid
           gas_error = self.accel - CS.out.aEgo
           if self.last_gas > 0:
-              gas_pedal_force = self.gasonly_pid.update(gas_error, speed=CS.out.vEgo, feedforward=self.accel)
-          # gas_pedal_force = self.accel
+            gas_pedal_force = self.gasonly_pid.update(gas_error, speed=CS.out.vEgo, feedforward=self.accel)
+          else:
+            gas_pedal_force = self.accel
           gas_pedal_force += wind_brake_ms2 + hill_brake
           self.gas = float(np.interp(gas_pedal_force, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_GAS_LOOKUP_V))
           self.last_gas = self.gas
