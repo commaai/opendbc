@@ -127,16 +127,12 @@ def create_lfahda_cluster(packer, CAN, enabled):
 def create_ccnc(packer, CAN, openpilotLongitudinalControl, enabled, hud, leftBlinker, rightBlinker, msg_161, msg_162, msg_1b5, is_metric, out):
   for f in {"FAULT_LSS", "FAULT_HDA", "FAULT_DAS", "FAULT_LFA", "FAULT_DAW", "FAULT_ESS"}:
     msg_162[f] = 0
-
   if msg_161["ALERTS_2"] == 5:  # CONSIDER_TAKING_A_BREAK
     msg_161.update({"ALERTS_2": 0, "SOUNDS_2": 0})
-
   if msg_161["ALERTS_3"] == 17:  # DRIVE_CAREFULLY
     msg_161["ALERTS_3"] = 0
-
   if msg_161["ALERTS_5"] in (2, 5):  # WATCH_FOR_SURROUNDING_VEHICLES, USE_SWITCH_OR_PEDAL_TO_ACCELERATE
     msg_161["ALERTS_5"] = 0
-
   if msg_161["SOUNDS_4"] == 2 and msg_161["LFA_ICON"] in (3, 0,):  # LFA BEEPS
     msg_161["SOUNDS_4"] = 0
 
@@ -195,10 +191,8 @@ def create_ccnc(packer, CAN, openpilotLongitudinalControl, enabled, hud, leftBli
   if openpilotLongitudinalControl:
     if msg_161["ALERTS_3"] in (1, 2, 3, 4, 7, 8, 9, 10):  # HIDE ISLA, DISTANCE MESSAGES
       msg_161["ALERTS_3"] = 0
-
     if msg_161["ALERTS_5"] == 4:  # SMART_CRUISE_CONTROL_CONDITIONS_NOT_MET
       msg_161["ALERTS_5"] = 0
-
     if msg_161["SOUNDS_3"] == 5:  # DISABLE ISLA SOUND
       msg_161["SOUNDS_3"] = 0
 
