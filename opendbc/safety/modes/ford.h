@@ -110,7 +110,7 @@ static bool ford_get_quality_flag_valid(const CANPacket_t *to_push) {
                                                                                                 \
   /* no blending at low speed due to lack of torque wind-up and inaccurate current curvature */ \
   .angle_error_min_speed = 10.0,    /* m/s */                                                   \
-  .frequency = 20U,  /* Hz */                                                                   \
+  .frequency = 20U,                                                                             \
                                                                                                 \
   .angle_is_curvature = (limit_lateral_acceleration),                                           \
   .enforce_angle_error = true,                                                                  \
