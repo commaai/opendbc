@@ -155,7 +155,7 @@ def create_ccnc(packer, CAN, openpilotLongitudinalControl, enabled, hud, leftBli
     "LCA_RIGHT_ARROW": 2 if rightBlinker else 0,
   })
 
-  if lfa_icon and (leftBlinker or rightBlinker):
+  if enabled and (leftBlinker or rightBlinker):
     leftlaneraw, rightlaneraw = msg_1b5["LEFT_POSITION"], msg_1b5["RIGHT_POSITION"]
 
     scale_per_m = 15 / 1.7
