@@ -67,7 +67,6 @@ static bool nissan_tx_hook(const CANPacket_t *to_send) {
       {0., 5., 15.},
       {5., 3.5, .4}
     },
-    .frequency = 100U,
   };
 
   bool tx = true;
