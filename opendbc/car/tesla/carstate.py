@@ -22,6 +22,8 @@ class CarState(CarStateBase):
     self.hands_on_level = 0
     self.das_control = None
 
+    self.is3Y = CP.carFingerprint in ["TESLA_MODEL_3", "TESLA_MODEL_Y"]
+
   def update_autopark_state(self, autopark_state: str, cruise_enabled: bool):
     autopark_now = autopark_state in ("ACTIVE", "COMPLETE", "SELFPARK_STARTED")
     if autopark_now and not self.autopark_prev and not self.cruise_enabled_prev:
@@ -111,8 +113,11 @@ class CarState(CarStateBase):
     ret.stockLkas = cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"] == 2  # LANE_KEEP_ASSIST
 
     # Stock Autosteer should be off (includes FSD)
-    ret.invalidLkasSetting = cp_ap_party.vl["DAS_settings"]["DAS_autosteerEnabled"] != 0
-
+    if self.is3Y:
+      ret.invalidLkasSetting = cp_ap_party.vl["DAS_settings"]["DAS_autosteerEnabled"] != 0
+    else:
+      #TODO: Find S/X equivalent
+      pass
     # Buttons # ToDo: add Gap adjust button
 
     # Messages needed by carcontroller
@@ -122,6 +127,7 @@ class CarState(CarStateBase):
 
   @staticmethod
   def get_can_parsers(CP):
+    is3Y = CP.carFingerprint in ["TESLA_MODEL_3", "TESLA_MODEL_Y"]
     party_messages = [
       # sig_address, frequency
       ("DI_speed", 50),
@@ -136,9 +142,11 @@ class CarState(CarStateBase):
       ("DAS_control", 25),
       ("DAS_steeringControl", 50),
       ("DAS_status", 2),
-      ("DAS_settings", 2),
       ("SCCM_steeringAngleSensor", 100),
     ]
+
+    if is3Y:
+      ap_party_messages.append(("DAS_settings", 2))
 
     return {
       Bus.party: CANParser(DBC[CP.carFingerprint][Bus.party], party_messages, CANBUS.party),
