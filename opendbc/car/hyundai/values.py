@@ -320,7 +320,7 @@ class CAR(Platforms):
     flags=HyundaiFlags.MANDO_RADAR | HyundaiFlags.CHECKSUM_CRC8,
   )
   HYUNDAI_SONATA_2024 = HyundaiCanFDPlatformConfig(
-    [HyundaiCarDocs("Hyundai Sonata 2024-25", "All", car_parts=CarParts.common([CarHarness.hyundai_a]))],
+    [HyundaiCarDocs("Hyundai Sonata 2024-25", car_parts=CarParts.common([CarHarness.hyundai_a]))],
     CarSpecs(mass=1556, wheelbase=2.84, steerRatio=12.81),
     flags=HyundaiFlags.CCNC,
   )
@@ -360,7 +360,7 @@ class CAR(Platforms):
     flags=HyundaiFlags.MANDO_RADAR | HyundaiFlags.CHECKSUM_CRC8 | HyundaiFlags.HYBRID,
   )
   HYUNDAI_SONATA_HEV_2024 = HyundaiCanFDPlatformConfig(
-    [HyundaiCarDocs("Hyundai Sonata Hybrid 2024-25", "All", car_parts=CarParts.common([CarHarness.hyundai_a]))],
+    [HyundaiCarDocs("Hyundai Sonata Hybrid 2024-25", car_parts=CarParts.common([CarHarness.hyundai_a]))],
     CarSpecs(mass=1616, wheelbase=2.84, steerRatio=13.27),
     flags=HyundaiFlags.CCNC,
   )
@@ -417,7 +417,7 @@ class CAR(Platforms):
     flags=HyundaiFlags.CHECKSUM_CRC8,
   )
   KIA_K5_2025 = HyundaiCanFDPlatformConfig(
-    [HyundaiCarDocs("Kia K5 2025", "Highway Driving Assist", car_parts=CarParts.common([CarHarness.hyundai_m]))],
+    [HyundaiCarDocs("Kia K5 2025", car_parts=CarParts.common([CarHarness.hyundai_m]))],
     CarSpecs(mass=3230 * CV.LB_TO_KG, wheelbase=2.85, steerRatio=13.27),
     flags=HyundaiFlags.CCNC,
   )
