@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import random
 import unittest
 import numpy as np
 
@@ -50,6 +51,9 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
   packer: CANPackerPanda
 
+  def _get_steer_cmd_angle_max(self, speed):
+    return get_max_angle(max(speed, 1), self.VM)
+
   def setUp(self):
     self.VM = VehicleModel(get_safety_CP())
     self.packer = CANPackerPanda("tesla_model3_party")
@@ -74,7 +78,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
   def _user_brake_msg(self, brake, quality_flag: bool = True):
     values = {"IBST_driverBrakeApply": 2 if brake else 1}
     if not quality_flag:
-      values["IBST_driverBrakeApply"] = 3  # FAULT
+      values["IBST_driverBrakeApply"] = random.choice((0, 3))  # NOT_INIT_OR_OFF, FAULT
     return self.packer.make_can_msg_panda("IBST_status", 0, values)
 
   def _speed_msg(self, speed):
