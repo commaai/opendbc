@@ -38,8 +38,6 @@ class CarInterface(CarInterfaceBase):
     ret.longitudinalTuning.kiV = [0.5]
 
     # TODO: verify MRR_64 before it's used for longitudinal control
-    ret.radarUnavailable = Bus.radar not in DBC[candidate]
-    if not ret.radarUnavailable:
       if DBC[candidate][Bus.radar] == RADAR.DELPHI_MRR:
         # average of 33.3 Hz radar timestep / 4 scan modes = 60 ms
         # MRR_Header_Timestamps->CAN_DET_TIME_SINCE_MEAS reports 61.3 ms
