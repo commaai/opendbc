@@ -674,7 +674,7 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
       raise unittest.SkipTest
 
   @abc.abstractmethod
-  def _angle_cmd_msg(self, angle: float, enabled: bool):
+  def _angle_cmd_msg(self, angle: float, enabled: bool, increment_timer: bool = True):
     pass
 
   @abc.abstractmethod
@@ -789,14 +789,14 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
 
     for i in range(max_rt_msgs * 2):
       should_tx = i <= max_rt_msgs
-      self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(0, True)))
+      self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
 
     # Test recovery after sending too many messages
     self.safety.set_timer(RT_INTERVAL)
-    self.assertFalse(self._tx(self._angle_cmd_msg(0, True)))
+    self.assertFalse(self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
 
     self.safety.set_timer(RT_INTERVAL + 1)
-    self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
 
 
 class PandaSafetyTest(PandaSafetyTestBase):

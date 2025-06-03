@@ -51,6 +51,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
   INACTIVE_ACCEL = 0.0
 
   cnt_epas = 0
+  cnt_angle_cmd = 0
 
   packer: CANPackerPanda
 
@@ -67,8 +68,11 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
     self.steer_control_types = {d: v for v, d in self.define.dv["DAS_steeringControl"]["DAS_steeringControlType"].items()}
 
-  def _angle_cmd_msg(self, angle: float, state: bool | int, bus: int = 0):
+  def _angle_cmd_msg(self, angle: float, state: bool | int, increment_timer: bool = True, bus: int = 0):
     values = {"DAS_steeringAngleRequest": angle, "DAS_steeringControlType": state}
+    if increment_timer:
+      self.safety.set_timer(self.cnt_angle_cmd * 20000)
+      self.__class__.cnt_angle_cmd += 1
     return self.packer.make_can_msg_panda("DAS_steeringControl", bus, values)
 
   def _angle_meas_msg(self, angle: float, hands_on_level: int = 0, eac_status: int = 1, eac_error_code: int = 0):
