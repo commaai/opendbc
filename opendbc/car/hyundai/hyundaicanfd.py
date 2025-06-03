@@ -162,8 +162,10 @@ def create_ccnc(packer, CAN, openpilotLongitudinalControl, enabled, hud, leftBli
     leftlane = abs(int(round(15 + (leftlaneraw - 1.7) * scale_per_m)))
     rightlane = abs(int(round(15 + (rightlaneraw - 1.7) * scale_per_m)))
 
-    if msg_1b5["LEFT_QUAL"] not in (2, 3): leftlane = 0
-    if msg_1b5["RIGHT_QUAL"] not in (2, 3): rightlane = 0
+    if msg_1b5["LEFT_QUAL"] not in (2, 3):
+      leftlane = 0
+    if msg_1b5["RIGHT_QUAL"] not in (2, 3):
+      rightlane = 0
 
     if leftlaneraw == -2.0248375:
       leftlane = 30 - rightlane
