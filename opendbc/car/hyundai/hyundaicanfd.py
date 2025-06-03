@@ -127,16 +127,16 @@ def create_lfahda_cluster(packer, CAN, enabled):
 def create_ccnc(packer, CAN, openpilotLongitudinalControl, enabled, hud, leftBlinker, rightBlinker, msg_161, msg_162, msg_1b5, is_metric, out):
   for f in {"FAULT_LSS", "FAULT_HDA", "FAULT_DAS", "FAULT_LFA", "FAULT_DAW", "FAULT_ESS"}:
     msg_162[f] = 0
-  if msg_161["ALERTS_2"] == 5:  # CONSIDER_TAKING_A_BREAK
+  if msg_161["ALERTS_2"] == 5:
     msg_161.update({"ALERTS_2": 0, "SOUNDS_2": 0})
-  if msg_161["ALERTS_3"] == 17:  # DRIVE_CAREFULLY
+  if msg_161["ALERTS_3"] == 17:
     msg_161["ALERTS_3"] = 0
-  if msg_161["ALERTS_5"] in (2, 5):  # WATCH_FOR_SURROUNDING_VEHICLES, USE_SWITCH_OR_PEDAL_TO_ACCELERATE
+  if msg_161["ALERTS_5"] in (2, 5):
     msg_161["ALERTS_5"] = 0
-  if msg_161["SOUNDS_4"] == 2 and msg_161["LFA_ICON"] in (3, 0,):  # LFA BEEPS
+  if msg_161["SOUNDS_4"] == 2 and msg_161["LFA_ICON"] in (3, 0,):
     msg_161["SOUNDS_4"] = 0
 
-  LANE_CHANGE_SPEED_MIN = 8.9408  # 20 * 0.44704
+  LANE_CHANGE_SPEED_MIN = 8.9408
 
   msg_161.update({
     "DAW_ICON": 0,
@@ -189,11 +189,11 @@ def create_ccnc(packer, CAN, openpilotLongitudinalControl, enabled, hud, leftBli
     msg_162["VIBRATE"] = 1
 
   if openpilotLongitudinalControl:
-    if msg_161["ALERTS_3"] in (1, 2, 3, 4, 7, 8, 9, 10):  # HIDE ISLA, DISTANCE MESSAGES
+    if msg_161["ALERTS_3"] in (1, 2, 3, 4, 7, 8, 9, 10):
       msg_161["ALERTS_3"] = 0
-    if msg_161["ALERTS_5"] == 4:  # SMART_CRUISE_CONTROL_CONDITIONS_NOT_MET
+    if msg_161["ALERTS_5"] == 4:
       msg_161["ALERTS_5"] = 0
-    if msg_161["SOUNDS_3"] == 5:  # DISABLE ISLA SOUND
+    if msg_161["SOUNDS_3"] == 5:
       msg_161["SOUNDS_3"] = 0
 
     main_cruise_enabled = out.cruiseState.available
@@ -246,7 +246,6 @@ def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_ov
     "DISTANCE_SETTING": hud_control.leadDistanceBars,
   }
 
-  # fixes auto regen stuck on max for hybrids, should probably apply to all cars
   values.update({"ACC_ObjDist": 1} if cruise_info is None else {s: cruise_info[s] for s in ["ACC_ObjDist", "ACC_ObjRelSpd"]})
 
   return packer.make_can_msg("SCC_CONTROL", CAN.ECAN, values)
