@@ -284,7 +284,7 @@ class RadarInterface(RadarInterfaceBase):
       msg = self.rcp.vl[f"MRR_Detection_{ii:03d}"]
 
       maxRangeID = 7 if ii < DELPHI_MRR_RADAR_MSG_COUNT_64 else 4 # all messages have 7 points except the last one, which has only 4 points in CANFD
-      for iii in range(1,maxRangeID):
+      for iii in range(1, maxRangeID):
 
         # SCAN_INDEX rotates through 0..3 on each message for different measurement modes
         # Indexes 0 and 2 have a max range of ~40m, 1 and 3 are ~170m (MRR_Header_SensorCoverage->CAN_RANGE_COVERAGE)
