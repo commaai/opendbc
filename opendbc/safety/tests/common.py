@@ -782,21 +782,21 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
     if self.LATERAL_FREQUENCY == -1:
       raise unittest.SkipTest("No real time limits")
 
+    # Angle safety enforces real time limits by checking the message send frequency in a 250ms time window
     self.safety.set_timer(0)
     self.safety.set_controls_allowed(True)
     max_rt_msgs = int(self.LATERAL_FREQUENCY * RT_INTERVAL / 1e6 * 1.2 + 1)  # 1.2x buffer
+
     for i in range(max_rt_msgs * 2):
       should_tx = i <= max_rt_msgs
       self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(0, True)))
 
     # Test recovery after sending too many messages
-    for rt_ts in np.arange(0, RT_INTERVAL * 2, 10000):
-      should_tx = rt_ts > RT_INTERVAL
-      self.safety.set_timer(rt_ts)
-      self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(0, True)))
-      if should_tx:
-        # Break before we block again
-        break
+    self.safety.set_timer(RT_INTERVAL)
+    self.assertFalse(self._tx(self._angle_cmd_msg(0, True)))
+
+    self.safety.set_timer(RT_INTERVAL + 1)
+    self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
 
 
 class PandaSafetyTest(PandaSafetyTestBase):
