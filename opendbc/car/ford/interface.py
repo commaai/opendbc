@@ -44,8 +44,7 @@ class CarInterface(CarInterfaceBase):
         # average of 33.3 Hz radar timestep / 4 scan modes = 60 ms
         # MRR_Header_Timestamps->CAN_DET_TIME_SINCE_MEAS reports 61.3 ms
         ret.radarDelay = 0.06
-
-      if DBC[candidate][Bus.radar] == RADAR.DELPHI_MRR_64:
+      elif DBC[candidate][Bus.radar] == RADAR.DELPHI_MRR_64:
         # average of 20 Hz radar timestep / 4 scan modes = 100 ms
         ret.radarDelay = 0.1
 
