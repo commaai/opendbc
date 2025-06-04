@@ -89,6 +89,7 @@ def _create_delphi_mrr_radar_can_parser(CP) -> CANParser:
 
   return CANParser(RADAR.DELPHI_MRR, messages, CanBus(CP).radar)
 
+
 def _create_delphi_mrr_radar_can_parser_64(CP) -> CANParser:
   messages = []
 
