@@ -792,11 +792,15 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
       self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
 
     # Test recovery after sending too many messages
+    self.safety.set_timer(RT_INTERVAL - 1)
+    for _ in range(5):
+      self.assertFalse(self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
+
+    # send one message to reset it
     self.safety.set_timer(RT_INTERVAL)
     self.assertFalse(self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
-
-    self.safety.set_timer(RT_INTERVAL + 1)
-    self.assertTrue(self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
+    for _ in range(5):
+      self.assertTrue(self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
 
 
 class PandaSafetyTest(PandaSafetyTestBase):
