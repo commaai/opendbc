@@ -256,20 +256,6 @@ class RadarInterface(RadarInterfaceBase):
   def _update_delphi_mrr_64(self, ret: structs.RadarData):
     headerScanIndex = int(self.rcp.vl["MRR_Detection_001"]['CAN_SCAN_INDEX_2LSB_01_01'])
 
-    # In reverse, the radar continually sends the last messages. Mark this as invalid
-    if (self.prev_headerScanIndex + 1) % 4 != headerScanIndex:
-      self.radar_unavailable_cnt += 1
-    else:
-      self.radar_unavailable_cnt = 0
-    self.prev_headerScanIndex = headerScanIndex
-
-    if self.radar_unavailable_cnt >= 5:
-      self.pts.clear()
-      self.points.clear()
-      self.clusters.clear()
-      ret.errors.radarUnavailableTemporary = True
-      return True
-
     # TODO: Verify the below is correct for CANFD as well - copied from CAN version
     #       Use points with Doppler coverage of +-60 m/s, reduces similar points
     if headerScanIndex in (0, 1):
