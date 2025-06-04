@@ -74,7 +74,8 @@ bool heartbeat_engaged = false;             // openpilot enabled, passed in hear
 uint32_t heartbeat_engaged_mismatches = 0;  // count of mismatches between heartbeat_engaged and controls_allowed
 
 // for safety modes with angle steering control
-uint32_t ts_angle_last = 0;
+uint32_t rt_angle_msgs = 0;
+uint32_t ts_angle_check_last = 0;
 int desired_angle_last = 0;
 struct sample_t angle_meas;         // last 6 steer angles/curvatures
 
@@ -409,11 +410,11 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
     {SAFETY_BODY, &body_hooks},
     {SAFETY_FORD, &ford_hooks},
     {SAFETY_RIVIAN, &rivian_hooks},
+    {SAFETY_TESLA, &tesla_hooks},
 #ifdef CANFD
     {SAFETY_HYUNDAI_CANFD, &hyundai_canfd_hooks},
 #endif
 #ifdef ALLOW_DEBUG
-    {SAFETY_TESLA, &tesla_hooks},
     {SAFETY_SUBARU_PREGLOBAL, &subaru_preglobal_hooks},
     {SAFETY_VOLKSWAGEN_PQ, &volkswagen_pq_hooks},
     {SAFETY_ALLOUTPUT, &alloutput_hooks},
@@ -437,7 +438,8 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
   cruise_button_prev = 0;
   desired_torque_last = 0;
   rt_torque_last = 0;
-  ts_angle_last = 0;
+  rt_angle_msgs = 0;
+  ts_angle_check_last = 0;
   desired_angle_last = 0;
   ts_torque_check_last = 0;
   ts_steer_req_mismatch_last = 0;
