@@ -132,6 +132,9 @@ class VehicleModel:
     Returns:
       Steering wheel angle [rad]
     """
+    if abs(u) < 1e-3:
+      return 0.0
+
     curv = yaw_rate / u
     return self.get_steer_from_curvature(curv, u, roll)
 

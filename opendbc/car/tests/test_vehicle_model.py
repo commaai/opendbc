@@ -23,6 +23,9 @@ class TestVehicleModel:
 
           assert sa == pytest.approx(new_sa)
 
+  def test_get_steer_from_yaw_rate_zero_speed(self):
+    assert self.VM.get_steer_from_yaw_rate(0.1, 0.0, 0.0) == 0.0
+
   def test_dyn_ss_sol_against_yaw_rate(self):
     """Verify that the yaw_rate helper function matches the results
     from the state space model."""
