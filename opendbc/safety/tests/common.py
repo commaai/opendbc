@@ -796,8 +796,8 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
     for _ in range(5):
       self.assertFalse(self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
 
-    # send one message to reset it
     self.safety.set_timer(RT_INTERVAL)
+    # send one message to reset it
     self.assertFalse(self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
     for _ in range(5):
       self.assertTrue(self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
