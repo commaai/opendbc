@@ -16,8 +16,10 @@ fi
 cd $CPPCHECK_DIR
 
 VERS="2.17.1"
-git fetch --all --tags --force
-git checkout $VERS
+if [ "$(git describe --tags --always)" != "$VERS" ]; then
+  git fetch --all --tags --force
+  git checkout $VERS
+fi
 
 #make clean
 make MATCHCOMPILTER=yes CXXFLAGS="-O2" -j8

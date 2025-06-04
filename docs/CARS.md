@@ -123,7 +123,7 @@
 |Hyundai|Ioniq Plug-in Hybrid 2019|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|Ioniq Plug-in Hybrid 2020-22|All|[Upstream](#upstream)|
 |Hyundai|Kona 2020|Smart Cruise Control (SCC)|[Upstream](#upstream)|
-|Hyundai|Kona 2022|Smart Cruise Control (SCC)|[Upstream](#upstream)|
+|Hyundai|Kona 2022|Smart Cruise Control (SCC)|[Dashcam mode](#dashcam)|
 |Hyundai|Kona Electric 2018-21|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|Kona Electric 2022-23|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Hyundai|Kona Electric (with HDA II, Korea only) 2023|Smart Cruise Control (SCC)|[Upstream](#upstream)|

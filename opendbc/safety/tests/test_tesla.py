@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import random
 import unittest
 import numpy as np
 
@@ -50,6 +51,9 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
   packer: CANPackerPanda
 
+  def _get_steer_cmd_angle_max(self, speed):
+    return get_max_angle(max(speed, 1), self.VM)
+
   def setUp(self):
     self.VM = VehicleModel(get_safety_CP())
     self.packer = CANPackerPanda("tesla_model3_party")
@@ -74,7 +78,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
   def _user_brake_msg(self, brake, quality_flag: bool = True):
     values = {"IBST_driverBrakeApply": 2 if brake else 1}
     if not quality_flag:
-      values["IBST_driverBrakeApply"] = 3  # FAULT
+      values["IBST_driverBrakeApply"] = random.choice((0, 3))  # NOT_INIT_OR_OFF, FAULT
     return self.packer.make_can_msg_panda("IBST_status", 0, values)
 
   def _speed_msg(self, speed):
@@ -288,7 +292,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         # at limit (safety tolerance adds 1)
         max_angle = round_angle(get_max_angle(speed, self.VM), angle_unit_offset + 1) * sign
         max_angle = np.clip(max_angle, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
-        self._tx(self._angle_cmd_msg(max_angle, True))
+        self.safety.set_desired_angle_last(round(max_angle * self.DEG_TO_CAN))
 
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle, True)))
 
@@ -331,6 +335,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         self.assertFalse(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
 
         # Don't change
+        self.safety.set_desired_angle_last(round(max_angle_delta * self.DEG_TO_CAN))
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
 
         # Down
