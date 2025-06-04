@@ -88,7 +88,8 @@ static bool tesla_get_quality_flag_valid(const CANPacket_t *to_push) {
   if (addr == 0x155) {
     valid = (GET_BYTE(to_push, 5) & 0x1U) == 0x1U;  // ESP_wheelSpeedsQF
   } else if (addr == 0x39d) {
-    valid = (GET_BYTE(to_push, 2) & 0x03U) != 3U;  // IBST_driverBrakeApply=FAULT
+    int user_brake_status = GET_BYTE(to_push, 2) & 0x03U;
+    valid = (user_brake_status != 0) && (user_brake_status != 3);  // IBST_driverBrakeApply=NOT_INIT_OR_OFF, FAULT
   } else {
   }
   return valid;
@@ -197,6 +198,7 @@ static bool tesla_tx_hook(const CANPacket_t *to_send) {
   const AngleSteeringLimits TESLA_STEERING_LIMITS = {
     .max_angle = 3600,  // 360 deg, EPAS faults above this
     .angle_deg_to_can = 10,
+    .frequency = 50U,
   };
 
   // NOTE: based off TESLA_MODEL_Y to match openpilot

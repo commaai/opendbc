@@ -18,7 +18,6 @@ ENABLE_BUTTONS = (Buttons.RESUME, Buttons.SET, Buttons.CANCEL)
 
 
 class HyundaiButtonBase:
-  # pylint: disable=no-member,abstract-method
   BUTTONS_TX_BUS = 0  # tx on this bus, rx on 0
   SCC_BUS = 0  # rx on this bus
 
@@ -75,7 +74,6 @@ class HyundaiButtonBase:
 
 
 class HyundaiLongitudinalBase(common.LongitudinalAccelSafetyTest):
-  # pylint: disable=no-member,abstract-method
 
   DISABLED_ECU_UDS_MSG: tuple[int, int]
   DISABLED_ECU_ACTUATION_MSG: tuple[int, int]

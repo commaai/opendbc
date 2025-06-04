@@ -6,7 +6,7 @@ import importlib
 import numpy as np
 from collections.abc import Callable
 
-from opendbc.can.packer import CANPacker  # pylint: disable=import-error
+from opendbc.can.packer import CANPacker
 from opendbc.safety import ALTERNATIVE_EXPERIENCE
 from opendbc.safety.tests.libsafety import libsafety_py
 
@@ -15,6 +15,7 @@ from opendbc.safety.tests.mads_common import MadsSafetyTestBase
 MAX_WRONG_COUNTERS = 5
 MAX_SAMPLE_VALS = 6
 VEHICLE_SPEED_FACTOR = 1000
+RT_INTERVAL = 250000  # 250ms
 
 # Max allowed delta between car speeds
 MAX_SPEED_DELTA = 2.0  # m/s
@@ -215,7 +216,6 @@ class TorqueSteeringSafetyTestBase(PandaSafetyTestBase, abc.ABC):
   MAX_TORQUE_LOOKUP: tuple[list[float], list[int]] = ([0], [0])
   DYNAMIC_MAX_TORQUE = False
   MAX_RT_DELTA = 0
-  RT_INTERVAL = 250000
 
   NO_STEER_REQ_BIT = False
 
@@ -501,7 +501,7 @@ class DriverTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
         self.assertTrue(self._tx(self._torque_cmd_msg(t)))
 
       # Increase timer to update rt_torque_last
-      self.safety.set_timer(self.RT_INTERVAL + 1)
+      self.safety.set_timer(RT_INTERVAL + 1)
       self.assertTrue(self._tx(self._torque_cmd_msg(sign * (self.MAX_RT_DELTA - 1))))
       self.assertTrue(self._tx(self._torque_cmd_msg(sign * (self.MAX_RT_DELTA + 1))))
 
@@ -605,7 +605,7 @@ class MotorTorqueSteeringSafetyTest(TorqueSteeringSafetyTestBase, abc.ABC):
         self.assertTrue(self._tx(self._torque_cmd_msg(t)))
 
       # Increase timer to update rt_torque_last
-      self.safety.set_timer(self.RT_INTERVAL + 1)
+      self.safety.set_timer(RT_INTERVAL + 1)
       self.assertTrue(self._tx(self._torque_cmd_msg(sign * self.MAX_RT_DELTA)))
       self.assertTrue(self._tx(self._torque_cmd_msg(sign * (self.MAX_RT_DELTA + 1))))
 
@@ -668,6 +668,9 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
   ANGLE_RATE_UP: list[float]  # windup limit
   ANGLE_RATE_DOWN: list[float]  # unwind limit
 
+  # Real time limits
+  LATERAL_FREQUENCY: int = -1  # Hz
+
   @classmethod
   def setUpClass(cls):
     if cls.__name__ == "AngleSteeringSafetyTest":
@@ -675,12 +678,15 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
       raise unittest.SkipTest
 
   @abc.abstractmethod
-  def _angle_cmd_msg(self, angle: float, enabled: bool):
+  def _angle_cmd_msg(self, angle: float, enabled: bool, increment_timer: bool = True):
     pass
 
   @abc.abstractmethod
   def _angle_meas_msg(self, angle: float):
     pass
+
+  def _get_steer_cmd_angle_max(self, speed):
+    return self.STEER_ANGLE_MAX
 
   def _set_prev_desired_angle(self, t):
     t = round(t * self.DEG_TO_CAN)
@@ -763,6 +769,43 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
             # controls_allowed is checked if actuation bit is 1, else the angle must be close to meas (inactive)
             should_tx = controls_allowed if steer_control_enabled else angle_cmd == angle_meas
             self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(angle_cmd, steer_control_enabled)))
+
+  def test_angle_violation(self):
+    # If violation occurs, angle cmd is blocked until reset to 0. Matches behavior of torque safety modes
+    self.safety.set_controls_allowed(True)
+
+    for speed in (0., 1., 5., 10., 15., 50.):
+      self._tx(self._angle_cmd_msg(0, True))
+      self._reset_speed_measurement(speed)
+
+      for _ in range(20):
+        self.assertFalse(self._tx(self._angle_cmd_msg(self._get_steer_cmd_angle_max(speed), True)))
+      self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
+
+  def test_rt_limits(self):
+    # TODO: remove and check all safety modes
+    if self.LATERAL_FREQUENCY == -1:
+      raise unittest.SkipTest("No real time limits")
+
+    # Angle safety enforces real time limits by checking the message send frequency in a 250ms time window
+    self.safety.set_timer(0)
+    self.safety.set_controls_allowed(True)
+    max_rt_msgs = int(self.LATERAL_FREQUENCY * RT_INTERVAL / 1e6 * 1.2 + 1)  # 1.2x buffer
+
+    for i in range(max_rt_msgs * 2):
+      should_tx = i <= max_rt_msgs
+      self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
+
+    # One under RT interval should do nothing
+    self.safety.set_timer(RT_INTERVAL - 1)
+    for _ in range(5):
+      self.assertFalse(self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
+
+    # Increment timer and send 1 message to reset RT window
+    self.safety.set_timer(RT_INTERVAL)
+    self.assertFalse(self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
+    for _ in range(5):
+      self.assertTrue(self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
 
 
 class PandaSafetyTest(PandaSafetyTestBase):
