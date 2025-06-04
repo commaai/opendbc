@@ -791,13 +791,13 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
       should_tx = i <= max_rt_msgs
       self.assertEqual(should_tx, self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
 
-    # Test recovery after sending too many messages
+    # One under RT interval should do nothing
     self.safety.set_timer(RT_INTERVAL - 1)
     for _ in range(5):
       self.assertFalse(self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
 
+    # Increment timer past RT interval and send 1 message to reset
     self.safety.set_timer(RT_INTERVAL)
-    # send one message to reset it
     self.assertFalse(self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
     for _ in range(5):
       self.assertTrue(self._tx(self._angle_cmd_msg(0, True, increment_timer=False)))
