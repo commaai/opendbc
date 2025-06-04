@@ -4,7 +4,7 @@ from opendbc.can.parser import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP, STEER_THRESHOLD
+from opendbc.car.tesla.values import DBC, CANBUS, GEAR_MAP, STEER_THRESHOLD, CAR
 
 ButtonType = structs.CarState.ButtonEvent.Type
 
@@ -22,7 +22,7 @@ class CarState(CarStateBase):
     self.hands_on_level = 0
     self.das_control = None
 
-    self.is3Y = CP.carFingerprint in ["TESLA_MODEL_3", "TESLA_MODEL_Y"]
+    self.is3Y = CP.carFingerprint in (CAR.TESLA_MODEL_3, CAR.TESLA_MODEL_Y)
 
   def update_autopark_state(self, autopark_state: str, cruise_enabled: bool):
     autopark_now = autopark_state in ("ACTIVE", "COMPLETE", "SELFPARK_STARTED")
@@ -127,7 +127,6 @@ class CarState(CarStateBase):
 
   @staticmethod
   def get_can_parsers(CP):
-    is3Y = CP.carFingerprint in ["TESLA_MODEL_3", "TESLA_MODEL_Y"]
     party_messages = [
       # sig_address, frequency
       ("DI_speed", 50),
@@ -145,7 +144,7 @@ class CarState(CarStateBase):
       ("SCCM_steeringAngleSensor", 100),
     ]
 
-    if is3Y:
+    if CP.carFingerprint in (CAR.TESLA_MODEL_3, CAR.TESLA_MODEL_Y):
       ap_party_messages.append(("DAS_settings", 2))
 
     return {
