@@ -54,8 +54,8 @@ class CarInterface(CarInterfaceBase):
 
     # For now continue to allow the user to still fall back to Ford Long
     # for  CANFD platforms - in case radar is not fully reliable
-    ret.alphaLongitudinalAvailable = ret.radarUnavailable or bool(ret.flags & FordFlags.CANFD)
-    if alpha_long or (not ret.radarUnavailable and not bool(ret.flags & FordFlags.CANFD)):
+    ret.alphaLongitudinalAvailable = bool(ret.flags & FordFlags.CANFD)
+    if alpha_long or not bool(ret.flags & FordFlags.CANFD):
       ret.safetyConfigs[-1].safetyParam |= FordSafetyFlags.LONG_CONTROL.value
       ret.openpilotLongitudinalControl = True
 
