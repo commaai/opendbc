@@ -251,6 +251,7 @@ class RadarInterface(RadarInterfaceBase):
     return True
 
   def _update_delphi_mrr_64(self, ret: structs.RadarData):
+    # Ensure all point IDs match. Note that this message is sent first, but trigger_msg waits for the last message to come in
     headerScanIndex = int(self.rcp.vl["MRR_Detection_001"]['CAN_SCAN_INDEX_2LSB_01_01'])
 
     # TODO: Verify the below is correct for CANFD as well - copied from CAN version
