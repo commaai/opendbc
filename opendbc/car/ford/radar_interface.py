@@ -248,8 +248,6 @@ class RadarInterface(RadarInterfaceBase):
     return self.do_clustering()
 
   def _update_delphi_mrr_64(self, ret: structs.RadarData):
-    # There is no discovered MRR_Header_InformationDetections message in CANFD
-    # headerScanIndex = int(self.rcp.vl["MRR_Header_InformationDetections"]['CAN_SCAN_INDEX']) & 0b11
     headerScanIndex = int(self.rcp.vl["MRR_Detection_001"]['CAN_SCAN_INDEX_2LSB_01_01'])
 
     # In reverse, the radar continually sends the last messages. Mark this as invalid
@@ -269,16 +267,6 @@ class RadarInterface(RadarInterfaceBase):
     # Use points with Doppler coverage of +-60 m/s, reduces similar points
     if headerScanIndex in (0, 1):
       return False
-
-    # There is not discovered MRR_Header_SensorCoverage message in CANFD
-    # if DELPHI_MRR_RADAR_RANGE_COVERAGE[headerScanIndex] != int(self.rcp.vl["MRR_Header_SensorCoverage"]["CAN_RANGE_COVERAGE"]):
-    #   self.invalid_cnt += 1
-    # else:
-    #   self.invalid_cnt = 0
-
-    # # Rarely MRR_Header_InformationDetections can fail to send a message. The scan index is skipped in this case
-    # if self.invalid_cnt >= 5:
-    #   errors.append("wrongConfig")
 
     for ii in range(1, DELPHI_MRR_RADAR_MSG_COUNT_64 + 1):
       msg = self.rcp.vl[f"MRR_Detection_{ii:03d}"]
