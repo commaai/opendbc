@@ -230,6 +230,7 @@ class RadarInterface(RadarInterfaceBase):
 
       valid = bool(msg[f"CAN_DET_VALID_LEVEL_{ii:02d}"])
 
+      # TODO: verify this is correct for CANFD as well - copied from CAN version
       # Long range measurement mode is more sensitive and can detect the road surface
       dist = msg[f"CAN_DET_RANGE_{ii:02d}"]  # m [0|255.984]
       if scanIndex in (1, 3) and dist < DELPHI_MRR_MIN_LONG_RANGE_DIST:
@@ -262,7 +263,8 @@ class RadarInterface(RadarInterfaceBase):
     for ii in range(1, DELPHI_MRR_RADAR_MSG_COUNT_64 + 1):
       msg = self.rcp.vl[f"MRR_Detection_{ii:03d}"]
 
-      maxRangeID = 6 if ii < DELPHI_MRR_RADAR_MSG_COUNT_64 else 3  # all messages have 6 points except the last one
+      # all messages have 6 points except the last one
+      maxRangeID = 6 if ii < DELPHI_MRR_RADAR_MSG_COUNT_64 else 3
       for iii in range(1, maxRangeID + 1):
 
         # SCAN_INDEX rotates through 0..3
@@ -338,4 +340,3 @@ class RadarInterface(RadarInterfaceBase):
       del self.pts[idx]
 
     self.points = []
-    return
