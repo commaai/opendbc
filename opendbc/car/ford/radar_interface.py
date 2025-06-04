@@ -98,6 +98,7 @@ def _create_delphi_mrr_radar_can_parser_64(CP) -> CANParser:
 
   return CANParser(RADAR.DELPHI_MRR_64, messages, CanBus(CP).radar)
 
+
 class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
     super().__init__(CP)
