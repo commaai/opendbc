@@ -157,7 +157,6 @@ class RadarInterface(RadarInterfaceBase):
     ret.points = list(self.pts.values())
     return ret
 
-
   def _update_delphi_esr(self):
     for ii in sorted(self.updated_messages):
       cpt = self.rcp.vl[ii]
@@ -186,7 +185,6 @@ class RadarInterface(RadarInterfaceBase):
       else:
         if ii in self.pts:
           del self.pts[ii]
-
 
   def _update_delphi_mrr(self, ret: structs.RadarData):
     headerScanIndex = int(self.rcp.vl["MRR_Header_InformationDetections"]['CAN_SCAN_INDEX']) & 0b11
@@ -252,7 +250,6 @@ class RadarInterface(RadarInterfaceBase):
     self.do_clustering()
     return True
 
-
   def _update_delphi_mrr_64(self, ret: structs.RadarData):
     headerScanIndex = int(self.rcp.vl["MRR_Detection_001"]['CAN_SCAN_INDEX_2LSB_01_01'])
 
@@ -298,7 +295,6 @@ class RadarInterface(RadarInterfaceBase):
     # Update the points once we've cycled through all 4 scan modes
     self.do_clustering()
     return True
-
 
   # Do the common work for CAN and CANFD clustering and prepare the points to be used for liveTracks
   def do_clustering(self):
