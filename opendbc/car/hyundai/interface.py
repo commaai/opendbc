@@ -63,6 +63,7 @@ class CarInterface(CarInterfaceBase):
           # sanity check SCC_CONTROL isn't on E-CAN (powertrain bus)
           if 0x1a0 in fingerprint[CAN.ECAN]:
             carlog.error('dashcamOnly: invalid CAN topology. Incorrect harness?')
+            ret.dashcamReason = 'Possibly incorrect harness variant'
             ret.dashcamOnly = True
 
       # Some LKA steering cars have alternative messages for gear checks
