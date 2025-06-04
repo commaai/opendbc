@@ -6,7 +6,7 @@ from opendbc.can.packer import CANPacker
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
 from opendbc.car.honda import hondacan
 from opendbc.car.honda.values import CruiseButtons, VISUAL_HUD, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, HONDA_NIDEC_ALT_PCM_ACCEL, HONDA_BOSCH_CANFD, \
-                                                 CarControllerParams, GasOnlyTuning
+                                                 CarControllerParams
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.common.pid import PIDController
 
@@ -122,7 +122,7 @@ class CarController(CarControllerBase):
     self.gas_pedal_force = 0.0
     self.last_gas = 0.0
     self.gasonly_pid = PIDController (k_p=([0,], [0,]),
-                                      k_i=(GasOnlyTuning.kiBP, GasOnlyTuning.kiV),
+                                      k_i=([0., 5., 35.], [1.2, 0.8, 0.5]), # matches Nidec
                                       k_f=1, rate=50 )
 
 
