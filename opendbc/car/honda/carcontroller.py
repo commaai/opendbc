@@ -210,7 +210,7 @@ class CarController(CarControllerBase):
       pcm_speed = float(np.interp(gas - brake, pcm_speed_BP, pcm_speed_V))
       pcm_accel = int(np.clip((accel / 1.44) / max_accel, 10.0 / self.params.NIDEC_GAS_MAX, 1.0) * self.params.NIDEC_GAS_MAX)
 
-      if speed_control == 1:
+      if speed_control == 1 and CC.longActive:
         pcm_accel = 198
 
     if not self.CP.openpilotLongitudinalControl:
