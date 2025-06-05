@@ -123,7 +123,7 @@ class CarController(CarControllerBase):
     self.last_gas = 0.0
     self.gasonly_pid = PIDController (k_p=0.,
                                       k_i= ([0., 5., 35.], [1.2, 0.8, 0.5]),
-                                      k_f=1, rate=DT_CTRL * 2 )
+                                      k_f=1, rate= 2 / DT_CTRL )
 
 
   def update(self, CC, CS, now_nanos):
@@ -230,10 +230,11 @@ class CarController(CarControllerBase):
 
           # perform a gas-only pid
           gas_error = self.accel - CS.out.aEgo
-          if not stopping:
+          if (actuators.longControlState == LongCtrlState.pid):
             gas_pedal_force = self.gasonly_pid.update(gas_error, speed=CS.out.vEgo, feedforward=self.accel)
           else:
             gas_pedal_force = self.accel
+            self.gasonly_pid.reset()
 
           gas_pedal_force += wind_brake_ms2 + hill_brake
           self.gas = float(np.interp(gas_pedal_force, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_GAS_LOOKUP_V))
