@@ -230,7 +230,7 @@ class CarController(CarControllerBase):
 
           # perform a gas-only pid
           gas_error = self.accel - CS.out.aEgo
-          if ! stopping:
+          if not stopping:
             gas_pedal_force = self.gasonly_pid.update(gas_error, speed=CS.out.vEgo, feedforward=self.accel)
           else:
             gas_pedal_force = self.accel
