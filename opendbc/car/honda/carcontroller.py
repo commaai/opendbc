@@ -121,7 +121,7 @@ class CarController(CarControllerBase):
     self.pitch = 0.0
     self.gas_pedal_force = 0.0
     self.last_gas = 0.0
-    self.gasonly_pid = PIDController (k_p=0.5, k_i=0.1, k_f=1, rate=DT_CTRL * 2 )
+    self.gasonly_pid = PIDController (k_p=0.5, k_i=0., k_f=1, rate=DT_CTRL * 2 )
 
 
   def update(self, CC, CS, now_nanos):
@@ -236,8 +236,6 @@ class CarController(CarControllerBase):
 
           stopping = (actuators.longControlState == LongCtrlState.stopping)
           self.stopping_counter = self.stopping_counter + 1 if stopping else 0
-
-          self.gas = float(np.interp(accel + wind_brake_ms2 + hill_brake, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_GAS_LOOKUP_V))
 
           can_sends.extend(hondacan.create_acc_commands(self.packer, self.CAN, CC.enabled, CC.longActive, self.accel, self.gas,
                                                         self.stopping_counter, self.CP.carFingerprint, gas_pedal_force, CS.out.vEgo))
