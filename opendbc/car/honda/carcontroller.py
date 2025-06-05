@@ -233,12 +233,12 @@ class CarController(CarControllerBase):
           if ! stopping:
             gas_pedal_force = self.gasonly_pid.update(gas_error, speed=CS.out.vEgo, feedforward=self.accel)
           else:
-            gas_pedal_force = self.accel 
+            gas_pedal_force = self.accel
 
           gas_pedal_force += wind_brake_ms2 + hill_brake
           self.gas = float(np.interp(gas_pedal_force, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_GAS_LOOKUP_V))
           self.last_gas = self.gas
-          
+
           can_sends.extend(hondacan.create_acc_commands(self.packer, self.CAN, CC.enabled, CC.longActive, self.accel, self.gas,
                                                         self.stopping_counter, self.CP.carFingerprint, gas_pedal_force, CS.out.vEgo))
 
