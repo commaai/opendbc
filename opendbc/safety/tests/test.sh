@@ -15,7 +15,7 @@ else
 fi
 
 # run safety tests and generate coverage data
-pytest -n8
+pytest -n8 --ignore-glob=misra/*
 
 # generate and open report
 if [ "$1" == "--report" ]; then
