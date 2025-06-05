@@ -123,7 +123,7 @@ class CarController(CarControllerBase):
     self.last_gas = 0.0
     self.gasonly_pid = PIDController (k_p=0.,
                                       k_i= ([0., 5., 35.], [1.2, 0.8, 0.5]),
-                                      k_f=1, rate= 2 / DT_CTRL )
+                                      k_f=1, rate= 1 / DT_CTRL / 2)
 
 
   def update(self, CC, CS, now_nanos):
