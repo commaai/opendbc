@@ -141,6 +141,7 @@ FW_VERSIONS = {
   },
   CAR.HYUNDAI_IONIQ_HEV_2022: {
     (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00AEhe SCC F-CUP      1.00 1.02 99110-G2100         ',
       b'\xf1\x00AEhe SCC F-CUP      1.00 1.00 99110-G2600         ',
       b'\xf1\x00AEhe SCC FHCUP      1.00 1.00 99110-G2600         ',
       b'\xf1\x00AEhe SCC FHCUP      1.00 1.02 99110-G2100         ',
@@ -150,8 +151,8 @@ FW_VERSIONS = {
       b'\xf1\x00AE  MDPS C 1.00 1.01 56310G2510\x00 4APHC101',
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
-      b'\xf1\x00AEH MFC  AT USA LHD 1.00 1.00 95740-G2700 201027',
       b'\xf1\x00AEH MFC  AT USA LHD 1.00 1.01 95740-G2600 190819',
+      b'\xf1\x00AEH MFC  AT USA LHD 1.00 1.00 95740-G2700 201027',
     ],
   },
   CAR.HYUNDAI_SONATA: {
@@ -1232,6 +1233,7 @@ FW_VERSIONS = {
     ],
     (Ecu.eps, 0x7d4, None): [
       b'\xf1\x00OSP MDPS C 1.00 1.04 56310/J9291 4OPCC104',
+      b'\xf1\x00OSP MDPS C 1.00 1.04 56310/J9290 4OPCC104',
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00YB__ FCA -----      1.00 1.01 99110-J9000      \x00\x00\x00',
@@ -1239,6 +1241,7 @@ FW_VERSIONS = {
     (Ecu.transmission, 0x7e1, None): [
       b'\xf1\x00T01G00BL  T01I00A1  DOS2T16X2XI00NS0\x8c`\xff\xe7',
       b'\xf1\x00T01G00BL  T01I00A1  DOS2T16X4XI00NS0\x99L\xeeq',
+      b'\xf1\x00T01960BL  T01E60A1  DOS2T16X4XE60NS4N\x90\xe6\xcb',
     ],
   },
 }
