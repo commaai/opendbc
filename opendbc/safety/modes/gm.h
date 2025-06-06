@@ -12,9 +12,9 @@
 
 
 #define GM_0xBE_RX_CHECK \
-	{.msg = {{0xBE, 0, 6, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},    /* Volt, Silverado, Acadia Denali */ \
+    {.msg = {{0xBE, 0, 6, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},    /* Volt, Silverado, Acadia Denali */ \
             {0xBE, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},    /* Bolt EUV */ \
-	        {0xBE, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}}},  /* Escalade */ \
+            {0xBE, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}}},  /* Escalade */ \
 
 
 static const LongitudinalLimits *gm_long_limits;
@@ -79,12 +79,11 @@ static void gm_rx_hook(const CANPacket_t *to_push) {
     //}
 //    if (addr == 0xF1) {
 //      brake_pressed = GET_BIT(to_push, 1U);
-//	  printf("Brake Pressed %d", brake_pressed);
 //    }
-	if ((addr == 0xBE) && (gm_hw == GM_ASCM)) {
+    if ((addr == 0xBE) && (gm_hw == GM_ASCM)) {
       brake_pressed = GET_BYTE(to_push, 1) >= 8U;
     }
-	
+
     if ((addr == 0xC9) && (gm_hw == GM_CAM)) {
       brake_pressed = GET_BIT(to_push, 40U);
     }
@@ -214,14 +213,26 @@ static safety_config gm_init(uint16_t param) {
 
   static RxCheck gm_ev_rx_checks[] = {
     GM_COMMON_RX_CHECKS
+<<<<<<< HEAD
 
 	GM_0xBE_RX_CHECK
+=======
+    GM_0xBE_RX_CHECK
+>>>>>>> 59f3e50 (lint fixes)
     {.msg = {{0xBD, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 40U}, { 0 }, { 0 }}},
 
   };
 
   static RxCheck gm_f1_can_brake_rx_checks[] = {
     GM_COMMON_RX_CHECKS
+<<<<<<< HEAD
+=======
+#if 0
+    {.msg = {{0xF1, 0, 6, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},    /* Volt, Silverado, Acadia Denali */ \
+            {0xF1, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},    /* Bolt EUV */ \
+            {0xF1, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}}},  /* Escalade */
+#endif
+>>>>>>> 59f3e50 (lint fixes)
   };
 
 
@@ -238,7 +249,7 @@ static safety_config gm_init(uint16_t param) {
   } else {
   }
 
-  bool gm_cam_long = false;
+static bool gm_cam_long = false;
 
 #ifdef ALLOW_DEBUG
   const uint16_t GM_PARAM_HW_CAM_LONG = 2;
@@ -252,20 +263,18 @@ static safety_config gm_init(uint16_t param) {
     // FIXME: cppcheck thinks that gm_cam_long is always false. This is not true
     // if ALLOW_DEBUG is defined but cppcheck is run without ALLOW_DEBUG
     // cppcheck-suppress knownConditionTrueFalse
-	if (gm_hw == GM_CAM && gm_cam_long) {
-	  SET_TX_MSGS(GM_CAM_LONG_TX_MSGS, ret);
+    if ((gm_hw == GM_CAM) && gm_cam_long) {
+      SET_TX_MSGS(GM_CAM_LONG_TX_MSGS, ret);
     } else {
       SET_TX_MSGS(GM_CAM_TX_MSGS, ret);
     }
-	if (F1_CAN_BRAKE){
-//	  printf("F1_CAN_BRAKE RX CHECK");	
+    if (F1_CAN_BRAKE){
+      SET_RX_CHECKS(gm_f1_can_brake_rx_checks, ret);
+    }
 
-	  SET_RX_CHECKS(gm_f1_can_brake_rx_checks, ret);
-	}
-	
     //ret = gm_cam_long ? BUILD_SAFETY_CFG(gm_rx_checks, GM_CAM_LONG_TX_MSGS) : BUILD_SAFETY_CFG(gm_rx_checks, GM_CAM_TX_MSGS);
   } else {
-	  SET_TX_MSGS(GM_ASCM_TX_MSGS, ret);
+      SET_TX_MSGS(GM_ASCM_TX_MSGS, ret);
       //ret = BUILD_SAFETY_CFG(gm_rx_checks, GM_ASCM_TX_MSGS);
   }
 
