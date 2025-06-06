@@ -55,7 +55,6 @@ class CarState(CarStateBase):
                                  "CRUISE_BUTTONS"
     self.is_metric = False
     self.buttons_counter = 0
-    self.low_speed_alert = False
 
     self.cruise_info = {}
 
