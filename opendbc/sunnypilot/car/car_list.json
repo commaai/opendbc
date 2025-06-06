@@ -1918,16 +1918,6 @@
     ],
     "package": "Smart Cruise Control (SCC)"
   },
-  "Kia Optima Hybrid 2017": {
-    "platform": "KIA_OPTIMA_H",
-    "make": "Kia",
-    "brand": "hyundai",
-    "model": "Optima Hybrid",
-    "year": [
-      "2017"
-    ],
-    "package": "Advanced Smart Cruise Control"
-  },
   "Kia Optima Hybrid 2019": {
     "platform": "KIA_OPTIMA_H_G4_FL",
     "make": "Kia",

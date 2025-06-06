@@ -176,7 +176,8 @@ class CarInterface(CarInterfaceBase):
     if stock_cp.flags & (HyundaiFlags.CANFD_CAMERA_SCC | HyundaiFlags.CAMERA_SCC):
       stock_cp.radarUnavailable = False
 
-    stock_cp.dashcamOnly = False
+    if stock_cp.flags & HyundaiFlags.ALT_LIMITS_2:
+      stock_cp.dashcamOnly = False
 
     return ret
 
