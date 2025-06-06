@@ -89,7 +89,7 @@ FW_VERSIONS = {
       b'LC5T-14F397-AH\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
     ],
   },
-  CAR.FORD_EXPEDITION_MK4: { # Only the later years of MK4 support lane centering (2022-2024)
+  CAR.FORD_EXPEDITION_MK4: {
     (Ecu.eps, 0x730, None): [
       b'NL14-14D003-AE\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
     ],
