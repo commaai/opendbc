@@ -63,14 +63,10 @@ extern const int MAX_WRONG_COUNTERS;
 #define MAX_SAMPLE_VALS 6
 // used to represent floating point vehicle speed in a sample_t
 #define VEHICLE_SPEED_FACTOR 1000.0
-#define MAX_TORQUE_RT_INTERVAL 250000U
+#define MAX_RT_INTERVAL 250000U
 
-// Lateral constants
-// ISO 11270
-static const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
-
-static const float EARTH_G = 9.81;
-static const float AVERAGE_ROAD_ROLL = 0.06;  // ~3.4 degrees, 6% superelevation
+// Conversions
+#define KPH_TO_MS (1.0 / 3.6)
 
 // sample struct that keeps 6 samples in memory
 struct sample_t {
@@ -106,7 +102,7 @@ typedef struct {
 
   const int max_rate_up;
   const int max_rate_down;
-  const int max_rt_delta;  // max change in torque per 250ms interval (MAX_TORQUE_RT_INTERVAL)
+  const int max_rt_delta;  // max change in torque per 250ms interval (MAX_RT_INTERVAL)
 
   const SteeringControlType type;
 
@@ -133,6 +129,7 @@ typedef struct {
   const struct lookup_t angle_rate_down_lookup;
   const int max_angle_error;             // used to limit error between meas and cmd while enabled
   const float angle_error_min_speed;     // minimum speed to start limiting angle error
+  const uint32_t frequency;              // Hz
 
   const bool angle_is_curvature;         // if true, we can apply max lateral acceleration limits
   const bool enforce_angle_error;        // enables max_angle_error check
@@ -283,7 +280,8 @@ extern bool heartbeat_engaged;             // openpilot enabled, passed in heart
 extern uint32_t heartbeat_engaged_mismatches;  // count of mismatches between heartbeat_engaged and controls_allowed
 
 // for safety modes with angle steering control
-extern uint32_t ts_angle_last;
+extern uint32_t rt_angle_msgs;
+extern uint32_t ts_angle_check_last;
 extern int desired_angle_last;
 extern struct sample_t angle_meas;         // last 6 steer angles/curvatures
 
