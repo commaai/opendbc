@@ -2,13 +2,14 @@ import platform
 
 CC = 'gcc'
 system = platform.system()
-mac_ver = platform.mac_ver()
+mac_ver = platform.mac_ver()[0].split('.')
 
 # gcc installed by homebrew has version suffix (e.g. gcc-12) in order to be
 # distinguishable from system one - which acts as a symlink to clang
-# clang works on macOS 15 and greater but has issues on earlier macOS versions.
-# see: https://github.com/commaai/openpilot/issues/35093
-if system == 'Darwin' and mac_ver[0] and mac_ver[0] < '15':
+# clang on macOS 15 worked until we added gcov, at which point it broke again.
+# see for why we went with clang: https://github.com/commaai/openpilot/issues/35093
+# see for why we are changing this again: https://github.com/commaai/opendbc/issues/2369
+if system == 'Darwin' and mac_ver[0] and mac_ver[0] <= '15':
   CC += '-13'
 
 env = Environment(
