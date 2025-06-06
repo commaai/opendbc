@@ -98,7 +98,7 @@ class CarInterface(CarInterfaceBase):
       ret.transmissionType = TransmissionType.automatic
     if candidate in F1_CAN_BRAKE:
       ret.safetyConfigs[0].safetyParam |= GMSafetyFlags.F1_CAN_BRAKE.value
-      
+
     ret.longitudinalTuning.kiBP = [5., 35.]
 
     if candidate in (CAMERA_ACC_CAR | SDGM_CAR):
@@ -224,5 +224,5 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.GMC_YUKON_XL_2017:
       ret.steerActuatorDelay = 0.3
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
-      
+
     return ret
