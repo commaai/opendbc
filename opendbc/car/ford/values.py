@@ -56,6 +56,7 @@ class FordFlags(IntFlag):
 class RADAR:
   DELPHI_ESR = 'ford_fusion_2018_adas'
   DELPHI_MRR = 'FORD_CADS'
+  DELPHI_MRR_64 = 'FORD_CADS_64'
 
 
 class Footnote(Enum):
@@ -80,8 +81,10 @@ class FordCarDocs(CarDocs):
       self.car_parts = CarParts([Device.threex, harness])
 
     if harness == CarHarness.ford_q4:
-      self.setup_video_link = "https://www.youtube.com/watch?v=uUGkH6C_EQU"
+      self.setup_video = "https://www.youtube.com/watch?v=uUGkH6C_EQU"
 
+    if CP.carFingerprint in (CAR.FORD_F_150_MK14, CAR.FORD_F_150_LIGHTNING_MK1):
+      self.setup_video = "https://www.youtube.com/watch?v=MewJc9LYp9M"
 
 @dataclass
 class FordPlatformConfig(PlatformConfig):
@@ -104,6 +107,7 @@ class FordPlatformConfig(PlatformConfig):
 class FordCANFDPlatformConfig(FordPlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {
     Bus.pt: 'ford_lincoln_base_pt',
+    Bus.radar: RADAR.DELPHI_MRR_64,
   })
 
   def init(self):
@@ -146,6 +150,10 @@ class CAR(Platforms):
     ],
     CarSpecs(mass=2050, wheelbase=3.025, steerRatio=16.8),
   )
+  FORD_EXPEDITION_MK4 = FordCANFDPlatformConfig(
+    [FordCarDocs("Ford Expedition 2022-24", "Co-Pilot360 Assist 2.0", hybrid=False)],
+    CarSpecs(mass=2000, wheelbase=3.69, steerRatio=17.0),
+  )
   FORD_F_150_MK14 = FordCANFDPlatformConfig(
     [FordCarDocs("Ford F-150 2021-23", "Co-Pilot360 Assist 2.0", hybrid=True)],
     CarSpecs(mass=2000, wheelbase=3.69, steerRatio=17.0),
@@ -166,11 +174,11 @@ class CAR(Platforms):
     CarSpecs(mass=1650, wheelbase=3.076, steerRatio=17.0),
   )
   FORD_MUSTANG_MACH_E_MK1 = FordCANFDPlatformConfig(
-    [FordCarDocs("Ford Mustang Mach-E 2021-23", "All")],
+    [FordCarDocs("Ford Mustang Mach-E 2021-23", "All", setup_video="https://www.youtube.com/watch?v=AR4_eTF3b_A")],
     CarSpecs(mass=2200, wheelbase=2.984, steerRatio=17.0),  # TODO: check steer ratio
   )
   FORD_RANGER_MK2 = FordCANFDPlatformConfig(
-    [FordCarDocs("Ford Ranger 2024", "Adaptive Cruise Control with Lane Centering")],
+    [FordCarDocs("Ford Ranger 2024", "Adaptive Cruise Control with Lane Centering", setup_video="https://www.youtube.com/watch?v=2oJlXCKYOy0")],
     CarSpecs(mass=2000, wheelbase=3.27, steerRatio=17.0),
   )
 
