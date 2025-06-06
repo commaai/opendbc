@@ -1348,6 +1348,16 @@
     ],
     "package": "Smart Cruise Control (SCC)"
   },
+  "Hyundai Kona 2022": {
+    "platform": "HYUNDAI_KONA_2022",
+    "make": "Hyundai",
+    "brand": "hyundai",
+    "model": "Kona",
+    "year": [
+      "2022"
+    ],
+    "package": "Smart Cruise Control (SCC)"
+  },
   "Hyundai Kona Electric 2018-21": {
     "platform": "HYUNDAI_KONA_EV",
     "make": "Hyundai",
@@ -1907,6 +1917,16 @@
       "2020"
     ],
     "package": "Smart Cruise Control (SCC)"
+  },
+  "Kia Optima Hybrid 2017": {
+    "platform": "KIA_OPTIMA_H",
+    "make": "Kia",
+    "brand": "hyundai",
+    "model": "Optima Hybrid",
+    "year": [
+      "2017"
+    ],
+    "package": "Advanced Smart Cruise Control"
   },
   "Kia Optima Hybrid 2019": {
     "platform": "KIA_OPTIMA_H_G4_FL",
