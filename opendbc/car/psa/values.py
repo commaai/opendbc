@@ -58,11 +58,8 @@ PSA_VERSION_RESP = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40, 0xF0,
 
 PSA_RX_OFFSET = -0x20
 
-# FW Query only works when called manually with fw_versions.py
-# OP get_present_ecus() scan does not return any of the ECUs listed in fingerprints.py, so the FW query is skipped
-# For testing, this can be overriden by commenting out lines 241+242 in opendbc/car/fw_versions.py
-# Full ECU scan takes ~10 seconds
-# Proposal: Fingerprint using VIN or modify get_present_ecus()
+# PSA ECUs send an unpadded response on tester_present request.
+# _is_tester_present_response only accepts padded responses, so needed to be modified.
 
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[request for bus in (0, 1) for request in [
