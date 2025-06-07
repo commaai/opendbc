@@ -8,7 +8,7 @@ from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 Ecu = CarParams.Ecu
 
 class CarControllerParams:
-  STEER_STEP = 1  # spamming at 100 Hz works well, stock lkas is ~20 Hz
+  STEER_STEP = 1  # spamming at 100 Hz works well, stock lkas is 20 Hz
 
   # Angle rate limits are set to meet ISO 11270
   ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
@@ -17,7 +17,7 @@ class CarControllerParams:
     ([0., 5., 25.], [5., 2.0, 0.3]),
   )
   STEER_DRIVER_ALLOWANCE = 10  # Driver intervention threshold, 1.0 Nm
-  EPS_MAX_TORQUE = 4.5 # TODO: max EPS torque seen in Nm
+
   def __init__(self, CP):
     pass
 
@@ -47,37 +47,25 @@ class CAR(Platforms):
     ),
   )
 
-# Same as StdQueries.DEFAULT_DIAGNOSTIC_REQUEST
 PSA_DIAG_REQ  = bytes([uds.SERVICE_TYPE.DIAGNOSTIC_SESSION_CONTROL, 0x01])
-# The Diagnostic response includes the ECU rx/tx timings
 PSA_DIAG_RESP = bytes([uds.SERVICE_TYPE.DIAGNOSTIC_SESSION_CONTROL + 0x40, 0x01])
 
 PSA_SERIAL_REQ = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER,  0xF1, 0x8C])
 PSA_SERIAL_RESP = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40, 0xF1, 0x8C])
 
 PSA_VERSION_REQ  = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER, 0xF0, 0xFE])
-# TODO: Placeholder or info for uds module - The actual response is multi-frame TP
 PSA_VERSION_RESP = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40, 0xF0, 0xFE])
 
 PSA_RX_OFFSET = -0x20
 
+# FW Query only works when called manually with fw_versions.py
+# OP get_present_ecus() scan does not return any of the ECUs listed in fingerprints.py, so the FW query is skipped
+# For testing, this can be overriden by commenting out lines 241+242 in opendbc/car/fw_versions.py
+# Full ECU scan takes ~10 seconds
+# Proposal: Fingerprint using VIN or modify get_present_ecus()
+
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[request for bus in (0, 1) for request in [
-    Request(
-    [StdQueries.TESTER_PRESENT_REQUEST],
-    [StdQueries.TESTER_PRESENT_RESPONSE],
-    rx_offset      = PSA_RX_OFFSET,
-    bus            = bus,
-    obd_multiplexing = False,
-    ),
-    Request(
-      [StdQueries.EXTENDED_DIAGNOSTIC_REQUEST,  StdQueries.MANUFACTURER_SOFTWARE_VERSION_REQUEST],
-      [StdQueries.EXTENDED_DIAGNOSTIC_RESPONSE, StdQueries.MANUFACTURER_SOFTWARE_VERSION_RESPONSE],
-      rx_offset=0x08,
-      bus=bus,
-      obd_multiplexing=False,
-      whitelist_ecus=[Ecu.eps, Ecu.hybrid, Ecu.electricBrakeBooster, Ecu.engine, Ecu.abs],
-    ),
     Request(
       [PSA_DIAG_REQ, PSA_SERIAL_REQ],
       [PSA_DIAG_RESP, PSA_SERIAL_RESP],
