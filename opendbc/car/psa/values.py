@@ -8,7 +8,7 @@ from opendbc.car.fw_query_definitions import FwQueryConfig, Request
 Ecu = CarParams.Ecu
 
 class CarControllerParams:
-  STEER_STEP = 1  # spamming at 100 Hz works well, stock lkas is 20 Hz
+  STEER_STEP = 1
 
   # Angle rate limits are set to meet ISO 11270
   ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
