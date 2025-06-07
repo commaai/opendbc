@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from opendbc.car.structs import CarParams
 from opendbc.car import AngleSteeringLimits, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.docs_definitions import CarDocs, CarHarness, CarParts
-from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
+from opendbc.car.fw_query_definitions import FwQueryConfig, Request
 
 Ecu = CarParams.Ecu
 
