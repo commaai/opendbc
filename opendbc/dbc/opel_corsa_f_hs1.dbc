@@ -672,7 +672,6 @@ BA_ "???" BO_ 520 0;
 VAL_ 840 P134_Com_stEng 7 "RESERVED" 6 "DegradedGO" 5 "GO" 4 "Stopped" 3 "Running" 2 "Starting" 1 "Cut" 0 "Locked" ;
 
 
-CM_ "opel_corsa_f_hs1.dbc starts here";
 
 BO_ 757 STEERING: 7 XXX
  SG_ COUNTER : 3|4@0+ (1,0) [0|255] "" XXX

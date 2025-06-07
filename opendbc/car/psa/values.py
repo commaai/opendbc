@@ -37,10 +37,10 @@ class PSAPlatformConfig(PlatformConfig):
   })
 
 class CAR(Platforms):
-  PSA_OPEL_CORSA_F = PSAPlatformConfig(
-    [PSACarDocs("Opel Corsa F")],
+  PSA_PEUGEOT_208 = PSAPlatformConfig(
+    [PSACarDocs("Peugeot 208")],
     PSACarSpecs(
-      mass=1530,
+      mass=1530, # electric variant
       wheelbase=2.540,
       steerRatio=17.6,
       centerToFrontRatio=0.44,

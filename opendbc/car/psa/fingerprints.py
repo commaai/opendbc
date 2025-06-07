@@ -5,12 +5,12 @@ from opendbc.car.psa.values import CAR
 Ecu = CarParams.Ecu
 
 FINGERPRINTS = {
-  CAR.PSA_OPEL_CORSA_F: [{
+  CAR.PSA_PEUGEOT_208: [{
   }],
 }
 
 FW_VERSIONS = {
-  CAR.PSA_OPEL_CORSA_F: {
+  CAR.PSA_PEUGEOT_208: {
     # ARTIV - Radar
     (Ecu.fwdRadar, 0x6B6, None): [
         b'212053276',
