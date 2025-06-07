@@ -5,8 +5,8 @@ from opendbc.car.psa.values import CAR
 Ecu = CarParams.Ecu
 
 FINGERPRINTS = {
-  CAR.PSA_PEUGEOT_208: [{
-  }],
+  CAR.PSA_PEUGEOT_208: [
+  ],
 }
 
 FW_VERSIONS = {
