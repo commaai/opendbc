@@ -44,7 +44,7 @@ class CarState(CarStateBase):
     ret.steeringTorque = cp.vl['STEERING']['DRIVER_TORQUE']
     ret.steeringTorqueEps = cp.vl['IS_DAT_DIRA']['EPS_TORQUE']
     ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > CarControllerParams.STEER_DRIVER_ALLOWANCE, 5)
-    ret.steerFaultTemporary = False # TODO: test  bool(cp.vl['IS_DAT_DIRA']['TRQ_LIMIT_STATE']) # TRQ_LIMIT_STATE triggers before EPS actually gives up
+    ret.steerFaultTemporary = False
     ret.steerFaultPermanent = bool(cp.vl['IS_DAT_DIRA']['STEERING_REBOOT_REQUEST'])
     ret.espDisabled = bool(cp_adas.vl['ESP']['ESP_STATUS_INV'])
 
