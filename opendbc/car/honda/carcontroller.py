@@ -215,6 +215,8 @@ class CarController(CarControllerBase):
           # perform a gas-only pid
           if (actuators.longControlState == LongCtrlState.pid):
             gas_error = self.accel - CS.out.aEgo
+            self.gasonly_pid.neg_limit = self.params.BOSCH_ACCEL_MIN
+            self.gasonly_pid.pos_limit = self.params.BOSCH_ACCEL_MAX
             gas_pedal_force = self.gasonly_pid.update(gas_error, speed=CS.out.vEgo, feedforward=self.accel)
           else:
             gas_pedal_force = self.accel
