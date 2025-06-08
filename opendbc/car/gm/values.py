@@ -195,7 +195,8 @@ class CAR(Platforms):
   )
   GMC_YUKON_XL_2017 = GMPlatformConfig(
     [GMCarDocs("GMC Yukon XL 2017", "Adaptive Cruise Control (ACC) & LKAS")],
-    GMCarSpecs(mass=2739, wheelbase=3.302, steerRatio=24,  centerToFrontRatio=0.5, tireStiffnessFactor=1.0),
+    GMCarSpecs(mass=2739, wheelbase=3.302, steerRatio=23,  centerToFrontRatio=0.55, tireStiffnessFactor=1.0),
+    # https://www.cars.com/research/gmc-yukon_xl-2017/specs/387599/ 3042lbs front 2923lbs rear
   )
 
 class CruiseButtons:

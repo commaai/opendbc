@@ -4,17 +4,13 @@
 
 // TODO: do checksum and counter checks. Add correct timestep, 0.1s for now.
 #define GM_COMMON_RX_CHECKS \
-    {.msg = {{0x184, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}}, \
-    {.msg = {{0x34A, 0, 5, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}}, \
-    {.msg = {{0x1E1, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}}, \
-    {.msg = {{0x1C4, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}}, \
-    {.msg = {{0xC9, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}}, \
-
-#define GM_0xBE_RX_CHECK \
-    {.msg = {{0xBE, 0, 6, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},    /* Volt, Silverado, Acadia Denali */ \
-            {0xBE, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},    /* Bolt EUV */ \
-            {0xBE, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}}},  /* Escalade */ \
-
+    {.msg = {{0x184, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 10U}, { 0 }, { 0 }}}, \
+    {.msg = {{0x34A, 0, 5, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 10U}, { 0 }, { 0 }}}, \
+    {.msg = {{0x1E1, 0, 7, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 10U}, { 0 }, { 0 }}}, \
+    {.msg = {{0xBE , 0, 6, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 10U},                 \
+             {0xF1 , 0, 6, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 10U}, { 0 }}}, /* Volt, Silverado, Acadia Denali, Bolt EUV,Escalade */ \
+    {.msg = {{0x1C4, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 10U}, { 0 }, { 0 }}}, \
+    {.msg = {{0xC9 , 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 10U}, { 0 }, { 0 }}}, \
 
 static const LongitudinalLimits *gm_long_limits;
 
@@ -170,9 +166,9 @@ static bool gm_tx_hook(const CANPacket_t *to_send) {
 static safety_config gm_init(uint16_t param) {
   const uint16_t GM_PARAM_HW_CAM = 1;
   const uint16_t GM_PARAM_EV = 4;
-  const uint16_t GM_PARAM_F1_CAN_BRAKE = 8;
-  bool F1_CAN_BRAKE = false;
-  F1_CAN_BRAKE = GET_FLAG(param, GM_PARAM_F1_CAN_BRAKE);
+// 6-7test  const uint16_t GM_PARAM_F1_CAN_BRAKE = 8;
+// 6-7test  bool F1_CAN_BRAKE = false;
+// 6-7test  F1_CAN_BRAKE = GET_FLAG(param, GM_PARAM_F1_CAN_BRAKE);
 //  printf("F1_CAN_BRAKE Value %d",F1_CAN_BRAKE);
 
   // common safety checks assume unscaled integer values
@@ -207,27 +203,13 @@ static safety_config gm_init(uint16_t param) {
 
   static RxCheck gm_rx_checks[] = {
     GM_COMMON_RX_CHECKS
-    GM_0xBE_RX_CHECK
   };
 
   static RxCheck gm_ev_rx_checks[] = {
     GM_COMMON_RX_CHECKS
-    GM_0xBE_RX_CHECK
-    {.msg = {{0xBD, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 40U}, { 0 }, { 0 }}},
+    {.msg = {{0xBD, 0, 7, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 40U}, { 0 }, { 0 }}},
 
   };
-
-  static RxCheck gm_f1_can_brake_rx_checks[] = {
-    GM_COMMON_RX_CHECKS
-#if 0
-    {.msg = {{0xF1, 0, 6, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},    /* Volt, Silverado, Acadia Denali */ \
-            {0xF1, 0, 7, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U},    /* Bolt EUV */ \
-            {0xF1, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}}},  /* Escalade */
-#endif
-  };
-
-
-
 
   gm_hw = GET_FLAG(param, GM_PARAM_HW_CAM) ? GM_CAM : GM_ASCM;
 //  printf("Gm hw %d",gm_hw);
@@ -240,7 +222,8 @@ static safety_config gm_init(uint16_t param) {
   } else {
   }
 
-static bool gm_cam_long = false;
+  bool gm_cam_long = false;
+
 
 #ifdef ALLOW_DEBUG
   const uint16_t GM_PARAM_HW_CAM_LONG = 2;
@@ -259,14 +242,11 @@ static bool gm_cam_long = false;
     } else {
       SET_TX_MSGS(GM_CAM_TX_MSGS, ret);
     }
-    if (F1_CAN_BRAKE){
-      SET_RX_CHECKS(gm_f1_can_brake_rx_checks, ret);
-    }
 
-    //ret = gm_cam_long ? BUILD_SAFETY_CFG(gm_rx_checks, GM_CAM_LONG_TX_MSGS) : BUILD_SAFETY_CFG(gm_rx_checks, GM_CAM_TX_MSGS);
+//    ret = gm_cam_long ? BUILD_SAFETY_CFG(gm_rx_checks, GM_CAM_LONG_TX_MSGS) : BUILD_SAFETY_CFG(gm_rx_checks, GM_CAM_TX_MSGS);
   } else {
-      SET_TX_MSGS(GM_ASCM_TX_MSGS, ret);
-      //ret = BUILD_SAFETY_CFG(gm_rx_checks, GM_ASCM_TX_MSGS);
+    SET_TX_MSGS(GM_ASCM_TX_MSGS, ret);
+//    ret = BUILD_SAFETY_CFG(gm_rx_checks, GM_ASCM_TX_MSGS);
   }
 
   const bool gm_ev = GET_FLAG(param, GM_PARAM_EV);
