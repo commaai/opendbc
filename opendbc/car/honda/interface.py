@@ -210,6 +210,10 @@ class CarInterface(CarInterfaceBase):
     if 0x1BE in fingerprint[CAN.pt] and candidate in (CAR.HONDA_ACCORD, CAR.HONDA_HRV_3G):
       ret.flags |= HondaFlags.BOSCH_ALT_BRAKE.value
 
+    # Detect alternate Bosch gearbox msg (0x1A3)
+    if 0x1A3 in fingerprint[CAN.pt] and candidate == CAR.HONDA_HRV_3G:
+      ret.flags |= HondaFlags.BOSCH_ALT_GEARS.value
+
     if ret.flags & HondaFlags.BOSCH_ALT_BRAKE:
       ret.safetyConfigs[-1].safetyParam |= HondaSafetyFlags.ALT_BRAKE.value
 
