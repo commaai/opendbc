@@ -603,6 +603,14 @@ FW_VERSIONS = {
       b'\xf1\x00BD__ SCC H-CUP      1.00 1.02 99110-M6000         ',
     ],
   },
+  CAR.KIA_K4_2025: {
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00CL4 MFC  AT USA LHD 1.00 1.02 99210-GG000 240708',
+    ],
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00CL4_ RDR -----      1.00 1.01 99110-GG000         ',
+    ],
+  },
   CAR.KIA_K5_2021: {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00DL3_ SCC F-CUP      1.00 1.03 99110-L2100         ',
