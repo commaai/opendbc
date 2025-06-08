@@ -15,7 +15,7 @@ DELPHI_ESR_RADAR_MSGS = list(range(0x500, 0x540))
 DELPHI_MRR_RADAR_START_ADDR = 0x120
 DELPHI_MRR_RADAR_HEADER_ADDR = 0x174  # MRR_Header_SensorCoverage
 DELPHI_MRR_RADAR_MSG_COUNT = 64
-DELPHI_MRR_RADAR_MSG_COUNT_64 = 22 # 22 messages in CANFD
+DELPHI_MRR_RADAR_MSG_COUNT_64 = 22  # 22 messages in CANFD
 
 DELPHI_MRR_RADAR_RANGE_COVERAGE = {0: 42, 1: 164, 2: 45, 3: 175}  # scan index to detection range (m)
 DELPHI_MRR_MIN_LONG_RANGE_DIST = 30  # meters
@@ -89,6 +89,7 @@ def _create_delphi_mrr_radar_can_parser(CP) -> CANParser:
 
   return CANParser(RADAR.DELPHI_MRR, messages, CanBus(CP).radar)
 
+
 def _create_delphi_mrr_radar_can_parser_64(CP) -> CANParser:
   messages = []
 
@@ -97,6 +98,7 @@ def _create_delphi_mrr_radar_can_parser_64(CP) -> CANParser:
     messages += [(msg, 20)]
 
   return CANParser(RADAR.DELPHI_MRR_64, messages, CanBus(CP).radar)
+
 
 class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
@@ -228,6 +230,7 @@ class RadarInterface(RadarInterfaceBase):
 
       valid = bool(msg[f"CAN_DET_VALID_LEVEL_{ii:02d}"])
 
+      # TODO: verify this is correct for CANFD as well - copied from CAN version
       # Long range measurement mode is more sensitive and can detect the road surface
       dist = msg[f"CAN_DET_RANGE_{ii:02d}"]  # m [0|255.984]
       if scanIndex in (1, 3) and dist < DELPHI_MRR_MIN_LONG_RANGE_DIST:
@@ -245,50 +248,29 @@ class RadarInterface(RadarInterfaceBase):
     if headerScanIndex != 3:
       return False
 
-    return self.do_clustering()
+    self.do_clustering()
+    return True
 
   def _update_delphi_mrr_64(self, ret: structs.RadarData):
-    # There is not discovered MRR_Header_InformationDetections message in CANFD
-    # headerScanIndex = int(self.rcp.vl["MRR_Header_InformationDetections"]['CAN_SCAN_INDEX']) & 0b11
+    # Ensure all point IDs match. Note that this message is sent first, but trigger_msg waits for the last message to come in
     headerScanIndex = int(self.rcp.vl["MRR_Detection_001"]['CAN_SCAN_INDEX_2LSB_01_01'])
 
-    # In reverse, the radar continually sends the last messages. Mark this as invalid
-    if (self.prev_headerScanIndex + 1) % 4 != headerScanIndex:
-      self.radar_unavailable_cnt += 1
-    else:
-      self.radar_unavailable_cnt = 0
-    self.prev_headerScanIndex = headerScanIndex
-
-    if self.radar_unavailable_cnt >= 5:
-      self.pts.clear()
-      self.points.clear()
-      self.clusters.clear()
-      ret.errors.radarUnavailableTemporary = True
-      return True
-
-    # Use points with Doppler coverage of +-60 m/s, reduces similar points
+    # TODO: Verify the below is correct for CANFD as well - copied from CAN version
+    #       Use points with Doppler coverage of +-60 m/s, reduces similar points
     if headerScanIndex in (0, 1):
-      return False, []
-
-    # There is not discovered MRR_Header_SensorCoverage message in CANFD
-    # if DELPHI_MRR_RADAR_RANGE_COVERAGE[headerScanIndex] != int(self.rcp.vl["MRR_Header_SensorCoverage"]["CAN_RANGE_COVERAGE"]):
-    #   self.invalid_cnt += 1
-    # else:
-    #   self.invalid_cnt = 0
-
-    # # Rarely MRR_Header_InformationDetections can fail to send a message. The scan index is skipped in this case
-    # if self.invalid_cnt >= 5:
-    #   errors.append("wrongConfig")
+      return False
 
     for ii in range(1, DELPHI_MRR_RADAR_MSG_COUNT_64 + 1):
       msg = self.rcp.vl[f"MRR_Detection_{ii:03d}"]
 
-      maxRangeID = 7 if ii < 22 else 4 # all messages have 7 points except the last one, which has only 4 points in CANFD
-      for iii in range(1,maxRangeID):
+      # all messages have 6 points except the last one
+      maxRangeID = 6 if ii < DELPHI_MRR_RADAR_MSG_COUNT_64 else 3
+      for iii in range(1, maxRangeID + 1):
 
-        # SCAN_INDEX rotates through 0..3 on each message for different measurement modes
-        # Indexes 0 and 2 have a max range of ~40m, 1 and 3 are ~170m (MRR_Header_SensorCoverage->CAN_RANGE_COVERAGE)
-        # Indexes 0 and 1 have a Doppler coverage of +-71 m/s, 2 and 3 have +-60 m/s
+        # SCAN_INDEX rotates through 0..3
+        # TODO: Verify the below is correct for CANFD as well - copied from CAN version
+        #       Indexes 0 and 2 have a max range of ~40m, 1 and 3 are ~170m (MRR_Header_SensorCoverage->CAN_RANGE_COVERAGE)
+        #       Indexes 0 and 1 have a Doppler coverage of +-71 m/s, 2 and 3 have +-60 m/s
         scanIndex = msg[f"CAN_SCAN_INDEX_2LSB_{ii:02d}_{iii:02d}"]
 
         # Throw out old measurements. Very unlikely to happen, but is proper behavior
@@ -310,11 +292,12 @@ class RadarInterface(RadarInterfaceBase):
 
           self.points.append([dRel, yRel * 2, distRate * 2])
 
-    # Update once we've cycled through all 4 scan modes
     if headerScanIndex != 3:
-      return True, [] # MRR_Detection_* messages in CANFD are at 20Hz, services.py expects liveTracks to be at 20Hz - we'll send messages to meet the 20Hz
+      return True
 
-    return self.do_clustering()
+    # Update the points once we've cycled through all 4 scan modes
+    self.do_clustering()
+    return True
 
   # Do the common work for CAN and CANFD clustering and prepare the points to be used for liveTracks
   def do_clustering(self):
@@ -357,5 +340,3 @@ class RadarInterface(RadarInterfaceBase):
       del self.pts[idx]
 
     self.points = []
-
-    return True
