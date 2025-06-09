@@ -24,8 +24,6 @@ static uint8_t psa_get_counter(const CANPacket_t *to_push) {
     cnt = (GET_BYTE(to_push, 3) >> 4) & 0xF;
   } else if (addr == PSA_HS2_DYN_ABR_38D) {
     cnt = (GET_BYTE(to_push, 5) >> 4) & 0xF;
-  } else if (addr == PSA_STEERING_ALT) {
-    cnt = GET_BYTE(to_push, 4) & 0xF;
   } else {
   }
   return cnt;
@@ -39,14 +37,12 @@ static uint32_t psa_get_checksum(const CANPacket_t *to_push) {
     chksum = GET_BYTE(to_push, 5) & 0xF;
   } else if (addr == PSA_HS2_DYN_ABR_38D) {
     chksum = GET_BYTE(to_push, 5) & 0xF;
-  } else if (addr == PSA_STEERING_ALT) {
-    chksum = (GET_BYTE(to_push, 4) >> 4) & 0xF;
   } else {
   }
   return chksum;
 }
 
-static uint8_t _psa_compute_checksum(const CANPacket_t *to_push, uint8_t chk_ini, int chk_pos, bool chk_high_nibble) {
+static uint8_t _psa_compute_checksum(const CANPacket_t *to_push, uint8_t chk_ini, int chk_pos) {
   int len = GET_LEN(to_push);
 
   uint8_t sum = 0;
@@ -54,11 +50,8 @@ static uint8_t _psa_compute_checksum(const CANPacket_t *to_push, uint8_t chk_ini
     uint8_t b = to_push->data[i];
 
     if (i == chk_pos) {
-      if (chk_high_nibble) {
-        b &= 0x0F;
-      } else {
-        b &= 0xF0;
-      }
+      // set checksum in low nibble to 0
+      b &= 0xF0;
     }
     sum += (b >> 4) + (b & 0xF);
   }
@@ -71,11 +64,10 @@ static uint32_t psa_compute_checksum(const CANPacket_t *to_push) {
 
   uint8_t chk = 0;
   if (addr == PSA_HS2_DAT_MDD_CMD_452) {
-    chk = _psa_compute_checksum(to_push, 0x4, 5, false);
+    chk = _psa_compute_checksum(to_push, 0x4, 5);
   } else if (addr == PSA_HS2_DYN_ABR_38D) {
-    chk = _psa_compute_checksum(to_push, 0x7, 5, false);
-  } else if (addr == PSA_STEERING_ALT) {
-    chk = _psa_compute_checksum(to_push, 0x3, 4, true);
+    chk = _psa_compute_checksum(to_push, 0x7, 5);
+  } else {
   }
 
   return chk;
@@ -166,12 +158,12 @@ static safety_config psa_init(uint16_t param) {
   };
 
   static RxCheck psa_rx_checks[] = {
-    {.msg = {{PSA_HS2_DAT_MDD_CMD_452, PSA_ADAS_BUS, 6, .max_counter = 15U, .ignore_quality_flag = true, .frequency = 20U}, { 0 }, { 0 }}},                    // cruise state
-    {.msg = {{PSA_HS2_DYN_ABR_38D, PSA_ADAS_BUS, 8, .max_counter = 15U, .ignore_quality_flag = true, .frequency = 25U}, { 0 }, { 0 }}},                        // speed
-    {.msg = {{PSA_STEERING_ALT, PSA_CAM_BUS, 7, .max_counter = 15U, .ignore_quality_flag = true, .frequency = 100U}, { 0 }, { 0 }}},                           // steering angle
-    {.msg = {{PSA_STEERING, PSA_CAM_BUS, 7, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 100U}, { 0 }, { 0 }}},  // driver torque
-    {.msg = {{PSA_DAT_BSI, PSA_MAIN_BUS, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 20U}, { 0 }, { 0 }}},   // doors
-    {.msg = {{PSA_DRIVER, PSA_MAIN_BUS, 6, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 10U}, { 0 }, { 0 }}},    // gas pedal
+    {.msg = {{PSA_HS2_DAT_MDD_CMD_452, PSA_ADAS_BUS, 6, .max_counter = 15U, .ignore_quality_flag = true, .frequency = 20U}, { 0 }, { 0 }}},                       // cruise state
+    {.msg = {{PSA_HS2_DYN_ABR_38D, PSA_ADAS_BUS, 8, .max_counter = 15U, .ignore_quality_flag = true, .frequency = 25U}, { 0 }, { 0 }}},                           // speed
+    {.msg = {{PSA_STEERING_ALT, PSA_CAM_BUS, 7, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 100U}, { 0 }, { 0 }}}, // steering angle
+    {.msg = {{PSA_STEERING, PSA_CAM_BUS, 7, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 100U}, { 0 }, { 0 }}},     // driver torque
+    {.msg = {{PSA_DAT_BSI, PSA_MAIN_BUS, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 20U}, { 0 }, { 0 }}},      // doors
+    {.msg = {{PSA_DRIVER, PSA_MAIN_BUS, 6, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 10U}, { 0 }, { 0 }}},       // gas pedal
   };
 
   return BUILD_SAFETY_CFG(psa_rx_checks, PSA_TX_MSGS);
