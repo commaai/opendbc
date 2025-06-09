@@ -16,9 +16,6 @@
 #define PSA_ADAS_BUS 1
 #define PSA_MAIN_BUS 2
 
-static bool psa_lkas_msg_check(int addr) {
-  return addr == PSA_LANE_KEEP_ASSIST;
-}
 
 static void psa_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
@@ -58,7 +55,6 @@ static bool psa_tx_hook(const CANPacket_t *to_send) {
   bool tx = true;
   int addr = GET_ADDR(to_send);
 
-  // Angle rate limits are set to meet ISO 11270
   static const AngleSteeringLimits PSA_STEERING_LIMITS = {
       .angle_deg_to_can = 100,
       .angle_rate_up_lookup = {
@@ -93,7 +89,7 @@ static bool psa_fwd_hook(int bus_num, int addr) {
   bool block_msg = false;
 
   if (bus_num == PSA_MAIN_BUS) {
-    block_msg = psa_lkas_msg_check(addr);
+    block_msg = addr == PSA_LANE_KEEP_ASSIST;
   }
 
   return block_msg;

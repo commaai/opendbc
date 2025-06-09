@@ -10,7 +10,6 @@ Ecu = CarParams.Ecu
 class CarControllerParams:
   STEER_STEP = 1
 
-  # Angle rate limits are set to meet ISO 11270
   ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
     390, # deg
     ([0., 5., 25.], [2.5, 1.5, 0.2]),
