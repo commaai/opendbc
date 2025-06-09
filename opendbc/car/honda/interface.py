@@ -73,7 +73,7 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.HONDA_CIVIC_2022 and all(msg not in fingerprint[CAN.pt] for msg in (0x191, 0x1A3)):
       ret.transmissionType = TransmissionType.manual
     # New Civics don't have 0x191, but do have 0x1A3
-    elif candidate == CAR.HONDA_CIVIC_2022 and 0x1A3 in fingerprint[CAN.pt]:
+    elif candidate in (CAR.HONDA_CIVIC_2022, CAR.HONDA_HRV_3G) and 0x1A3 in fingerprint[CAN.pt]:
       ret.transmissionType = TransmissionType.cvt
 
     # Certain Hondas have an extra steering sensor at the bottom of the steering rack,
@@ -209,10 +209,6 @@ class CarInterface(CarInterfaceBase):
     # TODO: Only detect feature for Accord/Accord Hybrid, not all Bosch DBCs have BRAKE_MODULE
     if 0x1BE in fingerprint[CAN.pt] and candidate in (CAR.HONDA_ACCORD, CAR.HONDA_HRV_3G):
       ret.flags |= HondaFlags.BOSCH_ALT_BRAKE.value
-
-    # Detect alternate Bosch gearbox msg (0x1A3)
-    if 0x1A3 in fingerprint[CAN.pt] and candidate == CAR.HONDA_HRV_3G:
-      ret.flags |= HondaFlags.BOSCH_ALT_GEARS.value
 
     if ret.flags & HondaFlags.BOSCH_ALT_BRAKE:
       ret.safetyConfigs[-1].safetyParam |= HondaSafetyFlags.ALT_BRAKE.value

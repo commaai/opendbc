@@ -70,7 +70,6 @@ class HondaFlags(IntFlag):
   NIDEC_ALT_SCM_MESSAGES = 64
 
   BOSCH_CANFD = 128
-  BOSCH_ALT_GEARS  = 256
 
 # Car button codes
 class CruiseButtons:
