@@ -16,6 +16,70 @@
 #define PSA_ADAS_BUS 1
 #define PSA_MAIN_BUS 2
 
+static uint8_t psa_get_counter(const CANPacket_t *to_push) {
+  int addr = GET_ADDR(to_push);
+
+  uint8_t cnt = 0;
+  if (addr == PSA_HS2_DAT_MDD_CMD_452) {
+    cnt = (GET_BYTE(to_push, 3) >> 4) & 0xF;
+  } else if (addr == PSA_HS2_DYN_ABR_38D) {
+    cnt = (GET_BYTE(to_push, 5) >> 4) & 0xF;
+  } else if (addr == PSA_STEERING_ALT) {
+    cnt = GET_BYTE(to_push, 4) & 0xF;
+  } else {
+  }
+  return cnt;
+}
+
+static uint32_t psa_get_checksum(const CANPacket_t *to_push) {
+  int addr = GET_ADDR(to_push);
+
+  uint8_t chksum = 0;
+  if (addr == PSA_HS2_DAT_MDD_CMD_452) {
+    chksum = GET_BYTE(to_push, 5) & 0xF;
+  } else if (addr == PSA_HS2_DYN_ABR_38D) {
+    chksum = GET_BYTE(to_push, 5) & 0xF;
+  } else if (addr == PSA_STEERING_ALT) {
+    chksum = (GET_BYTE(to_push, 4) >> 4) & 0xF;
+  } else {
+  }
+  return chksum;
+}
+
+static uint8_t _psa_compute_checksum(const CANPacket_t *to_push, uint8_t chk_ini, int chk_pos, bool chk_high_nibble) {
+  int len = GET_LEN(to_push);
+
+  uint8_t sum = 0;
+  for (int i = 0; i < len; i++) {
+    uint8_t b = to_push->data[i];
+
+    if (i == chk_pos) {
+      if (chk_high_nibble) {
+        b &= 0x0F;
+      } else {
+        b &= 0xF0;
+      }
+    }
+    sum += (b >> 4) + (b & 0xF);
+  }
+  return (chk_ini - sum) & 0xF;
+}
+
+
+static uint32_t psa_compute_checksum(const CANPacket_t *to_push) {
+  int addr = GET_ADDR(to_push);
+
+  uint8_t chk = 0;
+  if (addr == PSA_HS2_DAT_MDD_CMD_452) {
+    chk = _psa_compute_checksum(to_push, 0x00, 5, false);
+  } else if (addr == PSA_HS2_DYN_ABR_38D) {
+    chk = _psa_compute_checksum(to_push, 0x00, 5, false);
+  } else if (addr == PSA_STEERING_ALT) {
+    chk = _psa_compute_checksum(to_push, 0x00, 4, true);
+  }
+
+  return chk;
+}
 
 static void psa_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
