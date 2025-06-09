@@ -71,11 +71,11 @@ static uint32_t psa_compute_checksum(const CANPacket_t *to_push) {
 
   uint8_t chk = 0;
   if (addr == PSA_HS2_DAT_MDD_CMD_452) {
-    chk = _psa_compute_checksum(to_push, 0x00, 5, false);
+    chk = _psa_compute_checksum(to_push, 0x4, 5, false);
   } else if (addr == PSA_HS2_DYN_ABR_38D) {
-    chk = _psa_compute_checksum(to_push, 0x00, 5, false);
+    chk = _psa_compute_checksum(to_push, 0x7, 5, false);
   } else if (addr == PSA_STEERING_ALT) {
-    chk = _psa_compute_checksum(to_push, 0x00, 4, true);
+    chk = _psa_compute_checksum(to_push, 0x3, 4, true);
   }
 
   return chk;
