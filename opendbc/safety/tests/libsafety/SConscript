@@ -23,12 +23,10 @@ env = Environment(
     '-Wfatal-errors',
     '-Wno-pointer-to-int-cast',
     '-DCANFD',
-    # GCC coverage flags
-    '-fprofile-arcs',
-    '-ftest-coverage',
-  ],
+  # GCC coverage flags
+  ] + (['-fprofile-arcs', '-ftest-coverage'] if system != "Darwin" else []),
   CPPPATH=["#", "../../board/"],
-  LIBS=["gcov"],
+  LIBS=["gcov"] if system != "Darwin" else [],
 )
 if system == "Darwin":
   env.PrependENVPath('PATH', '/opt/homebrew/bin')
