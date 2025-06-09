@@ -22,8 +22,6 @@ class CarState(CarStateBase):
     self.hands_on_level = 0
     self.das_control = None
 
-    self.is3Y = CP.carFingerprint in (CAR.TESLA_MODEL_3, CAR.TESLA_MODEL_Y)
-
   def update_autopark_state(self, autopark_state: str, cruise_enabled: bool):
     autopark_now = autopark_state in ("ACTIVE", "COMPLETE", "SELFPARK_STARTED")
     if autopark_now and not self.autopark_prev and not self.cruise_enabled_prev:
@@ -113,7 +111,7 @@ class CarState(CarStateBase):
     ret.stockLkas = cp_ap_party.vl["DAS_steeringControl"]["DAS_steeringControlType"] == 2  # LANE_KEEP_ASSIST
 
     # Stock Autosteer should be off (includes FSD)
-    if self.is3Y:
+    if self.CP.carFingerprint in (CAR.TESLA_MODEL_3, CAR.TESLA_MODEL_Y):
       ret.invalidLkasSetting = cp_ap_party.vl["DAS_settings"]["DAS_autosteerEnabled"] != 0
     else:
       #TODO: Find S/X equivalent
