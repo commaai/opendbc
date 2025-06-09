@@ -78,15 +78,8 @@ static void psa_rx_hook(const CANPacket_t *to_push) {
   int addr = GET_ADDR(to_push);
 
   if (bus == PSA_CAM_BUS) {
-    if (addr == PSA_DAT_BSI) {
-      //TODO: check GET_BIT(to_push, 5);
-      brake_pressed = (GET_BYTE(to_push, 0U) >> 5U) & 1U; // P013_MainBrake
-    }
-    if (addr == PSA_DRIVER) {
-      gas_pressed = GET_BYTE(to_push, 3) > 0U; // GAS_PEDAL
-    }
     if (addr == PSA_STEERING) {
-      int torque_driver_new = GET_BYTE(to_push, 1); // TODO: check
+      int torque_driver_new = to_signed(GET_BYTE(to_push, 1), 8);
       update_sample(&torque_driver, torque_driver_new);
     }
     if (addr == PSA_STEERING_ALT) {
@@ -101,8 +94,15 @@ static void psa_rx_hook(const CANPacket_t *to_push) {
       UPDATE_VEHICLE_SPEED(speed * 0.01); // VITESSE_VEHICULE_ROUES
     }
     if (addr == PSA_HS2_DAT_MDD_CMD_452) {
-      // TODO: check pcm_cruise_check(GET_BIT(to_push, 3) & 0x40);
       pcm_cruise_check(((GET_BYTE(to_push, 2U) >> 7U) & 1U)); // DDE_ACTIVATION_RVV_ACC
+    }
+  }
+  if (bus == PSA_MAIN_BUS) {
+    if (addr == PSA_DAT_BSI) {
+      brake_pressed = (GET_BYTE(to_push, 0U) >> 5U) & 1U; // P013_MainBrake
+    }
+    if (addr == PSA_DRIVER) {
+      gas_pressed = GET_BYTE(to_push, 3) > 0U; // GAS_PEDAL
     }
   }
 }
