@@ -58,16 +58,15 @@ static bool psa_tx_hook(const CANPacket_t *to_send) {
   bool tx = true;
   int addr = GET_ADDR(to_send);
 
-  // TODO: update rate limits
-  // Currently set to ISO11270 limits
+  // Angle rate limits are set to meet ISO 11270
   static const AngleSteeringLimits PSA_STEERING_LIMITS = {
       .angle_deg_to_can = 100,
       .angle_rate_up_lookup = {
-      {0., 5., 15.},
+      {0., 5., 25.},
       {2.5, 1.5, 0.2},
     },
     .angle_rate_down_lookup = {
-      {0., 5., 15.},
+      {0., 5., 25.},
       {5., 2.0, 0.3},
     },
   };
@@ -107,7 +106,6 @@ static safety_config psa_init(uint16_t param) {
   };
 
   static RxCheck psa_rx_checks[] = {
-    // TODO: counters and checksums
     {.msg = {{PSA_STEERING, PSA_CAM_BUS, 7, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 100U}, { 0 }, { 0 }}},            // driver torque
     {.msg = {{PSA_STEERING_ALT, PSA_CAM_BUS, 7, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 100U}, { 0 }, { 0 }}},        // steering angle
     {.msg = {{PSA_DRIVER, PSA_MAIN_BUS, 6, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 10U}, { 0 }, { 0 }}},              // gas pedal
@@ -116,7 +114,6 @@ static safety_config psa_init(uint16_t param) {
     {.msg = {{PSA_HS2_DAT_MDD_CMD_452, PSA_ADAS_BUS, 6, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 20U}, { 0 }, { 0 }}}, // cruise state
   };
 
-  print("psa_init\n");
   return BUILD_SAFETY_CFG(psa_rx_checks, PSA_TX_MSGS);
 }
 
@@ -125,6 +122,7 @@ const safety_hooks psa_hooks = {
   .rx = psa_rx_hook,
   .tx = psa_tx_hook,
   .fwd = psa_fwd_hook,
-  // .get_counter = psa_get_counter,
-  // .get_checksums = psa_get_checksum,
+  .get_counter = psa_get_counter,
+  .get_checksum = psa_get_checksum,
+  .compute_checksum = psa_compute_checksum,
 };
