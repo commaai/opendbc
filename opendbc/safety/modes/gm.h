@@ -13,7 +13,7 @@
 #define GM_ASCM_RX_CHECKS \
     {.msg = {{0xBE, 0, 6, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 10U},    /* Acadia */ \
              {0xBE, 0, 7, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 10U},    /* Chevy, Bolt EUV */ \
-			 {0xBE, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 10U}}},  /* Cadalac */ \
+             {0xBE, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 10U}}},  /* Cadalac */ \
 
 static const LongitudinalLimits *gm_long_limits;
 
@@ -203,12 +203,12 @@ static safety_config gm_init(uint16_t param) {
 
   static RxCheck gm_ascm_rx_checks[] = {
     GM_COMMON_RX_CHECKS
-	GM_ASCM_RX_CHECKS
+    GM_ASCM_RX_CHECKS
   };
 
   static RxCheck gm_ev_rx_checks[] = {
     GM_COMMON_RX_CHECKS
-	GM_ASCM_RX_CHECKS
+    GM_ASCM_RX_CHECKS
     {.msg = {{0xBD, 0, 7, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 40U}, { 0 }, { 0 }}},
   };
 
@@ -234,9 +234,9 @@ static safety_config gm_init(uint16_t param) {
   safety_config ret;
   
   if (F1_CAN_BRAKE){
-	   SET_RX_CHECKS(gm_rx_checks, ret);
+       SET_RX_CHECKS(gm_rx_checks, ret);
   } else {
-	   SET_RX_CHECKS(gm_ascm_rx_checks, ret);
+       SET_RX_CHECKS(gm_ascm_rx_checks, ret);
   }
   if (gm_hw == GM_CAM) {
     // FIXME: cppcheck thinks that gm_cam_long is always false. This is not true
