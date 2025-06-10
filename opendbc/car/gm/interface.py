@@ -220,7 +220,7 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.GMC_YUKON:
       ret.steerActuatorDelay = 0.5
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
-      #ret.dashcamOnly = True  # Needs steerRatio, tireStiffness, and lat accel factor tuning
+      ret.dashcamOnly = True  # Needs steerRatio, tireStiffness, and lat accel factor tuning
     elif candidate == CAR.GMC_YUKON_XL_2017:
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[10., 41.0], [10., 41.0]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.13, 0.24], [0.01, 0.02]]
