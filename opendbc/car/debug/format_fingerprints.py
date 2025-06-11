@@ -3,7 +3,7 @@ import jinja2
 import os
 
 from cereal import car
-from openpilot.common.basedir import BASEDIR
+from opendbc.car.common.basedir import BASEDIR
 from opendbc.car.interfaces import get_interface_attr
 
 Ecu = car.CarParams.Ecu
@@ -66,7 +66,7 @@ FW_VERSIONS{% if not FW_VERSIONS[brand] %}: dict[str, dict[tuple, list[bytes]]]{
 def format_brand_fw_versions(brand, extra_fw_versions: None | dict[str, dict[tuple, list[bytes]]] = None):
   extra_fw_versions = extra_fw_versions or {}
 
-  fingerprints_file = os.path.join(BASEDIR, f"opendbc/car/{brand}/fingerprints.py")
+  fingerprints_file = os.path.join(BASEDIR, f"{brand}/fingerprints.py")
   with open(fingerprints_file) as f:
     comments = [line for line in f.readlines() if line.startswith("#") and "noqa" not in line]
 
