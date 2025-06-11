@@ -2,11 +2,11 @@
 import jinja2
 import os
 
-from cereal import car
 from opendbc.car.common.basedir import BASEDIR
 from opendbc.car.interfaces import get_interface_attr
+from opendbc.car.structs import CarParams
 
-Ecu = car.CarParams.Ecu
+Ecu = CarParams.Ecu
 
 CARS = get_interface_attr('CAR')
 FW_VERSIONS = get_interface_attr('FW_VERSIONS')
