@@ -14,7 +14,7 @@
 |Audi|A4 2016-24|All|[Not compatible](#flexray)|
 |Audi|A5 2016-24|All|[Not compatible](#flexray)|
 |Audi|Q2 2018|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
-|Audi|Q3 2019-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
+|Audi|Q3 2019-24|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Audi|Q5 2017-24|All|[Not compatible](#flexray)|
 |Audi|RS3 2018|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Audi|S3 2015-17|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
@@ -54,7 +54,7 @@
 |Ford|Maverick 2023-24|Co-Pilot360 Assist|[Upstream](#upstream)|
 |Ford|Maverick Hybrid 2022|LARIAT Luxury|[Upstream](#upstream)|
 |Ford|Maverick Hybrid 2023-24|Co-Pilot360 Assist|[Upstream](#upstream)|
-|Ford|Mustang Mach-E 2021-23|All|[Upstream](#upstream)|
+|Ford|Mustang Mach-E 2021-24|All|[Upstream](#upstream)|
 |Ford|Ranger 2024|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
 |Genesis|G70 2018|All|[Upstream](#upstream)|
 |Genesis|G70 2019-21|All|[Upstream](#upstream)|
@@ -80,8 +80,8 @@
 |Honda|Civic 2022-24|All|[Upstream](#upstream)|
 |Honda|Civic Hatchback 2017-21|Honda Sensing|[Upstream](#upstream)|
 |Honda|Civic Hatchback 2022-24|All|[Upstream](#upstream)|
-|Honda|Civic Hatchback Hybrid 2023 (Europe only)|All|[Upstream](#upstream)|
 |Honda|Civic Hatchback Hybrid 2025|All|[Upstream](#upstream)|
+|Honda|Civic Hatchback Hybrid (Europe only) 2023|All|[Upstream](#upstream)|
 |Honda|Clarity 2018-21|All|[Community](#community)|
 |Honda|CR-V 2015-16|Touring Trim|[Upstream](#upstream)|
 |Honda|CR-V 2017-22|Honda Sensing|[Upstream](#upstream)|
@@ -193,12 +193,12 @@
 |Kia|Telluride 2023-24|HDA2|[Community](#community)|
 |Lexus|CT Hybrid 2017-18|Lexus Safety System+|[Upstream](#upstream)|
 |Lexus|ES 2017-18|All|[Upstream](#upstream)|
-|Lexus|ES 2019-24|All|[Upstream](#upstream)|
+|Lexus|ES 2019-25|All|[Upstream](#upstream)|
 |Lexus|ES Hybrid 2017-18|All|[Upstream](#upstream)|
 |Lexus|ES Hybrid 2019-25|All|[Upstream](#upstream)|
 |Lexus|GS F 2016|All|[Upstream](#upstream)|
 |Lexus|IS 2017-19|All|[Upstream](#upstream)|
-|Lexus|IS 2022-23|All|[Upstream](#upstream)|
+|Lexus|IS 2022-24|All|[Upstream](#upstream)|
 |Lexus|LC 2024|All|[Upstream](#upstream)|
 |Lexus|NS 2022-25|Any|[Not compatible](#can-bus-security)|
 |Lexus|NX 2018-19|All|[Upstream](#upstream)|
@@ -359,11 +359,11 @@
 |Volkswagen|Sharan 2018-22|Adaptive Cruise Control (ACC) & Lane Assist|[Dashcam mode](#dashcam)|
 |Volkswagen|T-Cross 2021|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|T-Roc 2018-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
-|Volkswagen|Taos 2022-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
+|Volkswagen|Taos 2022-24|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Teramont 2018-22|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Teramont Cross Sport 2021-22|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Teramont X 2021-22|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
-|Volkswagen|Tiguan 2018-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
+|Volkswagen|Tiguan 2018-24|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Tiguan eHybrid 2021-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Volkswagen|Touran 2016-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 
