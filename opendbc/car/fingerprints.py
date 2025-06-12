@@ -11,7 +11,6 @@ from opendbc.car.nissan.values import CAR as NISSAN
 from opendbc.car.subaru.values import CAR as SUBARU
 from opendbc.car.toyota.values import CAR as TOYOTA
 from opendbc.car.volkswagen.values import CAR as VW
-from opendbc.car.psa.values import CAR as PSA
 
 FW_VERSIONS = get_interface_attr('FW_VERSIONS', combine_brands=True, ignore_none=True)
 _FINGERPRINTS = get_interface_attr('FINGERPRINTS', combine_brands=True, ignore_none=True)
@@ -336,7 +335,6 @@ MIGRATION = {
   "SKODA SCALA 1ST GEN": VW.SKODA_KAMIQ_MK1,
   "SKODA_SCALA_MK1": VW.SKODA_KAMIQ_MK1,
   "SKODA SUPERB 3RD GEN": VW.SKODA_SUPERB_MK3,
-  "PEUGEOT 208": PSA.PSA_PEUGEOT_208,
 
   "mock": MOCK.MOCK,
 }
