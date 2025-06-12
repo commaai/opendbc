@@ -8,6 +8,17 @@ Ecu = CarParams.Ecu
 
 
 FW_VERSIONS = {
+   CAR.HYUNDAI_GRANDEUR_DIESEL_2019: {
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00IG__ SCC FHCUP      1.00 1.01 96400-G8500         ',
+    ],
+    (Ecu.eps, 0x7d4, None): [
+      b'\xf1\x00IG  MDPS C 1.00 1.01 56310G8350\x00 4IG8C101',
+    ],
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00IG  MFC  AT KOR LHD 1.00 1.00 95740-M9200 170919',
+    ],
+  },
   CAR.HYUNDAI_AZERA_6TH_GEN: {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00IG__ SCC F-CU-      1.00 1.00 99110-G8100         ',
