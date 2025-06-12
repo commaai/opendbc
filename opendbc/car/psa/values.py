@@ -37,7 +37,7 @@ class PSAPlatformConfig(PlatformConfig):
 
 class CAR(Platforms):
   PSA_PEUGEOT_208 = PSAPlatformConfig(
-    [PSACarDocs("Peugeot 208")],
+    [PSACarDocs("Peugeot 208 2019-25")],
     PSACarSpecs(
       mass=1530, # electric variant
       wheelbase=2.540,
