@@ -1,6 +1,5 @@
 from collections import defaultdict
 import pytest
-import re
 
 from opendbc.car.car_helpers import interfaces
 from opendbc.car.docs import get_all_car_docs
