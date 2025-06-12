@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "opendbc/safety/safety_declarations.h"
