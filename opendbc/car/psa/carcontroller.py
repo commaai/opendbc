@@ -25,15 +25,6 @@ class CarController(CarControllerBase):
 
     self.apply_angle_last = apply_angle
 
-    ### CANCEL/RESUME buttons ###
-    # TODO test
-    # if CC.cruiseControl.cancel:
-    #   can_sends.append(create_cancel_acc(self.packer, self.frame, CS.acc_status_msg, CC.cruiseControl.cancel))
-
-    # TODO test
-    # if CC.cruiseControl.resume:
-    #   can_sends.append(create_resume_acc(self.packer, self.frame, CS.adas_status_msg, CC.cruiseControl.resume))
-
     new_actuators = actuators.as_builder()
     new_actuators.steeringAngleDeg = self.apply_angle_last
     self.frame += 1
