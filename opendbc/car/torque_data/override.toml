@@ -12,6 +12,9 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 "SUBARU_OUTBACK_2023" = [nan, 3.0, nan]
 "SUBARU_ASCENT_2023" = [nan, 3.0, nan]
 
+# PSA angle based controllers
+"PSA_PEUGEOT_208" = [nan, 2.0, nan]
+
 # Toyota LTA also has torque
 "TOYOTA_RAV4_TSS2_2023" = [nan, 3.0, nan]
 
