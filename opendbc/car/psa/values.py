@@ -1,9 +1,9 @@
 from dataclasses import dataclass, field
 
 from opendbc.car.structs import CarParams
-from opendbc.car import AngleSteeringLimits, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car import AngleSteeringLimits, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
 from opendbc.car.docs_definitions import CarDocs, CarHarness, CarParts
-from opendbc.car.fw_query_definitions import FwQueryConfig, Request
+from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
 
@@ -46,37 +46,15 @@ class CAR(Platforms):
     ),
   )
 
-PSA_DIAG_REQ  = bytes([uds.SERVICE_TYPE.DIAGNOSTIC_SESSION_CONTROL, 0x01])
-PSA_DIAG_RESP = bytes([uds.SERVICE_TYPE.DIAGNOSTIC_SESSION_CONTROL + 0x40, 0x01])
-
-PSA_SERIAL_REQ = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER,  0xF1, 0x8C])
-PSA_SERIAL_RESP = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40, 0xF1, 0x8C])
-
-PSA_VERSION_REQ  = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER, 0xF0, 0xFE])
-PSA_VERSION_RESP = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40, 0xF0, 0xFE])
-
-PSA_RX_OFFSET = -0x20
-
-# PSA ECUs send an unpadded response on tester_present request.
-# _is_tester_present_response only accepts padded responses, so needed to be modified.
-
+# Placeholder, FW Query will be added in separate PR
 FW_QUERY_CONFIG = FwQueryConfig(
-  requests=[request for bus in (0, 1) for request in [
+  requests=[
     Request(
-      [PSA_DIAG_REQ, PSA_SERIAL_REQ],
-      [PSA_DIAG_RESP, PSA_SERIAL_RESP],
-      rx_offset=PSA_RX_OFFSET,
-      bus=bus,
-      obd_multiplexing=False,
+      [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.UDS_VERSION_REQUEST],
+      [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.UDS_VERSION_RESPONSE],
+      bus=0,
     ),
-    Request(
-      [PSA_DIAG_REQ, PSA_VERSION_REQ],
-      [PSA_DIAG_RESP, PSA_VERSION_RESP],
-      rx_offset=PSA_RX_OFFSET,
-      bus=bus,
-      obd_multiplexing=False,
-    ),
-  ]]
+  ],
 )
 
 DBC = CAR.create_dbc_map()
