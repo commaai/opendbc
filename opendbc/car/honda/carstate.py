@@ -52,8 +52,9 @@ def get_can_messages(CP, gearbox_msg):
   if CP.flags & HondaFlags.BOSCH_ALT_BRAKE:
     messages.append(("BRAKE_MODULE", 50))
 
-  if CP.carFingerprint in (HONDA_BOSCH | {CAR.HONDA_CIVIC, CAR.HONDA_ODYSSEY, CAR.HONDA_ODYSSEY_CHN}):
-    messages.append(("EPB_STATUS", 50))
+  # TODO: Fix this properly for Honda City
+  #if CP.carFingerprint in (HONDA_BOSCH | {CAR.HONDA_CIVIC, CAR.HONDA_ODYSSEY, CAR.HONDA_ODYSSEY_CHN}):
+    #messages.append(("EPB_STATUS", 50))
 
   if CP.carFingerprint in HONDA_BOSCH:
     # these messages are on camera bus on radarless cars
@@ -187,8 +188,9 @@ class CarState(CarStateBase):
     ret.brakeHoldActive = cp.vl["VSA_STATUS"]["BRAKE_HOLD_ACTIVE"] == 1
 
     # TODO: set for all cars
-    if self.CP.carFingerprint in (HONDA_BOSCH | {CAR.HONDA_CIVIC, CAR.HONDA_ODYSSEY, CAR.HONDA_ODYSSEY_CHN}):
-      ret.parkingBrake = cp.vl["EPB_STATUS"]["EPB_STATE"] != 0
+    # TODO: Fix this properly for Honda City
+    #if self.CP.carFingerprint in (HONDA_BOSCH | {CAR.HONDA_CIVIC, CAR.HONDA_ODYSSEY, CAR.HONDA_ODYSSEY_CHN}):
+      #ret.parkingBrake = cp.vl["EPB_STATUS"]["EPB_STATE"] != 0
 
     if self.CP.transmissionType == TransmissionType.manual:
       ret.clutchPressed = cp.vl["GEARBOX_ALT_2"]["GEAR_MT"] == 0
