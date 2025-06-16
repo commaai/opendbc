@@ -17,10 +17,6 @@ class Btn:
   SET = 3
   RESUME = 4
 
-HONDA_NIDEC = 0
-HONDA_BOSCH = 1
-
-
 # Honda safety has several different configurations tested here:
 #  * Nidec
 #    * normal (PCM-enable)
@@ -32,7 +28,6 @@ HONDA_BOSCH = 1
 
 
 class HondaButtonEnableBase(common.PandaCarSafetyTest):
-  # pylint: disable=no-member,abstract-method
 
   # override these inherited tests since we're using button enable
   def test_disable_control_allowed_from_cruise(self):
@@ -139,7 +134,6 @@ class HondaButtonEnableBase(common.PandaCarSafetyTest):
 
 
 class HondaPcmEnableBase(common.PandaCarSafetyTest):
-  # pylint: disable=no-member,abstract-method
 
   def test_buttons(self):
     """
