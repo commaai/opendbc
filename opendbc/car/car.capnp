@@ -372,7 +372,6 @@ struct CarControl {
 
     # longitudinal commands
     accel @4: Float32;  # m/s^2
-    aTarget @9: Float32;  # m/s^2, acceleration target before integral
     longControlState @5: LongControlState;
 
     # these are only for logging the actual values sent to the car over CAN
