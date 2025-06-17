@@ -230,6 +230,7 @@ class CarController(CarControllerBase):
           else:
             gas_pedal_force = self.accel
             self.gasonly_pid.reset()
+          gas_pedal_force += wind_brake_ms2 + hill_brake
           self.gas = float(np.interp(gas_pedal_force, self.params.BOSCH_GAS_LOOKUP_BP, self.params.BOSCH_GAS_LOOKUP_V))
 
           stopping = actuators.longControlState == LongCtrlState.stopping
