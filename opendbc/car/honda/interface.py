@@ -88,10 +88,10 @@ class CarInterface(CarInterfaceBase):
       ret.longitudinalActuatorDelay = 0.5 # s
       if candidate in HONDA_BOSCH_RADARLESS:
         ret.stopAccel = CarControllerParams.BOSCH_ACCEL_MIN  # stock uses -4.0 m/s^2 once stopped but limited by safety model
-    else:
-      # default longitudinal tuning for all hondas
-      ret.longitudinalTuning.kiBP = [0., 5., 35.]
-      ret.longitudinalTuning.kiV = [1.2, 0.8, 0.5]
+
+    # default longitudinal tuning for all hondas
+    ret.longitudinalTuning.kiBP = [0., 5., 35.]
+    ret.longitudinalTuning.kiV = [1.2, 0.8, 0.5]
 
     eps_modified = False
     for fw in car_fw:
@@ -115,6 +115,8 @@ class CarInterface(CarInterfaceBase):
     elif candidate in (CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_BOSCH_DIESEL):
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]  # TODO: determine if there is a dead zone at the top end
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.8], [0.24]]
+      if candidate == CAR.HONDA_CIVIC_BOSCH:
+          CarControllerParams.BOSCH_GAS_LOOKUP_V = [0, 750]
 
     elif candidate == CAR.HONDA_CIVIC_2022:
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]  # TODO: determine if there is a dead zone at the top end
@@ -176,8 +178,15 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.8], [0.24]]
 
     elif candidate == CAR.ACURA_RDX_3G:
+      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 3840], [0, 3840]]  # TODO: determine if there is a dead zone at the top end
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2], [0.06]]
+
+    elif candidate == CAR.ACURA_RDX_3G_MMR:
+      if not (ret.openpilotLongitudinalControl):
+        ret.minSteerSpeed = 70.0 * CV.KPH_TO_MS # min is 70kph to activate but 60kph to deactivate.  Used 70kph to clarify for warning message
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 3840], [0, 3840]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2], [0.06]]
+      CarControllerParams.BOSCH_GAS_LOOKUP_V = [0, 2250]
 
     elif candidate in (CAR.HONDA_ODYSSEY, CAR.HONDA_ODYSSEY_CHN):
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.28], [0.08]]
