@@ -171,7 +171,7 @@ static bool honda_tx_hook(const CANPacket_t *to_send) {
     .max_accel = 200,   // accel is used for brakes
     .min_accel = -350,
 
-    .max_gas = 2000,
+    .max_gas = 2250,
     .inactive_gas = -30000,
   };
 
