@@ -100,7 +100,6 @@ class CarState(CarStateBase):
     main_messages = [
       ('Dat_BSI', 20),
       ('RESTRAINTS', 10),
-      ('DRIVER', 10),
       ('HS2_DAT7_BSI_612', 10),
     ]
     return {

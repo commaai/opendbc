@@ -4,7 +4,7 @@
 
 #define PSA_STEERING              757  // RX from XXX, driver torque
 #define PSA_STEERING_ALT          773  // RX from EPS, steering angle
-#define PSA_DRIVER                1390 // RX from BSI, gas pedal
+#define PSA_DYN_CMM               520  // RX from CMM, gas pedal
 #define PSA_DAT_BSI               1042 // RX from BSI, doors
 #define PSA_HS2_DYN_ABR_38D       909  // RX from UC_FREIN, speed
 #define PSA_HS2_DAT_MDD_CMD_452   1106 // RX from BSI, cruise state
@@ -77,6 +77,9 @@ static void psa_rx_hook(const CANPacket_t *to_push) {
   int addr = GET_ADDR(to_push);
 
   if (bus == PSA_CAM_BUS) {
+    if (addr == PSA_DYN_CMM) {
+      gas_pressed = GET_BYTE(to_push, 3) > 0U; // GAS_PEDAL
+    }
     if (addr == PSA_STEERING) {
       int torque_driver_new = to_signed(GET_BYTE(to_push, 1), 8);
       update_sample(&torque_driver, torque_driver_new);
@@ -85,23 +88,22 @@ static void psa_rx_hook(const CANPacket_t *to_push) {
       int angle_meas_new = to_signed((GET_BYTE(to_push, 0) << 8) | GET_BYTE(to_push, 1), 16);
       update_sample(&angle_meas, angle_meas_new);
     }
-  }
-  if (bus == PSA_ADAS_BUS) {
     if (addr == PSA_HS2_DYN_ABR_38D) {
       int speed = (GET_BYTE(to_push, 0) << 8) | GET_BYTE(to_push, 1);
       vehicle_moving = speed > 0;
       UPDATE_VEHICLE_SPEED(speed * 0.01); // VITESSE_VEHICULE_ROUES
     }
+  }
+
+  if (bus == PSA_ADAS_BUS) {
     if (addr == PSA_HS2_DAT_MDD_CMD_452) {
       pcm_cruise_check(((GET_BYTE(to_push, 2U) >> 7U) & 1U)); // DDE_ACTIVATION_RVV_ACC
     }
   }
+
   if (bus == PSA_MAIN_BUS) {
     if (addr == PSA_DAT_BSI) {
       brake_pressed = (GET_BYTE(to_push, 0U) >> 5U) & 1U; // P013_MainBrake
-    }
-    if (addr == PSA_DRIVER) {
-      gas_pressed = GET_BYTE(to_push, 3) > 0U; // GAS_PEDAL
     }
   }
 }
@@ -158,11 +160,11 @@ static safety_config psa_init(uint16_t param) {
 
   static RxCheck psa_rx_checks[] = {
     {.msg = {{PSA_HS2_DAT_MDD_CMD_452, PSA_ADAS_BUS, 6, .max_counter = 15U, .ignore_quality_flag = true, .frequency = 20U}, { 0 }, { 0 }}},                       // cruise state
-    {.msg = {{PSA_HS2_DYN_ABR_38D, PSA_ADAS_BUS, 8, .max_counter = 15U, .ignore_quality_flag = true, .frequency = 25U}, { 0 }, { 0 }}},                           // speed
+    {.msg = {{PSA_HS2_DYN_ABR_38D, PSA_CAM_BUS, 8, .max_counter = 15U, .ignore_quality_flag = true, .frequency = 25U}, { 0 }, { 0 }}},                           // speed
     {.msg = {{PSA_STEERING_ALT, PSA_CAM_BUS, 7, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 100U}, { 0 }, { 0 }}}, // steering angle
     {.msg = {{PSA_STEERING, PSA_CAM_BUS, 7, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 100U}, { 0 }, { 0 }}},     // driver torque
+    {.msg = {{PSA_DYN_CMM, PSA_CAM_BUS, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 100U}, { 0 }, { 0 }}},       // gas pedal
     {.msg = {{PSA_DAT_BSI, PSA_MAIN_BUS, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 20U}, { 0 }, { 0 }}},      // doors
-    {.msg = {{PSA_DRIVER, PSA_MAIN_BUS, 6, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 10U}, { 0 }, { 0 }}},       // gas pedal
   };
 
   return BUILD_SAFETY_CFG(psa_rx_checks, PSA_TX_MSGS);
