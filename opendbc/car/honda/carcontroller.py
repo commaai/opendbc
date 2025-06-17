@@ -134,11 +134,9 @@ class CarController(CarControllerBase):
 
     if CC.longActive:
       accel = actuators.accel
-      aTarget = actuators.aTarget
       gas, brake = compute_gas_brake(actuators.accel, CS.out.vEgo, self.CP.carFingerprint)
     else:
       accel = 0.0
-      aTarget = 0.0
       gas, brake = 0.0, 0.0
 
     # *** rate limit steer ***
@@ -236,7 +234,6 @@ class CarController(CarControllerBase):
 
           stopping = actuators.longControlState == LongCtrlState.stopping
           self.stopping_counter = self.stopping_counter + 1 if stopping else 0
-
           can_sends.extend(hondacan.create_acc_commands(self.packer, self.CAN, CC.enabled, CC.longActive, self.accel, self.gas,
                                                         self.stopping_counter, self.CP.carFingerprint, gas_pedal_force, CS.out.vEgo))
         else:
