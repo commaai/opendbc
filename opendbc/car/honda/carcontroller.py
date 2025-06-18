@@ -159,8 +159,8 @@ class CarController(CarControllerBase):
       if self.frame % 10 == 0:
         can_sends.append(make_tester_present_msg(0x18DAB0F1, 1, suppress_response=True))
 
-    # Send steering command.
-    can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, CC.latActive))
+    # Send steering command.  Only if not steeringPressed, otherwise some models will fault EPS.
+    can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, CC.latActive and not CS.out.steeringPressed))
 
     # wind brake from air resistance decel at high speed
     wind_brake = np.interp(CS.out.vEgo, [0.0, 2.3, 35.0], [0.001, 0.002, 0.15])
