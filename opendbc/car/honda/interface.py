@@ -228,7 +228,7 @@ class CarInterface(CarInterfaceBase):
     # conflict with PCM acc
     ret.autoResumeSng = candidate in (HONDA_BOSCH | {CAR.HONDA_CIVIC})
     ret.minEnableSpeed = -1. if ret.autoResumeSng else 25.51 * CV.MPH_TO_MS
-    ret.minSteerSpeed = 23 * CV.KPH_TO_MS if candidate in (CAR.HONDA_CITY)
+    ret.minSteerSpeed = 23 * CV.KPH_TO_MS if candidate in (CAR.HONDA_CITY) else -1
 
     ret.steerActuatorDelay = 0.1
     ret.steerLimitTimer = 0.8
