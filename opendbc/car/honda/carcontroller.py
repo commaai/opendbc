@@ -153,9 +153,9 @@ class CarController(CarControllerBase):
                                  self.params.STEER_LOOKUP_BP, self.params.STEER_LOOKUP_V))
 
     # alt_camera models fault if user and comma both apply torque
-    if CS.out.steeringPressed and self.CP.carFingerprint in (HONDA_BOSCH_ALT_CAMERA)
+    if CS.out.steeringPressed and self.CP.carFingerprint in (HONDA_BOSCH_ALT_CAMERA):
       apply_torque = 0
-    
+
     # Send CAN commands
     can_sends = []
 
