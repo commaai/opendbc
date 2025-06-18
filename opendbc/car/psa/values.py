@@ -20,10 +20,6 @@ class CarControllerParams:
   def __init__(self, CP):
     pass
 
-@dataclass(frozen=True, kw_only=True)
-class PSACarSpecs(CarSpecs):
-  tireStiffnessFactor: float = 1.03
-
 @dataclass
 class PSACarDocs(CarDocs):
   package: str = "Adaptive Cruise Control (ACC) & Lane Assist"
@@ -38,12 +34,7 @@ class PSAPlatformConfig(PlatformConfig):
 class CAR(Platforms):
   PSA_PEUGEOT_208 = PSAPlatformConfig(
     [PSACarDocs("Peugeot 208 2019-25")],
-    PSACarSpecs(
-      mass=1530, # electric variant
-      wheelbase=2.540,
-      steerRatio=17.6,
-      centerToFrontRatio=0.44,
-    ),
+    CarSpecs(mass=1530, wheelbase=2.54, steerRatio=17.6),
   )
 
 # Placeholder, FW Query will be added in separate PR

@@ -14,7 +14,7 @@ class CarController(CarControllerBase):
     can_sends = []
     actuators = CC.actuators
 
-    ### lateral control ###
+    # lateral control
     if CC.latActive:
       apply_angle = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw,
                                                    CS.out.steeringAngleDeg, CC.latActive, CarControllerParams.ANGLE_LIMITS)
