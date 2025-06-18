@@ -6,7 +6,7 @@ from opendbc.can.parser import CANParser
 from opendbc.car import Bus, create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.honda.hondacan import CanBus, get_cruise_speed_conversion
-from opendbc.car.honda.values import CAR, DBC, STEER_THRESHOLD, HONDA_BOSCH, HONDA_BOSCH_CANFD, \
+from opendbc.car.honda.values import CAR, DBC, STEER_THRESHOLD, HONDA_BOSCH, HONDA_BOSCH_CANFD, HONDA_BOSCH_ALT_CAMERA, \
                                                  HONDA_NIDEC_ALT_SCM_MESSAGES, HONDA_BOSCH_RADARLESS, \
                                                  HondaFlags, CruiseButtons, CruiseSettings, GearShifter
 from opendbc.car.interfaces import CarStateBase
@@ -64,8 +64,8 @@ def get_can_messages(CP, gearbox_msg):
       ]
 
   if CP.carFingerprint not in (CAR.HONDA_ACCORD, CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.HONDA_CRV_HYBRID, CAR.HONDA_INSIGHT,
-                               CAR.ACURA_RDX_3G, CAR.ACURA_RDX_3G_MMR, CAR.HONDA_E, CAR.HONDA_ODYSSEY_CHN, CAR.HONDA_FREED, CAR.HONDA_HRV,
-                               *HONDA_BOSCH_RADARLESS, *HONDA_BOSCH_CANFD):
+                               CAR.ACURA_RDX_3G, CAR.HONDA_E, CAR.HONDA_ODYSSEY_CHN, CAR.HONDA_FREED, CAR.HONDA_HRV,
+                               *HONDA_BOSCH_ALT_CAMERA, *HONDA_BOSCH_RADARLESS, *HONDA_BOSCH_CANFD):
     messages.append(("DOORS_STATUS", 3))
 
   if CP.carFingerprint in HONDA_BOSCH_RADARLESS:
@@ -132,7 +132,7 @@ class CarState(CarStateBase):
     ret.standstill = cp.vl["ENGINE_DATA"]["XMISSION_SPEED"] < 1e-5
     # TODO: find a common signal across all cars
     if self.CP.carFingerprint in (CAR.HONDA_ACCORD, CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.HONDA_CRV_HYBRID, CAR.HONDA_INSIGHT,
-                                  CAR.ACURA_RDX_3G, CAR.ACURA_RDX_3G_MMR, CAR.HONDA_E, *HONDA_BOSCH_RADARLESS, *HONDA_BOSCH_CANFD):
+                                  CAR.ACURA_RDX_3G, CAR.HONDA_E, *HONDA_BOSCH_ALT_CAMERA, *HONDA_BOSCH_RADARLESS, *HONDA_BOSCH_CANFD):
       ret.doorOpen = bool(cp.vl["SCM_FEEDBACK"]["DRIVERS_DOOR_OPEN"])
     elif self.CP.carFingerprint in (CAR.HONDA_ODYSSEY_CHN, CAR.HONDA_FREED, CAR.HONDA_HRV):
       ret.doorOpen = bool(cp.vl["SCM_BUTTONS"]["DRIVERS_DOOR_OPEN"])
@@ -245,7 +245,7 @@ class CarState(CarStateBase):
     ret.cruiseState.available = bool(cp.vl[self.main_on_sig_msg]["MAIN_ON"])
 
     # Adds low speed warning as some models disable cruise at various speeds, ignore warning under 3mph
-    if self.CP.carFingerprint == CAR.ACURA_RDX_3G_MMR:
+    if self.CP.carFingerprint in HONDA_BOSCH_ALT_CAMERA:
       ret.lowSpeedAlert = ret.cruiseState.enabled and ret.vEgo >= 4 * CV.MPH_TO_MS and \
         cp.vl["STEER_STATUS"]["STEER_CONTROL_ACTIVE"] == 0 and not ret.steeringPressed
 
