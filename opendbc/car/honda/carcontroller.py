@@ -151,6 +151,10 @@ class CarController(CarControllerBase):
     apply_torque = int(np.interp(-limited_torque * self.params.STEER_MAX,
                                  self.params.STEER_LOOKUP_BP, self.params.STEER_LOOKUP_V))
 
+    # alt_camera models fault if user and comma both apply torque
+    if CS.out.steeringPressed and self.CP.carFingerprint in (HONDA_BOSCH_ALT_CAMERA)
+      apply_torque = 0
+    
     # Send CAN commands
     can_sends = []
 
@@ -160,7 +164,7 @@ class CarController(CarControllerBase):
         can_sends.append(make_tester_present_msg(0x18DAB0F1, 1, suppress_response=True))
 
     # Send steering command.  Only if not steeringPressed, otherwise some models will fault EPS.
-    can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, CC.latActive and not CS.out.steeringPressed))
+    can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, CC.latActive))
 
     # wind brake from air resistance decel at high speed
     wind_brake = np.interp(CS.out.vEgo, [0.0, 2.3, 35.0], [0.001, 0.002, 0.15])
