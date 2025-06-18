@@ -138,9 +138,9 @@ class CAR(Platforms):
   FORD_EXPLORER_MK6 = FordPlatformConfig(
     [
       FordCarDocs("Ford Explorer 2020-24"),
-      FordCarDocs("Ford Explorer Hybrid 2020-24"),  # Hybrid: Limited and Platinum only
+      FordCarDocs("Ford Explorer Hybrid 2020-24"),  # Limited and Platinum only
       FordCarDocs("Lincoln Aviator 2020-24", "Co-Pilot360 Plus"),
-      FordCarDocs("Lincoln Aviator Plug-in Hybrid 2020-24", "Co-Pilot360 Plus"),  # Hybrid: Grand Touring only
+      FordCarDocs("Lincoln Aviator Plug-in Hybrid 2020-24", "Co-Pilot360 Plus"),  # Grand Touring only
     ],
     CarSpecs(mass=2050, wheelbase=3.025, steerRatio=16.8),
   )
