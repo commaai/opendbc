@@ -1,4 +1,3 @@
-# ruff: noqa: E501
 from opendbc.car.structs import CarParams
 from opendbc.car.psa.values import CAR
 
