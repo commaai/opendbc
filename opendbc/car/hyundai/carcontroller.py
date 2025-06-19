@@ -80,11 +80,6 @@ def process_hud_alert(enabled, fingerprint, hud_control):
 
   return sys_warning, sys_state, left_lane_warning, right_lane_warning
 
-def get_safety_CP():
-  from opendbc.car.hyundai.interface import CarInterface
-  # We use ioniq_5_pe numbers as a base. We might need to reconsider this to the "lowest common denominator" of all angle vehicles.
-  return CarInterface.get_non_essential_params("HYUNDAI_IONIQ_5_PE")
-
 
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
@@ -95,7 +90,7 @@ class CarController(CarControllerBase):
     self.angle_limit_counter = 0
 
     # Vehicle model used for lateral limiting
-    self.VM = VehicleModel(get_safety_CP())
+    self.VM = VehicleModel(CP)
 
     self.accel_last = 0
     self.apply_torque_last = 0
