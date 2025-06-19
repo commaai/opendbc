@@ -30,8 +30,8 @@ non_tested_cars = [
 
 # HKG Angle Steering (LFA2) (Still WIP, hence why ignored)
 non_tested_cars += [
+  # HYUNDAI.HYUNDAI_IONIQ_5_PE, # commented to run the tests
   HYUNDAI.GENESIS_GV80_2025,
-  HYUNDAI.HYUNDAI_IONIQ_5_PE,
   HYUNDAI.KIA_EV6_2025,
   HYUNDAI.KIA_EV9,
 ]
