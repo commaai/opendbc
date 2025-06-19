@@ -29,7 +29,7 @@ def round_angle(angle_deg: float, can_offset=0):
   scaled += can_offset
   return scaled * 0.1
 
-class TestHyundaiCanfdBase(HyundaiButtonBase, common.PandaCarSafetyTest, common.DriverTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
+class TestHyundaiCanfdBase(HyundaiButtonBase, common.PandaCarSafetyTest):
 
   TX_MSGS = [[0x50, 0], [0x1CF, 1], [0x2A4, 0]]
   STANDSTILL_THRESHOLD = 0.375 * 0.03125  # kph

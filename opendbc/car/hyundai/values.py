@@ -382,7 +382,7 @@ class CAR(Platforms):
   )
   HYUNDAI_IONIQ_5_PE = HyundaiCanFDPlatformConfig(
     [
-      HyundaiCarDocs("Hyundai Ioniq 5 PE (with HDA II & LFA2) 2025+", "Highway Driving Assist II & Lane Follow Assist 2",
+      HyundaiCarDocs("Hyundai Ioniq 5 PE (with HDA II & LFA2) 2025", "Highway Driving Assist II & Lane Follow Assist 2",
                      car_parts=CarParts.common([CarHarness.hyundai_q]))
     ],
     HYUNDAI_IONIQ_5.specs,
