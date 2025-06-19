@@ -26,8 +26,6 @@ non_tested_cars = [
   HONDA.HONDA_ODYSSEY_CHN,
   VOLKSWAGEN.VOLKSWAGEN_CRAFTER_MK2,  # need a route from an ACC-equipped Crafter
   SUBARU.SUBARU_FORESTER_HYBRID,
-  TESLA.TESLA_MODEL_3,
-  TESLA.TESLA_MODEL_Y,
 ]
 
 
@@ -53,6 +51,7 @@ routes = [
 
   CarTestRoute("54827bf84c38b14f|2023-01-25--14-14-11", FORD.FORD_BRONCO_SPORT_MK1),
   CarTestRoute("f8eaaccd2a90aef8|2023-05-04--15-10-09", FORD.FORD_ESCAPE_MK4),
+  CarTestRoute("56574443e0c3783c/00000002--c00bd0fe69", FORD.FORD_ESCAPE_MK4_5),
   CarTestRoute("62241b0c7fea4589|2022-09-01--15-32-49", FORD.FORD_EXPLORER_MK6),
   CarTestRoute("e886087f430e7fe7|2023-06-16--23-06-36", FORD.FORD_FOCUS_MK4),
   CarTestRoute("bd37e43731e5964b|2023-04-30--10-42-26", FORD.FORD_MAVERICK_MK1),
@@ -60,6 +59,7 @@ routes = [
   CarTestRoute("e36b272d5679115f/00000369--a3e8499a85", FORD.FORD_F_150_MK14),
   CarTestRoute("83a4e056c7072678|2023-11-13--16-51-33", FORD.FORD_MUSTANG_MACH_E_MK1),
   CarTestRoute("37998aa0fade36ab/00000000--48f927c4f5", FORD.FORD_RANGER_MK2),
+  CarTestRoute("61a1b9e7a4eae0f6/00000000--79d85d1315", FORD.FORD_EXPEDITION_MK4),
   #TestRoute("f1b4c567731f4a1b|2018-04-30--10-15-35", FORD.FUSION),
 
   CarTestRoute("7cc2a8365b4dd8a9|2018-12-02--12-10-44", GM.GMC_ACADIA),
@@ -223,6 +223,7 @@ routes = [
   CarTestRoute("f49e8041283f2939|2019-05-30--11-51-51", TOYOTA.LEXUS_ES_TSS2),  # hybrid
   CarTestRoute("da23c367491f53e2|2021-05-21--09-09-11", TOYOTA.LEXUS_CTH, segment=3),
   CarTestRoute("32696cea52831b02|2021-11-19--18-13-30", TOYOTA.LEXUS_RC),
+  CarTestRoute("7f8f479cfa6f392a/00000001--9a84b69c9d", TOYOTA.LEXUS_RC_TSS2),
   CarTestRoute("ab9b64a5e5960cba|2023-10-24--17-32-08", TOYOTA.LEXUS_GS_F),
   CarTestRoute("886fcd8408d570e9|2020-01-29--02-18-55", TOYOTA.LEXUS_RX),
   CarTestRoute("d27ad752e9b08d4f|2021-05-26--19-39-51", TOYOTA.LEXUS_RX),  # hybrid
@@ -312,7 +313,9 @@ routes = [
 
   CarTestRoute("bc095dc92e101734/000000db--ee9fe46e57", RIVIAN.RIVIAN_R1_GEN1),
 
-  #CarTestRoute("46cdc864ec865f4b/00000007--42f94db730", TESLA.TESLA_MODEL_Y),
+  CarTestRoute("7dc058789994da80/00000112--adb970f6a8", TESLA.TESLA_MODEL_3),
+  CarTestRoute("46cdc864ec865f4b/00000007--42f94db730", TESLA.TESLA_MODEL_Y),
+  CarTestRoute("2c912ca5de3b1ee9/0000025d--6eb6bcbca4", TESLA.TESLA_MODEL_Y, segment=4),
 
   # Segments that test specific issues
   # Controls mismatch due to standstill threshold
