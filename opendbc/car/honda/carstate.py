@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
-from opendbc.car import Bus, create_button_events, structs
+from opendbc.car import Bus, create_button_events, structs, DT_CTRL
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.honda.hondacan import CanBus, get_cruise_speed_conversion
 from opendbc.car.honda.values import CAR, DBC, STEER_THRESHOLD, HONDA_BOSCH, HONDA_BOSCH_CANFD, HONDA_BOSCH_ALT_CAMERA, \
@@ -100,6 +100,7 @@ class CarState(CarStateBase):
     self.brake_switch_active = False
     self.cruise_setting = 0
     self.v_cruise_pcm_prev = 0
+    self.last_steer = 0
 
     # When available we use cp.vl["CAR_SPEED"]["ROUGH_CAR_SPEED_2"] to populate vEgoCluster
     # However, on cars without a digital speedometer this is not always present (HRV, FIT, CRV 2016, ILX and RDX)
@@ -244,10 +245,12 @@ class CarState(CarStateBase):
     ret.cruiseState.enabled = cp.vl["POWERTRAIN_DATA"]["ACC_STATUS"] != 0
     ret.cruiseState.available = bool(cp.vl[self.main_on_sig_msg]["MAIN_ON"])
 
-    # Adds low speed warning as some models disable cruise at various speeds, ignore warning under 3mph
+    # Adds low speed warning ever 30 seconds as bosch_alt_camera models disable cruise under 70kph, ignore warning under 3mph
     if self.CP.carFingerprint in HONDA_BOSCH_ALT_CAMERA:
-      ret.lowSpeedAlert = ret.cruiseState.enabled and ret.vEgo >= 4 * CV.MPH_TO_MS and \
-        cp.vl["STEER_STATUS"]["STEER_CONTROL_ACTIVE"] == 0 and not ret.steeringPressed
+      if ret.steeringPressed and ret.vEgo < 70 * CV.KPH_TO_MS:
+        self.last_steer = DT_CTRL
+      ret.lowSpeedAlert = ( DT_CTRL > self.last_steer + 3000 ) and ret.cruiseState.enabled and ret.vEgo >= 4 * CV.MPH_TO_MS and \
+          cp.vl["STEER_STATUS"]["STEER_CONTROL_ACTIVE"] == 0
 
     # Gets rid of Pedal Grinding noise when brake is pressed at slow speeds for some models
     if self.CP.carFingerprint in (CAR.HONDA_PILOT, CAR.HONDA_RIDGELINE):
