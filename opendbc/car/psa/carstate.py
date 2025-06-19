@@ -44,7 +44,6 @@ class CarState(CarStateBase):
     ret.steeringTorque = cp.vl['STEERING']['DRIVER_TORQUE']
     ret.steeringTorqueEps = cp.vl['IS_DAT_DIRA']['EPS_TORQUE']
     ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > CarControllerParams.STEER_DRIVER_ALLOWANCE, 5)
-    ret.steerFaultTemporary = False
     ret.steerFaultPermanent = bool(cp.vl['IS_DAT_DIRA']['STEERING_REBOOT_REQUEST'])
     ret.espDisabled = bool(cp_adas.vl['ESP']['ESP_STATUS_INV'])
 
@@ -63,9 +62,6 @@ class CarState(CarStateBase):
       ret.gearShifter = GearShifter.reverse
     else:
       ret.gearShifter = GearShifter.drive
-
-    ret.stockFcw = cp_adas.vl['HS2_DYN_MDD_ETAT_2F6']['REQUEST_TAKEOVER'] == 2 # 0: no error, 1: non-critical request, 2: critical request
-    ret.stockAeb = bool(cp_adas.vl['HS2_DYN_MDD_ETAT_2F6']['AUTO_BRAKING_IN_PROGRESS'])
 
     # blinkers
     blinker = cp_main.vl['HS2_DAT7_BSI_612']['CDE_CLG_ET_HDC']
@@ -95,7 +91,6 @@ class CarState(CarStateBase):
       ('HS2_DYN_UCF_MDD_32D', 50),
       ('HS2_DAT_MDD_CMD_452', 20),
       ('HS2_DYN1_MDD_ETAT_2B6', 50),
-      ('HS2_DYN_MDD_ETAT_2F6', 50),
     ]
     main_messages = [
       ('Dat_BSI', 20),
