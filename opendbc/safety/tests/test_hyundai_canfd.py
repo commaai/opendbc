@@ -123,7 +123,8 @@ class TestHyundaiCanfdTorqueSteering(TestHyundaiCanfdBase, common.DriverTorqueSt
 
 
 class TestHyundaiCanfdAngleSteering(TestHyundaiCanfdBase, common.AngleSteeringSafetyTest):
-  PLATFORMS: dict[str, CAR] = {str(platform): platform for platform in CAR if platform.config.flags & HyundaiFlags.CANFD_ANGLE_STEERING}
+  PLATFORMS = {str(platform): platform for platform in CAR if
+               platform.config.flags & HyundaiFlags.CANFD_ANGLE_STEERING and not CarInterface.get_non_essential_params(str(platform)).dashcamOnly}
 
   # Angle control limits
   STEER_ANGLE_MAX = 180  # deg

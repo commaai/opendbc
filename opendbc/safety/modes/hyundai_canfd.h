@@ -169,8 +169,14 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
     .angle_deg_to_can = 10,
     .frequency = 100U,
   };
+  
+  // We need to find a middle ground between all the possible params or find a way to properly fingerprint.
+  // HYUNDAI_IONIQ_5_PE: -0.0008688329819908074
+  // KIA_EV6_2025: -0.000889804937754786
+  // KIA_EV9: -0.0005410588125765342
+  // GENESIS_GV80_2025: -0.0005685702046115589
 
-  // NOTE: based off IONIQ_5_PE to match openpilot
+  // IONIQ 5 PE values.
   const AngleSteeringParams HYUNDAI_STEERING_PARAMS = {
     .slip_factor = -0.0008688329819908074,  // calc_slip_factor(VM)
     .steer_ratio = 14.26,
