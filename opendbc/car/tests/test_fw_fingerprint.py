@@ -4,7 +4,6 @@ import time
 from collections import defaultdict
 
 from opendbc.car.can_definitions import CanData
-from opendbc.car.car_helpers import interfaces
 from opendbc.car.structs import CarParams
 from opendbc.car.fingerprints import FW_VERSIONS
 from opendbc.car.fw_versions import FW_QUERY_CONFIGS, FUZZY_EXCLUDE_ECUS, VERSIONS, build_fw_dict, \
@@ -122,7 +121,7 @@ class TestFwFingerprint:
         with subtests.test(car_model=car_model.value):
           assert not len(bad_ecus), f'{car_model}: Fingerprints contain ECUs added for data collection: {bad_ecus}'
 
-  def test_blacklisted_ecus(self, subtests):
+  def test_blacklisted_ecus(self, subtests, interfaces):
     blacklisted_addrs = (0x7c4, 0x7d0)  # includes A/C ecu and an unknown ecu
     for car_model, ecus in FW_VERSIONS.items():
       with subtests.test(car_model=car_model.value):
