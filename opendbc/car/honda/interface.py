@@ -180,7 +180,7 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2], [0.06]]
 
     elif candidate == CAR.ACURA_RDX_3G_MMR:
-      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 3840], [0, 3840]]
+      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 3810], [0, 3810]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2], [0.06]]
       CarControllerParams.BOSCH_GAS_LOOKUP_V = [0, 2000]
 
