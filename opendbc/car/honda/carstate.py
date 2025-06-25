@@ -154,7 +154,7 @@ class CarState(CarStateBase):
       # FIXME: find and set the ACC faulted signals on more platforms
       if self.CP.openpilotLongitudinalControl:
         if self.CP.carFingerprint == CAR.ACURA_MDX_4G:
-          pass # TODO: find signal
+          ret.accFaulted = False # TODO: find signal
         else:
           ret.accFaulted = bool(cp.vl["STANDSTILL"]["BRAKE_ERROR_1"] or cp.vl["STANDSTILL"]["BRAKE_ERROR_2"])
 
