@@ -204,7 +204,7 @@ class CAR(Platforms):
   ACURA_MDX_4G = HondaBoschPlatformConfig(
     [HondaCarDocs("Acura MDX 2022", "Type S", min_steer_speed=3. * CV.MPH_TO_MS)],
     CarSpecs(mass=4788 * CV.LB_TO_KG, wheelbase=2.89, steerRatio=14.6, centerToFrontRatio=0.428, tireStiffnessFactor=0.444),  # as spec
-    {Bus.pt: 'acura_rdx_2020_can_generated'},
+    {Bus.pt: 'honda_pilot_2023_can_generated'},
   )
   HONDA_INSIGHT = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda Insight 2019-22", "All", min_steer_speed=3. * CV.MPH_TO_MS)],
