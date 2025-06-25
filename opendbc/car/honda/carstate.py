@@ -60,6 +60,7 @@ def get_can_messages(CP, gearbox_msg):
       messages += [
         ("ACC_HUD", 10),
         ("LKAS_HUD", 10),
+        ("ACC_CONTROL", 50),
       ]
     # these messages are on camera bus on radarless cars
     elif not CP.openpilotLongitudinalControl and CP.carFingerprint not in HONDA_BOSCH_RADARLESS:
