@@ -56,16 +56,18 @@ def get_can_messages(CP, gearbox_msg):
     messages.append(("EPB_STATUS", 50))
 
   if CP.carFingerprint in HONDA_BOSCH:
+    if CP.carFingerprint == CAR.ACURA_MDX_4G:
+      messages += [
+        ("ACC_HUD", 10),
+        ("LKAS_HUD", 10),
+      ]
     # these messages are on camera bus on radarless cars
-    if not CP.openpilotLongitudinalControl and CP.carFingerprint not in HONDA_BOSCH_RADARLESS:
+    elif not CP.openpilotLongitudinalControl and CP.carFingerprint not in HONDA_BOSCH_RADARLESS:
       messages += [
         ("ACC_HUD", 10),
         ("ACC_CONTROL", 50),
       ]
-    if CP.carFingerprint == CAR.ACURA_MDX_4G:
-      messages += [
-        ("LKAS_HUD", 10),
-      ]
+
 
   if CP.carFingerprint not in (CAR.HONDA_ACCORD, CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.HONDA_CRV_HYBRID, CAR.HONDA_INSIGHT,
                                CAR.ACURA_RDX_3G, CAR.HONDA_E, CAR.HONDA_ODYSSEY_CHN, CAR.HONDA_FREED, CAR.HONDA_HRV, CAR.ACURA_MDX_4G,
