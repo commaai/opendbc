@@ -19,7 +19,7 @@ class CanBus(CanBusBase):
       self._pt, self._radar = self.offset + 1, self.offset
       # normally steering commands are sent to radar, which forwards them to powertrain bus
       # when radar is disabled, steering commands are sent directly to powertrain bus
-      self._lkas = self._pt if CP.openpilotLongitudinalControl else self._radar
+      self._lkas = self._pt # if CP.openpilotLongitudinalControl else self._radar
     else:
       self._pt, self._radar, self._lkas = self.offset, self.offset + 1, self.offset
 
