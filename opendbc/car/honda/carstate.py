@@ -88,7 +88,9 @@ class CarState(CarStateBase):
     super().__init__(CP)
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
     self.gearbox_msg = "GEARBOX"
-    if CP.carFingerprint == CAR.HONDA_ACCORD and CP.transmissionType == TransmissionType.cvt:
+    if CP.carFingerprint in (CAR.HONDA_ACCORD, CAR.HONDA_ACCORD_11G) and CP.transmissionType == TransmissionType.cvt:
+      self.gearbox_msg = "GEARBOX_15T"
+    elif CP.carFingerprint == CAR.HONDA_CRV_6G:
       self.gearbox_msg = "GEARBOX_15T"
     elif CP.carFingerprint == CAR.HONDA_CIVIC_2022 and CP.transmissionType == TransmissionType.cvt:
       self.gearbox_msg = "GEARBOX_ALT"
