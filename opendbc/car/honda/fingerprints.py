@@ -125,6 +125,14 @@ FW_VERSIONS = {
       b'38897-TWD-J020\x00\x00',
     ],
   },
+  CAR.HONDA_ACCORD_11G: {
+    (Ecu.fwdRadar, 0x18dab0f1, None): [
+      b'8S302-30A-A040\x00\x00',
+    ],
+    (Ecu.fwdCamera, 0x18dab5f1, None): [
+      b'8S102-30A-A050\x00\x00',
+    ],
+  },
   CAR.HONDA_CIVIC: {
     (Ecu.transmission, 0x18da1ef1, None): [
       b'28101-5CG-A040\x00\x00',
@@ -395,6 +403,23 @@ FW_VERSIONS = {
       b'77959-TLA-Q040\x00\x00',
       b'77959-TLA-Z040\x00\x00',
       b'77959-TMM-F040\x00\x00',
+    ],
+  },
+  CAR.HONDA_CRV_HYBRID_6G: {
+    (Ecu.fwdRadar, 0x18dab0f1, None): [
+      b'8S302-3D4-A050\x00\x00',
+    ],
+    (Ecu.fwdCamera, 0x18dab5f1, None): [
+      b'8S102-3D4-A060\x00\x00',
+      b'8S102-3D4-A080\x00\x00',
+    ],
+  },
+  CAR.HONDA_CRV_6G: {
+    (Ecu.fwdRadar, 0x18dab0f1, None): [
+      b'8S302-3A0-A060\x00\x00',
+    ],
+    (Ecu.fwdCamera, 0x18dab5f1, None): [
+      b'8S102-3A0-A090\x00\x00',
     ],
   },
   CAR.HONDA_CRV_EU: {
