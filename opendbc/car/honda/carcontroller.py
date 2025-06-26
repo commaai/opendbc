@@ -235,7 +235,7 @@ class CarController(CarControllerBase):
 
           if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
             gas_pedal_force = self.accel # radarless does not need a pid
-          elif (actuators.longControlState == LongCtrlState.pid) and (not CS.out.gasPressed) and (CS.out.vEgo > 4.4704):
+          elif (actuators.longControlState == LongCtrlState.pid) and (not CS.out.gasPressed):
             # perform a gas-only pid
             gas_error = self.accel - CS.out.aEgo
             self.gasonly_pid.neg_limit = self.params.BOSCH_ACCEL_MIN
