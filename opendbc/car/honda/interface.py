@@ -66,6 +66,9 @@ class CarInterface(CarInterfaceBase):
     # Accord ICE 1.5T CVT has different gearbox message
     if candidate == CAR.HONDA_ACCORD and 0x191 in fingerprint[CAN.pt]:
       ret.transmissionType = TransmissionType.cvt
+    # 11G Accord
+    elif candidate == CAR.HONDA_ACCORD_11G and 0x1A3 not in fingerprint[CAN.pt]:
+      ret.transmissionType = TransmissionType.cvt
     # Civic Type R is missing 0x191 and 0x1A3
     elif candidate in (CAR.HONDA_CIVIC_2022, CAR.ACURA_INTEGRA) and all(msg not in fingerprint[CAN.pt] for msg in (0x191, 0x1A3)):
       ret.transmissionType = TransmissionType.manual
@@ -129,6 +132,10 @@ class CarInterface(CarInterfaceBase):
       else:
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.18]]
 
+    elif candidate == CAR.HONDA_ACCORD_11G:
+      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.2], [0.18]]
+
     elif candidate == CAR.ACURA_ILX:
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 3840], [0, 3840]]  # TODO: determine if there is a dead zone at the top end
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.8], [0.24]]
@@ -150,7 +157,7 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.64], [0.192]]
       ret.wheelSpeedFactor = 1.025
 
-    elif candidate == CAR.HONDA_CRV_HYBRID:
+    elif candidate in (CAR.HONDA_CRV_HYBRID, CAR.HONDA_CRV_HYBRID_6G, CAR.HONDA_CRV_6G):
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]  # TODO: determine if there is a dead zone at the top end
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.18]]
       ret.wheelSpeedFactor = 1.025
