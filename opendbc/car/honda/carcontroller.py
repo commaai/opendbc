@@ -178,7 +178,8 @@ class CarController(CarControllerBase):
 
     # Send steering command.
     if self.CP.carFingerprint in (HONDA_BOSCH_ALT_RADAR): # faults when steer control occurs while steeringPressed
-      steerDisable = CS.out.steeringPressed or ( abs ( CS.out.steeringTorque - self.steeringTorque_last ) > 200 )
+      steerDisable = CS.out.steeringPressed or ( abs ( CS.out.steeringTorque - self.steeringTorque_last ) > 200 ) \
+                     or ( CS.out.aEgo < 0.0 and CS.out.vEgo < 6.7 )
       self.steeringTorque_last = CS.out.steeringTorque
       if steerDisable:
         self.last_torque = 0
@@ -271,7 +272,7 @@ class CarController(CarControllerBase):
     # Send dashboard UI commands.
     # On Nidec, this controls longitudinal positive acceleration
     if self.frame % 10 == 0:
-      display_lines = hud_control.lanesVisible and CS.show_lanelines and (abs(apply_torque) < self.params.STEER_MAX)
+      display_lines = hud_control.lanesVisible and CS.show_lanelines and (abs(apply_torque) < self.params.STEER_MAX) and not SteerDisable
       hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
                     display_lines, fcw_display, acc_alert, steer_required, hud_control.leadDistanceBars)
       can_sends.extend(hondacan.create_ui_commands(self.packer, self.CAN, self.CP, CC.enabled, pcm_speed, hud, CS.is_metric, CS.acc_hud, CS.lkas_hud))
