@@ -67,8 +67,8 @@ class CarControllerParams:
   STEER_STEP = 2  # FVCM_HSC2_FrP03 message frequency 50Hz
 
   STEER_MAX = 250
-  STEER_DELTA_UP = 3  # torque increase per refresh
-  STEER_DELTA_DOWN = 5  # torque decrease per refresh
+  STEER_DELTA_UP = 10  # torque increase per refresh
+  STEER_DELTA_DOWN = 10  # torque decrease per refresh
   STEER_DRIVER_ALLOWANCE = 100  # allowed driver torque before start limiting
   STEER_DRIVER_MULTIPLIER = 2  # weight driver torque
   STEER_DRIVER_FACTOR = 100

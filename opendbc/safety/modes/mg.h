@@ -44,8 +44,8 @@ static void mg_rx_hook(const CANPacket_t *to_push) {
 static bool mg_tx_hook(const CANPacket_t *to_send) {
   const TorqueSteeringLimits MG_STEERING_LIMITS = {
     .max_torque = 250,
-    .max_rate_up = 3,
-    .max_rate_down = 5,
+    .max_rate_up = 10,
+    .max_rate_down = 10,
     .max_rt_delta = 125,
     .driver_torque_multiplier = 2,
     .driver_torque_allowance = 100,
