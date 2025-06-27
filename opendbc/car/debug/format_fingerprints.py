@@ -17,6 +17,7 @@ FINGERPRINTS_PY_TEMPLATE = jinja2.Template("""
 {%- if FINGERPRINTS[brand] %}
 # ruff: noqa: E501
 {% endif %}
+\"\"\" AUTO-FORMATTED USING opendbc/car/debug/format_fingerprints.py, MAKE CHANGES THERE \"\"\"
 {% if FW_VERSIONS[brand] %}
 from opendbc.car.structs import CarParams
 {% endif %}
