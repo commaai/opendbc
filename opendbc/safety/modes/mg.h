@@ -58,7 +58,7 @@ static bool mg_tx_hook(const CANPacket_t *to_send) {
 
   // Steering control
   if (addr == 0x1fd) {
-    int desired_torque = (((GET_BYTE(to_send, 0) & 0x7U) << 8) | GET_BYTE(to_send, 1) );
+    int desired_torque = ((GET_BYTE(to_send, 0) & 0x7U) << 8) | GET_BYTE(to_send, 1);
     desired_torque = desired_torque - 1024U;
     bool steer_req = GET_BIT(to_send, 35U);
 
