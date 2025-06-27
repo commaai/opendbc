@@ -14,25 +14,25 @@ class CarController(CarControllerBase):
     self.apply_torque_last = 0
 
   def update(self, CC, CS, now_nanos):
+    actuators = CC.actuators
+
     can_sends = []
-
-    apply_torque = 0
-
-    if CC.latActive:
-      # calculate steer and also set limits due to driver torque
-      new_torque = int(round(CC.actuators.torque * CarControllerParams.STEER_MAX))
-      apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last,
-                                                      CS.out.steeringTorque, CarControllerParams)
 
     # steering command
     if self.frame % CarControllerParams.STEER_STEP == 0:
+      if CC.latActive:
+        # calculate steer and also set limits due to driver torque
+        new_torque = int(round(actuators.torque * CarControllerParams.STEER_MAX))
+        apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, CarControllerParams)
+      else:
+        apply_torque = 0
+
+      self.apply_torque_last = apply_torque
       can_sends.append(create_lka_steering(self.packer, (self.frame // CarControllerParams.STEER_STEP) % 16, apply_torque, CC.latActive))
 
-    self.apply_torque_last = apply_torque
-
-    new_actuators = CC.actuators.as_builder()
-    new_actuators.torque = apply_torque / CarControllerParams.STEER_MAX
-    new_actuators.torqueOutputCan = apply_torque
+    new_actuators = actuators.as_builder()
+    new_actuators.torque = self.apply_torque_last / CarControllerParams.STEER_MAX
+    new_actuators.torqueOutputCan = self.apply_torque_last
 
     self.frame += 1
     return new_actuators, can_sends
