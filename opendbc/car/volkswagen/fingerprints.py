@@ -1,4 +1,4 @@
-""" AUTO-FORMATTED USING opendbc/car/debug/format_fingerprints.py, MAKE CHANGES THERE """
+""" AUTO-FORMATTED USING opendbc/car/debug/format_fingerprints.py, EDIT STRUCTURE THERE."""
 from opendbc.car.structs import CarParams
 from opendbc.car.volkswagen.values import CAR
 
