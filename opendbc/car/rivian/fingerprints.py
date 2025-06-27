@@ -1,3 +1,4 @@
+""" AUTO-FORMATTED USING opendbc/car/debug/format_fingerprints.py, MAKE CHANGES THERE """
 from opendbc.car.structs import CarParams
 from opendbc.car.rivian.values import CAR
 
