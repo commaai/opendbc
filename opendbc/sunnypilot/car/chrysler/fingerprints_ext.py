@@ -10,10 +10,6 @@ FW_VERSIONS_EXT = {
       b'68453485AC',
       b'68510283AH',
     ],
-    (Ecu.abs, 0x747, None): [
-      b'68728724AA',
-      b'68728727AA',
-    ],
     (Ecu.eps, 0x75a, None): [
       b'68552791AA',
     ],

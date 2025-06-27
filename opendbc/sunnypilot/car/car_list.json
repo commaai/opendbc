@@ -81,7 +81,7 @@
     ],
     "package": "Adaptive Cruise Control (ACC) & Lane Assist"
   },
-  "Audi Q3 2019-23": {
+  "Audi Q3 2019-24": {
     "platform": "AUDI_Q3_MK2",
     "make": "Audi",
     "brand": "volkswagen",
@@ -91,7 +91,8 @@
       "2020",
       "2021",
       "2022",
-      "2023"
+      "2023",
+      "2024"
     ],
     "package": "Adaptive Cruise Control (ACC) & Lane Assist"
   },
@@ -434,6 +435,18 @@
     ],
     "package": "Co-Pilot360 Assist+"
   },
+  "Ford Expedition 2022-24": {
+    "platform": "FORD_EXPEDITION_MK4",
+    "make": "Ford",
+    "brand": "ford",
+    "model": "Expedition",
+    "year": [
+      "2022",
+      "2023",
+      "2024"
+    ],
+    "package": "Co-Pilot360 Assist 2.0"
+  },
   "Ford Explorer 2020-24": {
     "platform": "FORD_EXPLORER_MK6",
     "make": "Ford",
@@ -618,7 +631,7 @@
     ],
     "package": "Co-Pilot360 Assist"
   },
-  "Ford Mustang Mach-E 2021-23": {
+  "Ford Mustang Mach-E 2021-24": {
     "platform": "FORD_MUSTANG_MACH_E_MK1",
     "make": "Ford",
     "brand": "ford",
@@ -626,7 +639,8 @@
     "year": [
       "2021",
       "2022",
-      "2023"
+      "2023",
+      "2024"
     ],
     "package": "All"
   },
@@ -903,14 +917,6 @@
     ],
     "package": "All"
   },
-  "Honda Civic Hatchback Hybrid 2023 (Europe only)": {
-    "platform": "HONDA_CIVIC_2022",
-    "make": "Honda",
-    "brand": "honda",
-    "model": "Civic Hatchback Hybrid 2023 (Europe only)",
-    "year": [],
-    "package": "All"
-  },
   "Honda Civic Hatchback Hybrid 2025": {
     "platform": "HONDA_CIVIC_2022",
     "make": "Honda",
@@ -918,6 +924,16 @@
     "model": "Civic Hatchback Hybrid",
     "year": [
       "2025"
+    ],
+    "package": "All"
+  },
+  "Honda Civic Hatchback Hybrid (Europe only) 2023": {
+    "platform": "HONDA_CIVIC_2022",
+    "make": "Honda",
+    "brand": "honda",
+    "model": "Civic Hatchback Hybrid (Europe only)",
+    "year": [
+      "2023"
     ],
     "package": "All"
   },
@@ -2071,7 +2087,7 @@
     ],
     "package": "All"
   },
-  "Lexus ES 2019-24": {
+  "Lexus ES 2019-25": {
     "platform": "LEXUS_ES_TSS2",
     "make": "Lexus",
     "brand": "toyota",
@@ -2082,7 +2098,8 @@
       "2021",
       "2022",
       "2023",
-      "2024"
+      "2024",
+      "2025"
     ],
     "package": "All"
   },
@@ -2135,14 +2152,15 @@
     ],
     "package": "All"
   },
-  "Lexus IS 2022-23": {
+  "Lexus IS 2022-24": {
     "platform": "LEXUS_IS_TSS2",
     "make": "Lexus",
     "brand": "toyota",
     "model": "IS",
     "year": [
       "2022",
-      "2023"
+      "2023",
+      "2024"
     ],
     "package": "All"
   },
@@ -3838,14 +3856,15 @@
     ],
     "package": "Adaptive Cruise Control (ACC) & Lane Assist"
   },
-  "Volkswagen Taos 2022-23": {
+  "Volkswagen Taos 2022-24": {
     "platform": "VOLKSWAGEN_TAOS_MK1",
     "make": "Volkswagen",
     "brand": "volkswagen",
     "model": "Taos",
     "year": [
       "2022",
-      "2023"
+      "2023",
+      "2024"
     ],
     "package": "Adaptive Cruise Control (ACC) & Lane Assist"
   },
@@ -3885,7 +3904,7 @@
     ],
     "package": "Adaptive Cruise Control (ACC) & Lane Assist"
   },
-  "Volkswagen Tiguan 2018-23": {
+  "Volkswagen Tiguan 2018-24": {
     "platform": "VOLKSWAGEN_TIGUAN_MK2",
     "make": "Volkswagen",
     "brand": "volkswagen",
@@ -3896,7 +3915,8 @@
       "2020",
       "2021",
       "2022",
-      "2023"
+      "2023",
+      "2024"
     ],
     "package": "Adaptive Cruise Control (ACC) & Lane Assist"
   },
