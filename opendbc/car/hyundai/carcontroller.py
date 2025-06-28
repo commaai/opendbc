@@ -36,7 +36,7 @@ def get_max_angle(v_ego_raw: float, VM: VehicleModel):
   return math.degrees(VM.get_steer_from_curvature(max_curvature, v_ego_raw, 0))  # deg
 
 def apply_hyundai_steer_angle_limits(apply_angle: float, apply_angle_last: float, v_ego_raw: float, steering_angle: float,
-                                     lat_active: bool, limits: AngleSteeringLimits, VM: VehicleModel, frames_since_override) -> float:
+                                     lat_active: bool, limits: AngleSteeringLimits, VM: VehicleModel) -> float:
   apply_angle = np.clip(apply_angle, -819.2, 819.1)
 
   # *** max lateral jerk limit ***
@@ -109,7 +109,6 @@ class CarController(CarControllerBase):
     hud_control = CC.hudControl
 
     apply_torque = 0
-    frames_since_override = self.frame - self.last_override_frame
 
     # steering torque
     if not self.CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
@@ -123,7 +122,7 @@ class CarController(CarControllerBase):
     else:
       self.apply_angle_last = apply_hyundai_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw,
                                                                CS.out.steeringAngleDeg, CC.latActive,
-                                                               CarControllerParams.ANGLE_LIMITS, self.VM, frames_since_override)
+                                                               CarControllerParams.ANGLE_LIMITS, self.VM)
       if CS.out.steeringPressed:  # User is overriding
         # Let's try to consider that the override is not a true or false but a progressive depending on how much torque is being applied to the col
         self.last_override_frame = self.frame
@@ -132,10 +131,6 @@ class CarController(CarControllerBase):
         adaptive_ramp_rate = max(torque_delta / self.angle_torque_override_cycles, 1)  # Ensure at least 1 unit per cycle
         self.lkas_max_torque = max(self.lkas_max_torque - adaptive_ramp_rate, self.params.ANGLE_MIN_TORQUE)
       else:
-        # if https://github.com/commaai/openpilot/pull/35580 is merged, we can use the code below instead of hardcoding a value
-        # active_min_torque = max(0.30 * self.angle_max_torque, self.angle_min_active_torque)  # 0.3 is the minimum torque when the user is not overriding
-        # target_torque = int(np.interp(abs(actuators.torque), [0., 1.], [active_min_torque, self.angle_max_torque]))
-
         # Hardcoding to a "sensible" value until we can get a better dynamic value with the new controller above.
         target_torque = max(0.50 * self.angle_max_torque, self.angle_min_active_torque)
 

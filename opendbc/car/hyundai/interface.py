@@ -117,7 +117,6 @@ class CarInterface(CarInterfaceBase):
     ret.steerActuatorDelay = 0.1
     ret.steerLimitTimer = 0.4
 
-    # if https://github.com/commaai/openpilot/pull/35580 is merged, we can remove the conditional below.
     if not ret.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
