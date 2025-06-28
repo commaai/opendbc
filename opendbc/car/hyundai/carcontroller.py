@@ -3,7 +3,7 @@ import numpy as np
 from opendbc.car.vehicle_model import VehicleModel
 from opendbc.can.packer import CANPacker
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, apply_driver_steer_torque_limits, common_fault_avoidance, \
-  make_tester_present_msg, structs, AngleSteeringLimits, rate_limit
+  make_tester_present_msg, structs, rate_limit
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.hyundai import hyundaicanfd, hyundaican
 from opendbc.car.hyundai.hyundaicanfd import CanBus
@@ -262,19 +262,19 @@ class CarController(CarControllerBase):
 
     # *** max lateral jerk limit ***
     max_angle_delta = get_max_angle_delta(max(v_ego_raw, 1), self.VM)
-  
+
     # prevent fault
     max_angle_delta = min(max_angle_delta, MAX_ANGLE_RATE)
     new_apply_angle = rate_limit(apply_angle, self.apply_angle_last, -max_angle_delta, max_angle_delta)
-  
+
     # *** max lateral accel limit ***
     max_angle = get_max_angle(max(v_ego_raw, 1), self.VM)
     new_apply_angle = np.clip(new_apply_angle, -max_angle, max_angle)
-  
+
     # angle is current angle when inactive
     if not lat_active:
       new_apply_angle = steering_angle
-  
+
     # prevent fault
     return float(np.clip(new_apply_angle, -limits.STEER_ANGLE_MAX, limits.STEER_ANGLE_MAX))
 
@@ -292,9 +292,8 @@ class CarController(CarControllerBase):
         return max(self.apply_torque_last - self.ramp_down_reduction_gain_rate, target_torque)
       else:
         return min(self.apply_torque_last + self.ramp_up_reduction_gain_rate, target_torque)
-      
+
   def update_angle_steering_control(self, CS, CC, actuators):
     new_angle = self.apply_hyundai_steer_angle_limits(CS, CC, actuators.steeringAngleDeg)
     torque_reduction_gain = self.calculate_angle_torque_reduction_gain(CS)
     return new_angle, torque_reduction_gain
-    
