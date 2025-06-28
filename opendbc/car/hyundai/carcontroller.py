@@ -131,7 +131,7 @@ class CarController(CarControllerBase):
         adaptive_ramp_rate = max(torque_delta / self.angle_torque_override_cycles, 1)  # Ensure at least 1 unit per cycle
         self.lkas_max_torque = max(self.lkas_max_torque - adaptive_ramp_rate, self.params.ANGLE_MIN_TORQUE)
       else:
-        # Hardcoding to a "sensible" value until we can get a better dynamic value with the new controller above.
+        # EU vehicles have been seen to "idle" at 96, while US vehicles have been seen idling at "230" for LFA.
         target_torque = max(0.50 * self.angle_max_torque, self.angle_min_active_torque)
 
         # Ramp up or down toward the target torque smoothly
