@@ -152,15 +152,15 @@ def create_ccnc(packer, CAN, openpilotLongitudinalControl, enabled, hud, leftBli
   })
 
   if enabled and (leftBlinker or rightBlinker):
-    leftlaneraw, rightlaneraw = msg_1b5["LEFT_POSITION"], msg_1b5["RIGHT_POSITION"]
+    leftlaneraw, rightlaneraw = msg_1b5["Info_LftLnPosVal"], msg_1b5["Info_RtLnPosVal"]
 
     scale_per_m = 15 / 1.7
     leftlane = abs(int(round(15 + (leftlaneraw - 1.7) * scale_per_m)))
     rightlane = abs(int(round(15 + (rightlaneraw - 1.7) * scale_per_m)))
 
-    if msg_1b5["LEFT_QUAL"] not in (2, 3):
+    if msg_1b5["Info_LftLnQualSta"] not in (2, 3):
       leftlane = 0
-    if msg_1b5["RIGHT_QUAL"] not in (2, 3):
+    if msg_1b5["Info_RtLnQualSta"] not in (2, 3):
       rightlane = 0
 
     if leftlaneraw == -2.0248375:
@@ -215,7 +215,7 @@ def create_ccnc(packer, CAN, openpilotLongitudinalControl, enabled, hud, leftBli
     })
 
     msg_162["LEAD"] = 0 if not main_cruise_enabled else 2 if enabled else 1
-    msg_162["LEAD_DISTANCE"] = msg_1b5["LEAD_DISTANCE"]
+    msg_162["LEAD_DISTANCE"] = msg_1b5["Longitudinal_Distance"]
 
   return [packer.make_can_msg(msg, CAN.ECAN, data) for msg, data in [("CCNC_0x161", msg_161), ("CCNC_0x162", msg_162)]]
 
