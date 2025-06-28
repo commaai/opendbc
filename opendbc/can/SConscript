@@ -13,11 +13,13 @@ libdbc = envDBC.SharedLibrary('libdbc', src, LIBS=[common, ], LINKFLAGS=LINKFLAG
 
 # Build packer and parser
 lenv = envCython.Clone()
-lenv["LIBPATH"].append(Dir("."))
-lenv["RPATH"] = [libdbc[0].dir.abspath, ]
-parser = lenv.SharedLibrary(target="parser_pyx",source="parser_pyx.pyx",SHLIBPREFIX="",SHLIBSUFFIX=".so",LIBS=[common, 'dbc'])
-packer = lenv.SharedLibrary(target="packer_pyx",source="packer_pyx.pyx",SHLIBPREFIX="",SHLIBSUFFIX=".so",LIBS=[common, 'dbc'])
+dbc_dir = libdbc[0].dir.abspath
+lenv.Append(LIBPATH=[dbc_dir], LINKFLAGS=["-Wl,-rpath,$ORIGIN", f"-Wl,-rpath,{dbc_dir}",])
+parser = lenv.SharedLibrary(target="parser_pyx", source="parser_pyx.pyx",SHLIBPREFIX="", SHLIBSUFFIX=".so", LIBS=[common, 'dbc'])
+packer = lenv.SharedLibrary(target="packer_pyx", source="packer_pyx.pyx",SHLIBPREFIX="", SHLIBSUFFIX=".so", LIBS=[common, 'dbc'])
 
-opendbc_python = Alias("opendbc_python", [parser, packer])
+pkg = Dir('#pythonpath/opendbc/can')
+installed = env.Install(pkg,[libdbc[0],parser[0],packer[0]])
 
+opendbc_python = Alias('opendbc_python',installed)
 Export('opendbc_python')
