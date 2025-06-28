@@ -15,9 +15,9 @@ LongCtrlState = structs.CarControl.Actuators.LongControlState
 
 # EPS faults if you apply torque while the steering angle is above 90 degrees for more than 1 second
 # All slightly below EPS thresholds to avoid fault
-MAX_FAULT_ANGLE = 85
-MAX_FAULT_ANGLE_FRAMES = 89
-MAX_FAULT_ANGLE_CONSECUTIVE_FRAMES = 2
+MAX_ANGLE = 85
+MAX_ANGLE_FRAMES = 89
+MAX_ANGLE_CONSECUTIVE_FRAMES = 2
 
 MAX_ANGLE_RATE = 5
 # Add extra tolerance for average banked road since safety doesn't have the roll
@@ -116,9 +116,9 @@ class CarController(CarControllerBase):
 
     # steering torque
     if not self.CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
-      self.angle_limit_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringAngleDeg) >= MAX_FAULT_ANGLE, CC.latActive,
-                                                                         self.angle_limit_counter, MAX_FAULT_ANGLE_FRAMES,
-                                                                         MAX_FAULT_ANGLE_CONSECUTIVE_FRAMES)
+      self.angle_limit_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringAngleDeg) >= MAX_ANGLE, CC.latActive,
+                                                                         self.angle_limit_counter, MAX_ANGLE_FRAMES,
+                                                                         MAX_ANGLE_CONSECUTIVE_FRAMES)
       new_torque = int(round(actuators.torque * self.params.STEER_MAX))
       apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.params)
 
