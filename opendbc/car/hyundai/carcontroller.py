@@ -100,8 +100,12 @@ class CarController(CarControllerBase):
     self.apply_angle_last = 0
     self.angle_torque_reduction_gain = 0
     self.last_override_frame = 0
-    self.angle_min_active_torque = self.params.ANGLE_MIN_TORQUE
-    self.angle_max_torque = self.params.ANGLE_MAX_TORQUE
+
+    # For future parametrization / tuning
+    self.ramp_down_reduction_gain_rate = self.params.ANGLE_RAMP_DOWN_TORQUE_REDUCTION_RATE
+    self.ramp_up_reduction_gain_rate = self.params.ANGLE_RAMP_UP_TORQUE_REDUCTION_RATE
+    self.min_torque_reduction_gain = self.params.ANGLE_MIN_TORQUE_REDUCTION_GAIN
+    self.max_torque_reduction_gain = self.params.ANGLE_MAX_TORQUE_REDUCTION_GAIN
     self.angle_torque_override_cycles = self.params.ANGLE_TORQUE_OVERRIDE_CYCLES
 
   def update(self, CC, CS, now_nanos):
@@ -126,22 +130,22 @@ class CarController(CarControllerBase):
       if CS.out.steeringPressed:  # User is overriding
         # Let's try to consider that the override is not a true or false but a progressive depending on how much torque is being applied to the col
         self.last_override_frame = self.frame
-        torque_delta = self.angle_torque_reduction_gain - self.params.ANGLE_MIN_TORQUE
+        torque_delta = self.angle_torque_reduction_gain - self.min_torque_reduction_gain
         adaptive_ramp_rate = max(torque_delta / self.angle_torque_override_cycles, 1)
-        self.angle_torque_reduction_gain = max(self.angle_torque_reduction_gain - adaptive_ramp_rate, self.params.ANGLE_MIN_TORQUE)
+        self.angle_torque_reduction_gain = max(self.angle_torque_reduction_gain - adaptive_ramp_rate, self.min_torque_reduction_gain)
       else:
         # EU vehicles have been seen to "idle" at 0.384, while US vehicles have been seen idling at "0.92" for LFA.
-        target_torque = max(0.50 * self.angle_max_torque, self.angle_min_active_torque)  # fractional values
+        target_torque = max(0.50 * self.max_torque_reduction_gain, self.min_torque_reduction_gain)
 
         if self.angle_torque_reduction_gain > target_torque:
-          self.angle_torque_reduction_gain = max(self.angle_torque_reduction_gain - self.params.ANGLE_RAMP_DOWN_RATE, target_torque)
+          self.angle_torque_reduction_gain = max(self.angle_torque_reduction_gain - self.ramp_down_reduction_gain_rate, target_torque)
         else:
-          self.angle_torque_reduction_gain = min(self.angle_torque_reduction_gain + self.params.ANGLE_RAMP_UP_RATE, target_torque)
+          self.angle_torque_reduction_gain = min(self.angle_torque_reduction_gain + self.ramp_up_reduction_gain_rate, target_torque)
 
       apply_steer_req = CC.latActive and self.angle_torque_reduction_gain != 0
 
       # Safety clamp
-      self.angle_torque_reduction_gain = float(np.clip(self.angle_torque_reduction_gain, self.params.ANGLE_MIN_TORQUE, self.angle_max_torque))
+      self.angle_torque_reduction_gain = float(np.clip(self.angle_torque_reduction_gain, self.min_torque_reduction_gain, self.max_torque_reduction_gain))
 
     if not CC.latActive:
       apply_torque = 0

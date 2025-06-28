@@ -16,25 +16,39 @@ class CarControllerParams:
   ACCEL_MAX = 2.0 # m/s
 
   ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
-    # LKAS angle command is unlimited, but LFA is limited to 176.7 deg (but does not fault if requesting above, it's just clamped)
-    180,  # deg
-    ([],[]), #Tesla controls
-    ([],[]), #Tesla controls
+    # Steering angle limits based on observed stock ADAS behavior:
+    # - LKAS max requested angle is 176.7°, but no fault occurs if higher values are requested.
+    # - LFA max stock value is 119.9°.
+    # The ADAS ECU clamps LKAS commands above 176.7° down to 176.7°,
+    # and clamps LFA commands above 119.9° down to 119.9°.
+    180,  # degrees (safe upper bound for command, allowing some margin)
+    # HKG uses a vehicle model instead, check carcontroller.py for details
+    ([], []),
+    ([], []),
   )
 
-  # Stock LFA system is seen sending 250 max, but for LKAS events it's 175 max.
-  # 250 can at least achieve 4 m/s^2, 80 corresponds to ~2.5 m/s^2
-  ANGLE_MAX_TORQUE = 1  # The maximum amount of torque that will be allowed
-  ANGLE_MIN_TORQUE = .1  # The minimum amount of torque that will be allowed while overriding. (to keep some feedback to the driver)
-  ANGLE_RAMP_UP_RATE = 0.008  # Max rate of change for torque increasing.
-  ANGLE_RAMP_DOWN_RATE = 0.0012  # Max rate of change for torque decreasing. (when the user is overriding the system)
-  ANGLE_TORQUE_OVERRIDE_CYCLES = 17  # The number of cycles it takes to ramp down to min torque when the user intervenes.
+  # Torque control parameters:
+  # The stock torque values we observed are:
+  # - 1.0 is the max we've observed during stock LFA.
+  # - 0.7 has been observed in some models as the max LKAS torque requested.
+  #
+  # Note: When using angle-based steering control, the Torque Reduction Gain
+  # does NOT directly affect lateral acceleration or jerk limits.
+  # Those limits are determined solely by the commanded steering angle and vehicle speed.
+  # In contrast, torque-based control systems do not use a Torque Reduction Gain,
+  # but instead rely directly on torque commands which directly influence these limits.
+  #
+  # The normalized torque command defines the maximum steering torque we allow the EPS to apply
+  # to reach the desired steering angle, effectively limiting the maximum assist torque.
 
-  # More torque optimization
-  # The torque is calculated based on the curvature of the road and the speed of the car and it's a percentage of the maximum torque.
-  SMOOTHING_ANGLE_VEGO_MATRIX = [0, 2.22, 4.1, 8.5]
-  SMOOTHING_ANGLE_ALPHA_MATRIX = [0.05, 0.1, 0.3, 0.6]
-  SMOOTHING_ANGLE_MAX_VEGO = SMOOTHING_ANGLE_VEGO_MATRIX[-1]
+  ANGLE_MAX_TORQUE_REDUCTION_GAIN = 1.  # Maximum torque command applied to the steering actuator.
+  ANGLE_MIN_TORQUE_REDUCTION_GAIN = 0.1  # Minimum torque command allowed when the driver is overriding, to maintain steering feedback.
+
+  # Rate limits for changing steering torque commands:
+  ANGLE_RAMP_UP_TORQUE_REDUCTION_RATE = 0.008  # Maximum rate at which torque can increase per control cycle.
+  ANGLE_RAMP_DOWN_TORQUE_REDUCTION_RATE = 0.0012  # Maximum rate at which torque can decrease per cycle (especially during driver override)
+
+  ANGLE_TORQUE_OVERRIDE_CYCLES = 17  # Number of control cycles over which torque ramps down to minimum after driver override is detected.
 
   def __init__(self, CP):
     self.STEER_DELTA_UP = 3
