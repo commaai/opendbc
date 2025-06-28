@@ -1,22 +1,18 @@
 Import('env', 'envCython', 'common', 'arch')
 
 envDBC = env.Clone()
-dbc_file_path = '-DDBC_FILE_PATH=\'"%s"\'' % (envDBC.Dir("../dbc").abspath)
-envDBC['CXXFLAGS'] += [dbc_file_path]
-src = ["dbc.cc", "parser.cc", "packer.cc", "common.cc"]
+envDBC['CXXFLAGS'] += ['-DDBC_FILE_PATH=\\"%s\\"' % envDBC.Dir('../dbc').abspath]
+src = ['dbc.cc', 'parser.cc', 'packer.cc', 'common.cc']
+linkflags = envDBC['LINKFLAGS']
+if arch == 'Darwin':
+  linkflags += ['-Wl,-install_name,@loader_path/libdbc.dylib']
+libdbc = envDBC.SharedLibrary('libdbc', src, LIBS=[common], LINKFLAGS=linkflags)
 
-# shared library for openpilot
-LINKFLAGS = envDBC["LINKFLAGS"]
-if arch == "Darwin":
-  LINKFLAGS += ["-Wl,-install_name,@loader_path/libdbc.dylib"]
-libdbc = envDBC.SharedLibrary('libdbc', src, LIBS=[common, ], LINKFLAGS=LINKFLAGS)
-
-# Build packer and parser
 lenv = envCython.Clone()
 dbc_dir = libdbc[0].dir.abspath
-lenv.Append(LIBPATH=[dbc_dir], LINKFLAGS=["-Wl,-rpath,$ORIGIN", f"-Wl,-rpath,{dbc_dir}",])
-parser = lenv.SharedLibrary(target="parser_pyx", source="parser_pyx.pyx",SHLIBPREFIX="", SHLIBSUFFIX=".so", LIBS=[common, 'dbc'])
-packer = lenv.SharedLibrary(target="packer_pyx", source="packer_pyx.pyx",SHLIBPREFIX="", SHLIBSUFFIX=".so", LIBS=[common, 'dbc'])
+lenv.Append(LIBPATH=[dbc_dir],LINKFLAGS=[  '-Wl,-rpath=$ORIGIN',  f'-Wl,-rpath={dbc_dir}'])
+parser = lenv.SharedLibrary('parser_pyx', 'parser_pyx.pyx', SHLIBPREFIX='', SHLIBSUFFIX='.so', LIBS=[common,'dbc'])
+packer = lenv.SharedLibrary('packer_pyx', 'packer_pyx.pyx', SHLIBPREFIX='', SHLIBSUFFIX='.so', LIBS=[common,'dbc'])
 
 pkg = Dir('#pythonpath/opendbc/can')
 installed = env.Install(pkg,[libdbc[0],parser[0],packer[0]])
