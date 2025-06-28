@@ -35,7 +35,7 @@ class CanBus(CanBusBase):
     return self._cam
 
 
-def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_torque, apply_angle, angle_torque_reduction_gain):
+def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_torque, apply_angle):
   common_values = {
     "LKA_MODE": 2,
     "LKA_ICON": 2 if enabled else 1,
@@ -61,7 +61,7 @@ def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_torque,
       "LKA_AVAILABLE": 3 if lat_active else 0,
       "ADAS_StrAnglReqVal": apply_angle,
       "LKAS_ANGLE_ACTIVE": 2 if lat_active else 1,
-      "ADAS_ACIAnglTqRedcGainVal": angle_torque_reduction_gain if lat_active else 0,
+      "ADAS_ACIAnglTqRedcGainVal": apply_torque if lat_active else 0,
     }
 
   lfa_values = copy.copy(common_values)

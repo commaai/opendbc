@@ -99,7 +99,6 @@ class CarController(CarControllerBase):
 
     self.apply_angle_last = 0
     self.angle_torque_reduction_gain = 0
-    self.last_override_frame = 0
 
     # For future parametrization / tuning
     self.ramp_down_reduction_gain_rate = self.params.ANGLE_RAMP_DOWN_TORQUE_REDUCTION_RATE
@@ -112,8 +111,6 @@ class CarController(CarControllerBase):
     actuators = CC.actuators
     hud_control = CC.hudControl
 
-    apply_torque = 0
-
     # steering torque
     if not self.CP.flags & HyundaiFlags.CANFD_ANGLE_STEERING:
       self.angle_limit_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringAngleDeg) >= MAX_ANGLE, CC.latActive,
@@ -124,32 +121,13 @@ class CarController(CarControllerBase):
 
     # angle control
     else:
-      self.apply_angle_last = apply_hyundai_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw,
-                                                               CS.out.steeringAngleDeg, CC.latActive,
-                                                               CarControllerParams.ANGLE_LIMITS, self.VM)
-      if CS.out.steeringPressed:  # User is overriding
-        # Let's try to consider that the override is not a true or false but a progressive depending on how much torque is being applied to the col
-        self.last_override_frame = self.frame
-        torque_delta = self.angle_torque_reduction_gain - self.min_torque_reduction_gain
-        adaptive_ramp_rate = max(torque_delta / self.angle_torque_override_cycles, 1)
-        self.angle_torque_reduction_gain = max(self.angle_torque_reduction_gain - adaptive_ramp_rate, self.min_torque_reduction_gain)
-      else:
-        # EU vehicles have been seen to "idle" at 0.384, while US vehicles have been seen idling at "0.92" for LFA.
-        target_torque = max(0.50 * self.max_torque_reduction_gain, self.min_torque_reduction_gain)
-
-        if self.angle_torque_reduction_gain > target_torque:
-          self.angle_torque_reduction_gain = max(self.angle_torque_reduction_gain - self.ramp_down_reduction_gain_rate, target_torque)
-        else:
-          self.angle_torque_reduction_gain = min(self.angle_torque_reduction_gain + self.ramp_up_reduction_gain_rate, target_torque)
-
-      apply_steer_req = CC.latActive and self.angle_torque_reduction_gain != 0
-
+      self.apply_angle_last, apply_torque = self.update_angle_steering_control(CS, CC,actuators)
       # Safety clamp
-      self.angle_torque_reduction_gain = float(np.clip(self.angle_torque_reduction_gain, self.min_torque_reduction_gain, self.max_torque_reduction_gain))
+      apply_torque = float(np.clip(apply_torque, self.min_torque_reduction_gain, self.max_torque_reduction_gain))
+      apply_steer_req = CC.latActive and apply_torque != 0
 
     if not CC.latActive:
       apply_torque = 0
-      self.angle_torque_reduction_gain = 0
 
     # Hold torque with induced temporary fault when cutting the actuation bit
     # FIXME: we don't use this with CAN FD?
@@ -249,7 +227,7 @@ class CarController(CarControllerBase):
 
     # steering control
     can_sends.extend(hyundaicanfd.create_steering_messages(self.packer, self.CP, self.CAN, CC.enabled, apply_steer_req, apply_torque,
-                                                           self.apply_angle_last, self.angle_torque_reduction_gain))
+                                                           self.apply_angle_last))
 
     # prevent LFA from activating on LKA steering cars by sending "no lane lines detected" to ADAS ECU
     if self.frame % 5 == 0 and lka_steering:
@@ -297,3 +275,26 @@ class CarController(CarControllerBase):
             self.last_button_frame = self.frame
 
     return can_sends
+
+  def calculate_angle_torque_reduction_gain(self, CS, last_angle_torque_reduction_gain):
+    """ Calculate the angle torque reduction gain based on the current steering state. """
+    if CS.out.steeringPressed:  # User is overriding
+      torque_delta = last_angle_torque_reduction_gain - self.min_torque_reduction_gain
+      adaptive_ramp_rate = max(torque_delta / self.angle_torque_override_cycles, 1)
+      return max(last_angle_torque_reduction_gain - adaptive_ramp_rate, self.min_torque_reduction_gain)
+    else:
+      # EU vehicles have been seen to "idle" at 0.384, while US vehicles have been seen idling at "0.92" for LFA.
+      target_torque = max(0.50 * self.max_torque_reduction_gain, self.min_torque_reduction_gain)
+
+      if last_angle_torque_reduction_gain > target_torque:
+        return max(last_angle_torque_reduction_gain - self.ramp_down_reduction_gain_rate, target_torque)
+      else:
+        return min(last_angle_torque_reduction_gain + self.ramp_up_reduction_gain_rate, target_torque)
+      
+  def update_angle_steering_control(self, CS, CC, actuators):
+    new_angle = apply_hyundai_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw,
+                                                             CS.out.steeringAngleDeg, CC.latActive,
+                                                             CarControllerParams.ANGLE_LIMITS, self.VM)
+    torque_reduction_gain = self.calculate_angle_torque_reduction_gain(CS, self.apply_torque_last)
+    return new_angle, torque_reduction_gain
+    
