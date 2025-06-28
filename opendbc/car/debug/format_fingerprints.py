@@ -14,9 +14,10 @@ FINGERPRINTS = get_interface_attr('FINGERPRINTS')
 ECU_NAME = {v: k for k, v in Ecu.schema.enumerants.items()}
 
 FINGERPRINTS_PY_TEMPLATE = jinja2.Template("""
-{%- if FINGERPRINTS[brand] %}
+{%- if FINGERPRINTS[brand] and brand != 'body' %}
 # ruff: noqa: E501
 {% endif %}
+\"\"\" AUTO-FORMATTED USING opendbc/car/debug/format_fingerprints.py, EDIT STRUCTURE THERE.\"\"\"
 {% if FW_VERSIONS[brand] %}
 from opendbc.car.structs import CarParams
 {% endif %}
