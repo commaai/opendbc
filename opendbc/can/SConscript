@@ -14,7 +14,7 @@ lenv.Append(LIBPATH=[dbc_dir],LINKFLAGS=[  '-Wl,-rpath=$ORIGIN',  f'-Wl,-rpath={
 parser = lenv.SharedLibrary('parser_pyx', 'parser_pyx.pyx', SHLIBPREFIX='', SHLIBSUFFIX='.so', LIBS=[common,'dbc'])
 packer = lenv.SharedLibrary('packer_pyx', 'packer_pyx.pyx', SHLIBPREFIX='', SHLIBSUFFIX='.so', LIBS=[common,'dbc'])
 
-pkg = Dir('#pythonpath/opendbc/can')
+pkg = Dir('#openpilot/opendbc/can')
 installed = env.Install(pkg,[libdbc[0],parser[0],packer[0]])
 
 opendbc_python = Alias('opendbc_python',installed)
