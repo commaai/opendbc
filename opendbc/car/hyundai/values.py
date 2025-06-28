@@ -24,10 +24,10 @@ class CarControllerParams:
 
   # Stock LFA system is seen sending 250 max, but for LKAS events it's 175 max.
   # 250 can at least achieve 4 m/s^2, 80 corresponds to ~2.5 m/s^2
-  ANGLE_MAX_TORQUE = 250  # The maximum amount of torque that will be allowed
-  ANGLE_MIN_TORQUE = 25  # The minimum amount of torque that will be allowed while overriding. (to keep some feedback to the driver)
-  ANGLE_RAMP_UP_RATE = 2  # Max rate of change for torque increasing.
-  ANGLE_RAMP_DOWN_RATE = 3  # Max rate of change for torque decreasing. (when the user is overriding the system)
+  ANGLE_MAX_TORQUE = 1  # The maximum amount of torque that will be allowed
+  ANGLE_MIN_TORQUE = .1  # The minimum amount of torque that will be allowed while overriding. (to keep some feedback to the driver)
+  ANGLE_RAMP_UP_RATE = 0.008  # Max rate of change for torque increasing.
+  ANGLE_RAMP_DOWN_RATE = 0.0012  # Max rate of change for torque decreasing. (when the user is overriding the system)
   ANGLE_TORQUE_OVERRIDE_CYCLES = 17  # The number of cycles it takes to ramp down to min torque when the user intervenes.
 
   # More torque optimization
