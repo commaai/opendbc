@@ -46,7 +46,7 @@ class CarControllerParams:
 
   # Rate limits for changing steering torque commands:
   ANGLE_RAMP_UP_TORQUE_REDUCTION_RATE = 0.008  # Maximum rate at which torque can increase per control cycle.
-  ANGLE_RAMP_DOWN_TORQUE_REDUCTION_RATE = 0.0012  # Maximum rate at which torque can decrease per cycle (especially during driver override)
+  ANGLE_RAMP_DOWN_TORQUE_REDUCTION_RATE = 0.0012  # Maximum rate at which torque can decrease per cycle
 
   ANGLE_TORQUE_OVERRIDE_CYCLES = 17  # Number of control cycles over which torque ramps down to minimum after driver override is detected.
 

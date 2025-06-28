@@ -282,7 +282,7 @@ class CarController(CarControllerBase):
     """ Calculate the angle torque reduction gain based on the current steering state. """
     if CS.out.steeringPressed:  # User is overriding
       torque_delta = self.apply_torque_last - self.min_torque_reduction_gain
-      adaptive_ramp_rate = max(torque_delta / self.angle_torque_override_cycles, 1)
+      adaptive_ramp_rate = max(torque_delta / self.angle_torque_override_cycles, 0.004) # the minimum rate of change we've seen
       return max(self.apply_torque_last - adaptive_ramp_rate, self.min_torque_reduction_gain)
     else:
       # EU vehicles have been seen to "idle" at 0.384, while US vehicles have been seen idling at "0.92" for LFA.
