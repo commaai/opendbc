@@ -385,7 +385,7 @@ BO_ 437 FR_CMR_03_50ms: 32 FR_CMR
  SG_ Info_RtLnCvtrVal : 128|16@1- (1,0) [0|65535] "" CGW
  SG_ Info_RtLnCrvtrDrvtvVal : 144|16@1- (1,0) [0|65535] "" CGW
  SG_ ID_CIPV : 192|7@1+ (1,0) [0|127] "" Dummy
- SG_ Longitudinal_Distance : 212|12@1+ (0.05,0) [0|204.75] "m"
+ SG_ Longitudinal_Distance : 212|12@1+ (0.05,0) [0|204.75] "m" Dummy
 
 BO_ 442 BLINDSPOTS_REAR_CORNERS: 24 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
