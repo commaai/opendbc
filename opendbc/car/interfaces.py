@@ -149,6 +149,9 @@ class CarInterfaceBase(ABC):
     ret.centerToFront = ret.wheelbase * platform.config.specs.centerToFrontRatio
     ret.minEnableSpeed = platform.config.specs.minEnableSpeed
     ret.minSteerSpeed = platform.config.specs.minSteerSpeed
+    ret.tireStiffnessFactor = platform.config.specs.tireStiffnessFactor
+    ret.tireStiffnessFront = platform.config.specs.tireStiffnessFront
+    ret.tireStiffnessRear = platform.config.specs.tireStiffnessRear
     ret.flags |= int(platform.config.flags)
 
     ret = cls._get_params(ret, candidate, fingerprint, car_fw, alpha_long, is_release, docs)
@@ -159,7 +162,10 @@ class CarInterfaceBase(ABC):
 
     # Set params dependent on values set by the car interface
     ret.rotationalInertia = scale_rot_inertia(ret.mass, ret.wheelbase)
-    ret.tireStiffnessFront, ret.tireStiffnessRear = scale_tire_stiffness(ret.mass, ret.wheelbase, ret.centerToFront, platform.config.specs.tireStiffnessFactor)
+    if not ret.tireStiffnessFront or not ret.tireStiffnessRear:
+      ret.tireStiffnessFront, ret.tireStiffnessRear = scale_tire_stiffness(ret.mass, ret.wheelbase, ret.centerToFront, ret.tireStiffnessFactor)
+    else:
+      ret.tireStiffnessFactor = 1.0
 
     return ret
 
