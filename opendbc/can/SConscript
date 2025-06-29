@@ -15,8 +15,8 @@ lenv.Append(LIBPATH=[dbc_dir])
 
 if arch == 'Darwin':
   builder = lenv.LoadableModule
-  lenv['MODULEPREFIX'] = ''
-  lenv['MODULESUFFIX'] = '.so'
+  lenv['LDMODULEPREFIX'] = ''
+  lenv['LDMODULESUFFIX'] = '.so'
   rpath_flags = [
     '-Wl,-rpath,@loader_path',
     '-Wl,-rpath,@loader_path/../..',
