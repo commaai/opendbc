@@ -1,3 +1,4 @@
+""" AUTO-FORMATTED USING opendbc/car/debug/format_fingerprints.py, EDIT STRUCTURE THERE."""
 from opendbc.car.structs import CarParams
 from opendbc.car.hyundai.values import CAR
 
@@ -354,6 +355,7 @@ FW_VERSIONS = {
   },
   CAR.KIA_STINGER: {
     (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00CK__ SCC FHCUP      1.00 1.02 96400-J5000         ',
       b'\xf1\x00CK__ SCC F_CUP      1.00 1.01 96400-J5000         ',
       b'\xf1\x00CK__ SCC F_CUP      1.00 1.01 96400-J5100         ',
       b'\xf1\x00CK__ SCC F_CUP      1.00 1.02 96400-J5100         ',
@@ -369,6 +371,7 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00CK  MFC  AT EUR LHD 1.00 1.03 95740-J5000 170822',
+      b'\xf1\x00CK  MFC  AT KOR LHD 1.00 1.04 95740-J5000 180504',
       b'\xf1\x00CK  MFC  AT USA LHD 1.00 1.03 95740-J5000 170822',
       b'\xf1\x00CK  MFC  AT USA LHD 1.00 1.04 95740-J5000 180504',
     ],
