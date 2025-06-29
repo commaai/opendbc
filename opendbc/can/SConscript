@@ -6,7 +6,7 @@ envDBC['CXXFLAGS'] += ['-DDBC_FILE_PATH=\\"%s\\"' % envDBC.Dir('../dbc').abspath
 src = ['dbc.cc', 'parser.cc', 'packer.cc', 'common.cc']
 linkflags = envDBC['LINKFLAGS']
 if arch == 'Darwin':
-  linkflags += ['-Wl,-install_name,@loader_path/../..//libdbc.dylib']
+  linkflags += ['-Wl,-install_name,@loader_path/libdbc.dylib']
 libdbc = envDBC.SharedLibrary('libdbc',src,LIBS=[common],LINKFLAGS=linkflags)
 
 lenv = envCython.Clone()
@@ -14,26 +14,24 @@ dbc_dir = libdbc[0].dir.abspath
 lenv.Append(LIBPATH=[dbc_dir])
 
 if arch == 'Darwin':
+  builder = lenv.LoadableModule
+  lenv['MODULESUFFIX'] = '.so'
   rpath_flags = [
     '-Wl,-rpath,@loader_path',
     '-Wl,-rpath,@loader_path/../..',
   ]
 else:
+  builder = lenv.SharedLibrary
+  lenv['SHLIBPREFIX'] = ''
+  lenv['SHLIBSUFFIX'] = '.so'
   rpath_flags = [
     Literal('-Wl,-rpath,$ORIGIN'),
     Literal('-Wl,-rpath,$ORIGIN/../..'),
   ]
-lenv.Append(LINKFLAGS=rpath_flags)
-if arch == 'Darwin':
-  builder = lenv.LoadableModule
-  lenv['MODULESUFFIX'] = '.so'
-else:
-  builder = lenv.SharedLibrary
-  lenv['SHLIBPREFIX'] = ''
-  lenv['SHLIBSUFFIX'] = '.so'
 
-parser = builder('parser_pyx', 'parser_pyx.pyx', LIBS=[common, libdbc[0].name])
-packer = builder('packer_pyx', 'packer_pyx.pyx', LIBS=[common, libdbc[0].name])
+lenv.Append(LINKFLAGS=rpath_flags)
+parser = builder('parser_pyx', 'parser_pyx.pyx', LIBS=[common,'dbc'])
+packer = builder('packer_pyx', 'packer_pyx.pyx', LIBS=[common,'dbc'])
 
 opendbc_python = Alias('opendbc_python',[parser,packer,libdbc])
 Export('opendbc_python')
