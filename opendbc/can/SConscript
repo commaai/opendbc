@@ -25,8 +25,8 @@ else:
   ]
 lenv.Append(LINKFLAGS=rpath_flags)
 builder = lenv.LoadableModule if arch == 'Darwin' else lenv.SharedLibrary
-parser = builder('parser_pyx', 'parser_pyx.pyx', SHLIBPREFIX='', SHLIBSUFFIX='.so', LIBS=[common, libdbc])
-packer = builder('packer_pyx', 'packer_pyx.pyx', SHLIBPREFIX='', SHLIBSUFFIX='.so', LIBS=[common, libdbc])
+parser = builder('parser_pyx', 'parser_pyx.pyx', SHLIBPREFIX='', SHLIBSUFFIX='.so', LIBS=[common, libdbc[0].name])
+packer = builder('packer_pyx', 'packer_pyx.pyx', SHLIBPREFIX='', SHLIBSUFFIX='.so', LIBS=[common, libdbc[0].name])
 
 opendbc_python = Alias('opendbc_python',[parser,packer,libdbc])
 Export('opendbc_python')
