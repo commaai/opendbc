@@ -21,7 +21,7 @@ class CAR(Platforms):
     [
       MgCarDocs("MG ZS EV 2021-24"),
     ],
-    CarSpecs(mass=3206., wheelbase=3.08, steerRatio=15.2),
+    CarSpecs(mass=3206., wheelbase=3.08, steerRatio=14.2),
   )
 
 
