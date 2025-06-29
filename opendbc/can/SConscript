@@ -1,8 +1,9 @@
-Import('env','envCython','common','arch')
-from SCons.Subst import Literal        # ← add this
+Import('env', 'envCython', 'common', 'arch')
+from SCons.Subst import Literal
+
 envDBC = env.Clone()
 envDBC['CXXFLAGS'] += ['-DDBC_FILE_PATH=\\"%s\\"' % envDBC.Dir('../dbc').abspath]
-src = ['dbc.cc','parser.cc','packer.cc','common.cc']
+src = ['dbc.cc', 'parser.cc', 'packer.cc', 'common.cc']
 linkflags = envDBC['LINKFLAGS']
 if arch == 'Darwin':
   linkflags += ['-Wl,-install_name,@loader_path/../..//libdbc.dylib']
@@ -23,8 +24,9 @@ else:
     Literal('-Wl,-rpath,$ORIGIN/../..'),
   ]
 lenv.Append(LINKFLAGS=rpath_flags)
-parser = lenv.SharedLibrary('parser_pyx','parser_pyx.pyx',SHLIBPREFIX='',SHLIBSUFFIX='.so',LIBS=[common,'dbc'])
-packer = lenv.SharedLibrary('packer_pyx','packer_pyx.pyx',SHLIBPREFIX='',SHLIBSUFFIX='.so',LIBS=[common,'dbc'])
+builder = lenv.LoadableModule if arch == 'Darwin' else lenv.SharedLibrary
+parser = builder('parser_pyx', 'parser_pyx.pyx', SHLIBPREFIX='', SHLIBSUFFIX='.so', LIBS=[common,'dbc'])
+packer = builder('packer_pyx', 'packer_pyx.pyx', SHLIBPREFIX='', SHLIBSUFFIX='.so', LIBS=[common,'dbc'])
 
 opendbc_python = Alias('opendbc_python',[parser,packer,libdbc])
 Export('opendbc_python')
