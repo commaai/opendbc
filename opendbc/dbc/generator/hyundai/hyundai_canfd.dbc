@@ -46,12 +46,15 @@ BO_ 160 WHEEL_SPEEDS: 24 XXX
  SG_ WHL_SpdRLVal : 96|14@1+ (0.03125,0) [0|0] "km^h" XXX
  SG_ WHL_SpdRRVal : 112|14@1+ (0.03125,0) [0|0] "km^h" XXX
 
-BO_ 203 LFA_ALT: 24 ADRV
- SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
- SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
- SG_ LKAS_ANGLE_ACTIVE : 29|2@0+ (1,0) [0|1] "" XXX
- SG_ LKAS_ANGLE_CMD : 32|14@1- (0.1,0) [0|511] "" XXX
- SG_ LKAS_ANGLE_MAX_TORQUE : 55|8@0+ (1,0) [0|255] "" XXX
+BO_ 203 ADAS_CMD_35_10ms: 24 CGW_CCU
+ SG_ CHECKSUM : 0|16@1+ (1,0) [0|0] "0" FCU_C,GW_RGW,MDPS,SFA
+ SG_ COUNTER : 16|8@1+ (1,0) [0|0] "0" FCU_C,GW_RGW,MDPS,SFA
+ SG_ ADAS_ActvACISta : 24|4@1+ (1,0) [0|0] "" GW_RGW,MDPS,SFA
+ SG_ ADAS_ActvACILvl2Sta : 28|4@1+ (1,0) [0|0] "" ESC,FCU_C,GW_RGW,MDPS,SFA,VPC_C
+ SG_ ADAS_StrAnglReqVal : 32|14@1- (0.1,0) [0|119.9] "Deg" GW_RGW,MDPS,SFA
+ SG_ ADAS_ACIAnglTqRedcGainVal : 48|8@1+ (0.004,0) [0|1] "" GW_RGW,MDPS,SFA
+ SG_ FCA_ESA_ActvSta : 56|2@1+ (1,0) [0|0] "" GW_RGW,MDPS,SFA
+ SG_ FCA_ESA_TqBstGainVal : 64|8@1+ (0.004,0) [0|0] "" GW_RGW,MDPS,SFA
 
 BO_ 234 MDPS: 24 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
@@ -92,8 +95,8 @@ BO_ 272 LKAS_ALT: 32 XXX
  SG_ NEW_SIGNAL_2 : 70|2@0+ (1,0) [0|3] "" XXX
  SG_ LKAS_ANGLE_ACTIVE : 77|2@0+ (1,0) [0|3] "" XXX
  SG_ HAS_LANE_SAFETY : 80|1@0+ (1,0) [0|1] "" XXX
- SG_ LKAS_ANGLE_CMD : 82|14@1- (0.1,0) [0|511] "" XXX
- SG_ LKAS_ANGLE_MAX_TORQUE : 96|8@1+ (1,0) [0|255] "" XXX
+ SG_ ADAS_StrAnglReqVal : 82|14@1- (0.1,0) [0|176.7] "Deg" GW_RGW,MDPS,SFA
+ SG_ ADAS_ACIAnglTqRedcGainVal : 96|8@1+ (0.004,0) [0|1] "" GW_RGW,MDPS,SFA
  SG_ NEW_SIGNAL_3 : 111|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 282 FR_CMR_01_10ms: 16 FR_CMR
@@ -666,9 +669,16 @@ BO_ 1264 LOCAL_TIME: 8 XXX
 
 CM_ SG_ 96 BRAKE_PRESSURE "User applied brake pedal pressure. Ramps from computer applied pressure on falling edge of cruise. Cruise cancels if !=0";
 CM_ SG_ 101 BRAKE_POSITION "User applied brake pedal position, max is ~700. Signed on some vehicles";
+CM_ SG_ 203 ADAS_ActvACISta "ADAS Active AngleControlInterface State";
+CM_ SG_ 203 ADAS_ActvACILvl2Sta "ADAS Active AngleControlInterface Level 2 State";
+CM_ SG_ 203 ADAS_StrAnglReqVal "(LFA) ADAS Steering Angle Request Value; Capped at 119.9;";
+CM_ SG_ 203 ADAS_ACIAnglTqRedcGainVal "(LFA) ADAS AngleControlInterface Angle Torque Reduction Gain Value";
+CM_ SG_ 203 FCA_ESA_ActvSta "FCA_ESA Active State";
+CM_ SG_ 203 FCA_ESA_TqBstGainVal "FCA_ESA Torque Boost Gain Value";
 CM_ BO_ 272 "Alternative LKAS message, used on cars such as 2023 Ioniq 6, 2nd gen Kona. Matches LKAS except size is 32 bytes";
 CM_ SG_ 272 LKA_AVAILABLE "Angle control cars: 3 when LKA is generally available, goes to 0 during changes with LFA";
-CM_ SG_ 272 LKAS_ANGLE_CMD "tracks MDPS->STEERING_ANGLE when not engaged, not STEERING_SENSORS->STEERING_ANGLE";
+CM_ SG_ 272 ADAS_StrAnglReqVal "(LKAS) ADAS Steering Angle Request Value; Capped at 176.7; tracks MDPS->STEERING_ANGLE when not engaged, not STEERING_SENSORS->STEERING_ANGLE";
+CM_ SG_ 272 ADAS_ACIAnglTqRedcGainVal "(LKAS) ADAS AngleControlInterface Angle Torque Reduction Gain Value";
 CM_ SG_ 298 NEW_SIGNAL_4 "todo: figure out why always set to 9";
 CM_ SG_ 352 SET_ME_9 "has something to do with AEB settings";
 CM_ SG_ 373 ACCEnable "Likely a copy of CAN's TCS13->ACCEnable";
@@ -691,6 +701,12 @@ VAL_ 64 GEAR 0 "P" 5 "D" 6 "N" 7 "R";
 VAL_ 69 GEAR 0 "P" 5 "D" 6 "N" 7 "R";
 VAL_ 96 TRACTION_AND_STABILITY_CONTROL 0 "On" 5 "Limited" 1 "Off";
 VAL_ 112 GEAR 0 "P" 5 "D" 6 "N" 7 "R";
+VAL_ 203 ADAS_ActvACISta 0 "INIT" 1 "INACTIVE" 2 "ACTIVE35(ACTIVE)" 3 "ACTIVE33(Redundancy)" 4 "RESERVED" 5 "RESERVED" 6 "RESERVED" 7 "RESERVED" 8 "RESERVED" 9 "RESERVED" 10 "RESERVED" 11 "RESERVED" 12 "RESERVED" 13 "RESERVED" 14 "RESERVED" 15 "RESERVED";
+VAL_ 203 ADAS_ActvACILvl2Sta 0 "INIT" 1 "INACTIVE" 2 "ACTIVE35(ACTIVE)" 3 "RESERVED" 4 "RESERVED" 5 "RESERVED" 6 "RESERVED" 7 "RESERVED" 8 "RESERVED" 9 "RESERVED" 10 "RESERVED" 11 "RESERVED" 12 "RESERVED" 13 "RESERVED" 14 "RESERVED" 15 "RESERVED";
+VAL_ 203 ADAS_StrAnglReqVal 0 "0x0x000~0x3FFF:Real Values" 16383 "0x0x000~0x3FFF:Real Values";
+VAL_ 203 ADAS_ACIAnglTqRedcGainVal 0 "0x0x00~0xFA:Real Values" 250 "0x0x00~0xFA:Real Values" 251 "RESERVED" 252 "RESERVED" 253 "RESERVED" 254 "RESERVED" 255 "RESERVED";
+VAL_ 203 FCA_ESA_ActvSta 0 "Inactive" 1 "Active" 2 "RESERVED" 3 "RESERVED";
+VAL_ 203 FCA_ESA_TqBstGainVal 0 "0x0x00~0xFA:Real Values" 250 "0x0x00~0xFA:Real Values" 251 "RESERVED" 252 "RESERVED" 253 "RESERVED" 254 "RESERVED" 255 "RESERVED";
 VAL_ 234 LKA_FAULT 0 "ok" 1 "lka fault";
 VAL_ 272 LKA_MODE 1 "warning only" 2 "assist" 6 "off";
 VAL_ 272 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green";
