@@ -66,10 +66,9 @@ def create_longitudinal(packer, frame, accel, enabled):
   values = {
     "ACM_longitudinalRequest_Counter": frame % 15,
     "ACM_AccelerationRequest": accel if enabled else 0,
-    "ACM_VehicleHoldRequired": 0,
-    "ACM_PrndRequired": 0,
+    "ACM_PrndRequest": 0,
     "ACM_longInterfaceEnable": 1 if enabled else 0,
-    "ACM_AccelerationRequestType": 0,
+    "ACM_VehicleHoldRequest": 0,
   }
 
   data = packer.make_can_msg("ACM_longitudinalRequest", 0, values)[1]
@@ -86,10 +85,10 @@ def create_adas_status(packer, vdm_adas_status, interface_status):
     "VDM_AdasFaultStatus",
     "VDM_AdasAccelLimit",
     "VDM_AdasDriverModeStatus",
-    "VDM_AdasAccelRequest",
+    "VDM_AdasUnkown1",
     "VDM_AdasInterfaceStatus",
-    "VDM_AdasAccelRequestAcknowledged",
     "VDM_AdasVehicleHoldStatus",
+    "VDM_UserAdasRequest",
   )}
 
   if interface_status is not None:
