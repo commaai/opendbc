@@ -801,8 +801,8 @@ FW_VERSIONS = {
   CAR.HONDA_HRV_3G: {
     (Ecu.eps, 0x18da30f1, None): [
       b'39990-3M0-G110\x00\x00',
-      b'39990-3W0-A030\x00\x00',
       b'39990-3M0-J030\x00\x00',
+      b'39990-3W0-A030\x00\x00',
     ],
     (Ecu.gateway, 0x18daeff1, None): [
       b'38897-3M0-M110\x00\x00',
