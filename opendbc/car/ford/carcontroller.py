@@ -30,7 +30,9 @@ def bronco_special(apply_curvature, apply_curvature_last, v_ego_raw):
         last_lataccel = lataccel + diff
     last_lataccel = last_lataccel * alpha + lataccel * (1 - alpha)
 
-    return float(last_lataccel / (v_ego_raw ** 2 + 1e-6))
+    output_curvature = last_lataccel / (v_ego_raw ** 2 + 1e-6)
+
+    return np.interp(v_ego_raw, [5, 10], [apply_curvature, output_curvature])
 
 
 def apply_ford_curvature_limits(apply_curvature, apply_curvature_last, current_curvature, v_ego_raw, steering_angle, lat_active, CP):
