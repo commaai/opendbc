@@ -16,7 +16,7 @@ MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_R
 
 
 def bronco_special(apply_curvature, apply_curvature_last, v_ego_raw):
-    diff = 0.15
+    diff = 0.1
     tau = 1 # 1 second smooths over the overshoot
     dt = DT_CTRL * CarControllerParams.STEER_STEP
     alpha = 1 - np.exp(-dt/tau)
@@ -28,7 +28,7 @@ def bronco_special(apply_curvature, apply_curvature_last, v_ego_raw):
         last_lataccel = lataccel - diff
     elif lataccel < last_lataccel - diff:
         last_lataccel = lataccel + diff
-    last_lataccel = last_lataccel * alpha + lataccel * (1 - alpha)
+    last_lataccel =  alpha * lataccel + (1 - alpha) * last_lataccel
 
     output_curvature = last_lataccel / (v_ego_raw ** 2 + 1e-6)
 
