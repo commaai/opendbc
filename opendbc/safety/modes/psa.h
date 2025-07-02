@@ -124,10 +124,6 @@ static bool psa_tx_hook(const CANPacket_t *to_send) {
     },
   };
 
-  // TODO: Safety check for cruise buttons
-  // TODO: check resume is not pressed when controls not allowed
-  // TODO: check cancel is not pressed when cruise isn't engaged
-
   // Safety check for LKA
   if (addr == PSA_LANE_KEEP_ASSIST) {
     // SET_ANGLE
