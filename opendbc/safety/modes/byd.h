@@ -6,7 +6,7 @@ static void byd_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
   int addr = GET_ADDR(to_push);
 
-  if(bus == 0) {
+  if (bus == 0) {
     // current steering angle, factor -0.1 and little endian
     if (addr == 287) {
       int angle_meas_new = (GET_BYTES(to_push, 0, 2) & 0xFFFFU);
@@ -39,11 +39,11 @@ static void byd_rx_hook(const CANPacket_t *to_push) {
       int res_pressed = (GET_BYTE(to_push, 0) >> 4U) & 1U;
       int cancel = (GET_BYTE(to_push, 2) >> 3U) & 1U;
 
-      if (set_pressed | res_pressed) {
+      if (set_pressed || res_pressed) {
         controls_allowed = true;
       }
 
-      if (cancel) {
+      if (cancel != 0) {
         controls_allowed = false;
       }
     }
@@ -56,8 +56,6 @@ static void byd_rx_hook(const CANPacket_t *to_push) {
       pcm_cruise_check(engaged);
     }
   }
-
-  generic_rx_checks((addr == 482) && (bus == 0));
 }
 
 static bool byd_tx_hook(const CANPacket_t *to_send) {
@@ -108,39 +106,41 @@ static bool byd_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static int byd_fwd_hook(int bus_num, int addr) {
-  int bus_fwd = -1;
-
-  if (bus_num == 0) {
-    bus_fwd = 2;
-  }
+static bool byd_fwd_hook(int bus_num, int addr) {
+  bool block_msg = false;
 
   if (bus_num == 2) {
-    bool is_lkas_msg = ((addr == 0x1E2) || (addr == 0x316));
-    bool is_acc_msg = (addr == 0x32E);
-    bool block_msg = is_lkas_msg || is_acc_msg;
-    if (!block_msg) {
-      bus_fwd = 0;
+    // LKAS
+    if (addr == 0x1E2) {
+      block_msg = true;
+    }
+    // HUD
+    if (addr == 0x316) {
+      block_msg = true;
+    }
+    // ACC
+    if (addr == 0x32e) {
+      block_msg = true;
     }
   }
 
-  return bus_fwd;
+  return block_msg;
 }
 
 static safety_config byd_init(uint16_t param) {
   static const CanMsg BYD_TX_MSGS[] = {
-    {482, 0, 8}, // STEERING_MODULE_ADAS
-    {790, 0, 8}, // LKAS_HUD_ADAS
-    {814, 0, 8}  // ACC_CMD
+    {482, 0, 8, .check_relay = true, .disable_static_blocking = true}, // STEERING_MODULE_ADAS
+    {790, 0, 8, .check_relay = false}, // LKAS_HUD_ADAS
+    {814, 0, 8, .check_relay = false}  // ACC_CMD
   };
 
   static RxCheck byd_rx_checks[] = {
-    {.msg = {{287, 0, 5, .check_checksum = false, .frequency = 100U}, { 0 }, { 0 }}}, // STEER_MODULE_2
-    {.msg = {{290, 0, 8, .check_checksum = false, .frequency = 50U}, { 0 }, { 0 }}},  // WHEEL_SPEED
-    {.msg = {{508, 0, 8, .check_checksum = false, .frequency = 50U}, { 0 }, { 0 }}},  // STEERING_TORQUE
-    {.msg = {{834, 0, 8, .check_checksum = false, .frequency = 50U}, { 0 }, { 0 }}},  // PEDAL
-    {.msg = {{944, 0, 8, .check_checksum = false, .frequency = 20U}, { 0 }, { 0 }}},  // PCM_BUTTONS
-    {.msg = {{814, 2, 8, .check_checksum = false, .frequency = 50U}, { 0 }, { 0 }}},  // ACC_CMD
+    {.msg = {{287, 0, 5, .frequency = 100U}, { 0 }, { 0 }}}, // STEER_MODULE_2
+    {.msg = {{290, 0, 8, .frequency = 50U}, { 0 }, { 0 }}},  // WHEEL_SPEED
+    {.msg = {{508, 0, 8, .frequency = 50U}, { 0 }, { 0 }}},  // STEERING_TORQUE
+    {.msg = {{834, 0, 8, .frequency = 50U}, { 0 }, { 0 }}},  // PEDAL
+    {.msg = {{944, 0, 8, .frequency = 20U}, { 0 }, { 0 }}},  // PCM_BUTTONS
+    {.msg = {{814, 2, 8, .frequency = 50U}, { 0 }, { 0 }}},  // ACC_CMD
   };
 
   UNUSED(param);

@@ -2,13 +2,13 @@ from opendbc.can.packer import CANPacker
 
 from openpilot.selfdrive.car import apply_std_steer_angle_limits, AngleRateLimit
 from openpilot.selfdrive.car.interfaces import CarControllerBase
-from openpilot.selfdrive.car.byd.bydcan import create_can_steer_command, send_buttons, create_lkas_hud, create_accel_command
+from openpilot.selfdrive.car.byd.bydcan import create_can_steer_command, create_lkas_hud, create_accel_command
 from openpilot.selfdrive.car.byd.values import DBC
 from openpilot.common.numpy_fast import clip
 
-ECU_FAULT_ANGLE = 260 # degress
+ECU_FAULT_ANGLE = 260 # degrees
 
-class CarControllerParams():
+class CarControllerParams:
   ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[4., 3., 2.])
   ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[6., 4., 3.])
 
