@@ -707,7 +707,7 @@ CM_ SG_ 437 Info_RtLnDptSta "This signal indicates the lane departure status of 
 CM_ SG_ 437 Info_RtLnPosVal "This signal outputs the position of right line from camera center.";
 CM_ SG_ 437 Info_RtLnHdingAnglVal "This signal outputs the heading angle of right line.";
 CM_ SG_ 437 Info_RtLnCvtrVal "This signal outputs the curvature of right line.";
-CM_ SG_ 437 ID_CIPV "Valid Object = 1 to 127 - ID detected by front camera can vary depending on vehicle environment. - Additional logic would be required to apply this signal for ISG. - Confirmaiton by Autonomous Driving Engineering Team is required to use ID_CIPV signa";
+CM_ SG_ 437 ID_CIPV "Valid Object = 1 to 255 - ID detected by front camera can vary depending on vehicle environment. - Additional logic would be required to apply this signal for ISG.";
 CM_ SG_ 437 Relative_Velocity "+ : Preceding, - : Oncoming - Velocity detected by front camera can vary depending on vehicle environment. - Additional logic would be required to apply this signal for ISG. - Confirmaiton by Autonomous Driving Engineering Team is required to use ID_C";
 CM_ SG_ 480 NEW_SIGNAL_5 "todo: figure out why always set to 1";
 CM_ SG_ 506 FR_CMR_Crc2Val "The data area for CRC calculation is based on the data length (DLC) of the message DB.The CRC shall be calculated over the entire data block (excluding the CRC bytes) including the user data, alive counter and Data ID - CRC Polynomial (0x1021) , In";
