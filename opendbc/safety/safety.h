@@ -24,6 +24,7 @@
 #include "opendbc/safety/modes/volkswagen_pq.h"
 #include "opendbc/safety/modes/elm327.h"
 #include "opendbc/safety/modes/body.h"
+#include "opendbc/safety/modes/byd.h"
 
 // CAN-FD only safety modes
 #ifdef CANFD

@@ -1,5 +1,6 @@
 from typing import get_args
 from opendbc.car.body.values import CAR as BODY
+from opendbc.car.byd.values import BYD as BODY
 from opendbc.car.chrysler.values import CAR as CHRYSLER
 from opendbc.car.ford.values import CAR as FORD
 from opendbc.car.gm.values import CAR as GM
