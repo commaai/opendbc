@@ -177,7 +177,9 @@ def get_present_ecus(can_recv: CanRecvCallable, can_send: CanSendCallable, set_o
 
   for brand, config, r in REQUESTS:
     # Skip query if no panda available
-    if r.bus > num_pandas * 4 - 1:
+    if r.bus is None:
+      continue
+    elif r.bus > num_pandas * 4 - 1:
       continue
 
     for ecu_type, addr, sub_addr in config.get_all_ecus(VERSIONS[brand]):
@@ -291,7 +293,9 @@ def get_fw_versions(can_recv: CanRecvCallable, can_send: CanSendCallable, set_ob
     for addr_chunk in chunks(addr_group):
       for brand, config, r in requests:
         # Skip query if no panda available
-        if r.bus > num_pandas * 4 - 1:
+        if r.bus is None:
+          continue
+        elif r.bus > num_pandas * 4 - 1:
           continue
 
         # Toggle OBD multiplexing for each request
