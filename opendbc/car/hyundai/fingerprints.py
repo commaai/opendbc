@@ -1,3 +1,4 @@
+""" AUTO-FORMATTED USING opendbc/car/debug/format_fingerprints.py, EDIT STRUCTURE THERE."""
 from opendbc.car.structs import CarParams
 from opendbc.car.hyundai.values import CAR
 
@@ -50,6 +51,8 @@ FW_VERSIONS = {
     ],
     (Ecu.eps, 0x7d4, None): [
       b'\xf1\x00AE  MDPS C 1.00 1.03 56310/G2300 4AEHC103',
+      b'\xf1\x00AE  MDPS C 1.00 1.03 56310G2300\x00 4AEHC103',
+      b'\xf1\x00AE  MDPS C 1.00 1.05 56310/G2500 4AEHC105',
       b'\xf1\x00AE  MDPS C 1.00 1.05 56310/G2501 4AEHC105',
       b'\xf1\x00AE  MDPS C 1.00 1.07 56310/G2301 4AEHC107',
       b'\xf1\x00AE  MDPS C 1.00 1.07 56310/G2501 4AEHC107',
@@ -59,6 +62,7 @@ FW_VERSIONS = {
       b'\xf1\x00AEH MFC  AT EUR LHD 1.00 1.00 95740-G2400 180222',
       b'\xf1\x00AEH MFC  AT EUR LHD 1.00 1.00 95740-G7200 160418',
       b'\xf1\x00AEH MFC  AT EUR RHD 1.00 1.00 95740-G2400 180222',
+      b'\xf1\x00AEH MFC  AT USA LHD 1.00 1.00 95740-G2300 170703',
       b'\xf1\x00AEH MFC  AT USA LHD 1.00 1.00 95740-G2400 180222',
     ],
   },
@@ -354,6 +358,7 @@ FW_VERSIONS = {
   },
   CAR.KIA_STINGER: {
     (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00CK__ SCC FHCUP      1.00 1.02 96400-J5000         ',
       b'\xf1\x00CK__ SCC F_CUP      1.00 1.01 96400-J5000         ',
       b'\xf1\x00CK__ SCC F_CUP      1.00 1.01 96400-J5100         ',
       b'\xf1\x00CK__ SCC F_CUP      1.00 1.02 96400-J5100         ',
@@ -369,6 +374,7 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00CK  MFC  AT EUR LHD 1.00 1.03 95740-J5000 170822',
+      b'\xf1\x00CK  MFC  AT KOR LHD 1.00 1.04 95740-J5000 180504',
       b'\xf1\x00CK  MFC  AT USA LHD 1.00 1.03 95740-J5000 170822',
       b'\xf1\x00CK  MFC  AT USA LHD 1.00 1.04 95740-J5000 180504',
     ],
@@ -1018,6 +1024,7 @@ FW_VERSIONS = {
       b'\xf1\x00NE1 MFC  AT EUR LHD 1.00 1.00 99211-GI100 230915',
       b'\xf1\x00NE1 MFC  AT EUR LHD 1.00 1.01 99211-GI010 211007',
       b'\xf1\x00NE1 MFC  AT EUR LHD 1.00 1.01 99211-GI100 240110',
+      b'\xf1\x00NE1 MFC  AT EUR LHD 1.00 1.02 99211-GI010 211206',
       b'\xf1\x00NE1 MFC  AT EUR LHD 1.00 1.03 99211-GI010 220401',
       b'\xf1\x00NE1 MFC  AT EUR LHD 1.00 1.06 99211-GI000 210813',
       b'\xf1\x00NE1 MFC  AT EUR LHD 1.00 1.06 99211-GI010 230110',
