@@ -1,38 +1,24 @@
 Import('env', 'envCython', 'common', 'arch')
-from SCons.Subst import Literal
 
 envDBC = env.Clone()
-envDBC['CXXFLAGS'] += ['-DDBC_FILE_PATH=\\"%s\\"' % envDBC.Dir('../dbc').abspath]
-src = ['dbc.cc', 'parser.cc', 'packer.cc', 'common.cc']
-linkflags = envDBC['LINKFLAGS']
-if arch == 'Darwin':
-  linkflags += ['-Wl,-install_name,@loader_path/libdbc.dylib']
-libdbc = envDBC.SharedLibrary('libdbc',src,LIBS=[common],LINKFLAGS=linkflags)
+dbc_file_path = '-DDBC_FILE_PATH=\'"%s"\'' % (envDBC.Dir("../dbc").abspath)
+envDBC['CXXFLAGS'] += [dbc_file_path]
+src = ["dbc.cc", "parser.cc", "packer.cc", "common.cc"]
 
+# shared library for openpilot
+LINKFLAGS = envDBC["LINKFLAGS"]
+if arch == "Darwin":
+  LINKFLAGS += ["-Wl,-install_name,@loader_path/libdbc.dylib"]
+libdbc = envDBC.SharedLibrary('libdbc', src, LIBS=[common, ], LINKFLAGS=LINKFLAGS)
+
+# Build packer and parser
 lenv = envCython.Clone()
-dbc_dir = libdbc[0].dir.abspath
-lenv.Append(LIBPATH=[dbc_dir])
+lenv["LIBPATH"].append(libdbc[0].dir.abspath)
+lenv['LINKFLAGS'] += ['-Wl,-rpath,\$$ORIGIN']
+lenv['LINKFLAGS'] += ['-Wl,-rpath,\$$ORIGIN/../..']
+parser = lenv.Program('parser_pyx.so', 'parser_pyx.pyx', LIBS=[common, libdbc[0].name])
+packer = lenv.Program('packer_pyx.so', 'packer_pyx.pyx', LIBS=[common, libdbc[0].name])
 
-if arch == 'Darwin':
-  builder = lenv.LoadableModule
-  lenv['LDMODULEPREFIX'] = ''
-  lenv['LDMODULESUFFIX'] = '.so'
-  rpath_flags = [
-    '-Wl,-rpath,@loader_path',
-    '-Wl,-rpath,@loader_path/../..',
-  ]
-else:
-  builder = lenv.SharedLibrary
-  lenv['SHLIBPREFIX'] = ''
-  lenv['SHLIBSUFFIX'] = '.so'
-  rpath_flags = [
-    Literal('-Wl,-rpath,$ORIGIN'),
-    Literal('-Wl,-rpath,$ORIGIN/../..'),
-  ]
+opendbc_python = Alias("opendbc_python", [parser, packer])
 
-lenv.Append(LINKFLAGS=rpath_flags)
-parser = builder('parser_pyx', 'parser_pyx.pyx', LIBS=[common,libdbc[0].name])
-packer = builder('packer_pyx', 'packer_pyx.pyx', LIBS=[common,libdbc[0].name])
-
-opendbc_python = Alias('opendbc_python',[parser,packer,libdbc])
 Export('opendbc_python')
