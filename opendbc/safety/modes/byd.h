@@ -77,7 +77,7 @@ static bool byd_tx_hook(const CANPacket_t *to_send) {
     .inactive_accel = 100,  // 0. m/s^2
   };
 
-  bool tx = true;
+  bool tx = false;
   bool violation = false;
   int addr = GET_ADDR(to_send);
 
@@ -106,32 +106,11 @@ static bool byd_tx_hook(const CANPacket_t *to_send) {
   return tx;
 }
 
-static bool byd_fwd_hook(int bus_num, int addr) {
-  bool block_msg = false;
-
-  if (bus_num == 2) {
-    // LKAS
-    if (addr == 0x1E2) {
-      block_msg = true;
-    }
-    // HUD
-    if (addr == 0x316) {
-      block_msg = true;
-    }
-    // ACC
-    if (addr == 0x32e) {
-      block_msg = true;
-    }
-  }
-
-  return block_msg;
-}
-
 static safety_config byd_init(uint16_t param) {
   static const CanMsg BYD_TX_MSGS[] = {
-    {482, 0, 8, .check_relay = true, .disable_static_blocking = true}, // STEERING_MODULE_ADAS
-    {790, 0, 8, .check_relay = false}, // LKAS_HUD_ADAS
-    {814, 0, 8, .check_relay = false}  // ACC_CMD
+    {482, 0, 8, .check_relay = true}, // STEERING_MODULE_ADAS
+    {790, 0, 8, .check_relay = true}, // LKAS_HUD_ADAS
+    {814, 0, 8, .check_relay = true}  // ACC_CMD
   };
 
   static RxCheck byd_rx_checks[] = {
@@ -152,5 +131,4 @@ const safety_hooks byd_hooks = {
   .init = byd_init,
   .rx = byd_rx_hook,
   .tx = byd_tx_hook,
-  .fwd = byd_fwd_hook,
 };

@@ -1,9 +1,9 @@
 from opendbc.can.packer import CANPacker
 
-from openpilot.selfdrive.car import apply_std_steer_angle_limits, AngleRateLimit
-from openpilot.selfdrive.car.interfaces import CarControllerBase
-from openpilot.selfdrive.car.byd.bydcan import create_can_steer_command, create_lkas_hud, create_accel_command
-from openpilot.selfdrive.car.byd.values import DBC
+from opendbc.car import apply_std_steer_angle_limits, AngleRateLimit
+from opendbc.car.interfaces import CarControllerBase
+from opendbc.car.byd.bydcan import create_can_steer_command, create_lkas_hud, create_accel_command
+from opendbc.car.byd.values import DBC
 from openpilot.common.numpy_fast import clip
 
 ECU_FAULT_ANGLE = 260 # degrees
@@ -51,7 +51,7 @@ class CarController(CarControllerBase):
 
       can_sends.append(create_can_steer_command(self.packer, apply_angle, lat_active, CS.out.standstill, CS.lkas_healthy, CS.lkas_rdy_btn))
       can_sends.append(create_lkas_hud(self.packer, enabled, CS.lss_state, CS.lss_alert, CS.tsr, \
-        CS.abh, CS.passthrough, CS.HMA, CS.pt2, CS.pt3, CS.pt4, CS.pt5, self.lka_active))
+        CS.abh, CS.passthrough, CS.HMA, self.lka_active))
 
       if self.CP.openpilotLongitudinalControl:
         long_active = enabled and not CS.out.gasPressed

@@ -1,6 +1,6 @@
 # ruff: noqa: E501
 from cereal import car
-from openpilot.selfdrive.car.byd.values import CAR
+from opendbc.car.byd.values import CAR
 
 Ecu = car.CarParams.Ecu
 

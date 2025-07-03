@@ -1,8 +1,16 @@
 from dataclasses import dataclass, field
-from openpilot.selfdrive.car import CarSpecs, DbcDict, PlatformConfig, Platforms, dbc_dict
-from openpilot.selfdrive.car.docs_definitions import CarInfo
+from opendbc.car import CarSpecs, DbcDict, PlatformConfig, Platforms, Bus
+from opendbc.car.docs_definitions import CarParts, CarDocs, CarHarness
 
 HUD_MULTIPLIER = 1.068
+
+def dbc_dict(pt, radar):
+  return {Bus.pt: pt, Bus.radar: radar}
+
+@dataclass
+class BydCarDocs(CarDocs):
+  package: str = "All"
+  car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.custom]))
 
 @dataclass
 class BYDPlatformConfig(PlatformConfig):
@@ -15,10 +23,8 @@ class CANBUS:
 
 class CAR(Platforms):
   ATTO3 = BYDPlatformConfig(
-    "BYD ATTO 3",
-    CarInfo("BYD Atto 3", "ALL"),
-    specs=CarSpecs(mass=2090., wheelbase=2.72, steerRatio=16.0)
+    BydCarDocs("BYD ATTO 3"),
+    CarSpecs(mass=2090., wheelbase=2.72, steerRatio=16.0)
   )
 
-CAR_INFO = CAR.create_carinfo_map()
 DBC = CAR.create_dbc_map()

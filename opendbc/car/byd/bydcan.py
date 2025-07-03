@@ -57,7 +57,7 @@ def create_accel_command(packer, accel, enabled, brake_hold):
 
 # 50hz
 def create_lkas_hud(packer, enabled, lss_state, lss_alert, tsr, ahb, passthrough,\
-    hma, pt2, pt3, pt4, pt5, lka_on):
+    hma, lka_on):
 
   values = {
     "STEER_ACTIVE_ACTIVE_LOW": lka_on,
@@ -73,10 +73,6 @@ def create_lkas_hud(packer, enabled, lss_state, lss_alert, tsr, ahb, passthrough
     "HAND_ON_WHEEL_WARNING": 0,
     "TSR": tsr,
     "HMA": hma,
-    "PT2": pt2,
-    "PT3": pt3,
-    "PT4": pt4,
-    "PT5": pt5,
   }
 
   return packer.make_can_msg("LKAS_HUD_ADAS", 0, values)

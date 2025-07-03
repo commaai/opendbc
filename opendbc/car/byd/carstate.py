@@ -3,8 +3,8 @@ from opendbc.can.parser import CANParser
 from opendbc.can.can_define import CANDefine
 from openpilot.common.numpy_fast import mean
 from openpilot.common.conversions import Conversions as CV
-from openpilot.selfdrive.car.interfaces import CarStateBase
-from openpilot.selfdrive.car.byd.values import DBC, CANBUS, HUD_MULTIPLIER
+from opendbc.car.interfaces import CarStateBase
+from opendbc.car.byd.values import DBC, CANBUS, HUD_MULTIPLIER
 from common.params import Params
 
 class CarState(CarStateBase):
@@ -23,10 +23,6 @@ class CarState(CarStateBase):
     self.passthrough = 0
     self.lka_on = 0
     self.HMA = 0
-    self.pt2 = 0
-    self.pt3 = 0
-    self.pt4 = 0
-    self.pt5 = 0
     self.lkas_rdy_btn = False
     self.lkas_faulted = False
 
@@ -42,10 +38,6 @@ class CarState(CarStateBase):
     self.abh = cp_cam.vl["LKAS_HUD_ADAS"]['SET_ME_XFF']
     self.passthrough = cp_cam.vl["LKAS_HUD_ADAS"]['SET_ME_X5F']
     self.HMA = cp_cam.vl["LKAS_HUD_ADAS"]['HMA']
-    self.pt2 = cp_cam.vl["LKAS_HUD_ADAS"]['PT2']
-    self.pt3 = cp_cam.vl["LKAS_HUD_ADAS"]['PT3']
-    self.pt4 = cp_cam.vl["LKAS_HUD_ADAS"]['PT4']
-    self.pt5 = cp_cam.vl["LKAS_HUD_ADAS"]['PT5']
     self.lkas_healthy = cp_cam.vl["STEERING_MODULE_ADAS"]['EPS_OK']
 
     # EV irrelevant messages
