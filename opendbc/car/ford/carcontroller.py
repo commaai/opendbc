@@ -15,14 +15,14 @@ AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation. higher actual roll 
 MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~2.4 m/s^2
 
 
-def bronco_special(apply_curvature, apply_curvature_last, v_ego_raw):
+def anti_overshoot(new_curvature, last_curvature, v_ego):
     diff = 0.05
-    tau = 5 # 5 smooths over the overshoot
+    tau = 5 # 5s smooths over the overshoot
     dt = DT_CTRL * CarControllerParams.STEER_STEP
     alpha = 1 - np.exp(-dt/tau)
 
-    lataccel = apply_curvature * (v_ego_raw ** 2)
-    last_lataccel = apply_curvature_last * (v_ego_raw ** 2)
+    lataccel = new_curvature * (v_ego ** 2)
+    last_lataccel = last_curvature * (v_ego ** 2)
 
     if lataccel > last_lataccel + diff:
         last_lataccel = lataccel - diff
@@ -30,9 +30,9 @@ def bronco_special(apply_curvature, apply_curvature_last, v_ego_raw):
         last_lataccel = lataccel + diff
     last_lataccel =  alpha * lataccel + (1 - alpha) * last_lataccel
 
-    output_curvature = last_lataccel / (v_ego_raw ** 2 + 1e-6)
+    output_curvature = last_lataccel / (v_ego ** 2 + 1e-6)
 
-    return np.interp(v_ego_raw, [5, 10], [apply_curvature, output_curvature])
+    return np.interp(v_ego, [5, 10], [apply_curvature, output_curvature])
 
 
 def apply_ford_curvature_limits(apply_curvature, apply_curvature_last, current_curvature, v_ego_raw, steering_angle, lat_active, CP):
@@ -68,7 +68,7 @@ class CarController(CarControllerBase):
     self.CAN = fordcan.CanBus(CP)
 
     self.apply_curvature_last = 0
-    self.bronco_special_curvature_last = 0
+    self.anti_overshoot_curvature_last = 0
     self.accel = 0.0
     self.gas = 0.0
     self.brake_request = False
@@ -106,8 +106,8 @@ class CarController(CarControllerBase):
       # Bronco and some other cars consistently overshoot curv requests
       # Apply some deadzone + smoothing convergence to avoid oscillations
       if self.CP.carFingerprint in [CAR.FORD_BRONCO_SPORT_MK1, CAR.FORD_F_150_MK14]:
-        self.bronco_special_curvature_last = bronco_special(actuators.curvature, self.bronco_special_curvature_last, CS.out.vEgoRaw)
-        request_curvature = self.bronco_special_curvature_last
+        self.anti_overshoot_curvature_last = anti_overshoot(actuators.curvature, self.anti_overshoot_curvature_last, CS.out.vEgoRaw)
+        request_curvature = self.anti_overshoot_curvature_last
       else:
         request_curvature = actuators.curvature
 
