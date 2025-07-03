@@ -32,7 +32,7 @@ def anti_overshoot(new_curvature, last_curvature, v_ego):
 
     output_curvature = last_lataccel / (v_ego ** 2 + 1e-6)
 
-    return np.interp(v_ego, [5, 10], [apply_curvature, output_curvature])
+    return np.interp(v_ego, [5, 10], [new_curvature, output_curvature])
 
 
 def apply_ford_curvature_limits(apply_curvature, apply_curvature_last, current_curvature, v_ego_raw, steering_angle, lat_active, CP):
