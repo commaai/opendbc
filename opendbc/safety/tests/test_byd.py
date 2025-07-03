@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 import unittest
-from panda import Panda
-from panda.tests.libpanda import libpanda_py
-import panda.tests.safety.common as common
-from panda.tests.safety.common import CANPackerPanda
+import opendbc.safety.tests.common as common
+from opendbc.car.structs import CarParams
+from opendbc.safety.tests.libsafety import libsafety_py
+from opendbc.safety.tests.common import CANPackerPanda
 
 
 class TestBydSafety(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest):
@@ -11,7 +11,7 @@ class TestBydSafety(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest):
   TX_MSGS = [[0x1E2, 0], [0x316, 0], [0x32E, 0]]
   STANDSTILL_THRESHOLD = 0
   GAS_PRESSED_THRESHOLD = 1
-  RELAY_MALFUNCTION_ADDRS = {0: (0x1E2,)}
+  RELAY_MALFUNCTION_ADDRS = {0: (0x1E2, 0x316, 0x32E)}
   FWD_BLACKLISTED_ADDRS = {0: [], 2: [0x1E2, 0x316, 0x32E]}
   FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
@@ -19,6 +19,7 @@ class TestBydSafety(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest):
   CAM_BUS = 2
 
   # Angle control limits
+  STEER_ANGLE_MAX = 300
   DEG_TO_CAN = 10
 
   ANGLE_RATE_BP = [0., 5., 15.]
@@ -27,8 +28,8 @@ class TestBydSafety(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest):
 
   def setUp(self):
     self.packer = CANPackerPanda("byd_general_pt")
-    self.safety = libpanda_py.libpanda
-    self.safety.set_safety_hooks(Panda.SAFETY_BYD, 0)
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.byd, 0)
     self.safety.init_tests()
 
   def _angle_cmd_msg(self, angle: float, enabled: bool):

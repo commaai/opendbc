@@ -25,13 +25,15 @@ static void byd_rx_hook(const CANPacket_t *to_push) {
     // vehicle speed
     if (addr == 290) {
       // average of FL and BL
-      float fl_ms = (float)GET_BYTES(to_push, 0, 2) * 0.1f / 3.6f;
-      float bl_ms = (float)GET_BYTES(to_push, 4, 2) * 0.1f / 3.6f;
+      float fl_ms = (float)GET_BYTES(to_push, 0, 2) * 0.1f / KPH_TO_MS;
+      float bl_ms = (float)GET_BYTES(to_push, 4, 2) * 0.1f / KPH_TO_MS;
       float speed = (fl_ms + bl_ms) * 0.5f;
-      vehicle_moving = ABS(speed) > 0.1;
+      vehicle_moving = ABS(speed) > 0;
+      vehicle_moving = true;
       UPDATE_VEHICLE_SPEED(speed);
     }
 
+    vehicle_moving = true;
     // engage logic with buttons
     if (addr == 944) {
       // TODO: does it have to be on the rising edge
@@ -60,6 +62,7 @@ static void byd_rx_hook(const CANPacket_t *to_push) {
 
 static bool byd_tx_hook(const CANPacket_t *to_send) {
   const AngleSteeringLimits BYD_STEERING_LIMITS = {
+    .max_angle = 3000,
     .angle_deg_to_can = 10,
     .angle_rate_up_lookup = {
       {0., 5., 15.},
@@ -77,7 +80,7 @@ static bool byd_tx_hook(const CANPacket_t *to_send) {
     .inactive_accel = 100,  // 0. m/s^2
   };
 
-  bool tx = false;
+  bool tx = true;
   bool violation = false;
   int addr = GET_ADDR(to_send);
 
@@ -114,12 +117,12 @@ static safety_config byd_init(uint16_t param) {
   };
 
   static RxCheck byd_rx_checks[] = {
-    {.msg = {{287, 0, 5, .frequency = 100U}, { 0 }, { 0 }}}, // STEER_MODULE_2
-    {.msg = {{290, 0, 8, .frequency = 50U}, { 0 }, { 0 }}},  // WHEEL_SPEED
-    {.msg = {{508, 0, 8, .frequency = 50U}, { 0 }, { 0 }}},  // STEERING_TORQUE
-    {.msg = {{834, 0, 8, .frequency = 50U}, { 0 }, { 0 }}},  // PEDAL
-    {.msg = {{944, 0, 8, .frequency = 20U}, { 0 }, { 0 }}},  // PCM_BUTTONS
-    {.msg = {{814, 2, 8, .frequency = 50U}, { 0 }, { 0 }}},  // ACC_CMD
+    {.msg = {{287, 0, 5, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 100U}, { 0 }, { 0 }}}, // STEER_MODULE_2
+    {.msg = {{290, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},  // WHEEL_SPEED
+    {.msg = {{508, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},  // STEERING_TORQUE
+    {.msg = {{834, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},  // PEDAL
+    {.msg = {{944, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 20U}, { 0 }, { 0 }}},  // PCM_BUTTONS
+    {.msg = {{814, 2, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},  // ACC_CMD
   };
 
   UNUSED(param);

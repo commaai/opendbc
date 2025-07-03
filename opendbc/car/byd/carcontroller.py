@@ -1,10 +1,9 @@
-from opendbc.can.packer import CANPacker
+import numpy as np
 
-from opendbc.car import apply_std_steer_angle_limits, AngleRateLimit
+from opendbc.can.packer import CANPacker
+from opendbc.car import Bus, apply_std_steer_angle_limits, AngleRateLimit
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.byd.bydcan import create_can_steer_command, create_lkas_hud, create_accel_command
-from opendbc.car.byd.values import DBC
-from openpilot.common.numpy_fast import clip
 
 ECU_FAULT_ANGLE = 260 # degrees
 
@@ -16,10 +15,11 @@ class CarControllerParams:
     pass
 
 class CarController(CarControllerBase):
-  def __init__(self, dbc_name, CP, VM):
+  def __init__(self, dbc_names, CP, VM):
+    super().__init__(dbc_names, CP)
     self.CP = CP
     self.frame = 0
-    self.packer = CANPacker(DBC[CP.carFingerprint]['pt'])
+    self.packer = CANPacker(dbc_names[Bus.pt])
 
     self.lka_active = False
 
@@ -47,7 +47,7 @@ class CarController(CarControllerBase):
         # 1. steer rate too high
         # 2. met with resistance while steering
         # 3. applied steer too far away from current steeringAngleDeg
-        apply_angle = clip(apply_angle, CS.out.steeringAngleDeg - 10, CS.out.steeringAngleDeg + 10)
+        apply_angle = np.clip(apply_angle, CS.out.steeringAngleDeg - 10, CS.out.steeringAngleDeg + 10)
 
       can_sends.append(create_can_steer_command(self.packer, apply_angle, lat_active, CS.out.standstill, CS.lkas_healthy, CS.lkas_rdy_btn))
       can_sends.append(create_lkas_hud(self.packer, enabled, CS.lss_state, CS.lss_alert, CS.tsr, \

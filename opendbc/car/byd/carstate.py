@@ -1,16 +1,15 @@
-from cereal import car
+import numpy as np
+from opendbc.car import Bus, structs
 from opendbc.can.parser import CANParser
 from opendbc.can.can_define import CANDefine
-from openpilot.common.numpy_fast import mean
-from openpilot.common.conversions import Conversions as CV
+from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.byd.values import DBC, CANBUS, HUD_MULTIPLIER
-from common.params import Params
 
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
-    can_define = CANDefine(DBC[CP.carFingerprint]['pt'])
+    can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
     self.shifter_values = can_define.dv["DRIVE_STATE"]['GEAR']
     self.set_distance_values = can_define.dv['ACC_HUD_ADAS']['SET_DISTANCE']
 
@@ -26,11 +25,10 @@ class CarState(CarStateBase):
     self.lkas_rdy_btn = False
     self.lkas_faulted = False
 
-    self.p = Params()
-    self.prev_distance_val = -1
-
-  def update(self, cp, cp_cam):
-    ret = car.CarState.new_message()
+  def update(self, can_parsers) -> structs.CarState:
+    cp = can_parsers[Bus.pt]
+    cp_cam = can_parsers[Bus.cam]
+    ret = structs.CarState()
 
     self.tsr = cp_cam.vl["LKAS_HUD_ADAS"]['TSR']
     self.lka_on = cp_cam.vl["LKAS_HUD_ADAS"]['STEER_ACTIVE_ACTIVE_LOW']
@@ -49,7 +47,7 @@ class CarState(CarStateBase):
       cp.vl["WHEEL_SPEED"]['WHEELSPEED_BL'],
       cp.vl["WHEEL_SPEED"]['WHEELSPEED_BL'], # TODO: why would BR make the value wrong? Wheelspeed sensor prob?
     )
-    ret.vEgoRaw = mean([ret.wheelSpeeds.rr, ret.wheelSpeeds.rl, ret.wheelSpeeds.fr, ret.wheelSpeeds.fl])
+    ret.vEgoRaw = np.mean([ret.wheelSpeeds.rr, ret.wheelSpeeds.rl, ret.wheelSpeeds.fr, ret.wheelSpeeds.fl])
 
     # unfiltered speed from CAN sensors
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
@@ -91,12 +89,6 @@ class CarState(CarStateBase):
     ret.stockAeb = False
     ret.stockFcw = False
     ret.cruiseState.available = any([cp_cam.vl["ACC_HUD_ADAS"]["ACC_ON1"], cp_cam.vl["ACC_HUD_ADAS"]["ACC_ON2"]])
-
-    # VAL_ 813 SET_DISTANCE 8 "4bar" 4 "3bar" 2 "2bar" 1 "1bar" ;
-    distance_val = int(cp_cam.vl["ACC_HUD_ADAS"]['SET_DISTANCE'])
-    if distance_val != self.prev_distance_val:
-      self.p.put("LongitudinalPersonality", str(2 if distance_val in (4, 8) else distance_val - 1))
-    self.prev_distance_val = distance_val
 
     # engage and disengage logic, do we still need this?
     if (cp.vl["PCM_BUTTONS"]["SET_BTN"] != 0 or cp.vl["PCM_BUTTONS"]["RES_BTN"] != 0) and not ret.brakePressed:
@@ -140,10 +132,8 @@ class CarState(CarStateBase):
 
 
   @staticmethod
-  def get_can_parser(CP):
-    signals = [
-      # TODO get the frequency
-      # sig_address, frequency
+  def get_can_parsers(CP):
+    pt_signals = [
       ("DRIVE_STATE", 50),
       ("WHEEL_SPEED", 50),
       ("PEDAL", 50),
@@ -155,17 +145,14 @@ class CarState(CarStateBase):
       ("PCM_BUTTONS", 0),
     ]
 
-    return CANParser(DBC[CP.carFingerprint]['pt'], signals, CANBUS.main_bus)
-
-  @staticmethod
-  def get_cam_can_parser(CP):
-    signals = [
-      # TODO get the frequency
-      # sig_address, frequency
+    cam_signals = [
       ("ACC_HUD_ADAS", 50),
       ("ACC_CMD", 50),
       ("LKAS_HUD_ADAS", 50),
       ("STEERING_MODULE_ADAS", 50),
     ]
 
-    return CANParser(DBC[CP.carFingerprint]['pt'], signals, CANBUS.cam_bus)
+    return {
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_signals, CANBUS.main_bus),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_signals, CANBUS.cam_bus),
+    }
