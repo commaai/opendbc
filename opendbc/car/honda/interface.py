@@ -31,7 +31,7 @@ class CarInterface(CarInterfaceBase):
       return CarControllerParams.NIDEC_ACCEL_MIN, np.interp(current_speed, ACCEL_MAX_BP, ACCEL_MAX_VALS)
 
   @staticmethod
-  def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, docs) -> structs.CarParams:
+  def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
     ret.brand = "honda"
 
     CAN = CanBus(ret, fingerprint)
@@ -73,7 +73,7 @@ class CarInterface(CarInterfaceBase):
     elif candidate == CAR.HONDA_CIVIC_2022 and all(msg not in fingerprint[CAN.pt] for msg in (0x191, 0x1A3)):
       ret.transmissionType = TransmissionType.manual
     # New Civics don't have 0x191, but do have 0x1A3
-    elif candidate == CAR.HONDA_CIVIC_2022 and 0x1A3 in fingerprint[CAN.pt]:
+    elif candidate in (CAR.HONDA_CIVIC_2022, CAR.HONDA_HRV_3G) and 0x1A3 in fingerprint[CAN.pt]:
       ret.transmissionType = TransmissionType.cvt
 
     # Certain Hondas have an extra steering sensor at the bottom of the steering rack,

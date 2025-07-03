@@ -17,13 +17,13 @@ static safety_config volkswagen_mqb_init(uint16_t param) {
                                                        {MSG_ACC_02, 0, 8, .check_relay = true}, {MSG_ACC_06, 0, 8, .check_relay = true}, {MSG_ACC_07, 0, 8, .check_relay = true}};
 
   static RxCheck volkswagen_mqb_rx_checks[] = {
-    {.msg = {{MSG_ESP_19, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_LH_EPS_03, 0, 8, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_ESP_05, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_TSK_06, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_MOTOR_20, 0, 8, .max_counter = 15U, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_MOTOR_14, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 10U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_GRA_ACC_01, 0, 8, .max_counter = 15U, .frequency = 33U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_ESP_19, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_LH_EPS_03, 0, 8, .max_counter = 15U, .ignore_quality_flag = true, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_ESP_05, 0, 8, .max_counter = 15U, .ignore_quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_TSK_06, 0, 8, .max_counter = 15U, .ignore_quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_MOTOR_20, 0, 8, .max_counter = 15U, .ignore_quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_MOTOR_14, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 10U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_GRA_ACC_01, 0, 8, .max_counter = 15U, .ignore_quality_flag = true, .frequency = 33U}, { 0 }, { 0 }}},
   };
 
   UNUSED(param);
