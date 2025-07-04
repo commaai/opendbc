@@ -121,7 +121,7 @@ class CarController(CarControllerBase):
     self.steeringTorque_last = 0.0 # last driver torque
     # try new Bosch pid
     self.gasonly_pid = PIDController (k_p=([0,], [0.5,]),
-                                      k_i= ([0,], [0,]),
+                                      k_i= ([0., 5., 35.], [1.2, 0.8, 0.5]),
                                       k_f=1, rate= 1 / DT_CTRL / 2)
 #    self.gasonly_pid = PIDController (k_p=([0,], [0,]),
 #                                      k_i= ([0., 5., 35.], [1.2, 0.8, 0.5]),
