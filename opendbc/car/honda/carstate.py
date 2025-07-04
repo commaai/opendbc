@@ -158,16 +158,17 @@ class CarState(CarStateBase):
                           cp.vl["DOORS_STATUS"]["DOOR_OPEN_RL"], cp.vl["DOORS_STATUS"]["DOOR_OPEN_RR"]])
     ret.seatbeltUnlatched = bool(cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LAMP"] or not cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LATCHED"])
 
-    if slef.CP.carFingerprint != CAR.ACURA_RLX_HYBRID:
+    if self.CP.carFingerprint != CAR.ACURA_RLX_HYBRID:
       steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]["STEER_STATUS"]]
-      # removing perm faults ret.steerFaultPermanent = steer_status not in ("NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT")
+      # removing perm faults
+      # ret.steerFaultPermanent = steer_status not in ("NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT")
       ret.steerFaultTemporary = steer_status not in ("NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT")
       # LOW_SPEED_LOCKOUT is not worth a warning
       # NO_TORQUE_ALERT_2 can be caused by bump or steering nudge from driver
       ret.steerFaultTemporary = steer_status not in ("NORMAL", "LOW_SPEED_LOCKOUT", "NO_TORQUE_ALERT_2")
     else:
       ret.steerFaultTemporary = False
-    
+
     if self.CP.carFingerprint in HONDA_BOSCH_RADARLESS:
       ret.accFaulted = bool(cp.vl["CRUISE_FAULT_STATUS"]["CRUISE_FAULT"])
     else:
@@ -229,10 +230,10 @@ class CarState(CarStateBase):
     ret.gasPressed = ret.gas > 1e-5
 
 
-    if CP.carFingerpring == CAR.ACURA_RLX_HYBRID:
+    if self.CP.carFingerprint == CAR.ACURA_RLX_HYBRID:
       ret.steeringTorque = cp.vl["STEER_MOTOR_TORQUE"]["MOTOR_TORQUE"]
     else:
-      ret.steeringTorque = cp.vl["STEER_STATUS"]["STEER_TORQUE_SENSOR"]      
+      ret.steeringTorque = cp.vl["STEER_STATUS"]["STEER_TORQUE_SENSOR"]
     ret.steeringTorqueEps = cp.vl["STEER_MOTOR_TORQUE"]["MOTOR_TORQUE"]
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD.get(self.CP.carFingerprint, 1200)
 
@@ -335,7 +336,7 @@ class CarState(CarStateBase):
         ("ACC_HUD", 10),
         ("BRAKE_COMMAND", 50),
       ]
-    
+
     elif CP.carFingerprint not in HONDA_BOSCH:
       cam_messages += [
         ("ACC_HUD", 10),
