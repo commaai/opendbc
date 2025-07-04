@@ -201,7 +201,7 @@ class CarController(CarControllerBase):
     if not CC.longActive:
       pcm_speed = 0.0
       pcm_accel = int(0.0)
-    elif False: # self.CP.carFingerprint in HONDA_NIDEC_ALT_PCM_ACCEL:
+    elif self.CP.carFingerprint in HONDA_NIDEC_ALT_PCM_ACCEL:
       pcm_speed_V = [0.0,
                      np.clip(CS.out.vEgo - 3.0, 0.0, 100.0),
                      np.clip(CS.out.vEgo + 0.0, 0.0, 100.0),
