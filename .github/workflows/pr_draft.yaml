@@ -5,7 +5,9 @@ on:
 
 jobs:
   redraft:
-    if: github.event.review.state == 'changes_requested'
+    # TODO: doesn't work due to perms issue. https://github.com/commaai/opendbc/actions/runs/16079182504/job/45380739128?pr=2385
+    if: false
+    #if: github.event.review.state == 'changes_requested'
     permissions:
       pull-requests: write
     runs-on: ubuntu-latest
