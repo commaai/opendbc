@@ -25,6 +25,7 @@ non_tested_cars = [
   HYUNDAI.GENESIS_G90,
   #Seeing if CI finds more problems before real testdrive, and awaiting steering board in the mail, then will replace
   HONDA.ACURA_MDX_3G_HYBRID,
+  HONDA.ACURA_RLX_HYBRID,
   HONDA.HONDA_ODYSSEY_CHN,
   VOLKSWAGEN.VOLKSWAGEN_CRAFTER_MK2,  # need a route from an ACC-equipped Crafter
   SUBARU.SUBARU_FORESTER_HYBRID,
