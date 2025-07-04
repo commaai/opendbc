@@ -56,7 +56,7 @@ class CarInterface(CarInterfaceBase):
     else:
       ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.hondaNidec)]
       ret.openpilotLongitudinalControl = True
-
+      ret.stoppingDecelRate = 0.3
       ret.pcmCruise = True
 
     if candidate == CAR.HONDA_CRV_5G:
