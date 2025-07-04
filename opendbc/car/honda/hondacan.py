@@ -146,7 +146,7 @@ def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_
       'ENABLE_MINI_CAR': 1 if enabled else 0,
       # only moves the lead car without ACC_ON
       'HUD_DISTANCE': hud.lead_distance_bars,  # wraps to 0 at 4 bars
-      'IMPERIAL_UNIT': int(not is_metric),
+      'IMPERIAL_UNIT': 0 if (CP.carFingerprint == CAR.ACURA_RLX_HYBRID) else int(not is_metric),
       'HUD_LEAD': 2 if enabled and hud.lead_visible else 1 if enabled else 0,
       'SET_ME_X01_2': 1,
     }
