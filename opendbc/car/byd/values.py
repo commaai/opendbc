@@ -38,15 +38,7 @@ FW_QUERY_CONFIG = FwQueryConfig(
         [StdQueries.UDS_VERSION_REQUEST],
         [StdQueries.UDS_VERSION_RESPONSE],
         bus=0,
-    ),
-   ],
-   extra_ecus=[
-    # All known ECUs translated from the DBC file
-    (Ecu.unknown, 0x1E2, None),
-    (Ecu.unknown, 0x32D, None),  # ACC_HUD_ADAS
-    (Ecu.unknown, 0x316, None),  # LKAS_HUD_ADAS
-    (Ecu.unknown, 0x11F, None),  # STEER Angle
-   ]
+    )],
 )
 
 DBC = CAR.create_dbc_map()
