@@ -25,15 +25,12 @@ static void byd_rx_hook(const CANPacket_t *to_push) {
     // vehicle speed
     if (addr == 290) {
       // average of FL and BL
-      float fl_ms = (float)GET_BYTES(to_push, 0, 2) * 0.1f / KPH_TO_MS;
-      float bl_ms = (float)GET_BYTES(to_push, 4, 2) * 0.1f / KPH_TO_MS;
-      float speed = (fl_ms + bl_ms) * 0.5f;
-      vehicle_moving = ABS(speed) > 0;
-      vehicle_moving = true;
-      UPDATE_VEHICLE_SPEED(speed);
+      uint16_t fl_ms = (GET_BYTE(to_push, 1) << 8) | (GET_BYTE(to_push, 0));
+      uint16_t bl_ms = (GET_BYTE(to_push, 5) << 8) | (GET_BYTE(to_push, 4));
+      vehicle_moving = (fl_ms | bl_ms) != 0U;
+      UPDATE_VEHICLE_SPEED((fl_ms + bl_ms) / 2.0 * 0.1 * KPH_TO_MS);
     }
 
-    vehicle_moving = true;
     // engage logic with buttons
     if (addr == 944) {
       // TODO: does it have to be on the rising edge

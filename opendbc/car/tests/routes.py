@@ -39,7 +39,7 @@ class CarTestRoute(NamedTuple):
 routes = [
   CarTestRoute("efdf9af95e71cd84|2022-05-13--19-03-31", COMMA.COMMA_BODY),
 
-  CarTestRoute("efdf9af95e71cd84|2022-05-13--19-03-31", BYD.BYD_ATTO3), # TODO: record a route
+  CarTestRoute("efdf9af95e71cd84|2022-05-13--19-03-31", BYD.BYD_ATTO3),
 
   CarTestRoute("0c94aa1e1296d7c6|2021-05-05--19-48-37", CHRYSLER.JEEP_GRAND_CHEROKEE),
   CarTestRoute("91dfedae61d7bd75|2021-05-22--20-07-52", CHRYSLER.JEEP_GRAND_CHEROKEE_2019),

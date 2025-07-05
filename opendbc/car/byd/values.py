@@ -6,6 +6,7 @@ from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
 
+# Multiplier between GPS ground speed to the meter cluster's displayed speed
 HUD_MULTIPLIER = 1.068
 
 class CANBUS:
@@ -27,18 +28,25 @@ class BYDPlatformConfig(PlatformConfig):
 
 class CAR(Platforms):
   BYD_ATTO3 = BYDPlatformConfig(
-    [BydCarDocs("Byd Atto 3")],
+    [BydCarDocs("Byd Atto 3 2022-24")],
     CarSpecs(mass=2090., wheelbase=2.72, steerRatio=16.0)
   )
 
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
     Request(
-      [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.SUPPLIER_SOFTWARE_VERSION_REQUEST],
-      [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.SUPPLIER_SOFTWARE_VERSION_RESPONSE],
-      bus=0,
-    )
-  ]
+        [StdQueries.UDS_VERSION_REQUEST],
+        [StdQueries.UDS_VERSION_RESPONSE],
+        bus=0,
+    ),
+   ],
+   extra_ecus=[
+    # All known ECUs translated from the DBC file
+    (Ecu.unknown, 0x1E2, None),
+    (Ecu.unknown, 0x32D, None),  # ACC_HUD_ADAS
+    (Ecu.unknown, 0x316, None),  # LKAS_HUD_ADAS
+    (Ecu.unknown, 0x11F, None),  # STEER Angle
+   ]
 )
 
 DBC = CAR.create_dbc_map()
