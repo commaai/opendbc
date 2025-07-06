@@ -6,7 +6,7 @@ from opendbc.can.packer import CANPacker
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
 from opendbc.car.honda import hondacan
 from opendbc.car.honda.values import CruiseButtons, VISUAL_HUD, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, HONDA_NIDEC_ALT_PCM_ACCEL, HONDA_NIDEC_HYBRID, \
-                                     CarControllerParams, CAR, NIDEC_ACCEL_MIN
+                                     CarControllerParams, CAR
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.common.conversions import Conversions as CV
 
@@ -154,7 +154,7 @@ class CarController(CarControllerBase):
     if CC.longActive:
       # accel = float (np.clip ( actuators.accel, -100.0, np.interp (steerfactor, [ 1.0, 4.0 ], [-3.5, 3.5]) ) )
       hill_brake = math.sin(self.pitch) * ACCELERATION_DUE_TO_GRAVITY
-      accel = float (max ( actuators.accel + hill_brake, NIDEC_ACCEL_MIN ) )
+      accel = float (max ( actuators.accel + hill_brake, CarControllerParams.NIDEC_ACCEL_MIN ) )
       if accel > max ( 0, CS.out.aEgo) + 0.1:
         accel = 10000.0
       gas, brake = compute_gas_brake(accel, CS.out.vEgo, self.CP.carFingerprint)
