@@ -1,4 +1,3 @@
-import numpy as np
 from opendbc.car import Bus, structs
 from opendbc.can.parser import CANParser
 from opendbc.can.can_define import CANDefine
@@ -9,7 +8,9 @@ from opendbc.car.byd.values import DBC, CANBUS, HUD_MULTIPLIER
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
+    print(CP.carFingerprint)
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
+
     self.shifter_values = can_define.dv["DRIVE_STATE"]['GEAR']
     self.set_distance_values = can_define.dv['ACC_HUD_ADAS']['SET_DISTANCE']
 
@@ -47,7 +48,7 @@ class CarState(CarStateBase):
       cp.vl["WHEEL_SPEED"]['WHEELSPEED_BL'],
       cp.vl["WHEEL_SPEED"]['WHEELSPEED_BL'], # TODO: why would BR make the value wrong? Wheelspeed sensor prob?
     )
-    ret.vEgoRaw = np.mean([ret.wheelSpeeds.rr, ret.wheelSpeeds.rl, ret.wheelSpeeds.fr, ret.wheelSpeeds.fl])
+    ret.vEgoRaw = (ret.wheelSpeeds.rl + ret.wheelSpeeds.fl) / 2.0
 
     # unfiltered speed from CAN sensors
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)

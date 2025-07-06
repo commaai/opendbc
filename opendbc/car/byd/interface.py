@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 from opendbc.car import get_safety_config, structs
 from opendbc.car.interfaces import CarInterfaceBase
-from opendbc.car.tesla.carcontroller import CarController
-from opendbc.car.tesla.carstate import CarState
+from opendbc.car.byd.carcontroller import CarController
+from opendbc.car.byd.carstate import CarState
 
 class CarInterface(CarInterfaceBase):
   CarState = CarState
@@ -23,6 +23,8 @@ class CarInterface(CarInterfaceBase):
     ret.centerToFront = ret.wheelbase * 0.44
 
     ret.openpilotLongitudinalControl = True
+    ret.longitudinalTuning.kpBP = [0., 5., 20.]
+    ret.longitudinalTuning.kiBP = [0., 5., 20.]
     ret.longitudinalTuning.kpV = [2.2, 2.0, 1.8]
     ret.longitudinalTuning.kiV = [0.45, 0.40, 0.32]
 

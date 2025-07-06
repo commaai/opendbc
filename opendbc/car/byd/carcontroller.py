@@ -1,21 +1,24 @@
 import numpy as np
 
 from opendbc.can.packer import CANPacker
-from opendbc.car import Bus, apply_std_steer_angle_limits, AngleRateLimit
+from opendbc.car import Bus, apply_std_steer_angle_limits, AngleSteeringLimits
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.byd.bydcan import create_can_steer_command, create_lkas_hud, create_accel_command
 
 ECU_FAULT_ANGLE = 260 # degrees
 
 class CarControllerParams:
-  ANGLE_RATE_LIMIT_UP = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[4., 3., 2.])
-  ANGLE_RATE_LIMIT_DOWN = AngleRateLimit(speed_bp=[0., 5., 15.], angle_v=[6., 4., 3.])
+  ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
+    300, # deg
+    ([0., 5., 15.], [4., 3., 2.]),
+    ([0., 5., 15.], [6., 4., 3.]),
+  )
 
   def __init__(self, CP):
     pass
 
 class CarController(CarControllerBase):
-  def __init__(self, dbc_names, CP, VM):
+  def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
     self.CP = CP
     self.frame = 0
@@ -58,7 +61,7 @@ class CarController(CarControllerBase):
         brake_hold = CS.out.standstill and actuators.accel < 0
         can_sends.append(create_accel_command(self.packer, actuators.accel, long_active, brake_hold))
 
-    new_actuators = actuators.copy()
+    new_actuators = actuators.as_builder()
     new_actuators.steeringAngleDeg = apply_angle
 
     self.frame += 1
