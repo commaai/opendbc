@@ -154,7 +154,7 @@ class CarController(CarControllerBase):
     if CC.longActive:
       # accel = float (np.clip ( actuators.accel, -100.0, np.interp (steerfactor, [ 1.0, 4.0 ], [-3.5, 3.5]) ) )
       hill_brake = math.sin(self.pitch) * ACCELERATION_DUE_TO_GRAVITY
-      accel = actuators.accel + hill_brake
+      accel = float (max ( actuators.accel + hill_brake, NIDEC_ACCEL_MIN ) )
       if accel > max ( 0, CS.out.aEgo) + 0.1:
         accel = 10000.0
       gas, brake = compute_gas_brake(accel, CS.out.vEgo, self.CP.carFingerprint)
