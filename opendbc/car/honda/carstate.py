@@ -33,13 +33,19 @@ def get_can_messages(CP, gearbox_msg):
   ]
 
   if  CP.carFingerprint == CAR.ACURA_RLX_HYBRID:
-    messages += [("CAR_SPEED", 0),] # missing on RLX
+    messages += [
+      ("CAR_SPEED", 0), # missing on RLX
+    ]
   else:
     messages += [("CAR_SPEED", 10),]
 
-  if  CP.carFingerprint in (SERIAL_STEERING, CAR.ACURA_RLX_HYBRID):
+  if  CP.carFingerprint in SERIAL_STEERING:
     messages += [
-      ("STEER_STATUS", 0), # initially slow to transmit, temp disable RLX
+      ("STEER_STATUS", 0), # initially slow to transmit
+    ]
+  elif  CP.carFingerprint == CAR.ACURA_RLX_HYBRID:
+    messages += [
+      ("STEER_STATUS", 0), # temp disable RLX
     ]
   else:
     messages +=[
