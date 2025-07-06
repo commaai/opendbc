@@ -163,7 +163,7 @@ class CarController(CarControllerBase):
 
     # Send steering command.
     if self.CP.carFingerprint in (HONDA_BOSCH_ALT_RADAR): # faults when steer control occurs while steeringPressed
-      steerDisable = CS.out.steeringPressed or ( abs ( CS.out.steeringTorque - self.steeringTorque_last ) > 200 )
+      steerDisable = CC.longActive and (CS.out.steeringPressed or ( abs ( CS.out.steeringTorque - self.steeringTorque_last ) > 200 ))
       self.steeringTorque_last = CS.out.steeringTorque
       if steerDisable:
         self.last_torque = 0
