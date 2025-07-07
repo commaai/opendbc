@@ -16,23 +16,23 @@ MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_R
 
 
 def anti_overshoot(new_curvature, last_curvature, v_ego):
-    diff = 0.05
-    tau = 5 # 5s smooths over the overshoot
-    dt = DT_CTRL * CarControllerParams.STEER_STEP
-    alpha = 1 - np.exp(-dt/tau)
+  diff = 0.1
+  tau = 5 # 5s smooths over the overshoot
+  dt = DT_CTRL * CarControllerParams.STEER_STEP
+  alpha = 1 - np.exp(-dt/tau)
 
-    lataccel = new_curvature * (v_ego ** 2)
-    last_lataccel = last_curvature * (v_ego ** 2)
+  lataccel = new_curvature * (v_ego ** 2)
+  last_lataccel = last_curvature * (v_ego ** 2)
 
-    if lataccel > last_lataccel + diff:
-        last_lataccel = lataccel - diff
-    elif lataccel < last_lataccel - diff:
-        last_lataccel = lataccel + diff
-    last_lataccel =  alpha * lataccel + (1 - alpha) * last_lataccel
+  if lataccel > last_lataccel + diff:
+      last_lataccel = lataccel - diff
+  elif lataccel < last_lataccel - diff:
+      last_lataccel = lataccel + diff
+  last_lataccel =  alpha * lataccel + (1 - alpha) * last_lataccel
 
-    output_curvature = last_lataccel / (v_ego ** 2 + 1e-6)
+  output_curvature = last_lataccel / (v_ego ** 2 + 1e-6)
 
-    return np.interp(v_ego, [5, 10], [new_curvature, output_curvature])
+  return np.interp(v_ego, [5, 10], [new_curvature, output_curvature])
 
 
 def apply_ford_curvature_limits(apply_curvature, apply_curvature_last, current_curvature, v_ego_raw, steering_angle, lat_active, CP):
