@@ -16,7 +16,7 @@ MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL - (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_R
 
 
 def anti_overshoot(new_curvature, last_curvature, v_ego):
-    diff = 0.05
+    diff = 0.1
     tau = 5 # 5s smooths over the overshoot
     dt = DT_CTRL * CarControllerParams.STEER_STEP
     alpha = 1 - np.exp(-dt/tau)
