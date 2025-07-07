@@ -2,6 +2,8 @@
 
 #include "opendbc/safety/safety_declarations.h"
 
+static bool byd_longitudinal = false;
+
 static void byd_rx_hook(const CANPacket_t *to_push) {
   int bus = GET_BUS(to_push);
   int addr = GET_ADDR(to_push);
@@ -59,7 +61,7 @@ static void byd_rx_hook(const CANPacket_t *to_push) {
 
 static bool byd_tx_hook(const CANPacket_t *to_send) {
   const AngleSteeringLimits BYD_STEERING_LIMITS = {
-    .max_angle = 3000,
+    .max_angle = 2200,
     .angle_deg_to_can = 10,
     .angle_rate_up_lookup = {
       {0., 5., 15.},
@@ -95,7 +97,7 @@ static bool byd_tx_hook(const CANPacket_t *to_send) {
   }
 
   // acc violation checks
-  if (addr == 814) {
+  if ((addr == 814) && byd_longitudinal) {
     int desired_accel = GET_BYTE(to_send, 0);
     violation |= longitudinal_accel_checks(desired_accel, BYD_LONG_LIMITS);
   }
@@ -103,11 +105,24 @@ static bool byd_tx_hook(const CANPacket_t *to_send) {
   if (violation) {
     tx = false;
   }
+
   return tx;
 }
 
 static safety_config byd_init(uint16_t param) {
+
+  UNUSED(param);
+#ifdef ALLOW_DEBUG
+  const int BYD_FLAG_LONGITUDINAL_CONTROL = 1;
+  byd_longitudinal = GET_FLAG(param, BYD_FLAG_LONGITUDINAL_CONTROL);
+#endif
+
   static const CanMsg BYD_TX_MSGS[] = {
+    {482, 0, 8, .check_relay = true}, // STEERING_MODULE_ADAS
+    {790, 0, 8, .check_relay = true}, // LKAS_HUD_ADAS
+  };
+
+  static const CanMsg BYD_TX_LONG_MSGS[] = {
     {482, 0, 8, .check_relay = true}, // STEERING_MODULE_ADAS
     {790, 0, 8, .check_relay = true}, // LKAS_HUD_ADAS
     {814, 0, 8, .check_relay = true}  // ACC_CMD
@@ -122,8 +137,15 @@ static safety_config byd_init(uint16_t param) {
     {.msg = {{814, 2, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},  // ACC_CMD
   };
 
-  UNUSED(param);
-  return BUILD_SAFETY_CFG(byd_rx_checks, BYD_TX_MSGS);
+  safety_config ret;
+  if (byd_longitudinal) {
+    ret = BUILD_SAFETY_CFG(byd_rx_checks, BYD_TX_LONG_MSGS);
+  }
+  else {
+    ret = BUILD_SAFETY_CFG(byd_rx_checks, BYD_TX_MSGS);
+  }
+
+  return ret;
 }
 
 

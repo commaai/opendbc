@@ -24,7 +24,7 @@ def create_can_steer_command(packer, steer_angle, steer_req, is_standstill, ecu_
   return packer.make_can_msg("STEERING_MODULE_ADAS", 0, values)
 
 def create_accel_command(packer, accel, enabled, brake_hold):
-  accel = max(min(accel * 18, 30), -50)
+  accel = max(min(accel * 15, 30), -50)
   accel_factor = 12 if accel >= 2 else 5 if accel < 0 else 11
   enabled &= not brake_hold
 
@@ -50,12 +50,11 @@ def create_accel_command(packer, accel, enabled, brake_hold):
     "ACC_CONTROLLABLE_AND_ON": enabled,
     "ACC_OVERRIDE_OR_STANDSTILL": brake_hold,
     "STANDSTILL_STATE": brake_hold,
-    "STANDSTILL_RESUME": 0, # TODO integrate buttons
+    "STANDSTILL_RESUME": 0,
   }
 
   return packer.make_can_msg("ACC_CMD", 0, values)
 
-# 50hz
 def create_lkas_hud(packer, enabled, lss_state, lss_alert, tsr, ahb, passthrough,\
     hma, lka_on):
 
@@ -79,10 +78,10 @@ def create_lkas_hud(packer, enabled, lss_state, lss_alert, tsr, ahb, passthrough
 
 def send_buttons(packer, state):
   values = {
-      "SET_BTN": state,
-      "RES_BTN": state,
-      "SET_ME_1_1": 1,
-      "SET_ME_1_2": 1,
+    "SET_BTN": state,
+    "RES_BTN": state,
+    "SET_ME_1_1": 1,
+    "SET_ME_1_2": 1,
   }
   return packer.make_can_msg("PCM_BUTTONS", 0, values)
 

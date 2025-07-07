@@ -8,18 +8,18 @@ from opendbc.safety.tests.common import CANPackerPanda
 
 class TestBydSafety(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest):
 
-  TX_MSGS = [[0x1E2, 0], [0x316, 0], [0x32E, 0]]
+  TX_MSGS = [[0x1E2, 0], [0x316, 0]]
   STANDSTILL_THRESHOLD = 0
   GAS_PRESSED_THRESHOLD = 3
-  RELAY_MALFUNCTION_ADDRS = {0: (0x1E2, 0x316, 0x32E)}
-  FWD_BLACKLISTED_ADDRS = {0: [], 2: [0x1E2, 0x316, 0x32E]}
+  RELAY_MALFUNCTION_ADDRS = {0: (0x1E2, 0x316)}
+  FWD_BLACKLISTED_ADDRS = {0: [], 2: [0x1E2, 0x316]}
   FWD_BUS_LOOKUP = {0: 2, 2: 0}
 
   MAIN_BUS = 0
   CAM_BUS = 2
 
   # Angle control limits
-  STEER_ANGLE_MAX = 300
+  STEER_ANGLE_MAX = 220
   DEG_TO_CAN = 10
 
   ANGLE_RATE_BP = [0., 5., 15.]

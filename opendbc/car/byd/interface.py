@@ -3,6 +3,7 @@ from opendbc.car import get_safety_config, structs
 from opendbc.car.interfaces import CarInterfaceBase
 from opendbc.car.byd.carcontroller import CarController
 from opendbc.car.byd.carstate import CarState
+from opendbc.car.byd.values import BydSafetyFlags
 
 class CarInterface(CarInterfaceBase):
   CarState = CarState
@@ -19,17 +20,18 @@ class CarInterface(CarInterfaceBase):
     ret.steerActuatorDelay = 0.1          # Steering wheel actuator delay in seconds
 
     ret.steerAtStandstill = False
-    ret.radarUnavailable = True
     ret.centerToFront = ret.wheelbase * 0.44
-
-    ret.openpilotLongitudinalControl = True
-    ret.longitudinalTuning.kpBP = [0., 5., 20.]
-    ret.longitudinalTuning.kiBP = [0., 5., 20.]
-    ret.longitudinalTuning.kpV = [2.2, 2.0, 1.8]
-    ret.longitudinalTuning.kiV = [0.45, 0.40, 0.32]
-
     ret.wheelSpeedFactor = 0.695
+    ret.radarUnavailable = True
 
-    ret.stoppingDecelRate = 0.1 # reach stopping target smoothly
+    ret.alphaLongitudinalAvailable = True
+    if alpha_long:
+      ret.openpilotLongitudinalControl = True
+      ret.safetyConfigs[0].safetyParam |= BydSafetyFlags.LONG_CONTROL.value
+      ret.longitudinalTuning.kpBP = [0., 5., 20.]
+      ret.longitudinalTuning.kiBP = [0., 5., 20.]
+      ret.longitudinalTuning.kpV = [1.2, 1.1, 1.0]
+      ret.longitudinalTuning.kiV = [0.22, 0.2, 0.15]
+      ret.stoppingDecelRate = 0.1 # reach stopping target smoothly
 
     return ret

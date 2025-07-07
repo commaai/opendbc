@@ -3,7 +3,10 @@ from opendbc.can.parser import CANParser
 from opendbc.can.can_define import CANDefine
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.interfaces import CarStateBase
-from opendbc.car.byd.values import DBC, CANBUS, HUD_MULTIPLIER
+from opendbc.car.byd.values import DBC, CANBUS
+
+# Multiplier between GPS ground speed to the meter cluster's displayed speed
+HUD_MULTIPLIER = 1.068
 
 class CarState(CarStateBase):
   def __init__(self, CP):
@@ -14,7 +17,6 @@ class CarState(CarStateBase):
     self.shifter_values = can_define.dv["DRIVE_STATE"]['GEAR']
     self.set_distance_values = can_define.dv['ACC_HUD_ADAS']['SET_DISTANCE']
 
-    self.is_cruise_latch = False
     self.prev_angle = 0
     self.lss_state = 0
     self.lss_alert = 0
@@ -44,9 +46,9 @@ class CarState(CarStateBase):
 
     ret.wheelSpeeds = self.get_wheel_speeds(
       cp.vl["WHEEL_SPEED"]['WHEELSPEED_FL'],
-      cp.vl["WHEEL_SPEED"]['WHEELSPEED_FR'],
+      cp.vl["WHEEL_SPEED"]['WHEELSPEED_FL'],
       cp.vl["WHEEL_SPEED"]['WHEELSPEED_BL'],
-      cp.vl["WHEEL_SPEED"]['WHEELSPEED_BL'], # TODO: why would BR make the value wrong? Wheelspeed sensor prob?
+      cp.vl["WHEEL_SPEED"]['WHEELSPEED_BL'],
     )
     ret.vEgoRaw = (ret.wheelSpeeds.rl + ret.wheelSpeeds.fl) / 2.0
 
@@ -65,10 +67,6 @@ class CarState(CarStateBase):
 
     ret.seatbeltUnlatched = cp.vl["METER_CLUSTER"]['SEATBELT_DRIVER'] == 0
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(can_gear, None))
-
-    disengage = ret.doorOpen or ret.seatbeltUnlatched or ret.brakeHoldActive
-    if disengage:
-      self.is_cruise_latch = False
 
     # gas pedal
     ret.gas = cp.vl["PEDAL"]['GAS_PEDAL']
@@ -91,14 +89,6 @@ class CarState(CarStateBase):
     ret.stockFcw = False
     ret.cruiseState.available = any([cp_cam.vl["ACC_HUD_ADAS"]["ACC_ON1"], cp_cam.vl["ACC_HUD_ADAS"]["ACC_ON2"]])
 
-    # engage and disengage logic, do we still need this?
-    if (cp.vl["PCM_BUTTONS"]["SET_BTN"] != 0 or cp.vl["PCM_BUTTONS"]["RES_BTN"] != 0) and not ret.brakePressed:
-      self.is_cruise_latch = True
-
-    # this can override the above engage disengage logic
-    if bool(cp_cam.vl["ACC_CMD"]["ACC_REQ_NOT_STANDSTILL"]):
-      self.is_cruise_latch = True
-
     # byd speedCluster will follow wheelspeed if cruiseState is not available
     if ret.cruiseState.available:
       ret.cruiseState.speedCluster = max(int(cp_cam.vl["ACC_HUD_ADAS"]['SET_SPEED']), 30) * CV.KPH_TO_MS
@@ -109,11 +99,7 @@ class CarState(CarStateBase):
     ret.cruiseState.standstill = bool(cp_cam.vl["ACC_CMD"]["STANDSTILL_STATE"])
     ret.cruiseState.nonAdaptive = False
 
-    stock_acc_on =  bool(cp_cam.vl["ACC_CMD"]["ACC_CONTROLLABLE_AND_ON"])
-    if not ret.cruiseState.available or ret.brakePressed or not stock_acc_on:
-      self.is_cruise_latch = False
-
-    ret.cruiseState.enabled = self.is_cruise_latch
+    ret.cruiseState.enabled = bool(cp_cam.vl["ACC_CMD"]["ACC_CONTROLLABLE_AND_ON"])
 
     # button presses
     ret.leftBlinker = bool(cp.vl["STALKS"]["LEFT_BLINKER"])

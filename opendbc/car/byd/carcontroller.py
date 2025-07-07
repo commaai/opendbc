@@ -1,21 +1,14 @@
-import numpy as np
-
 from opendbc.can.packer import CANPacker
 from opendbc.car import Bus, apply_std_steer_angle_limits, AngleSteeringLimits
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.byd.bydcan import create_can_steer_command, create_lkas_hud, create_accel_command
 
-ECU_FAULT_ANGLE = 260 # degrees
-
 class CarControllerParams:
   ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
-    300, # deg
+    220, # deg ECU_FAULT_MAX_ANGLES([0., 1., 8.], [360, 290, 220])
     ([0., 5., 15.], [4., 3., 2.]),
     ([0., 5., 15.], [6., 4., 3.]),
   )
-
-  def __init__(self, CP):
-    pass
 
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
@@ -23,7 +16,7 @@ class CarController(CarControllerBase):
     self.CP = CP
     self.frame = 0
     self.packer = CANPacker(dbc_names[Bus.pt])
-
+    self.apply_angle = 0
     self.lka_active = False
 
   def update(self, CC, CS, now_nanos):
@@ -31,7 +24,7 @@ class CarController(CarControllerBase):
 
     enabled = CC.latActive
     actuators = CC.actuators
-    apply_angle = CS.out.steeringAngleDeg
+
     # lkas user activation, cannot tie to lka_on state because it may deactivate itself
     if CS.lka_on:
       self.lka_active = True
@@ -39,22 +32,14 @@ class CarController(CarControllerBase):
       self.lka_active = False
 
     lat_active = enabled and self.lka_active and not CS.out.standstill
-      #and not CS.out.steeringPressed and abs(CS.out.steeringAngleDeg) < ECU_FAULT_ANGLE
 
     if (self.frame % 2) == 0:
-      if lat_active:
-        apply_angle = apply_std_steer_angle_limits(actuators.steeringAngleDeg, \
-          CS.out.steeringAngleDeg, CS.out.vEgo, CarControllerParams)
+      self.apply_angle = apply_std_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle, \
+      CS.out.vEgo, CS.out.steeringAngleDeg, lat_active, CarControllerParams.ANGLE_LIMITS)
 
-        # assumption why eps fault:
-        # 1. steer rate too high
-        # 2. met with resistance while steering
-        # 3. applied steer too far away from current steeringAngleDeg
-        apply_angle = np.clip(apply_angle, CS.out.steeringAngleDeg - 10, CS.out.steeringAngleDeg + 10)
-
-      can_sends.append(create_can_steer_command(self.packer, apply_angle, lat_active, CS.out.standstill, CS.lkas_healthy, CS.lkas_rdy_btn))
+      can_sends.append(create_can_steer_command(self.packer, self.apply_angle, lat_active, CS.out.standstill, CS.lkas_healthy, CS.lkas_rdy_btn))
       can_sends.append(create_lkas_hud(self.packer, enabled, CS.lss_state, CS.lss_alert, CS.tsr, \
-        CS.abh, CS.passthrough, CS.HMA, self.lka_active))
+      CS.abh, CS.passthrough, CS.HMA, self.lka_active))
 
       if self.CP.openpilotLongitudinalControl:
         long_active = enabled and not CS.out.gasPressed
@@ -62,7 +47,7 @@ class CarController(CarControllerBase):
         can_sends.append(create_accel_command(self.packer, actuators.accel, long_active, brake_hold))
 
     new_actuators = actuators.as_builder()
-    new_actuators.steeringAngleDeg = apply_angle
+    new_actuators.steeringAngleDeg = self.apply_angle
 
     self.frame += 1
     return new_actuators, can_sends

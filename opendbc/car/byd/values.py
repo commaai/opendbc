@@ -1,3 +1,4 @@
+from enum import IntFlag
 from dataclasses import dataclass, field
 from opendbc.car import CarSpecs, DbcDict, PlatformConfig, Platforms, Bus
 from opendbc.car.docs_definitions import CarParts, CarDocs, CarHarness
@@ -6,9 +7,6 @@ from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
 
-# Multiplier between GPS ground speed to the meter cluster's displayed speed
-HUD_MULTIPLIER = 1.068
-
 class CANBUS:
   main_bus = 0
   radar_bus = 1
@@ -16,6 +14,9 @@ class CANBUS:
 
 def dbc_dict(pt, radar):
   return {Bus.pt: pt, Bus.radar: radar}
+
+class BydSafetyFlags(IntFlag):
+  LONG_CONTROL = 1
 
 @dataclass
 class BydCarDocs(CarDocs):
@@ -28,7 +29,7 @@ class BYDPlatformConfig(PlatformConfig):
 
 class CAR(Platforms):
   BYD_ATTO3 = BYDPlatformConfig(
-    [BydCarDocs("Byd Atto 3 2022-24")],
+    [BydCarDocs("BYD ATTO 3 2022-24")],
     CarSpecs(mass=2090., wheelbase=2.72, steerRatio=16.0)
   )
 
