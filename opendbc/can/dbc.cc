@@ -60,6 +60,8 @@ ChecksumState* get_checksum(const std::string& dbc_name) {
     s = new ChecksumState({8, 4, 7, 3, false, PEDAL_CHECKSUM, &pedal_checksum});
   } else if (startswith(dbc_name, "tesla_model3_party")) {
     s = new ChecksumState({8, -1, 0, -1, true, TESLA_CHECKSUM, &tesla_checksum, &tesla_setup_signal});
+  } else if (startswith(dbc_name, "byd_")) {
+    s = new ChecksumState({8, 4, 7, -1, false, BYD_CHECKSUM, &byd_checksum});
   }
   return s;
 }
