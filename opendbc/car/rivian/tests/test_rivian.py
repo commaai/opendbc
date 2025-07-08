@@ -20,5 +20,5 @@ class TestRivian:
                 vin = "".join(vin)
 
                 matches = FW_QUERY_CONFIG.match_fw_to_car_fuzzy({}, vin, FW_VERSIONS)
-                should_match = year != ModelYear.S_2025 and not bad
+                should_match = year in {ModelYear.N_2022, ModelYear.P_2023, ModelYear.R_2024} and not bad
                 assert (matches == {platform}) == should_match, "Bad match"

@@ -120,7 +120,7 @@ class GMPlatformConfig(PlatformConfig):
   })
   wmis: set[str] = field(default_factory=set)
   years: set[str] = field(default_factory=set)
-  platform_class: set[str] = field(default_factory=set)  # Passenger cars , See https://en.m.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/GM/VIN_Codes
+  platform_class: set[str] = field(default_factory=set)  # Passenger cars, see https://en.m.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/GM/VIN_Codes
   platform_code: set[str] = field(default_factory=set)  # SUV/Truck
 
 
