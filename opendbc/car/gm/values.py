@@ -60,16 +60,16 @@ class CarControllerParams:
     self.BRAKE_LOOKUP_V = [self.MAX_BRAKE, 0.]
 
 class WMI:
-    class CHEVROLET:
-        TRUCK = {"1GC", "2GC", "3GC"}
-        MPV = {"1G1", "1GN", "2G1", "2GN", "3G1", "3GN", "KL1", "KL7"}
+  class CHEVROLET:
+    TRUCK = {"1GC", "2GC", "3GC"}
+    MPV = {"1G1", "1GN", "2G1", "2GN", "3G1", "3GN", "KL1", "KL7"}
 
-    class GMC:
-        TRUCK = {"1GT", "2GT", "3GT"}
-        MPV = {"1GK", "2GK", "3GK"}
+  class GMC:
+    TRUCK = {"1GT", "2GT", "3GT"}
+    MPV = {"1GK", "2GK", "3GK"}
 
-    class CADILLAC:
-        MPV = {"1G6", "1GY", "2G6", "3GY"}
+  class CADILLAC:
+    MPV = {"1G6", "1GY", "2G6", "3GY"}
 
 class ANY:
   ALL = {
