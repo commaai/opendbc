@@ -19,6 +19,7 @@ class CarState(CarStateBase):
       self.shifter_values = can_define.dv["PowertrainData_10"]["TrnRng_D_Rq"]
 
     self.distance_button = 0
+    self.lc_button = 0
 
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.pt]
@@ -91,7 +92,9 @@ class CarState(CarStateBase):
     # TODO: block this going to the camera otherwise it will enable stock TJA
     ret.genericToggle = bool(cp.vl["Steering_Data_FD1"]["TjaButtnOnOffPress"])
     prev_distance_button = self.distance_button
+    prev_lc_button = self.lc_button
     self.distance_button = cp.vl["Steering_Data_FD1"]["AccButtnGapTogglePress"]
+    self.lc_button = bool(cp.vl["Steering_Data_FD1"]["TjaButtnOnOffPress"])
 
     # lock info
     ret.doorOpen = any([cp.vl["BodyInfo_3_FD1"]["DrStatDrv_B_Actl"], cp.vl["BodyInfo_3_FD1"]["DrStatPsngr_B_Actl"],
@@ -110,7 +113,10 @@ class CarState(CarStateBase):
     self.acc_tja_status_stock_values = cp_cam.vl["ACCDATA_3"]
     self.lkas_status_stock_values = cp_cam.vl["IPMA_Data"]
 
-    ret.buttonEvents = create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise})
+    ret.buttonEvents = [
+      *create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise}),
+      *create_button_events(self.lc_button, prev_lc_button, {1: ButtonType.lkas}),
+    ]
 
     return ret
 

@@ -1,8 +1,7 @@
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
-from panda import uds
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Tool, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
@@ -54,6 +53,12 @@ class CarControllerParams:
   BRAKE_LOOKUP_V = [BRAKE_MAX, BRAKE_MIN]
 
 
+class SubaruSafetyFlags(IntFlag):
+  GEN2 = 1
+  LONG = 2
+  PREGLOBAL_REVERSED_DRIVER_TORQUE = 4
+
+
 class SubaruFlags(IntFlag):
   # Detected flags
   SEND_INFOTAINMENT = 1
@@ -98,7 +103,7 @@ class SubaruCarDocs(CarDocs):
   def init_make(self, CP: CarParams):
     self.car_parts.parts.extend([Tool.socket_8mm_deep, Tool.pry_tool])
 
-    if CP.experimentalLongitudinalAvailable:
+    if CP.alphaLongitudinalAvailable:
       self.footnotes.append(Footnote.EXP_LONG)
 
 
@@ -137,8 +142,8 @@ class CAR(Platforms):
   SUBARU_IMPREZA = SubaruPlatformConfig(
     [
       SubaruCarDocs("Subaru Impreza 2017-19"),
-      SubaruCarDocs("Subaru Crosstrek 2018-19", video_link="https://youtu.be/Agww7oE1k-s?t=26"),
-      SubaruCarDocs("Subaru XV 2018-19", video_link="https://youtu.be/Agww7oE1k-s?t=26"),
+      SubaruCarDocs("Subaru Crosstrek 2018-19", video="https://youtu.be/Agww7oE1k-s?t=26"),
+      SubaruCarDocs("Subaru XV 2018-19", video="https://youtu.be/Agww7oE1k-s?t=26"),
     ],
     CarSpecs(mass=1568, wheelbase=2.67, steerRatio=15),
   )

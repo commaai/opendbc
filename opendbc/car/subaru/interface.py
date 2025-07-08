@@ -1,15 +1,18 @@
-from panda import Panda
 from opendbc.car import get_safety_config, structs
 from opendbc.car.disable_ecu import disable_ecu
 from opendbc.car.interfaces import CarInterfaceBase
-from opendbc.car.subaru.values import CAR, GLOBAL_ES_ADDR, SubaruFlags
+from opendbc.car.subaru.carcontroller import CarController
+from opendbc.car.subaru.carstate import CarState
+from opendbc.car.subaru.values import CAR, GLOBAL_ES_ADDR, SubaruFlags, SubaruSafetyFlags
 
 
 class CarInterface(CarInterfaceBase):
+  CarState = CarState
+  CarController = CarController
 
   @staticmethod
-  def _get_params(ret: structs.CarParams, candidate: CAR, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
-    ret.carName = "subaru"
+  def _get_params(ret: structs.CarParams, candidate: CAR, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
+    ret.brand = "subaru"
     ret.radarUnavailable = True
     # for HYBRID CARS to be upstreamed, we need:
     # - replacement for ES_Distance so we can cancel the cruise control
@@ -29,7 +32,7 @@ class CarInterface(CarInterfaceBase):
       ret.enableBsm = 0x228 in fingerprint[0]
       ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.subaru)]
       if ret.flags & SubaruFlags.GLOBAL_GEN2:
-        ret.safetyConfigs[0].safetyParam |= Panda.FLAG_SUBARU_GEN2
+        ret.safetyConfigs[0].safetyParam |= SubaruSafetyFlags.GEN2.value
 
     ret.steerLimitTimer = 0.4
     ret.steerActuatorDelay = 0.1
@@ -72,7 +75,8 @@ class CarInterface(CarInterfaceBase):
       ret.steerActuatorDelay = 0.1
 
     elif candidate in (CAR.SUBARU_FORESTER_PREGLOBAL, CAR.SUBARU_OUTBACK_PREGLOBAL_2018):
-      ret.safetyConfigs[0].safetyParam = Panda.FLAG_SUBARU_PREGLOBAL_REVERSED_DRIVER_TORQUE  # Outback 2018-2019 and Forester have reversed driver torque signal
+      # Outback 2018-2019 and Forester have reversed driver torque signal
+      ret.safetyConfigs[0].safetyParam = SubaruSafetyFlags.PREGLOBAL_REVERSED_DRIVER_TORQUE.value
 
     elif candidate == CAR.SUBARU_LEGACY_PREGLOBAL:
       ret.steerActuatorDelay = 0.15
@@ -82,15 +86,15 @@ class CarInterface(CarInterfaceBase):
     else:
       raise ValueError(f"unknown car: {candidate}")
 
-    ret.experimentalLongitudinalAvailable = not (ret.flags & (SubaruFlags.GLOBAL_GEN2 | SubaruFlags.PREGLOBAL |
-                                                              SubaruFlags.LKAS_ANGLE | SubaruFlags.HYBRID))
-    ret.openpilotLongitudinalControl = experimental_long and ret.experimentalLongitudinalAvailable
+    ret.alphaLongitudinalAvailable = not (ret.flags & (SubaruFlags.GLOBAL_GEN2 | SubaruFlags.PREGLOBAL |
+                                                       SubaruFlags.LKAS_ANGLE | SubaruFlags.HYBRID))
+    ret.openpilotLongitudinalControl = alpha_long and ret.alphaLongitudinalAvailable
 
     if ret.flags & SubaruFlags.GLOBAL_GEN2 and ret.openpilotLongitudinalControl:
       ret.flags |= SubaruFlags.DISABLE_EYESIGHT.value
 
     if ret.openpilotLongitudinalControl:
-      ret.safetyConfigs[0].safetyParam |= Panda.FLAG_SUBARU_LONG
+      ret.safetyConfigs[0].safetyParam |= SubaruSafetyFlags.LONG.value
 
     return ret
 

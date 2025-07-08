@@ -194,10 +194,12 @@ struct CarState {
   steeringTorque @8 :Float32;      # TODO: standardize units
   steeringTorqueEps @27 :Float32;  # TODO: standardize units
   steeringPressed @9 :Bool;        # if the user is using the steering wheel
+  steeringDisengage @58 :Bool;     # more force than steeringPressed, disengages for applicable brands
   steerFaultTemporary @35 :Bool;   # temporary EPS fault
   steerFaultPermanent @36 :Bool;   # permanent EPS fault
   invalidLkasSetting @55 :Bool;    # stock LKAS is incorrectly configured (i.e. on or off)
   stockAeb @30 :Bool;
+  stockLkas @59 :Bool;
   stockFcw @31 :Bool;
   espDisabled @32 :Bool;
   accFaulted @42 :Bool;
@@ -205,6 +207,7 @@ struct CarState {
   espActive @51 :Bool;
   vehicleSensorsInvalid @52 :Bool;  # invalid steering angle readings, etc.
   lowSpeedAlert @56 :Bool;  # lost steering control due to a dynamic min steering speed
+  blockPcmEnable @60 :Bool;  # whether to allow PCM to enable this frame
 
   # cruise state
   cruiseState @10 :CruiseState;
@@ -214,6 +217,7 @@ struct CarState {
 
   # button presses
   buttonEvents @11 :List(ButtonEvent);
+  buttonEnable @57 :Bool;  # user is requesting enable, usually one frame. set if pcmCruise=False
   leftBlinker @20 :Bool;
   rightBlinker @21 :Bool;
   genericToggle @23 :Bool;
@@ -299,13 +303,14 @@ struct CarState {
 # ******* radar state @ 20hz *******
 
 struct RadarData @0x888ad6581cf0aacb {
-  errors @0 :List(Error);
+  errors @3 :Error;
   points @1 :List(RadarPoint);
 
-  enum Error {
-    canError @0;
-    fault @1;
-    wrongConfig @2;
+  struct Error {
+    canError @0 :Bool;
+    radarFault @1 :Bool;
+    wrongConfig @2 :Bool;
+    radarUnavailableTemporary @3 :Bool;  # radar data is temporarily unavailable due to conditions the car sets
   }
 
   # similar to LiveTracks
@@ -326,8 +331,15 @@ struct RadarData @0x888ad6581cf0aacb {
     measured @6 :Bool;
   }
 
+  enum ErrorDEPRECATED {
+    canError @0;
+    fault @1;
+    wrongConfig @2;
+  }
+
   # deprecated
   canMonoTimesDEPRECATED @2 :List(UInt64);
+  errorsDEPRECATED @0 :List(ErrorDEPRECATED);
 }
 
 # ******* car controls @ 100hz *******
@@ -347,13 +359,14 @@ struct CarControl {
 
   orientationNED @13 :List(Float32);
   angularVelocity @14 :List(Float32);
+  currentCurvature @17 :Float32;  # From vehicle model
 
   cruiseControl @4 :CruiseControl;
   hudControl @5 :HUDControl;
 
   struct Actuators {
     # lateral commands, mutually exclusive
-    steer @2: Float32;  # [0.0, 1.0]
+    torque @2: Float32;  # [0.0, 1.0]
     steeringAngleDeg @3: Float32;
     curvature @7: Float32;
 
@@ -364,7 +377,7 @@ struct CarControl {
     # these are only for logging the actual values sent to the car over CAN
     gas @0: Float32;   # [0.0, 1.0]
     brake @1: Float32; # [0.0, 1.0]
-    steerOutputCan @8: Float32;   # value sent over can to the car
+    torqueOutputCan @8: Float32;   # value sent over can to the car
     speed @6: Float32;  # m/s
 
     enum LongControlState @0xe40f3a917d908282{
@@ -389,12 +402,14 @@ struct CarControl {
     lanesVisible @2: Bool;
     leadVisible @3: Bool;
     visualAlert @4: VisualAlert;
-    audibleAlert @5: AudibleAlert;
     rightLaneVisible @6: Bool;
     leftLaneVisible @7: Bool;
     rightLaneDepart @8: Bool;
     leftLaneDepart @9: Bool;
     leadDistanceBars @10: Int8;  # 1-3: 1 is closest, 3 is farthest. some ports may utilize 2-4 bars instead
+
+    # not used with the dash, TODO: separate structs for dash UI and device UI
+    audibleAlert @5: AudibleAlert;
 
     enum VisualAlert {
       # these are the choices from the Honda
@@ -444,7 +459,7 @@ struct CarOutput {
 # ****** car param ******
 
 struct CarParams {
-  carName @0 :Text;
+  brand @0 :Text;  # Designates which group a platform falls under. Each folder in opendbc/car is assigned one brand string
   carFingerprint @1 :Text;
   fuzzyFingerprint @55 :Bool;
 
@@ -454,14 +469,15 @@ struct CarParams {
   enableDsu @5 :Bool;        # driving support unit
   enableBsm @56 :Bool;       # blind spot monitoring
   flags @64 :UInt32;         # flags for car specific quirks
-  experimentalLongitudinalAvailable @71 :Bool;
+  alphaLongitudinalAvailable @71 :Bool;
 
   minEnableSpeed @7 :Float32;
   minSteerSpeed @8 :Float32;
+  steerAtStandstill @77 :Bool;  # is steering available at standstill? just check if it faults
   safetyConfigs @62 :List(SafetyConfig);
   alternativeExperience @65 :Int16;      # panda flag for features like no disengage on gas
 
-  # Car docs fields
+  # Car docs fields, not used for control
   maxLateralAccel @68 :Float32;
   autoResumeSng @69 :Bool;               # describes whether car can resume from a stop automatically
 
@@ -622,6 +638,8 @@ struct CarParams {
     chryslerCusw @30;
     psa @31;
     fcaGiorgio @32;
+    rivian @33;
+    volkswagenMeb @34;
   }
 
   enum SteerControlType {

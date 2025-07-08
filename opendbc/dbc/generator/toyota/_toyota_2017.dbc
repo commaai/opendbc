@@ -507,7 +507,7 @@ VAL_ 835 ACC_TYPE 2 "permanent low speed lockout" 1 "ok";
 VAL_ 835 ACC_MALFUNCTION 1 "faulted" 0 "ok";
 VAL_ 835 ACC_CUT_IN 1 "CUT-IN Detected" 0 "clear";
 VAL_ 835 ALLOW_LONG_PRESS 2 "set speed increase by 5 speed units regardless" 1 "set speed increase by 1 speed unit on short press, 5 speed units on long press";
-VAL_ 865 CLUTCH_RELEASED 0 "clutch pressed any amount" 1 "clutch released"
+VAL_ 865 CLUTCH_RELEASED 0 "clutch pressed any amount" 1 "clutch released";
 VAL_ 921 CRUISE_CONTROL_STATE 2 "disabled" 11 "hold" 10 "hold_waiting_user_cmd" 6 "enabled" 5 "faulted";
 VAL_ 921 DISTANCE_LINES 0 "not displayed" 1 "close" 2 "medium" 3 "far";
 VAL_ 956 SPORT_ON 0 "off" 1 "on";

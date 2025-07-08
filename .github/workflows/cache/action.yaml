@@ -1,0 +1,9 @@
+name: 'Restore cache'
+runs:
+  using: "composite"
+  steps:
+    - name: Restore cached cppcheck
+      uses: actions/cache@v4
+      with:
+        path: opendbc/safety/tests/misra/cppcheck/
+        key: cppcheck-cache-${{ runner.os }}-${{ hashFiles('opendbc/safety/tests/misra/install.sh') }}

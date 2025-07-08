@@ -53,9 +53,11 @@ class CarState(CarStateBase):
       cp.vl["WHEEL_SPEEDS_REAR"]["WHEEL_SPEED_RL"],
       cp.vl["WHEEL_SPEEDS_REAR"]["WHEEL_SPEED_RR"],
     )
-    ret.vEgoRaw = (ret.wheelSpeeds.fl + ret.wheelSpeeds.fr + ret.wheelSpeeds.rl + ret.wheelSpeeds.rr) / 4.
+    # safety uses the rear wheel speeds for the speed measurement and angle limiting
+    ret.vEgoRaw = (ret.wheelSpeeds.rl + ret.wheelSpeeds.rr) / 2.0
 
-    ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
+    v_ego_raw_full = (ret.wheelSpeeds.fl + ret.wheelSpeeds.fr + ret.wheelSpeeds.rl + ret.wheelSpeeds.rr) / 4.0
+    ret.vEgo, ret.aEgo = self.update_speed_kf(v_ego_raw_full)
     ret.standstill = cp.vl["WHEEL_SPEEDS_REAR"]["WHEEL_SPEED_RL"] == 0.0 and cp.vl["WHEEL_SPEEDS_REAR"]["WHEEL_SPEED_RR"] == 0.0
 
     if self.CP.carFingerprint == CAR.NISSAN_ALTIMA:

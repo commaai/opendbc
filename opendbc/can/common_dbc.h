@@ -16,12 +16,13 @@ enum SignalType {
   HONDA_CHECKSUM,
   TOYOTA_CHECKSUM,
   PEDAL_CHECKSUM,
-  VOLKSWAGEN_MQB_CHECKSUM,
+  VOLKSWAGEN_MQB_MEB_CHECKSUM,
   XOR_CHECKSUM,
   SUBARU_CHECKSUM,
   CHRYSLER_CHECKSUM,
   HKG_CAN_FD_CHECKSUM,
   FCA_GIORGIO_CHECKSUM,
+  TESLA_CHECKSUM,
 };
 
 struct Signal {
@@ -64,6 +65,7 @@ typedef struct ChecksumState {
   bool little_endian;
   SignalType checksum_type;
   unsigned int (*calc_checksum)(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
+  void (*setup_signal)(Signal &sig, const std::string& dbc_name, int line_num);
 } ChecksumState;
 
 DBC* dbc_parse(const std::string& dbc_path);

@@ -25,6 +25,15 @@ AddOption('--asan',
           action='store_true',
           help='turn on ASAN')
 
+# safety options
+AddOption('--ubsan',
+          action='store_true',
+          help='turn on UBSan')
+
+AddOption('--mutation',
+          action='store_true',
+          help='generate mutation-ready code')
+
 ccflags_asan = ["-fsanitize=address", "-fno-omit-frame-pointer"] if GetOption('asan') else []
 ldflags_asan = ["-fsanitize=address"] if GetOption('asan') else []
 
@@ -51,8 +60,10 @@ env = Environment(
   CXXFLAGS=["-std=c++1z"],
   CPPPATH=cpppath,
   CYTHONCFILESUFFIX=".cpp",
-  tools=["default", "cython"]
+  tools=["default", "cython", "compilation_db"]
 )
+
+env.CompilationDatabase('compile_commands.json')
 
 common = ''
 Export('env', 'arch', 'common')
