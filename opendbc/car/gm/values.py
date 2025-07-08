@@ -109,7 +109,7 @@ class GMPlatformConfig(PlatformConfig):
   })
   wmis: set[str] = field(default_factory=set)
   years: set[str] = field(default_factory=set)
-  platform_code: set[str] = field(default_factory=set)  # SUV/Truck
+  platform_code: set[str] = field(default_factory=set)
 
 
 @dataclass
@@ -200,7 +200,7 @@ class CAR(Platforms):
     [GMCarDocs("Chevrolet Trailblazer 2021-22")],
     GMCarSpecs(mass=1345, wheelbase=2.64, steerRatio=16.8, centerToFrontRatio=0.4, tireStiffnessFactor=1.0),
     wmis=WMI.MPV,
-    platform_code={"M"},
+    platform_code={"9M"},
     years={ModelYear.M_2021, ModelYear.N_2022},
   )
   CADILLAC_XT4 = GMSDGMPlatformConfig(
