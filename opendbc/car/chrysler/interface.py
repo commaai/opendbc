@@ -62,10 +62,6 @@ class CarInterface(CarInterfaceBase):
       if any(fw.ecu == 'eps' and b"68" < fw.fwVersion[:4] <= b"6831" for fw in car_fw):
         ret.minSteerSpeed = 0.
 
-    elif candidate == CAR.RAM_HD_5TH_GEN:
-      ret.steerActuatorDelay = 0.2
-      CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning, 1.0, False)
-
     else:
       raise ValueError(f"Unsupported car: {candidate}")
 
