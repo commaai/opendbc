@@ -72,9 +72,6 @@ class WMI:
   class CADILLAC:
     MPV = {"1G6", "1GY", "2G6", "3GY"}
 
-class PlatformCodes:
-  ALL = set(string.ascii_uppercase + string.digits)
-
 
 class GMSafetyFlags(IntFlag):
   HW_CAM = 1
@@ -117,7 +114,6 @@ class GMPlatformConfig(PlatformConfig):
   })
   wmis: set[str] = field(default_factory=set)
   years: set[str] = field(default_factory=set)
-  platform_class: set[str] = field(default_factory=set)  # Passenger cars, see https://en.m.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/GM/VIN_Codes
   platform_code: set[str] = field(default_factory=set)  # SUV/Truck
 
 
@@ -142,6 +138,9 @@ class CAR(Platforms):
   CHEVROLET_VOLT = GMASCMPlatformConfig(
     [GMCarDocs("Chevrolet Volt 2017-18", min_enable_speed=0, video="https://youtu.be/QeMCN_4TFfQ")],
     GMCarSpecs(mass=1607, wheelbase=2.69, steerRatio=17.7, centerToFrontRatio=0.45, tireStiffnessFactor=0.469),
+    wmis=WMI.CHEVROLET.MPV,
+    platform_code={"RB", "RC", "RD"},
+    years={ModelYear.H_2017, ModelYear.J_2018},
   )
   CADILLAC_ATS = GMASCMPlatformConfig(
     [GMCarDocs("Cadillac ATS Premium Performance 2018")],
@@ -182,8 +181,7 @@ class CAR(Platforms):
     ],
     GMCarSpecs(mass=1669, wheelbase=2.63779, steerRatio=16.8, centerToFrontRatio=0.4, tireStiffnessFactor=1.0),
     wmis=WMI.CHEVROLET.MPV,
-    platform_class={"F"},
-    platform_code=PlatformCodes.ALL,
+    platform_code={"FX", "FZ", "F6"},
     years={ModelYear.N_2022, ModelYear.P_2023},
   )
   CHEVROLET_SILVERADO = GMPlatformConfig(
@@ -193,23 +191,20 @@ class CAR(Platforms):
     ],
     GMCarSpecs(mass=2450, wheelbase=3.75, steerRatio=16.3, tireStiffnessFactor=1.0),
     wmis=WMI.CHEVROLET.TRUCK | WMI.GMC.TRUCK,
-    platform_class=PlatformCodes.ALL,
-    platform_code={"8", "9", "W", "Y"},
+    platform_code={"P8", "P9", "PW", "UY", "U9"},
     years={ModelYear.L_2020, ModelYear.M_2021},
   )
   CHEVROLET_EQUINOX = GMPlatformConfig(
     [GMCarDocs("Chevrolet Equinox 2019-22")],
     GMCarSpecs(mass=1588, wheelbase=2.72, steerRatio=14.4, centerToFrontRatio=0.4),
     wmis=WMI.CHEVROLET.MPV,
-    platform_class=PlatformCodes.ALL,
-    platform_code={"X"},
+    platform_code={"AL", "AX"},
     years={ModelYear.K_2019, ModelYear.L_2020, ModelYear.M_2021, ModelYear.N_2022},
   )
   CHEVROLET_TRAILBLAZER = GMPlatformConfig(
     [GMCarDocs("Chevrolet Trailblazer 2021-22")],
     GMCarSpecs(mass=1345, wheelbase=2.64, steerRatio=16.8, centerToFrontRatio=0.4, tireStiffnessFactor=1.0),
     wmis=WMI.CHEVROLET.MPV,
-    platform_class=PlatformCodes.ALL,
     platform_code={"M"},
     years={ModelYear.M_2021, ModelYear.N_2022},
   )
@@ -217,24 +212,21 @@ class CAR(Platforms):
     [GMCarDocs("Cadillac XT4 2023", "Driver Assist Package")],
     GMCarSpecs(mass=1660, wheelbase=2.78, steerRatio=14.4, centerToFrontRatio=0.4),
     wmis=WMI.CADILLAC.MPV,
-    platform_class=PlatformCodes.ALL,
-    platform_code={"Z"},
+    platform_code={"K9", "UY"},
     years={ModelYear.P_2023},
   )
   CHEVROLET_VOLT_2019 = GMSDGMPlatformConfig(
     [GMCarDocs("Chevrolet Volt 2019", "Adaptive Cruise Control (ACC) & LKAS")],
     GMCarSpecs(mass=1607, wheelbase=2.69, steerRatio=15.7, centerToFrontRatio=0.45),
     wmis=WMI.CHEVROLET.MPV,
-    platform_class={"R"},
-    platform_code=PlatformCodes.ALL,
+    platform_code={"RB", "FZ"},
     years={ModelYear.K_2019},
   )
   CHEVROLET_TRAVERSE = GMSDGMPlatformConfig(
     [GMCarDocs("Chevrolet Traverse 2022-23", "RS, Premier, or High Country Trim")],
     GMCarSpecs(mass=1955, wheelbase=3.07, steerRatio=17.9, centerToFrontRatio=0.4),
     wmis=WMI.CHEVROLET.MPV,
-    platform_class=PlatformCodes.ALL,
-    platform_code={"R", "V"},
+    platform_code={"KB", "EV"},
     years={ModelYear.N_2022, ModelYear.P_2023},
   )
   GMC_YUKON = GMPlatformConfig(
@@ -247,11 +239,13 @@ def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str
   candidates = set()
   # Check the WMI and chassis code to determine the platform
   vin_obj = Vin(vin)
-  platform_class = vin_obj.vds[:1]
-  platform_code = vin_obj.vds[1:2]
+  platform_code = vin_obj.vds[:2]
   for platform in CAR:
-    if (vin_obj.wmi in platform.config.wmis and vin_obj.model_year in platform.config.years and \
-            platform_class in platform.config.platform_class and platform_code in platform.config.platform_code):
+    if (
+          vin_obj.wmi in platform.config.wmis and
+          vin_obj.model_year in platform.config.years and
+          platform_code in platform.config.platform_code
+    ):
       candidates.add(platform)
   return {str(c) for c in candidates}
 
