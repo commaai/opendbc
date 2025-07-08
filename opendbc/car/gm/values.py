@@ -120,8 +120,8 @@ class GMPlatformConfig(PlatformConfig):
   })
   wmis: set[str] = field(default_factory=set)
   years: set[str] = field(default_factory=set)
-  fourth_digits: set[str] = field(default_factory=set) # Passanger cars , See https://en.m.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/GM/VIN_Codes
-  fifth_digits: set[str] = field(default_factory=set) # SUV/Truck
+  platform_class: set[str] = field(default_factory=set)  # Passenger cars , See https://en.m.wikibooks.org/wiki/Vehicle_Identification_Numbers_(VIN_codes)/GM/VIN_Codes
+  platform_code: set[str] = field(default_factory=set)  # SUV/Truck
 
 
 @dataclass
@@ -185,8 +185,8 @@ class CAR(Platforms):
     ],
     GMCarSpecs(mass=1669, wheelbase=2.63779, steerRatio=16.8, centerToFrontRatio=0.4, tireStiffnessFactor=1.0),
     wmis = WMI.CHEVROLET.MPV,
-    fourth_digits = {"F"},
-    fifth_digits = ANY.ALL,
+    platform_class= {"F"},
+    platform_code= ANY.ALL,
     years = {ModelYear.N_2022, ModelYear.P_2023},
   )
   CHEVROLET_SILVERADO = GMPlatformConfig(
@@ -196,48 +196,48 @@ class CAR(Platforms):
     ],
     GMCarSpecs(mass=2450, wheelbase=3.75, steerRatio=16.3, tireStiffnessFactor=1.0),
     wmis = WMI.CHEVROLET.TRUCK | WMI.GMC.TRUCK,
-    fourth_digits = ANY.ALL,
-    fifth_digits = {"8", "9", "W", "Y"},
+    platform_class= ANY.ALL,
+    platform_code= {"8", "9", "W", "Y"},
     years = {ModelYear.L_2020, ModelYear.M_2021},
   )
   CHEVROLET_EQUINOX = GMPlatformConfig(
     [GMCarDocs("Chevrolet Equinox 2019-22")],
     GMCarSpecs(mass=1588, wheelbase=2.72, steerRatio=14.4, centerToFrontRatio=0.4),
     wmis = WMI.CHEVROLET.MPV,
-    fourth_digits = ANY.ALL,
-    fifth_digits = {"X"},
+    platform_class= ANY.ALL,
+    platform_code= {"X"},
     years = {ModelYear.K_2019, ModelYear.L_2020, ModelYear.M_2021, ModelYear.N_2022},
   )
   CHEVROLET_TRAILBLAZER = GMPlatformConfig(
     [GMCarDocs("Chevrolet Trailblazer 2021-22")],
     GMCarSpecs(mass=1345, wheelbase=2.64, steerRatio=16.8, centerToFrontRatio=0.4, tireStiffnessFactor=1.0),
     wmis = WMI.CHEVROLET.MPV,
-    fourth_digits = ANY.ALL,
-    fifth_digits = {"M"},
+    platform_class= ANY.ALL,
+    platform_code= {"M"},
     years = {ModelYear.M_2021, ModelYear.N_2022},
   )
   CADILLAC_XT4 = GMSDGMPlatformConfig(
     [GMCarDocs("Cadillac XT4 2023", "Driver Assist Package")],
     GMCarSpecs(mass=1660, wheelbase=2.78, steerRatio=14.4, centerToFrontRatio=0.4),
     wmis = WMI.CADILLAC.MPV,
-    fourth_digits = ANY.ALL,
-    fifth_digits = {"Z"},
+    platform_class= ANY.ALL,
+    platform_code= {"Z"},
     years = {ModelYear.P_2023},
   )
   CHEVROLET_VOLT_2019 = GMSDGMPlatformConfig(
     [GMCarDocs("Chevrolet Volt 2019", "Adaptive Cruise Control (ACC) & LKAS")],
     GMCarSpecs(mass=1607, wheelbase=2.69, steerRatio=15.7, centerToFrontRatio=0.45),
     wmis = WMI.CHEVROLET.MPV,
-    fourth_digits = {"R"},
-    fifth_digits = ANY.ALL,
+    platform_class= {"R"},
+    platform_code= ANY.ALL,
     years = {ModelYear.K_2019},
   )
   CHEVROLET_TRAVERSE = GMSDGMPlatformConfig(
     [GMCarDocs("Chevrolet Traverse 2022-23", "RS, Premier, or High Country Trim")],
     GMCarSpecs(mass=1955, wheelbase=3.07, steerRatio=17.9, centerToFrontRatio=0.4),
     wmis = WMI.CHEVROLET.MPV,
-    fourth_digits = ANY.ALL,
-    fifth_digits = {"R", "V"},
+    platform_class= ANY.ALL,
+    platform_code= {"R", "V"},
     years = {ModelYear.N_2022, ModelYear.P_2023},
   )
   GMC_YUKON = GMPlatformConfig(
