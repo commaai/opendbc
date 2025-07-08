@@ -25,12 +25,12 @@ class AngleSteeringLimits:
   ANGLE_RATE_LIMIT_DOWN: tuple[list[float], list[float]]
 
 
-def apply_hysteresis(lataccel: float, last_lataccel: float, diff: float) -> float:
-  if lataccel > last_lataccel + diff:
-    last_lataccel = lataccel - diff
-  elif lataccel < last_lataccel - diff:
-    last_lataccel = lataccel + diff
-  return last_lataccel
+def apply_hysteresis(val: float, val_steady: float, hyst_gap: float) -> float:
+  if val > val_steady + hyst_gap:
+    val_steady = val - hyst_gap
+  elif val < val_steady - hyst_gap:
+    val_steady = val + hyst_gap
+  return val_steady
 
 
 def create_button_events(cur_btn: int, prev_btn: int, buttons_dict: dict[int, structs.CarState.ButtonEvent.Type],
