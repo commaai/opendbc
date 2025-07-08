@@ -38,7 +38,7 @@ class Vin:
     self.wmi = self.vin[:3]  # World Manufacturer Identifier
     self.vds = self.vin[3:9]  # Vehicle Descriptor Section
     self.vis = self.vin[9:17]  # Vehicle Identifier Section
-    self.model_year = self.vis[9:10]  # Model Year, North America standard
+    self.model_year = self.vis[:1]  # Model Year, North America standard
 
 
 def is_valid_vin(vin: str):
