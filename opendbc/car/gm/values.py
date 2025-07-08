@@ -62,10 +62,9 @@ class CarControllerParams:
 
 class WMI:
   _prefixes = ("1G", "2G", "3G", "KL")
-  _truck_suffixes = ("C", "T")
   _mpv_suffixes = ("1", "6", "7", "N", "K", "Y")
 
-  TRUCK = {f"{p}{t}" for p in ("1G", "2G", "3G") for t in _truck_suffixes}
+  TRUCK = {f"{p}{t}" for p in ("1G", "2G", "3G") for t in ("C", "T")}
   MPV = {f"{p}{s}" for p, s in itertools.product(_prefixes, _mpv_suffixes)}
 
 
