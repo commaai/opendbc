@@ -5,7 +5,7 @@ from opendbc.car import Bus, PlatformConfig, DbcDict, Platforms, CarSpecs
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
-from opendbc.car.vin import ModelYear
+from opendbc.car.vin import ModelYear, Vin
 
 Ecu = CarParams.Ecu
 
@@ -245,16 +245,16 @@ class CAR(Platforms):
     GMCarSpecs(mass=2490, wheelbase=2.94, steerRatio=17.3, centerToFrontRatio=0.5, tireStiffnessFactor=1.0),
   )
 
+
 def match_fw_to_car_fuzzy(live_fw_versions, vin, offline_fw_versions) -> set[str]:
   candidates = set()
-# Check the WMI and chassis code to determine the platform
-  wmi = vin[:3]
-  year = vin[9:10]
-  fourth_digit = vin[3:4]
-  fifth_digit = vin[4:5]
+  # Check the WMI and chassis code to determine the platform
+  vin_obj = Vin(vin)
+  platform_class = vin_obj.vds[:1]
+  platform_code = vin_obj.vds[1:2]
   for platform in CAR:
-    if (wmi in platform.config.wmis and year in platform.config.years and \
-        fourth_digit in platform.config.fourth_digits and fifth_digit in platform.config.fifth_digits):
+    if (vin_obj.wmi in platform.config.wmis and vin_obj.model_year in platform.config.years and \
+            platform_class in platform.config.platform_class and platform_code in platform.config.platform_code):
       candidates.add(platform)
   return {str(c) for c in candidates}
 

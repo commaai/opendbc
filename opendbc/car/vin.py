@@ -30,6 +30,7 @@ class Vin:
   wmi: str = field(init=False)
   vds: str = field(init=False)
   vis: str = field(init=False)
+  model_year: str = field(init=False)
 
   def __post_init__(self):
     # parses VIN in accordance with North America standard >2000 vehicles:
@@ -37,6 +38,7 @@ class Vin:
     self.wmi = self.vin[:3]  # World Manufacturer Identifier
     self.vds = self.vin[3:9]  # Vehicle Descriptor Section
     self.vis = self.vin[9:17]  # Vehicle Identifier Section
+    self.model_year = self.vis[9:10]  # Model Year, North America standard
 
 
 def is_valid_vin(vin: str):
