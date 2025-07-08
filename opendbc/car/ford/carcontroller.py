@@ -26,7 +26,7 @@ def anti_overshoot(apply_curvature, apply_curvature_last, v_ego):
   last_lataccel = apply_hysteresis(last_lataccel, lataccel, diff)
   last_lataccel = alpha * lataccel + (1 - alpha) * last_lataccel
 
-  output_curvature = last_lataccel / (v_ego ** 2 + 1e-6)
+  output_curvature = last_lataccel / (max(v_ego, 1) ** 2)
 
   return np.interp(v_ego, [5, 10], [apply_curvature, output_curvature])
 
