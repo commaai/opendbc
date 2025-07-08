@@ -1,4 +1,4 @@
-import string
+import itertools
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
 
@@ -61,16 +61,12 @@ class CarControllerParams:
     self.BRAKE_LOOKUP_V = [self.MAX_BRAKE, 0.]
 
 class WMI:
-  class CHEVROLET:
-    TRUCK = {"1GC", "2GC", "3GC"}
-    MPV = {"1G1", "1GN", "2G1", "2GN", "3G1", "3GN", "KL1", "KL7"}
+  _prefixes = ("1G", "2G", "3G", "KL")
+  _truck_suffixes = ("C", "T")
+  _mpv_suffixes = ("1", "6", "7", "N", "K", "Y")
 
-  class GMC:
-    TRUCK = {"1GT", "2GT", "3GT"}
-    MPV = {"1GK", "2GK", "3GK"}
-
-  class CADILLAC:
-    MPV = {"1G6", "1GY", "2G6", "3GY"}
+  TRUCK = {f"{p}{t}" for p in ("1G", "2G", "3G") for t in _truck_suffixes}
+  MPV = {f"{p}{s}" for p, s in itertools.product(_prefixes, _mpv_suffixes)}
 
 
 class GMSafetyFlags(IntFlag):
@@ -138,7 +134,7 @@ class CAR(Platforms):
   CHEVROLET_VOLT = GMASCMPlatformConfig(
     [GMCarDocs("Chevrolet Volt 2017-18", min_enable_speed=0, video="https://youtu.be/QeMCN_4TFfQ")],
     GMCarSpecs(mass=1607, wheelbase=2.69, steerRatio=17.7, centerToFrontRatio=0.45, tireStiffnessFactor=0.469),
-    wmis=WMI.CHEVROLET.MPV,
+    wmis=WMI.MPV,
     platform_code={"RB", "RC", "RD"},
     years={ModelYear.H_2017, ModelYear.J_2018},
   )
@@ -180,7 +176,7 @@ class CAR(Platforms):
       GMCarDocs("Chevrolet Bolt EV 2022-23", "2LT Trim with Adaptive Cruise Control Package"),
     ],
     GMCarSpecs(mass=1669, wheelbase=2.63779, steerRatio=16.8, centerToFrontRatio=0.4, tireStiffnessFactor=1.0),
-    wmis=WMI.CHEVROLET.MPV,
+    wmis=WMI.MPV,
     platform_code={"FX", "FZ", "F6"},
     years={ModelYear.N_2022, ModelYear.P_2023},
   )
@@ -190,42 +186,42 @@ class CAR(Platforms):
       GMCarDocs("GMC Sierra 1500 2020-21", "Driver Alert Package II", video="https://youtu.be/5HbNoBLzRwE"),
     ],
     GMCarSpecs(mass=2450, wheelbase=3.75, steerRatio=16.3, tireStiffnessFactor=1.0),
-    wmis=WMI.CHEVROLET.TRUCK | WMI.GMC.TRUCK,
+    wmis=WMI.TRUCK,
     platform_code={"P8", "P9", "PW", "UY", "U9"},
     years={ModelYear.L_2020, ModelYear.M_2021},
   )
   CHEVROLET_EQUINOX = GMPlatformConfig(
     [GMCarDocs("Chevrolet Equinox 2019-22")],
     GMCarSpecs(mass=1588, wheelbase=2.72, steerRatio=14.4, centerToFrontRatio=0.4),
-    wmis=WMI.CHEVROLET.MPV,
+    wmis=WMI.MPV,
     platform_code={"AL", "AX"},
     years={ModelYear.K_2019, ModelYear.L_2020, ModelYear.M_2021, ModelYear.N_2022},
   )
   CHEVROLET_TRAILBLAZER = GMPlatformConfig(
     [GMCarDocs("Chevrolet Trailblazer 2021-22")],
     GMCarSpecs(mass=1345, wheelbase=2.64, steerRatio=16.8, centerToFrontRatio=0.4, tireStiffnessFactor=1.0),
-    wmis=WMI.CHEVROLET.MPV,
+    wmis=WMI.MPV,
     platform_code={"M"},
     years={ModelYear.M_2021, ModelYear.N_2022},
   )
   CADILLAC_XT4 = GMSDGMPlatformConfig(
     [GMCarDocs("Cadillac XT4 2023", "Driver Assist Package")],
     GMCarSpecs(mass=1660, wheelbase=2.78, steerRatio=14.4, centerToFrontRatio=0.4),
-    wmis=WMI.CADILLAC.MPV,
+    wmis=WMI.MPV,
     platform_code={"K9", "UY"},
     years={ModelYear.P_2023},
   )
   CHEVROLET_VOLT_2019 = GMSDGMPlatformConfig(
     [GMCarDocs("Chevrolet Volt 2019", "Adaptive Cruise Control (ACC) & LKAS")],
     GMCarSpecs(mass=1607, wheelbase=2.69, steerRatio=15.7, centerToFrontRatio=0.45),
-    wmis=WMI.CHEVROLET.MPV,
+    wmis=WMI.MPV,
     platform_code={"RB", "FZ"},
     years={ModelYear.K_2019},
   )
   CHEVROLET_TRAVERSE = GMSDGMPlatformConfig(
     [GMCarDocs("Chevrolet Traverse 2022-23", "RS, Premier, or High Country Trim")],
     GMCarSpecs(mass=1955, wheelbase=3.07, steerRatio=17.9, centerToFrontRatio=0.4),
-    wmis=WMI.CHEVROLET.MPV,
+    wmis=WMI.MPV,
     platform_code={"KB", "EV"},
     years={ModelYear.N_2022, ModelYear.P_2023},
   )
