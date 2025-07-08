@@ -1,5 +1,6 @@
 from opendbc.car.rivian.fingerprints import FW_VERSIONS
-from opendbc.car.rivian.values import CAR, FW_QUERY_CONFIG, WMI, ModelLine, ModelYear
+from opendbc.car.rivian.values import CAR, FW_QUERY_CONFIG, WMI, ModelLine
+from opendbc.car.vin import ModelYear
 
 
 class TestRivian:

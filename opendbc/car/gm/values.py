@@ -5,6 +5,7 @@ from opendbc.car import Bus, PlatformConfig, DbcDict, Platforms, CarSpecs
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
+from opendbc.car.vin import ModelYear
 
 Ecu = CarParams.Ecu
 
@@ -76,18 +77,6 @@ class ANY:
     "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
     "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
     }
-
-class YEARS:
-    _2016 = "G"
-    _2017 = "H"
-    _2018 = "J"
-    _2019 = "K"
-    _2020 = "L"
-    _2021 = "M"
-    _2022 = "N"
-    _2023 = "P"
-    _2024 = "R"
-    _2025 = "S"
 
 
 class GMSafetyFlags(IntFlag):
@@ -198,7 +187,7 @@ class CAR(Platforms):
     wmis = WMI.CHEVROLET.MPV,
     fourth_digits = {"F"},
     fifth_digits = ANY.ALL,
-    years = {YEARS._2022, YEARS._2023},
+    years = {ModelYear.N_2022, ModelYear.P_2023},
   )
   CHEVROLET_SILVERADO = GMPlatformConfig(
     [
@@ -209,7 +198,7 @@ class CAR(Platforms):
     wmis = WMI.CHEVROLET.TRUCK | WMI.GMC.TRUCK,
     fourth_digits = ANY.ALL,
     fifth_digits = {"8", "9", "W", "Y"},
-    years = {YEARS._2020, YEARS._2021},
+    years = {ModelYear.L_2020, ModelYear.M_2021},
   )
   CHEVROLET_EQUINOX = GMPlatformConfig(
     [GMCarDocs("Chevrolet Equinox 2019-22")],
@@ -217,7 +206,7 @@ class CAR(Platforms):
     wmis = WMI.CHEVROLET.MPV,
     fourth_digits = ANY.ALL,
     fifth_digits = {"X"},
-    years = {YEARS._2019, YEARS._2020, YEARS._2021, YEARS._2022},
+    years = {ModelYear.K_2019, ModelYear.L_2020, ModelYear.M_2021, ModelYear.N_2022},
   )
   CHEVROLET_TRAILBLAZER = GMPlatformConfig(
     [GMCarDocs("Chevrolet Trailblazer 2021-22")],
@@ -225,7 +214,7 @@ class CAR(Platforms):
     wmis = WMI.CHEVROLET.MPV,
     fourth_digits = ANY.ALL,
     fifth_digits = {"M"},
-    years = {YEARS._2021, YEARS._2022},
+    years = {ModelYear.M_2021, ModelYear.N_2022},
   )
   CADILLAC_XT4 = GMSDGMPlatformConfig(
     [GMCarDocs("Cadillac XT4 2023", "Driver Assist Package")],
@@ -233,7 +222,7 @@ class CAR(Platforms):
     wmis = WMI.CADILLAC.MPV,
     fourth_digits = ANY.ALL,
     fifth_digits = {"Z"},
-    years = {YEARS._2023},
+    years = {ModelYear.P_2023},
   )
   CHEVROLET_VOLT_2019 = GMSDGMPlatformConfig(
     [GMCarDocs("Chevrolet Volt 2019", "Adaptive Cruise Control (ACC) & LKAS")],
@@ -241,7 +230,7 @@ class CAR(Platforms):
     wmis = WMI.CHEVROLET.MPV,
     fourth_digits = {"R"},
     fifth_digits = ANY.ALL,
-    years = {YEARS._2019},
+    years = {ModelYear.K_2019},
   )
   CHEVROLET_TRAVERSE = GMSDGMPlatformConfig(
     [GMCarDocs("Chevrolet Traverse 2022-23", "RS, Premier, or High Country Trim")],
@@ -249,7 +238,7 @@ class CAR(Platforms):
     wmis = WMI.CHEVROLET.MPV,
     fourth_digits = ANY.ALL,
     fifth_digits = {"R", "V"},
-    years = {YEARS._2022, YEARS._2023},
+    years = {ModelYear.N_2022, ModelYear.P_2023},
   )
   GMC_YUKON = GMPlatformConfig(
     [GMCarDocs("GMC Yukon 2019-20", "Adaptive Cruise Control (ACC) & LKAS")],

@@ -1,5 +1,6 @@
 import re
 from dataclasses import dataclass, field
+from enum import StrEnum
 
 from opendbc.car import uds
 from opendbc.car.carlog import carlog
@@ -8,6 +9,19 @@ from opendbc.car.fw_query_definitions import STANDARD_VIN_ADDRS, StdQueries
 
 VIN_UNKNOWN = "0" * 17
 VIN_RE = "[A-HJ-NPR-Z0-9]{17}"
+
+
+class ModelYear(StrEnum):
+  G_2016 = "G"
+  H_2017 = "H"
+  J_2018 = "J"
+  K_2019 = "K"
+  L_2020 = "L"
+  M_2021 = "M"
+  N_2022 = "N"
+  P_2023 = "P"
+  R_2024 = "R"
+  S_2025 = "S"
 
 
 @dataclass
