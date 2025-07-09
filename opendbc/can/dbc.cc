@@ -216,6 +216,7 @@ DBC* dbc_parse(const std::string& dbc_path) {
 
 const std::string get_dbc_root_path() {
   char *basedir = std::getenv("BASEDIR");
+  printf("BASEDIR: %s\n", basedir ? basedir : "NULL");
   if (basedir != NULL) {
     return std::string(basedir) + "/opendbc/dbc";
   } else {
@@ -228,6 +229,7 @@ const DBC* dbc_lookup(const std::string& dbc_name) {
   static std::map<std::string, DBC*> dbcs;
 
   std::string dbc_file_path = dbc_name;
+  printf("root path: %s\n", get_dbc_root_path().c_str());
   if (!std::filesystem::exists(dbc_file_path)) {
     dbc_file_path = get_dbc_root_path() + "/" + dbc_name + ".dbc";
   }
