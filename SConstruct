@@ -53,6 +53,9 @@ env = Environment(
   ] + ccflags_asan,
   LDFLAGS=ldflags_asan,
   LINKFLAGS=ldflags_asan,
+  LIBPATH=[
+    "#opendbc/can/",
+  ],
   CFLAGS="-std=gnu11",
   CXXFLAGS=["-std=c++1z"],
   CPPPATH=cpppath,
