@@ -1,5 +1,4 @@
 Import('env', 'envCython', 'common', 'arch')
-from SCons.Subst import Literal
 
 envDBC = env.Clone()
 dbc_file_path = '-DDBC_FILE_PATH=\'"%s"\'' % (envDBC.Dir("../dbc").abspath)
