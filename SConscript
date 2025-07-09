@@ -1,4 +1,8 @@
-Import("env")
+Import("env", "envCython")
+
+# env["LIBPATH"].append(Dir("."))
+
+envCython["LIBPATH"].append("#opendbc/can")
 
 SConscript(['opendbc/can/SConscript'], exports={'env': env})
 SConscript(['opendbc/dbc/SConscript'], exports={'env': env})
