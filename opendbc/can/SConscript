@@ -1,11 +1,7 @@
 Import('env', 'envCython', 'common', 'arch')
 
 envDBC = env.Clone()
-# dbc_file_path = '-DDBC_FILE_PATH=\'"%s"\'' % (envDBC.Dir("../dbc").abspath)
-# dbc_file_path = '-DDBC_FILE_PATH=\'"%s"\'' % (envDBC.Dir("../dbc").get_relpath())
-dbc_file_path = '-DDBC_FILE_PATH=\'"%s"\'' % ("../dbc")
-print('relpath', envDBC.Dir("../dbc").get_relpath())
-print('dbc_file_path', dbc_file_path)
+dbc_file_path = '-DDBC_FILE_PATH=\'"../dbc"\''
 envDBC['CXXFLAGS'] += [dbc_file_path]
 src = ["dbc.cc", "parser.cc", "packer.cc", "common.cc"]
 
