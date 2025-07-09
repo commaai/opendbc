@@ -9,7 +9,6 @@ src = ["dbc.cc", "parser.cc", "packer.cc", "common.cc"]
 LINKFLAGS = envDBC["LINKFLAGS"]
 if arch == "Darwin":
   LINKFLAGS += [
-  "-Wl,-install_name,@loader_path/libdbc.dylib",
   "-Wl,-rpath,@loader_path",
   ]
 libdbc = envDBC.SharedLibrary('libdbc', src, LIBS=[common, ], LINKFLAGS=LINKFLAGS)
