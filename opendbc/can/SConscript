@@ -1,4 +1,5 @@
 Import('env', 'envCython', 'common', 'arch')
+from SCons.Subst import Literal
 
 envDBC = env.Clone()
 dbc_file_path = '-DDBC_FILE_PATH=\'"%s"\'' % (envDBC.Dir("../dbc").abspath)
@@ -14,8 +15,7 @@ libdbc = envDBC.SharedLibrary('libdbc', src, LIBS=[common, ], LINKFLAGS=LINKFLAG
 # Build packer and parser
 lenv = envCython.Clone()
 lenv["LIBPATH"].append(libdbc[0].dir.abspath)
-lenv['LINKFLAGS'] += [r'-Wl,-rpath,\$$ORIGIN']
-lenv['LINKFLAGS'] += [r'-Wl,-rpath,\$$ORIGIN/../..']
+lenv['RPATH'] = [Literal(r'\$$ORIGIN'), Literal(r'\$$ORIGIN/../..')]
 parser = lenv.Program('parser_pyx.so', 'parser_pyx.pyx', LIBS=[common, libdbc[0].name])
 packer = lenv.Program('packer_pyx.so', 'packer_pyx.pyx', LIBS=[common, libdbc[0].name])
 
