@@ -23,7 +23,7 @@ def anti_overshoot(apply_curvature, apply_curvature_last, v_ego):
 
   lataccel = apply_curvature * (v_ego ** 2)
   last_lataccel = apply_curvature_last * (v_ego ** 2)
-  last_lataccel = apply_hysteresis(last_lataccel, lataccel, diff)
+  last_lataccel = apply_hysteresis(lataccel, last_lataccel, diff)
   last_lataccel = alpha * lataccel + (1 - alpha) * last_lataccel
 
   output_curvature = last_lataccel / (max(v_ego, 1) ** 2)
