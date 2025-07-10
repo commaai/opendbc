@@ -36,7 +36,7 @@ class CarController(CarControllerBase):
     # Longitudinal control
     if self.CP.openpilotLongitudinalControl:
       accel = float(np.clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
-      can_sends.append(create_longitudinal(self.packer, self.frame, accel, CC.enabled))
+      can_sends.append(create_longitudinal(self.packer, self.frame, accel, CC.enabled, CC.longActive))
     else:
       interface_status = None
       if CC.cruiseControl.cancel:
