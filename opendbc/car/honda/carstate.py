@@ -192,7 +192,8 @@ class CarState(CarStateBase):
       # TODO: GEAR_MT doesn't look very legit, pick up the REVERSE light from SCM_FEEDBACK or similar instead
       ret.gearShifter = GearShifter.drive
     else:
-      ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(cp.vl[self.gearbox_msg]["GEAR_SHIFTER"], None))
+      gear_position = self.shifter_values.get(cp.vl[self.gearbox_msg]["GEAR_SHIFTER"], None)
+      ret.gearShifter = self.parse_gear_shifter(gear_position)
 
     ret.gas = cp.vl["POWERTRAIN_DATA"]["PEDAL_GAS"]
     ret.gasPressed = ret.gas > 1e-5
