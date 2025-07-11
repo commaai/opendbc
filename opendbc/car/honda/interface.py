@@ -66,17 +66,15 @@ class CarInterface(CarInterfaceBase):
     if any(0x33DA in f for f in fingerprint.values()):
       ret.flags |= HondaFlags.BOSCH_EXT_HUD.value
 
-    if 0x1A3 in fingerprint[CAN.pt]:
-      # Traditional autos, direct-drive EVs and eCVTs
-      ret.transmissionType = TransmissionType.automatic
+    if ret.flags & HondaFlags.ALLOW_MANUAL_TRANS and all(msg not in fingerprint[CAN.pt] for msg in (0x191, 0x1A3)):
+      # Manual transmission support for allowlisted cars only, to prevent silent fall-through on auto-detection failures
+      ret.transmissionType = TransmissionType.manual
     elif 0x191 in fingerprint[CAN.pt]:
-      # Traditional CVTs
+      # Traditional CVTs, gearshift position in GEARBOX_CVT
       ret.transmissionType = TransmissionType.cvt
     else:
-      # Manual transmission support for allowlisted cars only, to prevent silent fall-through on auto-detection failures
-      if candidate not in [CAR.HONDA_CIVIC_2022]:
-        raise ValueError(f"unexpected missing gear position message for {candidate}")
-      ret.transmissionType = TransmissionType.manual
+      # Traditional autos, direct-drive EVs and eCVTs, gearshift position in GEARBOX_AUTO
+      ret.transmissionType = TransmissionType.automatic
 
     # Certain Hondas have an extra steering sensor at the bottom of the steering rack,
     # which improves controls quality as it removes the steering column torsion from feedback.

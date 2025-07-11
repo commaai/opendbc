@@ -71,6 +71,8 @@ class HondaFlags(IntFlag):
 
   BOSCH_CANFD = 128
 
+  ALLOW_MANUAL_TRANS = 256
+
 # Car button codes
 class CruiseButtons:
   RES_ACCEL = 4
@@ -174,7 +176,7 @@ class CAR(Platforms):
     ],
     HONDA_CIVIC_BOSCH.specs,
     {Bus.pt: 'honda_civic_ex_2022_can_generated'},
-    flags=HondaFlags.BOSCH_RADARLESS,
+    flags=HondaFlags.BOSCH_RADARLESS | HondaFlags.ALLOW_MANUAL_TRANS
   )
   HONDA_CRV_5G = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda CR-V 2017-22", min_steer_speed=12. * CV.MPH_TO_MS)],
