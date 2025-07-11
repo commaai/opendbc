@@ -73,7 +73,9 @@ class CarInterface(CarInterfaceBase):
       # Traditional CVTs
       ret.transmissionType = TransmissionType.cvt
     else:
-      # TODO: Make sure we don't have timing issues, maybe some sort of assert/fp-fail here if it's not a Civic Type R or similar?
+      # Manual transmission support for allowlisted cars only, to prevent silent fall-through on auto-detection failures
+      if candidate not in [CAR.HONDA_CIVIC_2022]:
+        raise ValueError(f"unexpected missing gear position message for {candidate}")
       ret.transmissionType = TransmissionType.manual
 
     # Certain Hondas have an extra steering sensor at the bottom of the steering rack,
