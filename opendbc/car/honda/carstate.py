@@ -82,10 +82,9 @@ class CarState(CarStateBase):
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
 
     if CP.transmissionType != TransmissionType.manual:
+      self.gearbox_msg = "GEARBOX_AUTO"
       if CP.transmissionType == TransmissionType.cvt:
         self.gearbox_msg = "GEARBOX_CVT"
-      else:
-        self.gearbox_msg = "GEARBOX_AUTO"
       self.shifter_values = can_define.dv[self.gearbox_msg]["GEAR_SHIFTER"]
 
     self.main_on_sig_msg = "SCM_FEEDBACK"
