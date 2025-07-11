@@ -1,5 +1,6 @@
 CM_ "IMPORT _honda_common.dbc";
 CM_ "IMPORT _nidec_common.dbc";
+CM_ "IMPORT _gearbox_common.dbc";
 
 BO_ 342 STEERING_SENSORS: 6 EPS
  SG_ STEER_ANGLE_RATE : 23|16@0- (1,0) [-3000|3000] "deg/s" EON
@@ -15,12 +16,6 @@ BO_ 399 STEER_STATUS: 7 EPS
  SG_ STEER_CONFIG_INDEX : 43|4@0+ (1,0) [0|15] "" EON
  SG_ CHECKSUM : 51|4@0+ (1,0) [0|15] "" EON
  SG_ COUNTER : 53|2@0+ (1,0) [0|3] "" EON
-
-BO_ 401 GEARBOX: 8 PCM
- SG_ GEAR_SHIFTER : 5|6@0+ (1,0) [0|63] "" EON
- SG_ GEAR : 35|4@0+ (1,0) [0|15] "" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
 
 BO_ 404 STEERING_CONTROL: 4 EON
  SG_ SET_ME_X00 : 22|7@0+ (1,0) [0|127] "" EPS
@@ -60,10 +55,7 @@ BO_ 862 HIGHBEAM_CONTROL: 8 ADAS
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
-CM_ SG_ 401 GEAR "10 = reverse, 11 = transition";
 VAL_ 399 STEER_STATUS 5 "fault" 4 "no_torque_alert_2" 2 "no_torque_alert_1" 0 "normal" ;
-VAL_ 401 GEAR_SHIFTER 32 "L" 16 "S" 8 "D" 4 "N" 2 "R" 1 "P" ;
-VAL_ 401 GEAR 7 "L" 10 "S" 4 "D" 3 "N" 2 "R" 1 "P" ;
 VAL_ 422 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "cancel" 1 "main" 0 "none" ;
 VAL_ 422 LIGHTS_SETTING 3 "high_beam" 2 "low_beam" 1 "position" 0 "no_lights" ;
 VAL_ 422 CRUISE_SETTING 3 "distance_adj" 2 "tbd" 1 "lkas_button" 0 "none" ;
