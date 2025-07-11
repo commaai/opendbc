@@ -124,12 +124,9 @@ class CarInterface(CarInterfaceBase):
     # openpilot longitudinal behind experimental long toggle:
     #  - TSS2 radar ACC cars (disables radar)
 
-    if ret.flags & ToyotaFlags.SECOC.value:
-      ret.openpilotLongitudinalControl = False
-    else:
-      ret.openpilotLongitudinalControl = ret.enableDsu or \
-        candidate in (TSS2_CAR - RADAR_ACC_CAR) or \
-        bool(ret.flags & ToyotaFlags.DISABLE_RADAR.value)
+    ret.openpilotLongitudinalControl = ret.enableDsu or \
+      candidate in (TSS2_CAR - RADAR_ACC_CAR) or \
+      bool(ret.flags & ToyotaFlags.DISABLE_RADAR.value)
 
     ret.autoResumeSng = ret.openpilotLongitudinalControl and candidate in NO_STOP_TIMER_CAR
 
