@@ -67,8 +67,10 @@ class CarInterface(CarInterfaceBase):
       ret.flags |= HondaFlags.BOSCH_EXT_HUD.value
 
     if 0x1A3 in fingerprint[CAN.pt]:
+      # Traditional autos, direct-drive EVs and eCVTs
       ret.transmissionType = TransmissionType.automatic
     elif 0x191 in fingerprint[CAN.pt]:
+      # Traditional CVTs
       ret.transmissionType = TransmissionType.cvt
     else:
       # TODO: Make sure we don't have timing issues, maybe some sort of assert/fp-fail here if it's not a Civic Type R or similar?
