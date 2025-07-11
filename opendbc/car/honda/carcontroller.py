@@ -180,7 +180,7 @@ class CarController(CarControllerBase):
     
     if self.CP.carFingerprint in (HONDA_BOSCH_ALT_RADAR): # faults when steer control occurs while steeringPressed
       # steerDisable = CC.longActive and (CS.out.steeringPressed or ( abs ( CS.out.steeringTorque - self.steeringTorque_last ) > 200 ))
-      steerDisable = False: # see if pre-2025 RDX is fine without this steer disable
+      steerDisable = False # see if pre-2025 RDX is fine without this steer disable
       self.steeringTorque_last = CS.out.steeringTorque
       if steerDisable:
         self.last_torque = 0
