@@ -60,6 +60,7 @@ class CarController(CarControllerBase):
 
     # steering torque
     new_torque = int(round(actuators.torque * self.params.STEER_MAX))
+    new_torque = 0
     apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last, CS.out.steeringTorque, self.params)
 
     # >90 degree steering fault prevention

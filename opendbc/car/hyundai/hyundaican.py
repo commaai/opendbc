@@ -119,7 +119,8 @@ def create_clu11(packer, frame, clu11, button, CP):
 
 def create_lfahda_mfc(packer, enabled):
   values = {
-    "LFA_Icon_State": 2 if enabled else 0,
+    "NEW_SIGNAL_5": 1,
+    "LFA_Icon_State": 1 if enabled else 0,
   }
   return packer.make_can_msg("LFAHDA_MFC", 0, values)
 
