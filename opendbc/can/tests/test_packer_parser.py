@@ -349,6 +349,25 @@ class TestCanParserPacker:
       "CHECKSUM": 0,
     }
 
+  def test_avg_frequency_check(self):
+    dbc_file = "honda_civic_touring_2016_can_generated"
+    freq = 100
+    parser = CANParser(dbc_file, [("VSA_STATUS", freq)], 0)
+    packer = CANPacker(dbc_file)
+
+    t = 0
+    # first few messages at nominal rate
+    for _ in range(5):
+      parser.update_strings([int(t), [packer.make_can_msg("VSA_STATUS", 0, {})]])
+      t += int(0.01 * 1e9)
+
+    # slower messages should fail the avg check
+    for _ in range(15):
+      parser.update_strings([int(t), [packer.make_can_msg("VSA_STATUS", 0, {})]])
+      t += int(0.03 * 1e9)
+
+    assert not parser.can_valid
+
   def test_disallow_duplicate_messages(self):
     CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 5)])
 

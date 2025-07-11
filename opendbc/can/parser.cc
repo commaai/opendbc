@@ -70,6 +70,10 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
     vals[i] = tmp_vals[i];
     all_vals[i].push_back(vals[i]);
   }
+  if (seen_count == 0) {
+    first_seen_nanos = nanos;
+  }
+  seen_count++;
   last_seen_nanos = nanos;
 
   return true;
@@ -112,6 +116,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<st
     // msg is not valid if a message isn't received for 10 consecutive steps
     if (frequency > 0) {
       state.check_threshold = (1000000000ULL / frequency) * 10;
+      state.expected_interval = (1000000000ULL / frequency);
 
       // bus timeout threshold should be 10x the fastest msg
       bus_timeout_threshold = std::min(bus_timeout_threshold, state.check_threshold);
@@ -236,6 +241,16 @@ void CANParser::UpdateValid(uint64_t nanos) {
         }
       }
       _valid = false;
+    }
+
+    if (state.expected_interval > 0 && state.seen_count >= 5) {
+      const uint64_t avg_interval = (state.last_seen_nanos - state.first_seen_nanos) / state.seen_count;
+      if (avg_interval > state.expected_interval * 2) {
+        if (show_missing && !bus_timeout) {
+          LOGE_100("0x%X '%s' AVG TOO SLOW", state.address, state.name.c_str());
+        }
+        _valid = false;
+      }
     }
   }
   can_invalid_cnt = _valid ? 0 : (can_invalid_cnt + 1);

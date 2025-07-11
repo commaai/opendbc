@@ -71,6 +71,9 @@ public:
 
   uint64_t last_seen_nanos;
   uint64_t check_threshold;
+  uint64_t expected_interval = 0;
+  uint64_t first_seen_nanos = 0;
+  uint32_t seen_count = 0;
 
   uint8_t counter;
   uint8_t counter_fail;
