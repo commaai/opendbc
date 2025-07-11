@@ -4,12 +4,6 @@ CM_ "IMPORT _bosch_adas_2018.dbc";
 CM_ "IMPORT _steering_sensors_a.dbc";
 CM_ "IMPORT _gearbox_common.dbc";
 
-BO_ 419 GEARBOX: 8 XXX
- SG_ GEAR_SHIFTER : 24|8@1+ (1,0) [0|255] "" XXX
- SG_ GEAR : 32|8@1+ (1,0) [0|255] "" XXX
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
-
 BO_ 432 STANDSTILL: 7 VSA
  SG_ WHEELS_MOVING : 12|1@0+ (1,0) [0|1] "" EON
  SG_ BRAKE_ERROR_1 : 11|1@0+ (1,0) [0|1] "" EON
@@ -32,8 +26,6 @@ BO_ 892 CRUISE_PARAMS: 8 PCM
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
  SG_ COUNTER : 61|2@0+ (1,0) [0|15] "" EON
 
-VAL_ 419 GEAR_SHIFTER 2 "S" 32 "D" 16 "N" 8 "R" 4 "P";
-VAL_ 419 GEAR 26 "S" 20 "D" 19 "N" 18 "R" 17 "P";
 VAL_ 545 ECON_ON_2 0 "off" 3 "on";
 VAL_ 662 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "cancel" 1 "main" 0 "none";
 VAL_ 662 CRUISE_SETTING 3 "distance_adj" 2 "tbd" 1 "lkas_button" 0 "none";

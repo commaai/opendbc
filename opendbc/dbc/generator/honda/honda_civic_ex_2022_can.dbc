@@ -3,12 +3,6 @@ CM_ "IMPORT _bosch_2018.dbc";
 CM_ "IMPORT _steering_sensors_a.dbc";
 CM_ "IMPORT _gearbox_common.dbc";
 
-BO_ 419 GEARBOX_ALT: 8 PCM
- SG_ GEAR : 7|8@0+ (1,0) [0|255] "" EON
- SG_ GEAR_SHIFTER : 29|6@0+ (1,0) [0|63] "" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
-
 BO_ 432 STANDSTILL: 7 VSA
  SG_ WHEELS_MOVING : 12|1@0+ (1,0) [0|1] "" EON
  SG_ BRAKE_ERROR_1 : 11|1@0+ (1,0) [0|1] "" EON
@@ -93,5 +87,4 @@ CM_ SG_ 456 IDLESTOP_ALLOW "allows car to turn off engine at a standstill";
 CM_ SG_ 456 STANDSTILL "set to 1 when camera requests -4.0 m/s^2";
 CM_ SG_ 495 SPEED_LIMIT "Defaults to 0xFF if no speed limit found";
 
-VAL_ 419 GEAR_SHIFTER  32 "D" 16 "N" 8 "R" 4 "P" 0 "B" ;
 VAL_ 477 GEAR_MT 14 "reverse" 6 "6th" 5 "5th" 4 "4th" 3 "3rd" 2 "2nd" 1 "1st" 0 "Clutch";

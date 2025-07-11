@@ -3,12 +3,6 @@ CM_ "IMPORT _bosch_2018.dbc";
 CM_ "IMPORT _steering_sensors_a.dbc";
 CM_ "IMPORT _gearbox_common.dbc";
 
-BO_ 419 GEARBOX: 8 XXX
- SG_ GEAR_SHIFTER : 24|8@1+ (1,0) [0|255] "" XXX
- SG_ GEAR : 32|8@1+ (1,0) [0|255] "" XXX
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
-
 BO_ 432 STANDSTILL: 7 VSA
  SG_ WHEELS_MOVING : 12|1@0+ (1,0) [0|1] "" EON
  SG_ BRAKE_ERROR_1 : 11|1@0+ (1,0) [0|1] "" EON
@@ -76,7 +70,5 @@ CM_ SG_ 479 AEB_PREPARE "set 1s before AEB";
 CM_ SG_ 829 BEEP "beeps are pleasant, chimes are for warnings etc...";
 CM_ SG_ 829 LANE_LINES "related to lane lines on cluster, left/right white/green";
 
-VAL_ 419 GEAR_SHIFTER 2 "S" 32 "D" 16 "N" 8 "R" 4 "P";
-VAL_ 419 GEAR 26 "S" 20 "D" 19 "N" 18 "R" 17 "P";
 VAL_ 829 BEEP 3 "single_beep" 2 "triple_beep" 1 "repeated_beep" 0 "no_beep";
 VAL_ 829 LANE_LINES 7 "both_lines_green" 6 "both_lines_white" 2 "left_line_white" 0 "no_lines";
