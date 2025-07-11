@@ -19,7 +19,7 @@ BUTTONS_DICT = {CruiseButtons.RES_ACCEL: ButtonType.accelCruise, CruiseButtons.D
 SETTINGS_BUTTONS_DICT = {CruiseSettings.DISTANCE: ButtonType.gapAdjustCruise, CruiseSettings.LKAS: ButtonType.lkas}
 
 
-def get_can_messages(CP, gearbox_msg):
+def get_can_messages(CP):
   messages = [
     ("ENGINE_DATA", 100),
     ("WHEEL_SPEEDS", 50),
@@ -44,10 +44,10 @@ def get_can_messages(CP, gearbox_msg):
       ("SCM_BUTTONS", 25),
     ]
 
-  if CP.carFingerprint in (CAR.HONDA_CRV_HYBRID, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.ACURA_RDX_3G, CAR.HONDA_E):
-    messages.append((gearbox_msg, 50))
-  else:
-    messages.append((gearbox_msg, 100))
+  if CP.transmissionType == TransmissionType.automatic:
+    messages.append(("GEARBOX_AUTO", 50))
+  elif CP.transmissionType == TransmissionType.cvt:
+    messages.append(("GEARBOX_CVT", 100))
 
   if CP.flags & HondaFlags.BOSCH_ALT_BRAKE:
     messages.append(("BRAKE_MODULE", 50))
@@ -80,20 +80,18 @@ class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
-    self.gearbox_msg = "GEARBOX"
-    if CP.carFingerprint == CAR.HONDA_ACCORD and CP.transmissionType == TransmissionType.cvt:
-      self.gearbox_msg = "GEARBOX_15T"
-    elif CP.carFingerprint in (CAR.HONDA_CIVIC_2022, CAR.HONDA_HRV_3G) and CP.transmissionType == TransmissionType.cvt:
-      self.gearbox_msg = "GEARBOX_ALT"
-    elif CP.transmissionType == TransmissionType.manual:
-      self.gearbox_msg = "GEARBOX_ALT_2"
+
+    if CP.transmissionType != TransmissionType.manual:
+      if CP.transmissionType == TransmissionType.cvt:
+        self.gearbox_msg = "GEARBOX_CVT"
+      else:
+        self.gearbox_msg = "GEARBOX_AUTO"
+      self.shifter_values = can_define.dv[self.gearbox_msg]["GEAR_SHIFTER"]
 
     self.main_on_sig_msg = "SCM_FEEDBACK"
     if CP.carFingerprint in HONDA_NIDEC_ALT_SCM_MESSAGES:
       self.main_on_sig_msg = "SCM_BUTTONS"
 
-    if CP.transmissionType != TransmissionType.manual:
-      self.shifter_values = can_define.dv[self.gearbox_msg]["GEAR_SHIFTER"]
     self.steer_status_values = defaultdict(lambda: "UNKNOWN", can_define.dv["STEER_STATUS"]["STEER_STATUS"])
 
     self.brake_switch_prev = False
@@ -191,14 +189,10 @@ class CarState(CarStateBase):
       ret.parkingBrake = cp.vl["EPB_STATUS"]["EPB_STATE"] != 0
 
     if self.CP.transmissionType == TransmissionType.manual:
-      ret.clutchPressed = cp.vl["GEARBOX_ALT_2"]["GEAR_MT"] == 0
-      if cp.vl["GEARBOX_ALT_2"]["GEAR_MT"] == 14:
-        ret.gearShifter = GearShifter.reverse
-      else:
-        ret.gearShifter = GearShifter.drive
+      # TODO: GEAR_MT doesn't look very legit, pick up the REVERSE light from SCM_FEEDBACK or similar instead
+      ret.gearShifter = GearShifter.drive
     else:
-      gear = int(cp.vl[self.gearbox_msg]["GEAR_SHIFTER"])
-      ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(gear, None))
+      ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(cp.vl[self.gearbox_msg]["GEAR_SHIFTER"], None))
 
     ret.gas = cp.vl["POWERTRAIN_DATA"]["PEDAL_GAS"]
     ret.gasPressed = ret.gas > 1e-5
@@ -279,7 +273,7 @@ class CarState(CarStateBase):
     return ret
 
   def get_can_parsers(self, CP):
-    pt_messages = get_can_messages(CP, self.gearbox_msg)
+    pt_messages = get_can_messages(CP)
 
     cam_messages = [
       ("STEERING_CONTROL", 100),

@@ -66,15 +66,13 @@ class CarInterface(CarInterfaceBase):
     if any(0x33DA in f for f in fingerprint.values()):
       ret.flags |= HondaFlags.BOSCH_EXT_HUD.value
 
-    # Accord ICE 1.5T CVT has different gearbox message
-    if candidate == CAR.HONDA_ACCORD and 0x191 in fingerprint[CAN.pt]:
+    if 0x1A3 in fingerprint[CAN.pt]:
+      ret.transmissionType = TransmissionType.automatic
+    elif 0x191 in fingerprint[CAN.pt]:
       ret.transmissionType = TransmissionType.cvt
-    # Civic Type R is missing 0x191 and 0x1A3
-    elif candidate == CAR.HONDA_CIVIC_2022 and all(msg not in fingerprint[CAN.pt] for msg in (0x191, 0x1A3)):
+    else:
+      # TODO: Make sure we don't have timing issues, maybe some sort of assert/fp-fail here if it's not a Civic Type R or similar?
       ret.transmissionType = TransmissionType.manual
-    # New Civics don't have 0x191, but do have 0x1A3
-    elif candidate in (CAR.HONDA_CIVIC_2022, CAR.HONDA_HRV_3G) and 0x1A3 in fingerprint[CAN.pt]:
-      ret.transmissionType = TransmissionType.cvt
 
     # Certain Hondas have an extra steering sensor at the bottom of the steering rack,
     # which improves controls quality as it removes the steering column torsion from feedback.
