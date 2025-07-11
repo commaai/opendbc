@@ -14,4 +14,4 @@ BO_ 419 GEARBOX_AUTO: 8 PCM
 
 VAL_ 401 GEAR_SHIFTER 32 "L" 16 "S" 8 "D" 4 "N" 2 "R" 1 "P" ;
 VAL_ 401 GEAR 7 "L" 10 "S" 4 "D" 3 "N" 2 "R" 1 "P" ;
-VAL_ 419 GEAR_SHIFTER  32 "D" 16 "N" 8 "R" 4 "P" 0 "B" ;
+VAL_ 419 GEAR_SHIFTER 10 "S" 4 "D" 3 "N" 2 "R" 1 "P" ;
