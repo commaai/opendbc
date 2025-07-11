@@ -1066,6 +1066,7 @@ FW_VERSIONS = {
       b'\xf1\x00NX4 FR_CMR AT CAN LHD 1.00 1.01 99211-N9100 14A',
       b'\xf1\x00NX4 FR_CMR AT EUR LHD 1.00 1.00 99211-N9220 14K',
       b'\xf1\x00NX4 FR_CMR AT EUR LHD 1.00 2.02 99211-N9000 14E',
+      b'\xf1\x00NX4 FR_CMR AT EUR LHD 1.00 1.00 99211-N9240 14Q',
       b'\xf1\x00NX4 FR_CMR AT USA LHD 1.00 1.00 99211-N9210 14G',
       b'\xf1\x00NX4 FR_CMR AT USA LHD 1.00 1.00 99211-N9220 14K',
       b'\xf1\x00NX4 FR_CMR AT USA LHD 1.00 1.00 99211-N9240 14Q',
@@ -1079,6 +1080,9 @@ FW_VERSIONS = {
       b'\xf1\x00NX4__               1.00 1.01 99110-N9000         ',
       b'\xf1\x00NX4__               1.00 1.02 99110-N9000         ',
       b'\xf1\x00NX4__               1.01 1.00 99110-N9100         ',
+    ],
+    (Ecu.cornerRadar, 0x7b7, None): [
+      b'\xf1\x003D',
     ],
   },
   CAR.HYUNDAI_SANTA_CRUZ_1ST_GEN: {
