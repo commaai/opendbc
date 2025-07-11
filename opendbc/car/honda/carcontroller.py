@@ -177,7 +177,6 @@ class CarController(CarControllerBase):
         can_sends.append(make_tester_present_msg(0x18DAB0F1, bus, suppress_response=True))
 
     # Send steering command.
-    
     if self.CP.carFingerprint in (HONDA_BOSCH_ALT_RADAR): # faults when steer control occurs while steeringPressed
       # steerDisable = CC.longActive and (CS.out.steeringPressed or ( abs ( CS.out.steeringTorque - self.steeringTorque_last ) > 200 ))
       steerDisable = False # see if pre-2025 RDX is fine without this steer disable
