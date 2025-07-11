@@ -71,6 +71,8 @@ class HondaFlags(IntFlag):
 
   BOSCH_CANFD = 128
 
+  HAS_EPB = 512
+
 # Car button codes
 class CruiseButtons:
   RES_ACCEL = 4
