@@ -49,8 +49,8 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.PandaCarSafetyTest, common.
   BUTTONS_TX_BUS = 1
 
   def _torque_driver_msg(self, torque):
-    values = {"STEERING_COL_TORQUE": torque}
-    return self.packer.make_can_msg_panda("MDPS", self.PT_BUS, values)
+    values = {"MDPS_StrTqSnsrVal": torque}
+    return self.packer.make_can_msg_panda("MDPS_01_10ms", self.PT_BUS, values)
 
   def _torque_cmd_msg(self, torque, steer_req=1):
     values = {"TORQUE_REQUEST": torque, "STEER_REQ": steer_req}
