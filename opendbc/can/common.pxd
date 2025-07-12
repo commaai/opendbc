@@ -26,6 +26,7 @@ cdef extern from "common_dbc.h":
     HKG_CAN_FD_CHECKSUM,
     FCA_GIORGIO_CHECKSUM,
     TESLA_CHECKSUM,
+    BYD_CHECKSUM,
 
   cdef struct Signal:
     string name
