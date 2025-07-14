@@ -128,6 +128,7 @@ class CarState(CarStateBase):
     # panda checks if the signal is non-zero
     ret.standstill = cp.vl["ENGINE_DATA"]["XMISSION_SPEED"] < 1e-5
 
+    # doorOpen is true if we can find any door open, but signal locations vary, and we may only see the driver's door
     ret.doorOpen = bool(cp.vl["SCM_FEEDBACK"].get("DRIVERS_DOOR_OPEN", False)) or \
                    bool(cp.vl["SCM_BUTTONS"].get("DRIVERS_DOOR_OPEN", False))
     if self.CP.flags & HondaFlags.HAS_ALL_DOOR_STATES:
