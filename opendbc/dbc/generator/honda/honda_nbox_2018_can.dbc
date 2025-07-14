@@ -13,12 +13,5 @@ BO_ 401 GEARBOX_15T: 8 PCM
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
 
-BO_ 432 STANDSTILL: 7 VSA
- SG_ WHEELS_MOVING : 12|1@0+ (1,0) [0|1] "" EON
- SG_ BRAKE_ERROR_1 : 11|1@0+ (1,0) [0|1] "" EON
- SG_ BRAKE_ERROR_2 : 9|1@0+ (1,0) [0|1] "" EON
- SG_ COUNTER : 53|2@0+ (1,0) [0|3] "" EON
- SG_ CHECKSUM : 51|4@0+ (1,0) [0|15] "" EON
-
 VAL_ 401 GEAR_SHIFTER 32 "L" 16 "S" 8 "D" 4 "N" 2 "R" 1 "P";
 VAL_ 401 GEAR 7 "L" 10 "S" 4 "D" 3 "N" 2 "R" 1 "P";
