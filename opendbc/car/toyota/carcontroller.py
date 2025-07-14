@@ -65,7 +65,7 @@ class CarController(CarControllerBase):
     self.aego = FirstOrderFilter(0.0, 0.25, DT_CTRL * 3)
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
 
-    self.pitch2 = FirstOrderFilter(0, 2, DT_CTRL)
+    self.pitch2 = FirstOrderFilter(0, 1.5, DT_CTRL)
     # self.pitch_compensation = FirstOrderFilter(0, 2, DT_CTRL)
 
     self.accel = 0
@@ -233,7 +233,11 @@ class CarController(CarControllerBase):
           high_pass_pitch = CC.orientationNED[1] - self.pitch2.x
           pitch_compensation = math.sin(high_pass_pitch) * ACCELERATION_DUE_TO_GRAVITY
 
-          print(f"high_pass_pitch: {high_pass_pitch}, pitch: {self.pitch2.x}")
+          print(f"pitch: {CC.orientationNED[1]}, high_pass_pitch: {high_pass_pitch}, pitch: {self.pitch2.x}, pitch_compensation: {pitch_compensation}, pcm_accel_cmd: {pcm_accel_cmd}")
+
+          # if CC.orientationNED[1] > 0.15:
+          #   raise Exception
+
           pcm_accel_cmd += pitch_compensation
 
         else:
