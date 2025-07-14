@@ -31,18 +31,9 @@ def get_can_messages(CP, gearbox_msg):
     ("VSA_STATUS", 50),
     ("STEER_STATUS", 100),
     ("STEER_MOTOR_TORQUE", 0),  # TODO: not on every car
+    ("SCM_FEEDBACK", 10),  # FIXME: there are different frequencies for different arb IDs
+    ("SCM_BUTTONS", 25),  # FIXME: there are different frequencies for different arb IDs
   ]
-
-  if CP.carFingerprint == CAR.HONDA_ODYSSEY_CHN:
-    messages += [
-      ("SCM_FEEDBACK", 25),
-      ("SCM_BUTTONS", 50),
-    ]
-  else:
-    messages += [
-      ("SCM_FEEDBACK", 10),
-      ("SCM_BUTTONS", 25),
-    ]
 
   if CP.carFingerprint in (CAR.HONDA_CRV_HYBRID, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.ACURA_RDX_3G, CAR.HONDA_E):
     messages.append((gearbox_msg, 50))
