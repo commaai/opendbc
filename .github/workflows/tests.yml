@@ -1,34 +1,57 @@
 name: tests
 
-on: [push, pull_request]
-
-env:
-  RUN: docker run --shm-size 1G --rm opendbc /bin/sh -c
-  BUILD: |
-      docker pull $(grep -ioP '(?<=^from)\s+\S+' Dockerfile) || true
-      docker pull docker.io/commaai/opendbc:latest || true
-      docker build --cache-from docker.io/commaai/opendbc:latest -t opendbc -f Dockerfile .
+on:
+  push:
+    branches:
+      - master
+  pull_request:
 
 jobs:
-  test:
-    runs-on: ubuntu-20.04
+  tests:
+    name: ./test.sh
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-24.04' }}
+          - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-macos-8x14' || 'macos-latest' }}
     steps:
-      - uses: actions/checkout@v2
-      - name: Build Docker image
-        run: eval "$BUILD"
-      - name: Static analysis
-        run: |
-          docker run opendbc bash -c "cd opendbc && git init && git add -A && pre-commit run --all"
-      - name: Generator test
-        run: |
-          docker run opendbc bash -c "cd opendbc/generator && ./test_generator.py"
-      - name: Unit tests
-        run: |
-          docker run opendbc bash -c "python -m unittest discover opendbc"
-      - name: Push to dockerhub
-        if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request' && github.repository == 'commaai/opendbc'
-        run: |
-          docker login -u wmelching -p ${{ secrets.COMMA_DOCKERHUB_TOKEN}}
-          docker tag opendbc docker.io/commaai/opendbc:latest
-          docker push docker.io/commaai/opendbc:latest
+    - uses: commaai/timeout@v1
+      with:
+        timeout: ${{ github.repository == 'commaai/opendbc' && '60' || '999' }}
+    - uses: actions/checkout@v4
+    - uses: ./.github/workflows/cache
+    - run: ./test.sh
 
+  safety_tests:
+    name: safety
+    runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        flags: ['--ubsan']
+    steps:
+    - uses: commaai/timeout@v1
+    - uses: actions/checkout@v4
+    - uses: ./.github/workflows/cache
+    - name: Run safety tests
+      run: ./opendbc/safety/tests/test.sh ${{ matrix.flags }}
+
+  mutation:
+    name: Safety mutation tests
+    runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
+    timeout-minutes: 20
+    env:
+      GIT_REF: ${{ github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && github.event.before || format('origin/{0}', github.event.repository.default_branch) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # need master to get diff
+      - uses: ./.github/workflows/cache
+      - name: Run mutation tests
+        timeout-minutes: 5
+        run: |
+          source setup.sh
+          scons -j8
+          cd opendbc/safety/tests && ./mutation.sh
