@@ -11,7 +11,7 @@ Ecu = CarParams.Ecu
 
 
 FW_VERSIONS = {
-  CAR.HONDA_NBOX: {
+  CAR.HONDA_NBOX_2G: {
     (Ecu.vsa, 0x18da28f1, None): [
       b'57114-TTA-J030\x00\x00',
     ],

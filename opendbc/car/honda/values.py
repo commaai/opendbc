@@ -142,7 +142,7 @@ def radar_dbc_dict(pt_dict):
 
 class CAR(Platforms):
   # Bosch Cars
-  HONDA_NBOX = HondaBoschPlatformConfig(
+  HONDA_NBOX_2G = HondaBoschPlatformConfig(
     [
       HondaCarDocs("Honda N-Box 2018", "All", min_steer_speed=5.),
     ],
