@@ -236,7 +236,7 @@ class CarController(CarControllerBase):
           high_pass_pitch = pitch - self.pitch2.x
           pitch_compensation = math.sin(high_pass_pitch) * ACCELERATION_DUE_TO_GRAVITY
 
-          print(f"pitch: {CC.orientationNED[1]}, high_pass_pitch: {high_pass_pitch}, pitch: {self.pitch2.x}, pitch_compensation: {pitch_compensation}, pcm_accel_cmd: {pcm_accel_cmd}")
+          # print(f"pitch: {CC.orientationNED[1]}, high_pass_pitch: {high_pass_pitch}, pitch: {self.pitch2.x}, pitch_compensation: {pitch_compensation}, pcm_accel_cmd: {pcm_accel_cmd}")
 
           # if CC.orientationNED[1] > 0.15:
           #   raise Exception
