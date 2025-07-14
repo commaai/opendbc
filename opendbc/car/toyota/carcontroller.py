@@ -65,7 +65,7 @@ class CarController(CarControllerBase):
     self.aego = FirstOrderFilter(0.0, 0.25, DT_CTRL * 3)
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
 
-    self.pitch2 = FirstOrderFilter(0, 1.5, DT_CTRL)
+    self.pitch2 = FirstOrderFilter(0, 1.0, DT_CTRL)
     # self.pitch_compensation = FirstOrderFilter(0, 2, DT_CTRL)
 
     self.accel = 0
