@@ -65,6 +65,9 @@ class CarController(CarControllerBase):
     self.aego = FirstOrderFilter(0.0, 0.25, DT_CTRL * 3)
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
 
+    self.pitch2 = FirstOrderFilter(0, 1, DT_CTRL)
+    self.pitch_compensation = FirstOrderFilter(0, 1, DT_CTRL)
+
     self.accel = 0
     self.prev_accel = 0
     # *** end long control state ***
@@ -84,6 +87,7 @@ class CarController(CarControllerBase):
 
     if len(CC.orientationNED) == 3:
       self.pitch.update(CC.orientationNED[1])
+      self.pitch2.update(CC.orientationNED[1])
 
     # *** control msgs ***
     can_sends = []
@@ -224,6 +228,14 @@ class CarController(CarControllerBase):
                                                speed=CS.out.vEgo,
                                                feedforward=pcm_accel_cmd,
                                                freeze_integrator=actuators.longControlState != LongCtrlState.pid)
+
+          # pitch_compensation =
+          # pitch = self.pitch2.x * ACCELERATION_DUE_TO_GRAVITY
+          accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY
+
+          self.pitch_compensation.update(accel_due_to_pitch)
+          pcm_accel_cmd += accel_due_to_pitch - self.pitch_compensation.x
+
         else:
           self.long_pid.reset()
 
