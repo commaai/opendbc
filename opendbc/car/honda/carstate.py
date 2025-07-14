@@ -131,7 +131,7 @@ class CarState(CarStateBase):
     if self.CP.flags & HondaFlags.HAS_ALL_DOOR_STATES:
       ret.doorOpen = any([cp.vl["DOORS_STATUS"]["DOOR_OPEN_FL"], cp.vl["DOORS_STATUS"]["DOOR_OPEN_FR"],
                           cp.vl["DOORS_STATUS"]["DOOR_OPEN_RL"], cp.vl["DOORS_STATUS"]["DOOR_OPEN_RR"]])
-    # TODO: Check if it's safe to just unconditionally OR both the SCM_FEEDBACK and SCM_BUTTONS signals
+    # TODO: Once SCM_FEEDBACK/SCM_BUTTONS are common-ized, just unconditionally OR both the driver's door signals
     elif self.CP.carFingerprint in (CAR.HONDA_ACCORD, CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.HONDA_CRV_HYBRID, CAR.HONDA_INSIGHT,
                                   CAR.ACURA_RDX_3G, CAR.HONDA_E, *HONDA_BOSCH_RADARLESS, *HONDA_BOSCH_CANFD):
       ret.doorOpen = bool(cp.vl["SCM_FEEDBACK"]["DRIVERS_DOOR_OPEN"])
