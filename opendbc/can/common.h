@@ -34,6 +34,7 @@ unsigned int hkg_can_fd_checksum(uint32_t address, const Signal &sig, const std:
 unsigned int fca_giorgio_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int pedal_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int tesla_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
+unsigned int byd_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 
 #define DBC_ASSERT(condition, message)                             \
   do {                                                             \

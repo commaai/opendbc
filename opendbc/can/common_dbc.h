@@ -23,6 +23,7 @@ enum SignalType {
   HKG_CAN_FD_CHECKSUM,
   FCA_GIORGIO_CHECKSUM,
   TESLA_CHECKSUM,
+  BYD_CHECKSUM,
 };
 
 struct Signal {
