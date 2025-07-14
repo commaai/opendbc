@@ -229,6 +229,7 @@ class CarController(CarControllerBase):
                                                feedforward=pcm_accel_cmd,
                                                freeze_integrator=actuators.longControlState != LongCtrlState.pid)
 
+          # high pass filter
           # pitch_compensation =
           # pitch = self.pitch2.x * ACCELERATION_DUE_TO_GRAVITY
           accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY
