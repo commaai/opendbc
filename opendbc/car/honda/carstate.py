@@ -129,13 +129,11 @@ class CarState(CarStateBase):
     ret.standstill = cp.vl["ENGINE_DATA"]["XMISSION_SPEED"] < 1e-5
 
     # doorOpen is true if we can find any door open, but signal locations vary, and we may only see the driver's door
+    ret.doorOpen = bool(cp.vl["SCM_FEEDBACK"].get("DRIVERS_DOOR_OPEN", False)) or \
+                   bool(cp.vl["SCM_BUTTONS"].get("DRIVERS_DOOR_OPEN", False))
     if self.CP.flags & HondaFlags.HAS_ALL_DOOR_STATES:
-      ret.doorOpen = any([cp.vl["DOORS_STATUS"]["DOOR_OPEN_FL"], cp.vl["DOORS_STATUS"]["DOOR_OPEN_FR"],
-                          cp.vl["DOORS_STATUS"]["DOOR_OPEN_RL"], cp.vl["DOORS_STATUS"]["DOOR_OPEN_RR"]])
-    elif "DRIVERS_DOOR_OPEN" in cp.vl["SCM_BUTTONS"]:
-      ret.doorOpen = bool(cp.vl["SCM_BUTTONS"]["DRIVERS_DOOR_OPEN"])
-    else:
-      ret.doorOpen = bool(cp.vl["SCM_FEEDBACK"]["DRIVERS_DOOR_OPEN"])
+      ret.doorOpen |= any([cp.vl["DOORS_STATUS"]["DOOR_OPEN_FL"], cp.vl["DOORS_STATUS"]["DOOR_OPEN_FR"],
+                           cp.vl["DOORS_STATUS"]["DOOR_OPEN_RL"], cp.vl["DOORS_STATUS"]["DOOR_OPEN_RR"]])
 
     ret.seatbeltUnlatched = bool(cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LAMP"] or not cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LATCHED"])
 
