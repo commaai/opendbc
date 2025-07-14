@@ -2,7 +2,6 @@ from dataclasses import dataclass, field
 from enum import StrEnum, IntFlag
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, structs, uds
-from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts, Device
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries, p16
 from opendbc.car.vin import Vin
 
@@ -25,13 +24,6 @@ class ModelYear(StrEnum):
 
 
 @dataclass
-class RivianCarDocs(CarDocs):
-  package: str = "All"
-  car_parts: CarParts = field(default_factory=CarParts([Device.threex_angled_mount, CarHarness.rivian]))
-  setup_video: str = "https://youtu.be/uaISd1j7Z4U"
-
-
-@dataclass
 class RivianPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'rivian_primary_actuator', Bus.radar: 'rivian_mando_front_radar_generated'})
   wmis: set[WMI] = field(default_factory=set)
@@ -41,11 +33,7 @@ class RivianPlatformConfig(PlatformConfig):
 
 class CAR(Platforms):
   RIVIAN_R1_GEN1 = RivianPlatformConfig(
-    # TODO: verify this
-    [
-      RivianCarDocs("Rivian R1S 2022-24"),
-      RivianCarDocs("Rivian R1T 2022-24"),
-    ],
+    [],
     CarSpecs(mass=3206., wheelbase=3.08, steerRatio=15.2),
     wmis={WMI.RIVIAN_TRUCK, WMI.RIVIAN_MPV},
     lines={ModelLine.R1T, ModelLine.R1S},
