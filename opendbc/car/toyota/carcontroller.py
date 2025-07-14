@@ -65,8 +65,8 @@ class CarController(CarControllerBase):
     self.aego = FirstOrderFilter(0.0, 0.25, DT_CTRL * 3)
     self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
 
-    self.pitch2 = FirstOrderFilter(0, 1, DT_CTRL)
-    self.pitch_compensation = FirstOrderFilter(0, 1, DT_CTRL)
+    self.pitch2 = FirstOrderFilter(0, 2, DT_CTRL)
+    # self.pitch_compensation = FirstOrderFilter(0, 2, DT_CTRL)
 
     self.accel = 0
     self.prev_accel = 0
@@ -232,10 +232,14 @@ class CarController(CarControllerBase):
           # high pass filter
           # pitch_compensation =
           # pitch = self.pitch2.x * ACCELERATION_DUE_TO_GRAVITY
-          accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY
+          # accel_due_to_pitch = math.sin(CC.orientationNED[1]) * ACCELERATION_DUE_TO_GRAVITY
+          # filtered_accel_due_to_pitch = math.sin(self.pitch2.x) * ACCELERATION_DUE_TO_GRAVITY
 
-          self.pitch_compensation.update(accel_due_to_pitch)
-          pcm_accel_cmd += accel_due_to_pitch - self.pitch_compensation.x
+          high_pass_pitch = CC.orientationNED[1] - self.pitch2.x
+          pitch_compensation = math.sin(high_pass_pitch) * ACCELERATION_DUE_TO_GRAVITY
+
+          print(f"high_pass_pitch: {high_pass_pitch}, pitch: {self.pitch2.x}")
+          pcm_accel_cmd += pitch_compensation
 
         else:
           self.long_pid.reset()
