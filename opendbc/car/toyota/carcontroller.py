@@ -232,7 +232,7 @@ class CarController(CarControllerBase):
           # high pass filter
           pitch = 0
           if len(CC.orientationNED) == 3:
-            pitch = CC.orientationNED[1]
+            pitch = CC.orientationNED[1]  # apply minor amount of low pass to this for smoothness
           high_pass_pitch = pitch - self.pitch2.x
           pitch_compensation = math.sin(high_pass_pitch) * ACCELERATION_DUE_TO_GRAVITY
 
