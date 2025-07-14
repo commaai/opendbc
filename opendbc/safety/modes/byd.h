@@ -25,26 +25,26 @@ static void byd_rx_hook(const CANPacket_t *to_push) {
     }
 
     // vehicle speed
-    if (addr == 290) {
-      // average of FL and BL
-      uint16_t fl_ms = (GET_BYTE(to_push, 1) << 8) | (GET_BYTE(to_push, 0));
-      uint16_t bl_ms = (GET_BYTE(to_push, 5) << 8) | (GET_BYTE(to_push, 4));
-      vehicle_moving = (fl_ms | bl_ms) != 0U;
-      UPDATE_VEHICLE_SPEED((fl_ms + bl_ms) / 2.0 * 0.1 * KPH_TO_MS);
+    if (addr == 496) {
+      // average of FL and BR
+      uint16_t fl_ms = ((GET_BYTE(to_push, 1) & 0x000FU) << 8) | (GET_BYTE(to_push, 0));
+      uint16_t br_ms = ((GET_BYTE(to_push, 6) & 0x000FU) << 8) | (GET_BYTE(to_push, 5));
+      vehicle_moving = (fl_ms | br_ms) != 0U;
+      UPDATE_VEHICLE_SPEED((fl_ms + br_ms) / 2.0 * 0.1 * KPH_TO_MS);
     }
 
     // engage logic with buttons
     if (addr == 944) {
       // TODO: does it have to be on the rising edge
-      int set_pressed = (GET_BYTE(to_push, 0) >> 3U) & 1U;
-      int res_pressed = (GET_BYTE(to_push, 0) >> 4U) & 1U;
-      int cancel = (GET_BYTE(to_push, 2) >> 3U) & 1U;
+      bool set_pressed = ((GET_BYTE(to_push, 0) >> 3U) & 1U) == 1U;
+      bool res_pressed = ((GET_BYTE(to_push, 0) >> 4U) & 1U) == 1U;
+      bool cancel = ((GET_BYTE(to_push, 2) >> 3U) & 1U) == 1U;
 
       if (set_pressed || res_pressed) {
         controls_allowed = true;
       }
 
-      if (cancel != 0) {
+      if (cancel) {
         controls_allowed = false;
       }
     }
@@ -53,8 +53,8 @@ static void byd_rx_hook(const CANPacket_t *to_push) {
   if (bus == 2) {
     // cruise enabled
     if (addr == 814) {
-      bool engaged = (GET_BYTE(to_push, 5) >> 4) & 1U;
-      pcm_cruise_check(engaged);
+      bool engaged_active_low = (GET_BYTE(to_push, 5) >> 4) & 1U;
+      pcm_cruise_check(engaged_active_low);
     }
   }
 }
@@ -87,7 +87,7 @@ static bool byd_tx_hook(const CANPacket_t *to_send) {
   if (addr == 482) {
 
     int desired_angle = (GET_BYTES(to_send, 3, 2) & 0xFFFFU);
-    bool lka_active = (GET_BYTE(to_send, 2) >> 5) & 1U;
+    bool lka_active = GET_BYTE(to_send, 1) & 1U;
 
     desired_angle = to_signed(desired_angle, 16);
 
@@ -105,7 +105,6 @@ static bool byd_tx_hook(const CANPacket_t *to_send) {
   if (violation) {
     tx = false;
   }
-
   return tx;
 }
 
@@ -130,7 +129,7 @@ static safety_config byd_init(uint16_t param) {
 
   static RxCheck byd_rx_checks[] = {
     {.msg = {{287, 0, 5, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 100U}, { 0 }, { 0 }}}, // STEER_MODULE_2
-    {.msg = {{290, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},  // WHEEL_SPEED
+    {.msg = {{496, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},  // WHEEL_SPEED2
     {.msg = {{508, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},  // STEERING_TORQUE
     {.msg = {{834, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},  // PEDAL
     {.msg = {{944, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 20U}, { 0 }, { 0 }}},  // PCM_BUTTONS
@@ -140,8 +139,7 @@ static safety_config byd_init(uint16_t param) {
   safety_config ret;
   if (byd_longitudinal) {
     ret = BUILD_SAFETY_CFG(byd_rx_checks, BYD_TX_LONG_MSGS);
-  }
-  else {
+  } else {
     ret = BUILD_SAFETY_CFG(byd_rx_checks, BYD_TX_MSGS);
   }
 

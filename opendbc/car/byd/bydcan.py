@@ -1,17 +1,14 @@
-def create_can_steer_command(packer, steer_angle, steer_req, is_standstill, ecu_fault, recovery_btn):
+from opendbc.car.byd.values import BydSteerStates
+
+def create_can_steer_command(packer, steer_angle, steer_req, is_standstill, steer_state):
 
   set_me_xe = 0xE if is_standstill else 0xB
-  eps_ok = not steer_req
-  if recovery_btn:
-    eps_ok = ecu_fault
 
   values = {
     "STEER_REQ": steer_req,
     # to recover from ecu fault, it must be momentarily pulled low.
-    "EPS_OK": eps_ok,
+    "STEER_STATE": BydSteerStates.STEER_ENABLED if steer_req else steer_state,
     "STEER_ANGLE": steer_angle,
-    # must be 0x1 to steer
-    "SET_ME_X01": 0x1 if steer_req else 0,
     # 0xB fault lesser, maybe higher value fault lesser, 0xB also seem to have the highest angle limit at high speed.
     "SET_ME_XE": set_me_xe if steer_req else 0,
     "SET_ME_FF": 0xFF,
@@ -24,7 +21,7 @@ def create_can_steer_command(packer, steer_angle, steer_req, is_standstill, ecu_
   return packer.make_can_msg("STEERING_MODULE_ADAS", 0, values)
 
 def create_accel_command(packer, accel, enabled, brake_hold):
-  accel = max(min(accel * 15, 30), -50)
+  accel = max(min(accel * 13, 30), -50)
   accel_factor = 12 if accel >= 2 else 5 if accel < 0 else 11
   enabled &= not brake_hold
 
@@ -55,23 +52,15 @@ def create_accel_command(packer, accel, enabled, brake_hold):
 
   return packer.make_can_msg("ACC_CMD", 0, values)
 
-def create_lkas_hud(packer, enabled, lss_state, lss_alert, tsr, ahb, passthrough,\
-    hma, lka_on):
+def create_lkas_hud(packer, hud_pt, settings_pt, enabled, lka_on):
 
   values = {
-    "STEER_ACTIVE_ACTIVE_LOW": lka_on,
-    "LEFT_LANE_VISIBLE": enabled and lka_on,
-    "LKAS_ENABLED": enabled and lka_on,
-    "RIGHT_LANE_VISIBLE": enabled and lka_on,
-    "LSS_STATE": lss_state,
-    "SET_ME_1_2": 1,
-    "SETTINGS": lss_alert,
-    "SET_ME_X5F": ahb,
-    "SET_ME_XFF": passthrough,
+    "ADAS_SETTINGS_PT": settings_pt,
+    "HUD_PASSTHROUGH": hud_pt,
     # TODO integrate warning signs when steer limited
     "HAND_ON_WHEEL_WARNING": 0,
-    "TSR": tsr,
-    "HMA": hma,
+    "LKAS_ENABLED_ACTIVE_LOW": lka_on,
+    "LKAS_ACTIVE": enabled and lka_on,
   }
 
   return packer.make_can_msg("LKAS_HUD_ADAS", 0, values)

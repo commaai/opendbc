@@ -7,6 +7,11 @@ from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
 
+class BydSteerStates(IntFlag):
+  IDLE = 0
+  FAULTED = 1
+  STEER_ENABLED = 2
+
 class CANBUS:
   main_bus = 0
   radar_bus = 1
@@ -30,15 +35,15 @@ class BYDPlatformConfig(PlatformConfig):
 class CAR(Platforms):
   BYD_ATTO3 = BYDPlatformConfig(
     [BydCarDocs("BYD ATTO 3 2022-24")],
-    CarSpecs(mass=2090., wheelbase=2.72, steerRatio=16.0)
+    CarSpecs(mass=2090., wheelbase=2.72, steerRatio=16.0, centerToFrontRatio=0.44)
   )
 
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
     Request(
-        [StdQueries.UDS_VERSION_REQUEST],
-        [StdQueries.UDS_VERSION_RESPONSE],
-        bus=0,
+      [StdQueries.UDS_VERSION_REQUEST],
+      [StdQueries.UDS_VERSION_RESPONSE],
+      bus=0,
     )],
 )
 

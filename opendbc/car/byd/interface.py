@@ -16,11 +16,9 @@ class CarInterface(CarInterfaceBase):
     ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.byd)]
 
     ret.steerControlType = structs.CarParams.SteerControlType.angle
-    ret.steerLimitTimer = 0.1              # time before steerLimitAlert is issued
+    ret.steerLimitTimer = 0.4             # time before steerLimitAlert is issued
     ret.steerActuatorDelay = 0.1          # Steering wheel actuator delay in seconds
 
-    ret.steerAtStandstill = False
-    ret.centerToFront = ret.wheelbase * 0.44
     ret.wheelSpeedFactor = 0.695
     ret.radarUnavailable = True
 
