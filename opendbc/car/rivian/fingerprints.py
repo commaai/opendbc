@@ -11,4 +11,11 @@ FW_VERSIONS = {
       b'R1TS_v4.4.1(63),4.4.1\x00',
     ],
   },
+  CAR.RIVIAN_R1_GEN2: {
+    (Ecu.eps, 0x733, None): [
+      # Gen2 firmware versions - to be populated with actual values
+      b'R1TS_v5.0.0(70),5.0.0\x00',
+      b'R1TS_v5.1.0(71),5.1.0\x00',
+    ],
+  },
 }

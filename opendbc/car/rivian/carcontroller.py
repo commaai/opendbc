@@ -14,17 +14,22 @@ class CarController(CarControllerBase):
 
     self.cancel_frames = 0
 
+    # Select appropriate controller parameters based on platform
+    # Note: We use a simple approach since CarParams doesn't store platform info
+    # In practice, this would be determined by firmware fingerprinting
+    self.params = CarControllerParams(CP)
+
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     can_sends = []
 
     apply_torque = 0
-    steer_max = round(float(np.interp(CS.out.vEgoRaw, CarControllerParams.STEER_MAX_LOOKUP[0],
-                                      CarControllerParams.STEER_MAX_LOOKUP[1])))
+    steer_max = round(float(np.interp(CS.out.vEgoRaw, self.params.STEER_MAX_LOOKUP[0],
+                                      self.params.STEER_MAX_LOOKUP[1])))
     if CC.latActive:
       new_torque = int(round(CC.actuators.torque * steer_max))
       apply_torque = apply_driver_steer_torque_limits(new_torque, self.apply_torque_last,
-                                                      CS.out.steeringTorque, CarControllerParams, steer_max)
+                                                      CS.out.steeringTorque, self.params, steer_max)
 
     # send steering command
     self.apply_torque_last = apply_torque
@@ -35,7 +40,7 @@ class CarController(CarControllerBase):
 
     # Longitudinal control
     if self.CP.openpilotLongitudinalControl:
-      accel = float(np.clip(actuators.accel, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX))
+      accel = float(np.clip(actuators.accel, self.params.ACCEL_MIN, self.params.ACCEL_MAX))
       can_sends.append(create_longitudinal(self.packer, self.frame, accel, CC.enabled))
     else:
       interface_status = None

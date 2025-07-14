@@ -22,12 +22,22 @@ class ModelYear(StrEnum):
   P_2023 = "P"
   R_2024 = "R"
   S_2025 = "S"
+  T_2026 = "T"  # Gen2 start year
+  U_2027 = "U"
+  V_2028 = "V"
 
 
 @dataclass
 class RivianCarDocs(CarDocs):
   package: str = "All"
   car_parts: CarParts = field(default_factory=CarParts([Device.threex_angled_mount, CarHarness.rivian]))
+  setup_video: str = "https://youtu.be/uaISd1j7Z4U"
+
+
+@dataclass
+class RivianGen2CarDocs(CarDocs):
+  package: str = "All"
+  car_parts: CarParts = field(default_factory=CarParts([Device.threex_angled_mount, CarHarness.rivian_gen2]))
   setup_video: str = "https://youtu.be/uaISd1j7Z4U"
 
 
@@ -50,6 +60,17 @@ class CAR(Platforms):
     wmis={WMI.RIVIAN_TRUCK, WMI.RIVIAN_MPV},
     lines={ModelLine.R1T, ModelLine.R1S},
     years={ModelYear.N_2022, ModelYear.P_2023, ModelYear.R_2024},
+  )
+
+  RIVIAN_R1_GEN2 = RivianPlatformConfig(
+    [
+      RivianGen2CarDocs("Rivian R1S 2026-28"),
+      RivianGen2CarDocs("Rivian R1T 2026-28"),
+    ],
+    CarSpecs(mass=3206., wheelbase=3.08, steerRatio=15.2),
+    wmis={WMI.RIVIAN_TRUCK, WMI.RIVIAN_MPV},
+    lines={ModelLine.R1T, ModelLine.R1S},
+    years={ModelYear.T_2026, ModelYear.U_2027, ModelYear.V_2028},
   )
 
 
@@ -129,6 +150,21 @@ class CarControllerParams:
 
   def __init__(self, CP):
     pass
+
+
+class Gen2CarControllerParams(CarControllerParams):
+  # Enhanced parameters for Gen2 Rivian vehicles with improved steering response
+  STEER_MAX = 300  # Increased max torque for Gen2
+  STEER_MAX_LOOKUP = [9, 17], [400, 300]  # Higher torque values for Gen2
+  STEER_STEP = 1
+  STEER_DELTA_UP = 4  # Faster torque increase for Gen2
+  STEER_DELTA_DOWN = 6  # Faster torque decrease for Gen2
+  STEER_DRIVER_ALLOWANCE = 120  # Increased driver allowance for Gen2
+  STEER_DRIVER_MULTIPLIER = 1.8  # Slightly reduced for better feel
+  STEER_DRIVER_FACTOR = 100
+
+  ACCEL_MIN = -4.0  # Enhanced braking for Gen2
+  ACCEL_MAX = 2.5  # Enhanced acceleration for Gen2
 
 
 class RivianSafetyFlags(IntFlag):
