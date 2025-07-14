@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import numpy as np
-from opendbc.car import get_safety_config, structs
+from opendbc.car import get_safety_config, structs, uds
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.disable_ecu import disable_ecu
 from opendbc.car.honda.hondacan import CanBus
@@ -65,6 +65,11 @@ class CarInterface(CarInterfaceBase):
     # Detect Bosch cars with new HUD msgs
     if any(0x33DA in f for f in fingerprint.values()):
       ret.flags |= HondaFlags.BOSCH_EXT_HUD.value
+
+    if 0x405 in fingerprint[CAN.pt]:
+      ret.flags |= HondaFlags.HAS_ALL_DOOR_STATES.value
+    if 0x1C2 in fingerprint[CAN.pt]:
+      ret.flags |= HondaFlags.HAS_EPB.value
 
     if ret.flags & HondaFlags.ALLOW_MANUAL_TRANS and all(msg not in fingerprint[CAN.pt] for msg in (0x191, 0x1A3)):
       # Manual transmission support for allowlisted cars only, to prevent silent fall-through on auto-detection failures
@@ -236,6 +241,16 @@ class CarInterface(CarInterfaceBase):
     return ret
 
   @staticmethod
-  def init(CP, can_recv, can_send):
+  def init(CP, can_recv, can_send, communication_control=None):
     if CP.carFingerprint in (HONDA_BOSCH - HONDA_BOSCH_RADARLESS) and CP.openpilotLongitudinalControl:
-      disable_ecu(can_recv, can_send, bus=CanBus(CP).pt, addr=0x18DAB0F1, com_cont_req=b'\x28\x83\x03')
+      # 0x80 silences response
+      if communication_control is None:
+        communication_control = bytes([uds.SERVICE_TYPE.COMMUNICATION_CONTROL, 0x80 | uds.CONTROL_TYPE.DISABLE_RX_DISABLE_TX,
+                                       uds.MESSAGE_TYPE.NORMAL_AND_NETWORK_MANAGEMENT])
+      disable_ecu(can_recv, can_send, bus=CanBus(CP).pt, addr=0x18DAB0F1, com_cont_req=communication_control)
+
+  @staticmethod
+  def deinit(CP, can_recv, can_send):
+    communication_control = bytes([uds.SERVICE_TYPE.COMMUNICATION_CONTROL, 0x80 | uds.CONTROL_TYPE.ENABLE_RX_ENABLE_TX,
+                                   uds.MESSAGE_TYPE.NORMAL_AND_NETWORK_MANAGEMENT])
+    CarInterface.init(CP, can_recv, can_send, communication_control)

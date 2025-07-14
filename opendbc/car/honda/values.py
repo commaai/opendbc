@@ -71,7 +71,9 @@ class HondaFlags(IntFlag):
 
   BOSCH_CANFD = 128
 
-  ALLOW_MANUAL_TRANS = 256
+  HAS_ALL_DOOR_STATES = 256  # Some Hondas have all door states, others only driver door
+  HAS_EPB = 512
+  ALLOW_MANUAL_TRANS = 1024
 
 # Car button codes
 class CruiseButtons:
