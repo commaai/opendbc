@@ -40,9 +40,10 @@ class CarControllerParams:
 
   def __init__(self, CP):
     self.STEER_MAX = CP.lateralParams.torqueBP[-1]
-    # mirror of list (assuming first item is zero) for interp of signed request values
-    assert(CP.lateralParams.torqueBP[0] == 0)
-    assert(CP.lateralParams.torqueBP[0] == 0)
+    # mirror of list (assuming first item is zero) for interp of signed request
+    # values and verify that both arrays begin at zero
+    assert CP.lateralParams.torqueBP[0] == 0
+    assert CP.lateralParams.torqueV[0] == 0
     self.STEER_LOOKUP_BP = [v * -1 for v in CP.lateralParams.torqueBP][1:][::-1] + list(CP.lateralParams.torqueBP)
     self.STEER_LOOKUP_V = [v * -1 for v in CP.lateralParams.torqueV][1:][::-1] + list(CP.lateralParams.torqueV)
 
@@ -69,6 +70,8 @@ class HondaFlags(IntFlag):
   NIDEC_ALT_SCM_MESSAGES = 64
 
   BOSCH_CANFD = 128
+
+  HAS_EPB = 512
 
 # Car button codes
 class CruiseButtons:
@@ -174,7 +177,7 @@ class CAR(Platforms):
     [
       HondaCarDocs("Honda Civic 2022-24", "All", video="https://youtu.be/ytiOT5lcp6Q"),
       HondaCarDocs("Honda Civic Hatchback 2022-24", "All", video="https://youtu.be/ytiOT5lcp6Q"),
-      HondaCarDocs("Honda Civic Hatchback Hybrid 2023 (Europe only)", "All"),
+      HondaCarDocs("Honda Civic Hatchback Hybrid (Europe only) 2023", "All"),
       # TODO: Confirm 2024
       HondaCarDocs("Honda Civic Hatchback Hybrid 2025", "All"),
     ],

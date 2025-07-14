@@ -135,11 +135,11 @@ class CarInterfaceBase(ABC):
     """
     Parameters essential to controlling the car may be incomplete or wrong without FW versions or fingerprints.
     """
-    return cls.get_params(candidate, gen_empty_fingerprint(), list(), False, False)
+    return cls.get_params(candidate, gen_empty_fingerprint(), list(), False, False, False)
 
   @classmethod
   def get_params(cls, candidate: str, fingerprint: dict[int, dict[int, int]], car_fw: list[structs.CarParams.CarFw],
-                 alpha_long: bool, docs: bool) -> structs.CarParams:
+                 alpha_long: bool, is_release: bool, docs: bool) -> structs.CarParams:
     ret = CarInterfaceBase.get_std_params(candidate)
 
     platform = PLATFORMS[candidate]
@@ -152,7 +152,7 @@ class CarInterfaceBase(ABC):
     ret.tireStiffnessFactor = platform.config.specs.tireStiffnessFactor
     ret.flags |= int(platform.config.flags)
 
-    ret = cls._get_params(ret, candidate, fingerprint, car_fw, alpha_long, docs)
+    ret = cls._get_params(ret, candidate, fingerprint, car_fw, alpha_long, is_release, docs)
 
     # Vehicle mass is published curb weight plus assumed payload such as a human driver; notCars have no assumed payload
     if not ret.notCar:
@@ -167,12 +167,16 @@ class CarInterfaceBase(ABC):
   @staticmethod
   @abstractmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint: dict[int, dict[int, int]],
-                  car_fw: list[structs.CarParams.CarFw], alpha_long: bool, docs: bool) -> structs.CarParams:
+                  car_fw: list[structs.CarParams.CarFw], alpha_long: bool, is_release: bool, docs: bool) -> structs.CarParams:
     raise NotImplementedError
 
   @staticmethod
   def init(CP: structs.CarParams, can_recv: CanRecvCallable, can_send: CanSendCallable):
-    pass
+    """Used to disable longitudinal ECUs as needed"""
+
+  @staticmethod
+  def deinit(CP: structs.CarParams, can_recv: CanRecvCallable, can_send: CanSendCallable):
+    """Used to re-enable longitudinal ECUs as needed"""
 
   @staticmethod
   def get_steer_feedforward_default(desired_angle, v_ego):
@@ -226,21 +230,17 @@ class CarInterfaceBase(ABC):
     return ret
 
   @staticmethod
-  def configure_torque_tune(candidate: str, tune: structs.CarParams.LateralTuning, steering_angle_deadzone_deg: float = 0.0, use_steering_angle: bool = True):
+  def configure_torque_tune(candidate: str, tune: structs.CarParams.LateralTuning, steering_angle_deadzone_deg: float = 0.0):
     params = get_torque_params()[candidate]
 
     tune.init('torque')
-    tune.torque.useSteeringAngle = use_steering_angle
     tune.torque.kp = 1.0
     tune.torque.kf = 1.0
-    tune.torque.ki = 0.1
+    tune.torque.ki = 0.3
     tune.torque.friction = params['FRICTION']
     tune.torque.latAccelFactor = params['LAT_ACCEL_FACTOR']
     tune.torque.latAccelOffset = 0.0
     tune.torque.steeringAngleDeadzoneDeg = steering_angle_deadzone_deg
-
-  def _update(self) -> structs.CarState:
-    return self.CS.update(self.can_parsers)
 
   def update(self, can_packets: list[tuple[int, list[CanData]]]) -> structs.CarState:
     # parse can
@@ -249,7 +249,7 @@ class CarInterfaceBase(ABC):
         cp.update_strings(can_packets)
 
     # get CarState
-    ret = self._update()
+    ret = self.CS.update(self.can_parsers)
 
     ret.canValid = all(cp.can_valid for cp in self.can_parsers.values())
     ret.canTimeout = any(cp.bus_timeout for cp in self.can_parsers.values())
@@ -287,6 +287,7 @@ class CarStateBase(ABC):
     self.steering_pressed_cnt = 0
     self.left_blinker_prev = False
     self.right_blinker_prev = False
+    self.low_speed_alert = False
     self.cluster_speed_hyst_gap = 0.0
     self.cluster_min_speed = 0.0  # min speed before dropping to 0
     self.secoc_key: bytes = b"00" * 16
@@ -330,8 +331,8 @@ class CarStateBase(ABC):
 
   def update_steering_pressed(self, steering_pressed, steering_pressed_min_count):
     """Applies filtering on steering pressed for noisy driver torque signals."""
-    self.steering_pressed_cnt = self.steering_pressed_cnt + 1 if steering_pressed else 0
-    self.steering_pressed_cnt = min(self.steering_pressed_cnt, steering_pressed_min_count + 1)
+    self.steering_pressed_cnt += 1 if steering_pressed else -1
+    self.steering_pressed_cnt = int(np.clip(self.steering_pressed_cnt, 0, steering_pressed_min_count * 2 + 1))
     return self.steering_pressed_cnt > steering_pressed_min_count
 
   def update_blinker_from_stalk(self, blinker_time: int, left_blinker_stalk: bool, right_blinker_stalk: bool):

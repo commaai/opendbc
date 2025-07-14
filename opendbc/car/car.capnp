@@ -207,6 +207,7 @@ struct CarState {
   espActive @51 :Bool;
   vehicleSensorsInvalid @52 :Bool;  # invalid steering angle readings, etc.
   lowSpeedAlert @56 :Bool;  # lost steering control due to a dynamic min steering speed
+  blockPcmEnable @60 :Bool;  # whether to allow PCM to enable this frame
 
   # cruise state
   cruiseState @10 :CruiseState;
@@ -553,7 +554,6 @@ struct CarParams {
   }
 
   struct LateralTorqueTuning {
-    useSteeringAngle @0 :Bool;
     kp @1 :Float32;
     ki @2 :Float32;
     friction @3 :Float32;
@@ -561,6 +561,7 @@ struct CarParams {
     steeringAngleDeadzoneDeg @5 :Float32;
     latAccelFactor @6 :Float32;
     latAccelOffset @7 :Float32;
+    useSteeringAngleDEPRECATED @0 :Bool;
   }
 
   struct LongitudinalPIDTuning {

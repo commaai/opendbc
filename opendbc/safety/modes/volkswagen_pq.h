@@ -1,7 +1,7 @@
 #pragma once
 
-#include "safety_declarations.h"
-#include "safety_volkswagen_common.h"
+#include "opendbc/safety/safety_declarations.h"
+#include "opendbc/safety/modes/volkswagen_common.h"
 
 #define MSG_LENKHILFE_3         0x0D0   // RX from EPS, for steering angle and driver steering torque
 #define MSG_HCA_1               0x0D2   // TX by OP, Heading Control Assist steering torque
@@ -59,12 +59,12 @@ static safety_config volkswagen_pq_init(uint16_t param) {
                                                 {MSG_ACC_SYSTEM, 0, 8, .check_relay = true}, {MSG_ACC_GRA_ANZEIGE, 0, 8, .check_relay = true}};
 
   static RxCheck volkswagen_pq_rx_checks[] = {
-    {.msg = {{MSG_LENKHILFE_3, 0, 6, .max_counter = 15U, .frequency = 100U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_BREMSE_1, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_MOTOR_2, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_MOTOR_3, 0, 8, .ignore_checksum = true, .ignore_counter = true, .frequency = 100U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_MOTOR_5, 0, 8, .ignore_counter = true, .frequency = 50U}, { 0 }, { 0 }}},
-    {.msg = {{MSG_GRA_NEU, 0, 4, .max_counter = 15U, .frequency = 30U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_LENKHILFE_3, 0, 6, .max_counter = 15U, .ignore_quality_flag = true, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_BREMSE_1, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_MOTOR_2, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_MOTOR_3, 0, 8, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 100U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_MOTOR_5, 0, 8, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},
+    {.msg = {{MSG_GRA_NEU, 0, 4, .max_counter = 15U, .ignore_quality_flag = true, .frequency = 30U}, { 0 }, { 0 }}},
   };
 
   UNUSED(param);

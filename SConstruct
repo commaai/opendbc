@@ -30,10 +30,6 @@ AddOption('--ubsan',
           action='store_true',
           help='turn on UBSan')
 
-AddOption('--coverage',
-          action='store_true',
-          help='build with test coverage options')
-
 AddOption('--mutation',
           action='store_true',
           help='generate mutation-ready code')
@@ -64,8 +60,10 @@ env = Environment(
   CXXFLAGS=["-std=c++1z"],
   CPPPATH=cpppath,
   CYTHONCFILESUFFIX=".cpp",
-  tools=["default", "cython"]
+  tools=["default", "cython", "compilation_db"]
 )
+
+env.CompilationDatabase('compile_commands.json')
 
 common = ''
 Export('env', 'arch', 'common')

@@ -15,8 +15,9 @@
 *.html
 *.gcda
 *.gcno
-
+*.dump
 uv.lock
+/dist/
 
 opendbc/can/build/
 opendbc/can/obj/
@@ -28,3 +29,5 @@ opendbc/dbc/*_generated.dbc
 
 cppcheck-addon-ctu-file-list
 opendbc/safety/tests/coverage-out
+
+compile_commands.json
