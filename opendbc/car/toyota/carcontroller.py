@@ -196,13 +196,6 @@ class CarController(CarControllerBase):
         # internal PCM gas command can get stuck unwinding from negative accel so we apply a generous rate limit
         pcm_accel_cmd = actuators.accel
         if CC.longActive:
-          # high pass filter
-          high_pass_pitch = CC.orientationNED[1] - self.pitch2.x
-          pitch_compensation = math.sin(high_pass_pitch) * ACCELERATION_DUE_TO_GRAVITY
-
-          print(f"high_pass_pitch: {high_pass_pitch}, pitch: {self.pitch2.x}")
-          pcm_accel_cmd += pitch_compensation
-
           pcm_accel_cmd = rate_limit(pcm_accel_cmd, self.prev_accel, ACCEL_WINDDOWN_LIMIT, ACCEL_WINDUP_LIMIT)
         self.prev_accel = pcm_accel_cmd
 
@@ -235,6 +228,13 @@ class CarController(CarControllerBase):
                                                speed=CS.out.vEgo,
                                                feedforward=pcm_accel_cmd,
                                                freeze_integrator=actuators.longControlState != LongCtrlState.pid)
+
+          # high pass filter
+          high_pass_pitch = CC.orientationNED[1] - self.pitch2.x
+          pitch_compensation = math.sin(high_pass_pitch) * ACCELERATION_DUE_TO_GRAVITY
+
+          print(f"high_pass_pitch: {high_pass_pitch}, pitch: {self.pitch2.x}")
+          pcm_accel_cmd += pitch_compensation
 
         else:
           self.long_pid.reset()
