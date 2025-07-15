@@ -69,8 +69,8 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.PandaCarSafetyTest, common.
     return self.packer.make_can_msg_panda(self.GAS_MSG[0], self.PT_BUS, values)
 
   def _pcm_status_msg(self, enable):
-    values = {"ACCMode": 1 if enable else 0}
-    return self.packer.make_can_msg_panda("SCC_CONTROL", self.SCC_BUS, values)
+    values = {"SCC_OpSta": 1 if enable else 0}
+    return self.packer.make_can_msg_panda("ADAS_CMD_20_20ms", self.SCC_BUS, values)
 
   def _button_msg(self, buttons, main_button=0, bus=None):
     if bus is None:
@@ -130,8 +130,8 @@ class TestHyundaiCanfdLFASteeringAltButtonsBase(TestHyundaiCanfdLFASteeringBase)
     return self.packer.make_can_msg_panda("CRUISE_BUTTONS_ALT", self.PT_BUS, values)
 
   def _acc_cancel_msg(self, cancel, accel=0):
-    values = {"ACCMode": 4 if cancel else 0, "aReqRaw": accel, "aReqValue": accel}
-    return self.packer.make_can_msg_panda("SCC_CONTROL", self.PT_BUS, values)
+    values = {"SCC_OpSta": 4 if cancel else 0, "aReqRaw": accel, "aReqValue": accel}
+    return self.packer.make_can_msg_panda("ADAS_CMD_20_20ms", self.PT_BUS, values)
 
   def test_button_sends(self):
     """
@@ -143,7 +143,7 @@ class TestHyundaiCanfdLFASteeringAltButtonsBase(TestHyundaiCanfdLFASteeringBase)
         self.assertFalse(self._tx(self._button_msg(btn)))
 
   def test_acc_cancel(self):
-    # FIXME: the CANFD_ALT_BUTTONS cars are the only ones that use SCC_CONTROL to cancel, why can't we use buttons?
+    # FIXME: the CANFD_ALT_BUTTONS cars are the only ones that use ADAS_CMD_20_20ms to cancel, why can't we use buttons?
     for enabled in (True, False):
       self.safety.set_controls_allowed(enabled)
       self.assertTrue(self._tx(self._acc_cancel_msg(True)))
@@ -199,7 +199,7 @@ class TestHyundaiCanfdLKASteeringLongEV(HyundaiLongitudinalBase, TestHyundaiCanf
   TX_MSGS = [[0x50, 0], [0x1CF, 1], [0x2A4, 0], [0x51, 0], [0x730, 1], [0x12a, 1], [0x160, 1],
              [0x1e0, 1], [0x1a0, 1], [0x1ea, 1], [0x200, 1], [0x345, 1], [0x1da, 1]]
 
-  RELAY_MALFUNCTION_ADDRS = {0: (0x50, 0x2a4), 1: (0x1a0,)}  # LKAS, CAM_0x2A4, SCC_CONTROL
+  RELAY_MALFUNCTION_ADDRS = {0: (0x50, 0x2a4), 1: (0x1a0,)}  # LKAS, CAM_0x2A4, ADAS_CMD_20_20ms
 
   DISABLED_ECU_UDS_MSG = (0x730, 1)
   DISABLED_ECU_ACTUATION_MSG = (0x1a0, 1)
@@ -220,7 +220,7 @@ class TestHyundaiCanfdLKASteeringLongEV(HyundaiLongitudinalBase, TestHyundaiCanf
       "aReqRaw": accel,
       "aReqValue": accel,
     }
-    return self.packer.make_can_msg_panda("SCC_CONTROL", 1, values)
+    return self.packer.make_can_msg_panda("ADAS_CMD_20_20ms", 1, values)
 
 
 # Tests longitudinal for ICE, hybrid, EV cars with LFA steering
@@ -228,7 +228,7 @@ class TestHyundaiCanfdLFASteeringLongBase(HyundaiLongitudinalBase, TestHyundaiCa
 
   FWD_BLACKLISTED_ADDRS = {2: [0x12a, 0x1e0, 0x1a0, 0x160]}
 
-  RELAY_MALFUNCTION_ADDRS = {0: (0x12A, 0x1E0, 0x1a0, 0x160)}  # LFA, LFAHDA_CLUSTER, SCC_CONTROL, ADRV_0x160
+  RELAY_MALFUNCTION_ADDRS = {0: (0x12A, 0x1E0, 0x1a0, 0x160)}  # LFA, LFAHDA_CLUSTER, ADAS_CMD_20_20ms, ADRV_0x160
 
   DISABLED_ECU_UDS_MSG = (0x7D0, 0)
   DISABLED_ECU_ACTUATION_MSG = (0x1a0, 0)
@@ -250,7 +250,7 @@ class TestHyundaiCanfdLFASteeringLongBase(HyundaiLongitudinalBase, TestHyundaiCa
       "aReqRaw": accel,
       "aReqValue": accel,
     }
-    return self.packer.make_can_msg_panda("SCC_CONTROL", 0, values)
+    return self.packer.make_can_msg_panda("ADAS_CMD_20_20ms", 0, values)
 
   def test_tester_present_allowed(self, ecu_disable: bool = True):
     super().test_tester_present_allowed(ecu_disable=not self.SAFETY_PARAM & HyundaiSafetyFlags.CAMERA_SCC)
@@ -280,7 +280,7 @@ class TestHyundaiCanfdLFASteeringLongAltButtons(TestHyundaiCanfdLFASteeringLongB
     self.safety.init_tests()
 
   def test_acc_cancel(self):
-    # Alt buttons does not use SCC_CONTROL to cancel if longitudinal
+    # Alt buttons does not use ADAS_CMD_20_20ms to cancel if longitudinal
     pass
 
 
