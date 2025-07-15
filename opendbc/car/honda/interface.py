@@ -69,8 +69,8 @@ class CarInterface(CarInterfaceBase):
     if 0x1C2 in fingerprint[CAN.pt]:
       ret.flags |= HondaFlags.HAS_EPB.value
 
-    # Accord ICE 1.5T CVT has different gearbox message
-    if candidate == CAR.HONDA_ACCORD and 0x191 in fingerprint[CAN.pt]:
+    # Accord ICE 1.5T CVT and CANFD CR-V have different gearbox message
+    if candidate in (CAR.HONDA_ACCORD, CAR.HONDA_CRV_6G) and 0x191 in fingerprint[CAN.pt]:
       ret.transmissionType = TransmissionType.cvt
     # Civic Type R is missing 0x191 and 0x1A3
     elif candidate == CAR.HONDA_CIVIC_2022 and all(msg not in fingerprint[CAN.pt] for msg in (0x191, 0x1A3)):
@@ -141,7 +141,7 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.8], [0.24]]
       ret.wheelSpeedFactor = 1.025
 
-    elif candidate == CAR.HONDA_CRV_5G:
+    elif candidate in (CAR.HONDA_CRV_5G, CAR.HONDA_CRV_6G):
       if eps_modified:
         # stock request input values:     0x0000, 0x00DB, 0x01BB, 0x0296, 0x0377, 0x0454, 0x0532, 0x0610, 0x067F
         # stock request output values:    0x0000, 0x0500, 0x0A15, 0x0E6D, 0x1100, 0x1200, 0x129A, 0x134D, 0x1400
