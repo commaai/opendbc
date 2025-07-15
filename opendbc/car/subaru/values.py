@@ -100,10 +100,6 @@ class SubaruCarDocs(CarDocs):
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.subaru_a]))
   footnotes: list[Enum] = field(default_factory=lambda: [Footnote.GLOBAL])
 
-  def init_make(self, CP: CarParams):
-    if CP.alphaLongitudinalAvailable:
-      self.footnotes.append(Footnote.EXP_LONG)
-
 
 @dataclass
 class SubaruPlatformConfig(PlatformConfig):
@@ -126,7 +122,7 @@ class SubaruGen2PlatformConfig(SubaruPlatformConfig):
 class CAR(Platforms):
   # Global platform
   SUBARU_ASCENT = SubaruPlatformConfig(
-    [SubaruCarDocs("Subaru Ascent 2019-21", "All")],
+    [SubaruCarDocs("Subaru Ascent 2019-21", "All", footnotes=[Footnote.GLOBAL, Footnote.EXP_LONG])],
     CarSpecs(mass=2031, wheelbase=2.89, steerRatio=13.5),
   )
   SUBARU_OUTBACK = SubaruGen2PlatformConfig(
@@ -139,17 +135,17 @@ class CAR(Platforms):
   )
   SUBARU_IMPREZA = SubaruPlatformConfig(
     [
-      SubaruCarDocs("Subaru Impreza 2017-19"),
-      SubaruCarDocs("Subaru Crosstrek 2018-19", video="https://youtu.be/Agww7oE1k-s?t=26"),
-      SubaruCarDocs("Subaru XV 2018-19", video="https://youtu.be/Agww7oE1k-s?t=26"),
+      SubaruCarDocs("Subaru Impreza 2017-19", footnotes=[Footnote.GLOBAL, Footnote.EXP_LONG]),
+      SubaruCarDocs("Subaru Crosstrek 2018-19", video="https://youtu.be/Agww7oE1k-s?t=26", footnotes=[Footnote.GLOBAL, Footnote.EXP_LONG]),
+      SubaruCarDocs("Subaru XV 2018-19", video="https://youtu.be/Agww7oE1k-s?t=26", footnotes=[Footnote.GLOBAL, Footnote.EXP_LONG]),
     ],
     CarSpecs(mass=1568, wheelbase=2.67, steerRatio=15),
   )
   SUBARU_IMPREZA_2020 = SubaruPlatformConfig(
     [
-      SubaruCarDocs("Subaru Impreza 2020-22"),
-      SubaruCarDocs("Subaru Crosstrek 2020-23"),
-      SubaruCarDocs("Subaru XV 2020-21"),
+      SubaruCarDocs("Subaru Impreza 2020-22", footnotes=[Footnote.GLOBAL, Footnote.EXP_LONG]),
+      SubaruCarDocs("Subaru Crosstrek 2020-23", footnotes=[Footnote.GLOBAL, Footnote.EXP_LONG]),
+      SubaruCarDocs("Subaru XV 2020-21", footnotes=[Footnote.GLOBAL, Footnote.EXP_LONG]),
     ],
     CarSpecs(mass=1480, wheelbase=2.67, steerRatio=17),
     flags=SubaruFlags.STEER_RATE_LIMITED,
@@ -161,7 +157,7 @@ class CAR(Platforms):
     flags=SubaruFlags.HYBRID,
   )
   SUBARU_FORESTER = SubaruPlatformConfig(
-    [SubaruCarDocs("Subaru Forester 2019-21", "All")],
+    [SubaruCarDocs("Subaru Forester 2019-21", "All", footnotes=[Footnote.GLOBAL, Footnote.EXP_LONG])],
     CarSpecs(mass=1568, wheelbase=2.67, steerRatio=17),
     flags=SubaruFlags.STEER_RATE_LIMITED,
   )
