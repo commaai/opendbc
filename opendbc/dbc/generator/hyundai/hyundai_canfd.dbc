@@ -669,6 +669,25 @@ BO_ 1264 LOCAL_TIME: 8 XXX
  SG_ MINUTES : 21|6@0+ (1,0) [0|63] "" XXX
  SG_ SECONDS : 31|8@0+ (1,0) [0|59] "" XXX
 
+CM_ SG_ 96 BRAKE_PRESSURE "User applied brake pedal pressure. Ramps from computer applied pressure on falling edge of cruise. Cruise cancels if !=0";
+CM_ SG_ 101 BRAKE_POSITION "User applied brake pedal position, max is ~700. Signed on some vehicles";
+CM_ SG_ 203 ADAS_ActvACISta "ADAS Active AngleControlInterface State";
+CM_ SG_ 203 ADAS_ActvACILvl2Sta "ADAS Active AngleControlInterface Level 2 State";
+CM_ SG_ 203 ADAS_StrAnglReqVal "(LFA) ADAS Steering Angle Request Value; Capped at 119.9;";
+CM_ SG_ 203 ADAS_ACIAnglTqRedcGainVal "(LFA) ADAS AngleControlInterface Angle Torque Reduction Gain Value";
+CM_ SG_ 203 FCA_ESA_ActvSta "FCA_ESA Active State";
+CM_ SG_ 203 FCA_ESA_TqBstGainVal "FCA_ESA Torque Boost Gain Value";
+CM_ BO_ 272 "Alternative LKAS message, used on cars such as 2023 Ioniq 6, 2nd gen Kona. Matches LKAS except size is 32 bytes";
+CM_ SG_ 272 LKA_AVAILABLE "Angle control cars: 3 when LKA is generally available, goes to 0 during changes with LFA";
+CM_ SG_ 272 ADAS_StrAnglReqVal "(LKAS) ADAS Steering Angle Request Value; Capped at 176.7; tracks MDPS->STEERING_ANGLE when not engaged, not STEERING_SENSORS->STEERING_ANGLE";
+CM_ SG_ 272 ADAS_ACIAnglTqRedcGainVal "(LKAS) ADAS AngleControlInterface Angle Torque Reduction Gain Value";
+CM_ SG_ 298 NEW_SIGNAL_4 "todo: figure out why always set to 9";
+CM_ SG_ 352 SET_ME_9 "has something to do with AEB settings";
+CM_ SG_ 373 ACCEnable "Likely a copy of CAN's TCS13->ACCEnable";
+CM_ SG_ 373 DriverBraking "Likely derived from BRAKE->BRAKE_POSITION";
+CM_ SG_ 373 DriverBrakingLowSens "Higher threshold version of DriverBraking";
+CM_ SG_ 373 PROBABLY_EQUIP "aeb equip?";
+CM_ SG_ 416 VSetDis "set speed in display units";
 CM_ BO_ 416 "SCC_CONTROL, this is the signal responsible for longitudinal control and a few warnings related to it.";
 CM_ SG_ 416 SCC_ObjDstVal "This signal provides the distance to the in lane detected SCC object regarding to the own vehicle. - 자차선상의 전방 인식된 물체와의 거리";
 CM_ SG_ 416 SCC_ObjRelSpdVal "This signal provides the relative speed to the in lane detected SCC object regarding to the own vehicle. - 자차선상의 전방 인식된 물체와 자차간 상대 속도";
