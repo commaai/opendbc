@@ -69,7 +69,7 @@ class CarInterface(CarInterfaceBase):
     if 0x1C2 in fingerprint[CAN.pt]:
       ret.flags |= HondaFlags.HAS_EPB.value
 
-    if candidate in HONDA_BOSCH_CANFD and not (0x184 in fingerprint[CAN.pt]:)
+    if candidate in HONDA_BOSCH_CANFD and 0x184 not in fingerprint[CAN.pt]:
       ret.flags |= HondaFlags.BOSCH_ALT_BRAKE.value
 
     if ret.flags & HondaFlags.ALLOW_MANUAL_TRANS and all(msg not in fingerprint[CAN.pt] for msg in (0x191, 0x1A3)):
