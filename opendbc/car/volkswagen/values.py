@@ -195,10 +195,7 @@ class VWCarDocs(CarDocs):
   package: str = "Adaptive Cruise Control (ACC) & Lane Assist"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.vw_j533]))
   footnotes: list[Enum] = field(default_factory=lambda: [Footnote.VW_EXP_LONG])
-
-  def init_make(self, CP: structs.CarParams):
-    if abs(CP.minSteerSpeed - CarControllerParams.DEFAULT_MIN_STEER_SPEED) < 1e-3:
-      self.min_steer_speed = 0
+  min_steer_speed: float = 0
 
 
 # Check the 7th and 8th characters of the VIN before adding a new CAR. If the
@@ -234,8 +231,8 @@ class CAR(Platforms):
   )
   VOLKSWAGEN_CADDY_MK3 = VolkswagenPQPlatformConfig(
     [
-      VWCarDocs("Volkswagen Caddy 2019"),
-      VWCarDocs("Volkswagen Caddy Maxi 2019"),
+      VWCarDocs("Volkswagen Caddy 2019", min_steer_speed=None),
+      VWCarDocs("Volkswagen Caddy Maxi 2019", min_steer_speed=None),
     ],
     VolkswagenCarSpecs(mass=1613, wheelbase=2.6, minSteerSpeed=21 * CV.KPH_TO_MS),
     chassis_codes={"2K"},
@@ -243,11 +240,11 @@ class CAR(Platforms):
   )
   VOLKSWAGEN_CRAFTER_MK2 = VolkswagenMQBPlatformConfig(
     [
-      VWCarDocs("Volkswagen Crafter 2017-24", video="https://youtu.be/4100gLeabmo", car_parts=CarParts([Device.threex_angled_mount, CarHarness.vw_j533])),
-      VWCarDocs("Volkswagen e-Crafter 2018-24", video="https://youtu.be/4100gLeabmo", car_parts=CarParts([Device.threex_angled_mount, CarHarness.vw_j533])),
-      VWCarDocs("Volkswagen Grand California 2019-24", video="https://youtu.be/4100gLeabmo", car_parts=CarParts([Device.threex_angled_mount, CarHarness.vw_j533])),
-      VWCarDocs("MAN TGE 2017-24", video="https://youtu.be/4100gLeabmo", car_parts=CarParts([Device.threex_angled_mount, CarHarness.vw_j533])),
-      VWCarDocs("MAN eTGE 2020-24", video="https://youtu.be/4100gLeabmo", car_parts=CarParts([Device.threex_angled_mount, CarHarness.vw_j533])),
+      VWCarDocs("Volkswagen Crafter 2017-24", video="https://youtu.be/4100gLeabmo", car_parts=CarParts([Device.threex_angled_mount, CarHarness.vw_j533]), min_steer_speed=None),
+      VWCarDocs("Volkswagen e-Crafter 2018-24", video="https://youtu.be/4100gLeabmo", car_parts=CarParts([Device.threex_angled_mount, CarHarness.vw_j533]), min_steer_speed=None),
+      VWCarDocs("Volkswagen Grand California 2019-24", video="https://youtu.be/4100gLeabmo", car_parts=CarParts([Device.threex_angled_mount, CarHarness.vw_j533]), min_steer_speed=None),
+      VWCarDocs("MAN TGE 2017-24", video="https://youtu.be/4100gLeabmo", car_parts=CarParts([Device.threex_angled_mount, CarHarness.vw_j533]), min_steer_speed=None),
+      VWCarDocs("MAN eTGE 2020-24", video="https://youtu.be/4100gLeabmo", car_parts=CarParts([Device.threex_angled_mount, CarHarness.vw_j533]), min_steer_speed=None),
     ],
     VolkswagenCarSpecs(mass=2100, wheelbase=3.64, minSteerSpeed=50 * CV.KPH_TO_MS),
     chassis_codes={"SY", "SZ", "UY", "UZ"},
@@ -269,7 +266,7 @@ class CAR(Platforms):
     wmis={WMI.VOLKSWAGEN_MEXICO_CAR, WMI.VOLKSWAGEN_EUROPE_CAR},
   )
   VOLKSWAGEN_JETTA_MK6 = VolkswagenPQPlatformConfig(
-    [VWCarDocs("Volkswagen Jetta 2015-18")],
+    [VWCarDocs("Volkswagen Jetta 2015-18", min_steer_speed=None)],
     VolkswagenCarSpecs(mass=1518, wheelbase=2.65, minSteerSpeed=50 * CV.KPH_TO_MS, minEnableSpeed=20 * CV.KPH_TO_MS),
     chassis_codes={"5K", "AJ"},
     wmis={WMI.VOLKSWAGEN_MEXICO_CAR},
@@ -294,7 +291,7 @@ class CAR(Platforms):
     wmis={WMI.VOLKSWAGEN_EUROPE_CAR},
   )
   VOLKSWAGEN_PASSAT_NMS = VolkswagenPQPlatformConfig(
-    [VWCarDocs("Volkswagen Passat NMS 2017-22")],
+    [VWCarDocs("Volkswagen Passat NMS 2017-22", min_steer_speed=None)],
     VolkswagenCarSpecs(mass=1503, wheelbase=2.80, minSteerSpeed=50 * CV.KPH_TO_MS, minEnableSpeed=20 * CV.KPH_TO_MS),
     chassis_codes={"A3"},
     wmis={WMI.VOLKSWAGEN_USA_CAR},
@@ -310,8 +307,8 @@ class CAR(Platforms):
   )
   VOLKSWAGEN_SHARAN_MK2 = VolkswagenPQPlatformConfig(
     [
-      VWCarDocs("Volkswagen Sharan 2018-22"),
-      VWCarDocs("SEAT Alhambra 2018-20"),
+      VWCarDocs("Volkswagen Sharan 2018-22", min_steer_speed=None),
+      VWCarDocs("SEAT Alhambra 2018-20", min_steer_speed=None),
     ],
     VolkswagenCarSpecs(mass=1639, wheelbase=2.92, minSteerSpeed=50 * CV.KPH_TO_MS),
     chassis_codes={"7N"},
@@ -346,8 +343,8 @@ class CAR(Platforms):
   )
   VOLKSWAGEN_TRANSPORTER_T61 = VolkswagenMQBPlatformConfig(
     [
-      VWCarDocs("Volkswagen Caravelle 2020", car_parts=CarParts([Device.threex_angled_mount, CarHarness.vw_j533])),
-      VWCarDocs("Volkswagen California 2021-23", car_parts=CarParts([Device.threex_angled_mount, CarHarness.vw_j533])),
+      VWCarDocs("Volkswagen Caravelle 2020", car_parts=CarParts([Device.threex_angled_mount, CarHarness.vw_j533]), min_steer_speed=None),
+      VWCarDocs("Volkswagen California 2021-23", car_parts=CarParts([Device.threex_angled_mount, CarHarness.vw_j533]), min_steer_speed=None),
     ],
     VolkswagenCarSpecs(mass=1926, wheelbase=3.00, minSteerSpeed=14.0),
     chassis_codes={"7H", "7L"},
