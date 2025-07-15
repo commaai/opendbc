@@ -197,9 +197,6 @@ class VWCarDocs(CarDocs):
   footnotes: list[Enum] = field(default_factory=lambda: [Footnote.VW_EXP_LONG])
 
   def init_make(self, CP: structs.CarParams):
-    if CP.carFingerprint in (CAR.VOLKSWAGEN_CRAFTER_MK2, CAR.VOLKSWAGEN_TRANSPORTER_T61):
-      self.car_parts = CarParts([Device.threex_angled_mount, CarHarness.vw_j533])
-
     if abs(CP.minSteerSpeed - CarControllerParams.DEFAULT_MIN_STEER_SPEED) < 1e-3:
       self.min_steer_speed = 0
 
@@ -246,11 +243,11 @@ class CAR(Platforms):
   )
   VOLKSWAGEN_CRAFTER_MK2 = VolkswagenMQBPlatformConfig(
     [
-      VWCarDocs("Volkswagen Crafter 2017-24", video="https://youtu.be/4100gLeabmo"),
-      VWCarDocs("Volkswagen e-Crafter 2018-24", video="https://youtu.be/4100gLeabmo"),
-      VWCarDocs("Volkswagen Grand California 2019-24", video="https://youtu.be/4100gLeabmo"),
-      VWCarDocs("MAN TGE 2017-24", video="https://youtu.be/4100gLeabmo"),
-      VWCarDocs("MAN eTGE 2020-24", video="https://youtu.be/4100gLeabmo"),
+      VWCarDocs("Volkswagen Crafter 2017-24", video="https://youtu.be/4100gLeabmo", car_parts=CarParts([Device.threex_angled_mount, CarHarness.vw_j533])),
+      VWCarDocs("Volkswagen e-Crafter 2018-24", video="https://youtu.be/4100gLeabmo", car_parts=CarParts([Device.threex_angled_mount, CarHarness.vw_j533])),
+      VWCarDocs("Volkswagen Grand California 2019-24", video="https://youtu.be/4100gLeabmo", car_parts=CarParts([Device.threex_angled_mount, CarHarness.vw_j533])),
+      VWCarDocs("MAN TGE 2017-24", video="https://youtu.be/4100gLeabmo", car_parts=CarParts([Device.threex_angled_mount, CarHarness.vw_j533])),
+      VWCarDocs("MAN eTGE 2020-24", video="https://youtu.be/4100gLeabmo", car_parts=CarParts([Device.threex_angled_mount, CarHarness.vw_j533])),
     ],
     VolkswagenCarSpecs(mass=2100, wheelbase=3.64, minSteerSpeed=50 * CV.KPH_TO_MS),
     chassis_codes={"SY", "SZ", "UY", "UZ"},
@@ -349,8 +346,8 @@ class CAR(Platforms):
   )
   VOLKSWAGEN_TRANSPORTER_T61 = VolkswagenMQBPlatformConfig(
     [
-      VWCarDocs("Volkswagen Caravelle 2020"),
-      VWCarDocs("Volkswagen California 2021-23"),
+      VWCarDocs("Volkswagen Caravelle 2020", car_parts=CarParts([Device.threex_angled_mount, CarHarness.vw_j533])),
+      VWCarDocs("Volkswagen California 2021-23", car_parts=CarParts([Device.threex_angled_mount, CarHarness.vw_j533])),
     ],
     VolkswagenCarSpecs(mass=1926, wheelbase=3.00, minSteerSpeed=14.0),
     chassis_codes={"7H", "7L"},
