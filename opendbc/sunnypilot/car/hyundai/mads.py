@@ -24,7 +24,6 @@ MadsDataSP = namedtuple("MadsDataSP",
 
 class MadsCarController:
   def __init__(self):
-    super().__init__()
     self.mads = MadsDataSP(False, False, False, False)
 
     self.lat_disengage_blink = 0
