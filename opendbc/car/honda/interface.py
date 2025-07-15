@@ -69,6 +69,9 @@ class CarInterface(CarInterfaceBase):
     if 0x1C2 in fingerprint[CAN.pt]:
       ret.flags |= HondaFlags.HAS_EPB.value
 
+    if candidate in HONDA_BOSCH_CANFD and not (0x184 in fingerprint[CAN.pt]:)
+      ret.flags |= HondaFlags.BOSCH_ALT_BRAKE.value
+
     # Accord ICE 1.5T CVT and CANFD CR-V have different gearbox message
     if candidate in (CAR.HONDA_ACCORD, CAR.HONDA_CRV_6G) and 0x191 in fingerprint[CAN.pt]:
       ret.transmissionType = TransmissionType.cvt
