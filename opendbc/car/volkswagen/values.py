@@ -195,6 +195,7 @@ class VWCarDocs(CarDocs):
   package: str = "Adaptive Cruise Control (ACC) & Lane Assist"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.vw_j533]))
   footnotes: list[Enum] = field(default_factory=lambda: [Footnote.VW_EXP_LONG])
+  # More user friendly to default to 0 vs the DEFAULT_MIN_STEER_SPEED
   min_steer_speed: float = 0
 
 
