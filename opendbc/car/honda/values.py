@@ -190,7 +190,7 @@ class CAR(Platforms):
     [HondaCarDocs("Honda CR-V 2024", "All")],
     # mass: mean of 4 models in kg, steerRatio: 12.3 is spec end-to-end
     CarSpecs(mass=1667, wheelbase=2.66, steerRatio=16, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),
-    {Bus.pt: 'honda_pilot_2023_can_generated'},
+    {Bus.pt: 'honda_canfd_common_can_generated'},
     flags=HondaFlags.BOSCH_CANFD,
   )
   HONDA_CRV_HYBRID = HondaBoschPlatformConfig(
@@ -203,7 +203,7 @@ class CAR(Platforms):
     [HondaCarDocs("Honda CR-V Hybrid 2024-25", "All")],
     # mass: mean of 4 models in kg, steerRatio: 12.3 is spec end-to-end
     CarSpecs(mass=1667, wheelbase=2.66, steerRatio=16, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),
-    {Bus.pt: 'honda_pilot_2023_can_generated'},
+    {Bus.pt: 'honda_canfd_common_can_generated'},
     flags=HondaFlags.BOSCH_CANFD,
   )
   HONDA_HRV_3G = HondaBoschPlatformConfig(
@@ -231,7 +231,7 @@ class CAR(Platforms):
   HONDA_PILOT_4G = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda Pilot 2023", "All")],
     CarSpecs(mass=4278 * CV.LB_TO_KG, wheelbase=2.86, centerToFrontRatio=0.428, steerRatio=16.0, tireStiffnessFactor=0.444),  # as spec
-    {Bus.pt: 'honda_pilot_2023_can_generated'},
+    {Bus.pt: 'honda_canfd_common_can_generated'},
     flags=HondaFlags.BOSCH_CANFD | HondaFlags.BOSCH_ALT_BRAKE,
   )
 
