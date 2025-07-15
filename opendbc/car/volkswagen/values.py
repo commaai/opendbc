@@ -194,12 +194,9 @@ class Footnote(Enum):
 class VWCarDocs(CarDocs):
   package: str = "Adaptive Cruise Control (ACC) & Lane Assist"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.vw_j533]))
+  footnotes: list[Enum] = field(default_factory=lambda: [Footnote.VW_EXP_LONG])
 
   def init_make(self, CP: structs.CarParams):
-    self.footnotes.append(Footnote.VW_EXP_LONG)
-    if "SKODA" in CP.carFingerprint:
-      self.footnotes.append(Footnote.SKODA_HEATED_WINDSHIELD)
-
     if CP.carFingerprint in (CAR.VOLKSWAGEN_CRAFTER_MK2, CAR.VOLKSWAGEN_TRANSPORTER_T61):
       self.car_parts = CarParts([Device.threex_angled_mount, CarHarness.vw_j533])
 
@@ -399,44 +396,44 @@ class CAR(Platforms):
     wmis={WMI.SEAT},
   )
   SKODA_FABIA_MK4 = VolkswagenMQBPlatformConfig(
-    [VWCarDocs("Škoda Fabia 2022-23", footnotes=[Footnote.VW_MQB_A0])],
+    [VWCarDocs("Škoda Fabia 2022-23", footnotes=[Footnote.VW_EXP_LONG, Footnote.SKODA_HEATED_WINDSHIELD, Footnote.VW_MQB_A0])],
     VolkswagenCarSpecs(mass=1266, wheelbase=2.56),
     chassis_codes={"PJ"},
     wmis={WMI.SKODA},
   )
   SKODA_KAMIQ_MK1 = VolkswagenMQBPlatformConfig(
     [
-      VWCarDocs("Škoda Kamiq 2021-23", footnotes=[Footnote.VW_MQB_A0, Footnote.KAMIQ]),
-      VWCarDocs("Škoda Scala 2020-23", footnotes=[Footnote.VW_MQB_A0]),
+      VWCarDocs("Škoda Kamiq 2021-23", footnotes=[Footnote.VW_EXP_LONG, Footnote.SKODA_HEATED_WINDSHIELD, Footnote.VW_MQB_A0, Footnote.KAMIQ]),
+      VWCarDocs("Škoda Scala 2020-23", footnotes=[Footnote.VW_EXP_LONG, Footnote.SKODA_HEATED_WINDSHIELD, Footnote.VW_MQB_A0]),
     ],
     VolkswagenCarSpecs(mass=1230, wheelbase=2.66),
     chassis_codes={"NW"},
     wmis={WMI.SKODA},
   )
   SKODA_KAROQ_MK1 = VolkswagenMQBPlatformConfig(
-    [VWCarDocs("Škoda Karoq 2019-23")],
+    [VWCarDocs("Škoda Karoq 2019-23", footnotes=[Footnote.VW_EXP_LONG, Footnote.SKODA_HEATED_WINDSHIELD])],
     VolkswagenCarSpecs(mass=1278, wheelbase=2.66),
     chassis_codes={"NU"},
     wmis={WMI.SKODA},
   )
   SKODA_KODIAQ_MK1 = VolkswagenMQBPlatformConfig(
-    [VWCarDocs("Škoda Kodiaq 2017-23")],
+    [VWCarDocs("Škoda Kodiaq 2017-23", footnotes=[Footnote.VW_EXP_LONG, Footnote.SKODA_HEATED_WINDSHIELD])],
     VolkswagenCarSpecs(mass=1569, wheelbase=2.79),
     chassis_codes={"NS"},
     wmis={WMI.SKODA, WMI.VOLKSWAGEN_GROUP_RUS},
   )
   SKODA_OCTAVIA_MK3 = VolkswagenMQBPlatformConfig(
     [
-      VWCarDocs("Škoda Octavia 2015-19"),
-      VWCarDocs("Škoda Octavia RS 2016"),
-      VWCarDocs("Škoda Octavia Scout 2017-19"),
+      VWCarDocs("Škoda Octavia 2015-19", footnotes=[Footnote.VW_EXP_LONG, Footnote.SKODA_HEATED_WINDSHIELD]),
+      VWCarDocs("Škoda Octavia RS 2016", footnotes=[Footnote.VW_EXP_LONG, Footnote.SKODA_HEATED_WINDSHIELD]),
+      VWCarDocs("Škoda Octavia Scout 2017-19", footnotes=[Footnote.VW_EXP_LONG, Footnote.SKODA_HEATED_WINDSHIELD]),
     ],
     VolkswagenCarSpecs(mass=1388, wheelbase=2.68),
     chassis_codes={"NE"},
     wmis={WMI.SKODA},
   )
   SKODA_SUPERB_MK3 = VolkswagenMQBPlatformConfig(
-    [VWCarDocs("Škoda Superb 2015-22")],
+    [VWCarDocs("Škoda Superb 2015-22", footnotes=[Footnote.VW_EXP_LONG, Footnote.SKODA_HEATED_WINDSHIELD])],
     VolkswagenCarSpecs(mass=1505, wheelbase=2.84),
     chassis_codes={"3V", "NP"},
     wmis={WMI.SKODA},
