@@ -1,7 +1,7 @@
 #pragma once
 
-#include "safety_declarations.h"
-#include "safety_defaults.h"
+#include "opendbc/safety/safety_declarations.h"
+#include "opendbc/safety/modes/defaults.h"
 
 static bool elm327_tx_hook(const CANPacket_t *to_send) {
   const int GM_CAMERA_DIAG_ADDR = 0x24B;

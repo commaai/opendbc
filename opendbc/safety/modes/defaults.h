@@ -1,6 +1,6 @@
 #pragma once
 
-#include "safety_declarations.h"
+#include "opendbc/safety/safety_declarations.h"
 
 // GCOV_EXCL_START
 // Unreachable by design (doesn't define any rx msgs)
@@ -13,7 +13,7 @@ void default_rx_hook(const CANPacket_t *to_push) {
 
 static safety_config nooutput_init(uint16_t param) {
   UNUSED(param);
-  return (safety_config){NULL, 0, NULL, 0, true};
+  return (safety_config){NULL, 0, NULL, 0, true}; // NOLINT(readability/braces)
 }
 
 // GCOV_EXCL_START
@@ -36,7 +36,7 @@ static safety_config alloutput_init(uint16_t param) {
   const uint16_t ALLOUTPUT_PARAM_PASSTHROUGH = 1;
   controls_allowed = true;
   bool alloutput_passthrough = GET_FLAG(param, ALLOUTPUT_PARAM_PASSTHROUGH);
-  return (safety_config){NULL, 0, NULL, 0, !alloutput_passthrough};
+  return (safety_config){NULL, 0, NULL, 0, !alloutput_passthrough}; // NOLINT(readability/braces)
 }
 
 static bool alloutput_tx_hook(const CANPacket_t *to_send) {

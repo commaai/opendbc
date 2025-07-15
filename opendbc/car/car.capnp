@@ -194,10 +194,12 @@ struct CarState {
   steeringTorque @8 :Float32;      # TODO: standardize units
   steeringTorqueEps @27 :Float32;  # TODO: standardize units
   steeringPressed @9 :Bool;        # if the user is using the steering wheel
+  steeringDisengage @58 :Bool;     # more force than steeringPressed, disengages for applicable brands
   steerFaultTemporary @35 :Bool;   # temporary EPS fault
   steerFaultPermanent @36 :Bool;   # permanent EPS fault
   invalidLkasSetting @55 :Bool;    # stock LKAS is incorrectly configured (i.e. on or off)
   stockAeb @30 :Bool;
+  stockLkas @59 :Bool;
   stockFcw @31 :Bool;
   espDisabled @32 :Bool;
   accFaulted @42 :Bool;
@@ -205,6 +207,7 @@ struct CarState {
   espActive @51 :Bool;
   vehicleSensorsInvalid @52 :Bool;  # invalid steering angle readings, etc.
   lowSpeedAlert @56 :Bool;  # lost steering control due to a dynamic min steering speed
+  blockPcmEnable @60 :Bool;  # whether to allow PCM to enable this frame
 
   # cruise state
   cruiseState @10 :CruiseState;
@@ -551,7 +554,6 @@ struct CarParams {
   }
 
   struct LateralTorqueTuning {
-    useSteeringAngle @0 :Bool;
     kp @1 :Float32;
     ki @2 :Float32;
     friction @3 :Float32;
@@ -559,6 +561,7 @@ struct CarParams {
     steeringAngleDeadzoneDeg @5 :Float32;
     latAccelFactor @6 :Float32;
     latAccelOffset @7 :Float32;
+    useSteeringAngleDEPRECATED @0 :Bool;
   }
 
   struct LongitudinalPIDTuning {
