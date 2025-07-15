@@ -307,42 +307,38 @@ BO_ 373 TCS: 24 XXX
  SG_ NEW_SIGNAL_7 : 135|2@0+ (1,0) [0|3] "" XXX
  SG_ PROBABLY_EQUIP : 136|2@1+ (1,0) [0|3] "" XXX
 
-BO_ 416 SCC_CONTROL: 32 ADRV
+BO_ 416 ADAS_CMD_20_20ms: 32 ADRV
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
- SG_ ACC_ObjDist : 24|11@1+ (0.1,0) [0|204.7] "m" XXX
- SG_ ACC_ObjRelSpd : 35|9@1+ (0.1,-16.4) [-16.4|34.7] "m/s" XXX
- SG_ SET_ME_3 : 45|2@0+ (1,0) [0|3] "" XXX
- SG_ ObjValid : 46|1@0+ (1,0) [0|3] "" XXX
- SG_ SET_ME_TMP_64 : 55|8@0+ (1,0) [0|63] "" XXX
- SG_ ZEROS_7 : 63|8@0+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_1 : 64|2@1+ (1,0) [0|3] "" XXX
- SG_ MainMode_ACC : 66|1@1+ (1,0) [0|1] "" XXX
- SG_ ACCMode : 68|3@1+ (1,0) [0|7] "" XXX
- SG_ ZEROS_9 : 71|5@1+ (1,0) [0|15] "" XXX
- SG_ CRUISE_STANDSTILL : 76|1@1+ (1,0) [0|1] "" XXX
- SG_ ZEROS_5 : 77|11@1+ (1,0) [0|2047] "" XXX
- SG_ DISTANCE_SETTING : 88|3@1+ (1,0) [0|3] "" XXX
- SG_ ZEROS_8 : 95|5@0+ (1,0) [0|31] "" XXX
- SG_ VSetDis : 103|8@0+ (1,0) [0|255] "km/h or mph" XXX
- SG_ NEW_SIGNAL_6 : 104|1@0+ (1,0) [0|1] "" XXX
- SG_ SET_ME_2 : 105|3@1+ (1,0) [0|7] "" XXX
- SG_ NEW_SIGNAL_3 : 109|2@0+ (1,0) [0|1] "" XXX
- SG_ ZEROS_10 : 111|2@0+ (1,0) [0|3] "" XXX
- SG_ ZEROS_6 : 119|16@0+ (1,0) [0|65535] "" XXX
- SG_ aReqValue : 128|11@1+ (0.01,-10.23) [-10.23|10.24] "m/s^2" XXX
- SG_ aReqRaw : 140|11@1+ (0.01,-10.23) [-10.23|10.24] "m/s^2" XXX
- SG_ JerkUpperLimit : 158|7@0+ (0.1,0) [0|0] "" XXX
- SG_ JerkLowerLimit : 166|7@0+ (0.1,0) [0|12.7] "m/s^3" XXX
- SG_ NEW_SIGNAL_2 : 168|2@1+ (1,0) [0|3] "" XXX
- SG_ NEW_SIGNAL_8 : 170|4@1+ (1,0) [0|15] "" XXX
- SG_ OBJ_STATUS : 176|3@1+ (1,0) [0|7] "" XXX
- SG_ ZEROS_4 : 183|4@0+ (1,0) [0|63] "" XXX
- SG_ StopReq : 184|1@0+ (1,0) [0|1] "" XXX
- SG_ ZEROS_3 : 191|7@0+ (1,0) [0|127] "" XXX
- SG_ NEW_SIGNAL_15 : 192|11@1+ (0.1,0) [0|204.7] "m" XXX
- SG_ ZEROS_2 : 207|5@0+ (1,0) [0|63] "" XXX
- SG_ ZEROS : 215|48@0+ (1,0) [0|281474976710655] "" XXX
+ SG_ SCC_ObjDstVal : 24|11@1+ (0.1,0) [0|204.7] "m" CLU,CGW
+ SG_ SCC_ObjRelSpdVal : 35|12@1+ (0.1,-170) [-170|239.5] "m/s" CGW
+ SG_ SCC_ObjLatPosVal : 47|9@1+ (0.1,-20) [-20|31.1] "m" CLU,CGW
+ SG_ SET_ME_TMP_64 : 56|8@1+ (1,0) [0|63] "" XXX
+ SG_ SCC_SysFlrSta : 64|2@1+ (1,0) [0|3] "" CLU,CGW
+ SG_ SCC_MainOnOffSta : 66|2@1+ (1,0) [0|3] "" CLU,CGW
+ SG_ SCC_OpSta : 68|3@1+ (1,0) [0|7] "" CLU,CGW
+ SG_ SCC_TakeoverReq : 72|2@1+ (1,0) [0|3] "" CLU,CGW
+ SG_ SCC_InfoDis : 74|3@1+ (1,0) [0|7] "" CLU,CGW
+ SG_ SCC_DrvAlrtDis : 77|2@1+ (1,0) [0|3] "" CLU,CGW
+ SG_ SCC_ObjDstLvlVal : 80|8@1+ (1,0) [0|255] "" CLU,CGW
+ SG_ SCC_HeadwayDstSetVal : 88|4@1+ (1,0) [0|15] "" CLU,CGW
+ SG_ SCC_NSCCAutoSetSpdSta : 94|2@1+ (1,0) [0|3] "" CLU,CGW
+ SG_ SCC_TrgtSpdSetVal : 96|8@1+ (1,0) [0|255] "km/h or MPH" CLU,CGW
+ SG_ SCC_NSCCOpSta : 104|2@1+ (1,0) [0|3] "" CLU,CGW
+ SG_ SCC_NSCCOnOffSta : 106|2@1+ (1,0) [0|3] "" CLU,CGW
+ SG_ SCC_ObjSta : 108|3@1+ (1,0) [0|7] "" CLU,CGW
+ SG_ SCC_SnstvtyModRetVal : 112|3@1+ (1,0) [0|7] "" CLU,CGW
+ SG_ SCC_NSCCAutoSetSpdUpdtSta : 115|2@1+ (1,0) [0|3] "" CLU,CGW
+ SG_ SCC_NSCCInfoPUDis : 117|3@1+ (1,0) [0|7] "" CLU,CGW
+ SG_ SCC_AccelReqVal : 128|11@1+ (0.01,-10.23) [-10.23|10.24] "m/s^2" CGW
+ SG_ SCC_AccelReqRawVal : 140|11@1+ (0.01,-10.23) [-10.23|10.24] "m/s^2" CGW
+ SG_ SCC_JrkUppLimVal : 152|7@1+ (0.1,0) [0|12.7] "m/s^3" CGW
+ SG_ SCC_JrkLwrLimVal : 160|7@1+ (0.1,0) [0|12.7] "m/s^3" CGW
+ SG_ SCC_AccelLimBandUppVal : 168|6@1+ (0.02,0) [0|1.26] "m/s^2" CGW
+ SG_ SCC_AccelLimBandLwrVal : 176|6@1+ (0.02,0) [0|1.26] "m/s^2" CGW
+ SG_ SCC_VehStpReq : 184|2@1+ (1,0) [0|3] "" CGW
+ SG_ SCC_EngStateReq : 188|2@1+ (1,0) [0|3] "" CGW
+ SG_ SCC_TrgtDstVal : 192|11@1+ (0.1,0) [0|204.7] "m" CLU,CGW
 
 BO_ 426 CRUISE_BUTTONS_ALT: 16 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
@@ -673,25 +669,34 @@ BO_ 1264 LOCAL_TIME: 8 XXX
  SG_ MINUTES : 21|6@0+ (1,0) [0|63] "" XXX
  SG_ SECONDS : 31|8@0+ (1,0) [0|59] "" XXX
 
-CM_ SG_ 96 BRAKE_PRESSURE "User applied brake pedal pressure. Ramps from computer applied pressure on falling edge of cruise. Cruise cancels if !=0";
-CM_ SG_ 101 BRAKE_POSITION "User applied brake pedal position, max is ~700. Signed on some vehicles";
-CM_ SG_ 203 ADAS_ActvACISta "ADAS Active AngleControlInterface State";
-CM_ SG_ 203 ADAS_ActvACILvl2Sta "ADAS Active AngleControlInterface Level 2 State";
-CM_ SG_ 203 ADAS_StrAnglReqVal "(LFA) ADAS Steering Angle Request Value; Capped at 119.9;";
-CM_ SG_ 203 ADAS_ACIAnglTqRedcGainVal "(LFA) ADAS AngleControlInterface Angle Torque Reduction Gain Value";
-CM_ SG_ 203 FCA_ESA_ActvSta "FCA_ESA Active State";
-CM_ SG_ 203 FCA_ESA_TqBstGainVal "FCA_ESA Torque Boost Gain Value";
-CM_ BO_ 272 "Alternative LKAS message, used on cars such as 2023 Ioniq 6, 2nd gen Kona. Matches LKAS except size is 32 bytes";
-CM_ SG_ 272 LKA_AVAILABLE "Angle control cars: 3 when LKA is generally available, goes to 0 during changes with LFA";
-CM_ SG_ 272 ADAS_StrAnglReqVal "(LKAS) ADAS Steering Angle Request Value; Capped at 176.7; tracks MDPS->STEERING_ANGLE when not engaged, not STEERING_SENSORS->STEERING_ANGLE";
-CM_ SG_ 272 ADAS_ACIAnglTqRedcGainVal "(LKAS) ADAS AngleControlInterface Angle Torque Reduction Gain Value";
-CM_ SG_ 298 NEW_SIGNAL_4 "todo: figure out why always set to 9";
-CM_ SG_ 352 SET_ME_9 "has something to do with AEB settings";
-CM_ SG_ 373 ACCEnable "Likely a copy of CAN's TCS13->ACCEnable";
-CM_ SG_ 373 DriverBraking "Likely derived from BRAKE->BRAKE_POSITION";
-CM_ SG_ 373 DriverBrakingLowSens "Higher threshold version of DriverBraking";
-CM_ SG_ 373 PROBABLY_EQUIP "aeb equip?";
-CM_ SG_ 416 VSetDis "set speed in display units";
+CM_ SG_ 416 SCC_ObjDstVal "This signal provides the distance to the in lane detected SCC object regarding to the own vehicle. - 자차선상의 전방 인식된 물체와의 거리";
+CM_ SG_ 416 SCC_ObjRelSpdVal "This signal provides the relative speed to the in lane detected SCC object regarding to the own vehicle. - 자차선상의 전방 인식된 물체와 자차간 상대 속도";
+CM_ SG_ 416 SCC_ObjLatPosVal "This signal provides the lateral position of the detected SCC object regarding to the own vehicle.  The position of the SCC object on the left side in driving direction of the vehicle longitudinal axis correlates with a negative signal value.  Thus an";
+CM_ SG_ 416 SCC_SysFlrSta "This signal is evaluated by the driver information device to release the failure information to the driver. If this signal is set to anything other than 0, the TCS/ESC shall ignore any requests from SCC - 시스템 고장 발생 정보용 - 해당 값";
+CM_ SG_ 416 SCC_MainOnOffSta "This signal specifies the status of a Main switch of SCC system - Main swith 에 의한 SCC ON/OFF 상태 정보";
+CM_ SG_ 416 SCC_OpSta "The signal ACCmode specifies the operational mode of SCC - ACC 작동 상태 정보(off&ready / active / override / shut off)";
+CM_ SG_ 416 SCC_TakeoverReq "The Take-over Request supports the driver to identify the limits of the SCC control. Reasons for such a request may be: - Deceleration capability insufficient for the current situation. Clutch actuation by the driver is necessary to avoid stopping of t";
+CM_ SG_ 416 SCC_InfoDis "This signal carries information that indicates below 4 signals. (1) SCC Mode display (2) CC Mode display (3) Object disapearing display (4) Go notifying display - SCC 제어 상세 상태를 보여주는 정보 신호 (SCC 모드 / CC 모드 / 전�";
+CM_ SG_ 416 SCC_DrvAlrtDis "This signal carries the information which message shall be displayed to the driver  when the SCC must be disengaged by the system or cann’t be engaged. A signal value unequal 00H is repeated for 5 messages cycles in order to ensure it appears for at";
+CM_ SG_ 416 SCC_ObjDstLvlVal "If a in-path object is recognized by SCC, the driver should be informed. - 자차선상의 전방 물체 인식 여부 정보";
+CM_ SG_ 416 SCC_HeadwayDstSetVal "The desired time gap from which a following distance is extracted has to be presented to the driver at least if the value changes.  The representation of the information depends on the display concept. - 전방 차량과의 거리 setting 정보 ※ S";
+CM_ SG_ 416 SCC_NSCCAutoSetSpdSta "This is information if Auto Set Speed Control is enabled or not.";
+CM_ SG_ 416 SCC_TrgtSpdSetVal "The desired vehicle speed for free cruising has to be displayed all the time SCC is under active control. ※This signal can be sent in km/h or MPH according to the “SPEED_UNIT” signal (See CLU1 message). SPEED_UNIT = 0 : [km/h], SPEED_UNIT = 1 : [";
+CM_ SG_ 416 SCC_NSCCOpSta "This signal describes the operational status of NSCC-Z/C/R function.   NSCC-Z/C/R  작동 상태 정보(off/ready/active)";
+CM_ SG_ 416 SCC_NSCCOnOffSta "This signal describes the on/off status of NSCC-Z/C/R and HDA Auto-set function.   NSCC-Z/C/R  and HDA auto-set on/off 상태 정보";
+CM_ SG_ 416 SCC_ObjSta "This signal represents the state of in-path object and information of controllable state. - 자차선상의 전방 차량 인식 여부 및 제어 가능 상태 정보";
+CM_ SG_ 416 SCC_SnstvtyModRetVal "This signal is SCC sensitive set mode switch info return value to cluster - SCC 민감도 설정 관련 USM 설정 스위치 정보의 리턴 값";
+CM_ SG_ 416 SCC_NSCCAutoSetSpdUpdtSta "This is information if Auto Set Speed Control is updated or not.";
+CM_ SG_ 416 SCC_NSCCInfoPUDis "This signal shows the cluster pop-up for NSCC Information.";
+CM_ SG_ 416 SCC_AccelReqVal "This signal represents the SCC acceleration request after jerk limit. - Jerk limit를 거친 SCC 의 요구 가속도/감속도 값";
+CM_ SG_ 416 SCC_AccelReqRawVal "This signal represents the SCC acceleration request before jerk limit.  - Jerk limit를 거치지 않은 SCC 의 요구 가속도/감속도 값";
+CM_ SG_ 416 SCC_JrkUppLimVal "This signal is the value of positive jerk limit request.  - SCC 의 요구 가속도 상승변화율 제한 값";
+CM_ SG_ 416 SCC_JrkLwrLimVal "This signal is the value of negative jerk limit request.  - SCC 의 요구 가속도 하강변화율 제한 값";
+CM_ SG_ 416 SCC_AccelLimBandUppVal "This signal is the upper value of acceleration limit band. - SCC 의 가속도 제어 허용 범위 상한 참고값";
+CM_ SG_ 416 SCC_AccelLimBandLwrVal "This signal is the lower value of acceleration limit band. - SCC 의 가속도 제어 허용 범위 하한 참고값";
+CM_ SG_ 416 SCC_VehStpReq "A control request flag for vehicle stop. SCC expects vehicle to be controlled to a complete stop and hold its state. - SCC 해제 상황 발생시 차량 정차 유지를 위한 제동 요청 신호";
+CM_ SG_ 416 SCC_EngStateReq "This signal indicates engine state request of SCC.  - 0x0 : SCC deactive or SCC off  - 0x1 : 'ISG Stop' Possible  - 0x2 : 'ISG Start or Maintain Engine Run' Request  - 0x3 : Reserved";
+CM_ SG_ 416 SCC_TrgtDstVal "This signal provides the target distance for SCC fallowing control. - SCC 거리 제어를 위한 목표 차간 거리 정보";
 CM_ SG_ 480 NEW_SIGNAL_5 "todo: figure out why always set to 1";
 CM_ SG_ 687 HOD_Dir_Status "This signal indicates the status of hands on/off";
 CM_ SG_ 736 MAX_SPEED "Display units. Restricts car from driving above this speed unless accelerator pedal is depressed beyond pressure point";
@@ -802,7 +807,34 @@ VAL_ 354 FAULT_DAS 0 "HIDDEN" 1 "CHECK_DRIVER_ASSISTANCE_SYSTEM" 2 "DRIVER_ASSIS
 VAL_ 354 FAULT_ESS 0 "HIDDEN" 1 "CHECK_EMERGENCY_STOPPING_FUNCTION" 2 "EMERGENCY_STOPPING_FUNCTION_DISABLED_CAMERA_OBSCURED" 3 "EMERGENCY_STOPPING_FUNCTION_DISABLED_RADAR_BLOCKED";
 VAL_ 362 BLINKER_CONTROL 1 "hazards" 2 "hazards button backlight" 3 "left blinkers" 4 "right blinkers";
 VAL_ 373 ACCEnable 0 "SCC ready" 1 "SCC temp fault" 2 "SCC permanent fault" 3 "SCC permanent fault, communication issue";
-VAL_ 416 ACCMode 0 "off" 1 "enabled" 2 "driver_override" 3 "off_maybe_fault" 4 "cancelled";
+VAL_ 416 SCC_ObjDstVal 2046 "Default" 2047 "Error";
+VAL_ 416 SCC_ObjRelSpdVal 4094 "Default" 4095 "Error";
+VAL_ 416 SCC_ObjLatPosVal 510 "Default" 511 "Error";
+VAL_ 416 SCC_SysFlrSta 0 "System without error" 1 "Performance degredation" 2 "System temporairy unavailable" 3 "SCC Service Required";
+VAL_ 416 SCC_MainOnOffSta 0 "OFF" 1 "ON" 2 "Not used" 3 "Error Indicator";
+VAL_ 416 SCC_OpSta 0 "Off" 1 "Engaged" 2 "Override" 3 "Shutoff" 4 "Canceled or Paused";
+VAL_ 416 SCC_TakeoverReq 0 "No takeover request" 1 "Takeover request" 2 "Not used" 3 "Error Indicator";
+VAL_ 416 SCC_InfoDis 0 "-" 1 "Display “SCC Mode”" 2 "Display “Conventional Cruise Mode”" 3 "Display “Object disappeared at low speed”" 4 "Display “Available to resume acceleration control”" 7 "Invalid";
+VAL_ 416 SCC_DrvAlrtDis 0 "-" 1 "Display 'SCC Disengaged'" 2 "Display 'No SCC Engage Condition!'" 3 "Display 'SCC Disengaged When The Vehicle Stops'";
+VAL_ 416 SCC_ObjDstLvlVal 0 "No in-path object detected" 1 "Distance Warning" 2 "1st Object Distance Level" 3 "2nd Object Distance Level" 4 "3rd Object Distance Level" 5 "4th Object Distance Level" 255 "Error Indicator";
+VAL_ 416 SCC_HeadwayDstSetVal 0 "No time gap set" 1 "1st level distance" 2 "2nd level distance" 3 "3rd level distance" 4 "4th level distance" 14 "SCC-ML Active" 15 "Error Indicator";
+VAL_ 416 SCC_NSCCAutoSetSpdSta 0 "Auto Set Speed Off" 1 "Auto Set Speed On" 3 "Error Indicator";
+VAL_ 416 SCC_TrgtSpdSetVal 255 "Error";
+VAL_ 416 SCC_NSCCOpSta 0 "Off" 1 "Ready" 2 "Act" 3 "Error Indicator";
+VAL_ 416 SCC_NSCCOnOffSta 0 "Default" 1 "Off" 2 "On" 3 "Invalid";
+VAL_ 416 SCC_ObjSta 0 "No in-path object detected" 1 "In-path object detected (uncontrollable)" 2 "In-path object detected (controllable:longitudinal)";
+VAL_ 416 SCC_SnstvtyModRetVal 0 "Default" 1 "Comford Mode" 2 "Normal Mode" 3 "Dynamic Mode" 7 "Invalid";
+VAL_ 416 SCC_NSCCAutoSetSpdUpdtSta 0 "Auto Set Speed Update Off" 1 "Auto Set Speed Update On" 3 "Error Indicator";
+VAL_ 416 SCC_NSCCInfoPUDis 0 "None" 1 "NSCC Warning";
+VAL_ 416 SCC_AccelReqVal 2047 "Error";
+VAL_ 416 SCC_AccelReqRawVal 2047 "Error";
+VAL_ 416 SCC_JrkUppLimVal 127 "No Limit";
+VAL_ 416 SCC_JrkLwrLimVal 127 "No Limit";
+VAL_ 416 SCC_AccelLimBandUppVal 0 "Precise Control";
+VAL_ 416 SCC_AccelLimBandLwrVal 0 "Precise Control";
+VAL_ 416 SCC_VehStpReq 0 "No request" 1 "Stop control is required" 2 "Not used" 3 "Error Indicator";
+VAL_ 416 SCC_EngStateReq 0 "SCC deactive or SCC off" 1 "'ISG Stop' Possible" 2 "'ISG Start or Maintain Engine Run' Request";
+VAL_ 416 SCC_TrgtDstVal 2046 "Default" 2047 "Error";
 VAL_ 426 CRUISE_BUTTONS 0 "none" 1 "res_accel" 2 "set_decel" 3 "gap_distance" 4 "pause_resume";
 VAL_ 437 Info_LftLnQualSta 0 "Very Low Quality" 1 "Low Quality" 2 "High Quality" 3 "Very High Quality" 4 "Reserved" 5 "Reserved" 6 "Reserved" 7 "Error indicator";
 VAL_ 437 Info_LftLnDptSta 0 "No Left Line Departure" 1 "Left Line Departure" 2 "Reserved" 3 "Error Indicator";
