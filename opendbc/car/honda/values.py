@@ -187,9 +187,9 @@ class CAR(Platforms):
     flags=HondaFlags.BOSCH_ALT_BRAKE,
   )
   HONDA_CRV_6G = HondaBoschPlatformConfig(
-    [HondaCarDocs("Honda CR-V 2024", "All")],
-    # mass: mean of 4 models in kg, steerRatio: 12.3 is spec end-to-end
-    CarSpecs(mass=1667, wheelbase=2.66, steerRatio=16, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),
+    [HondaCarDocs("Honda CR-V 2023-25", "All")],
+    # mass: mean of 3 models in kg, steerRatio: mean of 2wd and awd
+    CarSpecs(mass=1639, wheelbase=2.7, steerRatio=12.35, centerToFrontRatio=0.42, tireStiffnessFactor=0.677),
     {Bus.pt: 'honda_canfd_common_can_generated'},
     flags=HondaFlags.BOSCH_CANFD,
   )
@@ -200,9 +200,9 @@ class CAR(Platforms):
     {Bus.pt: 'honda_accord_2018_can_generated'},
   )
   HONDA_CRV_HYBRID_6G = HondaBoschPlatformConfig(
-    [HondaCarDocs("Honda CR-V Hybrid 2024-25", "All")],
-    # mass: mean of 4 models in kg, steerRatio: 12.3 is spec end-to-end
-    CarSpecs(mass=1667, wheelbase=2.66, steerRatio=16, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),
+    [HondaCarDocs("Honda CR-V Hybrid 2023-25", "All")],
+    # mass: mean of 3 models in kg, steerRatio: mean of 2wd and awd
+    CarSpecs(mass=1767, wheelbase=2.7, steerRatio=12.35, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),
     {Bus.pt: 'honda_canfd_common_can_generated'},
     flags=HondaFlags.BOSCH_CANFD,
   )
