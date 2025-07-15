@@ -92,13 +92,13 @@ def create_acc_cancel(packer, CP, CAN, cruise_info_copy):
     values = {s: cruise_info_copy[s] for s in [
       "COUNTER",
       "CHECKSUM",
-      "NEW_SIGNAL_1",
-      "MainMode_ACC",
+      "SCC_SysFlrSta",
+      "SCC_MainOnOffSta",
       "SCC_OpSta",
-      "ZEROS_9",
+      "SCC_TakeoverReq",
       "SCC_InfoDis",
-      "ZEROS_5",
-      "DISTANCE_SETTING",
+      "SCC_DrvAlrtDis",
+      "SCC_HeadwayDstSetVal",
       "SCC_TrgtSpdSetVal",
     ]}
   else:
@@ -111,8 +111,8 @@ def create_acc_cancel(packer, CP, CAN, cruise_info_copy):
     ]}
   values.update({
     "SCC_OpSta": 4,
-    "aReqRaw": 0.0,
-    "aReqValue": 0.0,
+    "SCC_AccelReqRawVal": 0.0,
+    "SCC_AccelReqVal": 0.0,
   })
   return packer.make_can_msg("ADAS_CMD_20_20ms", CAN.ECAN, values)
 
@@ -146,7 +146,7 @@ def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_ov
     "SCC_ObjDstVal": 1,
     #"ObjValid": 0, # official DBC doesn't have this, it was overlapping with SCC_ObjLatPosVal
     #"OBJ_STATUS": 2, # official DBC doesn't have this, it was overlapping with SCC_AccelLimBandLwrVal
-    "SCC_ObjSta": 2, # this was on a very different place than the OBJ_STATUS above, its coincidence the values match :D 
+    "SCC_ObjSta": 2, # this was on a very different place than the OBJ_STATUS above, its coincidence the values match :D
     "SCC_NSCCOnOffSta": 2, # means ON, not sure why we care about it right now
     "SCC_ObjRelSpdVal": 0, # set_me_3 formelry was setting this 0x3 but this was overlapping with SCC_ObjRelSpdVal last 3 bits somehow
     "SET_ME_TMP_64": 0, # on my car is always 0, need to validate against othes
