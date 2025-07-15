@@ -1,5 +1,9 @@
+# B"H
+
 from dataclasses import dataclass, field
-from enum import StrEnum, IntFlag
+
+from backports.strenum import StrEnum
+from enum import IntFlag
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, structs, uds
 from opendbc.car.docs_definitions import CarHarness, CarDocs, CarParts, Device

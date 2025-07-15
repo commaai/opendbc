@@ -1,2 +1,4 @@
-from opendbc.can.parser_pyx import CANDefine
-assert CANDefine
+# B"H
+
+#from opendbc.can.parser_pyx import CANDefine
+#assert CANDefine

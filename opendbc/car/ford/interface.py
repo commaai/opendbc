@@ -1,3 +1,5 @@
+# B"H
+
 import numpy as np
 from opendbc.car import Bus, get_safety_config, structs
 from opendbc.car.carlog import carlog
@@ -5,7 +7,7 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.ford.carcontroller import CarController
 from opendbc.car.ford.carstate import CarState
 from opendbc.car.ford.fordcan import CanBus
-from opendbc.car.ford.radar_interface import RadarInterface
+#from opendbc.car.ford.radar_interface import RadarInterface
 from opendbc.car.ford.values import CarControllerParams, DBC, Ecu, FordFlags, RADAR, FordSafetyFlags
 from opendbc.car.interfaces import CarInterfaceBase
 
@@ -15,7 +17,7 @@ TransmissionType = structs.CarParams.TransmissionType
 class CarInterface(CarInterfaceBase):
   CarState = CarState
   CarController = CarController
-  RadarInterface = RadarInterface
+  #RadarInterface = RadarInterface
 
   @staticmethod
   def get_pid_accel_limits(CP, current_speed, cruise_speed):
@@ -37,6 +39,7 @@ class CarInterface(CarInterfaceBase):
     ret.longitudinalTuning.kiBP = [0.]
     ret.longitudinalTuning.kiV = [0.5]
 
+    '''
     # TODO: verify MRR_64 before it's used for longitudinal control
     if DBC[candidate][Bus.radar] == RADAR.DELPHI_MRR:
       # average of 33.3 Hz radar timestep / 4 scan modes = 60 ms
@@ -45,11 +48,13 @@ class CarInterface(CarInterfaceBase):
     elif DBC[candidate][Bus.radar] == RADAR.DELPHI_MRR_64:
       # average of 20 Hz radar timestep / 4 scan modes = 100 ms
       ret.radarDelay = 0.1
+   '''
 
-    CAN = CanBus(fingerprint=fingerprint)
+    #CAN = CanBus(fingerprint=fingerprint)
+
     cfgs = [get_safety_config(structs.CarParams.SafetyModel.ford)]
-    if CAN.main >= 4:
-      cfgs.insert(0, get_safety_config(structs.CarParams.SafetyModel.noOutput))
+    #if CAN.main >= 4:
+    #  cfgs.insert(0, get_safety_config(structs.CarParams.SafetyModel.noOutput))
     ret.safetyConfigs = cfgs
 
     # For now continue to allow the user to still fall back to Ford Long
@@ -62,12 +67,13 @@ class CarInterface(CarInterfaceBase):
     if ret.flags & FordFlags.CANFD:
       ret.safetyConfigs[-1].safetyParam |= FordSafetyFlags.CANFD.value
 
+    '''
       # TRON (SecOC) platforms are not supported
       # LateralMotionControl2, ACCDATA are 16 bytes on these platforms
-      if len(fingerprint[CAN.camera]):
-        if fingerprint[CAN.camera].get(0x3d6) != 8 or fingerprint[CAN.camera].get(0x186) != 8:
-          carlog.error('dashcamOnly: SecOC is unsupported')
-          ret.dashcamOnly = True
+      #if len(fingerprint[CAN.camera]):
+      #  if fingerprint[CAN.camera].get(0x3d6) != 8 or fingerprint[CAN.camera].get(0x186) != 8:
+      #    carlog.error('dashcamOnly: SecOC is unsupported')
+      #    ret.dashcamOnly = True
     else:
       # Lock out if the car does not have needed lateral and longitudinal control APIs.
       # Note that we also check CAN for adaptive cruise, but no known signal for LCA exists
@@ -82,18 +88,27 @@ class CarInterface(CarInterfaceBase):
           if config_tja != 0xFF or config_lca != 0xFF:
             carlog.error('dashcamOnly: Car lacks required lateral control APIs')
             ret.dashcamOnly = True
+    '''
 
     # Auto Transmission: 0x732 ECU or Gear_Shift_by_Wire_FD1
-    found_ecus = [fw.ecu for fw in car_fw]
-    if Ecu.shiftByWire in found_ecus or 0x5A in fingerprint[CAN.main] or docs:
-      ret.transmissionType = TransmissionType.automatic
-    else:
-      ret.transmissionType = TransmissionType.manual
-      ret.minEnableSpeed = 20.0 * CV.MPH_TO_MS
+    #found_ecus = [fw.ecu for fw in car_fw]
+
+    ret.transmissionType = TransmissionType.automatic
+
+    # blind spot
+    ret.enableBsm = True
+
+    '''
+    #if Ecu.shiftByWire in found_ecus or 0x5A in fingerprint[CAN.main] or docs:
+    #  ret.transmissionType = TransmissionType.automatic
+    #else:
+    #  ret.transmissionType = TransmissionType.manual
+    #  ret.minEnableSpeed = 20.0 * CV.MPH_TO_MS
 
     # BSM: Side_Detect_L_Stat, Side_Detect_R_Stat
     # TODO: detect bsm in car_fw?
-    ret.enableBsm = 0x3A6 in fingerprint[CAN.main] and 0x3A7 in fingerprint[CAN.main]
+    #ret.enableBsm = 0x3A6 in fingerprint[CAN.main] and 0x3A7 in fingerprint[CAN.main]
+    '''
 
     # LCA can steer down to zero
     ret.minSteerSpeed = 0.

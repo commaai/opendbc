@@ -1,7 +1,31 @@
+# B"H
+
 # functions common among cars
 import numpy as np
 from dataclasses import dataclass, field
-from enum import IntFlag, ReprEnum, StrEnum, EnumType, auto
+
+####
+####
+#from enum import IntFlag, ReprEnum, StrEnum, EnumType, auto
+from enum import IntFlag, auto
+
+# match python3.11 code
+
+# (1) EnumType
+from enum import EnumMeta
+EnumType = EnumMeta
+
+# (2) StrEnum
+from backports.strenum import StrEnum
+
+# (3) ReprEnum
+from enum import  Enum
+class ReprEnum(Enum):
+    def __repr__(self):
+        return f"<{self.__class__.__name__}.{self.name}: {self.value!r}>"
+####
+####
+
 from dataclasses import replace
 
 from opendbc.car import structs, uds
@@ -328,12 +352,12 @@ class ExtraPlatformConfig(PlatformConfigBase):
 
 class PlatformsType(EnumType):
   def __new__(metacls, cls, bases, classdict, *, boundary=None, _simple=False, **kwds):
-    for key in classdict._member_names.keys():
+    for key in classdict._member_names:
       cfg: PlatformConfig = classdict[key]
       cfg.platform_str = key
       cfg.freeze()
-    return super().__new__(metacls, cls, bases, classdict, boundary=boundary, _simple=_simple, **kwds)
-
+    #return super().__new__(metacls, cls, bases, classdict, boundary=boundary, _simple=_simple, **kwds)
+    return super().__new__(metacls, cls, bases, classdict)
 
 class Platforms(str, ReprEnum, metaclass=PlatformsType):
   config: PlatformConfigBase

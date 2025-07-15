@@ -1,10 +1,18 @@
-import json
+# B"H
+
 import os
-import numpy as np
 import time
-import tomllib
+import math
+
+import json
+import numpy as np
+#import tomllib
+import tomli as tomllib
+
 from abc import abstractmethod, ABC
-from enum import StrEnum
+#from enum import StrEnum
+from backports.strenum import StrEnum
+
 from typing import Any, NamedTuple
 from collections.abc import Callable
 from functools import cache
@@ -12,11 +20,11 @@ from functools import cache
 from opendbc.car import DT_CTRL, apply_hysteresis, gen_empty_fingerprint, scale_rot_inertia, scale_tire_stiffness, get_friction, STD_CARGO_KG
 from opendbc.car import structs
 from opendbc.car.can_definitions import CanData, CanRecvCallable, CanSendCallable
-from opendbc.car.common.basedir import BASEDIR
+#from opendbc.car.common.basedir import BASEDIR
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.simple_kalman import KF1D, get_kalman_gain
 from opendbc.car.values import PLATFORMS
-from opendbc.can.parser import CANParser
+#from opendbc.can.parser import CANParser
 
 GearShifter = structs.CarState.GearShifter
 ButtonType = structs.CarState.ButtonEvent.Type
@@ -31,6 +39,7 @@ FRICTION_THRESHOLD = 0.3
 ISO_LATERAL_ACCEL = 3.0  # m/s^2
 ISO_LATERAL_JERK = 5.0  # m/s^3
 
+BASEDIR = "/home/deepview/SSD/openpilot/opendbc/car"
 TORQUE_PARAMS_PATH = os.path.join(BASEDIR, 'torque_data/params.toml')
 TORQUE_OVERRIDE_PATH = os.path.join(BASEDIR, 'torque_data/override.toml')
 TORQUE_SUBSTITUTE_PATH = os.path.join(BASEDIR, 'torque_data/substitute.toml')
@@ -57,7 +66,30 @@ class LatControlInputs(NamedTuple):
 
 TorqueFromLateralAccelCallbackType = Callable[[LatControlInputs, structs.CarParams.LateralTorqueTuning, float, float, bool, bool], float]
 
+# from opendbc/car/torque_data/override.toml
+"""
+legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 
+# Guess
+"FORD_BRONCO_SPORT_MK1" = [nan, 1.5, nan]
+"FORD_ESCAPE_MK4" = [nan, 1.5, nan]
+"FORD_ESCAPE_MK4_5" = [nan, 1.5, nan]
+"FORD_EXPLORER_MK6" = [nan, 1.5, nan]
+"FORD_F_150_MK14" = [nan, 1.5, nan]
+"FORD_FOCUS_MK4" = [nan, 1.5, nan]
+"FORD_MAVERICK_MK1" = [nan, 1.5, nan]
+"FORD_F_150_LIGHTNING_MK1" = [nan, 1.5, nan]
+"FORD_MUSTANG_MACH_E_MK1" = [nan, 1.5, nan]
+"FORD_RANGER_MK2" = [nan, 1.5, nan]
+"""
+###
+
+_TORQUE_DATA = dict()
+_TORQUE_DATA["LAT_ACCEL_FACTOR"]= math.nan
+_TORQUE_DATA["MAX_LAT_ACCEL_MEASURED"] = 1.5
+_TORQUE_DATA["FRICTION"]= math.nan
+
+'''
 @cache
 def get_torque_params():
   with open(TORQUE_SUBSTITUTE_PATH, 'rb') as f:
@@ -86,7 +118,7 @@ def get_torque_params():
       torque_params[candidate] = torque_params[sub_candidate]
 
   return torque_params
-
+'''
 # generic car and radar interfaces
 
 
@@ -116,9 +148,9 @@ class CarInterfaceBase(ABC):
     self.v_ego_cluster_seen = False
 
     self.CS: CarStateBase = self.CarState(CP)
-    self.can_parsers: dict[StrEnum, CANParser] = self.CS.get_can_parsers(CP)
+    #self.can_parsers: dict[StrEnum, CANParser] = self.CS.get_can_parsers(CP)
 
-    dbc_names = {bus: cp.dbc_name for bus, cp in self.can_parsers.items()}
+    dbc_names = [] #{bus: cp.dbc_name for bus, cp in self.can_parsers.items()}
     self.CC: CarControllerBase = self.CarController(dbc_names, CP)
 
   def apply(self, c: structs.CarControl, now_nanos: int | None = None) -> tuple[structs.CarControl.Actuators, list[CanData]]:
@@ -140,6 +172,12 @@ class CarInterfaceBase(ABC):
   @classmethod
   def get_params(cls, candidate: str, fingerprint: dict[int, dict[int, int]], car_fw: list[structs.CarParams.CarFw],
                  alpha_long: bool, is_release: bool, docs: bool) -> structs.CarParams:
+
+    #print(f"[DEBUG] candidate = {candidate}")
+    #print(f"[DEBUG] valid candidates = {list(PLATFORMS.keys())}")
+
+    #assert candidate in list(PLATFORMS.keys())
+
     ret = CarInterfaceBase.get_std_params(candidate)
 
     platform = PLATFORMS[candidate]
@@ -198,7 +236,7 @@ class CarInterfaceBase(ABC):
     ret.carFingerprint = candidate
 
     # Car docs fields
-    ret.maxLateralAccel = get_torque_params()[candidate]['MAX_LAT_ACCEL_MEASURED']
+    ret.maxLateralAccel = _TORQUE_DATA['MAX_LAT_ACCEL_MEASURED']
     ret.autoResumeSng = True  # describes whether car can resume from a stop automatically
 
     # standard ALC params
@@ -369,9 +407,9 @@ class CarStateBase(ABC):
       return GearShifter.unknown
     return GEAR_SHIFTER_MAP.get(gear.upper(), GearShifter.unknown)
 
-  @staticmethod
-  def get_can_parsers(CP) -> dict[StrEnum, CANParser]:
-    return {}
+  #@staticmethod
+  #def get_can_parsers(CP) -> dict[StrEnum, CANParser]:
+  #  return {}
 
 
 class CarControllerBase(ABC):

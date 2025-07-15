@@ -1,6 +1,8 @@
+# B"H
+
 import math
 import numpy as np
-from opendbc.can.packer import CANPacker
+#from opendbc.can.packer import CANPacker
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, apply_std_steer_angle_limits, structs
 from opendbc.car.ford import fordcan
 from opendbc.car.ford.values import CarControllerParams, FordFlags
@@ -44,7 +46,7 @@ def apply_creep_compensation(accel: float, v_ego: float) -> float:
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
-    self.packer = CANPacker(dbc_names[Bus.pt])
+    self.packer = None #CANPacker(dbc_names[Bus.pt])
     self.CAN = fordcan.CanBus(CP)
 
     self.apply_curvature_last = 0
