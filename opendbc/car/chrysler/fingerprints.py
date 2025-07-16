@@ -274,6 +274,26 @@ FW_VERSIONS = {
       b'68632416AC',
     ],
   },
+  CAR.CHRYSLER_PACIFICA_2025_HYBRID: {
+    (Ecu.combinationMeter, 0x742, None): [
+      b'68594990AE',
+    ],
+    (Ecu.srs, 0x744, None): [
+      b'68526665AB',
+    ],
+    (Ecu.fwdRadar, 0x753, None): [
+      b'68645752AA',
+    ],
+    (Ecu.eps, 0x75a, None): [
+      b'68594341AC',
+    ],
+    (Ecu.engine, 0x7e0, None): [
+      b'05190392AB ',
+    ],
+    (Ecu.hybrid, 0x7e2, None): [
+      b'68676877AB',
+    ],
+  },
   CAR.JEEP_GRAND_CHEROKEE: {
     (Ecu.combinationMeter, 0x742, None): [
       b'68243549AG',
