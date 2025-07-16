@@ -64,7 +64,7 @@ class CarController(CarControllerBase):
     self.long_pid = get_long_tune(self.CP, self.params)
     self.aego = FirstOrderFilter(0.0, 0.25, DT_CTRL * 3)
     self.pitch = FirstOrderFilter(0, 0.25, DT_CTRL)
-    self.pitch_slow = FirstOrderFilter(0, 1.0, DT_CTRL)
+    self.pitch_slow = FirstOrderFilter(0, 1.5, DT_CTRL)
 
     self.accel = 0
     self.prev_accel = 0
