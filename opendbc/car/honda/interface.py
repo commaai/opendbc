@@ -37,7 +37,7 @@ class CarInterface(CarInterfaceBase):
     CAN = CanBus(ret, fingerprint)
 
     # Recent test route is needed to undashcam these cars
-    ret.dashcamOnly = candidate in HONDA_BOSCH_CANFD and candidate != CAR.ACURA_MDX_4G_MMR
+    ret.dashcamOnly = candidate in (CAR.HONDA_PILOT_4G)
 
     if candidate in HONDA_BOSCH:
       cfgs = [get_safety_config(structs.CarParams.SafetyModel.hondaBosch)]
@@ -68,6 +68,9 @@ class CarInterface(CarInterfaceBase):
 
     if 0x1C2 in fingerprint[CAN.pt]:
       ret.flags |= HondaFlags.HAS_EPB.value
+
+    if candidate in HONDA_BOSCH_CANFD and 0x184 not in fingerprint[CAN.pt]:
+      ret.flags |= HondaFlags.BOSCH_ALT_BRAKE.value
 
     # Accord ICE 1.5T CVT has different gearbox message
     if candidate == CAR.HONDA_ACCORD and 0x191 in fingerprint[CAN.pt]:
