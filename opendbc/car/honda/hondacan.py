@@ -1,6 +1,6 @@
 from opendbc.car import CanBusBase
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.honda.values import HondaFlags, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, HONDA_BOSCH_CANFD, CAR, CarControllerParams
+from opendbc.car.honda.values import HondaFlags, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, HONDA_BOSCH_CANFD, HONDA_BOSCH_ALT_RADAR, CAR, CarControllerParams
 
 # CAN bus layout with relay
 # 0 = ACC-CAN - radar side
@@ -47,7 +47,7 @@ class CanBus(CanBusBase):
 
 def get_cruise_speed_conversion(car_fingerprint: str, is_metric: bool) -> float:
   # on certain cars, CRUISE_SPEED changes to imperial with car's unit setting
-  return CV.MPH_TO_MS if car_fingerprint in (HONDA_BOSCH_RADARLESS | HONDA_BOSCH_CANFD) and not is_metric else CV.KPH_TO_MS
+  return CV.MPH_TO_MS if car_fingerprint in (HONDA_BOSCH_RADARLESS | HONDA_BOSCH_CANFD | HONDA_BOSCH_ALT_RADAR) and not is_metric else CV.KPH_TO_MS
 
 
 def create_brake_command(packer, CAN, apply_brake, pump_on, pcm_override, pcm_cancel_cmd, fcw, car_fingerprint, stock_brake):
@@ -136,7 +136,7 @@ def create_bosch_supplemental_1(packer, CAN):
   return packer.make_can_msg("BOSCH_SUPPLEMENTAL_1", CAN.lkas, values)
 
 
-def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_hud, lkas_hud):
+def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_hud, lkas_hud, steer_restricted):
   commands = []
   radar_disabled = CP.carFingerprint in (HONDA_BOSCH - HONDA_BOSCH_RADARLESS) and CP.openpilotLongitudinalControl
 
@@ -170,7 +170,8 @@ def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_
   lkas_hud_values = {
     'SET_ME_X41': 0x41,
     'STEERING_REQUIRED': hud.steer_required,
-    'SOLID_LANES': hud.lanes_visible,
+    'SOLID_LANES': hud.lanes_visible and not steer_restricted,
+    'DASHED_LANES': int(enabled),
     'BEEP': 0,
   }
 
