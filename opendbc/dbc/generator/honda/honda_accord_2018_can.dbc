@@ -41,4 +41,3 @@ VAL_ 419 GEAR 26 "S" 20 "D" 19 "N" 18 "R" 17 "P";
 VAL_ 545 ECON_ON_2 0 "off" 3 "on";
 VAL_ 662 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "cancel" 1 "main" 0 "none";
 VAL_ 662 CRUISE_SETTING 3 "distance_adj" 2 "tbd" 1 "lkas_button" 0 "none";
-VAL_ 806 CMBS_BUTTON 3 "pressed" 0 "released";
