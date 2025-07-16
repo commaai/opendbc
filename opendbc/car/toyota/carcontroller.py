@@ -34,6 +34,77 @@ MAX_STEER_RATE_FRAMES = 18  # tx control frames needed before torque can be cut
 MAX_USER_TORQUE = 500
 
 
+class LeadLagFilter:
+  """
+  Drivability lead‑lag network:
+          (1 + τ s)
+  G(s) = ------------
+          (1 + β τ s)
+
+  • τ   ~= PCM time‑constant (0.3‑0.6 s on Camry)
+  • β   < 1   (0.05‑0.2)  sets how much high‑freq you keep
+  """
+  def __init__(self, tau: float, beta: float, dt: float):
+    wz = 1.0 / tau                 # rad/s of the zero
+    wp = wz * beta                 # slower pole
+
+    # bilinear‑transform coefficients
+    self._a = (2 + wp*dt) / (2 + wz*dt)
+    self._b = (2 - wp*dt) / (2 + wp*dt)
+    self._c = (2 - wz*dt) / (2 + wz*dt)
+
+    self._u1 = 0.0                 # previous input  (u[k-1])
+    self._y1 = 0.0                 # previous output (y[k-1])
+    self._k = (1 + self._b) / (self._a + self._c)
+
+  def __call__(self, u: float) -> float:
+    y = self._a * u + self._c * self._u1 - self._b * self._y1
+    self._u1, self._y1 = u, y
+    return self._k * y
+
+
+# class HP_LP_Drivability:
+#   """
+#   High‑pass (tau_hp) immediately followed by
+#   Low‑pass  (tau_lp)  → behaves like a lead‑lag
+#   """
+#   def __init__(self, tau_hp, tau_lp, dt):
+#     self.lp_tail = FirstOrderFilter(0, tau_lp, dt)
+#     self.hp_state = FirstOrderFilter(0, tau_hp, dt)  # used only for its internal y
+#     self.y_prev = 0.0
+#
+#   def __call__(self, u):
+#     # --- high‑pass via y_hp = u - lowpass(u) ---
+#     lp_u = self.hp_state.update(u)
+#     y_hp = u - lp_u                # quick “kick” part
+#
+#     # --- add kick to previous output, then low‑pass the sum ---
+#     blended = self.y_prev + y_hp   # this is the lead action
+#     y_out = self.lp_tail.update(blended)  # lag smooth back
+#     self.y_prev = y_out
+#     return y_out
+
+class LeadLagSimple:
+  """
+  Discrete approximation of  (1 + τ s) / (1 + β τ s)
+  implemented as:  y = u + (1‑β)·HPβτ(u)
+  where HPβτ is a first‑order high‑pass with time–constant β·τ
+  """
+  def __init__(self, tau: float, beta: float, dt: float):
+    self.beta = beta
+    self.tau_hp = beta * tau               # HP time‑constant
+    self.alpha  = dt / (self.tau_hp + dt)  # LP coefficient inside HP
+    self.lp     = 0.0                      # internal low‑pass state
+
+  def __call__(self, u: float) -> float:
+    # first‑order low‑pass (part of the high‑pass)
+    self.lp += self.alpha * (u - self.lp)
+    hp = u - self.lp                       # high‑pass output
+
+    # lead‑lag output: input + scaled HP
+    return u + (1.0 - self.beta) * hp
+
+
 def get_long_tune(CP, params):
   if CP.carFingerprint in TSS2_CAR:
     kiBP = [2., 5.]
@@ -60,11 +131,32 @@ class CarController(CarControllerBase):
     self.steer_rate_counter = 0
     self.distance_button = 0
 
+    self.prev_accel_scurve = 0
+
+    tau_pcm  = 0.25          # <-- tune from step log
+    beta     = 0.05          # <-- tune (start 0.10)
+    self.drv_filter = LeadLagFilter(tau_pcm, beta, DT_CTRL*3)
+
+    # # simple version of the drivability filter
+    # dt = DT_CTRL * 3
+    # self.drv_filter_simple = HP_LP_Drivability(tau_hp=0.15, tau_lp=0.45, dt=dt)
+
+    # tau_pcm = 0.45  # same τ you were using
+    # beta = 0.12  # same β
+    # self.drv_filter_simple = LeadLagSimple(tau_pcm, beta, DT_CTRL * 3)
+
     # *** start long control state ***
     self.long_pid = get_long_tune(self.CP, self.params)
     self.aego = FirstOrderFilter(0.0, 0.25, DT_CTRL * 3)
     self.pitch = FirstOrderFilter(0, 0.25, DT_CTRL)
     self.pitch_slow = FirstOrderFilter(0, 1.5, DT_CTRL)
+
+    self.accel_filter = FirstOrderFilter(0.0, 0.25, DT_CTRL * 3)
+    self.accel_filter_slow = FirstOrderFilter(0.0, 0.5, DT_CTRL * 3)
+
+    self.debug = 0.0
+    self.debug2 = 0.0
+    self.debug3 = 0.0
 
     self.accel = 0
     self.prev_accel = 0
@@ -216,6 +308,17 @@ class CarController(CarControllerBase):
 
         future_t = float(np.interp(CS.out.vEgo, [2., 5.], [0.25, 0.5]))
         a_ego_future = a_ego_blended + j_ego * future_t
+        self.debug = a_ego_future
+
+        self.debug2 = self.drv_filter(actuators.accel)
+        print(actuators.accel, self.debug2)
+
+        self.accel_filter.update(actuators.accel)
+        self.accel_filter_slow.update(actuators.accel)
+
+        highpass_accel = self.accel_filter.x - self.accel_filter_slow.x
+        self.debug3 = actuators.accel - highpass_accel
+        print(highpass_accel)
 
         if CC.longActive:
           # constantly slowly unwind integral to recover from large temporary errors
@@ -294,6 +397,9 @@ class CarController(CarControllerBase):
     new_actuators.torqueOutputCan = apply_torque
     new_actuators.steeringAngleDeg = self.last_angle
     new_actuators.accel = self.accel
+    new_actuators.debug = self.debug
+    new_actuators.debug2 = self.debug2
+    new_actuators.debug3 = self.debug3
 
     self.frame += 1
     return new_actuators, can_sends

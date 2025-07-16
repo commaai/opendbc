@@ -380,6 +380,10 @@ struct CarControl {
     torqueOutputCan @8: Float32;   # value sent over can to the car
     speed @6: Float32;  # m/s
 
+    debug @9 :Float32;
+    debug2 @10 :Float32;
+    debug3 @11 :Float32;  # for debugging purposes, not sent to the car
+
     enum LongControlState @0xe40f3a917d908282{
       off @0;
       pid @1;
