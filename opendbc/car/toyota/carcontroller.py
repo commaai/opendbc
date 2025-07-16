@@ -229,7 +229,7 @@ class CarController(CarControllerBase):
 
           # compensate for changes in pitch
           high_pass_pitch = self.pitch.x - self.pitch_slow.x
-          pitch_compensation = math.sin(high_pass_pitch) * ACCELERATION_DUE_TO_GRAVITY
+          pitch_compensation = float(np.clip(math.sin(high_pass_pitch) * ACCELERATION_DUE_TO_GRAVITY, -1.5, 1.5))
           pcm_accel_cmd += pitch_compensation
 
         else:
