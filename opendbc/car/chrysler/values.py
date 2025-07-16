@@ -17,6 +17,9 @@ class ChryslerSafetyFlags(IntFlag):
 class ChryslerFlags(IntFlag):
   # Detected flags
   HIGHER_MIN_STEERING_SPEED = 1
+  RAM_HAS_CENTER_STACK_1_BUTTON = 2
+  RAM_HAS_CENTER_STACK_2_BUTTON = 4
+
 
 @dataclass
 class ChryslerCarDocs(CarDocs):

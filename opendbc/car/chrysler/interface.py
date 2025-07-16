@@ -30,7 +30,13 @@ class CarInterface(CarInterfaceBase):
       ret.safetyConfigs[0].safetyParam |= ChryslerSafetyFlags.RAM_DT.value
 
     CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
-    if candidate not in RAM_CARS:
+    if candidate in RAM_CARS:
+      center_stack_1 = 0xDD if candidate in RAM_HD else 0x330  # RAM_HD = 0xDD, RAM_DT = 0x330
+      if center_stack_1 in fingerprint[0]:
+        ret.flags |= ChryslerFlags.RAM_HAS_CENTER_STACK_1_BUTTON.value
+      if 0x28A in fingerprint[0]:  # Center_Stack_2
+        ret.flags |= ChryslerFlags.RAM_HAS_CENTER_STACK_2_BUTTON.value
+    else:
       # Newer FW versions standard on the following platforms, or flashed by a dealer onto older platforms have a higher minimum steering speed.
       new_eps_platform = candidate in (CAR.CHRYSLER_PACIFICA_2019_HYBRID, CAR.CHRYSLER_PACIFICA_2020, CAR.JEEP_GRAND_CHEROKEE_2019, CAR.DODGE_DURANGO)
       new_eps_firmware = any(fw.ecu == 'eps' and fw.fwVersion[:4] >= b"6841" for fw in car_fw)
