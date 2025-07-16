@@ -683,6 +683,7 @@ class AngleSteeringSafetyTest(VehicleSpeedSafetyTest):
   def test_angle_cmd_when_enabled(self):
     # when controls are allowed, angle cmd rate limit is enforced
     speeds = [0., 1., 5., 10., 15., 50.]
+    # TODO: what should CANPacker do here? we should also have good coverage checks on this
     if self.STEER_ANGLE_TEST_MAX is None:
         self.STEER_ANGLE_TEST_MAX = self.STEER_ANGLE_MAX * 2
     angles = np.concatenate((np.arange(-self.STEER_ANGLE_TEST_MAX, self.STEER_ANGLE_TEST_MAX, 5), [0]))
