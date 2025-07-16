@@ -101,8 +101,6 @@ class SubaruCarDocs(CarDocs):
   footnotes: list[Enum] = field(default_factory=lambda: [Footnote.GLOBAL])
 
   def init_make(self, CP: CarParams):
-    self.car_parts.parts.extend([Tool.socket_8mm_deep, Tool.pry_tool])
-
     if CP.alphaLongitudinalAvailable:
       self.footnotes.append(Footnote.EXP_LONG)
 
