@@ -218,13 +218,13 @@ class CAR(Platforms):
   HONDA_PILOT_4G = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda Pilot 2023", "All")],
     CarSpecs(mass=4278 * CV.LB_TO_KG, wheelbase=2.86, centerToFrontRatio=0.428, steerRatio=16.0, tireStiffnessFactor=0.444),  # as spec
-    {Bus.pt: 'honda_pilot_2023_can_generated'},
+    {Bus.pt: 'honda_canfd_common_can_generated'},
     flags=HondaFlags.BOSCH_CANFD | HondaFlags.BOSCH_ALT_BRAKE,
   )
   ACURA_MDX_4G_MMR = HondaBoschPlatformConfig(
     [HondaCarDocs("Acura MDX 2025", "All")],
     CarSpecs(mass=4544 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.428, steerRatio=14.6, tireStiffnessFactor=0.444),  # as spec
-    {Bus.pt: 'honda_pilot_2023_can_generated'},
+    {Bus.pt: 'honda_canfd_common_can_generated'},
     flags=HondaFlags.BOSCH_CANFD | HondaFlags.BOSCH_ALT_BRAKE,
   )
 
