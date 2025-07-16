@@ -118,13 +118,11 @@ def create_acc_commands(packer, CAN, enabled, active, accel, gas, stopping_count
   return commands
 
 
-def create_steering_control(packer, CAN, apply_torque, lkas_active, fingerprint):
+def create_steering_control(packer, CAN, apply_torque, lkas_active):
   values = {
     "STEER_TORQUE": apply_torque if lkas_active else 0,
     "STEER_TORQUE_REQUEST": lkas_active,
   }
-  if fingerprint in HONDA_BOSCH_ALT_RADAR:
-    values ['DISABLE_LOWSPEED_FAULT'] = lkas_active
   return packer.make_can_msg("STEERING_CONTROL", CAN.lkas, values)
 
 
@@ -138,7 +136,7 @@ def create_bosch_supplemental_1(packer, CAN):
   return packer.make_can_msg("BOSCH_SUPPLEMENTAL_1", CAN.lkas, values)
 
 
-def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_hud, lkas_hud):
+def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_hud, lkas_hud, steer_restricted):
   commands = []
   radar_disabled = CP.carFingerprint in (HONDA_BOSCH - HONDA_BOSCH_RADARLESS) and CP.openpilotLongitudinalControl
 
@@ -172,7 +170,7 @@ def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_
   lkas_hud_values = {
     'SET_ME_X41': 0x41,
     'STEERING_REQUIRED': hud.steer_required,
-    'SOLID_LANES': hud.lanes_visible,
+    'SOLID_LANES': hud.lanes_visible and not steer_restricted,
     'DASHED_LANES': int(enabled),
     'BEEP': 0,
   }
