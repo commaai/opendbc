@@ -151,8 +151,8 @@ class CarController(CarControllerBase):
     self.pitch = FirstOrderFilter(0, 0.25, DT_CTRL)
     self.pitch_slow = FirstOrderFilter(0, 1.5, DT_CTRL)
 
-    self.accel_filter = FirstOrderFilter(0.0, 0.25, DT_CTRL * 3)
-    self.accel_filter_slow = FirstOrderFilter(0.0, 0.5, DT_CTRL * 3)
+    self.accel_filter = FirstOrderFilter(0.0, 0.6, DT_CTRL * 3)
+    self.accel_filter_slow = FirstOrderFilter(0.0, 1, DT_CTRL * 3)
 
     self.debug = 0.0
     self.debug2 = 0.0
@@ -313,22 +313,23 @@ class CarController(CarControllerBase):
         self.debug2 = self.drv_filter(actuators.accel)
         print(actuators.accel, self.debug2)
 
-        self.accel_filter.update(actuators.accel)
-        self.accel_filter_slow.update(actuators.accel)
-
-        highpass_accel = self.accel_filter.x - self.accel_filter_slow.x
-        self.debug3 = actuators.accel - highpass_accel
-        print(highpass_accel)
-
         if CC.longActive:
-          # constantly slowly unwind integral to recover from large temporary errors
-          self.long_pid.i -= ACCEL_PID_UNWIND * float(np.sign(self.long_pid.i))
+          # # constantly slowly unwind integral to recover from large temporary errors
+          # self.long_pid.i -= ACCEL_PID_UNWIND * float(np.sign(self.long_pid.i))
+          #
+          # error_future = pcm_accel_cmd - a_ego_future
+          # pcm_accel_cmd = self.long_pid.update(error_future,
+          #                                      speed=CS.out.vEgo,
+          #                                      feedforward=pcm_accel_cmd,
+          #                                      freeze_integrator=actuators.longControlState != LongCtrlState.pid)
 
-          error_future = pcm_accel_cmd - a_ego_future
-          pcm_accel_cmd = self.long_pid.update(error_future,
-                                               speed=CS.out.vEgo,
-                                               feedforward=pcm_accel_cmd,
-                                               freeze_integrator=actuators.longControlState != LongCtrlState.pid)
+          self.accel_filter.update(actuators.accel)
+          self.accel_filter_slow.update(actuators.accel)
+
+          highpass_accel = self.accel_filter.x - self.accel_filter_slow.x
+          pcm_accel_cmd = actuators.accel - highpass_accel
+          self.debug3 = pcm_accel_cmd
+          print(highpass_accel)
 
           # compensate for changes in pitch
           high_pass_pitch = self.pitch.x - self.pitch_slow.x
@@ -337,6 +338,8 @@ class CarController(CarControllerBase):
 
         else:
           self.long_pid.reset()
+          self.accel_filter.x = 0.0
+          self.accel_filter_slow.x = 0.0
 
         # Along with rate limiting positive jerk above, this greatly improves gas response time
         # Consider the net acceleration request that the PCM should be applying (pitch included)
