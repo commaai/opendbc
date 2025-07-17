@@ -151,10 +151,10 @@ class CarController(CarControllerBase):
     self.pitch = FirstOrderFilter(0, 0.25, DT_CTRL)
     self.pitch_slow = FirstOrderFilter(0, 1.5, DT_CTRL)
 
-    self.accel_filter = FirstOrderFilter(0.0, 0.6, DT_CTRL * 3)
+    self.accel_filter = FirstOrderFilter(0.0, 0.4, DT_CTRL * 3)
     self.accel_filter_slow = FirstOrderFilter(0.0, 1, DT_CTRL * 3)
 
-    self.accel_filter2 = FirstOrderFilter(0.0, 0.1, DT_CTRL * 3)
+    self.accel_filter2 = FirstOrderFilter(0.0, 0.05, DT_CTRL * 3)  # TODO: dont use this filter?
     self.accel_filter_slow2 = FirstOrderFilter(0.0, 0.2, DT_CTRL * 3)
 
     self.debug = 0.0
