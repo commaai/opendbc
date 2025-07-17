@@ -56,5 +56,13 @@ class TestPsaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyTes
     values = {"P002_Com_rAPP": int(gas * 100)}
     return self.packer.make_can_msg_panda("Dyn_CMM", self.EPS_BUS, values)
 
+class TestPsaStockSafety(TestPsaSafetyBase):
+
+  def setUp(self):
+    self.packer = CANPackerPanda("psa_aee2010_r3")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.psa, 0)
+    self.safety.init_tests()
+
 if __name__ == "__main__":
     unittest.main()
