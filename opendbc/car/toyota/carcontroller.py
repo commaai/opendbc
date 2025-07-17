@@ -351,6 +351,8 @@ class CarController(CarControllerBase):
           self.long_pid.reset()
           self.accel_filter.x = 0.0
           self.accel_filter_slow.x = 0.0
+          self.accel_filter2.x = 0.0
+          self.accel_filter_slow2.x = 0.0
 
         # Along with rate limiting positive jerk above, this greatly improves gas response time
         # Consider the net acceleration request that the PCM should be applying (pitch included)
