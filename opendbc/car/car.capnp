@@ -382,7 +382,9 @@ struct CarControl {
 
     debug @9 :Float32;
     debug2 @10 :Float32;
-    debug3 @11 :Float32;  # for debugging purposes, not sent to the car
+    debug3 @11 :Float32;
+    debug4 @12 :Float32;
+    debug5 @13 :Float32;
 
     enum LongControlState @0xe40f3a917d908282{
       off @0;

@@ -149,14 +149,19 @@ class CarController(CarControllerBase):
     self.long_pid = get_long_tune(self.CP, self.params)
     self.aego = FirstOrderFilter(0.0, 0.25, DT_CTRL * 3)
     self.pitch = FirstOrderFilter(0, 0.25, DT_CTRL)
-    self.pitch_slow = FirstOrderFilter(0, 1.5, DT_CTRL)
+    self.pitch_slow = FirstOrderFilter(0, 2, DT_CTRL)
 
     self.accel_filter = FirstOrderFilter(0.0, 0.6, DT_CTRL * 3)
     self.accel_filter_slow = FirstOrderFilter(0.0, 1, DT_CTRL * 3)
 
+    self.accel_filter2 = FirstOrderFilter(0.0, 0.1, DT_CTRL * 3)
+    self.accel_filter_slow2 = FirstOrderFilter(0.0, 0.2, DT_CTRL * 3)
+
     self.debug = 0.0
     self.debug2 = 0.0
     self.debug3 = 0.0
+    self.debug4 = 0.0
+    self.debug5 = 0.0
 
     self.accel = 0
     self.prev_accel = 0
@@ -326,9 +331,15 @@ class CarController(CarControllerBase):
           self.accel_filter.update(actuators.accel)
           self.accel_filter_slow.update(actuators.accel)
 
+          self.accel_filter2.update(actuators.accel)
+          self.accel_filter_slow2.update(actuators.accel)
+
           highpass_accel = self.accel_filter.x - self.accel_filter_slow.x
-          pcm_accel_cmd = actuators.accel - highpass_accel
+          highpass_accel2 = self.accel_filter2.x - self.accel_filter_slow2.x
+          pcm_accel_cmd = actuators.accel - highpass_accel + highpass_accel2
           self.debug3 = pcm_accel_cmd
+          self.debug4 = highpass_accel
+          self.debug5 = highpass_accel2
           print(highpass_accel)
 
           # compensate for changes in pitch
@@ -403,6 +414,8 @@ class CarController(CarControllerBase):
     new_actuators.debug = self.debug
     new_actuators.debug2 = self.debug2
     new_actuators.debug3 = self.debug3
+    new_actuators.debug4 = self.debug4
+    new_actuators.debug5 = self.debug5
 
     self.frame += 1
     return new_actuators, can_sends
