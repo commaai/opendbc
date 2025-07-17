@@ -142,8 +142,8 @@ class CarInterface(CarInterfaceBase):
 
     if candidate in TSS2_CAR:
       ret.flags |= ToyotaFlags.RAISED_ACCEL_LIMIT.value
-      # ret.longitudinalTuning.kiBP = [0.]
-      # ret.longitudinalTuning.kiV = [0.5]
+      ret.longitudinalTuning.kiBP = [0.]
+      ret.longitudinalTuning.kiV = [0.5]
 
       ret.vEgoStopping = 0.25
       ret.vEgoStarting = 0.25
