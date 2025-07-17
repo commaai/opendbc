@@ -149,7 +149,7 @@ class CarController(CarControllerBase):
     self.long_pid = get_long_tune(self.CP, self.params)
     self.aego = FirstOrderFilter(0.0, 0.25, DT_CTRL * 3)
     self.pitch = FirstOrderFilter(0, 0.25, DT_CTRL)
-    self.pitch_slow = FirstOrderFilter(0, 2, DT_CTRL)
+    self.pitch_slow = FirstOrderFilter(0, 1.5, DT_CTRL)
 
     self.accel_filter = FirstOrderFilter(0.0, 0.6, DT_CTRL * 3)
     self.accel_filter_slow = FirstOrderFilter(0.0, 1, DT_CTRL * 3)
@@ -344,7 +344,7 @@ class CarController(CarControllerBase):
 
           # compensate for changes in pitch
           high_pass_pitch = self.pitch.x - self.pitch_slow.x
-          pitch_compensation = float(np.clip(math.sin(high_pass_pitch) * ACCELERATION_DUE_TO_GRAVITY, -1.5, 1.5))
+          pitch_compensation = float(np.clip(math.sin(high_pass_pitch) * ACCELERATION_DUE_TO_GRAVITY * 1.5, -1.5, 1.5))
           pcm_accel_cmd += pitch_compensation
 
         else:
