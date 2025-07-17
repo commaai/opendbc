@@ -78,7 +78,7 @@ static void psa_rx_hook(const CANPacket_t *to_push) {
 
   if (bus == PSA_CAM_BUS) {
     if (addr == PSA_DYN_CMM) {
-      gas_pressed = GET_BYTE(to_push, 3) > 0U; // GAS_PEDAL
+      gas_pressed = GET_BYTE(to_push, 3) > 0U; // P002_Com_rAPP
     }
     if (addr == PSA_STEERING) {
       int torque_driver_new = to_signed(GET_BYTE(to_push, 1), 8);
@@ -97,7 +97,7 @@ static void psa_rx_hook(const CANPacket_t *to_push) {
 
   if (bus == PSA_ADAS_BUS) {
     if (addr == PSA_HS2_DAT_MDD_CMD_452) {
-      pcm_cruise_check(((GET_BYTE(to_push, 2U) >> 7U) & 1U)); // DDE_ACTIVATION_RVV_ACC
+      pcm_cruise_check(((GET_BYTE(to_push, 2U) >> 7U) & 1U)); // RVV_ACC_ACTIVATION_REQ
     }
   }
 
