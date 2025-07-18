@@ -284,23 +284,7 @@ class CarController(CarControllerBase):
     # prevent fault
     return float(np.clip(new_apply_angle, -limits.STEER_ANGLE_MAX, limits.STEER_ANGLE_MAX)), target_torque_reduction_gain
 
-  def calculate_angle_torque_reduction_gain(self, CS, target_torque_reduction_gain):
-    """ Calculate the angle torque reduction gain based on the current steering state. """
-    if CS.out.steeringPressed:  # User is overriding
-      torque_delta = self.apply_torque_last - self.min_torque_reduction_gain
-      adaptive_ramp_rate = max(torque_delta / self.angle_torque_override_cycles, 0.004) # the minimum rate of change we've seen
-      return max(self.apply_torque_last - adaptive_ramp_rate, self.min_torque_reduction_gain)
-    else:
-      # EU vehicles have been seen to "idle" at 0.384, while US vehicles have been seen idling at "0.92" for LFA.
-      target_torque = max(target_torque_reduction_gain, 0.5) # at 0.5 under normal conditions
-      target_torque = max(target_torque, self.min_torque_reduction_gain)
-
-      if self.apply_torque_last > target_torque:
-        return max(self.apply_torque_last - self.ramp_down_reduction_gain_rate, target_torque)
-      else:
-        return min(self.apply_torque_last + self.ramp_up_reduction_gain_rate, target_torque)
-
   def update_angle_steering_control(self, CS, CC, actuators):
     new_angle, target_torque_reduction_gain = self.apply_hyundai_steer_angle_limits(CS, CC, actuators.steeringAngleDeg)
-    torque_reduction_gain = self.calculate_angle_torque_reduction_gain(CS, target_torque_reduction_gain)
+    torque_reduction_gain = 1.  # Hardcoding to 1.0 for now, as we don't have a good way to calculate it yet. It should be dynamic.
     return new_angle, torque_reduction_gain
