@@ -47,8 +47,8 @@ BO_ 160 WHEEL_SPEEDS: 24 XXX
  SG_ WHL_SpdRRVal : 112|14@1+ (0.03125,0) [0|0] "km^h" XXX
 
 BO_ 203 ADAS_CMD_35_10ms: 24 CGW_CCU
- SG_ ADAS_CMD_Crc35Val : 0|16@1+ (1,0) [0|0] "0" FCU_C,GW_RGW,MDPS,SFA
- SG_ ADAS_CMD_AlvCnt35Val : 16|8@1+ (1,0) [0|0] "0" FCU_C,GW_RGW,MDPS,SFA
+ SG_ CHECKSUM : 0|16@1+ (1,0) [0|0] "0" FCU_C,GW_RGW,MDPS,SFA
+ SG_ COUNTER : 16|8@1+ (1,0) [0|0] "0" FCU_C,GW_RGW,MDPS,SFA
  SG_ ADAS_ActvACISta : 24|4@1+ (1,0) [0|0] "" GW_RGW,MDPS,SFA
  SG_ ADAS_ActvACILvl2Sta : 28|4@1+ (1,0) [0|0] "" ESC,FCU_C,GW_RGW,MDPS,SFA,VPC_C
  SG_ ADAS_StrAnglReqVal : 32|14@1- (0.1,0) [0|119.9] "Deg" GW_RGW,MDPS,SFA
@@ -675,8 +675,6 @@ BO_ 1264 LOCAL_TIME: 8 XXX
 
 CM_ SG_ 96 BRAKE_PRESSURE "User applied brake pedal pressure. Ramps from computer applied pressure on falling edge of cruise. Cruise cancels if !=0";
 CM_ SG_ 101 BRAKE_POSITION "User applied brake pedal position, max is ~700. Signed on some vehicles";
-CM_ SG_ 203 ADAS_CMD_Crc35Val "ADAS_CMD_CyclicRedundancyCheck35Value";
-CM_ SG_ 203 ADAS_CMD_AlvCnt35Val "ADAS_CMD_AliveCounter35Value";
 CM_ SG_ 203 ADAS_ActvACISta "ADAS Active AngleControlInterface State";
 CM_ SG_ 203 ADAS_ActvACILvl2Sta "ADAS Active AngleControlInterface Level 2 State";
 CM_ SG_ 203 ADAS_StrAnglReqVal "(LFA) ADAS Steering Angle Request Value; Capped at 119.9;";
@@ -710,8 +708,6 @@ VAL_ 64 GEAR 0 "P" 5 "D" 6 "N" 7 "R";
 VAL_ 69 GEAR 0 "P" 5 "D" 6 "N" 7 "R";
 VAL_ 96 TRACTION_AND_STABILITY_CONTROL 0 "On" 5 "Limited" 1 "Off";
 VAL_ 112 GEAR 0 "P" 5 "D" 6 "N" 7 "R";
-VAL_ 203 ADAS_CMD_Crc35Val 0 "0x0x0~0xFFFF:CRCValue" 65535 "0x0x0~0xFFFF:CRCValue";
-VAL_ 203 ADAS_CMD_AlvCnt35Val 0 "0x0x0~0xFF:AlvCntValue" 255 "0x0x0~0xFF:AlvCntValue";
 VAL_ 203 ADAS_ActvACISta 0 "INIT" 1 "INACTIVE" 2 "ACTIVE35(ACTIVE)" 3 "ACTIVE33(Redundancy)" 4 "RESERVED" 5 "RESERVED" 6 "RESERVED" 7 "RESERVED" 8 "RESERVED" 9 "RESERVED" 10 "RESERVED" 11 "RESERVED" 12 "RESERVED" 13 "RESERVED" 14 "RESERVED" 15 "RESERVED";
 VAL_ 203 ADAS_ActvACILvl2Sta 0 "INIT" 1 "INACTIVE" 2 "ACTIVE35(ACTIVE)" 3 "RESERVED" 4 "RESERVED" 5 "RESERVED" 6 "RESERVED" 7 "RESERVED" 8 "RESERVED" 9 "RESERVED" 10 "RESERVED" 11 "RESERVED" 12 "RESERVED" 13 "RESERVED" 14 "RESERVED" 15 "RESERVED";
 VAL_ 203 ADAS_StrAnglReqVal 0 "0x0x000~0x3FFF:Real Values" 16383 "0x0x000~0x3FFF:Real Values";

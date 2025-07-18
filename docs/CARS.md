@@ -168,7 +168,7 @@
 |Kia|Niro EV 2022|All|[Upstream](#upstream)|
 |Kia|Niro EV (with HDA II) 2025|Highway Driving Assist II|[Upstream](#upstream)|
 |Kia|Niro EV (without HDA II) 2023-25|All|[Upstream](#upstream)|
-|Kia|Niro Hybrid 2018|All|[Upstream](#upstream)|
+|Kia|Niro Hybrid 2018|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Kia|Niro Hybrid 2021|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Kia|Niro Hybrid 2022|Smart Cruise Control (SCC)|[Upstream](#upstream)|
 |Kia|Niro Hybrid 2023|Smart Cruise Control (SCC)|[Upstream](#upstream)|
@@ -200,7 +200,7 @@
 |Lexus|GS F 2016|All|[Upstream](#upstream)|
 |Lexus|IS 2017-19|All|[Upstream](#upstream)|
 |Lexus|IS 2022-24|All|[Upstream](#upstream)|
-|Lexus|LC 2024|All|[Upstream](#upstream)|
+|Lexus|LC 2024-25|All|[Upstream](#upstream)|
 |Lexus|NS 2022-25|Any|[Not compatible](#can-bus-security)|
 |Lexus|NX 2018-19|All|[Upstream](#upstream)|
 |Lexus|NX 2020-21|All|[Upstream](#upstream)|
