@@ -13,11 +13,6 @@ BO_ 401 GEARBOX: 8 PCM
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
 
-BO_ 446 BRAKE_MODULE: 3 VSA
- SG_ BRAKE_PRESSED : 4|1@0+ (1,0) [0|1] "" XXX
- SG_ COUNTER : 21|2@0+ (1,0) [0|3] "" XXX
- SG_ CHECKSUM : 19|4@0+ (1,0) [0|15] "" XXX
-
 CM_ SG_ 479 RELATED_TO_GAS "bits 7, 3, and 1 set to 1 when gas not applied";
 CM_ SG_ 479 GAS_BRAKE "Signed value, negative when braking and positive when applying gas";
 
