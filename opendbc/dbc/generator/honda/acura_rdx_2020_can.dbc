@@ -10,11 +10,6 @@ BO_ 419 GEARBOX: 8 PCM
  SG_ GEAR_SHIFTER : 29|6@0+ (1,0) [0|63] "" EON
  SG_ GEAR : 7|8@0+ (1,0) [0|255] "" EON
 
-BO_ 446 BRAKE_MODULE: 3 VSA
- SG_ BRAKE_PRESSED : 4|1@0+ (1,0) [0|1] "" XXX
- SG_ COUNTER : 21|2@0+ (1,0) [0|3] "" XXX
- SG_ CHECKSUM : 19|4@0+ (1,0) [0|15] "" XXX
-
 VAL_ 419 GEAR_SHIFTER  32 "D" 8 "R" 4 "P" ;
 VAL_ 545 ECON_ON_2 0 "off" 3 "on" ;
 VAL_ 662 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "cancel" 1 "main" 0 "none" ;

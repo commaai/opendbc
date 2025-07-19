@@ -6,7 +6,7 @@ from opendbc.can.parser import CANParser
 from opendbc.car import Bus, create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.honda.hondacan import CanBus, get_cruise_speed_conversion
-from opendbc.car.honda.values import CAR, DBC, STEER_THRESHOLD, HONDA_BOSCH, HONDA_BOSCH_CANFD, \
+from opendbc.car.honda.values import CAR, DBC, STEER_THRESHOLD, HONDA_BOSCH, \
                                                  HONDA_NIDEC_ALT_SCM_MESSAGES, HONDA_BOSCH_RADARLESS, \
                                                  HondaFlags, CruiseButtons, CruiseSettings, GearShifter
 from opendbc.car.interfaces import CarStateBase
@@ -31,18 +31,9 @@ def get_can_messages(CP, gearbox_msg):
     ("VSA_STATUS", 50),
     ("STEER_STATUS", 100),
     ("STEER_MOTOR_TORQUE", 0),  # TODO: not on every car
+    ("SCM_FEEDBACK", 10),  # FIXME: there are different frequencies for different arb IDs
+    ("SCM_BUTTONS", 25),  # FIXME: there are different frequencies for different arb IDs
   ]
-
-  if CP.carFingerprint == CAR.HONDA_ODYSSEY_CHN:
-    messages += [
-      ("SCM_FEEDBACK", 25),
-      ("SCM_BUTTONS", 50),
-    ]
-  else:
-    messages += [
-      ("SCM_FEEDBACK", 10),
-      ("SCM_BUTTONS", 25),
-    ]
 
   if CP.carFingerprint in (CAR.HONDA_CRV_HYBRID, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.ACURA_RDX_3G, CAR.HONDA_E):
     messages.append((gearbox_msg, 50))
@@ -128,15 +119,16 @@ class CarState(CarStateBase):
     # panda checks if the signal is non-zero
     ret.standstill = cp.vl["ENGINE_DATA"]["XMISSION_SPEED"] < 1e-5
 
+    # doorOpen is true if we can find any door open, but signal locations vary, and we may only see the driver's door
+    # TODO: Test the eight Nidec cars without SCM signals for driver's door state, may be able to consolidate further
     if self.CP.flags & HondaFlags.HAS_ALL_DOOR_STATES:
       ret.doorOpen = any([cp.vl["DOORS_STATUS"]["DOOR_OPEN_FL"], cp.vl["DOORS_STATUS"]["DOOR_OPEN_FR"],
                           cp.vl["DOORS_STATUS"]["DOOR_OPEN_RL"], cp.vl["DOORS_STATUS"]["DOOR_OPEN_RR"]])
-    # TODO: Once SCM_FEEDBACK/SCM_BUTTONS are common-ized, just unconditionally OR both the driver's door signals
-    elif self.CP.carFingerprint in (CAR.HONDA_ACCORD, CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.HONDA_CRV_HYBRID, CAR.HONDA_INSIGHT,
-                                  CAR.ACURA_RDX_3G, CAR.HONDA_E, *HONDA_BOSCH_RADARLESS, *HONDA_BOSCH_CANFD):
-      ret.doorOpen = bool(cp.vl["SCM_FEEDBACK"]["DRIVERS_DOOR_OPEN"])
-    elif self.CP.carFingerprint in (CAR.HONDA_ODYSSEY_CHN, CAR.HONDA_FREED, CAR.HONDA_HRV):
+    elif "DRIVERS_DOOR_OPEN" in cp.vl["SCM_BUTTONS"]:
       ret.doorOpen = bool(cp.vl["SCM_BUTTONS"]["DRIVERS_DOOR_OPEN"])
+    else:
+      ret.doorOpen = bool(cp.vl["SCM_FEEDBACK"]["DRIVERS_DOOR_OPEN"])
+
     ret.seatbeltUnlatched = bool(cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LAMP"] or not cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LATCHED"])
 
     steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]["STEER_STATUS"]]
