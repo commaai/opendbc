@@ -46,12 +46,15 @@ BO_ 160 WHEEL_SPEEDS: 24 XXX
  SG_ WHL_SpdRLVal : 96|14@1+ (0.03125,0) [0|0] "km^h" XXX
  SG_ WHL_SpdRRVal : 112|14@1+ (0.03125,0) [0|0] "km^h" XXX
 
-BO_ 203 LFA_ALT: 24 ADRV
- SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
- SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
- SG_ LKAS_ANGLE_ACTIVE : 29|2@0+ (1,0) [0|1] "" XXX
- SG_ LKAS_ANGLE_CMD : 32|14@1- (0.1,0) [0|511] "" XXX
- SG_ LKAS_ANGLE_MAX_TORQUE : 55|8@0+ (1,0) [0|255] "" XXX
+BO_ 203 ADAS_CMD_35_10ms: 24 CGW_CCU
+ SG_ CHECKSUM : 0|16@1+ (1,0) [0|0] "0" FCU_C,GW_RGW,MDPS,SFA
+ SG_ COUNTER : 16|8@1+ (1,0) [0|0] "0" FCU_C,GW_RGW,MDPS,SFA
+ SG_ ADAS_ActvACISta : 24|4@1+ (1,0) [0|0] "" GW_RGW,MDPS,SFA
+ SG_ ADAS_ActvACILvl2Sta : 28|4@1+ (1,0) [0|0] "" ESC,FCU_C,GW_RGW,MDPS,SFA,VPC_C
+ SG_ ADAS_StrAnglReqVal : 32|14@1- (0.1,0) [0|119.9] "Deg" GW_RGW,MDPS,SFA
+ SG_ ADAS_ACIAnglTqRedcGainVal : 48|8@1+ (0.004,0) [0|1] "" GW_RGW,MDPS,SFA
+ SG_ FCA_ESA_ActvSta : 56|2@1+ (1,0) [0|0] "" GW_RGW,MDPS,SFA
+ SG_ FCA_ESA_TqBstGainVal : 64|8@1+ (0.004,0) [0|0] "" GW_RGW,MDPS,SFA
 
 BO_ 234 MDPS: 24 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
@@ -92,8 +95,8 @@ BO_ 272 LKAS_ALT: 32 XXX
  SG_ NEW_SIGNAL_2 : 70|2@0+ (1,0) [0|3] "" XXX
  SG_ LKAS_ANGLE_ACTIVE : 77|2@0+ (1,0) [0|3] "" XXX
  SG_ HAS_LANE_SAFETY : 80|1@0+ (1,0) [0|1] "" XXX
- SG_ LKAS_ANGLE_CMD : 82|14@1- (0.1,0) [0|511] "" XXX
- SG_ LKAS_ANGLE_MAX_TORQUE : 96|8@1+ (1,0) [0|255] "" XXX
+ SG_ ADAS_StrAnglReqVal : 82|14@1- (0.1,0) [0|176.7] "Deg" GW_RGW,MDPS,SFA
+ SG_ ADAS_ACIAnglTqRedcGainVal : 96|8@1+ (0.004,0) [0|1] "" GW_RGW,MDPS,SFA
  SG_ NEW_SIGNAL_3 : 111|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 282 FR_CMR_01_10ms: 16 FR_CMR
@@ -514,6 +517,12 @@ BO_ 593 RADAR_0x251: 16 FRONT_RADAR
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
 
+BO_ 687 HOD_FD_01_100ms: 8 XXX
+ SG_ HOD_Dir_Status : 18|3@0+ (1,0) [0|7] "" XXX
+ SG_ NEW_SIGNAL_2 : 32|8@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_3 : 40|8@1+ (1,0) [0|255] "" XXX
+ SG_ HOD_Option : 48|2@1+ (1,0) [0|255] "" XXX
+
 BO_ 698 FR_CMR_04_40ms: 32 FR_CMR
  SG_ FR_CMR_Crc4Val : 0|16@1+ (1,0) [0|65535] "" Dummy
  SG_ FR_CMR_AlvCnt4Val : 16|8@1+ (1,0) [0|255] "" Dummy
@@ -666,9 +675,16 @@ BO_ 1264 LOCAL_TIME: 8 XXX
 
 CM_ SG_ 96 BRAKE_PRESSURE "User applied brake pedal pressure. Ramps from computer applied pressure on falling edge of cruise. Cruise cancels if !=0";
 CM_ SG_ 101 BRAKE_POSITION "User applied brake pedal position, max is ~700. Signed on some vehicles";
+CM_ SG_ 203 ADAS_ActvACISta "ADAS Active AngleControlInterface State";
+CM_ SG_ 203 ADAS_ActvACILvl2Sta "ADAS Active AngleControlInterface Level 2 State";
+CM_ SG_ 203 ADAS_StrAnglReqVal "(LFA) ADAS Steering Angle Request Value; Capped at 119.9;";
+CM_ SG_ 203 ADAS_ACIAnglTqRedcGainVal "(LFA) ADAS AngleControlInterface Angle Torque Reduction Gain Value";
+CM_ SG_ 203 FCA_ESA_ActvSta "FCA_ESA Active State";
+CM_ SG_ 203 FCA_ESA_TqBstGainVal "FCA_ESA Torque Boost Gain Value";
 CM_ BO_ 272 "Alternative LKAS message, used on cars such as 2023 Ioniq 6, 2nd gen Kona. Matches LKAS except size is 32 bytes";
 CM_ SG_ 272 LKA_AVAILABLE "Angle control cars: 3 when LKA is generally available, goes to 0 during changes with LFA";
-CM_ SG_ 272 LKAS_ANGLE_CMD "tracks MDPS->STEERING_ANGLE when not engaged, not STEERING_SENSORS->STEERING_ANGLE";
+CM_ SG_ 272 ADAS_StrAnglReqVal "(LKAS) ADAS Steering Angle Request Value; Capped at 176.7; tracks MDPS->STEERING_ANGLE when not engaged, not STEERING_SENSORS->STEERING_ANGLE";
+CM_ SG_ 272 ADAS_ACIAnglTqRedcGainVal "(LKAS) ADAS AngleControlInterface Angle Torque Reduction Gain Value";
 CM_ SG_ 298 NEW_SIGNAL_4 "todo: figure out why always set to 9";
 CM_ SG_ 352 SET_ME_9 "has something to do with AEB settings";
 CM_ SG_ 373 ACCEnable "Likely a copy of CAN's TCS13->ACCEnable";
@@ -677,6 +693,7 @@ CM_ SG_ 373 DriverBrakingLowSens "Higher threshold version of DriverBraking";
 CM_ SG_ 373 PROBABLY_EQUIP "aeb equip?";
 CM_ SG_ 416 VSetDis "set speed in display units";
 CM_ SG_ 480 NEW_SIGNAL_5 "todo: figure out why always set to 1";
+CM_ SG_ 687 HOD_Dir_Status "This signal indicates the status of hands on/off";
 CM_ SG_ 736 MAX_SPEED "Display units. Restricts car from driving above this speed unless accelerator pedal is depressed beyond pressure point";
 CM_ BO_ 866 "Contains signals with detailed lane line information. Used by ADAS ECU on HDA 2 vehicles to operate LFA. Used on cars that use message 272.";
 CM_ SG_ 866 LEFT_LANE_LINE "Left lane line confidence";
@@ -691,6 +708,12 @@ VAL_ 64 GEAR 0 "P" 5 "D" 6 "N" 7 "R";
 VAL_ 69 GEAR 0 "P" 5 "D" 6 "N" 7 "R";
 VAL_ 96 TRACTION_AND_STABILITY_CONTROL 0 "On" 5 "Limited" 1 "Off";
 VAL_ 112 GEAR 0 "P" 5 "D" 6 "N" 7 "R";
+VAL_ 203 ADAS_ActvACISta 0 "INIT" 1 "INACTIVE" 2 "ACTIVE35(ACTIVE)" 3 "ACTIVE33(Redundancy)" 4 "RESERVED" 5 "RESERVED" 6 "RESERVED" 7 "RESERVED" 8 "RESERVED" 9 "RESERVED" 10 "RESERVED" 11 "RESERVED" 12 "RESERVED" 13 "RESERVED" 14 "RESERVED" 15 "RESERVED";
+VAL_ 203 ADAS_ActvACILvl2Sta 0 "INIT" 1 "INACTIVE" 2 "ACTIVE35(ACTIVE)" 3 "RESERVED" 4 "RESERVED" 5 "RESERVED" 6 "RESERVED" 7 "RESERVED" 8 "RESERVED" 9 "RESERVED" 10 "RESERVED" 11 "RESERVED" 12 "RESERVED" 13 "RESERVED" 14 "RESERVED" 15 "RESERVED";
+VAL_ 203 ADAS_StrAnglReqVal 0 "0x0x000~0x3FFF:Real Values" 16383 "0x0x000~0x3FFF:Real Values";
+VAL_ 203 ADAS_ACIAnglTqRedcGainVal 0 "0x0x00~0xFA:Real Values" 250 "0x0x00~0xFA:Real Values" 251 "RESERVED" 252 "RESERVED" 253 "RESERVED" 254 "RESERVED" 255 "RESERVED";
+VAL_ 203 FCA_ESA_ActvSta 0 "Inactive" 1 "Active" 2 "RESERVED" 3 "RESERVED";
+VAL_ 203 FCA_ESA_TqBstGainVal 0 "0x0x00~0xFA:Real Values" 250 "0x0x00~0xFA:Real Values" 251 "RESERVED" 252 "RESERVED" 253 "RESERVED" 254 "RESERVED" 255 "RESERVED";
 VAL_ 234 LKA_FAULT 0 "ok" 1 "lka fault";
 VAL_ 272 LKA_MODE 1 "warning only" 2 "assist" 6 "off";
 VAL_ 272 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green";
@@ -816,6 +839,7 @@ VAL_ 506 ISLA_AutoUsmSta 0 "None Auto Function (Delete Menu)" 1 "Auto Off" 2 "Au
 VAL_ 506 ISLA_Cntry 0 "Europe/Russia/Australia" 1 "Domestic" 2 "China" 3 "USA" 4 "Canada" 5 "Australia" 6 "Reserved" 7 "Reserved" 8 "Reserved" 9 "Reserved" 10 "Reserved" 11 "Reserved" 12 "Reserved" 13 "Reserved" 14 "Reserved" 15 "Initial Value (default)";
 VAL_ 506 ISLA_AddtnlSign 0 "No Recognition (default)" 1 "School Crossing" 16 "Do Not Pass" 17 "Reserved" 18 "Reserved" 19 "Reserved" 20 "Reserved" 21 "Reserved" 22 "Reserved" 23 "Reserved" 24 "Exit" 25 "Roundabout" 26 "Right Curve" 27 "Left Curve" 28 "Winding Road" 29 "Reserved" 30 "Reserved" 31 "Reserved" 2 "Pedestrian Crossing" 3 "Bicycle Crossing" 4 "Reserved" 5 "Reserved" 6 "Reserved" 7 "Reserved" 8 "Stop" 9 "Yield" 10 "Stop Ahead" 11 "Yield Ahead" 12 "Road Construction Ahead" 13 "Lane Reduction" 14 "Reserved" 15 "Reserved";
 VAL_ 506 ISLA_SchoolZone 0 "No School Zone" 1 "School Zone" 2 "Reserved" 3 "Reserved";
+VAL_ 687 HOD_Dir_Status 0 "HANDS OFF" 1 "HAND TOUCH (SOFT)" 2 "HAND TOUCH (STRONG)" 3 "HAND GRIP (SOFT)" 4 "HAND GRIP (STRONG)" 5 "RESERVED" 6 "RESERVED";
 VAL_ 698 IFSref_FR_CMR_Sta 0 "None Option (Default)" 1 "Normal" 2 "Blockage Status" 3 "Error Indicator";
 VAL_ 698 IFSref_VehNumVal 0 "No vehicle" 1 "Number of vehicles" 2 "Number of vehicles" 3 "Number of vehicles" 4 "Number of vehicles" 5 "Number of vehicles" 6 "Number of vehicles" 7 "Number of vehicles" 8 "Number of vehicles" 9 "Number of vehicles" 10 "Number of vehicles" 11 "Over than 10 vehicles" 12 "Reserved" 13 "Reserved" 14 "Default" 15 "Error indicator";
 VAL_ 698 IFSref_ILLAmbtSta 0 "Bright" 1 "Dark" 2 "Not used" 3 "Error indicator";

@@ -2164,13 +2164,14 @@
     ],
     "package": "All"
   },
-  "Lexus LC 2024": {
+  "Lexus LC 2024-25": {
     "platform": "LEXUS_LC_TSS2",
     "make": "Lexus",
     "brand": "toyota",
     "model": "LC",
     "year": [
-      "2024"
+      "2024",
+      "2025"
     ],
     "package": "All"
   },
@@ -3430,12 +3431,14 @@
     ],
     "package": "All"
   },
-  "Toyota Yaris 2023 (Non-US only)": {
+  "Toyota Yaris (Non-US only) 2023": {
     "platform": "TOYOTA_YARIS",
     "make": "Toyota",
     "brand": "toyota",
-    "model": "Yaris 2023 (Non-US only)",
-    "year": [],
+    "model": "Yaris (Non-US only)",
+    "year": [
+      "2023"
+    ],
     "package": "All"
   },
   "Volkswagen Arteon 2018-23": {

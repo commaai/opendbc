@@ -64,8 +64,10 @@ env = Environment(
   CXXFLAGS=["-std=c++1z"],
   CPPPATH=cpppath,
   CYTHONCFILESUFFIX=".cpp",
-  tools=["default", "cython"]
+  tools=["default", "cython", "compilation_db"]
 )
+
+env.CompilationDatabase('compile_commands.json')
 
 common = ''
 Export('env', 'arch', 'common')
