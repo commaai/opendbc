@@ -464,6 +464,37 @@ FW_VERSIONS = {
       b'\xf1\x00ON  MFC  AT USA LHD 1.00 1.04 99211-S9100 211227',
     ],
   },
+  CAR.HYUNDAI_PALISADE_2024: {
+  (Ecu.combinationMeter, 0x7c6, None): [
+    b'\xf1\x00020',
+  ],
+  (Ecu.abs, 0x7d1, None): [
+    b'\xf1\x00LX ESC \x0b 103#\x03) 58910-S8700',
+  ],
+  (Ecu.cornerRadar, 0x7b7, None): [
+    b'\xf1\x00LX2 BCW RR 2.00 , 3.00 (\x81SW#\x02h\x02\x81',
+  ],
+  (Ecu.eps, 0x7d4, None): [
+    b'\xf1\x00LXP MDPS C 1.00 1.00 56310S8620\x00 4LXPC100',
+  ],
+  (Ecu.hvac, 0x7b3, None): [
+    b"\xf1\x00LX2   97250-S8BH0CONTROL ASS'Y-DATC  1.03 LX2PE ATC 1.4 1.00  ",
+  ],
+  (Ecu.transmission, 0x7e1, None): [
+    b'\xf1\x00bcsh8p55  U992\x00\x00\x00\x00\x00\x00SLX0G38GSBU\xd4\xb5\xa4',
+  ],
+  (Ecu.fwdCamera, 0x7c4, None): [
+    b'\xf1\x00LX2 MFC  AT MES LHD 1.00 1.01 99211-S8600 230817',
+  ],
+  (Ecu.fwdRadar, 0x7d0, None): [
+    b'\xf1\x00LX2_ SCC F-CUP      1.00 1.00 99110-S8600         ',
+    b'\xf1\x10\x00\x00j\x00',
+  ],
+  (Ecu.parkingAdas, 0x7b1, None): [
+    b'\xf1\x10LXPB ADAS_PRK AXL 1.01 1.03 99910-S8500',
+  ],
+},
+
   CAR.HYUNDAI_VELOSTER: {
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00JS__ SCC H-CUP      1.00 1.02 95650-J3200         ',
