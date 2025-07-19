@@ -56,17 +56,42 @@ BO_ 203 ADAS_CMD_35_10ms: 24 CGW_CCU
  SG_ FCA_ESA_ActvSta : 56|2@1+ (1,0) [0|0] "" GW_RGW,MDPS,SFA
  SG_ FCA_ESA_TqBstGainVal : 64|8@1+ (0.004,0) [0|0] "" GW_RGW,MDPS,SFA
 
-BO_ 234 MDPS: 24 XXX
- SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
- SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
- SG_ LKA_ACTIVE : 48|1@0+ (1,0) [0|16777215] "" XXX
- SG_ LKA_FAULT : 54|1@0+ (1,0) [0|1] "" XXX
- SG_ STEERING_OUT_TORQUE : 64|12@1+ (0.1,-204.8) [0|65535] "" XXX
- SG_ STEERING_COL_TORQUE : 80|13@1+ (1,-4095) [0|4095] "" XXX
- SG_ STEERING_ANGLE : 96|16@1- (0.1,0) [0|255] "deg" XXX
- SG_ STEERING_ANGLE_2 : 128|16@1- (0.1,0) [0|65535] "deg" XXX
- SG_ LKA_ANGLE_ACTIVE : 145|2@0+ (1,0) [0|3] "" XXX
- SG_ LKA_ANGLE_FAULT : 149|1@0+ (1,0) [0|1] "" XXX
+BO_ 234 MDPS_01_10ms: 24 SFA
+ SG_ CHECKSUM : 0|16@1+ (1,0) [0|0] "" CGW_CCU,ESC,ICSC,RCU,RWA,RWS,VPC_C
+ SG_ COUNTER : 16|8@1+ (1,0) [0|0] "" CGW_CCU,ESC,ICSC,RCU,RWA,RWS,VPC_C
+ SG_ MDPS_WrngLmpSta : 24|3@1+ (1,0) [0|0] "" CGW_CCU,ESC,ICSC,RCU,RWA,RWS
+ SG_ MDPS_Typ : 27|3@1+ (1,0) [0|0] "" CGW_CCU,ICSC,RWA
+ SG_ MDPS_EngIdleRpmReq : 30|2@1+ (1,0) [0|0] "" CGW_CCU,RWA
+ SG_ MDPS_VsmPlgInSta : 32|2@1+ (1,0) [0|0] "flag" ESC,ICSC,RCU,RWA
+ SG_ MDPS_VsmDfctvSta : 34|2@1+ (1,0) [0|0] "" ESC,ICSC,RCU,RWA
+ SG_ MDPS_VsmSigErrSta : 36|2@1+ (1,0) [0|0] "" ESC,RCU,RWA
+ SG_ MDPS_PaPlugInSta : 38|2@1+ (1,0) [0|0] "" CGW_CCU,ESC,RCU,RWA
+ SG_ MDPS_PaModeSta : 40|4@1+ (1,0) [0|0] "" CGW_CCU,RWA
+ SG_ MDPS_PaCanfltSta : 44|2@1+ (1,0) [0|0] "" CGW_CCU,RWA
+ SG_ MDPS_LkaPlgInSta : 46|2@1+ (1,0) [0|0] "" CGW_CCU,ICSC,RWA
+ SG_ MDPS_LkaToiActvSta : 48|2@1+ (1,0) [0|0] "" CGW_CCU,RWA
+ SG_ MDPS_LkaToiUnblSta : 50|2@1+ (1,0) [0|0] "" CGW_CCU,RWA
+ SG_ MDPS_LkaToiFltSta : 52|2@1+ (1,0) [0|0] "" CGW_CCU,RWA
+ SG_ MDPS_LkaFailSta : 54|2@1+ (1,0) [0|0] "" CGW_CCU,RWA
+ SG_ MDPS_ResetOpSta : 59|2@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ MDPS_CurrModVal : 61|3@1+ (1,0) [0|0] "" CGW_CCU,RWA
+ SG_ MDPS_OutTqVal : 64|12@1+ (0.1,-204.8) [0|0] "Nm" CGW_CCU,ESC,ICSC,RCU,RWA
+ SG_ MDPS_VsmActResp : 76|2@1+ (1,0) [0|0] "" ESC,RCU,RWA
+ SG_ Reprogram_State_MDPS : 78|2@1+ (1,0) [0|0] "" CGW_CCU
+ SG_ MDPS_StrTqSnsrVal : 80|13@1+ (0.005,-20.48) [0|0] "Nm" CGW_CCU,ESC,ICSC,RCU,RWA,VPC_C
+ SG_ MDPS_PaStrAnglVal : 96|16@1- (0.1,0) [0|0] "Deg" CGW_CCU,RWA
+ SG_ MDPS_LoamModSta : 112|2@1+ (1,0) [0|0] "" CGW_CCU,RWA
+ SG_ MDPS_HDPSpprtSWVer : 114|5@1+ (1,0) [0|0] "" CGW_CCU,RWA
+ SG_ MDPS_ADASAciActvSta : 120|4@1+ (1,0) [0|0] "" CGW_CCU,ESC,RWA,RWS
+ SG_ MDPS_ADASAciPluginSta : 124|2@1+ (1,0) [0|0] "" RWA
+ SG_ MDPS_ADAS_AciFltSig : 126|2@1+ (1,0) [0|0] "" CGW_CCU,ESC,RWA
+ SG_ MDPS_EstStrAnglVal : 128|16@1- (0.1,0) [0|0] "Deg" CGW_CCU,RWA,RWS
+ SG_ MDPS_ADASAciActvSta_Lv2 : 144|4@1+ (1,0) [0|0] "" CGW_CCU,RWA
+ SG_ MDPS_ADAS_AciFltSig_Lv2 : 148|3@1+ (1,0) [0|0] "" CGW_CCU,RWA
+ SG_ MDPS_TpaPlugInSta : 152|2@1+ (1,0) [0|0] "" RWA,VPC_C
+ SG_ MDPS_TpaCanfltSta : 154|2@1+ (1,0) [0|0] "" RWA,VPC_C
+ SG_ MDPS_TpaModeSta : 156|4@1+ (1,0) [0|0] "" RWA,VPC_C
+ SG_ MDPS_TpaStrAnglVal : 160|16@1- (0.1,0) [0|0] "Deg" RWA,VPC_C
 
 BO_ 256 ACCELERATOR_BRAKE_ALT: 32 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
@@ -681,6 +706,27 @@ CM_ SG_ 203 ADAS_StrAnglReqVal "(LFA) ADAS Steering Angle Request Value; Capped 
 CM_ SG_ 203 ADAS_ACIAnglTqRedcGainVal "(LFA) ADAS AngleControlInterface Angle Torque Reduction Gain Value";
 CM_ SG_ 203 FCA_ESA_ActvSta "FCA_ESA Active State";
 CM_ SG_ 203 FCA_ESA_TqBstGainVal "FCA_ESA Torque Boost Gain Value";
+CM_ SG_ 234 MDPS_WrngLmpSta "The signal indicates the ststus of the ��MDPS Warning lamp��";
+CM_ SG_ 234 MDPS_Typ "Information regarding the type of MDPS. (C-MDPS / R-MDPS / SbW)";
+CM_ SG_ 234 MDPS_EngIdleRpmReq "This signal indicates the request status for engine idle rpm up according to MDPS fast rotation.";
+CM_ SG_ 234 MDPS_VsmPlgInSta "This signal indicates whether the VSM function of MDPS is plugged in or not.";
+CM_ SG_ 234 MDPS_VsmDfctvSta "Information regarding the MDPS ��defective�� Indication For VSM";
+CM_ SG_ 234 MDPS_VsmSigErrSta "Information indicating VSM signal status";
+CM_ SG_ 234 MDPS_PaPlugInSta "This signal indicates whether the PA function of MDPS is plugged in or not.";
+CM_ SG_ 234 MDPS_PaModeSta "This signal indicates the status of the PA steering function.";
+CM_ SG_ 234 MDPS_PaCanfltSta "�� This Signal should be used by only PA This signal indicates whether the MDPS is defective in PA cooperation control.  This signal is set as '1' only when MDPS Detects CAN Failure(TIMEOUT, Signal Error) of PA CAN Message";
+CM_ SG_ 234 MDPS_LkaPlgInSta "This signal indicates whether the LKA function of MDPS is plugged in or not.";
+CM_ SG_ 234 MDPS_LkaToiActvSta "This flag is set to 1 in response to the LKA Controller requesting the activation of the torque interface and set back to 0 in response to the LKA Controller requesting the de-activation of the torque interface.";
+CM_ SG_ 234 MDPS_LkaToiUnblSta "This is a flag that is set when the MDPS is not faulty, but is temporarily unable to activate the TOI due to steering torque limiting e.g. when the supply voltage is too low.";
+CM_ SG_ 234 MDPS_LkaToiFltSta "This fault flag is set when a fault within the MDPS system has been detected such that the LKA TOI can no longer function. CAN failures, internal MDPS failures, and LKA controller logic failures are all reported by this flag. Failures reported by the LKA";
+CM_ SG_ 234 MDPS_LkaFailSta "This fault flag is set whilst the MDPS TOI is in a fail state and has not yet recovered from it. This could either be due to an MDPS detected fault (as communicated by the ��MDPS_LkaToiFltSta' flag) or an LKA detected fault (as communicated by the ��LKA_";
+CM_ SG_ 234 MDPS_ResetOpSta "Information regarding the state of reset";
+CM_ SG_ 234 MDPS_CurrModVal "This signal indicates flex steer parameter value in MDPS. �� For information about flex steer mode set by user, refer to MDPS_FlxStrSta signal.";
+CM_ SG_ 234 MDPS_OutTqVal "MDPS column torque this signal has direction information. '+' Value means Counter clock wise rotation. '-' value means Clock wise rotation.";
+CM_ SG_ 234 MDPS_VsmActResp "Information of VSM Tqrque Intervention Act Response";
+CM_ SG_ 234 Reprogram_State_MDPS "Information regarding the reprogram state";
+CM_ SG_ 234 MDPS_StrTqSnsrVal "Steering torque sensor value Physical Value > 0: Left Direction (CCW) Physical Value < 0: Right Direction (CW) this signal has direction information. '+' Value means Counter clock wise rotation. '-' value means Clock wise rotation.";
+CM_ SG_ 234 MDPS_PaStrAnglVal "This value is used to inform PA of a compensated steering wheel angle by MDPS. The signal is signed 16bits. (PH) = (HEX) �� 0.1 (for 0 < HEX �� 32767)  or = (HEX - 65536) �� 0.1 (for HEX > 32767) [Deg] this signal has direction information. '+' V";
 CM_ BO_ 272 "Alternative LKAS message, used on cars such as 2023 Ioniq 6, 2nd gen Kona. Matches LKAS except size is 32 bytes";
 CM_ SG_ 272 LKA_AVAILABLE "Angle control cars: 3 when LKA is generally available, goes to 0 during changes with LFA";
 CM_ SG_ 272 ADAS_StrAnglReqVal "(LKAS) ADAS Steering Angle Request Value; Capped at 176.7; tracks MDPS->STEERING_ANGLE when not engaged, not STEERING_SENSORS->STEERING_ANGLE";
@@ -714,7 +760,39 @@ VAL_ 203 ADAS_StrAnglReqVal 0 "0x0x000~0x3FFF:Real Values" 16383 "0x0x000~0x3FFF
 VAL_ 203 ADAS_ACIAnglTqRedcGainVal 0 "0x0x00~0xFA:Real Values" 250 "0x0x00~0xFA:Real Values" 251 "RESERVED" 252 "RESERVED" 253 "RESERVED" 254 "RESERVED" 255 "RESERVED";
 VAL_ 203 FCA_ESA_ActvSta 0 "Inactive" 1 "Active" 2 "RESERVED" 3 "RESERVED";
 VAL_ 203 FCA_ESA_TqBstGainVal 0 "0x0x00~0xFA:Real Values" 250 "0x0x00~0xFA:Real Values" 251 "RESERVED" 252 "RESERVED" 253 "RESERVED" 254 "RESERVED" 255 "RESERVED";
-VAL_ 234 LKA_FAULT 0 "ok" 1 "lka fault";
+VAL_ 234 MDPS_WrngLmpSta 0 "MDPS Malfunction Warning lamp OFF" 1 "MDPS Malfunciton Warning lamp BLANKING(2Hz)" 2 "MDPS Malfunction Warning lamp ON" 3 "MDPS Malfunction Warning lamp BLANKING(1Hz)" 4 "RESERVED" 5 "RESERVED" 6 "RESERVED" 7 "Error Indicator";
+VAL_ 234 MDPS_Typ 0 "C-MDPS" 1 "R-MDPS(Dual Pinion)" 2 "R-MDPS(Belt)" 3 "SbW" 4 "RESERVED" 5 "RESERVED" 6 "RESERVED" 7 "Error Indicator";
+VAL_ 234 MDPS_EngIdleRpmReq 0 "Current Consumption is Low" 1 "Current Consumption is High" 2 ":RESERVED" 3 "Error Indicator";
+VAL_ 234 MDPS_VsmPlgInSta 0 "The VSM function of MDPS is not plugged in (unplugged)." 1 "The VSM function of MDPS is plugged in." 2 "RESERVED" 3 "Error Indicator";
+VAL_ 234 MDPS_VsmDfctvSta 0 "MDPS is not defective" 1 "MDPS is defective" 2 "RESERVED" 3 "Error Indicator";
+VAL_ 234 MDPS_VsmSigErrSta 0 "VSM1 signal is not error" 1 "VSM signal is error" 2 "RESERVED" 3 "Error Indicator";
+VAL_ 234 MDPS_PaPlugInSta 0 "The PA function of MDPS is not plugged in (unplugged)." 1 "The PA function of MDPS is plugged in." 2 "RESERVED" 3 "Error Indicator";
+VAL_ 234 MDPS_PaModeSta 0 "RESERVED" 1 "Steering still in initialization phase" 2 "Steering ready, waits for PA command" 3 "Steering set in standby by PA" 4 "Steering requested to go to first activation step" 5 "Steering requested to go to final activation step" 6 "Steering went to error internally" 7 "Steering aborted the automatic function" 8 "RESERVED" 9 "RESERVED" 10 "RESERVED" 11 "RESERVED" 12 "RESERVED" 13 "RESERVED" 14 "RESERVED" 15 "Error Indicator";
+VAL_ 234 MDPS_PaCanfltSta 0 "No Failure" 1 "Failure about Pa can message" 2 "RESERVED" 3 "Error Indicator";
+VAL_ 234 MDPS_LkaPlgInSta 0 "The LKA function of MDPS is not plugged in (unplugged)." 1 "The LKA function of MDPS is plugged in." 2 "RESERVED" 3 "Error Indicator";
+VAL_ 234 MDPS_LkaToiActvSta 0 "Deactivated" 1 "Activated" 2 "RESERVED" 3 "Error Indicator";
+VAL_ 234 MDPS_LkaToiUnblSta 0 "Available" 1 "Unavailable" 2 "RESERVED" 3 "Error Indicator";
+VAL_ 234 MDPS_LkaToiFltSta 0 "No fault" 1 "Faulty" 2 "RESERVED" 3 "Error Indicator";
+VAL_ 234 MDPS_LkaFailSta 0 "Not in fail state" 1 "In fail state" 2 "RESERVED" 3 "Error Indicator";
+VAL_ 234 MDPS_ResetOpSta 0 "Normal" 1 "Reset Complete" 2 "Reset Fail" 3 "RESERVED";
+VAL_ 234 MDPS_CurrModVal 0 "Comfort Mode" 1 "Sport Mode" 2 "Sport+ Mode" 3 "Chauffeur Mode" 4 "Mild Mode" 5 "Drift Mode" 6 "RESERVED" 7 "Error Indicator";
+VAL_ 234 MDPS_OutTqVal 0 "0x0x000~0xFFD:real values" 4093 "0x0x000~0xFFD:real values" 4094 "RESERVED" 4095 "Error Indicator";
+VAL_ 234 MDPS_VsmActResp 0 "VSM Control inactivated" 1 "VSM Control Activated" 2 "RESERVED" 3 "Invalid";
+VAL_ 234 Reprogram_State_MDPS 0 "normal operation" 1 "reprogramming" 2 "RESERVED" 3 "Error Indicator";
+VAL_ 234 MDPS_StrTqSnsrVal 0 "0x0x000~0x1FFD:real values" 8189 "0x0x000~0x1FFD:real values" 8190 "RESERVED" 8191 "Error Indicator";
+VAL_ 234 MDPS_PaStrAnglVal 0 "0x0x000~0x7FFD:real values" 32765 "0x0x000~0x7FFD:real values" 32766 "Not Initialized" 32767 "Error Indicator" 32768 "0x8000~0xFFFF:real values" 65535 "0x8000~0xFFFF:real values";
+VAL_ 234 MDPS_LoamModSta 0 "Normal" 1 "Loam Flag Warning Display" 2 "RESERVED" 3 "Error Indicator";
+VAL_ 234 MDPS_HDPSpprtSWVer 0 "HDP-MDPS Control Requirement Version" 1 "HDP-MDPS Control Requirement Version" 2 "HDP-MDPS Control Requirement Version" 3 "HDP-MDPS Control Requirement Version" 4 "HDP-MDPS Control Requirement Version" 5 "HDP-MDPS Control Requirement Version" 6 "HDP-MDPS Control Requirement Version" 7 "HDP-MDPS Control Requirement Version" 8 "HDP-MDPS Control Requirement Version" 9 "HDP-MDPS Control Requirement Version" 10 "HDP-MDPS Control Requirement Version" 11 "HDP-MDPS Control Requirement Version" 12 "HDP-MDPS Control Requirement Version" 13 "HDP-MDPS Control Requirement Version" 14 "HDP-MDPS Control Requirement Version" 15 "HDP-MDPS Control Requirement Version" 16 "HDP-MDPS Control Requirement Version" 17 "HDP-MDPS Control Requirement Version" 18 "HDP-MDPS Control Requirement Version" 19 "HDP-MDPS Control Requirement Version" 20 "HDP-MDPS Control Requirement Version" 21 "HDP-MDPS Control Requirement Version" 22 "HDP-MDPS Control Requirement Version" 23 "HDP-MDPS Control Requirement Version" 24 "HDP-MDPS Control Requirement Version" 25 "HDP-MDPS Control Requirement Version" 26 "HDP-MDPS Control Requirement Version" 27 "HDP-MDPS Control Requirement Version" 28 "HDP-MDPS Control Requirement Version" 29 "HDP-MDPS Control Requirement Version" 30 "HDP-MDPS Control Requirement Version" 31 "HDP-MDPS Control Requirement Version";
+VAL_ 234 MDPS_ADASAciActvSta 0 "INIT" 1 "INACTIVE" 2 "ACTIVE35(ACTIVE)" 3 "ACTIVE33(Redundancy)" 4 "RESERVED" 5 "RESERVED" 6 "RESERVED" 7 "RESERVED" 8 "RESERVED" 9 "RESERVED" 10 "RESERVED" 11 "RESERVED" 12 "RESERVED" 13 "RESERVED" 14 "RESERVED" 15 "RESERVED";
+VAL_ 234 MDPS_ADASAciPluginSta 0 "ADASAciNotPlugged-in" 1 "ADASAciPlugged-in" 2 "RESERVED" 3 "ErrorIndicator";
+VAL_ 234 MDPS_ADAS_AciFltSig 0 "No Fault" 1 "MDPS Fault" 2 "Fault Except MDPS" 3 "Both Fault";
+VAL_ 234 MDPS_EstStrAnglVal 0 "0x0x000~0x7FFD:real values" 32765 "0x0x000~0x7FFD:real values" 32766 "Not Initialized" 32767 "Error Indicator" 32768 "0x8000~0xFFFF:real values" 65535 "0x8000~0xFFFF:real values";
+VAL_ 234 MDPS_ADASAciActvSta_Lv2 0 "Not USED" 1 "INACTIVE" 2 "ACTIVE35(Active)" 3 "Reserved" 4 "Reserved" 5 "Reserved" 6 "Reserved" 7 "Reserved" 8 "Reserved" 9 "Reserved" 10 "Reserved" 11 "Reserved" 12 "Reserved" 13 "Reserved" 14 "Reserved" 15 "Reserved";
+VAL_ 234 MDPS_ADAS_AciFltSig_Lv2 0 "No Fault" 1 "MDPS Fault" 2 "Fault Except MDPS" 3 "Both Fault" 4 "Temporarily Unavailable" 5 "Temporarily Unavailable and MDPS Fault" 6 "Temporarily Unavailable and Fault Except MDPS" 7 "Temporarily Unavailable and Both Fault";
+VAL_ 234 MDPS_TpaPlugInSta 0 "The TPA function of MDPS is not plugged in (unplugged)" 1 "The TPA function of MDPS is plugged in" 2 "RESERVED" 3 "Error Indicator";
+VAL_ 234 MDPS_TpaCanfltSta 0 "No Failure" 1 "Failure about Tpa can message" 2 "RESERVED" 3 "Error Indicator";
+VAL_ 234 MDPS_TpaModeSta 0 "RESERVED" 1 "Steering still in initialization phase" 2 "Steering ready, waits for TPA command" 3 "Steering set in standby by TPA" 4 "Steering requested to go to first activation step activation step" 5 "Steering requested to go to final activation step" 6 "Steering went to error internally" 7 "Steering aborted the automatic function" 14 "RESERVED" 15 "Error Indicator";
+VAL_ 234 MDPS_TpaStrAnglVal 0 "0x0x000~0x7FFD:real values" 32765 "0x0x000~0x7FFD:real values" 32766 "Not Initialized" 32767 "Error Indicator" 32768 "0x8000~0xFFFF:real values" 65535 "0x8000~0xFFFF:real values";
 VAL_ 272 LKA_MODE 1 "warning only" 2 "assist" 6 "off";
 VAL_ 272 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green";
 VAL_ 272 LKAS_ANGLE_ACTIVE 0 "off" 1 "not active" 2 "active";
