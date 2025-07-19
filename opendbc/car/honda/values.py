@@ -70,6 +70,7 @@ class HondaFlags(IntFlag):
   NIDEC_ALT_SCM_MESSAGES = 64
 
   BOSCH_CANFD = 128
+  BOSCH_ALT_RADAR = 1024
 
   HAS_ALL_DOOR_STATES = 256  # Some Hondas have all door states, others only driver door
   HAS_EPB = 512
@@ -220,6 +221,12 @@ class CAR(Platforms):
     {Bus.pt: 'honda_pilot_2023_can_generated'},
     flags=HondaFlags.BOSCH_CANFD | HondaFlags.BOSCH_ALT_BRAKE,
   )
+  HONDA_ODYSSEY_5G_MMR = HondaBoschPlatformConfig(
+    [HondaCarDocs("Honda Odyssey 2021-25", "All", min_steer_speed=70. * CV.KPH_TO_MS)],
+    CarSpecs(mass=4590 * CV.LB_TO_KG, wheelbase=3.00, steerRatio=14.35, centerToFrontRatio=0.41, tireStiffnessFactor=1.02),  # per spec
+    {Bus.pt: 'acura_rdx_2020_can_generated'},
+    flags=HondaFlags.BOSCH_ALT_BRAKE,
+  )
 
   # Nidec Cars
   ACURA_ILX = HondaNidecPlatformConfig(
@@ -336,9 +343,9 @@ FW_QUERY_CONFIG = FwQueryConfig(
   # Note that we still attempt to match with them when they are present
   # This is or'd with (ALL_ECUS - ESSENTIAL_ECUS) from fw_versions.py
   non_essential_ecus={
-    Ecu.eps: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_CIVIC_2022, CAR.HONDA_E, CAR.HONDA_HRV_3G],
+    Ecu.eps: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_CIVIC_2022, CAR.HONDA_E, CAR.HONDA_HRV_3G, CAR.HONDA_ODYSSEY_5G_MMR],
     Ecu.vsa: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_CIVIC, CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_2022, CAR.HONDA_CRV_5G, CAR.HONDA_CRV_HYBRID,
-              CAR.HONDA_E, CAR.HONDA_HRV_3G, CAR.HONDA_INSIGHT],
+              CAR.HONDA_E, CAR.HONDA_HRV_3G, CAR.HONDA_INSIGHT, CAR.HONDA_ODYSSEY_5G_MMR],
   },
   extra_ecus=[
     (Ecu.combinationMeter, 0x18da60f1, None),
@@ -355,6 +362,7 @@ STEER_THRESHOLD = {
   # default is 1200, overrides go here
   CAR.ACURA_RDX: 400,
   CAR.HONDA_CRV_EU: 400,
+  CAR.HONDA_ODYSSEY_5G_MMR: 500,
 }
 
 HONDA_NIDEC_ALT_PCM_ACCEL = CAR.with_flags(HondaFlags.NIDEC_ALT_PCM_ACCEL)
@@ -362,6 +370,7 @@ HONDA_NIDEC_ALT_SCM_MESSAGES = CAR.with_flags(HondaFlags.NIDEC_ALT_SCM_MESSAGES)
 HONDA_BOSCH = CAR.with_flags(HondaFlags.BOSCH)
 HONDA_BOSCH_RADARLESS = CAR.with_flags(HondaFlags.BOSCH_RADARLESS)
 HONDA_BOSCH_CANFD = CAR.with_flags(HondaFlags.BOSCH_CANFD)
+HONDA_BOSCH_ALT_RADAR = CAR.with_flags(HondaFlags.BOSCH_ALT_RADAR)
 
 
 DBC = CAR.create_dbc_map()
