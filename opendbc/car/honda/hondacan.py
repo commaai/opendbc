@@ -187,10 +187,10 @@ def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_
     lkas_hud_values['SET_ME_X48'] = 0x48
 
   if CP.flags & HondaFlags.BOSCH_EXT_HUD and not CP.openpilotLongitudinalControl:
-    commands.append(packer.make_can_msg('LKAS_HUD_A', CAN.lkas, lkas_hud_values))
-    commands.append(packer.make_can_msg('LKAS_HUD_B', CAN.lkas, lkas_hud_values))
+    # commands.append(packer.make_can_msg('LKAS_HUD_A', CAN.lkas, lkas_hud_values))
+    # commands.append(packer.make_can_msg('LKAS_HUD_B', CAN.lkas, lkas_hud_values))
   else:
-    commands.append(packer.make_can_msg('LKAS_HUD', CAN.lkas, lkas_hud_values))
+#    commands.append(packer.make_can_msg('LKAS_HUD', CAN.lkas, lkas_hud_values))
 
   if radar_disabled:
     radar_hud_values = {
