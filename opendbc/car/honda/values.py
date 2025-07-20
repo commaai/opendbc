@@ -238,7 +238,7 @@ class CAR(Platforms):
     flags=HondaFlags.BOSCH_CANFD | HondaFlags.BOSCH_ALT_BRAKE,
   )
   HONDA_ACCORD_11G = HondaBoschPlatformConfig(
-    [HondaCarDocs("Honda Accord 2023", "All")],
+    [HondaCarDocs("Honda Accord 2023-25", "All")],
     CarSpecs(mass=3279 * CV.LB_TO_KG, wheelbase=2.83, steerRatio=16.33, centerToFrontRatio=0.39, tireStiffnessFactor=0.8467),
     {Bus.cam: 'honda_pilot_2023_can_generated', Bus.pt: 'honda_pilot_2023_can_generated'},
     flags=HondaFlags.BOSCH_CANFD,
