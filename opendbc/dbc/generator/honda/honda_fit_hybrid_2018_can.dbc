@@ -1,12 +1,7 @@
 CM_ "IMPORT _honda_common.dbc";
 CM_ "IMPORT _nidec_common.dbc";
 CM_ "IMPORT _steering_control_a.dbc";
-
-BO_ 342 STEERING_SENSORS: 6 EPS
- SG_ STEER_ANGLE : 7|16@0- (-0.1,0) [-500|500] "deg" EON
- SG_ STEER_ANGLE_RATE : 23|16@0- (1,0) [-3000|3000] "deg/s" EON
- SG_ COUNTER : 45|2@0+ (1,0) [0|3] "" EON
- SG_ CHECKSUM : 43|4@0+ (1,0) [0|3] "" EON
+CM_ "IMPORT _steering_sensors_b.dbc";
 
 BO_ 399 STEER_STATUS: 7 EPS
  SG_ STEER_TORQUE_SENSOR : 7|16@0- (-1,0) [-31000|31000] "tbd" EON
