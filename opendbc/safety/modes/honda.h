@@ -421,10 +421,10 @@ static bool honda_bosch_fwd_hook(int bus_num, int addr) {
     bool is_acc_msg = ((addr == 0x1C8) || (addr == 0x30C)) && honda_bosch_radarless && honda_bosch_long;
     block_msg = is_lkas_msg || is_acc_msg;
   }
-*/
   
   return block_msg;
 }
+*/
 
 const safety_hooks honda_nidec_hooks = {
   .init = honda_nidec_init,
