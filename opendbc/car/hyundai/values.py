@@ -596,6 +596,13 @@ class CAR(Platforms):
     CarSpecs(mass=2258, wheelbase=2.95, steerRatio=14.14),
     flags=HyundaiFlags.RADAR_SCC,
   )
+  GENESIS_GV80_HDA2 = HyundaiCanFDPlatformConfig(
+    [
+      HyundaiCarDocs("Genesis GV80 (with HDA II) 2021", "Highway Driving Assist II", car_parts=CarParts.common([CarHarness.hyundai_q])),
+    ],
+    CarSpecs(mass=2258, wheelbase=2.95, steerRatio=14.14),
+    flags=HyundaiFlags.RADAR_SCC | HyundaiFlags.CANFD_LKA_STEERING,
+  )
 
 
 class Buttons:
