@@ -179,7 +179,7 @@ FW_VERSIONS = {
       b'PYFM-21PS1-D\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
     ],
   },
-CAR.MAZDA_3: {
+  CAR.MAZDA_3: {
     (Ecu.eps, 0x730, None): [
       b'BHN1-3210X-J-00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
       b'K070-3210X-C-00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
