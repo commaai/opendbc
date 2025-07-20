@@ -278,7 +278,7 @@ CAR.MAZDA_3: {
       b'PXM7-21PS1-C\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
     ],
   },
-    CAR.MAZDA_CX5_2024: {
+CAR.MAZDA_CX5_2024: {
     (Ecu.eps, 0x730, None): [
       b'KSD5-3210X-C-00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
     ],
