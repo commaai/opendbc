@@ -15,18 +15,28 @@ jobs:
       matrix:
         include:
           - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-24.04' }}
-            flags: ''
-          - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-24.04' }}
-            flags: '--ubsan'
           - os: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-macos-8x14' || 'macos-latest' }}
-            flags: ''
     steps:
     - uses: commaai/timeout@v1
       with:
         timeout: ${{ github.repository == 'commaai/opendbc' && '60' || '999' }}
     - uses: actions/checkout@v4
     - uses: ./.github/workflows/cache
-    - run: ./test.sh ${{ matrix.flags }}
+    - run: ./test.sh
+
+  safety_tests:
+    name: safety
+    runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        flags: ['--ubsan']
+    steps:
+    - uses: commaai/timeout@v1
+    - uses: actions/checkout@v4
+    - uses: ./.github/workflows/cache
+    - name: Run safety tests
+      run: ./opendbc/safety/tests/test.sh ${{ matrix.flags }}
 
   mutation:
     name: Safety mutation tests

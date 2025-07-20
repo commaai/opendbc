@@ -25,6 +25,7 @@ env = Environment(
     '-DCANFD',
   ],
   CPPPATH=["#", "../../board/"],
+  tools=["default", "compilation_db"],
 )
 if system == "Darwin":
   env.PrependENVPath('PATH', '/opt/homebrew/bin')
