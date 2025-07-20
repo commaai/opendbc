@@ -183,7 +183,6 @@ class CAR(Platforms):
     # steerRatio: 12.3 is spec end-to-end
     CarSpecs(mass=3410 * CV.LB_TO_KG, wheelbase=2.66, steerRatio=16.0, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),
     {Bus.pt: 'honda_crv_ex_2017_can_generated', Bus.body: 'honda_crv_ex_2017_body_generated'},
-    flags=HondaFlags.BOSCH_ALT_BRAKE,
   )
   HONDA_CRV_HYBRID = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda CR-V Hybrid 2017-22", min_steer_speed=12. * CV.MPH_TO_MS)],
@@ -201,13 +200,12 @@ class CAR(Platforms):
     [HondaCarDocs("Acura RDX 2019-21", "All", min_steer_speed=3. * CV.MPH_TO_MS)],
     CarSpecs(mass=4068 * CV.LB_TO_KG, wheelbase=2.75, steerRatio=11.95, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),  # as spec
     {Bus.pt: 'acura_rdx_2020_can_generated'},
-    flags=HondaFlags.BOSCH_ALT_BRAKE,
   )
   ACURA_RDX_3G_MMR = HondaBoschPlatformConfig(
     [HondaCarDocs("Acura RDX 2022-25", "All", min_steer_speed=45. * CV.MPH_TO_MS)],
     CarSpecs(mass=4079 * CV.LB_TO_KG, wheelbase=2.75, steerRatio=12.0, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),  # as spec
     {Bus.pt: 'acura_rdx_2020_can_generated'},
-    flags=HondaFlags.BOSCH_ALT_BRAKE | HondaFlags.BOSCH_ALT_RADAR,
+    flags=HondaFlags.BOSCH_ALT_RADAR,
   )
   HONDA_INSIGHT = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda Insight 2019-22", "All", min_steer_speed=3. * CV.MPH_TO_MS)],
@@ -267,7 +265,7 @@ class CAR(Platforms):
     [HondaCarDocs("Honda Odyssey 2021-25", "All", min_steer_speed=45. * CV.MPH_TO_MS)],
     CarSpecs(mass=4590 * CV.LB_TO_KG, wheelbase=3.00, steerRatio=14.35, centerToFrontRatio=0.41, tireStiffnessFactor=1.02),  # per spec
     {Bus.pt: 'acura_rdx_2020_can_generated'},
-    flags=HondaFlags.BOSCH_ALT_BRAKE | HondaFlags.BOSCH_ALT_RADAR,
+    flags=HondaFlags.BOSCH_ALT_RADAR,
   )
 
   # Nidec Cars
