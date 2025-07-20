@@ -74,10 +74,6 @@ class CAR(Platforms):
     [MazdaCarDocs("Mazda CX-5 2022-25")],
     MAZDA_CX5.specs,
   )
-  MAZDA_CX5_2024 = MazdaPlatformConfig(
-    [MazdaCarDocs("Mazda CX-5 2024")],
-    MazdaCarSpecs(mass=1836, wheelbase=2.7, steerRatio=13)
-  )
 
 class LKAS_LIMITS:
   STEER_THRESHOLD = 15
