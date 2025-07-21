@@ -595,11 +595,13 @@ class TestHondaBoschCANFDAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschCANFDS
     self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.BOSCH_CANFD | HondaSafetyFlags.ALT_BRAKE)
     self.safety.init_tests()
 
-class TestHondaBoschCanfdLongSafety(TestHondaBoschLongSafety):
+class TestHondaBoschCanfdLongSafety(TestHondaBoschCANFDSafetyBase, TestHondaBoschLongSafety):
   """
     Covers the Honda Bosch CANFD safety mode with longitudinal control
   """
 
+  STEER_BUS = 0
+  
   RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0x1DF, 0x33D)}  # STEERING_CONTROL, ACC_CONTROL
 
   def setUp(self):
