@@ -601,7 +601,7 @@ class TestHondaBoschCanfdLongSafety(TestHondaBoschCANFDSafetyBase, TestHondaBosc
   """
 
   STEER_BUS = 0
-  
+
   RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0x1DF, 0x33D)}  # STEERING_CONTROL, ACC_CONTROL
 
   def setUp(self):
