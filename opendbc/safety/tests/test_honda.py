@@ -595,7 +595,7 @@ class TestHondaBoschCANFDAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschCANFDS
     self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.BOSCH_CANFD | HondaSafetyFlags.ALT_BRAKE)
     self.safety.init_tests()
 
-class TestHondaBoschCanfdLongSafety(common.LongitudinalAccelSafetyTest, TestHondaBoschCANFDSafetyBase):
+class TestHondaBoschCanfdLongSafety(TestBoschLongSafety):
   """
     Covers the Honda Bosch CANFD safety mode with longitudinal control
   """
@@ -605,42 +605,7 @@ class TestHondaBoschCanfdLongSafety(common.LongitudinalAccelSafetyTest, TestHond
     self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.BOSCH_CANFD | HondaSafetyFlags.BOSCH_LONG)
     self.safety.init_tests()
 
-  def _send_gas_brake_msg(self, gas, accel):
-    values = {
-      "GAS_COMMAND": gas,
-      "ACCEL_COMMAND": accel,
-      "BRAKE_REQUEST": accel < 0,
-    }
-    return self.packer.make_can_msg_panda("ACC_CONTROL", self.PT_BUS, values)
-
-  # Longitudinal doesn't need to send buttons
-  def test_spam_cancel_safety_check(self):
-    pass
-
-  def test_diagnostics(self):
-    tester_present = libsafety_py.make_CANPacket(0x18DAB0F1, self.PT_BUS, b"\x02\x3E\x80\x00\x00\x00\x00\x00")
-    self.assertTrue(self._tx(tester_present))
-
-    not_tester_present = libsafety_py.make_CANPacket(0x18DAB0F1, self.PT_BUS, b"\x03\xAA\xAA\x00\x00\x00\x00\x00")
-    self.assertFalse(self._tx(not_tester_present))
-
-  def test_gas_safety_check(self):
-    for controls_allowed in [True, False]:
-      for gas in np.arange(self.NO_GAS, self.MAX_GAS + 2000, 100):
-        accel = 0 if gas < 0 else gas / 1000
-        self.safety.set_controls_allowed(controls_allowed)
-        send = (controls_allowed and 0 <= gas <= self.MAX_GAS) or gas == self.NO_GAS
-        self.assertEqual(send, self._tx(self._send_gas_brake_msg(gas, accel)), (controls_allowed, gas, accel))
-
-  def test_brake_safety_check(self):
-    for controls_allowed in [True, False]:
-      for accel in np.arange(self.MIN_ACCEL - 1, self.MAX_ACCEL + 1, 0.01):
-        accel = round(accel, 2)  # floats might not hit exact boundary conditions without rounding
-        self.safety.set_controls_allowed(controls_allowed)
-        send = self.MIN_ACCEL <= accel <= self.MAX_ACCEL if controls_allowed else accel == 0
-        self.assertEqual(send, self._tx(self._send_gas_brake_msg(self.NO_GAS, accel)), (controls_allowed, accel))
-
-class TestHondaBoschCANFDLongAltBrakeSafety(TestHondaBoschCanfdLongSafety):
+class TestHondaBoschCANFDLongAltBrakeSafety(TestBoschLongSafety):
   """
     Covers the Honda Bosch CANFD safety mode with stock longitudinal and an alternate brake message
   """
