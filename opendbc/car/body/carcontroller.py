@@ -45,12 +45,12 @@ class CarController(CarControllerBase):
       speed_desired = CC.actuators.accel / 5.
       speed_diff_desired = -CC.actuators.torque / 2.
 
-      speed_measured = SPEED_FROM_RPM * (CS.out.wheelSpeeds.fl + CS.out.wheelSpeeds.fr) / 2.
+      speed_measured = CS.out.vEgoRaw
       speed_error = speed_desired - speed_measured
 
       torque = self.wheeled_speed_pid.update(speed_error, freeze_integrator=False)
 
-      speed_diff_measured = SPEED_FROM_RPM * (CS.out.wheelSpeeds.fl - CS.out.wheelSpeeds.fr)
+      speed_diff_measured = 0  # wheelSpeeds deprecated, disabling differential control
       turn_error = speed_diff_measured - speed_diff_desired
       freeze_integrator = ((turn_error < 0 and self.turn_pid.error_integral <= -MAX_TURN_INTEGRATOR) or
                            (turn_error > 0 and self.turn_pid.error_integral >= MAX_TURN_INTEGRATOR))

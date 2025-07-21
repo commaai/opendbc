@@ -57,13 +57,6 @@ class CarState(CarStateBase):
       ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(cp.vl["GEAR"]["PRNDL"], None))
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.standstill = not ret.vEgoRaw > 0.001
-    ret.wheelSpeeds = self.get_wheel_speeds(
-      cp.vl["ESP_6"]["WHEEL_SPEED_FL"],
-      cp.vl["ESP_6"]["WHEEL_SPEED_FR"],
-      cp.vl["ESP_6"]["WHEEL_SPEED_RL"],
-      cp.vl["ESP_6"]["WHEEL_SPEED_RR"],
-      unit=1,
-    )
 
     # button presses
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_stalk(200, cp.vl["STEERING_LEVERS"]["TURN_SIGNALS"] == 1,

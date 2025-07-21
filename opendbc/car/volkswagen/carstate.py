@@ -66,7 +66,7 @@ class CarState(CarStateBase):
       # MQB-specific
       self.upscale_lead_car_signal = bool(pt_cp.vl["Kombi_03"]["KBI_Variante"])  # Analog vs digital instrument cluster
 
-      ret.wheelSpeeds = self.get_wheel_speeds(
+      wheel_speeds = self.get_wheel_speeds(
         pt_cp.vl["ESP_19"]["ESP_VL_Radgeschw_02"],
         pt_cp.vl["ESP_19"]["ESP_VR_Radgeschw_02"],
         pt_cp.vl["ESP_19"]["ESP_HL_Radgeschw_02"],
@@ -113,7 +113,7 @@ class CarState(CarStateBase):
 
     # Shared logic
 
-    ret.vEgoRaw = float(np.mean([ret.wheelSpeeds.fl, ret.wheelSpeeds.fr, ret.wheelSpeeds.rl, ret.wheelSpeeds.rr]))
+    ret.vEgoRaw = float(np.mean([wheel_speeds.fl, wheel_speeds.fr, wheel_speeds.rl, wheel_speeds.rr]))
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.vEgoCluster = pt_cp.vl["Kombi_01"]["KBI_angez_Geschw"] * CV.KPH_TO_MS
 
@@ -147,7 +147,7 @@ class CarState(CarStateBase):
   def update_pq(self, pt_cp, cam_cp, ext_cp) -> structs.CarState:
     ret = structs.CarState()
     # Update vehicle speed and acceleration from ABS wheel speeds.
-    ret.wheelSpeeds = self.get_wheel_speeds(
+    wheel_speeds = self.get_wheel_speeds(
       pt_cp.vl["Bremse_3"]["Radgeschw__VL_4_1"],
       pt_cp.vl["Bremse_3"]["Radgeschw__VR_4_1"],
       pt_cp.vl["Bremse_3"]["Radgeschw__HL_4_1"],

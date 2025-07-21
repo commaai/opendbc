@@ -87,15 +87,15 @@ class CarState(CarStateBase):
 
     ret.seatbeltUnlatched = cp.vl["CGW1"]["CF_Gway_DrvSeatBeltSw"] == 0
 
-    ret.wheelSpeeds = self.get_wheel_speeds(
+    wheel_speeds = self.get_wheel_speeds(
       cp.vl["WHL_SPD11"]["WHL_SPD_FL"],
       cp.vl["WHL_SPD11"]["WHL_SPD_FR"],
       cp.vl["WHL_SPD11"]["WHL_SPD_RL"],
       cp.vl["WHL_SPD11"]["WHL_SPD_RR"],
     )
-    ret.vEgoRaw = (ret.wheelSpeeds.fl + ret.wheelSpeeds.fr + ret.wheelSpeeds.rl + ret.wheelSpeeds.rr) / 4.
+    ret.vEgoRaw = (wheel_speeds.fl + wheel_speeds.fr + wheel_speeds.rl + wheel_speeds.rr) / 4.
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
-    ret.standstill = ret.wheelSpeeds.fl <= STANDSTILL_THRESHOLD and ret.wheelSpeeds.rr <= STANDSTILL_THRESHOLD
+    ret.standstill = wheel_speeds.fl <= STANDSTILL_THRESHOLD and wheel_speeds.rr <= STANDSTILL_THRESHOLD
 
     self.cluster_speed_counter += 1
     if self.cluster_speed_counter > CLUSTER_SAMPLE_RATE:
@@ -231,16 +231,16 @@ class CarState(CarStateBase):
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(gear))
 
     # TODO: figure out positions
-    ret.wheelSpeeds = self.get_wheel_speeds(
+    wheel_speeds = self.get_wheel_speeds(
       cp.vl["WHEEL_SPEEDS"]["WHL_SpdFLVal"],
       cp.vl["WHEEL_SPEEDS"]["WHL_SpdFRVal"],
       cp.vl["WHEEL_SPEEDS"]["WHL_SpdRLVal"],
       cp.vl["WHEEL_SPEEDS"]["WHL_SpdRRVal"],
     )
-    ret.vEgoRaw = (ret.wheelSpeeds.fl + ret.wheelSpeeds.fr + ret.wheelSpeeds.rl + ret.wheelSpeeds.rr) / 4.
+    ret.vEgoRaw = (wheel_speeds.fl + wheel_speeds.fr + wheel_speeds.rl + wheel_speeds.rr) / 4.
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
-    ret.standstill = ret.wheelSpeeds.fl <= STANDSTILL_THRESHOLD and ret.wheelSpeeds.fr <= STANDSTILL_THRESHOLD and \
-                     ret.wheelSpeeds.rl <= STANDSTILL_THRESHOLD and ret.wheelSpeeds.rr <= STANDSTILL_THRESHOLD
+    ret.standstill = wheel_speeds.fl <= STANDSTILL_THRESHOLD and wheel_speeds.fr <= STANDSTILL_THRESHOLD and \
+                     wheel_speeds.rl <= STANDSTILL_THRESHOLD and wheel_speeds.rr <= STANDSTILL_THRESHOLD
 
     ret.steeringAngleDeg = cp.vl["STEERING_SENSORS"]["STEERING_ANGLE"]
     ret.steeringTorque = cp.vl["MDPS"]["STEERING_COL_TORQUE"]

@@ -43,13 +43,13 @@ class CarState(CarStateBase):
         ret.accFaulted = eyesight_fault
 
     cp_wheels = cp_alt if self.CP.flags & SubaruFlags.GLOBAL_GEN2 else cp
-    ret.wheelSpeeds = self.get_wheel_speeds(
+    wheel_speeds = self.get_wheel_speeds(
       cp_wheels.vl["Wheel_Speeds"]["FL"],
       cp_wheels.vl["Wheel_Speeds"]["FR"],
       cp_wheels.vl["Wheel_Speeds"]["RL"],
       cp_wheels.vl["Wheel_Speeds"]["RR"],
     )
-    ret.vEgoRaw = (ret.wheelSpeeds.fl + ret.wheelSpeeds.fr + ret.wheelSpeeds.rl + ret.wheelSpeeds.rr) / 4.
+    ret.vEgoRaw = (wheel_speeds.fl + wheel_speeds.fr + wheel_speeds.rl + wheel_speeds.rr) / 4.
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.standstill = ret.vEgoRaw == 0
 

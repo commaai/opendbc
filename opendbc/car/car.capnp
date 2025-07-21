@@ -168,7 +168,6 @@ struct CarState {
   vCruiseCluster @54 :Float32; # best estimate of set speed shown on car's instrument cluster, used for UI
 
   standstill @18 :Bool;
-  wheelSpeeds @2 :WheelSpeeds;
 
   gasPressed @4 :Bool;    # this is user pedal only
 
@@ -290,6 +289,7 @@ struct CarState {
   genericToggleDEPRECATED @23 :Bool;
   clutchPressedDEPRECATED @28 :Bool;
   cumLagMsDEPRECATED @50 :Float32;
+  wheelSpeedsDEPRECATED @2 :WheelSpeeds;
 }
 
 # ******* radar state @ 20hz *******

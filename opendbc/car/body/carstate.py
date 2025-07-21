@@ -9,10 +9,10 @@ class CarState(CarStateBase):
     cp = can_parsers[Bus.main]
     ret = structs.CarState()
 
-    ret.wheelSpeeds.fl = cp.vl['MOTORS_DATA']['SPEED_L']
-    ret.wheelSpeeds.fr = cp.vl['MOTORS_DATA']['SPEED_R']
+    wheel_speed_fl = cp.vl['MOTORS_DATA']['SPEED_L']
+    wheel_speed_fr = cp.vl['MOTORS_DATA']['SPEED_R']
 
-    ret.vEgoRaw = ((ret.wheelSpeeds.fl + ret.wheelSpeeds.fr) / 2.) * self.CP.wheelSpeedFactor
+    ret.vEgoRaw = ((wheel_speed_fl + wheel_speed_fr) / 2.) * self.CP.wheelSpeedFactor
 
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.standstill = False

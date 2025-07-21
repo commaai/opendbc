@@ -151,13 +151,13 @@ class CarState(CarStateBase):
 
     ret.espDisabled = cp.vl["VSA_STATUS"]["ESP_DISABLED"] != 0
 
-    ret.wheelSpeeds = self.get_wheel_speeds(
+    wheel_speeds = self.get_wheel_speeds(
       cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FL"],
       cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FR"],
       cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_RL"],
       cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_RR"],
     )
-    v_wheel = (ret.wheelSpeeds.fl + ret.wheelSpeeds.fr + ret.wheelSpeeds.rl + ret.wheelSpeeds.rr) / 4.0
+    v_wheel = (wheel_speeds.fl + wheel_speeds.fr + wheel_speeds.rl + wheel_speeds.rr) / 4.0
 
     # blend in transmission speed at low speed, since it has more low speed accuracy
     v_weight = float(np.interp(v_wheel, v_weight_bp, v_weight_v))
