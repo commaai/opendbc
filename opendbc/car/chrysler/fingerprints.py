@@ -210,6 +210,7 @@ FW_VERSIONS = {
       b'68594990AB',
       b'68594990AD',
       b'68594991AB',
+      b'68594990AE',
     ],
     (Ecu.srs, 0x744, None): [
       b'68405567AB',
@@ -235,6 +236,7 @@ FW_VERSIONS = {
       b'68525339AA',
       b'68525339AB',
       b'68594341AB',
+      b'68594341AC',
     ],
     (Ecu.engine, 0x7e0, None): [
       b'68416680AD ',
@@ -253,6 +255,7 @@ FW_VERSIONS = {
       b'68599493AC ',
       b'68657433AA ',
       b'68700317AC ',
+      b'05190392AB ',
     ],
     (Ecu.hybrid, 0x7e2, None): [
       b'05185116AF',
@@ -272,25 +275,6 @@ FW_VERSIONS = {
       b'68597647AF',
       b'68632416AB',
       b'68632416AC',
-    ],
-  },
-  CAR.CHRYSLER_PACIFICA_2025_HYBRID: {
-    (Ecu.combinationMeter, 0x742, None): [
-      b'68594990AE',
-    ],
-    (Ecu.srs, 0x744, None): [
-      b'68526665AB',
-    ],
-    (Ecu.fwdRadar, 0x753, None): [
-      b'68645752AA',
-    ],
-    (Ecu.eps, 0x75a, None): [
-      b'68594341AC',
-    ],
-    (Ecu.engine, 0x7e0, None): [
-      b'05190392AB ',
-    ],
-    (Ecu.hybrid, 0x7e2, None): [
       b'68676877AB',
     ],
   },
