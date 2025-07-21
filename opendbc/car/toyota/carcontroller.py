@@ -66,6 +66,11 @@ class CarController(CarControllerBase):
     self.pitch = FirstOrderFilter(0, 0.25, DT_CTRL)
     self.pitch_slow = FirstOrderFilter(0, 1.5, DT_CTRL)
 
+    self.accel_filter = FirstOrderFilter(0.0, 0.2, DT_CTRL * 3)
+    self.accel_filter2 = FirstOrderFilter(0.0, 0.4, DT_CTRL * 3)
+    self.accel_filter3 = FirstOrderFilter(0.0, 0.5, DT_CTRL * 3)
+    self.accel_filter4 = FirstOrderFilter(0.0, 1.0, DT_CTRL * 3)
+
     self.accel = 0
     self.prev_accel = 0
     # *** end long control state ***
@@ -218,16 +223,25 @@ class CarController(CarControllerBase):
         a_ego_future = a_ego_blended + j_ego * future_t
 
         if CC.longActive:
+          self.accel_filter.update(pcm_accel_cmd)
+          self.accel_filter2.update(pcm_accel_cmd)
+          self.accel_filter3.update(pcm_accel_cmd)
+          self.accel_filter4.update(pcm_accel_cmd)
+
           # constantly slowly unwind integral to recover from large temporary errors
           self.long_pid.i -= ACCEL_PID_UNWIND * float(np.sign(self.long_pid.i))
 
-          error_future = pcm_accel_cmd - a_ego_future
+          error_future = 0  # pcm_accel_cmd - a_ego_future
 
           if not stopping:
             # feedforward compensation for changes in pitch
             high_pass_pitch = self.pitch.x - self.pitch_slow.x
             pitch_compensation = float(np.clip(math.sin(high_pass_pitch) * ACCELERATION_DUE_TO_GRAVITY, -1.5, 1.5))
             pcm_accel_cmd += pitch_compensation
+
+            # what this fancy PID is already doing
+            pcm_accel_cmd += (self.accel_filter.x - self.accel_filter2.x)
+            pcm_accel_cmd -= (self.accel_filter3.x - self.accel_filter4.x)
 
           pcm_accel_cmd = self.long_pid.update(error_future,
                                                speed=CS.out.vEgo,
