@@ -595,7 +595,7 @@ class TestHondaBoschCANFDAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschCANFDS
     self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.BOSCH_CANFD | HondaSafetyFlags.ALT_BRAKE)
     self.safety.init_tests()
 
-class TestHondaBoschCanfdLongSafety(TestBoschLongSafety):
+class TestHondaBoschCanfdLongSafety(TestHondaBoschLongSafety):
   """
     Covers the Honda Bosch CANFD safety mode with longitudinal control
   """
@@ -605,7 +605,7 @@ class TestHondaBoschCanfdLongSafety(TestBoschLongSafety):
     self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.BOSCH_CANFD | HondaSafetyFlags.BOSCH_LONG)
     self.safety.init_tests()
 
-class TestHondaBoschCANFDLongAltBrakeSafety(TestBoschLongSafety):
+class TestHondaBoschCANFDLongAltBrakeSafety(TestHondaBoschLongSafety):
   """
     Covers the Honda Bosch CANFD safety mode with stock longitudinal and an alternate brake message
   """
