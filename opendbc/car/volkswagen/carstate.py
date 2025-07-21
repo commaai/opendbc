@@ -315,6 +315,7 @@ class CarState(CarStateBase):
       ("Lenkwinkel_1", 100),  # From J500 Steering Assist with integrated sensors
       ("Motor_3", 100),     # From J623 Engine control module
       ("Airbag_1", 50),     # From J234 Airbag control module
+      ("Bremse_5", 50),     # From J104 ABS/ESP controller
       ("GRA_Neu", 50),      # From J??? steering wheel control buttons
       ("Kombi_1", 50),      # From J285 Instrument cluster
       ("Motor_2", 50),      # From J623 Engine control module
