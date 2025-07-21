@@ -49,7 +49,7 @@ class CarControllerParams:
 
 
 class HondaSafetyFlags(IntFlag):
-  ALT_BRAKE = 1
+  ALT_BRAKE = 32 # not using 1 since breaks Volkswagen Mqb cross safety test
   BOSCH_LONG = 2
   NIDEC_ALT = 4
   RADARLESS = 8
