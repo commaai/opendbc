@@ -17,6 +17,8 @@ ACCELERATION_DUE_TO_GRAVITY = 9.81  # m/s^2
 
 ButtonType = structs.CarState.ButtonEvent.Type
 
+FRICTION_THRESHOLD = 0.3
+
 
 @dataclass
 class AngleSteeringLimits:
@@ -199,15 +201,14 @@ def rate_limit(new_value, last_value, dw_step, up_step):
   return float(np.clip(new_value, last_value + dw_step, last_value + up_step))
 
 
-def get_friction(lateral_accel_error: float, lateral_accel_deadzone: float, friction_threshold: float,
-                 torque_params: structs.CarParams.LateralTorqueTuning, friction_compensation: bool) -> float:
+def get_friction(torque_error: float, lateral_torque_deadzone: float, friction_threshold: float,
+                 torque_params: structs.CarParams.LateralTorqueTuning) -> float:
   friction_interp = np.interp(
-    apply_center_deadzone(lateral_accel_error, lateral_accel_deadzone),
+    apply_center_deadzone(torque_error, lateral_torque_deadzone),
     [-friction_threshold, friction_threshold],
     [-torque_params.friction, torque_params.friction]
   )
-  friction = float(friction_interp) if friction_compensation else 0.0
-  return friction
+  return float(friction_interp)
 
 
 def make_tester_present_msg(addr, bus, subaddr=None, suppress_response=False):

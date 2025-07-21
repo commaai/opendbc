@@ -25,7 +25,6 @@ V_CRUISE_MAX = 145
 MAX_CTRL_SPEED = (V_CRUISE_MAX + 4) * CV.KPH_TO_MS
 ACCEL_MAX = 2.0
 ACCEL_MIN = -3.5
-FRICTION_THRESHOLD = 0.3
 
 # ISO 11270
 ISO_LATERAL_ACCEL = 3.0  # m/s^2
@@ -187,10 +186,10 @@ class CarInterfaceBase(ABC):
     return self.get_steer_feedforward_default
 
   def torque_from_lateral_accel_linear(self, latcontrol_inputs: LatControlInputs, torque_params: structs.CarParams.LateralTorqueTuning,
-                                       lateral_accel_error: float, lateral_accel_deadzone: float, friction_compensation: bool, gravity_adjusted: bool) -> float:
+                                       lateral_accel_error: float, lateral_accel_deadzone: float, gravity_adjusted: bool) -> float:
     # The default is a linear relationship between torque and lateral acceleration (accounting for road roll and steering friction)
-    friction = get_friction(lateral_accel_error, lateral_accel_deadzone, FRICTION_THRESHOLD, torque_params, friction_compensation)
-    return (latcontrol_inputs.lateral_acceleration / float(torque_params.latAccelFactor)) + friction
+    # friction = get_friction(lateral_accel_error, lateral_accel_deadzone, FRICTION_THRESHOLD, torque_params, friction_compensation)
+    return (latcontrol_inputs.lateral_acceleration / float(torque_params.latAccelFactor)) #+ friction
 
   def torque_from_lateral_accel(self) -> TorqueFromLateralAccelCallbackType:
     return self.torque_from_lateral_accel_linear
