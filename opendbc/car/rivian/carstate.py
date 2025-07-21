@@ -98,7 +98,6 @@ class CarState(CarStateBase):
       ("ESP_Status", 50),
       ("VDM_PropStatus", 50),
       ("iBESP2", 50),
-      ("ESPiB3", 50),
       ("EPAS_AdasStatus", 100),
       ("EPAS_SystemStatus", 100),
       ("RCM_Status", 8),
