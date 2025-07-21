@@ -38,17 +38,7 @@ static HondaHw honda_hw = HONDA_NIDEC;
 
 
 static int honda_get_pt_bus(void) {
-//  return ((honda_hw == HONDA_BOSCH) && !honda_bosch_radarless && !honda_bosch_canfd) ? 1 : 0;  rewrite due to failing volkswagen test
-  int pt_bus = 99;
-  if (honda_hw == HONDA_NIDEC) {
-    pt_bus = 0;
-  }
-  if ((honda_hw == HONDA_BOSCH) && (honda_bosch_radarless | honda_bosch_canfd)) {
-    pt_bus = 0;
-  } else {
-    pt_bus = 1;
-  }
-  return pt_bus;
+  return ((honda_hw == HONDA_BOSCH) && !honda_bosch_radarless && !honda_bosch_canfd) ? 1 : 0;
 }
 
 static uint32_t honda_get_checksum(const CANPacket_t *to_push) {
