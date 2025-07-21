@@ -17,6 +17,8 @@ ACCELERATION_DUE_TO_GRAVITY = 9.81  # m/s^2
 
 ButtonType = structs.CarState.ButtonEvent.Type
 
+FRICTION_THRESHOLD = 0.3
+
 
 @dataclass
 class AngleSteeringLimits:
