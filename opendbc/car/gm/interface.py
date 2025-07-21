@@ -67,12 +67,17 @@ class CarInterface(CarInterfaceBase):
     steer_torque = (sig(latcontrol_inputs.lateral_acceleration * a) * b) + (latcontrol_inputs.lateral_acceleration * c)
     return float(steer_torque) + friction
 
-  def torque_from_lateral_accel_neural(self, latcontrol_inputs: LatControlInputs, torque_params: structs.CarParams.LateralTorqueTuning,
+  def torque_from_lateral_accel_neural(self, torque_error, latcontrol_inputs: LatControlInputs, torque_params: structs.CarParams.LateralTorqueTuning,
                                        lateral_accel_error: float, lateral_accel_deadzone: float, friction_compensation: bool, gravity_adjusted: bool) -> float:
+    if friction_compensation:
+      if abs(lateral_accel_error) > 0:
+        print(lateral_accel_error, torque_error)
     friction = get_friction(lateral_accel_error, lateral_accel_deadzone, FRICTION_THRESHOLD, torque_params, friction_compensation)
     inputs = list(latcontrol_inputs)
     if gravity_adjusted:
       inputs[0] += inputs[1]
+    if friction_compensation:
+      return friction
     return float(self.neural_ff_model.predict(inputs)) + friction
 
   def torque_from_lateral_accel(self) -> TorqueFromLateralAccelCallbackType:
