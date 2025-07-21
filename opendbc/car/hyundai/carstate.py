@@ -215,13 +215,8 @@ class CarState(CarStateBase):
     self.is_metric = cp.vl["CRUISE_BUTTONS_ALT"]["DISTANCE_UNIT"] != 1
     speed_factor = CV.KPH_TO_MS if self.is_metric else CV.MPH_TO_MS
 
-    if self.CP.flags & (HyundaiFlags.EV | HyundaiFlags.HYBRID):
-      if self.CP.flags & HyundaiFlags.EV:
-        ret.gasPressed = cp.vl[self.accelerator_msg_canfd]["ACCELERATOR_PEDAL"] > 0.00255
-      else:
-        ret.gasPressed = cp.vl[self.accelerator_msg_canfd]["ACCELERATOR_PEDAL"] > 0.01023
-    else:
-      ret.gasPressed = bool(cp.vl[self.accelerator_msg_canfd]["ACCELERATOR_PEDAL_PRESSED"])
+    signal = "ACCELERATOR_PEDAL" if self.CP.flags & HyundaiFlags.EV else "ACCELERATOR_PEDAL_PRESSED"
+    ret.gasPressed = cp.vl[self.accelerator_msg_canfd][signal] > 1e-5
 
     ret.brakePressed = cp.vl["TCS"]["DriverBraking"] == 1
 

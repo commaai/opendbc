@@ -30,11 +30,8 @@ class CarState(CarStateBase):
     conversion = CV.KPH_TO_MS if cp_adas.vl["Cluster"]["Cluster_Unit"] == 0 else CV.MPH_TO_MS
     ret.vEgoCluster = cp_adas.vl["Cluster"]["Cluster_VehicleSpeed"] * conversion
 
-    # Gas pedal
-    pedal_status = cp.vl["VDM_PropStatus"]["VDM_AcceleratorPedalPosition"]
-    ret.gasPressed = pedal_status > 0
-
-    # Brake pedal
+    # User pedals
+    ret.gasPressed = cp.vl["VDM_PropStatus"]["VDM_AcceleratorPedalPosition"] > 1e-5
     ret.brakePressed = cp.vl["iBESP2"]["iBESP2_BrakePedalApplied"] == 1
 
     # Steering wheel
