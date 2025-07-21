@@ -338,8 +338,7 @@ static safety_config honda_bosch_init(uint16_t param) {
   static CanMsg HONDA_RADARLESS_LONG_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0x33D, 0, 8, .check_relay = true}, {0x1C8, 0, 8, .check_relay = true},
                                                   {0x30C, 0, 8, .check_relay = true}};  // Bosch radarless w/ gas and brakes
 
-  static CanMsg HONDA_BOSCH_CANFD_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0xE5, 0, 8, .check_relay = true}, {0x296, 0, 4, .check_relay = false},
-                                               {0x33D, 0, 8, .check_relay = true}, {0x33DA, 0, 5, .check_relay = true}, {0x33DB, 0, 8, .check_relay = true},
+  static CanMsg HONDA_BOSCH_CANFD_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0xE5, 0, 8, .check_relay = true}, {0x296, 0, 4, .check_relay = false}, {0x33D, 0, 8, .check_relay = true},
                                                {0xE4, 4, 5, .check_relay = true}, {0xE5, 4, 8, .check_relay = true}, {0x296, 4, 4, .check_relay = false}, // repeat with bus 4 for red panda on comma3
                                                {0x33D, 4, 8, .check_relay = true}, {0x33DA, 4, 5, .check_relay = true}, {0x33DB, 4, 8, .check_relay = true}};
 
