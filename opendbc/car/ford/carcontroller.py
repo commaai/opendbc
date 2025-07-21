@@ -108,7 +108,7 @@ class CarController(CarControllerBase):
         apply_curvature = actuators.curvature
 
       # apply rate limits, curvature error limit, and clip to signal range
-      current_curvature = -CS.out.yawRate / max(CS.out.vEgoRaw, 0.1)
+      current_curvature = 0  # TODO: calculate from alternative source, yawRate deprecated
 
       self.apply_curvature_last = apply_ford_curvature_limits(apply_curvature, self.apply_curvature_last, current_curvature,
                                                               CS.out.vEgoRaw, 0., CC.latActive, self.CP)

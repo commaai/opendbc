@@ -170,7 +170,6 @@ struct CarState {
   vCruise @53 :Float32;        # actual set speed
   vCruiseCluster @54 :Float32; # set speed to display in the UI
 
-  yawRate @22 :Float32;     # best estimate of yaw rate
   standstill @18 :Bool;
   wheelSpeeds @2 :WheelSpeeds;
 
@@ -296,6 +295,7 @@ struct CarState {
   eventsDEPRECATED @13 :List(OnroadEventDEPRECATED);
   gasDEPRECATED @3 :Float32;        # this is user pedal only
   brakeDEPRECATED @5 :Float32;      # this is user pedal only
+  yawRateDEPRECATED @22 :Float32;   # best estimate of yaw rate
 }
 
 # ******* radar state @ 20hz *******
