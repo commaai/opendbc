@@ -312,8 +312,7 @@ class CarDocs:
     # hardware column
     hardware_col = "None"
     if self.car_parts.parts:
-      car_info = f"{self.make} {self.model}{' ' + self.years if self.years else ''}".replace(' ', '%20')
-      buy_link = f'<a href="https://comma.ai/shop/comma-3x?harness={car_info}">Buy Here</a>'
+      buy_link = f'<a href="https://comma.ai/shop/comma-3x?harness={self.name}">Buy Here</a>'
 
       tools_docs = [part for part in self.car_parts.all_parts() if isinstance(part, Tool)]
       parts_docs = [part for part in self.car_parts.all_parts() if not isinstance(part, Tool)]
