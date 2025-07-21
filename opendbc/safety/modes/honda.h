@@ -192,7 +192,7 @@ static bool honda_tx_hook(const CANPacket_t *to_send) {
   int bus_buttons = (honda_bosch_radarless) ? 2 : bus_pt;  // the camera controls ACC on radarless Bosch cars
 
   // ACC_HUD: safety check (nidec w/o pedal)
-  if ((addr == 0x30C) && (bus == bus_pt)) {
+  if ((addr == 0x30C) && (bus == bus_pt) && (honda_hw == HONDA_NIDEC)) {
     int pcm_speed = (GET_BYTE(to_send, 0) << 8) | GET_BYTE(to_send, 1);
     int pcm_gas = GET_BYTE(to_send, 2);
 
