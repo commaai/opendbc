@@ -152,9 +152,6 @@ struct OnroadEventDEPRECATED @0x9b1657f34caf3ad3 {
   }
 }
 
-# ******* main car state @ 100hz *******
-# all speeds in m/s
-
 struct CarState {
   # CAN health
   canValid @26 :Bool;       # invalid counter/checksums
@@ -162,20 +159,18 @@ struct CarState {
   canErrorCounter @48 :UInt32;
 
   # car speed
-  vEgo @1 :Float32;            # best estimate of speed
+  vEgo @1 :Float32;            # best estimate of speed, from the four wheel sensors
   aEgo @16 :Float32;           # best estimate of aCAN cceleration
   vEgoRaw @17 :Float32;        # unfiltered speed from wheel speed sensors
   vEgoCluster @44 :Float32;    # best estimate of speed shown on car's instrument cluster, used for UI
 
   vCruise @53 :Float32;        # actual set speed
-  vCruiseCluster @54 :Float32; # set speed to display in the UI
+  vCruiseCluster @54 :Float32; # best estimate of set speed shown on car's instrument cluster, used for UI
 
   standstill @18 :Bool;
   wheelSpeeds @2 :WheelSpeeds;
 
   gasPressed @4 :Bool;    # this is user pedal only
-
-  engineRpm @46 :Float32;
 
   brakePressed @6 :Bool;  # this is user pedal only
   regenBraking @45 :Bool; # this is user pedal only
@@ -185,7 +180,6 @@ struct CarState {
   # steering wheel
   steeringAngleDeg @7 :Float32;
   steeringAngleOffsetDeg @37 :Float32; # Offset betweens sensors in case there multiple
-  steeringRateDeg @15 :Float32;
   steeringTorque @8 :Float32;      # TODO: standardize units
   steeringTorqueEps @27 :Float32;  # TODO: standardize units
   steeringPressed @9 :Bool;        # if the user is using the steering wheel
@@ -215,14 +209,10 @@ struct CarState {
   buttonEnable @57 :Bool;  # user is requesting enable, usually one frame. set if pcmCruise=False
   leftBlinker @20 :Bool;
   rightBlinker @21 :Bool;
-  genericToggle @23 :Bool;
 
   # lock info
   doorOpen @24 :Bool;
   seatbeltUnlatched @25 :Bool;
-
-  # clutch (manual transmission only)
-  clutchPressed @28 :Bool;
 
   # blindspot sensors
   leftBlindspot @33 :Bool; # Is there something blocking the left lane change
@@ -232,7 +222,6 @@ struct CarState {
   charging @43 :Bool;
 
   # process meta
-  cumLagMs @50 :Float32;
 
   struct WheelSpeeds {
     # optional wheel speeds
@@ -296,6 +285,11 @@ struct CarState {
   gasDEPRECATED @3 :Float32;        # this is user pedal only
   brakeDEPRECATED @5 :Float32;      # this is user pedal only
   yawRateDEPRECATED @22 :Float32;   # best estimate of yaw rate
+  engineRpmDEPRECATED @46 :Float32;
+  steeringRateDegDEPRECATED @15 :Float32;
+  genericToggleDEPRECATED @23 :Bool;
+  clutchPressedDEPRECATED @28 :Bool;
+  cumLagMsDEPRECATED @50 :Float32;
 }
 
 # ******* radar state @ 20hz *******

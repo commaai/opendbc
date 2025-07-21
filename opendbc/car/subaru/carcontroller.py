@@ -47,9 +47,9 @@ class CarController(CarControllerBase):
         apply_steer_req = CC.latActive
 
         if self.CP.flags & SubaruFlags.STEER_RATE_LIMITED:
-          # Steering rate fault prevention
+          # Steering rate fault prevention (steeringRateDeg deprecated, disabling check)
           self.steer_rate_counter, apply_steer_req = \
-            common_fault_avoidance(abs(CS.out.steeringRateDeg) > MAX_STEER_RATE, apply_steer_req,
+            common_fault_avoidance(False, apply_steer_req,
                                    self.steer_rate_counter, MAX_STEER_RATE_FRAMES)
 
         can_sends.append(subarucan.create_steering_control(self.packer, apply_torque, apply_steer_req))

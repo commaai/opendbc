@@ -80,9 +80,6 @@ class CarState(CarStateBase):
       can_gear = int(cp.vl["GEAR_PACKET"]["GEAR"])
       if not self.CP.enableDsu and not self.CP.flags & ToyotaFlags.DISABLE_RADAR.value:
         ret.stockAeb = bool(cp_acc.vl["PRE_COLLISION"]["PRECOLLISION_ACTIVE"] and cp_acc.vl["PRE_COLLISION"]["FORCE"] < -1e-5)
-      if self.CP.carFingerprint != CAR.TOYOTA_MIRAI:
-        ret.engineRpm = cp.vl["ENGINE_RPM"]["RPM"]
-
     ret.wheelSpeeds = self.get_wheel_speeds(
       cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FL"],
       cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FR"],
@@ -96,7 +93,6 @@ class CarState(CarStateBase):
     ret.standstill = abs(ret.vEgoRaw) < 1e-3
 
     ret.steeringAngleDeg = cp.vl["STEER_ANGLE_SENSOR"]["STEER_ANGLE"] + cp.vl["STEER_ANGLE_SENSOR"]["STEER_FRACTION"]
-    ret.steeringRateDeg = cp.vl["STEER_ANGLE_SENSOR"]["STEER_RATE"]
     torque_sensor_angle_deg = cp.vl["STEER_TORQUE_SENSOR"]["STEER_ANGLE"]
 
     # On some cars, the angle measurement is non-zero while initializing
@@ -105,7 +101,8 @@ class CarState(CarStateBase):
 
     if self.accurate_steer_angle_seen:
       # Offset seems to be invalid for large steering angles and high angle rates
-      if abs(ret.steeringAngleDeg) < 90 and abs(ret.steeringRateDeg) < 100 and cp.can_valid:
+      steering_rate = cp.vl["STEER_ANGLE_SENSOR"]["STEER_RATE"]
+      if abs(ret.steeringAngleDeg) < 90 and abs(steering_rate) < 100 and cp.can_valid:
         self.angle_offset.update(torque_sensor_angle_deg - ret.steeringAngleDeg)
 
       if self.angle_offset.initialized:
@@ -171,7 +168,6 @@ class CarState(CarStateBase):
     ret.cruiseState.enabled = bool(cp.vl["PCM_CRUISE"]["CRUISE_ACTIVE"])
     ret.cruiseState.nonAdaptive = self.pcm_acc_status in (1, 2, 3, 4, 5, 6)
 
-    ret.genericToggle = bool(cp.vl["LIGHT_STALK"]["AUTO_HIGH_BEAM"])
     ret.espDisabled = cp.vl["ESP_CONTROL"]["TC_DISABLED"] != 0
 
     if self.CP.enableBsm:

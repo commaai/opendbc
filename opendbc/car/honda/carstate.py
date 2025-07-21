@@ -170,7 +170,6 @@ class CarState(CarStateBase):
       ret.vEgoCluster = cp.vl["CAR_SPEED"]["ROUGH_CAR_SPEED_2"] * conversion
 
     ret.steeringAngleDeg = cp.vl["STEERING_SENSORS"]["STEER_ANGLE"]
-    ret.steeringRateDeg = cp.vl["STEERING_SENSORS"]["STEER_ANGLE_RATE"]
 
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_stalk(
       250, cp.vl["SCM_FEEDBACK"]["LEFT_BLINKER"], cp.vl["SCM_FEEDBACK"]["RIGHT_BLINKER"])
@@ -180,7 +179,6 @@ class CarState(CarStateBase):
       ret.parkingBrake = cp.vl["EPB_STATUS"]["EPB_STATE"] != 0
 
     if self.CP.transmissionType == TransmissionType.manual:
-      ret.clutchPressed = cp.vl["GEARBOX_ALT_2"]["GEAR_MT"] == 0
       if cp.vl["GEARBOX_ALT_2"]["GEAR_MT"] == 14:
         ret.gearShifter = GearShifter.reverse
       else:

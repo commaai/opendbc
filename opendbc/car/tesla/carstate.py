@@ -51,7 +51,6 @@ class CarState(CarStateBase):
     epas_status = cp_party.vl["EPAS3S_sysStatus"]
     self.hands_on_level = epas_status["EPAS3S_handsOnLevel"]
     ret.steeringAngleDeg = -epas_status["EPAS3S_internalSAS"]
-    ret.steeringRateDeg = -cp_ap_party.vl["SCCM_steeringAngleSensor"]["SCCM_steeringAngleSpeed"]
     ret.steeringTorque = -epas_status["EPAS3S_torsionBarTorque"]
 
     # stock handsOnLevel uses >0.5 for 0.25s, but is too slow
