@@ -244,16 +244,8 @@ class CarDocs:
   # make + model + model years
   name: str
 
-  # Example for Toyota Corolla MY20
-  # requirements: Lane Tracing Assist (LTA) and Dynamic Radar Cruise Control (DRCC)
-  # US Market reference: "All", since all Corolla in the US come standard with LTA and DRCC
-
   # the simplest description of the requirements for the US market
   package: str
-
-  # the minimum compatibility requirements for this model, regardless
-  # of market. can be a package, trim, or list of features
-  requirements: str | None = None
 
   video: str | None = None
   setup_video: str | None = None
