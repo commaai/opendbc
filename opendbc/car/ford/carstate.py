@@ -38,7 +38,7 @@ class CarState(CarStateBase):
     ret.standstill = cp.vl["DesiredTorqBrk"]["VehStop_D_Stat"] == 1
 
     # gas pedal
-    ret.gasPressed = cp.vl["EngVehicleSpThrottle"]["ApedPos_Pc_ActlArb"] / 100. > 1e-6
+    ret.gasPressed = cp.vl["EngVehicleSpThrottle"]["ApedPos_Pc_ActlArb"] > 1e-4
 
     # brake pedal
     ret.brakePressed = cp.vl["EngBrakeData"]["BpedDrvAppl_D_Actl"] == 2

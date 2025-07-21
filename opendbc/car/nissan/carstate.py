@@ -36,9 +36,9 @@ class CarState(CarStateBase):
     self.distance_button = cp.vl["CRUISE_THROTTLE"]["FOLLOW_DISTANCE_BUTTON"]
 
     if self.CP.carFingerprint in (CAR.NISSAN_ROGUE, CAR.NISSAN_XTRAIL, CAR.NISSAN_ALTIMA):
-      ret.gasPressed = bool(cp.vl["GAS_PEDAL"]["GAS_PEDAL"] > 3)
+      ret.gasPressed = cp.vl["GAS_PEDAL"]["GAS_PEDAL"] > 3
     elif self.CP.carFingerprint in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC):
-      ret.gasPressed = bool(cp.vl["CRUISE_THROTTLE"]["GAS_PEDAL"] > 3)
+      ret.gasPressed = cp.vl["CRUISE_THROTTLE"]["GAS_PEDAL"] > 3
 
     if self.CP.carFingerprint in (CAR.NISSAN_ROGUE, CAR.NISSAN_XTRAIL, CAR.NISSAN_ALTIMA):
       ret.brakePressed = bool(cp.vl["DOORS_LIGHTS"]["USER_BRAKE_PRESSED"])

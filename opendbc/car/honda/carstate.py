@@ -189,7 +189,7 @@ class CarState(CarStateBase):
       gear = int(cp.vl[self.gearbox_msg]["GEAR_SHIFTER"])
       ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(gear, None))
 
-    ret.gasPressed = cp.vl["POWERTRAIN_DATA"]["PEDAL_GAS"] > 1e-5
+    ret.gasPressed = cp.vl["POWERTRAIN_DATA"]["PEDAL_GAS"] > 0
 
     ret.steeringTorque = cp.vl["STEER_STATUS"]["STEER_TORQUE_SENSOR"]
     ret.steeringTorqueEps = cp.vl["STEER_MOTOR_TORQUE"]["MOTOR_TORQUE"]

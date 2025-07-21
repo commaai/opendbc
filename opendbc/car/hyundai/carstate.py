@@ -134,7 +134,6 @@ class CarState(CarStateBase):
       ret.cruiseState.nonAdaptive = cp_cruise.vl["SCC11"]["SCCInfoDisplay"] == 2.  # Shows 'Cruise Control' on dash
       ret.cruiseState.speed = cp_cruise.vl["SCC11"]["VSetDis"] * speed_conv
 
-    # TODO: Find brake pressure
     ret.brakePressed = cp.vl["TCS13"]["DriverOverride"] == 2  # 2 includes regen braking by user on HEV/EV
     ret.brakeHoldActive = cp.vl["TCS15"]["AVH_LAMP"] == 2  # 0 OFF, 1 ERROR, 2 ACTIVE, 3 READY
     ret.parkingBrake = cp.vl["TCS13"]["PBRAKE_ACT"] == 1
@@ -144,11 +143,11 @@ class CarState(CarStateBase):
 
     if self.CP.flags & (HyundaiFlags.HYBRID | HyundaiFlags.EV | HyundaiFlags.FCEV):
       if self.CP.flags & HyundaiFlags.FCEV:
-        ret.gasPressed = cp.vl["FCEV_ACCELERATOR"]["ACCELERATOR_PEDAL"] / 254. > 0
+        ret.gasPressed = cp.vl["FCEV_ACCELERATOR"]["ACCELERATOR_PEDAL"] > 0
       elif self.CP.flags & HyundaiFlags.HYBRID:
-        ret.gasPressed = cp.vl["E_EMS11"]["CR_Vcu_AccPedDep_Pos"] / 254. > 0
+        ret.gasPressed = cp.vl["E_EMS11"]["CR_Vcu_AccPedDep_Pos"] > 0
       else:
-        ret.gasPressed = cp.vl["E_EMS11"]["Accel_Pedal_Pos"] / 254. > 0
+        ret.gasPressed = cp.vl["E_EMS11"]["Accel_Pedal_Pos"] > 0
     else:
       ret.gasPressed = bool(cp.vl["EMS16"]["CF_Ems_AclAct"])
 
@@ -217,8 +216,10 @@ class CarState(CarStateBase):
     speed_factor = CV.KPH_TO_MS if self.is_metric else CV.MPH_TO_MS
 
     if self.CP.flags & (HyundaiFlags.EV | HyundaiFlags.HYBRID):
-      offset = 255. if self.CP.flags & HyundaiFlags.EV else 1023.
-      ret.gasPressed = cp.vl[self.accelerator_msg_canfd]["ACCELERATOR_PEDAL"] / offset > 1e-5
+      if self.CP.flags & HyundaiFlags.EV:
+        ret.gasPressed = cp.vl[self.accelerator_msg_canfd]["ACCELERATOR_PEDAL"] > 0.00255
+      else:
+        ret.gasPressed = cp.vl[self.accelerator_msg_canfd]["ACCELERATOR_PEDAL"] > 0.01023
     else:
       ret.gasPressed = bool(cp.vl[self.accelerator_msg_canfd]["ACCELERATOR_PEDAL_PRESSED"])
 
