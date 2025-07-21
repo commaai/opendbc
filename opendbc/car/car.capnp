@@ -172,6 +172,7 @@ struct CarState {
 
   yawRate @22 :Float32;     # best estimate of yaw rate
   standstill @18 :Bool;
+  wheelSpeeds @2 :WheelSpeeds;
 
   # gas pedal, 0.0-1.0
   gas @3 :Float32;        # this is user pedal only
@@ -233,6 +234,14 @@ struct CarState {
   # process meta
   cumLagMs @50 :Float32;
 
+  struct WheelSpeeds {
+    # optional wheel speeds
+    fl @0 :Float32;
+    fr @1 :Float32;
+    rl @2 :Float32;
+    rr @3 :Float32;
+  }
+
   struct CruiseState {
     enabled @0 :Bool;
     speed @1 :Float32;
@@ -286,14 +295,6 @@ struct CarState {
   eventsDEPRECATED @13 :List(OnroadEventDEPRECATED);
   clutchPressedDEPRECATED @28 :Bool;
   engineRpmDEPRECATED @46 :Float32;
-  wheelSpeedsDEPRECATED @2 :WheelSpeeds;
-
-  struct WheelSpeeds {
-    fl @0 :Float32;
-    fr @1 :Float32;
-    rl @2 :Float32;
-    rr @3 :Float32;
-  }
 }
 
 # ******* radar state @ 20hz *******
