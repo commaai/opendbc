@@ -30,14 +30,12 @@ class CarState(CarStateBase):
     prev_distance_button = self.distance_button
     self.distance_button = cp.vl["CRZ_BTNS"]["DISTANCE_LESS"]
 
-    ret.wheelSpeeds = self.get_wheel_speeds(
+    self.parse_wheel_speeds(ret,
       cp.vl["WHEEL_SPEEDS"]["FL"],
       cp.vl["WHEEL_SPEEDS"]["FR"],
       cp.vl["WHEEL_SPEEDS"]["RL"],
       cp.vl["WHEEL_SPEEDS"]["RR"],
     )
-    ret.vEgoRaw = (ret.wheelSpeeds.fl + ret.wheelSpeeds.fr + ret.wheelSpeeds.rl + ret.wheelSpeeds.rr) / 4.
-    ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
 
     # Match panda speed reading
     speed_kph = cp.vl["ENGINE_DATA"]["SPEED"]
@@ -59,13 +57,17 @@ class CarState(CarStateBase):
     ret.steeringTorqueEps = cp.vl["STEER_TORQUE"]["STEER_TORQUE_MOTOR"]
     ret.steeringRateDeg = cp.vl["STEER_RATE"]["STEER_ANGLE_RATE"]
 
+    # TODO: this should be from 0 - 1.
     ret.brakePressed = cp.vl["PEDALS"]["BRAKE_ON"] == 1
+    ret.brake = cp.vl["BRAKE"]["BRAKE_PRESSURE"]
 
     ret.seatbeltUnlatched = cp.vl["SEATBELT"]["DRIVER_SEATBELT"] == 0
     ret.doorOpen = any([cp.vl["DOORS"]["FL"], cp.vl["DOORS"]["FR"],
                         cp.vl["DOORS"]["BL"], cp.vl["DOORS"]["BR"]])
 
-    ret.gasPressed = cp.vl["ENGINE_DATA"]["PEDAL_GAS"] > 0
+    # TODO: this should be from 0 - 1.
+    ret.gas = cp.vl["ENGINE_DATA"]["PEDAL_GAS"]
+    ret.gasPressed = ret.gas > 0
 
     # Either due to low speed or hands off
     lkas_blocked = cp.vl["STEER_RATE"]["LKAS_BLOCK"] == 1
@@ -135,6 +137,7 @@ class CarState(CarStateBase):
         ("CRZ_EVENTS", 50),
         ("CRZ_BTNS", 10),
         ("PEDALS", 50),
+        ("BRAKE", 50),
         ("SEATBELT", 10),
         ("DOORS", 10),
         ("GEAR", 20),

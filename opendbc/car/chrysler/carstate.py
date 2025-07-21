@@ -42,10 +42,12 @@ class CarState(CarStateBase):
     ret.seatbeltUnlatched = cp.vl["ORC_1"]["SEATBELT_DRIVER_UNLATCHED"] == 1
 
     # brake pedal
+    ret.brake = 0
     ret.brakePressed = cp.vl["ESP_1"]['Brake_Pedal_State'] == 1  # Physical brake pedal switch
 
     # gas pedal
-    ret.gasPressed = cp.vl["ECM_5"]["Accelerator_Position"] > 0
+    ret.gas = cp.vl["ECM_5"]["Accelerator_Position"]
+    ret.gasPressed = ret.gas > 1e-5
 
     # car speed
     if self.CP.carFingerprint in RAM_CARS:
@@ -56,13 +58,6 @@ class CarState(CarStateBase):
       ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(cp.vl["GEAR"]["PRNDL"], None))
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.standstill = not ret.vEgoRaw > 0.001
-    ret.wheelSpeeds = self.get_wheel_speeds(
-      cp.vl["ESP_6"]["WHEEL_SPEED_FL"],
-      cp.vl["ESP_6"]["WHEEL_SPEED_FR"],
-      cp.vl["ESP_6"]["WHEEL_SPEED_RL"],
-      cp.vl["ESP_6"]["WHEEL_SPEED_RR"],
-      unit=1,
-    )
 
     # button presses
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_stalk(200, cp.vl["STEERING_LEVERS"]["TURN_SIGNALS"] == 1,
@@ -117,10 +112,8 @@ class CarState(CarStateBase):
   @staticmethod
   def get_can_parsers(CP):
     pt_messages = [
-      # sig_address, frequency
       ("ESP_1", 50),
       ("EPS_2", 100),
-      ("ESP_6", 50),
       ("STEERING", 100),
       ("ECM_5", 50),
       ("CRUISE_BUTTONS", 50),

@@ -1,4 +1,3 @@
-import numpy as np
 from opendbc.can.parser import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.interfaces import CarStateBase
@@ -55,7 +54,6 @@ class CarState(CarStateBase):
     if self.CP.transmissionType == TransmissionType.direct:
       ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Motor_EV_01"]["MO_Waehlpos"], None))
     elif self.CP.transmissionType == TransmissionType.manual:
-      ret.clutchPressed = not pt_cp.vl["Motor_14"]["MO_Kuppl_schalter"]
       if bool(pt_cp.vl["Gateway_72"]["BCM1_Rueckfahrlicht_Schalter"]):
         ret.gearShifter = GearShifter.reverse
       else:
@@ -67,7 +65,7 @@ class CarState(CarStateBase):
       # MQB-specific
       self.upscale_lead_car_signal = bool(pt_cp.vl["Kombi_03"]["KBI_Variante"])  # Analog vs digital instrument cluster
 
-      ret.wheelSpeeds = self.get_wheel_speeds(
+      self.parse_wheel_speeds(ret,
         pt_cp.vl["ESP_19"]["ESP_VL_Radgeschw_02"],
         pt_cp.vl["ESP_19"]["ESP_VR_Radgeschw_02"],
         pt_cp.vl["ESP_19"]["ESP_HL_Radgeschw_02"],
@@ -79,6 +77,8 @@ class CarState(CarStateBase):
         ret.carFaultedNonCritical = bool(cam_cp.vl["HCA_01"]["EA_Ruckfreigabe"]) or cam_cp.vl["HCA_01"]["EA_ACC_Sollstatus"] > 0  # EA
 
       drive_mode = True
+      ret.gas = pt_cp.vl["Motor_20"]["MO_Fahrpedalrohwert_01"] / 100.0
+      ret.brake = pt_cp.vl["ESP_05"]["ESP_Bremsdruck"] / 250.0  # FIXME: this is pressure in Bar, not sure what OP expects
       brake_pedal_pressed = bool(pt_cp.vl["Motor_14"]["MO_Fahrer_bremst"])
       brake_pressure_detected = bool(pt_cp.vl["ESP_05"]["ESP_Fahrer_bremst"])
       ret.brakePressed = brake_pedal_pressed or brake_pressure_detected
@@ -112,9 +112,6 @@ class CarState(CarStateBase):
       ret.rightBlinker = bool(pt_cp.vl["Blinkmodi_02"]["Comfort_Signal_Right"])
 
     # Shared logic
-
-    ret.vEgoRaw = float(np.mean([ret.wheelSpeeds.fl, ret.wheelSpeeds.fr, ret.wheelSpeeds.rl, ret.wheelSpeeds.rr]))
-    ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.vEgoCluster = pt_cp.vl["Kombi_01"]["KBI_angez_Geschw"] * CV.KPH_TO_MS
 
     ret.steeringAngleDeg = pt_cp.vl["LWI_01"]["LWI_Lenkradwinkel"] * (1, -1)[int(pt_cp.vl["LWI_01"]["LWI_VZ_Lenkradwinkel"])]
@@ -123,7 +120,7 @@ class CarState(CarStateBase):
     ret.steeringPressed = abs(ret.steeringTorque) > self.CCP.STEER_DRIVER_ALLOWANCE
     ret.steerFaultTemporary, ret.steerFaultPermanent = self.update_hca_state(hca_status, drive_mode)
 
-    ret.gasPressed = pt_cp.vl["Motor_20"]["MO_Fahrpedalrohwert_01"] > 0
+    ret.gasPressed = ret.gas > 0
     ret.espActive = bool(pt_cp.vl["ESP_21"]["ESP_Eingriff"])
     ret.espDisabled = pt_cp.vl["ESP_21"]["ESP_Tastung_passiv"] != 0
     ret.seatbeltUnlatched = pt_cp.vl["Airbag_02"]["AB_Gurtschloss_FA"] != 3
@@ -147,13 +144,6 @@ class CarState(CarStateBase):
 
   def update_pq(self, pt_cp, cam_cp, ext_cp) -> structs.CarState:
     ret = structs.CarState()
-    # Update vehicle speed and acceleration from ABS wheel speeds.
-    ret.wheelSpeeds = self.get_wheel_speeds(
-      pt_cp.vl["Bremse_3"]["Radgeschw__VL_4_1"],
-      pt_cp.vl["Bremse_3"]["Radgeschw__VR_4_1"],
-      pt_cp.vl["Bremse_3"]["Radgeschw__HL_4_1"],
-      pt_cp.vl["Bremse_3"]["Radgeschw__HR_4_1"],
-    )
 
     # vEgo obtained from Bremse_1 vehicle speed rather than Bremse_3 wheel speeds because Bremse_3 isn't present on NSF
     ret.vEgoRaw = pt_cp.vl["Bremse_1"]["Geschwindigkeit_neu__Bremse_1_"] * CV.KPH_TO_MS
@@ -169,7 +159,9 @@ class CarState(CarStateBase):
     ret.steerFaultTemporary, ret.steerFaultPermanent = self.update_hca_state(hca_status)
 
     # Update gas, brakes, and gearshift.
-    ret.gasPressed = pt_cp.vl["Motor_3"]["Fahrpedal_Rohsignal"] > 0
+    ret.gas = pt_cp.vl["Motor_3"]["Fahrpedal_Rohsignal"] / 100.0
+    ret.gasPressed = ret.gas > 0
+    ret.brake = pt_cp.vl["Bremse_5"]["BR5_Bremsdruck"] / 250.0  # FIXME: this is pressure in Bar, not sure what OP expects
     ret.brakePressed = bool(pt_cp.vl["Motor_2"]["Bremslichtschalter"])
     ret.parkingBrake = bool(pt_cp.vl["Kombi_1"]["Bremsinfo"])
 
@@ -177,7 +169,6 @@ class CarState(CarStateBase):
     if self.CP.transmissionType == TransmissionType.automatic:
       ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Getriebe_1"]["Waehlhebelposition__Getriebe_1_"], None))
     elif self.CP.transmissionType == TransmissionType.manual:
-      ret.clutchPressed = not pt_cp.vl["Motor_1"]["Kupplungsschalter"]
       reverse_light = bool(pt_cp.vl["Gate_Komf_1"]["GK1_Rueckfahr"])
       if reverse_light:
         ret.gearShifter = GearShifter.reverse
@@ -334,8 +325,6 @@ class CarState(CarStateBase):
 
     if CP.transmissionType == TransmissionType.automatic:
       pt_messages += [("Getriebe_1", 100)]  # From J743 Auto transmission control module
-    elif CP.transmissionType == TransmissionType.manual:
-      pt_messages += [("Motor_1", 100)]  # From J623 Engine control module
 
     if CP.networkLocation == NetworkLocation.fwdCamera:
       # Extended CAN devices other than the camera are here on CANBUS.pt
