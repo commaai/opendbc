@@ -1,10 +1,17 @@
 BO_ 401 GEARBOX_CVT: 8 PCM
- SG_ GEAR_SHIFTER : 5|6@0+ (1,0) [0|63] "" EON
- SG_ BOH : 45|6@0+ (1,0) [0|63] "" XXX
- SG_ GEAR2 : 31|8@0+ (1,0) [0|1] "" XXX
- SG_ GEAR : 39|8@0+ (1,0) [0|255] "" XXX
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
+ SG_ SELECTED_P : 0|1@0+ (1,0) [0|1] "" XXX
+ SG_ SELECTED_R : 1|1@0+ (1,0) [0|1] "" XXX
+ SG_ SELECTED_N : 2|1@0+ (1,0) [0|1] "" XXX
+ SG_ SELECTED_D : 3|1@0+ (1,0) [0|1] "" XXX
+ SG_ FORWARD_GEAR : 23|1@0+ (1,0) [0|1] "" XXX
+ SG_ CVT_UNKNOWN_1 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ CVT_UNKNOWN_2 : 39|8@0+ (1,0) [0|255] "" XXX
+ SG_ GEAR_SHIFTER : 44|5@0+ (1,0) [0|31] "" XXX
+ SG_ SHIFTER_POSITION_VALID : 45|1@0+ (1,0) [0|1] "" XXX
+ SG_ NOT_FORWARD_GEAR : 48|1@0+ (1,0) [0|1] "" XXX
+ SG_ CVT_UNKNOWN_3 : 53|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" EON
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
 
 BO_ 419 GEARBOX_AUTO: 8 PCM
  SG_ GEAR : 7|8@0+ (1,0) [0|256] "" EON
@@ -12,6 +19,8 @@ BO_ 419 GEARBOX_AUTO: 8 PCM
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
 
-VAL_ 401 GEAR_SHIFTER 32 "L" 16 "S" 8 "D" 4 "N" 2 "R" 1 "P" ;
-VAL_ 401 GEAR 7 "L" 10 "S" 4 "D" 3 "N" 2 "R" 1 "P" ;
-VAL_ 419 GEAR_SHIFTER 10 "S" 4 "D" 3 "N" 2 "R" 1 "P" ;
+CM_ SG_ 401 CVT_UNKNOWN_1 "Probably measured/actual CVT ratio";
+CM_ SG_ 401 CVT_UNKNOWN_2 "Probably target/commanded CVT ratio";
+
+VAL_ 401 GEAR_SHIFTER 1 "P" 2 "R" 3 "N" 4 "D" 7 "L" 10 "S";
+VAL_ 419 GEAR_SHIFTER 1 "P" 2 "R" 3 "N" 4 "D" 7 "L" 10 "S";
