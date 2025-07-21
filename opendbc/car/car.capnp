@@ -247,9 +247,10 @@ struct CarState {
     speed @1 :Float32;
     speedCluster @6 :Float32;  # Set speed as shown on instrument cluster
     available @2 :Bool;
-    speedOffset @3 :Float32;
     standstill @4 :Bool;
     nonAdaptive @5 :Bool;
+
+    speedOffsetDEPRECATED @3 :Float32;
   }
 
   enum GearShifter {
