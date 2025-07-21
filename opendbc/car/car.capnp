@@ -176,8 +176,6 @@ struct CarState {
 
   gasPressed @4 :Bool;    # this is user pedal only
 
-  engineRpm @46 :Float32;
-
   brakePressed @6 :Bool;  # this is user pedal only
   regenBraking @45 :Bool; # this is user pedal only
   parkingBrake @39 :Bool;
@@ -294,6 +292,7 @@ struct CarState {
   gasDEPRECATED @3 :Float32;        # this is user pedal only
   brakeDEPRECATED @5 :Float32;      # this is user pedal only
   clutchPressedDEPRECATED @28 :Bool;
+  engineRpmDEPRECATED @46 :Float32;
 }
 
 # ******* radar state @ 20hz *******
