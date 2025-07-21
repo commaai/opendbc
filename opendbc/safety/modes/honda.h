@@ -348,7 +348,7 @@ static safety_config honda_bosch_init(uint16_t param) {
                                                     {0xE4, 4, 5, .check_relay = true}, {0x1DF, 4, 8, .check_relay = true}, {0x1EF, 4, 8, .check_relay = false},
                                                     {0x30C, 4, 8, .check_relay = false}, {0x33D, 4, 8, .check_relay = true}, {0x18DAB0F1, 4, 8, .check_relay = false}};
 
-  const uint16_t HONDA_PARAM_ALT_BRAKE = 1;
+  const uint16_t HONDA_PARAM_ALT_BRAKE = 32;
   const uint16_t HONDA_PARAM_RADARLESS = 8;
   const uint16_t HONDA_PARAM_BOSCH_CANFD = 16;
 
