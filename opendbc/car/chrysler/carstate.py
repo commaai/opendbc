@@ -51,18 +51,12 @@ class CarState(CarStateBase):
 
     # car speed
     if self.CP.carFingerprint in RAM_CARS:
+      ret.vEgoRaw = cp.vl["ESP_8"]["Vehicle_Speed"] * CV.KPH_TO_MS
       ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(cp.vl["Transmission_Status"]["Gear_State"], None))
-      self.parse_speeds(ret,
-        cp.vl["ESP_6"]["WHEEL_SPEED_FL"],
-        cp.vl["ESP_6"]["WHEEL_SPEED_FR"],
-        cp.vl["ESP_6"]["WHEEL_SPEED_RL"],
-        cp.vl["ESP_6"]["WHEEL_SPEED_RR"],
-        unit=1,
-      )
     else:
       ret.vEgoRaw = (cp.vl["SPEED_1"]["SPEED_LEFT"] + cp.vl["SPEED_1"]["SPEED_RIGHT"]) / 2.
       ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(cp.vl["GEAR"]["PRNDL"], None))
-      ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
+    ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.standstill = not ret.vEgoRaw > 0.001
 
     # button presses
@@ -118,10 +112,8 @@ class CarState(CarStateBase):
   @staticmethod
   def get_can_parsers(CP):
     pt_messages = [
-      # sig_address, frequency
       ("ESP_1", 50),
       ("EPS_2", 100),
-      ("ESP_6", 50),
       ("STEERING", 100),
       ("ECM_5", 50),
       ("CRUISE_BUTTONS", 50),

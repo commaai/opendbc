@@ -43,7 +43,7 @@ class CarState(CarStateBase):
         ret.accFaulted = eyesight_fault
 
     cp_wheels = cp_alt if self.CP.flags & SubaruFlags.GLOBAL_GEN2 else cp
-    self.parse_speeds(ret,
+    self.parse_wheel_speeds(ret,
       cp_wheels.vl["Wheel_Speeds"]["FL"],
       cp_wheels.vl["Wheel_Speeds"]["FR"],
       cp_wheels.vl["Wheel_Speeds"]["RL"],

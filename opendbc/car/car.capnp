@@ -289,7 +289,6 @@ struct CarState {
   wheelSpeedsDEPRECATED @2 :WheelSpeeds;
 
   struct WheelSpeeds {
-    # optional wheel speeds
     fl @0 :Float32;
     fr @1 :Float32;
     rl @2 :Float32;

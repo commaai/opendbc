@@ -151,7 +151,7 @@ class CarState(CarStateBase):
     ret.espDisabled = cp.vl["VSA_STATUS"]["ESP_DISABLED"] != 0
 
     fl = cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FL"]
-    fr = cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FR"]  
+    fr = cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_FR"]
     rl = cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_RL"]
     rr = cp.vl["WHEEL_SPEEDS"]["WHEEL_SPEED_RR"]
     v_wheel = (fl + fr + rl + rr) / 4.0

@@ -30,7 +30,7 @@ class CarState(CarStateBase):
     prev_distance_button = self.distance_button
     self.distance_button = cp.vl["CRZ_BTNS"]["DISTANCE_LESS"]
 
-    self.parse_speeds(ret,
+    self.parse_wheel_speeds(ret,
       cp.vl["WHEEL_SPEEDS"]["FL"],
       cp.vl["WHEEL_SPEEDS"]["FR"],
       cp.vl["WHEEL_SPEEDS"]["RL"],
