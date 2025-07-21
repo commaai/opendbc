@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, AngleSteeringLimits
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, AngleSteeringLimits, DT_CTRL
 from opendbc.car.structs import CarParams, CarState
 from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
@@ -85,19 +85,19 @@ GEAR_MAP = {
 
 
 class CarControllerParams:
-  ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
-    # EPAS faults above this angle
-    360,  # deg
-    # Tesla uses a vehicle model instead, check carcontroller.py for details
-    ([], []),
-    ([], []),
-  )
-
   STEER_STEP = 2  # Angle command is sent at 50 Hz
   ACCEL_MAX = 2.0    # m/s^2
   ACCEL_MIN = -3.48  # m/s^2
   JERK_LIMIT_MAX = 4.9  # m/s^3, ACC faults at 5.0
   JERK_LIMIT_MIN = -4.9  # m/s^3, ACC faults at 5.0
+
+  ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
+    360,  # deg, EPAS faults above this angle
+    # Tesla uses a vehicle model instead, check carcontroller.py for details
+    ([], []),
+    ([], []),
+    (1 / (DT_CTRL * STEER_STEP)),  # 50 Hz
+  )
 
 
 class TeslaSafetyFlags(IntFlag):
