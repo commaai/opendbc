@@ -223,10 +223,11 @@ class CarController(CarControllerBase):
 
           error_future = pcm_accel_cmd - a_ego_future
 
-          # feedforward compensation for changes in pitch
-          high_pass_pitch = self.pitch.x - self.pitch_slow.x
-          pitch_compensation = float(np.clip(math.sin(high_pass_pitch) * ACCELERATION_DUE_TO_GRAVITY, -1.5, 1.5))
-          pcm_accel_cmd += pitch_compensation
+          if not stopping:
+            # feedforward compensation for changes in pitch
+            high_pass_pitch = self.pitch.x - self.pitch_slow.x
+            pitch_compensation = float(np.clip(math.sin(high_pass_pitch) * ACCELERATION_DUE_TO_GRAVITY, -1.5, 1.5))
+            pcm_accel_cmd += pitch_compensation
 
           pcm_accel_cmd = self.long_pid.update(error_future,
                                                speed=CS.out.vEgo,
