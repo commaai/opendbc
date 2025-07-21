@@ -187,8 +187,8 @@ struct CarState {
   steeringAngleDeg @7 :Float32;
   steeringAngleOffsetDeg @37 :Float32; # Offset betweens sensors in case there multiple
   steeringRateDeg @15 :Float32;
-  steeringTorque @8 :Float32;      # TODO: standardize units
-  steeringTorqueEps @27 :Float32;  # TODO: standardize units
+  steeringTorque @8 :Float32;      # Native CAN units, only needed on cars where it's used for control
+  steeringTorqueEps @27 :Float32;  # Native CAN units, only needed on cars where it's used for control
   steeringPressed @9 :Bool;        # if the user is using the steering wheel
   steeringDisengage @58 :Bool;     # more force than steeringPressed, disengages for applicable brands
   steerFaultTemporary @35 :Bool;   # temporary EPS fault

@@ -30,7 +30,6 @@ def get_can_messages(CP, gearbox_msg):
     ("CAR_SPEED", 10),
     ("VSA_STATUS", 50),
     ("STEER_STATUS", 100),
-    ("STEER_MOTOR_TORQUE", 0),  # TODO: not on every car
     ("SCM_FEEDBACK", 10),  # FIXME: there are different frequencies for different arb IDs
     ("SCM_BUTTONS", 25),  # FIXME: there are different frequencies for different arb IDs
   ]
@@ -191,9 +190,7 @@ class CarState(CarStateBase):
 
     ret.gasPressed = cp.vl["POWERTRAIN_DATA"]["PEDAL_GAS"] > 0
 
-    ret.steeringTorque = cp.vl["STEER_STATUS"]["STEER_TORQUE_SENSOR"]
-    ret.steeringTorqueEps = cp.vl["STEER_MOTOR_TORQUE"]["MOTOR_TORQUE"]
-    ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD.get(self.CP.carFingerprint, 1200)
+    ret.steeringPressed = abs(cp.vl["STEER_STATUS"]["STEER_TORQUE_SENSOR"]) > STEER_THRESHOLD.get(self.CP.carFingerprint, 1200)
 
     if self.CP.carFingerprint in HONDA_BOSCH:
       # The PCM always manages its own cruise control state, but doesn't publish it
