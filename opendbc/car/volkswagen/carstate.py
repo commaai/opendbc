@@ -72,7 +72,6 @@ class CarState(CarStateBase):
         pt_cp.vl["ESP_19"]["ESP_HR_Radgeschw_02"],
       )
 
-      ret.yawRate = pt_cp.vl["ESP_02"]["ESP_Gierrate"] * (1, -1)[int(pt_cp.vl["ESP_02"]["ESP_VZ_Gierrate"])] * CV.DEG_TO_RAD
       hca_status = self.CCP.hca_status_values.get(pt_cp.vl["LH_EPS_03"]["EPS_HCA_Status"])
       if self.CP.flags & VolkswagenFlags.STOCK_HCA_PRESENT:
         ret.carFaultedNonCritical = bool(cam_cp.vl["HCA_01"]["EA_Ruckfreigabe"]) or cam_cp.vl["HCA_01"]["EA_ACC_Sollstatus"] > 0  # EA
@@ -156,7 +155,6 @@ class CarState(CarStateBase):
     ret.steeringRateDeg = pt_cp.vl["Lenkwinkel_1"]["Lenkradwinkel_Geschwindigkeit"] * (1, -1)[int(pt_cp.vl["Lenkwinkel_1"]["Lenkradwinkel_Geschwindigkeit_S"])]
     ret.steeringTorque = pt_cp.vl["Lenkhilfe_3"]["LH3_LM"] * (1, -1)[int(pt_cp.vl["Lenkhilfe_3"]["LH3_LMSign"])]
     ret.steeringPressed = abs(ret.steeringTorque) > self.CCP.STEER_DRIVER_ALLOWANCE
-    ret.yawRate = pt_cp.vl["Bremse_5"]["BR5_Giergeschw"] * (1, -1)[int(pt_cp.vl["Bremse_5"]["BR5_Vorzeichen"])] * CV.DEG_TO_RAD
     hca_status = self.CCP.hca_status_values.get(pt_cp.vl["Lenkhilfe_2"]["LH2_Sta_HCA"])
     ret.steerFaultTemporary, ret.steerFaultPermanent = self.update_hca_state(hca_status)
 
@@ -266,7 +264,6 @@ class CarState(CarStateBase):
       ("ESP_21", 50),       # From J104 ABS/ESP controller
       ("Motor_20", 50),     # From J623 Engine control module
       ("TSK_06", 50),       # From J623 Engine control module
-      ("ESP_02", 50),       # From J104 ABS/ESP controller
       ("GRA_ACC_01", 33),   # From J533 CAN gateway (via LIN from steering wheel controls)
       ("Gateway_73", 20),   # From J533 CAN gateway (aggregated data)
       ("Gateway_72", 10),   # From J533 CAN gateway (aggregated data)
