@@ -1,5 +1,4 @@
 import copy
-import numpy as np
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
 from opendbc.car import Bus, create_button_events, structs
@@ -68,16 +67,14 @@ class CarState(CarStateBase):
     # An Equinox has been seen with an unsupported status (3), so only check if either wheel is in reverse (2)
     left_whl_sign = -1 if pt_cp.vl["EBCMWheelSpdRear"]["RLWheelDir"] == 2 else 1
     right_whl_sign = -1 if pt_cp.vl["EBCMWheelSpdRear"]["RRWheelDir"] == 2 else 1
-    ret.wheelSpeeds = self.get_wheel_speeds(
+    self.parse_wheel_speeds(ret,
       left_whl_sign * pt_cp.vl["EBCMWheelSpdFront"]["FLWheelSpd"],
       right_whl_sign * pt_cp.vl["EBCMWheelSpdFront"]["FRWheelSpd"],
       left_whl_sign * pt_cp.vl["EBCMWheelSpdRear"]["RLWheelSpd"],
       right_whl_sign * pt_cp.vl["EBCMWheelSpdRear"]["RRWheelSpd"],
     )
-    ret.vEgoRaw = float(np.mean([ret.wheelSpeeds.fl, ret.wheelSpeeds.fr, ret.wheelSpeeds.rl, ret.wheelSpeeds.rr]))
-    ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
-    # sample rear wheel speeds, standstill=True if ECM allows engagement with brake
-    ret.standstill = abs(ret.wheelSpeeds.rl) <= STANDSTILL_THRESHOLD and abs(ret.wheelSpeeds.rr) <= STANDSTILL_THRESHOLD
+    # standstill=True if ECM allows engagement with brake
+    ret.standstill = abs(ret.vEgoRaw) <= STANDSTILL_THRESHOLD
 
     if pt_cp.vl["ECMPRDNL2"]["ManualMode"] == 1:
       ret.gearShifter = self.parse_gear_shifter("T")
