@@ -222,9 +222,6 @@ struct CarState {
   doorOpen @24 :Bool;
   seatbeltUnlatched @25 :Bool;
 
-  # clutch (manual transmission only)
-  clutchPressed @28 :Bool;
-
   # blindspot sensors
   leftBlindspot @33 :Bool; # Is there something blocking the left lane change
   rightBlindspot @34 :Bool; # Is there something blocking the right lane change
@@ -296,6 +293,7 @@ struct CarState {
   eventsDEPRECATED @13 :List(OnroadEventDEPRECATED);
   gasDEPRECATED @3 :Float32;        # this is user pedal only
   brakeDEPRECATED @5 :Float32;      # this is user pedal only
+  clutchPressedDEPRECATED @28 :Bool;
 }
 
 # ******* radar state @ 20hz *******

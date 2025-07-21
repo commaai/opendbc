@@ -179,7 +179,6 @@ class CarState(CarStateBase):
       ret.parkingBrake = cp.vl["EPB_STATUS"]["EPB_STATE"] != 0
 
     if self.CP.transmissionType == TransmissionType.manual:
-      ret.clutchPressed = cp.vl["GEARBOX_ALT_2"]["GEAR_MT"] == 0
       if cp.vl["GEARBOX_ALT_2"]["GEAR_MT"] == 14:
         ret.gearShifter = GearShifter.reverse
       else:

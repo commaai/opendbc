@@ -71,7 +71,6 @@ class CarState(CarStateBase):
       gear = self.shifter_values.get(cp.vl["PowertrainData_10"]["TrnRng_D_Rq"])
       ret.gearShifter = self.parse_gear_shifter(gear)
     elif self.CP.transmissionType == TransmissionType.manual:
-      ret.clutchPressed = cp.vl["Engine_Clutch_Data"]["CluPdlPos_Pc_Meas"] > 0
       if bool(cp.vl["BCM_Lamp_Stat_FD1"]["RvrseLghtOn_B_Stat"]):
         ret.gearShifter = GearShifter.reverse
       else:
@@ -150,7 +149,6 @@ class CarState(CarStateBase):
       ]
     elif CP.transmissionType == TransmissionType.manual:
       pt_messages += [
-        ("Engine_Clutch_Data", 33),
         ("BCM_Lamp_Stat_FD1", 1),
       ]
 
