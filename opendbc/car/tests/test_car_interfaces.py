@@ -6,7 +6,6 @@ from hypothesis import Phase, given, settings
 from collections.abc import Callable
 from typing import Any
 
-from panda import DLC_TO_LEN
 from opendbc.car import DT_CTRL, CanData, structs
 from opendbc.car.car_helpers import interfaces
 from opendbc.car.fingerprints import FW_VERSIONS
@@ -21,6 +20,9 @@ ALL_ECUS = {ecu for ecus in FW_VERSIONS.values() for ecu in ecus.keys()}
 ALL_ECUS |= {ecu for config in FW_QUERY_CONFIGS.values() for ecu in config.extra_ecus}
 
 ALL_REQUESTS = {tuple(r.request) for config in FW_QUERY_CONFIGS.values() for r in config.requests}
+
+# From panda/python/__init__.py
+DLC_TO_LEN = [0, 1, 2, 3, 4, 5, 6, 7, 8, 12, 16, 20, 24, 32, 48, 64]
 
 MAX_EXAMPLES = int(os.environ.get('MAX_EXAMPLES', '15'))
 
