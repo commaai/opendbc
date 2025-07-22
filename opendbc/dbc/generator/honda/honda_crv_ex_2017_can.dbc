@@ -18,4 +18,3 @@ CM_ SG_ 479 GAS_BRAKE "Signed value, negative when braking and positive when app
 
 VAL_ 401 GEAR_SHIFTER 32 "L" 16 "S" 8 "D" 4 "N" 2 "R" 1 "P" ;
 VAL_ 401 GEAR 7 "L" 10 "S" 4 "D" 3 "N" 2 "R" 1 "P" ;
-VAL_ 806 CMBS_BUTTON 3 "pressed" 0 "released" ;
