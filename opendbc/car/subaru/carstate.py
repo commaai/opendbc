@@ -43,12 +43,14 @@ class CarState(CarStateBase):
         ret.accFaulted = eyesight_fault
 
     cp_wheels = cp_alt if self.CP.flags & SubaruFlags.GLOBAL_GEN2 else cp
-    self.parse_wheel_speeds(ret,
+    ret.wheelSpeeds = self.get_wheel_speeds(
       cp_wheels.vl["Wheel_Speeds"]["FL"],
       cp_wheels.vl["Wheel_Speeds"]["FR"],
       cp_wheels.vl["Wheel_Speeds"]["RL"],
       cp_wheels.vl["Wheel_Speeds"]["RR"],
     )
+    ret.vEgoRaw = (ret.wheelSpeeds.fl + ret.wheelSpeeds.fr + ret.wheelSpeeds.rl + ret.wheelSpeeds.rr) / 4.
+    ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.standstill = ret.vEgoRaw == 0
 
     # continuous blinker signals for assisted lane change
