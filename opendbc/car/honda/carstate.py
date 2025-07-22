@@ -176,8 +176,8 @@ class CarState(CarStateBase):
       ret.parkingBrake = cp.vl["EPB_STATUS"]["EPB_STATE"] != 0
 
     if self.CP.transmissionType == TransmissionType.manual:
-      # TODO: GEAR_MT doesn't look very legit, pick up the REVERSE light from SCM_FEEDBACK or similar instead
-      ret.gearShifter = GearShifter.drive
+      reverse_light = bool(cp.vl["SCM_FEEDBACK"].get("REVERSE_LIGHT_ON", cp.vl["SCM_BUTTONS"]["REVERSE_LIGHT_ON"]))
+      ret.gearShifter = GearShifter.reverse if reverse_light else GearShifter.drive
     else:
       gear_position = self.shifter_values.get(cp.vl[self.gearbox_msg]["GEAR_SHIFTER"], None)
       ret.gearShifter = self.parse_gear_shifter(gear_position)
