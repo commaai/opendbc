@@ -18,7 +18,6 @@
 #define DEBUG(...)
 //#define DEBUG printf
 
-#define MAX_BAD_COUNTER 5
 #define CAN_INVALID_CNT 5
 
 // Car specific functions
@@ -70,12 +69,9 @@ public:
   std::vector<double> vals;
   std::vector<std::vector<double>> all_vals;
 
-  std::deque<uint64_t> timestamps;
-  uint64_t last_seen_nanos;
-  uint64_t check_threshold;
-
   uint8_t counter;
-  uint8_t counter_fail;
+  uint64_t check_threshold;
+  std::deque<uint64_t> timestamps;
 
   bool ignore_checksum = false;
   bool ignore_counter = false;
@@ -101,7 +97,8 @@ public:
   int can_invalid_cnt = CAN_INVALID_CNT;
 
   CANParser(int abus, const std::string& dbc_name,
-            const std::vector<std::pair<uint32_t, int>> &messages);
+            const std::vector<std::pair<uint32_t, int>> &messages,
+            bool ignore_checksum, bool ignore_counter);
   CANParser(int abus, const std::string& dbc_name, bool ignore_checksum, bool ignore_counter);
   std::set<uint32_t> update(const std::vector<CanData> &can_data);
   MessageState *getMessageState(uint32_t address) { return &message_states.at(address); }

@@ -65,7 +65,7 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
     tmp_vals[i] = tmp * sig.factor + sig.offset;
   }
 
-  // only update values if both checksum and counter are valid
+  // only update values + timestamps  if both checksum and counter are valid
   if (checksum_failed || counter_failed) {
     LOGE_100("0x%X message checks failed, checksum failed %d, counter failed %d", address, checksum_failed, counter_failed);
     return false;
@@ -85,24 +85,26 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
 
 
 bool MessageState::update_counter(int64_t cur_count, int cnt_size) {
-  if (((counter + 1) & ((1 << cnt_size) -1)) != cur_count) {
-    counter_fail = std::min(counter_fail + 1, MAX_BAD_COUNTER);
-    if (counter_fail > 1) {
-      INFO("0x%X COUNTER FAIL #%d -- %d -> %d\n", address, counter_fail, counter, (int)cur_count);
+  bool good = true;
+  if (timestamps.empty()) {
+    int expected = ((counter + 1) & ((1 << cnt_size) - 1));
+    good = ((counter + 1) & ((1 << cnt_size) - 1)) == cur_count;
+    if (!good) {
+      INFO("0x%X COUNTER FAIL -- %d -> %d, expected %d\n", address, counter, (int)cur_count, expected);
     }
-  } else if (counter_fail > 0) {
-    counter_fail--;
+    INFO("0x%X COUNTER INFO -- %d -> %d, expected %d\n", address, counter, (int)cur_count, expected);
   }
   counter = cur_count;
-  return counter_fail < MAX_BAD_COUNTER;
+  return good;
 }
 
 bool MessageState::valid(uint64_t current_nanos, bool bus_timeout) {
-  const bool print = !bus_timeout && ((current_nanos - first_seen_nanos) > 7e9);
+  /*
+    bad counters and checksums don't get added to timestamps, so those
+    cases get caught here too.
+  */
 
-  if (counter_fail >= MAX_BAD_COUNTER) {
-    return false;
-  }
+  const bool print = !bus_timeout && ((current_nanos - first_seen_nanos) > 7e9);
   if (timestamps.empty()) {
     if (print) LOGE_100("0x%X '%s' NOT SEEN", address, name.c_str());
     return false;
@@ -116,7 +118,7 @@ bool MessageState::valid(uint64_t current_nanos, bool bus_timeout) {
 
 // ***** CANParser *****
 
-CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<std::pair<uint32_t, int>> &messages)
+CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<std::pair<uint32_t, int>> &messages, bool ignore_counter, bool ignore_checksum)
   : bus(abus) {
   dbc = dbc_lookup(dbc_name);
   assert(dbc);
@@ -134,6 +136,8 @@ CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<st
     MessageState &state = message_states[address];
     state.address = address;
     // state.check_frequency = op.check_frequency,
+    state.ignore_counter = ignore_counter;
+    state.ignore_checksum = ignore_checksum;
 
     // msg is not valid if a message isn't received for 10 consecutive steps
     if (frequency > 0) {
