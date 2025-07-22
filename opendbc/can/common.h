@@ -96,8 +96,6 @@ public:
   uint64_t bus_timeout_threshold = 0;
   uint64_t can_invalid_cnt = CAN_INVALID_CNT;
 
-  CANParser(int abus, const std::string& dbc_name,
-            const std::vector<std::pair<uint32_t, int>> &messages);
   CANParser(int abus, const std::string& dbc_name, bool ignore_checksum, bool ignore_counter);
   std::set<uint32_t> update(const std::vector<CanData> &can_data);
   MessageState *getMessageState(uint32_t address) { return &message_states.at(address); }

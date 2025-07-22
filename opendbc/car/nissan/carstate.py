@@ -138,7 +138,7 @@ class CarState(CarStateBase):
   @staticmethod
   def get_can_parsers(CP):
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 1 if CP.carFingerprint == CAR.NISSAN_ALTIMA else 0),
-      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 0 if CP.carFingerprint == CAR.NISSAN_ALTIMA else 1),
-      Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 2),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], 1 if CP.carFingerprint == CAR.NISSAN_ALTIMA else 0),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], 0 if CP.carFingerprint == CAR.NISSAN_ALTIMA else 1),
+      Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.pt], 2),
     }

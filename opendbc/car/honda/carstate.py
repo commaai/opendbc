@@ -265,10 +265,10 @@ class CarState(CarStateBase):
 
   def get_can_parsers(self, CP):
     parsers = {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CanBus(CP).pt),
-      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CanBus(CP).camera),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], CanBus(CP).pt),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], CanBus(CP).camera),
     }
     if CP.enableBsm:
-      parsers[Bus.body] = CANParser(DBC[CP.carFingerprint][Bus.body], [], CanBus(CP).radar)
+      parsers[Bus.body] = CANParser(DBC[CP.carFingerprint][Bus.body], CanBus(CP).radar)
 
     return parsers

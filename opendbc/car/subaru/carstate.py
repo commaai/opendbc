@@ -169,7 +169,7 @@ class CarState(CarStateBase):
   @staticmethod
   def get_can_parsers(CP):
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CanBus.main),
-      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CanBus.camera),
-      Bus.alt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CanBus.alt)
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], CanBus.main),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], CanBus.camera),
+      Bus.alt: CANParser(DBC[CP.carFingerprint][Bus.pt], CanBus.alt)
     }

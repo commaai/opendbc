@@ -324,13 +324,13 @@ class TestCanParserPacker:
     existing_messages = ("STEERING_CONTROL", 228, "CAN_FD_MESSAGE", 245)
 
     for msg in existing_messages:
-      CANParser(TEST_DBC, [(msg, 0)])
+      CANParser(TEST_DBC)
       with pytest.raises(RuntimeError):
         new_msg = msg + "1" if isinstance(msg, str) else msg + 1
-        CANParser(TEST_DBC, [(new_msg, 0)])
+        CANParser(TEST_DBC)
 
   def test_track_all_signals(self):
-    parser = CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 0)])
+    parser = CANParser("toyota_nodsu_pt_generated")
     assert parser.vl["ACC_CONTROL"] == {
       "ACCEL_CMD": 0,
       "ALLOW_LONG_PRESS": 0,
@@ -350,13 +350,13 @@ class TestCanParserPacker:
     }
 
   def test_disallow_duplicate_messages(self):
-    CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 5)])
+    CANParser("toyota_nodsu_pt_generated")
 
     with pytest.raises(RuntimeError):
-      CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 5), ("ACC_CONTROL", 10)])
+      CANParser("toyota_nodsu_pt_generated")
 
     with pytest.raises(RuntimeError):
-      CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 10), ("ACC_CONTROL", 10)])
+      CANParser("toyota_nodsu_pt_generated")
 
   def test_allow_undefined_msgs(self):
     # TODO: we should throw an exception for these, but we need good

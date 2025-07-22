@@ -18,4 +18,4 @@ class TestDBCParser:
 
     for dbc in ALL_DBCS:
       with subtests.test(dbc=dbc):
-        CANParser(dbc, [], 0)
+        CANParser(dbc, 0)

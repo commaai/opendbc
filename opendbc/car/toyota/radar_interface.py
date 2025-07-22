@@ -7,7 +7,7 @@ from opendbc.car.interfaces import RadarInterfaceBase
 
 
 def _create_radar_can_parser(car_fingerprint):
-  return CANParser(DBC[car_fingerprint][Bus.radar], [], 1)
+  return CANParser(DBC[car_fingerprint][Bus.radar], 1)
 
 class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):

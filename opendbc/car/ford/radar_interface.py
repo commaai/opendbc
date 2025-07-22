@@ -70,11 +70,11 @@ def cluster_points(pts_l: list[list[float]], pts2_l: list[list[float]], max_dist
 
 
 def _create_delphi_esr_radar_can_parser(CP) -> CANParser:
-  return CANParser(RADAR.DELPHI_ESR, [], CanBus(CP).radar)
+  return CANParser(RADAR.DELPHI_ESR, CanBus(CP).radar)
 
 
 def _create_delphi_mrr_radar_can_parser(CP) -> CANParser:
-  return CANParser(RADAR.DELPHI_MRR, [], CanBus(CP).radar)
+  return CANParser(RADAR.DELPHI_MRR, CanBus(CP).radar)
 
 
 class RadarInterface(RadarInterfaceBase):

@@ -90,44 +90,6 @@ bool MessageState::update_counter_generic(int64_t v, int cnt_size) {
 }
 
 
-CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<std::pair<uint32_t, int>> &messages)
-  : bus(abus) {
-  dbc = dbc_lookup(dbc_name);
-  assert(dbc);
-
-  bus_timeout_threshold = std::numeric_limits<uint64_t>::max();
-
-  for (const auto& [address, frequency] : messages) {
-    // disallow duplicate message checks
-    if (message_states.find(address) != message_states.end()) {
-      std::stringstream is;
-      is << "Duplicate Message Check: " << address;
-      throw std::runtime_error(is.str());
-    }
-
-    MessageState &state = message_states[address];
-    state.address = address;
-    // state.check_frequency = op.check_frequency,
-
-    // msg is not valid if a message isn't received for 10 consecutive steps
-    if (frequency > 0) {
-      state.check_threshold = (1000000000ULL / frequency) * 10;
-
-      // bus timeout threshold should be 10x the fastest msg
-      bus_timeout_threshold = std::min(bus_timeout_threshold, state.check_threshold);
-    }
-
-    const Msg *msg = dbc->addr_to_msg.at(address);
-    state.name = msg->name;
-    state.size = msg->size;
-    assert(state.size <= 64);  // max signal size is 64 bytes
-
-    // track all signals for this message
-    state.parse_sigs = msg->sigs;
-    state.vals.resize(msg->sigs.size());
-    state.all_vals.resize(msg->sigs.size());
-  }
-}
 
 CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum, bool ignore_counter)
   : bus(abus) {
@@ -135,6 +97,9 @@ CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum
 
   dbc = dbc_lookup(dbc_name);
   assert(dbc);
+
+  // Set a default bus timeout threshold (100ms)
+  bus_timeout_threshold = 100000000ULL; // 100ms in nanoseconds
 
   for (const auto& msg : dbc->msgs) {
     MessageState state = {

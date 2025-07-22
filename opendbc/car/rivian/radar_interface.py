@@ -9,7 +9,7 @@ RADAR_START_ADDR = 0x500
 RADAR_MSG_COUNT = 32
 
 def get_radar_can_parser(CP):
-  return CANParser(DBC[CP.carFingerprint][Bus.radar], [], 1)
+  return CANParser(DBC[CP.carFingerprint][Bus.radar], 1)
 
 
 class RadarInterface(RadarInterfaceBase):

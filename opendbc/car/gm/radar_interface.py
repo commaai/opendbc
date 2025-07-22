@@ -17,7 +17,7 @@ LAST_RADAR_MSG = RADAR_HEADER_MSG + NUM_SLOTS
 
 
 def create_radar_can_parser(car_fingerprint):
-  return CANParser(DBC[car_fingerprint][Bus.radar], [], CanBus.OBSTACLE)
+  return CANParser(DBC[car_fingerprint][Bus.radar], CanBus.OBSTACLE)
 
 
 class RadarInterface(RadarInterfaceBase):

@@ -13,7 +13,7 @@ def _create_radar_can_parser(car_fingerprint):
   if Bus.radar not in DBC[car_fingerprint]:
     return None
 
-  return CANParser(DBC[car_fingerprint][Bus.radar], [], 1)
+  return CANParser(DBC[car_fingerprint][Bus.radar], 1)
 
 def _address_to_track(address):
   if address in RADAR_MSGS_C:

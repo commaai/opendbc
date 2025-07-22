@@ -26,7 +26,11 @@ cdef class CANParser:
     string dbc_name
     uint32_t bus
 
-  def __init__(self, dbc_name, messages, bus=0):
+  def __init__(self, dbc_name, bus=0):
+    # Handle backward compatibility - if bus looks like a message list, it's probably the old format
+    if isinstance(bus, (list, tuple)):
+      raise RuntimeError("CANParser no longer accepts explicit message lists. Remove the messages argument.")
+    
     self.dbc_name = dbc_name
     self.bus = bus
     self.dbc = dbc_lookup(dbc_name)
@@ -40,57 +44,30 @@ cdef class CANParser:
 
     cdef string cpp_dbc_name
     cdef int cpp_bus = bus
-    cdef vector[pair[uint32_t, int]] message_v
     
     if isinstance(dbc_name, str):
       cpp_dbc_name = (<str>dbc_name).encode("utf-8")
     else:
       cpp_dbc_name = dbc_name  # Assume bytes
 
-    # If empty message list, use the constructor that adds all messages
-    if len(messages) == 0:
-      with nogil:
-        self.can = new cpp_CANParser(cpp_bus, cpp_dbc_name, False, False)
-      
-      # Initialize Python structures for all messages
-      for i in range(self.dbc.msgs.size()):
-        msg = self.dbc.msgs[i]
-        address = msg.address
-        name = msg.name.decode("utf8")
-        signal_names = [sig.name.decode("utf-8") for sig in msg.sigs]
+    # Always use the constructor that adds all messages
+    with nogil:
+      self.can = new cpp_CANParser(cpp_bus, cpp_dbc_name, False, False)
+    
+    # Initialize Python structures for all messages
+    for i in range(self.dbc.msgs.size()):
+      msg = self.dbc.msgs[i]
+      address = msg.address
+      name = msg.name.decode("utf8")
+      signal_names = [sig.name.decode("utf-8") for sig in msg.sigs]
 
-        self.addresses.add(address)
-        self.vl[address] = {name: 0.0 for name in signal_names}
-        self.vl[name] = self.vl[address]
-        self.vl_all[address] = defaultdict(list)
-        self.vl_all[name] = self.vl_all[address]
-        self.ts_nanos[address] = {name: 0.0 for name in signal_names}
-        self.ts_nanos[name] = self.ts_nanos[address]
-    else:
-      # Convert message names into addresses and check existence in DBC
-      for i in range(len(messages)):
-        c = messages[i]
-        try:
-          m = self.dbc.addr_to_msg.at(c[0]) if isinstance(c[0], numbers.Number) else self.dbc.name_to_msg.at(c[0])
-        except IndexError:
-          raise RuntimeError(f"could not find message {repr(c[0])} in DBC {self.dbc_name}")
-
-        address = m.address
-        message_v.push_back((address, c[1]))
-        self.addresses.add(address)
-
-        name = m.name.decode("utf8")
-        signal_names = [sig.name.decode("utf-8") for sig in (<Msg*>m).sigs]
-
-        self.vl[address] = {name: 0.0 for name in signal_names}
-        self.vl[name] = self.vl[address]
-        self.vl_all[address] = defaultdict(list)
-        self.vl_all[name] = self.vl_all[address]
-        self.ts_nanos[address] = {name: 0.0 for name in signal_names}
-        self.ts_nanos[name] = self.ts_nanos[address]
-
-      with nogil:
-        self.can = new cpp_CANParser(cpp_bus, cpp_dbc_name, message_v)
+      self.addresses.add(address)
+      self.vl[address] = {name: 0.0 for name in signal_names}
+      self.vl[name] = self.vl[address]
+      self.vl_all[address] = defaultdict(list)
+      self.vl_all[name] = self.vl_all[address]
+      self.ts_nanos[address] = {name: 0.0 for name in signal_names}
+      self.ts_nanos[name] = self.ts_nanos[address]
 
   def __dealloc__(self):
     if self.can:
