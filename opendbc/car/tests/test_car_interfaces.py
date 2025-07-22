@@ -29,8 +29,8 @@ MAX_EXAMPLES = int(os.environ.get('MAX_EXAMPLES', '15'))
 
 def get_fuzzy_car_interface_args(draw: DrawType) -> dict:
   # Fuzzy CAN fingerprints and FW versions to test more states of the CarInterface
-  fingerprint_strategy = st.fixed_dictionaries({key: st.dictionaries(st.integers(min_value=0, max_value=0x800),
-                                                                     st.sampled_from(DLC_TO_LEN)) for key in range(4)})
+  fingerprint_strategy = st.fixed_dictionaries({0: st.dictionaries(st.integers(min_value=0, max_value=0x800),
+                                                                   st.sampled_from(DLC_TO_LEN))})
 
   # only pick from possible ecus to reduce search space
   car_fw_strategy = st.lists(st.builds(
@@ -46,8 +46,8 @@ def get_fuzzy_car_interface_args(draw: DrawType) -> dict:
   })
 
   params: dict = draw(params_strategy)
-  # reduce search space by duplicating CAN fingerprints across multi-panda setup (bus 0 and 4 is the same)
-  params['fingerprints'] |= {key + 4: params['fingerprints'][key] for key in range(4)}
+  # reduce search space by duplicating CAN fingerprints across all buses
+  params['fingerprints'] |= {key + 1: params['fingerprints'][0] for key in range(6)}
   return params
 
 
