@@ -112,7 +112,6 @@ class CarState(CarStateBase):
 
     ret.steeringAngleDeg = cp.vl["SAS11"]["SAS_Angle"]
     ret.steeringRateDeg = cp.vl["SAS11"]["SAS_Speed"]
-    ret.yawRate = cp.vl["ESP12"]["YAW_RATE"]
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_lamp(
       50, cp.vl["CGW1"]["CF_Gway_TurnSigLh"], cp.vl["CGW1"]["CF_Gway_TurnSigRh"])
     ret.steeringTorque = cp.vl["MDPS12"]["CR_Mdps_StrColTq"]
@@ -368,7 +367,6 @@ class CarState(CarStateBase):
       ("TCS15", 10),
       ("CLU11", 50),
       ("CLU15", 5),
-      ("ESP12", 100),
       ("CGW1", 10),
       ("CGW2", 5),
       ("CGW4", 5),
