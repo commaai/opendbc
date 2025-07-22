@@ -8,7 +8,7 @@ from opendbc.can.packer import CANPacker
 @pytest.mark.skip("TODO: varies too much between machines")
 class TestParser:
   def _benchmark(self, checks, thresholds, n):
-    parser = CANParser('toyota_new_mc_pt_generated', checks, 0)
+    parser = CANParser('toyota_new_mc_pt_generated', 0)
     packer = CANPacker('toyota_new_mc_pt_generated')
 
     t1 = time.process_time_ns()

@@ -21,9 +21,8 @@ class TestCanParserPacker:
         assert dat[0] == i
 
   def test_packer_counter(self):
-    msgs = [("CAN_FD_MESSAGE", 0), ]
     packer = CANPacker(TEST_DBC)
-    parser = CANParser(TEST_DBC, msgs, 0)
+    parser = CANParser(TEST_DBC, 0)
 
     # packer should increment the counter
     for i in range(1000):
@@ -49,9 +48,8 @@ class TestCanParserPacker:
       assert parser.vl["CAN_FD_MESSAGE"]["COUNTER"] == ((cnt + i) % 256)
 
   def test_parser_can_valid(self):
-    msgs = [("CAN_FD_MESSAGE", 10), ]
     packer = CANPacker(TEST_DBC)
-    parser = CANParser(TEST_DBC, msgs, 0)
+    parser = CANParser(TEST_DBC, 0)
 
     # shouldn't be valid initially
     assert not parser.can_valid
@@ -69,8 +67,7 @@ class TestCanParserPacker:
       assert parser.can_valid
 
   def test_parser_updated_list(self):
-    msgs = [("CAN_FD_MESSAGE", 10), ]
-    parser = CANParser(TEST_DBC, msgs, 0)
+    parser = CANParser(TEST_DBC, 0)
     packer = CANPacker(TEST_DBC)
 
     msg = packer.make_can_msg("CAN_FD_MESSAGE", 0, {})
@@ -85,11 +82,8 @@ class TestCanParserPacker:
     Tests number of allowed bad counters + ensures CAN stays invalid
     while receiving invalid messages + that we can recover
     """
-    msgs = [
-      ("STEERING_CONTROL", 0),
-    ]
     packer = CANPacker("honda_civic_touring_2016_can_generated")
-    parser = CANParser("honda_civic_touring_2016_can_generated", msgs, 0)
+    parser = CANParser("honda_civic_touring_2016_can_generated", 0)
 
     msg = packer.make_can_msg("STEERING_CONTROL", 0, {"COUNTER": 0})
 
@@ -109,11 +103,8 @@ class TestCanParserPacker:
     Previously, the signal update loop would only break once it got to one of these invalid signals,
     after already updating most/all of the signals.
     """
-    msgs = [
-      ("STEERING_CONTROL", 0),
-    ]
     packer = CANPacker("honda_civic_touring_2016_can_generated")
-    parser = CANParser("honda_civic_touring_2016_can_generated", msgs, 0)
+    parser = CANParser("honda_civic_touring_2016_can_generated", 0)
 
     def rx_steering_msg(values, bad_checksum=False):
       msg = packer.make_can_msg("STEERING_CONTROL", 0, values)
@@ -146,7 +137,7 @@ class TestCanParserPacker:
       ("STEERING_CONTROL", 0),
     ]
     packer = CANPacker(TEST_DBC)
-    parser = CANParser(TEST_DBC, msgs, 0)
+    parser = CANParser(TEST_DBC, 0)
 
     for steer in range(-256, 255):
       for active in (1, 0):
@@ -180,7 +171,7 @@ class TestCanParserPacker:
     """Test that both scale and offset are correctly preserved"""
     dbc_file = "honda_civic_touring_2016_can_generated"
     msgs = [("VSA_STATUS", 50)]
-    parser = CANParser(dbc_file, msgs, 0)
+    parser = CANParser(dbc_file, 0)
     packer = CANPacker(dbc_file)
 
     for brake in range(100):
@@ -197,7 +188,7 @@ class TestCanParserPacker:
 
     msgs = [("ES_LKAS", 50)]
 
-    parser = CANParser(dbc_file, msgs, 0)
+    parser = CANParser(dbc_file, 0)
     packer = CANPacker(dbc_file)
 
     idx = 0
@@ -223,9 +214,8 @@ class TestCanParserPacker:
     dbc_file = "honda_civic_touring_2016_can_generated"
 
     freq = 100
-    msgs = [("VSA_STATUS", freq), ("STEER_MOTOR_TORQUE", freq/2)]
 
-    parser = CANParser(dbc_file, msgs, 0)
+    parser = CANParser(dbc_file, 0)
     packer = CANPacker(dbc_file)
 
     i = 0
@@ -258,8 +248,7 @@ class TestCanParserPacker:
   def test_updated(self):
     """Test updated value dict"""
     dbc_file = "honda_civic_touring_2016_can_generated"
-    msgs = [("VSA_STATUS", 50)]
-    parser = CANParser(dbc_file, msgs, 0)
+    parser = CANParser(dbc_file, 0)
     packer = CANPacker(dbc_file)
 
     # Make sure nothing is updated
@@ -288,12 +277,8 @@ class TestCanParserPacker:
     """Test message timestamp dict"""
     dbc_file = "honda_civic_touring_2016_can_generated"
 
-    msgs = [
-      ("VSA_STATUS", 50),
-      ("POWERTRAIN_DATA", 100),
-    ]
 
-    parser = CANParser(dbc_file, msgs, 0)
+    parser = CANParser(dbc_file, 0)
     packer = CANPacker(dbc_file)
 
     # Check the default timestamp is zero
@@ -324,10 +309,11 @@ class TestCanParserPacker:
     existing_messages = ("STEERING_CONTROL", 228, "CAN_FD_MESSAGE", 245)
 
     for msg in existing_messages:
-      CANParser(TEST_DBC)
-      with pytest.raises(RuntimeError):
+      p = CANParser(TEST_DBC)
+      p.vl[msg]  # should work fine
+      with pytest.raises(KeyError):
         new_msg = msg + "1" if isinstance(msg, str) else msg + 1
-        CANParser(TEST_DBC)
+        p.vl[new_msg]
 
   def test_track_all_signals(self):
     parser = CANParser("toyota_nodsu_pt_generated")
@@ -348,15 +334,6 @@ class TestCanParserPacker:
       "ACCEL_CMD_ALT": 0,
       "CHECKSUM": 0,
     }
-
-  def test_disallow_duplicate_messages(self):
-    CANParser("toyota_nodsu_pt_generated")
-
-    with pytest.raises(RuntimeError):
-      CANParser("toyota_nodsu_pt_generated")
-
-    with pytest.raises(RuntimeError):
-      CANParser("toyota_nodsu_pt_generated")
 
   def test_allow_undefined_msgs(self):
     # TODO: we should throw an exception for these, but we need good

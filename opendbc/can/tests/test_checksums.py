@@ -11,7 +11,7 @@ class TestCanChecksums:
     Verify that opendbc calculates payload CRCs/checksums matching those received in known-good sample messages
     Depends on all non-zero bits in the sample message having a corresponding DBC signal, add UNKNOWN signals if needed
     """
-    parser = CANParser(dbc_file, [(msg_name, 0)], 0)
+    parser = CANParser(dbc_file, 0)
     packer = CANPacker(dbc_file)
 
     for data in test_messages:
@@ -65,8 +65,7 @@ class TestCanChecksums:
     """Test checksums for Honda standard and extended CAN ids"""
     # TODO: refactor to use self.verify_checksum()
     dbc_file = "honda_accord_2018_can_generated"
-    msgs = [("LKAS_HUD", 0), ("LKAS_HUD_A", 0)]
-    parser = CANParser(dbc_file, msgs, 0)
+    parser = CANParser(dbc_file, 0)
     packer = CANPacker(dbc_file)
 
     values = {
