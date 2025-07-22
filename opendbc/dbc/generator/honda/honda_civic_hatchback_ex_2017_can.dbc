@@ -4,18 +4,3 @@ CM_ "IMPORT _bosch_adas_2018.dbc";
 CM_ "IMPORT _bosch_standstill.dbc";
 CM_ "IMPORT _steering_sensors_a.dbc";
 CM_ "IMPORT _gearbox_common.dbc";
-
-BO_ 506 LEGACY_BRAKE_COMMAND: 8 ADAS
- SG_ CHIME : 40|8@1+ (1,0) [0|255] "" XXX
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
- SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
-
-BO_ 892 CRUISE_PARAMS: 8 PCM
- SG_ CRUISE_SPEED_OFFSET : 31|8@0- (0.1,0) [-128|127] "kph" EON
- SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
- SG_ COUNTER : 61|2@0+ (1,0) [0|15] "" EON
-
-VAL_ 545 ECON_ON_2 0 "off" 3 "on" ;
-VAL_ 662 CRUISE_BUTTONS 7 "tbd" 6 "tbd" 5 "tbd" 4 "accel_res" 3 "decel_set" 2 "cancel" 1 "main" 0 "none" ;
-VAL_ 662 CRUISE_SETTING 3 "distance_adj" 2 "tbd" 1 "lkas_button" 0 "none" ;
-VAL_ 806 CMBS_BUTTON 3 "pressed" 0 "released" ;
