@@ -3,8 +3,9 @@ import random
 import unittest
 import numpy as np
 
-from opendbc.car.tesla.values import TeslaSafetyFlags
-from opendbc.car.tesla.carcontroller import get_max_angle_delta, get_max_angle, get_safety_CP
+from opendbc.car.tesla.values import TeslaSafetyFlags, CarControllerParams
+from opendbc.car import get_max_angle_delta, get_max_angle
+from opendbc.car.tesla.carcontroller import get_safety_CP
 from opendbc.car.structs import CarParams
 from opendbc.car.vehicle_model import VehicleModel
 from opendbc.can.can_define import CANDefine
@@ -33,7 +34,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
   GAS_PRESSED_THRESHOLD = 3
 
   # Angle control limits
-  STEER_ANGLE_MAX = 360  # deg
+  STEER_ANGLE_MAX = CarControllerParams.ANGLE_LIMITS.STEER_ANGLE_MAX  # deg
   DEG_TO_CAN = 10
 
   # Tesla uses get_max_angle_delta and get_max_angle for real lateral accel and jerk limits
@@ -327,7 +328,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
         # Stay within limits
         # Up
-        max_angle_delta = round_angle(get_max_angle_delta(speed, self.VM), angle_unit_offset) * sign
+        max_angle_delta = round_angle(get_max_angle_delta(speed, self.LATERAL_FREQUENCY, self.VM), angle_unit_offset) * sign
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
 
         # Don't change
@@ -338,7 +339,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
         # Inject too high rates
         # Up
-        max_angle_delta = round_angle(get_max_angle_delta(speed, self.VM), angle_unit_offset + 1) * sign
+        max_angle_delta = round_angle(get_max_angle_delta(speed, self.LATERAL_FREQUENCY, self.VM), angle_unit_offset + 1) * sign
         self.assertFalse(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
 
         # Don't change
