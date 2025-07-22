@@ -52,8 +52,7 @@ class TestCarInterfaces:
   #  many generated examples to overrun when max_examples > ~20, don't use it
   @pytest.mark.parametrize("car_name", sorted(PLATFORMS))
   @settings(max_examples=MAX_EXAMPLES, deadline=None,
-            phases=(Phase.reuse, Phase.generate, Phase.shrink),)
-  # @seed(0)
+            phases=(Phase.reuse, Phase.generate, Phase.shrink))
   @given(data=st.data())
   def test_car_interfaces(self, car_name, data):
     CarInterface = interfaces[car_name]
