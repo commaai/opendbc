@@ -2,7 +2,7 @@
 import os
 from math import fabs, exp
 
-from opendbc.car import get_safety_config, get_friction, structs
+from opendbc.car import get_safety_config, structs
 from opendbc.car.common.basedir import BASEDIR
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.gm.carcontroller import CarController

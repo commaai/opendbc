@@ -9,7 +9,7 @@ from typing import Any, NamedTuple
 from collections.abc import Callable
 from functools import cache
 
-from opendbc.car import DT_CTRL, apply_hysteresis, gen_empty_fingerprint, scale_rot_inertia, scale_tire_stiffness, get_friction, STD_CARGO_KG
+from opendbc.car import DT_CTRL, apply_hysteresis, gen_empty_fingerprint, scale_rot_inertia, scale_tire_stiffness, STD_CARGO_KG
 from opendbc.car import structs
 from opendbc.car.can_definitions import CanData, CanRecvCallable, CanSendCallable
 from opendbc.car.common.basedir import BASEDIR
@@ -54,7 +54,7 @@ class LatControlInputs(NamedTuple):
   aego: float
 
 
-TorqueFromLateralAccelCallbackType = Callable[[LatControlInputs, structs.CarParams.LateralTorqueTuning, float, float, bool, bool], float]
+TorqueFromLateralAccelCallbackType = Callable[[LatControlInputs, structs.CarParams.LateralTorqueTuning, bool], float]
 
 
 @cache
