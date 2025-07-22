@@ -65,7 +65,7 @@ public:
   uint32_t address;
   unsigned int size;
 
-  std::vector<Signal> parse_sigs;
+  std::vector<Signal> signals;
   std::vector<double> vals;
   std::vector<std::vector<double>> all_vals;
 
@@ -79,7 +79,7 @@ public:
   bool ignore_counter = false;
 
   bool parse(uint64_t nanos, const std::vector<uint8_t> &dat);
-  bool update_counter_generic(int64_t v, int cnt_size);
+  bool update_counter(int64_t v, int cnt_size);
 };
 
 class CANParser {

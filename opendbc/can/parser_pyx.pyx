@@ -113,8 +113,8 @@ cdef class CANParser:
 
       with nogil:
         state = self.can.getMessageState(addr)
-      for i in range(state.parse_sigs.size()):
-        name = <unicode>state.parse_sigs[i].name
+      for i in range(state.signals.size()):
+        name = <unicode>state.signals[i].name
         vl[name] = state.vals[i]
         vl_all[name] = state.all_vals[i]
         ts_nanos[name] = state.last_seen_nanos
