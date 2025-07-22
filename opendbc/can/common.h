@@ -1,5 +1,6 @@
 #pragma once
 
+#include <deque>
 #include <cstring>
 #include <map>
 #include <set>
@@ -69,6 +70,7 @@ public:
   std::vector<double> vals;
   std::vector<std::vector<double>> all_vals;
 
+  std::deque<uint64_t> timestamps;
   uint64_t last_seen_nanos;
   uint64_t check_threshold;
 

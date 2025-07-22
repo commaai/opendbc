@@ -71,7 +71,10 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
     vals[i] = tmp_vals[i];
     all_vals[i].push_back(vals[i]);
   }
-  last_seen_nanos = nanos;
+  timestamps.push_back(nanos);
+  while (timestamps.size() > 500) {  // assuming a max frequency of 100Hz
+    timestamps.pop_front();
+  }
 
   return true;
 }
@@ -91,6 +94,8 @@ bool MessageState::update_counter(int64_t cur_count, int cnt_size) {
 }
 
 // ***** CANParser *****
+
+
 
 CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<std::pair<uint32_t, int>> &messages)
   : bus(abus) {
@@ -227,8 +232,8 @@ void CANParser::UpdateValid(uint64_t nanos) {
       _counters_valid = false;
     }
 
-    const bool missing = state.last_seen_nanos == 0;
-    const bool timed_out = (nanos - state.last_seen_nanos) > state.check_threshold;
+    const bool missing = state.timestamps.empty();
+    const bool timed_out = !missing && ((nanos - state.timestamps.back()) > state.check_threshold);
     if (state.check_threshold > 0 && (missing || timed_out)) {
       if (show_missing && !bus_timeout) {
         if (missing) {
