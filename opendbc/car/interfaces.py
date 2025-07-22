@@ -228,10 +228,10 @@ class CarInterfaceBase(ABC):
     params = get_torque_params()[candidate]
 
     tune.init('torque')
-    tune.torque.kp = 1.0
     tune.torque.kf = 1.0
-    tune.torque.ki = 0.3
-    tune.torque.friction = params['FRICTION']
+    tune.torque.kp = 1.0 / params['LAT_ACCEL_FACTOR']
+    tune.torque.ki = 0.3 / params['LAT_ACCEL_FACTOR']
+    tune.torque.friction = params['FRICTION'] / params['LAT_ACCEL_FACTOR']
     tune.torque.latAccelFactor = params['LAT_ACCEL_FACTOR']
     tune.torque.latAccelOffset = 0.0
     tune.torque.steeringAngleDeadzoneDeg = steering_angle_deadzone_deg
