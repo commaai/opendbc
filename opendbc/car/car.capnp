@@ -152,14 +152,14 @@ struct OnroadEventDEPRECATED @0x9b1657f34caf3ad3 {
   }
 }
 
-# ******* main car state @ 100hz *******
-# all speeds in m/s
-
 struct CarState {
   # CAN health
   canValid @26 :Bool;       # invalid counter/checksums
   canTimeout @40 :Bool;     # CAN bus dropped out
   canErrorCounter @48 :UInt32;
+
+  # process meta
+  cumLagMs @50 :Float32;
 
   # car speed
   vEgo @1 :Float32;            # best estimate of speed
@@ -187,14 +187,15 @@ struct CarState {
 
   # steering wheel
   steeringAngleDeg @7 :Float32;
-  steeringAngleOffsetDeg @37 :Float32; # Offset betweens sensors in case there multiple
-  steeringRateDeg @15 :Float32;
+  steeringAngleOffsetDeg @37 :Float32; # Offset between sensors in case there multiple
+  steeringRateDeg @15 :Float32;    # optional
   steeringTorque @8 :Float32;      # Native CAN units, only needed on cars where it's used for control
   steeringTorqueEps @27 :Float32;  # Native CAN units, only needed on cars where it's used for control
-  steeringPressed @9 :Bool;        # if the user is using the steering wheel
+  steeringPressed @9 :Bool;        # is the user overring the steering wheel?
   steeringDisengage @58 :Bool;     # more force than steeringPressed, disengages for applicable brands
-  steerFaultTemporary @35 :Bool;   # temporary EPS fault
-  steerFaultPermanent @36 :Bool;   # permanent EPS fault
+  steerFaultTemporary @35 :Bool;
+  steerFaultPermanent @36 :Bool;
+
   invalidLkasSetting @55 :Bool;    # stock LKAS is incorrectly configured (i.e. on or off)
   stockAeb @30 :Bool;
   stockLkas @59 :Bool;
@@ -221,18 +222,15 @@ struct CarState {
   genericToggle @23 :Bool;
 
   # lock info
-  doorOpen @24 :Bool;
-  seatbeltUnlatched @25 :Bool;
+  doorOpen @24 :Bool;           # ideally includes all doors
+  seatbeltUnlatched @25 :Bool;  # driver seatbelt
 
   # blindspot sensors
-  leftBlindspot @33 :Bool; # Is there something blocking the left lane change
+  leftBlindspot @33 :Bool;  # Is there something blocking the left lane change
   rightBlindspot @34 :Bool; # Is there something blocking the right lane change
 
-  fuelGauge @41 :Float32; # battery or fuel tank level from 0.0 to 1.0
+  fuelGauge @41 :Float32; # battery or fuel tank level from [0.0, 1.0]
   charging @43 :Bool;
-
-  # process meta
-  cumLagMs @50 :Float32;
 
   struct WheelSpeeds {
     # optional wheel speeds
