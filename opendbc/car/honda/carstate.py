@@ -264,35 +264,11 @@ class CarState(CarStateBase):
     return ret
 
   def get_can_parsers(self, CP):
-    pt_messages = get_can_messages(CP, self.gearbox_msg)
-
-    cam_messages = [
-      ("STEERING_CONTROL", 100),
-    ]
-
-    if CP.carFingerprint in HONDA_BOSCH_RADARLESS:
-      cam_messages += [
-        ("ACC_HUD", 10),
-        ("LKAS_HUD", 10),
-      ]
-
-    elif CP.carFingerprint not in HONDA_BOSCH:
-      cam_messages += [
-        ("ACC_HUD", 10),
-        ("LKAS_HUD", 10),
-        ("BRAKE_COMMAND", 50),
-      ]
-
-    body_messages = [
-      ("BSM_STATUS_LEFT", 3),
-      ("BSM_STATUS_RIGHT", 3),
-    ]
-
     parsers = {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).pt),
-      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).camera),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CanBus(CP).pt),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CanBus(CP).camera),
     }
     if CP.enableBsm:
-      parsers[Bus.body] = CANParser(DBC[CP.carFingerprint][Bus.body], body_messages, CanBus(CP).radar)
+      parsers[Bus.body] = CANParser(DBC[CP.carFingerprint][Bus.body], [], CanBus(CP).radar)
 
     return parsers
