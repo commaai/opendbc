@@ -27,9 +27,7 @@ MAX_EXAMPLES = int(os.environ.get('MAX_EXAMPLES', '15'))
 def get_fuzzy_car_interface_args(draw: DrawType) -> dict:
   # Fuzzy CAN fingerprints and FW versions to test more states of the CarInterface
   fingerprint_strategy = st.fixed_dictionaries({key: st.dictionaries(st.integers(min_value=0, max_value=0x800),
-                                                                     st.integers(min_value=0, max_value=64)) for key in range(4)})#.map(lambda fp: {**fp, **{k + 4: fp[k] for k in range(4)}})
-  # map 0, 1, 2, 3 to 4, 5, 6, 7:
-  # fingerprint_strategy |= {key + 4: fingerprint_strategy[key] for key in range(4)}
+                                                                     st.integers(min_value=0, max_value=64)) for key in range(4)})
 
   # only pick from possible ecus to reduce search space
   car_fw_strategy = st.lists(st.sampled_from(sorted(ALL_ECUS)))
