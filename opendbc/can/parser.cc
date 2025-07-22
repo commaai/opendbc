@@ -98,24 +98,19 @@ bool MessageState::update_counter(int64_t cur_count, int cnt_size) {
 }
 
 bool MessageState::valid(uint64_t current_nanos, bool bus_timeout) {
+  const bool print = !bus_timeout && ((current_nanos - first_seen_nanos) > 7e9);
+
   if (counter_fail >= MAX_BAD_COUNTER) {
     return false;
   }
-
-  const bool missing = timestamps.empty();
-  const bool timed_out = !missing && ((current_nanos - timestamps.back()) > check_threshold);
-  if (missing || timed_out) {
-    const bool show_missing = (current_nanos - first_seen_nanos) > 7e9;
-    if (show_missing && !bus_timeout) {
-      if (missing) {
-        LOGE_100("0x%X '%s' NOT SEEN", address, name.c_str());
-      } else if (timed_out) {
-        LOGE_100("0x%X '%s' TIMED OUT", address, name.c_str());
-      }
-    }
+  if (timestamps.empty()) {
+    if (print) LOGE_100("0x%X '%s' NOT SEEN", address, name.c_str());
     return false;
   }
-
+  if ((current_nanos - timestamps.back()) > check_threshold) {
+    if (print) LOGE_100("0x%X '%s' TIMED OUT", address, name.c_str());
+    return false;
+  }
   return true;
 }
 
