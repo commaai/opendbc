@@ -1,4 +1,3 @@
-import numpy as np
 from opendbc.can.parser import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.interfaces import CarStateBase
@@ -66,7 +65,7 @@ class CarState(CarStateBase):
       # MQB-specific
       self.upscale_lead_car_signal = bool(pt_cp.vl["Kombi_03"]["KBI_Variante"])  # Analog vs digital instrument cluster
 
-      ret.wheelSpeeds = self.get_wheel_speeds(
+      self.parse_wheel_speeds(ret,
         pt_cp.vl["ESP_19"]["ESP_VL_Radgeschw_02"],
         pt_cp.vl["ESP_19"]["ESP_VR_Radgeschw_02"],
         pt_cp.vl["ESP_19"]["ESP_HL_Radgeschw_02"],
@@ -113,9 +112,6 @@ class CarState(CarStateBase):
       ret.rightBlinker = bool(pt_cp.vl["Blinkmodi_02"]["Comfort_Signal_Right"])
 
     # Shared logic
-
-    ret.vEgoRaw = float(np.mean([ret.wheelSpeeds.fl, ret.wheelSpeeds.fr, ret.wheelSpeeds.rl, ret.wheelSpeeds.rr]))
-    ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.vEgoCluster = pt_cp.vl["Kombi_01"]["KBI_angez_Geschw"] * CV.KPH_TO_MS
 
     ret.steeringAngleDeg = pt_cp.vl["LWI_01"]["LWI_Lenkradwinkel"] * (1, -1)[int(pt_cp.vl["LWI_01"]["LWI_VZ_Lenkradwinkel"])]
@@ -148,13 +144,6 @@ class CarState(CarStateBase):
 
   def update_pq(self, pt_cp, cam_cp, ext_cp) -> structs.CarState:
     ret = structs.CarState()
-    # Update vehicle speed and acceleration from ABS wheel speeds.
-    ret.wheelSpeeds = self.get_wheel_speeds(
-      pt_cp.vl["Bremse_3"]["Radgeschw__VL_4_1"],
-      pt_cp.vl["Bremse_3"]["Radgeschw__VR_4_1"],
-      pt_cp.vl["Bremse_3"]["Radgeschw__HL_4_1"],
-      pt_cp.vl["Bremse_3"]["Radgeschw__HR_4_1"],
-    )
 
     # vEgo obtained from Bremse_1 vehicle speed rather than Bremse_3 wheel speeds because Bremse_3 isn't present on NSF
     ret.vEgoRaw = pt_cp.vl["Bremse_1"]["Geschwindigkeit_neu__Bremse_1_"] * CV.KPH_TO_MS
