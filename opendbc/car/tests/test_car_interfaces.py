@@ -6,6 +6,7 @@ from hypothesis import Phase, given, settings
 from collections.abc import Callable
 from typing import Any
 
+from panda import DLC_TO_LEN
 from opendbc.car import DT_CTRL, CanData, structs
 from opendbc.car.car_helpers import interfaces
 from opendbc.car.fingerprints import FW_VERSIONS
@@ -27,7 +28,7 @@ MAX_EXAMPLES = int(os.environ.get('MAX_EXAMPLES', '15'))
 def get_fuzzy_car_interface_args(draw: DrawType) -> dict:
   # Fuzzy CAN fingerprints and FW versions to test more states of the CarInterface
   fingerprint_strategy = st.fixed_dictionaries({key: st.dictionaries(st.integers(min_value=0, max_value=0x800),
-                                                                     st.integers(min_value=0, max_value=64)) for key in range(4)})
+                                                                     st.sampled_from(DLC_TO_LEN)) for key in range(4)})
 
   # only pick from possible ecus to reduce search space
   car_fw_strategy = st.lists(st.builds(
