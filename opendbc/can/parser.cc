@@ -85,20 +85,19 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
 
 
 bool MessageState::update_counter(int64_t cur_count, int cnt_size) {
-  bool good = true;
-  if (timestamps.empty()) {
-    int expected = ((counter + 1) & ((1 << cnt_size) - 1));
-    good = ((counter + 1) & ((1 << cnt_size) - 1)) == cur_count;
-    if (!good) {
-      INFO("0x%X COUNTER FAIL -- %d -> %d, expected %d\n", address, counter, (int)cur_count, expected);
+  if (((counter + 1) & ((1 << cnt_size) - 1)) != cur_count) {
+    counter_fail = std::min((int)counter_fail + 1, MAX_BAD_COUNTER);
+    if (counter_fail > 1) {
+      INFO("0x%X COUNTER FAIL #%d -- %d -> %d\n", address, counter_fail, counter, (int)cur_count);
     }
-    INFO("0x%X COUNTER INFO -- %d -> %d, expected %d\n", address, counter, (int)cur_count, expected);
+  } else if (counter_fail > 0) {
+    counter_fail--;
   }
   counter = cur_count;
-  return good;
+  return counter_fail < MAX_BAD_COUNTER;
 }
 
-bool MessageState::valid(uint64_t current_nanos, bool bus_timeout) {
+bool MessageState::valid(uint64_t current_nanos, bool bus_timeout) const {
   /*
     bad counters and checksums don't get added to timestamps, so those
     cases get caught here too.
@@ -241,11 +240,20 @@ void CANParser::UpdateCans(const CanData &can, std::set<uint32_t> &updated_addre
 
 void CANParser::UpdateValid(uint64_t nanos) {
   bool valid = true;
+  bool counters_valid = true;
+
   for (auto& kv : message_states) {
-    if (!kv.second.valid(nanos, bus_timeout)) {
+    const auto& state = kv.second;
+
+    if (state.counter_fail >= MAX_BAD_COUNTER) {
+      counters_valid = false;
+    }
+
+    if (!state.valid(nanos, bus_timeout)) {
       valid = false;
     }
   }
+
   can_invalid_cnt = valid ? 0 : std::min(can_invalid_cnt + 1, CAN_INVALID_CNT);
-  can_valid = (can_invalid_cnt < CAN_INVALID_CNT);
+  can_valid = (can_invalid_cnt < CAN_INVALID_CNT) && counters_valid;
 }

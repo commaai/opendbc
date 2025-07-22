@@ -18,6 +18,7 @@
 #define DEBUG(...)
 //#define DEBUG printf
 
+#define MAX_BAD_COUNTER 5
 #define CAN_INVALID_CNT 5
 
 // Car specific functions
@@ -70,13 +71,14 @@ public:
   std::vector<std::vector<double>> all_vals;
 
   uint8_t counter;
+  uint8_t counter_fail = 0;
   uint64_t check_threshold;
   std::deque<uint64_t> timestamps;
 
   bool ignore_checksum = false;
   bool ignore_counter = false;
 
-  bool valid(uint64_t current_nanos, bool bus_timeout);
+  bool valid(uint64_t current_nanos, bool bus_timeout) const;
   bool parse(uint64_t nanos, const std::vector<uint8_t> &dat);
   bool update_counter(int64_t v, int cnt_size);
 
