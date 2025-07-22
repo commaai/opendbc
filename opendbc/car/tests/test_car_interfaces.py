@@ -30,7 +30,13 @@ def get_fuzzy_car_interface_args(draw: DrawType) -> dict:
                                                                      st.integers(min_value=0, max_value=64)) for key in range(4)})
 
   # only pick from possible ecus to reduce search space
-  car_fw_strategy = st.lists(st.sampled_from(sorted(ALL_ECUS)))
+  car_fw_strategy = st.lists(
+    st.builds(
+      lambda fw, req: structs.CarParams.CarFw(ecu=fw[0], address=fw[1], subAddress=fw[2] or 0),
+      st.sampled_from(sorted(ALL_ECUS)),
+      st.sampled_from(sorted(ALL_REQUESTS)),
+    ),
+  )
 
   params_strategy = st.fixed_dictionaries({
     'fingerprints': fingerprint_strategy,
@@ -39,9 +45,6 @@ def get_fuzzy_car_interface_args(draw: DrawType) -> dict:
   })
 
   params: dict = draw(params_strategy)
-  params['car_fw'] = [structs.CarParams.CarFw(ecu=fw[0], address=fw[1], subAddress=fw[2] or 0,
-                                              request=draw(st.sampled_from(sorted(ALL_REQUESTS))))
-                      for fw in params['car_fw']]
   # reduce search space by duplicating CAN fingerprints across multi-panda setup (bus 0 and 4 is the same)
   params['fingerprints'] |= {key + 4: params['fingerprints'][key] for key in range(4)}
   return params
