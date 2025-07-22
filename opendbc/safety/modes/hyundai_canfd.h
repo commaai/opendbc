@@ -146,6 +146,13 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *to_push) {
   }
 }
 
+bool torque_reduction_gain_checks(float adas_aci_angl_tq_redc_gain_val) {
+  UNUSED(adas_aci_angl_tq_redc_gain_val);
+  //TODO: ensure that if "override" is happening, that this value is reduced in a timely manner,
+  // and fault if we are not giving up the control quickly enough.
+  return false;
+};
+
 static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
   const TorqueSteeringLimits HYUNDAI_CANFD_TORQUE_STEERING_LIMITS = {
     .max_torque = 270,
@@ -185,10 +192,15 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *to_send) {
   if (addr == steer_addr) {
     if (hyundai_canfd_angle_steering) {
       const int lkas_angle_active = (GET_BYTE(to_send, 9) >> 4) & 0x3U;
+      float ADAS_ACIAnglTqRedcGainVal = GET_BYTE(to_send, 12) * 0.004f;
       const bool steer_angle_req = lkas_angle_active != 1;
 
       int desired_angle = (GET_BYTE(to_send, 11) << 6) | (GET_BYTE(to_send, 10) >> 2);
       desired_angle = to_signed(desired_angle, 14);
+
+      if (torque_reduction_gain_checks(ADAS_ACIAnglTqRedcGainVal)) {
+        tx = false;
+      }
 
       if (steer_angle_cmd_checks_vm(desired_angle, steer_angle_req, HYUNDAI_CANFD_ANGLE_STEERING_LIMITS, HYUNDAI_STEERING_PARAMS)) {
         tx = false;
