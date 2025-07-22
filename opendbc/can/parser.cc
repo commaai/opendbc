@@ -80,6 +80,17 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
     timestamps.pop_front();
   }
 
+  // learn message frequency
+  if (frequency < 1e-5) {
+    double dt = (timestamps.back() - timestamps.front())*1e-9;
+    if (timestamps.size() >= 4 && (dt > 1.0f)) {
+      frequency = timestamps.size() / dt;
+      uint64_t new_thresh = (1000000000ULL / frequency) * 10;
+      printf("0x%X %s got %.2fHz, old %.2f new %.2f", address, name.c_str(), frequency, (double)check_threshold*1e-6, (double)new_thresh*1e-6);
+      check_threshold = (1000000000ULL / frequency) * 10;
+    }
+  }
+
   return true;
 }
 
