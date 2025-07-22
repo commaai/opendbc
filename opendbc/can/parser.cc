@@ -155,6 +155,34 @@ CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum
   }
 }
 
+bool CANParser::add_message(uint32_t address) {
+  // Check if message is already tracked
+  if (message_states.find(address) != message_states.end()) {
+    return false; // Message already exists
+  }
+
+  // Check if message exists in DBC
+  auto msg_it = dbc->addr_to_msg.find(address);
+  if (msg_it == dbc->addr_to_msg.end()) {
+    return false; // Message not found in DBC
+  }
+
+  const Msg *msg = msg_it->second;
+  
+  MessageState &state = message_states[address];
+  state.address = address;
+  state.name = msg->name;
+  state.size = msg->size;
+  state.check_threshold = 0; // Frequency 0 means no timeout checking
+  
+  // track all signals for this message
+  state.parse_sigs = msg->sigs;
+  state.vals.resize(msg->sigs.size());
+  state.all_vals.resize(msg->sigs.size());
+  
+  return true;
+}
+
 std::set<uint32_t> CANParser::update(const std::vector<CanData> &can_data) {
   // Clear all_values
   for (auto &state : message_states) {
