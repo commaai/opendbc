@@ -50,6 +50,7 @@ env = Environment(
     "-Wshadow",
     "-Wno-vla-cxx-extension",
     "-Wno-unknown-warning-option",  # for compatibility across compiler versions
+    "-fmax-errors=1",
   ] + ccflags_asan,
   LDFLAGS=ldflags_asan,
   LINKFLAGS=ldflags_asan,

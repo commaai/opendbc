@@ -38,6 +38,10 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
   bool checksum_failed = false;
   bool counter_failed = false;
 
+  if (first_seen_nanos == 0) {
+    first_seen_nanos = nanos;
+  }
+
   for (int i = 0; i < signals.size(); i++) {
     const auto &sig = signals[i];
 
@@ -93,9 +97,29 @@ bool MessageState::update_counter(int64_t cur_count, int cnt_size) {
   return counter_fail < MAX_BAD_COUNTER;
 }
 
+bool MessageState::valid(uint64_t current_nanos, bool bus_timeout) {
+  if (counter_fail >= MAX_BAD_COUNTER) {
+    return false;
+  }
+
+  const bool missing = timestamps.empty();
+  const bool timed_out = !missing && ((current_nanos - timestamps.back()) > check_threshold);
+  if (missing || timed_out) {
+    const bool show_missing = (current_nanos - first_seen_nanos) > 7e9;
+    if (show_missing && !bus_timeout) {
+      if (missing) {
+        LOGE_100("0x%X '%s' NOT SEEN", address, name.c_str());
+      } else if (timed_out) {
+        LOGE_100("0x%X '%s' TIMED OUT", address, name.c_str());
+      }
+    }
+    return false;
+  }
+
+  return true;
+}
+
 // ***** CANParser *****
-
-
 
 CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<std::pair<uint32_t, int>> &messages)
   : bus(abus) {
@@ -170,10 +194,6 @@ std::set<uint32_t> CANParser::update(const std::vector<CanData> &can_data) {
 
   std::set<uint32_t> updated_addresses;
   for (const auto &c : can_data) {
-    if (first_nanos == 0) {
-      first_nanos = c.nanos;
-    }
-
     UpdateCans(c, updated_addresses);
     UpdateValid(c.nanos);
   }
@@ -221,30 +241,12 @@ void CANParser::UpdateCans(const CanData &can, std::set<uint32_t> &updated_addre
 }
 
 void CANParser::UpdateValid(uint64_t nanos) {
-  const bool show_missing = (nanos - first_nanos) > 8e9;
-
-  bool _valid = true;
-  bool _counters_valid = true;
-  for (const auto& kv : message_states) {
-    const auto& state = kv.second;
-
-    if (state.counter_fail >= MAX_BAD_COUNTER) {
-      _counters_valid = false;
-    }
-
-    const bool missing = state.timestamps.empty();
-    const bool timed_out = !missing && ((nanos - state.timestamps.back()) > state.check_threshold);
-    if (state.check_threshold > 0 && (missing || timed_out)) {
-      if (show_missing && !bus_timeout) {
-        if (missing) {
-          LOGE_100("0x%X '%s' NOT SEEN", state.address, state.name.c_str());
-        } else if (timed_out) {
-          LOGE_100("0x%X '%s' TIMED OUT", state.address, state.name.c_str());
-        }
-      }
-      _valid = false;
+  bool valid = true;
+  for (auto& kv : message_states) {
+    if (!kv.second.valid(nanos, bus_timeout)) {
+      valid = false;
     }
   }
-  can_invalid_cnt = _valid ? 0 : (can_invalid_cnt + 1);
-  can_valid = (can_invalid_cnt < CAN_INVALID_CNT) && _counters_valid;
+  can_invalid_cnt = valid ? 0 : std::min(can_invalid_cnt + 1, CAN_INVALID_CNT);
+  can_valid = (can_invalid_cnt < CAN_INVALID_CNT);
 }
