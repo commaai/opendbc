@@ -168,7 +168,7 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint in HONDA_BOSCH_ALT_RADAR:
       ret.lowSpeedAlert = False
       # under 4mph not worth warning, but don't create falling edge if already in warning state
-      if (cp.vl["STEER_STATUS"]["STEER_CONTROL_ACTIVE"] != 1) and (self.steer_blocked_prev or ret.vEgo > 4.0 * CV.MPH_TO_MS):
+      if ret.cruiseState.enabled and (cp.vl["STEER_STATUS"]["STEER_CONTROL_ACTIVE"] != 1) and (self.steer_blocked_prev or ret.vEgo > 4.0 * CV.MPH_TO_MS):
         if ret.vEgo <= self.CP.minSteerSpeed:
           ret.lowSpeedAlert = True
         else:
