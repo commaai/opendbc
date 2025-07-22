@@ -2,7 +2,7 @@ import os
 import math
 import hypothesis.strategies as st
 import pytest
-from hypothesis import Phase, given, settings
+from hypothesis import Phase, given, settings, seed
 from collections.abc import Callable
 from typing import Any
 
@@ -27,8 +27,9 @@ MAX_EXAMPLES = int(os.environ.get('MAX_EXAMPLES', '15'))
 def get_fuzzy_car_interface_args(draw: DrawType) -> dict:
   # Fuzzy CAN fingerprints and FW versions to test more states of the CarInterface
   fingerprint_strategy = st.fixed_dictionaries({key: st.dictionaries(st.integers(min_value=0, max_value=0x800),
-                                                                     st.integers(min_value=0, max_value=64)) for key in
-                                                gen_empty_fingerprint()})
+                                                                     st.integers(min_value=0, max_value=64)) for key in range(4)})#.map(lambda fp: {**fp, **{k + 4: fp[k] for k in range(4)}})
+  # map 0, 1, 2, 3 to 4, 5, 6, 7:
+  # fingerprint_strategy |= {key + 4: fingerprint_strategy[key] for key in range(4)}
 
   # only pick from possible ecus to reduce search space
   car_fw_strategy = st.lists(st.sampled_from(sorted(ALL_ECUS)))
@@ -43,6 +44,8 @@ def get_fuzzy_car_interface_args(draw: DrawType) -> dict:
   params['car_fw'] = [structs.CarParams.CarFw(ecu=fw[0], address=fw[1], subAddress=fw[2] or 0,
                                               request=draw(st.sampled_from(sorted(ALL_REQUESTS))))
                       for fw in params['car_fw']]
+  # reduce search space by duplicating CAN fingerprints across multi-panda setup (bus 0 and 4 is the same)
+  params['fingerprints'] |= {key + 4: params['fingerprints'][key] for key in range(4)}
   return params
 
 
@@ -51,7 +54,8 @@ class TestCarInterfaces:
   #  many generated examples to overrun when max_examples > ~20, don't use it
   @pytest.mark.parametrize("car_name", sorted(PLATFORMS))
   @settings(max_examples=MAX_EXAMPLES, deadline=None,
-            phases=(Phase.reuse, Phase.generate, Phase.shrink))
+            phases=(Phase.reuse, Phase.generate, Phase.shrink),)
+  # @seed(0)
   @given(data=st.data())
   def test_car_interfaces(self, car_name, data):
     CarInterface = interfaces[car_name]
