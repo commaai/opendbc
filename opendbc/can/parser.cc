@@ -10,6 +10,9 @@
 
 #include "opendbc/can/common.h"
 
+
+// ***** MessageState *****
+
 int64_t get_raw_value(const std::vector<uint8_t> &msg, const Signal &sig) {
   int64_t ret = 0;
 
@@ -31,19 +34,17 @@ int64_t get_raw_value(const std::vector<uint8_t> &msg, const Signal &sig) {
 
 
 bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
-  std::vector<double> tmp_vals(parse_sigs.size());
+  std::vector<double> tmp_vals(signals.size());
   bool checksum_failed = false;
   bool counter_failed = false;
 
-  for (int i = 0; i < parse_sigs.size(); i++) {
-    const auto &sig = parse_sigs[i];
+  for (int i = 0; i < signals.size(); i++) {
+    const auto &sig = signals[i];
 
     int64_t tmp = get_raw_value(dat, sig);
     if (sig.is_signed) {
       tmp -= ((tmp >> (sig.size-1)) & 0x1) ? (1ULL << sig.size) : 0;
     }
-
-    //DEBUG("parse 0x%X %s -> %ld\n", address, sig.name, tmp);
 
     if (!ignore_checksum) {
       if (sig.calc_checksum != nullptr && sig.calc_checksum(address, sig, dat) != tmp) {
@@ -52,7 +53,7 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
     }
 
     if (!ignore_counter) {
-      if (sig.type == SignalType::COUNTER && !update_counter_generic(tmp, sig.size)) {
+      if (sig.type == SignalType::COUNTER && !update_counter(tmp, sig.size)) {
         counter_failed = true;
       }
     }
@@ -66,7 +67,7 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
     return false;
   }
 
-  for (int i = 0; i < parse_sigs.size(); i++) {
+  for (int i = 0; i < signals.size(); i++) {
     vals[i] = tmp_vals[i];
     all_vals[i].push_back(vals[i]);
   }
@@ -76,19 +77,20 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
 }
 
 
-bool MessageState::update_counter_generic(int64_t v, int cnt_size) {
-  if (((counter + 1) & ((1 << cnt_size) -1)) != v) {
+bool MessageState::update_counter(int64_t cur_count, int cnt_size) {
+  if (((counter + 1) & ((1 << cnt_size) -1)) != cur_count) {
     counter_fail = std::min(counter_fail + 1, MAX_BAD_COUNTER);
     if (counter_fail > 1) {
-      INFO("0x%X COUNTER FAIL #%d -- %d -> %d\n", address, counter_fail, counter, (int)v);
+      INFO("0x%X COUNTER FAIL #%d -- %d -> %d\n", address, counter_fail, counter, (int)cur_count);
     }
   } else if (counter_fail > 0) {
     counter_fail--;
   }
-  counter = v;
+  counter = cur_count;
   return counter_fail < MAX_BAD_COUNTER;
 }
 
+// ***** CANParser *****
 
 CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<std::pair<uint32_t, int>> &messages)
   : bus(abus) {
@@ -123,7 +125,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<st
     assert(state.size <= 64);  // max signal size is 64 bytes
 
     // track all signals for this message
-    state.parse_sigs = msg->sigs;
+    state.signals = msg->sigs;
     state.vals.resize(msg->sigs.size());
     state.all_vals.resize(msg->sigs.size());
   }
@@ -146,7 +148,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum
     };
 
     for (const auto& sig : msg.sigs) {
-      state.parse_sigs.push_back(sig);
+      state.signals.push_back(sig);
       state.vals.push_back(0);
       state.all_vals.push_back({});
     }

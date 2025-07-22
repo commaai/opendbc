@@ -64,7 +64,7 @@ cdef extern from "common.h":
   cdef const DBC* dbc_lookup(const string) except +
 
   cdef cppclass MessageState:
-    vector[Signal] parse_sigs
+    vector[Signal] signals
     vector[double] vals
     vector[vector[double]] all_vals
     uint64_t last_seen_nanos
