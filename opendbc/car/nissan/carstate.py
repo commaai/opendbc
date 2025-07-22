@@ -47,14 +47,16 @@ class CarState(CarStateBase):
     elif self.CP.carFingerprint in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC):
       ret.brakePressed = bool(cp.vl["CRUISE_THROTTLE"]["USER_BRAKE_PRESSED"])
 
-    fl = cp.vl["WHEEL_SPEEDS_FRONT"]["WHEEL_SPEED_FL"]
-    fr = cp.vl["WHEEL_SPEEDS_FRONT"]["WHEEL_SPEED_FR"]
-    rl = cp.vl["WHEEL_SPEEDS_REAR"]["WHEEL_SPEED_RL"]
-    rr = cp.vl["WHEEL_SPEEDS_REAR"]["WHEEL_SPEED_RR"]
+    ret.wheelSpeeds = self.get_wheel_speeds(
+      cp.vl["WHEEL_SPEEDS_FRONT"]["WHEEL_SPEED_FL"],
+      cp.vl["WHEEL_SPEEDS_FRONT"]["WHEEL_SPEED_FR"],
+      cp.vl["WHEEL_SPEEDS_REAR"]["WHEEL_SPEED_RL"],
+      cp.vl["WHEEL_SPEEDS_REAR"]["WHEEL_SPEED_RR"],
+    )
     # safety uses the rear wheel speeds for the speed measurement and angle limiting
-    ret.vEgoRaw = (rl + rr) / 2.0
+    ret.vEgoRaw = (ret.wheelSpeeds.rl + ret.wheelSpeeds.rr) / 2.0
 
-    v_ego_raw_full = (fl + fr + rl + rr) / 4.0
+    v_ego_raw_full = (ret.wheelSpeeds.fl + ret.wheelSpeeds.fr + ret.wheelSpeeds.rl + ret.wheelSpeeds.rr) / 4.0
     ret.vEgo, ret.aEgo = self.update_speed_kf(v_ego_raw_full)
     ret.standstill = cp.vl["WHEEL_SPEEDS_REAR"]["WHEEL_SPEED_RL"] == 0.0 and cp.vl["WHEEL_SPEEDS_REAR"]["WHEEL_SPEED_RR"] == 0.0
 
