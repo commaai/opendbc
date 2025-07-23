@@ -3,7 +3,7 @@ from typing import cast
 from collections import defaultdict
 from math import cos, sin
 from dataclasses import dataclass
-from opendbc.can.parser import CANParser
+from opendbc.can import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.ford.fordcan import CanBus
