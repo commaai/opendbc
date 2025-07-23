@@ -293,7 +293,7 @@ class CarController(CarControllerBase):
     # Send dashboard UI commands.
     # On Nidec, this controls longitudinal positive acceleration
     if self.frame % 10 == 0:
-      if CC.longActive and self.CP.carFingerprint in HONDA_NIDEC_HYBRID
+      if CC.longActive and self.CP.carFingerprint in HONDA_NIDEC_HYBRID:
         # standstill disengage
         if ( accel >= 0.01 ) and (CS.out.vEgo < 4.0 ) and ( pcm_speed < 25.0 / 3.6):
           pcm_speed = 25.0 / 3.6
