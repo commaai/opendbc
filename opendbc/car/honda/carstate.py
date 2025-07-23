@@ -78,9 +78,6 @@ def get_can_messages(CP):
   if CP.carFingerprint in HONDA_BOSCH_CANFD and not (CP.flags & HondaFlags.BOSCH_ALT_BRAKE):
     messages.append(("BRAKE_ERROR", 100))
 
-  if CP.carFingerprint in HONDA_BOSCH_CANFD:
-    messages.append(("STEERING_CONTROL", 100))
-
   if CP.carFingerprint in HONDA_BOSCH:
     # these messages are on camera bus on radarless cars
     if not CP.openpilotLongitudinalControl and CP.carFingerprint not in HONDA_BOSCH_RADARLESS:
@@ -190,7 +187,7 @@ class CarState(CarStateBase):
     else:
 
       if self.CP.openpilotLongitudinalControl and self.CP.carFingerprint in HONDA_BOSCH_CANFD:
-        if bool(cp.vl["STEERING_CONTROL"]["STEER_TORQUE"]) == 0:
+        if bool(cp_cam.vl["STEERING_CONTROL"]["STEER_TORQUE"]) == 0:
           pass # await a steer control signal before fault detection is accurate.
         if self.CP.flags & HondaFlags.BOSCH_ALT_BRAKE:
           ret.carFaultedNonCritical = bool(cp.vl["BRAKE_MODULE"]["CRUISE_FAULT"])
