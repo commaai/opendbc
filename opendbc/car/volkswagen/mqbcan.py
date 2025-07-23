@@ -167,3 +167,28 @@ def create_aeb_hud(packer, aeb_supported, fcw_active):
   }
 
   return packer.make_can_msg("ACC_15", 0, values)
+
+
+from opendbc.car.crc import CRC8H2F, VOLKSWAGEN_MQB_MEB_CONSTANTS
+
+
+def volkswagen_mqb_meb_checksum(address: int, sig, d: bytearray) -> int:
+  crc = 0xFF
+  for i in range(1, len(d)):
+    crc ^= d[i]
+    crc = CRC8H2F[crc]
+  counter = d[1] & 0x0F
+  const = VOLKSWAGEN_MQB_MEB_CONSTANTS.get(address)
+  if const:
+    crc ^= const[counter]
+    crc = CRC8H2F[crc]
+  return crc ^ 0xFF
+
+
+def xor_checksum(address: int, sig, d: bytearray) -> int:
+  checksum = 0
+  checksum_byte = sig.start_bit // 8
+  for i in range(len(d)):
+    if i != checksum_byte:
+      checksum ^= d[i]
+  return checksum
