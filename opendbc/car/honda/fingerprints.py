@@ -1103,11 +1103,11 @@ FW_VERSIONS = {
       b'54008-TZ5-A910\x00\x00',
       b'77959-TZ5-A110\x00\x00',
     ],
-    (Ecu.combinationMeter, 0x18da60f1, None): [
-      b'78109-TYS-A611\x00\x00',
-      b'78109-TYT-A220\x00\x00',
-      b'78109-TZ6-A720\x00\x00',
-    ],
+#    (Ecu.combinationMeter, 0x18da60f1, None): [ - remove, creates CI test error
+#      b'78109-TYS-A611\x00\x00',
+#      b'78109-TYT-A220\x00\x00',
+#      b'78109-TZ6-A720\x00\x00',
+#    ],
     (Ecu.srs, 0x18da53f1, None): [
       b'77959-TRX-A011\x00\x00',
       b'77959-TZ5-A220\x00\x00',
