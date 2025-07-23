@@ -272,8 +272,10 @@ class CarState(CarStateBase):
       ("Airbag_02", 5),     # From J234 Airbag control module
       ("Kombi_01", 2),      # From J285 Instrument cluster
       ("Blinkmodi_02", 1),  # From J519 BCM (sent at 1Hz when no lights active, 50Hz when active)
-      ("Kombi_03", 1),      # From J285 instrument cluster (not present on older cars, 1Hz when present)
     ]
+
+    if CP.flags & VolkswagenFlags.KOMBI_PRESENT:
+      pt_messages.append(("Kombi_03", 1)) # From J285 instrument cluster (not present on older cars)
 
     if CP.transmissionType == TransmissionType.direct:
       pt_messages.append(("Motor_EV_01", 10))  # From J??? unknown EV control module
