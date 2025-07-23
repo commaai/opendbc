@@ -258,8 +258,8 @@ def tesla_setup_signal(sig: Signal, dbc_name: str, line_num: int) -> None:
 
 # ***** DBC parser *****
 BO_RE = re.compile(r"^BO_ (\w+) (\w+) *: (\w+) (\w+)")
-SG_RE = re.compile(r"^SG_ (\w+) : (\d+)\|(\d+)@(\d)([+-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \([0-9.+\-eE]+\|[0-9.+\-eE]+\) \".*\" .*")
-SGM_RE = re.compile(r"^SG_ (\w+) (\w+) *: (\d+)\|(\d+)@(\d)([+-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \([0-9.+\-eE]+\|[0-9.+\-eE]+\) \".*\" .*")
+SG_RE = re.compile(r"^SG_ (\w+) : (\d+)\|(\d+)@(\d)([+-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[[0-9.+\-eE]+\|[0-9.+\-eE]+\] \".*\" .*")
+SGM_RE = re.compile(r"^SG_ (\w+) (\w+) *: (\d+)\|(\d+)@(\d)([+-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[[0-9.+\-eE]+\|[0-9.+\-eE]+\] \".*\" .*")
 
 
 def parse_dbc(path: str) -> DBC:
@@ -378,14 +378,17 @@ class CANPacker:
     if dbc_name in DBC_CACHE:
       self.dbc = DBC_CACHE[dbc_name]
     else:
-      self.dbc = parse_dbc(dbc_path)
-      DBC_CACHE[dbc_name] = self.dbc
+      try:
+        self.dbc = parse_dbc(dbc_path)
+        DBC_CACHE[dbc_name] = self.dbc
+      except FileNotFoundError as e:
+        raise RuntimeError(f"DBC file not found: {dbc_path}") from e
     self.counters: dict[int, int] = {}
 
   def pack(self, address: int, values: dict[str, float]) -> bytearray:
     msg = self.dbc.addr_to_msg.get(address)
     if msg is None:
-      raise RuntimeError(f"undefined address {address}")
+      return bytearray()
     dat = bytearray(msg.size)
     counter_set = False
     for name, value in values.items():
@@ -417,9 +420,11 @@ class CANPacker:
     else:
       msg = self.dbc.name_to_msg.get(name_or_addr)
       if msg is None:
-        raise RuntimeError(f"Undefined message {name_or_addr}")
+        return 0, b'', bus
       addr = msg.address
     dat = self.pack(addr, values)
+    if len(dat) == 0:
+      return 0, b'', bus
     return addr, bytes(dat), bus
 
 
