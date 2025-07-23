@@ -299,7 +299,7 @@ static safety_config honda_nidec_init(uint16_t param) {
                                      {0x30C, 0, 8, .check_relay = true}, {0x33D, 0, 5, .check_relay = true}};
 
   const uint16_t HONDA_PARAM_NIDEC_ALT = 4;
-  const uint16_t HONDA_PARAM_NIDEC_HYBRID = 4096;
+  const uint16_t HONDA_PARAM_NIDEC_HYBRID = 32;
 
   honda_hw = HONDA_NIDEC;
   honda_brake = 0;
