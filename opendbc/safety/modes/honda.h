@@ -71,6 +71,7 @@ static uint8_t honda_get_counter(const CANPacket_t *to_push) {
 
 static void honda_rx_hook(const CANPacket_t *to_push) {
   const bool pcm_cruise = ((honda_hw == HONDA_BOSCH) && !honda_bosch_long) || (honda_hw == HONDA_NIDEC);
+  const uint16_t HONDA_PARAM_NIDEC_HYBRID = 32;
   int pt_bus = honda_get_pt_bus();
 
   int addr = GET_ADDR(to_push);
@@ -193,6 +194,7 @@ static bool honda_tx_hook(const CANPacket_t *to_send) {
     .inactive_speed = 0,
   };
 
+  const uint16_t HONDA_PARAM_NIDEC_HYBRID = 32;
   bool tx = true;
   int addr = GET_ADDR(to_send);
   int bus = GET_BUS(to_send);
@@ -301,7 +303,6 @@ static safety_config honda_nidec_init(uint16_t param) {
                                      {0x30C, 0, 8, .check_relay = true}, {0x33D, 0, 5, .check_relay = true}};
 
   const uint16_t HONDA_PARAM_NIDEC_ALT = 4;
-  const uint16_t HONDA_PARAM_NIDEC_HYBRID = 32;
 
   honda_hw = HONDA_NIDEC;
   honda_brake = 0;
