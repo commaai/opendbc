@@ -16,7 +16,9 @@ MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_R
 MAX_LATERAL_JERK = 3.0 + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~3.6 m/s^3
 
 STEER_BIAS_MAX = 0.2 # Nm
-STEER_VIRTUAL_SPRING_COEFF = 4.0
+STEER_OVERRIDE_MAX_TORQUE = 2.5 # Nm max torque before EPS disengages
+STEER_OVERRRIDE_MAX_LAT_ACCEL = 2.0 # m/s^2 - similar to Tesla comfort steering mode
+STEER_OVERRRIDE_GAIN_LIMIT = 10 # jerky but stable
 
 
 def get_max_angle_delta(v_ego_raw: float, VM: VehicleModel):
@@ -25,8 +27,8 @@ def get_max_angle_delta(v_ego_raw: float, VM: VehicleModel):
   return max_angle_rate_sec * (DT_CTRL * CarControllerParams.STEER_STEP)
 
 
-def get_max_angle(v_ego_raw: float, VM: VehicleModel):
-  max_curvature = MAX_LATERAL_ACCEL / (v_ego_raw ** 2)  # 1/m
+def get_max_angle(v_ego_raw: float, VM: VehicleModel, lat_accel: float = MAX_LATERAL_ACCEL):
+  max_curvature = lat_accel / (v_ego_raw ** 2)  # 1/m
   return math.degrees(VM.get_steer_from_curvature(max_curvature, v_ego_raw, 0))  # deg
 
 
@@ -59,7 +61,16 @@ def get_safety_CP():
   from opendbc.car.tesla.interface import CarInterface
   return CarInterface.get_non_essential_params("TESLA_MODEL_Y")
 
-
+def applyOverrideAngle(apply_angle: float, driverTorque: float, vEgo: float, VM: VehicleModel) -> float:
+    # ignore torque pffset and disturbances
+    steering_torque_deadzone = driverTorque - np.clip(driverTorque, -STEER_BIAS_MAX, STEER_BIAS_MAX)
+    
+    # todo maybe saturate target lateral acc based on safety limit minus actual lateral acc
+    torque_to_angle = get_max_angle(max(1, vEgo), VM, STEER_OVERRRIDE_MAX_LAT_ACCEL) / (STEER_OVERRIDE_MAX_TORQUE - STEER_BIAS_MAX)
+    override_angle_target = steering_torque_deadzone * min(torque_to_angle, STEER_OVERRRIDE_GAIN_LIMIT)
+  
+    return apply_angle + override_angle_target
+  
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
@@ -78,18 +89,13 @@ class CarController(CarControllerBase):
     # When enabling in a tight curve, we wait until user reduces steering force to start steering.
     # Canceling is done on rising edge and is handled generically with CC.cruiseControl.cancel
     lat_active = CC.latActive and CS.hands_on_level < 3
-
-    steeringAngleDeg = actuators.steeringAngleDeg
-
-    # ignore potential steer bias
-    steeringTorqueDeadzone = CS.out.steeringTorque - np.clip(CS.out.steeringTorque, -STEER_BIAS_MAX, STEER_BIAS_MAX)
-    # create virtual spring effect
-    steeringAngleDeg += steeringTorqueDeadzone * STEER_VIRTUAL_SPRING_COEFF
-
     if self.frame % 2 == 0:
+      # Add driver override
+      steering_angle_with_override = applyOverrideAngle(actuators.steeringAngleDeg, CS.out.steeringTorque, CS.out.vEgoRaw, self.VM)
+
       # Angular rate limit based on speed
-      self.apply_angle_last = apply_tesla_steer_angle_limits(steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw,
-                                                             CS.out.steeringAngleDeg, lat_active,
+      self.apply_angle_last = apply_tesla_steer_angle_limits(steering_angle_with_override, self.apply_angle_last,
+                                                             CS.out.vEgoRaw, CS.out.steeringAngleDeg, lat_active,
                                                              CarControllerParams.ANGLE_LIMITS, self.VM)
 
       can_sends.append(self.tesla_can.create_steering_control(self.apply_angle_last, lat_active))
