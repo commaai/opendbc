@@ -274,7 +274,7 @@ class CarState(CarStateBase):
       ("Blinkmodi_02", 1),  # From J519 BCM (sent at 1Hz when no lights active, 50Hz when active)
     ]
 
-    if self.CP.flags & VolkswagenFlags.KOMBI_PRESENT:
+    if CP.flags & VolkswagenFlags.KOMBI_PRESENT:
       pt_messages.append(("Kombi_03", 1)) # From J285 instrument cluster (not present on older cars)
 
     if CP.transmissionType == TransmissionType.direct:
