@@ -114,7 +114,6 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint in (CAR.TESLA_MODEL_3, CAR.TESLA_MODEL_Y):
       ret.invalidLkasSetting = cp_ap_party.vl["DAS_settings"]["DAS_autosteerEnabled"] != 0
     else:
-      #TODO: Find S/X equivalent
       pass
     # Buttons # ToDo: add Gap adjust button
 
