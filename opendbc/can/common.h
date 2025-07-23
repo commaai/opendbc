@@ -96,7 +96,6 @@ public:
   bool can_valid = false;
   bool bus_timeout = false;
   uint64_t last_nonempty_nanos = 0;
-  uint64_t bus_timeout_threshold = 0;
   int can_invalid_cnt = CAN_INVALID_CNT;
 
   CANParser(int abus, const std::string& dbc_name,

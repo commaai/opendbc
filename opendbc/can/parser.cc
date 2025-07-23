@@ -87,8 +87,6 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
     double dt = (timestamps.back() - timestamps.front())*1e-9;
     if ((timestamps.size() >= 4 && (dt > 1.0f)) || (timestamps.size() >= max_buffer)) {
       frequency = std::min(timestamps.size() / dt, (double)100.0f);  // 100Hz max for checks
-      uint64_t new_thresh = (1000000000ULL / frequency) * 10;
-      printf("0x%X %s got %.2fHz, old %.2f new %.2f", address, name.c_str(), frequency, (double)check_threshold*1e-6, (double)new_thresh*1e-6);
       check_threshold = (1000000000ULL / frequency) * 10;
     }
   }
@@ -135,8 +133,6 @@ CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<st
   dbc = dbc_lookup(dbc_name);
   assert(dbc);
 
-  bus_timeout_threshold = std::numeric_limits<uint64_t>::max();
-
   for (const auto& [address, frequency] : messages) {
     // disallow duplicate message checks
     if (message_states.find(address) != message_states.end()) {
@@ -154,9 +150,6 @@ CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<st
     // msg is not valid if a message isn't received for 10 consecutive steps
     if (frequency > 0) {
       state.check_threshold = (1000000000ULL / frequency) * 10;
-
-      // bus timeout threshold should be 10x the fastest msg
-      bus_timeout_threshold = std::min(bus_timeout_threshold, state.check_threshold);
     }
 
     const Msg *msg = dbc->addr_to_msg.at(address);
@@ -208,6 +201,7 @@ std::set<uint32_t> CANParser::update(const std::vector<CanData> &can_data) {
     UpdateCans(c, updated_addresses);
     UpdateValid(c.nanos);
   }
+
   return updated_addresses;
 }
 
@@ -248,6 +242,13 @@ void CANParser::UpdateCans(const CanData &can, std::set<uint32_t> &updated_addre
   if (!bus_empty) {
     last_nonempty_nanos = can.nanos;
   }
+  uint64_t bus_timeout_threshold = 500*1e6;
+  for (const auto& kv : message_states) {
+    const auto& state = kv.second;
+    if (state.check_threshold > 0) {
+      bus_timeout_threshold = std::min(bus_timeout_threshold, state.check_threshold);
+    }
+  }
   bus_timeout = (can.nanos - last_nonempty_nanos) > bus_timeout_threshold;
 }
 
@@ -270,3 +271,4 @@ void CANParser::UpdateValid(uint64_t nanos) {
   can_invalid_cnt = valid ? 0 : std::min(can_invalid_cnt + 1, CAN_INVALID_CNT);
   can_valid = (can_invalid_cnt < CAN_INVALID_CNT) && counters_valid;
 }
+
