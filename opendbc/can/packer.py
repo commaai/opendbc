@@ -372,6 +372,9 @@ def set_signal_type(sig: Signal, chk: ChecksumState | None, dbc_name: str, line_
 # ***** packer *****
 class CANPacker:
   def __init__(self, dbc_name: str):
+    # Handle both string and bytes input (for compatibility with CANParser.dbc_name)
+    if isinstance(dbc_name, bytes):
+      dbc_name = dbc_name.decode("utf-8")
     dbc_path = dbc_name
     if not os.path.exists(dbc_path):
       dbc_path = os.path.join(os.path.dirname(__file__), "..", "dbc", dbc_name + ".dbc")
