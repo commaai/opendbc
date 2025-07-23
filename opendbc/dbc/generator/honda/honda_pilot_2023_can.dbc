@@ -4,6 +4,12 @@ CM_ "IMPORT _bosch_standstill.dbc";
 CM_ "IMPORT _steering_sensors_a.dbc";
 CM_ "IMPORT _gearbox_common.dbc";
 
+BO_ 388 BRAKE_ERROR: 8 XXX
+ SG_ BRAKE_ERROR_1 : 32|1@0+ (1,0) [0|1] "" EON
+ SG_ BRAKE_ERROR_2 : 34|1@0+ (1,0) [0|1] "" EON
+ SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
+ SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
+
 BO_ 479 ACC_CONTROL: 8 EON
  SG_ SET_TO_0 : 20|5@0+ (1,0) [0|1] "" XXX
  SG_ CONTROL_ON : 23|3@0+ (1,0) [0|5] "" XXX
