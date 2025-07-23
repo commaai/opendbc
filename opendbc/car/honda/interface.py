@@ -58,7 +58,7 @@ class CarInterface(CarInterfaceBase):
 
     if candidate in HONDA_NIDEC_HYBRID:
       ret.stoppingDecelRate = 0.3
-    
+
     if candidate == CAR.HONDA_CRV_5G:
       ret.enableBsm = 0x12f8bfa7 in fingerprint[CAN.radar]
 
