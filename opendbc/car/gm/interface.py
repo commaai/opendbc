@@ -73,10 +73,10 @@ class CarInterface(CarInterfaceBase):
     return float(self.neural_ff_model.predict(inputs))
 
   def torque_from_lateral_accel(self) -> TorqueFromLateralAccelCallbackType:
-    if self.CP.carFingerprint == CAR.CHEVROLET_BOLT_EUV:
-      self.neural_ff_model = NanoFFModel(NEURAL_PARAMS_PATH, self.CP.carFingerprint)
-      return self.torque_from_lateral_accel_neural
-    elif self.CP.carFingerprint in NON_LINEAR_TORQUE_PARAMS:
+    # if self.CP.carFingerprint == CAR.CHEVROLET_BOLT_EUV:
+    #   self.neural_ff_model = NanoFFModel(NEURAL_PARAMS_PATH, self.CP.carFingerprint)
+    #   return self.torque_from_lateral_accel_neural
+    if self.CP.carFingerprint in NON_LINEAR_TORQUE_PARAMS:
       return self.torque_from_lateral_accel_siglin
     else:
       return self.torque_from_lateral_accel_linear
