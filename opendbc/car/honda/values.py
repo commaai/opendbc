@@ -54,7 +54,7 @@ class HondaSafetyFlags(IntFlag):
   NIDEC_ALT = 4
   RADARLESS = 8
   BOSCH_CANFD = 16
-  NIDEC_HYBRID = 4096
+  NIDEC_HYBRID = 64
 
 class HondaFlags(IntFlag):
   # Detected flags
@@ -69,7 +69,7 @@ class HondaFlags(IntFlag):
   NIDEC = 16
   NIDEC_ALT_PCM_ACCEL = 32
   NIDEC_ALT_SCM_MESSAGES = 64
-  NIDEC_HYBRID = 4096
+  NIDEC_HYBRID = 2048
 
   BOSCH_CANFD = 128
   BOSCH_ALT_RADAR = 256
