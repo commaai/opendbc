@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "opendbc/can/logger.h"
-#include "opendbc/can/common_dbc.h"
+#include "opendbc/can/dbc.h"
 
 #define INFO printf
 #define WARN printf
