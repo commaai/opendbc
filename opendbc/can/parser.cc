@@ -76,15 +76,17 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
     all_vals[i].push_back(vals[i]);
   }
   timestamps.push_back(nanos);
-  while (timestamps.size() > 500) {  // assuming a max frequency of 100Hz
+
+  const int max_buffer = 500; // allows 0.5s history for 1kHz (highest freq we've seen)
+  while (timestamps.size() > max_buffer) {
     timestamps.pop_front();
   }
 
   // learn message frequency
   if (frequency < 1e-5) {
     double dt = (timestamps.back() - timestamps.front())*1e-9;
-    if (timestamps.size() >= 4 && (dt > 1.0f)) {
-      frequency = timestamps.size() / dt;
+    if ((timestamps.size() >= 4 && (dt > 1.0f)) || (timestamps.size() >= max_buffer)) {
+      frequency = std::min(timestamps.size() / dt, (double)100.0f);  // 100Hz max for checks
       uint64_t new_thresh = (1000000000ULL / frequency) * 10;
       printf("0x%X %s got %.2fHz, old %.2f new %.2f", address, name.c_str(), frequency, (double)check_threshold*1e-6, (double)new_thresh*1e-6);
       check_threshold = (1000000000ULL / frequency) * 10;
