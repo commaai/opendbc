@@ -80,7 +80,7 @@ def get_can_messages(CP):
 
   if CP.carFingerprint in HONDA_BOSCH_CANFD:
     messages.append(("STEERING_CONTROL", 100))
-  
+
   if CP.carFingerprint in HONDA_BOSCH:
     # these messages are on camera bus on radarless cars
     if not CP.openpilotLongitudinalControl and CP.carFingerprint not in HONDA_BOSCH_RADARLESS:
