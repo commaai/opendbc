@@ -143,6 +143,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<st
       .name = msg.name,
       .address = msg.address,
       .size = msg.size,
+      .ignore_alive = true, // will change below
       .ignore_checksum = ignore_checksum,
       .ignore_counter = ignore_counter,
     };
@@ -239,7 +240,7 @@ void CANParser::UpdateValid(uint64_t nanos) {
     }
     if (!state.valid(nanos, bus_timeout)) {
       valid = false;
-      LOGE("INVALID %s 0x%x cnt %d %.2fHz %zu", state.name.c_str(), state.address, state.counter_fail, state.frequency, state.timestamps.size());
+      //LOGE("INVALID %s 0x%x cnt %d %.2fHz %zu", state.name.c_str(), state.address, state.counter_fail, state.frequency, state.timestamps.size());
     }
   }
 
