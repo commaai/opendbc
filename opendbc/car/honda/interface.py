@@ -53,7 +53,7 @@ class CarInterface(CarInterfaceBase):
     else:
       ret.safetyConfigs = [get_safety_config(structs.CarParams.SafetyModel.hondaNidec)]
       ret.openpilotLongitudinalControl = True
-      
+
       ret.pcmCruise = True
 
     if candidate in HONDA_NIDEC_HYBRID:
