@@ -62,6 +62,8 @@ env = Environment(
   CYTHONCFILESUFFIX=".cpp",
   tools=["default", "cython", "compilation_db"]
 )
+if arch != "Darwin":
+  env.Append(CCFLAGS=["-fmax-errors=1", ])
 
 env.CompilationDatabase('compile_commands.json')
 

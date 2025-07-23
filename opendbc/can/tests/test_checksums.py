@@ -1,6 +1,5 @@
 import copy
-from opendbc.can.parser import CANParser
-from opendbc.can.packer import CANPacker
+from opendbc.can import CANPacker, CANParser
 
 
 class TestCanChecksums:

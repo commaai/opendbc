@@ -18,6 +18,7 @@
 *.dump
 uv.lock
 /dist/
+.vscode/
 
 opendbc/can/build/
 opendbc/can/obj/

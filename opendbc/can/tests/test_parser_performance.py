@@ -1,8 +1,7 @@
 import pytest
 import time
 
-from opendbc.can.parser import CANParser
-from opendbc.can.packer import CANPacker
+from opendbc.can import CANPacker, CANParser
 
 
 @pytest.mark.skip("TODO: varies too much between machines")

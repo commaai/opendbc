@@ -1,8 +1,7 @@
 import pytest
 import random
 
-from opendbc.can.parser import CANParser
-from opendbc.can.packer import CANPacker
+from opendbc.can import CANPacker, CANParser
 from opendbc.can.tests import TEST_DBC
 
 MAX_BAD_COUNTER = 5

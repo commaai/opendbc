@@ -1,5 +1,4 @@
-from opendbc.can.parser import CANParser
-from opendbc.can.can_define import CANDefine
+from opendbc.can import CANDefine, CANParser
 from opendbc.car import Bus, create_button_events, structs
 from opendbc.car.chrysler.values import DBC, STEER_THRESHOLD, RAM_CARS
 from opendbc.car.common.conversions import Conversions as CV

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from opendbc.can.parser import CANParser
+from opendbc.can import CANParser
 from opendbc.car import Bus
 from opendbc.car.structs import RadarData
 from opendbc.car.toyota.values import DBC, TSS2_CAR
