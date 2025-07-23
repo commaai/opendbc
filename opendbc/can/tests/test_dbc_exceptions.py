@@ -19,7 +19,7 @@ class TestCanParserPackerExceptions:
       CANDefine(TEST_DBC)
 
     parser = CANParser(dbc_file, msgs, 0)
-    with pytest.raises(RuntimeError):
+    with pytest.raises(IndexError):
       parser.update_strings([b''])
 
     # Everything is supposed to work below

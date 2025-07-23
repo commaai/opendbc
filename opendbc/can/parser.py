@@ -185,50 +185,47 @@ class CANParser:
     self.can_valid = self.can_invalid_cnt < CAN_INVALID_CNT and counters_valid
 
   def update_strings(self, strings, sendcan: bool = False):
-    try:
-      if strings and not isinstance(strings[0], list | tuple):
-        strings = [strings]
+    if strings and not isinstance(strings[0], list | tuple):
+      strings = [strings]
 
-      for addr in self.addresses:
-        for k in self.vl_all[addr]:
-          self.vl_all[addr][k].clear()
+    for addr in self.addresses:
+      for k in self.vl_all[addr]:
+        self.vl_all[addr][k].clear()
 
-      updated_addrs: set[int] = set()
-      for entry in strings:
-        t = entry[0]
-        frames = entry[1]
-        bus_empty = True
-        for address, dat, src in frames:
-          if src != self.bus:
-            continue
-          bus_empty = False
-          state = self.message_states.get(address)
-          if state is None or len(dat) > 64:
-            continue
-          if state.parse(t, dat):
-            updated_addrs.add(address)
-            msgname = state.name
-            for i, sig in enumerate(state.signals):
-              val = state.vals[i]
-              self.vl[address][sig.name] = val
-              self.vl[msgname][sig.name] = val
-              self.vl_all[address][sig.name] = state.all_vals[i]
-              self.vl_all[msgname][sig.name] = state.all_vals[i]
-              self.ts_nanos[address][sig.name] = state.timestamps[-1]
-              self.ts_nanos[msgname][sig.name] = state.timestamps[-1]
+    updated_addrs: set[int] = set()
+    for entry in strings:
+      t = entry[0]
+      frames = entry[1]
+      bus_empty = True
+      for address, dat, src in frames:
+        if src != self.bus:
+          continue
+        bus_empty = False
+        state = self.message_states.get(address)
+        if state is None or len(dat) > 64:
+          continue
+        if state.parse(t, dat):
+          updated_addrs.add(address)
+          msgname = state.name
+          for i, sig in enumerate(state.signals):
+            val = state.vals[i]
+            self.vl[address][sig.name] = val
+            self.vl[msgname][sig.name] = val
+            self.vl_all[address][sig.name] = state.all_vals[i]
+            self.vl_all[msgname][sig.name] = state.all_vals[i]
+            self.ts_nanos[address][sig.name] = state.timestamps[-1]
+            self.ts_nanos[msgname][sig.name] = state.timestamps[-1]
 
-        if not bus_empty:
-          self.last_nonempty_nanos = t
-        bus_timeout_threshold = 500 * 1_000_000
-        for st in self.message_states.values():
-          if st.timeout_threshold > 0:
-            bus_timeout_threshold = min(bus_timeout_threshold, st.timeout_threshold)
-        self.bus_timeout = (t - self.last_nonempty_nanos) > bus_timeout_threshold
-        self.update_valid(t)
+      if not bus_empty:
+        self.last_nonempty_nanos = t
+      bus_timeout_threshold = 500 * 1_000_000
+      for st in self.message_states.values():
+        if st.timeout_threshold > 0:
+          bus_timeout_threshold = min(bus_timeout_threshold, st.timeout_threshold)
+      self.bus_timeout = (t - self.last_nonempty_nanos) > bus_timeout_threshold
+      self.update_valid(t)
 
-      return updated_addrs
-    except (TypeError, IndexError):
-      raise RuntimeError("invalid parameter") from None
+    return updated_addrs
 
 
 class CANDefine:
