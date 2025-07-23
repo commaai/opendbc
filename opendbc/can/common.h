@@ -1,5 +1,6 @@
 #pragma once
 
+#include <deque>
 #include <cstring>
 #include <map>
 #include <set>
@@ -10,7 +11,7 @@
 #include <vector>
 
 #include "opendbc/can/logger.h"
-#include "opendbc/can/common_dbc.h"
+#include "opendbc/can/dbc.h"
 
 #define INFO printf
 #define WARN printf
@@ -21,7 +22,6 @@
 #define CAN_INVALID_CNT 5
 
 // Car specific functions
-void pedal_setup_signal(Signal &sig, const std::string& dbc_name, int line_num);
 void tesla_setup_signal(Signal &sig, const std::string& dbc_name, int line_num);
 
 unsigned int honda_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
@@ -32,7 +32,7 @@ unsigned int volkswagen_mqb_meb_checksum(uint32_t address, const Signal &sig, co
 unsigned int xor_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int hkg_can_fd_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int fca_giorgio_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
-unsigned int pedal_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
+unsigned int body_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int tesla_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 
 #define DBC_ASSERT(condition, message)                             \
@@ -65,21 +65,25 @@ public:
   uint32_t address;
   unsigned int size;
 
-  std::vector<Signal> parse_sigs;
+  std::vector<Signal> signals;
   std::vector<double> vals;
   std::vector<std::vector<double>> all_vals;
 
-  uint64_t last_seen_nanos;
-  uint64_t check_threshold;
-
   uint8_t counter;
-  uint8_t counter_fail;
+  uint8_t counter_fail = 0;
+  double frequency = 0.0f;
+  uint64_t timeout_threshold = 0;
+  std::deque<uint64_t> timestamps;
 
+  bool ignore_alive = false;
   bool ignore_checksum = false;
   bool ignore_counter = false;
 
+  bool valid(uint64_t current_nanos, bool bus_timeout) const;
   bool parse(uint64_t nanos, const std::vector<uint8_t> &dat);
-  bool update_counter_generic(int64_t v, int cnt_size);
+  bool update_counter(int64_t v, int cnt_size);
+
+  uint64_t first_seen_nanos = 0;
 };
 
 class CANParser {
@@ -91,10 +95,8 @@ private:
 public:
   bool can_valid = false;
   bool bus_timeout = false;
-  uint64_t first_nanos = 0;
   uint64_t last_nonempty_nanos = 0;
-  uint64_t bus_timeout_threshold = 0;
-  uint64_t can_invalid_cnt = CAN_INVALID_CNT;
+  int can_invalid_cnt = CAN_INVALID_CNT;
 
   CANParser(int abus, const std::string& dbc_name,
             const std::vector<std::pair<uint32_t, int>> &messages);
@@ -105,16 +107,4 @@ public:
 protected:
   void UpdateCans(const CanData &can, std::set<uint32_t> &updated_addresses);
   void UpdateValid(uint64_t nanos);
-};
-
-class CANPacker {
-private:
-  const DBC *dbc = NULL;
-  std::unordered_map<uint32_t, std::unordered_map<std::string, Signal>> signal_lookup;
-  std::map<uint32_t, uint32_t> counters;
-
-public:
-  CANPacker(const std::string& dbc_name);
-  std::vector<uint8_t> pack(uint32_t address, const std::vector<SignalPackValue> &values);
-  const Msg* lookup_message(uint32_t address);
 };
