@@ -1,11 +1,9 @@
-from __future__ import annotations
-
-import numbers
 import os
+import numbers
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 
-from .packer import DBC, DBC_CACHE, Signal, parse_dbc
+from opendbc.can.packer import DBC, DBC_CACHE, Signal, parse_dbc
 
 
 MAX_BAD_COUNTER = 5
@@ -124,9 +122,7 @@ class MessageState:
 
 
 class CANParser:
-  def __init__(self, dbc_name, messages: list[tuple[str | int, int]], bus: int = 0):
-    if isinstance(dbc_name, bytes):
-      dbc_name = dbc_name.decode("utf-8")
+  def __init__(self, dbc_name: str, messages: list[tuple[str | int, int]], bus: int = 0):
     self.dbc_name: str = dbc_name
     self.bus: int = bus
     self.dbc: DBC | None = _get_dbc(dbc_name)
@@ -237,8 +233,6 @@ class CANParser:
 
 class CANDefine:
   def __init__(self, dbc_name: str):
-    if isinstance(dbc_name, bytes):
-      dbc_name = dbc_name.decode("utf-8")
     self.dbc_name = dbc_name
     self.dbc = _get_dbc(dbc_name)
     if not self.dbc:
@@ -259,5 +253,3 @@ class CANDefine:
       dv[msgname][sgname] = dv[address][sgname]
 
     self.dv = dict(dv)
-
-
