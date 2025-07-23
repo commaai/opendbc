@@ -76,6 +76,7 @@ public:
   uint64_t timeout_threshold = 0;
   std::deque<uint64_t> timestamps;
 
+  bool ignore_alive = false;
   bool ignore_checksum = false;
   bool ignore_counter = false;
 

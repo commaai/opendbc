@@ -114,6 +114,10 @@ bool MessageState::valid(uint64_t current_nanos, bool bus_timeout) const {
     cases get caught here too.
   */
 
+  if (ignore_alive) {
+    return true;
+  }
+
   const bool print = true; //!bus_timeout && ((current_nanos - first_seen_nanos) > 7e9);
   if (timestamps.empty()) {
     if (print) LOGE_100("0x%X '%s' NOT SEEN", address, name.c_str());
@@ -145,6 +149,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<st
     state.address = address;
     state.ignore_counter = ignore_counter;
     state.ignore_checksum = ignore_checksum;
+    state.ignore_alive = (frequency == 0);
 
     const Msg *msg = dbc->addr_to_msg.at(address);
     state.name = msg->name;
