@@ -1,5 +1,6 @@
 import re
 import os
+import math
 from dataclasses import dataclass
 from collections.abc import Callable
 
@@ -398,7 +399,7 @@ class CANPacker:
       sig = msg.sigs.get(name)
       if sig is None:
         continue
-      ival = int(round((value - sig.offset) / sig.factor))
+      ival = int(math.floor((value - sig.offset) / sig.factor + 0.5))
       if ival < 0:
         ival = (1 << sig.size) + ival
       set_value(dat, sig, ival)

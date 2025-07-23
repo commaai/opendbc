@@ -108,15 +108,3 @@ protected:
   void UpdateCans(const CanData &can, std::set<uint32_t> &updated_addresses);
   void UpdateValid(uint64_t nanos);
 };
-
-class CANPacker {
-private:
-  const DBC *dbc = NULL;
-  std::unordered_map<uint32_t, std::unordered_map<std::string, Signal>> signal_lookup;
-  std::map<uint32_t, uint32_t> counters;
-
-public:
-  CANPacker(const std::string& dbc_name);
-  std::vector<uint8_t> pack(uint32_t address, const std::vector<SignalPackValue> &values);
-  const Msg* lookup_message(uint32_t address);
-};
