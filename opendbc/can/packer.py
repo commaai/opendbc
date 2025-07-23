@@ -45,11 +45,20 @@ class Msg:
 
 
 @dataclass
+class Val:
+  name: str
+  address: int
+  def_val: str
+  sigs: dict[str, Signal] | None = None
+
+
+@dataclass
 class DBC:
   name: str
   msgs: dict[int, Msg]
   addr_to_msg: dict[int, Msg]
   name_to_msg: dict[str, Msg]
+  vals: list[Val]
 
 
 # ***** checksum functions *****
@@ -309,6 +318,8 @@ def tesla_setup_signal(sig: Signal, dbc_name: str, line_num: int) -> None:
 BO_RE = re.compile(r"^BO_ (\w+) (\w+) *: (\w+) (\w+)")
 SG_RE = re.compile(r"^SG_ (\w+) : (\d+)\|(\d+)@(\d)([+-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[[0-9.+\-eE]+\|[0-9.+\-eE]+\] \".*\" .*")
 SGM_RE = re.compile(r"^SG_ (\w+) (\w+) *: (\d+)\|(\d+)@(\d)([+-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[[0-9.+\-eE]+\|[0-9.+\-eE]+\] \".*\" .*")
+VAL_RE = re.compile(r"^VAL_ (\w+) (\w+) (.*);")
+VAL_SPLIT_RE = re.compile(r'["]+')
 
 
 def parse_dbc(path: str) -> DBC:
@@ -321,6 +332,7 @@ def parse_dbc(path: str) -> DBC:
   msgs: dict[int, Msg] = {}
   addr_to_msg: dict[int, Msg] = {}
   name_to_msg: dict[str, Msg] = {}
+  vals: list[Val] = []
   address = 0
   signals_temp: dict[int, dict[str, Signal]] = {}
   for line_num, line in enumerate(lines, 1):
@@ -364,9 +376,20 @@ def parse_dbc(path: str) -> DBC:
       sig = Signal(sig_name, start_bit, msb, lsb, size, is_signed, factor, offset_val, is_little_endian)
       set_signal_type(sig, checksum_state, name, line_num)
       signals_temp[address][sig_name] = sig
+    elif line.startswith("VAL_ "):
+      m = VAL_RE.search(line)
+      if not m:
+        continue
+      val_addr = int(m.group(1), 0)
+      sgname = m.group(2)
+      defs = m.group(3)
+      words = [w.strip() for w in VAL_SPLIT_RE.split(defs) if w.strip()]
+      words = [w.upper().replace(" ", "_") for w in words]
+      val_def = " ".join(words).strip()
+      vals.append(Val(sgname, val_addr, val_def))
   for addr, sigs in signals_temp.items():
     msgs[addr].sigs = sigs
-  dbc = DBC(name, msgs, addr_to_msg, name_to_msg)
+  dbc = DBC(name, msgs, addr_to_msg, name_to_msg, vals)
   return dbc
 
 
@@ -421,9 +444,6 @@ def set_signal_type(sig: Signal, chk: ChecksumState | None, dbc_name: str, line_
 # ***** packer *****
 class CANPacker:
   def __init__(self, dbc_name: str):
-    # Handle both string and bytes input (for compatibility with CANParser.dbc_name)
-    if isinstance(dbc_name, bytes):
-      dbc_name = dbc_name.decode("utf-8")
     dbc_path = dbc_name
     if not os.path.exists(dbc_path):
       dbc_path = os.path.join(os.path.dirname(__file__), "..", "dbc", dbc_name + ".dbc")
