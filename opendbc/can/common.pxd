@@ -8,17 +8,18 @@ from libcpp.set cimport set
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp.unordered_map cimport unordered_map
+from libcpp.deque cimport deque
 
 
 ctypedef unsigned int (*calc_checksum_type)(uint32_t, const Signal&, const vector[uint8_t] &)
 
-cdef extern from "common_dbc.h":
+cdef extern from "dbc.h":
   ctypedef enum SignalType:
     DEFAULT,
     COUNTER,
     HONDA_CHECKSUM,
     TOYOTA_CHECKSUM,
-    PEDAL_CHECKSUM,
+    BODY_CHECKSUM,
     VOLKSWAGEN_MQB_MEB_CHECKSUM,
     XOR_CHECKSUM,
     SUBARU_CHECKSUM,
@@ -67,7 +68,7 @@ cdef extern from "common.h":
     vector[Signal] signals
     vector[double] vals
     vector[vector[double]] all_vals
-    uint64_t last_seen_nanos
+    deque[uint64_t] timestamps
 
   cdef struct CanFrame:
     long src

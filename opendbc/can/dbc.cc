@@ -14,7 +14,7 @@
 #include <clocale>
 
 #include "opendbc/can/common.h"
-#include "opendbc/can/common_dbc.h"
+#include "opendbc/can/dbc.h"
 
 std::regex bo_regexp(R"(^BO_ (\w+) (\w+) *: (\w+) (\w+))");
 std::regex sg_regexp(R"(^SG_ (\w+) : (\d+)\|(\d+)@(\d+)([\+|\-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[([0-9.+\-eE]+)\|([0-9.+\-eE]+)\] \"(.*)\" (.*))");
@@ -57,7 +57,7 @@ ChecksumState* get_checksum(const std::string& dbc_name) {
   } else if (startswith(dbc_name, "fca_giorgio")) {
     s = new ChecksumState({8, -1, 7, -1, false, FCA_GIORGIO_CHECKSUM, &fca_giorgio_checksum});
   } else if (startswith(dbc_name, "comma_body")) {
-    s = new ChecksumState({8, 4, 7, 3, false, PEDAL_CHECKSUM, &pedal_checksum});
+    s = new ChecksumState({8, 4, 7, 3, false, BODY_CHECKSUM, &body_checksum});
   } else if (startswith(dbc_name, "tesla_model3_party")) {
     s = new ChecksumState({8, -1, 0, -1, true, TESLA_CHECKSUM, &tesla_checksum, &tesla_setup_signal});
   }
@@ -71,8 +71,6 @@ void set_signal_type(Signal& s, ChecksumState* chk, const std::string& dbc_name,
     if (chk->setup_signal) {
       chk->setup_signal(s, dbc_name, line_num);
     }
-
-    pedal_setup_signal(s, dbc_name, line_num);
 
     if (s.name == "CHECKSUM") {
       s.type = chk->checksum_type;

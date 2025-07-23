@@ -3,7 +3,7 @@ Import('env', 'envCython', 'common', 'arch')
 envDBC = env.Clone()
 dbc_file_path = '-DDBC_FILE_PATH=\'"%s"\'' % (envDBC.Dir("../dbc").abspath)
 envDBC['CXXFLAGS'] += [dbc_file_path]
-src = ["dbc.cc", "parser.cc", "packer.cc", "common.cc"]
+src = ["dbc.cc", "parser.cc", "packer.cc", "car_specific.cc"]
 
 # shared library for openpilot
 LINKFLAGS = envDBC["LINKFLAGS"]

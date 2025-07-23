@@ -7,7 +7,7 @@ from opendbc.car.tesla.values import TeslaSafetyFlags
 from opendbc.car.tesla.carcontroller import get_max_angle_delta, get_max_angle, get_safety_CP
 from opendbc.car.structs import CarParams
 from opendbc.car.vehicle_model import VehicleModel
-from opendbc.can.can_define import CANDefine
+from opendbc.can import CANDefine
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerPanda, MAX_SPEED_DELTA, MAX_WRONG_COUNTERS, away_round, round_speed
