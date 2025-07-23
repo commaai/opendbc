@@ -132,7 +132,7 @@ bool MessageState::valid(uint64_t current_nanos, bool bus_timeout) const {
 
 // ***** CANParser *****
 
-CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<std::pair<uint32_t, int>> &messages, bool ignore_counter, bool ignore_checksum)
+CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<std::pair<uint32_t, int>> &messages)
   : bus(abus) {
   dbc = dbc_lookup(dbc_name);
   assert(dbc);
@@ -147,8 +147,6 @@ CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<st
 
     MessageState &state = message_states[address];
     state.address = address;
-    state.ignore_counter = ignore_counter;
-    state.ignore_checksum = ignore_checksum;
     state.ignore_alive = (frequency == 0);
 
     const Msg *msg = dbc->addr_to_msg.at(address);

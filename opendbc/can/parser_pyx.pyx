@@ -26,7 +26,7 @@ cdef class CANParser:
     string dbc_name
     uint32_t bus
 
-  def __init__(self, dbc_name, messages, bus=0, ignore_counter=False, ignore_checksum=False):
+  def __init__(self, dbc_name, messages, bus=0):
     self.dbc_name = dbc_name
     self.bus = bus
     self.dbc = dbc_lookup(dbc_name)
@@ -67,10 +67,8 @@ cdef class CANParser:
     else:
       cpp_dbc_name = dbc_name  # Assume bytes
     cdef int cpp_bus = bus
-    cdef bint cpp_ign_counter = ignore_counter
-    cdef bint cpp_ign_checksum = ignore_checksum
     with nogil:
-      self.can = new cpp_CANParser(cpp_bus, cpp_dbc_name, message_v, cpp_ign_counter, cpp_ign_checksum)
+      self.can = new cpp_CANParser(cpp_bus, cpp_dbc_name, message_v)
 
   def __dealloc__(self):
     if self.can:

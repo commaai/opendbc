@@ -66,7 +66,7 @@ class TestCanChecksums:
     # TODO: refactor to use self.verify_checksum()
     dbc_file = "honda_accord_2018_can_generated"
     msgs = [("LKAS_HUD", 0), ("LKAS_HUD_A", 0)]
-    parser = CANParser(dbc_file, msgs, 0, ignore_counter=True)
+    parser = CANParser(dbc_file, msgs, 0)
     packer = CANPacker(dbc_file)
 
     values = {
