@@ -31,7 +31,7 @@ def get_can_messages(CP):
     ("SCM_FEEDBACK", 10),  # FIXME: there are different frequencies for different arb IDs
     ("SCM_BUTTONS", 25),  # FIXME: there are different frequencies for different arb IDs
   ]
-  
+
   if  CP.carFingerprint == CAR.ACURA_RLX_HYBRID:
     messages += [
       ("CAR_SPEED", 0), # missing on RLX
@@ -56,23 +56,17 @@ def get_can_messages(CP):
     messages +=[
       ("STEER_STATUS", 100),
     ]
-  
+
   if CP.carFingerprint != CAR.ACURA_INTEGRA:
     messages += [
       ("ENGINE_DATA", 100), # Not found on Integra, but still want to check all others
     ]
 
-  if CP.carFingerprint in (CAR.HONDA_CRV_HYBRID, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.ACURA_RDX_3G, CAR.HONDA_E, *HONDA_BOSCH_ALT_RADAR, \
-                           CAR.ACURA_INTEGRA, CAR.ACURA_RLX_HYBRID):
-    messages.append((gearbox_msg, 50))
-  else:
-    messages.append((gearbox_msg, 100))
-
   if CP.carFingerprint in HONDA_NIDEC_HYBRID:
     messages += [
       ("HYBRID_STATUS", 100),
     ]
-  
+
   if CP.flags & HondaFlags.BOSCH_ALT_BRAKE:
     messages.append(("BRAKE_MODULE", 50))
 
@@ -321,7 +315,7 @@ class CarState(CarStateBase):
     pt_messages = get_can_messages(CP)
 
     cam_messages = []
-    
+
     if (CP.carFingerprint in (SERIAL_STEERING)) or (CP.carFingerprint in (CAR.ACURA_RLX_HYBRID)):
       pt_messages += [
         ("STEERING_CONTROL", 0), # no stock message on serial steering, temp disable on RLX
@@ -330,7 +324,7 @@ class CarState(CarStateBase):
       cam_messages += [
         ("STEERING_CONTROL", 100),
       ]
-    
+
     if CP.carFingerprint in HONDA_BOSCH_RADARLESS:
       cam_messages += [
         ("ACC_HUD", 10),
