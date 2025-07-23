@@ -145,7 +145,7 @@ class CarController(CarControllerBase):
     if len(CC.orientationNED) == 3:
       self.pitch = CC.orientationNED[1]
     hill_brake = math.sin(self.pitch) * ACCELERATION_DUE_TO_GRAVITY
-    
+
     if CC.longActive:
       accel = actuators.accel
       if (self.CP.carFingerprint in (HONDA_NIDEC_HYBRID)) and (accel > max ( 0, CS.out.aEgo) + 0.1):
@@ -297,7 +297,7 @@ class CarController(CarControllerBase):
         # standstill disengage
         if ( accel >= 0.01 ) and (CS.out.vEgo < 4.0 ) and ( pcm_speed < 25.0 / 3.6):
           pcm_speed = 25.0 / 3.6
-          
+
       display_lines = hud_control.lanesVisible and CS.show_lanelines and (abs(apply_torque) < self.params.STEER_MAX) and not steerDisable
       hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
                     display_lines, fcw_display, acc_alert, steer_required, hud_control.leadDistanceBars)
