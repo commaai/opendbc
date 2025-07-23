@@ -227,7 +227,7 @@ class CAR(Platforms):
     [HondaCarDocs("Honda Pilot 2023-25", "All")],
     CarSpecs(mass=4660 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.428, steerRatio=15.0, tireStiffnessFactor=0.444),  # as spec
     {Bus.cam: 'honda_pilot_2023_can_generated', Bus.pt: 'honda_pilot_2023_can_generated'},
-    flags=HondaFlags.BOSCH_CANFD,
+    flags=HondaFlags.BOSCH_CANFD | HondaFlags.BOSCH_ALT_BRAKE,
   )
   HONDA_PASSPORT_4G = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda Passport 2026", "All")],
