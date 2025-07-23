@@ -209,8 +209,6 @@ std::set<uint32_t> CANParser::update(const std::vector<CanData> &can_data) {
 }
 
 void CANParser::UpdateCans(const CanData &can, std::set<uint32_t> &updated_addresses) {
-  //DEBUG("got %zu messages\n", can.frames.size());
-
   bool bus_empty = true;
 
   for (const auto &frame : can.frames) {
@@ -259,14 +257,11 @@ void CANParser::UpdateValid(uint64_t nanos) {
 
   for (auto& kv : message_states) {
     const auto& state = kv.second;
-
     if (state.counter_fail >= MAX_BAD_COUNTER) {
       counters_valid = false;
     }
-
     if (!state.valid(nanos, bus_timeout)) {
       valid = false;
-      LOGE("INVALID %s %d %.2f %zu", state.name.c_str(), state.address, state.frequency, state.timestamps.size());
     }
   }
 
