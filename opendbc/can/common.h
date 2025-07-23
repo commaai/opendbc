@@ -1,5 +1,6 @@
 #pragma once
 
+#include <deque>
 #include <cstring>
 #include <map>
 #include <set>
@@ -69,17 +70,21 @@ public:
   std::vector<double> vals;
   std::vector<std::vector<double>> all_vals;
 
-  uint64_t last_seen_nanos;
-  uint64_t check_threshold;
-
   uint8_t counter;
-  uint8_t counter_fail;
+  uint8_t counter_fail = 0;
+  double frequency = 0.0f;
+  uint64_t timeout_threshold = 0;
+  std::deque<uint64_t> timestamps;
 
+  bool ignore_alive = false;
   bool ignore_checksum = false;
   bool ignore_counter = false;
 
+  bool valid(uint64_t current_nanos, bool bus_timeout) const;
   bool parse(uint64_t nanos, const std::vector<uint8_t> &dat);
   bool update_counter(int64_t v, int cnt_size);
+
+  uint64_t first_seen_nanos = 0;
 };
 
 class CANParser {
@@ -91,10 +96,8 @@ private:
 public:
   bool can_valid = false;
   bool bus_timeout = false;
-  uint64_t first_nanos = 0;
   uint64_t last_nonempty_nanos = 0;
-  uint64_t bus_timeout_threshold = 0;
-  uint64_t can_invalid_cnt = CAN_INVALID_CNT;
+  int can_invalid_cnt = CAN_INVALID_CNT;
 
   CANParser(int abus, const std::string& dbc_name,
             const std::vector<std::pair<uint32_t, int>> &messages);
