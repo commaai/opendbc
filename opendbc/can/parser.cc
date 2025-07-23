@@ -85,9 +85,9 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
   // learn message frequency
   if (frequency < 1e-5) {
     double dt = (timestamps.back() - timestamps.front())*1e-9;
-    if ((timestamps.size() >= 4 && (dt > 1.0f)) || (timestamps.size() >= max_buffer)) {
+    if ((timestamps.size() >= 3 && (dt > 1.0f)) || (timestamps.size() >= max_buffer)) {
       frequency = std::min(timestamps.size() / dt, (double)100.0f);  // 100Hz max for checks
-      timeout_threshold = (1000000000ULL / frequency) * 10;
+      timeout_threshold = (1000000000ULL / frequency) * 10;  // timeout on 10x expected freq
     }
   }
 
@@ -114,12 +114,12 @@ bool MessageState::valid(uint64_t current_nanos, bool bus_timeout) const {
     cases get caught here too.
   */
 
-  const bool print = !bus_timeout && ((current_nanos - first_seen_nanos) > 7e9);
+  const bool print = true; //!bus_timeout && ((current_nanos - first_seen_nanos) > 7e9);
   if (timestamps.empty()) {
     if (print) LOGE_100("0x%X '%s' NOT SEEN", address, name.c_str());
     return false;
   }
-  if ((current_nanos - timestamps.back()) > timeout_threshold) {
+  if (timeout_threshold > 0 && ((current_nanos - timestamps.back()) > timeout_threshold)) {
     if (print) LOGE_100("0x%X '%s' TIMED OUT", address, name.c_str());
     return false;
   }
@@ -206,14 +206,12 @@ void CANParser::UpdateCans(const CanData &can, std::set<uint32_t> &updated_addre
 
   for (const auto &frame : can.frames) {
     if (frame.src != bus) {
-      // DEBUG("skip %d: wrong bus\n", cmsg.getAddress());
       continue;
     }
     bus_empty = false;
 
     auto state_it = message_states.find(frame.address);
     if (state_it == message_states.end()) {
-      // DEBUG("skip %d: not specified\n", cmsg.getAddress());
       continue;
     }
     if (frame.dat.size() > 64) {
@@ -259,6 +257,7 @@ void CANParser::UpdateValid(uint64_t nanos) {
 
     if (!state.valid(nanos, bus_timeout)) {
       valid = false;
+      LOGE("INVALID %s %d %.2f %zu", state.name.c_str(), state.address, state.frequency, state.timestamps.size());
     }
   }
 
