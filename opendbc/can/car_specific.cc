@@ -6,6 +6,10 @@
 
 #include "opendbc/can/common.h"
 
+/*
+  TODO: these should move to their respective folders in opendbc/car/
+*/
+
 void tesla_setup_signal(Signal &sig, const std::string& dbc_name, int line_num) {
   if (endswith(sig.name, "Counter")) {
     sig.type = COUNTER;
