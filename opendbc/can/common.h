@@ -22,7 +22,6 @@
 #define CAN_INVALID_CNT 5
 
 // Car specific functions
-void pedal_setup_signal(Signal &sig, const std::string& dbc_name, int line_num);
 void tesla_setup_signal(Signal &sig, const std::string& dbc_name, int line_num);
 
 unsigned int honda_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
@@ -33,7 +32,7 @@ unsigned int volkswagen_mqb_meb_checksum(uint32_t address, const Signal &sig, co
 unsigned int xor_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int hkg_can_fd_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int fca_giorgio_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
-unsigned int pedal_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
+unsigned int body_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 unsigned int tesla_checksum(uint32_t address, const Signal &sig, const std::vector<uint8_t> &d);
 
 #define DBC_ASSERT(condition, message)                             \
