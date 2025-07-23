@@ -8,7 +8,8 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.honda.hondacan import CanBus, get_cruise_speed_conversion
 from opendbc.car.honda.values import CAR, DBC, STEER_THRESHOLD, HONDA_BOSCH, HONDA_BOSCH_CANFD, HONDA_BOSCH_ALT_RADAR, \
                                                  HONDA_NIDEC_ALT_SCM_MESSAGES, HONDA_BOSCH_RADARLESS, \
-                                                 HondaFlags, CruiseButtons, CruiseSettings, GearShifter
+                                                 HondaFlags, CruiseButtons, CruiseSettings, GearShifter, \
+                                                 SERIAL_STEERING, HONDA_NIDEC_HYBRID
 from opendbc.car.interfaces import CarStateBase
 
 TransmissionType = structs.CarParams.TransmissionType
@@ -26,24 +27,48 @@ def get_can_messages(CP, gearbox_msg):
     ("SEATBELT_STATUS", 10),
     ("CRUISE", 10),
     ("POWERTRAIN_DATA", 100),
-    ("CAR_SPEED", 10),
     ("VSA_STATUS", 50),
-    ("STEER_STATUS", 100),
     ("STEER_MOTOR_TORQUE", 0),  # TODO: not on every car
     ("SCM_FEEDBACK", 10),  # FIXME: there are different frequencies for different arb IDs
     ("SCM_BUTTONS", 25),  # FIXME: there are different frequencies for different arb IDs
   ]
+  
+  if  CP.carFingerprint == CAR.ACURA_RLX_HYBRID:
+    messages += [
+      ("CAR_SPEED", 0), # missing on RLX
+    ]
+  else:
+    messages += [("CAR_SPEED", 10),]
+
+  if  CP.carFingerprint in SERIAL_STEERING:
+    messages += [
+      ("STEER_STATUS", 0), # no stock message, only after steering board gateway opens
+    ]
+  elif  CP.carFingerprint == CAR.ACURA_RLX_HYBRID:
+    messages += [
+      ("STEER_STATUS", 0), # temp disable RLX
+    ]
+  else:
+    messages +=[
+      ("STEER_STATUS", 100),
+    ]
+  
   if CP.carFingerprint != CAR.ACURA_INTEGRA:
     messages += [
       ("ENGINE_DATA", 100), # Not found on Integra, but still want to check all others
     ]
 
   if CP.carFingerprint in (CAR.HONDA_CRV_HYBRID, CAR.HONDA_CIVIC_BOSCH_DIESEL, CAR.ACURA_RDX_3G, CAR.HONDA_E, *HONDA_BOSCH_ALT_RADAR, \
-                           CAR.ACURA_INTEGRA):
+                           CAR.ACURA_INTEGRA, CAR.ACURA_RLX_HYBRID):
     messages.append((gearbox_msg, 50))
   else:
     messages.append((gearbox_msg, 100))
 
+  if CP.carFingerprint in HONDA_NIDEC_HYBRID:
+    messages += [
+      ("HYBRID_STATUS", 100),
+    ]
+  
   if CP.flags & HondaFlags.BOSCH_ALT_BRAKE:
     messages.append(("BRAKE_MODULE", 50))
 
@@ -91,7 +116,8 @@ class CarState(CarStateBase):
 
     if CP.transmissionType != TransmissionType.manual:
       self.shifter_values = can_define.dv[self.gearbox_msg]["GEAR_SHIFTER"]
-    self.steer_status_values = defaultdict(lambda: "UNKNOWN", can_define.dv["STEER_STATUS"]["STEER_STATUS"])
+    if CP.carFingerprint != CAR.ACURA_RLX_HYBRID:
+      self.steer_status_values = defaultdict(lambda: "UNKNOWN", can_define.dv["STEER_STATUS"]["STEER_STATUS"])
 
     self.brake_switch_prev = False
     self.brake_switch_active = False
@@ -144,11 +170,15 @@ class CarState(CarStateBase):
 
     ret.seatbeltUnlatched = bool(cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LAMP"] or not cp.vl["SEATBELT_STATUS"]["SEATBELT_DRIVER_LATCHED"])
 
-    steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]["STEER_STATUS"]]
-    ret.steerFaultPermanent = steer_status not in ("NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT", "DRIVER_STEERING")
-    # LOW_SPEED_LOCKOUT is not worth a warning
-    # NO_TORQUE_ALERT_2 can be caused by bump or steering nudge from driver
-    ret.steerFaultTemporary = steer_status not in ("NORMAL", "LOW_SPEED_LOCKOUT", "NO_TORQUE_ALERT_2", "DRIVER_STEERING")
+    if self.CP.carFingerprint != CAR.ACURA_RLX_HYBRID:
+      steer_status = self.steer_status_values[cp.vl["STEER_STATUS"]["STEER_STATUS"]]
+      ret.steerFaultPermanent = steer_status not in ("NORMAL", "NO_TORQUE_ALERT_1", "NO_TORQUE_ALERT_2", "LOW_SPEED_LOCKOUT", "TMP_FAULT", "DRIVER_STEERING")
+      # LOW_SPEED_LOCKOUT is not worth a warning
+      # NO_TORQUE_ALERT_2 can be caused by bump or steering nudge from driver
+      ret.steerFaultTemporary = steer_status not in ("NORMAL", "LOW_SPEED_LOCKOUT", "NO_TORQUE_ALERT_2", "DRIVER_STEERING")
+    else: # ignore until RLX steering is fixed
+      ret.steerFaultPermanent = False
+      ret.steerFaultTemporary = False
 
     # Log non-critical stock ACC/LKAS faults if Nidec (camera) or longitudinal CANFD alt-brake
     if self.CP.carFingerprint not in HONDA_BOSCH:
@@ -163,6 +193,8 @@ class CarState(CarStateBase):
           ret.carFaultedNonCritical = bool(cp.vl["BRAKE_MODULE"]["CRUISE_FAULT"])
         else:
           ret.carFaultedNonCritical = bool(cp.vl["BRAKE_ERROR"]["BRAKE_ERROR_1"] or cp.vl["BRAKE_ERROR"]["BRAKE_ERROR_2"])
+      if self.CP.openpilotLongitudinalControl and self.CP.carFingerprint in HONDA_NIDEC_HYBRID:
+          ret.carFaultedNonCritical = bool(cp.vl["HYBRID_STATUS"]["BRAKE_ERROR_1"] or cp.vl["HYBRID_STATUS"]["BRAKE_ERROR_2"])
       elif self.CP.openpilotLongitudinalControl:
         ret.accFaulted = bool(cp.vl["STANDSTILL"]["BRAKE_ERROR_1"] or cp.vl["STANDSTILL"]["BRAKE_ERROR_2"])
 
@@ -212,7 +244,10 @@ class CarState(CarStateBase):
     ret.gas = cp.vl["POWERTRAIN_DATA"]["PEDAL_GAS"]
     ret.gasPressed = ret.gas > 1e-5
 
-    ret.steeringTorque = cp.vl["STEER_STATUS"]["STEER_TORQUE_SENSOR"]
+    if self.CP.carFingerprint == CAR.ACURA_RLX_HYBRID:
+      ret.steeringTorque = cp.vl["STEER_MOTOR_TORQUE"]["MOTOR_TORQUE"] # temp until steering fixed
+    else:
+      ret.steeringTorque = cp.vl["STEER_STATUS"]["STEER_TORQUE_SENSOR"]
     ret.steeringTorqueEps = cp.vl["STEER_MOTOR_TORQUE"]["MOTOR_TORQUE"]
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD.get(self.CP.carFingerprint, 1200)
 
@@ -295,14 +330,30 @@ class CarState(CarStateBase):
   def get_can_parsers(self, CP):
     pt_messages = get_can_messages(CP, self.gearbox_msg)
 
-    cam_messages = [
-      ("STEERING_CONTROL", 100),
-    ]
-
+    cam_messages = []
+    
+    if (CP.carFingerprint in (SERIAL_STEERING)) or (CP.carFingerprint in (CAR.ACURA_RLX_HYBRID)):
+      pt_messages += [
+        ("STEERING_CONTROL", 0), # no stock message on serial steering, temp disable on RLX
+      ]
+    else:
+      cam_messages += [
+        ("STEERING_CONTROL", 100),
+      ]
+    
     if CP.carFingerprint in HONDA_BOSCH_RADARLESS:
       cam_messages += [
         ("ACC_HUD", 10),
         ("LKAS_HUD", 10),
+      ]
+
+    elif CP.carFingerprint == CAR.ACURA_RLX_HYBRID:
+      pt_messages += [
+        ("LKAS_HUD", 0), # temporarily stopped, shut off by safety?
+      ]
+      cam_messages += [
+        ("ACC_HUD", 10),
+        ("BRAKE_COMMAND", 50),
       ]
 
     elif CP.carFingerprint not in HONDA_BOSCH:
