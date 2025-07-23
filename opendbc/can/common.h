@@ -73,7 +73,7 @@ public:
   uint8_t counter;
   uint8_t counter_fail = 0;
   double frequency = 0.0f;
-  uint64_t check_threshold = 0;
+  uint64_t timeout_threshold = 0;
   std::deque<uint64_t> timestamps;
 
   bool ignore_checksum = false;

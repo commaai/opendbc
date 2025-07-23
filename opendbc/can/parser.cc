@@ -87,7 +87,7 @@ bool MessageState::parse(uint64_t nanos, const std::vector<uint8_t> &dat) {
     double dt = (timestamps.back() - timestamps.front())*1e-9;
     if ((timestamps.size() >= 4 && (dt > 1.0f)) || (timestamps.size() >= max_buffer)) {
       frequency = std::min(timestamps.size() / dt, (double)100.0f);  // 100Hz max for checks
-      check_threshold = (1000000000ULL / frequency) * 10;
+      timeout_threshold = (1000000000ULL / frequency) * 10;
     }
   }
 
@@ -119,7 +119,7 @@ bool MessageState::valid(uint64_t current_nanos, bool bus_timeout) const {
     if (print) LOGE_100("0x%X '%s' NOT SEEN", address, name.c_str());
     return false;
   }
-  if ((current_nanos - timestamps.back()) > check_threshold) {
+  if ((current_nanos - timestamps.back()) > timeout_threshold) {
     if (print) LOGE_100("0x%X '%s' TIMED OUT", address, name.c_str());
     return false;
   }
@@ -143,14 +143,8 @@ CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<st
 
     MessageState &state = message_states[address];
     state.address = address;
-    // state.check_frequency = op.check_frequency,
     state.ignore_counter = ignore_counter;
     state.ignore_checksum = ignore_checksum;
-
-    // msg is not valid if a message isn't received for 10 consecutive steps
-    if (frequency > 0) {
-      state.check_threshold = (1000000000ULL / frequency) * 10;
-    }
 
     const Msg *msg = dbc->addr_to_msg.at(address);
     state.name = msg->name;
@@ -245,8 +239,8 @@ void CANParser::UpdateCans(const CanData &can, std::set<uint32_t> &updated_addre
   uint64_t bus_timeout_threshold = 500*1e6;
   for (const auto& kv : message_states) {
     const auto& state = kv.second;
-    if (state.check_threshold > 0) {
-      bus_timeout_threshold = std::min(bus_timeout_threshold, state.check_threshold);
+    if (state.timeout_threshold > 0) {
+      bus_timeout_threshold = std::min(bus_timeout_threshold, state.timeout_threshold);
     }
   }
   bus_timeout = (can.nanos - last_nonempty_nanos) > bus_timeout_threshold;
