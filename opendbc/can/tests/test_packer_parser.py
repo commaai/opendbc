@@ -349,15 +349,6 @@ class TestCanParserPacker:
       "CHECKSUM": 0,
     }
 
-  def test_disallow_duplicate_messages(self):
-    CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 5)])
-
-    with pytest.raises(RuntimeError):
-      CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 5), ("ACC_CONTROL", 10)])
-
-    with pytest.raises(RuntimeError):
-      CANParser("toyota_nodsu_pt_generated", [("ACC_CONTROL", 10), ("ACC_CONTROL", 10)])
-
   def test_allow_undefined_msgs(self):
     # TODO: we should throw an exception for these, but we need good
     #  discovery tests in openpilot first

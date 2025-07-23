@@ -132,48 +132,12 @@ bool MessageState::valid(uint64_t current_nanos, bool bus_timeout) const {
 
 // ***** CANParser *****
 
-CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<std::pair<uint32_t, int>> &messages)
+CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<std::pair<uint32_t, int>> &messages, bool ignore_counter, bool ignore_checksum)
   : bus(abus) {
   dbc = dbc_lookup(dbc_name);
   assert(dbc);
 
-  for (const auto& [address, frequency] : messages) {
-    // disallow duplicate message checks
-    if (message_states.find(address) != message_states.end()) {
-      std::stringstream is;
-      is << "Duplicate Message Check: " << address;
-      throw std::runtime_error(is.str());
-    }
-
-    MessageState &state = message_states[address];
-    state.address = address;
-    // hack for signals whose frequencies vary more than 10x
-    // TODO: figure out a good way to handle this without passing it in...
-    if (frequency < 10 && frequency > 0) {
-      state.frequency = frequency;
-      state.timeout_threshold = (1000000000ULL / frequency) * 10;  // timeout on 10x expected freq
-    }
-    state.ignore_alive = (frequency == 0);
-
-    const Msg *msg = dbc->addr_to_msg.at(address);
-    state.name = msg->name;
-    state.size = msg->size;
-    assert(state.size <= 64);  // max signal size is 64 bytes
-
-    // track all signals for this message
-    state.signals = msg->sigs;
-    state.vals.resize(msg->sigs.size());
-    state.all_vals.resize(msg->sigs.size());
-  }
-}
-
-CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum, bool ignore_counter)
-  : bus(abus) {
-  // Add all messages and signals
-
-  dbc = dbc_lookup(dbc_name);
-  assert(dbc);
-
+  // init all messages from the DBC
   for (const auto& msg : dbc->msgs) {
     MessageState state = {
       .name = msg.name,
@@ -182,6 +146,7 @@ CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum
       .ignore_checksum = ignore_checksum,
       .ignore_counter = ignore_counter,
     };
+    assert(msg.size <= 64);  // max signal size is 64 bytes
 
     for (const auto& sig : msg.sigs) {
       state.signals.push_back(sig);
@@ -190,6 +155,18 @@ CANParser::CANParser(int abus, const std::string& dbc_name, bool ignore_checksum
     }
 
     message_states[state.address] = state;
+  }
+
+  // apply any specific frequencies specified
+  for (const auto& [address, frequency] : messages) {
+    MessageState &state = message_states[address];
+    // hack for signals whose frequencies vary more than 10x
+    // TODO: figure out a good way to handle this without passing it in...
+    if (frequency < 10 && frequency > 0) {
+      state.frequency = frequency;
+      state.timeout_threshold = (1000000000ULL / frequency) * 10;  // timeout on 10x expected freq
+    }
+    state.ignore_alive = (frequency == 0);
   }
 }
 
@@ -222,7 +199,7 @@ void CANParser::UpdateCans(const CanData &can, std::set<uint32_t> &updated_addre
       continue;
     }
     if (frame.dat.size() > 64) {
-      DEBUG("got message longer than 64 bytes: 0x%X %zu\n", frame.address, frame.dat.size());
+      LOGE("got message longer than 64 bytes: 0x%X %zu", frame.address, frame.dat.size());
       continue;
     }
 
@@ -262,6 +239,7 @@ void CANParser::UpdateValid(uint64_t nanos) {
     }
     if (!state.valid(nanos, bus_timeout)) {
       valid = false;
+      LOGE("INVALID %s 0x%x cnt %d %.2fHz %zu", state.name.c_str(), state.address, state.counter_fail, state.frequency, state.timestamps.size());
     }
   }
 
