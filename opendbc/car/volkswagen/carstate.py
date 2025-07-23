@@ -275,7 +275,7 @@ class CarState(CarStateBase):
     ]
 
     if self.CP.flags & VolkswagenFlags.KOMBI_PRESENT:
-      pt_messages.append(("Kombi_03", 1) # From J285 instrument cluster (not present on older cars)
+      pt_messages.append(("Kombi_03", 1)) # From J285 instrument cluster (not present on older cars)
 
     if CP.transmissionType == TransmissionType.direct:
       pt_messages.append(("Motor_EV_01", 10))  # From J??? unknown EV control module
