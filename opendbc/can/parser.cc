@@ -118,7 +118,7 @@ bool MessageState::valid(uint64_t current_nanos, bool bus_timeout) const {
     return true;
   }
 
-  const bool print = true; //!bus_timeout && ((current_nanos - first_seen_nanos) > 7e9);
+  const bool print = !bus_timeout && ((current_nanos - first_seen_nanos) > 7e9);
   if (timestamps.empty()) {
     if (print) LOGE_100("0x%X '%s' NOT SEEN", address, name.c_str());
     return false;
@@ -147,6 +147,12 @@ CANParser::CANParser(int abus, const std::string& dbc_name, const std::vector<st
 
     MessageState &state = message_states[address];
     state.address = address;
+    // hack for signals whose frequencies vary more than 10x
+    // TODO: figure out a good way to handle this without passing it in...
+    if (frequency < 10 && frequency > 0) {
+      state.frequency = frequency;
+      state.timeout_threshold = (1000000000ULL / frequency) * 10;  // timeout on 10x expected freq
+    }
     state.ignore_alive = (frequency == 0);
 
     const Msg *msg = dbc->addr_to_msg.at(address);
