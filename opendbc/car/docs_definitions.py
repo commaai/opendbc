@@ -244,16 +244,8 @@ class CarDocs:
   # make + model + model years
   name: str
 
-  # Example for Toyota Corolla MY20
-  # requirements: Lane Tracing Assist (LTA) and Dynamic Radar Cruise Control (DRCC)
-  # US Market reference: "All", since all Corolla in the US come standard with LTA and DRCC
-
   # the simplest description of the requirements for the US market
   package: str
-
-  # the minimum compatibility requirements for this model, regardless
-  # of market. can be a package, trim, or list of features
-  requirements: str | None = None
 
   video: str | None = None
   setup_video: str | None = None
@@ -312,8 +304,7 @@ class CarDocs:
     # hardware column
     hardware_col = "None"
     if self.car_parts.parts:
-      model_years = self.model + (' ' + self.years if self.years else '')
-      buy_link = f'<a href="https://comma.ai/shop/comma-3x.html?make={self.make}&model={model_years}">Buy Here</a>'
+      buy_link = f'<a href="https://comma.ai/shop/comma-3x?harness={self.name}">Buy Here</a>'
 
       tools_docs = [part for part in self.car_parts.all_parts() if isinstance(part, Tool)]
       parts_docs = [part for part in self.car_parts.all_parts() if not isinstance(part, Tool)]
