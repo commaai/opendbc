@@ -155,6 +155,7 @@ static void honda_rx_hook(const CANPacket_t *to_push) {
       bool honda_stock_aeb = GET_BIT(to_push, 29U);
   
       int honda_stock_brake = 0;
+      honda_nidec_hybrid = GET_FLAG(param, HONDA_PARAM_NIDEC_HYBRID);
       if (honda_nidec_hybrid) {
         honda_stock_brake = (GET_BYTE(to_push, 6) << 2) | (GET_BYTE(to_push, 7) >> 6);
       }
@@ -214,6 +215,7 @@ static bool honda_tx_hook(const CANPacket_t *to_send) {
 
   // BRAKE: safety check (nidec)
   if ((addr == 0x1FA) && (bus == bus_pt)) {
+    honda_nidec_hybrid = GET_FLAG(param, HONDA_PARAM_NIDEC_HYBRID);
     if ( honda_nidec_hybrid ) {
       honda_brake = (GET_BYTE(to_send, 6) << 2) + ((GET_BYTE(to_send, 7) >> 6) & 0x3U);
     } else {
@@ -314,7 +316,6 @@ static safety_config honda_nidec_init(uint16_t param) {
   safety_config ret;
 
   bool enable_nidec_alt = GET_FLAG(param, HONDA_PARAM_NIDEC_ALT);
-  honda_nidec_hybrid = GET_FLAG(param, HONDA_PARAM_NIDEC_HYBRID);
 
   if (enable_nidec_alt) {
     // For Nidecs with main on signal on an alternate msg (missing 0x326)
