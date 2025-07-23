@@ -13,13 +13,13 @@ from libcpp.deque cimport deque
 
 ctypedef unsigned int (*calc_checksum_type)(uint32_t, const Signal&, const vector[uint8_t] &)
 
-cdef extern from "common_dbc.h":
+cdef extern from "dbc.h":
   ctypedef enum SignalType:
     DEFAULT,
     COUNTER,
     HONDA_CHECKSUM,
     TOYOTA_CHECKSUM,
-    PEDAL_CHECKSUM,
+    BODY_CHECKSUM,
     VOLKSWAGEN_MQB_MEB_CHECKSUM,
     XOR_CHECKSUM,
     SUBARU_CHECKSUM,

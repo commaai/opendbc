@@ -1,5 +1,4 @@
-from opendbc.can.can_define import CANDefine
-from opendbc.can.parser import CANParser
+from opendbc.can import CANDefine, CANParser
 from opendbc.car import Bus, create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.ford.fordcan import CanBus
