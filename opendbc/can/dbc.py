@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from collections.abc import Callable
 
 from opendbc import DBC_PATH
+
+# TODO: these should just be passed in along with the DBC file
 from opendbc.car.honda.hondacan import honda_checksum
 from opendbc.car.toyota.toyotacan import toyota_checksum
 from opendbc.car.subaru.subarucan import subaru_checksum
