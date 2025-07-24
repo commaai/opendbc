@@ -9,9 +9,9 @@ class TestCanParserPackerExceptions:
     dbc_file = "honda_civic_touring_2016_can_generated"
     dbc_invalid = dbc_file + "abcdef"
     msgs = [("STEERING_CONTROL", 50)]
-    with pytest.raises(RuntimeError):
+    with pytest.raises(FileNotFoundError):
       CANParser(dbc_invalid, msgs, 0)
-    with pytest.raises(RuntimeError):
+    with pytest.raises(FileNotFoundError):
       CANPacker(dbc_invalid)
     with pytest.raises(RuntimeError):
       CANDefine(dbc_invalid)
