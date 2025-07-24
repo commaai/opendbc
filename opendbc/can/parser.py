@@ -36,7 +36,7 @@ class MessageState:
   ignore_checksum: bool = False
   ignore_counter: bool = False
   frequency: float = 0.0
-  timeout_threshold: float = 0.0
+  timeout_threshold: float = 1e5  # default to 1Hz threshold
   vals: list[float] = field(default_factory=list)
   all_vals: list[list[float]] = field(default_factory=list)
   timestamps: deque[int] = field(default_factory=deque)
@@ -67,6 +67,7 @@ class MessageState:
 
       tmp_vals[i] = tmp * sig.factor + sig.offset
 
+    # must have good counter and checksum to update data
     if checksum_failed or counter_failed:
       return False
 
@@ -102,8 +103,10 @@ class MessageState:
     if self.ignore_alive:
       return True
     if not self.timestamps:
+      print("INVALID TS", self.name)#, (current_nanos - self.timestamps[-1])/1e9)
       return False
-    if self.timeout_threshold > 0 and (current_nanos - self.timestamps[-1]) > self.timeout_threshold:
+    if (current_nanos - self.timestamps[-1]) > self.timeout_threshold:
+      print("INVALID", self.name, (current_nanos - self.timestamps[-1])/1e9)
       return False
     return True
 
@@ -132,7 +135,6 @@ class CANParser:
     self.message_states: dict[int, MessageState] = {}
 
     for name_or_addr, freq in messages:
-      # Check if message exists in DBC first
       if isinstance(name_or_addr, numbers.Number):
         msg = self.dbc.addr_to_msg.get(int(name_or_addr))
       else:
@@ -173,11 +175,14 @@ class CANParser:
       name=msg.name,
       size=msg.size,
       signals=list(msg.sigs.values()),
-      #ignore_alive=math.isnan(freq == 0),
-      ignore_alive=True,
+      ignore_alive=freq is not None and math.isnan(freq),
     )
     if freq is not None and 0 < freq < 10:
       state.frequency = freq
+      state.timeout_threshold = (1_000_000_000 / freq) * 10
+    else:
+      # if frequency not specified, assume 1Hz until we learn it
+      freq = 1
       state.timeout_threshold = (1_000_000_000 / freq) * 10
 
     self.message_states[msg.address] = state
@@ -214,10 +219,6 @@ class CANParser:
           continue
         bus_empty = False
         state = self.message_states.get(address)
-        #if state is None:
-        #  # Try to dynamically add the message if it exists in DBC
-        #  self._add_message(address)
-        #  state = self.message_states.get(address)
         if state is None or len(dat) > 64:
           continue
         if state.parse(t, dat):
