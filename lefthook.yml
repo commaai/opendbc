@@ -15,6 +15,9 @@ test:
     # *** static analysis
     ruff:
       run: ruff check .
+    ty:
+      # TODO: get opendbc/car/ up
+      run: ty check opendbc/can/ opendbc/dbc/
     codespell:
       run: codespell {files} -L tge,stdio -S *.dbc
       files: git ls-tree -r HEAD --name-only

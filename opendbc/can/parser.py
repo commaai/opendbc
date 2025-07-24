@@ -123,7 +123,7 @@ class CANParser:
       if isinstance(name_or_addr, numbers.Number):
         msg = self.dbc.addr_to_msg.get(int(name_or_addr))
       else:
-        msg = self.dbc.name_to_msg.get(name_or_addr)
+        msg = self.dbc.name_to_msg.get(str(name_or_addr))
       if msg is None:
         raise RuntimeError(f"could not find message {name_or_addr!r} in DBC {dbc_name}")
       if msg.address in self.addresses:
@@ -169,7 +169,7 @@ class CANParser:
     self.can_valid = self.can_invalid_cnt < CAN_INVALID_CNT and counters_valid
 
   def update(self, strings, sendcan: bool = False):
-    if strings and not isinstance(strings[0], list | tuple):
+    if strings and not isinstance(strings[0], (list, tuple)):
       strings = [strings]
 
     for addr in self.addresses:
@@ -227,7 +227,7 @@ class CANDefine:
       parts = val.def_val.split()
       values = [int(v) for v in parts[::2]]
       defs = parts[1::2]
-      dv[address][sgname] = dict(zip(values, defs, strict=True))
+      dv[address][sgname] = dict(zip(values, defs))
       dv[msgname][sgname] = dv[address][sgname]
 
     self.dv = dict(dv)
