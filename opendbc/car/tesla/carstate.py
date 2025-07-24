@@ -39,13 +39,8 @@ class CarState(CarStateBase):
     ret.vEgoRaw = cp_party.vl["DI_speed"]["DI_vehicleSpeed"] * CV.KPH_TO_MS
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
 
-    # Gas pedal
-    pedal_status = cp_party.vl["DI_systemStatus"]["DI_accelPedalPos"]
-    ret.gas = pedal_status / 100.0
-    ret.gasPressed = pedal_status > 0
-
-    # Brake pedal
-    ret.brake = 0
+    # User pedals
+    ret.gasPressed = cp_party.vl["DI_systemStatus"]["DI_accelPedalPos"] > 1e-5
     ret.brakePressed = cp_party.vl["IBST_status"]["IBST_driverBrakeApply"] == 2
 
     # Steering wheel
