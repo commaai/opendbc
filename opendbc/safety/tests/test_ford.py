@@ -205,19 +205,19 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
         # send multiple times to verify counter checks
         for _ in range(10):
           if msg == "speed":
-            to_push = self._speed_msg(0, quality_flag=quality_flag)
+            msg = self._speed_msg(0, quality_flag=quality_flag)
           elif msg == "speed_2":
-            to_push = self._speed_msg_2(0, quality_flag=quality_flag)
+            msg = self._speed_msg_2(0, quality_flag=quality_flag)
           elif msg == "yaw":
-            to_push = self._yaw_rate_msg(0, 0, quality_flag=quality_flag)
+            msg = self._yaw_rate_msg(0, 0, quality_flag=quality_flag)
 
-          self.assertEqual(quality_flag, self._rx(to_push))
+          self.assertEqual(quality_flag, self._rx(msg))
           self.assertEqual(quality_flag, self.safety.get_controls_allowed())
 
         # Mess with checksum to make it fail, checksum is not checked for 2nd speed
-        to_push[0].data[3] = 0  # Speed checksum & half of yaw signal
+        msg[0].data[3] = 0  # Speed checksum & half of yaw signal
         should_rx = msg == "speed_2" and quality_flag
-        self.assertEqual(should_rx, self._rx(to_push))
+        self.assertEqual(should_rx, self._rx(msg))
         self.assertEqual(should_rx, self.safety.get_controls_allowed())
 
   def test_angle_measurements(self):
