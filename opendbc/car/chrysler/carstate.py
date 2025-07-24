@@ -1,5 +1,4 @@
-from opendbc.can.parser import CANParser
-from opendbc.can.can_define import CANDefine
+from opendbc.can import CANDefine, CANParser
 from opendbc.car import Bus, create_button_events, structs
 from opendbc.car.chrysler.values import DBC, STEER_THRESHOLD, RAM_CARS
 from opendbc.car.common.conversions import Conversions as CV
@@ -102,50 +101,8 @@ class CarState(CarStateBase):
     return ret
 
   @staticmethod
-  def get_cruise_messages():
-    messages = [
-      ("DAS_3", 50),
-      ("DAS_4", 50),
-    ]
-    return messages
-
-  @staticmethod
   def get_can_parsers(CP):
-    pt_messages = [
-      ("ESP_1", 50),
-      ("EPS_2", 100),
-      ("STEERING", 100),
-      ("ECM_5", 50),
-      ("CRUISE_BUTTONS", 50),
-      ("STEERING_LEVERS", 10),
-      ("ORC_1", 2),
-      ("BCM_1", 1),
-    ]
-
-    if CP.enableBsm:
-      pt_messages.append(("BSM_1", 2))
-
-    if CP.carFingerprint in RAM_CARS:
-      pt_messages += [
-        ("ESP_8", 50),
-        ("EPS_3", 50),
-        ("Transmission_Status", 50),
-      ]
-    else:
-      pt_messages += [
-        ("GEAR", 50),
-        ("SPEED_1", 100),
-      ]
-      pt_messages += CarState.get_cruise_messages()
-
-    cam_messages = [
-      ("DAS_6", 4),
-    ]
-
-    if CP.carFingerprint in RAM_CARS:
-      cam_messages += CarState.get_cruise_messages()
-
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 0),
-      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, 2),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 0),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 2),
     }

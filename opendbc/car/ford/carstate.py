@@ -1,5 +1,4 @@
-from opendbc.can.can_define import CANDefine
-from opendbc.can.parser import CANParser
+from opendbc.can import CANDefine, CANParser
 from opendbc.car import Bus, create_button_events, structs
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.ford.fordcan import CanBus
@@ -118,62 +117,7 @@ class CarState(CarStateBase):
 
   @staticmethod
   def get_can_parsers(CP):
-    pt_messages = [
-      # sig_address, frequency
-      ("VehicleOperatingModes", 100),
-      ("BrakeSysFeatures", 50),
-      ("Yaw_Data_FD1", 100),
-      ("DesiredTorqBrk", 50),
-      ("EngVehicleSpThrottle", 100),
-      ("BrakeSnData_4", 50),
-      ("EngBrakeData", 10),
-      ("Cluster_Info1_FD1", 10),
-      ("SteeringPinion_Data", 100),
-      ("EPAS_INFO", 50),
-      ("Steering_Data_FD1", 10),
-      ("BodyInfo_3_FD1", 2),
-      ("RCMStatusMessage2_FD1", 10),
-    ]
-
-    if CP.flags & FordFlags.CANFD:
-      pt_messages += [
-        ("Lane_Assist_Data3_FD1", 33),
-      ]
-    else:
-      pt_messages += [
-        ("INSTRUMENT_PANEL", 1),
-      ]
-
-    if CP.transmissionType == TransmissionType.automatic:
-      pt_messages += [
-        ("PowertrainData_10", 10),
-      ]
-    elif CP.transmissionType == TransmissionType.manual:
-      pt_messages += [
-        ("BCM_Lamp_Stat_FD1", 1),
-      ]
-
-    if CP.enableBsm and not (CP.flags & FordFlags.CANFD):
-      pt_messages += [
-        ("Side_Detect_L_Stat", 5),
-        ("Side_Detect_R_Stat", 5),
-      ]
-
-    cam_messages = [
-      # sig_address, frequency
-      ("ACCDATA", 50),
-      ("ACCDATA_2", 50),
-      ("ACCDATA_3", 5),
-      ("IPMA_Data", 1),
-    ]
-
-    if CP.enableBsm and CP.flags & FordFlags.CANFD:
-      cam_messages += [
-        ("Side_Detect_L_Stat", 5),
-        ("Side_Detect_R_Stat", 5),
-      ]
-
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).main),
-      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).camera),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CanBus(CP).main),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CanBus(CP).camera),
     }
