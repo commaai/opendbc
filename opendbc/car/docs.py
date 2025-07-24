@@ -10,6 +10,7 @@ from natsort import natsorted
 
 from opendbc.car.common.basedir import BASEDIR
 from opendbc.car import gen_empty_fingerprint
+from opendbc.metadata import get_brand_metadata
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import BaseCarHarness, CarDocs, Device, ExtraCarDocs, Column, ExtraCarsColumn, CommonFootnote, PartType, SupportType
 from opendbc.car.car_helpers import interfaces
@@ -46,7 +47,7 @@ def get_all_footnotes() -> dict[Enum, int]:
 def build_sorted_car_docs_list(platforms, footnotes=None):
   collected_car_docs: list[CarDocs | ExtraCarDocs] = []
   for platform in platforms.values():
-    car_docs = platform.config.car_docs
+    car_docs = get_brand_metadata(platform) or platform.config.car_docs
     CP = get_params_for_docs(platform)
 
     if not len(car_docs):
