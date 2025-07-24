@@ -13,7 +13,7 @@ class TestCanParserPackerExceptions:
       CANParser(dbc_invalid, msgs, 0)
     with pytest.raises(FileNotFoundError):
       CANPacker(dbc_invalid)
-    with pytest.raises(RuntimeError):
+    with pytest.raises(FileNotFoundError):
       CANDefine(dbc_invalid)
     with pytest.raises(KeyError):
       CANDefine(TEST_DBC)
