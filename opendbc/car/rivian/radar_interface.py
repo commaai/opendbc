@@ -22,11 +22,11 @@ class RadarInterface(RadarInterfaceBase):
     self.radar_off_can = CP.radarUnavailable
     self.rcp = get_radar_can_parser(CP)
 
-  def update(self, can_strings):
+  def update(self, can_msgs):
     if self.radar_off_can or (self.rcp is None):
       return super().update(None)
 
-    vls = self.rcp.update(can_strings)
+    vls = self.rcp.update(can_msgs)
     self.updated_messages.update(vls)
 
     if self.trigger_msg not in self.updated_messages:

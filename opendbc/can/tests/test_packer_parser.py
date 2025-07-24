@@ -305,13 +305,13 @@ class TestCanParserPacker:
     # - timestamp is correct for multiple runs
     # - timestamp is from the latest message if updating multiple strings
     for _ in range(10):
-      can_strings = []
+      can_msgs = []
       log_mono_time = 0
       for i in range(10):
         log_mono_time = int(0.01 * i * 1e+9)
         can_msg = packer.make_can_msg("VSA_STATUS", 0, {})
-        can_strings.append((log_mono_time, [can_msg]))
-      parser.update(can_strings)
+        can_msgs.append((log_mono_time, [can_msg]))
+      parser.update(can_msgs)
 
       ts_nanos = parser.ts_nanos["VSA_STATUS"].values()
       assert set(ts_nanos) == {log_mono_time}
