@@ -18,50 +18,6 @@ BUTTONS_DICT = {CruiseButtons.RES_ACCEL: ButtonType.accelCruise, CruiseButtons.D
 SETTINGS_BUTTONS_DICT = {CruiseSettings.DISTANCE: ButtonType.gapAdjustCruise, CruiseSettings.LKAS: ButtonType.lkas}
 
 
-def get_can_messages(CP):
-  messages = [
-    ("ENGINE_DATA", 100),
-    ("WHEEL_SPEEDS", 50),
-    ("STEERING_SENSORS", 100),
-    ("SEATBELT_STATUS", 10),
-    ("CRUISE", 10),
-    ("POWERTRAIN_DATA", 100),
-    ("CAR_SPEED", 10),
-    ("VSA_STATUS", 50),
-    ("STEER_STATUS", 100),
-    ("SCM_FEEDBACK", 10),  # FIXME: there are different frequencies for different arb IDs
-    ("SCM_BUTTONS", 25),  # FIXME: there are different frequencies for different arb IDs
-  ]
-
-  if CP.transmissionType == TransmissionType.automatic:
-    messages.append(("GEARBOX_AUTO", 50))
-  elif CP.transmissionType == TransmissionType.cvt:
-    messages.append(("GEARBOX_CVT", 100))
-
-  if CP.flags & HondaFlags.BOSCH_ALT_BRAKE:
-    messages.append(("BRAKE_MODULE", 50))
-
-  if CP.flags & HondaFlags.HAS_ALL_DOOR_STATES:
-    messages.append(("DOORS_STATUS", 3))
-  if CP.flags & HondaFlags.HAS_EPB:
-    messages.append(("EPB_STATUS", 50))
-
-  if CP.carFingerprint in HONDA_BOSCH:
-    # these messages are on camera bus on radarless cars
-    if not CP.openpilotLongitudinalControl and CP.carFingerprint not in HONDA_BOSCH_RADARLESS:
-      messages += [
-        ("ACC_HUD", 10),
-        ("ACC_CONTROL", 50),
-      ]
-
-  if CP.carFingerprint in HONDA_BOSCH_RADARLESS:
-    messages.append(("CRUISE_FAULT_STATUS", 50))
-  elif CP.openpilotLongitudinalControl:
-    messages.append(("STANDSTILL", 50))
-
-  return messages
-
-
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
@@ -250,35 +206,11 @@ class CarState(CarStateBase):
     return ret
 
   def get_can_parsers(self, CP):
-    pt_messages = get_can_messages(CP)
-
-    cam_messages = [
-      ("STEERING_CONTROL", 100),
-    ]
-
-    if CP.carFingerprint in HONDA_BOSCH_RADARLESS:
-      cam_messages += [
-        ("ACC_HUD", 10),
-        ("LKAS_HUD", 10),
-      ]
-
-    elif CP.carFingerprint not in HONDA_BOSCH:
-      cam_messages += [
-        ("ACC_HUD", 10),
-        ("LKAS_HUD", 10),
-        ("BRAKE_COMMAND", 50),
-      ]
-
-    body_messages = [
-      ("BSM_STATUS_LEFT", 3),
-      ("BSM_STATUS_RIGHT", 3),
-    ]
-
     parsers = {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).pt),
-      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).camera),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CanBus(CP).pt),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CanBus(CP).camera),
     }
     if CP.enableBsm:
-      parsers[Bus.body] = CANParser(DBC[CP.carFingerprint][Bus.body], body_messages, CanBus(CP).radar)
+      parsers[Bus.body] = CANParser(DBC[CP.carFingerprint][Bus.body], [], CanBus(CP).radar)
 
     return parsers

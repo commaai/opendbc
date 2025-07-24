@@ -192,7 +192,7 @@ class CarState(CarStateBase):
   def get_can_parsers(CP):
     pt_messages = [
       ("LIGHT_STALK", 1),
-      ("BLINKERS_STATE", 0),
+      ("BLINKERS_STATE", float('nan')),
       ("BODY_CONTROL_STATE", 3),
       ("BODY_CONTROL_STATE_2", 2),
       ("ESP_CONTROL", 3),
