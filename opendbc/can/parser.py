@@ -1,27 +1,14 @@
-import os
+import math
 import numbers
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 
-from opendbc.can.packer import DBC, DBC_CACHE, Signal, parse_dbc
+from opendbc.can.dbc import DBC, Signal
 
 
 MAX_BAD_COUNTER = 5
 CAN_INVALID_CNT = 5
 
-
-def _get_dbc(dbc_name: str) -> DBC:
-  dbc_path = dbc_name
-  if not os.path.exists(dbc_path):
-    dbc_path = os.path.join(os.path.dirname(__file__), "..", "dbc", dbc_name + ".dbc")
-  if dbc_name in DBC_CACHE:
-    return DBC_CACHE[dbc_name]
-  try:
-    dbc = parse_dbc(dbc_path)
-  except FileNotFoundError as e:
-    raise RuntimeError(f"DBC file not found: {dbc_path}") from e
-  DBC_CACHE[dbc_name] = dbc
-  return dbc
 
 
 def get_raw_value(dat: bytes | bytearray, sig: Signal) -> int:
@@ -49,7 +36,7 @@ class MessageState:
   ignore_checksum: bool = False
   ignore_counter: bool = False
   frequency: float = 0.0
-  timeout_threshold: float = 0.0
+  timeout_threshold: float = 1e5  # default to 1Hz threshold
   vals: list[float] = field(default_factory=list)
   all_vals: list[list[float]] = field(default_factory=list)
   timestamps: deque[int] = field(default_factory=deque)
@@ -80,6 +67,7 @@ class MessageState:
 
       tmp_vals[i] = tmp * sig.factor + sig.offset
 
+    # must have good counter and checksum to update data
     if checksum_failed or counter_failed:
       return False
 
@@ -116,20 +104,28 @@ class MessageState:
       return True
     if not self.timestamps:
       return False
-    if self.timeout_threshold > 0 and (current_nanos - self.timestamps[-1]) > self.timeout_threshold:
+    if (current_nanos - self.timestamps[-1]) > self.timeout_threshold:
       return False
     return True
 
 
+class VLDict(dict):
+  def __init__(self, parser):
+    super().__init__()
+    self.parser = parser
+
+  def __getitem__(self, key):
+    if key not in self:
+      self.parser._add_message(key)
+    return super().__getitem__(key)
+
 class CANParser:
-  def __init__(self, dbc_name: str, messages: list[tuple[str | int, int]], bus: int = 0):
+  def __init__(self, dbc_name: str, messages: list[tuple[str | int, int]], bus: int):
     self.dbc_name: str = dbc_name
     self.bus: int = bus
-    self.dbc: DBC | None = _get_dbc(dbc_name)
-    if not self.dbc:
-      raise RuntimeError(f"Can't find DBC: {dbc_name}")
+    self.dbc: DBC = DBC(dbc_name)
 
-    self.vl: dict[int | str, dict[str, float]] = {}
+    self.vl: dict[int | str, dict[str, float]] = VLDict(self)
     self.vl_all: dict[int | str, dict[str, list[float]]] = {}
     self.ts_nanos: dict[int | str, dict[str, int]] = {}
     self.addresses: set[int] = set()
@@ -145,32 +141,47 @@ class CANParser:
       if msg.address in self.addresses:
         raise RuntimeError("Duplicate Message Check: %d" % msg.address)
 
-      self.addresses.add(msg.address)
-      signal_names = list(msg.sigs.keys())
-      self.vl[msg.address] = {s: 0.0 for s in signal_names}
-      self.vl[msg.name] = self.vl[msg.address]
-      self.vl_all[msg.address] = defaultdict(list)
-      self.vl_all[msg.name] = self.vl_all[msg.address]
-      self.ts_nanos[msg.address] = {s: 0 for s in signal_names}
-      self.ts_nanos[msg.name] = self.ts_nanos[msg.address]
-
-      state = MessageState(
-        address=msg.address,
-        name=msg.name,
-        size=msg.size,
-        signals=list(msg.sigs.values()),
-        ignore_alive=freq == 0,
-      )
-      if 0 < freq < 10:
-        state.frequency = freq
-        state.timeout_threshold = (1_000_000_000 / freq) * 10
-
-      self.message_states[msg.address] = state
+      self._add_message(name_or_addr, freq)
 
     self.can_valid: bool = False
     self.bus_timeout: bool = False
     self.can_invalid_cnt: int = CAN_INVALID_CNT
     self.last_nonempty_nanos: int = 0
+
+  def _add_message(self, name_or_addr: str | int, freq: int = None) -> None:
+    if isinstance(name_or_addr, numbers.Number):
+      msg = self.dbc.addr_to_msg.get(int(name_or_addr))
+    else:
+      msg = self.dbc.name_to_msg.get(name_or_addr)
+    assert msg is not None
+    assert msg.address not in self.addresses
+
+    self.addresses.add(msg.address)
+    signal_names = list(msg.sigs.keys())
+    signals_dict = {s: 0.0 for s in signal_names}
+    dict.__setitem__(self.vl, msg.address, signals_dict)
+    dict.__setitem__(self.vl, msg.name, signals_dict)
+    self.vl_all[msg.address] = defaultdict(list)
+    self.vl_all[msg.name] = self.vl_all[msg.address]
+    self.ts_nanos[msg.address] = {s: 0 for s in signal_names}
+    self.ts_nanos[msg.name] = self.ts_nanos[msg.address]
+
+    state = MessageState(
+      address=msg.address,
+      name=msg.name,
+      size=msg.size,
+      signals=list(msg.sigs.values()),
+      ignore_alive=freq is not None and math.isnan(freq),
+    )
+    if freq is not None and freq > 0:
+      state.frequency = freq
+      state.timeout_threshold = (1_000_000_000 / freq) * 10
+    else:
+      # if frequency not specified, assume 1Hz until we learn it
+      freq = 1
+    state.timeout_threshold = (1_000_000_000 / freq) * 10
+
+    self.message_states[msg.address] = state
 
   def update_valid(self, nanos: int) -> None:
     valid = True
@@ -184,7 +195,7 @@ class CANParser:
     self.can_invalid_cnt = 0 if valid else min(self.can_invalid_cnt + 1, CAN_INVALID_CNT)
     self.can_valid = self.can_invalid_cnt < CAN_INVALID_CNT and counters_valid
 
-  def update_strings(self, strings, sendcan: bool = False):
+  def update(self, strings, sendcan: bool = False):
     if strings and not isinstance(strings[0], list | tuple):
       strings = [strings]
 
@@ -230,16 +241,13 @@ class CANParser:
 
 class CANDefine:
   def __init__(self, dbc_name: str):
-    self.dbc_name = dbc_name
-    self.dbc = _get_dbc(dbc_name)
-    if not self.dbc:
-      raise RuntimeError(f"Can't find DBC: '{dbc_name}'")
+    dbc = DBC(dbc_name)
 
     dv = defaultdict(dict)
-    for val in self.dbc.vals:
+    for val in dbc.vals:
       sgname = val.name
       address = val.address
-      msg = self.dbc.addr_to_msg.get(address)
+      msg = dbc.addr_to_msg.get(address)
       if msg is None:
         raise KeyError(address)
       msgname = msg.name
