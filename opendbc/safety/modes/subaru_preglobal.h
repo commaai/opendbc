@@ -77,7 +77,6 @@ static bool subaru_preglobal_tx_hook(const CANPacket_t *to_send) {
     if (steer_torque_cmd_checks(desired_torque, steer_req, SUBARU_PG_STEERING_LIMITS)) {
       tx = false;
     }
-
   }
   return tx;
 }
