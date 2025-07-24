@@ -140,6 +140,7 @@ class TestCanParserPacker:
 
   def test_packer_parser(self):
     msgs = [
+      ("Brake_Status", 0),
       ("CAN_FD_MESSAGE", 0),
       ("STEERING_CONTROL", 0),
     ]

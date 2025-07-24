@@ -103,10 +103,8 @@ class MessageState:
     if self.ignore_alive:
       return True
     if not self.timestamps:
-      print("INVALID TS", self.name)#, (current_nanos - self.timestamps[-1])/1e9)
       return False
     if (current_nanos - self.timestamps[-1]) > self.timeout_threshold:
-      print("INVALID", self.name, (current_nanos - self.timestamps[-1])/1e9)
       return False
     return True
 
@@ -118,7 +116,6 @@ class VLDict(dict):
 
   def __getitem__(self, key):
     if key not in self:
-      print("ADDING", key)
       self.parser._add_message(key)
     return super().__getitem__(key)
 
@@ -156,9 +153,8 @@ class CANParser:
       msg = self.dbc.addr_to_msg.get(int(name_or_addr))
     else:
       msg = self.dbc.name_to_msg.get(name_or_addr)
-
-    if msg is None or msg.address in self.addresses:
-      return
+    assert msg is not None
+    assert msg.address not in self.addresses
 
     self.addresses.add(msg.address)
     signal_names = list(msg.sigs.keys())
@@ -177,13 +173,13 @@ class CANParser:
       signals=list(msg.sigs.values()),
       ignore_alive=freq is not None and math.isnan(freq),
     )
-    if freq is not None and 0 < freq < 10:
+    if freq is not None and not state.ignore_alive:
       state.frequency = freq
       state.timeout_threshold = (1_000_000_000 / freq) * 10
     else:
       # if frequency not specified, assume 1Hz until we learn it
       freq = 1
-      state.timeout_threshold = (1_000_000_000 / freq) * 10
+    state.timeout_threshold = (1_000_000_000 / freq) * 10
 
     self.message_states[msg.address] = state
 
@@ -193,10 +189,8 @@ class CANParser:
     for state in self.message_states.values():
       if state.counter_fail >= MAX_BAD_COUNTER:
         counters_valid = False
-        print("INVALID CNT", state.name)
       if not state.valid(nanos, self.bus_timeout):
         valid = False
-        print("INVALID", state.name)
 
     self.can_invalid_cnt = 0 if valid else min(self.can_invalid_cnt + 1, CAN_INVALID_CNT)
     self.can_valid = self.can_invalid_cnt < CAN_INVALID_CNT and counters_valid
