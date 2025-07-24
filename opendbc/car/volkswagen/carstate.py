@@ -271,25 +271,3 @@ class CarState(CarStateBase):
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CANBUS.cam),
     }
 
-
-class MqbExtraSignals:
-  # Additional signal and message lists for optional or bus-portable controllers
-  fwd_radar_messages = [
-    ("ACC_06", 50),                              # From J428 ACC radar control module
-    ("ACC_10", 50),                              # From J428 ACC radar control module
-    ("ACC_02", 17),                              # From J428 ACC radar control module
-  ]
-  bsm_radar_messages = [
-    ("SWA_01", 20),                              # From J1086 Lane Change Assist
-  ]
-
-
-class PqExtraSignals:
-  # Additional signal and message lists for optional or bus-portable controllers
-  fwd_radar_messages = [
-    ("ACC_System", 50),                          # From J428 ACC radar control module
-    ("ACC_GRA_Anzeige", 25),                     # From J428 ACC radar control module
-  ]
-  bsm_radar_messages = [
-    ("SWA_1", 20),                               # From J1086 Lane Change Assist
-  ]
