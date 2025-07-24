@@ -108,19 +108,30 @@ class MessageState:
     return True
 
 
+class VLDict(dict):
+  def __init__(self, parser):
+    super().__init__()
+    self.parser = parser
+
+  def __getitem__(self, key):
+    if key not in self:
+      self.parser._add_message(key)
+    return super().__getitem__(key)
+
 class CANParser:
   def __init__(self, dbc_name: str, messages: list[tuple[str | int, int]], bus: int):
     self.dbc_name: str = dbc_name
     self.bus: int = bus
     self.dbc: DBC = DBC(dbc_name)
 
-    self.vl: dict[int | str, dict[str, float]] = {}
+    self.vl: dict[int | str, dict[str, float]] = VLDict(self)
     self.vl_all: dict[int | str, dict[str, list[float]]] = {}
     self.ts_nanos: dict[int | str, dict[str, int]] = {}
     self.addresses: set[int] = set()
     self.message_states: dict[int, MessageState] = {}
 
     for name_or_addr, freq in messages:
+      # Check if message exists in DBC first
       if isinstance(name_or_addr, numbers.Number):
         msg = self.dbc.addr_to_msg.get(int(name_or_addr))
       else:
@@ -130,32 +141,44 @@ class CANParser:
       if msg.address in self.addresses:
         raise RuntimeError("Duplicate Message Check: %d" % msg.address)
 
-      self.addresses.add(msg.address)
-      signal_names = list(msg.sigs.keys())
-      self.vl[msg.address] = {s: 0.0 for s in signal_names}
-      self.vl[msg.name] = self.vl[msg.address]
-      self.vl_all[msg.address] = defaultdict(list)
-      self.vl_all[msg.name] = self.vl_all[msg.address]
-      self.ts_nanos[msg.address] = {s: 0 for s in signal_names}
-      self.ts_nanos[msg.name] = self.ts_nanos[msg.address]
-
-      state = MessageState(
-        address=msg.address,
-        name=msg.name,
-        size=msg.size,
-        signals=list(msg.sigs.values()),
-        ignore_alive=math.isnan(freq),
-      )
-      if not state.ignore_alive and 0 < freq < 10:
-        state.frequency = freq
-        state.timeout_threshold = (1_000_000_000 / freq) * 10
-
-      self.message_states[msg.address] = state
+      self._add_message(name_or_addr, freq)
 
     self.can_valid: bool = False
     self.bus_timeout: bool = False
     self.can_invalid_cnt: int = CAN_INVALID_CNT
     self.last_nonempty_nanos: int = 0
+
+  def _add_message(self, name_or_addr: str | int, freq: int = None) -> None:
+    if isinstance(name_or_addr, numbers.Number):
+      msg = self.dbc.addr_to_msg.get(int(name_or_addr))
+    else:
+      msg = self.dbc.name_to_msg.get(name_or_addr)
+
+    if msg is None or msg.address in self.addresses:
+      return
+
+    self.addresses.add(msg.address)
+    signal_names = list(msg.sigs.keys())
+    signals_dict = {s: 0.0 for s in signal_names}
+    dict.__setitem__(self.vl, msg.address, signals_dict)
+    dict.__setitem__(self.vl, msg.name, signals_dict)
+    self.vl_all[msg.address] = defaultdict(list)
+    self.vl_all[msg.name] = self.vl_all[msg.address]
+    self.ts_nanos[msg.address] = {s: 0 for s in signal_names}
+    self.ts_nanos[msg.name] = self.ts_nanos[msg.address]
+
+    state = MessageState(
+      address=msg.address,
+      name=msg.name,
+      size=msg.size,
+      signals=list(msg.sigs.values()),
+      ignore_alive=math.isnan(freq == 0),
+    )
+    if freq is not None and 0 < freq < 10:
+      state.frequency = freq
+      state.timeout_threshold = (1_000_000_000 / freq) * 10
+
+    self.message_states[msg.address] = state
 
   def update_valid(self, nanos: int) -> None:
     valid = True
@@ -187,6 +210,10 @@ class CANParser:
           continue
         bus_empty = False
         state = self.message_states.get(address)
+        if state is None:
+          # Try to dynamically add the message if it exists in DBC
+          self._add_message(address)
+          state = self.message_states.get(address)
         if state is None or len(dat) > 64:
           continue
         if state.parse(t, dat):
