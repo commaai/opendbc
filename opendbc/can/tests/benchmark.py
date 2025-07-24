@@ -4,20 +4,17 @@ from opendbc.can import CANPacker, CANParser
 
 
 def _benchmark(checks, n):
-  print()
-  print("="*5, "Benchmark", "="*5)
-
   parser = CANParser('toyota_new_mc_pt_generated', checks, 0)
   packer = CANPacker('toyota_new_mc_pt_generated')
 
   t1 = time.process_time_ns()
   can_msgs = []
-  for i in range(50000):
+  for i in range(10000):
     values = {"ACC_CONTROL": {"ACC_TYPE": 1, "ALLOW_LONG_PRESS": 3}}
     msgs = [packer.make_can_msg(k, 0, v) for k, v in values.items()]
     can_msgs.append([int(0.01 * i * 1e9), msgs])
   t2 = time.process_time_ns()
-  print(f'Pack time took {(t2 - t1) / 1e6} ms')
+  pack_dt = t2 - t1
 
   ets = []
   for _ in range(25):
@@ -39,9 +36,10 @@ def _benchmark(checks, n):
 
   et = sum(ets) / len(ets)
   avg_nanos = et / len(can_msgs)
-  print('%s: [%d] %.1fms to parse %s, avg: %dns' % ("_benchmark", n, et/1e6, len(can_msgs), avg_nanos))
+  print('[%d] %.1fms to pack, %.1fms to parse %s messages, avg: %dns' % (n, pack_dt/1e6, et/1e6, len(can_msgs), avg_nanos))
 
 if __name__ == "__main__":
   # python -m cProfile -s cumulative  benchmark.py
   _benchmark([('ACC_CONTROL', 10)], 1)
+  _benchmark([('ACC_CONTROL', 10)], 5)
   _benchmark([('ACC_CONTROL', 10)], 10)
