@@ -1,27 +1,13 @@
-import os
 import numbers
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 
-from opendbc.can.packer import DBC, DBC_CACHE, Signal, parse_dbc
+from opendbc.can.dbc import DBC, Signal
 
 
 MAX_BAD_COUNTER = 5
 CAN_INVALID_CNT = 5
 
-
-def _get_dbc(dbc_name: str) -> DBC:
-  dbc_path = dbc_name
-  if not os.path.exists(dbc_path):
-    dbc_path = os.path.join(os.path.dirname(__file__), "..", "dbc", dbc_name + ".dbc")
-  if dbc_name in DBC_CACHE:
-    return DBC_CACHE[dbc_name]
-  try:
-    dbc = parse_dbc(dbc_path)
-  except FileNotFoundError as e:
-    raise RuntimeError(f"DBC file not found: {dbc_path}") from e
-  DBC_CACHE[dbc_name] = dbc
-  return dbc
 
 
 def get_raw_value(dat: bytes | bytearray, sig: Signal) -> int:
@@ -122,12 +108,10 @@ class MessageState:
 
 
 class CANParser:
-  def __init__(self, dbc_name: str, messages: list[tuple[str | int, int]], bus: int = 0):
+  def __init__(self, dbc_name: str, messages: list[tuple[str | int, int]], bus: int):
     self.dbc_name: str = dbc_name
     self.bus: int = bus
-    self.dbc: DBC | None = _get_dbc(dbc_name)
-    if not self.dbc:
-      raise RuntimeError(f"Can't find DBC: {dbc_name}")
+    self.dbc: DBC = DBC(dbc_name)
 
     self.vl: dict[int | str, dict[str, float]] = {}
     self.vl_all: dict[int | str, dict[str, list[float]]] = {}
@@ -230,16 +214,13 @@ class CANParser:
 
 class CANDefine:
   def __init__(self, dbc_name: str):
-    self.dbc_name = dbc_name
-    self.dbc = _get_dbc(dbc_name)
-    if not self.dbc:
-      raise RuntimeError(f"Can't find DBC: '{dbc_name}'")
+    dbc = DBC(dbc_name)
 
     dv = defaultdict(dict)
-    for val in self.dbc.vals:
+    for val in dbc.vals:
       sgname = val.name
       address = val.address
-      msg = self.dbc.addr_to_msg.get(address)
+      msg = dbc.addr_to_msg.get(address)
       if msg is None:
         raise KeyError(address)
       msgname = msg.name
