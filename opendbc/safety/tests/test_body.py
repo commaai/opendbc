@@ -47,7 +47,7 @@ class TestBody(common.PandaSafetyTest):
 
   def test_can_flasher(self):
     # CAN flasher always allowed
-    self.safety.set_controls_allowed(True)
+    self.safety.set_controls_allowed(False)
     self.assertTrue(self._tx(common.make_msg(0, 0x1, 8)))
 
     # 0xdeadfaceU allowed for CAN flashing mode
