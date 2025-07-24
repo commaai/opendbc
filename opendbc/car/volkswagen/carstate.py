@@ -257,7 +257,10 @@ class CarState(CarStateBase):
       return CarState.get_can_parsers_pq(CP)
 
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CANBUS.pt),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [
+        # the 50->1Hz is currently too much for the CANParser to figure out
+        ("Blinkmodi_02", 1),  # From J519 BCM (sent at 1Hz when no lights active, 50Hz when active)
+      ], CANBUS.pt),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CANBUS.cam),
     }
 
