@@ -173,7 +173,7 @@ class CANParser:
       signals=list(msg.sigs.values()),
       ignore_alive=freq is not None and math.isnan(freq),
     )
-    if freq is not None and not state.ignore_alive:
+    if freq is not None and freq > 0:
       state.frequency = freq
       state.timeout_threshold = (1_000_000_000 / freq) * 10
     else:
