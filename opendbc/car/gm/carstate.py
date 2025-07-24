@@ -189,7 +189,7 @@ class CarState(CarStateBase):
     cam_messages = []
     if CP.networkLocation == NetworkLocation.fwdCamera:
       pt_messages += [
-        ("ASCMLKASteeringCmd", 0),
+        ("ASCMLKASteeringCmd", float('nan')),
       ]
       cam_messages += [
         ("ASCMLKASteeringCmd", 10),
@@ -206,7 +206,7 @@ class CarState(CarStateBase):
         ]
 
     loopback_messages = [
-      ("ASCMLKASteeringCmd", 0),
+      ("ASCMLKASteeringCmd", float('nan')),
     ]
 
     return {

@@ -1,3 +1,4 @@
+import math
 import numbers
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
@@ -143,9 +144,9 @@ class CANParser:
         name=msg.name,
         size=msg.size,
         signals=list(msg.sigs.values()),
-        ignore_alive=freq == 0,
+        ignore_alive=math.isnan(freq),
       )
-      if 0 < freq < 10:
+      if not state.ignore_alive and 0 < freq < 10:
         state.frequency = freq
         state.timeout_threshold = (1_000_000_000 / freq) * 10
 
