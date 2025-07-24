@@ -7,7 +7,18 @@ from opendbc.car.interfaces import RadarInterfaceBase
 
 
 def _create_radar_can_parser(car_fingerprint):
-  return CANParser(DBC[car_fingerprint][Bus.radar], [], 1)
+  if car_fingerprint in TSS2_CAR:
+    RADAR_A_MSGS = list(range(0x180, 0x190))
+    RADAR_B_MSGS = list(range(0x190, 0x1a0))
+  else:
+    RADAR_A_MSGS = list(range(0x210, 0x220))
+    RADAR_B_MSGS = list(range(0x220, 0x230))
+
+  msg_a_n = len(RADAR_A_MSGS)
+  msg_b_n = len(RADAR_B_MSGS)
+  messages = list(zip(RADAR_A_MSGS + RADAR_B_MSGS, [20] * (msg_a_n + msg_b_n), strict=True))
+
+  return CANParser(DBC[car_fingerprint][Bus.radar], messages, 1)
 
 class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):

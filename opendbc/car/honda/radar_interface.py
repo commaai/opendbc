@@ -6,7 +6,9 @@ from opendbc.car.honda.values import DBC
 
 
 def _create_nidec_can_parser(car_fingerprint):
-  return CANParser(DBC[car_fingerprint][Bus.radar], [], 1)
+  radar_messages = [0x400] + list(range(0x430, 0x43A)) + list(range(0x440, 0x446))
+  messages = [(m, 20) for m in radar_messages]
+  return CANParser(DBC[car_fingerprint][Bus.radar], messages, 1)
 
 
 class RadarInterface(RadarInterfaceBase):
