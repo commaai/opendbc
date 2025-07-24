@@ -1,4 +1,5 @@
 from opendbc.car import structs
+from opendbc.car.crc import CRC8J1850
 from opendbc.car.chrysler.values import RAM_CARS
 
 GearShifter = structs.CarState.GearShifter
@@ -69,9 +70,6 @@ def create_cruise_buttons(packer, frame, bus, cancel=False, resume=False):
     "COUNTER": frame % 0x10,
   }
   return packer.make_can_msg("CRUISE_BUTTONS", bus, values)
-
-
-from opendbc.car.crc import CRC8J1850
 
 
 def chrysler_checksum(address: int, sig, d: bytearray) -> int:

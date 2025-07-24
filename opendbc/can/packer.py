@@ -12,12 +12,6 @@ from opendbc.car.hyundai.hyundaicanfd import hkg_can_fd_checksum
 from opendbc.car.volkswagen.mqbcan import volkswagen_mqb_meb_checksum, xor_checksum
 from opendbc.car.tesla.teslacan import tesla_checksum
 from opendbc.car.body.bodycan import body_checksum
-from opendbc.car.crc import (
-  CRC8H2F,
-  CRC8J1850,
-  CRC16_XMODEM,
-  VOLKSWAGEN_MQB_MEB_CONSTANTS,
-)
 
 DBC_CACHE: dict[str, "DBC"] = {}
 
@@ -77,9 +71,6 @@ class DBC:
 
 
 # ***** checksum functions *****
-
-
-
 
 def tesla_setup_signal(sig: Signal, dbc_name: str, line_num: int) -> None:
   if sig.name.endswith("Counter"):
