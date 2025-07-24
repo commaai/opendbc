@@ -39,18 +39,19 @@ class MessageState:
   timeout_threshold: float = 1e5  # default to 1Hz threshold
   vals: list[float] = field(default_factory=list)
   all_vals: list[list[float]] = field(default_factory=list)
-  timestamps: deque[int] = field(default_factory=deque)
+  timestamps: deque[float] = field(default_factory=deque)
   counter: int = 0
   counter_fail: int = 0
-  first_seen_nanos: int = 0
+  first_seen_seconds: float = 0.0
 
   def parse(self, nanos: int, dat: bytes) -> bool:
+    seconds = nanos * 1e-9
     tmp_vals: list[float] = [0.0] * len(self.signals)
     checksum_failed = False
     counter_failed = False
 
-    if self.first_seen_nanos == 0:
-      self.first_seen_nanos = nanos
+    if self.first_seen_seconds == 0.0:
+      self.first_seen_seconds = seconds
 
     for i, sig in enumerate(self.signals):
       tmp = get_raw_value(dat, sig)
@@ -79,16 +80,16 @@ class MessageState:
       self.vals[i] = v
       self.all_vals[i].append(v)
 
-    self.timestamps.append(nanos)
+    self.timestamps.append(seconds)
     max_buffer = 500
     while len(self.timestamps) > max_buffer:
       self.timestamps.popleft()
 
     if self.frequency < 1e-5 and len(self.timestamps) >= 3:
-      dt = (self.timestamps[-1] - self.timestamps[0]) * 1e-9
+      dt = self.timestamps[-1] - self.timestamps[0]
       if (dt > 1.0 or len(self.timestamps) >= max_buffer) and dt != 0:
         self.frequency = min(len(self.timestamps) / dt, 100.0)
-        self.timeout_threshold = (1_000_000_000 / self.frequency) * 10
+        self.timeout_threshold = (1.0 / self.frequency) * 10
     return True
 
   def update_counter(self, cur_count: int, cnt_size: int) -> bool:
@@ -100,11 +101,12 @@ class MessageState:
     return self.counter_fail < MAX_BAD_COUNTER
 
   def valid(self, current_nanos: int, bus_timeout: bool) -> bool:
+    current_seconds = current_nanos * 1e-9
     if self.ignore_alive:
       return True
     if not self.timestamps:
       return False
-    if (current_nanos - self.timestamps[-1]) > self.timeout_threshold:
+    if (current_seconds - self.timestamps[-1]) > self.timeout_threshold:
       return False
     return True
 
@@ -175,11 +177,11 @@ class CANParser:
     )
     if freq is not None and freq > 0:
       state.frequency = freq
-      state.timeout_threshold = (1_000_000_000 / freq) * 10
+      state.timeout_threshold = (1.0 / freq) * 10
     else:
       # if frequency not specified, assume 1Hz until we learn it
       freq = 1
-    state.timeout_threshold = (1_000_000_000 / freq) * 10
+    state.timeout_threshold = (1.0 / freq) * 10
 
     self.message_states[msg.address] = state
 
@@ -224,16 +226,16 @@ class CANParser:
             self.vl[msgname][sig.name] = val
             self.vl_all[address][sig.name] = state.all_vals[i]
             self.vl_all[msgname][sig.name] = state.all_vals[i]
-            self.ts_nanos[address][sig.name] = state.timestamps[-1]
-            self.ts_nanos[msgname][sig.name] = state.timestamps[-1]
+            self.ts_nanos[address][sig.name] = int(state.timestamps[-1] * 1e9)
+            self.ts_nanos[msgname][sig.name] = int(state.timestamps[-1] * 1e9)
 
       if not bus_empty:
         self.last_nonempty_nanos = t
-      bus_timeout_threshold = 500 * 1_000_000
+      bus_timeout_threshold = 0.5  # 500ms in seconds
       for st in self.message_states.values():
         if st.timeout_threshold > 0:
           bus_timeout_threshold = min(bus_timeout_threshold, st.timeout_threshold)
-      self.bus_timeout = (t - self.last_nonempty_nanos) > bus_timeout_threshold
+      self.bus_timeout = (t - self.last_nonempty_nanos) * 1e-9 > bus_timeout_threshold
       self.update_valid(t)
 
     return updated_addrs
