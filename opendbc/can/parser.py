@@ -115,6 +115,7 @@ class VLDict(dict):
 
   def __getitem__(self, key):
     if key not in self:
+      print("ADDING", key)
       self.parser._add_message(key)
     return super().__getitem__(key)
 
@@ -172,7 +173,8 @@ class CANParser:
       name=msg.name,
       size=msg.size,
       signals=list(msg.sigs.values()),
-      ignore_alive=math.isnan(freq == 0),
+      #ignore_alive=math.isnan(freq == 0),
+      ignore_alive=True,
     )
     if freq is not None and 0 < freq < 10:
       state.frequency = freq
@@ -186,8 +188,10 @@ class CANParser:
     for state in self.message_states.values():
       if state.counter_fail >= MAX_BAD_COUNTER:
         counters_valid = False
+        print("INVALID CNT", state.name)
       if not state.valid(nanos, self.bus_timeout):
         valid = False
+        print("INVALID", state.name)
 
     self.can_invalid_cnt = 0 if valid else min(self.can_invalid_cnt + 1, CAN_INVALID_CNT)
     self.can_valid = self.can_invalid_cnt < CAN_INVALID_CNT and counters_valid
@@ -210,10 +214,10 @@ class CANParser:
           continue
         bus_empty = False
         state = self.message_states.get(address)
-        if state is None:
-          # Try to dynamically add the message if it exists in DBC
-          self._add_message(address)
-          state = self.message_states.get(address)
+        #if state is None:
+        #  # Try to dynamically add the message if it exists in DBC
+        #  self._add_message(address)
+        #  state = self.message_states.get(address)
         if state is None or len(dat) > 64:
           continue
         if state.parse(t, dat):
