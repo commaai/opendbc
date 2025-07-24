@@ -17,6 +17,7 @@ LAST_RADAR_MSG = RADAR_HEADER_MSG + NUM_SLOTS
 
 
 def create_radar_can_parser(car_fingerprint):
+  # C1A-ARS3-A by Continental
   return CANParser(DBC[car_fingerprint][Bus.radar], [], CanBus.OBSTACLE)
 
 
