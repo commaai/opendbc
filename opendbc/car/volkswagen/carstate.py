@@ -256,12 +256,19 @@ class CarState(CarStateBase):
     if CP.flags & VolkswagenFlags.PQ:
       return CarState.get_can_parsers_pq(CP)
 
+    # another case of the 1-50Hz
+    cam_messages = []
+    if CP.flags & VolkswagenFlags.STOCK_HCA_PRESENT:
+      cam_messages += [
+        ("HCA_01", 1),  # From R242 Driver assistance camera, 50Hz if steering/1Hz if not
+      ]
+
     return {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [
         # the 50->1Hz is currently too much for the CANParser to figure out
         ("Blinkmodi_02", 1),  # From J519 BCM (sent at 1Hz when no lights active, 50Hz when active)
       ], CANBUS.pt),
-      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CANBUS.cam),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CANBUS.cam),
     }
 
   @staticmethod
