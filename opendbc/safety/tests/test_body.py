@@ -8,7 +8,7 @@ from opendbc.safety.tests.common import CANPackerPanda
 
 
 class TestBody(common.PandaSafetyTest):
-  TX_MSGS = [[0x250, 0], [0x251, 0], [0x350, 0], [0x351, 0],
+  TX_MSGS = [[0x250, 0], [0x251, 0],
              [0x1, 0], [0x1, 1], [0x1, 2], [0x1, 3]]
   FWD_BUS_LOOKUP = {}
 
@@ -25,10 +25,6 @@ class TestBody(common.PandaSafetyTest):
   def _torque_cmd_msg(self, torque_l, torque_r):
     values = {"TORQUE_L": torque_l, "TORQUE_R": torque_r}
     return self.packer.make_can_msg_panda("TORQUE_CMD", 0, values)
-
-  def _knee_torque_cmd_msg(self, torque_l, torque_r):
-    values = {"TORQUE_L": torque_l, "TORQUE_R": torque_r}
-    return self.packer.make_can_msg_panda("KNEE_TORQUE_CMD", 0, values)
 
   def _max_motor_rpm_cmd_msg(self, max_rpm_l, max_rpm_r):
     values = {"MAX_RPM_L": max_rpm_l, "MAX_RPM_R": max_rpm_r}
