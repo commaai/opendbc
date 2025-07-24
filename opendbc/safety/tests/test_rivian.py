@@ -97,16 +97,16 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
         # send multiple times to verify counter checks
         for _ in range(10):
           if msg == "speed":
-            msg = self._speed_msg(0, quality_flag=quality_flag)
+            to_push = self._speed_msg(0, quality_flag=quality_flag)
           elif msg == "speed_2":
-            msg = self._speed_msg_2(0, quality_flag=quality_flag)
+            to_push = self._speed_msg_2(0, quality_flag=quality_flag)
 
-          self.assertEqual(quality_flag, self._rx(msg))
+          self.assertEqual(quality_flag, self._rx(to_push))
           self.assertEqual(quality_flag, self.safety.get_controls_allowed())
 
         # Mess with checksum to make it fail
-        msg[0].data[0] = 0xff
-        self.assertFalse(self._rx(msg))
+        to_push[0].data[0] = 0xff
+        self.assertFalse(self._rx(to_push))
         self.assertFalse(self.safety.get_controls_allowed())
 
 
