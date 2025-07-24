@@ -301,7 +301,7 @@ class CarState(CarStateBase):
 
   def get_can_parsers_canfd(self, CP):
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CanBus(CP).ECAN),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [("CRUISE_BUTTONS", 50), ], CanBus(CP).ECAN),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CanBus(CP).CAM),
     }
 
