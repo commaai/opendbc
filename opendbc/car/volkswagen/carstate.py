@@ -256,123 +256,25 @@ class CarState(CarStateBase):
     if CP.flags & VolkswagenFlags.PQ:
       return CarState.get_can_parsers_pq(CP)
 
-    pt_messages = [
-      # sig_address, frequency
-      ("LWI_01", 100),      # From J500 Steering Assist with integrated sensors
-      ("LH_EPS_03", 100),   # From J500 Steering Assist with integrated sensors
-      ("ESP_19", 100),      # From J104 ABS/ESP controller
-      ("ESP_05", 50),       # From J104 ABS/ESP controller
-      ("ESP_21", 50),       # From J104 ABS/ESP controller
-      ("Motor_20", 50),     # From J623 Engine control module
-      ("TSK_06", 50),       # From J623 Engine control module
-      ("GRA_ACC_01", 33),   # From J533 CAN gateway (via LIN from steering wheel controls)
-      ("Gateway_73", 20),   # From J533 CAN gateway (aggregated data)
-      ("Gateway_72", 10),   # From J533 CAN gateway (aggregated data)
-      ("Motor_14", 10),     # From J623 Engine control module
-      ("Airbag_02", 5),     # From J234 Airbag control module
-      ("Kombi_01", 2),      # From J285 Instrument cluster
-      ("Blinkmodi_02", 1),  # From J519 BCM (sent at 1Hz when no lights active, 50Hz when active)
-    ]
-
-    if CP.flags & VolkswagenFlags.KOMBI_PRESENT:
-      pt_messages.append(("Kombi_03", 1)) # From J285 instrument cluster (not present on older cars)
-
-    if CP.transmissionType == TransmissionType.direct:
-      pt_messages.append(("Motor_EV_01", 10))  # From J??? unknown EV control module
-
-    if CP.networkLocation == NetworkLocation.fwdCamera:
-      # Radars are here on CANBUS.pt
-      pt_messages += MqbExtraSignals.fwd_radar_messages
-      if CP.enableBsm:
-        pt_messages += MqbExtraSignals.bsm_radar_messages
-
+    # another case of the 1-50Hz
     cam_messages = []
     if CP.flags & VolkswagenFlags.STOCK_HCA_PRESENT:
       cam_messages += [
         ("HCA_01", 1),  # From R242 Driver assistance camera, 50Hz if steering/1Hz if not
       ]
 
-    if CP.networkLocation == NetworkLocation.fwdCamera:
-      cam_messages += [
-        # sig_address, frequency
-        ("LDW_02", 10)      # From R242 Driver assistance camera
-      ]
-    else:
-      # Radars are here on CANBUS.cam
-      cam_messages += MqbExtraSignals.fwd_radar_messages
-      if CP.enableBsm:
-        cam_messages += MqbExtraSignals.bsm_radar_messages
-
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CANBUS.pt),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [
+        # the 50->1Hz is currently too much for the CANParser to figure out
+        ("Blinkmodi_02", 1),  # From J519 BCM (sent at 1Hz when no lights active, 50Hz when active)
+      ], CANBUS.pt),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CANBUS.cam),
     }
 
   @staticmethod
   def get_can_parsers_pq(CP):
-    pt_messages = [
-      # sig_address, frequency
-      ("Bremse_1", 100),    # From J104 ABS/ESP controller
-      ("Bremse_3", 100),    # From J104 ABS/ESP controller
-      ("Lenkhilfe_3", 100),  # From J500 Steering Assist with integrated sensors
-      ("Lenkwinkel_1", 100),  # From J500 Steering Assist with integrated sensors
-      ("Motor_3", 100),     # From J623 Engine control module
-      ("Airbag_1", 50),     # From J234 Airbag control module
-      ("Bremse_5", 50),     # From J104 ABS/ESP controller
-      ("GRA_Neu", 50),      # From J??? steering wheel control buttons
-      ("Kombi_1", 50),      # From J285 Instrument cluster
-      ("Motor_2", 50),      # From J623 Engine control module
-      ("Motor_5", 50),      # From J623 Engine control module
-      ("Lenkhilfe_2", 20),  # From J500 Steering Assist with integrated sensors
-      ("Gate_Komf_1", 10),  # From J533 CAN gateway
-    ]
-
-    if CP.transmissionType == TransmissionType.automatic:
-      pt_messages += [("Getriebe_1", 100)]  # From J743 Auto transmission control module
-
-    if CP.networkLocation == NetworkLocation.fwdCamera:
-      # Extended CAN devices other than the camera are here on CANBUS.pt
-      pt_messages += PqExtraSignals.fwd_radar_messages
-      if CP.enableBsm:
-        pt_messages += PqExtraSignals.bsm_radar_messages
-
-    cam_messages = []
-    if CP.networkLocation == NetworkLocation.fwdCamera:
-      cam_messages += [
-        # sig_address, frequency
-        ("LDW_Status", 10)      # From R242 Driver assistance camera
-      ]
-
-    if CP.networkLocation == NetworkLocation.gateway:
-      # Radars are here on CANBUS.cam
-      cam_messages += PqExtraSignals.fwd_radar_messages
-      if CP.enableBsm:
-        cam_messages += PqExtraSignals.bsm_radar_messages
-
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CANBUS.pt),
-      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CANBUS.cam),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CANBUS.pt),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CANBUS.cam),
     }
 
-
-class MqbExtraSignals:
-  # Additional signal and message lists for optional or bus-portable controllers
-  fwd_radar_messages = [
-    ("ACC_06", 50),                              # From J428 ACC radar control module
-    ("ACC_10", 50),                              # From J428 ACC radar control module
-    ("ACC_02", 17),                              # From J428 ACC radar control module
-  ]
-  bsm_radar_messages = [
-    ("SWA_01", 20),                              # From J1086 Lane Change Assist
-  ]
-
-
-class PqExtraSignals:
-  # Additional signal and message lists for optional or bus-portable controllers
-  fwd_radar_messages = [
-    ("ACC_System", 50),                          # From J428 ACC radar control module
-    ("ACC_GRA_Anzeige", 25),                     # From J428 ACC radar control module
-  ]
-  bsm_radar_messages = [
-    ("SWA_1", 20),                               # From J1086 Lane Change Assist
-  ]

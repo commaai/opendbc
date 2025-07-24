@@ -122,27 +122,7 @@ class CarState(CarStateBase):
 
   @staticmethod
   def get_can_parsers(CP):
-    party_messages = [
-      # sig_address, frequency
-      ("DI_speed", 50),
-      ("DI_systemStatus", 100),
-      ("IBST_status", 25),
-      ("DI_state", 10),
-      ("EPAS3S_sysStatus", 100),
-      ("UI_warning", 10)
-    ]
-
-    ap_party_messages = [
-      ("DAS_control", 25),
-      ("DAS_steeringControl", 50),
-      ("DAS_status", 2),
-      ("SCCM_steeringAngleSensor", 100),
-    ]
-
-    if CP.carFingerprint in (CAR.TESLA_MODEL_3, CAR.TESLA_MODEL_Y):
-      ap_party_messages.append(("DAS_settings", 2))
-
     return {
-      Bus.party: CANParser(DBC[CP.carFingerprint][Bus.party], party_messages, CANBUS.party),
-      Bus.ap_party: CANParser(DBC[CP.carFingerprint][Bus.party], ap_party_messages, CANBUS.autopilot_party)
+      Bus.party: CANParser(DBC[CP.carFingerprint][Bus.party], [], CANBUS.party),
+      Bus.ap_party: CANParser(DBC[CP.carFingerprint][Bus.party], [], CANBUS.autopilot_party)
     }
