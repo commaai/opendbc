@@ -75,7 +75,6 @@ static void honda_rx_hook(const CANPacket_t *to_push) {
 
   // sample speed
   if (addr == 0x158) {
-    // first 2 bytes
     vehicle_moving = GET_BYTE(to_push, 0) | GET_BYTE(to_push, 1);
   }
 

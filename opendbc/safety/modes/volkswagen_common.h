@@ -42,7 +42,7 @@ static uint32_t volkswagen_mqb_meb_compute_crc(const CANPacket_t *to_push) {
   int addr = GET_ADDR(to_push);
   int len = GET_LEN(to_push);
 
-  // This is CRC-8H2F/AUTOSAR with a twist. See the OpenDBC implementation
+  // This is CRC-8H2F/AUTOSAR with a twist. See the opendbc/car/volkswagen/ implementation
   // of this algorithm for a version with explanatory comments.
 
   uint8_t crc = 0xFFU;
