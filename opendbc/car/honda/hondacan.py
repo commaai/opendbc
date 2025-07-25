@@ -129,11 +129,18 @@ def create_steering_control(packer, CAN, apply_torque, lkas_active):
 def create_bosch_supplemental_1(packer, CAN):
   # non-active params
   values = {
-    "SET_ME_X04": 0, # 0x04,
-    "SET_ME_X00": 5, # 0
-    "SET_ME_X80": 128, # 0x80,
-    "SET_ME_X10": 0, # 0x10,
-    "ROW5": 208,
+
+    # "SET_ME_X04": 0, # 0x04,
+    # "SET_ME_X00": 5, # 0
+    # "SET_ME_X80": 128, # 0x80,
+    # "SET_ME_X10": 0, # 0x10,
+    # "ROW5": 208,
+
+    "SET_ME_X04": 0x04,
+    "SET_ME_X00": 0
+    "SET_ME_X80": 0x80,
+    "SET_ME_X10": 0x10,
+
   }
   return packer.make_can_msg("BOSCH_SUPPLEMENTAL_1", CAN.lkas, values)
 
