@@ -41,10 +41,12 @@ class CarState(CarStateBase):
     ret.seatbeltUnlatched = cp.vl["ORC_1"]["SEATBELT_DRIVER_UNLATCHED"] == 1
 
     # brake pedal
+    ret.brake = 0
     ret.brakePressed = cp.vl["ESP_1"]['Brake_Pedal_State'] == 1  # Physical brake pedal switch
 
     # gas pedal
-    ret.gasPressed = cp.vl["ECM_5"]["Accelerator_Position"] > 0
+    ret.gas = cp.vl["ECM_5"]["Accelerator_Position"]
+    ret.gasPressed = ret.gas > 1e-5
 
     # car speed
     if self.CP.carFingerprint in RAM_CARS:
