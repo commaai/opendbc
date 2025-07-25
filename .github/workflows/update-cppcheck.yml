@@ -1,8 +1,9 @@
 name: Update cppcheck
 
 on:
+  push:
   schedule:
-    - cron: '0 8 * * 1'  # 12am PST (8am UTC) every Monday
+    - cron: "0 14 * * 1" # every Monday at 2am UTC (6am PST)
   workflow_dispatch:
 
 jobs:
@@ -21,7 +22,14 @@ jobs:
         run: |
           sed -i "s/^VERS=\".*\"/VERS=\"${{ steps.version.outputs.vers }}\"/" opendbc/safety/tests/misra/install.sh
           grep VERS opendbc/safety/tests/misra/install.sh
-      - uses: stefanzweifel/git-auto-commit-action@8621497c8c39c72f3e2a999a26b4ca1b5058a842
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@9153d834b60caba6d51c9b9510b087acf9f33f83
         with:
-          commit_message: 'build: Scheduled auto-update cppcheck version'
-          file_pattern: 'opendbc/safety/tests/misra/install.sh'
+          author: Vehicle Researcher <user@comma.ai>
+          commit-message: "Update translations"
+          title: "[bot] Update cppcheck to ${{ steps.version.outputs.vers }}"
+          body: "See all cppcheck releases: https://github.com/danmar/cppcheck/releases"
+          branch: "update-cppcheck"
+          base: "master"
+          delete-branch: true
+          labels: bot
