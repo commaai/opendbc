@@ -120,7 +120,7 @@ class CarState(CarStateBase):
     ret.steeringPressed = abs(ret.steeringTorque) > self.CCP.STEER_DRIVER_ALLOWANCE
     ret.steerFaultTemporary, ret.steerFaultPermanent = self.update_hca_state(hca_status, drive_mode)
 
-    ret.gasPressed = pt_cp.vl["Motor_20"]["MO_Fahrpedalrohwert_01"] / 100.0 > 0
+    ret.gasPressed = pt_cp.vl["Motor_20"]["MO_Fahrpedalrohwert_01"] > 0
     ret.espActive = bool(pt_cp.vl["ESP_21"]["ESP_Eingriff"])
     ret.espDisabled = pt_cp.vl["ESP_21"]["ESP_Tastung_passiv"] != 0
     ret.seatbeltUnlatched = pt_cp.vl["Airbag_02"]["AB_Gurtschloss_FA"] != 3
@@ -159,7 +159,7 @@ class CarState(CarStateBase):
     ret.steerFaultTemporary, ret.steerFaultPermanent = self.update_hca_state(hca_status)
 
     # Update gas, brakes, and gearshift.
-    ret.gasPressed = pt_cp.vl["Motor_3"]["Fahrpedal_Rohsignal"] / 100.0 > 0
+    ret.gasPressed = pt_cp.vl["Motor_3"]["Fahrpedal_Rohsignal"] > 0
     ret.brake = pt_cp.vl["Bremse_5"]["BR5_Bremsdruck"] / 250.0  # FIXME: this is pressure in Bar, not sure what OP expects
     ret.brakePressed = bool(pt_cp.vl["Motor_2"]["Bremslichtschalter"])
     ret.parkingBrake = bool(pt_cp.vl["Kombi_1"]["Bremsinfo"])
