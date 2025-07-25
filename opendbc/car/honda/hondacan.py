@@ -133,6 +133,7 @@ def create_bosch_supplemental_1(packer, CAN):
     "SET_ME_X00": 5, # 0
     "SET_ME_X80": 128, # 0x80,
     "SET_ME_X10": 0, # 0x10,
+    "ROW5": 208,
   }
   return packer.make_can_msg("BOSCH_SUPPLEMENTAL_1", CAN.lkas, values)
 
