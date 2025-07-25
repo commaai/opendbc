@@ -137,7 +137,7 @@ def create_bosch_supplemental_1(packer, CAN):
     # "ROW5": 208,
 
     "SET_ME_X04": 0x04,
-    "SET_ME_X00": 0
+    "SET_ME_X00": 0,
     "SET_ME_X80": 0x80,
     "SET_ME_X10": 0x10,
 
