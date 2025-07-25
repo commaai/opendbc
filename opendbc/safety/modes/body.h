@@ -2,19 +2,19 @@
 
 #include "opendbc/safety/safety_declarations.h"
 
-static void body_rx_hook(const CANPacket_t *to_push) {
+static void body_rx_hook(const CANPacket_t *msg) {
   // body is never at standstill
   vehicle_moving = true;
 
-  if (GET_ADDR(to_push) == 0x201U) {
+  if (GET_ADDR(msg) == 0x201U) {
     controls_allowed = true;
   }
 }
 
-static bool body_tx_hook(const CANPacket_t *to_send) {
+static bool body_tx_hook(const CANPacket_t *msg) {
   bool tx = true;
-  int addr = GET_ADDR(to_send);
-  int len = GET_LEN(to_send);
+  int addr = GET_ADDR(msg);
+  int len = GET_LEN(msg);
 
   if (!controls_allowed && (addr != 0x1)) {
     tx = false;
@@ -22,7 +22,7 @@ static bool body_tx_hook(const CANPacket_t *to_send) {
 
   // Allow going into CAN flashing mode even if controls are not allowed
   bool flash_msg = (addr == 0x250) && (len == 8);
-  if (!controls_allowed && (GET_BYTES(to_send, 0, 4) == 0xdeadfaceU) && (GET_BYTES(to_send, 4, 4) == 0x0ab00b1eU) && flash_msg) {
+  if (!controls_allowed && (GET_BYTES(msg, 0, 4) == 0xdeadfaceU) && (GET_BYTES(msg, 4, 4) == 0x0ab00b1eU) && flash_msg) {
     tx = true;
   }
 
