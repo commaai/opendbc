@@ -18,6 +18,7 @@ BO_ 229 BOSCH_SUPPLEMENTAL_1: 8 XXX
  SG_ SET_ME_X00 : 8|8@1+ (1,0) [0|255] "" XXX
  SG_ SET_ME_X80 : 16|8@1+ (1,0) [0|255] "" XXX
  SG_ SET_ME_X10 : 24|8@1+ (1,0) [0|255] "" XXX
+ SG_ ROW5 : 39|8@0+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|15] "" XXX
 
