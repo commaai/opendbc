@@ -6,7 +6,7 @@
 #include "opendbc/safety/safety_declarations.h"
 #include "opendbc/safety/board/can.h"
 
-// include the safety policies.
+// all the safety modes
 #include "opendbc/safety/modes/defaults.h"
 #include "opendbc/safety/modes/honda.h"
 #include "opendbc/safety/modes/toyota.h"

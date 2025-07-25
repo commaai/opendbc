@@ -47,7 +47,8 @@ class CarState(CarStateBase):
 
     # steering wheel
     ret.steeringAngleDeg = cp.vl["SteeringPinion_Data"]["StePinComp_An_Est"]
-    ret.steeringPressed = self.update_steering_pressed(abs(cp.vl["EPAS_INFO"]["SteeringColumnTorque"]) > CarControllerParams.STEER_DRIVER_ALLOWANCE, 5)
+    ret.steeringTorque = cp.vl["EPAS_INFO"]["SteeringColumnTorque"]
+    ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > CarControllerParams.STEER_DRIVER_ALLOWANCE, 5)
     ret.steerFaultTemporary = cp.vl["EPAS_INFO"]["EPAS_Failure"] == 1
     ret.steerFaultPermanent = cp.vl["EPAS_INFO"]["EPAS_Failure"] in (2, 3)
     ret.espDisabled = cp.vl["Cluster_Info1_FD1"]["DrvSlipCtlMde_D_Rq"] != 0  # 0 is default mode

@@ -9,7 +9,6 @@ static uint8_t rivian_get_counter(const CANPacket_t *to_push) {
   if ((addr == 0x208) || (addr == 0x150)) {
     // Signal: ESP_Status_Counter, VDM_PropStatus_Counter
     cnt = GET_BYTE(to_push, 1) & 0xFU;
-  } else {
   }
   return cnt;
 }

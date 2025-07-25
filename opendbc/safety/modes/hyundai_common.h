@@ -6,7 +6,7 @@ extern uint16_t hyundai_canfd_crc_lut[256];
 uint16_t hyundai_canfd_crc_lut[256];
 
 static const uint8_t HYUNDAI_PREV_BUTTON_SAMPLES = 8;  // roughly 160 ms
-                                                       //
+
 extern const uint32_t HYUNDAI_STANDSTILL_THRSLD;
 const uint32_t HYUNDAI_STANDSTILL_THRSLD = 12;  // 0.375 kph
 
