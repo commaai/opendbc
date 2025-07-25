@@ -129,9 +129,11 @@ class CarState(CarStateBase):
       gear_position = self.shifter_values.get(cp.vl[self.gearbox_msg]["GEAR_SHIFTER"], None)
       ret.gearShifter = self.parse_gear_shifter(gear_position)
 
-    ret.gasPressed = cp.vl["POWERTRAIN_DATA"]["PEDAL_GAS"] > 0
+    ret.gas = cp.vl["POWERTRAIN_DATA"]["PEDAL_GAS"]
+    ret.gasPressed = ret.gas > 1e-5
 
-    ret.steeringPressed = abs(cp.vl["STEER_STATUS"]["STEER_TORQUE_SENSOR"]) > STEER_THRESHOLD.get(self.CP.carFingerprint, 1200)
+    ret.steeringTorque = cp.vl["STEER_STATUS"]["STEER_TORQUE_SENSOR"]
+    ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD.get(self.CP.carFingerprint, 1200)
 
     if self.CP.carFingerprint in HONDA_BOSCH:
       # The PCM always manages its own cruise control state, but doesn't publish it
@@ -166,12 +168,13 @@ class CarState(CarStateBase):
         self.brake_switch_prev = brake_switch
       ret.brakePressed = (cp.vl["POWERTRAIN_DATA"]["BRAKE_PRESSED"] != 0) or self.brake_switch_active
 
+    ret.brake = cp.vl["VSA_STATUS"]["USER_BRAKE"]
     ret.cruiseState.enabled = cp.vl["POWERTRAIN_DATA"]["ACC_STATUS"] != 0
     ret.cruiseState.available = bool(cp.vl[self.main_on_sig_msg]["MAIN_ON"])
 
     # Gets rid of Pedal Grinding noise when brake is pressed at slow speeds for some models
     if self.CP.carFingerprint in (CAR.HONDA_PILOT, CAR.HONDA_RIDGELINE):
-      if cp.vl["VSA_STATUS"]["USER_BRAKE"] > 0.1:
+      if ret.brake > 0.1:
         ret.brakePressed = True
 
     if self.CP.carFingerprint in HONDA_BOSCH:

@@ -39,8 +39,13 @@ class CarState(CarStateBase):
     ret.vEgoRaw = cp_party.vl["DI_speed"]["DI_vehicleSpeed"] * CV.KPH_TO_MS
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
 
-    # User pedals
-    ret.gasPressed = cp_party.vl["DI_systemStatus"]["DI_accelPedalPos"] > 1e-5
+    # Gas pedal
+    pedal_status = cp_party.vl["DI_systemStatus"]["DI_accelPedalPos"]
+    ret.gas = pedal_status / 100.0
+    ret.gasPressed = pedal_status > 0
+
+    # Brake pedal
+    ret.brake = 0
     ret.brakePressed = cp_party.vl["IBST_status"]["IBST_driverBrakeApply"] == 2
 
     # Steering wheel
@@ -48,9 +53,10 @@ class CarState(CarStateBase):
     self.hands_on_level = epas_status["EPAS3S_handsOnLevel"]
     ret.steeringAngleDeg = -epas_status["EPAS3S_internalSAS"]
     ret.steeringRateDeg = -cp_ap_party.vl["SCCM_steeringAngleSensor"]["SCCM_steeringAngleSpeed"]
+    ret.steeringTorque = -epas_status["EPAS3S_torsionBarTorque"]
 
     # stock handsOnLevel uses >0.5 for 0.25s, but is too slow
-    ret.steeringPressed = self.update_steering_pressed(abs(-epas_status["EPAS3S_torsionBarTorque"]) > STEER_THRESHOLD, 5)
+    ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > STEER_THRESHOLD, 5)
 
     eac_status = self.can_define.dv["EPAS3S_sysStatus"]["EPAS3S_eacStatus"].get(int(epas_status["EPAS3S_eacStatus"]), None)
     ret.steerFaultPermanent = eac_status == "EAC_FAULT"

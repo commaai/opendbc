@@ -3,6 +3,9 @@
 #include "opendbc/safety/safety_declarations.h"
 
 static void body_rx_hook(const CANPacket_t *msg) {
+  // body is never at standstill
+  vehicle_moving = true;
+
   if (GET_ADDR(msg) == 0x201U) {
     controls_allowed = true;
   }
