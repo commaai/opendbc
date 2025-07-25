@@ -27,6 +27,7 @@ jobs:
         uses: peter-evans/create-pull-request@9153d834b60caba6d51c9b9510b087acf9f33f83
         with:
           author: Vehicle Researcher <user@comma.ai>
+          token: ${{ secrets.ACTIONS_CREATE_PR_PAT }}
           commit-message: "Update translations"
           title: "[bot] Update cppcheck to ${{ steps.version.outputs.vers }}"
           body: "See all cppcheck releases: https://github.com/danmar/cppcheck/releases"
