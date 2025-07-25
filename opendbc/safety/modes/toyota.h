@@ -42,7 +42,7 @@
 
 #define TOYOTA_ALT_BRAKE_RX_CHECKS(lta)                                                                                                    \
   TOYOTA_COMMON_RX_CHECKS(lta)                                                                                                             \
-  {.msg = {{0x1D2, 0, 8, .ignore_counter = true, .ignore_quality_flag = true, .frequency = 33U}, { 0 }, { 0 }}},                           \
+  {.msg = {{0x1D2, 0, 8, 33U, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                           \
   {.msg = {{0x224, 0, 8, 40U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
 
 #define TOYOTA_SECOC_RX_CHECKS                                                                                                             \
