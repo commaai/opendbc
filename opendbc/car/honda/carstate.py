@@ -107,6 +107,8 @@ class CarState(CarStateBase):
 
     ret = structs.CarState()
 
+    throwaway = cp_cam.vl["STEERING_CONTROL"]["STEER_TORQUE"] # wait for steer signal
+
     # car params
     v_weight_v = [0., 1.]  # don't trust smooth speed at low values to avoid premature zero snapping
     v_weight_bp = [1., 6.]   # smooth blending, below ~0.6m/s the smooth speed snaps to zero
