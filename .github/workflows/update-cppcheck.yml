@@ -1,0 +1,27 @@
+name: Update cppcheck
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'  # 12am PST (8am UTC) every Monday
+  workflow_dispatch:
+
+jobs:
+  update-cppcheck:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get latest cppcheck version
+        id: version
+        run: |
+          LATEST=$(curl -fsSL https://api.github.com/repos/danmar/cppcheck/releases/latest | jq -r .tag_name)
+          echo "vers=$LATEST" >> "$GITHUB_OUTPUT"
+      - name: Update VERS in install.sh
+        run: |
+          sed -i "s/^VERS=\".*\"/VERS=\"${{ steps.version.outputs.vers }}\"/" opendbc/safety/tests/misra/install.sh
+          grep VERS opendbc/safety/tests/misra/install.sh
+      - uses: stefanzweifel/git-auto-commit-action@8621497c8c39c72f3e2a999a26b4ca1b5058a842
+        with:
+          commit_message: 'build: Scheduled auto-update cppcheck version'
+          file_pattern: 'opendbc/safety/tests/misra/install.sh'
