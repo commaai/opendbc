@@ -129,28 +129,28 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
   def test_rx_hook(self):
     # counter check
-    for msg in ("angle", "long", "speed", "speed_2"):
+    for msg_type in ("angle", "long", "speed", "speed_2"):
       # send multiple times to verify counter checks
       for i in range(10):
-        if msg == "angle":
+        if msg_type == "angle":
           msg = self._angle_cmd_msg(0, True, bus=2)
-        elif msg == "long":
+        elif msg_type == "long":
           msg = self._long_control_msg(0, bus=2)
-        elif msg == "speed":
+        elif msg_type == "speed":
           msg = self._speed_msg(0)
-        elif msg == "speed_2":
+        elif msg_type == "speed_2":
           msg = self._speed_msg_2(0)
 
         should_rx = i >= 5
         if not should_rx:
           # mess with checksums
-          if msg == "angle":
+          if msg_type == "angle":
             msg[0].data[3] = 0
-          elif msg == "long":
+          elif msg_type == "long":
             msg[0].data[7] = 0
-          elif msg == "speed":
+          elif msg_type == "speed":
             msg[0].data[0] = 0
-          elif msg == "speed_2":
+          elif msg_type == "speed_2":
             msg[0].data[7] = 0
 
         self.safety.set_controls_allowed(True)

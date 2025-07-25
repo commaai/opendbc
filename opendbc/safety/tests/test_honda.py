@@ -89,16 +89,16 @@ class HondaButtonEnableBase(common.PandaCarSafetyTest):
 
     # TODO: move this test to common
     # checksum checks
-    for msg in ["btn", "gas", "speed"]:
+    for msg_type in ["btn", "gas", "speed"]:
       self.safety.set_controls_allowed(1)
-      if msg == "btn":
+      if msg_type == "btn":
         msg = self._button_msg(Btn.SET)
-      if msg == "gas":
+      if msg_type == "gas":
         msg = self._user_gas_msg(0)
-      if msg == "speed":
+      if msg_type == "speed":
         msg = self._speed_msg(0)
       self.assertTrue(self._rx(msg))
-      if msg != "btn":
+      if msg_type != "btn":
         msg[0].data[4] = 0  # invalidate checksum
         msg[0].data[5] = 0
         msg[0].data[6] = 0
