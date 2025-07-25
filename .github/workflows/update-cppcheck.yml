@@ -8,9 +8,10 @@ on:
 
 jobs:
   update-cppcheck:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
       - name: Get latest cppcheck version
