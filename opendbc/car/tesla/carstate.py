@@ -41,7 +41,6 @@ class CarState(CarStateBase):
 
     # Gas pedal
     pedal_status = cp_party.vl["DI_systemStatus"]["DI_accelPedalPos"]
-    ret.gas = pedal_status / 100.0
     ret.gasPressed = pedal_status > 0
 
     # Brake pedal
