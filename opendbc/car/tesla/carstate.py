@@ -40,9 +40,7 @@ class CarState(CarStateBase):
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
 
     # Gas pedal
-    pedal_status = cp_party.vl["DI_systemStatus"]["DI_accelPedalPos"]
-    ret.gas = pedal_status / 100.0
-    ret.gasPressed = pedal_status > 0
+    ret.gasPressed = cp_party.vl["DI_systemStatus"]["DI_accelPedalPos"] > 0
 
     # Brake pedal
     ret.brake = 0
@@ -53,9 +51,10 @@ class CarState(CarStateBase):
     self.hands_on_level = epas_status["EPAS3S_handsOnLevel"]
     ret.steeringAngleDeg = -epas_status["EPAS3S_internalSAS"]
     ret.steeringRateDeg = -cp_ap_party.vl["SCCM_steeringAngleSensor"]["SCCM_steeringAngleSpeed"]
+    ret.steeringTorque = -epas_status["EPAS3S_torsionBarTorque"]
 
     # stock handsOnLevel uses >0.5 for 0.25s, but is too slow
-    ret.steeringPressed = self.update_steering_pressed(abs(-epas_status["EPAS3S_torsionBarTorque"]) > STEER_THRESHOLD, 5)
+    ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > STEER_THRESHOLD, 5)
 
     eac_status = self.can_define.dv["EPAS3S_sysStatus"]["EPAS3S_eacStatus"].get(int(epas_status["EPAS3S_eacStatus"]), None)
     ret.steerFaultPermanent = eac_status == "EAC_FAULT"
@@ -122,27 +121,7 @@ class CarState(CarStateBase):
 
   @staticmethod
   def get_can_parsers(CP):
-    party_messages = [
-      # sig_address, frequency
-      ("DI_speed", 50),
-      ("DI_systemStatus", 100),
-      ("IBST_status", 25),
-      ("DI_state", 10),
-      ("EPAS3S_sysStatus", 100),
-      ("UI_warning", 10)
-    ]
-
-    ap_party_messages = [
-      ("DAS_control", 25),
-      ("DAS_steeringControl", 50),
-      ("DAS_status", 2),
-      ("SCCM_steeringAngleSensor", 100),
-    ]
-
-    if CP.carFingerprint in (CAR.TESLA_MODEL_3, CAR.TESLA_MODEL_Y):
-      ap_party_messages.append(("DAS_settings", 2))
-
     return {
-      Bus.party: CANParser(DBC[CP.carFingerprint][Bus.party], party_messages, CANBUS.party),
-      Bus.ap_party: CANParser(DBC[CP.carFingerprint][Bus.party], ap_party_messages, CANBUS.autopilot_party)
+      Bus.party: CANParser(DBC[CP.carFingerprint][Bus.party], [], CANBUS.party),
+      Bus.ap_party: CANParser(DBC[CP.carFingerprint][Bus.party], [], CANBUS.autopilot_party)
     }

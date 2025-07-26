@@ -35,11 +35,9 @@ class CarState(CarStateBase):
     self.distance_button = cp.vl["CRUISE_THROTTLE"]["FOLLOW_DISTANCE_BUTTON"]
 
     if self.CP.carFingerprint in (CAR.NISSAN_ROGUE, CAR.NISSAN_XTRAIL, CAR.NISSAN_ALTIMA):
-      ret.gas = cp.vl["GAS_PEDAL"]["GAS_PEDAL"]
+      ret.gasPressed = bool(cp.vl["GAS_PEDAL"]["GAS_PEDAL"] > 3)
     elif self.CP.carFingerprint in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC):
-      ret.gas = cp.vl["CRUISE_THROTTLE"]["GAS_PEDAL"]
-
-    ret.gasPressed = bool(ret.gas > 3)
+      ret.gasPressed = bool(cp.vl["CRUISE_THROTTLE"]["GAS_PEDAL"] > 3)
 
     if self.CP.carFingerprint in (CAR.NISSAN_ROGUE, CAR.NISSAN_XTRAIL, CAR.NISSAN_ALTIMA):
       ret.brakePressed = bool(cp.vl["DOORS_LIGHTS"]["USER_BRAKE_PRESSED"])
@@ -134,64 +132,8 @@ class CarState(CarStateBase):
 
   @staticmethod
   def get_can_parsers(CP):
-    pt_messages = [
-      # sig_address, frequency
-      ("STEER_ANGLE_SENSOR", 100),
-      ("WHEEL_SPEEDS_REAR", 50),
-      ("WHEEL_SPEEDS_FRONT", 50),
-      ("ESP", 25),
-      ("GEARBOX", 25),
-      ("DOORS_LIGHTS", 10),
-      ("LIGHTS", 10),
-    ]
-
-    if CP.carFingerprint in (CAR.NISSAN_ROGUE, CAR.NISSAN_XTRAIL, CAR.NISSAN_ALTIMA):
-      pt_messages += [
-        ("GAS_PEDAL", 100),
-        ("CRUISE_THROTTLE", 50),
-        ("HUD", 25),
-      ]
-
-    elif CP.carFingerprint in (CAR.NISSAN_LEAF, CAR.NISSAN_LEAF_IC):
-      pt_messages += [
-        ("BRAKE_PEDAL", 100),
-        ("CRUISE_THROTTLE", 50),
-        ("CANCEL_MSG", 50),
-        ("HUD_SETTINGS", 25),
-        ("SEATBELT", 10),
-      ]
-
-    if CP.carFingerprint == CAR.NISSAN_ALTIMA:
-      pt_messages += [
-        ("CRUISE_STATE", 10),
-        ("LKAS_SETTINGS", 10),
-        ("PROPILOT_HUD", 50),
-      ]
-    else:
-      pt_messages.append(("STEER_TORQUE_SENSOR", 100))
-
-    cam_messages = []
-    if CP.carFingerprint in (CAR.NISSAN_ROGUE, CAR.NISSAN_XTRAIL):
-      cam_messages.append(("PRO_PILOT", 100))
-    elif CP.carFingerprint == CAR.NISSAN_ALTIMA:
-      cam_messages.append(("STEER_TORQUE_SENSOR", 100))
-
-    if CP.carFingerprint == CAR.NISSAN_ALTIMA:
-      adas_messages = [
-        ("LKAS", 100),
-        ("PRO_PILOT", 100),
-      ]
-    else:
-      adas_messages = [
-        ("PROPILOT_HUD_INFO_MSG", 2),
-        ("LKAS_SETTINGS", 10),
-        ("CRUISE_STATE", 50),
-        ("PROPILOT_HUD", 50),
-        ("LKAS", 100),
-      ]
-
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 1 if CP.carFingerprint == CAR.NISSAN_ALTIMA else 0),
-      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, 0 if CP.carFingerprint == CAR.NISSAN_ALTIMA else 1),
-      Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.pt], adas_messages, 2),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 1 if CP.carFingerprint == CAR.NISSAN_ALTIMA else 0),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 0 if CP.carFingerprint == CAR.NISSAN_ALTIMA else 1),
+      Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 2),
     }

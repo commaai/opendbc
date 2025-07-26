@@ -244,7 +244,7 @@ class CarInterfaceBase(ABC):
     # parse can
     for cp in self.can_parsers.values():
       if cp is not None:
-        cp.update_strings(can_packets)
+        cp.update(can_packets)
 
     # get CarState
     ret = self.CS.update(self.can_parsers)
