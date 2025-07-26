@@ -56,7 +56,7 @@ class TestInterfaces:
   def test_constants_defined(self):
     """Test that important constants are properly defined"""
     assert V_CRUISE_MAX == 145
-    assert MAX_CTRL_SPEED > 145  # Should be higher than cruise max in m/s
+    assert MAX_CTRL_SPEED > 40  # Should be reasonable speed in m/s (~149 km/h)
     assert ACCEL_MAX == 2.0
     assert ACCEL_MIN == -3.5
     assert ACCEL_MIN < 0 < ACCEL_MAX  # Sensible acceleration range
