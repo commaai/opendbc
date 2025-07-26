@@ -20,6 +20,7 @@
 uv.lock
 /dist/
 .vscode/
+__pycache__/
 
 opendbc/can/build/
 opendbc/can/obj/
