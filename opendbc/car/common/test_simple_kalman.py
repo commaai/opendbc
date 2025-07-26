@@ -96,9 +96,9 @@ class TestGetKalmanGain:
     C = np.array([[1.0, 0.0]])
     Q = np.array([[0.01, 0.0], [0.0, 0.01]])
     R = 0.1
-    
+
     gain = get_kalman_gain(0.0, A, C, Q, R)
-    
+
     # Should handle gracefully and return reasonable gains
     assert gain.shape == (2, 1)
     assert np.all(gain >= 0)

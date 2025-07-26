@@ -1,4 +1,3 @@
-from unittest.mock import Mock
 from opendbc.car.fw_query_definitions import (
   p16, StdQueries, STANDARD_VIN_ADDRS, ESSENTIAL_ECUS, ECU_NAME,
   FwQueryConfig, Request, AddrType, EcuAddrBusType, EcuAddrSubAddr
@@ -16,7 +15,7 @@ class TestFwQueryDefinitions:
     assert p16(0x1234) == b'\x12\x34'
     assert p16(0x0000) == b'\x00\x00'
     assert p16(0xFFFF) == b'\xFF\xFF'
-    
+
     # Test that it produces 2 bytes
     assert len(p16(0x1234)) == 2
     assert len(p16(0)) == 2
@@ -25,7 +24,7 @@ class TestFwQueryDefinitions:
     """Test STANDARD_VIN_ADDRS contains expected addresses"""
     expected_addrs = [0x7e0, 0x7e2, 0x760, 0x7c6, 0x18da10f1, 0x18da0ef1]
     assert STANDARD_VIN_ADDRS == expected_addrs
-    
+
     # Should be a list of integers
     for addr in STANDARD_VIN_ADDRS:
       assert isinstance(addr, int)
@@ -35,7 +34,7 @@ class TestFwQueryDefinitions:
     """Test ESSENTIAL_ECUS contains expected ECU types"""
     expected_ecus = [Ecu.engine, Ecu.eps, Ecu.abs, Ecu.fwdRadar, Ecu.fwdCamera, Ecu.vsa]
     assert ESSENTIAL_ECUS == expected_ecus
-    
+
     # Should all be ECU enum values
     for ecu in ESSENTIAL_ECUS:
       assert isinstance(ecu, int)  # Enum values are ints
@@ -45,7 +44,7 @@ class TestFwQueryDefinitions:
     # Should be a dict mapping ECU values to names
     assert isinstance(ECU_NAME, dict)
     assert len(ECU_NAME) > 0
-    
+
     # Test some known ECU mappings exist
     for ecu in ESSENTIAL_ECUS:
       assert ecu in ECU_NAME
@@ -56,15 +55,15 @@ class TestFwQueryDefinitions:
     # Test tester present request
     expected_request = bytes([uds.SERVICE_TYPE.TESTER_PRESENT, 0x0])
     assert StdQueries.TESTER_PRESENT_REQUEST == expected_request
-    
+
     # Test tester present response
     expected_response = bytes([uds.SERVICE_TYPE.TESTER_PRESENT + 0x40, 0x0])
     assert StdQueries.TESTER_PRESENT_RESPONSE == expected_response
-    
+
     # Test short versions
     short_request = bytes([uds.SERVICE_TYPE.TESTER_PRESENT])
     assert StdQueries.SHORT_TESTER_PRESENT_REQUEST == short_request
-    
+
     short_response = bytes([uds.SERVICE_TYPE.TESTER_PRESENT + 0x40])
     assert StdQueries.SHORT_TESTER_PRESENT_RESPONSE == short_response
 
@@ -76,14 +75,14 @@ class TestFwQueryDefinitions:
       uds.SESSION_TYPE.DEFAULT
     ])
     assert StdQueries.DEFAULT_DIAGNOSTIC_REQUEST == expected_default_req
-    
+
     # Test extended diagnostic request
     expected_extended_req = bytes([
       uds.SERVICE_TYPE.DIAGNOSTIC_SESSION_CONTROL,
       uds.SESSION_TYPE.EXTENDED_DIAGNOSTIC
     ])
     assert StdQueries.EXTENDED_DIAGNOSTIC_REQUEST == expected_extended_req
-    
+
     # Responses should have service type + 0x40
     assert StdQueries.DEFAULT_DIAGNOSTIC_RESPONSE[0] == uds.SERVICE_TYPE.DIAGNOSTIC_SESSION_CONTROL + 0x40
     assert StdQueries.EXTENDED_DIAGNOSTIC_RESPONSE[0] == uds.SERVICE_TYPE.DIAGNOSTIC_SESSION_CONTROL + 0x40
@@ -92,7 +91,7 @@ class TestFwQueryDefinitions:
     """Test manufacturer software version request"""
     expected_start = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER])
     assert StdQueries.MANUFACTURER_SOFTWARE_VERSION_REQUEST.startswith(expected_start)
-    
+
     # Should include the data identifier
     expected_identifier = p16(uds.DATA_IDENTIFIER_TYPE.VEHICLE_MANUFACTURER_ECU_SOFTWARE_NUMBER)
     assert expected_identifier in StdQueries.MANUFACTURER_SOFTWARE_VERSION_REQUEST
@@ -102,7 +101,7 @@ class TestFwQueryDefinitions:
     expected_req = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER]) + \
                    p16(uds.DATA_IDENTIFIER_TYPE.SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER)
     assert StdQueries.SUPPLIER_SOFTWARE_VERSION_REQUEST == expected_req
-    
+
     expected_resp = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40]) + \
                     p16(uds.DATA_IDENTIFIER_TYPE.SYSTEM_SUPPLIER_ECU_SOFTWARE_VERSION_NUMBER)
     assert StdQueries.SUPPLIER_SOFTWARE_VERSION_RESPONSE == expected_resp
@@ -112,7 +111,7 @@ class TestFwQueryDefinitions:
     expected_req = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER]) + \
                    p16(uds.DATA_IDENTIFIER_TYPE.VEHICLE_MANUFACTURER_ECU_HARDWARE_NUMBER)
     assert StdQueries.MANUFACTURER_ECU_HARDWARE_NUMBER_REQUEST == expected_req
-    
+
     expected_resp = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40]) + \
                     p16(uds.DATA_IDENTIFIER_TYPE.VEHICLE_MANUFACTURER_ECU_HARDWARE_NUMBER)
     assert StdQueries.MANUFACTURER_ECU_HARDWARE_NUMBER_RESPONSE == expected_resp
@@ -122,7 +121,7 @@ class TestFwQueryDefinitions:
     expected_req = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER]) + \
                    p16(uds.DATA_IDENTIFIER_TYPE.APPLICATION_SOFTWARE_IDENTIFICATION)
     assert StdQueries.UDS_VERSION_REQUEST == expected_req
-    
+
     expected_resp = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40]) + \
                     p16(uds.DATA_IDENTIFIER_TYPE.APPLICATION_SOFTWARE_IDENTIFICATION)
     assert StdQueries.UDS_VERSION_RESPONSE == expected_resp
@@ -137,18 +136,18 @@ class TestFwQueryDefinitions:
     # OBD VIN
     assert StdQueries.OBD_VIN_REQUEST == b'\x09\x02'
     assert StdQueries.OBD_VIN_RESPONSE == b'\x49\x02\x01'
-    
+
     # UDS VIN
     expected_uds_req = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER]) + p16(uds.DATA_IDENTIFIER_TYPE.VIN)
     assert StdQueries.UDS_VIN_REQUEST == expected_uds_req
-    
+
     expected_uds_resp = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40]) + p16(uds.DATA_IDENTIFIER_TYPE.VIN)
     assert StdQueries.UDS_VIN_RESPONSE == expected_uds_resp
-    
+
     # GM VIN
     assert StdQueries.GM_VIN_REQUEST == b'\x1a\x90'
     assert StdQueries.GM_VIN_RESPONSE == b'\x5a\x90'
-    
+
     # KWP VIN
     assert StdQueries.KWP_VIN_REQUEST == b'\x21\x81'
     assert StdQueries.KWP_VIN_RESPONSE == b'\x61\x81'
@@ -160,11 +159,11 @@ class TestFwQueryDefinitions:
       response=[b'\x62\xF1\x87'],
       whitelist_ecus=[Ecu.engine, Ecu.abs]
     )
-    
+
     assert request.request == [b'\x22\xF1\x87']
     assert request.response == [b'\x62\xF1\x87']
     assert request.whitelist_ecus == [Ecu.engine, Ecu.abs]
-    
+
     # Test defaults
     assert request.rx_offset == 0x8
     assert request.bus == 1
@@ -181,7 +180,7 @@ class TestFwQueryDefinitions:
       auxiliary=True,
       obd_multiplexing=False
     )
-    
+
     assert request.rx_offset == 0x10
     assert request.bus == 0
     assert request.auxiliary == True
@@ -193,9 +192,9 @@ class TestFwQueryDefinitions:
       request=[b'\x22\xF1\x87'],
       response=[b'\x62\xF1\x87']
     )
-    
+
     config = FwQueryConfig(requests=[request])
-    
+
     assert config.requests == [request]
     assert config.non_essential_ecus == {}
     assert config.extra_ecus == []
@@ -208,12 +207,12 @@ class TestFwQueryDefinitions:
       response=[b'\x62\xF1\x87'],
       whitelist_ecus=[Ecu.engine]
     )
-    
+
     config = FwQueryConfig(
       requests=[request],
       extra_ecus=[(Ecu.engine, 0x7e0, None)]
     )
-    
+
     assert config.extra_ecus == [(Ecu.engine, 0x7e0, None)]
 
   def test_fw_query_config_auxiliary_request_duplication(self):
@@ -224,9 +223,9 @@ class TestFwQueryDefinitions:
       bus=0,
       auxiliary=True
     )
-    
+
     config = FwQueryConfig(requests=[request])
-    
+
     # Should have original + duplicated auxiliary request
     assert len(config.requests) == 2
     assert config.requests[0].bus == 0
@@ -247,7 +246,7 @@ class TestFwQueryDefinitions:
       response=[b'\x62\xF1\x87'],
       whitelist_ecus=[Ecu.abs]  # Only ABS, not engine
     )
-    
+
     try:
       FwQueryConfig(
         requests=[request],
@@ -263,7 +262,7 @@ class TestFwQueryDefinitions:
       request=[b'\x22\xF1\x87', b'\x22\xF1\x90'],  # 2 requests
       response=[b'\x62\xF1\x87']  # 1 response
     )
-    
+
     try:
       FwQueryConfig(requests=[request])
       assert False, "Should have raised assertion error"
@@ -279,7 +278,7 @@ class TestFwQueryDefinitions:
       auxiliary=True,  # Auxiliary panda
       obd_multiplexing=True  # OBD multiplexing
     )
-    
+
     try:
       FwQueryConfig(requests=[request])
       assert False, "Should have raised assertion error"
@@ -292,14 +291,14 @@ class TestFwQueryDefinitions:
       request=[b'\x22\xF1\x87'],
       response=[b'\x62\xF1\x87']
     )
-    
+
     # Try to mark a non-essential ECU as non-essential (unnecessary)
     non_essential_ecu = None
     for ecu_val in range(50):  # Look for an ECU not in ESSENTIAL_ECUS
       if ecu_val not in ESSENTIAL_ECUS:
         non_essential_ecu = ecu_val
         break
-    
+
     if non_essential_ecu is not None:
       try:
         FwQueryConfig(
@@ -316,9 +315,9 @@ class TestFwQueryDefinitions:
       request=[b'\x22\xF1\x87'],
       response=[b'\x62\xF1\x87']
     )
-    
+
     config = FwQueryConfig(requests=[request])
-    
+
     # Mock offline firmware versions
     offline_fw = {
       "BRAND_MODEL1": {
@@ -329,9 +328,9 @@ class TestFwQueryDefinitions:
         (Ecu.eps, 0x7e2, None): [b'firmware3']
       }
     }
-    
+
     all_ecus = config.get_all_ecus(offline_fw)
-    
+
     # Should include all ECUs from offline firmware
     expected_ecus = {
       (Ecu.engine, 0x7e0, None),
@@ -347,20 +346,20 @@ class TestFwQueryDefinitions:
       response=[b'\x62\xF1\x87'],
       whitelist_ecus=[Ecu.engine, Ecu.fwdCamera]
     )
-    
+
     config = FwQueryConfig(
       requests=[request],
       extra_ecus=[(Ecu.fwdCamera, 0x7e3, None)]
     )
-    
+
     offline_fw = {
       "BRAND_MODEL1": {
         (Ecu.engine, 0x7e0, None): [b'firmware1']
       }
     }
-    
+
     all_ecus = config.get_all_ecus(offline_fw, include_extra_ecus=True)
-    
+
     # Should include both offline and extra ECUs
     expected_ecus = {
       (Ecu.engine, 0x7e0, None),
@@ -375,20 +374,20 @@ class TestFwQueryDefinitions:
       response=[b'\x62\xF1\x87'],
       whitelist_ecus=[Ecu.engine, Ecu.fwdCamera]
     )
-    
+
     config = FwQueryConfig(
       requests=[request],
       extra_ecus=[(Ecu.fwdCamera, 0x7e3, None)]
     )
-    
+
     offline_fw = {
       "BRAND_MODEL1": {
         (Ecu.engine, 0x7e0, None): [b'firmware1']
       }
     }
-    
+
     all_ecus = config.get_all_ecus(offline_fw, include_extra_ecus=False)
-    
+
     # Should only include offline ECUs, not extra
     expected_ecus = {
       (Ecu.engine, 0x7e0, None)
@@ -401,14 +400,14 @@ class TestFwQueryDefinitions:
     addr: AddrType = (0x7e0, None)
     assert addr[0] == 0x7e0
     assert addr[1] is None
-    
+
     addr_with_subaddr: AddrType = (0x7e0, 0x10)
     assert addr_with_subaddr[1] == 0x10
-    
+
     # Test EcuAddrBusType
     ecu_addr_bus: EcuAddrBusType = (0x7e0, None, 0)
     assert len(ecu_addr_bus) == 3
-    
+
     # Test EcuAddrSubAddr
     ecu_addr_sub: EcuAddrSubAddr = (Ecu.engine, 0x7e0, None)
     assert ecu_addr_sub[0] == Ecu.engine

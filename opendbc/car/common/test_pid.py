@@ -27,7 +27,7 @@ class TestPIDController:
     # Test at low speed (should interpolate between first two gains)
     error = 2.0
     speed = 5.0
-    output = controller.update(error, speed=speed)
+    controller.update(error, speed=speed)
 
     # P term should be interpolated: 0.5 + (1.0-0.5)*(5/15) = 0.5 + 0.5*0.333 = 0.667
     expected_kp = 0.5 + (1.0 - 0.5) * (5.0 / 15.0)
@@ -79,10 +79,10 @@ class TestPIDController:
   def test_saturation_limits(self):
     # Test output saturation
     controller = PIDController(10.0, 0.0, 0.0, neg_limit=-5, pos_limit=5)
-    
+
     # Large error should saturate
     output = controller.update(10.0, 0.0)
     assert output == 5.0  # Should hit positive limit
-    
+
     output = controller.update(-10.0, 0.0)
     assert output == -5.0  # Should hit negative limit
