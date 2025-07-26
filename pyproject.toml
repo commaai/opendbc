@@ -123,3 +123,28 @@ include-package-data = true
 
 [tool.setuptools.package-data]
 "opendbc.safety" = ["*.h", "board/*.h", "board/drivers/*.h", "modes/*.h"]
+
+[tool.coverage.run]
+branch = true
+source = ["opendbc"]
+omit = [
+  "*/tests/*",
+  "*/test_*",
+  "opendbc/safety/tests/*",
+  "setup.py",
+  "*/venv/*",
+  "*/__pycache__/*",
+  "*/site-packages/*",
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+fail_under = 70.0
+exclude_lines = [
+  "pragma: no cover",
+  "def __repr__",
+  "raise AssertionError",
+  "raise NotImplementedError",
+]

@@ -25,4 +25,4 @@ test:
 
     # *** tests ***
     pytest:
-      run: pytest -n8
+      run: pytest -n8 --cov --cov-branch --cov-report=term-missing --cov-fail-under=70
