@@ -80,7 +80,7 @@ static bool toyota_get_quality_flag_valid(const CANPacket_t *msg) {
 }
 
 static void toyota_rx_hook(const CANPacket_t *msg) {
-  if (GET_BUS(msg) == 0U) {
+  if (msg->bus == 0U) {
     // get eps motor torque (0.66 factor in dbc)
     if (msg->addr == 0x260) {
       int torque_meas_new = (GET_BYTE(msg, 5) << 8) | GET_BYTE(msg, 6);
@@ -197,10 +197,9 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
   };
 
   bool tx = true;
-  int bus = GET_BUS(msg);
 
   // Check if msg is sent on BUS 0
-  if (bus == 0) {
+  if (msg->bus == 0) {
     // ACCEL: safety check on byte 1-2
     if (msg->addr == 0x343) {
       int desired_accel = (GET_BYTE(msg, 0) << 8) | GET_BYTE(msg, 1);

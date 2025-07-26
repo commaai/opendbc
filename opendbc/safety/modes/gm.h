@@ -33,7 +33,7 @@ static void gm_rx_hook(const CANPacket_t *msg) {
 
   const int GM_STANDSTILL_THRSLD = 10;  // 0.311kph
 
-  if (GET_BUS(msg) == 0U) {
+  if (msg->bus == 0U) {
     if (msg->addr == 0x184) {
       int torque_driver_new = ((GET_BYTE(msg, 6) & 0x7U) << 8) | GET_BYTE(msg, 7);
       torque_driver_new = to_signed(torque_driver_new, 11);

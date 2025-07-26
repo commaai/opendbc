@@ -17,7 +17,7 @@
 
 // track msgs coming from OP so that we know what CAM msgs to drop and what to forward
 static void mazda_rx_hook(const CANPacket_t *msg) {
-  if ((int)GET_BUS(msg) == MAZDA_MAIN) {
+  if ((int)msg->bus == MAZDA_MAIN) {
     if (msg->addr == MAZDA_ENGINE_DATA) {
       // sample speed: scale by 0.01 to get kph
       int speed = (GET_BYTE(msg, 2) << 8) | GET_BYTE(msg, 3);
@@ -58,9 +58,8 @@ static bool mazda_tx_hook(const CANPacket_t *msg) {
   };
 
   bool tx = true;
-  int bus = GET_BUS(msg);
   // Check if msg is sent on the main BUS
-  if (bus == MAZDA_MAIN) {
+  if (msg->bus == MAZDA_MAIN) {
     // steer cmd checks
     if (msg->addr == MAZDA_LKAS) {
       int desired_torque = (((GET_BYTE(msg, 0) & 0x0FU) << 8) | GET_BYTE(msg, 1)) - 2048U;

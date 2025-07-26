@@ -76,7 +76,7 @@ static safety_config volkswagen_pq_init(uint16_t param) {
 }
 
 static void volkswagen_pq_rx_hook(const CANPacket_t *msg) {
-  if (GET_BUS(msg) == 0U) {
+  if (msg->bus == 0U) {
     // Update in-motion state from speed value.
     // Signal: Bremse_1.Geschwindigkeit_neu__Bremse_1_
     if (msg->addr == MSG_BREMSE_1) {

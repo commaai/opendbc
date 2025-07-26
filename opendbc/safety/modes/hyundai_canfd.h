@@ -68,13 +68,12 @@ static uint32_t hyundai_canfd_get_checksum(const CANPacket_t *msg) {
 }
 
 static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
-  int bus = GET_BUS(msg);
   int addr = msg->addr;
 
   const int pt_bus = hyundai_canfd_lka_steering ? 1 : 0;
   const int scc_bus = hyundai_camera_scc ? 2 : pt_bus;
 
-  if (bus == pt_bus) {
+  if (msg->bus == pt_bus) {
     // driver torque
     if (addr == 0xea) {
       int torque_driver_new = ((GET_BYTE(msg, 11) & 0x1fU) << 8U) | GET_BYTE(msg, 10);
@@ -126,7 +125,7 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
     }
   }
 
-  if (bus == scc_bus) {
+  if (msg->bus == scc_bus) {
     // cruise state
     if ((addr == 0x1a0) && !hyundai_longitudinal) {
       // 1=enabled, 2=driver override

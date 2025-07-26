@@ -90,9 +90,7 @@ static bool tesla_get_quality_flag_valid(const CANPacket_t *msg) {
 }
 
 static void tesla_rx_hook(const CANPacket_t *msg) {
-  int bus = GET_BUS(msg);
-
-  if (bus == 0) {
+  if (msg->bus == 0) {
     // Steering angle: (0.1 * val) - 819.2 in deg.
     if (msg->addr == 0x370) {
       // Store it 1/10 deg to match steering request
@@ -162,7 +160,7 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
     }
   }
 
-  if (bus == 2) {
+  if (msg->bus == 2) {
     // DAS_control
     if (msg->addr == 0x2b9) {
       // "AEB_ACTIVE"

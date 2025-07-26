@@ -70,8 +70,6 @@ static void honda_rx_hook(const CANPacket_t *msg) {
   const bool pcm_cruise = ((honda_hw == HONDA_BOSCH) && !honda_bosch_long) || (honda_hw == HONDA_NIDEC);
   int pt_bus = honda_get_pt_bus();
 
-  int bus = GET_BUS(msg);
-
   // sample speed
   if (msg->addr == 0x158) {
     vehicle_moving = GET_BYTE(msg, 0) | GET_BYTE(msg, 1);
@@ -103,8 +101,8 @@ static void honda_rx_hook(const CANPacket_t *msg) {
   }
 
   // state machine to enter and exit controls for button enabling
-  // 0x1A6 for the ILX, 0x296 for the Civic Touring
-  if (((msg->addr == 0x1A6) || (msg->addr == 0x296)) && (bus == pt_bus)) {
+      // 0x1A6 for the ILX, 0x296 for the Civic Touring
+    if (((msg->addr == 0x1A6) || (msg->addr == 0x296)) && (msg->bus == pt_bus)) {
     int button = (GET_BYTE(msg, 0) & 0xE0U) >> 5;
 
     // enter controls on the falling edge of set or resume
@@ -146,7 +144,7 @@ static void honda_rx_hook(const CANPacket_t *msg) {
 
   // disable stock Honda AEB in alternative experience
   if (!(alternative_experience & ALT_EXP_DISABLE_STOCK_AEB)) {
-    if ((bus == 2) && (msg->addr == 0x1FA)) {
+    if ((msg->bus == 2) && (msg->addr == 0x1FA)) {
       bool honda_stock_aeb = GET_BIT(msg, 29U);
       int honda_stock_brake = (GET_BYTE(msg, 0) << 2) | (GET_BYTE(msg, 1) >> 6);
 
@@ -181,13 +179,12 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
   };
 
   bool tx = true;
-  int bus = GET_BUS(msg);
 
   int bus_pt = honda_get_pt_bus();
   int bus_buttons = (honda_bosch_radarless) ? 2 : bus_pt;  // the camera controls ACC on radarless Bosch cars
 
   // ACC_HUD: safety check (nidec w/o pedal)
-  if ((msg->addr == 0x30C) && (bus == bus_pt)) {
+  if ((msg->addr == 0x30C) && (msg->bus == bus_pt)) {
     int pcm_speed = (GET_BYTE(msg, 0) << 8) | GET_BYTE(msg, 1);
     int pcm_gas = GET_BYTE(msg, 2);
 
@@ -200,7 +197,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
   }
 
   // BRAKE: safety check (nidec)
-  if ((msg->addr == 0x1FA) && (bus == bus_pt)) {
+  if ((msg->addr == 0x1FA) && (msg->bus == bus_pt)) {
     honda_brake = (GET_BYTE(msg, 0) << 2) + ((GET_BYTE(msg, 1) >> 6) & 0x3U);
     if (longitudinal_brake_checks(honda_brake, HONDA_NIDEC_LONG_LIMITS)) {
       tx = false;
@@ -211,7 +208,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
   }
 
   // BRAKE/GAS: safety check (bosch)
-  if ((msg->addr == 0x1DF) && (bus == bus_pt)) {
+  if ((msg->addr == 0x1DF) && (msg->bus == bus_pt)) {
     int accel = (GET_BYTE(msg, 3) << 3) | ((GET_BYTE(msg, 4) >> 5) & 0x7U);
     accel = to_signed(accel, 11);
 
@@ -227,7 +224,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
   }
 
   // ACCEL: safety check (radarless)
-  if ((msg->addr == 0x1C8) && (bus == bus_pt)) {
+  if ((msg->addr == 0x1C8) && (msg->bus == bus_pt)) {
     int accel = (GET_BYTE(msg, 0) << 4) | (GET_BYTE(msg, 1) >> 4);
     accel = to_signed(accel, 12);
 
@@ -258,7 +255,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
   // FORCE CANCEL: safety check only relevant when spamming the cancel button in Bosch HW
   // ensuring that only the cancel button press is sent (VAL 2) when controls are off.
   // This avoids unintended engagements while still allowing resume spam
-  if ((msg->addr == 0x296) && !controls_allowed && (bus == bus_buttons)) {
+  if ((msg->addr == 0x296) && !controls_allowed && (msg->bus == bus_buttons)) {
     if (((GET_BYTE(msg, 0) >> 5) & 0x7U) != 2U) {
       tx = false;
     }

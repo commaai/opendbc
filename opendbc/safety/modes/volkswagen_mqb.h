@@ -42,7 +42,7 @@ static safety_config volkswagen_mqb_init(uint16_t param) {
 }
 
 static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
-  if (GET_BUS(msg) == 0U) {
+  if (msg->bus == 0U) {
     // Update in-motion state by sampling wheel speeds
     if (msg->addr == MSG_ESP_19) {
       // sum 4 wheel speeds
