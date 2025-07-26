@@ -1,8 +1,9 @@
 import os
+import unittest
 import math
 import hypothesis.strategies as st
-import pytest
 from hypothesis import Phase, given, settings
+from parameterized import parameterized
 from collections.abc import Callable
 from typing import Any
 
@@ -28,126 +29,144 @@ MAX_EXAMPLES = int(os.environ.get('MAX_EXAMPLES', '15'))
 
 
 def get_fuzzy_car_interface_args(draw: DrawType) -> dict:
-  # Fuzzy CAN fingerprints and FW versions to test more states of the CarInterface
-  fingerprint_strategy = st.fixed_dictionaries({0: st.dictionaries(st.integers(min_value=0, max_value=0x800),
-                                                                   st.sampled_from(DLC_TO_LEN))})
+    fingerprint_strategy = st.fixed_dictionaries({
+        0: st.dictionaries(
+            st.integers(min_value=0, max_value=0x800),
+            st.sampled_from(DLC_TO_LEN)
+        )
+    })
+    car_fw_strategy = st.lists(st.builds(
+        lambda fw, req: structs.CarParams.CarFw(
+            ecu=fw[0], address=fw[1], subAddress=fw[2] or 0, request=req
+        ),
+        st.sampled_from(sorted(ALL_ECUS)),
+        st.sampled_from(sorted(ALL_REQUESTS)),
+    ))
+    params_strategy = st.fixed_dictionaries({
+        'fingerprints': fingerprint_strategy,
+        'car_fw': car_fw_strategy,
+        'alpha_long': st.booleans(),
+    })
 
-  # only pick from possible ecus to reduce search space
-  car_fw_strategy = st.lists(st.builds(
-    lambda fw, req: structs.CarParams.CarFw(ecu=fw[0], address=fw[1], subAddress=fw[2] or 0, request=req),
-    st.sampled_from(sorted(ALL_ECUS)),
-    st.sampled_from(sorted(ALL_REQUESTS)),
-  ))
-
-  params_strategy = st.fixed_dictionaries({
-    'fingerprints': fingerprint_strategy,
-    'car_fw': car_fw_strategy,
-    'alpha_long': st.booleans(),
-  })
-
-  params: dict = draw(params_strategy)
-  # reduce search space by duplicating CAN fingerprints across all buses
-  params['fingerprints'] |= {key + 1: params['fingerprints'][0] for key in range(6)}
-  return params
+    params: dict = draw(params_strategy)
+    params['fingerprints'] |= {
+        key + 1: params['fingerprints'][0] for key in range(6)
+    }
+    return params
 
 
-class TestCarInterfaces:
-  # FIXME: Due to the lists used in carParams, Phase.target is very slow and will cause
-  #  many generated examples to overrun when max_examples > ~20, don't use it
-  @pytest.mark.parametrize("car_name", sorted(PLATFORMS))
-  @settings(max_examples=MAX_EXAMPLES, deadline=None,
-            phases=(Phase.reuse, Phase.generate, Phase.shrink))
-  @given(data=st.data())
-  def test_car_interfaces(self, car_name, data):
-    CarInterface = interfaces[car_name]
+class TestCarInterfaces(unittest.TestCase):
 
-    args = get_fuzzy_car_interface_args(data.draw)
+    @parameterized.expand([(cn,) for cn in sorted(PLATFORMS)])
+    @settings(max_examples=MAX_EXAMPLES, deadline=None,
+              phases=(Phase.reuse, Phase.generate, Phase.shrink))
+    @given(data=st.data())
+    def test_car_interfaces(self, car_name, data):
+        """Fuzz-test a single CarInterface implementation."""
+        CarInterface = interfaces[car_name]
+        args = get_fuzzy_car_interface_args(data.draw)
 
-    car_params = CarInterface.get_params(car_name, args['fingerprints'], args['car_fw'],
-                                         alpha_long=args['alpha_long'], is_release=False, docs=False)
-    car_interface = CarInterface(car_params)
-    assert car_params
-    assert car_interface
+        car_params = CarInterface.get_params(
+            car_name,
+            args['fingerprints'],
+            args['car_fw'],
+            alpha_long=args['alpha_long'],
+            is_release=False,
+            docs=False
+        )
+        car_interface = CarInterface(car_params)
 
-    assert car_params.mass > 1
-    assert car_params.wheelbase > 0
-    # centerToFront is center of gravity to front wheels, assert a reasonable range
-    assert car_params.wheelbase * 0.3 < car_params.centerToFront < car_params.wheelbase * 0.7
-    assert car_params.maxLateralAccel > 0
+        # Basic sanity
+        self.assertTrue(car_params)
+        self.assertTrue(car_interface)
 
-    # Longitudinal sanity checks
-    assert len(car_params.longitudinalTuning.kpV) == len(car_params.longitudinalTuning.kpBP)
-    assert len(car_params.longitudinalTuning.kiV) == len(car_params.longitudinalTuning.kiBP)
+        # Mass & geometry
+        self.assertGreater(car_params.mass, 1)
+        self.assertGreater(car_params.wheelbase, 0)
+        self.assertGreater(car_params.centerToFront,
+                           car_params.wheelbase * 0.3)
+        self.assertLess(car_params.centerToFront,
+                        car_params.wheelbase * 0.7)
+        self.assertGreater(car_params.maxLateralAccel, 0)
 
-    # Lateral sanity checks
-    if car_params.steerControlType != structs.CarParams.SteerControlType.angle:
-      tune = car_params.lateralTuning
-      if tune.which() == 'pid':
-        if car_name != MOCK.MOCK:
-          assert not math.isnan(tune.pid.kf) and tune.pid.kf > 0
-          assert len(tune.pid.kpV) > 0 and len(tune.pid.kpV) == len(tune.pid.kpBP)
-          assert len(tune.pid.kiV) > 0 and len(tune.pid.kiV) == len(tune.pid.kiBP)
+        # Longitudinal tuning
+        lt = car_params.longitudinalTuning
+        self.assertEqual(len(lt.kpV), len(lt.kpBP))
+        self.assertEqual(len(lt.kiV), len(lt.kiBP))
 
-      elif tune.which() == 'torque':
-        assert not math.isnan(tune.torque.kf) and tune.torque.kf > 0
-        assert not math.isnan(tune.torque.friction) and tune.torque.friction > 0
+        # Lateral tuning
+        if car_params.steerControlType != structs.CarParams.SteerControlType.angle:
+            tune = car_params.lateralTuning
+            kind = tune.which()
+            if kind == 'pid':
+                if car_name != MOCK.MOCK:
+                    self.assertFalse(math.isnan(tune.pid.kf))
+                    self.assertGreater(tune.pid.kf, 0)
+                    self.assertGreater(len(tune.pid.kpV), 0)
+                    self.assertEqual(len(tune.pid.kpV), len(tune.pid.kpBP))
+                    self.assertGreater(len(tune.pid.kiV), 0)
+                    self.assertEqual(len(tune.pid.kiV), len(tune.pid.kiBP))
+            elif kind == 'torque':
+                self.assertFalse(math.isnan(tune.torque.kf))
+                self.assertGreater(tune.torque.kf, 0)
+                self.assertFalse(math.isnan(tune.torque.friction))
+                self.assertGreater(tune.torque.friction, 0)
 
-    # Run car interface
-    # TODO: use hypothesis to generate random messages
-    now_nanos = 0
-    CC = structs.CarControl().as_reader()
-    for _ in range(10):
-      car_interface.update([])
-      car_interface.apply(CC, now_nanos)
-      now_nanos += DT_CTRL * 1e9  # 10 ms
+        # Drive the interface through a few cycles
+        now_nanos = 0
+        CC_reader = structs.CarControl().as_reader()
+        for _ in range(10):
+            car_interface.update([])
+            car_interface.apply(CC_reader, now_nanos)
+            now_nanos += DT_CTRL * 1e9
 
-    CC = structs.CarControl()
-    CC.enabled = True
-    CC.latActive = True
-    CC.longActive = True
-    CC = CC.as_reader()
-    for _ in range(10):
-      car_interface.update([])
-      car_interface.apply(CC, now_nanos)
-      now_nanos += DT_CTRL * 1e9  # 10ms
+        CC2 = structs.CarControl()
+        CC2.enabled = True
+        CC2.latActive = True
+        CC2.longActive = True
+        CC2_reader = CC2.as_reader()
+        for _ in range(10):
+            car_interface.update([])
+            car_interface.apply(CC2_reader, now_nanos)
+            now_nanos += DT_CTRL * 1e9
 
-    # Test radar interface
-    radar_interface = CarInterface.RadarInterface(car_params)
-    assert radar_interface
+        # Radar interface
+        radar = CarInterface.RadarInterface(car_params)
+        self.assertTrue(radar)
+        radar.update([])
+        if (not car_params.radarUnavailable and
+                radar.rcp is not None and
+                hasattr(radar, '_update') and
+                hasattr(radar, 'trigger_msg')):
+            radar._update([radar.trigger_msg])
+        if (not car_params.radarUnavailable and radar.rcp is not None):
+            cans = [(0, [CanData(0, b'', 0) for _ in range(5)])]
+            rr = radar.update(cans)
+            self.assertTrue(rr is None or len(rr.errors) > 0)
 
-    # Run radar interface once
-    radar_interface.update([])
-    if not car_params.radarUnavailable and radar_interface.rcp is not None and \
-       hasattr(radar_interface, '_update') and hasattr(radar_interface, 'trigger_msg'):
-      radar_interface._update([radar_interface.trigger_msg])
+    @parameterized.expand([
+        ("num_brands",),
+    ])
+    def test_interface_attrs(self, _):
+        """Asserts basic behavior of interface attribute getter"""
+        num_brands = len(get_interface_attr('CAR'))
+        self.assertGreaterEqual(num_brands, 12)
 
-    # Test radar fault
-    if not car_params.radarUnavailable and radar_interface.rcp is not None:
-      cans = [(0, [CanData(0, b'', 0) for _ in range(5)])]
-      rr = radar_interface.update(cans)
-      assert rr is None or len(rr.errors) > 0
+        ret = get_interface_attr('FAKE_ATTR')
+        self.assertEqual(len(ret), num_brands)
 
-  def test_interface_attrs(self):
-    """Asserts basic behavior of interface attribute getter"""
-    num_brands = len(get_interface_attr('CAR'))
-    assert num_brands >= 12
+        combined = get_interface_attr('DBC', combine_brands=True)
+        self.assertGreaterEqual(len(combined), 160)
 
-    # Should return value for all brands when not combining, even if attribute doesn't exist
-    ret = get_interface_attr('FAKE_ATTR')
-    assert len(ret) == num_brands
+        non_dict = get_interface_attr('CAR', combine_brands=True)
+        self.assertEqual(len(non_dict), 0)
 
-    # Make sure we can combine dicts
-    ret = get_interface_attr('DBC', combine_brands=True)
-    assert len(ret) >= 160
+        none_brands = {b for b, v in get_interface_attr('FINGERPRINTS').items() if v is None}
+        self.assertGreaterEqual(len(none_brands), 1)
+        filtered = get_interface_attr('FINGERPRINTS', ignore_none=True)
+        self.assertTrue(none_brands.isdisjoint(filtered),
+                        f'Brands with None values still present: {none_brands & set(filtered)}')
 
-    # We don't support combining non-dicts
-    ret = get_interface_attr('CAR', combine_brands=True)
-    assert len(ret) == 0
 
-    # If brand has None value, it shouldn't return when ignore_none=True is specified
-    none_brands = {b for b, v in get_interface_attr('FINGERPRINTS').items() if v is None}
-    assert len(none_brands) >= 1
-
-    ret = get_interface_attr('FINGERPRINTS', ignore_none=True)
-    none_brands_in_ret = none_brands.intersection(ret)
-    assert len(none_brands_in_ret) == 0, f'Brands with None values in ignore_none=True result: {none_brands_in_ret}'
+if __name__ == "__main__":
+    unittest.main()

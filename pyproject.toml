@@ -47,12 +47,18 @@ examples = [
   "matplotlib",
 ]
 
+[hammett]
+modules=[
+    "opendbc/car/tests",
+]
+
+
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
-addopts = "-Werror --strict-config --strict-markers --durations=10 -n auto"
+addopts = "-Werror --strict-config --strict-markers --durations=10"
 python_files = "test_*.py"
 testpaths = [
   "opendbc"
