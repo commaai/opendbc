@@ -323,11 +323,8 @@ static safety_config honda_nidec_init(uint16_t param) {
 }
 
 static safety_config honda_bosch_init(uint16_t param) {
-  // HONDA_BOSCH_TX_MSGS is used by Bosch and Bosch CAN FD
-  static CanMsg HONDA_BOSCH_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0xE5, 0, 8, .check_relay = true},
-                                         // Send buttons on powertrain bus: 0 for Bosch CAN FD, 1 for CAN
-                                         {0x296, 0, 4, .check_relay = false}, {0x296, 1, 4, .check_relay = false},
-                                         {0x33D, 0, 5, .check_relay = true}, {0x33D, 0, 8, .check_relay = true}, {0x33DA, 0, 5, .check_relay = true}, {0x33DB, 0, 8, .check_relay = true}};  // Bosch
+  static CanMsg HONDA_BOSCH_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0xE5, 0, 8, .check_relay = true}, {0x296, 1, 4, .check_relay = false},
+                                         {0x33D, 0, 5, .check_relay = true}, {0x33DA, 0, 5, .check_relay = true}, {0x33DB, 0, 8, .check_relay = true}};  // Bosch
 
   static CanMsg HONDA_BOSCH_LONG_TX_MSGS[] = {{0xE4, 1, 5, .check_relay = true}, {0x1DF, 1, 8, .check_relay = true}, {0x1EF, 1, 8, .check_relay = false},
                                               {0x1FA, 1, 8, .check_relay = false}, {0x30C, 1, 8, .check_relay = false}, {0x33D, 1, 5, .check_relay = true},
@@ -339,8 +336,15 @@ static safety_config honda_bosch_init(uint16_t param) {
   static CanMsg HONDA_RADARLESS_LONG_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0x33D, 0, 8, .check_relay = true}, {0x1C8, 0, 8, .check_relay = true},
                                                   {0x30C, 0, 8, .check_relay = true}};  // Bosch radarless w/ gas and brakes
 
+  static CanMsg HONDA_BOSCH_CANFD_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0xE5, 0, 8, .check_relay = true}, {0x296, 0, 4, .check_relay = false}, {0x33D, 0, 8, .check_relay = true},
+                                               // repeat with bus 4 for red panda on comma3
+                                              {0xE4, 4, 5, .check_relay = true}, {0xE5, 4, 8, .check_relay = true}, {0x296, 4, 4, .check_relay = false}, {0x33D, 4, 8, .check_relay = true}};
+
   static CanMsg HONDA_BOSCH_CANFD_LONG_TX_MSGS[] = {{0xE4, 0, 5, .check_relay = true}, {0x1DF, 0, 8, .check_relay = true}, {0x1EF, 0, 8, .check_relay = false},
-                                                    {0x30C, 0, 8, .check_relay = false}, {0x33D, 0, 8, .check_relay = true}, {0x18DAB0F1, 0, 8, .check_relay = false}}; // Bosch CANFD w/ gas and brakes
+                                                    {0x30C, 0, 8, .check_relay = false}, {0x33D, 0, 8, .check_relay = true}, {0x18DAB0F1, 0, 8, .check_relay = false}, // Bosch CANFD w/ gas and brakes
+                                                    // repeat with bus 4 for red panda on comma3                                                  
+                                                    {0xE4, 4, 5, .check_relay = true}, {0x1DF, 4, 8, .check_relay = true}, {0x1EF, 4, 8, .check_relay = false},
+                                                    {0x30C, 4, 8, .check_relay = false}, {0x33D, 4, 8, .check_relay = true}, {0x18DAB0F1, 4, 8, .check_relay = false}};
 
   const uint16_t HONDA_PARAM_ALT_BRAKE = 1;
   const uint16_t HONDA_PARAM_RADARLESS = 8;
@@ -409,7 +413,7 @@ static safety_config honda_bosch_init(uint16_t param) {
     if (honda_bosch_long) {
       SET_TX_MSGS(HONDA_BOSCH_CANFD_LONG_TX_MSGS, ret);
     } else {
-      SET_TX_MSGS(HONDA_BOSCH_TX_MSGS, ret);
+      SET_TX_MSGS(HONDA_BOSCH_CANFD_TX_MSGS, ret);
     }
   } else {
     if (honda_bosch_long) {
