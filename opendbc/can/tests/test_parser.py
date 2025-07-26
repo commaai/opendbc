@@ -35,120 +35,114 @@ BO_ 200 ALIVE_MESSAGE: 8 Vector__XXX
       for i in range(5):
         time_ns = base_time + (i * 500_000_000)  # 500ms intervals = 2 second span
         messages.append((time_ns, [(100, b'\x00\x01\x02\x03\x04\x05\x06\x07', 0)]))
-      
+
       parser.update(messages)
-      
+
       # Verify frequency was calculated (should be around 2Hz based on our intervals)
       state = parser.message_states[100]
       assert state.frequency > 1e-5  # Should have calculated frequency
       assert state.timeout_threshold > 0  # Should have set timeout threshold
-      
     finally:
       os.unlink(dbc_file)
 
   def test_frequency_calculation_buffer_full(self):
     """Test frequency calculation when buffer reaches max_buffer size"""
     dbc_file = self.create_test_dbc()
-    
+
     try:
       parser = CANParser(dbc_file, [(100, 0)], 0)
-      
+
       # Create 502 messages to exceed max_buffer of 500
       base_time = 1000000000
       messages = []
-      
+
       for i in range(502):
         time_ns = base_time + (i * 10_000_000)  # 10ms intervals
         messages.append((time_ns, [(100, b'\x00\x01\x02\x03\x04\x05\x06\x07', 0)]))
-      
+
       parser.update(messages)
-      
+
       # Should trigger frequency calculation due to buffer size
       state = parser.message_states[100]
       assert len(state.timestamps) == 500  # Buffer should be limited to 500
       assert state.frequency > 1e-5  # Frequency should be calculated
-      
     finally:
       os.unlink(dbc_file)
 
   def test_ignore_alive_branch(self):
     """Test ignore_alive branch in valid() method (covers line 104)"""
     dbc_file = self.create_test_dbc()
-    
+
     try:
       parser = CANParser(dbc_file, [(100, 0)], 0)
-      
+
       # Set ignore_alive to True on the message state
       state = parser.message_states[100]
       state.ignore_alive = True
-      
+
       # valid() should return True immediately when ignore_alive is set
       current_time = 1000000000
       assert state.valid(current_time, False) is True
       assert state.valid(current_time, True) is True  # Should ignore bus_timeout too
-      
     finally:
       os.unlink(dbc_file)
 
   def test_oversized_data_branch(self):
     """Test handling of data > 64 bytes (covers line 217)"""
     dbc_file = self.create_test_dbc()
-    
+
     try:
       parser = CANParser(dbc_file, [(100, 0)], 0)
-      
+
       # Create a message with data > 64 bytes
       oversized_data = b'\x00' * 65  # 65 bytes > 64 byte limit
       time_ns = 1000000000
-      
+
       # This should be skipped due to length check
       updated = parser.update([(time_ns, [(100, oversized_data, 0)])])
-      
+
       # Should return empty set since message was skipped
       assert 100 not in updated
-      
+
       # State should not be updated
       state = parser.message_states[100]
       assert len(state.vals) == 0  # No values should be parsed
-      
     finally:
       os.unlink(dbc_file)
 
   def test_no_timeout_thresholds(self):
     """Test loop when no timeout_thresholds > 0 (covers line 234->233)"""
     dbc_file = self.create_test_dbc()
-    
+
     try:
       parser = CANParser(dbc_file, [(100, 0)], 0)
-      
+
       # Set timeout_threshold to 0 for all states to trigger the branch
       for state in parser.message_states.values():
         state.timeout_threshold = 0
-      
+
       time_ns = 1000000000
       parser.update([(time_ns, [(100, b'\x00\x01\x02\x03\x04\x05\x06\x07', 0)])])
-      
+
       # Should not crash and should use default bus_timeout_threshold
       assert parser.bus_timeout is False  # Should be calculated properly
-      
     finally:
       os.unlink(dbc_file)
 
   def test_unknown_address_handling(self):
     """Test handling of unknown CAN addresses"""
     dbc_file = self.create_test_dbc()
-    
+
     try:
       parser = CANParser(dbc_file, [(100, 0)], 0)
-      
+
       # Send message to unknown address 999
       time_ns = 1000000000
       updated = parser.update([(time_ns, [(999, b'\x00\x01\x02\x03\x04\x05\x06\x07', 0)])])
-      
+
       # Should skip unknown address gracefully
       assert 999 not in updated
       assert 999 not in parser.message_states
-      
     finally:
       os.unlink(dbc_file)
 
