@@ -29,7 +29,7 @@ class TestDisableEcu:
         assert result is True
         
         # Should log appropriate messages
-        mock_carlog.warning.assert_any_call("ecu disable (0x7d0, None) ...")
+        mock_carlog.warning.assert_any_call("ecu disable ('0x7d0', None) ...")
         mock_carlog.warning.assert_any_call("communication control disable tx/rx ...")
         mock_carlog.warning.assert_any_call("ecu disabled")
         
