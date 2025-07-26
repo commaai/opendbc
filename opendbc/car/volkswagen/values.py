@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from enum import Enum, IntFlag, StrEnum
 
 from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, structs, uds
-from opendbc.can.can_define import CANDefine
+from opendbc.can import CANDefine
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, \
                                                      Device
