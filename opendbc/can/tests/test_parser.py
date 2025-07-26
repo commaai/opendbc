@@ -1,9 +1,6 @@
-import pytest
 import tempfile
 import os
-from unittest.mock import Mock
 from opendbc.can.parser import CANParser
-from opendbc.can.dbc import DBC
 
 
 class TestCANParser:
@@ -18,7 +15,7 @@ BO_ 100 TEST_MESSAGE: 8 Vector__XXX
 BO_ 200 ALIVE_MESSAGE: 8 Vector__XXX
  SG_ DATA_SIGNAL : 0|16@1+ (0.1,0) [0|6553.5] "" Vector__XXX
 """
-    
+
     with tempfile.NamedTemporaryFile(mode='w', suffix='.dbc', delete=False) as f:
       f.write(dbc_content)
       return f.name
@@ -26,14 +23,14 @@ BO_ 200 ALIVE_MESSAGE: 8 Vector__XXX
   def test_frequency_calculation_large_dt(self):
     """Test frequency calculation when dt > 1.0 (covers lines 90-91)"""
     dbc_file = self.create_test_dbc()
-    
+
     try:
       parser = CANParser(dbc_file, [(100, 0)], 0)
-      
+
       # Simulate messages over long time period to trigger dt > 1.0 branch
       base_time = 1000000000  # 1 second in nanoseconds
       messages = []
-      
+
       # Create messages spread over 2+ seconds to trigger dt > 1.0
       for i in range(5):
         time_ns = base_time + (i * 500_000_000)  # 500ms intervals = 2 second span

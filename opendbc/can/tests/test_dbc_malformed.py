@@ -68,7 +68,7 @@ BO_ 100 test_message: 8 Vector__XXX
       assert len(dbc.msgs) == 0
     finally:
       os.unlink(temp_path)
-    
+
   def test_valid_dbc_for_comparison(self):
     # Test valid DBC to ensure our malformed tests are meaningful
     valid_dbc = """VERSION ""
