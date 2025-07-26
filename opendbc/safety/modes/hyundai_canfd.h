@@ -69,7 +69,7 @@ static uint32_t hyundai_canfd_get_checksum(const CANPacket_t *msg) {
 
 static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
   int bus = GET_BUS(msg);
-  int addr = GET_ADDR(msg);
+  int addr = msg->addr;
 
   const int pt_bus = hyundai_canfd_lka_steering ? 1 : 0;
   const int scc_bus = hyundai_camera_scc ? 2 : pt_bus;
@@ -156,7 +156,7 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
   };
 
   bool tx = true;
-  int addr = GET_ADDR(msg);
+  int addr = msg->addr;
 
   // steering
   const int steer_addr = (hyundai_canfd_lka_steering && !hyundai_longitudinal) ? hyundai_canfd_get_lka_addr() : 0x12a;

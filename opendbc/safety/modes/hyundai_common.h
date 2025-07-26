@@ -115,7 +115,6 @@ void hyundai_common_cruise_buttons_check(const int cruise_button, const bool mai
 #ifdef CANFD
 uint32_t hyundai_common_canfd_compute_checksum(const CANPacket_t *msg) {
   int len = GET_LEN(msg);
-  uint32_t address = GET_ADDR(msg);
 
   uint16_t crc = 0;
 
@@ -124,8 +123,8 @@ uint32_t hyundai_common_canfd_compute_checksum(const CANPacket_t *msg) {
   }
 
   // Add address to crc
-  crc = (crc << 8U) ^ hyundai_canfd_crc_lut[(crc >> 8U) ^ ((address >> 0U) & 0xFFU)];
-  crc = (crc << 8U) ^ hyundai_canfd_crc_lut[(crc >> 8U) ^ ((address >> 8U) & 0xFFU)];
+  crc = (crc << 8U) ^ hyundai_canfd_crc_lut[(crc >> 8U) ^ ((msg->addr >> 0U) & 0xFFU)];
+  crc = (crc << 8U) ^ hyundai_canfd_crc_lut[(crc >> 8U) ^ ((msg->addr >> 8U) & 0xFFU)];
 
   if (len == 24) {
     crc ^= 0x819dU;

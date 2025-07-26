@@ -34,9 +34,7 @@ static void gm_rx_hook(const CANPacket_t *msg) {
   const int GM_STANDSTILL_THRSLD = 10;  // 0.311kph
 
   if (GET_BUS(msg) == 0U) {
-    int addr = GET_ADDR(msg);
-
-    if (addr == 0x184) {
+    if (msg->addr == 0x184) {
       int torque_driver_new = ((GET_BYTE(msg, 6) & 0x7U) << 8) | GET_BYTE(msg, 7);
       torque_driver_new = to_signed(torque_driver_new, 11);
       // update array of samples
@@ -44,14 +42,14 @@ static void gm_rx_hook(const CANPacket_t *msg) {
     }
 
     // sample rear wheel speeds
-    if (addr == 0x34A) {
+    if (msg->addr == 0x34A) {
       int left_rear_speed = (GET_BYTE(msg, 0) << 8) | GET_BYTE(msg, 1);
       int right_rear_speed = (GET_BYTE(msg, 2) << 8) | GET_BYTE(msg, 3);
       vehicle_moving = (left_rear_speed > GM_STANDSTILL_THRSLD) || (right_rear_speed > GM_STANDSTILL_THRSLD);
     }
 
     // ACC steering wheel buttons (GM_CAM is tied to the PCM)
-    if ((addr == 0x1E1) && !gm_pcm_cruise) {
+    if ((msg->addr == 0x1E1) && !gm_pcm_cruise) {
       int button = (GET_BYTE(msg, 5) & 0x70U) >> 4;
 
       // enter controls on falling edge of set or rising edge of resume (avoids fault)
@@ -71,15 +69,15 @@ static void gm_rx_hook(const CANPacket_t *msg) {
 
     // Reference for brake pressed signals:
     // https://github.com/commaai/openpilot/blob/master/selfdrive/car/gm/carstate.py
-    if ((addr == 0xBE) && (gm_hw == GM_ASCM)) {
+    if ((msg->addr == 0xBE) && (gm_hw == GM_ASCM)) {
       brake_pressed = GET_BYTE(msg, 1) >= 8U;
     }
 
-    if ((addr == 0xC9) && (gm_hw == GM_CAM)) {
+    if ((msg->addr == 0xC9) && (gm_hw == GM_CAM)) {
       brake_pressed = GET_BIT(msg, 40U);
     }
 
-    if (addr == 0x1C4) {
+    if (msg->addr == 0x1C4) {
       gas_pressed = GET_BYTE(msg, 5) != 0U;
 
       // enter controls on rising edge of ACC, exit controls when ACC off
@@ -89,7 +87,7 @@ static void gm_rx_hook(const CANPacket_t *msg) {
       }
     }
 
-    if (addr == 0xBD) {
+    if (msg->addr == 0xBD) {
       regen_braking = (GET_BYTE(msg, 0) >> 4) != 0U;
     }
   }
@@ -107,10 +105,9 @@ static bool gm_tx_hook(const CANPacket_t *msg) {
   };
 
   bool tx = true;
-  int addr = GET_ADDR(msg);
 
   // BRAKE: safety check
-  if (addr == 0x315) {
+  if (msg->addr == 0x315) {
     int brake = ((GET_BYTE(msg, 0) & 0xFU) << 8) + GET_BYTE(msg, 1);
     brake = (0x1000 - brake) & 0xFFF;
     if (longitudinal_brake_checks(brake, *gm_long_limits)) {
@@ -119,7 +116,7 @@ static bool gm_tx_hook(const CANPacket_t *msg) {
   }
 
   // LKA STEER: safety check
-  if (addr == 0x180) {
+  if (msg->addr == 0x180) {
     int desired_torque = ((GET_BYTE(msg, 0) & 0x7U) << 8) + GET_BYTE(msg, 1);
     desired_torque = to_signed(desired_torque, 11);
 
@@ -131,7 +128,7 @@ static bool gm_tx_hook(const CANPacket_t *msg) {
   }
 
   // GAS/REGEN: safety check
-  if (addr == 0x2CB) {
+  if (msg->addr == 0x2CB) {
     bool apply = GET_BIT(msg, 0U);
     // convert float CAN signal to an int for gas checks: 22534 / 0.125 = 180272
     int gas_regen = (((GET_BYTE(msg, 1) & 0x7U) << 16) | (GET_BYTE(msg, 2) << 8) | GET_BYTE(msg, 3)) - 180272U;
@@ -147,7 +144,7 @@ static bool gm_tx_hook(const CANPacket_t *msg) {
   }
 
   // BUTTONS: used for resume spamming and cruise cancellation with stock longitudinal
-  if ((addr == 0x1E1) && gm_pcm_cruise) {
+  if ((msg->addr == 0x1E1) && gm_pcm_cruise) {
     int button = (GET_BYTE(msg, 5) >> 4) & 0x7U;
 
     bool allowed_cancel = (button == 6) && cruise_engaged_prev;

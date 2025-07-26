@@ -43,10 +43,8 @@ static safety_config volkswagen_mqb_init(uint16_t param) {
 
 static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
   if (GET_BUS(msg) == 0U) {
-    int addr = GET_ADDR(msg);
-
     // Update in-motion state by sampling wheel speeds
-    if (addr == MSG_ESP_19) {
+    if (msg->addr == MSG_ESP_19) {
       // sum 4 wheel speeds
       int speed = 0;
       for (uint8_t i = 0U; i < 8U; i += 2U) {
@@ -60,7 +58,7 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
     // Update driver input torque samples
     // Signal: LH_EPS_03.EPS_Lenkmoment (absolute torque)
     // Signal: LH_EPS_03.EPS_VZ_Lenkmoment (direction)
-    if (addr == MSG_LH_EPS_03) {
+    if (msg->addr == MSG_LH_EPS_03) {
       int torque_driver_new = GET_BYTE(msg, 5) | ((GET_BYTE(msg, 6) & 0x1FU) << 8);
       int sign = (GET_BYTE(msg, 6) & 0x80U) >> 7;
       if (sign == 1) {
@@ -69,7 +67,7 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
       update_sample(&torque_driver, torque_driver_new);
     }
 
-    if (addr == MSG_TSK_06) {
+    if (msg->addr == MSG_TSK_06) {
       // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
       // Always exit controls on main switch off
       // Signal: TSK_06.TSK_Status
@@ -86,7 +84,7 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
       }
     }
 
-    if (addr == MSG_GRA_ACC_01) {
+    if (msg->addr == MSG_GRA_ACC_01) {
       // If using openpilot longitudinal, enter controls on falling edge of Set or Resume with main switch on
       // Signal: GRA_ACC_01.GRA_Tip_Setzen
       // Signal: GRA_ACC_01.GRA_Tip_Wiederaufnahme
@@ -107,17 +105,17 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
     }
 
     // Signal: Motor_20.MO_Fahrpedalrohwert_01
-    if (addr == MSG_MOTOR_20) {
+    if (msg->addr == MSG_MOTOR_20) {
       gas_pressed = ((GET_BYTES(msg, 0, 4) >> 12) & 0xFFU) != 0U;
     }
 
     // Signal: Motor_14.MO_Fahrer_bremst (ECU detected brake pedal switch F63)
-    if (addr == MSG_MOTOR_14) {
+    if (msg->addr == MSG_MOTOR_14) {
       volkswagen_mqb_brake_pedal_switch = (GET_BYTE(msg, 3) & 0x10U) >> 4;
     }
 
     // Signal: ESP_05.ESP_Fahrer_bremst (ESP detected driver brake pressure above platform specified threshold)
-    if (addr == MSG_ESP_05) {
+    if (msg->addr == MSG_ESP_05) {
       volkswagen_mqb_brake_pressure_detected = (GET_BYTE(msg, 3) & 0x4U) >> 2;
     }
 
@@ -145,13 +143,12 @@ static bool volkswagen_mqb_tx_hook(const CANPacket_t *msg) {
     .inactive_accel = 3010,  // VW sends one increment above the max range when inactive
   };
 
-  int addr = GET_ADDR(msg);
   bool tx = true;
 
   // Safety check for HCA_01 Heading Control Assist torque
   // Signal: HCA_01.HCA_01_LM_Offset (absolute torque)
   // Signal: HCA_01.HCA_01_LM_OffSign (direction)
-  if (addr == MSG_HCA_01) {
+  if (msg->addr == MSG_HCA_01) {
     int desired_torque = GET_BYTE(msg, 2) | ((GET_BYTE(msg, 3) & 0x1U) << 8);
     bool sign = GET_BIT(msg, 31U);
     if (sign) {
@@ -167,11 +164,11 @@ static bool volkswagen_mqb_tx_hook(const CANPacket_t *msg) {
 
   // Safety check for both ACC_06 and ACC_07 acceleration requests
   // To avoid floating point math, scale upward and compare to pre-scaled safety m/s2 boundaries
-  if ((addr == MSG_ACC_06) || (addr == MSG_ACC_07)) {
+  if ((msg->addr == MSG_ACC_06) || (msg->addr == MSG_ACC_07)) {
     bool violation = false;
     int desired_accel = 0;
 
-    if (addr == MSG_ACC_06) {
+    if (msg->addr == MSG_ACC_06) {
       // Signal: ACC_06.ACC_Sollbeschleunigung_02 (acceleration in m/s2, scale 0.005, offset -7.22)
       desired_accel = ((((GET_BYTE(msg, 4) & 0x7U) << 8) | GET_BYTE(msg, 3)) * 5U) - 7220U;
     } else {
@@ -191,7 +188,7 @@ static bool volkswagen_mqb_tx_hook(const CANPacket_t *msg) {
 
   // FORCE CANCEL: ensuring that only the cancel button press is sent when controls are off.
   // This avoids unintended engagements while still allowing resume spam
-  if ((addr == MSG_GRA_ACC_01) && !controls_allowed) {
+  if ((msg->addr == MSG_GRA_ACC_01) && !controls_allowed) {
     // disallow resume and set: bits 16 and 19
     if ((GET_BYTE(msg, 2) & 0x9U) != 0U) {
       tx = false;

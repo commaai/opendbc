@@ -15,22 +15,20 @@ static bool tesla_autopark = false;
 static bool tesla_autopark_prev = false;
 
 static uint8_t tesla_get_counter(const CANPacket_t *msg) {
-  int addr = GET_ADDR(msg);
-
   uint8_t cnt = 0;
-  if (addr == 0x2b9) {
+  if (msg->addr == 0x2b9) {
     // Signal: DAS_controlCounter
     cnt = GET_BYTE(msg, 6) >> 5;
-  } else if (addr == 0x488) {
+  } else if (msg->addr == 0x488) {
     // Signal: DAS_steeringControlCounter
     cnt = GET_BYTE(msg, 2) & 0x0FU;
-  } else if ((addr == 0x257) || (addr == 0x118) || (addr == 0x39d) || (addr == 0x286) || (addr == 0x311)) {
+  } else if ((msg->addr == 0x257) || (msg->addr == 0x118) || (msg->addr == 0x39d) || (msg->addr == 0x286) || (msg->addr == 0x311)) {
     // Signal: DI_speedCounter, DI_systemStatusCounter, IBST_statusCounter, DI_locStatusCounter, UI_warningCounter
     cnt = GET_BYTE(msg, 1) & 0x0FU;
-  } else if (addr == 0x155) {
+  } else if (msg->addr == 0x155) {
     // Signal: ESP_wheelRotationCounter
     cnt = GET_BYTE(msg, 6) >> 4;
-  } else if (addr == 0x370) {
+  } else if (msg->addr == 0x370) {
     // Signal: EPAS3S_sysStatusCounter
     cnt = GET_BYTE(msg, 6) & 0x0FU;
   } else {
@@ -56,7 +54,7 @@ static int _tesla_get_checksum_byte(const int addr) {
 
 static uint32_t tesla_get_checksum(const CANPacket_t *msg) {
   uint8_t chksum = 0;
-  int checksum_byte = _tesla_get_checksum_byte(GET_ADDR(msg));
+  int checksum_byte = _tesla_get_checksum_byte(msg->addr);
   if (checksum_byte != -1) {
     chksum = GET_BYTE(msg, checksum_byte);
   }
@@ -64,13 +62,11 @@ static uint32_t tesla_get_checksum(const CANPacket_t *msg) {
 }
 
 static uint32_t tesla_compute_checksum(const CANPacket_t *msg) {
-  unsigned int addr = GET_ADDR(msg);
-
   uint8_t chksum = 0;
-  int checksum_byte = _tesla_get_checksum_byte(addr);
+  int checksum_byte = _tesla_get_checksum_byte(msg->addr);
 
   if (checksum_byte != -1) {
-    chksum = (uint8_t)((addr & 0xFFU) + ((addr >> 8) & 0xFFU));
+    chksum = (uint8_t)((msg->addr & 0xFFU) + ((msg->addr >> 8) & 0xFFU));
     int len = GET_LEN(msg);
     for (int i = 0; i < len; i++) {
       if (i != checksum_byte) {
@@ -82,12 +78,10 @@ static uint32_t tesla_compute_checksum(const CANPacket_t *msg) {
 }
 
 static bool tesla_get_quality_flag_valid(const CANPacket_t *msg) {
-  int addr = GET_ADDR(msg);
-
   bool valid = false;
-  if (addr == 0x155) {
+  if (msg->addr == 0x155) {
     valid = (GET_BYTE(msg, 5) & 0x1U) == 0x1U;  // ESP_wheelSpeedsQF
-  } else if (addr == 0x39d) {
+  } else if (msg->addr == 0x39d) {
     int user_brake_status = GET_BYTE(msg, 2) & 0x03U;
     valid = (user_brake_status != 0) && (user_brake_status != 3);  // IBST_driverBrakeApply=NOT_INIT_OR_OFF, FAULT
   } else {
@@ -97,11 +91,10 @@ static bool tesla_get_quality_flag_valid(const CANPacket_t *msg) {
 
 static void tesla_rx_hook(const CANPacket_t *msg) {
   int bus = GET_BUS(msg);
-  int addr = GET_ADDR(msg);
 
   if (bus == 0) {
     // Steering angle: (0.1 * val) - 819.2 in deg.
-    if (addr == 0x370) {
+    if (msg->addr == 0x370) {
       // Store it 1/10 deg to match steering request
       const int angle_meas_new = (((GET_BYTE(msg, 4) & 0x3FU) << 8) | GET_BYTE(msg, 5)) - 8192U;
       update_sample(&angle_meas, angle_meas_new);
@@ -115,31 +108,31 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
     }
 
     // Vehicle speed (DI_speed)
-    if (addr == 0x257) {
+    if (msg->addr == 0x257) {
       // Vehicle speed: ((val * 0.08) - 40) / MS_TO_KPH
       float speed = ((((GET_BYTE(msg, 2) << 4) | (GET_BYTE(msg, 1) >> 4)) * 0.08) - 40.) * KPH_TO_MS;
       UPDATE_VEHICLE_SPEED(speed);
     }
 
     // 2nd vehicle speed (ESP_B)
-    if (addr == 0x155) {
+    if (msg->addr == 0x155) {
       // Disable controls if speeds from DI (Drive Inverter) and ESP ECUs are too far apart.
       float esp_speed = (((GET_BYTE(msg, 6) & 0x0FU) << 6) | GET_BYTE(msg, 5) >> 2) * 0.5 * KPH_TO_MS;
       speed_mismatch_check(esp_speed);
     }
 
     // Gas pressed
-    if (addr == 0x118) {
+    if (msg->addr == 0x118) {
       gas_pressed = (GET_BYTE(msg, 4) != 0U);
     }
 
     // Brake pressed
-    if (addr == 0x39d) {
+    if (msg->addr == 0x39d) {
       brake_pressed = (GET_BYTE(msg, 2) & 0x03U) == 2U;
     }
 
     // Cruise and Autopark/Summon state
-    if (addr == 0x286) {
+    if (msg->addr == 0x286) {
       // Autopark state
       int autopark_state = (GET_BYTE(msg, 3) >> 1) & 0x0FU;  // DI_autoparkState
       bool tesla_autopark_now = (autopark_state == 3) ||  // ACTIVE
@@ -171,13 +164,13 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
 
   if (bus == 2) {
     // DAS_control
-    if (addr == 0x2b9) {
+    if (msg->addr == 0x2b9) {
       // "AEB_ACTIVE"
       tesla_stock_aeb = (GET_BYTE(msg, 2) & 0x03U) == 1U;
     }
 
     // DAS_steeringControl
-    if (addr == 0x488) {
+    if (msg->addr == 0x488) {
       int steering_control_type = GET_BYTE(msg, 2) >> 6;
       bool tesla_stock_lkas_now = steering_control_type == 2;  // "LANE_KEEP_ASSIST"
 
@@ -215,7 +208,6 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
   };
 
   bool tx = true;
-  int addr = GET_ADDR(msg);
   bool violation = false;
 
   // Don't send any messages when Autopark is active
@@ -224,7 +216,7 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
   }
 
   // Steering control: (0.1 * val) - 1638.35 in deg.
-  if (addr == 0x488) {
+  if (msg->addr == 0x488) {
     // We use 1/10 deg as a unit here
     int raw_angle_can = ((GET_BYTE(msg, 0) & 0x7FU) << 8) | GET_BYTE(msg, 1);
     int desired_angle = raw_angle_can - 16384;
@@ -248,7 +240,7 @@ static bool tesla_tx_hook(const CANPacket_t *msg) {
   }
 
   // DAS_control: longitudinal control message
-  if (addr == 0x2b9) {
+  if (msg->addr == 0x2b9) {
     // No AEB events may be sent by openpilot
     int aeb_event = GET_BYTE(msg, 2) & 0x03U;
     if (aeb_event != 0) {

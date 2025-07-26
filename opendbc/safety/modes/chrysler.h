@@ -65,39 +65,38 @@ static uint8_t chrysler_get_counter(const CANPacket_t *msg) {
 
 static void chrysler_rx_hook(const CANPacket_t *msg) {
   const int bus = GET_BUS(msg);
-  const int addr = GET_ADDR(msg);
 
   // Measured EPS torque
-  if ((bus == 0) && (addr == chrysler_addrs->EPS_2)) {
+  if ((bus == 0) && (msg->addr == chrysler_addrs->EPS_2)) {
     int torque_meas_new = ((GET_BYTE(msg, 4) & 0x7U) << 8) + GET_BYTE(msg, 5) - 1024U;
     update_sample(&torque_meas, torque_meas_new);
   }
 
   // enter controls on rising edge of ACC, exit controls on ACC off
   const int das_3_bus = (chrysler_platform == CHRYSLER_PACIFICA) ? 0 : 2;
-  if ((bus == das_3_bus) && (addr == chrysler_addrs->DAS_3)) {
+  if ((bus == das_3_bus) && (msg->addr == chrysler_addrs->DAS_3)) {
     bool cruise_engaged = GET_BIT(msg, 21U);
     pcm_cruise_check(cruise_engaged);
   }
 
   // TODO: use the same message for both
   // update vehicle moving
-  if ((chrysler_platform != CHRYSLER_PACIFICA) && (bus == 0) && (addr == chrysler_addrs->ESP_8)) {
+  if ((chrysler_platform != CHRYSLER_PACIFICA) && (bus == 0) && (msg->addr == chrysler_addrs->ESP_8)) {
     vehicle_moving = ((GET_BYTE(msg, 4) << 8) + GET_BYTE(msg, 5)) != 0U;
   }
-  if ((chrysler_platform == CHRYSLER_PACIFICA) && (bus == 0) && (addr == 514)) {
+  if ((chrysler_platform == CHRYSLER_PACIFICA) && (bus == 0) && (msg->addr == 514)) {
     int speed_l = (GET_BYTE(msg, 0) << 4) + (GET_BYTE(msg, 1) >> 4);
     int speed_r = (GET_BYTE(msg, 2) << 4) + (GET_BYTE(msg, 3) >> 4);
     vehicle_moving = (speed_l != 0) || (speed_r != 0);
   }
 
   // exit controls on rising edge of gas press
-  if ((bus == 0) && (addr == chrysler_addrs->ECM_5)) {
+  if ((bus == 0) && (msg->addr == chrysler_addrs->ECM_5)) {
     gas_pressed = GET_BYTE(msg, 0U) != 0U;
   }
 
   // exit controls on rising edge of brake press
-  if ((bus == 0) && (addr == chrysler_addrs->ESP_1)) {
+  if ((bus == 0) && (msg->addr == chrysler_addrs->ESP_1)) {
     brake_pressed = ((GET_BYTE(msg, 0U) & 0xFU) >> 2U) == 1U;
   }
 }
@@ -131,10 +130,9 @@ static bool chrysler_tx_hook(const CANPacket_t *msg) {
   };
 
   bool tx = true;
-  int addr = GET_ADDR(msg);
 
   // STEERING
-  if (addr == chrysler_addrs->LKAS_COMMAND) {
+  if (msg->addr == chrysler_addrs->LKAS_COMMAND) {
     int start_byte = (chrysler_platform == CHRYSLER_PACIFICA) ? 0 : 1;
     int desired_torque = ((GET_BYTE(msg, start_byte) & 0x7U) << 8) | GET_BYTE(msg, start_byte + 1);
     desired_torque -= 1024;
@@ -149,7 +147,7 @@ static bool chrysler_tx_hook(const CANPacket_t *msg) {
   }
 
   // FORCE CANCEL: only the cancel button press is allowed
-  if (addr == chrysler_addrs->CRUISE_BUTTONS) {
+  if (msg->addr == chrysler_addrs->CRUISE_BUTTONS) {
     const bool is_cancel = GET_BYTE(msg, 0) == 1U;
     const bool is_resume = GET_BYTE(msg, 0) == 0x10U;
     const bool allowed = is_cancel || (is_resume && controls_allowed);
