@@ -169,11 +169,11 @@ typedef struct {
   const int addr;
   const int bus;
   const int len;
+  const uint32_t frequency;          // expected frequency of the message [Hz]
   const bool ignore_checksum;        // checksum check is not performed when set to true
   const bool ignore_counter;         // counter check is not performed when set to true
   const uint8_t max_counter;         // maximum value of the counter. 0 means that the counter check is skipped
   const bool ignore_quality_flag;    // true if quality flag check is skipped
-  const uint32_t frequency;          // expected frequency of the message [Hz]
 } CanMsgCheck;
 
 typedef struct {

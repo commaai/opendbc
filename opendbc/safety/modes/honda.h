@@ -4,18 +4,18 @@
 
 // All common address checks except SCM_BUTTONS which isn't on one Nidec safety configuration
 #define HONDA_COMMON_NO_SCM_FEEDBACK_RX_CHECKS(pt_bus)                                                                                      \
-  {.msg = {{0x1A6, (pt_bus), 8, .max_counter = 3U, .ignore_quality_flag = true, .frequency = 25U},                  /* SCM_BUTTONS */       \
-           {0x296, (pt_bus), 4, .max_counter = 3U, .ignore_quality_flag = true, .frequency = 25U}, { 0 }}},                                 \
-  {.msg = {{0x158, (pt_bus), 8, .max_counter = 3U, .ignore_quality_flag = true, .frequency = 100U}, { 0 }, { 0 }}},  /* ENGINE_DATA */      \
-  {.msg = {{0x17C, (pt_bus), 8, .max_counter = 3U, .ignore_quality_flag = true, .frequency = 100U}, { 0 }, { 0 }}},  /* POWERTRAIN_DATA */  \
+  {.msg = {{0x1A6, (pt_bus), 8, 25U, .max_counter = 3U, .ignore_quality_flag = true},                  /* SCM_BUTTONS */       \
+           {0x296, (pt_bus), 4, 25U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }}},                                 \
+  {.msg = {{0x158, (pt_bus), 8, 100U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  /* ENGINE_DATA */      \
+  {.msg = {{0x17C, (pt_bus), 8, 100U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  /* POWERTRAIN_DATA */  \
 
 #define HONDA_COMMON_RX_CHECKS(pt_bus)                                                                                                  \
   HONDA_COMMON_NO_SCM_FEEDBACK_RX_CHECKS(pt_bus)                                                                                        \
-  {.msg = {{0x326, (pt_bus), 8, .max_counter = 3U, .ignore_quality_flag = true, .frequency = 10U}, { 0 }, { 0 }}},  /* SCM_FEEDBACK */  \
+  {.msg = {{0x326, (pt_bus), 8, 10U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  /* SCM_FEEDBACK */  \
 
 // Alternate brake message is used on some Honda Bosch, and Honda Bosch radarless (where PT bus is 0)
 #define HONDA_ALT_BRAKE_ADDR_CHECK(pt_bus)                                                                                              \
-  {.msg = {{0x1BE, (pt_bus), 3, .max_counter = 3U, .ignore_quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},  /* BRAKE_MODULE */  \
+  {.msg = {{0x1BE, (pt_bus), 3, 50U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  /* BRAKE_MODULE */  \
 
 enum {
   HONDA_BTN_NONE = 0,
@@ -301,7 +301,7 @@ static safety_config honda_nidec_init(uint16_t param) {
     // For Nidecs with main on signal on an alternate msg (missing 0x326)
     static RxCheck honda_nidec_alt_rx_checks[] = {
       HONDA_COMMON_NO_SCM_FEEDBACK_RX_CHECKS(0)
-      {.msg = {{0x1FA, 2, 8, .max_counter = 3U, .ignore_quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},  // BRAKE_COMMAND
+      {.msg = {{0x1FA, 2, 8, 50U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // BRAKE_COMMAND
     };
 
     SET_RX_CHECKS(honda_nidec_alt_rx_checks, ret);
@@ -309,7 +309,7 @@ static safety_config honda_nidec_init(uint16_t param) {
     // Nidec includes BRAKE_COMMAND
     static RxCheck honda_nidec_common_rx_checks[] = {
       HONDA_COMMON_RX_CHECKS(0)
-      {.msg = {{0x1FA, 2, 8, .max_counter = 3U, .ignore_quality_flag = true, .frequency = 50U}, { 0 }, { 0 }}},  // BRAKE_COMMAND
+      {.msg = {{0x1FA, 2, 8, 50U, .max_counter = 3U, .ignore_quality_flag = true}, { 0 }, { 0 }}},  // BRAKE_COMMAND
     };
 
     SET_RX_CHECKS(honda_nidec_common_rx_checks, ret);
