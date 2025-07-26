@@ -59,18 +59,16 @@ static const CanMsg HYUNDAI_TX_MSGS[] = {
 static bool hyundai_legacy = false;
 
 static uint8_t hyundai_get_counter(const CANPacket_t *msg) {
-  int addr = GET_ADDR(msg);
-
   uint8_t cnt = 0;
-  if (addr == 0x260) {
+  if (msg->addr == 0x260) {
     cnt = (GET_BYTE(msg, 7) >> 4) & 0x3U;
-  } else if (addr == 0x386) {
+  } else if (msg->addr == 0x386) {
     cnt = ((GET_BYTE(msg, 3) >> 6) << 2) | (GET_BYTE(msg, 1) >> 6);
-  } else if (addr == 0x394) {
+  } else if (msg->addr == 0x394) {
     cnt = (GET_BYTE(msg, 1) >> 5) & 0x7U;
-  } else if (addr == 0x421) {
+  } else if (msg->addr == 0x421) {
     cnt = GET_BYTE(msg, 7) & 0xFU;
-  } else if (addr == 0x4F1) {
+  } else if (msg->addr == 0x4F1) {
     cnt = (GET_BYTE(msg, 3) >> 4) & 0xFU;
   } else {
   }
@@ -78,16 +76,14 @@ static uint8_t hyundai_get_counter(const CANPacket_t *msg) {
 }
 
 static uint32_t hyundai_get_checksum(const CANPacket_t *msg) {
-  int addr = GET_ADDR(msg);
-
   uint8_t chksum = 0;
-  if (addr == 0x260) {
+  if (msg->addr == 0x260) {
     chksum = GET_BYTE(msg, 7) & 0xFU;
-  } else if (addr == 0x386) {
+  } else if (msg->addr == 0x386) {
     chksum = ((GET_BYTE(msg, 7) >> 6) << 2) | (GET_BYTE(msg, 5) >> 6);
-  } else if (addr == 0x394) {
+  } else if (msg->addr == 0x394) {
     chksum = GET_BYTE(msg, 6) & 0xFU;
-  } else if (addr == 0x421) {
+  } else if (msg->addr == 0x421) {
     chksum = GET_BYTE(msg, 7) >> 4;
   } else {
   }
@@ -95,7 +91,7 @@ static uint32_t hyundai_get_checksum(const CANPacket_t *msg) {
 }
 
 static uint32_t hyundai_compute_checksum(const CANPacket_t *msg) {
-  int addr = GET_ADDR(msg);
+  int addr = msg->addr;
 
   uint8_t chksum = 0;
   if (addr == 0x386) {
@@ -131,19 +127,18 @@ static uint32_t hyundai_compute_checksum(const CANPacket_t *msg) {
 }
 
 static void hyundai_rx_hook(const CANPacket_t *msg) {
-  int bus = GET_BUS(msg);
-  int addr = GET_ADDR(msg);
+  int addr = msg->addr;
 
   // SCC12 is on bus 2 for camera-based SCC cars, bus 0 on all others
   if (addr == 0x421) {
-    if (((bus == 0) && !hyundai_camera_scc) || ((bus == 2) && hyundai_camera_scc)) {
+    if (((msg->bus == 0) && !hyundai_camera_scc) || ((msg->bus == 2) && hyundai_camera_scc)) {
       // 2 bits: 13-14
       int cruise_engaged = (GET_BYTES(msg, 0, 4) >> 13) & 0x3U;
       hyundai_common_cruise_state_check(cruise_engaged);
     }
   }
 
-  if (bus == 0) {
+  if (msg->bus == 0) {
     if (addr == 0x251) {
       int torque_driver_new = (GET_BYTES(msg, 0, 2) & 0x7ffU) - 1024U;
       // update array of samples
@@ -188,7 +183,7 @@ static bool hyundai_tx_hook(const CANPacket_t *msg) {
   const TorqueSteeringLimits HYUNDAI_STEERING_LIMITS_ALT_2 = HYUNDAI_LIMITS(170, 2, 3);
 
   bool tx = true;
-  int addr = GET_ADDR(msg);
+  int addr = msg->addr;
 
   // FCA11: Block any potential actuation
   if (addr == 0x38D) {
