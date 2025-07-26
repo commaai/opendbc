@@ -26,7 +26,8 @@ testing = [
   "pytest-coverage",
   "pytest-mock",
   "pytest-randomly",
-  "pytest-xdist",
+  # https://github.com/pytest-dev/pytest-xdist/pull/1229
+  "pytest-xdist @ git+https://github.com/sshane/pytest-xdist@2b4372bd62699fb412c4fe2f95bf9f01bd2018da",
   "pytest-subtests",
   "hypothesis==6.47.*",
   "parameterized>=0.8,<0.9",

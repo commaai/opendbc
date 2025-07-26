@@ -141,14 +141,12 @@ class CarState(CarStateBase):
 
     if self.CP.flags & (HyundaiFlags.HYBRID | HyundaiFlags.EV | HyundaiFlags.FCEV):
       if self.CP.flags & HyundaiFlags.FCEV:
-        ret.gas = cp.vl["FCEV_ACCELERATOR"]["ACCELERATOR_PEDAL"] / 254.
+        ret.gasPressed = cp.vl["FCEV_ACCELERATOR"]["ACCELERATOR_PEDAL"] > 0
       elif self.CP.flags & HyundaiFlags.HYBRID:
-        ret.gas = cp.vl["E_EMS11"]["CR_Vcu_AccPedDep_Pos"] / 254.
+        ret.gasPressed = cp.vl["E_EMS11"]["CR_Vcu_AccPedDep_Pos"] > 0
       else:
-        ret.gas = cp.vl["E_EMS11"]["Accel_Pedal_Pos"] / 254.
-      ret.gasPressed = ret.gas > 0
+        ret.gasPressed = cp.vl["E_EMS11"]["Accel_Pedal_Pos"] > 0
     else:
-      ret.gas = cp.vl["EMS12"]["PV_AV_CAN"] / 100.
       ret.gasPressed = bool(cp.vl["EMS16"]["CF_Ems_AclAct"])
 
     # Gear Selection via Cluster - For those Kia/Hyundai which are not fully discovered, we can use the Cluster Indicator for Gear Selection,
@@ -216,9 +214,7 @@ class CarState(CarStateBase):
     speed_factor = CV.KPH_TO_MS if self.is_metric else CV.MPH_TO_MS
 
     if self.CP.flags & (HyundaiFlags.EV | HyundaiFlags.HYBRID):
-      offset = 255. if self.CP.flags & HyundaiFlags.EV else 1023.
-      ret.gas = cp.vl[self.accelerator_msg_canfd]["ACCELERATOR_PEDAL"] / offset
-      ret.gasPressed = ret.gas > 1e-5
+      ret.gasPressed = cp.vl[self.accelerator_msg_canfd]["ACCELERATOR_PEDAL"] > 1e-5
     else:
       ret.gasPressed = bool(cp.vl[self.accelerator_msg_canfd]["ACCELERATOR_PEDAL_PRESSED"])
 

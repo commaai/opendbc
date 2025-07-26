@@ -169,11 +169,11 @@ typedef struct {
   const int addr;
   const int bus;
   const int len;
+  const uint32_t frequency;          // expected frequency of the message [Hz]
   const bool ignore_checksum;        // checksum check is not performed when set to true
   const bool ignore_counter;         // counter check is not performed when set to true
   const uint8_t max_counter;         // maximum value of the counter. 0 means that the counter check is skipped
   const bool ignore_quality_flag;    // true if quality flag check is skipped
-  const uint32_t frequency;          // expected frequency of the message [Hz]
 } CanMsgCheck;
 
 typedef struct {
@@ -202,14 +202,14 @@ typedef struct {
   bool disable_forwarding;
 } safety_config;
 
-typedef uint32_t (*get_checksum_t)(const CANPacket_t *to_push);
-typedef uint32_t (*compute_checksum_t)(const CANPacket_t *to_push);
-typedef uint8_t (*get_counter_t)(const CANPacket_t *to_push);
-typedef bool (*get_quality_flag_valid_t)(const CANPacket_t *to_push);
+typedef uint32_t (*get_checksum_t)(const CANPacket_t *msg);
+typedef uint32_t (*compute_checksum_t)(const CANPacket_t *msg);
+typedef uint8_t (*get_counter_t)(const CANPacket_t *msg);
+typedef bool (*get_quality_flag_valid_t)(const CANPacket_t *msg);
 
 typedef safety_config (*safety_hook_init)(uint16_t param);
-typedef void (*rx_hook)(const CANPacket_t *to_push);
-typedef bool (*tx_hook)(const CANPacket_t *to_send);  // returns true if the message is allowed
+typedef void (*rx_hook)(const CANPacket_t *msg);
+typedef bool (*tx_hook)(const CANPacket_t *msg);  // returns true if the message is allowed
 typedef bool (*fwd_hook)(int bus_num, int addr);      // returns true if the message should be blocked from forwarding
 
 typedef struct {
@@ -223,8 +223,8 @@ typedef struct {
   get_quality_flag_valid_t get_quality_flag_valid;
 } safety_hooks;
 
-bool safety_rx_hook(const CANPacket_t *to_push);
-bool safety_tx_hook(CANPacket_t *to_send);
+bool safety_rx_hook(const CANPacket_t *msg);
+bool safety_tx_hook(CANPacket_t *msg);
 int to_signed(int d, int bits);
 void update_sample(struct sample_t *sample, int sample_new);
 bool get_longitudinal_allowed(void);

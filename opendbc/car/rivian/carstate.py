@@ -31,9 +31,7 @@ class CarState(CarStateBase):
     ret.vEgoCluster = cp_adas.vl["Cluster"]["Cluster_VehicleSpeed"] * conversion
 
     # Gas pedal
-    pedal_status = cp.vl["VDM_PropStatus"]["VDM_AcceleratorPedalPosition"]
-    ret.gas = pedal_status / 100.0
-    ret.gasPressed = pedal_status > 0
+    ret.gasPressed = cp.vl["VDM_PropStatus"]["VDM_AcceleratorPedalPosition"] > 0
 
     # Brake pedal
     ret.brake = cp.vl["ESPiB3"]["ESPiB3_pMC1"] / 250.0  # pressure in Bar
