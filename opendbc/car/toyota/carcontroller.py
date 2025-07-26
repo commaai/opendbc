@@ -12,7 +12,7 @@ from opendbc.car.toyota import toyotacan
 from opendbc.car.toyota.values import CAR, STATIC_DSU_MSGS, NO_STOP_TIMER_CAR, TSS2_CAR, \
                                         CarControllerParams, ToyotaFlags, \
                                         UNSUPPORTED_DSU_CAR
-from opendbc.can.packer import CANPacker
+from opendbc.can import CANPacker
 
 Ecu = structs.CarParams.Ecu
 LongCtrlState = structs.CarControl.Actuators.LongControlState
@@ -272,9 +272,10 @@ class CarController(CarControllerBase):
         can_sends.append(toyotacan.create_fcw_command(self.packer, fcw_alert))
 
     # *** static msgs ***
-    for addr, cars, bus, fr_step, vl in STATIC_DSU_MSGS:
-      if self.frame % fr_step == 0 and self.CP.enableDsu and self.CP.carFingerprint in cars:
-        can_sends.append(CanData(addr, vl, bus))
+    if self.CP.enableDsu:
+      for addr, cars, bus, fr_step, vl in STATIC_DSU_MSGS:
+        if self.frame % fr_step == 0 and self.CP.carFingerprint in cars:
+          can_sends.append(CanData(addr, vl, bus))
 
     # keep radar disabled
     if self.frame % 20 == 0 and self.CP.flags & ToyotaFlags.DISABLE_RADAR.value:

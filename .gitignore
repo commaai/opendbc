@@ -1,3 +1,4 @@
+.cache/
 /build/
 .mypy_cache/
 *.pyc
@@ -15,8 +16,11 @@
 *.html
 *.gcda
 *.gcno
-
+*.dump
 uv.lock
+/dist/
+.vscode/
+__pycache__/
 
 opendbc/can/build/
 opendbc/can/obj/
@@ -28,3 +32,5 @@ opendbc/dbc/*_generated.dbc
 
 cppcheck-addon-ctu-file-list
 opendbc/safety/tests/coverage-out
+
+compile_commands.json
