@@ -6,9 +6,7 @@ from opendbc.car.honda.values import DBC
 
 
 def _create_nidec_can_parser(car_fingerprint):
-  radar_messages = [0x400] + list(range(0x430, 0x43A)) + list(range(0x440, 0x446))
-  messages = [(m, 20) for m in radar_messages]
-  return CANParser(DBC[car_fingerprint][Bus.radar], messages, 1)
+  return CANParser(DBC[car_fingerprint][Bus.radar], [], 1)
 
 
 class RadarInterface(RadarInterfaceBase):
@@ -27,13 +25,13 @@ class RadarInterface(RadarInterfaceBase):
     self.trigger_msg = 0x445
     self.updated_messages = set()
 
-  def update(self, can_strings):
+  def update(self, can_msgs):
     # in Bosch radar and we are only steering for now, so sleep 0.05s to keep
     # radard at 20Hz and return no points
     if self.radar_off_can:
       return super().update(None)
 
-    vls = self.rcp.update(can_strings)
+    vls = self.rcp.update(can_msgs)
     self.updated_messages.update(vls)
 
     if self.trigger_msg not in self.updated_messages:
