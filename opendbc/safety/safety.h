@@ -325,15 +325,19 @@ void safety_tick(const safety_config *cfg) {
       // lag threshold is max of: 1s and MAX_MISSED_MSGS * expected timestep.
       // Quite conservative to not risk false triggers.
       // 2s of lag is worse case, since the function is called at 1Hz
-      uint32_t timestep = 1e6 / cfg->rx_checks[i].msg[cfg->rx_checks[i].status.index].frequency;
+      uint32_t frequency = cfg->rx_checks[i].msg[cfg->rx_checks[i].status.index].frequency;
+      uint32_t timestep = 1e6 / frequency;
       bool lagging = elapsed_time > MAX(timestep * MAX_MISSED_MSGS, 1e6);
       cfg->rx_checks[i].status.lagging = lagging;
       if (lagging) {
         controls_allowed = false;
       }
 
-      if (lagging || !is_msg_valid(cfg->rx_checks, i)) {
+      // enforce minimum frequency for safety-relevant messages
+      bool frequency_invalid = frequency < 10U;
+      if (lagging || frequency_invalid || !is_msg_valid(cfg->rx_checks, i)) {
         rx_checks_invalid = true;
+        controls_allowed = false;
       }
     }
   }
