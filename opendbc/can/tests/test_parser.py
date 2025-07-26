@@ -153,52 +153,50 @@ BO_ 200 ALIVE_MESSAGE: 8 Vector__XXX
 BO_ 100 COUNTER_MESSAGE: 8 Vector__XXX
  SG_ COUNTER : 0|4@1+ (1,0) [0|15] "" Vector__XXX
 """
-    
+
     with tempfile.NamedTemporaryFile(mode='w', suffix='.dbc', delete=False) as f:
       f.write(dbc_content)
       dbc_file = f.name
-    
+
     try:
       # Need to manually set signal type to COUNTER (type=1)
       parser = CANParser(dbc_file, [(100, 0)], 0)
       state = parser.message_states[100]
       state.signals[0].type = 1  # Set as COUNTER type
-      
+
       time_ns = 1000000000
-      
+
       # Send sequence with correct counter progression
       parser.update([(time_ns, [(100, b'\x00\x00\x00\x00\x00\x00\x00\x00', 0)])])  # counter=0
       parser.update([(time_ns + 1000000, [(100, b'\x01\x00\x00\x00\x00\x00\x00\x00', 0)])])  # counter=1
-      
+
       # Should have good counter
       assert state.counter_fail == 0
-      
+
       # Send message with skipped counter (should increment fail count)
       parser.update([(time_ns + 2000000, [(100, b'\x05\x00\x00\x00\x00\x00\x00\x00', 0)])])  # counter=5 (skipped)
-      
+
       assert state.counter_fail > 0
-      
     finally:
       os.unlink(dbc_file)
 
   def test_bus_timeout_detection(self):
     """Test bus timeout detection logic"""
     dbc_file = self.create_test_dbc()
-    
+
     try:
       parser = CANParser(dbc_file, [(100, 0)], 0)
-      
+
       base_time = 1000000000
-      
+
       # Send initial message
       parser.update([(base_time, [(100, b'\x00\x01\x02\x03\x04\x05\x06\x07', 0)])])
-      
+
       # Send empty frame (no messages for this bus)
       empty_time = base_time + 600_000_000  # 600ms later, should trigger timeout
       parser.update([(empty_time, [])])  # Empty frames list
-      
+
       # Should detect bus timeout
       assert parser.bus_timeout is True
-      
     finally:
       os.unlink(dbc_file)
