@@ -98,6 +98,7 @@ static bool is_msg_valid(RxCheck addr_list[], int index) {
   if (index != -1) {
     if (!addr_list[index].status.valid_checksum || !addr_list[index].status.valid_quality_flag || (addr_list[index].status.wrong_counters >= MAX_WRONG_COUNTERS)) {
       valid = false;
+      controls_allowed = false;
     }
   }
   return valid;
@@ -328,12 +329,14 @@ void safety_tick(const safety_config *cfg) {
       uint32_t timestep = 1e6 / frequency;
       bool lagging = elapsed_time > MAX(timestep * MAX_MISSED_MSGS, 1e6);
       cfg->rx_checks[i].status.lagging = lagging;
+      if (lagging) {
+        controls_allowed = false;
+      }
 
       // enforce minimum frequency for safety-relevant messages
       bool frequency_invalid = frequency < 10U;
       if (lagging || frequency_invalid || !is_msg_valid(cfg->rx_checks, i)) {
         rx_checks_invalid = true;
-        controls_allowed = false;
       }
     }
   }
