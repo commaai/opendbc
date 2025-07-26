@@ -18,15 +18,16 @@ class TestFirstOrderFilter:
     assert initial_value < result < 15.0
     
   def test_uninitialized_filter(self):
-    # Test filter when not initialized (covers the x is None branch)
+    # Test filter when not initialized (covers the initialized=False branch)
     dt = 0.01
-    tau = 0.1
+    rc = 0.1
     
-    filter_obj = FirstOrderFilter(None, dt, tau)
+    filter_obj = FirstOrderFilter(10.0, rc, dt, initialized=False)
     
-    # First update should return the input value directly
+    # First update should return the input value directly and set initialized=True
     result = filter_obj.update(20.0)
     assert result == 20.0
+    assert filter_obj.initialized is True
     
     # Second update should apply filtering
     result2 = filter_obj.update(25.0)
