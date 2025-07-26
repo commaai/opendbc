@@ -16,7 +16,8 @@ class CarControllerParams:
   STEER_THRESHOLD = 1.0
 
   def __init__(self, CP):
-    pass
+    # Body doesn't need CP-specific configuration
+    del CP  # Explicitly indicate parameter is unused
 
 
 class CAR(Platforms):
