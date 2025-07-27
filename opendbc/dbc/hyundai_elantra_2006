@@ -1,0 +1,34 @@
+BO_ 339 NEW_MSG_153: 8 XXX
+ SG_ TCS : 2|1@0+ (1,0) [0|1] "" XXX
+ SG_ NEW_SIGNAL_1 : 16|8@1+ (1,0) [0|255] "" XXX
+
+BO_ 496 NEW_MSG_1F0: 8 XXX
+ SG_ NEW_SIGNAL_4 : 7|8@0+ (1,0) [0|15] "" XXX
+ SG_ NEW_SIGNAL_3 : 15|8@0+ (1,0) [0|15] "" XXX
+ SG_ FL : 23|8@0+ (1,0) [0|15] "" XXX
+ SG_ FR : 31|8@0+ (1,0) [0|15] "" XXX
+
+BO_ 672 NEW_MSG_2A0: 8 XXX
+ SG_ NEW_SIGNAL_1 : 16|8@1+ (1,0) [0|255] "" XXX
+
+BO_ 790 ECU: 8 XXX
+ SG_ NEW_SIGNAL_1 : 15|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_2 : 16|8@1+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_3 : 31|8@0+ (1,0) [0|255] "" XXX
+ SG_ NEW_SIGNAL_4 : 32|8@1+ (1,0) [0|255] "" XXX
+
+BO_ 809 NEW_MSG_329: 7 XXX
+ SG_ ENGINE_COOLANT_TEMP : 8|8@1+ (1,0) [0|255] "" XXX
+ SG_ THROTTLE_POSITION : 47|8@0+ (1,-32) [32|255] "" XXX
+
+BO_ 1087 NEW_MSG_43F: 8 XXX
+ SG_ RPM M : 42|13@1+ (1,0) [0|31] "" XXX
+ SG_ gear2 : 3|4@0+ (1,0) [0|15] "" XXX
+ SG_ gear : 10|3@0+ (1,0) [0|7] "" XXX
+
+BO_ 1088 NEW_MSG_440: 8 XXX
+ SG_ speed : 23|8@0+ (1,0) [0|255] "km/h" XXX
+ SG_ brake_pressed : 27|2@0+ (1,0) [0|3] "" XXX
+
+BO_ 1349 NEW_MSG_545: 4 XXX
+
