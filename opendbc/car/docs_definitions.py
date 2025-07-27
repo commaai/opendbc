@@ -393,7 +393,7 @@ class CarDocs:
       item = star_icon.format(item.value)
     elif column == Column.MODEL and len(self.years):
       item += f" {self.years}"
-    elif column == Column.VIDEO and len(item) > 0:
+    elif column in (Column.VIDEO, Column.SETUP_VIDEO) and len(item) > 0:
       item = video_icon.format(item)
 
     footnotes = get_footnotes(self.footnotes, column)
