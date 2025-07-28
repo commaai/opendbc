@@ -229,11 +229,13 @@ class CANParser:
 
       if not bus_empty:
         self.last_nonempty_nanos = t
+
+      ignore_alive = all(s.ignore_alive for s in self.message_states.values())
       bus_timeout_threshold = 500 * 1_000_000
       for st in self.message_states.values():
         if st.timeout_threshold > 0:
           bus_timeout_threshold = min(bus_timeout_threshold, st.timeout_threshold)
-      self.bus_timeout = (t - self.last_nonempty_nanos) > bus_timeout_threshold
+      self.bus_timeout = ((t - self.last_nonempty_nanos) > bus_timeout_threshold) and not ignore_alive
       self.update_valid(t)
 
     return updated_addrs
