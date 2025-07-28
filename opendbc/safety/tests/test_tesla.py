@@ -34,7 +34,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
   GAS_PRESSED_THRESHOLD = 3
 
   # Angle control limits
-  STEER_ANGLE_MAX = CarControllerParams.ANGLE_LIMITS.STEER_ANGLE_MAX  # deg
+  STEER_ANGLE_MAX = 360  # deg
   DEG_TO_CAN = 10
 
   # Tesla uses get_max_angle_delta and get_max_angle for real lateral accel and jerk limits
