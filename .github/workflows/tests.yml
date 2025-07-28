@@ -56,6 +56,7 @@ jobs:
           scons -j8
           cd opendbc/safety/tests && ./mutation.sh
 
+  # TODO: this needs to move to opendbc
   test_models:
     name: test models
     runs-on: ${{ github.repository == 'commaai/opendbc' && 'namespace-profile-amd64-8x16' || 'ubuntu-latest' }}
@@ -87,7 +88,7 @@ jobs:
         path: .ci_cache/comma_download_cache
         key: car_models-${{ hashFiles('selfdrive/car/tests/test_models.py', 'opendbc/car/tests/routes.py') }}-${{ matrix.job }}
     - name: Build openpilot
-      run: ${{ env.RUN }} "scons -j$(nproc) common/ cereal/ selfdrive/pandad/"
+      run: ${{ env.RUN }} "scons -j$(nproc) common/ cereal/ selfdrive/pandad/ msgq_repo/"
     - name: Test car models
       timeout-minutes: ${{ contains(runner.name, 'nsc') && (steps.routes-cache.outputs.cache-hit == 'true') && ((steps.setup-step.outputs.duration < 18) && 1 || 2) || 6 }}
       run: |
