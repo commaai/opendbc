@@ -39,9 +39,9 @@
 #define MSG_SUBARU_ES_STATIC_1           0x22a
 #define MSG_SUBARU_ES_STATIC_2           0x325
 
-#define SUBARU_MAIN_BUS 0
-#define SUBARU_ALT_BUS  1
-#define SUBARU_CAM_BUS  2
+#define SUBARU_MAIN_BUS 0U
+#define SUBARU_ALT_BUS  1U
+#define SUBARU_CAM_BUS  2U
 
 #define SUBARU_BASE_TX_MSGS(alt_bus, lkas_msg) \
   {lkas_msg,                     SUBARU_MAIN_BUS, 8, .check_relay = true},  \
@@ -92,7 +92,7 @@ static uint32_t subaru_compute_checksum(const CANPacket_t *msg) {
 }
 
 static void subaru_rx_hook(const CANPacket_t *msg) {
-  const int alt_main_bus = subaru_gen2 ? SUBARU_ALT_BUS : SUBARU_MAIN_BUS;
+  const unsigned int alt_main_bus = subaru_gen2 ? SUBARU_ALT_BUS : SUBARU_MAIN_BUS;
 
   int addr = GET_ADDR(msg);
   if ((addr == MSG_SUBARU_Steering_Torque) && (msg->bus == (unsigned char)SUBARU_MAIN_BUS)) {
@@ -108,13 +108,13 @@ static void subaru_rx_hook(const CANPacket_t *msg) {
   }
 
   // enter controls on rising edge of ACC, exit controls on ACC off
-  if ((addr == MSG_SUBARU_CruiseControl) && (msg->bus == (unsigned char)alt_main_bus)) {
+  if ((addr == MSG_SUBARU_CruiseControl) && (msg->bus == alt_main_bus)) {
     bool cruise_engaged = GET_BIT(msg, 41U);
     pcm_cruise_check(cruise_engaged);
   }
 
   // update vehicle moving with any non-zero wheel speed
-  if ((addr == MSG_SUBARU_Wheel_Speeds) && (msg->bus == (unsigned char)alt_main_bus)) {
+  if ((addr == MSG_SUBARU_Wheel_Speeds) && (msg->bus == alt_main_bus)) {
     uint32_t fr = (GET_BYTES(msg, 1, 3) >> 4) & 0x1FFFU;
     uint32_t rr = (GET_BYTES(msg, 3, 3) >> 1) & 0x1FFFU;
     uint32_t rl = (GET_BYTES(msg, 4, 3) >> 6) & 0x1FFFU;
@@ -125,11 +125,11 @@ static void subaru_rx_hook(const CANPacket_t *msg) {
     UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.057 * KPH_TO_MS);
   }
 
-  if ((addr == MSG_SUBARU_Brake_Status) && (msg->bus == (unsigned char)alt_main_bus)) {
+  if ((addr == MSG_SUBARU_Brake_Status) && (msg->bus == alt_main_bus)) {
     brake_pressed = GET_BIT(msg, 62U);
   }
 
-  if ((addr == MSG_SUBARU_Throttle) && (msg->bus == (unsigned char)SUBARU_MAIN_BUS)) {
+  if ((addr == MSG_SUBARU_Throttle) && (msg->bus == SUBARU_MAIN_BUS)) {
     gas_pressed = GET_BYTE(msg, 4) != 0U;
   }
 }

@@ -7,7 +7,7 @@ static bool nissan_alt_eps = false;
 static void nissan_rx_hook(const CANPacket_t *msg) {
   int addr = GET_ADDR(msg);
 
-  if (msg->bus == (unsigned char)(nissan_alt_eps ? 1 : 0)) {
+  if (msg->bus == (nissan_alt_eps ? 1U : 0U)) {
     if (addr == 0x2) {
       // Current steering angle
       // Factor -0.1, little endian
@@ -47,7 +47,7 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
   }
 
   // Handle cruise enabled
-  if ((addr == 0x30f) && (msg->bus == (unsigned char)(nissan_alt_eps ? 1 : 2))) {
+  if ((addr == 0x30f) && (msg->bus == (nissan_alt_eps ? 1U : 2U))) {
     bool cruise_engaged = (GET_BYTE(msg, 0) >> 3) & 1U;
     pcm_cruise_check(cruise_engaged);
   }
