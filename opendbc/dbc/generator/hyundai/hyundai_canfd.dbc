@@ -386,8 +386,9 @@ BO_ 437 FR_CMR_03_50ms: 32 FR_CMR
  SG_ Info_RtLnHdingAnglVal : 115|10@1- (0.000976563,0) [-0.500000256|0.499023693] "rad" RR_C_RDR,CGW
  SG_ Info_RtLnCvtrVal : 128|16@1- (1,0) [0|65535] "" CGW
  SG_ Info_RtLnCrvtrDrvtvVal : 144|16@1- (1,0) [0|65535] "" CGW
- SG_ ID_CIPV : 192|7@1+ (1,0) [0|127] "" Dummy
- SG_ Longitudinal_Distance : 212|12@1+ (0.05,0) [0|204.75] "m" Dummy
+ SG_ ID_CIPV : 192|8@1+ (1,0) [0|255] "" XXX
+ SG_ Relative_Velocity : 200|12@1+ (0.05,-100) [-100|104.75] "m/s" XXX
+ SG_ Longitudinal_Distance : 212|12@1+ (0.05,0) [0|204.75] "m" XXX
 
 BO_ 442 BLINDSPOTS_REAR_CORNERS: 24 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
@@ -685,6 +686,25 @@ CM_ BO_ 272 "Alternative LKAS message, used on cars such as 2023 Ioniq 6, 2nd ge
 CM_ SG_ 272 LKA_AVAILABLE "Angle control cars: 3 when LKA is generally available, goes to 0 during changes with LFA";
 CM_ SG_ 272 ADAS_StrAnglReqVal "(LKAS) ADAS Steering Angle Request Value; Capped at 176.7; tracks MDPS->STEERING_ANGLE when not engaged, not STEERING_SENSORS->STEERING_ANGLE";
 CM_ SG_ 272 ADAS_ACIAnglTqRedcGainVal "(LKAS) ADAS AngleControlInterface Angle Torque Reduction Gain Value";
+CM_ BO_ 282 "Sent by the camera containing DAW (Driver Attention Warning) information and information about HBA (High Beam Assist).";
+CM_ SG_ 282 FR_CMR_Crc1Val "The data area for CRC calculation is based on the data length (DLC) of the message DB. The CRC shall be calculated over the entire data block (excluding the CRC bytes) including the user data, alive counter and Data ID - CRC Polynomial (0x1021) , In";
+CM_ SG_ 282 FR_CMR_AlvCnt1Val "For the first transmission request for a data element the counter shall be initialized with 0 and shall be incremented by 1 for every subsequent send request. When the counter reaches the maximum value(0xFF), then it shall restart with 0 for the next s";
+CM_ SG_ 282 HBA_SysOptSta "HBA System Option Information to Lamp Controller";
+CM_ SG_ 282 HBA_SysSta "This signal indicates the status of High Beam Assist system.";
+CM_ SG_ 282 HBA_IndLmpReq "HBA System Indicator Lamp Status";
+CM_ SG_ 282 FCA_Equip_MFC "FCA Sensor Type";
+CM_ SG_ 282 HBA_OptUsmSta "HBA Option USM Status";
+CM_ SG_ 282 DAW_LVDA_PUDis "Message for displaying LVDA(Leading Vehicle Departure Alert) Warning";
+CM_ SG_ 282 DAW_LVDA_OptUsmSta "LVDA USM state";
+CM_ SG_ 282 DAW_OptUsmSta "This signal represents the lastest DAW ON/OFF value of USM.";
+CM_ SG_ 282 DAW_SysSta "This signal represents Attention Assist System Status or Attention Level.";
+CM_ SG_ 282 DAW_WrnMsgSta "0x1 value requests DAW Rest recommend warning message popup at CLU. 0x2 value requests HDA/LFA Hands-Off call at TMS.";
+CM_ SG_ 282 DAW_TimeRstReq "This signal requests CLU 'Last Break Time' Reset. DAW send '0x1' when detecting driver's rest.";
+CM_ SG_ 282 DAW_SnstvtyModRetVal "This signal represents the feedback value of the current ADAS warning timing.";
+CM_ SG_ 282 FR_CMR_SCCEquipSta "This signal indicates equipment for SCC";
+CM_ SG_ 282 FR_CMR_ReqADASMapMsgVal "This signal indicates an ADAS map message request from FR_CMR to H_U. Each bit indicates the request messages as follows. - Bit 0 : H_U_NAVI_V2_STUB_E - Bit 1 : HU_NAVI_V2_PROSHORT_E_00 (곡률) - Bit 2 : HU_NAVI_V2_PROSHORT_E_00 (곡률 외 정보)";
+CM_ SG_ 282 FR_CMR_SwVer1Val "This signal indicates a major version of FR_CMR software. If FR_CMR software version is A.00, 'A' and '00' mean major and minor version respectively.";
+CM_ SG_ 282 FR_CMR_SwVer2Val "This signal indicates a minor version of FR_CMR software. If FR_CMR software version is A.00, 'A' and '00' mean major and minor version respectively.";
 CM_ SG_ 298 NEW_SIGNAL_4 "todo: figure out why always set to 9";
 CM_ SG_ 352 SET_ME_9 "has something to do with AEB settings";
 CM_ SG_ 373 ACCEnable "Likely a copy of CAN's TCS13->ACCEnable";
@@ -692,8 +712,89 @@ CM_ SG_ 373 DriverBraking "Likely derived from BRAKE->BRAKE_POSITION";
 CM_ SG_ 373 DriverBrakingLowSens "Higher threshold version of DriverBraking";
 CM_ SG_ 373 PROBABLY_EQUIP "aeb equip?";
 CM_ SG_ 416 VSetDis "set speed in display units";
+CM_ BO_ 437 "Sent by the camera containing lane and lead information.";
+CM_ SG_ 437 FR_CMR_Crc3Val "The data area for CRC calculation is based on the data length (DLC) of the message DB. The CRC shall be calculated over the entire data block (excluding the CRC bytes) including the user data, alive counter and Data ID - CRC Polynomial (0x1021) , In";
+CM_ SG_ 437 FR_CMR_AlvCnt3Val "For the first transmission request for a data element the counter shall be initialized with 0 and shall be incremented by 1 for every subsequent send request. When the counter reaches the maximum value(0xFF), then it shall restart with 0 for the next s";
+CM_ SG_ 437 Info_LftLnQualSta "This signal indicates the quality of left line.";
+CM_ SG_ 437 Info_LftLnDptSta "This signal indicates the lane departure status of left line.";
+CM_ SG_ 437 Info_LftLnPosVal "This signal outputs the position of left line from camera center.";
+CM_ SG_ 437 Info_LftLnHdingAnglVal "This signal outputs the heading angle of left line.";
+CM_ SG_ 437 Info_LftLnCvtrVal "This signal outputs the curvature of left line.";
+CM_ SG_ 437 Info_RtLnQualSta "This signal indicates the quality of right line.";
+CM_ SG_ 437 Info_RtLnDptSta "This signal indicates the lane departure status of right line.";
+CM_ SG_ 437 Info_RtLnPosVal "This signal outputs the position of right line from camera center.";
+CM_ SG_ 437 Info_RtLnHdingAnglVal "This signal outputs the heading angle of right line.";
+CM_ SG_ 437 Info_RtLnCvtrVal "This signal outputs the curvature of right line.";
+CM_ SG_ 437 ID_CIPV "Valid Object = 1 to 255 - ID detected by front camera can vary depending on vehicle environment. - Additional logic would be required to apply this signal for ISG.";
+CM_ SG_ 437 Relative_Velocity "+ : Preceding, - : Oncoming - Velocity detected by front camera can vary depending on vehicle environment. - Additional logic would be required to apply this signal for ISG. - Confirmaiton by Autonomous Driving Engineering Team is required to use ID_C";
 CM_ SG_ 480 NEW_SIGNAL_5 "todo: figure out why always set to 1";
+CM_ BO_ 506 "Sent by the camera containing speed limit information. ISLW stands for Intelligent Speed Limit Warning, and ISLA is Intelligent Speed Limit Assist. it also contains road sign information.";
+CM_ SG_ 506 FR_CMR_Crc2Val "The data area for CRC calculation is based on the data length (DLC) of the message DB.The CRC shall be calculated over the entire data block (excluding the CRC bytes) including the user data, alive counter and Data ID - CRC Polynomial (0x1021) , In";
+CM_ SG_ 506 FR_CMR_AlvCnt2Val "For the first transmission request for a data element the counter shall be initialized with 0 and shall be incremented by 1 for every subsequent send request. When the counter reaches the maximum value(0xFF), then it shall restart with 0 for the next s";
+CM_ SG_ 506 ISLW_OptUsmSta "ISLW option information";
+CM_ SG_ 506 ISLW_SysSta "Validity of ISLW information";
+CM_ SG_ 506 ISLW_NoPassingInfoDis "This signal indicates additional information of ISLW. For example no passing.";
+CM_ SG_ 506 ISLW_OvrlpSignDis "indicates presence of Overlap sign";
+CM_ SG_ 506 ISLW_SpdCluMainDis "Main Speed Information for cluster display in main page(0x1~0xFCH: 1*(HEX VALUE) [KPH or MPH :Reference signal is  CF_Clu_SPEED_UNIT of CLU])";
+CM_ SG_ 506 ISLW_SpdNaviMainDis "Main Speed information for navigation display in main page(0x1~0xFCH: 1*(HEX VALUE) [KPH or MPH :Reference signal is  Navi_ISLW_SpdUnit of Navigation)";
+CM_ SG_ 506 ISLW_SubCondinfoSta1 "Indicates 1st conditional traffic sign status";
+CM_ SG_ 506 ISLW_SubCondinfoSta2 "Indicates 2nd conditional traffic sign status";
+CM_ SG_ 506 ISLW_SpdCluSubMainDis "Main Speed Information for cluster display in ISLW detail page";
+CM_ SG_ 506 ISLW_SpdCluDisSubCond1 "Indicates conditional speed limit/no passing of 1st conditional traffic sign for Cluster in ISLW Detail page";
+CM_ SG_ 506 ISLW_SpdCluDisSubCond2 "Indicates conditional speed limit/no passing of 2nd conditional traffic sign for Cluster in ISLW Detail page";
+CM_ SG_ 506 ISLW_SpdNaviSubMainDis "Main Speed Information for NAVI display in ISLW detail page";
+CM_ SG_ 506 ISLW_SpdNaviDisSubCond1 "Indicates conditional speed limit/no passing of 1st conditional traffic sign for NAVI in ISLW Detail page";
+CM_ SG_ 506 ISLW_SpdNaviDisSubCond2 "Indicates conditional speed limit/no passing of 2nd conditional traffic sign for NAVI in ISLW Detail page";
+CM_ SG_ 506 ISLA_SpdwOffst "This is a ISLA speed with offset to change the set speed of MSLA/CC/SCC.Unit (kph or mph) refers to cluster signal: CLU_SpdUnitTyp@CLU_01_20ms";
+CM_ SG_ 506 ISLA_SwIgnoreReq "This is a signal requesting to ignore the -(SET) or +(SET) switch input of the driver.";
+CM_ SG_ 506 ISLA_SpdChgReq "This is a signal requesting to change the set speed of MSLA/CC/SCC to the ISLA speed.";
+CM_ SG_ 506 ISLA_SpdWrn "This is a warning signal when VANZ exceeds the speed limit.";
+CM_ SG_ 506 ISLA_IcyWrn "This is a warning signal when the snow or ice sign is recognized when it is less than 4 'C.";
+CM_ SG_ 506 ISLA_SymFlashMod "This is a signal for the flashing mode of the symbol.";
+CM_ SG_ 506 ISLA_Popup "This is a signal for ISLA pop-up.";
+CM_ SG_ 506 ISLA_OptUsmSta "This is a ISLA option USM signal set by the driver.";
+CM_ SG_ 506 ISLA_OffstUsmSta "This is a signal for offset speed set by the driver. Unit (kph or mph) refers to cluster signal: CLU_SpdUnitTyp@CLU_01_20ms";
+CM_ SG_ 506 ISLA_AutoUsmSta "This is a signal for ISLA AUTO USM set by the driver.";
+CM_ SG_ 506 ISLA_Cntry "This is a signal for categorizing countries";
+CM_ SG_ 506 ISLA_AddtnlSign "This is a signal for additional sign";
+CM_ SG_ 506 ISLA_SchoolZone "This is a signal for School Zone";
 CM_ SG_ 687 HOD_Dir_Status "This signal indicates the status of hands on/off";
+CM_ BO_ 698 "Sent by the camera containing information about vehicles in front of us. IFS stands for Intelligent Front-lighting System, and this signal provides the information necessary for it to operate.";
+CM_ SG_ 698 FR_CMR_Crc4Val "The data area for CRC calculation is based on the data length (DLC) of the message DB. The CRC shall be calculated over the entire data block (excluding the CRC bytes) including the user data, alive counter and Data ID - CRC Polynomial (0x1021) , In";
+CM_ SG_ 698 FR_CMR_AlvCnt4Val "For the first transmission request for a data element the counter shall be initialized with 0 and shall be incremented by 1 for every subsequent send request. When the counter reaches the maximum value(0xFF), then it shall restart with 0 for the next s";
+CM_ SG_ 698 IFSref_FR_CMR_Sta "This is IFS system status needed for operate the IFS function of headlamp highbeam";
+CM_ SG_ 698 IFSref_VehNumVal "This is number of vehicles detected from camera";
+CM_ SG_ 698 IFSref_ILLAmbtSta "This signal is status of the ambient brightness 0x0 is bright condition (HighBeam off), 0x1 is dark condition (None)";
+CM_ SG_ 698 IFSref_VehLftAngl1Val "This is left angle of vehicle 1 Deg = (HEX)*0.1-25";
+CM_ SG_ 698 IFSref_VehRtAngl1Val "This is right angle of vehicle 1 Deg = (HEX)*0.1-25";
+CM_ SG_ 698 IFSref_VehLftAngl2Val "This is left angle of vehicle 2 Deg = (HEX)*0.1-25";
+CM_ SG_ 698 IFSref_VehDst1Val "IFSref_VehicleDistance1Value";
+CM_ SG_ 698 IFSref_VehRtAngl2Val "This is right angle of vehicle 2 Deg = (HEX)*0.1-25";
+CM_ SG_ 698 IFSref_VehLftAngl3Val "This is left angle of vehicle 3 Deg = (HEX)*0.1-25";
+CM_ SG_ 698 IFSref_VehRtAngl3Val "This is right angle of vehicle 3 Deg = (HEX)*0.1-25";
+CM_ SG_ 698 IFSref_VehLftAngl4Val "This is left angle of vehicle 4 Deg = (HEX)*0.1-25";
+CM_ SG_ 698 IFSref_VehRtAngl4Val "This is right angle of vehicle 4 Deg = (HEX)*0.1-25";
+CM_ SG_ 698 IFSref_VehLftAngl5Val "This is left angle of vehicle 5 Deg = (HEX)*0.1-25";
+CM_ SG_ 698 IFSref_VehRtAngl5Val "This is right angle of vehicle 5 Deg = (HEX)*0.1-25";
+CM_ SG_ 698 IFSref_VehLftAngl6Val "This is left angle of vehicle 6 Deg = (HEX)*0.1-25";
+CM_ SG_ 698 IFSref_VehRtAngl6Val "This is right angle of vehicle 6 Deg = (HEX)*0.1-25";
+CM_ SG_ 698 IFSref_VehLftAngl7Val "This is left angle of vehicle 7 Deg = (HEX)*0.1-25";
+CM_ SG_ 698 IFSref_VehRtAngl7Val "This is right angle of vehicle 7 Deg = (HEX)*0.1-25";
+CM_ SG_ 698 IFSref_VehLftAngl8Val "This is left angle of vehicle 8 Deg = (HEX)*0.1-25";
+CM_ SG_ 698 IFSref_VehRtAngl8Val "This is right angle of vehicle 8 Deg = (HEX)*0.1-25";
+CM_ SG_ 698 IFSref_VehLftAngl9Val "This is left angle of vehicle 9 Deg = (HEX)*0.1-25";
+CM_ SG_ 698 IFSref_VehRtAngl9Val "This is right angle of vehicle 9 Deg = (HEX)*0.1-25";
+CM_ SG_ 698 IFSref_VehLftAngl10Val "This is left angle of vehicle 10 Deg = (HEX)*0.1-25";
+CM_ SG_ 698 IFSref_VehRtAngl10Val "This is right angle of vehicle 10 Deg = (HEX)*0.1-25";
+CM_ SG_ 698 IFSref_VehDst2Val "IFSref_VehicleDistance2Value";
+CM_ SG_ 698 IFSref_VehDst3Val "IFSref_VehicleDistance3Value";
+CM_ SG_ 698 IFSref_VehDst4Val "IFSref_VehicleDistance4Value";
+CM_ SG_ 698 IFSref_VehDst5Val "IFSref_VehicleDistance5Value";
+CM_ SG_ 698 IFSref_VehDst6Val "IFSref_VehicleDistance6Value";
+CM_ SG_ 698 IFSref_VehDst7Val "IFSref_VehicleDistance7Value";
+CM_ SG_ 698 IFSref_VehDst8Val "IFSref_VehicleDistance8Value";
+CM_ SG_ 698 IFSref_VehDst9Val "IFSref_VehicleDistance9Value";
+CM_ SG_ 698 IFSref_VehDst10Val "IFSref_VehicleDistance10Value";
 CM_ SG_ 736 MAX_SPEED "Display units. Restricts car from driving above this speed unless accelerator pedal is depressed beyond pressure point";
 CM_ BO_ 866 "Contains signals with detailed lane line information. Used by ADAS ECU on HDA 2 vehicles to operate LFA. Used on cars that use message 272.";
 CM_ SG_ 866 LEFT_LANE_LINE "Left lane line confidence";
