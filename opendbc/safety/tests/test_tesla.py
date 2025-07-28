@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 
 from opendbc.car.tesla.values import TeslaSafetyFlags, CarControllerParams
-from opendbc.car import get_max_angle_delta, get_max_angle
+from opendbc.car import get_max_angle_delta_vm, get_max_angle_vm
 from opendbc.car.tesla.carcontroller import get_safety_CP
 from opendbc.car.structs import CarParams
 from opendbc.car.vehicle_model import VehicleModel
@@ -57,7 +57,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
   packer: CANPackerPanda
 
   def _get_steer_cmd_angle_max(self, speed):
-    return get_max_angle(max(speed, 1), self.VM)
+    return get_max_angle_vm(max(speed, 1), self.VM)
 
   def setUp(self):
     self.VM = VehicleModel(get_safety_CP())
@@ -298,14 +298,14 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         angle_unit_offset = -1 if sign == -1 else 0
 
         # at limit (safety tolerance adds 1)
-        max_angle = round_angle(get_max_angle(speed, self.VM), angle_unit_offset + 1) * sign
+        max_angle = round_angle(get_max_angle_vm(speed, self.VM), angle_unit_offset + 1) * sign
         max_angle = np.clip(max_angle, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
         self.safety.set_desired_angle_last(round(max_angle * self.DEG_TO_CAN))
 
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle, True)))
 
         # 1 unit above limit
-        max_angle_raw = round_angle(get_max_angle(speed, self.VM), angle_unit_offset + 2) * sign
+        max_angle_raw = round_angle(get_max_angle_vm(speed, self.VM), angle_unit_offset + 2) * sign
         max_angle = np.clip(max_angle_raw, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
         self._tx(self._angle_cmd_msg(max_angle, True))
 
@@ -328,7 +328,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
         # Stay within limits
         # Up
-        max_angle_delta = round_angle(get_max_angle_delta(speed, CarControllerParams.STEER_STEP, self.VM), angle_unit_offset) * sign
+        max_angle_delta = round_angle(get_max_angle_delta_vm(speed, CarControllerParams.STEER_STEP, self.VM), angle_unit_offset) * sign
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
 
         # Don't change
@@ -339,7 +339,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
         # Inject too high rates
         # Up
-        max_angle_delta = round_angle(get_max_angle_delta(speed, CarControllerParams.STEER_STEP, self.VM), angle_unit_offset + 1) * sign
+        max_angle_delta = round_angle(get_max_angle_delta_vm(speed, CarControllerParams.STEER_STEP, self.VM), angle_unit_offset + 1) * sign
         self.assertFalse(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
 
         # Don't change

@@ -1,11 +1,13 @@
 import numpy as np
 from opendbc.can import CANPacker
-from opendbc.car import Bus, apply_common_steer_angle_limits
+from opendbc.car import Bus, apply_vm_steer_angle_limits
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.tesla.teslacan import TeslaCAN
 from opendbc.car.tesla.values import CarControllerParams
 from opendbc.car.vehicle_model import VehicleModel
 
+# limit angle rate to both prevent a fault and for low speed comfort (~12 mph rate down to 0 mph)
+MAX_ANGLE_RATE = 5  # deg/20ms frame, EPS faults at 12 at a standstill
 
 def get_safety_CP():
   # We use the TESLA_MODEL_Y platform for lateral limiting to match safety
@@ -35,9 +37,8 @@ class CarController(CarControllerBase):
 
     if self.frame % 2 == 0:
       # Angular rate limit based on speed
-      self.apply_angle_last = apply_common_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw,
-                                                              CS.out.steeringAngleDeg, lat_active,
-                                                              CarControllerParams.ANGLE_LIMITS, CarControllerParams.STEER_STEP, self.VM)
+      self.apply_angle_last = apply_vm_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, CS.out.steeringAngleDeg,
+                                                          lat_active, CarControllerParams, self.VM, MAX_ANGLE_RATE)
 
       can_sends.append(self.tesla_can.create_steering_control(self.apply_angle_last, lat_active))
 

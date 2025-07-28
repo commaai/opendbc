@@ -38,7 +38,6 @@ class AngleSteeringLimits:
   ANGLE_RATE_LIMIT_DOWN: tuple[list[float], list[float]]
   MAX_LATERAL_ACCEL: float = MAX_LATERAL_ACCEL  # Used primarily to lower the limits for more conservative approaches.
   MAX_LATERAL_JERK: float = MAX_LATERAL_JERK  # Used primarily to lower the limits for more conservative approaches.
-  MAX_ANGLE_RATE: int = 5.0
 
 
 def apply_hysteresis(val: float, val_steady: float, hyst_gap: float) -> float:
@@ -114,31 +113,34 @@ class Bus(StrEnum):
   ap_party = auto()
 
 
-def get_max_angle_delta(v_ego_raw: float, steer_step: int, VM: VehicleModel, max_lateral_jerk: float = MAX_LATERAL_JERK):
+def get_max_angle_delta_vm(v_ego_raw: float, steer_step: int, VM: VehicleModel, max_lateral_jerk: float = MAX_LATERAL_JERK):
   """ Calculate the maximum steering angle rate based on lateral jerk limits. """
   max_curvature_rate_sec = max_lateral_jerk / (v_ego_raw ** 2)  # (1/m)/s
   max_angle_rate_sec = math.degrees(VM.get_steer_from_curvature(max_curvature_rate_sec, v_ego_raw, 0))  # deg/s
   return max_angle_rate_sec * (DT_CTRL * steer_step)
 
 
-def get_max_angle(v_ego_raw: float, VM: VehicleModel, max_lateral_accel: float = MAX_LATERAL_ACCEL):
+def get_max_angle_vm(v_ego_raw: float, VM: VehicleModel, max_lateral_accel: float = MAX_LATERAL_ACCEL):
   """ Calculate the maximum steering angle based on lateral acceleration limits. """
   max_curvature = max_lateral_accel / (v_ego_raw ** 2)  # 1/m
   return math.degrees(VM.get_steer_from_curvature(max_curvature, v_ego_raw, 0))  # deg
 
 
-def apply_common_steer_angle_limits(apply_angle: float, apply_angle_last: float, v_ego_raw: float, steering_angle: float, lat_active: bool,
-                                    limits: AngleSteeringLimits, steer_step: int, VM: VehicleModel) -> float:
+def apply_vm_steer_angle_limits(apply_angle: float, apply_angle_last: float, v_ego_raw: float, steering_angle: float, lat_active: bool,
+                                limits, VM: VehicleModel, MAX_ANGLE_RATE: float = None) -> float:
   """Apply rate, accel, and safety limit constraints to steering angle."""
   v_ego_safe = max(v_ego_raw, 1.)
 
   # *** max lateral jerk limit ***
-  max_angle_delta = get_max_angle_delta(v_ego_safe, steer_step, VM, limits.MAX_LATERAL_JERK)
-  max_angle_delta = min(max_angle_delta, limits.MAX_ANGLE_RATE)
+  max_angle_delta = get_max_angle_delta_vm(v_ego_safe, limits.STEER_STEP, VM, limits.ANGLE_LIMITS.MAX_LATERAL_JERK)
+
+  if MAX_ANGLE_RATE is not None:
+    max_angle_delta = min(max_angle_delta, MAX_ANGLE_RATE)
+
   new_apply_angle = rate_limit(apply_angle, apply_angle_last, -max_angle_delta, max_angle_delta)
 
   # *** max lateral accel limit ***
-  max_angle = get_max_angle(v_ego_safe, VM, limits.MAX_LATERAL_ACCEL)
+  max_angle = get_max_angle_vm(v_ego_safe, VM, limits.ANGLE_LIMITS.MAX_LATERAL_ACCEL)
   new_apply_angle = np.clip(new_apply_angle, -max_angle, max_angle)
 
   # angle is current angle when inactive
@@ -146,7 +148,7 @@ def apply_common_steer_angle_limits(apply_angle: float, apply_angle_last: float,
     new_apply_angle = steering_angle
 
   # *** final hard limit to prevent fault ***
-  return float(np.clip(new_apply_angle, -limits.STEER_ANGLE_MAX, limits.STEER_ANGLE_MAX))
+  return float(np.clip(new_apply_angle, -limits.ANGLE_LIMITS.STEER_ANGLE_MAX, limits.ANGLE_LIMITS.STEER_ANGLE_MAX))
 
 
 def apply_driver_steer_torque_limits(apply_torque: int, apply_torque_last: int, driver_torque: float, LIMITS, steer_max: int = None):
