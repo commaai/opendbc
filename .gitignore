@@ -17,17 +17,16 @@
 *.gcda
 *.gcno
 *.dump
+*.gcov
 uv.lock
 /dist/
 .vscode/
 __pycache__/
+mull.yml
+*.profraw
 
 opendbc/can/build/
 opendbc/can/obj/
-opendbc/can/packer_pyx.cpp
-opendbc/can/parser_pyx.cpp
-opendbc/can/packer_pyx.html
-opendbc/can/parser_pyx.html
 opendbc/dbc/*_generated.dbc
 
 cppcheck-addon-ctu-file-list
