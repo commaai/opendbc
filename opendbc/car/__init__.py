@@ -36,7 +36,6 @@ class AngleSteeringLimits:
   STEER_ANGLE_MAX: float
   ANGLE_RATE_LIMIT_UP: tuple[list[float], list[float]]
   ANGLE_RATE_LIMIT_DOWN: tuple[list[float], list[float]]
-  CONTROL_FREQUENCY: float = None
   MAX_LATERAL_ACCEL: float = MAX_LATERAL_ACCEL  # Used primarily to lower the limits for more conservative approaches.
   MAX_LATERAL_JERK: float = MAX_LATERAL_JERK  # Used primarily to lower the limits for more conservative approaches.
   MAX_ANGLE_RATE: int = 5.0
@@ -115,11 +114,11 @@ class Bus(StrEnum):
   ap_party = auto()
 
 
-def get_max_angle_delta(v_ego_raw: float, freq: float, VM: VehicleModel, max_lateral_jerk: float = MAX_LATERAL_JERK):
+def get_max_angle_delta(v_ego_raw: float, steer_step: int, VM: VehicleModel, max_lateral_jerk: float = MAX_LATERAL_JERK):
   """ Calculate the maximum steering angle rate based on lateral jerk limits. """
   max_curvature_rate_sec = max_lateral_jerk / (v_ego_raw ** 2)  # (1/m)/s
   max_angle_rate_sec = math.degrees(VM.get_steer_from_curvature(max_curvature_rate_sec, v_ego_raw, 0))  # deg/s
-  return max_angle_rate_sec / float(freq) # hz
+  return max_angle_rate_sec * (DT_CTRL * steer_step)
 
 
 def get_max_angle(v_ego_raw: float, VM: VehicleModel, max_lateral_accel: float = MAX_LATERAL_ACCEL):
@@ -129,12 +128,12 @@ def get_max_angle(v_ego_raw: float, VM: VehicleModel, max_lateral_accel: float =
 
 
 def apply_common_steer_angle_limits(apply_angle: float, apply_angle_last: float, v_ego_raw: float, steering_angle: float, lat_active: bool,
-                                    limits: AngleSteeringLimits, VM: VehicleModel) -> float:
+                                    limits: AngleSteeringLimits, steer_step: int, VM: VehicleModel) -> float:
   """Apply rate, accel, and safety limit constraints to steering angle."""
   v_ego_safe = max(v_ego_raw, 1.)
 
   # *** max lateral jerk limit ***
-  max_angle_delta = get_max_angle_delta(v_ego_safe, limits.CONTROL_FREQUENCY, VM, limits.MAX_LATERAL_JERK)
+  max_angle_delta = get_max_angle_delta(v_ego_safe, steer_step, VM, limits.MAX_LATERAL_JERK)
   max_angle_delta = min(max_angle_delta, limits.MAX_ANGLE_RATE)
   new_apply_angle = rate_limit(apply_angle, apply_angle_last, -max_angle_delta, max_angle_delta)
 

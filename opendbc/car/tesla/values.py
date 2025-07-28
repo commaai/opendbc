@@ -95,7 +95,6 @@ class CarControllerParams:
     # Tesla uses a vehicle model instead, check carcontroller.py for details
     ([], []),
     ([], []),
-    50,  # Hz, steering command is sent at 50 Hz
   )
 
   STEER_STEP = 2  # Angle command is sent at 50 Hz
