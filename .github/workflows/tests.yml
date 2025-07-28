@@ -69,7 +69,7 @@ jobs:
         repository: 'commaai/openpilot'
         ref: 'master' # TODO: not master...
         submodules: true
-    - uses: ./github/workflows/setup-with-retry
+    - uses: ./.github/workflows/setup-with-retry
       id: setup-step
     - name: Cache test routes
       id: routes-cache
