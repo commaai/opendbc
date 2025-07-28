@@ -1,5 +1,6 @@
 import math
 
+from opendbc.car.carlog import carlog
 from opendbc.can.dbc import DBC, Signal, SignalType
 
 
@@ -11,12 +12,14 @@ class CANPacker:
   def pack(self, address: int, values: dict[str, float]) -> bytearray:
     msg = self.dbc.addr_to_msg.get(address)
     if msg is None:
+      carlog.error(f"msg not found for {address=}")
       return bytearray()
     dat = bytearray(msg.size)
     counter_set = False
     for name, value in values.items():
       sig = msg.sigs.get(name)
       if sig is None:
+        carlog.error(f"unknown signal {name=}")
         continue
       ival = int(math.floor((value - sig.offset) / sig.factor + 0.5))
       if ival < 0:
@@ -43,6 +46,7 @@ class CANPacker:
     else:
       msg = self.dbc.name_to_msg.get(name_or_addr)
       if msg is None:
+        carlog.error(f"msg not found for {name_or_addr=}")
         return 0, b'', bus
       addr = msg.address
     dat = self.pack(addr, values)
