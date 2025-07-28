@@ -20,9 +20,8 @@
 static bool subaru_pg_reversed_driver_torque = false;
 
 static void subaru_preglobal_rx_hook(const CANPacket_t *msg) {
-  const int bus = GET_BUS(msg);
 
-  if (bus == SUBARU_PG_MAIN_BUS) {
+  if (msg->bus == (unsigned char)SUBARU_PG_MAIN_BUS) {
     int addr = GET_ADDR(msg);
     if (addr == MSG_SUBARU_PG_Steering_Torque) {
       int torque_driver_new;

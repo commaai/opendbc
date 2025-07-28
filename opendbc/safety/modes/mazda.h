@@ -17,7 +17,7 @@
 
 // track msgs coming from OP so that we know what CAM msgs to drop and what to forward
 static void mazda_rx_hook(const CANPacket_t *msg) {
-  if ((int)GET_BUS(msg) == MAZDA_MAIN) {
+  if ((int)msg->bus == MAZDA_MAIN) {
     int addr = GET_ADDR(msg);
 
     if (addr == MAZDA_ENGINE_DATA) {
@@ -60,9 +60,8 @@ static bool mazda_tx_hook(const CANPacket_t *msg) {
   };
 
   bool tx = true;
-  int bus = GET_BUS(msg);
   // Check if msg is sent on the main BUS
-  if (bus == MAZDA_MAIN) {
+  if (msg->bus == (unsigned char)MAZDA_MAIN) {
     int addr = GET_ADDR(msg);
 
     // steer cmd checks
