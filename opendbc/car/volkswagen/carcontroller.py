@@ -22,7 +22,6 @@ class CarController(CarControllerBase):
     else:
       self.CCS = mqbcan
     self.packer_pt = CANPacker(dbc_names[Bus.pt])
-    self.ext_bus = self.CAN.main if CP.networkLocation == structs.CarParams.NetworkLocation.fwdCamera else self.CAN.camera
     self.aeb_available = not CP.flags & VolkswagenFlags.PQ
     self.openpilot_longitudinal = self.CP.openpilotLongitudinalControl and not self.CP.flags & VolkswagenFlags.MEB
 
@@ -62,7 +61,7 @@ class CarController(CarControllerBase):
           apply_curvature = 0
           apply_steer_power = 0
 
-        can_sends.append(mebcan.create_steering_control(self.packer_pt, self.CAN.main, apply_curvature, qfk_enable, apply_steer_power))
+        can_sends.append(mebcan.create_steering_control(self.packer_pt, self.CAN.pt, apply_curvature, qfk_enable, apply_steer_power))
 
         self.apply_curvature_last = apply_curvature
         self.apply_steer_power_last = apply_steer_power
@@ -96,25 +95,25 @@ class CarController(CarControllerBase):
         if not hca_enabled:
           self.hca_frame_timer_running = 0
 
-        self.eps_timer_soft_disable_alert = self.hca_frame_timer_running > self.CCP.STEER_TIME_ALERT / DT_CTRL
-        self.apply_torque_last = apply_torque
-        can_sends.append(self.CCS.create_steering_control(self.packer_pt, self.CAN.main, apply_torque, hca_enabled))
+      self.eps_timer_soft_disable_alert = self.hca_frame_timer_running > self.CCP.STEER_TIME_ALERT / DT_CTRL
+      self.apply_torque_last = apply_torque
+      can_sends.append(self.CCS.create_steering_control(self.packer_pt, self.CAN.pt, apply_torque, hca_enabled))
 
-        if self.CP.flags & VolkswagenFlags.STOCK_HCA_PRESENT:
-          # Pacify VW Emergency Assist driver inactivity detection by changing its view of driver steering input torque
-          # to the greatest of actual driver input or 2x openpilot's output (1x openpilot output is not enough to
-          # consistently reset inactivity detection on straight level roads). See commaai/openpilot#23274 for background.
-          ea_simulated_torque = float(np.clip(apply_torque * 2, -self.CCP.STEER_MAX, self.CCP.STEER_MAX))
-          if abs(CS.out.steeringTorque) > abs(ea_simulated_torque):
-            ea_simulated_torque = CS.out.steeringTorque
-          can_sends.append(self.CCS.create_eps_update(self.packer_pt, self.CAN.camera, CS.eps_stock_values, ea_simulated_torque))
+      if self.CP.flags & VolkswagenFlags.STOCK_HCA_PRESENT:
+        # Pacify VW Emergency Assist driver inactivity detection by changing its view of driver steering input torque
+        # to the greatest of actual driver input or 2x openpilot's output (1x openpilot output is not enough to
+        # consistently reset inactivity detection on straight level roads). See commaai/openpilot#23274 for background.
+        ea_simulated_torque = float(np.clip(apply_torque * 2, -self.CCP.STEER_MAX, self.CCP.STEER_MAX))
+        if abs(CS.out.steeringTorque) > abs(ea_simulated_torque):
+          ea_simulated_torque = CS.out.steeringTorque
+        can_sends.append(self.CCS.create_eps_update(self.packer_pt, self.CAN.cam, CS.eps_stock_values, ea_simulated_torque))
 
     # TODO: refactor a bit
     if self.CP.flags & VolkswagenFlags.MEB:
       if self.frame % 2 == 0:
-        can_sends.append(mebcan.create_ea_control(self.packer_pt, self.CAN.main))
+        can_sends.append(mebcan.create_ea_control(self.packer_pt, self.CAN.pt))
       if self.frame % 50 == 0:
-        can_sends.append(mebcan.create_ea_hud(self.packer_pt, self.CAN.main))
+        can_sends.append(mebcan.create_ea_hud(self.packer_pt, self.CAN.pt))
 
     # **** Acceleration Controls ******************************************** #
 
@@ -124,7 +123,7 @@ class CarController(CarControllerBase):
         accel = float(np.clip(actuators.accel, self.CCP.ACCEL_MIN, self.CCP.ACCEL_MAX) if CC.longActive else 0)
         stopping = actuators.longControlState == LongCtrlState.stopping
         starting = actuators.longControlState == LongCtrlState.pid and (CS.esp_hold_confirmation or CS.out.vEgo < self.CP.vEgoStopping)
-        can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.main, CS.acc_type, CC.longActive, accel,
+        can_sends.extend(self.CCS.create_acc_accel_control(self.packer_pt, self.CAN.pt, CS.acc_type, CC.longActive, accel,
                                                            acc_control, stopping, starting, CS.esp_hold_confirmation))
 
       #if self.aeb_available:
@@ -139,7 +138,7 @@ class CarController(CarControllerBase):
       hud_alert = 0
       if hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw):
         hud_alert = self.CCP.LDW_MESSAGES["laneAssistTakeOver"]
-      can_sends.append(self.CCS.create_lka_hud_control(self.packer_pt, self.CAN.main, CS.ldw_stock_values, CC.latActive,
+      can_sends.append(self.CCS.create_lka_hud_control(self.packer_pt, self.CAN.pt, CS.ldw_stock_values, CC.latActive,
                                                        CS.out.steeringPressed, hud_alert, hud_control))
 
     if self.frame % self.CCP.ACC_HUD_STEP == 0 and self.openpilot_longitudinal:
@@ -150,14 +149,14 @@ class CarController(CarControllerBase):
       # FIXME: PQ may need to use the on-the-wire mph/kmh toggle to fix rounding errors
       # FIXME: Detect clusters with vEgoCluster offsets and apply an identical vCruiseCluster offset
       set_speed = hud_control.setSpeed * CV.MS_TO_KPH
-      can_sends.append(self.CCS.create_acc_hud_control(self.packer_pt, self.CAN.main, acc_hud_status, set_speed,
+      can_sends.append(self.CCS.create_acc_hud_control(self.packer_pt, self.CAN.pt, acc_hud_status, set_speed,
                                                        lead_distance, hud_control.leadDistanceBars))
 
     # **** Stock ACC Button Controls **************************************** #
 
     gra_send_ready = self.CP.pcmCruise and CS.gra_stock_values["COUNTER"] != self.gra_acc_counter_last
     if gra_send_ready and (CC.cruiseControl.cancel or CC.cruiseControl.resume):
-      can_sends.append(self.CCS.create_acc_buttons_control(self.packer_pt, self.ext_bus, CS.gra_stock_values,
+      can_sends.append(self.CCS.create_acc_buttons_control(self.packer_pt, self.CAN.ext, CS.gra_stock_values,
                                                            cancel=CC.cruiseControl.cancel, resume=CC.cruiseControl.resume))
 
     new_actuators = actuators.as_builder()

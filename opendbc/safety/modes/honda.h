@@ -41,7 +41,7 @@ static unsigned int honda_get_pt_bus(void) {
 
 static uint32_t honda_get_checksum(const CANPacket_t *msg) {
   int checksum_byte = GET_LEN(msg) - 1U;
-  return (uint8_t)(GET_BYTE(msg, checksum_byte)) & 0xFU;
+  return (uint8_t)(msg->data[checksum_byte]) & 0xFU;
 }
 
 static uint32_t honda_compute_checksum(const CANPacket_t *msg) {
@@ -52,7 +52,7 @@ static uint32_t honda_compute_checksum(const CANPacket_t *msg) {
     checksum += (uint8_t)(addr & 0xFU); addr >>= 4;
   }
   for (int j = 0; j < len; j++) {
-    uint8_t byte = GET_BYTE(msg, j);
+    uint8_t byte = msg->data[j];
     checksum += (uint8_t)(byte & 0xFU) + (byte >> 4U);
     if (j == (len - 1)) {
       checksum -= (byte & 0xFU);  // remove checksum in message
@@ -63,7 +63,7 @@ static uint32_t honda_compute_checksum(const CANPacket_t *msg) {
 
 static uint8_t honda_get_counter(const CANPacket_t *msg) {
   int counter_byte = GET_LEN(msg) - 1U;
-  return (GET_BYTE(msg, counter_byte) >> 4U) & 0x3U;
+  return (msg->data[counter_byte] >> 4U) & 0x3U;
 }
 
 static void honda_rx_hook(const CANPacket_t *msg) {
@@ -72,7 +72,7 @@ static void honda_rx_hook(const CANPacket_t *msg) {
 
   // sample speed
   if (msg->addr == 0x158U) {
-    vehicle_moving = GET_BYTE(msg, 0) | GET_BYTE(msg, 1);
+    vehicle_moving = msg->data[0] | msg->data[1];
   }
 
   // check ACC main state
@@ -103,7 +103,7 @@ static void honda_rx_hook(const CANPacket_t *msg) {
   // state machine to enter and exit controls for button enabling
   // 0x1A6 for the ILX, 0x296 for the Civic Touring
   if (((msg->addr == 0x1A6U) || (msg->addr == 0x296U)) && (msg->bus == pt_bus)) {
-    int button = (GET_BYTE(msg, 0) & 0xE0U) >> 5;
+    int button = (msg->data[0] & 0xE0U) >> 5;
 
     // enter controls on the falling edge of set or resume
     bool set = (button != HONDA_BTN_SET) && (cruise_button_prev == HONDA_BTN_SET);
@@ -139,14 +139,14 @@ static void honda_rx_hook(const CANPacket_t *msg) {
   }
 
   if (msg->addr == 0x17CU) {
-    gas_pressed = GET_BYTE(msg, 0) != 0U;
+    gas_pressed = msg->data[0] != 0U;
   }
 
   // disable stock Honda AEB in alternative experience
   if (!(alternative_experience & ALT_EXP_DISABLE_STOCK_AEB)) {
     if ((msg->bus == 2U) && (msg->addr == 0x1FAU)) {
       bool honda_stock_aeb = GET_BIT(msg, 29U);
-      int honda_stock_brake = (GET_BYTE(msg, 0) << 2) | (GET_BYTE(msg, 1) >> 6);
+      int honda_stock_brake = (msg->data[0] << 2) | (msg->data[1] >> 6);
 
       // Forward AEB when stock braking is higher than openpilot braking
       // only stop forwarding when AEB event is over
@@ -185,8 +185,8 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
 
   // ACC_HUD: safety check (nidec w/o pedal)
   if ((msg->addr == 0x30CU) && (msg->bus == bus_pt)) {
-    int pcm_speed = (GET_BYTE(msg, 0) << 8) | GET_BYTE(msg, 1);
-    int pcm_gas = GET_BYTE(msg, 2);
+    int pcm_speed = (msg->data[0] << 8) | msg->data[1];
+    int pcm_gas = msg->data[2];
 
     bool violation = false;
     violation |= longitudinal_speed_checks(pcm_speed, HONDA_NIDEC_LONG_LIMITS);
@@ -198,7 +198,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
 
   // BRAKE: safety check (nidec)
   if ((msg->addr == 0x1FAU) && (msg->bus == bus_pt)) {
-    honda_brake = (GET_BYTE(msg, 0) << 2) + ((GET_BYTE(msg, 1) >> 6) & 0x3U);
+    honda_brake = (msg->data[0] << 2) + ((msg->data[1] >> 6) & 0x3U);
     if (longitudinal_brake_checks(honda_brake, HONDA_NIDEC_LONG_LIMITS)) {
       tx = false;
     }
@@ -209,10 +209,10 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
 
   // BRAKE/GAS: safety check (bosch)
   if ((msg->addr == 0x1DFU) && (msg->bus == bus_pt)) {
-    int accel = (GET_BYTE(msg, 3) << 3) | ((GET_BYTE(msg, 4) >> 5) & 0x7U);
+    int accel = (msg->data[3] << 3) | ((msg->data[4] >> 5) & 0x7U);
     accel = to_signed(accel, 11);
 
-    int gas = (GET_BYTE(msg, 0) << 8) | GET_BYTE(msg, 1);
+    int gas = (msg->data[0] << 8) | msg->data[1];
     gas = to_signed(gas, 16);
 
     bool violation = false;
@@ -225,7 +225,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
 
   // ACCEL: safety check (radarless)
   if ((msg->addr == 0x1C8U) && (msg->bus == bus_pt)) {
-    int accel = (GET_BYTE(msg, 0) << 4) | (GET_BYTE(msg, 1) >> 4);
+    int accel = (msg->data[0] << 4) | (msg->data[1] >> 4);
     accel = to_signed(accel, 12);
 
     bool violation = false;
@@ -238,7 +238,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
   // STEER: safety check
   if ((msg->addr == 0xE4U) || (msg->addr == 0x194U)) {
     if (!controls_allowed) {
-      bool steer_applied = GET_BYTE(msg, 0) | GET_BYTE(msg, 1);
+      bool steer_applied = msg->data[0] | msg->data[1];
       if (steer_applied) {
         tx = false;
       }
@@ -256,7 +256,7 @@ static bool honda_tx_hook(const CANPacket_t *msg) {
   // ensuring that only the cancel button press is sent (VAL 2) when controls are off.
   // This avoids unintended engagements while still allowing resume spam
   if ((msg->addr == 0x296U) && !controls_allowed && (msg->bus == bus_buttons)) {
-    if (((GET_BYTE(msg, 0) >> 5) & 0x7U) != 2U) {
+    if (((msg->data[0] >> 5) & 0x7U) != 2U) {
       tx = false;
     }
   }
