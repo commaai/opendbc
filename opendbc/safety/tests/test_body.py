@@ -62,7 +62,8 @@ class TestBody(common.PandaSafetyTest):
     self.assertFalse(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x1a')))
 
     self.assertTrue(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x0a')))
-    self.assertFalse(self._tx(common.make_msg(0, 0x1, 7)))
+    # cover test but this could be a valid message(bytes in the CAN firmware)
+    self.assertTrue(self._tx(common.make_msg(0, 0x1, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x0a')))
 
 if __name__ == "__main__":
   unittest.main()
