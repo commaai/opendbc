@@ -39,7 +39,8 @@ class CarInterface(CarInterfaceBase):
 
     elif ret.flags & VolkswagenFlags.MEB:
       # Set global MEB parameters
-      safety_configs = [get_safety_config(structs.CarParams.SafetyModel.volkswagenMeb)]
+      ret.dashcamOnly = True  # In development, safety code not yet available
+      safety_configs = [get_safety_config(structs.CarParams.SafetyModel.noOutput)]
       ret.enableBsm = 0x24C in fingerprint[0]  # MEB_Side_Assist_01
       ret.steerControlType = structs.CarParams.SteerControlType.angle
       ret.transmissionType = TransmissionType.automatic
@@ -49,8 +50,6 @@ class CarInterface(CarInterfaceBase):
       else:
         ret.networkLocation = NetworkLocation.fwdCamera
 
-      # In development, safety code not yet available
-      ret.dashcamOnly = True
 
     else:
       # Set global MQB parameters
