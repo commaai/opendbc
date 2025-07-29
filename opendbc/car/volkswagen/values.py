@@ -2,7 +2,7 @@ from collections import defaultdict, namedtuple
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag, StrEnum
 
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, structs, uds
+from opendbc.car import Bus, CanBusBase, CarSpecs, DbcDict, PlatformConfig, Platforms, structs, uds
 from opendbc.can import CANDefine
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, \
@@ -15,6 +15,24 @@ NetworkLocation = structs.CarParams.NetworkLocation
 TransmissionType = structs.CarParams.TransmissionType
 GearShifter = structs.CarState.GearShifter
 Button = namedtuple('Button', ['event_type', 'can_addr', 'can_msg', 'values'])
+
+
+# TODO: Move forward/rear radar location-detect logic here (cp_extcan, etc)
+class CanBus(CanBusBase):
+  def __init__(self, CP=None, fingerprint=None) -> None:
+    super().__init__(CP, fingerprint)
+
+  @property
+  def main(self) -> int:
+    return self.offset
+
+  @property
+  def aux(self) -> int:
+    return self.offset + 1
+
+  @property
+  def camera(self) -> int:
+    return self.offset + 2
 
 
 class CarControllerParams:
@@ -105,11 +123,6 @@ class CarControllerParams:
         "emergencyAssistChangingLanes": 9,    # "Emergency Assist: Changing lanes..." with urgent beep
         "laneAssistDeactivated": 10,          # "Lane Assist deactivated." silent with persistent icon afterward
       }
-
-
-class CANBUS:
-  pt = 0
-  cam = 2
 
 
 class WMI(StrEnum):
