@@ -17,53 +17,46 @@ static bool tesla_autopark_prev = false;
 static uint8_t tesla_get_counter(const CANPacket_t *msg) {
 
   uint8_t cnt = 0;
-  switch (msg->addr) {
-    case 0x2b9U:
-      // Signal: DAS_controlCounter
-      cnt = msg->data[6] >> 5;
-      break;
-    case 0x488U:
-      // Signal: DAS_steeringControlCounter
-      cnt = msg->data[2] & 0x0FU;
-      break;
-    case 0x155U:
-      // Signal: ESP_wheelRotationCounter
-      cnt = msg->data[6] >> 4;
-      break;
-    case 0x370U:
-      // Signal: EPAS3S_sysStatusCounter
-      cnt = msg->data[6] & 0x0FU;
-      break;
-    default:
-      // DI_speedCounter
-      // DI_systemStatusCounter
-      // IBST_statusCounter
-      // DI_locStatusCounter
-      // UI_warningCounter
-      cnt = msg->data[1] & 0x0FU;
-      break;
+  if (msg->addr == 0x2b9U) {
+    // DAS_controlCounter
+    cnt = msg->data[6] >> 5;
+  } else if (msg->addr == 0x488U) {
+    // DAS_steeringControlCounter
+    cnt = msg->data[2] & 0x0FU;
+  } else if (msg->addr == 0x155U) {
+    // ESP_wheelRotationCounter
+    cnt = msg->data[6] >> 4;
+  } else if (msg->addr == 0x370U) {
+    // EPAS3S_sysStatusCounter
+    cnt = msg->data[6] & 0x0FU;
+  } else {
+    // DI_speedCounter
+    // DI_systemStatusCounter
+    // IBST_statusCounter
+    // DI_locStatusCounter
+    // UI_warningCounter
+    cnt = msg->data[1] & 0x0FU;
   }
   return cnt;
 }
 
 static int _tesla_get_checksum_byte(const int addr) {
-  int checksum_byte = 0;
-  switch (addr) {
-    case 0x370: // EPAS3S_sysStatusChecksum
-    case 0x2b9: // DAS_controlChecksum
-    case 0x155: // ESP_wheelRotationChecksum
-      checksum_byte = 7;
-      break;
-    case 0x488: // DAS_steeringControlChecksum
-      checksum_byte = 3;
-      break;
-    /**
-     * All messages with a checksum byte of 0
-     * UI_warningChecksum, DI_speedChecksum, DI_systemStatusChecksum, IBST_statusChecksum, DI_locStatusChecksum
-     */
-    default:
-      break;
+  int checksum_byte = -1;
+  if (addr == 0x370 || addr == 0x2b9 || addr == 0x155) {
+    // EPAS3S_sysStatusChecksum, DAS_controlChecksum, ESP_wheelRotationChecksum
+    checksum_byte = 7;
+  } else if (addr == 0x488) {
+    // DAS_steeringControlChecksum
+    checksum_byte = 3;
+  } else  {
+    // UI_warningChecksum
+    // DI_speedChecksum
+    // DI_systemStatusChecksum
+    // IBST_statusChecksum
+    // DI_locStatusChecksum
+    checksum_byte = 0;
   }
+
   return checksum_byte;
 }
 
