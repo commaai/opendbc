@@ -3,32 +3,30 @@
 #include "opendbc/safety/safety_declarations.h"
 
 // Safety-relevant CAN messages for Ford vehicles.
-#define FORD_EngBrakeData          0x165   // RX from PCM, for driver brake pedal and cruise state
-#define FORD_EngVehicleSpThrottle  0x204   // RX from PCM, for driver throttle input
-#define FORD_DesiredTorqBrk        0x213   // RX from ABS, for standstill state
-#define FORD_BrakeSysFeatures      0x415   // RX from ABS, for vehicle speed
-#define FORD_EngVehicleSpThrottle2 0x202   // RX from PCM, for second vehicle speed
-#define FORD_Yaw_Data_FD1          0x91    // RX from RCM, for yaw rate
-#define FORD_Steering_Data_FD1     0x083   // TX by OP, various driver switches and LKAS/CC buttons
-#define FORD_ACCDATA               0x186   // TX by OP, ACC controls
-#define FORD_ACCDATA_3             0x18A   // TX by OP, ACC/TJA user interface
-#define FORD_Lane_Assist_Data1     0x3CA   // TX by OP, Lane Keep Assist
-#define FORD_LateralMotionControl  0x3D3   // TX by OP, Lateral Control message
-#define FORD_LateralMotionControl2 0x3D6   // TX by OP, alternate Lateral Control message
-#define FORD_IPMA_Data             0x3D8   // TX by OP, IPMA and LKAS user interface
+#define FORD_EngBrakeData          0x165U   // RX from PCM, for driver brake pedal and cruise state
+#define FORD_EngVehicleSpThrottle  0x204U   // RX from PCM, for driver throttle input
+#define FORD_DesiredTorqBrk        0x213U   // RX from ABS, for standstill state
+#define FORD_BrakeSysFeatures      0x415U   // RX from ABS, for vehicle speed
+#define FORD_EngVehicleSpThrottle2 0x202U   // RX from PCM, for second vehicle speed
+#define FORD_Yaw_Data_FD1          0x91U    // RX from RCM, for yaw rate
+#define FORD_Steering_Data_FD1     0x083U   // TX by OP, various driver switches and LKAS/CC buttons
+#define FORD_ACCDATA               0x186U   // TX by OP, ACC controls
+#define FORD_ACCDATA_3             0x18AU   // TX by OP, ACC/TJA user interface
+#define FORD_Lane_Assist_Data1     0x3CAU   // TX by OP, Lane Keep Assist
+#define FORD_LateralMotionControl  0x3D3U   // TX by OP, Lateral Control message
+#define FORD_LateralMotionControl2 0x3D6U   // TX by OP, alternate Lateral Control message
+#define FORD_IPMA_Data             0x3D8U   // TX by OP, IPMA and LKAS user interface
 
 // CAN bus numbers.
 #define FORD_MAIN_BUS 0U
 #define FORD_CAM_BUS  2U
 
 static uint8_t ford_get_counter(const CANPacket_t *msg) {
-  int addr = GET_ADDR(msg);
-
   uint8_t cnt = 0;
-  if (addr == FORD_BrakeSysFeatures) {
+  if (msg->addr == FORD_BrakeSysFeatures) {
     // Signal: VehVActlBrk_No_Cnt
     cnt = (GET_BYTE(msg, 2) >> 2) & 0xFU;
-  } else if (addr == FORD_Yaw_Data_FD1) {
+  } else if (msg->addr == FORD_Yaw_Data_FD1) {
     // Signal: VehRollYaw_No_Cnt
     cnt = GET_BYTE(msg, 5);
   } else {
@@ -37,13 +35,11 @@ static uint8_t ford_get_counter(const CANPacket_t *msg) {
 }
 
 static uint32_t ford_get_checksum(const CANPacket_t *msg) {
-  int addr = GET_ADDR(msg);
-
   uint8_t chksum = 0;
-  if (addr == FORD_BrakeSysFeatures) {
+  if (msg->addr == FORD_BrakeSysFeatures) {
     // Signal: VehVActlBrk_No_Cs
     chksum = GET_BYTE(msg, 3);
-  } else if (addr == FORD_Yaw_Data_FD1) {
+  } else if (msg->addr == FORD_Yaw_Data_FD1) {
     // Signal: VehRollYawW_No_Cs
     chksum = GET_BYTE(msg, 4);
   } else {
@@ -52,15 +48,13 @@ static uint32_t ford_get_checksum(const CANPacket_t *msg) {
 }
 
 static uint32_t ford_compute_checksum(const CANPacket_t *msg) {
-  int addr = GET_ADDR(msg);
-
   uint8_t chksum = 0;
-  if (addr == FORD_BrakeSysFeatures) {
+  if (msg->addr == FORD_BrakeSysFeatures) {
     chksum += GET_BYTE(msg, 0) + GET_BYTE(msg, 1);  // Veh_V_ActlBrk
     chksum += GET_BYTE(msg, 2) >> 6;                    // VehVActlBrk_D_Qf
     chksum += (GET_BYTE(msg, 2) >> 2) & 0xFU;           // VehVActlBrk_No_Cnt
     chksum = 0xFFU - chksum;
-  } else if (addr == FORD_Yaw_Data_FD1) {
+  } else if (msg->addr == FORD_Yaw_Data_FD1) {
     chksum += GET_BYTE(msg, 0) + GET_BYTE(msg, 1);  // VehRol_W_Actl
     chksum += GET_BYTE(msg, 2) + GET_BYTE(msg, 3);  // VehYaw_W_Actl
     chksum += GET_BYTE(msg, 5);                         // VehRollYaw_No_Cnt
@@ -73,14 +67,12 @@ static uint32_t ford_compute_checksum(const CANPacket_t *msg) {
 }
 
 static bool ford_get_quality_flag_valid(const CANPacket_t *msg) {
-  int addr = GET_ADDR(msg);
-
   bool valid = false;
-  if (addr == FORD_BrakeSysFeatures) {
+  if (msg->addr == FORD_BrakeSysFeatures) {
     valid = (GET_BYTE(msg, 2) >> 6) == 0x3U;           // VehVActlBrk_D_Qf
-  } else if (addr == FORD_EngVehicleSpThrottle2) {
+  } else if (msg->addr == FORD_EngVehicleSpThrottle2) {
     valid = ((GET_BYTE(msg, 4) >> 5) & 0x3U) == 0x3U;  // VehVActlEng_D_Qf
-  } else if (addr == FORD_Yaw_Data_FD1) {
+  } else if (msg->addr == FORD_Yaw_Data_FD1) {
     valid = ((GET_BYTE(msg, 6) >> 4) & 0x3U) == 0x3U;  // VehYawWActl_D_Qf
   } else {
   }
@@ -120,22 +112,20 @@ static const AngleSteeringLimits FORD_STEERING_LIMITS = FORD_LIMITS(false);
 
 static void ford_rx_hook(const CANPacket_t *msg) {
   if (msg->bus == FORD_MAIN_BUS) {
-    int addr = GET_ADDR(msg);
-
     // Update in motion state from standstill signal
-    if (addr == FORD_DesiredTorqBrk) {
+    if (msg->addr == FORD_DesiredTorqBrk) {
       // Signal: VehStop_D_Stat
       vehicle_moving = ((GET_BYTE(msg, 3) >> 3) & 0x3U) != 1U;
     }
 
     // Update vehicle speed
-    if (addr == FORD_BrakeSysFeatures) {
+    if (msg->addr == FORD_BrakeSysFeatures) {
       // Signal: Veh_V_ActlBrk
       UPDATE_VEHICLE_SPEED(((GET_BYTE(msg, 0) << 8) | GET_BYTE(msg, 1)) * 0.01 * KPH_TO_MS);
     }
 
     // Check vehicle speed against a second source
-    if (addr == FORD_EngVehicleSpThrottle2) {
+    if (msg->addr == FORD_EngVehicleSpThrottle2) {
       // Disable controls if speeds from ABS and PCM ECUs are too far apart.
       // Signal: Veh_V_ActlEng
       float filtered_pcm_speed = ((GET_BYTE(msg, 6) << 8) | GET_BYTE(msg, 7)) * 0.01 * KPH_TO_MS;
@@ -143,7 +133,7 @@ static void ford_rx_hook(const CANPacket_t *msg) {
     }
 
     // Update vehicle yaw rate
-    if (addr == FORD_Yaw_Data_FD1) {
+    if (msg->addr == FORD_Yaw_Data_FD1) {
       // Signal: VehYaw_W_Actl
       // TODO: we should use the speed which results in the closest angle measurement to the desired angle
       float ford_yaw_rate = (((GET_BYTE(msg, 2) << 8U) | GET_BYTE(msg, 3)) * 0.0002) - 6.5;
@@ -153,14 +143,14 @@ static void ford_rx_hook(const CANPacket_t *msg) {
     }
 
     // Update gas pedal
-    if (addr == FORD_EngVehicleSpThrottle) {
+    if (msg->addr == FORD_EngVehicleSpThrottle) {
       // Pedal position: (0.1 * val) in percent
       // Signal: ApedPos_Pc_ActlArb
       gas_pressed = (((GET_BYTE(msg, 0) & 0x03U) << 8) | GET_BYTE(msg, 1)) > 0U;
     }
 
     // Update brake pedal and cruise state
-    if (addr == FORD_EngBrakeData) {
+    if (msg->addr == FORD_EngBrakeData) {
       // Signal: BpedDrvAppl_D_Actl
       brake_pressed = ((GET_BYTE(msg, 0) >> 4) & 0x3U) == 2U;
 
@@ -189,10 +179,8 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
 
   bool tx = true;
 
-  int addr = GET_ADDR(msg);
-
   // Safety check for ACCDATA accel and brake requests
-  if (addr == FORD_ACCDATA) {
+  if (msg->addr == FORD_ACCDATA) {
     // Signal: AccPrpl_A_Rq
     int gas = ((GET_BYTE(msg, 6) & 0x3U) << 8) | GET_BYTE(msg, 7);
     // Signal: AccPrpl_A_Pred
@@ -223,7 +211,7 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
   // Safety check for Steering_Data_FD1 button signals
   // Note: Many other signals in this message are not relevant to safety (e.g. blinkers, wiper switches, high beam)
   // which we passthru in OP.
-  if (addr == FORD_Steering_Data_FD1) {
+  if (msg->addr == FORD_Steering_Data_FD1) {
     // Violation if resume button is pressed while controls not allowed, or
     // if cancel button is pressed when cruise isn't engaged.
     bool violation = false;
@@ -236,7 +224,7 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
   }
 
   // Safety check for Lane_Assist_Data1 action
-  if (addr == FORD_Lane_Assist_Data1) {
+  if (msg->addr == FORD_Lane_Assist_Data1) {
     // Do not allow steering using Lane_Assist_Data1 (Lane-Departure Aid).
     // This message must be sent for Lane Centering to work, and can include
     // values such as the steering angle or lane curvature for debugging,
@@ -248,7 +236,7 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
   }
 
   // Safety check for LateralMotionControl action
-  if (addr == FORD_LateralMotionControl) {
+  if (msg->addr == FORD_LateralMotionControl) {
     // Signal: LatCtl_D_Rq
     bool steer_control_enabled = ((GET_BYTE(msg, 4) >> 2) & 0x7U) != 0U;
     unsigned int raw_curvature = (GET_BYTE(msg, 0) << 3) | (GET_BYTE(msg, 1) >> 5);
@@ -269,7 +257,7 @@ static bool ford_tx_hook(const CANPacket_t *msg) {
   }
 
   // Safety check for LateralMotionControl2 action
-  if (addr == FORD_LateralMotionControl2) {
+  if (msg->addr == FORD_LateralMotionControl2) {
     static const AngleSteeringLimits FORD_CANFD_STEERING_LIMITS = FORD_LIMITS(true);
 
     // Signal: LatCtl_D2_Rq

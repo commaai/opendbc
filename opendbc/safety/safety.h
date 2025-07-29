@@ -105,7 +105,7 @@ static bool is_msg_valid(RxCheck addr_list[], int index) {
 }
 
 static int get_addr_check_index(const CANPacket_t *msg, RxCheck addr_list[], const int len) {
-  int addr = GET_ADDR(msg);
+  int addr = msg->addr;
   int length = GET_LEN(msg);
 
   int index = -1;
@@ -200,7 +200,7 @@ bool safety_rx_hook(const CANPacket_t *msg) {
   // the relay malfunction hook runs on all incoming rx messages.
   // check all applicable tx msgs for liveness on sending bus.
   // used to detect a relay malfunction or control messages from disabled ECUs like the radar
-  const int addr = GET_ADDR(msg);
+  const int addr = msg->addr;
   for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
     const CanMsg *m = &current_safety_config.tx_msgs[i];
     if (m->check_relay) {
@@ -217,7 +217,7 @@ bool safety_rx_hook(const CANPacket_t *msg) {
 }
 
 static bool tx_msg_safety_check(const CANPacket_t *msg, const CanMsg msg_list[], int len) {
-  int addr = GET_ADDR(msg);
+  int addr = msg->addr;
   int length = GET_LEN(msg);
 
   bool whitelisted = false;
