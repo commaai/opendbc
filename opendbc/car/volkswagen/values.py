@@ -189,7 +189,7 @@ class VolkswagenFlags(IntFlag):
 
   # Static flags
   PQ = 2
-  MEB = 4
+  MEB = 8
 
 
 @dataclass
