@@ -27,18 +27,23 @@ class CanBus(CanBusBase):
 
   @property
   def pt(self) -> int:
+    # ADAS / Extended CAN, gateway side of the relay
     return self.offset
 
   @property
   def aux(self) -> int:
+    # NetworkLocation.fwdCamera: radar-camera object fusion bus
+    # NetworkLocation.gateway: powertrain bus
     return self.offset + 1
 
   @property
   def cam(self) -> int:
+    # ADAS / Extended CAN, camera side of the relay
     return self.offset + 2
 
   @property
   def ext(self) -> int:
+    # ADAS / Extended CAN, side of the relay with the ACC radar
     return self._ext
 
 class CarControllerParams:
