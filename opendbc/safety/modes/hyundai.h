@@ -131,19 +131,18 @@ static uint32_t hyundai_compute_checksum(const CANPacket_t *msg) {
 }
 
 static void hyundai_rx_hook(const CANPacket_t *msg) {
-  int bus = GET_BUS(msg);
   int addr = GET_ADDR(msg);
 
   // SCC12 is on bus 2 for camera-based SCC cars, bus 0 on all others
   if (addr == 0x421) {
-    if (((bus == 0) && !hyundai_camera_scc) || ((bus == 2) && hyundai_camera_scc)) {
+    if (((msg->bus == 0U) && !hyundai_camera_scc) || ((msg->bus == 2U) && hyundai_camera_scc)) {
       // 2 bits: 13-14
       int cruise_engaged = (GET_BYTES(msg, 0, 4) >> 13) & 0x3U;
       hyundai_common_cruise_state_check(cruise_engaged);
     }
   }
 
-  if (bus == 0) {
+  if (msg->bus == 0U) {
     if (addr == 0x251) {
       int torque_driver_new = (GET_BYTES(msg, 0, 2) & 0x7ffU) - 1024U;
       // update array of samples

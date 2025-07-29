@@ -14,15 +14,13 @@
 #define MSG_SUBARU_PG_ES_Distance           0x161
 #define MSG_SUBARU_PG_Steering_Torque       0x371
 
-#define SUBARU_PG_MAIN_BUS 0
-#define SUBARU_PG_CAM_BUS  2
+#define SUBARU_PG_MAIN_BUS 0U
+#define SUBARU_PG_CAM_BUS  2U
 
 static bool subaru_pg_reversed_driver_torque = false;
 
 static void subaru_preglobal_rx_hook(const CANPacket_t *msg) {
-  const int bus = GET_BUS(msg);
-
-  if (bus == SUBARU_PG_MAIN_BUS) {
+  if (msg->bus == SUBARU_PG_MAIN_BUS) {
     int addr = GET_ADDR(msg);
     if (addr == MSG_SUBARU_PG_Steering_Torque) {
       int torque_driver_new;

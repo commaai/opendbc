@@ -64,40 +64,39 @@ static uint8_t chrysler_get_counter(const CANPacket_t *msg) {
 }
 
 static void chrysler_rx_hook(const CANPacket_t *msg) {
-  const int bus = GET_BUS(msg);
   const int addr = GET_ADDR(msg);
 
   // Measured EPS torque
-  if ((bus == 0) && (addr == chrysler_addrs->EPS_2)) {
+  if ((msg->bus == 0U) && (addr == chrysler_addrs->EPS_2)) {
     int torque_meas_new = ((GET_BYTE(msg, 4) & 0x7U) << 8) + GET_BYTE(msg, 5) - 1024U;
     update_sample(&torque_meas, torque_meas_new);
   }
 
   // enter controls on rising edge of ACC, exit controls on ACC off
-  const int das_3_bus = (chrysler_platform == CHRYSLER_PACIFICA) ? 0 : 2;
-  if ((bus == das_3_bus) && (addr == chrysler_addrs->DAS_3)) {
+  const unsigned int das_3_bus = (chrysler_platform == CHRYSLER_PACIFICA) ? 0U : 2U;
+  if ((msg->bus == das_3_bus) && (addr == chrysler_addrs->DAS_3)) {
     bool cruise_engaged = GET_BIT(msg, 21U);
     pcm_cruise_check(cruise_engaged);
   }
 
   // TODO: use the same message for both
   // update vehicle moving
-  if ((chrysler_platform != CHRYSLER_PACIFICA) && (bus == 0) && (addr == chrysler_addrs->ESP_8)) {
+  if ((chrysler_platform != CHRYSLER_PACIFICA) && (msg->bus == 0U) && (addr == chrysler_addrs->ESP_8)) {
     vehicle_moving = ((GET_BYTE(msg, 4) << 8) + GET_BYTE(msg, 5)) != 0U;
   }
-  if ((chrysler_platform == CHRYSLER_PACIFICA) && (bus == 0) && (addr == 514)) {
+  if ((chrysler_platform == CHRYSLER_PACIFICA) && (msg->bus == 0U) && (addr == 514)) {
     int speed_l = (GET_BYTE(msg, 0) << 4) + (GET_BYTE(msg, 1) >> 4);
     int speed_r = (GET_BYTE(msg, 2) << 4) + (GET_BYTE(msg, 3) >> 4);
     vehicle_moving = (speed_l != 0) || (speed_r != 0);
   }
 
   // exit controls on rising edge of gas press
-  if ((bus == 0) && (addr == chrysler_addrs->ECM_5)) {
+  if ((msg->bus == 0U) && (addr == chrysler_addrs->ECM_5)) {
     gas_pressed = GET_BYTE(msg, 0U) != 0U;
   }
 
   // exit controls on rising edge of brake press
-  if ((bus == 0) && (addr == chrysler_addrs->ESP_1)) {
+  if ((msg->bus == 0U) && (addr == chrysler_addrs->ESP_1)) {
     brake_pressed = ((GET_BYTE(msg, 0U) & 0xFU) >> 2U) == 1U;
   }
 }

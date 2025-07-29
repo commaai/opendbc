@@ -83,7 +83,7 @@ struct lookup_t {
 
 typedef struct {
   int addr;
-  int bus;
+  unsigned int bus;
   int len;
   bool check_relay;              // if true, trigger relay malfunction if existence on destination bus and block forwarding to destination bus
   bool disable_static_blocking;  // if true, static blocking is disabled so safety mode can dynamically handle it (e.g. selective AEB pass-through)
@@ -167,7 +167,7 @@ typedef struct {
 
 typedef struct {
   const int addr;
-  const int bus;
+  const unsigned int bus;
   const int len;
   const uint32_t frequency;          // expected frequency of the message [Hz]
   const bool ignore_checksum;        // checksum check is not performed when set to true

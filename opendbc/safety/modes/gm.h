@@ -30,10 +30,9 @@ static GmHardware gm_hw = GM_ASCM;
 static bool gm_pcm_cruise = false;
 
 static void gm_rx_hook(const CANPacket_t *msg) {
-
   const int GM_STANDSTILL_THRSLD = 10;  // 0.311kph
 
-  if (GET_BUS(msg) == 0U) {
+  if (msg->bus == 0U) {
     int addr = GET_ADDR(msg);
 
     if (addr == 0x184) {

@@ -119,7 +119,7 @@ static bool ford_get_quality_flag_valid(const CANPacket_t *msg) {
 static const AngleSteeringLimits FORD_STEERING_LIMITS = FORD_LIMITS(false);
 
 static void ford_rx_hook(const CANPacket_t *msg) {
-  if (GET_BUS(msg) == FORD_MAIN_BUS) {
+  if (msg->bus == FORD_MAIN_BUS) {
     int addr = GET_ADDR(msg);
 
     // Update in motion state from standstill signal
