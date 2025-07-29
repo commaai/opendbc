@@ -137,6 +137,11 @@ class CarController(CarControllerBase):
     # *** rate limit steer ***
     limited_torque = rate_limit(actuators.torque, self.last_torque, -self.params.STEER_DELTA_DOWN * DT_CTRL,
                                 self.params.STEER_DELTA_UP * DT_CTRL)
+
+    self.steer_rate_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringRateDeg) >= MAX_STEER_RATE, CC.latActive,
+                                                                      self.steer_rate_counter, MAX_STEER_RATE_FRAMES)
+    if not apply_steer_req:
+      limited_torque = 0
     self.last_torque = limited_torque
 
     # *** apply brake hysteresis ***
@@ -162,12 +167,6 @@ class CarController(CarControllerBase):
     if self.CP.carFingerprint in (HONDA_BOSCH - HONDA_BOSCH_RADARLESS) and self.CP.openpilotLongitudinalControl:
       if self.frame % 10 == 0:
         can_sends.append(make_tester_present_msg(0x18DAB0F1, 1, suppress_response=True))
-
-    # Steering jerk fault mitigation
-    self.steer_rate_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringRateDeg) >= MAX_STEER_RATE, CC.latActive,
-                                                                      self.steer_rate_counter, MAX_STEER_RATE_FRAMES)
-    if not apply_steer_req:
-      apply_torque = 0
 
     # Send steering command.
     can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, apply_steer_req))
