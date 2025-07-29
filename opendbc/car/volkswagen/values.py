@@ -17,10 +17,13 @@ GearShifter = structs.CarState.GearShifter
 Button = namedtuple('Button', ['event_type', 'can_addr', 'can_msg', 'values'])
 
 
-# TODO: Move forward/rear radar location-detect logic here (cp_extcan, etc)
 class CanBus(CanBusBase):
   def __init__(self, CP=None, fingerprint=None) -> None:
     super().__init__(CP, fingerprint)
+
+    self._ext = self.offset
+    if CP is not None:
+      self._ext = self.offset + 2 if CP.networkLocation == NetworkLocation.gateway else self.offset
 
   @property
   def main(self) -> int:
@@ -34,6 +37,9 @@ class CanBus(CanBusBase):
   def camera(self) -> int:
     return self.offset + 2
 
+  @property
+  def ext(self) -> int:
+    return self._ext
 
 class CarControllerParams:
   STEER_STEP = 2                           # HCA_01/HCA_1 message frequency 50Hz

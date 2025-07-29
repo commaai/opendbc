@@ -17,7 +17,6 @@ class CarController(CarControllerBase):
     self.CAN = CanBus(CP)
     self.CCS = pqcan if CP.flags & VolkswagenFlags.PQ else mqbcan
     self.packer_pt = CANPacker(dbc_names[Bus.pt])
-    self.ext_bus = self.CAN.main if CP.networkLocation == structs.CarParams.NetworkLocation.fwdCamera else self.CAN.camera
     self.aeb_available = not CP.flags & VolkswagenFlags.PQ
 
     self.apply_torque_last = 0
@@ -116,7 +115,7 @@ class CarController(CarControllerBase):
 
     gra_send_ready = self.CP.pcmCruise and CS.gra_stock_values["COUNTER"] != self.gra_acc_counter_last
     if gra_send_ready and (CC.cruiseControl.cancel or CC.cruiseControl.resume):
-      can_sends.append(self.CCS.create_acc_buttons_control(self.packer_pt, self.ext_bus, CS.gra_stock_values,
+      can_sends.append(self.CCS.create_acc_buttons_control(self.packer_pt, self.CAN.ext, CS.gra_stock_values,
                                                            cancel=CC.cruiseControl.cancel, resume=CC.cruiseControl.resume))
 
     new_actuators = actuators.as_builder()
