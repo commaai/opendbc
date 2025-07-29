@@ -59,18 +59,17 @@ static const CanMsg HYUNDAI_TX_MSGS[] = {
 static bool hyundai_legacy = false;
 
 static uint8_t hyundai_get_counter(const CANPacket_t *msg) {
-  int addr = GET_ADDR(msg);
 
   uint8_t cnt = 0;
-  if (addr == 0x260) {
+  if (msg->addr == 0x260U) {
     cnt = (GET_BYTE(msg, 7) >> 4) & 0x3U;
-  } else if (addr == 0x386) {
+  } else if (msg->addr == 0x386U) {
     cnt = ((GET_BYTE(msg, 3) >> 6) << 2) | (GET_BYTE(msg, 1) >> 6);
-  } else if (addr == 0x394) {
+  } else if (msg->addr == 0x394U) {
     cnt = (GET_BYTE(msg, 1) >> 5) & 0x7U;
-  } else if (addr == 0x421) {
+  } else if (msg->addr == 0x421U) {
     cnt = GET_BYTE(msg, 7) & 0xFU;
-  } else if (addr == 0x4F1) {
+  } else if (msg->addr == 0x4F1U) {
     cnt = (GET_BYTE(msg, 3) >> 4) & 0xFU;
   } else {
   }
@@ -78,16 +77,15 @@ static uint8_t hyundai_get_counter(const CANPacket_t *msg) {
 }
 
 static uint32_t hyundai_get_checksum(const CANPacket_t *msg) {
-  int addr = GET_ADDR(msg);
 
   uint8_t chksum = 0;
-  if (addr == 0x260) {
+  if (msg->addr == 0x260U) {
     chksum = GET_BYTE(msg, 7) & 0xFU;
-  } else if (addr == 0x386) {
+  } else if (msg->addr == 0x386U) {
     chksum = ((GET_BYTE(msg, 7) >> 6) << 2) | (GET_BYTE(msg, 5) >> 6);
-  } else if (addr == 0x394) {
+  } else if (msg->addr == 0x394U) {
     chksum = GET_BYTE(msg, 6) & 0xFU;
-  } else if (addr == 0x421) {
+  } else if (msg->addr == 0x421U) {
     chksum = GET_BYTE(msg, 7) >> 4;
   } else {
   }
@@ -95,10 +93,8 @@ static uint32_t hyundai_get_checksum(const CANPacket_t *msg) {
 }
 
 static uint32_t hyundai_compute_checksum(const CANPacket_t *msg) {
-  int addr = GET_ADDR(msg);
-
   uint8_t chksum = 0;
-  if (addr == 0x386) {
+  if (msg->addr == 0x386U) {
     // count the bits
     for (int i = 0; i < 8; i++) {
       uint8_t b = GET_BYTE(msg, i);
@@ -115,12 +111,12 @@ static uint32_t hyundai_compute_checksum(const CANPacket_t *msg) {
   } else {
     // sum of nibbles
     for (int i = 0; i < 8; i++) {
-      if ((addr == 0x394) && (i == 7)) {
+      if ((msg->addr == 0x394U) && (i == 7)) {
         continue; // exclude
       }
       uint8_t b = GET_BYTE(msg, i);
-      if (((addr == 0x260) && (i == 7)) || ((addr == 0x394) && (i == 6)) || ((addr == 0x421) && (i == 7))) {
-        b &= (addr == 0x421) ? 0x0FU : 0xF0U; // remove checksum
+      if (((msg->addr == 0x260U) && (i == 7)) || ((msg->addr == 0x394U) && (i == 6)) || ((msg->addr == 0x421U) && (i == 7))) {
+        b &= (msg->addr == 0x421U) ? 0x0FU : 0xF0U; // remove checksum
       }
       chksum += (b % 16U) + (b / 16U);
     }
@@ -131,10 +127,9 @@ static uint32_t hyundai_compute_checksum(const CANPacket_t *msg) {
 }
 
 static void hyundai_rx_hook(const CANPacket_t *msg) {
-  int addr = GET_ADDR(msg);
 
   // SCC12 is on bus 2 for camera-based SCC cars, bus 0 on all others
-  if (addr == 0x421) {
+  if (msg->addr == 0x421U) {
     if (((msg->bus == 0U) && !hyundai_camera_scc) || ((msg->bus == 2U) && hyundai_camera_scc)) {
       // 2 bits: 13-14
       int cruise_engaged = (GET_BYTES(msg, 0, 4) >> 13) & 0x3U;
@@ -143,39 +138,39 @@ static void hyundai_rx_hook(const CANPacket_t *msg) {
   }
 
   if (msg->bus == 0U) {
-    if (addr == 0x251) {
+    if (msg->addr == 0x251U) {
       int torque_driver_new = (GET_BYTES(msg, 0, 2) & 0x7ffU) - 1024U;
       // update array of samples
       update_sample(&torque_driver, torque_driver_new);
     }
 
     // ACC steering wheel buttons
-    if (addr == 0x4F1) {
+    if (msg->addr == 0x4F1U) {
       int cruise_button = GET_BYTE(msg, 0) & 0x7U;
       bool main_button = GET_BIT(msg, 3U);
       hyundai_common_cruise_buttons_check(cruise_button, main_button);
     }
 
     // gas press, different for EV, hybrid, and ICE models
-    if ((addr == 0x371) && hyundai_ev_gas_signal) {
+    if ((msg->addr == 0x371U) && hyundai_ev_gas_signal) {
       gas_pressed = (((GET_BYTE(msg, 4) & 0x7FU) << 1) | GET_BYTE(msg, 3) >> 7) != 0U;
-    } else if ((addr == 0x371) && hyundai_hybrid_gas_signal) {
+    } else if ((msg->addr == 0x371U) && hyundai_hybrid_gas_signal) {
       gas_pressed = GET_BYTE(msg, 7) != 0U;
-    } else if ((addr == 0x91) && hyundai_fcev_gas_signal) {
+    } else if ((msg->addr == 0x91U) && hyundai_fcev_gas_signal) {
       gas_pressed = GET_BYTE(msg, 6) != 0U;
-    } else if ((addr == 0x260) && !hyundai_ev_gas_signal && !hyundai_hybrid_gas_signal) {
+    } else if ((msg->addr == 0x260U) && !hyundai_ev_gas_signal && !hyundai_hybrid_gas_signal) {
       gas_pressed = (GET_BYTE(msg, 7) >> 6) != 0U;
     } else {
     }
 
     // sample wheel speed, averaging opposite corners
-    if (addr == 0x386) {
+    if (msg->addr == 0x386U) {
       uint32_t front_left_speed = GET_BYTES(msg, 0, 2) & 0x3FFFU;
       uint32_t rear_right_speed = GET_BYTES(msg, 6, 2) & 0x3FFFU;
       vehicle_moving = (front_left_speed > HYUNDAI_STANDSTILL_THRSLD) || (rear_right_speed > HYUNDAI_STANDSTILL_THRSLD);
     }
 
-    if (addr == 0x394) {
+    if (msg->addr == 0x394U) {
       brake_pressed = ((GET_BYTE(msg, 5) >> 5U) & 0x3U) == 0x2U;
     }
   }
@@ -187,10 +182,9 @@ static bool hyundai_tx_hook(const CANPacket_t *msg) {
   const TorqueSteeringLimits HYUNDAI_STEERING_LIMITS_ALT_2 = HYUNDAI_LIMITS(170, 2, 3);
 
   bool tx = true;
-  int addr = GET_ADDR(msg);
 
   // FCA11: Block any potential actuation
-  if (addr == 0x38D) {
+  if (msg->addr == 0x38DU) {
     int CR_VSM_DecCmd = GET_BYTE(msg, 1);
     bool FCA_CmdAct = GET_BIT(msg, 20U);
     bool CF_VSM_DecCmdAct = GET_BIT(msg, 31U);
@@ -201,7 +195,7 @@ static bool hyundai_tx_hook(const CANPacket_t *msg) {
   }
 
   // ACCEL: safety check
-  if (addr == 0x421) {
+  if (msg->addr == 0x421U) {
     int desired_accel_raw = (((GET_BYTE(msg, 4) & 0x7U) << 8) | GET_BYTE(msg, 3)) - 1023U;
     int desired_accel_val = ((GET_BYTE(msg, 5) << 3) | (GET_BYTE(msg, 4) >> 5)) - 1023U;
 
@@ -221,7 +215,7 @@ static bool hyundai_tx_hook(const CANPacket_t *msg) {
   }
 
   // LKA STEER: safety check
-  if (addr == 0x340) {
+  if (msg->addr == 0x340U) {
     int desired_torque = ((GET_BYTES(msg, 0, 4) >> 16) & 0x7ffU) - 1024U;
     bool steer_req = GET_BIT(msg, 27U);
 
@@ -234,14 +228,14 @@ static bool hyundai_tx_hook(const CANPacket_t *msg) {
   }
 
   // UDS: Only tester present ("\x02\x3E\x80\x00\x00\x00\x00\x00") allowed on diagnostics address
-  if (addr == 0x7D0) {
+  if (msg->addr == 0x7D0U) {
     if ((GET_BYTES(msg, 0, 4) != 0x00803E02U) || (GET_BYTES(msg, 4, 4) != 0x0U)) {
       tx = false;
     }
   }
 
   // BUTTONS: used for resume spamming and cruise cancellation
-  if ((addr == 0x4F1) && !hyundai_longitudinal) {
+  if ((msg->addr == 0x4F1U) && !hyundai_longitudinal) {
     int button = GET_BYTE(msg, 0) & 0x7U;
 
     bool allowed_resume = (button == 1) && controls_allowed;
