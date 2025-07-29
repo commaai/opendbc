@@ -5,10 +5,9 @@
 static bool nissan_alt_eps = false;
 
 static void nissan_rx_hook(const CANPacket_t *msg) {
-  int addr = GET_ADDR(msg);
 
   if (msg->bus == (nissan_alt_eps ? 1U : 0U)) {
-    if (addr == 0x2) {
+    if (msg->addr == 0x2U) {
       // Current steering angle
       // Factor -0.1, little endian
       int angle_meas_new = (GET_BYTES(msg, 0, 4) & 0xFFFFU);
@@ -19,7 +18,7 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
       update_sample(&angle_meas, angle_meas_new);
     }
 
-    if (addr == 0x285) {
+    if (msg->addr == 0x285U) {
       // Get current speed and standstill
       uint16_t right_rear = (GET_BYTE(msg, 0) << 8) | (GET_BYTE(msg, 1));
       uint16_t left_rear = (GET_BYTE(msg, 2) << 8) | (GET_BYTE(msg, 3));
@@ -28,8 +27,8 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
     }
 
     // X-Trail 0x15c, Leaf 0x239
-    if ((addr == 0x15c) || (addr == 0x239)) {
-      if (addr == 0x15c){
+    if ((msg->addr == 0x15cU) || (msg->addr == 0x239U)) {
+      if (msg->addr == 0x15cU){
         gas_pressed = ((GET_BYTE(msg, 5) << 2) | ((GET_BYTE(msg, 6) >> 6) & 0x3U)) > 3U;
       } else {
         gas_pressed = GET_BYTE(msg, 0) > 3U;
@@ -37,8 +36,8 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
     }
 
     // X-trail 0x454, Leaf 0x239
-    if ((addr == 0x454) || (addr == 0x239)) {
-      if (addr == 0x454){
+    if ((msg->addr == 0x454U) || (msg->addr == 0x239U)) {
+      if (msg->addr == 0x454U){
         brake_pressed = (GET_BYTE(msg, 2) & 0x80U) != 0U;
       } else {
         brake_pressed = ((GET_BYTE(msg, 4) >> 5) & 1U) != 0U;
@@ -47,7 +46,7 @@ static void nissan_rx_hook(const CANPacket_t *msg) {
   }
 
   // Handle cruise enabled
-  if ((addr == 0x30f) && (msg->bus == (nissan_alt_eps ? 1U : 2U))) {
+  if ((msg->addr == 0x30fU) && (msg->bus == (nissan_alt_eps ? 1U : 2U))) {
     bool cruise_engaged = (GET_BYTE(msg, 0) >> 3) & 1U;
     pcm_cruise_check(cruise_engaged);
   }
@@ -69,11 +68,10 @@ static bool nissan_tx_hook(const CANPacket_t *msg) {
   };
 
   bool tx = true;
-  int addr = GET_ADDR(msg);
   bool violation = false;
 
   // steer cmd checks
-  if (addr == 0x169) {
+  if (msg->addr == 0x169U) {
     int desired_angle = ((GET_BYTE(msg, 0) << 10) | (GET_BYTE(msg, 1) << 2) | ((GET_BYTE(msg, 2) >> 6) & 0x3U));
     bool lka_active = (GET_BYTE(msg, 6) >> 4) & 1U;
 
@@ -86,7 +84,7 @@ static bool nissan_tx_hook(const CANPacket_t *msg) {
   }
 
   // acc button check, only allow cancel button to be sent
-  if (addr == 0x20b) {
+  if (msg->addr == 0x20bU) {
     // Violation of any button other than cancel is pressed
     violation |= ((GET_BYTE(msg, 1) & 0x3dU) > 0U);
   }
