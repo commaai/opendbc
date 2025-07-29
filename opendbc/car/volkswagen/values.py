@@ -46,6 +46,7 @@ class CanBus(CanBusBase):
     # ADAS / Extended CAN, side of the relay with the ACC radar
     return self._ext
 
+
 class CarControllerParams:
   STEER_STEP = 2                           # HCA_01/HCA_1 message frequency 50Hz
   ACC_CONTROL_STEP = 2                     # ACC_06/ACC_07/ACC_System frequency 50Hz
