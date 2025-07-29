@@ -1,6 +1,6 @@
 from opendbc.car import CanBusBase
 from opendbc.car.common.conversions import Conversions as CV
-from opendbc.car.honda.values import HondaFlags, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, CAR, CarControllerParams
+from opendbc.car.honda.values import HondaFlags, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, HONDA_BOSCH_CANFD, CAR, CarControllerParams
 
 # CAN bus layout with relay
 # 0 = ACC-CAN - radar side
@@ -14,7 +14,8 @@ class CanBus(CanBusBase):
     # use fingerprint if specified
     super().__init__(CP if fingerprint is None else None, fingerprint)
 
-    if CP.carFingerprint in (HONDA_BOSCH - HONDA_BOSCH_RADARLESS):
+    # powertrain bus is split instead of radar on radarless and CAN FD Bosch
+    if CP.carFingerprint in (HONDA_BOSCH - HONDA_BOSCH_RADARLESS - HONDA_BOSCH_CANFD):
       self._pt, self._radar = self.offset + 1, self.offset
       # normally steering commands are sent to radar, which forwards them to powertrain bus
       # when radar is disabled, steering commands are sent directly to powertrain bus
@@ -42,11 +43,6 @@ class CanBus(CanBusBase):
   @property
   def body(self) -> int:
     return self.offset
-
-
-def get_cruise_speed_conversion(car_fingerprint: str, is_metric: bool) -> float:
-  # on certain cars, CRUISE_SPEED changes to imperial with car's unit setting
-  return CV.MPH_TO_MS if car_fingerprint in HONDA_BOSCH_RADARLESS and not is_metric else CV.KPH_TO_MS
 
 
 def create_brake_command(packer, CAN, apply_brake, pump_on, pcm_override, pcm_cancel_cmd, fcw, car_fingerprint, stock_brake):
@@ -173,11 +169,14 @@ def create_ui_commands(packer, CAN, CP, enabled, pcm_speed, hud, is_metric, acc_
     'BEEP': 0,
   }
 
-  if CP.carFingerprint in HONDA_BOSCH_RADARLESS:
+  if CP.carFingerprint in (HONDA_BOSCH_RADARLESS | HONDA_BOSCH_CANFD):
     lkas_hud_values['LANE_LINES'] = 3
     lkas_hud_values['DASHED_LANES'] = hud.lanes_visible
+
     # car likely needs to see LKAS_PROBLEM fall within a specific time frame, so forward from camera
-    lkas_hud_values['LKAS_PROBLEM'] = lkas_hud['LKAS_PROBLEM']
+    # TODO: needed for Bosch CAN FD?
+    if CP.carFingerprint in HONDA_BOSCH_RADARLESS:
+      lkas_hud_values['LKAS_PROBLEM'] = lkas_hud['LKAS_PROBLEM']
 
   if not (CP.flags & HondaFlags.BOSCH_EXT_HUD):
     lkas_hud_values['SET_ME_X48'] = 0x48
@@ -206,6 +205,24 @@ def spam_buttons_command(packer, CAN, button_val, car_fingerprint):
     'CRUISE_BUTTONS': button_val,
     'CRUISE_SETTING': 0,
   }
-  # send buttons to camera on radarless cars
+  # send buttons to camera on radarless (camera does ACC) cars
   bus = CAN.camera if car_fingerprint in HONDA_BOSCH_RADARLESS else CAN.pt
   return packer.make_can_msg("SCM_BUTTONS", bus, values)
+
+
+def honda_checksum(address: int, sig, d: bytearray) -> int:
+  s = 0
+  extended = address > 0x7FF
+  addr = address
+  while addr:
+    s += addr & 0xF
+    addr >>= 4
+  for i in range(len(d)):
+    x = d[i]
+    if i == len(d) - 1:
+      x >>= 4
+    s += (x & 0xF) + (x >> 4)
+  s = 8 - s
+  if extended:
+    s += 3
+  return s & 0xF

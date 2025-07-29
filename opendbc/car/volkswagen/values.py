@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from enum import Enum, IntFlag, StrEnum
 
 from opendbc.car import Bus, CanBusBase, CarSpecs, DbcDict, PlatformConfig, Platforms, structs, uds
-from opendbc.can.can_define import CANDefine
+from opendbc.can import CANDefine
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, \
                                                      Device
@@ -185,6 +185,7 @@ class VolkswagenSafetyFlags(IntFlag):
 class VolkswagenFlags(IntFlag):
   # Detected flags
   STOCK_HCA_PRESENT = 1
+  KOMBI_PRESENT = 4
 
   # Static flags
   PQ = 2
@@ -193,7 +194,7 @@ class VolkswagenFlags(IntFlag):
 
 @dataclass
 class VolkswagenMQBPlatformConfig(PlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'vw_mqb_2010'})
+  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'vw_mqb'})
   # Volkswagen uses the VIN WMI and chassis code to match in the absence of the comma power
   # on camera-integrated cars, as we lose too many ECUs to reliably identify the vehicle
   chassis_codes: set[str] = field(default_factory=set)
@@ -214,7 +215,7 @@ class VolkswagenMEBPlatformConfig(PlatformConfig):
 
 @dataclass
 class VolkswagenPQPlatformConfig(VolkswagenMQBPlatformConfig):
-  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'vw_golf_mk4'})
+  dbc_dict: DbcDict = field(default_factory=lambda: {Bus.pt: 'vw_pq'})
 
   def init(self):
     self.flags |= VolkswagenFlags.PQ
@@ -247,7 +248,7 @@ class Footnote(Enum):
     "in software, but doesn't yet have a harness available from the comma store.",
     Column.HARDWARE)
   VW_MEB = CarFootnote(
-    "Volkswagen MEB plattform is using CAN-FD, which is supported by comma 3x or red panda.",
+    "Volkswagen MEB platform is using CAN-FD, which is supported by comma 3x or red panda.",
     Column.HARDWARE)
 
 
@@ -279,11 +280,11 @@ class CAR(Platforms):
 
   VOLKSWAGEN_ARTEON_MK1 = VolkswagenMQBPlatformConfig(
     [
-      VWCarDocs("Volkswagen Arteon 2018-23", video_link="https://youtu.be/FAomFKPFlDA"),
-      VWCarDocs("Volkswagen Arteon R 2020-23", video_link="https://youtu.be/FAomFKPFlDA"),
-      VWCarDocs("Volkswagen Arteon eHybrid 2020-23", video_link="https://youtu.be/FAomFKPFlDA"),
-      VWCarDocs("Volkswagen Arteon Shooting Brake 2020-23", video_link="https://youtu.be/FAomFKPFlDA"),
-      VWCarDocs("Volkswagen CC 2018-22", video_link="https://youtu.be/FAomFKPFlDA"),
+      VWCarDocs("Volkswagen Arteon 2018-23", video="https://youtu.be/FAomFKPFlDA"),
+      VWCarDocs("Volkswagen Arteon R 2020-23", video="https://youtu.be/FAomFKPFlDA"),
+      VWCarDocs("Volkswagen Arteon eHybrid 2020-23", video="https://youtu.be/FAomFKPFlDA"),
+      VWCarDocs("Volkswagen Arteon Shooting Brake 2020-23", video="https://youtu.be/FAomFKPFlDA"),
+      VWCarDocs("Volkswagen CC 2018-22", video="https://youtu.be/FAomFKPFlDA"),
     ],
     VolkswagenCarSpecs(mass=1733, wheelbase=2.84),
     chassis_codes={"AN", "3H"},
@@ -312,11 +313,11 @@ class CAR(Platforms):
   )
   VOLKSWAGEN_CRAFTER_MK2 = VolkswagenMQBPlatformConfig(
     [
-      VWCarDocs("Volkswagen Crafter 2017-24", video_link="https://youtu.be/4100gLeabmo"),
-      VWCarDocs("Volkswagen e-Crafter 2018-24", video_link="https://youtu.be/4100gLeabmo"),
-      VWCarDocs("Volkswagen Grand California 2019-24", video_link="https://youtu.be/4100gLeabmo"),
-      VWCarDocs("MAN TGE 2017-24", video_link="https://youtu.be/4100gLeabmo"),
-      VWCarDocs("MAN eTGE 2020-24", video_link="https://youtu.be/4100gLeabmo"),
+      VWCarDocs("Volkswagen Crafter 2017-24", video="https://youtu.be/4100gLeabmo"),
+      VWCarDocs("Volkswagen e-Crafter 2018-24", video="https://youtu.be/4100gLeabmo"),
+      VWCarDocs("Volkswagen Grand California 2019-24", video="https://youtu.be/4100gLeabmo"),
+      VWCarDocs("MAN TGE 2017-24", video="https://youtu.be/4100gLeabmo"),
+      VWCarDocs("MAN eTGE 2020-24", video="https://youtu.be/4100gLeabmo"),
     ],
     VolkswagenCarSpecs(mass=2100, wheelbase=3.64, minSteerSpeed=50 * CV.KPH_TO_MS),
     chassis_codes={"SY", "SZ", "UY", "UZ"},
@@ -393,7 +394,7 @@ class CAR(Platforms):
     wmis={WMI.VOLKSWAGEN_EUROPE_CAR},
   )
   VOLKSWAGEN_TAOS_MK1 = VolkswagenMQBPlatformConfig(
-    [VWCarDocs("Volkswagen Taos 2022-23")],
+    [VWCarDocs("Volkswagen Taos 2022-24")],
     VolkswagenCarSpecs(mass=1498, wheelbase=2.69),
     chassis_codes={"B2"},
     wmis={WMI.VOLKSWAGEN_MEXICO_SUV, WMI.VOLKSWAGEN_ARGENTINA},
@@ -406,7 +407,7 @@ class CAR(Platforms):
   )
   VOLKSWAGEN_TIGUAN_MK2 = VolkswagenMQBPlatformConfig(
     [
-      VWCarDocs("Volkswagen Tiguan 2018-23"),
+      VWCarDocs("Volkswagen Tiguan 2018-24"),
       VWCarDocs("Volkswagen Tiguan eHybrid 2021-23"),
     ],
     VolkswagenCarSpecs(mass=1715, wheelbase=2.74),
@@ -452,7 +453,7 @@ class CAR(Platforms):
     wmis={WMI.AUDI_GERMANY_CAR},
   )
   AUDI_Q3_MK2 = VolkswagenMQBPlatformConfig(
-    [VWCarDocs("Audi Q3 2019-23")],
+    [VWCarDocs("Audi Q3 2019-24")],
     VolkswagenCarSpecs(mass=1623, wheelbase=2.68),
     chassis_codes={"8U", "F3", "FS"},
     wmis={WMI.AUDI_EUROPE_MPV, WMI.AUDI_GERMANY_CAR},

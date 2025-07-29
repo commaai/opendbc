@@ -17,6 +17,8 @@ ACCELERATION_DUE_TO_GRAVITY = 9.81  # m/s^2
 
 ButtonType = structs.CarState.ButtonEvent.Type
 
+FRICTION_THRESHOLD = 0.3
+
 
 @dataclass
 class AngleSteeringLimits:
@@ -98,13 +100,16 @@ class Bus(StrEnum):
   ap_party = auto()
 
 
-def apply_driver_steer_torque_limits(apply_torque, apply_torque_last, driver_torque, LIMITS):
+def apply_driver_steer_torque_limits(apply_torque: int, apply_torque_last: int, driver_torque: float, LIMITS, steer_max: int = None):
+  # some safety modes utilize a dynamic max steer
+  if steer_max is None:
+    steer_max = LIMITS.STEER_MAX
 
   # limits due to driver torque
-  driver_max_torque = LIMITS.STEER_MAX + (LIMITS.STEER_DRIVER_ALLOWANCE + driver_torque * LIMITS.STEER_DRIVER_FACTOR) * LIMITS.STEER_DRIVER_MULTIPLIER
-  driver_min_torque = -LIMITS.STEER_MAX + (-LIMITS.STEER_DRIVER_ALLOWANCE + driver_torque * LIMITS.STEER_DRIVER_FACTOR) * LIMITS.STEER_DRIVER_MULTIPLIER
-  max_steer_allowed = max(min(LIMITS.STEER_MAX, driver_max_torque), 0)
-  min_steer_allowed = min(max(-LIMITS.STEER_MAX, driver_min_torque), 0)
+  driver_max_torque = steer_max + (LIMITS.STEER_DRIVER_ALLOWANCE + driver_torque * LIMITS.STEER_DRIVER_FACTOR) * LIMITS.STEER_DRIVER_MULTIPLIER
+  driver_min_torque = -steer_max + (-LIMITS.STEER_DRIVER_ALLOWANCE + driver_torque * LIMITS.STEER_DRIVER_FACTOR) * LIMITS.STEER_DRIVER_MULTIPLIER
+  max_steer_allowed = max(min(steer_max, driver_max_torque), 0)
+  min_steer_allowed = min(max(-steer_max, driver_min_torque), 0)
   apply_torque = np.clip(apply_torque, min_steer_allowed, max_steer_allowed)
 
   # slow rate if steer torque increases in magnitude
@@ -197,14 +202,13 @@ def rate_limit(new_value, last_value, dw_step, up_step):
 
 
 def get_friction(lateral_accel_error: float, lateral_accel_deadzone: float, friction_threshold: float,
-                 torque_params: structs.CarParams.LateralTorqueTuning, friction_compensation: bool) -> float:
+                 torque_params: structs.CarParams.LateralTorqueTuning) -> float:
   friction_interp = np.interp(
     apply_center_deadzone(lateral_accel_error, lateral_accel_deadzone),
     [-friction_threshold, friction_threshold],
     [-torque_params.friction, torque_params.friction]
   )
-  friction = float(friction_interp) if friction_compensation else 0.0
-  return friction
+  return float(friction_interp)
 
 
 def make_tester_present_msg(addr, bus, subaddr=None, suppress_response=False):

@@ -10,7 +10,7 @@ class CarInterface(CarInterfaceBase):
   CarController = CarController
 
   @staticmethod
-  def _get_params(ret: structs.CarParams, candidate: CAR, fingerprint, car_fw, experimental_long, docs) -> structs.CarParams:
+  def _get_params(ret: structs.CarParams, candidate: CAR, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:
     ret.brand = "volkswagen"
     ret.radarUnavailable = True
 
@@ -68,6 +68,8 @@ class CarInterface(CarInterfaceBase):
 
       if 0x126 in fingerprint[2]:  # HCA_01
         ret.flags |= VolkswagenFlags.STOCK_HCA_PRESENT.value
+      if 0x6B8 in fingerprint[0]:  # Kombi_03
+        ret.flags |= VolkswagenFlags.KOMBI_PRESENT.value
 
     # Global lateral tuning defaults, can be overridden per-vehicle
 
@@ -87,8 +89,8 @@ class CarInterface(CarInterfaceBase):
 
     # Global longitudinal tuning defaults, can be overridden per-vehicle
 
-    ret.experimentalLongitudinalAvailable = not ret.flags & VolkswagenFlags.MEB and (ret.networkLocation == NetworkLocation.gateway or docs)
-    if experimental_long:
+    ret.alphaLongitudinalAvailable = ret.networkLocation == NetworkLocation.gateway or docs
+    if alpha_long:
       # Proof-of-concept, prep for E2E only. No radar points available. Panda ALLOW_DEBUG firmware required.
       ret.openpilotLongitudinalControl = True
       safety_configs[0].safetyParam |= VolkswagenSafetyFlags.LONG_CONTROL.value

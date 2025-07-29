@@ -1,5 +1,4 @@
-import numpy as np
-from opendbc.can.parser import CANParser
+from opendbc.can import CANParser
 from opendbc.car import Bus, structs
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.common.conversions import Conversions as CV
@@ -56,7 +55,6 @@ class CarState(CarStateBase):
     if self.CP.transmissionType == TransmissionType.direct:
       ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Motor_EV_01"]["MO_Waehlpos"], None))
     elif self.CP.transmissionType == TransmissionType.manual:
-      ret.clutchPressed = not pt_cp.vl["Motor_14"]["MO_Kuppl_schalter"]
       if bool(pt_cp.vl["Gateway_72"]["BCM1_Rueckfahrlicht_Schalter"]):
         ret.gearShifter = GearShifter.reverse
       else:
@@ -69,18 +67,17 @@ class CarState(CarStateBase):
       self.qfk_curvature = -pt_cp.vl["QFK_01"]["Curvature"] * (1, -1)[int(pt_cp.vl["QFK_01"]["Curvature_VZ"])]
       ret.fuelGauge = pt_cp.vl["Motor_16"]["MO_Energieinhalt_BMS"]  # TODO: is this available on MQB as well?
 
-      ret.wheelSpeeds = self.get_wheel_speeds(
+      self.parse_wheel_speeds(ret,
         pt_cp.vl["ESC_51"]["VL_Radgeschw"],
         pt_cp.vl["ESC_51"]["VR_Radgeschw"],
         pt_cp.vl["ESC_51"]["HL_Radgeschw"],
         pt_cp.vl["ESC_51"]["HR_Radgeschw"],
       )
 
-      ret.yawRate = pt_cp.vl["ESC_50"]["Yaw_Rate"] * (1, -1)[int(pt_cp.vl["ESC_50"]["Yaw_Rate_Sign"])] * CV.DEG_TO_RAD
       hca_status = self.CCP.hca_status_values.get(pt_cp.vl["QFK_01"]["LatCon_HCA_Status"])
 
       drive_mode = ret.gearShifter == GearShifter.drive
-      ret.gas = pt_cp.vl["Motor_54"]["Accelerator_Pressure"]
+      ret.gasPressed = pt_cp.vl["Motor_54"]["Accelerator_Pressure"] > 0
       ret.brake = pt_cp.vl["ESC_51"]["Brake_Pressure"]
       ret.brakePressed = bool(pt_cp.vl["Motor_14"]["MO_Fahrer_bremst"]) # includes regen braking by user
       ret.parkingBrake = pt_cp.vl["Gateway_73"]["EPB_Status"] in (1, 4) # EPB closing or closed
@@ -114,22 +111,22 @@ class CarState(CarStateBase):
 
     else:
       # MQB-specific
-      self.upscale_lead_car_signal = bool(pt_cp.vl["Kombi_03"]["KBI_Variante"])  # Analog vs digital instrument cluster
+      if self.CP.flags & VolkswagenFlags.KOMBI_PRESENT:
+        self.upscale_lead_car_signal = bool(pt_cp.vl["Kombi_03"]["KBI_Variante"])  # Analog vs digital instrument cluster
 
-      ret.wheelSpeeds = self.get_wheel_speeds(
+      self.parse_wheel_speeds(ret,
         pt_cp.vl["ESP_19"]["ESP_VL_Radgeschw_02"],
         pt_cp.vl["ESP_19"]["ESP_VR_Radgeschw_02"],
         pt_cp.vl["ESP_19"]["ESP_HL_Radgeschw_02"],
         pt_cp.vl["ESP_19"]["ESP_HR_Radgeschw_02"],
       )
 
-      ret.yawRate = pt_cp.vl["ESP_02"]["ESP_Gierrate"] * (1, -1)[int(pt_cp.vl["ESP_02"]["ESP_VZ_Gierrate"])] * CV.DEG_TO_RAD
       hca_status = self.CCP.hca_status_values.get(pt_cp.vl["LH_EPS_03"]["EPS_HCA_Status"])
       if self.CP.flags & VolkswagenFlags.STOCK_HCA_PRESENT:
         ret.carFaultedNonCritical = bool(cam_cp.vl["HCA_01"]["EA_Ruckfreigabe"]) or cam_cp.vl["HCA_01"]["EA_ACC_Sollstatus"] > 0  # EA
 
       drive_mode = True
-      ret.gas = pt_cp.vl["Motor_20"]["MO_Fahrpedalrohwert_01"] / 100.0
+      ret.gasPressed = pt_cp.vl["Motor_20"]["MO_Fahrpedalrohwert_01"] > 0
       ret.brake = pt_cp.vl["ESP_05"]["ESP_Bremsdruck"] / 250.0  # FIXME: this is pressure in Bar, not sure what OP expects
       brake_pedal_pressed = bool(pt_cp.vl["Motor_14"]["MO_Fahrer_bremst"])
       brake_pressure_detected = bool(pt_cp.vl["ESP_05"]["ESP_Fahrer_bremst"])
@@ -164,9 +161,7 @@ class CarState(CarStateBase):
       ret.rightBlinker = bool(pt_cp.vl["Blinkmodi_02"]["Comfort_Signal_Right"])
 
     # Shared logic
-
-    ret.vEgoRaw = float(np.mean([ret.wheelSpeeds.fl, ret.wheelSpeeds.fr, ret.wheelSpeeds.rl, ret.wheelSpeeds.rr]))
-    ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
+    ret.vEgoCluster = pt_cp.vl["Kombi_01"]["KBI_angez_Geschw"] * CV.KPH_TO_MS
 
     ret.steeringAngleDeg = pt_cp.vl["LWI_01"]["LWI_Lenkradwinkel"] * (1, -1)[int(pt_cp.vl["LWI_01"]["LWI_VZ_Lenkradwinkel"])]
     ret.steeringRateDeg = pt_cp.vl["LWI_01"]["LWI_Lenkradw_Geschw"] * (1, -1)[int(pt_cp.vl["LWI_01"]["LWI_VZ_Lenkradw_Geschw"])]
@@ -174,7 +169,6 @@ class CarState(CarStateBase):
     ret.steeringPressed = abs(ret.steeringTorque) > self.CCP.STEER_DRIVER_ALLOWANCE
     ret.steerFaultTemporary, ret.steerFaultPermanent = self.update_hca_state(hca_status, drive_mode)
 
-    ret.gasPressed = ret.gas > 0
     ret.espActive = bool(pt_cp.vl["ESP_21"]["ESP_Eingriff"])
     ret.espDisabled = pt_cp.vl["ESP_21"]["ESP_Tastung_passiv"] != 0
     ret.seatbeltUnlatched = pt_cp.vl["Airbag_02"]["AB_Gurtschloss_FA"] != 3
@@ -191,18 +185,13 @@ class CarState(CarStateBase):
 
     ret.buttonEvents = self.create_button_events(pt_cp, self.CCP.BUTTONS)
 
+    ret.lowSpeedAlert = self.update_low_speed_alert(ret.vEgo)
+
     self.frame += 1
     return ret
 
   def update_pq(self, pt_cp, cam_cp, ext_cp) -> structs.CarState:
     ret = structs.CarState()
-    # Update vehicle speed and acceleration from ABS wheel speeds.
-    ret.wheelSpeeds = self.get_wheel_speeds(
-      pt_cp.vl["Bremse_3"]["Radgeschw__VL_4_1"],
-      pt_cp.vl["Bremse_3"]["Radgeschw__VR_4_1"],
-      pt_cp.vl["Bremse_3"]["Radgeschw__HL_4_1"],
-      pt_cp.vl["Bremse_3"]["Radgeschw__HR_4_1"],
-    )
 
     # vEgo obtained from Bremse_1 vehicle speed rather than Bremse_3 wheel speeds because Bremse_3 isn't present on NSF
     ret.vEgoRaw = pt_cp.vl["Bremse_1"]["Geschwindigkeit_neu__Bremse_1_"] * CV.KPH_TO_MS
@@ -214,14 +203,12 @@ class CarState(CarStateBase):
     ret.steeringRateDeg = pt_cp.vl["Lenkwinkel_1"]["Lenkradwinkel_Geschwindigkeit"] * (1, -1)[int(pt_cp.vl["Lenkwinkel_1"]["Lenkradwinkel_Geschwindigkeit_S"])]
     ret.steeringTorque = pt_cp.vl["Lenkhilfe_3"]["LH3_LM"] * (1, -1)[int(pt_cp.vl["Lenkhilfe_3"]["LH3_LMSign"])]
     ret.steeringPressed = abs(ret.steeringTorque) > self.CCP.STEER_DRIVER_ALLOWANCE
-    ret.yawRate = pt_cp.vl["Bremse_5"]["Giergeschwindigkeit"] * (1, -1)[int(pt_cp.vl["Bremse_5"]["Vorzeichen_der_Giergeschwindigk"])] * CV.DEG_TO_RAD
     hca_status = self.CCP.hca_status_values.get(pt_cp.vl["Lenkhilfe_2"]["LH2_Sta_HCA"])
     ret.steerFaultTemporary, ret.steerFaultPermanent = self.update_hca_state(hca_status)
 
     # Update gas, brakes, and gearshift.
-    ret.gas = pt_cp.vl["Motor_3"]["Fahrpedal_Rohsignal"] / 100.0
-    ret.gasPressed = ret.gas > 0
-    ret.brake = pt_cp.vl["Bremse_5"]["Bremsdruck"] / 250.0  # FIXME: this is pressure in Bar, not sure what OP expects
+    ret.gasPressed = pt_cp.vl["Motor_3"]["Fahrpedal_Rohsignal"] > 0
+    ret.brake = pt_cp.vl["Bremse_5"]["BR5_Bremsdruck"] / 250.0  # FIXME: this is pressure in Bar, not sure what OP expects
     ret.brakePressed = bool(pt_cp.vl["Motor_2"]["Bremslichtschalter"])
     ret.parkingBrake = bool(pt_cp.vl["Kombi_1"]["Bremsinfo"])
 
@@ -229,7 +216,6 @@ class CarState(CarStateBase):
     if self.CP.transmissionType == TransmissionType.automatic:
       ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Getriebe_1"]["Waehlhebelposition__Getriebe_1_"], None))
     elif self.CP.transmissionType == TransmissionType.manual:
-      ret.clutchPressed = not pt_cp.vl["Motor_1"]["Kupplungsschalter"]
       reverse_light = bool(pt_cp.vl["Gate_Komf_1"]["GK1_Rueckfahr"])
       if reverse_light:
         ret.gearShifter = GearShifter.reverse
@@ -290,8 +276,18 @@ class CarState(CarStateBase):
     # Additional safety checks performed in CarInterface.
     ret.espDisabled = bool(pt_cp.vl["Bremse_1"]["ESP_Passiv_getastet"])
 
+    ret.lowSpeedAlert = self.update_low_speed_alert(ret.vEgo)
+
     self.frame += 1
     return ret
+
+  def update_low_speed_alert(self, v_ego: float) -> bool:
+    # Low speed steer alert hysteresis logic
+    if (self.CP.minSteerSpeed - 1e-3) > CarControllerParams.DEFAULT_MIN_STEER_SPEED and v_ego < (self.CP.minSteerSpeed + 1.):
+      self.low_speed_alert = True
+    elif v_ego > (self.CP.minSteerSpeed + 2.):
+      self.low_speed_alert = False
+    return self.low_speed_alert
 
   def update_hca_state(self, hca_status, drive_mode=True):
     # Treat FAULT as temporary for worst likely EPS recovery time, for cars without factory Lane Assist
@@ -308,181 +304,34 @@ class CarState(CarStateBase):
     elif CP.flags & VolkswagenFlags.MEB:
       return CarState.get_can_parsers_meb(CP)
 
-    pt_messages = [
-      # sig_address, frequency
-      ("LWI_01", 100),      # From J500 Steering Assist with integrated sensors
-      ("LH_EPS_03", 100),   # From J500 Steering Assist with integrated sensors
-      ("ESP_19", 100),      # From J104 ABS/ESP controller
-      ("ESP_05", 50),       # From J104 ABS/ESP controller
-      ("ESP_21", 50),       # From J104 ABS/ESP controller
-      ("Motor_20", 50),     # From J623 Engine control module
-      ("TSK_06", 50),       # From J623 Engine control module
-      ("ESP_02", 50),       # From J104 ABS/ESP controller
-      ("GRA_ACC_01", 33),   # From J533 CAN gateway (via LIN from steering wheel controls)
-      ("Gateway_73", 20),   # From J533 CAN gateway (aggregated data)
-      ("Gateway_72", 10),   # From J533 CAN gateway (aggregated data)
-      ("Motor_14", 10),     # From J623 Engine control module
-      ("Airbag_02", 5),     # From J234 Airbag control module
-      ("Kombi_01", 2),      # From J285 Instrument cluster
-      ("Blinkmodi_02", 1),  # From J519 BCM (sent at 1Hz when no lights active, 50Hz when active)
-      ("Kombi_03", 0),      # From J285 instrument cluster (not present on older cars, 1Hz when present)
-    ]
-
-    if CP.transmissionType == TransmissionType.direct:
-      pt_messages.append(("Motor_EV_01", 10))  # From J??? unknown EV control module
-
-    if CP.networkLocation == NetworkLocation.fwdCamera:
-      # Radars are here on CanBus.main
-      pt_messages += MqbExtraSignals.fwd_radar_messages
-      if CP.enableBsm:
-        pt_messages += MqbExtraSignals.bsm_radar_messages
-
+    # another case of the 1-50Hz
     cam_messages = []
     if CP.flags & VolkswagenFlags.STOCK_HCA_PRESENT:
       cam_messages += [
         ("HCA_01", 1),  # From R242 Driver assistance camera, 50Hz if steering/1Hz if not
       ]
 
-    if CP.networkLocation == NetworkLocation.fwdCamera:
-      cam_messages += [
-        # sig_address, frequency
-        ("LDW_02", 10)      # From R242 Driver assistance camera
-      ]
-    else:
-      # Radars are here on CanBus.camera
-      cam_messages += MqbExtraSignals.fwd_radar_messages
-      if CP.enableBsm:
-        cam_messages += MqbExtraSignals.bsm_radar_messages
-
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).main),
-      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).camera),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [
+        # the 50->1Hz is currently too much for the CANParser to figure out
+        ("Blinkmodi_02", 1),  # From J519 BCM (sent at 1Hz when no lights active, 50Hz when active)
+      ], CanBus.main),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus.camera),
     }
 
   @staticmethod
   def get_can_parsers_pq(CP):
-    pt_messages = [
-      # sig_address, frequency
-      ("Bremse_1", 100),    # From J104 ABS/ESP controller
-      ("Bremse_3", 100),    # From J104 ABS/ESP controller
-      ("Lenkhilfe_3", 100),  # From J500 Steering Assist with integrated sensors
-      ("Lenkwinkel_1", 100),  # From J500 Steering Assist with integrated sensors
-      ("Motor_3", 100),     # From J623 Engine control module
-      ("Airbag_1", 50),     # From J234 Airbag control module
-      ("Bremse_5", 50),     # From J104 ABS/ESP controller
-      ("GRA_Neu", 50),      # From J??? steering wheel control buttons
-      ("Kombi_1", 50),      # From J285 Instrument cluster
-      ("Motor_2", 50),      # From J623 Engine control module
-      ("Motor_5", 50),      # From J623 Engine control module
-      ("Lenkhilfe_2", 20),  # From J500 Steering Assist with integrated sensors
-      ("Gate_Komf_1", 10),  # From J533 CAN gateway
-    ]
-
-    if CP.transmissionType == TransmissionType.automatic:
-      pt_messages += [("Getriebe_1", 100)]  # From J743 Auto transmission control module
-    elif CP.transmissionType == TransmissionType.manual:
-      pt_messages += [("Motor_1", 100)]  # From J623 Engine control module
-
-    if CP.networkLocation == NetworkLocation.fwdCamera:
-      # Extended CAN devices other than the camera are here on CanBus.main
-      pt_messages += PqExtraSignals.fwd_radar_messages
-      if CP.enableBsm:
-        pt_messages += PqExtraSignals.bsm_radar_messages
-
-    cam_messages = []
-    if CP.networkLocation == NetworkLocation.fwdCamera:
-      cam_messages += [
-        # sig_address, frequency
-        ("LDW_Status", 10)      # From R242 Driver assistance camera
-      ]
-
-    if CP.networkLocation == NetworkLocation.gateway:
-      # Radars are here on CanBus.camera
-      cam_messages += PqExtraSignals.fwd_radar_messages
-      if CP.enableBsm:
-        cam_messages += PqExtraSignals.bsm_radar_messages
-
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).main),
-      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).camera),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CanBus.main),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CanBus.camera),
     }
 
   @staticmethod
   def get_can_parsers_meb(CP):
-    pt_messages = [
-      # sig_address, frequency
-      ("LWI_01", 100),            # From J500 Steering Assist with integrated sensors
-      ("GRA_ACC_01", 33),         # From J533 CAN gateway (via LIN from steering wheel controls)
-      ("Airbag_02", 5),           # From J234 Airbag control module
-      ("Motor_14", 10),           # From J623 Engine control module
-      ("Motor_16", 2),            # From J623 Engine control module
-      ("Blinkmodi_02", 1),        # From J519 BCM (sent at 1Hz when no lights active, 50Hz when active)
-      ("LH_EPS_03", 100),         # From J500 Steering Assist with integrated sensors
-      ("ZV_02", 5),               # From ZV
-      ("QFK_01", 100),            # From Steering
-      ("ESP_21", 50),             #
-      ("ESC_51", 100),            #
-      ("Motor_54", 10),           #
-      ("ESC_50", 50),             #
-      ("VMM_02", 50),             #
-      ("Gateway_73", 20),         #
-      ("Motor_51", 50),           #
-    ]
-
-    if CP.networkLocation == NetworkLocation.fwdCamera:
-      # Radars are here on CanBus.main
-      pt_messages += MebExtraSignals.fwd_radar_messages
-      if CP.enableBsm:
-        pt_messages += MebExtraSignals.bsm_radar_messages
-
-    cam_messages = [
-      # sig_address, frequency
-      ("LDW_02", 10),     # From R242 Driver assistance camera
-      ("TA_01", 10),      # From R242 Driver assistance camera (Travel Assist)
-    ]
-
-    if CP.networkLocation == NetworkLocation.gateway:
-      # Radars are here on CanBus.camera
-      cam_messages += MebExtraSignals.fwd_radar_messages
-      if CP.enableBsm:
-        cam_messages += MebExtraSignals.bsm_radar_messages
-
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, CanBus(CP).main),
-      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, CanBus(CP).camera),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [
+        # the 50->1Hz is currently too much for the CANParser to figure out
+        ("Blinkmodi_02", 1),  # From J519 BCM (sent at 1Hz when no lights active, 50Hz when active)
+      ], CanBus.main),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CanBus.camera),
     }
-
-
-class MqbExtraSignals:
-  # Additional signal and message lists for optional or bus-portable controllers
-  fwd_radar_messages = [
-    ("ACC_06", 50),                              # From J428 ACC radar control module
-    ("ACC_10", 50),                              # From J428 ACC radar control module
-    ("ACC_02", 17),                              # From J428 ACC radar control module
-  ]
-  bsm_radar_messages = [
-    ("SWA_01", 20),                              # From J1086 Lane Change Assist
-  ]
-
-
-class PqExtraSignals:
-  # Additional signal and message lists for optional or bus-portable controllers
-  fwd_radar_messages = [
-    ("ACC_System", 50),                          # From J428 ACC radar control module
-    ("ACC_GRA_Anzeige", 25),                     # From J428 ACC radar control module
-  ]
-  bsm_radar_messages = [
-    ("SWA_1", 20),                               # From J1086 Lane Change Assist
-  ]
-
-
-class MebExtraSignals:
-  # Additional signal and message lists for optional or bus-portable controllers
-  fwd_radar_messages = [
-    ("MEB_ACC_01", 17),        #
-    ("ACC_18", 50),            #
-    ("AWV_03", 1),             # Front Collision Detection (1 Hz when inactive, 50 Hz when active)
-  ]
-  bsm_radar_messages = [
-    ("MEB_Side_Assist_01", 20),
-  ]

@@ -21,7 +21,7 @@ TOYOTA_COMMON_LONG_TX_MSGS = [[0x283, 0], [0x2E6, 0], [0x2E7, 0], [0x33E, 0], [0
 class TestToyotaSafetyBase(common.PandaCarSafetyTest, common.LongitudinalAccelSafetyTest):
 
   TX_MSGS = TOYOTA_COMMON_TX_MSGS + TOYOTA_COMMON_LONG_TX_MSGS
-  RELAY_MALFUNCTION_ADDRS = {0: (0x2E4, 0x343)}
+  RELAY_MALFUNCTION_ADDRS = {0: (0x2E4, 0x191, 0x412, 0x343)}
   FWD_BLACKLISTED_ADDRS = {2: [0x2E4, 0x412, 0x191, 0x343]}
   EPS_SCALE = 73
 
@@ -108,15 +108,15 @@ class TestToyotaSafetyBase(common.PandaCarSafetyTest, common.LongitudinalAccelSa
     for msg in ["trq", "pcm"]:
       self.safety.set_controls_allowed(1)
       if msg == "trq":
-        to_push = self._torque_meas_msg(0)
+        msg = self._torque_meas_msg(0)
       if msg == "pcm":
-        to_push = self._pcm_status_msg(True)
-      self.assertTrue(self._rx(to_push))
-      to_push[0].data[4] = 0
-      to_push[0].data[5] = 0
-      to_push[0].data[6] = 0
-      to_push[0].data[7] = 0
-      self.assertFalse(self._rx(to_push))
+        msg = self._pcm_status_msg(True)
+      self.assertTrue(self._rx(msg))
+      msg[0].data[4] = 0
+      msg[0].data[5] = 0
+      msg[0].data[6] = 0
+      msg[0].data[7] = 0
+      self.assertFalse(self._rx(msg))
       self.assertFalse(self.safety.get_controls_allowed())
 
 
@@ -124,7 +124,7 @@ class TestToyotaSafetyTorque(TestToyotaSafetyBase, common.MotorTorqueSteeringSaf
 
   MAX_RATE_UP = 15
   MAX_RATE_DOWN = 25
-  MAX_TORQUE = 1500
+  MAX_TORQUE_LOOKUP = [0], [1500]
   MAX_RT_DELTA = 450
   MAX_TORQUE_ERROR = 350
   TORQUE_MEAS_TOLERANCE = 1  # toyota safety adds one to be conservative for rounding
@@ -267,7 +267,7 @@ class TestToyotaStockLongitudinalBase(TestToyotaSafetyBase):
 
   TX_MSGS = TOYOTA_COMMON_TX_MSGS
   # Base addresses minus ACC_CONTROL (0x343)
-  RELAY_MALFUNCTION_ADDRS = {0: (0x2E4,)}
+  RELAY_MALFUNCTION_ADDRS = {0: (0x2E4, 0x191, 0x412)}
   FWD_BLACKLISTED_ADDRS = {2: [0x2E4, 0x412, 0x191]}
 
   LONGITUDINAL = False
@@ -312,8 +312,8 @@ class TestToyotaStockLongitudinalAngle(TestToyotaStockLongitudinalBase, TestToyo
 class TestToyotaSecOcSafety(TestToyotaStockLongitudinalBase):
 
   TX_MSGS = TOYOTA_SECOC_TX_MSGS
-  RELAY_MALFUNCTION_ADDRS = {0: (0x2E4,)}
-  FWD_BLACKLISTED_ADDRS = {2: [0x2E4, 0x412, 0x191, 0x131]}
+  RELAY_MALFUNCTION_ADDRS = {0: (0x2E4, 0x191, 0x412, 0x131)}
+  FWD_BLACKLISTED_ADDRS = {2: [0x2E4, 0x191, 0x412, 0x131]}
 
   def setUp(self):
     self.packer = CANPackerPanda("toyota_secoc_pt_generated")
