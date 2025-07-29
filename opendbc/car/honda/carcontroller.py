@@ -2,13 +2,17 @@ import numpy as np
 from collections import namedtuple
 
 from opendbc.can import CANPacker
-from opendbc.car import Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
+from opendbc.car import Bus, DT_CTRL, common_fault_avoidance, rate_limit, make_tester_present_msg, structs
 from opendbc.car.honda import hondacan
 from opendbc.car.honda.values import CruiseButtons, VISUAL_HUD, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, HONDA_NIDEC_ALT_PCM_ACCEL, CarControllerParams
 from opendbc.car.interfaces import CarControllerBase
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
+
+# LKA angle-rate limits for avoiding EPS faults
+MAX_STEER_RATE = 60  # deg/s
+MAX_STEER_RATE_FRAMES = 10  # tx control frames needed before torque can be cut
 
 
 def compute_gb_honda_bosch(accel, speed):
@@ -109,6 +113,7 @@ class CarController(CarControllerBase):
     self.apply_brake_last = 0
     self.last_pump_ts = 0.
     self.stopping_counter = 0
+    self.steer_rate_counter = 0
 
     self.accel = 0.0
     self.speed = 0.0
@@ -158,8 +163,14 @@ class CarController(CarControllerBase):
       if self.frame % 10 == 0:
         can_sends.append(make_tester_present_msg(0x18DAB0F1, 1, suppress_response=True))
 
+    # Steering jerk fault mitigation
+    self.steer_rate_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringRateDeg) >= MAX_STEER_RATE, CC.latActive,
+                                                                      self.steer_rate_counter, MAX_STEER_RATE_FRAMES)
+    if not apply_steer_req:
+      apply_torque = 0
+
     # Send steering command.
-    can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, CC.latActive))
+    can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, apply_steer_req))
 
     # wind brake from air resistance decel at high speed
     wind_brake = np.interp(CS.out.vEgo, [0.0, 2.3, 35.0], [0.001, 0.002, 0.15])
