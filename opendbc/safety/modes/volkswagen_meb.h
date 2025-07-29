@@ -32,7 +32,7 @@ static safety_config volkswagen_meb_init(uint16_t param) {
 }
 
 static void volkswagen_meb_rx_hook(const CANPacket_t *msg) {
-  if (GET_BUS(msg) == 0U) {
+  if (msg->bus == 0U) {
     int addr = GET_ADDR(msg);
 
     // Update in-motion state by sampling wheel speeds
