@@ -47,7 +47,7 @@ static uint32_t honda_get_checksum(const CANPacket_t *msg) {
 static uint32_t honda_compute_checksum(const CANPacket_t *msg) {
   int len = GET_LEN(msg);
   uint8_t checksum = 0U;
-  unsigned int addr = GET_ADDR(msg);
+  unsigned int addr = msg->addr;
   while (addr > 0U) {
     checksum += (uint8_t)(addr & 0xFU); addr >>= 4;
   }

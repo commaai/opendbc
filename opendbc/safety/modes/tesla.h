@@ -55,7 +55,7 @@ static int _tesla_get_checksum_byte(const int addr) {
 
 static uint32_t tesla_get_checksum(const CANPacket_t *msg) {
   uint8_t chksum = 0;
-  int checksum_byte = _tesla_get_checksum_byte(GET_ADDR(msg));
+  int checksum_byte = _tesla_get_checksum_byte(msg->addr);
   if (checksum_byte != -1) {
     chksum = GET_BYTE(msg, checksum_byte);
   }
@@ -63,13 +63,11 @@ static uint32_t tesla_get_checksum(const CANPacket_t *msg) {
 }
 
 static uint32_t tesla_compute_checksum(const CANPacket_t *msg) {
-  unsigned int addr = GET_ADDR(msg);
-
   uint8_t chksum = 0;
-  int checksum_byte = _tesla_get_checksum_byte(addr);
+  int checksum_byte = _tesla_get_checksum_byte(msg->addr);
 
   if (checksum_byte != -1) {
-    chksum = (uint8_t)((addr & 0xFFU) + ((addr >> 8) & 0xFFU));
+    chksum = (uint8_t)((msg->addr & 0xFFU) + ((msg->addr >> 8) & 0xFFU));
     int len = GET_LEN(msg);
     for (int i = 0; i < len; i++) {
       if (i != checksum_byte) {

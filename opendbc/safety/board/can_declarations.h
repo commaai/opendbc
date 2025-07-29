@@ -2,7 +2,6 @@
 
 #define CANPACKET_HEAD_SIZE 6U
 
-// TODO: this is always CANFD
 #ifdef CANFD
   #define CANPACKET_DATA_SIZE_MAX 64U
 #else
@@ -22,4 +21,3 @@ typedef struct {
 } __attribute__((packed, aligned(4))) CANPacket_t;
 
 #define GET_LEN(msg) (dlc_to_len[(msg)->data_len_code])
-#define GET_ADDR(msg) ((msg)->addr)

@@ -82,9 +82,8 @@ static uint8_t subaru_get_counter(const CANPacket_t *msg) {
 }
 
 static uint32_t subaru_compute_checksum(const CANPacket_t *msg) {
-  int addr = GET_ADDR(msg);
   int len = GET_LEN(msg);
-  uint8_t checksum = (uint8_t)(addr) + (uint8_t)((unsigned int)(addr) >> 8U);
+  uint8_t checksum = (uint8_t)(msg->addr) + (uint8_t)((unsigned int)(msg->addr) >> 8U);
   for (int i = 1; i < len; i++) {
     checksum += (uint8_t)GET_BYTE(msg, i);
   }
