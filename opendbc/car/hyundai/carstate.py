@@ -92,7 +92,8 @@ class CarState(CarStateBase):
       cp.vl["WHL_SPD11"]["WHL_SPD_RL"],
       cp.vl["WHL_SPD11"]["WHL_SPD_RR"],
     )
-    ret.standstill = cp.vl["WHL_SPD11"]["WHL_SPD_FL"] <= STANDSTILL_THRESHOLD and cp.vl["WHL_SPD11"]["WHL_SPD_RR"] <= STANDSTILL_THRESHOLD
+    ret.standstill = cp.vl["WHL_SPD11"]["WHL_SPD_FL"] <= STANDSTILL_THRESHOLD and cp.vl["WHL_SPD11"]["WHL_SPD_RR"] <= STANDSTILL_THRESHOLD \
+      and cp.vl["WHL_SPD11"]["WHL_SPD_FR"] <= STANDSTILL_THRESHOLD and cp.vl["WHL_SPD11"]["WHL_SPD_RL"] <= STANDSTILL_THRESHOLD
 
     self.cluster_speed_counter += 1
     if self.cluster_speed_counter > CLUSTER_SAMPLE_RATE:
