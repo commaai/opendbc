@@ -55,6 +55,14 @@ class TestBody(common.PandaSafetyTest):
     self.assertFalse(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0')))  # not correct data/len
     self.assertFalse(self._tx(common.make_msg(0, 0x251, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x0a')))  # wrong address
 
+  def test_can_flasher_invalid(self):
+    # Invalid CAN flasher message
+    self.safety.set_controls_allowed(False)
+    self.assertTrue(self._tx(common.make_msg(0, 0x1, 8)))
+    self.assertFalse(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x1a')))
+
+    self.assertTrue(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x0a')))
+    self.assertFalse(self._tx(common.make_msg(0, 0x1, 7)))
 
 if __name__ == "__main__":
   unittest.main()
