@@ -120,7 +120,7 @@ uint32_t hyundai_common_canfd_compute_checksum(const CANPacket_t *msg) {
   uint16_t crc = 0;
 
   for (int i = 2; i < len; i++) {
-    crc = (crc << 8U) ^ hyundai_canfd_crc_lut[(crc >> 8U) ^ GET_BYTE(msg, i)];
+    crc = (crc << 8U) ^ hyundai_canfd_crc_lut[(crc >> 8U) ^ msg->data[i]];
   }
 
   // Add address to crc

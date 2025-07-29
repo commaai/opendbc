@@ -61,14 +61,14 @@ static uint32_t toyota_compute_checksum(const CANPacket_t *msg) {
   int len = GET_LEN(msg);
   uint8_t checksum = (uint8_t)(msg->addr) + (uint8_t)((unsigned int)(msg->addr) >> 8U) + (uint8_t)(len);
   for (int i = 0; i < (len - 1); i++) {
-    checksum += (uint8_t)GET_BYTE(msg, i);
+    checksum += (uint8_t)msg->data[i];
   }
   return checksum;
 }
 
 static uint32_t toyota_get_checksum(const CANPacket_t *msg) {
   int checksum_byte = GET_LEN(msg) - 1U;
-  return (uint8_t)(GET_BYTE(msg, checksum_byte));
+  return (uint8_t)(msg->data[checksum_byte]);
 }
 
 static bool toyota_get_quality_flag_valid(const CANPacket_t *msg) {
@@ -85,7 +85,7 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
 
     // get eps motor torque (0.66 factor in dbc)
     if (msg->addr == 0x260U) {
-      int torque_meas_new = (GET_BYTE(msg, 5) << 8) | GET_BYTE(msg, 6);
+      int torque_meas_new = (msg->data[5] << 8) | msg->data[6];
       torque_meas_new = to_signed(torque_meas_new, 16);
 
       // scale by dbc_factor
@@ -99,7 +99,7 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
       torque_meas.max++;
 
       // driver torque for angle limiting
-      int torque_driver_new = (GET_BYTE(msg, 1) << 8) | GET_BYTE(msg, 2);
+      int torque_driver_new = (msg->data[1] << 8) | msg->data[2];
       torque_driver_new = to_signed(torque_driver_new, 16);
       update_sample(&torque_driver, torque_driver_new);
 
@@ -107,7 +107,7 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
       // note that angle can be relative to init angle on some TSS2 platforms, LTA has the same offset
       bool steer_angle_initializing = GET_BIT(msg, 3U);
       if (!steer_angle_initializing) {
-        int angle_meas_new = (GET_BYTE(msg, 3) << 8U) | GET_BYTE(msg, 4);
+        int angle_meas_new = (msg->data[3] << 8U) | msg->data[4];
         angle_meas_new = to_signed(angle_meas_new, 16);
         update_sample(&angle_meas, angle_meas_new);
       }
@@ -122,7 +122,7 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
         pcm_cruise_check(cruise_engaged);
       }
       if (msg->addr == 0x116U) {
-        gas_pressed = GET_BYTE(msg, 1) != 0U;  // GAS_PEDAL.GAS_PEDAL_USER
+        gas_pressed = msg->data[1] != 0U;  // GAS_PEDAL.GAS_PEDAL_USER
       }
       if (msg->addr == 0x101U) {
         brake_pressed = GET_BIT(msg, 3U);  // BRAKE_MODULE.BRAKE_PRESSED (toyota_rav4_prime_generated.dbc)
@@ -146,7 +146,7 @@ static void toyota_rx_hook(const CANPacket_t *msg) {
       int speed = 0;
       // sum 4 wheel speeds. conversion: raw * 0.01 - 67.67
       for (uint8_t i = 0U; i < 8U; i += 2U) {
-        int wheel_speed = (GET_BYTE(msg, i) << 8U) | GET_BYTE(msg, (i + 1U));
+        int wheel_speed = (msg->data[i] << 8U) | msg->data[(i + 1U)];
         speed += wheel_speed - 6767;
       }
       // check that all wheel speeds are at zero value
@@ -204,7 +204,7 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
   if (msg->bus == 0U) {
     // ACCEL: safety check on byte 1-2
     if (msg->addr == 0x343U) {
-      int desired_accel = (GET_BYTE(msg, 0) << 8) | GET_BYTE(msg, 1);
+      int desired_accel = (msg->data[0] << 8) | msg->data[1];
       desired_accel = to_signed(desired_accel, 16);
 
       bool violation = false;
@@ -229,7 +229,7 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
     // AEB: block all actuation. only used when DSU is unplugged
     if (msg->addr == 0x283U) {
       // only allow the checksum, which is the last byte
-      bool block = (GET_BYTES(msg, 0, 4) != 0U) || (GET_BYTE(msg, 4) != 0U) || (GET_BYTE(msg, 5) != 0U);
+      bool block = (GET_BYTES(msg, 0, 4) != 0U) || (msg->data[4] != 0U) || (msg->data[5] != 0U);
       if (block) {
         tx = false;
       }
@@ -240,8 +240,8 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
       // check the STEER_REQUEST, STEER_REQUEST_2, TORQUE_WIND_DOWN, STEER_ANGLE_CMD signals
       bool lta_request = GET_BIT(msg, 0U);
       bool lta_request2 = GET_BIT(msg, 25U);
-      int torque_wind_down = GET_BYTE(msg, 5);
-      int lta_angle = (GET_BYTE(msg, 1) << 8) | GET_BYTE(msg, 2);
+      int torque_wind_down = msg->data[5];
+      int lta_angle = (msg->data[1] << 8) | msg->data[2];
       lta_angle = to_signed(lta_angle, 16);
 
       bool steer_control_enabled = lta_request || lta_request2;
@@ -288,8 +288,8 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
       // SecOC cars block any form of LTA actuation for now
       bool lta_request = GET_BIT(msg, 3U);  // STEERING_LTA_2.STEER_REQUEST
       bool lta_request2 = GET_BIT(msg, 0U);  // STEERING_LTA_2.STEER_REQUEST_2
-      int lta_angle_msb = GET_BYTE(msg, 2);  // STEERING_LTA_2.STEER_ANGLE_CMD (MSB)
-      int lta_angle_lsb = GET_BYTE(msg, 3);  // STEERING_LTA_2.STEER_ANGLE_CMD (LSB)
+      int lta_angle_msb = msg->data[2];  // STEERING_LTA_2.STEER_ANGLE_CMD (MSB)
+      int lta_angle_lsb = msg->data[3];  // STEERING_LTA_2.STEER_ANGLE_CMD (LSB)
 
       bool actuation = lta_request || lta_request2 || (lta_angle_msb != 0) || (lta_angle_lsb != 0);
       if (actuation) {
@@ -299,7 +299,7 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
 
     // STEER: safety check on bytes 2-3
     if (msg->addr == 0x2E4U) {
-      int desired_torque = (GET_BYTE(msg, 1) << 8) | GET_BYTE(msg, 2);
+      int desired_torque = (msg->data[1] << 8) | msg->data[2];
       desired_torque = to_signed(desired_torque, 16);
       bool steer_req = GET_BIT(msg, 0U);
       // When using LTA (angle control), assert no actuation on LKA message
