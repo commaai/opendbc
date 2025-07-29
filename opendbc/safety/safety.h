@@ -28,7 +28,6 @@
 // CAN-FD only safety modes
 #ifdef CANFD
 #include "opendbc/safety/modes/hyundai_canfd.h"
-#include "opendbc/safety/modes/volkswagen_meb.h"
 #endif
 
 uint32_t GET_BYTES(const CANPacket_t *msg, int start, int len) {
@@ -411,9 +410,6 @@ int set_safety_hooks(uint16_t mode, uint16_t param) {
     {SAFETY_TESLA, &tesla_hooks},
 #ifdef CANFD
     {SAFETY_HYUNDAI_CANFD, &hyundai_canfd_hooks},
-#ifdef ALLOW_DEBUG
-    {SAFETY_VOLKSWAGEN_MEB, &volkswagen_meb_hooks},
-#endif
 #endif
 #ifdef ALLOW_DEBUG
     {SAFETY_SUBARU_PREGLOBAL, &subaru_preglobal_hooks},
