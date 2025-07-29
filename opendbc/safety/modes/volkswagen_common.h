@@ -30,12 +30,12 @@ bool volkswagen_resume_button_prev = false;
 
 
 static uint32_t volkswagen_mqb_meb_get_checksum(const CANPacket_t *msg) {
-  return (uint8_t)GET_BYTE(msg, 0);
+  return (uint8_t)msg->data[0];
 }
 
 static uint8_t volkswagen_mqb_meb_get_counter(const CANPacket_t *msg) {
   // MQB/MEB message counters are consistently found at LSB 8.
-  return (uint8_t)GET_BYTE(msg, 1) & 0xFU;
+  return (uint8_t)msg->data[1] & 0xFU;
 }
 
 static uint32_t volkswagen_mqb_meb_compute_crc(const CANPacket_t *msg) {
@@ -46,7 +46,7 @@ static uint32_t volkswagen_mqb_meb_compute_crc(const CANPacket_t *msg) {
 
   uint8_t crc = 0xFFU;
   for (int i = 1; i < len; i++) {
-    crc ^= (uint8_t)GET_BYTE(msg, i);
+    crc ^= (uint8_t)msg->data[i];
     crc = volkswagen_crc8_lut_8h2f[crc];
   }
 

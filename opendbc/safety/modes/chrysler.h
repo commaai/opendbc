@@ -23,7 +23,7 @@ static const ChryslerAddrs *chrysler_addrs;
 
 static uint32_t chrysler_get_checksum(const CANPacket_t *msg) {
   int checksum_byte = GET_LEN(msg) - 1U;
-  return (uint8_t)(GET_BYTE(msg, checksum_byte));
+  return (uint8_t)(msg->data[checksum_byte]);
 }
 
 static uint32_t chrysler_compute_checksum(const CANPacket_t *msg) {
@@ -33,7 +33,7 @@ static uint32_t chrysler_compute_checksum(const CANPacket_t *msg) {
   int len = GET_LEN(msg);
   for (int j = 0; j < (len - 1); j++) {
     uint8_t shift = 0x80U;
-    uint8_t curr = (uint8_t)GET_BYTE(msg, j);
+    uint8_t curr = (uint8_t)msg->data[j];
     for (int i=0; i<8; i++) {
       uint8_t bit_sum = curr & shift;
       uint8_t temp_chk = checksum & 0x80U;
@@ -60,13 +60,13 @@ static uint32_t chrysler_compute_checksum(const CANPacket_t *msg) {
 }
 
 static uint8_t chrysler_get_counter(const CANPacket_t *msg) {
-  return (uint8_t)(GET_BYTE(msg, 6) >> 4);
+  return (uint8_t)(msg->data[6] >> 4);
 }
 
 static void chrysler_rx_hook(const CANPacket_t *msg) {
   // Measured EPS torque
   if ((msg->bus == 0U) && (msg->addr == chrysler_addrs->EPS_2)) {
-    int torque_meas_new = ((GET_BYTE(msg, 4) & 0x7U) << 8) + GET_BYTE(msg, 5) - 1024U;
+    int torque_meas_new = ((msg->data[4] & 0x7U) << 8) + msg->data[5] - 1024U;
     update_sample(&torque_meas, torque_meas_new);
   }
 
@@ -80,22 +80,22 @@ static void chrysler_rx_hook(const CANPacket_t *msg) {
   // TODO: use the same message for both
   // update vehicle moving
   if ((chrysler_platform != CHRYSLER_PACIFICA) && (msg->bus == 0U) && (msg->addr == chrysler_addrs->ESP_8)) {
-    vehicle_moving = ((GET_BYTE(msg, 4) << 8) + GET_BYTE(msg, 5)) != 0U;
+    vehicle_moving = ((msg->data[4] << 8) + msg->data[5]) != 0U;
   }
   if ((chrysler_platform == CHRYSLER_PACIFICA) && (msg->bus == 0U) && (msg->addr == 514U)) {
-    int speed_l = (GET_BYTE(msg, 0) << 4) + (GET_BYTE(msg, 1) >> 4);
-    int speed_r = (GET_BYTE(msg, 2) << 4) + (GET_BYTE(msg, 3) >> 4);
+    int speed_l = (msg->data[0] << 4) + (msg->data[1] >> 4);
+    int speed_r = (msg->data[2] << 4) + (msg->data[3] >> 4);
     vehicle_moving = (speed_l != 0) || (speed_r != 0);
   }
 
   // exit controls on rising edge of gas press
   if ((msg->bus == 0U) && (msg->addr == chrysler_addrs->ECM_5)) {
-    gas_pressed = GET_BYTE(msg, 0U) != 0U;
+    gas_pressed = msg->data[0U] != 0U;
   }
 
   // exit controls on rising edge of brake press
   if ((msg->bus == 0U) && (msg->addr == chrysler_addrs->ESP_1)) {
-    brake_pressed = ((GET_BYTE(msg, 0U) & 0xFU) >> 2U) == 1U;
+    brake_pressed = ((msg->data[0U] & 0xFU) >> 2U) == 1U;
   }
 }
 
@@ -132,13 +132,13 @@ static bool chrysler_tx_hook(const CANPacket_t *msg) {
   // STEERING
   if (msg->addr == chrysler_addrs->LKAS_COMMAND) {
     int start_byte = (chrysler_platform == CHRYSLER_PACIFICA) ? 0 : 1;
-    int desired_torque = ((GET_BYTE(msg, start_byte) & 0x7U) << 8) | GET_BYTE(msg, start_byte + 1);
+    int desired_torque = ((msg->data[start_byte] & 0x7U) << 8) | msg->data[start_byte + 1];
     desired_torque -= 1024;
 
     const TorqueSteeringLimits limits = (chrysler_platform == CHRYSLER_PACIFICA) ? CHRYSLER_STEERING_LIMITS :
                                         (chrysler_platform == CHRYSLER_RAM_DT) ? CHRYSLER_RAM_DT_STEERING_LIMITS : CHRYSLER_RAM_HD_STEERING_LIMITS;
 
-    bool steer_req = (chrysler_platform == CHRYSLER_PACIFICA) ? GET_BIT(msg, 4U) : (GET_BYTE(msg, 3) & 0x7U) == 2U;
+    bool steer_req = (chrysler_platform == CHRYSLER_PACIFICA) ? GET_BIT(msg, 4U) : (msg->data[3] & 0x7U) == 2U;
     if (steer_torque_cmd_checks(desired_torque, steer_req, limits)) {
       tx = false;
     }
@@ -146,8 +146,8 @@ static bool chrysler_tx_hook(const CANPacket_t *msg) {
 
   // FORCE CANCEL: only the cancel button press is allowed
   if (msg->addr == chrysler_addrs->CRUISE_BUTTONS) {
-    const bool is_cancel = GET_BYTE(msg, 0) == 1U;
-    const bool is_resume = GET_BYTE(msg, 0) == 0x10U;
+    const bool is_cancel = msg->data[0] == 1U;
+    const bool is_resume = msg->data[0] == 0x10U;
     const bool allowed = is_cancel || (is_resume && controls_allowed);
     if (!allowed) {
       tx = false;

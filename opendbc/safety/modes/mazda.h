@@ -20,28 +20,28 @@ static void mazda_rx_hook(const CANPacket_t *msg) {
   if ((int)msg->bus == MAZDA_MAIN) {
     if (msg->addr == MAZDA_ENGINE_DATA) {
       // sample speed: scale by 0.01 to get kph
-      int speed = (GET_BYTE(msg, 2) << 8) | GET_BYTE(msg, 3);
+      int speed = (msg->data[2] << 8) | msg->data[3];
       vehicle_moving = speed > 10; // moving when speed > 0.1 kph
     }
 
     if (msg->addr == MAZDA_STEER_TORQUE) {
-      int torque_driver_new = GET_BYTE(msg, 0) - 127U;
+      int torque_driver_new = msg->data[0] - 127U;
       // update array of samples
       update_sample(&torque_driver, torque_driver_new);
     }
 
     // enter controls on rising edge of ACC, exit controls on ACC off
     if (msg->addr == MAZDA_CRZ_CTRL) {
-      bool cruise_engaged = GET_BYTE(msg, 0) & 0x8U;
+      bool cruise_engaged = msg->data[0] & 0x8U;
       pcm_cruise_check(cruise_engaged);
     }
 
     if (msg->addr == MAZDA_ENGINE_DATA) {
-      gas_pressed = (GET_BYTE(msg, 4) || (GET_BYTE(msg, 5) & 0xF0U));
+      gas_pressed = (msg->data[4] || (msg->data[5] & 0xF0U));
     }
 
     if (msg->addr == MAZDA_PEDALS) {
-      brake_pressed = (GET_BYTE(msg, 0) & 0x10U);
+      brake_pressed = (msg->data[0] & 0x10U);
     }
   }
 }
@@ -62,7 +62,7 @@ static bool mazda_tx_hook(const CANPacket_t *msg) {
   if (msg->bus == (unsigned char)MAZDA_MAIN) {
     // steer cmd checks
     if (msg->addr == MAZDA_LKAS) {
-      int desired_torque = (((GET_BYTE(msg, 0) & 0x0FU) << 8) | GET_BYTE(msg, 1)) - 2048U;
+      int desired_torque = (((msg->data[0] & 0x0FU) << 8) | msg->data[1]) - 2048U;
 
       if (steer_torque_cmd_checks(desired_torque, -1, MAZDA_STEERING_LIMITS)) {
         tx = false;
@@ -73,7 +73,7 @@ static bool mazda_tx_hook(const CANPacket_t *msg) {
     if (msg->addr == MAZDA_CRZ_BTNS) {
       // allow resume spamming while controls allowed, but
       // only allow cancel while controls not allowed
-      bool cancel_cmd = (GET_BYTE(msg, 0) == 0x1U);
+      bool cancel_cmd = (msg->data[0] == 0x1U);
       if (!controls_allowed && !cancel_cmd) {
         tx = false;
       }

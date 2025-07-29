@@ -48,7 +48,7 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
       // sum 4 wheel speeds
       int speed = 0;
       for (uint8_t i = 0U; i < 8U; i += 2U) {
-        int wheel_speed = GET_BYTE(msg, i) | (GET_BYTE(msg, i + 1U) << 8);
+        int wheel_speed = msg->data[i] | (msg->data[i + 1U] << 8);
         speed += wheel_speed;
       }
       // Check all wheel speeds for any movement
@@ -59,8 +59,8 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
     // Signal: LH_EPS_03.EPS_Lenkmoment (absolute torque)
     // Signal: LH_EPS_03.EPS_VZ_Lenkmoment (direction)
     if (msg->addr == MSG_LH_EPS_03) {
-      int torque_driver_new = GET_BYTE(msg, 5) | ((GET_BYTE(msg, 6) & 0x1FU) << 8);
-      int sign = (GET_BYTE(msg, 6) & 0x80U) >> 7;
+      int torque_driver_new = msg->data[5] | ((msg->data[6] & 0x1FU) << 8);
+      int sign = (msg->data[6] & 0x80U) >> 7;
       if (sign == 1) {
         torque_driver_new *= -1;
       }
@@ -71,7 +71,7 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
       // When using stock ACC, enter controls on rising edge of stock ACC engage, exit on disengage
       // Always exit controls on main switch off
       // Signal: TSK_06.TSK_Status
-      int acc_status = (GET_BYTE(msg, 3) & 0x7U);
+      int acc_status = (msg->data[3] & 0x7U);
       bool cruise_engaged = (acc_status == 3) || (acc_status == 4) || (acc_status == 5);
       acc_main_on = cruise_engaged || (acc_status == 2);
 
@@ -111,12 +111,12 @@ static void volkswagen_mqb_rx_hook(const CANPacket_t *msg) {
 
     // Signal: Motor_14.MO_Fahrer_bremst (ECU detected brake pedal switch F63)
     if (msg->addr == MSG_MOTOR_14) {
-      volkswagen_mqb_brake_pedal_switch = (GET_BYTE(msg, 3) & 0x10U) >> 4;
+      volkswagen_mqb_brake_pedal_switch = (msg->data[3] & 0x10U) >> 4;
     }
 
     // Signal: ESP_05.ESP_Fahrer_bremst (ESP detected driver brake pressure above platform specified threshold)
     if (msg->addr == MSG_ESP_05) {
-      volkswagen_mqb_brake_pressure_detected = (GET_BYTE(msg, 3) & 0x4U) >> 2;
+      volkswagen_mqb_brake_pressure_detected = (msg->data[3] & 0x4U) >> 2;
     }
 
     brake_pressed = volkswagen_mqb_brake_pedal_switch || volkswagen_mqb_brake_pressure_detected;
@@ -149,7 +149,7 @@ static bool volkswagen_mqb_tx_hook(const CANPacket_t *msg) {
   // Signal: HCA_01.HCA_01_LM_Offset (absolute torque)
   // Signal: HCA_01.HCA_01_LM_OffSign (direction)
   if (msg->addr == MSG_HCA_01) {
-    int desired_torque = GET_BYTE(msg, 2) | ((GET_BYTE(msg, 3) & 0x1U) << 8);
+    int desired_torque = msg->data[2] | ((msg->data[3] & 0x1U) << 8);
     bool sign = GET_BIT(msg, 31U);
     if (sign) {
       desired_torque *= -1;
@@ -170,13 +170,13 @@ static bool volkswagen_mqb_tx_hook(const CANPacket_t *msg) {
 
     if (msg->addr == MSG_ACC_06) {
       // Signal: ACC_06.ACC_Sollbeschleunigung_02 (acceleration in m/s2, scale 0.005, offset -7.22)
-      desired_accel = ((((GET_BYTE(msg, 4) & 0x7U) << 8) | GET_BYTE(msg, 3)) * 5U) - 7220U;
+      desired_accel = ((((msg->data[4] & 0x7U) << 8) | msg->data[3]) * 5U) - 7220U;
     } else {
       // Signal: ACC_07.ACC_Folgebeschl (acceleration in m/s2, scale 0.03, offset -4.6)
-      int secondary_accel = (GET_BYTE(msg, 4) * 30U) - 4600U;
+      int secondary_accel = (msg->data[4] * 30U) - 4600U;
       violation |= (secondary_accel != 3020);  // enforce always inactive (one increment above max range) at this time
       // Signal: ACC_07.ACC_Sollbeschleunigung_02 (acceleration in m/s2, scale 0.005, offset -7.22)
-      desired_accel = (((GET_BYTE(msg, 7) << 3) | ((GET_BYTE(msg, 6) & 0xE0U) >> 5)) * 5U) - 7220U;
+      desired_accel = (((msg->data[7] << 3) | ((msg->data[6] & 0xE0U) >> 5)) * 5U) - 7220U;
     }
 
     violation |= longitudinal_accel_checks(desired_accel, VOLKSWAGEN_MQB_LONG_LIMITS);
@@ -190,7 +190,7 @@ static bool volkswagen_mqb_tx_hook(const CANPacket_t *msg) {
   // This avoids unintended engagements while still allowing resume spam
   if ((msg->addr == MSG_GRA_ACC_01) && !controls_allowed) {
     // disallow resume and set: bits 16 and 19
-    if ((GET_BYTE(msg, 2) & 0x9U) != 0U) {
+    if ((msg->data[2] & 0x9U) != 0U) {
       tx = false;
     }
   }
