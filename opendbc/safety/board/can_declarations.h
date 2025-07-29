@@ -21,6 +21,5 @@ typedef struct {
   unsigned char data[CANPACKET_DATA_SIZE_MAX];
 } __attribute__((packed, aligned(4))) CANPacket_t;
 
-#define GET_BUS(msg) ((msg)->bus)
 #define GET_LEN(msg) (dlc_to_len[(msg)->data_len_code])
 #define GET_ADDR(msg) ((msg)->addr)

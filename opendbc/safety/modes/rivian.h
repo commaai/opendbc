@@ -70,10 +70,9 @@ static bool rivian_get_quality_flag_valid(const CANPacket_t *msg) {
 }
 
 static void rivian_rx_hook(const CANPacket_t *msg) {
-  int bus = GET_BUS(msg);
   int addr = GET_ADDR(msg);
 
-  if (bus == 0)  {
+  if (msg->bus == 0U)  {
     // Vehicle speed
     if (addr == 0x208) {
       float speed = ((GET_BYTE(msg, 6) << 8) | GET_BYTE(msg, 7)) * 0.01;
@@ -102,7 +101,7 @@ static void rivian_rx_hook(const CANPacket_t *msg) {
     }
   }
 
-  if (bus == 2) {
+  if (msg->bus == 2U) {
     // Cruise state
     if (addr == 0x100) {
       const int feature_status = GET_BYTE(msg, 2) >> 5U;
@@ -135,9 +134,8 @@ static bool rivian_tx_hook(const CANPacket_t *msg) {
   };
 
   bool tx = true;
-  int bus = GET_BUS(msg);
 
-  if (bus == 0) {
+  if (msg->bus == 0U) {
     int addr = GET_ADDR(msg);
 
     // Steering control
