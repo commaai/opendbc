@@ -247,6 +247,8 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
       self.assertNotEqual(autopark_active, self._tx(self._angle_cmd_msg(0, True)))
       self.assertNotEqual(autopark_active, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_CANCEL_GENERIC_SILENT"])))
       self.assertNotEqual(autopark_active or not self.LONGITUDINAL, self._tx(self._long_control_msg(0, acc_state=self.acc_states["ACC_ON"])))
+      # Make sure CAN is not blocked
+      self.assertNotEqual(autopark_active, self.safety.safety_fwd_hook(2, MSG_DAS_steeringControl))
 
       # Regain controls when Autopark disables
       self._rx(self._pcm_status_msg(True, 0))
@@ -279,6 +281,22 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     self.assertEqual(1, self._rx(lkas_msg_cam))
     self.assertEqual(0, self.safety.safety_fwd_hook(2, lkas_msg_cam.addr))
     self.assertFalse(self._tx(no_lkas_msg))
+
+    # rising edge LKAS
+    self.assertTrue(self._rx(lkas_msg_cam))
+    self.assertEqual(0, self.safety.safety_fwd_hook(2, lkas_msg_cam.addr))
+    self.assertFalse(self._tx(lkas_msg_cam))
+
+    # LKAS is not allowed when controls are enabled
+    self.assertEqual(1, self._rx(no_lkas_msg_cam))
+    self.assertEqual(-1, self.safety.safety_fwd_hook(2, no_lkas_msg_cam.addr))
+    self.assertTrue(self._tx(no_lkas_msg))
+    self.safety.set_controls_allowed(True)
+    self.assertTrue(self._rx(lkas_msg_cam))
+    self.assertEqual(-1, self.safety.safety_fwd_hook(2, lkas_msg_cam.addr))
+    self.assertFalse(self._tx(lkas_msg_cam))
+
+
 
   def test_angle_cmd_when_enabled(self):
     # We properly test lateral acceleration and jerk below
