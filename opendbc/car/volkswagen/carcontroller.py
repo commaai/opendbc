@@ -13,15 +13,16 @@ LongCtrlState = structs.CarControl.Actuators.LongControlState
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
-    self.CCP = CarControllerParams(CP)
     self.CAN = CanBus(CP)
+    self.CCP = CarControllerParams(CP)
+    self.packer_pt = CANPacker(dbc_names[Bus.pt])
+
+    self.CCS = mqbcan
     if CP.flags & VolkswagenFlags.PQ:
       self.CCS = pqcan
     elif CP.flags & VolkswagenFlags.MEB:
       self.CCS = mebcan
-    else:
-      self.CCS = mqbcan
-    self.packer_pt = CANPacker(dbc_names[Bus.pt])
+
     self.aeb_available = not CP.flags & VolkswagenFlags.PQ
     self.openpilot_longitudinal = self.CP.openpilotLongitudinalControl and not self.CP.flags & VolkswagenFlags.MEB
 
