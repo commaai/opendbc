@@ -147,7 +147,7 @@ def apply_vm_steer_angle_limits(apply_angle: float, apply_angle_last: float, v_e
   if not lat_active:
     new_apply_angle = steering_angle
 
-  # *** final hard limit to prevent fault ***
+  # final hard limit to prevent fault
   return float(np.clip(new_apply_angle, -limits.ANGLE_LIMITS.STEER_ANGLE_MAX, limits.ANGLE_LIMITS.STEER_ANGLE_MAX))
 
 
