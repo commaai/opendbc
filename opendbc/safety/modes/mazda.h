@@ -21,6 +21,7 @@ static void mazda_rx_hook(const CANPacket_t *msg) {
     // sample speed: scale by 0.01 to get kph
     int speed = (msg->data[2] << 8) | msg->data[3];
     vehicle_moving = speed > 10; // moving when speed > 0.1 kph
+    UPDATE_VEHICLE_SPEED(speed * 0.01 * KPH_TO_MS);
   }
 
   if (msg->addr == MAZDA_STEER_TORQUE) {
@@ -36,7 +37,7 @@ static void mazda_rx_hook(const CANPacket_t *msg) {
   }
 
   if (msg->addr == MAZDA_ENGINE_DATA) {
-    gas_pressed = ((msg->data[4] << 4) | (msg->data[5] >> 4)) > 0;
+    gas_pressed = (msg->data[4] || (msg->data[5] & 0xF0U));
   }
 
   if (msg->addr == MAZDA_PEDALS) {

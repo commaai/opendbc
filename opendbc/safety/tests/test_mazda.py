@@ -80,6 +80,29 @@ class TestMazdaSafety(common.PandaCarSafetyTest, common.DriverTorqueSteeringSafe
     self.assertTrue(self._tx(self._button_msg(cancel=True)))
     self.assertTrue(self._tx(self._button_msg(resume=True)))
 
+  def test_speed_bytes(self):
+    values = {"SPEED": int.from_bytes(b'\x00\x00')}
+    self.assertTrue(self._rx(self.packer.make_can_msg_panda("ENGINE_DATA", 0, values)))
+    self.assertFalse(self.safety.get_vehicle_moving())
+    values = {"SPEED": int.from_bytes(b'\x00\x10')}
+    self.assertTrue(self._rx(self.packer.make_can_msg_panda("ENGINE_DATA", 0, values)))
+    self.assertTrue(self.safety.get_vehicle_moving())
+    values = {"SPEED": int.from_bytes(b'\x10\x00')}
+    self.assertTrue(self._rx(self.packer.make_can_msg_panda("ENGINE_DATA", 0, values)))
+    self.assertTrue(self.safety.get_vehicle_moving())
+
+
+  def test_gas_bytes(self):
+    values = {"PEDAL_GAS": int.from_bytes(b'\x00\x00')}
+    self.assertTrue(self._rx(self.packer.make_can_msg_panda("ENGINE_DATA", 0, values)))
+    self.assertFalse(self.safety.get_gas_pressed_prev())
+    values = {"PEDAL_GAS": int.from_bytes(b'\x00\x10')}
+    self.assertTrue(self._rx(self.packer.make_can_msg_panda("ENGINE_DATA", 0, values)))
+    self.assertTrue(self.safety.get_gas_pressed_prev())
+    values = {"PEDAL_GAS": int.from_bytes(b'\x01\x00')}
+    self.assertTrue(self._rx(self.packer.make_can_msg_panda("ENGINE_DATA", 0, values)))
+    self.assertTrue(self.safety.get_gas_pressed_prev())
+
 
 if __name__ == "__main__":
   unittest.main()
