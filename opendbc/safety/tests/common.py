@@ -3,6 +3,7 @@ import abc
 import math
 import unittest
 import importlib
+import itertools
 import numpy as np
 from collections.abc import Callable
 
@@ -963,6 +964,14 @@ class PandaCarSafetyTest(PandaSafetyTest):
   def _speed_msg_2(self, speed: float):
     pass
 
+  @abc.abstractmethod
+  def _wheel_speed_2wheel_msg(self, wheel_left: float, wheel_right: float):
+    pass
+
+  @abc.abstractmethod
+  def _wheel_speed_4wheel_msg(self, wheel_fl: float, wheel_fr: float, wheel_rl: float, wheel_rr: float):
+    pass
+
   # Safety modes can override if vehicle_moving is driven by a different message
   def _vehicle_moving_msg(self, speed: float):
     return self._speed_msg(speed)
@@ -1102,6 +1111,24 @@ class PandaCarSafetyTest(PandaSafetyTest):
     # past threshold
     self._rx(self._vehicle_moving_msg(self.STANDSTILL_THRESHOLD + 1))
     self.assertTrue(self.safety.get_vehicle_moving())
+
+    if self._wheel_speed_2wheel_msg(0, 0) is not None:
+      for i in range(1, 3):  # number of moving wheels: 1 to 2
+        for moving_indices in itertools.combinations(range(2), i):
+            speeds = [0.0] * 2
+            for idx in moving_indices:
+                speeds[idx] = self.STANDSTILL_THRESHOLD + 1
+            self._rx(self._wheel_speed_2wheel_msg(*speeds))
+            self.assertTrue(self.safety.get_vehicle_moving())
+
+    if self._wheel_speed_4wheel_msg(0, 0, 0, 0) is not None:
+      for i in range(1, 5):  # number of moving wheels: 1 to 4
+        for moving_indices in itertools.combinations(range(4), i):
+            speeds = [0.0] * 4
+            for idx in moving_indices:
+                speeds[idx] = self.STANDSTILL_THRESHOLD + 1
+            self._rx(self._wheel_speed_4wheel_msg(*speeds))
+            self.assertTrue(self.safety.get_vehicle_moving())
 
   def test_rx_hook_speed_mismatch(self):
     if self._speed_msg_2(0) is None:

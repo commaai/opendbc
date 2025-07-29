@@ -37,7 +37,12 @@ static void subaru_preglobal_rx_hook(const CANPacket_t *msg) {
 
     // update vehicle moving with any non-zero wheel speed
     if (msg->addr == MSG_SUBARU_PG_Wheel_Speeds) {
-      vehicle_moving = ((GET_BYTES(msg, 0, 4) >> 12) != 0U) || (GET_BYTES(msg, 4, 4) != 0U);
+      vehicle_moving = (
+        (GET_BYTES(msg, 0, 2) & 0x1FFFU) > 0U ||
+        (GET_BYTES(msg, 2, 2) & 0x1FFFU) > 0U ||
+        (GET_BYTES(msg, 4, 2) & 0x1FFFU) > 0U ||
+        (GET_BYTES(msg, 6, 2) & 0x1FFFU) > 0U
+      );
     }
 
     if (msg->addr == MSG_SUBARU_PG_Brake_Pedal) {
