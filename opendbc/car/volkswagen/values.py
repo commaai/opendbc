@@ -26,7 +26,7 @@ class CanBus(CanBusBase):
       self._ext = self.offset + 2 if CP.networkLocation == NetworkLocation.gateway else self.offset
 
   @property
-  def main(self) -> int:
+  def pt(self) -> int:
     return self.offset
 
   @property
@@ -34,7 +34,7 @@ class CanBus(CanBusBase):
     return self.offset + 1
 
   @property
-  def camera(self) -> int:
+  def cam(self) -> int:
     return self.offset + 2
 
   @property
