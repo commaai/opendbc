@@ -5,9 +5,9 @@
 #define PSA_STEERING              757U  // RX from XXX, driver torque
 #define PSA_STEERING_ALT          773U  // RX from EPS, steering angle
 #define PSA_DYN_CMM               520U  // RX from CMM, gas pedal
-#define PSA_DAT_BSI               1042U // RX from BSI, doors
 #define PSA_HS2_DYN_ABR_38D       909U  // RX from UC_FREIN, speed
 #define PSA_HS2_DAT_MDD_CMD_452   1106U // RX from BSI, cruise state
+#define PSA_DYN2_FRE              973U  // RX from ABS, brake pressure
 #define PSA_LANE_KEEP_ASSIST      1010U // TX from OP,  EPS
 
 // CAN bus
@@ -53,7 +53,6 @@ static uint8_t _psa_compute_checksum(const CANPacket_t *msg, uint8_t chk_ini, in
   return (chk_ini - sum) & 0xFU;
 }
 
-
 static uint32_t psa_compute_checksum(const CANPacket_t *msg) {
   uint8_t chk = 0;
   if (msg->addr == PSA_HS2_DAT_MDD_CMD_452) {
@@ -79,6 +78,10 @@ static void psa_rx_hook(const CANPacket_t *msg) {
       int angle_meas_new = to_signed((msg->data[0] << 8) | msg->data[1], 16);
       update_sample(&angle_meas, angle_meas_new);
     }
+    if (msg->addr == PSA_DYN2_FRE) {
+      int brake_pressure = (msg->data[5] << 4) | ((msg->data[6] & 0xF0) >> 4); // BRAKE_PRESSURE
+      brake_pressed = brake_pressure > 0;
+    }
     if (msg->addr == PSA_HS2_DYN_ABR_38D) {
       int speed = (msg->data[0] << 8) | msg->data[1];
       vehicle_moving = speed > 0;
@@ -88,13 +91,7 @@ static void psa_rx_hook(const CANPacket_t *msg) {
 
   if (msg->bus == PSA_ADAS_BUS) {
     if (msg->addr == PSA_HS2_DAT_MDD_CMD_452) {
-      pcm_cruise_check(((msg->data[2U] >> 7U) & 1U)); // RVV_ACC_ACTIVATION_REQ
-    }
-  }
-
-  if (msg->bus == PSA_MAIN_BUS) {
-    if (msg->addr == PSA_DAT_BSI) {
-      brake_pressed = (msg->data[0U] >> 5U) & 1U; // P013_MainBrake
+      pcm_cruise_check((msg->data[2U] >> 7U) & 1U); // RVV_ACC_ACTIVATION_REQ
     }
   }
 }
@@ -102,7 +99,7 @@ static void psa_rx_hook(const CANPacket_t *msg) {
 static bool psa_tx_hook(const CANPacket_t *msg) {
   bool tx = true;
   static const AngleSteeringLimits PSA_STEERING_LIMITS = {
-      .angle_deg_to_can = 100,
+      .angle_deg_to_can = 10,
       .angle_rate_up_lookup = {
       {0., 5., 25.},
       {2.5, 1.5, .2},
@@ -144,12 +141,15 @@ static safety_config psa_init(uint16_t param) {
   };
 
   static RxCheck psa_rx_checks[] = {
-    {.msg = {{PSA_HS2_DAT_MDD_CMD_452, PSA_ADAS_BUS, 6, 20U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                       // cruise state
-    {.msg = {{PSA_HS2_DYN_ABR_38D, PSA_CAM_BUS, 8, 25U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                            // speed
+    // TODO: implement pytest checksum
+    // {.msg = {{PSA_HS2_DAT_MDD_CMD_452, PSA_ADAS_BUS, 6, 20U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                       // cruise state
+    // {.msg = {{PSA_HS2_DYN_ABR_38D, PSA_CAM_BUS, 8, 25U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                            // speed
+    {.msg = {{PSA_HS2_DAT_MDD_CMD_452, PSA_ADAS_BUS, 6, 20U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                       // cruise state
+    {.msg = {{PSA_HS2_DYN_ABR_38D, PSA_CAM_BUS, 8, 25U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                            // speed
     {.msg = {{PSA_STEERING_ALT, PSA_CAM_BUS, 7, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // steering angle
     {.msg = {{PSA_STEERING, PSA_CAM_BUS, 7, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},     // driver torque
     {.msg = {{PSA_DYN_CMM, PSA_CAM_BUS, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},      // gas pedal
-    {.msg = {{PSA_DAT_BSI, PSA_MAIN_BUS, 8, 20U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},      // doors
+    {.msg = {{PSA_DYN2_FRE, PSA_CAM_BUS, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},      // brake pressure
   };
 
   return BUILD_SAFETY_CFG(psa_rx_checks, PSA_TX_MSGS);

@@ -9,15 +9,16 @@ from opendbc.safety.tests.common import CANPackerPanda
 LANE_KEEP_ASSIST = 0x3F2
 
 class TestPsaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest):
-  RELAY_MALFUNCTION_ADDRS = {0: (LANE_KEEP_ASSIST)}
+  RELAY_MALFUNCTION_ADDRS = {0: (LANE_KEEP_ASSIST,)}
   FWD_BLACKLISTED_ADDRS = {2: [LANE_KEEP_ASSIST]}
   TX_MSGS = [[1010, 0]]
 
   EPS_BUS = 0
+  ADAS_BUS = 1
   CRUISE_BUS = 2
 
   STEER_ANGLE_MAX = 390
-  DEG_TO_CAN = 100
+  DEG_TO_CAN = 10
 
   ANGLE_RATE_BP = [0., 5., 25.]
   ANGLE_RATE_UP = [2.5, 1.5, .2]
@@ -39,14 +40,11 @@ class TestPsaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyTes
 
   def _pcm_status_msg(self, enable):
     values = {"RVV_ACC_ACTIVATION_REQ": enable}
-    return self.packer.make_can_msg_panda("HS2_DAT_MDD_CMD_452", self.CRUISE_BUS, values)
+    return self.packer.make_can_msg_panda("HS2_DAT_MDD_CMD_452", self.ADAS_BUS, values)
 
   def _speed_msg(self, speed):
-    values = {
-      "P265_VehV_VPsvValWhlBckL": speed * 3.6,
-      "P266_VehV_VPsvValWhlBckR": speed * 3.6,
-    }
-    return self.packer.make_can_msg_panda("Dyn4_FRE", self.EPS_BUS, values)
+    values = {"VITESSE_VEHICULE_ROUES": speed}
+    return self.packer.make_can_msg_panda("HS2_DYN_ABR_38D", self.EPS_BUS, values)
 
   def _user_brake_msg(self, brake):
     values = {"BRAKE_PRESSURE": int(brake * 1500)}
