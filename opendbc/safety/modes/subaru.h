@@ -93,42 +93,46 @@ static uint32_t subaru_compute_checksum(const CANPacket_t *msg) {
 static void subaru_rx_hook(const CANPacket_t *msg) {
   const unsigned int alt_main_bus = subaru_gen2 ? SUBARU_ALT_BUS : SUBARU_MAIN_BUS;
 
-  if ((msg->addr == MSG_SUBARU_Steering_Torque) && (msg->bus == SUBARU_MAIN_BUS)) {
-    int torque_driver_new;
-    torque_driver_new = ((GET_BYTES(msg, 0, 4) >> 16) & 0x7FFU);
-    torque_driver_new = -1 * to_signed(torque_driver_new, 11);
-    update_sample(&torque_driver, torque_driver_new);
+  if (msg->bus == SUBARU_MAIN_BUS){
+    if (msg->addr == MSG_SUBARU_Steering_Torque) {
+      int torque_driver_new;
+      torque_driver_new = ((GET_BYTES(msg, 0, 4) >> 16) & 0x7FFU);
+      torque_driver_new = -1 * to_signed(torque_driver_new, 11);
+      update_sample(&torque_driver, torque_driver_new);
 
-    int angle_meas_new = (GET_BYTES(msg, 4, 2) & 0xFFFFU);
-    // convert Steering_Torque -> Steering_Angle to centidegrees, to match the ES_LKAS_ANGLE angle request units
-    angle_meas_new = ROUND(to_signed(angle_meas_new, 16) * -2.17);
-    update_sample(&angle_meas, angle_meas_new);
+      int angle_meas_new = (GET_BYTES(msg, 4, 2) & 0xFFFFU);
+      // convert Steering_Torque -> Steering_Angle to centidegrees, to match the ES_LKAS_ANGLE angle request units
+      angle_meas_new = ROUND(to_signed(angle_meas_new, 16) * -2.17);
+      update_sample(&angle_meas, angle_meas_new);
+    }
+
+    if (msg->addr == MSG_SUBARU_Throttle) {
+      gas_pressed = msg->data[4] != 0U;
+    }
   }
 
-  // enter controls on rising edge of ACC, exit controls on ACC off
-  if ((msg->addr == MSG_SUBARU_CruiseControl) && (msg->bus == alt_main_bus)) {
-    bool cruise_engaged = (msg->data[5] >> 1) & 1U;
-    pcm_cruise_check(cruise_engaged);
-  }
+  if (msg->bus == alt_main_bus){
+      // enter controls on rising edge of ACC, exit controls on ACC off
+    if (msg->addr == MSG_SUBARU_CruiseControl) {
+      bool cruise_engaged = (msg->data[5] >> 1) & 1U;
+      pcm_cruise_check(cruise_engaged);
+    }
 
-  // update vehicle moving with any non-zero wheel speed
-  if ((msg->addr == MSG_SUBARU_Wheel_Speeds) && (msg->bus == alt_main_bus)) {
-    uint32_t fr = (GET_BYTES(msg, 1, 3) >> 4) & 0x1FFFU;
-    uint32_t rr = (GET_BYTES(msg, 3, 3) >> 1) & 0x1FFFU;
-    uint32_t rl = (GET_BYTES(msg, 4, 3) >> 6) & 0x1FFFU;
-    uint32_t fl = (GET_BYTES(msg, 6, 2) >> 3) & 0x1FFFU;
+    // update vehicle moving with any non-zero wheel speed
+    if (msg->addr == MSG_SUBARU_Wheel_Speeds) {
+      uint32_t fr = (GET_BYTES(msg, 1, 3) >> 4) & 0x1FFFU;
+      uint32_t rr = (GET_BYTES(msg, 3, 3) >> 1) & 0x1FFFU;
+      uint32_t rl = (GET_BYTES(msg, 4, 3) >> 6) & 0x1FFFU;
+      uint32_t fl = (GET_BYTES(msg, 6, 2) >> 3) & 0x1FFFU;
 
-    vehicle_moving = (fr > 0U) || (rr > 0U) || (rl > 0U) || (fl > 0U);
+      vehicle_moving = (fr > 0U) || (rr > 0U) || (rl > 0U) || (fl > 0U);
 
-    UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.057 * KPH_TO_MS);
-  }
+      UPDATE_VEHICLE_SPEED((fr + rr + rl + fl) / 4.0 * 0.057 * KPH_TO_MS);
+    }
 
-  if ((msg->addr == MSG_SUBARU_Brake_Status) && (msg->bus == alt_main_bus)) {
-    brake_pressed = (msg->data[7] >> 6) & 1U;
-  }
-
-  if ((msg->addr == MSG_SUBARU_Throttle) && (msg->bus == SUBARU_MAIN_BUS)) {
-    gas_pressed = msg->data[4] != 0U;
+    if (msg->addr == MSG_SUBARU_Brake_Status) {
+      brake_pressed = (msg->data[7] >> 6) & 1U;
+    }
   }
 }
 
