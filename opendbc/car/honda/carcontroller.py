@@ -10,9 +10,7 @@ from opendbc.car.interfaces import CarControllerBase
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 
-# LKA angle-rate limits for avoiding EPS faults
-MAX_STEER_RATE = 60  # deg/s
-MAX_STEER_RATE_FRAMES = 3  # tx control frames needed before torque can be cut
+MAX_STEER_RATE = 60  # deg/s, LKA angle-rate limit for avoiding EPS faults
 
 
 def compute_gb_honda_bosch(accel, speed):
@@ -138,8 +136,7 @@ class CarController(CarControllerBase):
     limited_torque = rate_limit(actuators.torque, self.last_torque, -self.params.STEER_DELTA_DOWN * DT_CTRL,
                                 self.params.STEER_DELTA_UP * DT_CTRL)
 
-    self.steer_rate_counter, apply_steer_req = common_fault_avoidance(abs(CS.out.steeringRateDeg) >= MAX_STEER_RATE, CC.latActive,
-                                                                      self.steer_rate_counter, MAX_STEER_RATE_FRAMES)
+    apply_steer_req = CC.latActive and not abs(CS.out.steeringRateDeg) >= MAX_STEER_RATE
     if not apply_steer_req:
       limited_torque = 0
     self.last_torque = limited_torque
