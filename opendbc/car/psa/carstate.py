@@ -18,7 +18,7 @@ class CarState(CarStateBase):
     ret = structs.CarState()
 
     # car speed
-    ret.wheelSpeeds = self.get_wheel_speeds(
+    self.parse_wheel_speeds(ret,
       cp.vl['Dyn4_FRE']['P263_VehV_VPsvValWhlFrtL'],
       cp.vl['Dyn4_FRE']['P264_VehV_VPsvValWhlFrtR'],
       cp.vl['Dyn4_FRE']['P265_VehV_VPsvValWhlBckL'],
@@ -30,8 +30,7 @@ class CarState(CarStateBase):
     ret.standstill = bool(cp_adas.vl['HS2_DYN_UCF_MDD_32D']['VEHICLE_STANDSTILL'])
 
     # gas
-    ret.gas = cp.vl['Dyn_CMM']['P002_Com_rAPP'] / 100.0
-    ret.gasPressed = ret.gas > 0
+    ret.gasPressed = cp.vl['Dyn_CMM']['P002_Com_rAPP'] / 100.0 > 0
 
     # brake
     ret.brake = cp.vl['Dyn2_FRE']['BRAKE_PRESSURE'] / 1500.
@@ -73,29 +72,8 @@ class CarState(CarStateBase):
 
   @staticmethod
   def get_can_parsers(CP):
-    cam_messages = [
-      ('Dyn4_FRE', 50),
-      ('STEERING_ALT', 100),
-      ('STEERING', 100),
-      ('Dyn2_FRE', 100),
-      ('Dyn2_CMM', 50),
-      ('Dyn_CMM', 100),
-      ('Dyn_EasyMove', 50),
-      ('IS_DAT_DIRA', 10),
-    ]
-    adas_messages = [
-      ('HS2_DYN_ABR_38D', 25),
-      ('HS2_DYN_UCF_MDD_32D', 50),
-      ('HS2_DAT_MDD_CMD_452', 20),
-      ('HS2_DYN1_MDD_ETAT_2B6', 50),
-    ]
-    main_messages = [
-      ('Dat_BSI', 20),
-      ('RESTRAINTS', 10),
-      ('HS2_DAT7_BSI_612', 10),
-    ]
     return {
-      Bus.main: CANParser(DBC[CP.carFingerprint][Bus.pt], main_messages, 2),
-      Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.pt], adas_messages, 1),
-      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, 0),
+      Bus.main: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 2),
+      Bus.adas: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 1),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 0),
     }
