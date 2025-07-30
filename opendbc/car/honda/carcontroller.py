@@ -2,7 +2,7 @@ import numpy as np
 from collections import namedtuple
 
 from opendbc.can import CANPacker
-from opendbc.car import Bus, DT_CTRL, common_fault_avoidance, rate_limit, make_tester_present_msg, structs
+from opendbc.car import Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
 from opendbc.car.honda import hondacan
 from opendbc.car.honda.values import CruiseButtons, VISUAL_HUD, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, HONDA_NIDEC_ALT_PCM_ACCEL, CarControllerParams
 from opendbc.car.interfaces import CarControllerBase
@@ -111,7 +111,6 @@ class CarController(CarControllerBase):
     self.apply_brake_last = 0
     self.last_pump_ts = 0.
     self.stopping_counter = 0
-    self.steer_rate_counter = 0
 
     self.accel = 0.0
     self.speed = 0.0
