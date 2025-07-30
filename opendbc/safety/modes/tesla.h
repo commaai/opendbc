@@ -42,7 +42,7 @@ static uint8_t tesla_get_counter(const CANPacket_t *msg) {
 
 static int _tesla_get_checksum_byte(const int addr) {
   int checksum_byte = -1;
-  if (addr == 0x370 || addr == 0x2b9 || addr == 0x155) {
+  if ((addr == 0x370) || (addr == 0x2b9) || (addr == 0x155)) {
     // EPAS3S_sysStatusChecksum, DAS_controlChecksum, ESP_wheelRotationChecksum
     checksum_byte = 7;
   } else if (addr == 0x488) {
@@ -74,9 +74,7 @@ static uint32_t tesla_compute_checksum(const CANPacket_t *msg) {
   chksum = (uint8_t)((msg->addr & 0xFFU) + ((msg->addr >> 8) & 0xFFU));
   int len = GET_LEN(msg);
   for (int i = 0; i < len; i++) {
-    if (i != checksum_byte) {
-      chksum += msg->data[i];
-    }
+    chksum += (uint8_t)msg->data[i] * (uint8_t)(i == checksum_byte ? 0 : 1);
   }
   return chksum;
 }
