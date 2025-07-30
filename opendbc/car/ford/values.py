@@ -68,7 +68,7 @@ class Footnote(Enum):
 
 @dataclass
 class FordCarDocs(CarDocs):
-  package: str = "Co-Pilot360 Assist+"
+  package: str = "A version of Co-Pilot360 which includes adaptive cruise control such as Co-Pilot360 Assist or Co-Pilot360 Active"
   hybrid: bool = False
   plug_in_hybrid: bool = False
 
