@@ -74,7 +74,9 @@ static uint32_t tesla_compute_checksum(const CANPacket_t *msg) {
   chksum = (uint8_t)((msg->addr & 0xFFU) + ((msg->addr >> 8) & 0xFFU));
   int len = GET_LEN(msg);
   for (int i = 0; i < len; i++) {
-    chksum += (uint8_t)msg->data[i] * (uint8_t)(i == checksum_byte ? 0 : 1);
+    if (i != checksum_byte) {
+      chksum += (uint8_t)msg->data[i];
+    }
   }
   return chksum;
 }
