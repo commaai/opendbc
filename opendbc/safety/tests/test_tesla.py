@@ -296,8 +296,6 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
     self.assertEqual(-1, self.safety.safety_fwd_hook(2, lkas_msg_cam.addr))
     self.assertFalse(self._tx(lkas_msg_cam))
 
-
-
   def test_angle_cmd_when_enabled(self):
     # We properly test lateral acceleration and jerk below
     pass
