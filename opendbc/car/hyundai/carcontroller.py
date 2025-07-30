@@ -1,7 +1,7 @@
 import math
 import numpy as np
 from opendbc.car.vehicle_model import VehicleModel
-from opendbc.can.packer import CANPacker
+from opendbc.can import CANPacker
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, apply_driver_steer_torque_limits, common_fault_avoidance, \
   make_tester_present_msg, structs, rate_limit
 from opendbc.car.common.conversions import Conversions as CV
