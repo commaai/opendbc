@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from opendbc.car import structs
 import numpy as np
 
 
