@@ -68,7 +68,7 @@ class TestVolkswagenPqSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueS
 
   # ACC engagement and brake light switch status
   # Called indirectly for compatibility with common.py tests
-  def _motor_2_msg(self, brake_pressed=False, cruise_engaged=False):
+  def _motor_2_msg(self, brake_pressed=False, cruise_engaged:bool | int = False):
     values = {"Bremslichtschalter": brake_pressed,
               "GRA_Status": cruise_engaged}
     return self.packer.make_can_msg_panda("Motor_2", 0, values)
@@ -129,6 +129,13 @@ class TestVolkswagenPqStockSafety(TestVolkswagenPqSafetyBase):
     self.safety.set_controls_allowed(1)
     self.assertTrue(self._tx(self._button_msg(resume=True)))
 
+  def test_cruise_engaged_variant(self):
+    for engaged in [2, 0]:
+      self._rx(self._motor_2_msg(cruise_engaged=engaged))
+      self.assertEqual(True if engaged == 2 else False, self.safety.get_cruise_engaged_prev())
+      self._rx(self._motor_2_msg(cruise_engaged=not engaged))
+      self.assertEqual(not engaged, self.safety.get_cruise_engaged_prev())
+
 
 class TestVolkswagenPqLongSafety(TestVolkswagenPqSafetyBase, common.LongitudinalAccelSafetyTest):
   TX_MSGS = [[MSG_HCA_1, 0], [MSG_LDW_1, 0], [MSG_ACC_SYSTEM, 0], [MSG_ACC_GRA_ANZEIGE, 0]]
@@ -159,6 +166,8 @@ class TestVolkswagenPqLongSafety(TestVolkswagenPqSafetyBase, common.Longitudinal
       self._rx(self._motor_5_msg(main_switch=False))
       self._rx(self._button_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
       self._rx(self._button_msg(bus=0))
+      self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} with main switch off")
+      self._rx(self._button_msg(_set=(button == "set"), resume=(button == "resume"), bus=0)) # spam button again to cover test
       self.assertFalse(self.safety.get_controls_allowed(), f"controls allowed on {button} with main switch off")
       self._rx(self._motor_5_msg(main_switch=True))
       self._rx(self._button_msg(_set=(button == "set"), resume=(button == "resume"), bus=0))
