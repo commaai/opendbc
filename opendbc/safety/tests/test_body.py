@@ -62,7 +62,7 @@ class TestBody(common.PandaSafetyTest):
     self.assertFalse(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x1a')))
 
     self.assertTrue(self._tx(common.make_msg(0, 0x250, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x0a')))
-    # cover test but this could be a valid message(bytes in the CAN firmware)
+    # Cover test. This could be a valid CAN flasher message, may represent a real byte sequence in a body firmware payload.
     self.assertTrue(self._tx(common.make_msg(0, 0x1, dat=b'\xce\xfa\xad\xde\x1e\x0b\xb0\x0a')))
 
 if __name__ == "__main__":
