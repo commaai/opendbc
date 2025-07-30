@@ -12,7 +12,7 @@ LongCtrlState = structs.CarControl.Actuators.LongControlState
 
 # LKA angle-rate limits for avoiding EPS faults
 MAX_STEER_RATE = 60  # deg/s
-MAX_STEER_RATE_FRAMES = 10  # tx control frames needed before torque can be cut
+MAX_STEER_RATE_FRAMES = 3  # tx control frames needed before torque can be cut
 
 
 def compute_gb_honda_bosch(accel, speed):
