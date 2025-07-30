@@ -11,9 +11,9 @@
 #define PSA_LANE_KEEP_ASSIST      1010 // TX from OP,  EPS
 
 // CAN bus
-#define PSA_CAM_BUS  0
-#define PSA_ADAS_BUS 1
-#define PSA_MAIN_BUS 2
+#define PSA_CAM_BUS  0U
+#define PSA_ADAS_BUS 1U
+#define PSA_MAIN_BUS 2U
 
 static uint8_t psa_get_counter(const CANPacket_t *msg) {
   int addr = GET_ADDR(msg);
@@ -73,10 +73,9 @@ static uint32_t psa_compute_checksum(const CANPacket_t *msg) {
 }
 
 static void psa_rx_hook(const CANPacket_t *msg) {
-  int bus = GET_BUS(msg);
   int addr = GET_ADDR(msg);
 
-  if (bus == PSA_CAM_BUS) {
+  if (msg->bus == PSA_CAM_BUS) {
     if (addr == PSA_DYN_CMM) {
       gas_pressed = GET_BYTE(msg, 3) > 0U; // P002_Com_rAPP
     }
@@ -95,13 +94,13 @@ static void psa_rx_hook(const CANPacket_t *msg) {
     }
   }
 
-  if (bus == PSA_ADAS_BUS) {
+  if (msg->bus == PSA_ADAS_BUS) {
     if (addr == PSA_HS2_DAT_MDD_CMD_452) {
       pcm_cruise_check(((GET_BYTE(msg, 2U) >> 7U) & 1U)); // RVV_ACC_ACTIVATION_REQ
     }
   }
 
-  if (bus == PSA_MAIN_BUS) {
+  if (msg->bus == PSA_MAIN_BUS) {
     if (addr == PSA_DAT_BSI) {
       brake_pressed = (GET_BYTE(msg, 0U) >> 5U) & 1U; // P013_MainBrake
     }
@@ -141,7 +140,7 @@ static bool psa_tx_hook(const CANPacket_t *msg) {
 static bool psa_fwd_hook(int bus_num, int addr) {
   bool block_msg = false;
 
-  if (bus_num == PSA_MAIN_BUS) {
+  if (bus_num == (int)PSA_MAIN_BUS) {
     block_msg = addr == PSA_LANE_KEEP_ASSIST;
   }
 
