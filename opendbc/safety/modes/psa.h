@@ -18,9 +18,9 @@
 static uint8_t psa_get_counter(const CANPacket_t *msg) {
   uint8_t cnt = 0;
   if (msg->addr == PSA_HS2_DAT_MDD_CMD_452) {
-    cnt = (GET_BYTE(msg, 3) >> 4) & 0xFU;
+    cnt = (msg->data[3] >> 4) & 0xFU;
   } else if (msg->addr == PSA_HS2_DYN_ABR_38D) {
-    cnt = (GET_BYTE(msg, 5) >> 4) & 0xFU;
+    cnt = (msg->data[5] >> 4) & 0xFU;
   } else {
   }
   return cnt;
@@ -29,9 +29,9 @@ static uint8_t psa_get_counter(const CANPacket_t *msg) {
 static uint32_t psa_get_checksum(const CANPacket_t *msg) {
   uint8_t chksum = 0;
   if (msg->addr == PSA_HS2_DAT_MDD_CMD_452) {
-    chksum = GET_BYTE(msg, 5) & 0xFU;
+    chksum = msg->data[5] & 0xFU;
   } else if (msg->addr == PSA_HS2_DYN_ABR_38D) {
-    chksum = GET_BYTE(msg, 5) & 0xFU;
+    chksum = msg->data[5] & 0xFU;
   } else {
   }
   return chksum;
@@ -69,18 +69,18 @@ static uint32_t psa_compute_checksum(const CANPacket_t *msg) {
 static void psa_rx_hook(const CANPacket_t *msg) {
   if (msg->bus == PSA_CAM_BUS) {
     if (msg->addr == PSA_DYN_CMM) {
-      gas_pressed = GET_BYTE(msg, 3) > 0U; // P002_Com_rAPP
+      gas_pressed = msg->data[3] > 0U; // P002_Com_rAPP
     }
     if (msg->addr == PSA_STEERING) {
-      int torque_driver_new = to_signed(GET_BYTE(msg, 1), 8);
+      int torque_driver_new = to_signed(msg->data[1], 8);
       update_sample(&torque_driver, torque_driver_new);
     }
     if (msg->addr == PSA_STEERING_ALT) {
-      int angle_meas_new = to_signed((GET_BYTE(msg, 0) << 8) | GET_BYTE(msg, 1), 16);
+      int angle_meas_new = to_signed((msg->data[0] << 8) | msg->data[1], 16);
       update_sample(&angle_meas, angle_meas_new);
     }
     if (msg->addr == PSA_HS2_DYN_ABR_38D) {
-      int speed = (GET_BYTE(msg, 0) << 8) | GET_BYTE(msg, 1);
+      int speed = (msg->data[0] << 8) | msg->data[1];
       vehicle_moving = speed > 0;
       UPDATE_VEHICLE_SPEED(speed * 0.01); // VITESSE_VEHICULE_ROUES
     }
@@ -88,13 +88,13 @@ static void psa_rx_hook(const CANPacket_t *msg) {
 
   if (msg->bus == PSA_ADAS_BUS) {
     if (msg->addr == PSA_HS2_DAT_MDD_CMD_452) {
-      pcm_cruise_check(((GET_BYTE(msg, 2U) >> 7U) & 1U)); // RVV_ACC_ACTIVATION_REQ
+      pcm_cruise_check(((msg->data[2U] >> 7U) & 1U)); // RVV_ACC_ACTIVATION_REQ
     }
   }
 
   if (msg->bus == PSA_MAIN_BUS) {
     if (msg->addr == PSA_DAT_BSI) {
-      brake_pressed = (GET_BYTE(msg, 0U) >> 5U) & 1U; // P013_MainBrake
+      brake_pressed = (msg->data[0U] >> 5U) & 1U; // P013_MainBrake
     }
   }
 }
@@ -116,9 +116,9 @@ static bool psa_tx_hook(const CANPacket_t *msg) {
   // Safety check for LKA
   if (msg->addr == PSA_LANE_KEEP_ASSIST) {
     // SET_ANGLE
-    int desired_angle = to_signed((GET_BYTE(msg, 6) << 6) | ((GET_BYTE(msg, 7) & 0xFCU) >> 2), 14);
+    int desired_angle = to_signed((msg->data[6] << 6) | ((msg->data[7] & 0xFCU) >> 2), 14);
     // TORQUE_FACTOR
-    bool lka_active = ((GET_BYTE(msg, 5) & 0xFEU) >> 1) == 100U;
+    bool lka_active = ((msg->data[5] & 0xFEU) >> 1) == 100U;
 
     if (steer_angle_cmd_checks(desired_angle, lka_active, PSA_STEERING_LIMITS)) {
       tx = false;
