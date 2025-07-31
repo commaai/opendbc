@@ -219,15 +219,15 @@ class CANParser:
           continue
         if state.parse(t, dat):
           updated_addrs.add(address)
-          msgname = state.name
+
+          vl_addr = self.vl[address]
+          vl_all_addr = self.vl_all[address]
+          ts_addr = self.ts_nanos[address]
+
           for i, sig in enumerate(state.signals):
-            val = state.vals[i]
-            self.vl[address][sig.name] = val
-            self.vl[msgname][sig.name] = val
-            self.vl_all[address][sig.name] = state.all_vals[i]
-            self.vl_all[msgname][sig.name] = state.all_vals[i]
-            self.ts_nanos[address][sig.name] = state.timestamps[-1]
-            self.ts_nanos[msgname][sig.name] = state.timestamps[-1]
+            vl_addr[sig.name] = state.vals[i]
+            vl_all_addr[sig.name] = state.all_vals[i]
+            ts_addr[sig.name] = state.timestamps[-1]
 
       if not bus_empty:
         self.last_nonempty_nanos = t
