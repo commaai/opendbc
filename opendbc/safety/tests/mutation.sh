@@ -6,7 +6,7 @@ cd $DIR
 
 $DIR/install_mull.sh
 
-GIT_REF="${GIT_REF:-origin/master-new}"
+GIT_REF="${GIT_REF:-origin/master}"
 GIT_ROOT=$(git rev-parse --show-toplevel)
 MULL_OPS="mutators: [cxx_increment, cxx_decrement, cxx_comparison, cxx_boundary, cxx_bitwise_assignment, cxx_bitwise, cxx_arithmetic_assignment, cxx_arithmetic, cxx_remove_negation]"
 echo -e "$MULL_OPS" > $GIT_ROOT/mull.yml
