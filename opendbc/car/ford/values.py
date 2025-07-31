@@ -67,7 +67,9 @@ class Footnote(Enum):
   GLOBAL = CarFootnote(
     "OpenPilot on Ford requires adaptive cruise control. Ford frequently renames their Co-Pilot packages, "
     "but not all packages include adaptive cruise control. Co-Pilot360 Assist+, Co-Pilot360 Assist 2.0,"
-    "and Co-Pilot360 Active are known to include adaptive cruise control")
+    "and Co-Pilot360 Active are known to include adaptive cruise control",
+    Column.PACKAGE,
+  )
 
 
 
