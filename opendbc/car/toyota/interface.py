@@ -1,3 +1,4 @@
+from math import fabs, exp
 from opendbc.car import Bus, structs, get_safety_config, uds
 from opendbc.car.toyota.carstate import CarState
 from opendbc.car.toyota.carcontroller import CarController
@@ -7,6 +8,7 @@ from opendbc.car.toyota.values import Ecu, CAR, DBC, ToyotaFlags, CarControllerP
                                                   ToyotaSafetyFlags
 from opendbc.car.disable_ecu import disable_ecu
 from opendbc.car.interfaces import CarInterfaceBase
+from opendbc.car.interfaces import CarInterfaceBase, TorqueFromLateralAccelCallbackType, LatControlInputs, NanoFFModel
 
 SteerControlType = structs.CarParams.SteerControlType
 
@@ -15,6 +17,26 @@ class CarInterface(CarInterfaceBase):
   CarState = CarState
   CarController = CarController
   RadarInterface = RadarInterface
+
+  def torque_from_lateral_accel_linear(self, latcontrol_inputs: LatControlInputs, torque_params: structs.CarParams.LateralTorqueTuning,
+                                       gravity_adjusted: bool) -> float:
+    def sig(val):
+      # https://timvieira.github.io/blog/post/2014/02/11/exp-normalize-trick
+      if val >= 0:
+        return 1 / (1 + exp(-val)) - 0.5
+      else:
+        z = exp(val)
+        return z / (1 + z) - 0.5
+
+    # The "lat_accel vs torque" relationship is assumed to be the sum of "sigmoid + linear" curves
+    # An important thing to consider is that the slope at 0 should be > 0 (ideally >1)
+    # This has big effect on the stability about 0 (noise when going straight)
+    # ToDo: To generalize to other GMs, explore tanh function as the nonlinear
+    non_linear_torque_params = [1.5, 0.7, 1/2.4/2, 0.009054123646805178]
+    assert non_linear_torque_params, "The params are not defined"
+    a, b, c, _ = non_linear_torque_params
+    steer_torque = (sig(latcontrol_inputs.lateral_acceleration * a) * b) + (latcontrol_inputs.lateral_acceleration * c)
+    return float(steer_torque)
 
   @staticmethod
   def get_pid_accel_limits(CP, current_speed, cruise_speed):
