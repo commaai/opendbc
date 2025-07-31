@@ -64,11 +64,16 @@ class Footnote(Enum):
     "North and South America/Southeast Asia.",
     Column.MODEL,
   )
+  GLOBAL = CarFootnote(
+    "OpenPilot on Ford requires adaptive cruise control. Ford frequently renames their Co-Pilot packages, "
+    "but not all packages include adaptive cruise control. Co-Pilot360 Assist+, Co-Pilot360 Assist 2.0,"
+    "and Co-Pilot360 Active are known to include adaptive cruise control")
+
 
 
 @dataclass
 class FordCarDocs(CarDocs):
-  package: str = "A version of Co-Pilot360 which includes adaptive cruise control such as Co-Pilot360 Assist or Co-Pilot360 Active"
+  package: str = "Co-Pilot360 Assist+, Co-Pilot360 Assist 2.0, Co-Pilot360 Active"
   hybrid: bool = False
   plug_in_hybrid: bool = False
 
