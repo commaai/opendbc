@@ -69,15 +69,15 @@ class CarInterface(CarInterfaceBase):
     if 0x1C2 in fingerprint[CAN.pt]:
       ret.flags |= HondaFlags.HAS_EPB.value
 
-    # Accord ICE 1.5T CVT has different gearbox message
-    if candidate == CAR.HONDA_ACCORD and 0x191 in fingerprint[CAN.pt]:
-      ret.transmissionType = TransmissionType.cvt
-    # Civic Type R is missing 0x191 and 0x1A3
-    elif candidate == CAR.HONDA_CIVIC_2022 and all(msg not in fingerprint[CAN.pt] for msg in (0x191, 0x1A3)):
+    if ret.flags & HondaFlags.ALLOW_MANUAL_TRANS and all(msg not in fingerprint[CAN.pt] for msg in (0x191, 0x1A3)):
+      # Manual transmission support for allowlisted cars only, to prevent silent fall-through on auto-detection failures
       ret.transmissionType = TransmissionType.manual
-    # New Civics don't have 0x191, but do have 0x1A3
-    elif candidate in (CAR.HONDA_CIVIC_2022, CAR.HONDA_HRV_3G) and 0x1A3 in fingerprint[CAN.pt]:
+    elif 0x191 in fingerprint[CAN.pt] and candidate != CAR.ACURA_RDX:
+      # Traditional CVTs, gearshift position in GEARBOX_CVT
       ret.transmissionType = TransmissionType.cvt
+    else:
+      # Traditional autos, direct-drive EVs and eCVTs, gearshift position in GEARBOX_AUTO
+      ret.transmissionType = TransmissionType.automatic
 
     # Certain Hondas have an extra steering sensor at the bottom of the steering rack,
     # which improves controls quality as it removes the steering column torsion from feedback.
