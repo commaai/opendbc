@@ -9,6 +9,7 @@ from opendbc.can.dbc import DBC, Signal
 
 MAX_BAD_COUNTER = 5
 CAN_INVALID_CNT = 5
+MESSAGE_HISTORY_SIZE = 500
 
 
 
@@ -40,7 +41,7 @@ class MessageState:
   timeout_threshold: float = 1e5  # default to 1Hz threshold
   vals: list[float] = field(default_factory=list)
   all_vals: list[list[float]] = field(default_factory=list)
-  timestamps: deque[int] = field(default_factory=deque)
+  timestamps: deque[int] = field(default_factory=lambda: deque(maxlen=MESSAGE_HISTORY_SIZE))
   counter: int = 0
   counter_fail: int = 0
   first_seen_nanos: int = 0
@@ -82,13 +83,10 @@ class MessageState:
       self.all_vals[i].append(v)
 
     self.timestamps.append(nanos)
-    max_buffer = 500
-    while len(self.timestamps) > max_buffer:
-      self.timestamps.popleft()
 
     if self.frequency < 1e-5 and len(self.timestamps) >= 3:
       dt = (self.timestamps[-1] - self.timestamps[0]) * 1e-9
-      if (dt > 1.0 or len(self.timestamps) >= max_buffer) and dt != 0:
+      if (dt > 1.0 or len(self.timestamps) >= MESSAGE_HISTORY_SIZE) and dt != 0:
         self.frequency = min(len(self.timestamps) / dt, 100.0)
         self.timeout_threshold = (1_000_000_000 / self.frequency) * 10
     return True
