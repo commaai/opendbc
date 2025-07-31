@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from opendbc.car import structs
 import numpy as np
 
 
@@ -110,12 +111,11 @@ def rate_limit(new_value, last_value, dw_step, up_step):
   return float(np.clip(new_value, last_value + dw_step, last_value + up_step))
 
 
-# TODO: I couldn't find references to the code below in the codebase.
-# def get_friction(lateral_accel_error: float, lateral_accel_deadzone: float, friction_threshold: float,
-#                  torque_params: structs.CarParams.LateralTorqueTuning) -> float:
-#   friction_interp = np.interp(
-#     apply_center_deadzone(lateral_accel_error, lateral_accel_deadzone),
-#     [-friction_threshold, friction_threshold],
-#     [-torque_params.friction, torque_params.friction]
-#   )
-#   return float(friction_interp)
+def get_friction(lateral_accel_error: float, lateral_accel_deadzone: float, friction_threshold: float,
+                 torque_params: structs.CarParams.LateralTorqueTuning) -> float:
+  friction_interp = np.interp(
+    apply_center_deadzone(lateral_accel_error, lateral_accel_deadzone),
+    [-friction_threshold, friction_threshold],
+    [-torque_params.friction, torque_params.friction]
+  )
+  return float(friction_interp)
