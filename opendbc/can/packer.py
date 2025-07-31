@@ -9,6 +9,16 @@ class CANPacker:
     self.dbc = DBC(dbc_name)
     self.counters: dict[int, int] = {}
 
+    self.counter_signals: dict[int, Signal] = {}
+    self.checksum_signals: dict[int, Signal] = {}
+
+    for addr, msg in self.dbc.addr_to_msg.items():
+      for sig in msg.sigs.values():
+        if sig.type == SignalType.COUNTER or sig.name == "COUNTER":
+          self.counter_signals[addr] = sig
+        elif sig.type > SignalType.COUNTER and sig.calc_checksum:
+          self.checksum_signals[addr] = sig
+
   def pack(self, address: int, values: dict[str, float]) -> bytearray:
     msg = self.dbc.addr_to_msg.get(address)
     if msg is None:
@@ -16,6 +26,8 @@ class CANPacker:
       return bytearray()
     dat = bytearray(msg.size)
     counter_set = False
+    sig_counter = self.counter_signals.get(address)
+    sig_checksum = self.checksum_signals.get(address)
     for name, value in values.items():
       sig = msg.sigs.get(name)
       if sig is None:
@@ -25,17 +37,17 @@ class CANPacker:
       if ival < 0:
         ival = (1 << sig.size) + ival
       set_value(dat, sig, ival)
-      if sig.type == SignalType.COUNTER or sig.name == "COUNTER":
+      if sig is sig_counter:
         self.counters[address] = int(value)
         counter_set = True
-    sig_counter = next((s for s in msg.sigs.values() if s.type == SignalType.COUNTER or s.name == "COUNTER"), None)
+
     if sig_counter and not counter_set:
       if address not in self.counters:
         self.counters[address] = 0
       set_value(dat, sig_counter, self.counters[address])
       self.counters[address] = (self.counters[address] + 1) % (1 << sig_counter.size)
-    sig_checksum = next((s for s in msg.sigs.values() if s.type > SignalType.COUNTER), None)
-    if sig_checksum and sig_checksum.calc_checksum:
+
+    if sig_checksum:
       checksum = sig_checksum.calc_checksum(address, sig_checksum, dat)
       set_value(dat, sig_checksum, checksum)
     return dat
