@@ -177,7 +177,6 @@ class CANParser:
     )
     if freq is not None and freq > 0:
       state.frequency = freq
-      state.timeout_threshold = (1_000_000_000 / freq) * 10
     else:
       # if frequency not specified, assume 1Hz until we learn it
       freq = 1
