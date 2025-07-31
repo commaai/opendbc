@@ -27,7 +27,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        target: /^(?!master$|master-new$).*/
+        target: /^(?!master$|master$).*/
         exclude: /sunnypilot:.*/
         change-to: ${{ github.base_ref }}
         already-exists-action: close_this
