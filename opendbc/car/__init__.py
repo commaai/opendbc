@@ -1,5 +1,4 @@
 # functions common among cars
-import numpy as np
 from dataclasses import dataclass, field
 from enum import IntFlag, ReprEnum, StrEnum, EnumType, auto
 from dataclasses import replace
@@ -16,8 +15,6 @@ STD_CARGO_KG = 136.
 ACCELERATION_DUE_TO_GRAVITY = 9.81  # m/s^2
 
 ButtonType = structs.CarState.ButtonEvent.Type
-
-FRICTION_THRESHOLD = 0.3
 
 
 def apply_hysteresis(val: float, val_steady: float, hyst_gap: float) -> float:
@@ -91,10 +88,6 @@ class Bus(StrEnum):
   main = auto()
   party = auto()
   ap_party = auto()
-
-
-def rate_limit(new_value, last_value, dw_step, up_step):
-  return float(np.clip(new_value, last_value + dw_step, last_value + up_step))
 
 
 def make_tester_present_msg(addr, bus, subaddr=None, suppress_response=False):
