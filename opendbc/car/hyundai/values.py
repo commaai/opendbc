@@ -164,8 +164,6 @@ class HyundaiCanFDPlatformConfig(PlatformConfig):
 
   def init(self):
     self.flags |= HyundaiFlags.CANFD
-    if self.flags & HyundaiFlags.MANDO_RADAR:
-      self.dbc_dict = {Bus.pt: "hyundai_canfd_generated", Bus.radar: 'hyundai_canfd_radar_generated'}
 
 
 class CAR(Platforms):
