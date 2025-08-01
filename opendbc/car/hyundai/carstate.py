@@ -56,9 +56,7 @@ class CarState(CarStateBase):
     self.buttons_counter = 0
 
     self.cruise_info = {}
-    self.msg_161 = {}
-    self.msg_162 = {}
-    self.msg_1b5 = {}
+    self.msg_161, self.msg_162, self.msg_1b5 = {}, {}, {}
 
     # On some cars, CLU15->CF_Clu_VehicleSpeed can oscillate faster than the dash updates. Sample at 5 Hz
     self.cluster_speed = 0
