@@ -230,6 +230,8 @@ class TestSubaruGen2LongitudinalSafety(TestSubaruLongitudinalSafetyBase, TestSub
     for sid in range(0xFF):
       msg = b'\x03' + sid.to_bytes(1) + b'\x00' * 6
       self.assertFalse(self._tx(self._es_uds_msg(msg)))
+    self.assertFalse(self._tx(self._es_uds_msg(b'\x03\x22\x11\x30\x00\x00\x00\x01')))
+    self.assertFalse(self._tx(self._es_uds_msg(b'\x02\x3E\x80\x00\x00\x00\x00\x01')))
 
 
 if __name__ == "__main__":
