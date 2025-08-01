@@ -179,7 +179,7 @@ class CAR(Platforms):
       HyundaiCarDocs("Hyundai Elantra 2019", car_parts=CarParts.common([CarHarness.hyundai_g])),
     ],
     # steerRatio: 14 is Stock | Settled Params Learner values are steerRatio: 15.401566348670535, stiffnessFactor settled on 1.0081302973865127
-    CarSpecs(mass=1275, wheelbase=2.7, steerRatio=15.4, tireStiffnessFactor=0.385, minEnableSpeed=19 * CV.MPH_TO_MS, minSteerSpeed=32 * CV.MPH_TO_MS),
+    CarSpecs(mass=1275, wheelbase=2.7, steerRatio=15.4, tireStiffnessFactor=0.385, minSteerSpeed=32 * CV.MPH_TO_MS, minEnableSpeed=19 * CV.MPH_TO_MS),
     flags=HyundaiFlags.LEGACY | HyundaiFlags.CLUSTER_GEARS,
   )
   HYUNDAI_ELANTRA_GT_I30 = HyundaiPlatformConfig(
@@ -420,7 +420,7 @@ class CAR(Platforms):
       HyundaiCarDocs("Kia Niro Plug-in Hybrid 2018-19", "All", car_parts=CarParts.common([CarHarness.hyundai_c])),
       HyundaiCarDocs("Kia Niro Plug-in Hybrid 2020", car_parts=CarParts.common([CarHarness.hyundai_d])),
     ],
-    KIA_NIRO_EV.specs.override(minEnableSpeed=10. * CV.MPH_TO_MS, minSteerSpeed=32 * CV.MPH_TO_MS),
+    KIA_NIRO_EV.specs.override(minSteerSpeed=32 * CV.MPH_TO_MS, minEnableSpeed=10. * CV.MPH_TO_MS),
     flags=HyundaiFlags.MANDO_RADAR | HyundaiFlags.HYBRID | HyundaiFlags.UNSUPPORTED_LONGITUDINAL,
   )
   KIA_NIRO_PHEV_2022 = HyundaiPlatformConfig(
