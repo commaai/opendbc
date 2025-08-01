@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 
 from opendbc.car.tesla.values import TeslaSafetyFlags, CarControllerParams
-from opendbc.car import get_max_angle_delta_vm, get_max_angle_vm, MAX_LATERAL_JERK, MAX_LATERAL_ACCEL
+from opendbc.car.lateral import get_max_angle_delta_vm, get_max_angle_vm, MAX_LATERAL_JERK, MAX_LATERAL_ACCEL
 from opendbc.car.tesla.carcontroller import get_safety_CP
 from opendbc.car.structs import CarParams
 from opendbc.car.vehicle_model import VehicleModel
