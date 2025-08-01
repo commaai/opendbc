@@ -304,7 +304,7 @@
     ],
     "package": "Adaptive Cruise Control (ACC)"
   },
-  "Chrysler Pacifica Hybrid 2019-24": {
+  "Chrysler Pacifica Hybrid 2019-25": {
     "platform": "CHRYSLER_PACIFICA_2019_HYBRID",
     "make": "Chrysler",
     "brand": "chrysler",
@@ -315,7 +315,8 @@
       "2021",
       "2022",
       "2023",
-      "2024"
+      "2024",
+      "2025"
     ],
     "package": "Adaptive Cruise Control (ACC)"
   },
@@ -934,6 +935,16 @@
     "model": "Civic Hatchback Hybrid (Europe only)",
     "year": [
       "2023"
+    ],
+    "package": "All"
+  },
+  "Honda Civic Hybrid 2025": {
+    "platform": "HONDA_CIVIC_2022",
+    "make": "Honda",
+    "brand": "honda",
+    "model": "Civic Hybrid",
+    "year": [
+      "2025"
     ],
     "package": "All"
   },
@@ -1840,7 +1851,7 @@
     "year": [
       "2018"
     ],
-    "package": "All"
+    "package": "Smart Cruise Control (SCC)"
   },
   "Kia Niro Hybrid 2021": {
     "platform": "KIA_NIRO_HEV_2021",
