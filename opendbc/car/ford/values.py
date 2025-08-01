@@ -70,7 +70,7 @@ class Footnote(Enum):
     " Co-Pilot360 Assist 2.0, and Co-Pilot360 Active are known to include ACC and LCA",
     Column.PACKAGE,
   )
-   GLOBAL = CarFootnote(
+  GLOBAL = CarFootnote(
     "Ford offers two different lane assist packages.  Lane Keep Assist (LKA) and Lane Centering Assist (LCA).  LKA is not"
     "compatible with OpenPilot.  All vehicles with LCA will also have LKA, but not all vehicles with LKA will have LCA"
     "Please ensure your vehicle has LCA",
