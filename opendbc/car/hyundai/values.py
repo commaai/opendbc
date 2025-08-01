@@ -142,9 +142,6 @@ class HyundaiCarDocs(CarDocs):
     if CP.flags & HyundaiFlags.CANFD:
       self.footnotes.insert(0, Footnote.CANFD)
 
-    if self.name == 'Telluride':
-      self.car_parts = CarParts([Device.threex_angled_mount])
-
 
 @dataclass
 class HyundaiPlatformConfig(PlatformConfig):
