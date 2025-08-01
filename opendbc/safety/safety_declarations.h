@@ -34,7 +34,6 @@
 #define SAFETY_VOLKSWAGEN_MEB 34U
 
 #define GET_BIT(msg, b) ((bool)!!(((msg)->data[((b) / 8U)] >> ((b) % 8U)) & 0x1U))
-#define GET_BYTE(msg, b) ((msg)->data[(b)])
 #define GET_FLAG(value, mask) (((__typeof__(mask))(value) & (mask)) == (mask)) // cppcheck-suppress misra-c2012-1.2; allow __typeof__
 
 #define BUILD_SAFETY_CFG(rx, tx) ((safety_config){(rx), (sizeof((rx)) / sizeof((rx)[0])), \
@@ -63,14 +62,10 @@ extern const int MAX_WRONG_COUNTERS;
 #define MAX_SAMPLE_VALS 6
 // used to represent floating point vehicle speed in a sample_t
 #define VEHICLE_SPEED_FACTOR 1000.0
-#define MAX_TORQUE_RT_INTERVAL 250000U
+#define MAX_RT_INTERVAL 250000U
 
-// Lateral constants
-// ISO 11270
-static const float ISO_LATERAL_ACCEL = 3.0;  // m/s^2
-
-static const float EARTH_G = 9.81;
-static const float AVERAGE_ROAD_ROLL = 0.06;  // ~3.4 degrees, 6% superelevation
+// Conversions
+#define KPH_TO_MS (1.0 / 3.6)
 
 // sample struct that keeps 6 samples in memory
 struct sample_t {
@@ -87,7 +82,7 @@ struct lookup_t {
 
 typedef struct {
   int addr;
-  int bus;
+  unsigned int bus;
   int len;
   bool check_relay;              // if true, trigger relay malfunction if existence on destination bus and block forwarding to destination bus
   bool disable_static_blocking;  // if true, static blocking is disabled so safety mode can dynamically handle it (e.g. selective AEB pass-through)
@@ -106,7 +101,7 @@ typedef struct {
 
   const int max_rate_up;
   const int max_rate_down;
-  const int max_rt_delta;  // max change in torque per 250ms interval (MAX_TORQUE_RT_INTERVAL)
+  const int max_rt_delta;  // max change in torque per 250ms interval (MAX_RT_INTERVAL)
 
   const SteeringControlType type;
 
@@ -133,6 +128,7 @@ typedef struct {
   const struct lookup_t angle_rate_down_lookup;
   const int max_angle_error;             // used to limit error between meas and cmd while enabled
   const float angle_error_min_speed;     // minimum speed to start limiting angle error
+  const uint32_t frequency;              // Hz
 
   const bool angle_is_curvature;         // if true, we can apply max lateral acceleration limits
   const bool enforce_angle_error;        // enables max_angle_error check
@@ -170,13 +166,13 @@ typedef struct {
 
 typedef struct {
   const int addr;
-  const int bus;
+  const unsigned int bus;
   const int len;
+  const uint32_t frequency;          // expected frequency of the message [Hz]
   const bool ignore_checksum;        // checksum check is not performed when set to true
   const bool ignore_counter;         // counter check is not performed when set to true
   const uint8_t max_counter;         // maximum value of the counter. 0 means that the counter check is skipped
   const bool ignore_quality_flag;    // true if quality flag check is skipped
-  const uint32_t frequency;          // expected frequency of the message [Hz]
 } CanMsgCheck;
 
 typedef struct {
@@ -205,14 +201,14 @@ typedef struct {
   bool disable_forwarding;
 } safety_config;
 
-typedef uint32_t (*get_checksum_t)(const CANPacket_t *to_push);
-typedef uint32_t (*compute_checksum_t)(const CANPacket_t *to_push);
-typedef uint8_t (*get_counter_t)(const CANPacket_t *to_push);
-typedef bool (*get_quality_flag_valid_t)(const CANPacket_t *to_push);
+typedef uint32_t (*get_checksum_t)(const CANPacket_t *msg);
+typedef uint32_t (*compute_checksum_t)(const CANPacket_t *msg);
+typedef uint8_t (*get_counter_t)(const CANPacket_t *msg);
+typedef bool (*get_quality_flag_valid_t)(const CANPacket_t *msg);
 
 typedef safety_config (*safety_hook_init)(uint16_t param);
-typedef void (*rx_hook)(const CANPacket_t *to_push);
-typedef bool (*tx_hook)(const CANPacket_t *to_send);  // returns true if the message is allowed
+typedef void (*rx_hook)(const CANPacket_t *msg);
+typedef bool (*tx_hook)(const CANPacket_t *msg);  // returns true if the message is allowed
 typedef bool (*fwd_hook)(int bus_num, int addr);      // returns true if the message should be blocked from forwarding
 
 typedef struct {
@@ -226,8 +222,8 @@ typedef struct {
   get_quality_flag_valid_t get_quality_flag_valid;
 } safety_hooks;
 
-bool safety_rx_hook(const CANPacket_t *to_push);
-bool safety_tx_hook(CANPacket_t *to_send);
+bool safety_rx_hook(const CANPacket_t *msg);
+bool safety_tx_hook(CANPacket_t *msg);
 int to_signed(int d, int bits);
 void update_sample(struct sample_t *sample, int sample_new);
 bool get_longitudinal_allowed(void);
@@ -283,7 +279,8 @@ extern bool heartbeat_engaged;             // openpilot enabled, passed in heart
 extern uint32_t heartbeat_engaged_mismatches;  // count of mismatches between heartbeat_engaged and controls_allowed
 
 // for safety modes with angle steering control
-extern uint32_t ts_angle_last;
+extern uint32_t rt_angle_msgs;
+extern uint32_t ts_angle_check_last;
 extern int desired_angle_last;
 extern struct sample_t angle_meas;         // last 6 steer angles/curvatures
 

@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from enum import Enum, IntFlag
-from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, AngleSteeringLimits
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms
+from opendbc.car.lateral import AngleSteeringLimits
 from opendbc.car.structs import CarParams, CarState
 from opendbc.car.docs_definitions import CarDocs, CarFootnote, CarHarness, CarParts, Column
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
@@ -55,6 +56,10 @@ class CAR(Platforms):
      ],
     CarSpecs(mass=2072., wheelbase=2.890, steerRatio=12.0),
   )
+  TESLA_MODEL_X = TeslaPlatformConfig(
+    [TeslaCarDocsHW4("Tesla Model X (with HW4) 2024")],
+    CarSpecs(mass=2495., wheelbase=2.960, steerRatio=12.0),
+  )
 
 
 FW_QUERY_CONFIG = FwQueryConfig(
@@ -88,11 +93,9 @@ class CarControllerParams:
   ANGLE_LIMITS: AngleSteeringLimits = AngleSteeringLimits(
     # EPAS faults above this angle
     360,  # deg
-    # Angle rate limits are set using the Tesla Model Y VehicleModel such that they maximally meet ISO 11270
-    # At 5 m/s, FSD has been seen hitting up to ~4 deg/frame with ~5 deg/frame at very low creeping speeds
-    # At 30 m/s, FSD has been seen hitting mostly 0.1 deg/frame, sometimes 0.2 deg/frame, and rarely 0.3 deg/frame
-    ([0., 5., 25.], [2.5, 1.5, 0.2]),
-    ([0., 5., 25.], [5., 2.0, 0.3]),
+    # Tesla uses a vehicle model instead, check carcontroller.py for details
+    ([], []),
+    ([], []),
   )
 
   STEER_STEP = 2  # Angle command is sent at 50 Hz

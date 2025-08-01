@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import random
 import unittest
 import numpy as np
 
@@ -6,7 +7,7 @@ from opendbc.car.tesla.values import TeslaSafetyFlags
 from opendbc.car.tesla.carcontroller import get_max_angle_delta, get_max_angle, get_safety_CP
 from opendbc.car.structs import CarParams
 from opendbc.car.vehicle_model import VehicleModel
-from opendbc.can.can_define import CANDefine
+from opendbc.can import CANDefine
 from opendbc.safety.tests.libsafety import libsafety_py
 import opendbc.safety.tests.common as common
 from opendbc.safety.tests.common import CANPackerPanda, MAX_SPEED_DELTA, MAX_WRONG_COUNTERS, away_round, round_speed
@@ -41,14 +42,21 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
   ANGLE_RATE_UP = None
   ANGLE_RATE_DOWN = None
 
+  # Real time limits
+  LATERAL_FREQUENCY = 50  # Hz
+
   # Long control limits
   MAX_ACCEL = 2.0
   MIN_ACCEL = -3.48
   INACTIVE_ACCEL = 0.0
 
   cnt_epas = 0
+  cnt_angle_cmd = 0
 
   packer: CANPackerPanda
+
+  def _get_steer_cmd_angle_max(self, speed):
+    return get_max_angle(max(speed, 1), self.VM)
 
   def setUp(self):
     self.VM = VehicleModel(get_safety_CP())
@@ -60,8 +68,11 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
     self.steer_control_types = {d: v for v, d in self.define.dv["DAS_steeringControl"]["DAS_steeringControlType"].items()}
 
-  def _angle_cmd_msg(self, angle: float, state: bool | int, bus: int = 0):
+  def _angle_cmd_msg(self, angle: float, state: bool | int, increment_timer: bool = True, bus: int = 0):
     values = {"DAS_steeringAngleRequest": angle, "DAS_steeringControlType": state}
+    if increment_timer:
+      self.safety.set_timer(self.cnt_angle_cmd * int(1e6 / self.LATERAL_FREQUENCY))
+      self.__class__.cnt_angle_cmd += 1
     return self.packer.make_can_msg_panda("DAS_steeringControl", bus, values)
 
   def _angle_meas_msg(self, angle: float, hands_on_level: int = 0, eac_status: int = 1, eac_error_code: int = 0):
@@ -74,7 +85,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
   def _user_brake_msg(self, brake, quality_flag: bool = True):
     values = {"IBST_driverBrakeApply": 2 if brake else 1}
     if not quality_flag:
-      values["IBST_driverBrakeApply"] = 3  # FAULT
+      values["IBST_driverBrakeApply"] = random.choice((0, 3))  # NOT_INIT_OR_OFF, FAULT
     return self.packer.make_can_msg_panda("IBST_status", 0, values)
 
   def _speed_msg(self, speed):
@@ -118,38 +129,38 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
   def test_rx_hook(self):
     # counter check
-    for msg in ("angle", "long", "speed", "speed_2"):
+    for msg_type in ("angle", "long", "speed", "speed_2"):
       # send multiple times to verify counter checks
       for i in range(10):
-        if msg == "angle":
-          to_push = self._angle_cmd_msg(0, True, bus=2)
-        elif msg == "long":
-          to_push = self._long_control_msg(0, bus=2)
-        elif msg == "speed":
-          to_push = self._speed_msg(0)
-        elif msg == "speed_2":
-          to_push = self._speed_msg_2(0)
+        if msg_type == "angle":
+          msg = self._angle_cmd_msg(0, True, bus=2)
+        elif msg_type == "long":
+          msg = self._long_control_msg(0, bus=2)
+        elif msg_type == "speed":
+          msg = self._speed_msg(0)
+        elif msg_type == "speed_2":
+          msg = self._speed_msg_2(0)
 
         should_rx = i >= 5
         if not should_rx:
           # mess with checksums
-          if msg == "angle":
-            to_push[0].data[3] = 0
-          elif msg == "long":
-            to_push[0].data[7] = 0
-          elif msg == "speed":
-            to_push[0].data[0] = 0
-          elif msg == "speed_2":
-            to_push[0].data[7] = 0
+          if msg_type == "angle":
+            msg[0].data[3] = 0
+          elif msg_type == "long":
+            msg[0].data[7] = 0
+          elif msg_type == "speed":
+            msg[0].data[0] = 0
+          elif msg_type == "speed_2":
+            msg[0].data[7] = 0
 
         self.safety.set_controls_allowed(True)
-        self.assertEqual(should_rx, self._rx(to_push))
+        self.assertEqual(should_rx, self._rx(msg))
         self.assertEqual(should_rx, self.safety.get_controls_allowed())
 
       # Send static counters
       for i in range(MAX_WRONG_COUNTERS + 1):
         should_rx = i + 1 < MAX_WRONG_COUNTERS
-        self.assertEqual(should_rx, self._rx(to_push))
+        self.assertEqual(should_rx, self._rx(msg))
         self.assertEqual(should_rx, self.safety.get_controls_allowed())
 
   def test_vehicle_speed_measurements(self):
@@ -184,8 +195,8 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
   def test_user_brake_quality_flag(self):
     for quality_flag in (True, False):
-      to_push = self._user_brake_msg(True, quality_flag=quality_flag)
-      self.assertEqual(quality_flag, self._rx(to_push))
+      msg = self._user_brake_msg(True, quality_flag=quality_flag)
+      self.assertEqual(quality_flag, self._rx(msg))
 
   def test_steering_wheel_disengage(self):
     # Tesla disengages when the user forcibly overrides the locked-in angle steering control
@@ -275,6 +286,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
   def test_lateral_accel_limit(self):
     for speed in np.linspace(0, 40, 100):
+      speed = max(speed, 1)
       # match DI_vehicleSpeed rounding on CAN
       speed = round_speed(away_round(speed / 0.08 * 3.6) * 0.08 / 3.6)
       for sign in (-1, 1):
@@ -287,7 +299,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         # at limit (safety tolerance adds 1)
         max_angle = round_angle(get_max_angle(speed, self.VM), angle_unit_offset + 1) * sign
         max_angle = np.clip(max_angle, -self.STEER_ANGLE_MAX, self.STEER_ANGLE_MAX)
-        self._tx(self._angle_cmd_msg(max_angle, True))
+        self.safety.set_desired_angle_last(round(max_angle * self.DEG_TO_CAN))
 
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle, True)))
 
@@ -302,6 +314,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
   def test_lateral_jerk_limit(self):
     for speed in np.linspace(0, 40, 100):
+      speed = max(speed, 1)
       # match DI_vehicleSpeed rounding on CAN
       speed = round_speed(away_round(speed / 0.08 * 3.6) * 0.08 / 3.6)
       for sign in (-1, 1):  # (-1, 1):
@@ -329,6 +342,7 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
         self.assertFalse(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
 
         # Don't change
+        self.safety.set_desired_angle_last(round(max_angle_delta * self.DEG_TO_CAN))
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
 
         # Down
