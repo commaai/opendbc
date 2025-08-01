@@ -392,12 +392,15 @@ BO_ 1568 BODY_CONTROL_STATE: 8 XXX
  SG_ DOOR_OPEN_FR : 44|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1570 LIGHT_STALK: 8 SCM
- SG_ AUTO_HIGH_BEAM : 37|1@0+ (1,0) [0|1] "" XXX
+ SG_ LIGHT_STALK_MOVED : 15|1@0+ (1,0) [0|1] "" XXX
+ SG_ TAIL_LIGHT : 19|1@0+ (1,0) [0|1] "" XXX
+ SG_ HEADLIGHT_MODE : 21|3@1+ (1,0) [0|7] "" XXX
  SG_ FRONT_FOG : 27|1@0+ (1,0) [0|1] "" XXX
  SG_ PARKING_LIGHT : 28|1@0+ (1,0) [0|1] "" XXX
  SG_ LOW_BEAM : 29|1@0+ (1,0) [0|1] "" XXX
  SG_ HIGH_BEAM : 30|1@0+ (1,0) [0|1] "" XXX
  SG_ DAYTIME_RUNNING_LIGHT : 31|1@0+ (1,0) [0|1] "" XXX
+ SG_ AUTO_HIGH_BEAM : 37|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1571 CERTIFICATION_ECU: 8 CGW
  SG_ DOOR_LOCK_FEEDBACK_LIGHT : 15|1@0+ (1,0) [0|0] "" XXX
@@ -553,4 +556,5 @@ VAL_ 1552 UNITS 1 "km (km/L)" 2 "km (L/100km)" 3 "miles (MPG US)" 4 "miles (MPG 
 VAL_ 1553 UNITS 1 "km" 2 "miles";
 VAL_ 1556 TURN_SIGNALS 3 "none" 2 "right" 1 "left";
 VAL_ 1556 BLINKER_BUTTON_PRESSED 1 "button pressed" 0 "not pressed";
+VAL_ 1570 HEADLIGHT_MODE 0 "headlights off" 2 "force parking lights" 4 "force low beams" 7 "auto low beams" 6 "auto parking lights";
 VAL_ 1592 LOCK_STATUS 0 "locked" 1 "unlocked";
