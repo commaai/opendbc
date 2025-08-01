@@ -72,7 +72,7 @@ class Footnote(Enum):
   )
    GLOBAL = CarFootnote(
     "Ford offers two different lane assist packages.  Lane Keep Assist (LKA) and Lane Centering Assist (LCA).  LKA is not"
-    compatible with OpenPilot.  All vehicles with LCA will also have LKA, but not all vehicles with LKA will have LCA"
+    "compatible with OpenPilot.  All vehicles with LCA will also have LKA, but not all vehicles with LKA will have LCA"
     "Please ensure your vehicle has LCA",
     Column.PACKAGE,
   )
