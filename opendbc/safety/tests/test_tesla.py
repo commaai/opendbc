@@ -331,7 +331,8 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
         # Stay within limits
         # Up
-        max_angle_delta = round_angle(get_max_angle_delta_vm(speed, CarControllerParams.STEER_STEP, self.VM, self.MAX_LATERAL_JERK), angle_unit_offset) * sign
+        max_angle_delta = get_max_angle_delta_vm(speed, CarControllerParams.STEER_STEP, self.VM, self.MAX_LATERAL_JERK)
+        max_angle_delta = round_angle(max_angle_delta, angle_unit_offset) * sign
         self.assertTrue(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
 
         # Don't change
@@ -342,8 +343,8 @@ class TestTeslaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyT
 
         # Inject too high rates
         # Up
-        max_angle_delta = get_max_angle_delta_vm(speed, CarControllerParams.STEER_STEP, self.VM, self.MAX_LATERAL_JERK), angle_unit_offset + 1
-        max_angle_delta = round_angle(max_angle_delta) * sign
+        max_angle_delta = get_max_angle_delta_vm(speed, CarControllerParams.STEER_STEP, self.VM, self.MAX_LATERAL_JERK)
+        max_angle_delta = round_angle(max_angle_delta, angle_unit_offset + 1) * sign
         self.assertFalse(self._tx(self._angle_cmd_msg(max_angle_delta, True)))
 
         # Don't change
