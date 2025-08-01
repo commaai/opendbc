@@ -308,13 +308,6 @@ class CarState(CarStateBase):
       msgs += [
         ("CRUISE_BUTTONS", 50)
       ]
-    # remove this?
-    if self.CP.flags & HyundaiFlags.CCNC and not self.CP.flags & HyundaiFlags.CANFD_LKA_STEERING:
-      msgs += [
-        ("CCNC_0x161", 20),
-        ("CCNC_0x162", 20),
-        ("FR_CMR_03_50ms", 20),
-      ]
     return {
       Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], msgs, CanBus(CP).ECAN),
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CanBus(CP).CAM),
