@@ -1,8 +1,9 @@
+import numpy as np
 from dataclasses import dataclass
 from opendbc.car import structs
-import numpy as np
 
 FRICTION_THRESHOLD = 0.3
+
 
 @dataclass
 class AngleSteeringLimits:
@@ -26,10 +27,10 @@ def apply_driver_steer_torque_limits(apply_torque: int, apply_torque_last: int, 
   # slow rate if steer torque increases in magnitude
   if apply_torque_last > 0:
     apply_torque = np.clip(apply_torque, max(apply_torque_last - LIMITS.STEER_DELTA_DOWN, -LIMITS.STEER_DELTA_UP),
-                           apply_torque_last + LIMITS.STEER_DELTA_UP)
+                        apply_torque_last + LIMITS.STEER_DELTA_UP)
   else:
     apply_torque = np.clip(apply_torque, apply_torque_last - LIMITS.STEER_DELTA_UP,
-                           min(apply_torque_last + LIMITS.STEER_DELTA_DOWN, LIMITS.STEER_DELTA_UP))
+                        min(apply_torque_last + LIMITS.STEER_DELTA_DOWN, LIMITS.STEER_DELTA_UP))
 
   return int(round(float(apply_torque)))
 
@@ -46,12 +47,12 @@ def apply_dist_to_meas_limits(val, val_last, val_meas,
   # slow rate if val increases in magnitude
   if val_last > 0:
     val = np.clip(val,
-                  max(val_last - STEER_DELTA_DOWN, -STEER_DELTA_UP),
-                  val_last + STEER_DELTA_UP)
+               max(val_last - STEER_DELTA_DOWN, -STEER_DELTA_UP),
+               val_last + STEER_DELTA_UP)
   else:
     val = np.clip(val,
-                  val_last - STEER_DELTA_UP,
-                  min(val_last + STEER_DELTA_DOWN, STEER_DELTA_UP))
+               val_last - STEER_DELTA_UP,
+               min(val_last + STEER_DELTA_DOWN, STEER_DELTA_UP))
 
   return float(val)
 
