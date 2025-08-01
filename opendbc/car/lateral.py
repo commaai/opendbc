@@ -2,13 +2,16 @@ import math
 import numpy as np
 from dataclasses import dataclass
 from opendbc.car import structs, rate_limit, DT_CTRL
-from opendbc.car.interfaces import ISO_LATERAL_ACCEL, ISO_LATERAL_JERK
 from opendbc.car.vehicle_model import VehicleModel
 
 FRICTION_THRESHOLD = 0.3
 
 # Add extra tolerance for average banked road since safety doesn't have the roll
 AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation. higher actual roll lowers lateral acceleration
+
+# ISO 11270
+ISO_LATERAL_ACCEL = 3.0  # m/s^2
+ISO_LATERAL_JERK = 5.0  # m/s^3
 
 
 @dataclass
