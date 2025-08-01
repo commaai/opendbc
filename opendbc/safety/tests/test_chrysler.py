@@ -38,7 +38,10 @@ class TestChryslerSafety(common.PandaCarSafetyTest, common.MotorTorqueSteeringSa
     return self.packer.make_can_msg_panda("DAS_3", self.DAS_BUS, values)
 
   def _speed_msg(self, speed):
-    values = {"SPEED_LEFT": speed, "SPEED_RIGHT": speed}
+    return self._wheel_speed_2wheel_msg(speed, speed)
+
+  def _wheel_speed_2wheel_msg(self, wheel_left: float, wheel_right: float):
+    values = {"SPEED_LEFT": wheel_left, "SPEED_RIGHT": wheel_right}
     return self.packer.make_can_msg_panda("SPEED_1", 0, values)
 
   def _user_gas_msg(self, gas):
