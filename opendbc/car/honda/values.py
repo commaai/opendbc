@@ -55,6 +55,7 @@ class HondaSafetyFlags(IntFlag):
   RADARLESS = 8
   BOSCH_CANFD = 16
 
+
 class HondaFlags(IntFlag):
   # Detected flags
   # Bosch models with alternate set of LKAS_HUD messages
@@ -120,6 +121,7 @@ class HondaCarDocs(CarDocs):
       self.car_parts = CarParts([Device.threex_angled_mount, harness])
     else:
       self.car_parts = CarParts.common([harness])
+
 
 class Footnote(Enum):
   CIVIC_DIESEL = CarFootnote(
