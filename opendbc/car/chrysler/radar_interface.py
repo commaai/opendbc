@@ -13,20 +13,7 @@ def _create_radar_can_parser(car_fingerprint):
   if Bus.radar not in DBC[car_fingerprint]:
     return None
 
-  msg_n = len(RADAR_MSGS_C)
-  # list of [(signal name, message name or number), (...)]
-  # [('RADAR_STATE', 1024),
-  #  ('LONG_DIST', 1072),
-  #  ('LONG_DIST', 1073),
-  #  ('LONG_DIST', 1074),
-  #  ('LONG_DIST', 1075),
-
-  messages = list(zip(RADAR_MSGS_C +
-                      RADAR_MSGS_D,
-                      [20] * msg_n +  # 20Hz (0.05s)
-                      [20] * msg_n, strict=True))  # 20Hz (0.05s)
-
-  return CANParser(DBC[car_fingerprint][Bus.radar], messages, 1)
+  return CANParser(DBC[car_fingerprint][Bus.radar], [], 1)
 
 def _address_to_track(address):
   if address in RADAR_MSGS_C:
@@ -42,11 +29,11 @@ class RadarInterface(RadarInterfaceBase):
     self.updated_messages = set()
     self.trigger_msg = LAST_MSG
 
-  def update(self, can_strings):
+  def update(self, can_msgs):
     if self.rcp is None or self.CP.radarUnavailable:
       return super().update(None)
 
-    vls = self.rcp.update(can_strings)
+    vls = self.rcp.update(can_msgs)
     self.updated_messages.update(vls)
 
     if self.trigger_msg not in self.updated_messages:
