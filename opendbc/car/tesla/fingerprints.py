@@ -41,5 +41,5 @@ FW_VERSIONS = {
     (Ecu.eps, 0x730, None): [
       b'TeM3_SP_XP002p2_0.0.0 (23),XPR003.6.0',
     ],
-  }
+  },
 }
