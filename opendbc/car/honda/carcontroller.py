@@ -10,6 +10,8 @@ from opendbc.car.interfaces import CarControllerBase
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 
+MAX_STEER_RATE = 60  # deg/s, LKA angle-rate limit for avoiding EPS faults
+
 
 def compute_gb_honda_bosch(accel, speed):
   # TODO returns 0s, is unused
@@ -132,6 +134,10 @@ class CarController(CarControllerBase):
     # *** rate limit steer ***
     limited_torque = rate_limit(actuators.torque, self.last_torque, -self.params.STEER_DELTA_DOWN * DT_CTRL,
                                 self.params.STEER_DELTA_UP * DT_CTRL)
+
+    apply_steer_req = CC.latActive and not abs(CS.out.steeringRateDeg) >= MAX_STEER_RATE
+    if not apply_steer_req:
+      limited_torque = 0
     self.last_torque = limited_torque
 
     # *** apply brake hysteresis ***
@@ -159,7 +165,7 @@ class CarController(CarControllerBase):
         can_sends.append(make_tester_present_msg(0x18DAB0F1, 1, suppress_response=True))
 
     # Send steering command.
-    can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, CC.latActive))
+    can_sends.append(hondacan.create_steering_control(self.packer, self.CAN, apply_torque, apply_steer_req))
 
     # wind brake from air resistance decel at high speed
     wind_brake = np.interp(CS.out.vEgo, [0.0, 2.3, 35.0], [0.001, 0.002, 0.15])
