@@ -240,6 +240,7 @@ def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_ov
     "JerkLowerLimit": jerk if enabled else 1,
     "JerkUpperLimit": 3.0,
 
+    "ACC_ObjDist": 1,
     "ObjValid": 0,
     "OBJ_STATUS": 2,
     "SET_ME_2": 0x4,
@@ -247,8 +248,8 @@ def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_ov
     "SET_ME_TMP_64": 0x64,
     "DISTANCE_SETTING": hud_control.leadDistanceBars,
   }
-
-  values.update({"ACC_ObjDist": 1} if cruise_info is None else {s: cruise_info[s] for s in ["ACC_ObjDist", "ACC_ObjRelSpd"]})
+  if cruise_info:
+    values.update({s: cruise_info[s] for s in ["ACC_ObjDist", "ACC_ObjRelSpd"]})
 
   return packer.make_can_msg("SCC_CONTROL", CAN.ECAN, values)
 
