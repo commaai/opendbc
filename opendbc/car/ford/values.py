@@ -65,17 +65,21 @@ class Footnote(Enum):
     Column.MODEL,
   )
   GLOBAL = CarFootnote(
-    "OpenPilot on Ford requires adaptive cruise control. Ford frequently renames their Co-Pilot packages, "
-    "but not all packages include adaptive cruise control. Co-Pilot360 Assist+, Co-Pilot360 Assist 2.0,"
-    "and Co-Pilot360 Active are known to include adaptive cruise control",
+    "OpenPilot on Ford requires adaptive cruise control (ACC) and Lane Centering Assist (LCA). Ford's Co-Pilot naming scheme is complitcated"
+    "and evolving with new package names, but be aware that not all packages include ACC and LCA. Co-Pilot360 Assist+,"
+    " Co-Pilot360 Assist 2.0, and Co-Pilot360 Active are known to include ACC and LCA",
+    Column.PACKAGE,
+  )
+   GLOBAL = CarFootnote(
+    "Ford offers two different lane assist packages.  Lane Keep Assist (LKA) and Lane Centering Assist (LCA).  LKA is not"
+    compatible with OpenPilot.  All vehicles with LCA will also have LKA, but not all vehicles with LKA will have LCA"
+    "Please ensure your vehicle has LCA",
     Column.PACKAGE,
   )
 
-
-
 @dataclass
 class FordCarDocs(CarDocs):
-  package: str = "Co-Pilot360 Assist+, Co-Pilot360 Assist 2.0, Co-Pilot360 Active"
+  package: str = "Adaptive Cruise Control and Lane Centering Assist (LCA)"
   hybrid: bool = False
   plug_in_hybrid: bool = False
 
