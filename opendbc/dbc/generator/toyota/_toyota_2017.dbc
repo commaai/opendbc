@@ -431,8 +431,6 @@ CM_ SG_ 581 GAS_PEDAL "it seems slightly filtered";
 CM_ SG_ 608 STEER_TORQUE_DRIVER "driver torque";
 CM_ SG_ 608 STEER_OVERRIDE "set when driver torque exceeds a certain value";
 CM_ SG_ 614 ANGLE "set to measured angle when ipas control isn't active";
-CM_ SG_ 800 SLOPE_ANGLE "potentially used by the PCM to compensate for road pitch";
-CM_ SG_ 800 ACCEL "filtered ego acceleration";
 CM_ SG_ 835 ACC_TYPE "if 2, car is likely to have a permanent low speed lockout. 1 is ok";
 CM_ SG_ 835 RADAR_DIRTY "Display Clean Radar Sensor message on HUD";
 CM_ SG_ 835 ACC_MALFUNCTION "display ACC fault on dash if set to 1";
