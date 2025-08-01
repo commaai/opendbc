@@ -68,7 +68,7 @@ class Footnote(Enum):
 
 @dataclass
 class FordCarDocs(CarDocs):
-  package: str = "Co-Pilot360 Assist+"
+  package: str = "Co-Pilot360&nbsp;Assist+"
   hybrid: bool = False
   plug_in_hybrid: bool = False
 
