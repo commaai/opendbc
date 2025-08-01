@@ -1,16 +1,14 @@
 import math
 import numpy as np
 from dataclasses import dataclass
-from opendbc.car import structs, rate_limit, DT_CTRL, ACCELERATION_DUE_TO_GRAVITY
-from opendbc.car.interfaces import ISO_LATERAL_ACCEL
+from opendbc.car import structs, rate_limit, DT_CTRL
+from opendbc.car.interfaces import ISO_LATERAL_ACCEL, ISO_LATERAL_JERK
 from opendbc.car.vehicle_model import VehicleModel
 
 FRICTION_THRESHOLD = 0.3
 
 # Add extra tolerance for average banked road since safety doesn't have the roll
 AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation. higher actual roll lowers lateral acceleration
-MAX_LATERAL_ACCEL = ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~3.6 m/s^2
-MAX_LATERAL_JERK = 3.0 + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)  # ~3.6 m/s^3
 
 
 @dataclass
@@ -18,8 +16,9 @@ class AngleSteeringLimits:
   STEER_ANGLE_MAX: float
   ANGLE_RATE_LIMIT_UP: tuple[list[float], list[float]]
   ANGLE_RATE_LIMIT_DOWN: tuple[list[float], list[float]]
-  MAX_LATERAL_ACCEL: float = MAX_LATERAL_ACCEL  # Used primarily to lower the limits for more conservative approaches.
-  MAX_LATERAL_JERK: float = MAX_LATERAL_JERK  # Used primarily to lower the limits for more conservative approaches.
+  MAX_LATERAL_ACCEL: float = ISO_LATERAL_ACCEL * .7  # ~2.1m/s^2, 70% ISO limits as default, but ideally this is set manually for comfortable limits?
+  MAX_LATERAL_JERK: float = ISO_LATERAL_JERK * .5  # ~2.5m/s^3, 50% of ISO limits as default, but ideally this is set manually for comfortable limits?
+
 
 def apply_driver_steer_torque_limits(apply_torque: int, apply_torque_last: int, driver_torque: float, LIMITS, steer_max: int = None):
   # some safety modes utilize a dynamic max steer
