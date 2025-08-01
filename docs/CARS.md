@@ -31,16 +31,16 @@
 |comma|body|All|[Upstream](#upstream)|
 |CUPRA|Ateca 2018-23|Adaptive Cruise Control (ACC) & Lane Assist|[Upstream](#upstream)|
 |Dodge|Durango 2020-21|Adaptive Cruise Control (ACC)|[Upstream](#upstream)|
-|Ford|Bronco Sport 2021-24|Co-Pilot360 Assist+|[Upstream](#upstream)|
-|Ford|Escape 2020-22|Co-Pilot360 Assist+|[Upstream](#upstream)|
-|Ford|Escape 2023-24|Co-Pilot360 Assist+|[Upstream](#upstream)|
-|Ford|Escape Hybrid 2020-22|Co-Pilot360 Assist+|[Upstream](#upstream)|
-|Ford|Escape Hybrid 2023-24|Co-Pilot360 Assist+|[Upstream](#upstream)|
-|Ford|Escape Plug-in Hybrid 2020-22|Co-Pilot360 Assist+|[Upstream](#upstream)|
-|Ford|Escape Plug-in Hybrid 2023-24|Co-Pilot360 Assist+|[Upstream](#upstream)|
+|Ford|Bronco Sport 2021-24|Co-Pilot360&nbsp;Assist+|[Upstream](#upstream)|
+|Ford|Escape 2020-22|Co-Pilot360&nbsp;Assist+|[Upstream](#upstream)|
+|Ford|Escape 2023-24|Co-Pilot360&nbsp;Assist+|[Upstream](#upstream)|
+|Ford|Escape Hybrid 2020-22|Co-Pilot360&nbsp;Assist+|[Upstream](#upstream)|
+|Ford|Escape Hybrid 2023-24|Co-Pilot360&nbsp;Assist+|[Upstream](#upstream)|
+|Ford|Escape Plug-in Hybrid 2020-22|Co-Pilot360&nbsp;Assist+|[Upstream](#upstream)|
+|Ford|Escape Plug-in Hybrid 2023-24|Co-Pilot360&nbsp;Assist+|[Upstream](#upstream)|
 |Ford|Expedition 2022-24|Co-Pilot360 Assist 2.0|[Upstream](#upstream)|
-|Ford|Explorer 2020-24|Co-Pilot360 Assist+|[Upstream](#upstream)|
-|Ford|Explorer Hybrid 2020-24|Co-Pilot360 Assist+|[Upstream](#upstream)|
+|Ford|Explorer 2020-24|Co-Pilot360&nbsp;Assist+|[Upstream](#upstream)|
+|Ford|Explorer Hybrid 2020-24|Co-Pilot360&nbsp;Assist+|[Upstream](#upstream)|
 |Ford|F-150 2021-23|Co-Pilot360 Assist 2.0|[Upstream](#upstream)|
 |Ford|F-150 Hybrid 2021-23|Co-Pilot360 Assist 2.0|[Upstream](#upstream)|
 |Ford|Focus 2018|Adaptive Cruise Control with Lane Centering|[Upstream](#upstream)|
