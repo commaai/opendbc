@@ -251,8 +251,7 @@ class CarState(CarStateBase):
       alt = "_ALT"
     ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_lamp(50, cp.vl["BLINKERS"][f"LEFT_LAMP{alt}"], cp.vl["BLINKERS"][f"RIGHT_LAMP{alt}"])
     if self.CP.enableBsm:
-      ret.leftBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"][f"FL_INDICATOR{alt}"] != 0
-      ret.rightBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"][f"FR_INDICATOR{alt}"] != 0
+      ret.leftBlindspot, ret.rightBlindspot = [cp.vl["BLINDSPOTS_REAR_CORNERS"][f"{s}_INDICATOR{alt}"] != 0 for s in ("FL", "FR")]
 
     # cruise state
     # CAN FD cars enable on main button press, set available if no TCS faults preventing engagement
