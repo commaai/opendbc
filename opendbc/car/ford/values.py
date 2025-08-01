@@ -65,7 +65,7 @@ class Footnote(Enum):
     Column.MODEL,
   )
   GLOBAL = CarFootnote(
-    "OpenPilot on Ford requires adaptive cruise control (ACC) and Lane Centering Assist (LCA). Ford's Co-Pilot naming scheme is complitcated"
+    "OpenPilot on Ford requires adaptive cruise control (ACC) and Lane Centering Assist (LCA). Ford's Co-Pilot naming scheme is complicated"
     "and evolving with new package names, but be aware that not all packages include ACC and LCA. Co-Pilot360 Assist+,"
     " Co-Pilot360 Assist 2.0, and Co-Pilot360 Active are known to include ACC and LCA",
     Column.PACKAGE,
