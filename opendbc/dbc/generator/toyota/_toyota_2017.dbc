@@ -188,12 +188,19 @@ BO_ 869 DSU_CRUISE : 7 DSU
  SG_ CRUISE_REQUEST : 31|8@0+ (100,-12800) [0|0] "N" XXX
  SG_ LEAD_DISTANCE : 39|8@0+ (1,0) [0|0] "m" XXX
 
+BO_ 898 AIR_CONDITIONER: 8 XXX
+ SG_ CLIMATE_SET_POINT : 5|6@0+ (1,0) [5|33] "" XXX
+ SG_ AIR_CONDITIONER_STATE : 48|7@1+ (1,0) [0|127] "" XXX
+
 BO_ 921 PCM_CRUISE_SM: 8 XXX
  SG_ MAIN_ON : 4|1@0+ (1,0) [0|1] "" XXX
  SG_ CRUISE_CONTROL_STATE : 11|4@0+ (1,0) [0|15] "" XXX
  SG_ DISTANCE_LINES : 14|2@0+ (1,0) [0|3] "" XXX
  SG_ TEMP_ACC_FAULTED : 15|1@0+ (1,0) [0|1] "" XXX
  SG_ UI_SET_SPEED : 31|8@0+ (1,0) [0|255] "" XXX
+
+BO_ 944 AIR_CONDITIONER_2: 8 XXX
+ SG_ WINDSCREEN_DEFOG : 43|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 951 ESP_CONTROL: 8 ESP
  SG_ TC_DISABLED : 13|1@0+ (1,0) [0|1] "" XXX
@@ -445,6 +452,7 @@ CM_ SG_ 865 GAS_PEDAL_ALT "copy of main GAS_PEDAL. Both use 8 bits. Might indica
 CM_ SG_ 865 CLUTCH_RELEASED "boolean of clutch for 6MT.";
 CM_ SG_ 865 ACCEL_NET "net positive acceleration (gas) applied by the system if on flat ground, may not include creeping force";
 CM_ SG_ 865 ACC_FAULTED "1 when ACC is faulted and the PCM disallows engagement. Also describes a lockout when the ACC_CONTROL->ACC_MALFUNCTION bit is set.";
+CM_ SG_ 898 AIR_CONDITIONER_STATE "very difficult to parse with some air register motors operating without user-inputs";
 CM_ SG_ 921 UI_SET_SPEED "set speed shown in the vehicle's UI with the vehicle's unit";
 CM_ SG_ 921 TEMP_ACC_FAULTED "1 when the UI is displaying or playing fault-related alerts or sounds. Also 1 when pressing main on.";
 CM_ SG_ 951 BRAKE_LIGHTS_ACC "brake lights when ACC commands decel";
@@ -506,6 +514,8 @@ VAL_ 835 ACC_MALFUNCTION 1 "faulted" 0 "ok";
 VAL_ 835 ACC_CUT_IN 1 "CUT-IN Detected" 0 "clear";
 VAL_ 835 ALLOW_LONG_PRESS 2 "set speed increase by 5 speed units regardless" 1 "set speed increase by 1 speed unit on short press, 5 speed units on long press";
 VAL_ 865 CLUTCH_RELEASED 0 "clutch pressed any amount" 1 "clutch released";
+VAL_ 898 CLIMATE_SET_POINT 0 "CLIMATE LO MODE" 55 "CLIMATE HI MODE" 57 "CLIMATE OFF";
+VAL_ 898 AIR_CONDITIONER_STATE 20 "CLIMATE OFF";
 VAL_ 921 CRUISE_CONTROL_STATE 2 "disabled" 11 "hold" 10 "hold_waiting_user_cmd" 6 "enabled" 5 "faulted";
 VAL_ 921 DISTANCE_LINES 0 "not displayed" 1 "close" 2 "medium" 3 "far";
 VAL_ 956 SPORT_ON 0 "off" 1 "on";
