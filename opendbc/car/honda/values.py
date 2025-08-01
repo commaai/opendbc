@@ -166,7 +166,7 @@ class CAR(Platforms):
   )
   HONDA_ACCORD_11G = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda Accord 2023-25", "All")],
-    CarSpecs(mass=3,477 * CV.LB_TO_KG, wheelbase=2.83, steerRatio=13.9, centerToFrontRatio=0.39, tireStiffnessFactor=0.8467), # Sport (best selling) trim specs
+    CarSpecs(mass=3477 * CV.LB_TO_KG, wheelbase=2.83, steerRatio=13.9, centerToFrontRatio=0.39, tireStiffnessFactor=0.8467), # Sport (best selling) trim specs
   )
   HONDA_CIVIC_BOSCH = HondaBoschPlatformConfig(
     [
