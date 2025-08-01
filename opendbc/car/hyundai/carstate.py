@@ -249,7 +249,8 @@ class CarState(CarStateBase):
       self.msg_161, self.msg_162, self.msg_1b5 = map(copy.copy, (cp_cam.vl["CCNC_0x161"], cp_cam.vl["CCNC_0x162"], cp_cam.vl["FR_CMR_03_50ms"]))
       self.cruise_info = copy.copy((cp_cam if self.CP.flags & HyundaiFlags.CANFD_CAMERA_SCC else cp).vl["SCC_CONTROL"])
       alt = "_ALT"
-    ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_lamp(50, cp.vl["BLINKERS"][f"LEFT_LAMP{alt}"], cp.vl["BLINKERS"][f"RIGHT_LAMP{alt}"])
+    ret.leftBlinker, ret.rightBlinker = self.update_blinker_from_lamp(50, cp.vl["BLINKERS"][f"LEFT_LAMP{alt}"],
+                                                                      cp.vl["BLINKERS"][f"RIGHT_LAMP{alt}"])
     if self.CP.enableBsm:
       ret.leftBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"][f"FL_INDICATOR{alt}"] != 0
       ret.rightBlindspot = cp.vl["BLINDSPOTS_REAR_CORNERS"][f"FR_INDICATOR{alt}"] != 0
