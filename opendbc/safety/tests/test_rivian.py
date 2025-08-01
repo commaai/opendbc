@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import unittest
-import numpy as np
 
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
@@ -40,9 +39,6 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
   DRIVER_TORQUE_ALLOWANCE = 100
   DRIVER_TORQUE_FACTOR = 2
 
-  # Max allowed delta between car speeds
-  MAX_SPEED_DELTA = 2.0  # m/s
-
   cnt_speed = 0
   cnt_speed_2 = 0
 
@@ -61,6 +57,7 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
     return self.packer.make_can_msg_panda("ESP_Status", 0, values, fix_checksum=checksum)
 
   def _speed_msg_2(self, speed, quality_flag=True):
+    # Rivian has a dynamic max torque limit based on speed, so it checks two sources
     return self._user_gas_msg(0, speed, quality_flag)
 
   def _user_brake_msg(self, brake):
@@ -95,36 +92,22 @@ class TestRivianSafetyBase(common.PandaCarSafetyTest, common.DriverTorqueSteerin
   def test_rx_hook(self):
     # checksum, counter, and quality flag checks
     for quality_flag in (True, False):
-      for msg in ("speed", "speed_2"):
+      for msg_type in ("speed", "speed_2"):
         self.safety.set_controls_allowed(True)
         # send multiple times to verify counter checks
         for _ in range(10):
-          if msg == "speed":
-            to_push = self._speed_msg(0, quality_flag=quality_flag)
-          elif msg == "speed_2":
-            to_push = self._speed_msg_2(0, quality_flag=quality_flag)
+          if msg_type == "speed":
+            msg = self._speed_msg(0, quality_flag=quality_flag)
+          elif msg_type == "speed_2":
+            msg = self._speed_msg_2(0, quality_flag=quality_flag)
 
-          self.assertEqual(quality_flag, self._rx(to_push))
+          self.assertEqual(quality_flag, self._rx(msg))
           self.assertEqual(quality_flag, self.safety.get_controls_allowed())
 
         # Mess with checksum to make it fail
-        to_push[0].data[0] = 0xff
-        self.assertFalse(self._rx(to_push))
+        msg[0].data[0] = 0xff
+        self.assertFalse(self._rx(msg))
         self.assertFalse(self.safety.get_controls_allowed())
-
-  def test_rx_hook_speed_mismatch(self):
-    # TODO: this can be a common test w/ Ford
-    # Rivian has a dynamic max torque limit based on speed, so it checks two sources
-    for speed in np.arange(0, 40, 0.5):
-      for speed_delta in np.arange(-5, 5, 0.1):
-        speed_2 = round(max(speed + speed_delta, 0), 1)
-        # Set controls allowed in between rx since first message can reset it
-        self._rx(self._speed_msg(speed))
-        self.safety.set_controls_allowed(True)
-        self._rx(self._speed_msg_2(speed_2))
-
-        within_delta = abs(speed - speed_2) <= self.MAX_SPEED_DELTA
-        self.assertEqual(self.safety.get_controls_allowed(), within_delta)
 
 
 class TestRivianStockSafety(TestRivianSafetyBase):
