@@ -18,6 +18,7 @@ class CarState(CarStateBase):
     self.esp_hold_confirmation = False
     self.upscale_lead_car_signal = False
     self.eps_stock_values = False
+    self.qfk_curvature = 0.
 
   def update_button_enable(self, buttonEvents: list[structs.CarState.ButtonEvent]):
     if not self.CP.pcmCruise:
@@ -61,7 +62,54 @@ class CarState(CarStateBase):
     else:
       ret.gearShifter = self.parse_gear_shifter(self.CCP.shifter_values.get(pt_cp.vl["Gateway_73"]["GE_Fahrstufe"], None))
 
-    if True:
+    if self.CP.flags & VolkswagenFlags.MEB:
+      # MEB-specific
+      self.qfk_curvature = -pt_cp.vl["QFK_01"]["Curvature"] * (1, -1)[int(pt_cp.vl["QFK_01"]["Curvature_VZ"])]
+      ret.fuelGauge = pt_cp.vl["Motor_16"]["MO_Energieinhalt_BMS"]  # TODO: is this available on MQB as well?
+
+      self.parse_wheel_speeds(ret,
+        pt_cp.vl["ESC_51"]["VL_Radgeschw"],
+        pt_cp.vl["ESC_51"]["VR_Radgeschw"],
+        pt_cp.vl["ESC_51"]["HL_Radgeschw"],
+        pt_cp.vl["ESC_51"]["HR_Radgeschw"],
+      )
+
+      hca_status = self.CCP.hca_status_values.get(pt_cp.vl["QFK_01"]["LatCon_HCA_Status"])
+
+      drive_mode = ret.gearShifter == GearShifter.drive
+      ret.gasPressed = pt_cp.vl["Motor_54"]["Accelerator_Pressure"] > 0
+      ret.brake = pt_cp.vl["ESC_51"]["Brake_Pressure"]
+      ret.brakePressed = bool(pt_cp.vl["Motor_14"]["MO_Fahrer_bremst"]) # includes regen braking by user
+      ret.parkingBrake = pt_cp.vl["Gateway_73"]["EPB_Status"] in (1, 4) # EPB closing or closed
+
+      ret.doorOpen = any([pt_cp.vl["ZV_02"]["ZV_FT_offen"],
+                          pt_cp.vl["ZV_02"]["ZV_BT_offen"],
+                          pt_cp.vl["ZV_02"]["ZV_HFS_offen"],
+                          pt_cp.vl["ZV_02"]["ZV_HBFS_offen"],
+                          pt_cp.vl["ZV_02"]["ZV_HD_offen"]])
+
+      if self.CP.enableBsm:
+        ret.leftBlindspot = bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Left"]) or bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Left"])
+        ret.rightBlindspot = bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Info_Right"]) or bool(ext_cp.vl["MEB_Side_Assist_01"]["Blind_Spot_Warn_Right"])
+
+      ret.stockFcw = bool(pt_cp.vl["VMM_02"]["FCW_Active"]) or bool(ext_cp.vl["AWV_03"]["FCW_Active"])
+      ret.stockAeb = bool(pt_cp.vl["VMM_02"]["AEB_Active"])
+
+      self.travel_assist_available = bool(cam_cp.vl["TA_01"]["Travel_Assist_Available"])
+      self.acc_type = ext_cp.vl["ACC_18"]["ACC_Typ"]
+      self.esp_hold_confirmation = bool(pt_cp.vl["VMM_02"]["ESP_Hold"])
+      acc_limiter_mode = bool(ext_cp.vl["MEB_ACC_01"]["ACC_Limiter_Mode"])
+      speed_limiter_mode = bool(pt_cp.vl["Motor_51"]["TSK_Limiter_ausgewaehlt"])
+
+      ret.cruiseState.available = pt_cp.vl["Motor_51"]["TSK_Status"] in (2, 3, 4, 5)
+      ret.cruiseState.enabled = pt_cp.vl["Motor_51"]["TSK_Status"] in (3, 4, 5)
+      ret.cruiseState.speed = int(round(ext_cp.vl["MEB_ACC_01"]["ACC_Wunschgeschw_02"])) * CV.KPH_TO_MS if self.CP.pcmCruise else 0
+      ret.accFaulted = drive_mode and pt_cp.vl["Motor_51"]["TSK_Status"] in (6, 7)
+
+      ret.leftBlinker = bool(pt_cp.vl["Blinkmodi_02"]["BM_links"])
+      ret.rightBlinker = bool(pt_cp.vl["Blinkmodi_02"]["BM_rechts"])
+
+    else:
       # MQB-specific
       if self.CP.flags & VolkswagenFlags.KOMBI_PRESENT:
         self.upscale_lead_car_signal = bool(pt_cp.vl["Kombi_03"]["KBI_Variante"])  # Analog vs digital instrument cluster
@@ -78,6 +126,8 @@ class CarState(CarStateBase):
         ret.carFaultedNonCritical = bool(cam_cp.vl["HCA_01"]["EA_Ruckfreigabe"]) or cam_cp.vl["HCA_01"]["EA_ACC_Sollstatus"] > 0  # EA
 
       drive_mode = True
+      ret.vEgoCluster = pt_cp.vl["Kombi_01"]["KBI_angez_Geschw"] * CV.KPH_TO_MS
+      ret.gasPressed = pt_cp.vl["Motor_20"]["MO_Fahrpedalrohwert_01"] > 0
       ret.brake = pt_cp.vl["ESP_05"]["ESP_Bremsdruck"] / 250.0  # FIXME: this is pressure in Bar, not sure what OP expects
       brake_pedal_pressed = bool(pt_cp.vl["Motor_14"]["MO_Fahrer_bremst"])
       brake_pressure_detected = bool(pt_cp.vl["ESP_05"]["ESP_Fahrer_bremst"])
@@ -112,7 +162,6 @@ class CarState(CarStateBase):
       ret.rightBlinker = bool(pt_cp.vl["Blinkmodi_02"]["Comfort_Signal_Right"])
 
     # Shared logic
-    ret.vEgoCluster = pt_cp.vl["Kombi_01"]["KBI_angez_Geschw"] * CV.KPH_TO_MS
 
     ret.steeringAngleDeg = pt_cp.vl["LWI_01"]["LWI_Lenkradwinkel"] * (1, -1)[int(pt_cp.vl["LWI_01"]["LWI_VZ_Lenkradwinkel"])]
     ret.steeringRateDeg = pt_cp.vl["LWI_01"]["LWI_Lenkradw_Geschw"] * (1, -1)[int(pt_cp.vl["LWI_01"]["LWI_VZ_Lenkradw_Geschw"])]
@@ -120,7 +169,6 @@ class CarState(CarStateBase):
     ret.steeringPressed = abs(ret.steeringTorque) > self.CCP.STEER_DRIVER_ALLOWANCE
     ret.steerFaultTemporary, ret.steerFaultPermanent = self.update_hca_state(hca_status, drive_mode)
 
-    ret.gasPressed = pt_cp.vl["Motor_20"]["MO_Fahrpedalrohwert_01"] > 0
     ret.espActive = bool(pt_cp.vl["ESP_21"]["ESP_Eingriff"])
     ret.espDisabled = pt_cp.vl["ESP_21"]["ESP_Tastung_passiv"] != 0
     ret.seatbeltUnlatched = pt_cp.vl["Airbag_02"]["AB_Gurtschloss_FA"] != 3
@@ -253,6 +301,8 @@ class CarState(CarStateBase):
   def get_can_parsers(CP):
     if CP.flags & VolkswagenFlags.PQ:
       return CarState.get_can_parsers_pq(CP)
+    elif CP.flags & VolkswagenFlags.MEB:
+      return CarState.get_can_parsers_meb(CP)
 
     # another case of the 1-50Hz
     cam_messages = []
@@ -276,3 +326,12 @@ class CarState(CarStateBase):
       Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CanBus(CP).cam),
     }
 
+  @staticmethod
+  def get_can_parsers_meb(CP):
+    return {
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [
+        # the 50->1Hz is currently too much for the CANParser to figure out
+        ("Blinkmodi_02", 1),  # From J519 BCM (sent at 1Hz when no lights active, 50Hz when active)
+      ], CanBus.pt),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], CanBus.cam),
+    }
