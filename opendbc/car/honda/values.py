@@ -53,6 +53,7 @@ class HondaSafetyFlags(IntFlag):
   BOSCH_LONG = 2
   NIDEC_ALT = 4
   RADARLESS = 8
+  BOSCH_CANFD = 16
 
 
 class HondaFlags(IntFlag):
@@ -164,6 +165,10 @@ class CAR(Platforms):
     # steerRatio: 11.82 is spec end-to-end
     CarSpecs(mass=3279 * CV.LB_TO_KG, wheelbase=2.83, steerRatio=16.33, centerToFrontRatio=0.39, tireStiffnessFactor=0.8467),
     {Bus.pt: 'honda_accord_2018_can_generated'},
+  )
+  HONDA_ACCORD_11G = HondaBoschCANFDPlatformConfig(
+    [HondaCarDocs("Honda Accord 2023-25", "All")],
+    CarSpecs(mass=3477 * CV.LB_TO_KG, wheelbase=2.83, steerRatio=13.9, centerToFrontRatio=0.39, tireStiffnessFactor=0.8467), # Sport (best selling) trim specs
   )
   HONDA_CIVIC_BOSCH = HondaBoschPlatformConfig(
     [
