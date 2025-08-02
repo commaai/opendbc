@@ -46,6 +46,8 @@ class CarState(CarStateBase):
 
     self.pcm_follow_distance = 0
 
+    self.lkas_status = None
+
     self.acc_type = 1
     self.lkas_hud = {}
     self.gvc = 0.0
@@ -178,12 +180,24 @@ class CarState(CarStateBase):
     if self.CP.carFingerprint not in UNSUPPORTED_DSU_CAR:
       self.pcm_follow_distance = cp.vl["PCM_CRUISE_2"]["PCM_FOLLOW_DISTANCE"]
 
+
+    button_events = []
+
     if self.CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR):
       # distance button is wired to the ACC module (camera or radar)
       prev_distance_button = self.distance_button
       self.distance_button = cp_acc.vl["ACC_CONTROL"]["DISTANCE"]
 
-      ret.buttonEvents = create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise})
+      button_events.extend(create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise}))
+
+    # fake pressed/unpressed lkas button events
+    prev_lkas_status = self.lkas_status
+    self.lkas_status = cp_cam.vl["LKAS_HUD"]["LKAS_STATUS"]
+    if self.lkas_status != prev_lkas_status and prev_lkas_status is not None:
+      button_events.extend(create_button_events(1, 0, {1: ButtonType.lkas}))
+      button_events.extend(create_button_events(0, 1, {1: ButtonType.lkas}))
+
+    ret.buttonEvents = button_events
 
     return ret
 
