@@ -126,7 +126,6 @@ class TestVolkswagenMqbSafetyBase(common.PandaCarSafetyTest, common.DriverTorque
     self.assertEqual(0, self.safety.get_torque_driver_max())
     self.assertEqual(0, self.safety.get_torque_driver_min())
 
-
 class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafetyBase):
   TX_MSGS = [[MSG_HCA_01, 0], [MSG_LDW_02, 0], [MSG_LH_EPS_03, 2], [MSG_GRA_ACC_01, 0], [MSG_GRA_ACC_01, 2]]
   FWD_BLACKLISTED_ADDRS = {0: [MSG_LH_EPS_03], 2: [MSG_HCA_01, MSG_LDW_02]}
@@ -145,7 +144,10 @@ class TestVolkswagenMqbStockSafety(TestVolkswagenMqbSafetyBase):
     # do not block resume if we are engaged already
     self.safety.set_controls_allowed(1)
     self.assertTrue(self._tx(self._gra_acc_01_msg(resume=1)))
-
+    # rx check
+    self.safety.set_controls_allowed(1)
+    self._rx(self._gra_acc_01_msg(cancel=1, bus=0))
+    self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after cancel")
 
 class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):
   TX_MSGS = [[MSG_HCA_01, 0], [MSG_LDW_02, 0], [MSG_LH_EPS_03, 2], [MSG_ACC_02, 0], [MSG_ACC_06, 0], [MSG_ACC_07, 0]]
@@ -195,6 +197,17 @@ class TestVolkswagenMqbLongSafety(TestVolkswagenMqbSafetyBase):
     self.safety.set_controls_allowed(1)
     self._rx(self._tsk_status_msg(False, main_switch=False))
     self.assertFalse(self.safety.get_controls_allowed(), "controls allowed after ACC main switch off")
+
+  def test_acc_engagement_status(self):
+    self.safety.set_controls_allowed(1)
+    for tsk_status in [2, 3, 4, 5]:
+      values = {"TSK_Status": tsk_status}
+      self._rx(self.packer.make_can_msg_panda("TSK_06", 0, values))
+      self.assertTrue(self.safety.get_controls_allowed())
+    for tsk_status in [0, 1]:
+      values = {"TSK_Status": tsk_status}
+      self._rx(self.packer.make_can_msg_panda("TSK_06", 0, values))
+      self.assertFalse(self.safety.get_controls_allowed())
 
   def test_accel_safety_check(self):
     for controls_allowed in [True, False]:
