@@ -1,6 +1,6 @@
 import math
 import numpy as np
-from opendbc.can.packer import CANPacker
+from opendbc.can import CANPacker
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, apply_std_steer_angle_limits, apply_hysteresis, structs
 from opendbc.car.ford import fordcan
 from opendbc.car.ford.values import CarControllerParams, FordFlags, CAR
@@ -23,7 +23,7 @@ def anti_overshoot(apply_curvature, apply_curvature_last, v_ego):
 
   lataccel = apply_curvature * (v_ego ** 2)
   last_lataccel = apply_curvature_last * (v_ego ** 2)
-  last_lataccel = apply_hysteresis(last_lataccel, lataccel, diff)
+  last_lataccel = apply_hysteresis(lataccel, last_lataccel, diff)
   last_lataccel = alpha * lataccel + (1 - alpha) * last_lataccel
 
   output_curvature = last_lataccel / (max(v_ego, 1) ** 2)

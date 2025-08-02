@@ -66,17 +66,16 @@ def replay_drive(msgs, safety_mode, param, alternative_experience, param_sp):
 
     if msg.which() == 'sendcan':
       for canmsg in msg.sendcan:
-        to_send = package_can_msg(canmsg)
-        sent = safety.safety_tx_hook(to_send)
+        msg = package_can_msg(canmsg)
+        sent = safety.safety_tx_hook(msg)
 
         # mismatched
-        if (safety.get_controls_allowed() and not safety.get_controls_allowed_lat()):
+        if safety.get_controls_allowed() and not safety.get_controls_allowed_lat():
           mads_mismatch += 1
           print(f"controls allowed but not controls allowed lat [{mads_mismatch}]")
           print(f"msg:{canmsg.address} ({hex(canmsg.address)})")
           for var, getter in DEBUG_VARS.items():
             print(f"  {var}: {getter(safety)}")
-
         if not sent:
           tx_blocked += 1
           tx_controls_blocked += safety.get_controls_allowed()
@@ -113,8 +112,8 @@ def replay_drive(msgs, safety_mode, param, alternative_experience, param_sp):
       # ignore msgs we sent
       for canmsg in filter(lambda m: m.src < 128, msg.can):
         safety.safety_fwd_hook(canmsg.src, canmsg.address)
-        to_push = package_can_msg(canmsg)
-        recv = safety.safety_rx_hook(to_push)
+        msg = package_can_msg(canmsg)
+        recv = safety.safety_rx_hook(msg)
         if not recv:
           rx_invalid += 1
           invalid_addrs.add(canmsg.address)
