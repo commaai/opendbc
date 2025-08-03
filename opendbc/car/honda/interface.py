@@ -139,6 +139,7 @@ class CarInterface(CarInterfaceBase):
     # TODO: see if all Bosch CAN-FD can be handled in one candidate block
     elif candidate == CAR.HONDA_ACCORD_11G:
       ret.steerActuatorDelay = 0.22  # TODO: lagd is learning ~0.418 end-to-end after short testing, refine after more driving
+      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
       CarControllerParams.BOSCH_GAS_LOOKUP_V = [0, 1060]
 
