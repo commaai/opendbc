@@ -3,7 +3,8 @@ import re
 from dataclasses import dataclass, field, replace
 from enum import Enum, IntFlag
 
-from opendbc.car import AngleSteeringLimits, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car.lateral import AngleSteeringLimits
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, \
                                                      Device
@@ -65,21 +66,14 @@ class Footnote(Enum):
     Column.MODEL,
   )
   GLOBAL = CarFootnote(
-    "OpenPilot on Ford requires adaptive cruise control (ACC) and Lane Centering Assist (LCA). Ford's Co-Pilot naming scheme is complicated"
-    "and evolving with new package names, but be aware that not all packages include ACC and LCA. Co-Pilot360 Assist+,"
-    " Co-Pilot360 Assist 2.0, and Co-Pilot360 Active are known to include ACC and LCA",
-    Column.PACKAGE,
-  )
-  HW_TYPE = CarFootnote(
-    "Ford offers two different lane assist packages.  Lane Keep Assist (LKA) and Lane Centering Assist (LCA).  LKA is not"
-    "compatible with OpenPilot.  All vehicles with LCA will also have LKA, but not all vehicles with LKA will have LCA"
-    "Please ensure your vehicle has LCA",
+    "Co-Pilot360 and Co-Pilot360 Assist are NOT COMPATIBLE with OpenPilot",
     Column.PACKAGE,
   )
 
+
 @dataclass
 class FordCarDocs(CarDocs):
-  package: str = "Adaptive Cruise Control and Lane Centering Assist (LCA)"
+  package: str = "Co-Pilot360 Assist+ or Co-Pilot360 Assist 2.0 or Co-Pilot360 Active"
   hybrid: bool = False
   plug_in_hybrid: bool = False
 
@@ -134,41 +128,41 @@ class FordF150LightningPlatform(FordCANFDPlatformConfig):
 
 class CAR(Platforms):
   FORD_BRONCO_SPORT_MK1 = FordPlatformConfig(
-    [FordCarDocs("Ford Bronco Sport 2021-24", footnotes=[Footnote.HW_TYPE])],
+    [FordCarDocs("Ford Bronco Sport 2021-24")],
     CarSpecs(mass=1625, wheelbase=2.67, steerRatio=17.7),
   )
   FORD_ESCAPE_MK4 = FordPlatformConfig(
     [
-      FordCarDocs("Ford Escape 2020-22", hybrid=True, plug_in_hybrid=True, footnotes=[Footnote.HW_TYPE]),
-      FordCarDocs("Ford Kuga 2020-23", "Adaptive Cruise Control with Lane Centering", hybrid=True, plug_in_hybrid=True, footnotes=[Footnote.HW_TYPE]),
+      FordCarDocs("Ford Escape 2020-22", hybrid=True, plug_in_hybrid=True),
+      FordCarDocs("Ford Kuga 2020-23", "Adaptive Cruise Control with Lane Centering", hybrid=True, plug_in_hybrid=True),
     ],
     CarSpecs(mass=1750, wheelbase=2.71, steerRatio=16.7),
   )
   FORD_ESCAPE_MK4_5 = FordCANFDPlatformConfig(
     [
-      FordCarDocs("Ford Escape 2023-24", hybrid=True, plug_in_hybrid=True, footnotes=[Footnote.HW_TYPE], setup_video="https://www.youtube.com/watch?v=M6uXf4b2SHM"),
-      FordCarDocs("Ford Kuga Hybrid 2024", "All", footnotes=[Footnote.HW_TYPE]),
-      FordCarDocs("Ford Kuga Plug-in Hybrid 2024", "All", footnotes=[Footnote.HW_TYPE]),
+      FordCarDocs("Ford Escape 2023-24", hybrid=True, plug_in_hybrid=True, setup_video="https://www.youtube.com/watch?v=M6uXf4b2SHM"),
+      FordCarDocs("Ford Kuga Hybrid 2024", "All"),
+      FordCarDocs("Ford Kuga Plug-in Hybrid 2024", "All"),
     ],
     CarSpecs(mass=1750, wheelbase=2.71, steerRatio=16.7),
   )
   FORD_EXPLORER_MK6 = FordPlatformConfig(
     [
-      FordCarDocs("Ford Explorer 2020-24", hybrid=True, footnotes=[Footnote.HW_TYPE]),  # Hybrid: Limited and Platinum only
-      FordCarDocs("Lincoln Aviator 2020-24", "Co-Pilot360 Plus", plug_in_hybrid=True, footnotes=[Footnote.HW_TYPE]),  # Hybrid: Grand Touring only
+      FordCarDocs("Ford Explorer 2020-24", hybrid=True),  # Hybrid: Limited and Platinum only
+      FordCarDocs("Lincoln Aviator 2020-24", "Co-Pilot360 Plus", plug_in_hybrid=True),  # Hybrid: Grand Touring only
     ],
     CarSpecs(mass=2050, wheelbase=3.025, steerRatio=16.8),
   )
   FORD_EXPEDITION_MK4 = FordCANFDPlatformConfig(
-    [FordCarDocs("Ford Expedition 2022-24", "Co-Pilot360 Assist 2.0", hybrid=False, footnotes=[Footnote.HW_TYPE])],
+    [FordCarDocs("Ford Expedition 2022-24", "Co-Pilot360 Assist 2.0", hybrid=False)],
     CarSpecs(mass=2000, wheelbase=3.69, steerRatio=17.0),
   )
   FORD_F_150_MK14 = FordCANFDPlatformConfig(
-    [FordCarDocs("Ford F-150 2021-23", "Co-Pilot360 Assist 2.0", hybrid=True, footnotes=[Footnote.HW_TYPE])],
+    [FordCarDocs("Ford F-150 2021-23", "Co-Pilot360 Assist 2.0", hybrid=True)],
     CarSpecs(mass=2000, wheelbase=3.69, steerRatio=17.0),
   )
   FORD_F_150_LIGHTNING_MK1 = FordF150LightningPlatform(
-    [FordCarDocs("Ford F-150 Lightning 2022-23", "Co-Pilot360 Assist 2.0", footnotes=[Footnote.HW_TYPE])],
+    [FordCarDocs("Ford F-150 Lightning 2022-23", "Co-Pilot360 Assist 2.0")],
     CarSpecs(mass=2948, wheelbase=3.70, steerRatio=16.9),
   )
   FORD_FOCUS_MK4 = FordPlatformConfig(
@@ -177,17 +171,17 @@ class CAR(Platforms):
   )
   FORD_MAVERICK_MK1 = FordPlatformConfig(
     [
-      FordCarDocs("Ford Maverick 2022", "LARIAT Luxury", hybrid=True, footnotes=[Footnote.HW_TYPE]),
-      FordCarDocs("Ford Maverick 2023-24", "Co-Pilot360 Assist", hybrid=True, footnotes=[Footnote.HW_TYPE]),
+      FordCarDocs("Ford Maverick 2022", "LARIAT Luxury", hybrid=True),
+      FordCarDocs("Ford Maverick 2023-24", "Co-Pilot360 Assist", hybrid=True),
     ],
     CarSpecs(mass=1650, wheelbase=3.076, steerRatio=17.0),
   )
   FORD_MUSTANG_MACH_E_MK1 = FordCANFDPlatformConfig(
-    [FordCarDocs("Ford Mustang Mach-E 2021-24", "All", footnotes=[Footnote.HW_TYPE], setup_video="https://www.youtube.com/watch?v=AR4_eTF3b_A")],
+    [FordCarDocs("Ford Mustang Mach-E 2021-24", "All", setup_video="https://www.youtube.com/watch?v=AR4_eTF3b_A")],
     CarSpecs(mass=2200, wheelbase=2.984, steerRatio=17.0),  # TODO: check steer ratio
   )
   FORD_RANGER_MK2 = FordCANFDPlatformConfig(
-    [FordCarDocs("Ford Ranger 2024", "Adaptive Cruise Control with Lane Centering", footnotes=[Footnote.HW_TYPE], setup_video="https://www.youtube.com/watch?v=2oJlXCKYOy0")],
+    [FordCarDocs("Ford Ranger 2024", "Adaptive Cruise Control with Lane Centering", setup_video="https://www.youtube.com/watch?v=2oJlXCKYOy0")],
     CarSpecs(mass=2000, wheelbase=3.27, steerRatio=17.0),
   )
 
