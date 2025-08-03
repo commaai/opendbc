@@ -168,7 +168,7 @@ class CAR(Platforms):
   )
   HONDA_ACCORD_11G = HondaBoschCANFDPlatformConfig(
     [HondaCarDocs("Honda Accord 2023-25", "All")],
-    CarSpecs(mass=3477 * CV.LB_TO_KG, wheelbase=2.83, steerRatio=14.8, centerToFrontRatio=0.39),
+    CarSpecs(mass=3477 * CV.LB_TO_KG, wheelbase=2.83, steerRatio=15.7, centerToFrontRatio=0.39),
   )
   HONDA_CIVIC_BOSCH = HondaBoschPlatformConfig(
     [
