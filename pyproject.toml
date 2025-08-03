@@ -26,7 +26,8 @@ testing = [
   "pytest-coverage",
   "pytest-mock",
   "pytest-randomly",
-  "pytest-xdist",
+  # https://github.com/pytest-dev/pytest-xdist/pull/1229
+  "pytest-xdist @ git+https://github.com/sshane/pytest-xdist@2b4372bd62699fb412c4fe2f95bf9f01bd2018da",
   "pytest-subtests",
   "hypothesis==6.47.*",
   "parameterized>=0.8,<0.9",
@@ -114,6 +115,7 @@ flake8-implicit-str-concat.allow-multiline=false
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "pytest.main".msg = "pytest.main requires special handling that is easy to mess up!"
+"numpy.mean".msg = "Sum and divide. np.mean is slow"
 # TODO: re-enable when all tests are converted to pytest
 #"unittest".msg = "Use pytest"
 
