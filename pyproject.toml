@@ -115,6 +115,7 @@ flake8-implicit-str-concat.allow-multiline=false
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "pytest.main".msg = "pytest.main requires special handling that is easy to mess up!"
+"numpy.mean".msg = "Sum and divide. np.mean is slow"
 # TODO: re-enable when all tests are converted to pytest
 #"unittest".msg = "Use pytest"
 
