@@ -3,6 +3,7 @@ import struct
 from Crypto.Hash import CMAC
 from Crypto.Cipher import AES
 
+
 def add_mac(key, trip_cnt, reset_cnt, msg_cnt, msg):
   # TODO: clean up conversion to and from hex
 
@@ -22,7 +23,7 @@ def add_mac(key, trip_cnt, reset_cnt, msg_cnt, msg):
   # Step 3: Calculate CMAC (28 bit)
   cmac = CMAC.new(key, ciphermod=AES)
   cmac.update(to_auth)
-  mac = cmac.digest().hex()[:7] # truncated MAC
+  mac = cmac.digest().hex()[:7]  # truncated MAC
 
   # Step 4: Build message
   # [Payload (32 bit)][Message Counter Flag (2 bit)][Reset Flag (2 bit)][Authenticator (28 bit)]
@@ -32,12 +33,13 @@ def add_mac(key, trip_cnt, reset_cnt, msg_cnt, msg):
 
   return (addr, payload, bus)
 
-def build_sync_mac(key, trip_cnt, reset_cnt, id_=0xf):
-  id_ = struct.pack('>H', id_) # 16
-  trip_cnt = struct.pack('>H', trip_cnt) # 16
-  reset_cnt = struct.pack('>I', reset_cnt << 12)[:-1] # 20 + 4 padding
 
-  to_auth = id_ + trip_cnt + reset_cnt # SecOC 11.4.1.1 page 138
+def build_sync_mac(key, trip_cnt, reset_cnt, id_=0xf):
+  id_ = struct.pack('>H', id_)  # 16
+  trip_cnt = struct.pack('>H', trip_cnt)  # 16
+  reset_cnt = struct.pack('>I', reset_cnt << 12)[:-1]  # 20 + 4 padding
+
+  to_auth = id_ + trip_cnt + reset_cnt  # SecOC 11.4.1.1 page 138
 
   cmac = CMAC.new(key, ciphermod=AES)
   cmac.update(to_auth)

@@ -24,7 +24,7 @@ class CarController(CarControllerBase):
 
     can_sends = []
 
-    ### STEER ###
+    # STEER ###
     steer_hud_alert = 1 if hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw) else 0
 
     # windup slower

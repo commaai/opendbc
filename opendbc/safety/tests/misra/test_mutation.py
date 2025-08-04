@@ -43,6 +43,7 @@ for p in patterns:
 
 mutations = random.sample(mutations, 2)  # can remove this once cppcheck is faster
 
+
 @pytest.mark.parametrize("fn, rule, transform, should_fail", mutations)
 def test_misra_mutation(fn, rule, transform, should_fail):
   with tempfile.TemporaryDirectory() as tmp:
@@ -59,7 +60,7 @@ def test_misra_mutation(fn, rule, transform, should_fail):
     # run test
     r = subprocess.run(f"OPENDBC_ROOT={tmp} opendbc/safety/tests/misra/test_misra.sh",
                        stdout=subprocess.PIPE, cwd=ROOT, shell=True, encoding='utf8')
-    print(r.stdout) # helpful for debugging failures
+    print(r.stdout)  # helpful for debugging failures
     failed = r.returncode != 0
     assert failed == should_fail
     if should_fail:

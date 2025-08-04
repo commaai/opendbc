@@ -70,8 +70,8 @@ def create_pcs_commands(packer, accel, active, mass):
     "DSS1GDRV": min(accel, 0),     # accel
     "PCSALM": 1 if active else 0,  # goes high same time as PRECOLLISION_ACTIVE
     "IBTRGR": 1 if active else 0,  # unknown
-    "PBATRGR": 1 if active else 0, # noisy actuation bit?
-    "PREFILL": 1 if active else 0, # goes on and off before DSS1GDRV
+    "PBATRGR": 1 if active else 0,  # noisy actuation bit?
+    "PREFILL": 1 if active else 0,  # goes on and off before DSS1GDRV
     "AVSTRGR": 1 if active else 0,
   }
   msg2 = packer.make_can_msg("PRE_COLLISION_2", 0, values2)

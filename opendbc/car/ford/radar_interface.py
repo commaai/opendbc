@@ -150,7 +150,7 @@ class RadarInterface(RadarInterfaceBase):
         self.valid_cnt[ii] += 1
       else:
         self.valid_cnt[ii] = max(self.valid_cnt[ii] - 1, 0)
-      #print ii, self.valid_cnt[ii], cpt['VALID'], cpt['X_Rel'], cpt['Angle']
+      # print ii, self.valid_cnt[ii], cpt['VALID'], cpt['X_Rel'], cpt['Angle']
 
       # radar point only valid if there have been enough valid measurements
       if self.valid_cnt[ii] > 0:

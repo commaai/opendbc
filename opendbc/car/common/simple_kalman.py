@@ -38,7 +38,7 @@ class KF1D:
     # self.K = np.transpose(K)
 
   def update(self, meas):
-    #self.x = np.dot(self.A_K, self.x) + np.dot(self.K, meas)
+    # self.x = np.dot(self.A_K, self.x) + np.dot(self.K, meas)
     x0_0 = self.A_K_0 * self.x0_0 + self.A_K_1 * self.x1_0 + self.K0_0 * meas
     x1_0 = self.A_K_2 * self.x0_0 + self.A_K_3 * self.x1_0 + self.K1_0 * meas
     self.x0_0 = x0_0

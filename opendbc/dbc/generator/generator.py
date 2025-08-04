@@ -52,13 +52,14 @@ def create_all(output_path: str):
     if src_dir == generator_path:
       continue
 
-    #print(src_dir)
+    # print(src_dir)
     for filename in filenames:
       if filename.startswith('_') or not filename.endswith('.dbc'):
         continue
 
-      #print(filename)
+      # print(filename)
       create_dbc(src_dir, filename, output_path)
+
 
 if __name__ == "__main__":
   create_all(opendbc_root)
