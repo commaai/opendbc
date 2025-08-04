@@ -4,7 +4,6 @@ import struct
 from enum import IntEnum, Enum
 from dataclasses import dataclass
 
-
 @dataclass
 class ExchangeStationIdsReturn:
   id_length: int
@@ -12,30 +11,25 @@ class ExchangeStationIdsReturn:
   available: int
   protected: int
 
-
 @dataclass
 class GetDaqListSizeReturn:
   list_size: int
   first_pid: int
-
 
 @dataclass
 class GetSessionStatusReturn:
   status: int
   info: int | None
 
-
 @dataclass
 class DiagnosticServiceReturn:
   length: int
   type: int
 
-
 @dataclass
 class ActionServiceReturn:
   length: int
   type: int
-
 
 class COMMAND_CODE(IntEnum):
   CONNECT = 0x01
@@ -67,7 +61,6 @@ class COMMAND_CODE(IntEnum):
   PROGRAM_6 = 0x22
   DNLOAD_6 = 0x23
 
-
 COMMAND_RETURN_CODES = {
   0x00: "acknowledge / no error",
   0x01: "DAQ processor overload",
@@ -89,19 +82,15 @@ COMMAND_RETURN_CODES = {
   0x36: "resource/function not available",
 }
 
-
 class BYTE_ORDER(Enum):
   LITTLE_ENDIAN = '<'
   BIG_ENDIAN = '>'
 
-
 class CommandTimeoutError(Exception):
   pass
 
-
 class CommandCounterError(Exception):
   pass
-
 
 class CommandResponseError(Exception):
   def __init__(self, message, return_code):
@@ -112,9 +101,8 @@ class CommandResponseError(Exception):
   def __str__(self):
     return self.message
 
-
 class CcpClient:
-  def __init__(self, panda, tx_addr: int, rx_addr: int, bus: int = 0, byte_order: BYTE_ORDER = BYTE_ORDER.BIG_ENDIAN, debug=False):
+  def __init__(self, panda, tx_addr: int, rx_addr: int, bus: int=0, byte_order: BYTE_ORDER=BYTE_ORDER.BIG_ENDIAN, debug=False):
     self.tx_addr = tx_addr
     self.rx_addr = rx_addr
     self.can_bus = bus

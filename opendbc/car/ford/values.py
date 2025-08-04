@@ -86,7 +86,6 @@ class FordCarDocs(CarDocs):
     if CP.carFingerprint in (CAR.FORD_F_150_MK14, CAR.FORD_F_150_LIGHTNING_MK1, CAR.FORD_EXPEDITION_MK4):
       self.setup_video = "https://www.youtube.com/watch?v=MewJc9LYp9M"
 
-
 @dataclass
 class FordPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {
@@ -113,7 +112,6 @@ class FordCANFDPlatformConfig(FordPlatformConfig):
   def init(self):
     super().init()
     self.flags |= FordFlags.CANFD
-
 
 @dataclass
 class FordF150LightningPlatform(FordCANFDPlatformConfig):

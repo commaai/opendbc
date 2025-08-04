@@ -59,7 +59,7 @@ routes = [
   CarTestRoute("83a4e056c7072678/2023-11-13--16-51-33", FORD.FORD_MUSTANG_MACH_E_MK1),
   CarTestRoute("37998aa0fade36ab/00000000--48f927c4f5", FORD.FORD_RANGER_MK2),
   CarTestRoute("61a1b9e7a4eae0f6/00000000--79d85d1315", FORD.FORD_EXPEDITION_MK4),
-  # TestRoute("f1b4c567731f4a1b/2018-04-30--10-15-35", FORD.FUSION),
+  #TestRoute("f1b4c567731f4a1b/2018-04-30--10-15-35", FORD.FUSION),
 
   CarTestRoute("7cc2a8365b4dd8a9/2018-12-02--12-10-44", GM.GMC_ACADIA),
   CarTestRoute("aa20e335f61ba898/2019-02-05--16-59-04", GM.BUICK_REGAL),
@@ -316,7 +316,7 @@ routes = [
   CarTestRoute("7dc058789994da80/00000112--adb970f6a8", TESLA.TESLA_MODEL_3),
   CarTestRoute("46cdc864ec865f4b/00000007--42f94db730", TESLA.TESLA_MODEL_Y),
   CarTestRoute("2c912ca5de3b1ee9/0000025d--6eb6bcbca4", TESLA.TESLA_MODEL_Y, segment=4),
-  CarTestRoute("bdda168c0c35fad7/00000001--5c5a36ec06", TESLA.TESLA_MODEL_X),  # openpilot longitudinal
+  CarTestRoute("bdda168c0c35fad7/00000001--5c5a36ec06", TESLA.TESLA_MODEL_X), # openpilot longitudinal
 
   # Segments that test specific issues
   # Controls mismatch due to standstill threshold

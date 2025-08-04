@@ -6,7 +6,6 @@ from opendbc.car.car_helpers import get_car
 from opendbc.car.can_definitions import CanData
 from opendbc.car.structs import CarParams, CarControl
 
-
 class PandaRunner(AbstractContextManager):
   def __enter__(self):
     self.p = Panda()
@@ -52,7 +51,6 @@ class PandaRunner(AbstractContextManager):
     _, can_sends = self.CI.apply(cc)
     self.p.can_send_many(can_sends, timeout=25)
     self.p.send_heartbeat()
-
 
 if __name__ == "__main__":
   with PandaRunner() as p:

@@ -133,7 +133,7 @@ class TestFordFW:
 
     # model year hint in between the range should match
     live_fw[(0x706, None)] = {b"MB5T-14F397-XX\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"}
-    candidates = FW_QUERY_CONFIG.match_fw_to_car_fuzzy(live_fw, '', {expected_fingerprint: offline_fw, })
+    candidates = FW_QUERY_CONFIG.match_fw_to_car_fuzzy(live_fw, '', {expected_fingerprint: offline_fw,})
     assert candidates == {expected_fingerprint}
 
     # unseen model year hint should not match

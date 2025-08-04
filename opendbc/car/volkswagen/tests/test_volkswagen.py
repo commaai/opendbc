@@ -26,7 +26,7 @@ class TestVolkswagenPlatformConfigs:
       with subtests.test(platform=platform.value):
         assert len(platform.config.wmis) > 0, "WMIs not set"
         assert len(platform.config.chassis_codes) > 0, "Chassis codes not set"
-        assert all(CHASSIS_CODE_PATTERN.match(cc) for cc in
+        assert all(CHASSIS_CODE_PATTERN.match(cc) for cc in \
                             platform.config.chassis_codes), "Bad chassis codes"
 
         # No two platforms should share chassis codes

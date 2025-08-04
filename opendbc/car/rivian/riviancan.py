@@ -35,7 +35,7 @@ def create_lka_steering(packer, frame, acm_lka_hba_cmd, apply_torque, enabled, a
     # TODO: what are these used for?
     "ACM_ldwWarnTypeState": 2,  # always 2
     "ACM_ldwWarnTimingState": 1,  # always 1
-    # "ACM_lkaHandsoffDisplayWarning": 1,  # TODO: we can send this when openpilot wants you to pay attention
+    #"ACM_lkaHandsoffDisplayWarning": 1,  # TODO: we can send this when openpilot wants you to pay attention
   }
 
   data = packer.make_can_msg("ACM_lkaHbaCmd", 0, values)[1]

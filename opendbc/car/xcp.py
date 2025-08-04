@@ -3,7 +3,6 @@ import time
 import struct
 from enum import IntEnum
 
-
 class COMMAND_CODE(IntEnum):
   CONNECT = 0xFF
   DISCONNECT = 0xFE
@@ -62,7 +61,6 @@ class COMMAND_CODE(IntEnum):
   PROGRAM_MAX = 0xC9
   PROGRAM_VERIFY = 0xC8
 
-
 ERROR_CODES = {
   0x00: "Command processor synchronization",
   0x10: "Command was not executed",
@@ -84,11 +82,9 @@ ERROR_CODES = {
   0x32: "The slave internal program verify routine detects an error",
 }
 
-
 class CONNECT_MODE(IntEnum):
   NORMAL = 0x00,
   USER_DEFINED = 0x01,
-
 
 class GET_ID_REQUEST_TYPE(IntEnum):
   ASCII = 0x00,
@@ -98,14 +94,11 @@ class GET_ID_REQUEST_TYPE(IntEnum):
   ASAM_MC2_UPLOAD = 0x04,
   # 128-255 user defined
 
-
 class CommandTimeoutError(Exception):
   pass
 
-
 class CommandCounterError(Exception):
   pass
-
 
 class CommandResponseError(Exception):
   def __init__(self, message, return_code):
@@ -116,9 +109,8 @@ class CommandResponseError(Exception):
   def __str__(self):
     return self.message
 
-
 class XcpClient:
-  def __init__(self, panda, tx_addr: int, rx_addr: int, bus: int = 0, timeout: float = 0.1, debug=False, pad=True):
+  def __init__(self, panda, tx_addr: int, rx_addr: int, bus: int=0, timeout: float=0.1, debug=False, pad=True):
     self.tx_addr = tx_addr
     self.rx_addr = rx_addr
     self.can_bus = bus
@@ -172,7 +164,7 @@ class XcpClient:
     raise CommandTimeoutError("timeout waiting for response")
 
   # commands
-  def connect(self, connect_mode: CONNECT_MODE = CONNECT_MODE.NORMAL) -> dict:
+  def connect(self, connect_mode: CONNECT_MODE=CONNECT_MODE.NORMAL) -> dict:
     self._send_cto(COMMAND_CODE.CONNECT, bytes([connect_mode]))
     resp = self._recv_dto(self.timeout)
     assert len(resp) == 7, f"incorrect data length: {len(resp)}"
@@ -245,7 +237,7 @@ class XcpClient:
     resp = b""
     while len(resp) < size:
       resp += self._recv_dto(self.timeout)[:size - len(resp) + 1]
-    return resp[:size]  # trim off bytes with undefined values
+    return resp[:size] # trim off bytes with undefined values
 
   def short_upload(self, size: int, addr_ext: int, addr: int) -> bytes:
     if size > 6:
@@ -253,7 +245,7 @@ class XcpClient:
     if addr_ext > 255:
       raise ValueError("address extension must be less than 256")
     self._send_cto(COMMAND_CODE.SHORT_UPLOAD, bytes([size, 0x00, addr_ext]) + struct.pack(f"{self._byte_order}I", addr))
-    return self._recv_dto(self.timeout)[:size]  # trim off bytes with undefined values
+    return self._recv_dto(self.timeout)[:size] # trim off bytes with undefined values
 
   def download(self, data: bytes) -> bytes:
     size = len(data)

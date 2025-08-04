@@ -5,7 +5,7 @@ from opendbc.can import CANPacker, CANParser
 class TestCanChecksums:
 
   def verify_checksum(self, subtests, dbc_file: str, msg_name: str, msg_addr: int, test_messages: list[bytes],
-                      checksum_field: str = 'CHECKSUM', counter_field='COUNTER'):
+                      checksum_field: str = 'CHECKSUM', counter_field = 'COUNTER'):
     """
     Verify that opendbc calculates payload CRCs/checksums matching those received in known-good sample messages
     Depends on all non-zero bits in the sample message having a corresponding DBC signal, add UNKNOWN signals if needed

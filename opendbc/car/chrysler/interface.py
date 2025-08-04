@@ -18,7 +18,7 @@ class CarInterface(CarInterfaceBase):
     ret.dashcamOnly = candidate in RAM_HD
 
     # radar parsing needs some work, see https://github.com/commaai/openpilot/issues/26842
-    ret.radarUnavailable = True  # Bus.radar not in DBC[candidate][Bus.radar]
+    ret.radarUnavailable = True # Bus.radar not in DBC[candidate][Bus.radar]
     ret.steerActuatorDelay = 0.1
     ret.steerLimitTimer = 0.4
 

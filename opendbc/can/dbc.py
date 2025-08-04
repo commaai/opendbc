@@ -16,6 +16,7 @@ from opendbc.car.tesla.teslacan import tesla_checksum
 from opendbc.car.body.bodycan import body_checksum
 
 
+
 class SignalType:
   DEFAULT = 0
   COUNTER = 1
@@ -46,6 +47,7 @@ class Signal:
   calc_checksum: 'Callable[[int, Signal, bytearray], int] | None' = None
 
 
+
 @dataclass
 class Msg:
   name: str
@@ -67,7 +69,6 @@ SG_RE = re.compile(r"^SG_ (\w+) : (\d+)\|(\d+)@(\d)([+-]) \(([0-9.+\-eE]+),([0-9
 SGM_RE = re.compile(r"^SG_ (\w+) (\w+) *: (\d+)\|(\d+)@(\d)([+-]) \(([0-9.+\-eE]+),([0-9.+\-eE]+)\) \[[0-9.+\-eE]+\|[0-9.+\-eE]+\] \".*\" .*")
 VAL_RE = re.compile(r"^VAL_ (\w+) (\w+) (.*);")
 VAL_SPLIT_RE = re.compile(r'["]+')
-
 
 @dataclass
 class DBC:

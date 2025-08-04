@@ -147,7 +147,7 @@ class CAR(Platforms):
     TOYOTA_AVALON.specs,
     dbc_dict('toyota_nodsu_pt_generated', 'toyota_adas'),
   )
-  TOYOTA_AVALON_TSS2 = ToyotaTSS2PlatformConfig(  # TSS 2.5
+  TOYOTA_AVALON_TSS2 = ToyotaTSS2PlatformConfig( # TSS 2.5
     [
       ToyotaCarDocs("Toyota Avalon 2022"),
       ToyotaCarDocs("Toyota Avalon Hybrid 2022"),
@@ -163,7 +163,7 @@ class CAR(Platforms):
     dbc_dict('toyota_nodsu_pt_generated', 'toyota_adas'),
     flags=ToyotaFlags.NO_DSU,
   )
-  TOYOTA_CAMRY_TSS2 = ToyotaTSS2PlatformConfig(  # TSS 2.5
+  TOYOTA_CAMRY_TSS2 = ToyotaTSS2PlatformConfig( # TSS 2.5
     [
       ToyotaCarDocs("Toyota Camry 2021-24", footnotes=[Footnote.CAMRY]),
       ToyotaCarDocs("Toyota Camry Hybrid 2021-24"),
@@ -294,7 +294,7 @@ class CAR(Platforms):
     CarSpecs(mass=1170, wheelbase=2.55, steerRatio=14.80, tireStiffnessFactor=0.5533),
     flags=ToyotaFlags.RADAR_ACC,
   )
-  TOYOTA_MIRAI = ToyotaTSS2PlatformConfig(  # TSS 2.5
+  TOYOTA_MIRAI = ToyotaTSS2PlatformConfig( # TSS 2.5
     [ToyotaCarDocs("Toyota Mirai 2021")],
     CarSpecs(mass=4300. * CV.LB_TO_KG, wheelbase=2.91, steerRatio=14.8, tireStiffnessFactor=0.8),
   )
@@ -399,7 +399,7 @@ class CAR(Platforms):
 
 # (addr, cars, bus, 1/freq*100, vl)
 STATIC_DSU_MSGS = [
-  (0x128, (CAR.TOYOTA_PRIUS, CAR.TOYOTA_RAV4H, CAR.LEXUS_RX, CAR.LEXUS_NX, CAR.TOYOTA_RAV4, CAR.TOYOTA_COROLLA, CAR.TOYOTA_AVALON),
+  (0x128, (CAR.TOYOTA_PRIUS, CAR.TOYOTA_RAV4H, CAR.LEXUS_RX, CAR.LEXUS_NX, CAR.TOYOTA_RAV4, CAR.TOYOTA_COROLLA, CAR.TOYOTA_AVALON), \
                                                                                                                       1, 3, b'\xf4\x01\x90\x83\x00\x37'),
   (0x128, (CAR.TOYOTA_HIGHLANDER, CAR.TOYOTA_SIENNA, CAR.LEXUS_CTH, CAR.LEXUS_ES), 1,   3, b'\x03\x00\x20\x00\x00\x52'),
   (0x141, (CAR.TOYOTA_PRIUS, CAR.TOYOTA_RAV4H, CAR.LEXUS_RX, CAR.LEXUS_NX, CAR.TOYOTA_RAV4, CAR.TOYOTA_COROLLA, CAR.TOYOTA_HIGHLANDER, CAR.TOYOTA_AVALON,

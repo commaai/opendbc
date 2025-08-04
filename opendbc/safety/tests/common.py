@@ -92,7 +92,7 @@ class PandaSafetyTestBase(unittest.TestCase):
 
   def _generic_limit_safety_check(self, msg_function: MessageFunction, min_allowed_value: float, max_allowed_value: float,
                                   min_possible_value: float, max_possible_value: float, test_delta: float = 1, inactive_value: float = 0,
-                                  msg_allowed=True, additional_setup: Callable[[float], None] | None = None):
+                                  msg_allowed = True, additional_setup: Callable[[float], None] | None = None):
     """
       Enforces that a signal within a message is only allowed to be sent within a specific range, min_allowed_value -> max_allowed_value.
       Tests the range of min_possible_value -> max_possible_value with a delta of test_delta.
