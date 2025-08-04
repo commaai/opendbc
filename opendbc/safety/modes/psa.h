@@ -69,12 +69,8 @@ static void psa_rx_hook(const CANPacket_t *msg) {
     if (msg->addr == PSA_DYN_CMM) {
       gas_pressed = msg->data[3] > 0U; // P002_Com_rAPP
     }
-    if (msg->addr == PSA_STEERING) {
-      int torque_driver_new = to_signed(msg->data[1], 8);
-      update_sample(&torque_driver, torque_driver_new);
-    }
     if (msg->addr == PSA_STEERING_ALT) {
-      int angle_meas_new = to_signed((msg->data[0] << 8) | msg->data[1], 16);
+      int angle_meas_new = to_signed((msg->data[0] << 8) | msg->data[1], 16); // ANGLE
       update_sample(&angle_meas, angle_meas_new);
     }
     if (msg->addr == PSA_DYN2_FRE) {
