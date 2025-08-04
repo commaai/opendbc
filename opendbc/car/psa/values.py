@@ -17,8 +17,6 @@ class CarControllerParams:
   )
   STEER_DRIVER_ALLOWANCE = 10  # Driver intervention threshold, 1.0 Nm
 
-  def __init__(self, CP):
-    pass
 
 @dataclass
 class PSACarDocs(CarDocs):
