@@ -106,8 +106,7 @@ static bool is_msg_valid(RxCheck addr_list[], int index) {
 }
 
 static int get_addr_check_index(const CANPacket_t *msg, RxCheck addr_list[], const int len) {
-  int bus = GET_BUS(msg);
-  int addr = GET_ADDR(msg);
+  int addr = msg->addr;
   int length = GET_LEN(msg);
 
   int index = -1;
@@ -115,7 +114,7 @@ static int get_addr_check_index(const CANPacket_t *msg, RxCheck addr_list[], con
     // if multiple msgs are allowed, determine which one is present on the bus
     if (!addr_list[i].status.msg_seen) {
       for (uint8_t j = 0U; (j < MAX_ADDR_CHECK_MSGS) && (addr_list[i].msg[j].addr != 0); j++) {
-        if ((addr == addr_list[i].msg[j].addr) && (bus == addr_list[i].msg[j].bus) &&
+        if ((addr == addr_list[i].msg[j].addr) && (msg->bus == addr_list[i].msg[j].bus) &&
               (length == addr_list[i].msg[j].len)) {
           addr_list[i].status.index = j;
           addr_list[i].status.msg_seen = true;
@@ -126,7 +125,7 @@ static int get_addr_check_index(const CANPacket_t *msg, RxCheck addr_list[], con
 
     if (addr_list[i].status.msg_seen) {
       int idx = addr_list[i].status.index;
-      if ((addr == addr_list[i].msg[idx].addr) && (bus == addr_list[i].msg[idx].bus) &&
+      if ((addr == addr_list[i].msg[idx].addr) && (msg->bus == addr_list[i].msg[idx].bus) &&
           (length == addr_list[i].msg[idx].len)) {
         index = i;
         break;
@@ -202,12 +201,11 @@ bool safety_rx_hook(const CANPacket_t *msg) {
   // the relay malfunction hook runs on all incoming rx messages.
   // check all applicable tx msgs for liveness on sending bus.
   // used to detect a relay malfunction or control messages from disabled ECUs like the radar
-  const int bus = GET_BUS(msg);
-  const int addr = GET_ADDR(msg);
+  const int addr = msg->addr;
   for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
     const CanMsg *m = &current_safety_config.tx_msgs[i];
     if (m->check_relay) {
-      stock_ecu_check((m->addr == addr) && (m->bus == bus));
+      stock_ecu_check((m->addr == addr) && (m->bus == msg->bus));
     }
   }
 
@@ -220,13 +218,12 @@ bool safety_rx_hook(const CANPacket_t *msg) {
 }
 
 static bool tx_msg_safety_check(const CANPacket_t *msg, const CanMsg msg_list[], int len) {
-  int addr = GET_ADDR(msg);
-  int bus = GET_BUS(msg);
+  int addr = msg->addr;
   int length = GET_LEN(msg);
 
   bool whitelisted = false;
   for (int i = 0; i < len; i++) {
-    if ((addr == msg_list[i].addr) && (bus == msg_list[i].bus) && (length == msg_list[i].len)) {
+    if ((addr == msg_list[i].addr) && (msg->bus == msg_list[i].bus) && (length == msg_list[i].len)) {
       whitelisted = true;
       break;
     }
@@ -269,7 +266,7 @@ int safety_fwd_hook(int bus_num, int addr) {
   if (!blocked) {
     for (int i = 0; i < current_safety_config.tx_msgs_len; i++) {
       const CanMsg *m = &current_safety_config.tx_msgs[i];
-      if (m->check_relay && !m->disable_static_blocking && (m->addr == addr) && (m->bus == destination_bus)) {
+      if (m->check_relay && !m->disable_static_blocking && (m->addr == addr) && (m->bus == (unsigned int)destination_bus)) {
         blocked = true;
         break;
       }

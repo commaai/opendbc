@@ -1,4 +1,4 @@
-CM_ "IMPORT _hyundai_common.dbc";
+CM_ "IMPORT _hyundai_canfd_common.dbc";
 
 BO_ 53 ACCELERATOR: 32 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
@@ -97,7 +97,7 @@ BO_ 272 LKAS_ALT: 32 XXX
  SG_ HAS_LANE_SAFETY : 80|1@0+ (1,0) [0|1] "" XXX
  SG_ ADAS_StrAnglReqVal : 82|14@1- (0.1,0) [0|176.7] "Deg" GW_RGW,MDPS,SFA
  SG_ ADAS_ACIAnglTqRedcGainVal : 96|8@1+ (0.004,0) [0|1] "" GW_RGW,MDPS,SFA
- SG_ NEW_SIGNAL_3 : 111|8@0+ (1,0) [0|255] "" XXX
+ SG_ DAMP_FACTOR : 64|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 282 FR_CMR_01_10ms: 16 FR_CMR
  SG_ FR_CMR_Crc1Val : 0|16@1+ (1,0) [0|0] "" Dummy,IBU_HS,vBDM
@@ -145,7 +145,7 @@ BO_ 298 LFA: 16 ADRV
  SG_ NEW_SIGNAL_2 : 70|2@0+ (1,0) [0|3] "" XXX
  SG_ NEW_SIGNAL_4 : 72|4@1+ (1,0) [0|15] "" XXX
  SG_ HAS_LANE_SAFETY : 80|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_3 : 111|8@0+ (1,0) [0|255] "" XXX
+ SG_ DAMP_FACTOR : 104|8@1+ (1,0) [0|255] "" XXX
 
 BO_ 304 GEAR_SHIFTER: 16 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
