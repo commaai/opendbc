@@ -4,7 +4,7 @@ from collections import namedtuple
 from opendbc.can import CANPacker
 from opendbc.car import Bus, DT_CTRL, rate_limit, make_tester_present_msg, structs
 from opendbc.car.honda import hondacan
-from opendbc.car.honda.values import CruiseButtons, VISUAL_HUD, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, HONDA_NIDEC_ALT_PCM_ACCEL, CarControllerParams
+from opendbc.car.honda.values import CruiseButtons, VISUAL_HUD, HONDA_BOSCH, HONDA_BOSCH_RADARLESS, HONDA_NIDEC_ALT_PCM_ACCEL, CarControllerParams, HondaFlags
 from opendbc.car.interfaces import CarControllerBase
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
@@ -74,17 +74,25 @@ def brake_pump_hysteresis(apply_brake, apply_brake_last, last_pump_ts, ts):
   return pump_on, last_pump_ts
 
 
-def process_hud_alert(hud_alert):
+def process_hud_alert(CS, CP, hud_control):
   # initialize to no alert
   fcw_display = 0
   steer_required = 0
   acc_alert = 0
 
+  hud_alert = hud_control.visualAlert
+
   # priority is: FCW, steer required, all others
   if hud_alert == VisualAlert.fcw:
     fcw_display = VISUAL_HUD[hud_alert.raw]
-  elif hud_alert in (VisualAlert.steerRequired, VisualAlert.ldw):
+  elif hud_alert == VisualAlert.steerRequired:
     steer_required = VISUAL_HUD[hud_alert.raw]
+  elif hud_alert == VisualAlert.ldw:
+    if CS.out.steeringPressed and (hud_control.leftLaneDepart or hud_control.rightLaneDepart) and \
+      ((CP.carFingerprint in HONDA_BOSCH) and not (CP.flags & HondaFlags.BOSCH_EXT_HUD)):
+      pass # Lane departure side is already passed through to hondacan
+    else:
+      steer_required = VISUAL_HUD[hud_alert.raw]
   else:
     acc_alert = VISUAL_HUD[hud_alert.raw]
 
@@ -93,7 +101,7 @@ def process_hud_alert(hud_alert):
 
 HUDData = namedtuple("HUDData",
                      ["pcm_accel", "v_cruise", "lead_visible",
-                      "lanes_visible", "fcw", "acc_alert", "steer_required", "lead_distance_bars"])
+                      "lanes_visible", "fcw", "acc_alert", "steer_required", "ldw_left", "ldw_right", "lead_distance_bars"])
 
 
 class CarController(CarControllerBase):
@@ -142,7 +150,7 @@ class CarController(CarControllerBase):
     self.brake_last = rate_limit(pre_limit_brake, self.brake_last, -2., DT_CTRL)
 
     # vehicle hud display, wait for one update from 10Hz 0x304 msg
-    fcw_display, steer_required, acc_alert = process_hud_alert(hud_control.visualAlert)
+    fcw_display, steer_required, acc_alert = process_hud_alert(CS, self.CP, hud_control)
 
     # **** process the car messages ****
 
@@ -227,8 +235,8 @@ class CarController(CarControllerBase):
     # Send dashboard UI commands.
     # On Nidec, this controls longitudinal positive acceleration
     if self.frame % 10 == 0:
-      hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible,
-                    hud_control.lanesVisible, fcw_display, acc_alert, steer_required, hud_control.leadDistanceBars)
+      hud = HUDData(int(pcm_accel), int(round(hud_v_cruise)), hud_control.leadVisible, hud_control.lanesVisible, fcw_display,
+                    acc_alert, steer_required, hud_control.leftLaneDepart, hud_control.rightLaneDepart, hud_control.leadDistanceBars)
       can_sends.extend(hondacan.create_ui_commands(self.packer, self.CAN, self.CP, CC.enabled, pcm_speed, hud, CS.is_metric, CS.acc_hud, CS.lkas_hud))
 
       if self.CP.openpilotLongitudinalControl and self.CP.carFingerprint not in HONDA_BOSCH:
