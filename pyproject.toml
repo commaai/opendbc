@@ -107,7 +107,12 @@ ignore = [
   "UP031",
   "NPY002",  # new numpy random syntax is worse
   "C420",
+  "E111",
+  "E114",
+  "E226",
+    "E241", "E221"
 ]
+preview=true
 flake8-implicit-str-concat.allow-multiline=false
 
 [tool.ruff.lint.per-file-ignores]
