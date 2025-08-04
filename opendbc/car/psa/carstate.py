@@ -24,16 +24,13 @@ class CarState(CarStateBase):
       cp.vl['Dyn4_FRE']['P265_VehV_VPsvValWhlBckL'],
       cp.vl['Dyn4_FRE']['P266_VehV_VPsvValWhlBckR'],
     )
-    ret.vEgoRaw = cp_adas.vl['HS2_DYN_ABR_38D']['VITESSE_VEHICULE_ROUES'] * CV.KPH_TO_MS
-    ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.yawRate = cp_adas.vl['HS2_DYN_UCF_MDD_32D']['VITESSE_LACET_BRUTE'] * CV.DEG_TO_RAD
     ret.standstill = bool(cp_adas.vl['HS2_DYN_UCF_MDD_32D']['VEHICLE_STANDSTILL'])
 
     # gas
-    ret.gasPressed = cp.vl['Dyn_CMM']['P002_Com_rAPP'] / 100.0 > 0
+    ret.gasPressed = cp.vl['Dyn_CMM']['P002_Com_rAPP'] > 0
 
     # brake
-    ret.brake = cp.vl['Dyn2_FRE']['BRAKE_PRESSURE'] / 1500.
     ret.brakePressed = bool(cp_main.vl['Dat_BSI']['P013_MainBrake'])
     ret.parkingBrake = cp.vl['Dyn_EasyMove']['P337_Com_stPrkBrk'] == 1 # 0: disengaged, 1: engaged, 3: brake actuator moving
 
