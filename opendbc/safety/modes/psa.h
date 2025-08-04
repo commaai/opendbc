@@ -61,7 +61,6 @@ static uint32_t psa_compute_checksum(const CANPacket_t *msg) {
     chk = _psa_compute_checksum(msg, 0x7, 5);
   } else {
   }
-
   return chk;
 }
 
@@ -79,7 +78,7 @@ static void psa_rx_hook(const CANPacket_t *msg) {
       update_sample(&angle_meas, angle_meas_new);
     }
     if (msg->addr == PSA_DYN2_FRE) {
-      int brake_pressure = (msg->data[5] << 4) | ((msg->data[6] & 0xF0) >> 4); // BRAKE_PRESSURE
+      int brake_pressure = ((unsigned int)msg->data[5] << 4) | (((unsigned int)msg->data[6] & 0xF0U) >> 4); // BRAKE_PRESSURE
       brake_pressed = brake_pressure > 0;
     }
     if (msg->addr == PSA_HS2_DYN_ABR_38D) {
@@ -141,11 +140,8 @@ static safety_config psa_init(uint16_t param) {
   };
 
   static RxCheck psa_rx_checks[] = {
-    // TODO: implement pytest checksum
-    // {.msg = {{PSA_HS2_DAT_MDD_CMD_452, PSA_ADAS_BUS, 6, 20U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                       // cruise state
-    // {.msg = {{PSA_HS2_DYN_ABR_38D, PSA_CAM_BUS, 8, 25U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                            // speed
-    {.msg = {{PSA_HS2_DAT_MDD_CMD_452, PSA_ADAS_BUS, 6, 20U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                       // cruise state
-    {.msg = {{PSA_HS2_DYN_ABR_38D, PSA_CAM_BUS, 8, 25U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},                            // speed
+    {.msg = {{PSA_HS2_DAT_MDD_CMD_452, PSA_ADAS_BUS, 6, 20U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                       // cruise state
+    {.msg = {{PSA_HS2_DYN_ABR_38D, PSA_CAM_BUS, 8, 25U, .max_counter = 15U, .ignore_quality_flag = true}, { 0 }, { 0 }}},                            // speed
     {.msg = {{PSA_STEERING_ALT, PSA_CAM_BUS, 7, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}}, // steering angle
     {.msg = {{PSA_STEERING, PSA_CAM_BUS, 7, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},     // driver torque
     {.msg = {{PSA_DYN_CMM, PSA_CAM_BUS, 8, 100U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},      // gas pedal
