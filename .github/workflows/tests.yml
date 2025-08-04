@@ -76,9 +76,9 @@ jobs:
         ref: 'master'
         submodules: true
     - run: rm -rf opendbc_repo/
-    - uses: actions/checkout@v4
-      with:
-        path: opendbc_repo
+    #- uses: actions/checkout@v4
+    #  with:
+    #    path: opendbc_repo
     - uses: ./.github/workflows/setup-with-retry
       id: setup-step
     - name: Cache test routes
