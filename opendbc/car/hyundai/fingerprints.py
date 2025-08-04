@@ -1261,4 +1261,12 @@ FW_VERSIONS = {
       b'\xf1\x00T01G00BL  T01I00A1  DOS2T16X4XI00NS0\x99L\xeeq',
     ],
   },
+  CAR.GENESIS_G70_2024: {
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00IK  MFC  AT USA LHD 1.00 1.02 99211-G9500 230712',
+    ],
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00IKPE RDR -----      1.00 1.00 99110-G9600         ',
+    ],
+  },
 }
