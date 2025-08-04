@@ -1097,6 +1097,7 @@ FW_VERSIONS = {
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00NQ5 FR_CMR AT AUS RHD 1.00 1.00 99211-P1040 663',
       b'\xf1\x00NQ5 FR_CMR AT EUR LHD 1.00 1.00 99211-P1040 663',
+      b'\xf1\x00NQ5 FR_CMR AT GEN LHD 1.00 1.00 99211-P1040 663',
       b'\xf1\x00NQ5 FR_CMR AT GEN LHD 1.00 1.00 99211-P1060 665',
       b'\xf1\x00NQ5 FR_CMR AT USA LHD 1.00 1.00 99211-P1030 662',
       b'\xf1\x00NQ5 FR_CMR AT USA LHD 1.00 1.00 99211-P1040 663',
@@ -1191,6 +1192,21 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdRadar, 0x7d0, None): [
       b'\xf1\x00JX1_ SCC FHCUP      1.00 1.01 99110-T6100         ',
+    ],
+  },
+  CAR.GENESIS_GV80_HDA2: {
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00JX1 MFC  AT USA LHD 1.00 1.06 99211-T6010 210208',
+    ],
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00JX1_ SCC -----      1.00 1.03 99110-T6000         ',
+      b'\xf1\x10\x00/\x00\x00',
+    ],
+    (Ecu.cornerRadar, 0x7b7, None): [
+      b"\xf1\x00JX1 BCW RR 1.00 , 1.06 (st\x05!\x01'Tx",
+    ],
+    (Ecu.hvac, 0x7b3, None): [
+      b"\xf1\x00JX1   97255-T6520CONTROL ASS'Y-DATC  1.06JX1 DATC(-)2.1       ",
     ],
   },
   CAR.KIA_CARNIVAL_4TH_GEN: {
