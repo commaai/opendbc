@@ -110,7 +110,7 @@ ignore = [
   "E111", "E114", "E226", "E241",
   "E221", "E265", "E266", "E261",
   "E252", "E251", "E231", "E225",
-  "E262",
+  "E262", "C419",
 ]
 preview=true
 flake8-implicit-str-concat.allow-multiline=false
