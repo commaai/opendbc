@@ -162,7 +162,7 @@ class CAR(Platforms):
     CarSpecs(mass=2948, wheelbase=3.70, steerRatio=16.9),
   )
   FORD_FOCUS_MK4 = FordPlatformConfig(
-    [FordCarDocs("Ford Focus 2018", "Adaptive Cruise Control with Lane Centering", footnotes=[Footnote.FOCUS], hybrid=True)],  # mHEV only
+    [FordCarDocs("Ford Focus 2018, 2022", "Adaptive Cruise Control with Lane Centering", footnotes=[Footnote.FOCUS], hybrid=True)],  # mHEV only
     CarSpecs(mass=1350, wheelbase=2.7, steerRatio=15.0),
   )
   FORD_MAVERICK_MK1 = FordPlatformConfig(
