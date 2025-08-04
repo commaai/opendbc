@@ -1,4 +1,5 @@
-from opendbc.car import apply_std_steer_angle_limits, Bus
+from opendbc.car import Bus
+from opendbc.car.lateral import apply_std_steer_angle_limits
 from opendbc.can.packer import CANPacker
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.psa.psacan import create_lka_steering
