@@ -16,7 +16,7 @@ BO_ 401 GEARBOX_CVT: 8 PCM
 BO_ 419 GEARBOX_AUTO: 8 PCM
  SG_ TRANS_SHIFT_ACTIVITY : 7|8@0+ (1,0) [0|256] "" EON
  SG_ TRANS_TARGET_GEAR : 11|4@0+ (1,0) [0|15] "" XXX
- SG_ REGEN_STRENGTH : 13|2@0+ (1,0) [0|3] "Stage" XXX
+ SG_ REGEN_STAGE_SELECTION : 13|2@0+ (1,0) [0|3] "Stage" XXX
  SG_ REGEN_UNKNOWN_1 : 16|1@0+ (1,0) [0|1] "" XXX
  SG_ FORWARD_DRIVING_MODE : 20|1@0+ (1,0) [0|1] "" XXX
  SG_ AUTO_UNKNOWN_1 : 27|2@0+ (1,0) [0|3] "" XXX
@@ -30,6 +30,7 @@ BO_ 419 GEARBOX_AUTO: 8 PCM
 CM_ SG_ 401 CVT_UNKNOWN_1 "Probably measured/actual CVT ratio";
 CM_ SG_ 401 CVT_UNKNOWN_2 "Probably target/commanded CVT ratio";
 CM_ SG_ 419 TRANS_SHIFT_ACTIVITY "Tracks but trails TRANS_TARGET_GEAR with extra activity, probable solenoid activations or TC lockup";
+CM_ SG_ 419 REGEN_STAGE_SELECTION "Driver-selected regenerative braking threshold, 0 through 3";
 CM_ SG_ 419 REGEN_UNKNOWN_1 "Goes high when user enables regen, but slightly delayed, doesn't appear to be a brake light signal";
 CM_ SG_ 419 REGEN_UNKNOWN_2 "Both bits set when user enables regen, otherwise zero";
 
