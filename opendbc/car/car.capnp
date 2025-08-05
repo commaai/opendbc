@@ -35,7 +35,7 @@ struct OnroadEventDEPRECATED @0x9b1657f34caf3ad3 {
     buttonEnable @12;
     pedalPressed @13;  # exits active state
     preEnableStandstill @73;  # added during pre-enable state with brake
-    gasPressedOverride @108;  # added when user is pressing gas with no disengage on gas
+    acceleratorPressedOverride @108;  # added when user is pressing gas with no disengage on gas
     steerOverride @114;
     cruiseDisabled @14;
     speedTooLow @17;
@@ -174,7 +174,7 @@ struct CarState {
   standstill @18 :Bool;
   wheelSpeeds @2 :WheelSpeeds;
 
-  gasPressed @4 :Bool;    # this is user pedal only
+  acceleratorPressed @4 :Bool;    # this is user pedal only
 
   # brake pedal, 0.0-1.0
   brake @5 :Float32;      # this is user pedal only

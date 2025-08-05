@@ -45,7 +45,7 @@ class CarState(CarStateBase):
     ret.brakePressed = cp.vl["ESP_1"]['Brake_Pedal_State'] == 1  # Physical brake pedal switch
 
     # gas pedal
-    ret.gasPressed = cp.vl["ECM_5"]["Accelerator_Position"] > 1e-5
+    ret.acceleratorPressed = cp.vl["ECM_5"]["Accelerator_Position"] > 1e-5
 
     # car speed
     if self.CP.carFingerprint in RAM_CARS:
