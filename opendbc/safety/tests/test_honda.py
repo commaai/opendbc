@@ -10,6 +10,7 @@ from opendbc.safety.tests.common import CANPackerPanda, MAX_WRONG_COUNTERS
 
 HONDA_N_COMMON_TX_MSGS = [[0xE4, 0], [0x194, 0], [0x1FA, 0], [0x30C, 0], [0x33D, 0]]
 
+
 class Btn:
   NONE = 0
   MAIN = 1
