@@ -121,16 +121,6 @@ static bool psa_tx_hook(const CANPacket_t *msg) {
   return tx;
 }
 
-static bool psa_fwd_hook(int bus_num, int addr) {
-  bool block_msg = false;
-
-  if (bus_num == (int)PSA_MAIN_BUS) {
-    block_msg = addr == (int)PSA_LANE_KEEP_ASSIST;
-  }
-
-  return block_msg;
-}
-
 static safety_config psa_init(uint16_t param) {
   UNUSED(param);
   static const CanMsg PSA_TX_MSGS[] = {
@@ -153,7 +143,6 @@ const safety_hooks psa_hooks = {
   .init = psa_init,
   .rx = psa_rx_hook,
   .tx = psa_tx_hook,
-  .fwd = psa_fwd_hook,
   .get_counter = psa_get_counter,
   .get_checksum = psa_get_checksum,
   .compute_checksum = psa_compute_checksum,
