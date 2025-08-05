@@ -9,9 +9,9 @@ TransmissionType = structs.CarParams.TransmissionType
 
 class CarState(CarStateBase):
   def update(self, can_parsers) -> structs.CarState:
-    cp = can_parsers[Bus.cam]
+    cp = can_parsers[Bus.main]
     cp_adas = can_parsers[Bus.adas]
-    cp_main = can_parsers[Bus.main]
+    cp_cam = can_parsers[Bus.cam]
     ret = structs.CarState()
 
     # car speed
