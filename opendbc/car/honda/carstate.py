@@ -132,7 +132,7 @@ class CarState(CarStateBase):
       gear_position = self.shifter_values.get(cp.vl[self.gearbox_msg]["GEAR_SHIFTER"], None)
       ret.gearShifter = self.parse_gear_shifter(gear_position)
       if self.CP.transmissionType == TransmissionType.automatic:
-        ret.regenBraking = cp.vl["GEARBOX_AUTO"]["REGEN_STAGE_SELECTION"] > 0
+        ret.regenBraking = cp.vl["GEARBOX_AUTO"].get(["REGEN_STAGE_SELECTION"], 0) > 0
 
     ret.gasPressed = cp.vl["POWERTRAIN_DATA"]["PEDAL_GAS"] > 1e-5
 
