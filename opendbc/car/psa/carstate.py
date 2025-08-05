@@ -8,9 +8,6 @@ GearShifter = structs.CarState.GearShifter
 TransmissionType = structs.CarParams.TransmissionType
 
 class CarState(CarStateBase):
-  def __init__(self, CP):
-    super().__init__(CP)
-
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.cam]
     cp_adas = can_parsers[Bus.adas]
