@@ -13,9 +13,9 @@ class TestPsaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyTes
   FWD_BLACKLISTED_ADDRS = {2: [LANE_KEEP_ASSIST]}
   TX_MSGS = [[1010, 0]]
 
-  EPS_BUS = 0
+  CAM_BUS = 0
   ADAS_BUS = 1
-  CRUISE_BUS = 2
+  MAIN_BUS = 2
 
   STEER_ANGLE_MAX = 390
   DEG_TO_CAN = 10
@@ -32,11 +32,11 @@ class TestPsaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyTes
 
   def _angle_cmd_msg(self, angle: float, enabled: bool):
     values = {"SET_ANGLE": angle, "TORQUE_FACTOR": 100 if enabled else 0}
-    return self.packer.make_can_msg_panda("LANE_KEEP_ASSIST", self.EPS_BUS, values)
+    return self.packer.make_can_msg_panda("LANE_KEEP_ASSIST", self.CAM_BUS, values)
 
   def _angle_meas_msg(self, angle: float):
     values = {"ANGLE": angle}
-    return self.packer.make_can_msg_panda("STEERING_ALT", self.EPS_BUS, values)
+    return self.packer.make_can_msg_panda("STEERING_ALT", self.CAM_BUS, values)
 
   def _pcm_status_msg(self, enable):
     values = {"RVV_ACC_ACTIVATION_REQ": enable}
@@ -44,15 +44,15 @@ class TestPsaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyTes
 
   def _speed_msg(self, speed):
     values = {"VITESSE_VEHICULE_ROUES": speed}
-    return self.packer.make_can_msg_panda("HS2_DYN_ABR_38D", self.EPS_BUS, values)
+    return self.packer.make_can_msg_panda("HS2_DYN_ABR_38D", self.CAM_BUS, values)
 
   def _user_brake_msg(self, brake):
     values = {"BRAKE_PRESSURE": int(brake * 1500)}
-    return self.packer.make_can_msg_panda("Dyn2_FRE", self.EPS_BUS, values)
+    return self.packer.make_can_msg_panda("Dyn2_FRE", self.CAM_BUS, values)
 
   def _user_gas_msg(self, gas):
     values = {"P002_Com_rAPP": int(gas * 100)}
-    return self.packer.make_can_msg_panda("Dyn_CMM", self.EPS_BUS, values)
+    return self.packer.make_can_msg_panda("Dyn_CMM", self.CAM_BUS, values)
 
 class TestPsaStockSafety(TestPsaSafetyBase):
 

@@ -8,7 +8,7 @@ from opendbc.car.psa.values import CarControllerParams
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
-    self.packer = CANPacker(dbc_names[Bus.cam])
+    self.packer = CANPacker(dbc_names[Bus.main])
     self.apply_angle_last = 0
 
   def update(self, CC, CS, now_nanos):

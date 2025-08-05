@@ -28,7 +28,7 @@ class CarState(CarStateBase):
     ret.gasPressed = cp.vl['Dyn_CMM']['P002_Com_rAPP'] > 0
 
     # brake
-    ret.brakePressed = bool(cp_main.vl['Dat_BSI']['P013_MainBrake'])
+    ret.brakePressed = bool(cp_cam.vl['Dat_BSI']['P013_MainBrake'])
     ret.parkingBrake = cp.vl['Dyn_EasyMove']['P337_Com_stPrkBrk'] == 1 # 0: disengaged, 1: engaged, 3: brake actuator moving
 
     # steering wheel
@@ -49,19 +49,19 @@ class CarState(CarStateBase):
     # gear
     if self.CP.transmissionType == TransmissionType.manual:
       ret.clutchPressed = bool(cp.vl['Dyn2_CMM']['P091_ConvCD_stDebVal'])
-    if bool(cp_main.vl['Dat_BSI']['P103_Com_bRevGear']):
+    if bool(cp_cam.vl['Dat_BSI']['P103_Com_bRevGear']):
       ret.gearShifter = GearShifter.reverse
     else:
       ret.gearShifter = GearShifter.drive
 
     # blinkers
-    blinker = cp_main.vl['HS2_DAT7_BSI_612']['CDE_CLG_ET_HDC']
+    blinker = cp_cam.vl['HS2_DAT7_BSI_612']['CDE_CLG_ET_HDC']
     ret.leftBlinker = blinker == 1
     ret.rightBlinker = blinker == 2
 
     # lock info
-    ret.doorOpen = any([cp_main.vl['Dat_BSI']['DRIVER_DOOR'], cp_main.vl['Dat_BSI']['PASSENGER_DOOR']])
-    ret.seatbeltUnlatched = cp_main.vl['RESTRAINTS']['DRIVER_SEATBELT'] != 2
+    ret.doorOpen = any([cp_cam.vl['Dat_BSI']['DRIVER_DOOR'], cp_cam.vl['Dat_BSI']['PASSENGER_DOOR']])
+    ret.seatbeltUnlatched = cp_cam.vl['RESTRAINTS']['DRIVER_SEATBELT'] != 2
     return ret
 
   @staticmethod
