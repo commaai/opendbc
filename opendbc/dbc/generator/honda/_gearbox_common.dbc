@@ -16,10 +16,13 @@ BO_ 401 GEARBOX_CVT: 8 PCM
 BO_ 419 GEARBOX_AUTO: 8 PCM
  SG_ TRANS_SHIFT_ACTIVITY : 7|8@0+ (1,0) [0|256] "" EON
  SG_ TRANS_TARGET_GEAR : 11|4@0+ (1,0) [0|15] "" XXX
+ SG_ REGEN_STRENGTH : 13|2@0+ (1,0) [0|3] "Stage" XXX
+ SG_ REGEN_UNKNOWN_1 : 16|1@0+ (1,0) [0|1] "" XXX
  SG_ FORWARD_DRIVING_MODE : 20|1@0+ (1,0) [0|1] "" XXX
  SG_ AUTO_UNKNOWN_1 : 27|2@0+ (1,0) [0|3] "" XXX
  SG_ AUTO_UNKNOWN_2 : 29|1@0+ (1,0) [0|1] "" XXX
  SG_ GEAR_SHIFTER : 35|4@0+ (1,0) [0|15] "" EON
+ SG_ REGEN_UNKNOWN_2 : 50|2@0+ (1,0) [0|3] "" XXX
  SG_ CHECKSUM : 59|4@0+ (1,0) [0|3] "" EON
  SG_ COUNTER : 61|2@0+ (1,0) [0|3] "" EON
  SG_ AUTO_UNKNOWN_3 : 62|1@0+ (1,0) [0|1] "" XXX
@@ -27,6 +30,8 @@ BO_ 419 GEARBOX_AUTO: 8 PCM
 CM_ SG_ 401 CVT_UNKNOWN_1 "Probably measured/actual CVT ratio";
 CM_ SG_ 401 CVT_UNKNOWN_2 "Probably target/commanded CVT ratio";
 CM_ SG_ 419 TRANS_SHIFT_ACTIVITY "Tracks but trails TRANS_TARGET_GEAR with extra activity, probable solenoid activations or TC lockup";
+CM_ SG_ 419 REGEN_UNKNOWN_1 "Goes high when user enables regen, but slightly delayed, doesn't appear to be a brake light signal";
+CM_ SG_ 419 REGEN_UNKNOWN_2 "Both bits set when user enables regen, otherwise zero";
 
 VAL_ 401 GEAR_SHIFTER 1 "P" 2 "R" 3 "N" 4 "D" 7 "L" 10 "S";
 VAL_ 419 GEAR_SHIFTER 1 "P" 2 "R" 3 "N" 4 "D" 7 "L" 10 "S";
