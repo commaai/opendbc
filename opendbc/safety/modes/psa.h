@@ -69,6 +69,7 @@ static void psa_rx_hook(const CANPacket_t *msg) {
     if (msg->addr == PSA_DYN_CMM) {
       gas_pressed = msg->data[3] > 0U; // P002_Com_rAPP
     }
+
     if (msg->addr == PSA_STEERING_ALT) {
       int angle_meas_new = to_signed((msg->data[0] << 8) | msg->data[1], 16); // ANGLE
       update_sample(&angle_meas, angle_meas_new);
