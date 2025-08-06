@@ -136,12 +136,10 @@ class CarInterface(CarInterfaceBase):
       else:
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.18]]
 
-    # TODO: see if all Bosch CAN-FD can be handled in one candidate block
     elif candidate == CAR.HONDA_ACCORD_11G:
       ret.steerActuatorDelay = 0.22
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 2560], [0, 2560]]
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
-      CarControllerParams.BOSCH_GAS_LOOKUP_V = [0, 1060]
 
     elif candidate == CAR.ACURA_ILX:
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 3840], [0, 3840]]  # TODO: determine if there is a dead zone at the top end
