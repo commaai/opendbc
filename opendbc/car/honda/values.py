@@ -328,12 +328,6 @@ FW_QUERY_CONFIG = FwQueryConfig(
       [StdQueries.UDS_VERSION_RESPONSE],
       bus=1,
     ),
-    # TODO: Test to see if this gets through the OBD side of the CAN gateway on CAN-FD cars
-    Request(
-      [StdQueries.DEFAULT_DIAGNOSTIC_REQUEST, StdQueries.UDS_VERSION_REQUEST],
-      [StdQueries.DEFAULT_DIAGNOSTIC_RESPONSE, StdQueries.UDS_VERSION_RESPONSE],
-      bus=1,
-    ),
 
     # Data collection requests:
     # Log manufacturer-specific identifier for current ECUs
