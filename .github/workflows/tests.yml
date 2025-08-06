@@ -19,7 +19,7 @@ jobs:
     steps:
     - uses: commaai/timeout@v1
       with:
-        timeout: ${{ github.repository == 'commaai/opendbc' && '75' || '999' }}
+        timeout: ${{ github.repository == 'commaai/opendbc' && '60' || '999' }}
     - uses: actions/checkout@v4
     - uses: ./.github/workflows/cache
     - run: ./test.sh
