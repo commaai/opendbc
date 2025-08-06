@@ -27,10 +27,12 @@ ALL_GAS_EV_HYBRID_COMBOS = [
   {"GAS_MSG": ("ACCELERATOR_ALT", "ACCELERATOR_PEDAL"), "SCC_BUS": 2, "SAFETY_PARAM": HyundaiSafetyFlags.HYBRID_GAS | HyundaiSafetyFlags.CAMERA_SCC},
 ]
 
+
 def round_angle(angle_deg: float, can_offset=0):
   scaled = int(angle_deg / 0.1)
   scaled += can_offset
   return scaled * 0.1
+
 
 class TestHyundaiCanfdBase(HyundaiButtonBase, common.PandaCarSafetyTest):
 
@@ -90,6 +92,7 @@ class TestHyundaiCanfdBase(HyundaiButtonBase, common.PandaCarSafetyTest):
       "ADAPTIVE_CRUISE_MAIN_BTN": main_button,
     }
     return self.packer.make_can_msg_panda("CRUISE_BUTTONS", bus, values)
+
 
 class TestHyundaiCanfdTorqueSteering(TestHyundaiCanfdBase, common.DriverTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
 
@@ -285,7 +288,6 @@ class TestHyundaiCanfdAngleSteering(TestHyundaiCanfdBase, common.AngleSteeringSa
       for _ in range(20):
         self.assertFalse(self._tx(self._angle_cmd_msg(get_max_angle_vm(max(speed, 1), self.get_vm(car_name), self.MAX_LATERAL_JERK), True)))
       self.assertTrue(self._tx(self._angle_cmd_msg(0, True)))
-
 
 
 class TestHyundaiCanfdLFASteeringBase(TestHyundaiCanfdTorqueSteering):
