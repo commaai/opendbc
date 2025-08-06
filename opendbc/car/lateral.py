@@ -6,6 +6,10 @@ from opendbc.car.vehicle_model import VehicleModel
 
 FRICTION_THRESHOLD = 0.3
 
+# ISO 11270
+ISO_LATERAL_ACCEL = 3.0  # m/s^2
+ISO_LATERAL_JERK = 5.0  # m/s^3
+
 
 @dataclass
 class AngleSteeringLimits:
