@@ -83,7 +83,7 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
     }
 
     // steering angle
-    if (msg->addr == 0x125) {
+    if (msg->addr == 0x125U) {
       int angle_meas_new = (msg->data[4] << 8) | msg->data[3];
       angle_meas_new = to_signed(angle_meas_new, 16);
       update_sample(&angle_meas, angle_meas_new);
@@ -144,12 +144,12 @@ static void hyundai_canfd_rx_hook(const CANPacket_t *msg) {
   }
 }
 
-bool torque_reduction_gain_checks(float adas_aci_angl_tq_redc_gain_val) {
-  UNUSED(adas_aci_angl_tq_redc_gain_val);
-  //TODO: ensure that if "override" is happening, that this value is reduced in a timely manner,
-  // and fault if we are not giving up the control quickly enough.
-  return false;
-};
+// bool torque_reduction_gain_checks(float adas_aci_angl_tq_redc_gain_val) {
+//   UNUSED(adas_aci_angl_tq_redc_gain_val);
+//   //TODO: ensure that if "override" is happening, that this value is reduced in a timely manner,
+//   // and fault if we are not giving up the control quickly enough.
+//   return false;
+// };
 
 static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
   const TorqueSteeringLimits HYUNDAI_CANFD_TORQUE_STEERING_LIMITS = {
@@ -189,15 +189,15 @@ static bool hyundai_canfd_tx_hook(const CANPacket_t *msg) {
   if (msg->addr == steer_addr) {
     if (hyundai_canfd_angle_steering) {
       const int lkas_angle_active = (msg->data[9] >> 4) & 0x3U;
-      float ADAS_ACIAnglTqRedcGainVal = msg->data[12] * 0.004f;
+      // float ADAS_ACIAnglTqRedcGainVal = msg->data[12] * 0.004f;
       const bool steer_angle_req = lkas_angle_active != 1;
 
       int desired_angle = (msg->data[11] << 6) | (msg->data[10] >> 2);
       desired_angle = to_signed(desired_angle, 14);
 
-      if (torque_reduction_gain_checks(ADAS_ACIAnglTqRedcGainVal)) {
-        tx = false;
-      }
+      // if (torque_reduction_gain_checks(ADAS_ACIAnglTqRedcGainVal)) {
+      //   tx = false;
+      // }
 
       if (steer_angle_cmd_checks_vm(desired_angle, steer_angle_req, HYUNDAI_CANFD_ANGLE_STEERING_LIMITS, HYUNDAI_STEERING_PARAMS)) {
         tx = false;
