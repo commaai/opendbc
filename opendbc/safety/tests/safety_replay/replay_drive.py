@@ -7,6 +7,7 @@ from opendbc.car.carlog import carlog
 from opendbc.safety.tests.libsafety import libsafety_py
 from opendbc.safety.tests.safety_replay.helpers import package_can_msg, init_segment
 
+
 # replay a drive to check for safety violations
 def replay_drive(msgs, safety_mode, param, alternative_experience):
   safety = libsafety_py.libsafety
@@ -70,6 +71,7 @@ def replay_drive(msgs, safety_mode, param, alternative_experience):
   print("blocked addrs:", blocked_addrs)
 
   return tx_controls_blocked == 0 and rx_invalid == 0 and not safety_tick_rx_invalid
+
 
 if __name__ == "__main__":
   from openpilot.tools.lib.logreader import LogReader
