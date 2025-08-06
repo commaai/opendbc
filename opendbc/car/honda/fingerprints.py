@@ -944,23 +944,14 @@ FW_VERSIONS = {
     ],
   },
   CAR.HONDA_ACCORD_11G: {
-    (Ecu.transmission, 0x18da1ef1, None): [
-      b'PLACEHOLDER',
-    ],
-    (Ecu.electricBrakeBooster, 0x18da2bf1, None): [
-      b'PLACEHOLDER',
-    ],
     (Ecu.eps, 0x18da30f1, None): [
-      b'PLACEHOLDER',
+      b'39991-30B-A060\x00\x00',
     ],
     (Ecu.gateway, 0x18daeff1, None): [
-      b'PLACEHOLDER',
-    ],
-    (Ecu.shiftByWire, 0x18da0bf1, None): [
-      b'PLACEHOLDER',
+      b'5J802-30B-AA10\x00\x00',
     ],
     (Ecu.srs, 0x18da53f1, None): [
-      b'PLACEHOLDER',
+      b'77959-30B-A750\x00\x00',
     ],
     (Ecu.fwdRadar, 0x18dab0f1, None): [
       b'8S302-30A-A040\x00\x00',
@@ -970,7 +961,7 @@ FW_VERSIONS = {
       b'8S102-30A-A060\x00\x00',
     ],
     (Ecu.vsa, 0x18da28f1, None): [
-      b'PLACEHOLDER',
+      b'57114-30B-A030\x00\x00',
     ],
   },
 }
