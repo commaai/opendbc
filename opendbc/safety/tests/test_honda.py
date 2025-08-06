@@ -10,6 +10,7 @@ from opendbc.safety.tests.common import CANPackerPanda, MAX_WRONG_COUNTERS
 
 HONDA_N_COMMON_TX_MSGS = [[0xE4, 0], [0x194, 0], [0x1FA, 0], [0x30C, 0], [0x33D, 0]]
 
+
 class Btn:
   NONE = 0
   MAIN = 1
@@ -559,15 +560,16 @@ class TestHondaBoschRadarlessLongSafety(common.LongitudinalAccelSafetyTest, Hond
   def test_spam_cancel_safety_check(self):
     pass
 
+
 class TestHondaBoschCANFDSafetyBase(TestHondaBoschSafetyBase):
   """Base class for CANFD Honda Bosch"""
   PT_BUS = 0
   STEER_BUS = 0
   BUTTONS_BUS = 0
 
-  TX_MSGS = [[0xE4, 0], [0x296, 0], [0x33D, 0], [0x33DA, 0], [0x33DB, 0]]
-  FWD_BLACKLISTED_ADDRS = {2: [0xE4, 0xE5, 0x33D, 0x33DA, 0x33DB]}
-  RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0xE5, 0x33D, 0x33DA, 0x33DB)}  # STEERING_CONTROL
+  TX_MSGS = [[0xE4, 0], [0x296, 0], [0x33D, 0]]
+  FWD_BLACKLISTED_ADDRS = {2: [0xE4, 0x33D]}
+  RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0x33D)}
 
   def setUp(self):
     self.packer = CANPackerPanda("honda_common_canfd_generated")
