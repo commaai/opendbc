@@ -19,6 +19,23 @@ MAX_ANGLE_FRAMES = 89
 MAX_ANGLE_CONSECUTIVE_FRAMES = 2
 
 
+def calculate_angle_torque_reduction_gain(params, CS, apply_torque_last, target_torque_reduction_gain):
+  """ Calculate the angle torque reduction gain based on the current steering state. """
+  if CS.out.steeringPressed:  # User is overriding
+    torque_delta = apply_torque_last - params.ANGLE_MIN_TORQUE_REDUCTION_GAIN
+    adaptive_ramp_rate = max(torque_delta / params.ANGLE_TORQUE_OVERRIDE_CYCLES, 0.004) # the minimum rate of change we've seen
+    return max(apply_torque_last - adaptive_ramp_rate, params.ANGLE_MIN_TORQUE_REDUCTION_GAIN)
+  else:
+    # EU vehicles have been seen to "idle" at 0.384, while US vehicles have been seen idling at "0.92" for LFA.
+    target_torque = max(target_torque_reduction_gain, 0.5) # at 0.5 under normal conditions
+    target_torque = max(target_torque, params.ANGLE_MIN_TORQUE_REDUCTION_GAIN)
+
+    if apply_torque_last > target_torque:
+      return max(apply_torque_last - params.ANGLE_RAMP_DOWN_TORQUE_REDUCTION_RATE, target_torque)
+    else:
+      return min(apply_torque_last + params.ANGLE_RAMP_UP_TORQUE_REDUCTION_RATE, target_torque)
+
+
 def process_hud_alert(enabled, fingerprint, hud_control):
   sys_warning = (hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw))
 
@@ -62,13 +79,6 @@ class CarController(CarControllerBase):
     self.apply_angle_last = 0
     self.angle_torque_reduction_gain = 0
 
-    # For future parametrization / tuning
-    self.ramp_down_reduction_gain_rate = self.params.ANGLE_RAMP_DOWN_TORQUE_REDUCTION_RATE
-    self.ramp_up_reduction_gain_rate = self.params.ANGLE_RAMP_UP_TORQUE_REDUCTION_RATE
-    self.min_torque_reduction_gain = self.params.ANGLE_MIN_TORQUE_REDUCTION_GAIN
-    self.max_torque_reduction_gain = self.params.ANGLE_MAX_TORQUE_REDUCTION_GAIN
-    self.angle_torque_override_cycles = self.params.ANGLE_TORQUE_OVERRIDE_CYCLES
-
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
     hud_control = CC.hudControl
@@ -85,7 +95,7 @@ class CarController(CarControllerBase):
     else:
       self.apply_angle_last, apply_torque = self.update_angle_steering_control(CS, CC,actuators)
       # Safety clamp
-      apply_torque = float(np.clip(apply_torque, self.min_torque_reduction_gain, self.max_torque_reduction_gain))
+      apply_torque = float(np.clip(apply_torque, self.params.ANGLE_MIN_TORQUE_REDUCTION_GAIN, self.params.ANGLE_MAX_TORQUE_REDUCTION_GAIN))
       apply_steer_req = CC.latActive and apply_torque != 0
 
     if not CC.latActive:
@@ -237,25 +247,11 @@ class CarController(CarControllerBase):
 
     return can_sends
 
-  def calculate_angle_torque_reduction_gain(self, CS, target_torque_reduction_gain):
-    """ Calculate the angle torque reduction gain based on the current steering state. """
-    if CS.out.steeringPressed:  # User is overriding
-      torque_delta = self.apply_torque_last - self.min_torque_reduction_gain
-      adaptive_ramp_rate = max(torque_delta / self.angle_torque_override_cycles, 0.004) # the minimum rate of change we've seen
-      return max(self.apply_torque_last - adaptive_ramp_rate, self.min_torque_reduction_gain)
-    else:
-      # EU vehicles have been seen to "idle" at 0.384, while US vehicles have been seen idling at "0.92" for LFA.
-      target_torque = max(target_torque_reduction_gain, 0.5) # at 0.5 under normal conditions
-      target_torque = max(target_torque, self.min_torque_reduction_gain)
-
-      if self.apply_torque_last > target_torque:
-        return max(self.apply_torque_last - self.ramp_down_reduction_gain_rate, target_torque)
-      else:
-        return min(self.apply_torque_last + self.ramp_up_reduction_gain_rate, target_torque)
 
   def update_angle_steering_control(self, CS, CC, actuators):
     new_angle = apply_vm_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, CS.out.steeringAngleDeg,
                                             CC.latActive, self.params, self.VM, MAX_ANGLE_RATE=5)
+
     target_torque_reduction_gain = 1. if CC.latActive else 0
-    torque_reduction_gain = self.calculate_angle_torque_reduction_gain(CS, target_torque_reduction_gain)
+    torque_reduction_gain = calculate_angle_torque_reduction_gain(self.params, CS, self.apply_torque_last, target_torque_reduction_gain)
     return new_angle, torque_reduction_gain
