@@ -87,30 +87,30 @@ def apply_std_steer_angle_limits(apply_angle: float, apply_angle_last: float, v_
   return float(np.clip(new_apply_angle, -limits.STEER_ANGLE_MAX, limits.STEER_ANGLE_MAX))
 
 
-def get_max_angle_delta_vm(v_ego_raw: float, VM: VehicleModel):
-  max_curvature_rate_sec = MAX_LATERAL_JERK / (v_ego_raw ** 2)  # (1/m)/s
+def get_max_angle_delta_vm(v_ego_raw: float, VM: VehicleModel, limits):
+  max_curvature_rate_sec = limits.ANGLE_LIMITS.MAX_LATERAL_JERK / (v_ego_raw ** 2)  # (1/m)/s
   max_angle_rate_sec = math.degrees(VM.get_steer_from_curvature(max_curvature_rate_sec, v_ego_raw, 0))  # deg/s
-  return max_angle_rate_sec * (DT_CTRL * CarControllerParams.STEER_STEP)
+  return max_angle_rate_sec * (DT_CTRL * limits.STEER_STEP)
 
 
-def get_max_angle_vm(v_ego_raw: float, VM: VehicleModel):
-  max_curvature = MAX_LATERAL_ACCEL / (v_ego_raw ** 2)  # 1/m
+def get_max_angle_vm(v_ego_raw: float, VM: VehicleModel, limits):
+  max_curvature = limits.ANGLE_LIMITS.MAX_LATERAL_ACCEL / (v_ego_raw ** 2)  # 1/m
   return math.degrees(VM.get_steer_from_curvature(max_curvature, v_ego_raw, 0))  # deg
 
 
 def apply_steer_angle_limits_vm(apply_angle: float, apply_angle_last: float, v_ego_raw: float, steering_angle: float,
-                                   lat_active: bool, limits: AngleSteeringLimits, VM: VehicleModel) -> float:
+                                lat_active: bool, limits, VM: VehicleModel) -> float:
   v_ego_raw = max(v_ego_raw, 1)
 
   # *** max lateral jerk limit ***
-  max_angle_delta = get_max_angle_delta(v_ego_raw, VM)
+  max_angle_delta = get_max_angle_delta_vm(v_ego_raw, VM, limits)
 
-  # prevent fault
-  max_angle_delta = min(max_angle_delta, MAX_ANGLE_RATE)
+  # prevent fault/low speed comfort
+  max_angle_delta = min(max_angle_delta, limits.ANGLE_LIMITS.MAX_ANGLE_RATE)
   new_apply_angle = rate_limit(apply_angle, apply_angle_last, -max_angle_delta, max_angle_delta)
 
   # *** max lateral accel limit ***
-  max_angle = get_max_angle(v_ego_raw, VM)
+  max_angle = get_max_angle_vm(v_ego_raw, VM, limits)
   new_apply_angle = np.clip(new_apply_angle, -max_angle, max_angle)
 
   # angle is current angle when inactive
