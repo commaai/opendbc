@@ -2,8 +2,8 @@ import numpy as np
 import math
 from opendbc.can import CANPacker
 from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, rate_limit
-from opendbc.car.lateral import AngleSteeringLimits
-from opendbc.car.interfaces import CarControllerBase, ISO_LATERAL_ACCEL
+from opendbc.car.lateral import AngleSteeringLimits, apply_steer_angle_limits_vm
+from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.tesla.teslacan import TeslaCAN
 from opendbc.car.tesla.values import CarControllerParams
 from opendbc.car.vehicle_model import VehicleModel
@@ -37,9 +37,9 @@ class CarController(CarControllerBase):
 
     if self.frame % 2 == 0:
       # Angular rate limit based on speed
-      self.apply_angle_last = apply_tesla_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw,
-                                                             CS.out.steeringAngleDeg, lat_active,
-                                                             CarControllerParams.ANGLE_LIMITS, self.VM)
+      self.apply_angle_last = apply_steer_angle_limits_vm(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw,
+                                                          CS.out.steeringAngleDeg, lat_active,
+                                                          CarControllerParams, self.VM)
 
       can_sends.append(self.tesla_can.create_steering_control(self.apply_angle_last, lat_active))
 

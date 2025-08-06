@@ -122,7 +122,7 @@ def apply_steer_angle_limits_vm(apply_angle: float, apply_angle_last: float, v_e
     new_apply_angle = steering_angle
 
   # prevent fault
-  return float(np.clip(new_apply_angle, -limits.STEER_ANGLE_MAX, limits.STEER_ANGLE_MAX))
+  return float(np.clip(new_apply_angle, -limits.ANGLE_LIMITS.STEER_ANGLE_MAX, limits.ANGLE_LIMITS.STEER_ANGLE_MAX))
 
 
 def common_fault_avoidance(fault_condition: bool, request: bool, above_limit_frames: int,
