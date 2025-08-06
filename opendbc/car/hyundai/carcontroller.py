@@ -31,9 +31,11 @@ def calculate_angle_torque_reduction_gain(params, CS, apply_torque_last, target_
     target_torque = max(target_torque, params.ANGLE_MIN_TORQUE_REDUCTION_GAIN)
 
     if apply_torque_last > target_torque:
-      return max(apply_torque_last - params.ANGLE_RAMP_DOWN_TORQUE_REDUCTION_RATE, target_torque)
+      reduced_torque = max(apply_torque_last - params.ANGLE_RAMP_DOWN_TORQUE_REDUCTION_RATE, target_torque)
     else:
-      return min(apply_torque_last + params.ANGLE_RAMP_UP_TORQUE_REDUCTION_RATE, target_torque)
+      reduced_torque = min(apply_torque_last + params.ANGLE_RAMP_UP_TORQUE_REDUCTION_RATE, target_torque)
+
+  return float(np.clip(reduced_torque, params.ANGLE_MIN_TORQUE_REDUCTION_GAIN, params.ANGLE_MAX_TORQUE_REDUCTION_GAIN))
 
 
 def process_hud_alert(enabled, fingerprint, hud_control):
@@ -93,10 +95,12 @@ class CarController(CarControllerBase):
 
     # angle control
     else:
-      self.apply_angle_last, apply_torque = self.update_angle_steering_control(CS, CC,actuators)
-      # Safety clamp
-      apply_torque = float(np.clip(apply_torque, self.params.ANGLE_MIN_TORQUE_REDUCTION_GAIN, self.params.ANGLE_MAX_TORQUE_REDUCTION_GAIN))
-      apply_steer_req = CC.latActive and apply_torque != 0
+      self.apply_angle_last = apply_vm_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, CS.out.steeringAngleDeg,
+                                                          CC.latActive, self.params, self.VM, MAX_ANGLE_RATE=5)
+
+      target_torque_reduction_gain = 1. if CC.latActive else 0
+      apply_torque = calculate_angle_torque_reduction_gain(self.params, CS, self.apply_torque_last, target_torque_reduction_gain)
+      apply_steer_req = CC.latActive and apply_torque != 0 # apply_steer_req is True when we are actively attempting to steer
 
     if not CC.latActive:
       apply_torque = 0
@@ -246,12 +250,3 @@ class CarController(CarControllerBase):
             self.last_button_frame = self.frame
 
     return can_sends
-
-
-  def update_angle_steering_control(self, CS, CC, actuators):
-    new_angle = apply_vm_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, CS.out.steeringAngleDeg,
-                                            CC.latActive, self.params, self.VM, MAX_ANGLE_RATE=5)
-
-    target_torque_reduction_gain = 1. if CC.latActive else 0
-    torque_reduction_gain = calculate_angle_torque_reduction_gain(self.params, CS, self.apply_torque_last, target_torque_reduction_gain)
-    return new_angle, torque_reduction_gain
