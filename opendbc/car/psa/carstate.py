@@ -48,8 +48,6 @@ class CarState(CarStateBase):
     ret.accFaulted = cp_adas.vl['HS2_DYN_UCF_MDD_32D']['ACC_ETAT_DECEL_OR_ESP_STATUS'] == 3 # 0: Inhibited, 1: Waiting, 2: Active, 3: Fault
 
     # gear
-    if self.CP.transmissionType == TransmissionType.manual:
-      ret.clutchPressed = bool(cp.vl['Dyn2_CMM']['P091_ConvCD_stDebVal'])
     if bool(cp_cam.vl['Dat_BSI']['P103_Com_bRevGear']):
       ret.gearShifter = GearShifter.reverse
     else:
