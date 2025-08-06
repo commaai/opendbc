@@ -330,8 +330,8 @@ FW_QUERY_CONFIG = FwQueryConfig(
     ),
     # TODO: Test to see if this gets through the OBD side of the CAN gateway on CAN-FD cars
     Request(
-      [StdQueries.TESTER_PRESENT_REQUEST, StdQueries.DEFAULT_DIAGNOSTIC_REQUEST, StdQueries.UDS_VERSION_REQUEST],
-      [StdQueries.TESTER_PRESENT_RESPONSE, StdQueries.DEFAULT_DIAGNOSTIC_RESPONSE, StdQueries.UDS_VERSION_RESPONSE],
+      [StdQueries.DEFAULT_DIAGNOSTIC_REQUEST, StdQueries.UDS_VERSION_REQUEST],
+      [StdQueries.DEFAULT_DIAGNOSTIC_RESPONSE, StdQueries.UDS_VERSION_RESPONSE],
       bus=1,
     ),
 
