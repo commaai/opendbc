@@ -65,7 +65,7 @@ class Footnote(Enum):
     Column.MODEL,
   )
   GLOBAL = CarFootnote(
-    "Co-Pilot360 and Co-Pilot360 Assist are NOT COMPATIBLE with OpenPilot",
+    "Co-Pilot360 and Co-Pilot360 Assist are not compatible with OpenPilot",
     Column.PACKAGE,
   )
 
