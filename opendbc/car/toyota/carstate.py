@@ -184,20 +184,18 @@ class CarState(CarStateBase):
       # lkas button is wired to the camera
       prev_lkas_button = self.lkas_button
       self.lkas_button = cp_cam.vl["LKAS_HUD"]["LDA_ON_MESSAGE"]
-      print(self.lkas_button, prev_lkas_button)
 
+      # Cycles between 1 and 2 when pressing the button, then rests back at 0 after ~3s
       if self.lkas_button != 0 and self.lkas_button != prev_lkas_button:
-        # Cycles between 1 and 2 when pressing the button, then rests back at 0 after ~3s
-        buttonEvents += create_button_events(1, 0, {1: ButtonType.lkas, 2: ButtonType.lkas})
-        buttonEvents += create_button_events(0, 1, {1: ButtonType.lkas, 2: ButtonType.lkas})
-        print('buttonEvents', buttonEvents)
+        buttonEvents += [create_button_events(1, 0, {1: ButtonType.lkas, 2: ButtonType.lkas}),
+                         create_button_events(0, 1, {1: ButtonType.lkas, 2: ButtonType.lkas})]
 
-    if self.CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR):
-      # distance button is wired to the ACC module (camera or radar)
-      prev_distance_button = self.distance_button
-      self.distance_button = cp_acc.vl["ACC_CONTROL"]["DISTANCE"]
+      if self.CP.carFingerprint not in RADAR_ACC_CAR:
+        # distance button is wired to the ACC module (camera or radar)
+        prev_distance_button = self.distance_button
+        self.distance_button = cp_acc.vl["ACC_CONTROL"]["DISTANCE"]
 
-      buttonEvents += create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise})
+        buttonEvents += create_button_events(self.distance_button, prev_distance_button, {1: ButtonType.gapAdjustCruise})
     ret.buttonEvents = buttonEvents
 
     return ret
