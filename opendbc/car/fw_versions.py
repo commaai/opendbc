@@ -1,6 +1,6 @@
 from collections import defaultdict
 from collections.abc import Callable, Iterator
-from typing import Protocol, TypeVar
+from typing import Protocol, TypeVar, Any
 
 from tqdm import tqdm
 
@@ -325,3 +325,57 @@ def get_fw_versions(can_recv: CanRecvCallable, can_send: CanSendCallable, set_ob
           carlog.exception("FW query exception")
 
   return car_fw
+
+
+if __name__ == "__main__":
+  import time
+  import argparse
+  import cereal.messaging as messaging
+  from openpilot.selfdrive.car.vin import get_vin
+
+  parser = argparse.ArgumentParser(description='Get firmware version of ECUs')
+  parser.add_argument('--scan', action='store_true')
+  parser.add_argument('--debug', action='store_true')
+  parser.add_argument('--brand', help='Only query addresses/with requests for this brand')
+  args = parser.parse_args()
+
+  logcan = messaging.sub_sock('can')
+  pandaStates_sock = messaging.sub_sock('pandaStates')
+  sendcan = messaging.pub_sock('sendcan')
+
+  extra: Any = None
+  if args.scan:
+    extra = {}
+    # Honda
+    for i in range(256):
+      extra[(Ecu.unknown, 0x18da00f1 + (i << 8), None)] = []
+      extra[(Ecu.unknown, 0x700 + i, None)] = []
+      extra[(Ecu.unknown, 0x750, i)] = []
+    extra = {"any": {"debug": extra}}
+
+  time.sleep(1.)
+  num_pandas = len(messaging.recv_one_retry(pandaStates_sock).pandaStates)
+
+  t = time.time()
+  print("Getting vin...")
+  vin_rx_addr, vin = get_vin(logcan, sendcan, 1, retry=10, debug=args.debug)
+  print(f'RX: {hex(vin_rx_addr)}, VIN: {vin}')
+  print(f"Getting VIN took {time.time() - t:.3f} s")
+  print()
+
+  t = time.time()
+  fw_vers = get_fw_versions(logcan, sendcan, query_brand=args.brand, extra=extra, num_pandas=num_pandas, debug=args.debug, progress=True)
+  _, candidates = match_fw_to_car(fw_vers)
+
+  print()
+  print("Found FW versions")
+  print("{")
+  padding = max([len(fw.brand) for fw in fw_vers] or [0])
+  for version in fw_vers:
+    subaddr = None if version.subAddress == 0 else hex(version.subAddress)
+    print(f"  Brand: {version.brand:{padding}}, bus: {version.bus} - (Ecu.{version.ecu}, {hex(version.address)}, {subaddr}): [{version.fwVersion}]")
+  print("}")
+
+  print()
+  print("Possible matches:", candidates)
+  print(f"Getting fw took {time.time() - t:.3f} s")
