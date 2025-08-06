@@ -943,7 +943,7 @@ FW_VERSIONS = {
       b'8S302-T90-A040\x00\x00',
     ],
   },
-  CAR.HONDA_E: {
+  CAR.HONDA_ACCORD_11G: {
     (Ecu.eps, 0x18da30f1, None): [
       b'PLACEHOLDER',
     ],
