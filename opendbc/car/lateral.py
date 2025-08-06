@@ -21,7 +21,7 @@ class AngleSteeringLimits:
   # v2 vehicle model limits (using apply_steer_angle_limits_vm)
   MAX_LATERAL_ACCEL: float = -1
   MAX_LATERAL_JERK: float = -1
-  MAX_ANGLE_RATE: float = -1
+  MAX_ANGLE_RATE: float = math.inf
 
 
 def apply_driver_steer_torque_limits(apply_torque: int, apply_torque_last: int, driver_torque: float, LIMITS, steer_max: int = None):
