@@ -36,8 +36,8 @@ class CarInterface(CarInterfaceBase):
 
     CAN = CanBus(ret, fingerprint)
 
-    # Recent test route is needed to undashcam these cars
-    # ret.dashcamOnly = candidate in HONDA_BOSCH_CANFD
+    # Pilot 4G needs a rescaled lateral actuator, switch to lat accel torque control, and an updated test route
+    ret.dashcamOnly = candidate in [CAR.HONDA_PILOT_4G]
 
     if candidate in HONDA_BOSCH:
       cfgs = [get_safety_config(structs.CarParams.SafetyModel.hondaBosch)]
