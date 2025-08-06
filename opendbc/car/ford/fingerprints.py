@@ -1,3 +1,4 @@
+""" AUTO-FORMATTED USING opendbc/car/debug/format_fingerprints.py, EDIT STRUCTURE THERE."""
 from opendbc.car.structs import CarParams
 from opendbc.car.ford.values import CAR
 
@@ -116,6 +117,7 @@ FW_VERSIONS = {
       b'PL3V-2D053-BB\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
     ],
     (Ecu.fwdRadar, 0x764, None): [
+      b'ML3T-14D049-AK\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
       b'ML3T-14D049-AL\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
     ],
     (Ecu.fwdCamera, 0x706, None): [
@@ -123,6 +125,7 @@ FW_VERSIONS = {
       b'ML3T-14H102-ABS\x00\x00\x00\x00\x00\x00\x00\x00\x00',
       b'ML3T-14H102-ABT\x00\x00\x00\x00\x00\x00\x00\x00\x00',
       b'PJ6T-14H102-ABJ\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+      b'PJ6T-14H102-ABS\x00\x00\x00\x00\x00\x00\x00\x00\x00',
       b'RJ6T-14H102-ACJ\x00\x00\x00\x00\x00\x00\x00\x00\x00',
       b'RJ6T-14H102-BBC\x00\x00\x00\x00\x00\x00\x00\x00\x00',
     ],
