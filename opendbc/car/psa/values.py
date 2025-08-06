@@ -8,6 +8,7 @@ from opendbc.car.fw_query_definitions import FwQueryConfig, Request, StdQueries
 
 Ecu = CarParams.Ecu
 
+
 class CarControllerParams:
   STEER_STEP = 1
 
@@ -24,17 +25,20 @@ class PSACarDocs(CarDocs):
   package: str = "Adaptive Cruise Control (ACC) & Lane Assist"
   car_parts: CarParts = field(default_factory=CarParts.common([CarHarness.psa_a]))
 
+
 @dataclass
 class PSAPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {
     Bus.pt: 'psa_aee2010_r3',
   })
 
+
 class CAR(Platforms):
   PSA_PEUGEOT_208 = PSAPlatformConfig(
     [PSACarDocs("Peugeot 208 2019-25")],
     CarSpecs(mass=1530, wheelbase=2.54, steerRatio=17.6),
   )
+
 
 # Placeholder, FW Query will be added in separate PR
 FW_QUERY_CONFIG = FwQueryConfig(

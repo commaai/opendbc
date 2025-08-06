@@ -7,6 +7,7 @@ from opendbc.car.interfaces import CarStateBase
 GearShifter = structs.CarState.GearShifter
 TransmissionType = structs.CarParams.TransmissionType
 
+
 class CarState(CarStateBase):
   def update(self, can_parsers) -> structs.CarState:
     cp = can_parsers[Bus.main]

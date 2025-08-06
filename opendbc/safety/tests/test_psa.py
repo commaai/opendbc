@@ -8,6 +8,7 @@ from opendbc.safety.tests.common import CANPackerPanda
 
 LANE_KEEP_ASSIST = 0x3F2
 
+
 class TestPsaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyTest):
   RELAY_MALFUNCTION_ADDRS = {0: (LANE_KEEP_ASSIST,)}
   FWD_BLACKLISTED_ADDRS = {2: [LANE_KEEP_ASSIST]}
@@ -54,6 +55,7 @@ class TestPsaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyTes
     values = {"P002_Com_rAPP": int(gas * 100)}
     return self.packer.make_can_msg_panda("Dyn_CMM", self.MAIN_BUS, values)
 
+
 class TestPsaStockSafety(TestPsaSafetyBase):
 
   def setUp(self):
@@ -61,6 +63,7 @@ class TestPsaStockSafety(TestPsaSafetyBase):
     self.safety = libsafety_py.libsafety
     self.safety.set_safety_hooks(CarParams.SafetyModel.psa, 0)
     self.safety.init_tests()
+
 
 if __name__ == "__main__":
     unittest.main()

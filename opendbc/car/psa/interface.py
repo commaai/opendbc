@@ -5,6 +5,7 @@ from opendbc.car.psa.carstate import CarState
 
 TransmissionType = structs.CarParams.TransmissionType
 
+
 class CarInterface(CarInterfaceBase):
   CarState = CarState
   CarController = CarController

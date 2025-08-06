@@ -3,6 +3,7 @@ def psa_checksum(address: int, sig, d: bytearray) -> int:
   checksum = sum((b >> 4) + (b & 0xF) for b in d)
   return (chk_ini - checksum) & 0xF
 
+
 def create_lka_steering(packer, frame: int, lat_active: bool, apply_angle: float):
   values = {
     'DRIVE': 1,
