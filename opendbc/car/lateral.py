@@ -18,7 +18,7 @@ class AngleSteeringLimits:
   ANGLE_RATE_LIMIT_UP: tuple[list[float], list[float]]
   ANGLE_RATE_LIMIT_DOWN: tuple[list[float], list[float]]
 
-  # v2 vehicle model limits
+  # v2 vehicle model limits (using apply_steer_angle_limits_vm)
   MAX_LATERAL_ACCEL: float = -1
   MAX_LATERAL_JERK: float = -1
   MAX_ANGLE_RATE: float = -1
