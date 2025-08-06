@@ -325,7 +325,6 @@ STEER_THRESHOLD = {
   # default is 1200, overrides go here
   CAR.ACURA_RDX: 400,
   CAR.HONDA_CRV_EU: 400,
-  CAR.HONDA_ACCORD_11G: 600,
 }
 
 
