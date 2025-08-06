@@ -1162,6 +1162,7 @@ FW_VERSIONS = {
   CAR.SKODA_OCTAVIA_MK3: {
     (Ecu.engine, 0x7e0, None): [
       b'\xf1\x8704C906025L \xf1\x896198',
+      b'\xf1\x8704C906026AB\xf1\x892993',
       b'\xf1\x8704E906016ER\xf1\x895823',
       b'\xf1\x8704E906027HD\xf1\x893742',
       b'\xf1\x8704E906027MH\xf1\x894786',
@@ -1178,6 +1179,7 @@ FW_VERSIONS = {
       b'\xf1\x870CW300041N \xf1\x891605',
       b'\xf1\x870CW300043B \xf1\x891601',
       b'\xf1\x870CW300043P \xf1\x891605',
+      b'\xf1\x870CW300049M \xf1\x890901',
       b'\xf1\x870D9300012H \xf1\x894518',
       b'\xf1\x870D9300014T \xf1\x895221',
       b'\xf1\x870D9300041C \xf1\x894936',
@@ -1204,6 +1206,7 @@ FW_VERSIONS = {
       b'\xf1\x875Q0909144AB\xf1\x891082\xf1\x82\x0521T00403A1',
       b'\xf1\x875Q0909144AB\xf1\x891082\xf1\x82\x0521T00603A1',
       b'\xf1\x875Q0909144R \xf1\x891061\xf1\x82\x0516A00604A1',
+      b'\xf1\x875Q0909144T \xf1\x891072\xf1\x82\x0521T00401A1',
       b'\xf1\x875Q0909144T \xf1\x891072\xf1\x82\x0521T00601A1',
       b'\xf1\x875QD909144E \xf1\x891081\xf1\x82\x0521T00503A1',
     ],
