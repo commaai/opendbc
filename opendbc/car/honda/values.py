@@ -168,6 +168,10 @@ class CAR(Platforms):
     CarSpecs(mass=3279 * CV.LB_TO_KG, wheelbase=2.83, steerRatio=16.33, centerToFrontRatio=0.39, tireStiffnessFactor=0.8467),
     {Bus.pt: 'honda_accord_2018_can_generated'},
   )
+  HONDA_ACCORD_11G = HondaBoschCANFDPlatformConfig(
+    [HondaCarDocs("Honda Accord 2023", "All")],
+    CarSpecs(mass=3477 * CV.LB_TO_KG, wheelbase=2.83, steerRatio=16.0, centerToFrontRatio=0.39),
+  )
   HONDA_CIVIC_BOSCH = HondaBoschPlatformConfig(
     [
       HondaCarDocs("Honda Civic 2019-21", "All", video="https://www.youtube.com/watch?v=4Iz1Mz5LGF8",
@@ -325,6 +329,7 @@ STEER_THRESHOLD = {
   # default is 1200, overrides go here
   CAR.ACURA_RDX: 400,
   CAR.HONDA_CRV_EU: 400,
+  CAR.HONDA_ACCORD_11G: 600,
 }
 
 
