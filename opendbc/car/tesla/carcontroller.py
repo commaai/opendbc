@@ -10,6 +10,7 @@ from opendbc.car.vehicle_model import VehicleModel
 # limit angle rate to both prevent a fault and for low speed comfort (~12 mph rate down to 0 mph)
 MAX_ANGLE_RATE = 5  # deg/20ms frame, EPS faults at 12 at a standstill
 
+
 def get_safety_CP():
   # We use the TESLA_MODEL_Y platform for lateral limiting to match safety
   # A Model 3 at 40 m/s using the Model Y limits sees a <0.3% difference in max angle (from curvature factor)
