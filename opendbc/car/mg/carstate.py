@@ -23,9 +23,7 @@ class CarState(CarStateBase):
     ret.standstill = abs(ret.vEgoRaw) < 0.01
 
     # Gas pedal
-    pedal_status = cp.vl["GW_HSC2_HCU_FrP00"]["EPTAccelActuPosHSC2"]
-    ret.gas = pedal_status / 100.0
-    ret.gasPressed = pedal_status > 0
+    ret.gasPressed = cp.vl["GW_HSC2_HCU_FrP00"]["EPTAccelActuPosHSC2"] > 0
 
     # Brake pedal
     ret.brake = 0
