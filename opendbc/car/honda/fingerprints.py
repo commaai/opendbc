@@ -463,32 +463,26 @@ FW_VERSIONS = {
       b'77959-TLA-H240\x00\x00',
     ],
   },
-  CAR.HONDA_FIT: {
-  (Ecu.gateway, 0x18da10f1, None): [
-    b'38897-T5C-J010\x00\x00',
-    b'\x0cJ2152677\x00\x00\x00\x00                  ',
-  ],
-  (Ecu.fwdRadar, 0x18da0f11, None): [
-    b'36161-T5C-J060\x00\x00',
-    b'\x0e5W5CL113203006\x00\x00',
-  ],
-  (Ecu.eps, 0x18da0aef, None): [
-    b'39990-T5B-N120\x00\x00',
-    b'\r BK8F035483D\x00                 ',
-  ],
-  (Ecu.srs, 0x18da0b91, None): [
-    b'77959-T5C-J860\x00\x00',
-    b'\n20185048MT\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
-  ],
-  (Ecu.shiftByWire, 0x18da0c61, None): [
-    b'54008-T9P-J010\x00\x00',
-    b'\x1215440612188A101650\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
-  ],
-  (Ecu.combinationMeter, 0x18da0b61, None): [
-    b'78109-T5C-9210\x00\x00',
-    b'\x18J2390010\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
-  ],
-},
+    CAR.HONDA_FIT: {
+    (Ecu.gateway, 0x18da10f1, None): [
+      b'38897-T5C-J010\x00\x00',
+    ],
+    (Ecu.fwdRadar, 0x18da0f11, None): [
+      b'36161-T5C-J060\x00\x00',
+    ],
+    (Ecu.eps, 0x18da0aef, None): [
+      b'39990-T5B-N120\x00\x00',
+    ],
+    (Ecu.srs, 0x18da0b91, None): [
+      b'77959-T5C-J860\x00\x00',
+    ],
+    (Ecu.shiftByWire, 0x18da0c61, None): [
+      b'54008-T9P-J010\x00\x00',
+    ],
+    (Ecu.combinationMeter, 0x18da0b61, None): [
+      b'78109-T5C-9210\x00\x00',
+    ],
+  },
   CAR.HONDA_FREED: {
     (Ecu.gateway, 0x18daeff1, None): [
       b'38897-TDK-J010\x00\x00',
