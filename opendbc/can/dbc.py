@@ -199,7 +199,7 @@ def get_checksum_state(dbc_name: str) -> ChecksumState | None:
   elif dbc_name.startswith("tesla_model3_party"):
     return ChecksumState(8, -1, 0, -1, True, SignalType.TESLA_CHECKSUM, tesla_checksum, tesla_setup_signal)
   elif dbc_name.startswith("psa_"):
-    return ChecksumState(4, 4, 15, 11, True, SignalType.PSA_CHECKSUM, psa_checksum)
+    return ChecksumState(4, 4, 3, 3, False, SignalType.PSA_CHECKSUM, psa_checksum)
   return None
 
 
