@@ -72,29 +72,8 @@ class CarState(CarStateBase):
 
   @staticmethod
   def get_can_parsers(CP):
-    pt_messages = [
-      # sig_address, frequency
-      ("SCS_HSC2_FrP15", 10),
-      ("GW_HSC2_HCU_FrP00", 100),
-      ("EHBS_HSC2_FrP00", 50),
-      ("SAS_HSC2_FrP00", 100),
-      ("EPS_HSC2_FrP03", 50),
-      ("GW_HSC2_BCM_FrP04", 20),
-      ("GW_HSC2_ECM_FrP04", 50),
-      ("GW_HSC2_SDM_FrP00", 50),
-      ("RADAR_HSC2_FrP02", 50),
-      ("RADAR_HSC2_FrP00", 50),
-    ]
-
-    cam_messages = [
-      ("FVCM_HSC2_FrP02", 50),
-    ]
-
-    radar_messages = [
-    ]
-
     return {
-      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], pt_messages, 0),
-      Bus.radar: CANParser(DBC[CP.carFingerprint][Bus.pt], radar_messages, 1),
-      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], cam_messages, 2),
+      Bus.pt: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 0),
+      Bus.radar: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 1),
+      Bus.cam: CANParser(DBC[CP.carFingerprint][Bus.pt], [], 2),
     }

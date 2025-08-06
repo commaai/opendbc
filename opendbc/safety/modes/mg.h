@@ -2,38 +2,35 @@
 
 #include "opendbc/safety/safety_declarations.h"
 
-static void mg_rx_hook(const CANPacket_t *to_push) {
-  int bus = GET_BUS(to_push);
-  int addr = GET_ADDR(to_push);
-
-  if (bus == 0)  {
+static void mg_rx_hook(const CANPacket_t *msg) {
+  if (msg->bus == 0)  {
     // Vehicle speed
-    if (addr == 0x353) {
-      float speed = (((GET_BYTE(to_push, 0) & 0x7FU) << 8) | GET_BYTE(to_push, 1)) * 0.015625;
+    if (msg->addr == 0x353) {
+      float speed = (((msg->data[0] & 0x7FU) << 8) | msg->data[1]) * 0.015625;
       vehicle_moving = speed > 0.0;
       UPDATE_VEHICLE_SPEED(speed * KPH_TO_MS);
     }
 
     // Gas pressed
-    if (addr == 0xaf) {
-      gas_pressed = GET_BYTE(to_push, 0) != 0;
+    if (msg->addr == 0xaf) {
+      gas_pressed = msg->data[0] != 0;
     }
 
     // Driver torque
-    if (addr == 0x1ec) {
-      int torque_driver_new = ((GET_BYTE(to_push, 4) & 0x7U) << 8) | GET_BYTE(to_push, 5);
+    if (msg->addr == 0x1ec) {
+      int torque_driver_new = ((msg->data[4] & 0x7U) << 8) | msg->data[5];
       torque_driver_new = torque_driver_new - 1024U;
       update_sample(&torque_driver, torque_driver_new);
     }
 
     // Brake pressed
-    if (addr == 0x1b6) {
-      brake_pressed = GET_BIT(to_push, 10U);
+    if (msg->addr == 0x1b6) {
+      brake_pressed = GET_BIT(msg, 10U);
     }
 
     // Cruise state
-    if (addr == 0x242) {
-      int cruise_state = (GET_BYTE(to_push, 5) & 0x38U) >> 3;
+    if (msg->addr == 0x242) {
+      int cruise_state = (msg->data[5] & 0x38U) >> 3;
       bool cruise_engaged = (cruise_state == 2) ||  // Active
                             (cruise_state == 3);    // Override
       pcm_cruise_check(cruise_engaged);
@@ -41,7 +38,7 @@ static void mg_rx_hook(const CANPacket_t *to_push) {
   }
 }
 
-static bool mg_tx_hook(const CANPacket_t *to_send) {
+static bool mg_tx_hook(const CANPacket_t *msg) {
   const TorqueSteeringLimits MG_STEERING_LIMITS = {
     .max_torque = 250,
     .max_rate_up = 15,
@@ -53,14 +50,13 @@ static bool mg_tx_hook(const CANPacket_t *to_send) {
   };
 
   bool tx = true;
-  int addr = GET_ADDR(to_send);
   bool violation = false;
 
   // Steering control
-  if (addr == 0x1fd) {
-    int desired_torque = ((GET_BYTE(to_send, 0) & 0x7U) << 8) | GET_BYTE(to_send, 1);
+  if (msg->addr == 0x1fd) {
+    int desired_torque = ((msg->data[0] & 0x7U) << 8) | msg->data[1];
     desired_torque = desired_torque - 1024U;
-    bool steer_req = GET_BIT(to_send, 35U);
+    bool steer_req = GET_BIT(msg, 35U);
 
     violation |= steer_torque_cmd_checks(desired_torque, steer_req, MG_STEERING_LIMITS);
   }
