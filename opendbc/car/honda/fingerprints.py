@@ -944,6 +944,12 @@ FW_VERSIONS = {
     ],
   },
   CAR.HONDA_ACCORD_11G: {
+    (Ecu.transmission, 0x18da1ef1, None): [
+      b'PLACEHOLDER',
+    ],
+    (Ecu.electricBrakeBooster, 0x18da2bf1, None): [
+      b'PLACEHOLDER',
+    ],
     (Ecu.eps, 0x18da30f1, None): [
       b'PLACEHOLDER',
     ],
