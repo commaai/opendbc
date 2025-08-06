@@ -1,8 +1,7 @@
 import numpy as np
-import math
 from opendbc.can import CANPacker
-from opendbc.car import ACCELERATION_DUE_TO_GRAVITY, Bus, DT_CTRL, rate_limit
-from opendbc.car.lateral import AngleSteeringLimits, apply_steer_angle_limits_vm
+from opendbc.car import Bus
+from opendbc.car.lateral import apply_steer_angle_limits_vm
 from opendbc.car.interfaces import CarControllerBase
 from opendbc.car.tesla.teslacan import TeslaCAN
 from opendbc.car.tesla.values import CarControllerParams
