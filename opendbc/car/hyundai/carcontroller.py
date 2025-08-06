@@ -1,14 +1,13 @@
-import math
 import numpy as np
 from opendbc.car.vehicle_model import VehicleModel
 from opendbc.can import CANPacker
-from opendbc.car import Bus, DT_CTRL, make_tester_present_msg, structs, rate_limit, ACCELERATION_DUE_TO_GRAVITY
-from opendbc.car.lateral import apply_driver_steer_torque_limits, common_fault_avoidance
+from opendbc.car import Bus, DT_CTRL, make_tester_present_msg, structs
+from opendbc.car.lateral import apply_vm_steer_angle_limits, apply_driver_steer_torque_limits, common_fault_avoidance
 from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.hyundai import hyundaicanfd, hyundaican
 from opendbc.car.hyundai.hyundaicanfd import CanBus
 from opendbc.car.hyundai.values import HyundaiFlags, Buttons, CarControllerParams, CAR
-from opendbc.car.interfaces import CarControllerBase, ISO_LATERAL_ACCEL
+from opendbc.car.interfaces import CarControllerBase
 
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
@@ -19,21 +18,6 @@ MAX_ANGLE = 85
 MAX_ANGLE_FRAMES = 89
 MAX_ANGLE_CONSECUTIVE_FRAMES = 2
 
-MAX_ANGLE_RATE = 5
-# Add extra tolerance for average banked road since safety doesn't have the roll
-AVERAGE_ROAD_ROLL = 0.06  # ~3.4 degrees, 6% superelevation. higher actual roll lowers lateral acceleration
-MAX_LATERAL_ACCEL = (ISO_LATERAL_ACCEL + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)) * 0.8  # ~2,88 m/s^2; limit to 80% of pada safety.
-MAX_LATERAL_JERK = (3.0 + (ACCELERATION_DUE_TO_GRAVITY * AVERAGE_ROAD_ROLL)) * 0.8  # ~2,88 m/s^3; limit to 80% of pada safety.
-
-
-def get_max_angle_delta(v_ego_raw: float, VM: VehicleModel, freq=100.):
-  max_curvature_rate_sec = MAX_LATERAL_JERK / (v_ego_raw ** 2)  # (1/m)/s
-  max_angle_rate_sec = math.degrees(VM.get_steer_from_curvature(max_curvature_rate_sec, v_ego_raw, 0))  # deg/s
-  return max_angle_rate_sec / float(freq) # hz
-
-def get_max_angle(v_ego_raw: float, VM: VehicleModel):
-  max_curvature = MAX_LATERAL_ACCEL / (v_ego_raw ** 2)  # 1/m
-  return math.degrees(VM.get_steer_from_curvature(max_curvature, v_ego_raw, 0))  # deg
 
 def process_hud_alert(enabled, fingerprint, hud_control):
   sys_warning = (hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw))
@@ -253,35 +237,6 @@ class CarController(CarControllerBase):
 
     return can_sends
 
-  def apply_hyundai_steer_angle_limits(self, CS, CC, apply_angle: float) -> tuple[float, float]:
-    lat_active = CC.latActive
-    v_ego_raw = CS.out.vEgoRaw
-    steering_angle = CS.out.steeringAngleDeg
-    limits = CarControllerParams.ANGLE_LIMITS
-    apply_angle = np.clip(apply_angle, -819.2, 819.1)
-
-    # *** max lateral jerk limit ***
-    max_angle_delta = get_max_angle_delta(max(v_ego_raw, 1), self.VM)
-
-    # prevent fault
-    max_angle_delta = min(max_angle_delta, MAX_ANGLE_RATE)
-    new_apply_angle = rate_limit(apply_angle, self.apply_angle_last, -max_angle_delta, max_angle_delta)
-
-    # *** max lateral accel limit ***
-    max_angle = get_max_angle(max(v_ego_raw, 1), self.VM)
-    new_apply_angle = np.clip(new_apply_angle, -max_angle, max_angle)
-
-    # *** torque reduction gain ***
-    target_torque_reduction_gain = 1.  # Hardcoding to 1.0 for now, as we don't have a good way to calculate it yet. It should be dynamic.
-
-    # angle is current angle when inactive
-    if not lat_active:
-      new_apply_angle = steering_angle
-      target_torque_reduction_gain = 0
-
-    # prevent fault
-    return float(np.clip(new_apply_angle, -limits.STEER_ANGLE_MAX, limits.STEER_ANGLE_MAX)), target_torque_reduction_gain
-
   def calculate_angle_torque_reduction_gain(self, CS, target_torque_reduction_gain):
     """ Calculate the angle torque reduction gain based on the current steering state. """
     if CS.out.steeringPressed:  # User is overriding
@@ -299,6 +254,8 @@ class CarController(CarControllerBase):
         return min(self.apply_torque_last + self.ramp_up_reduction_gain_rate, target_torque)
 
   def update_angle_steering_control(self, CS, CC, actuators):
-    new_angle, target_torque_reduction_gain = self.apply_hyundai_steer_angle_limits(CS, CC, actuators.steeringAngleDeg)
+    new_angle = apply_vm_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, CS.out.steeringAngleDeg,
+                                            CC.latActive, CarControllerParams, self.VM, MAX_ANGLE_RATE=5)
+    target_torque_reduction_gain = 1. if CC.latActive else 0
     torque_reduction_gain = self.calculate_angle_torque_reduction_gain(CS, target_torque_reduction_gain)
     return new_angle, torque_reduction_gain
