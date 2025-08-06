@@ -255,7 +255,7 @@ class CarController(CarControllerBase):
 
   def update_angle_steering_control(self, CS, CC, actuators):
     new_angle = apply_vm_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw, CS.out.steeringAngleDeg,
-                                            CC.latActive, CarControllerParams, self.VM, MAX_ANGLE_RATE=5)
+                                            CC.latActive, self.params, self.VM, MAX_ANGLE_RATE=5)
     target_torque_reduction_gain = 1. if CC.latActive else 0
     torque_reduction_gain = self.calculate_angle_torque_reduction_gain(CS, target_torque_reduction_gain)
     return new_angle, torque_reduction_gain
