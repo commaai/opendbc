@@ -943,13 +943,28 @@ FW_VERSIONS = {
       b'8S302-T90-A040\x00\x00',
     ],
   },
-  CAR.HONDA_ACCORD_11G: {
+  CAR.HONDA_E: {
+    (Ecu.eps, 0x18da30f1, None): [
+      b'PLACEHOLDER',
+    ],
+    (Ecu.gateway, 0x18daeff1, None): [
+      b'PLACEHOLDER',
+    ],
+    (Ecu.shiftByWire, 0x18da0bf1, None): [
+      b'PLACEHOLDER',
+    ],
+    (Ecu.srs, 0x18da53f1, None): [
+      b'PLACEHOLDER',
+    ],
     (Ecu.fwdRadar, 0x18dab0f1, None): [
       b'8S302-30A-A040\x00\x00',
     ],
     (Ecu.fwdCamera, 0x18dab5f1, None): [
       b'8S102-30A-A050\x00\x00',
       b'8S102-30A-A060\x00\x00',
+    ],
+    (Ecu.vsa, 0x18da28f1, None): [
+      b'PLACEHOLDER',
     ],
   },
 }
