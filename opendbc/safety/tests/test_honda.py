@@ -174,6 +174,7 @@ class HondaBase(common.PandaCarSafetyTest):
   cnt_brake = 0
   cnt_powertrain_data = 0
   cnt_acc_state = 0
+  cnt_gearbox = 0
 
   def _powertrain_data_msg(self, cruise_on=None, brake_pressed=None, gas_pressed=None):
     # preserve the state
@@ -427,6 +428,22 @@ class TestHondaBoschAltBrakeSafetyBase(TestHondaBoschSafetyBase):
     self.assertTrue(self.safety.get_controls_allowed())
 
 
+class TestHondaBoschRegenSafetyBase(TestHondaBoschSafetyBase):
+  """
+    Base Bosch safety test class with regen signal available in GEARBOX_AUTO
+  """
+  def setUp(self):
+    super().setUp()
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.REGEN)
+    self.safety.init_tests()
+
+  # existence of _user_regen_msg adds regen tests
+  def _user_regen_msg(self, regen):
+    values = {"REGEN_STAGE_SELECTION": 1 if regen else 0, "COUNTER": self.cnt_gearbox % 4}
+    self.__class__.cnt_gearbox += 1
+    return self.packer.make_can_msg_panda("GEARBOX_AUTO", self.PT_BUS, values)
+
+
 class TestHondaBoschSafety(HondaPcmEnableBase, TestHondaBoschSafetyBase):
   """
     Covers the Honda Bosch safety mode with stock longitudinal
@@ -438,6 +455,12 @@ class TestHondaBoschSafety(HondaPcmEnableBase, TestHondaBoschSafetyBase):
 
 
 class TestHondaBoschAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschAltBrakeSafetyBase):
+  """
+    Covers the Honda Bosch safety mode with stock longitudinal and an alternate brake message
+  """
+
+
+class TestHondaBoschRegenSafety(HondaPcmEnableBase, TestHondaBoschRegenSafetyBase):
   """
     Covers the Honda Bosch safety mode with stock longitudinal and an alternate brake message
   """
