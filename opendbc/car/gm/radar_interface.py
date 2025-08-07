@@ -18,19 +18,7 @@ LAST_RADAR_MSG = RADAR_HEADER_MSG + NUM_SLOTS
 
 def create_radar_can_parser(car_fingerprint):
   # C1A-ARS3-A by Continental
-  radar_targets = list(range(SLOT_1_MSG, SLOT_1_MSG + NUM_SLOTS))
-  signals = list(zip(['FLRRNumValidTargets',
-                      'FLRRSnsrBlckd', 'FLRRYawRtPlsblityFlt',
-                      'FLRRHWFltPrsntInt', 'FLRRAntTngFltPrsnt',
-                      'FLRRAlgnFltPrsnt', 'FLRRSnstvFltPrsntInt'] +
-                     ['TrkRange'] * NUM_SLOTS + ['TrkRangeRate'] * NUM_SLOTS +
-                     ['TrkRangeAccel'] * NUM_SLOTS + ['TrkAzimuth'] * NUM_SLOTS +
-                     ['TrkWidth'] * NUM_SLOTS + ['TrkObjectID'] * NUM_SLOTS,
-                     [RADAR_HEADER_MSG] * 7 + radar_targets * 6, strict=True))
-
-  messages = list({(s[1], 14) for s in signals})
-
-  return CANParser(DBC[car_fingerprint][Bus.radar], messages, CanBus.OBSTACLE)
+  return CANParser(DBC[car_fingerprint][Bus.radar], [], CanBus.OBSTACLE)
 
 
 class RadarInterface(RadarInterfaceBase):
@@ -42,11 +30,11 @@ class RadarInterface(RadarInterfaceBase):
     self.trigger_msg = LAST_RADAR_MSG
     self.updated_messages = set()
 
-  def update(self, can_strings):
+  def update(self, can_msgs):
     if self.rcp is None:
       return super().update(None)
 
-    vls = self.rcp.update(can_strings)
+    vls = self.rcp.update(can_msgs)
     self.updated_messages.update(vls)
 
     if self.trigger_msg not in self.updated_messages:
