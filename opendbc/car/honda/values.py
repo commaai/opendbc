@@ -236,7 +236,7 @@ class CAR(Platforms):
   )
   HONDA_PILOT_4G = HondaBoschCANFDPlatformConfig(
     [HondaCarDocs("Honda Pilot 2023-25", "All")],
-    CarSpecs(mass=4660 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.442, steerRatio=15.7, tireStiffnessFactor=0.985),  # using 25 Elite spec + E2E
+    CarSpecs(mass=4660 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.442, steerRatio=15.7),
   )
 
   # Nidec Cars
