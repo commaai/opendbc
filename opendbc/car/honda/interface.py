@@ -194,7 +194,7 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.38], [0.11]]
 
     elif candidate == CAR.HONDA_PILOT_4G:
-      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]  # TODO: determine if there is a dead zone at the top end
+      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 2500], [0, 2500]]
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
     elif candidate == CAR.HONDA_RIDGELINE:
