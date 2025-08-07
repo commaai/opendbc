@@ -44,7 +44,7 @@ class TestPsaSafetyBase(common.PandaCarSafetyTest, common.AngleSteeringSafetyTes
     return self.packer.make_can_msg_panda("HS2_DAT_MDD_CMD_452", self.ADAS_BUS, values)
 
   def _speed_msg(self, speed):
-    values = {"VITESSE_VEHICULE_ROUES": speed}
+    values = {"VITESSE_VEHICULE_ROUES": speed * 3.6}
     return self.packer.make_can_msg_panda("HS2_DYN_ABR_38D", self.MAIN_BUS, values)
 
   def _user_brake_msg(self, brake):

@@ -38,6 +38,7 @@ class CarState(CarStateBase):
     ret.steeringTorque = cp.vl['STEERING']['DRIVER_TORQUE']
     ret.steeringTorqueEps = cp.vl['IS_DAT_DIRA']['EPS_TORQUE']
     ret.steeringPressed = self.update_steering_pressed(abs(ret.steeringTorque) > CarControllerParams.STEER_DRIVER_ALLOWANCE, 5)
+    self.eps_active = cp.vl['IS_DAT_DIRA']['EPS_STATE_LKA'] == 3 # 0: Unauthorized, 1: Authorized, 2: Available, 3: Active, 4: Defect
 
     # cruise
     ret.cruiseState.speed = cp_adas.vl['HS2_DAT_MDD_CMD_452']['SPEED_SETPOINT'] * CV.KPH_TO_MS # set to 255 when ACC is off, -2 kph offset from dash speed

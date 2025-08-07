@@ -17,7 +17,7 @@ class CarControllerParams:
     ([0., 5., 25.], [2.5, 1.5, .2]),
     ([0., 5., 25.], [5., 2., .3]),
   )
-  STEER_DRIVER_ALLOWANCE = 10  # Driver intervention threshold, 1.0 Nm
+  STEER_DRIVER_ALLOWANCE = 5  # Driver intervention threshold, 0.5 Nm
 
 
 @dataclass

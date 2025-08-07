@@ -158,12 +158,13 @@ BO_ 760 NEW_MSG_2F8: 7 XXX
 BO_ 770 NEW_MSG_302: 7 XXX
  SG_ ACC_RELATED : 46|1@0+ (1,0) [0|1] "" XXX
 
+// TODO: find checksum
 BO_ 773 STEERING_ALT: 7 XXX
  SG_ ANGLE : 7|16@0- (0.1,0) [-3276.8|3276.7] "degrees" XXX
  SG_ RATE : 23|8@0+ (1,0) [0|255] "" XXX
  SG_ RATE_SIGN : 31|1@0+ (1,0) [0|1] "" XXX
- SG_ COUNTER : 35|4@0+ (1,0) [0|255] "" XXX
- SG_ CHECKSUM : 39|4@0+ (1,0) [0|15] "" XXX
+ SG_ 0_COUNTER : 35|4@0+ (1,0) [0|255] "" XXX
+ SG_ 0_CHECKSUM : 39|4@0+ (1,0) [0|15] "" XXX
  SG_ RATE_ALT : 47|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 781 Dyn4_FRE: 8 CDS___Fahrdynamikregelung
