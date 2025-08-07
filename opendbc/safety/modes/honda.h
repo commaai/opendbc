@@ -358,11 +358,6 @@ static safety_config honda_bosch_init(uint16_t param) {
     HONDA_ALT_BRAKE_ADDR_CHECK(1)
   };
 
-  // Bosch CANFD has powertrain bus on bus 0
-  static RxCheck honda_bosch_canfd_rx_checks[] = {
-    HONDA_COMMON_RX_CHECKS(0)
-  };
-
   honda_hw = HONDA_BOSCH;
   honda_brake_switch_prev = false;
   honda_bosch_radarless = GET_FLAG(param, HONDA_PARAM_RADARLESS);
