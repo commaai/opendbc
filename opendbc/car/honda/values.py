@@ -239,6 +239,10 @@ class CAR(Platforms):
     CarSpecs(mass=4278 * CV.LB_TO_KG, wheelbase=2.86, centerToFrontRatio=0.428, steerRatio=16.0, tireStiffnessFactor=0.444),  # as spec
     flags=HondaFlags.BOSCH_ALT_BRAKE,
   )
+  ACURA_MDX_4G_MMR = HondaBoschCANFDPlatformConfig(
+    [HondaCarDocs("Acura MDX 2025", "All")],
+    CarSpecs(mass=4544 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.428, steerRatio=14.6),
+  )
 
   # Nidec Cars
   ACURA_ILX = HondaNidecPlatformConfig(
@@ -330,6 +334,7 @@ STEER_THRESHOLD = {
   CAR.ACURA_RDX: 400,
   CAR.HONDA_CRV_EU: 400,
   CAR.HONDA_ACCORD_11G: 600,
+  CAR.ACURA_MDX_4G_MMR: 600,
 }
 
 
