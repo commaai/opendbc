@@ -569,6 +569,27 @@ class TestHondaBoschRadarlessAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschRa
     self.safety.init_tests()
 
 
+class TestHondaBoschRadarlessRegenSafety(HondaPcmEnableBase, TestHondaBoschRadarlessSafetyBase, TestHondaBoschRegenSafetyBase):
+  """
+    Covers the Honda Bosch Radarless safety mode with stock longitudinal and driver regen paddles available
+  """
+  def setUp(self):
+    super().setUp()
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.RADARLESS | HondaSafetyFlags.REGEN)
+    self.safety.init_tests()
+
+
+class TestHondaBoschRadarlessAltBrakeRegenSafety(HondaPcmEnableBase, TestHondaBoschRadarlessSafetyBase,
+                                                 TestHondaBoschAltBrakeSafetyBase, TestHondaBoschRegenSafetyBase):
+  """
+    Covers the Honda Bosch Radarless safety mode with stock longitudinal, alternate brake message, and driver regen paddles available
+  """
+  def setUp(self):
+    super().setUp()
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.RADARLESS | HondaSafetyFlags.ALT_BRAKE | HondaSafetyFlags.REGEN)
+    self.safety.init_tests()
+
+
 class TestHondaBoschRadarlessLongSafety(common.LongitudinalAccelSafetyTest, HondaButtonEnableBase,
                                         TestHondaBoschRadarlessSafetyBase):
   """
