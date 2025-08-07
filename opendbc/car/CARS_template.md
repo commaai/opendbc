@@ -48,7 +48,6 @@ Supported Models' section of each make [on our wiki](https://wiki.comma.ai/).
 Some notable works-in-progress:
 * Honda
   * 2024 Acura Integra, commaai/openpilot#32056
-  * 2023-24 Honda Accord (CAN-FD), commaai/openpilot#32229
   * 2024 Honda CR-V (CAN-FD), commaai/openpilot#32806
   * 2024 Honda CR-V Hybrid (CAN-FD), commaai/openpilot#31527
     * Depends on commaai/opendbc#1100
