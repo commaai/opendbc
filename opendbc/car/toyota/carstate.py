@@ -42,8 +42,8 @@ class CarState(CarStateBase):
     self.accurate_steer_angle_seen = False
     self.angle_offset = FirstOrderFilter(None, 60.0, DT_CTRL, initialized=False)
 
-    self.distance_button = 0
     self.lkas_button = 0
+    self.distance_button = 0
 
     self.pcm_follow_distance = 0
 
