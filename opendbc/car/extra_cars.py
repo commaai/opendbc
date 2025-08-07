@@ -31,7 +31,6 @@ class CAR(Platforms):
   EXTRA_HONDA = ExtraPlatformConfig(
     [
       CommunityCarDocs("Acura Integra 2024", "All"),
-      CommunityCarDocs("Honda Accord 2023-24", "All"),
       CommunityCarDocs("Honda Clarity 2018-21", "All"),
       CommunityCarDocs("Honda CR-V 2024", "All"),
       CommunityCarDocs("Honda CR-V Hybrid 2024", "All"),
