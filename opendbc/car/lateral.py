@@ -1,15 +1,27 @@
+import math
 import numpy as np
 from dataclasses import dataclass
-from opendbc.car import structs
+from opendbc.car import structs, rate_limit, DT_CTRL
+from opendbc.car.vehicle_model import VehicleModel
 
 FRICTION_THRESHOLD = 0.3
+
+# ISO 11270
+ISO_LATERAL_ACCEL = 3.0  # m/s^2
+ISO_LATERAL_JERK = 5.0  # m/s^3
 
 
 @dataclass
 class AngleSteeringLimits:
+  # v1 limits (using apply_std_steer_angle_limits)
   STEER_ANGLE_MAX: float
   ANGLE_RATE_LIMIT_UP: tuple[list[float], list[float]]
   ANGLE_RATE_LIMIT_DOWN: tuple[list[float], list[float]]
+
+  # v2 vehicle model limits (using apply_steer_angle_limits_vm)
+  MAX_LATERAL_ACCEL: float = 0
+  MAX_LATERAL_JERK: float = 0
+  MAX_ANGLE_RATE: float = math.inf
 
 
 def apply_driver_steer_torque_limits(apply_torque: int, apply_torque_last: int, driver_torque: float, LIMITS, steer_max: int = None):
@@ -77,6 +89,43 @@ def apply_std_steer_angle_limits(apply_angle: float, apply_angle_last: float, v_
     new_apply_angle = steering_angle
 
   return float(np.clip(new_apply_angle, -limits.STEER_ANGLE_MAX, limits.STEER_ANGLE_MAX))
+
+
+def get_max_angle_delta_vm(v_ego_raw: float, VM: VehicleModel, limits):
+  """Calculate the maximum steering angle rate based on lateral jerk limits."""
+  max_curvature_rate_sec = limits.ANGLE_LIMITS.MAX_LATERAL_JERK / (v_ego_raw ** 2)  # (1/m)/s
+  max_angle_rate_sec = math.degrees(VM.get_steer_from_curvature(max_curvature_rate_sec, v_ego_raw, 0))  # deg/s
+  return max_angle_rate_sec * (DT_CTRL * limits.STEER_STEP)
+
+
+def get_max_angle_vm(v_ego_raw: float, VM: VehicleModel, limits):
+  """Calculate the maximum steering angle based on lateral acceleration limits."""
+  max_curvature = limits.ANGLE_LIMITS.MAX_LATERAL_ACCEL / (v_ego_raw ** 2)  # 1/m
+  return math.degrees(VM.get_steer_from_curvature(max_curvature, v_ego_raw, 0))  # deg
+
+
+def apply_steer_angle_limits_vm(apply_angle: float, apply_angle_last: float, v_ego_raw: float, steering_angle: float,
+                                lat_active: bool, limits, VM: VehicleModel) -> float:
+  """Apply jerk, accel, and safety limit constraints to steering angle."""
+  v_ego_raw = max(v_ego_raw, 1)
+
+  # *** max lateral jerk limit ***
+  max_angle_delta = get_max_angle_delta_vm(v_ego_raw, VM, limits)
+
+  # prevent fault/low speed comfort
+  max_angle_delta = min(max_angle_delta, limits.ANGLE_LIMITS.MAX_ANGLE_RATE)
+  new_apply_angle = rate_limit(apply_angle, apply_angle_last, -max_angle_delta, max_angle_delta)
+
+  # *** max lateral accel limit ***
+  max_angle = get_max_angle_vm(v_ego_raw, VM, limits)
+  new_apply_angle = np.clip(new_apply_angle, -max_angle, max_angle)
+
+  # angle is current angle when inactive
+  if not lat_active:
+    new_apply_angle = steering_angle
+
+  # prevent fault
+  return float(np.clip(new_apply_angle, -limits.ANGLE_LIMITS.STEER_ANGLE_MAX, limits.ANGLE_LIMITS.STEER_ANGLE_MAX))
 
 
 def common_fault_avoidance(fault_condition: bool, request: bool, above_limit_frames: int,
