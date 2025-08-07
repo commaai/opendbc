@@ -36,9 +36,6 @@ class CarInterface(CarInterfaceBase):
 
     CAN = CanBus(ret, fingerprint)
 
-    # Pilot 4G needs a rescaled lateral actuator, switch to lat accel torque control, and an updated test route
-    ret.dashcamOnly = candidate in [CAR.HONDA_PILOT_4G]
-
     if candidate in HONDA_BOSCH:
       cfgs = [get_safety_config(structs.CarParams.SafetyModel.hondaBosch)]
       if candidate in HONDA_BOSCH_CANFD and CAN.pt >= 4:
