@@ -462,8 +462,18 @@ class TestHondaBoschAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschAltBrakeSaf
 
 class TestHondaBoschRegenSafety(HondaPcmEnableBase, TestHondaBoschRegenSafetyBase):
   """
-    Covers the Honda Bosch safety mode with stock longitudinal and an alternate brake message
+    Covers the Honda Bosch safety mode with stock longitudinal and driver regen paddles available
   """
+
+
+class TestHondaBoschAltBrakeRegenSafety(HondaPcmEnableBase, TestHondaBoschAltBrakeSafetyBase, TestHondaBoschRegenSafetyBase):
+  """
+    Covers the Honda Bosch safety mode with stock longitudinal, alternate brake message, and driver regen paddles available
+  """
+  def setUp(self):
+    super().setUp()
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.ALT_BRAKE | HondaSafetyFlags.REGEN)
+    self.safety.init_tests()
 
 
 class TestHondaBoschLongSafety(HondaButtonEnableBase, TestHondaBoschSafetyBase):
