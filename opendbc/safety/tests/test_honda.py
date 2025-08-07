@@ -10,6 +10,7 @@ from opendbc.safety.tests.common import CANPackerPanda, MAX_WRONG_COUNTERS
 
 HONDA_N_COMMON_TX_MSGS = [[0xE4, 0], [0x194, 0], [0x1FA, 0], [0x30C, 0], [0x33D, 0]]
 
+
 class Btn:
   NONE = 0
   MAIN = 1
@@ -561,6 +562,7 @@ class TestHondaBoschRadarlessLongSafety(common.LongitudinalAccelSafetyTest, Hond
   def test_spam_cancel_safety_check(self):
     pass
 
+
 class TestHondaBoschCANFDSafetyBase(TestHondaBoschSafetyBase):
   """Base class for CANFD Honda Bosch"""
   PT_BUS = 0
@@ -568,8 +570,8 @@ class TestHondaBoschCANFDSafetyBase(TestHondaBoschSafetyBase):
   BUTTONS_BUS = 0
 
   TX_MSGS = [[0xE4, 0], [0x296, 0], [0x33D, 0]]
-  FWD_BLACKLISTED_ADDRS = {2: [0xE4, 0xE5, 0x33D]}
-  RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0xE5, 0x33D)}  # STEERING_CONTROL / SCM_BUTTONS / LKAS_HUD
+  FWD_BLACKLISTED_ADDRS = {2: [0xE4, 0x33D]}
+  RELAY_MALFUNCTION_ADDRS = {0: (0xE4, 0x33D)}
 
   def setUp(self):
     self.packer = CANPackerPanda("honda_common_canfd_generated")
@@ -597,6 +599,7 @@ class TestHondaBoschCANFDAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschCANFDS
     self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.BOSCH_CANFD | HondaSafetyFlags.ALT_BRAKE)
     self.safety.init_tests()
 
+
 class TestHondaBoschCANFDLongSafety(TestHondaBoschLongSafety, TestHondaBoschCANFDSafetyBase):
   """
     Covers the Honda Bosch CANFD safety mode with longitudinal control
@@ -614,6 +617,7 @@ class TestHondaBoschCANFDLongSafety(TestHondaBoschLongSafety, TestHondaBoschCANF
     super().setUp()
     self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.BOSCH_CANFD | HondaSafetyFlags.BOSCH_LONG)
     self.safety.init_tests()
+
 
 if __name__ == "__main__":
   unittest.main()

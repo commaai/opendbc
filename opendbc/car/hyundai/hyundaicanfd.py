@@ -46,6 +46,7 @@ def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_torque)
     "STEER_MODE": 0,
     "HAS_LANE_SAFETY": 0,  # hide LKAS settings
     "NEW_SIGNAL_2": 0,
+    "DAMP_FACTOR": 100,  # can potentially tuned for better perf [3, 200]
   }
 
   lkas_values = copy.copy(common_values)
@@ -65,6 +66,7 @@ def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_torque)
 
   return ret
 
+
 def create_suppress_lfa(packer, CAN, lfa_block_msg, lka_steering_alt):
   suppress_msg = "CAM_0x362" if lka_steering_alt else "CAM_0x2a4"
   msg_bytes = 32 if lka_steering_alt else 24
@@ -77,6 +79,7 @@ def create_suppress_lfa(packer, CAN, lfa_block_msg, lka_steering_alt):
   values["RIGHT_LANE_LINE"] = 0
   return packer.make_can_msg(suppress_msg, CAN.ACAN, values)
 
+
 def create_buttons(packer, CP, CAN, cnt, btn):
   values = {
     "COUNTER": cnt,
@@ -86,6 +89,7 @@ def create_buttons(packer, CP, CAN, cnt, btn):
 
   bus = CAN.ECAN if CP.flags & HyundaiFlags.CANFD_LKA_STEERING else CAN.CAM
   return packer.make_can_msg("CRUISE_BUTTONS", bus, values)
+
 
 def create_acc_cancel(packer, CP, CAN, cruise_info_copy):
   # TODO: why do we copy different values here?
@@ -116,6 +120,7 @@ def create_acc_cancel(packer, CP, CAN, cruise_info_copy):
     "aReqValue": 0.0,
   })
   return packer.make_can_msg("SCC_CONTROL", CAN.ECAN, values)
+
 
 def create_lfahda_cluster(packer, CAN, enabled):
   values = {
