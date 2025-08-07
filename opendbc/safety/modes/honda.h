@@ -350,47 +350,6 @@ static safety_config honda_bosch_init(uint16_t param) {
   const uint16_t HONDA_PARAM_BOSCH_CANFD = 16;
   const uint16_t HONDA_PARAM_REGEN = 32;
 
-  // Bosch radarless has the powertrain bus on bus 0
-  static RxCheck honda_bosch_pt0_rx_checks[] = {
-    HONDA_COMMON_RX_CHECKS(0)
-  };
-
-  static RxCheck honda_bosch_pt0_regen_rx_checks[] = {
-    HONDA_COMMON_RX_CHECKS(0)
-    HONDA_REGEN_ADDR_CHECK(0)
-  };
-
-  static RxCheck honda_bosch_pt0_alt_brake_rx_checks[] = {
-    HONDA_COMMON_RX_CHECKS(0)
-    HONDA_ALT_BRAKE_ADDR_CHECK(0)
-  };
-
-  static RxCheck honda_bosch_pt0_regen_alt_brake_rx_checks[] = {
-    HONDA_COMMON_RX_CHECKS(0)
-    HONDA_ALT_BRAKE_ADDR_CHECK(0)
-    HONDA_REGEN_ADDR_CHECK(0)
-  };
-
-  // Bosch has powertrain on bus 1, verified 0x1A6 does not exist
-  static RxCheck honda_bosch_pt1_rx_checks[] = {
-    HONDA_COMMON_RX_CHECKS(1)
-  };
-
-  static RxCheck honda_bosch_pt1_regen_rx_checks[] = {
-    HONDA_COMMON_RX_CHECKS(1)
-    HONDA_REGEN_ADDR_CHECK(1)
-  };
-
-  static RxCheck honda_bosch_pt1_alt_brake_rx_checks[] = {
-    HONDA_COMMON_RX_CHECKS(1)
-    HONDA_ALT_BRAKE_ADDR_CHECK(1)
-  };
-
-  static RxCheck honda_bosch_pt1_regen_alt_brake_rx_checks[] = {
-    HONDA_COMMON_RX_CHECKS(1)
-    HONDA_ALT_BRAKE_ADDR_CHECK(1)
-    HONDA_REGEN_ADDR_CHECK(1)
-  };
 
   honda_hw = HONDA_BOSCH;
   honda_brake_switch_prev = false;
@@ -410,28 +369,60 @@ static safety_config honda_bosch_init(uint16_t param) {
   if (honda_bosch_radarless || honda_bosch_canfd) {
     if (honda_regen) {
       if (honda_alt_brake_msg) {
+        static RxCheck honda_bosch_pt0_regen_alt_brake_rx_checks[] = {
+          HONDA_COMMON_RX_CHECKS(0)
+          HONDA_ALT_BRAKE_ADDR_CHECK(0)
+          HONDA_REGEN_ADDR_CHECK(0)
+        };
         SET_RX_CHECKS(honda_bosch_pt0_regen_alt_brake_rx_checks, ret);
       } else {
+        static RxCheck honda_bosch_pt0_regen_rx_checks[] = {
+          HONDA_COMMON_RX_CHECKS(0)
+          HONDA_REGEN_ADDR_CHECK(0)
+        };
         SET_RX_CHECKS(honda_bosch_pt0_regen_rx_checks, ret);
       }
     } else {
       if (honda_alt_brake_msg) {
+        static RxCheck honda_bosch_pt0_alt_brake_rx_checks[] = {
+          HONDA_COMMON_RX_CHECKS(0)
+          HONDA_ALT_BRAKE_ADDR_CHECK(0)
+        };
         SET_RX_CHECKS(honda_bosch_pt0_alt_brake_rx_checks, ret);
       } else {
+        static RxCheck honda_bosch_pt0_rx_checks[] = {
+          HONDA_COMMON_RX_CHECKS(0)
+        };
         SET_RX_CHECKS(honda_bosch_pt0_rx_checks, ret);
       }
     }
   } else {
     if (honda_regen) {
       if (honda_alt_brake_msg) {
+        static RxCheck honda_bosch_pt1_regen_alt_brake_rx_checks[] = {
+          HONDA_COMMON_RX_CHECKS(1)
+          HONDA_ALT_BRAKE_ADDR_CHECK(1)
+          HONDA_REGEN_ADDR_CHECK(1)
+        };
         SET_RX_CHECKS(honda_bosch_pt1_regen_alt_brake_rx_checks, ret);
       } else {
+        static RxCheck honda_bosch_pt1_regen_rx_checks[] = {
+          HONDA_COMMON_RX_CHECKS(1)
+          HONDA_REGEN_ADDR_CHECK(1)
+        };
         SET_RX_CHECKS(honda_bosch_pt1_regen_rx_checks, ret);
       }
     } else {
       if (honda_alt_brake_msg) {
+        static RxCheck honda_bosch_pt1_alt_brake_rx_checks[] = {
+          HONDA_COMMON_RX_CHECKS(1)
+          HONDA_ALT_BRAKE_ADDR_CHECK(1)
+        };
         SET_RX_CHECKS(honda_bosch_pt1_alt_brake_rx_checks, ret);
       } else {
+        static RxCheck honda_bosch_pt1_rx_checks[] = {
+          HONDA_COMMON_RX_CHECKS(1)
+        };
         SET_RX_CHECKS(honda_bosch_pt1_rx_checks, ret);
       }
     }
