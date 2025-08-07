@@ -49,9 +49,6 @@ Some notable works-in-progress:
 * Honda
   * 2024 Acura Integra, commaai/openpilot#32056
   * 2023-24 Honda Accord (CAN-FD), commaai/openpilot#32229
-  * 2024 Honda CR-V (CAN-FD), commaai/openpilot#32806
-  * 2024 Honda CR-V Hybrid (CAN-FD), commaai/openpilot#31527
-    * Depends on commaai/opendbc#1100
   * 2021-25 Honda Odyssey, commaai/opendbc#1330
   * 2023-24 Honda Pilot (CAN-FD), commaai/openpilot#30324
   * Camera ACC stability improvements, commaai/openpilot#31022
