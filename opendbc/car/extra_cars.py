@@ -47,7 +47,7 @@ class CAR(Platforms):
       CommunityCarDocs("Acura TLX 2018-20", "All"),
       GMSecurityCarDocs("Acura ZDX 2024", "All"),
       CommunityCarDocs("Honda Accord 2016-17", "Honda Sensing"),
-      CommunityCarDocs("Honda Accord 2023-24", "All"),
+      CommunityCarDocs("Honda Accord 2024-25", "All"),
       CommunityCarDocs("Honda Clarity 2018-21", "All"),
       CommunityCarDocs("Honda CR-V 2023-25", "All"),
       CommunityCarDocs("Honda CR-V Hybrid 2023-25", "All"),
