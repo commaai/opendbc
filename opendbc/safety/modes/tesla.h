@@ -84,7 +84,7 @@ static bool tesla_get_quality_flag_valid(const CANPacket_t *msg) {
   if (msg->addr == 0x155U) {
     valid = (msg->data[5] & 0x1U) == 0x1U;  // ESP_wheelSpeedsQF
   } else if (msg->addr == 0x145U) {
-    int user_brake_status = (msg->data[3] & 0x60U) >> 5;
+    int user_brake_status = (msg->data[3] >> 5) & 0x03U;
     valid = (user_brake_status != 0) && (user_brake_status != 3);  // ESP_driverBrakeApply=NotInit_orOff, Faulty_SNA
   } else {
   }
