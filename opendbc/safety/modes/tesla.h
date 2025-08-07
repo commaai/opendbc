@@ -129,7 +129,7 @@ static void tesla_rx_hook(const CANPacket_t *msg) {
 
     // Brake pressed
     if (msg->addr == 0x145U) {
-      brake_pressed = ((msg->data[3] & 0x60U) >> 5) == 2U;
+      brake_pressed = ((msg->data[3] >> 5) & 0x03U) == 2U;
     }
 
     // Cruise and Autopark/Summon state
