@@ -208,7 +208,7 @@ class CAR(Platforms):
   )
   HONDA_CRV_6G = HondaBoschCANFDPlatformConfig(
     [HondaCarDocs("Honda CR-V 2023-25", "All")],
-    CarSpecs(mass=1639, wheelbase=2.7, steerRatio=12.35, centerToFrontRatio=0.42, tireStiffnessFactor=0.677),
+    CarSpecs(mass=1639, wheelbase=2.7, steerRatio=15.5, centerToFrontRatio=0.42, tireStiffnessFactor=1.015),
   )
   HONDA_CRV_HYBRID = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda CR-V Hybrid 2017-22", min_steer_speed=12. * CV.MPH_TO_MS)],
@@ -218,7 +218,7 @@ class CAR(Platforms):
   )
   HONDA_CRV_HYBRID_6G = HondaBoschCANFDPlatformConfig(
     [HondaCarDocs("Honda CR-V Hybrid 2023-25", "All")],
-    CarSpecs(mass=1767, wheelbase=2.7, steerRatio=12.35, centerToFrontRatio=0.41, tireStiffnessFactor=0.677),
+    CarSpecs(mass=1767, wheelbase=2.7, steerRatio=15.5, centerToFrontRatio=0.41, tireStiffnessFactor=1.015),
   )
   HONDA_HRV_3G = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda HR-V 2023-25", "All")],
