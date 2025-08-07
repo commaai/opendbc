@@ -228,6 +228,7 @@ class TestCanParserPacker:
     packer = CANPacker(dbc_file)
 
     i = 0
+
     def send_msg(blank=False):
       nonlocal i
       i += 1
