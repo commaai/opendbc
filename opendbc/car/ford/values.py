@@ -170,7 +170,7 @@ class CAR(Platforms):
   FORD_MAVERICK_MK1 = FordPlatformConfig(
     [
       FordCarDocs("Ford Maverick 2022", hybrid=True),
-      FordCarDocs("Ford Maverick 2023-24", "Co-Pilot360 Assist", hybrid=True),
+      FordCarDocs("Ford Maverick 2023-24", hybrid=True),
     ],
     CarSpecs(mass=1650, wheelbase=3.076, steerRatio=17.0),
   )
