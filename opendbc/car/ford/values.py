@@ -132,7 +132,7 @@ class CAR(Platforms):
   FORD_ESCAPE_MK4 = FordPlatformConfig(
     [
       FordCarDocs("Ford Escape 2020-22", hybrid=True, plug_in_hybrid=True),
-      FordCarDocs("Ford Kuga 2020-23", "Adaptive Cruise Control with Lane Centering", hybrid=True, plug_in_hybrid=True),
+      FordCarDocs("Ford Kuga 2020-23", hybrid=True, plug_in_hybrid=True),
     ],
     CarSpecs(mass=1750, wheelbase=2.71, steerRatio=16.7),
   )
@@ -164,12 +164,12 @@ class CAR(Platforms):
     CarSpecs(mass=2948, wheelbase=3.70, steerRatio=16.9),
   )
   FORD_FOCUS_MK4 = FordPlatformConfig(
-    [FordCarDocs("Ford Focus 2018", "Adaptive Cruise Control with Lane Centering", footnotes=[Footnote.FOCUS], hybrid=True)],  # mHEV only
+    [FordCarDocs("Ford Focus 2018", footnotes=[Footnote.FOCUS], hybrid=True)],  # mHEV only
     CarSpecs(mass=1350, wheelbase=2.7, steerRatio=15.0),
   )
   FORD_MAVERICK_MK1 = FordPlatformConfig(
     [
-      FordCarDocs("Ford Maverick 2022", "LARIAT Luxury", hybrid=True),
+      FordCarDocs("Ford Maverick 2022", hybrid=True),
       FordCarDocs("Ford Maverick 2023-24", "Co-Pilot360 Assist", hybrid=True),
     ],
     CarSpecs(mass=1650, wheelbase=3.076, steerRatio=17.0),
@@ -179,7 +179,7 @@ class CAR(Platforms):
     CarSpecs(mass=2200, wheelbase=2.984, steerRatio=17.0),  # TODO: check steer ratio
   )
   FORD_RANGER_MK2 = FordCANFDPlatformConfig(
-    [FordCarDocs("Ford Ranger 2024", "Adaptive Cruise Control with Lane Centering", setup_video="https://www.youtube.com/watch?v=2oJlXCKYOy0")],
+    [FordCarDocs("Ford Ranger 2024", setup_video="https://www.youtube.com/watch?v=2oJlXCKYOy0")],
     CarSpecs(mass=2000, wheelbase=3.27, steerRatio=17.0),
   )
 
