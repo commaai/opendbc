@@ -110,7 +110,7 @@ routes = [
   CarTestRoute("b1c832ad56b6bc9d/00000010--debfcf5867", HONDA.HONDA_CIVIC_2022),  # 2025 Civic Hatch Hybrid with new eCVT transmission
   CarTestRoute("f9c43864cf057d05/2024-01-15--23-01-20", HONDA.HONDA_PILOT_4G),  # TODO: Replace with a newer route
   CarTestRoute("f39cf149898833ff/0000002b--54f3fae045", HONDA.HONDA_ACCORD_11G),
-  CarTestRoute("2dc4489d7e1410ca/00000001--32428d7a40", HONDA.HONDA_CRV_6G), # TODO: Replace with a newer route
+  CarTestRoute("63568e3e2f56c8ad/0000000a--a254e90429", HONDA.HONDA_CRV_6G),
   CarTestRoute("6748cf29ce4cb27b/00000002--b48d9c241c", HONDA.HONDA_CRV_HYBRID_6G),
 
   CarTestRoute("87d7f06ade479c2e/2023-09-11--23-30-11", HYUNDAI.HYUNDAI_AZERA_6TH_GEN),
