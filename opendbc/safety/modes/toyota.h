@@ -25,7 +25,7 @@
   {0x128, 1, 6, .check_relay = false}, {0x141, 1, 4, .check_relay = false}, {0x160, 1, 8, .check_relay = false}, {0x161, 1, 7, .check_relay = false}, \
   {0x470, 1, 4, .check_relay = false}, \
   /* PCS_HUD */                        \
-  {0x411, 0, 8, .check_relay = false}, \
+  {0x411, 0, 8, .check_relay = true}, \
   /* radar diagnostic address */       \
   {0x750, 0, 8, .check_relay = false}, \
   /* ACC */                            \
