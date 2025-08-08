@@ -150,13 +150,13 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
     return self.packer.make_can_msg_panda("EngVehicleSpThrottle", 0, values)
 
   # Cruise status
-  def _pcm_status_msg(self, enable: bool):
+  def _pcm_status_msg(self, enable: bool, que_assist_enable: bool = False):
     # brake pedal and cruise state share same message, so we have to send
     # the other signal too
     brake = self.safety.get_brake_pressed_prev()
     values = {
       "BpedDrvAppl_D_Actl": 2 if brake else 1,
-      "CcStat_D_Actl": 5 if enable else 0,
+      "CcStat_D_Actl": 4 if que_assist_enable else 5 if enable else 0,  # 4 = TJA engaged, 5 = ACC engaged
     }
     return self.packer.make_can_msg_panda("EngBrakeData", 0, values)
 
@@ -257,6 +257,12 @@ class TestFordSafetyBase(common.PandaCarSafetyTest):
 
           should_tx = abs(curvature) <= curvature_accel_limit_upper
           self.assertEqual(should_tx, self._tx(self._lat_ctl_msg(True, 0, 0, curvature, 0)))
+
+  def test_acc_que_assist(self):
+    for enable in (True, False):
+      self.safety.set_controls_allowed(True)
+      self._rx(self._pcm_status_msg(enable, que_assist_enable=enable))
+      self.assertEqual(enable, self.safety.get_cruise_engaged_prev())
 
   def test_steer_allowed(self):
     path_offsets = np.arange(-5.12, 5.11, 2.5).round()
@@ -408,15 +414,22 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
   MIN_GAS = -0.5
   INACTIVE_GAS = -5.0
 
+  def setUp(self):
+    self.packer = CANPackerPanda("ford_lincoln_base_pt")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.ford, FordSafetyFlags.LONG_CONTROL)
+    self.safety.init_tests()
+
   # ACC command
-  def _acc_command_msg(self, gas: float, brake: float, brake_actuation: bool, cmbb_deny: bool = False):
+  def _acc_command_msg(self, gas: float, brake: float, brake_actuation: bool, cmbb_deny: bool = False,
+                       decel_only: bool = False, prechare_brake: bool = False):
     values = {
-      "AccPrpl_A_Rq": gas,                              # [-5|5.23] m/s^2
-      "AccPrpl_A_Pred": gas,                            # [-5|5.23] m/s^2
-      "AccBrkTot_A_Rq": brake,                          # [-20|11.9449] m/s^2
-      "AccBrkPrchg_B_Rq": 1 if brake_actuation else 0,  # Pre-charge brake request: 0=No, 1=Yes
-      "AccBrkDecel_B_Rq": 1 if brake_actuation else 0,  # Deceleration request: 0=Inactive, 1=Active
-      "CmbbDeny_B_Actl": 1 if cmbb_deny else 0,         # [0|1] deny AEB actuation
+      "AccPrpl_A_Rq": gas,                                                     # [-5|5.23] m/s^2
+      "AccPrpl_A_Pred": gas,                                                   # [-5|5.23] m/s^2
+      "AccBrkTot_A_Rq": brake,                                                 # [-20|11.9449] m/s^2
+      "AccBrkPrchg_B_Rq": 1 if prechare_brake else 1 if brake_actuation else 0,# Pre-charge brake request: 0=No, 1=Yes
+      "AccBrkDecel_B_Rq": 1 if decel_only else 1 if brake_actuation else 0,    # Deceleration request: 0=Inactive, 1=Active
+      "CmbbDeny_B_Actl": 1 if cmbb_deny else 0,                                # [0|1] deny AEB actuation
     }
     return self.packer.make_can_msg_panda("ACCDATA", 0, values)
 
@@ -447,6 +460,27 @@ class TestFordLongitudinalSafetyBase(TestFordSafetyBase):
           should_tx = (controls_allowed and self.MIN_ACCEL <= brake <= self.MAX_ACCEL) or brake == self.INACTIVE_ACCEL
           should_tx = should_tx and (controls_allowed or not brake_actuation)
           self.assertEqual(should_tx, self._tx(self._acc_command_msg(self.INACTIVE_GAS, brake, brake_actuation)))
+
+  def test_brake_request_safety_check(self):
+    # Test with decel_only brake
+    for controls_allowed in (True, False):
+      self.safety.set_controls_allowed(controls_allowed)
+      for decel_only in (True, False):
+        for brake in np.arange(self.MIN_ACCEL - 2, self.MAX_ACCEL + 2, 0.05):
+          brake = round(brake, 2)
+          should_tx = (controls_allowed and self.MIN_ACCEL <= brake <= self.MAX_ACCEL) or brake == self.INACTIVE_ACCEL
+          should_tx = should_tx and (controls_allowed or not decel_only)
+          self.assertEqual(should_tx, self._tx(self._acc_command_msg(self.INACTIVE_GAS, brake, False, decel_only=decel_only)))
+
+    # Test with prechare_brake
+    for controls_allowed in (True, False):
+      self.safety.set_controls_allowed(controls_allowed)
+      for prechare_brake in (True, False):
+        for brake in np.arange(self.MIN_ACCEL - 2, self.MAX_ACCEL + 2, 0.05):
+          brake = round(brake, 2)
+          should_tx = (controls_allowed and self.MIN_ACCEL <= brake <= self.MAX_ACCEL) or brake == self.INACTIVE_ACCEL
+          should_tx = should_tx and (controls_allowed or not prechare_brake)
+          self.assertEqual(should_tx, self._tx(self._acc_command_msg(self.INACTIVE_GAS, brake, False, prechare_brake=prechare_brake)))
 
 
 class TestFordLongitudinalSafety(TestFordLongitudinalSafetyBase):
