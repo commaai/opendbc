@@ -45,6 +45,7 @@ class EnhancedSmartCruiseControl:
     #  This indicates that SCC12 likely displays it on the dashboard, and another FCA message may also cause it to appear.
     values["AEB_Status"] = 2  # AEB enabled
 
+
 class EsccCarStateBase:
   def __init__(self):
     self.escc_aeb_warning = 0

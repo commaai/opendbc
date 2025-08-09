@@ -4,11 +4,13 @@ from opendbc.car.toyota.values import ToyotaSafetyFlags
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.libsafety import libsafety_py
 
+
 def to_signed(d, bits):
   ret = d
   if d >= (1 << (bits - 1)):
     ret = d - (1 << bits)
   return ret
+
 
 def is_steering_msg(mode, param, addr):
   ret = False
@@ -37,6 +39,7 @@ def is_steering_msg(mode, param, addr):
   elif mode == CarParams.SafetyModel.tesla:
     ret = addr == 0x488
   return ret
+
 
 def get_steer_value(mode, param, msg):
   # TODO: use CANParser
@@ -77,8 +80,10 @@ def get_steer_value(mode, param, msg):
     angle = (((msg.data[0] & 0x7F) << 8) | (msg.data[1])) - 16384  # ceil(1638.35/0.1)
   return torque, angle
 
+
 def package_can_msg(msg):
   return libsafety_py.make_CANPacket(msg.address, msg.src % 4, msg.dat)
+
 
 def init_segment(safety, msgs, mode, param):
   sendcan = (msg for msg in msgs if msg.which() == 'sendcan')

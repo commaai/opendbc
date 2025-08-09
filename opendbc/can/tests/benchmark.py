@@ -38,6 +38,7 @@ def _benchmark(checks, n):
   avg_nanos = et / len(can_msgs)
   print('[%d] %.1fms to pack, %.1fms to parse %s messages, avg: %dns' % (n, pack_dt/1e6, et/1e6, len(can_msgs), avg_nanos))
 
+
 if __name__ == "__main__":
   # python -m cProfile -s cumulative  benchmark.py
   _benchmark([('ACC_CONTROL', 10)], 1)
