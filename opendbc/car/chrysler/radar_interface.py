@@ -9,6 +9,7 @@ RADAR_MSGS_D = list(range(0x2a2, 0x2b4+2, 2))  # d_ messages
 LAST_MSG = max(RADAR_MSGS_C + RADAR_MSGS_D)
 NUMBER_MSGS = len(RADAR_MSGS_C) + len(RADAR_MSGS_D)
 
+
 def _create_radar_can_parser(car_fingerprint):
   if Bus.radar not in DBC[car_fingerprint]:
     return None
@@ -28,12 +29,14 @@ def _create_radar_can_parser(car_fingerprint):
 
   return CANParser(DBC[car_fingerprint][Bus.radar], messages, 1)
 
+
 def _address_to_track(address):
   if address in RADAR_MSGS_C:
     return (address - RADAR_MSGS_C[0]) // 2
   if address in RADAR_MSGS_D:
     return (address - RADAR_MSGS_D[0]) // 2
   raise ValueError("radar received unexpected address %d" % address)
+
 
 class RadarInterface(RadarInterfaceBase):
   def __init__(self, CP):
