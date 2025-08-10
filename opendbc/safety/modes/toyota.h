@@ -237,7 +237,7 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
     // AEB: block all actuation. only used when DSU is unplugged
     if (msg->addr == 0x283U) {
       // only allow the checksum, which is the last byte
-      bool block = (GET_BYTES(msg, 0, 4) != 0U) || (msg->data[4] != 0U) || (msg->data[5] != 0U);
+      bool block = !toyota_enable_dsu && ((GET_BYTES(msg, 0, 4) != 0U) || (msg->data[4] != 0U) || (msg->data[5] != 0U));
       if (block) {
         tx = false;
       }
