@@ -12,10 +12,9 @@ from opendbc.safety.tests.common import CANPackerPanda
 
 TOYOTA_COMMON_TX_MSGS = [[0x2E4, 0], [0x191, 0], [0x412, 0], [0x343, 0], [0x1D2, 0]]  # LKAS + LTA + ACC & PCM cancel cmds
 TOYOTA_SECOC_TX_MSGS = [[0x131, 0]] + TOYOTA_COMMON_TX_MSGS
-TOYOTA_COMMON_LONG_TX_MSGS = [[0x283, 0], [0x2E6, 0], [0x2E7, 0], [0x33E, 0], [0x344, 0], [0x365, 0], [0x366, 0], [0x4CB, 0],  # DSU bus 0
-                              [0x128, 1], [0x141, 1], [0x160, 1], [0x161, 1], [0x470, 1],  # DSU bus 1
-                              [0x411, 0],  # PCS_HUD
-                              [0x750, 0]]  # radar diagnostic address
+TOYOTA_COMMON_LONG_TX_MSGS = [[0x411, 0], [0x750, 0]]  # PCS_HUD + radar diagnostic address
+TOYOTA_DSU_MSGS = [[0x283, 0], [0x2E6, 0], [0x2E7, 0], [0x33E, 0], [0x344, 0], [0x365, 0], [0x366, 0], [0x4CB, 0],  # DSU bus 0
+                              [0x128, 1], [0x141, 1], [0x160, 1], [0x161, 1], [0x470, 1]]  # DSU bus 1
 
 
 class TestToyotaSafetyBase(common.PandaCarSafetyTest, common.LongitudinalAccelSafetyTest):
@@ -80,17 +79,6 @@ class TestToyotaSafetyBase(common.PandaCarSafetyTest, common.LongitudinalAccelSa
       tester_present = libsafety_py.make_CANPacket(0x750, 0, msg)
       self.assertEqual(should_tx and not stock_longitudinal, self._tx(tester_present))
 
-  def test_block_aeb(self, stock_longitudinal: bool = False):
-    for controls_allowed in (True, False):
-      for bad in (True, False):
-        for _ in range(10):
-          self.safety.set_controls_allowed(controls_allowed)
-          dat = [random.randint(1, 255) for _ in range(7)]
-          if not bad:
-            dat = [0]*6 + dat[-1:]
-          msg = libsafety_py.make_CANPacket(0x283, 0, bytes(dat))
-          self.assertEqual(not bad and not stock_longitudinal, self._tx(msg))
-
   # Only allow LTA msgs with no actuation
   def test_lta_steer_cmd(self):
     for engaged, req, req2, torque_wind_down, angle in itertools.product([True, False],
@@ -118,6 +106,28 @@ class TestToyotaSafetyBase(common.PandaCarSafetyTest, common.LongitudinalAccelSa
       msg[0].data[7] = 0
       self.assertFalse(self._rx(msg))
       self.assertFalse(self.safety.get_controls_allowed())
+
+
+class TestToyotaSafetyEnableDSU(TestToyotaSafetyBase):
+
+  TX_MSGS = TOYOTA_DSU_MSGS
+
+  def setUp(self):
+    self.packer = CANPackerPanda("toyota_nodsu_pt_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_safety_hooks(CarParams.SafetyModel.toyota, self.EPS_SCALE | ToyotaSafetyFlags.ENABLE_DSU)
+    self.safety.init_tests()
+
+  def test_block_aeb(self, stock_longitudinal: bool = False):
+    for controls_allowed in (True, False):
+      for bad in (True, False):
+        for _ in range(10):
+          self.safety.set_controls_allowed(controls_allowed)
+          dat = [random.randint(1, 255) for _ in range(7)]
+          if not bad:
+            dat = [0]*6 + dat[-1:]
+          msg = libsafety_py.make_CANPacket(0x283, 0, bytes(dat))
+          self.assertEqual(not bad and not stock_longitudinal, self._tx(msg))
 
 
 class TestToyotaSafetyTorque(TestToyotaSafetyBase, common.MotorTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
