@@ -72,6 +72,17 @@ class TestToyotaSafetyBase(common.PandaCarSafetyTest, common.LongitudinalAccelSa
     values = {"CRUISE_ACTIVE": enable}
     return self.packer.make_can_msg_panda("PCM_CRUISE", 0, values)
 
+  def _check_block_aeb(self, stock_longitudinal: bool = False):
+    for controls_allowed in (True, False):
+      for bad in (True, False):
+        for _ in range(10):
+          self.safety.set_controls_allowed(controls_allowed)
+          dat = [random.randint(1, 255) for _ in range(7)]
+          if not bad:
+            dat = [0]*6 + dat[-1:]
+          msg = libsafety_py.make_CANPacket(0x283, 0, bytes(dat))
+          self.assertEqual(not bad and not stock_longitudinal, self._tx(msg))
+
   def test_diagnostics(self, stock_longitudinal: bool = False):
     for should_tx, msg in ((False, b"\x6D\x02\x3E\x00\x00\x00\x00\x00"),  # fwdCamera tester present
                            (False, b"\x0F\x03\xAA\xAA\x00\x00\x00\x00"),  # non-tester present
@@ -119,15 +130,7 @@ class TestToyotaSafetyEnableDSU(TestToyotaSafetyBase):
     self.safety.init_tests()
 
   def test_block_aeb(self, stock_longitudinal: bool = False):
-    for controls_allowed in (True, False):
-      for bad in (True, False):
-        for _ in range(10):
-          self.safety.set_controls_allowed(controls_allowed)
-          dat = [random.randint(1, 255) for _ in range(7)]
-          if not bad:
-            dat = [0]*6 + dat[-1:]
-          msg = libsafety_py.make_CANPacket(0x283, 0, bytes(dat))
-          self.assertEqual(not bad and not stock_longitudinal, self._tx(msg))
+    super()._check_block_aeb(stock_longitudinal=stock_longitudinal)
 
 
 class TestToyotaSafetyTorque(TestToyotaSafetyBase, common.MotorTorqueSteeringSafetyTest, common.SteerRequestCutSafetyTest):
@@ -286,15 +289,7 @@ class TestToyotaStockLongitudinalBase(TestToyotaSafetyBase):
     super().test_diagnostics(stock_longitudinal=stock_longitudinal)
 
   def test_block_aeb(self, stock_longitudinal: bool = True):
-    for controls_allowed in (True, False):
-      for bad in (True, False):
-        for _ in range(10):
-          self.safety.set_controls_allowed(controls_allowed)
-          dat = [random.randint(1, 255) for _ in range(7)]
-          if not bad:
-            dat = [0]*6 + dat[-1:]
-          msg = libsafety_py.make_CANPacket(0x283, 0, bytes(dat))
-          self.assertEqual(not bad and not stock_longitudinal, self._tx(msg))
+    super()._check_block_aeb(stock_longitudinal=stock_longitudinal)
 
   def test_acc_cancel(self):
     """
