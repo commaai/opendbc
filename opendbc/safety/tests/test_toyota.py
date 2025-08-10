@@ -286,15 +286,7 @@ class TestToyotaStockLongitudinalBase(TestToyotaSafetyBase):
     super().test_diagnostics(stock_longitudinal=stock_longitudinal)
 
   def test_block_aeb(self, stock_longitudinal: bool = True):
-    for controls_allowed in (True, False):
-      for bad in (True, False):
-        for _ in range(10):
-          self.safety.set_controls_allowed(controls_allowed)
-          dat = [random.randint(1, 255) for _ in range(7)]
-          if not bad:
-            dat = [0]*6 + dat[-1:]
-          msg = libsafety_py.make_CANPacket(0x283, 0, bytes(dat))
-          self.assertEqual(not bad and not stock_longitudinal, self._tx(msg))
+    super().test_block_aeb(stock_longitudinal=stock_longitudinal)
 
   def test_acc_cancel(self):
     """
