@@ -842,6 +842,16 @@
     ],
     "package": "All"
   },
+  "Honda Accord 2023": {
+    "platform": "HONDA_ACCORD_11G",
+    "make": "Honda",
+    "brand": "honda",
+    "model": "Accord",
+    "year": [
+      "2023"
+    ],
+    "package": "All"
+  },
   "Honda Accord Hybrid 2018-22": {
     "platform": "HONDA_ACCORD",
     "make": "Honda",
