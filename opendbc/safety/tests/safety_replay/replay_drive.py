@@ -136,6 +136,7 @@ def replay_drive(msgs, safety_mode, param, alternative_experience, param_sp):
 
   return tx_controls_blocked == 0 and tx_controls_lat_blocked == 0 and rx_invalid == 0 and not safety_tick_rx_invalid
 
+
 if __name__ == "__main__":
   from openpilot.tools.lib.logreader import LogReader
 

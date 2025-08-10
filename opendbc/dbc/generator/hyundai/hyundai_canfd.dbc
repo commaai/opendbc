@@ -1,4 +1,4 @@
-CM_ "IMPORT _hyundai_common.dbc";
+CM_ "IMPORT _hyundai_canfd_common.dbc";
 
 BO_ 53 ACCELERATOR: 32 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX

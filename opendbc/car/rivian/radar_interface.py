@@ -8,6 +8,7 @@ from opendbc.car.rivian.values import DBC
 RADAR_START_ADDR = 0x500
 RADAR_MSG_COUNT = 32
 
+
 def get_radar_can_parser(CP):
   messages = [(f"RADAR_TRACK_{addr:x}", 20) for addr in range(RADAR_START_ADDR, RADAR_START_ADDR + RADAR_MSG_COUNT)]
   return CANParser(DBC[CP.carFingerprint][Bus.radar], messages, 1)

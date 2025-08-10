@@ -11,7 +11,6 @@ MAX_BAD_COUNTER = 5
 CAN_INVALID_CNT = 5
 
 
-
 def get_raw_value(dat: bytes | bytearray, sig: Signal) -> int:
   ret = 0
   i = sig.msb // 8
@@ -40,7 +39,7 @@ class MessageState:
   timeout_threshold: float = 1e5  # default to 1Hz threshold
   vals: list[float] = field(default_factory=list)
   all_vals: list[list[float]] = field(default_factory=list)
-  timestamps: deque[int] = field(default_factory=deque)
+  timestamps: deque[int] = field(default_factory=lambda: deque(maxlen=500))
   counter: int = 0
   counter_fail: int = 0
   first_seen_nanos: int = 0
@@ -82,13 +81,10 @@ class MessageState:
       self.all_vals[i].append(v)
 
     self.timestamps.append(nanos)
-    max_buffer = 500
-    while len(self.timestamps) > max_buffer:
-      self.timestamps.popleft()
 
     if self.frequency < 1e-5 and len(self.timestamps) >= 3:
       dt = (self.timestamps[-1] - self.timestamps[0]) * 1e-9
-      if (dt > 1.0 or len(self.timestamps) >= max_buffer) and dt != 0:
+      if (dt > 1.0 or len(self.timestamps) >= self.timestamps.maxlen) and dt != 0:
         self.frequency = min(len(self.timestamps) / dt, 100.0)
         self.timeout_threshold = (1_000_000_000 / self.frequency) * 10
     return True
@@ -120,6 +116,7 @@ class VLDict(dict):
     if key not in self:
       self.parser._add_message(key)
     return super().__getitem__(key)
+
 
 class CANParser:
   def __init__(self, dbc_name: str, messages: list[tuple[str | int, int]], bus: int):
@@ -177,7 +174,6 @@ class CANParser:
     )
     if freq is not None and freq > 0:
       state.frequency = freq
-      state.timeout_threshold = (1_000_000_000 / freq) * 10
     else:
       # if frequency not specified, assume 1Hz until we learn it
       freq = 1
@@ -219,15 +215,15 @@ class CANParser:
           continue
         if state.parse(t, dat):
           updated_addrs.add(address)
-          msgname = state.name
+
+          vl_addr = self.vl[address]
+          vl_all_addr = self.vl_all[address]
+          ts_addr = self.ts_nanos[address]
+
           for i, sig in enumerate(state.signals):
-            val = state.vals[i]
-            self.vl[address][sig.name] = val
-            self.vl[msgname][sig.name] = val
-            self.vl_all[address][sig.name] = state.all_vals[i]
-            self.vl_all[msgname][sig.name] = state.all_vals[i]
-            self.ts_nanos[address][sig.name] = state.timestamps[-1]
-            self.ts_nanos[msgname][sig.name] = state.timestamps[-1]
+            vl_addr[sig.name] = state.vals[i]
+            vl_all_addr[sig.name] = state.all_vals[i]
+            ts_addr[sig.name] = state.timestamps[-1]
 
       if not bus_empty:
         self.last_nonempty_nanos = t

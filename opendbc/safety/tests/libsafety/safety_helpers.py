@@ -1,6 +1,7 @@
 # panda safety helpers, from safety_helpers.c
 from typing import Protocol
 
+
 def setup_safety_helpers(ffi):
   ffi.cdef("""
   void set_controls_allowed(bool c);
@@ -75,6 +76,7 @@ def setup_safety_helpers(ffi):
   void mads_heartbeat_engaged_check(void);
   void set_steering_disengage(bool c);
   """)
+
 
 class PandaSafety(Protocol):
   def set_controls_allowed(self, c: bool) -> None: ...

@@ -241,6 +241,7 @@ class TestHyundaiCanfdLKASteeringLongEV(HyundaiLongitudinalBase, TestHyundaiCanf
     values = {"MainMode_ACC": enable}
     return self.packer.make_can_msg_panda("SCC_CONTROL", self.PT_BUS, values)
 
+
 # Tests longitudinal for ICE, hybrid, EV cars with LFA steering
 class TestHyundaiCanfdLFASteeringLongBase(HyundaiLongitudinalBase, TestHyundaiCanfdLFASteeringBase):
 
