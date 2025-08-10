@@ -25,6 +25,8 @@
   {0x750, 0, 8, .check_relay = false}, \
   /* ACC */                            \
   {0x343, 0, 8, .check_relay = true},  \
+  /* PCS_HUD */                        \
+  {0x411, 0, 8, .check_relay = false}, \
 
 // only allow these when enableDsu is true
 #define TOYOTA_COMMON_ENABLE_DSU_TX_MSGS \
@@ -35,8 +37,6 @@
   /* DSU bus 1 */ \
   {0x128, 1, 6, .check_relay = false}, {0x141, 1, 4, .check_relay = false}, {0x160, 1, 8, .check_relay = false}, {0x161, 1, 7, .check_relay = false}, \
   {0x470, 1, 4, .check_relay = false}, \
-  /* PCS_HUD */                        \
-  {0x411, 0, 8, .check_relay = false}, \
 
 #define TOYOTA_COMMON_RX_CHECKS(lta)                                                                                                       \
   {.msg = {{ 0xaa, 0, 8, 83U, .ignore_checksum = true, .ignore_counter = true, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
