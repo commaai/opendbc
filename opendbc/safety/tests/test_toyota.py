@@ -110,7 +110,7 @@ class TestToyotaSafetyBase(common.PandaCarSafetyTest, common.LongitudinalAccelSa
 
 class TestToyotaSafetyEnableDSU(TestToyotaSafetyBase):
 
-  TX_MSGS = TOYOTA_DSU_MSGS
+  TX_MSGS = TOYOTA_COMMON_TX_MSGS + TOYOTA_COMMON_LONG_TX_MSGS + TOYOTA_DSU_MSGS
 
   def setUp(self):
     self.packer = CANPackerPanda("toyota_nodsu_pt_generated")
