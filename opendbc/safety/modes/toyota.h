@@ -29,7 +29,7 @@
   {0x411, 0, 8, .check_relay = false}, \
 
 // only allow these when enableDsu is true
-#define TOYOTA_COMMON_ENABLE_DSU_TX_MSGS \
+#define TOYOTA_COMMON_DSU_TX_MSGS \
   TOYOTA_COMMON_LONG_TX_MSGS \
   /* DSU bus 0 */ \
   {0x283, 0, 7, .check_relay = false}, {0x2E6, 0, 8, .check_relay = false}, {0x2E7, 0, 8, .check_relay = false}, {0x33E, 0, 7, .check_relay = false}, \
@@ -348,8 +348,8 @@ static safety_config toyota_init(uint16_t param) {
     TOYOTA_COMMON_LONG_TX_MSGS
   };
 
-  static const CanMsg TOYOTA_ENABLE_DSU_TX_MSGS[] = {
-    TOYOTA_COMMON_ENABLE_DSU_TX_MSGS
+  static const CanMsg TOYOTA_DSU_TX_MSGS[] = {
+    TOYOTA_COMMON_DSU_TX_MSGS
   };
 
   // safety param flags
@@ -381,7 +381,7 @@ static safety_config toyota_init(uint16_t param) {
     }
   } else {
     if (toyota_enable_dsu) {
-      SET_TX_MSGS(TOYOTA_ENABLE_DSU_TX_MSGS, ret);
+      SET_TX_MSGS(TOYOTA_DSU_TX_MSGS, ret);
     } else {
       SET_TX_MSGS(TOYOTA_LONG_TX_MSGS, ret);
     }
