@@ -43,6 +43,7 @@ for p in patterns:
 
 mutations = random.sample(mutations, 2)  # can remove this once cppcheck is faster
 
+
 @pytest.mark.parametrize("fn, rule, transform, should_fail", mutations)
 def test_misra_mutation(fn, rule, transform, should_fail):
   with tempfile.TemporaryDirectory() as tmp:
