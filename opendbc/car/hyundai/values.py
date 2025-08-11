@@ -170,7 +170,7 @@ class CAR(Platforms):
   HYUNDAI_AZERA_6TH_GEN = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Azera 2022", "All", car_parts=CarParts.common([CarHarness.hyundai_k]))],
     CarSpecs(mass=1600, wheelbase=2.885, steerRatio=14.5),
-    flags=HyundaiFlags.HYBRID,
+    flags=HyundaiFlags.HAS_CLUSTER_LANELINES,
   )
   HYUNDAI_AZERA_HEV_6TH_GEN = HyundaiPlatformConfig(
     [
