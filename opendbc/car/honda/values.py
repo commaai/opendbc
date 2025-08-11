@@ -240,7 +240,7 @@ class CAR(Platforms):
     flags=HondaFlags.BOSCH_ALT_BRAKE,
   )
   ACURA_MDX_4G_MMR = HondaBoschCANFDPlatformConfig(
-    [HondaCarDocs("Acura MDX 2025", "All")],
+    [HondaCarDocs("Acura MDX 2025", "non-TypeS")],
     CarSpecs(mass=4544 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.428, steerRatio=14.6),
   )
 
