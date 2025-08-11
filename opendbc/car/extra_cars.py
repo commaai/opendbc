@@ -49,8 +49,6 @@ class CAR(Platforms):
       CommunityCarDocs("Honda Accord 2016-17", "Honda Sensing"),
       CommunityCarDocs("Honda Accord 2024-25", "All"),
       CommunityCarDocs("Honda Clarity 2018-21", "All"),
-      CommunityCarDocs("Honda CR-V 2023-25", "All"),
-      CommunityCarDocs("Honda CR-V Hybrid 2023-25", "All"),
       CommunityCarDocs("Honda Odyssey 2021-25", "All"),
       CommunityCarDocs("Honda Passport 2026", "All"),
       CommunityCarDocs("Honda Pilot 2023-25", "All"),
