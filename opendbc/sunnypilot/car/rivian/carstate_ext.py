@@ -66,7 +66,7 @@ class CarStateExt:
           self.set_speed -= CV.MPH_TO_MS
 
       if not ret.cruiseState.enabled:
-        self.set_speed = ret.vEgo
+        self.set_speed = ret.vEgoCluster
 
       self.set_speed = max(MIN_SET_SPEED, min(self.set_speed, MAX_SET_SPEED))
       ret.cruiseState.speed = self.set_speed
