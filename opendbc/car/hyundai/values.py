@@ -807,6 +807,4 @@ LEGACY_SAFETY_MODE_CAR = CAR.with_flags(HyundaiFlags.LEGACY)
 #       HyundaiFlags.CANFD_RADAR_SCC | HyundaiFlags.CANFD_NO_RADAR_DISABLE | )
 UNSUPPORTED_LONGITUDINAL_CAR = CAR.with_flags(HyundaiFlags.LEGACY) | CAR.with_flags(HyundaiFlags.UNSUPPORTED_LONGITUDINAL)
 
-HAS_CLUSTER_LANELINES = CAR.with_flags(HyundaiFlags.HAS_CLUSTER_LANELINES)
-
 DBC = CAR.create_dbc_map()

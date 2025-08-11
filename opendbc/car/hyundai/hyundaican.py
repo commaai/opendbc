@@ -1,5 +1,5 @@
 import crcmod
-from opendbc.car.hyundai.values import CAR, HyundaiFlags, HAS_CLUSTER_LANELINES
+from opendbc.car.hyundai.values import CAR, HyundaiFlags
 
 hyundai_checksum = crcmod.mkCrcFun(0x11D, initCrc=0xFD, rev=False, xorOut=0xdf)
 
@@ -34,7 +34,7 @@ def create_lkas11(packer, frame, CP, apply_torque, steer_req,
   values["CF_Lkas_ToiFlt"] = torque_fault  # seems to allow actuation on CR_Lkas_StrToqReq
   values["CF_Lkas_MsgCount"] = frame % 0x10
 
-  if CP.carFingerprint in HAS_CLUSTER_LANELINES:
+  if CP.flags & HyundaiFlags.HAS_CLUSTER_LANELINES:
     values["CF_Lkas_LdwsActivemode"] = int(left_lane) + (int(right_lane) << 1)
     values["CF_Lkas_LdwsOpt_USM"] = 2
 
