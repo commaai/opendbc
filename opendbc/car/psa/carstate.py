@@ -60,7 +60,7 @@ class CarState(CarStateBase):
     ret.rightBlinker = blinker == 2
 
     # lock info
-    ret.doorOpen = any([cp_cam.vl['Dat_BSI']['DRIVER_DOOR'], cp_cam.vl['Dat_BSI']['PASSENGER_DOOR']])
+    ret.doorOpen = any((cp_cam.vl['Dat_BSI']['DRIVER_DOOR'], cp_cam.vl['Dat_BSI']['PASSENGER_DOOR']))
     ret.seatbeltUnlatched = cp_cam.vl['RESTRAINTS']['DRIVER_SEATBELT'] != 2
     return ret
 
