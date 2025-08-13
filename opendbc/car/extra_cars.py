@@ -37,7 +37,6 @@ class CAR(Platforms):
 
   EXTRA_HONDA = ExtraPlatformConfig(
     [
-      CommunityCarDocs("Acura Integra 2023-25", "All"),
       CommunityCarDocs("Acura MDX 2015-16", "Advance Package"),
       CommunityCarDocs("Acura MDX 2017-20", "All"),
       CommunityCarDocs("Acura MDX 2025", "All"),
