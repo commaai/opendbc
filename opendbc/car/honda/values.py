@@ -239,7 +239,7 @@ class CAR(Platforms):
     CarSpecs(mass=4660 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.442, steerRatio=17.5),
   )
   ACURA_MDX_4G_MMR = HondaBoschCANFDPlatformConfig(
-    [HondaCarDocs("Acura MDX 2025", "non-TypeS")],
+    [HondaCarDocs("Acura MDX 2025", "All except Type S")],
     CarSpecs(mass=4544 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.428, steerRatio=16.2),
   )
 
