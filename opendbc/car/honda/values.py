@@ -169,7 +169,10 @@ class CAR(Platforms):
     {Bus.pt: 'honda_accord_2018_can_generated'},
   )
   HONDA_ACCORD_11G = HondaBoschCANFDPlatformConfig(
-    [HondaCarDocs("Honda Accord 2023", "All")],
+    [
+      HondaCarDocs("Honda Accord 2023-25", "All"),
+      HondaCarDocs("Honda Accord Hybrid 2023-25", "All"),
+  ],
     CarSpecs(mass=3477 * CV.LB_TO_KG, wheelbase=2.83, steerRatio=16.0, centerToFrontRatio=0.39),
   )
   HONDA_CIVIC_BOSCH = HondaBoschPlatformConfig(
@@ -235,9 +238,13 @@ class CAR(Platforms):
     {Bus.pt: 'acura_rdx_2020_can_generated'},
   )
   HONDA_PILOT_4G = HondaBoschCANFDPlatformConfig(
-    [HondaCarDocs("Honda Pilot 2023", "All")],
-    CarSpecs(mass=4278 * CV.LB_TO_KG, wheelbase=2.86, centerToFrontRatio=0.428, steerRatio=16.0, tireStiffnessFactor=0.444),  # as spec
-    flags=HondaFlags.BOSCH_ALT_BRAKE,
+    [HondaCarDocs("Honda Pilot 2023-25", "All")],
+    CarSpecs(mass=4660 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.442, steerRatio=17.5),
+  )
+  # mid-model refresh
+  ACURA_MDX_4G_MMR = HondaBoschCANFDPlatformConfig(
+    [HondaCarDocs("Acura MDX 2025", "All except Type S")],
+    CarSpecs(mass=4544 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.428, steerRatio=16.2),
   )
 
   # Nidec Cars
@@ -330,6 +337,8 @@ STEER_THRESHOLD = {
   CAR.ACURA_RDX: 400,
   CAR.HONDA_CRV_EU: 400,
   CAR.HONDA_ACCORD_11G: 600,
+  CAR.HONDA_PILOT_4G: 600,
+  CAR.ACURA_MDX_4G_MMR: 600,
 }
 
 
