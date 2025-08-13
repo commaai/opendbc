@@ -181,7 +181,7 @@ class CarInterface(CarInterfaceBase):
       ret.steerActuatorDelay = 0.15
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV  = [[0, 4096], [0, 4096]]  # TODO: determine if there is a dead zone at the top end
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
-    
+
     elif candidate == CAR.ACURA_RDX:
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 1000], [0, 1000]]  # TODO: determine if there is a dead zone at the top end
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.8], [0.24]]
