@@ -259,12 +259,12 @@ class CAR(Platforms):
     flags=HyundaiFlags.CAMERA_SCC | HyundaiFlags.ALT_LIMITS_2,
   )
   HYUNDAI_KONA_2ND_GEN = HyundaiCanFDPlatformConfig(
-    [HyundaiCarDocs("Hyundai Kona 2024-25", car_parts=CarParts.common([CarHarness.hyundai_l]))],
+    [HyundaiCarDocs("Hyundai Kona (without HDA II) 2024-25", car_parts=CarParts.common([CarHarness.hyundai_l]))],
     CarSpecs(mass=1590, wheelbase=2.66, steerRatio=13.6, tireStiffnessFactor=0.385),
     flags=HyundaiFlags.CCNC,
   )
   HYUNDAI_KONA_HEV_2ND_GEN = HyundaiCanFDPlatformConfig(
-    [HyundaiCarDocs("Hyundai Kona Hybrid 2024", car_parts=CarParts.common([CarHarness.hyundai_l]))],
+    [HyundaiCarDocs("Hyundai Kona Hybrid (without HDA II) 2024", car_parts=CarParts.common([CarHarness.hyundai_l]))],
     CarSpecs(mass=1590, wheelbase=2.66, steerRatio=13.6, tireStiffnessFactor=0.385),
     flags=HyundaiFlags.CCNC,
   )
@@ -279,10 +279,13 @@ class CAR(Platforms):
     flags=HyundaiFlags.CAMERA_SCC | HyundaiFlags.EV | HyundaiFlags.ALT_LIMITS,
   )
   HYUNDAI_KONA_EV_2ND_GEN = HyundaiCanFDPlatformConfig(
-    [HyundaiCarDocs("Hyundai Kona Electric (with HDA II, Korea only) 2023", video="https://www.youtube.com/watch?v=U2fOCmcQ8hw",
-                    car_parts=CarParts.common([CarHarness.hyundai_r]))],
+    [
+      HyundaiCarDocs("Hyundai Kona Electric (with HDA II, Korea only) 2023", video="https://www.youtube.com/watch?v=U2fOCmcQ8hw",
+                    car_parts=CarParts.common([CarHarness.hyundai_r])),
+      HyundaiCarDocs("Hyundai Kona Electric (without HDA II) 2024", car_parts=CarParts.common([CarHarness.hyundai_a])),
+    ],
     CarSpecs(mass=1740, wheelbase=2.66, steerRatio=13.6, tireStiffnessFactor=0.385),
-    flags=HyundaiFlags.EV | HyundaiFlags.CANFD_NO_RADAR_DISABLE,
+    flags=HyundaiFlags.EV | HyundaiFlags.CANFD_NO_RADAR_DISABLE | HyundaiFlags.CCNC,
   )
   HYUNDAI_KONA_HEV = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Kona Hybrid 2020", car_parts=CarParts.common([CarHarness.hyundai_i]))],  # TODO: check packages,
@@ -323,7 +326,7 @@ class CAR(Platforms):
     flags=HyundaiFlags.MANDO_RADAR | HyundaiFlags.CHECKSUM_CRC8,
   )
   HYUNDAI_SONATA_2024 = HyundaiCanFDPlatformConfig(
-    [HyundaiCarDocs("Hyundai Sonata 2024-25", car_parts=CarParts.common([CarHarness.hyundai_a]))],
+    [HyundaiCarDocs("Hyundai Sonata (without HDA II) 2024-25", car_parts=CarParts.common([CarHarness.hyundai_a]))],
     CarSpecs(mass=1556, wheelbase=2.84, steerRatio=12.81),
     flags=HyundaiFlags.CCNC,
   )
@@ -363,7 +366,7 @@ class CAR(Platforms):
     flags=HyundaiFlags.MANDO_RADAR | HyundaiFlags.CHECKSUM_CRC8 | HyundaiFlags.HYBRID,
   )
   HYUNDAI_SONATA_HEV_2024 = HyundaiCanFDPlatformConfig(
-    [HyundaiCarDocs("Hyundai Sonata Hybrid 2024-25", car_parts=CarParts.common([CarHarness.hyundai_a]))],
+    [HyundaiCarDocs("Hyundai Sonata Hybrid (without HDA II) 2024-25", car_parts=CarParts.common([CarHarness.hyundai_a]))],
     CarSpecs(mass=1616, wheelbase=2.84, steerRatio=13.27),
     flags=HyundaiFlags.CCNC,
   )
@@ -391,7 +394,7 @@ class CAR(Platforms):
     CarSpecs(mass=1630, wheelbase=2.756, steerRatio=13.7, tireStiffnessFactor=0.385),
   )
   HYUNDAI_TUCSON_HEV_2025 = HyundaiCanFDPlatformConfig(
-    [HyundaiCarDocs("Hyundai Tucson Hybrid 2025", car_parts=CarParts.common([CarHarness.hyundai_n]))],
+    [HyundaiCarDocs("Hyundai Tucson Hybrid (without HDA II) 2025", car_parts=CarParts.common([CarHarness.hyundai_n]))],
     CarSpecs(mass=1630, wheelbase=2.756, steerRatio=13.7, tireStiffnessFactor=0.385),
     flags=HyundaiFlags.CCNC,
   )
@@ -401,7 +404,7 @@ class CAR(Platforms):
     CarSpecs(mass=1870, wheelbase=3, steerRatio=14.2),
   )
   HYUNDAI_SANTA_CRUZ_2025 = HyundaiCanFDPlatformConfig(
-    [HyundaiCarDocs("Hyundai Santa Cruz 2025", car_parts=CarParts.common([CarHarness.hyundai_n]))],
+    [HyundaiCarDocs("Hyundai Santa Cruz (without HDA II) 2025", car_parts=CarParts.common([CarHarness.hyundai_n]))],
     CarSpecs(mass=1920, wheelbase=3, steerRatio=14.2),
     flags=HyundaiFlags.CCNC,
   )
@@ -420,7 +423,7 @@ class CAR(Platforms):
     CarSpecs(mass=2878 * CV.LB_TO_KG, wheelbase=2.8, steerRatio=13.75, tireStiffnessFactor=0.5)
   )
   KIA_K4_2025 = HyundaiCanFDPlatformConfig(
-    [HyundaiCarDocs("Kia K4 2025", car_parts=CarParts.common([CarHarness.hyundai_a]))],
+    [HyundaiCarDocs("Kia K4 (without HDA II) 2025", car_parts=CarParts.common([CarHarness.hyundai_a]))],
     CarSpecs(mass=2987 * CV.LB_TO_KG, wheelbase=2.72, steerRatio=13.4),
     flags=HyundaiFlags.CCNC,
   )
@@ -430,7 +433,7 @@ class CAR(Platforms):
     flags=HyundaiFlags.CHECKSUM_CRC8,
   )
   KIA_K5_2025 = HyundaiCanFDPlatformConfig(
-    [HyundaiCarDocs("Kia K5 2025", car_parts=CarParts.common([CarHarness.hyundai_m]))],
+    [HyundaiCarDocs("Kia K5 (without HDA II) 2025", car_parts=CarParts.common([CarHarness.hyundai_m]))],
     CarSpecs(mass=3230 * CV.LB_TO_KG, wheelbase=2.85, steerRatio=13.27),
     flags=HyundaiFlags.CCNC,
   )
@@ -541,7 +544,7 @@ class CAR(Platforms):
     flags=HyundaiFlags.RADAR_SCC,
   )
   KIA_SORENTO_2024 = HyundaiCanFDPlatformConfig(
-    [HyundaiCarDocs("Kia Sorento 2024-25", car_parts=CarParts.common([CarHarness.hyundai_a]))],
+    [HyundaiCarDocs("Kia Sorento (without HDA II) 2024-25", car_parts=CarParts.common([CarHarness.hyundai_a]))],
     CarSpecs(mass=3957 * CV.LB_TO_KG, wheelbase=2.81, steerRatio=13.5),
     flags=HyundaiFlags.CCNC,
   )

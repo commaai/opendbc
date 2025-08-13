@@ -744,6 +744,7 @@ FW_VERSIONS = {
     ],
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00SX2EMFC  AT KOR LHD 1.00 1.00 99211-BF000 230410',
+      b'\xf1\x00SX2EMFC  AT USA LHD 1.00 1.02 99211-BF000 230823',
     ],
   },
   CAR.KIA_NIRO_EV: {
