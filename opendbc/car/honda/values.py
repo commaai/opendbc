@@ -235,9 +235,8 @@ class CAR(Platforms):
     {Bus.pt: 'acura_rdx_2020_can_generated'},
   )
   HONDA_PILOT_4G = HondaBoschCANFDPlatformConfig(
-    [HondaCarDocs("Honda Pilot 2023", "All")],
-    CarSpecs(mass=4278 * CV.LB_TO_KG, wheelbase=2.86, centerToFrontRatio=0.428, steerRatio=16.0, tireStiffnessFactor=0.444),  # as spec
-    flags=HondaFlags.BOSCH_ALT_BRAKE,
+    [HondaCarDocs("Honda Pilot 2023-25", "All")],
+    CarSpecs(mass=4660 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.442, steerRatio=17.5),
   )
   ACURA_MDX_4G_MMR = HondaBoschCANFDPlatformConfig(
     [HondaCarDocs("Acura MDX 2025", "non-TypeS")],
@@ -334,6 +333,7 @@ STEER_THRESHOLD = {
   CAR.ACURA_RDX: 400,
   CAR.HONDA_CRV_EU: 400,
   CAR.HONDA_ACCORD_11G: 600,
+  CAR.HONDA_PILOT_4G: 600,
   CAR.ACURA_MDX_4G_MMR: 600,
 }
 
