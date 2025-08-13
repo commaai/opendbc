@@ -9,6 +9,7 @@
 |Acura|Integra 2023-25|All|[Community](#community)|
 |Acura|MDX 2015-16|Advance Package|[Community](#community)|
 |Acura|MDX 2017-20|All|[Community](#community)|
+|Acura|MDX 2025|All except Type S|[Upstream](#upstream)|
 |Acura|MDX 2025|All|[Community](#community)|
 |Acura|RDX 2016-18|AcuraWatch Plus or Advance Package|[Upstream](#upstream)|
 |Acura|RDX 2019-21|All|[Upstream](#upstream)|
@@ -82,9 +83,9 @@
 |GMC|Yukon 2019-20|Adaptive Cruise Control (ACC) & LKAS|[Dashcam mode](#dashcam)|
 |Honda|Accord 2016-17|Honda Sensing|[Community](#community)|
 |Honda|Accord 2018-22|All|[Upstream](#upstream)|
-|Honda|Accord 2023|All|[Upstream](#upstream)|
-|Honda|Accord 2024-25|All|[Community](#community)|
+|Honda|Accord 2023-25|All|[Upstream](#upstream)|
 |Honda|Accord Hybrid 2018-22|All|[Upstream](#upstream)|
+|Honda|Accord Hybrid 2023-25|All|[Upstream](#upstream)|
 |Honda|Civic 2016-18|Honda Sensing|[Upstream](#upstream)|
 |Honda|Civic 2019-21|All|[Upstream](#upstream)|
 |Honda|Civic 2022-24|All|[Upstream](#upstream)|
@@ -111,8 +112,7 @@
 |Honda|Passport 2019-25|All|[Upstream](#upstream)|
 |Honda|Passport 2026|All|[Community](#community)|
 |Honda|Pilot 2016-22|Honda Sensing|[Upstream](#upstream)|
-|Honda|Pilot 2023|All|[Dashcam mode](#dashcam)|
-|Honda|Pilot 2023-25|All|[Community](#community)|
+|Honda|Pilot 2023-25|All|[Upstream](#upstream)|
 |Honda|Prologue 2024-25|All|[Not compatible](#can-bus-security)|
 |Honda|Ridgeline 2017-25|Honda Sensing|[Upstream](#upstream)|
 |Hyundai|Azera 2022|All|[Upstream](#upstream)|
