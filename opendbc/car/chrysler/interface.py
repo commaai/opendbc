@@ -5,6 +5,7 @@ from opendbc.car.chrysler.carstate import CarState
 from opendbc.car.chrysler.radar_interface import RadarInterface
 from opendbc.car.chrysler.values import CAR, RAM_HD, RAM_DT, RAM_CARS, ChryslerFlags, ChryslerSafetyFlags
 from opendbc.car.interfaces import CarInterfaceBase
+from opendbc.sunnypilot.car.chrysler.values import ChryslerFlagsSP
 
 
 class CarInterface(CarInterfaceBase):
@@ -87,5 +88,9 @@ class CarInterface(CarInterfaceBase):
 
     if candidate == CAR.RAM_HD_5TH_GEN:
       stock_cp.dashcamOnly = False
+
+    if 0x4FF in fingerprint[0]:
+      ret.flags |= ChryslerFlagsSP.NO_MIN_STEERING_SPEED.value
+      stock_cp.minSteerSpeed = 0.
 
     return ret
