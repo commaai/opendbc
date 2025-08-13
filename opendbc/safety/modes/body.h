@@ -3,22 +3,20 @@
 #include "opendbc/safety/safety_declarations.h"
 
 static void body_rx_hook(const CANPacket_t *msg) {
-  if (GET_ADDR(msg) == 0x201U) {
+  if (msg->addr == 0x201U) {
     controls_allowed = true;
   }
 }
 
 static bool body_tx_hook(const CANPacket_t *msg) {
   bool tx = true;
-  int addr = GET_ADDR(msg);
-  int len = GET_LEN(msg);
 
-  if (!controls_allowed && (addr != 0x1)) {
+  if (!controls_allowed && (msg->addr != 0x1U)) {
     tx = false;
   }
 
   // Allow going into CAN flashing mode even if controls are not allowed
-  bool flash_msg = (addr == 0x250) && (len == 8);
+  bool flash_msg = (msg->addr == 0x250U) && (GET_LEN(msg) == 8U);
   if (!controls_allowed && (GET_BYTES(msg, 0, 4) == 0xdeadfaceU) && (GET_BYTES(msg, 4, 4) == 0x0ab00b1eU) && flash_msg) {
     tx = true;
   }
