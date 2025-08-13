@@ -211,7 +211,7 @@ class CAR(Platforms):
       HondaCarDocs("Honda CR-V 2023-25", "All"),
       HondaCarDocs("Honda CR-V Hybrid 2023-25", "All"),
     ],
-    CarSpecs(mass=1703, wheelbase=2.7, steerRatio=15.5, centerToFrontRatio=0.42),
+    CarSpecs(mass=1703, wheelbase=2.7, steerRatio=16.2, centerToFrontRatio=0.42),
   )
   HONDA_CRV_HYBRID = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda CR-V Hybrid 2017-22", min_steer_speed=12. * CV.MPH_TO_MS)],
