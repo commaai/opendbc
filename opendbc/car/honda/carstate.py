@@ -125,7 +125,7 @@ class CarState(CarStateBase):
 
     # TODO: extract into separate PR
     if self.CP.carFingerprint == CAR.HONDA_CITY:
-      ret.parkingBrake = cp.vl["SCM_FEEDBACK"]["HANDBRAKE_ON"] != 0
+      ret.parkingBrake = cp.vl["SCM_FEEDBACK"]["PARKING_BRAKE_ON"] != 0
     if self.CP.flags & HondaFlags.HAS_EPB:
       ret.parkingBrake = cp.vl["EPB_STATUS"]["EPB_STATE"] != 0
 
