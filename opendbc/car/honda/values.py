@@ -223,7 +223,7 @@ class CAR(Platforms):
   )
   HONDA_CITY = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda City (Brazil only) 2023", "All")],
-    CarSpecs(mass=3125 * CV.LB_TO_KG, wheelbase=2.7, steerRatio=13.0, centerToFrontRatio=0.41, tireStiffnessFactor=0.5, minSteerSpeed=23. * CV.KPH_TO_MS),
+    CarSpecs(mass=3125 * CV.LB_TO_KG, wheelbase=2.6, steerRatio=16.2, centerToFrontRatio=0.41, minSteerSpeed=23. * CV.KPH_TO_MS),
     {Bus.pt: 'honda_civic_ex_2022_can_generated'},
     flags=HondaFlags.BOSCH_RADARLESS,
   )
