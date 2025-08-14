@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from math import fabs, exp
+import numpy as np
 
 from opendbc.car import get_safety_config, structs
 from opendbc.car.common.conversions import Conversions as CV
@@ -7,17 +8,17 @@ from opendbc.car.gm.carcontroller import CarController
 from opendbc.car.gm.carstate import CarState
 from opendbc.car.gm.radar_interface import RadarInterface, RADAR_HEADER_MSG, CAMERA_DATA_HEADER_MSG
 from opendbc.car.gm.values import CAR, CarControllerParams, EV_CAR, CAMERA_ACC_CAR, SDGM_CAR, ALT_ACCS, CanBus, GMSafetyFlags
-from opendbc.car.interfaces import CarInterfaceBase, TorqueFromLateralAccelCallbackType
+from opendbc.car.interfaces import CarInterfaceBase, TorqueFromLateralAccelCallbackType, LateralAccelFromTorqueCallbackType
 
 TransmissionType = structs.CarParams.TransmissionType
 NetworkLocation = structs.CarParams.NetworkLocation
+
 
 NON_LINEAR_TORQUE_PARAMS = {
   CAR.CHEVROLET_BOLT_EUV: [2.6531724862969748, 1.0, 0.1919764879840985, 0.009054123646805178],
   CAR.GMC_ACADIA: [4.78003305, 1.0, 0.3122, 0.05591772],
   CAR.CHEVROLET_SILVERADO: [3.29974374, 1.0, 0.25571356, 0.0465122]
 }
-
 
 class CarInterface(CarInterfaceBase):
   CarState = CarState
@@ -41,7 +42,7 @@ class CarInterface(CarInterfaceBase):
     else:
       return CarInterfaceBase.get_steer_feedforward_default
 
-  def torque_from_lateral_accel_siglin(self, lateral_acceleration: float, torque_params: structs.CarParams.LateralTorqueTuning) -> float:
+  def torque_from_lateral_accel_siglin_func(self, lateral_acceleration: float) -> float:
     def sig(val):
       # https://timvieira.github.io/blog/post/2014/02/11/exp-normalize-trick
       if val >= 0:
@@ -62,9 +63,25 @@ class CarInterface(CarInterfaceBase):
 
   def torque_from_lateral_accel(self) -> TorqueFromLateralAccelCallbackType:
     if self.CP.carFingerprint in NON_LINEAR_TORQUE_PARAMS:
-      return self.torque_from_lateral_accel_siglin
+      lataccel_values = np.arange(-5.0, 5.0, 0.01)
+      torque_values = [self.torque_from_lateral_accel_siglin_func(x) for x in lataccel_values]
+      assert min(torque_values) < -1 and max(torque_values) > 1, "The torque values should cover the range [-1, 1]"
+      def torque_from_lateral_accel_siglin(lateral_acceleration: float, torque_params: structs.CarParams.LateralTorqueTuning):
+        return np.interp(lateral_acceleration, lataccel_values, torque_values)
+      return torque_from_lateral_accel_siglin
     else:
       return self.torque_from_lateral_accel_linear
+
+  def lateral_accel_from_torque(self) -> LateralAccelFromTorqueCallbackType:
+    if self.CP.carFingerprint in NON_LINEAR_TORQUE_PARAMS:
+      lataccel_values = np.arange(-5.0, 5.0, 0.01)
+      torque_values = [self.torque_from_lateral_accel_siglin_func(x) for x in lataccel_values]
+      assert min(torque_values) < -1 and max(torque_values) > 1, "The torque values should cover the range [-1, 1]"
+      def lateral_accel_from_torque_siglin(torque: float, torque_params: structs.CarParams.LateralTorqueTuning):
+        return np.interp(torque, torque_values, lataccel_values)
+      return lateral_accel_from_torque_siglin
+    else:
+      return self.lateral_accel_from_torque_linear
 
   @staticmethod
   def _get_params(ret: structs.CarParams, candidate, fingerprint, car_fw, alpha_long, is_release, docs) -> structs.CarParams:

@@ -42,6 +42,7 @@ GEAR_SHIFTER_MAP: dict[str, structs.CarState.GearShifter] = {
 }
 
 TorqueFromLateralAccelCallbackType = Callable[[float, structs.CarParams.LateralTorqueTuning, bool], float]
+LateralAccelFromTorqueCallbackType = Callable[[float, structs.CarParams.LateralTorqueTuning, bool], float]
 
 
 @cache
@@ -178,6 +179,14 @@ class CarInterfaceBase(ABC):
 
   def torque_from_lateral_accel(self) -> TorqueFromLateralAccelCallbackType:
     return self.torque_from_lateral_accel_linear
+
+
+  def lateral_accel_from_torque_linear(self, torque: float, torque_params: structs.CarParams.LateralTorqueTuning) -> float:
+    # The default is a linear relationship between torque and lateral acceleration (accounting for road roll and steering friction)
+    return torque * float(torque_params.latAccelFactor)
+
+  def lateral_accel_from_torque(self) -> LateralAccelFromTorqueCallbackType:
+    return self.lateral_accel_from_torque_linear
 
   # returns a set of default params to avoid repetition in car specific params
   @staticmethod
