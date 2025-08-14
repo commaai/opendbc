@@ -961,4 +961,17 @@ FW_VERSIONS = {
       b'8S102-30A-A060\x00\x00',
     ],
   },
+  CAR.HONDA_CRV_6G: {
+    (Ecu.fwdRadar, 0x18dab0f1, None): [
+      b'8S302-3C0-Q050\x00\x00',
+      b'8S302-3D4-A050\x00\x00',
+    ],
+    (Ecu.fwdCamera, 0x18dab5f1, None): [
+      b'8S102-3C0-Q060\x00\x00',
+      b'8S102-3D4-A060\x00\x00',
+      b'8S102-3D4-A070\x00\x00',
+      b'8S102-3D4-A080\x00\x00',
+      b'8S102-3D4-A090\x00\x00',
+    ],
+  },
 }
