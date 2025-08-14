@@ -26,9 +26,15 @@ class CarStateExt:
     self.aBasis = cp.vl["TCS13"]["aBasis"]
 
     if self.CP_SP.flags & HyundaiFlagsSP.NON_SCC:
-      ret.cruiseState.available = False
-      ret.cruiseState.enabled = False
-      ret.cruiseState.speed = 255
+      cruise_available_msg = "E_CRUISE_CONTROL"
+      cruise_available_sig = "CRUISE_LAMP_M"
+      cruise_enabled_msg = "E_CRUISE_CONTROL"
+      cruise_enabled_sig = "CF_Lvr_CruiseSet"
+      cruise_speed_msg = "ELECT_GEAR"
+      cruise_speed_sig = "SLC_SET_SPEED"
+      ret.cruiseState.available = cp.vl[cruise_available_msg][cruise_available_sig] != 0
+      ret.cruiseState.enabled = cp.vl[cruise_enabled_msg][cruise_enabled_sig] != 0
+      ret.cruiseState.speed = cp.vl[cruise_speed_msg][cruise_speed_sig] * speed_conv
       ret.cruiseState.standstill = False
       ret.cruiseState.nonAdaptive = False
 
