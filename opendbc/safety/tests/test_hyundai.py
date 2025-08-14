@@ -25,6 +25,11 @@ _ALL_NON_SCC_COMBOS = [
    "ACC_STATE_MSG": ("E_CRUISE_CONTROL", "CRUISE_LAMP_M"),
    "GAS_MSG": ("E_EMS11", "CR_Vcu_AccPedDep_Pos"),
    "SAFETY_PARAM": HyundaiSafetyFlags.HYBRID_GAS},
+  # EV
+  {"PCM_STATUS_MSG": ("LABEL11", "CC_ACT"),
+   "ACC_STATE_MSG": ("LABEL11", "CC_React"),
+   "GAS_MSG": ("E_EMS11", "Accel_Pedal_Pos"),
+   "SAFETY_PARAM": HyundaiSafetyFlags.EV_GAS},
 ]
 ALL_NON_SCC_COMBOS = [{**p, **lda} for lda in LDA_BUTTON for p in _ALL_NON_SCC_COMBOS]
 
