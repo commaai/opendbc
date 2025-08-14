@@ -12,6 +12,7 @@ from opendbc.car.interfaces import CarStateBase
 from opendbc.sunnypilot.car.hyundai.carstate_ext import CarStateExt
 from opendbc.sunnypilot.car.hyundai.escc import EsccCarStateBase
 from opendbc.sunnypilot.car.hyundai.mads import MadsCarState
+from opendbc.sunnypilot.car.hyundai.values import HyundaiFlagsSP
 
 ButtonType = structs.CarState.ButtonEvent.Type
 
@@ -30,7 +31,7 @@ class CarState(CarStateBase, EsccCarStateBase, MadsCarState, CarStateExt):
     CarStateBase.__init__(self, CP, CP_SP)
     EsccCarStateBase.__init__(self)
     MadsCarState.__init__(self, CP, CP_SP)
-    CarStateExt.__init__(self)
+    CarStateExt.__init__(self, CP, CP_SP)
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
 
     self.cruise_buttons: deque = deque([Buttons.NONE] * PREV_BUTTON_SAMPLES, maxlen=PREV_BUTTON_SAMPLES)
@@ -131,7 +132,7 @@ class CarState(CarStateBase, EsccCarStateBase, MadsCarState, CarStateExt):
       ret.cruiseState.enabled = cp.vl["TCS13"]["ACC_REQ"] == 1
       ret.cruiseState.standstill = False
       ret.cruiseState.nonAdaptive = False
-    else:
+    elif not self.CP_SP.flags & HyundaiFlagsSP.NON_SCC:
       ret.cruiseState.available = cp_cruise.vl["SCC11"]["MainMode_ACC"] == 1
       ret.cruiseState.enabled = cp_cruise.vl["SCC12"]["ACCMode"] != 0
       ret.cruiseState.standstill = cp_cruise.vl["SCC11"]["SCCInfoDisplay"] == 4.
@@ -172,7 +173,7 @@ class CarState(CarStateBase, EsccCarStateBase, MadsCarState, CarStateExt):
 
     ret.gearShifter = self.parse_gear_shifter(self.shifter_values.get(gear))
 
-    if not self.CP.openpilotLongitudinalControl or self.CP.flags & HyundaiFlags.CAMERA_SCC:
+    if (not self.CP.openpilotLongitudinalControl or self.CP.flags & HyundaiFlags.CAMERA_SCC) and not self.CP_SP.flags & HyundaiFlagsSP.NON_SCC:
       aeb_src = "FCA11" if self.CP.flags & HyundaiFlags.USE_FCA.value else "SCC12"
       aeb_sig = "FCA_CmdAct" if self.CP.flags & HyundaiFlags.USE_FCA.value else "AEB_CmdAct"
       aeb_warning = cp_cruise.vl[aeb_src]["CF_VSM_Warn"] != 0
@@ -204,7 +205,7 @@ class CarState(CarStateBase, EsccCarStateBase, MadsCarState, CarStateExt):
     if self.CP.openpilotLongitudinalControl:
       ret.cruiseState.available = self.get_main_cruise(ret)
 
-    CarStateExt.update(self, ret, can_parsers)
+    CarStateExt.update(self, ret, can_parsers, speed_conv)
 
     ret.blockPcmEnable = not self.recent_button_interaction()
 

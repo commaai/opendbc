@@ -8,6 +8,8 @@ from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, Device
 from opendbc.car.fw_query_definitions import FwQueryConfig, Request, p16
 
+from opendbc.sunnypilot.car.hyundai.values import HyundaiFlagsSP
+
 Ecu = CarParams.Ecu
 
 
@@ -802,5 +804,8 @@ LEGACY_SAFETY_MODE_CAR = CAR.with_flags(HyundaiFlags.LEGACY)
 # TODO: another PR with (HyundaiFlags.LEGACY | HyundaiFlags.UNSUPPORTED_LONGITUDINAL | HyundaiFlags.CAMERA_SCC |
 #       HyundaiFlags.CANFD_RADAR_SCC | HyundaiFlags.CANFD_NO_RADAR_DISABLE | )
 UNSUPPORTED_LONGITUDINAL_CAR = CAR.with_flags(HyundaiFlags.LEGACY) | CAR.with_flags(HyundaiFlags.UNSUPPORTED_LONGITUDINAL)
+
+# port extensions
+NON_SCC_CAR = CAR.with_sp_flags(HyundaiFlagsSP.NON_SCC)
 
 DBC = CAR.create_dbc_map()

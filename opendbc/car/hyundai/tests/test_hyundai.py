@@ -11,7 +11,8 @@ from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
 from opendbc.car.hyundai.values import CAMERA_SCC_CAR, CANFD_CAR, CAN_GEARS, CAR, CHECKSUM, DATE_FW_ECUS, \
                                          HYBRID_CAR, EV_CAR, FW_QUERY_CONFIG, LEGACY_SAFETY_MODE_CAR, CANFD_FUZZY_WHITELIST, \
                                          UNSUPPORTED_LONGITUDINAL_CAR, PLATFORM_CODE_ECUS, HYUNDAI_VERSION_REQUEST_LONG, \
-                                         HyundaiFlags, get_platform_codes, HyundaiSafetyFlags
+                                         HyundaiFlags, get_platform_codes, HyundaiSafetyFlags, \
+                                         NON_SCC_CAR
 from opendbc.car.hyundai.fingerprints import FW_VERSIONS
 
 Ecu = CarParams.Ecu
@@ -157,6 +158,8 @@ class TestHyundaiFingerprint:
             continue
           if platform_code_ecu == Ecu.eps and car_model in no_eps_platforms:
             continue
+          if car_model in NON_SCC_CAR:
+            continue
           assert platform_code_ecu in [e[0] for e in ecus]
 
   def test_fw_format(self, subtests):
@@ -169,6 +172,9 @@ class TestHyundaiFingerprint:
       with subtests.test(car_model=car_model.value):
         for ecu, fws in ecus.items():
           if ecu[0] not in PLATFORM_CODE_ECUS:
+            continue
+
+          if car_model in NON_SCC_CAR:
             continue
 
           codes = set()
@@ -236,6 +242,9 @@ class TestHyundaiFingerprint:
         for fw in fw_versions:
           car_fw.append(CarParams.CarFw(ecu=ecu_name, fwVersion=fw, address=addr,
                                         subAddress=0 if sub_addr is None else sub_addr))
+
+      if platform in NON_SCC_CAR:
+        continue
 
       CP = CarParams(carFw=car_fw)
       matches = FW_QUERY_CONFIG.match_fw_to_car_fuzzy(build_fw_dict(CP.carFw), CP.carVin, FW_VERSIONS)

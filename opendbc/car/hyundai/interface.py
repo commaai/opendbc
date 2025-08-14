@@ -179,6 +179,12 @@ class CarInterface(CarInterfaceBase):
     if stock_cp.flags & HyundaiFlags.ALT_LIMITS_2:
       stock_cp.dashcamOnly = False
 
+    if ret.flags & HyundaiFlagsSP.NON_SCC:
+      stock_cp.alphaLongitudinalAvailable = False
+      stock_cp.openpilotLongitudinalControl = False
+      stock_cp.pcmCruise = True
+      ret.safetyParam |= HyundaiSafetyFlagsSP.NON_SCC
+
     return ret
 
   @staticmethod
