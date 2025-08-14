@@ -1258,10 +1258,10 @@ FW_VERSIONS = {
       b'\xf1\x00YB__ FCA -----      1.00 1.01 99110-J9000      \x00\x00\x00',
     ],
     (Ecu.transmission, 0x7e1, None): [
+      b'\xf1\x00HT6WA280BLHT6VA650A1COS4N20NS1\x00\x00\x00\x00\x00\x00\x15\xf5\x87~',
       b'\xf1\x00T01960BL  T01E60A1  DOS2T16X4XE60NS4N\x90\xe6\xcb',
       b'\xf1\x00T01G00BL  T01I00A1  DOS2T16X2XI00NS0\x8c`\xff\xe7',
       b'\xf1\x00T01G00BL  T01I00A1  DOS2T16X4XI00NS0\x99L\xeeq',
-      b'\xf1\x00HT6WA280BLHT6VA650A1COS4N20NS1\x00\x00\x00\x00\x00\x00\x15\xf5\x87~',
     ],
   },
 }
