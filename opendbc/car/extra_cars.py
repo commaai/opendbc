@@ -50,7 +50,6 @@ class CAR(Platforms):
       CommunityCarDocs("Honda CR-V 2023-25", "All"),
       CommunityCarDocs("Honda CR-V Hybrid 2023-25", "All"),
       CommunityCarDocs("Honda Odyssey 2021-25", "All"),
-      CommunityCarDocs("Honda Passport 2026", "All"),
       GMSecurityCarDocs("Honda Prologue 2024-25", "All"),
     ],
   )
