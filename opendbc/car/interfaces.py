@@ -180,9 +180,7 @@ class CarInterfaceBase(ABC):
   def torque_from_lateral_accel(self) -> TorqueFromLateralAccelCallbackType:
     return self.torque_from_lateral_accel_linear
 
-
   def lateral_accel_from_torque_linear(self, torque: float, torque_params: structs.CarParams.LateralTorqueTuning) -> float:
-    # The default is a linear relationship between torque and lateral acceleration (accounting for road roll and steering friction)
     return torque * float(torque_params.latAccelFactor)
 
   def lateral_accel_from_torque(self) -> LateralAccelFromTorqueCallbackType:
@@ -228,8 +226,8 @@ class CarInterfaceBase(ABC):
 
     tune.init('torque')
     tune.torque.kf = 1.0
-    tune.torque.kp = 1.0 #/ params['LAT_ACCEL_FACTOR']
-    tune.torque.ki = 0.3 #/ params['LAT_ACCEL_FACTOR']
+    tune.torque.kp = 1.0
+    tune.torque.ki = 0.3
     tune.torque.friction = params['FRICTION'] * params['LAT_ACCEL_FACTOR']
     tune.torque.latAccelFactor = params['LAT_ACCEL_FACTOR']
     tune.torque.latAccelOffset = 0.0

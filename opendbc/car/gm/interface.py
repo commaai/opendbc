@@ -13,7 +13,6 @@ from opendbc.car.interfaces import CarInterfaceBase, TorqueFromLateralAccelCallb
 TransmissionType = structs.CarParams.TransmissionType
 NetworkLocation = structs.CarParams.NetworkLocation
 
-
 NON_LINEAR_TORQUE_PARAMS = {
   CAR.CHEVROLET_BOLT_EUV: [2.6531724862969748, 1.0, 0.1919764879840985, 0.009054123646805178],
   CAR.GMC_ACADIA: [4.78003305, 1.0, 0.3122, 0.05591772],
@@ -42,30 +41,33 @@ class CarInterface(CarInterfaceBase):
     else:
       return CarInterfaceBase.get_steer_feedforward_default
 
-  def torque_from_lateral_accel_siglin_func(self, lateral_acceleration: float) -> float:
-    def sig(val):
-      # https://timvieira.github.io/blog/post/2014/02/11/exp-normalize-trick
-      if val >= 0:
-        return 1 / (1 + exp(-val)) - 0.5
-      else:
-        z = exp(val)
-        return z / (1 + z) - 0.5
+  def get_lataccel_torque_siglin(self, lateral_acceleration: float) -> float:
+    def torque_from_lateral_accel_siglin_func(lateral_acceleration: float) -> float:
+      def sig(val):
+        # https://timvieira.github.io/blog/post/2014/02/11/exp-normalize-trick
+        if val >= 0:
+          return 1 / (1 + exp(-val)) - 0.5
+        else:
+          z = exp(val)
+          return z / (1 + z) - 0.5
 
-    # The "lat_accel vs torque" relationship is assumed to be the sum of "sigmoid + linear" curves
-    # An important thing to consider is that the slope at 0 should be > 0 (ideally >1)
-    # This has big effect on the stability about 0 (noise when going straight)
-    # ToDo: To generalize to other GMs, explore tanh function as the nonlinear
-    non_linear_torque_params = NON_LINEAR_TORQUE_PARAMS.get(self.CP.carFingerprint)
-    assert non_linear_torque_params, "The params are not defined"
-    a, b, c, _ = non_linear_torque_params
-    steer_torque = (sig(lateral_acceleration * a) * b) + (lateral_acceleration * c)
-    return float(steer_torque)
+      # The "lat_accel vs torque" relationship is assumed to be the sum of "sigmoid + linear" curves
+      # An important thing to consider is that the slope at 0 should be > 0 (ideally >1)
+      # This has big effect on the stability about 0 (noise when going straight)
+      # ToDo: To generalize to other GMs, explore tanh function as the nonlinear
+      non_linear_torque_params = NON_LINEAR_TORQUE_PARAMS.get(self.CP.carFingerprint)
+      assert non_linear_torque_params, "The params are not defined"
+      a, b, c, _ = non_linear_torque_params
+      steer_torque = (sig(lateral_acceleration * a) * b) + (lateral_acceleration * c)
+      return float(steer_torque)
+    lataccel_values = np.arange(-5.0, 5.0, 0.01)
+    torque_values = [torque_from_lateral_accel_siglin_func(x) for x in lataccel_values]
+    assert min(torque_values) < -1 and max(torque_values) > 1, "The torque values should cover the range [-1, 1]"
+    return torque_values, lataccel_values
 
   def torque_from_lateral_accel(self) -> TorqueFromLateralAccelCallbackType:
     if self.CP.carFingerprint in NON_LINEAR_TORQUE_PARAMS:
-      lataccel_values = np.arange(-5.0, 5.0, 0.01)
-      torque_values = [self.torque_from_lateral_accel_siglin_func(x) for x in lataccel_values]
-      assert min(torque_values) < -1 and max(torque_values) > 1, "The torque values should cover the range [-1, 1]"
+      torque_values, lataccel_values = self.get_lataccel_torque_siglin()
       def torque_from_lateral_accel_siglin(lateral_acceleration: float, torque_params: structs.CarParams.LateralTorqueTuning):
         return np.interp(lateral_acceleration, lataccel_values, torque_values)
       return torque_from_lateral_accel_siglin
@@ -74,9 +76,7 @@ class CarInterface(CarInterfaceBase):
 
   def lateral_accel_from_torque(self) -> LateralAccelFromTorqueCallbackType:
     if self.CP.carFingerprint in NON_LINEAR_TORQUE_PARAMS:
-      lataccel_values = np.arange(-5.0, 5.0, 0.01)
-      torque_values = [self.torque_from_lateral_accel_siglin_func(x) for x in lataccel_values]
-      assert min(torque_values) < -1 and max(torque_values) > 1, "The torque values should cover the range [-1, 1]"
+      torque_values, lataccel_values = self.get_lataccel_torque_siglin()
       def lateral_accel_from_torque_siglin(torque: float, torque_params: structs.CarParams.LateralTorqueTuning):
         return np.interp(torque, torque_values, lataccel_values)
       return lateral_accel_from_torque_siglin
