@@ -171,6 +171,9 @@ class CarInterfaceBase(ABC):
                     docs: bool) -> structs.CarParamsSP:
     car_params_sp = structs.CarParamsSP()
 
+    platform = PLATFORMS[candidate]
+    car_params_sp.flags |= int(platform.config.sp_flags)
+
     return cls._get_params_sp(car_params, car_params_sp, candidate, fingerprint, car_fw, alpha_long, docs)
 
   @staticmethod
