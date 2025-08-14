@@ -209,6 +209,13 @@ class CAR(Platforms):
     {Bus.pt: 'honda_crv_ex_2017_can_generated', Bus.body: 'honda_crv_ex_2017_body_generated'},
     flags=HondaFlags.BOSCH_ALT_BRAKE,
   )
+  HONDA_CRV_6G = HondaBoschCANFDPlatformConfig(
+    [
+      HondaCarDocs("Honda CR-V 2023-25", "All"),
+      HondaCarDocs("Honda CR-V Hybrid 2023-25", "All"),
+    ],
+    CarSpecs(mass=1703, wheelbase=2.7, steerRatio=16.2, centerToFrontRatio=0.42),
+  )
   HONDA_CRV_HYBRID = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda CR-V Hybrid 2017-22", min_steer_speed=12. * CV.MPH_TO_MS)],
     # mass: mean of 4 models in kg, steerRatio: 12.3 is spec end-to-end
@@ -339,6 +346,7 @@ STEER_THRESHOLD = {
   CAR.HONDA_ACCORD_11G: 600,
   CAR.HONDA_PILOT_4G: 600,
   CAR.ACURA_MDX_4G_MMR: 600,
+  CAR.HONDA_CRV_6G: 600,
 }
 
 
