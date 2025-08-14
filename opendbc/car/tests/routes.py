@@ -25,9 +25,6 @@ non_tested_cars = [
   HYUNDAI.GENESIS_G90,
   VOLKSWAGEN.VOLKSWAGEN_CRAFTER_MK2,  # need a route from an ACC-equipped Crafter
   SUBARU.SUBARU_FORESTER_HYBRID,
-
-  # port extensions
-  HYUNDAI.KIA_CEED_PHEV_2022_NON_SCC,
 ]
 
 

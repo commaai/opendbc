@@ -599,14 +599,6 @@ class CAR(Platforms):
     flags=HyundaiFlags.RADAR_SCC,
   )
 
-  # port extensions
-  KIA_CEED_PHEV_2022_NON_SCC = HyundaiPlatformConfig(
-    [HyundaiCarDocs("Kia Ceed Plug-in Hybrid Non-SCC 2022", "No Smart Cruise Control (Non-SCC)", car_parts=CarParts.common([CarHarness.hyundai_i]))],
-    CarSpecs(mass=1650, wheelbase=2.65, steerRatio=13.75, tireStiffnessFactor=0.5),
-    flags=HyundaiFlags.HYBRID,
-    sp_flags=HyundaiFlagsSP.NON_SCC,
-  )
-
 
 class Buttons:
   NONE = 0
