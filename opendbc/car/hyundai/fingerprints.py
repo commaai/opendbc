@@ -1268,5 +1268,5 @@ FW_VERSIONS = {
     (Ecu.fwdCamera, 0x7c4, None): [
       b'\xf1\x00NU2 MFC  AT EUR LHD 1.00 1.02 99211-MA300 230502',
     ],
-},
+  },
 }
