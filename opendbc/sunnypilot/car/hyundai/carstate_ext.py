@@ -9,7 +9,6 @@ from enum import StrEnum
 
 from opendbc.car import Bus, structs
 from opendbc.can.parser import CANParser
-from opendbc.car.hyundai.values import HyundaiFlags
 from opendbc.sunnypilot.car.hyundai.values import HyundaiFlagsSP
 
 
@@ -27,12 +26,12 @@ class CarStateExt:
     self.aBasis = cp.vl["TCS13"]["aBasis"]
 
     if self.CP_SP.flags & HyundaiFlagsSP.NON_SCC:
-      cruise_available_msg = "LABEL11" if self.CP.flags & HyundaiFlags.EV else "E_CRUISE_CONTROL"
-      cruise_available_sig = "CC_React" if self.CP.flags & HyundaiFlags.EV else "CRUISE_LAMP_M"
-      cruise_enabled_msg = "LABEL11" if self.CP.flags & HyundaiFlags.EV else "E_CRUISE_CONTROL"
-      cruise_enabled_sig = "CC_ACT" if self.CP.flags & HyundaiFlags.EV else "CF_Lvr_CruiseSet"
-      cruise_speed_msg = "E_EMS11" if self.CP.flags & HyundaiFlags.EV else "ELECT_GEAR"
-      cruise_speed_sig = "Cruise_Limit_Target" if self.CP.flags & HyundaiFlags.EV else "SLC_SET_SPEED"
+      cruise_available_msg = "E_CRUISE_CONTROL"
+      cruise_available_sig = "CRUISE_LAMP_M"
+      cruise_enabled_msg = "E_CRUISE_CONTROL"
+      cruise_enabled_sig = "CF_Lvr_CruiseSet"
+      cruise_speed_msg = "ELECT_GEAR"
+      cruise_speed_sig = "SLC_SET_SPEED"
       ret.cruiseState.available = cp.vl[cruise_available_msg][cruise_available_sig] != 0
       ret.cruiseState.enabled = cp.vl[cruise_enabled_msg][cruise_enabled_sig] != 0
       ret.cruiseState.speed = cp.vl[cruise_speed_msg][cruise_speed_sig] * speed_conv

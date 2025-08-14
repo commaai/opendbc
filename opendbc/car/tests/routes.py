@@ -28,7 +28,6 @@ non_tested_cars = [
 
   # port extensions
   HYUNDAI.KIA_CEED_PHEV_2022_NON_SCC,
-  HYUNDAI.HYUNDAI_KONA_EV_NON_SCC,
 ]
 
 
