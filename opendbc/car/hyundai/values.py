@@ -600,6 +600,12 @@ class CAR(Platforms):
   )
 
   # port extensions
+  HYUNDAI_KONA_EV_NON_SCC = HyundaiPlatformConfig(
+    [HyundaiCarDocs("Hyundai Kona Electric Non-SCC 2019", "No Smart Cruise Control (Non-SCC)", car_parts=CarParts.common([CarHarness.hyundai_g]))],
+    HYUNDAI_KONA_EV.specs,
+    flags=HyundaiFlags.EV | HyundaiFlags.ALT_LIMITS,
+    sp_flags=HyundaiFlagsSP.NON_SCC,
+  )
   KIA_CEED_PHEV_2022_NON_SCC = HyundaiPlatformConfig(
     [HyundaiCarDocs("Kia Ceed Plug-in Hybrid Non-SCC 2022", "No Smart Cruise Control (Non-SCC)", car_parts=CarParts.common([CarHarness.hyundai_i]))],
     CarSpecs(mass=1650, wheelbase=2.65, steerRatio=13.75, tireStiffnessFactor=0.5),
