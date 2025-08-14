@@ -41,25 +41,20 @@ class CarInterface(CarInterfaceBase):
     else:
       return CarInterfaceBase.get_steer_feedforward_default
 
-  def get_lataccel_torque_siglin(self, lateral_acceleration: float) -> float:
-    def torque_from_lateral_accel_siglin_func(lateral_acceleration: float) -> float:
-      def sig(val):
-        # https://timvieira.github.io/blog/post/2014/02/11/exp-normalize-trick
-        if val >= 0:
-          return 1 / (1 + exp(-val)) - 0.5
-        else:
-          z = exp(val)
-          return z / (1 + z) - 0.5
+  def get_lataccel_torque_siglin(self) -> float:
 
+    def torque_from_lateral_accel_siglin_func(lateral_acceleration: float) -> float:
       # The "lat_accel vs torque" relationship is assumed to be the sum of "sigmoid + linear" curves
       # An important thing to consider is that the slope at 0 should be > 0 (ideally >1)
       # This has big effect on the stability about 0 (noise when going straight)
-      # ToDo: To generalize to other GMs, explore tanh function as the nonlinear
       non_linear_torque_params = NON_LINEAR_TORQUE_PARAMS.get(self.CP.carFingerprint)
       assert non_linear_torque_params, "The params are not defined"
       a, b, c, _ = non_linear_torque_params
-      steer_torque = (sig(lateral_acceleration * a) * b) + (lateral_acceleration * c)
+      sig_input = a * lateral_acceleration
+      sig = np.sign(sig_input) * (1 / (1 + exp(-fabs(sig_input))) - 0.5)
+      steer_torque = (sig * b) + (lateral_acceleration * c)
       return float(steer_torque)
+
     lataccel_values = np.arange(-5.0, 5.0, 0.01)
     torque_values = [torque_from_lateral_accel_siglin_func(x) for x in lataccel_values]
     assert min(torque_values) < -1 and max(torque_values) > 1, "The torque values should cover the range [-1, 1]"
