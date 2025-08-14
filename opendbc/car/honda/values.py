@@ -10,6 +10,7 @@ Ecu = structs.CarParams.Ecu
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 GearShifter = structs.CarState.GearShifter
 
+
 class CarControllerParams:
   # Allow small margin below -3.5 m/s^2 from ISO 15622:2018 since we
   # perform the closed loop control, and might need some
@@ -53,6 +54,7 @@ class HondaSafetyFlags(IntFlag):
   BOSCH_LONG = 2
   NIDEC_ALT = 4
   RADARLESS = 8
+  BOSCH_CANFD = 16
 
 
 class HondaFlags(IntFlag):
@@ -74,6 +76,7 @@ class HondaFlags(IntFlag):
   HAS_ALL_DOOR_STATES = 256  # Some Hondas have all door states, others only driver door
   HAS_EPB = 512
   ALLOW_MANUAL_TRANS = 1024
+
 
 # Car button codes
 class CruiseButtons:
@@ -165,6 +168,13 @@ class CAR(Platforms):
     CarSpecs(mass=3279 * CV.LB_TO_KG, wheelbase=2.83, steerRatio=16.33, centerToFrontRatio=0.39, tireStiffnessFactor=0.8467),
     {Bus.pt: 'honda_accord_2018_can_generated'},
   )
+  HONDA_ACCORD_11G = HondaBoschCANFDPlatformConfig(
+    [
+      HondaCarDocs("Honda Accord 2023-25", "All"),
+      HondaCarDocs("Honda Accord Hybrid 2023-25", "All"),
+  ],
+    CarSpecs(mass=3477 * CV.LB_TO_KG, wheelbase=2.83, steerRatio=16.0, centerToFrontRatio=0.39),
+  )
   HONDA_CIVIC_BOSCH = HondaBoschPlatformConfig(
     [
       HondaCarDocs("Honda Civic 2019-21", "All", video="https://www.youtube.com/watch?v=4Iz1Mz5LGF8",
@@ -199,6 +209,13 @@ class CAR(Platforms):
     {Bus.pt: 'honda_crv_ex_2017_can_generated', Bus.body: 'honda_crv_ex_2017_body_generated'},
     flags=HondaFlags.BOSCH_ALT_BRAKE,
   )
+  HONDA_CRV_6G = HondaBoschCANFDPlatformConfig(
+    [
+      HondaCarDocs("Honda CR-V 2023-25", "All"),
+      HondaCarDocs("Honda CR-V Hybrid 2023-25", "All"),
+    ],
+    CarSpecs(mass=1703, wheelbase=2.7, steerRatio=16.2, centerToFrontRatio=0.42),
+  )
   HONDA_CRV_HYBRID = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda CR-V Hybrid 2017-22", min_steer_speed=12. * CV.MPH_TO_MS)],
     # mass: mean of 4 models in kg, steerRatio: 12.3 is spec end-to-end
@@ -228,9 +245,13 @@ class CAR(Platforms):
     {Bus.pt: 'acura_rdx_2020_can_generated'},
   )
   HONDA_PILOT_4G = HondaBoschCANFDPlatformConfig(
-    [HondaCarDocs("Honda Pilot 2023", "All")],
-    CarSpecs(mass=4278 * CV.LB_TO_KG, wheelbase=2.86, centerToFrontRatio=0.428, steerRatio=16.0, tireStiffnessFactor=0.444),  # as spec
-    flags=HondaFlags.BOSCH_ALT_BRAKE,
+    [HondaCarDocs("Honda Pilot 2023-25", "All")],
+    CarSpecs(mass=4660 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.442, steerRatio=17.5),
+  )
+  # mid-model refresh
+  ACURA_MDX_4G_MMR = HondaBoschCANFDPlatformConfig(
+    [HondaCarDocs("Acura MDX 2025", "All except Type S")],
+    CarSpecs(mass=4544 * CV.LB_TO_KG, wheelbase=2.89, centerToFrontRatio=0.428, steerRatio=16.2),
   )
 
   # Nidec Cars
@@ -308,10 +329,32 @@ class CAR(Platforms):
   )
 
 
+HONDA_NIDEC_ALT_PCM_ACCEL = CAR.with_flags(HondaFlags.NIDEC_ALT_PCM_ACCEL)
+HONDA_NIDEC_ALT_SCM_MESSAGES = CAR.with_flags(HondaFlags.NIDEC_ALT_SCM_MESSAGES)
+HONDA_BOSCH = CAR.with_flags(HondaFlags.BOSCH)
+HONDA_BOSCH_RADARLESS = CAR.with_flags(HondaFlags.BOSCH_RADARLESS)
+HONDA_BOSCH_CANFD = CAR.with_flags(HondaFlags.BOSCH_CANFD)
+
+
+DBC = CAR.create_dbc_map()
+
+
+STEER_THRESHOLD = {
+  # default is 1200, overrides go here
+  CAR.ACURA_RDX: 400,
+  CAR.HONDA_CRV_EU: 400,
+  CAR.HONDA_ACCORD_11G: 600,
+  CAR.HONDA_PILOT_4G: 600,
+  CAR.ACURA_MDX_4G_MMR: 600,
+  CAR.HONDA_CRV_6G: 600,
+}
+
+
 HONDA_ALT_VERSION_REQUEST = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER]) + \
   p16(0xF112)
 HONDA_ALT_VERSION_RESPONSE = bytes([uds.SERVICE_TYPE.READ_DATA_BY_IDENTIFIER + 0x40]) + \
   p16(0xF112)
+
 
 FW_QUERY_CONFIG = FwQueryConfig(
   requests=[
@@ -348,9 +391,9 @@ FW_QUERY_CONFIG = FwQueryConfig(
   # Note that we still attempt to match with them when they are present
   # This is or'd with (ALL_ECUS - ESSENTIAL_ECUS) from fw_versions.py
   non_essential_ecus={
-    Ecu.eps: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_CIVIC_2022, CAR.HONDA_E, CAR.HONDA_HRV_3G],
+    Ecu.eps: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_CIVIC_2022, CAR.HONDA_E, CAR.HONDA_HRV_3G, *HONDA_BOSCH_CANFD],
     Ecu.vsa: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_CIVIC, CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_2022, CAR.HONDA_CRV_5G, CAR.HONDA_CRV_HYBRID,
-              CAR.HONDA_E, CAR.HONDA_HRV_3G, CAR.HONDA_INSIGHT],
+              CAR.HONDA_E, CAR.HONDA_HRV_3G, CAR.HONDA_INSIGHT, *HONDA_BOSCH_CANFD],
   },
   extra_ecus=[
     (Ecu.combinationMeter, 0x18da60f1, None),
@@ -362,18 +405,3 @@ FW_QUERY_CONFIG = FwQueryConfig(
     # (Ecu.unknown, 0x18DAB3F1, None),
   ],
 )
-
-STEER_THRESHOLD = {
-  # default is 1200, overrides go here
-  CAR.ACURA_RDX: 400,
-  CAR.HONDA_CRV_EU: 400,
-}
-
-HONDA_NIDEC_ALT_PCM_ACCEL = CAR.with_flags(HondaFlags.NIDEC_ALT_PCM_ACCEL)
-HONDA_NIDEC_ALT_SCM_MESSAGES = CAR.with_flags(HondaFlags.NIDEC_ALT_SCM_MESSAGES)
-HONDA_BOSCH = CAR.with_flags(HondaFlags.BOSCH)
-HONDA_BOSCH_RADARLESS = CAR.with_flags(HondaFlags.BOSCH_RADARLESS)
-HONDA_BOSCH_CANFD = CAR.with_flags(HondaFlags.BOSCH_CANFD)
-
-
-DBC = CAR.create_dbc_map()
