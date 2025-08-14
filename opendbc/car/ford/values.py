@@ -3,7 +3,8 @@ import re
 from dataclasses import dataclass, field, replace
 from enum import Enum, IntFlag
 
-from opendbc.car import AngleSteeringLimits, Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car import Bus, CarSpecs, DbcDict, PlatformConfig, Platforms, uds
+from opendbc.car.lateral import AngleSteeringLimits
 from opendbc.car.structs import CarParams
 from opendbc.car.docs_definitions import CarFootnote, CarHarness, CarDocs, CarParts, Column, \
                                                      Device
@@ -56,7 +57,6 @@ class FordFlags(IntFlag):
 class RADAR:
   DELPHI_ESR = 'ford_fusion_2018_adas'
   DELPHI_MRR = 'FORD_CADS'
-  DELPHI_MRR_64 = 'FORD_CADS_64'
 
 
 class Footnote(Enum):
@@ -86,6 +86,7 @@ class FordCarDocs(CarDocs):
     if CP.carFingerprint in (CAR.FORD_F_150_MK14, CAR.FORD_F_150_LIGHTNING_MK1, CAR.FORD_EXPEDITION_MK4):
       self.setup_video = "https://www.youtube.com/watch?v=MewJc9LYp9M"
 
+
 @dataclass
 class FordPlatformConfig(PlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {
@@ -107,12 +108,12 @@ class FordPlatformConfig(PlatformConfig):
 class FordCANFDPlatformConfig(FordPlatformConfig):
   dbc_dict: DbcDict = field(default_factory=lambda: {
     Bus.pt: 'ford_lincoln_base_pt',
-    Bus.radar: RADAR.DELPHI_MRR_64,
   })
 
   def init(self):
     super().init()
     self.flags |= FordFlags.CANFD
+
 
 @dataclass
 class FordF150LightningPlatform(FordCANFDPlatformConfig):
@@ -137,7 +138,7 @@ class CAR(Platforms):
   )
   FORD_ESCAPE_MK4_5 = FordCANFDPlatformConfig(
     [
-      FordCarDocs("Ford Escape 2023-24", hybrid=True, plug_in_hybrid=True),
+      FordCarDocs("Ford Escape 2023-24", hybrid=True, plug_in_hybrid=True, setup_video="https://www.youtube.com/watch?v=M6uXf4b2SHM"),
       FordCarDocs("Ford Kuga Hybrid 2024", "All"),
       FordCarDocs("Ford Kuga Plug-in Hybrid 2024", "All"),
     ],
@@ -174,7 +175,7 @@ class CAR(Platforms):
     CarSpecs(mass=1650, wheelbase=3.076, steerRatio=17.0),
   )
   FORD_MUSTANG_MACH_E_MK1 = FordCANFDPlatformConfig(
-    [FordCarDocs("Ford Mustang Mach-E 2021-23", "All", setup_video="https://www.youtube.com/watch?v=AR4_eTF3b_A")],
+    [FordCarDocs("Ford Mustang Mach-E 2021-24", "All", setup_video="https://www.youtube.com/watch?v=AR4_eTF3b_A")],
     CarSpecs(mass=2200, wheelbase=2.984, steerRatio=17.0),  # TODO: check steer ratio
   )
   FORD_RANGER_MK2 = FordCANFDPlatformConfig(
