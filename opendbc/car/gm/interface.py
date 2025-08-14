@@ -9,7 +9,7 @@ from opendbc.car.gm.carcontroller import CarController
 from opendbc.car.gm.carstate import CarState
 from opendbc.car.gm.radar_interface import RadarInterface, RADAR_HEADER_MSG, CAMERA_DATA_HEADER_MSG
 from opendbc.car.gm.values import CAR, CarControllerParams, EV_CAR, CAMERA_ACC_CAR, SDGM_CAR, ALT_ACCS, CanBus, GMSafetyFlags
-from opendbc.car.interfaces import CarInterfaceBase, TorqueFromLateralAccelCallbackType, LatControlInputs, NanoFFModel
+from opendbc.car.interfaces import CarInterfaceBase, TorqueFromLateralAccelCallbackType
 
 TransmissionType = structs.CarParams.TransmissionType
 NetworkLocation = structs.CarParams.NetworkLocation
@@ -45,8 +45,7 @@ class CarInterface(CarInterfaceBase):
     else:
       return CarInterfaceBase.get_steer_feedforward_default
 
-  def torque_from_lateral_accel_siglin(self, latcontrol_inputs: LatControlInputs, torque_params: structs.CarParams.LateralTorqueTuning,
-                                       gravity_adjusted: bool) -> float:
+  def torque_from_lateral_accel_siglin(self, lateral_acceleration: float, torque_params: structs.CarParams.LateralTorqueTuning) -> float:
     def sig(val):
       # https://timvieira.github.io/blog/post/2014/02/11/exp-normalize-trick
       if val >= 0:
@@ -62,20 +61,10 @@ class CarInterface(CarInterfaceBase):
     non_linear_torque_params = NON_LINEAR_TORQUE_PARAMS.get(self.CP.carFingerprint)
     assert non_linear_torque_params, "The params are not defined"
     a, b, c, _ = non_linear_torque_params
-    steer_torque = (sig(latcontrol_inputs.lateral_acceleration * a) * b) + (latcontrol_inputs.lateral_acceleration * c)
+    steer_torque = (sig(lateral_acceleration * a) * b) + (lateral_acceleration * c)
     return float(steer_torque)
 
-  def torque_from_lateral_accel_neural(self, latcontrol_inputs: LatControlInputs, torque_params: structs.CarParams.LateralTorqueTuning,
-                                       gravity_adjusted: bool) -> float:
-    inputs = list(latcontrol_inputs)
-    if gravity_adjusted:
-      inputs[0] += inputs[1]
-    return float(self.neural_ff_model.predict(inputs))
-
   def torque_from_lateral_accel(self) -> TorqueFromLateralAccelCallbackType:
-    # if self.CP.carFingerprint == CAR.CHEVROLET_BOLT_EUV:
-    #   self.neural_ff_model = NanoFFModel(NEURAL_PARAMS_PATH, self.CP.carFingerprint)
-    #   return self.torque_from_lateral_accel_neural
     if self.CP.carFingerprint in NON_LINEAR_TORQUE_PARAMS:
       return self.torque_from_lateral_accel_siglin
     else:
