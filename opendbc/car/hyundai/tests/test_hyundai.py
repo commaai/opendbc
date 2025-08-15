@@ -38,7 +38,6 @@ NO_DATES_PLATFORMS = {
   CAR.HYUNDAI_SONATA_LF,
   CAR.HYUNDAI_VELOSTER,
   CAR.HYUNDAI_KONA_2022,
-  CAR.HYUNDAI_MUFASA_1ST_GEN,
 }
 
 CANFD_EXPECTED_ECUS = {Ecu.fwdCamera, Ecu.fwdRadar}
@@ -148,7 +147,8 @@ class TestHyundaiFingerprint:
   def test_platform_code_ecus_available(self, subtests):
     # TODO: add queries for these non-CAN FD cars to get EPS
     no_eps_platforms = CANFD_CAR | {CAR.KIA_SORENTO, CAR.KIA_OPTIMA_G4, CAR.KIA_OPTIMA_G4_FL, CAR.KIA_OPTIMA_H,
-                                    CAR.KIA_OPTIMA_H_G4_FL, CAR.HYUNDAI_SONATA_LF, CAR.HYUNDAI_TUCSON, CAR.GENESIS_G90, CAR.GENESIS_G80, CAR.HYUNDAI_ELANTRA}
+                                    CAR.KIA_OPTIMA_H_G4_FL, CAR.HYUNDAI_SONATA_LF, CAR.HYUNDAI_TUCSON, CAR.GENESIS_G90, 
+                                    CAR.GENESIS_G80, CAR.HYUNDAI_ELANTRA, CAR.HYUNDAI_MUFASA_1ST_GEN}
 
     # Asserts ECU keys essential for fuzzy fingerprinting are available on all platforms
     for car_model, ecus in FW_VERSIONS.items():
