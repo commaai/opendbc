@@ -1266,4 +1266,12 @@ FW_VERSIONS = {
       b'\xf1\x00T01G00BL  T01I00A1  DOS2T16X4XI00NS0\x99L\xeeq',
     ],
   },
+  CAR.HYUNDAI_MUFASA_1ST_GEN: {
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00NU2_ RDR -----      1.00 1.00 99110-MA300         ',
+    ],
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00NU2 MFC  AT EUR LHD 1.00 1.02 99211-MA300 230502',
+    ],
+  },
 }

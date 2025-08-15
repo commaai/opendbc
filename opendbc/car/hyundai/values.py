@@ -377,6 +377,11 @@ class CAR(Platforms):
     CarSpecs(mass=1690, wheelbase=3.055, steerRatio=17),  # mass: from https://www.hyundai-motor.com.tw/clicktobuy/custin#spec_0, steerRatio: from learner
     flags=HyundaiFlags.CHECKSUM_CRC8,
   )
+  HYUNDAI_MUFASA_1ST_GEN = HyundaiCanFDPlatformConfig(
+    [HyundaiCarDocs("Hyundai Mufasa 2025", "All", car_parts=CarParts.common([CarHarness.hyundai_l]))],
+    CarSpecs(mass=1836, wheelbase=2.70, steerRatio=13.0),  # from carParams
+    flags=HyundaiFlags.CANFD | HyundaiFlags.RADAR_SCC,
+  )
 
   # Kia
   KIA_FORTE = HyundaiPlatformConfig(
