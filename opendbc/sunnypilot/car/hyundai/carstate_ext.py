@@ -30,7 +30,7 @@ class CarStateExt:
       cruise_available_msg = "LABEL11" if self.CP.flags & HyundaiFlags.EV else "E_CRUISE_CONTROL"
       cruise_available_sig = "CC_React" if self.CP.flags & HyundaiFlags.EV else "CRUISE_LAMP_M"
       cruise_enabled_msg = "LABEL11" if self.CP.flags & HyundaiFlags.EV else "E_CRUISE_CONTROL"
-      cruise_enabled_sig = "CC_ACT" if self.CP.flags & HyundaiFlags.EV else "CF_Lvr_CruiseSet"
+      cruise_enabled_sig = "CC_ACT" if self.CP.flags & HyundaiFlags.EV else "CRUISE_LAMP_S"
       cruise_speed_msg = "E_EMS11" if self.CP.flags & HyundaiFlags.EV else "ELECT_GEAR"
       cruise_speed_sig = "Cruise_Limit_Target" if self.CP.flags & HyundaiFlags.EV else "SLC_SET_SPEED"
       ret.cruiseState.available = cp.vl[cruise_available_msg][cruise_available_sig] != 0

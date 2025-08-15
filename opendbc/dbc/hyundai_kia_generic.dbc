@@ -1539,7 +1539,7 @@ BO_ 1355 EV_PC6: 8 CGW
 
 BO_ 1429 E_CRUISE_CONTROL: 8 XXX
  SG_ CRUISE_LAMP_M : 50|1@0+ (1,0) [0|1] "" XXX
- SG_ CF_Lvr_CruiseSet : 51|1@0+ (1,0) [0|1] "" XXX
+ SG_ CRUISE_LAMP_S : 51|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 1430 EV_PC2: 8 CGW
  SG_ CR_Ldc_ActVol_LS_V : 32|8@1+ (0.1,0) [0|0] "V" Vector__XXX
