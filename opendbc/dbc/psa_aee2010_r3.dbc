@@ -162,8 +162,8 @@ BO_ 773 STEERING_ALT: 7 XXX
  SG_ ANGLE : 7|16@0- (0.1,0) [-3276.8|3276.7] "degrees" XXX
  SG_ RATE : 23|8@0+ (1,0) [0|255] "" XXX
  SG_ RATE_SIGN : 31|1@0+ (1,0) [0|1] "" XXX
- SG_ COUNTER : 35|4@0+ (1,0) [0|255] "" XXX
- SG_ CHECKSUM : 39|4@0+ (1,0) [0|15] "" XXX
+ SG_ 0_COUNTER : 35|4@0+ (1,0) [0|255] "" XXX
+ SG_ 0_CHECKSUM : 39|4@0+ (1,0) [0|15] "" XXX
  SG_ RATE_ALT : 47|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 781 Dyn4_FRE: 8 CDS___Fahrdynamikregelung
@@ -833,6 +833,7 @@ CM_ SG_ 758 CHECKSUM_TRANSM_DYN_ACC2 "CHK_INI = 0x7";
 CM_ SG_ 758 PROCESS_COUNTER_4B_ACC2 "This counter increments from 0 to 15 at each activation of the calculation process.";
 CM_ SG_ 773 ANGLE "-565 to 560, seems like estimate and not init";
 CM_ SG_ 773 RATE_SIGN "1=moving clockwise, 0=moving anticlockwise";
+CM_ SG_ 773 0_CHECKSUM "TODO: find checksum";
 CM_ BO_ 840 "ID 348:  Engine Dynamic Frame 2 (Period time 20 ms)";
 CM_ SG_ 840 P165_FlFCD_stWtLvlSensDebVal "P165: Water in fuel indication (1 = water in fuel detected / 0 = no water in fuel)";
 CM_ SG_ 840 P152_Gearbx_stGear "P152: Gear detected by ratio vehicule speed to engine speed";
