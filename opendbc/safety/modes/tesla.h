@@ -18,21 +18,24 @@ static uint8_t tesla_get_counter(const CANPacket_t *msg) {
 
   uint8_t cnt = 0;
   if (msg->addr == 0x2b9U) {
-    // Signal: DAS_controlCounter
+    // DAS_controlCounter
     cnt = msg->data[6] >> 5;
   } else if (msg->addr == 0x488U) {
-    // Signal: DAS_steeringControlCounter
+    // DAS_steeringControlCounter
     cnt = msg->data[2] & 0x0FU;
-  } else if ((msg->addr == 0x257U) || (msg->addr == 0x118U) || (msg->addr == 0x39dU) || (msg->addr == 0x286U) || (msg->addr == 0x311U)) {
-    // Signal: DI_speedCounter, DI_systemStatusCounter, IBST_statusCounter, DI_locStatusCounter, UI_warningCounter
-    cnt = msg->data[1] & 0x0FU;
   } else if (msg->addr == 0x155U) {
-    // Signal: ESP_wheelRotationCounter
+    // ESP_wheelRotationCounter
     cnt = msg->data[6] >> 4;
   } else if (msg->addr == 0x370U) {
-    // Signal: EPAS3S_sysStatusCounter
+    // EPAS3S_sysStatusCounter
     cnt = msg->data[6] & 0x0FU;
   } else {
+    // DI_speedCounter
+    // DI_systemStatusCounter
+    // IBST_statusCounter
+    // DI_locStatusCounter
+    // UI_warningCounter
+    cnt = msg->data[1] & 0x0FU;
   }
   return cnt;
 }
@@ -40,25 +43,27 @@ static uint8_t tesla_get_counter(const CANPacket_t *msg) {
 static int _tesla_get_checksum_byte(const int addr) {
   int checksum_byte = -1;
   if ((addr == 0x370) || (addr == 0x2b9) || (addr == 0x155)) {
-    // Signal: EPAS3S_sysStatusChecksum, DAS_controlChecksum, ESP_wheelRotationChecksum
+    // EPAS3S_sysStatusChecksum, DAS_controlChecksum, ESP_wheelRotationChecksum
     checksum_byte = 7;
   } else if (addr == 0x488) {
-    // Signal: DAS_steeringControlChecksum
+    // DAS_steeringControlChecksum
     checksum_byte = 3;
-  } else if ((addr == 0x257) || (addr == 0x118) || (addr == 0x39d) || (addr == 0x286) || (addr == 0x311)) {
-    // Signal: DI_speedChecksum, DI_systemStatusChecksum, IBST_statusChecksum, DI_locStatusChecksum, UI_warningChecksum
+  } else  {
+    // UI_warningChecksum
+    // DI_speedChecksum
+    // DI_systemStatusChecksum
+    // IBST_statusChecksum
+    // DI_locStatusChecksum
     checksum_byte = 0;
-  } else {
   }
+
   return checksum_byte;
 }
 
 static uint32_t tesla_get_checksum(const CANPacket_t *msg) {
   uint8_t chksum = 0;
   int checksum_byte = _tesla_get_checksum_byte(msg->addr);
-  if (checksum_byte != -1) {
-    chksum = msg->data[checksum_byte];
-  }
+  chksum = msg->data[checksum_byte];
   return chksum;
 }
 
@@ -66,13 +71,11 @@ static uint32_t tesla_compute_checksum(const CANPacket_t *msg) {
   uint8_t chksum = 0;
   int checksum_byte = _tesla_get_checksum_byte(msg->addr);
 
-  if (checksum_byte != -1) {
-    chksum = (uint8_t)((msg->addr & 0xFFU) + ((msg->addr >> 8) & 0xFFU));
-    int len = GET_LEN(msg);
-    for (int i = 0; i < len; i++) {
-      if (i != checksum_byte) {
-        chksum += msg->data[i];
-      }
+  chksum = (uint8_t)((msg->addr & 0xFFU) + ((msg->addr >> 8) & 0xFFU));
+  int len = GET_LEN(msg);
+  for (int i = 0; i < len; i++) {
+    if (i != checksum_byte) {
+      chksum += (uint8_t)msg->data[i];
     }
   }
   return chksum;
@@ -81,12 +84,12 @@ static uint32_t tesla_compute_checksum(const CANPacket_t *msg) {
 static bool tesla_get_quality_flag_valid(const CANPacket_t *msg) {
 
   bool valid = false;
-  if (msg->addr == 0x155U) {
-    valid = (msg->data[5] & 0x1U) == 0x1U;  // ESP_wheelSpeedsQF
-  } else if (msg->addr == 0x39dU) {
+  if (msg->addr == 0x39dU) {
     int user_brake_status = msg->data[2] & 0x03U;
     valid = (user_brake_status != 0) && (user_brake_status != 3);  // IBST_driverBrakeApply=NOT_INIT_OR_OFF, FAULT
-  } else {
+  }else{
+    // msg->addr == 0x155U
+    valid = (msg->data[5] & 0x1U) == 0x1U;  // ESP_wheelSpeedsQF
   }
   return valid;
 }
