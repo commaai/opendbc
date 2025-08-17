@@ -91,7 +91,7 @@ BO_ 272 LKAS_ALT: 32 XXX
  SG_ LKA_SysIndReq : 38|3@1+ (1,0) [0|7] "" ADAS_DRV
  SG_ StrTqReqVal : 41|11@1+ (0.0078125,-8) [-8|7.9921875] "Nm" ADAS_DRV
  SG_ ActToiSta : 52|2@1+ (1,0) [0|3] "" ADAS_DRV
- SG_ LKA_ToiFltSta : 54|2@1+ (1,0) [0|3] "" ADAS_DRV
+ SG_ ToiFltSta : 54|2@1+ (1,0) [0|3] "" ADAS_DRV
  SG_ LFA_BUTTON : 56|1@1+ (1,0) [0|255] "" XXX
  SG_ LKA_SysWrn : 60|4@1+ (1,0) [0|15] "" ADAS_DRV
  SG_ Damping_Gain : 64|8@1+ (1,0) [0|255] "" CGW
@@ -99,6 +99,7 @@ BO_ 272 LKAS_ALT: 32 XXX
  SG_ LKA_UsmMod : 80|2@1+ (1,0) [0|3] "" ADAS_DRV
  SG_ ADAS_StrAnglReqVal : 82|14@1- (0.1,0) [0|176.7] "Deg" GW_RGW,MDPS,SFA
  SG_ ADAS_ACIAnglTqRedcGainVal : 96|8@1+ (0.004,0) [0|1] "" GW_RGW,MDPS,SFA
+ SG_ FCA_ESA_CtrlSta : 107|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 282 FR_CMR_01_10ms: 16 FR_CMR
  SG_ FR_CMR_Crc1Val : 0|16@1+ (1,0) [0|0] "" Dummy,IBU_HS,vBDM
@@ -143,19 +144,19 @@ BO_ 298 LFA: 16 ADRV
  SG_ LKA_SysIndReq : 38|3@1+ (1,0) [0|7] "" CLU,RR_C_RDR,CGW
  SG_ StrTqReqVal : 41|11@1+ (0.0078125,-8) [-8|7.9921875] "Nm" CGW
  SG_ ActToiSta : 52|2@1+ (1,0) [0|3] "" CLU,CGW
- SG_ ADAS_ToiFltSta : 54|2@1+ (1,0) [0|3] "" CGW
- SG_ LFA_BUTTON : 56|1@0+ (1,0) [0|1] "" XXX
+ SG_ ToiFltSta : 54|2@1+ (1,0) [0|3] "" CGW
+ SG_ LFA_BUTTON : 56|1@0+ (1,0) [0|255] "" XXX
  SG_ BCA_Rear_WrnSta : 57|3@1+ (1,0) [0|255] "" ADRV
  SG_ LKA_SysWrn : 60|4@1+ (1,0) [0|15] "" CLU,CGW
  SG_ FCA_LO_WrnSta : 64|1@1+ (1,0) [0|1] "" ADRV
- SG_ STEER_MODE : 65|3@1+ (1,0) [0|1] "" ADRV
- SG_ FCA_LS_WrnSta : 68|2@1+ (1,0) [0|3] "" ADRV
- SG_ NEW_SIGNAL_2 : 70|1@0+ (1,0) [0|3] "" ADRV
- SG_ SCC_TakeoverReq_CLU_AMP_PE_02_Warn_Sound : 72|2@1+ (1,0) [0|255] "" ADRV
+ SG_ FCA_LS_WrnSta : 68|1@1+ (1,0) [0|1] "" ADRV
+ SG_ LKA_OnOffEquip2Sta : 72|2@1+ (1,0) [0|255] "" ADRV
  SG_ LKA_UsmMod : 80|2@1+ (1,0) [0|3] "" CLU,CGW
- SG_ Info_PedtrnDst : 84|3@1+ (1,0) [0|7] "" ADAS_DRV
+ SG_ Info_PedtrnDst : 84|3@0+ (1,0) [0|7] "" ADAS_DRV
  SG_ ELK_SysFlrSta : 85|5@1+ (1,0) [0|31] "" ADRV
  SG_ ELK_SymbDisp : 90|3@1+ (1,0) [0|7] "" ADRV
+ SG_ FCA_ESA_WrnSta : 93|1@1+ (1,0) [0|7] "" ADRV
+ SG_ FCA_ESA_CtrlSta : 101|1@1+ (1,0) [0|7] "" ADRV
  SG_ Damping_Gain : 104|8@1+ (1,0) [0|255] "" CGW
 
 BO_ 304 GEAR_SHIFTER: 16 XXX
@@ -691,7 +692,7 @@ CM_ SG_ 203 ADAS_ACIAnglTqRedcGainVal "(LFA) ADAS AngleControlInterface Angle To
 CM_ SG_ 203 FCA_ESA_ActvSta "FCA_ESA Active State";
 CM_ SG_ 203 FCA_ESA_TqBstGainVal "FCA_ESA Torque Boost Gain Value";
 CM_ BO_ 272 "Alternative LKAS message, used on cars such as 2023 Ioniq 6, 2nd gen Kona. Matches LKAS except size is 32 bytes";
-CM_ SG_ 272 LKA_ToiFltSta "This fault flag is set when a fault in the LKA system has been detected by the LKA ECU such that LKA can no longer function. CAN failures, internal video ECU failures, hard-wired component (e.g. master switch) failures and other system logic failures are";
+CM_ SG_ 272 ToiFltSta "This fault flag is set when a fault in the LKA system has been detected by the LKA ECU such that LKA can no longer function. CAN failures, internal video ECU failures, hard-wired component (e.g. master switch) failures and other system logic failures are";
 CM_ SG_ 272 ADAS_StrAnglReqVal "(LKAS) ADAS Steering Angle Request Value; Capped at 176.7; tracks MDPS->STEERING_ANGLE when not engaged, not STEERING_SENSORS->STEERING_ANGLE";
 CM_ SG_ 272 ADAS_ACIAnglTqRedcGainVal "(LKAS) ADAS AngleControlInterface Angle Torque Reduction Gain Value";
 CM_ BO_ 282 "Sent by the camera containing DAW (Driver Attention Warning) information and information about HBA (High Beam Assist).";
@@ -725,13 +726,12 @@ CM_ SG_ 298 LKA_StrSnd "LKA_SteeringSound ##2G##LDW_LKA - LKA11 - CF_LKA_Steer_S
 CM_ SG_ 298 LKA_SysIndReq "LKA_SystemIndicatorRequest ##2G##LDW_LKA - LKA11 - CF_LKA_SymbolState";
 CM_ SG_ 298 StrTqReqVal "This is the driver torque overlay demand value. A negative value represents a torque that would accelerate the steering wheel in a clockwise direction. This signal is always zero whilst the TOI is inactive.";
 CM_ SG_ 298 ActToiSta "This is a flag that is set to 1 when requesting the steering to activate the torque overlay interface (TOI).  This must be done before an attempt is made to request non-zero steering torque overlay.";
-CM_ SG_ 298 ADAS_ToiFltSta "This fault flag is set when a fault in the LKA system has been detected by the LKA ECU such that LKA can no longer function. CAN failures, internal video ECU failures, hard-wired component (e.g. master switch) failures and other system logic failures are";
+CM_ SG_ 298 ToiFltSta "This fault flag is set when a fault in the LKA system has been detected by the LKA ECU such that LKA can no longer function. CAN failures, internal video ECU failures, hard-wired component (e.g. master switch) failures and other system logic failures are";
 CM_ SG_ 298 LKA_SysWrn "A signal that provides additional information on the operation of the LKA system for the HMI to display to the driver. This includes additional fault information, reasons for unavailability of the system and additional warnings like the hands-off warning";
 CM_ SG_ 298 FCA_LS_WrnSta "(Reverse Engineered) This signal was observed while ELK was taking over to prevent a blind spot collision.";
 CM_ SG_ 298 LKA_UsmMod "This signal indicates LKA USM Mode";
 CM_ SG_ 298 ELK_SymbDisp "Emergency Lane-Keeping";
 CM_ SG_ 298 Damping_Gain "ADAS Damping Gain for MDPS";
-CM_ SG_ 298 Info_PedtrnDst "Distance of the nearest pedestrian";
 CM_ SG_ 352 SET_ME_9 "has something to do with AEB settings";
 CM_ SG_ 373 ACCEnable "Likely a copy of CAN's TCS13->ACCEnable";
 CM_ SG_ 373 DriverBraking "Likely derived from BRAKE->BRAKE_POSITION";
@@ -879,7 +879,7 @@ VAL_ 272 LKA_StrSnd 0 "Off" 1 "Warning" 2 "Reserved" 3 "Reserved";
 VAL_ 272 LKA_SysIndReq 0 "Off" 1 "Unavailable_(Grey On)" 2 "Lane Recognized_(Green On)" 3 "Lane Departure_(Green Blink)" 4 "System Fail_(Orange On)" 5 "Not Calibrated_(Orange Blink)" 6 "Regulation_(Orange On)" 7 "Reserved";
 VAL_ 272 StrTqReqVal 2046 "Reserved" 2047 "Invalid";
 VAL_ 272 ActToiSta 0 "De-activate TOI" 1 "Activate TOI" 2 "Reserved" 3 "Error indicator";
-VAL_ 272 LKA_ToiFltSta 0 "No Fault" 1 "Fault" 2 "Reserved" 3 "Error indicatorr";
+VAL_ 272 ToiFltSta 0 "No Fault" 1 "Fault" 2 "Reserved" 3 "Error indicatorr";
 VAL_ 272 LKA_SysWrn 0 "No Info" 1 "Reserved" 2 "Reserved" 3 "Reserved" 4 "Hands-Off Warning 1" 5 "Hands-Off Warning 2" 6 "Hands-Off Warning 3" 7 "Reserved" 8 "Reserved" 9 "System Automatic off" 10 "Reserved" 11 "Reserved" 12 "Reserved" 13 "Reserved" 14 "Reserved" 15 "System Fail";
 VAL_ 272 LKA_UsmMod 0 "NONE" 1 "LKA 1 mode" 2 "Reserved" 3 "LDW";
 VAL_ 272 ADAS_ACIAnglTqRedcGainVal 0 "0x0x00~0xFA:Real Values" 250 "0x0x00~0xFA:Real Values" 251 "RESERVED" 252 "RESERVED" 253 "RESERVED" 254 "RESERVED" 255 "RESERVED";
@@ -905,12 +905,11 @@ VAL_ 298 LKA_StrSnd 0 "Off" 1 "Warning" 2 "Reserved" 3 "Reserved";
 VAL_ 298 LKA_SysIndReq 0 "Off" 1 "Unavailable_(Grey On)" 2 "Lane Recognized_(Green On)" 3 "Lane Departure_(Green Blink)" 4 "System Fail_(Orange On)" 5 "Not Calibrated_(Orange Blink)" 6 "Regulation_(Orange On)" 7 "Reserved";
 VAL_ 298 StrTqReqVal 2046 "Reserved" 2047 "Invalid";
 VAL_ 298 ActToiSta 0 "De-activate TOI" 1 "Activate TOI" 2 "Reserved" 3 "Error indicator";
-VAL_ 298 ADAS_ToiFltSta 0 "No Fault" 1 "Fault" 2 "Reserved" 3 "Error indicatorr";
+VAL_ 298 ToiFltSta 0 "No Fault" 1 "Fault" 2 "Reserved" 3 "Error indicatorr";
 VAL_ 298 LKA_SysWrn 0 "No Info" 1 "Reserved" 2 "Reserved" 3 "Reserved" 4 "Hands-Off Warning 1" 5 "Hands-Off Warning 2" 6 "Hands-Off Warning 3" 7 "Reserved" 8 "Reserved" 9 "System Automatic off" 10 "Reserved" 11 "Reserved" 12 "Reserved" 13 "Reserved" 14 "Reserved" 15 "System Fail";
 VAL_ 298 FCA_LS_WrnSta 3 "ELK Steering to the right";
 VAL_ 298 LKA_UsmMod 0 "NONE" 1 "LKA 1 mode" 2 "Reserved" 3 "LDW";
 VAL_ 298 ELK_SymbDisp 3 "Evasive Action Taking Place";
-VAL_ 298 Info_PedtrnDst 0 "15m~(Default)" 1 "10~15m" 2 "5~10m" 3 "0~5m" 4 "Reserved" 5 "Reserved" 6 "Reserved" 7 "Invalid" ;
 VAL_ 304 PARK_BUTTON 1 "Pressed" 2 "Not Pressed";
 VAL_ 304 KNOB_POSITION 1 "R" 2 "N (on R side)" 3 "Centered" 4 "N (on D side)" 5 "D";
 VAL_ 304 GEAR 1 "P" 2 "R" 3 "N" 4 "D";
