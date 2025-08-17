@@ -37,7 +37,7 @@ class CanBus(CanBusBase):
 
 
 def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_torque):
-  common_values = {
+  values = {
     "LKA_OptUsmSta": 2,
     "LKA_SysIndReq": 2 if enabled else 1,
     "StrTqReqVal": apply_torque,
@@ -45,22 +45,17 @@ def create_steering_messages(packer, CP, CAN, enabled, lat_active, apply_torque)
     "ActToiSta": 1 if lat_active else 0,
     "Damping_Gain": 100,  # can potentially tuned for better perf [3, 200]
     "LKA_UsmMod": 0,  # hide LKAS settings
+    "LKA_RcgSta": 0,  # lane recognition status (0 for "not recognized")
   }
-
-  lkas_values = copy.copy(common_values)
-  lkas_values["LKA_AVAILABLE"] = 0
-
-  lfa_values = copy.copy(common_values)
-  lfa_values["NEW_SIGNAL_1"] = 0
 
   ret = []
   if CP.flags & HyundaiFlags.CANFD_LKA_STEERING:
     lkas_msg = "LKAS_ALT" if CP.flags & HyundaiFlags.CANFD_LKA_STEERING_ALT else "LKAS"
     if CP.openpilotLongitudinalControl:
-      ret.append(packer.make_can_msg("LFA", CAN.ECAN, lfa_values))
-    ret.append(packer.make_can_msg(lkas_msg, CAN.ACAN, lkas_values))
+      ret.append(packer.make_can_msg("LFA", CAN.ECAN, values))
+    ret.append(packer.make_can_msg(lkas_msg, CAN.ACAN, values))
   else:
-    ret.append(packer.make_can_msg("LFA", CAN.ECAN, lfa_values))
+    ret.append(packer.make_can_msg("LFA", CAN.ECAN, values))
 
   return ret
 
