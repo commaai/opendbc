@@ -707,7 +707,7 @@ CM_ SG_ 373 ACCEnable "Likely a copy of CAN's TCS13->ACCEnable";
 CM_ SG_ 373 DriverBraking "Likely derived from BRAKE->BRAKE_POSITION";
 CM_ SG_ 373 DriverBrakingLowSens "Higher threshold version of DriverBraking";
 CM_ SG_ 373 PROBABLY_EQUIP "aeb equip?";
-CM_ BO_ 416 "SCC_CONTROL, this is the signal responsible for longitudinal control and a few warnings related to it.";
+CM_ BO_ 416 "Known of the official DBC as ADAS_CMD_20_20ms, this is the signal responsible for longitudinal control and a few warnings related to it.";
 CM_ SG_ 416 SCC_ObjDstVal "This signal provides the distance to the in lane detected SCC object regarding to the own vehicle. - 자차선상의 전방 인식된 물체와의 거리";
 CM_ SG_ 416 SCC_ObjRelSpdVal "This signal provides the relative speed to the in lane detected SCC object regarding to the own vehicle. - 자차선상의 전방 인식된 물체와 자차간 상대 속도";
 CM_ SG_ 416 SCC_ObjLatPosVal "This signal provides the lateral position of the detected SCC object regarding to the own vehicle.  The position of the SCC object on the left side in driving direction of the vehicle longitudinal axis correlates with a negative signal value.  Thus an";
