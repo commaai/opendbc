@@ -223,6 +223,7 @@ BO_ 702 CAM_0x2be: 32 CAMERA
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
 
+CM_ BO_ 80 "Known in official DBC as L_ADAS_CMD_30_10ms";
 CM_ SG_ 80 StrTqReqVal "This is the driver torque overlay demand value. A negative value represents a torque that would accelerate the steering wheel in a clockwise direction. This signal is always zero whilst the TOI is inactive.";
 CM_ SG_ 80 ActToiSta "This is a flag that is set to 1 when requesting the steering to activate the torque overlay interface (TOI).  This must be done before an attempt is made to request non-zero steering torque overlay.";
 CM_ SG_ 80 LKA_ToiFltSta "This fault flag is set when a fault in the LKA system has been detected by the LKA ECU such that LKA can no longer function. CAN failures, internal video ECU failures, hard-wired component (e.g. master switch) failures and other system logic failures are";
