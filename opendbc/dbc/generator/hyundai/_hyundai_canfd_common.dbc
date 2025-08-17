@@ -39,21 +39,21 @@ BU_: XXX CAMERA FRONT_RADAR ADRV APRK
 BO_ 80 LKAS: 16 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
- SG_ LKA_OptUsmSta : 24|3@1+ (1,0) [0|7] ""  ADAS_DRV
- SG_ LKA_RcgSta : 27|3@1+ (1,0) [0|7] ""  ADAS_DRV
- SG_ LKA_LHLnWrnSta : 30|2@1+ (1,0) [0|3] ""  ADAS_DRV
- SG_ LKA_RHLnWrnSta : 32|2@1+ (1,0) [0|3] ""  ADAS_DRV
- SG_ LKA_HndsoffSnd : 34|2@1+ (1,0) [0|3] ""  ADAS_DRV
- SG_ LKA_StrSnd : 36|2@1+ (1,0) [0|3] ""  ADAS_DRV
- SG_ LKA_SysIndReq : 38|3@1+ (1,0) [0|7] ""  ADAS_DRV
- SG_ StrTqReqVal : 41|11@1+ (0.0078125,-8) [-8|7.9921875] "Nm"  ADAS_DRV
- SG_ ActToiSta : 52|2@1+ (1,0) [0|3] ""  ADAS_DRV
- SG_ LKA_ToiFltSta : 54|2@1+ (1,0) [0|3] ""  ADAS_DRV
+ SG_ LKA_OptUsmSta : 24|3@1+ (1,0) [0|7] "" ADAS_DRV
+ SG_ LKA_RcgSta : 27|3@1+ (1,0) [0|7] "" ADAS_DRV
+ SG_ LKA_LHLnWrnSta : 30|2@1+ (1,0) [0|3] "" ADAS_DRV
+ SG_ LKA_RHLnWrnSta : 32|2@1+ (1,0) [0|3] "" ADAS_DRV
+ SG_ LKA_HndsoffSnd : 34|2@1+ (1,0) [0|3] "" ADAS_DRV
+ SG_ LKA_StrSnd : 36|2@1+ (1,0) [0|3] "" ADAS_DRV
+ SG_ LKA_SysIndReq : 38|3@1+ (1,0) [0|7] "" ADAS_DRV
+ SG_ StrTqReqVal : 41|11@1+ (0.0078125,-8) [-8|7.9921875] "Nm" ADAS_DRV
+ SG_ ActToiSta : 52|2@1+ (1,0) [0|3] "" ADAS_DRV
+ SG_ LKA_ToiFltSta : 54|2@1+ (1,0) [0|3] "" ADAS_DRV
  SG_ LFA_BUTTON : 56|1@1+ (1,0) [0|255] "" XXX
- SG_ LKA_SysWrn : 60|4@1+ (1,0) [0|15] ""  ADAS_DRV
+ SG_ LKA_SysWrn : 60|4@1+ (1,0) [0|15] "" ADAS_DRV
  SG_ Damping_Gain : 64|8@1+ (1,0) [0|255] "" CGW
- SG_ LKA_UsmMod : 80|2@1+ (1,0) [0|3] ""  ADAS_DRV
- SG_ Info_PedtrnDst : 84|3@1+ (1,0) [0|7] ""  ADAS_DRV
+ SG_ LKA_UsmMod : 80|2@1+ (1,0) [0|3] "" ADAS_DRV
+ SG_ Info_PedtrnDst : 84|3@1+ (1,0) [0|7] "" ADAS_DRV
 
 BO_ 81 ADRV_0x51: 32 ADRV
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
@@ -224,11 +224,7 @@ BO_ 702 CAM_0x2be: 32 CAMERA
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
 
 CM_ BO_ 676 "Contains signals with detailed lane line information. Used by ADAS ECU on HDA 2 vehicles to operate LFA.";
-
-CM_ SG_ 80 HAS_LANE_SAFETY "If 0, hides LKAS 'Lane Safety' menu from vehicle settings";
 CM_ SG_ 676 LEFT_LANE_LINE "Left lane line confidence";
 CM_ SG_ 676 RIGHT_LANE_LINE "Right lane line confidence";
-VAL_ 80 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green" ;
-VAL_ 80 LKA_MODE 1 "warning only" 2 "assist" 6 "off" ;
 VAL_ 676 LEFT_LANE_LINE 0 "Not Detected" 1 "Low Confidence" 2 "Medium Confidence" 3 "High Confidence";
 VAL_ 676 RIGHT_LANE_LINE 0 "Not Detected" 1 "Low Confidence" 2 "Medium Confidence" 3 "High Confidence";
