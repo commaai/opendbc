@@ -82,18 +82,21 @@ BO_ 261 ACCELERATOR_ALT: 32 XXX
 BO_ 272 LKAS_ALT: 32 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
- SG_ LKA_MODE : 24|3@1+ (1,0) [0|7] "" XXX
- SG_ LKA_AVAILABLE : 27|2@1+ (1,0) [0|255] "" XXX
- SG_ LKA_WARNING : 32|1@1+ (1,0) [0|1] "" XXX
- SG_ LKA_ICON : 38|2@1+ (1,0) [0|255] "" XXX
- SG_ FCA_SYSWARN : 40|1@0+ (1,0) [0|1] "" XXX
- SG_ TORQUE_REQUEST : 41|11@1+ (1,-1024) [0|4095] "" XXX
- SG_ STEER_REQ : 52|1@1+ (1,0) [0|1] "" XXX
+ SG_ LKA_OptUsmSta : 24|3@1+ (1,0) [0|7] "" ADAS_DRV
+ SG_ LKA_RcgSta : 27|3@1+ (1,0) [0|7] "" ADAS_DRV
+ SG_ LKA_LHLnWrnSta : 30|2@1+ (1,0) [0|3] "" ADAS_DRV
+ SG_ LKA_RHLnWrnSta : 32|2@1+ (1,0) [0|3] "" ADAS_DRV
+ SG_ LKA_HndsoffSnd : 34|2@1+ (1,0) [0|3] "" ADAS_DRV
+ SG_ LKA_StrSnd : 36|2@1+ (1,0) [0|3] "" ADAS_DRV
+ SG_ LKA_SysIndReq : 38|3@1+ (1,0) [0|7] "" ADAS_DRV
+ SG_ StrTqReqVal : 41|11@1+ (0.0078125,-8) [-8|7.9921875] "Nm" ADAS_DRV
+ SG_ ActToiSta : 52|2@1+ (1,0) [0|3] "" ADAS_DRV
+ SG_ LKA_ToiFltSta : 54|2@1+ (1,0) [0|3] "" ADAS_DRV
  SG_ LFA_BUTTON : 56|1@1+ (1,0) [0|255] "" XXX
- SG_ LKA_ASSIST : 62|1@1+ (1,0) [0|1] "" XXX
+ SG_ LKA_SysWrn : 60|4@1+ (1,0) [0|15] "" ADAS_DRV
  SG_ Damping_Gain : 64|8@1+ (1,0) [0|255] "" CGW
  SG_ LKAS_ANGLE_ACTIVE : 77|2@0+ (1,0) [0|3] "" XXX
- SG_ HAS_LANE_SAFETY : 80|1@0+ (1,0) [0|1] "" XXX
+ SG_ LKA_UsmMod : 80|2@1+ (1,0) [0|3] "" ADAS_DRV
  SG_ ADAS_StrAnglReqVal : 82|14@1- (0.1,0) [0|176.7] "Deg" GW_RGW,MDPS,SFA
  SG_ ADAS_ACIAnglTqRedcGainVal : 96|8@1+ (0.004,0) [0|1] "" GW_RGW,MDPS,SFA
 
@@ -686,7 +689,7 @@ CM_ SG_ 203 ADAS_ACIAnglTqRedcGainVal "(LFA) ADAS AngleControlInterface Angle To
 CM_ SG_ 203 FCA_ESA_ActvSta "FCA_ESA Active State";
 CM_ SG_ 203 FCA_ESA_TqBstGainVal "FCA_ESA Torque Boost Gain Value";
 CM_ BO_ 272 "Alternative LKAS message, used on cars such as 2023 Ioniq 6, 2nd gen Kona. Matches LKAS except size is 32 bytes";
-CM_ SG_ 272 LKA_AVAILABLE "Angle control cars: 3 when LKA is generally available, goes to 0 during changes with LFA";
+CM_ SG_ 272 LKA_ToiFltSta "This fault flag is set when a fault in the LKA system has been detected by the LKA ECU such that LKA can no longer function. CAN failures, internal video ECU failures, hard-wired component (e.g. master switch) failures and other system logic failures are";
 CM_ SG_ 272 ADAS_StrAnglReqVal "(LKAS) ADAS Steering Angle Request Value; Capped at 176.7; tracks MDPS->STEERING_ANGLE when not engaged, not STEERING_SENSORS->STEERING_ANGLE";
 CM_ SG_ 272 ADAS_ACIAnglTqRedcGainVal "(LKAS) ADAS AngleControlInterface Angle Torque Reduction Gain Value";
 CM_ BO_ 282 "Sent by the camera containing DAW (Driver Attention Warning) information and information about HBA (High Beam Assist).";
@@ -864,9 +867,19 @@ VAL_ 203 ADAS_ACIAnglTqRedcGainVal 0 "0x0x00~0xFA:Real Values" 250 "0x0x00~0xFA:
 VAL_ 203 FCA_ESA_ActvSta 0 "Inactive" 1 "Active" 2 "RESERVED" 3 "RESERVED";
 VAL_ 203 FCA_ESA_TqBstGainVal 0 "0x0x00~0xFA:Real Values" 250 "0x0x00~0xFA:Real Values" 251 "RESERVED" 252 "RESERVED" 253 "RESERVED" 254 "RESERVED" 255 "RESERVED";
 VAL_ 234 LKA_FAULT 0 "ok" 1 "lka fault";
-VAL_ 272 LKA_MODE 1 "warning only" 2 "assist" 6 "off";
-VAL_ 272 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green";
-VAL_ 272 LKAS_ANGLE_ACTIVE 0 "off" 1 "not active" 2 "active";
+VAL_ 272 LKA_OptUsmSta 0 "None LKA/LDW Option (Default)" 1 "LDW" 2 "LKA" 3 "Reserved" 4 "LDW Only (None LKA)" 5 "LDW only OFF (None LKA)" 6 "LDW/LKA OFF" 7 "Invalid";
+VAL_ 272 LKA_RcgSta 0 "Not Recognized" 1 "Left Lane Recognition" 2 "Right Lane Recognition" 3 "Full Lane Recognition" 4 "Reserved" 5 "Reserved" 6 "Reserved" 7 "Reserved";
+VAL_ 272 LKA_LHLnWrnSta 0 "No Warning" 1 "Lane Departure Warning" 2 "Reserved" 3 "Reserved";
+VAL_ 272 LKA_RHLnWrnSta 0 "No Warning" 1 "Lane Departure Warning" 2 "Reserved" 3 "Reserved";
+VAL_ 272 LKA_HndsoffSnd 0 "Off" 1 "Hands-off Sound Warning" 2 "Reserved" 3 "Reserved";
+VAL_ 272 LKA_StrSnd 0 "Off" 1 "Warning" 2 "Reserved" 3 "Reserved";
+VAL_ 272 LKA_SysIndReq 0 "Off" 1 "Unavailable_(Grey On)" 2 "Lane Recognized_(Green On)" 3 "Lane Departure_(Green Blink)" 4 "System Fail_(Orange On)" 5 "Not Calibrated_(Orange Blink)" 6 "Regulation_(Orange On)" 7 "Reserved";
+VAL_ 272 StrTqReqVal 2046 "Reserved" 2047 "Invalid";
+VAL_ 272 ActToiSta 0 "De-activate TOI" 1 "Activate TOI" 2 "Reserved" 3 "Error indicator";
+VAL_ 272 LKA_ToiFltSta 0 "No Fault" 1 "Fault" 2 "Reserved" 3 "Error indicatorr";
+VAL_ 272 LKA_SysWrn 0 "No Info" 1 "Reserved" 2 "Reserved" 3 "Reserved" 4 "Hands-Off Warning 1" 5 "Hands-Off Warning 2" 6 "Hands-Off Warning 3" 7 "Reserved" 8 "Reserved" 9 "System Automatic off" 10 "Reserved" 11 "Reserved" 12 "Reserved" 13 "Reserved" 14 "Reserved" 15 "System Fail";
+VAL_ 272 LKA_UsmMod 0 "NONE" 1 "LKA 1 mode" 2 "Reserved" 3 "LDW";
+VAL_ 272 ADAS_ACIAnglTqRedcGainVal 0 "0x0x00~0xFA:Real Values" 250 "0x0x00~0xFA:Real Values" 251 "RESERVED" 252 "RESERVED" 253 "RESERVED" 254 "RESERVED" 255 "RESERVED";
 VAL_ 282 HBA_SysOptSta 0 "None HBA Option (Default)" 1 "HBA Option" 2 "Reserved" 3 "Error indicator";
 VAL_ 282 HBA_SysSta 0 "HBA Disable" 1 "HBA Enable & High Beam Off" 2 "HBA Enable & High Beam On" 3 "Reserved" 4 "Reserved" 5 "Reserved" 6 "Reserved" 7 "System Fail";
 VAL_ 282 HBA_IndLmpReq 0 "HBA Indicator Lamp Off" 1 "HBA Indicator Lamp On" 2 "Reserved" 3 "Error indicator";
