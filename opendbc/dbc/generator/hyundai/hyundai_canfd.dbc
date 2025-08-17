@@ -682,6 +682,7 @@ BO_ 1264 LOCAL_TIME: 8 XXX
 
 CM_ SG_ 96 BRAKE_PRESSURE "User applied brake pedal pressure. Ramps from computer applied pressure on falling edge of cruise. Cruise cancels if !=0";
 CM_ SG_ 101 BRAKE_POSITION "User applied brake pedal position, max is ~700. Signed on some vehicles";
+CM_ BO_ 203 "Known in official DBC as ADAS_CMD_35_10ms";
 CM_ SG_ 203 ADAS_ActvACISta "ADAS Active AngleControlInterface State";
 CM_ SG_ 203 ADAS_ActvACILvl2Sta "ADAS Active AngleControlInterface Level 2 State";
 CM_ SG_ 203 ADAS_StrAnglReqVal "(LFA) ADAS Steering Angle Request Value; Capped at 119.9;";
