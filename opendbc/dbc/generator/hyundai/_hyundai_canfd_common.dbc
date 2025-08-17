@@ -39,19 +39,23 @@ BU_: XXX CAMERA FRONT_RADAR ADRV APRK
 BO_ 80 LKAS: 16 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
- SG_ LKA_MODE : 24|3@1+ (1,0) [0|7] "" XXX
- SG_ LKA_AVAILABLE : 27|2@1+ (1,0) [0|255] "" XXX
- SG_ LKA_WARNING : 32|1@1+ (1,0) [0|1] "" XXX
- SG_ LKA_ICON : 38|2@1+ (1,0) [0|255] "" XXX
- SG_ FCA_SYSWARN : 40|1@0+ (1,0) [0|1] "" XXX
- SG_ TORQUE_REQUEST : 41|11@1+ (1,-1024) [0|4095] "" XXX
- SG_ STEER_REQ : 52|1@1+ (1,0) [0|1] "" XXX
+ SG_ LKA_OptUsmSta : 24|3@1+ (1,0) [0|7] ""  ADAS_DRV
+ SG_ LKA_RcgSta : 27|3@1+ (1,0) [0|7] ""  ADAS_DRV
+ SG_ LKA_LHLnWrnSta : 30|2@1+ (1,0) [0|3] ""  ADAS_DRV
+ SG_ LKA_RHLnWrnSta : 32|2@1+ (1,0) [0|3] ""  ADAS_DRV
+ SG_ LKA_HndsoffSnd : 34|2@1+ (1,0) [0|3] ""  ADAS_DRV
+ SG_ LKA_StrSnd : 36|2@1+ (1,0) [0|3] ""  ADAS_DRV
+ SG_ LKA_SysIndReq : 38|3@1+ (1,0) [0|7] ""  ADAS_DRV
+ SG_ LKA_StrTqReqVal : 41|11@1+ (0.0078125,-8) [-8|7.9921875] "Nm"  ADAS_DRV
+ SG_ LKA_ActToiSta : 52|2@1+ (1,0) [0|3] ""  ADAS_DRV
+ SG_ LKA_ToiFltSta : 54|2@1+ (1,0) [0|3] ""  ADAS_DRV
  SG_ LFA_BUTTON : 56|1@1+ (1,0) [0|255] "" XXX
- SG_ LKA_ASSIST : 62|1@1+ (1,0) [0|1] "" XXX
+ SG_ LKA_SysWrn : 60|4@1+ (1,0) [0|15] ""  ADAS_DRV
+ SG_ ADAS_Damping_Gain : 64|8@1+ (1,0) [0|255] "" CGW
  SG_ STEER_MODE : 65|3@1+ (1,0) [0|1] "" XXX
  SG_ NEW_SIGNAL_2 : 70|2@0+ (1,0) [0|3] "" XXX
- SG_ HAS_LANE_SAFETY : 80|1@0+ (1,0) [0|1] "" XXX
- SG_ DAMP_FACTOR : 64|8@1+ (1,0) [0|255] "" XXX
+ SG_ LKA_UsmMod : 80|2@1+ (1,0) [0|3] ""  ADAS_DRV
+ SG_ Info_PedtrnDst : 84|3@1+ (1,0) [0|7] ""  ADAS_DRV
 
 BO_ 81 ADRV_0x51: 32 ADRV
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
