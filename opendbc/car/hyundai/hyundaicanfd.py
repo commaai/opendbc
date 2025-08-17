@@ -119,7 +119,7 @@ def create_acc_cancel(packer, CP, CAN, cruise_info_copy):
     "SCC_AccelReqRawVal": 0.0,
     "SCC_AccelReqVal": 0.0,
   })
-  return packer.make_can_msg("ADAS_CMD_20_20ms", CAN.ECAN, values)
+  return packer.make_can_msg("SCC_CONTROL", CAN.ECAN, values)
 
 
 def create_lfahda_cluster(packer, CAN, enabled):
@@ -159,7 +159,7 @@ def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_ov
     "SCC_HeadwayDstSetVal": hud_control.leadDistanceBars,
   }
 
-  return packer.make_can_msg("ADAS_CMD_20_20ms", CAN.ECAN, values)
+  return packer.make_can_msg("SCC_CONTROL", CAN.ECAN, values)
 
 
 def create_spas_messages(packer, CAN, left_blink, right_blink):
