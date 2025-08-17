@@ -60,6 +60,7 @@ FW_VERSIONS = {
       b'476605SH1D',
       b'476605SH7D',
       b'476605SK2A',
+      b'476605SH7E',
     ],
     (Ecu.eps, 0x742, None): [
       b'5SH2A\x99A\x05\x02N123F\x15\x81\x00\x00\x00\x00\x00\x00\x00\x80',
