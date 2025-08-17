@@ -153,6 +153,7 @@ BO_ 298 LFA: 16 ADRV
  SG_ NEW_SIGNAL_2 : 70|1@0+ (1,0) [0|3] "" ADRV
  SG_ SCC_TakeoverReq_CLU_AMP_PE_02_Warn_Sound : 72|2@1+ (1,0) [0|255] "" ADRV
  SG_ LKA_UsmMod : 80|2@1+ (1,0) [0|3] "" CLU,CGW
+ SG_ Info_PedtrnDst : 84|3@1+ (1,0) [0|7] "" ADAS_DRV
  SG_ ELK_SysFlrSta : 85|5@1+ (1,0) [0|31] "" ADRV
  SG_ ELK_SymbDisp : 90|3@1+ (1,0) [0|7] "" ADRV
  SG_ Damping_Gain : 104|8@1+ (1,0) [0|255] "" CGW
@@ -730,6 +731,7 @@ CM_ SG_ 298 FCA_LS_WrnSta "(Reverse Engineered) This signal was observed while E
 CM_ SG_ 298 LKA_UsmMod "This signal indicates LKA USM Mode";
 CM_ SG_ 298 ELK_SymbDisp "Emergency Lane-Keeping";
 CM_ SG_ 298 Damping_Gain "ADAS Damping Gain for MDPS";
+CM_ SG_ 298 Info_PedtrnDst "Distance of the nearest pedestrian";
 CM_ SG_ 352 SET_ME_9 "has something to do with AEB settings";
 CM_ SG_ 373 ACCEnable "Likely a copy of CAN's TCS13->ACCEnable";
 CM_ SG_ 373 DriverBraking "Likely derived from BRAKE->BRAKE_POSITION";
@@ -908,6 +910,7 @@ VAL_ 298 LKA_SysWrn 0 "No Info" 1 "Reserved" 2 "Reserved" 3 "Reserved" 4 "Hands-
 VAL_ 298 FCA_LS_WrnSta 3 "ELK Steering to the right";
 VAL_ 298 LKA_UsmMod 0 "NONE" 1 "LKA 1 mode" 2 "Reserved" 3 "LDW";
 VAL_ 298 ELK_SymbDisp 3 "Evasive Action Taking Place";
+VAL_ 298 Info_PedtrnDst 0 "15m~(Default)" 1 "10~15m" 2 "5~10m" 3 "0~5m" 4 "Reserved" 5 "Reserved" 6 "Reserved" 7 "Invalid" ;
 VAL_ 304 PARK_BUTTON 1 "Pressed" 2 "Not Pressed";
 VAL_ 304 KNOB_POSITION 1 "R" 2 "N (on R side)" 3 "Centered" 4 "N (on D side)" 5 "D";
 VAL_ 304 GEAR 1 "P" 2 "R" 3 "N" 4 "D";
