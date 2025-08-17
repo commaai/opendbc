@@ -52,8 +52,6 @@ def create_brake_command(packer, CAN, apply_brake, pump_on, pcm_override, pcm_ca
   pcm_fault_cmd = False
 
   values = {
-    "COMPUTER_BRAKE": apply_brake,
-    "BRAKE_PUMP_REQUEST": pump_on,
     "CRUISE_OVERRIDE": pcm_override,
     "CRUISE_FAULT_CMD": pcm_fault_cmd,
     "CRUISE_CANCEL_CMD": pcm_cancel_cmd,
@@ -66,6 +64,16 @@ def create_brake_command(packer, CAN, apply_brake, pump_on, pcm_override, pcm_ca
     "AEB_REQ_2": 0,
     "AEB_STATUS": 0,
   }
+  if car_fingerprint in HONDA_HYBRID:
+    values.update({
+      "COMPUTER_BRAKE_HYBRID": apply_brake,
+      "BRAKE_PUMP_REQUEST_HYBRID": apply_brake,
+    })
+  else:
+    values.update({
+      "COMPUTER_BRAKE": apply_brake,
+      "BRAKE_PUMP_REQUEST": pump_on,
+    })
   return packer.make_can_msg("BRAKE_COMMAND", CAN.pt, values)
 
 
