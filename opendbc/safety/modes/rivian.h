@@ -4,20 +4,15 @@
 
 static uint8_t rivian_get_counter(const CANPacket_t *msg) {
   uint8_t cnt = 0;
-  if ((msg->addr == 0x208U) || (msg->addr == 0x150U)) {
-    // Signal: ESP_Status_Counter, VDM_PropStatus_Counter
-    cnt = msg->data[1] & 0xFU;
-  }
+  // Signal: ESP_Status_Counter, VDM_PropStatus_Counter
+  cnt = msg->data[1] & 0xFU;
   return cnt;
 }
 
 static uint32_t rivian_get_checksum(const CANPacket_t *msg) {
   uint8_t chksum = 0;
-  if ((msg->addr == 0x208U) || (msg->addr == 0x150U)) {
-    // Signal: ESP_Status_Checksum, VDM_PropStatus_Checksum
-    chksum = msg->data[0];
-  } else {
-  }
+  // Signal: ESP_Status_Checksum, VDM_PropStatus_Checksum
+  chksum = msg->data[0];
   return chksum;
 }
 
@@ -39,24 +34,53 @@ static uint8_t _rivian_compute_checksum(const CANPacket_t *msg, uint8_t poly, ui
   return crc ^ xor_output;
 }
 
+typedef struct {
+  uint32_t addr;
+  uint8_t poly;
+  uint8_t xor_output;
+} ChecksumConfig;
+
 static uint32_t rivian_compute_checksum(const CANPacket_t *msg) {
+  static const ChecksumConfig checksum_configs[] = {
+    {0x208U, 0x1D, 0xB1},  // ESP_Vehicle_Speed_Checksum
+    {0x150U, 0x1D, 0x9A},  // VDM_VehicleSpeed_Checksum
+  };
+
   uint8_t chksum = 0;
-  if (msg->addr == 0x208U) {
-    chksum = _rivian_compute_checksum(msg, 0x1D, 0xB1);
-  } else if (msg->addr == 0x150U) {
-    chksum = _rivian_compute_checksum(msg, 0x1D, 0x9A);
-  } else {
+  for (uint16_t i = 0; i < (sizeof(checksum_configs) / sizeof(ChecksumConfig)); i++) {
+    if (msg->addr == checksum_configs[i].addr) {
+      chksum = _rivian_compute_checksum(msg, checksum_configs[i].poly, checksum_configs[i].xor_output);
+    }
   }
+  // Handle unknown addresses if necessary
   return chksum;
 }
 
+typedef struct {
+  uint32_t addr;
+  uint8_t data_index;
+  uint8_t shift;
+  uint8_t mask;
+} QualityFlagConfig;
+
 static bool rivian_get_quality_flag_valid(const CANPacket_t *msg) {
+  static const QualityFlagConfig quality_flag_configs[] = {
+    {0x208U, 3, 3, 0x3U},  // ESP_Vehicle_Speed_Q
+    {0x150U, 1, 6, 0x1U},  // VDM_VehicleSpeedQ
+
+    {0x000U, 1, 1, 0x0U},  // Last entry, prevent mutated address from being used
+  };
+
   bool valid = false;
-  if (msg->addr == 0x208U) {
-    valid = ((msg->data[3] >> 3) & 0x3U) == 0x1U;  // ESP_Vehicle_Speed_Q
-  } else if (msg->addr == 0x150U) {
-    valid = (msg->data[1] >> 6) == 0x1U;  // VDM_VehicleSpeedQ
-  } else {
+  uint16_t q_count = sizeof(quality_flag_configs) / sizeof(QualityFlagConfig) - 1U;  // Exclude the last entry
+  // FIXME: MULL error: < to <= will also work, which in hindsight is bad since OoB access
+  // however, if in the Out-of-Bounds case, it will simply mask to 0 -> False
+  // mull-ignore-next: cxx_lt_to_le
+  for (uint16_t i = 0; i < q_count; i++) {
+    if (msg->addr == quality_flag_configs[i].addr) {
+      uint8_t value = (msg->data[quality_flag_configs[i].data_index] >> quality_flag_configs[i].shift) & quality_flag_configs[i].mask;
+      valid = (value == 0x1U);
+    }
   }
   return valid;
 }
@@ -92,12 +116,10 @@ static void rivian_rx_hook(const CANPacket_t *msg) {
     }
   }
 
-  if (msg->bus == 2U) {
+  if (msg->addr == 0x100U) {
     // Cruise state
-    if (msg->addr == 0x100U) {
-      const int feature_status = msg->data[2] >> 5U;
-      pcm_cruise_check(feature_status == 1);
-    }
+    const int feature_status = msg->data[2] >> 5U;
+    pcm_cruise_check(feature_status == 1);
   }
 }
 
