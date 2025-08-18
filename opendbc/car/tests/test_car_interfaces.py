@@ -1,7 +1,6 @@
 import os
 import math
 import hypothesis.strategies as st
-import pytest
 from hypothesis import Phase, given, settings
 from collections.abc import Callable
 from typing import Any

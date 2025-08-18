@@ -88,8 +88,8 @@ class LatAccelReport:
       violation = jerks['up_jerk'] > MAX_LAT_JERK_UP + MAX_LAT_JERK_UP_TOLERANCE or jerks['down_jerk'] > MAX_LAT_JERK_DOWN
       violation_str = " - VIOLATION" if violation else ""
 
-      print(f"{car_model:{max_car_model_len}} - up jerk: {round(jerks['up_jerk'], 2):5} "
-            f"m/s^3, down jerk: {round(jerks['down_jerk'], 2):5} m/s^3{violation_str}")
+      print(f"{car_model:{max_car_model_len}} - up jerk: {round(jerks['up_jerk'], 2):5} m/s^3, " +
+            f"down jerk: {round(jerks['down_jerk'], 2):5} m/s^3{violation_str}")
 
 
 if __name__ == '__main__':
