@@ -227,6 +227,18 @@ static safety_config hyundai_canfd_init(uint16_t param) {
     HYUNDAI_CANFD_LKA_STEERING_ALT_COMMON_TX_MSGS(0, 1)
   };
 
+  // LKA steering + CAMERA_SCC, non-longitudinal:
+  // allow sending SCC_CONTROL cancel (0x1A0) on ECAN (bus=1)
+  static const CanMsg HYUNDAI_CANFD_LKA_STEERING_CAMERA_SCC_TX_MSGS[] = {
+    HYUNDAI_CANFD_LKA_STEERING_COMMON_TX_MSGS(0, 1)
+    HYUNDAI_CANFD_SCC_CONTROL_COMMON_TX_MSGS(1, false)
+  };
+
+  static const CanMsg HYUNDAI_CANFD_LKA_STEERING_ALT_CAMERA_SCC_TX_MSGS[] = {
+    HYUNDAI_CANFD_LKA_STEERING_ALT_COMMON_TX_MSGS(0, 1)
+    HYUNDAI_CANFD_SCC_CONTROL_COMMON_TX_MSGS(1, false)
+  };
+
   static const CanMsg HYUNDAI_CANFD_LKA_STEERING_LONG_TX_MSGS[] = {
     HYUNDAI_CANFD_LKA_STEERING_COMMON_TX_MSGS(0, 1)
     HYUNDAI_CANFD_LFA_STEERING_COMMON_TX_MSGS(1)
@@ -319,6 +331,33 @@ static safety_config hyundai_canfd_init(uint16_t param) {
         SET_TX_MSGS(HYUNDAI_CANFD_LKA_STEERING_ALT_TX_MSGS, ret);
       } else {
         SET_TX_MSGS(HYUNDAI_CANFD_LKA_STEERING_TX_MSGS, ret);
+      }
+
+      // *** LKA steering checks ***
+      // E-CAN is on bus 1. If CAMERA_SCC, SCC_CONTROL is on CAM bus=2 (RX),
+      // but we still send cancel (0x1A0) on ECAN bus=1 (TX allow).
+      if (hyundai_camera_scc) {
+        static RxCheck hyundai_canfd_lka_cam_scc_rx_checks[] = {
+          HYUNDAI_CANFD_STD_BUTTONS_RX_CHECKS(1)
+          HYUNDAI_CANFD_SCC_ADDR_CHECK(2)   // camera SCC lives on CAM bus
+        };
+        SET_RX_CHECKS(hyundai_canfd_lka_cam_scc_rx_checks, ret);
+        if (hyundai_canfd_lka_steering_alt) {
+          SET_TX_MSGS(HYUNDAI_CANFD_LKA_STEERING_ALT_CAMERA_SCC_TX_MSGS, ret);
+        } else {
+          SET_TX_MSGS(HYUNDAI_CANFD_LKA_STEERING_CAMERA_SCC_TX_MSGS, ret);
+        }
+      } else {
+        static RxCheck hyundai_canfd_lka_steering_rx_checks[] = {
+          HYUNDAI_CANFD_STD_BUTTONS_RX_CHECKS(1)
+          HYUNDAI_CANFD_SCC_ADDR_CHECK(1)   // radar/ADAS SCC on ECAN
+        };
+        SET_RX_CHECKS(hyundai_canfd_lka_steering_rx_checks, ret);
+        if (hyundai_canfd_lka_steering_alt) {
+          SET_TX_MSGS(HYUNDAI_CANFD_LKA_STEERING_ALT_TX_MSGS, ret);
+        } else {
+          SET_TX_MSGS(HYUNDAI_CANFD_LKA_STEERING_TX_MSGS, ret);
+        }
       }
 
     } else if (!hyundai_camera_scc) {
