@@ -33,11 +33,10 @@ class CarInterface(CarInterfaceBase):
     cam_can = CanBus(None, fingerprint).CAM
     lka_steering = (0x50 in fingerprint[cam_can]) or (0x110 in fingerprint[cam_can])
     # 只對 Mufasa 加後門：沒有 0x50/0x110 但任一 bus 有 0x12A(LKAS11) 也視為 LKA
+    # Mufasa 後門：沒有 0x50/0x110，但任一 bus 有 0x12A(LKAS11) 也視為 LKA
     if (candidate == CAR.HYUNDAI_MUFASA_1ST_GEN) and (not lka_steering):
-      for b in range(len(fingerprint)):
-        if 0x12A in fingerprint[b]:
-          lka_steering = True
-          break
+      if any(0x12A in fingerprint[b] for b in range(len(fingerprint))):
+        lka_steering = True
     CAN = CanBus(None, fingerprint, lka_steering)
     # --- MUFASA 超短 DBG：失敗時會出現在 "Captured stdout call" ---
     if candidate == CAR.HYUNDAI_MUFASA_1ST_GEN:
@@ -66,16 +65,15 @@ class CarInterface(CarInterfaceBase):
       if lka_steering:
         # detect LKA steering
         ret.flags |= HyundaiFlags.CANFD_LKA_STEERING.value
-        # Mufasa：ALT + Camera-SCC（沒有雷達 ECU，就讓 safety 走 camera 流程）
+        # Mufasa：ALT + Camera-SCC（沒有雷達 ECU 的情況）
         if candidate == CAR.HYUNDAI_MUFASA_1ST_GEN:
           ret.flags |= HyundaiFlags.CANFD_LKA_STEERING_ALT.value
-          # 若沒宣告 RADAR_SCC，且 ECAN 上看不到雷達起始位址，標記為 CAMERA_SCC
           if not (ret.flags & HyundaiFlags.RADAR_SCC):
-            from opendbc.car.hyundai.radar_interface import RADAR_START_ADDR
             if RADAR_START_ADDR not in fingerprint[CAN.ECAN]:
               ret.flags |= HyundaiFlags.CANFD_CAMERA_SCC.value
-         elif 0x110 in fingerprint[CAN.CAM]:
-           ret.flags |= HyundaiFlags.CANFD_LKA_STEERING_ALT.value
+        # 其他車維持舊邏輯：看到 0x110 就開 ALT
+        if 0x110 in fingerprint[CAN.CAM]:
+          ret.flags |= HyundaiFlags.CANFD_LKA_STEERING_ALT.value
       else:
         # no LKA steering
         if 0x1cf not in fingerprint[CAN.ECAN]:
