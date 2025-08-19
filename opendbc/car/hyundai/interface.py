@@ -31,7 +31,7 @@ class CarInterface(CarInterfaceBase):
     # that finally retransmits our steering command in LFA or LFA_ALT to the MDPS.
     # "LFA steering" if camera directly sends LFA to the MDPS
     cam_can = CanBus(None, fingerprint).CAM
-    lka_steering = 0x50 in fingerprint[cam_can] or 0x110 in fingerprint[cam_can]
+    lka_steering = any(x in fingerprint[cam_can] for x in (0x50, 0x110, 0x12A))
     CAN = CanBus(None, fingerprint, lka_steering)
 
     if ret.flags & HyundaiFlags.CANFD:
