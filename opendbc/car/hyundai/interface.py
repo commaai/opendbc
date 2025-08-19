@@ -43,12 +43,11 @@ class CarInterface(CarInterfaceBase):
       cam = CAN.CAM
       ecan = CAN.ECAN
       acan = CAN.ACAN
-      f50  = int(0x50  in fingerprint[cam])
+      f50  = int(0x50 in fingerprint[cam])
       f110 = int(0x110 in fingerprint[cam])
       f12a = int(0x12A in fingerprint[cam])
       # 單行、短字串，避免洗版
       print(f"[MUFASA] lka={int(lka_steering)} flags=0x{int(ret.flags):x} bus(E/A/C)={ecan}/{acan}/{cam} cam(50,110,12a)={f50},{f110},{f12a}", flush=True)
-
 
     if ret.flags & HyundaiFlags.CANFD:
       # Shared configuration for CAN-FD cars
