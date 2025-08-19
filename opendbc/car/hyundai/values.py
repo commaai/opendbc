@@ -380,6 +380,7 @@ class CAR(Platforms):
   HYUNDAI_MUFASA_1ST_GEN = HyundaiCanFDPlatformConfig(
     [HyundaiCarDocs("Hyundai Mufasa 2025", "All", car_parts=CarParts.common([CarHarness.hyundai_l]))],
     CarSpecs(mass=1836, wheelbase=2.70, steerRatio=13.0),  # from carParams
+    lags=HyundaiFlags.CAMERA_SCC,
   )
 
   # Kia
