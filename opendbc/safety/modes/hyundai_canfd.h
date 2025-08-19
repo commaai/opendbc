@@ -337,11 +337,19 @@ static safety_config hyundai_canfd_init(uint16_t param) {
       // E-CAN is on bus 1. If CAMERA_SCC, SCC_CONTROL is on CAM bus=2 (RX),
       // but we still send cancel (0x1A0) on ECAN bus=1 (TX allow).
       if (hyundai_camera_scc) {
-        static RxCheck hyundai_canfd_lka_cam_scc_rx_checks[] = {
-          HYUNDAI_CANFD_STD_BUTTONS_RX_CHECKS(1)
-          HYUNDAI_CANFD_SCC_ADDR_CHECK(2)   // camera SCC lives on CAM bus
-        };
-        SET_RX_CHECKS(hyundai_canfd_lka_cam_scc_rx_checks, ret);
+        if (hyundai_canfd_alt_buttons) {
+          static RxCheck hyundai_canfd_lka_cam_scc_altbtn_rx_checks[] = {
+            HYUNDAI_CANFD_ALT_BUTTONS_RX_CHECKS(1)
+            HYUNDAI_CANFD_SCC_ADDR_CHECK(2)   // camera SCC lives on CAM bus
+          };
+          SET_RX_CHECKS(hyundai_canfd_lka_cam_scc_altbtn_rx_checks, ret);
+        } else {
+          static RxCheck hyundai_canfd_lka_cam_scc_rx_checks[] = {
+            HYUNDAI_CANFD_STD_BUTTONS_RX_CHECKS(1)
+            HYUNDAI_CANFD_SCC_ADDR_CHECK(2)   // camera SCC lives on CAM bus
+          };
+          SET_RX_CHECKS(hyundai_canfd_lka_cam_scc_rx_checks, ret);
+        }
         if (hyundai_canfd_lka_steering_alt) {
           SET_TX_MSGS(HYUNDAI_CANFD_LKA_STEERING_ALT_CAMERA_SCC_TX_MSGS, ret);
         } else {
