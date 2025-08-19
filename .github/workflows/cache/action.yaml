@@ -8,7 +8,6 @@ runs:
       with:
         path: opendbc/safety/tests/misra/cppcheck/
         key: cppcheck-cache-${{ runner.os }}-${{ hashFiles('opendbc/safety/tests/misra/install.sh') }}
-
     - name: Set cache-hit output
       run: echo "cache-hit=${{ steps.cppcache.outputs.cache-hit }}" >> $GITHUB_OUTPUT
       shell: bash
