@@ -202,7 +202,7 @@ class CAR(Platforms):
     ],
     HONDA_CIVIC_BOSCH.specs,
     {Bus.pt: 'honda_civic_ex_2022_can_generated'},
-    flags=HondaFlags.BOSCH_RADARLESS | HondaFlags.ALLOW_MANUAL_TRANS,
+    flags=HondaFlags.BOSCH_RADARLESS | HondaFlags.ALLOW_MANUAL_TRANS
   )
   HONDA_CRV_5G = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda CR-V 2017-22", min_steer_speed=15. * CV.MPH_TO_MS)],
@@ -239,7 +239,7 @@ class CAR(Platforms):
   HONDA_INSIGHT = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda Insight 2019-22", "All", min_steer_speed=3. * CV.MPH_TO_MS)],
     CarSpecs(mass=2987 * CV.LB_TO_KG, wheelbase=2.7, steerRatio=15.0, centerToFrontRatio=0.39, tireStiffnessFactor=0.82),  # as spec
-    {Bus.pt: 'honda_insight_ex_2019_can_generated'}
+    {Bus.pt: 'honda_insight_ex_2019_can_generated'},
   )
   HONDA_E = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda e 2020", "All", min_steer_speed=3. * CV.MPH_TO_MS)],
@@ -337,6 +337,7 @@ HONDA_BOSCH = CAR.with_flags(HondaFlags.BOSCH)
 HONDA_BOSCH_RADARLESS = CAR.with_flags(HondaFlags.BOSCH_RADARLESS)
 HONDA_BOSCH_CANFD = CAR.with_flags(HondaFlags.BOSCH_CANFD)
 HONDA_HYBRID = CAR.with_flags(HondaFlags.HYBRID)
+
 
 DBC = CAR.create_dbc_map()
 
