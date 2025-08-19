@@ -10,7 +10,6 @@
 |Acura|MDX 2015-16|Advance Package|[Community](#community)|
 |Acura|MDX 2017-20|All|[Community](#community)|
 |Acura|MDX 2025|All except Type S|[Upstream](#upstream)|
-|Acura|MDX 2025|All|[Community](#community)|
 |Acura|RDX 2016-18|AcuraWatch Plus or Advance Package|[Upstream](#upstream)|
 |Acura|RDX 2019-21|All|[Upstream](#upstream)|
 |Acura|RDX 2022-25|All|[Community](#community)|
