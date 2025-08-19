@@ -39,10 +39,6 @@ class CarInterface(CarInterfaceBase):
           break
     CAN = CanBus(None, fingerprint, lka_steering)
 
-    if candidate == CAR.HYUNDAI_MUFASA_1ST_GEN:
-     print(f"[DBG] lka={lka_steering} flags=0x{int(ret.flags):x} ECAN={CanBus(None,fingerprint,lka_steering).ECAN} ACAN={CanBus(None,fingerprint,lka_steering).ACAN} CAM={CanBus(None,fingerprint,lka_steering).CAM}", flush=True)
-
-
     if ret.flags & HyundaiFlags.CANFD:
       # Shared configuration for CAN-FD cars
       ret.alphaLongitudinalAvailable = candidate not in CANFD_UNSUPPORTED_LONGITUDINAL_CAR
