@@ -22,7 +22,7 @@ jobs:
       id: cache
     - uses: commaai/timeout@v1
       with:
-        timeout: ${{ github.repository == 'commaai/opendbc' && (steps.cache.outputs.cache-hit == 'true' && '60' || '120') || '999' }}
+        timeout: ${{ github.repository == 'commaai/opendbc' && (steps.cache.outputs.cache-hit == 'true' && '60' || '90') || '999' }}
     - run: ./test.sh
 
   safety_tests:
