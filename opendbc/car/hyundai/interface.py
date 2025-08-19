@@ -50,6 +50,8 @@ class CarInterface(CarInterfaceBase):
       if lka_steering:
         # detect LKA steering
         ret.flags |= HyundaiFlags.CANFD_LKA_STEERING.value
+        if candidate == CAR.HYUNDAI_MUFASA_1ST_GEN:
+          ret.flags |= HyundaiFlags.CANFD_LKA_STEERING_ALT.value
         if 0x110 in fingerprint[CAN.CAM]:
           ret.flags |= HyundaiFlags.CANFD_LKA_STEERING_ALT.value
       else:
