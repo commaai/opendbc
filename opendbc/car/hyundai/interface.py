@@ -32,10 +32,15 @@ class CarInterface(CarInterfaceBase):
     # "LFA steering" if camera directly sends LFA to the MDPS
     cam_can = CanBus(None, fingerprint).CAM
     lka_steering = (0x50 in fingerprint[cam_can]) or (0x110 in fingerprint[cam_can])
-    if not lka_steering:
-      if any(0x12A in fingerprint[b] for b in range(len(fingerprint))):
-        lka_steering = True
+    if (candidate == CAR.HYUNDAI_MUFASA_1ST_GEN) and (not lka_steering):
+      for b in range(len(fingerprint)):
+        if 0x12A in fingerprint[b]:
+          lka_steering = True
+          break
     CAN = CanBus(None, fingerprint, lka_steering)
+
+    if candidate == CAR.HYUNDAI_MUFASA_1ST_GEN:
+     print(f"[DBG] lka={lka_steering} flags=0x{int(ret.flags):x} ECAN={CanBus(None,fingerprint,lka_steering).ECAN} ACAN={CanBus(None,fingerprint,lka_steering).ACAN} CAM={CanBus(None,fingerprint,lka_steering).CAM}", flush=True)
 
 
     if ret.flags & HyundaiFlags.CANFD:
