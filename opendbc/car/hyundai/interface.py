@@ -65,12 +65,15 @@ class CarInterface(CarInterfaceBase):
       if lka_steering:
         # detect LKA steering
         ret.flags |= HyundaiFlags.CANFD_LKA_STEERING.value
-        # Mufasa：ALT + Camera-SCC（沒有雷達 ECU 的情況）
+
+        # Mufasa：ALT +（需要時）Camera-SCC + ALT_BUTTONS
         if candidate == CAR.HYUNDAI_MUFASA_1ST_GEN:
           ret.flags |= HyundaiFlags.CANFD_LKA_STEERING_ALT.value
-          if not (ret.flags & HyundaiFlags.RADAR_SCC):
-            if RADAR_START_ADDR not in fingerprint[CAN.ECAN]:
-              ret.flags |= HyundaiFlags.CANFD_CAMERA_SCC.value
+          ret.flags |= HyundaiFlags.CANFD_ALT_BUTTONS.value
+          if RADAR_START_ADDR not in fingerprint[CAN.ECAN]:
+            ret.flags |= HyundaiFlags.CANFD_CAMERA_SCC.value
+            ret.flags &= ~HyundaiFlags.RADAR_SCC.value  # 清掉誤設的雷達旗標
+
         # 其他車維持舊邏輯：看到 0x110 就開 ALT
         if 0x110 in fingerprint[CAN.CAM]:
           ret.flags |= HyundaiFlags.CANFD_LKA_STEERING_ALT.value
@@ -102,7 +105,10 @@ class CarInterface(CarInterfaceBase):
         ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CANFD_ALT_BUTTONS.value
       if ret.flags & HyundaiFlags.CANFD_CAMERA_SCC:
         ret.safetyConfigs[-1].safetyParam |= HyundaiSafetyFlags.CAMERA_SCC.value
-
+       #
+      if candidate == CAR.HYUNDAI_MUFASA_1ST_GEN:
+        print(f"[MUFASA-END] flags=0x{int(ret.flags):x} sparam=0x{int(ret.safetyConfigs[-1].safetyParam):x}", flush=True)
+       #
     else:
       # Shared configuration for non CAN-FD cars
       ret.alphaLongitudinalAvailable = candidate not in UNSUPPORTED_LONGITUDINAL_CAR
