@@ -2,7 +2,7 @@ import copy
 import numpy as np
 from opendbc.car import CanBusBase
 from opendbc.car.crc import CRC16_XMODEM
-from opendbc.car.hyundai.values import HyundaiFlags
+from opendbc.car.hyundai.values import HyundaiFlags, CAR
 
 
 class CanBus(CanBusBase):
@@ -22,6 +22,19 @@ class CanBus(CanBusBase):
     self._a += self.offset
     self._e += self.offset
     self._cam = 2 + self.offset
+
+    # Mufasa：LKAS11(0x12A) 在 camera bus（你的 log 是 src:1）
+    # 這裡動態把 CAM 指到實際含 0x12A 的那條 bus，避免固定為 2 造成 canValid 一直 False
+    try:
+      if CP is not None and (CP.flags & HyundaiFlags.CANFD) and getattr(CP, "carFingerprint", None) == CAR.HYUNDAI_MUFASA_1ST_GEN:
+        if fingerprint is not None:
+          for b in range(len(fingerprint)):
+            if 0x12A in fingerprint[b]:
+              self._cam = b + self.offset
+              break
+    except Exception:
+      # 任何 import/型別/空指標問題都忽略，不影響其他車型
+      pass
 
   @property
   def ECAN(self):
