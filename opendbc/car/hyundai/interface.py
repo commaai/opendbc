@@ -33,6 +33,9 @@ class CarInterface(CarInterfaceBase):
     cam_can = CanBus(None, fingerprint).CAM
     lka_steering = (0x50 in fingerprint[cam_can]) or (0x110 in fingerprint[cam_can])
     CAN = CanBus(None, fingerprint, lka_steering)
+    if not lka_steering:
+      if any(0x12A in fingerprint[b] for b in range(len(fingerprint))):
+        lka_steering = True
 
     if ret.flags & HyundaiFlags.CANFD:
       # Shared configuration for CAN-FD cars
