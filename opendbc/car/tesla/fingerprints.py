@@ -14,6 +14,7 @@ FW_VERSIONS = {
       b'TeMYG4_DCS_Update_0.0.0 (9),E4014.26.0',
       b'TeMYG4_Legacy3Y_0.0.0 (2),E4015.02.0',
       b'TeMYG4_Legacy3Y_0.0.0 (5),E4015.03.2',
+      b'TeMYG4_Legacy3Y_0.0.0 (5),E4L015.03.2',
       b'TeMYG4_Main_0.0.0 (59),E4H014.29.0',
       b'TeMYG4_Main_0.0.0 (65),E4H015.01.0',
       b'TeMYG4_Main_0.0.0 (67),E4H015.02.1',

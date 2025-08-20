@@ -3,6 +3,7 @@ from opendbc.car.hyundai.values import CAR, HyundaiFlags
 
 hyundai_checksum = crcmod.mkCrcFun(0x11D, initCrc=0xFD, rev=False, xorOut=0xdf)
 
+
 def create_lkas11(packer, frame, CP, apply_torque, steer_req,
                   torque_fault, lkas11, sys_warning, sys_state, enabled,
                   left_lane, right_lane,
@@ -123,6 +124,7 @@ def create_lfahda_mfc(packer, enabled):
   }
   return packer.make_can_msg("LFAHDA_MFC", 0, values)
 
+
 def create_acc_commands(packer, enabled, accel, upper_jerk, idx, hud_control, set_speed, stopping, long_override, use_fca, CP):
   commands = []
 
@@ -185,6 +187,7 @@ def create_acc_commands(packer, enabled, accel, upper_jerk, idx, hud_control, se
 
   return commands
 
+
 def create_acc_opt(packer, CP):
   commands = []
 
@@ -205,6 +208,7 @@ def create_acc_opt(packer, CP):
     commands.append(packer.make_can_msg("FCA12", 0, fca12_values))
 
   return commands
+
 
 def create_frt_radar_opt(packer):
   frt_radar11_values = {

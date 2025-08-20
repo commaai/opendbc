@@ -124,6 +124,7 @@ FW_VERSIONS = {
     (Ecu.engine, 0x7e0, None): [
       b'\xaa\x00Bu\x07',
       b'\xaa\x01bt\x07',
+      b'\xaa\x01fr\x07',
       b'\xaa!`u\x07',
       b'\xaa!au\x07',
       b'\xaa!av\x07',
@@ -146,6 +147,7 @@ FW_VERSIONS = {
     (Ecu.transmission, 0x7e1, None): [
       b'\xe3\xd0\x081\x00',
       b'\xe3\xd5\x161\x00',
+      b'\xe3\xd5F1\x00',
       b'\xe3\xe5F1\x00',
       b'\xe3\xf5\x06\x00\x00',
       b'\xe3\xf5\x07\x00\x00',

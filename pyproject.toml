@@ -86,6 +86,7 @@ indent-width = 2
 target-version="py311"
 
 [tool.ruff.lint]
+preview = true
 select = [
   "E", "F", "W", "PIE", "C4", "ISC", "A", "B",
   "NPY", # numpy
@@ -107,6 +108,10 @@ ignore = [
   "UP031",
   "NPY002",  # new numpy random syntax is worse
   "C420",
+  "E111", "E114", "E226", "E241",
+  "E221", "E265", "E266", "E261",
+  "E252", "E251", "E231", "E225",
+  "E262", "C419",
 ]
 flake8-implicit-str-concat.allow-multiline=false
 
@@ -115,6 +120,7 @@ flake8-implicit-str-concat.allow-multiline=false
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "pytest.main".msg = "pytest.main requires special handling that is easy to mess up!"
+"numpy.mean".msg = "Sum and divide. np.mean is slow"
 # TODO: re-enable when all tests are converted to pytest
 #"unittest".msg = "Use pytest"
 

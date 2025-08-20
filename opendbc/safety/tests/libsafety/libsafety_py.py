@@ -37,6 +37,7 @@ void can_set_checksum(CANPacket_t *packet);
 
 setup_safety_helpers(ffi)
 
+
 class CANPacket:
   reserved: int
   bus: int
@@ -46,6 +47,7 @@ class CANPacket:
   extended: int
   addr: int
   data: list[int]
+
 
 class Panda(PandaSafety, Protocol):
   # CAN
