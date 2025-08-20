@@ -331,14 +331,13 @@ class CAR(Platforms):
       HyundaiCarDocs("Hyundai Palisade 2020-22", "All", video="https://youtu.be/TAnDqjF4fDY?t=456", car_parts=CarParts.common([CarHarness.hyundai_h])),
       HyundaiCarDocs("Kia Telluride 2020-22", "All", car_parts=CarParts.common([CarHarness.hyundai_h])),
     ],
-      HYUNDAI_PALISADE_2024 = HyundaiPlatformConfig(
+    CarSpecs(mass=1999, wheelbase=2.9, steerRatio=15.6 * 1.15, tireStiffnessFactor=0.63),
+    flags=HyundaiFlags.MANDO_RADAR | HyundaiFlags.CHECKSUM_CRC8,
+  )
+  HYUNDAI_PALISADE_2024 = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Palisade 2024", "All", car_parts=CarParts.common([CarHarness.hyundai_k]))],
     CarSpecs(mass=1836, wheelbase=2.70, steerRatio=13.0),
     flags=HyundaiFlags.CHECKSUM_CRC8,
-  ),
-
-    CarSpecs(mass=1999, wheelbase=2.9, steerRatio=15.6 * 1.15, tireStiffnessFactor=0.63),
-    flags=HyundaiFlags.MANDO_RADAR | HyundaiFlags.CHECKSUM_CRC8,
   )
   HYUNDAI_VELOSTER = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Veloster 2019-20", min_enable_speed=5. * CV.MPH_TO_MS, car_parts=CarParts.common([CarHarness.hyundai_e]))],
