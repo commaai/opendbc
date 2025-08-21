@@ -66,10 +66,12 @@ class CarController(CarControllerBase):
     self.pitch = FirstOrderFilter(0, 0.25, DT_CTRL)
     self.pitch_slow = FirstOrderFilter(0, 1.5, DT_CTRL)
 
-    self.pcm_accel_cmd = FirstOrderFilter(0, 0.1, DT_CTRL)
-    self.pcm_accel_cmd_slow = FirstOrderFilter(0, 0.4, DT_CTRL)
-    self.pcm_accel_cmd_slower = FirstOrderFilter(0, 0.6, DT_CTRL)
-    self.pcm_accel_cmd_slowest = FirstOrderFilter(0, 0.8, DT_CTRL)
+    self.pcm_accel_cmd = FirstOrderFilter(0, 0.1, DT_CTRL)  # chatgpt says these should be evenly spaced to avoid leakage during ramps :thinking face:
+    self.pcm_accel_cmd_slow = FirstOrderFilter(0, 0.2, DT_CTRL)
+    self.pcm_accel_cmd_slower = FirstOrderFilter(0, 0.4, DT_CTRL)
+    self.pcm_accel_cmd_slowest = FirstOrderFilter(0, 0.6, DT_CTRL)
+
+    self.f1 = FirstOrderFilter(0, 0.2, DT_CTRL)
 
     self.accel = 0
     self.prev_accel = 0
@@ -191,6 +193,20 @@ class CarController(CarControllerBase):
     self.pcm_accel_cmd_slower.update(actuators.accel)
     self.pcm_accel_cmd_slowest.update(actuators.accel)
 
+    # laggy response comp
+    hp1 = self.pcm_accel_cmd.x - self.pcm_accel_cmd_slow.x
+    hp2 = self.pcm_accel_cmd_slow.x - self.pcm_accel_cmd_slower.x
+    hp3 = self.pcm_accel_cmd_slower.x - self.pcm_accel_cmd_slowest.x
+
+    # high_pass_accel_cmd = self.pcm_accel_cmd.x - self.pcm_accel_cmd_slow.x
+    # high_pass_accel_cmd = hp1 - hp2 - hp3
+    # high_pass_accel_cmd = hp1 - hp3
+    high_pass_accel_cmd = hp1 - hp2
+    self.f1.update(high_pass_accel_cmd)
+    high_pass_accel_cmd = (hp1 - hp2) - self.f1.x
+    # high_pass_accel_cmd = hp1 - 2*hp2 + hp3
+    # pcm_accel_cmd -= (hp1 - hp2) * 10
+
     if self.CP.openpilotLongitudinalControl:
       if self.frame % 3 == 0:
         # Press distance button until we are at the correct bar length. Only change while enabled to avoid skipping startup popup
@@ -237,16 +253,9 @@ class CarController(CarControllerBase):
             # feedforward compensation for changes in pitch
             high_pass_pitch = self.pitch.x - self.pitch_slow.x
             pitch_compensation = float(np.clip(math.sin(high_pass_pitch) * ACCELERATION_DUE_TO_GRAVITY, -1.5, 1.5))
-            pcm_accel_cmd += pitch_compensation
+            # pcm_accel_cmd += pitch_compensation
 
-            # laggy response comp
-            hp1 = self.pcm_accel_cmd.x - self.pcm_accel_cmd_slow.x
-            hp2 = self.pcm_accel_cmd_slow.x - self.pcm_accel_cmd_slower.x
-            hp3 = self.pcm_accel_cmd_slower.x - self.pcm_accel_cmd_slowest.x
-
-            # high_pass_accel_cmd = self.pcm_accel_cmd.x - self.pcm_accel_cmd_slow.x
-            high_pass_accel_cmd = hp1 - hp2 - hp3
-            pcm_accel_cmd += high_pass_accel_cmd
+            pcm_accel_cmd -= high_pass_accel_cmd * 10
 
           pcm_accel_cmd = self.long_pid.update(error_future,
                                                speed=CS.out.vEgo,
