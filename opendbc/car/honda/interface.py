@@ -84,19 +84,13 @@ class CarInterface(CarInterfaceBase):
       if fw.ecu == "eps" and b"," in fw.fwVersion:
         ret.dashcamOnly = True
 
-    # Certain Hondas have an extra steering sensor at the bottom of the steering rack,
-    # which improves controls quality as it removes the steering column torsion from feedback.
-    # Tire stiffness factor fictitiously lower if it includes the steering column torsion effect.
-    # For modeling details, see p.198-200 in "The Science of Vehicle Dynamics (2014), M. Guiggiani"
-
     if candidate in LEGACY_LATERAL_TUNING:
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = LEGACY_LATERAL_TUNING[candidate][1]
-      ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
-      if len(LEGACY_LATERAL_TUNING[candidate]) > 2:
-        ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = LEGACY_LATERAL_TUNING[candidate][2]
-      ret.lateralTuning.pid.kf = 0.00006  # conservative feed-forward
       ret.steerActuatorDelay = 0.1
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = LEGACY_LATERAL_TUNING[candidate]["kpv_kiv"]
+      ret.lateralTuning.pid.kpBP, ret.lateralTuning.pid.kiBP = LEGACY_LATERAL_TUNING[candidate].get("kpbp_kibp", [[0.], [0.]])
+      ret.lateralTuning.pid.kf = 0.00006  # conservative feed-forward
     else:
+      ret.steerActuatorDelay = 0.15
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
     # *** Longitudinal control tuning ***
