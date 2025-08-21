@@ -214,6 +214,9 @@ class CarInterface(CarInterfaceBase):
     if ret.flags & HondaFlags.BOSCH_ALT_BRAKE:
       ret.safetyConfigs[-1].safetyParam |= HondaSafetyFlags.ALT_BRAKE.value
 
+    if 0x1A3 in fingerprint[CAN.pt]:
+      ret.safetyConfigs[-1].safetyParam |= HondaSafetyFlags.REGEN.value
+
     # These cars use alternate SCM messages (SCM_FEEDBACK AND SCM_BUTTON)
     if candidate in HONDA_NIDEC_ALT_SCM_MESSAGES:
       ret.safetyConfigs[-1].safetyParam |= HondaSafetyFlags.NIDEC_ALT.value
