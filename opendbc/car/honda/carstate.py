@@ -34,7 +34,7 @@ class CarState(CarStateBase):
       self.main_on_sig_msg = "SCM_BUTTONS"
 
     self.steer_status_values = defaultdict(lambda: "UNKNOWN", can_define.dv["STEER_STATUS"]["STEER_STATUS"])
-    
+
     self.brake_switch_prev = False
     self.brake_switch_active = False
 
