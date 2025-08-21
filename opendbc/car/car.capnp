@@ -490,7 +490,7 @@ struct CarParams {
   tireStiffnessRear @24 :Float32;    # [N/rad] rear tire coeff of stiff
 
   longitudinalTuning @25 :LongitudinalPIDTuning;
-  lateralParamsDEPRECATED @48 :LateralParams;
+  lateralParams @48 :LateralParams;
   lateralTuning :union {
     pid @26 :LateralPIDTuning;
     indiDEPRECATED @27 :LateralINDITuning;
@@ -535,7 +535,7 @@ struct CarParams {
     safetyParam2DEPRECATED @2 :UInt32;
   }
 
-  struct LateralParamsDEPRECATED {
+  struct LateralParams {
     torqueBP @0 :List(Int32);
     torqueV @1 :List(Int32);
   }
