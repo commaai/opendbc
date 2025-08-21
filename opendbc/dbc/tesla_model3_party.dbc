@@ -293,7 +293,7 @@ BO_ 923 DAS_status: 8 PARTY
  SG_ DAS_autopilotState : 0|4@1+ (1,0) [0|15] ""  aps
 
 BO_ 325 ESP_status: 8 PARTY
- SG_ ESP_absBrakeEvent2 : 22|4@1+ (1,0) [0|0] ""  X
+ SG_ ESP_absBrakeEvent2 : 22|2@1+ (1,0) [0|0] ""  X
  SG_ ESP_absFaultLamp : 17|1@1+ (1,0) [0|0] ""  X
  SG_ ESP_brakeApply : 31|1@1+ (1,0) [0|0] ""  X
  SG_ ESP_brakeDiscWipingActive : 28|1@1+ (1,0) [0|0] ""  X
