@@ -179,7 +179,8 @@ class CAR(Platforms):
     [
       HondaCarDocs("Honda Civic 2019-21", "All", video="https://www.youtube.com/watch?v=4Iz1Mz5LGF8",
                    footnotes=[Footnote.CIVIC_DIESEL], min_steer_speed=2. * CV.MPH_TO_MS),
-      HondaCarDocs("Honda Civic Hatchback 2017-21", min_steer_speed=12. * CV.MPH_TO_MS),
+      HondaCarDocs("Honda Civic Hatchback 2017-18", min_steer_speed=12. * CV.MPH_TO_MS),
+      HondaCarDocs("Honda Civic Hatchback 2019-21", "All", min_steer_speed=12. * CV.MPH_TO_MS),
     ],
     CarSpecs(mass=1326, wheelbase=2.7, steerRatio=15.38, centerToFrontRatio=0.4),  # steerRatio: 10.93 is end-to-end spec
     {Bus.pt: 'honda_civic_hatchback_ex_2017_can_generated'},
@@ -225,6 +226,12 @@ class CAR(Platforms):
   HONDA_HRV_3G = HondaBoschPlatformConfig(
     [HondaCarDocs("Honda HR-V 2023-25", "All")],
     CarSpecs(mass=3125 * CV.LB_TO_KG, wheelbase=2.61, steerRatio=15.2, centerToFrontRatio=0.41, tireStiffnessFactor=0.5),
+    {Bus.pt: 'honda_civic_ex_2022_can_generated'},
+    flags=HondaFlags.BOSCH_RADARLESS,
+  )
+  HONDA_CITY_7G = HondaBoschPlatformConfig(
+    [HondaCarDocs("Honda City (Brazil only) 2023", "All")],
+    CarSpecs(mass=3125 * CV.LB_TO_KG, wheelbase=2.6, steerRatio=19.0, centerToFrontRatio=0.41, minSteerSpeed=23. * CV.KPH_TO_MS),
     {Bus.pt: 'honda_civic_ex_2022_can_generated'},
     flags=HondaFlags.BOSCH_RADARLESS,
   )
@@ -353,6 +360,7 @@ STEER_THRESHOLD = {
   CAR.HONDA_PILOT_4G: 600,
   CAR.ACURA_MDX_4G_MMR: 600,
   CAR.HONDA_CRV_6G: 600,
+  CAR.HONDA_CITY_7G: 600,
 }
 
 
@@ -397,9 +405,9 @@ FW_QUERY_CONFIG = FwQueryConfig(
   # Note that we still attempt to match with them when they are present
   # This is or'd with (ALL_ECUS - ESSENTIAL_ECUS) from fw_versions.py
   non_essential_ecus={
-    Ecu.eps: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_CIVIC_2022, CAR.HONDA_E, CAR.HONDA_HRV_3G, CAR.ACURA_INTEGRA, *HONDA_BOSCH_CANFD],
-    Ecu.vsa: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_CIVIC, CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CIVIC_2022, CAR.HONDA_CRV_5G, CAR.HONDA_CRV_HYBRID,
-              CAR.HONDA_E, CAR.HONDA_HRV_3G, CAR.HONDA_INSIGHT, CAR.ACURA_INTEGRA, *HONDA_BOSCH_CANFD],
+    Ecu.eps: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_E, *HONDA_BOSCH_RADARLESS, *HONDA_BOSCH_CANFD],
+    Ecu.vsa: [CAR.ACURA_RDX_3G, CAR.HONDA_ACCORD, CAR.HONDA_CIVIC, CAR.HONDA_CIVIC_BOSCH, CAR.HONDA_CRV_5G, CAR.HONDA_CRV_HYBRID,
+              CAR.HONDA_E, CAR.HONDA_INSIGHT, *HONDA_BOSCH_RADARLESS, *HONDA_BOSCH_CANFD],
   },
   extra_ecus=[
     (Ecu.combinationMeter, 0x18da60f1, None),
