@@ -828,9 +828,6 @@ FW_VERSIONS = {
     ],
   },
   CAR.ACURA_ILX: {
-    (Ecu.combinationMeter, 0x18da60f1, None): [
-      b'78109-TV9-C610\x00\x00',
-    ],
     (Ecu.gateway, 0x18daeff1, None): [
       b'38897-TX6-A010\x00\x00',
     ],
