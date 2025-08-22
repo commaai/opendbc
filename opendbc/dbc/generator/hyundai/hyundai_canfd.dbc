@@ -384,8 +384,8 @@ BO_ 437 FR_CMR_03_50ms: 32 FR_CMR
  SG_ Info_RtLnDptSta : 99|2@1+ (1,0) [0|3] "" RR_C_RDR,CGW
  SG_ Info_RtLnPosVal : 101|14@1- (0.0039625,0) [-32.4608|32.4568375] "m" RR_C_RDR,CGW
  SG_ Info_RtLnHdingAnglVal : 115|10@1- (0.000976563,0) [-0.500000256|0.499023693] "rad" RR_C_RDR,CGW
- SG_ Info_RtLnCvtrVal : 128|16@1- (1,0) [0|65535] "" CGW
- SG_ Info_RtLnCrvtrDrvtvVal : 144|16@1- (1,0) [0|65535] "" CGW
+ SG_ Info_RtLnCvtrVal : 128|16@1- (1e-06,0) [-0.032768|0.032767] "1/m" CGW
+ SG_ Info_RtLnCrvtrDrvtvVal : 144|16@1- (4e-09,0) [-0.000131072|0.000131068] "1/m2" CGW
  SG_ ID_CIPV : 192|8@1+ (1,0) [0|255] "" XXX
  SG_ Relative_Velocity : 200|12@1+ (0.05,-100) [-100|104.75] "m/s" XXX
  SG_ Longitudinal_Distance : 212|12@1+ (0.05,0) [0|204.75] "m" XXX
