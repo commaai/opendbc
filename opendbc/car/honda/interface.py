@@ -225,7 +225,7 @@ class CarInterface(CarInterfaceBase):
     if candidate in HONDA_BOSCH_CANFD:
       ret.safetyConfigs[-1].safetyParam |= HondaSafetyFlags.BOSCH_CANFD.value
 
-    if ret.flags & HondaFlags.NIDEC & HondaFlags.HYBRID:
+    if (ret.flags & HondaFlags.NIDEC) and (ret.flags & HondaFlags.HYBRID):
       ret.safetyConfigs[-1].safetyParam |= HondaSafetyFlags.NIDEC_HYBRID.value
 
     # min speed to enable ACC. if car can do stop and go, then set enabling speed
