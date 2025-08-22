@@ -35,18 +35,14 @@ class CarControllerParams:
   BOSCH_GAS_LOOKUP_BP = [-0.2, 2.0]  # 2m/s^2
   BOSCH_GAS_LOOKUP_V = [0, 1600]
 
+  STEER_MAX = 2560  # Max output from stock LKA camera
   STEER_STEP = 1  # 100 Hz
   STEER_DELTA_UP = 3  # min/max in 0.33s for all Honda
   STEER_DELTA_DOWN = 3
 
   def __init__(self, CP):
-    self.STEER_MAX = CP.lateralParams.torqueBP[-1]
-    # mirror of list (assuming first item is zero) for interp of signed request
-    # values and verify that both arrays begin at zero
-    assert CP.lateralParams.torqueBP[0] == 0
-    assert CP.lateralParams.torqueV[0] == 0
-    self.STEER_LOOKUP_BP = [v * -1 for v in CP.lateralParams.torqueBP][1:][::-1] + list(CP.lateralParams.torqueBP)
-    self.STEER_LOOKUP_V = [v * -1 for v in CP.lateralParams.torqueV][1:][::-1] + list(CP.lateralParams.torqueV)
+    if CP.carFingerprint in LEGACY_LATERAL_TUNING:
+      self.STEER_MAX = LEGACY_LATERAL_TUNING[CP.carFingerprint]["steer_max"]
 
 
 class HondaSafetyFlags(IntFlag):
@@ -342,6 +338,34 @@ class CAR(Platforms):
   )
 
 
+# All new Honda/Acura ports should use the lateral acceleration torque controller.
+# Don't add new entries to this list. All older ports should eventually be migrated.
+# When migrating older ports, match the actuation range used by the stock LKA camera.
+LEGACY_LATERAL_TUNING = {
+  CAR.ACURA_ILX: {"steer_max": 3840, "kpv_kiv": [[0.8], [0.24]]},
+  CAR.ACURA_RDX: {"steer_max": 1000, "kpv_kiv": [[0.8], [0.24]]},
+  CAR.ACURA_RDX_3G: {"steer_max": 3840, "kpv_kiv": [[0.2], [0.06]]},
+  CAR.HONDA_ACCORD: {"steer_max": 4096, "kpv_kiv": [[0.6], [0.18]]},
+  CAR.HONDA_CIVIC: {"steer_max": 2560, "kpv_kiv": [[1.1], [0.33]]},
+  CAR.HONDA_CIVIC_BOSCH: {"steer_max": 4096, "kpv_kiv": [[0.8], [0.24]]},
+  CAR.HONDA_CIVIC_BOSCH_DIESEL: {"steer_max": 4096, "kpv_kiv": [[0.8], [0.24]]},
+  CAR.HONDA_CIVIC_2022: {"steer_max": 4096, "kpv_kiv": [[0.05, 0.5], [0.0125, 0.125]], "kpbp_kibp": [[0, 10], [0, 10]]},
+  CAR.HONDA_CRV: {"steer_max": 1000, "kpv_kiv": [[0.8], [0.24]]},
+  CAR.HONDA_CRV_EU: {"steer_max": 1000, "kpv_kiv": [[0.8], [0.24]]},
+  CAR.HONDA_CRV_HYBRID: {"steer_max": 4096, "kpv_kiv": [[0.6], [0.18]]},
+  CAR.HONDA_CRV_5G: {"steer_max": 3840, "kpv_kiv": [[0.64], [0.192]]},
+  CAR.HONDA_E: {"steer_max": 4096, "kpv_kiv": [[0.6], [0.18]]},
+  CAR.HONDA_FIT: {"steer_max": 4096, "kpv_kiv": [[0.2], [0.05]]},
+  CAR.HONDA_FREED: {"steer_max": 4096, "kpv_kiv": [[0.2], [0.05]]},
+  CAR.HONDA_HRV: {"steer_max": 4096, "kpv_kiv": [[0.16], [0.025]]},
+  CAR.HONDA_HRV_3G: {"steer_max": 4096, "kpv_kiv": [[0.8], [0.24]]},
+  CAR.HONDA_INSIGHT: {"steer_max": 4096, "kpv_kiv": [[0.6], [0.18]]},
+  CAR.HONDA_ODYSSEY: {"steer_max": 4096, "kpv_kiv": [[0.28], [0.08]]},
+  CAR.HONDA_PILOT: {"steer_max": 4096, "kpv_kiv": [[0.38], [0.11]]},
+  CAR.HONDA_RIDGELINE: {"steer_max": 4096, "kpv_kiv": [[0.38], [0.11]]},
+}
+
+
 HONDA_NIDEC_ALT_PCM_ACCEL = CAR.with_flags(HondaFlags.NIDEC_ALT_PCM_ACCEL)
 HONDA_NIDEC_ALT_SCM_MESSAGES = CAR.with_flags(HondaFlags.NIDEC_ALT_SCM_MESSAGES)
 HONDA_BOSCH = CAR.with_flags(HondaFlags.BOSCH)
@@ -350,6 +374,16 @@ HONDA_BOSCH_CANFD = CAR.with_flags(HondaFlags.BOSCH_CANFD)
 
 
 DBC = CAR.create_dbc_map()
+
+
+WHEEL_SPEED_FACTOR = {
+  CAR.HONDA_CRV: 1.025,
+  CAR.HONDA_CRV_EU: 1.025,
+  CAR.HONDA_CRV_5G: 1.025,
+  CAR.HONDA_CRV_HYBRID: 1.025,
+  CAR.HONDA_HRV: 1.025,
+  CAR.HONDA_HRV_3G: 1.025,
+}
 
 
 STEER_THRESHOLD = {
