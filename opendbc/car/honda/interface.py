@@ -76,10 +76,6 @@ class CarInterface(CarInterfaceBase):
       # Traditional autos, direct-drive EVs and eCVTs, gearshift position in GEARBOX_AUTO
       ret.transmissionType = TransmissionType.automatic
 
-    # Certain Hondas have an extra steering sensor at the bottom of the steering rack,
-    # which improves controls quality as it removes the steering column torsion from feedback.
-    # Tire stiffness factor fictitiously lower if it includes the steering column torsion effect.
-    # For modeling details, see p.198-200 in "The Science of Vehicle Dynamics (2014), M. Guiggiani"
     ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0], [0]]
     ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
     ret.lateralTuning.pid.kf = 0.00006  # conservative feed-forward
@@ -116,19 +112,9 @@ class CarInterface(CarInterfaceBase):
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]  # TODO: determine if there is a dead zone at the top end
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.18]]
 
-    elif candidate == CAR.HONDA_ACCORD_11G:
-      ret.steerActuatorDelay = 0.22
-      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 2560], [0, 2560]]
-      CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
-
     elif candidate == CAR.ACURA_ILX:
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 3840], [0, 3840]]  # TODO: determine if there is a dead zone at the top end
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.8], [0.24]]
-
-    elif candidate == CAR.HONDA_CITY_7G:
-      ret.steerActuatorDelay = 0.15
-      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 2560], [0, 2560]]
-      CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
     elif candidate in (CAR.HONDA_CRV, CAR.HONDA_CRV_EU):
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 1000], [0, 1000]]  # TODO: determine if there is a dead zone at the top end
@@ -144,11 +130,6 @@ class CarInterface(CarInterfaceBase):
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]  # TODO: determine if there is a dead zone at the top end
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.18]]
       ret.wheelSpeedFactor = 1.025
-
-    elif candidate in (CAR.HONDA_CRV_6G):
-      ret.steerActuatorDelay = 0.15
-      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 2560], [0, 2560]]
-      CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
     elif candidate == CAR.HONDA_FIT:
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]  # TODO: determine if there is a dead zone at the top end
@@ -182,16 +163,6 @@ class CarInterface(CarInterfaceBase):
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]  # TODO: determine if there is a dead zone at the top end
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.38], [0.11]]
 
-    elif candidate == CAR.HONDA_PILOT_4G:
-      ret.steerActuatorDelay = 0.15
-      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 2560], [0, 2560]]
-      CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
-
-    elif candidate == CAR.ACURA_MDX_4G_MMR:
-      ret.steerActuatorDelay = 0.15
-      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 2560], [0, 2560]]
-      CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
-
     elif candidate == CAR.HONDA_RIDGELINE:
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]  # TODO: determine if there is a dead zone at the top end
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.38], [0.11]]
@@ -205,7 +176,9 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.18]] # TODO: can probably use some tuning
 
     else:
-      raise ValueError(f"unsupported car {candidate}")
+      ret.steerActuatorDelay = 0.15
+      ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 2560], [0, 2560]]
+      CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
     # These cars use alternate user brake msg (0x1BE)
     if 0x1BE in fingerprint[CAN.pt] and candidate in (CAR.HONDA_ACCORD, CAR.HONDA_HRV_3G, *HONDA_BOSCH_CANFD):
@@ -213,17 +186,12 @@ class CarInterface(CarInterfaceBase):
 
     if ret.flags & HondaFlags.BOSCH_ALT_BRAKE:
       ret.safetyConfigs[-1].safetyParam |= HondaSafetyFlags.ALT_BRAKE.value
-
-    # These cars use alternate SCM messages (SCM_FEEDBACK AND SCM_BUTTON)
     if candidate in HONDA_NIDEC_ALT_SCM_MESSAGES:
       ret.safetyConfigs[-1].safetyParam |= HondaSafetyFlags.NIDEC_ALT.value
-
     if ret.openpilotLongitudinalControl and candidate in HONDA_BOSCH:
       ret.safetyConfigs[-1].safetyParam |= HondaSafetyFlags.BOSCH_LONG.value
-
     if candidate in HONDA_BOSCH_RADARLESS:
       ret.safetyConfigs[-1].safetyParam |= HondaSafetyFlags.RADARLESS.value
-
     if candidate in HONDA_BOSCH_CANFD:
       ret.safetyConfigs[-1].safetyParam |= HondaSafetyFlags.BOSCH_CANFD.value
 
