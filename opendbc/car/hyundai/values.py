@@ -600,6 +600,24 @@ class CAR(Platforms):
   )
 
   # port extensions
+  HYUNDAI_BAYON_1ST_GEN_NON_SCC = HyundaiPlatformConfig(
+    [HyundaiCarDocs("Hyundai Bayon Non-SCC 2021", "No Smart Cruise Control (Non-SCC)", car_parts=CarParts.common([CarHarness.hyundai_n]))],
+    CarSpecs(mass=1150, wheelbase=2.58, steerRatio=13.27 * 1.15),
+    flags=HyundaiFlags.CHECKSUM_CRC8,
+    sp_flags=HyundaiFlagsSP.NON_SCC,
+  )
+  HYUNDAI_ELANTRA_2022_NON_SCC = HyundaiPlatformConfig(
+    [HyundaiCarDocs("Hyundai Elantra Non-SCC 2022", "No Smart Cruise Control (Non-SCC)", car_parts=CarParts.common([CarHarness.hyundai_k]))],
+    HYUNDAI_ELANTRA_2021.specs,
+    flags=HyundaiFlags.CHECKSUM_CRC8,
+    sp_flags=HyundaiFlagsSP.NON_SCC,
+  )
+  HYUNDAI_KONA_NON_SCC = HyundaiPlatformConfig(
+    [HyundaiCarDocs("Hyundai Kona Non-SCC 2019", "No Smart Cruise Control (Non-SCC)", car_parts=CarParts.common([CarHarness.hyundai_b]))],
+    HYUNDAI_KONA.specs,
+    flags=HyundaiFlags.ALT_LIMITS,
+    sp_flags=HyundaiFlagsSP.NON_SCC,
+  )
   HYUNDAI_KONA_EV_NON_SCC = HyundaiPlatformConfig(
     [HyundaiCarDocs("Hyundai Kona Electric Non-SCC 2019", "No Smart Cruise Control (Non-SCC)", car_parts=CarParts.common([CarHarness.hyundai_g]))],
     HYUNDAI_KONA_EV.specs,
@@ -611,6 +629,28 @@ class CAR(Platforms):
     CarSpecs(mass=1650, wheelbase=2.65, steerRatio=13.75, tireStiffnessFactor=0.5),
     flags=HyundaiFlags.HYBRID,
     sp_flags=HyundaiFlagsSP.NON_SCC,
+  )
+  KIA_FORTE_2019_NON_SCC = HyundaiPlatformConfig(
+    [HyundaiCarDocs("Kia Forte Non-SCC 2019", "No Smart Cruise Control (Non-SCC)", car_parts=CarParts.common([CarHarness.hyundai_g]))],
+    KIA_FORTE.specs,
+    sp_flags=HyundaiFlagsSP.NON_SCC | HyundaiFlagsSP.NON_SCC_NO_FCA,
+  )
+  KIA_FORTE_2021_NON_SCC = HyundaiPlatformConfig(
+    [HyundaiCarDocs("Kia Forte Non-SCC 2021", "No Smart Cruise Control (Non-SCC)", car_parts=CarParts.common([CarHarness.hyundai_g]))],
+    KIA_FORTE.specs,
+    sp_flags=HyundaiFlagsSP.NON_SCC,
+  )
+  KIA_SELTOS_2023_NON_SCC = HyundaiPlatformConfig(
+    [HyundaiCarDocs("Kia Seltos Non-SCC 2023-24", "No Smart Cruise Control (Non-SCC)", car_parts=CarParts.common([CarHarness.hyundai_l]))],
+    KIA_SELTOS.specs,
+    flags=HyundaiFlags.CHECKSUM_CRC8,
+    sp_flags=HyundaiFlagsSP.NON_SCC,
+  )
+  GENESIS_G70_2021_NON_SCC = HyundaiPlatformConfig(
+    [HyundaiCarDocs("Genesis G70 Non-SCC 2021", "No Smart Cruise Control (Non-SCC)", car_parts=CarParts.common([CarHarness.hyundai_f]))],
+    GENESIS_G70_2020.specs,
+    flags=HyundaiFlags.CHECKSUM_CRC8,
+    sp_flags=HyundaiFlagsSP.NON_SCC | HyundaiFlagsSP.NON_SCC_RADAR_FCA,
   )
 
 

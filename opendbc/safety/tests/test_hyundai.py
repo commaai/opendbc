@@ -18,8 +18,8 @@ LDA_BUTTON = [
   {"SAFETY_PARAM_SP": HyundaiSafetyFlagsSP.HAS_LDA_BUTTON},
 ]
 
-# All combinations of non-SCC cars
-_ALL_NON_SCC_COMBOS = [
+# All combinations of non-SCC HEV/PHEV/EV cars
+_ALL_NON_SCC_HEV_EV_COMBOS = [
   # Hybrid
   {"PCM_STATUS_MSG": ("E_CRUISE_CONTROL", "CRUISE_LAMP_S"),
    "ACC_STATE_MSG": ("E_CRUISE_CONTROL", "CRUISE_LAMP_M"),
@@ -31,7 +31,7 @@ _ALL_NON_SCC_COMBOS = [
    "GAS_MSG": ("E_EMS11", "Accel_Pedal_Pos"),
    "SAFETY_PARAM": HyundaiSafetyFlags.EV_GAS},
 ]
-ALL_NON_SCC_COMBOS = [{**p, **lda} for lda in LDA_BUTTON for p in _ALL_NON_SCC_COMBOS]
+ALL_NON_SCC_HEV_EV_COMBOS = [{**p, **lda} for lda in LDA_BUTTON for p in _ALL_NON_SCC_HEV_EV_COMBOS]
 
 
 # 4 bit checkusm used in some hyundai messages
@@ -480,8 +480,59 @@ class TestHyundaiLongitudinalESCCSafety(HyundaiLongitudinalBase, TestHyundaiSafe
     pass
 
 
-@parameterized_class(ALL_NON_SCC_COMBOS)
+@parameterized_class(LDA_BUTTON)
 class TestHyundaiNonSCCSafety(TestHyundaiSafety):
+
+  @classmethod
+  def setUpClass(cls):
+    if cls.__name__ == "TestHyundaiNonSCCSafety":
+      cls.safety = None
+      raise unittest.SkipTest
+
+  def setUp(self):
+    self.packer = CANPackerPanda("hyundai_kia_generic")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_current_safety_param_sp(HyundaiSafetyFlagsSP.NON_SCC | self.SAFETY_PARAM_SP)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hyundai, 0)
+    self.safety.init_tests()
+
+  def _pcm_status_msg(self, enable):
+    values = {"CRUISE_LAMP_S": enable, "AliveCounter": self.cnt_gas % 4}
+    self.__class__.cnt_gas += 1
+    return self.packer.make_can_msg_panda("EMS16", 0, values, fix_checksum=checksum)
+
+  def _acc_state_msg(self, enable):
+    values = {"CRUISE_LAMP_M": enable, "AliveCounter": self.cnt_gas % 4}
+    self.__class__.cnt_gas += 1
+    return self.packer.make_can_msg_panda("EMS16", 0, values, fix_checksum=checksum)
+
+  def _user_gas_msg(self, gas: float, controls_allowed: bool = True):
+    values = {"CF_Ems_AclAct": gas, "CRUISE_LAMP_M": 1, "CRUISE_LAMP_S": controls_allowed, "AliveCounter": self.cnt_gas % 4}
+    self.__class__.cnt_gas += 1
+    return self.packer.make_can_msg_panda("EMS16", 0, values, fix_checksum=checksum)
+
+  def test_allow_engage_with_gas_pressed(self):
+    self._rx(self._user_gas_msg(1, self.safety.get_controls_allowed()))
+    self.safety.set_controls_allowed(True)
+    self._rx(self._user_gas_msg(1, self.safety.get_controls_allowed()))
+    self.assertTrue(self.safety.get_controls_allowed())
+    self._rx(self._user_gas_msg(1, self.safety.get_controls_allowed()))
+    self.assertTrue(self.safety.get_controls_allowed())
+
+  def test_no_disengage_on_gas(self):
+    self._rx(self._user_gas_msg(0, self.safety.get_controls_allowed()))
+    self.safety.set_controls_allowed(True)
+    self._rx(self._user_gas_msg(self.GAS_PRESSED_THRESHOLD + 1, self.safety.get_controls_allowed()))
+    # Test we allow lateral, but not longitudinal
+    self.assertTrue(self.safety.get_controls_allowed())
+    self.assertFalse(self.safety.get_longitudinal_allowed())
+    # Make sure we can re-gain longitudinal actuation
+    self._rx(self._user_gas_msg(0, self.safety.get_controls_allowed()))
+    self.assertTrue(self.safety.get_longitudinal_allowed())
+
+
+@parameterized_class(ALL_NON_SCC_HEV_EV_COMBOS)
+class TestHyundaiNonSCCSafety_HEV_EV(TestHyundaiSafety):
 
   PCM_STATUS_MSG = ("", "")
   ACC_STATE_MSG = ("", "")
@@ -490,7 +541,7 @@ class TestHyundaiNonSCCSafety(TestHyundaiSafety):
 
   @classmethod
   def setUpClass(cls):
-    if cls.__name__ == "TestHyundaiNonSCCSafety":
+    if cls.__name__ == "TestHyundaiNonSCCSafety_HEV_EV":
       cls.safety = None
       raise unittest.SkipTest
 

@@ -59,7 +59,7 @@ class MadsCarController:
       lkas_icon = 2 if enabled else 1
 
     # Override common signals for KIA_OPTIMA_G4 and KIA_OPTIMA_G4_FL
-    if CP.carFingerprint in (CAR.KIA_OPTIMA_G4, CAR.KIA_OPTIMA_G4_FL):
+    if CP.carFingerprint in (CAR.KIA_OPTIMA_G4, CAR.KIA_OPTIMA_G4_FL, CAR.HYUNDAI_KONA_NON_SCC):
       lkas_icon = 3 if (self.mads.lat_active if self.mads.enable_mads else enabled) else 1
 
     return lkas_icon
