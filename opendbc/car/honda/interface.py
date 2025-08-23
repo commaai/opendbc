@@ -11,7 +11,7 @@ from opendbc.car.honda.carstate import CarState
 from opendbc.car.honda.radar_interface import RadarInterface
 from opendbc.car.interfaces import CarInterfaceBase
 
-from opendbc.sunnypilot.car.honda.values_ext import HondaSafetyFlagsSP
+from opendbc.sunnypilot.car.honda.values_ext import HondaFlagsSP, HondaSafetyFlagsSP
 
 TransmissionType = structs.CarParams.TransmissionType
 
@@ -252,11 +252,43 @@ class CarInterface(CarInterfaceBase):
   def _get_params_sp(stock_cp: structs.CarParams, ret: structs.CarParamsSP, candidate, fingerprint: dict[int, dict[int, int]],
                      car_fw: list[structs.CarParams.CarFw], alpha_long: bool, docs: bool) -> structs.CarParamsSP:
     eps_modified = False
-    for fw in car_fw:
-      if fw.ecu == "eps" and b"," in fw.fwVersion:
-        eps_modified = True
+    # FIXME-SP: uncomment when the sync brings in https://github.com/commaai/opendbc/pull/2672
+    # for fw in car_fw:
+    #   if fw.ecu == "eps" and b"," in fw.fwVersion:
+    #     ret.flags |= HondaFlagsSP.EPS_MOD.value
+    #     eps_modified = True
+    #     stock_cp.dashcamOnly = False
 
-    if candidate == CAR.HONDA_CLARITY:
+    if candidate == CAR.HONDA_CIVIC:
+      if eps_modified:
+        # stock request input values:     0x0000, 0x00DE, 0x014D, 0x01EF, 0x0290, 0x0377, 0x0454, 0x0610, 0x06EE
+        # stock request output values:    0x0000, 0x0917, 0x0DC5, 0x1017, 0x119F, 0x140B, 0x1680, 0x1680, 0x1680
+        # modified request output values: 0x0000, 0x0917, 0x0DC5, 0x1017, 0x119F, 0x140B, 0x1680, 0x2880, 0x3180
+        # stock filter output values:     0x009F, 0x0108, 0x0108, 0x0108, 0x0108, 0x0108, 0x0108, 0x0108, 0x0108
+        # modified filter output values:  0x009F, 0x0108, 0x0108, 0x0108, 0x0108, 0x0108, 0x0108, 0x0400, 0x0480
+        # note: max request allowed is 4096, but request is capped at 3840 in firmware, so modifications result in 2x max
+        stock_cp.lateralParams.torqueBP, stock_cp.lateralParams.torqueV = [[0, 2560, 8000], [0, 2560, 3840]]
+        stock_cp.lateralTuning.pid.kpV, stock_cp.lateralTuning.pid.kiV = [[0.3], [0.1]]
+
+    elif candidate == CAR.HONDA_ACCORD:
+      if eps_modified:
+        stock_cp.lateralTuning.pid.kpV, stock_cp.lateralTuning.pid.kiV = [[0.3], [0.09]]
+
+    elif candidate == CAR.HONDA_CRV_5G:
+      if eps_modified:
+        # stock request input values:     0x0000, 0x00DB, 0x01BB, 0x0296, 0x0377, 0x0454, 0x0532, 0x0610, 0x067F
+        # stock request output values:    0x0000, 0x0500, 0x0A15, 0x0E6D, 0x1100, 0x1200, 0x129A, 0x134D, 0x1400
+        # modified request output values: 0x0000, 0x0500, 0x0A15, 0x0E6D, 0x1100, 0x1200, 0x1ACD, 0x239A, 0x2800
+        stock_cp.lateralParams.torqueBP, stock_cp.lateralParams.torqueV = [[0, 2560, 10000], [0, 2560, 3840]]
+        stock_cp.lateralTuning.pid.kpV, stock_cp.lateralTuning.pid.kiV = [[0.21], [0.07]]
+
+    elif candidate == CAR.HONDA_CLARITY:
+      # FIXME-SP: remove when the sync brings in https://github.com/commaai/opendbc/pull/2672
+      for fw in car_fw:
+        if fw.ecu == "eps" and b"," in fw.fwVersion:
+          ret.flags |= HondaFlagsSP.EPS_MOD.value
+          eps_modified = True
+
       ret.safetyParam |= HondaSafetyFlagsSP.CLARITY
       stock_cp.autoResumeSng = True
       stock_cp.minEnableSpeed = -1
