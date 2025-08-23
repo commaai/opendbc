@@ -26,13 +26,13 @@ def _initialize_custom_longitudinal_tuning(CI: CarInterfaceBase, CP: structs.Car
 
   # Hyundai Custom Longitudinal Tuning
   if CP.brand == 'hyundai':
-    hyundai_longitudinal_tuning = params_dict["HyundaiLongitudinalTuning"]
+    hyundai_longitudinal_tuning = int(params_dict["HyundaiLongitudinalTuning"])
     if hyundai_longitudinal_tuning == LongitudinalTuningType.DYNAMIC:
       CP_SP.flags |= HyundaiFlagsSP.LONG_TUNING_DYNAMIC.value
     if hyundai_longitudinal_tuning == LongitudinalTuningType.PREDICTIVE:
       CP_SP.flags |= HyundaiFlagsSP.LONG_TUNING_PREDICTIVE.value
 
-  CP_SP = CI.get_longitudinal_tuning_sp(CP, CP_SP)
+  _ = CI.get_longitudinal_tuning_sp(CP, CP_SP)
 
 
 def _initialize_radar_tracks(CP: structs.CarParams, CP_SP: structs.CarParamsSP, can_recv: CanRecvCallable = None, can_send: CanSendCallable = None) -> None:
