@@ -958,6 +958,19 @@
     ],
     "package": "All"
   },
+  "Honda Clarity 2018-21": {
+    "platform": "HONDA_CLARITY",
+    "make": "Honda",
+    "brand": "honda",
+    "model": "Clarity",
+    "year": [
+      "2018",
+      "2019",
+      "2020",
+      "2021"
+    ],
+    "package": "Honda Sensing"
+  },
   "Honda CR-V 2015-16": {
     "platform": "HONDA_CRV",
     "make": "Honda",

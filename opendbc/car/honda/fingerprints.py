@@ -2,6 +2,9 @@
 from opendbc.car.structs import CarParams
 from opendbc.car.honda.values import CAR
 
+from opendbc.sunnypilot.car.fw_versions_ext import merge_fw_versions
+from opendbc.sunnypilot.car.honda.fingerprints_ext import FW_VERSIONS_EXT
+
 Ecu = CarParams.Ecu
 
 # Modified FW can be identified by the second dash being replaced by a comma
@@ -965,3 +968,5 @@ FW_VERSIONS = {
     ],
   },
 }
+
+FW_VERSIONS = merge_fw_versions(FW_VERSIONS, FW_VERSIONS_EXT)

@@ -11,6 +11,8 @@ from opendbc.car.honda.carstate import CarState
 from opendbc.car.honda.radar_interface import RadarInterface
 from opendbc.car.interfaces import CarInterfaceBase
 
+from opendbc.sunnypilot.car.honda.values_ext import HondaSafetyFlagsSP
+
 TransmissionType = structs.CarParams.TransmissionType
 
 
@@ -208,6 +210,10 @@ class CarInterface(CarInterfaceBase):
       ret.lateralParams.torqueBP, ret.lateralParams.torqueV = [[0, 4096], [0, 4096]]  # TODO: determine if there is a dead zone at the top end
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.18]] # TODO: can probably use some tuning
 
+    # TODO-SP: remove when https://github.com/commaai/opendbc/pull/2687 is merged
+    elif candidate == CAR.HONDA_CLARITY:
+      pass
+
     else:
       raise ValueError(f"unsupported car {candidate}")
 
@@ -239,6 +245,33 @@ class CarInterface(CarInterfaceBase):
 
     ret.steerLimitTimer = 0.8
     ret.radarDelay = 0.1
+
+    return ret
+
+  @staticmethod
+  def _get_params_sp(stock_cp: structs.CarParams, ret: structs.CarParamsSP, candidate, fingerprint: dict[int, dict[int, int]],
+                     car_fw: list[structs.CarParams.CarFw], alpha_long: bool, docs: bool) -> structs.CarParamsSP:
+    eps_modified = False
+    for fw in car_fw:
+      if fw.ecu == "eps" and b"," in fw.fwVersion:
+        eps_modified = True
+
+    if candidate == CAR.HONDA_CLARITY:
+      ret.safetyParam |= HondaSafetyFlagsSP.CLARITY
+      stock_cp.autoResumeSng = True
+      stock_cp.minEnableSpeed = -1
+      if eps_modified:
+        for fw in car_fw:
+          if fw.ecu == "eps" and b"-" not in fw.fwVersion and b"," in fw.fwVersion:
+            stock_cp.lateralTuning.pid.kf = 0.00004
+            stock_cp.lateralParams.torqueBP, stock_cp.lateralParams.torqueV = [[0, 2560, 15360], [0, 2560, 3840]]
+            stock_cp.lateralTuning.pid.kpV, stock_cp.lateralTuning.pid.kiV = [[0.1575], [0.05175]]
+          elif fw.ecu == "eps" and b"-" in fw.fwVersion and b"," in fw.fwVersion:
+            stock_cp.lateralParams.torqueBP, stock_cp.lateralParams.torqueV = [[0, 2560, 10240], [0, 2560, 3840]]
+            stock_cp.lateralTuning.pid.kpV, stock_cp.lateralTuning.pid.kiV = [[0.3], [0.1]]
+      else:
+        stock_cp.lateralParams.torqueBP, stock_cp.lateralParams.torqueV = [[0, 2560], [0, 2560]]
+        stock_cp.lateralTuning.pid.kpV, stock_cp.lateralTuning.pid.kiV = [[0.8], [0.24]]
 
     return ret
 

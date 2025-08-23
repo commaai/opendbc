@@ -8,6 +8,8 @@ import opendbc.safety.tests.common as common
 from opendbc.car.structs import CarParams
 from opendbc.safety.tests.common import CANPackerPanda, MAX_WRONG_COUNTERS
 
+from opendbc.sunnypilot.car.honda.values_ext import HondaSafetyFlagsSP
+
 HONDA_N_COMMON_TX_MSGS = [[0xE4, 0], [0x194, 0], [0x1FA, 0], [0x30C, 0], [0x33D, 0]]
 
 
@@ -296,6 +298,8 @@ class TestHondaNidecSafetyBase(HondaBase):
 
   MAX_GAS = 198
 
+  BRAKE_SIG = "COMPUTER_BRAKE"
+
   def setUp(self):
     self.packer = CANPackerPanda("honda_civic_touring_2016_can_generated")
     self.safety = libsafety_py.libsafety
@@ -303,7 +307,7 @@ class TestHondaNidecSafetyBase(HondaBase):
     self.safety.init_tests()
 
   def _send_brake_msg(self, brake, aeb_req=0, bus=0):
-    values = {"COMPUTER_BRAKE": brake, "AEB_REQ_1": aeb_req}
+    values = {self.BRAKE_SIG: brake, "AEB_REQ_1": aeb_req}
     return self.packer.make_can_msg_panda("BRAKE_COMMAND", bus, values)
 
   def _rx_brake_msg(self, brake, aeb_req=0):
@@ -639,6 +643,18 @@ class TestHondaBoschCANFDAltBrakeSafety(HondaPcmEnableBase, TestHondaBoschCANFDS
   def setUp(self):
     super().setUp()
     self.safety.set_safety_hooks(CarParams.SafetyModel.hondaBosch, HondaSafetyFlags.BOSCH_CANFD | HondaSafetyFlags.ALT_BRAKE)
+    self.safety.init_tests()
+
+
+class TestHondaNidecClaritySafety(TestHondaNidecPcmSafety):
+
+  BRAKE_SIG = "COMPUTER_BRAKE_ALT"
+
+  def setUp(self):
+    self.packer = CANPackerPanda("honda_clarity_hybrid_2018_can_generated")
+    self.safety = libsafety_py.libsafety
+    self.safety.set_current_safety_param_sp(HondaSafetyFlagsSP.CLARITY)
+    self.safety.set_safety_hooks(CarParams.SafetyModel.hondaNidec, 0)
     self.safety.init_tests()
 
 

@@ -10,6 +10,8 @@ from opendbc.car.honda.values import CAR, DBC, STEER_THRESHOLD, HONDA_BOSCH, HON
                                                  HondaFlags, CruiseButtons, CruiseSettings, GearShifter
 from opendbc.car.interfaces import CarStateBase
 
+from opendbc.sunnypilot.car.honda.carstate_ext import CarStateExt
+
 TransmissionType = structs.CarParams.TransmissionType
 ButtonType = structs.CarState.ButtonEvent.Type
 
@@ -18,9 +20,10 @@ BUTTONS_DICT = {CruiseButtons.RES_ACCEL: ButtonType.accelCruise, CruiseButtons.D
 SETTINGS_BUTTONS_DICT = {CruiseSettings.DISTANCE: ButtonType.gapAdjustCruise, CruiseSettings.LKAS: ButtonType.lkas}
 
 
-class CarState(CarStateBase):
+class CarState(CarStateBase, CarStateExt):
   def __init__(self, CP, CP_SP):
-    super().__init__(CP, CP_SP)
+    CarStateBase.__init__(self, CP, CP_SP)
+    CarStateExt.__init__(self, CP, CP_SP)
     can_define = CANDefine(DBC[CP.carFingerprint][Bus.pt])
 
     if CP.transmissionType != TransmissionType.manual:
@@ -205,6 +208,8 @@ class CarState(CarStateBase):
       *create_button_events(self.cruise_buttons, prev_cruise_buttons, BUTTONS_DICT),
       *create_button_events(self.cruise_setting, prev_cruise_setting, SETTINGS_BUTTONS_DICT),
     ]
+
+    CarStateExt.update(self, ret, can_parsers)
 
     return ret, ret_sp
 
