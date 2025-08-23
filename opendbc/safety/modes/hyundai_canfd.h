@@ -21,7 +21,7 @@
   {0x1E0, e_can, 16, .check_relay = (e_can) == 0},  /* LFAHDA_CLUSTER */ \
 
 #define HYUNDAI_CANFD_SCC_CONTROL_COMMON_TX_MSGS(e_can, longitudinal) \
-  {0x1A0, e_can, 32, .check_relay = (longitudinal)},  /* ADAS_CMD_20_20ms */ \
+  {0x1A0, e_can, 32, .check_relay = (longitudinal)},  /* SCC_CONTROL */ \
 
 // *** Addresses checked in rx hook ***
 // EV, ICE, HYBRID: ACCELERATOR (0x35), ACCELERATOR_BRAKE_ALT (0x100), ACCELERATOR_ALT (0x105)
@@ -41,7 +41,7 @@
   HYUNDAI_CANFD_COMMON_RX_CHECKS(pt_bus)                                                                                                         \
   {.msg = {{0x1aa, (pt_bus), 16, 50U, .ignore_checksum = true, .max_counter = 0xffU, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
 
-// ADAS_CMD_20_20ms (from ADAS unit or camera)
+// SCC_CONTROL (from ADAS unit or camera)
 #define HYUNDAI_CANFD_SCC_ADDR_CHECK(scc_bus)                                                                            \
   {.msg = {{0x1a0, (scc_bus), 32, 50U, .max_counter = 0xffU, .ignore_quality_flag = true}, { 0 }, { 0 }}},  \
 
