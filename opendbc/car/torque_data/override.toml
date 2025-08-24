@@ -81,7 +81,6 @@ legend = ["LAT_ACCEL_FACTOR", "MAX_LAT_ACCEL_MEASURED", "FRICTION"]
 "HYUNDAI_NEXO_1ST_GEN" = [2.5, 2.5, 0.1]
 "HONDA_ACCORD_11G" = [1.35, 1.35, 0.17]
 "HYUNDAI_KONA_2ND_GEN" = [2.5, 2.5, 0.1]
-"KIA_K4_2025" = [2.5, 2.5, 0.1]
 
 # Dashcam or fallback configured as ideal car
 "MOCK" = [10.0, 10, 0.0]
