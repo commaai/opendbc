@@ -47,6 +47,14 @@ def get_long_tune(CP, params):
                        rate=1 / (DT_CTRL * 3))
 
 
+def warp_accel2(a, d=0.18, a0=0.50, sigma=0.08):
+  r = abs(a)
+  if r >= a0:
+    return a
+  amp = 1.0 - r / a0  # linear fade to 0 at a0
+  return a + d * math.tanh(a / sigma) * amp
+
+
 class CarController(CarControllerBase):
   def __init__(self, dbc_names, CP):
     super().__init__(dbc_names, CP)
@@ -224,6 +232,13 @@ class CarController(CarControllerBase):
                                                speed=CS.out.vEgo,
                                                feedforward=pcm_accel_cmd,
                                                freeze_integrator=actuators.longControlState != LongCtrlState.pid)
+
+          # In my Camry Hybrid, the gas/EV motors take a while to kick in when transitioning from brake to gas while moving.
+          # I wonder if this is because PCM/motor controller always thinks a slow movement towards zero means
+          # the API user (camera/openpilot) wants to coast instead of just pass through.
+          # The camera seems to send requests that either stick around zero or quickly pass through it
+          # TODO: verify if this is true by looking at more cases
+          pcm_accel_cmd = warp_accel2(pcm_accel_cmd)
         else:
           self.long_pid.reset()
 
